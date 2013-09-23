@@ -132,3 +132,6 @@ rm $ECFLOW_WS_DIR
 
 ls -lh $ECFLOWTAR
 gzip $ECFLOWTAR
+
+# Move tar file to /var/tmp/ma0/clientRoot/workspace
+mv $ECFLOWTAR.gz ../../.

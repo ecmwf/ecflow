@@ -30,8 +30,7 @@ else
       ssh %USER%@%REMOTE_HOST% "cd $ROOT_DIR; rm -rf ecflow*"
 
       # cd to where tar file directory resides
-      cd $WK
-      cd ..
+      cd %ECFLOW_TAR_DIR%
       scp $ECFLOWTAR.gz  %REMOTE_HOST%:$ROOT_DIR/
       ssh %USER%@%REMOTE_HOST% "cd $ROOT_DIR; gunzip $ECFLOWTAR.gz; tar -xf $ECFLOWTAR; mv $ECFLOW ecflow"
 
@@ -41,8 +40,7 @@ else
       rsh %REMOTE_HOST% "cd $ROOT_DIR; rm -rf ecflow*"
 
       # cd to where tar file directory resides
-      cd $WK
-      cd ..
+      cd %ECFLOW_TAR_DIR%
       ecrcp $ECFLOWTAR.gz  %REMOTE_HOST%:$ROOT_DIR/
       rsh %REMOTE_HOST% "cd $ROOT_DIR; gunzip $ECFLOWTAR.gz; tar -xf $ECFLOWTAR; mv $ECFLOW ecflow"
    fi

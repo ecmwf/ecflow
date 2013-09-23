@@ -488,6 +488,7 @@ def build_boost( boost ):
     add_boost_tasks( family )
     
 def add_suite_variables( suite ):
+    suite.add_variable("ECFLOW_TAR_DIR","/var/tmp/ma0/clientRoot/workspace")
     suite.add_variable("ECF_HOME", os.getenv("SCRATCH") + "/nightly")
     suite.add_variable("ECF_INCLUDE",os.getenv("SCRATCH") + "/nightly")
     suite.add_variable("USER","ma0")
@@ -507,7 +508,8 @@ def add_suite_variables( suite ):
 # Defs
 # ================================================================================    
 defs = ecflow.Defs()
-
+defs.add_variable("ECFLOW_TAR_DIR","/var/tmp/ma0/clientRoot/workspace")
+ 
 print "build boost"
 with defs.add_suite("boost_suite") as boost_suite:
     boost_suite.add_variable("ECF_FILES",os.getenv("SCRATCH") + "/nightly/boost_suite")
@@ -537,11 +539,13 @@ with defs.add_suite("suite") as suite:
         build.add_time("18:15")
         build.add_defstatus( ecflow.DState.suspended );
     
-        p4_sync = build.add_task("p4_sync")
-        p4_sync.add_variable("ARCH","opensuse113")
+        git_pull = build.add_task("git_pull")
+        git_pull.add_variable("ARCH","opensuse113")
+        git_pull.add_variable("LOCAL_HOST",os.uname()[1]) # run this locally
+
     
         tar_fam = build.add_family("tar")
-        tar_fam.add_trigger("p4_sync == complete")
+        tar_fam.add_trigger("git_pull == complete")
     
         create_tar = tar_fam.add_task("create_tar")
         create_tar.add_variable("ARCH","opensuse113")

@@ -15,6 +15,7 @@ else
    cp build/test.sh  $HOME/bin/test.sh
    cp build/rmbin.sh $HOME/bin/rmbin.sh
    
+   # will move tar to /var/tmp/ma0/clientRoot/workspace
    sh -x build/tar_ecflow.sh
 fi
 
