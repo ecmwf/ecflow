@@ -1,0 +1,27 @@
+<div class="highlight"><pre><span class="c">#!/usr/bin/env cdp</span>
+<span class="nb">set </span>USE SMS 1; <span class="nb">set </span>USE ECF 1
+<span class="k">if</span> <span class="o">(</span>USE_SMS<span class="o">)</span> <span class="k">then</span>
+<span class="k">  </span>edit SMSLOGHOST       <span class="k">${</span><span class="nv">SCHOST</span><span class="k">}</span>
+  edit SMSLOGPORT       9316;   edit SMSTRIES         1
+  edit SMSHOME          <span class="nv">$SCRATCH</span>/output
+  edit SMSFILES         <span class="nv">$HOMEDIR</span>/smsfiles
+  edit SMSINCLUDE       <span class="nv">$HOMEDIR</span>/include
+  edit SMSCMD  <span class="s2">&quot;/home/ma/emos/bin/smssubmit %USER% %WSHOST% %SMSJOB% %SMSJOBOUT%&quot;</span>
+  edit SMSKILL <span class="s2">&quot;/home/ma/emos/bin/smskill %USER% %WSHOST% %SMSRID% %SMSJOBOUT%&quot;</span>
+endif
+<span class="k">if</span> <span class="o">(</span>USE_ECF<span class="o">)</span> <span class="k">then</span>
+<span class="k">  </span>edit ECF_LOGHOST       <span class="k">${</span><span class="nv">SCHOST</span><span class="k">}</span>
+  edit ECF_LOGPORT       9316;   edit ECF_TRIES         1
+  edit ECF_HOME          <span class="nv">$SCRATCH</span>/output
+  edit ECF_FILES         <span class="nv">$HOMEDIR</span>/smsfiles
+  edit ECF_INCLUDE       <span class="nv">$HOMEDIR</span>/include
+  edit ECF_JOB_CMD  <span class="s2">&quot;/home/ma/emos/bin/smssubmit %USER% %WSHOST% %ECF_JOB% %ECF_JOBOUT% &quot;</span>
+  edit ECF_KILL_CMD <span class="s2">&quot;/home/ma/emos/bin/smskill %USER% %WSHOST% %ECF_RID% %ECF_JOBOUT% &quot;</span>
+endif
+task python;     defstatus suspended
+<span class="k">if</span> <span class="o">(</span>USE_SMS<span class="o">)</span> <span class="k">then </span>edit SMSMICRO ^; edit SMSCMD <span class="s2">&quot;^SMSJOB^ &gt; ^SMSJOBOUT^ 2&gt;&amp;1 &amp;&quot;</span>
+endif
+<span class="k">if</span> <span class="o">(</span>USE_ECF<span class="o">)</span> <span class="k">then </span>edit ECF_MICRO ^; edit ECF_JOB_CMD <span class="s2">&quot;^ECF_JOB^ &gt; ^ECF_JOBOUT^ 2&gt;&amp;1 &amp;&quot;</span>
+endif
+meter step -1 100
+</pre></div>

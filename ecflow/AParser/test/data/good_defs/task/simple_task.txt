@@ -1,0 +1,17 @@
+suite suiteName
+   family familyName0
+      task t1
+      task t2
+      task t4
+      task t5
+      endtask
+   endfamily
+endsuite
+
+suite s1
+   family familyName0
+      task t1 ; task t2 ;task t4 ; task t5
+      endtask
+   endfamily
+endsuite
+

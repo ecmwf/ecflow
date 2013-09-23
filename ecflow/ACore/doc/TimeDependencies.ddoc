@@ -1,0 +1,270 @@
+
+o Long term testing of server *******
+  24 * 60 * 60 = 86400 seconds: hence 24hrs = 86400 seconds
+  
+   Assuming a server poll of 5 sec ~1 minute:
+   5 * 12 = 60
+   86400/12*60*60   = 2hrs   
+   Hence we can simulate 24 hrs  by running for  2 hrs with a 5 sec poll period
+   Hence we can simulate 12 days by running for 24 hrs with a 5 sec poll period.
+  
+   3 * 20 = 60
+   86400/20*60*60   = 1.2 hrs
+   Hence we can simulate 24 hrs  by running for 1.2 hrs with 3 sec poll period
+   Hence we can simulate 20 days by running for  24 hrs with 3 sec poll period
+  
+   20s * 3 = 60
+   86400/3*60*60   = 8 hrs  ~ 24hrs
+   Hence we can simulate 24 hrs  by running for 8 hrs with 20 sec poll period
+  
+
+o Documentation of Today/time attribute
+
+   isFree is called when a node is queued. if it returns true, if free of its time dependency
+   checkForReque: is called when a node has completed, and need to determine if it should run again.
+ 
+   These are different/orthogonal concerns.
+   Typically for a *single time slot we can't requeue. However we could
+   have a set of time slots.
+
+   ///                                               isFree:hhhhhhhhhhhhhhhhh
+   ///                                               Begin:
+   ///                                               V
+   ///checkForReque:rrrrrrrrrrrrrrrrhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh
+   ///       isFree:hhhhhhhhhhhhhhhh|fffffffffffffffffffffffffffffffffffffff
+   ///       begin :
+   ///        V
+   /// Time   ======================0=======================================
+   ///                            10:00
+
+   ///                           isFree:hhhFhhhhhhFhhhh    isFree:hhhhhhhhhhhhhhhhh
+   ///                            Begin:                   Begin:
+   ///                                 V                        V
+   ///checkForReque:rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrhhhhhhhhhhhhhhhhhhhhhhhhh
+   ///       isFree:hhhhhhhhhhhhhhhhFhhhhhhFhhhhhhFhhhhhhhhhhhhhhhhhhhhhhhhh
+   ///       begin :
+   ///        V
+   /// Time   ======================0======0======0===========================
+   ///                            10:00  11:00  12:00
+
+
+                                                 isFree:-----free-----
+                                                 begin: 
+                                                 reque:
+                                                 V
+ checkForReque:rrrrrrrrrrrrrrrrhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh
+         isFree:hhhhhhhhhhhhhhhh|fffffffffffffffffffffffffffffffffffffff
+         begin:
+         reque:
+          V                   
+   Today  ======================0=======================================
+                               10:00
+
+   Difference between time and today. If begin is started after the time slot
+   then the node is free to re-run
+
+   Time Series
+   ============
+   Note: Current we dont implement this, in that after the time series we hold ******
+
+
+                                                          isFree:hhhhhhhhhhhhhhhhhh
+                                                            V
+      CheckForReque:rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh
+             isFree:hhhhhhhFhhhhFhhhhFhhhhFhhhhFhhhhFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+               V           |    |    |    |    |    |
+   Time-Series ============o====|====|====|====|====0=============================
+                         10:00  1    2    3    4  15:00
+
+   If the job starts at 10:00 but takes more than 1 hour, then it will miss the 11:00 slot
+   and will have to start at 12:00
+   
+
+Time & Date
+====================================================================
+clock - real, hybrid 
+HYBRID: Is also used as a test mechanism. When we have a suite with a 
+        real clock, we need a way of free all the date dependencies.
+        By using a Hybrid clock all the date dependency no longer
+	    Hold. Allowing suite to run.
+	    
+Issues
+=======
+
+Clock Issues:
+------------
+With the old version,  we have a real clock, which if the server is started/stopped.
+has issues with time dependencies. A real clock is used since many suites follow
+the real time, to keep track of task job dependencies, i.e when one job feeds another.
+
+However this can cause non deterministic behaviour when time slots are missed.
+typically when we have time series, and relative times
+
+
+Task run times
+--------------
+  According to Axel in the old version, if a task exceeed its time slot, because a task
+  took longer to run than expected, then it is submitted straight away.
+  Apart from the end time!!!
+      i.e time 00:00  12:00 00:30
+      if task run takes longer than 30 minutes, it is run straight away, on completion
+      until it reaches 12:00.
+  However this leads to non-determistic behaviour.
+    
+  In the new ECF under real mode, the behaviour is similar.
+  Under the virual clock, if server is suspended so is the time,
+  This leads to more deterministic behaviour
+  
+  (Note: In the case where a suite is suspended, and then resumed, 
+         what should we do, this could mean delaying until the next day,
+         This is a special case, where we may allow task to be submitted
+         immediately ?? . This is essentialy how today differs from time ??)
+    
+Relative times
+---------------
+  o ********relative times not actually used in the operational suites *****
+  o When a Node has multipe relative times then only the attribute with
+    the smallest time is ever used. (may need to warn about the others)
+    i.e  time +10:00
+         time +20:00
+    Here the +20:00 is redundant. 
+    However things get more complicated with multiple relative time series
+    	time +00:00 20:00 00:10
+    	time +00:00 23:00 00:15
+    This assumes task takes less that 5 minutes, and therefore available time slots
+    are 10,15,20,30,40,45
+    
+    Maximum relative time is 99 hours and 59 minutes
+    
+   o Issues: relative time series and day changes ?
+        - relative time is time relative to the suite/Family start, and this
+          is could be concieved to be independent of day change.
+              
+Real Clock
+----------
+o This tracks real time.
+  When a server is shutdown, no jobs can be submitted. However tasks
+  that are free of time & date dependencies are marked.
+  When the server is restarted, then the marked tasks are checked
+  for trigger/inlimit, and if free the jobs are submitted.
+  This mimimize missed time slots, however when we have a time
+  series it will result in missed time slots.
+  i.e  time 00:00 20:00 00:10
+  If server server is suspended at 13:00 for 1 hour, then job can not be submitted
+  when the server resumes at 14:00, only 1 job is submitted. 
+  Also relative times will not be honoured.
+  
+Virtual Clock
+-------------
+o Tracks real time up to the point where the server is shutdown,
+  The internal clock/calendar is then suspended, no jobs are sumbmitted.
+  When the server is restarted the calendar is resumed.
+  + No time slots will be missed
+  + relative time will still be honoured
+  
+  When should you choose real/virtual clock ?
+  When the suite design requires that no time slots are ever missed
+  and relative times are honoured. And where this is more important, 
+  than tracking real time.
+  
+  Note it should be possible to have a mix of virtual and hybrid clocks
+  
+    
+Hybrid clock
+------------ 
+  The concept of hybrid is not fully defined. See below.
+  It appears HYBRID is only partially used in real operation suites
+  (mostly used in testing)
+
+  Under the HYBRID clock the date is not supposed to change.
+  However John understanding is that if a repeat is involved.
+  then the date is incremented when the suite finish's.
+  
+  o However we can have repeats and time at family level
+    Under this case, if the day does not change in the calendar.
+    ** Then the time attributes are not reset and hence task/family 
+    never completes. **
+
+   o It appears that we must support concept of day changed
+     and this must be applicable to hybrid. i.e date does not
+     change but the day does. This allows time based attributes
+     like "time 10:00" to work under the HYBRID
+
+   Alternatively we dissallow use of hybrid, and time dependent attribute,
+
+  Need to check with Axel if he has the same understanding
+
+  The definition file has concept of time relative to the suite/family start.
+  If we also have HYBRID clock with repeat *and* time attributes
+  
+  Does this implies that relative times must be less than 24 hours ?
+  This area appears to be confusing. At the moment I assume:
+    o date does not change
+    o However day does change(at midnight). 
+      (to allow allow time base attributes to work)
+  
+  ?????? Also suite relative time is assumed that it can be more than *******
+  ?????? 24 hours, under hybrid or real calendar's.                   *******
+
+======================================================================================================
+*date(suite,family,task)
+	- real clock
+    - hybrid clock( set to complete at begin )
+    - wrap( yes/no depends on the date)
+      there can be multiple date dependencies. 
+      When the node completes,  it requeues,  the next date is used.
+      ** This assumes that node takes longer than the date specified.
+      ** Not very useful unless it is known that Node takes more than
+      ** a day to complete.
+
+      The hybrid clock does not make sense when used with a date.
+      Under a hybrid clock the date does not change, hence any
+      node with a date dependency completes at the beginning of
+      the suite, otherwise the suite will never complete.
+
+*day(suite,family,task) 
+	- real clock
+    - hybrid clock( set to complete at begin )
+    - wrap( yes)
+    There can be multiple day dependencies. can be combined with date.
+    ** Same restriction as date, use with hybrid clocks limited.
+
+*time([h]h:mm(suite,family,task) 
+	- (real clock, hybrid clock)
+    - wrap( _NO_ Unless forced to by repeat,date or day attributes, applied hierarchally downwards)
+
+    the time > time, then node is free.
+    time <start_time>                           
+	if time == start_time NODE is free, held otherwise
+    time <start_time> <end time> <increment>    
+	if (time >= start_time && time < end_time && time on increment) 
+        NODE is free, held otherwise
+        
+    Use + to say relative 
+	1/ suite start time
+	2/ repeated families start time <TODO>
+
+*today(suite,family,task) 
+	- (real clock,hybrid clock)
+    - wrap ( no)
+    	If time series then node holds after the valid time slot
+    	Suite(begin time) > today( Node is free for single slot)
+   
+
+*cron (suite,family,task) 
+	- (Real, Hybrid- depends, if week_day,day_of_month, or month specified)
+	- wrap( yes & no 
+       	Single time slot - wraps indefinetly
+        Series Time      - does not wrap, unless 
+                           weekday,day_of_month_,month specified)
+        week day     - wraps
+        day_of_month - wraps
+        Month        - wraps 
+    o When node completes, it is requeued.
+    o aborted task not requeued
+
+
+*repeat - Real clock, Hybrid ??
+	- (day,month,year)(suite)  
+   	- (integer,enumerated,string, file, date) (suite,family,task)
+   o when node completes, and is re-queued until last value is reached

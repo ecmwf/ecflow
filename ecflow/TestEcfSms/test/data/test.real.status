@@ -1,0 +1,42 @@
+/test:l2 33 limit 0 
+/test:ECF_INCLUDE 3 variable 0 /var/tmp/ma0/clientRoot/workspace/MyProject/TestEcfSms/test/data/includes
+/test:ECF_HOME 3 variable 0 /var/tmp/ma0/clientRoot/workspace/MyProject/TestEcfSms/test/data
+/test/f1 11 family 2 complete
+/test/f1:SLEEP 3 variable 0 2
+/test/f1/t1 10 task 2 complete
+/test/f1/t1:progress 24 meter 30 
+/test/f1/t2 10 task 2 complete
+/test/f1/t2:a 9 event 1 set
+/test/f1/t2:b 9 event 1 set
+/test/f1/t3 10 task 2 complete
+/test/f1/t4 10 task 2 complete
+/test/f1/t5 10 task 2 complete
+/test/f1/t6 10 task 2 complete
+/test/f1/t7 10 task 2 complete
+/test/f2 11 family 3 queued
+/test/f2:SLEEP 3 variable 0 2
+/test/f2/t1 10 task 3 queued
+/test/f2/t2 10 task 3 queued
+/test/f2/t3 10 task 3 queued
+/test/f2/t4 10 task 2 complete
+/test/f2/t5 10 task 3 queued
+/test/f3 11 family 2 complete
+/test/f3/t1 10 task 2 complete
+/test/f4 11 family 2 complete
+/test/f4:NAME 22 repeat 2 
+/test/f4:SLEEP 3 variable 0 2
+/test/f4/f5 11 family 2 complete
+/test/f4/f5:VALUE 22 repeat 4 
+/test/f4/f5/t1 10 task 2 complete
+/test/f4/f5/t1:DATE 22 repeat 20000104 
+/test/f5 11 family 2 complete
+/test/f5:SLEEP 3 variable 0 4
+/test/f5/t1 10 task 2 complete
+/test/f5/t2 10 task 2 complete
+/test/f5/t3 10 task 2 complete
+/test/f5/t4 10 task 2 complete
+/test/f5/t5 10 task 2 complete
+/test/f5/t6 10 task 2 complete
+/test/f5/t7 10 task 2 complete
+/test/f5/t8 10 task 2 complete
+/test/f5/t9 10 task 2 complete

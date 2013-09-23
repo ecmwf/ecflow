@@ -1,0 +1,6 @@
+suite suiteName
+   family familyName0
+   		time  20:00 10:00 01:00          # invalid range start time > end time
+   endfamily
+endsuite
+

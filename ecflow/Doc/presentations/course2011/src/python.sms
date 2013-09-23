@@ -1,0 +1,7 @@
+^include <py_head.h>
+
+for step in range(0,101):
+    print step
+    call_meter("step", step)
+
+^include <py_tail.h>

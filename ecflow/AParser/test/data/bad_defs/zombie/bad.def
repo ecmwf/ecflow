@@ -1,0 +1,4 @@
+suite suiteName
+   zombie ecf               # should be ecf:::0
+endsuite
+

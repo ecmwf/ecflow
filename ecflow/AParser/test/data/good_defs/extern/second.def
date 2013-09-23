@@ -1,0 +1,17 @@
+ 
+#
+# The defs is used conjunction with first.def to test resolution of externs
+#
+
+suite a
+   family b
+   		family c
+   			family d
+   				task e
+   					event event
+           	    	meter meter  0 100 100  # meter <name> <min> <max> [optional color change]
+           	endfamily
+    	endfamily
+    endfamily
+endsuite
+

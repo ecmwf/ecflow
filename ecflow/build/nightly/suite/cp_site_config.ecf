@@ -1,0 +1,31 @@
+%include <head.h>
+
+# ======================================================================
+# Run LOCALLY  %SUITE%_%FAMILY%_%TASK%
+# ======================================================================
+export WK=%WK%
+
+if [[ %SET_TO_TEST_SCRIPT% = true ]] ; then
+   echo "Test only"
+else
+   remote_host=%REMOTE_HOST:%
+   root_wk=%ROOT_WK:/var/tmp/ma0%
+   
+   # ============================================================================================
+   # Update site config.jam. Note  %SITE_CONFIG% needs WK to be defined/exported
+   # ============================================================================================
+   if [[ %ARCH% = opensuse113 || %ARCH% = redhat ]] ; then
+   
+      if [[ "$remote_host" = "" ]] 
+      then
+          cp %SITE_CONFIG%   %BOOST_DIR%/%BOOST_VERSION%/tools/build/v2/site-config.jam
+      else      
+         # NOTE: uses SSH
+         scp %SITE_CONFIG%   $remote_host:$root_wk/boost/%BOOST_VERSION%/tools/build/v2/site-config.jam
+      fi
+   else
+      rcp %SITE_CONFIG%   $remote_host:$root_wk/boost/%BOOST_VERSION%/tools/build/v2/site-config.jam
+   fi
+fi
+
+%include <tail.h>

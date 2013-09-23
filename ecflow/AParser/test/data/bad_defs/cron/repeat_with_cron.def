@@ -1,0 +1,9 @@
+suite suiteName
+    family f
+        cron 23:00                          # cant have repeat  & cron at same level
+        repeat date YMD 20090331 20121212 1 # status 0
+        task t
+        task t2
+    endfamily
+endsuite
+

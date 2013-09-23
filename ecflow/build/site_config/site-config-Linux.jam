@@ -1,0 +1,98 @@
+## Copyright 2009-2012 ECMWF. 
+## This software is licensed under the terms of the Apache Licence version 2.0 
+## which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
+## In applying this licence, ECMWF does not waive the privileges and immunities 
+## granted to it by virtue of its status as an intergovernmental organisation 
+## nor does it submit to any jurisdiction. 
+
+# ===================================================================
+# site-config.jam file for Linux/gcc
+# This file should be placed in $HOME or $BOOST_ROOT/tools/build/v2/
+# ===================================================================
+
+#
+# Pull in environment variables
+#
+import os ;
+local BOOST_ROOT = [ os.environ BOOST_ROOT ] ;
+
+#
+# --layout=system    -> libboost_system.a (default)
+# --layout=tagged    -> libboost_system-mt-d.a(debug)          libboost_system-mt.a(release) 
+# --layout=versioned -> libboost_system-xlc-mt-d-1.42(debug)   libboost_system-xlc-mt-1_42.a(release)
+#
+# Boost libraries referenced in client/server programs
+# assumes --layout=tagged for the debug release and profile variant
+#
+lib boost_serialization : :   <variant>debug <file>$(BOOST_ROOT)/stage/lib/libboost_serialization-mt-d.a ;
+lib boost_system : :          <variant>debug <file>$(BOOST_ROOT)/stage/lib/libboost_system-mt-d.a ;
+lib boost_thread : :          <variant>debug <file>$(BOOST_ROOT)/stage/lib/libboost_thread-mt-d.a ;
+lib boost_test   : :          <variant>debug <file>$(BOOST_ROOT)/stage/lib/libboost_unit_test_framework-mt-d.a ;
+lib boost_test_monitor : :    <variant>debug <file>$(BOOST_ROOT)/stage/lib/libboost_test_exec_monitor-mt-d.a ;
+lib boost_program_options : : <variant>debug <file>$(BOOST_ROOT)/stage/lib/libboost_program_options-mt-d.a ;
+lib boost_filesystem      : : <variant>debug <file>$(BOOST_ROOT)/stage/lib/libboost_filesystem-mt-d.a ;
+lib boost_datetime        : : <variant>debug <file>$(BOOST_ROOT)/stage/lib/libboost_date_time-mt-d.a ;
+
+# profile uses release libs
+lib boost_serialization : :   <variant>profile <file>$(BOOST_ROOT)/stage/lib/libboost_serialization-mt.a ;
+lib boost_system : :          <variant>profile <file>$(BOOST_ROOT)/stage/lib/libboost_system-mt.a ;
+lib boost_thread : :          <variant>profile <file>$(BOOST_ROOT)/stage/lib/libboost_thread-mt.a ;
+lib boost_test   : :          <variant>profile <file>$(BOOST_ROOT)/stage/lib/libboost_unit_test_framework-mt.a ;
+lib boost_test_monitor : :    <variant>profile <file>$(BOOST_ROOT)/stage/lib/libboost_test_exec_monitor-mt.a ;
+lib boost_program_options : : <variant>profile <file>$(BOOST_ROOT)/stage/lib/libboost_program_options-mt.a ;
+lib boost_filesystem      : : <variant>profile <file>$(BOOST_ROOT)/stage/lib/libboost_filesystem-mt.a ;
+lib boost_datetime        : : <variant>profile <file>$(BOOST_ROOT)/stage/lib/libboost_date_time-mt.a ;
+
+lib boost_serialization : :   <variant>release <file>$(BOOST_ROOT)/stage/lib/libboost_serialization-mt.a ;
+lib boost_system : :          <variant>release <file>$(BOOST_ROOT)/stage/lib/libboost_system-mt.a ;
+lib boost_thread : :          <variant>release <file>$(BOOST_ROOT)/stage/lib/libboost_thread-mt.a ;
+lib boost_test   : :          <variant>release <file>$(BOOST_ROOT)/stage/lib/libboost_unit_test_framework-mt.a ;
+lib boost_test_monitor : :    <variant>release <file>$(BOOST_ROOT)/stage/lib/libboost_test_exec_monitor-mt.a ;
+lib boost_program_options : : <variant>release <file>$(BOOST_ROOT)/stage/lib/libboost_program_options-mt.a ;
+lib boost_filesystem      : : <variant>release <file>$(BOOST_ROOT)/stage/lib/libboost_filesystem-mt.a ;
+lib boost_datetime        : : <variant>release <file>$(BOOST_ROOT)/stage/lib/libboost_date_time-mt.a ;
+ 
+#
+# Notice: we don't add requirements <library>pthread ,  because
+#  	a/ Not all tests require it
+#  	b/ Can cause links errors
+# Hence left to individual projects/test
+#
+project site-config 
+	: requirements <include>$(BOOST_ROOT)  
+ 	;
+
+# using syntax:
+# using toolset-name : version : invocation-command : options ;
+#   where options allows <cflags, cxxflags, compileflags and linkflags >
+#
+using gcc ;
+using testing ;
+
+# ========================= PYTHON ===================================================
+
+# Since we are not hard wiring the path to the python interpreter, the unit tests will use $PATH
+# - If you change python version ,remember to change: $WK/build/install_ecflow.sh: ECFLOW_PYTHON_INSTALL_DIR
+
+using python
+     :  # version
+     :  # cmd-or-prefix
+     :  # includes
+     :  # libraries
+     :  # condition
+     ;
+
+# ==================== ECFLOWVIEW =======================================================
+
+local motif_library = [ os.environ MOTIF_LIBRARY ] ;
+motif_library default = "/usr/lib64" ; 
+constant MOTIF_LIBRARY : $(motif_library) ; 
+
+MOTIF_LIBRARY default = /usr/lib ;
+
+# ================================================================================
+# Link with FDB, (PRODGEN)
+lib libfdb
+    :
+    : <file>/usr/local/lib/metaps/lib/libfdb.a 
+    ;

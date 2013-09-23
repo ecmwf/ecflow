@@ -1,0 +1,137 @@
+## Copyright 2009-2012 ECMWF. 
+## This software is licensed under the terms of the Apache Licence version 2.0 
+## which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
+## In applying this licence, ECMWF does not waive the privileges and immunities 
+## granted to it by virtue of its status as an intergovernmental organisation 
+## nor does it submit to any jurisdiction. 
+
+#
+# Client
+#
+project theClient ;
+
+use-project theCore      : ../ACore ;
+use-project theNodeAttr  : ../ANattr ;
+use-project theNode      : ../ANode ;
+use-project theParser    : ../AParser ;
+use-project theBase      : ../Base ;
+
+#
+# This should be in the site-config.jam file as a project wide requirement
+# however if this is done, it will not link since, lpthread appears twice
+# on the link line
+#
+lib pthread  ;
+
+#
+# define DEBUG_CLIENT for additional debug
+#
+# Having a library avoid compile objects shared between client and test having
+# differing compilation properties
+#
+# Exclude ClientMain.cpp from the library.
+#
+# The <include> means we will automatically add this directory to the include path
+# of any other target that uses this lib
+#
+lib libclient : [ glob src/*.cpp : src/*Main.cpp ]
+              : <include>../ACore/src
+                <include>../ANattr/src 
+                <include>../ANode/src 
+                <include>../Base/src 
+                <include>../AParser/src 
+                <include>../Client/src
+                <variant>debug:<define>DEBUG
+                <link>static
+                <use>/theCore//core
+                <use>/theNode//node
+                <use>/theParser//libparser
+                <use>/theBase//base
+            	<use>/site-config//boost_system
+             	<use>/site-config//boost_serialization
+             	<use>/site-config//boost_filesystem
+             	<use>/site-config//boost_program_options
+             	<use>/site-config//boost_datetime
+         :
+         : <include>../Client/src         
+         ;               
+         
+#
+# client. This Just pulls in src/ClientMain.cpp
+#
+exe ecflow_client : [ glob src/*Main.cpp ]
+             /theCore//core
+             /theNodeAttr//nodeattr
+             /theNode//node
+             /theParser//libparser
+             /theBase//base
+             libclient
+             /site-config//boost_system
+             /site-config//boost_serialization
+             /site-config//boost_filesystem
+             /site-config//boost_program_options
+             /site-config//boost_datetime
+	         pthread
+           : <variant>debug:<define>DEBUG
+           ;
+ 
+#
+# Tests for client. All test source code, by pulling in libclient we avoid 
+# linking with ClientMain.cpp
+#
+exe tclient : [ glob test/*.cpp : test/TestSinglePerf.cpp test/TestMigration.cpp ]  
+	       pthread
+           /theCore//core
+           /theNodeAttr//nodeattr
+           /theNode//node
+           /theParser//libparser
+           /theBase//base
+           libclient
+           /site-config//boost_system
+           /site-config//boost_serialization
+           /site-config//boost_filesystem
+           /site-config//boost_program_options
+           /site-config//boost_datetime
+           /site-config//boost_test
+         : <include>../ANode/test 
+           <include>../Base/test 
+           <variant>debug:<define>DEBUG
+	     ;
+	     
+exe test_large_defs_perf : [ glob test/TestSinglePerf.cpp  ]   [ glob test/SCPort.cpp  ]
+           /theCore//core
+           /theNodeAttr//nodeattr
+           /theNode//node
+           /theParser//libparser
+           /theBase//base
+           libclient
+           pthread
+           /site-config//boost_system
+           /site-config//boost_serialization
+           /site-config//boost_filesystem
+           /site-config//boost_program_options
+           /site-config//boost_datetime
+           /site-config//boost_test
+         : <include>../ANode/test 
+           <include>../Base/test 
+           <variant>debug:<define>DEBUG
+         ;
+         
+exe test_migration : [ glob test/TestMigration.cpp  ]   [ glob test/SCPort.cpp  ]
+           /theCore//core
+           /theNodeAttr//nodeattr
+           /theNode//node
+           /theParser//libparser
+           /theBase//base
+           libclient
+           pthread
+           /site-config//boost_system
+           /site-config//boost_serialization
+           /site-config//boost_filesystem
+           /site-config//boost_program_options
+           /site-config//boost_datetime
+           /site-config//boost_test
+         : <include>../ANode/test 
+           <include>../Base/test 
+           <variant>debug:<define>DEBUG
+         ;

@@ -1,0 +1,12 @@
+suite suiteName
+   family familyName0
+   
+      task taskName0
+      
+      task fred
+      
+      endtask
+      
+   endfamily
+endsuite
+

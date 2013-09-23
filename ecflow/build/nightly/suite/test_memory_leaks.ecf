@@ -1,0 +1,24 @@
+%include <head.h>
+
+# ======================================================================
+# Run LOCALLY
+# ======================================================================
+export WK=%WK%
+
+if [[ %SET_TO_TEST_SCRIPT% = true ]] ; then
+   echo "Test only"
+else
+   cd $WK;
+   valgrind --leak-check=full --show-reachable=yes ACore/bin/%COMPILER_VERSION%/release/coretest
+   valgrind --leak-check=full --show-reachable=yes ANattr/bin/%COMPILER_VERSION%/release/nodeattrtest
+   valgrind --leak-check=full --show-reachable=yes ANode/bin/%COMPILER_VERSION%/release/nodetest
+   valgrind --leak-check=full --show-reachable=yes AParser/bin/%COMPILER_VERSION%/release/tparser
+   valgrind --leak-check=full --show-reachable=yes Base/bin/%COMPILER_VERSION%/release/basetest
+   valgrind --leak-check=full --show-reachable=yes Client/bin/%COMPILER_VERSION%/release/tclient
+   valgrind --leak-check=full --show-reachable=yes Server/bin/%COMPILER_VERSION%/release/tserver
+   valgrind --leak-check=full --show-reachable=yes --num-callers=30 Test/bin/%COMPILER_VERSION%/release/server-test
+   valgrind --leak-check=full --show-reachable=yes --num-callers=30 Test/bin/%COMPILER_VERSION%/release/test-zombies
+   valgrind --leak-check=full --show-reachable=yes CSim/bin/%COMPILER_VERSION%/release/testsimulator
+fi
+
+%include <tail.h>

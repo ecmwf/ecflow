@@ -1,0 +1,26 @@
+#!/usr/bin/env cdp
+set USE SMS 1; set USE ECF 1
+if (USE_SMS) then
+  edit SMSLOGHOST       ${SCHOST}
+  edit SMSLOGPORT       9316;   edit SMSTRIES         1
+  edit SMSHOME          $SCRATCH/output
+  edit SMSFILES         $HOMEDIR/smsfiles
+  edit SMSINCLUDE       $HOMEDIR/include
+  edit SMSCMD  "/home/ma/emos/bin/smssubmit %USER% %WSHOST% %SMSJOB% %SMSJOBOUT%"
+  edit SMSKILL "/home/ma/emos/bin/smskill %USER% %WSHOST% %SMSRID% %SMSJOBOUT%"
+endif
+if (USE_ECF) then
+  edit ECF_LOGHOST       ${SCHOST}
+  edit ECF_LOGPORT       9316;   edit ECF_TRIES         1
+  edit ECF_HOME          $SCRATCH/output
+  edit ECF_FILES         $HOMEDIR/smsfiles
+  edit ECF_INCLUDE       $HOMEDIR/include
+  edit ECF_JOB_CMD  "/home/ma/emos/bin/smssubmit %USER% %WSHOST% %ECF_JOB% %ECF_JOBOUT% "
+  edit ECF_KILL_CMD "/home/ma/emos/bin/smskill %USER% %WSHOST% %ECF_RID% %ECF_JOBOUT% "
+endif
+task python;     defstatus suspended
+if (USE_SMS) then edit SMSMICRO ^; edit SMSCMD "^SMSJOB^ > ^SMSJOBOUT^ 2>&1 &"
+endif
+if (USE_ECF) then edit ECF_MICRO ^; edit ECF_JOB_CMD "^ECF_JOB^ > ^ECF_JOBOUT^ 2>&1 &"
+endif
+meter step -1 100

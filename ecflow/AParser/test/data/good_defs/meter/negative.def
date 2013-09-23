@@ -1,0 +1,6 @@
+suite suiteName
+   family familyName
+      task taskName
+          meter myMeter  -1 100 100  # meter <name> <min> <max> [optional color change]
+     endfamily
+endsuite

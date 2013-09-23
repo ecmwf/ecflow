@@ -1,0 +1,28 @@
+<div class="highlight"><pre><span class="n">family</span><span class="p">(</span><span class="n">PROJECT</span><span class="p">)</span>
+  <span class="n">def_fam</span><span class="p">()</span>
+  <span class="n">families</span> <span class="o">=</span> <span class="s">&#39;00 12&#39;</span>
+  <span class="n">var</span><span class="p">(</span><span class="s">&#39;ENSEMBLES&#39;</span><span class="p">,</span> <span class="mi">50</span><span class="p">)</span>
+  <span class="n">trigger</span><span class="p">(</span><span class="s">&quot;make==complete&quot;</span><span class="p">)</span>
+  <span class="k">for</span> <span class="n">fam</span> <span class="ow">in</span> <span class="n">qw</span><span class="p">(</span><span class="n">families</span><span class="p">):</span>
+      <span class="n">family</span><span class="p">(</span><span class="n">fam</span><span class="p">)</span>
+      <span class="k">if</span> <span class="n">fam</span> <span class="o">==</span> <span class="s">&quot;00&quot;</span><span class="p">:</span>
+          <span class="n">var</span><span class="p">(</span><span class="s">&#39;DELTA_DAY&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+      <span class="k">else</span><span class="p">:</span>
+          <span class="n">var</span><span class="p">(</span><span class="s">&#39;DELTA_DAY&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+      <span class="n">var</span><span class="p">(</span><span class="s">&#39;EMOS_BASE&#39;</span><span class="p">,</span> <span class="n">fam</span><span class="p">)</span>
+      <span class="n">call_skull</span><span class="p">(</span><span class="n">PROJECT</span><span class="p">)</span>
+
+      <span class="n">family</span><span class="p">(</span><span class="s">&quot;pop&quot;</span><span class="p">)</span>
+      <span class="n">oncl</span><span class="p">()</span>
+      <span class="n">trigger</span><span class="p">(</span><span class="s">&quot;./&quot;</span><span class="o">+</span><span class="n">PROJECT</span><span class="o">+</span><span class="s">&quot;==complete&quot;</span><span class="p">)</span>
+      <span class="n">call_pop_skull</span><span class="p">()</span>
+      <span class="n">endfamily</span><span class="p">(</span><span class="s">&quot;pop&quot;</span><span class="p">)</span>
+
+      <span class="n">family</span><span class="p">(</span><span class="s">&quot;ws&quot;</span><span class="p">)</span>
+      <span class="n">onws</span><span class="p">()</span>
+      <span class="n">trigger</span><span class="p">(</span><span class="s">&quot;./&quot;</span><span class="o">+</span><span class="n">PROJECT</span><span class="o">+</span><span class="s">&quot;==complete&quot;</span><span class="p">)</span>
+      <span class="n">call_pop_skull</span><span class="p">()</span>
+      <span class="n">endfamily</span><span class="p">(</span><span class="s">&quot;ws&quot;</span><span class="p">)</span>
+      <span class="n">endfamily</span><span class="p">(</span><span class="n">fam</span><span class="p">)</span>
+<span class="n">endfamily</span><span class="p">(</span><span class="n">PROJECT</span><span class="p">)</span>
+</pre></div>

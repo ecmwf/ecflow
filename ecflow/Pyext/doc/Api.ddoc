@@ -1,0 +1,29 @@
+
+API
+===
+
+The default api is provided by the ecflow module.
+
+However this API can be tailored to be more object oriented.
+
+There can be two ways of using this API.
+Lets assume we have specified this API in ecf.py
+
+o The contents of ecf.py can be placed in
+  __init__.py. So that whenever the user imports
+  ecflow, the corresponding API is automatically available.
+  
+  + This is no confusion here.
+  + the API will be versioned along with the extension.
+  + tested
+  - Hard wired, however it can still be updated by
+    the user if required
+  
+o leave as a specific import:
+  
+  import ecf
+  
+  + Need a separate version.
+  + more flexible
+  - version mismatch between extension and API could arise
+  - Need to test separately

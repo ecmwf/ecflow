@@ -1,0 +1,4 @@
+suite suiteName
+ 
+    repeat file filename fred.txt   # comment
+endsuite

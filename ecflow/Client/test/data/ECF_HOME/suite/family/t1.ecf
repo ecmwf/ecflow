@@ -1,0 +1,72 @@
+%manual
+	OPERATORS: This is an example of using a manual
+	
+	This is used to also test variable subsitution of 
+	generated variables
+	SUITE     = %SUITE%
+	DATE      = %DATE%
+	DAY       = %DAY%
+	DD        = %DD%
+	DOW       = %DOW%
+	DOY       = %DOY%
+	MM        = %MM%
+	MONTH     = %MONTH%
+	YYYY      = %YYYY%
+	ECF_DATE   = %ECF_DATE%
+	ECF_TIME   = %ECF_TIME%
+	ECF_CLOCK  = %ECF_CLOCK%
+
+	FAMILY    = %FAMILY%
+	FAMILY1   = %FAMILY1%
+
+	TASK      = %TASK%
+	ECF_RID    = %ECF_RID:<not defined yet, since empty string in task>%
+	ECF_TRYNO  = %ECF_TRYNO%
+	ECF_NAME   = %ECF_NAME%
+	ECF_PASS   = %ECF_PASS%
+	ECF_SCRIPT = %ECF_SCRIPT%
+	ECF_JOB    = %ECF_JOB%
+	ECF_JOBOUT = %ECF_JOBOUT%
+    
+    Other ECF_ variables
+	ECF_KILL_CMD  = %ECF_KILL_CMD:<not defined yet>%
+	ECF_JOB_CMD   = %ECF_JOB_CMD%
+	ECF_HOME      = %ECF_HOME%
+	ECF_TRIES     = %ECF_TRIES:<Error>%
+	SMFILES      = %SMFILES:<not defined yet>%
+	ECF_INCLUDE   = %ECF_INCLUDE:<not defined yet>%
+	ECF_FETCH     = %ECF_FETCH:<not defined yet>%
+	ECF_OUT       = %ECF_OUT:<not defined yet>%
+	ECF_MICRO     = %ECF_MICRO%
+%end
+
+#============================================================
+# Using angle brackets should use ECF_INCLUDE
+#=========================================================
+%include <head.h>
+
+
+echo do some work
+# SLEEPTIME is defined thedefs.def file. Test variable substituition
+sleep %SLEEPTIME%
+echo end of job
+
+# test smsevent. smsmeter replaced with path to client exe
+smsevent  eventname
+smsmeter  metername 10
+
+%include <tail.h>
+
+
+%manual
+	Rest of the manual page is placed here, closer to the code
+%end
+%comment
+  Comment start
+%end
+%comment
+  Comment end
+%end
+%nopp
+  ignore everything in here
+%end

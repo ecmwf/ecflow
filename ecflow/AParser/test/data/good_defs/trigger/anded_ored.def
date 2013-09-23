@@ -1,0 +1,12 @@
+suite suite
+    family family
+    	task t1
+    	task t2
+		task a             
+         	event eventName 
+    	task b             
+   			trigger t1  == complete                  # a comment at end of trigger
+   			trigger -a t2  == complete               # a comment at end of trigger
+   			trigger -o a  == complete               # a comment at end of trigger
+    endfamily
+endsuite

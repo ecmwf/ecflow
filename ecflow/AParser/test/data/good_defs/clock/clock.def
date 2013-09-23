@@ -1,0 +1,5 @@
+suite suiteName
+	clock real 300
+endsuite
+
+suite s1; clock real 300;endsuite

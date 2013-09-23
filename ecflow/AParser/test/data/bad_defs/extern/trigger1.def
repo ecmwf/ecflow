@@ -1,0 +1,11 @@
+#
+# Trigger references to node path, not in externs is an error
+#
+suite suiteName
+   family familyName
+      task q
+            trigger /a/b/c/d/e:event == set       # extern event path
+      task r
+            trigger /a/b/c/d/e:meter le 30        # extern meter path   
+    endfamily
+endsuite

@@ -1,0 +1,69 @@
+## Copyright 2009-2012 ECMWF. 
+## This software is licensed under the terms of the Apache Licence version 2.0 
+## which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
+## In applying this licence, ECMWF does not waive the privileges and immunities 
+## granted to it by virtue of its status as an intergovernmental organisation 
+## nor does it submit to any jurisdiction. 
+
+#
+# Base project
+#
+project theBase ;
+
+use-project theCore     : ../ACore ;
+use-project theNodeAttr : ../ANattr ;
+use-project theNode     : ../ANode ;
+use-project theParser   : ../AParser ;
+
+# The <include> means we will automatically add this directory to the include path
+# of any other target that uses this lib
+#
+lib base : [ glob src/*.cpp ] [ glob src/cts/*.cpp ] [ glob src/stc/*.cpp ]
+         : <include>../ACore/src
+           <include>../ANattr/src
+           <include>../AParser/src 
+           <include>../ANode/src
+           <include>../Base/src
+           <include>../Base/src/cts
+           <include>../Base/src/stc
+           <link>static
+           <variant>debug:<define>DEBUG
+           <use>/theCore//core
+           <use>/theNodeAttr//nodeattr
+           <use>/theParser//libparser
+           <use>/theNode//node
+           <use>/site-config//boost_system
+           <use>/site-config//boost_serialization
+           <use>/site-config//boost_filesystem
+           <use>/site-config//boost_datetime
+           <use>/site-config//boost_program_options
+           <use>/site-config//boost_test
+         :
+         : <include>../Base/src  
+           <include>../Base/src/cts 
+           <include>../Base/src/stc     
+         ;  
+         
+#
+# This should be in the site-config.jam file as a project wide requirement
+# however if this is done, it will not link since, lpthread appears twice
+# on the link line
+#
+lib pthread ;
+
+exe basetest : [ glob test/*.cpp  ]
+           /theCore//core
+           /theNodeAttr//nodeattr
+           /theNode//node
+           /theParser//libparser
+           base
+           /site-config//boost_system
+           /site-config//boost_serialization
+           /site-config//boost_filesystem
+           /site-config//boost_datetime
+           /site-config//boost_program_options
+           /site-config//boost_test
+           pthread
+         : <include>../ANode/test
+           <variant>debug:<define>DEBUG
+	     ;

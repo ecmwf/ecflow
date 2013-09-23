@@ -1,0 +1,7 @@
+suite suiteName
+   family familyName
+      task t1
+      		late -c +00:15 -s 20:00 -c +02:00  # how to cope with duplivates ????????????
+    endfamily
+endsuite
+

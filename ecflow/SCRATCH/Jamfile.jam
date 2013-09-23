@@ -1,0 +1,33 @@
+## Copyright 2009-2012 ECMWF. 
+## This software is licensed under the terms of the Apache Licence version 2.0 
+## which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
+## In applying this licence, ECMWF does not waive the privileges and immunities 
+## granted to it by virtue of its status as an intergovernmental organisation 
+## nor does it submit to any jurisdiction. 
+#
+# SCRATCH project, used for platform testing
+#
+#project theSCRATCH ;
+
+lib pthread ;
+
+# ***********************************************************
+# Comment this in for test:
+# ***********************************************************
+#exe test : [ glob src/*.cpp  ] 
+#           pthread
+#           /site-config//boost_system
+#           /site-config//boost_serialization
+#           /site-config//boost_thread
+#           /site-config//boost_test
+#         : <include>../SCRATCH/src
+#           <variant>debug:<define>DEBUG
+#         ;
+         
+exe test : [ glob src/*.cpp  ] 
+           pthread
+         : <include>src/
+           <variant>debug:<define>DEBUG
+         ;
+        
+ 

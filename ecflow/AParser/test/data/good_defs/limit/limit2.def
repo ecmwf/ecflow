@@ -1,0 +1,6 @@
+
+suite pop
+  clock hybrid 0 # 24.02.2006 14:47
+  inlimit pop
+  limit pop 10
+endsuite

@@ -1,0 +1,721 @@
+
+Portable binary archive
+======================
+Please on must unix systems( linux, hpux, solaris) the default 'char' type is
+signed. However on AIX, the default char is signed.
+This cause problems with portble binary archive.
+
+I have manually changed code where we reference, c'char' to 'signed char'
+to make it explicit. 
+
+Need to conform this fixes the problems on AIX
+
+
+
+
+I recommend using the 'signed char' type in the source at the appropriate locations instead of setting the -qchars option, as our headers assume the default value of the option will be used.
+
+-- 
+Christopher Lord
+C++FE Developer, W-Code Architect
+
+
+
+From:        Michael Wong/Toronto/IBM
+To:        Avi Bahra <avi.bahra@ecmwf.int>
+Cc:        Stephan.Siemen@ecmwf.int, Chris Lord/Toronto/IBM@IBMCA
+Date:        2013/06/11 12:54 PM
+Subject:        Boost Serialization fix was(Re: Possibility for a visit to ECMWF in 2013 and status update)
+
+
+Hi Avi, I wanted to checkpoint with you again on your Boost usage progress. One of our developer has found the fix to the problem with
+regards to Boost.serialization with regards to the portable binary archive. It turns out to  be an issue with the default signedness of chars. We have an option to control that using -qchars
+
+         -qchars={signed|unsigned}
+                Specifies whether the data type char will be signed or unsigned.
+
+                Default: -qchars=unsigned
+
+I suspect you have to change to use -qchars=signed
+
+Chris Lord will be able to answer detailed question about how to make it work, as he did extensive analysis on this.
+_________________________________________________________
+Regards, Michael
+http://isocpp.org/wiki/faq/wg21:michael-wong
+OpenMP CEO: http://openmp.org/wp/about-openmp/
+My Blogs: http://ibm.co/pCvPHR
+C++11 status: http://tinyurl.com/43y8xgf
+Boost test results http://www.ibm.com/support/docview.wss?rs=2239&context=SSJT9L&uid=swg27006911
+C/C++ Compilers Feature Request Page http://www.ibm.com/developerworks/rfe/?PROD_ID=700
+TM: https://sites.google.com/site/tmforcplusplus/
+
+IBM Corporation
+XL C++ Compiler kernel Development
+IBM Canada Ltd., C2/KD2/8200/MKM
+8200 Warden Avenue
+Markham, Ontario L6G 1C7
+W:905-413-3283 F:905-413-4839
+
+
+
+
+From:    Avi Bahra <avi.bahra@ecmwf.int>
+To:   Michael Wong/Toronto/IBM@IBMCA
+Date:    02/13/2013 10:54 AM
+Subject:    Re: Possibility for a visit to ECMWF in 2013 and status update
+
+
+
+
+Hi Michael,
+
+  Currently we use the fortran MPI on the super computers.
+  That is as much as I know.
+
+  The new project I am working on, will need to use MPI.(via C++)
+  We may or may not use boost MPI, so I just wanted to see if it
+  was possible.
+
+Best regards
+
+Ta,
+ Avi
+
+----- Original Message -----
+From: "Michael Wong" <michaelw@ca.ibm.com>
+To: "Avi Bahra" <avi.bahra@ecmwf.int>
+Sent: Wednesday, 13 February, 2013 2:46:09 PM
+Subject: Re: Possibility for a visit to ECMWF in 2013 and status update
+
+Got it, thanks.
+One more question, we want to see what we can do about fixing Boost.MPI for ECMWF.
+Are you using our mpiexec or openmpi?
+
+The real problem with boost.MPI is that even though underneath it actually works with our compiler, there is a wrapper with mpiexec that intercepts the return code, translates it and makes it seem to always fail at runtime. In reality, it worked. Using Openmpi may solve this problem. We are trying to put another wrapper on top of mpiexec to divert the true return code to Boost so that it can report a pass.
+
+
+Regards, Michael
+
+OpenMP CEO: http://openmp.org/wp/about-openmp/
+My Blogs: http://ibm.co/pCvPHR
+C++11 status: http://tinyurl.com/43y8xgf
+Boost test results http://www.ibm.com/support/docview.wss?rs=2239&context=SSJT9L&uid=swg27006911
+C/C++ Compilers Support/Feature Request Page http://www.ibm.com/software/awdtools/ccompilers/support/ http://www.ibm.com/support/docview.wss?uid=swg27005811
+STM: https://sites.google.com/site/tmforcplusplus/
+
+Director & Vice President ISOCPP.org
+Canada and IBM C++Standard HoD
+Chair of WG21 SG5 Transactional Memory
+
+XL C++ Compiler kernel Development
+IBM Canada Ltd., C2/KD2/8200/MKM
+8200 Warden Avenue
+Markham, Ontario L6G 1C7
+W:905-413-3283 F:905-413-4839
+
+
+                From:                  Avi Bahra <avi.bahra@ecmwf.int>
+                To:                  Michael Wong/Toronto/IBM@IBMCA
+                Date:                  02/13/2013 04:27 AM
+                Subject:                  Re: Possibility for a visit to ECMWF in 2013 and status update
+
+
+
+
+
+
+Best regards
+
+Ta,
+Avi
+
+----- Original Message -----
+From: "Michael Wong" <michaelw@ca.ibm.com>
+To: "Avi Bahra" <Avi.Bahra@ecmwf.int>
+Sent: Tuesday, 12 February, 2013 7:30:34 PM
+Subject: Fw: Possibility for a visit to ECMWF in 2013 and status update
+
+
+
+Hi Avi, I wanted to check back again as I am afraid I was not clear in my last note.
+I wonder if you can resend this tar file containing the problem for serialization as I don't have it any more.
+
+aix_portable_binary_minus_one_bug.tar
+
+Thanks.
+
+Regards, Michael
+
+OpenMP CEO: http://openmp.org/wp/about-openmp/
+My Blogs: http://ibm.co/pCvPHR
+C++11 status: http://tinyurl.com/43y8xgf
+Boost test results http://www.ibm.com/support/docview.wss?rs=2239&context=SSJT9L&uid=swg27006911
+C/C++ Compilers Support/Feature Request Page http://www.ibm.com/software/awdtools/ccompilers/support/ http://www.ibm.com/support/docview.wss?uid=swg27005811
+STM: https://sites.google.com/site/tmforcplusplus/
+
+Director & Vice President ISOCPP.org http://isocpp.org/wiki/faq/wg21:michael-wong
+Canada and IBM C++Standard HoD
+Chair of WG21 SG5 Transactional Memory
+Vice Chair Standards Council of Canada Programming Languages
+
+XL C++ Compiler kernel Development
+IBM Canada Ltd., C2/KD2/8200/MKM
+8200 Warden Avenue
+Markham, Ontario L6G 1C7
+W:905-413-3283 F:905-413-4839
+----- Forwarded by Michael Wong/Toronto/IBM on 02/12/2013 02:28 PM -----
+
+
+
+
+From:
+Michael Wong/Toronto/IBM
+
+
+
+To:
+Avi Bahra <avi.bahra@ecmwf.int>
+
+
+
+Cc:
+Dorra Bouchiha/Toronto/IBM@IBMCA, John Hague <HAGUEJ@uk.ibm.com>, Stephan Siemen <Stephan.Siemen@ecmwf.int>
+
+
+
+Date:
+01/18/2013 02:01 PM
+
+
+
+Subject:
+Re: Possibility for a visit to ECMWF in 2013 and status update
+
+
+
+Avi Bahra <avi.bahra@ecmwf.int> wrote on 01/18/2013 06:18:19 AM:
+
+> From:
+>
+> Avi Bahra <avi.bahra@ecmwf.int>
+>
+> To:
+>
+> Michael Wong/Toronto/IBM@IBMCA
+>
+> Cc:
+>
+> Dorra Bouchiha/Toronto/IBM@IBMCA, John Hague <HAGUEJ@uk.ibm.com>,
+> Stephan Siemen <Stephan.Siemen@ecmwf.int>
+>
+> Date:
+>
+> 01/18/2013 06:18 AM
+>
+> Subject:
+>
+> Re: Possibility for a visit to ECMWF in 2013 and status update
+>
+> Hi Michael,
+>
+> I have just tried my old test cases with AIX v12.1 and boost
+> version 1.47 and
+> the problem still exists. Hence v12.1 can not cope with
+> serialisation of integers
+> with value '-1' or boost shared ptrs, when using PORTABLE_BINARY_ARCHIVE.
+> (The PORTABLE_BINARY_ARCHIVE is not covered by the boost
+> serialisation regression test).
+> I can resend the standalone test cases which reproduce the crashes ?
+
+Yes, I found in the original email chain the zip file you sent to Sasha before I got on the cc list. Unfortunately Sasha recently passed away. I can not track down the testcase in her directory. I nthis email chain I found, it is this tar file:
+
+aix_portable_binary_minus_one_bug.tar
+
+
+
+Sasha Kasapinovic wrote:
+> Hi Avi,
+>
+> This issue is not specific to AIX or xlC compiler, as I can also
+reproduce it on Linux/PPC machine (which is also Big Endian like AIX),
+both using g++ compiler and xlC compiler. We could look into whether
+this code has been tested to work with Big Endian architecture.
+>
+> Warm regards,
+> Sasha Kasapinovic
+> C++ Compiler Development, IBM Toronto Lab
+> phone: 905.413.4387 fax: 905.413.4839 tie-line: 969.4387
+> e-mail: skasapin@ca.ibm.com
+>
+> Inactive hide details for Avi Bahra <avi.bahra@ecmwf.int>Avi Bahra
+<avi.bahra@ecmwf.int>
+>
+>
+> *Avi Bahra <avi.bahra@ecmwf.int>*
+>
+> 04/27/2010 12:36 PM
+> Please respond to
+> avi.bahra
+>
+>
+>
+> To
+>
+> Sasha Kasapinovic/Toronto/IBM@IBMCA
+>
+> cc
+>
+>
+> Subject
+>
+> Re: portable binary, minus one does not restore on AIX
+>
+>
+>
+>
+> Sasha Kasapinovic wrote:
+> > Hi Avi,
+> >
+> > Is Serialization Portable Binary Archive meant to work both for Little
+> > and Big Endian architecture?
+> >
+> > Warm regards,
+> > Sasha Kasapinovic
+> >
+> > Inactive hide details for Avi Bahra <avi.bahra@ecmwf.int>Avi Bahra
+> > <avi.bahra@ecmwf.int>
+> >
+> >
+> > *Avi Bahra <avi.bahra@ecmwf.int>*
+> >
+> > 04/21/2010 04:43 AM
+> > Please respond to
+> > avi.bahra
+> >
+> >
+> >
+> > To
+> >
+> > Sasha Kasapinovic/Toronto/IBM@IBMCA
+> >
+> > cc
+> >
+> >
+> > Subject
+> >
+> > Re: portable binary, minus one does not restore on AIX
+> >
+> >
+> >
+> >
+> > Sasha Kasapinovic wrote:
+> > > Hi Avi,
+> > >
+> > > Are you able to confirm that this testsuite also passes with
+g++ on AIX?
+> > > When you say that this program produces the passing output on
+Linux,
+> > > what architecture are you using? Is it big or small endian?
+> > >
+> > > Kind regards,
+> > > Sasha Kasapinovic
+> > > C++ Compiler Development, IBM Toronto Lab
+> > > phone: 905.413.4387 fax: 905.413.4839 tie-line: 969.4387
+> > > e-mail: skasapin@ca.ibm.com
+> > >
+> > > Inactive hide details for Avi Bahra <avi.bahra@ecmwf.int>Avi Bahra
+> > > <avi.bahra@ecmwf.int>
+> > >
+> > >
+> > > *Avi Bahra <avi.bahra@ecmwf.int>*
+> > >
+> > > 04/20/2010 08:01 AM
+> > > Please respond to
+> > > avi.bahra
+> > >
+> > >
+> > >
+> > > To
+> > >
+> > > Sasha Kasapinovic/Toronto/IBM@IBMCA
+> > >
+> > > cc
+> > >
+> > >
+> > > Subject
+> > >
+> > > portable binary, minus one does not restore on AIX
+> > >
+> > >
+> > >
+> > >
+> > > Hi Sasha,
+> > >
+> > > With reference to portable binary bug.
+> > >
+> > > I have included a stand alone test case as an attachment.
+> > > This shows a problem with XL/C compiler beta2 compiler.
+> > > This program produces the following output on Linux:
+> > >
+> > > oetzi{/var/tmp/ma0/clientRoot/workspace/MyProject/SCRATCH}:719 -->
+> > > bin/gcc-4.2.1/debug/test
+> > > Text archive Saving -1:-1 OK
+> > > Text archive Restoring -1:-1 OK
+> > > portable binary archive Saving -1:-1 OK
+> > > portable binary archive Restoring -1:-1 OK
+> > >
+> > >
+> > > When run on AIX I get:
+> > >
+> > > bin/vacpp/debug/threading-multi/test
+> > > Text archive Saving -1:-1 OK
+> > > Text archive Restoring -1:-1 OK
+> > > portable binary archive Saving -1:-1 OK
+> > > portable binary archive Restoring restore fred.txt failed.
+> > > boost::archive exception for TimeStruct : integer cannot be
+represented
+> > >
+> > > Please ensure that you add a define for BOOST_VERSION_1_42 or
+> > > BOOST_VERSION_1_40, (depending on your boost version).
+> > > If you are using boost 1.41 you will need to change file
+> > > portable_binary_iarchive.cpp and portable_binary_oarchive.cpp
+> > > just grep for BOOST_VERSION_1_42
+> > >
+> > > Best regards,
+> > > Avi
+> > > /(See attached file: aix_portable_binary_minus_one_bug.tar)/
+> > >
+> >
+> > Hi Sasha,
+> >
+> > The passing test was on Suse Linux, gcc 4.2.1.
+> > Running the following code:
+> >
+> > #define LITTLE 0
+> > #define BIG 1
+> > int machineEndianness() {
+> > int i = 1;
+> > char *p = (char *) &i;
+> > if (p[0] == 1) // Lowest address contains the least significant
+byte
+> > return LITTLE;
+> > else
+> > return BIG;
+> > }
+> > int main() {
+> >
+> > if (machineEndianness() == LITTLE ) {
+> > cout << "LITTLE_ENDIAN\n";
+> > }
+> > else {
+> > cout << "BIG_ENDIAN\n";
+> > }
+> > }
+> >
+> > Shows it to be Litte Endian on my Linux box,
+> > as opposed to big endian on AIX.
+> >
+> > I have never been able to get g++ working on AIX. I didn't think
+> > was possible?
+> >
+> > Best regards
+> > Avi
+> >
+> Hi Sasha,
+>
+> There are many serialisation types:
+> text (portable to all platforms)
+> binary( portable to platforms of the same type)
+> portable binary( portable to all platforms)
+> xml( portable to all platforms )
+>
+> My understanding is the portable binary format should
+> handle conversion between big/little endian platforms.
+> Looking at the source for portable binary archive, it
+> does mess with handling endian'ness. ( If it didn't
+> handle this, it could not really be called portable!)
+>
+> However there appears to be some quirks with the
+> aix compiler, since even on the same platform the restore from disk,
+> does not work.
+>
+> Is this going to be difficult to fix ? since there is a similar issues
+> with shared ptrs, and portable binary archive.
+>
+> Best regards,
+> Avi
+>
+>
+Hi Sasha,
+
+At moment I am using boost serialization as a communication
+mechanism between client and server programs. I am making do
+with text archive, since this is portable. But as the data
+size increases, I will need to resort to the portable binary
+archive at some point.
+
+So please keep me posted on any progress with
+portable binary archive, good or bad and any
+additional xlc beta's.
+
+Best regards,
+
+Avi
+
+>
+> With respect to boost geometry, we are happy and do not require any fixes.
+>
+OK thanks.. We won't followup on geometry.
+
+> I did have additional query however, does the v12.1 compiler pass
+> the boost MPI tests ?
+
+MPI with the xlC compiler works but the Boost works with a wrapper passing options (as it needs library link options and such) in ways that does not match what the compiler expects so the underlying POE environment always fails immediately. If we invoke the MPi compiler directly, it works perfectly. We have been trying to figure out how to fix the option passing mechanism. This is an annoying problem that causes an otherwise passing library suite to fail completely with a bad RC. It is not a compiler issue.
+
+Can you tell us what MPI testcase you want working and we can verify it here to make sure it is passing. We can arrange to install the same product+version.config.
+
+
+>
+>
+> Best regards
+>
+> Ta,
+> Avi
+>
+> ----- Original Message -----
+> From: "Michael Wong" <michaelw@ca.ibm.com>
+> To: "Avi Bahra" <avi.bahra@ecmwf.int>
+> Cc: "Dorra Bouchiha" <dorrab@ca.ibm.com>, "John Hague"
+> <HAGUEJ@uk.ibm.com>, "Stephan Siemen" <Stephan.Siemen@ecmwf.int>
+> Sent: Thursday, 17 January, 2013 1:57:14 PM
+> Subject: Re: Possibility for a visit to ECMWF in 2013 and status update
+>
+>
+>
+> Hi Avi, we tried the serialization examples in our latest released
+> V12.1 compiler Boost 1.47 in release and debug modes for boost and
+> did not encounter any failures.
+>
+> This problem may have been solved. What version of Boost and
+> compiler are you using?
+>
+> I know you talked to us about this awhile back and I have the
+> testcase. Would you be able to try with the latest combination and
+> report your results.
+>
+> Also would you know whether you still need geometry as we are trying
+> to prioritize our Boost fixes based on what ECMWF requires most
+> urgently. Thanks.
+>
+>
+> Regards, Michael
+>
+> OpenMP CEO: http://openmp.org/wp/about-openmp/
+> My Blogs: http://ibm.co/pCvPHR
+> C++11 status: http://tinyurl.com/43y8xgf
+> Boost test results http://www.ibm.com/support/docview.wss?
+> rs=2239&context=SSJT9L&uid=swg27006911
+> C/C++ Compilers Support/Feature Request Page http://www.ibm.com/
+> software/awdtools/ccompilers/support/ http://www.ibm.com/support/
+> docview.wss?uid=swg27005811
+> STM: https://sites.google.com/site/tmforcplusplus/
+>
+> Director & Vice President ISOCPP.org
+> Canada and IBM C++Standard HoD
+> Chair of WG21 SG5 Transactional Memory
+>
+> XL C++ Compiler kernel Development
+> IBM Canada Ltd., C2/KD2/8200/MKM
+> 8200 Warden Avenue
+> Markham, Ontario L6G 1C7
+> W:905-413-3283 F:905-413-4839
+>
+> Inactive hide details for Avi Bahra ---01/08/2013 08:37:38 AM---With
+> reference to boost serialisation. Most of the issues with Avi Bahra
+> ---01/08/2013 08:37:38 AM---With reference to boost serialisation.
+> Most of the issues with boost serialisation have been resolve
+>
+>
+>
+>
+> From:
+> Avi Bahra <avi.bahra@ecmwf.int>
+>
+>
+>
+> To:
+> Michael Wong/Toronto/IBM@IBMCA
+>
+>
+>
+> Cc:
+> John Hague <HAGUEJ@uk.ibm.com>, Dorra Bouchiha/Toronto/IBM@IBMCA,
+> Stephan Siemen <Stephan.Siemen@ecmwf.int>
+>
+>
+>
+> Date:
+> 01/08/2013 08:37 AM
+>
+>
+>
+> Subject:
+> Re: Possibility for a visit to ECMWF in 2013 and status update
+>
+>
+>
+>
+> With reference to boost serialisation.
+> Most of the issues with boost serialisation have been resolved with the v12
+> version of the compiler.
+>
+> The *only* issue not covered is the PORTABLE_BINARY_ARCHIVE.
+> This is not in the boost tests, but appears in the boost
+> serialisation examples.
+> The PORTABLE_BINARY_ARCHIVE allows platform independent
+> serialisation in binary
+> mode, and is much faster than using the standard text archive.
+> However on IBM/xlc
+> it is broken( it works fine on linux and HPUX).
+> I have already provided the failing standalone test case, a while back.
+>
+> Best regards
+>
+> Ta,
+> Avi
+>
+> ----- Original Message -----
+> From: "Michael Wong" <michaelw@ca.ibm.com>
+> To: "Avi Bahra" <Avi.Bahra@ecmwf.int>, "Stephan Siemen"
+> <Stephan.Siemen@ecmwf.int>
+> Cc: "John Hague" <HAGUEJ@uk.ibm.com>, "Dorra Bouchiha" <dorrab@ca.ibm.com>
+> Sent: Tuesday, 4 December, 2012 7:35:46 PM
+> Subject: Fw: Possibility for a visit to ECMWF in 2013 and status update
+>
+>
+>
+> Hi Avi et al, I believe the following request for Geometry support
+> came from ECMWF (possibly from Will Wier, Dorra may be able to
+> confirm) . Right now it is passing at 93% with the following tests
+> failing. Would you know which tests are needed:
+>
+> http://www.boost.org/development/tests/trunk/developer/geometry.html
+>
+>
+> Currently, the following in geometry are still failing:
+> convex_hull
+> distance
+> multi_convex_hull
+> multi_distance
+> pythagoras
+> select_most_precise
+> traverse
+> union
+>
+> Would you confirm Boost.geometry is needed by your team, and whether
+> you need to pass the above failing tests? Thanks.
+>
+> Regards, Michael
+>
+> OpenMP CEO: http://openmp.org/wp/about-openmp/
+> My Blogs: http://ibm.co/pCvPHR
+> C++11 status: http://tinyurl.com/43y8xgf
+> Boost test results http://www.ibm.com/support/docview.wss?
+> rs=2239&context=SSJT9L&uid=swg27006911
+> C/C++ Compilers Support/Feature Request Page http://www.ibm.com/
+> software/awdtools/ccompilers/support/ http://www.ibm.com/support/
+> docview.wss?uid=swg27005811
+> STM: https://sites.google.com/site/tmforcplusplus/
+>
+> Director & Vice President ISOCPP.org
+> Canada and IBM C++Standard HoD
+> Chair of WG21 SG5 Transactional Memory
+>
+> XL C++ Compiler kernel Development
+> IBM Canada Ltd., C2/KD2/8200/MKM
+> 8200 Warden Avenue
+> Markham, Ontario L6G 1C7
+> W:905-413-3283 F:905-413-4839
+> ----- Forwarded by Michael Wong/Toronto/IBM on 12/04/2012 02:29 PM -----
+>
+>
+>
+>
+> From:
+> Michael Wong/Toronto/IBM
+>
+>
+>
+> To:
+> Avi Bahra <Avi.Bahra@ecmwf.int>, Stephan.Siemen@ecmwf.int
+>
+>
+>
+> Date:
+> 11/28/2012 11:29 AM
+>
+>
+>
+> Subject:
+> Possibility for a visit to ECMWF in 2013 and status update
+>
+>
+> Hi all, this is just another checkpoint on your progress on Boost
+> while trying not to bug you too much as I know you have a lot of work.
+>
+> I am wondering if there are any other Boost concerns. I am aware of
+> serialization, spirit, geometry, interprocess, and mpi. Are there
+> any others? As far as I know, spirit and geometry, should be much
+> better. We are aiming for serialization next. Would there be a
+> better priority?
+>
+> I will be giving a talk in Bristol UK at the ACCU conference in mid
+> April, 2013 in Bristol UK. I wonder if that would be a good time to
+> visit to see a review of your OOPS code rewrite and status as well
+> as updated Boost concerns. I am deeply interested in keeping up to
+> date on this. As the Conference will be paying for my flight and
+> hotel in Bristol, this could lower the cost of visit considerably for ECMWF.
+>
+> Please let me know.
+>
+> P.S. I am still interested in updating ECMWF as an external customer
+> reference based on the internal customer reference we already did
+> before with ECMWF based on our joint activities on the IFS/Boost . I
+> believe the conversion will only take half an hour of someone's time
+> through a telephone interview and we can do all the work. I wanted
+> to see if this would be possible with either the IFS/OOPS team or
+> the Boost group. Please let me know as our management team would
+> really be supportive of this closer tie-in relationship.
+>
+> Thank you.
+>
+> Regards, Michael
+>
+> OpenMP CEO: http://openmp.org/wp/about-openmp/
+> My Blogs: http://ibm.co/pCvPHR
+> C++11 status: http://www.ibm.com/software/awdtools/xlcpp/aix/
+> features/?S_CMP=rnav
+> Boost test results http://www.ibm.com/support/docview.wss?
+> rs=2239&context=SSJT9L&uid=swg27006911
+> C/C++ Compilers Support/Feature Request Page http://www.ibm.com/
+> software/awdtools/ccompilers/support/ http://www.ibm.com/support/
+> docview.wss?uid=swg27005811
+> STM: https://sites.google.com/site/tmforcplusplus/
+>
+> Director & Vice President ISOCPP.org
+> Canada and IBM C++Standard HoD
+> Chair of WG21 SG5 Transactional Memory
+>
+> XL C++ Compiler kernel Development
+> IBM Canada Ltd., C2/KD2/8200/MKM
+> 8200 Warden Avenue
+> Markham, Ontario L6G 1C7
+> W:905-413-3283 F:905-413-4839
+>
+>
+>
+
+[attachment "aix_portable_binary_minus_one_bug.tar.gz" deleted by Michael Wong/Toronto/IBM]
+
+
+

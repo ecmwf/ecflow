@@ -1,0 +1,258 @@
+#!/usr/bin/env cdp 
+
+set PROJECT skull
+set SELECTION $PROJECT
+# set SELECTION e${PROJECT}
+
+case SELECTION
+in (skull) do   set FIRST_DAY 0; endin
+in (eskull) do  set FIRST_DAY 1; endin
+endcase
+
+alias def_fam defstatus suspended
+                 
+setenv -i USER SCRATCH HOME  HOST
+
+set GROUP               `id -gn`
+set SCHOST              c1a
+set WSHOST              `uname -n`
+set CLHOST              lxa
+
+case USER in (map) do
+  set WSQUEUE             serial
+  set WS_QUEUE_EPILOG     ns
+  set SCQUEUE             ns
+  set SC_QUEUE_EPILOG     ns
+  set ACCOUNT             ecodmdma
+endin
+in () do
+  set WSQUEUE             serial
+  set WS_QUEUE_EPILOG     ns
+  set SCQUEUE             ns
+  set SC_QUEUE_EPILOG     ns
+  set ACCOUNT             decmsaf
+endin
+endcase
+
+set WSLOGDIR            $SCRATCH/output
+$ mkdir -p $WSLOGDIR/$SELECTION # call shell command
+
+set SCLOGDIR            /s1a/ms_dir/$GROUP/$USER/smsjoboutput
+set WDIR                /s1a/ms_dir/$GROUP/$USER/wdir
+
+set VERSION             0040        
+# CONV: set FIRST_DATE `date +%Y%m%d` # date is a keyword for play
+set FIRST_DATE          `\date +%Y%m%d`
+set LAST_DATE           `newdate -D $FIRST_DATE 1`
+
+set QUEUE_EPILOG ns
+
+define onws {
+  edit QUEUE   $WSQUEUE
+  edit QUEUE_EPILOG $WS_QUEUE_EPILOG
+  edit LOGDIR  $WSLOGDIR
+  edit SMSOUT  $WSLOGDIR
+  edit WSHOST  $HOST
+}
+
+define oncl {
+  edit QUEUE   $WSQUEUE
+  edit QUEUE_EPILOG $WS_QUEUE_EPILOG
+  edit LOGDIR  $WSLOGDIR
+  edit SMSOUT  $WSLOGDIR
+  edit WSHOST  linux_cluster
+  edit WSHOST  $CLHOST
+}
+
+define onsc {
+  edit QUEUE   $SCQUEUE
+  edit QUEUE_EPILOG $SC_QUEUE_EPILOG
+  edit LOGDIR  $SCLOGDIR
+  edit SMSOUT  $SCLOGDIR
+  edit WSHOST  $SCHOST
+}
+
+define onecg {
+  edit QUEUE   normal
+  edit QUEUE_EPILOG normal
+  edit LOGDIR  $WSLOGDIR
+  edit SMSOUT  $WSLOGDIR
+  edit WSHOST ecgate
+}
+
+define day { # weekdey
+  # edit WEEKDAY $*; label weekday $* # CONV
+  edit WEEKDAY "$*"; label weekday "$*"
+}
+
+#
+# always better to include external files
+# out from the suite definition
+#
+
+< inc_${PROJECT}.def
+# < inc_skull.def
+< dinner.def
+< barber.def
+< weekly.def
+
+set USE_SMS 1
+set USE_ECF 1
+
+if (!USE_SMS and !USE_ECF) then echo "it cannot be"; abort; endif
+
+suite $SELECTION 
+  defstatus suspended
+
+  edit USER             $USER
+  edit SCHOST           $SCHOST
+  edit WSHOST           $WSHOST 
+  edit CLHOST           $CLHOST
+  edit WSLOGDIR         $WSLOGDIR
+  edit SCLOGDIR         $SCLOGDIR
+  edit DATEMASK         *.*.*
+  edit QUEUE_EPILOG     $QUEUE_EPILOG
+
+
+  setenv -i PWD
+  set HOMEDIR $HOME/sms_server/$SELECTION
+  set HOMEDIR $PWD
+
+if (USE_SMS) then
+  edit SMSLOGHOST       ${SCHOST}
+  edit SMSLOGPORT       9316
+  edit SMSTRIES         1
+  edit SMSHOME          $SCRATCH/output
+  edit SMSFILES         $HOMEDIR/smsfiles
+  edit SMSINCLUDE       $HOMEDIR/include
+  edit SMSCMD  "/home/ma/emos/bin/smssubmit %USER% %WSHOST% %SMSJOB% %SMSJOBOUT%"
+  edit SMSKILL "/home/ma/emos/bin/smskill %USER% %WSHOST% %SMSRID% %SMSJOBOUT%"
+endif
+if (USE_ECF) then
+  edit ECF_LOGHOST       ${SCHOST}
+  edit ECF_LOGPORT       9316
+  edit ECF_TRIES         1
+  edit ECF_HOME          $SCRATCH/output
+  edit ECF_FILES         $HOMEDIR/smsfiles
+  edit ECF_INCLUDE       $HOMEDIR/include
+  edit ECF_JOB_CMD  "/home/ma/emos/bin/smssubmit %USER% %WSHOST% %ECF_JOB% %ECF_JOBOUT% "
+  edit ECF_KILL_CMD "/home/ma/emos/bin/smskill %USER% %WSHOST% %ECF_RID% %ECF_JOBOUT% "
+endif
+
+  edit ACCOUNT          $ACCOUNT
+  edit VERSION          $VERSION
+  edit EPSVERSION       0001
+  edit RFVERSION        0001
+  edit DELTA_DAY        0
+  edit EMOS_BASE        00
+  
+  edit USE_YMD          true
+
+  edit FSFAMILY         / # $HOME/
+  edit BINS             $HOME/bin
+  edit XBINS            /home/ma/emos/bin
+  edit STREAM           undef
+  edit EPSTYPE          undef
+  edit MEMBER           0
+  edit FIRST_DAY        $FIRST_DAY
+  edit EMOS_TIME_STEP_H 00
+
+  # repeat date YMD    $FIRST_DATE $LAST_DATE
+  edit YMD    $FIRST_DATE
+  edit   SUITE_START $FIRST_DATE
+
+  family limits
+    defstatus complete
+    limit lim 3
+  endfamily
+
+  # generate binaries 
+  family make ; 
+    complete /$SELECTION:YMD ne /$SELECTION:SUITE_START
+    family wst; onws;    call_skull_make; endfamily
+    family ecg; onecg;   call_skull_make; endfamily
+    family hpc; onsc;    call_skull_make; endfamily
+    family lcl; oncl;    
+      if (USE_SMS) then
+	edit SMSCMD "/home/ma/emos/bin/smssubmit.new %USER% %WSHOST% %SMSJOB% %SMSJOBOUT% "
+      endif
+      if (USE_ECF) then
+	edit ECF_JOB_CMD  "/home/ma/emos/bin/smssubmit.new %USER% %WSHOST% %ECF_JOB% %ECF_JOBOUT% "
+      endif
+
+      call_skull_make; endfamily
+  endfamily
+
+  family $PROJECT
+    def_fam
+    set families "00 12"
+
+    edit ENSEMBLES 50
+    trigger ./make==complete
+
+    loop fam ( $families ) do
+      
+      family $fam ; # onsc
+        if (fam eq 00) then
+          edit DELTA_DAY 1 
+        else
+          edit DELTA_DAY 0
+        endif
+
+        edit EMOS_BASE $fam
+        
+	call_skull
+
+      family pop; oncl
+        trigger ./${PROJECT}==complete
+	call_pop_skull
+      endfamily
+
+      family ws; onws
+        trigger ./${PROJECT}==complete
+	call_pop_skull
+      endfamily
+
+      endfamily #fam        
+
+    endloop #fam = 12, 00
+  endfamily
+
+  family consumer
+    def_fam
+   < consumer.def
+  endfamily
+
+  onws
+  edit SLEEP 20
+  call_dinner
+
+  call_barber_shop
+
+  call_weekly
+
+  task perl
+    defstatus suspended
+if (USE_SMS) then
+    edit SMSMICRO ^
+    edit SMSCMD "^SMSJOB^ > ^SMSJOBOUT^ 2>&1 &"
+endif
+if (USE_ECF) then
+    edit ECF_MICRO ^
+    edit ECF_JOB_CMD "^ECF_JOB^ > ^ECF_JOBOUT^ 2>&1 &"
+endif
+    meter step -1 100
+
+  task python
+    defstatus suspended
+if (USE_SMS) then
+    edit SMSMICRO ^
+    edit SMSCMD "^SMSJOB^ > ^SMSJOBOUT^ 2>&1 &"
+endif
+if (USE_ECF) then
+    edit ECF_MICRO ^
+    edit ECF_JOB_CMD "^ECF_JOB^ > ^ECF_JOBOUT^ 2>&1 &"
+endif
+    meter step -1 100
+endsuite
+EOF

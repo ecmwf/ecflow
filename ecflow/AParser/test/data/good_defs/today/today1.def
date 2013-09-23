@@ -1,0 +1,16 @@
+suite suiteName
+   family familyName0
+   		today 15:00            #comment
+   		today 19:00
+   		today 15:00
+   		today 10:00 20:00 01:00
+   		today 10:00 20:00 01:00
+		task t
+   			today 15:00
+   			today 19:00
+   			today 15:00
+   			today 10:00 20:00 01:00
+   			today 10:00 20:00 01:00		   		
+   endfamily
+endsuite
+

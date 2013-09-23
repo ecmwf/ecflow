@@ -1,0 +1,93 @@
+SPHINX
+======
+The documentation is generated. It relies on sphinx-build being available on the command line.
+Also in order to document the Python api. Conf.py has been altered so that
+we have added path to ecflow extension( i.e ecflow.so)
+
+   sys.path.insert(0,os.getcwd() + "/../../Pyext/ecflow")   
+
+However ecflow.so relies on boost python.
+This is typically done as a hard coded path in ecflow.so. 
+This hard coded path refers to the release area.
+i.e ECFLOW_PYTHON_INSTALL_DIR
+
+Hence we need an existing install of ecflow.
+This can be bypassed by using LD_LIBRARY_PATH to point to dir' 
+where boost python resides. 
+
+Note: When changing boost versions, the links may not be correct.
+i.e Pyext/ecflow.so -> link to ECFLOW_PYTHON_INSTALL_DIR/boost python 1.45
+    However when upgrading to boost 1.47 this will not be correct
+    until the first install.
+Again use LD_LIBRARY_PATH set path to correct boost version/python.
+
+
+
+Use the following to generate the documentation:
+
+# cd Doc/online  
+# make clean; make html
+
+The generated documentation can then be viewed in a web browser
+by opening the file:
+ 
+  Doc/tutorial/_build/html/index.html
+  
+The ecflow tar script will automatically generate the tutorial
+so that there does not have to be a dependency on sphinx-build
+on platforms other then linux
+
+Intranet
+========
+The address for review in the intra net is::
+     
+   http://intra.ecmwf.int/metapps/manuals/ecflow
+   
+When the tutorial has been changed locally it can be updated to web server using::
+
+   sitecopy -u ecflow
+   
+   
+External website
+================
+
+  http://wedit.ecmwf.int/publications/manuals/ecflow/
+  
+   
+When replying, type your text above this line.
+----------------------------------------------
+Latest update:
+
+There was then a further problem.
+
+Avi had reinitialised the site (probably) and this resulted in the
+site not being normally update-able.
+
+To fix this:
+
+      sitecopy -k -u ecflow
+      sitecopy -c ecflow
+
+Andy
+
+--------------------------------------------------------------
+
+Resolution:
+
+Entered on 2011-06-21 at 15:51:36 by Andy Brady:
+
+
+sitecopy -k -u ecflow
+sitecopy -c ecflow  
+
+
+
+Documenting ecflow extension
+----------------------------
+ecflow python extension uses boost python for the binding between C++ and Python and sphinx for document generation.
+When sphinx generates the ecflow API documentation it uses introspection to search for documentation in the python code. 
+It happens that boost overrides some python introspection API for functions and methods which sphinx expects to have. 
+Therefore you should see many warnings of type:
+     (WARNING/2) error while formatting arguments for ecflow.ZombieAttr.zombie_type: arg is not a Python function
+ 
+Do not worry since sphinx is able to generate the proper documentation.

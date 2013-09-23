@@ -1,0 +1,4 @@
+DBG:[14:20:32 3.11.2009]    state change /dfo unknown --> queued duration_(00:00:00) initTime_(2009-Nov-03 14:20:32) suiteTime_(2009-Nov-03 14:20:32)
+DBG:[14:20:32 3.11.2009]    state change /dfo queued --> complete duration_(00:00:00) initTime_(2009-Nov-03 14:20:32) suiteTime_(2009-Nov-03 14:20:32)
+DBG:[14:20:32 3.11.2009]    state change /dfi unknown --> queued duration_(00:00:00) initTime_(2009-Nov-03 14:20:32) suiteTime_(2009-Nov-03 14:20:32)
+DBG:[14:20:32 3.11.2009]    state change /dfi queued --> complete duration_(00:00:00) initTime_(2009-Nov-03 14:20:32) suiteTime_(2009-Nov-03 14:20:32)

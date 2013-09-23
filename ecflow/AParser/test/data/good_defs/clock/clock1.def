@@ -1,0 +1,5 @@
+suite suiteName
+	clock real +01:00
+endsuite
+
+suite s1; clock real +01:00;endsuite

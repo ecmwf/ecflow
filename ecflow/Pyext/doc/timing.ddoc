@@ -1,0 +1,75 @@
+#How to time a function using a decorator:
+#==========================================================================
+
+#!/usr/bin/env python2.7
+import ecflow
+
+#
+# time a function using time.time() and the a @ function decorator
+#
+import time
+ 
+def print_timing(func):
+    #
+    def wrapper(*arg):
+        
+        t1 = time.time()
+        res = func(*arg)
+        t2 = time.time()
+        
+        print '%s took %0.3f s' % (func.func_name, (t2-t1))
+        return res
+    #
+    return wrapper
+
+#
+# declare the @ decorator just before the function, invokes print_timing()
+#
+@print_timing
+def time_client_sync_local():
+    try:
+        print "Creating client"
+        ci = ecflow.Client()
+        print "Doing a sync local"
+        ci.sync_local()                        # retrieve server definition, by sync with client defs
+    except RuntimeError, e:
+        print "Failed: " + str(e)
+        
+if __name__ == '__main__':
+    time_client_sync_local()
+
+
+#How to time a function using the with statement
+#=================================================================================
+# assume python 2.7 or has support for with
+import time
+import ecflow
+
+class Timer(object):
+    def __enter__(self):
+        self.__start = time.time()
+
+    def __exit__(self, type, value, traceback):
+        # Error handling here
+        self.__finish = time.time()
+
+    def duration_in_seconds(self):
+        return self.__finish - self.__start
+
+
+timer = Timer()
+with timer:
+    # Whatever you want to measure goes here
+    try:
+        print "Creating client"
+        ci = ecflow.Client()
+        print "Doing a sync local"
+        ci.sync_local()                        # retrieve server definition, by sync with client defs
+    except RuntimeError, e:
+        print "Failed: " + str(e)
+        
+    # time.sleep(2)
+
+print timer.duration_in_seconds()
+
+

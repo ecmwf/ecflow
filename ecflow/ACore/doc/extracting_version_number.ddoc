@@ -1,0 +1,32 @@
+
+This file outline how we can extract the release, major and minor numbers
+
+   const int Version::release_ = 2;
+   const int Version::major_= 0;
+   const std::string Version::minor_ = "2rc1" ;  // this can be string so remember to remove quotes
+
+Can use the following to extract the version number in a shell
+
+// Following assume release,major,minor is at most 2 chars, hence highest number is 99
+# Cut and paste the code below & verify the correct output is obtained:
+
+release=$(grep "Version::release_" ACore/src/Version.cpp  | cut -d= -s -f2 | sed 's/;//g' | sed 's/ //g')
+major=$(grep   "Version::major_"   ACore/src/Version.cpp  | cut -d= -s -f2 | sed 's/;//g' | sed 's/ //g')
+minor=$(grep   "Version::minor_"   ACore/src/Version.cpp  | cut -d= -s -f2 | sed 's/;//g' | sed 's/ //g' | sed 's/"//g' )
+ECFLOW=ecflow_${release}_${major}_${minor}
+echo $ECFLOW
+
+// cut -d= -s -f2
+//     -s, --only-delimited
+//              do not print lines not containing delimiters
+//
+//     -d means delimit by =, (const int Version::release_) ( 1 ;)
+//                            (const int Version::major_)   ( 9 ;)
+//                            (const int Version::minor_)   ( 0 ;)
+//     -f2 means field 2      ( 1 ;)
+//                            ( 9 ;)
+//                            ( 0 ;)
+// sed 's/;//g'               ( 1 )     # remove semi-colon
+//                            ( 9 )
+//                            ( 0 )
+// sed 's/"//g'               # remove quotes from the minor string

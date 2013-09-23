@@ -1,0 +1,5 @@
+suite suiteName
+   date 100.*.2009   # day should be in rage 1-31
+   
+endsuite
+

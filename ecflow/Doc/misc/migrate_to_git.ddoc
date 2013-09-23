@@ -1,0 +1,45 @@
+To migrate from perforce to git, clean up generated files to avoid adding them to eclipse
+    cd $WK
+    sh -x build/cleah.sh
+
+  o Copy to  git directory
+      cd /var/tmp/ma0/clientRoot/workspace/git/working-directory
+      cp -r ../../MyProject ecflow
+
+  o Remove the eclipse based files and directories
+      cd /var/tmp/ma0/clientRoot/workspace/git/working-directory
+      find . -name \*.cproject -exec rm -rf \*.cproject {} \; -print
+      find . -name \*.project -exec rm -rf \*.project {} \; -print
+      find . -name \*.settings -exec rm -rf \*.settings {} \; -print
+      find . -name \*.csettings -exec rm -rf \*.csettings {} \; -print
+      find . -name \*.metadata -exec rm -rf \*.metadata {} \; -print
+   
+  o Create git repo
+    currently we are not bothering with copying the history.
+    cd  /var/tmp/ma0/clientRoot/workspace/git/working-directory
+    git init
+    git add .
+    git status
+    
+  o Open eclipse and create a C++ project
+    - select 
+      /var/tmp/ma0/clientRoot/workspace/git/working-directory/ecflow
+    - project name:
+      ecflow.
+      
+      
+  o Update $WK/build/tar_ecflow.sh
+                     tar_incr_ecflow.sh
+    - replace MyProject with ecflow
+    
+  o Update nightly build to include
+  
+   - git clone
+   - git update
+   - Keep tar, for uploading to web, and for HP-UX which does not have git
+    
+  o Update build properties:
+  
+  o Upload to stash:
+  
+  

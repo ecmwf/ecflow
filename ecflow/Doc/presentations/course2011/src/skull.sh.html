@@ -1,0 +1,237 @@
+<div class="highlight"><pre><span class="c">#!/bin/ksh</span>
+<span class="nv">DEBUG_DEF2ECF</span><span class="o">=</span>0
+<span class="nb">exec </span>3&gt; expanded.tmp
+. <span class="k">${</span><span class="nv">TOP</span><span class="p">:=.</span><span class="k">}</span>/libgen.sh
+
+<span class="nv">PROJECT</span><span class="o">=</span>skull
+<span class="nv">SELECTION</span><span class="o">=</span><span class="nv">$PROJECT</span>
+<span class="c"># set SELECTION e${PROJECT}</span>
+<span class="k">case</span> <span class="nv">$SELECTION</span> in 
+    skull <span class="o">)</span> <span class="nv">FIRST_DAY</span><span class="o">=</span>0;;
+    eskull<span class="o">)</span> <span class="nv">FIRST_DAY</span><span class="o">=</span>1;;
+<span class="k">esac</span>
+<span class="k">function </span>def_fam <span class="o">{</span>
+    defstatus suspended
+<span class="o">}</span>
+<span class="nv">GROUP</span><span class="o">=</span><span class="k">$(</span>id -gn<span class="k">)</span>
+<span class="nv">SCHOST</span><span class="o">=</span>c1a
+<span class="nv">WSHOST</span><span class="o">=</span><span class="k">$(</span>uname -n<span class="k">)</span>
+<span class="nv">CLHOST</span><span class="o">=</span>lxa
+<span class="k">case</span> <span class="nv">$USER</span> in
+    map<span class="o">)</span> <span class="nv">WSQUEUE</span><span class="o">=</span>serial
+         <span class="nv">WS_QUEUE_EPILOG</span><span class="o">=</span>ns
+         <span class="nv">SCQUEUE</span><span class="o">=</span>ns
+         <span class="nv">SC_QUEUE_EPILOG</span><span class="o">=</span>ns
+         <span class="nv">ACCOUNT</span><span class="o">=</span>ecodmdma;;
+    *<span class="o">)</span>   <span class="nv">WSQUEUE</span><span class="o">=</span>serial
+         <span class="nv">WS_QUEUE_EPILOG</span><span class="o">=</span>ns
+         <span class="nv">SCQUEUE</span><span class="o">=</span>ns
+         <span class="nv">SC_QUEUE_EPILOG</span><span class="o">=</span>ns
+         <span class="nv">ACCOUNT</span><span class="o">=</span>decmsaf;;
+<span class="k">esac</span>
+
+<span class="nv">WSLOGDIR</span><span class="o">=</span><span class="nv">$SCRATCH</span>/output
+mkdir -p <span class="nv">$WSLOGDIR</span>/<span class="nv">$SELECTION</span> <span class="c"># call shell command</span>
+<span class="nv">SCLOGDIR</span><span class="o">=</span>/s1a/ms_dir/<span class="nv">$GROUP</span>/<span class="nv">$USER</span>/smsjoboutput
+<span class="nv">WDIR</span><span class="o">=</span>/s1a/ms_dir/<span class="nv">$GROUP</span>/<span class="nv">$USER</span>/wdir
+<span class="nv">VERSION</span><span class="o">=</span>0040
+<span class="c"># CONV: set FIRST_DATE `date +%Y%m%d` # date is a keyword for play</span>
+<span class="nv">FIRST_DATE</span><span class="o">=</span><span class="k">$(</span><span class="se">\d</span>ate +%Y%m%d<span class="k">)</span>
+<span class="nv">LAST_DATE</span><span class="o">=</span><span class="k">$(</span>newdate -D <span class="nv">$FIRST_DATE</span> 1<span class="k">)</span>
+<span class="nv">QUEUE_EPILOG</span><span class="o">=</span>ns
+onws<span class="o">()</span> <span class="o">{</span>
+    edit QUEUE   <span class="nv">$WSQUEUE</span>
+    edit QUEUE_EPILOG <span class="nv">$WS_QUEUE_EPILOG</span>
+    edit LOGDIR  <span class="nv">$WSLOGDIR</span>
+    edit SMSOUT  <span class="nv">$WSLOGDIR</span>
+    edit WSHOST  <span class="nv">$HOST</span>
+<span class="o">}</span>
+oncl<span class="o">()</span> <span class="o">{</span>
+    edit QUEUE   <span class="nv">$WSQUEUE</span>
+    edit QUEUE_EPILOG <span class="nv">$WS_QUEUE_EPILOG</span>
+    edit LOGDIR  <span class="nv">$WSLOGDIR</span>
+    edit SMSOUT  <span class="nv">$WSLOGDIR</span>
+    edit WSHOST  linux_cluster
+    edit WSHOST  <span class="nv">$CLHOST</span>
+<span class="o">}</span>
+onsc<span class="o">()</span> <span class="o">{</span>
+    edit QUEUE   <span class="nv">$SCQUEUE</span>
+    edit QUEUE_EPILOG <span class="nv">$SC_QUEUE_EPILOG</span>
+    edit LOGDIR  <span class="nv">$SCLOGDIR</span>
+    edit SMSOUT  <span class="nv">$SCLOGDIR</span>
+    edit WSHOST  <span class="nv">$SCHOST</span>
+<span class="o">}</span>
+onecg<span class="o">()</span> <span class="o">{</span>
+    edit QUEUE   normal
+    edit QUEUE_EPILOG normal
+    edit LOGDIR  <span class="nv">$WSLOGDIR</span>
+    edit SMSOUT  <span class="nv">$WSLOGDIR</span>
+    edit WSHOST ecgate
+<span class="o">}</span>
+day<span class="o">()</span> <span class="o">{</span>
+<span class="c"># edit WEEKDAY $*; label weekday $* # CONV</span>
+    edit WEEKDAY <span class="s2">&quot;\&quot;$*\&quot;&quot;</span>
+    label weekday <span class="s2">&quot;$*&quot;</span>
+<span class="o">}</span>
+<span class="c">#</span>
+<span class="c"># always better to include external files</span>
+<span class="c"># out from the suite definition</span>
+<span class="c">#</span>
+. inc_<span class="k">${</span><span class="nv">PROJECT</span><span class="k">}</span>.sh
+<span class="c"># &lt; inc_skull.def</span>
+. dinner.sh
+. barber.sh
+. weekly.sh
+<span class="nv">USE_SMS</span><span class="o">=</span>1
+<span class="nv">USE_ECF</span><span class="o">=</span>1
+<span class="k">if</span> <span class="o">((</span> !<span class="nv">$USE_SMS</span> <span class="o">&amp;&amp;</span> !<span class="nv">$USE_ECF</span> <span class="o">))</span>; <span class="k">then</span>
+<span class="k">    </span><span class="nb">echo</span> <span class="s2">&quot;it cannot be&quot;</span>
+    abort
+<span class="k">fi</span>
+suite <span class="nv">$SELECTION</span>
+defstatus suspended
+edit USER             <span class="nv">$USER</span>
+edit SCHOST           <span class="nv">$SCHOST</span>
+edit WSHOST           <span class="nv">$WSHOST</span>
+edit CLHOST           <span class="nv">$CLHOST</span>
+edit WSLOGDIR         <span class="nv">$WSLOGDIR</span>
+edit SCLOGDIR         <span class="nv">$SCLOGDIR</span>
+edit DATEMASK         *.*.*
+edit QUEUE_EPILOG     <span class="nv">$QUEUE_EPILOG</span>
+<span class="c"># setenv -i PWD</span>
+<span class="nv">HOMEDIR</span><span class="o">=</span><span class="nv">$HOME</span>/sms_server/<span class="nv">$SELECTION</span>
+<span class="nv">HOMEDIR</span><span class="o">=</span><span class="nv">$PWD</span>
+<span class="k">if</span> <span class="o">[[</span> -n USE_SMS <span class="o">]]</span>; <span class="k">then</span>
+<span class="k">    </span>edit SMSLOGHOST       <span class="k">${</span><span class="nv">SCHOST</span><span class="k">}</span>
+    edit SMSLOGPORT       9316
+    edit SMSTRIES         1
+    edit SMSHOME          <span class="nv">$SCRATCH</span>/output
+    edit SMSFILES         <span class="nv">$HOMEDIR</span>/smsfiles
+    edit SMSINCLUDE       <span class="nv">$HOMEDIR</span>/include
+    edit SMSCMD  <span class="s2">&quot;\&quot;/home/ma/emos/bin/smssubmit %USER% %WSHOST% %SMSJOB% %SMSJOBOUT%\&quot;&quot;</span>
+    edit SMSKILL <span class="s2">&quot;\&quot;/home/ma/emos/bin/smskill %USER% %WSHOST% %SMSRID% %SMSJOBOUT%\&quot;&quot;</span>
+<span class="k">fi</span>
+<span class="k">if</span> <span class="o">[[</span> -n USE_ECF <span class="o">]]</span>; <span class="k">then</span>
+<span class="k">    </span>edit ECF_LOGHOST       <span class="k">${</span><span class="nv">SCHOST</span><span class="k">}</span>
+    edit ECF_LOGPORT       9316
+    edit ECF_TRIES         1
+    edit ECF_HOME          <span class="nv">$SCRATCH</span>/output
+    edit ECF_FILES         <span class="nv">$HOMEDIR</span>/smsfiles
+    edit ECF_INCLUDE       <span class="nv">$HOMEDIR</span>/include
+    edit ECF_JOB_CMD  <span class="s2">&quot;\&quot;/home/ma/emos/bin/smssubmit %USER% %WSHOST% %ECF_JOB% %ECF_JOBOUT% \&quot;&quot;</span>
+    edit ECF_KILL_CMD <span class="s2">&quot;\&quot;/home/ma/emos/bin/smskill %USER% %WSHOST% %ECF_RID% %ECF_JOBOUT% \&quot;&quot;</span>
+<span class="k">fi</span>
+edit ACCOUNT          <span class="nv">$ACCOUNT</span>
+edit VERSION          <span class="nv">$VERSION</span>
+edit EPSVERSION       0001
+edit RFVERSION        0001
+edit DELTA_DAY        0
+edit EMOS_BASE        00
+edit USE_YMD          <span class="nb">true</span>
+edit FSFAMILY         / <span class="c"># $HOME/</span>
+edit BINS             <span class="nv">$HOME</span>/bin
+edit XBINS            /home/ma/emos/bin
+edit STREAM           undef
+edit EPSTYPE          undef
+edit MEMBER           0
+edit FIRST_DAY        <span class="nv">$FIRST_DAY</span>
+edit EMOS_TIME_STEP_H 00
+<span class="c"># repeat date YMD    $FIRST_DATE $LAST_DATE</span>
+edit YMD    <span class="nv">$FIRST_DATE</span>
+edit   SUITE_START <span class="nv">$FIRST_DATE</span>
+family limits
+defstatus <span class="nb">complete</span>
+limit lim 3
+endfamily
+<span class="c"># generate binaries</span>
+family make 
+<span class="nb">complete</span> /<span class="nv">$SELECTION</span>:YMD ne /<span class="nv">$SELECTION</span>:SUITE_START
+family wst
+onws
+call_skull_make
+endfamily
+family ecg
+onecg
+call_skull_make
+endfamily
+family hpc
+onsc
+call_skull_make
+endfamily
+family lcl
+oncl
+<span class="k">if</span> <span class="o">[[</span> -n USE_SMS <span class="o">]]</span>; <span class="k">then</span>
+<span class="k">    </span>edit SMSCMD <span class="s2">&quot;\&quot;/home/ma/emos/bin/smssubmit.new %USER% %WSHOST% %SMSJOB% %SMSJOBOUT% \&quot;&quot;</span>
+<span class="k">fi</span>
+<span class="k">if</span> <span class="o">[[</span> -n USE_ECF <span class="o">]]</span>; <span class="k">then</span>
+<span class="k">    </span>edit ECF_JOB_CMD  <span class="s2">&quot;\&quot;/home/ma/emos/bin/smssubmit.new %USER% %WSHOST% %ECF_JOB% %ECF_JOBOUT% \&quot;&quot;</span>
+<span class="k">fi</span>
+call_skull_make
+endfamily
+endfamily
+
+family <span class="nv">$PROJECT</span>
+  def_fam
+  <span class="nv">families</span><span class="o">=</span><span class="s2">&quot;00 12&quot;</span>
+
+  edit ENSEMBLES 50
+  trigger <span class="s2">&quot;(./make==complete)&quot;</span>
+  <span class="k">for </span>fam in  <span class="nv">$families</span> ; <span class="k">do</span>
+<span class="k">    </span>family <span class="nv">$fam</span> <span class="c"># onsc</span>
+    <span class="k">if</span> <span class="o">((</span> <span class="nv">$fam</span> <span class="o">==</span> 00 <span class="o">))</span>; <span class="k">then</span>
+<span class="k">	</span>edit DELTA_DAY 1
+    <span class="k">else</span>
+<span class="k">	</span>edit DELTA_DAY 0
+    <span class="k">fi</span>
+<span class="k">    </span>edit EMOS_BASE <span class="nv">$fam</span>
+
+    call_skull
+
+    family pop;    oncl
+    trigger <span class="s2">&quot;(./${PROJECT}==complete)&quot;</span>
+    call_pop_skull
+    endfamily
+
+    family ws;    onws
+    trigger <span class="s2">&quot;(./${PROJECT}==complete)&quot;</span>
+    call_pop_skull
+    endfamily
+
+    endfamily <span class="c">#fam</span>
+<span class="k">done</span>
+
+endfamily
+family consumer
+def_fam
+. consumer.sh
+endfamily
+onws
+edit SLEEP 20
+call_dinner
+call_barber_shop
+call_weekly
+task perl
+defstatus suspended
+<span class="k">if</span> <span class="o">[[</span> -n USE_SMS <span class="o">]]</span>; <span class="k">then</span>
+<span class="k">    </span>edit SMSMICRO ^
+    edit SMSCMD <span class="s2">&quot;\&quot;^SMSJOB^ &gt; ^SMSJOBOUT^ 2&gt;&amp;1 &amp;\&quot;&quot;</span>
+<span class="k">fi</span>
+<span class="k">if</span> <span class="o">[[</span> -n USE_ECF <span class="o">]]</span>; <span class="k">then</span>
+<span class="k">    </span>edit ECF_MICRO ^
+    edit ECF_JOB_CMD <span class="s2">&quot;\&quot;^ECF_JOB^ &gt; ^ECF_JOBOUT^ 2&gt;&amp;1 &amp;\&quot;&quot;</span>
+<span class="k">fi</span>
+meter step -1 100
+task python
+defstatus suspended
+<span class="k">if</span> <span class="o">[[</span> -n USE_SMS <span class="o">]]</span>; <span class="k">then</span>
+<span class="k">    </span>edit SMSMICRO ^
+    edit SMSCMD <span class="s2">&quot;\&quot;^SMSJOB^ &gt; ^SMSJOBOUT^ 2&gt;&amp;1 &amp;\&quot;&quot;</span>
+<span class="k">fi</span>
+<span class="k">if</span> <span class="o">[[</span> -n USE_ECF <span class="o">]]</span>; <span class="k">then</span>
+<span class="k">    </span>edit ECF_MICRO ^
+    edit ECF_JOB_CMD <span class="s2">&quot;\&quot;^ECF_JOB^ &gt; ^ECF_JOBOUT^ 2&gt;&amp;1 &amp;\&quot;&quot;</span>
+<span class="k">fi</span>
+meter step -1 100
+endsuite
+<span class="nb">exit </span>0
+</pre></div>

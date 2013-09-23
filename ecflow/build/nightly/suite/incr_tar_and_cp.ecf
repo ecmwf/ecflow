@@ -1,0 +1,15 @@
+%include <head.h>
+
+# ======================================================================
+# Run LOCALLY
+# ======================================================================
+export WK=%WK%
+cd $WK
+ 
+if [[ %SET_TO_TEST_SCRIPT% = true ]] ; then
+   echo "Test only"
+else
+   sh -x build/tar_incr_ecflow.sh
+fi
+
+%include <tail.h>

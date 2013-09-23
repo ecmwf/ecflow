@@ -1,0 +1,122 @@
+# 3.1.7
+defs_state MIGRATE state>:aborted flag:late,message state_change:983039 modify_change:1018
+  edit ECF_HOME '/tmp/map/work/p4/merlin/workspace/MyProject/Pyext/test/data/CUSTOMER/ECF_HOME'
+  edit ECF_CLIENT_EXE_PATH '/tmp/map/work/p4/merlin/workspace/MyProject/Client/bin/gcc\-4.5/debug/ecflow_client'
+  edit SLEEP '10'
+  edit ECF_INCLUDE '/tmp/map/work/p4/merlin/workspace/MyProject/Pyext/test/data/CUSTOMER/ECF_HOME/includes'
+suite suite #  begun:1 state:aborted dur:01:29:57 flag:message,no_reque
+  defstatus suspended
+  edit ECF_EXTN '.sms'
+  clock real 
+  calendar initTime:2013-Sep-10 12:37:03 suiteTime:2013-Sep-10 15:56:00 duration:03:18:57 initLocalTime:2013-Sep-10 12:37:03 lastTime:2013-Sep-10 15:56:00 calendarIncrement:00:01:00
+  family limits
+    defstatus unknown
+    limit mars 3
+  endfamily
+  family family # state:aborted dur:02:18:57 flag:message
+    repeat date YMD 20010101 20131211 1
+    inlimit /limits:localhost
+    autocancel 1
+    task task # passwd:jxX0gIbR abort<:   Script for /suite/family/task can not be found:
+   ECF_SCRIPT(/tmp/map/work/p4/merlin/workspace/MyProject/Pyext/test/data/CUSTOMER/ECF_HOME/suite/family/task.sms) does not exist:
+   Variable ECF_FETCH not defined:
+   Variable ECF_FILES not defined:
+   Search of directory ECF_HOME(/tmp/map/work/p4/merlin/workspace/MyProject/Pyext/test/data/CUSTOMER/ECF_HOME) failed:
+>abort try:2 state:aborted dur:02:19:57 flag:task_aborted,no_script
+      edit VARIABLE 'VALUE'
+      label into ""
+      meter step -1 100 0
+      event 1 
+    task rescue # passwd:Bs7hroqB abort<:   Script for /suite/family/rescue can not be found:
+   ECF_SCRIPT(/tmp/map/work/p4/merlin/workspace/MyProject/Pyext/test/data/CUSTOMER/ECF_HOME/suite/family/rescue.sms) does not exist:
+   Variable ECF_FETCH not defined:
+   Variable ECF_FILES not defined:
+   Search of directory ECF_HOME(/tmp/map/work/p4/merlin/workspace/MyProject/Pyext/test/data/CUSTOMER/ECF_HOME) failed:
+>abort try:2 state:aborted dur:02:19:57 flag:task_aborted,no_script
+      late -s +00:05 -c 00:05
+      complete task eq complete
+      trigger task == aborted
+    task step # passwd:4N9cOzVA abort<:   Script for /suite/family/step can not be found:
+   ECF_SCRIPT(/tmp/map/work/p4/merlin/workspace/MyProject/Pyext/test/data/CUSTOMER/ECF_HOME/suite/family/step.sms) does not exist:
+   Variable ECF_FETCH not defined:
+   Variable ECF_FILES not defined:
+   Search of directory ECF_HOME(/tmp/map/work/p4/merlin/workspace/MyProject/Pyext/test/data/CUSTOMER/ECF_HOME) failed:
+>abort try:2 state:aborted dur:02:19:57 flag:task_aborted,no_script
+      trigger task:step le step:STEP
+      trigger -o task eq complete
+      repeat integer STEP 0 100
+    family loop_in_time # state:complete
+      defstatus complete
+      time 12:00
+      task hold # state:complete
+        complete 1==1
+        trigger 1==0
+    endfamily
+  endfamily
+  task household # passwd:31NZt9lV abort<:   Script for /suite/household can not be found:
+   ECF_SCRIPT(/tmp/map/work/p4/merlin/workspace/MyProject/Pyext/test/data/CUSTOMER/ECF_HOME/suite/household.sms) does not exist:
+   Variable ECF_FETCH not defined:
+   Variable ECF_FILES not defined:
+   Search of directory ECF_HOME(/tmp/map/work/p4/merlin/workspace/MyProject/Pyext/test/data/CUSTOMER/ECF_HOME) failed:
+>abort try:2 state:aborted dur:02:22:57 flag:task_aborted,no_script
+    cron 00:00 23:59 01:00 # nextTimeSlot/13:00
+  task monthly # state:queued
+    date 1.*.*
+  family remote # state:aborted dur:01:29:57 flag:message,no_reque suspended:1
+    edit ECF_TRIES '1'
+    edit ECF_JOB_CMD '/home/ma/emos/bin/smssubmit.cray %USER% %SCHOST% %ECF_JOB% %ECF_JOBOUT%'
+    edit ECF_INCLUDE '/home/ma/emos/def/o/include'
+    edit ECF_FILES '/home/ma/map/course/submit'
+    edit ECF_HOME '/vol/emos_nc/output'
+    edit ECF_OUT '/vol/emos_nc/output'
+    edit LOGDIR '/vol/emos_nc/output'
+    edit ACCOUNT 'oeoper'
+    edit QUEUE 'emos'
+    edit USER 'emos'
+    family c2a # state:aborted dur:01:29:57 flag:no_reque
+      edit ECF_OUT '/s2o1/emos_esuite/emos_data/log'
+      edit LOGDIR '/s2o1/emos_esuite/emos_data/log'
+      task sub # passwd:gyBC8q.O abort<: PID(28027)  path(/suite/remote/c2a/sub)  exited with status 255 [ /home/ma/emos/bin/smssubmit.cray emos c2a /vol/emos_nc/output/suite/remote/c2a/sub.job1 /s2o1/emos_esuite/emos_data/log/suite/remote/c2a/sub.1 ]>abort try:1 state:aborted dur:01:29:57 flag:task_aborted,ecfcmd_failed,message,no_reque
+        edit SCHOST 'c2a'
+    endfamily
+    family lxab # state:submitted dur:02:01:57 flag:no_reque
+      task sub # passwd:NsjydD2C try:1 state:submitted dur:02:01:57 flag:message,no_reque
+        edit SCHOST 'lxab'
+    endfamily
+    family ecgate # state:aborted dur:02:02:57 flag:no_reque
+      task sub # passwd:6pIZXvrl abort<: PID(32480)  path(/suite/remote/ecgate/sub)  exited with status 255 [ /home/ma/emos/bin/smssubmit.cray emos ecgate /vol/emos_nc/output/suite/remote/ecgate/sub.job1 /vol/emos_nc/output/suite/remote/ecgate/sub.1 ]>abort try:1 state:aborted dur:02:02:57 flag:task_aborted,ecfcmd_failed,message,no_reque
+        edit SCHOST 'ecgate'
+    endfamily
+    family ecgb # state:submitted dur:02:01:57 flag:no_reque
+      task sub # passwd:8EesaUc3 try:1 state:submitted dur:02:01:57 flag:message,no_reque
+        edit SCHOST 'ecgb'
+    endfamily
+    family ibis # state:aborted dur:02:02:57 flag:no_reque
+      task sub # passwd:AEX5NtyU abort<: PID(32532)  path(/suite/remote/ibis/sub)  exited with status 1 [ /home/ma/emos/bin/smssubmit.cray emos ibis /vol/emos_nc/output/suite/remote/ibis/sub.job1 /vol/emos_nc/output/suite/remote/ibis/sub.1 ]>abort try:1 state:aborted dur:02:02:57 flag:task_aborted,ecfcmd_failed,message,no_reque
+        edit SCHOST 'ibis'
+    endfamily
+    family bilbo # state:aborted dur:02:02:57 flag:no_reque
+      task sub # passwd:30IPtlxu abort<: PID(32543)  path(/suite/remote/bilbo/sub)  exited with status 1 [ /home/ma/emos/bin/smssubmit.cray emos bilbo /vol/emos_nc/output/suite/remote/bilbo/sub.job1 /vol/emos_nc/output/suite/remote/bilbo/sub.1 ]>abort try:1 state:aborted dur:02:02:57 flag:task_aborted,ecfcmd_failed,message,no_reque
+        edit SCHOST 'bilbo'
+    endfamily
+  endfamily
+  family catchup2rt # state:aborted dur:03:18:57 flag:message suspended:1
+    repeat date YMD 20130101 20140101 1 # 20130606
+    family timer # state:queued dur:02:56:57
+      complete /o/main:YMD gt /suite/catchup2rt:YMD
+      task dummy # state:queued dur:02:56:57
+        time 12:00 # isValid:false
+      task sub # state:queued dur:02:56:57
+        edit ECF_JOB_CMD '/home/ma/emos/bin/smssubmit.cray %USER% %SCHOST% %ECF_JOB% %ECF_JOBOUT%'
+        edit SCHOST 'ibis'
+    endfamily
+    task doer # passwd:OXQkmELW abort<:   Script for /suite/catchup2rt/doer can not be found:
+   ECF_SCRIPT(/tmp/map/work/p4/merlin/workspace/MyProject/Pyext/test/data/CUSTOMER/ECF_HOME/suite/catchup2rt/doer.sms) does not exist:
+   Variable ECF_FETCH not defined:
+   Variable ECF_FILES not defined:
+   Search of directory ECF_HOME(/tmp/map/work/p4/merlin/workspace/MyProject/Pyext/test/data/CUSTOMER/ECF_HOME) failed:
+>abort try:1 state:aborted dur:03:18:57 flag:task_aborted,no_script,message,no_reque
+      complete timer eq complete
+      trigger 1==0
+  endfamily
+endsuite

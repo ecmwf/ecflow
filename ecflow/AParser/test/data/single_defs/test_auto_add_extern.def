@@ -1,0 +1,42 @@
+#
+# test auto add extern for triggers and inlimits
+#
+extern /a/b/c/d         
+extern /a/b/c/d/e:event        
+extern /a/b/c/d/e:meter       
+extern /made/up/redundant/extren     # REDUNDANT extern, should get removed after auto_add_extren(true)
+extern /made/up/redundant/extren     # Duplicates should be ignored.
+
+extern /limits:c1a
+extern /limits:c1a                   # Duplicates should be ignored
+extern fred
+extern limits:hpcd
+extern /suiteName:sg1
+extern /obs/limits:hpcd
+
+# Expect 9 unique externs
+# Also because we have defined externs , expect no warnings:
+
+suite extern
+   family f1
+      task p
+            trigger /a/b/c/d == complete          # extern path
+      task q
+            trigger /a/b/c/d/e:event == set       # extern event path
+      task r
+            trigger /a/b/c/d/e:meter le 30        # extern meter path   
+    endfamily
+    
+    
+    inlimit /limits:c1a
+    inlimit fred
+    family anon    
+         inlimit limits:hpcd       
+      task t1
+         inlimit /suiteName:sg1            
+      task t2
+            inlimit /obs/limits:hpcd       
+      task t3
+            inlimit /limits:c1a            
+    endfamily
+endsuite

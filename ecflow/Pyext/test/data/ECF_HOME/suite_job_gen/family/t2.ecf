@@ -1,0 +1,9 @@
+ 
+%include <head.h>
+
+echo do some work
+# SLEEPTIME is defined thedefs.def file. Test variable substituition
+sleep 10
+echo end of job
+
+%include <tail.h>

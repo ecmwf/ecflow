@@ -1,0 +1,753 @@
+localhost:3141 --ping :ma0 rtt:00:00:00.001594
+localhost:3141 --zombie_get :ma0 rtt:00:00:00.000818
+localhost:3141 --log=new Test/data/ECF_HOME_debug/test_repeat_integer/test_repeat_integer.def_log  :ma0 rtt:00:00:00.000851
+localhost:3141 --log=clear :ma0 rtt:00:00:00.000761
+localhost:3141 --delete _all_ force yes  :ma0 rtt:00:00:00.000780
+localhost:3141 --load=Test/data/ECF_HOME_debug/test_repeat_integer/test_repeat_integer.def  :ma0 rtt:00:00:00.002748
+localhost:3141 --restart :ma0 rtt:00:00:00.000755
+localhost:3141 --begin=test_repeat_integer :ma0 rtt:00:00:00.002220
+localhost:3141 --get :ma0 rtt:00:00:00.002406
+localhost:3141 --news=0 140 1  :ma0 rtt:00:00:00.001107
+localhost:3141 --sync=0 140 1  :ma0 rtt:00:00:00.002342
+localhost:3141 --get :ma0 rtt:00:00:00.002121
+localhost:3141 --news=0 271 2  :ma0 rtt:00:00:00.001044
+localhost:3141 --sync=0 140 1  :ma0 rtt:00:00:00.002141
+localhost:3141 --get :ma0 rtt:00:00:00.001929
+localhost:3141 --zombie_get :ma0 rtt:00:00:00.000723
+localhost:3141 --zombie_get :ma0 rtt:00:00:00.000725
+localhost:3141 --log=new Test/data/ECF_HOME_debug/test_repeat_date/test_repeat_date.def_log  :ma0 rtt:00:00:00.000769
+localhost:3141 --log=clear :ma0 rtt:00:00:00.000772
+localhost:3141 --delete _all_ force yes  :ma0 rtt:00:00:00.000823
+localhost:3141 --load=Test/data/ECF_HOME_debug/test_repeat_date/test_repeat_date.def  :ma0 rtt:00:00:00.002388
+localhost:3141 --restart :ma0 rtt:00:00:00.000733
+localhost:3141 --begin=test_repeat_date :ma0 rtt:00:00:00.002114
+localhost:3141 --get :ma0 rtt:00:00:00.002349
+localhost:3141 --news=0 451 6  :ma0 rtt:00:00:00.000838
+localhost:3141 --sync=0 451 6  :ma0 rtt:00:00:00.001649
+localhost:3141 --get :ma0 rtt:00:00:00.001388
+localhost:3141 --news=0 591 6  :ma0 rtt:00:00:00.001537
+localhost:3141 --sync=0 591 6  :ma0 rtt:00:00:00.002285
+localhost:3141 --get :ma0 rtt:00:00:00.002288
+localhost:3141 --news=0 661 6  :ma0 rtt:00:00:00.001085
+localhost:3141 --sync=0 661 6  :ma0 rtt:00:00:00.002283
+localhost:3141 --get :ma0 rtt:00:00:00.002007
+localhost:3141 --zombie_get :ma0 rtt:00:00:00.000829
+localhost:3141 --zombie_get :ma0 rtt:00:00:00.000724
+localhost:3141 --log=new Test/data/ECF_HOME_debug/test_repeat_enumerator/test_repeat_enumerator.def_log  :ma0 rtt:00:00:00.000778
+localhost:3141 --log=clear :ma0 rtt:00:00:00.000785
+localhost:3141 --delete _all_ force yes  :ma0 rtt:00:00:00.000823
+localhost:3141 --load=Test/data/ECF_HOME_debug/test_repeat_enumerator/test_repeat_enumerator.def  :ma0 rtt:00:00:00.002341
+localhost:3141 --restart :ma0 rtt:00:00:00.000717
+localhost:3141 --begin=test_repeat_enumerator :ma0 rtt:00:00:00.001677
+localhost:3141 --get :ma0 rtt:00:00:00.002288
+localhost:3141 --zombie_get :ma0 rtt:00:00:00.000807
+localhost:3141 --zombie_get :ma0 rtt:00:00:00.000725
+localhost:3141 --log=new Test/data/ECF_HOME_debug/test_repeat_defstatus/test_repeat_defstatus.def_log  :ma0 rtt:00:00:00.000795
+localhost:3141 --log=clear :ma0 rtt:00:00:00.000744
+localhost:3141 --delete _all_ force yes  :ma0 rtt:00:00:00.000811
+localhost:3141 --load=Test/data/ECF_HOME_debug/test_repeat_defstatus/test_repeat_defstatus.def  :ma0 rtt:00:00:00.002400
+localhost:3141 --restart :ma0 rtt:00:00:00.000700
+localhost:3141 --begin=test_repeat_defstatus :ma0 rtt:00:00:00.000835
+localhost:3141 --get :ma0 rtt:00:00:00.002359
+localhost:3141 --zombie_get :ma0 rtt:00:00:00.000810
+localhost:3141 --zombie_get :ma0 rtt:00:00:00.000707
+localhost:3141 --log=new Test/data/ECF_HOME_debug/test_handle/test_handle.def_log  :ma0 rtt:00:00:00.000799
+localhost:3141 --log=clear :ma0 rtt:00:00:00.000787
+localhost:3141 --delete _all_ force yes  :ma0 rtt:00:00:00.000807
+localhost:3141 --load=Test/data/ECF_HOME_debug/test_handle/test_handle.def  :ma0 rtt:00:00:00.004505
+localhost:3141 --restart :ma0 rtt:00:00:00.000501
+localhost:3141 --begin :ma0 rtt:00:00:00.000770
+localhost:3141 --ch_register=false s0 s1 s2  :ma0 rtt:00:00:00.000555
+localhost:3141 --sync_full=1 :ma0 rtt:00:00:00.001948
+localhost:3141 --ch_suites :ma0 rtt:00:00:00.000586
+localhost:3141 --ch_drop=1 :ma0 rtt:00:00:00.000495
+localhost:3141 --ch_suites :ma0 rtt:00:00:00.000486
+localhost:3141 --ch_register=false s0 s1 s2  :ma0 rtt:00:00:00.000532
+localhost:3141 --sync=1 1006 32  :ma0 rtt:00:00:00.001916
+localhost:3141 --ch_add=1 s3 s4  :ma0 rtt:00:00:00.000514
+localhost:3141 --ch_suites :ma0 rtt:00:00:00.000564
+localhost:3141 --sync=1 1006 32  :ma0 rtt:00:00:00.002695
+localhost:3141 --ch_rem=1 s3 s4  :ma0 rtt:00:00:00.000511
+localhost:3141 --ch_suites :ma0 rtt:00:00:00.000552
+localhost:3141 --sync=1 1006 34  :ma0 rtt:00:00:00.001899
+localhost:3141 --ch_drop=1 :ma0 rtt:00:00:00.000486
+localhost:3141 --ch_suites :ma0 rtt:00:00:00.000503
+localhost:3141 --ch_register=false s0 s1 s2  :ma0 rtt:00:00:00.000506
+localhost:3141 --ch_register=false s3 s4  :ma0 rtt:00:00:00.000537
+localhost:3141 --ch_suites :ma0 rtt:00:00:00.000549
+localhost:3141 --ch_drop=1 :ma0 rtt:00:00:00.000502
+localhost:3141 --ch_drop=2 :ma0 rtt:00:00:00.000472
+localhost:3141 --ch_suites :ma0 rtt:00:00:00.000498
+localhost:3141 --zombie_get :ma0 rtt:00:00:00.000561
+localhost:3141 --zombie_get :ma0 rtt:00:00:00.000552
+localhost:3141 --log=new Test/data/ECF_HOME_debug/test_handle_sync/test_handle_sync.def_log  :ma0 rtt:00:00:00.000546
+localhost:3141 --log=clear :ma0 rtt:00:00:00.000528
+localhost:3141 --delete _all_ force yes  :ma0 rtt:00:00:00.000582
+localhost:3141 --load=Test/data/ECF_HOME_debug/test_handle_sync/test_handle_sync.def  :ma0 rtt:00:00:00.003888
+localhost:3141 --restart :ma0 rtt:00:00:00.000484
+localhost:3141 --begin :ma0 rtt:00:00:00.000720
+localhost:3141 --ch_register=false s0 s1 s2  :ma0 rtt:00:00:00.000540
+localhost:3141 --news=1 0 0  :ma0 rtt:00:00:00.000496
+localhost:3141 --sync_full=1 :ma0 rtt:00:00:00.001951
+localhost:3141 --suspend /s3  :ma0 rtt:00:00:00.000524
+localhost:3141 --news=1 1126 54  :ma0 rtt:00:00:00.000481
+localhost:3141 --force=complete /s3  :ma0 rtt:00:00:00.000553
+localhost:3141 --news=1 1126 54  :ma0 rtt:00:00:00.000481
+localhost:3141 --sync=1 1126 54  :ma0 rtt:00:00:00.000631
+localhost:3141 --force=complete /s0  :ma0 rtt:00:00:00.000549
+localhost:3141 --news=1 1136 54  :ma0 rtt:00:00:00.000493
+localhost:3141 --sync=1 1136 54  :ma0 rtt:00:00:00.000898
+localhost:3141 --ch_drop=1 :ma0 rtt:00:00:00.000498
+localhost:3141 --ch_register=false s0 s1 s2  :ma0 rtt:00:00:00.000515
+localhost:3141 --news=1 1146 54  :ma0 rtt:00:00:00.000499
+localhost:3141 --sync=1 1146 54  :ma0 rtt:00:00:00.001963
+localhost:3141 --force=complete /s1  :ma0 rtt:00:00:00.000544
+localhost:3141 --sync=1 1146 54  :ma0 rtt:00:00:00.000894
+localhost:3141 --order=/s0 alpha  :ma0 rtt:00:00:00.000539
+localhost:3141 --sync=1 1155 54  :ma0 rtt:00:00:00.000874
+localhost:3141 --ch_drop=1 :ma0 rtt:00:00:00.000481
+localhost:3141 --suites :ma0 rtt:00:00:00.000492
+localhost:3141 --ch_register=false s0 s1 s2  :ma0 rtt:00:00:00.000503
+localhost:3141 --news=1 1157 54  :ma0 rtt:00:00:00.000496
+localhost:3141 --sync=1 1157 54  :ma0 rtt:00:00:00.001895
+localhost:3141 --force=unknown /s1  :ma0 rtt:00:00:00.000572
+localhost:3141 --sync=1 1157 54  :ma0 rtt:00:00:00.000892
+localhost:3141 --delete force yes /s2  :ma0 rtt:00:00:00.000524
+localhost:3141 --news=1 1166 54  :ma0 rtt:00:00:00.000482
+localhost:3141 --sync=1 1166 54  :ma0 rtt:00:00:00.001520
+localhost:3141 --ch_suites :ma0 rtt:00:00:00.000601
+localhost:3141 --ch_drop=1 :ma0 rtt:00:00:00.000513
+localhost:3141 --ch_suites :ma0 rtt:00:00:00.000490
+localhost:3141 --zombie_get :ma0 rtt:00:00:00.000495
+localhost:3141 --zombie_get :ma0 rtt:00:00:00.000484
+localhost:3141 --log=new Test/data/ECF_HOME_debug/test_handle_sync/test_handle_sync.def_log  :ma0 rtt:00:00:00.000544
+localhost:3141 --log=clear :ma0 rtt:00:00:00.000523
+localhost:3141 --delete _all_ force yes  :ma0 rtt:00:00:00.000557
+localhost:3141 --load=Test/data/ECF_HOME_debug/test_handle_sync/test_handle_sync.def  :ma0 rtt:00:00:00.002196
+localhost:3141 --restart :ma0 rtt:00:00:00.000498
+localhost:3141 --begin :ma0 rtt:00:00:00.000596
+localhost:3141 --ch_register=false s0 s1 s2  :ma0 rtt:00:00:00.000534
+localhost:3141 --ch_suites :ma0 rtt:00:00:00.000550
+localhost:3141 --sync_full=1 :ma0 rtt:00:00:00.001931
+localhost:3141 --delete yes /s0  :ma0 rtt:00:00:00.000535
+localhost:3141 --delete yes /s1  :ma0 rtt:00:00:00.000519
+localhost:3141 --delete yes /s2  :ma0 rtt:00:00:00.000516
+localhost:3141 --sync=1 1224 69  :ma0 rtt:00:00:00.000834
+localhost:3141 --ch_suites :ma0 rtt:00:00:00.000541
+localhost:3141 --load=<in-memory-defs>  :ma0 rtt:00:00:00.001792
+localhost:3141 --sync=1 1230 72  :ma0 rtt:00:00:00.001890
+localhost:3141 --ch_drop=1 :ma0 rtt:00:00:00.000481
+localhost:3141 --zombie_get :ma0 rtt:00:00:00.000486
+localhost:3141 --zombie_get :ma0 rtt:00:00:00.000485
+localhost:3141 --log=new Test/data/ECF_HOME_debug/test_reque/test_reque.def_log  :ma0 rtt:00:00:00.000535
+localhost:3141 --log=clear :ma0 rtt:00:00:00.000516
+localhost:3141 --delete _all_ force yes  :ma0 rtt:00:00:00.000546
+localhost:3141 --load=Test/data/ECF_HOME_debug/test_reque/test_reque.def  :ma0 rtt:00:00:00.001593
+localhost:3141 --restart :ma0 rtt:00:00:00.000496
+localhost:3141 --begin=test_reque :ma0 rtt:00:00:00.001472
+localhost:3141 --get :ma0 rtt:00:00:00.002323
+localhost:3141 --news=0 1412 83  :ma0 rtt:00:00:00.000997
+localhost:3141 --sync=0 1412 83  :ma0 rtt:00:00:00.002161
+localhost:3141 --get :ma0 rtt:00:00:00.002035
+localhost:3141 --news=0 1520 83  :ma0 rtt:00:00:00.001032
+localhost:3141 --sync=0 1520 83  :ma0 rtt:00:00:00.002325
+localhost:3141 --get :ma0 rtt:00:00:00.002004
+localhost:3141 --requeue /test_reque  :ma0 rtt:00:00:00.002281
+localhost:3141 --get :ma0 rtt:00:00:00.002302
+localhost:3141 --news=0 1714 85  :ma0 rtt:00:00:00.000983
+localhost:3141 --sync=0 1714 85  :ma0 rtt:00:00:00.002194
+localhost:3141 --get :ma0 rtt:00:00:00.002009
+localhost:3141 --news=0 1822 85  :ma0 rtt:00:00:00.001008
+localhost:3141 --sync=0 1822 85  :ma0 rtt:00:00:00.002332
+localhost:3141 --get :ma0 rtt:00:00:00.002077
+localhost:3141 --zombie_get :ma0 rtt:00:00:00.000764
+localhost:3141 --zombie_get :ma0 rtt:00:00:00.000729
+localhost:3141 --log=new Test/data/ECF_HOME_debug/test_kill_cmd/test_kill_cmd.def_log  :ma0 rtt:00:00:00.000776
+localhost:3141 --log=clear :ma0 rtt:00:00:00.000759
+localhost:3141 --delete _all_ force yes  :ma0 rtt:00:00:00.000807
+localhost:3141 --load=Test/data/ECF_HOME_debug/test_kill_cmd/test_kill_cmd.def  :ma0 rtt:00:00:00.001838
+localhost:3141 --restart :ma0 rtt:00:00:00.000500
+localhost:3141 --begin=test_kill_task :ma0 rtt:00:00:00.001078
+localhost:3141 --sync_full=0 :ma0 rtt:00:00:00.001403
+localhost:3141 --sync=0 1884 89  :ma0 rtt:00:00:00.002116
+localhost:3141 --kill /test_kill_task/family/t0  :ma0 rtt:00:00:00.001073
+localhost:3141 --sync=0 1897 89  :ma0 rtt:00:00:00.001359
+localhost:3141 --sync=0 1899 89  :ma0 rtt:00:00:00.002039
+localhost:3141 --zombie_get :ma0 rtt:00:00:00.000814
+localhost:3141 --zombie_get :ma0 rtt:00:00:00.000712
+localhost:3141 --log=new Test/data/ECF_HOME_debug/test_kill_cmd/test_kill_cmd.def_log  :ma0 rtt:00:00:00.000781
+localhost:3141 --log=clear :ma0 rtt:00:00:00.000753
+localhost:3141 --delete _all_ force yes  :ma0 rtt:00:00:00.000854
+localhost:3141 --load=Test/data/ECF_HOME_debug/test_kill_cmd/test_kill_cmd.def  :ma0 rtt:00:00:00.002131
+localhost:3141 --restart :ma0 rtt:00:00:00.000726
+localhost:3141 --begin=test_kill_suite :ma0 rtt:00:00:00.001499
+localhost:3141 --sync_full=0 :ma0 rtt:00:00:00.001974
+localhost:3141 --sync=0 1944 93  :ma0 rtt:00:00:00.002119
+localhost:3141 --kill /test_kill_suite  :ma0 rtt:00:00:00.001051
+localhost:3141 --sync=0 1957 93  :ma0 rtt:00:00:00.001405
+localhost:3141 --sync=0 1959 93  :ma0 rtt:00:00:00.002062
+localhost:3141 --zombie_get :ma0 rtt:00:00:00.000766
+localhost:3141 --zombie_get :ma0 rtt:00:00:00.000713
+localhost:3141 --log=new Test/data/ECF_HOME_debug/test_change_order/test_change_order.def_log  :ma0 rtt:00:00:00.000826
+localhost:3141 --log=clear :ma0 rtt:00:00:00.000836
+localhost:3141 --delete _all_ force yes  :ma0 rtt:00:00:00.000820
+localhost:3141 --load=Test/data/ECF_HOME_debug/test_change_order/test_change_order.def  :ma0 rtt:00:00:00.005046
+localhost:3141 --restart :ma0 rtt:00:00:00.000489
+localhost:3141 --begin :ma0 rtt:00:00:00.000771
+localhost:3141 --sync_full=0 :ma0 rtt:00:00:00.004407
+localhost:3141 --order=/a order  :ma0 rtt:00:00:00.000540
+localhost:3141 --sync=0 2163 103  :ma0 rtt:00:00:00.000903
+localhost:3141 --order=/a alpha  :ma0 rtt:00:00:00.000509
+localhost:3141 --sync=0 2165 103  :ma0 rtt:00:00:00.000844
+localhost:3141 --order=/a bottom  :ma0 rtt:00:00:00.000504
+localhost:3141 --sync=0 2167 103  :ma0 rtt:00:00:00.000845
+localhost:3141 --order=/a alpha  :ma0 rtt:00:00:00.000531
+localhost:3141 --order=/a down  :ma0 rtt:00:00:00.000502
+localhost:3141 --sync=0 2169 103  :ma0 rtt:00:00:00.000857
+localhost:3141 --order=/a alpha  :ma0 rtt:00:00:00.000515
+localhost:3141 --order=/c up  :ma0 rtt:00:00:00.000506
+localhost:3141 --sync=0 2173 103  :ma0 rtt:00:00:00.001106
+localhost:3141 --order=/a/a order  :ma0 rtt:00:00:00.000532
+localhost:3141 --sync=0 2177 103  :ma0 rtt:00:00:00.000849
+localhost:3141 --order=/a/a alpha  :ma0 rtt:00:00:00.000506
+localhost:3141 --sync=0 2179 103  :ma0 rtt:00:00:00.000846
+localhost:3141 --order=/a/a bottom  :ma0 rtt:00:00:00.000532
+localhost:3141 --sync=0 2181 103  :ma0 rtt:00:00:00.000841
+localhost:3141 --order=/a/a alpha  :ma0 rtt:00:00:00.000505
+localhost:3141 --order=/a/a down  :ma0 rtt:00:00:00.000524
+localhost:3141 --sync=0 2183 103  :ma0 rtt:00:00:00.000927
+localhost:3141 --order=/a/a alpha  :ma0 rtt:00:00:00.000513
+localhost:3141 --order=/a/c up  :ma0 rtt:00:00:00.000508
+localhost:3141 --sync=0 2187 103  :ma0 rtt:00:00:00.000918
+localhost:3141 --zombie_get :ma0 rtt:00:00:00.000506
+localhost:3141 --zombie_get :ma0 rtt:00:00:00.000497
+localhost:3141 --log=new Test/data/ECF_HOME_debug/test_change_order/test_change_order.def_log  :ma0 rtt:00:00:00.000545
+localhost:3141 --log=clear :ma0 rtt:00:00:00.000529
+localhost:3141 --delete _all_ force yes  :ma0 rtt:00:00:00.000592
+localhost:3141 --load=Test/data/ECF_HOME_debug/test_change_order/test_change_order.def  :ma0 rtt:00:00:00.007291
+localhost:3141 --restart :ma0 rtt:00:00:00.000501
+localhost:3141 --begin :ma0 rtt:00:00:00.000935
+localhost:3141 --sync_full=0 :ma0 rtt:00:00:00.006717
+localhost:3141 --ch_register=false a b c  :ma0 rtt:00:00:00.000578
+localhost:3141 --sync=1 2514 119  :ma0 rtt:00:00:00.004363
+localhost:3141 --sync=1 2514 117  :ma0 rtt:00:00:00.000520
+localhost:3141 --order=/a order  :ma0 rtt:00:00:00.000537
+localhost:3141 --sync=1 2514 117  :ma0 rtt:00:00:00.000907
+localhost:3141 --order=/a alpha  :ma0 rtt:00:00:00.000514
+localhost:3141 --sync=1 2516 117  :ma0 rtt:00:00:00.000870
+localhost:3141 --order=/a bottom  :ma0 rtt:00:00:00.000521
+localhost:3141 --sync=1 2518 117  :ma0 rtt:00:00:00.000848
+localhost:3141 --order=/a alpha  :ma0 rtt:00:00:00.000525
+localhost:3141 --order=/a down  :ma0 rtt:00:00:00.000503
+localhost:3141 --sync=1 2520 117  :ma0 rtt:00:00:00.000867
+localhost:3141 --order=/a alpha  :ma0 rtt:00:00:00.000524
+localhost:3141 --order=/c up  :ma0 rtt:00:00:00.000522
+localhost:3141 --sync=1 2524 117  :ma0 rtt:00:00:00.001098
+localhost:3141 --order=/a/a order  :ma0 rtt:00:00:00.000514
+localhost:3141 --sync=1 2528 117  :ma0 rtt:00:00:00.000847
+localhost:3141 --order=/a/a alpha  :ma0 rtt:00:00:00.000520
+localhost:3141 --sync=1 2530 117  :ma0 rtt:00:00:00.000846
+localhost:3141 --order=/a/a bottom  :ma0 rtt:00:00:00.000519
+localhost:3141 --sync=1 2532 117  :ma0 rtt:00:00:00.000880
+localhost:3141 --order=/a/a alpha  :ma0 rtt:00:00:00.000519
+localhost:3141 --order=/a/a down  :ma0 rtt:00:00:00.000505
+localhost:3141 --sync=1 2534 117  :ma0 rtt:00:00:00.000862
+localhost:3141 --order=/a/a alpha  :ma0 rtt:00:00:00.000505
+localhost:3141 --order=/a/c up  :ma0 rtt:00:00:00.000552
+localhost:3141 --sync=1 2538 117  :ma0 rtt:00:00:00.000916
+localhost:3141 --zombie_get :ma0 rtt:00:00:00.000514
+localhost:3141 --zombie_get :ma0 rtt:00:00:00.000550
+localhost:3141 --log=new Test/data/ECF_HOME_debug/test_limit/test_limit.def_log  :ma0 rtt:00:00:00.000533
+localhost:3141 --log=clear :ma0 rtt:00:00:00.000516
+localhost:3141 --delete _all_ force yes  :ma0 rtt:00:00:00.000589
+localhost:3141 --load=Test/data/ECF_HOME_debug/test_limit/test_limit.def  :ma0 rtt:00:00:00.002230
+localhost:3141 --restart :ma0 rtt:00:00:00.000503
+localhost:3141 --begin=test_limit :ma0 rtt:00:00:00.002060
+localhost:3141 --get :ma0 rtt:00:00:00.003202
+localhost:3141 --news=0 2768 123  :ma0 rtt:00:00:00.001038
+localhost:3141 --sync=0 2768 123  :ma0 rtt:00:00:00.001993
+localhost:3141 --get :ma0 rtt:00:00:00.002829
+localhost:3141 --zombie_get :ma0 rtt:00:00:00.000853
+localhost:3141 --zombie_get :ma0 rtt:00:00:00.000725
+localhost:3141 --log=new Test/data/ECF_HOME_debug/test_today_single_slot/test_today_single_slot.def_log  :ma0 rtt:00:00:00.000794
+localhost:3141 --log=clear :ma0 rtt:00:00:00.000746
+localhost:3141 --delete _all_ force yes  :ma0 rtt:00:00:00.000819
+localhost:3141 --load=Test/data/ECF_HOME_debug/test_today_single_slot/test_today_single_slot.def  :ma0 rtt:00:00:00.002144
+localhost:3141 --restart :ma0 rtt:00:00:00.000716
+localhost:3141 --begin=test_today_single_slot :ma0 rtt:00:00:00.001863
+localhost:3141 --get :ma0 rtt:00:00:00.002164
+localhost:3141 --zombie_get :ma0 rtt:00:00:00.000783
+localhost:3141 --zombie_get :ma0 rtt:00:00:00.000722
+localhost:3141 --log=new Test/data/ECF_HOME_debug/test_today_relative_time_series/test_today_relative_time_series.def_log  :ma0 rtt:00:00:00.000785
+localhost:3141 --log=clear :ma0 rtt:00:00:00.000753
+localhost:3141 --delete _all_ force yes  :ma0 rtt:00:00:00.000806
+localhost:3141 --load=Test/data/ECF_HOME_debug/test_today_relative_time_series/test_today_relative_time_series.def  :ma0 rtt:00:00:00.002235
+localhost:3141 --restart :ma0 rtt:00:00:00.000733
+localhost:3141 --begin=test_today_relative_time_series :ma0 rtt:00:00:00.000786
+localhost:3141 --get :ma0 rtt:00:00:00.002183
+localhost:3141 --news=0 2942 131  :ma0 rtt:00:00:00.001012
+localhost:3141 --sync=0 2942 131  :ma0 rtt:00:00:00.001338
+localhost:3141 --get :ma0 rtt:00:00:00.001887
+localhost:3141 --news=0 2943 131  :ma0 rtt:00:00:00.001040
+localhost:3141 --sync=0 2943 131  :ma0 rtt:00:00:00.001342
+localhost:3141 --get :ma0 rtt:00:00:00.001948
+localhost:3141 --news=0 2944 131  :ma0 rtt:00:00:00.000995
+localhost:3141 --sync=0 2944 131  :ma0 rtt:00:00:00.001923
+localhost:3141 --get :ma0 rtt:00:00:00.001860
+localhost:3141 --news=0 2990 131  :ma0 rtt:00:00:00.001043
+localhost:3141 --sync=0 2990 131  :ma0 rtt:00:00:00.001330
+localhost:3141 --get :ma0 rtt:00:00:00.001863
+localhost:3141 --news=0 2991 131  :ma0 rtt:00:00:00.001036
+localhost:3141 --sync=0 2991 131  :ma0 rtt:00:00:00.001339
+localhost:3141 --get :ma0 rtt:00:00:00.001856
+localhost:3141 --news=0 2992 131  :ma0 rtt:00:00:00.000989
+localhost:3141 --sync=0 2992 131  :ma0 rtt:00:00:00.001931
+localhost:3141 --get :ma0 rtt:00:00:00.001831
+localhost:3141 --zombie_get :ma0 rtt:00:00:00.000780
+localhost:3141 --zombie_get :ma0 rtt:00:00:00.000763
+localhost:3141 --log=new Test/data/ECF_HOME_debug/test_today_real_time_series/test_today_real_time_series.def_log  :ma0 rtt:00:00:00.000823
+localhost:3141 --log=clear :ma0 rtt:00:00:00.000767
+localhost:3141 --delete _all_ force yes  :ma0 rtt:00:00:00.000849
+localhost:3141 --load=Test/data/ECF_HOME_debug/test_today_real_time_series/test_today_real_time_series.def  :ma0 rtt:00:00:00.002284
+localhost:3141 --restart :ma0 rtt:00:00:00.000712
+localhost:3141 --begin=test_today_real_time_series :ma0 rtt:00:00:00.000800
+localhost:3141 --get :ma0 rtt:00:00:00.002248
+localhost:3141 --news=0 3104 135  :ma0 rtt:00:00:00.001324
+localhost:3141 --news=0 3104 135  :ma0 rtt:00:00:00.001037
+localhost:3141 --news=0 3104 135  :ma0 rtt:00:00:00.001011
+localhost:3141 --sync=0 3104 135  :ma0 rtt:00:00:00.001937
+localhost:3141 --get :ma0 rtt:00:00:00.001925
+localhost:3141 --news=0 3149 135  :ma0 rtt:00:00:00.001022
+localhost:3141 --news=0 3149 135  :ma0 rtt:00:00:00.001019
+localhost:3141 --news=0 3149 135  :ma0 rtt:00:00:00.001017
+localhost:3141 --sync=0 3149 135  :ma0 rtt:00:00:00.002064
+localhost:3141 --get :ma0 rtt:00:00:00.001955
+localhost:3141 --zombie_get :ma0 rtt:00:00:00.000796
+localhost:3141 --zombie_get :ma0 rtt:00:00:00.000889
+localhost:3141 --log=new Test/data/ECF_HOME_debug/test_events/test_events.def_log  :ma0 rtt:00:00:00.000794
+localhost:3141 --log=clear :ma0 rtt:00:00:00.000782
+localhost:3141 --delete _all_ force yes  :ma0 rtt:00:00:00.000808
+localhost:3141 --load=Test/data/ECF_HOME_debug/test_events/test_events.def  :ma0 rtt:00:00:00.003309
+localhost:3141 --restart :ma0 rtt:00:00:00.000500
+localhost:3141 --begin=test_events :ma0 rtt:00:00:00.002266
+localhost:3141 --get :ma0 rtt:00:00:00.002928
+localhost:3141 --news=0 3298 139  :ma0 rtt:00:00:00.001039
+localhost:3141 --sync=0 3298 139  :ma0 rtt:00:00:00.001313
+localhost:3141 --get :ma0 rtt:00:00:00.002571
+localhost:3141 --news=0 3301 139  :ma0 rtt:00:00:00.001035
+localhost:3141 --sync=0 3301 139  :ma0 rtt:00:00:00.001922
+localhost:3141 --get :ma0 rtt:00:00:00.002557
+localhost:3141 --news=0 3324 139  :ma0 rtt:00:00:00.001105
+localhost:3141 --sync=0 3324 139  :ma0 rtt:00:00:00.002705
+localhost:3141 --get :ma0 rtt:00:00:00.002523
+localhost:3141 --zombie_get :ma0 rtt:00:00:00.000732
+localhost:3141 --zombie_get :ma0 rtt:00:00:00.000742
+localhost:3141 --log=new Test/data/ECF_HOME_debug/test_complete/test_complete.def_log  :ma0 rtt:00:00:00.000784
+localhost:3141 --log=clear :ma0 rtt:00:00:00.000786
+localhost:3141 --delete _all_ force yes  :ma0 rtt:00:00:00.000815
+localhost:3141 --load=Test/data/ECF_HOME_debug/test_complete/test_complete.def  :ma0 rtt:00:00:00.003330
+localhost:3141 --restart :ma0 rtt:00:00:00.000719
+localhost:3141 --begin=test_complete :ma0 rtt:00:00:00.002345
+localhost:3141 --get :ma0 rtt:00:00:00.002671
+localhost:3141 --news=0 3507 143  :ma0 rtt:00:00:00.001112
+localhost:3141 --sync=0 3507 143  :ma0 rtt:00:00:00.002612
+localhost:3141 --get :ma0 rtt:00:00:00.002276
+localhost:3141 --zombie_get :ma0 rtt:00:00:00.000744
+localhost:3141 --log=new Test/data/ECF_HOME_debug/test_complete_does_not_hold/test_complete_does_not_hold.def_log  :ma0 rtt:00:00:00.000826
+localhost:3141 --log=clear :ma0 rtt:00:00:00.000745
+localhost:3141 --delete _all_ force yes  :ma0 rtt:00:00:00.000821
+localhost:3141 --load=Test/data/ECF_HOME_debug/test_complete_does_not_hold/test_complete_does_not_hold.def  :ma0 rtt:00:00:00.002355
+localhost:3141 --restart :ma0 rtt:00:00:00.000716
+localhost:3141 --begin=test_complete_does_not_hold :ma0 rtt:00:00:00.001561
+localhost:3141 --get :ma0 rtt:00:00:00.002340
+localhost:3141 --log=new Test/data/ECF_HOME_debug/test_complete_with_empty_family/test_complete_with_empty_family.def_log  :ma0 rtt:00:00:00.000878
+localhost:3141 --log=clear :ma0 rtt:00:00:00.000783
+localhost:3141 --delete _all_ force yes  :ma0 rtt:00:00:00.000886
+localhost:3141 --load=Test/data/ECF_HOME_debug/test_complete_with_empty_family/test_complete_with_empty_family.def  :ma0 rtt:00:00:00.002763
+localhost:3141 --restart :ma0 rtt:00:00:00.000707
+localhost:3141 --begin=test_complete_with_empty_family :ma0 rtt:00:00:00.002443
+localhost:3141 --get :ma0 rtt:00:00:00.002457
+localhost:3141 --zombie_get :ma0 rtt:00:00:00.000884
+localhost:3141 --log=new Test/data/ECF_HOME_debug/test_abort_cmd/test_abort_cmd.def_log  :ma0 rtt:00:00:00.000796
+localhost:3141 --log=clear :ma0 rtt:00:00:00.000749
+localhost:3141 --delete _all_ force yes  :ma0 rtt:00:00:00.000965
+localhost:3141 --load=Test/data/ECF_HOME_debug/test_abort_cmd/test_abort_cmd.def  :ma0 rtt:00:00:00.002040
+localhost:3141 --restart :ma0 rtt:00:00:00.000804
+localhost:3141 --begin=test_abort_cmd :ma0 rtt:00:00:00.001465
+localhost:3141 --get :ma0 rtt:00:00:00.002093
+localhost:3141 --zombie_get :ma0 rtt:00:00:00.000760
+localhost:3141 --zombie_get :ma0 rtt:00:00:00.000722
+localhost:3141 --log=new Test/data/ECF_HOME_debug/test_shutdown/test_shutdown.def_log  :ma0 rtt:00:00:00.000799
+localhost:3141 --log=clear :ma0 rtt:00:00:00.000758
+localhost:3141 --delete _all_ force yes  :ma0 rtt:00:00:00.000807
+localhost:3141 --load=Test/data/ECF_HOME_debug/test_shutdown/test_shutdown.def  :ma0 rtt:00:00:00.002494
+localhost:3141 --restart :ma0 rtt:00:00:00.000726
+localhost:3141 --begin=test_shutdown :ma0 rtt:00:00:00.000824
+localhost:3141 --shutdown=yes :ma0 rtt:00:00:00.000680
+localhost:3141 --sync_full=0 :ma0 rtt:00:00:00.002101
+localhost:3141 --sync=0 3969 159  :ma0 rtt:00:00:00.001582
+localhost:3141 --sync=0 3970 159  :ma0 rtt:00:00:00.001078
+localhost:3141 --sync=0 3970 159  :ma0 rtt:00:00:00.001101
+localhost:3141 --sync=0 3970 159  :ma0 rtt:00:00:00.001619
+localhost:3141 --restart :ma0 rtt:00:00:00.002204
+localhost:3141 --get :ma0 rtt:00:00:00.002526
+localhost:3141 --zombie_get :ma0 rtt:00:00:00.000805
+localhost:3141 --zombie_get :ma0 rtt:00:00:00.000721
+localhost:3141 --log=new Test/data/ECF_HOME_debug/test_suspend_node/test_suspend_node.def_log  :ma0 rtt:00:00:00.000795
+localhost:3141 --log=clear :ma0 rtt:00:00:00.000748
+localhost:3141 --delete _all_ force yes  :ma0 rtt:00:00:00.000812
+localhost:3141 --load=Test/data/ECF_HOME_debug/test_suspend_node/test_suspend_node.def  :ma0 rtt:00:00:00.002633
+localhost:3141 --restart :ma0 rtt:00:00:00.000505
+localhost:3141 --begin=test_suspend_node :ma0 rtt:00:00:00.000566
+localhost:3141 --suspend /test_suspend_node/family  :ma0 rtt:00:00:00.000511
+localhost:3141 --sync_full=0 :ma0 rtt:00:00:00.001683
+localhost:3141 --sync=0 4077 163  :ma0 rtt:00:00:00.001114
+localhost:3141 --sync=0 4077 163  :ma0 rtt:00:00:00.001066
+localhost:3141 --sync=0 4077 163  :ma0 rtt:00:00:00.002114
+localhost:3141 --sync=0 4098 163  :ma0 rtt:00:00:00.001920
+localhost:3141 --sync=0 4107 163  :ma0 rtt:00:00:00.001134
+localhost:3141 --sync=0 4107 163  :ma0 rtt:00:00:00.002167
+localhost:3141 --resume /test_suspend_node/family  :ma0 rtt:00:00:00.002183
+localhost:3141 --get :ma0 rtt:00:00:00.002853
+localhost:3141 --zombie_get :ma0 rtt:00:00:00.000768
+localhost:3141 --zombie_get :ma0 rtt:00:00:00.000723
+localhost:3141 --log=new Test/data/ECF_HOME_debug/test_cron_time_series/test_cron_time_series.def_log  :ma0 rtt:00:00:00.000786
+localhost:3141 --log=clear :ma0 rtt:00:00:00.000759
+localhost:3141 --delete _all_ force yes  :ma0 rtt:00:00:00.000851
+localhost:3141 --load=Test/data/ECF_HOME_debug/test_cron_time_series/test_cron_time_series.def  :ma0 rtt:00:00:00.002216
+localhost:3141 --restart :ma0 rtt:00:00:00.000736
+localhost:3141 --begin=test_cron_time_series :ma0 rtt:00:00:00.000794
+localhost:3141 --get :ma0 rtt:00:00:00.002235
+localhost:3141 --news=0 4258 167  :ma0 rtt:00:00:00.001067
+localhost:3141 --news=0 4258 167  :ma0 rtt:00:00:00.001010
+localhost:3141 --sync=0 4258 167  :ma0 rtt:00:00:00.001992
+localhost:3141 --get :ma0 rtt:00:00:00.001889
+localhost:3141 --news=0 4303 167  :ma0 rtt:00:00:00.001011
+localhost:3141 --news=0 4303 167  :ma0 rtt:00:00:00.001005
+localhost:3141 --sync=0 4303 167  :ma0 rtt:00:00:00.001989
+localhost:3141 --get :ma0 rtt:00:00:00.001898
+localhost:3141 --zombie_get :ma0 rtt:00:00:00.000748
+localhost:3141 --zombie_get :ma0 rtt:00:00:00.000703
+localhost:3141 --log=new Test/data/ECF_HOME_debug/test_file_cmd/test_file_cmd.def_log  :ma0 rtt:00:00:00.000767
+localhost:3141 --log=clear :ma0 rtt:00:00:00.000755
+localhost:3141 --delete _all_ force yes  :ma0 rtt:00:00:00.000857
+localhost:3141 --load=Test/data/ECF_HOME_debug/test_file_cmd/test_file_cmd.def  :ma0 rtt:00:00:00.002238
+localhost:3141 --restart :ma0 rtt:00:00:00.000722
+localhost:3141 --begin=test_file_cmd :ma0 rtt:00:00:00.002131
+localhost:3141 --get :ma0 rtt:00:00:00.001859
+localhost:3141 --file=/test_file_cmd script 10000  :ma0 rtt:00:00:00.000734
+localhost:3141 --file=/test_file_cmd job 10000  :ma0 rtt:00:00:00.000575
+localhost:3141 --file=/test_file_cmd jobout 10000  :ma0 rtt:00:00:00.000808
+localhost:3141 --file=/test_file_cmd manual 10000  :ma0 rtt:00:00:00.000954
+localhost:3141 --file=/test_file_cmd kill 10000  :ma0 rtt:00:00:00.000872
+localhost:3141 --file=/test_file_cmd stat 10000  :ma0 rtt:00:00:00.000810
+localhost:3141 --file=/test_file_cmd/family script 10000  :ma0 rtt:00:00:00.000926
+localhost:3141 --file=/test_file_cmd/family job 10000  :ma0 rtt:00:00:00.000939
+localhost:3141 --file=/test_file_cmd/family jobout 10000  :ma0 rtt:00:00:00.000952
+localhost:3141 --file=/test_file_cmd/family manual 10000  :ma0 rtt:00:00:00.000865
+localhost:3141 --file=/test_file_cmd/family kill 10000  :ma0 rtt:00:00:00.000794
+localhost:3141 --file=/test_file_cmd/family stat 10000  :ma0 rtt:00:00:00.000895
+localhost:3141 --file=/test_file_cmd/family/t0 script 10000  :ma0 rtt:00:00:00.000787
+localhost:3141 --file=/test_file_cmd/family/t0 job 10000  :ma0 rtt:00:00:00.000948
+localhost:3141 --file=/test_file_cmd/family/t0 jobout 10000  :ma0 rtt:00:00:00.000908
+localhost:3141 --file=/test_file_cmd/family/t0 manual 10000  :ma0 rtt:00:00:00.000993
+localhost:3141 --file=/test_file_cmd/family/t0 kill 10000  :ma0 rtt:00:00:00.000818
+localhost:3141 --file=/test_file_cmd/family/t0 stat 10000  :ma0 rtt:00:00:00.000896
+localhost:3141 --file=/test_file_cmd/family/t1 script 10000  :ma0 rtt:00:00:00.000827
+localhost:3141 --file=/test_file_cmd/family/t1 job 10000  :ma0 rtt:00:00:00.000830
+localhost:3141 --file=/test_file_cmd/family/t1 jobout 10000  :ma0 rtt:00:00:00.000950
+localhost:3141 --file=/test_file_cmd/family/t1 manual 10000  :ma0 rtt:00:00:00.001013
+localhost:3141 --file=/test_file_cmd/family/t1 kill 10000  :ma0 rtt:00:00:00.000931
+localhost:3141 --file=/test_file_cmd/family/t1 stat 10000  :ma0 rtt:00:00:00.000987
+localhost:3141 --zombie_get :ma0 rtt:00:00:00.000917
+localhost:3141 --zombie_get :ma0 rtt:00:00:00.000856
+localhost:3141 --log=new Test/data/ECF_HOME_debug/test_triggers_and_meters/test_triggers_and_meters.def_log  :ma0 rtt:00:00:00.000870
+localhost:3141 --log=clear :ma0 rtt:00:00:00.000825
+localhost:3141 --delete _all_ force yes  :ma0 rtt:00:00:00.001000
+localhost:3141 --load=Test/data/ECF_HOME_debug/test_triggers_and_meters/test_triggers_and_meters.def  :ma0 rtt:00:00:00.006511
+localhost:3141 --restart :ma0 rtt:00:00:00.000536
+localhost:3141 --begin=test_triggers_and_meters :ma0 rtt:00:00:00.006932
+localhost:3141 --get :ma0 rtt:00:00:00.003926
+localhost:3141 --news=0 4594 175  :ma0 rtt:00:00:00.001023
+localhost:3141 --sync=0 4594 175  :ma0 rtt:00:00:00.002577
+localhost:3141 --get :ma0 rtt:00:00:00.003520
+localhost:3141 --news=0 4660 175  :ma0 rtt:00:00:00.001043
+localhost:3141 --sync=0 4660 175  :ma0 rtt:00:00:00.002591
+localhost:3141 --get :ma0 rtt:00:00:00.003536
+localhost:3141 --news=0 4726 175  :ma0 rtt:00:00:00.001038
+localhost:3141 --sync=0 4726 175  :ma0 rtt:00:00:00.002202
+localhost:3141 --get :ma0 rtt:00:00:00.003526
+localhost:3141 --zombie_get :ma0 rtt:00:00:00.000790
+localhost:3141 --zombie_get :ma0 rtt:00:00:00.000756
+localhost:3141 --log=new Test/data/ECF_HOME_debug/test_why_day/test_why_day.def_log  :ma0 rtt:00:00:00.000783
+localhost:3141 --log=clear :ma0 rtt:00:00:00.000750
+localhost:3141 --delete _all_ force yes  :ma0 rtt:00:00:00.000879
+localhost:3141 --load=Test/data/ECF_HOME_debug/test_why_day/test_why_day.def  :ma0 rtt:00:00:00.002096
+localhost:3141 --restart :ma0 rtt:00:00:00.000718
+localhost:3141 --begin=test_why_day :ma0 rtt:00:00:00.000780
+localhost:3141 --sync_full=0 :ma0 rtt:00:00:00.001765
+localhost:3141 --zombie_get :ma0 rtt:00:00:00.000916
+localhost:3141 --log=new Test/data/ECF_HOME_debug/test_why_date/test_why_date.def_log  :ma0 rtt:00:00:00.000793
+localhost:3141 --log=clear :ma0 rtt:00:00:00.000765
+localhost:3141 --delete _all_ force yes  :ma0 rtt:00:00:00.000889
+localhost:3141 --load=Test/data/ECF_HOME_debug/test_why_date/test_why_date.def  :ma0 rtt:00:00:00.002029
+localhost:3141 --restart :ma0 rtt:00:00:00.000697
+localhost:3141 --begin=test_why_date :ma0 rtt:00:00:00.000787
+localhost:3141 --sync_full=0 :ma0 rtt:00:00:00.001839
+localhost:3141 --log=new Test/data/ECF_HOME_debug/test_why_time/test_why_time.def_log  :ma0 rtt:00:00:00.000800
+localhost:3141 --log=clear :ma0 rtt:00:00:00.000802
+localhost:3141 --delete _all_ force yes  :ma0 rtt:00:00:00.000797
+localhost:3141 --load=Test/data/ECF_HOME_debug/test_why_time/test_why_time.def  :ma0 rtt:00:00:00.002091
+localhost:3141 --restart :ma0 rtt:00:00:00.000718
+localhost:3141 --begin=test_why_time :ma0 rtt:00:00:00.000778
+localhost:3141 --sync_full=0 :ma0 rtt:00:00:00.001753
+localhost:3141 --log=new Test/data/ECF_HOME_debug/test_why_today/test_why_today.def_log  :ma0 rtt:00:00:00.000764
+localhost:3141 --log=clear :ma0 rtt:00:00:00.000746
+localhost:3141 --delete _all_ force yes  :ma0 rtt:00:00:00.000775
+localhost:3141 --load=Test/data/ECF_HOME_debug/test_why_today/test_why_today.def  :ma0 rtt:00:00:00.002027
+localhost:3141 --restart :ma0 rtt:00:00:00.000718
+localhost:3141 --begin=test_why_today :ma0 rtt:00:00:00.000798
+localhost:3141 --sync_full=0 :ma0 rtt:00:00:00.001773
+localhost:3141 --log=new Test/data/ECF_HOME_debug/test_why_cron/test_why_cron.def_log  :ma0 rtt:00:00:00.000815
+localhost:3141 --log=clear :ma0 rtt:00:00:00.000785
+localhost:3141 --delete _all_ force yes  :ma0 rtt:00:00:00.000944
+localhost:3141 --load=Test/data/ECF_HOME_debug/test_why_cron/test_why_cron.def  :ma0 rtt:00:00:00.002163
+localhost:3141 --restart :ma0 rtt:00:00:00.000714
+localhost:3141 --begin=test_why_cron :ma0 rtt:00:00:00.000853
+localhost:3141 --sync_full=0 :ma0 rtt:00:00:00.001839
+localhost:3141 --log=new Test/data/ECF_HOME_debug/test_why_limit/test_why_limit.def_log  :ma0 rtt:00:00:00.000950
+localhost:3141 --log=clear :ma0 rtt:00:00:00.000764
+localhost:3141 --delete _all_ force yes  :ma0 rtt:00:00:00.000550
+localhost:3141 --load=Test/data/ECF_HOME_debug/test_why_limit/test_why_limit.def  :ma0 rtt:00:00:00.001851
+localhost:3141 --restart :ma0 rtt:00:00:00.000491
+localhost:3141 --begin=test_why_limit :ma0 rtt:00:00:00.001091
+localhost:3141 --sync_full=0 :ma0 rtt:00:00:00.001767
+localhost:3141 --get :ma0 rtt:00:00:00.001970
+localhost:3141 --get :ma0 rtt:00:00:00.002742
+localhost:3141 --get :ma0 rtt:00:00:00.002792
+localhost:3141 --get :ma0 rtt:00:00:00.002725
+localhost:3141 --get :ma0 rtt:00:00:00.002751
+localhost:3141 --get :ma0 rtt:00:00:00.002718
+localhost:3141 --get :ma0 rtt:00:00:00.002756
+localhost:3141 --get :ma0 rtt:00:00:00.002724
+localhost:3141 --get :ma0 rtt:00:00:00.002835
+localhost:3141 --get :ma0 rtt:00:00:00.002715
+localhost:3141 --get :ma0 rtt:00:00:00.002782
+localhost:3141 --get :ma0 rtt:00:00:00.002761
+localhost:3141 --log=new Test/data/ECF_HOME_debug/test_why_trigger/test_why_trigger.def_log  :ma0 rtt:00:00:00.000829
+localhost:3141 --log=clear :ma0 rtt:00:00:00.000767
+localhost:3141 --delete _all_ force yes  :ma0 rtt:00:00:00.000850
+localhost:3141 --load=Test/data/ECF_HOME_debug/test_why_trigger/test_why_trigger.def  :ma0 rtt:00:00:00.002027
+localhost:3141 --restart :ma0 rtt:00:00:00.000734
+localhost:3141 --begin=test_why_trigger :ma0 rtt:00:00:00.000829
+localhost:3141 --sync_full=0 :ma0 rtt:00:00:00.001716
+localhost:3141 --log=new Test/data/ECF_HOME_debug/test_why_meter/test_why_meter.def_log  :ma0 rtt:00:00:00.000784
+localhost:3141 --log=clear :ma0 rtt:00:00:00.000739
+localhost:3141 --delete _all_ force yes  :ma0 rtt:00:00:00.000789
+localhost:3141 --load=Test/data/ECF_HOME_debug/test_why_meter/test_why_meter.def  :ma0 rtt:00:00:00.002763
+localhost:3141 --restart :ma0 rtt:00:00:00.000854
+localhost:3141 --begin=test_why_meter :ma0 rtt:00:00:00.001467
+localhost:3141 --sync_full=0 :ma0 rtt:00:00:00.001438
+localhost:3141 --log=new Test/data/ECF_HOME_debug/test_why_event/test_why_event.def_log  :ma0 rtt:00:00:00.000560
+localhost:3141 --log=clear :ma0 rtt:00:00:00.000515
+localhost:3141 --delete _all_ force yes  :ma0 rtt:00:00:00.000541
+localhost:3141 --load=Test/data/ECF_HOME_debug/test_why_event/test_why_event.def  :ma0 rtt:00:00:00.002027
+localhost:3141 --restart :ma0 rtt:00:00:00.000488
+localhost:3141 --begin=test_why_event :ma0 rtt:00:00:00.001042
+localhost:3141 --sync_full=0 :ma0 rtt:00:00:00.001318
+localhost:3141 --log=new Test/data/ECF_HOME_debug/test_why_user_var/test_why_user_var.def_log  :ma0 rtt:00:00:00.000566
+localhost:3141 --log=clear :ma0 rtt:00:00:00.000522
+localhost:3141 --delete _all_ force yes  :ma0 rtt:00:00:00.000556
+localhost:3141 --load=Test/data/ECF_HOME_debug/test_why_user_var/test_why_user_var.def  :ma0 rtt:00:00:00.001786
+localhost:3141 --restart :ma0 rtt:00:00:00.000488
+localhost:3141 --begin=test_why_user_var :ma0 rtt:00:00:00.000972
+localhost:3141 --sync_full=0 :ma0 rtt:00:00:00.001155
+localhost:3141 --log=new Test/data/ECF_HOME_debug/test_why_gen_var/test_why_gen_var.def_log  :ma0 rtt:00:00:00.000547
+localhost:3141 --log=clear :ma0 rtt:00:00:00.000512
+localhost:3141 --delete _all_ force yes  :ma0 rtt:00:00:00.000536
+localhost:3141 --load=Test/data/ECF_HOME_debug/test_why_gen_var/test_why_gen_var.def  :ma0 rtt:00:00:00.001831
+localhost:3141 --restart :ma0 rtt:00:00:00.000486
+localhost:3141 --begin=test_why_gen_var :ma0 rtt:00:00:00.001012
+localhost:3141 --sync_full=0 :ma0 rtt:00:00:00.001184
+localhost:3141 --log=new Test/data/ECF_HOME_debug/test_why_repeat/test_why_repeat.def_log  :ma0 rtt:00:00:00.000596
+localhost:3141 --log=clear :ma0 rtt:00:00:00.000511
+localhost:3141 --delete _all_ force yes  :ma0 rtt:00:00:00.000536
+localhost:3141 --load=Test/data/ECF_HOME_debug/test_why_repeat/test_why_repeat.def  :ma0 rtt:00:00:00.002163
+localhost:3141 --restart :ma0 rtt:00:00:00.000504
+localhost:3141 --begin=test_why_repeat :ma0 rtt:00:00:00.001293
+localhost:3141 --sync_full=0 :ma0 rtt:00:00:00.001210
+localhost:3141 --zombie_get :ma0 rtt:00:00:00.000557
+localhost:3141 --log=new Test/data/ECF_HOME_debug/test_time_single_slot/test_time_single_slot.def_log  :ma0 rtt:00:00:00.000519
+localhost:3141 --log=clear :ma0 rtt:00:00:00.000510
+localhost:3141 --delete _all_ force yes  :ma0 rtt:00:00:00.000535
+localhost:3141 --load=Test/data/ECF_HOME_debug/test_time_single_slot/test_time_single_slot.def  :ma0 rtt:00:00:00.001462
+localhost:3141 --restart :ma0 rtt:00:00:00.000483
+localhost:3141 --begin=test_time_single_slot :ma0 rtt:00:00:00.000562
+localhost:3141 --get :ma0 rtt:00:00:00.002240
+localhost:3141 --zombie_get :ma0 rtt:00:00:00.000812
+localhost:3141 --zombie_get :ma0 rtt:00:00:00.000747
+localhost:3141 --log=new Test/data/ECF_HOME_debug/test_time_multiple_single_slot/test_time_multiple_single_slot.def_log  :ma0 rtt:00:00:00.000792
+localhost:3141 --log=clear :ma0 rtt:00:00:00.000779
+localhost:3141 --delete _all_ force yes  :ma0 rtt:00:00:00.000847
+localhost:3141 --load=Test/data/ECF_HOME_debug/test_time_multiple_single_slot/test_time_multiple_single_slot.def  :ma0 rtt:00:00:00.002199
+localhost:3141 --restart :ma0 rtt:00:00:00.000729
+localhost:3141 --begin=test_time_multiple_single_slot :ma0 rtt:00:00:00.000829
+localhost:3141 --get :ma0 rtt:00:00:00.002265
+localhost:3141 --news=0 5429 231  :ma0 rtt:00:00:00.001035
+localhost:3141 --news=0 5429 231  :ma0 rtt:00:00:00.001046
+localhost:3141 --news=0 5429 231  :ma0 rtt:00:00:00.001050
+localhost:3141 --sync=0 5429 231  :ma0 rtt:00:00:00.002064
+localhost:3141 --get :ma0 rtt:00:00:00.001902
+localhost:3141 --news=0 5476 231  :ma0 rtt:00:00:00.001045
+localhost:3141 --news=0 5476 231  :ma0 rtt:00:00:00.001037
+localhost:3141 --news=0 5476 231  :ma0 rtt:00:00:00.001031
+localhost:3141 --sync=0 5476 231  :ma0 rtt:00:00:00.001942
+localhost:3141 --get :ma0 rtt:00:00:00.001908
+localhost:3141 --zombie_get :ma0 rtt:00:00:00.000767
+localhost:3141 --zombie_get :ma0 rtt:00:00:00.000727
+localhost:3141 --log=new Test/data/ECF_HOME_debug/test_time_relative_time_series/test_time_relative_time_series.def_log  :ma0 rtt:00:00:00.000803
+localhost:3141 --log=clear :ma0 rtt:00:00:00.000751
+localhost:3141 --delete _all_ force yes  :ma0 rtt:00:00:00.000812
+localhost:3141 --load=Test/data/ECF_HOME_debug/test_time_relative_time_series/test_time_relative_time_series.def  :ma0 rtt:00:00:00.002174
+localhost:3141 --restart :ma0 rtt:00:00:00.000747
+localhost:3141 --begin=test_time_relative_time_series :ma0 rtt:00:00:00.000923
+localhost:3141 --get :ma0 rtt:00:00:00.002217
+localhost:3141 --news=0 5586 235  :ma0 rtt:00:00:00.001040
+localhost:3141 --sync=0 5586 235  :ma0 rtt:00:00:00.001332
+localhost:3141 --get :ma0 rtt:00:00:00.001847
+localhost:3141 --news=0 5587 235  :ma0 rtt:00:00:00.001036
+localhost:3141 --sync=0 5587 235  :ma0 rtt:00:00:00.001330
+localhost:3141 --get :ma0 rtt:00:00:00.001862
+localhost:3141 --news=0 5588 235  :ma0 rtt:00:00:00.001030
+localhost:3141 --sync=0 5588 235  :ma0 rtt:00:00:00.001907
+localhost:3141 --get :ma0 rtt:00:00:00.001864
+localhost:3141 --news=0 5634 235  :ma0 rtt:00:00:00.001043
+localhost:3141 --sync=0 5634 235  :ma0 rtt:00:00:00.001330
+localhost:3141 --get :ma0 rtt:00:00:00.001869
+localhost:3141 --news=0 5635 235  :ma0 rtt:00:00:00.001084
+localhost:3141 --sync=0 5635 235  :ma0 rtt:00:00:00.001336
+localhost:3141 --get :ma0 rtt:00:00:00.001866
+localhost:3141 --news=0 5636 235  :ma0 rtt:00:00:00.001042
+localhost:3141 --sync=0 5636 235  :ma0 rtt:00:00:00.001944
+localhost:3141 --get :ma0 rtt:00:00:00.001866
+localhost:3141 --zombie_get :ma0 rtt:00:00:00.000753
+localhost:3141 --zombie_get :ma0 rtt:00:00:00.000728
+localhost:3141 --log=new Test/data/ECF_HOME_debug/test_time_real_series/test_time_real_series.def_log  :ma0 rtt:00:00:00.000776
+localhost:3141 --log=clear :ma0 rtt:00:00:00.000767
+localhost:3141 --delete _all_ force yes  :ma0 rtt:00:00:00.000843
+localhost:3141 --load=Test/data/ECF_HOME_debug/test_time_real_series/test_time_real_series.def  :ma0 rtt:00:00:00.002184
+localhost:3141 --restart :ma0 rtt:00:00:00.000749
+localhost:3141 --begin=test_time_real_series :ma0 rtt:00:00:00.000790
+localhost:3141 --get :ma0 rtt:00:00:00.001729
+localhost:3141 --news=0 5746 239  :ma0 rtt:00:00:00.001022
+localhost:3141 --news=0 5746 239  :ma0 rtt:00:00:00.001054
+localhost:3141 --news=0 5746 239  :ma0 rtt:00:00:00.001027
+localhost:3141 --sync=0 5746 239  :ma0 rtt:00:00:00.001934
+localhost:3141 --get :ma0 rtt:00:00:00.001898
+localhost:3141 --news=0 5791 239  :ma0 rtt:00:00:00.001034
+localhost:3141 --news=0 5791 239  :ma0 rtt:00:00:00.001043
+localhost:3141 --news=0 5791 239  :ma0 rtt:00:00:00.001034
+localhost:3141 --sync=0 5791 239  :ma0 rtt:00:00:00.001973
+localhost:3141 --get :ma0 rtt:00:00:00.001872
+localhost:3141 --zombie_get :ma0 rtt:00:00:00.000810
+localhost:3141 --zombie_get :ma0 rtt:00:00:00.000747
+localhost:3141 --log=new Test/data/ECF_HOME_debug/test_late/test_late.def_log  :ma0 rtt:00:00:00.000780
+localhost:3141 --log=clear :ma0 rtt:00:00:00.000768
+localhost:3141 --delete _all_ force yes  :ma0 rtt:00:00:00.000834
+localhost:3141 --load=Test/data/ECF_HOME_debug/test_late/test_late.def  :ma0 rtt:00:00:00.001888
+localhost:3141 --restart :ma0 rtt:00:00:00.000714
+localhost:3141 --begin=test_late :ma0 rtt:00:00:00.001453
+localhost:3141 --get :ma0 rtt:00:00:00.001910
+localhost:3141 --news=0 5868 243  :ma0 rtt:00:00:00.001042
+localhost:3141 --sync=0 5868 243  :ma0 rtt:00:00:00.001371
+localhost:3141 --get :ma0 rtt:00:00:00.001607
+localhost:3141 --news=0 5870 243  :ma0 rtt:00:00:00.001032
+localhost:3141 --sync=0 5870 243  :ma0 rtt:00:00:00.001619
+localhost:3141 --get :ma0 rtt:00:00:00.001537
+localhost:3141 --sync_full=0 :ma0 rtt:00:00:00.001516
+localhost:3141 --zombie_get :ma0 rtt:00:00:00.000770
+localhost:3141 --zombie_get :ma0 rtt:00:00:00.000741
+localhost:3141 --log=new Test/data/ECF_HOME_debug/test_server_job_submission/test_server_job_submission.def_log  :ma0 rtt:00:00:00.000797
+localhost:3141 --log=clear :ma0 rtt:00:00:00.000762
+localhost:3141 --delete _all_ force yes  :ma0 rtt:00:00:00.000810
+localhost:3141 --load=Test/data/ECF_HOME_debug/test_server_job_submission/test_server_job_submission.def  :ma0 rtt:00:00:00.002509
+localhost:3141 --restart :ma0 rtt:00:00:00.000717
+localhost:3141 --begin=test_server_job_submission :ma0 rtt:00:00:00.002936
+localhost:3141 --get :ma0 rtt:00:00:00.002446
+localhost:3141 --zombie_get :ma0 rtt:00:00:00.000778
+localhost:3141 --zombie_get :ma0 rtt:00:00:00.000705
+localhost:3141 --log=new Test/data/ECF_HOME_debug/test_restore_defs_from_check_pt/test_restore_defs_from_check_pt.def_log  :ma0 rtt:00:00:00.000782
+localhost:3141 --log=clear :ma0 rtt:00:00:00.000763
+localhost:3141 --delete _all_ force yes  :ma0 rtt:00:00:00.000826
+localhost:3141 --load=Test/data/ECF_HOME_debug/test_restore_defs_from_check_pt/test_restore_defs_from_check_pt.def  :ma0 rtt:00:00:00.001965
+localhost:3141 --restart :ma0 rtt:00:00:00.000718
+localhost:3141 --begin=test_restore_defs_from_check_pt :ma0 rtt:00:00:00.001473
+localhost:3141 --get :ma0 rtt:00:00:00.001889
+localhost:3141 --check_pt=never :ma0 rtt:00:00:00.000714
+localhost:3141 --get :ma0 rtt:00:00:00.001421
+localhost:3141 --check_pt :ma0 rtt:00:00:00.001161
+localhost:3141 --restore_from_checkpt :ma0 rtt:00:00:00.000741
+localhost:3141 --halt=yes :ma0 rtt:00:00:00.000691
+localhost:3141 --restore_from_checkpt :ma0 rtt:00:00:00.000716
+localhost:3141 --delete _all_ yes  :ma0 rtt:00:00:00.000851
+localhost:3141 --get :ma0 rtt:00:00:00.000889
+localhost:3141 --restore_from_checkpt :ma0 rtt:00:00:00.001208
+localhost:3141 --get :ma0 rtt:00:00:00.001442
+localhost:3141 --check_pt=on_time:120 :ma0 rtt:00:00:00.000689
+localhost:3141 --zombie_get :ma0 rtt:00:00:00.000737
+localhost:3141 --zombie_get :ma0 rtt:00:00:00.000723
+localhost:3141 --log=new Test/data/ECF_HOME_debug/test_wait_cmd/test_wait_cmd.def_log  :ma0 rtt:00:00:00.000797
+localhost:3141 --log=clear :ma0 rtt:00:00:00.000765
+localhost:3141 --delete _all_ force yes  :ma0 rtt:00:00:00.000770
+localhost:3141 --load=Test/data/ECF_HOME_debug/test_wait_cmd/test_wait_cmd.def  :ma0 rtt:00:00:00.002531
+localhost:3141 --restart :ma0 rtt:00:00:00.000509
+localhost:3141 --begin=test_wait_cmd :ma0 rtt:00:00:00.002830
+localhost:3141 --get :ma0 rtt:00:00:00.002840
+localhost:3141 --zombie_get :ma0 rtt:00:00:00.000860
+localhost:3141 --log=new Test/data/ECF_HOME_debug/test_wait_cmd_parse_fail/test_wait_cmd_parse_fail.def_log  :ma0 rtt:00:00:00.000800
+localhost:3141 --log=clear :ma0 rtt:00:00:00.000767
+localhost:3141 --delete _all_ force yes  :ma0 rtt:00:00:00.000847
+localhost:3141 --load=Test/data/ECF_HOME_debug/test_wait_cmd_parse_fail/test_wait_cmd_parse_fail.def  :ma0 rtt:00:00:00.002834
+localhost:3141 --restart :ma0 rtt:00:00:00.000726
+localhost:3141 --begin=test_wait_cmd_parse_fail :ma0 rtt:00:00:00.004206
+localhost:3141 --sync_full=0 :ma0 rtt:00:00:00.002854
+localhost:3141 --sync=0 6337 261  :ma0 rtt:00:00:00.002927
+localhost:3141 --sync=0 6408 261  :ma0 rtt:00:00:00.002610
+localhost:3141 --sync=0 6438 261  :ma0 rtt:00:00:00.000789
+localhost:3141 --log=new Test/data/ECF_HOME_debug/test_wait_cmd_non_existant_paths/test_wait_cmd_non_existant_paths.def_log  :ma0 rtt:00:00:00.000822
+localhost:3141 --log=clear :ma0 rtt:00:00:00.000759
+localhost:3141 --delete _all_ force yes  :ma0 rtt:00:00:00.000844
+localhost:3141 --load=Test/data/ECF_HOME_debug/test_wait_cmd_non_existant_paths/test_wait_cmd_non_existant_paths.def  :ma0 rtt:00:00:00.002826
+localhost:3141 --restart :ma0 rtt:00:00:00.000727
+localhost:3141 --begin=test_wait_cmd_non_existant_paths :ma0 rtt:00:00:00.004255
+localhost:3141 --sync_full=0 :ma0 rtt:00:00:00.002858
+localhost:3141 --sync=0 6541 265  :ma0 rtt:00:00:00.002904
+localhost:3141 --sync=0 6584 265  :ma0 rtt:00:00:00.002972
+localhost:3141 --sync=0 6648 265  :ma0 rtt:00:00:00.000773
+localhost:3141 --zombie_get :ma0 rtt:00:00:00.000767
+localhost:3141 --log=new Test/data/ECF_HOME_debug/test_alias/test_alias.def_log  :ma0 rtt:00:00:00.000773
+localhost:3141 --log=clear :ma0 rtt:00:00:00.000775
+localhost:3141 --delete _all_ force yes  :ma0 rtt:00:00:00.000824
+localhost:3141 --load=Test/data/ECF_HOME_debug/test_alias/test_alias.def  :ma0 rtt:00:00:00.001962
+localhost:3141 --restart :ma0 rtt:00:00:00.000772
+localhost:3141 --begin=test_alias :ma0 rtt:00:00:00.001498
+localhost:3141 --get :ma0 rtt:00:00:00.001978
+localhost:3141 --file=/test_alias/task_a script 10000  :ma0 rtt:00:00:00.000870
+localhost:3141 --sync_full=0 :ma0 rtt:00:00:00.002039
+localhost:3141 --sync=0 6723 269  :ma0 rtt:00:00:00.001990
+localhost:3141 --sync=0 6744 269  :ma0 rtt:00:00:00.002100
+localhost:3141 --order=/test_alias/task_a/alias0 down  :ma0 rtt:00:00:00.000795
+localhost:3141 --sync=0 6750 269  :ma0 rtt:00:00:00.001277
+localhost:3141 --order=/test_alias/task_a/alias0 up  :ma0 rtt:00:00:00.000739
+localhost:3141 --sync=0 6752 269  :ma0 rtt:00:00:00.001272
+localhost:3141 --order=/test_alias/task_a/alias0 order  :ma0 rtt:00:00:00.000768
+localhost:3141 --sync=0 6754 269  :ma0 rtt:00:00:00.001300
+localhost:3141 --order=/test_alias/task_a/alias0 alpha  :ma0 rtt:00:00:00.000769
+localhost:3141 --sync=0 6756 269  :ma0 rtt:00:00:00.001274
+localhost:3141 --delete yes /test_alias/task_a/alias0  :ma0 rtt:00:00:00.000748
+localhost:3141 --delete yes /test_alias/task_a/alias1  :ma0 rtt:00:00:00.000741
+localhost:3141 --sync=0 6758 269  :ma0 rtt:00:00:00.001274
+localhost:3141 --zombie_get :ma0 rtt:00:00:00.000768
+localhost:3141 --suites :ma0 rtt:00:00:00.000752
+localhost:3141 --stats :ma0 rtt:00:00:00.000989
+localhost:3141 --terminate=yes :ma0 rtt:00:00:00.001247

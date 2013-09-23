@@ -1,0 +1,11 @@
+suite suiteName
+   
+     repeat enumerated quotes "first" "second" "third"  # sdsdsd 
+   
+endsuite
+
+suite suiteName2
+   
+     repeat enumerated quotes 'first' 'second' "third"  # sdsdsd 
+   
+endsuite

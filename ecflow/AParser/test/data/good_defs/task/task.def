@@ -1,0 +1,9 @@
+suite suiteName
+   family f
+      task t1
+      endtask
+      task t2
+      endtask
+   endfamily
+endsuite
+

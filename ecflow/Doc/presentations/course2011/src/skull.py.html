@@ -1,0 +1,293 @@
+<div class="highlight"><pre><span class="c">#!/usr/bin/env python</span>
+<span class="kn">import</span> <span class="nn">sys</span><span class="o">,</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">ih</span>
+<span class="kn">from</span> <span class="nn">ecflow</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">inc_hostc</span> <span class="kn">import</span> <span class="o">*</span>
+
+<span class="n">PROJECT</span> <span class="o">=</span> <span class="s">&quot;skull&quot;</span>
+<span class="n">SELECTION</span> <span class="o">=</span> <span class="n">PROJECT</span>
+<span class="c"># SELECTION = &quot;e%s&quot;%PROJECT</span>
+<span class="k">if</span> <span class="n">SELECTION</span> <span class="o">==</span> <span class="s">&quot;skull&quot;</span><span class="p">:</span>    <span class="n">FIRST_DAY</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="k">elif</span> <span class="n">SELECTION</span> <span class="o">==</span> <span class="s">&quot;eskull&quot;</span><span class="p">:</span> <span class="n">FIRST_DAY</span> <span class="o">=</span> <span class="mi">1</span>
+
+<span class="n">USER</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s">&quot;USER&quot;</span><span class="p">)</span>
+<span class="n">SCRATCH</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s">&quot;SCRATCH&quot;</span><span class="p">)</span>
+<span class="n">HOME</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s">&quot;HOME&quot;</span><span class="p">)</span>
+<span class="n">HOST</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s">&quot;HOST&quot;</span><span class="p">)</span>
+<span class="n">PWD</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s">&quot;PWD&quot;</span><span class="p">)</span>
+
+<span class="n">GROUP</span> <span class="o">=</span> <span class="n">ih</span><span class="o">.</span><span class="n">shcmd</span><span class="p">(</span><span class="s">&quot;id -gn&quot;</span><span class="p">)</span>
+<span class="n">SCHOST</span> <span class="o">=</span> <span class="s">&quot;c1a&quot;</span>
+<span class="n">WSHOST</span> <span class="o">=</span> <span class="n">ih</span><span class="o">.</span><span class="n">shcmd</span><span class="p">(</span><span class="s">&quot;uname -n&quot;</span><span class="p">)</span>
+<span class="n">CLHOST</span> <span class="o">=</span> <span class="s">&quot;lxa&quot;</span>
+
+<span class="k">if</span> <span class="n">USER</span> <span class="o">==</span> <span class="s">&quot;map&quot;</span><span class="p">:</span>
+    <span class="n">WSQUEUE</span> <span class="o">=</span> <span class="s">&quot;serial&quot;</span>
+    <span class="n">WS_QUEUE_EPILOG</span> <span class="o">=</span> <span class="s">&quot;ns&quot;</span>
+    <span class="n">SCQUEUE</span> <span class="o">=</span> <span class="s">&quot;ns&quot;</span>
+    <span class="n">SC_QUEUE_EPILOG</span> <span class="o">=</span> <span class="s">&quot;ns&quot;</span>
+    <span class="n">ACCOUNT</span> <span class="o">=</span> <span class="s">&quot;ecodmdma&quot;</span>
+<span class="k">elif</span> <span class="n">USER</span> <span class="o">==</span> <span class="s">&quot;emos&quot;</span><span class="p">:</span>
+    <span class="n">WSQUEUE</span> <span class="o">=</span> <span class="s">&quot;serial&quot;</span>
+    <span class="n">WS_QUEUE_EPILOG</span> <span class="o">=</span> <span class="s">&quot;ns&quot;</span>
+    <span class="n">SCQUEUE</span> <span class="o">=</span> <span class="s">&quot;ns&quot;</span>
+    <span class="n">SC_QUEUE_EPILOG</span> <span class="o">=</span> <span class="s">&quot;ns&quot;</span>
+    <span class="n">ACCOUNT</span> <span class="o">=</span> <span class="s">&quot;oesu&quot;</span>
+<span class="k">elif</span> <span class="n">USER</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="s">&quot;tr&quot;</span><span class="p">:</span>
+    <span class="n">WSQUEUE</span> <span class="o">=</span> <span class="s">&quot;serial&quot;</span>
+    <span class="n">WS_QUEUE_EPILOG</span> <span class="o">=</span> <span class="s">&quot;ns&quot;</span>
+    <span class="n">SCQUEUE</span> <span class="o">=</span> <span class="s">&quot;ns&quot;</span>
+    <span class="n">SC_QUEUE_EPILOG</span> <span class="o">=</span> <span class="s">&quot;ns&quot;</span>
+    <span class="n">ACCOUNT</span> <span class="o">=</span> <span class="s">&quot;ectrain&quot;</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="n">WSQUEUE</span> <span class="o">=</span> <span class="s">&quot;serial&quot;</span>
+    <span class="n">WS_QUEUE_EPILOG</span> <span class="o">=</span> <span class="s">&quot;ns&quot;</span>
+    <span class="n">SCQUEUE</span> <span class="o">=</span> <span class="s">&quot;ns&quot;</span>
+    <span class="n">SC_QUEUE_EPILOG</span> <span class="o">=</span> <span class="s">&quot;ns&quot;</span>
+    <span class="n">ACCOUNT</span> <span class="o">=</span> <span class="s">&quot;decmsaf&quot;</span>
+
+<span class="k">def</span> <span class="nf">def_fam</span><span class="p">():</span>
+    <span class="n">def_suspended</span><span class="p">()</span>
+<span class="n">WSLOGDIR</span> <span class="o">=</span> <span class="n">SCRATCH</span><span class="o">+</span><span class="s">&quot;/output&quot;</span>
+<span class="n">ih</span><span class="o">.</span><span class="n">shcmd</span><span class="p">(</span><span class="s">&quot;mkdir -p </span><span class="si">%s</span><span class="s">/</span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span><span class="p">(</span><span class="n">WSLOGDIR</span><span class="p">,</span><span class="n">SELECTION</span><span class="p">))</span>
+<span class="n">SCLOGDIR</span> <span class="o">=</span> <span class="s">&quot;/s1a/ms_dir/</span><span class="si">%s</span><span class="s">/</span><span class="si">%s</span><span class="s">/smsjoboutput&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">GROUP</span><span class="p">,</span> <span class="n">USER</span><span class="p">)</span>
+<span class="n">WDIR</span> <span class="o">=</span> <span class="s">&quot;/s1a/ms_dir/</span><span class="si">%s</span><span class="s">/</span><span class="si">%s</span><span class="s">/wdir&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">GROUP</span><span class="p">,</span> <span class="n">USER</span><span class="p">)</span>
+<span class="n">VERSION</span> <span class="o">=</span> <span class="mo">0040</span>
+<span class="n">FIRST_DATE</span> <span class="o">=</span> <span class="n">ih</span><span class="o">.</span><span class="n">shcmd</span><span class="p">(</span><span class="s">&quot;\date +%Y%m</span><span class="si">%d</span><span class="s">&quot;</span><span class="p">)</span>
+<span class="n">LAST_DATE</span> <span class="o">=</span> <span class="n">ih</span><span class="o">.</span><span class="n">shcmd</span><span class="p">(</span><span class="s">&quot;newdate -D </span><span class="si">%s</span><span class="s"> 1&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">FIRST_DATE</span><span class="p">))</span>
+<span class="n">QUEUE_EPILOG</span> <span class="o">=</span> <span class="s">&quot;ns&quot;</span>
+
+<span class="k">def</span> <span class="nf">onws</span><span class="p">():</span>
+    <span class="n">var</span><span class="p">(</span><span class="s">&#39;QUEUE&#39;</span><span class="p">,</span> <span class="n">WSQUEUE</span><span class="p">)</span>
+    <span class="n">var</span><span class="p">(</span><span class="s">&#39;QUEUE_EPILOG&#39;</span><span class="p">,</span> <span class="n">WS_QUEUE_EPILOG</span><span class="p">)</span>
+    <span class="n">var</span><span class="p">(</span><span class="s">&#39;LOGDIR&#39;</span><span class="p">,</span> <span class="n">WSLOGDIR</span><span class="p">)</span>
+    <span class="n">var</span><span class="p">(</span><span class="s">&#39;SMSOUT&#39;</span><span class="p">,</span> <span class="n">WSLOGDIR</span><span class="p">)</span>
+    <span class="n">var</span><span class="p">(</span><span class="s">&#39;WSHOST&#39;</span><span class="p">,</span> <span class="n">HOST</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">oncl</span><span class="p">():</span>
+    <span class="n">var</span><span class="p">(</span><span class="s">&#39;QUEUE&#39;</span><span class="p">,</span> <span class="n">WSQUEUE</span><span class="p">)</span>
+    <span class="n">var</span><span class="p">(</span><span class="s">&#39;QUEUE_EPILOG&#39;</span><span class="p">,</span> <span class="n">WS_QUEUE_EPILOG</span><span class="p">)</span>
+    <span class="n">var</span><span class="p">(</span><span class="s">&#39;LOGDIR&#39;</span><span class="p">,</span> <span class="n">WSLOGDIR</span><span class="p">)</span>
+    <span class="n">var</span><span class="p">(</span><span class="s">&#39;SMSOUT&#39;</span><span class="p">,</span> <span class="n">WSLOGDIR</span><span class="p">)</span>
+    <span class="n">var</span><span class="p">(</span><span class="s">&#39;WSHOST&#39;</span><span class="p">,</span> <span class="s">&quot;linux_cluster&quot;</span><span class="p">)</span>
+    <span class="n">var</span><span class="p">(</span><span class="s">&#39;WSHOST&#39;</span><span class="p">,</span> <span class="n">CLHOST</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">onsc</span><span class="p">():</span>
+    <span class="n">var</span><span class="p">(</span><span class="s">&#39;QUEUE&#39;</span><span class="p">,</span> <span class="n">SCQUEUE</span><span class="p">)</span>
+    <span class="n">var</span><span class="p">(</span><span class="s">&#39;QUEUE_EPILOG&#39;</span><span class="p">,</span> <span class="n">SC_QUEUE_EPILOG</span><span class="p">)</span>
+    <span class="n">var</span><span class="p">(</span><span class="s">&#39;LOGDIR&#39;</span><span class="p">,</span> <span class="n">SCLOGDIR</span><span class="p">)</span>
+    <span class="n">var</span><span class="p">(</span><span class="s">&#39;SMSOUT&#39;</span><span class="p">,</span> <span class="n">SCLOGDIR</span><span class="p">)</span>
+    <span class="n">var</span><span class="p">(</span><span class="s">&#39;WSHOST&#39;</span><span class="p">,</span> <span class="n">SCHOST</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">onecg</span><span class="p">():</span>
+    <span class="n">var</span><span class="p">(</span><span class="s">&#39;QUEUE&#39;</span><span class="p">,</span> <span class="s">&quot;normal&quot;</span><span class="p">)</span>
+    <span class="n">var</span><span class="p">(</span><span class="s">&#39;QUEUE_EPILOG&#39;</span><span class="p">,</span> <span class="s">&quot;normal&quot;</span><span class="p">)</span>
+    <span class="n">var</span><span class="p">(</span><span class="s">&#39;LOGDIR&#39;</span><span class="p">,</span> <span class="n">WSLOGDIR</span><span class="p">)</span>
+    <span class="n">var</span><span class="p">(</span><span class="s">&#39;SMSOUT&#39;</span><span class="p">,</span> <span class="n">WSLOGDIR</span><span class="p">)</span>
+    <span class="n">var</span><span class="p">(</span><span class="s">&#39;WSHOST&#39;</span><span class="p">,</span> <span class="s">&quot;ecgate&quot;</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">day</span><span class="p">():</span>
+    <span class="c"># weekdey</span>
+    <span class="c"># edit WEEKDAY $*; label weekday $* # CONV</span>
+    <span class="n">var</span><span class="p">(</span><span class="s">&#39;WEEKDAY&#39;</span><span class="p">,</span> <span class="s">&quot;$*&quot;</span><span class="p">)</span>
+
+<span class="kn">from</span> <span class="nn">inc_skull</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">import</span> <span class="nn">dinner</span> 
+<span class="kn">import</span> <span class="nn">barber</span>
+<span class="kn">import</span> <span class="nn">weekly</span> 
+<span class="n">USE_SMS</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="n">USE_ECF</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="k">if</span>  <span class="ow">not</span> <span class="n">USE_SMS</span> <span class="ow">and</span>  <span class="ow">not</span> <span class="n">USE_ECF</span><span class="p">:</span>
+    <span class="k">print</span> <span class="s">&quot;it cannot be&quot;</span>
+    <span class="n">abort</span><span class="p">()</span>
+
+<span class="k">def</span> <span class="nf">create_suite</span><span class="p">():</span>
+    <span class="k">print</span> <span class="n">SELECTION</span>
+    <span class="n">s</span> <span class="o">=</span> <span class="n">suite</span><span class="p">(</span><span class="n">SELECTION</span><span class="p">)</span>
+    <span class="n">DEFS</span> <span class="o">=</span> <span class="n">Defs</span><span class="p">()</span>
+    <span class="n">DEFS</span><span class="o">.</span><span class="n">add_suite</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+    
+    <span class="n">def_suspended</span><span class="p">()</span>
+    <span class="n">var</span><span class="p">(</span><span class="s">&#39;USER&#39;</span><span class="p">,</span> <span class="n">USER</span><span class="p">)</span>
+    <span class="n">var</span><span class="p">(</span><span class="s">&#39;SCHOST&#39;</span><span class="p">,</span> <span class="n">SCHOST</span><span class="p">)</span>
+    <span class="n">var</span><span class="p">(</span><span class="s">&#39;WSHOST&#39;</span><span class="p">,</span> <span class="n">WSHOST</span><span class="p">)</span>
+    <span class="n">var</span><span class="p">(</span><span class="s">&#39;CLHOST&#39;</span><span class="p">,</span> <span class="n">CLHOST</span><span class="p">)</span>
+    <span class="n">var</span><span class="p">(</span><span class="s">&#39;WSLOGDIR&#39;</span><span class="p">,</span> <span class="n">WSLOGDIR</span><span class="p">)</span>
+    <span class="n">var</span><span class="p">(</span><span class="s">&#39;SCLOGDIR&#39;</span><span class="p">,</span> <span class="n">SCLOGDIR</span><span class="p">)</span>
+    <span class="n">var</span><span class="p">(</span><span class="s">&#39;DATEMASK&#39;</span><span class="p">,</span> <span class="s">&quot;*.*.*&quot;</span><span class="p">)</span>
+    <span class="n">var</span><span class="p">(</span><span class="s">&#39;QUEUE_EPILOG&#39;</span><span class="p">,</span> <span class="n">QUEUE_EPILOG</span><span class="p">)</span>
+    <span class="n">HOMEDIR</span> <span class="o">=</span> <span class="n">HOME</span><span class="o">+</span><span class="s">&quot;/sms_server/&quot;</span><span class="o">+</span><span class="n">SELECTION</span>
+    <span class="n">HOMEDIR</span> <span class="o">=</span> <span class="n">PWD</span>
+    <span class="k">if</span> <span class="n">USE_SMS</span><span class="p">:</span>
+        <span class="n">var</span><span class="p">(</span><span class="s">&#39;SMSLOGHOST&#39;</span><span class="p">,</span> <span class="n">SCHOST</span><span class="p">)</span>
+        <span class="n">var</span><span class="p">(</span><span class="s">&#39;SMSLOGPORT&#39;</span><span class="p">,</span> <span class="mi">9316</span><span class="p">)</span>
+        <span class="n">var</span><span class="p">(</span><span class="s">&#39;SMSTRIES&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">var</span><span class="p">(</span><span class="s">&#39;SMSHOME&#39;</span><span class="p">,</span> <span class="n">SCRATCH</span><span class="p">)</span>
+        <span class="n">var</span><span class="p">(</span><span class="s">&#39;SMSFILES&#39;</span><span class="p">,</span> <span class="n">HOMEDIR</span><span class="o">+</span><span class="s">&quot;/smsfiles&quot;</span><span class="p">)</span>
+        <span class="n">var</span><span class="p">(</span><span class="s">&#39;SMSINCLUDE&#39;</span><span class="p">,</span> <span class="n">HOMEDIR</span><span class="o">+</span><span class="s">&quot;/include&quot;</span><span class="p">)</span>
+        <span class="n">var</span><span class="p">(</span><span class="s">&#39;SMSCMD&#39;</span><span class="p">,</span> <span class="s">&quot;/home/ma/emos/bin/smssubmit %USER</span><span class="si">% %</span><span class="s">WSHOST</span><span class="si">% %</span><span class="s">SMSJOB</span><span class="si">% %</span><span class="s">SMSJOBOUT%&quot;</span><span class="p">)</span>
+        <span class="n">var</span><span class="p">(</span><span class="s">&#39;SMSKILL&#39;</span><span class="p">,</span> <span class="s">&quot;/home/ma/emos/bin/smskill %USER</span><span class="si">% %</span><span class="s">WSHOST</span><span class="si">% %</span><span class="s">SMSRID</span><span class="si">% %</span><span class="s">SMSJOBOUT%&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">USE_ECF</span><span class="p">:</span>
+        <span class="n">var</span><span class="p">(</span><span class="s">&#39;ECF_LOGHOST&#39;</span><span class="p">,</span> <span class="n">SCHOST</span><span class="p">)</span>
+        <span class="n">var</span><span class="p">(</span><span class="s">&#39;ECF_LOGPORT&#39;</span><span class="p">,</span> <span class="mi">9316</span><span class="p">)</span>
+        <span class="n">var</span><span class="p">(</span><span class="s">&#39;ECF_TRIES&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">var</span><span class="p">(</span><span class="s">&#39;ECF_HOME&#39;</span><span class="p">,</span> <span class="n">SCRATCH</span><span class="p">)</span>
+        <span class="n">var</span><span class="p">(</span><span class="s">&#39;ECF_FILES&#39;</span><span class="p">,</span> <span class="n">HOMEDIR</span><span class="o">+</span><span class="s">&quot;/smsfiles&quot;</span><span class="p">)</span>
+        <span class="n">var</span><span class="p">(</span><span class="s">&#39;ECF_INCLUDE&#39;</span><span class="p">,</span> <span class="n">HOMEDIR</span><span class="o">+</span><span class="s">&quot;/include&quot;</span><span class="p">)</span>
+        <span class="n">var</span><span class="p">(</span><span class="s">&#39;ECF_JOB_CMD&#39;</span><span class="p">,</span> <span class="s">&quot;/home/ma/emos/bin/smssubmit %USER</span><span class="si">% %</span><span class="s">WSHOST</span><span class="si">% %</span><span class="s">ECF_JOB</span><span class="si">% %</span><span class="s">ECF_JOBOUT% &quot;</span><span class="p">)</span>
+        <span class="n">var</span><span class="p">(</span><span class="s">&#39;ECF_KILL_CMD&#39;</span><span class="p">,</span> <span class="s">&quot;/home/ma/emos/bin/smskill %USER</span><span class="si">% %</span><span class="s">WSHOST</span><span class="si">% %</span><span class="s">ECF_RID</span><span class="si">% %</span><span class="s">ECF_JOBOUT% &quot;</span><span class="p">)</span>
+    <span class="c"># endif</span>
+    <span class="n">var</span><span class="p">(</span><span class="s">&#39;ACCOUNT&#39;</span><span class="p">,</span> <span class="n">ACCOUNT</span><span class="p">)</span>
+    <span class="n">var</span><span class="p">(</span><span class="s">&#39;VERSION&#39;</span><span class="p">,</span> <span class="n">VERSION</span><span class="p">)</span>
+    <span class="n">var</span><span class="p">(</span><span class="s">&#39;EPSVERSION&#39;</span><span class="p">,</span> <span class="s">&quot;0001&quot;</span><span class="p">)</span>
+    <span class="n">var</span><span class="p">(</span><span class="s">&#39;RFVERSION&#39;</span><span class="p">,</span> <span class="s">&quot;0001&quot;</span><span class="p">)</span>
+    <span class="n">var</span><span class="p">(</span><span class="s">&#39;DELTA_DAY&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">var</span><span class="p">(</span><span class="s">&#39;EMOS_BASE&#39;</span><span class="p">,</span> <span class="s">&quot;00&quot;</span><span class="p">)</span>
+    <span class="n">var</span><span class="p">(</span><span class="s">&#39;USE_YMD&#39;</span><span class="p">,</span> <span class="s">&quot;true&quot;</span><span class="p">)</span>
+    <span class="n">var</span><span class="p">(</span><span class="s">&#39;FSFAMILY&#39;</span><span class="p">,</span> <span class="s">&quot;/&quot;</span><span class="p">)</span>
+    <span class="n">var</span><span class="p">(</span><span class="s">&#39;BINS&#39;</span><span class="p">,</span> <span class="n">HOME</span><span class="p">)</span>
+    <span class="n">var</span><span class="p">(</span><span class="s">&#39;XBINS&#39;</span><span class="p">,</span> <span class="s">&quot;/home/ma/emos/bin&quot;</span><span class="p">)</span>
+    <span class="n">var</span><span class="p">(</span><span class="s">&#39;STREAM&#39;</span><span class="p">,</span> <span class="s">&quot;undef&quot;</span><span class="p">)</span>
+    <span class="n">var</span><span class="p">(</span><span class="s">&#39;EPSTYPE&#39;</span><span class="p">,</span> <span class="s">&quot;undef&quot;</span><span class="p">)</span>
+    <span class="n">var</span><span class="p">(</span><span class="s">&#39;MEMBER&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">var</span><span class="p">(</span><span class="s">&#39;FIRST_DAY&#39;</span><span class="p">,</span> <span class="n">FIRST_DAY</span><span class="p">)</span>
+    <span class="n">var</span><span class="p">(</span><span class="s">&#39;EMOS_TIME_STEP_H&#39;</span><span class="p">,</span> <span class="mo">00</span><span class="p">)</span>
+<span class="c"># repeat date YMD    $FIRST_DATE $LAST_DATE</span>
+    <span class="n">var</span><span class="p">(</span><span class="s">&#39;YMD&#39;</span><span class="p">,</span> <span class="n">FIRST_DAY</span><span class="p">)</span>
+    <span class="n">var</span><span class="p">(</span><span class="s">&#39;  SUITE_START&#39;</span><span class="p">,</span> <span class="n">FIRST_DAY</span><span class="p">)</span>
+    <span class="n">family</span><span class="p">(</span><span class="s">&quot;limits&quot;</span><span class="p">)</span>
+    <span class="n">def_complete</span><span class="p">()</span>
+    <span class="n">limit</span><span class="p">(</span><span class="s">&quot;lim&quot;</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+    <span class="n">endfamily</span><span class="p">()</span> <span class="c">#</span>
+
+    <span class="n">family</span><span class="p">(</span><span class="s">&quot;make&quot;</span><span class="p">)</span>
+    <span class="n">complete</span><span class="p">(</span><span class="s">&quot;/</span><span class="si">%s</span><span class="s">:YMD ne /</span><span class="si">%s</span><span class="s">:SUITE_START&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">SELECTION</span><span class="p">,</span> <span class="n">SELECTION</span><span class="p">))</span>
+    <span class="n">family</span><span class="p">(</span><span class="s">&quot;wst&quot;</span><span class="p">)</span>
+    <span class="n">onws</span><span class="p">()</span>
+    <span class="n">call_skull_make</span><span class="p">()</span>
+    <span class="n">endfamily</span><span class="p">()</span> <span class="c">#</span>
+    <span class="n">family</span><span class="p">(</span><span class="s">&quot;ecg&quot;</span><span class="p">)</span>
+    <span class="n">onecg</span><span class="p">()</span>
+    <span class="n">call_skull_make</span><span class="p">()</span>
+    <span class="n">endfamily</span><span class="p">()</span> <span class="c">#</span>
+    <span class="n">family</span><span class="p">(</span><span class="s">&quot;hpc&quot;</span><span class="p">)</span>
+    <span class="n">onsc</span><span class="p">()</span>
+    <span class="n">call_skull_make</span><span class="p">()</span>
+    <span class="n">endfamily</span><span class="p">()</span> <span class="c">#</span>
+    <span class="n">family</span><span class="p">(</span><span class="s">&quot;lcl&quot;</span><span class="p">)</span>
+    <span class="n">oncl</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">USE_SMS</span><span class="p">:</span>
+        <span class="n">var</span><span class="p">(</span><span class="s">&#39;SMSCMD&#39;</span><span class="p">,</span> <span class="s">&quot;/home/ma/emos/bin/smssubmit.new %USER</span><span class="si">% %</span><span class="s">WSHOST</span><span class="si">% %</span><span class="s">SMSJOB</span><span class="si">% %</span><span class="s">SMSJOBOUT% &quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">USE_ECF</span><span class="p">:</span>
+        <span class="n">var</span><span class="p">(</span><span class="s">&#39;ECF_JOB_CMD&#39;</span><span class="p">,</span> <span class="s">&quot;/home/ma/emos/bin/smssubmit.new %USER</span><span class="si">% %</span><span class="s">WSHOST</span><span class="si">% %</span><span class="s">ECF_JOB</span><span class="si">% %</span><span class="s">ECF_JOBOUT% &quot;</span><span class="p">)</span>
+    <span class="n">call_skull_make</span><span class="p">()</span>
+    <span class="n">endfamily</span><span class="p">()</span>
+    <span class="n">endfamily</span><span class="p">()</span>
+
+    <span class="n">family</span><span class="p">(</span><span class="n">PROJECT</span><span class="p">)</span>
+    <span class="n">def_fam</span><span class="p">()</span>
+    <span class="n">families</span> <span class="o">=</span> <span class="s">&#39;00 12&#39;</span>
+    <span class="n">var</span><span class="p">(</span><span class="s">&#39;ENSEMBLES&#39;</span><span class="p">,</span> <span class="mi">50</span><span class="p">)</span>
+    <span class="n">trigger</span><span class="p">(</span><span class="s">&quot;make==complete&quot;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">fam</span> <span class="ow">in</span> <span class="n">qw</span><span class="p">(</span><span class="n">families</span><span class="p">):</span>
+        <span class="n">family</span><span class="p">(</span><span class="n">fam</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">fam</span> <span class="o">==</span> <span class="s">&quot;00&quot;</span><span class="p">:</span>
+            <span class="n">var</span><span class="p">(</span><span class="s">&#39;DELTA_DAY&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">var</span><span class="p">(</span><span class="s">&#39;DELTA_DAY&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">var</span><span class="p">(</span><span class="s">&#39;EMOS_BASE&#39;</span><span class="p">,</span> <span class="n">fam</span><span class="p">)</span>
+        <span class="n">call_skull</span><span class="p">(</span><span class="n">PROJECT</span><span class="p">)</span>
+
+        <span class="n">family</span><span class="p">(</span><span class="s">&quot;pop&quot;</span><span class="p">)</span>
+        <span class="n">oncl</span><span class="p">()</span>
+        <span class="n">trigger</span><span class="p">(</span><span class="s">&quot;./&quot;</span><span class="o">+</span><span class="n">PROJECT</span><span class="o">+</span><span class="s">&quot;==complete&quot;</span><span class="p">)</span>
+        <span class="n">call_pop_skull</span><span class="p">()</span>
+        <span class="n">endfamily</span><span class="p">(</span><span class="s">&quot;pop&quot;</span><span class="p">)</span>
+
+        <span class="n">family</span><span class="p">(</span><span class="s">&quot;ws&quot;</span><span class="p">)</span>
+        <span class="n">onws</span><span class="p">()</span>
+        <span class="n">trigger</span><span class="p">(</span><span class="s">&quot;./&quot;</span><span class="o">+</span><span class="n">PROJECT</span><span class="o">+</span><span class="s">&quot;==complete&quot;</span><span class="p">)</span>
+        <span class="n">call_pop_skull</span><span class="p">()</span>
+        <span class="n">endfamily</span><span class="p">(</span><span class="s">&quot;ws&quot;</span><span class="p">)</span>
+        <span class="n">endfamily</span><span class="p">(</span><span class="n">fam</span><span class="p">)</span>
+
+    <span class="n">endfamily</span><span class="p">(</span><span class="n">PROJECT</span><span class="p">)</span>
+
+    <span class="n">family</span><span class="p">(</span><span class="s">&quot;consumer&quot;</span><span class="p">)</span>
+    <span class="n">def_fam</span><span class="p">()</span>
+    <span class="kn">import</span> <span class="nn">consumer</span>
+    <span class="n">consumer</span><span class="o">.</span><span class="n">call_consumer</span><span class="p">(</span><span class="n">SELECTION</span><span class="p">)</span>
+    <span class="n">endfamily</span><span class="p">(</span><span class="s">&quot;consumer&quot;</span><span class="p">)</span>
+
+    <span class="n">onws</span><span class="p">()</span>
+    <span class="n">var</span><span class="p">(</span><span class="s">&#39;SLEEP&#39;</span><span class="p">,</span> <span class="mi">20</span><span class="p">)</span>
+
+    <span class="n">dinner</span><span class="o">.</span><span class="n">call_dinner</span><span class="p">()</span>
+
+    <span class="n">barber</span><span class="o">.</span><span class="n">call_barber_shop</span><span class="p">()</span>
+
+    <span class="c"># weekly.call_weekly(SELECTION, FIRST_DATE)</span>
+
+    <span class="n">task</span><span class="p">(</span><span class="s">&quot;perl&quot;</span><span class="p">)</span>
+    <span class="n">def_suspended</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">USE_SMS</span><span class="p">:</span>
+        <span class="n">var</span><span class="p">(</span><span class="s">&#39;SMSMICRO&#39;</span><span class="p">,</span> <span class="s">&quot;^&quot;</span><span class="p">)</span>
+        <span class="n">var</span><span class="p">(</span><span class="s">&#39;SMSCMD&#39;</span><span class="p">,</span> <span class="s">&quot;^SMSJOB^ &gt; ^SMSJOBOUT^ 2&gt;&amp;1&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">USE_ECF</span><span class="p">:</span>
+        <span class="n">var</span><span class="p">(</span><span class="s">&#39;ECF_MICRO&#39;</span><span class="p">,</span> <span class="s">&quot;^&quot;</span><span class="p">)</span>
+        <span class="n">var</span><span class="p">(</span><span class="s">&#39;ECF_JOB_CMD&#39;</span><span class="p">,</span> <span class="s">&quot;^ECF_JOB^ &gt; ^ECF_JOBOUT^ 2&gt;&amp;1&quot;</span><span class="p">)</span>
+        <span class="n">meter</span><span class="p">(</span> <span class="s">&quot;step&quot;</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
+
+    <span class="n">task</span><span class="p">(</span><span class="s">&quot;python&quot;</span><span class="p">)</span>
+    <span class="n">def_suspended</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">USE_SMS</span><span class="p">:</span>
+        <span class="n">var</span><span class="p">(</span><span class="s">&#39;SMSMICRO&#39;</span><span class="p">,</span> <span class="s">&quot;^&quot;</span><span class="p">)</span>
+        <span class="n">var</span><span class="p">(</span><span class="s">&#39;SMSCMD&#39;</span><span class="p">,</span> <span class="s">&quot;^SMSJOB^ &gt; ^SMSJOBOUT^ 2&gt;&amp;1&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">USE_ECF</span><span class="p">:</span>
+        <span class="n">var</span><span class="p">(</span><span class="s">&#39;ECF_MICRO&#39;</span><span class="p">,</span> <span class="s">&quot;^&quot;</span><span class="p">)</span>
+        <span class="n">var</span><span class="p">(</span><span class="s">&#39;ECF_JOB_CMD&#39;</span><span class="p">,</span> <span class="s">&quot;^ECF_JOB^ &gt; ^ECF_JOBOUT^ 2&gt;&amp;1&quot;</span><span class="p">)</span>
+    <span class="n">meter</span><span class="p">(</span> <span class="s">&quot;step&quot;</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
+    <span class="n">endsuite</span><span class="p">(</span><span class="n">SELECTION</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">DEFS</span>
+
+<span class="k">def</span> <span class="nf">expand</span><span class="p">(</span><span class="n">defs</span><span class="p">,</span> <span class="n">play</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">load</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+    <span class="n">file_name</span> <span class="o">=</span> <span class="n">PROJECT</span> <span class="o">+</span> <span class="s">&quot;.dump&quot;</span>
+    <span class="n">f</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_name</span><span class="p">,</span> <span class="s">&quot;w&quot;</span><span class="p">)</span>
+    <span class="k">print</span> <span class="o">&gt;&gt;</span><span class="n">f</span><span class="p">,</span> <span class="n">defs</span>
+    <span class="c"># load into sms</span>
+    <span class="k">if</span> <span class="n">play</span><span class="p">:</span>
+        <span class="n">prog</span><span class="o">=</span><span class="s">&#39;&#39;</span>
+        <span class="n">cmd</span> <span class="o">=</span> <span class="s">&quot;cdp -c &#39;play -l </span><span class="si">%s</span><span class="s">&#39;&quot;</span><span class="o">%</span> <span class="p">(</span><span class="n">file_name</span><span class="p">)</span>
+        <span class="k">print</span> <span class="n">cmd</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">system</span><span class="p">(</span><span class="n">cmd</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">play</span><span class="p">:</span>
+        <span class="k">if</span>   <span class="n">USER</span> <span class="o">==</span> <span class="s">&quot;map&quot;</span><span class="p">:</span>  <span class="n">prog</span> <span class="o">=</span> <span class="s">&quot;set SMS_PROG 900130;&quot;</span>
+        <span class="k">elif</span> <span class="n">USER</span> <span class="o">==</span> <span class="s">&quot;emos&quot;</span><span class="p">:</span> <span class="n">prog</span> <span class="o">=</span> <span class="s">&quot;set SMS_PROG 314159;&quot;</span>
+        <span class="k">else</span><span class="p">:</span> 
+            <span class="n">g</span> <span class="o">=</span> <span class="mi">90000</span> <span class="o">+</span> <span class="nb">int</span><span class="p">(</span><span class="n">GROUP</span><span class="p">)</span>
+            <span class="n">prog</span> <span class="o">=</span> <span class="s">&quot;set SMS_PROG </span><span class="si">%s</span><span class="s">;&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">g</span><span class="p">)</span>
+        <span class="n">cmd</span> <span class="o">=</span> <span class="s">&quot;cdp -c &#39;</span><span class="si">%s</span><span class="s"> login </span><span class="si">%s</span><span class="s"> </span><span class="si">%s</span><span class="s"> 1; play -r /</span><span class="si">%s</span><span class="s"> </span><span class="si">%s</span><span class="s">&#39;&quot;</span> \
+            <span class="o">%</span> <span class="p">(</span><span class="n">prog</span><span class="p">,</span> <span class="n">HOST</span><span class="p">,</span> <span class="n">USER</span><span class="p">,</span> <span class="n">PROJECT</span><span class="p">,</span> <span class="n">file_name</span><span class="p">)</span>
+        <span class="k">print</span> <span class="n">cmd</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">system</span><span class="p">(</span><span class="n">cmd</span><span class="p">)</span>
+
+    <span class="c"># load into ecflow</span>
+    <span class="n">ECF</span> <span class="o">=</span> <span class="s">&quot;/usr/local/apps/ecflow/current/bin/ecflow_client&quot;</span>
+    <span class="k">if</span> <span class="n">load</span><span class="p">:</span>
+        <span class="n">port</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+        <span class="k">if</span>   <span class="n">USER</span> <span class="o">==</span> <span class="s">&quot;map&quot;</span><span class="p">:</span>  <span class="n">port</span> <span class="o">=</span> <span class="s">&quot;--port 20130 --host ibis&quot;</span>
+        <span class="k">elif</span> <span class="n">USER</span> <span class="o">==</span> <span class="s">&quot;emos&quot;</span><span class="p">:</span> <span class="n">port</span> <span class="o">=</span> <span class="s">&quot;--port  3199 --host ibis&quot;</span>
+
+        <span class="n">cmd</span> <span class="o">=</span> <span class="s">&quot;</span><span class="si">%s</span><span class="s"> </span><span class="si">%s</span><span class="s"> --load </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">ECF</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="n">file_name</span><span class="p">)</span>
+        <span class="k">print</span> <span class="n">cmd</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">system</span><span class="p">(</span><span class="n">cmd</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">res</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">cmd</span> <span class="o">=</span> <span class="s">&quot;</span><span class="si">%s</span><span class="s"> </span><span class="si">%s</span><span class="s"> --replace /</span><span class="si">%s</span><span class="s"> </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">ECF</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="n">PROJECT</span><span class="p">,</span> <span class="n">file_name</span><span class="p">)</span>
+            <span class="k">print</span> <span class="n">cmd</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">system</span><span class="p">(</span><span class="n">cmd</span><span class="p">)</span>
+
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">defs</span> <span class="o">=</span> <span class="n">create_suite</span><span class="p">()</span>
+    <span class="n">expand</span><span class="p">(</span><span class="n">defs</span><span class="p">,</span> <span class="n">play</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">load</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+</pre></div>

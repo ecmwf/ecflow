@@ -1,0 +1,13 @@
+suite suiteName
+   family familyName
+      task taskName
+      	label foo ""
+    endfamily
+endsuite
+
+suite s1;
+   family familyName
+      task taskName ; label foo ""
+    endfamily
+endsuite
+

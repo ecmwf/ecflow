@@ -1,0 +1,99 @@
+This file outline the requirements for the text interface:
+/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
+
+Broadly the text interface must allow:
+    o Access to the client interface.
+    o Access to the server
+     
+It should be noted that the text interface will provide the core functionality.
+This should be enough for end user to add their own custom functionality on top.
+  
+
+Documentation:
+==============
+o The text interface must provide interactive documentation. 
+  This must document the parameters used in the interface and error handling
+  Additionally it should provide usage examples.
+
+
+Language:
+=========
+o ECF does not support conditionals (for, if, while,etc) in the definition file.
+  hence the text interface must be able create the definition using
+  these conditionals. This requirement implies the use of a scripting language.
+  
+o The scripting language must be available on all the platforms used by ECF
+
+o Ideally the scripting language must be easy to learn and use.
+  Since the definition structure can be described in the scripting language,
+  the api provided must be stable and self documenting.
+
+
+Client side:
+=============
+  
+o The text interface must allow a definition file to be created and saved as a 
+  defs file. This allows ECF to be independent of the mechanism used to  
+  create the defs file.  The interface must be rich enough to support
+  all the different attributes of the definition file.
+  
+o Must allow definition or checkpoint file to be read in.
+
+o It must provide a mechanism to obtain the state of the definition
+  file running in the server. ( ie. node states, events, meters, etc)
+  Ideally the user should be able to specify the selected node.
+  
+o Allow the definition to be traversed, and mutated.
+
+  
+Client/server:
+===============
+o Allow the definition in the server to be:
+  - Downloaded
+  - Up-loaded
+  - Deleted/Cancelled
+  - Changed.(modified)
+  
+o Allow a node to be:
+  - replaced
+  - forced to a given state
+  - suspended and resumed
+  - requeued
+  - sorted/ ordered
+  - free'ed of it holding dependencies
+  - Moved to a different server.
+  - have its attributes added, deleted or changed
+
+o Allow the white list file to be re loaded..
+
+o Allow running jobs to be deleted.
+
+o Allow access to multiple server on the same host
+  
+o Allow server to be pinged, re-started, check pointed, halted and terminated
+  
+  
+ Monitoring
+=============
+ o Allow monitoring of progress and report what's changed.
+ 
+ o Allow access to the jobs output, job manuals, job output
+ 
+ o Allow access to the server log file. ( take into account log file server)
+ 
+ o Allow user to query why a node is not running.
+ 
+ Simulation
+ ============
+ o support simulation of the definition file, without requiring any jobs
+ 
+ 
+ 
+Issues
+========
+o Do we need to support comparison of definition files ?
+  Comparison has two forms :
+        a/ structure
+        b/ state
+  The distinction is important :
+  

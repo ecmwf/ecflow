@@ -1,0 +1,193 @@
+## Copyright 2009-2012 ECMWF. 
+## This software is licensed under the terms of the Apache Licence version 2.0 
+## which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
+## In applying this licence, ECMWF does not waive the privileges and immunities 
+## granted to it by virtue of its status as an intergovernmental organisation 
+## nor does it submit to any jurisdiction. 
+
+Compilation problems with: <boost_root>/libs/detail/utf8_codecvt_facet.cpp
+==========================================================================
+
+This needs to be fixed to boost versions:
+    1.42:
+    1.43:
+    1.44: (not tested)
+    1.45:
+
+acc version 6 compiler problems with <boost_root>/libs/detail/utf8_codecvt_facet.cpp
+
+Work around is to rewrite "get_cont_octet_out_count_impl"
+ignoring the preprocessor directives (which are window specific anyway)
+(see below). This needs to be done for each release as we dont know
+what else has changed.
+
+>>>>>>>>
+For 1.42 can no longer build boost on HP-UX.
+File-system, program-options and serialisation all show a similar
+problem
+
++ bjam --build-dir=./tmpBuildDir toolset=acc stage link=static --with-filesystem variant=debug
+...patience...
+.......
+acc.compile.c++ tmpBuildDir/boost/bin.v2/libs/filesystem/build/acc/debug/link-static/threading-multi/utf8_codecvt_facet.o
+"./libs/detail/utf8_codecvt_facet.cpp", line 255: error #2014-D: extra text after expected end of preprocessing directive
+  #elif WCHAR_MAX > 0x10000
+
+ 
+The actual file <boost_root>/libs/detail/utf8_codecvt_facet.cpp
+appears to have been changed in boost 1.40
+for the function  get_cont_octet_out_count_impl
+
+FROM:
+// note the following code will generate on some platforms where
+// wchar_t is defined as UCS2.  The warnings are superfluous as
+// the specialization is never instantitiated with such compilers.
+template<>
+int get_cont_octet_out_count_impl<4>(wchar_t word){
+    if (word < 0x80) {
+        return 0;
+    }
+    if (word < 0x800) {
+        return 1;
+    }
+    if (word < 0x10000) {
+        return 2;
+    }
+    if (word < 0x200000) {
+        return 3;
+    }
+    if (word < 0x4000000) {
+        return 4;
+    }
+    return 5;
+}
+
+TO:
+
+template<>
+int get_cont_octet_out_count_impl<4>(wchar_t word){
+    if (word < 0x80) {
+        return 0;
+    }
+    if (word < 0x800) {
+        return 1;
+    }
+
+    // Note that the following code will generate warnings on some platforms
+    // where wchar_t is defined as UCS2.  The warnings are superfluous as the
+    // specialization is never instantitiated with such compilers, but this
+    // can cause problems if warnings are being treated as errors, so we guard
+    // against that.  Including <boost/detail/utf8_codecvt_facet.hpp> as we do
+    // should be enough to get WCHAR_MAX defined.
+#if !defined(WCHAR_MAX)
+#   error WCHAR_MAX not defined!
+#endif
+    // cope with VC++ 7.1 or earlier having invalid WCHAR_MAX
+#if defined(_MSC_VER) && _MSC_VER <= 1310 // 7.1 or earlier
+    return 2;
+#elif WCHAR_MAX > 0x10000
+   
+   if (word < 0x10000) {
+        return 2;
+    }
+    if (word < 0x200000) {
+        return 3;
+    }
+    if (word < 0x4000000) {
+        return 4;
+    }
+    return 5;
+   
+#else
+    return 2;
+#endif
+}
+
+
+
+
+
+acc version 6 compiler problems with /boost/asio/detail/socket_ops.hpp 
+==================================================================================================
+**** This is required for all boost version < 1.45
+**** Seem to have been fixed in boost 1.45
+
+1/ The asio /boost/asio/detail/socket_ops.hpp (Line 643)
+   make a reference to ::pselect which is not defined on HPUX 11.23
+ 
+   In HP_UX 11.11,11.23  select() was defined in <sys/time.h>
+   In HP-UX 11.31        select() was moved to <sys/select.h> and pselect() was introduced in the same file
+
+   Hence boost/socket_ops.hpp needs a way of distinguishing OS versions.
+   for the moment the work around may be to introduce a define like 011.31 | OS_IS_HPUX11_31
+
+   // avi>> added ' && defined(OS_IS_HPUX11_31)'
+   #if defined(__hpux) && defined(__HP_aCC) && defined(OS_IS_HPUX11_31)
+
+   SO THAT WE CHOOSE select and NOT pselect
+
+2/ additionally in 11.23 there are 2 ::select to choose:
+
+  #include <sys/time.h>
+
+      int select(int nfds, fd_set *readfds, fd_set *writefds,
+           fd_set *errorfds, struct timeval *timeout);
+ 
+  For Backward Compatibility Only: (_XOPEN_SOURCE_EXTENDED not defined)
+
+      #include <time.h>
+
+      int select(size_t nfds, int *readfds, int *writefds,
+           int *exceptds, const struct timeval *timeout);
+
+
+  to get round the problem had to compile as:
+
+     bjam define=_XOPEN_SOURCE_EXTENDED
+
+  to choose the right select
+  
+  
+ Compilation problems with boost 1.48
+ ==============================================================
+ acc.compile.c++ tmpBuildDir/boost/bin.v2/libs/date_time/build/acc/debug/link-static/threading-multi/gregorian/greg_month.o
+"./boost/numeric/conversion/detail/preprocessed/numeric_cast_traits.hpp", line 25: error #2247: class "boost::numeric::numeric_cast_traits<char, char, void>" has already been defined
+      struct numeric_cast_traits
+             ^
+
+"./boost/numeric/conversion/detail/preprocessed/numeric_cast_traits.hpp", line 158: error #2247: class "boost::numeric::numeric_cast_traits<char, char, void>" has already been defined
+      struct numeric_cast_traits
+             ^
+
+"./boost/numeric/conversion/detail/preprocessed/numeric_cast_traits.hpp", line 170: error #2247: class "boost::numeric::numeric_cast_traits<char, char, void>" has already been defined
+      struct numeric_cast_traits
+             ^
+
+"./boost/numeric/conversion/detail/preprocessed/numeric_cast_traits.hpp", line 182: error #2247: class "boost::numeric::numeric_cast_traits<char, uint8_t, void>" has already been defined
+      struct numeric_cast_traits
+             ^
+
+"./boost/numeric/conversion/detail/preprocessed/numeric_cast_traits.hpp", line 194: error #2247: class "boost::numeric::numeric_cast_traits<char, int16_t, void>" has already been defined
+      struct numeric_cast_traits
+ 
+ 
+ >>>
+ >>> See:: https://svn.boost.org/trac/boost/attachment/ticket/6158/cstdint_patch.diff
+ >>>
+ *****
+ ***** Had to apply the same patch: i.e around line 101 of file  $BOOST_ROOT/boost/cstdint.hpp
+ *****
+ 103c103,107
+2  <   using ::int8_t;             
+3  ---
+4  > #if defined(sun) || defined(__sun)
+5  >   typedef signed char int8_t;
+6  > #else
+7  >   using ::int8_t;
+8  > #endif
+ 
+  # Hack because boost::int8_t was being interpreted as a char,
+  # This cause duplicate class definition during template instantiation.
+  # in the file ./boost/numeric/conversion/detail/preprocessed/numeric_cast_traits.hpp
+ 
+ 

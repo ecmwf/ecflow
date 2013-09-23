@@ -1,0 +1,265 @@
+#============================================================
+suite trunk_test
+  clock hybrid 0 # 18.03.2008 16:54
+  edit USER 'fim'
+  edit SMSINCLUDE '/scratch/ms/fi/fim/hm_home/trunk_test/lib/sms'
+  edit SMSFILES '/scratch/ms/fi/fim/hm_home/trunk_test/lib/sms'
+  edit EXP 'trunk_test'
+  edit ARGS ''
+  edit ENVT ''
+  edit YMD ''
+  edit HH '0'
+  edit Env_system '/home/ms/fi/fim/hm_home/trunk_test/Env_system'
+  edit TARGETNODE '%SMSHOST%'
+  edit HM_REV '/home/ms/dk/nhz/harmonie_release/trunk'
+  edit R_HOST ''
+  edit SRC_DIR ''
+  edit ENSMBR '-1'
+  edit SMSTRIES '1'
+  edit SMSJOBOUT '/hpce/ms_dir/ms/fi/fim/HARMONIE%SMSNAME%.%SMSTRYNO%'
+  edit SMSCMD 'perl -S Submit.pl -o %SMSJOBOUT% %SMSJOB% >> mSMS.log 2>&1'
+  edit SKIPifDONE '0'
+  task InitRun
+  family Build
+    trigger  ( InitRun eq complete)
+    task Build_pack
+    family Utilities
+      task Make_gl
+      task Make_monitor
+      task Make_oulan
+      task Make_gl_ecgate
+    endfamily
+    task Archive_log
+  endfamily
+endsuite
+suite test_def
+  clock hybrid 0 # 09.10.2009 16:54
+  edit USER 'sniemela'
+  edit SMSINCLUDE '/usr/people/sms/usr_def/hirlam/test_def/scripts'
+  edit SMSFILES '/usr/people/sms/usr_def/hirlam/test_def/scripts'
+  edit EXP 'test_def'
+  edit ARGS ''
+  edit ENVT ''
+  edit YMD ''
+  edit HH '0'
+  edit Env_system '/home/users/sniemela/Harmonie/hm_home/test_def/Env_system'
+  edit TARGETNODE '%SMSHOST%'
+  edit HM_REV '/operative/hirlam/home/Harmonie/33h1'
+  edit R_HOST ''
+  edit SRC_DIR ''
+  edit PP ''
+  edit ENSMBR '-1'
+  edit SMSTRIES '1'
+  edit HM_WD '/home/users/sniemela/Harmonie/hm_home/test_def'
+  edit DTGBEG '2008090100'
+  edit DTGEND '2008090100'
+  edit _mSMS_DocURL ''
+  edit SMSJOBOUT '/home/sms/tmp/%SMSNAME%.%SMSTRYNO%'
+  edit SMSCMD 'ssh %SMSHOST% -l %USER% ". /etc/profile;bsub "< %SMSJOB% 1>%SMSJOBOUT% 2>&1 &'
+  edit SKIPifDONE '0'
+  edit KONE_VALINTA 'jumbo'
+  task Ping_HPC
+    edit SMSHOST 'sms.fmi.fi'
+    edit SMSCMD 'sh< %SMSJOB% 1>%SMSJOBOUT% 2>&1 &'
+    label HOST ""
+  task Prepare_SMS
+    trigger  ( Ping_HPC eq complete)
+    edit SMSHOST 'sms.fmi.fi'
+    edit SMSCMD 'sh< %SMSJOB% 1>%SMSJOBOUT% 2>&1 &'
+  task InitRun
+    trigger  ( Ping_HPC eq complete) and  ( Prepare_SMS eq complete)
+  family Build
+    trigger  ( InitRun eq complete)
+    task Build_pack
+    family Utilities
+      task Make_gl
+      task Make_monitor
+      task Make_oulan
+    endfamily
+    task Archive_log
+      trigger  ( Build_pack eq complete and Utilities eq complete)
+  endfamily
+  family MARS
+    trigger  ( InitRun eq complete)
+    task Empty
+  endfamily
+  family MakeCycleInput
+    repeat date YMD 20080901 20080901 1 # status 0
+    trigger  ( Build eq complete and  ( MakeCycleInput:YMD lt  ( Postprocessing:YMD + 3)))
+    family Hour
+      repeat integer HH 0 23 24 # status 0
+      trigger  ( ../InitRun eq complete)
+      complete  (  (  ( ../MakeCycleInput:YMD le 20080901) and  ( Hour:HH lt 00)) or  (  ( ../MakeCycleInput:YMD ge 20080901) and  ( Hour:HH)))
+      task Prepare_cycle
+      family Climate
+        trigger  ( Prepare_cycle eq complete)
+        task Empty
+      endfamily
+      family Boundaries
+        trigger  ( Climate eq complete)
+        task Boundary_strategy
+        family LBC0
+          task hir2aro
+            trigger  ( ../Boundary_strategy eq complete)
+        endfamily
+        family LBC1
+          task hir2aro
+            trigger  ( ../Boundary_strategy eq complete)
+        endfamily
+        family LBC2
+          task hir2aro
+            trigger  ( ../Boundary_strategy eq complete)
+        endfamily
+        family LBC3
+          task hir2aro
+            trigger  ( ../Boundary_strategy eq complete)
+        endfamily
+        family LBC4
+          task hir2aro
+            trigger  ( ../Boundary_strategy eq complete)
+        endfamily
+        family LBC5
+          task hir2aro
+            trigger  ( ../Boundary_strategy eq complete)
+        endfamily
+        family LBC6
+          task hir2aro
+            trigger  ( ../Boundary_strategy eq complete)
+        endfamily
+      endfamily
+      family Observations
+        trigger  ( Climate eq complete and ../../MARS eq complete)
+        task Empty
+      endfamily
+      task Archive_log
+        trigger  ( Boundaries eq complete and Observations eq complete)
+    endfamily
+  endfamily
+  family Date
+    repeat date YMD 20080901 20080901 1 # status 0
+    trigger  ( Build eq complete)
+    family Hour
+      repeat integer HH 0 23 24 # status 0
+      complete  (  (  ( ../Date:YMD le 20080901) and  ( Hour:HH lt 00)) or  (  ( ../Date:YMD ge 20080901) and  ( Hour:HH gt 00)))
+      family Cycle
+        trigger  (  ( ../../MakeCycleInput eq complete) or  ( ../../MakeCycleInput:YMD gt ../../Date:YMD) or  (  ( ../../MakeCycleInput:YMD eq ../../Date:YMD) and  ( ../../MakeCycleInput/Hour:HH gt ../Hour:HH)) or  (  ( ../../MakeCycleInput:YMD eq ../../Date:YMD) and  ( ../../MakeCycleInput/Hour:HH eq ../Hour:HH)))
+        family StartData
+          trigger  (  ( ../../../MakeCycleInput eq complete) or  ( ../../../MakeCycleInput:YMD gt ../../../Date:YMD) or  (  ( ../../../MakeCycleInput:YMD eq ../../../Date:YMD) and  ( ../../../MakeCycleInput/Hour:HH gt ../../Hour:HH)) or  (  ( ../../../MakeCycleInput:YMD eq ../../../Date:YMD) and  ( ../../../MakeCycleInput/Hour:HH eq ../../Hour:HH) and  ( ../../../MakeCycleInput/Hour/Boundaries/LBC0 eq complete)))
+          task Prep_ini_surfex
+          task FirstGuess
+        endfamily
+        family Analysis
+          trigger  ( StartData eq complete and  (  ( ../../../MakeCycleInput eq complete) or  ( ../../../MakeCycleInput:YMD gt ../../../Date:YMD) or  (  ( ../../../MakeCycleInput:YMD eq ../../../Date:YMD) and  ( ../../../MakeCycleInput/Hour:HH gt ../../Hour:HH)) or  (  ( ../../../MakeCycleInput:YMD eq ../../../Date:YMD) and  ( ../../../MakeCycleInput/Hour:HH eq ../../Hour:HH) and  ( ../../../MakeCycleInput/Hour/Observations eq complete))))
+          family AnSFC
+            task Empty
+          endfamily
+          family AnUA
+            task Empty
+          endfamily
+        endfamily
+        family Forecasting
+          trigger  (  ( StartData eq complete and Analysis eq complete) and  (  ( ../../../MakeCycleInput eq complete) or  ( ../../../MakeCycleInput:YMD gt ../../../Date:YMD) or  (  ( ../../../MakeCycleInput:YMD eq ../../../Date:YMD) and  ( ../../../MakeCycleInput/Hour:HH gt ../../Hour:HH)) or  (  ( ../../../MakeCycleInput:YMD eq ../../../Date:YMD) and  ( ../../../MakeCycleInput/Hour:HH eq ../../Hour:HH) and  ( ../../../MakeCycleInput/Hour/Boundaries eq complete))))
+          task Forecast
+          task Archive_fc
+            trigger  ( Forecast eq complete)
+        endfamily
+      endfamily
+      task Archive_log
+        trigger  ( Cycle eq complete)
+      task LogProgress
+        trigger  ( Cycle eq complete)
+    endfamily
+  endfamily
+  family Postprocessing
+    repeat date YMD 20080901 20080901 1 # status 0
+    trigger  ( Build eq complete)
+    family Hour
+      repeat integer HH 0 23 24 # status 0
+      trigger  (  ( ../Date eq complete) or  ( ../Date:YMD gt ../Postprocessing:YMD) or  (  ( ../Date:YMD eq ../Postprocessing:YMD) and  ( ../Date/Hour:HH gt Hour:HH)))
+      complete  (  (  ( ../Postprocessing:YMD le 20080901) and  ( Hour:HH lt 00)) or  (  ( ../Postprocessing:YMD ge 20080901) and  ( Hour:HH gt 00)))
+      family Extract4ver
+        family fldextr0
+          task Run_fldver
+        endfamily
+        family fldextr1
+          task Run_fldver
+        endfamily
+        family fldextr2
+          task Run_fldver
+        endfamily
+        family fldextr3
+          task Run_fldver
+        endfamily
+        family fldextr4
+          task Run_fldver
+        endfamily
+        family fldextr5
+          task Run_fldver
+        endfamily
+        family fldextr6
+          task Run_fldver
+        endfamily
+      endfamily
+      task Gather_extract
+        trigger  ( Extract4ver eq complete)
+      family Postp_family
+        family Postp0
+          task Postpp
+        endfamily
+        family Postp1
+          task Postpp
+        endfamily
+        family Postp2
+          task Postpp
+        endfamily
+        family Postp3
+          task Postpp
+        endfamily
+        family Postp4
+          task Postpp
+        endfamily
+        family Postp5
+          task Postpp
+        endfamily
+        family Postp6
+          task Postpp
+        endfamily
+      endfamily
+      family Grib_family
+        trigger  ( Postp_family eq complete)
+        family Grib0
+          task Makegrib
+        endfamily
+        family Grib1
+          task Makegrib
+        endfamily
+        family Grib2
+          task Makegrib
+        endfamily
+        family Grib3
+          task Makegrib
+        endfamily
+        family Grib4
+          task Makegrib
+        endfamily
+        family Grib5
+          task Makegrib
+        endfamily
+        family Grib6
+          task Makegrib
+        endfamily
+      endfamily
+      task Cleancycle
+        trigger  ( Postp_family eq complete and Gather_extract eq complete and Grib_family eq complete)
+      family ECMWF
+        task Empty
+      endfamily
+      task Archive_log
+        trigger  ( ECMWF eq complete and Cleancycle eq complete)
+      task LogProgress
+        trigger  ( ECMWF eq complete and Cleancycle eq complete)
+        edit PP 'PP'
+    endfamily
+  endfamily
+endsuite
+#============================================================

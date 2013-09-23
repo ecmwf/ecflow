@@ -1,0 +1,14 @@
+suite suiteName
+   family f
+   		task t
+   			meter step 0 240 120
+   		task tt
+   			complete t:step ge 120
+   			trigger t == complete
+   endfamily
+endsuite
+
+suite s1; family f; task t;meter step 0 240 120;task tt;complete t:step ge 120;trigger t == complete
+endfamily
+endsuite
+

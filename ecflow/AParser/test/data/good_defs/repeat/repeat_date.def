@@ -1,0 +1,6 @@
+suite suiteName
+    repeat date YMD 20090331 20121212 1 # status 0
+endsuite
+
+suite s1; repeat date YMD 20090331 20121212 1 # status 0
+endsuite

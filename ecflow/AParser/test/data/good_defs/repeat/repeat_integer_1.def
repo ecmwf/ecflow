@@ -1,0 +1,5 @@
+suite suiteName
+   
+    repeat integer VARIABLE_XX 0 10 2 # comment
+  
+endsuite

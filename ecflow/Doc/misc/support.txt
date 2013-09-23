@@ -1,0 +1,74 @@
+
+Question to ask user
+====================
+
+o Platform and compiler and boost version ?
+  It may be compiler/boost version that we have not tested ?
+   
+o Version 
+
+o Need the definition file.
+  - Gives a que to the size of data transmitted for client/server communication.
+  - We can use Pyext/test/TestBench.py to load to an existing/new server
+    to test the customer defs.
+  
+o Log file
+  - Will verify the server version
+  - show server load, kind of requests, performance issues i.e news/sync
+  
+o Ask user to supply info returned from:
+  ecflow_client --port< > --host<> --stats
+     Will verify server version and the total number of requests handled by the server
+     Will also record the request handled in the last minute.
+     
+  ecflow_client --port< > --host<> --ping
+  From the host/machine where they are running ecflowview
+     See if there is any networking issue.
+     Should vary between 1-65 milli second response for decent network response
+     
+     itanium    ->linix(11.3)  ~ 12-65 ms
+     ecgate     ->linix(11.3)  ~  6-27 ms
+     c1a        ->linux(11.3)  ~ 18-50 ms
+     c2a        ->linux(11.3)  ~ 13-26 ms
+     linux(10.3)->linux(11.3)  ~   1-7 ms
+     linux(11.3)->linux(11.3)  ~   1-7 ms
+     
+     If it takes long, ask them to do:
+        ping -R <host> 
+        - Look for variation in ping times, along a given network path.
+        - Look for number of pings on a network path getting no response
+     This records the packet routing(network path) information, 
+     and might indicate why its slow.
+     
+  
+o If there is a performance problem.
+  * First establish if its *consistent* and reproducible*
+  - Establish if they are using the right version of ecflowview.
+    Post 3.1.0, we now put version in the ecflowview window title.
+  - Check ecflowview Poll rate, if this is excessive it can intefere with interactive use.
+    i.e Edit->Preference, select "Server Options" tab
+        Check "Call server every" <> seconds. If this is <15 seconds, it could explain
+        slow interactive use.
+  
+  The following should be done *before* trying to reproduce the problem
+
+  - In ecflowView, select the server, RMB->Extra->Client Logging on
+    This will produce a file called:
+       >> ecflow_client.log
+    This will log the round trip time from the client ->server ->client
+    for all user commands make by the GUI.
+    Please send the file back.
+    
+    make sure they disable it afterwards, ie RMB->Extra->Client Logging off
+     
+  - Run strace;
+    - ps -ef | grep ecflow_server   # not the pid
+    - strace -p <pid> strace.txt 2>& 1
+      *OR* strace -p <pid> -o tmp.txt
+    
+      This will record all the system level commands, there arguments and return values,
+      additionally we can see the *size* in bytes of the client/server communication.
+      watch out for sendmsg/recvmsg.
+      Type CTRL Q, to stop recording, and send the file.
+      
+  

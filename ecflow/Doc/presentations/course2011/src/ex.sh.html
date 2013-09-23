@@ -1,0 +1,30 @@
+<div class="highlight"><pre>family <span class="nv">$PROJECT</span>
+  def_fam
+  <span class="nv">families</span><span class="o">=</span><span class="s2">&quot;00 12&quot;</span>
+
+  edit ENSEMBLES 50
+  trigger <span class="s2">&quot;(./make==complete)&quot;</span>
+  <span class="k">for </span>fam in  <span class="nv">$families</span> ; <span class="k">do</span>
+<span class="k">    </span>family <span class="nv">$fam</span> <span class="c"># onsc</span>
+    <span class="k">if</span> <span class="o">((</span> <span class="nv">$fam</span> <span class="o">==</span> 00 <span class="o">))</span>; <span class="k">then</span>
+<span class="k">	</span>edit DELTA_DAY 1
+    <span class="k">else</span>
+<span class="k">	</span>edit DELTA_DAY 0
+    <span class="k">fi</span>
+<span class="k">    </span>edit EMOS_BASE <span class="nv">$fam</span>
+
+    call_skull
+
+    family pop;    oncl
+    trigger <span class="s2">&quot;(./${PROJECT}==complete)&quot;</span>
+    call_pop_skull
+    endfamily
+
+    family ws;    onws
+    trigger <span class="s2">&quot;(./${PROJECT}==complete)&quot;</span>
+    call_pop_skull
+    endfamily
+
+    endfamily <span class="c">#fam</span>
+  <span class="k">done</span>
+</pre></div>

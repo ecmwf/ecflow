@@ -1,0 +1,11 @@
+suite suiteName
+  family familyNamea
+   		task a
+   		task b
+       endfamily
+   family familyName
+   		task a
+   		task b
+    			trigger ..//familyNamea\b == complete                      
+     endfamily
+endsuite

@@ -1,0 +1,3 @@
+suite cron
+	cron 00:60                              #  error should   min 0-59
+endsuite

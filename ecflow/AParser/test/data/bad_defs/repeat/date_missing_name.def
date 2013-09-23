@@ -1,0 +1,3 @@
+suite suiteName
+    repeat date 20090331 20121212 1  
+endsuite

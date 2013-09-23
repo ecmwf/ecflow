@@ -1,0 +1,3 @@
+suite cron
+	cron 36:00                              #  error should between hour 0-23
+endsuite

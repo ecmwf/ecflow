@@ -1,0 +1,208 @@
+#============================================================
+suite weather
+  clock hybrid -3542400 # 29.08.2009 16:54
+  # repeat day 1 # status 0   ************** DISABLED SO THAT SUITE CAN COMPLETE *****************
+  edit SMSTRIES '2'
+  edit SMSCMD 'smssubmit.x %SMSJOB% hades rdx'
+  edit SMSHOME '/vol/rdx_dir/mars_stats/sms'
+  edit SMSINCLUDE '/vol/rdx_dir/mars_stats/sms/include'
+  edit SMSFILES '/vol/rdx_dir/mars_stats/sms/weather'
+  edit SMSSTATUSCMD 'smscheck %SCHOST% %EXPVER% %SMSJOB%'
+  edit ACCOUNT 'ecrmna'
+  edit OWNER 'naw'
+  edit EXPVER 'weather'
+  edit LOGDIR '/scratch/rd/rdx'
+  edit USER 'rdx'
+  edit QUEUE 'normal'
+  edit ECFS 'no'
+  family naw
+    family general
+      # time 06:00
+      task metgrams
+        defstatus complete
+      task equipot
+        defstatus complete
+    endfamily
+    family tephi
+      edit WSHOST 'linux_cluster'
+      edit SMSKILL '/home/rd/rdx/bin/smskill %USER% %WSHOST% %SMSRID% %SMSJOB%'
+      edit SMSCMD '/home/rd/rdx/bin/smssubmit.x %SMSJOB% %WSHOST% %USER%'
+      edit HOUR '00'
+      # time 05:35
+      task rd_tephi
+        defstatus complete
+        edit TDATE '2000110500'
+        edit EXPVER 'e4mb'
+      task tephi
+    endfamily
+    family main
+      edit WSHOST 'linux_cluster'
+      edit SCHOST 'c1a'
+      edit CPUTIME '30000'
+      edit MEM '800'
+      edit SMSLOGPORT '9314'
+      edit SMSLOGHOST 'c1a-batch'
+      edit SMSKILL '/home/rd/rdx/bin/smskill %USER% %WSHOST% %SMSRID% %SMSJOB%'
+      edit SMSCMD '/home/rd/rdx/bin/smssubmit.x.nils %SMSJOB% %WSHOST% %USER%'
+      edit LOGDIR '/vol/explog/outputs'
+      family scm_quick
+        edit LONG 'no'
+        edit START12 'no'
+        task getmars_scm
+          edit SMSKILL '/home/rd/rdx/bin/smskill %USER% %SCHOST% %SMSRID% %SMSJOB%'
+          edit SMSCMD '/home/rd/rdx/bin/smssubmit.x %SMSJOB% %SCHOST% %USER%'
+          edit LOGDIR '/c1a/rdx_dir/log'
+          # time 05:20
+        task getdata_scm
+          trigger getmars_scm eq complete
+          edit CLASS 'np'
+          edit NPES '8'
+          edit MEM '800'
+          edit SMSKILL '/home/rd/rdx/bin/smskill %USER% %SCHOST% %SMSRID% %SMSJOB%'
+          edit SMSCMD '/home/rd/rdx/bin/smssubmit.x %SMSJOB% %SCHOST% %USER%'
+          edit LOGDIR '/c1a/rdx_dir/log'
+        task benson
+          trigger getdata_scm eq complete
+          edit QUEUE 'normal'
+        task chilbolton
+          trigger getdata_scm eq complete
+        task husbos
+          trigger getdata_scm eq complete
+        task belvoir_castle
+          trigger getdata_scm eq complete
+        task york
+          trigger getdata_scm eq complete
+        task welshpool
+          trigger getdata_scm eq complete
+          edit QUEUE 'normal'
+        task newmarket
+          trigger getdata_scm eq complete
+      endfamily
+      family scm
+        edit LONG 'yes'
+        edit START12 'no'
+        task getmars_scm
+          edit SMSKILL '/home/rd/rdx/bin/smskill %USER% %SCHOST% %SMSRID% %SMSJOB%'
+          edit SMSCMD '/home/rd/rdx/bin/smssubmit.x %SMSJOB% %SCHOST% %USER%'
+          edit LOGDIR '/c1a/rdx_dir/log'
+          # time 06:45
+        task getdata_scm
+          trigger getmars_scm eq complete
+          edit CLASS 'np'
+          edit NPES '8'
+          edit MEM '800'
+          edit SMSKILL '/home/rd/rdx/bin/smskill %USER% %SCHOST% %SMSRID% %SMSJOB%'
+          edit SMSCMD '/home/rd/rdx/bin/smssubmit.x %SMSJOB% %SCHOST% %USER%'
+          edit LOGDIR '/c1a/rdx_dir/log'
+          edit SMSPASS 'FREE'
+        task benson
+          trigger getdata_scm eq complete
+          edit SMSPASS 'FREE'
+        task chilbolton
+          trigger getdata_scm eq complete
+        task husbos
+          trigger getdata_scm eq complete
+          edit SMSPASS 'FREE'
+        task belvoir_castle
+          trigger getdata_scm eq complete
+        task york
+          trigger getdata_scm eq complete
+        task welshpool
+          trigger getdata_scm eq complete
+          edit SMSPASS 'FREE'
+        task newmarket
+          trigger getdata_scm eq complete
+        task cabauw
+          trigger getdata_scm eq complete
+        task arm_sgp
+          trigger getdata_scm eq complete
+        task vocals0850W
+          defstatus complete
+          trigger getdata_scm eq complete
+        task vocals0750W
+          defstatus complete
+          trigger getdata_scm eq complete
+        task web
+          trigger benson eq complete and chilbolton eq complete and husbos eq complete and belvoir_castle eq complete and york eq complete and welshpool eq complete and newmarket eq complete and cabauw eq complete and arm_sgp eq complete and vocals0850W eq complete and vocals0750W eq complete
+      endfamily
+    endfamily
+  endfamily
+endsuite
+suite weather12
+  clock hybrid -9244800 # 14.06.2009 16:54
+  # repeat day 1 # status 0  ************** DISABLED SO THAT SUITE CAN COMPLETE *****************
+  edit SMSTRIES '2'
+  edit SMSCMD 'smssubmit.x %SMSJOB% hades rdx'
+  edit SMSHOME '/vol/rdx_dir/mars_stats/sms'
+  edit SMSINCLUDE '/vol/rdx_dir/mars_stats/sms/include'
+  edit SMSFILES '/vol/rdx_dir/mars_stats/sms/weather'
+  edit SMSSTATUSCMD 'smscheck %SCHOST% %EXPVER% %SMSJOB%'
+  edit ACCOUNT 'ecrmna'
+  edit OWNER 'naw'
+  edit EXPVER 'weather'
+  edit LOGDIR '/scratch/rd/rdx'
+  edit USER 'rdx'
+  edit QUEUE 'normal'
+  edit ECFS 'no'
+  family naw
+    family main
+      edit WSHOST 'linux_cluster'
+      edit SCHOST 'c1a'
+      edit CPUTIME '30000'
+      edit MEM '800'
+      edit SMSLOGPORT '9314'
+      edit SMSLOGHOST 'c1a-batch'
+      edit SMSKILL '/home/rd/rdx/bin/smskill %USER% %WSHOST% %SMSRID% %SMSJOB%'
+      edit SMSCMD '/home/rd/rdx/bin/smssubmit.x.nils %SMSJOB% %WSHOST% %USER%'
+      edit LOGDIR '/vol/explog/outputs'
+      family scm
+        edit LONG 'yes'
+        edit START12 'yes'
+        task getmars_scm
+          edit SMSKILL '/home/rd/rdx/bin/smskill %USER% %SCHOST% %SMSRID% %SMSJOB%'
+          edit SMSCMD '/home/rd/rdx/bin/smssubmit.x %SMSJOB% %SCHOST% %USER%'
+          edit LOGDIR '/c1a/rdx_dir/log'
+          edit SMSPASS 'FREE'
+          # time 17:45
+        task getdata_scm
+          trigger getmars_scm eq complete
+          edit CLASS 'np'
+          edit NPES '8'
+          edit MEM '800'
+          edit SMSKILL '/home/rd/rdx/bin/smskill %USER% %SCHOST% %SMSRID% %SMSJOB%'
+          edit SMSCMD '/home/rd/rdx/bin/smssubmit.x %SMSJOB% %SCHOST% %USER%'
+          edit LOGDIR '/c1a/rdx_dir/log'
+        task benson
+          trigger getdata_scm eq complete
+        task chilbolton
+          trigger getdata_scm eq complete
+        task husbos
+          trigger getdata_scm eq complete
+        task belvoir_castle
+          trigger getdata_scm eq complete
+        task york
+          trigger getdata_scm eq complete
+        task welshpool
+          trigger getdata_scm eq complete
+        task newmarket
+          trigger getdata_scm eq complete
+        task cabauw
+          defstatus complete
+          trigger getdata_scm eq complete
+          edit SMSPASS 'FREE'
+        task arm_sgp
+          defstatus complete
+          trigger getdata_scm eq complete
+        task vocals0850W
+          defstatus complete
+          trigger getdata_scm eq complete
+        task vocals0750W
+          defstatus complete
+          trigger getdata_scm eq complete
+        task web
+          trigger benson eq complete and chilbolton eq complete and husbos eq complete and belvoir_castle eq complete and york eq complete and welshpool eq complete and newmarket eq complete and cabauw eq complete and arm_sgp eq complete and vocals0750W eq complete and vocals0850W eq complete
+      endfamily
+    endfamily
+  endfamily
+endsuite
+#============================================================

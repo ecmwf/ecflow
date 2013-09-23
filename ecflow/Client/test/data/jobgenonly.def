@@ -1,0 +1,15 @@
+#
+# We can define a variable ECF_HOME as want to use relative paths
+# i.e since the test must be relocatble to other platforms
+#
+suite suite
+	edit SLEEPTIME 10
+	edit ECF_INCLUDE $ECF_HOME/includes
+	family family
+	   task t1
+	   	event eventname
+	   	meter metername 0 100 100
+	   task t2
+	   task t3
+	endfamily
+endsuite

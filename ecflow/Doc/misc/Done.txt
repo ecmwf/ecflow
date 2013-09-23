@@ -1,0 +1,437 @@
+
+Discontinued functionality
+/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
+   o owner
+   o action
+   o text
+   o abort
+
+
+
+Completed Tasks
+/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
+o Documentation.
+    - user manuals. 
+    - Reference manuals,  sphinx-build
+    - build documentation
+    - online-tutorial
+ 
+
+- Add ecf_start script. 
+      Use similar structure for defining environment.
+       
+- Add ecf_stop 
+      Use similar structure, must halt, checkpoint, terminate server
+ 
+- Build/install scripts        
+   - install instructions and scripts
+   
+- Develop and conduct training  
+    - Training materials . ( need section for python api )
+    - Training prep/plan  
+     
+Migration:
+==========
+o At each release of ECF we can change the data model. This means
+  that the checkpoint file will change, as could the IPC messaging
+  between client and the server.
+  o The check point file, will use the boost class versioning to
+    handle changes between the releases.
+    
+  o The IPC messaging api will not be migrated. 
+    This is not really an issue, since the client/server will be
+    released together.
+    The only issue that may arise is if we want to tranfer defs
+    between servers of different ecf releases. This will not be possible.
+
+
+Need long term testing of server
+==================================
+  24 * 60 * 60 = 86400 seconds:
+  Assuming a server poll of 5 sec ~ 1 minute:
+   5 * 12 = 60
+   86400/12*60*60   = 2hrs   
+   Hence we can simulate 24 hrs  by running for  2 hrs with a 5 sec poll period
+   Hence we can simulate 12 days by running for 24 hrs with a 5 sec poll period.
+  
+   3 * 20 = 60
+   86400/20*60*60   = 1.2 hrs
+   Hence we can simulate 24 hrs  by running for 1.2 hrs with 3 sec poll period
+   Hence we can simulate 20 days by running for  24 hrs with 3 sec poll period
+  
+   20s * 3 = 60
+   86400/3*60*60   = 8 hrs  ~ 24hrs
+   Hence we can simulate 24 hrs  by running for 8 hrs with 20 sec poll period
+
+
+Bug Fixes
+==============
+o Fixed bug with aborted, re-submission placed in resolveDependencies to check for limits
+  Previously abort forced an immediate job submission ignoring limits.
+  
+  
+Documentation
+/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
+- Added user manual
+- Added python reference manual. This is generated from the extension using pydoc
+- Added online tutorial
+
+
+Commands Used by XCDP
+/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
+    o Checkpoint  add client api for check pointing the defs file
+    o Requeue: Resets the triggers, and tryno.(avoid overwriting old output)
+    o run: job is pushed independently of the dependencies  
+    oforce: This commands is used to force a node into a particular state. 
+          Force can also be used to set/clear events
+          Force can balos be used to set repeats to their last value
+    o delete ((t)ime | (d)ate | (T)rigger) dependencies or (-tdT) to 
+      remove all  dependencies
+
+
+Python Integration: This forms the Text Interface
+/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
+    o Added python interface for creating the Node tree.           
+    o Added python interface for calling the client to server api  
+    o Defined documentation strings for Client, Defs and node attributes api
+      Including specfication of Exceptions that will be raised
+    o Test building a defintion in python, saving to disk, and sending to server
+    o Tested Error handling. Defining an incorrect Definition will
+      raise C++ exception which are translated to python exceptions.
+    o Can toggle error handling stratgey, form exception based, to returing 0  for success & 1 on error
+ 
+    o Traversal of the defs structure in python  
+      Can now recreate the defs being traversed
+
+    o Can automatically add externs, with option to delete existing externs of defs first
+    o Can load defs file or checkpoint file
+    o Tested on Linux, HPUX and AIX
+    o Checking
+      Expressions
+      InLimit
+      Job generation
+      simulation
+ 
+Advanced Zombie management
+/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
+o added suport for zombie attribute: 
+  This can be added at any node level and provied a way of automatically 
+  handling zombies. Theye work similar to variables. So that zombie reponse
+  can be altered depending where in the tree, the attribute is added.
+  
+  i.e zombie user:fob::
+  This will fob all child commands , where the zombie was created by 'user' action
+  
+  It consist of foure fields seperated by ':'
+  field 1: zombie type, ie one of [ user | ecf | path }
+  field 2: User action, ie one of [ fob, fail, remove, adopt, block ]
+  field 3: (optional), specifies the child cmd , ie one of [ init, event, meter, label, wait, abort, complete ]
+           If only a subset is specified, the remaining commands, will block (default behaviour)
+  field 4: Controls the lifetime of the zombie in the server.
+  
+  Please note that if fobed is specfied, the zombie reference in the server is 
+  automatically deleted, when a 'complete' child command is recieved.
+  
+  
+Simulator
+/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
+    Developed a simulator for end client use as a debug aid:
+    o Will validate the defintion file structure.
+    o Will simulate until suite completion or to a maximum of one year. 
+      No tasks are submitted. (i.e no process created)
+    o Can simulate for both hybrid and real clocks, in past/future
+    o Allows for checking of deadlocks.
+    o Checking of cron type attributes. i.e several months in the future
+    o Developed analysis package which provides a textual dump
+      of which suite did not complete and why.
+    o With the addition of user added verification  attributes, the simulator
+      can verify expected behaviour.
+
+
+Platform & compilers & test status:
+/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
+    Linux gcc 4.2.1, 4.5 
+    debug  : All tests pass
+    release: All tests pass
+    profile: All tests pass
+    valgrind: no memory leaks
+     
+    HP-UX(itanium B.11.23) gcc 4.3.1 : does not compile fully 
+  
+    HP-UX(itanium B.11.23) aCC ver 6    
+    debug  : All tests pass but long compile times
+    release: All tests pass , even longer compile times            
+ 
+    AIX v10.1 
+    all non serialisation test pass. v10.1, all serialisation tests fail.
+     
+    AIX v11.1   ** portable binary serialisation fails **
+    debug  : All tests pass.  
+    release: python does not build, 
+             Serialializtion tests all fail.
+             It appears that in release mode implicit type registration fails
+             Tried using explicit type registration, this now fails in debug
+             hence did not bother with release.
+              
+ 
+    Boost 1.42:
+    Boost build broken. Need to copy over new boost build from net.
+    Linux:  Working: Fixes shared_ptr serialisation memory leaks
+    HPUX:   Working: 
+            Hack File: <BOOST_ROOT>/libs/detail/utf8_codecvt_facet.cpp
+            Hack file: <BOOST_ROOT>/boost/asio/detail/socket_ops.hpp
+    AIX :   Working: 
+            Hack File: <BOOST_ROOT>/boost/serialization/force_include.hpp
+            The file force_include.hpp allows for implicit type registration
+          
+          
+Job submission:
+/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
+    o Added ability to locate sms files
+    o added pre-processing, and tests which validate preprocessing against 
+      existing SMS
+    o added variable subsitution
+    o Added support for generated variables.
+    o Created child process and adding signal functionality to
+      monitor child termination
+    o Job submission test verification
+    - ensures that each task goes through the following life cycle 
+      unknown->queued->submitted->active->complete
+    - Create a Golden reference log file, this is validated
+      and then each used for comparison with the generated
+      log file. This is used to trap any regression.
+    o If a job is aborted for any reason, the reason is now stored and available 
+      for the UI.
+    o SMSFETCH/ECF_FETCH. This is not used in researh or operations. So I have
+      commented out this functionality. Remains to be tested.
+    o Aded support for %includenopp
+ 
+Client
+/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
+    Created client code structure, allow for new commands to be added.
+    Added config file, to simulate the environment variables
+    Added support for command line parsing. client --help shows list of options
+    Added client handshake with server, if connection fails are a number of 
+    attempts then host file opened and alternative host tried.
+    Added a timeout period connection  
+        
+    ECF_RID added remote id. This is set in the jobs/.ecf files and picked
+    up by the child commands. This info is the passed to the task in the 
+    the server The remote id, will probably be the queuing id, and thus prove
+    useful in deleting rogue zombies.
+    
+    Added simple versioning.
+   
+   o Can automatically add externs, with option to delete existing externs of defs first
+   o DEBUG Client using environment variable ECF_DEBUG_CLIENT
+   
+    Following commands added: 
+    GetDefsCmd:  used to transfer node tree, to/from client/server
+    BeginCmd:    sets default state/defstatus and enables dependency evalaution
+    InitCmd:     Places the selected task into the QUEUED state
+    CompleteCmd: Places the selected task into the COMPLETE state
+    AbortCmd:    Places the selected task into the ABORTED state
+    CtsWaitCmd:  Evaluates a expression, blocks whilst expression is false
+    EventCmd:    Sets the chosen event.
+    MeterCmd:    Sets the meter value
+    LabelCmd:    Sets the label(s) on the chosen node
+    DeleteNodeCmd:  Clears the existing definition. 
+                Used mainly for testing. a Fresh starts
+    PingCmd: Checks to see if server is alive.  
+    LogCmd:  Create a new log file, or Gets(last n lines) or clears the log file 
+    LogMessageCmd:  write a message to the log file
+    ShowCmd: Writes the definition returned from the server to standard out
+    GroupCmd:Allows a series of commands to be sent to the server
+    ReloadWhiteListFileCmd: Force the white list file to be reread by 
+                            the server.  Enable/disable users.
+    ReplaceNodeCmd: Replaces a Node with a new definition
+    RequeueNodeCmd: Requeue a node
+    FreeDepCmd: Free a node of trigger, date, and time dependencies
+    CFilemd  : Added support for getting script, job, jobout and manual
+    PlugCmd  : Allows a node to moved. Even to a different server
+    suspend/resume: Added at server level and for each node
+    kill cmd : kill a active or submitteds jobs, via ECF_KILL
+    Job status: report status of active.submitted tasks, via ECF_STATUS_CMD
+    Order cmd : order the nodes in the defintion file
+    Why Cmd:    gives a reason why a node is not running
+    Url Cmd:  invokes a url command
+    AlterCmd: used to add,delete and change node attributes
+    ClientHandleCmd: allows user to register interest in a set of suites, 
+                     so thats news and sync() can cut down on network traffic.
+    SuitesCmd: returns a list suites, and client handles.
+    
+    server_load: This shows the number of requests per second, (user & child)
+                 Show graphically using gnuplot
+    
+Server
+/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
+Created a TCP based server  
+    o Added background node tree traversers which evaluates node tree
+      dependencies every minute
+    o Added authentication of client request.
+    o Added shutdown, halt, restart, terminate cmds
+    o Server status,  
+    o add infrastructure to read server environment. 
+      Default reads from config file
+      but can be overriden by enviromnent settings
+    o persist checkpoint file, defined by CHSCHECKINTERVAL 
+    o enable/disable checkpoint file saving via config file
+    o Added LOG_ASSERT, if server crashes, we can look in log file, to see where.
+    o Server, will check ECF_HOME, is accessable and writeable, if "." expands to absolute path
+    o Adding prompting to delete_node, halt, shutdown and terminate server.
+    o DEBUG Server parameter --debug and ECF_DEBUF_SERVER
+    o Support for Node history
+    
+    o scheduling
+      Some tasks ONLY serve as dummy's ie they will never be run and 
+      have no assocated ecf file. Added support ECF_DUMMY_TASK
+      This will stop job generation form complaining if no script found
+     
+  
+    o Calendar object
+      Added support for real and hybrid( i.e date does not change) calendars
+      Integrated calendar object into server code.
+      Generated variables now use calendar object
+      Today,Cron,Time,date,day attributes now use the calendar object
+      Server poll, period is used to update the calendar
+      Dependency evaluation now considers time dependent
+      attributes of a node, like today,time,date,day,cron.
+
+      Suite can be set via clock Attribute to past/future.
+      Added tests for calendar objects.
+      Added test for hybrid, to ensure date does not change past midnight
+    
+    o Serialization. This is used in the comm' between client server.
+      i.e Objects converted to stream of data, send over the net, then
+      streams of date is reconverted to objects.  
+      Added support for :
+    - TEXT/ASCII Serialization.  
+      Portable across different OS, but may be slow
+    - BINARY Serialization.      
+      FAST when used with same OS
+    - PORTABLE_BINARY Serialization. 
+      binary Serialization that works accross OS. ( AIX issues )
+        
+    o security (white-list, black-list file/ secure mode)
+      The new system does not maintain a continuous connection with the server.
+      When the server is invoked it looks for file pointed to be ECF_LISTS
+      if the file is found. It will specify the users and their access 
+      priviliges. If no file is specified all user can access the server.
+      Each non task request will encode the current user. This is sent to the
+      server. The server then authenticate each request according to access 
+      priviliges.  Note each request to server encodes whether it will make a 
+      change  (i.e write access) or if it just requires read access.
+   
+    o Server replies.
+      Currently every client command, is replied to by the server for testing,
+      This is useful for the python integration as well.
+      however this is not always required. When there is no error should 
+      consider not returning, hence client can assume ok.
+
+    o Data Transfer between client server:
+      Chose Boost ASIO/Serialization for ease of use, and documentation, 
+      actively maintained.  Others included Protocol Buffers, Thrift, XDR
+
+    o Statistics
+      Support added for returning server statisics
+
+    o Added simple versioning.
+    
+    o if server started & checkpoint files exists in ECF_HOME load it.
+      if that fails try the backup checkpt file
+     
+Node   
+/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
+Classes for Node tree, Suite,Family,Task,Node 
+   
+Added support for :  
+    Vistor
+    serialization of node tree
+    RepeatDate       value() returns the date by its real value as a long
+    RepeatInteger    value() returns the value, by the current value of integer
+    RepeatEnumerated value() returns the current position/index,  
+    RepeatString     value() returns the current position/index   
+    RepeatDay        value() returns the current step., enddate not defined
+    - Clock
+    - Cron 
+    - day
+    - date
+    - time
+    - relative times ie use of + on time,today and cron attributes
+    - Late support  
+    - Variable support
+    - Limit and inlimit support
+    - labels. 
+    - events
+    - meters,
+    - defstatus, 
+    - triggers, 
+    - complete
+    
+    auto-cancel  ( Check dependencies on removed nodes and warn )
+ 
+Logging
+/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
+    simple logging added. All command sent to the server are logged.
+    Node state changes logged.
+    Job processing logged
+  
+  
+Parsing
+/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
+    Can now completely parse the operational suites and create the in memory 
+    Nodes Several issues discovered. 
+    Originally Used boost spirit for defs file parsing, however this did not 
+    work on AIX, hence wrote my own parser for the defs file.
+    Trigger and complete expression however do use spirit parsers.
+    Added line number reporting
+    Added support to handle trigger/complete continuation lines
+    Rewrote parser so that it works on HP-UX and AIX. (Dropped boost spirit)
+    support for trigger -a and trigger -o
+    Support for multiple statements per line by use of ';'
+    
+    Decided not to use JSON format and will stick with existing format.
+  
+  
+Expressions
+/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
+    Complete and trigger expression can be parsed, and abstract syntax 
+    tree(AST) created.
+    Trigger references to Node tree, events, meters, variables, repeats, 
+    resolved or an error message issued.
+    AST evaluation tested.
+    Used boost spirit for trigger/complete expression parsing
+     
+    Support for expression evalution and visitor design pattern
+  
+  
+Testing
+/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
+    Added testing infra-structure, decided to use Boost test
+    Added numerous unit and regression test and integrated into build system, so
+    that regression test are automatically run on a successful build.
+    Used valgrind to fix memory leaks
+    Used gprof to identify performance issues.
+    
+    Evaluated unit tests:  Decided on Boost test.
+  
+Build system:
+/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
+    Installed Eclipse CDT and integrated with perforce plugin.
+    Installed Boost
+    Decided on bjam. very easy to create debug, release, profile variants
+    Learned to use perforce.
+  
+  
+Create requirements and functional spec on the WIKI
+/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
+    Collated future requirements.
+    Reviewed by Axel/John
+    
+Engineering
+/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
+      serialization of calendar in particular ptime uses exceptions ,and is 
+      horendously slow. Is there a more effecient way ?
+      Note: when a ptime is not initialised its Date, has a special value,
+      it is this that is causing the exceptions :
+      FIXED: By initialise the calendar to current date and time.

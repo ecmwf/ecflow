@@ -1,0 +1,49 @@
+%include <head.h>
+
+# ==========================================================
+# Run as REMOTE_HOST.  
+# ==========================================================
+ 
+if [[ %SET_TO_TEST_SCRIPT% = true ]] ; then
+   echo "Test only"
+else
+
+   if [[ %TOOLSET% = intel-linux || %TOOLSET% = intel ]] ; then
+      # provide access to intel c++ compiler
+      export PATH=/usr/local/apps/intel/composer_xe_2013.3.163/bin:$PATH
+      sh -x iccvars.sh intel64
+   fi
+
+   # ========================================================================
+   # Build the boost libs used by ecflow
+   # ========================================================================
+   
+   cd $BOOST_ROOT
+   
+   # uncomment for clean build
+   #rm -rf stage
+   #rm -rf tmpBuildDir
+   #rm -rf bin.v2
+   
+   # ========================================================================
+   # Note: boost thread *ONLY* need to *test* multi-threaded server
+   # ========================================================================
+   
+   ./bjam --build-dir=./tmpBuildDir toolset=%TOOLSET% stage link=static --layout=tagged --with-system variant=debug 
+   ./bjam --build-dir=./tmpBuildDir toolset=%TOOLSET% stage link=static --layout=tagged --with-date_time variant=debug 
+   ./bjam --build-dir=./tmpBuildDir toolset=%TOOLSET% stage link=static --layout=tagged --with-filesystem variant=debug   
+   ./bjam --build-dir=./tmpBuildDir toolset=%TOOLSET% stage link=static --layout=tagged --with-program_options variant=debug 
+   ./bjam --build-dir=./tmpBuildDir toolset=%TOOLSET% stage link=static --layout=tagged --with-serialization  variant=debug 
+   ./bjam --build-dir=./tmpBuildDir toolset=%TOOLSET% stage link=static --layout=tagged --with-thread variant=debug  
+   ./bjam --build-dir=./tmpBuildDir toolset=%TOOLSET% stage link=static --layout=tagged --with-test variant=debug  
+   
+   ./bjam --build-dir=./tmpBuildDir toolset=%TOOLSET% stage link=static --layout=tagged --with-system variant=release 
+   ./bjam --build-dir=./tmpBuildDir toolset=%TOOLSET% stage link=static --layout=tagged --with-date_time variant=release  
+   ./bjam --build-dir=./tmpBuildDir toolset=%TOOLSET% stage link=static --layout=tagged --with-filesystem variant=release   
+   ./bjam --build-dir=./tmpBuildDir toolset=%TOOLSET% stage link=static --layout=tagged --with-program_options variant=release 
+   ./bjam --build-dir=./tmpBuildDir toolset=%TOOLSET% stage link=static --layout=tagged --with-serialization  variant=release 
+   ./bjam --build-dir=./tmpBuildDir toolset=%TOOLSET% stage link=static --layout=tagged --with-thread variant=release  
+   ./bjam --build-dir=./tmpBuildDir toolset=%TOOLSET% stage link=static --layout=tagged --with-test variant=release  
+fi
+
+%include <tail.h>

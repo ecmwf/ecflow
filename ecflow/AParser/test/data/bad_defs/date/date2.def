@@ -1,0 +1,4 @@
+suite suiteName
+   date 0.14.2009       # day is invalid, month is invalid
+endsuite
+

@@ -1,0 +1,8 @@
+suite suiteName
+   family familyName0
+      task fred             # duplicate task names
+      task fred
+      endtask
+   endfamily
+endsuite
+
