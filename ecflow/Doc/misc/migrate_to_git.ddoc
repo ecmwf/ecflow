@@ -20,6 +20,10 @@ To migrate from perforce to git, clean up generated files to avoid adding them t
     git init
     git add .
     git status
+    git commit -am "initial commit"
+    git remote add origin ssh://git@software.ecmwf.int:7999/ecflow/ecflow.git
+    git push origin master
+    
     
   o Open eclipse and create a C++ project
     - select 
@@ -27,6 +31,7 @@ To migrate from perforce to git, clean up generated files to avoid adding them t
     - project name:
       ecflow.
       
+    Team -> share project ->git
       
   o Update $WK/build/tar_ecflow.sh
                      tar_incr_ecflow.sh
