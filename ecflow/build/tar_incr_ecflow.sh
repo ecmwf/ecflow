@@ -35,7 +35,7 @@ rm -rf $WK/TestEcfSms/test/data/test_hybrid.def
 # TAR
 # temporarily create a symbolic link, so that tar file matches directory ecflow.
 # ==============================================================================================
-ln -s MyProject ecflow
+ln -s ecflow ecflow
 
 # Recursively find in directory MyProject all writable:
 #     cpp, c,hpp,sh, defs files, .ecf, jam and py files and tar/gzip them up.

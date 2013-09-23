@@ -81,7 +81,7 @@ rm -rf $ECFLOWTAR.gz
 rm -rf $ECFLOWTAR
 
 # temporarily create a symbolic link ECFLOW_WS_DIR, so that tar file directory name has version number in it
-ln -s MyProject $ECFLOW_WS_DIR
+ln -s ecflow $ECFLOW_WS_DIR
 
 # Exclusions from tar file: 
 # o/ .pydevproject used by Pydev eclipse plug-in
