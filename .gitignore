@@ -11,6 +11,10 @@ swap
 *.glog
 *.def.glog
 
+*.log
+*.so
+*.pyc
+
 naw.def.glog
 
 gmon.out
