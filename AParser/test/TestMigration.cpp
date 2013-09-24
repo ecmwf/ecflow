@@ -201,7 +201,7 @@ BOOST_AUTO_TEST_CASE( test_state_node_attributes )
          suite_ptr suite = defs.add_suite("s1");
          Label label("name","value\nvalue");
          suite->addLabel(label);
-//      PrintStyle::setStyle(PrintStyle::MIGRATE); std::cout << defs;
+      PrintStyle::setStyle(PrintStyle::MIGRATE); std::cout << defs;
          BOOST_CHECK_MESSAGE( helper.test_state_persist_and_reload_with_checkpt(defs), "Label state: failed: " << helper.errorMsg());
       }
       {

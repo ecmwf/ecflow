@@ -258,10 +258,10 @@ BOOST_AUTO_TEST_CASE( test_str_replace )
  	test_replace(testStr,"is a","was a","This was a string");
 
    testStr = "This\n is a string";
-   test_replace(testStr,"\n","<nl>","This<nl> is a string");
+   test_replace(testStr,"\n","\\n","This\\n is a string");
 
    testStr = "This\n is\n a\n string\n";
-   test_replace_all(testStr,"\n","<nl>","This<nl> is<nl> a<nl> string<nl>");
+   test_replace_all(testStr,"\n","\\n","This\\n is\\n a\\n string\\n");
 
  	// Test case insenstive string comparison
 	BOOST_CHECK_MESSAGE(Str::caseInsCompare("","")," bug1");
@@ -285,10 +285,10 @@ BOOST_AUTO_TEST_CASE( test_str_replace_all )
    test_replace_all(testStr,"is a","was a","This was a string");
 
    testStr = "This\n is a string";
-   test_replace_all(testStr,"\n","<nl>","This<nl> is a string");
+   test_replace_all(testStr,"\n","\\n","This\\n is a string");
 
    testStr = "This\n is\n a\n string\n";
-   test_replace_all(testStr,"\n","<nl>","This<nl> is<nl> a<nl> string<nl>");
+   test_replace_all(testStr,"\n","\\n","This\\n is\\n a\\n string\\n");
 }
 
 BOOST_AUTO_TEST_CASE( test_str_to_int )

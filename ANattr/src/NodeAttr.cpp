@@ -250,7 +250,7 @@ std::ostream& Label::print( std::ostream& os ) const {
          }
          else {
             std::string value = new_value_;
-            Str::replaceall(value,"\n","<nl>");
+            Str::replaceall(value,"\n","\\n");
             os << " # \"" << value << "\"";
          }
       }
@@ -269,7 +269,7 @@ std::string Label::toString() const {
    else  {
       // replace \n, otherwise re-parse will fail
       std::string value = value_;
-      Str::replaceall(value,"\n","<nl>");
+      Str::replaceall(value,"\n","\\n");
       ret += value;
    }
    ret += "\"";
@@ -314,8 +314,8 @@ void Label::parse(const std::string& line, std::vector<std::string >& lineTokens
       Str::removeQuotes(lineTokens[2]);
       Str::removeSingleQuotes(lineTokens[2]);
       value_ = lineTokens[2];
-      if (value_.find("<nl>") != std::string::npos) {
-         Str::replaceall(value_,"<nl>","\n");
+      if (value_.find("\\n") != std::string::npos) {
+         Str::replaceall(value_,"\\n","\n");
       }
    }
    else {
@@ -333,8 +333,8 @@ void Label::parse(const std::string& line, std::vector<std::string >& lineTokens
       Str::removeQuotes(value);
       Str::removeSingleQuotes(value);
       value_ = value;
-      if (value_.find("<nl>") != std::string::npos) {
-         Str::replaceall(value_,"<nl>","\n");
+      if (value_.find("\\n") != std::string::npos) {
+         Str::replaceall(value_,"\\n","\n");
       }
 
 
@@ -356,8 +356,8 @@ void Label::parse(const std::string& line, std::vector<std::string >& lineTokens
             //std::cout << "new label = '" << new_value << "'\n";
             new_value_ = new_value;
 
-            if (new_value_.find("<nl>") != std::string::npos) {
-               Str::replaceall(new_value_,"<nl>","\n");
+            if (new_value_.find("\\n") != std::string::npos) {
+               Str::replaceall(new_value_,"\\n","\n");
             }
          }
       }
