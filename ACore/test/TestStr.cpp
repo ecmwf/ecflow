@@ -245,6 +245,9 @@ BOOST_AUTO_TEST_CASE( test_str_replace )
 	testStr = "This is a string";
  	test_replace(testStr,"is a","was a","This was a string");
 
+   testStr = "This\n is a string";
+   test_replace(testStr,"\n","<nl>","This<nl> is a string");
+
  	// Test case insenstive string comparison
 	BOOST_CHECK_MESSAGE(Str::caseInsCompare("","")," bug1");
 	BOOST_CHECK_MESSAGE(!Str::caseInsCompare("Str","Str1")," bug1");
