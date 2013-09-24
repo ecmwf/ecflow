@@ -1,4 +1,4 @@
-message( STATUS "---------------------------------------------------------" )
+message( STATUS "------------------------------------------------------" )
 
 if(Boost_FOUND)
     message( STATUS " Boost    include : [${Boost_INCLUDE_DIRS}]" )
