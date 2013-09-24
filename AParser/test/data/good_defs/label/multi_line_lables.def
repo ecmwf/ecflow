@@ -1,0 +1,7 @@
+ 
+suite s3
+   label foo ""
+   label foo2 "value"
+   label foo3 "value<nl>value" # <nl> should be converted to \n
+   label foo4 "value<nl>value  <nl>fred fred2<nl>" # <nl> should be converted to \n
+endsuite

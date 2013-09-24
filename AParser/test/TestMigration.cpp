@@ -180,12 +180,38 @@ BOOST_AUTO_TEST_CASE( test_state_node_attributes )
       BOOST_CHECK_MESSAGE( helper.test_state_persist_and_reload_with_checkpt(defs), "Event state: failed: " << helper.errorMsg());
    }
    {
-      Defs defs;
-      task_ptr task = defs.add_suite("s1")->add_task("t1");
-      Label label("name","value"); label.set_new_value("new  value");
-      task->addLabel(label);
+      {
+         Defs defs;
+         task_ptr task = defs.add_suite("s1")->add_task("t1");
+         Label label("name","value"); label.set_new_value("new  value");
+         task->addLabel(label);
+         //      PrintStyle::setStyle(PrintStyle::MIGRATE); std::cout << defs;
+         BOOST_CHECK_MESSAGE( helper.test_state_persist_and_reload_with_checkpt(defs), "Label state: failed: " << helper.errorMsg());
+      }
+      {
+         Defs defs;
+         suite_ptr suite = defs.add_suite("s1");
+         Label label("name","value"); label.set_new_value("new  value");
+         suite->addLabel(label);
 //      PrintStyle::setStyle(PrintStyle::MIGRATE); std::cout << defs;
-      BOOST_CHECK_MESSAGE( helper.test_state_persist_and_reload_with_checkpt(defs), "Label state: failed: " << helper.errorMsg());
+         BOOST_CHECK_MESSAGE( helper.test_state_persist_and_reload_with_checkpt(defs), "Label state: failed: " << helper.errorMsg());
+      }
+      {
+         Defs defs;
+         suite_ptr suite = defs.add_suite("s1");
+         Label label("name","value\nvalue");
+         suite->addLabel(label);
+//      PrintStyle::setStyle(PrintStyle::MIGRATE); std::cout << defs;
+         BOOST_CHECK_MESSAGE( helper.test_state_persist_and_reload_with_checkpt(defs), "Label state: failed: " << helper.errorMsg());
+      }
+      {
+         Defs defs;
+         suite_ptr suite = defs.add_suite("s1");
+         Label label("name","value\nvalue");  label.set_new_value("value\nwith\nmany\nnewlines");
+         suite->addLabel(label);
+//      PrintStyle::setStyle(PrintStyle::MIGRATE); std::cout << defs;
+         BOOST_CHECK_MESSAGE( helper.test_state_persist_and_reload_with_checkpt(defs), "Label state: failed: " << helper.errorMsg());
+      }
    }
    {
        Defs defs;

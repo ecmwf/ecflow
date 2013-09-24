@@ -219,8 +219,8 @@ bool ChildAttrs::operator==(const ChildAttrs& rhs) const
 #ifdef DEBUG
          if (Ecf::debug_equality()) {
             std::cout << "ChildAttrs::operator==  (labels_[i] != rhs.labels_[i]) " << node_->debugNodePath() << "\n";
-            std::cout << "   lhs = " << labels_[i].toString() << "\n";
-            std::cout << "   rhs = " << rhs.labels_[i].toString() << "\n";
+            std::cout << "   lhs = " << labels_[i].dump() << "\n";
+            std::cout << "   rhs = " << rhs.labels_[i].dump() << "\n";
          }
 #endif
          return false;

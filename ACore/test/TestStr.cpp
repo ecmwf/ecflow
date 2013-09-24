@@ -232,6 +232,18 @@ static void test_replace( std::string& testStr, const std::string& find, const s
 	BOOST_CHECK_MESSAGE(testStr == expected,"Expected '" << expected << "' but found '" << testStr <<"'");
 }
 
+static void test_replace_all( std::string& testStr, const std::string& find, const std::string& replace, const std::string& expected)
+{
+   std::string testStrCopy = testStr;
+
+   BOOST_CHECK_MESSAGE(Str::replace_all(testStr,find,replace), "Replace failed for " << testStr << " find(" << find << ") replace(" << replace << ")");
+   BOOST_CHECK_MESSAGE(testStr == expected,"Expected '" << expected << "' but found '" << testStr <<"'");
+
+   Str::replaceall(testStrCopy,find,replace);
+   BOOST_CHECK_MESSAGE(testStr == testStrCopy,"Expected '" << testStrCopy << "' but found '" << testStr <<"'");
+}
+
+
 BOOST_AUTO_TEST_CASE( test_str_replace )
 {
 	cout << "ACore:: ...test_str_replace\n";
@@ -248,12 +260,35 @@ BOOST_AUTO_TEST_CASE( test_str_replace )
    testStr = "This\n is a string";
    test_replace(testStr,"\n","<nl>","This<nl> is a string");
 
+   testStr = "This\n is\n a\n string\n";
+   test_replace_all(testStr,"\n","<nl>","This<nl> is<nl> a<nl> string<nl>");
+
  	// Test case insenstive string comparison
 	BOOST_CHECK_MESSAGE(Str::caseInsCompare("","")," bug1");
 	BOOST_CHECK_MESSAGE(!Str::caseInsCompare("Str","Str1")," bug1");
 	BOOST_CHECK_MESSAGE(!Str::caseInsCompare("","Str1")," bug1");
  	BOOST_CHECK_MESSAGE(Str::caseInsCompare("Str","STR")," bug1");
  	BOOST_CHECK_MESSAGE(Str::caseInsCompare("Case","CaSE")," bug1");
+}
+
+BOOST_AUTO_TEST_CASE( test_str_replace_all )
+{
+   cout << "ACore:: ...test_str_replace_all\n";
+
+   std::string testStr = "This is a string";
+   test_replace_all(testStr,"This","That","That is a string");
+
+   testStr = "This is a string";
+   test_replace_all(testStr,"This is a string","","");
+
+   testStr = "This is a string";
+   test_replace_all(testStr,"is a","was a","This was a string");
+
+   testStr = "This\n is a string";
+   test_replace_all(testStr,"\n","<nl>","This<nl> is a string");
+
+   testStr = "This\n is\n a\n string\n";
+   test_replace_all(testStr,"\n","<nl>","This<nl> is<nl> a<nl> string<nl>");
 }
 
 BOOST_AUTO_TEST_CASE( test_str_to_int )

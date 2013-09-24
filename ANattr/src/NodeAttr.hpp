@@ -16,6 +16,8 @@
 //============================================================================
 
 #include <ostream>
+#include <iostream>
+#include <vector>
 #include <limits> // for std::numeric_limits<int>::max()
 
 #include <boost/operators.hpp>
@@ -49,14 +51,25 @@ public:
 
    // 2 kinds of equality, structure and state
    friend bool operator==(const Label& lhs,const Label& rhs) {
-      if (lhs.name_ != rhs.name_ )  return false;
-      if (lhs.new_value_ != rhs.new_value_) return false;
-      return lhs.value_ == rhs.value_;
+      if (lhs.name_ != rhs.name_ )  {
+         std::cout << "lhs.name_ '" << lhs.name_ << "' != rhs.name_ '" << rhs.name_ << "'\n";
+         return false;
+      }
+      if (lhs.new_value_ != rhs.new_value_) {
+         std::cout << "lhs.new_value_ '" << lhs.new_value_ << "' != rhs.new_value_ '" << rhs.new_value_ << "'\n";
+         return false;
+      }
+      if ( lhs.value_ != rhs.value_ ) {
+         std::cout << "lhs.value_ '" << lhs.value_ << "' != rhs.value_ '" << rhs.value_ << "'\n";
+         return false;
+      }
+      return true;
    }
 
    std::string toString() const;
    std::string dump() const;
 
+   void parse(const std::string& line, std::vector<std::string >& lineTokens, bool parse_state);
    static const Label& EMPTY(); // Added to support return by reference
 
 private:

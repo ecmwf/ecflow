@@ -238,12 +238,22 @@ Label::Label(const std::string& name, const std::string& l)
    }
 }
 
+
 std::ostream& Label::print( std::ostream& os ) const {
 
    Indentor in;
    Indentor::indent( os ) << toString();
    if (!PrintStyle::defsStyle()) {
-      if (!new_value_.empty()) os << " # \"" << new_value_ << "\"";
+      if (!new_value_.empty()) {
+         if (new_value_.find("\n") == std::string::npos) {
+            os << " # \"" << new_value_ << "\"";
+         }
+         else {
+            std::string value = new_value_;
+            Str::replaceall(value,"\n","<nl>");
+            os << " # \"" << value << "\"";
+         }
+      }
    }
    os << "\n";
    return os;
@@ -255,7 +265,13 @@ std::string Label::toString() const {
    ret += "label ";
    ret += name_;
    ret += " \"";
-   ret += value_;
+   if (value_.find("\n") == std::string::npos) ret += value_;
+   else  {
+      // replace \n, otherwise re-parse will fail
+      std::string value = value_;
+      Str::replaceall(value,"\n","<nl>");
+      ret += value;
+   }
    ret += "\"";
    return ret;
 }
@@ -283,3 +299,68 @@ void Label::reset() {
    std::cout << "Label::reset()\n";
 #endif
 }
+
+
+void Label::parse(const std::string& line, std::vector<std::string >& lineTokens, bool parse_state)
+{
+   if ( lineTokens.size() < 3 )
+      throw std::runtime_error( "Label::parse: Invalid label :" + line );
+
+   name_ = lineTokens[1];
+
+   // parsing will always STRIP single or double quotes, print will add double quotes
+   // label simple_label 'ecgems'
+   if ( lineTokens.size() == 3 ) {
+      Str::removeQuotes(lineTokens[2]);
+      Str::removeSingleQuotes(lineTokens[2]);
+      value_ = lineTokens[2];
+      if (value_.find("<nl>") != std::string::npos) {
+         Str::replaceall(value_,"<nl>","\n");
+      }
+   }
+   else {
+
+      // label complex_label "smsfetch -F %ECF_FILES% -I %ECF_INCLUDE%"  # fred
+      // label simple_label "fred" #  "smsfetch -F %ECF_FILES% -I %ECF_INCLUDE%"
+      std::string value; value.reserve(line.size());
+      size_t line_token_size = lineTokens.size();
+      for (size_t i = 2; i < line_token_size; ++i) {
+         if ( lineTokens[i].at( 0 ) == '#' ) break;
+         if ( i != 2 ) value += " ";
+         value += lineTokens[i];
+      }
+
+      Str::removeQuotes(value);
+      Str::removeSingleQuotes(value);
+      value_ = value;
+      if (value_.find("<nl>") != std::string::npos) {
+         Str::replaceall(value_,"<nl>","\n");
+      }
+
+
+      // state
+      if (parse_state) {
+         // label name "value" # "new  value"
+         bool comment_fnd = false;
+         size_t first_quote_after_comment = 0;
+         size_t last_quote_after_comment = 0;
+         for(size_t i = line.size()-1; i > 0; i--) {
+            if (line[i] == '#') { comment_fnd = true; break; }
+            if (line[i] == '"') {
+               if (last_quote_after_comment == 0) last_quote_after_comment = i;
+               first_quote_after_comment = i;
+            }
+         }
+         if (comment_fnd && first_quote_after_comment != last_quote_after_comment) {
+            std::string new_value = line.substr(first_quote_after_comment+1,last_quote_after_comment-first_quote_after_comment-1);
+            //std::cout << "new label = '" << new_value << "'\n";
+            new_value_ = new_value;
+
+            if (new_value_.find("<nl>") != std::string::npos) {
+               Str::replaceall(new_value_,"<nl>","\n");
+            }
+         }
+      }
+   }
+}
+

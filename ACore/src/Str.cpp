@@ -13,7 +13,7 @@
 //
 // Description : This class is used as a helper class
 //============================================================================
-
+#include <boost/algorithm/string/replace.hpp>
 #include <boost/lexical_cast.hpp>
 
 #include "Str.hpp"
@@ -107,6 +107,24 @@ bool Str::replace(std::string& jobLine, const std::string& stringToFind, const s
 		return true;
 	}
 	return false;
+}
+
+bool Str::replace_all(std::string& subject, const std::string& search, const std::string& replace)
+{
+   bool replaced = false ;
+   size_t pos = 0;
+   while ((pos = subject.find(search, pos)) != std::string::npos) {
+      subject.replace(pos, search.length(), replace);
+      pos += replace.length();
+      replaced = true;
+   }
+   return replaced;
+}
+
+
+void Str::replaceall(std::string& subject, const std::string& search, const std::string& replace)
+{
+   boost::replace_all(subject, search, replace);
 }
 
 void Str::split(const std::string& line, std::vector< std::string >& tokens,const std::string& delimiters )

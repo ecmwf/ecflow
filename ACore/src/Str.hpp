@@ -42,7 +42,9 @@ public:
 
 	/// Find 'stringToFind' in 'jobLine' and replace with string 'stringToRplace'
 	/// return true if replace ok else returns false;
-	static bool replace(std::string& jobLine, const std::string& stringToFind, const std::string& stringToRplace);
+   static bool replace(std::string& jobLine, const std::string& stringToFind, const std::string& stringToRplace);
+   static bool replace_all(std::string& jobLine, const std::string& stringToFind, const std::string& stringToRplace);
+   static void replaceall(std::string& jobLine, const std::string& stringToFind, const std::string& stringToRplace);
 
 	/// split string using default delimiters of space and tab as a separator;
 	/// The split is based on *ANY* of the characters in the delimiters.
