@@ -358,6 +358,7 @@ public:
 	   addParser( new VerifyParser(p) );
 	   addParser( new ZombieAttrParser(p) );
       addParser( new EventParser(p) );
+      addParser( new LabelParser(p) );
       addParser( new CalendarParser(p) );
  	}
 

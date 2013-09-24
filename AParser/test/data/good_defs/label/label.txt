@@ -5,9 +5,12 @@ suite suiteName
     endfamily
 endsuite
 
-suite s1;
+suite s1
    family familyName
       task taskName ; label foo ""
     endfamily
 endsuite
 
+suite s3
+   label foo ""
+endsuite
