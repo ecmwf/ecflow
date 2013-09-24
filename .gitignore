@@ -9,5 +9,10 @@ swap
 *.dat
 *.def_log
 *.glog
+*.def.glog
+
+naw.def.glog
 
 gmon.out
+/eurydice.3141.ecf.check
+/eurydice.3141.ecf.log
