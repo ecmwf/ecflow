@@ -1,2 +1,13 @@
 /bin
 swap
+
+*.job0
+*.job1
+*.job2
+*.job3
+
+*.dat
+*.def_log
+*.glog
+
+gmon.out
