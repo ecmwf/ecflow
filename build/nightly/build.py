@@ -235,7 +235,7 @@ def add_aix_gcc_variables( aix_gcc ) :
 
 def add_build_debug( parent ): 
     f = parent.add_family("build_debug")
-    f.add_trigger("cp_site_config == complete")
+    f.add_trigger("cp_site_config == complete and git_clone == complete")
     f.add_variable("MODE","debug")
     f.add_task("build")
     task_test = f.add_task("test")
@@ -250,7 +250,7 @@ def add_build_debug( parent ):
 
 def add_build_release( parent ):
     f = parent.add_family("build_release")
-    f.add_trigger("cp_site_config == complete")
+    f.add_trigger("cp_site_config == complete and git_clone == complete")
     f.add_variable("MODE","release")
     task_build = f.add_task("build")
     
@@ -267,6 +267,14 @@ def add_build_release( parent ):
 
     task_test.add_label("progress","")
     task_test.add_meter("progress",0,100,100)
+    
+def add_git_tasks( parent , set_git_clone_def_status = False ) :
+    git_clone = parent.add_task("git_clone")
+    if set_git_clone_def_status :
+        git_clone.add_defstatus( ecflow.DState.complete )
+    git_pull = parent.add_task("git_pull")
+    git_pull.add_defstatus( ecflow.DState.complete )
+
             
 def add_build_profile( parent ):
     f = parent.add_family("build_profile")
@@ -300,8 +308,12 @@ def build_localhost( parent ) :
     if (parent.name() == "build") :
         localhost.add_trigger("tar/create_tar == active or tar/create_tar == complete")
     add_localhost_variables(localhost)
+    
+    add_git_tasks( localhost , True)
+
     add_build_and_test_tasks( localhost )
     add_build_profile( localhost )
+    
     localhost.add_task("test_memory_leaks").add_trigger("build_release == complete and build_debug == complete")
     localhost.add_task("test_server_memory").add_trigger("test_memory_leaks == complete or test_memory_leaks == aborted")
     localhost.add_task("test_client_performance").add_trigger("test_server_memory == complete or test_server_memory == aborted")
@@ -319,6 +331,9 @@ def build_localhost_clang( parent ) :
     if (parent.name() == "build") :
         localhost_clang.add_trigger("localhost == complete || localhost == aborted")
     add_localhost_clang_variables(localhost_clang)
+    
+    add_git_tasks( localhost_clang , True)
+
     add_build_and_test_tasks( localhost_clang )
     add_build_profile( localhost_clang )
     localhost_clang.add_task("test_memory_leaks").add_trigger("build_release == complete and build_debug == complete")
@@ -329,53 +344,58 @@ def build_localhost_clang( parent ) :
 
 def build_linux_64( parent ) :
     linux_64 = parent.add_family("linux64")
-    if (parent.name() == "build") :
-        linux_64.add_trigger("tar/cp_tar_to_linux64 == complete")
-    else :
-        linux_64.add_trigger("/suite/build_incr/incr_tar_and_cp == complete")
+    #if (parent.name() == "build") :
+    #    linux_64.add_trigger("tar/cp_tar_to_linux64 == complete")
+    #else :
+    #    linux_64.add_trigger("/suite/build_incr/incr_tar_and_cp == complete")
     add_linux_64_variables(linux_64)
     add_remote_linux_64_variables(linux_64)
+    add_git_tasks( linux_64 )
     add_build_and_test_tasks( linux_64 )
     
 def build_linux_64_intel( parent ) :
     linux_64 = parent.add_family("linux64intel")
     linux_64.add_variable("BOOST_VERSION","boost_1_53_0")
-    if (parent.name() == "build") :
-        linux_64.add_trigger("tar/cp_tar_to_linux64intel == complete")
-    else :
-        linux_64.add_trigger("/suite/build_incr/incr_tar_and_cp == complete")
+    #if (parent.name() == "build") :
+    #    linux_64.add_trigger("tar/cp_tar_to_linux64intel == complete")
+    #else :
+    #    linux_64.add_trigger("/suite/build_incr/incr_tar_and_cp == complete")
     add_linux_64_intel_variables(linux_64)
     add_remote_linux_64_intel_variables(linux_64)
+    add_git_tasks( linux_64 )
     add_build_and_test_tasks( linux_64 )
     
 def build_opensuse113( parent ) :
     opensuse113 = parent.add_family("opensuse113")
-    if (parent.name() == "build") :
-        opensuse113.add_trigger("tar/cp_tar_to_opensuse113 == complete")
-    else :
-        opensuse113.add_trigger("/suite/build_incr/incr_tar_and_cp == complete")
+    #if (parent.name() == "build") :
+    #    opensuse113.add_trigger("tar/cp_tar_to_opensuse113 == complete")
+    #else :
+    #    opensuse113.add_trigger("/suite/build_incr/incr_tar_and_cp == complete")
     add_opensuse113_variables(opensuse113)
     add_remote_opensuse113_variables(opensuse113)
+    add_git_tasks( opensuse113 )
     add_build_and_test_tasks( opensuse113 )
     
 def build_redhat( parent ) :
     redhat = parent.add_family("redhat")
-    if (parent.name() == "build") :
-        redhat.add_trigger("tar/cp_tar_to_redhat == complete")
-    else :
-        redhat.add_trigger("/suite/build_incr/incr_tar_and_cp == complete")
+    #if (parent.name() == "build") :
+    #    redhat.add_trigger("tar/cp_tar_to_redhat == complete")
+    #else :
+    #    redhat.add_trigger("/suite/build_incr/incr_tar_and_cp == complete")
     add_redhat_variables(redhat)
     add_remote_redhat_variables(redhat)
+    add_git_tasks( redhat )
     add_build_and_test_tasks( redhat )
     
 def build_opensuse103( parent ) :
     opensuse103 = parent.add_family("opensuse103")
-    if (parent.name() == "build") :
-        opensuse103.add_trigger("tar/cp_tar_to_opensuse103 == complete")
-    else :
-        opensuse103.add_trigger("/suite/build_incr/incr_tar_and_cp == complete")
+    #if (parent.name() == "build") :
+    #    opensuse103.add_trigger("tar/cp_tar_to_opensuse103 == complete")
+    #else :
+    #    opensuse103.add_trigger("/suite/build_incr/incr_tar_and_cp == complete")
     add_opensuse103_variables(opensuse103)
     add_remote_opensuse103_variables(opensuse103)
+    add_git_tasks( opensuse103 )
     add_build_and_test_tasks( opensuse103 )
 
 def build_hpux( parent ):
@@ -386,16 +406,18 @@ def build_hpux( parent ):
         hpux.add_trigger("/suite/build_incr/incr_tar_and_cp  == complete")
     add_hpux_variables( hpux )
     add_remote_hpux_variables( hpux )
+    add_git_tasks( hpux , True) #  git not available on HP-UX, hence set git_clone to def-status complete
     add_build_and_test_tasks( hpux )
 
 def build_aix_power7( parent ) :
     aix_power7 = parent.add_family("aix_power7")
-    if (parent.name() == "build") :
-        aix_power7.add_trigger("tar/cp_tar_to_aix_power7 == complete ")
-    else :
-        aix_power7.add_trigger("/suite/build_incr/incr_tar_and_cp == complete")
+    #if (parent.name() == "build") :
+    #    aix_power7.add_trigger("tar/cp_tar_to_aix_power7 == complete ")
+    #else :
+    #    aix_power7.add_trigger("/suite/build_incr/incr_tar_and_cp == complete")
     add_aix_power7_variables( aix_power7 )
     add_remote_aix_power7_variables( aix_power7 )
+    add_git_tasks( aix_power7 )
     add_build_and_test_tasks( aix_power7 )
     
 def build_aix_rs6000_xlc( parent ) :
@@ -406,16 +428,18 @@ def build_aix_rs6000_xlc( parent ) :
         aix_rs6000.add_trigger("/suite/build_incr/incr_tar_and_cp == complete")
     add_aix_rs6000_variables(aix_rs6000)
     add_remote_aix_rs6000_variables(aix_rs6000)
+    add_git_tasks( aix_rs6000 , True ) #  git not available on ecgate, hence set git_clone to def-status complete
     add_build_and_test_tasks( aix_rs6000 )
 
 def build_aix_gcc(parent) :
     aix_gcc = parent.add_family("aix_gcc")
-    if (parent.name() == "build") :
-        aix_gcc.add_trigger("tar/cp_tar_to_aix_gcc == complete ")
-    else :
-        aix_gcc.add_trigger("/suite/build_incr/incr_tar_and_cp == complete")
+    #if (parent.name() == "build") :
+    #    aix_gcc.add_trigger("tar/cp_tar_to_aix_gcc == complete ")
+    #else :
+    #    aix_gcc.add_trigger("/suite/build_incr/incr_tar_and_cp == complete")
     add_aix_gcc_variables( aix_gcc )
     add_remote_aix_gcc_variables( aix_gcc )
+    add_git_tasks( aix_gcc )
     add_build_and_test_tasks( aix_gcc )
   
 def add_boost_tasks( family ):
@@ -522,17 +546,17 @@ with defs.add_suite("suite") as suite:
     suite.add_variable("BOOST_VERSION",BOOST_VERSION)
     add_suite_variables(suite)
 
-    with suite.add_family("build_incr") as build_incr:
-        incr_tar_and_cp = build_incr.add_task("incr_tar_and_cp")
-        incr_tar_and_cp.add_variable("ARCH","opensuse113")
-        incr_tar_and_cp.add_defstatus( ecflow.DState.suspended );
-        build_linux_64( build_incr )
-        build_linux_64_intel( build_incr )
-        build_opensuse113( build_incr )
-        build_opensuse103( build_incr )
-        build_hpux(build_incr)
-        build_aix_power7(build_incr)
-        build_aix_rs6000_xlc(build_incr)
+    #with suite.add_family("build_incr") as build_incr:
+        #incr_tar_and_cp = build_incr.add_task("incr_tar_and_cp")
+        #incr_tar_and_cp.add_variable("ARCH","opensuse113")
+        #incr_tar_and_cp.add_defstatus( ecflow.DState.suspended );
+        #build_linux_64( build_incr )
+        #build_linux_64_intel( build_incr )
+        #build_opensuse113( build_incr )
+        #build_opensuse103( build_incr )
+        #build_hpux(build_incr)
+        #build_aix_power7(build_incr)
+        #build_aix_rs6000_xlc(build_incr)
     
     with suite.add_family("build") as build:
         build.add_repeat( ecflow.RepeatDay() )
@@ -554,29 +578,29 @@ with defs.add_suite("suite") as suite:
         cp_tar_to_hpux.add_trigger("create_tar == complete")
         add_hpux_variables( cp_tar_to_hpux )
     
-        cp_tar_to_linux64 = tar_fam.add_task("cp_tar_to_linux64")
-        cp_tar_to_linux64.add_trigger("create_tar == complete")
-        add_linux_64_variables(cp_tar_to_linux64)
+        #cp_tar_to_linux64 = tar_fam.add_task("cp_tar_to_linux64")
+        #cp_tar_to_linux64.add_trigger("create_tar == complete")
+        #add_linux_64_variables(cp_tar_to_linux64)
 
-        cp_tar_to_linux64intel = tar_fam.add_task("cp_tar_to_linux64intel")
-        cp_tar_to_linux64intel.add_trigger("create_tar == complete")
-        add_linux_64_intel_variables(cp_tar_to_linux64intel)
+        #cp_tar_to_linux64intel = tar_fam.add_task("cp_tar_to_linux64intel")
+        #cp_tar_to_linux64intel.add_trigger("create_tar == complete")
+        #add_linux_64_intel_variables(cp_tar_to_linux64intel)
     
-        cp_tar_to_opensuse113 = tar_fam.add_task("cp_tar_to_opensuse113")
-        cp_tar_to_opensuse113.add_trigger("create_tar == complete")
-        add_opensuse113_variables(cp_tar_to_opensuse113)
+        #cp_tar_to_opensuse113 = tar_fam.add_task("cp_tar_to_opensuse113")
+        #cp_tar_to_opensuse113.add_trigger("create_tar == complete")
+        #add_opensuse113_variables(cp_tar_to_opensuse113)
     
-        cp_tar_to_opensuse103 = tar_fam.add_task("cp_tar_to_opensuse103")
-        cp_tar_to_opensuse103.add_trigger("create_tar == complete")
-        add_opensuse103_variables(cp_tar_to_opensuse103)
+        #cp_tar_to_opensuse103 = tar_fam.add_task("cp_tar_to_opensuse103")
+        #cp_tar_to_opensuse103.add_trigger("create_tar == complete")
+        #add_opensuse103_variables(cp_tar_to_opensuse103)
  
-        cp_tar_to_redhat = tar_fam.add_task("cp_tar_to_redhat")
-        cp_tar_to_redhat.add_trigger("create_tar == complete")
-        add_redhat_variables(cp_tar_to_redhat)
+        #cp_tar_to_redhat = tar_fam.add_task("cp_tar_to_redhat")
+        #cp_tar_to_redhat.add_trigger("create_tar == complete")
+        #add_redhat_variables(cp_tar_to_redhat)
    
-        cp_tar_to_aix_power7 = tar_fam.add_task("cp_tar_to_aix_power7")
-        cp_tar_to_aix_power7.add_trigger("create_tar == complete")
-        add_aix_power7_variables( cp_tar_to_aix_power7 )
+        #cp_tar_to_aix_power7 = tar_fam.add_task("cp_tar_to_aix_power7")
+        #cp_tar_to_aix_power7.add_trigger("create_tar == complete")
+        #add_aix_power7_variables( cp_tar_to_aix_power7 )
     
         cp_tar_to_aix_rs6000_xlc = tar_fam.add_task("cp_tar_to_aix_rs6000_xlc")
         cp_tar_to_aix_rs6000_xlc.add_trigger("create_tar == complete")

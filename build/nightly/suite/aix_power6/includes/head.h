@@ -8,6 +8,7 @@ module unload c
 module unload c++/vacpp/10.1.0.0
 module load %COMPILER_VERSION%
 module load python/2.7.2-01
+module load git/1.7.1.1-01
 
 # Hack for test, so that we can undefine ECF_RID in the tests. See file test.ecf:
 export PID_RID=$ECF_RID

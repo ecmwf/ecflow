@@ -1,0 +1,28 @@
+%include <head.h>
+
+if [[ "%LOCAL_HOST:%" != ""  ]] ; then
+
+   # ======================================================================
+   # Run LOCALLY
+   # ======================================================================
+   cd %WK%
+      
+   # Update by pulling from the master repository
+   git pull origin master 
+   
+else
+   # ======================================================================
+   # Run REMOTELY
+   # ======================================================================
+   cd %ROOT_WK:%
+   
+   # remove existing ecflow, the .git should be in ecflow/.git
+   rm -rf ecflow
+   
+   # clone from stash repository
+   git clone ssh://git@software.ecmwf.int:7999/ecflow/ecflow.git
+   
+fi
+
+%include <tail.h>
+ 

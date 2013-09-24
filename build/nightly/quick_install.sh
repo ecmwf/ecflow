@@ -17,6 +17,9 @@ cp -r $WK/build/nightly .
 # Generate the defs, the is loaded into the server by load.py
 # =======================================================================
 python $WK/build/nightly/build.py
+if [[ $? = 1 ]] ; then
+   exit 1
+fi
 
 # =======================================================================
 # Kill the server
