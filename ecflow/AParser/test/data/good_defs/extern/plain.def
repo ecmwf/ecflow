@@ -1,0 +1,7 @@
+extern fred                             # allow non absolute paths
+extern /mofc/00/efi/swarm/sync_climate
+
+suite suiteName
+    limit sg1  10
+    limit mars 10
+endsuite

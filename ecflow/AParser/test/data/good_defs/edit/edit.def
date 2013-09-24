@@ -1,0 +1,24 @@
+ 
+suite edit
+	edit ECF_INCLUDE /home/ma/map/sms/example/x                  # comment line
+	edit ECF_FILES   /home/ma/map/sms/example/x                  #comment line
+    edit EXPVER 'f8na'                                          #
+    edit USER 'ecgems'                                          #comment
+    edit USER2 "ecgems"                                         # comment
+    edit INT1 "10"                                             # comment
+    edit INT2 '11'                                             # comment
+    edit YMD  '20091012'                                        # comment
+ 	family family
+		edit ECF_FETCH  "smsfetch -F %ECF_FILES% -I %ECF_INCLUDE%"  # comment line
+		edit ECF_FETCH2 'smsfetch -F %ECF_FILES% -I %ECF_INCLUDE%'  #comment line
+		task t2
+	endfamily
+endsuite
+	
+suite s1; edit ECF_INCLUDE /home/ma/map/sms/example/x ; edit INT2 '11'                                             # comment
+    edit YMD  '20091012'                                        # comment
+ 	family family
+		edit ECF_FETCH  "smsfetch -F %ECF_FILES% -I %ECF_INCLUDE%" ; edit ECF_FETCH2 'smsfetch -F %ECF_FILES% -I %ECF_INCLUDE%'  #comment line
+		task t2 ; endfamily
+endsuite
+	

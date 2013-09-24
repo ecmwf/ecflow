@@ -1,0 +1,14 @@
+#!/usr/bin/env cdp
+cdp << EOF
+define ERROR {
+  if(rc==0) then exit 1; endif
+}
+
+set SMS_PROG %SMS_PROG%
+login %SMSNODE% %USER% 1 ; ERROR
+suites -s %SUITE%
+loop task ( $missing ) do
+  force -r complete /%SUITE%/%FAMILY%/tc\$task ; ERROR
+endloop
+exit
+EOF

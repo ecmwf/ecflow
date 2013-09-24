@@ -1,0 +1,264 @@
+/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
+
+Requirements
+===============================================================================
+Aliases provide the functionality to clone a Task,
+perform some minor modification to the script, and then run it.
+Mainly used for test and to allow multiple copies of same task to run 
+simultaneously. A Task alias represents a reduced snapshot of the task.
+
+They can only be created by user interaction (not via keyword in definition)
+and do *not* interfere with normal scheduling. State changes in the aliases
+are not bubbled up. Likewise hierarchical state changes in suite/family/task
+do not affect the alias. Re-queue of Suite/Family/Task does not affect an alias
+
+When an alias is created from a Task, we will do the following:
+   - COPY:   A copy over any events, meters and label's. This allows the 
+             child commands to update the aliases.
+   - REMOVE: any time dependent variables, time,today,day,date,cron
+             Aliases are used for testing, and hence should not be 
+             time dependant.
+   - REMOVE: Repeats, but add repeat name as a user variable
+   - REMOVE: User supplied variables ECF_SCRIPT, ECF_JOBOUT, ECF_JOB and ECF_NAME
+             are ignored and generated variables override them, otherwise 
+             job output could be lost.
+   - REMOVE: Auto-cancel attribute , otherwise output will not be readable
+   - REMOVE: Trigger expression
+   - REMOVE: Complete expression
+   - REMOVE: defstatus, since default state for alias is QUEUED
+
+The following attributes are handled in the same way as tasks:
+   - Late attribute
+   - Zombie attribute
+   - Limit checking
+  
+Aliases must be persistable so that they can appear in the check point file.
+
+If the definition file is reloaded( played ) in the server, then the
+aliases are removed and the default alias number is reset to zero.
+  
+The python API will not allow aliases. 
+  
+Creation
+==============================================================================
+
+o/ Created by ecFlowview, during job submission. Either using the
+   the task .ecf file directly or via the pre-processed .ecf file.
+   The resulting file is called .usr file 
+   
+   The .usr file will contain all the inherited variables used by the
+   task. On alias construction these are added as user variables.
+   Default status for a alias is QUEUED
+   
+o/ Aliases are parent'ed by the task. There can be multiple aliases.
+   The aliases are named: alias<n> where n is an integer starting from 0
+   
+o/ A directory with the name of the parent task in created.
+   The .usr file will reside in this task directory
+   The job output will be placed in the same directory:
+   
+     [s] [f] [tx]
+             [ty]                TASK=ty, ECF_NAME=/s/f/ty, ECF_JOB=/s/f/ty.job, ECF_JOBOUT=/s/f/ty.1
+             [tz]
+
+--->
+
+  [s] [f] [tx]
+          [ty]                   ; TASK=ty, ECF_NAME=/s/f/ty,        ECF_JOB=/s/f/ty.1
+               [alias0,active]   ; TASK=ty, ECF_NAME=/s/f/ty/alias0, ECF_JOB=/s/f/ty/alias0.1
+               [alias1,submitted]; TASK=ty, ECF_NAME=/s/f/ty/alias1, ECF_JOB=/s/f/ty/alias1.1
+          [tz]
+          
+   However if ECF_OUT(remote output) is defined, then this will take precedence over the
+   default location.
+
+ 
+Commands
+============================================================================
+The following command will need updating to support aliases
+   - Delete. The delete command does not delete task directory.
+   - kill  
+   - force
+   - run/execute
+   - alter ?
+   - order ?
+
+An alias is not plug-able,i.e. an alias can not be moved between tasks.
+Since an alias has no trigger or time dependencies the why command
+will only report limit dependencies.
+
+Synchronisation
+=============================================================================
+The synchronisation between server and GUI must be updated to include
+incremental changes to the aliases (i.e state changes, ordering) or large scale changes
+i.e deletion and creation of aliases.
+ 
+
+GUI
+===============================================================================
+The GUI must be updated to support:
+  o/ alias creation and display
+  o/ Run/execute the alias
+  o/ deletion
+  o/ Ordering
+  o/ Kill  
+  
+Regression/Unit Tests
+=====================
+The test that includes aliases must run on:
+   - AIX, ibm_power6 and rs6000 platforms
+   - HPUX
+   - Linux(SUSE 10.3 and 11.3) gcc 4.2.1 and gcc 4.5
+
+
+
+
+
+Alises Work BreakDown Structure  ~24 days
+===========================================================================
+
+o Alias design:
+  - Task with flag. Need to review all code assumption about Task/parent
+  - Separate class. introduce a Intermediate class, i.e Submitable
+                    This will require moving parts of code in Task into Submittable
+                    
+                               Node
+                             /      \
+                          /            \
+                NodeContainer         Submittable
+                  /       \               / \
+                /           \           /     \
+            Suite         Family      Task    Alias
+   Will need to try implementation and see how things pan out and adapt.
+   ( 1 day)
+                    
+
+o Updated EditScriptCmd to add alias support.
+  - The edit_script_submit() command will be updated to add a  boolean option
+  - Change parsing to allow alias.
+  - If flag set Create Alias
+  - **** Once alias is created submit it straight away.
+  - Change ecFlowview to allow this flag to be passed
+  - Update any regression tests
+  ( 1 days )
+  
+o Review all assumption about Task/Task parentage.
+  - Must review all the places where Task/isTask is used.
+    In some places we may have assumed Task parent is NodeContainer
+  - Review NodeTreeVisitor. Used in simulator & resolving extern's.
+  ( 2 days )
+
+o ALias creation
+   - Create Directory, it may already exist
+   - Create .usr file from user edited script
+   - COPY:   A copy over any events, meters and label's. This allows the 
+             child commands to update the aliases.
+   - REMOVE: any time dependent variables, time,today,day,date,cron
+             Aliases are used for testing, and hence should not be 
+             time dependent.
+   - REMOVE: Repeats, but add repeat name as a user variable
+   - REMOVE: User supplied variables ECF_SCRIPT, ECF_JOBOUT, ECF_JOB and ECF_NAME, ECF_FETCH
+             are ignored and generated variables override them, otherwise 
+             job output could be lost.
+   - REMOVE: Auto-cancel attribute , otherwise output will not be readable
+   - REMOVE: Trigger expression
+   - REMOVE: Complete expression   
+   - REMOVE: defstatus
+
+   - Ensure TASK generated variable for alias, is same as task
+   ( 3 days )
+
+o Update EcfFile. This is used in Job submission
+  Check all assumptions about Task/Parent
+  Change to allow Job creation with .usr file,  
+  Check use of isTask() replace with isSubmittable()
+  ( 2 days )
+
+o Updated Defs:
+  - node_ptr Defs::findAbsNode(const std::string& pathToNode) const;
+    Must be able to return an alias.
+    Update Task to add findAbsNode() like NodeContainer
+    Update Task to add findNode      like NodeContainer, used in finding relative paths
+  
+  - void getAllNodes(std::vector<Node*>& vec) const
+    Update to include aliases
+      
+  ( 1 day )
+  
+o Change Task/Alias
+  - add: bool for alias, alias number vector of aliases    
+  - add: bool isAlias() 
+  - Function to locate ecf file, must now also locate .usr file              
+  - Update equality operator to include, alias-number, bool alias, vector of tasks
+  - State changes in alias are not bubbled up
+  - Hierarchical changes in Suite/Family/Task ignore aliases
+  - Add doDeleteChild() so that we can handle alias deletetion
+  - Task add add_Child()
+  - Add removeChild(), see NodeContainer::removeChild()
+    See NodeContainer::doDeleteChild()
+  - Add bool checkInvariants(std::string& errorMsg) const
+  - Add order() like NodeContainer
+  ( 3 days )  
+  
+o Sync
+  - Update Sync commands  to ensure aliases are handled. 
+    See CompoundMemento::incremental_sync
+  - Update OrderMemento to add Aliases
+  ( 2 days )
+  
+o Review Commands for aliases
+  - Run/Execute cmd
+  - Delete Cmd
+    Check for active/submitted, must now include aliases
+  - Kill Cmd
+  - OrderCmd
+  - Force Cmd
+  - Alter Cmd
+  - Zombie Cmd
+  - Task/Child commands
+  - Disable Move/Plug command for aliases, update test
+  ( 5 days )
+  
+o Update GUI
+  o/ alias creation and display
+  o/ Run/execute the alias
+  o/ deletion
+  o/ Ordering
+  o/ Kill  
+  ( 4 days )
+  
+o Test/Regression
+  - Add function Defs::get_all_aliases();
+  - add alias testing for persistence
+  - Update failing tests
+  ( 1 day )
+  
+======================================================================================
+
+o Test
+  - alias creation
+    Need to be able to create Alias without directory, and file contents
+    i.e if file contents is empty create alias or is this na error
+   - Test error conditions
+   
+  - alias deletion
+  
+o Locating an alias: absNodePath();
+
+o Run alias
+
+o Update Sync tests
+
+o Test Commands
+  - Run/Execute cmd
+  - EditScriptCmd
+  - Delete Cmd
+    Check for active/submitted, must now include aliases
+  - Kill Cmd
+  - OrderCmd
+  - Force Cmd
+  - Alter Cmd
+  - Zombie Cmd
+  - Task/Child commands
+  - Disable Move/Plug command for aliases, update test
+ 

@@ -1,0 +1,39 @@
+This file discusses the issues regarding migration
+===================================================
+
+How do we handle migration to new releases of the client ?
+- I general we should AVOID changing the child API and data
+  This will allow *OLD* client to talk to *newer* server
+  
+- If you need to change client to server commands, then play
+  special attention to those command that embed enum's.
+  
+- i.e Take CtsCmd, this handles all message to the server
+  that take no arguments. If in the future they need arguments
+  then for development release ensure that, leave the enum in
+  place, as this will preserve the commands. Allowing newer
+  clients to talk to old server, i.e allowing it to be halted,
+  shutdown and terminated. (all these take no arguments)
+  
+Handling Migration
+==================
+o If we have changed releases and updated client->server or
+  server to client api/serialisation.
+  Then to migrate, the old server needs to be taken down and
+  new server restarted. This is not like the check point.
+  since the client <-->server is done in real time
+
+  
+Other issues
+============
+If the definition is changed, then make sure the migration tests
+capture and test, migration from old to new data.
+
+See file ACore/TestVersioning.cpp to see an example of how to
+implement versioning for each class.
+
+WE now support migration to future releases. The defs file can
+be written with state. This can be read by future versions.
+Make sure to update AParser/test/TestStateParser.cpp
+for ant changes that affect state.
+

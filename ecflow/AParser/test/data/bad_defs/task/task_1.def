@@ -1,0 +1,12 @@
+   suite suiteName
+       family familyName0
+          family heir_familyName0      
+          		task fred                      # duplicate tasks within hier family
+          		task fred
+          endfamily
+      endfamily
+      family familyName1
+      endfamily
+      family familyName2
+      endfamily
+   endsuite

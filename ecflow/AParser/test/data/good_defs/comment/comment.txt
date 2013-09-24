@@ -1,0 +1,35 @@
+# # comment 
+# This is defs file that show use of comments
+# # comment 
+
+suite suiteName                      # comment 
+   family familyName0                # comment 
+      task taskName0                 # comment 
+         event 0                     # comment 
+         event 1 eventName           # comment 
+         meter myMeter 0 100         # comment 
+      family heir_familyName0        # comment 
+         task taskName0              # comment 
+            event 0                  # comment 
+            event 1 eventName        # comment 
+            meter myMeter 0 100      # comment 
+      endfamily                      # comment 
+   endfamily                         # comment 
+   family familyName1                # comment 
+      task taskName1                 # comment 
+         event 1                     # comment 
+         event 2 eventName           # comment 
+         meter myMeter 0 100         # comment 
+   endfamily                         # comment 
+   family familyName2                # comment 
+      task taskName2                 # comment 
+         event 2                     # comment 
+         event 3 eventName           # comment 
+         meter myMeter 0 100         # comment 
+   endfamily                         # comment 
+endsuite                             # comment 
+
+# Final comment  # comment 
+                    
+
+

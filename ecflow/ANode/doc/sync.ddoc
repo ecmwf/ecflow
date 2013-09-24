@@ -1,0 +1,269 @@
+Design of delta changes
+=======================
+  This deals with case where only small amount of changes have happened
+  to the definition in the server. Hence instead of sending the whole
+  defs to the client, we send only small deltas, which are then merged
+  into the client defs.
+  There are two kind of changes:
+    o state changes. ie change in state,event,meter, dependencies, etc
+      The predominate change
+    o structural changes. i.e node, node attribute added or deleted.
+      Much rarer.
+
+  However there is an additional complication caused by use of handles
+  Users register interest in a set of suites, and are returned a handle
+  For example we could have 30 suites in a definition but the user is only
+  interested in 2 of them.  
+      
+    
+Node:
+    o added
+    o deleted
+    o changed Atributes(changed, added deleted )
+    
+    
+State Changes
+=============
+o Some state changes can arise during node resolution: 
+  o autocancel, can cause deletion of node tree
+  o Calendar updates in the time base attributes
+  o change in limit values. *** these can be on *other* suite which will need updating *****
+  o begin/requeue can reset attributes, ie repeat's
+  o Hybrid clock, date, day, etc can be set free
+  
+Since state changes can happen, outside of the commands. Will require
+that each state change creates a memento. This will require a singleton.
+(** This could be quite burden-some, in terms of memory usage, and management **)
+
+All of these state changes, (apart from auto-cancel) are simple
+*changes* ie no new attributes are deleted/added.
+
+Hence one design choice is to use the "Existing mechanism" for simple
+state changes, this avoids having to create/maintain mementos for the
+most common use case.
+
+For structural changes use the new mechanism(design choice 2)
+However we will still need all the memento's in order to apply
+the changes.
+    
+    
+Merging Changes
+================
+o When we have received the delta changes from the server, these changes
+  need to be merged with the client side defs. This will necessitate
+  data model changes. However the merge should *NOT* generate any memento's
+ 
+
+Testing Merge
+=============
+We will test the merge is successful by getting the full defs and then
+by doing an equality comparison.
+This means that the state_change_no must incremented to
+be anything that can effect its equality.
+Additional the equality operator must include relevant state change
+
+
+Existing mechanism. design choice 1
+================================================================================
+
+Handling State Changes
+------------------------
+o A singleton is required to store the max state and modify change number, 
+  and also to signify when we are at the server/client side.
+  Note: This can't be in the Defs since we want a dependence on it.
+  i,e The Node Attribute should not depend on the Defs.
+  
+o Each node and each node attribute has a unsigned state_changed integer
+  When a state change happens, the corresponding singleton state_changed 
+  integer is incremented and assigned to node/attribute.
+  
+  One option was to assign the state change number up the node tree
+  to allow us to prune, the search space when computing the delta's to
+  be sent to the client. However this was dismissed, since processing
+  Limits, would have required we store the parent node on each limit.
+  By traversing the entire node tree, this would not be required.
+  
+  Every sync command, will assign the latest state changed number
+  to the defs, so that the client has this number. 
+  
+o When the client ask for the delta defs, they always provide the current
+  state changed number. The server defs is then traversed, any node path
+  which is less or equal to the client state change number is ignored.
+  In order to determine what's changed on a node, we do the following:
+    1/ Check each of the node attributes:
+            event,meter,label,repeat,limit
+            time,today,date,day,cron
+            trigger,complete
+            defStatus, status
+            late
+            
+           => implies we need to store 'state-changed' of each state attribute
+              
+       For each changed state attribute, we create a memento.
+       Each memento encodes:
+            1/ path to node
+            2/ attribute type
+            3/ new attribute value
+       
+   2/ After the traversal, we should have created, a list of these memento
+      
+   3/ The client get delta defs commands, then returns these memento to the client.
+      These are then applied to the client defs to bring it in sync
+      with the server defs. Additionally the latest state change number is
+      also returned and stored with the client.
+      
+      
+Handling Structural changes
+----------------------------
+For both choices below the state and modify number will need to stored on the defs.
+This will transferred both ways:
+    client->server The server can determine what's changed, and memento passed back to client
+    server->client The client stores the latest numbers.
+
+Choice 1:
+    o For each node, we hold a state/modify change number as a unsigned integer.
+  
+    o When ever there is a structural change, we increment the nodes modify change number.
+      The number is passed up the hierarchy and stored in the top level suite.
+      Note intermediate node are not changed.
+  
+    o Each client will have a structure change integer, during the server defs tree
+    traverse, we identify which node has been modified. The identification is the
+    same as that used for state changes, described earlier.
+    The whole suite is then copied
+  
+    o If a node has been added/deleted, then the parent node has its structure
+    node changed.
+  
+    ISSUES:
+    - Holding a int for each and every node is expensive
+    - If we delete attributes for a top level node, it means we will end up
+      sending the whole node tree, for a minor change.
+  
+  How do we handle attributes that have been deleted. ?
+  
+  
+Choice 2:
+    o The modify change number is only stored on the singleton only
+      This saves on each node having to store this number.
+      
+    o We could also store the number on the suite, hence we know
+      at the minimum which suite was modified. Hence only this suite
+      needs to be passed back to the client.
+      
+    **************************************************************
+    ISSUES: This is very appealing, but has a major flaw.!!!
+            What happens when a suite is deleted ?
+            The modify number is not sufficient to say what's changed
+            
+            The work around would to have an integer: deleted_suite_no.
+            But this would mean 3 integers need to be passed, every time:
+            state_change_no           # for simple state changes ~ 99% of uses case
+            modify_change_no          # add suites,family,task, delete nodes under a suite, re-order ~ 1%
+            delete_suites_change_no   # extremely rare ~ < 1%
+    ***************************************************************
+  
+Choice 3:  
+    o The modify change number is only stored on the singleton only
+      This saves on each node having to store this number.
+  
+    o To handle the issues of choice 2: We simple copy over the entire defs.
+  
+    ISSUES: Can be expensive for structural changes, but then they are very rare.
+    And the winner is Choice 3:
+    
+    
+    
+Dealing with Client handle:
+===========================
+Clients like ecFlowview may only be interested in a few suites.
+We can reduce the network traffic by only returning changes made to the suites.
+However this now adds more complications:
+  
+    Ecf::state_change_no
+    Ecf::modify_change_no
+  
+    Defs::state_change_no
+    Defs::modify_change_no
+  
+    Server: s1,s2,s3,s4    --> return Ecf::state_change_no, Ecf::modify_change_no
+    Client 1: s1, s2       --> return max state_change_no, modify_change_no over s1,s2 --> client stores this in Defs
+    Client 2: s1, s3       --> return max state_change_no, modify_change_no over s1,s3 --> client stores this in Defs
+    Clinet 3: s4           --> return max state_change_no, modify_change_no over s4    --> client stores this in Defs
+  
+  Now suppose a change happens to s4. When client 1 ask for a sync, it will get
+  state/modify change number associated with change to suite s4. 
+  This will cause us to traverse/and or copy the suites for client handle 1, and unecessarily
+  
+  This again could be mitigate by storing the,state/modify change number on the suites
+  When the client asks for a sync, we can compute the max change number, over the suites in our handle.
+  and hence determine of the suite was modified/changed.
+  ** At the expense of missing, changes due to suite deletion ***
+  ** however we could store max change no, on the client handle ?? ****
+  ** or update client handle only when deleting suites.
+  See ClinetSuiteMgr::remove_deleted_suite()
+  
+  **** Changes to suites can be trapped at the command level ***
+  **** ie store original number in a constructor
+  **** at the end of the command, if we have changed, update number on the suite
+  **** The same trick can be played for normal operations, that are not in commands
+  
+  **** i.e time dependencies can be trapped in one function Suite::updateCalendar
+  **** state changes can be trapped in one function Suite::resolveDependencies
+  
+  
+Conclusions
+ =======================================================================
+ o There is considerable memory overhead.
+   For state & structure changes: 14*4 + 4 = 60 bytes, 
+   we can have thousands of node, hence this could be quite an overhead.
+  
+ o Structure change, can be very expensive, when attributes of a top level node is deleted. 
+   
+ o For state change there is the advantage we always reflect the most up to date  change
+
+   
+ Design Choice 2
+ =================
+ o Whenever we have a state change, we create a memento. 
+   Whenever we have a state change to the same attribute the earlier, memento
+   is discarded. This avoids maintaining intermediate changes.
+ 
+ o Every minute, these changes are base-lined. Hence we have a vector of
+   of all the changes made, at the minute interval. Each minute iterval
+   has a number associated with it. This number is stored on the defs.
+   
+o Whenever the client asks for the fill defs, this number is also passed back.
+
+o When the client ask for the delta defs. The client number is compared with
+  sever defs. If client number is outside of the
+  server range, the full defs is returned, otherwise we return the,
+  applicable sub list. The returned list of mementos is then applied
+  to the clients defs, to bring it in sync with the server.
+   
+Issues:
+  - The list of changes made, can become quite big over time.
+    o We can provide several way of pruning the changed history.
+      1/ provide a memory limit, if the list of changes exceeds this
+         memory limit, then the earlier changes are discarded.
+       
+      2/ provide a hard limit, ie will store all changes made in the last
+         10 minutes.
+
+  - Consumes memory even if client never askes for deltas
+   
+  - Trapping state changes outside of the commands requires a lot
+    of work/maintainance. since a lot of implicit state changes
+    happens during node resolution.
+   
+Conclusions
+===========
+o More memory overhead/churn, in that, this overhead is required even if the
+  client doesn't ask for delta defs.
+o Small runtime overhead, in maintaining the most unique state changes
+o For more complication in handling the implicit state changes.
+o Need to decide how long the change history is held.
+  
+  For all these reason this design choice, can only be used for
+  structural changes, and not state changes.
+  (note structural changes are less frequent than simple state changes)

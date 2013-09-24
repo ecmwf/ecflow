@@ -1,0 +1,7 @@
+suite suiteName
+   family familyName
+      task t1
+      	  late  # oops no -s -a -c specified
+    endfamily
+endsuite
+

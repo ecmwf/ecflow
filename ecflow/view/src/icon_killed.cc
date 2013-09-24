@@ -1,0 +1,47 @@
+#include "pixmap.h"
+/* XPM */
+static const char * bits[] = {
+/* columns rows colors chars-per-pixel */
+"16 16 23 1",
+"  c #FFFF00000000",
+". c #FEF909040904",
+"X c #FDF312081208",
+"o c #FD5617711771",
+"O c #FCD31BF31BF3",
+"+ c #FD21193E193E",
+"@ c #F98C38CC38CC",
+"# c #F852439E439E",
+"$ c #F6F04FC74FC7",
+"% c #F39C6D166D16",
+"& c #F0EF84AE84AE",
+"* c #EFED8D8B8D8B",
+"= c #F12882B482B4",
+"- c #EE619B2C9B2C",
+"; c #EDF99EC39EC3",
+": c #ED0FA6C9A6C9",
+"> c #EC72AC32AC32",
+", c #EA17C0EEC0EE",
+"< c #E960C73EC73E",
+"1 c #E8A6CDA2CDA2",
+"2 c #E92CC90CC90C",
+"3 c #E75ED8EFD8EF",
+"4 c #E5E5E5E5E5E5",
+/* pixels */
+"       ;44444444",
+"       =44444444",
+"       -44444444",
+"       1  444444",
+"      $4  444444",
+"      34  4<Oo<4",
+"    $344  <+X,44",
+"-&-14444  + *444",
+"44444444  .X@444",
+"44444444  :% >44",
+"44444444  42 @44",
+"44444444  44# >4",
+"4444444444444444",
+"4444444444444444",
+"4444444444444444",
+"4444444444444444"
+};
+static pixmap p("killed",(const char**)bits);

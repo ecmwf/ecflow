@@ -1,0 +1,35 @@
+<div class="highlight"><pre>  family <span class="nv">$PROJECT</span>
+    def_fam
+    <span class="nb">set </span>families <span class="s2">&quot;00 12&quot;</span>
+
+    edit ENSEMBLES 50
+    trigger ./make<span class="o">==</span><span class="nb">complete</span>
+
+<span class="nb">    </span>loop fam <span class="o">(</span> <span class="nv">$families</span> <span class="o">)</span> <span class="k">do</span>
+<span class="k">      </span>
+<span class="k">      </span>family <span class="nv">$fam</span> ; <span class="c"># onsc</span>
+        <span class="k">if</span> <span class="o">(</span>fam eq 00<span class="o">)</span> <span class="k">then</span>
+<span class="k">          </span>edit DELTA_DAY 1 
+        <span class="k">else</span>
+<span class="k">          </span>edit DELTA_DAY 0
+        endif
+
+        edit EMOS_BASE <span class="nv">$fam</span>
+        
+	call_skull
+
+      family pop; oncl
+        trigger ./<span class="k">${</span><span class="nv">PROJECT</span><span class="k">}</span><span class="o">==</span><span class="nb">complete</span>
+<span class="nb">	</span>call_pop_skull
+      endfamily
+
+      family ws; onws
+        trigger ./<span class="k">${</span><span class="nv">PROJECT</span><span class="k">}</span><span class="o">==</span><span class="nb">complete</span>
+<span class="nb">	</span>call_pop_skull
+      endfamily
+
+      endfamily <span class="c">#fam        </span>
+
+    endloop <span class="c">#fam = 12, 00</span>
+  endfamily
+</pre></div>

@@ -1,0 +1,8 @@
+suite suiteName
+   # Events added to suite/family can not be signaled by child commands
+   # However alter/force should allow events to set/cleared on Family/suite
+   event 0 
+   event name
+   event 1 eventName
+   event 2 eventNamea
+endsuite

@@ -1,0 +1,8 @@
+suite suiteName
+   family familyName0
+      task taskName0
+           event 1 eventName
+           event 1 eventName
+      endfamily
+endsuite
+

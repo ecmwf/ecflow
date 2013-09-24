@@ -1,0 +1,257 @@
+!===========================================================
+! Name        : 
+! Author      : 
+! Revision    : $Revision: #17 $ 
+!
+! Copyright 2009-2012 ECMWF. 
+! This software is licensed under the terms of the Apache Licence version 2.0 
+! which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
+! In applying this licence, ECMWF does not waive the privileges and immunities 
+! granted to it by virtue of its status as an intergovernmental organisation 
+! nor does it submit to any jurisdiction. 
+!
+! Description : 
+! this file may be found in 
+! - sources in order to generate  xcdp.menu.h
+! - ~/.ecflowrc/xcdp.menu # edit backup remove (reset)
+! - ~/ is preferred to $HOME
+! - menus can call system command
+!===========================================================
+!
+! Format
+!-------
+! menu TITLE 
+! {
+!	(vis flg,enable flg,title,command,question,answer)
+! }
+!
+!===========================================================
+!
+! Values for the status flags
+!----------------------------
+!
+!NONE ALL UNKNOWN SUSPENDED COMPLETE QUEUED SUBMITTED ACTIVE
+!ABORTED CLEAR SET SHUTDOWN HALTED
+!
+! Values for type flags
+!----------------------
+!
+!NONE ALL SERVER SUITE FAMILY TASK EVENT
+!
+! Values for visible flags
+!-------------------------
+!
+!NONE ALL SERVER SUITE FAMILY TASK EVENT
+!
+! Values for special flags
+!-------------------------
+! 
+!NONE ALL  HAS_TRIGGERS HAS_TIME HAS_DATE
+!
+!===========================================================
+
+!==============================================================================
+! Main menu
+!==============================================================================
+
+version 1 0 0 ;
+
+menu 'MAIN'
+{
+  (~SUSPENDED & NODE, ALL, 'Suspend',  'suspend  <full_name>')
+  (SUSPENDED & NODE,  ALL, 'Resume',   'resume <full_name>')
+
+  ( TASK, ~ACTIVE & ~SUBMITTED, 'Rerun', 'force queued <full_name>')
+  ( FAMILY, ~ACTIVE & ~SUBMITTED, 'Rerun', 'run <full_name>')
+
+  (TASK|ALIAS, SUBMITTED|ACTIVE, 'Set complete', 
+    'force complete <full_name>',
+    'Have you checked that the job is not active anymore (jobstatus) ?', YES)
+  (TASK|ALIAS, UNKNOWN|QUEUED|ABORTED, 'Set complete', 
+    'force complete <full_name>')
+  (TASK|ALIAS, SUBMITTED|ACTIVE, 'Set aborted', 
+    'force aborted <full_name>',
+    'Have you checked that the job is not active anymore (jobstatus) ?', YES)
+  (TASK|ALIAS, UNKNOWN|QUEUED|COMPLETE, 'Set aborted', 
+     'force aborted <full_name>')
+
+  (TASK|ALIAS, ~ACTIVE & ~SUBMITTED, 'Execute', 'run <full_name>')
+
+  (SUITE|TASK|FAMILY, ~ACTIVE & ~SUBMITTED, 'Requeue',
+     'requeue -f <full_name>', 
+     'Confirm requeuing of <full_name>', YES)
+
+  (SUITE|FAMILY, ABORTED | SUSPENDED, 'Requeue aborted',
+    'requeue -a <full_name>', 
+    'Confirm requeuing of aborted tasks from <full_name>', YES)
+
+  (ALL,ALL,'-',SEPARATOR)
+
+  (SUITE|TASK|FAMILY,(QUEUED) & (HAS_TRIGGERS|HAS_TIME|HAS_DATE),'Delete',MENU)
+  (NODE|ALIAS,ALL,'Special', MENU)
+  (NODE& ADMIN, ALL,'Force', MENU)
+  ((NODE|ALIAS)& ADMIN, ALL,'Order', MENU)
+
+  (ALL,ALL,'-',SEPARATOR ,'',YES)
+  (SUITE|FAMILY|TASK, ALL, 'Web...', 'url <full_name> ', '', YES)
+
+  (ALL,ALL,'-',SEPARATOR)
+
+  (SUITE & (OPER|ADMIN) ,UNKNOWN|COMPLETE,'Begin',
+        'begin <full_name>','',YES)
+
+  (SUITE & (OPER|ADMIN) ,~SUBMITTED & ~ACTIVE,'Cancel',
+        'cancel -y <full_name>',
+        'Do you really want to cancel suite <full_name> ?',NO)
+
+! Events
+!---------------------------------
+
+  (EVENT, CLEAR,     'Set'  , 'force set <full_name>',   '',YES)
+  (EVENT, SET,       'Clear', 'force clear <full_name>', '',YES)
+
+!!-----------------------------------
+
+  (SERVER & (ADMIN|OPER) & LOCKED , ALL , 'Unlock', 'unlock -y',
+        'Before going further, please check why the server was locked.',NO)
+	(ALL,ALL,'-',SEPARATOR,'',YES)
+
+!!-----------------------------------
+
+  (SERVER,SHUTDOWN|HALTED, 'Restart',  
+    'restart -y','Restart the server in <node_name>?' ,NO)
+  (SERVER,~SHUTDOWN,       'Shutdown', 
+    'shutdown -y','Shutdown the server in <node_name>?',NO)
+  (SERVER,~HALTED,         'Halt',     
+    'halt -y','Halt the server in <node_name>?',NO)
+  (SERVER,HALTED,          'Terminate',
+    'terminate -y','Terminate the server in <node_name>?',NO)
+  (ALL,ALL,'-',SEPARATOR,'',YES)
+  (SERVER,ALL,             'Checkpoint','check','',YES)
+  (SERVER,HALTED,          'Recover',   
+    'recover -y','Recover the server in <node_name>?',NO)
+
+!!-----------------------------------
+
+  (LIMIT , ALL, 'Reset' , 
+      'reset <full_name>', 'Confirm resetting <full_name>', YES)
+  (ALIAS , ALL, 'Remove', 
+    'cancel -y <full_name>', 'Confirm remove alias <full_name>', YES)
+
+!!-----------------------------------
+
+  (ALL,ALL,'-',SEPARATOR)
+
+  (TASK|LIMIT|LABEL|METER|REPEAT|VARIABLE, ALL , 'Edit...', WINDOW(Edit))
+  (TASK|ALIAS, ALL , 'Output...', WINDOW(Output) )
+
+  (TASK|ALIAS, SUBMITTED|ACTIVE , 'Status...',   WINDOW(Jobstatus))
+  (ALIAS, ALL , 'Job...', WINDOW(Job) )
+  (TASK|ALIAS, ALL , 'Script...', WINDOW(Script) )
+
+  (SERVER, ALL ,  'Suites...',   WINDOW(Suites)   )
+  (SERVER, ALL ,  'History...',  WINDOW(History)  )
+  (SERVER, ALL ,  'Zombies...',  WINDOW(Zombies)  )
+  (ALL,ALL,'-',SEPARATOR)
+  (SERVER, ALL ,  'Options...',  WINDOW(Options)  )
+}
+
+!==============================================================================
+! Status submenu
+!==============================================================================
+
+menu 'Status'
+{
+  (SUITE|TASK|FAMILY, ~SUSPENDED,'Suspend', 'suspend <full_name>', '',YES)
+  (SUITE|TASK|FAMILY, SUSPENDED ,'Resume',  'resume <full_name>',  '',YES)
+
+  (ALL,ALL,'-',SEPARATOR)
+
+  (TASK, ~ACTIVE & ~SUBMITTED, 'Rerun', 'force queued <full_name>', '',YES)
+  (TASK, ~COMPLETE, 'Set complete', 'force complete <full_name>', '',YES)
+
+  (SUITE|TASK|FAMILY|ALIAS, ~ACTIVE & ~SUBMITTED,
+   'Requeue','requeue -f <full_name>', 'Confirm requeuing of <full_name>', YES)
+
+  (SUITE|FAMILY, ABORTED | SUSPENDED,
+	'Requeue aborted','requeue -a <full_name>', 
+	'Confirm requeuing aborted tasks below <full_name>', YES)
+}
+
+!==============================================================================
+! Suite submenu
+!==============================================================================
+
+menu 'Suite'
+{
+  (SUITE,UNKNOWN|COMPLETE,'Begin','begin <full_name>','',YES)
+
+  (SUITE,ALL,'Cancel','cancel -y <full_name>',
+    'Do you really want to cancel <full_name> ?',NO)
+
+  (ALL,ALL,'-',SEPARATOR)
+}
+
+!==============================================================================
+! Delete submenu
+!==============================================================================
+
+menu 'Delete'
+{
+  (ALL,HAS_TRIGGERS|HAS_TIME|HAS_DATE, 'All dependencies',
+    'delete -tdT <full_name>')
+  (ALL,HAS_TRIGGERS, 'Trigger dependencies','delete -T <full_name>')
+  (ALL,HAS_TIME, 'Time dependencies','delete -t <full_name>')
+  (ALL,QUEUED,   'Date dependencies','delete -d <full_name>')
+}
+
+menu "Order"
+{
+  (ALL,ALL,'Top','order -t top <full_name>')
+  (ALL,ALL,'Up','order -t up <full_name>')
+  (ALL,ALL,'Down','order -t down <full_name>')
+  (ALL,ALL,'Bottom','order -t bottom <full_name>')
+  (ALL,ALL,'Alphabetically','order -t alphabetical <full_name>')
+}
+
+menu "Force"
+{
+  (NODE, ~UNKNOWN, 'Unknown',   'force -q -r unknown <full_name>')
+  (NODE, ~COMPLETE & ~ACTIVE & ~SUBMITTED, 'Complete', 
+   'force =q -r complete <full_name>', 
+   'Check running/queued jobs and Confirm force complete of <full_name>', YES)
+  (NODE, ~QUEUED & ~ACTIVE & ~SUBMITTED,   'Queued',   
+   'force -q -r queued <full_name>')
+  (NODE, ~SUBMITTED & ~ACTIVE,'Submitted',
+   'force -q -r submitted <full_name>')
+  (NODE, ~ACTIVE,   'Active',   'force -q -r active <full_name>')
+  (NODE, ~ABORTED,  'Aborted',  'force -q -r aborted <full_name>', 
+   'Check running/queued jobs and Confirm force submitted of <full_name>', YES)
+}
+
+menu "Special"
+{
+  (SUITE|FAMILY,(ACTIVE|SUBMITTED|ABORTED),'Kill',
+   'kill <full_name>','',YES)
+  (TASK|ALIAS,(ACTIVE|SUBMITTED),'Kill','kill <full_name>','',YES)
+
+  (ALL,ALL,'Check',WINDOW(Check),'',YES)
+  (TASK|ALIAS,ALL,'Free password','alter -v <full_name> SMSPASS FREE')
+  (TASK|ALIAS,ALL,'ClearZ','alter -F zombie <full_name>')
+  ((SUITE|FAMILY), SELECTION, 'Plug into selected node', PLUG)
+  (SUITE|SERVER, ALL, 'Collect...',  WINDOW(Collector))
+  (SERVER|SUITE,ALL,'Windows', MENU)
+  (ALL,ALL,'echo', 'sh echo ok')
+}
+
+menu "Windows"
+{
+  (SERVER, ALL , 'Info...', WINDOW(Info))
+  (SERVER, ALL , 'Man...',  WINDOW(Manual))
+  (SERVER, ALL , 'Var...',  WINDOW(Variables))
+  (SERVER, ALL , 'Msg...',  WINDOW(Messages))
+  (SERVER, ALL , 'Why...',  WINDOW(Why))
+  (SERVER, ALL , 'Triggers...',  WINDOW(Triggers))
+  (SERVER, ALL , 'Check...',  WINDOW(Check))
+  (SERVER, ALL , 'Jobstatus...',  WINDOW(Jobstatus))
+}

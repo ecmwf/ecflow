@@ -1,0 +1,5 @@
+
+# this is comment
+  # this is another comment line
+suite  theSuiteName
+endsuite

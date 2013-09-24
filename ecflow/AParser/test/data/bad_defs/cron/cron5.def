@@ -1,0 +1,3 @@
+suite cron
+	cron -m 1,2,3,13,14 12:00   #  Error month should have range 1-12
+endsuite

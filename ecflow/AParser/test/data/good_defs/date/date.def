@@ -1,0 +1,22 @@
+suite suiteName
+   date *.*.2009
+   family familyName0
+   	  date 1.*.2009
+      task taskName0
+   	  		date 1.12.2009
+      task fred
+   	  		date 01.*.*
+      endtask
+   endfamily
+endsuite
+
+suite s1;date *.*.2009; family familyName0
+   	  date 1.*.2009
+      task taskName0
+   	  		date 1.12.2009
+      task fred
+   	  		date 01.*.*
+      endtask
+   endfamily
+endsuite
+

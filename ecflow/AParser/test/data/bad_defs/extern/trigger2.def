@@ -1,0 +1,10 @@
+#
+# Trigger references to node path, not in externs is an error
+#
+suite bad_extern
+   family f1
+      task p
+            trigger /a/b/c/d == complete          # extern path
+    endfamily
+endsuite
+

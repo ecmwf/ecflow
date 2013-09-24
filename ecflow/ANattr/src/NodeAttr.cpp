@@ -1,0 +1,285 @@
+//============================================================================
+// Name        :
+// Author      : Avi
+// Revision    : $Revision: #67 $ 
+//
+// Copyright 2009-2012 ECMWF. 
+// This software is licensed under the terms of the Apache Licence version 2.0 
+// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
+// In applying this licence, ECMWF does not waive the privileges and immunities 
+// granted to it by virtue of its status as an intergovernmental organisation 
+// nor does it submit to any jurisdiction. 
+//
+// Description :
+//============================================================================
+
+#include <assert.h>
+#include <sstream>
+
+#include <boost/foreach.hpp>
+#include <boost/lexical_cast.hpp>
+
+#include "NodeAttr.hpp"
+#include "Indentor.hpp"
+#include "Calendar.hpp"
+#include "PrintStyle.hpp"
+#include "Str.hpp"
+#include "Ecf.hpp"
+
+using namespace std;
+using namespace ecf;
+
+const std::string& Event::SET() { static const std::string SET = "set"; return SET; }
+const std::string& Event::CLEAR() { static const std::string CLEAR = "clear"; return CLEAR; }
+const Event& Event::EMPTY() { static const Event EVENT = Event(); return EVENT ; }
+const Meter& Meter::EMPTY() { static const Meter METER = Meter(); return METER ; }
+const Label& Label::EMPTY() { static const Label LABEL = Label(); return LABEL ; }
+
+////////////////////////////////////////////////////////////////////////////////////////////
+
+Event::Event( int number, const std::string& eventName )
+: value_( false ), number_( number ), name_( eventName ), used_( false ), state_change_no_( 0 )
+{
+   if ( !eventName.empty() ) {
+      string msg;
+      if ( !Str::valid_name( eventName, msg ) ) {
+         throw std::runtime_error( "Event::Event: Invalid event name : " + msg );
+      }
+   }
+}
+
+Event::Event(  const std::string& eventName )
+: value_( false ), number_( std::numeric_limits<int>::max() ), name_( eventName ), used_( false ), state_change_no_( 0 )
+{
+   if ( eventName.empty() ) {
+      throw std::runtime_error( "Event::Event: Invalid event name : name must be specified if no number supplied");
+   }
+
+   // If the eventName is a integer, then treat it as such, by setting number_ and clearing name_
+   // This was added after migration failed, since *python* api allowed:
+   //       ta.add_event(1);
+   //       ta.add_event("1");
+   // and when we called ecflow_client --migrate/--get it generated
+   //       event 1
+   //       event 1
+   // which then did *not* load.
+   //
+   // Test for numeric, and then casting, is ****faster***** than relying on exception alone
+   if ( eventName.find_first_of( Str::NUMERIC() ) != std::string::npos ) {
+      try {
+         number_ = boost::lexical_cast< int >( eventName );
+         name_.clear();
+         return;
+      }
+      catch ( boost::bad_lexical_cast&  ) {
+         // cast failed, a real string, carry on
+      }
+   }
+
+   string msg;
+   if ( !Str::valid_name( eventName, msg ) ) {
+      throw std::runtime_error( "Event::Event: Invalid event name : " + msg );
+   }
+}
+
+void Event::set_value( bool b ) {
+   value_ = b;
+   state_change_no_ = Ecf::incr_state_change_no();
+
+#ifdef DEBUG_STATE_CHANGE_NO
+   std::cout << "Event::set_value\n";
+#endif
+}
+
+std::string Event::name_or_number() const {
+   if ( name_.empty() ) {
+      std::stringstream ss;
+      ss << number_;
+      return ss.str();
+   }
+   return name_;
+}
+
+bool Event::operator==( const Event& rhs ) const {
+   if ( value_ != rhs.value_ ) {
+      return false;
+   }
+   if ( number_ != rhs.number_ ) {
+      return false;
+   }
+   if ( name_ != rhs.name_ ) {
+      return false;
+   }
+   return true;
+}
+
+std::ostream& Event::print( std::ostream& os ) const {
+   Indentor in;
+   Indentor::indent( os ) << toString();
+   if ( !PrintStyle::defsStyle() ) {
+      if (value_)  os << " # " << Event::SET();
+   }
+   os << "\n";
+   return os;
+}
+
+std::string Event::toString() const {
+   std::stringstream ss;
+   if ( number_ == std::numeric_limits< int >::max() )
+      ss << "event " << name_;
+   else ss << "event " << number_ << " " << name_;
+   return ss.str();
+}
+
+std::string Event::dump() const {
+   std::stringstream ss;
+   ss << toString() << " value(" << value_ << ")  used(" << used_ << ")";
+   return ss.str();
+}
+
+bool Event::isValidState( const std::string& state ) {
+   if ( state == Event::SET() )
+      return true;
+   if ( state == Event::CLEAR() )
+      return true;
+   return false;
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////
+
+Meter::Meter( const std::string& name, int min, int max, int colorChange ) :
+	         min_( min ), max_( max ), value_( min ), colorChange_( colorChange ),
+	         name_( name ), used_( false ), state_change_no_( 0 )
+{
+   if ( !Str::valid_name( name ) ) {
+      throw std::runtime_error("Meter::Meter: Invalid Meter name: " + name);
+   }
+
+   if ( min > max )
+      throw std::out_of_range( "Meter::Meter: Invalid Meter(name,min,max,color_change) : min must be less than max" );
+
+   if (colorChange == std::numeric_limits<int>::max()) {
+      colorChange_ =  max_;
+   }
+
+   if ( colorChange_ < min || colorChange_ > max ) {
+      std::stringstream ss;
+      ss << "Meter::Meter: Invalid Meter(name,min,max,color_change) color_change(" << colorChange_ << ") must be between min(" << min_ << ") and max(" << max_ << ")";
+      throw std::out_of_range( ss.str() );
+   }
+}
+
+void Meter::set_value( int v ) {
+
+   if (!isValidValue( v )) {
+      std::stringstream ss;
+      ss << "Meter::set_value(int): The meter(" << name_ << ") value must be in the range[" << min() << "-" << max() << "] but found '" << v << "'";
+      throw std::runtime_error( ss.str() );
+   }
+
+   value_ = v;
+   state_change_no_ = Ecf::incr_state_change_no();
+
+#ifdef DEBUG_STATE_CHANGE_NO
+   std::cout << "Meter::set_value\n";
+#endif
+}
+
+bool Meter::operator==( const Meter& rhs ) const {
+   if ( value_ != rhs.value_ ) {
+      return false;
+   }
+   if ( min_ != rhs.min_ ) {
+      return false;
+   }
+   if ( max_ != rhs.max_ ) {
+      return false;
+   }
+   if ( colorChange_ != rhs.colorChange_ ) {
+      return false;
+   }
+   if ( name_ != rhs.name_ ) {
+      return false;
+   }
+   return true;
+}
+
+std::ostream& Meter::print( std::ostream& os ) const {
+   Indentor in;
+   Indentor::indent( os ) <<  toString();
+   if ( !PrintStyle::defsStyle() ) {
+      if (value_ != min_) os << " # " << value_;
+   }
+   os << "\n";
+   return os;
+}
+
+std::string Meter::toString() const {
+   std::stringstream ss;
+   ss << "meter " << name_ << " " << min_ << " " << max_ << " " << colorChange_;
+   return ss.str();
+}
+
+std::string Meter::dump() const {
+   std::stringstream ss;
+   ss << "meter " << name_ << " min(" << min_ << ") max (" << max_
+            << ") colorChange(" << colorChange_ << ") value(" << value_
+            << ") used(" << used_ << ")";
+   return ss.str();
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////
+
+Label::Label(const std::string& name, const std::string& l)
+: name_(name),value_(l),state_change_no_(0)
+{
+   if ( !Str::valid_name( name ) ) {
+      throw std::runtime_error("Label::Label: Invalid Label name :" + name);
+   }
+}
+
+std::ostream& Label::print( std::ostream& os ) const {
+
+   Indentor in;
+   Indentor::indent( os ) << toString();
+   if (!PrintStyle::defsStyle()) {
+      if (!new_value_.empty()) os << " # \"" << new_value_ << "\"";
+   }
+   os << "\n";
+   return os;
+}
+
+std::string Label::toString() const {
+   // parsing always STRIPS the quotes, hence add them back
+   std::string ret; ret.reserve(name_.size() + value_.size() + 10);
+   ret += "label ";
+   ret += name_;
+   ret += " \"";
+   ret += value_;
+   ret += "\"";
+   return ret;
+}
+
+std::string Label::dump() const {
+   std::stringstream ss;
+   ss << toString() << " : \"" << new_value_  << "\"";
+   return ss.str();
+}
+
+void Label::set_new_value( const std::string& l ) {
+   new_value_ = l;
+   state_change_no_ = Ecf::incr_state_change_no();
+
+#ifdef DEBUG_STATE_CHANGE_NO
+   std::cout << "Label::set_new_value\n";
+#endif
+}
+
+void Label::reset() {
+   new_value_.clear();
+   state_change_no_ = Ecf::incr_state_change_no();
+
+#ifdef DEBUG_STATE_CHANGE_NO
+   std::cout << "Label::reset()\n";
+#endif
+}

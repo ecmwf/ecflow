@@ -1,0 +1,14 @@
+# here we have a trigger expression that references a meter and a node.
+# We should only except a string which is 'set' or 'clear'
+# i.e
+#    trigger /suite/family/m:var gt  0 or /suite/family/m:var eq set
+# here var could be an event
+
+suite suite
+    family family
+      task a             
+         trigger /suite/family/m:meter gt  0 or /suite/family/m:meter eq complete
+      task m
+         meter meter  0 100 100  # meter <name> <min> <max> [optional color change]
+    endfamily
+endsuite

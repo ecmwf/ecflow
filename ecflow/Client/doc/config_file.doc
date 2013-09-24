@@ -1,0 +1,63 @@
+// This file gives an example of how to load
+// a config file using boost program options.
+// This was originally use in test, without having to
+// specify enviroment variables.
+
+
+#include <boost/program_options.hpp>
+namespace po = boost::program_options;
+
+void ClientEnvironment::read_config_file()
+{
+#ifdef DEBUG_ENVIRONMENT
+   std::cout << "ClientEnvironment::read_config_file() no_ecf_ = " << no_ecf_ << "\n";
+#endif
+
+   try {
+      std::string host,port,constructor_supplied_host_file;
+      // use config to discover, the hosts file, otherwise use the host file provided in the constructor
+      if (!host_file_.empty()) {
+         constructor_supplied_host_file = host_file_;
+      }
+
+      // read the environment from the config file
+      po::options_description config_file_options("Configuration");
+      config_file_options.add_options()
+      ("ECF_NODE", po::value<std::string>(&host)->default_value(Str::LOCALHOST()), "The host name")
+      ("ECF_NAME", po::value<std::string>(&task_path_) ,       "Full name of task")
+      ("ECF_PASS", po::value<std::string>(&jobs_password_)->default_value(""),    "The jobs password")
+      ("ECF_TRYNO", po::value<int>(&task_try_num_), "The task try number")
+      ("ECF_HOSTFILE", po::value<std::string>(&host_file_), "File that lists alternate hosts")
+      ("ECF_TIMEOUT", po::value<long>(&timeout_)->default_value(MIN_TIMEOUT), "Max time in seconds for client to deliver message")
+      ("ECF_DENIED", po::value<bool>(&denied_)->default_value(false) , "If set ECF denies access, client will exit with failure")
+      ("ECF_PORT", po::value<std::string>(&port)->default_value(Str::DEFAULT_PORT_NUMBER()), "The TCP/IP port to call")
+      ("NO_ECF", po::value<bool>(&no_ecf_)->default_value("false"), " if defined then abort cmd")
+        ;
+
+      std::string path = File::test_data("environment.cfg","Client");
+
+
+      ifstream ifs(path.c_str());
+      if (ifs) {
+         po::variables_map vm;
+         po::store(parse_config_file(ifs, config_file_options), vm);
+         po::notify( vm);
+      }
+
+      /// Overwrite the host file read from the config file, since we need to use
+      /// host file supplied via the constructor
+      if (!constructor_supplied_host_file.empty()) {
+         host_file_ = constructor_supplied_host_file;
+      }
+
+      // Add the ECF_NODE host into list of hosts
+      if (!host.empty()) {
+         if (port.empty()) host_vec_.push_back(std::make_pair(host,Str::DEFAULT_PORT_NUMBER()));
+         else              host_vec_.push_back(std::make_pair(host,port));
+      }
+   }
+    catch(std::exception& e)
+    {
+         cerr << "ClientEnvironment::read_config_file() " <<  e.what() << "\n";
+    }
+}

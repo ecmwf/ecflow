@@ -1,0 +1,49 @@
+#  
+defs_state MIGRATE
+
+# The file can be of different styles:
+#    DEFS: This is the structure only (default), 
+#          when we write out defs to disk, this will exclude aliases.
+#          Hence we use 
+#             defs_state MIGRATE
+#          So that when *testing*, we write out the defs in the state state in meant to be loaded
+#   STATE: structure + state
+#   MIGRATE: structure + state (No checking, and no externs )
+    
+# ===============================================================================
+# This will test that for alias we allow _variables_ names *without* checking
+# i.e for tasks EDACLASS:"od" would be an illegal variable name
+# ===============================================================================
+suite suiteName
+
+  task t1
+    alias alias0
+    
+         edit SMSURLCMD '${BROWSER:=firefox} -remote 'openURL(%SMSURLBASE%/%SMSURL%)'' # comment
+   
+         edit VAR  "value !£$%^&*() ~@: ?><,."   #comment
+   
+         edit VAR1 '123'
+   
+         edit VAR2 value2
+   
+         edit VAR3 ""
+         edit VAR55 ''
+         edit VAR56 '#'
+         edit VAR57 "#"
+         
+         # alias show allow variable names with invalid names
+         edit name:1 '1'
+         edit namx$1 '1'
+         
+         
+        edit DO_PUSH_TO_WEB:yes 'yes'
+        edit ECF_HOME:0 '/vol/emos_nc/output'
+        edit ECF_OUT:0 '/vol/emos_nc/output'
+        edit EDACLASS:"od" 'od'
+        edit EDACLASS:undef 'od'
+        edit EDAEXPVER:"0001" '0001'
+        
+    endalias
+endsuite
+ 

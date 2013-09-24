@@ -1,0 +1,10 @@
+suite pontus
+  family acq
+    task data
+      trigger wait/wait:data
+    family wait
+      task wait
+        event data
+    endfamily
+  endfamily
+endsuite

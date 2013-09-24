@@ -1,0 +1,24 @@
+%include <head.h>
+
+# ==========================================================
+# Run as REMOTE_HOST. i.e %REMOTE_HOST:%
+# !!! This relies on ecflow to have been untarred on the remote.
+# ==========================================================
+
+#===============================================================
+# defines variable WK ***this is NEEDED by SITE_CONFIG below ****
+#===============================================================
+%include <export_WK.h>
+ 
+if [[ %SET_TO_TEST_SCRIPT% = true ]] ; then
+   echo "Test only"
+else
+   # ========================================================================
+   # FIRST setup site-config.jam, by copying from ecflow workspace directory
+   # SITE_CONFIG relies on $WK being setup
+   # ========================================================================
+   echo "BOOST_ROOT=$BOOST_ROOT"
+   cp %SITE_CONFIG% $BOOST_ROOT/tools/build/v2/site-config.jam
+fi
+
+%include <tail.h>

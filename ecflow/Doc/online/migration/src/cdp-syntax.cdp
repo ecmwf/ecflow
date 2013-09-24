@@ -1,0 +1,49 @@
+Syntax of the CDP command line
+  
+  <digit>        ::= [0-9]
+  <letter>       ::= [a-Z,A-Z,_]
+  <escape>       ::= '\'
+  <softquote>    ::= '"'
+  <hardquote>    ::= '''
+  <substitute>   ::= '`'
+  <command-end>  ::= ';' | '\n'
+  
+  <name>         ::= <letter> [<letter> | <digit>]*
+  <integer>      ::= <digit>+
+  <double>       ::= [-] [<integer>] [.[0-9]*] [[E|e] [+|-] [0-9][0-9]*]
+  
+  <unary>        ::= '-' | '!' | '~' | "not"
+  <operator>     ::= '||' | '&&' | '==' | '!=' | '<' | '<=' | '>'  | '>=' |
+                     '+'  | '-'  | '*'  | '/'  | '%' | '^'  | "or" | "and" |
+                     "eq" | "ne" | "lt" | "le" | "gt" | "ge" | "mod"
+  <io_directive> ::= '>' | ">>" | ">&" | ">>&" | ">=" | '|' |
+                     '<' | "<<" | "<=" | "<<="
+  
+  <ioi_variable> ::= '*' | '$' | '#' | '[0-9]'
+  <variable>     ::= <name> | <ioi_variable>
+  <reference>    ::= '$'<variable> | '$''{'<name>'}'
+  
+  <history>      ::= '!'[<integer>|<name>|'!']
+  <shell_input>  ::= <substitute> <characters> <substitute>
+  
+  <operand>      ::= [<unary>]  <name>|<function>|<expression>
+  <expression>   ::= '(' <operand> [ <operator> <operand> ]* ')'
+  <function>     ::= <name> <expression>
+  <list>         ::= '(' [<text> | <variable> | <shell_input>]* ')'
+  
+  <case>         ::= "case" <name> ["in" <list> "do" <cmds> "endin"]* "endcase"
+  <for>          ::= "for" <name> <number>|<expression> <number>|<expression> 
+                     ["step" <number>|<expression>] "do" <cmds> "endfor"
+  <if>           ::= "if" <expression> "then" <cmds> ["else" <cmds>] "endif"
+  <loop>         ::= "loop" <name> <list> "do" <cmds> "endloop"
+  <while>        ::= "while" <expression> "do" <cmds> "endwhile"
+  
+  <cmds>         ::= <case> | <for> | <if> | <loop> | <while> | ["" | <text>]
+                     [ ";" <cmds> ]
+  
+  <userfunction> ::= "define" <name> '{' '\n' [<text><'\n'>]* '}'
+  
+  <option>       ::= '-'<letter> <optarg>*
+  <optarg>       ::= <text>*
+  <exe>          ::= <exename> <option>* <argument>* <command-end>
+

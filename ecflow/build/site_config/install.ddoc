@@ -1,0 +1,105 @@
+using python in bjam file
+=========================
+ 
+ In the site-config.jam file we can specify 
+ 
+    using python ;
+    
+This will determine the default python from $PATH.
+If there several python versions, then the python required must be added
+to the $PATH first. The python must include the devel packages. 
+As the headers in these packages is used by boost python.
+    
+using python
+     :  # version
+     :  # cmd-or-prefix
+     :  # includes
+     :  # libraries
+     :  # condition
+     ;
+
+By using a specific version, it means that the unit tests, will use the
+same specific version. 
+
+However we did not want to hard code the version of python.
+As that would restrict install for the general case.
+Is is assumed that the Autoconf tools will  determine the correct
+python version. We current only support python 2.5->2.7
+
+
+Linux  32
+===========
+# Buy using a specific version we don't need to update $PATH, 
+# when python tests invoked from scripts
+
+# Note sure how to access python version, hence defined a project wide constant variable
+# This is used during installation
+python_version = [ os.environ PYTHON_VERSION ] ;
+python_version default = 2.7 ; # if PYTHON_VERSION not set, use this default
+constant PYTHON_VERSION : $(python_version) ;
+
+using python
+     : $(python_version)                          # version
+     : /usr/local/apps/python/2.7.2-01/bin/python # cmd-or-prefix
+     :                                            # includes
+     :                                            # libraries
+     :                                            # condition
+     ;
+ 
+
+AIX Power6
+===========
+using python
+     : 2.5                             # version
+     : /usr/local/python64/bin/python  # cmd-or-prefix
+     : /usr/local/include/python2.5 /usr/local/python64/include/python2.5/ # includes  
+     : # libraries
+     : # condition
+     ;
+     
+Now update to python 2.7
+using python : 2.7 ;
+
+     
+HPUX - itanium
+==============
+
+using python
+     :                                        # version
+     : /usr/local/apps/python/2.7/bin/python  # cmd-or-prefix (for python 2.5 use )/opt/python/usr/local/bin/python
+     : # includes  
+     : # libraries
+     : # condition
+     ;
+
+#using python
+#     :                                   # version
+#     : /opt/python/usr/local/bin/python  # cmd-or-prefix
+#     : # includes  
+#     : # libraries
+#     : # condition
+#     ;    
+     
+=================================================================================
+
+Install structure
+-----------------
+$ECFLOW_DESTDIR/$ECFLOW_INSTALL_DIR/bin/ecflow_client
+                                        ecflow_server
+                                        ecflowview (<dll_path>=$ECFLOW_INSTALL_DIR/lib/libxpmcc.so)
+                                        ecflow_start.sh
+                                        ecflow_stop.sh
+                                        noconnect.sh
+                                        
+$ECFLOW_DESTDIR/$ECFLOW_INSTALL_DIR/doc/ecflow/user_manual.docx
+                                               user_manual.pdf
+                                               client_options.docx
+                                        
+$ECFLOW_INSTALL_DIR/lib/libxpmcc.so                                 
+                                         
+$ECFLOW_DESTDIR/$ECFLOW_PYTHON_INSTALL_DIR/__init__.py
+                           libboost_python.so
+                           ecflow.so <dll-path>=$ECFLOW_PYTHON_INSTALL_DIR/lib/libboost_python.so)
+                                                                   
+                                        
+

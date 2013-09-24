@@ -1,0 +1,7 @@
+suite suiteName
+   family familyName0
+   endfamily
+   family familyName0             # duplicate family names
+   endfamily
+endsuite
+

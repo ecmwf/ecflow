@@ -1,0 +1,27 @@
+suite suiteName
+   day monday
+   family familyName0
+   	  day tuesday
+      task taskName0
+   	  		day wednesday
+      task fred
+   	  		day thursday
+   	  		day friday
+   	  		day saturday
+   	  		day sunday
+       endtask
+   endfamily
+endsuite
+
+suite s1; day monday;family familyName0 ; day tuesday
+      task taskName0
+   	  		day wednesday
+      task fred
+   	  		day thursday
+   	  		day friday
+   	  		day saturday
+   	  		day sunday
+       endtask
+   endfamily
+endsuite
+

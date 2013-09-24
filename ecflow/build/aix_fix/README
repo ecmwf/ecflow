@@ -1,0 +1,118 @@
+## Copyright 2009-2012 ECMWF. 
+## This software is licensed under the terms of the Apache Licence version 2.0 
+## which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
+## In applying this licence, ECMWF does not waive the privileges and immunities 
+## granted to it by virtue of its status as an intergovernmental organisation 
+## nor does it submit to any jurisdiction. 
+
+Boost 1.44
+=================================================================================
+force_include.hpp needs to be moved to boost/serialization/force_include.hpp
+This file fixes serialization via base ptr bugs, for Boost version < 1.44
+
+
+Boost 1.45, Serialisation crashes in release mode.
+==================================================================================
+
+FROM IBM:
+We have a Boost patch fix that fixes Serialization library runtime problems experienced at -O3
+
+The symptom's root cause is in singleton pattern of Serialization library that uses static object
+that is created but not referenced. 
+A trick in the library code is used to make a reference to this object by passing 
+it to a function with empty body to keep it around for static initialization. 
+Our optimizer aggressively inlines away the function with empty body, eliminating 
+this trick of a reference. This explains why turning off inlining also works. 
+Ensuring that we don't inline away this function will keep the static object around.
+
+This is a questionable Boost trick which we will advise either not use, or protect under macros. 
+The fix is in your Boost header and no compiler changes are needed.
+
+The changes are in two header files attached:
+boost/serialization/force_include.hpp and
+boost/serialization/singleton.hpp
+
+(See attached file: singleton.hpp)(See attached file: force_include.hpp)
+(See attached file: header_diff_item2.txt)
+
+
+Boost 1.45
+=====================================================================================
+1/boost will will not build cleanly due to a compilation error in v3 filesystem
+the work around is to comment out the v3 file system dependencies.
+in $BOOST_ROOT/libs/filesystem/build/Jamfile.v2
+
+>>>>>> OR
+
+Change file path.hpp:
+FROM:
+  //------------------------------------------------------------------------------------//
+  //                             class path::iterator                                   //
+  //------------------------------------------------------------------------------------//
+ 
+  class path::iterator
+    : public boost::iterator_facade<
+      iterator,
+      path const,
+      boost::bidirectional_traversal_tag >
+  {
+    ....
+TO:
+  //------------------------------------------------------------------------------------//
+  //                             class path::iterator                                   //
+  //------------------------------------------------------------------------------------//
+ 
+  class path::iterator
+    : public boost::iterator_facade<
+      path::iterator,
+      path const,
+      boost::bidirectional_traversal_tag >
+  {
+    ....
+
+ie. since iterator_facade uses CRTP, the iterator is being interperted as "boost::iterator"
+    passing "path::iterator" as the template argument fixes the compile error on AIX.
+    This should be safe for other platforms as well
+
+    This has been registered as a bug. ticket #4912
+
+2/ Problems running python examples, with boost filesystem linked,
+
+
+Python: Effects all boost versions where we want to embed python interpreter in C++
+=====================================================================================
+The following exe's,on AIX, python 2.5 64 bit, acc v11.1,
+raise *hundreds* of warning messages of the type:
+     ld: 0711-224 WARNING: Duplicate symbol: _PyObject_New.
+linking with flags -bloadmap:PARM, reveals:
+
+ _Py_NoneStruct            Objects/object.c(/usr/local/python64/lib/python2.5/config/libpython2.5.a[object.o])
+    ** Duplicate **        /usr/local/python64/lib/python2.5/config/python.exp{.}
+.Py_FatalError            Python/pythonrun.c(/usr/local/python64/lib/python2.5/config/libpython2.5.a[pythonrun.o])
+    ** Duplicate **        /usr/local/python64/lib/python2.5/config/python.exp{.}
+
+It appears that the symbols are defined libpython2.5.a and in the exports file 'python.exp':
+removing the export file: -Wl,-bI:/usr/local/python64/lib/python2.5/config/python.exp 
+from the link line removes the warning messages
+
+This can be done explicitly: $BOOST_ROOT/tools/build/v2/tools/python.jam
+Go to line: 992 and comment out <linkflags>-Wl,-bI:$(libraries[1])/python.exp
+ 
+    else if $(target-os) = aix
+    {
+        alias python_for_extensions
+            :
+            : $(target-requirements)
+            :
+            : $(usage-requirements) # <linkflags>-Wl,-bI:$(libraries[1])/python.exp
+            ;
+    }
+   
+
+This is not an absolute requirement, if you can live with warnings messages.
+The notes in python.jam seems to expect them: file python.jam
+
+    # the Python framework, even when building extensions. Note that framework
+    # builds of Python always use shared libraries, so we do not need to worry
+    # about duplicate Python symbols.
+           

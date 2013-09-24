@@ -1,0 +1,4 @@
+suite suiteName
+    zombie fred:adopt:meter:100    # fred is not a valid zombie type
+endsuite
+

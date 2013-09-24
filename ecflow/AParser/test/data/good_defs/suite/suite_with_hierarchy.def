@@ -1,0 +1,20 @@
+suite  theSuiteName
+	task t1
+	task t2
+	task t3
+	family f1
+		task f1_t1
+		task f1_t2
+	endfamily
+	task t4
+endsuite
+suite  s1
+	task t1
+	task t2
+	task t3
+	family f1
+		task f1_t1
+		task f1_t2
+	endfamily
+	task t4
+endsuite

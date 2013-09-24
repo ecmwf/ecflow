@@ -1,0 +1,16 @@
+suite suiteName;endsuite
+suite obs; endsuite
+
+suite fred; task a; task b; endsuite # a comment suite fred; task a; task b; endsuite
+
+
+suite  s1; task t1; task t2;task t3;family f1;task f1_t1;task f1_t2;endfamily;task t4
+endsuite
+
+suite  s2;task t1;task t2;task t3;family f1;task f1_t1;task f1_t2;endfamily; task t4 # comment,
+endsuite
+
+#suite fred; task a; task b; endsuite
+ #suite fred; task a; task b; endsuite
+ # suite fred; task a; task b; endsuite
+ 

@@ -1,0 +1,37 @@
+
+
+AIX
+===========================================================================================
+
+# ECF/Boost serialisation has problems in release mode: This was an attempt to make it work:
+# Note: when building boost on AIX, comment out.
+#   override compiler release flags, see usage below: Just using <variant>release:<cxxflags>-O2
+#   may not be enough, since -O3 is still added., and hence probably still overrides the -O2
+#   hence use this alternative approach.
+#   
+import feature ;
+feature.extend optimization : unspecified ;
+
+project site-config 
+   : requirements <include>$(BOOST_ROOT)  
+   : requirements <threading>multi 
+   : requirements <define>AIX 
+   : requirements <cxxflags>-qsuppress=1540-0198                          # (W) The omitted keyword "private" is assumed for base class
+   : requirements <cxxflags>-qsuppress=1540-2883                          # (W) Inline function "<function>" given attribute noinline.
+   : requirements <variant>release:<cxxflags>-qsuppress=1500-029          # supress could not be inlined message
+   : requirements <variant>release:<cxxflags>-O2                          # serialization has problems with -O3
+   : requirements <variant>release:<optimization>unspecified <variant>release:<cflags>-O2  # serialization has problems with -O3
+   : requirements <linkflags>-bbigtoc  
+   ;
+
+   
+# -bbigtoc:
+#  we get TOC overflow, because compiler/linker has 64k limit on
+#  the number of global symbols. Options are use:
+#       0/ Break up shared lib
+#       1/ -bbigtoc to overcome at the cost of performance degradation
+#       2/ --qipa=level=0 if this fails try
+#       3/ --qipa=level=1 if this fails try
+#       4/ --qipa=level=2 if this fails, revert to -bbigtoc
+#       Currently option 2-4 didn't work!
+   

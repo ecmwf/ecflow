@@ -1,0 +1,13 @@
+suite suiteName
+   family familyName0
+   		time 15:00
+   		time 00:00 23:59 00:30
+        time 00:00 06:59 00:30
+   endfamily
+endsuite
+
+suite s1 
+   family familyName0
+   		time 15:00 ; time 00:00 23:59 00:30 ;time 00:00 06:59 00:30
+   endfamily
+endsuite

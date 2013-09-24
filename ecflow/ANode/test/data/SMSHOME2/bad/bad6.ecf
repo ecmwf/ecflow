@@ -1,0 +1,15 @@
+
+#
+# test for embedded  manual/comment
+#
+
+%comment
+	OPERATORS: This is an example of usinh a manual
+	First include head.h
+	
+%manual
+    Illegal we cannt have embedded manuals in a comment
+%end
+
+%end
+ 

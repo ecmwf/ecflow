@@ -1,0 +1,64 @@
+define call_barber_passerby {
+# family passby
+ # limit to one at a time entering the 
+ # shop to check if there is room to
+ # stay in there
+
+task passby 
+  cron 00:00 23:59 00:01 # this one is regular 
+  edit ID 0
+  inlimit ./limit:passby
+      
+# other frequent passers by can be added here
+# endfamily
+}
+
+# called by client generator task
+define call_barber_client {
+set id $1
+family $id
+# to be called by passby to create a new client
+task cut
+inlimit ../limit:barbers
+
+# there may be many barbers in the shop
+# but one cashier only
+task pay 
+  trigger ./cut == complete
+  inlimit ../limit:barbers
+  inlimit ../limit:cashiers
+
+task leave
+  trigger cut==complete and pay==complete
+# if ($id % 2 eq 0) then # CONV
+  rem2 = $id % 2
+ if ($rem2 eq 0) then # CONV
+  defstatus complete
+  endtask
+
+  autocancel 0
+endif
+
+endfamily
+}
+
+# main definition
+define call_barber_shop {
+family shop
+  defstatus suspended
+  edit NB_CHAIRS 4
+
+family limit 
+  defstatus complete
+  # CONV
+  # text passby is mutex ie one door only while barber \
+  #      and cashier may be changed dynamically
+  limit passby   1 
+  limit barbers  1 
+  limit cashiers 1  
+endfamily # limit
+
+  call_barber_passerby
+
+endfamily
+}

@@ -1,0 +1,11 @@
+suite suiteName
+   family familyName0
+		task t
+   			time 15:00
+   			time 19:00
+   			time +15:00
+   			time 10:00 20:00 01:00
+   			time +10:00 20:00 01:00		   		
+   endfamily
+endsuite
+

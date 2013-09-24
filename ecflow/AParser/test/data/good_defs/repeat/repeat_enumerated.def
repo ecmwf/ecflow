@@ -1,0 +1,11 @@
+suite s1
+   
+    repeat enumerated VARIABLE first second third #sdsdsd
+   
+endsuite
+
+suite s2
+   
+    repeat enumerated VARIABLE 20130101 20130102 20130103 #sdsdsd
+   
+endsuite

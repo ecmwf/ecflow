@@ -1,0 +1,21 @@
+#!/usr/bin/perl -w
+# perl.ecf
+^include <head.pl>
+^manual
+one liner manual
+^end
+^comment
+one liner comment
+^end
+
+xlabel("info", "start");
+xevent("1");
+print "a perl task";
+for (my $step=1; $step <= 100; $step++) {
+   print "this is the step number $step\n";
+   xmeter("step", $step);
+}
+	
+xevent("2");	  
+xlabel("info", "completion");
+^include <tail.pl>

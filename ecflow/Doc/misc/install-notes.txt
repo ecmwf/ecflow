@@ -1,0 +1,78 @@
+ Install steps
+ =============
+ 
+ 0/ These Steps should be encapsulated by $WK/build/install.sh ***************
+ 
+ 1/ Become emos user. Required for write access to installation directory
+    Note: 
+         # su - emos 
+         (uses a new environment) This is a good way of testing that the install environment has been set up
+ 
+         # su emos
+         Uses the current environment
+         
+    # su - emos
+    
+    You can invoke id: to confirm logged in as emos:
+    i.e # id
+    
+ 2/ Set the installation directory. The same on all platforms
+    ECFLOW_INSTALL_DIR is used by bjam install
+ 
+   # export ECFLOW_INSTALL_DIR=/usr/local/apps/sms/ecflow
+   
+ 3/ Set BOOST_ROOT. Required since we need boost build and bjam.
+ 
+    linux 32 : export BOOST_ROOT=/var/tmp/ma0/boost/boost_1_47_0
+    linux 64 : export BOOST_ROOT=/vol/ecf/boost/boost_1_47_0
+    hpux     : export BOOST_ROOT=/scratch/ma/emos/ma0/hpia64/boost/boost_1_47_0
+    AIX      : export BOOST_ROOT=/s1a/emos_esuite/emos_data/sms/boost/boost_1_47_0
+ 
+ 4/ Change directory to ecflow root.
+ 
+    linux 32 : cd /var/tmp/ma0/clientRoot/workspace/git/working-directory
+    linux 64 : cd /vol/ecf/ecflow_1_9_0
+    hpux     : cd /scratch/ma/emos/ma0/hpia64/ecflow_1_9_0
+    AIX      : cd /s1a/emos_esuite/emos_data/sms/ecflow_1_9_0
+ 
+ 5/ Invoke the install, varies per platform:
+    probably a good idea to keep bjam in $BOOST_ROOT as this will help install as emos
+ 
+    Linux 32/64:
+      Only install ecflow and ecflowview since we have x-windows on linux
+ 
+      debug:    
+         # $BOOST_ROOT/bjam -d2 install-all                
+      
+      release:  
+         # $BOOST_ROOT/bjam -d2 variant=release install-all  
+ 
+    HPUX:
+      Only install ecflow
+      debug:    
+         # $BOOST_ROOT/bjam -d2 install  
+      
+      release:  
+         # $BOOST_ROOT/bjam -d2 variant=release install  
+    
+    AIX:
+      Only install ecflow
+      We only have debug build. release does not work.
+      * note use: # su emos since we need to set path to python libs *
+      
+         # $BOOST_ROOT/bjam -d2 install  
+
+6/ Check file permissions.
+   The file files are copied with emos umask. 
+   Hence the file permissions may need changing:
+
+   chmod 755 $ECFLOW_INSTALL_DIR/bin/*
+
+==============================================================================
+
+o Please note that oetzi/ma0 has been added to the .rhosts file
+
+  so we can also install as:
+  
+      rsh emos@lxa "bjam -d2 install"
+         

@@ -1,0 +1,868 @@
+#!/bin/ksh
+#==========================================================================
+##.TITLE   EMOS - METAPS utilities
+##.NAME    sms_submit
+##.SECTION EMOS
+##.DATE    2005-09-12
+##.VERSION 1.0
+#==========================================================================
+
+##$  sms_submit user host file
+##
+##?  Decides according to host argument which submit method to use.
+
+# Modifications:
+
+# Error handling and cleanup
+export SGE_ROOT=/usr/local/apps/sge
+export SLURM_ROOT=/usr/local/apps/slurm/current/bin
+export LL_ROOT=/usr/lpp/LoadL/full/bin
+STANDALONE=/usr/local/apps/sms/bin/standalone
+RUNSHELL=/bin/ksh 
+TIMEOUT=300  # timeout period (seconds)
+SSH="ssh -o ConnectTimeout=$TIMEOUT -o BatchMode=yes -o StrictHostKeyChecking=no "
+RSH=rsh
+PROFILE=". $HOME/.profile"
+type rsh > /dev/null || RSH=$SSH
+
+#--------------------------------------------------------------------------
+#  Parameters for ecrcmd
+#--------------------------------------------------------------------------
+
+SSH="ssh -o ConnectTimeout=$TIMEOUT -o BatchMode=yes -o StrictHostKeyChecking=no "
+
+ERROR() { 
+  err=$?
+  echo "ERROR $0: $* $? - Exiting."
+  # CP_SUB
+
+  [[ -f $subfile ]] && grep "has been submitted" $subfile && exit 0
+  [[ -f $subfile ]] && grep "Submitted batch job" $subfile && exit 0
+# Unable to run job: failed receiving gdi request # TBD OK
+  cat $subfile
+  exit $err
+}
+
+kill_submitted_and_abort() {
+    # not used while not deterministic: job may run in betweem and 
+    # become a zombie 
+    outf=$TMPDIR/kill$$
+    if [[ $? == 0 ]] && [[ -d $TMPDIR ]] ; then
+        touch $outf
+        grep "ECF_NODE="  ${subfile%.sub}   > $outf && \
+            grep "ECF_PORT=" ${subfile%.sub}  >> $outf && \
+            grep "ECF_NAME="  ${subfile%.sub}  >> $outf && \
+            grep "ECF_PASS="  ${subfile%.sub}  >> $outf && \
+            echo "export ECF_NODE ECF_PORT ECF_NAME ECF_PASS" >>$outf &&\
+            echo "ecflow_client --abort || :" >> $outf && . $outf
+        grep "^SMSNODE="  ${subfile%.sub}   > $outf && \
+            grep "^SMS_PROG=" ${subfile%.sub}  >> $outf && \
+            grep "^SMSNAME="  ${subfile%.sub}  >> $outf && \
+            grep "^SMSPASS="  ${subfile%.sub}  >> $outf && \
+            echo "export SMSNODE SMS_PROG SMSNAME SMSPASS " >> $outf && \
+            echo "smsabort || :" >> $outf && . $outf
+        ksh -x $outf
+        rm -f $outf
+    fi
+}
+
+kill_nqs() {
+    if [[ -s $subfile ]] ; then
+      tid=$(tail -1 $subfile | cut -d\. -f1 )
+      # tid=`tail -1 $subfile | cut -d\. -f1 `
+      # where=`tail -1 $subfile | cut -d\. -f2 `
+      $RSH $host -l $user qsig -s 2 $tid || qsig -s 2 $tid
+      $RSH $host -l $user qdel -W 10 $tid || qdel -W 10 $tid
+      
+    elif [[ -s $4 ]] ; then
+      tid=$(grep PBS_JOB ${4}.1 | cut -d= -f2)
+      $RSH $host -l $user qsig -s 2 $tid
+      $RSH $host -l $user qdel -W 10 $tid
+      
+    else
+      # Signal the job
+      $RSH $host -l $user qsig -s 2 $smsid
+
+      # Remove the job from PBS (give 10 ssmeconds delay for the above to finish)
+      $RSH $host -l $user qdel -W 10 $smsid
+    fi
+}
+
+kill_vpp() {
+    $RSH $host -l $user qdel -2 $smsid
+}
+
+kill_nqs() {
+    $RSH $host -l $user qdel -2 $smsid
+}
+
+kill_sge() {
+    use sge || :
+    QDEL=sge_qdel
+    type $QDEL || QDEL="ssh $host $SGE_ROOT/sge6_2u5/bin/lx24-amd64/qdel"
+    if [[ -s $subfile ]] then
+      tid=$(grep " has been submitted" $subfile | cut -f 3 -d" ")
+      $QDEL $tid
+    elif [[ -s $4 ]] ; then
+      tid=$(grep active_jobs $4 | grep cd | cut -d"." -f 2 | cut -d"/" -f8)
+      $QDEL $tid
+    else
+      $QDEL $smsid
+    fi
+}
+
+kill_new_linux() {
+  tid=$(grep " has been submitted" $subfile | cut -f 3 -d" ")
+  $SSH $host -l $user $SGE_ROOT/sge6_2u5/bin/lx24-amd64/qdel $tid
+}
+
+kill_ll() {
+ if [[ -s $subfile ]] then
+   tid=$(grep " has been submitted." $subfile | cut -d\" -f2)
+   $RSH $host -l $user $LL_ROOT/llcancel $tid
+ else
+
+   if [[ "$host" == hpc* ]] ; then
+     host=$(echo $host | cut -c1-4)
+     id=${host}0$(echo $smsid % 1000 | bc).$(echo $smsid / 1000 | bc)
+   else
+       id=$smsid
+       if [[ -f $smsid ]] ; then
+           grep "LOADL_STEP_ID=NOT_SET" $subfile && \
+               id=$(grep JOB_ID= $subfile | cut -d= -f2) && \
+               $RSH $host -l user kill -9 $id
+       fi
+   fi
+
+   $RSH $host -l $user $LL_ROOT/llcancel $id
+ fi
+}
+
+kill_slurm() {
+ if [[ -s $subfile ]] then
+   tid=$(grep "Submitted batch job " $subfile | awk '{print $4}')
+   $SSH $host -l $user $SLURM_ROOT/scancel $tid
+ else
+     id=$smsid
+     if [[ -f $smsid ]] ; then
+         grep "LOADL_STEP_ID=NOT_SET" $subfile && id=$(grep JOB_ID= $subfile | \
+             cut -d= -f2) && \
+             $SSH $host -l $user kill -9 $id
+     fi
+     
+     $SSH $host -l $user $SLURM_ROOT/scancel $id
+ fi
+}
+
+kill_rsh() {
+    $RSH $host -l $user /bin/kill -2 $smsid
+    # SGI syntax: kill -signal -pgid
+    $RSH $host -l $user kill -15 $smsid || kill -15 $smsid
+}
+
+status_pbs() {
+
+    qstat=/usr/local/apps/propbs/bin/qstat
+
+    if [[ -s $subfile ]] ; then
+        display_subfile
+      tid=$(tail -1 $subfile)
+    elif [[ -s $smsjob ]] ; then
+      tid=$(grep PBS_JOB ${smsjob}.1 | cut -d= -f2)
+    else
+      tid=$smsid
+    fi
+
+    banner "** output ** "
+    $RSH $host -l $user tail -100 /var/spool/PBS/spool/${tid}* &
+    wait
+    banner "** qstat ** "
+    $RSH $host -l $user $qstat -f $tid | grep $user && OK=OK &
+
+}
+
+status_vpp() {
+    $RSH $host -l $user qstat $smsid  | grep $user && OK=OK &
+}
+
+status_nqs() {
+    $RSH $host -l $user qstat $smsid  | grep $user && OK=OK &
+}
+
+status_swarm() {
+#    use sge
+    task_name=$(basename $smsjob | cut -d\. -f1)
+    if [[ -s $subfile ]] then
+        display_subfile
+      tid=$(grep " has been submitted" $subfile | cut -f 3 -d" ")
+    elif [[ -s $smsjob ]] ; then
+      tid=$(grep active_jobs $smsjob | grep cd | cut -d"." -f 2 | cut -d"/" -f8)
+    else
+      tid=$smsrid
+    fi
+
+    printf "==============================================================\n"
+    if [[ $host == @(lxa|lxb|lxab) ]] ; then
+        cat $file | $SSH $host $SGR_ROOT/sge6_2u5/bin/lx24-amd64/qstat -u $user -f  | \
+            grep -E "$task_name|$tid" | grep $user && OK=OK
+        cat $file | $SSH $host $SGE_ROOT/sge6_2u5/bin/lx24-amd64/qstat -j $tid && \
+            print "$smsjob is there\n" || print "$smsjob not there ... \n"
+    else
+        qstat -u $user -f  | grep -E "$task_name|$tid" | grep $user && OK=OK
+        qstat -j $tid && print "$smsjob is there\n" || print "$smsjob not there ... \n"
+    fi
+    printf "==============================================================\n"
+}
+
+status_new_linux() {
+    status_swarm
+}
+
+status_ll() {
+    if [[ -s $subfile ]] then
+        tid=$(grep " has been submitted." $subfile | cut -d\" -f2)
+        host=$(echo $tid | cut -d\. -f1)
+        host4=$(echo $host | cut -c1-4)
+               
+        $RSH $host $LL_ROOT/llq -f %id %jn %o %c %st %nh $tid  | grep $user && OK=OK &
+
+    else
+        
+        if [[ -s $smsjob ]] ; then
+            host=$(grep HOST= $smsjob | cut -d= -f2)
+        fi
+        
+        if [[ "$host" == hpc* ]] ; then
+            host=$(echo $host | cut -c1-4)
+            host4=$(echo $host | cut -c1-4)
+            id=${host}0$(echo $smsid % 1000 | bc).$( echo $smsid / 1000 | bc)
+        else 
+            id=$host.$smsid
+        fi
+        
+        $RSH $host $LL_ROOT/llq -f %id %jn %o %c %st %nh $tid  | grep $user
+    fi
+}
+
+status_slurm() {
+ if [[ -s $subfile ]] then
+     display_subfile
+   tid=$(grep "Submitted batch job" $subfile | cut -d' ' -f4)
+   $SSH -l $user $host $SLURM_ROOT/scontrol show job -d $tid
+   $SSH -l $user $host $SLURM_ROOT/squeue | grep $user | grep " $tid"
+ elif [[ $host != $hostname ]] ; then
+     $SSH -l $user $host "$0 $user $host $file $uout $smsid status"
+ fi
+}
+
+status_rsh() {
+    if [[ $smsid == 0 ]]; then echo "too early"; exit 0; fi
+    $RSH $host -l $user ps -elf | grep " $user " | grep " $smsid " | grep -v " grep " && \
+        $RSH $host -l $user ps --sid $smsid -f 
+
+    \ps -elf | grep " $user " | grep " $smsid " | grep -v " grep " && OK=OK &
+    \ps --sid $smsid -f && OK=OK &   
+}
+
+disp_subfile() {
+  if [[ -s $subfile ]]; then # && [[ $OK = NOK ]] ; then
+    ls -la $subfile
+    # echo #    grep "^# +++ hpc" $subfile 
+    cat $subfile
+    # && type=ll
+fi
+}
+
+#--------------------------------------------------------------------------
+#  Check the number of arguments
+#--------------------------------------------------------------------------
+
+set -x
+echo $0 $*
+
+if [ $# -lt 3 ] ; then
+  echo
+  echo "usage: $0 <user> <host> file remote_output [node_suffix]"
+  echo
+  echo "example: $0 uid ecgate task.job1"
+  echo "while node_suffix is empty, host-batch node is the target, "
+  echo "      else \$node\$nodesuffix is the replacement target"
+  echo  
+  exit 1
+fi
+
+set -x
+
+user=$1
+host=$2
+file=$3
+uout=$4
+node_suffix=$5
+smsid=$5
+
+for last; do true; done # last shall be submit status kill only
+case $last in
+submit | status |  kill ) echo;;
+*) last="submit" ;;
+esac
+
+subfile=${file}.sub
+
+#--------------------------------------------------------------------------
+# determine queuing system from hostname
+# (can be replaced by a more refined method later...)
+#--------------------------------------------------------------------------
+
+hostname=$(hostname)
+
+case $host in
+    bilbo | belegorn | boromir | denethor | faramir | acq | pp1 | diss) type=pbs;;
+    vpp* )    type=vppnqs;;
+    swarm | linux_cluster | lxa | lxb | lxab )    type=sge_qsub;;
+    ecgate1 | ecgb* | ecgt* ) type=slurm;;
+    ecgate  | ecga* | c2* )   type=ll;;
+    $hostname | localhost )   type=local;;
+    datasvc)                  type=ssh;;
+    * )                       type=rsh;;
+esac
+
+# if [[ $type = "local" ]] && [[ $hostname = @(ecg*|vsms*) ]]; then type=ssh; fi
+
+#--------------------------------------------------------------------------
+# determine job file type and output directory
+#--------------------------------------------------------------------------
+
+output=""
+if egrep -i "^#.*QSUB " $file > /dev/null ; then
+  jtype=nqs
+  output=$(egrep -i "^#.*QSUB -o" $file | cut -d" " -f 4 | head -1)
+
+elif egrep -i "^#.*@.*queue" $file > /dev/null ; then
+  jtype=ll
+  output=$(egrep -i "^#.*@.*output" $file | cut -d"=" -f 2 | head -1)
+
+elif [[ $host == @(ecgb*|ecgt0*|ecgate1) ]] ; then
+  jtype=slurm
+  output=$(egrep -i "^#.*-o" $file | cut -d" " -f 3 | head -1)
+
+elif egrep -i "^#.*PBS " $file > /dev/null ; then
+  jtype=pbs
+
+elif egrep -i "^#.*SBATCH " $file > /dev/null ; then
+  jtype=slurm
+  output=$(egrep -i "^#.*-o" $file | cut -d" " -f 3 | head -1)
+  if [[ output == "" ]]; then
+    output=$(egrep -i "^#.*-output" $file | cut -d" " -f 3 | head -1)
+  fi
+  if [[ output == "" ]]; then output=$uout; fi
+  if [[ output != "" ]]; then
+    head -1 $output && grep "#!/" && RUNSHELL=$(head -1 $output | cut -d! -f2)
+  else 
+    RUNSHELL="/bin/bash"
+  fi
+  case $RUNSHELL in
+    *tcsh) PROFILE=". $HOME/.tcshrc";;
+    *csh) PROFILE=". $HOME/.cshrc";;
+  esac
+elif [[ $host == @(linux_cluster|lxa|lxb|lxab|swarm) ]] ; then
+  jtype=sge_qsub
+  output=$(egrep -i "^#.*-o" $file | cut -d" " -f 3 | head -1)
+
+else
+  jtype=sh
+
+fi
+
+case $last in
+submit)
+#--------------------------------------------------------------------------
+#  File must exist!
+#--------------------------------------------------------------------------
+
+if [[ ! -f $file ]] ; then
+  echo "$0: File $file not found?"
+  exit 1
+fi
+
+chmod 755 $file
+
+if [[ "$uout" != "" ]]; then output=$uout; mkdir -p $(dirname $uout); fi
+if [[ $output == *0.0 ]]; then echo "filename error $output"; exit 1; fi
+cp $file ${file}.pre
+# mailx -s "o:$output uo:$uout" $USER < /dev/null; exit 0
+
+LC="-c "
+if egrep -qi "^[[:space:]]*#[[:space:]]*@[[:space:]]*environment[[:space:]]*=" $file > /dev/null
+then
+  LC="-lc "
+fi
+
+[[ "$output" == "" ]] || outputdir=$(dirname $output)
+if [[ "$outputdir" != "" ]] ; then 
+#--------------------------------------------------------------------------
+#  Create the output directory if it can be found
+#--------------------------------------------------------------------------
+if [[ ! -d $outputdir ]] ; then
+  # don't worry anymore about output directory
+  $RSH $host -l $user mkdir -m 775 -p $outputdir || \
+      mkdir -m 775 -p $outputdir || /bin/true
+fi
+fi
+;;
+esac
+
+case $type in
+#==========================================================================
+# Submit to hp using PBS
+  pbs )
+#==========================================================================
+
+case $last in 
+kill) kill_pbs; exit 0;;
+status) status_pbs; exit 0;;
+esac
+
+# get queue-name, job-name
+if [[ $jtype == nqs ]] ; then
+  queue=$(grep 'QSUB -q ' $file | cut -d" " -f 4 | head -1)
+  jname=$(grep 'QSUB -r ' $file | cut -d" " -f 4 | head -1)
+
+elif [[ $jtype == ll ]] ; then
+  queue=$(egrep '^#.*@.*class.*=' $file | cut -d"=" -f 2 | head -1)
+  jname=$(egrep '^#.*@.*job_name.*=' $file | cut -d"=" -f 2 | head -1)
+
+elif [[ $jtype != pbs ]] ; then
+  ERROR "No conversion available for these types ($jtype -> $type)."
+fi
+
+#--------------------------------------------------------------------------
+#  Create the script (${file}__) that will contain the PBS directives
+#--------------------------------------------------------------------------
+
+if [[ $jtype != pbs ]] ; then
+
+cat > ${file}__ <<- EOF
+#!$RUNSHELL
+if [[ -f $HOME/.profile ]]; then
+$PROFILE
+fi
+#PBS -S /bin/ksh
+#PBS -N $jname
+#PBS -V
+#PBS -o /dev/null
+#PBS -e /dev/null
+#PBS -j oe
+#PBS -u $user
+#PBS -q $queue
+EOF
+
+  egrep -v '^#.*QSUB -|^:$|^#.*@' $file >> ${file}__
+
+  mv -f ${file}__ ${file}
+
+fi
+#--------------------------------------------------------------------------
+# Remote shell to $host and submit from there
+#--------------------------------------------------------------------------
+
+#rsh $host -l $user /usr/local/apps/propbs/bin/pbsqsub < $file || ERROR "Failed to submit job to PBS (possible failure of rsh)."
+
+if [[ $(uname -n) == @(ecgb*|vsms*|sms-map) ]]; then
+  $SSH -l $user $host /usr/local/apps/propbs/bin/pbsqsub -f $file > $subfile 2>&1 || \
+      ERROR "Failed to submit job to PBS. " 
+else
+    ecrcmd --timeout=$TIMEOUT < $file $user@$host $LC \
+        /usr/local/apps/propbs/bin/pbsqsub -f $file > $subfile || \
+        ERROR "Failed to submit job to PBS." 
+fi
+
+  ;;
+#==========================================================================
+# Submit to vpp using NQS
+  vppnqs )
+#==========================================================================
+
+case $last in 
+kill) kill_vpp; exit 0;;
+status) status_vpp; exit 0;;
+esac
+
+if [[ $jtype == ll ]] ; then
+  /home/ma/emos/bin/ll2nqs.pl $file ${file}__ || ERROR "Conversion ll2nqs.pl failed."
+  mv -f ${file}__ $file
+
+elif [[ $jtype != nqs ]] ; then
+  ERROR "No conversion available for these types ($jtype -> $type)."
+
+else
+  grep -v "QSUB -p" $file | grep -v "QSUB -lh" > ${file}__
+  mv -f ${file}__ $file
+fi
+  
+#--------------------------------------------------------------------------
+#  Send the file using qsub
+#  If send failed, sleep a while and try again, until maximum number of
+#  tries.
+#--------------------------------------------------------------------------
+
+$SSH $host -l $user /usr/local/bin/vppqsub < $file | grep -i submitted  > $subfile || \
+  ERROR "Failed to submit $file."
+
+  ;;
+#==========================================================================
+  sge_qsub ) # swarm linux cluster 
+
+case $last in 
+kill) kill_sge; exit 0;;
+status) status_sge; exit 0;;
+esac
+
+# get queue-name, job-name
+if [[ $jtype == nqs ]] ; then
+  queue=$(grep 'QSUB -q ' $file | cut -d" " -f 4 | head -1)
+  jname=$(grep 'QSUB -r ' $file | cut -d" " -f 4 | head -1)
+
+elif [[ $jtype == ll ]] ; then
+  queue=$(egrep '^#.*@.*class.*=' $file | cut -d"=" -f 2 | head -1)
+  jname=$(egrep '^#.*@.*job_name.*=' $file | cut -d"=" -f 2 | head -1)
+
+elif [[ $jtype != sge_qsub ]] ; then
+  ERROR "No conversion available for these types ($jtype -> $type)."
+fi
+
+#--------------------------------------------------------------------------
+#  Create the script (${file}__) that will contain the PBS directives
+#--------------------------------------------------------------------------
+
+# if [[ $jtype != sge_qsub ]] ; then
+
+  queue=$(grep 'QSUB -q ' $file | cut -d" " -f 4 | head -1)
+
+cat > ${file}__ <<- EOF
+#\$ -S /home/ma/emos/bin/ksh
+#\$ -N ${jname}
+#\$ -V
+#\$ -o $output
+#\$ -j y
+#\$ -u $user
+#\$ -q $queue
+EOF
+
+  egrep -v '^#.*QSUB -|^:$|^#.*@' $file >> ${file}__
+  chmod 755 ${file}__
+  mv -f ${file}__ ${file}
+
+# fi
+
+    mkdir -m 775 -p $outputdir || /bin/true
+    if [[ $host == @(lxa|lxb|lxab) ]] ; then
+        cat $file | $SSH $host \
+            $SGE_ROOT/sge6_2u5/bin/lx24-amd64/qsub -notify > $subfile 2>&1 || \
+            ERROR "Job submission failed (${file}__)." 
+    elif [[ $HOST == @(ibis|pikachu) ]] ; then
+      cat $file | $RSH drn01 \
+          SGE_ROOT=$SGE_ROOT $SGE_ROOT/bin/lx24-amd64/qsub -notify > $subfile 2>&1 || \
+          ERROR "Job submission failed (${file}__)." 
+    elif [[ -d $SGE_ROOT ]]; then
+      /usr/local/share/sge_qsub -notify $file > $subfile 2>&1 || \
+          ERROR "Job submission failed (${file}__)." 
+    else
+      cat $file | $SSH drn01 \
+          ${SGE_ROOT:=/usr/local/apps/sge}/bin/lx24-amd64/qsub -notify > $subfile 2>&1 || \
+          cat $file | $SSH drn01 \
+          SGE_ROOT=$SGE_ROOT $SGE_ROOT/bin/lx24-amd64/qsub -notify $file > $subfile 2>&1 || \
+          ERROR "Job submission failed (${file}__)." 
+      
+      # || ERROR "Job submission failed (${file}__)." 
+    fi
+#     sge_qsub -notify $file  > $subfile || ERROR "Job submission failed (${file}__)."
+    ;;
+
+#==========================================================================
+# Submit to other workstation using NQS
+  nqs )
+#==========================================================================
+
+case $last in 
+kill) kill_nqs; exit 0;;
+status) status_nqs; exit 0;;
+esac
+
+#--------------------------------------------------------------------------
+#  Create the script (${file}__) that will run the qsub
+#--------------------------------------------------------------------------
+
+cat > ${file}__ <<- EOF
+#!/bin/ksh
+unset WAITQUEUE
+set -e
+EOF
+
+# qsub statement
+echo "/usr/local/share/qsub < ${file}" >> ${file}__
+
+#
+#  Create the real request
+#
+grep -v "QSUB -A" $file | grep -v "QSUB -lh" | grep -v "QSUB -p" | grep -v "QSUB -u" > ${file}__.qsub
+mv -f ${file}__.qsub ${file}
+
+#--------------------------------------------------------------------------
+# Remote shell to $host and submit from there
+#--------------------------------------------------------------------------
+chmod +x ${file}__
+$SSH $host -l $user -n "${file}__" || ERROR "Job submission failed (${file}__)."
+
+sleep 10
+/bin/rm -f ${file}__
+
+  ;;
+#==========================================================================
+# Submit to IBM server using loadleveler
+  ll )
+#==========================================================================
+
+case $last in 
+kill) kill_ll; exit 0;;
+status) status_ll; exit 0;;
+esac
+
+if [[ $jtype == nqs ]] ; then
+  #
+  #  Create the real request
+  #
+  /home/ma/emos/bin/nqs2ll.pl $host $file ${file}__ || ERROR "Conversion nqs2ll.pl failed."
+  if [[ "$uout" != "" ]]; then
+      cat ${file}__ | sed -e "s:# @ output = .*:# @ output = $output:" | \
+          sed -e "s:# @ error .*:# @ error  = $output:" > ${file}
+  else
+      mv -f ${file}__ ${file}
+  fi
+
+elif [[ $jtype != ll ]] ; then
+  ERROR "No conversion available for these types ($jtype -> $type)."
+fi
+#--------------------------------------------------------------------------
+# Remote shell to $host and submit from there
+#--------------------------------------------------------------------------
+
+if [[ $host == @(c2*) ]] ; then
+  # file="/ws$file"
+  if [[ $node_suffix == "" ]] ; then
+    host="${host}-batch"
+  else
+    host="${host}${node_suffix}"
+  fi
+fi
+
+if [[ $(uname -n) == @(ecgb*|vsms*|sms-map) ]]; then
+  $SSH -l $user ${host} \
+      "unset WAITQUEUE ; $LL_ROOT/llsubmit - 2>&1 " < $file > $subfile 2>&1 || \
+      ERROR "Failed to submit job to LoadLeveler. $?" 
+else
+  ecrcmd --timeout=$TIMEOUT < $file $user@$host $LC \
+      "unset WAITQUEUE ; $LL_ROOT/llsubmit -"  > $subfile || \
+      ERROR "Failed to submit job to LoadLeveler."
+fi
+
+  ;;
+
+  slurm ) # swarm linux cluster 
+
+case $last in 
+kill) kill_slurm; exit 0;;
+status) status_slurm; exit 0;;
+esac
+
+# get queue-name, job-name
+if [[ $jtype == nqs ]] ; then
+  queue=$(grep 'QSUB -q ' $file | cut -d" " -f 4 | head -1)
+  jname=$(grep 'QSUB -r ' $file | cut -d" " -f 4 | head -1)
+
+# srun sinfo 
+  cat > ${file}__ <<- EOF
+#!$RUNSHELL
+#SBATCH --output=${output:-/dev/null}
+#SBATCH --error=${output:=/dev/null}
+#SBATCH --time=01:00:00
+#SBATCH --job-name=${jname}
+#SBATCH --get-user-env
+#SBATCH --uid=$user
+##BATCH --qos=normal # express/long
+$PROFILE
+EOF
+# cp $file  ${file}.pre
+  cat $file | egrep -v '^#.*QSUB -|^:$|^#.*@' | \
+      grep -E -v '(^#.*SBATCH --output.*|#.*SBATCH --error.*|^#.*SBATCH --uid.*|^#.*SBATCH --qos.*)'  >> ${file}__
+  chmod 755 ${file}__
+
+elif [[ $jtype == slurm ]]; then
+
+  cat > ${file}__ <<- EOF
+#!$RUNSHELL
+#SBATCH --output=${output:-/dev/null}
+#SBATCH --error=${output:-/dev/null}
+#SBATCH --time=01:00:00
+#SBATCH --job-name=${jname}
+#SBATCH --get-user-env
+#SBATCH --uid=$user
+##BATCH --qos=normal # express/long
+$PROFILE
+EOF
+# cp $file  ${file}.pre
+  cat $file | egrep -v '^#.*QSUB -|^:$|^#.*@' | \
+      grep -E -v '(^#.*SBATCH --output.*|#.*SBATCH --error.*|^#.*SBATCH --uid.*|^#.*SBATCH --qos.*)'  >> ${file}__
+  chmod 755 ${file}__
+
+elif [[ $jtype == ll ]] ; then 
+  $PROFILE
+  # /usr/local/apps/slurm/utils/bin/ll2slurm
+  ll2slurm -q -i $file -o ${file}__  || ERROR "Job conversion to slurm failed (${file})." 
+elif [[ $jtype != slurm ]]; then
+  ERROR "No conversion available for these types ($jtype -> $type)."
+fi
+
+#--------------------------------------------------------------------------
+#  Create the script (${file}__) that will contain the PBS directives
+#--------------------------------------------------------------------------
+  mv ${file}__ $file
+
+  if [[ $hostname == @(ecgb*|ecgate1) ]]; then
+      touch $output
+      $SLURM_ROOT/sbatch < ${file} > $subfile 2>&1 \
+      || ERROR "Job submission failed (${file})." 
+  else
+      $SSH $host -l $user touch $output
+      cat ${file} | $SSH $host -l $user $SLURM_ROOT/sbatch > $subfile 2>&1 \
+          || ERROR "Job submission failed (${file})." 
+  fi
+;;
+#==========================================================================
+# Submit using ssh
+#==========================================================================
+  ssh )
+
+case $last in 
+kill) kill_ssh; exit 0;;
+status) status_ssh; exit 0;;
+esac
+
+  cmd="ssh $user@$host"
+#
+#  Add the header with requested shell
+#
+
+  cat > ${file}__ <<- EOF
+#!$RUNSHELL
+# output=$output
+$PROFILE
+EOF
+
+#
+#  Add the real request removing all qsub statements
+#
+
+if [[ $jtype == ll ]] ; then
+  egrep -v '^#.*@|^#!|^:$' $file >> ${file}__
+elif [[ $jtype == nqs ]] ; then
+  egrep -v '^#.*QSUB|^#!|^:$' $file >> ${file}__
+elif [[ $jtype == slurm ]] ; then
+  egrep -v '^#.*SBATCH|^#!|^:$' $file >> ${file}__
+elif [[ $jtype == pbs ]] ; then
+  egrep -v '^#.*PBS|^#!|^:$' $file >> ${file}__
+fi
+
+#
+#  Submit the job
+#
+$cmd "/usr/local/bin/standalone -o $output -s $RUNSHELL " < ${file}__ || ERROR "Job submission to ssh standalone failed."
+;;
+
+#==========================================================================
+# Submit to any other workstation using rsh standalone or
+# submit to local workstation using standalone
+  rsh | local )
+#==========================================================================
+
+case $last in 
+kill) kill_rsh; exit 0;;
+status) status_rsh; exit 0;;
+esac
+
+if [[ $type == local ]] ; then
+  cmd=""
+elif [[ $hostname == @(ecgb*|vsms*) ]] ; then
+  cmd="$SSH -l $user $host "
+else
+  cmd="rsh $host -l $user "
+fi
+   
+#
+#  Add the header with requested shell
+#
+
+cat > ${file}__ <<- EOF
+#!$RUNSHELL
+# output=$output
+$PROFILE
+EOF
+#
+#  Add the real request removing all qsub statements
+#
+
+if [[ $jtype == ll ]] ; then
+  egrep -v '^#.*@|^#!|^:$' $file >> ${file}__
+
+elif [[ $jtype == nqs ]] ; then
+  egrep -v '^#.*QSUB|^#!|^:$' $file >> ${file}__
+
+elif [[ $jtype == slurm ]] ; then
+  egrep -v '^#.*SBATCH|^#!|^:$' $file >> ${file}__
+
+elif [[ $jtype == pbs ]] ; then
+  egrep -v '^#.*PBS|^#!|^:$' $file >> ${file}__
+
+fi
+
+mv -f ${file}__ $file
+#
+#  Submit the job
+#
+if [[ $type == local ]] ; then
+
+    case $hostname in
+        ecg* | vsms*)  nohup $RUNSHELL -x $file > $output 2>&1 &             ;;
+        *) standalone -o $output -s $RUNSHELL < $file || ERROR "Job submission to standalone failed."
+            ;;
+        esac
+else
+
+    case $hostname in
+        ecg* | vsms*)  # $cmd "nohup $RUNSHELL -x $file > $output 2>&1 &"             
+            $cmd "$STANDALONE -o $output -s $RUNSHELL" < $file  > $subfile || \
+                ERROR "Job submission to rsh standalone failed."
+            ;;
+        *)
+            $cmd "/usr/local/bin/standalone -o $output -s $RUNSHELL" < $file  > $subfile ||\
+                 ERROR "Job submission to rsh standalone failed."
+            ;;
+    esac
+fi
+
+  ;;
+esac
+
+exit 0
+
+ssh-keygen -t dsa
+scp ~/.ssh/id_dsa.pub ecgate:.ssh/authorized_keys2
+ssh-agent sh -c 'ssh-add < /dev/null && bash' 
+
+
+ssh-keygen -t rsa
+ssh server "mkdir .ssh; chmod 0700 .ssh"
+scp .ssh/id_rsa.pub server:.ssh/authorized_keys2
+scp $HOME/.ssh/id_rsa.pub c2a:$HOME/.ssh/authorized_keys2
+scp $HOME/.ssh/id_rsa.pub c2b:$HOME/.ssh/authorized_keys2
+
+cp $HOME/.ssh/id_rsa.pub $HOME/.ssh/authorized_keys2

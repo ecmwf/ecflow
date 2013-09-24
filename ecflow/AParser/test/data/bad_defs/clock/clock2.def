@@ -1,0 +1,11 @@
+suite suiteName
+    clock real 99.1.2006   # day out of range
+endsuite
+
+suite suiteName
+    clock real 1.15.2006   # month out of range
+endsuite
+
+suite suiteName
+    clock real 1.15.0000   # 0 year out of range
+endsuite

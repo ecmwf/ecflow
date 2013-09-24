@@ -1,0 +1,10 @@
+suite mars
+  clock hybrid 01.07.2009  
+  family archive
+  	repeat integer fred 1 1 
+    task grib
+      verify complete:6        # 00:30 4:30 8:30 12:30 16:30 20:30
+      time 00:30 23:59 04:00   #
+   endfamily
+endsuite
+ 

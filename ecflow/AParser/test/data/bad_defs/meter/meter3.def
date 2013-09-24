@@ -1,0 +1,7 @@
+suite suiteName
+   family familyName
+      task taskName
+          meter myMeter  0 100 100  
+          meter myMeter  0 100 100  #  duplicate meters are not allowed
+    endfamily
+endsuite

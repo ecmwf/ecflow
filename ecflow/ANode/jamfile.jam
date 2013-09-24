@@ -1,0 +1,64 @@
+## Copyright 2009-2012 ECMWF. 
+## This software is licensed under the terms of the Apache Licence version 2.0 
+## which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
+## In applying this licence, ECMWF does not waive the privileges and immunities 
+## granted to it by virtue of its status as an intergovernmental organisation 
+## nor does it submit to any jurisdiction. 
+
+#
+# Node project
+#
+project theNode ;
+
+use-project theCore     : ../ACore ;
+use-project theNodeAttr : ../ANattr ;
+
+
+# The <include> means we will automatically add this directory to the include path
+# of any other target that uses this lib
+#
+lib node : [ glob src/*.cpp ]
+         : <link>static
+           <variant>debug:<define>DEBUG
+           <use>/theCore//core
+           <use>/theNodeAttr//nodeattr
+           <use>/site-config//boost_system
+           <use>/site-config//boost_serialization
+           <use>/site-config//boost_filesystem
+           <use>/site-config//boost_datetime
+           <use>/site-config//boost_test
+         :
+         : <include>../ANode/src         
+         ;
+
+
+#
+# This is *ONLY* required when the define ECFLOW_MT is used, (used by Signal.cpp)
+lib pthread ;
+
+exe nodetest : [ glob test/*.cpp : test/TestSingleExprParse.cpp ]
+           pthread
+           /theCore//core
+           /theNodeAttr//nodeattr
+           node
+           /site-config//boost_system
+           /site-config//boost_serialization
+           /site-config//boost_filesystem
+           /site-config//boost_test
+           /site-config//boost_datetime
+         : <variant>debug:<define>DEBUG
+	      ;
+	     
+	     
+exe stest : test/TestSingleExprParse.cpp
+           pthread
+           /theCore//core
+           /theNodeAttr//nodeattr
+           node
+           /site-config//boost_system
+           /site-config//boost_serialization
+           /site-config//boost_filesystem
+           /site-config//boost_test
+           /site-config//boost_datetime
+         : <variant>debug:<define>DEBUG
+ 	     ;

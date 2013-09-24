@@ -1,0 +1,4 @@
+suite  
+	verify complete:3        # cant have 2 verify completes, must be of different states
+	verify complete:4        #  
+endsuite

@@ -1,0 +1,248 @@
+This file outlines the design considerations for zombies
+/////////1/////////2/////////3/////////4/////////5/////////6/////////7
+
+   --------------                             ----------------------- 
+   | ECF server |--------System::spawn()----->| Child process       |  
+   |            |                             | invokes ECF_JOB_CMD |
+   |            |<------ SIGCHLD(waitpid)-----|                     |
+   --------------                             -----------------------
+         ^                                            |  Phase1
+         |                                            |
+         |                           ECF_JOB_CMD creates a Job process
+         |                                            |
+         |                                            V  Phase2
+         |                                      -----------------------
+         |                                      |   Task/Job          | 
+         |         ClientInvoker                | ECF_PORT            |
+       TCP/IP(init,complete,event,meter,abort)--| ECF_NAME(task_path) |  
+                                                | ECF_PASS            |
+                                                | ECF_TRYNO           |
+                                                -----------------------
+
+Job submission in ECF can involve several steps
+/////////1/////////2/////////3/////////4/////////5/////////6/////////7
+ phase 1: Spawn of ECF_JOB_CMD
+ phase 2: Invocation of ECF_JOB_CMD, this creates the *real* job 
+          which communicates with the server
+ For TEST     :ECF_JOB_CMD = "%ECF_JOB% 1> %ECF_JOBOUT% 2>&1
+     this collapses phase 1 and 2, to a single step
+ For Operation:ECF_JOB_CMD = ecf_submit %USER% %SCHOST% %ECF_JOB% %ECF_JOBOUT%'
+     This uses ecf_submit,This spawns the process to the different load 
+     levellers depending on OS, etc. and hence involves at 
+     least 2 process.
+The System class handles phase 1, we capture the death of the 
+child process and hence this class will not in operations handle the 
+death of the real job created by ecf_submit.
+ 
+The jobs file are shell scripts, which have IPC(child commands) which 
+talk to to the ecf server. Since the scripts are user created, 
+they can include, errors: i,e
+   o multiple call to complete
+     To guard against this, we should *not* reset password in the 
+     task  complete cmd To avoid zombie creation
+   o Failure to call complete (maybe due to early exit in the 
+     job file)
+     There is not much we can do here, the job will stay active.
+   o Path do not match, since the node tree, in the server has been 
+     deleted. Typically the job will hold on the child commands.
+     See proposal below, where we provide additional zombie control
+                 
+                                                                              
+Zombies
+/////////1/////////2/////////3/////////4/////////5/////////6/////////7
+Zombies are running tasks which the server does not authenticate.
+(i.e jobs without a valid password(ECF_PASS) or where path does not 
+match).There are several kinds of zombies, user, path and ecf. 
+(See below)
+        
+Running Jobs, communicate with the server, via the ClientInvoker 
+interface.
+This will try to communicate with the server for a ECF_TIMEOUT seconds.
+ECF_TIMEOUT is an environment variable, if not defined we 
+default to 24hrs.It will cycle through the hosts file. 
+
+In operations the host file consists of 2 or 3 *backup* servers. 
+Note: In operations, a scheduled task will copy the checkpoint file 
+from home server, to the backup servers. 
+This allows the back up servers to take over in the event the 
+home server dies/is halted.
+
+Important: The backup server *MUST* have the *same* port number as
+           the home server, i.e. since the job was created with a 
+           particular port number.
+  
+Currently some user use non blocking child commands, 
+i.e by invoking the child commands in the background.
+(This may not make sense for all child cmds) 
+(i.e they do not want there JOB to wait, while IPC, attempts to
+connect to the ecf server)
+
+
+Current behaviour: Task/Job----> Server
+/////////1/////////2/////////3/////////4/////////5/////////6/////////7
+o Server halted:
+  client cycles through the host file, if no host file, continues for 
+  ECF_TIMEOUT/24hrs
+  If host file, exists, but we can not parse it, fails with 
+  an error message
+o If task paths don't match, those in the server, client interface 
+  errors and returns immediately
+o if password match fails, client interface errors and 
+  returns immediately  
+o If we can not connect to server(Network down, or server down), 
+  Child commands, block for 24 hours
+  Other commands non-blocking and terminate immediately
+  
+
+SMS manual User interaction with zombies
+/////////1/////////2/////////3/////////4/////////5/////////6/////////7
+o fob, i.e ignore zombie by allowing child commands, to complete, 
+  without blocking.
+o delete, delete zombie from the list, it may reappear
+o recover/adopt the child
+o fail, let the child command(ClientInvoker) fail,
+        
+        
+User configurable zombie management
+/////////1/////////2/////////3/////////4/////////5/////////6/////////7
+In operations the child commands should block. i.e continue attempting 
+communication with the server. For other clients, child commands 
+should not block, but terminate, and hence allow the job to complete.
+This proposal outlines a way of adding this configurability and
+additionally allowing for a more automated response.
+
+It is expected the the zombies would still popup, but additionally
+will show the automated response. (when defined).
+
+Introduce a new attribute "zombie", which is added to the definition 
+file, which allow user to define, how child 
+(init,complete,event,meter,label) communication with the server is 
+handled in an automated fashion in the presence of zombies.
+
+This will work in the similar fashion as variables. 
+i,e we will look up  the node tree hierarchy for a zombie construct. 
+This allows for a finer degree of control. 
+Typically zombie attribure should be added to the Suite/family
+    
+    zombie ::= { <zombie_type>: 
+                    child(optional) : 
+                    <client_side_action | server_side_action> :
+                    zombie_life_time(optional) }
+    
+zombie_type = [ user | ecf | path ]
+          
+   o path: (ECF_NAME) can not be found in the server, because node 
+     tree was deleted,replaced,reload, server crashed or backup 
+     server does not have node tree
+   - Jobs could have been created, via 'ecf' or 'user' commands
+     All we know is that task paths dont match
+     We could however, have *partial* match on suite 
+     or family node paths
+     *** Paths zombies type, can only be added to a suite/family, 
+     *** since by its nature the task path does not exist
+     *** Applied when we have a partial path match.
+     *** if no match at all will terminate/fail child command.
+          
+   o user:
+   - job is created by user action like, rerun, requeue
+     user zombies are differentiated from ecf(scheduled)
+     They are automatically created when the force option is used
+     and we have tasks in an active or submitted states.
+          
+   o ecf:
+   - Jobs are created as part of the normal scheduling
+   - Ecf Crashed ( or terminated and restarted) and the recovered 
+     check pt file is out of date
+   - Task repeatedly re-run ? Earlier copies will not be remembered.
+   - Task sent by another ECF server, but which can not talk to the 
+     original ECF server
+   - Network glitches/network down.
+        
+
+child = [ init, event, meter, label, wait, abort, complete ]
+    any number of comma separated child cmds can be specified, or 
+    can be  left empty. see example below.
+    If for example only event is specified, then the other
+    child commands will block.(ie the default behaviour)
+ 
+    
+client_side_action = [ fob | fail | block(default) ]
+   o fob:   child command always succeeds, the child commands are 
+            allowed to complete, without blocking
+   o fail:  Ask child to fail with an error 
+   o block: Ask child to block, default action for zombies.
+                       
+server_side_action:  [ adopt | delete ]              
+   o adopt:  allow the password  supplied by child commands, to be 
+             passed to the node, and automatically adopt.
+   o delete: simply delete from zombies list. Child continues blocking
+        
+Note: only adopt allows the child command to change the node tree 
+state.
+zombie_lifetime: Determines how long the zombie lives, before 
+auto-deletion.(optional)
+       
+       
+Valid options
+/////////1/////////2/////////3/////////4/////////5/////////6/////////7
+     For <user> zombie type the valid actions are:
+        o  fail | adopt  | fob | delete | block(default)
+
+     For <ecf> zombie type the valid actions are:
+        o  fail | adopt  | fob | delete | block(default)
+        
+     For <path> zombie type the valid actions are:
+        o  fail  | fob | delete | block(default)
+              
+      A Node can have mutiple zombies but they can not have duplicate
+      zombie types.                    
+ 
+Example zombie construct:
+/////////1/////////2/////////3/////////4/////////5/////////6/////////7
+  suite s1
+     task t1
+     family f1
+        family control
+            zombie user::fail:300  
+            zombie ecf::block:3600  
+            zombie path:label,event:fob:200
+            
+        family experimental
+            zombie user:label:fob:0  
+            zombie ecf::fail:0  
+            zombie path::fail:0
+    
+Here for family 'control':
+User Zombies, all child commands fail, The associated zombie, 
+is removed after 300 seconds. zombies arising from scheduled jobs, 
+should block, and zombie be removed after an hour
+Any path zombies, label and event child commands cmd, should be ignored. 
+zombie removed after 200 seconds
+        
+For family experimental:
+User zombies, with child label should fob, and zombie removed as 
+soon as possible. ecf and path zombies should fail, and zombie removed 
+from the list as soon as possible
+    
+If no zombies constructs are added the default behaviour is equivalent to:
+
+     zombie user::block:900  
+     zombie ecf::block:3600  
+     zombie path::block:300
+     
+In the example above, this would be applied to task t1.
+This is the current behaviour.
+
+        
+Design issues
+=============
+o Please note that there are 3 different objects, each with their own 
+  state:
+   Process (task_path, pid, password)
+   Task    (task_path, pid, password)
+   Zombie  (task_path, pid, password)
+  
+o When jobs are submitted and then forced via begin/requee
+  It quite possible for to have two different process
+  with the *same* password
+        

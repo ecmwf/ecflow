@@ -1,0 +1,93 @@
+## Copyright 2009-2012 ECMWF. 
+## This software is licensed under the terms of the Apache Licence version 2.0 
+## which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
+## In applying this licence, ECMWF does not waive the privileges and immunities 
+## granted to it by virtue of its status as an intergovernmental organisation 
+## nor does it submit to any jurisdiction. 
+
+#
+# Server
+#
+project theServer ;
+
+#
+# IMPORTANT: server *MUST* not link with client or include any of the client code
+#
+use-project theCore     : ../ACore ;
+use-project theNodeAttr : ../ANattr ;
+use-project theNode     : ../ANode ;
+use-project theBase     : ../Base ;
+use-project theParser   : ../AParser ;
+
+lib pthread ;
+
+#
+# Split into library, so that testing can use library, and hence same compiler option
+#
+# The <include> means we will automatically add this directory to the include path
+# of any other target that uses this lib
+
+#
+# Note: boost_thread is *ONLY* needed to test multi-threaded server, i.e when ECFLOW_MT defined
+#
+lib libserver : [ glob src/*.cpp : src/*Main.cpp ]
+              : <include>../ACore/src
+                <include>../ANattr/src 
+                <include>../ANode/src 
+                <include>../AParser/src 
+                <include>../Base/src 
+                <include>../Server/src
+                <variant>debug:<define>DEBUG
+                <link>static
+                <use>/theCore//core
+                <use>/theNode//node
+                <use>/theBase//base
+                <use>/theParser//libparser
+                <use>/site-config//boost_system
+                <use>/site-config//boost_thread
+                <use>/site-config//boost_serialization
+                <use>/site-config//boost_filesystem
+                <use>/site-config//boost_program_options
+                <use>/site-config//boost_datetime
+              :
+              : <include>../Server/src         
+              ;
+               
+exe ecflow_server : [ glob src/*Main.cpp ]
+            pthread
+             /theCore//core
+             /theNodeAttr//nodeattr
+             /theNode//node
+             /theParser//libparser
+             /theBase//base
+             libserver
+             /site-config//boost_system
+             /site-config//boost_thread
+             /site-config//boost_serialization
+             /site-config//boost_filesystem
+             /site-config//boost_datetime
+             /site-config//boost_program_options
+           : <variant>debug:<define>DEBUG
+           ;
+
+#
+# Test for server
+# IMPORTANT: server *MUST* not link with client or include any of the client code
+#
+exe tserver : [ glob test/*.cpp ]
+            pthread
+             /theCore//core
+             /theNodeAttr//nodeattr
+             /theNode//node
+             /theParser//libparser
+             /theBase//base
+             libserver
+             /site-config//boost_system
+             /site-config//boost_thread
+             /site-config//boost_serialization
+             /site-config//boost_filesystem
+             /site-config//boost_datetime
+             /site-config//boost_program_options
+             /site-config//boost_test
+           : <variant>debug:<define>DEBUG
+           ;

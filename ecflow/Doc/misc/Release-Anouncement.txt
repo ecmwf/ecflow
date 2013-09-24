@@ -1,0 +1,94 @@
+ ======================================================================================
+Subject: New beta/test release of ecFlow now available
+
+A new version of the ecFlow(3.1.9) has been released:
+
+#Please be aware that A new ecflow release candidate is planned.
+#If you are using the test version then the link will
+#be changed.
+
+This release is accessible from: /usr/local/apps/ecflow/3.1.9
+on the following platforms:
+
+   o linux 10.3      (garm)
+   o linux 11.3      (anubis/opensuse113)
+   o redhat/RHEL 6.4 (ecgb)
+   o linux cluster   (lxa/lxb)
+   o HPUX            (itanium)
+   o AIX/ibm_power7  (c2a/c2b)
+   o AIX/rs6000      (ecgate)
+ 
+The release includes the following changes:
+
+ 3.1.9: (production, September 2013)
+   - ecflowview    : fix crash in the preference dialog
+   - ecflow_client : Change parsing for aliases variables. No longer check variable names.
+   - ecflow_client : Fixed parsing bug associated with trigger node references, relative paths not correct
+   - ecflow_server : Changed Pre-process to ignore generated variables SUITE,FAMILY,TASK in %comment %end(user variables)
+ 
+ 
+To use a specific version:
+
+   export ECFLOW_VERSION=3.1.9
+   use ecflow
+   
+To use the latest test version:
+
+   export ECFLOW_VERSION=test
+   use ecflow
+   
+To use the latest ecFlow on linux/HPUX/ecgate call:
+
+   use ecflow
+   
+   This will setup the PATHS for client server and python extension
+   Note: The GUI(ecflowview) is only available on linux and ecgate.
+   Please note that the latest version of ecflow can change at any
+   time, so it is advisable to specify the version for long term usage.
+
+   On AIX(c2a/c2b) and redhat/RHEL(ecgb):
+
+   Please use the module functionality  i.e
+      module avail ecflow
+      module unload ecflow 
+      module load ecflow/3.1.9
+                  
+            
+Compatibility
+========================================================================
+The client/Server from one release should not be mixed with another.
+To avoid this problem it is *highly* recommended that you use a 
+specific version:
+
+   export ECFLOW_VERSION=3.1.9
+   use ecflow
+
+Additionally references to ecflow_client in the scripts(.ecf) should use
+the server variable %ECF_VERSION% to locate the executable, this ensures
+that client version is in sync with the server i.e
+
+   /usr/local/apps/ecflow/%ECF_VERSION%/bin/ecflow_client --complete
+
+Please see:
+
+   http://intra.ecmwf.int/metapps/manuals/ecflow/release_process/release_process.html#release-process
+
+for further details.
+
+Documentation
+=======================================================================
+The user manual(word and pdf formats) are available from:
+
+   /usr/local/apps/ecflow/current/doc
+
+The online documentation and tutorial are accessible from:
+
+   http://intra.ecmwf.int/metapps/manuals/ecflow
+   http://software.ecmwf.int/wiki/display/ECFLOW/Home
+
+Tar file
+======================================================================
+A tar copy of this release has been placed in /scratch/ma/ma0
+
+   
+ 

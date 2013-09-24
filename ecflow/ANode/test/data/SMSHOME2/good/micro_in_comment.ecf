@@ -1,0 +1,7 @@
+
+echo do %% some work
+
+# mismatched micro characters staring with a # are not reported as errors
+#BSUB -o /u/Carolyn.Pasti/ecf/out/test500/sleep2.o%J
+#BSUB -e /u/Carolyn.Pasti/ecf/out/test500/sleep2.o%J
+ 

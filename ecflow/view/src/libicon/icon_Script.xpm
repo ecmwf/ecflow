@@ -1,0 +1,41 @@
+/*=============================================================================================*/
+/* Name        :                                                                               */
+/* Author      :                                                                               */
+/* Revision    : $Revision: #3 $                                                                    */
+/*                                                                                             */
+/* Copyright 2009-2012 ECMWF.                                                                  */
+/* This software is licensed under the terms of the Apache Licence version 2.0                 */
+/* which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.                        */
+/* In applying this licence, ECMWF does not waive the privileges and immunities                */
+/* granted to it by virtue of its status as an intergovernmental organisation                  */
+/* nor does it submit to any jurisdiction.                                                     */
+/*                                                                                             */
+/* Description :                                                                               */
+/*=============================================================================================*/
+
+/* XPM */
+static char * Script_xpm[] = {
+"16 16 7 1",
+" 	c #E79DE79DE79D",
+".	c #DF7DDF7DDF7D",
+"X	c #000000000000",
+"o	c #FFFFFFFFFFFF",
+"O	c #CF3CCF3CFFFF",
+"+	c #8A288A288A28",
+"@	c #AAAAAAAAAAAA",
+"      .XXX.     ",
+"     .XooOX     ",
+"    .XooO+X     ",
+"   .XooO+X.     ",
+"  .XooO+X+X.    ",
+"  XXXO+X++@X.   ",
+"  X++XX++O.@X.  ",
+"  X+OXO+O.Oo+X  ",
+"   XoO.O.OoO@X  ",
+"    XoO.OoOO@X  ",
+"     XoOoOO@X   ",
+"      XoOO@X    ",
+"     XXXO@X     ",
+"    X+@X@X      ",
+"    X@OXX       ",
+"     XXX        "};

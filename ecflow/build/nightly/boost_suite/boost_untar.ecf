@@ -1,0 +1,61 @@
+%include <head.h>
+
+if [[ %SET_TO_TEST_SCRIPT% = true ]] ; then
+   echo "Test only"
+else
+   # ==========================================================
+   # Run as REMOTE_HOST. i.e %REMOTE_HOST:%
+   # ==========================================================
+   
+   cd %BOOST_DIR%
+   
+   # On the HPUX cant use -e for testing file existence, use -r instead
+   if [[ %ARCH% = hpux ]] ; then
+      # Only untar if the file is not there
+      if [ ! -r %BOOST_VERSION% ]
+      then
+         if [ -r %BOOST_VERSION%.tar.gz ] ; then
+           if [ ! -r %BOOST_VERSION%.tar ] ; then
+               gunzip %BOOST_VERSION%.tar.gz
+            fi
+         fi
+         if [ -r %BOOST_VERSION%.tar ] ; then
+            /usr/local/bin/gnutar -xf %BOOST_VERSION%.tar
+         fi
+      fi
+      
+      if [ ! -r %BOOST_VERSION% ]
+      then
+         echo "failed to untar boost"
+         exit 1
+      fi
+   else
+      # Only untar if the file is not there
+      if [ ! -e %BOOST_VERSION% ]
+      then
+         if [ -e %BOOST_VERSION%.tar.gz ] ; then
+         
+            if [ ! -e %BOOST_VERSION%.tar ] ; then
+               gunzip %BOOST_VERSION%.tar.gz
+            fi
+         fi
+         
+         if [ -e %BOOST_VERSION%.tar ] ; then
+            if [[ %ARCH% = rs6000 || %ARCH% = ibm_power6 || %ARCH% = ibm_power7 ]]  
+            then
+               gtar -xf %BOOST_VERSION%.tar
+            else
+               tar -xf %BOOST_VERSION%.tar
+            fi
+         fi
+      fi
+      
+      if [ ! -e %BOOST_VERSION% ]
+      then
+         echo "failed to untar boost"
+         exit 1
+      fi
+   fi
+fi
+
+%include <tail.h>

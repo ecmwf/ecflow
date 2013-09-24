@@ -1,0 +1,97 @@
+************************************************************
+ VERY VERY VERY IMPORTANT:
+ Pre-announce release, because:
+   a/ User support need to set up the modules on AIX
+   b/ Daniel needs to pre-test it works on all other linux flavours
+   c/ For those people who use current LINK, will be hosed
+      They need warning and chance to prepare
+   d/ For those people using a *FIXED* release, make sure
+      you announce any old version that are to be deleted
+   e/ Announce how they will migrate from 1 version to another
+   f/ CHECK https://software.ecmwf.int/wiki/display/ECFLOW/Home
+      Make sure fixed bugs are recorded/closed.
+ ************************************************************
+
+Process
+=======
+
+0/ Check we are not in a high risk period ???
+0/ Update Documentation
+
+  - Internal wiki:  http://wedit.ecmwf.int/publications/manuals/ecflow/
+      cd $WK/Doc/online
+      make clean; make html
+      sitecopy -u ecflow
+
+  - External Doc:
+    Rely on Daniel, to update ??
+    Need automated way:
+    - Just need to update python API.
+
+0/ *Before* each release, make sure the ecflow tar file is
+   copied to $SCRATCH and inform Daniel. This will allow
+   him to make rpm packages, build on other linux flavours.
+
+   This is important, so that release, used internally is in
+   sync with release given to users. 
+   <Inform Daniel>
+   
+0/ Inform user support so that they can update the module functionality
+
+0/ Update WIKI:
+   This announces the changes in the release
+   https://software.ecmwf.int/wiki/display/ECFLOW/Latest+news
+
+   In both cases add a tag/label for "news". This make the newly added page
+   appear in the top half of the latest news
+
+0/ Update release:
+   0 release: This uploads the release zip file: making it accessible to member states
+   http://software.ecmwf.int/wiki/display/ECFLOW/Releases
+   
+   0 Beta releases :
+   https://software.ecmwf.int/wiki/display/ECFLOW/Pre-Releases
+   
+   Add a page with the title of the release. 
+   In both cases add a tag/label for "news". This make the newly added page
+   appear in the top half of the latest news
+   
+0/ Announce release
+   mail group:  ecflow_int@lists.ecmwf.int 
+   Use: Release-Anouncement.txt
+  
+  
+ 
+IMPORTANT: To copy ecflow onto c2a please do the following
+============================================================
+# rlogin c2b
+# su emos
+# cd /usr/local/apps/ecflow
+# ecrcp -avr 3.0.rc2 emos@c1a:/usr/local/apps/ecflow/.
+# 
+# rlogin c2a
+# su emos
+# rm current
+# ln -s 3.0.rc2 current
+
+*Make* sure destination has a trailing '/.' otherwise you
+can end up renaming.
+
+   
+ecflow users group   ecflow_int@lists.ecmwf.int  
+=====================================================================
+Bahra Avi
+Bonet, Axel
+Hodkinson, John
+Hofstadler, Alfred
+
+Radnoti, Gabor
+Haseler, Jan
+
+Modigliani, Umberto
+Weihrauch, Christian
+Santoalla, Daniel Varel
+Burton Paul
+Dando Paul
+Lucas, Dominique
+

@@ -1,0 +1,4 @@
+suite suiteName
+    zombie user:fred:event,meter:100    # fred is not a valid user action
+endsuite
+

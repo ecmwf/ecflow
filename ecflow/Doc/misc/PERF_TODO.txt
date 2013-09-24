@@ -1,0 +1,596 @@
+
+Testing Performance
+==========================================================
+
+o AParser/parse_timer  $SCRATCH/3199.def::
+     This mimicks the download without the network, (but ignore compare)
+     Times for Checkpt/restore/compare, 
+ 
+o Client/bin/gcc-4.2.1/release/test_large_defs_perf 
+   A real client server test on the local machine.
+   Will delete,load,begin, sync, all the defs found in /var/tmp/ma0/BIG_DEFS/
+   
+o ecrcp -r /var/tmp/ma0/BIG_DEFS/ %REMOTE_HOST%:$ROOT_DIR/$ECFLOW/BIG_DEFS
+
+Trigger Parsing
+=================================================================
+Currently use spirit classic for parsing trigger expressions:
+Trigger expression parsing happens during:
+   1/ Client side: for loading and check defs
+   2/ Client Side: During replace command
+   2/ Server side: During dependency evaluation.
+
+Need to replace with spirit qi: for the following reason:
+   1/ Spirit classic, is woefully slow, at run time
+   2/ Will not be supported in the future. Need to replace with spirit qi
+   3/ Add a lot of work arounds for performance problems:
+      1/ Recognise the expression, if it has already be parsed , we store
+         in a map, and clone the AST to avoid having to re-parse.
+      2/ For very simple expressions, i.e "a == complete" we use simple parser.
+   
+I assume we can intermix the 2 spirit lib's, hence first step may be to use it
+with the simplest expressions.
+   
+Cacheing
+==================================================================
+Currently when ever a user request the full defs, the desearlistion 
+is cached. i.e if another user also request the full defs , we can just
+return the string.
+These could have been an oppertunity to also use/update the cache 
+when check pointing. However there is small but significant difference
+between the two.
+  Check-pointing: Saves the edit history.
+  Syncing       : No edit history.
+  
+Over time time the edit-history could be significant. This is download-able
+as a separate command.
+If this issue could be resolved there there can be huge savings, for
+both syncing and check pointing. Since the periodic check-pt would
+automatically update the cache, like syncing would also update the cache.
+
+(Note: cache is only updated when there is data model/defs tree change)
+
+
+DISK IO
+=====================================================================
+   o/ print code: and minimise use of <<.
+      In most cases this is used only due formatting of integers.
+   o/ Each request, involve disk IO, ie writing to log file.
+      ? Could buffer MSG, but warnings & errors, no buffering ?
+      Could add another log category, hidden, so that commands
+      are not buffered, only the affect, i.e. the state change
+      messages are buffered.
+
+Need a test case before starting.
+   Test case will average of 10 check pts.
+   Test case checkpt, interspersed with other requests, and time.
+   (if check pt is made async' we should show significant performance
+     improvement)      
+   
+   o  Compare performance of writing checkpt to a string, with
+      writing to file directly. (It is far more efficient to write 
+      a few large writes than many smaller writes.)
+      Hence this should be more efficient even *WITHOUT* memory mapped files.
+      (DONE: saving of about 0.5-1sec on very large files)
+      
+   o/ Investigate use of memory mapped file for writing checkpt file.
+      
+   o/ Investigate asyncronous  disk IO for writing check point file
+      
+      - kernel AIO
+        http://code.google.com/p/kernel/wiki/AIOUserGuide
+      - Posix AIO,glibc
+        http://www.ibm.com/developerworks/linux/library/l-async/
+      - Use a thread pool with syncronous blocking IO
+        - ASIO
+        - boost thread pool
+   
+
+See: http://www.cplusplus.com/forum/general/2511/
+Thank you both for your insight. 
+Minimizing the frequency of the << operator has had significant effects on 
+how fast the text file is outputted. The convenience of the << operator << 
+is useful in providing formatted text output, however, this apparently comes
+with significant cost in the output time efficiency in large files. 
+
+By formatting the text output myself into a string (acting as a buffer), 
+and then moving the contents of the string to the file using the << operator, 
+the output time dropped significantly from ~3.25min to ~1min for a 62MB file.
+ Changing the size of the buffer (in lines) did not significantly increase the 
+ output time of the file. In other words, by changing the amount of lines that 
+ the string holds before dumping its content into the file did not affect the rate.
+
+To determine the processing bottleneck that was taking place, 
+I decided to forego the line formatting and see how fast it would take 
+to output the same amount of lines consisting of a constant string. 
+The answer: 7 seconds. So the next bottleneck has become my own text formatting code. 
+At least it is significantly more efficient than formatting text using the << operator!
+
+So my next endeavor will be to figure out a way to optimize my own text-formatting code. 
+A good lesson here: Use << for small files for ease of output and coding; 
+format the text yourself for large files and control over efficiency. 
+
+
+
+Blocking IO
+======================================================================
+The log file shows that on systems with poor disk performance.
+(i.e $SCRATCH ) that check pointing can block the server and 
+interfere with job scheduling.
+
+Should investigate check pointing on a separate thread.
+
+
+   
+Issues around reducing network load & improving browsing
+==========================================================================
+One bottleneck is the download of defs from the server.
+
+o Create a bench mark test suite that measures the costs of
+  full defs download from the server.  Use different sizes.
+  (DONE) - Client/test/TestPerfForLargeDefs.cpp
+
+  Tests for 3199.def: 59631576 :  ~58MB
+           Suites:         18
+           Family:     105375
+           Tasks:      215437     Total no Nodes: 320830
+           
+           Variables:  885533
+           
+           time           245
+           today            0
+           date             0
+           day              0
+           cron             0
+           
+           late         41023        
+              
+           event        35477
+           meter        14994
+           label        46714
+           
+           trigger     115613        #  some duplication
+           complete      6870
+           
+           limit          635
+           inlimit      52376
+           
+           autocancel       0   
+           repeat          90   
+           defstatus     1975
+           Verify           0
+           Zombie           0
+           
+   *BASE* Times for Client/test/TestPerfForLargeDefs::      
+         Release mode:          TEXT      PORTABLE BINARY    BINARY
+         load into server       ~20s          ~15s           14.8s
+         download from server   ~12.7s         ~8.7s          8.7s
+ 
+         /var/tmp/ma0/BIG_DEFS/3199.def Delete:0 Load:18 Download: 12, 13, 14, 14, 13 Avg: 13.2
+         /var/tmp/ma0/BIG_DEFS/3199.def Delete:0 Load:18 Download: 12, 12, 12, 13, 13 Avg: 12.4
+         /var/tmp/ma0/BIG_DEFS/mega.def Delete:42 Load:3 Download: 3, 2, 1, 1, 1 Avg: 1.6
+         /var/tmp/ma0/BIG_DEFS/mega.def Delete:47 Load:3 Download: 3, 2, 2, 1, 1 Avg: 1.8
+  
+         AParser/parse_timer  $SCRATCH/3199.def::
+            Before Changes: 12.35,12.41,12.42,12.33,12.64   Avg: 12.43
+
+BEST* so far Client/test/TestPerfForLargeDefs::======================================================
+
+    bin/gcc-4.2.1/release/parse_timer /var/tmp/ma0/BIG_DEFS/3199.def with PORTABLE_BINARY
+    Parsing Node tree and AST creation time = 5.22 parse(1)
+    Checkpt(PORTABLE_BINARY) and reload , time taken = 6.89 file_size(42000387)  result(1) msg()
+    Total elapsed time = 12 seconds
+    6.88 --> 7.98
+
+   oetzi{/var/tmp/ma0/clientRoot/workspace/MyProject/AParser}:1043 --> bin/gcc-4.2.1/release/parse_timer /var/tmp/ma0/BIG_DEFS/3199.def
+   Parsing Node tree and AST creation time = 4.59 parse(1)
+   Checkpt(TEXT_ARCHIVE) and reload , time taken   = 7.85 file_size(55963684)  result(1) msg()
+   Total elapsed time = 12 seconds
+   7.85->9.64
+   
+   // Note: the Download(Sync-FULL) does not take defs destruction into account.
+      
+   opensuse103
+      oetzi{/var/tmp/ma0/clientRoot/workspace/MyProject}:352 --> Client/bin/gcc-4.2.1/release/test_large_defs_perf
+      Running 1 test case...
+      Client:: ...test_perf_for_large_defs:   port(3142)
+      /var/tmp/ma0/BIG_DEFS/3199.def Delete:0 Load:12 Begin:3  Download(Sync):7, 0, 0, 0, 0  
+                                                               Download(Sync-FULL):4, 4, 4, 4, 4 Avg:4  
+                                                               Download(FULL):7, 8, 7, 9, 8      Avg:7.8
+      /var/tmp/ma0/BIG_DEFS/mega.def Delete:0 Load:1 Begin:0   Download(Sync):2, 0, 0, 0, 0  
+                                                               Download(Sync-FULL):0, 0, 0, 0, 0 Avg:0  
+                                                               Download(FULL):1, 1, 1, 1, 1      Avg:1
+   opensuse113
+      + Client/bin/gcc-4.5/release/test_large_defs_perf
+      Running 1 test case...
+      Client:: ...test_perf_for_large_defs:   port(3142)
+      /var/tmp/ma0/BIG_DEFS/3199.def Delete:0 Load:10 Begin:2  Download(Sync):7, 0, 0, 0, 0  
+                                                               Download(Sync-FULL):3, 4, 4, 3, 3 Avg:3.4  
+                                                               Download(FULL):7, 7, 7, 7, 7 Avg:7
+      /var/tmp/ma0/BIG_DEFS/mega.def Delete:0 Load:2 Begin:0   Download(Sync):2, 0, 0, 0, 0  
+                                                               Download(Sync-FULL):0, 0, 0, 0, 0 Avg:0  
+                                                               Download(FULL):1, 1, 1, 1, 1 Avg:1
+    
+   opensuse113 (EOS_PORTABLE_BINARY_ARCHIVE)
+      Running 1 test case...
+      Client:: ...test_perf_for_large_defs:   port(3142)
+      /var/tmp/ma0/BIG_DEFS/3199.def Delete:0 Load:8 Begin:2  Download(Sync):5, 0, 0, 0, 0  
+                                                              Download(Sync-FULL):2, 2, 2, 2, 2 Avg:2  
+                                                              Download(FULL):5, 5, 5, 6, 5 Avg:5.2
+      /var/tmp/ma0/BIG_DEFS/mega.def Delete:0 Load:2 Begin:0  Download(Sync):1, 0, 0, 0, 0  
+                                                              Download(Sync-FULL):0, 0, 0, 0, 0 Avg:0  
+                                                              Download(FULL):1, 0, 0, 0, 0 Avg:0.2
+    
+==========================================================================================================
+
+o Return Nodes depending on the level.
+
+  i.e level 0: Just return defs & server state
+      level 1: return defs & suites only
+      level 2: return defs & suite, and first suite children
+      
+   This can be done by, just modify NodeContainer serialisation.
+   Each node has a level, this is compared with the requested level
+
+o Server comms, encode,protocol, outside of the message.
+  This allows Portable binary archive to be used in conjunction
+  with text archive. Could have HTML, in future.
+  - Update command so that each request client->server 
+    and each response server->client, encodes a protocol
+  - Default to text/portable archive
+  - Test on all platforms
+  - Change connection.h to encode/decode the protocol.
+  - Add portable binary archive. Recode exe size, Text size & performance changes
+    (Make sure all platforms still cope, NOTE: the singleton cost is much higher)
+  - AIX(TEXT), linux(TEXT & portable binary, must be able to choose)
+
+ 
+o Make all attributes children of Node.
+  All derived from the same base class.
+  Hence we only take hit for those attributes that are used.
+  Too big a change ?????
+  
+o Skeleton body/level
+  First request returns the skeleton
+  Subsequent request return the body, but for
+  a cut down node tree.
+  Issues: how to handle changes ?
+    
+  Effort            : Large
+  Application Effort: Large:
+  Outcome: By commenting out all the serialisation of data members, ie For Suite,Family,Task,Submittable
+           we can mimick a skeleton down load
+           3199.def ~60 meg
+                          Skeleton: load    ~9 seconds
+                                   download ~3 seconds
+       
+========================== SUCCESS ===============================================================
+
+Client<DONE>
+   When using the class ClientInvoker, most of the user commands, end
+   up using Program Options. This was done for a consistent interface.
+   i.e ClientInvoker api, will convert each api call into argc/argv
+   argument. This will end up using program options.
+
+   Unfortunately Program options is very slow compared to other functionality.
+   Hence for critical speed sensitive request we should bypass.
+   i.e we call the Client to server command directly.
+
+o Incremental sync:
+  Make sure we only update change number when a data model change is made.
+  The flags were being set/cleared, with out making any changes (i.e same value)
+  but change number was still incremented, causing unneccessary memento's.
+  <DONE>
+
+o Minimise system level calls made by the server
+  To record all system level calls we call:
+  strace -p <server pid> -o output_file.txt
+  
+  - This shows that during job generation, when creating the output directory.
+    we were making too many calls to stat.
+    By checking if directory exist, saved on thousands of stats
+    <DONE>
+    
+  - Signal handling;
+    We control when we handle child process termination signals.
+    We were making unneccessary calls block SIGCHLD
+    <DONE>
+
+o <DONE>Move trigger and complete AST into the expression class,
+  <DONE> move repeat generate variable into Repeat base class. Save on in memory size.
+        Hence reducing size of node, when no trigger expressions.
+        + save on initialisation cost
+        Big saving in memory size, i.e 8 bytes times 300000 ~2MB in memory
+
+           Release mode:          TEXT      PORTABLE BINARY    BINARY
+           load into server       ~18s          
+           download from server   ~12.7s           
+          
+           Load time improved by ~2 seconds
+
+o <DONE> AutoCancel: Very rarely used. But uses a shared ptr serialisation
+         This was *because* of python api.
+         Investigate use of raw ptr & effect on python api. OK
+         There is a performance penality in using shared ptr in serialisation
+         even if it is empty.
+           
+           Release mode:          TEXT      PORTABLE BINARY    BINARY
+           load into server       ~18s          
+           download from server   ~12s           
+           
+           improved download by 0.7 seconds
+        
+o <DONE> Late, Remove shared ptr and replace with raw ptr
+
+   AParser/parse_timer  $SCRATCH/3199.def::
+      This mimicks the download without the network, (but ignore compare)
+      Times for Checkpt/restore/compare, 
+         Before Changes: 12.42, 13.63, 12.38, 12.54, 14.27: Avg: 13.08
+         After Changes:  12.26, 12.17, 13.32, 12.63, 12.79: Avg: 12.6   (saved ~0.4s)
+
+   Client/test/TestPerfForLargeDefs.cpp (saved ~ 0.2 seconds)
+      /var/tmp/ma0/BIG_DEFS/3199.def Delete:0 Load:18 Download: 11, 12, 13, 12, 13 Avg: 12.2
+      /var/tmp/ma0/BIG_DEFS/mega.def Delete:42 Load:2 Download: 3, 2, 1, 1, 1 Avg: 1.6
+
+
+o <DONE>Variable state change no 
+        Move to Node: (will save (No of variables * 4) - (No of Nodes *4) = ~2MB
+        However a change to a single variable will require copy all node variables
+
+   Client/test/TestPerfForLargeDefs.cpp:   port(3142)
+   /var/tmp/ma0/BIG_DEFS/3199.def Delete:0 Load:18 Download: 11, 12, 12, 12, 13 Avg: 12
+   /var/tmp/ma0/BIG_DEFS/mega.def Delete:41 Load:2 Download: 2, 2, 1, 1, 1 Avg: 1.4
+   
+   
+o <DONE>Move time base attributes into a separate class
+   improvement of about 1 seconds for large defs
+   
+   Client:: ...test_perf_for_large_defs:   port(3142)
+   Client/bin/gcc-4.2.1/release/test_large_defs_perf
+      /var/tmp/ma0/BIG_DEFS/3199.def Delete:0 Load:16 Download: 10, 11, 11, 11, 12 Avg: 11
+      /var/tmp/ma0/BIG_DEFS/mega.def Delete:42 Load:2 Download: 2, 1, 1, 1, 1 Avg: 1.2
+      
+      
+o <DONE>: Fix issue of delete taking to long
+
+   Client:: ...test_perf_for_large_defs:   port(3142)
+   /var/tmp/ma0/BIG_DEFS/3199.def Delete:0 Load:16 Download: 10, 11, 11, 11, 12 Avg: 11
+   /var/tmp/ma0/BIG_DEFS/mega.def Delete:0 Load:2 Download: 2, 1, 1, 1, 1 Avg: 1.2
+
+
+o <DONE> Take edit history out of node and place into Defs.
+
+   Save of ~ 0.6 seconds
+   
+   Client:: ...test_perf_for_large_defs:   port(3142)
+   /var/tmp/ma0/BIG_DEFS/3199.def Delete:0 Load:15 Download: 10, 10, 10, 11, 11 Avg: 10.4
+   /var/tmp/ma0/BIG_DEFS/mega.def Delete:0 Load:2 Download: 2, 1, 1, 1, 1 Avg: 1.2
+
+o <DONE> After begin, download times are much slower invetsigate
+         Times are the same
+
+o <DONE>Distinguish between checkpoint and client comms
+        i.e edit history should be check pointed but does *NOT*
+            need serialising when requesting full defs.
+           + add a custom command to get the edit history, given a path
+ 
+o <DONE>events meter, labels, use into child attributes
+
+        Client:: ...test_perf_for_large_defs:   port(3142)
+         /var/tmp/ma0/BIG_DEFS/3199.def Delete:0 Load:14 Begin:3 Download: 9, 10, 10, 10, 10 Avg: 9.8
+         /var/tmp/ma0/BIG_DEFS/mega.def Delete:0 Load:2 Begin:0 Download: 2, 1, 1, 1, 1 Avg: 1.2
+
+        oetzi{/var/tmp/ma0/clientRoot/workspace/MyProject/AParser}:483 --> bin/gcc-4.2.1/release/parse_timer /var/tmp/ma0/BIG_DEFS/3199.def
+         Parsing Node tree and AST creation time = 5.13 parse(1)
+         Checkpt(TEXT_ARCHIVE) and reload , time taken   = 9.63 file_size(58317543)  result(1) msg()
+         Total elapsed time = 14 seconds
+   
+0 <DONE>Node suspended, state is being persisted ???
+
+   oetzi{/var/tmp/ma0/clientRoot/workspace/MyProject}:520 --> AParser/bin/gcc-4.2.1/release/parse_timer /var/tmp/ma0/BIG_DEFS/3199.def
+   Parsing Node tree and AST creation time = 5.18 parse(1)
+   Checkpt(TEXT_ARCHIVE) and reload , time taken   = 9.4 file_size(57675793)  result(1) msg()
+   Total elapsed time = 14 seconds
+
+o <DONE> Move zombie & verify attr to a separate class , rarely used
+
+      /var/tmp/ma0/BIG_DEFS/3199.def Delete:0 Load:15 Begin:4 Download: 8, 9, 9, 9, 10 Avg: 9
+      /var/tmp/ma0/BIG_DEFS/mega.def Delete:0 Load:2 Begin:0 Download: 2, 1, 1, 1, 1 Avg: 1.2
+
+        oetzi{/var/tmp/ma0/clientRoot/workspace/MyProject/AParser}:538 --> bin/gcc-4.2.1/release/parse_timer /var/tmp/ma0/BIG_DEFS/3199.def
+         Parsing Node tree and AST creation time = 5.34 parse(1)
+         Checkpt(TEXT_ARCHIVE) and reload , time taken   = 9.09 file_size(56071732)  result(1) msg()
+         Total elapsed time = 14 seconds
+
+o <DONE> Removed shared ptrs form trigger and complete expressions
+
+   oetzi{/var/tmp/ma0/clientRoot/workspace/MyProject}:646 --> Client/bin/gcc-4.2.1/release/test_large_defs_perf 
+   Running 1 test case...
+   Starting server
+   Client:: ...test_perf_for_large_defs:   port(3142)
+   /var/tmp/ma0/BIG_DEFS/3199.def Delete:0 Load:15 Begin:3 Download: 8, 9, 9, 9, 9 Avg: 8.8
+   /var/tmp/ma0/BIG_DEFS/mega.def Delete:0 Load:2 Begin:0 Download: 2, 1, 1, 1, 1 Avg: 1.2
+   8.8->9.8
+
+   oetzi{/var/tmp/ma0/clientRoot/workspace/MyProject/AParser}:11 --> bin/gcc-4.2.1/release/parse_timer /var/tmp/ma0/BIG_DEFS/3199.def
+   Parsing Node tree and AST creation time = 4.44 parse(1)
+   Checkpt(TEXT_ARCHIVE) and reload , time taken   = 8.7 file_size(56071728)  result(1) msg()
+   Total elapsed time = 13 seconds
+   8.7->10.72
+
+o <DONE> Move: Generate suite generate variables, do not persist them.
+ 
+  oetzi{/var/tmp/ma0/clientRoot/workspace/MyProject/AParser}:782 --> bin/gcc-4.2.1/release/parse_timer /var/tmp/ma0/BIG_DEFS/3199.def
+  Parsing Node tree and AST creation time = 4.4 parse(1)
+  Checkpt(TEXT_ARCHIVE) and reload , time taken   = 8.66 file_size(56069424)  result(1) msg()
+  Total elapsed time = 13 seconds
+   8.66->8.78
+   
+   oetzi{/var/tmp/ma0/clientRoot/workspace/MyProject}:778 --> Client/bin/gcc-4.2.1/release/test_large_defs_perf
+   Running 1 test case...
+   Starting server
+   Client:: ...test_perf_for_large_defs:   port(3142)
+   /var/tmp/ma0/BIG_DEFS/3199.def Delete:0 Load:14 Begin:3 Download: 8, 9, 9, 9, 9 Avg: 8.8
+   /var/tmp/ma0/BIG_DEFS/mega.def Delete:0 Load:2 Begin:0 Download: 2, 1, 1, 1, 1 Avg: 1.2
+
+o <DONE>Calendar: Do not persist cache data
+
+   oetzi{/var/tmp/ma0/clientRoot/workspace/MyProject}:831 --> AParser/bin/gcc-4.2.1/release/parse_timer /var/tmp/ma0/BIG_DEFS/3199.def
+   Parsing Node tree and AST creation time = 4.38 parse(1)
+   Checkpt(TEXT_ARCHIVE) and reload , time taken   = 8.65 file_size(56069114)  result(1) msg()
+   Total elapsed time = 13 seconds
+
+
+o <DONE> Track_never objects which are never serialised through pointers
+
+   oetzi{/var/tmp/ma0/clientRoot/workspace/MyProject}:1060 --> Client/bin/gcc-4.2.1/release/test_large_defs_perf 
+   Running 1 test case...
+   Starting server
+   Client:: ...test_perf_for_large_defs:   port(3142)
+   /var/tmp/ma0/BIG_DEFS/3199.def Delete:0 Load:14 Begin:3 Download: 7, 8, 8, 8, 8 Avg: 7.8
+   /var/tmp/ma0/BIG_DEFS/mega.def Delete:0 Load:2 Begin:0 Download: 2, 1, 1, 1, 1 Avg: 1.2
+
+   oetzi{/var/tmp/ma0/clientRoot/workspace/MyProject/AParser}:1043 --> bin/gcc-4.2.1/release/parse_timer /var/tmp/ma0/BIG_DEFS/3199.def
+   Parsing Node tree and AST creation time = 4.59 parse(1)
+   Checkpt(TEXT_ARCHIVE) and reload , time taken   = 7.89 file_size(55963684)  result(1) msg()
+   Total elapsed time = 12 seconds
+
+o <DONE> Checkpt ( migration), Need fallback where defs written with state
+
+o <DONE> Cache the de-serialisation in the server when returning the FULL definition
+  Current for each client request we have:
+  
+      client1:  --------------> get---------------> Server
+                serialise---------<----de-serialize
+
+      client2:  --------------> get---------------> Server
+                serialise---------<----de-serialize
+
+      client3:  --------------> get---------------> Server
+                serialise---------<----de-serialize
+
+   By caching the de-serialisation process, we can speed up
+   the downloads. However whenever there is a state change
+   we need to update the cache
+ 
+       client1:  --------------> get---------------> Server
+                serialise------<----de-serialisation
+
+      client2:  --------------> get---------------> Server
+                serialise---------<----return cache
+
+      client3:  --------------> get---------------> Server
+                serialise---------<----return cache
+   
+   
+    Where do we store the cache ? this is important since for
+    large definition it can be very large 100MB, hence we
+    must avoid copies all cost.
+        
+    Issues: The check pt should really update the cache, however
+    the check pt includes the edit history ???
+   
+   oetzi{/var/tmp/ma0/clientRoot/workspace/MyProject}:555 --> Client/bin/gcc-4.2.1/release/test_large_defs_perf 
+   Running 1 test case...
+   Client:: ...test_perf_for_large_defs:   port(3142)
+   /var/tmp/ma0/BIG_DEFS/3199.def Delete:0 Load:14 Begin:3  Download(Sync):9, 0, 0, 0, 0  
+                                                            Download(Sync-FULL):5, 5, 4, 4, 4 Avg:4.4  
+                                                            Download(FULL):8, 8, 9, 9, 9      Avg:8.6
+   /var/tmp/ma0/BIG_DEFS/mega.def Delete:0 Load:2 Begin:0  Download(Sync):2, 0, 0, 0, 0  
+                                                           Download(Sync-FULL):0, 0, 0, 0, 0 Avg:0  
+                                                           Download(FULL):1, 1, 1, 1, 1      Avg:1
+
+o <DONE>Dont created generated variables in the default constructors, creat on demand
+
+ 
+   Client:: ...test_perf_for_large_defs:   port(3142)
+   /var/tmp/ma0/BIG_DEFS/3199.def Delete:0 Load:12 Begin:3  Download(Sync):7, 0, 0, 0, 0  
+                                                            Download(Sync-FULL):4, 4, 4, 4, 4 Avg:4  
+                                                            Download(FULL):8, 8, 8, 8, 8 Avg:8
+   /var/tmp/ma0/BIG_DEFS/mega.def Delete:0 Load:2 Begin:0   Download(Sync):1, 0, 0, 0, 0  
+                                                            Download(Sync-FULL):0, 0, 0, 0, 0 Avg:0  
+                                                            Download(FULL):1, 1, 1, 1, 1 Avg:1
+
+========================== FAILURES ===============================================================
+
+o <DONE> track_never on pointers 
+  Failed because we need to the apposite, i.e object which are NEVER serialzed
+  through a pointer should be marked as track_never
+    
+   Parsing Node tree and AST creation time = 4.43 parse(1)
+   Checkpt(TEXT_ARCHIVE) and reload , time taken   = 8.99 file_size(55712891)  result(1) msg()
+   Total elapsed time = 13 seconds
+
+  oetzi{/var/tmp/ma0/clientRoot/workspace/MyProject}:646 --> Client/bin/gcc-4.2.1/release/test_large_defs_perf 
+   Running 1 test case...
+   Starting server
+   Client:: ...test_perf_for_large_defs:   port(3142)
+   /var/tmp/ma0/BIG_DEFS/3199.def Delete:0 Load:14 Begin:3 Download: 8, 9, 9, 9, 10 Avg: 9
+   /var/tmp/ma0/BIG_DEFS/mega.def Delete:0 Load:2 Begin:0 Download: 2, 1, 1, 1, 1 Avg: 1.2
+
+   ***** Small improvement BUT following warning shown, HENCE backed out **********************
+   ***** The BOOST_CLASS_TRACKING(ChildAttrs,boost::serialization::track_never)
+   ***** Needs to placed in HEADER file 
+
+gcc.compile.c++ ../ANode/bin/gcc-4.2.1/release/link-static/src/Defs.o
+/var/tmp/ma0/boost/boost_1_47_0/boost/mpl/print.hpp: In instantiation of ‘boost::mpl::print<boost::serialization::BOOST_SERIALIZATION_STATIC_WARNING_LINE<148> >’:
+/var/tmp/ma0/boost/boost_1_47_0/boost/serialization/static_warning.hpp:92:   instantiated from ‘boost::serialization::static_warning_test<false, 148>’
+/var/tmp/ma0/boost/boost_1_47_0/boost/archive/detail/check.hpp:148:   instantiated from ‘void boost::archive::detail::check_pointer_tracking() [with T = ecf::LateAttr]’
+/var/tmp/ma0/boost/boost_1_47_0/boost/archive/detail/oserializer.hpp:454:   instantiated from ‘static void boost::archive::detail::save_pointer_type<Archive>::save(Archive&, const T&) [with T = ecf::LateAttr, Archive = boost::archive::text_oarchive]’
+/var/tmp/ma0/boost/boost_1_47_0/boost/archive/detail/oserializer.hpp:473:   instantiated from ‘static void boost::archive::detail::save_pointer_type<Archive>::invoke(Archive&, TPtr) [with TPtr = ecf::LateAttr*, Archive = boost::archive::text_oarchive]’
+/var/tmp/ma0/boost/boost_1_47_0/boost/archive/detail/oserializer.hpp:525:   instantiated from ‘void boost::archive::save(Archive&, T&) [with Archive = boost::archive::text_oarchive, T = ecf::LateAttr* const]’
+/var/tmp/ma0/boost/boost_1_47_0/boost/archive/detail/common_oarchive.hpp:69:   instantiated from ‘void boost::archive::detail::common_oarchive<Archive>::save_override(T&, int) [with T = ecf::LateAttr* const, Archive = boost::archive::text_oarchive]’
+/var/tmp/ma0/boost/boost_1_47_0/boost/archive/basic_text_oarchive.hpp:80:   instantiated from ‘void boost::archive::basic_text_oarchive<Archive>::save_override(T&, int) [with T = ecf::LateAttr* const, Archive = boost::archive::text_oarchive]’
+/var/tmp/ma0/boost/boost_1_47_0/boost/archive/detail/interface_oarchive.hpp:63:   instantiated from ‘Archive& boost::archive::detail::interface_oarchive<Archive>::operator<<(T&) [with T = ecf::LateAttr* const, Archive = boost::archive::text_oarchive]’
+/var/tmp/ma0/boost/boost_1_47_0/boost/archive/detail/interface_oarchive.hpp:71:   instantiated from ‘Archive& boost::archive::detail::interface_oarchive<Archive>::operator&(T&) [with T = ecf::LateAttr*, Archive = boost::archive::text_oarchive]’
+../ANode/src/Node.hpp:686:   instantiated from ‘void Node::serialize(Archive&, unsigned int) [with Archive = boost::archive::text_oarchive]’
+/var/tmp/ma0/boost/boost_1_47_0/boost/serialization/access.hpp:118:   instantiated from ‘static void boost::serialization::access::serialize(Archive&, T&, unsigned int) [with Archive = boost::archive::text_oarchive, T = Node]’
+/var/tmp/ma0/boost/boost_1_47_0/boost/serialization/serialization.hpp:69:   instantiated from ‘void boost::serialization::serialize(Archive&, T&, unsigned int) [with Archive = boost::archive::text_oarchive, T = Node]’
+/var/tmp/ma0/boost/boost_1_47_0/boost/serialization/serialization.hpp:128:   instantiated from ‘void boost::serialization::serialize_adl(Archive&, T&, unsigned int) [with Archive = boost::archive::text_oarchive, T = Node]’
+/var/tmp/ma0/boost/boost_1_47_0/boost/archive/detail/oserializer.hpp:148:   instantiated from ‘void boost::archive::detail::oserializer<Archive, T>::save_object_data(boost::archive::detail::basic_oarchive&, const void*) const [with Archive = boost::archive::text_oarchive, T = Node]’
+
+
+Robert Ramey:
+   But this begs the real question.  Do you want tracking or don't you.
+
+   Without tracking -
+      you won't be able to serialize apointer.
+      and you'll missing the opptimization of space if the same object is
+      serialized more than once.
+      It will be faster to save and restore
+   With tracking
+      The opposite will be true
+
+   So the decision to use tracking shouldn't made  as to the easiest way to fix
+   the warning.
+   The other way is to make the object we're saving non-const. 
+   
+
+
+o <DONE> Repeat: These are rarely used. Current serialised by value.
+  This needs to be a pointer to minimise serialisation costs !!!
+
+  Times for Checkpt/restore/compare, AParser/parse_timer
+   Before Changes: 12.35,12.41,12.42,12.33,12.64   Avg: 12.43
+   After Changes:  14.53,12.35,12.32,12.3,13.63    Avg: 13.06
+   HENCE: Backed out of changes, since no significant improvement
+        
+o <DONE> Make Repeat a ptr, rename RepeatBase to Repeat
+
+   There was no *SIGNIFICANT* improvement in measured performance, compared to current fastest
+   oetzi{/var/tmp/ma0/clientRoot/workspace/MyProject}:439 --> Client/bin/gcc-4.2.1/release/test_large_defs_perf       
+   Running 1 test case...
+   Starting server
+   Client:: ...test_perf_for_large_defs:   port(3142)
+   /var/tmp/ma0/BIG_DEFS/3199.def Delete:0 Load:17 Begin:3 Download: 9, 10, 10, 10, 11 Avg: 10.1
+   /var/tmp/ma0/BIG_DEFS/mega.def Delete:0 Load:3 Begin:0 Download: 1, 2, 1, 1, 1 Avg: 1.2
+
+   oetzi{/var/tmp/ma0/clientRoot/workspace/MyProject/AParser}:431 --> bin/gcc-4.2.1/release/parse_timer /var/tmp/ma0/BIG_DEFS/3199.def
+   Parsing Node tree and AST creation time = 4.44 parse(1)
+   Checkpt(TEXT_ARCHIVE) and reload and compare, time taken   = 10.1 file_size(60235654)  result(1) msg()
+   Total elapsed time = 14 seconds        
+   
+o <DONE> EOS portable binary archive
+   o executable sizes are doubled.
+   o However performance is better.
+   

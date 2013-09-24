@@ -1,0 +1,8 @@
+suite suiteName
+   family familyName
+      task t1
+      	  late -s +00:15 -c +02:00  #  Con only have one late per node
+      	  late -a 00:15 -c +02:00   #  Con only have one late per node
+    endfamily
+endsuite
+

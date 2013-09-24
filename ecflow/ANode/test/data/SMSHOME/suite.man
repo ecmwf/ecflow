@@ -1,0 +1,4 @@
+%manual
+%include <manual.h>
+suite manual
+%end

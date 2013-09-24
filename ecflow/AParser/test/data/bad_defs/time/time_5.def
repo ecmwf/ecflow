@@ -1,0 +1,5 @@
+suite suiteName
+   family familyName0
+   		time 23:76        # bad minutes range should be 00-59
+    endfamily
+endsuite

@@ -1,0 +1,97 @@
+# alias ecf=/var/tmp/map/work/p4/merlin/workspace/MyProject/Client/bin/gcc-4.5/debug/ecflow_client
+# ecf --port 3199 --host ibis --replace /reload tool/reload.sdef
+suite reload
+  defstatus suspended
+  # repeat date YMD 20120101 20120101 1
+  limit  limit 30
+  inlimit /reload:limit
+  date 1.*.*
+  # time 12:00 # NOK
+  # cron 12:00 13:00 00:10
+  # meter step -1 100 90 # NOK
+  event 1
+  # label info "" # NOK
+
+  edit SMSTRIES 1 
+  edit ECF_TRIES 1
+
+  edit SMSCMD '%SMSJOB% > %SMSJOBOUT% 2>&1'
+  edit ECF_CMD '%SMSJOB% > %SMSJOBOUT% 2>&1'
+
+  edit SMSKILLCMD 'kill -15 %SMSRID%'
+  edit ECF_KILL_CMD 'kill -15 %ECF_RID%'
+
+  edit SMSSTATUSCMD   'ps -lf -p %SMSRID%'
+  edit ECF_STATUS_CMD 'ps -lf -p %ECF_RID%'
+
+  edit SMSFILES  /home/ma/map/bin/sms2ecf/smsfiles
+  edit ECF_FILES /home/ma/map/bin/sms2ecf/smsfiles
+
+  edit SMSINCLUDE  /home/ma/map/bin/sms2ecf/include
+  edit ECF_INCLUDE /home/ma/map/bin/sms2ecf/include
+
+  edit RELOAD_FROM_NODE localhost
+  edit RELOAD_FROM_PROG 314159
+  edit RELOAD_FROM_PORT 3199
+  edit RELOAD_FROM_PATH /ealadin
+  edit RELOAD_FROM_KIND ECF
+
+  edit RELOAD_TO_NODE localhost
+  edit RELOAD_TO_PROG 314159
+  edit RELOAD_TO_PORT 20130
+  edit RELOAD_TO_NAME /ealadin
+  edit RELOAD_TO_KIND ECF
+
+  family limits
+   limit  limit 30
+   limit mutex 1
+  endfamily
+
+  family process
+    inlimit limits:mutex
+    trigger process ne aborted
+
+    task get; label info ''
+    task convert; #      trigger get eq complete
+    task load; #         trigger convert eq complete
+  endfamily
+
+  family test_repeat
+  family date
+  date 1.*.*
+  today 12:00
+  task a1; repeat date YMD 20120101 20120101 1
+  task a2; repeat date YMD 20120101 20120102 1
+  task a3; repeat date YMD 20120101 20120103 1
+  task a4; repeat date YMD 20120101 20120104 1
+  task a5; repeat date YMD 20120101 20120105 1
+  
+  endfamily
+
+  family int
+  day sunday
+  task a1; repeat integer INT 20120101 20120101 1
+  task a2; repeat integer INT 20120101 20120102 1
+  task a3; repeat integer INT 20120101 20120103 1
+  task a4; repeat integer INT 20120101 20120104 1
+  task a5; repeat integer INT 20120101 20120105 1
+  endfamily
+
+  family str
+  task a1; repeat string STR "0" 
+  task a2; repeat string STR "0" "1"
+  task a3; repeat string STR "0" "1" "2"
+  task a4; repeat string STR "0" "1" "2" "3" 
+  task a5; repeat string STR "0" "1" "2" "3" "4"
+  endfamily
+
+  family enum
+  # task a1; repeat enumerate ENU "0" 
+  task a2; repeat enumerated ENU "0" "1"
+  task a3; repeat enumerated ENU "0" "1" "2"
+  task a4; repeat enumerated ENU "0" "1" "2" "3" 
+  task a5; repeat enumerated ENU "0" "1" "2" "3" "4"
+  endfamily
+
+  endfamily
+endsuite

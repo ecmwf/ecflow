@@ -1,0 +1,22 @@
+
+Fix for smart_cast.hpp
+======================
+
+Line 206:
+  replaced: 
+     if ( tmp == 0 ) throw_exception(std::bad_cast());
+  with:
+     if ( tmp == 0 ) boost::serialization::throw_exception(std::bad_cast());
+     
+     
+Due to following compile error:
+================================
+
+   acc.compile.c++ ANattr/bin/acc/debug/link-static/threading-multi/src/RepeatAttr.o
+"/scratch/ma/emos/ma0/hpia64/boost/boost_1_53_0/boost/serialization/smart_cast.hpp", line 206: error #2308: more than one instance of overloaded function "throw_exception" matches the argument list:
+            function template "void boost::throw_exception(const E &)"
+            function template "void boost::serialization::throw_exception(const E &)"
+            argument types are: (std::bad_cast)
+                      if ( tmp == 0 ) throw_exception(std::bad_cast());
+                                      ^
+   

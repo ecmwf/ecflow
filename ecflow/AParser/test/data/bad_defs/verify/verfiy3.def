@@ -1,0 +1,3 @@
+suite  
+	verify complete:int        # correct format is <state>:int, ie verify complete:3
+endsuite

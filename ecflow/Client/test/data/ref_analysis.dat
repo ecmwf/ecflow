@@ -1,0 +1,33 @@
+Command                               count      min  average      max     std
+localhost:3141 --begin                   49      562     1530     6932     1146
+localhost:3141 --ch_add                   1      514
+localhost:3141 --ch_drop                  8      472      491      513       12
+localhost:3141 --ch_register              9      503      533      578       22
+localhost:3141 --ch_rem                   1      511
+localhost:3141 --ch_suites               11      486      538      601       37
+localhost:3141 --check_pt                 3      689      854     1161      216
+localhost:3141 --delete                  56      516      756     1000      133
+localhost:3141 --file                    25      575      875     1013       94
+localhost:3141 --force                    4      544      554      572       10
+localhost:3141 --get                     83      889     2256     3926      519
+localhost:3141 --halt                     1      691
+localhost:3141 --kill                     2     1051     1062     1073       11
+localhost:3141 --load                    50     1462     2566     7291     1103
+localhost:3141 --log                     98      510      733      950      106
+localhost:3141 --news                    60      481      982     1537      196
+localhost:3141 --order                   33      502      549      795       82
+localhost:3141 --ping                     1     1594
+localhost:3141 --requeue                  1     2281
+localhost:3141 --restart                 50      483      676     2204      246
+localhost:3141 --restore_from_checkpt     3      716      888     1208      226
+localhost:3141 --resume                   1     2183
+localhost:3141 --shutdown                 1      680
+localhost:3141 --stats                    1      989
+localhost:3141 --suites                   2      492      622      752      130
+localhost:3141 --suspend                  2      511      517      524        6
+localhost:3141 --sync                   103      520     1610     4363      671
+localhost:3141 --sync_full               25     1155     2085     6717     1152
+localhost:3141 --terminate                1     1247
+localhost:3141 --zombie_get              68      484      729      917      105
+
+total round trip time 00:00:00.942435 for 753 requests

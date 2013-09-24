@@ -1,0 +1,45 @@
+MSG:[09:10:19 18.1.2012] --delete _all_ yes  :ma0
+MSG:[09:10:19 18.1.2012] --load=Test/data/ECF_HOME/test_server_job_submission/test_server_job_submission.def  :ma0
+LOG:[09:10:19 18.1.2012]  unknown: /
+MSG:[09:10:19 18.1.2012] --restart :ma0
+MSG:[09:10:19 18.1.2012] --begin=test_server_job_submission :ma0
+LOG:[09:10:19 18.1.2012]  queued: /test_server_job_submission
+LOG:[09:10:19 18.1.2012]  queued: /test_server_job_submission/family
+LOG:[09:10:19 18.1.2012]  queued: /test_server_job_submission/family/t0
+LOG:[09:10:19 18.1.2012]  queued: /test_server_job_submission/family/t1
+LOG:[09:10:19 18.1.2012]  queued: /test_server_job_submission/family/t2
+LOG:[09:10:19 18.1.2012]  queued: /
+LOG:[09:10:19 18.1.2012]  submitted: /test_server_job_submission/family/t0
+LOG:[09:10:19 18.1.2012]  submitted: /test_server_job_submission/family
+LOG:[09:10:19 18.1.2012]  submitted: /test_server_job_submission
+LOG:[09:10:19 18.1.2012]  submitted: /
+LOG:[09:10:19 18.1.2012]  submitted: /test_server_job_submission/family/t1
+LOG:[09:10:19 18.1.2012]  submitted: /
+LOG:[09:10:19 18.1.2012]  submitted: /test_server_job_submission/family/t2
+LOG:[09:10:19 18.1.2012]  submitted: /
+MSG:[09:10:19 18.1.2012] chd:init /test_server_job_submission/family/t0
+LOG:[09:10:19 18.1.2012]  active: /test_server_job_submission/family/t0
+LOG:[09:10:19 18.1.2012]  active: /test_server_job_submission/family
+LOG:[09:10:19 18.1.2012]  active: /test_server_job_submission
+LOG:[09:10:19 18.1.2012]  active: /
+MSG:[09:10:19 18.1.2012] chd:init /test_server_job_submission/family/t1
+LOG:[09:10:19 18.1.2012]  active: /test_server_job_submission/family/t1
+LOG:[09:10:19 18.1.2012]  active: /
+MSG:[09:10:19 18.1.2012] chd:init /test_server_job_submission/family/t2
+LOG:[09:10:19 18.1.2012]  active: /test_server_job_submission/family/t2
+LOG:[09:10:19 18.1.2012]  active: /
+MSG:[09:10:20 18.1.2012] --get [server(5018 145)] :ma0
+MSG:[09:10:20 18.1.2012] chd:complete /test_server_job_submission/family/t1
+LOG:[09:10:20 18.1.2012]  complete: /test_server_job_submission/family/t1
+LOG:[09:10:20 18.1.2012]  active: /
+MSG:[09:10:20 18.1.2012] chd:complete /test_server_job_submission/family/t2
+LOG:[09:10:20 18.1.2012]  complete: /test_server_job_submission/family/t2
+LOG:[09:10:20 18.1.2012]  active: /
+MSG:[09:10:20 18.1.2012] chd:complete /test_server_job_submission/family/t0
+LOG:[09:10:20 18.1.2012]  complete: /test_server_job_submission/family/t0
+LOG:[09:10:20 18.1.2012]  complete: /test_server_job_submission/family
+LOG:[09:10:20 18.1.2012]  complete: /test_server_job_submission
+LOG:[09:10:20 18.1.2012]  complete: /
+MSG:[09:10:22 18.1.2012] --news=0 5019 145  :ma0 [server(5047,145) : *Small* scale changes :NEWS]
+MSG:[09:10:22 18.1.2012] --sync=0 5019 145  :ma0
+MSG:[09:10:22 18.1.2012] --get [server(5047 145)] :ma0

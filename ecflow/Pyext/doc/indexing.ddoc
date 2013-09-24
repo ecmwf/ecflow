@@ -1,0 +1,35 @@
+
+// Example of creating a StringVector
+// This allows conversion of a python list to a vector of strings
+//
+// Keep for documentation, since we can also pass a python list directly to the
+// the c++ interface, and do the conversion on the c++ side
+
+   class_<std::vector<std::string> >("StrVec",
+            "Represents a vector of strings\n\n"
+            "It allows the translation of a Python list of strings to a C++ vector of strings.\n"
+            "Please use ecflow.list_to_str_vec() to automatically convert a Python string list\n"
+            "to a C++ vector of string.\n"
+            "\nUsage::\n\n"
+            "   strvec = StrVec()\n"
+            "   StrVec.append(strvec,\"red\")\n"
+            "   StrVec.append(strvec,\"green\")\n"
+            "   StrVec.append(strvec,\"blue\")\n"
+            "   rep1 = RepeatEnumerated(\"COLOR\", strvec )\n\n"
+            "   rep2 = RepeatEnumerated(\"COLOR\", list_to_str_vec([\"red\",\"green\"]) )\n"
+            )
+   .def(vector_indexing_suite<std::vector<std::string> >())
+   ;
+   
+   
+These function would then be placed in __init.py__, and therefore be loaded
+when the module was loaded.
+
+   from ecflow import *
+
+   def list_to_str_vec( theList ):
+      """Converts a python list to a C++ StrVec in ecflow extension"""
+      strvec = StrVec()
+      for theStr in theList:
+         StrVec.append(strvec,theStr)
+      return strvec; 

@@ -1,0 +1,52 @@
+extern /o/main/12/an;extern /limits:c1a
+extern /limits:linux_cluster;extern /limits:pdb
+extern /limits:q2diss;extern /o/main:YMD
+extern /o/main/12/an/slwet
+extern /o/main/12/an/4dvar/ifstraj:finalwave
+extern /o/main/12/an/4dvar
+extern /o/main/12/an
+extern /o/main/12/fc/model
+extern /o/main/12/fc/model
+extern /o/main/12/an/4dvar/uptraj_0
+extern /o/main/12/an/4dvar/uptraj_0
+extern /o/main/12/fc/model
+extern /o/main/00dc/fc/model:step
+extern /o/main/00dc/fc/model
+extern /o/main/12/obs/get/get_stor
+extern /limits:prod
+extern /o/main/12/prod/240/prod_wparam
+extern /o/main:YMD
+extern /o/main/00/an
+extern /o/main/00/an/slwet
+extern /o/main/00/an/4dvar/ifstraj:finalwave
+extern /o/main/00/an/4dvar
+extern /o/main/00/an
+extern /o/main/00/fc/model
+extern /o/main/00/fc/model
+extern /o/main/00/an/4dvar/uptraj_0
+extern /o/main/00/an/4dvar/uptraj_0
+extern /o/main/00/fc/model
+extern /o/main/12dc/fc/model:step
+extern /o/main/12dc/fc/model
+extern /o/main/00/obs/get/get_stor
+extern /o/main/00/prod/240/prod_wparam
+extern /limits:mars
+extern /mofc/00/efi/swarm/sync_climate
+
+suite suiteName
+	limit sg1  10
+	limit mars 10
+endsuite
+
+suite obs
+    family limits
+    	limit hpcd 20
+    endfamily
+    
+    family anon
+    	task t1
+    		inlimit /suiteName:sg1
+   		task t2
+   			inlimit /obs/limits:hpcd         
+    endfamily
+endsuite

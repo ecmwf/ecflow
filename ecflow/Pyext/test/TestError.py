@@ -1,0 +1,372 @@
+#////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
+# Name        :
+# Author      : Avi
+# Revision    : $Revision: #10 $
+#
+# Copyright 2009-2012 ECMWF.
+# This software is licensed under the terms of the Apache Licence version 2.0
+# which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+# In applying this licence, ECMWF does not waive the privileges and immunities
+# granted to it by virtue of its status as an intergovernmental organisation
+# nor does it submit to any jurisdiction.
+#////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
+
+#  code for testing errors in creation of defs file in python
+
+import os
+from ecflow import Date, Meter, Event, Clock, Variable, Label, Limit, InLimit, \
+                   RepeatDate, RepeatEnumerated, RepeatInteger, RepeatString, \
+                   Task, Family, Suite, Defs
+
+def check_date(day,month,year):
+    try:    
+        Date(day,month,year)
+        return True
+    except IndexError: 
+        return False
+
+def check_meter(name,min_meter_value,max_meter_value,color_change):
+    try:    
+        Meter(name,min_meter_value,max_meter_value,color_change)
+        return True
+    except IndexError: 
+        return False
+    except RuntimeError: 
+        return False
+    
+def check_event_number_and_name(number,name):
+    try:    
+        Event(number,name)
+        return True
+    except: 
+        return False
+    
+def check_event(number):
+    try:    
+        Event(number)
+        return True
+    except RuntimeError: 
+        return False
+        
+def check_clock(day_of_month,month,year):
+    try:    
+        Clock(day_of_month,month,year)
+        return True
+    except IndexError: 
+        return False
+
+def check_variable(name,value):
+    try:    
+        Variable(name,value)
+        return True
+    except RuntimeError: 
+        return False
+    
+def check_label(name,value):
+    try:    
+        Label(name,value)
+        return True
+    except RuntimeError: 
+        return False
+    
+def check_limit(name,int_token):
+    try:    
+        Limit(name,int_token)
+        return True
+    except RuntimeError: 
+        return False
+    except TypeError: 
+        return False
+    
+def check_inlimit(name,path_to_node,int_token):
+    try:    
+        InLimit(name,path_to_node,int_token)
+        return True
+    except RuntimeError: 
+        return False
+    except TypeError: 
+        return False
+        
+def check_repeat_date(name, start, end, step):
+    try:    
+        RepeatDate(name,start,end,step)
+        return True
+    except RuntimeError: 
+        return False
+    
+def check_repeat_integer(name, start, end, step):
+    try:    
+        RepeatInteger(name,start,end,step)
+        return True
+    except RuntimeError: 
+        return False
+    except TypeError: 
+        return False
+
+def check_repeat_enumerated(name, list_of_strings):
+    try:    
+        RepeatEnumerated(name,list_of_strings)
+        return True
+    except RuntimeError: 
+        return False
+    except TypeError: 
+        return False
+ 
+def check_repeat_string(name, list_of_strings):
+    try:    
+        RepeatString(name,list_of_strings)
+        return True
+    except RuntimeError: 
+        return False
+    except TypeError: 
+        return False
+        
+def check_node_name(name):
+    try:
+        Task(name)
+        Family(name)
+        Suite(name)
+        return True;
+    except RuntimeError: 
+        return False
+  
+def check_defs(path_to_defs):
+    try:    
+        Defs(path_to_defs)
+        return True
+    except RuntimeError: 
+        return False
+          
+if __name__ == "__main__":
+    
+    # Names with leading '.' should not be allowed. Will interfere with triggers
+    # Empty names not allowed
+    # Spaces not allowed
+    invalid_names = [ ".", "", " ","   ",  "fred doc", "1 "]
+    
+    # Allow names with leading underscore
+    valid_names = [ "_", "__", "_._", "1.2", "fred.doc", "_.1"]
+    
+    assert check_date(0,1,2010),            "Expected valid date"
+    assert check_date(10,0,2010),           "Expected valid date"
+    assert check_date(10,1,0),              "Expected valid date"
+    assert check_date(0,0,0),               "Expected valid date"
+    assert check_date(40,1,2010) == False,  "Expected exception since day > 31"
+    assert check_date(-10,1,2010) == False, "Expected exception since day >= 0"
+    assert check_date(1,14,2010) == False,  "Expected exception since month > 12"
+    assert check_date(1,-1,2010) == False,  "Expected exception since month >= 0"
+    assert check_date(1,1,-2) == False,     "Expected exception since year >= 0"
+
+    # clock do not support wild carding hence we cant use 0 like in Date
+    assert check_clock(12,1,2010),           "Expected valid date"
+    assert check_clock(10,1,2010),           "Expected valid date"
+    assert check_clock(10,1,1400),           "Expected valid date"
+    assert check_clock(31,12,2010),          "Expected valid date"
+    assert check_clock(40,1,2010) == False,  "Expected exception since day > 31"
+    assert check_clock(-10,1,2010) == False, "Expected exception since day >= 0"
+    assert check_clock(1,14,2010) == False,  "Expected exception since month > 12"
+    assert check_clock(1,-1,2010) == False,  "Expected exception since month >= 0"
+    assert check_clock(1,1,-2) == False,     "Expected exception since year >= 0"
+
+    assert check_meter("m",0,100,100),             "Expected valid Meter"
+    assert check_meter("m",0,100,0),               "Expected valid Meter"
+    assert check_meter("m",200,100,100) == False,  "Expected exception since min > max"
+    assert check_meter("m",0,100,-20) == False,    "Expected exception since color_change should between min-max"
+    assert check_meter("m",0,100,200) == False,    "Expected exception since color_change should between min-max"
+    assert check_meter("",0,100,100) == False,     "Expected exception since no name specified"
+    assert check_meter(" ",0,100,100) == False,    "Expected Exception can not have spaces for a name"
+
+    assert check_event(1),                            "Expected valid Event"
+    assert check_event(2),                            "Expected valid Event"
+    assert check_event_number_and_name(2,"fred"),     "Expected valid Event"
+    assert check_event_number_and_name(2,2) == False, "Expected failure since the name is not a string"
+
+    assert check_repeat_date("m",20000101,20001201,200),          "Expected valid repeat"
+    assert check_repeat_date("m",20001201,20000101,200) == False, "Expected exception since end YMD > start YMD"
+    assert check_repeat_date("m",200001011,20001201,200)== False, "Expected Exception since start is invalid."
+    assert check_repeat_date("m",20000101,200012013,200)== False, "Expected Exception since send is invalid."
+    assert check_repeat_date("m",00000000,00000000,200)== False,  "Expected Exception since start/end are not valid dates is invalid."
+    assert check_repeat_date("",20000101,20001201,200)==False,    "Expected Exception since no name specified"
+    assert check_repeat_date(" ",20000101,20001201,200)==False,   "Expected Exception can not have spaces for a name"
+    assert check_repeat_integer("name",0, 10, 2 ),                "Expected valid repeat"
+    assert check_repeat_integer("",0, 10, 2 )==False,             "Expected Exception since no name specified"
+    assert check_repeat_integer(" ",0, 10, 2 )==False,            "Expected Exception can not have spaces for a name"
+    assert check_repeat_string("name",[ "a" ]),                   "Expected valid repeat"
+    assert check_repeat_string("",["a"] )==False,                 "Expected Exception since no name specified"
+    assert check_repeat_string(" ",["a"] )==False,                "Expected Exception can not have spaces for a name"
+    assert check_repeat_string("name",[ 1,2 ])==False,            "Expected Exception since a list of strings was expected"
+    assert check_repeat_enumerated("name",[ "a" ]),               "Expected valid repeat"
+    assert check_repeat_enumerated("",["a"] )==False,             "Expected Exception since no name specified"
+    assert check_repeat_enumerated(" ",["a"] )==False,            "Expected Exception since a list of strings was expected"
+    assert check_repeat_enumerated("name",[ 1,2 ])==False,        "Expected Exception since a list of strings was expected"
+
+
+    assert check_variable("name","value"),        "Expected valid Variable"
+    assert check_variable("name",""),             "Expected valid Variable"
+    assert check_variable("name"," "),            "Expected valid Variable"
+    assert check_variable("name","12"),           "Expected valid Variable"
+    assert check_variable("","12")==False,        "Expected Exception name must be specified"
+    assert check_variable(" ","12")==False,       "Expected Exception can not have spaces for a name"
+
+    assert check_label("name","value"),        "Expected valid label"
+    assert check_label("name",""),             "Expected valid label"
+    assert check_label("name"," "),            "Expected valid label"
+    assert check_label("name","12"),           "Expected valid label"
+    assert check_label("","12")==False,        "Expected exception name must be specified"
+    assert check_label(" ","12")==False,       "Expected Exception can not have spaces for a name"
+
+    assert check_limit("name",1),              "Expected valid limit"
+    assert check_limit("name",20000),          "Expected valid limit"
+    assert check_limit("name","ten")==False,   "Expected exception, token must be a integer"
+    assert check_limit("name","2")==False,     "Expected exception, token must be a integer"
+    assert check_limit("","2")==False,         "Expected exception, no name specified"
+    assert check_limit(" ","2")==False,        "Expected exception, can not have spaces for a name"
+
+    assert check_inlimit("limit_name","/path/to/limit",1),      "Expected valid in limit"
+    assert check_inlimit("limit_name","/path/to/limit",999999), "Expected valid in limit"
+    assert check_inlimit("limit_name","",1),                    "Expected valid in limit"
+    assert check_inlimit("","",1)==False,                       "Expected exception, no limit name specified"
+    assert check_inlimit(" ","",1)==False,                      "Expected exception, can not have spaces for a name"
+ 
+
+    # ========================================================================
+    # Check node names
+    for i in range(25):
+        assert check_node_name(str(i)),             "Integer names should be allowed"
+     
+    for name in valid_names:
+        assert check_node_name(name),  "Expected valid name " + name
+    
+    for name in invalid_names:
+        assert check_node_name(name)==False,  "Expected exception for invalid name " + name
+
+   
+    assert check_defs("a_made_up_path_that_doesnt_not_exit.def") == False, "Expected exception, Defs file does not exist"
+
+    # =================================================================================
+    # test save_as_defs
+    defs = Defs()                      # create a empty definition
+    s1 = defs.add_suite("s1")          # create a suite "s1" and add to defs
+    defs.save_as_defs("testerror.def") # create a defs on disk
+    assert check_defs("testerror.def"), "Expected defs file to exist"
+    os.remove("testerror.def")
+
+    # =================================================================================
+    # duplicate suites not allowed
+    test_passed = False
+    try :
+        defs = Defs()               # create a empty definition
+        s1 = defs.add_suite("s1")   # create a suite "s1" and add to defs
+        s2 = defs.add_suite("s1")   # Exception thrown trying to add suite name "s1" again
+    except RuntimeError, e : 
+        test_passed = True
+        pass 
+    assert test_passed,"duplicate suite test failed"   
+
+    # =================================================================================
+    # duplicate family not allowed
+    test_passed = False
+    try:
+        suite = Suite("1")
+        fam1 = Family("1")
+        fam2 = Family("1")
+        suite.add_family(fam1)
+        suite.add_family(fam2)
+    except RuntimeError, e : 
+        test_passed = True
+        pass
+    assert test_passed,"duplicate Family test failed"   
+  
+    # =================================================================================
+    # duplicate task not allowed
+    test_passed = False
+    try:
+        suite = Suite("1")
+        ta = Task("a")
+        tb = Task("a")
+        suite.add_task(ta)
+        suite.add_task(tb)
+    except RuntimeError, e : 
+        test_passed = True
+        pass
+    assert test_passed,"duplicate Task test failed"   
+
+    # =================================================================================
+    # duplicate meter not allowed
+    test_passed = False
+    try:
+        defs = Defs()
+        suite = defs.add_suite("1")
+        ta = suite.add_task("a")
+        ta.add_meter("meter",0,100);
+        ta.add_meter("meter",0,100);
+    except RuntimeError, e : 
+        test_passed = True
+        pass
+    assert test_passed,"duplicate event test failed"   
+
+    test_passed = False
+    try:
+        defs = Defs()
+        suite = defs.add_suite("1")
+        ta = suite.add_task("a")
+        ta.add_meter(Meter("meter",0,100));
+        ta.add_meter(Meter("meter",10,100));
+    except RuntimeError, e : 
+        test_passed = True
+        pass
+    assert test_passed,"duplicate meter test failed"   
+    
+    # =================================================================================
+    # duplicate event not allowed
+    test_passed = False
+    try:
+        defs = Defs()
+        suite = defs.add_suite("1")
+        ta = suite.add_task("a")
+        ta.add_event(1);
+        ta.add_event("1");
+    except RuntimeError, e : 
+        test_passed = True
+        pass
+    assert test_passed,"duplicate event test failed"   
+    
+    test_passed = False
+    try:
+        defs = Defs()
+        suite = defs.add_suite("1")
+        ta = suite.add_task("a")
+        ta.add_event("name");
+        ta.add_event("name");
+    except RuntimeError, e : 
+        test_passed = True
+        pass
+    assert test_passed,"duplicate event test failed"   
+    
+    test_passed = False
+    try:
+        defs = Defs()
+        suite = defs.add_suite("1")
+        ta = suite.add_task("a")
+        ta.add_event(1,"name");
+        ta.add_event(1,"name");
+    except RuntimeError, e : 
+        test_passed = True
+        pass
+    assert test_passed,"duplicate event test failed"   
+    
+    
+    # =================================================================================
+    # Add same task to suite and family
+    # This should fail but doesnt, because task is reference counted it still works !!!
+    # Only way to trap this is record ptrs used on the C++ side. Hence left out
+    #
+    new_defs = Defs();
+    suite = new_defs.add_suite("ns1")
+    family =  suite.add_family("f1")
+    task =  Task("t1")
+    suite.add_task(task)
+    family.add_task(task)
+    print new_defs
+ 
+    print "All Tests pass"

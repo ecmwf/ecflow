@@ -1,0 +1,24 @@
+# This file was taken from one of operational suites
+  
+suite limits
+  defstatus complete
+  clock hybrid 0 # 01.07.2009 14:47
+  limit metis 6
+endsuite
+
+suite admin
+  #defstatus suspended
+  clock hybrid  22.12.2005   # run at midnight to ensure test is deterministice
+  inlimit /limits:metis
+  
+  family daily
+ 	verify complete:1
+    repeat date YMD 20070115 20070118 1 #  run 4 times
+    family check
+ 	  verify complete:4           # make sure it actually ran 4 times
+      task rcp
+        time 00:00 23:59 00:10    # Note: finish minute (59) is not a multiple of the increment 10, last time is 23:50
+ 	    verify complete:576       # 576 = 24(hours) * 6( completions per hour) * 4 times
+ 	endfamily
+  endfamily
+endsuite 

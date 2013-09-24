@@ -1,0 +1,16 @@
+
+
+# Since we have comment out, this should not appear in the jobs file
+#%include <qsub.h>
+# QSUB -lT 3500
+# QSUB -lt 3500
+# QSUB -lM 50mb
+
+
+%include <config.h>
+
+%include <trap.h>
+%include <setup.h>
+ 
+%include <endt.h>
+ 

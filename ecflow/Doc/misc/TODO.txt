@@ -1,0 +1,43 @@
+
+o Migration of ecflow release in OPS and research
+
+ 
+Client 
+/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
+        
+    o Test for file-system full, this may be a common problems. hence Guard
+      1/ ECF_HOME is full, ie handling, check-pt file, and log file
+      2/ Jobs. Job file generation and job-output file full.
+         i.e Abort task, and provide a reason ?         
+    o (optional) auto-migrate ( Check dependencies on removed nodes and warn ) 
+    o (optional) auto-restore ( Check dependencies on removed nodes and warn )
+    o (optional) structure logging of commands such that its allows commands 
+                 to be replayed on client side 
+                                              
+Server  
+/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
+                 
+    o autorestore
+    o automigrate
+  
+ 
+Others 
+/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
+
+o Test case for portable binary archive bug on AIX: Michael Wong, Robert Ramey:
+
+o Parser expression:
+//    exprMap["../obs:YMD ge  ( (19720101 + 6576) - (12 + 1) )"] = std::make_pair(AstGreaterEqual::stype(),true);
+
+o Size of full defs, returned to client keeps on growing ????
+  Data specific, small defs does not show problem.
+  This is partly accounted for by:
+   - Task process id:
+   - Task password
+  
+o deployment plan
+    - testing with operations( client, server, xcdp, python ), Automake
+    - migration
+      ( ? )
+   
+           

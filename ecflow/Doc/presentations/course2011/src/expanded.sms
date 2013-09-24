@@ -1,0 +1,566 @@
+suite skull
+  defstatus suspended
+  clock hybrid 0 # 20.09.2011 15:38
+  edit USER 'map'
+  edit SCHOST 'c1a'
+  edit CLHOST 'lxa'
+  edit WSLOGDIR '/scratch/ma/map/output'
+  edit SCLOGDIR '/s1a/ms_dir/ma/map/smsjoboutput'
+  edit DATEMASK '*.*.*'
+  edit SMSLOGHOST 'c1a'
+  edit SMSLOGPORT '9316'
+  edit SMSTRIES '1'
+  edit SMSHOME '/scratch/ma/map/output'
+  edit SMSFILES '/tmp/map/work/p4/merlin/workspace/MyProject/Doc/online/migration/src/skull/smsfiles'
+  edit SMSINCLUDE '/tmp/map/work/p4/merlin/workspace/MyProject/Doc/online/migration/src/skull/include'
+  edit SMSCMD '/home/ma/emos/bin/smssubmit %USER% %WSHOST% %SMSJOB% %SMSJOBOUT%'
+  edit SMSKILL '/home/ma/emos/bin/smskill %USER% %WSHOST% %SMSRID% %SMSJOBOUT%'
+  edit ACCOUNT 'ecodmdma'
+  edit VERSION '0040'
+  edit EPSVERSION '0001'
+  edit RFVERSION '0001'
+  edit DELTA_DAY '0'
+  edit EMOS_BASE '00'
+  edit USE_YMD 'true'
+  edit FSFAMILY '/'
+  edit BINS '/home/ma/map/bin'
+  edit XBINS '/home/ma/emos/bin'
+  edit STREAM 'undef'
+  edit EPSTYPE 'undef'
+  edit MEMBER '0'
+  edit FIRST_DAY '0'
+  edit EMOS_TIME_STEP_H '00'
+  edit YMD '20110920'
+  edit SUITE_START '20110920'
+  edit QUEUE 'serial'
+  edit QUEUE_EPILOG 'ns'
+  edit LOGDIR '/scratch/ma/map/output'
+  edit SMSOUT '/scratch/ma/map/output'
+  edit WSHOST 'ibis'
+  edit SLEEP '20'
+  family limits
+    defstatus complete
+    limit lim 3
+  endfamily
+  family make
+    complete /skull:YMD ne /skull:SUITE_START
+    family wst
+      edit QUEUE 'serial'
+      edit QUEUE_EPILOG 'ns'
+      edit LOGDIR '/scratch/ma/map/output'
+      edit SMSOUT '/scratch/ma/map/output'
+      edit WSHOST 'ibis'
+      task do
+    endfamily
+    family ecg
+      edit QUEUE 'normal'
+      edit QUEUE_EPILOG 'normal'
+      edit LOGDIR '/scratch/ma/map/output'
+      edit SMSOUT '/scratch/ma/map/output'
+      edit WSHOST 'ecgate'
+      task do
+    endfamily
+    family hpc
+      edit QUEUE 'ns'
+      edit QUEUE_EPILOG 'ns'
+      edit LOGDIR '/s1a/ms_dir/ma/map/smsjoboutput'
+      edit SMSOUT '/s1a/ms_dir/ma/map/smsjoboutput'
+      edit WSHOST 'c1a'
+      task do
+    endfamily
+    family lcl
+      edit QUEUE 'serial'
+      edit QUEUE_EPILOG 'ns'
+      edit LOGDIR '/scratch/ma/map/output'
+      edit SMSOUT '/scratch/ma/map/output'
+      edit WSHOST 'lxa'
+      edit SMSCMD '/home/ma/emos/bin/smssubmit.new %USER% %WSHOST% %SMSJOB% %SMSJOBOUT% '
+      task do
+    endfamily
+  endfamily
+  family skull
+    defstatus suspended
+    trigger ./make eq complete
+    edit ENSEMBLES '50'
+    family 00
+      edit DELTA_DAY '1'
+      edit EMOS_BASE '00'
+      family skull
+        task another
+      endfamily
+      family pop
+        trigger ./skull eq complete
+        edit QUEUE 'serial'
+        edit QUEUE_EPILOG 'ns'
+        edit LOGDIR '/scratch/ma/map/output'
+        edit SMSOUT '/scratch/ma/map/output'
+        edit WSHOST 'lxa'
+        edit ANALYSIS 'NO'
+        task plot
+      endfamily
+      family ws
+        trigger ./skull eq complete
+        edit QUEUE 'serial'
+        edit QUEUE_EPILOG 'ns'
+        edit LOGDIR '/scratch/ma/map/output'
+        edit SMSOUT '/scratch/ma/map/output'
+        edit WSHOST 'ibis'
+        edit ANALYSIS 'NO'
+        task plot
+      endfamily
+    endfamily
+    family 12
+      edit DELTA_DAY '0'
+      edit EMOS_BASE '12'
+      family skull
+        task another
+      endfamily
+      family pop
+        trigger ./skull eq complete
+        edit QUEUE 'serial'
+        edit QUEUE_EPILOG 'ns'
+        edit LOGDIR '/scratch/ma/map/output'
+        edit SMSOUT '/scratch/ma/map/output'
+        edit WSHOST 'lxa'
+        edit ANALYSIS 'NO'
+        task plot
+      endfamily
+      family ws
+        trigger ./skull eq complete
+        edit QUEUE 'serial'
+        edit QUEUE_EPILOG 'ns'
+        edit LOGDIR '/scratch/ma/map/output'
+        edit SMSOUT '/scratch/ma/map/output'
+        edit WSHOST 'ibis'
+        edit ANALYSIS 'NO'
+        task plot
+      endfamily
+    endfamily
+  endfamily
+  family consumer
+    defstatus suspended
+    edit SLEEP '10'
+    edit PRODUCE 'yes'
+    edit CONSUME 'yes'
+    family limit
+      defstatus complete
+      limit consume 7
+    endfamily
+    family admin
+      task leader
+        defstatus complete
+        event 1
+        text 'this task is dummy task not designed to run'
+    endfamily
+    task produce
+      edit BEG '0'
+      edit FIN '48'
+      edit BY '3'
+      event p
+      event c
+      meter step -1 48 48
+    family produce0
+      edit CONSUME 'no'
+      task produce
+        edit BEG '0'
+        edit FIN '48'
+        edit BY '3'
+        event p
+        event c
+        meter step -1 48 48
+    endfamily
+    family produce1
+      edit CONSUME 'no'
+      task produce
+        repeat integer STEP 0 48 3 # status 0
+        edit BEG '%STEP%'
+        edit FIN '0'
+        edit BY '3'
+        event p
+        event c
+        meter step -1 0 0
+    endfamily
+    family consume
+      inlimit ./limit:consume
+      edit PRODUCE 'no'
+      task consume
+        edit BEG '0'
+        edit FIN '48'
+        edit BY '3'
+        edit CALL_WAITER '1'
+        edit LEAD '/skull/consumer/admin/leader:1'
+        edit PROD '/skull/consumer/produce'
+        event p
+        event c
+        meter step -1 48 48
+    endfamily
+    family consume0
+      inlimit ./limit:consume
+      edit PRODUCE 'no'
+      task consume
+        repeat integer STEP 0 48 3 # status 0
+        trigger  ( /skull/consumer/admin/leader:1 and  ( ./consume:STEP le /skull/consumer/produce1/produce:STEP)) or  (  not /skull/consumer/admin/leader:1 and  ( ./consume:STEP le /skull/consumer/produce0/produce:step))
+        edit BEG '%STEP%'
+        edit FIN '%STEP%'
+        edit BY '3'
+        event p
+        event c
+    endfamily
+    family consume1
+      inlimit ./limit:consume
+      edit PRODUCE 'no'
+      family 1
+        task consume
+          repeat integer STEP 0 48 9 # status 0
+          trigger  ( /skull/consumer/admin/leader:1 and  ( ./consume:STEP le /skull/consumer/produce1/produce:STEP)) or  (  not /skull/consumer/admin/leader:1 and  ( ./consume:STEP le /skull/consumer/produce0/produce:step))
+          edit BEG '%STEP%'
+          edit FIN '%STEP%'
+          edit BY '9'
+          event p
+          event c
+      endfamily
+      family 2
+        task consume
+          repeat integer STEP 3 48 9 # status 3
+          trigger  ( /skull/consumer/admin/leader:1 and  ( ./consume:STEP le /skull/consumer/produce1/produce:STEP)) or  (  not /skull/consumer/admin/leader:1 and  ( ./consume:STEP le /skull/consumer/produce0/produce:step))
+          edit BEG '%STEP%'
+          edit FIN '%STEP%'
+          edit BY '9'
+          event p
+          event c
+      endfamily
+      family 3
+        task consume
+          repeat integer STEP 6 48 9 # status 6
+          trigger  ( /skull/consumer/admin/leader:1 and  ( ./consume:STEP le /skull/consumer/produce1/produce:STEP)) or  (  not /skull/consumer/admin/leader:1 and  ( ./consume:STEP le /skull/consumer/produce0/produce:step))
+          edit BEG '%STEP%'
+          edit FIN '%STEP%'
+          edit BY '9'
+          event p
+          event c
+      endfamily
+    endfamily
+    family consume2
+      inlimit ./limit:consume
+      edit PRODUCE 'no'
+      family 000
+        task consume
+          trigger  ( /skull/consumer/admin/leader:1 and  ( ./consume:STEP le /skull/consumer/produce1/produce:STEP)) or  (  not /skull/consumer/admin/leader:1 and  ( ./consume:STEP le /skull/consumer/produce0/produce:step))
+          edit BEG '0'
+          edit FIN '0'
+          edit BY '3'
+          edit STEP '0'
+          event p
+          event c
+      endfamily
+      family 003
+        task consume
+          trigger  ( /skull/consumer/admin/leader:1 and  ( ./consume:STEP le /skull/consumer/produce1/produce:STEP)) or  (  not /skull/consumer/admin/leader:1 and  ( ./consume:STEP le /skull/consumer/produce0/produce:step))
+          edit BEG '3'
+          edit FIN '3'
+          edit BY '3'
+          edit STEP '3'
+          event p
+          event c
+      endfamily
+      family 006
+        task consume
+          trigger  ( /skull/consumer/admin/leader:1 and  ( ./consume:STEP le /skull/consumer/produce1/produce:STEP)) or  (  not /skull/consumer/admin/leader:1 and  ( ./consume:STEP le /skull/consumer/produce0/produce:step))
+          edit BEG '6'
+          edit FIN '6'
+          edit BY '3'
+          edit STEP '6'
+          event p
+          event c
+      endfamily
+      family 009
+        task consume
+          trigger  ( /skull/consumer/admin/leader:1 and  ( ./consume:STEP le /skull/consumer/produce1/produce:STEP)) or  (  not /skull/consumer/admin/leader:1 and  ( ./consume:STEP le /skull/consumer/produce0/produce:step))
+          edit BEG '9'
+          edit FIN '9'
+          edit BY '3'
+          edit STEP '9'
+          event p
+          event c
+      endfamily
+      family 012
+        task consume
+          trigger  ( /skull/consumer/admin/leader:1 and  ( ./consume:STEP le /skull/consumer/produce1/produce:STEP)) or  (  not /skull/consumer/admin/leader:1 and  ( ./consume:STEP le /skull/consumer/produce0/produce:step))
+          edit BEG '12'
+          edit FIN '12'
+          edit BY '3'
+          edit STEP '12'
+          event p
+          event c
+      endfamily
+      family 015
+        task consume
+          trigger  ( /skull/consumer/admin/leader:1 and  ( ./consume:STEP le /skull/consumer/produce1/produce:STEP)) or  (  not /skull/consumer/admin/leader:1 and  ( ./consume:STEP le /skull/consumer/produce0/produce:step))
+          edit BEG '15'
+          edit FIN '15'
+          edit BY '3'
+          edit STEP '15'
+          event p
+          event c
+      endfamily
+      family 018
+        task consume
+          trigger  ( /skull/consumer/admin/leader:1 and  ( ./consume:STEP le /skull/consumer/produce1/produce:STEP)) or  (  not /skull/consumer/admin/leader:1 and  ( ./consume:STEP le /skull/consumer/produce0/produce:step))
+          edit BEG '18'
+          edit FIN '18'
+          edit BY '3'
+          edit STEP '18'
+          event p
+          event c
+      endfamily
+      family 021
+        task consume
+          trigger  ( /skull/consumer/admin/leader:1 and  ( ./consume:STEP le /skull/consumer/produce1/produce:STEP)) or  (  not /skull/consumer/admin/leader:1 and  ( ./consume:STEP le /skull/consumer/produce0/produce:step))
+          edit BEG '21'
+          edit FIN '21'
+          edit BY '3'
+          edit STEP '21'
+          event p
+          event c
+      endfamily
+      family 024
+        task consume
+          trigger  ( /skull/consumer/admin/leader:1 and  ( ./consume:STEP le /skull/consumer/produce1/produce:STEP)) or  (  not /skull/consumer/admin/leader:1 and  ( ./consume:STEP le /skull/consumer/produce0/produce:step))
+          edit BEG '24'
+          edit FIN '24'
+          edit BY '3'
+          edit STEP '24'
+          event p
+          event c
+      endfamily
+      family 027
+        task consume
+          trigger  ( /skull/consumer/admin/leader:1 and  ( ./consume:STEP le /skull/consumer/produce1/produce:STEP)) or  (  not /skull/consumer/admin/leader:1 and  ( ./consume:STEP le /skull/consumer/produce0/produce:step))
+          edit BEG '27'
+          edit FIN '27'
+          edit BY '3'
+          edit STEP '27'
+          event p
+          event c
+      endfamily
+      family 030
+        task consume
+          trigger  ( /skull/consumer/admin/leader:1 and  ( ./consume:STEP le /skull/consumer/produce1/produce:STEP)) or  (  not /skull/consumer/admin/leader:1 and  ( ./consume:STEP le /skull/consumer/produce0/produce:step))
+          edit BEG '30'
+          edit FIN '30'
+          edit BY '3'
+          edit STEP '30'
+          event p
+          event c
+      endfamily
+      family 033
+        task consume
+          trigger  ( /skull/consumer/admin/leader:1 and  ( ./consume:STEP le /skull/consumer/produce1/produce:STEP)) or  (  not /skull/consumer/admin/leader:1 and  ( ./consume:STEP le /skull/consumer/produce0/produce:step))
+          edit BEG '33'
+          edit FIN '33'
+          edit BY '3'
+          edit STEP '33'
+          event p
+          event c
+      endfamily
+      family 036
+        task consume
+          trigger  ( /skull/consumer/admin/leader:1 and  ( ./consume:STEP le /skull/consumer/produce1/produce:STEP)) or  (  not /skull/consumer/admin/leader:1 and  ( ./consume:STEP le /skull/consumer/produce0/produce:step))
+          edit BEG '36'
+          edit FIN '36'
+          edit BY '3'
+          edit STEP '36'
+          event p
+          event c
+      endfamily
+      family 039
+        task consume
+          trigger  ( /skull/consumer/admin/leader:1 and  ( ./consume:STEP le /skull/consumer/produce1/produce:STEP)) or  (  not /skull/consumer/admin/leader:1 and  ( ./consume:STEP le /skull/consumer/produce0/produce:step))
+          edit BEG '39'
+          edit FIN '39'
+          edit BY '3'
+          edit STEP '39'
+          event p
+          event c
+      endfamily
+      family 042
+        task consume
+          trigger  ( /skull/consumer/admin/leader:1 and  ( ./consume:STEP le /skull/consumer/produce1/produce:STEP)) or  (  not /skull/consumer/admin/leader:1 and  ( ./consume:STEP le /skull/consumer/produce0/produce:step))
+          edit BEG '42'
+          edit FIN '42'
+          edit BY '3'
+          edit STEP '42'
+          event p
+          event c
+      endfamily
+      family 045
+        task consume
+          trigger  ( /skull/consumer/admin/leader:1 and  ( ./consume:STEP le /skull/consumer/produce1/produce:STEP)) or  (  not /skull/consumer/admin/leader:1 and  ( ./consume:STEP le /skull/consumer/produce0/produce:step))
+          edit BEG '45'
+          edit FIN '45'
+          edit BY '3'
+          edit STEP '45'
+          event p
+          event c
+      endfamily
+      family 048
+        task consume
+          trigger  ( /skull/consumer/admin/leader:1 and  ( ./consume:STEP le /skull/consumer/produce1/produce:STEP)) or  (  not /skull/consumer/admin/leader:1 and  ( ./consume:STEP le /skull/consumer/produce0/produce:step))
+          edit BEG '48'
+          edit FIN '48'
+          edit BY '3'
+          edit STEP '48'
+          event p
+          event c
+      endfamily
+    endfamily
+  endfamily
+  family dinner
+    defstatus suspended
+    edit SLEEP '10'
+    family simple
+      family limit
+        defstatus complete
+        limit 1 1
+        limit 2 1
+        limit 3 1
+        limit 4 1
+        limit 5 1
+      endfamily
+      family 1
+        repeat integer iter 1 100 1 # status 1
+        task eat
+          inlimit ../limit:1
+          inlimit ../limit:2
+          event release
+        task release
+          trigger ./eat:release or ./eat eq complete
+      endfamily
+      family 2
+        repeat integer iter 1 100 1 # status 1
+        task eat
+          inlimit ../limit:2
+          inlimit ../limit:3
+          event release
+        task release
+          trigger ./eat:release or ./eat eq complete
+      endfamily
+      family 3
+        repeat integer iter 1 100 1 # status 1
+        task eat
+          inlimit ../limit:3
+          inlimit ../limit:4
+          event release
+        task release
+          trigger ./eat:release or ./eat eq complete
+      endfamily
+      family 4
+        repeat integer iter 1 100 1 # status 1
+        task eat
+          inlimit ../limit:4
+          inlimit ../limit:5
+          event release
+        task release
+          trigger ./eat:release or ./eat eq complete
+      endfamily
+      family 5
+        repeat integer iter 1 100 1 # status 1
+        task eat
+          inlimit ../limit:5
+          inlimit ../limit:1
+          event release
+        task release
+          trigger ./eat:release or ./eat eq complete
+      endfamily
+    endfamily
+    family normal
+      family limit
+        defstatus complete
+        limit 1 1
+        limit 2 1
+        limit 3 1
+        limit 4 1
+        limit 5 1
+      endfamily
+      family 1
+        task eat
+          inlimit ../limit:1
+          inlimit ../limit:2
+          repeat integer iter 1 100 1 # status 1
+          trigger ./think ne active and ./think ne submitted and ./think ne aborted
+          event release
+        task think
+          repeat integer iter 1 100 1 # status 1
+          trigger  ( ./eat ne active and ./eat ne submitted and ./eat ne aborted) or  ( ./eat:release or ./eat eq complete)
+      endfamily
+      family 2
+        task eat
+          inlimit ../limit:2
+          inlimit ../limit:3
+          repeat integer iter 1 100 1 # status 1
+          trigger ./think ne active and ./think ne submitted and ./think ne aborted
+          event release
+        task think
+          repeat integer iter 1 100 1 # status 1
+          trigger  ( ./eat ne active and ./eat ne submitted and ./eat ne aborted) or  ( ./eat:release or ./eat eq complete)
+      endfamily
+      family 3
+        task eat
+          inlimit ../limit:3
+          inlimit ../limit:4
+          repeat integer iter 1 100 1 # status 1
+          trigger ./think ne active and ./think ne submitted and ./think ne aborted
+          event release
+        task think
+          repeat integer iter 1 100 1 # status 1
+          trigger  ( ./eat ne active and ./eat ne submitted and ./eat ne aborted) or  ( ./eat:release or ./eat eq complete)
+      endfamily
+      family 4
+        task eat
+          inlimit ../limit:4
+          inlimit ../limit:5
+          repeat integer iter 1 100 1 # status 1
+          trigger ./think ne active and ./think ne submitted and ./think ne aborted
+          event release
+        task think
+          repeat integer iter 1 100 1 # status 1
+          trigger  ( ./eat ne active and ./eat ne submitted and ./eat ne aborted) or  ( ./eat:release or ./eat eq complete)
+      endfamily
+      family 5
+        task eat
+          inlimit ../limit:5
+          inlimit ../limit:1
+          repeat integer iter 1 100 1 # status 1
+          trigger ./think ne active and ./think ne submitted and ./think ne aborted
+          event release
+        task think
+          repeat integer iter 1 100 1 # status 1
+          trigger  ( ./eat ne active and ./eat ne submitted and ./eat ne aborted) or  ( ./eat:release or ./eat eq complete)
+      endfamily
+    endfamily
+  endfamily
+  family shop
+    defstatus suspended
+    edit NB_CHAIRS '4'
+    family limit
+      defstatus complete
+      limit passby 1
+      limit barbers 1
+      limit cashiers 1
+    endfamily
+    task passby
+      inlimit ./limit:passby
+      edit ID '0'
+      cron 00:00 23:59 00:01
+  endfamily
+  task perl
+    defstatus suspended
+    edit SMSMICRO '^'
+    edit SMSCMD '^SMSJOB^ > ^SMSJOBOUT^ 2>&1 &'
+    meter step -1 100 100
+  task python
+    defstatus suspended
+    edit SMSMICRO '^'
+    edit SMSCMD '^SMSJOB^ > ^SMSJOBOUT^ 2>&1 &'
+    meter step -1 100 100
+endsuite

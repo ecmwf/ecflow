@@ -1,0 +1,13 @@
+suite cron
+	cron 23:00                              # run every day at 23:00
+	cron 10:00 20:00 01:00                  # run every hour between 10am and 8pm
+	cron -w 0,1 10:00                       # run every sunday and monday at 10am
+	cron -d 10,11,12 12:00                  # run 10th, 11th and 12th of each month at noon
+	cron -m 1,2,3 12:00                     # run on Jan,Feb and March every day at noon.
+	cron -w 0,6 12:00
+	cron -w 0,1,2,3,4,5,6 12:00
+	cron -w 0 -m 5,6,7,8 10:00 20:00 01:00  # run every sunday, between May-Aug, every hour between 10am and 8pm
+endsuite
+
+suite s1;cron 23:00 ;cron 10:00 20:00 01:00 ;cron -w 0,1 10:00 ;cron -d 10,11,12 12:00 ;cron -m 1,2,3 12:00 ; cron -w 0,6 12:00;cron -w 0,1,2,3,4,5,6 12:00;cron -w 0 -m 5,6,7,8 10:00 20:00 01:00  # run every sunday, between May-Aug, every hour between 10am and 8pm
+endsuite

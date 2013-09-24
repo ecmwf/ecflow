@@ -1,0 +1,24 @@
+
+Time Dependencies  
+=================
+o It should be noted that even when the server is suspended. 
+  i.e no jobs are submitted
+  The time based attributes will still be updated.
+  
+o The calendar is used to update the time dependent attributes. via call to updateCalendar()
+  Any time based attribute which is free, during the call is *marked*
+  This allow checking for free/holding to return immediately when free.
+  
+  When the node is 'begun' or requeed  the time base attributes are reset.
+  
+  
+Trgiggers & complete
+=====================
+o During Node::resolution() any triggers and complete expressions
+  that are free are *marked*
+  
+o When a node is 'begun' and trigger and complete expressions are reset.
+
+
+Both of the above approaches will speed up updateClanedar() and node resolution
+and thus allow for faster job submission.

@@ -1,0 +1,78 @@
+## Copyright 2009-2012 ECMWF. 
+## This software is licensed under the terms of the Apache Licence version 2.0 
+## which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
+## In applying this licence, ECMWF does not waive the privileges and immunities 
+## granted to it by virtue of its status as an intergovernmental organisation 
+## nor does it submit to any jurisdiction. 
+
+#
+# Test project
+#
+use-project theCore     : ../ACore ;
+use-project theNodeAttr : ../ANattr ;
+use-project theNode     : ../ANode ;
+use-project theParser   : ../AParser ;
+use-project theBase     : ../Base ;
+use-project theServer   : ../Server ;
+use-project theClient   : ../Client ;
+
+lib pthread ;
+
+
+#
+# Split into library, so that testing can use library, and hence same compiler option
+#
+#
+# Split into library, so that testing can use library, and hence same compiler option
+#
+# The <include> means we will automatically add this directory to the include path
+# of any other target that uses this lib
+#
+lib libecfsms : [ glob src/*.cpp ]
+              : <include>../ACore/src
+                <include>../ANattr/src 
+                <include>../ANode/src 
+                <include>../AParser/src 
+                <include>../Base/src 
+          	    <include>../Client/src 
+                <variant>debug:<define>DEBUG
+                <link>static
+                <use>/theCore//core
+                <use>/theNodeAttr//nodeattr
+                <use>/theNode//node
+                <use>/theBase//base
+                <use>/theParser//libparser
+           	    <use>/theClient//libclient
+            	<use>/site-config//boost_system
+             	<use>/site-config//boost_serialization
+             	<use>/site-config//boost_filesystem
+             	<use>/site-config//boost_program_options
+             	<use>/site-config//boost_datetime
+      	      :
+              : <include>../TestEcfSms/src  
+              ;
+           
+
+# Ignore TestSingle.cpp, used for standalone testing
+exe smsecftest : [ glob test/*.cpp   ]  
+	       pthread
+           /theCore//core
+           /theNodeAttr//nodeattr
+           /theNode//node
+           /theParser//libparser
+           /theBase//base
+           /theClient//libclient
+           libecfsms
+           /site-config//boost_system
+           /site-config//boost_serialization
+           /site-config//boost_filesystem
+           /site-config//boost_program_options
+           /site-config//boost_test
+           /site-config//boost_datetime
+         : <include>../Base/test 
+           <include>../Client/test 
+           <include>../TestEcfSms/test
+           <variant>debug:<define>DEBUG
+ 	     ;
+ 	     
+ 

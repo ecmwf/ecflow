@@ -1,0 +1,52 @@
+
+XML format
+==========
+
+Moreover you can make Boost.Test to produce them in XML format using output_format=XML
+and use some automated tool that will format this information as you like.
+
+To run individual tests.
+========================
+
+<unit-test> --log_level=test_suite --run_test=<test suite>/<test name> 
+
+i.e.
+
+bin/gcc-4.5/debug/coretest --log_level=test_suite --run_test=CoreTestSuite/test_log
+
+To run Multiple tests in the same test suite
+============================================
+
+<exe> --log_level=test_suite --run_test=<test suite>/<test name>,<test2> 
+
+i.e 
+
+bin/gcc-4.5/debug/coretest --log_level=test_suite --run_test=CoreTestSuite/test_log,test_log_append
+
+
+If you have Multiple test suites,
+=================================
+
+All test units within the referred test suites are going to be run.
+
+BOOST_AUTO_TEST_SUITE( s1 )
+BOOST_AUTO_TEST_CASE( test1 ){}
+BOOST_AUTO_TEST_CASE( lest2 ){}
+BOOST_AUTO_TEST_SUITE_END()
+
+
+BOOST_AUTO_TEST_SUITE( s2 )
+BOOST_AUTO_TEST_CASE( test1 ){}
+BOOST_AUTO_TEST_CASE( test11 ){}
+
+<exe> --log_level=test_suite --run_test=<test suite> 
+
+<exe> --log_level=test_suite --run_test=s2
+
+Reference
+===========
+See: 
+
+http://www.boost.org/doc/libs/1_47_0/libs/test/doc/html/utf/user-guide/runtime-config/run-by-name.html
+
+  

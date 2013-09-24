@@ -1,0 +1,19 @@
+Tried an implementation of the multi-threaded server,
+However this did not improve the performance of the server
+under high load. Was in fact slightly slower.
+
+Hence abandoned, Tar of implementation kept if we need
+to re-visit.
+
+One un diagnosed crash. Does not always happen. Server crashes
+===============================================================
+Client:: ...test_server_stress_test_2:   port(3155)
+pure virtual method called
+terminate called without an active exception
+ClientInvoker:: Connection error: (Client::handle_read: connection error( End of file ) for request( --replace=/suite1 Client/test/data/lifecycle.txt parent  :ma0 ) on localhost:3155): Trying again
+ClientInvoker:: Connection error: (Client::handle_connect: Ran out of end points: connection error( Connection refused ) for request( --replace=/suite1 Client/test/data/lifecycle.txt parent  :ma0 ) on localhost:3155): Trying again
+ClientInvoker:: Connection error: (Client::handle_connect: Ran out of end points: connection error( Connection refused ) for request( --terminate=yes :ma0 ) on localhost:3155): Trying again
+ClientInvoker:: Connection error: (Client::handle_connect: Ran out of end points: connection error( Connection refused ) for request( --terminate=yes :ma0 ) on localhost:3155): Trying again
+Client/test/TerminateServer.hpp(42): fatal error in "test_server_stress_test_2": --terminate=yes should return 0
+Request( --terminate=yes :ma0 ), Failed to connect to localhost:3155. After 2 attempts. Is the server running ?
+Client environment:

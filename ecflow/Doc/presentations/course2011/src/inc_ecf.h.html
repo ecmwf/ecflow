@@ -1,0 +1,56 @@
+<div class="highlight"><pre><span class="nb">export </span><span class="nv">ECF_PORT</span><span class="o">=</span>%ECF_PORT:0%; <span class="nv">ECF_FOLLOW</span><span class="o">=</span>%ECF_FOLLOW:NO%; <span class="nb">set</span> -a
+<span class="k">case</span> <span class="nv">$ECF_PORT</span> in
+0 <span class="o">)</span> <span class="nb">echo</span> <span class="s2">&quot;sms is leading&quot;</span>
+    <span class="k">if</span> <span class="o">[[</span> <span class="nv">$ECF_FOLLOW</span> <span class="o">=</span> ECF <span class="o">]]</span> ; <span class="k">then </span>
+<span class="k">    </span><span class="nv">ECF_NAME</span><span class="o">=</span><span class="nv">$SMSNAME</span>; <span class="nv">ECF_NODE</span><span class="o">=</span><span class="nv">$SMSNODE</span>; <span class="nv">ECF_PASS</span><span class="o">=</span><span class="nv">$SMSPASS</span>; <span class="nv">ECF_PORT</span><span class="o">=</span>%ECF_PORT:0%
+    <span class="k">fi</span>
+;;
+* <span class="o">)</span> <span class="nb">echo</span> <span class="s2">&quot;welcome into ecflow world&quot;</span>
+   <span class="nv">PATH</span><span class="o">=</span>/usr/local/apps/current/bin:<span class="nv">$PATH</span> <span class="c"># or call &quot;use ecflow&quot;</span>
+   <span class="nv">ECF_NAME</span><span class="o">=</span>%ECF_NAME:0%; <span class="nv">ECF_NODE</span><span class="o">=</span>%ECF_NODE:0%; <span class="nv">ECF_PASS</span><span class="o">=</span>%ECF_PASS:0%
+   <span class="nv">ECF_TRYNO</span><span class="o">=</span>%ECF_TRYNO:0% 
+   <span class="nv">ECF_HOSTFILE</span><span class="o">=</span><span class="nv">$HOME</span>/.ecfhostfile 
+   <span class="nv">ECF_JOBOUT</span><span class="o">=</span>%ECF_JOBOUT:0%
+   <span class="nv">svr</span><span class="o">=</span>ecflow_client; <span class="c"># svr=/usr/local/apps/ecflow/current/bin/ecflow_client</span>
+   <span class="nb">export </span><span class="nv">SMSNAME</span><span class="o">=</span><span class="nv">$ECF_NAME</span> <span class="c"># ifs requests SMSNAME to be defined for meter-event posting</span>
+   <span class="k">if</span> <span class="o">[[</span> <span class="nv">$ECF_FOLLOW</span> !<span class="o">=</span> SMS <span class="o">]]</span> ; <span class="k">then </span>
+<span class="k">     </span><span class="nb">export </span><span class="nv">NO_SMS</span><span class="o">=</span>1 <span class="nv">NOSMS</span><span class="o">=</span>1; 
+   <span class="k">else</span>
+<span class="k">     </span><span class="nv">SMSNODE</span><span class="o">=</span><span class="nv">$ECF_NODE</span> <span class="nv">SMSPASS</span><span class="o">=</span>ECF_PASS <span class="nv">SMS_PROG</span><span class="o">=</span>314159
+   <span class="k">fi</span>
+   <span class="c"># export ECF_DEBUG_CLIENT=1</span>
+<span class="k">function  </span>smsabort <span class="o">{</span> 
+  <span class="nv">$svr</span> --abort <span class="nv">$*</span>
+<span class="o">}</span>
+<span class="k">function  </span>smscomplete <span class="o">{</span> 
+  <span class="nv">$svr</span> --complete 
+<span class="o">}</span>
+<span class="k">function  </span>smsevent <span class="o">{</span> 
+  <span class="nv">$svr</span> --event <span class="nv">$*</span>
+<span class="o">}</span>
+<span class="k">function  </span>smsinit <span class="o">{</span> 
+  <span class="nv">$svr</span> --init <span class="nv">$*</span> 
+<span class="o">}</span>
+<span class="k">function  </span>smslabel <span class="o">{</span> 
+<span class="nv">$svr</span> --label <span class="nv">$*</span> 
+<span class="o">}</span>
+<span class="nb">alias  </span><span class="nv">smsmail</span><span class="o">=</span><span class="s2">&quot;echo &#39;not implemented&#39;\; exit 1&quot;</span>
+<span class="k">function  </span>smsmeter <span class="o">{</span> 
+  <span class="nv">$svr</span> --meter <span class="nv">$*</span>
+<span class="o">}</span>
+<span class="k">function  </span>smsmsg <span class="o">{</span> 
+  <span class="nv">$svr</span> --msg <span class="nv">$*</span>
+<span class="o">}</span>
+<span class="k">function  </span>smsping <span class="o">{</span> 
+  <span class="nv">$svr</span> --ping <span class="nv">$*</span>
+<span class="o">}</span>
+<span class="nb">alias  </span><span class="nv">smsrand</span><span class="o">=</span><span class="s2">&quot;echo &#39;unimplemented&#39;\; exit 1&quot;</span>
+<span class="nb">alias  </span><span class="nv">smsstatus</span><span class="o">=</span><span class="s2">&quot;echo &#39;unimplemented&#39;\; exit 1&quot;</span>
+<span class="nb">alias  </span><span class="nv">smsvariable</span><span class="o">=</span><span class="s2">&quot;echo &#39;unimplemented&#39;\; exit 1&quot;</span>
+<span class="k">function  </span>smswait <span class="o">{</span> 
+  <span class="nv">$svr</span> --wait <span class="nv">$*</span> 
+<span class="o">}</span>
+;;
+<span class="k">esac</span>
+<span class="nb">set</span> +a
+</pre></div>

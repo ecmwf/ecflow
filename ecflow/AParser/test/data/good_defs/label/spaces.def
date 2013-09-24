@@ -1,0 +1,10 @@
+suite suiteName
+   family familyName
+      task taskName
+      
+      	label foo ""
+      	
+      	label fred ""
+    endfamily
+endsuite
+

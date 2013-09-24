@@ -1,0 +1,13 @@
+
+#
+# test for embedded manual
+%manual
+	OPERATORS: This is an example of usinh a manual
+	First include head.h
+	
+%manual
+    Illegal we can't have embedded manuals
+%end
+
+%end
+ 

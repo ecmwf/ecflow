@@ -1,0 +1,8 @@
+suite s1
+  # clock real 300 -c 60
+  family daily
+    repeat date YMD 20101215 20101217 1
+    task t1
+      time 10:30
+  endfamily
+endsuite

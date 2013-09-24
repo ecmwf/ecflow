@@ -1,0 +1,39 @@
+suite cron
+
+   clock real  # Need real clock otherwise crons would be complete
+   
+   task cron1
+      cron -w 0 , 1, 2 -m 5, 6, 7 , 8,9,10      10:00  20:00  01:00  # run every sunday, between May-Aug, every hour between 10am and 8pm
+      
+   task cron2
+         cron 23:00                              # run every day at 23:00
+         
+   task cron3
+      cron 10:00 20:00 01:00                  # run every hour between 10am and 8pm
+      
+   task cron4
+      cron -w 0,1 10:00                       # run every sunday and monday at 10am
+      
+   task cron5
+      cron -d 10,11,12 12:00                  # run 10th, 11th and 12th of each month at noon
+      
+   task cron6
+      cron -m 1,2,3 12:00                     # run on Jan,Feb and March every day at noon.
+      
+   task cron7
+      cron -w 0,6 12:00
+      
+   task cron8
+      cron -w 0,1,2,3,4,5,6 12:00
+      
+   task cron9
+      cron -w 0 -m 5,6,7,8 10:00 20:00 01:00  # run every sunday, between May-Aug, every hour between 10am and 8pm
+   
+   task cron10
+      cron -w 0,1,2 -d 1,20,24 -m 5,6,7,8 10:00 20:00 01:00  #  
+
+
+   task cron11
+      cron 00:00 23:59 00:01  #  run every minute
+   
+endsuite

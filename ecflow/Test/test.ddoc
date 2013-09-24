@@ -1,0 +1,102 @@
+. Test design documentation
+===============================
+
+Time
+======
+ o Currently many client side test, create the test with current time + one minute.
+   However when doing cross platform test these tests can fail since
+   the date is not the same as the server machine.
+   
+   i.e time on oetzi and itanium is out of sync by one minute
+   This means this test will keep on holding an not complete.
+   
+   Need to be able to compensate for this.
+
+Job submission and Calendar increment
+=====================================
+o In release mode, job submission interval is same as calendar increment. i.e 60 seconds
+  However for testing, this will take too long, so we need to speed up the
+  calendar. i.e for a job submission interval of 2 seconds, we increment a calendar
+  by one minute on Linux.
+  The job submission interval is specified via the command line to the server.
+  The Calendar increment is specIfied via the clock attribute in the suite definition.
+  This allows us to have multiple suite, where the calendar increment can be
+  different.
+  
+  While 2 second jobs submission interval -> calendar increment 60 seconds works
+  on linux. Its not the same on different platforms. 
+  
+  State change intervals: with job sub 2 seconds--> calendar 60 sec
+  On Linux(oetzi)
+  submit------------------>init---------------------> complete
+  17:18:09    0 sec        17:18:09     1 sec         17:18:10   (Log file wall clock)
+  17:19:02    0 sec        17:19:02     0 sec         17:19:02   (suite calendar time)
+  
+  Notice that the calendar time has not changed since its incremented
+  by a minute, for each 2 seconds. (i.e only 1 second has elapsed)
+ 
+  Therefore on linux spawning a process from submit->init->complete
+  takes less than the job submission interval of 2 seconds.
+  This means we will will not miss any time dependency slots separated by one minute
+  
+  
+  On HPUX(Itanium): with job sub 1 sec ---> calendar 60 sec
+  submit------------------>init---------------------> complete
+  8:25:37    5 sec         8:25:42      3 sec         8:25:45   (Log file wall clock)
+  8:27:28    5 min*        8:32:28      3 min         8:35:28   (suite calendar time)
+  
+  At the extreme of 1 second job submission interval on HPUX it can be seen that it
+  takes 8 seconds between submit->active->complete during this time
+  the suite calendar has increment by 8 minutes. Hence if we had any
+  time dependencies with 1 minute interval, then time slots will get missed.
+  
+  HENCE FOR TESTING PURPOSES SUBMIT-->INIT-->COMPLETE MUST TAKE LESS THAN JOB SUBMISSION
+  INTERVAL ELSE THE TESTING WILL FAIL.
+  In fact the time on HPUX can very widely depending on the load.
+  
+  The check above is implemented in;
+  	void Node::setStateOnly(NState::State newState)
+  
+
+Cross platform client server
+=============================
+
+o Issues: 
+  The biggest problem is clearing/truncating the ecf.log from the client side when a
+  new test is about to be run. It appears that if the server side is holding an open 
+  ofstream(i.e in the singleton log). Then clearing on the client side has no effect.
+  It may be that file is disk cached !!! and it does not write to physical medium.
+  (It appears that ofstream does not have sync() ie for forcing disk cache to be written to
+   the physical medium. Note: closing a file gives a strong hint to OS, to write the
+   file to disk, but does not guarantee it.)
+   Google search on ofstream and disk caching sync()
+          
+  As an experiment the log file was change not to hold a ofstream but instead
+  buffer the log lines, and when the buffer exceeed 50, it was written
+  to the log file and closed. This was proved to work. However it is not a good
+  long term solution. Because:
+  	a/ it requires explict flushing, 
+  	b/ the file will  get huge, and opening  to append will take a long time?
+  	c/ A crash, would mean log file data would be lost
+  	
+  i.e since closing a file forces the disk cache to written to the physical medium
+
+o When testing across platforms the following environment variables must be set
+
+$SCRATCH  : This specifies the location of the file system shared between the
+            client and server. The test data that resides on local linux machine
+            is copied over.
+               
+ $ECF_NODE : This specfies the machine name on which the server is running.
+            The server must be running first.
+            
+ $ECF_LOG : specifies the path to log file created by the server.
+           This path must be accessible by the client and server.
+           This is required by testing, as the log is copied over
+           for each test run. So that it can be compared to the golden log file.
+           
+ $ECF_CLIENT_EXE_PATH : This specfies the path to client executable.
+           The Test generate the ECF_ file. When the sms file are processed into
+           the tasks. The task must be able to communicate to the server
+           Hence the test will embed the path to the client exe, in jobs.
+           Typically need equivalent to smsinit/smscomplete/ smsabort, etc
