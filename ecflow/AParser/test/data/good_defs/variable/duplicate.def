@@ -1,0 +1,4 @@
+suite suiteName
+   edit VAR2 value2
+   edit VAR2 value3     # allow duplicates to update the last value
+endsuite

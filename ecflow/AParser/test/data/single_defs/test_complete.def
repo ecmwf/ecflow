@@ -1,0 +1,16 @@
+   suite complete
+      edit SMSHOME data/SMSHOME
+      edit SMSINCLUDE $SMSHOME/includes
+      edit SLEEPTIME 1
+      family family
+         complete /complete/family/check:nofiles
+         repeat integer VAR 0 3
+         task check
+            event 1 nofiles
+         task t1
+            trigger check == complete
+        task t2
+            trigger t2 == complete
+      endfamily
+   endsuite
+

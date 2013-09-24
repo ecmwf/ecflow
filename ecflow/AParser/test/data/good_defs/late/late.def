@@ -1,0 +1,13 @@
+suite suiteName
+   family familyName
+      task t1
+      		late -s +00:15 -a 20:00 -c +02:00
+      task t2
+      		late -a 20:00 -c +02:00 -s +00:15
+      task t3
+      		late -c +02:00 -a 20:00  -s +00:15
+      task t4
+            late  -s 00:02 -c +00:05
+    endfamily
+endsuite
+

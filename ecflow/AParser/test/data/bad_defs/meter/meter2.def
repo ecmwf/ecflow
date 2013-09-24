@@ -1,0 +1,6 @@
+suite suiteName
+   family familyName
+      task taskName
+          meter myMeter  0 100 200  #  color change must be between min(0) and max(100)
+    endfamily
+endsuite

@@ -1,0 +1,4 @@
+# 2.0.31 
+defs_state STATE state:unknown flag: state_change:17 modify_change:0 server_state:SHUTDOWN
+  edit ECF_MICRO '%'
+  edit ECF_HOME '/var/tmp/ma0/clientRoot/workspace/MyProject'

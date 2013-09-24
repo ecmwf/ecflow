@@ -1,0 +1,10 @@
+
+
+%ecfmicro ^
+exe_time=`date +%s -r ACore/bin/^COMPILER_TEST_PATH:gcc^/coretest`
+^ecfmicro %
+
+
+%manual
+  Rest of the manual page is placed here, closer to the code
+%end

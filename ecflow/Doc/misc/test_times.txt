@@ -1,0 +1,308 @@
+
+Dec 2012 -(TEXT_ARCHIVE) RELEASE - Times for NO reply if returning OK from server.
+================================================================================================
+
+Client:: ...test_server_stress_test:   port(3155)
+ Server handled 1000 requests in boost_timer(0.32) DurationTimer(00:00:00.526701)
+Client:: ...test_server_group_stress_test:   port(3156)
+ Server handled 1000 commands using 125 group requests in boost_timer(0.22) DurationTimer(00:00:00.465975)
+Client:: ...test_server_stress_test_2:   port(3157)
+ Server handled 10080 requests in boost_timer(3.1) DurationTimer(00:00:06.315809)
+
+-----------------------
+Client:: ...test_perf_for_large_defs:   port(3142)
+/var/tmp/ma0/BIG_DEFS/3199.def  : file size 59631576
+ Load:                10
+ Begin:               2
+ Download(Sync):      6, 0, 0, 0, 0        : sync_local() with the same Client. First call updates cache.
+ Download(Sync-FULL): 3, 3, 3, 3, 3 Avg:3  : sync_local() with *different* clients. Uses Cache
+ Download(FULL):      6, 7, 7, 7, 7 Avg:6.8  : get_defs() from same client.
+ Suspend 6001 tasks : 0   sync_local() : 0
+ Resume 6001 tasks  : 0   sync_local() : 0
+ Check pt:            3, 3, 3, 3, 3 Avg:3
+ Delete:              0
+/var/tmp/ma0/BIG_DEFS/mega.def  : file size 6723372
+ Load:                2
+ Begin:               0
+ Download(Sync):      1, 0, 0, 0, 0        : sync_local() with the same Client. First call updates cache.
+ Download(Sync-FULL): 0, 0, 0, 0, 0 Avg:0  : sync_local() with *different* clients. Uses Cache
+ Download(FULL):      1, 1, 1, 1, 1 Avg:1  : get_defs() from same client.
+ Suspend 6001 tasks : 0   sync_local() : 0
+ Resume 6001 tasks  : 0   sync_local() : 0
+ Check pt:            0, 0, 0, 0, 0 Avg:0
+ Delete:              0
+/var/tmp/ma0/BIG_DEFS/od.def  : file size 11081032
+Warning: TASK /lbc/perle/local/perle has a inlimit ../process:excl :The referenced FAMILY '/lbc/perle/process' does not define the limit excl
+
+ Load:                2
+ Begin:               0
+ Download(Sync):      1, 0, 0, 0, 0        : sync_local() with the same Client. First call updates cache.
+ Download(Sync-FULL): 0, 0, 0, 0, 0 Avg:0  : sync_local() with *different* clients. Uses Cache
+ Download(FULL):      1, 1, 1, 1, 1 Avg:1  : get_defs() from same client.
+ Suspend 6001 tasks : 0   sync_local() : 0
+ Resume 6001 tasks  : 0   sync_local() : 0
+ Check pt:            0, 0, 0, 0, 0 Avg:0
+ Delete:              0
+
+-------------------------------------
+Running 49 test cases...
+Test:: ...test_repeat_integer 11 update-calendar-count(4)
+Test:: ...test_repeat_date 12 update-calendar-count(8)
+Test:: ...test_repeat_enumerator 6 update-calendar-count(11)
+Test:: ...test_repeat_defstatus 3 update-calendar-count(12)
+Test:: ...test_handle 0 update-calendar-count(0)
+Test:: ...test_handle_sync 0 update-calendar-count(0)
+Test:: ...test_handle_add_remove_add 0 update-calendar-count(0)
+Test:: ...test_requeue_node 18 update-calendar-count(18)
+Test:: ...test_kill_cmd 4
+Test:: ...test_hierarchical_kill_cmd 4
+Test:: ...test_change_order 0 update-calendar-count(0)
+Test:: ...test_handle_change_order 0 update-calendar-count(0)
+Test:: ...test_limit 6 update-calendar-count(22)
+Test:: ...test_today_single_slot 3 update-calendar-count(23)
+Test:: ...test_today_relative_time_series 24 update-calendar-count(31)
+Test:: ...test_today_real_time_series 24 update-calendar-count(39)
+Test:: ...test_events 15 update-calendar-count(44)
+Test:: ...test_complete 3 update-calendar-count(45)
+Test:: ...test_complete_does_not_hold 6 update-calendar-count(47)
+Test:: ...test_complete_with_empty_family 3 update-calendar-count(48)
+Test:: ...test_abort_cmd 6 update-calendar-count(50)
+Test:: ...test_shutdown 7 update-calendar-count(53)
+Test:: ...test_suspend_node 9 update-calendar-count(56)
+Test:: ...test_cron_time_series 15 update-calendar-count(61)
+Test:: ...test_file_cmd 3 update-calendar-count(62)
+Test:: ...test_triggers_and_meters 12 update-calendar-count(66)
+Test:: ...test_why_day TASK /test_why_day/family/t1 (queued)  is day  dependent ( next run on thursday the current day is wednesday ) 0 update-calendar-count(66)
+Test:: ...test_why_date TASK /test_why_date/family/t1 (queued)  is date dependent ( next run on date 20.12.2012 the current date is 19/12/2012 ) 0 update-calendar-count(66)
+Test:: ...test_why_time TASK /test_why_time/family/t1 (queued)  is time dependent ( next run is at 14:41 2012-Dec-20 ) 0 update-calendar-count(66)
+Test:: ...test_why_today TASK /test_why_today/family/t1 (queued)  is today dependent ( next run time is 02:00, current time is 01:00 ) 0 update-calendar-count(66)
+Test:: ...test_why_cron TASK /test_why_cron/family/t1 (queued)  is cron dependent  ( next run is at 08:00 2021-Jun-21, current time 11:00 2010-Jun-21 ) 0 update-calendar-count(66)
+Test:: ...test_why_limit The node 'SUITE:/test_why_limit' (submitted)  ' is not queued or aborted.
+The node 'FAMILY:/test_why_limit/family' (submitted)  ' is not queued or aborted.
+limit /test_why_limit:disk is full(/test_why_limit/family/t0,)
+The definition state(submitted) is not queued or aborted. 11 update-calendar-count(69)
+Test:: ...test_why_trigger TASK /test_why_trigger/family/t1 (queued) expression (1 == 0) does not evaluate 0 update-calendar-count(69)
+Test:: ...test_why_meter TASK /test_why_meter/family/t1 (queued) expression (/test_why_meter/family:meter(<type=meter> <value=0>) > 20) does not evaluate 0 update-calendar-count(69)
+Test:: ...test_why_event TASK /test_why_event/family/t1 (queued) expression (/test_why_event/family/t2:theEvent(<type=event> <value=0>) == set) does not evaluate 0 update-calendar-count(69)
+Test:: ...test_why_user_var TASK /test_why_user_var/family/t1 (queued) expression (/test_why_user_var:user_var(<type=user-variable> <value=10>) == 100) does not evaluate 0 update-calendar-count(69)
+Test:: ...test_why_gen_var TASK /test_why_gen_var/family/t1 (queued) expression (/test_why_gen_var/family/t1:ECF_TRYNO(<type=gen-variable> <value=0>) == 100) does not evaluate 0 update-calendar-count(69)
+Test:: ...test_why_repeat TASK /test_why_repeat/family/t1 (queued) expression ((/test_why_repeat/family:family_repeat_var(<type=repeat> <value=0>) == 100) OR (/test_why_repeat:suite_repeat_var(<type=repeat> <value=0>) == 100)) does not evaluate 0 update-calendar-count(69)
+Test:: ...test_time_single_slot 3 update-calendar-count(70)
+Test:: ...test_time_multiple_single_slot 21 update-calendar-count(77)
+Test:: ...test_time_relative_time_series 21 update-calendar-count(84)
+Test:: ...test_time_real_series 21 update-calendar-count(91)
+Test:: ...test_late 9 update-calendar-count(94)
+Test:: ...test_server_job_submission 3 update-calendar-count(95)
+Test:: ...test_restore_defs_from_check_pt 3 update-calendar-count(96)
+Test:: ...test_wait_cmd 12 update-calendar-count(100)
+Test:: ...test_wait_cmd_parse_fail 2 update-calendar-count(0)
+Test:: ...test_wait_cmd_non_existant_paths 2 update-calendar-count(0)
+Test:: ...test_alias 5 update-calendar-count(103)
+TestFixture::~TestFixture() 
+test_alias          
+Server statistics
+   Version                         Ecflow version 3.1.0rc3
+   Status                          RUNNING
+   Host                            oetzi
+   Port                            3142
+   Up since                        2012-Dec-19 15:38:30
+   Job sub' interval               3s
+   ECF_HOME                        /var/tmp/ma0/clientRoot/workspace/MyProject
+   ECF_LOG                         /var/tmp/ma0/clientRoot/workspace/MyProject/Test/data/ECF_HOME_release/test_alias/test_alias.def_log
+   ECF_CHECK                       /var/tmp/ma0/clientRoot/workspace/MyProject/oetzi.3142.ecf.check
+   Check pt interval               120s
+   Check pt mode                   CHECK_ON_TIME
+   Check pt save time alarm        30s
+   Number of Suites                1
+   Request's per 1,5,15,30,60 min  7.67 5.00 3.58 2.44 3.22
+
+   Check points                    3
+   Restart server                  50
+   Shutdown server                 1
+   Halt server                     1
+   Ping                            1
+   Get full definition             91
+   Sync                            136
+   News                            68
+
+   Task init                       126
+   Task complete                   117
+   Task wait                       4
+   Task abort                      9
+   Task event                      5
+   Task meter                      44
+   Task label                      4
+
+   Zombie get                      68
+
+   Load definition                 50
+   Begin                           49
+   Requeue                         1
+   Node delete                     56
+   Node suspend                    2
+   Node resume                     1
+   Node kill                       2
+   Log cmd                         98
+   Order                           33
+   Force                           4
+   Suites                          2
+   Edit script                     2
+   Client handle                   30
+   stats cmd                       1
+
+   File ECF                        5
+   File job                        4
+   File Job out                    4
+   File Cmd out                    8
+   File manual                     4
+
+Timing: *NOTE*: The child commands *NOT* recorded. Since its a separate exe(ecflow_client), called via .ecf script
+Command                               count      min  average      max     std
+localhost:3142 --begin                   49      307     1165    11305     1813
+localhost:3142 --ch_add                   1      350
+localhost:3142 --ch_drop                  8      378      386      401        8
+localhost:3142 --ch_register              9      385      404      427       13
+localhost:3142 --ch_rem                   1      348
+localhost:3142 --ch_suites               11      374      394      427       14
+localhost:3142 --check_pt                 3      402      493      656      115
+localhost:3142 --delete                  56      300      417      846       90
+localhost:3142 --file                    25      484      538      694       49
+localhost:3142 --force                    4      368      375      388        7
+localhost:3142 --get                     91      513      878     1743      194
+localhost:3142 --halt                     1      440
+localhost:3142 --kill                     2      568    14784    29000    14216
+localhost:3142 --load                    50      571      996     6846      875
+localhost:3142 --log                     98      300      421      642       65
+localhost:3142 --news                    68      379      743     6230      682
+localhost:3142 --order                   33      346      756    13261     2210
+localhost:3142 --ping                     1      869
+localhost:3142 --requeue                  1    27825
+localhost:3142 --restart                 50      279      384     1484      166
+localhost:3142 --restore_from_checkpt     3      468     4069    11128     4991
+localhost:3142 --resume                   1     1567
+localhost:3142 --shutdown                 1      389
+localhost:3142 --stats                    1    12863
+localhost:3142 --suites                   2      382      428      475       46
+localhost:3142 --suspend                  2      319      341      363       22
+localhost:3142 --sync                   111      411     1192    32654     3477
+localhost:3142 --sync_full               25      483      717     1543      233
+localhost:3142 --terminate                1      722
+localhost:3142 --zombie_get              68      344      460     1056       85
+
+total round trip time 00:00:00.644205 for 777 requests
+
+
+Sept 2012 -(TEXT_ARCHIVE) RELEASE
+================================================================================================
+
+TEXT_ARCHIVE 
+AParser:: ...test_single_defs AParser/test/data/single_defs/mega.def file_size(6723372)
+ Parsing Node tree and AST creation time                    = 1.04 < limit(1.2)
+ Parsing Node tree *only* time                              = 0.45 < limit(0.5)
+ Test all paths can be found. time taken                    = 0.42 < limit(0.5)
+ Persist only, time taken                                   = 0.26 < limit(0.5)
+ Persist and reload(DEFS) and compare, time taken           = 1.12 < limit(1.5) file_size(6669201)
+ Persist and reload(STATE) and compare, time taken          = 1.38 file_size(12036681)
+ Persist and reload(MIGRATE) and compare, time taken        = 0.69 < limit(1.5) file_size(6669220)
+ Checkpt(TEXT_ARCHIVE) and reload and compare, time taken   = 1.06 < limit(1.4) file_size(7195285)
+ time for 10 jobSubmissions:0.1s jobs:1052 < limit(0.2)
+ time for Defs::check (  inlimit resolution)                = 0.02 < limit(0.1)
+ time for deleting all nodes                                = 0.12
+ Total elapsed time = 6 seconds
+
+AParser/bin/gcc-4.2.1/release/parse_timer /var/tmp/ma0/BIG_DEFS/3199.def
+ Parsing Node tree and AST creation time         = 4.59 parse(1)
+ Checkpt(TEXT_ARCHIVE) and reload , time taken   = 8.08 file_size(55960852)  result(1) msg()
+
+Client: 
+ Server handled 1000 commands                          in boost_timer(0.31) DurationTimer(00:00:00.472479)
+ Server handled 1000 commands using 125 group requests in boost_timer(0.25) DurationTimer(00:00:00.338411)
+ 
+Client/bin/gcc-4.2.1/release/tsingle 
+   /var/tmp/ma0/BIG_DEFS/3199.def Delete:0 Load:13 Begin:4  
+                                   Download(Sync):8, 0, 0, 0, 0  
+                                   Download(Sync-FULL):4, 4, 4, 4, 5 Avg:4.2  
+                                   Download(FULL):9, 9, 8, 8, 8      Avg:8.4
+   /var/tmp/ma0/BIG_DEFS/mega.def Delete:0 Load:2 Begin:0   
+                                   Download(Sync):1, 0, 0, 0, 0  
+                                   Download(Sync-FULL):0, 0, 0, 0, 0 Avg:0  
+                                   Download(FULL):1, 1, 1, 1, 1      Avg:1
+ 
+EOS_PORTABLE_BINARY_ARCHIVE/release
+====================================================================================================
+
+AParser/bin/gcc-4.2.1/release/parse_timer /var/tmp/ma0/BIG_DEFS/3199.def
+ Parsing Node tree and AST creation time                        = 5.39 parse(1)
+ Checkpt(EOS_PORTABLE_BINARY_ARCHIVE) and reload , time taken   = 7.2 file_size(44381690)  result(1) msg()
+
+Client:: ...test_perf_for_large_defs:   port(3142)
+/var/tmp/ma0/BIG_DEFS/3199.def Delete:0 Load:12 Begin:4  
+                                Download(Sync):6, 0, 0, 0, 0  
+                                Download(Sync-FULL):3, 3, 3, 3, 3 Avg:3  
+                                Download(FULL):5, 6, 6, 6, 6      Avg:5.8
+/var/tmp/ma0/BIG_DEFS/mega.def Delete:0 Load:2 Begin:0  
+                                Download(Sync):1, 0, 0, 0, 0  
+                                Download(Sync-FULL):0, 0, 0, 0, 0 Avg:0  
+                                Download(FULL):1, 0, 0, 0, 0      Avg:0.2
+ 
+lxab/release: 
+ AParser:: ...test_single_defs AParser/test/data/single_defs/mega.def file_size(6723372)
+ Parsing Node tree and AST creation time                         = 0.62 < limit(1.2)
+ Parsing Node tree *only* time                                   = 0.28 < limit(0.5)
+ Test all paths can be found. time taken                         = 0.21 < limit(0.5)
+ Persist only, time taken                                        = 0.19 < limit(0.5)
+ Persist and reload(DEFS) and compare, time taken                = 0.87 < limit(1.5) file_size(6669201)
+ Persist and reload(STATE) and compare, time taken               = 1.01 file_size(12036681)
+ Persist and reload(MIGRATE) and compare, time taken             = 0.64 < limit(1.5) file_size(6669220)
+ Checkpt(EOS_PORTABLE_BINARY) and reload and compare, time taken = 0.65 < limit(1.4) file_size(5679415)
+ time for 10 jobSubmissions:0.06s jobs:1052 < limit(0.2)
+ time for Defs::check (  inlimit resolution) = 0.02 < limit(0.1)
+ time for deleting all nodes = 0.08
+ Total elapsed time = 5 seconds
+
+HPUX/release
+ AParser:: ...test_single_defs AParser/test/data/single_defs/mega.def file_size(6723372)
+ Parsing Node tree and AST creation time                         = 5.78 < limit(7.8)
+ Parsing Node tree *only* time                                   = 3.42 < limit(5)
+ Test all paths can be found. time taken                         = 2.26 < limit(4.5)
+ Persist only, time taken                                        = 1.82 < limit(3.5)
+ Persist and reload(DEFS) and compare, time taken                = 8.24 < limit(9.5) file_size(6669201)
+ Persist and reload(STATE) and compare, time taken               = 10.34 file_size(12036681)
+ Persist and reload(MIGRATE) and compare, time taken             = 6.2 < limit(9.5) file_size(6669220)
+ Checkpt(EOS_PORTABLE_BINARY) and reload and compare, time taken = 3.02 < limit(11.5) file_size(5679317)
+ time for 10 jobSubmissions:0.6s jobs:1060 < limit(3.5)
+ time for Defs::check (  inlimit resolution) = 0.11 < limit(1)
+ time for deleting all nodes = 0.84
+ Total elapsed time = 45 seconds
+ 
+rs6000/release
+ AParser:: ...test_single_defs AParser/test/data/single_defs/mega.def file_size(6723372)
+ Parsing Node tree and AST creation time                         = 4.65479 < limit(8)
+ Parsing Node tree *only* time                                   = 2.88915 < limit(4.5)
+ Test all paths can be found. time taken                         = 2.15203 < limit(4.2)
+ Persist only, time taken                                        = 1.3826 < limit(2.5)
+ Persist and reload(DEFS) and compare, time taken                = 6.64453 < limit(9) file_size(6669201)
+ Persist and reload(STATE) and compare, time taken               = 8.46131 file_size(12036681)
+ Persist and reload(MIGRATE) and compare, time taken             = 4.80021 < limit(9) file_size(6669220)
+ Checkpt(EOS_PORTABLE_BINARY) and reload and compare, time taken = 2.88234 < limit(18) file_size(5679418)
+ time for 10 jobSubmissions:0.557259s jobs:1054 < limit(4.5)
+ time for Defs::check (  inlimit resolution) = 0.114702 < limit(2)
+ time for deleting all nodes = 0.834757
+ Total elapsed time = 37 seconds
+
+power6/release
+ AParser:: ...test_single_defs AParser/test/data/single_defs/mega.def file_size(6723372)
+ Parsing Node tree and AST creation time                         = 3.42329 < limit(7.8)
+ Parsing Node tree *only* time                                   = 2.0742 < limit(5)
+ Test all paths can be found. time taken                         = 1.73509 < limit(4.5)
+ Persist only, time taken                                        = 1.0683 < limit(3.5)
+ Persist and reload(DEFS) and compare, time taken                = 5.01178 < limit(9.5) file_size(6669201)
+ Persist and reload(STATE) and compare, time taken               = 6.37502 file_size(12036681)
+ Persist and reload(MIGRATE) and compare, time taken             = 3.59141 < limit(9.5) file_size(6669220)
+ Checkpt(EOS_PORTABLE_BINARY) and reload and compare, time taken = 1.84573 < limit(11.5) file_size(5679421)
+ time for 10 jobSubmissions:0.514055s jobs:1054 < limit(3.5)
+ time for Defs::check (  inlimit resolution) = 0.080723 < limit(1)
+ time for deleting all nodes = 0.694512
+ Total elapsed time = 27 seconds
+  
+ 

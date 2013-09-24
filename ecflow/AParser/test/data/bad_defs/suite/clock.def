@@ -1,0 +1,7 @@
+    # only suites are allowed to have clocks
+    suite suiteName
+       family familyName0
+		 	clock real 20.1.2006
+      endfamily
+   endsuite
+

@@ -1,0 +1,38 @@
+family skull
+  defstatus suspended
+  trigger ./make eq complete
+  edit ENSEMBLES '50'
+  family 00
+    edit DELTA_DAY '1'
+    edit EMOS_BASE '00'
+    family skull
+      task another
+    endfamily
+    family pop
+      trigger ./skull eq complete
+      edit QUEUE 'serial'
+      edit QUEUE_EPILOG 'ns'
+      edit LOGDIR '/scratch/ma/map/output'
+      edit SMSOUT '/scratch/ma/map/output'
+      edit WSHOST 'lxa'
+      edit ANALYSIS 'NO'
+      task plot
+    endfamily
+    family ws
+      trigger ./skull eq complete
+      edit QUEUE 'serial'
+      edit QUEUE_EPILOG 'ns'
+      edit LOGDIR '/scratch/ma/map/output'
+      edit SMSOUT '/scratch/ma/map/output'
+      edit WSHOST 'ibis'
+      edit ANALYSIS 'NO'
+      task plot
+    endfamily
+  endfamily
+  family 12
+    edit DELTA_DAY '0'
+    edit EMOS_BASE '12'
+    family skull
+      task another
+    endfamily
+    family pop

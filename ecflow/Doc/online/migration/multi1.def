@@ -1,0 +1,93 @@
+suite limits
+  defstatus complete
+  limit power6 120
+  limit power7 120
+  limit prod   10
+  limit diss   10
+  limit test   10
+endsuite
+
+suite multi
+
+  family main
+    inlimit /limits:power6
+    repeat date YMD 20120101 20301212
+
+  family 00
+    family obs; 
+      task get; 
+    endfamily
+    
+    family ana
+      trigger obs eq complete
+      task ifs
+    endfamily
+
+    family fc
+      trigger ana eq complete
+      task model
+        meter step -1 120
+    endfamily
+
+    family prod
+    inlimit /limits:prod
+      family 000; 
+    trigger /multi/main/00/fc/model:step gt  0 or /multi/main/00/fc/model eq complete
+      task gen; endfamily
+      family 012;
+    trigger /multi/main/00/fc/model:step gt 12 or /multi/main/00/fc/model eq complete
+      task gen; endfamily
+      family 024; 
+    trigger /multi/main/00/fc/model:step gt 24 or /multi/main/00/fc/model eq complete
+      task gen; endfamily
+      family 048;
+    trigger /multi/main/00/fc/model:step gt 48 or /multi/main/00/fc/model eq complete
+      task gen; endfamily
+      family 096; 
+    trigger /multi/main/00/fc/model:step gt 96 or /multi/main/00/fc/model eq complete
+      task gen; endfamily
+      family 120; 
+    trigger /multi/main/00/fc/model:step gt 120 or /multi/main/00/fc/model eq complete
+      task gen; endfamily
+    endfamily prod
+
+    family diss
+    inlimit /limits:diss
+      family 000; 
+    trigger /multi/main/00/prod/000 eq complete
+      task gen; endfamily
+      family 012;
+    trigger /multi/main/00/prod/012 eq complete
+      task gen; endfamily
+      family 024; 
+    trigger /multi/main/00/prod/024 eq complete
+      task gen; endfamily
+      family 048;
+    trigger /multi/main/00/prod/048 eq complete
+      task gen; endfamily
+      family 096; 
+    trigger /multi/main/00/prod/096 eq complete
+      task gen; endfamily
+      family 120; 
+    trigger /multi/main/00/prod/120 eq complete
+      task gen; endfamily
+    endfamily diss
+
+    family test
+      inlimit /limits:test
+
+      family fc_complete
+    trigger /multi/main/00/fc eq complete
+    task test1
+      endfamily
+
+      family prod_complete
+    trigger /multi/main/00/prod eq complete
+    task test1
+      endfamily
+
+      family diss
+    trigger /multi/main/00/diss eq complete
+    task test1
+      endfamily
+    endfamily 

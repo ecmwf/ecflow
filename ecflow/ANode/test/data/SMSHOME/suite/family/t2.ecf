@@ -1,0 +1,19 @@
+ 
+# using %include "filename"
+# include the contents of the file %ECF_HOME%/%SUITE%/%FAMILY%/filename
+#
+# since we are using quotes we expect to find 'head.h' and 'tail.h'
+# in the same directory as the sms files.
+#======================================================================
+%include "head.h"
+
+
+echo do some work
+# SLEEPTIME is defined thedefs.def file. Test variable substituition
+sleep 10
+echo end of job
+
+
+%include "tail.h"
+
+ 

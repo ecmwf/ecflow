@@ -1,0 +1,9 @@
+suite suiteName
+   family familyName
+   		task a
+   		task b
+   			trigger a == complete                       
+   			trigger b == complete               # duplicate task trigger        
+     endfamily
+endsuite
+

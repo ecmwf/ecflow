@@ -1,0 +1,95 @@
+
+# ===========================================================================
+# Jamfile part for embedded  python. Used an example, but not used in ecFlow
+# ===========================================================================
+ 
+# Declare libraries, Used in the embedded python
+# The ordering is important. The libecf_ext must come before other libs
+# or we risk undefined symbols when this library is loaded. (Especially on HPUX)
+# 
+# To avoid this library we could have built the source directly 
+# for the exe, however then we would run into issue of possible compiling
+# source differently for the extension, and bjam complains.
+#    error: Duplicate name of actual target
+
+#lib libecf_ext : [ glob src/*.cpp   ]
+#    : 
+#    <include>../ACore/src
+#    <include>../ANattr/src 
+#    <include>../ANode/src 
+#    <include>../AParser/src 
+#    <include>../Base/src 
+#    <include>../Client/src
+#    <include>../CSim/src
+#    <variant>debug:<define>DEBUG
+#    <use>/theCore//core
+#    <use>/theNodeAttr//nodeattr
+#    <use>/theNode//node
+#    <use>/theParser//libparser
+#    <use>/theBase//base
+#    <use>/theClient//libclient
+#    <use>/theSimulator//libsimu
+#    <use>/site-config//boost_system
+#    <use>/site-config//boost_serialization
+#    <use>/site-config//boost_filesystem
+#    <use>/site-config//boost_program_options
+#    <use>/site-config//boost_datetime
+#    :
+#    : <include>../Pyext/src     
+#    ;               
+              
+# *** =============================================================
+# The following exe's,on AIX, python 2.5 64 bit, acc v11.1,
+# raise *hundreds* of warning messages of the type:
+#     ld: 0711-224 WARNING: Duplicate symbol: _PyObject_New.
+# linking with flags -bloadmap:PARM, reveals:
+#
+# _Py_NoneStruct            Objects/object.c(/usr/local/python64/lib/python2.5/config/libpython2.5.a[object.o])
+#    ** Duplicate **        /usr/local/python64/lib/python2.5/config/python.exp{.}
+#.Py_FatalError            Python/pythonrun.c(/usr/local/python64/lib/python2.5/config/libpython2.5.a[pythonrun.o])
+#    ** Duplicate **        /usr/local/python64/lib/python2.5/config/python.exp{.}
+#
+# It appears that the symbols are defined libpython2.5.a and in the exports file 'python.exp':
+# removing the export file: -Wl,-bI:/usr/local/python64/lib/python2.5/config/python.exp 
+# from the link line removes warning messages
+#
+# This can be done explicitly: $BOOST_ROOT/tools/build/v2/tools/python.jam
+# Go to line: 992 and comment out <linkflags>-Wl,-bI:$(libraries[1])/python.exp
+# *** ==============================================================
+
+# Declare an executable called embedding that embeds Python. Used as a reference
+# exe embedding : test/TestEmbedded.cpp /python//python ;
+
+# Declare test target that embeds pthon that call ecf
+#exe embedding_ecf : test/TestEmbeddedEcf.cpp
+#             /theCore//core
+#             /theNodeAttr//nodeattr
+#             /theNode//node
+#             /theParser//libparser
+#             /theBase//base
+#             /theClient//libclient
+#             /theSimulator//libsimu
+#             libecf_ext
+#             /site-config//boost_system
+#             /site-config//boost_serialization
+#             /site-config//boost_filesystem
+#             /site-config//boost_program_options
+#             /site-config//boost_datetime
+#             /python//python 
+#           : <variant>debug:<define>DEBUG
+#           ;
+
+# Declare a test of the reference embedding application
+#testing.run embedding 
+#  :              # any ordinary arguments
+#  : script.py    # any arguments that should be treated as relative paths
+#  :              # requirements
+#  : test_embed ; # name of test
+  
+  
+# Declare a test of the ecf embedding application
+#testing.run embedding_ecf 
+#  :                  # any ordinary arguments
+#  :                  # any arguments that should be treated as relative paths
+#  :                  # requirements
+#  : test_embed_ecf ; # name of test

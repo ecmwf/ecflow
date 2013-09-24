@@ -1,0 +1,22 @@
+
+extern /limits:c1a
+extern /limits:linux_cluster
+extern /limits:pdb
+extern /limits:q2diss
+
+suite obs
+    limit sg1
+    inlimit /limits:c1a
+    family limits
+    	limit hpcd 20
+    endfamily
+    
+    family anon    
+            inlimit  sg1       
+    	task t1
+            inlimit  sg1        #  
+            inlimit  sg1        # duplicate inlimit
+   		task t2
+   		task t3
+     endfamily
+endsuite

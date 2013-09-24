@@ -1,0 +1,12 @@
+extern                    #extern without anything
+extern                    # extern without anything
+extern /limits:c1a
+extern /limits:linux_cluster;
+extern /limits:pdb
+ 
+suite suiteName
+    limit sg1  10
+    limit mars 10
+endsuite
+
+ 

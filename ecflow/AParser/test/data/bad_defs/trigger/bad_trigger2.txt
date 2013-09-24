@@ -1,0 +1,7 @@
+suite suiteName
+    family familyName1
+		task a
+    	task b
+   			trigger z == complete   # reference to non existing sibling
+    endfamily
+endsuite

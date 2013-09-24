@@ -1,0 +1,63 @@
+
+Should autocancel to be top down, or bottom up;
+
+TOP DOWN   
+=======================================================================
+  Need to check for auto cancel in Node::resolveDependencies
+  Issues:
+    Should we still *RECURSE* down to check for auto cancelled nodes, when a node is complete ???
+    
+    o Yes: if this Node container is complete, has no auto cancelled node, but there may
+      exist child nodes that have auto cancel. How do we protect against
+      active/submitted children, or we have created zombies.
+      checkForAutoCancel, needs to check state of tasks
+      
+      Profiling shows that checking down the hierarchy, is quite expensive
+      18% for NodeContainer::checkForAutoCancel
+       6% of this function
+      i.e whenever a suite is complete we always traverse down looking for
+      autocomplete, YUK. !!!!!!
+       
+    o No, simpler we only check at current node level.
+      If this is a suite/family, we still need to check that there are no child
+      task in active or submitted states.
+ 
+      We may miss child nodes that have auto-cancel, since when a parent node is
+      complete, we stop further traversal down the hierarchy.
+      However this is relativly un-common ???
+      Axel was not sure, how SMS handled this, 
+ 
+ Solution:
+   <TODO> 1/ Add a cache to suite to check if has auto-cancle, however this cant be
+             a/ In the parser: Cos python interface wont see it
+             b/ Can be done in Node::addAutoCancel() since parent hierarchy may not have been set
+             
+             Has to done as a post process step, equally yuk.
+             Could default to true, same behaviour as now. 
+             But allow LoadDefs/begin cmd, do the setup. ?
+ 
+       
+       
+BOTTOM UP traversal
+============================================================================
+    When a state change happens on a node: we call handleStateChange()
+    This will by default call:
+        void Node::requeueOrSetMostSignificantStateUpNodeTree()
+
+    Need: to make sure we only cancel node, after, repeat, and timedependencies.
+    
+    Issues: ***********************************************************
+        Autocancel has a time period, which means, we need *still* need 
+        another mechanism to handle auto-cancel time expiration.
+        Simulation test fail.
+        
+        Could be in update calendar, since that has traveser the full structure
+        anyway, (ie. to update time attributes)
+        *** HOWEVER *** when we suspend a node, we update calendar, and not node resultion
+        *************** do we still autocancel during a suspend ????
+        
+        calendar & state observer mechanism ???
+     
+
+  
+   

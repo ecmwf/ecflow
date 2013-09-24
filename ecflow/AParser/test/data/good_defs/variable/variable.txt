@@ -1,0 +1,24 @@
+suite suiteName
+ 
+   edit SMSURLCMD '${BROWSER:=firefox} -remote 'openURL(%SMSURLBASE%/%SMSURL%)''
+   
+   edit VAR  "value !£$%^&*() ~@: ?><,."
+   
+   edit VAR1 '123'
+   
+   edit VAR2 value2
+   
+   edit VAR3 ""
+   edit VAR55 ''
+   edit VAR56 '#'
+   edit VAR57 "#"
+
+endsuite
+
+suite s1
+ 
+   edit SMSURLCMD '${BROWSER:=firefox} -remote 'openURL(%SMSURLBASE%/%SMSURL%)''; edit VAR  "value !£$%^&*() ~@: ?><,."
+   
+   edit VAR1 '123'; edit VAR2 value2
+   
+endsuite

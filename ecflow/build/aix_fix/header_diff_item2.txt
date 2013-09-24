@@ -1,0 +1,49 @@
+force_include.hpp
+===============
+*** boost/serialization/force_include.hpp~	Mon May 31 17:17:21 2010
+--- boost/serialization/force_include.hpp	Tue Dec 13 16:18:07 2011
+***************
+*** 43,48 ****
+--- 43,49 ----
+  #       define BOOST_USED __attribute__ ((used))
+  #   elif defined(__IBMCPP__) && (__IBMCPP__ >= 1110)
+  #       define BOOST_USED __attribute__ ((used))
++ #       define BOOST_NOINLINE __attribute__((noinline))
+  #   elif defined(__INTEL_COMPILER) && (BOOST_INTEL_CXX_VERSION >= 800)
+  #       define BOOST_USED __attribute__ ((used))
+  #   endif
+***************
+*** 54,59 ****
+--- 55,64 ----
+  
+  #ifndef BOOST_DLLEXPORT
+  #    define BOOST_DLLEXPORT
++ #endif
++ 
++ #ifndef BOOST_NOINLINE
++ #    define BOOST_NOINLINE
+  #endif
+  
+  #endif // BOOST_SERIALIZATION_FORCE_INCLUDE_HPP
+
+singleton.hpp
+============
+*** boost/serialization/singleton.hpp~	Thu Nov 11 22:56:29 2010
+--- boost/serialization/singleton.hpp	Tue Dec 13 16:18:07 2011
+***************
+*** 123,129 ****
+  private:
+      BOOST_DLLEXPORT static T & instance;
+      // include this to provoke instantiation at pre-execution time
+!     static void use(T const &) {}
+      BOOST_DLLEXPORT static T & get_instance() {
+          static detail::singleton_wrapper< T > t;
+          // refer to instance, causing it to be instantiated (and
+--- 123,129 ----
+  private:
+      BOOST_DLLEXPORT static T & instance;
+      // include this to provoke instantiation at pre-execution time
+!     static void use(T const &) BOOST_NOINLINE {}
+      BOOST_DLLEXPORT static T & get_instance() {
+          static detail::singleton_wrapper< T > t;
+          // refer to instance, causing it to be instantiated (and

@@ -1,0 +1,4 @@
+suite suiteName
+ 
+    repeat string VARIABLE str1 str2              #comment
+endsuite

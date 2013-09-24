@@ -1,0 +1,68 @@
+1.9.0: Changed PartExpression serialisation
+1.9.1: Added timeout to Client
+       Changed trigger expression to use DState, to take into account suspended state
+       Changed checkPt to allow mode and interval change
+1.9.2  Fixed bug with complete expression holding a node.
+1.9.3  Added version as a option to client
+1.9.4  Updated python api, simplified api, and added new test
+1.9.5  Change ecflow_client so that it accepts --port and --host for any command
+1.9.6  externs no longer persisted. Used on client side only. Saves on network bandwidth,&check pt file size, & in memory size
+       externs can be generated automatically. externs, now stored as set.
+1.9.7  Added --check option to allow checking in of server defs, on command line and in python
+1.9.8  Changed ordering so that it does a incremental sync, instead of a full sync.
+1.9.9  Changed handled cmd so that user can register interest in suites that have not yet been added
+1.9.10 Changed base cmd, to log before authentication, changed Task cmd authentication to add logging for failure
+1.9.11 Changed ecf_client -> ecflow_client, and ecf_server -> ecflow_server
+1.9.12 Changed server termination, no longer requires exception, grace-full by removing pending async handlers
+1.9.13 Change child process spawning, to close all open file descriptors, in child process
+1.9.14 Change ClientInvoker::set_host_port() so we don't traverse hosts file, when set
+1.9.15 Fixed bug where we assumed hard coded ECF_MICRO of %, instead of seeing if it was overridden
+1.9.16 Change notification, to add subject destruction notification
+1.9.17 Change notification to add Aspects, this is used in the order change notifications
+1.9.18 Fixed bug where late flag was not being set.
+1.9.19 Changed add/delete of family/task to be incremental change, add/delete suite will still do a full sync
+1.9.20 Changed python api, to make use of default arg facility
+1.9.21 Change Limits, to store set of paths rather than vector. DM Change + release token in queued state
+1.9.22 Changed ClientToServerCmd::doJobSubmission, no longer throw exception on job submission failure.
+1.9.23 Allow duplicate edit variables, to update last value.
+1.9.24 Updated Node attribute migration tests
+1.9.25 Fixed bug with edit scripts, need to exclude all dynamic variables from %comment/%end
+1.9.26 Fixed bug with variable substitution in edit script command.
+1.9.27 Added support environment variable ECF_EXTENSION, to allow easier migration. i.e support .ecf | .sms, ( Overridden by 2.0.4)
+2.0.0  Added support for aliases and multiple paths
+2.0.1  Updated python api, for Node, regarding default args for adding inlimit,etc
+2.0.2  Improved error reporting when parsing variables
+2.0.3  Allow Suites and Family to have events
+2.0.4  Added support for ECF_EXTN, allow users to override default script extension
+2.0.5  Changed trigger expression parsing to allow !,&&,||
+2.0.6  Fix issues found by eclipse indigo, static analysis tool(Codan)
+2.0.7  Fix bug in checking of inlimits. Inlimit which reference a limit by path, but which was defined in extern, was reported as error.(in error)
+2.0.8  Fix bug with memory leak due to chamgemgrsingleton in destructor of Defs,Suite,Family,Task,Alias in unit tests
+2.0.9  Fix default menus in ecflowview
+2.0.10 Fix bug in python api, could not add/delete zombie attribute
+2.0.11 Changed replace, to propagate state, & do immediate job submission
+2.0.12 Change client to server poll to 1 second for ping. In release mode total wait was 20 seconds
+2.0.13 Fix bug in python api, default argument for add_meter wrong, fix for ECFLOW-18
+2.0.14 Fixed API so that we can handle python list in argument or constructor(without need for list_to_str_vec()/list_to_int_vec(), etc
+2.0.15 Fixed Label,Limit,InLimit,Meter and Repeat constructors that allowed illegal names. Updated Python unit tests
+2.0.16 Removed Node::is_task()/is_alias() from the Python API, replaced with Python isinstance()
+
+History Moved to: Doc/online/change_history
+=================================================================================================
+
+ecflow_int@lists.ecmwf.int  
+ 
+A new version of ecflow (2.0.20) has been released.
+
+This is accessible on path: /usr/local/apps/ecflow/2.0.20
+on the following platforms:
+   HPUX(Itanium), 
+   AIX-Power6(c1b), 
+   AIX-rs6000(ecgate),
+   Linux cluster(lxb)
+   opensuse113(anubis)
+   opensuse103
+   
+Here is the history of the changes :
+
+ 

@@ -1,0 +1,12 @@
+ 
+suite suiteName
+  family familyName
+  	    task b
+  	    task c
+   		task a
+   			trigger a == complete and \
+   			        b == complete and\
+   			        c == complete
+   endfamily
+endsuite
+

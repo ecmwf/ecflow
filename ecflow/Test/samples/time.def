@@ -1,0 +1,54 @@
+suite time
+   family t1
+      task t1
+         time 00:01
+         time 23:59
+         
+     task t2
+         time 09:00
+         time 12:00
+
+     task t3
+         time 12:00
+         time 18:00
+
+     task t4
+         time 18:00
+         time 23:00
+         
+     task t5
+         time 10:00
+    task t6
+         time 11:00
+    task t7
+         time 12:00
+    task t8
+         time 13:00
+    task t9
+         time 14:00
+    task t10
+         time 15:00
+    task t11
+         time 16:00
+    task t12
+         time 17:00
+    task t13
+         time 18:00
+    task t14
+         time 19:00
+    task t15
+         time 20:00
+    task t16
+         time 21:00
+    task t17
+         time 22:00
+    task t18
+         time 23:00
+    task t19
+         time 23:00
+    task t20
+         time 00:00
+ 
+               
+   endfamily
+endsuite

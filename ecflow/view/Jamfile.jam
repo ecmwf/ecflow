@@ -1,0 +1,100 @@
+## Copyright 2009-2012 ECMWF. 
+## This software is licensed under the terms of the Apache Licence version 2.0 
+## which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
+## In applying this licence, ECMWF does not waive the privileges and immunities 
+## granted to it by virtue of its status as an intergovernmental organisation 
+## nor does it submit to any jurisdiction. 
+
+#
+# ecflowview
+#
+project ecflowview ;
+
+use-project theCore      : ../ACore ;
+use-project theNodeAttr  : ../ANattr ;
+use-project theNode      : ../ANode ;
+use-project theBase      : ../Base ;
+use-project theClient    : ../Client ;
+use-project theTest      : ../Test ;
+# import python ;
+
+# This should be in the site-config.jam file as a project wide requirement
+# however if this is done, it will not link since, lpthread appears twice
+# on the link line
+#
+lib pthread  ;
+import os ;
+MOTIF_INCLUDE = [ os.environ MOTIF_INCLUDE ] ;
+MOTIF_INCLUDE default = /usr/include ;
+# MOTIF_LIBRARY = [ os.environ MOTIF_LIBRARY ] ;
+# MOTIF_LIBRARY default = /usr/lib64 ;
+# echo "# MOTIF_LIBRARY = $(MOTIF_LIBRARY)" ;
+
+exe ecflowview 
+   : [ glob src/*.cc src/*.c src/*cpp 
+       src/libicon/*.cc src/libxec/*.c src/libui/*.cc :
+       src/menul.c src/lister.cc src/tmpnam.c src/line.c src/x.c src/extent.cc
+       src/node_alert.cc src/array.cc src/option.cc 
+       src/dialog.cc ] 
+     /theCore//core
+     /theNodeAttr//nodeattr
+     /theNode//node
+     /theParser//libparser
+     /theBase//base
+     /theClient//libclient
+     /site-config//boost_system
+     /site-config//boost_serialization
+     /site-config//boost_filesystem
+     /site-config//boost_program_options
+     /site-config//boost_datetime
+     pthread
+   : <variant>debug:<define>DEBUG
+     <toolset>gcc:<include>$(MOTIF_INCLUDE)
+     <include>../view/src
+     <include>../view/src/libicon
+     <include>../view/src/libxec
+     <include>../view/src/libui	
+     <define>_GNU_SOURCE
+     <define>linux
+     <define>UNIX
+     <define>unix
+     <linkflags>-lm 
+     <linkflags>-g
+     <linkflags>-lcrypt
+     <toolset>gcc:<linkflags>-L$(MOTIF_LIBRARY)
+     <dll-path>$(MOTIF_LIBRARY)
+     <linkflags>-L/usr/X11R6/lib
+     <linkflags>-lXpm
+     <linkflags>-lXm
+     <linkflags>-lXp
+     <linkflags>-lXext
+     <linkflags>-lXt
+     <linkflags>-lX11
+     <linkflags>-lfl
+   ;
+
+   
+#
+# Test the view
+# This uses /theTest//libharness to setup a server
+#
+exe test-view : [ glob test/*.cpp  ]  
+          pthread
+           /theCore//core
+           /theNodeAttr//nodeattr
+           /theNode//node
+           /theParser//libparser
+           /theBase//base
+           /theClient//libclient
+           /theTest//libharness
+           /site-config//boost_system
+           /site-config//boost_serialization
+           /site-config//boost_filesystem
+           /site-config//boost_program_options
+           /site-config//boost_test
+           /site-config//boost_datetime
+         : <include>../Base/test 
+           <include>../Test/src 
+           <variant>debug:<define>DEBUG
+        ;
+# ibis:/var/tmp/map/work/p4/merlin/workspace/MyProject/build $ cp site_config/site-config-Linux64.jam /tmp/map/work/boost_1_47_0/tools/build/v2/site-config.jam 

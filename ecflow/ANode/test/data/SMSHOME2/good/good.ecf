@@ -1,0 +1,27 @@
+%manual
+	OPERATORS: This is an example of usinh a manual
+	First include head.h
+%end
+
+ 
+
+
+echo do some work
+echo end of job
+
+
+ 
+
+%manual
+  Rest of the manual page is placed here, closer to the code
+%end
+%comment
+  Comment start
+%end
+%comment
+  Comment end
+%end
+
+%nopp
+  ignore everything in here
+%end

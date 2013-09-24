@@ -1,0 +1,4 @@
+%include <head.h>
+echo "I will now sleep for %SLEEP% seconds"
+sleep %SLEEP%
+%include <tail.h>

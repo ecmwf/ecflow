@@ -1,0 +1,65 @@
+
+Compatibility issues between different boost versions ?
+========================================================
+
+o start boost 1.45 server  
+o ping using 1.47 client
+
+   cl --port=5050 --ping
+   Connection::handle_read_data boost::archive::archive_exception unsupported version
+   server::handle_read error occurred Invalid argument
+   Connection::handle_read_data boost::archive::archive_exception unsupported version
+   server::handle_read error occurred Invalid argument
+   Request( --ping :ma0 ), Failed to connect to localhost:5050. After 2 attempts. Is the server running ?
+
+o start boost 1.47 server
+o ping with boost 1.45 client
+
+   ecflow_client --port=5050 --ping
+   Connection::handle_read_data boost::archive::archive_exception unsupported version
+   Connection::handle_read_data boost::archive::archive_exception unsupported version
+   Request( --ping :ma0 ), Failed to connect to localhost:5050. After 2 attempts. Is the server running ?
+
+   Server appears to send back a valid reply but client throws
+
+   cl --port=5050 --debug_server_on
+      server::debug_server_on
+      server::handle_write: client request --debug_server_on :ma0 replying with  cmd:Ok
+   ecflow_client --port=5050 --ping
+      server::handle_accept
+      server::acceptNewConnection()   
+      server::handle_read : client request --ping :ma0
+   Connection::handle_read_data boost::archive::archive_exception unsupported version
+      server::handle_write: client request --ping :ma0 replying with  cmd:Ok
+      server::handle_accept
+      server::acceptNewConnection()   
+      server::handle_read : client request --ping :ma0
+   Connection::handle_read_data boost::archive::archive_exception unsupported version
+   Request( --ping :ma0 ), Failed to connect to localhost:5050. After 2 attempts. Is the server running ?
+      server::handle_write: client request --ping :ma0 replying with  cmd:Ok
+ 
+ 
+unsupported_version
+===================
+This system records the current library version number to all archives created. 
+Note that this is in no way related to version number of classes used by application programs. 
+This refers to the version of the serialization system used to create the archive. 
+Future versions of this serialization system will be able to identify 
+archives created under previous (i.e. this) system and alter the loading procedure accordingly. 
+Hence, future enhancements to this serialization system should not obsolete any existing archive files. 
+
+It is only necessary to increment this version number when the newer system creates archives incompatible in format with the current one.
+Should it ever occur that an older program attempts to read newer archives whose format has changed, this exception is thrown.
+
+Other implications
+==================
+- All other client/server communication will be affected.
+
+- Future version of ecflow will need to use same boost libs version.
+  *IF* there is no other changes and we want to inter-mix, client
+  server from different release.
+  => Even without boost, we do only support forward capability
+     of the checkpt files, and not of client/server coms.
+     
+  
+

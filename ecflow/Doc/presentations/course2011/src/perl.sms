@@ -1,0 +1,10 @@
+#!/usr/bin/perl -w
+^include <perl_head.h>
+
+print "Pure perl SMS task";
+for (my $step=1; $step <= 100; $step++) {
+   print "this is the number $step\n";
+   xmeter("step", $step);
+}
+		  
+^include <perl_tail.h>

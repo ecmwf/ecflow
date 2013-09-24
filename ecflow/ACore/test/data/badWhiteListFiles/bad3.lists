@@ -1,0 +1,9 @@
+#
+2.10.14   #  valid version number should be greater than 4.4.5
+   
+#
+# These user have read and write access to the server
+#
+uid1    # a comment
+uid2  # a comment
+  

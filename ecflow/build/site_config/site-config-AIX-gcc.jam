@@ -1,0 +1,186 @@
+## Copyright 2009-2012 ECMWF. 
+## This software is licensed under the terms of the Apache Licence version 2.0 
+## which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
+## In applying this licence, ECMWF does not waive the privileges and immunities 
+## granted to it by virtue of its status as an intergovernmental organisation 
+## nor does it submit to any jurisdiction. 
+
+# ===================================================================
+# site-config.jam file for AIX/gcc
+#
+# This file should be placed in $HOME or $BOOST_ROOT/tools/build/v2/
+#
+# Last test on gcc 4.5 32 mode: 
+#
+# o Had to change path to: 
+#    export PATH=/usr/local/apps/gcc/4.5.0/ILP32/bin/:$PATH:
+#
+# Assumed: gcc will transparently calls AIX linker/assembler, confirmed by using: gcc -v
+#   o many of issues arise since 64 bit gcc on AIX is not supported/tested
+#
+# Issues:
+#   o Built boost lib's debug & release
+#     Did at one time manage to build boost, but tring to build agian get:
+#       bjam --build-dir=./tmpBuildDir toolset=gcc stage link=static --layout=tagged --with-system variant=debug
+#       /wsscratch/ma/emos/ma0/rs6000/boost/boost_1_45_0/tools/build/v2/site-config.jam:90: in modules.load
+#       rule http://gcc.gnu.org/ml/libstdc++/2007-05/msg00012.html unknown in module site-config.
+#       /wsscratch/ma/emos/ma0/rs6000/boost/boost_1_45_0/tools/build/v2/build-system.jam:257: in load-config
+#       /wsscratch/ma/emos/ma0/rs6000/boost/boost_1_45_0/tools/build/v2/build-system.jam:361: in load-configuration-files
+#       /wsscratch/ma/emos/ma0/rs6000/boost/boost_1_45_0/tools/build/v2/build-system.jam:554: in load
+#       /wsscratch/ma/emos/ma0/rs6000/boost/boost_1_45_0/tools/build/v2/kernel/modules.jam:283: in import
+#       /wsscratch/ma/emos/ma0/rs6000/boost/boost_1_45_0/tools/build/v2/kernel/bootstrap.jam:142: in boost-build
+#       /wsscratch/ma/emos/ma0/rs6000/boost/boost_1_45_0/boost-build.jam:17: in module scope
+#
+#   o Built some of projects ok, i.e like ACore
+#     Forced to link with -pthread, due to undefined symbols( even if not explicitly used)
+#   o None of test's ran. Get "IOT/Abort trap"
+#     gdb shows, exception raised causes pthread_kill raised a SIGABRT, which terminate's the process.
+#     The exception is caused by static in boost v3 filesystem (even though for boost 1.45) its not the default
+#     which calls std::locale(""), this throws an exception. **i.e before main **, hence its never caught
+#     The default LANG=en_US
+#     **** If we reset to empty, ie export LANG= , or export LANG=C
+#     **** then we can get past the error:
+#     
+#   o Once we have fixed the locale/LANG then gcc 4.5 has a bug with std::getline()
+#     since when it reaches the end of line, it does not set eof state on the stream!!!!!!!!!
+#     Hence any tests which use getline() will fail.
+#     See: http://gcc.gnu.org/ml/gcc-bugs/2002-10/msg01135.html
+           http://gcc.gnu.org/ml/libstdc++/2007-05/msg00012.html
+#
+#     OK: managed to work around this by use class File_r this use define AIX_GCC.
+#     and use C i/O  routines like fopen()/fclose() and my own implementation of getLine use C I/O
+#
+#   o Show stopper issue is Exception handling, 
+#     or more like lack of exception handling
+#     Thrown exception are not caught in in catch clause, leading to termination
+#        See: http://gcc.gnu.org/bugzilla/show_bug.cgi?id=17277
+#        This appears to have been resolved, maybe its regressed
+#
+#     ? appears that  32 bit gcc catches exception
+#     ? pthread or -maix64 causes exception handling to break
+#        http://stackoverflow.com/questions/305424/aix-why-does-throwing-an-exception-abort-multithreaded-code
+#        http://gcc.gnu.org/ml/gcc/2001-09/msg01248.html
+#        http://gcc.gnu.org/ml/libstdc++/2008-03/msg00068.html
+#        http://gcc.gnu.org/ml/gcc-bugs/2001-09/msg00134.html
+#        ** http://gcc.gnu.org/bugzilla/show_bug.cgi?id=10778 **
+#
+#     Tried suggestion to link with lpthread instead of pthread
+#     
+#   o Python integration broken
+#     Needs investigating.
+#
+#   o Link warnings, Base,Client,Server
+#     ld: 0711-224 WARNING: Duplicate symbol: fc_softc
+#     ld: 0711-224 WARNING: Duplicate symbol: _GLOBAL__F_fc_softc
+#     ld: 0711-224 WARNING: Duplicate symbol: .global constructors keyed to 65535_0_fc_softc
+#     ld: 0711-224 WARNING: Duplicate symbol: .global destructors keyed to 65535_1_fc_softc
+#     ld: 0711-345 Use the -bloadmap or -bnoquiet option to obtain more information.
+#
+#     see : http://www.ibm.com/developerworks/forums/thread.jspa?messageID=14533450
+#     Appears to be a missing typedef in /usr/include/net/if_arp.h
+#     Which is causing problem with initialisation of global object
+#
+#     When there is more than one global constructor in a c++ project, then only one global object gets constructed.
+#     The clue is that gcc seems to create only one global-constructor-entry per object file,
+#     giving it the mangled name of the first global object in the source.
+#     So all object files having sys/thread.h compiled in, contain a global-constructor-entry of the same name,
+#     so only one of them gets collected (by gcc's collect2), and therefore only one is executed at program-startup.
+#
+#     The problem is that IBM changed the header files in such a way that gcc
+#     doesn't like them. Note that there's a step in the gcc build process
+#     that creates a customized version of headers to work with the particular
+#     OS version on the build machine, which probably isn't AIX 5.3. Most
+#     likely, the header files in /usr/include are combining badly with gcc's
+#     idea of the corrected version.
+#
+#  o Debugging in gdb, no good, use totalview, this gives very good debugging capabilities
+#
+#  o BOOST_CHECK_THROW not working
+#
+#  o release mode
+#    - crashes anywhere we create a std::ofstream   
+#    - streambuffer init/ io_base init/locale
+# 
+# ================================================================================
+
+#
+# Pull in environment variables
+#
+import os ;
+local BOOST_ROOT = [ os.environ BOOST_ROOT ] ;
+
+#
+# --layout=system    -> libboost_system.a (default)
+# --layout=tagged    -> libboost_system-mt-d.a(debug)          libboost_system-mt.a(release) 
+# --layout=versioned -> libboost_system-xlc-mt-d-1.42(debug)   libboost_system-xlc-mt-1_42.a(release)
+#
+# Boost libraries referenced in client/server programs
+# assumes --layout=tagged for the debug release and profile variant
+#
+lib boost_serialization : :   <variant>debug <file>$(BOOST_ROOT)/stage/lib/libboost_serialization-mt-d.a ;
+lib boost_system : :          <variant>debug <file>$(BOOST_ROOT)/stage/lib/libboost_system-mt-d.a ;
+lib boost_thread : :          <variant>debug <file>$(BOOST_ROOT)/stage/lib/libboost_thread-mt-d.a ;
+lib boost_test   : :          <variant>debug <file>$(BOOST_ROOT)/stage/lib/libboost_unit_test_framework-mt-d.a ;
+lib boost_test_monitor : :    <variant>debug <file>$(BOOST_ROOT)/stage/lib/libboost_test_exec_monitor-mt-d.a ;
+lib boost_program_options : : <variant>debug <file>$(BOOST_ROOT)/stage/lib/libboost_program_options-mt-d.a ;
+lib boost_filesystem      : : <variant>debug <file>$(BOOST_ROOT)/stage/lib/libboost_filesystem-mt-d.a ;
+lib boost_datetime        : : <variant>debug <file>$(BOOST_ROOT)/stage/lib/libboost_date_time-mt-d.a ;
+
+# profile uses release libs
+lib boost_serialization : :   <variant>profile <file>$(BOOST_ROOT)/stage/lib/libboost_serialization-mt.a ;
+lib boost_system : :          <variant>profile <file>$(BOOST_ROOT)/stage/lib/libboost_system-mt.a ;
+lib boost_thread : :          <variant>profile <file>$(BOOST_ROOT)/stage/lib/libboost_thread-mt.a ;
+lib boost_test   : :          <variant>profile <file>$(BOOST_ROOT)/stage/lib/libboost_unit_test_framework-mt.a ;
+lib boost_test_monitor : :    <variant>profile <file>$(BOOST_ROOT)/stage/lib/libboost_test_exec_monitor-mt.a ;
+lib boost_program_options : : <variant>profile <file>$(BOOST_ROOT)/stage/lib/libboost_program_options-mt.a ;
+lib boost_filesystem      : : <variant>profile <file>$(BOOST_ROOT)/stage/lib/libboost_filesystem-mt.a ;
+lib boost_datetime        : : <variant>profile <file>$(BOOST_ROOT)/stage/lib/libboost_date_time-mt.a ;
+
+lib boost_serialization : :   <variant>release <file>$(BOOST_ROOT)/stage/lib/libboost_serialization-mt.a ;
+lib boost_system : :          <variant>release <file>$(BOOST_ROOT)/stage/lib/libboost_system-mt.a ;
+lib boost_thread : :          <variant>release <file>$(BOOST_ROOT)/stage/lib/libboost_thread-mt.a ;
+lib boost_test   : :          <variant>release <file>$(BOOST_ROOT)/stage/lib/libboost_unit_test_framework-mt.a ;
+lib boost_test_monitor : :    <variant>release <file>$(BOOST_ROOT)/stage/lib/libboost_test_exec_monitor-mt.a ;
+lib boost_program_options : : <variant>release <file>$(BOOST_ROOT)/stage/lib/libboost_program_options-mt.a ;
+lib boost_filesystem      : : <variant>release <file>$(BOOST_ROOT)/stage/lib/libboost_filesystem-mt.a ;
+lib boost_datetime        : : <variant>release <file>$(BOOST_ROOT)/stage/lib/libboost_date_time-mt.a ;
+
+#
+# o AIX_GCC is used to work_around the std::getline() bug where eof state is not set on the stream
+#
+project site-config 
+   : requirements <include>$(BOOST_ROOT)  
+   : requirements <define>AIX_GCC 
+   ;
+
+# o pthread: 
+#   Even though most projects don't use pthreads, if we don't compile and link with -pthread
+#   then we get pthread related undefined symbols
+#
+# o "-mminimal-toc"
+#   Required only for ecflow.so, to prevent TOC overflow errors at link time
+#   Need a way of applying this only for ecflow.so ?
+#
+
+# using syntax:
+# using toolset-name : version :invocation-command : options ;
+#   where options allows <cflags, cxxflags, compileflags and linkflags >
+#
+
+using gcc : : : 
+   <cxxflags>-pthread 
+#   <linkflags>-L/usr/local/apps/gcc/4.5.0/ILP32/lib/gcc/powerpc-ibm-aix5.3.0.0/4.5.0
+   <linkflags>"-mminimal-toc" 
+#  <linkflags>"-Wl,-bbigtoc" 
+   <linkflags>-pthread
+   ;
+   
+using testing ;
+
+# ================================================================================
+# Link with FDB  (PRODGEN)
+ 
+lib libfdb
+    :
+    : <file>/usr/local/lib/libfdb.a   
+    ;

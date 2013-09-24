@@ -1,0 +1,3 @@
+suite suiteName
+   edit #var value
+endsuite

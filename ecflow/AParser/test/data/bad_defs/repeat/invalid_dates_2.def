@@ -1,0 +1,5 @@
+suite suiteName
+   
+    repeat date YMD 20091099 20091501   # should have format yyyymmdd  invalid day of month
+  
+endsuite

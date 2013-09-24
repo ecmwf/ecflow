@@ -1,0 +1,22 @@
+%include <head.h>
+
+# ======================================================================
+# Run LOCALLY
+# ======================================================================
+export WK=%WK%
+
+if [[ %SET_TO_TEST_SCRIPT% = true ]] ; then
+   echo "Test only"
+else
+   # ============================================================================================
+   # Copy test.sh & rmbin,sh to $HOME/bin/
+   # ============================================================================================
+   cd $WK
+   cp build/test.sh  $HOME/bin/test.sh
+   cp build/rmbin.sh $HOME/bin/rmbin.sh
+   
+   # will move tar to /var/tmp/ma0/clientRoot/workspace
+   sh -x build/tar_ecflow.sh
+fi
+
+%include <tail.h>

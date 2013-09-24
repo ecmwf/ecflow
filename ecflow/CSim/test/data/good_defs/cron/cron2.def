@@ -1,0 +1,10 @@
+suite cron2
+                         # use real clock otherwise the date wont change
+   clock real 1.10.2009  # need to define a date otherwise log file content varies according to the time 
+   family cronFamily
+		task t
+  			 cron -w 0,1 10:00  11:00 01:00          # run every Sunday & Monday at 10 and 11 am	
+  			 verify complete:4                      # task should complete 16 times	
+   endfamily
+endsuite
+

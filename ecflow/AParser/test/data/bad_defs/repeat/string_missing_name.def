@@ -1,0 +1,4 @@
+suite suiteName
+ 
+    repeat string  
+endsuite

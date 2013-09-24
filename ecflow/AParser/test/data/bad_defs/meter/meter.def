@@ -1,0 +1,6 @@
+suite suiteName
+   family familyName
+      task taskName
+          meter myMeter  200 100 100  #  min val(200)  > max value(100)
+    endfamily
+endsuite

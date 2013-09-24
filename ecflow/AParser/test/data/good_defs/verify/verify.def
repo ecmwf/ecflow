@@ -1,0 +1,32 @@
+
+suite suiteName
+   verify complete:3 
+   verify unknown:3 
+   verify queued:3 
+   verify aborted:3 
+   verify submitted:3 
+    verify active:3 
+   family f
+    	verify complete:3 
+   		verify unknown:3 
+   		verify queued:3 
+   		verify aborted:3 
+   		verify submitted:3 
+   		verify active:3 
+      task t1
+    		verify complete:3 
+   			verify unknown:3 
+   			verify queued:3 
+   			verify aborted:3 
+   			verify submitted:3 
+    			verify active:3 
+      task t2
+    		verify complete:3 
+   			verify unknown:3 
+   			verify queued:3 
+   			verify aborted:3 
+   			verify submitted:3 
+   			verify active:3 
+    endfamily
+endsuite
+

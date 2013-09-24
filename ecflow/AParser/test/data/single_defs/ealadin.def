@@ -1,0 +1,3671 @@
+extern /limits:mars
+extern /limits:localhost
+extern /limits:c1b
+extern /limits:linux_cluster
+extern /limits:swarm
+extern /limits:ha_pp
+extern /limits:ecfs
+extern /limits:obs_get
+extern /limits:pdb
+extern /limits:q2diss
+extern /limits:pdb_bc
+extern /limits:q2diss_bc
+extern /limits:rebuild
+extern /o/main/12/fc
+extern /o/main/12/fc/model:step
+extern /o/main:YMD
+extern /o/main/18/fc
+extern /o/main/18/fc/model:step
+extern /o/main/00/fc
+extern /o/main/00/fc/model:step
+extern /o/main/06/fc
+extern /o/main/06/fc/model:step
+extern /o/main/12bc/fc
+extern /o/main/12bc/fc/model:step
+extern /o/main/18bc/fc
+extern /o/main/18bc/fc/model:step
+extern /o/main/00bc/fc
+extern /o/main/00bc/fc/model:step
+extern /o/main/06bc/fc
+extern /o/main/06bc/fc/model:step
+
+suite ealadin
+  #defstatus suspended
+  edit QUEUE 'ts'
+  edit QUEUE_EPILOG 'SC_QUEUE_EPILOG'
+  edit ECFCMD 'smssubmit %USER% %SCHOST% %ECFJOB% %ECFJOBOUT%'
+  edit ECFKILL 'smskill %USER% %SCHOST% %ECFRID% %ECFJOB% %ECFJOBOUT%'
+  edit ECFSTATUSCMD '/home/ma/emos/bin/smsstatus %USER% %SCHOST% %ECFRID% %ECFJOB%'
+  edit LOGDIR '/s1a/emos_esuite/emos_data/0047/log'
+  edit ECFOUT '/s1a/emos_esuite/emos_data/0047/log'
+  edit THREADS_FRA '6'
+  edit THREADS_LBC '6'
+  edit EMOS_TIME_STEP_H 'undef'
+  edit STREAM 'undef'
+  edit ECF_URLBASE 'http://www.ecmwf.int'
+  edit NB_TASKS_FRA '38'
+  edit SCLOGDIR '/s1a/emos_esuite/emos_data/0047/log'
+  edit USER 'emos'
+  edit STHOST_BKUP '/s1b'
+  edit DATEMASK '*.*.*'
+  edit CALL_ECPDS 'false'
+  edit EXPVER '0047'
+  edit MEMBER '-1'
+  edit ECF_OUT '/vol/emos_nc/output'
+  edit FSFAMILY 'undef'
+  edit USE_YMD 'true'
+  edit ECF_URLCMD '${BROWSER:=firefox} -remote 'openURL(%ECF_URLBASE%/%ECF_URL%)''
+  edit NB_TASKS_LBC '32'
+  edit DELTA_DAY '0'
+  edit STHOST '/s1a'
+  edit VERSION '%EXPVER%'
+  edit SCHOST_BKUP 'c1b'
+  edit ACCOUNT_FRA 'oesu'
+  edit MEM '2500'
+  edit EPSTYPE 'undef'
+  edit ACCOUNT_LBC 'oesu'
+  edit ALADIN_STEP '-1'
+  edit ECF_LOGHOST 'localhost'
+  edit WSLOGDIR '/vol/emos_nc/output'
+  edit INIEXPVER '0001'
+  edit WSHOST 'localhost'
+  edit ECF_URL 'index.html'
+  edit THREADS '1'
+  edit SCHOST 'localhost'
+  edit ECF_LOGPORT '9316'
+  edit REAL_TIME '1'
+  edit FIRST_DAY '0'
+  inlimit /limits:localhost
+  family limits
+    defstatus complete
+    limit limiter 1
+    limit oper 7
+    limit bkup 7
+    limit clst 7
+    limit lbc 26
+    limit main 84
+    limit 927 21
+    limit subd 21
+    limit init 7
+  endfamily
+  family main
+    repeat date YMD 20100607 20201212 1
+    edit LOGTASK 'main'
+    edit ECF_URLBASE 'http://diss.ecmwf.int/do/monitoring/arrival'
+    edit ECPDS_STREAM 'JSN2'
+    edit DESTINATION 'FRA'
+    family 12
+      edit ACCOUNT '%ACCOUNT_FRA%'
+      edit NB_TASKS '%NB_TASKS_FRA%'
+      edit STREAM 'oper'
+      edit EMOS_BASE '1'
+      edit ECF_URL 'FRA/ALADIN/12'
+      inlimit /ealadin/limits:main
+      family ref
+        defstatus complete
+        complete /o/main:YMD gt /ealadin/main:YMD
+        edit EMOS_BASE '1'
+        task external
+          defstatus complete
+          complete /o/main/12/fc eq complete or /o/main/12/fc/model:step gt 42
+          trigger 0==1
+        family timed
+          complete /ealadin:REAL_TIME eq 0
+          time 17:58
+          task dummy
+            complete 1==1
+        endfamily
+      endfamily
+      family prl
+        trigger ref eq complete
+        family 00
+          edit ALADIN_STEP '00'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_FRA%'
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            inlimit /ealadin/limits:927
+            meter step -1 42 42
+          task ecpds
+            defstatus complete
+            trigger ./927 eq complete
+            edit ECPDS_AT '17:58'
+            edit DOM 'francecep'
+            label scheduled ""
+          family subd
+            trigger ./927 eq active or ./927 eq complete
+            inlimit /ealadin/limits:subd
+            family poly
+              edit DOM 'polyf'
+              task 927
+                meter step -1 42 42
+            endfamily
+            family antg
+              edit DOM 'antig'
+              task 927
+                meter step -1 42 42
+            endfamily
+            family ncal
+              edit DOM 'ncal'
+              task 927
+                meter step -1 42 42
+            endfamily
+            task ecpds
+              defstatus complete
+              trigger ./poly==complete and ./antg==complete and ./ncal==complete
+              edit DOM 'polyf antig ncal'
+              label scheduled ""
+          endfamily
+        endfamily
+        family 03
+          edit ALADIN_STEP '03'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_FRA%'
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            inlimit /ealadin/limits:927
+            meter step -1 42 42
+          task ecpds
+            defstatus complete
+            trigger ./927 eq complete
+            trigger -a ../00/ecpds eq complete
+            edit ECPDS_AT '17:58'
+            edit DOM 'francecep'
+            label scheduled ""
+          family subd
+            trigger ./927 eq active or ./927 eq complete
+            inlimit /ealadin/limits:subd
+            family poly
+              edit DOM 'polyf'
+              task 927
+                meter step -1 42 42
+            endfamily
+            family antg
+              edit DOM 'antig'
+              task 927
+                meter step -1 42 42
+            endfamily
+            family ncal
+              edit DOM 'ncal'
+              task 927
+                meter step -1 42 42
+            endfamily
+            task ecpds
+              defstatus complete
+              trigger ./poly==complete and ./antg==complete and ./ncal==complete
+              trigger -a ../../00/subd/ecpds eq complete
+              edit DOM 'polyf antig ncal'
+              label scheduled ""
+          endfamily
+        endfamily
+        family 06
+          edit ALADIN_STEP '06'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_FRA%'
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            inlimit /ealadin/limits:927
+            meter step -1 42 42
+          task ecpds
+            defstatus complete
+            trigger ./927 eq complete
+            trigger -a ../03/ecpds eq complete
+            edit ECPDS_AT '17:58'
+            edit DOM 'francecep'
+            label scheduled ""
+          family subd
+            trigger ./927 eq active or ./927 eq complete
+            inlimit /ealadin/limits:subd
+            family poly
+              edit DOM 'polyf'
+              task 927
+                meter step -1 42 42
+            endfamily
+            family antg
+              edit DOM 'antig'
+              task 927
+                meter step -1 42 42
+            endfamily
+            family ncal
+              edit DOM 'ncal'
+              task 927
+                meter step -1 42 42
+            endfamily
+            task ecpds
+              defstatus complete
+              trigger ./poly==complete and ./antg==complete and ./ncal==complete
+              trigger -a ../../03/subd/ecpds eq complete
+              edit DOM 'polyf antig ncal'
+              label scheduled ""
+          endfamily
+        endfamily
+        family 09
+          edit ALADIN_STEP '09'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_FRA%'
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            inlimit /ealadin/limits:927
+            meter step -1 42 42
+          task ecpds
+            defstatus complete
+            trigger ./927 eq complete
+            trigger -a ../06/ecpds eq complete
+            edit ECPDS_AT '17:58'
+            edit DOM 'francecep'
+            label scheduled ""
+        endfamily
+        family 12
+          edit ALADIN_STEP '12'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_FRA%'
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            inlimit /ealadin/limits:927
+            meter step -1 42 42
+          task ecpds
+            defstatus complete
+            trigger ./927 eq complete
+            trigger -a ../06/ecpds eq complete
+            edit ECPDS_AT '17:58'
+            edit DOM 'francecep'
+            label scheduled ""
+        endfamily
+        family 15
+          edit ALADIN_STEP '15'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_FRA%'
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            inlimit /ealadin/limits:927
+            meter step -1 42 42
+          task ecpds
+            defstatus complete
+            trigger ./927 eq complete
+            trigger -a ../06/ecpds eq complete
+            edit ECPDS_AT '17:58'
+            edit DOM 'francecep'
+            label scheduled ""
+        endfamily
+        family 18
+          edit ALADIN_STEP '18'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_FRA%'
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            inlimit /ealadin/limits:927
+            meter step -1 42 42
+          task ecpds
+            defstatus complete
+            trigger ./927 eq complete
+            trigger -a ../06/ecpds eq complete
+            edit ECPDS_AT '17:58'
+            edit DOM 'francecep'
+            label scheduled ""
+        endfamily
+        family 21
+          edit ALADIN_STEP '21'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_FRA%'
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            inlimit /ealadin/limits:927
+            meter step -1 42 42
+          task ecpds
+            defstatus complete
+            trigger ./927 eq complete
+            trigger -a ../06/ecpds eq complete
+            edit ECPDS_AT '17:58'
+            edit DOM 'francecep'
+            label scheduled ""
+        endfamily
+        family 24
+          edit ALADIN_STEP '24'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_FRA%'
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            inlimit /ealadin/limits:927
+            meter step -1 42 42
+          task ecpds
+            defstatus complete
+            trigger ./927 eq complete
+            trigger -a ../06/ecpds eq complete
+            edit ECPDS_AT '17:58'
+            edit DOM 'francecep'
+            label scheduled ""
+        endfamily
+        family 27
+          edit ALADIN_STEP '27'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_FRA%'
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            inlimit /ealadin/limits:927
+            meter step -1 42 42
+          task ecpds
+            defstatus complete
+            trigger ./927 eq complete
+            trigger -a ../06/ecpds eq complete
+            edit ECPDS_AT '17:58'
+            edit DOM 'francecep'
+            label scheduled ""
+        endfamily
+        family 30
+          edit ALADIN_STEP '30'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_FRA%'
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            inlimit /ealadin/limits:927
+            meter step -1 42 42
+          task ecpds
+            defstatus complete
+            trigger ./927 eq complete
+            trigger -a ../06/ecpds eq complete
+            edit ECPDS_AT '17:58'
+            edit DOM 'francecep'
+            label scheduled ""
+        endfamily
+        family 33
+          edit ALADIN_STEP '33'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_FRA%'
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            inlimit /ealadin/limits:927
+            meter step -1 42 42
+          task ecpds
+            defstatus complete
+            trigger ./927 eq complete
+            trigger -a ../06/ecpds eq complete
+            edit ECPDS_AT '17:58'
+            edit DOM 'francecep'
+            label scheduled ""
+        endfamily
+        family 36
+          edit ALADIN_STEP '36'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_FRA%'
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            inlimit /ealadin/limits:927
+            meter step -1 42 42
+          task ecpds
+            defstatus complete
+            trigger ./927 eq complete
+            trigger -a ../06/ecpds eq complete
+            edit ECPDS_AT '17:58'
+            edit DOM 'francecep'
+            label scheduled ""
+        endfamily
+        family 39
+          edit ALADIN_STEP '39'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_FRA%'
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            inlimit /ealadin/limits:927
+            meter step -1 42 42
+          task ecpds
+            defstatus complete
+            trigger ./927 eq complete
+            trigger -a ../06/ecpds eq complete
+            edit ECPDS_AT '17:58'
+            edit DOM 'francecep'
+            label scheduled ""
+        endfamily
+      endfamily
+      family prod
+        defstatus complete
+        trigger prl eq complete
+        edit ECF_URLBASE 'http://diss.ecmwf.int/do/monitoring/arrival'
+        edit TO_ECFS 'false'
+        edit ECPDS_AT '17:58'
+        limit mutex 1
+        inlimit prod:mutex
+        family fra
+          edit DESTINATION 'FRA'
+          edit ECF_URL 'FRA/ALADIN/12'
+          task ecpds
+            edit ECPDS_STREAM 'JSN2'
+            edit DOM 'francecep'
+            label scheduled ""
+        endfamily
+      endfamily
+    endfamily
+    family 18
+      edit ACCOUNT '%ACCOUNT_FRA%'
+      edit NB_TASKS '%NB_TASKS_FRA%'
+      edit STREAM 'scda'
+      edit EMOS_BASE '1'
+      edit ECF_URL 'FRA/ALADIN/18'
+      inlimit /ealadin/limits:main
+      family ref
+        defstatus complete
+        complete /o/main:YMD gt /ealadin/main:YMD
+        edit EMOS_BASE '1'
+        task external
+          defstatus complete
+          complete /o/main/18/fc eq complete or /o/main/18/fc/model:step gt 60
+          trigger 0==1
+        family timed
+          complete /ealadin:REAL_TIME eq 0
+          time 00:00
+          task dummy
+            complete 1==1
+        endfamily
+      endfamily
+      family prl
+        trigger ref eq complete
+        family 00
+          edit ALADIN_STEP '00'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_FRA%'
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            inlimit /ealadin/limits:927
+            meter step -1 60 60
+          task ecpds
+            defstatus complete
+            trigger ./927 eq complete
+            edit ECPDS_AT '00:00'
+            edit DOM 'francecep'
+            label scheduled ""
+          family subd
+            trigger ./927 eq active or ./927 eq complete
+            inlimit /ealadin/limits:subd
+            family poly
+              edit DOM 'polyf'
+              task 927
+                meter step -1 60 60
+            endfamily
+            family antg
+              edit DOM 'antig'
+              task 927
+                meter step -1 60 60
+            endfamily
+            family ncal
+              edit DOM 'ncal'
+              task 927
+                meter step -1 60 60
+            endfamily
+            task ecpds
+              defstatus complete
+              trigger ./poly==complete and ./antg==complete and ./ncal==complete
+              edit DOM 'polyf antig ncal'
+              label scheduled ""
+          endfamily
+        endfamily
+        family 03
+          edit ALADIN_STEP '03'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_FRA%'
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            inlimit /ealadin/limits:927
+            meter step -1 60 60
+          task ecpds
+            defstatus complete
+            trigger ./927 eq complete
+            trigger -a ../00/ecpds eq complete
+            edit ECPDS_AT '00:00'
+            edit DOM 'francecep'
+            label scheduled ""
+          family subd
+            trigger ./927 eq active or ./927 eq complete
+            inlimit /ealadin/limits:subd
+            family poly
+              edit DOM 'polyf'
+              task 927
+                meter step -1 60 60
+            endfamily
+            family antg
+              edit DOM 'antig'
+              task 927
+                meter step -1 60 60
+            endfamily
+            family ncal
+              edit DOM 'ncal'
+              task 927
+                meter step -1 60 60
+            endfamily
+            task ecpds
+              defstatus complete
+              trigger ./poly==complete and ./antg==complete and ./ncal==complete
+              trigger -a ../../00/subd/ecpds eq complete
+              edit DOM 'polyf antig ncal'
+              label scheduled ""
+          endfamily
+        endfamily
+        family 06
+          edit ALADIN_STEP '06'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_FRA%'
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            inlimit /ealadin/limits:927
+            meter step -1 60 60
+          task ecpds
+            defstatus complete
+            trigger ./927 eq complete
+            trigger -a ../03/ecpds eq complete
+            edit ECPDS_AT '00:00'
+            edit DOM 'francecep'
+            label scheduled ""
+          family subd
+            trigger ./927 eq active or ./927 eq complete
+            inlimit /ealadin/limits:subd
+            family poly
+              edit DOM 'polyf'
+              task 927
+                meter step -1 60 60
+            endfamily
+            family antg
+              edit DOM 'antig'
+              task 927
+                meter step -1 60 60
+            endfamily
+            family ncal
+              edit DOM 'ncal'
+              task 927
+                meter step -1 60 60
+            endfamily
+            task ecpds
+              defstatus complete
+              trigger ./poly==complete and ./antg==complete and ./ncal==complete
+              trigger -a ../../03/subd/ecpds eq complete
+              edit DOM 'polyf antig ncal'
+              label scheduled ""
+          endfamily
+        endfamily
+        family 09
+          edit ALADIN_STEP '09'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_FRA%'
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            inlimit /ealadin/limits:927
+            meter step -1 60 60
+          task ecpds
+            defstatus complete
+            trigger ./927 eq complete
+            trigger -a ../06/ecpds eq complete
+            edit ECPDS_AT '00:00'
+            edit DOM 'francecep'
+            label scheduled ""
+        endfamily
+        family 12
+          edit ALADIN_STEP '12'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_FRA%'
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            inlimit /ealadin/limits:927
+            meter step -1 60 60
+          task ecpds
+            defstatus complete
+            trigger ./927 eq complete
+            trigger -a ../06/ecpds eq complete
+            edit ECPDS_AT '00:00'
+            edit DOM 'francecep'
+            label scheduled ""
+        endfamily
+        family 15
+          edit ALADIN_STEP '15'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_FRA%'
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            inlimit /ealadin/limits:927
+            meter step -1 60 60
+          task ecpds
+            defstatus complete
+            trigger ./927 eq complete
+            trigger -a ../06/ecpds eq complete
+            edit ECPDS_AT '00:00'
+            edit DOM 'francecep'
+            label scheduled ""
+        endfamily
+        family 18
+          edit ALADIN_STEP '18'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_FRA%'
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            inlimit /ealadin/limits:927
+            meter step -1 60 60
+          task ecpds
+            defstatus complete
+            trigger ./927 eq complete
+            trigger -a ../06/ecpds eq complete
+            edit ECPDS_AT '00:00'
+            edit DOM 'francecep'
+            label scheduled ""
+        endfamily
+        family 21
+          edit ALADIN_STEP '21'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_FRA%'
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            inlimit /ealadin/limits:927
+            meter step -1 60 60
+          task ecpds
+            defstatus complete
+            trigger ./927 eq complete
+            trigger -a ../06/ecpds eq complete
+            edit ECPDS_AT '00:00'
+            edit DOM 'francecep'
+            label scheduled ""
+        endfamily
+        family 24
+          edit ALADIN_STEP '24'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_FRA%'
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            inlimit /ealadin/limits:927
+            meter step -1 60 60
+          task ecpds
+            defstatus complete
+            trigger ./927 eq complete
+            trigger -a ../06/ecpds eq complete
+            edit ECPDS_AT '00:00'
+            edit DOM 'francecep'
+            label scheduled ""
+        endfamily
+        family 27
+          edit ALADIN_STEP '27'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_FRA%'
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            inlimit /ealadin/limits:927
+            meter step -1 60 60
+          task ecpds
+            defstatus complete
+            trigger ./927 eq complete
+            trigger -a ../06/ecpds eq complete
+            edit ECPDS_AT '00:00'
+            edit DOM 'francecep'
+            label scheduled ""
+        endfamily
+        family 30
+          edit ALADIN_STEP '30'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_FRA%'
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            inlimit /ealadin/limits:927
+            meter step -1 60 60
+          task ecpds
+            defstatus complete
+            trigger ./927 eq complete
+            trigger -a ../06/ecpds eq complete
+            edit ECPDS_AT '00:00'
+            edit DOM 'francecep'
+            label scheduled ""
+        endfamily
+        family 33
+          edit ALADIN_STEP '33'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_FRA%'
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            inlimit /ealadin/limits:927
+            meter step -1 60 60
+          task ecpds
+            defstatus complete
+            trigger ./927 eq complete
+            trigger -a ../06/ecpds eq complete
+            edit ECPDS_AT '00:00'
+            edit DOM 'francecep'
+            label scheduled ""
+        endfamily
+        family 36
+          edit ALADIN_STEP '36'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_FRA%'
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            inlimit /ealadin/limits:927
+            meter step -1 60 60
+          task ecpds
+            defstatus complete
+            trigger ./927 eq complete
+            trigger -a ../06/ecpds eq complete
+            edit ECPDS_AT '00:00'
+            edit DOM 'francecep'
+            label scheduled ""
+        endfamily
+        family 39
+          edit ALADIN_STEP '39'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_FRA%'
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            inlimit /ealadin/limits:927
+            meter step -1 60 60
+          task ecpds
+            defstatus complete
+            trigger ./927 eq complete
+            trigger -a ../06/ecpds eq complete
+            edit ECPDS_AT '00:00'
+            edit DOM 'francecep'
+            label scheduled ""
+        endfamily
+        family 42
+          edit ALADIN_STEP '42'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_FRA%'
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            inlimit /ealadin/limits:927
+            meter step -1 60 60
+          task ecpds
+            defstatus complete
+            trigger ./927 eq complete
+            trigger -a ../06/ecpds eq complete
+            edit ECPDS_AT '00:00'
+            edit DOM 'francecep'
+            label scheduled ""
+        endfamily
+        family 45
+          edit ALADIN_STEP '45'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_FRA%'
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            inlimit /ealadin/limits:927
+            meter step -1 60 60
+          task ecpds
+            defstatus complete
+            trigger ./927 eq complete
+            trigger -a ../06/ecpds eq complete
+            edit ECPDS_AT '00:00'
+            edit DOM 'francecep'
+            label scheduled ""
+        endfamily
+        family 48
+          edit ALADIN_STEP '48'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_FRA%'
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            inlimit /ealadin/limits:927
+            meter step -1 60 60
+          task ecpds
+            defstatus complete
+            trigger ./927 eq complete
+            trigger -a ../06/ecpds eq complete
+            edit ECPDS_AT '00:00'
+            edit DOM 'francecep'
+            label scheduled ""
+        endfamily
+        family 51
+          edit ALADIN_STEP '51'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_FRA%'
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            inlimit /ealadin/limits:927
+            meter step -1 60 60
+          task ecpds
+            defstatus complete
+            trigger ./927 eq complete
+            trigger -a ../06/ecpds eq complete
+            edit ECPDS_AT '00:00'
+            edit DOM 'francecep'
+            label scheduled ""
+        endfamily
+        family 54
+          edit ALADIN_STEP '54'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_FRA%'
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            inlimit /ealadin/limits:927
+            meter step -1 60 60
+          task ecpds
+            defstatus complete
+            trigger ./927 eq complete
+            trigger -a ../06/ecpds eq complete
+            edit ECPDS_AT '00:00'
+            edit DOM 'francecep'
+            label scheduled ""
+        endfamily
+        family 57
+          edit ALADIN_STEP '57'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_FRA%'
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            inlimit /ealadin/limits:927
+            meter step -1 60 60
+          task ecpds
+            defstatus complete
+            trigger ./927 eq complete
+            trigger -a ../06/ecpds eq complete
+            edit ECPDS_AT '00:00'
+            edit DOM 'francecep'
+            label scheduled ""
+        endfamily
+      endfamily
+      family prod
+        defstatus complete
+        trigger prl eq complete
+        edit ECF_URLBASE 'http://diss.ecmwf.int/do/monitoring/arrival'
+        edit TO_ECFS 'false'
+        edit ECPDS_AT '00:00'
+        limit mutex 1
+        inlimit prod:mutex
+        family fra
+          edit DESTINATION 'FRA'
+          edit ECF_URL 'FRA/ALADIN/18'
+          task ecpds
+            edit ECPDS_STREAM 'JSN2'
+            edit ECPDS_OPER 'false'
+            edit CALL_ECPDS 'false'
+            edit TO_ECPDS 'false'
+            label scheduled ""
+        endfamily
+      endfamily
+    endfamily
+    family 00
+      edit ACCOUNT '%ACCOUNT_FRA%'
+      edit NB_TASKS '%NB_TASKS_FRA%'
+      edit DELTA_DAY '1'
+      edit STREAM 'oper'
+      edit EMOS_BASE '0'
+      edit ECF_URL 'FRA/ALADIN/00'
+      inlimit /ealadin/limits:main
+      family ref
+        defstatus complete
+        complete /o/main:YMD gt /ealadin/main:YMD
+        edit EMOS_BASE '0'
+        task external
+          defstatus complete
+          complete /o/main/00/fc eq complete or /o/main/00/fc/model:step gt 54
+          trigger 0==1
+        family timed
+          complete /ealadin:REAL_TIME eq 0
+          time 06:01
+          task dummy
+            complete 1==1
+        endfamily
+      endfamily
+      family prl
+        trigger ref eq complete
+        family 00
+          edit ALADIN_STEP '00'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_FRA%'
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            inlimit /ealadin/limits:927
+            meter step -1 54 54
+          task ecpds
+            defstatus complete
+            trigger ./927 eq complete
+            edit ECPDS_AT '06:01'
+            edit DOM 'francecep'
+            label scheduled ""
+          family subd
+            trigger ./927 eq active or ./927 eq complete
+            inlimit /ealadin/limits:subd
+            family poly
+              edit DOM 'polyf'
+              task 927
+                meter step -1 54 54
+            endfamily
+            family antg
+              edit DOM 'antig'
+              task 927
+                meter step -1 54 54
+            endfamily
+            family ncal
+              edit DOM 'ncal'
+              task 927
+                meter step -1 54 54
+            endfamily
+            task ecpds
+              defstatus complete
+              trigger ./poly==complete and ./antg==complete and ./ncal==complete
+              edit DOM 'polyf antig ncal'
+              label scheduled ""
+          endfamily
+        endfamily
+        family 03
+          edit ALADIN_STEP '03'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_FRA%'
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            inlimit /ealadin/limits:927
+            meter step -1 54 54
+          task ecpds
+            defstatus complete
+            trigger ./927 eq complete
+            trigger -a ../00/ecpds eq complete
+            edit ECPDS_AT '06:01'
+            edit DOM 'francecep'
+            label scheduled ""
+          family subd
+            trigger ./927 eq active or ./927 eq complete
+            inlimit /ealadin/limits:subd
+            family poly
+              edit DOM 'polyf'
+              task 927
+                meter step -1 54 54
+            endfamily
+            family antg
+              edit DOM 'antig'
+              task 927
+                meter step -1 54 54
+            endfamily
+            family ncal
+              edit DOM 'ncal'
+              task 927
+                meter step -1 54 54
+            endfamily
+            task ecpds
+              defstatus complete
+              trigger ./poly==complete and ./antg==complete and ./ncal==complete
+              trigger -a ../../00/subd/ecpds eq complete
+              edit DOM 'polyf antig ncal'
+              label scheduled ""
+          endfamily
+        endfamily
+        family 06
+          edit ALADIN_STEP '06'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_FRA%'
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            inlimit /ealadin/limits:927
+            meter step -1 54 54
+          task ecpds
+            defstatus complete
+            trigger ./927 eq complete
+            trigger -a ../03/ecpds eq complete
+            edit ECPDS_AT '06:01'
+            edit DOM 'francecep'
+            label scheduled ""
+          family subd
+            trigger ./927 eq active or ./927 eq complete
+            inlimit /ealadin/limits:subd
+            family poly
+              edit DOM 'polyf'
+              task 927
+                meter step -1 54 54
+            endfamily
+            family antg
+              edit DOM 'antig'
+              task 927
+                meter step -1 54 54
+            endfamily
+            family ncal
+              edit DOM 'ncal'
+              task 927
+                meter step -1 54 54
+            endfamily
+            task ecpds
+              defstatus complete
+              trigger ./poly==complete and ./antg==complete and ./ncal==complete
+              trigger -a ../../03/subd/ecpds eq complete
+              edit DOM 'polyf antig ncal'
+              label scheduled ""
+          endfamily
+        endfamily
+        family 09
+          edit ALADIN_STEP '09'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_FRA%'
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            inlimit /ealadin/limits:927
+            meter step -1 54 54
+          task ecpds
+            defstatus complete
+            trigger ./927 eq complete
+            trigger -a ../06/ecpds eq complete
+            edit ECPDS_AT '06:01'
+            edit DOM 'francecep'
+            label scheduled ""
+        endfamily
+        family 12
+          edit ALADIN_STEP '12'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_FRA%'
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            inlimit /ealadin/limits:927
+            meter step -1 54 54
+          task ecpds
+            defstatus complete
+            trigger ./927 eq complete
+            trigger -a ../06/ecpds eq complete
+            edit ECPDS_AT '06:01'
+            edit DOM 'francecep'
+            label scheduled ""
+        endfamily
+        family 15
+          edit ALADIN_STEP '15'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_FRA%'
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            inlimit /ealadin/limits:927
+            meter step -1 54 54
+          task ecpds
+            defstatus complete
+            trigger ./927 eq complete
+            trigger -a ../06/ecpds eq complete
+            edit ECPDS_AT '06:01'
+            edit DOM 'francecep'
+            label scheduled ""
+        endfamily
+        family 18
+          edit ALADIN_STEP '18'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_FRA%'
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            inlimit /ealadin/limits:927
+            meter step -1 54 54
+          task ecpds
+            defstatus complete
+            trigger ./927 eq complete
+            trigger -a ../06/ecpds eq complete
+            edit ECPDS_AT '06:01'
+            edit DOM 'francecep'
+            label scheduled ""
+        endfamily
+        family 21
+          edit ALADIN_STEP '21'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_FRA%'
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            inlimit /ealadin/limits:927
+            meter step -1 54 54
+          task ecpds
+            defstatus complete
+            trigger ./927 eq complete
+            trigger -a ../06/ecpds eq complete
+            edit ECPDS_AT '06:01'
+            edit DOM 'francecep'
+            label scheduled ""
+        endfamily
+        family 24
+          edit ALADIN_STEP '24'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_FRA%'
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            inlimit /ealadin/limits:927
+            meter step -1 54 54
+          task ecpds
+            defstatus complete
+            trigger ./927 eq complete
+            trigger -a ../06/ecpds eq complete
+            edit ECPDS_AT '06:01'
+            edit DOM 'francecep'
+            label scheduled ""
+        endfamily
+        family 27
+          edit ALADIN_STEP '27'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_FRA%'
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            inlimit /ealadin/limits:927
+            meter step -1 54 54
+          task ecpds
+            defstatus complete
+            trigger ./927 eq complete
+            trigger -a ../06/ecpds eq complete
+            edit ECPDS_AT '06:01'
+            edit DOM 'francecep'
+            label scheduled ""
+        endfamily
+        family 30
+          edit ALADIN_STEP '30'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_FRA%'
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            inlimit /ealadin/limits:927
+            meter step -1 54 54
+          task ecpds
+            defstatus complete
+            trigger ./927 eq complete
+            trigger -a ../06/ecpds eq complete
+            edit ECPDS_AT '06:01'
+            edit DOM 'francecep'
+            label scheduled ""
+        endfamily
+        family 33
+          edit ALADIN_STEP '33'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_FRA%'
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            inlimit /ealadin/limits:927
+            meter step -1 54 54
+          task ecpds
+            defstatus complete
+            trigger ./927 eq complete
+            trigger -a ../06/ecpds eq complete
+            edit ECPDS_AT '06:01'
+            edit DOM 'francecep'
+            label scheduled ""
+        endfamily
+        family 36
+          edit ALADIN_STEP '36'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_FRA%'
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            inlimit /ealadin/limits:927
+            meter step -1 54 54
+          task ecpds
+            defstatus complete
+            trigger ./927 eq complete
+            trigger -a ../06/ecpds eq complete
+            edit ECPDS_AT '06:01'
+            edit DOM 'francecep'
+            label scheduled ""
+        endfamily
+        family 39
+          edit ALADIN_STEP '39'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_FRA%'
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            inlimit /ealadin/limits:927
+            meter step -1 54 54
+          task ecpds
+            defstatus complete
+            trigger ./927 eq complete
+            trigger -a ../06/ecpds eq complete
+            edit ECPDS_AT '06:01'
+            edit DOM 'francecep'
+            label scheduled ""
+        endfamily
+        family 42
+          edit ALADIN_STEP '42'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_FRA%'
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            inlimit /ealadin/limits:927
+            meter step -1 54 54
+          task ecpds
+            defstatus complete
+            trigger ./927 eq complete
+            trigger -a ../06/ecpds eq complete
+            edit ECPDS_AT '06:01'
+            edit DOM 'francecep'
+            label scheduled ""
+        endfamily
+        family 45
+          edit ALADIN_STEP '45'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_FRA%'
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            inlimit /ealadin/limits:927
+            meter step -1 54 54
+          task ecpds
+            defstatus complete
+            trigger ./927 eq complete
+            trigger -a ../06/ecpds eq complete
+            edit ECPDS_AT '06:01'
+            edit DOM 'francecep'
+            label scheduled ""
+        endfamily
+        family 48
+          edit ALADIN_STEP '48'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_FRA%'
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            inlimit /ealadin/limits:927
+            meter step -1 54 54
+          task ecpds
+            defstatus complete
+            trigger ./927 eq complete
+            trigger -a ../06/ecpds eq complete
+            edit ECPDS_AT '06:01'
+            edit DOM 'francecep'
+            label scheduled ""
+        endfamily
+        family 51
+          edit ALADIN_STEP '51'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_FRA%'
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            inlimit /ealadin/limits:927
+            meter step -1 54 54
+          task ecpds
+            defstatus complete
+            trigger ./927 eq complete
+            trigger -a ../06/ecpds eq complete
+            edit ECPDS_AT '06:01'
+            edit DOM 'francecep'
+            label scheduled ""
+        endfamily
+      endfamily
+      family prod
+        defstatus complete
+        trigger prl eq complete
+        edit ECF_URLBASE 'http://diss.ecmwf.int/do/monitoring/arrival'
+        edit TO_ECFS 'false'
+        edit ECPDS_AT '06:01'
+        limit mutex 1
+        inlimit prod:mutex
+        family fra
+          edit DESTINATION 'FRA'
+          edit ECF_URL 'FRA/ALADIN/00'
+          task ecpds
+            edit ECPDS_STREAM 'JSN2'
+            edit DOM 'francecep'
+            label scheduled ""
+        endfamily
+      endfamily
+    endfamily
+    family 06
+      edit ACCOUNT '%ACCOUNT_FRA%'
+      edit NB_TASKS '%NB_TASKS_FRA%'
+      edit DELTA_DAY '1'
+      edit STREAM 'scda'
+      edit EMOS_BASE '0'
+      edit ECF_URL 'FRA/ALADIN/06'
+      inlimit /ealadin/limits:main
+      family ref
+        defstatus complete
+        complete /o/main:YMD gt /ealadin/main:YMD
+        edit EMOS_BASE '0'
+        task external
+          defstatus complete
+          complete /o/main/06/fc eq complete or /o/main/06/fc/model:step gt 60
+          trigger 0==1
+        family timed
+          complete /ealadin:REAL_TIME eq 0
+          time 12:00
+          task dummy
+            complete 1==1
+        endfamily
+      endfamily
+      family prl
+        trigger ref eq complete
+        family 00
+          edit ALADIN_STEP '00'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_FRA%'
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            inlimit /ealadin/limits:927
+            meter step -1 60 60
+          task ecpds
+            defstatus complete
+            trigger ./927 eq complete
+            edit ECPDS_AT '12:00'
+            edit DOM 'francecep'
+            label scheduled ""
+          family subd
+            trigger ./927 eq active or ./927 eq complete
+            inlimit /ealadin/limits:subd
+            family poly
+              edit DOM 'polyf'
+              task 927
+                meter step -1 60 60
+            endfamily
+            family antg
+              edit DOM 'antig'
+              task 927
+                meter step -1 60 60
+            endfamily
+            family ncal
+              edit DOM 'ncal'
+              task 927
+                meter step -1 60 60
+            endfamily
+            task ecpds
+              defstatus complete
+              trigger ./poly==complete and ./antg==complete and ./ncal==complete
+              edit DOM 'polyf antig ncal'
+              label scheduled ""
+          endfamily
+        endfamily
+        family 03
+          edit ALADIN_STEP '03'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_FRA%'
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            inlimit /ealadin/limits:927
+            meter step -1 60 60
+          task ecpds
+            defstatus complete
+            trigger ./927 eq complete
+            trigger -a ../00/ecpds eq complete
+            edit ECPDS_AT '12:00'
+            edit DOM 'francecep'
+            label scheduled ""
+          family subd
+            trigger ./927 eq active or ./927 eq complete
+            inlimit /ealadin/limits:subd
+            family poly
+              edit DOM 'polyf'
+              task 927
+                meter step -1 60 60
+            endfamily
+            family antg
+              edit DOM 'antig'
+              task 927
+                meter step -1 60 60
+            endfamily
+            family ncal
+              edit DOM 'ncal'
+              task 927
+                meter step -1 60 60
+            endfamily
+            task ecpds
+              defstatus complete
+              trigger ./poly==complete and ./antg==complete and ./ncal==complete
+              trigger -a ../../00/subd/ecpds eq complete
+              edit DOM 'polyf antig ncal'
+              label scheduled ""
+          endfamily
+        endfamily
+        family 06
+          edit ALADIN_STEP '06'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_FRA%'
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            inlimit /ealadin/limits:927
+            meter step -1 60 60
+          task ecpds
+            defstatus complete
+            trigger ./927 eq complete
+            trigger -a ../03/ecpds eq complete
+            edit ECPDS_AT '12:00'
+            edit DOM 'francecep'
+            label scheduled ""
+          family subd
+            trigger ./927 eq active or ./927 eq complete
+            inlimit /ealadin/limits:subd
+            family poly
+              edit DOM 'polyf'
+              task 927
+                meter step -1 60 60
+            endfamily
+            family antg
+              edit DOM 'antig'
+              task 927
+                meter step -1 60 60
+            endfamily
+            family ncal
+              edit DOM 'ncal'
+              task 927
+                meter step -1 60 60
+            endfamily
+            task ecpds
+              defstatus complete
+              trigger ./poly==complete and ./antg==complete and ./ncal==complete
+              trigger -a ../../03/subd/ecpds eq complete
+              edit DOM 'polyf antig ncal'
+              label scheduled ""
+          endfamily
+        endfamily
+        family 09
+          edit ALADIN_STEP '09'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_FRA%'
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            inlimit /ealadin/limits:927
+            meter step -1 60 60
+          task ecpds
+            defstatus complete
+            trigger ./927 eq complete
+            trigger -a ../06/ecpds eq complete
+            edit ECPDS_AT '12:00'
+            edit DOM 'francecep'
+            label scheduled ""
+        endfamily
+        family 12
+          edit ALADIN_STEP '12'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_FRA%'
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            inlimit /ealadin/limits:927
+            meter step -1 60 60
+          task ecpds
+            defstatus complete
+            trigger ./927 eq complete
+            trigger -a ../06/ecpds eq complete
+            edit ECPDS_AT '12:00'
+            edit DOM 'francecep'
+            label scheduled ""
+        endfamily
+        family 15
+          edit ALADIN_STEP '15'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_FRA%'
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            inlimit /ealadin/limits:927
+            meter step -1 60 60
+          task ecpds
+            defstatus complete
+            trigger ./927 eq complete
+            trigger -a ../06/ecpds eq complete
+            edit ECPDS_AT '12:00'
+            edit DOM 'francecep'
+            label scheduled ""
+        endfamily
+        family 18
+          edit ALADIN_STEP '18'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_FRA%'
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            inlimit /ealadin/limits:927
+            meter step -1 60 60
+          task ecpds
+            defstatus complete
+            trigger ./927 eq complete
+            trigger -a ../06/ecpds eq complete
+            edit ECPDS_AT '12:00'
+            edit DOM 'francecep'
+            label scheduled ""
+        endfamily
+        family 21
+          edit ALADIN_STEP '21'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_FRA%'
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            inlimit /ealadin/limits:927
+            meter step -1 60 60
+          task ecpds
+            defstatus complete
+            trigger ./927 eq complete
+            trigger -a ../06/ecpds eq complete
+            edit ECPDS_AT '12:00'
+            edit DOM 'francecep'
+            label scheduled ""
+        endfamily
+        family 24
+          edit ALADIN_STEP '24'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_FRA%'
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            inlimit /ealadin/limits:927
+            meter step -1 60 60
+          task ecpds
+            defstatus complete
+            trigger ./927 eq complete
+            trigger -a ../06/ecpds eq complete
+            edit ECPDS_AT '12:00'
+            edit DOM 'francecep'
+            label scheduled ""
+        endfamily
+        family 27
+          edit ALADIN_STEP '27'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_FRA%'
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            inlimit /ealadin/limits:927
+            meter step -1 60 60
+          task ecpds
+            defstatus complete
+            trigger ./927 eq complete
+            trigger -a ../06/ecpds eq complete
+            edit ECPDS_AT '12:00'
+            edit DOM 'francecep'
+            label scheduled ""
+        endfamily
+        family 30
+          edit ALADIN_STEP '30'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_FRA%'
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            inlimit /ealadin/limits:927
+            meter step -1 60 60
+          task ecpds
+            defstatus complete
+            trigger ./927 eq complete
+            trigger -a ../06/ecpds eq complete
+            edit ECPDS_AT '12:00'
+            edit DOM 'francecep'
+            label scheduled ""
+        endfamily
+        family 33
+          edit ALADIN_STEP '33'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_FRA%'
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            inlimit /ealadin/limits:927
+            meter step -1 60 60
+          task ecpds
+            defstatus complete
+            trigger ./927 eq complete
+            trigger -a ../06/ecpds eq complete
+            edit ECPDS_AT '12:00'
+            edit DOM 'francecep'
+            label scheduled ""
+        endfamily
+        family 36
+          edit ALADIN_STEP '36'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_FRA%'
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            inlimit /ealadin/limits:927
+            meter step -1 60 60
+          task ecpds
+            defstatus complete
+            trigger ./927 eq complete
+            trigger -a ../06/ecpds eq complete
+            edit ECPDS_AT '12:00'
+            edit DOM 'francecep'
+            label scheduled ""
+        endfamily
+        family 39
+          edit ALADIN_STEP '39'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_FRA%'
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            inlimit /ealadin/limits:927
+            meter step -1 60 60
+          task ecpds
+            defstatus complete
+            trigger ./927 eq complete
+            trigger -a ../06/ecpds eq complete
+            edit ECPDS_AT '12:00'
+            edit DOM 'francecep'
+            label scheduled ""
+        endfamily
+        family 42
+          edit ALADIN_STEP '42'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_FRA%'
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            inlimit /ealadin/limits:927
+            meter step -1 60 60
+          task ecpds
+            defstatus complete
+            trigger ./927 eq complete
+            trigger -a ../06/ecpds eq complete
+            edit ECPDS_AT '12:00'
+            edit DOM 'francecep'
+            label scheduled ""
+        endfamily
+        family 45
+          edit ALADIN_STEP '45'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_FRA%'
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            inlimit /ealadin/limits:927
+            meter step -1 60 60
+          task ecpds
+            defstatus complete
+            trigger ./927 eq complete
+            trigger -a ../06/ecpds eq complete
+            edit ECPDS_AT '12:00'
+            edit DOM 'francecep'
+            label scheduled ""
+        endfamily
+        family 48
+          edit ALADIN_STEP '48'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_FRA%'
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            inlimit /ealadin/limits:927
+            meter step -1 60 60
+          task ecpds
+            defstatus complete
+            trigger ./927 eq complete
+            trigger -a ../06/ecpds eq complete
+            edit ECPDS_AT '12:00'
+            edit DOM 'francecep'
+            label scheduled ""
+        endfamily
+        family 51
+          edit ALADIN_STEP '51'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_FRA%'
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            inlimit /ealadin/limits:927
+            meter step -1 60 60
+          task ecpds
+            defstatus complete
+            trigger ./927 eq complete
+            trigger -a ../06/ecpds eq complete
+            edit ECPDS_AT '12:00'
+            edit DOM 'francecep'
+            label scheduled ""
+        endfamily
+        family 54
+          edit ALADIN_STEP '54'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_FRA%'
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            inlimit /ealadin/limits:927
+            meter step -1 60 60
+          task ecpds
+            defstatus complete
+            trigger ./927 eq complete
+            trigger -a ../06/ecpds eq complete
+            edit ECPDS_AT '12:00'
+            edit DOM 'francecep'
+            label scheduled ""
+        endfamily
+        family 57
+          edit ALADIN_STEP '57'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_FRA%'
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            inlimit /ealadin/limits:927
+            meter step -1 60 60
+          task ecpds
+            defstatus complete
+            trigger ./927 eq complete
+            trigger -a ../06/ecpds eq complete
+            edit ECPDS_AT '12:00'
+            edit DOM 'francecep'
+            label scheduled ""
+        endfamily
+      endfamily
+      family prod
+        defstatus complete
+        trigger prl eq complete
+        edit ECF_URLBASE 'http://diss.ecmwf.int/do/monitoring/arrival'
+        edit TO_ECFS 'false'
+        edit ECPDS_AT '12:00'
+        limit mutex 1
+        inlimit prod:mutex
+        family fra
+          edit DESTINATION 'FRA'
+          edit ECF_URL 'FRA/ALADIN/06'
+          task ecpds
+            edit ECPDS_STREAM 'JSN2'
+            edit ECPDS_OPER 'false'
+            edit CALL_ECPDS 'false'
+            edit TO_ECPDS 'false'
+            label scheduled ""
+        endfamily
+      endfamily
+    endfamily
+    task logfilestore
+      edit LOGSTOECFS 'no'
+      edit MOVE_TO_ECFS 'yes'
+      edit KEEPLOGS 'no'
+      edit QUEUE 'emos'
+      edit QUEUE_EPILOG 'emos-exp'
+      edit WSHOST 'localhost'
+      edit ECFCMD 'smssubmit %USER% %WSHOST% %ECFJOB% %ECFJOBOUT%'
+      edit ECFKILL 'smskill %USER% %WSHOST% %ECFRID% %ECFJOB% %ECFJOBOUT%'
+      edit ECFSTATUSCMD '/home/ma/emos/bin/smsstatus %USER% %WSHOST% %ECFRID% %ECFJOB%'
+      edit LOGDIR '/vol/emos_nc/output'
+      edit ECFOUT '/vol/emos_nc/output'
+    task logfiles
+      trigger ./12==complete and ./18==complete and ./00==complete and ./06==complete and ./logfilestore==complete
+      edit MOVE_TO_ECFS 'no'
+      edit QUEUE 'emos'
+      edit QUEUE_EPILOG 'emos-exp'
+      edit WSHOST 'localhost'
+      edit ECFCMD 'smssubmit %USER% %WSHOST% %ECFJOB% %ECFJOBOUT%'
+      edit ECFKILL 'smskill %USER% %WSHOST% %ECFRID% %ECFJOB% %ECFJOBOUT%'
+      edit ECFSTATUSCMD '/home/ma/emos/bin/smsstatus %USER% %WSHOST% %ECFRID% %ECFJOB%'
+      edit LOGDIR '/vol/emos_nc/output'
+      edit ECFOUT '/vol/emos_nc/output'
+      edit ACCOUNT 'oesu'
+      time 12:30
+  endfamily
+  family lbc
+    repeat date YMD 20100607 20201212 1
+    edit LOGTASK 'lbc'
+    family 12bc
+      task clean
+        edit ACCOUNT '%ACCOUNT_LBC%'
+        edit NB_TASKS '%NB_TASKS_LBC%'
+        edit STREAM 'oper'
+        edit EMOS_BASE '1'
+        inlimit /ealadin/limits:lbc
+      family ref
+        defstatus complete
+        complete /o/main:YMD gt /ealadin/lbc:YMD
+        edit EMOS_BASE '1'
+        task external
+          defstatus complete
+          complete /o/main/12bc/fc eq complete or /o/main/12bc/fc/model:step gt 72
+          trigger 0==1
+        family timed
+          complete /ealadin:REAL_TIME eq 0
+          time 18:06
+          task dummy
+            complete 1==1
+        endfamily
+      endfamily
+      family prl
+        trigger ref eq complete
+        family 00
+          edit ALADIN_STEP '00'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_LBC%'
+            meter step -1 72 72
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            meter step -1 72 72
+        endfamily
+        family 03
+          edit ALADIN_STEP '03'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_LBC%'
+            meter step -1 72 72
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            meter step -1 72 72
+        endfamily
+        family 06
+          edit ALADIN_STEP '06'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_LBC%'
+            meter step -1 72 72
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            meter step -1 72 72
+        endfamily
+        family 09
+          edit ALADIN_STEP '09'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_LBC%'
+            meter step -1 72 72
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            meter step -1 72 72
+        endfamily
+        family 12
+          edit ALADIN_STEP '12'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_LBC%'
+            meter step -1 72 72
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            meter step -1 72 72
+        endfamily
+        family 15
+          edit ALADIN_STEP '15'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_LBC%'
+            meter step -1 72 72
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            meter step -1 72 72
+        endfamily
+        family 18
+          edit ALADIN_STEP '18'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_LBC%'
+            meter step -1 72 72
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            meter step -1 72 72
+        endfamily
+        family 21
+          edit ALADIN_STEP '21'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_LBC%'
+            meter step -1 72 72
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            meter step -1 72 72
+        endfamily
+        family 24
+          edit ALADIN_STEP '24'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_LBC%'
+            meter step -1 72 72
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            meter step -1 72 72
+        endfamily
+        family 27
+          edit ALADIN_STEP '27'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_LBC%'
+            meter step -1 72 72
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            meter step -1 72 72
+        endfamily
+        family 30
+          edit ALADIN_STEP '30'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_LBC%'
+            meter step -1 72 72
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            meter step -1 72 72
+        endfamily
+        family 33
+          edit ALADIN_STEP '33'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_LBC%'
+            meter step -1 72 72
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            meter step -1 72 72
+        endfamily
+        family 36
+          edit ALADIN_STEP '36'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_LBC%'
+            meter step -1 72 72
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            meter step -1 72 72
+        endfamily
+        family 39
+          edit ALADIN_STEP '39'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_LBC%'
+            meter step -1 72 72
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            meter step -1 72 72
+        endfamily
+        family 42
+          edit ALADIN_STEP '42'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_LBC%'
+            meter step -1 72 72
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            meter step -1 72 72
+        endfamily
+        family 45
+          edit ALADIN_STEP '45'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_LBC%'
+            meter step -1 72 72
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            meter step -1 72 72
+        endfamily
+        family 48
+          edit ALADIN_STEP '48'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_LBC%'
+            meter step -1 72 72
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            meter step -1 72 72
+        endfamily
+        family 51
+          edit ALADIN_STEP '51'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_LBC%'
+            meter step -1 72 72
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            meter step -1 72 72
+        endfamily
+        family 54
+          edit ALADIN_STEP '54'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_LBC%'
+            meter step -1 72 72
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            meter step -1 72 72
+        endfamily
+        family 57
+          edit ALADIN_STEP '57'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_LBC%'
+            meter step -1 72 72
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            meter step -1 72 72
+        endfamily
+        family 60
+          edit ALADIN_STEP '60'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_LBC%'
+            meter step -1 72 72
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            meter step -1 72 72
+        endfamily
+        family 63
+          edit ALADIN_STEP '63'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_LBC%'
+            meter step -1 72 72
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            meter step -1 72 72
+        endfamily
+        family 66
+          edit ALADIN_STEP '66'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_LBC%'
+            meter step -1 72 72
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            meter step -1 72 72
+        endfamily
+        family 69
+          edit ALADIN_STEP '69'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_LBC%'
+            meter step -1 72 72
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            meter step -1 72 72
+        endfamily
+      endfamily
+      family prod
+        defstatus complete
+        trigger prl eq complete
+        edit ECF_URLBASE 'http://diss.ecmwf.int/do/monitoring/arrival'
+        edit TO_ECFS 'false'
+        edit ECPDS_AT '18:06'
+        limit mutex 1
+        inlimit prod:mutex
+        family hun
+          edit DESTINATION 'HUN'
+          edit ECF_URL 'HUN/ALADIN/1'
+          task ecpds
+            label scheduled ""
+        endfamily
+        family czm
+          edit DESTINATION 'CZM'
+          edit ECF_URL 'CZM/ALADIN/1'
+          task ecpds
+            label scheduled ""
+        endfamily
+        family sli
+          edit DESTINATION 'SLI'
+          edit ECF_URL 'SLI/ALADIN/1'
+          task ecpds
+            label scheduled ""
+        endfamily
+        family aus
+          edit DESTINATION 'AUS'
+          edit ECF_URL 'AUS/ALADIN/1'
+          task ecpds
+            edit ECPDS_OPER 'false'
+            label scheduled ""
+        endfamily
+      endfamily
+    endfamily
+    family 18bc
+      task clean
+        edit ACCOUNT '%ACCOUNT_LBC%'
+        edit NB_TASKS '%NB_TASKS_LBC%'
+        edit STREAM 'SCDA'
+        edit EMOS_BASE '1'
+        inlimit /ealadin/limits:lbc
+      family ref
+        defstatus complete
+        complete /o/main:YMD gt /ealadin/lbc:YMD
+        edit EMOS_BASE '1'
+        task external
+          defstatus complete
+          complete /o/main/18bc/fc eq complete or /o/main/18bc/fc/model:step gt 72
+          trigger 0==1
+        family timed
+          complete /ealadin:REAL_TIME eq 0
+          time 00:06
+          task dummy
+            complete 1==1
+        endfamily
+      endfamily
+      family prl
+        trigger ref eq complete
+        family 00
+          edit ALADIN_STEP '00'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_LBC%'
+            meter step -1 72 72
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            meter step -1 72 72
+        endfamily
+        family 03
+          edit ALADIN_STEP '03'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_LBC%'
+            meter step -1 72 72
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            meter step -1 72 72
+        endfamily
+        family 06
+          edit ALADIN_STEP '06'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_LBC%'
+            meter step -1 72 72
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            meter step -1 72 72
+        endfamily
+        family 09
+          edit ALADIN_STEP '09'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_LBC%'
+            meter step -1 72 72
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            meter step -1 72 72
+        endfamily
+        family 12
+          edit ALADIN_STEP '12'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_LBC%'
+            meter step -1 72 72
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            meter step -1 72 72
+        endfamily
+        family 15
+          edit ALADIN_STEP '15'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_LBC%'
+            meter step -1 72 72
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            meter step -1 72 72
+        endfamily
+        family 18
+          edit ALADIN_STEP '18'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_LBC%'
+            meter step -1 72 72
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            meter step -1 72 72
+        endfamily
+        family 21
+          edit ALADIN_STEP '21'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_LBC%'
+            meter step -1 72 72
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            meter step -1 72 72
+        endfamily
+        family 24
+          edit ALADIN_STEP '24'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_LBC%'
+            meter step -1 72 72
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            meter step -1 72 72
+        endfamily
+        family 27
+          edit ALADIN_STEP '27'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_LBC%'
+            meter step -1 72 72
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            meter step -1 72 72
+        endfamily
+        family 30
+          edit ALADIN_STEP '30'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_LBC%'
+            meter step -1 72 72
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            meter step -1 72 72
+        endfamily
+        family 33
+          edit ALADIN_STEP '33'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_LBC%'
+            meter step -1 72 72
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            meter step -1 72 72
+        endfamily
+        family 36
+          edit ALADIN_STEP '36'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_LBC%'
+            meter step -1 72 72
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            meter step -1 72 72
+        endfamily
+        family 39
+          edit ALADIN_STEP '39'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_LBC%'
+            meter step -1 72 72
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            meter step -1 72 72
+        endfamily
+        family 42
+          edit ALADIN_STEP '42'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_LBC%'
+            meter step -1 72 72
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            meter step -1 72 72
+        endfamily
+        family 45
+          edit ALADIN_STEP '45'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_LBC%'
+            meter step -1 72 72
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            meter step -1 72 72
+        endfamily
+        family 48
+          edit ALADIN_STEP '48'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_LBC%'
+            meter step -1 72 72
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            meter step -1 72 72
+        endfamily
+        family 51
+          edit ALADIN_STEP '51'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_LBC%'
+            meter step -1 72 72
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            meter step -1 72 72
+        endfamily
+        family 54
+          edit ALADIN_STEP '54'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_LBC%'
+            meter step -1 72 72
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            meter step -1 72 72
+        endfamily
+        family 57
+          edit ALADIN_STEP '57'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_LBC%'
+            meter step -1 72 72
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            meter step -1 72 72
+        endfamily
+        family 60
+          edit ALADIN_STEP '60'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_LBC%'
+            meter step -1 72 72
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            meter step -1 72 72
+        endfamily
+        family 63
+          edit ALADIN_STEP '63'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_LBC%'
+            meter step -1 72 72
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            meter step -1 72 72
+        endfamily
+        family 66
+          edit ALADIN_STEP '66'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_LBC%'
+            meter step -1 72 72
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            meter step -1 72 72
+        endfamily
+        family 69
+          edit ALADIN_STEP '69'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_LBC%'
+            meter step -1 72 72
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            meter step -1 72 72
+        endfamily
+      endfamily
+      family prod
+        defstatus complete
+        trigger prl eq complete
+        edit ECF_URLBASE 'http://diss.ecmwf.int/do/monitoring/arrival'
+        edit TO_ECFS 'false'
+        edit ECPDS_AT '00:06'
+        limit mutex 1
+        inlimit prod:mutex
+        family hun
+          edit DESTINATION 'HUN'
+          edit ECF_URL 'HUN/ALADIN/1'
+          task ecpds
+            label scheduled ""
+        endfamily
+        family czm
+          edit DESTINATION 'CZM'
+          edit ECF_URL 'CZM/ALADIN/1'
+          task ecpds
+            label scheduled ""
+        endfamily
+        family sli
+          edit DESTINATION 'SLI'
+          edit ECF_URL 'SLI/ALADIN/1'
+          task ecpds
+            label scheduled ""
+        endfamily
+        family aus
+          edit DESTINATION 'AUS'
+          edit ECF_URL 'AUS/ALADIN/1'
+          task ecpds
+            edit ECPDS_OPER 'false'
+            label scheduled ""
+        endfamily
+      endfamily
+    endfamily
+    family 00bc
+      task clean
+        edit ACCOUNT '%ACCOUNT_LBC%'
+        edit NB_TASKS '%NB_TASKS_LBC%'
+        edit DELTA_DAY '1'
+        edit STREAM 'oper'
+        edit EMOS_BASE '0'
+        inlimit /ealadin/limits:lbc
+      family ref
+        defstatus complete
+        complete /o/main:YMD gt /ealadin/lbc:YMD
+        edit EMOS_BASE '0'
+        task external
+          defstatus complete
+          complete /o/main/00bc/fc eq complete or /o/main/00bc/fc/model:step gt 72
+          trigger 0==1
+        family timed
+          complete /ealadin:REAL_TIME eq 0
+          time 06:06
+          task dummy
+            complete 1==1
+        endfamily
+      endfamily
+      family prl
+        trigger ref eq complete
+        family 00
+          edit ALADIN_STEP '00'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_LBC%'
+            meter step -1 72 72
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            meter step -1 72 72
+        endfamily
+        family 03
+          edit ALADIN_STEP '03'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_LBC%'
+            meter step -1 72 72
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            meter step -1 72 72
+        endfamily
+        family 06
+          edit ALADIN_STEP '06'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_LBC%'
+            meter step -1 72 72
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            meter step -1 72 72
+        endfamily
+        family 09
+          edit ALADIN_STEP '09'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_LBC%'
+            meter step -1 72 72
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            meter step -1 72 72
+        endfamily
+        family 12
+          edit ALADIN_STEP '12'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_LBC%'
+            meter step -1 72 72
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            meter step -1 72 72
+        endfamily
+        family 15
+          edit ALADIN_STEP '15'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_LBC%'
+            meter step -1 72 72
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            meter step -1 72 72
+        endfamily
+        family 18
+          edit ALADIN_STEP '18'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_LBC%'
+            meter step -1 72 72
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            meter step -1 72 72
+        endfamily
+        family 21
+          edit ALADIN_STEP '21'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_LBC%'
+            meter step -1 72 72
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            meter step -1 72 72
+        endfamily
+        family 24
+          edit ALADIN_STEP '24'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_LBC%'
+            meter step -1 72 72
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            meter step -1 72 72
+        endfamily
+        family 27
+          edit ALADIN_STEP '27'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_LBC%'
+            meter step -1 72 72
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            meter step -1 72 72
+        endfamily
+        family 30
+          edit ALADIN_STEP '30'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_LBC%'
+            meter step -1 72 72
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            meter step -1 72 72
+        endfamily
+        family 33
+          edit ALADIN_STEP '33'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_LBC%'
+            meter step -1 72 72
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            meter step -1 72 72
+        endfamily
+        family 36
+          edit ALADIN_STEP '36'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_LBC%'
+            meter step -1 72 72
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            meter step -1 72 72
+        endfamily
+        family 39
+          edit ALADIN_STEP '39'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_LBC%'
+            meter step -1 72 72
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            meter step -1 72 72
+        endfamily
+        family 42
+          edit ALADIN_STEP '42'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_LBC%'
+            meter step -1 72 72
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            meter step -1 72 72
+        endfamily
+        family 45
+          edit ALADIN_STEP '45'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_LBC%'
+            meter step -1 72 72
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            meter step -1 72 72
+        endfamily
+        family 48
+          edit ALADIN_STEP '48'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_LBC%'
+            meter step -1 72 72
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            meter step -1 72 72
+        endfamily
+        family 51
+          edit ALADIN_STEP '51'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_LBC%'
+            meter step -1 72 72
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            meter step -1 72 72
+        endfamily
+        family 54
+          edit ALADIN_STEP '54'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_LBC%'
+            meter step -1 72 72
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            meter step -1 72 72
+        endfamily
+        family 57
+          edit ALADIN_STEP '57'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_LBC%'
+            meter step -1 72 72
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            meter step -1 72 72
+        endfamily
+        family 60
+          edit ALADIN_STEP '60'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_LBC%'
+            meter step -1 72 72
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            meter step -1 72 72
+        endfamily
+        family 63
+          edit ALADIN_STEP '63'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_LBC%'
+            meter step -1 72 72
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            meter step -1 72 72
+        endfamily
+        family 66
+          edit ALADIN_STEP '66'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_LBC%'
+            meter step -1 72 72
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            meter step -1 72 72
+        endfamily
+        family 69
+          edit ALADIN_STEP '69'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_LBC%'
+            meter step -1 72 72
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            meter step -1 72 72
+        endfamily
+      endfamily
+      family prod
+        defstatus complete
+        trigger prl eq complete
+        edit ECF_URLBASE 'http://diss.ecmwf.int/do/monitoring/arrival'
+        edit TO_ECFS 'false'
+        edit ECPDS_AT '06:06'
+        limit mutex 1
+        inlimit prod:mutex
+        family hun
+          edit DESTINATION 'HUN'
+          edit ECF_URL 'HUN/ALADIN/0'
+          task ecpds
+            label scheduled ""
+        endfamily
+        family czm
+          edit DESTINATION 'CZM'
+          edit ECF_URL 'CZM/ALADIN/0'
+          task ecpds
+            label scheduled ""
+        endfamily
+        family sli
+          edit DESTINATION 'SLI'
+          edit ECF_URL 'SLI/ALADIN/0'
+          task ecpds
+            label scheduled ""
+        endfamily
+        family aus
+          edit DESTINATION 'AUS'
+          edit ECF_URL 'AUS/ALADIN/0'
+          task ecpds
+            edit ECPDS_OPER 'false'
+            label scheduled ""
+        endfamily
+      endfamily
+    endfamily
+    family 06bc
+      task clean
+        edit ACCOUNT '%ACCOUNT_LBC%'
+        edit NB_TASKS '%NB_TASKS_LBC%'
+        edit DELTA_DAY '1'
+        edit STREAM 'SCDA'
+        edit EMOS_BASE '0'
+        inlimit /ealadin/limits:lbc
+      family ref
+        defstatus complete
+        complete /o/main:YMD gt /ealadin/lbc:YMD
+        edit EMOS_BASE '0'
+        task external
+          defstatus complete
+          complete /o/main/06bc/fc eq complete or /o/main/06bc/fc/model:step gt 72
+          trigger 0==1
+        family timed
+          complete /ealadin:REAL_TIME eq 0
+          time 12:06
+          task dummy
+            complete 1==1
+        endfamily
+      endfamily
+      family prl
+        trigger ref eq complete
+        family 00
+          edit ALADIN_STEP '00'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_LBC%'
+            meter step -1 72 72
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            meter step -1 72 72
+        endfamily
+        family 03
+          edit ALADIN_STEP '03'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_LBC%'
+            meter step -1 72 72
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            meter step -1 72 72
+        endfamily
+        family 06
+          edit ALADIN_STEP '06'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_LBC%'
+            meter step -1 72 72
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            meter step -1 72 72
+        endfamily
+        family 09
+          edit ALADIN_STEP '09'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_LBC%'
+            meter step -1 72 72
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            meter step -1 72 72
+        endfamily
+        family 12
+          edit ALADIN_STEP '12'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_LBC%'
+            meter step -1 72 72
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            meter step -1 72 72
+        endfamily
+        family 15
+          edit ALADIN_STEP '15'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_LBC%'
+            meter step -1 72 72
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            meter step -1 72 72
+        endfamily
+        family 18
+          edit ALADIN_STEP '18'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_LBC%'
+            meter step -1 72 72
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            meter step -1 72 72
+        endfamily
+        family 21
+          edit ALADIN_STEP '21'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_LBC%'
+            meter step -1 72 72
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            meter step -1 72 72
+        endfamily
+        family 24
+          edit ALADIN_STEP '24'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_LBC%'
+            meter step -1 72 72
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            meter step -1 72 72
+        endfamily
+        family 27
+          edit ALADIN_STEP '27'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_LBC%'
+            meter step -1 72 72
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            meter step -1 72 72
+        endfamily
+        family 30
+          edit ALADIN_STEP '30'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_LBC%'
+            meter step -1 72 72
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            meter step -1 72 72
+        endfamily
+        family 33
+          edit ALADIN_STEP '33'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_LBC%'
+            meter step -1 72 72
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            meter step -1 72 72
+        endfamily
+        family 36
+          edit ALADIN_STEP '36'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_LBC%'
+            meter step -1 72 72
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            meter step -1 72 72
+        endfamily
+        family 39
+          edit ALADIN_STEP '39'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_LBC%'
+            meter step -1 72 72
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            meter step -1 72 72
+        endfamily
+        family 42
+          edit ALADIN_STEP '42'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_LBC%'
+            meter step -1 72 72
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            meter step -1 72 72
+        endfamily
+        family 45
+          edit ALADIN_STEP '45'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_LBC%'
+            meter step -1 72 72
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            meter step -1 72 72
+        endfamily
+        family 48
+          edit ALADIN_STEP '48'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_LBC%'
+            meter step -1 72 72
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            meter step -1 72 72
+        endfamily
+        family 51
+          edit ALADIN_STEP '51'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_LBC%'
+            meter step -1 72 72
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            meter step -1 72 72
+        endfamily
+        family 54
+          edit ALADIN_STEP '54'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_LBC%'
+            meter step -1 72 72
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            meter step -1 72 72
+        endfamily
+        family 57
+          edit ALADIN_STEP '57'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_LBC%'
+            meter step -1 72 72
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            meter step -1 72 72
+        endfamily
+        family 60
+          edit ALADIN_STEP '60'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_LBC%'
+            meter step -1 72 72
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            meter step -1 72 72
+        endfamily
+        family 63
+          edit ALADIN_STEP '63'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_LBC%'
+            meter step -1 72 72
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            meter step -1 72 72
+        endfamily
+        family 66
+          edit ALADIN_STEP '66'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_LBC%'
+            meter step -1 72 72
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            meter step -1 72 72
+        endfamily
+        family 69
+          edit ALADIN_STEP '69'
+          task init
+            inlimit /ealadin/limits:init
+          task 901
+            trigger init ==complete
+            edit THREADS '%THREADS_LBC%'
+            meter step -1 72 72
+          task 927
+            trigger ./901==complete
+            edit DOM 'francecep'
+            meter step -1 72 72
+        endfamily
+      endfamily
+      family prod
+        defstatus complete
+        trigger prl eq complete
+        edit ECF_URLBASE 'http://diss.ecmwf.int/do/monitoring/arrival'
+        edit TO_ECFS 'false'
+        edit ECPDS_AT '12:06'
+        limit mutex 1
+        inlimit prod:mutex
+        family hun
+          edit DESTINATION 'HUN'
+          edit ECF_URL 'HUN/ALADIN/0'
+          task ecpds
+            label scheduled ""
+        endfamily
+        family czm
+          edit DESTINATION 'CZM'
+          edit ECF_URL 'CZM/ALADIN/0'
+          task ecpds
+            label scheduled ""
+        endfamily
+        family sli
+          edit DESTINATION 'SLI'
+          edit ECF_URL 'SLI/ALADIN/0'
+          task ecpds
+            label scheduled ""
+        endfamily
+        family aus
+          edit DESTINATION 'AUS'
+          edit ECF_URL 'AUS/ALADIN/0'
+          task ecpds
+            edit ECPDS_OPER 'false'
+            label scheduled ""
+        endfamily
+      endfamily
+    endfamily
+    task logfilestore
+      edit LOGSTOECFS 'no'
+      edit MOVE_TO_ECFS 'yes'
+      edit KEEPLOGS 'no'
+      edit QUEUE 'emos'
+      edit QUEUE_EPILOG 'emos-exp'
+      edit WSHOST 'localhost'
+      edit ECFCMD 'smssubmit %USER% %WSHOST% %ECFJOB% %ECFJOBOUT%'
+      edit ECFKILL 'smskill %USER% %WSHOST% %ECFRID% %ECFJOB% %ECFJOBOUT%'
+      edit ECFSTATUSCMD '/home/ma/emos/bin/smsstatus %USER% %WSHOST% %ECFRID% %ECFJOB%'
+      edit LOGDIR '/vol/emos_nc/output'
+      edit ECFOUT '/vol/emos_nc/output'
+    task logfiles
+      trigger ./12bc==complete and ./18bc==complete and ./00bc==complete and ./06bc==complete and ./logfilestore==complete
+      edit MOVE_TO_ECFS 'no'
+      edit QUEUE 'emos'
+      edit QUEUE_EPILOG 'emos-exp'
+      edit WSHOST 'localhost'
+      edit ECFCMD 'smssubmit %USER% %WSHOST% %ECFJOB% %ECFJOBOUT%'
+      edit ECFKILL 'smskill %USER% %WSHOST% %ECFRID% %ECFJOB% %ECFJOBOUT%'
+      edit ECFSTATUSCMD '/home/ma/emos/bin/smsstatus %USER% %WSHOST% %ECFRID% %ECFJOB%'
+      edit LOGDIR '/vol/emos_nc/output'
+      edit ECFOUT '/vol/emos_nc/output'
+      edit ACCOUNT 'oesu'
+      time 12:30
+  endfamily
+  family lag
+    repeat date YMD 20100607 20201212 1
+    edit LOGTASK 'lag'
+    family 12
+      task clean
+      task ecpds
+        trigger /ealadin/main/12 eq complete
+        trigger -a /ealadin/main:YMD eq /ealadin/lag:YMD
+        trigger -a /ealadin/main:YMD gt /ealadin/lag:YMD
+        edit ECF_URLBASE 'http://diss.ecmwf.int/do/monitoring/arrival'
+        edit ECPDS_STREAM 'JSN2'
+        edit DESTINATION 'FRA'
+        edit CALL_ECPDS 'false'
+        edit ECPDS_AT '12:06'
+        edit ECPDS_OPER 'false'
+        edit TO_ECFS 'true'
+        edit ECF_URL ' FRA/ALADIN/12'
+        edit TO_ECPDS 'false'
+        edit ACCOUNT '%ACCOUNT_FRA%'
+        edit NB_TASKS '%NB_TASKS_FRA%'
+        edit STREAM 'oper'
+        edit EMOS_BASE '1'
+        inlimit /ealadin/limits:main
+        label scheduled ""
+    endfamily
+    family 18
+      task clean
+      task ecpds
+        trigger /ealadin/main/18 eq complete
+        trigger -a /ealadin/main:YMD eq /ealadin/lag:YMD
+        trigger -a /ealadin/main:YMD gt /ealadin/lag:YMD
+        edit ECF_URLBASE 'http://diss.ecmwf.int/do/monitoring/arrival'
+        edit ECPDS_STREAM 'JSN2'
+        edit DESTINATION 'FRA'
+        edit CALL_ECPDS 'false'
+        edit ECPDS_AT '17:58'
+        edit ECPDS_OPER 'false'
+        edit TO_ECFS 'true'
+        edit ECF_URL ' FRA/ALADIN/18'
+        edit TO_ECPDS 'false'
+        edit ACCOUNT '%ACCOUNT_FRA%'
+        edit NB_TASKS '%NB_TASKS_FRA%'
+        edit STREAM 'scda'
+        edit EMOS_BASE '1'
+        inlimit /ealadin/limits:main
+        label scheduled ""
+    endfamily
+    family 00
+      task clean
+      task ecpds
+        trigger /ealadin/main/00 eq complete
+        trigger -a /ealadin/main:YMD eq /ealadin/lag:YMD
+        trigger -a /ealadin/main:YMD gt /ealadin/lag:YMD
+        edit ECF_URLBASE 'http://diss.ecmwf.int/do/monitoring/arrival'
+        edit ECPDS_STREAM 'JSN2'
+        edit DESTINATION 'FRA'
+        edit CALL_ECPDS 'false'
+        edit ECPDS_AT '00:00'
+        edit ECPDS_OPER 'false'
+        edit TO_ECFS 'true'
+        edit ECF_URL ' FRA/ALADIN/00'
+        edit TO_ECPDS 'false'
+        edit ACCOUNT '%ACCOUNT_FRA%'
+        edit NB_TASKS '%NB_TASKS_FRA%'
+        edit DELTA_DAY '1'
+        edit STREAM 'oper'
+        edit EMOS_BASE '0'
+        inlimit /ealadin/limits:main
+        label scheduled ""
+    endfamily
+    family 06
+      task clean
+      task ecpds
+        trigger /ealadin/main/06 eq complete
+        trigger -a /ealadin/main:YMD eq /ealadin/lag:YMD
+        trigger -a /ealadin/main:YMD gt /ealadin/lag:YMD
+        edit ECF_URLBASE 'http://diss.ecmwf.int/do/monitoring/arrival'
+        edit ECPDS_STREAM 'JSN2'
+        edit DESTINATION 'FRA'
+        edit CALL_ECPDS 'false'
+        edit ECPDS_AT '06:01'
+        edit ECPDS_OPER 'false'
+        edit TO_ECFS 'true'
+        edit ECF_URL ' FRA/ALADIN/06'
+        edit TO_ECPDS 'false'
+        edit ACCOUNT '%ACCOUNT_FRA%'
+        edit NB_TASKS '%NB_TASKS_FRA%'
+        edit DELTA_DAY '1'
+        edit STREAM 'scda'
+        edit EMOS_BASE '0'
+        inlimit /ealadin/limits:main
+        label scheduled ""
+    endfamily
+    task logfilestore
+      edit LOGSTOECFS 'no'
+      edit MOVE_TO_ECFS 'yes'
+      edit KEEPLOGS 'no'
+      edit QUEUE 'emos'
+      edit QUEUE_EPILOG 'emos-exp'
+      edit WSHOST 'localhost'
+      edit ECFCMD 'smssubmit %USER% %WSHOST% %ECFJOB% %ECFJOBOUT%'
+      edit ECFKILL 'smskill %USER% %WSHOST% %ECFRID% %ECFJOB% %ECFJOBOUT%'
+      edit ECFSTATUSCMD '/home/ma/emos/bin/smsstatus %USER% %WSHOST% %ECFRID% %ECFJOB%'
+      edit LOGDIR '/vol/emos_nc/output'
+      edit ECFOUT '/vol/emos_nc/output'
+    task logfiles
+      trigger ./12==complete and ./18==complete and ./00==complete and ./06==complete and ./logfilestore==complete
+      edit MOVE_TO_ECFS 'no'
+      edit QUEUE 'emos'
+      edit QUEUE_EPILOG 'emos-exp'
+      edit WSHOST 'localhost'
+      edit ECFCMD 'smssubmit %USER% %WSHOST% %ECFJOB% %ECFJOBOUT%'
+      edit ECFKILL 'smskill %USER% %WSHOST% %ECFRID% %ECFJOB% %ECFJOBOUT%'
+      edit ECFSTATUSCMD '/home/ma/emos/bin/smsstatus %USER% %WSHOST% %ECFRID% %ECFJOB%'
+      edit LOGDIR '/vol/emos_nc/output'
+      edit ECFOUT '/vol/emos_nc/output'
+      edit ACCOUNT 'oesu'
+      time 12:30
+  endfamily
+endsuite

@@ -1,0 +1,2562 @@
+#============================================================
+extern an
+extern an
+extern fc
+extern fc
+extern eps_sv
+extern eps_sv
+extern eps_fc
+extern eps_fc
+extern eps_varfc
+extern eps_varfc
+extern oceatm
+extern oceatm
+extern oce
+extern oce
+extern fpos
+extern fpos
+extern sens
+extern sens
+extern wam
+extern wam
+extern oc
+extern oc
+extern climplot
+extern climplot
+extern an
+extern an
+extern fc
+extern fc
+extern eps_sv
+extern eps_sv
+extern eps_fc
+extern eps_fc
+extern eps_varfc
+extern eps_varfc
+extern oceatm
+extern oceatm
+extern oce
+extern oce
+extern fpos
+extern fpos
+extern sens
+extern sens
+extern wam
+extern wam
+extern oc
+extern oc
+extern climplot
+extern climplot
+suite ptb
+  clock hybrid 0 # 03.11.2008 16:55
+  family a020
+    edit SMSTRIES '1'
+    edit SMSFILES '/vol/msverify/sms/ptb/a020'
+    edit SMSINCLUDE '/vol/msverify/sms/ptb/a020/include'
+    edit SMSHOME '/vol/msverify/sms'
+    edit SMSOUT '/vol/msverify/sms'
+    edit SMSLOGPORT '9314'
+    edit SMSLOGHOST 'hpce-batch'
+    edit FSFAMILY ''
+    edit DELTA_DAY '0'
+    edit HOUR ''
+    edit MEMBER '0'
+    edit NPROCA '1'
+    edit NPROCB '1'
+    edit THREADS '1'
+    edit BRANCH ''
+    edit PARALLEL '4'
+    edit DEBUG '0'
+    edit PROFILE '0'
+    edit DISPLAY 'define_your_own:0.0'
+    edit QUEUE 'normal'
+    edit SCHOST 'hpce'
+    edit WSHOST 'ecgate'
+    edit LOGHOST 'ecgate'
+    edit EXPVER 'a020'
+    edit OWNER 'ptb'
+    edit USER 'xpt'
+    edit ACCOUNT 'ptearth'
+    edit YMD '19900101'
+    edit SECS '0'
+    edit SMSCMD 'smssubmit.x %SMSJOB% %SCHOST% %USER%'
+    edit SMSKILL 'smskill %USER% %SCHOST% %SMSRID% %SMSJOB%'
+    edit SMSSTATUSCMD 'smscheck %SCHOST% %EXPVER% %SMSJOB%'
+    edit LOGDIR '/hpce/rdx_dir/msx'
+    family make
+      edit YMD '19900101'
+      edit HOUR '00'
+      edit FSFAMILY 'make'
+      task setup
+        edit QUEUE 'normal'
+      family libs
+        defstatus complete
+        trigger setup eq complete
+        edit CCSUBDIR '.'
+        task p4setup_ifs
+          edit SMSTRIES '2'
+        task p4diff_ifs
+          trigger p4setup_ifs eq complete
+        family compile
+          trigger p4setup_ifs eq complete
+          family ifsaux
+            defstatus complete
+            task libifsaux
+          endfamily
+          family surf
+            defstatus complete
+            trigger ifsaux eq complete
+            task libsurf
+          endfamily
+          family trans
+            defstatus complete
+            trigger ifsaux eq complete
+            task libtrans
+          endfamily
+          family ifs
+            defstatus complete
+            trigger  ( ifsaux eq complete or ifsaux eq unknown) and  ( trans eq complete or trans eq unknown) and  ( surf eq complete or surf eq unknown)
+            task libifs
+          endfamily
+          family wam
+            defstatus complete
+            trigger ifsaux eq complete
+            task libwam
+          endfamily
+          family odb
+            defstatus complete
+            family compiler
+              task libodbsqlcompiler
+            endfamily
+            family databases
+              trigger compiler eq complete
+              family CCMA
+                task libCCMA
+              endfamily
+              family ECMA
+                task libECMA
+              endfamily
+            endfamily
+            family corelibs
+              trigger ../ifsaux eq complete
+              family odb
+                task libodb
+              endfamily
+              family odbdummy
+                trigger odb/libodb eq complete
+                task libodbdummy
+              endfamily
+              family odbmain
+                trigger odb/libodb eq complete and odbdummy/libodbdummy eq complete and ../../ifs eq complete
+                task libodbmain
+              endfamily
+              family odbport
+                trigger odb/libodb eq complete and odbdummy/libodbdummy eq complete and odbmain/libodbmain eq complete and ../../ifs eq complete
+                task libodbport
+              endfamily
+            endfamily
+          endfamily
+          family ssa
+            defstatus complete
+            trigger ifsaux eq complete and ifs eq complete and odb/corelibs/odb/libodb eq complete
+            task libssa
+          endfamily
+          family obstat
+            defstatus complete
+            trigger ifsaux eq complete and odb/corelibs/odb/libodb eq complete
+            task libobstat
+          endfamily
+          family bl
+            defstatus complete
+            trigger ifsaux eq complete
+            task libbl95
+          endfamily
+          family scat
+            defstatus complete
+            trigger ifsaux eq complete
+            task libscat
+          endfamily
+          family satrad
+            defstatus complete
+            trigger ifsaux eq complete
+            task libsatrad
+          endfamily
+          family aeolus
+            defstatus complete
+            trigger ifsaux eq complete
+            task libaeolus
+          endfamily
+          family prepdata
+            defstatus complete
+            trigger  ( ifsaux eq complete or ifsaux eq unknown) and  ( trans eq complete or trans eq unknown) and  ( ifs eq complete or ifs eq unknown)
+            task libprepdata
+          endfamily
+        endfamily
+      endfamily
+      task links
+        trigger  ( setup eq complete or setup eq unknown) and  ( libs eq complete or libs eq unknown)
+        edit QUEUE 'normal'
+      task logfiles
+        trigger  ( links eq complete or links eq unknown)
+        edit SMSCMD 'smssubmit.x %SMSJOB% %SCHOST% %USER%'
+        edit SMSKILL 'smskill %USER% %SCHOST% %SMSRID% %SMSJOB%'
+        edit SMSSTATUSCMD 'smscheck %SCHOST% %EXPVER% %SMSJOB%'
+        edit LOGDIR '/hpce/rdx_dir/msx'
+    endfamily
+    family coup
+      edit VERSION 'a020'
+      edit STREAM 'MMSF'
+      edit EPSTYPE 'fc'
+      edit EMOS_BASE '00'
+      edit DATEMASK '*.*.*'
+      edit FIRST_DAY '0'
+      edit YMD '19690101'
+      edit USE_YMD 'true'
+      edit FCCHUNK '1'
+      edit OCESUITE '0'
+      edit ORIGIN 'ECMF'
+      edit SMSTRIES '1'
+      edit DELTA_DAY '0'
+      edit USER_PRIORITY '50'
+      edit PRIORITY '50'
+      edit EMOS_TYPE 'fc'
+      edit EMOS_TIME_STEP_H '0000'
+      edit EMOS_STREAM 'DA'
+      edit FSFAMILY 'coup'
+      edit FCNPES '1'
+      edit MEMBER '0'
+      edit COUP 'true'
+      edit RUNBACK '0'
+      edit OCASSIMTOTAL '3'
+      edit OCCONTROLTOTAL '1'
+      edit OCNEWPERTORDER 'yes'
+      edit SMSCMD 'smssubmit.x %SMSJOB% %SCHOST% %USER%'
+      edit SMSKILL 'smskill %USER% %SCHOST% %SMSRID% %SMSJOB%'
+      edit SMSSTATUSCMD 'smscheck %SCHOST% %EXPVER% %SMSJOB%'
+      edit LOGDIR '/hpce/rdx_dir/msx'
+      edit HOUR '00'
+      edit CHUNK '0'
+      edit RUNCOUPLE '0'
+      edit FCLENGTH '0'
+      edit FCGROUP 'fc0'
+      edit OCGROUP 'an0'
+      edit OCTOTAL '3'
+      edit FCTOTAL '1'
+      edit OCSUITENO '1'
+      edit CFCTOTDONE '0'
+      edit FCTOTDONE '0'
+      edit CFCEXTOTDONE '0'
+      edit FCEXTOTDONE '0'
+      family limits
+        defstatus complete
+        limit mars 1
+        limit cpmodel 1
+        limit fdbclean 1
+        limit ws 1
+        limit PIC 6
+      endfamily
+      family make
+        trigger /ptb/a020/make eq complete
+        task setup
+        task links
+          trigger setup eq complete
+        task datalinks
+          trigger links eq complete
+        task ocsetup
+          trigger datalinks eq complete
+        task libsoc
+          trigger ./ocsetup eq complete
+        task oclinks
+          trigger ./libsoc eq complete
+        task prepdata
+          trigger oclinks eq complete
+        task mc_tools
+          trigger prepdata eq complete
+        task sc_tools
+          trigger mc_tools eq complete
+        task tools
+          defstatus complete
+          trigger oclinks eq complete
+          edit SMSCMD 'smssubmit.x %SMSJOB% %WSHOST% %USER%'
+          edit SMSKILL 'smskill %USER% %WSHOST% %SMSRID% %SMSJOB%'
+          edit SMSSTATUSCMD 'smscheck %WSHOST% %EXPVER% %SMSJOB%'
+          edit LOGDIR '/vol/msexplog/outputs'
+          edit QUEUE 'expsms'
+        task octools
+          defstatus complete
+          trigger tools eq complete
+          edit SMSCMD 'smssubmit.x %SMSJOB% %WSHOST% %USER%'
+          edit SMSKILL 'smskill %USER% %WSHOST% %SMSRID% %SMSJOB%'
+          edit SMSSTATUSCMD 'smscheck %WSHOST% %EXPVER% %SMSJOB%'
+          edit LOGDIR '/vol/msexplog/outputs'
+          edit QUEUE 'expsms'
+        task build_seasplot
+          defstatus complete
+          trigger octools eq complete
+          edit SMSCMD 'smssubmit.x %SMSJOB% %WSHOST% %USER%'
+          edit SMSKILL 'smskill %USER% %WSHOST% %SMSRID% %SMSJOB%'
+          edit SMSSTATUSCMD 'smscheck %WSHOST% %EXPVER% %SMSJOB%'
+          edit LOGDIR '/vol/msexplog/outputs'
+          edit QUEUE 'expsms'
+        family couple
+          trigger mc_tools eq complete
+          task ifs
+            trigger ../oclinks eq complete
+          task oasis
+          task wamabs
+        endfamily
+        family const
+          task wconst
+            trigger ../couple eq complete
+        endfamily
+        family control
+          defstatus complete
+          trigger const eq complete
+          edit FSFAMILY 'control'
+          task ocean
+            trigger ../libsoc eq complete
+          task forcing
+            trigger ocean eq complete
+          task getcouple
+            defstatus complete
+            trigger forcing eq complete
+            edit RUNCOUPLE '1'
+            edit FCGROUP 'fc0'
+        endfamily
+        family assim
+          trigger control eq complete and const eq complete
+          edit FSFAMILY 'assim'
+          task ocean
+            trigger ../libsoc eq complete
+          task forcing
+            trigger ocean eq complete
+          task getcouple
+            trigger forcing eq complete
+            edit RUNCOUPLE '1'
+            edit FCGROUP 'fc0'
+        endfamily
+        task logfiles
+          trigger setup eq complete and links eq complete and datalinks eq complete and ocsetup eq complete and libsoc eq complete and oclinks eq complete and tools eq complete and sc_tools eq complete and octools eq complete and build_seasplot eq complete and couple eq complete and const eq complete and control eq complete and assim eq complete
+          edit SMSCMD 'smssubmit.x %SMSJOB% %SCHOST% %USER%'
+          edit SMSKILL 'smskill %USER% %SCHOST% %SMSRID% %SMSJOB%'
+          edit SMSSTATUSCMD 'smscheck %SCHOST% %EXPVER% %SMSJOB%'
+          edit LOGDIR '/hpce/rdx_dir/msx'
+          edit LOGTASK 'make'
+      endfamily
+      family fcdate
+        trigger make eq complete
+        family main
+          repeat enumerated YMD  "19690101" "19690102" # status 19690102
+          edit LOGTASK 'fcdate/main'
+          family control0
+            defstatus complete
+            edit FSFAMILY 'control'
+            edit OCTOTAL '1'
+            edit OCGROUP 'an0'
+            edit FCTOTAL '1'
+            edit RUNCOUPLE '1'
+            edit FCLENGTH '24'
+            edit SUBFSFAMILY '_an0_fc0'
+            edit FCGROUP 'fc0'
+            task getini
+            task inidata
+              trigger getini eq complete
+              edit NPES '12'
+              edit ININPES '12'
+              edit MEM '900'
+              edit THREADS '2'
+              edit CPUTIME '1000'
+            task oceini
+            family eps_sv
+              defstatus complete
+              edit MOFCSV 'true'
+              family svevo
+                edit DELTA_DAY '-2'
+                task getini
+                  edit PRIORITY '40'
+                task inidata
+                  trigger getini eq complete
+                  edit NPES '12'
+                  edit ININPES '12'
+                  edit MEM '900'
+                  edit THREADS '2'
+                  edit CPUTIME '1000'
+                task svnh
+                  trigger inidata eq complete
+                  edit FCLENGTH '48'
+                  edit EPSSVDIAB '0'
+                  edit EPSTROP '0'
+                  edit MEMBER '0'
+                  edit MEM '1600'
+                  edit NPES '8'
+                  edit THREADS '4'
+                  edit CPUTIME '16000'
+                  edit EC_SMT 'no'
+                task svsh
+                  trigger inidata eq complete
+                  edit FCLENGTH '48'
+                  edit EPSSVDIAB '0'
+                  edit EPSTROP '0'
+                  edit MEMBER '0'
+                  edit MEM '1600'
+                  edit NPES '8'
+                  edit THREADS '4'
+                  edit CPUTIME '16000'
+                  edit EC_SMT 'no'
+              endfamily
+              family svini
+                edit DELTA_DAY '0'
+                task getini
+                  trigger ../svevo eq complete
+                  edit PRIORITY '40'
+                task inidata
+                  trigger getini eq complete
+                  edit NPES '12'
+                  edit ININPES '12'
+                  edit MEM '900'
+                  edit THREADS '2'
+                  edit CPUTIME '1000'
+                task svnh
+                  trigger inidata eq complete
+                  edit FCLENGTH '48'
+                  edit EPSSVDIAB '0'
+                  edit EPSTROP '0'
+                  edit MEMBER '0'
+                  edit MEM '1600'
+                  edit NPES '8'
+                  edit THREADS '4'
+                  edit CPUTIME '16000'
+                  edit EC_SMT 'no'
+                task svsh
+                  trigger inidata eq complete
+                  edit FCLENGTH '48'
+                  edit EPSSVDIAB '0'
+                  edit EPSTROP '0'
+                  edit MEMBER '0'
+                  edit MEM '1600'
+                  edit NPES '8'
+                  edit THREADS '4'
+                  edit CPUTIME '16000'
+                  edit EC_SMT 'no'
+                task targets
+                  trigger svsh eq complete
+                  edit FCLENGTH '48'
+                task subspace
+                  trigger svnh eq complete and svsh eq complete and targets eq complete
+                  edit FCLENGTH '48'
+                task sv1
+                  trigger targets eq complete and subspace eq complete
+                  edit FCLENGTH '48'
+                  edit EPSSVDIAB 'true'
+                  edit EPSTROP '1'
+                  edit MEMBER '1'
+                  edit MEM '1600'
+                  edit NPES '8'
+                  edit THREADS '4'
+                  edit CPUTIME '16000'
+                  edit EC_SMT 'no'
+                task sv2
+                  trigger targets eq complete and subspace eq complete
+                  edit FCLENGTH '48'
+                  edit EPSSVDIAB 'true'
+                  edit EPSTROP '1'
+                  edit MEMBER '2'
+                  edit MEM '1600'
+                  edit NPES '8'
+                  edit THREADS '4'
+                  edit CPUTIME '16000'
+                  edit EC_SMT 'no'
+                task sv3
+                  trigger sv1 eq complete and targets eq complete
+                  edit FCLENGTH '48'
+                  edit MEM '1600'
+                  edit NPES '8'
+                  edit THREADS '4'
+                  edit CPUTIME '16000'
+                  edit EC_SMT 'no'
+                  edit EPSSVDIAB 'true'
+                  edit EPSTROP '1'
+                  edit MEMBER '3'
+                task sv4
+                  trigger sv2 eq complete and targets eq complete
+                  edit FCLENGTH '48'
+                  edit MEM '1600'
+                  edit NPES '8'
+                  edit THREADS '4'
+                  edit CPUTIME '16000'
+                  edit EC_SMT 'no'
+                  edit EPSSVDIAB 'true'
+                  edit EPSTROP '1'
+                  edit MEMBER '4'
+                task sv5
+                  trigger sv3 eq complete and targets eq complete and subspace eq complete
+                  edit FCLENGTH '48'
+                  edit MEM '1600'
+                  edit NPES '8'
+                  edit THREADS '4'
+                  edit CPUTIME '16000'
+                  edit EC_SMT 'no'
+                  edit EPSSVDIAB 'true'
+                  edit EPSTROP '1'
+                  edit MEMBER '5'
+                task sv6
+                  trigger sv4 eq complete and targets eq complete and subspace eq complete
+                  edit FCLENGTH '48'
+                  edit MEM '1600'
+                  edit NPES '8'
+                  edit THREADS '4'
+                  edit CPUTIME '16000'
+                  edit EC_SMT 'no'
+                  edit EPSSVDIAB 'true'
+                  edit EPSTROP '1'
+                  edit MEMBER '6'
+              endfamily
+            endfamily
+            family eps_pert
+              task getae
+                defstatus complete
+                trigger ../eps_sv eq complete
+                edit EPSSVDIAB 'true'
+                edit EPSTROP '1'
+              task getsvs
+                defstatus complete
+                trigger getae eq complete
+                edit EPSSVDIAB 'true'
+                edit EPSTROP '1'
+              task ocrot
+                defstatus complete
+                trigger getsvs eq complete
+                edit EPSSVDIAB 'true'
+                edit EPSTROP '1'
+              task geticp
+                trigger ../getini eq complete
+              family pert_ic
+                inlimit /ptb/a020/coup/limits:PIC
+                trigger geticp eq complete and ocrot eq complete and ../inidata eq complete
+                edit EPSTROP '0'
+                family 000
+                  edit MEMBER '0'
+                  task pertinic
+                endfamily
+                family 001
+                  edit MEMBER '1'
+                  task pertinic
+                endfamily
+                family 002
+                  edit MEMBER '2'
+                  task pertinic
+                endfamily
+                family 003
+                  edit MEMBER '3'
+                  task pertinic
+                endfamily
+                family 004
+                  edit MEMBER '4'
+                  task pertinic
+                endfamily
+                family 005
+                  edit MEMBER '5'
+                  task pertinic
+                endfamily
+                family 006
+                  edit MEMBER '6'
+                  task pertinic
+                endfamily
+                family 007
+                  edit MEMBER '7'
+                  task pertinic
+                endfamily
+                family 008
+                  edit MEMBER '8'
+                  task pertinic
+                endfamily
+                family 009
+                  edit MEMBER '9'
+                  task pertinic
+                endfamily
+                family 010
+                  edit MEMBER '10'
+                  task pertinic
+                endfamily
+                family 011
+                  edit MEMBER '11'
+                  task pertinic
+                endfamily
+                family 012
+                  edit MEMBER '12'
+                  task pertinic
+                endfamily
+                family 013
+                  edit MEMBER '13'
+                  task pertinic
+                endfamily
+                family 014
+                  edit MEMBER '14'
+                  task pertinic
+                endfamily
+                family 015
+                  edit MEMBER '15'
+                  task pertinic
+                endfamily
+                family 016
+                  edit MEMBER '16'
+                  task pertinic
+                endfamily
+                family 017
+                  edit MEMBER '17'
+                  task pertinic
+                endfamily
+                family 018
+                  edit MEMBER '18'
+                  task pertinic
+                endfamily
+                family 019
+                  edit MEMBER '19'
+                  task pertinic
+                endfamily
+                family 020
+                  edit MEMBER '20'
+                  task pertinic
+                endfamily
+                family 021
+                  edit MEMBER '21'
+                  task pertinic
+                endfamily
+                family 022
+                  edit MEMBER '22'
+                  task pertinic
+                endfamily
+                family 023
+                  edit MEMBER '23'
+                  task pertinic
+                endfamily
+                family 024
+                  edit MEMBER '24'
+                  task pertinic
+                endfamily
+                family 025
+                  edit MEMBER '25'
+                  task pertinic
+                endfamily
+                family 026
+                  edit MEMBER '26'
+                  task pertinic
+                endfamily
+                family 027
+                  edit MEMBER '27'
+                  task pertinic
+                endfamily
+                family 028
+                  edit MEMBER '28'
+                  task pertinic
+                endfamily
+                family 029
+                  edit MEMBER '29'
+                  task pertinic
+                endfamily
+                family 030
+                  edit MEMBER '30'
+                  task pertinic
+                endfamily
+                family 031
+                  edit MEMBER '31'
+                  task pertinic
+                endfamily
+                family 032
+                  edit MEMBER '32'
+                  task pertinic
+                endfamily
+                family 033
+                  edit MEMBER '33'
+                  task pertinic
+                endfamily
+                family 034
+                  edit MEMBER '34'
+                  task pertinic
+                endfamily
+                family 035
+                  edit MEMBER '35'
+                  task pertinic
+                endfamily
+                family 036
+                  edit MEMBER '36'
+                  task pertinic
+                endfamily
+                family 037
+                  edit MEMBER '37'
+                  task pertinic
+                endfamily
+                family 038
+                  edit MEMBER '38'
+                  task pertinic
+                endfamily
+                family 039
+                  edit MEMBER '39'
+                  task pertinic
+                endfamily
+                family 040
+                  edit MEMBER '40'
+                  task pertinic
+                endfamily
+                family 041
+                  edit MEMBER '41'
+                  task pertinic
+                endfamily
+                family 042
+                  edit MEMBER '42'
+                  task pertinic
+                endfamily
+                family 043
+                  edit MEMBER '43'
+                  task pertinic
+                endfamily
+                family 044
+                  edit MEMBER '44'
+                  task pertinic
+                endfamily
+                family 045
+                  edit MEMBER '45'
+                  task pertinic
+                endfamily
+                family 046
+                  edit MEMBER '46'
+                  task pertinic
+                endfamily
+                family 047
+                  edit MEMBER '47'
+                  task pertinic
+                endfamily
+                family 048
+                  edit MEMBER '48'
+                  task pertinic
+                endfamily
+                family 049
+                  edit MEMBER '49'
+                  task pertinic
+                endfamily
+                family 050
+                  edit MEMBER '50'
+                  task pertinic
+                endfamily
+              endfamily
+            endfamily
+            task ocwavini
+              edit SMSTRIES '2'
+              edit MEM '300'
+              edit NPES '1'
+              edit CPUTIME '400'
+            task ocwcold
+              defstatus complete
+              trigger inidata eq complete and ocwavini eq complete and eps_pert eq complete
+              edit MEM '800'
+              edit NPES '1'
+              edit THREADS '8'
+              edit CPUTIME '2000'
+            task ocwavfcdata
+              trigger ./ocwcold eq complete and ocwavini eq complete
+            family fc0
+              edit OCFCPERT '0'
+              edit FCGROUP 'fc0'
+              edit SUBFSFAMILY '_an0_fc0'
+              task iniocean
+                trigger  ( ../oceini eq complete and  ( ../getini eq active or ../getini eq complete))
+              task iniatmos
+                trigger  ( /ptb/a020/coup/fcdate/main/control0/inidata eq complete and /ptb/a020/coup/fcdate/main/control0/ocwavfcdata eq complete and /ptb/a020/coup/fcdate/main/control0/eps_pert eq complete)
+                edit FCCHUNK '1'
+              task cpmodel1
+                inlimit /ptb/a020/coup/limits:cpmodel
+                trigger  ( iniocean eq complete and iniatmos eq complete and /ptb/a020/coup/fcdate/main/control0/inidata eq complete and /ptb/a020/coup/fcdate/main/control0/ocwavfcdata eq complete and /ptb/a020/coup/fcdate/main/control0/eps_pert eq complete)
+                edit FCCHUNKSUB '1'
+                edit MEM '1300'
+                edit NPES '1'
+                edit THREADS '8'
+                edit EC_SMT 'yes'
+                edit CPUTIME '360000'
+                meter step -1 24 24
+              task extrafields
+                trigger cpmodel1 eq complete
+              task mm_sfc
+                trigger extrafields eq complete
+              task mm_ua
+                trigger mm_sfc eq complete
+            endfamily
+          endfamily
+          family assim0
+            edit FSFAMILY 'assim'
+            edit OCGROUP 'an0'
+            edit FCTOTAL '1'
+            edit RUNCOUPLE '1'
+            edit FCLENGTH '24'
+            edit SUBFSFAMILY '_an0_fc0'
+            edit FCGROUP 'fc0'
+            task getini
+            task inidata
+              trigger getini eq complete
+              edit NPES '12'
+              edit ININPES '12'
+              edit MEM '900'
+              edit THREADS '2'
+              edit CPUTIME '1000'
+            task oceini
+            family eps_sv
+              defstatus complete
+              edit MOFCSV 'true'
+              family svevo
+                edit DELTA_DAY '-2'
+                task getini
+                  edit PRIORITY '40'
+                task inidata
+                  trigger getini eq complete
+                  edit NPES '12'
+                  edit ININPES '12'
+                  edit MEM '900'
+                  edit THREADS '2'
+                  edit CPUTIME '1000'
+                task svnh
+                  trigger inidata eq complete
+                  edit FCLENGTH '48'
+                  edit EPSSVDIAB '0'
+                  edit EPSTROP '0'
+                  edit MEMBER '0'
+                  edit MEM '1600'
+                  edit NPES '8'
+                  edit THREADS '4'
+                  edit CPUTIME '16000'
+                  edit EC_SMT 'no'
+                task svsh
+                  trigger inidata eq complete
+                  edit FCLENGTH '48'
+                  edit EPSSVDIAB '0'
+                  edit EPSTROP '0'
+                  edit MEMBER '0'
+                  edit MEM '1600'
+                  edit NPES '8'
+                  edit THREADS '4'
+                  edit CPUTIME '16000'
+                  edit EC_SMT 'no'
+              endfamily
+              family svini
+                edit DELTA_DAY '0'
+                task getini
+                  trigger ../svevo eq complete
+                  edit PRIORITY '40'
+                task inidata
+                  trigger getini eq complete
+                  edit NPES '12'
+                  edit ININPES '12'
+                  edit MEM '900'
+                  edit THREADS '2'
+                  edit CPUTIME '1000'
+                task svnh
+                  trigger inidata eq complete
+                  edit FCLENGTH '48'
+                  edit EPSSVDIAB '0'
+                  edit EPSTROP '0'
+                  edit MEMBER '0'
+                  edit MEM '1600'
+                  edit NPES '8'
+                  edit THREADS '4'
+                  edit CPUTIME '16000'
+                  edit EC_SMT 'no'
+                task svsh
+                  trigger inidata eq complete
+                  edit FCLENGTH '48'
+                  edit EPSSVDIAB '0'
+                  edit EPSTROP '0'
+                  edit MEMBER '0'
+                  edit MEM '1600'
+                  edit NPES '8'
+                  edit THREADS '4'
+                  edit CPUTIME '16000'
+                  edit EC_SMT 'no'
+                task targets
+                  trigger svsh eq complete
+                  edit FCLENGTH '48'
+                task subspace
+                  trigger svnh eq complete and svsh eq complete and targets eq complete
+                  edit FCLENGTH '48'
+                task sv1
+                  trigger targets eq complete and subspace eq complete
+                  edit FCLENGTH '48'
+                  edit EPSSVDIAB 'true'
+                  edit EPSTROP '1'
+                  edit MEMBER '1'
+                  edit MEM '1600'
+                  edit NPES '8'
+                  edit THREADS '4'
+                  edit CPUTIME '16000'
+                  edit EC_SMT 'no'
+                task sv2
+                  trigger targets eq complete and subspace eq complete
+                  edit FCLENGTH '48'
+                  edit EPSSVDIAB 'true'
+                  edit EPSTROP '1'
+                  edit MEMBER '2'
+                  edit MEM '1600'
+                  edit NPES '8'
+                  edit THREADS '4'
+                  edit CPUTIME '16000'
+                  edit EC_SMT 'no'
+                task sv3
+                  trigger sv1 eq complete and targets eq complete
+                  edit FCLENGTH '48'
+                  edit MEM '1600'
+                  edit NPES '8'
+                  edit THREADS '4'
+                  edit CPUTIME '16000'
+                  edit EC_SMT 'no'
+                  edit EPSSVDIAB 'true'
+                  edit EPSTROP '1'
+                  edit MEMBER '3'
+                task sv4
+                  trigger sv2 eq complete and targets eq complete
+                  edit FCLENGTH '48'
+                  edit MEM '1600'
+                  edit NPES '8'
+                  edit THREADS '4'
+                  edit CPUTIME '16000'
+                  edit EC_SMT 'no'
+                  edit EPSSVDIAB 'true'
+                  edit EPSTROP '1'
+                  edit MEMBER '4'
+                task sv5
+                  trigger sv3 eq complete and targets eq complete and subspace eq complete
+                  edit FCLENGTH '48'
+                  edit MEM '1600'
+                  edit NPES '8'
+                  edit THREADS '4'
+                  edit CPUTIME '16000'
+                  edit EC_SMT 'no'
+                  edit EPSSVDIAB 'true'
+                  edit EPSTROP '1'
+                  edit MEMBER '5'
+                task sv6
+                  trigger sv4 eq complete and targets eq complete and subspace eq complete
+                  edit FCLENGTH '48'
+                  edit MEM '1600'
+                  edit NPES '8'
+                  edit THREADS '4'
+                  edit CPUTIME '16000'
+                  edit EC_SMT 'no'
+                  edit EPSSVDIAB 'true'
+                  edit EPSTROP '1'
+                  edit MEMBER '6'
+              endfamily
+            endfamily
+            family eps_pert
+              task getae
+                defstatus complete
+                trigger ../eps_sv eq complete
+                edit EPSSVDIAB 'true'
+                edit EPSTROP '1'
+              task getsvs
+                defstatus complete
+                trigger getae eq complete
+                edit EPSSVDIAB 'true'
+                edit EPSTROP '1'
+              task ocrot
+                defstatus complete
+                trigger getsvs eq complete
+                edit EPSSVDIAB 'true'
+                edit EPSTROP '1'
+              task geticp
+                trigger ../getini eq complete
+              family pert_ic
+                inlimit /ptb/a020/coup/limits:PIC
+                trigger geticp eq complete and ocrot eq complete and ../inidata eq complete
+                edit EPSTROP '0'
+                family 000
+                  edit MEMBER '0'
+                  task pertinic
+                endfamily
+                family 001
+                  edit MEMBER '1'
+                  task pertinic
+                endfamily
+                family 002
+                  edit MEMBER '2'
+                  task pertinic
+                endfamily
+                family 003
+                  edit MEMBER '3'
+                  task pertinic
+                endfamily
+                family 004
+                  edit MEMBER '4'
+                  task pertinic
+                endfamily
+                family 005
+                  edit MEMBER '5'
+                  task pertinic
+                endfamily
+                family 006
+                  edit MEMBER '6'
+                  task pertinic
+                endfamily
+                family 007
+                  edit MEMBER '7'
+                  task pertinic
+                endfamily
+                family 008
+                  edit MEMBER '8'
+                  task pertinic
+                endfamily
+                family 009
+                  edit MEMBER '9'
+                  task pertinic
+                endfamily
+                family 010
+                  edit MEMBER '10'
+                  task pertinic
+                endfamily
+                family 011
+                  edit MEMBER '11'
+                  task pertinic
+                endfamily
+                family 012
+                  edit MEMBER '12'
+                  task pertinic
+                endfamily
+                family 013
+                  edit MEMBER '13'
+                  task pertinic
+                endfamily
+                family 014
+                  edit MEMBER '14'
+                  task pertinic
+                endfamily
+                family 015
+                  edit MEMBER '15'
+                  task pertinic
+                endfamily
+                family 016
+                  edit MEMBER '16'
+                  task pertinic
+                endfamily
+                family 017
+                  edit MEMBER '17'
+                  task pertinic
+                endfamily
+                family 018
+                  edit MEMBER '18'
+                  task pertinic
+                endfamily
+                family 019
+                  edit MEMBER '19'
+                  task pertinic
+                endfamily
+                family 020
+                  edit MEMBER '20'
+                  task pertinic
+                endfamily
+                family 021
+                  edit MEMBER '21'
+                  task pertinic
+                endfamily
+                family 022
+                  edit MEMBER '22'
+                  task pertinic
+                endfamily
+                family 023
+                  edit MEMBER '23'
+                  task pertinic
+                endfamily
+                family 024
+                  edit MEMBER '24'
+                  task pertinic
+                endfamily
+                family 025
+                  edit MEMBER '25'
+                  task pertinic
+                endfamily
+                family 026
+                  edit MEMBER '26'
+                  task pertinic
+                endfamily
+                family 027
+                  edit MEMBER '27'
+                  task pertinic
+                endfamily
+                family 028
+                  edit MEMBER '28'
+                  task pertinic
+                endfamily
+                family 029
+                  edit MEMBER '29'
+                  task pertinic
+                endfamily
+                family 030
+                  edit MEMBER '30'
+                  task pertinic
+                endfamily
+                family 031
+                  edit MEMBER '31'
+                  task pertinic
+                endfamily
+                family 032
+                  edit MEMBER '32'
+                  task pertinic
+                endfamily
+                family 033
+                  edit MEMBER '33'
+                  task pertinic
+                endfamily
+                family 034
+                  edit MEMBER '34'
+                  task pertinic
+                endfamily
+                family 035
+                  edit MEMBER '35'
+                  task pertinic
+                endfamily
+                family 036
+                  edit MEMBER '36'
+                  task pertinic
+                endfamily
+                family 037
+                  edit MEMBER '37'
+                  task pertinic
+                endfamily
+                family 038
+                  edit MEMBER '38'
+                  task pertinic
+                endfamily
+                family 039
+                  edit MEMBER '39'
+                  task pertinic
+                endfamily
+                family 040
+                  edit MEMBER '40'
+                  task pertinic
+                endfamily
+                family 041
+                  edit MEMBER '41'
+                  task pertinic
+                endfamily
+                family 042
+                  edit MEMBER '42'
+                  task pertinic
+                endfamily
+                family 043
+                  edit MEMBER '43'
+                  task pertinic
+                endfamily
+                family 044
+                  edit MEMBER '44'
+                  task pertinic
+                endfamily
+                family 045
+                  edit MEMBER '45'
+                  task pertinic
+                endfamily
+                family 046
+                  edit MEMBER '46'
+                  task pertinic
+                endfamily
+                family 047
+                  edit MEMBER '47'
+                  task pertinic
+                endfamily
+                family 048
+                  edit MEMBER '48'
+                  task pertinic
+                endfamily
+                family 049
+                  edit MEMBER '49'
+                  task pertinic
+                endfamily
+                family 050
+                  edit MEMBER '50'
+                  task pertinic
+                endfamily
+              endfamily
+            endfamily
+            task ocwavini
+              edit SMSTRIES '2'
+              edit MEM '300'
+              edit NPES '1'
+              edit CPUTIME '400'
+            task ocwcold
+              defstatus complete
+              trigger inidata eq complete and ocwavini eq complete and eps_pert eq complete
+              edit MEM '800'
+              edit NPES '1'
+              edit THREADS '8'
+              edit CPUTIME '2000'
+            task ocwavfcdata
+              trigger ./ocwcold eq complete and ocwavini eq complete
+            family fc0
+              edit OCFCPERT '0'
+              edit FCGROUP 'fc0'
+              edit SUBFSFAMILY '_an0_fc0'
+              task iniocean
+                trigger  ( ../oceini eq complete and  ( ../getini eq active or ../getini eq complete))
+              task iniatmos
+                trigger  ( /ptb/a020/coup/fcdate/main/assim0/inidata eq complete and /ptb/a020/coup/fcdate/main/assim0/ocwavfcdata eq complete and /ptb/a020/coup/fcdate/main/assim0/eps_pert eq complete)
+                edit FCCHUNK '1'
+              task cpmodel1
+                inlimit /ptb/a020/coup/limits:cpmodel
+                trigger  ( iniocean eq complete and iniatmos eq complete and /ptb/a020/coup/fcdate/main/assim0/inidata eq complete and /ptb/a020/coup/fcdate/main/assim0/ocwavfcdata eq complete and /ptb/a020/coup/fcdate/main/assim0/eps_pert eq complete)
+                edit FCCHUNKSUB '1'
+                edit MEM '1300'
+                edit NPES '1'
+                edit THREADS '8'
+                edit EC_SMT 'yes'
+                edit CPUTIME '360000'
+                meter step -1 24 24
+              task extrafields
+                trigger cpmodel1 eq complete
+              task mm_sfc
+                trigger extrafields eq complete
+              task mm_ua
+                trigger mm_sfc eq complete
+            endfamily
+          endfamily
+          family assim1
+            edit FSFAMILY 'assim'
+            edit OCGROUP 'an1'
+            edit FCTOTAL '1'
+            edit RUNCOUPLE '1'
+            edit FCLENGTH '24'
+            edit SUBFSFAMILY '_an1_fc1'
+            edit FCGROUP 'fc1'
+            task getini
+              defstatus complete
+            task inidata
+              defstatus complete
+              trigger getini eq complete
+              edit NPES '12'
+              edit ININPES '12'
+              edit MEM '900'
+              edit THREADS '2'
+              edit CPUTIME '1000'
+            task oceini
+            family eps_sv
+              defstatus complete
+              edit MOFCSV 'true'
+              family svevo
+                edit DELTA_DAY '-2'
+                task getini
+                  edit PRIORITY '40'
+                task inidata
+                  trigger getini eq complete
+                  edit NPES '12'
+                  edit ININPES '12'
+                  edit MEM '900'
+                  edit THREADS '2'
+                  edit CPUTIME '1000'
+                task svnh
+                  trigger inidata eq complete
+                  edit FCLENGTH '48'
+                  edit EPSSVDIAB '0'
+                  edit EPSTROP '0'
+                  edit MEMBER '0'
+                  edit MEM '1600'
+                  edit NPES '8'
+                  edit THREADS '4'
+                  edit CPUTIME '16000'
+                  edit EC_SMT 'no'
+                task svsh
+                  trigger inidata eq complete
+                  edit FCLENGTH '48'
+                  edit EPSSVDIAB '0'
+                  edit EPSTROP '0'
+                  edit MEMBER '0'
+                  edit MEM '1600'
+                  edit NPES '8'
+                  edit THREADS '4'
+                  edit CPUTIME '16000'
+                  edit EC_SMT 'no'
+              endfamily
+              family svini
+                edit DELTA_DAY '0'
+                task getini
+                  trigger ../svevo eq complete
+                  edit PRIORITY '40'
+                task inidata
+                  trigger getini eq complete
+                  edit NPES '12'
+                  edit ININPES '12'
+                  edit MEM '900'
+                  edit THREADS '2'
+                  edit CPUTIME '1000'
+                task svnh
+                  trigger inidata eq complete
+                  edit FCLENGTH '48'
+                  edit EPSSVDIAB '0'
+                  edit EPSTROP '0'
+                  edit MEMBER '0'
+                  edit MEM '1600'
+                  edit NPES '8'
+                  edit THREADS '4'
+                  edit CPUTIME '16000'
+                  edit EC_SMT 'no'
+                task svsh
+                  trigger inidata eq complete
+                  edit FCLENGTH '48'
+                  edit EPSSVDIAB '0'
+                  edit EPSTROP '0'
+                  edit MEMBER '0'
+                  edit MEM '1600'
+                  edit NPES '8'
+                  edit THREADS '4'
+                  edit CPUTIME '16000'
+                  edit EC_SMT 'no'
+                task targets
+                  trigger svsh eq complete
+                  edit FCLENGTH '48'
+                task subspace
+                  trigger svnh eq complete and svsh eq complete and targets eq complete
+                  edit FCLENGTH '48'
+                task sv1
+                  trigger targets eq complete and subspace eq complete
+                  edit FCLENGTH '48'
+                  edit EPSSVDIAB 'true'
+                  edit EPSTROP '1'
+                  edit MEMBER '1'
+                  edit MEM '1600'
+                  edit NPES '8'
+                  edit THREADS '4'
+                  edit CPUTIME '16000'
+                  edit EC_SMT 'no'
+                task sv2
+                  trigger targets eq complete and subspace eq complete
+                  edit FCLENGTH '48'
+                  edit EPSSVDIAB 'true'
+                  edit EPSTROP '1'
+                  edit MEMBER '2'
+                  edit MEM '1600'
+                  edit NPES '8'
+                  edit THREADS '4'
+                  edit CPUTIME '16000'
+                  edit EC_SMT 'no'
+                task sv3
+                  trigger sv1 eq complete and targets eq complete
+                  edit FCLENGTH '48'
+                  edit MEM '1600'
+                  edit NPES '8'
+                  edit THREADS '4'
+                  edit CPUTIME '16000'
+                  edit EC_SMT 'no'
+                  edit EPSSVDIAB 'true'
+                  edit EPSTROP '1'
+                  edit MEMBER '3'
+                task sv4
+                  trigger sv2 eq complete and targets eq complete
+                  edit FCLENGTH '48'
+                  edit MEM '1600'
+                  edit NPES '8'
+                  edit THREADS '4'
+                  edit CPUTIME '16000'
+                  edit EC_SMT 'no'
+                  edit EPSSVDIAB 'true'
+                  edit EPSTROP '1'
+                  edit MEMBER '4'
+                task sv5
+                  trigger sv3 eq complete and targets eq complete and subspace eq complete
+                  edit FCLENGTH '48'
+                  edit MEM '1600'
+                  edit NPES '8'
+                  edit THREADS '4'
+                  edit CPUTIME '16000'
+                  edit EC_SMT 'no'
+                  edit EPSSVDIAB 'true'
+                  edit EPSTROP '1'
+                  edit MEMBER '5'
+                task sv6
+                  trigger sv4 eq complete and targets eq complete and subspace eq complete
+                  edit FCLENGTH '48'
+                  edit MEM '1600'
+                  edit NPES '8'
+                  edit THREADS '4'
+                  edit CPUTIME '16000'
+                  edit EC_SMT 'no'
+                  edit EPSSVDIAB 'true'
+                  edit EPSTROP '1'
+                  edit MEMBER '6'
+              endfamily
+            endfamily
+            family eps_pert
+              defstatus complete
+              task getae
+                defstatus complete
+                trigger ../eps_sv eq complete
+                edit EPSSVDIAB 'true'
+                edit EPSTROP '1'
+              task getsvs
+                defstatus complete
+                trigger getae eq complete
+                edit EPSSVDIAB 'true'
+                edit EPSTROP '1'
+              task ocrot
+                defstatus complete
+                trigger getsvs eq complete
+                edit EPSSVDIAB 'true'
+                edit EPSTROP '1'
+              task geticp
+                trigger ../getini eq complete
+              family pert_ic
+                inlimit /ptb/a020/coup/limits:PIC
+                trigger geticp eq complete and ocrot eq complete and ../inidata eq complete
+                edit EPSTROP '0'
+                family 000
+                  edit MEMBER '0'
+                  task pertinic
+                endfamily
+                family 001
+                  edit MEMBER '1'
+                  task pertinic
+                endfamily
+                family 002
+                  edit MEMBER '2'
+                  task pertinic
+                endfamily
+                family 003
+                  edit MEMBER '3'
+                  task pertinic
+                endfamily
+                family 004
+                  edit MEMBER '4'
+                  task pertinic
+                endfamily
+                family 005
+                  edit MEMBER '5'
+                  task pertinic
+                endfamily
+                family 006
+                  edit MEMBER '6'
+                  task pertinic
+                endfamily
+                family 007
+                  edit MEMBER '7'
+                  task pertinic
+                endfamily
+                family 008
+                  edit MEMBER '8'
+                  task pertinic
+                endfamily
+                family 009
+                  edit MEMBER '9'
+                  task pertinic
+                endfamily
+                family 010
+                  edit MEMBER '10'
+                  task pertinic
+                endfamily
+                family 011
+                  edit MEMBER '11'
+                  task pertinic
+                endfamily
+                family 012
+                  edit MEMBER '12'
+                  task pertinic
+                endfamily
+                family 013
+                  edit MEMBER '13'
+                  task pertinic
+                endfamily
+                family 014
+                  edit MEMBER '14'
+                  task pertinic
+                endfamily
+                family 015
+                  edit MEMBER '15'
+                  task pertinic
+                endfamily
+                family 016
+                  edit MEMBER '16'
+                  task pertinic
+                endfamily
+                family 017
+                  edit MEMBER '17'
+                  task pertinic
+                endfamily
+                family 018
+                  edit MEMBER '18'
+                  task pertinic
+                endfamily
+                family 019
+                  edit MEMBER '19'
+                  task pertinic
+                endfamily
+                family 020
+                  edit MEMBER '20'
+                  task pertinic
+                endfamily
+                family 021
+                  edit MEMBER '21'
+                  task pertinic
+                endfamily
+                family 022
+                  edit MEMBER '22'
+                  task pertinic
+                endfamily
+                family 023
+                  edit MEMBER '23'
+                  task pertinic
+                endfamily
+                family 024
+                  edit MEMBER '24'
+                  task pertinic
+                endfamily
+                family 025
+                  edit MEMBER '25'
+                  task pertinic
+                endfamily
+                family 026
+                  edit MEMBER '26'
+                  task pertinic
+                endfamily
+                family 027
+                  edit MEMBER '27'
+                  task pertinic
+                endfamily
+                family 028
+                  edit MEMBER '28'
+                  task pertinic
+                endfamily
+                family 029
+                  edit MEMBER '29'
+                  task pertinic
+                endfamily
+                family 030
+                  edit MEMBER '30'
+                  task pertinic
+                endfamily
+                family 031
+                  edit MEMBER '31'
+                  task pertinic
+                endfamily
+                family 032
+                  edit MEMBER '32'
+                  task pertinic
+                endfamily
+                family 033
+                  edit MEMBER '33'
+                  task pertinic
+                endfamily
+                family 034
+                  edit MEMBER '34'
+                  task pertinic
+                endfamily
+                family 035
+                  edit MEMBER '35'
+                  task pertinic
+                endfamily
+                family 036
+                  edit MEMBER '36'
+                  task pertinic
+                endfamily
+                family 037
+                  edit MEMBER '37'
+                  task pertinic
+                endfamily
+                family 038
+                  edit MEMBER '38'
+                  task pertinic
+                endfamily
+                family 039
+                  edit MEMBER '39'
+                  task pertinic
+                endfamily
+                family 040
+                  edit MEMBER '40'
+                  task pertinic
+                endfamily
+                family 041
+                  edit MEMBER '41'
+                  task pertinic
+                endfamily
+                family 042
+                  edit MEMBER '42'
+                  task pertinic
+                endfamily
+                family 043
+                  edit MEMBER '43'
+                  task pertinic
+                endfamily
+                family 044
+                  edit MEMBER '44'
+                  task pertinic
+                endfamily
+                family 045
+                  edit MEMBER '45'
+                  task pertinic
+                endfamily
+                family 046
+                  edit MEMBER '46'
+                  task pertinic
+                endfamily
+                family 047
+                  edit MEMBER '47'
+                  task pertinic
+                endfamily
+                family 048
+                  edit MEMBER '48'
+                  task pertinic
+                endfamily
+                family 049
+                  edit MEMBER '49'
+                  task pertinic
+                endfamily
+                family 050
+                  edit MEMBER '50'
+                  task pertinic
+                endfamily
+              endfamily
+            endfamily
+            task ocwavini
+              defstatus complete
+              edit SMSTRIES '2'
+              edit MEM '300'
+              edit NPES '1'
+              edit CPUTIME '400'
+            task ocwcold
+              defstatus complete
+              trigger inidata eq complete and ocwavini eq complete and eps_pert eq complete
+              edit MEM '800'
+              edit NPES '1'
+              edit THREADS '8'
+              edit CPUTIME '2000'
+            task ocwavfcdata
+              defstatus complete
+              trigger ./ocwcold eq complete and ocwavini eq complete
+            family fc1
+              edit OCFCPERT '1'
+              edit FCGROUP 'fc1'
+              edit SUBFSFAMILY '_an1_fc1'
+              task iniocean
+                trigger  ( ../oceini eq complete and  ( ../getini eq active or ../getini eq complete))
+              task iniatmos
+                trigger  ( /ptb/a020/coup/fcdate/main/assim0/inidata eq complete and /ptb/a020/coup/fcdate/main/assim0/ocwavfcdata eq complete and /ptb/a020/coup/fcdate/main/assim0/eps_pert eq complete)
+                edit FCCHUNK '1'
+              task cpmodel1
+                inlimit /ptb/a020/coup/limits:cpmodel
+                trigger  ( iniocean eq complete and iniatmos eq complete and /ptb/a020/coup/fcdate/main/assim0/inidata eq complete and /ptb/a020/coup/fcdate/main/assim0/ocwavfcdata eq complete and /ptb/a020/coup/fcdate/main/assim0/eps_pert eq complete)
+                edit FCCHUNKSUB '1'
+                edit MEM '1300'
+                edit NPES '1'
+                edit THREADS '8'
+                edit EC_SMT 'yes'
+                edit CPUTIME '360000'
+                meter step -1 24 24
+              task extrafields
+                trigger cpmodel1 eq complete
+              task mm_sfc
+                trigger extrafields eq complete
+              task mm_ua
+                trigger mm_sfc eq complete
+            endfamily
+          endfamily
+          family assim2
+            edit FSFAMILY 'assim'
+            edit OCGROUP 'an2'
+            edit FCTOTAL '1'
+            edit RUNCOUPLE '1'
+            edit FCLENGTH '24'
+            edit SUBFSFAMILY '_an2_fc2'
+            edit FCGROUP 'fc2'
+            task getini
+              defstatus complete
+            task inidata
+              defstatus complete
+              trigger getini eq complete
+              edit NPES '12'
+              edit ININPES '12'
+              edit MEM '900'
+              edit THREADS '2'
+              edit CPUTIME '1000'
+            task oceini
+            family eps_sv
+              defstatus complete
+              edit MOFCSV 'true'
+              family svevo
+                edit DELTA_DAY '-2'
+                task getini
+                  edit PRIORITY '40'
+                task inidata
+                  trigger getini eq complete
+                  edit NPES '12'
+                  edit ININPES '12'
+                  edit MEM '900'
+                  edit THREADS '2'
+                  edit CPUTIME '1000'
+                task svnh
+                  trigger inidata eq complete
+                  edit FCLENGTH '48'
+                  edit EPSSVDIAB '0'
+                  edit EPSTROP '0'
+                  edit MEMBER '0'
+                  edit MEM '1600'
+                  edit NPES '8'
+                  edit THREADS '4'
+                  edit CPUTIME '16000'
+                  edit EC_SMT 'no'
+                task svsh
+                  trigger inidata eq complete
+                  edit FCLENGTH '48'
+                  edit EPSSVDIAB '0'
+                  edit EPSTROP '0'
+                  edit MEMBER '0'
+                  edit MEM '1600'
+                  edit NPES '8'
+                  edit THREADS '4'
+                  edit CPUTIME '16000'
+                  edit EC_SMT 'no'
+              endfamily
+              family svini
+                edit DELTA_DAY '0'
+                task getini
+                  trigger ../svevo eq complete
+                  edit PRIORITY '40'
+                task inidata
+                  trigger getini eq complete
+                  edit NPES '12'
+                  edit ININPES '12'
+                  edit MEM '900'
+                  edit THREADS '2'
+                  edit CPUTIME '1000'
+                task svnh
+                  trigger inidata eq complete
+                  edit FCLENGTH '48'
+                  edit EPSSVDIAB '0'
+                  edit EPSTROP '0'
+                  edit MEMBER '0'
+                  edit MEM '1600'
+                  edit NPES '8'
+                  edit THREADS '4'
+                  edit CPUTIME '16000'
+                  edit EC_SMT 'no'
+                task svsh
+                  trigger inidata eq complete
+                  edit FCLENGTH '48'
+                  edit EPSSVDIAB '0'
+                  edit EPSTROP '0'
+                  edit MEMBER '0'
+                  edit MEM '1600'
+                  edit NPES '8'
+                  edit THREADS '4'
+                  edit CPUTIME '16000'
+                  edit EC_SMT 'no'
+                task targets
+                  trigger svsh eq complete
+                  edit FCLENGTH '48'
+                task subspace
+                  trigger svnh eq complete and svsh eq complete and targets eq complete
+                  edit FCLENGTH '48'
+                task sv1
+                  trigger targets eq complete and subspace eq complete
+                  edit FCLENGTH '48'
+                  edit EPSSVDIAB 'true'
+                  edit EPSTROP '1'
+                  edit MEMBER '1'
+                  edit MEM '1600'
+                  edit NPES '8'
+                  edit THREADS '4'
+                  edit CPUTIME '16000'
+                  edit EC_SMT 'no'
+                task sv2
+                  trigger targets eq complete and subspace eq complete
+                  edit FCLENGTH '48'
+                  edit EPSSVDIAB 'true'
+                  edit EPSTROP '1'
+                  edit MEMBER '2'
+                  edit MEM '1600'
+                  edit NPES '8'
+                  edit THREADS '4'
+                  edit CPUTIME '16000'
+                  edit EC_SMT 'no'
+                task sv3
+                  trigger sv1 eq complete and targets eq complete
+                  edit FCLENGTH '48'
+                  edit MEM '1600'
+                  edit NPES '8'
+                  edit THREADS '4'
+                  edit CPUTIME '16000'
+                  edit EC_SMT 'no'
+                  edit EPSSVDIAB 'true'
+                  edit EPSTROP '1'
+                  edit MEMBER '3'
+                task sv4
+                  trigger sv2 eq complete and targets eq complete
+                  edit FCLENGTH '48'
+                  edit MEM '1600'
+                  edit NPES '8'
+                  edit THREADS '4'
+                  edit CPUTIME '16000'
+                  edit EC_SMT 'no'
+                  edit EPSSVDIAB 'true'
+                  edit EPSTROP '1'
+                  edit MEMBER '4'
+                task sv5
+                  trigger sv3 eq complete and targets eq complete and subspace eq complete
+                  edit FCLENGTH '48'
+                  edit MEM '1600'
+                  edit NPES '8'
+                  edit THREADS '4'
+                  edit CPUTIME '16000'
+                  edit EC_SMT 'no'
+                  edit EPSSVDIAB 'true'
+                  edit EPSTROP '1'
+                  edit MEMBER '5'
+                task sv6
+                  trigger sv4 eq complete and targets eq complete and subspace eq complete
+                  edit FCLENGTH '48'
+                  edit MEM '1600'
+                  edit NPES '8'
+                  edit THREADS '4'
+                  edit CPUTIME '16000'
+                  edit EC_SMT 'no'
+                  edit EPSSVDIAB 'true'
+                  edit EPSTROP '1'
+                  edit MEMBER '6'
+              endfamily
+            endfamily
+            family eps_pert
+              defstatus complete
+              task getae
+                defstatus complete
+                trigger ../eps_sv eq complete
+                edit EPSSVDIAB 'true'
+                edit EPSTROP '1'
+              task getsvs
+                defstatus complete
+                trigger getae eq complete
+                edit EPSSVDIAB 'true'
+                edit EPSTROP '1'
+              task ocrot
+                defstatus complete
+                trigger getsvs eq complete
+                edit EPSSVDIAB 'true'
+                edit EPSTROP '1'
+              task geticp
+                trigger ../getini eq complete
+              family pert_ic
+                inlimit /ptb/a020/coup/limits:PIC
+                trigger geticp eq complete and ocrot eq complete and ../inidata eq complete
+                edit EPSTROP '0'
+                family 000
+                  edit MEMBER '0'
+                  task pertinic
+                endfamily
+                family 001
+                  edit MEMBER '1'
+                  task pertinic
+                endfamily
+                family 002
+                  edit MEMBER '2'
+                  task pertinic
+                endfamily
+                family 003
+                  edit MEMBER '3'
+                  task pertinic
+                endfamily
+                family 004
+                  edit MEMBER '4'
+                  task pertinic
+                endfamily
+                family 005
+                  edit MEMBER '5'
+                  task pertinic
+                endfamily
+                family 006
+                  edit MEMBER '6'
+                  task pertinic
+                endfamily
+                family 007
+                  edit MEMBER '7'
+                  task pertinic
+                endfamily
+                family 008
+                  edit MEMBER '8'
+                  task pertinic
+                endfamily
+                family 009
+                  edit MEMBER '9'
+                  task pertinic
+                endfamily
+                family 010
+                  edit MEMBER '10'
+                  task pertinic
+                endfamily
+                family 011
+                  edit MEMBER '11'
+                  task pertinic
+                endfamily
+                family 012
+                  edit MEMBER '12'
+                  task pertinic
+                endfamily
+                family 013
+                  edit MEMBER '13'
+                  task pertinic
+                endfamily
+                family 014
+                  edit MEMBER '14'
+                  task pertinic
+                endfamily
+                family 015
+                  edit MEMBER '15'
+                  task pertinic
+                endfamily
+                family 016
+                  edit MEMBER '16'
+                  task pertinic
+                endfamily
+                family 017
+                  edit MEMBER '17'
+                  task pertinic
+                endfamily
+                family 018
+                  edit MEMBER '18'
+                  task pertinic
+                endfamily
+                family 019
+                  edit MEMBER '19'
+                  task pertinic
+                endfamily
+                family 020
+                  edit MEMBER '20'
+                  task pertinic
+                endfamily
+                family 021
+                  edit MEMBER '21'
+                  task pertinic
+                endfamily
+                family 022
+                  edit MEMBER '22'
+                  task pertinic
+                endfamily
+                family 023
+                  edit MEMBER '23'
+                  task pertinic
+                endfamily
+                family 024
+                  edit MEMBER '24'
+                  task pertinic
+                endfamily
+                family 025
+                  edit MEMBER '25'
+                  task pertinic
+                endfamily
+                family 026
+                  edit MEMBER '26'
+                  task pertinic
+                endfamily
+                family 027
+                  edit MEMBER '27'
+                  task pertinic
+                endfamily
+                family 028
+                  edit MEMBER '28'
+                  task pertinic
+                endfamily
+                family 029
+                  edit MEMBER '29'
+                  task pertinic
+                endfamily
+                family 030
+                  edit MEMBER '30'
+                  task pertinic
+                endfamily
+                family 031
+                  edit MEMBER '31'
+                  task pertinic
+                endfamily
+                family 032
+                  edit MEMBER '32'
+                  task pertinic
+                endfamily
+                family 033
+                  edit MEMBER '33'
+                  task pertinic
+                endfamily
+                family 034
+                  edit MEMBER '34'
+                  task pertinic
+                endfamily
+                family 035
+                  edit MEMBER '35'
+                  task pertinic
+                endfamily
+                family 036
+                  edit MEMBER '36'
+                  task pertinic
+                endfamily
+                family 037
+                  edit MEMBER '37'
+                  task pertinic
+                endfamily
+                family 038
+                  edit MEMBER '38'
+                  task pertinic
+                endfamily
+                family 039
+                  edit MEMBER '39'
+                  task pertinic
+                endfamily
+                family 040
+                  edit MEMBER '40'
+                  task pertinic
+                endfamily
+                family 041
+                  edit MEMBER '41'
+                  task pertinic
+                endfamily
+                family 042
+                  edit MEMBER '42'
+                  task pertinic
+                endfamily
+                family 043
+                  edit MEMBER '43'
+                  task pertinic
+                endfamily
+                family 044
+                  edit MEMBER '44'
+                  task pertinic
+                endfamily
+                family 045
+                  edit MEMBER '45'
+                  task pertinic
+                endfamily
+                family 046
+                  edit MEMBER '46'
+                  task pertinic
+                endfamily
+                family 047
+                  edit MEMBER '47'
+                  task pertinic
+                endfamily
+                family 048
+                  edit MEMBER '48'
+                  task pertinic
+                endfamily
+                family 049
+                  edit MEMBER '49'
+                  task pertinic
+                endfamily
+                family 050
+                  edit MEMBER '50'
+                  task pertinic
+                endfamily
+              endfamily
+            endfamily
+            task ocwavini
+              defstatus complete
+              edit SMSTRIES '2'
+              edit MEM '300'
+              edit NPES '1'
+              edit CPUTIME '400'
+            task ocwcold
+              defstatus complete
+              trigger inidata eq complete and ocwavini eq complete and eps_pert eq complete
+              edit MEM '800'
+              edit NPES '1'
+              edit THREADS '8'
+              edit CPUTIME '2000'
+            task ocwavfcdata
+              defstatus complete
+              trigger ./ocwcold eq complete and ocwavini eq complete
+            family fc2
+              edit OCFCPERT '2'
+              edit FCGROUP 'fc2'
+              edit SUBFSFAMILY '_an2_fc2'
+              task iniocean
+                trigger  ( ../oceini eq complete and  ( ../getini eq active or ../getini eq complete))
+              task iniatmos
+                trigger  ( /ptb/a020/coup/fcdate/main/assim0/inidata eq complete and /ptb/a020/coup/fcdate/main/assim0/ocwavfcdata eq complete and /ptb/a020/coup/fcdate/main/assim0/eps_pert eq complete)
+                edit FCCHUNK '1'
+              task cpmodel1
+                inlimit /ptb/a020/coup/limits:cpmodel
+                trigger  ( iniocean eq complete and iniatmos eq complete and /ptb/a020/coup/fcdate/main/assim0/inidata eq complete and /ptb/a020/coup/fcdate/main/assim0/ocwavfcdata eq complete and /ptb/a020/coup/fcdate/main/assim0/eps_pert eq complete)
+                edit FCCHUNKSUB '1'
+                edit MEM '1300'
+                edit NPES '1'
+                edit THREADS '8'
+                edit EC_SMT 'yes'
+                edit CPUTIME '360000'
+                meter step -1 24 24
+              task extrafields
+                trigger cpmodel1 eq complete
+              task mm_sfc
+                trigger extrafields eq complete
+              task mm_ua
+                trigger mm_sfc eq complete
+            endfamily
+          endfamily
+          task logfiles
+            trigger control0 eq complete and assim0 eq complete and assim1 eq complete and assim2 eq complete
+            edit SMSCMD 'smssubmit.x %SMSJOB% %SCHOST% %USER%'
+            edit SMSKILL 'smskill %USER% %SCHOST% %SMSRID% %SMSJOB%'
+            edit SMSSTATUSCMD 'smscheck %SCHOST% %EXPVER% %SMSJOB%'
+            edit LOGDIR '/hpce/rdx_dir/msx'
+            edit MOVE_TO_ECFS 'no'
+        endfamily
+        family lag
+          repeat enumerated YMD  "19690101" "19690102" # status 19690102
+          edit LOGTASK 'fcdate/lag'
+          family control0
+            defstatus complete
+            edit FSFAMILY 'control'
+            edit OCTOTAL '1'
+            edit OCGROUP 'an0'
+            edit FCTOTAL '1'
+            edit RUNCOUPLE '1'
+            edit FCLENGTH '24'
+            edit FCGROUP 'fc0'
+            edit RUNFC '0'
+            family archive
+              inlimit /ptb/a020/coup/limits:mars
+              edit OCNEWPERTORDER 'yes'
+              edit FCGROUP 'fc0'
+              edit FCCHUNK '1'
+              task preparcoup
+                trigger  ( /ptb/a020/coup/fcdate/main:YMD gt /ptb/a020/coup/fcdate/lag:YMD) or  ( /ptb/a020/coup/fcdate/main:YMD eq /ptb/a020/coup/fcdate/lag:YMD and  (  ( /ptb/a020/coup/fcdate/main/control0/fc0 eq complete)))
+              task arcfc
+                trigger preparcoup eq complete
+                event fdb
+                label files ""
+              task sfc_arc
+                trigger preparcoup eq complete
+                event fdb
+                label files ""
+              task ua_arc
+                trigger preparcoup eq complete
+                event fdb
+                label files ""
+              task mm_sfc_arc
+                trigger preparcoup eq complete
+                event fdb
+                label files ""
+              task mm_ua_arc
+                trigger preparcoup eq complete
+                event fdb
+                label files ""
+            endfamily
+            family restarts
+              trigger archive eq complete
+              edit FCCHUNKSUB '1'
+              family fc0
+                edit OCFCPERT '0'
+                edit FCGROUP 'fc0'
+                task saverestarts
+              endfamily
+            endfamily
+            task ocflush
+              trigger archive eq complete and restarts eq complete
+            family process
+              family fc0
+                trigger  ( /ptb/a020/coup/fcdate/main:YMD gt /ptb/a020/coup/fcdate/lag:YMD) or  ( /ptb/a020/coup/fcdate/main:YMD eq /ptb/a020/coup/fcdate/lag:YMD and /ptb/a020/coup/fcdate/main/control0/fc0 eq complete)
+                edit OCFCPERT '0'
+                edit FCGROUP 'fc0'
+                task nino_oc
+                  edit SMSCMD 'smssubmit.x %SMSJOB% %WSHOST% %USER%'
+                  edit SMSKILL 'smskill %USER% %WSHOST% %SMSRID% %SMSJOB%'
+                  edit SMSSTATUSCMD 'smscheck %WSHOST% %EXPVER% %SMSJOB%'
+                  edit LOGDIR '/vol/msexplog/outputs'
+                  edit QUEUE 'expsms'
+                task nino_daily
+                  trigger nino_oc eq complete
+                  edit SMSCMD 'smssubmit.x %SMSJOB% %WSHOST% %USER%'
+                  edit SMSKILL 'smskill %USER% %WSHOST% %SMSRID% %SMSJOB%'
+                  edit SMSSTATUSCMD 'smscheck %WSHOST% %EXPVER% %SMSJOB%'
+                  edit LOGDIR '/vol/msexplog/outputs'
+                  edit QUEUE 'expsms'
+                task nino_atmos
+                  trigger nino_daily eq complete
+                  edit SMSCMD 'smssubmit.x %SMSJOB% %WSHOST% %USER%'
+                  edit SMSKILL 'smskill %USER% %WSHOST% %SMSRID% %SMSJOB%'
+                  edit SMSSTATUSCMD 'smscheck %WSHOST% %EXPVER% %SMSJOB%'
+                  edit LOGDIR '/vol/msexplog/outputs'
+                  edit QUEUE 'expsms'
+                task tcyc
+                  trigger ../../archive eq complete
+                  edit SMSCMD 'smssubmit.x %SMSJOB% %WSHOST% %USER%'
+                  edit SMSKILL 'smskill %USER% %WSHOST% %SMSRID% %SMSJOB%'
+                  edit SMSSTATUSCMD 'smscheck %WSHOST% %EXPVER% %SMSJOB%'
+                  edit LOGDIR '/vol/msexplog/outputs'
+                  edit QUEUE 'expsms'
+              endfamily
+            endfamily
+          endfamily
+          family assim0
+            edit FSFAMILY 'assim'
+            edit OCGROUP 'an0'
+            edit FCTOTAL '1'
+            edit RUNCOUPLE '1'
+            edit FCLENGTH '24'
+            edit FCGROUP 'fc0'
+            edit RUNFC '0'
+            family archive
+              inlimit /ptb/a020/coup/limits:mars
+              edit OCNEWPERTORDER 'yes'
+              edit FCGROUP 'fc0'
+              edit FCCHUNK '1'
+              task preparcoup
+                trigger  ( /ptb/a020/coup/fcdate/main:YMD gt /ptb/a020/coup/fcdate/lag:YMD) or  ( /ptb/a020/coup/fcdate/main:YMD eq /ptb/a020/coup/fcdate/lag:YMD and  (  ( /ptb/a020/coup/fcdate/main/assim0/fc0 eq complete)))
+              task arcfc
+                trigger preparcoup eq complete
+                event fdb
+                label files ""
+              task sfc_arc
+                trigger preparcoup eq complete
+                event fdb
+                label files ""
+              task ua_arc
+                trigger preparcoup eq complete
+                event fdb
+                label files ""
+              task mm_sfc_arc
+                trigger preparcoup eq complete
+                event fdb
+                label files ""
+              task mm_ua_arc
+                trigger preparcoup eq complete
+                event fdb
+                label files ""
+            endfamily
+            family restarts
+              trigger archive eq complete
+              edit FCCHUNKSUB '1'
+              family fc0
+                edit OCFCPERT '0'
+                edit FCGROUP 'fc0'
+                task saverestarts
+              endfamily
+            endfamily
+            task ocflush
+              trigger archive eq complete and restarts eq complete
+            family process
+              family fc0
+                trigger  ( /ptb/a020/coup/fcdate/main:YMD gt /ptb/a020/coup/fcdate/lag:YMD) or  ( /ptb/a020/coup/fcdate/main:YMD eq /ptb/a020/coup/fcdate/lag:YMD and /ptb/a020/coup/fcdate/main/assim0/fc0 eq complete)
+                edit OCFCPERT '0'
+                edit FCGROUP 'fc0'
+                task nino_oc
+                  edit SMSCMD 'smssubmit.x %SMSJOB% %WSHOST% %USER%'
+                  edit SMSKILL 'smskill %USER% %WSHOST% %SMSRID% %SMSJOB%'
+                  edit SMSSTATUSCMD 'smscheck %WSHOST% %EXPVER% %SMSJOB%'
+                  edit LOGDIR '/vol/msexplog/outputs'
+                  edit QUEUE 'expsms'
+                task nino_daily
+                  trigger nino_oc eq complete
+                  edit SMSCMD 'smssubmit.x %SMSJOB% %WSHOST% %USER%'
+                  edit SMSKILL 'smskill %USER% %WSHOST% %SMSRID% %SMSJOB%'
+                  edit SMSSTATUSCMD 'smscheck %WSHOST% %EXPVER% %SMSJOB%'
+                  edit LOGDIR '/vol/msexplog/outputs'
+                  edit QUEUE 'expsms'
+                task nino_atmos
+                  trigger nino_daily eq complete
+                  edit SMSCMD 'smssubmit.x %SMSJOB% %WSHOST% %USER%'
+                  edit SMSKILL 'smskill %USER% %WSHOST% %SMSRID% %SMSJOB%'
+                  edit SMSSTATUSCMD 'smscheck %WSHOST% %EXPVER% %SMSJOB%'
+                  edit LOGDIR '/vol/msexplog/outputs'
+                  edit QUEUE 'expsms'
+                task tcyc
+                  trigger ../../archive eq complete
+                  edit SMSCMD 'smssubmit.x %SMSJOB% %WSHOST% %USER%'
+                  edit SMSKILL 'smskill %USER% %WSHOST% %SMSRID% %SMSJOB%'
+                  edit SMSSTATUSCMD 'smscheck %WSHOST% %EXPVER% %SMSJOB%'
+                  edit LOGDIR '/vol/msexplog/outputs'
+                  edit QUEUE 'expsms'
+              endfamily
+            endfamily
+          endfamily
+          family assim1
+            edit FSFAMILY 'assim'
+            edit OCGROUP 'an1'
+            edit FCTOTAL '1'
+            edit RUNCOUPLE '1'
+            edit FCLENGTH '24'
+            edit FCGROUP 'fc1'
+            edit RUNFC '0'
+            family archive
+              inlimit /ptb/a020/coup/limits:mars
+              edit OCNEWPERTORDER 'yes'
+              edit FCGROUP 'fc1'
+              edit FCCHUNK '1'
+              task preparcoup
+                trigger  ( /ptb/a020/coup/fcdate/main:YMD gt /ptb/a020/coup/fcdate/lag:YMD) or  ( /ptb/a020/coup/fcdate/main:YMD eq /ptb/a020/coup/fcdate/lag:YMD and  (  ( /ptb/a020/coup/fcdate/main/assim1/fc1 eq complete)))
+              task arcfc
+                trigger preparcoup eq complete
+                event fdb
+                label files ""
+              task sfc_arc
+                trigger preparcoup eq complete
+                event fdb
+                label files ""
+              task ua_arc
+                trigger preparcoup eq complete
+                event fdb
+                label files ""
+              task mm_sfc_arc
+                trigger preparcoup eq complete
+                event fdb
+                label files ""
+              task mm_ua_arc
+                trigger preparcoup eq complete
+                event fdb
+                label files ""
+            endfamily
+            family restarts
+              trigger archive eq complete
+              edit FCCHUNKSUB '1'
+              family fc1
+                edit OCFCPERT '1'
+                edit FCGROUP 'fc1'
+                task saverestarts
+              endfamily
+            endfamily
+            task ocflush
+              trigger archive eq complete and restarts eq complete
+            family process
+              family fc1
+                trigger  ( /ptb/a020/coup/fcdate/main:YMD gt /ptb/a020/coup/fcdate/lag:YMD) or  ( /ptb/a020/coup/fcdate/main:YMD eq /ptb/a020/coup/fcdate/lag:YMD and /ptb/a020/coup/fcdate/main/assim1/fc1 eq complete)
+                edit OCFCPERT '1'
+                edit FCGROUP 'fc1'
+                task nino_oc
+                  edit SMSCMD 'smssubmit.x %SMSJOB% %WSHOST% %USER%'
+                  edit SMSKILL 'smskill %USER% %WSHOST% %SMSRID% %SMSJOB%'
+                  edit SMSSTATUSCMD 'smscheck %WSHOST% %EXPVER% %SMSJOB%'
+                  edit LOGDIR '/vol/msexplog/outputs'
+                  edit QUEUE 'expsms'
+                task nino_daily
+                  trigger nino_oc eq complete
+                  edit SMSCMD 'smssubmit.x %SMSJOB% %WSHOST% %USER%'
+                  edit SMSKILL 'smskill %USER% %WSHOST% %SMSRID% %SMSJOB%'
+                  edit SMSSTATUSCMD 'smscheck %WSHOST% %EXPVER% %SMSJOB%'
+                  edit LOGDIR '/vol/msexplog/outputs'
+                  edit QUEUE 'expsms'
+                task nino_atmos
+                  trigger nino_daily eq complete
+                  edit SMSCMD 'smssubmit.x %SMSJOB% %WSHOST% %USER%'
+                  edit SMSKILL 'smskill %USER% %WSHOST% %SMSRID% %SMSJOB%'
+                  edit SMSSTATUSCMD 'smscheck %WSHOST% %EXPVER% %SMSJOB%'
+                  edit LOGDIR '/vol/msexplog/outputs'
+                  edit QUEUE 'expsms'
+                task tcyc
+                  trigger ../../archive eq complete
+                  edit SMSCMD 'smssubmit.x %SMSJOB% %WSHOST% %USER%'
+                  edit SMSKILL 'smskill %USER% %WSHOST% %SMSRID% %SMSJOB%'
+                  edit SMSSTATUSCMD 'smscheck %WSHOST% %EXPVER% %SMSJOB%'
+                  edit LOGDIR '/vol/msexplog/outputs'
+                  edit QUEUE 'expsms'
+              endfamily
+            endfamily
+          endfamily
+          family assim2
+            edit FSFAMILY 'assim'
+            edit OCGROUP 'an2'
+            edit FCTOTAL '1'
+            edit RUNCOUPLE '1'
+            edit FCLENGTH '24'
+            edit FCGROUP 'fc2'
+            edit RUNFC '0'
+            family archive
+              inlimit /ptb/a020/coup/limits:mars
+              edit OCNEWPERTORDER 'yes'
+              edit FCGROUP 'fc2'
+              edit FCCHUNK '1'
+              task preparcoup
+                trigger  ( /ptb/a020/coup/fcdate/main:YMD gt /ptb/a020/coup/fcdate/lag:YMD) or  ( /ptb/a020/coup/fcdate/main:YMD eq /ptb/a020/coup/fcdate/lag:YMD and  (  ( /ptb/a020/coup/fcdate/main/assim2/fc2 eq complete)))
+              task arcfc
+                trigger preparcoup eq complete
+                event fdb
+                label files ""
+              task sfc_arc
+                trigger preparcoup eq complete
+                event fdb
+                label files ""
+              task ua_arc
+                trigger preparcoup eq complete
+                event fdb
+                label files ""
+              task mm_sfc_arc
+                trigger preparcoup eq complete
+                event fdb
+                label files ""
+              task mm_ua_arc
+                trigger preparcoup eq complete
+                event fdb
+                label files ""
+            endfamily
+            family restarts
+              trigger archive eq complete
+              edit FCCHUNKSUB '1'
+              family fc2
+                edit OCFCPERT '2'
+                edit FCGROUP 'fc2'
+                task saverestarts
+              endfamily
+            endfamily
+            task ocflush
+              trigger archive eq complete and restarts eq complete
+            family process
+              family fc2
+                trigger  ( /ptb/a020/coup/fcdate/main:YMD gt /ptb/a020/coup/fcdate/lag:YMD) or  ( /ptb/a020/coup/fcdate/main:YMD eq /ptb/a020/coup/fcdate/lag:YMD and /ptb/a020/coup/fcdate/main/assim2/fc2 eq complete)
+                edit OCFCPERT '2'
+                edit FCGROUP 'fc2'
+                task nino_oc
+                  edit SMSCMD 'smssubmit.x %SMSJOB% %WSHOST% %USER%'
+                  edit SMSKILL 'smskill %USER% %WSHOST% %SMSRID% %SMSJOB%'
+                  edit SMSSTATUSCMD 'smscheck %WSHOST% %EXPVER% %SMSJOB%'
+                  edit LOGDIR '/vol/msexplog/outputs'
+                  edit QUEUE 'expsms'
+                task nino_daily
+                  trigger nino_oc eq complete
+                  edit SMSCMD 'smssubmit.x %SMSJOB% %WSHOST% %USER%'
+                  edit SMSKILL 'smskill %USER% %WSHOST% %SMSRID% %SMSJOB%'
+                  edit SMSSTATUSCMD 'smscheck %WSHOST% %EXPVER% %SMSJOB%'
+                  edit LOGDIR '/vol/msexplog/outputs'
+                  edit QUEUE 'expsms'
+                task nino_atmos
+                  trigger nino_daily eq complete
+                  edit SMSCMD 'smssubmit.x %SMSJOB% %WSHOST% %USER%'
+                  edit SMSKILL 'smskill %USER% %WSHOST% %SMSRID% %SMSJOB%'
+                  edit SMSSTATUSCMD 'smscheck %WSHOST% %EXPVER% %SMSJOB%'
+                  edit LOGDIR '/vol/msexplog/outputs'
+                  edit QUEUE 'expsms'
+                task tcyc
+                  trigger ../../archive eq complete
+                  edit SMSCMD 'smssubmit.x %SMSJOB% %WSHOST% %USER%'
+                  edit SMSKILL 'smskill %USER% %WSHOST% %SMSRID% %SMSJOB%'
+                  edit SMSSTATUSCMD 'smscheck %WSHOST% %EXPVER% %SMSJOB%'
+                  edit LOGDIR '/vol/msexplog/outputs'
+                  edit QUEUE 'expsms'
+              endfamily
+            endfamily
+          endfamily
+          task logfiles
+            trigger control0 eq complete and assim0 eq complete and assim1 eq complete and assim2 eq complete
+            edit SMSCMD 'smssubmit.x %SMSJOB% %SCHOST% %USER%'
+            edit SMSKILL 'smskill %USER% %SCHOST% %SMSRID% %SMSJOB%'
+            edit SMSSTATUSCMD 'smscheck %SCHOST% %EXPVER% %SMSJOB%'
+            edit LOGDIR '/hpce/rdx_dir/msx'
+            edit MOVE_TO_ECFS 'no'
+        endfamily
+        family clean
+          repeat enumerated YMD  "19690101" "19690102" # status 19690102
+          edit LOGTASK 'fcdate/clean'
+          family control0
+            defstatus complete
+            edit FSFAMILY 'control'
+            edit OCTOTAL '1'
+            edit OCGROUP 'an0'
+            edit RUNCOUPLE '1'
+            edit FCTOTAL '1'
+            edit FCTOT '1'
+            family fc0
+              edit OCFCPERT '0'
+              edit FCGROUP 'fc0'
+              edit FCCHUNK '1'
+              task saveoce
+                trigger  (  (  ( /ptb/a020/coup/fcdate/lag:YMD gt /ptb/a020/coup/fcdate/clean:YMD) or  ( /ptb/a020/coup/fcdate/lag:YMD eq /ptb/a020/coup/fcdate/clean:YMD and  ( /ptb/a020/coup/fcdate/lag/control0 eq complete) and  ( /ptb/a020/coup/fcdate/main/control0 eq complete))))
+              task occleanfdb
+                inlimit /ptb/a020/coup/limits:fdbclean
+                trigger saveoce eq complete
+                edit ICPDATA '1'
+              task occleanfdbicp
+                inlimit /ptb/a020/coup/limits:fdbclean
+                trigger occleanfdb eq complete
+              task occleandirs
+                trigger occleanfdb eq complete and occleanfdbicp eq complete
+            endfamily
+          endfamily
+          family assim0
+            edit FSFAMILY 'assim'
+            edit OCGROUP 'an0'
+            edit RUNCOUPLE '1'
+            edit FCTOTAL '1'
+            edit FCTOT '3'
+            family fc0
+              edit OCFCPERT '0'
+              edit FCGROUP 'fc0'
+              edit FCCHUNK '1'
+              task saveoce
+                trigger  (  (  ( /ptb/a020/coup/fcdate/lag:YMD gt /ptb/a020/coup/fcdate/clean:YMD) or  ( /ptb/a020/coup/fcdate/lag:YMD eq /ptb/a020/coup/fcdate/clean:YMD and  ( /ptb/a020/coup/fcdate/lag/assim0 eq complete) and  ( /ptb/a020/coup/fcdate/main/assim0 eq complete))))
+              task occleanfdb
+                inlimit /ptb/a020/coup/limits:fdbclean
+                trigger saveoce eq complete
+                edit ICPDATA '1'
+              task occleanfdbicp
+                inlimit /ptb/a020/coup/limits:fdbclean
+                trigger occleanfdb eq complete and ../../assim1 eq complete and ../../assim2 eq complete
+              task occleandirs
+                trigger occleanfdb eq complete and ../../assim1 eq complete and ../../assim2 eq complete and occleanfdbicp eq complete
+            endfamily
+          endfamily
+          family assim1
+            edit FSFAMILY 'assim'
+            edit OCGROUP 'an1'
+            edit RUNCOUPLE '1'
+            edit FCTOTAL '1'
+            edit FCTOT '3'
+            family fc1
+              edit OCFCPERT '1'
+              edit FCGROUP 'fc1'
+              edit FCCHUNK '1'
+              task saveoce
+                trigger  (  (  ( /ptb/a020/coup/fcdate/lag:YMD gt /ptb/a020/coup/fcdate/clean:YMD) or  ( /ptb/a020/coup/fcdate/lag:YMD eq /ptb/a020/coup/fcdate/clean:YMD and  ( /ptb/a020/coup/fcdate/lag/assim1 eq complete) and  ( /ptb/a020/coup/fcdate/main/assim1 eq complete))))
+              task occleanfdb
+                inlimit /ptb/a020/coup/limits:fdbclean
+                trigger saveoce eq complete
+                edit ICPDATA '1'
+              task occleanfdbicp
+                defstatus complete
+                inlimit /ptb/a020/coup/limits:fdbclean
+                trigger occleanfdb eq complete
+              task occleandirs
+                trigger occleanfdb eq complete and occleanfdbicp eq complete
+            endfamily
+          endfamily
+          family assim2
+            edit FSFAMILY 'assim'
+            edit OCGROUP 'an2'
+            edit RUNCOUPLE '1'
+            edit FCTOTAL '1'
+            edit FCTOT '3'
+            family fc2
+              edit OCFCPERT '2'
+              edit FCGROUP 'fc2'
+              edit FCCHUNK '1'
+              task saveoce
+                trigger  (  (  ( /ptb/a020/coup/fcdate/lag:YMD gt /ptb/a020/coup/fcdate/clean:YMD) or  ( /ptb/a020/coup/fcdate/lag:YMD eq /ptb/a020/coup/fcdate/clean:YMD and  ( /ptb/a020/coup/fcdate/lag/assim2 eq complete) and  ( /ptb/a020/coup/fcdate/main/assim2 eq complete))))
+              task occleanfdb
+                inlimit /ptb/a020/coup/limits:fdbclean
+                trigger saveoce eq complete
+                edit ICPDATA '1'
+              task occleanfdbicp
+                defstatus complete
+                inlimit /ptb/a020/coup/limits:fdbclean
+                trigger occleanfdb eq complete
+              task occleandirs
+                trigger occleanfdb eq complete and occleanfdbicp eq complete
+            endfamily
+          endfamily
+          task logfiles
+            trigger control0 eq complete and assim0 eq complete and assim1 eq complete and assim2 eq complete
+            edit SMSCMD 'smssubmit.x %SMSJOB% %SCHOST% %USER%'
+            edit SMSKILL 'smskill %USER% %SCHOST% %SMSRID% %SMSJOB%'
+            edit SMSSTATUSCMD 'smscheck %SCHOST% %EXPVER% %SMSJOB%'
+            edit LOGDIR '/hpce/rdx_dir/msx'
+            edit MOVE_TO_ECFS 'no'
+        endfamily
+      endfamily
+    endfamily
+    task wipefdb
+      trigger  ( an eq complete or an eq unknown) and  ( fc eq complete or fc eq unknown) and  ( eps_sv eq complete or eps_sv eq unknown) and  ( eps_fc eq complete or eps_fc eq unknown) and  ( eps_varfc eq complete or eps_varfc eq unknown) and  ( oceatm eq complete or oceatm eq unknown) and  ( oce eq complete or oce eq unknown) and  ( fpos eq complete or fpos eq unknown) and  ( sens eq complete or sens eq unknown) and  ( wam eq complete or wam eq unknown) and  ( oc eq complete or oc eq unknown) and  ( climplot eq complete or climplot eq unknown) and  ( coup eq complete or coup eq unknown)
+      edit YMD '19900101'
+      edit HOUR '00'
+      edit FSFAMILY 'cancel'
+    task cancel
+      trigger  ( an eq complete or an eq unknown) and  ( fc eq complete or fc eq unknown) and  ( eps_sv eq complete or eps_sv eq unknown) and  ( eps_fc eq complete or eps_fc eq unknown) and  ( eps_varfc eq complete or eps_varfc eq unknown) and  ( oceatm eq complete or oceatm eq unknown) and  ( oce eq complete or oce eq unknown) and  ( fpos eq complete or fpos eq unknown) and  ( sens eq complete or sens eq unknown) and  ( wam eq complete or wam eq unknown) and  ( oc eq complete or oc eq unknown) and  ( climplot eq complete or climplot eq unknown) and  ( coup eq complete or coup eq unknown) and  ( wipefdb eq complete or wipefdb eq unknown)
+      edit YMD '19900101'
+      edit HOUR '00'
+      edit FSFAMILY 'cancel'
+      edit SMSCMD 'smssubmit.x %SMSJOB% %WSHOST% %USER%'
+      edit SMSKILL 'smskill %USER% %WSHOST% %SMSRID% %SMSJOB%'
+      edit SMSSTATUSCMD 'smscheck %WSHOST% %EXPVER% %SMSJOB%'
+      edit LOGDIR '/vol/msexplog/outputs'
+      edit QUEUE 'expsms'
+  endfamily
+endsuite
+#============================================================

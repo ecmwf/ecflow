@@ -1,0 +1,44 @@
+## Copyright 2009-2012 ECMWF. 
+## This software is licensed under the terms of the Apache Licence version 2.0 
+## which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
+## In applying this licence, ECMWF does not waive the privileges and immunities 
+## granted to it by virtue of its status as an intergovernmental organisation 
+## nor does it submit to any jurisdiction. 
+
+#
+# Node attribute project
+#
+project theNodeAttr ;
+
+use-project theCore : ../ACore ;
+
+# The <include> means we will automatically add this directory to the include path
+# of any other target that uses this lib
+#
+lib nodeattr : [ glob src/*.cpp ]
+         : <link>static
+           <variant>debug:<define>DEBUG
+           <use>/theCore//core
+           <use>/site-config//boost_system
+           <use>/site-config//boost_serialization
+           <use>/site-config//boost_filesystem
+           <use>/site-config//boost_datetime
+           <use>/site-config//boost_test
+         :
+         : <include>../ANattr/src         
+         ;
+
+#
+# boost_datetime is only required for formatting. i.e to call to_simple_string
+#  cerr <<  to_simple_string(calendar.suiteTime()) << "\n";
+#
+exe nodeattrtest : [ glob test/*.cpp ]
+           /theCore//core
+           nodeattr
+           /site-config//boost_system
+           /site-config//boost_filesystem
+           /site-config//boost_serialization
+           /site-config//boost_datetime
+           /site-config//boost_test
+         :  <variant>debug:<define>DEBUG
+	     ;

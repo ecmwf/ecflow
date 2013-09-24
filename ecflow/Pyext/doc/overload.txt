@@ -1,0 +1,14 @@
+
+When we have mutiple function of the same name but different args we can use
+the following to choose the correct overload
+
+   // choose the correct overload
+   void    (NodeContainer::*add_family)(family_ptr)          = &NodeContainer::addFamily;
+   void    (NodeContainer::*add_task)(task_ptr)              = &NodeContainer::addTask;
+   class_<NodeContainer, bases<Node>, boost::noncopyable >("NodeContainer",DefsDoc::node_container_doc(), no_init)
+   .def("add_family",&NodeContainer::add_family ,DefsDoc::add_family_doc())
+   .def("add_task",  &NodeContainer::add_task ,  DefsDoc::add_task_doc())
+   .def("add_family",add_family ,DefsDoc::add_family_doc())
+   .def("add_task",  add_task,   DefsDoc::add_task_doc())
+   .add_property("nodes",    boost::python::range( &NodeContainer::node_begin,  &NodeContainer::node_end),"Returns a list of Node's")
+   ;

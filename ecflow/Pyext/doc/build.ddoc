@@ -1,0 +1,47 @@
+
+Boost PYTHON - Built on the fly
+===============================
+The following will cause boost python to be built on the fly:
+This will cause boost python to be built under $BOOST_ROOT/bin.v2/
+
+   import os ;
+   local BOOST_ROOT = [ os.environ BOOST_ROOT ] ;
+   use-project boost : $(BOOST_ROOT) ;
+   project 
+      : requirements <library>/boost/python//boost_python 
+      ;
+      
+   + Only built when required
+   - If boost root is made read only the above will fail
+   
+*** During install boost python is rebuilt and the correct symbol links are setup.
+
+
+Pre-built boost python
+======================
+boost python can be pre-built. (i.e like other boost libs)
+
+   bjam toolset=gcc --build-dir=./tmpBuildDir --layout=tagged link=shared --with-python variant=debug stage
+   bjam toolset=gcc --build-dir=./tmpBuildDir --layout=tagged link=shared --with-python variant=release stage
+
+
+Need to update site-config.jam to include:
+
+   lib boost_python          : : <variant>debug   <file>$(BOOST_ROOT)/stage/lib/libboost_python-mt-d.so ;
+   lib boost_python          : : <variant>release <file>$(BOOST_ROOT)/stage/lib/libboost_python-mt.so ;
+
+Update Pyext/jamfile.jam
+
+   project
+      : requirements <library>/site-config//boost_python 
+      ;
+      
+*** Install: Boost python is *NOT* rebuilt. Just copied
+***          as a consequence the symbolic links are *NOT* correctly set
+***          Hence the embedded paths(RPATH) will not work correctly
+***          objdump -x ecflow.so | more
+
+**** i.e ecflow.so will link with: libboost_python-mt-d.so.1.45.0
+****     However the symbolic like libboost_python-mt-d.so.1.45.0 -> libboost_python-mt-d.so
+****     need to be setup manually.
+

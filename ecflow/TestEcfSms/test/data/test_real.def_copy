@@ -1,0 +1,76 @@
+# Definition of the suite test. 
+  
+# For old sms define the environment variable TEST_HOME
+#setenv -i TEST_HOME 
+suite test 
+    clock real
+    edit ECF_INCLUDE TestEcfSms/test/data/includes
+    edit ECF_HOME    TestEcfSms/test/data 
+    limit l2 2
+    family f1
+        edit SLEEP 2
+    	task t1 	
+	       meter progress 1 30 20
+    	task t2
+	       trigger t1 eq complete
+	       event a
+	       event b
+	   task t3
+	       trigger t2:a
+	   task t4
+	       trigger t2 eq complete
+	       complete t2:b
+	   task t5
+	       trigger t1:progress ge 10
+	   task t6
+	       trigger t1:progress ge 15
+	   task t7
+	       trigger t1:progress ge 25
+    endfamily
+    family f2 
+        edit SLEEP 2 
+        task t1 
+            time 00:30 23:30 00:30 
+        task t2 
+            day  sunday 
+        task t3 
+            date 09.*.* 
+            time 12:00 
+        task t4 
+            time +00:02 
+        task t5 
+            time 00:02 
+    endfamily
+    family f3 
+        task t1 
+            label info "" 
+    endfamily  
+    family f4 
+        edit SLEEP 2 
+        repeat string NAME a b 
+        family f5 
+            repeat integer VALUE 1 3 
+            task t1 
+                repeat date DATE 19991230 20000103 
+                label info "" 
+        endfamily 
+    endfamily 
+    family f5 
+        inlimit l2 
+        edit SLEEP 4 
+		task t1
+		task t2
+		task t3
+		task t4
+		task t5
+		task t6
+		task t7
+		task t8
+		task t9
+    endfamily
+    family f6
+        edit SLEEP 1
+    	autocancel 0
+		task t1
+    endfamily
+endsuite 

@@ -1,0 +1,5 @@
+# Test that a replacement character for ecfmicro must be single character
+# Note: a single £ is multi-character of size 2
+ 
+%ecfmicro ££
+ 

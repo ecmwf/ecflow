@@ -1,0 +1,6 @@
+suite suiteName
+   time 19:00                   # suites dont have a time
+   family familyName0	
+   endfamily
+endsuite
+

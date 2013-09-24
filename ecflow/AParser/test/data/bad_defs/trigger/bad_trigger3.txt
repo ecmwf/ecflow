@@ -1,0 +1,7 @@
+suite suiteName
+    family familyName1
+		task a
+    	task b
+   			trigger /suiteName/ == complete   # incomplete absolute path
+    endfamily
+endsuite

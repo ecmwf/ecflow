@@ -1,0 +1,73 @@
+Address in use
+==============
+
+When the server is started on a given port. Then if there is
+a TCP socket with the same number in LISTEN state, then we
+will a error "Address in use"
+
+
+How can this arise
+==================
+
+1 Server crashes and is re-started immediately
+
+2 The problem shows itself when the server dies or when it has been
+  terminated, and there are outstanding clients, who are trying
+  to communicate with the server.
+
+How do we resolve these problems:
+=================================
+1/ By invoking netstat -anlptu
+   We can see that there is socket in TIME_WAIT state.
+   To get round this we  RESUSE ADRRES option, before
+   binding to the acceptor
+
+  
+2/ This problem arose because the default job submission command:
+   
+   Job submission in ECF is a two phase step.
+    phase 1: Spawn of ECF_JOB_CMD
+    phase 2: Invocation of ECF_JOB_CMD, this creates the *real* job which communicates with the server
+      For ECF_JOB_CMD = "%ECF_JOB% 1> %ECF_JOBOUT% 2>&1
+      this collapses phase 1 and 2, to a single step
+      
+      For Operation:ECF_JOB_CMD = ecf_submit %USER% %SCHOST% %ECFJOB% %ECFJOBOUT%'
+      This uses ecf_submit,This spawns the process to the different load levellers depending on OS, etc.
+      and hence involves at least 2 process.
+      This class handles phase 1, we capture the death of the child process
+      and hence this class will not in operations handle the death of the real job
+      created by ecf_submit.
+      
+  Hence with ECF_JOB_CMD = "%ECF_JOB% 1> %ECF_JOBOUT% 2>&1
+  we create a child process, and child process, inherit the parents files.
+  In our case there inherit the server's sockets.
+  See class System, to see how we spawn the job.
+  
+  Hence when the server dies, the child still hold the socket.
+  This prevents the server from starting on the same port.
+  
+  Notice: that smssubmit uses a special exe, standalone.exe
+  this closes all open file descriptors, apart from standard out/JOBOUT.
+  This allows the server to be restarted.
+  
+  Resolution:
+  o/ Don't take the server down
+  o/ Don't use ECF_JOB_CMD = "%ECF_JOB% 1> %ECF_JOBOUT% 2>&1
+     If you still want to use this make sure to specify a backup server in .ecfhostsfile
+     This will require some management, since we need backup server to load the check point file.
+     
+  o/ Use smssubmit/standalone exe, that will close all inherited file descriptors, apart form
+     the ones it needs.
+     
+  o/ Change The server so that all spawned child process, close file descriptors
+     The closing is done in the child process.
+     This will mean ~ 1024  closes
+        int fd_limit = sysconf(_SC_OPEN_MAX);
+        for (int i=3; i<fd_limit; i++) close(i);
+        
+  
+The last option was chosen, even though there is small performance penalty
+This requires the least amount of explanation to the end user.
+Allowing them to use any ECF_CMD/EF_JOB_CMD with out worry.
+  
+  

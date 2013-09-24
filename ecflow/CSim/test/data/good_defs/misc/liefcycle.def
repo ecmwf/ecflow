@@ -1,0 +1,16 @@
+suite suite1
+  family family1
+   	task a
+        event 1 myEvent
+        meter myMeter 0 100
+   	task b
+   		trigger a == complete
+   endfamily
+   family family2
+   		task aa
+   			trigger ../family1/a:myMeter >= 20 and ../family1/a:myEvent 
+   		task bb
+   			trigger ../family1/a:myMeter >= 50  or  ../family1/a:myEvent
+    endfamily
+endsuite
+

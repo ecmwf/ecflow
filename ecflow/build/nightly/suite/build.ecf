@@ -1,0 +1,64 @@
+%include <head.h>
+# line just after head.h ------------------------------------------
+%manual
+# =============================================================================
+# Change to work space directory: 
+# We do ***not** want to hard wire version in the definition
+# This will allow us to change version without having to modify the definition
+# ==============================================================================
+%end
+release=
+major=
+minor=
+if [[ "%LOCAL_HOST:%" != ""  ]] ; then
+   export WK=%WK%
+   cd $WK
+else
+   cd %ROOT_WK:%/ecflow
+fi
+
+# Determine the release,major,minor numbers for this version 
+release=$(grep "Version::release_" ACore/src/Version.cpp  | cut -d= -s -f2 | sed 's/;//g' | sed 's/ //g')
+major=$(grep   "Version::major_"   ACore/src/Version.cpp  | cut -d= -s -f2 | sed 's/;//g' | sed 's/ //g')
+minor=$(grep   "Version::minor_"   ACore/src/Version.cpp  | cut -d= -s -f2 | sed 's/;//g' | sed 's/ //g' | sed 's/"//g' )
+
+# =================================================================================
+# Environment used by ecflow
+# Hack for ecflow extension:
+# Note: The environment variable ARCH is used to conditionally compile ecflowview
+#
+# In order to embed the path to boost python in ecflow extension
+# we must build with ECFLOW_INSTALL_DIR & ECFLOW_PYTHON_INSTALL_DIR set
+#===================================================================================
+export ECFLOW_INSTALL_DIR=/usr/local/apps/ecflow/$release.$major.$minor
+export ECFLOW_PYTHON_INSTALL_DIR=$ECFLOW_INSTALL_DIR/lib/python%PYTHON_VERSION%/site-packages/ecflow 
+
+# bjam use ARCH environment to determine if the ecflowview should be built
+if [[ %ARCH% = linux64 || %ARCH% = opensuse113  || %ARCH% = opensuse103 ||  %ARCH% = redhat ||  %ARCH% = linux64intel ]] ; then
+   export ARCH=linux
+fi
+
+# **NOTE** do not use -e for file existence it WONT work on HPUX/HP_UX, i.e will **IGNORE** the first if statement
+if [[ %ARCH% = rs6000 ]] ; then
+   export ARCH=rs6000
+fi
+
+
+# for intel compiler
+if [[ %ARCH% = linux64intel ]] ; then
+   export PATH=/usr/local/apps/intel/composer_xe_2013.3.163/bin:$PATH
+   sh -x iccvars.sh intel64
+fi
+
+
+echo $PATH
+if [[ %SET_TO_TEST_SCRIPT% = true ]] ; then
+   echo "Test only"
+else
+   # TEST should be set to -n if defined
+   $BOOST_ROOT/bjam %TEMPLATE_DEPTH:% variant=%MODE% -j%NO_OF_CORES% %TEST:% -d2
+fi
+ 
+#==================================================================================
+
+%include <tail.h>

@@ -1,0 +1,38 @@
+    suite suiteName
+      edit VAR value
+      edit VAR1 "value"
+      family familyName0
+         edit VAR value
+         task taskName0
+            edit VAR1 "value"
+            event 0 
+            event 1 eventName
+            meter myMeter 0 100
+         family heir_familyName0
+            edit VAR1 value
+            task taskName0
+               edit VAR1 value
+               event 0 
+               event 1 eventName
+               meter myMeter 0 100
+         endfamily
+      endfamily
+      family familyName1
+         edit VAR value
+         task taskName1
+            edit VAR1 "value"
+            event 1 
+            event 2 eventName
+            meter myMeter 0 100
+      endfamily
+      family familyName2
+         edit VAR value
+         task taskName2
+            trigger ../familyName1/taskName1 == complete
+            edit VAR1 "value"
+            event 2 
+            event 3 eventName
+            meter myMeter 0 100
+      endfamily
+   endsuite
+

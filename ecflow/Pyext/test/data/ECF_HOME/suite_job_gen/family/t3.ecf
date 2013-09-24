@@ -1,0 +1,34 @@
+ 
+%include <head.h>
+
+
+echo do some work
+sleep 10
+echo end of job
+
+#=====================================================
+# change the ecfmicro character
+%ecfmicro &
+
+&manual
+	START Rest of the manual page is placed here, closer to the code
+&end
+&comment
+  Comment start
+  &SUITE&
+&end
+&comment
+  Comment end
+&end
+&nopp
+  ignore everything in here
+&end
+&manual
+	END of the manual
+&end
+#=====================================================
+# change the ecfmicro character back
+&ecfmicro %
+
+
+%include <tail.h>

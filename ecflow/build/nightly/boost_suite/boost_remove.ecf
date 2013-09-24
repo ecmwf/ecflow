@@ -1,0 +1,14 @@
+%include <head.h>
+
+if [[ %SET_TO_TEST_SCRIPT% = true ]] ; then
+   echo "Test only"
+else
+   # ==========================================================
+   # Run as REMOTE_HOST. i.e %REMOTE_HOST:%
+   # ==========================================================
+   
+   cd %BOOST_DIR%
+   rm -rf %BOOST_VERSION% || true ;
+fi
+
+%include <tail.h>

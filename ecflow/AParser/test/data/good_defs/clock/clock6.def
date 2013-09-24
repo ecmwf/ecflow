@@ -1,0 +1,24 @@
+suite s1
+  clock real 300 -s                #  
+endsuite
+ 
+suite s3
+  clock real 20.1.1992 300 -s  
+endsuite
+
+suite s4
+  clock real 20.1.1992 +01:00 -s
+endsuite
+
+
+suite s01
+  clock real 300  -s            # -s means stop start calendar with server
+endsuite
+
+suite s02
+  clock real +01:00  -s         # 
+endsuite
+
+suite s03
+  clock real 20.1.1992 +01:00   -s
+endsuite

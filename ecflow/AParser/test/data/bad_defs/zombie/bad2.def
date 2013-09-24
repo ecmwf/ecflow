@@ -1,0 +1,7 @@
+suite suiteName
+   zombie ecf:fob:init:100
+   zombie path:fail:event:100
+   zombie user:adopt:meter:100
+   zombie ecf:fob:init:100       # can only have one ecf
+endsuite
+

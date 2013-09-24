@@ -1,0 +1,20 @@
+suite suite
+    family family
+    	task t1
+    	task t2
+    	task t3
+    	task t4
+    	task t5
+    	task t6
+    	task t7
+    	task t8
+    	task t9
+    	task t10
+		task a             
+         	event eventName 
+    	task b             
+   			trigger -a t2  == complete     # option -a and -o should be last
+   			trigger -o t3  == complete     # option -a and -o should be last
+   			trigger t1  == complete        # trigger with out options should be first
+    endfamily
+endsuite

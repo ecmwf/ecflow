@@ -1,0 +1,5 @@
+suite suiteName
+   
+    repeat date YMD 20091901 20091501   # should have format yyyymmdd  19 and 15 ar not valid months
+  
+endsuite

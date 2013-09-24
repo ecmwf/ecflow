@@ -1,0 +1,16 @@
+
+suite main
+  family dc00
+         task obs
+         task ref
+         family an
+            task forceinv
+         endfamily
+         family fc
+            # this should fail to find the referenced node, since .. means parents parent i.e main
+            # since there is no family 'an' under main this should fail.
+            trigger ../an/forceinv == complete # this should really be ./an/forceinv == complete
+         endfamily    
+   endfamily
+endsuite
+

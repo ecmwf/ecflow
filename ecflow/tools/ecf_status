@@ -1,0 +1,209 @@
+#!/bin/ksh
+#==========================================================================
+##.TITLE   EMOS - METAPS utilities
+##.NAME    smsstatus
+##.SECTION EMOS
+##.AUTHOR  Axel Bonet
+##.DATE    2006-02-08
+##.VERSION 1.0
+##.FILE    ~emos/bin/smsstatus
+##.ORIGIN  smskill
+#==========================================================================
+##$  smsstatus user host smsrid smsjob
+##
+##?  Decides according to host argument which stat command to use.
+
+# Modifications:
+
+#--------------------------------------------------------------------------
+#  Check the number of arguments
+#--------------------------------------------------------------------------
+export SLURM_ROOT=/usr/local/apps/slurm/current/bin
+SSH=ssh
+RSH=rsh
+type rsh || RSH=ssh
+
+echo $0 $* ; # echo ; 
+date ; echo
+set -xv
+
+if [ $# -lt 4 ] ; then
+  echo "usage: $0 <user> <host> <smsid> <smsjob>"
+  echo "example: $0 emos leda 12345 smsjob"
+  exit 1
+fi
+
+user=$1
+host=$2
+smsid=$3
+smsjob=$4
+subfile=${smsjob}.sub
+
+#--------------------------------------------------------------------------
+# determine queuing system from hostname
+# (can be replaced by a more refined method later...)
+#--------------------------------------------------------------------------
+
+hostname=$(hostname)
+
+case $host in
+  happ | happ2 | celeborn | elrond | altariel | frodo | bilbo | belegorn | boromir | denethor | faramir | hallas | acq | pp1 | diss | acq2 | pp2 | acq3 | pp3 )
+    type=pbs;;
+  swarm | linux_cluster | lxa | lxb | lxab )    type=swarm;;
+
+  ecgate1 | ecgb* )                             type=slurm;;
+
+  ecgate  | ecga* | c2* )                       type=ll;;
+  $hostname | localhost | diomedes | ariel | osiris | adam | lenny ) 
+  type=local;;
+  datasvc | wedit | indigo | cassini | suse91 | stratos | katana | vali | mordred | ablamor | ibis | lenny )
+        type=ssh;;
+  * )
+    type=rsh
+    ;;
+esac
+
+OK=NOK
+
+case $type in
+#==========================================================================
+  pbs )
+#==========================================================================
+
+    qstat=/usr/local/apps/propbs/bin/qstat
+
+    if [[ -s $subfile ]] ; then
+      tid=$(tail -1 $subfile)
+    elif [[ -s $smsjob ]] ; then
+      tid=$(grep PBS_JOB ${smsjob}.1 | cut -d= -f2)
+    else
+      tid=$smsid
+    fi
+
+    banner "** output ** "
+    $RSH $host -l $user tail -100 /var/spool/PBS/spool/${tid}*
+    banner "** qstat ** "
+    $RSH $host -l $user $qstat -f $tid | grep $user && OK=OK &
+  ;;
+#==========================================================================
+  vppnqs )
+#==========================================================================
+
+    $RSH $host -l $user qstat $smsid  | grep $user && OK=OK &
+  ;;
+#==========================================================================
+  nqs )
+#==========================================================================
+
+    $RSH $host -l $user qstat $smsid  | grep $user && OK=OK &
+    ;;
+
+#==========================================================================
+  swarm | linux_cluster | lxa | lxb | lxab )
+#==========================================================================
+#    use sge
+    task_name=$(basename $smsjob | cut -d\. -f1)
+    if [[ -s $subfile ]] then
+      tid=$(grep "Submitted batch job" $subfile | cut -f 3 -d" ")
+    elif [[ -s $smsjob ]] ; then
+      tid=$(grep active_jobs $smsjob | grep cd | cut -d"." -f 2 | cut -d"/" -f8)
+    else
+      tid=$smsrid
+fi
+
+    printf "==============================================================\n"
+
+    if [[ $host == @(lxa|lxb|lxab) ]] ; then
+        cat $file | ssh $host /usr/local/apps/sge/sge6_2u5/bin/lx24-amd64/qstat -u $user -f  | grep -E "$task_name|$tid" | grep $user && OK=OK
+        cat $file | ssh $host /usr/local/apps/sge/sge6_2u5/bin/lx24-amd64/qstat -j $tid && print "$smsjob is there\n" || print "$smsjob not there ... \n"
+    else
+      qstat -u $user -f  | grep -E "$task_name|$tid" | grep $user && OK=OK
+      qstat -j $tid && print "$smsjob is there\n" || print "$smsjob not there ... \n"
+    fi
+
+    printf "==============================================================\n"
+
+  ;;
+#==========================================================================
+  ll )
+#==========================================================================
+
+ if [[ -s $subfile ]] then
+   tid=$(grep " has been submitted." $subfile | cut -d\" -f2)
+   host=$(echo $tid | cut -d\. -f1)
+   host4=$(echo $host | cut -c1-4)
+
+
+    $RSH $host /usr/lpp/LoadL/full/bin/llq -f %id %jn %o %c %st %nh $tid  | grep $user && OK=OK &
+
+else
+
+   if [[ -s $smsjob ]] ; then
+     host=$(grep HOST= $smsjob | cut -d= -f2)
+   fi
+
+   if [[ "$host" == hpc* ]] ; then
+     host=$(echo $host | cut -c1-4)
+     host4=$(echo $host | cut -c1-4)   
+     id=${host}0$(echo $smsid % 1000 | bc).$(echo $smsid / 1000 | bc)
+   else 
+     id=$host.$smsid
+   fi
+   
+   # rsh $host -l $user /usr/lpp/LoadL/full/bin/llq -x $id && OK=OK &
+   $RSH $host /usr/lpp/LoadL/full/bin/llq -f %id %jn %o %c %st %nh $tid  | grep $user && OK=OK &
+ fi
+  ;;
+#==========================================================================
+  slurm )
+#==========================================================================
+
+        if [[ -s $subfile ]] then
+            tid=$(grep " has been submitted." $subfile | cut -d\" -f2)
+            host=$(echo $tid | cut -d\. -f1)
+            host4=$(echo $host | cut -c1-4)
+        fi
+            
+        if [[ "$hostname" == @(ecgate1|ecgb*) ]] ; then
+            $SLURM_ROOT/squeue | grep " $tid"  | grep $user && OK=OK &
+        else
+            ssh -l $user $host $SLURM_ROOT/squeue | grep " $tid"  | grep $user && OK=OK &
+        fi
+  ;;
+#==========================================================================
+  rsh )
+#==========================================================================
+        
+        if [[ $smsid == 0 ]]; then echo "too early"; exit 0; fi
+        $RSH $host -l $user ps -elf | grep " $user " | grep " $smsid " | grep -v " grep " && OK=OK 2>/dev/null &
+        
+        $RSH $host -l $user ps -sid $smsid -f && OK=OK &
+
+        ;;     
+#==========================================================================
+  local )
+#==========================================================================
+
+    # \ps -U $user -u $user -lf $smsid &
+    if [[ $smsid == 0 ]]; then echo "too early"; exit 0; fi
+    \ps -elf | grep " $user " | grep " $smsid " | grep -v " grep " && OK=OK &
+    \ps -sid $smsid -f && OK=OK &
+    ;;
+
+  esac
+
+set +x
+display_subfile() {
+  if [[ -s $subfile ]]; then # && [[ $OK = NOK ]] ; then
+    ls -la $subfile
+    # echo #    grep "^# +++ hpc" $subfile 
+    cat $subfile
+    # && type=ll
+fi
+}
+
+echo "$0 $* # $tid"
+display_subfile
+# wait
+
+exit 0

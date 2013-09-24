@@ -1,0 +1,13 @@
+
+host1:3142    # some description of the port
+host2:3141    # another description
+
+host3
+
+host4:4001
+
+host5
+host6:4081
+
+# a comment
+#a comment

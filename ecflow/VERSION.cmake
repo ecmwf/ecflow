@@ -1,0 +1,2 @@
+set( ${PROJECT_NAME}_VERSION_STR  "3.8.0" )
+

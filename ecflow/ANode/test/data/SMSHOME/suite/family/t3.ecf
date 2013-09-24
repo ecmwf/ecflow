@@ -1,0 +1,39 @@
+# using %include "filename"
+# include the contents of the file %ECF_HOME%/%SUITE%/%FAMILY%/filename
+#
+# since we are using quotes we expect to find 'head.h' and 'tail.h'
+# in the same directory as the sms files.
+#======================================================================
+%include "head.h"
+
+
+echo do some work
+sleep 10
+echo end of job
+
+#=====================================================
+# change the ecfmicro character
+%ecfmicro &
+
+&manual
+	START Rest of the manual page is placed here, closer to the code
+&end
+&comment
+  Comment start
+  &SUITE&
+&end
+&comment
+  Comment end
+&end
+&nopp
+  ignore everything in here
+&end
+&manual
+	END of the manual
+&end
+#=====================================================
+# change the ecfmicro character back
+&ecfmicro %
+
+
+%include "tail.h"

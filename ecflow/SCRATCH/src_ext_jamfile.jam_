@@ -1,0 +1,110 @@
+## Copyright 2009-2012 ECMWF. 
+## This software is licensed under the terms of the Apache Licence version 2.0 
+## which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
+## In applying this licence, ECMWF does not waive the privileges and immunities 
+## granted to it by virtue of its status as an intergovernmental organisation 
+## nor does it submit to any jurisdiction. 
+#
+# SCRATCH project, used for platform testing
+#
+#project theSCRATCH ;
+
+lib pthread ;
+
+# ***********************************************************
+# Comment this in for test:
+# ***********************************************************
+#exe test : [ glob src/*.cpp  ] 
+#           pthread
+#           /site-config//boost_system
+#           /site-config//boost_serialization
+#           /site-config//boost_thread
+#           /site-config//boost_test
+#         : <include>../SCRATCH/src
+#           <variant>debug:<define>DEBUG
+#         ;
+         
+#exe test : [ glob src/*.cpp  ] 
+#           pthread
+#           /site-config//boost_thread
+#           /site-config//boost_serialization
+#         : <include>src/
+#           <variant>debug:<define>DEBUG
+#         ;
+        
+#===================================================================================================
+# Make the definition of the python-extension rule available
+# Somehow this bjam causes boost python libs to be built under $BOOST_ROOT/bin.v2
+# How can I get it to use boost python that was built with all the other boost libs ???
+import python ;
+
+if ! [ python.configured ]
+{
+    ECHO "notice: no Python configured in user-config.jam" ;
+    ECHO "notice: will use default configuration" ;
+    using python ;
+}
+
+# Specify the path to the Boost project.  If you move this project,
+# adjust this path to refer to the Boost root directory.
+import os ;
+local BOOST_ROOT = [ os.environ BOOST_ROOT ] ;
+use-project boost
+  : $(BOOST_ROOT) ;
+           
+project
+  : requirements <library>/boost/python//boost_python ;
+
+# ========================================================================
+# Extension:  Declare a Python extension called ecflow.  
+# ========================================================================
+python-extension hello_ext  : [ glob src_ext/1/hello_world.cpp ] ;
+python-extension hello_ext2 : [ glob src_ext/2/exposing_classes.cpp ] ;
+python-extension hello_ext3 : [ glob src_ext/3/constructors.cpp ] ;
+python-extension hello_ext4 : [ glob src_ext/4/data_members.cpp ] ;
+python-extension hello_ext5 : [ glob src_ext/5/class_properties.cpp ] ;
+python-extension hello_ext6 : [ glob src_ext/6/inheritance.cpp ] ;
+python-extension hello_ext7 : [ glob src_ext/7/virtual_functions.cpp ] ;
+python-extension hello_ext8 : [ glob src_ext/8/call_policies.cpp ] ;
+python-extension hello_ext8 : [ glob src_ext/9/  ] ;
+
+# Put the extension and Boost.Python DLL in the current directory, so
+# that running script by hand works.
+#install convenient_copy 
+#  : hello_ext 
+#  : <install-dependencies>on <install-type>SHARED_LIB <install-type>PYTHON_EXTENSION 
+#    <location>. 
+#  ;
+
+# ========================================================================
+# TESTING: unit-tests and test for python fragments 
+# ========================================================================
+import testing ;
+
+# A little "rule" (function) to clean up the syntax of declaring tests of these extension modules.
+local rule run-test ( test-name : sources + )
+{
+    testing.make-test run-pyd : $(sources) : : $(test-name) ;
+}
+
+# Declare test targets;             
+run-test hello_world_test : hello_ext [ glob src_ext/1/hello_world_test.py ] ;
+run-test exposing_classes_test : hello_ext2 [ glob src_ext/2/exposing_classes_test.py ] ;
+run-test constructors_test : hello_ext3 [ glob src_ext/3/constructors_test.py ] ;
+run-test data_members_test : hello_ext4 [ glob src_ext/4/data_members_test.py ] ;
+run-test class_properties_test : hello_ext5 [ glob src_ext/5/class_properties_test.py ] ;
+run-test inheritance_test : hello_ext6 [ glob src_ext/6/inheritance_test.py ] ;
+run-test virtual_function_test : hello_ext7 [ glob src_ext/7/virtual_function_test.py ] ;
+run-test call_policies_test : hello_ext8 [ glob src_ext/8/call_policies_test.py ] ;
+# run-test call_policies_test : hello_ext9 [ glob src_ext/9/call_policies_test.py ] ;
+
+explicit test-all 
+   hello_world_test  
+   exposing_classes_test 
+   constructors_test
+   data_members_test
+   class_properties_test
+   call_policies_test
+   ;
+
+         
