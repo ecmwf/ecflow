@@ -11,14 +11,17 @@ swap
 *.glog
 *.def.glog
 
-**/naw.*
-
+# hack to ignore naw.def.glog
+**/naw.def.glog
+ 
 *.log
 *.so
 *.pyc
 
- 
 gmon.out
+
+*.check
+*.b
 /eurydice.3141.ecf.check
 /eurydice.3141.ecf.log
 /eurydice.3141.ecf.check.b
