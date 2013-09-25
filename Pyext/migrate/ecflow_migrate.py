@@ -16,105 +16,149 @@ import os       # for getenv
 import shutil   # used to remove directory tree
 import argparse # for argument parsing     
 
-def ensure_start_abort_and_end_abort_on_sameline(list_of_all_theLines, output_lines):
-    """
-    The correct format is: where abort state is on the same line
-    task task # passwd:jxX0gIbR abort<: reason for abort >abort:
-    """
-    migrated = False
-    start_line_append = ""
-    for line in list_of_all_theLines:
-        # process line
-        end_abort_pos = line.find(">abort")
-        task_pos = line.find("task")
-        if task_pos != -1:
-            start_abort_pos = line.find("abort<:")
-            if start_abort_pos != -1 and end_abort_pos != -1:
-                # start and end found on same line. This is the correct format
-                start_line_append = ""
-            
-            if start_abort_pos != -1 and end_abort_pos == -1:
-                # print "start abort found with no end abort"
-                start_line_append = line
-                start_line_append = start_line_append.rstrip('\n')
-                start_line_append += " "
-                migrated = True
-                continue
-
-        if len(start_line_append) > 0:
-            start_line_append += line
-            if end_abort_pos != -1:
-                output_lines.append(start_line_append) # preserve'\n' for this case                   
-                # print start_line_append
-                start_line_append = "";
-            else:
-                start_line_append = start_line_append.rstrip('\n')
-                start_line_append += " "
-
-            continue;
-              
-        output_lines.append(line)
-       
-    return migrated
-     
-def ensure_label_on_sameline(list_of_all_theLines, output_lines):
-    """
-    The correct format is where label in on the same line
-        label name "value" # "new value"
-    However if the value or new value has new line it can mess up the parsing
-        label info "have you? set START_LOBSVR=1 in the task, once, to launch the logserver,
-setup ssh login
-created remote /tmp/map/cray"
-    """
-    #count = 0;
-    migrated = False
-    start_line_append = ""
-    for line in list_of_all_theLines:
-        #count =  count + 1
-        #print str(count) + ": " + line
-        #if count == 383119:
-        #    print "debug mee"
-        if len(start_line_append) > 0:
-            start_line_append += line
-            no_of_quotes = line.count('"')
-            if no_of_quotes == 1:
-                output_lines.append(start_line_append) # preserve'\n' for this case 
-                start_line_append = "" 
-            else:
-                start_line_append = start_line_append.rstrip('\n')
-            continue            
-        else:
+class Migrator(object):
+    def __init__(self, list_of_input_lines):
+        self.list_of_input_lines =  list_of_input_lines
+        self.list_of_output_lines = []
         
+    def _migration_hook(self,default_version_number):
+        """Derived suite should override this function to build the suite
+           Should not be called explicitly. How could we enforce this ?
+        """
+        return False;
+    
+    def output_lines(self):
+        return self.list_of_output_lines
+    
+    def migrate(self, default_version_number):
+        """Template/skeleton function. 
+        """
+        version = self.version_number_as_integer(default_version_number) 
+        if version >= default_version_number:
+            self.list_of_output_lines = self.list_of_input_lines
+            return False
+
+        self.list_of_output_lines = [] 
+        migrated = self._migration_hook(default_version_number)
+        if migrated : 
+            self.list_of_output_lines = self.list_of_output_lines   # preserve this migration
+            print "Applying " + type(self).__name__  
+        else:
+            self.list_of_output_lines = self.list_of_input_lines   
+        return migrated         
+
+    def version_number_as_integer(self,default_version):
+        """Determine the version number used in ecflow_client --migrate
+           This should be in the very first line
+           # 3.1.8
+        """
+        if len(self.list_of_input_lines) > 0:
+            tokens = self.list_of_input_lines[0].split()
+            if len(tokens) > 1:
+                # print tokens
+                version = (int)(tokens[1].replace(".",""))
+                # print "******************* found version " + str(version)
+                return version;
+        return default_version
+    
+    
+class MigrateForTaskAbort(Migrator):
+    def __init__(self, list_of_input_lines):
+        Migrator.__init__(self, list_of_input_lines)
+ 
+    def _migration_hook(self,default_version_number):
+        """
+        The correct format is: where abort state is on the same line
+        task task # passwd:jxX0gIbR abort<: reason for abort >abort:
+        ensure_start_abort_and_end_abort_on_sameline
+        """
+        migrated = False
+        start_line_append = ""
+        for line in self.list_of_input_lines:
             # process line
-            tokens = line.split()
-            if len(tokens) >0 and tokens[0] == "label":
-                no_of_quotes = line.count('"')
-                if no_of_quotes % 2 != 0 : 
+            end_abort_pos = line.find(">abort")
+            task_pos = line.find("task")
+            if task_pos != -1:
+                start_abort_pos = line.find("abort<:")
+                if start_abort_pos != -1 and end_abort_pos != -1:
+                    # start and end found on same line. This is the correct format
+                    start_line_append = ""
+                
+                if start_abort_pos != -1 and end_abort_pos == -1:
+                    # print "start abort found with no end abort"
                     start_line_append = line
                     start_line_append = start_line_append.rstrip('\n')
+                    start_line_append += " "
                     migrated = True
                     continue
-              
-        output_lines.append(line)
-       
-    return migrated
-     
-     
-def version_number_as_integer(list_of_all_theLines, default_version):
-    """Determine the version number used in ecflow_client --migrate
-       This should be in the very first line
-       # 3.1.8
-    """
-    if len(list_of_all_theLines) > 0:
-        tokens = list_of_all_theLines[0].split()
-        if len(tokens) > 1:
-            version = (int)(tokens[1].replace(".",""))
-            # print "******************* found version " + str(version)
-            return version;
-    return default_version
     
+            if len(start_line_append) > 0:
+                start_line_append += line
+                if end_abort_pos != -1:
+                    self.list_of_output_lines.append(start_line_append) # preserve'\n' for this case                   
+                    # print start_line_append
+                    start_line_append = "";
+                else:
+                    start_line_append = start_line_append.rstrip('\n')
+                    start_line_append += " "
+    
+                continue;
+                  
+            self.list_of_output_lines.append(line)
+           
+        return migrated  
+    
+    
+class MigrateForLabel(Migrator):
+    def __init__(self, list_of_input_lines):
+        Migrator.__init__(self, list_of_input_lines)
+ 
+    def _migration_hook(self,default_version_number):
+        """
+        The correct format is where label in on the same line
+            label name "value" # "new value"
+        However if the value or new value has new line it can mess up the parsing
+            label info "have you? set START_LOBSVR=1 in the task, once, to launch the logserver,
+    setup ssh login
+    created remote /tmp/map/cray"
+        """
+        #count = 0;
+        migrated = False
+        start_line_append = ""
+        for line in self.list_of_input_lines:
+            #count =  count + 1
+            #print str(count) + ": " + line
+            #if count == 383119:
+            #    print "debug mee"
+            if len(start_line_append) > 0:
+                start_line_append += line
+                no_of_quotes = line.count('"')
+                if no_of_quotes == 1:
+                    self.list_of_output_lines.append(start_line_append) # preserve'\n' for this case 
+                    start_line_append = "" 
+                else:
+                    start_line_append = start_line_append.rstrip('\n')
+                continue            
+            else:
+            
+                # process line
+                tokens = line.split()
+                if len(tokens) >0 and tokens[0] == "label":
+                    no_of_quotes = line.count('"')
+                    if no_of_quotes % 2 != 0 : 
+                        start_line_append = line
+                        start_line_append = start_line_append.rstrip('\n')
+                        migrated = True
+                        continue
+                  
+            self.list_of_output_lines.append(line)
+           
+        return migrated
+     
+     
     
 def do_migrate(defs_file):
+    
     migration_count = 0
     fileName, fileExtension = os.path.splitext(defs_file)
     output_file_name = fileName + ".mig";
@@ -122,43 +166,30 @@ def do_migrate(defs_file):
     input_file_object = open(defs_file,'r')
     output_file_object = open(output_file_name,'w')
     try:
-        list_of_all_theLines = input_file_object.readlines()  # preserves new lines, we want this
+        list_of_input_lines = input_file_object.readlines()  # preserves new lines, we want this
         
-        version = version_number_as_integer(list_of_all_theLines,318) 
-        
-        if version < 318:
+        list_of_output_lines = []
+        abort_migrator = MigrateForTaskAbort(list_of_input_lines)
+        if abort_migrator.migrate(318):
+            migration_count += 1
+            # did migration, update input lines for next migration
+            list_of_input_lines = abort_migrator.output_lines()
+        list_of_output_lines = abort_migrator.output_lines()
+         
+         
+        label_migrator = MigrateForLabel(list_of_input_lines)
+        if label_migrator.migrate(319):
+            migration_count += 1
+            # did migration, update input lines for next migration
+            list_of_input_lines = label_migrator.output_lines()
+        list_of_output_lines = label_migrator.output_lines()
             
-            list_of_output_lines = [] 
-            
-            # This fix is only applicable for versions < 3.1.8
-            migrated = ensure_start_abort_and_end_abort_on_sameline(list_of_all_theLines,list_of_output_lines)
-            if migrated : 
-                migration_count = migration_count + 1
-                list_of_all_theLines = list_of_output_lines   # preserve this migration
-                print "Applying Task abort state migration, for file:" + defs_file + "  version:" + str(version)
-        else:
-            list_of_output_lines = list_of_all_theLines
-            
-            
-        if version < 319: # This fix is only applicable for versions < 3.1.9
-                  
-            list_of_output_lines = [] # reset, otherwise when no migration we can end up doubling file
-                
-            migrated = ensure_label_on_sameline(list_of_all_theLines,list_of_output_lines)
-            if migrated : 
-                migration_count = migration_count + 1
-                list_of_all_theLines = list_of_output_lines  # preserve this migration
-                print "Applying label migration for file:" + defs_file + "  version:" + str(version)
-        else:
-            list_of_output_lines = list_of_all_theLines
-
-        # Add any future migration bug fixes here.
-        # ... 
         output_file_object.writelines(list_of_output_lines)
     finally:
         input_file_object.close()
         output_file_object.close()
-    return migration_count
+        
+    return migration_count 
 
 if __name__ == "__main__":
     
