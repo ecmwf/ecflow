@@ -80,3 +80,14 @@ suite suite #  begun:1 state:aborted dur:01:29:57 flag:message,no_reque
       trigger 1==0
   endfamily
 endsuite
+#
+# Label that spans multiple lines
+suite made_up
+    label info "110 nodes for 1 minutes in 55 minutes, emos12Aeda"
+    label info "((11*10*64)) for 30"
+    label info ""
+    label info "have you? set START_LOBSVR=1 in the task, once, to launch the logserver,
+setup ssh login
+created remote /tmp/map/cray"
+  zombie ecf:fob:label:3600 
+endsuite

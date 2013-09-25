@@ -1,0 +1,13 @@
+# 3.1.7
+defs_state MIGRATE state>:aborted flag:late,message state_change:2058963 modify_change:1954
+  edit ECF_INCLUDE '/tmp/map/work/p4/merlin/workspace/MyProject/Pyext/test/data/CUSTOMER/ECF_HOME/includes'
+  history /test MSG:[11:40:24 20.9.2013] --replace=/test <empty> parent  :mapMSG:[11:41:01 20.9.2013] --replace=/test <empty> parent  :mapMSG:[11:51:53 20.9.2013] --replace=/test <empty> parent  :mapMSG:[11:52:53 20.9.2013] --replace=/test <empty> parent  :mapMSG:[11:53:24 20.9.2013] --replace=/test <empty> parent  :mapMSG:[11:54:51 20.9.2013] --replace=/test <empty> parent  :map
+suite made_up
+    label info "110 nodes for 1 minutes in 55 minutes, emos12Aeda"
+    label info "((11*10*64)) for 30"
+    label info ""
+    label info "have you? set START_LOBSVR=1 in the task, once, to launch the logserver,
+setup ssh login
+created remote /tmp/map/cray"
+  zombie ecf:fob:label:3600 
+endsuite

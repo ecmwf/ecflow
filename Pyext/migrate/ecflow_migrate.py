@@ -17,41 +17,88 @@ import shutil   # used to remove directory tree
 import argparse # for argument parsing     
 
 def ensure_start_abort_and_end_abort_on_sameline(list_of_all_theLines, output_lines):
-   migrated = False
-   start_line_append = ""
-   for line in list_of_all_theLines:
-       # process line
-       end_abort_pos = line.find(">abort")
-       task_pos = line.find("task")
-       if task_pos != -1:
-           start_abort_pos = line.find("abort<:")
-           if start_abort_pos != -1 and end_abort_pos != -1:
-               # start and end found on same line. This is the correct format
-               start_line_append = ""
+    """
+    The correct format is: where abort state is on the same line
+    task task # passwd:jxX0gIbR abort<: reason for abort >abort:
+    """
+    migrated = False
+    start_line_append = ""
+    for line in list_of_all_theLines:
+        # process line
+        end_abort_pos = line.find(">abort")
+        task_pos = line.find("task")
+        if task_pos != -1:
+            start_abort_pos = line.find("abort<:")
+            if start_abort_pos != -1 and end_abort_pos != -1:
+                # start and end found on same line. This is the correct format
+                start_line_append = ""
             
-           if start_abort_pos != -1 and end_abort_pos == -1:
-               print "start abort found with no end abort"
-               start_line_append = line
-               start_line_append = start_line_append.rstrip('\n')
-               start_line_append += " "
-               migrated = True
-               continue
+            if start_abort_pos != -1 and end_abort_pos == -1:
+                # print "start abort found with no end abort"
+                start_line_append = line
+                start_line_append = start_line_append.rstrip('\n')
+                start_line_append += " "
+                migrated = True
+                continue
 
-       if len(start_line_append) > 0:
-           start_line_append += line
-           if end_abort_pos != -1:
-               output_lines.append(start_line_append) # preserve'\n' for this case                   
-               # print start_line_append
-               start_line_append = "";
-           else:
-               start_line_append = start_line_append.rstrip('\n')
-               start_line_append += " "
+        if len(start_line_append) > 0:
+            start_line_append += line
+            if end_abort_pos != -1:
+                output_lines.append(start_line_append) # preserve'\n' for this case                   
+                # print start_line_append
+                start_line_append = "";
+            else:
+                start_line_append = start_line_append.rstrip('\n')
+                start_line_append += " "
 
-           continue;
+            continue;
               
-       output_lines.append(line)
+        output_lines.append(line)
        
-   return migrated
+    return migrated
+     
+def ensure_label_on_sameline(list_of_all_theLines, output_lines):
+    """
+    The correct format is where label in on the same line
+        label name "value" # "new value"
+    However if the value or new value has new line it can mess up the parsing
+        label info "have you? set START_LOBSVR=1 in the task, once, to launch the logserver,
+setup ssh login
+created remote /tmp/map/cray"
+    """
+    #count = 0;
+    migrated = False
+    start_line_append = ""
+    for line in list_of_all_theLines:
+        #count =  count + 1
+        #print str(count) + ": " + line
+        #if count == 383119:
+        #    print "debug mee"
+        if len(start_line_append) > 0:
+            start_line_append += line
+            no_of_quotes = line.count('"')
+            if no_of_quotes == 1:
+                output_lines.append(start_line_append) # preserve'\n' for this case 
+                start_line_append = "" 
+            else:
+                start_line_append = start_line_append.rstrip('\n')
+            continue            
+        else:
+        
+            # process line
+            tokens = line.split()
+            if len(tokens) >0 and tokens[0] == "label":
+                no_of_quotes = line.count('"')
+                if no_of_quotes % 2 != 0 : 
+                    start_line_append = line
+                    start_line_append = start_line_append.rstrip('\n')
+                    migrated = True
+                    continue
+              
+        output_lines.append(line)
+       
+    return migrated
+     
      
 def version_number_as_integer(list_of_all_theLines, default_version):
     """Determine the version number used in ecflow_client --migrate
@@ -78,6 +125,7 @@ def do_migrate(defs_file):
         list_of_all_theLines = input_file_object.readlines()  # preserves new lines, we want this
         
         version = version_number_as_integer(list_of_all_theLines,318) 
+        
         if version < 318:
             # This fix is only applicable for versions < 3.1.8
             migrated = ensure_start_abort_and_end_abort_on_sameline(list_of_all_theLines,list_of_output_lines)
@@ -86,6 +134,19 @@ def do_migrate(defs_file):
             print "***** NO migration required for " + ARGS.defs_file + " version " + str(version)
             list_of_output_lines = list_of_all_theLines
             
+            
+        if version < 319: # This fix is only applicable for versions < 3.1.9
+            # Do not lose previous migration
+            if migrated:
+                list_of_all_theLines = list_of_output_lines
+                list_of_output_lines = [] 
+                
+            migrated = ensure_label_on_sameline(list_of_all_theLines,list_of_output_lines)
+            if migrated : migration_count = migration_count + 1
+        else:
+            print "***** NO migration required for " + ARGS.defs_file + " version " + str(version)
+            list_of_output_lines = list_of_all_theLines
+
         # Add any future migration bug fixes here.
         # ... 
         
