@@ -121,7 +121,7 @@ class DefsTraverser:
         for var in node.variables:    self.__writeln("edit " + var.name() + " '" + var.value() + "'")
         for meter in node.meters:     self.__writeln(str(meter) + " # value: " + str(meter.value()))
         for event in node.events:     self.__writeln(str(event) + " # value: " + str(event.value()))
-        for label in node.labels:     self.__writeln(str(label) + " # value: " + label.value())
+        for label in node.labels:     self.__writeln(str(label) + " # value: " + label.new_value())
         for limit in node.limits:     self.__writeln(str(limit) + " # value: " + str(limit.value()))
         for inlimit in node.inlimits: self.__writeln(str(inlimit))
         for the_time in node.times:   self.__writeln(str(the_time))

@@ -1,4 +1,4 @@
-/bin
+bin/
 swap
 
 *.job0
@@ -11,12 +11,13 @@ swap
 *.glog
 *.def.glog
 
+**/naw.*
+
 *.log
 *.so
 *.pyc
 
-naw.def.glog
-
+ 
 gmon.out
 /eurydice.3141.ecf.check
 /eurydice.3141.ecf.log
