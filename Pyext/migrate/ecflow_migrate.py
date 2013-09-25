@@ -113,6 +113,7 @@ def version_number_as_integer(list_of_all_theLines, default_version):
             return version;
     return default_version
     
+    
 def do_migrate(defs_file):
     migration_count = 0
     fileName, fileExtension = os.path.splitext(defs_file)
@@ -121,35 +122,38 @@ def do_migrate(defs_file):
     input_file_object = open(defs_file,'r')
     output_file_object = open(output_file_name,'w')
     try:
-        list_of_output_lines = [] 
         list_of_all_theLines = input_file_object.readlines()  # preserves new lines, we want this
         
         version = version_number_as_integer(list_of_all_theLines,318) 
         
         if version < 318:
+            
+            list_of_output_lines = [] 
+            
             # This fix is only applicable for versions < 3.1.8
             migrated = ensure_start_abort_and_end_abort_on_sameline(list_of_all_theLines,list_of_output_lines)
-            if migrated : migration_count = migration_count + 1
+            if migrated : 
+                migration_count = migration_count + 1
+                list_of_all_theLines = list_of_output_lines   # preserve this migration
+                print "Applying Task abort state migration, for file:" + defs_file + "  version:" + str(version)
         else:
-            print "***** NO migration required for " + ARGS.defs_file + " version " + str(version)
             list_of_output_lines = list_of_all_theLines
             
             
         if version < 319: # This fix is only applicable for versions < 3.1.9
-            # Do not lose previous migration
-            if migrated:
-                list_of_all_theLines = list_of_output_lines
-                list_of_output_lines = [] 
+                  
+            list_of_output_lines = [] # reset, otherwise when no migration we can end up doubling file
                 
             migrated = ensure_label_on_sameline(list_of_all_theLines,list_of_output_lines)
-            if migrated : migration_count = migration_count + 1
+            if migrated : 
+                migration_count = migration_count + 1
+                list_of_all_theLines = list_of_output_lines  # preserve this migration
+                print "Applying label migration for file:" + defs_file + "  version:" + str(version)
         else:
-            print "***** NO migration required for " + ARGS.defs_file + " version " + str(version)
             list_of_output_lines = list_of_all_theLines
 
         # Add any future migration bug fixes here.
         # ... 
-        
         output_file_object.writelines(list_of_output_lines)
     finally:
         input_file_object.close()

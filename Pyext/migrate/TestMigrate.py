@@ -2,6 +2,7 @@
 import os
 import ecflow_migrate
 import unittest
+import filecmp
 
 # These tests the migration for  ecflow < 318 to ecflow 318
 #
@@ -21,6 +22,13 @@ class TestMigrate318(unittest.TestCase):
 
         list_of_defs_lines =[ "# "]
         self.assertEqual(ecflow_migrate.version_number_as_integer(list_of_defs_lines,10), 10,"Expected 10, since valid version not provided")
+
+    def test_no_migration(self):
+        migration_count = ecflow_migrate.do_migrate("migrate/no_migration.def")
+        self.assertEqual(migration_count,0,"Expected no migration")
+        self.assertTrue(filecmp.cmp("migrate/no_migration.def","migrate/no_migration.mig"))
+        # remove the generated file
+        os.remove("migrate/no_migration.mig")
 
 # ==============================================================================================
     # Test for abort bug
@@ -89,8 +97,10 @@ class TestMigrate318(unittest.TestCase):
                 
         # remove the generated file
         os.remove("migrate/abort_and_label_bug.mig")
+        
 
-#run the tests
+
+#run the tests 
 if __name__  == '__main__':
     #print "Current working directory: " + os.getcwd()
     unittest.main()

@@ -1,0 +1,11 @@
+# 3.1.7
+defs_state MIGRATE state>:aborted flag:late,message state_change:983039 modify_change:1018
+  edit SLEEP '10'
+suite suite #  begun:1 state:aborted dur:01:29:57 flag:message,no_reque
+   task a
+   task b
+endsuite
+suite made_up
+   task a
+   task b
+endsuite
