@@ -23,10 +23,10 @@
    
  3/ Set BOOST_ROOT. Required since we need boost build and bjam.
  
-    linux 32 : export BOOST_ROOT=/var/tmp/ma0/boost/boost_1_47_0
-    linux 64 : export BOOST_ROOT=/vol/ecf/boost/boost_1_47_0
-    hpux     : export BOOST_ROOT=/scratch/ma/emos/ma0/hpia64/boost/boost_1_47_0
-    AIX      : export BOOST_ROOT=/s1a/emos_esuite/emos_data/sms/boost/boost_1_47_0
+    linux 32 : export BOOST_ROOT=/var/tmp/ma0/boost/boost_1_53_0
+    linux 64 : export BOOST_ROOT=/vol/ecf/boost/boost_1_53_0
+    hpux     : export BOOST_ROOT=/scratch/ma/emos/ma0/hpia64/boost/boost_1_53_0
+    AIX      : export BOOST_ROOT=/s1a/emos_esuite/emos_data/sms/boost/boost_1_53_0
  
  4/ Change directory to ecflow root.
  

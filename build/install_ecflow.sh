@@ -73,10 +73,12 @@ install_arg=install-all
 # the correct embedded paths with ecflow.so (i.e for boost python )
 # ======================================================================
 
+BOOST_VERSION=boost_1_53_0
+
 if [[ "$user" = "map" ]] # when user emos is commented out
 then
    ARCH=linux
-   export BOOST_ROOT=${BOOST_ROOT:-/vol/ecf/opensuse113/boost/boost_1_47_0};  
+   export BOOST_ROOT=${BOOST_ROOT:-/vol/ecf/opensuse113/boost/$BOOST_VERSION};  
    export WK=${WK:-/vol/ecf/opensuse113/ecflow}
 
 elif [[ "$ARCH" = "Linux" ]] || [[ "$ARCH" = "linux" ]] 
@@ -86,23 +88,23 @@ then
    # =====================================================================
    if [ "$OS_VERSION" = opensuse113 ] ; then
    
-      export BOOST_ROOT=/vol/ecf/opensuse113/boost/boost_1_47_0; 
+      export BOOST_ROOT=/vol/ecf/opensuse113/boost/$BOOST_VERSION; 
       export WK=/vol/ecf/opensuse113/ecflow
       
    elif [ "$OS_VERSION" = opensuse103 ] ; then 
    
-      export BOOST_ROOT=/vol/ecf/opensuse103/boost/boost_1_47_0;  
+      export BOOST_ROOT=/vol/ecf/opensuse103/boost/$BOOST_VERSION;  
       export WK=/vol/ecf/opensuse103/ecflow
       
    elif [ "$OS_VERSION" = rhel6 ] ; then 
 
-      export BOOST_ROOT=/vol/ecf/redhat/boost/boost_1_47_0;  
+      export BOOST_ROOT=/vol/ecf/redhat/boost/$BOOST_VERSION;  
       export WK=/vol/ecf/redhat/ecflow
    
    elif [ "$OS_VERSION" = sles11 ] ; then 
    
       # lxab this is still opensuse113
-      export BOOST_ROOT=/vol/ecf/cluster/boost/boost_1_47_0;  
+      export BOOST_ROOT=/vol/ecf/cluster/boost/$BOOST_VERSION;  
       export WK=/vol/ecf/cluster/ecflow
    fi
   
@@ -112,7 +114,7 @@ elif [[ "$ARCH" = hpia64 ]] ; then
    # HPUX:   We don't install ecflowview on HPUX, no x-windows
    # ======================================================================
    NEW_SCRATCH=/scratch/ma/emos/ma0
-   export BOOST_ROOT=$NEW_SCRATCH/$ARCH/boost/boost_1_47_0;  
+   export BOOST_ROOT=$NEW_SCRATCH/$ARCH/boost/$BOOST_VERSION;  
    export WK=$NEW_SCRATCH/$ARCH/ecflow   
       
    install_arg=install 
@@ -122,7 +124,7 @@ elif [[ "$ARCH" = ibm_power6 ]] ; then
    # ======================================================================
    # AIX:   We don't install ecflowview on AIX, no x-windows
    # ======================================================================
-   export BOOST_ROOT=/s1a/emos_esuite/emos_data/sms/boost/boost_1_47_0;  
+   export BOOST_ROOT=/s1a/emos_esuite/emos_data/sms/boost/$BOOST_VERSION;  
    export WK=/s1a/emos_esuite/emos_data/sms/ecflow 
    
    install_arg=install 
@@ -132,14 +134,14 @@ elif [[ "$ARCH" = ibm_power7 ]] ; then
    # ======================================================================
    # AIX:   We don't install ecflowview on AIX, no x-windows
    # ======================================================================
-   export BOOST_ROOT=/s2o1/emos_data/ecflow/boost/boost_1_47_0;  
+   export BOOST_ROOT=/s2o1/emos_data/ecflow/boost/$BOOST_VERSION;  
    export WK=/s2o1/emos_data/ecflow/ecflow 
    
    install_arg=install 
    
 elif [[ "$ARCH" = rs6000 ]] ; then 
 
-   export BOOST_ROOT=/emos_data/ecflow/rs6000/xlc/boost/boost_1_47_0;  
+   export BOOST_ROOT=/emos_data/ecflow/rs6000/xlc/boost/$BOOST_VERSION;  
    export WK=/emos_data/ecflow/rs6000/xlc/ecflow    
 fi
 

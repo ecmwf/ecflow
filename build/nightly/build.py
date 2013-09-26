@@ -38,7 +38,7 @@ def get_ecflow_version( work_space ):
     return ecflow_version
         
 WK=os.getenv("WK") 
-BOOST_VERSION="boost_1_47_0"
+BOOST_VERSION="boost_1_53_0"
 
 ecflow_version_list = get_ecflow_version( WK )
 assert len(ecflow_version_list) == 3, "Expected version to have release, major,minor"
@@ -326,7 +326,7 @@ def build_localhost_clang( parent ) :
     # Hence left out test_client_performance and test_server_performance
     localhost_clang = parent.add_family("localhost_clang")
     localhost_clang.add_variable("BOOST_DIR","/var/tmp/ma0/boost/clang")
-    localhost_clang.add_variable("BOOST_VERSION","boost_1_53_0")
+    #localhost_clang.add_variable("BOOST_VERSION","boost_1_53_0")
 
     if (parent.name() == "build") :
         localhost_clang.add_trigger("localhost == complete || localhost == aborted")
@@ -355,7 +355,7 @@ def build_linux_64( parent ) :
     
 def build_linux_64_intel( parent ) :
     linux_64 = parent.add_family("linux64intel")
-    linux_64.add_variable("BOOST_VERSION","boost_1_53_0")
+    #linux_64.add_variable("BOOST_VERSION","boost_1_53_0")
     #if (parent.name() == "build") :
     #    linux_64.add_trigger("tar/cp_tar_to_linux64intel == complete")
     #else :

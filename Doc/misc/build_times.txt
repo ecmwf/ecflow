@@ -35,8 +35,7 @@ Compiler:  v11.1
       Debug Flags
       ============
       xlC_r -c -qsuppress=1540-0198    -DAIX -DDEBUG -qcpluscmt -qNOOPTimize -qnoinline -g -qfullpath -qfuncsect -qeh 
-      -qrtti -I"../ACore/src" -I"/s1a/emos_esuite/emos_data/sms/boost/boost_1_47_0"  
-      -o "bin/vacpp/debug/threading-multi/test/TestLog.o" "test/TestLog.cpp"
+      -qrtti  
  
    RELEASE
       bjam invocation:  bjam -j2 variant=release
@@ -46,8 +45,7 @@ Compiler:  v11.1
       Release flags
       =============
       xlC_r -c -qsuppress=1500-029 -qsuppress=1540-0198    -DAIX -DNDEBUG -qcpluscmt -O3 -qstrict -qfuncsect -qeh 
-      -qrtti -I"../ACore/src" -I"/s1a/emos_esuite/emos_data/sms/boost/boost_1_47_0"  
-      -o "bin/vacpp/release/threading-multi/test/TestLog.o" "test/TestLog.cpp"
+      -qrtti  
 
 
 Compiler:  v12
@@ -61,8 +59,7 @@ Compiler:  v12
       Debug Flags
       ============
       xlC_r -c -qsuppress=1540-0198    -DAIX -DDEBUG -qcpluscmt -qNOOPTimize -qnoinline -g -qfullpath -qfuncsect -qeh 
-      -qrtti -I"../ACore/src" -I"/s1a/emos_esuite/emos_data/sms/boost/boost_1_47_0"  
-      -o "bin/vacpp/debug/threading-multi/test/TestLog.o" "test/TestLog.cpp"
+      -qrtti  
  
    RELEASE
       bjam invocation:  bjam -j2 variant=release
@@ -75,8 +72,7 @@ Compiler:  v12
       Release flags
       =============
       xlC_r -c -qsuppress=1500-029 -qsuppress=1540-0198    -DAIX -DNDEBUG -qcpluscmt -O3 -qstrict -qfuncsect -qeh 
-      -qrtti -I"../ACore/src" -I"/s1a/emos_esuite/emos_data/sms/boost/boost_1_47_0"  
-      -o "bin/vacpp/release/threading-multi/test/TestLog.o" "test/TestLog.cpp"
+      -qrtti  
 
  
 Linux:
