@@ -344,10 +344,6 @@ def build_localhost_clang( parent ) :
 
 def build_linux_64( parent ) :
     linux_64 = parent.add_family("linux64")
-    #if (parent.name() == "build") :
-    #    linux_64.add_trigger("tar/cp_tar_to_linux64 == complete")
-    #else :
-    #    linux_64.add_trigger("/suite/build_incr/incr_tar_and_cp == complete")
     add_linux_64_variables(linux_64)
     add_remote_linux_64_variables(linux_64)
     add_git_tasks( linux_64 )
@@ -355,11 +351,6 @@ def build_linux_64( parent ) :
     
 def build_linux_64_intel( parent ) :
     linux_64 = parent.add_family("linux64intel")
-    #linux_64.add_variable("BOOST_VERSION","boost_1_53_0")
-    #if (parent.name() == "build") :
-    #    linux_64.add_trigger("tar/cp_tar_to_linux64intel == complete")
-    #else :
-    #    linux_64.add_trigger("/suite/build_incr/incr_tar_and_cp == complete")
     add_linux_64_intel_variables(linux_64)
     add_remote_linux_64_intel_variables(linux_64)
     add_git_tasks( linux_64 )
@@ -367,10 +358,6 @@ def build_linux_64_intel( parent ) :
     
 def build_opensuse113( parent ) :
     opensuse113 = parent.add_family("opensuse113")
-    #if (parent.name() == "build") :
-    #    opensuse113.add_trigger("tar/cp_tar_to_opensuse113 == complete")
-    #else :
-    #    opensuse113.add_trigger("/suite/build_incr/incr_tar_and_cp == complete")
     add_opensuse113_variables(opensuse113)
     add_remote_opensuse113_variables(opensuse113)
     add_git_tasks( opensuse113 )
@@ -378,10 +365,6 @@ def build_opensuse113( parent ) :
     
 def build_redhat( parent ) :
     redhat = parent.add_family("redhat")
-    #if (parent.name() == "build") :
-    #    redhat.add_trigger("tar/cp_tar_to_redhat == complete")
-    #else :
-    #    redhat.add_trigger("/suite/build_incr/incr_tar_and_cp == complete")
     add_redhat_variables(redhat)
     add_remote_redhat_variables(redhat)
     add_git_tasks( redhat )
@@ -389,10 +372,6 @@ def build_redhat( parent ) :
     
 def build_opensuse103( parent ) :
     opensuse103 = parent.add_family("opensuse103")
-    #if (parent.name() == "build") :
-    #    opensuse103.add_trigger("tar/cp_tar_to_opensuse103 == complete")
-    #else :
-    #    opensuse103.add_trigger("/suite/build_incr/incr_tar_and_cp == complete")
     add_opensuse103_variables(opensuse103)
     add_remote_opensuse103_variables(opensuse103)
     add_git_tasks( opensuse103 )
@@ -411,10 +390,6 @@ def build_hpux( parent ):
 
 def build_aix_power7( parent ) :
     aix_power7 = parent.add_family("aix_power7")
-    #if (parent.name() == "build") :
-    #    aix_power7.add_trigger("tar/cp_tar_to_aix_power7 == complete ")
-    #else :
-    #    aix_power7.add_trigger("/suite/build_incr/incr_tar_and_cp == complete")
     add_aix_power7_variables( aix_power7 )
     add_remote_aix_power7_variables( aix_power7 )
     add_git_tasks( aix_power7 )
@@ -422,21 +397,13 @@ def build_aix_power7( parent ) :
     
 def build_aix_rs6000_xlc( parent ) :
     aix_rs6000 = parent.add_family("aix_rs6000_xlc")
-    if (parent.name() == "build") :
-        aix_rs6000.add_trigger("tar/cp_tar_to_aix_rs6000_xlc == complete ")
-    else :
-        aix_rs6000.add_trigger("/suite/build_incr/incr_tar_and_cp == complete")
     add_aix_rs6000_variables(aix_rs6000)
     add_remote_aix_rs6000_variables(aix_rs6000)
-    add_git_tasks( aix_rs6000 , True ) #  git not available on ecgate, hence set git_clone to def-status complete
+    add_git_tasks( aix_rs6000 )  
     add_build_and_test_tasks( aix_rs6000 )
 
 def build_aix_gcc(parent) :
     aix_gcc = parent.add_family("aix_gcc")
-    #if (parent.name() == "build") :
-    #    aix_gcc.add_trigger("tar/cp_tar_to_aix_gcc == complete ")
-    #else :
-    #    aix_gcc.add_trigger("/suite/build_incr/incr_tar_and_cp == complete")
     add_aix_gcc_variables( aix_gcc )
     add_remote_aix_gcc_variables( aix_gcc )
     add_git_tasks( aix_gcc )
@@ -602,9 +569,9 @@ with defs.add_suite("suite") as suite:
         #cp_tar_to_aix_power7.add_trigger("create_tar == complete")
         #add_aix_power7_variables( cp_tar_to_aix_power7 )
     
-        cp_tar_to_aix_rs6000_xlc = tar_fam.add_task("cp_tar_to_aix_rs6000_xlc")
-        cp_tar_to_aix_rs6000_xlc.add_trigger("create_tar == complete")
-        add_aix_rs6000_variables( cp_tar_to_aix_rs6000_xlc )
+        #cp_tar_to_aix_rs6000_xlc = tar_fam.add_task("cp_tar_to_aix_rs6000_xlc")
+        #cp_tar_to_aix_rs6000_xlc.add_trigger("create_tar == complete")
+        #add_aix_rs6000_variables( cp_tar_to_aix_rs6000_xlc )
     
         #cp_tar_to_aix_gcc = suite.add_task("cp_tar_to_aix_gcc")
         #cp_tar_to_aix_gcc.add_trigger("create_tar == complete")

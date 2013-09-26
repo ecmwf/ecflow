@@ -22,6 +22,9 @@ export LL_NOFILTER=1
 # use vacpp11101
 use %COMPILER_VERSION%
 
+# load git
+use git
+
 # Hack for test, so that we can undefine ECF_RID in the tests. See file test.ecf:
 export PID_RID=$ECF_RID
 
