@@ -8,6 +8,13 @@
 **Change History**
 ==================
 
+4.0.0 (production, October 2013)
+   - ecflow_client : Updated parsing to allow suite to have labels
+   - ecflow_client : Moved to boost 1.53
+   - ecflow_server : Moved to boost 1.53
+   - *             : Update ecflow_migrate to take into account label's that have new lines
+   - *             : Migrated source control management from perforce to git, and up updated build scripts
+   
 3.1.9: (production, September 2013)
    - ecflowview    : fix crash in the preference dialog
    - ecflow_client : Change parsing for aliases variables. No longer check variable names.
