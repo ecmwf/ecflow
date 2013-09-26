@@ -89,6 +89,16 @@ class TestMigrate318(unittest.TestCase):
     
         expected_output_lines = ["# 3.1.2","label name \"value1value2value3\"\n" ]
         self.assertEqual(migrator.output_lines(),expected_output_lines)
+        
+    def test_label_over_multiple_lines_with_state(self):
+        list_of_defs_lines = ["# 3.1.2","label name \"value1\n", "value2\n", "value3\" # \"value4\n", "value5\"\n" ]  
+        
+        migrator = ecflow_migrate.MigrateForLabel(list_of_defs_lines)
+        migrator.migrate(319)
+    
+        expected_output_lines = ["# 3.1.2","label name \"value1value2value3\" # \"value4value5\"\n" ]
+        self.assertEqual(migrator.output_lines(),expected_output_lines)
+ 
  
     def test_migrate_label_file(self):
         migration_count = ecflow_migrate.do_migrate("migrate/label_bug.def")

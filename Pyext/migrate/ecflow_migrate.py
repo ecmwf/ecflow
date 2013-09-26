@@ -22,8 +22,7 @@ class Migrator(object):
         self.list_of_output_lines = []
         
     def _migration_hook(self,default_version_number):
-        """Derived suite should override this function to build the suite
-           Should not be called explicitly. How could we enforce this ?
+        """Derived suite should override this function to perform the migration
         """
         return False;
     
@@ -31,7 +30,7 @@ class Migrator(object):
         return self.list_of_output_lines
     
     def migrate(self, default_version_number):
-        """Template/skeleton function. 
+        """Template/skeleton function, whicj will call the hooks
         """
         version = self.version_number_as_integer(default_version_number) 
         if version >= default_version_number:
@@ -41,7 +40,7 @@ class Migrator(object):
         self.list_of_output_lines = [] 
         migrated = self._migration_hook(default_version_number)
         if migrated : 
-            self.list_of_output_lines = self.list_of_output_lines   # preserve this migration
+            self.list_of_input_lines = self.list_of_output_lines   # preserve this migration
             print "Applying " + type(self).__name__  
         else:
             self.list_of_output_lines = self.list_of_input_lines   
@@ -63,6 +62,10 @@ class Migrator(object):
     
     
 class MigrateForTaskAbort(Migrator):
+    """Fix bug where the task abort states(i.e a string) will contain new lines and hence
+       spill over the next line, and affecting the parser. This will move the abort string
+       into the same line, and remove the interleaving new lines
+    """
     def __init__(self, list_of_input_lines):
         Migrator.__init__(self, list_of_input_lines)
  
@@ -110,6 +113,9 @@ class MigrateForTaskAbort(Migrator):
     
     
 class MigrateForLabel(Migrator):
+    """Fix bug where label value has new lines, and hence spills over to next line
+       This will remove place newline back onto the same line
+    """
     def __init__(self, list_of_input_lines):
         Migrator.__init__(self, list_of_input_lines)
  
@@ -123,6 +129,7 @@ class MigrateForLabel(Migrator):
     created remote /tmp/map/cray"
         """
         #count = 0;
+        no_of_label_quotes = 0
         migrated = False
         start_line_append = ""
         for line in self.list_of_input_lines:
@@ -131,11 +138,13 @@ class MigrateForLabel(Migrator):
             #if count == 383119:
             #    print "debug mee"
             if len(start_line_append) > 0:
+                no_of_label_quotes += line.count('"')
                 start_line_append += line
-                no_of_quotes = line.count('"')
-                if no_of_quotes == 1:
-                    self.list_of_output_lines.append(start_line_append) # preserve'\n' for this case 
-                    start_line_append = "" 
+                if no_of_label_quotes % 2 == 0:
+                    # even number of quotes
+                    self.list_of_output_lines.append(start_line_append) # preserve last '\n'  
+                    start_line_append = ""
+                    no_of_label_quotes = 0 
                 else:
                     start_line_append = start_line_append.rstrip('\n')
                 continue            
@@ -144,8 +153,8 @@ class MigrateForLabel(Migrator):
                 # process line
                 tokens = line.split()
                 if len(tokens) >0 and tokens[0] == "label":
-                    no_of_quotes = line.count('"')
-                    if no_of_quotes % 2 != 0 : 
+                    no_of_label_quotes = line.count('"')
+                    if no_of_label_quotes % 2 != 0 : 
                         start_line_append = line
                         start_line_append = start_line_append.rstrip('\n')
                         migrated = True
