@@ -16,6 +16,11 @@ Process
 =======
 
 0/ Check we are not in a high risk period ???
+0/ Tag the release
+   git tag -a <release-number> -m "ecflow release-number"
+   git tag
+   git show <release number>
+   
 0/ Update Documentation
 
   - Internal wiki:  http://wedit.ecmwf.int/publications/manuals/ecflow/
