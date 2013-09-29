@@ -39,6 +39,19 @@ o ping with boost 1.45 client
       server::handle_write: client request --ping :ma0 replying with  cmd:Ok
  
  
+Hence we have this scenario:
+
+               -------->     old server (get boost::archive::archive_exception unsupported version)
+   new client                            i.e no forward compatibility
+              <---------     OK (because of backward compatibility)
+              
+              
+              -------->     new server( Ok because of backward compatibility)
+   old client   
+               <-------     boost::archive::archive_exception unsupported version)
+                            i.e no forward compatibility
+                                           
+ 
 unsupported_version
 ===================
 This system records the current library version number to all archives created. 
@@ -59,7 +72,42 @@ Other implications
   *IF* there is no other changes and we want to inter-mix, client
   server from different release.
   => Even without boost, we do only support forward capability
-     of the checkpt files, and not of client/server coms.
+     of the checkpt files, and not of client/server comms.
      
-  
+  => Possible hacks, to allow old server to read new client comms,
+     is to *change* the archive version 
+=======================================================================================
 
+Avi Bahra wrote:
+> Currently I have built a client/server that uses ASIO with boost
+> serialization. I built one set with boost 1.45 and another with boost
+> 1.47
+>
+> However:
+>
+> o start boost 1.45 server
+> o ping using 1.47 client
+>
+>   I get a boost::archive::archive_exception unsupported version
+>
+> o start boost 1.47 server
+> o ping with boost 1.45 client
+>
+>   Again I get a boost::archive::archive_exception unsupported version
+>
+> Given that there was no change in format of the ping, is this bug or
+> feature ? Is there any way of disabling this feature of the archive ,
+> so exception
+> is only thrown when there is format change?
+>
+> Any help appreciated.
+>
+> Ta,
+> Avi
+
+You might not have changed the format of your data types.  But your data 
+types are built upon more primitive built-in ones.  There is no guarentee 
+that an archive created in a subsequent version will be readable by a 
+previous version of the library.
+
+Robert Ramey
