@@ -51,53 +51,44 @@ BOOST_AUTO_TEST_CASE( test_autocancel_ast_node_reset )
    // ****: is in hours. Hence autocancel at hour resolution
    Defs theDefs;
    {
-      std::auto_ptr< Suite > suite( new Suite( "s1" ) );
       ClockAttr clockAttr(true);
       clockAttr.date(12,10,2009); // 12 October 2009 was a Monday
+      suite_ptr suite = theDefs.add_suite("s1");
       suite->addClock( clockAttr );
-      std::auto_ptr< Family > fam( new Family( "family" ) );
 
-      std::auto_ptr< Task > task( new Task( "t" ) );
+      family_ptr fam = suite->add_family("family");
+      task_ptr task = fam->add_task("t");
       task->add_trigger( "/s2/family/t == complete" );
-      fam->addTask( task );
 
-      std::auto_ptr< Task > task2( new Task( "t2" ) );
+      task_ptr task2 = fam->add_task("t2");
       task2->add_trigger( "/s3/family/t == complete" );
       task2->add_complete( "/s2/family == complete" );
-      fam->addTask( task2 );
 
-      std::auto_ptr< Task > task3( new Task( "t3" ) );
+      task_ptr task3 = fam->add_task("t3");
       task3->add_trigger( "/s3 == complete" );
       task3->add_complete( "/s2 == complete");
-      fam->addTask( task3 );
-
-      suite->addFamily( fam );
-      theDefs.addSuite( suite );
       //		cout << theDefs << "\n";
    }
    {
-      std::auto_ptr< Suite > suite( new Suite( "s2" ) );
       ClockAttr clockAttr(true);
       clockAttr.date(12,10,2009); // 12 October 2009 was a Monday
+
+      suite_ptr suite = theDefs.add_suite("s2");
       suite->addClock( clockAttr );
-      std::auto_ptr< Family > fam( new Family( "family" ) );
-      std::auto_ptr< Task > task( new Task( "t" ) );
-      fam->addTask( task );
       suite->addAutoCancel( ecf::AutoCancelAttr( ecf::TimeSlot(1,0), false));
-      suite->addFamily( fam );
-      theDefs.addSuite( suite );
+
+      family_ptr fam = suite->add_family("family");
+      fam->add_task("t");
    }
    {
-      std::auto_ptr< Suite > suite( new Suite( "s3" ) );
       ClockAttr clockAttr(true);
       clockAttr.date(12,10,2009); // 12 October 2009 was a Monday
+      suite_ptr suite = theDefs.add_suite("s3");
       suite->addClock( clockAttr );
-      std::auto_ptr< Family > fam( new Family( "family" ) );
-      std::auto_ptr< Task > task( new Task( "t" ) );
-      fam->addTask( task );
       suite->addAutoCancel( ecf::AutoCancelAttr( ecf::TimeSlot(1,0), false));
-      suite->addFamily( fam );
-      theDefs.addSuite( suite );
+
+      family_ptr fam = suite->add_family("family");
+      fam->add_task("t");
    }
 
    // Check number of AST nodes. The AST should be created on the fly
@@ -130,40 +121,31 @@ BOOST_AUTO_TEST_CASE( test_autocancel_suite )
    // ****: is in hours. Hence autocancel at hour resolution
    Defs theDefs;
    {
-      std::auto_ptr< Suite > suite( new Suite( "test_autocancel_10_hours_relative" ) );
       ClockAttr clockAttr(true);
       clockAttr.date(12,10,2009); // 12 October 2009 was a Monday
+      suite_ptr suite = theDefs.add_suite("test_autocancel_10_hours_relative");
       suite->addClock( clockAttr );
       suite->addAutoCancel( ecf::AutoCancelAttr( ecf::TimeSlot(10,0), true));
-      std::auto_ptr< Family > fam( new Family( "family" ) );
-      std::auto_ptr< Task > task( new Task( "t" ) );
-      fam->addTask( task );
-      suite->addFamily( fam );
-      theDefs.addSuite( suite );
+      family_ptr fam = suite->add_family("family");
+      fam->add_task("t");
    }
    {
-      std::auto_ptr< Suite > suite( new Suite( "test_autocancel_1_hours_real" ) );
       ClockAttr clockAttr(true);
       clockAttr.date(12,10,2009); // 12 October 2009 was a Monday
+      suite_ptr suite = theDefs.add_suite("test_autocancel_1_hours_real");
       suite->addClock( clockAttr );
       suite->addAutoCancel( ecf::AutoCancelAttr( ecf::TimeSlot(1,0), false));
-      std::auto_ptr< Family > fam( new Family( "family" ) );
-      std::auto_ptr< Task > task( new Task( "t" ) );
-      fam->addTask( task );
-      suite->addFamily( fam );
-      theDefs.addSuite( suite );
+      family_ptr fam = suite->add_family("family");
+      fam->add_task("t");
    }
    {
-      std::auto_ptr< Suite > suite( new Suite( "test_autocancel_1_day_relative" ) );
       ClockAttr clockAttr(true);
       clockAttr.date(12,10,2009); // 12 October 2009 was a Monday
+      suite_ptr suite = theDefs.add_suite("test_autocancel_1_day_relative");
       suite->addClock( clockAttr );
       suite->addAutoCancel( ecf::AutoCancelAttr(1) );
-      std::auto_ptr< Family > fam( new Family( "family" ) );
-      std::auto_ptr< Task > task( new Task( "t" ) );
-      fam->addTask( task );
-      suite->addFamily( fam );
-      theDefs.addSuite( suite );
+      family_ptr fam = suite->add_family("family");
+      fam->add_task("t");
       //    	cout << theDefs << "\n";
    }
 
@@ -183,44 +165,42 @@ BOOST_AUTO_TEST_CASE( test_autocancel_family_and_task )
    // ****: is in hours. Hence autocancel at hour resolution
    Defs theDefs;
    {
-      std::auto_ptr< Suite > suite( new Suite( "test_autocancel_9_10_hours_relative" ) );
       ClockAttr clockAttr(true);
       clockAttr.date(12,10,2009); // 12 October 2009 was a Monday
+      suite_ptr suite = theDefs.add_suite("test_autocancel_9_10_hours_relative");
       suite->addClock( clockAttr );
-      std::auto_ptr< Family > fam( new Family( "family" ) );
+
+      family_ptr fam = suite->add_family("family");
       fam->addAutoCancel( ecf::AutoCancelAttr( ecf::TimeSlot(10,0), true));
-      std::auto_ptr< Task > task( new Task( "t" ) );
+
+      task_ptr task = fam->add_task("t");
       task->addAutoCancel( ecf::AutoCancelAttr( ecf::TimeSlot(9,0), true));
-      fam->addTask( task );
-      suite->addFamily( fam );
-      theDefs.addSuite( suite );
+
       //		cout << theDefs << "\n";
    }
    {
-      std::auto_ptr< Suite > suite( new Suite( "test_autocancel_1_2_hours_real" ) );
       ClockAttr clockAttr(true);
       clockAttr.date(12,10,2009); // 12 October 2009 was a Monday
+      suite_ptr suite = theDefs.add_suite("test_autocancel_1_2_hours_real");
       suite->addClock( clockAttr );
-      std::auto_ptr< Family > fam( new Family( "family" ) );
+
+      family_ptr fam = suite->add_family("family");
       fam->addAutoCancel( ecf::AutoCancelAttr( ecf::TimeSlot(2,0), false));
-      std::auto_ptr< Task > task( new Task( "t" ) );
+
+      task_ptr task = fam->add_task("t");
       task->addAutoCancel( ecf::AutoCancelAttr( ecf::TimeSlot(1,0), false));
-      fam->addTask( task );
-      suite->addFamily( fam );
-      theDefs.addSuite( suite );
    }
    {
-      std::auto_ptr< Suite > suite( new Suite( "test_autocancel_1_2_day_relative" ) );
       ClockAttr clockAttr(true);
       clockAttr.date(12,10,2009); // 12 October 2009 was a Monday
+      suite_ptr suite = theDefs.add_suite("test_autocancel_1_2_day_relative");
       suite->addClock( clockAttr );
-      std::auto_ptr< Family > fam( new Family( "family" ) );
-      std::auto_ptr< Task > task( new Task( "t" ) );
-      task->addAutoCancel( ecf::AutoCancelAttr(1) );
-      fam->addTask( task );
+
+      family_ptr fam = suite->add_family("family");
       fam->addAutoCancel( ecf::AutoCancelAttr(2) );
-      suite->addFamily( fam );
-      theDefs.addSuite( suite );
+
+      task_ptr task = fam->add_task("t");
+      task->addAutoCancel( ecf::AutoCancelAttr(1) );
       //    	cout << theDefs << "\n";
    }
 
@@ -242,40 +222,33 @@ BOOST_AUTO_TEST_CASE( test_autocancel_task )
    // ****: is in hours. Hence autocancel at hour resolution
    Defs theDefs;
    {
-      std::auto_ptr< Suite > suite( new Suite( "test_autocancel_10_hours_relative" ) );
       ClockAttr clockAttr(true);
       clockAttr.date(12,10,2009); // 12 October 2009 was a Monday
+      suite_ptr suite = theDefs.add_suite("test_autocancel_10_hours_relative");
       suite->addClock( clockAttr );
-      std::auto_ptr< Family > fam( new Family( "family" ) );
-      std::auto_ptr< Task > task( new Task( "t" ) );
+
+      family_ptr fam = suite->add_family("family");
+      task_ptr task = fam->add_task("t");
       task->addAutoCancel( ecf::AutoCancelAttr( ecf::TimeSlot(10,0), true));
-      fam->addTask( task );
-      suite->addFamily( fam );
-      theDefs.addSuite( suite );
    }
    {
-      std::auto_ptr< Suite > suite( new Suite( "test_autocancel_1_hours_real" ) );
       ClockAttr clockAttr(true);
       clockAttr.date(12,10,2009); // 12 October 2009 was a Monday
+      suite_ptr suite = theDefs.add_suite("test_autocancel_1_hours_real");
       suite->addClock( clockAttr );
-      std::auto_ptr< Family > fam( new Family( "family" ) );
-      std::auto_ptr< Task > task( new Task( "t" ) );
+      family_ptr fam = suite->add_family("family");
+      task_ptr task = fam->add_task("t");
       task->addAutoCancel( ecf::AutoCancelAttr( ecf::TimeSlot(1,0), false));
-      fam->addTask( task );
-      suite->addFamily( fam );
-      theDefs.addSuite( suite );
    }
    {
-      std::auto_ptr< Suite > suite( new Suite( "test_autocancel_1_day_relative" ) );
       ClockAttr clockAttr(true);
       clockAttr.date(12,10,2009); // 12 October 2009 was a Monday
+      suite_ptr suite = theDefs.add_suite("test_autocancel_1_day_relative");
       suite->addClock( clockAttr );
-      std::auto_ptr< Family > fam( new Family( "family" ) );
-      std::auto_ptr< Task > task( new Task( "t" ) );
+
+      family_ptr fam = suite->add_family("family");
+      task_ptr task = fam->add_task("t");
       task->addAutoCancel( ecf::AutoCancelAttr(1) );
-      fam->addTask( task );
-      suite->addFamily( fam );
-      theDefs.addSuite( suite );
       //    	cout << theDefs << "\n";
    }
 
@@ -284,14 +257,14 @@ BOOST_AUTO_TEST_CASE( test_autocancel_task )
    BOOST_CHECK_MESSAGE(simulator.run(theDefs,TestUtil::testDataLocation("test_autocancel_task.def"), errorMsg),errorMsg);
 
    // make sure autocancel deletes the tasks and leaves families intact.
-   std::vector<task_ptr> vec;
-   theDefs.get_all_tasks(vec);
+   std::vector<task_ptr> task_vec;
+   theDefs.get_all_tasks(task_vec);
 
    std::vector<Family*> famVec;
    theDefs.getAllFamilies(famVec);
 
    BOOST_CHECK_MESSAGE(famVec.size() == 3,"Expected to have 3 families but found " << famVec.size());
-   BOOST_CHECK_MESSAGE(vec.size() == 0,"Expected to have 0 tasks but found " << vec.size());
+   BOOST_CHECK_MESSAGE(task_vec.size() == 0,"Expected to have 0 tasks but found " << task_vec.size());
 }
 
 BOOST_AUTO_TEST_SUITE_END()
