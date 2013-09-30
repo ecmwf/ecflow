@@ -64,18 +64,15 @@ BOOST_AUTO_TEST_CASE( test_time )
 
    Defs theDefs;
    {
-      std::auto_ptr< Suite > suite( new Suite( "test_time" ) );
+      suite_ptr suite = theDefs.add_suite("test_time");
       ClockAttr clockAttr(theLocalTime,false/*false means use real clock*/);
       suite->addClock( clockAttr );
 
-      std::auto_ptr< Family > fam( new Family( "family" ) );
-      std::auto_ptr< Task > task( new Task( "t" ) );
+      family_ptr fam = suite->add_family( "family" );
+      task_ptr task = fam->add_task("t");
       task->addTime( ecf::TimeAttr( TimeSlot(time_plus_minute.time_of_day()) ) );
       task->addVerify( VerifyAttr(NState::COMPLETE,1) );  // expect task to complete 1 time
 
-      fam->addTask( task );
-      suite->addFamily( fam );
-      theDefs.addSuite( suite );
       //  	cout << theDefs << "\n";
    }
 
@@ -100,21 +97,18 @@ BOOST_AUTO_TEST_CASE( test_time_series )
    // on Monday since we are using a hybrid clock
    Defs theDefs;
    {
-      std::auto_ptr< Suite > suite( new Suite( "test_time_series" ) );
       ClockAttr clockAttr(true/*false means use hybrid clock*/);
       clockAttr.date(12,10,2009); // 12 October 2009 was a Monday
+      suite_ptr suite = theDefs.add_suite("test_time_series");
       suite->addClock( clockAttr );
 
-      std::auto_ptr< Family > fam( new Family( "family" ) );
-      std::auto_ptr< Task > task( new Task( "t" ) );
+      family_ptr fam = suite->add_family( "family" );
+      task_ptr task = fam->add_task("t");
       TimeSeries timeSeries(TimeSlot(00,30), TimeSlot(23,59), TimeSlot(4,0), false/* relative */);
 
       task->addTime( TimeAttr( timeSeries ));
       task->addVerify( VerifyAttr(NState::COMPLETE,6) );  // expect task to complete 6 times
 
-      fam->addTask( task );
-      suite->addFamily( fam );
-      theDefs.addSuite( suite );
       //  	cout << theDefs << "\n";
    }
 
@@ -146,19 +140,16 @@ BOOST_AUTO_TEST_CASE( test_time_and_date )
       boost::gregorian::date todaysDate = theLocalTime.date();
       boost::posix_time::ptime   time_plus_minute =  theLocalTime +  minutes(1);
 
-      std::auto_ptr< Suite > suite( new Suite( "test_time_and_date" ) );
       ClockAttr clockAttr(theLocalTime,false/*false means use real clock*/);
+      suite_ptr suite = theDefs.add_suite("test_time_and_date");
       suite->addClock( clockAttr );
 
-      std::auto_ptr< Family > fam( new Family( "family" ) );
-      std::auto_ptr< Task > task( new Task( "t" ) );
+      family_ptr fam = suite->add_family( "family" );
+      task_ptr task = fam->add_task("t");
       task->addDate( DateAttr(todaysDate.day(),todaysDate.month(),todaysDate.year()) );
       task->addTime( ecf::TimeAttr( TimeSlot(time_plus_minute.time_of_day()) ) );
       task->addVerify( VerifyAttr(NState::COMPLETE,1) );  // expect task to complete 1 time
 
-      fam->addTask( task );
-      suite->addFamily( fam );
-      theDefs.addSuite( suite );
       //  	cout << theDefs << "\n";
    }
 
@@ -191,19 +182,16 @@ BOOST_AUTO_TEST_CASE( test_time_and_tomorrows_date )
       tomorrows_date += days(1);
       boost::posix_time::ptime   time_plus_minute =  theLocalTime +  minutes(1);
 
-      std::auto_ptr< Suite > suite( new Suite( "test_time_and_tomorrows_date" ) );
       ClockAttr clockAttr(theLocalTime,false/*false means use real clock*/);
+      suite_ptr suite = theDefs.add_suite("test_time_and_tomorrows_date");
       suite->addClock( clockAttr );
 
-      std::auto_ptr< Family > fam( new Family( "family" ) );
-      std::auto_ptr< Task > task( new Task( "t" ) );
+      family_ptr fam = suite->add_family( "family" );
+      task_ptr task = fam->add_task("t");
       task->addDate( DateAttr(tomorrows_date.day(),tomorrows_date.month(),tomorrows_date.year()) );
       task->addTime( ecf::TimeAttr( TimeSlot(time_plus_minute.time_of_day()) ) );
       task->addVerify( VerifyAttr(NState::COMPLETE,1) );  // expect task to complete 1 time
 
-      fam->addTask( task );
-      suite->addFamily( fam );
-      theDefs.addSuite( suite );
       //    cout << theDefs << "\n";
    }
 
@@ -241,21 +229,18 @@ BOOST_AUTO_TEST_CASE( test_multiple_times_and_dates )
       boost::posix_time::time_duration td_plus_minute  =  theLocalTime.time_of_day() +  minutes(1);
       boost::posix_time::time_duration td_plus_hour    =  theLocalTime.time_of_day() +  hours(1);
 
-      std::auto_ptr< Suite > suite( new Suite( "test_multiple_times_and_dates" ) );
       ClockAttr clockAttr(theLocalTime,false/*false means use real clock*/);
+      suite_ptr suite = theDefs.add_suite("test_multiple_times_and_dates");
       suite->addClock( clockAttr );
 
-      std::auto_ptr< Family > fam( new Family( "family" ) );
-      std::auto_ptr< Task > task( new Task( "t" ) );
+      family_ptr fam = suite->add_family( "family" );
+      task_ptr task = fam->add_task("t");
       task->addDate( DateAttr(todaysDate.day(),todaysDate.month(),todaysDate.year()) );
       task->addDate( DateAttr(tomarrows_date.day(),tomarrows_date.month(),tomarrows_date.year()) );
       task->addTime( TimeAttr( TimeSlot(td_plus_minute) ));
       task->addTime( TimeAttr( TimeSlot(td_plus_hour) ));
       task->addVerify( VerifyAttr(NState::COMPLETE,4) );  // expect task to complete 4 time
 
-      fam->addTask( task );
-      suite->addFamily( fam );
-      theDefs.addSuite( suite );
       //  	cout << theDefs << "\n";
    }
 
@@ -289,7 +274,7 @@ BOOST_AUTO_TEST_CASE( test_multiple_times_and_dates_hybrid )
       boost::posix_time::time_duration td_plus_minute  =  theLocalTime.time_of_day() +  minutes(1);
       boost::posix_time::time_duration td_plus_10_minute  =  theLocalTime.time_of_day() +  minutes(10);
 
-      suite_ptr suite = theDefs.add_suite( "test_multiple_times_and_dates_hybrid" );
+      suite_ptr suite = theDefs.add_suite("test_multiple_times_and_dates_hybrid");
       suite->addClock( ClockAttr(theLocalTime) ); // defaults to hybrid
 
       family_ptr fam = suite->add_family("family");
@@ -325,22 +310,19 @@ BOOST_AUTO_TEST_CASE( test_multiple_times_and_days )
    // Initialise real clock on a sunday, such that task should run on Monday & tuesday twice
    Defs theDefs;
    {
-      std::auto_ptr< Suite > suite( new Suite( "test_multiple_times_and_days" ) );
       ClockAttr clockAttr(false/*false means use real clock*/);
       clockAttr.date(11,10,2009); // 11 October 2009 was a sunday
+      suite_ptr suite = theDefs.add_suite("test_multiple_times_and_days");
       suite->addClock( clockAttr );
 
-      std::auto_ptr< Family > fam( new Family( "family" ) );
-      std::auto_ptr< Task > task( new Task( "t" ) );
+      family_ptr fam = suite->add_family("family");
+      task_ptr task = fam->add_task("t");
       task->addDay( DayAttr(DayAttr::MONDAY) );
       task->addDay( DayAttr(DayAttr::TUESDAY) );
       task->addTime( TimeAttr( TimeSlot(10,0) ));
       task->addTime( TimeAttr( TimeSlot(20,0) ));
       task->addVerify( VerifyAttr(NState::COMPLETE,4) );  // expect task to complete 4 time
 
-      fam->addTask( task );
-      suite->addFamily( fam );
-      theDefs.addSuite( suite );
       //  	cout << theDefs << "\n";
    }
 
@@ -368,13 +350,13 @@ BOOST_AUTO_TEST_CASE( test_multiple_times_and_days_hybrid )
    // on Monday since we are using a hybrid clock
    Defs theDefs;
    {
-      std::auto_ptr< Suite > suite( new Suite( "test_multiple_times_and_days_hybrid" ) );
       ClockAttr clockAttr(true/*false means use hybrid clock*/);
       clockAttr.date(12,10,2009); // 12 October 2009 was a Monday
+      suite_ptr suite = theDefs.add_suite("test_multiple_times_and_days_hybrid");
       suite->addClock( clockAttr );
 
-      std::auto_ptr< Family > fam( new Family( "family" ) );
-      std::auto_ptr< Task > task( new Task( "t" ) );
+      family_ptr fam = suite->add_family("family");
+      task_ptr task = fam->add_task("t");
       task->addDay( DayAttr(DayAttr::MONDAY) );
       task->addDay( DayAttr(DayAttr::TUESDAY) );
       task->addTime( TimeAttr( TimeSlot(10,0) ));
@@ -382,9 +364,6 @@ BOOST_AUTO_TEST_CASE( test_multiple_times_and_days_hybrid )
       task->addTime( TimeAttr( TimeSlot(20,0) ));
       task->addVerify( VerifyAttr(NState::COMPLETE,3) );  // expect task to complete 3 times
 
-      fam->addTask( task );
-      suite->addFamily( fam );
-      theDefs.addSuite( suite );
       //  	cout << theDefs << "\n";
    }
 

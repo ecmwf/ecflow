@@ -142,11 +142,11 @@ void test_sms_preprocessing(const std::string& directory, bool pass)
 	// Create a defs file, where the task name mirrors the sms files in the given directory
  	Defs theDefs;
  	{
-		std::auto_ptr< Suite > suite( new Suite( "suite" ) );
- 		std::auto_ptr< Family > fam( new Family( "family" ) );
+      suite_ptr suite = theDefs.add_suite("suite");
 		suite->addVariable( Variable( Str::ECF_INCLUDE(), "$ECF_HOME/includes" ) );
 		suite->addVariable( Variable( Str::ECF_OUT(),     "$ECF_HOME" ) );
 		suite->addVariable( Variable( "SLEEPTIME", "10" ) );
+      family_ptr fam = suite->add_family( "family" );
 
 		// for operations auto discover the variables used in the header files and give
 		// them a dummy value. This would allow the test to pass when doing
@@ -163,35 +163,20 @@ void test_sms_preprocessing(const std::string& directory, bool pass)
 		fs::directory_iterator end_iter;
 		for (fs::directory_iterator dir_itr( full_path ); dir_itr != end_iter; ++dir_itr) {
 			try {
-#if BOOST_FILESYSTEM_VERSION == 3
 				fs::path relPath( directory + "/" + dir_itr->path().filename().string());
-#else
-				fs::path relPath( directory + "/" + dir_itr->path().filename() );
-#endif
 
 				// Ignore directores were only interested in .ecf files.
  				if (fs::is_directory(relPath)) continue;
-#if BOOST_FILESYSTEM_VERSION == 3
             if (File::getExt(relPath.filename().string()) != "ecf" ) continue; // ignore other files
-#else
- 				if (File::getExt(relPath.leaf()) != "ecf" ) continue; // ignore other files
-#endif
 
 				//std::cout << "......Parsing file " << relPath.string() << "\n";
  				//std::cout << "adding task name " << relPath.leaf() << "\n";
-#if BOOST_FILESYSTEM_VERSION == 3
-            std::auto_ptr< Task > task1( new Task( relPath.stem().string() ) );
-#else
- 				std::auto_ptr< Task > task1( new Task( relPath.stem() ) );
-#endif
- 				fam->addTask( task1 );
+ 				fam->add_task( relPath.stem().string() );
 			}
 			catch ( const std::exception & ex ) {
 				std::cout << "Exception " << dir_itr->path().filename() << " " << ex.what() << std::endl;
 			}
 		}
-		suite->addFamily( fam );
-		theDefs.addSuite( suite );
 		//cerr << "The defs\n" << theDefs << "\n";
 	}
 

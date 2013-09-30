@@ -54,20 +54,15 @@ BOOST_AUTO_TEST_CASE( test_resolve_dependencies )
 	std::string suitename = "suite";
 	std::string familyname = "f";
 	{
-		std::auto_ptr<Task> task(new Task("t" ));
+		suite_ptr suite = defs.add_suite( suitename );
+      family_ptr fam = suite->add_family( familyname );
+
+		task_ptr task = fam->add_task( "t" );
 		task->addMeter( Meter(metername,0,240,120) );
 
-		std::auto_ptr<Task> task_tt(new Task("tt" ));
+      task_ptr task_tt = fam->add_task( "tt" );
 		task_tt->add_complete(  "t:step ge 120");
 		task_tt->add_trigger(   "t == complete" );
-
-		std::auto_ptr<Family> fam( new Family(familyname));
-		fam->addTask( task );
-		fam->addTask( task_tt );
-
-		std::auto_ptr<Suite> suite( new Suite(suitename));
-		suite->addFamily(fam);
-		defs.addSuite( suite );
 
 		std::string errorMsg;
 		BOOST_CHECK_MESSAGE( defs.checkInvariants(errorMsg), errorMsg);

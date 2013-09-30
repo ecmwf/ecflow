@@ -46,11 +46,10 @@ BOOST_AUTO_TEST_SUITE( SimulatorTestSuite )
 BOOST_AUTO_TEST_CASE( test_repeat_with_cron  )
 {
    cout << "Simulator:: ...test_repeat_with_cron\n";
-
 //    suite s
 //    clock real <today date>
 //      family f
-//     repeat date YMD 20091001  20091004 1  # yyyymmdd
+//      repeat date YMD 20091001  20091004 1  # yyyymmdd
 //       family plot
 //          complete plot/finish == complete
 //
@@ -67,47 +66,43 @@ BOOST_AUTO_TEST_CASE( test_repeat_with_cron  )
 
    Defs theDefs;
    {
-      std::auto_ptr< Suite > suite( new Suite( "test_repeat_with_cron" ) );
-
       boost::posix_time::ptime   theLocalTime =  Calendar::second_clock_time();
       boost::posix_time::ptime   time_plus_2_minute =  theLocalTime +  minutes(2);
-
       ClockAttr clockAttr(theLocalTime, false/* real clock*/);
+
+      suite_ptr suite = theDefs.add_suite("test_repeat_with_cron");
       suite->addClock( clockAttr );
 
-      std::auto_ptr< Family > f( new Family( "f" ) );
+      family_ptr f = suite->add_family( "f" );
       f->addRepeat( RepeatDate("YMD",20091001,20091004,1));  // repeat contents 4 times
       f->addVerify( VerifyAttr(NState::COMPLETE,1) );          // family completes once
 
-      std::auto_ptr< Family > family_plot( new Family( "plot" ) );
+      family_ptr family_plot = f->add_family( "plot" );
       family_plot->add_complete(  "plot/finish ==  complete");
       family_plot->addVerify( VerifyAttr(NState::COMPLETE,4) );
 
 
-      std::auto_ptr< Task > task_finish( new Task( "finish" ) );
+      task_ptr task_finish = family_plot->add_task("finish");
       task_finish->add_trigger(  "1 == 0");
       task_finish->add_complete( "checkdata:done or checkdata == complete" );
       task_finish->addVerify( VerifyAttr(NState::COMPLETE,8) );
-      family_plot->addTask( task_finish );
 
-      std::auto_ptr< Task > task_checkdata( new Task( "checkdata" ) );
+      task_ptr task_checkdata = family_plot->add_task("checkdata");
       task_checkdata->addEvent( Event(1,"done"));
+
       CronAttr cronAttr;
       cronAttr.addTimeSeries( ecf::TimeSlot(time_plus_2_minute.time_of_day()) );
       task_checkdata->addCron( cronAttr  );
       task_checkdata->addVerify( VerifyAttr(NState::COMPLETE,8) );
-      family_plot->addTask( task_checkdata );
 
-      f->addFamily( family_plot );
-
-      suite->addFamily( f );
-      theDefs.addSuite( suite );
-      cout << theDefs << "\n";
+//    cout << theDefs << "\n";
    }
 
    Simulator simulator;
    std::string errorMsg;
    BOOST_REQUIRE_MESSAGE(simulator.run(theDefs, TestUtil::testDataLocation("test_repeat_with_cron.def"), errorMsg),errorMsg);
 }
+
+
 BOOST_AUTO_TEST_SUITE_END()
 

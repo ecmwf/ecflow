@@ -75,41 +75,28 @@ BOOST_AUTO_TEST_CASE( test_sms_file_locator )
 	//endsuite
  	Defs theDefs;
  	{
-		std::auto_ptr< Suite > suite( new Suite( "suite" ) );
- 		std::auto_ptr< Family > fam( new Family( "family" ) );
+ 	   suite_ptr suite = theDefs.add_suite("suite");
 		suite->addVariable( Variable( Str::ECF_INCLUDE(), "$ECF_HOME/includes" ) );
  		suite->addVariable( Variable( "SLEEPTIME", "10" ) );
-		std::auto_ptr< Task > t1( new Task( "t1" ) );
-		std::auto_ptr< Task > t2( new Task( "t2" ) );
-		std::auto_ptr< Task > t3( new Task( "t3" ) );
-		fam->addTask( t1 );
-		fam->addTask( t2 );
-		fam->addTask( t3 );
-		suite->addFamily( fam );
-		theDefs.addSuite( suite );
+ 		family_ptr fam = suite->add_family( "family" );
+		fam->add_task( "t1" );
+		fam->add_task( "t2" );
+		fam->add_task( "t3" );
  	}
  	{
-		std::auto_ptr< Suite > suite1( new Suite( "suite1" ) );
- 		std::auto_ptr< Family > fam( new Family( "family" ) );
- 		std::auto_ptr< Task > t1( new Task( "suite1_task1" ) );
-		std::auto_ptr< Task > t2( new Task( "suite1_task2" ) );
-		std::auto_ptr< Task > t3( new Task( "suite1_task3" ) );
-		fam->addTask( t1 );
-		fam->addTask( t2 );
-		fam->addTask( t3 );
-		suite1->addFamily( fam );
-		theDefs.addSuite( suite1 );
+      suite_ptr suite = theDefs.add_suite("suite1");
+      family_ptr fam = suite->add_family( "family" );
+      fam->add_task( "suite1_task1" );
+      fam->add_task( "suite1_task2" );
+      fam->add_task( "suite1_task3" );
  	}
  	{
-		std::auto_ptr< Suite > suite2( new Suite( "suite2" ) );
+      suite_ptr suite2 = theDefs.add_suite("suite2");
 		suite2->addVariable( Variable( Str::ECF_INCLUDE(), "$ECF_HOME/includes" ) );
  		suite2->addVariable( Variable( Str::ECF_FILES(), "$ECF_HOME" ) );
- 		std::auto_ptr< Family > fam( new Family( "family" ) );
+      family_ptr fam = suite2->add_family( "family" );
 		fam->addVariable( Variable( Str::ECF_FETCH(), "smsfetch -F %ECF_FILES% -I %ECF_INCLUDE%" ) );
- 		std::auto_ptr< Task > t2( new Task( "t2" ) );
- 		fam->addTask( t2 );
- 		suite2->addFamily( fam );
-		theDefs.addSuite( suite2 );
+ 		fam->add_task( "t2" );
  	}
 // 	cerr << theDefs << "\n";
 

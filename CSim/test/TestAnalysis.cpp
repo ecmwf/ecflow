@@ -54,20 +54,15 @@ BOOST_AUTO_TEST_CASE( test_analysys )
    // It will prodice a defs.depth and defs.flat files. Make sure to remove them
    Defs theDefs;
    {
-      std::auto_ptr< Suite > suite( new Suite( "test_analysys" ) );
-      std::auto_ptr< Family > fam( new Family( "family" ) );
+      suite_ptr suite = theDefs.add_suite("test_analysys");
+      family_ptr fam = suite->add_family("family");
 
-      std::auto_ptr< Task > task1( new Task( "t1" ) );
+      task_ptr task1 = fam->add_task("t1");
       task1->add_trigger( "t2 == complete" );
 
-      std::auto_ptr< Task > task2( new Task( "t2" ) );
+      task_ptr task2 = fam->add_task("t2");
       task2->add_trigger( "t1 == complete" );
 
-      fam->addTask(  task1 );
-      fam->addTask(  task2 );
-
-      suite->addFamily( fam );
-      theDefs.addSuite( suite );
       //		cout << theDefs << "\n";
    }
 

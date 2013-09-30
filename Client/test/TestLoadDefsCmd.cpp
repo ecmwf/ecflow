@@ -96,7 +96,7 @@ BOOST_AUTO_TEST_CASE( test_load_defs_cmd_handleRequest )
 
  	// Modify the Defs file to add a task/trigger that references the undefined
  	// extern path defined in file 'first.def' This should fail.
-	std::auto_ptr<Task> task(new Task("AMadeUpName"));
+	task_ptr task = Task::create( "AMadeUpName");
 	task->add_trigger( "/a/b/c/d/e/f/g/h/j == complete");
 	secondDefs.suiteVec().back()->familyVec().back()->addTask(task);
 
