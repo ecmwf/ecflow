@@ -64,28 +64,23 @@ BOOST_AUTO_TEST_CASE( test_meter )
 
  	Defs theDefs;
  	{
- 	   std::auto_ptr< Suite > suite( new Suite( "test_meter" ) );
  	   ClockAttr clockAttr(theLocalTime );
+ 	   suite_ptr suite = theDefs.add_suite("test_meter");
  	   suite->addClock( clockAttr );
  	   suite->addVerify( VerifyAttr(NState::COMPLETE,1) );
 
- 	   std::auto_ptr< Task > fc( new Task( "fc" ) );
+ 	   family_ptr fam = suite->add_family("family");
+ 	   fam->addVerify( VerifyAttr(NState::COMPLETE,1) );
+
+ 	   task_ptr fc = fam->add_task("fc");
  	   fc->addMeter( Meter("hour",0,240,240) );
  	   fc->addVerify( VerifyAttr(NState::COMPLETE,1) );
 
- 	   std::auto_ptr< Task > half( new Task( "half" ) );
+      task_ptr half = fam->add_task("half");
  	   half->add_trigger( "fc:hour >= 120" );
  	   half->addVerify( VerifyAttr(NState::COMPLETE,1) );
-
- 	   std::auto_ptr< Family > fam( new Family( "family" ) );
- 	   fam->addVerify( VerifyAttr(NState::COMPLETE,1) );
- 	   fam->addTask( fc );
- 	   fam->addTask( half );
- 	   suite->addFamily( fam );
- 	   theDefs.addSuite( suite );
- 	}
-
 //  	cout << theDefs << "\n";
+ 	}
 
    Simulator simulator;
 	std::string errorMsg;

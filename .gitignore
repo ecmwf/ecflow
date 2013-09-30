@@ -6,6 +6,8 @@ swap
 *.job2
 *.job3
 
+*.1
+
 *.dat
 *.def_log
 *.glog
@@ -17,6 +19,9 @@ swap
 *.log
 *.so
 *.pyc
+
+ECF_HOME_debug/
+ECF_HOME_release/
 
 gmon.out
 
