@@ -177,7 +177,7 @@ def add_hpux_variables( hpux ):
     hpux.add_variable("BOOST_DIR","/scratch/ma/emos/ma0/hpia64/boost")
     hpux.add_variable("ARCH","hpux")
     hpux.add_variable("SITE_CONFIG","$WK/build/site_config/site-config-HPUX.jam")
-    hpux.add_variable("BUILD_ECFLOWVIEW","")  # dont build on this platform
+    hpux.add_variable("BUILD_ECFLOWVIEW","false")  # dont build on this platform
 
 def add_remote_aix_power7_variables( aix_power7 ) :
     # for c2a we need to use logsrvr in order to see the job output
@@ -209,7 +209,7 @@ def add_aix_power7_variables( aix_power7 ) :
     aix_power7.add_variable("BOOST_DIR","/s2o1/emos_data/ecflow/boost")
     aix_power7.add_variable("ARCH","ibm_power7")
     aix_power7.add_variable("SITE_CONFIG","$WK/build/site_config/site-config-AIX.jam")
-    aix_power7.add_variable("BUILD_ECFLOWVIEW","")  # dont build on this platform
+    aix_power7.add_variable("BUILD_ECFLOWVIEW","false")  # dont build on this platform
 
 
 def add_remote_aix_rs6000_variables( aix_rs6000 ) :
