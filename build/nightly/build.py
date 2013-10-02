@@ -117,6 +117,24 @@ def add_opensuse113_variables( opensuse113 ):
     opensuse113.add_variable("BOOST_DIR","/vol/ecf/opensuse113/boost")
     opensuse113.add_variable("ARCH","opensuse113")
     opensuse113.add_variable("SITE_CONFIG","$WK/build/site_config/site-config-Linux64.jam")
+
+def add_cray_gnu_compiler_variables( cray ):
+    cray.add_variable("COMPILER_TEST_PATH","gcc-4.3/$mode")
+    cray.add_variable("COMPILER_VERSION","gcc-4.3")
+    cray.add_variable("TOOLSET","gcc")
+    # cray.add_variable("TEMPLATE_DEPTH","c++-template-depth=512") # needed for gnu/4.8.1
+    
+def add_remote_cray_variables( cray ):
+    cray.add_variable("ECF_KILL_CMD","ssh  %USER%@%REMOTE_HOST% \"kill -15 %ECF_RID%\"") 
+    cray.add_variable("ECF_JOB_CMD","ssh  %USER%@%REMOTE_HOST% '%ECF_JOB% > %ECF_JOBOUT%  2>&1'")
+
+def add_cray_variables( cray ):
+    cray.add_variable("REMOTE_HOST","cctdtn1")
+    cray.add_variable("ROOT_WK","/home/ma/ma0")
+    cray.add_variable("BOOST_DIR","/home/ma/ma0/boost")
+    cray.add_variable("ARCH","cray")
+    cray.add_variable("SITE_CONFIG","$WK/build/site_config/site-config-Linux64.jam")
+    
     
 def add_remote_redhat_variables( redhat ):
     redhat.add_variable("ECF_KILL_CMD","ssh  %USER%@%REMOTE_HOST% \"kill -15 %ECF_RID%\"") 
@@ -159,6 +177,7 @@ def add_hpux_variables( hpux ):
     hpux.add_variable("BOOST_DIR","/scratch/ma/emos/ma0/hpia64/boost")
     hpux.add_variable("ARCH","hpux")
     hpux.add_variable("SITE_CONFIG","$WK/build/site_config/site-config-HPUX.jam")
+    hpux.add_variable("BUILD_ECFLOWVIEW","")  # dont build on this platform
 
 def add_remote_aix_power7_variables( aix_power7 ) :
     # for c2a we need to use logsrvr in order to see the job output
@@ -190,6 +209,8 @@ def add_aix_power7_variables( aix_power7 ) :
     aix_power7.add_variable("BOOST_DIR","/s2o1/emos_data/ecflow/boost")
     aix_power7.add_variable("ARCH","ibm_power7")
     aix_power7.add_variable("SITE_CONFIG","$WK/build/site_config/site-config-AIX.jam")
+    aix_power7.add_variable("BUILD_ECFLOWVIEW","")  # dont build on this platform
+
 
 def add_remote_aix_rs6000_variables( aix_rs6000 ) :
     aix_rs6000.add_variable("ECF_JOB_CMD",    "/home/ma/emos/bin/smssubmit %USER% %SCHOST% %ECF_JOB% %ECF_JOBOUT%")
@@ -370,6 +391,14 @@ def build_redhat( parent ) :
     add_git_tasks( redhat )
     add_build_and_test_tasks( redhat )
     
+def build_cray_gnu( parent ) :
+    cray = parent.add_family("cray_gnu")
+    add_cray_variables(cray)
+    add_cray_gnu_compiler_variables(cray)
+    add_remote_cray_variables(cray)
+    add_git_tasks( cray )
+    add_build_and_test_tasks( cray )
+    
 def build_opensuse103( parent ) :
     opensuse103 = parent.add_family("opensuse103")
     add_opensuse103_variables(opensuse103)
@@ -489,6 +518,7 @@ def add_suite_variables( suite ):
     suite.add_variable("BOOST_DIR","/var/tmp/ma0/boost")
     suite.add_variable("PYTHON_VERSION","2.7")
     suite.add_variable("SET_TO_TEST_SCRIPT","false")
+    suite.add_variable("BUILD_ECFLOWVIEW","true")
     # automatically fob all zombies when compiling ecflow 
     child_list = []
     suite.add_zombie(ecflow.ZombieAttr(ecflow.ZombieType.ecf,  child_list, ecflow.ZombieUserActionType.fob, 0))
@@ -539,6 +569,7 @@ with defs.add_suite("suite") as suite:
         build_linux_64_intel( build )
         build_opensuse113( build )
         build_redhat( build )
+        build_cray_gnu( build )
         build_opensuse103( build )
         build_hpux(build)
         build_aix_power7(build)
