@@ -34,7 +34,7 @@ export ECFLOW_INSTALL_DIR=/usr/local/apps/ecflow/$release.$major.$minor
 export ECFLOW_PYTHON_INSTALL_DIR=$ECFLOW_INSTALL_DIR/lib/python%PYTHON_VERSION%/site-packages/ecflow 
 
 # bjam use ARCH environment to determine if the ecflowview should be built
-if [[ %BUILD_ECFLOWVIEW:% = != "" ]] ; then
+if [[ %BUILD_ECFLOWVIEW:% != "" ]] ; then
    export ARCH=linux
 fi
 
