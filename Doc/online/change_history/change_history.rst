@@ -8,10 +8,8 @@
 **Change History**
 ==================
 
-4.0.0 (production, October 2013)
+3.1.10 (production, October 2013)
    - ecflow_client : Updated parsing to allow suite to have labels
-   - ecflow_client : Moved to boost 1.53
-   - ecflow_server : Moved to boost 1.53
    - *             : Update ecflow_migrate to take into account label's that have new lines
    - *             : Migrated source control management from perforce to git, and up updated build scripts
    
