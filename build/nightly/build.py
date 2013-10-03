@@ -183,6 +183,11 @@ def add_remote_aix_power7_variables( aix_power7 ) :
     # for c2a we need to use logsrvr in order to see the job output
     aix_power7.add_variable("ECF_LOGHOST","c2a")
     aix_power7.add_variable("ECF_LOGPORT","9316")
+    
+    # Set the remote location for output, LOGDIR needed by queing system
+    # See function ECF_RCP, where the remote file system, is copied to local file system, at the end of the job
+    aix_power7.add_variable("LOGDIR", "/s2o1/emos_data/ecflow/log")
+    aix_power7.add_variable("ECF_OUT","/s2o1/emos_data/ecflow/log")
 
     aix_power7.add_variable("ECF_INCLUDE",  WK + "/build/nightly/suite/aix_power7/includes")
     aix_power7.add_variable("ECF_JOB_CMD",    "/home/ma/emos/bin/smssubmit.c2a %USER% %SCHOST% %ECF_JOB% %ECF_JOBOUT%")
@@ -195,10 +200,6 @@ def add_remote_aix_power7_variables( aix_power7 ) :
     aix_power7.add_variable("SCHOST","c2a")    # Super Computer HOST
     aix_power7.add_variable("WSHOST",os.uname()[1])  # Work Space HOST
 
-    # Set the remote location for output, LOGDIR needed by queing system
-    # See function ECF_RCP, where the remote file system, is copied to local file system, at the end of the job
-    aix_power7.add_variable("LOGDIR", "/s2o1/emos_data/ecflow/log")
-    aix_power7.add_variable("ECF_OUT","/s2o1/emos_data/ecflow/log")
     aix_power7.add_variable("COMPILER_VERSION","c++/vacpp/12.1.0.0")  # c++/vacpp/11.1.0.1 c++/vacpp/12.1.0.0
     aix_power7.add_variable("COMPILER_TEST_PATH","vacpp/$mode/threading-multi")
     aix_power7.add_variable("TOOLSET","vacpp")
