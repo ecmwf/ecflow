@@ -520,6 +520,7 @@ def add_suite_variables( suite ):
     suite.add_variable("PYTHON_VERSION","2.7")
     suite.add_variable("SET_TO_TEST_SCRIPT","false")
     suite.add_variable("BUILD_ECFLOWVIEW","true")
+    suite.add_variable("GIT_BRANCH","develop")  # when makeing a relase switch to master
     # automatically fob all zombies when compiling ecflow 
     child_list = []
     suite.add_zombie(ecflow.ZombieAttr(ecflow.ZombieType.ecf,  child_list, ecflow.ZombieUserActionType.fob, 0))
