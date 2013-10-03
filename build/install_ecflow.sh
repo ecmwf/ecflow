@@ -73,7 +73,7 @@ install_arg=install-all
 # the correct embedded paths with ecflow.so (i.e for boost python )
 # ======================================================================
 
-BOOST_VERSION=boost_1_53_0
+BOOST_VERSION=boost_1_47_0
 
 if [[ "$user" = "map" ]] # when user emos is commented out
 then
