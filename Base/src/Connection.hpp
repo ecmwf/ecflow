@@ -198,35 +198,17 @@ private:
 				std::cout << "handle_read_data inbound_data_.size(" << inbound_data_.size() << ")\n";
 #endif
 
-				std::istringstream archive_stream(archive_data);
-
-#if defined(BINARY_ARCHIVE)
-				// std::cout << "handle_read_data Archive BINARY\n";
-				boost::archive::binary_iarchive archive( archive_stream );
-				archive >> t;
-
-#elif defined(PORTABLE_BINARY_ARCHIVE)
-				//	std::cout << "handle_read_data Archive PORTABLE_BINARY\n";
-				portable_binary_iarchive archive( archive_stream );
-				archive >> t;
-
-#elif defined(EOS_PORTABLE_BINARY_ARCHIVE)
-            // std::cout << "handle_read_data Archive EOS_PORTABLE_BINARY\n";
-            eos::portable_iarchive archive( archive_stream );
-            archive >> t;
-#else
-            // std::cout << "handle_read_data Archive TEXT\n";
-           boost::archive::text_iarchive archive( archive_stream );
-           archive >> t;
-#endif
-			} catch (const boost::archive::archive_exception& ae ) {
+				ecf::restore_from_string(archive_data,t);
+			}
+			catch (const boost::archive::archive_exception& ae ) {
 				// Unable to decode data.
 				ecf::LogToCout logToCout;
 				LOG(ecf::Log::ERR,"Connection::handle_read_data boost::archive::archive_exception " << ae.what());
 				boost::system::error_code error( boost::asio::error::invalid_argument);
 				boost::get<0>(handler)(error);
 				return;
-			} catch (std::exception& ) {
+			}
+			catch (std::exception& ) {
 				// Unable to decode data.
 				ecf::LogToCout logToCout;
 				LOG(ecf::Log::ERR,"Connection::handle_read_data Unable to decode data");

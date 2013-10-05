@@ -26,7 +26,6 @@
 #include "Log.hpp"
 #include <vector>
 
-#include "boost_archive.hpp" // collates boost archive includes
 #include "Log.hpp"
 #include "Serialization.hpp"
 #include "Server.hpp"
@@ -97,22 +96,7 @@ void CConnection::handle_read_data(const boost::system::error_code& e)
    // Extract the data structure from the data just received.
    try {
       std::string archive_data(&inbound_data_[0], inbound_data_.size());
-      std::istringstream archive_stream(archive_data);
-
-#if defined(BINARY_ARCHIVE)
-      boost::archive::binary_iarchive archive( archive_stream );
-
-#elif defined(PORTABLE_BINARY_ARCHIVE)
-      portable_binary_iarchive archive( archive_stream );
-
-#elif defined(EOS_PORTABLE_BINARY_ARCHIVE)
-      eos::portable_iarchive archive( archive_stream );
-
-#else
-      boost::archive::text_iarchive archive( archive_stream );
-#endif
-
-      archive >> inbound_request_;
+      ecf::restore_from_string(archive_data,inbound_request_);
    }
    catch (const boost::archive::archive_exception& ae ) {
       // Unable to decode data.
