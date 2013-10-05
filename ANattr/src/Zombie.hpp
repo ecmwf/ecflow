@@ -62,6 +62,8 @@ public:
 	Zombie();
 
 /// accessors
+   // distinguish between manual and automatic user action. manual take precedence
+	bool manual_user_action() const { return user_action_set_;}
 	bool fob() const;
 	bool fail() const ;
 	bool adopt() const;
@@ -81,6 +83,8 @@ public:
  	int try_no() const { return try_no_; }
 	int duration() const { return duration_; }
 	ecf::User::Action user_action() const;
+	std::string user_action_str() const;
+
 
 	const boost::posix_time::ptime&  creation_time() const { return creation_time_; }
 
