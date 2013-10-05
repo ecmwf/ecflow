@@ -80,7 +80,7 @@ void save_as_string(std::string& outbound_data, const T& t)
 }
 
 template< typename T >
-void restore_from_string(std::string& archive_data, T& t)
+void restore_from_string(const std::string& archive_data, T& t)
 {
    std::istringstream archive_stream(archive_data);
 
