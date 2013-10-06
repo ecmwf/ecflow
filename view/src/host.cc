@@ -1161,6 +1161,41 @@ bool check_version( const char* v1, const char* v2 )
    return true;
 }
 
+void get_server_version(ClientInvoker& client, std::string& server_version)
+{
+   try {
+      client.server_version();
+      server_version = client.server_reply().get_string();
+
+      if (server_version.empty()) {
+         // assume new client old server
+         client.allow_new_client_old_server(true);
+
+         // try again
+         client.server_version();
+         server_version = client.server_reply().get_string();
+      }
+   }
+   catch (...)  {
+      // assume new client old server
+      client.allow_new_client_old_server(true);
+
+      // try again
+      client.server_version();
+      server_version = client.server_reply().get_string();
+   }
+
+   // if still empty, assume old client new server, *UNTESTED*
+   if (server_version.empty()) {
+      // assume new server old client/viewer
+      client.allow_new_server_old_client(true);
+
+      // try again
+      client.server_version();
+      server_version = client.server_reply().get_string();
+   }
+}
+
 void ehost::login()
 {
    gui::message("Login to %s", name());
@@ -1177,13 +1212,14 @@ void ehost::login()
          return;
       }
 
-      client_.server_version();
-      std::string version = client_.server_reply().get_string();
+      // if we can not get the server version, attempt forward compatibility
+      std::string server_version;
+      get_server_version(client_,server_version);
 
-      if (!check_version(version.c_str(), ecf::Version::raw().c_str())) {
+      if (!check_version(server_version.c_str(), ecf::Version::raw().c_str())) {
         if (!confirm::ask(false, "%s (%s@%d): version mismatch, server is %s, client is %s\ntry to connect anyway?", name(),
                           machine(), number(),
-                          version.c_str(),
+                          server_version.c_str(),
                           ecf::Version::raw().c_str())) {
           connect_ = false;
           connected_ = false;

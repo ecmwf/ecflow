@@ -29,13 +29,13 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/tuple/tuple.hpp>
 
-#include "boost_archive.hpp" // collates boost archive includes
 #include "Log.hpp"
+#include "Str.hpp"
+#include "Ecf.hpp"
 #include "Serialization.hpp"
 
 #ifdef DEBUG
 //#define DEBUG_CONNECTION 1
-//#include "Ecf.hpp"
 //#define DEBUG_CONNECTION_MEMORY 1
 #endif
 
@@ -54,8 +54,12 @@
  */
 class connection {
 public:
-	/// Constructor.
-	connection(boost::asio::io_service& io_service) : socket_(io_service)
+	/// Allow tentative support for new client to talk to old server
+   /// by changing the boost serialisation archive version, hence tentative
+	connection(boost::asio::io_service& io_service)
+    : allow_new_client_old_server_(false),
+      allow_new_server_old_client_(false),
+      socket_(io_service)
 	{
 #ifdef DEBUG_CONNECTION
 		std::cout << "Connection::connection\n";
@@ -74,6 +78,11 @@ public:
 		return socket_;
 	}
 
+	// support for forward compatibility, by changing boost archive version
+	// Chosen to change client side only
+   void allow_new_client_old_server(bool f)  { allow_new_client_old_server_ = f;}
+   void allow_new_server_old_client(bool f)  { allow_new_server_old_client_ = f;}
+
 	/// Asynchronously write a data structure to the socket.
 	template<typename T, typename Handler>
 	void async_write(const T& t, Handler handler) {
@@ -84,6 +93,12 @@ public:
 		// Serialise the data first so we know how large it is.
 		try {
 		   ecf::save_as_string(outbound_data_,t);
+
+         if (allow_new_client_old_server_ && !Ecf::server()) {
+            // Client context, forward compatibility, new client -> old server
+            ecf::Str::replace(outbound_data_,"22 serialization::archive 10","22 serialization::archive 9");
+         }
+
 		} catch (const boost::archive::archive_exception& ae ) {
 		   // Unable to decode data.
 		   // Something went wrong, inform the caller.
@@ -192,12 +207,17 @@ private:
 			// Extract the data structure from the data just received.
 			try {
 				std::string archive_data(&inbound_data_[0], inbound_data_.size());
+
 #ifdef DEBUG_CONNECTION_MEMORY
 				if (Ecf::server()) std::cout << "server::";
 				else               std::cout << "client::";
 				std::cout << "handle_read_data inbound_data_.size(" << inbound_data_.size() << ")\n";
 #endif
 
+				if (allow_new_server_old_client_ && !Ecf::server()) {
+				   // Client context, forward compatibility, new server  -> old client
+				   ecf::Str::replace(archive_data,"22 serialization::archive 10","22 serialization::archive 9");
+				}
 				ecf::restore_from_string(archive_data,t);
 			}
 			catch (const boost::archive::archive_exception& ae ) {
@@ -223,6 +243,8 @@ private:
 	}
 
 private:
+   bool allow_new_client_old_server_;
+   bool allow_new_server_old_client_;
 	boost::asio::ip::tcp::socket socket_;/// The underlying socket.
 	std::string outbound_header_;        /// Holds an out-bound header.
 	std::string outbound_data_;          /// Holds the out-bound data.
