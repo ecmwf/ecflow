@@ -10,15 +10,31 @@ Issues:
    Hence a new client/ecflowview will not be able to communicate with an old server.
    
 Options:
-   1/ At the server end manually adjust the archive version, in the client message.
-      - This would be a hack, that require changing the message, for each client
-        call. May affect performance, since string will need modifying.
-        Even then boost serialisation library may change in a future release.
+1/ At the server end manually adjust the archive version, in the client message.
+- This would be a hack, that require changing the message, for each client call. 
+- May affect performance, since string will need modifying.
+- Even then boost serialisation library may change in a future release.
+     
         
-   2/ The the client->server protocol only:
-      The server->client, should be ok, since boost support backward compatibility.
-      Will require data driven api.
+2/ Change the client->server protocol only:
++ The server->client, should be ok, since boost support backward compatibility.
++ Will require data driven api.
         command name=value, name=value, name=value.
-      This will support forward compatibility. If an old server recieves a command
-      it does not understand, it will be ignored. Additionally  new name/value, as
-      arguments can be added, without affecting old servers.
+  This will support forward compatibility. If an old server receives a command
+  it does not understand, it will be ignored. 
++ Additionally  new name/value, as arguments can be added, without affecting old servers.
+- Issue of loading defs form new client to old server, will still remain.
+
+3/ change client<->server protocol
++ most flexible.
+- most amount of work
+- transfer of defs from server to client, will pose a problem
+- Issue of loading defs from new client to old server, will still remain. 
+- server to client comms, using simple data driven approach will not work, for
+  hierarchical objects. i.e like suite and family, memento. This will require,
+  xml.json,yaml type solution. 
+  
+Conclusion:
+  Option 2 appears to offer the most, 'bang for the buck'.
+  
+      
