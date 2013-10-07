@@ -125,10 +125,35 @@ def add_cray_gnu_compiler_variables( cray ):
     # cray.add_variable("TEMPLATE_DEPTH","c++-template-depth=512") # needed for gnu/4.8.1
     
 def add_remote_cray_variables( cray ):
-    cray.add_variable("ECF_KILL_CMD","ssh  %USER%@%REMOTE_HOST% \"kill -15 %ECF_RID%\"") 
-    cray.add_variable("ECF_JOB_CMD","ssh  %USER%@%REMOTE_HOST% '%ECF_JOB% > %ECF_JOBOUT%  2>&1'")
+    # re use axel scripts for trap.h. rcp.eh etc,  
+    # However this re-use requires definitions for SMSNAME and SMSPASS
+    cray.add_variable("SMSNAME", "0")
+    cray.add_variable("SMSPASS", "0")
+    cray.add_variable("ECF_INCLUDE", "/home/ma/emos/def/cray/include")
+    
+    # for cray we need to use logsrvr in order to see the job output
+    cray.add_variable("ECF_LOGHOST","cctdtn1")
+    cray.add_variable("ECF_LOGPORT","10016")  #  revert to 9316 when log output umask setting fixed
+    
+    # Set the remote location for output, LOGDIR needed by queing system
+    # See function ECF_RCP, where the remote file system, is copied to local file system, at the end of the job
+    cray.add_variable("LOGDIR", "/scratch/ma/ma0/nightly")
+    cray.add_variable("ECF_OUT","/scratch/ma/ma0/nightly")
+
+
+    cray.add_variable("ECF_KILL_CMD",   "/home/ma/emos/bin/smssubmit.cray %USER% %SCHOST% %ECF_RID% %ECF_JOB% %ECF_JOBOUT% kill")
+    cray.add_variable("ECF_STATUS_CMD", "/home/ma/emos/bin/smssubmit.cray %USER% %SCHOST% %ECF_RID% %ECF_JOB% %ECF_JOBOUT% stat")
+    cray.add_variable("ECF_JOB_CMD",   "/home/ma/emos/bin/smssubmit.cray  %USER% %SCHOST% %ECF_JOB% %ECF_JOBOUT%")
+
+    cray.add_variable("QUEUE","ns")
+    cray.add_variable("ACCOUNT","ecodmdma")
+    #cray.add_variable("STHOST","/s2o1")  # Needed by qsub.h
+    cray.add_variable("SCHOST","cctdtn1")    # Super Computer HOST
+    cray.add_variable("WSHOST",os.uname()[1])  # Work Space HOST
 
 def add_cray_variables( cray ):
+    # Look for includes in ECF_INCLUDES, and the ECF_HOME
+    cray.add_variable("ECF_HOME", os.getenv("SCRATCH") + "/nightly/suite/cray")
     cray.add_variable("REMOTE_HOST","cctdtn1")
     cray.add_variable("ROOT_WK","/home/ma/ma0")
     cray.add_variable("BOOST_DIR","/home/ma/ma0/boost")
