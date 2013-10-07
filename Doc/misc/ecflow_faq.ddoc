@@ -1,0 +1,24 @@
+
+How have a task that run even ifs aborted
+==========================================
+
+task t2
+   trigger t1 eq complete
+   cron 00:10
+   event nok
+
+task memo # this task is just to keep memory of the problem met with t2
+   trigger t3:nok
+
+task watchdog # script to requeue t2 when aborted
+   cron 00:10
+   trigger t2 eq aborted
+
+This pattern consider the case where you design the t2 task wrapper with code like
+   #ksh script
+   if [[ ! -f $file ]] ; then xevent nok; sleep 60; fi
+   cmd || xevent nok # raise the event when the command has a problem
+   set +e # in some section of the code known to raise issue, closed with set -e
+   
+   
+See: https://software.ecmwf.int/issues/browse/SUP-640
