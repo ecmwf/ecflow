@@ -54,6 +54,10 @@ const std::string Version::TAG = " (debug)";  // Old tag: beta(debug)
 const std::string Version::TAG = ""; // Old tag: beta
 #endif
 
+
+// See: http://www.cmake.org/cmake/help/cmake_tutorial.html
+// For defining version numbers. This is done is a separate file
+// that is then included
 std::string Version::description()
 {
    std::stringstream ss;
