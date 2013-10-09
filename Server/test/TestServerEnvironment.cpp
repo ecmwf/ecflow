@@ -38,7 +38,7 @@ BOOST_AUTO_TEST_CASE( test_server_environment_ecfinterval )
 {
 	cout << "Server:: ...test_server_environment_ecfinterval\n";
 
-	// sms interval is valid for range [1-60]
+	// ecflow server interval is valid for range [1-60]
 	for(int i=-10; i< 70; ++i)
 	{
 		string errorMsg;
