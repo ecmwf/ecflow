@@ -253,11 +253,7 @@ bool File::find(
 			if ( find( itr->path(), file_name, path_found ) )
 				return true;
 		}
-#if BOOST_FILESYSTEM_VERSION == 3
 	   else if ( itr->path().filename() == file_name ) // see below
-#else
-		else if ( itr->leaf() == file_name ) // see below
-#endif
 		{
 			path_found = itr->path();
 			return true;
@@ -281,11 +277,7 @@ void File::findAll(
 
 			findAll( itr->path(), file_name, paths_found ) ;
 		}
-#if BOOST_FILESYSTEM_VERSION == 3
       else if ( itr->path().filename() == file_name ) // see below
-#else
-      else if ( itr->leaf() == file_name ) // see below
-#endif
 		{
 			paths_found.push_back( itr->path() );
  		}
