@@ -25,13 +25,20 @@ minor=$(grep   "Version::minor_"   ACore/src/Version.cpp  | cut -d= -s -f2 | sed
 # =================================================================================
 # Environment used by ecflow
 # Hack for ecflow extension:
-# Note: The environment variable ARCH is used to conditionally compile ecflowview
 #
 # In order to embed the path to boost python in ecflow extension
 # we must build with ECFLOW_INSTALL_DIR & ECFLOW_PYTHON_INSTALL_DIR set
 #===================================================================================
 export ECFLOW_INSTALL_DIR=/usr/local/apps/ecflow/$release.$major.$minor
+
+# ===================================================================================
+# for cray, can have 3 different compiler, and multiple versions
+# ===================================================================================
+if [[ %ARCH% = cray ]] ; then
+   export ECFLOW_INSTALL_DIR=/usr/local/apps/ecflow/$release.$major.$minor/%CRAY_COMPILER_TOOLSET%/%CRAY_COMPILER_TOOLSET_VERSION%
+fi
 export ECFLOW_PYTHON_INSTALL_DIR=$ECFLOW_INSTALL_DIR/lib/python%PYTHON_VERSION%/site-packages/ecflow 
+
 
 # bjam use ARCH environment to determine if the ecflowview should be built
 if [[ %BUILD_ECFLOWVIEW% = "true" ]] ; then

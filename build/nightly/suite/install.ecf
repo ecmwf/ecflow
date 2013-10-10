@@ -14,10 +14,14 @@ else
    # ********************************************************
    # <TODO> : This does not work, even on a interactive shell
    # ********************************************************
-    
-   if [[ %ARCH% = hpux ]] ; then
+
+   if [[ %ARCH% = linux64 ]] ; then
    
-      rsh -l emos itanium "$WK/build/install_ecflow.sh release"
+      rsh -l emos lxb "$WK/build/install_ecflow.sh release"
+    
+   elif [[ %ARCH% = cray ]] ; then
+   
+      rsh -l emos cct "$WK/build/install_ecflow.sh release"
    
    elif [[ %ARCH% = linux64 ]] ; then
    

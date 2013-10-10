@@ -68,6 +68,23 @@ fi
 
 install_arg=install-all
 
+# ==============================================================================
+# In order to embedd boost_python path in the ecflow extension, we need
+# ECFLOW_INSTALL_DIR to be set correctly, when building the extension
+# Hacky work around since, <dll-path> does not work for a relink at install time.
+# Set install directory for ecflow & embedding of boost python extension
+# ===============================================================================
+cd $WK
+
+# Determine the release,major,minor numbers for this version 
+release=$(grep "Version::release_" ACore/src/Version.cpp  | cut -d= -s -f2 | sed 's/;//g' | sed 's/ //g')
+major=$(grep   "Version::major_"   ACore/src/Version.cpp  | cut -d= -s -f2 | sed 's/;//g' | sed 's/ //g')
+minor=$(grep   "Version::minor_"   ACore/src/Version.cpp  | cut -d= -s -f2 | sed 's/;//g' | sed 's/ //g' | sed 's/"//g' )
+ECFLOW_VERSION=$release.$major.$minor
+   
+export ECFLOW_INSTALL_DIR=${ECFLOW_INSTALL_DIR:-/usr/local/apps/ecflow/$release.$major.$minor}
+
+
 # ======================================================================
 # We do NOT install on the LOCAL build machine, since that will not have
 # the correct embedded paths with ecflow.so (i.e for boost python )
@@ -108,6 +125,20 @@ then
       export WK=/vol/ecf/cluster/ecflow
    fi
   
+elif [[ "$ARCH" = cray ]] ; then 
+
+   export WK=/home/ma/ma0/ecflow
+   export BOOST_ROOT=/home/ma/ma0/boost/$BOOST_VERSION
+   
+   export ECFLOW_INSTALL_DIR=${ECFLOW_INSTALL_DIR:-/usr/local/apps/ecflow/$release.$major.$minor/gnu/$COMPILER_VERSION}
+  
+   if [ "$PE_ENV" = INTEL ] ; then
+      export ECFLOW_INSTALL_DIR=${ECFLOW_INSTALL_DIR:-/usr/local/apps/ecflow/$release.$major.$minor/intel/$COMPILER_VERSION}
+   fi
+   #if [ "$PE_ENV" = CRAY ] ; then
+   #   export ECFLOW_INSTALL_DIR=${ECFLOW_INSTALL_DIR:-/usr/local/apps/ecflow/$release.$major.$minor/cray/$COMPILER_VERSION} 
+   #fi
+
 elif [[ "$ARCH" = hpia64 ]] ; then 
 
    # ======================================================================
@@ -145,24 +176,12 @@ elif [[ "$ARCH" = rs6000 ]] ; then
    export WK=/emos_data/ecflow/rs6000/xlc/ecflow    
 fi
 
+# =======================================================================================
+# Python
+# ========================================================================================
+export ECFLOW_PYTHON_INSTALL_DIR=$ECFLOW_INSTALL_DIR/lib/python2.7/site-packages/ecflow 
 
-# ==========================================================================
-# In order to embedd boost_python path in the ecflow extension, we need
-# ECFLOW_INSTALL_DIR to be set correctly, when building the extension
-# Hacky work around since, <dll-path> does not work for a relink at install time.
-# Set install directory for ecflow & embedding of boost python extension
-# ===============================================================================
-cd $WK
 
-# Determine the release,major,minor numbers for this version 
-release=$(grep "Version::release_" ACore/src/Version.cpp  | cut -d= -s -f2 | sed 's/;//g' | sed 's/ //g')
-major=$(grep   "Version::major_"   ACore/src/Version.cpp  | cut -d= -s -f2 | sed 's/;//g' | sed 's/ //g')
-minor=$(grep   "Version::minor_"   ACore/src/Version.cpp  | cut -d= -s -f2 | sed 's/;//g' | sed 's/ //g' | sed 's/"//g' )
-ECFLOW_VERSION=$release.$major.$minor
-   
-export ECFLOW_INSTALL_DIR=${ECFLOW_INSTALL_DIR:-/usr/local/apps/ecflow/$release.$major.$minor}
-export ECFLOW_PYTHON_INSTALL_DIR=$ECFLOW_INSTALL_DIR/lib/python2.7/site-packages/ecflow ;
-   
 # ============================================================================
 # INSTALL
 # ============================================================================

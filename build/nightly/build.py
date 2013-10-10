@@ -122,6 +122,8 @@ def add_cray_gnu_compiler_variables( cray ):
     cray.add_variable("COMPILER_TEST_PATH","gcc-4.3/$mode")
     cray.add_variable("COMPILER_VERSION","gcc-4.3")
     cray.add_variable("TOOLSET","gcc")
+    cray.add_variable("CRAY_COMPILER_TOOLSET","gnu")
+    cray.add_variable("CRAY_COMPILER_TOOLSET_VERSION","43")
     # cray.add_variable("TEMPLATE_DEPTH","c++-template-depth=512") # needed for gnu/4.8.1
     
 def add_remote_cray_variables( cray ):
@@ -546,6 +548,9 @@ def add_suite_variables( suite ):
     suite.add_variable("SET_TO_TEST_SCRIPT","false")
     suite.add_variable("BUILD_ECFLOWVIEW","true")
     suite.add_variable("GIT_BRANCH","develop")  # when makeing a relase switch to master
+    suite.add_variable("CRAY_COMPILER_TOOLSET","gnu")
+    suite.add_variable("CRAY_COMPILER_TOOLSET_VERSION","43")
+
     # automatically fob all zombies when compiling ecflow 
     child_list = []
     suite.add_zombie(ecflow.ZombieAttr(ecflow.ZombieType.ecf,  child_list, ecflow.ZombieUserActionType.fob, 0))
