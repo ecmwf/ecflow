@@ -124,6 +124,7 @@ def add_cray_gnu_compiler_variables( cray ):
     cray.add_variable("TOOLSET","gcc")
     cray.add_variable("CRAY_COMPILER_TOOLSET","gnu")
     cray.add_variable("CRAY_COMPILER_TOOLSET_VERSION","43")
+    cray.add_variable("SITE_CONFIG","$WK/build/site_config/site-config-cray-gcc.jam")
     # cray.add_variable("TEMPLATE_DEPTH","c++-template-depth=512") # needed for gnu/4.8.1
 
 def add_remote_cray_variables( cray ):
@@ -160,7 +161,6 @@ def add_cray_variables( cray ):
     cray.add_variable("ROOT_WK","/home/ma/ma0")
     cray.add_variable("BOOST_DIR","/home/ma/ma0/boost")
     cray.add_variable("ARCH","cray")
-    cray.add_variable("SITE_CONFIG","$WK/build/site_config/site-config-Linux64.jam")
     
     
 def add_remote_redhat_variables( redhat ):
