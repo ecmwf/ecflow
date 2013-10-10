@@ -58,7 +58,7 @@ if [[ %SET_TO_TEST_SCRIPT% = true ]] ; then
    echo "Test only"
 else
    # TEST should be set to -n if defined
-   $BOOST_ROOT/bjam %TEMPLATE_DEPTH:% variant=%MODE% -j%NO_OF_CORES% %TEST:% -d2
+   $BOOST_ROOT/bjam toolset=%TOOLSET% %TEMPLATE_DEPTH:% variant=%MODE% -j%NO_OF_CORES% %TEST:% -d2
 fi
  
 #==================================================================================

@@ -125,7 +125,7 @@ def add_cray_gnu_compiler_variables( cray ):
     cray.add_variable("CRAY_COMPILER_TOOLSET","gnu")
     cray.add_variable("CRAY_COMPILER_TOOLSET_VERSION","43")
     # cray.add_variable("TEMPLATE_DEPTH","c++-template-depth=512") # needed for gnu/4.8.1
-    
+
 def add_remote_cray_variables( cray ):
     # re use axel scripts for trap.h. rcp.eh etc,  
     # However this re-use requires definitions for SMSNAME and SMSPASS

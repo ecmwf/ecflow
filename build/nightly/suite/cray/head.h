@@ -26,7 +26,6 @@ unset ECF_HOME
 unset ECF_HOSTFILE
 unset ECF_JOBOUT
 unset ECF_OUT
-unset ECF_HOME
 
 # ============================================================================
 # Defines the variables that are needed for any communication with ECF
