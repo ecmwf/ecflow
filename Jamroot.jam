@@ -25,7 +25,7 @@ build-project TestEcfSms ;
 import os ;
 ARCH = [ os.environ ARCH ] ;
 ARCH default = UNDEF ;  # if arch not defined set as UNDEF, otherwise if $(ARCH) will be true
-build_gui = linux rs6000 other_gui_arch ;
+build_gui = linux rs6000 cray other_gui_arch ;
 # echo "ARCH =  $(ARCH)" ;
 if $(ARCH) in $(build_gui) {
    build-project view ;
@@ -135,31 +135,27 @@ alias install-base :
 	install-client 
 	install-tools 
 	install-doc
-        install-migrate
+   install-migrate
 	;
-
 alias install : 
 	install-base
 	Pyext//install-py 
  	Pyext//install-py1
 	;
-
 alias install-viewer :
 	install-view
 	;
 alias install-viewer64 :
 	install-view64
  	;
-
 alias install-all :
 	install
-        install-viewer
-        ;
-	
+   install-viewer
+   ;
 alias install-all64 :
 	install
-        install-viewer64
-        ;
+   install-viewer64
+   ;
 
 # make install explicit, otherwise we end installing for all calls to bjam
 explicit install-server ;
