@@ -120,7 +120,7 @@ std::string Version::compiler()
 #elif defined(__INTEL_COMPILER)
    ss << "intel " <<  __INTEL_COMPILER;
 #elif defined(_CRAYC)
-   ss << "cray " <<  __INTEL_COMPILER;
+   ss << "cray " <<  _CRAYC;
 #else
    ss << "gcc " << __GNUC__ << "." << __GNUC_MINOR__ << "." << __GNUC_PATCHLEVEL__;
 #endif
