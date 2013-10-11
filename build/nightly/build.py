@@ -443,36 +443,35 @@ def build_redhat( parent ) :
 
 def build_cray_gnu( parent ) :
     cray = parent.add_family("cray_gnu")
-    cray.add_trigger("git_clone == complete")
     add_cray_variables(cray)
     add_cray_gnu_compiler_variables(cray)
     add_remote_cray_variables(cray)
+    add_git_tasks( cray )
     add_build_and_test_tasks( cray )
     
 def build_cray_intel( parent ) :
     cray = parent.add_family("cray_intel")
     cray.add_variable("BOOST_VERSION","boost_1_53_0")
-    cray.add_trigger("git_clone == complete and cray_gnu == complete ")
+    cray.add_trigger("cray_gnu == complete or cray_gnu == aborted")
     add_cray_variables(cray)
     add_cray_intel_compiler_variables(cray)
     add_remote_cray_variables(cray)
+    add_git_tasks( cray )
     add_build_and_test_tasks( cray )
     
 def build_cray_cray( parent ) :
     cray = parent.add_family("cray_cray")
     cray.add_variable("BOOST_VERSION","boost_1_53_0")
-    cray.add_trigger("git_clone == complete and cray_intel == complete ")
+    cray.add_trigger("cray_intel == complete or cray_intel == aborted")
     add_cray_variables(cray)
     add_cray_cray_compiler_variables(cray)
     add_remote_cray_variables(cray)
+    add_git_tasks( cray )
     add_build_and_test_tasks( cray )
     
 def build_cray( parent ) :
     cray = parent.add_family("cray")
     cray.add_variable("NO_OF_CORES","8")
-    add_cray_variables(cray)
-    add_remote_cray_variables(cray)
-    add_git_tasks( cray )
     build_cray_gnu( cray)
     build_cray_intel( cray)
     build_cray_cray( cray)
