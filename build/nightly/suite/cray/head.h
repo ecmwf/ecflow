@@ -58,10 +58,10 @@ ulimit
 
 # Setup Module environment, the default is CRAY.
 if [[ %CRAY_COMPILER_TOOLSET% = gnu ]] ; then
-   module swap PrgEnv-cray PrgEnv-gnu/5.0.41
+   module swap PrgEnv-cray PrgEnv-gnu
    module load gcc/4.6.3
 fi
 if [[ %CRAY_COMPILER_TOOLSET% = intel ]] ; then
-   module swap PrgEnv-cray PrgEnv-gnu/5.0.41
+   module swap PrgEnv-cray PrgEnv-intel
 fi
 
