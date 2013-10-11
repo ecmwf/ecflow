@@ -159,3 +159,10 @@ void Alias::add_alias_variable(const std::string& name, const std::string& value
    addVariable( Variable(name,value,false));
 }
 
+node_ptr Alias::find_node_up_the_tree(const std::string& name) const
+{
+   Node* the_parent = parent();
+   if (the_parent) the_parent->find_node_up_the_tree(name);
+   return node_ptr();
+}
+

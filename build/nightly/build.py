@@ -296,11 +296,11 @@ def add_aix_gcc_variables( aix_gcc ) :
     aix_gcc.add_variable("ARCH","rs6000")
     aix_gcc.add_variable("SITE_CONFIG","$WK/build/site_config/site-config-AIX-gcc.jam")
 
-def find_node_up_tree
-
 def add_build_debug( parent ): 
     f = parent.add_family("build_debug")
-    #f.add_trigger("cp_site_config == complete and git_clone == complete")
+    git_clone = parent.find_node_up_the_tree("git_clone")
+    assert git_clone != None
+    f.add_trigger("cp_site_config == complete and " + git_clone.get_abs_node_path() + " == complete")
     f.add_variable("MODE","debug")
     f.add_task("build")
     task_test = f.add_task("test")
@@ -315,7 +315,9 @@ def add_build_debug( parent ):
 
 def add_build_release( parent ):
     f = parent.add_family("build_release")
-    #f.add_trigger("cp_site_config == complete and git_clone == complete")
+    git_clone = parent.find_node_up_the_tree("git_clone")
+    assert git_clone != None
+    f.add_trigger("cp_site_config == complete and " + git_clone.get_abs_node_path() + " == complete")
     f.add_variable("MODE","release")
     task_build = f.add_task("build")
     
@@ -437,6 +439,7 @@ def build_redhat( parent ) :
 
 def build_cray_gnu( parent ) :
     cray = parent.add_family("cray_gnu")
+    cray.add_trigger("git_clone == complete")
     add_cray_variables(cray)
     add_cray_gnu_compiler_variables(cray)
     add_remote_cray_variables(cray)
@@ -444,6 +447,8 @@ def build_cray_gnu( parent ) :
     
 def build_cray_intel( parent ) :
     cray = parent.add_family("cray_intel")
+    cray.add_variable("BOOST_VERSION","boost_1_53_0")
+    cray.add_trigger("git_clone == complete and cray_gnu == complete ")
     add_cray_variables(cray)
     add_cray_intel_compiler_variables(cray)
     add_remote_cray_variables(cray)
@@ -451,6 +456,8 @@ def build_cray_intel( parent ) :
     
 def build_cray_cray( parent ) :
     cray = parent.add_family("cray_cray")
+    cray.add_variable("BOOST_VERSION","boost_1_53_0")
+    cray.add_trigger("git_clone == complete and cray_intel == complete ")
     add_cray_variables(cray)
     add_cray_cray_compiler_variables(cray)
     add_remote_cray_variables(cray)
