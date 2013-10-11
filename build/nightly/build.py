@@ -103,6 +103,8 @@ def add_linux_64_intel_variables( linux_64_intel ):
     linux_64_intel.add_variable("BOOST_DIR","/vol/ecf/cluster/intel/boost")
     linux_64_intel.add_variable("ARCH","linux64intel")
     linux_64_intel.add_variable("SITE_CONFIG","$WK/build/site_config/site-config-Linux64-intel.jam")
+    linux_64_intel.add_variable("BOOST_VERSION","boost_1_53_0")  
+
 
 def add_remote_opensuse113_variables( opensuse113 ):
     opensuse113.add_variable("ECF_KILL_CMD","ssh  %USER%@%REMOTE_HOST% \"kill -15 %ECF_RID%\"") 
@@ -549,7 +551,6 @@ def build_boost( boost ):
     add_boost_tasks( family )
 
     family = boost.add_family("linux64intel")
-    family.add_variable("BOOST_VERSION","boost_1_53_0") # intel compiler
     add_linux_64_intel_variables(family)
     add_remote_linux_64_intel_variables(family)
     add_boost_tasks( family )
