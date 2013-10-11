@@ -125,6 +125,8 @@ def add_cray_gnu_compiler_variables( cray ):
     cray.add_variable("CRAY_COMPILER_TOOLSET","gnu")
     cray.add_variable("CRAY_COMPILER_TOOLSET_VERSION","46")  # for install
     cray.add_variable("SITE_CONFIG","$WK/build/site_config/site-config-cray-gcc.jam")
+    cray.add_variable("ROOT_WK","/home/ma/ma0/workspace/gnu")
+
     # cray.add_variable("TEMPLATE_DEPTH","c++-template-depth=512") # needed for gnu/4.8.1
 
 def add_cray_intel_compiler_variables( cray ):
@@ -134,6 +136,8 @@ def add_cray_intel_compiler_variables( cray ):
     cray.add_variable("CRAY_COMPILER_TOOLSET","intel")
     cray.add_variable("CRAY_COMPILER_TOOLSET_VERSION","14")  # for install
     cray.add_variable("SITE_CONFIG","$WK/build/site_config/site-config-cray-intel.jam")
+    cray.add_variable("ROOT_WK","/home/ma/ma0/workspace/intel")
+
 
 def add_cray_cray_compiler_variables( cray ):
     cray.add_variable("COMPILER_TEST_PATH","cray/$mode")
@@ -142,7 +146,8 @@ def add_cray_cray_compiler_variables( cray ):
     cray.add_variable("CRAY_COMPILER_TOOLSET","cray")
     cray.add_variable("CRAY_COMPILER_TOOLSET_VERSION","14")  # for install
     cray.add_variable("SITE_CONFIG","$WK/build/site_config/site-config-cray-cray.jam")
-    
+    cray.add_variable("ROOT_WK","/home/ma/ma0/workspace/cray")
+
 def add_remote_cray_variables( cray ):
     # re use axel scripts for trap.h. rcp.eh etc,  
     # However this re-use requires definitions for SMSNAME and SMSPASS
@@ -173,7 +178,6 @@ def add_cray_variables( cray ):
     # Look for includes in ECF_INCLUDES, and the ECF_HOME
     cray.add_variable("ECF_HOME", os.getenv("SCRATCH") + "/nightly/suite/cray")
     cray.add_variable("REMOTE_HOST","cctdtn1")
-    cray.add_variable("ROOT_WK","/home/ma/ma0")
     cray.add_variable("BOOST_DIR","/home/ma/ma0/boost")
     cray.add_variable("ARCH","cray")
     
