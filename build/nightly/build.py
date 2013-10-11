@@ -119,11 +119,11 @@ def add_opensuse113_variables( opensuse113 ):
     opensuse113.add_variable("SITE_CONFIG","$WK/build/site_config/site-config-Linux64.jam")
 
 def add_cray_gnu_compiler_variables( cray ):
-    cray.add_variable("COMPILER_TEST_PATH","gcc-4.3/$mode")
-    cray.add_variable("COMPILER_VERSION","gcc-4.3")
+    cray.add_variable("COMPILER_TEST_PATH","gcc-4.6.3/$mode")
+    cray.add_variable("COMPILER_VERSION","gcc-4.6.3")
     cray.add_variable("TOOLSET","gcc")
     cray.add_variable("CRAY_COMPILER_TOOLSET","gnu")
-    cray.add_variable("CRAY_COMPILER_TOOLSET_VERSION","43")  # for install
+    cray.add_variable("CRAY_COMPILER_TOOLSET_VERSION","46")  # for install
     cray.add_variable("SITE_CONFIG","$WK/build/site_config/site-config-cray-gcc.jam")
     # cray.add_variable("TEMPLATE_DEPTH","c++-template-depth=512") # needed for gnu/4.8.1
 
@@ -465,6 +465,7 @@ def build_cray_cray( parent ) :
     
 def build_cray( parent ) :
     cray = parent.add_family("cray")
+    cray.add_variable("NO_OF_CORES","8")
     add_cray_variables(cray)
     add_remote_cray_variables(cray)
     add_git_tasks( cray )
