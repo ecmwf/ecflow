@@ -152,7 +152,7 @@ def add_remote_cray_variables( cray ):
     
     # for cray we need to use logsrvr in order to see the job output
     cray.add_variable("ECF_LOGHOST","cctdtn1")
-    cray.add_variable("ECF_LOGPORT","10016")  #  revert to 9316 when log output umask setting fixed
+    cray.add_variable("ECF_LOGPORT","9316")   
     
     # Set the remote location for output, LOGDIR needed by queing system
     # See function ECF_RCP, where the remote file system, is copied to local file system, at the end of the job
