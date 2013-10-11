@@ -123,10 +123,26 @@ def add_cray_gnu_compiler_variables( cray ):
     cray.add_variable("COMPILER_VERSION","gcc-4.3")
     cray.add_variable("TOOLSET","gcc")
     cray.add_variable("CRAY_COMPILER_TOOLSET","gnu")
-    cray.add_variable("CRAY_COMPILER_TOOLSET_VERSION","43")
+    cray.add_variable("CRAY_COMPILER_TOOLSET_VERSION","43")  # for install
     cray.add_variable("SITE_CONFIG","$WK/build/site_config/site-config-cray-gcc.jam")
     # cray.add_variable("TEMPLATE_DEPTH","c++-template-depth=512") # needed for gnu/4.8.1
 
+def add_cray_intel_compiler_variables( cray ):
+    cray.add_variable("COMPILER_TEST_PATH","intel-linux/$mode")
+    cray.add_variable("COMPILER_VERSION","intel-linux")
+    cray.add_variable("TOOLSET","intel")
+    cray.add_variable("CRAY_COMPILER_TOOLSET","intel")
+    cray.add_variable("CRAY_COMPILER_TOOLSET_VERSION","14")  # for install
+    cray.add_variable("SITE_CONFIG","$WK/build/site_config/site-config-cray-intel.jam")
+
+def add_cray_cray_compiler_variables( cray ):
+    cray.add_variable("COMPILER_TEST_PATH","cray/$mode")
+    cray.add_variable("COMPILER_VERSION","cray")
+    cray.add_variable("TOOLSET","cray")
+    cray.add_variable("CRAY_COMPILER_TOOLSET","cray")
+    cray.add_variable("CRAY_COMPILER_TOOLSET_VERSION","14")  # for install
+    cray.add_variable("SITE_CONFIG","$WK/build/site_config/site-config-cray-cray.jam")
+    
 def add_remote_cray_variables( cray ):
     # re use axel scripts for trap.h. rcp.eh etc,  
     # However this re-use requires definitions for SMSNAME and SMSPASS
@@ -142,7 +158,6 @@ def add_remote_cray_variables( cray ):
     # See function ECF_RCP, where the remote file system, is copied to local file system, at the end of the job
     cray.add_variable("LOGDIR", "/scratch/ma/ma0/nightly")
     cray.add_variable("ECF_OUT","/scratch/ma/ma0/nightly")
-
 
     cray.add_variable("ECF_KILL_CMD",   "/home/ma/emos/bin/smssubmit.cray %USER% %SCHOST% %ECF_RID% %ECF_JOB% %ECF_JOBOUT% kill")
     cray.add_variable("ECF_STATUS_CMD", "/home/ma/emos/bin/smssubmit.cray %USER% %SCHOST% %ECF_RID% %ECF_JOB% %ECF_JOBOUT% stat")
@@ -281,10 +296,11 @@ def add_aix_gcc_variables( aix_gcc ) :
     aix_gcc.add_variable("ARCH","rs6000")
     aix_gcc.add_variable("SITE_CONFIG","$WK/build/site_config/site-config-AIX-gcc.jam")
 
+def find_node_up_tree
 
 def add_build_debug( parent ): 
     f = parent.add_family("build_debug")
-    f.add_trigger("cp_site_config == complete and git_clone == complete")
+    #f.add_trigger("cp_site_config == complete and git_clone == complete")
     f.add_variable("MODE","debug")
     f.add_task("build")
     task_test = f.add_task("test")
@@ -299,7 +315,7 @@ def add_build_debug( parent ):
 
 def add_build_release( parent ):
     f = parent.add_family("build_release")
-    f.add_trigger("cp_site_config == complete and git_clone == complete")
+    #f.add_trigger("cp_site_config == complete and git_clone == complete")
     f.add_variable("MODE","release")
     task_build = f.add_task("build")
     
@@ -418,14 +434,36 @@ def build_redhat( parent ) :
     add_remote_redhat_variables(redhat)
     add_git_tasks( redhat )
     add_build_and_test_tasks( redhat )
-    
+
 def build_cray_gnu( parent ) :
     cray = parent.add_family("cray_gnu")
     add_cray_variables(cray)
     add_cray_gnu_compiler_variables(cray)
     add_remote_cray_variables(cray)
-    add_git_tasks( cray )
     add_build_and_test_tasks( cray )
+    
+def build_cray_intel( parent ) :
+    cray = parent.add_family("cray_intel")
+    add_cray_variables(cray)
+    add_cray_intel_compiler_variables(cray)
+    add_remote_cray_variables(cray)
+    add_build_and_test_tasks( cray )
+    
+def build_cray_cray( parent ) :
+    cray = parent.add_family("cray_cray")
+    add_cray_variables(cray)
+    add_cray_cray_compiler_variables(cray)
+    add_remote_cray_variables(cray)
+    add_build_and_test_tasks( cray )
+    
+def build_cray( parent ) :
+    cray = parent.add_family("cray")
+    add_cray_variables(cray)
+    add_remote_cray_variables(cray)
+    add_git_tasks( cray )
+    build_cray_gnu( cray)
+    build_cray_intel( cray)
+    build_cray_cray( cray)
     
 def build_opensuse103( parent ) :
     opensuse103 = parent.add_family("opensuse103")
@@ -601,7 +639,7 @@ with defs.add_suite("suite") as suite:
         build_linux_64_intel( build )
         build_opensuse113( build )
         build_redhat( build )
-        build_cray_gnu( build )
+        build_cray( build )
         build_opensuse103( build )
         build_hpux(build)
         build_aix_power7(build)

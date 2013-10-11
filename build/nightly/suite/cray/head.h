@@ -55,3 +55,13 @@ echo "ECF_INCLUDE = %ECF_INCLUDE%"
 which ecflow_client
 which python
 ulimit
+
+# Setup Module environment, the default is CRAY.
+if [[ %CRAY_COMPILER_TOOLSET% = gnu ]] ; then
+   module swap PrgEnv-cray PrgEnv-gnu/5.0.41
+   module load gcc/4.6.3
+fi
+if [[ %CRAY_COMPILER_TOOLSET% = intel ]] ; then
+   module swap PrgEnv-cray PrgEnv-gnu/5.0.41
+fi
+
