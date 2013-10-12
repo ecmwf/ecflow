@@ -237,6 +237,7 @@ run-test TestJobGeneration : ecflow [ glob test/TestJobGeneration.py ] ;
 run-test TestGetAllTasks   : ecflow [ glob test/TestGetAllTasks.py ] ;
 run-test TestDerivable     : ecflow [ glob test/TestDerivable.py ] ;
 run-test TestWith          : ecflow [ glob test/TestWith.py ] ;
+run-test TestFind          : ecflow [ glob test/TestFind.py ] ;
 run-test TestMigrate       : ecflow [ glob migrate/TestMigrate.py ] ;
 run-test TestRepeatArithmetic : ecflow [ glob test/TestRepeatArithmetic.py ] ;
 
@@ -278,7 +279,7 @@ run-test t25      : ecflow [ glob test/CleanupOnlineTutorial.py ] ;
 alias test-all
  :  TestUserManual TestJobGeneration TestClientApi TestDefs TestError TestTraversal TestDefsCheck 
     TestSimulator TestAddDelete TestAddDeleteFunc TestAddNodeFunc TestParent TestGetAllTasks TestDerivable 
-    TestMigrate TestRepeatArithmetic TestWith
+    TestMigrate TestRepeatArithmetic TestWith TestFind
     t1 t2 t2_1 t2_2 t2_3 t3 t4 t5 t6 t7 t7_1 t8 t9 t10 t11 t12 t12_with t13 t14 t15 t16 t17 t18 t18_1 t19 t20 t21 t22 t23 t24 t25
     # test_embed test_embed_ecf 
     ;
@@ -287,7 +288,7 @@ alias test-all
 explicit test-all
     TestUserManual TestJobGeneration TestClientApi TestDefs TestError TestTraversal TestDefsCheck 
     TestSimulator TestAddDelete TestAddDeleteFunc TestAddNodeFunc TestParent TestGetAllTasks TestDerivable 
-    TestMigrate TestRepeatArithmetic TestWith
+    TestMigrate TestRepeatArithmetic TestWith TestFind
     t1 t2 t2_1 t2_2 t2_3 t3 t4 t5 t6 t7 t7_1 t8 t9 t10 t11 t12 t12_with t13 t14 t15 t16 t17 t18 t18_1 t19 t20 t21 t22 t23 t24 t25
     # test_embed test_embed_ecf 
     ;

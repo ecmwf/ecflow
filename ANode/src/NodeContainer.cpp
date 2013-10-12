@@ -551,13 +551,18 @@ node_ptr NodeContainer::findImmediateChild(const std::string& theName, size_t& c
 	return node_ptr();
 }
 
-node_ptr NodeContainer::find_node_up_the_tree(const std::string& name) const
+node_ptr NodeContainer::find_node_up_the_tree(const std::string& the_name) const
 {
+   if (name() == the_name) {
+      return non_const_this();
+   }
+
    size_t not_used;
-   node_ptr fnd_node = findImmediateChild(name,not_used);
+   node_ptr fnd_node = findImmediateChild(the_name,not_used);
    if (fnd_node) return fnd_node;
+
    Node* the_parent = parent();
-   if (the_parent) return the_parent->find_node_up_the_tree(name);
+   if (the_parent) return the_parent->find_node_up_the_tree(the_name);
    return node_ptr();
 }
 

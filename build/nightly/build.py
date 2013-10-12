@@ -304,9 +304,7 @@ def add_aix_gcc_variables( aix_gcc ) :
 
 def add_build_debug( parent ): 
     f = parent.add_family("build_debug")
-    git_clone = parent.find_node_up_the_tree("git_clone")
-    assert git_clone != None
-    f.add_trigger("cp_site_config == complete and " + git_clone.get_abs_node_path() + " == complete")
+    f.add_trigger("cp_site_config == complete and git_clone == complete")
     f.add_variable("MODE","debug")
     f.add_task("build")
     task_test = f.add_task("test")
@@ -321,9 +319,7 @@ def add_build_debug( parent ):
 
 def add_build_release( parent ):
     f = parent.add_family("build_release")
-    git_clone = parent.find_node_up_the_tree("git_clone")
-    assert git_clone != None
-    f.add_trigger("cp_site_config == complete and " + git_clone.get_abs_node_path() + " == complete")
+    f.add_trigger("cp_site_config == complete and git_clone == complete")
     f.add_variable("MODE","release")
     task_build = f.add_task("build")
     

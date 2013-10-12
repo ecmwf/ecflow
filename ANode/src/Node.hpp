@@ -432,8 +432,8 @@ public:
    void set_memento(const FlagMemento* );
 
    // Find functions: ============================================================
-   // Will search for a node  by name(ie not a path) first on a parent then up the
-   // node tree
+   // Will search for a node by name(ie not a path) first on siblings, then on a parent
+   // then up the node tree, will stop at the suite .
    virtual node_ptr find_node_up_the_tree(const std::string& name) const = 0;
 
    // This is used to find relative nodes.
