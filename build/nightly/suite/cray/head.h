@@ -56,12 +56,16 @@ which ecflow_client
 which python
 ulimit
 
-# Setup Module environment, the default is CRAY.
+# ===================================================================================
+# Load the right environment, first unload all
+module unload PrgEnv-cray
+module unload PrgEnv-intel
+module unload PrgEnv-gnu
+
+module load PrgEnv-%CRAY_COMPILER_TOOLSET%
+
+# For gnu, we will use gnu 4.6.3
 if [[ %CRAY_COMPILER_TOOLSET% = gnu ]] ; then
-   module swap PrgEnv-cray PrgEnv-gnu
    module load gcc/4.6.3
-fi
-if [[ %CRAY_COMPILER_TOOLSET% = intel ]] ; then
-   module swap PrgEnv-cray PrgEnv-intel
 fi
 

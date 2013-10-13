@@ -13,6 +13,7 @@ Issues:
       Connection::handle_read_data boost::archive::archive_exception unsupported version
       server::handle_read: Invalid argument
    This happens because it can not decode the message.
+   Currently no error message is sent back to the client.
    
    
 Options:
@@ -24,14 +25,13 @@ Options:
 + requires no change to old released server/ ecflow versions
 + least amount of work. Changes required to Connection/Client/ClientInvoker/host.pp(ecflowview)
   This would be a hack, that require changing the message, for each client call. 
-+ Only modify version when needed
++ Only modify archive version when needed
   
 - If client->server message format, changed, this solution will fail.
-- May affect client performance, since string will need modifying.
+- May affect client performance, since string will need modifying. 
 - Even then boost serialisation library may change in a future release.
 - PlugCmd  ????
      
-- TODO: host.cc, server_version () 
         
 2/ Change the client->server protocol only:
 ===================================================================================
@@ -72,6 +72,25 @@ Options:
   hierarchical objects. i.e like suite and family, memento. This will require,
   xml.json,yaml type solution. 
         
+Clients
+=================================================================================
+
+ecflowview:
+   - This is the biggest concern:
+   
+command line:
+   - User should be able to control the version of the client, to make sure
+     its the same as the server.
+   
+Job file:
+    By using %ECF_VERSION% in the job file, we can ensure that client version
+    is in sync with server.
+    
+Python api:
+   - User should be able to control the version of the client, to make sure
+     its the same as the server. Depends on ecflow.so, hence PYTHONPATH
+     needs to point to a ecflow.so, which is the same as the server.
+   
         
 Testing
 ===========================================================================
@@ -80,3 +99,7 @@ Testing
 - test ecflowview, new server old client
 - 2 protocols ? boost & data driven ?
 
+Future
+===========================================================================
+- The boost xml archives, there are proposed patches that handle, forward
+  compatibility. Needs investigation.
