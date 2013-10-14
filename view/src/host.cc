@@ -1405,33 +1405,37 @@ void ehost::suites( int which, std::vector<std::string>& l )
             break;
          case SUITES_REG:
             gui::message("%s: registering to suites", name());
-	    suites_ = l;
-	    try {
-	      if (l.empty()) {
-		client_.reset();
-		if (client_.client_handle() != 0) {
-		  try {
-		    client_.ch1_drop();
-		  } catch ( std::exception &e ) {
-		    std::cout << "# no drop possible: " << e.what() << "\n";
-		  }
-		}
-	      }
-	      client_.ch_register(new_suites_, suites_);
-	      status();
-	      redraw();	    
-	    } catch ( std::exception &e ) {
-	      gui::error("host::suites-reg-error: %s", e.what());
-	    }	     	 
-	   break;
-      default:
-	gui::message("%s: suites, what?");
-	break;
+            suites_ = l;
+            try {
+               if (l.empty()) {
+                  if (client_.client_handle() != 0) {
+                     try {
+                        client_.ch1_drop();
+                     }
+                     catch ( std::exception &e ) {
+                        std::cout << "# no drop possible: " << e.what() << "\n";
+                     }
+                  }
+                  // reset handle to zero , and clear the defs
+                  client_.reset();
+               }
+               client_.ch_register(new_suites_, suites_);
+               status();
+               redraw();
+            }
+            catch ( std::exception &e ) {
+               gui::error("host::suites-reg-error: %s", e.what());
+            }
+            break;
+         default:
+            gui::message("%s: suites, what?");
+            break;
       }
-   } catch ( std::exception &e ) {
-     if (0x0 != client_.defs().get()) { /* ignore empty server */
-       gui::error("host::suites-error: %s", e.what());
-     }
+   }
+   catch ( std::exception &e ) {
+      if (0x0 != client_.defs().get()) { /* ignore empty server */
+         gui::error("host::suites-error: %s", e.what());
+      }
    }
 }
 

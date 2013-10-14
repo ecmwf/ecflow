@@ -97,6 +97,14 @@ const char* PathsCmd::theArg() const
    return NULL;
 }
 
+bool PathsCmd::delete_all_cmd() const
+{
+   if (api_ == PathsCmd::DELETE && paths_.empty()) {
+      return true;
+   }
+   return false ;
+}
+
 STC_Cmd_ptr PathsCmd::doHandleRequest(AbstractServer* as) const
 {
    std::stringstream ss;

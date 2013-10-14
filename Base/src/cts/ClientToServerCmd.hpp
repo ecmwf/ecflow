@@ -107,6 +107,7 @@ public:
    virtual bool ping_cmd() const { return false;}
    virtual bool why_cmd( std::string& ) const { return false;}
    virtual bool show_cmd() const { return false ;}
+   virtual bool delete_all_cmd() const { return false ;}
 
    // CLIENT side Parse and command construction, create can throw std::runtime_error for errors
    virtual const char* theArg() const = 0;  // used for argument parsing
@@ -843,6 +844,7 @@ public:
    virtual std::ostream& print(std::ostream& os) const;
    virtual bool equals(ClientToServerCmd*) const;
    virtual bool isWrite() const;
+   virtual bool delete_all_cmd() const;
 
    virtual const char* theArg() const;
    virtual void addOption(boost::program_options::options_description& desc) const;

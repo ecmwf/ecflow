@@ -10,6 +10,7 @@
 
 3.1.10 (production, October 2013)
    - ecflowview    : Limited support to allow new clients to interact with old servers
+   - ecflowview    : ECFLOW-71 error in ecflow on delete using GUID
    - ecflow_client : Updated suite definition parser, to allow suites to have labels
    - ecflow_client : Fix bug in the display of zombies. Action shown in log file did not match, command line display, when zombie attributes used.
    - ecflow_client : Updated zombie display, to prepend manual or automatic in front of action, i.e manual-fob.
