@@ -899,15 +899,18 @@ bool Node::variable_substitution(std::string& cmd, const NameValueMap& user_edit
    }
 
    if (double_micro_found) {
-      // replace all double micro with a single micro
+      // replace all double micro with a single micro, this must be a single parse
       // date +%%Y%%m%%d" ==> date +%Y%m%d
+      // %%%%             ==> %%            // i.e single parse
       std::string doubleEcfMicro;
       doubleEcfMicro += micro;
       doubleEcfMicro += micro;
+      size_t last_pos = 0;
       while ( 1 ) {
-          string::size_type ecf_double_micro_pos = cmd.find( doubleEcfMicro );
+          string::size_type ecf_double_micro_pos = cmd.find( doubleEcfMicro , last_pos);
           if ( ecf_double_micro_pos != std::string::npos ) {
              cmd.erase( cmd.begin() + ecf_double_micro_pos );
+             last_pos = ecf_double_micro_pos + 1;
           }
           else break;
        }

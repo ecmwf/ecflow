@@ -11,12 +11,12 @@
 3.1.10 (production, October 2013)
    - ecflowview    : Limited support to allow new clients to interact with old servers
    - ecflowview    : ECFLOW-71 error in ecflow on delete using GUID
+   - ecflow_server : Pre-processor: %%%% should be replaced with %%, and not %
    - ecflow_client : Updated suite definition parser, to allow suites to have labels
    - ecflow_client : Fix bug in the display of zombies. Action shown in log file did not match, command line display, when zombie attributes used.
    - ecflow_client : Updated zombie display, to prepend manual or automatic in front of action, i.e manual-fob.
                      This distinguishes between action taken by the user, from automatic action, especially when zombie attributes are used.
-   - ecflow.so     : Added new python function to Node  find_node_up_the_tree(), to make it easier to
-                     to add triggers.
+   - ecflow.so     : Added new python function to Node(find_node_up_the_tree()), to make it easier to to add triggers.
    - *             : Update ecflow_migrate to take into account label's that have new lines
    - *             : Migrated source control management from perforce to git, and updated build scripts
    - *             : Updated build scripts to support cray XC30
