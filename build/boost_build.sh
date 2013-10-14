@@ -50,14 +50,16 @@ if test_uname Linux ; then
     # PE_ENV is defined in cray environment, at least on sandy bridge
     if [[ "$PE_ENV" = GNU || "$PE_ENV" = INTEL || "$PE_ENV" = CRAY ]]
     then
-       cp $WK/build/site_config/site-config-cray.jam $BOOST_ROOT/tools/build/v2/site-config.jam
+       cp $WK/build/site_config/site-config-cray-gcc.jam $BOOST_ROOT/tools/build/v2/site-config.jam
        if [ "$PE_ENV" = INTEL ] ; then
          layout=versioned  
          tool=intel
+         cp $WK/build/site_config/site-config-cray-intel.jam $BOOST_ROOT/tools/build/v2/site-config.jam
        fi
        if [ "$PE_ENV" = CRAY ] ; then
          tool=cray
          layout=versioned  
+         cp $WK/build/site_config/site-config-cray-cray.jam $BOOST_ROOT/tools/build/v2/site-config.jam
        fi
     else
        cp $WK/build/site_config/site-config-Linux64.jam $BOOST_ROOT/tools/build/v2/site-config.jam  

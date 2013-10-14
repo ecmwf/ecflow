@@ -8,8 +8,8 @@ if [[ %SET_TO_TEST_SCRIPT% = true ]] ; then
    echo "Test only"
 else
 
-   if [[ %TOOLSET% = intel-linux || %TOOLSET% = intel ]] ; then
-      # provide access to intel c++ compiler
+   if [[ %ARCH% = linux64intel ]] ; then
+      # provide access to intel c++ compiler on lxab
       export PATH=/usr/local/apps/intel/composer_xe_2013.3.163/bin:$PATH
       sh -x iccvars.sh intel64
    fi
