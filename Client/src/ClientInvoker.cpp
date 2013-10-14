@@ -293,6 +293,12 @@ int ClientInvoker::do_invoke_cmd(Cmd_ptr cts_cmd) const
 						/// will return false if further action required
 						if (theClient.handle_server_response( server_reply_, clientEnv_.debug() )) {
 							// The normal response.  RoundTriprecorder will record in rtt_
+
+						   // If the command was a delete_all command, reset client_handle
+						   if (cts_cmd->delete_all_cmd()) {
+						      ClientInvoker* non_const_this = const_cast<ClientInvoker*>(this);
+						      non_const_this->reset();
+						   }
 							return 0; // the normal exit path
 						}
 					}
