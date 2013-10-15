@@ -49,7 +49,7 @@ lib libserver : [ glob src/*.cpp : src/*Main.cpp ]
                 <use>/site-config//boost_filesystem
                 <use>/site-config//boost_program_options
                 <use>/site-config//boost_datetime
-              :
+              : <toolset>cray:<define>BOOST_ASIO_DISABLE_FENCED_BLOCK
               : <include>../Server/src         
               ;
                
