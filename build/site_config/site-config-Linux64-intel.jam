@@ -6,7 +6,6 @@
 ## nor does it submit to any jurisdiction. 
 
 # ===================================================================
-# site-config.jam file for Linux/gcc
 # This file should be placed in $HOME or $BOOST_ROOT/tools/build/v2/
 # ===================================================================
 
@@ -69,8 +68,13 @@ project site-config
 # using toolset-name : version : invocation-command : options ;
 #   where options allows <cflags, cxxflags, compileflags and linkflags >
 #
-#using intel : : : <cxxflags>-fPIC ;
-using intel-linux : : : <cxxflags>-fPIC ;
+# Suppress the following warnings:
+#    warning #1875: offsetof applied to non-POD (Plain Old Data) types is nonstandard
+#        This warning is mostly from boost python headers
+#    warning #1881: argument must be a constant null pointer value
+#        This warning is in the vewier, with X-windows
+#
+using intel-linux : : : <cxxflags>-fPIC <compileflags>-wd1875,1881  ;
 
 using testing ;
 

@@ -70,6 +70,17 @@ if test_uname Linux ; then
 
    compiler=gcc-$(gcc -dumpversion)
    
+   # When on cray check PE_ENV for environment
+   if [[ "$PE_ENV" = INTEL || "$PE_ENV" = CRAY ]]
+   then
+       if [ "$PE_ENV" = INTEL ] ; then
+         compiler=intel-linux
+       fi
+       if [ "$PE_ENV" = CRAY ] ; then
+         compiler=cray
+       fi
+   fi   
+   
    # Allow the compiler to be overridden on linux
    if [ ${#compiler_arg} -ne 0 ] ; then
       compiler=$compiler_arg

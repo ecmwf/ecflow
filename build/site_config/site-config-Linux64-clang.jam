@@ -6,7 +6,6 @@
 ## nor does it submit to any jurisdiction. 
 
 # ===================================================================
-# site-config.jam file for Linux/gcc
 # This file should be placed in $HOME or $BOOST_ROOT/tools/build/v2/
 # ===================================================================
 
