@@ -85,8 +85,8 @@ public:
 
    // support for forward compatibility, by changing boost archive version
    // Chosen to change client side only
-   void allow_new_client_old_server(bool f)  { allow_new_client_old_server_ = f;}
-   void allow_new_server_old_client(bool f)  { allow_new_server_old_client_ = f;}
+   void allow_new_client_old_server(int archive_version_of_old_server);
+   int allow_new_client_old_server() const;
 
 	/// If testing, overwrite the task path set in the environment, required for
 	/// testing the task based commands.
@@ -302,8 +302,6 @@ private:
 	bool cli_;                             // Command Line Interface. Controls whether output written to standard out
 	bool test_;                            // used in testing only
 	bool testInterface_;                   // used in testing only
-   bool allow_new_client_old_server_;     // by default false, forward compatibility
-   bool allow_new_server_old_client_;     // by default false, forward compatibility
 	unsigned int connection_attempts_;     // No of attempts to establish connection with the server
 	unsigned int retry_connection_period_; // No of seconds to wait before trying to connect in case of failure.
 

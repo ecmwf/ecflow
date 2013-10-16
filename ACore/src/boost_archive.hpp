@@ -43,4 +43,29 @@
 #include "portable_iarchive.hpp"
 #endif
 
+#include <boost/noncopyable.hpp>
+
+namespace ecf {
+
+// Utility class for boost archive version
+class boost_archive : private boost::noncopyable {
+public:
+
+   // return the current archive version
+   static int version();
+
+   // extract the boost archive version, assumes text archive *****
+   static int extract_version(const std::string&);
+
+   // replace archive version, return true if replace worked.
+   static bool replace_version(std::string&, int new_version);
+
+   // avoid hard coding
+   static int version_1_47() { return 9;}
+
+private:
+   boost_archive();
+};
+
+}
 #endif

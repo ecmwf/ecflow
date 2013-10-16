@@ -38,7 +38,7 @@ def get_ecflow_version( work_space ):
     return ecflow_version
         
 WK=os.getenv("WK") 
-BOOST_VERSION="boost_1_47_0"
+BOOST_VERSION="boost_1_53_0"
 
 ecflow_version_list = get_ecflow_version( WK )
 assert len(ecflow_version_list) == 3, "Expected version to have release, major,minor"
@@ -389,6 +389,9 @@ def build_localhost( parent ) :
     localhost.add_task("test_server_performance").add_trigger("test_client_performance == complete or test_client_performance == aborted")
     localhost.add_task("test_performance").add_trigger("test_server_performance == complete or test_server_performance == aborted")
     localhost.add_task("test_migration").add_trigger("test_performance == complete or test_server_performance == aborted")
+    task = localhost.add_task("test_new_client_old_server")
+    task.add_trigger("test_migration == complete or test_migration == aborted")
+    task.add_variable("OLD_VERSION","3.1.9")
 
 def build_localhost_clang( parent ) :
     # Currently clang based profile builds, have a memory fault. 

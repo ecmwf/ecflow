@@ -15,6 +15,17 @@ Issues:
    This happens because it can not decode the message.
    Currently no error message is sent back to the client.
    
+Approach:
+====================================================================================
+In the short term we use option 1.
+  Should this be with boost 1.47 or boost 1.53 ?
+  Since we will provide some backward compatibility, will aim for boost 1.53
+  Hence new release should be 4.0.0
+  
+
+In the longer term we will use approach 3:
+  This will *still* need to able talk to old server.
+   
    
 Options:
 1/ Modify boost archive version, when client->server comms fails.
@@ -41,9 +52,9 @@ Options:
   This will support forward compatibility. If an old server receives a command
   it does not understand, it will be ignored. 
 + Additionally  new name/value, as arguments can be added, without affecting old servers.
+
 - Issue of loading defs from new client to old server, will still remain.
-  However this will not be typical use case, and we use option 1, in this  case.
-  
+
   
   WBS:
   - Give preference to those client/server commands, used by the viewer
@@ -66,12 +77,33 @@ Options:
 ====================================================================================
 + most flexible.
 - most amount of work
-- transfer of defs from server to client, will pose a problem
+- transfer of defs from server<->client, will pose a problem
 - Issue of loading defs from new client to old server, will still remain. 
 - server to client comms, using simple data driven approach will not work, for
   hierarchical objects. i.e like suite and family, memento. This will require,
   xml.json,yaml type solution. 
-        
+
+  This could be got round by using a hybrid approach :
+       <version><\n>
+       <command><\n>
+       <boost-string>
+  
+  i.e
+       v1
+       load
+       22 serialization::archive 9 0 0 2400 0 0 1 1
+       
+  This allows us to separate the command, from the serialisation.
+  There will be small penalty on parsing however.
+  In the future we could an alternative to boost.
+  
+  *****************************
+  In addition we wil still need to support old format, so that new client can
+  take to old server.
+  However for the viwer & command line, we may need an environment variable
+  to allow new client to talk to old server.
+  *****************************
+
 Clients
 =================================================================================
 

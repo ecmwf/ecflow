@@ -52,7 +52,14 @@ BOOST_AUTO_TEST_CASE( test_server_version )
 
    ClientInvoker theClient(invokeServer.host(), invokeServer.port());
    BOOST_REQUIRE_MESSAGE(theClient.server_version() == 0,"server version\n" << theClient.errorMsg());
-   BOOST_REQUIRE_MESSAGE(theClient.get_string() == Version::raw(),"Expected client version(" << Version::raw() << ") to match server version(" << theClient.get_string() << ")");
+   if (ClientEnvironment::hostSpecified().empty()) {
+      // This check only valid if server was invoked locally. Ignore for remote servers
+      BOOST_REQUIRE_MESSAGE(theClient.get_string() == Version::raw(),"Expected client version(" << Version::raw() << ") to match server version(" << theClient.get_string() << ")");
+   }
+   else {
+      // remote server, version may be different
+      BOOST_WARN_MESSAGE(theClient.get_string() == Version::raw(),"Client version(" << Version::raw() << ") does not match server version(" << theClient.get_string() << ")");
+   }
 }
 
 BOOST_AUTO_TEST_CASE( test_server_state_changes )
@@ -248,6 +255,7 @@ BOOST_AUTO_TEST_CASE( test_server_stress_test_2 )
       BOOST_REQUIRE_MESSAGE( theClient.checkPtDefs(ecf::CheckPt::ON_TIME,180) == 0," should return 0\n" << theClient.errorMsg());
       BOOST_REQUIRE_MESSAGE( theClient.checkPtDefs(ecf::CheckPt::ON_TIME) == 0," should return 0\n" << theClient.errorMsg());
       BOOST_REQUIRE_MESSAGE( theClient.checkPtDefs(ecf::CheckPt::UNDEFINED) == 0," should return 0\n" << theClient.errorMsg()); //32
+      BOOST_REQUIRE_MESSAGE( theClient.checkPtDefs(ecf::CheckPt::ON_TIME,CheckPt::default_interval()) == 0," should return 0\n" << theClient.errorMsg());
 
       BOOST_REQUIRE_MESSAGE( theClient.freeDep("/suite1") == 0, " should return 0\n" << theClient.errorMsg());
       BOOST_REQUIRE_MESSAGE( theClient.freeDep("/suite1",true,true,true,true) == 0, " should return 0\n" << theClient.errorMsg());
@@ -285,7 +293,7 @@ BOOST_AUTO_TEST_CASE( test_server_stress_test_2 )
       BOOST_REQUIRE_MESSAGE( theClient.defs().get(),"Server returned a NULL defs");
       BOOST_REQUIRE_MESSAGE( theClient.defs()->suiteVec().size() >= 1,"  no suite ?");
    }
-   cout << " Server handled " << load * 60
+   cout << " Server handled " << load * 61
         << " requests in boost_timer(" << boost_timer.elapsed()
         << ") DurationTimer(" << to_simple_string(duration_timer.elapsed())
         << ")" << endl;

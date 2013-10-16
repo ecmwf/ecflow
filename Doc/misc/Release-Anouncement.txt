@@ -1,13 +1,13 @@
  ======================================================================================
 Subject: New beta/test release of ecFlow now available
 
-A new version of the ecFlow(3.1.9) has been released:
+A new version of the ecFlow(4.0.0rc1) has been released:
 
 #Please be aware that A new ecflow release candidate is planned.
 #If you are using the test version then the link will
 #be changed.
 
-This release is accessible from: /usr/local/apps/ecflow/3.1.9
+This release is accessible from: /usr/local/apps/ecflow/4.0.0rc1
 on the following platforms:
 
    o linux 10.3      (garm)
@@ -17,19 +17,21 @@ on the following platforms:
    o HPUX            (itanium)
    o AIX/ibm_power7  (c2a/c2b)
    o AIX/rs6000      (ecgate)
+   o cct/cctdtn1     (cray XC30) 
  
 The release includes the following changes:
 
- 3.1.9: (production, September 2013)
+ 4.0.0 : (production, September 2013)
    - ecflowview    : fix crash in the preference dialog
    - ecflow_client : Change parsing for aliases variables. No longer check variable names.
    - ecflow_client : Fixed parsing bug associated with trigger node references, relative paths not correct
    - ecflow_server : Changed Pre-process to ignore generated variables SUITE,FAMILY,TASK in %comment %end(user variables)
  
+
  
 To use a specific version:
 
-   export ECFLOW_VERSION=3.1.9
+   export ECFLOW_VERSION=4.0.0rc1
    use ecflow
    
 To use the latest test version:
@@ -51,7 +53,7 @@ To use the latest ecFlow on linux/HPUX/ecgate call:
    Please use the module functionality  i.e
       module avail ecflow
       module unload ecflow 
-      module load ecflow/3.1.9
+      module load ecflow/4.0.0rc1
                   
             
 Compatibility
@@ -60,7 +62,7 @@ The client/Server from one release should not be mixed with another.
 To avoid this problem it is *highly* recommended that you use a 
 specific version:
 
-   export ECFLOW_VERSION=3.1.9
+   export ECFLOW_VERSION=4.0.0rc1
    use ecflow
 
 Additionally references to ecflow_client in the scripts(.ecf) should use

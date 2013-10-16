@@ -52,8 +52,6 @@ using namespace boost::posix_time;
 // class ClientInvoker
 ClientInvoker::ClientInvoker()
 : on_error_throw_exception_(true), cli_(false), test_(false),testInterface_(false),
-  allow_new_client_old_server_(false),
-  allow_new_server_old_client_(false),
   connection_attempts_(2),retry_connection_period_(RETRY_CONNECTION_PERIOD)
 {
 	if (clientEnv_.debug()) cout << "\nClientInvoker::ClientInvoker():============================start============================================\n";
@@ -61,8 +59,6 @@ ClientInvoker::ClientInvoker()
 
 ClientInvoker::ClientInvoker(const std::string& host_port)
 : on_error_throw_exception_(true), cli_(false), test_(false),testInterface_(false),
-  allow_new_client_old_server_(false),
-  allow_new_server_old_client_(false),
   connection_attempts_(2),retry_connection_period_(RETRY_CONNECTION_PERIOD)
 {
    if (clientEnv_.debug()) cout << "\nClientInvoker::ClientInvoker():============================start============================================\n";
@@ -76,8 +72,6 @@ ClientInvoker::ClientInvoker(const std::string& host_port)
 
 ClientInvoker::ClientInvoker(const std::string& host, const std::string& port)
 : on_error_throw_exception_(true), cli_(false), test_(false),testInterface_(false),
-  allow_new_client_old_server_(false),
-  allow_new_server_old_client_(false),
   connection_attempts_(2),retry_connection_period_(RETRY_CONNECTION_PERIOD)
 {
    if (clientEnv_.debug()) cout << "\nClientInvoker::ClientInvoker():============================start============================================\n";
@@ -86,8 +80,6 @@ ClientInvoker::ClientInvoker(const std::string& host, const std::string& port)
 
 ClientInvoker::ClientInvoker(const std::string& host, int port)
 : on_error_throw_exception_(true), cli_(false), test_(false),testInterface_(false),
-  allow_new_client_old_server_(false),
-  allow_new_server_old_client_(false),
   connection_attempts_(2),retry_connection_period_(RETRY_CONNECTION_PERIOD)
 {
    if (clientEnv_.debug()) cout << "\nClientInvoker::ClientInvoker():============================start============================================\n";
@@ -100,6 +92,16 @@ void ClientInvoker::set_host_port(const std::string& host, const std::string& po
    // o Override environment setting
    // o For child commands will override opening of ecf_hosts file
 	clientEnv_.set_host_port(host,port);
+}
+
+void ClientInvoker::allow_new_client_old_server(int archive_version_of_old_server)
+{
+   clientEnv_.allow_new_client_old_server(archive_version_of_old_server);
+}
+
+int ClientInvoker::allow_new_client_old_server() const
+{
+   return clientEnv_.allow_new_client_old_server();
 }
 
 void ClientInvoker::taskPath(const std::string& s) {
@@ -283,8 +285,7 @@ int ClientInvoker::do_invoke_cmd(Cmd_ptr cts_cmd) const
 
 					boost::asio::io_service io_service;
 					Client theClient( io_service, cts_cmd , clientEnv_.host(), clientEnv_.port(), clientEnv_.connect_timeout() );
-					theClient.allow_new_client_old_server(allow_new_client_old_server_);
-					theClient.allow_new_server_old_client(allow_new_server_old_client_);
+					if (clientEnv_.allow_new_client_old_server() != 0) theClient.allow_new_client_old_server(clientEnv_.allow_new_client_old_server());
 					io_service.run();
 					if (clientEnv_.debug()) cout << "ClientInvoker: >>> After: io_service.run() <<<\n";
 

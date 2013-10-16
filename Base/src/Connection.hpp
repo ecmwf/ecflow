@@ -57,8 +57,7 @@ public:
 	/// Allow tentative support for new client to talk to old server
    /// by changing the boost serialisation archive version, hence tentative
 	connection(boost::asio::io_service& io_service)
-    : allow_new_client_old_server_(false),
-      allow_new_server_old_client_(false),
+    : allow_new_client_old_server_(0),
       socket_(io_service)
 	{
 #ifdef DEBUG_CONNECTION
@@ -80,8 +79,7 @@ public:
 
 	// support for forward compatibility, by changing boost archive version
 	// Chosen to change client side only
-   void allow_new_client_old_server(bool f)  { allow_new_client_old_server_ = f;}
-   void allow_new_server_old_client(bool f)  { allow_new_server_old_client_ = f;}
+   void allow_new_client_old_server(int f)  { allow_new_client_old_server_ = f;}
 
 	/// Asynchronously write a data structure to the socket.
 	template<typename T, typename Handler>
@@ -94,14 +92,13 @@ public:
 		try {
 		   ecf::save_as_string(outbound_data_,t);
 
-         if (allow_new_client_old_server_ && !Ecf::server()) {
-            // Client context, forward compatibility, new client -> old server
-            ecf::Str::replace(outbound_data_,"22 serialization::archive 10","22 serialization::archive 9");
+         if (allow_new_client_old_server_ != 0 && !Ecf::server()) {
+            // Client context, forward compatibility, new client -> old server(* assumes old server is boost lib version 9 *)
+            ecf::boost_archive::replace_version(outbound_data_,allow_new_client_old_server_);
          }
 
 		} catch (const boost::archive::archive_exception& ae ) {
-		   // Unable to decode data.
-		   // Something went wrong, inform the caller.
+		   // Unable to decode data. Something went wrong, inform the caller.
 		   ecf::LogToCout logToCout;
 		   LOG(ecf::Log::ERR,"Connection::async_write boost::archive::archive_exception " << ae.what());
 		   boost::system::error_code error(boost::asio::error::invalid_argument);
@@ -199,8 +196,8 @@ private:
 
 	/// Handle a completed read of message data.
 	template<typename T, typename Handler>
-	void handle_read_data(const boost::system::error_code& e, T& t,
-			boost::tuple<Handler> handler) {
+	void handle_read_data(const boost::system::error_code& e, T& t, boost::tuple<Handler> handler)
+	{
 		if (e) {
 			boost::get<0>(handler)(e);
 		} else {
@@ -214,16 +211,35 @@ private:
 				std::cout << "handle_read_data inbound_data_.size(" << inbound_data_.size() << ")\n";
 #endif
 
-				if (allow_new_server_old_client_ && !Ecf::server()) {
-				   // Client context, forward compatibility, new server  -> old client
-				   ecf::Str::replace(archive_data,"22 serialization::archive 10","22 serialization::archive 9");
-				}
 				ecf::restore_from_string(archive_data,t);
 			}
 			catch (const boost::archive::archive_exception& ae ) {
-				// Unable to decode data.
+
+			   // Log anyway so we know client <--> server incompatible
 				ecf::LogToCout logToCout;
 				LOG(ecf::Log::ERR,"Connection::handle_read_data boost::archive::archive_exception " << ae.what());
+
+			   // two context, client code or server, before giving up, try
+			   // - Client context, new server  -> old client
+			   // - Server context, new client  -> old server
+            // Match up the boost archive version in the string archive_data with current version
+            std::string archive_data(&inbound_data_[0], inbound_data_.size());
+			   int current_archive_version = ecf::boost_archive::version();
+			   int archive_version_in_data = ecf::boost_archive::extract_version(archive_data);
+			   if (current_archive_version != archive_version_in_data ) {
+			      if (ecf::boost_archive::replace_version(archive_data,current_archive_version)) {
+
+			         try {
+			            ecf::restore_from_string(archive_data,t);
+			            // It worked
+			            boost::get<0>(handler)(e);
+			            return;
+			         }
+			         catch (...) {}  // fall through and return error code
+			      }
+			   }
+
+				// Unable to decode data.
 				boost::system::error_code error( boost::asio::error::invalid_argument);
 				boost::get<0>(handler)(error);
 				return;
@@ -243,8 +259,7 @@ private:
 	}
 
 private:
-   bool allow_new_client_old_server_;
-   bool allow_new_server_old_client_;
+   int allow_new_client_old_server_;
 	boost::asio::ip::tcp::socket socket_;/// The underlying socket.
 	std::string outbound_header_;        /// Holds an out-bound header.
 	std::string outbound_data_;          /// Holds the out-bound data.

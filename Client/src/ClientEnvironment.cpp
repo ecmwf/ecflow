@@ -54,7 +54,8 @@ ClientEnvironment::ClientEnvironment()
   task_try_num_(1),timeout_(MAX_TIMEOUT),connect_timeout_(0),
   denied_(false),no_ecf_(false), debug_(false),under_test_(false),
   host_file_read_(false),
-  host_vec_index_(0)
+  host_vec_index_(0),
+  allow_new_client_old_server_(0)
 {
 	init();
 }
@@ -65,7 +66,8 @@ ClientEnvironment::ClientEnvironment(const std::string& hostFile, const std::str
   task_try_num_(1),timeout_(MAX_TIMEOUT),connect_timeout_(0),
   denied_(false),no_ecf_(false), debug_(false),under_test_(false),
   host_file_read_(false),
-  host_vec_index_(0)
+  host_vec_index_(0),
+  allow_new_client_old_server_(0)
 {
 	init();
 
@@ -189,7 +191,8 @@ std::string ClientEnvironment::toString() const
 	for(size_t i = 0; i < env_.size(); i++) {
 		ss << "   " << env_[i].first << " = " << env_[i].second << "\n";
 	}
-	ss << "   ECF_DEBUG_CLIENT = " << debug_ << "\n";
+   ss << "   ECF_ALLOW_NEW_CLIENT_OLD_SERVER = " << allow_new_client_old_server_ << "\n";
+   ss << "   ECF_DEBUG_CLIENT = " << debug_ << "\n";
 	return ss.str();
 }
 
@@ -232,6 +235,19 @@ void ClientEnvironment::read_environment_variables()
 	if (getenv("ECF_DENIED")) denied_ = true;
 	if (getenv("NO_ECF")) no_ecf_ = true;
 	if (getenv("ECF_DEBUG_CLIENT")) debug_ = true;
+
+	char *allow_new_client_old_server = getenv("ECF_ALLOW_NEW_CLIENT_OLD_SERVER");
+	if (allow_new_client_old_server) {
+	   try {
+	      allow_new_client_old_server_ =  boost::lexical_cast<int>(allow_new_client_old_server);
+	   }
+	   catch (...) {
+	      throw std::runtime_error("The environment variable ECF_ALLOW_NEW_CLIENT_OLD_SERVER must be an integer. Try 9");
+	   }
+	   if (allow_new_client_old_server_ < 9) {
+         throw std::runtime_error("The environment variable ECF_ALLOW_NEW_CLIENT_OLD_SERVER must be an integer > 8, Try 9");
+	   }
+	}
 
 	/// Override the config settings *IF* any
  	std::string port = Str::DEFAULT_PORT_NUMBER();

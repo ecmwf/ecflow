@@ -45,9 +45,9 @@ namespace ecf {
 //
 // **Please update file history.ddoc with the changed made for each release ***
 // ********************************************************************
-const int Version::release_ = 3;
-const int Version::major_= 1;
-const std::string Version::minor_ = "10" ;
+const int Version::release_ = 4;
+const int Version::major_= 0;
+const std::string Version::minor_ = "0rc1" ;
 #ifdef DEBUG
 const std::string Version::TAG = " (debug)";  // Old tag: beta(debug)
 #else
