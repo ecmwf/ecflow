@@ -156,7 +156,8 @@ void CronAttr::calendarChanged( const ecf::Calendar& c )
       state_change_no_ = Ecf::incr_state_change_no();
    }
 
-   if (!timeSeries_.hasIncrement() && isFree(c)) {
+   // Once a cron is free, it stays free until re-queue
+   if (isFree(c)) {
       setFree();
    }
    // A cron is always re-queable, hence we use isFree to control when it can actually run.
