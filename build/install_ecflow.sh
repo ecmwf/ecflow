@@ -127,17 +127,13 @@ then
   
 elif [[ "$ARCH" = cray ]] ; then 
 
-   export WK=/home/ma/ma0/ecflow
-   export BOOST_ROOT=/home/ma/ma0/boost/$BOOST_VERSION
+   export WK=/perm/ma/ma0/workspace/$PE_ENV/ecflow
+   export BOOST_ROOT=/perm/ma/ma0/boost/$BOOST_VERSION
+   export ECFLOW_INSTALL_DIR=${ECFLOW_INSTALL_DIR:-/usr/local/apps/ecflow/$release.$major.$minor/$PE_ENV/$COMPILER_VERSION}
    
-   export ECFLOW_INSTALL_DIR=${ECFLOW_INSTALL_DIR:-/usr/local/apps/ecflow/$release.$major.$minor/gnu/$COMPILER_VERSION}
-  
-   if [ "$PE_ENV" = INTEL ] ; then
-      export ECFLOW_INSTALL_DIR=${ECFLOW_INSTALL_DIR:-/usr/local/apps/ecflow/$release.$major.$minor/intel/$COMPILER_VERSION}
-   fi
-   #if [ "$PE_ENV" = CRAY ] ; then
-   #   export ECFLOW_INSTALL_DIR=${ECFLOW_INSTALL_DIR:-/usr/local/apps/ecflow/$release.$major.$minor/cray/$COMPILER_VERSION} 
-   #fi
+   echo "WK = $WK"
+   echo "BOOST_ROOT = $BOOST_ROOT"
+   echo "ECFLOW_INSTALL_DIR = $ECFLOW_INSTALL_DIR"
 
 elif [[ "$ARCH" = hpia64 ]] ; then 
 

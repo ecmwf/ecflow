@@ -162,6 +162,9 @@ void server::start_accept()
 #else
    if (serverEnv_.debug()) cout << "   server::start_accept()" << endl;
    connection_ptr new_conn( new connection( io_service_ ) );
+   if (serverEnv_.allow_old_client_new_server() !=0 ) {
+      new_conn->allow_old_client_new_server(serverEnv_.allow_old_client_new_server());
+   }
    acceptor_.async_accept( new_conn->socket(),
                            boost::bind( &server::handle_accept, this,
                                  boost::asio::placeholders::error,

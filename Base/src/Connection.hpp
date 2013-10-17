@@ -58,6 +58,7 @@ public:
    /// by changing the boost serialisation archive version, hence tentative
 	connection(boost::asio::io_service& io_service)
     : allow_new_client_old_server_(0),
+      allow_old_client_new_server_(0),
       socket_(io_service)
 	{
 #ifdef DEBUG_CONNECTION
@@ -77,9 +78,12 @@ public:
 		return socket_;
 	}
 
-	// support for forward compatibility, by changing boost archive version
-	// Chosen to change client side only
+	// support for forward compatibility, by changing boost archive version, used in client context
    void allow_new_client_old_server(int f)  { allow_new_client_old_server_ = f;}
+
+   // support for forward compatibility, by changing boost archive version, used in server context
+   void allow_old_client_new_server(int f)  { allow_old_client_new_server_ = f;}
+
 
 	/// Asynchronously write a data structure to the socket.
 	template<typename T, typename Handler>
@@ -95,6 +99,13 @@ public:
          if (allow_new_client_old_server_ != 0 && !Ecf::server()) {
             // Client context, forward compatibility, new client -> old server(* assumes old server is boost lib version 9 *)
             ecf::boost_archive::replace_version(outbound_data_,allow_new_client_old_server_);
+         }
+
+         // Server context: To allow build of ecflow, i.e old clients 3.0.x, installed on machines hpux,aix,etc
+         // need to communicate to *new* server 4.0.0,  new server (boost 1.53:10) ) --> (old_client:boost_1.47:9)
+         // Note: the read below, will have determined the actual archive version used.
+         if (Ecf::server() && allow_old_client_new_server_ != 0 ) {
+            ecf::boost_archive::replace_version(outbound_data_,allow_old_client_new_server_);
          }
 
 		} catch (const boost::archive::archive_exception& ae ) {
@@ -212,6 +223,21 @@ private:
 #endif
 
 				ecf::restore_from_string(archive_data,t);
+
+	         // Server context: To allow build of ecflow, i.e old clients 3.0.x, installed on machines hpux,aix,etc
+	         // need to communicate to *new* server 4.0.0,   new server (boost 1.53:10) ) --> (old_client:boost_1.47:9)
+	         if (Ecf::server() && allow_old_client_new_server_ != 0 ) {
+	            // get the actual version used, and *re-use* when replying back to *old* client
+	            int archive_version_in_data = ecf::boost_archive::extract_version(archive_data);
+	            int current_archive_version = ecf::boost_archive::version();
+	            if ( current_archive_version != archive_version_in_data ) {
+	               allow_old_client_new_server_ = archive_version_in_data;
+	            }
+	            else {
+	               // compatible, don't bother changing the write format
+	               allow_old_client_new_server_ = 0;
+	            }
+ 	         }
 			}
 			catch (const boost::archive::archive_exception& ae ) {
 
@@ -220,8 +246,8 @@ private:
 				LOG(ecf::Log::ERR,"Connection::handle_read_data boost::archive::archive_exception " << ae.what());
 
 			   // two context, client code or server, before giving up, try
-			   // - Client context, new server  -> old client
-			   // - Server context, new client  -> old server
+			   // - Client context, new server  -> old client (* assumes old client updated, with this code *)
+			   // - Server context, new client  -> old server (* assumes old server updated, with this code *)
             // Match up the boost archive version in the string archive_data with current version
             std::string archive_data(&inbound_data_[0], inbound_data_.size());
 			   int current_archive_version = ecf::boost_archive::version();
@@ -260,6 +286,7 @@ private:
 
 private:
    int allow_new_client_old_server_;
+   int allow_old_client_new_server_;
 	boost::asio::ip::tcp::socket socket_;/// The underlying socket.
 	std::string outbound_header_;        /// Holds an out-bound header.
 	std::string outbound_data_;          /// Holds the out-bound data.

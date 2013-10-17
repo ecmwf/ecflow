@@ -40,6 +40,7 @@
 #include "Version.hpp"
 #include "Calendar.hpp"
 #include "File.hpp"
+#include "boost_archive.hpp"
 
 using namespace ecf;
 using namespace std;
@@ -80,6 +81,7 @@ ServerEnvironment::ServerEnvironment( int argc, char* argv[])
   help_option_(false),
   version_option_(false),
   reply_back_if_ok_(false),
+  allow_old_client_new_server_(0),
   checkMode_(ecf::CheckPt::ON_TIME),
   tcp_protocol_(boost::asio::ip::tcp::v4())
 {
@@ -166,6 +168,9 @@ ServerEnvironment::ServerEnvironment( int argc, char* argv[])
       LOG(Log::MSG, "Host(" <<  hostPort().first << ")  Port(" << hostPort().second << ") using TCP/IP v6");
    LOG(Log::MSG, "ECF_HOME " <<  ecf_home());
    LOG(Log::MSG, "Job scheduling interval: " <<  submitJobsInterval_);
+   if (allow_old_client_new_server_ != 0) {
+      LOG(Log::MSG, "ECF_ALLOW_OLD_CLIENT_NEW_SERVER enabled: " <<  allow_old_client_new_server_);
+   }
 }
 
 ServerEnvironment::~ServerEnvironment()
@@ -497,6 +502,12 @@ void ServerEnvironment::read_environment_variables(std::string& log_file_name)
 
 	if (getenv("ECF_DEBUG_SERVER")) {
 		debug_ = true; // can also be enabled via --debug option
+	}
+
+	if (getenv("ECF_ALLOW_OLD_CLIENT_NEW_SERVER")) {
+	   // we don't need exact version of boost archive version of old client, since we can determine
+	   // this from the message sent to the server from the *old* client
+	   allow_old_client_new_server_ = ecf::boost_archive::version_1_47();
 	}
 }
 
