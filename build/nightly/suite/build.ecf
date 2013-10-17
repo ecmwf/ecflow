@@ -35,7 +35,20 @@ export ECFLOW_INSTALL_DIR=/usr/local/apps/ecflow/$release.$major.$minor
 # for cray, can have 3 different compiler, and multiple versions
 # ===================================================================================
 if [[ %ARCH% = cray ]] ; then
-   export ECFLOW_INSTALL_DIR=/usr/local/apps/ecflow/$release.$major.$minor/%CRAY_COMPILER_TOOLSET%/%CRAY_COMPILER_TOOLSET_VERSION%
+
+   if [[ "$PE_ENV" = CRAY ]] ; then
+      export COMPILER_VERSION=$(echo $CRAY_CC_VERSION | sed 's/\.//' | cut -c1-2)
+   fi
+
+   if [[ "$PE_ENV" = INTEL ]] ; then
+      export COMPILER_VERSION=$(icc -dumpversion | sed 's/\.//' | cut -c1-3)
+   fi
+   
+   if [[ "$PE_ENV" = GNU ]] ; then
+      export COMPILER_VERSION=$(gcc -dumpversion | sed 's/\.//' | cut -c1-2)
+   fi
+
+   export ECFLOW_INSTALL_DIR=/usr/local/apps/ecflow/$release.$major.$minor/$PE_ENV/$COMPILER_VERSION
 fi
 export ECFLOW_PYTHON_INSTALL_DIR=$ECFLOW_INSTALL_DIR/lib/python%PYTHON_VERSION%/site-packages/ecflow 
 

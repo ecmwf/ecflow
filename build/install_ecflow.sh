@@ -90,7 +90,7 @@ export ECFLOW_INSTALL_DIR=${ECFLOW_INSTALL_DIR:-/usr/local/apps/ecflow/$release.
 # the correct embedded paths with ecflow.so (i.e for boost python )
 # ======================================================================
 
-BOOST_VERSION=boost_1_47_0
+BOOST_VERSION=boost_1_53_0
 
 if [[ "$user" = "map" ]] # when user emos is commented out
 then
@@ -127,6 +127,18 @@ then
   
 elif [[ "$ARCH" = cray ]] ; then 
 
+   if [[ "$PE_ENV" = CRAY ]] ; then
+      export COMPILER_VERSION=$(echo $CRAY_CC_VERSION | sed 's/\.//' | cut -c1-2)
+   fi
+
+   if [[ "$PE_ENV" = INTEL ]] ; then
+      export COMPILER_VERSION=$(icc -dumpversion | sed 's/\.//' | cut -c1-3)
+   fi
+   
+   if [[ "$PE_ENV" = GNU ]] ; then
+      export COMPILER_VERSION=$(gcc -dumpversion | sed 's/\.//' | cut -c1-2)
+   fi
+   
    export WK=/perm/ma/ma0/workspace/$PE_ENV/ecflow
    export BOOST_ROOT=/perm/ma/ma0/boost/$BOOST_VERSION
    export ECFLOW_INSTALL_DIR=${ECFLOW_INSTALL_DIR:-/usr/local/apps/ecflow/$release.$major.$minor/$PE_ENV/$COMPILER_VERSION}
@@ -134,6 +146,7 @@ elif [[ "$ARCH" = cray ]] ; then
    echo "WK = $WK"
    echo "BOOST_ROOT = $BOOST_ROOT"
    echo "ECFLOW_INSTALL_DIR = $ECFLOW_INSTALL_DIR"
+   echo "COMPILER_VERSION = $COMPILER_VERSION"
 
 elif [[ "$ARCH" = hpia64 ]] ; then 
 

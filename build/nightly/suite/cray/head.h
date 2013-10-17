@@ -40,7 +40,6 @@ export PID_RID=$$
 # Shorten normal timeout for child commands to one hour
 export ECF_TIMEOUT=3600
 
-
 # =============================================================================
 # BOOST
 export BOOST_ROOT=%BOOST_DIR%/%BOOST_VERSION%
@@ -62,10 +61,10 @@ module unload PrgEnv-cray
 module unload PrgEnv-intel
 module unload PrgEnv-gnu
 
-module load PrgEnv-%CRAY_COMPILER_TOOLSET%
+%MODULE_LOAD%
 
 # For gnu, we will use gnu 4.6.3
-if [[ %CRAY_COMPILER_TOOLSET% = gnu ]] ; then
-   module load gcc/4.6.3
+if [[ "$PE_ENV" = GNU ]] ; then
+   %MODULE_LOAD_GCC%
 fi
 

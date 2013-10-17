@@ -120,34 +120,31 @@ def add_opensuse113_variables( opensuse113 ):
     opensuse113.add_variable("ARCH","opensuse113")
     opensuse113.add_variable("SITE_CONFIG","$WK/build/site_config/site-config-Linux64.jam")
 
-def add_cray_gnu_compiler_variables( cray ):
-    cray.add_variable("COMPILER_TEST_PATH","gcc-4.6.3/$mode")
-    cray.add_variable("COMPILER_VERSION","gcc-4.6.3")
-    cray.add_variable("TOOLSET","gcc")
-    cray.add_variable("CRAY_COMPILER_TOOLSET","gnu")
-    cray.add_variable("CRAY_COMPILER_TOOLSET_VERSION","46")  # for install
-    cray.add_variable("SITE_CONFIG","$WK/build/site_config/site-config-cray-gcc.jam")
-    cray.add_variable("ROOT_WK","/perm/ma/ma0/workspace/GNU")
+def add_cray_gnu_compiler_variables( cray_gnu ):
+    cray_gnu.add_variable("COMPILER_TEST_PATH","gcc-4.6.3/$mode")
+    cray_gnu.add_variable("COMPILER_VERSION","gcc-4.6.3")
+    cray_gnu.add_variable("TOOLSET","gcc")
+    cray_gnu.add_variable("MODULE_LOAD","module load PrgEnv-gnu")
+    cray_gnu.add_variable("SITE_CONFIG","$WK/build/site_config/site-config-cray-gcc.jam")
+    cray_gnu.add_variable("ROOT_WK","/perm/ma/ma0/workspace/GNU")
 
-    # cray.add_variable("TEMPLATE_DEPTH","c++-template-depth=512") # needed for gnu/4.8.1
+    # cray_gnu.add_variable("TEMPLATE_DEPTH","c++-template-depth=512") # needed for gnu/4.8.1
 
-def add_cray_intel_compiler_variables( cray ):
-    cray.add_variable("COMPILER_TEST_PATH","intel-linux/$mode")
-    cray.add_variable("COMPILER_VERSION","intel-linux")
-    cray.add_variable("TOOLSET","intel")
-    cray.add_variable("CRAY_COMPILER_TOOLSET","intel")
-    cray.add_variable("CRAY_COMPILER_TOOLSET_VERSION","14")  # for install
-    cray.add_variable("SITE_CONFIG","$WK/build/site_config/site-config-cray-intel.jam")
-    cray.add_variable("ROOT_WK","/perm/ma/ma0/workspace/INTEL")
+def add_cray_intel_compiler_variables( cray_intel ):
+    cray_intel.add_variable("COMPILER_TEST_PATH","intel-linux/$mode")
+    cray_intel.add_variable("COMPILER_VERSION","intel-linux")
+    cray_intel.add_variable("TOOLSET","intel")
+    cray_intel.add_variable("MODULE_LOAD","module load PrgEnv-intel")
+    cray_intel.add_variable("SITE_CONFIG","$WK/build/site_config/site-config-cray-intel.jam")
+    cray_intel.add_variable("ROOT_WK","/perm/ma/ma0/workspace/INTEL")
 
-def add_cray_cray_compiler_variables( cray ):
-    cray.add_variable("COMPILER_TEST_PATH","cray/$mode")
-    cray.add_variable("COMPILER_VERSION","cray")
-    cray.add_variable("TOOLSET","cray")
-    cray.add_variable("CRAY_COMPILER_TOOLSET","cray")
-    cray.add_variable("CRAY_COMPILER_TOOLSET_VERSION","14")  # for install
-    cray.add_variable("SITE_CONFIG","$WK/build/site_config/site-config-cray-cray.jam")
-    cray.add_variable("ROOT_WK","/perm/ma/ma0/workspace/CRAY")
+def add_cray_cray_compiler_variables( cray_cray ):
+    cray_cray.add_variable("COMPILER_TEST_PATH","cray/$mode")
+    cray_cray.add_variable("COMPILER_VERSION","cray")
+    cray_cray.add_variable("TOOLSET","cray")
+    cray_cray.add_variable("MODULE_LOAD","module load PrgEnv-cray")
+    cray_cray.add_variable("SITE_CONFIG","$WK/build/site_config/site-config-cray-cray.jam")
+    cray_cray.add_variable("ROOT_WK","/perm/ma/ma0/workspace/CRAY")
 
 def add_remote_cray_variables( cray ):
     # re use axel scripts for trap.h. rcp.eh etc,  
@@ -181,6 +178,7 @@ def add_cray_variables( cray ):
     cray.add_variable("REMOTE_HOST","cctdtn1")
     cray.add_variable("BOOST_DIR","/perm/ma/ma0/boost")
     cray.add_variable("ARCH","cray")
+    cray.add_variable("MODULE_LOAD_GCC","module load gcc/4.6.3")
     
     
 def add_remote_redhat_variables( redhat ):
@@ -596,8 +594,6 @@ def add_suite_variables( suite ):
     suite.add_variable("SET_TO_TEST_SCRIPT","false")
     suite.add_variable("BUILD_ECFLOWVIEW","true")
     suite.add_variable("GIT_BRANCH","develop")  # when makeing a relase switch to master
-    suite.add_variable("CRAY_COMPILER_TOOLSET","gnu")
-    suite.add_variable("CRAY_COMPILER_TOOLSET_VERSION","43")
 
     # automatically fob all zombies when compiling ecflow 
     child_list = []
