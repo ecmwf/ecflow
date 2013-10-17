@@ -127,7 +127,7 @@ def add_cray_gnu_compiler_variables( cray ):
     cray.add_variable("CRAY_COMPILER_TOOLSET","gnu")
     cray.add_variable("CRAY_COMPILER_TOOLSET_VERSION","46")  # for install
     cray.add_variable("SITE_CONFIG","$WK/build/site_config/site-config-cray-gcc.jam")
-    cray.add_variable("ROOT_WK","/perm/ma/ma0/workspace/gnu")
+    cray.add_variable("ROOT_WK","/perm/ma/ma0/workspace/GNU")
 
     # cray.add_variable("TEMPLATE_DEPTH","c++-template-depth=512") # needed for gnu/4.8.1
 
@@ -138,8 +138,7 @@ def add_cray_intel_compiler_variables( cray ):
     cray.add_variable("CRAY_COMPILER_TOOLSET","intel")
     cray.add_variable("CRAY_COMPILER_TOOLSET_VERSION","14")  # for install
     cray.add_variable("SITE_CONFIG","$WK/build/site_config/site-config-cray-intel.jam")
-    cray.add_variable("ROOT_WK","/perm/ma/ma0/workspace/intel")
-
+    cray.add_variable("ROOT_WK","/perm/ma/ma0/workspace/INTEL")
 
 def add_cray_cray_compiler_variables( cray ):
     cray.add_variable("COMPILER_TEST_PATH","cray/$mode")
@@ -148,7 +147,7 @@ def add_cray_cray_compiler_variables( cray ):
     cray.add_variable("CRAY_COMPILER_TOOLSET","cray")
     cray.add_variable("CRAY_COMPILER_TOOLSET_VERSION","14")  # for install
     cray.add_variable("SITE_CONFIG","$WK/build/site_config/site-config-cray-cray.jam")
-    cray.add_variable("ROOT_WK","/perm/ma/ma0/workspace/cray")
+    cray.add_variable("ROOT_WK","/perm/ma/ma0/workspace/CRAY")
 
 def add_remote_cray_variables( cray ):
     # re use axel scripts for trap.h. rcp.eh etc,  
