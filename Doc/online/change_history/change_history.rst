@@ -20,7 +20,7 @@
    - ecflow.so     : Added new python function to Node(find_node_up_the_tree()), to make it easier to add triggers.
    - *             : Update ecflow_migrate to take into account label's that have new lines
    - *             : Migrated source control management from perforce to git, and updated build scripts
-   - *             : Updated build scripts to support cray XC30
+   - *             : Updated build scripts to allow compilation and regression tests on cray XC30
    - *             : switch to boost 1.53
    
 3.1.9: (production, September 2013)
