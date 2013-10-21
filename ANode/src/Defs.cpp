@@ -294,11 +294,6 @@ void Defs::add_suite_only(suite_ptr s, size_t position)
    client_suite_mgr_.suite_added_in_defs(s);
 }
 
-void Defs::addSuite(std::auto_ptr<Suite> s)
-{
-	addSuite( suite_ptr(s) );
-}
-
 suite_ptr Defs::removeSuite(suite_ptr s)
 {
 	std::vector<suite_ptr>::iterator i = std::find(suiteVec_.begin(), suiteVec_.end(),s);

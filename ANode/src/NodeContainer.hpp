@@ -47,9 +47,7 @@ public:
    task_ptr add_task(const std::string& task_name);
    family_ptr add_family(const std::string& family_name);
  	void addTask( task_ptr , size_t position = std::numeric_limits<std::size_t>::max());
- 	void addTask( std::auto_ptr<Task> );
  	void addFamily( family_ptr, size_t position = std::numeric_limits<std::size_t>::max());
- 	void addFamily( std::auto_ptr<Family> );
 
 	virtual void immediateChildren(std::vector<node_ptr>&) const;
  	virtual void allChildren(std::set<Node*>&) const;

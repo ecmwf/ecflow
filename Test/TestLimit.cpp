@@ -84,31 +84,26 @@ BOOST_AUTO_TEST_CASE( test_limit )
  	{
  		std::string suiteName = "test_limit";
   		std::string pathToLimit = "/" + suiteName;
-		std::auto_ptr< Suite > suite( new Suite( suiteName ) );
+
+      suite_ptr suite = theDefs.add_suite( suiteName );
 		suite->addLimit(Limit("fast",1));
 		suite->addLimit(Limit("disk",50));
 
- 		std::auto_ptr< Family > fam( new Family( "family" ) );
+      family_ptr fam = suite->add_family("family");
 		fam->addInLimit(InLimit("fast",pathToLimit));
 		fam->addVerify( VerifyAttr(NState::COMPLETE,1) );
  		for(int i=0; i < taskSize; i++) {
- 			std::auto_ptr< Task > task( new Task( "t" + boost::lexical_cast<std::string>(i)  ) );
+ 		   task_ptr task = fam->add_task( "t" + boost::lexical_cast<std::string>(i) );
  			task->addVerify( VerifyAttr(NState::COMPLETE,1) );
-  			fam->addTask( task );
  		}
 
-		std::auto_ptr< Family > fam2( new Family( "family2" ) );
+      family_ptr fam2 = suite->add_family("family2");
 		fam2->addInLimit(InLimit("disk",pathToLimit,20));
 		fam2->addVerify( VerifyAttr(NState::COMPLETE,1) );
  		for(int i=0; i < taskSize; i++) {
- 			std::auto_ptr< Task > task( new Task( "t" + boost::lexical_cast<std::string>(i)  ) );
+ 		   task_ptr task = fam2->add_task( "t" + boost::lexical_cast<std::string>(i) );
  			task->addVerify( VerifyAttr(NState::COMPLETE,1) );
-  			fam2->addTask( task );
   		}
-
- 		suite->addFamily( fam );
- 		suite->addFamily( fam2 );
-		theDefs.addSuite( suite );
  	}
 
 

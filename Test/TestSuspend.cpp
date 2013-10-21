@@ -102,22 +102,19 @@ BOOST_AUTO_TEST_CASE( test_shutdown )
       //       we will find that state change happens at job submission interval,
       //       and hence skews time series.  Which can leave state in a queued state,
       //       and hence test never completes
-      std::auto_ptr< Suite > suite( new Suite( "test_shutdown" ) );
+      suite_ptr suite = theDefs.add_suite("test_shutdown");
       ClockAttr clockAttr(theLocalTime);
       suite->addClock( clockAttr );
 
-      std::auto_ptr< Family > fam( new Family( "family" ) );
+      family_ptr fam = suite->add_family("family");
       for(int i=0; i < taskSize; i++) {
-         std::auto_ptr< Task > task( new Task( "t" + boost::lexical_cast<std::string>(i) ) );
+         task_ptr task = fam->add_task("t" + boost::lexical_cast<std::string>(i));
 
          boost::posix_time::ptime   time1 =  theLocalTime +  minutes(1 + i);
          task->addTime( ecf::TimeAttr( ecf::TimeSlot(time1.time_of_day())  ));
 
          task->addVerify( VerifyAttr(NState::COMPLETE,1) );      // task should complete 1 times
-         fam->addTask( task );
       }
-      suite->addFamily( fam );
-      theDefs.addSuite( suite );
    }
 
    // The test harness will create corresponding directory structure and populate with standard sms files.
@@ -175,34 +172,28 @@ BOOST_AUTO_TEST_CASE( test_suspend_node )
       // i.e if local time is 9:59 and we create a TimeSlot like
       // 		task->addTime( ecf::TimeAttr( ecf::TimeSlot(theTm.tm_hour,theTm.tm_min+3) )  );
       // The the minute will be 62, which is illegal and will not parse
-      boost::posix_time::ptime   theLocalTime =  Calendar::second_clock_time();
+      boost::posix_time::ptime theLocalTime =  Calendar::second_clock_time();
 
-      std::auto_ptr< Suite > suite( new Suite( "test_suspend_node" ) );
+      suite_ptr suite = theDefs.add_suite("test_suspend_node");
       ClockAttr clockAttr(theLocalTime);
       suite->addClock( clockAttr );
 
-      std::auto_ptr< Task > t1( new Task( "t1" ) );
-      boost::posix_time::ptime   time1 =  theLocalTime +  minutes(1);
+      task_ptr t1 = suite->add_task( "t1");
+      boost::posix_time::ptime time1 =  theLocalTime +  minutes(1);
       t1->addTime( ecf::TimeAttr( ecf::TimeSlot(time1.time_of_day())  ));
-      suite->addTask( t1 );
 
-      std::auto_ptr< Task > t2( new Task( "t2" ) );
-      boost::posix_time::ptime   time2 =  theLocalTime +  minutes(2);
+      task_ptr t2 = suite->add_task( "t2");
+      boost::posix_time::ptime time2 =  theLocalTime +  minutes(2);
       t2->addTime( ecf::TimeAttr( ecf::TimeSlot(time2.time_of_day())  ));
-      suite->addTask( t2 );
 
-      std::auto_ptr< Family > fam( new Family( "family" ) );
+      family_ptr fam = suite->add_family("family");
       for(int i=0; i < 2; i++) {
-         std::auto_ptr< Task > task( new Task( "t" + boost::lexical_cast<std::string>(i) ) );
-
-         boost::posix_time::ptime   time1 =  theLocalTime +  minutes(1 + i);
-         task->addTime( ecf::TimeAttr( ecf::TimeSlot(time1.time_of_day())  ));
-
+         task_ptr task = fam->add_task("t" + boost::lexical_cast<std::string>(i));
          task->addVerify( VerifyAttr(NState::COMPLETE,1) );      // task should complete 1 times
-         fam->addTask( task );
+
+         boost::posix_time::ptime time1 =  theLocalTime +  minutes(1 + i);
+         task->addTime( ecf::TimeAttr( ecf::TimeSlot(time1.time_of_day())  ));
       }
-      suite->addFamily( fam );
-      theDefs.addSuite( suite );
    }
 
    // The test harness will create corresponding directory structure and populate with standard sms files.

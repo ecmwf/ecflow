@@ -63,15 +63,12 @@ BOOST_AUTO_TEST_CASE( test_ )
 	//	endsuite
    	Defs theDefs;
  	{
- 		std::auto_ptr< Suite > suite( new Suite( "test_abort_cmd" ) );
+      suite_ptr suite = theDefs.add_suite("test_abort_cmd");
  		suite->addVariable( Variable("ECF_TRIES","4") );
- 		family_ptr fam0 = Family::create("family0");
- 		task_ptr abort = Task::create("abort");
+ 		family_ptr fam0 = suite->add_family("family0");
+ 		task_ptr abort = fam0->add_task("abort");
  		abort->addVerify( VerifyAttr(NState::ABORTED,3) ); // task should abort 3 times & succeed on 4th attempt
  		abort->addVerify( VerifyAttr(NState::COMPLETE,1) );// task should complete 1 times
- 		fam0->addTask( abort );
- 		suite->addFamily( fam0 );
-		theDefs.addSuite( suite );
  	}
 
 	// Create a custom ecf file for test_task_abort_cmd/family0/abort to invoke the child abort command

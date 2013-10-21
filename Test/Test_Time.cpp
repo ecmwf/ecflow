@@ -77,17 +77,14 @@ BOOST_AUTO_TEST_CASE( test_single_real_time )
       //       we will find that state change happens at job submission interval,
       //       and hence skews time series.  Which can leave state in a queued state,
       //       and hence test never completes
-      std::auto_ptr< Suite > suite( new Suite( "test_time_single_slot" ) );
+      suite_ptr suite = theDefs.add_suite("test_time_single_slot");
       ClockAttr clockAttr(theLocalTime);
       suite->addClock( clockAttr );
 
-      std::auto_ptr< Family > fam( new Family( "family" ) );
-      std::auto_ptr< Task > task( new Task( "t" ) );
+      family_ptr fam = suite->add_family("family");
+      task_ptr task = fam->add_task("t");
       task->addTime( ecf::TimeAttr(ecf::TimeSlot(time1.time_of_day())));
       task->addVerify( VerifyAttr(NState::COMPLETE,1) );      // task should complete 1 times
-      fam->addTask( task );
-      suite->addFamily( fam );
-      theDefs.addSuite( suite );
    }
 
    // The test harness will create corresponding directory structure
@@ -130,20 +127,17 @@ BOOST_AUTO_TEST_CASE( test_time_multiple_single_slot )
       boost::posix_time::ptime time2 = theLocalTime + minutes(4);
       boost::posix_time::ptime time3 = theLocalTime + minutes(7);
 
-      std::auto_ptr< Suite > suite( new Suite( "test_time_multiple_single_slot" ) );
+      suite_ptr suite = theDefs.add_suite("test_time_multiple_single_slot");
       ClockAttr clockAttr(theLocalTime);
       suite->addClock( clockAttr );
       suite->add_variable("SLEEPTIME",boost::lexical_cast<std::string>(TestFixture::job_submission_interval()-1));
 
-      std::auto_ptr< Family > fam( new Family( "family" ) );
-      std::auto_ptr< Task > task( new Task( "t" ) );
+      family_ptr fam = suite->add_family("family");
+      task_ptr task = fam->add_task("t");
       task->addTime( ecf::TimeAttr( ecf::TimeSlot(time1.time_of_day()) )  );
       task->addTime( ecf::TimeAttr( ecf::TimeSlot(time2.time_of_day()) )  );
       task->addTime( ecf::TimeAttr( ecf::TimeSlot(time3.time_of_day()) )  );
       task->addVerify( VerifyAttr(NState::COMPLETE,3) );      // task should complete 3 times
-      fam->addTask( task );
-      suite->addFamily( fam );
-      theDefs.addSuite( suite );
    }
 
    // The test harness will create corresponding directory structure
@@ -181,13 +175,13 @@ BOOST_AUTO_TEST_CASE( test_time_relative_time_series )
    {
       // Initialise clock with todays date and time, then create a time attribute
       // with a time series, so that task runs 3 times relative to suite start
-      std::auto_ptr< Suite > suite( new Suite( "test_time_relative_time_series" ) );
+      suite_ptr suite = theDefs.add_suite("test_time_relative_time_series");
       ClockAttr clockAttr(Calendar::second_clock_time());
       suite->addClock( clockAttr );
       suite->add_variable("SLEEPTIME",boost::lexical_cast<std::string>(TestFixture::job_submission_interval()-1));
 
-      std::auto_ptr< Family > fam( new Family( "family" ) );
-      std::auto_ptr< Task > task( new Task( "t" ) );
+      family_ptr fam = suite->add_family("family");
+      task_ptr task = fam->add_task("t");
       task->addTime( ecf::TimeAttr(
                ecf::TimeSlot(0,1),
                ecf::TimeSlot(0,7),
@@ -196,9 +190,6 @@ BOOST_AUTO_TEST_CASE( test_time_relative_time_series )
       )
       );
       task->addVerify( VerifyAttr(NState::COMPLETE,3) );      // task should complete 3 times
-      fam->addTask( task );
-      suite->addFamily( fam );
-      theDefs.addSuite( suite );
    }
 
    // The test harness will create corresponding directory structure

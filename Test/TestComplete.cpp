@@ -80,29 +80,23 @@ BOOST_AUTO_TEST_CASE( test_complete )
  	std::string eventName = "nofiles";
   	Defs theDefs;
  	{
- 		std::auto_ptr< Suite > suite( new Suite( "test_complete" ) );
-
- 		std::auto_ptr< Family > fam( new Family( "family" ) );
+      suite_ptr suite = theDefs.add_suite("test_complete");
+      family_ptr fam = suite->add_family("family");
  		fam->addRepeat( RepeatInteger("VAR",0,1,1));  // repeat family 2 times
  		fam->add_complete( "/test_complete/family/check:nofiles" );
 		fam->addVerify( VerifyAttr(NState::COMPLETE,2) );       // family should complete 2 times
-		std::auto_ptr< Task > task_check( new Task("check" ));
+
+      task_ptr task_check = fam->add_task("check");
  		task_check->addEvent( Event(1,eventName) );
  		task_check->addVerify( VerifyAttr(NState::COMPLETE,4) );
 
-		std::auto_ptr< Task > task_t1( new Task("t1" ));
+      task_ptr task_t1 = fam->add_task("t1");
 		task_t1->add_trigger( "check == complete");
 		task_t1->addVerify( VerifyAttr(NState::COMPLETE,2) );
 
-		std::auto_ptr< Task > task_t2( new Task("t2" ));
+      task_ptr task_t2 = fam->add_task("t2");
 		task_t2->add_trigger( "t2 == complete" );
 		task_t2->addVerify( VerifyAttr(NState::COMPLETE,2) );
-
- 		fam->addTask( task_check );
- 		fam->addTask( task_t1 );
- 		fam->addTask( task_t2 );
- 		suite->addFamily( fam );
- 		theDefs.addSuite( suite );
  	}
 
 	// With repeat the task do not follow the normal life cycle changes

@@ -518,10 +518,6 @@ void NodeContainer::add_family_only( family_ptr f,size_t position)
     add_remove_state_change_no_ = Ecf::incr_state_change_no();
 }
 
-void NodeContainer::addTask(std::auto_ptr<Task> t)
-{
-	addTask( task_ptr(t) );
-}
 
 void NodeContainer::addFamily(family_ptr f,size_t position)
 {
@@ -533,14 +529,8 @@ void NodeContainer::addFamily(family_ptr f,size_t position)
 	add_family_only( f, position );
 }
 
-void NodeContainer::addFamily(std::auto_ptr<Family> f)
-{
-	addFamily( family_ptr(f) );
-}
-
 node_ptr NodeContainer::findImmediateChild(const std::string& theName, size_t& child_pos) const
 {
-   child_pos = std::numeric_limits<std::size_t>::max();
  	size_t node_vec_size = nodeVec_.size();
 	for(size_t t = 0; t < node_vec_size; t++) {
 		if (nodeVec_[t]->name() == theName) {
@@ -548,6 +538,7 @@ node_ptr NodeContainer::findImmediateChild(const std::string& theName, size_t& c
 	 		return nodeVec_[t];
  		}
  	}
+   child_pos = std::numeric_limits<std::size_t>::max();
 	return node_ptr();
 }
 

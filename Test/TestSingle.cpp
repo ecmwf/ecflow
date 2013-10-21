@@ -102,15 +102,12 @@ BOOST_AUTO_TEST_CASE( test_mega_def )
 //
 //   Defs theDefs;
 //   {
-//      std::auto_ptr< Suite > suite( new Suite( test_name) );
-//      std::auto_ptr< Family > fam( new Family( "fam" ) );
+//      suite_ptr suite = theDefs.add_suite( test_name );
+//      family_ptr fam = suite->add_family("fam" );
 //      for(int i = 0; i < tasks; i++) {
-//         task_ptr t = Task::create("t" + boost::lexical_cast<std::string>(i));
-//         fam->addTask(t);
+//         fam->add_task( "t" +   boost::lexical_cast<std::string>(i));
 //      }
 //      //      suite->addRepeat( RepeatDate("YMD",19000101,99991201,1) );
-//      suite->addFamily( fam );
-//      theDefs.addSuite( suite );
 //   }
 //
 //   ServerTestHarness serverTestHarness( false /*doVerification*/, false /* standardVerification*/);

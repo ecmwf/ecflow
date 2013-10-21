@@ -58,16 +58,13 @@ BOOST_AUTO_TEST_CASE( test_server_job_submission )
 	int taskSize = 3; // on linux 1024 tasks take ~4 seconds for job submission
   	Defs theDefs;
  	{
-		std::auto_ptr< Suite > suite( new Suite( "test_server_job_submission" ) );
- 		std::auto_ptr< Family > fam( new Family( "family" ) );
+      suite_ptr suite = theDefs.add_suite( "test_server_job_submission" );
+      family_ptr fam = suite->add_family("family" );
 	 	fam->addVerify( VerifyAttr(NState::COMPLETE,1) );
   		for(int i=0; i < taskSize; i++) {
-  			std::auto_ptr< Task > task( new Task( "t" + boost::lexical_cast<std::string>(i) ) );
+         task_ptr task = fam->add_task( "t" +   boost::lexical_cast<std::string>(i));
   	 		task->addVerify( VerifyAttr(NState::COMPLETE,1) );
-  			fam->addTask( task );
  		}
- 		suite->addFamily( fam );
-		theDefs.addSuite( suite );
  	}
 
 

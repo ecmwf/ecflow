@@ -16,6 +16,7 @@
 #include <iostream>
 #include <boost/foreach.hpp>
 #include <boost/algorithm/string/trim.hpp>
+#include <boost/make_shared.hpp>
 
 #include "ClientToServerCmd.hpp"
 #include "GroupSTCCmd.hpp"
@@ -206,7 +207,7 @@ STC_Cmd_ptr GroupCTSCmd::doHandleRequest(AbstractServer* as) const
 
 	as->update_stats().group_cmd_++;
 
-	std::auto_ptr<GroupSTCCmd> theReturnedGroupCmd( new GroupSTCCmd() );
+	boost::shared_ptr<GroupSTCCmd> theReturnedGroupCmd = boost::make_shared<GroupSTCCmd>();
 
 	// For the command to succeed all children MUST succeed
    size_t cmd_vec_size = cmdVec_.size();
@@ -254,7 +255,7 @@ STC_Cmd_ptr GroupCTSCmd::doHandleRequest(AbstractServer* as) const
 		return PreAllocatedReply::ok_cmd();
 	}
 
-	return STC_Cmd_ptr( theReturnedGroupCmd.release() ) ;
+	return theReturnedGroupCmd ;
 }
 
 const char* GroupCTSCmd::arg() { return CtsApi::groupArg() ;}

@@ -74,21 +74,17 @@ BOOST_AUTO_TEST_CASE( test_repeat_integer )
 	int taskSize = 2; // on linux 1024 tasks take ~4 seconds for job submission
   	Defs theDefs;
  	{
-		std::auto_ptr< Suite > suite( new Suite( "test_repeat_integer" ) );
- 		std::auto_ptr< Family > fam( new Family( "family" ) );
+      suite_ptr suite = theDefs.add_suite( "test_repeat_integer" );
+ 		suite->addVerify( VerifyAttr(NState::COMPLETE,1) ); // test will complete, when suite completes, hence only *one* complete not two
+ 		suite->addRepeat( RepeatInteger("VAR",0,1,1)); // repeat suite 2 times,
+      family_ptr fam = suite->add_family("family");
  		fam->addRepeat( RepeatInteger("VAR",0,1,1));    // repeat family 2 times
 		fam->addVerify( VerifyAttr(NState::COMPLETE,2) );
   		for(int i=0; i < taskSize; i++) {
-  			std::auto_ptr< Task > task( new Task( "t" + boost::lexical_cast<std::string>(i) ) );
+  		   task_ptr task = fam->add_task ( "t" + boost::lexical_cast<std::string>(i) );
   			task->addVerify( VerifyAttr(NState::COMPLETE,4) );      // task should complete 4 times
-  			fam->addTask( task );
  		}
- 		suite->addRepeat( RepeatInteger("VAR",0,1,1)); // repeat suite 2 times
- 		suite->addFamily( fam );
- 		suite->addVerify( VerifyAttr(NState::COMPLETE,1) );
-		theDefs.addSuite( suite );
  	}
-
 
  	// The test harness will create corresponding directory structure
  	// and populate with standard sms files.
@@ -184,6 +180,7 @@ BOOST_AUTO_TEST_CASE( test_repeat_defstatus )
 
 	// TEST SHOULD COMPLETE STRAIGHT AWAY SINCE WE HAVE A DEFSTATUS COMPLETE
 	// since the complete state is set on all children of suite.
+
 	// Create the defs file corresponding to the text below
  	//# Note: we have to use relative paths, since these tests are relocatable
 	//suite test_repeat_defstatus
@@ -200,21 +197,19 @@ BOOST_AUTO_TEST_CASE( test_repeat_defstatus )
 	int taskSize = 2; // on linux 1024 tasks take ~4 seconds for job submission
   	Defs theDefs;
  	{
-		std::auto_ptr< Suite > suite( new Suite( "test_repeat_defstatus" ) );
+      suite_ptr suite = theDefs.add_suite(  "test_repeat_defstatus" );
 		suite->addDefStatus(DState::COMPLETE);
+ 		suite->addRepeat( RepeatInteger("VAR",0,1,1));
+ 		suite->addVerify( VerifyAttr(NState::COMPLETE,1) );
 
- 		std::auto_ptr< Family > fam( new Family( "family" ) );
- 		fam->addRepeat( RepeatInteger("VAR",0,1,1));    // repeat family 2 times
+      family_ptr fam = suite->add_family("family" );
+ 		fam->addRepeat( RepeatInteger("VAR",0,1,1));
 		fam->addVerify( VerifyAttr(NState::COMPLETE,1) );
   		for(int i=0; i < taskSize; i++) {
-  			std::auto_ptr< Task > task( new Task( "t" + boost::lexical_cast<std::string>(i) ) );
-  			task->addVerify( VerifyAttr(NState::COMPLETE,1) );      // task should complete 4 times
-  			fam->addTask( task );
+
+         task_ptr task = fam->add_task( "t" + boost::lexical_cast<std::string>(i) );
+  			task->addVerify( VerifyAttr(NState::COMPLETE,1) );
  		}
- 		suite->addRepeat( RepeatInteger("VAR",0,1,1)); // repeat suite 2 times
- 		suite->addFamily( fam );
- 		suite->addVerify( VerifyAttr(NState::COMPLETE,1) );
-		theDefs.addSuite( suite );
  	}
 
    ServerTestHarness serverTestHarness(false/*do log file verification*/);
