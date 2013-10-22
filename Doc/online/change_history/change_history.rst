@@ -17,11 +17,12 @@
    - ecflow_client : Fix bug in the display of zombies. Action shown in log file did not match, command line display, when zombie attributes used.
    - ecflow_client : Updated zombie display, to prepend manual or automatic in front of action, i.e manual-fob.
                      This distinguishes between action taken by the user, from automatic action, especially when zombie attributes are used.
+   - ecflow_client : Fix bug in --server_load, where suite paths were not extracted correctly
    - ecflow.so     : Added new python function to Node(find_node_up_the_tree()), to make it easier to add triggers.
    - *             : Update ecflow_migrate to take into account label's that have new lines
    - *             : Migrated source control management from perforce to git, and updated build scripts
    - *             : Updated build scripts to allow compilation and regression tests on cray XC30
-   - *             : switch to boost 1.53
+   - *             : switch to boost 1.53, and removed use of std::auto_ptr and replaced with boost:;shared_ptr in the tests
    
 3.1.9: (production, September 2013)
    - ecflowview    : fix crash in the preference dialog
