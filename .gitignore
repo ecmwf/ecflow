@@ -1,4 +1,5 @@
 bin/
+ecbuild/
 swap
 
 *.job0
