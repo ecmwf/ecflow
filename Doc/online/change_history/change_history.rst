@@ -9,6 +9,7 @@
 ==================
 
 4.0.0 (production, October 2013)
+   - ecflowview    : logout-login fix
    - ecflowview    : Limited support to allow new clients to interact with old servers
    - ecflowview    : ECFLOW-71 error in ecflow on delete using GUID
    - ecflow_server : Pre-processor: %%%% should be replaced with %%, and not %
