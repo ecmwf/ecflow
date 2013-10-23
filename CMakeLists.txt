@@ -11,6 +11,26 @@
 #
 #       -DCMAKE_PREFIX_PATH=/path/to/jasper:/path/to/any/package/out/of/place
 #       -DBUILD_SHARED_LIBS=OFF
+# ========================================================
+# Usage instructions:
+#
+# cd $WK
+# mkdir ecbuild
+# cd ecbuild
+# Build debug and release in same tree
+# mkdir debug
+# mkdir release
+# cd debug
+#  
+#/usr/local/apps/cmake/current/bin/cmake ../../  \
+#         -DCMAKE_BUILD_TYPE=Debug \
+#         -DCMAKE_MODULE_PATH=/usr/local/apps/ecbuild/1.2.0/share/ecbuild/cmake \
+#         -DPYTHON_LIBRARY=/usr/local/apps/python/current/lib/libpython2.7.a \
+#         -DPYTHON_INCLUDE_DIR=/usr/local/apps/python/current/include/python2.7 \
+#         -DPYTHON_EXECUTABLE=/usr/local/apps/python/current/bin/python2.7 
+#
+#############################################################
+
 
 cmake_minimum_required( VERSION 2.6.4 FATAL_ERROR )
 
