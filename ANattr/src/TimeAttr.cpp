@@ -34,7 +34,7 @@ void TimeAttr::calendarChanged( const ecf::Calendar& c )
    }
 
    // For a time series, we rely on the re queue to reset makeFree
-   if (!timeSeries_.hasIncrement() && isFree(c)) {
+   if (isFree(c)) {
       setFree();
    }
 }

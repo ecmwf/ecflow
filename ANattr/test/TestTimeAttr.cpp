@@ -180,6 +180,96 @@ BOOST_AUTO_TEST_CASE( test_time_attr)
          BOOST_CHECK_MESSAGE(timeSeries4.isFree(calendar),timeSeries4.toString() << " day_changed(" << day_changed << ")  isFree should pass at time " << time );
       }
       BOOST_CHECK_MESSAGE(!timeSeries4.checkForRequeue(calendar,t4_min,t4_max),timeSeries4.toString() << " checkForRequeue should fail at " << time );
+
+
+       // Typically when a time is free, it stays free, until it is re-queued
+       // However in order to test isFree for time with time intervals, we need to re-queue
+       timeSeries.requeue( calendar );
+       timeSeries2.requeue( calendar );
+
+       // Do not requeue time 00, and time 15, so that we can check for free
+
+   }
+}
+
+BOOST_AUTO_TEST_CASE( test_time_once_free_stays_free)
+{
+   cout << "ANattr:: ...test_time_once_free_stays_free\n";
+
+   Calendar calendar;
+   calendar.init(ptime(date(2010,2,10), minutes(0)), Calendar::REAL);
+
+   TimeSeries timeSeriesX(TimeSlot(10,0), TimeSlot(20,0), TimeSlot(1,0), false/* relative */);
+   TimeSeries timeSeries2X(TimeSlot(11,0), TimeSlot(15,0), TimeSlot(1,0), false/* relative */);
+   TimeSeries timeSeries3X(TimeSlot(15,0),  false/* relative */);
+   TimeSeries timeSeries4X(TimeSlot(0,0),  false/* relative */);
+
+   TimeAttr timeSeries(timeSeriesX );
+   TimeAttr timeSeries2(timeSeries2X );
+   TimeAttr timeSeries3(timeSeries3X );
+   TimeAttr timeSeries4(timeSeries4X );
+
+   bool day_changed = false; // after midnight make sure we keep day_changed
+   for(int m=1; m < 96; m++) {
+      calendar.update( time_duration( minutes(30) ) );
+      if (!day_changed) {
+         day_changed = calendar.dayChanged();
+      }
+      boost::posix_time::time_duration time = calendar.suiteTime().time_of_day();
+      // cout << time << " day_changed(" << day_changed << ")\n";
+
+      timeSeries.calendarChanged( calendar );
+      timeSeries2.calendarChanged( calendar );
+      timeSeries3.calendarChanged( calendar );
+      timeSeries4.calendarChanged( calendar );
+
+      // **********************************************************************************
+      // When a time (regardless of whether its single slot or time series) is free, it stays free,
+      // until explicitly re-queued,
+      // ***********************************************************************************
+
+      if (time < timeSeries.time_series().start().duration()) {
+         if (!day_changed) BOOST_CHECK_MESSAGE(!timeSeries.isFree(calendar),timeSeries.toString() << " should NOT be free at time " << time );
+         else BOOST_CHECK_MESSAGE(timeSeries.isFree(calendar),timeSeries.toString() << " should be free at time " << time );
+      }
+      else if (time >= timeSeries.time_series().start().duration()) {
+         BOOST_CHECK_MESSAGE(timeSeries.isFree(calendar),timeSeries.toString() << " should be free at time " << time );
+      }
+
+
+      if (time < timeSeries2.time_series().start().duration()) {
+         if (!day_changed) BOOST_CHECK_MESSAGE(!timeSeries2.isFree(calendar),timeSeries2.toString() << " should NOT be free at time " << time );
+         else BOOST_CHECK_MESSAGE(timeSeries.isFree(calendar),timeSeries.toString() << " should be free at time " << time );
+      }
+      else if (time >= timeSeries2.time_series().start().duration()) {
+         BOOST_CHECK_MESSAGE(timeSeries2.isFree(calendar),timeSeries2.toString() << " should be free at time " << time );
+      }
+
+      if (!day_changed) {
+         if (time == timeSeries3.time_series().start().duration()  ) {
+            BOOST_CHECK_MESSAGE(timeSeries3.isFree(calendar),timeSeries3.toString() << " should be free at time " << time );
+         }
+         else if (time > timeSeries3.time_series().start().duration()) {
+            BOOST_CHECK_MESSAGE(timeSeries3.isFree(calendar),timeSeries3.toString() << " isFree, once free should stay free at time " << time );
+         }
+      }
+      else {
+         BOOST_CHECK_MESSAGE(timeSeries3.isFree(calendar),timeSeries3.toString() << " should be free at time after day change " << time );
+      }
+
+
+      // single slot at midnight, Once a single slot if Free it *stays* free until explicitly requeued, (i.e by parent repeat/cron)
+      if (!day_changed) {
+         if (time == timeSeries4.time_series().start().duration()  ) {
+            BOOST_CHECK_MESSAGE(timeSeries4.isFree(calendar),timeSeries4.toString() << " should be free at time " << time );
+         }
+         else {
+            BOOST_CHECK_MESSAGE(!timeSeries4.isFree(calendar),timeSeries4.toString() << " day_changed(" << day_changed << ")  isFree should fail at time " << time );
+         }
+      }
+      else {
+         BOOST_CHECK_MESSAGE(timeSeries4.isFree(calendar),timeSeries4.toString() << " day_changed(" << day_changed << ")  isFree should pass at time " << time );
+      }
    }
 }
 

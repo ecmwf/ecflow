@@ -362,8 +362,7 @@ bool TimeSeries::checkForRequeue( const ecf::Calendar& calendar, const TimeSlot&
 
       // If the current value is greater that finish, then returning true would increment
       // value past the end, and force node state to be stuck in state queue.
-      // To counter this when value == finish we return false;
-      if ( nextTimeSlot_.duration() >= finish_.duration() ) {
+      if ( nextTimeSlot_.duration() > finish_.duration() ) {
          return false;
       }
 
