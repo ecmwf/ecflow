@@ -308,6 +308,38 @@ BOOST_AUTO_TEST_CASE( test_str_to_int )
 	BOOST_CHECK_MESSAGE(Str::to_int("99 99",0) == 0,"Expected 0 for failure");
 }
 
+BOOST_AUTO_TEST_CASE( test_extract_data_member_value )
+{
+   cout << "ACore:: ...test_extract_data_member_value\n";
+   std::string expected = "value";
+   std::string actual;
+   std::string str = "aa bb c fred:value";
+   BOOST_CHECK_MESSAGE(Str::extract_data_member_value(str,"fred:",actual)," failed");
+   BOOST_CHECK_MESSAGE(expected == actual,"expected '" << expected << "' but found '" << actual << "'");
+
+
+   str = "fred:x  bill:zzz jake:12345 1234:99  6677";
+   expected = "x";
+   BOOST_CHECK_MESSAGE(Str::extract_data_member_value(str,"fred:",actual)," failed");
+   BOOST_CHECK_MESSAGE(expected == actual,"expected '" << expected << "' but found '" << actual << "'");
+
+   expected = "zzz";
+   BOOST_CHECK_MESSAGE(Str::extract_data_member_value(str,"bill:",actual)," failed");
+   BOOST_CHECK_MESSAGE(expected == actual,"expected '" << expected << "' but found '" << actual << "'");
+
+   expected = "12345";
+   BOOST_CHECK_MESSAGE(Str::extract_data_member_value(str,"jake:",actual)," failed");
+   BOOST_CHECK_MESSAGE(expected == actual,"expected '" << expected << "' but found '" << actual << "'");
+
+   expected = "99";
+   BOOST_CHECK_MESSAGE(Str::extract_data_member_value(str,"1234:",actual)," failed");
+   BOOST_CHECK_MESSAGE(expected == actual,"expected '" << expected << "' but found '" << actual << "'");
+
+   expected = "77";
+   BOOST_CHECK_MESSAGE(Str::extract_data_member_value(str,"66",actual)," failed");
+   BOOST_CHECK_MESSAGE(expected == actual,"expected '" << expected << "' but found '" << actual << "'");
+}
+
 //// ==============================================================
 //// Timing to find the fastest looping
 //// ==============================================================
