@@ -154,7 +154,7 @@ def add_remote_cray_variables( cray ):
     cray.add_variable("ECF_INCLUDE", "/home/ma/emos/def/cray/include")
     
     # for cray we need to use logsrvr in order to see the job output
-    cray.add_variable("ECF_LOGHOST","cctdtn1")
+    cray.add_variable("ECF_LOGHOST","cct")
     cray.add_variable("ECF_LOGPORT","9316")   
     
     # Set the remote location for output, LOGDIR needed by queing system
@@ -169,13 +169,13 @@ def add_remote_cray_variables( cray ):
     cray.add_variable("QUEUE","ns")
     cray.add_variable("ACCOUNT","ecodmdma")
     #cray.add_variable("STHOST","/s2o1")  # Needed by qsub.h
-    cray.add_variable("SCHOST","cctdtn1")    # Super Computer HOST
+    cray.add_variable("SCHOST","cct")    # Super Computer HOST
     cray.add_variable("WSHOST",os.uname()[1])  # Work Space HOST
 
 def add_cray_variables( cray ):
     # Look for includes in ECF_INCLUDES, and the ECF_HOME
     cray.add_variable("ECF_HOME", os.getenv("SCRATCH") + "/nightly/suite/cray")
-    cray.add_variable("REMOTE_HOST","cctdtn1")
+    cray.add_variable("REMOTE_HOST","cct")
     cray.add_variable("BOOST_DIR","/perm/ma/ma0/boost")
     cray.add_variable("ARCH","cray")
     cray.add_variable("MODULE_LOAD_GCC","module load gcc/4.6.3")

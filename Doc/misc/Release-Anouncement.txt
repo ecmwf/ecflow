@@ -17,7 +17,7 @@ on the following platforms:
    o HPUX            (itanium)
    o AIX/ibm_power7  (c2a/c2b)
    o AIX/rs6000      (ecgate)
-   o cct/cctdtn1     (cray XC30) 
+   o cct             (cray XC30) 
  
 The release includes the following changes:
 
