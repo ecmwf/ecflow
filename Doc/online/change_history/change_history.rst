@@ -20,7 +20,9 @@
                      This distinguishes between action taken by the user, from automatic action, especially when zombie attributes are used.
    - ecflow_client : Fix bug in --server_load, where suite paths were not extracted correctly
    - ecflow.so     : Added new python function to Node(find_node_up_the_tree()), to make it easier to add triggers.
-   - *             : Update ecflow_migrate to take into account label's that have new lines
+   - *             : Fix --migrate bugs: to take into account label's that have new lines
+   - *             : Fix --migrate bugs: (reading history with group commands, group separater ';' treated as newline 
+                     in error during parse. DefsStructureParser.cpp)
    - *             : Migrated source control management from perforce to git, and updated build scripts
    - *             : Updated build scripts to allow compilation and regression tests on cray XC30
    - *             : switch to boost 1.53, and removed use of std::auto_ptr and replaced with boost:;shared_ptr in the tests
@@ -32,7 +34,7 @@
    - ecflow_server : Changed Pre-process to ignore generated variables SUITE,FAMILY,TASK in %comment %end(user variables)
  
 3.1.8: (production, September 2013)
-   - ecflow_server : Fix --migrate bugs(reading cron state, and reading message history)
+   - ecflow_server : Fix --migrate bugs: (reading cron state, and reading message history)
    - ecflow_server : Fix --migrate bugs: task, aborted reason, should not have \n. Need to use migrate.py, as fix.
    - ecflow_server : Changed --version to print date and time of compilation
    - ecflow_client : Update Repeat attribute to be able to return index_or_value(), Needed by ecflowview

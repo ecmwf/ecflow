@@ -130,6 +130,11 @@ void DefsStructureParser::getNextLine(std::string& line)
 	if (multi_statements_per_line_vec_.empty()) {
 		infile_.getline(line);
 		lineNumber_++;
+	   if (file_type_ == PrintStyle::MIGRATE) {
+	      // ignore multiline for migrate, *BECAUSE* *history* for group command uses ';'
+	      return;
+	   }
+
 
 		if (!line.empty()) {
 
