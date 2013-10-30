@@ -37,6 +37,33 @@ namespace fs = boost::filesystem;
 
 BOOST_AUTO_TEST_SUITE( NodeTestSuite )
 
+BOOST_AUTO_TEST_CASE( test_ecf_file_with_bad_ECF_MICRO )
+{
+   cout << "ANode:: ...test_ecf_file_with_bad_ECF_MICRO\n";
+
+   // Create the defs file corresponding to the text below
+   //suite suite
+   //  task t1
+   //     ECF_MICRO ""   # can not be empty if overridden
+   //  task t2
+   //     ECF_MICRO "ss" # must be a single char
+   //endsuite
+
+   task_ptr task_t1;
+   task_ptr task_t2;
+   std::pair<std::string,std::string> p;
+   Defs theDefs; {
+      suite_ptr suite = theDefs.add_suite("suite");
+      task_t1 = suite->add_task( "t1" );  task_t1->add_variable("ECF_MICRO","");
+      task_t2 = suite->add_task( "t2" );  task_t2->add_variable("ECF_MICRO","ss");
+   }
+
+   // Check we throw for bad ECF_MICRO chars
+   std::string ecf_file_location;
+   BOOST_REQUIRE_THROW(EcfFile ecfFile(task_t1.get(),ecf_file_location),std::runtime_error);
+   BOOST_REQUIRE_THROW(EcfFile ecfFile(task_t2.get(),ecf_file_location),std::runtime_error);
+}
+
 BOOST_AUTO_TEST_CASE( test_ecf_simple_include_file )
 {
    // The specific files are specified in ECF_INCLUDE and common files

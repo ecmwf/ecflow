@@ -83,8 +83,11 @@ EcfFile::EcfFile( Node* t,
   /*,fetchCommand_( fetchCommand ) */
 {
    node_->findParentUserVariableValue(Str::ECF_MICRO(),ecfMicroCache_);
-   LOG_ASSERT(!ecfMicroCache_.empty(),"");
-   LOG_ASSERT(ecfMicroCache_.size() == 1,""); // should be a single char, like like %
+   if ( ecfMicroCache_.empty() || ecfMicroCache_.size() != 1) {
+      std::stringstream ss;
+      ss << "EcfFile::EcfFile: Node " << t->absNodePath() << " is referencing a invalid ECF_MICRO variable(' " << ecfMicroCache_ << "). ECF_MICRO when overridden, must be a single character.";
+      throw std::runtime_error(ss.str());
+   }
 
 #ifdef DEBUG_ECF_
    cout << "   EcfFile::EcfFile pathToEcfFileOrCommand = " << script_path_or_cmd_ << " fetchCommand = " << fetchCommand << "\n";
@@ -1273,12 +1276,13 @@ int EcfFile::countEcfMicro(const std::string& line, const std::string& ecfMicro)
 
    /// Pound char could be more than one char ?
    int count = 0;
-   LOG_ASSERT(!ecfMicro.empty(),"ecfmicro empty");
-   const char theChar = ecfMicro[0];
-   size_t end = line.size();
-   for(size_t i = 0; i < end; ++i) {
-      if (line[i] == theChar) {
-         count++;
+   if ( !ecfMicro.empty()) {
+      const char theChar = ecfMicro[0];
+      size_t end = line.size();
+      for(size_t i = 0; i < end; ++i) {
+         if (line[i] == theChar) {
+            count++;
+         }
       }
    }
    //	cerr << "line " << line << " count = " << count << "\n";
