@@ -562,7 +562,7 @@ void Submittable::kill(const std::string& zombie_pid)
 
    if (!variableSubsitution(ecf_kill_cmd)) {
       std::stringstream ss;
-      ss << "Submittable::kill: Variable substitution failed for ECF_KILL_CMD, on task " << absNodePath() << "\n";
+      ss << "Submittable::kill: Variable substitution failed for ECF_KILL_CMD(" << ecf_kill_cmd << ") on task " << absNodePath() << "\n";
       throw std::runtime_error( ss.str() );
    }
 
@@ -599,7 +599,7 @@ void Submittable::status()
 
    if (!variableSubsitution(ecf_status_cmd)) {
       std::stringstream ss;
-      ss << "Submittable::status: Variable substitution failed for ECF_STATUS_CMD, on task " << absNodePath() << "\n";
+      ss << "Submittable::status: Variable substitution failed for ECF_STATUS_CMD(" << ecf_status_cmd << ") on task " << absNodePath() << "\n";
       throw std::runtime_error( ss.str() );
    }
 

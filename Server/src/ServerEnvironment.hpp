@@ -45,7 +45,8 @@ public:
 
 class ServerEnvironment : private boost::noncopyable {
 public:
-	ServerEnvironment(int argc, char* argv[]);
+   ServerEnvironment(int argc, char* argv[]);
+   ServerEnvironment(int argc, char* argv[], const std::string& path_to_config_file); // *only used in test*
 	~ServerEnvironment();
 
 	/// return true if option are valid false and error message otherwise
@@ -170,8 +171,10 @@ public:
 	std::string dump() const;
 
 private:
+   void init(int argc, char* argv[], const std::string& path_to_config_file);
+
 	///  defaults are read from a config file
-	void read_config_file(std::string& log_file_name);
+	void read_config_file(std::string& log_file_name,const std::string& path_to_config_file);
 
 	/// Get the standard environment variables, overwrite any settings from config file
 	void read_environment_variables(std::string& log_file_name);

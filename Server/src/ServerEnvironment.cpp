@@ -67,6 +67,7 @@ const int defaultSubmitJobsInterval =  60;
 ////////////////////////////////////////////////////////////////////////////////////////////
 // class ServerEnvironment:
 ///////////////////////////////////////////////////////////////////////////////////////////
+
 ServerEnvironment::ServerEnvironment( int argc, char* argv[])
 : serverHost_(host_name_.name()),
   serverPort_(0),
@@ -85,9 +86,36 @@ ServerEnvironment::ServerEnvironment( int argc, char* argv[])
   checkMode_(ecf::CheckPt::ON_TIME),
   tcp_protocol_(boost::asio::ip::tcp::v4())
 {
+   init(argc,argv,"server_environment.cfg");
+}
+
+// This is ONLY used in test
+ServerEnvironment::ServerEnvironment(int argc, char* argv[], const std::string& path_to_config_file)
+: serverHost_(host_name_.name()),
+  serverPort_(0),
+  checkPtInterval_(0),
+  checkpt_save_time_alarm_(CheckPt::default_save_time_alarm()),
+  submitJobsInterval_(defaultSubmitJobsInterval),
+#ifdef ECFLOW_MT
+  threads_(boost::thread::hardware_concurrency()),
+#endif
+  jobGeneration_(true),
+  debug_(false),
+  help_option_(false),
+  version_option_(false),
+  reply_back_if_ok_(false),
+  allow_old_client_new_server_(0),
+  checkMode_(ecf::CheckPt::ON_TIME),
+  tcp_protocol_(boost::asio::ip::tcp::v4())
+{
+   init(argc,argv,path_to_config_file);
+}
+
+void ServerEnvironment::init(int argc, char* argv[], const std::string& path_to_config_file)
+{
    std::string log_file_name;
    try {
-      read_config_file(log_file_name);
+      read_config_file(log_file_name,path_to_config_file);
       read_environment_variables(log_file_name); // overrides any settings in the config file
    }
    catch ( std::exception& e) {
@@ -99,33 +127,33 @@ ServerEnvironment::ServerEnvironment( int argc, char* argv[])
       throw ServerEnvironmentException(msg);
    }
 
- 	// get server process id. This may be visualised in xecf. makes it easier to kill server
- 	try { ecf_pid_ = boost::lexical_cast<std::string>(getpid());  }
- 	catch (boost::bad_lexical_cast& e) {
- 	   throw ServerEnvironmentException("ServerEnvironment::ServerEnvironment:: Could not convert PID to a string\n");
- 	}
+   // get server process id. This may be visualised in xecf. makes it easier to kill server
+   try { ecf_pid_ = boost::lexical_cast<std::string>(getpid());  }
+   catch (boost::bad_lexical_cast& e) {
+      throw ServerEnvironmentException("ServerEnvironment::ServerEnvironment:: Could not convert PID to a string\n");
+   }
    // std::cout << "PID = " << ecf_pid_ << "\n";
 
 
-	// The options(argc/argv) must be read after the environment, since they override everything else
- 	ServerOptions options(argc,argv,this);
- 	help_option_ = options.help_option();
- 	if (help_option_) return;    // User is printing the help
+   // The options(argc/argv) must be read after the environment, since they override everything else
+   ServerOptions options(argc,argv,this);
+   help_option_ = options.help_option();
+   if (help_option_) return;    // User is printing the help
    version_option_ = options.version_option();
    if (version_option_) return; // User is printing the version
 
 
- 	/// Config, Environment, or Options may have updated port, update port dependent file names
- 	/// If we have default names make unique, by prefixing host and port
+   /// Config, Environment, or Options may have updated port, update port dependent file names
+   /// If we have default names make unique, by prefixing host and port
    assert(!ecf_checkpt_file_.empty());          // expect name of form "ecf.check"
    assert(!ecf_backup_checkpt_file_.empty());   // expect name of form "ecf.check.b"
    assert(!log_file_name.empty());              // expect name of form "ecf.log"
    assert(!ecf_white_list_file_.empty());       // expect name of form "ecf.lists"
- 	std::string port = boost::lexical_cast<std::string>(serverPort_);
+   std::string port = boost::lexical_cast<std::string>(serverPort_);
 
    // If path is absolute leave as is
- 	if (ecf_checkpt_file_ == Ecf::CHECKPT())
- 	   ecf_checkpt_file_ = host_name_.prefix_host_and_port(port,ecf_checkpt_file_);
+   if (ecf_checkpt_file_ == Ecf::CHECKPT())
+      ecf_checkpt_file_ = host_name_.prefix_host_and_port(port,ecf_checkpt_file_);
    if (ecf_checkpt_file_[0] != '/') {
       // Prepend with ECF_HOME
       std::string check_pt = ecf_home();
@@ -135,8 +163,8 @@ ServerEnvironment::ServerEnvironment( int argc, char* argv[])
    }
 
    // If path is absolute leave as is
- 	if (ecf_backup_checkpt_file_ == Ecf::BACKUP_CHECKPT())
- 	   ecf_backup_checkpt_file_ = host_name_.prefix_host_and_port(port,ecf_backup_checkpt_file_);
+   if (ecf_backup_checkpt_file_ == Ecf::BACKUP_CHECKPT())
+      ecf_backup_checkpt_file_ = host_name_.prefix_host_and_port(port,ecf_backup_checkpt_file_);
    if (ecf_backup_checkpt_file_[0] != '/') {
       std::string check_pt = ecf_home();
       check_pt += Str::PATH_SEPERATOR();
@@ -144,24 +172,24 @@ ServerEnvironment::ServerEnvironment( int argc, char* argv[])
       ecf_backup_checkpt_file_ = check_pt;
    }
 
-	if (ecf_white_list_file_ == Str::WHITE_LIST_FILE())
-	   ecf_white_list_file_ = host_name_.prefix_host_and_port(port,ecf_white_list_file_);
+   if (ecf_white_list_file_ == Str::WHITE_LIST_FILE())
+      ecf_white_list_file_ = host_name_.prefix_host_and_port(port,ecf_white_list_file_);
 
-	// Change directory to ECF_HOME and check thats its accessible
-	change_dir_to_ecf_home_and_check_accesibility();
-
-
-	// LOG FILE ================================================================================
-	if (log_file_name == Ecf::LOG_FILE())
-	   log_file_name =  host_name_.prefix_host_and_port(port,log_file_name);
-
-	// Create the Log file. The log file is obtained from the environment. Hence **must** be done last.
-	Log::create(log_file_name);
+   // Change directory to ECF_HOME and check thats its accessible
+   change_dir_to_ecf_home_and_check_accesibility();
 
 
-	// Init log file:
-	LOG(Log::MSG, Version::description() );
-	LOG(Log::MSG, "Started at " << to_simple_string(Calendar::second_clock_time()) << " universal time");
+   // LOG FILE ================================================================================
+   if (log_file_name == Ecf::LOG_FILE())
+      log_file_name =  host_name_.prefix_host_and_port(port,log_file_name);
+
+   // Create the Log file. The log file is obtained from the environment. Hence **must** be done last.
+   Log::create(log_file_name);
+
+
+   // Init log file:
+   LOG(Log::MSG, Version::description() );
+   LOG(Log::MSG, "Started at " << to_simple_string(Calendar::second_clock_time()) << " universal time");
    if ( tcp_protocol_.family() ==  2 /*PF_INET*/)
       LOG(Log::MSG, "Host(" <<  hostPort().first << ")  Port(" << hostPort().second << ") using TCP/IP v4");
    else
@@ -407,7 +435,7 @@ bool ServerEnvironment::authenticateWriteAccess(const std::string& user, bool cl
 // Privates:
 // ============================================================================================
 
-void ServerEnvironment::read_config_file(std::string& log_file_name)
+void ServerEnvironment::read_config_file(std::string& log_file_name,const std::string& path_to_config_file)
 {
    if (debug())  cout << "ServerEnvironment::read_config_file() current_path = " << fs::current_path() << "\n";
 
@@ -436,9 +464,9 @@ void ServerEnvironment::read_config_file(std::string& log_file_name)
          ("ECF_LISTS",     po::value<std::string>(&ecf_white_list_file_)->default_value(Str::WHITE_LIST_FILE()), "Path name to file the list valid users and thier access rights")
          ;
 
-      ifstream ifs("server_environment.cfg");
+      ifstream ifs(path_to_config_file.c_str());
       if (!ifs) {
-         if (debug()) cout << "Could not load server_environment.cfg\n";
+         if (debug()) cout << "Could not load server_environment.cfg " << path_to_config_file << "\n";
       }
 
       /// This is *NOT* redundant, when the file is empty/not present, then the default value
