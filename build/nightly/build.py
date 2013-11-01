@@ -469,7 +469,7 @@ def build_cray_cray( parent ) :
     
 def build_cray( parent ) :
     cray = parent.add_family("cray")
-    cray.add_variable("NO_OF_CORES","8")
+    cray.add_variable("NO_OF_CORES","2") # temp until stings get sorted on cray
     build_cray_gnu( cray)
     build_cray_intel( cray)
     build_cray_cray( cray)
