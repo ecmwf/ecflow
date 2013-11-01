@@ -105,7 +105,8 @@ BOOST_AUTO_TEST_CASE( test_time_multiple_single_slot )
    // for each time attribute leave GAP of 3 * job submission interval
    // on slow systems submitted->active->complete > TestFixture::job_submission_interval()
    // Also the task duration must be greater than job_submission_interval,  otherwise
-   // we will get multiple invocation for the same time step
+   // we will get multiple invocation for the same time step.
+   // *sometimes* just submitted->active can take many times job submission interval.
 
    //# Note: we have to use relative paths, since these tests are relocatable
    //suite test_time_multiple_single_slot
@@ -114,8 +115,8 @@ BOOST_AUTO_TEST_CASE( test_time_multiple_single_slot )
    //	family family
    //   	task t1
    //         time 10:01
-   //         time 10:04
    //         time 10:07
+   //         time 10:13
    //  	endfamily
    //endsuite
    Defs theDefs;
@@ -124,13 +125,15 @@ BOOST_AUTO_TEST_CASE( test_time_multiple_single_slot )
       // with todays time + minute.
       boost::posix_time::ptime theLocalTime = boost::posix_time::ptime(date(2010,6,21),time_duration(10,0,0));
       boost::posix_time::ptime time1 = theLocalTime + minutes(1);
-      boost::posix_time::ptime time2 = theLocalTime + minutes(4);
-      boost::posix_time::ptime time3 = theLocalTime + minutes(7);
+      boost::posix_time::ptime time2 = time1 + minutes(TestFixture::job_submission_interval()*2);
+      boost::posix_time::ptime time3 = time2 + minutes(TestFixture::job_submission_interval()*2);
 
       suite_ptr suite = theDefs.add_suite("test_time_multiple_single_slot");
       ClockAttr clockAttr(theLocalTime);
       suite->addClock( clockAttr );
-      suite->add_variable("SLEEPTIME",boost::lexical_cast<std::string>(TestFixture::job_submission_interval()-1));
+      int sleep_time = TestFixture::job_submission_interval()-2;
+      if (sleep_time <=0 ) sleep_time = 1;
+      suite->add_variable("SLEEPTIME",boost::lexical_cast<std::string>(sleep_time));
 
       family_ptr fam = suite->add_family("family");
       task_ptr task = fam->add_task("t");
@@ -228,10 +231,12 @@ BOOST_AUTO_TEST_CASE( test_time_real_series )
       // with a time series, so that task runs 3 times
       boost::posix_time::ptime theLocalTime = boost::posix_time::ptime(date(2010,6,21),time_duration(10,0,0));
       boost::posix_time::ptime time1 = theLocalTime + minutes(1);
-      boost::posix_time::ptime time2 = theLocalTime + minutes(7);
+      boost::posix_time::ptime time2 = time1 + minutes(TestFixture::job_submission_interval()*4);
 
       suite_ptr suite = theDefs.add_suite("test_time_real_series");
-      suite->add_variable("SLEEPTIME",boost::lexical_cast<std::string>(TestFixture::job_submission_interval()-1));
+      int sleep_time = TestFixture::job_submission_interval()-2;
+      if (sleep_time <=0 ) sleep_time = 1;
+      suite->add_variable("SLEEPTIME",boost::lexical_cast<std::string>(sleep_time));
 
       ClockAttr clockAttr(theLocalTime,false);
       suite->addClock( clockAttr );
@@ -241,9 +246,13 @@ BOOST_AUTO_TEST_CASE( test_time_real_series )
       task->addTime( ecf::TimeAttr(
                ecf::TimeSlot(time1.time_of_day()),
                ecf::TimeSlot(time2.time_of_day()),
-               ecf::TimeSlot(0,3)
+               ecf::TimeSlot(0,TestFixture::job_submission_interval()*2)
       ));
       task->addVerify( VerifyAttr(NState::COMPLETE,3) );      // task should complete 3 times
+      // 1 +    7  + 13
+      // 1 + (2*n) + (2*n) = 1 + 4n
+      // start = 1, finish = 13, when n=3, when n = job submission interval
+      // to complete 3 times, we must use interval of n*2
    }
 
    // The test harness will create corresponding directory structure
