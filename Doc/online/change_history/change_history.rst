@@ -14,7 +14,7 @@
    - ecflowview    : ECFLOW-71 error in ecflow on delete using GUID
    - ecflow_server : Pre-processor: %%%% should be replaced with %%, and not %
    - ecflow_server : Fixed cron/time(with time series) on a family, once free should stay free, until re-queued
-   = ecflow_server : SUP-681 ecflow_server crash. server_enviroment.cfg, should not have quotes for the value parts
+   - ecflow_server : SUP-681 ecflow_server crash. server_enviroment.cfg, should not have quotes for the value parts
    - ecflow_client : Updated suite definition parser, to allow suites to have labels
    - ecflow_client : Fix bug in the display of zombies. Action shown in log file did not match, command line display, when zombie attributes used.
    - ecflow_client : Updated zombie display, to prepend manual or automatic in front of action, i.e manual-fob.
@@ -27,7 +27,7 @@
    - *             : Migrated source control management from perforce to git, and updated build scripts
    - *             : Updated build scripts to allow compilation and regression tests on cray XC30
    - *             : switch to boost 1.53, and removed use of std::auto_ptr and replaced with boost:;shared_ptr in the tests
-   
+
 3.1.9: (production, September 2013)
    - ecflowview    : fix crash in the preference dialog
    - ecflow_client : Change parsing for aliases variables. No longer check variable names.
