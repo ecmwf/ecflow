@@ -55,6 +55,9 @@ which ecflow_client
 which python
 ulimit
 
+# Export Python to pick up python 2.7
+export PATH=/usr/local/apps/python/current/bin:$PATH
+
 # ===================================================================================
 # Load the right environment, first unload all
 module unload PrgEnv-cray
