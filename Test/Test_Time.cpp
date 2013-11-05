@@ -115,8 +115,8 @@ BOOST_AUTO_TEST_CASE( test_time_multiple_single_slot )
    //	family family
    //   	task t1
    //         time 10:01
+   //         time 10:04
    //         time 10:07
-   //         time 10:13
    //  	endfamily
    //endsuite
    Defs theDefs;
@@ -125,15 +125,13 @@ BOOST_AUTO_TEST_CASE( test_time_multiple_single_slot )
       // with todays time + minute.
       boost::posix_time::ptime theLocalTime = boost::posix_time::ptime(date(2010,6,21),time_duration(10,0,0));
       boost::posix_time::ptime time1 = theLocalTime + minutes(1);
-      boost::posix_time::ptime time2 = time1 + minutes(TestFixture::job_submission_interval()*2);
-      boost::posix_time::ptime time3 = time2 + minutes(TestFixture::job_submission_interval()*2);
+      boost::posix_time::ptime time2 = time1 + minutes(TestFixture::job_submission_interval());
+      boost::posix_time::ptime time3 = time2 + minutes(TestFixture::job_submission_interval());
 
       suite_ptr suite = theDefs.add_suite("test_time_multiple_single_slot");
       ClockAttr clockAttr(theLocalTime);
       suite->addClock( clockAttr );
-      int sleep_time = TestFixture::job_submission_interval()-2;
-      if (sleep_time <=0 ) sleep_time = 1;
-      suite->add_variable("SLEEPTIME",boost::lexical_cast<std::string>(sleep_time));
+      suite->add_variable("SLEEPTIME","1");
 
       family_ptr fam = suite->add_family("family");
       task_ptr task = fam->add_task("t");
@@ -231,12 +229,10 @@ BOOST_AUTO_TEST_CASE( test_time_real_series )
       // with a time series, so that task runs 3 times
       boost::posix_time::ptime theLocalTime = boost::posix_time::ptime(date(2010,6,21),time_duration(10,0,0));
       boost::posix_time::ptime time1 = theLocalTime + minutes(1);
-      boost::posix_time::ptime time2 = time1 + minutes(TestFixture::job_submission_interval()*4);
+      boost::posix_time::ptime time2 = time1 + minutes(TestFixture::job_submission_interval()*2);
 
       suite_ptr suite = theDefs.add_suite("test_time_real_series");
-      int sleep_time = TestFixture::job_submission_interval()-2;
-      if (sleep_time <=0 ) sleep_time = 1;
-      suite->add_variable("SLEEPTIME",boost::lexical_cast<std::string>(sleep_time));
+      suite->add_variable("SLEEPTIME","1");
 
       ClockAttr clockAttr(theLocalTime,false);
       suite->addClock( clockAttr );
@@ -246,7 +242,7 @@ BOOST_AUTO_TEST_CASE( test_time_real_series )
       task->addTime( ecf::TimeAttr(
                ecf::TimeSlot(time1.time_of_day()),
                ecf::TimeSlot(time2.time_of_day()),
-               ecf::TimeSlot(0,TestFixture::job_submission_interval()*2)
+               ecf::TimeSlot(0,TestFixture::job_submission_interval())
       ));
       task->addVerify( VerifyAttr(NState::COMPLETE,3) );      // task should complete 3 times
       // 1 +    7  + 13

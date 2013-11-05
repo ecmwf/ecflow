@@ -409,13 +409,15 @@ ServerTestHarness::testWaiter(const ClientInvoker& theClient,
       if ( assertTimer.duration() >=  assertTimer.timeConstraint() ) {
          // Give clues why we are not finishing on time, by using Why and by dumping out node tree
          cout << "Test time " << assertTimer.duration() << " taking longer than time constraint of " << assertTimer.timeConstraint() << " aborting\n";
-         cout << "completeSuiteCnt = " << completeSuiteCnt << " full_defs->suiteVec().size() = " <<  full_defs->suiteVec().size() << " hasAutoCancel = " << hasAutoCancel << "\n";
+         cout << "   completeSuiteCnt = " << completeSuiteCnt << "\n";
+         cout << "   full_defs->suiteVec().size() = " <<  full_defs->suiteVec().size() << "\n";
+         cout << "   hasAutoCancel = " << hasAutoCancel << "\n";
          std::cout << "update-calendar-count(" << serverUpdateCalendarCount_ << ")\n";
          std::cout << "WHY:\n";
          WhyCmd reason(full_defs, "" /* do a top down why */ );
          std::cout << reason.why() << "\n";
       }
-      BOOST_REQUIRE_MESSAGE(assertTimer.duration() <  assertTimer.timeConstraint(),*full_defs);
+      BOOST_REQUIRE_MESSAGE(assertTimer.duration() <  assertTimer.timeConstraint(),"\n" << *full_defs);
       if ( assertTimer.duration() >= assertTimer.timeConstraint()) break; // fix warning on AIX
 
       // auto adjust sleep time.
