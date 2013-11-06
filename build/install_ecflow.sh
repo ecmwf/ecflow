@@ -196,10 +196,14 @@ export ECFLOW_PYTHON_INSTALL_DIR=$ECFLOW_INSTALL_DIR/lib/python2.7/site-packages
 # ============================================================================
 $BOOST_ROOT/bjam -d2 variant=$mode_arg $test_arg $install_arg
    
+# ===========================================================================
 # install system files for ecmwf configuration: servers list + menu
-DEST=$ECFLOW_INSTALL_DIR/lib
-cp -f $WK/build/servers $WK/view/src/ecflowview.menu $DEST/.
-chmod 644 $DEST/servers $DEST/ecflowview.menu
+# ===========================================================================
+if [[ "$test_arg" = "" ]] ; then
+   DEST=$ECFLOW_INSTALL_DIR/lib
+   cp -f $WK/build/servers $WK/view/src/ecflowview.menu $DEST/.
+   chmod 644 $DEST/servers $DEST/ecflowview.menu
+fi
    
 # ============================================================================ 
 # Copy over release from c2a -> c2b
