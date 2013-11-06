@@ -8,9 +8,9 @@
 **Change History**
 ==================
 
-4.0.0 (production, October 2013)
+4.0.0 (production, November 2013)
    - ecflowview    : logout-login fix
-   - ecflowview    : Limited support to allow new clients to interact with old servers
+   - ecflowview    : Support to allow new clients to interact with old servers
    - ecflowview    : ECFLOW-71 error in ecflow on delete using GUID
    - ecflow_server : Pre-processor: %%%% should be replaced with %%, and not %
    - ecflow_server : Fixed cron/time(with time series) on a family, once free should stay free, until re-queued
