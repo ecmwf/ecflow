@@ -141,7 +141,7 @@ elif [[ "$ARCH" = cray ]] ; then
    
    export WK=/perm/ma/ma0/workspace/$PE_ENV/ecflow
    export BOOST_ROOT=/perm/ma/ma0/boost/$BOOST_VERSION
-   export ECFLOW_INSTALL_DIR=${ECFLOW_INSTALL_DIR:-/usr/local/apps/ecflow/$release.$major.$minor/$PE_ENV/$COMPILER_VERSION}
+   export ECFLOW_INSTALL_DIR=/usr/local/apps/ecflow/$release.$major.$minor/$PE_ENV/$COMPILER_VERSION
    
    echo "WK = $WK"
    echo "BOOST_ROOT = $BOOST_ROOT"
