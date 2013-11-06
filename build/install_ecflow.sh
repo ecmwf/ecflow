@@ -128,19 +128,13 @@ then
 elif [[ "$ARCH" = cray ]] ; then 
 
    if [[ "$PE_ENV" = CRAY ]] ; then
-      # export COMPILER_VERSION=$(echo $CRAY_CC_VERSION | sed 's/\.//' | cut -c1-2)
       echo "The PE_ENV=CRAY, For ecflow we only support install with PE_ENV=GNU"
       exit 1
    fi
    if [[ "$PE_ENV" = INTEL ]] ; then
-      # export COMPILER_VERSION=$(icc -dumpversion | sed 's/\.//' | cut -c1-3)
       echo "The PE_ENV=INTEL, For ecflow we only support install with PE_ENV=GNU"
       exit 1
    fi
-   if [[ "$PE_ENV" = GNU ]] ; then
-      export COMPILER_VERSION=$(gcc -dumpversion | sed 's/\.//' | cut -c1-2)
-   fi
-   #export ECFLOW_INSTALL_DIR=/usr/local/apps/ecflow/$release.$major.$minor/$PE_ENV/$COMPILER_VERSION
    
    export WK=/perm/ma/ma0/workspace/$PE_ENV/ecflow
    export BOOST_ROOT=/perm/ma/ma0/boost/$BOOST_VERSION

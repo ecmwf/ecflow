@@ -33,23 +33,25 @@ export ECFLOW_INSTALL_DIR=/usr/local/apps/ecflow/$release.$major.$minor
 
 # ===================================================================================
 # for cray, can have 3 different compiler, and multiple versions
+# *HOWEVER* we only install using the GNU compiler.
+# Note: we would only use:
+#       export ECFLOW_INSTALL_DIR=/usr/local/apps/ecflow/$release.$major.$minor/$PE_ENV/$COMPILER_VERSION
+# If we had libraries to install.
+# Hence for ecflow we will stick with: /usr/local/apps/ecflow/<version>
 # ===================================================================================
-if [[ %ARCH% = cray ]] ; then
+#if [[ %ARCH% = cray ]] ; then
+#   if [[ "$PE_ENV" = CRAY ]] ; then
+#      export COMPILER_VERSION=$(echo $CRAY_CC_VERSION | sed 's/\.//' | cut -c1-2)
+#   fi
+#   if [[ "$PE_ENV" = INTEL ]] ; then
+#      export COMPILER_VERSION=$(icc -dumpversion | sed 's/\.//' | cut -c1-3)
+#   fi
+#   if [[ "$PE_ENV" = GNU ]] ; then
+#      export COMPILER_VERSION=$(gcc -dumpversion | sed 's/\.//' | cut -c1-2)
+#   fi
+#   export ECFLOW_INSTALL_DIR=/usr/local/apps/ecflow/$release.$major.$minor/$PE_ENV/$COMPILER_VERSION
+#fi
 
-   if [[ "$PE_ENV" = CRAY ]] ; then
-      export COMPILER_VERSION=$(echo $CRAY_CC_VERSION | sed 's/\.//' | cut -c1-2)
-   fi
-
-   if [[ "$PE_ENV" = INTEL ]] ; then
-      export COMPILER_VERSION=$(icc -dumpversion | sed 's/\.//' | cut -c1-3)
-   fi
-   
-   if [[ "$PE_ENV" = GNU ]] ; then
-      export COMPILER_VERSION=$(gcc -dumpversion | sed 's/\.//' | cut -c1-2)
-   fi
-
-   export ECFLOW_INSTALL_DIR=/usr/local/apps/ecflow/$release.$major.$minor/$PE_ENV/$COMPILER_VERSION
-fi
 export ECFLOW_PYTHON_INSTALL_DIR=$ECFLOW_INSTALL_DIR/lib/python%PYTHON_VERSION%/site-packages/ecflow 
 
 
