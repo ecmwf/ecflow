@@ -113,8 +113,9 @@ public:
   	std::string dump() const;
  	bool checkInvariants(std::string& errormsg) const;
 
-	/// expects HH:MM or +HH:MM will throw std:runtime_error for errors
-	static bool getTime(const std::string& time, int& hour, int& min);
+	/// expects HH:MM or +HH:MM will throw std:runtime_error for errors,
+ 	/// *if* hour not in range(0-24), minutes(0-59), *and* check_time parameter is enabled
+	static bool getTime(const std::string& time, int& hour, int& min, bool check_time = true);
 
 	/// extract string like
 	///     time +00:00 20:00 00:10 # this is a comment which will be ignored. index = 1

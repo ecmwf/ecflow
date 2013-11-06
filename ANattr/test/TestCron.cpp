@@ -198,7 +198,26 @@ BOOST_AUTO_TEST_CASE( test_cron_state_parsing )
        expected.setFree();
        BOOST_CHECK_MESSAGE(parsed_cronAttr == expected,"Expected " << expected.dump() << " : " << expected.time().dump()
                            << " but found " << parsed_cronAttr.dump() << " : " << parsed_cronAttr.time().dump());
-    }
+   }
+   {
+      std::string line = "cron 00:00 18:00 06:00 # isValid:false nextTimeSlot/24:00";
+      std::vector<std::string> lineTokens;
+      Str::split(line,lineTokens);
+      bool parse_state = true;
+      CronAttr parsed_cronAttr;
+      CronAttr::parse( parsed_cronAttr,lineTokens, index, parse_state);
+
+      CronAttr expected;
+      TimeSlot start(0,0);
+      TimeSlot finish(18,0);
+      TimeSlot incr(6,0);
+      TimeSeries series(start, finish,incr);
+      series.set_next_time_slot(TimeSlot(24,0));
+      series.set_isValid(false); // to match isValid:false
+      expected.addTimeSeries(series);
+      BOOST_CHECK_MESSAGE(parsed_cronAttr == expected,"Expected " << expected.dump() << " : " << expected.time().dump()
+                          << " but found " << parsed_cronAttr.dump() << " : " << parsed_cronAttr.time().dump());
+   }
 }
 
 BOOST_AUTO_TEST_CASE( test_cron_once_free_stays_free)
