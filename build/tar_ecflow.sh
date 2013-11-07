@@ -108,6 +108,7 @@ tar --exclude=*.check --exclude=*.check.b \
     --exclude=SCRATCH \
     --exclude=_build --exclude=func_spec --exclude=misc --exclude=newsletter --exclude=presentations --exclude=seminar --exclude=tac --exclude=Thumbs.db \
     --exclude=.pydevproject \
+    --exclude=.git \
     --exclude=.metadata --exclude=.cproject --exclude=.project --exclude=.settings --exclude=.csettings \
     --exclude=ecbuild \
     --exclude=bin \
