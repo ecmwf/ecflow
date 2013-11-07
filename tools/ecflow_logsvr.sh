@@ -1,7 +1,7 @@
 #!/bin/ksh
 
 if [[ $# -ge 2 ]] ; then
-    echo logsvr.sh port
+    echo ecflow_logsvr.sh port
     exit -1
 fi
 
