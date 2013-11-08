@@ -185,7 +185,13 @@ void Node::requeue( bool resetRepeats, int clear_suspended_in_child_nodes)
    if (resetRepeats) repeat_.reset(); // if repeat is empty reset() does nothing
 
    bool edit_history_set = flag().is_set(ecf::Flag::MESSAGE);
+   bool reset_next_time_slot = true;
+   if (flag().is_set(ecf::Flag::NO_REQUE_IF_SINGLE_TIME_DEP)) {
+      reset_next_time_slot =  false;
+   }
+
    flag_.reset();
+
    if (edit_history_set) flag().set(ecf::Flag::MESSAGE);
 
    if (lateAttr_) lateAttr_->reset();
@@ -197,14 +203,18 @@ void Node::requeue( bool resetRepeats, int clear_suspended_in_child_nodes)
    /// Note we do *NOT* reset for requeue as we want to advance the valid time slots.
    /// *NOTE* Update calendar will *free* time dependencies *even* time series. They rely
    /// on this function to clear the time dependencies so they *HOLD* the task.
-   if (time_dep_attrs_) time_dep_attrs_->requeue();
+   ///
+   /// If we have done an interactive run or complete, *dont* increment next_time_slot_
+   if (time_dep_attrs_) time_dep_attrs_->requeue(reset_next_time_slot);
 }
 
-void Node::set_no_requeue_if_single_time_dependency()
+void Node::set_no_requeue_if_single_time_dependency(bool miss_next_time_slot)
 {
 //   cout << "Node::set_no_requeue_if_single_time_dependency() " << absNodePath() << "\n";
    SuiteChanged0 changed(shared_from_this());
    flag().set(Flag::NO_REQUE_IF_SINGLE_TIME_DEP);
+
+   if (miss_next_time_slot && time_dep_attrs_) time_dep_attrs_->miss_next_time_slot();
 
    Node* theParent = parent();
    while (theParent) {
@@ -214,7 +224,7 @@ void Node::set_no_requeue_if_single_time_dependency()
       if (!theParent->crons().empty()) {
          break;
       }
-      theParent->set_no_requeue_if_single_time_dependency();
+      theParent->set_no_requeue_if_single_time_dependency(false);
       theParent = theParent->parent();
    }
 }

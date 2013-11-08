@@ -184,13 +184,15 @@ void TimeSeries::reset(const ecf::Calendar& c)
 #endif
 }
 
-void TimeSeries::requeue(const ecf::Calendar& c)
+void TimeSeries::requeue(const ecf::Calendar& c,bool reset_next_time_slot)
 {
    // *RESET* to handle case where time slot has been advanced, but at requeue it must be reset
    // This is important otherwise user can never reset and time slot that had been advanced
    // by using miss_next_time_slot()
-   isValid_ = true;
-   nextTimeSlot_ = start_;
+   if (reset_next_time_slot) {
+      isValid_ = true;
+      nextTimeSlot_ = start_;
+   }
 
 	//   time 13:00 // nextTimeSlot_ is initialised to 13:00, on TimeSeries::requeue() invalidate time series
 	//              // to stop multiple job submissions on same time slot
@@ -211,7 +213,6 @@ void TimeSeries::requeue(const ecf::Calendar& c)
 	if (!hasIncrement()) {
 		if (current_time >= start_.duration() ) {
 			isValid_ = false;
-
 #ifdef DEBUG_TIME_SERIES
 	 	 	LOG(Log::DBG,"      TimeSeries::increment (duration(c) >= start_.duration() ) "  << toString() << " duration=" << to_simple_string(duration(c)));
 #endif
@@ -340,6 +341,9 @@ void TimeSeries::miss_next_time_slot()
       time_duration value = nextTimeSlot_.duration();
       value += incr_.duration();
       nextTimeSlot_ = TimeSlot(value.hours(),value.minutes());
+      if (nextTimeSlot_.duration() > finish_.duration()) {
+         isValid_ = false;
+      }
    }
 }
 

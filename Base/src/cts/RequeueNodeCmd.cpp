@@ -84,6 +84,7 @@ STC_Cmd_ptr RequeueNodeCmd::doHandleRequest(AbstractServer* as) const
 	      theNodeToRequeue->getAllTasks(taskVec);
 	      for(size_t i=0; i < taskVec.size(); i++) {
 	         if (taskVec[i]->state() == NState::ABORTED) {
+	            taskVec[i]->flag().clear(Flag::NO_REQUE_IF_SINGLE_TIME_DEP );
 	            taskVec[i]->requeue( true /* reset repeats */,clear_suspended_in_child_nodes);
 	            taskVec[i]->set_most_significant_state_up_node_tree(); // can be waste full
 	         }
@@ -98,6 +99,16 @@ STC_Cmd_ptr RequeueNodeCmd::doHandleRequest(AbstractServer* as) const
 	            return PreAllocatedReply::ok_cmd();
 	         }
 	      }
+	      // The NO_REQUE_IF_SINGLE_TIME_DEP is typically cleared at the *end* requeue, however there are cases
+	      // where we need to reset it *BEFORE* re-queue. Since it is tied to missing the next time slot
+	      // i.e take this case:
+	      //     time 10:00  15:00 00:30
+	      // If we force complete, we set NO_REQUE_IF_SINGLE_TIME_DEP, which is used to advance next valid time slot
+	      // (i.e no reset), however when we reach the *end* time i.e 15:00
+	      // calling force complete now leaves node in a complete state and with NO_REQUE_IF_SINGLE_TIME_DEP set.
+	      // Hence *any* *MANUAL* reque afterward will cause NOT reset the next valid time slot.
+	      // So we explicitly set it here.
+	      theNodeToRequeue->flag().clear(Flag::NO_REQUE_IF_SINGLE_TIME_DEP );
 	      theNodeToRequeue->requeue(  true /* reset repeats */, clear_suspended_in_child_nodes );
 	      theNodeToRequeue->set_most_significant_state_up_node_tree();
 	   }
@@ -110,6 +121,7 @@ STC_Cmd_ptr RequeueNodeCmd::doHandleRequest(AbstractServer* as) const
 	      // The GUI: that calls this command should call a separate request
 	      // the returns the active/submitted tasks first. This can then be
 	      // presented to the user, who can elect to kill them if required.
+         theNodeToRequeue->flag().clear(Flag::NO_REQUE_IF_SINGLE_TIME_DEP );
 	      theNodeToRequeue->requeue(  true /* reset repeats */, clear_suspended_in_child_nodes );
 	      theNodeToRequeue->set_most_significant_state_up_node_tree();
 	   }

@@ -46,16 +46,16 @@ void TimeDepAttrs::begin()
    markHybridTimeDependentsAsComplete();
 }
 
-void TimeDepAttrs::requeue() {
+void TimeDepAttrs::requeue(bool reset_next_time_slot) {
 
    /// If a job takes longer than it slots, then that slot is missed, and next slot is used
    /// Note we do *NOT* reset for requeue as we want to advance to the next time slot
    /// *NOTE* Update calendar will *free* time dependencies *even* time series. They rely
    /// on this function to clear the time dependencies so they *HOLD* the task.
    const Calendar& calendar = node_->suite()->calendar();
-   for(size_t i = 0; i < todayVec_.size(); i++)  { todayVec_[i].requeue(calendar);}
-   for(size_t i = 0; i < timeVec_.size(); i++)   {  timeVec_[i].requeue(calendar);}
-   for(size_t i = 0; i < crons_.size(); i++)     {    crons_[i].requeue(calendar);}
+   for(size_t i = 0; i < todayVec_.size(); i++)  { todayVec_[i].requeue(calendar,reset_next_time_slot);}
+   for(size_t i = 0; i < timeVec_.size(); i++)   {  timeVec_[i].requeue(calendar,reset_next_time_slot);}
+   for(size_t i = 0; i < crons_.size(); i++)     {    crons_[i].requeue(calendar,reset_next_time_slot);}
 
    for(size_t i = 0; i < days_.size(); i++)      {  days_[i].clearFree(); }
    for(size_t i = 0; i < dates_.size(); i++)     { dates_[i].clearFree(); }
@@ -180,14 +180,27 @@ bool TimeDepAttrs::testTimeDependenciesForRequeue() const
    }
 
 
-   /// If user has *INTERACTIVLY* forced changed  in state to complete
-   /// *OR* run the job. Then avoid automated re-queue. This allows
-   /// node to stay in the state complete, and hence allows repeats to update
+   /// If user has *INTERACTIVLY* forced changed  in state to complete *OR* run the job.
+   /// Then avoid automated re-queue. This allows node to stay in the state complete,
+   /// and hence allows repeats to update.
    /// NOTE: Crons should *always* be allowed to re-queued
    int noOfTimeDependencies = 0;
    if (node_->flag_.is_set(Flag::NO_REQUE_IF_SINGLE_TIME_DEP)) {
-      noOfTimeDependencies += timeVec_.size();
-      noOfTimeDependencies += todayVec_.size();
+
+      for(size_t i = 0; i < timeVec_.size();  i++)  {
+         if (!timeVec_[i].time_series().hasIncrement()) {
+            // a *single* time slot and *not* a range, hence don't re-queue
+            noOfTimeDependencies++;
+            break;
+         }
+      }
+      for(size_t i = 0; i < todayVec_.size();  i++)  {
+         if (!todayVec_[i].time_series().hasIncrement()) {
+            // a *single* time slot and *not* a range, hence don't re-queue
+            noOfTimeDependencies++;
+            break;
+         }
+      }
       noOfTimeDependencies += dates_.size();
       noOfTimeDependencies += days_.size();
 #ifdef DEBUG_REQUEUE
@@ -257,6 +270,37 @@ bool TimeDepAttrs::testTimeDependenciesForRequeue() const
    LOG(Log::DBG,"   TimeDepAttrs::testTimeDependenciesForRequeue() " << node_->debugNodePath() << " HOLDING ");
 #endif
    return false;
+}
+
+
+void TimeDepAttrs::miss_next_time_slot()
+{
+   // Note: when we have multiple time dependencies.
+   // We need find valid next time dependency:
+   //   time 10:00
+   //   time 11:00
+   //   time 12:00 14:00 00:30
+   // Also we could have a mix:
+   //   time  10:00
+   //   today 10:30
+   //   time 11:00
+   //   time 12:00 14:00 00:30
+
+
+   // for the moment assume, they have been added sequentially,
+   // hence only first time is updated
+   for(size_t i=0;i<timeVec_.size();i++)  {
+      timeVec_[i].miss_next_time_slot();
+      break;
+   }
+   for(size_t i=0;i<todayVec_.size();i++){
+      todayVec_[i].miss_next_time_slot();
+      break;
+   }
+   for(size_t i=0;i<crons_.size();i++) {
+      crons_[i].miss_next_time_slot();
+      break;
+   }
 }
 
 

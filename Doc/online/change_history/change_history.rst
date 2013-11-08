@@ -12,6 +12,7 @@
    - ecflowview    : logout-login fix
    - ecflowview    : Support to allow new clients to interact with old servers
    - ecflowview    : ECFLOW-71 error in ecflow on delete using GUID
+   - ecflow_server : Change Force and Run commands, to work similar to SMS, they now advance the next time slot
    - ecflow_server : Pre-processor: %%%% should be replaced with %%, and not %
    - ecflow_server : Fixed cron/time(with time series) on a family, once free should stay free, until re-queued
    - ecflow_server : SUP-681 ecflow_server crash. server_enviroment.cfg, should not have quotes for the value parts

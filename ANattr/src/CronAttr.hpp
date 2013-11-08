@@ -50,7 +50,7 @@ public:
 	void resetRelativeDuration();
 
 	void reset(const ecf::Calendar& c);
-	void requeue(const ecf::Calendar& c);
+	void requeue(const ecf::Calendar& c,bool reset_next_time_slot = true);
 
    void miss_next_time_slot();
 	void setFree();   // ensures that isFree() always returns true

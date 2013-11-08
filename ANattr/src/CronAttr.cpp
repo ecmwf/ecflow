@@ -286,10 +286,10 @@ void CronAttr::reset(const ecf::Calendar& c)
  	timeSeries_.reset(c);
 }
 
-void CronAttr::requeue(const ecf::Calendar& c)
+void CronAttr::requeue(const ecf::Calendar& c, bool reset_next_time_slot)
 {
    clearFree();
-   timeSeries_.requeue(c);
+   timeSeries_.requeue(c,reset_next_time_slot);
 }
 
 bool CronAttr::isFree(const ecf::Calendar& c) const

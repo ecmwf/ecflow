@@ -37,7 +37,8 @@ public:
 
 
    void begin();
-   void requeue();
+   void requeue(bool reset_next_time_slot);
+   void miss_next_time_slot();
    void freeHoldingDateDependencies();
    void freeHoldingTimeDependencies();
 

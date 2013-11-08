@@ -133,7 +133,7 @@ public:
    /// This is applied *up* the hierarchy until we *hit* a node with a repeat or Cron attribute
    /// This is done since repeat and cron can be used to reset the NO_REQUE_IF_SINGLE_TIME_DEP flags
    /// This functionality is only required during interactive force or run
-   void set_no_requeue_if_single_time_dependency();
+   void set_no_requeue_if_single_time_dependency(bool miss_next_time_slot);
 
    /// Recursively run the tasks under this node, ignore suspend,limits,triggers, and time dependencies
    /// if force is set, run even if task is submitted or active. (will create zombies)

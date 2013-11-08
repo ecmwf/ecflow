@@ -81,8 +81,8 @@ STC_Cmd_ptr RunNodeCmd::doHandleRequest(AbstractServer* as) const
 
 	   if (force_) as->zombie_ctrl().add_user_zombies(node);
 
-	   // Avoid re-running the task again.
-      node->set_no_requeue_if_single_time_dependency();
+	   // Avoid re-running the task again on the same time slot
+      node->set_no_requeue_if_single_time_dependency(true /* miss next time slot */);
 
 	   if (!node->run(jobsParam, force_)) {
          LOG(Log::ERR,"RunNodeCmd: Failed for " << paths_[i] << " : " << jobsParam.getErrorMsg());

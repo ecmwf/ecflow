@@ -65,7 +65,7 @@ public:
 	void reset(const ecf::Calendar& c);
 
 	/// Increment time series. Will find the next time slot after current calendar
-	void requeue(const ecf::Calendar& c);
+	void requeue(const ecf::Calendar& c,bool reset_next_time_slot = true);
 
 	/// if relativeToSuiteStart returns the relative duration, else returns calendar suite time of day.
 	/// The returned resolution is in minutes
@@ -136,6 +136,7 @@ public:
 	static void parse_state(size_t index,const std::vector<std::string>& lineTokens, ecf::TimeSeries& ts);
 	void set_isValid(bool b) { isValid_= b;} // for test only
 	void set_next_time_slot( const TimeSlot& ts) { nextTimeSlot_ = ts; } // needed for test only
+	const TimeSlot& get_next_time_slot() const { return nextTimeSlot_;}
 private:
 	static void testTime(int hour, int minute);
 

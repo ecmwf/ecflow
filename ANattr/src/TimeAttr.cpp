@@ -72,7 +72,7 @@ std::string TimeAttr::dump() const
     if (makeFree_) ss << "(free) ";
     else           ss << "(holding) ";
 
- 	ss << timeSeries_.toString();
+ 	ss << timeSeries_.dump();
 
  	return ss.str();
 }
