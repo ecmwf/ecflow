@@ -185,19 +185,21 @@ void Node::requeue( bool resetRepeats, int clear_suspended_in_child_nodes)
    if (resetRepeats) repeat_.reset(); // if repeat is empty reset() does nothing
 
    bool edit_history_set = flag().is_set(ecf::Flag::MESSAGE);
+
+   // allow next time on time based attributes to be incremented and *not* reset,
+   // when force and run commands used
    bool reset_next_time_slot = true;
    if (flag().is_set(ecf::Flag::NO_REQUE_IF_SINGLE_TIME_DEP)) {
       reset_next_time_slot =  false;
    }
-
    flag_.reset();
-
    if (edit_history_set) flag().set(ecf::Flag::MESSAGE);
+
 
    if (lateAttr_) lateAttr_->reset();
    if (child_attrs_) child_attrs_->requeue();
 
-   for(size_t i = 0; i < limitVec_.size(); i++)   { limitVec_[i]->reset(); }
+   for(size_t i = 0; i < limitVec_.size(); i++) { limitVec_[i]->reset(); }
 
    /// If a job takes longer than it slots, then that slot is missed, and next slot is used
    /// Note we do *NOT* reset for requeue as we want to advance the valid time slots.
