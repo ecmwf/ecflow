@@ -168,9 +168,12 @@ void TimeSeries::reset(const ecf::Calendar& c)
 
 	(void)resetRelativeDuration();
 
-	// Note: **difference between reset and reque, when we have a range
-	//  reset  : while( current_time > nextTimeSlot_.duration()) {  // need for why command
+	// Note: **difference between reset and re-queue,
+	//  Hence if at begin(), time slot same as current time, allow job to run.
+	//  reset  : while( current_time >  nextTimeSlot_.duration()) {  // need for why command
+	//              if (current_time >  start_.duration() ) {
 	//  requeue: while( current_time >= nextTimeSlot_.duration()) {
+	//              if (current_time >= start_.duration() ) {
 
    // Update nextTimeSlot_ so that why command works out of the box, when nodes have been begun.
    // *if* the current time is *AT* the start do *not* increment nextTimeSlot_, otherwise we will miss first time slot
@@ -182,12 +185,12 @@ void TimeSeries::reset(const ecf::Calendar& c)
          nextTimeSlot_ = TimeSlot(value.hours(),value.minutes());
       }
       if (nextTimeSlot_.duration() > finish_.duration()) {
-         isValid_ = false;
+         isValid_ = false;  // time has expired
       }
    }
    else {
-      if (current_time >= start_.duration() ) {
-         isValid_ = false;
+      if (current_time > start_.duration() ) {
+         isValid_ = false; // time has expired
       }
    }
 
@@ -225,7 +228,7 @@ void TimeSeries::requeue(const ecf::Calendar& c,bool reset_next_time_slot)
    time_duration current_time = duration(c);
 	if (!hasIncrement()) {
 		if (current_time >= start_.duration() ) {
-			isValid_ = false;
+			isValid_ = false; // time has expired
 #ifdef DEBUG_TIME_SERIES
 	 	 	LOG(Log::DBG,"      TimeSeries::increment (duration(c) >= start_.duration() ) "  << toString() << " duration=" << to_simple_string(duration(c)));
 #endif
@@ -255,7 +258,7 @@ void TimeSeries::requeue(const ecf::Calendar& c,bool reset_next_time_slot)
 	}
 
  	if (nextTimeSlot_.duration() > finish_.duration()) {
-		isValid_ = false;
+		isValid_ = false;  // time has expired
 #ifdef DEBUG_TIME_SERIES
  	 	LOG(Log::DBG,"      TimeSeries::increment "  << toString());
 #endif
@@ -270,6 +273,7 @@ bool TimeSeries::isFree(const ecf::Calendar& calendar) const
 #endif
 
 	if (!isValid_) {
+	   // time has expired, hence time is not free
 #ifdef DEBUG_TIME_SERIES_IS_FREE
    	 	LOG(Log::DBG,"TimeSeries::isFree (!isValid_) HOLDING "  << toString());
 #endif
@@ -348,6 +352,7 @@ bool TimeSeries::match_duration_with_time_series(const boost::posix_time::time_d
 void TimeSeries::miss_next_time_slot()
 {
    if ( !hasIncrement()) {
+      // single slot, does not have a next time slot, hence expire time
       isValid_ = false;
    }
    else {
@@ -355,6 +360,7 @@ void TimeSeries::miss_next_time_slot()
       value += incr_.duration();
       nextTimeSlot_ = TimeSlot(value.hours(),value.minutes());
       if (nextTimeSlot_.duration() > finish_.duration()) {
+         // time has expired,
          isValid_ = false;
       }
    }
@@ -370,7 +376,8 @@ bool TimeSeries::checkForRequeue( const ecf::Calendar& calendar, const TimeSlot&
    // *************************************************************************
 
    if (!isValid_) {
-      return false; // time has expired, hence can no longer re-queues
+      // time has expired, hence can no longer re-queues, i.e no future time dependency
+      return false;
    }
 
    if ( hasIncrement()) {
