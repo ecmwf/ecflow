@@ -534,6 +534,16 @@ void Submittable::kill(const std::string& zombie_pid)
          return;
       }
 
+      // *** Generated variables are *NOT* persisted.                                     ***
+      // *** Hence if we have recovered from a check point file, then they will be empty. ***
+      // *** i.e terminate server with active jobs, restart from saved check_pt file
+      // *** and then try to kill the active job, will get an exception( see below) since
+      // *** Generated variable ECF_RID will be empty.
+      if (!sub_gen_variables_) {
+         // std::cout << "Generated variables empty, regenerating !!!!!\n";
+         update_generated_variables();
+      }
+
       /// If we are in active state, then ECF_RID must have been setup
       /// This is typically used in the KILL CMD, make sure its there
       if (state() == NState::ACTIVE && genvar_ecfrid().theValue().empty() ) {
@@ -581,6 +591,16 @@ void Submittable::status()
 {
    if (state() != NState::ACTIVE && state() != NState::SUBMITTED) {
       return;
+   }
+
+   // *** Generated variables are *NOT* persisted.                                     ***
+   // *** Hence if we have recovered from a check point file, then they will be empty. ***
+   // *** i.e terminate server with active jobs, restart from saved check_pt file
+   // *** and then try to kill/status the active job, will get an exception(see below) since
+   // *** Generated variable ECF_RID will be empty.
+   if (!sub_gen_variables_) {
+      //std::cout << "Generated variables empty, regenerating !!!!!\n";
+      update_generated_variables();
    }
 
    /// If we are in active state, then ECF_RID must have been setup
