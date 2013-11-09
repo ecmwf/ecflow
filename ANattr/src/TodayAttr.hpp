@@ -114,7 +114,7 @@ public:
 	void resetRelativeDuration();
 
 	void reset(const ecf::Calendar& c) { clearFree(); timeSeries_.reset(c);}       // updates state_change_no_
-	void requeue(const ecf::Calendar& c,bool reset_next_time_slot)
+	void requeue(const ecf::Calendar& c,bool reset_next_time_slot = true)
 	   { clearFree(); timeSeries_.requeue(c,reset_next_time_slot);} // updates state_change_no_
 
 	void miss_next_time_slot(); // updates state_change_no_

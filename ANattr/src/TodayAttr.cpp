@@ -100,14 +100,7 @@ void TodayAttr::calendarChanged( const ecf::Calendar& c )
 
    // For a time series, we rely on the re queue to reset makeFree
    if (isFree(c)) {
-      if (!timeSeries_.hasIncrement() ) {
-         setFree();
-      }
-      else {
-         if (timeSeries_.duration(c) >= timeSeries_.finish().duration() ) {
-            setFree();
-         }
-      }
+      setFree();
    }
 }
 
@@ -155,19 +148,24 @@ bool TodayAttr::why(const ecf::Calendar& c, std::string& theReasonWhy) const
    if (isFree(c)) return false;
    theReasonWhy += " is today dependent";
 
-   // This can apply to single and series
-   boost::posix_time::time_duration calendar_time = timeSeries_.duration(c);
-   if (calendar_time < timeSeries_.start().duration()) {
-       timeSeries_.why(c, theReasonWhy);
-       return true;
-   }
+   // Check to see if time has expired, if has not, then report why
+   if (timeSeries_.is_valid()) {
+      // This can apply to single and series
+      boost::posix_time::time_duration calendar_time = timeSeries_.duration(c);
+      if (calendar_time < timeSeries_.start().duration()) {
+         timeSeries_.why(c, theReasonWhy);
+         return true;
+      }
 
-   if (timeSeries_.hasIncrement()) {
-      if (calendar_time > timeSeries_.start().duration() && calendar_time < timeSeries_.finish().duration()) {
-          timeSeries_.why(c, theReasonWhy);
-          return true;
+      if (timeSeries_.hasIncrement()) {
+         if (calendar_time > timeSeries_.start().duration() && calendar_time < timeSeries_.finish().duration()) {
+            timeSeries_.why(c, theReasonWhy);
+            return true;
+         }
       }
    }
+
+   // the time has expired, report for the next day
 
    // For a single slot, we are always free after single slot time, hence we must look for tomorrow.
    // If we are in series then, we past the last time slot

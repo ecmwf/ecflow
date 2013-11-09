@@ -137,7 +137,11 @@ public:
 	void set_isValid(bool b) { isValid_= b;} // for test only
 	void set_next_time_slot( const TimeSlot& ts) { nextTimeSlot_ = ts; } // needed for test only
 	const TimeSlot& get_next_time_slot() const { return nextTimeSlot_;}
+
+	// Used in test only. Is the time still valid, return false means time has expired.
+	bool is_valid() const { return isValid_;}
 private:
+
 	static void testTime(int hour, int minute);
 
 	// HANDLE CASE WHERE FINISH MINUTES IS NOT DIVISIBLE BY THE INCREMENT

@@ -166,17 +166,30 @@ void TimeSeries::reset(const ecf::Calendar& c)
  	isValid_ = true;
  	nextTimeSlot_ = start_;
 
+	(void)resetRelativeDuration();
+
+	// Note: **difference between reset and reque, when we have a range
+	//  reset  : while( current_time > nextTimeSlot_.duration()) {  // need for why command
+	//  requeue: while( current_time >= nextTimeSlot_.duration()) {
+
    // Update nextTimeSlot_ so that why command works out of the box, when nodes have been begun.
-   // *if* the current time is at the start do *not* increment nextTimeSlot_, otherwise we will mist first time slot
+   // *if* the current time is *AT* the start do *not* increment nextTimeSlot_, otherwise we will miss first time slot
+ 	time_duration current_time = duration(c);
    if (hasIncrement()) {
-      time_duration current_time = duration(c);
       while( current_time > nextTimeSlot_.duration()) {
          time_duration value = nextTimeSlot_.duration();
          value += incr_.duration();
          nextTimeSlot_ = TimeSlot(value.hours(),value.minutes());
       }
+      if (nextTimeSlot_.duration() > finish_.duration()) {
+         isValid_ = false;
+      }
    }
-	(void)resetRelativeDuration();
+   else {
+      if (current_time >= start_.duration() ) {
+         isValid_ = false;
+      }
+   }
 
 #ifdef DEBUG_TIME_SERIES
 	LogToCout toCoutAsWell;
@@ -352,10 +365,13 @@ bool TimeSeries::checkForRequeue( const ecf::Calendar& calendar, const TimeSlot&
    // ************************************************************************
    // THIS IS CALLED IN THE CONTEXT WHERE NODE HAS COMPLETED.
    // RETURNING TRUE FROM HERE WILL FORCE NODE TO QUEUED STATE
-   // HENCE THIS FUNCTION MUST RETURN FALSE, WHEN END OF TIME SLOT HAS BEEN REACHED
+   // HENCE THIS FUNCTION MUST RETURN FALSE, WHEN END OF TIME SLOT HAS BEEN REACHED/expired
+   // The resolution is in minutes
    // *************************************************************************
 
-   // The resolution is in minutes
+   if (!isValid_) {
+      return false; // time has expired, hence can no longer re-queues
+   }
 
    if ( hasIncrement()) {
       // Note if we are equal to the finish and were called as part of completeCmd
