@@ -534,6 +534,13 @@ const char* ClientDoc::run(){
             "       ci.run(path_list)                      # run all tasks specified in the paths\n"
             "   except RuntimeError, e:\n"
             "       print str(e)\n"
+            "\nEffect::\n\n"
+            "   Lets see the effect of run command on the following defs::\n\n"
+            "   suite s1\n"
+            "      task t1; time 10:00             # will complete straight away\n"
+            "      task t2; time 10:00 13:00 01:00 # will re-queue 3 times and complete on fourth run\n\n"
+            "In the last case (task t2) after each run the next time slot is incremented.\n"
+            "This can be seen by calling the Why command."
             ;
 }
 
@@ -992,6 +999,14 @@ const char* ClientDoc::force_state(){
             "       ci.force_state(paths,State.complete)\n"
             "   except RuntimeError, e:\n"
             "       print str(e)\n"
+            "\nEffect::\n\n"
+            "   Lets see the effect of forcing complete on the following defs::\n\n"
+            "   suite s1\n"
+            "      task t1; time 10:00             # will complete straight away\n"
+            "      task t2; time 10:00 13:00 01:00 # will re-queue 3 times and complete on fourth \n\n"
+            "In the last case (task t2) after each force complete, the next time slot is incremented.\n"
+            "This can be seen by calling the Why command."
+
             ;
 }
 
