@@ -181,6 +181,14 @@ bool Simulator::run(Defs& theDefs, const std::string& defs_filename,  std::strin
  				errorMsg += "All suites have completed, but autocancel has not taken effect?\n";
  			}
 
+ 			if (foundCrons_) {
+ 			   std::string msg;
+ 			   if (!theDefs.verification(msg)) {
+ 			      errorMsg += msg;
+ 			      errorMsg += "\n";
+ 			   }
+ 			}
+
   			Analyser analyser;
   			analyser.run(theDefs);
   			errorMsg += "Please see files .flat and .depth for analysis";
