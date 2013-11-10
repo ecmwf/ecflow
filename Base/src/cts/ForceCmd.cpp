@@ -153,9 +153,18 @@ const char* ForceCmd::desc() {
             "         with recursive option\n"
             "  arg4 = path_to_node or path_to_node:<event>: paths must begin with '/'\n"
             "Usage:\n"
-            "   --force=complete /suite/t1 /suite/t2   # Set task t1 & t2 to complete\n"
-            "   --force=clear /suite/task:ev           # Clear the event 'ev' on task /suite/task\n"
-            "   --force=complete recursive /suite/f1   # Recursively set complete all children of /suite/f1"
+            "  --force=complete /suite/t1 /suite/t2   # Set task t1 & t2 to complete\n"
+            "  --force=clear /suite/task:ev           # Clear the event 'ev' on task /suite/task\n"
+            "  --force=complete recursive /suite/f1   # Recursively set complete all children of /suite/f1\n"
+            "Effect:\n"
+            "  Consider the effect of forcing complete when the current time is at 09:00\n"
+            "  suite s1\n"
+            "     task t1; time 12:00             # will complete straight away\n"
+            "     task t2; time 10:00 13:00 01:00 # will complete on fourth attempt\n\n"
+            "  --force=complete /s1/t1 /s1/t2\n"
+            "  When we have a time range(i.e as shown with task t2), it is re-queued and the\n"
+            "  next time slot is incremented for each complete, until it expires, and the task completes.\n"
+            "  Use the Why command, to show next run time (i.e. next time slot)"
             ;
 }
 
