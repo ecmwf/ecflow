@@ -947,6 +947,7 @@ const char* ClientDoc::alter(){
             " change variable name value    # Find the specified variable, and set the new value.\n"
             " change clock_type name        # The name must be one of 'hybrid' or 'real'.\n"
             " change clock_gain name        # The gain must be convertible to an integer.\n"
+            " change clock_sync name        # Sync suite calendar with the computer.\n"
             " change event name(optional )  # if no name specified the event is set, otherwise name must be 'set' or 'clear'\n"
             " change meter name value       # The meter value must be convertible to an integer, and between meter min-max range.\n"
             " change label name value       # sets the label\n"

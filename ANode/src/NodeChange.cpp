@@ -108,6 +108,22 @@ void Node::changeClockGain(const std::string& gain)
 #endif
 }
 
+void Node::changeClockSync()
+{
+   clock_ptr clock = suite()->clockAttr();
+   if (!clock.get())  {
+      suite()->addClock( ClockAttr() ); // will update state change_no
+   }
+   else {
+      // clear so that on re-queue we sync with computer
+      clock->sync();
+   }
+
+#ifdef DEBUG_STATE_CHANGE_NO
+   std::cout << "Node::changeClockSync\n";
+#endif
+}
+
 bool Node::set_event(const std::string& event_name_or_number ,bool value)
 {
    if (child_attrs_) return child_attrs_->set_event(event_name_or_number,value);

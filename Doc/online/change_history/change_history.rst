@@ -16,6 +16,8 @@
    - ecflow_server : Pre-processor: %%%% should be replaced with %%, and not %
    - ecflow_server : Fixed cron/time(with time series) on a family, once free should stay free, until re-queued
    - ecflow_server : SUP-681 ecflow_server crash. server_enviroment.cfg, should not have quotes for the value parts
+   - ecflow_server : added 'alter change clock_sync', to allow suite calendar to sync with computer
+   - ecflow_server : Updated kill and status commands, to automatically generate variables like ECF_RID. Allow 'kill' straight after checkpoint recovery.
    - ecflow_client : Updated suite definition parser, to allow suites to have labels
    - ecflow_client : Fix bug in the display of zombies. Action shown in log file did not match, command line display, when zombie attributes used.
    - ecflow_client : Updated zombie display, to prepend manual or automatic in front of action, i.e manual-fob.
@@ -23,7 +25,7 @@
    - ecflow_client : Fix bug in --server_load, where suite paths were not extracted correctly
    - ecflow.so     : Added new python function to Node(find_node_up_the_tree()), to make it easier to add triggers.
    - *             : Fix --migrate bugs: to take into account label's that have new lines
-   - *             : Fix --migrate bugs: (reading history with group commands, group separater ';' treated as newline 
+   - *             : Fix --migrate bugs: (reading history with group commands, group separator ';' treated as newline 
                      in error during parse. DefsStructureParser.cpp)
    - *             : Migrated source control management from perforce to git, and updated build scripts
    - *             : Updated build scripts to allow compilation and regression tests on cray XC30

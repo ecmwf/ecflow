@@ -150,7 +150,8 @@ static AlterCmd::Change_attr_type changeAttrType(const std::string& s)
 	if (s == "variable") return AlterCmd::VARIABLE;
    if (s == "clock_type") return AlterCmd::CLOCK_TYPE;
    if (s == "clock_date") return AlterCmd::CLOCK_DATE;
-	if (s == "clock_gain") return AlterCmd::CLOCK_GAIN;
+   if (s == "clock_gain") return AlterCmd::CLOCK_GAIN;
+   if (s == "clock_sync") return AlterCmd::CLOCK_SYNC;
  	if (s == "event") return AlterCmd::EVENT;
 	if (s == "meter") return AlterCmd::METER;
 	if (s == "label") return AlterCmd::LABEL;
@@ -169,6 +170,7 @@ static std::string to_string(AlterCmd::Change_attr_type c)
       case AlterCmd::CLOCK_TYPE:   return "clock_type"; break;
       case AlterCmd::CLOCK_DATE:   return "clock_date"; break;
       case AlterCmd::CLOCK_GAIN:   return "clock_gain"; break;
+      case AlterCmd::CLOCK_SYNC:   return "clock_sync"; break;
       case AlterCmd::EVENT:        return "event"; break;
       case AlterCmd::METER:        return "meter"; break;
       case AlterCmd::LABEL:        return "label"; break;
@@ -185,11 +187,12 @@ static std::string to_string(AlterCmd::Change_attr_type c)
 }
 static void validChangeAttr(std::vector<std::string>& vec)
 {
-	vec.reserve(14);
+	vec.reserve(15);
 	vec.push_back("variable");
 	vec.push_back("clock_type");
    vec.push_back("clock_gain");
    vec.push_back("clock_date");
+   vec.push_back("clock_sync");
  	vec.push_back("event");
 	vec.push_back("meter");
 	vec.push_back("label");
@@ -320,6 +323,7 @@ STC_Cmd_ptr AlterCmd::doHandleRequest(AbstractServer* as) const
             case AlterCmd::CLOCK_TYPE:  node->changeClockType(name_); break;  // node must be a suite, value must [hybrid|real| virtual]
             case AlterCmd::CLOCK_DATE:  node->changeClockDate(name_); break;  // Expecting day.month.year: node must be a suite, value must [hybrid|real| virtual]
             case AlterCmd::CLOCK_GAIN:  node->changeClockGain(name_); break;  // node must be a suite, value must be int
+            case AlterCmd::CLOCK_SYNC:  node->changeClockSync(); break;       // node must be a suite, sync clock with computer
             case AlterCmd::EVENT:       node->changeEvent(name_,value_);break;  // if value is empty just set, [1|0] or name [set | clear]
             case AlterCmd::METER:       node->changeMeter(name_,value_); break;
             case AlterCmd::LABEL:       node->changeLabel(name_,value_); break;
@@ -378,8 +382,8 @@ const char* AlterCmd::desc() {
             "           [ variable | time | today | date  | day | cron | event | meter |\n"
             "             label | trigger | complete | repeat | limit | inlimit | limit_path | zombie ]\n"
             "         For change:\n"
-            "           [ variable | clock_type, clock_gain | clock_date | event | meter | label |\n"
-            "             trigger | complete | repeat | limit_max | limit_value | defstatus  ]\n"
+            "           [ variable | clock_type | clock_gain | clock_date | clock_sync  | event | meter | label |\n"
+            "             trigger  | complete   | repeat     | limit_max  | limit_value | defstatus  ]\n"
             "         For add:\n"
             "           [ variable | time | today | date | day | zombie ]\n"
             "         For set_flag and clear_flag:\n"
@@ -670,7 +674,7 @@ void AlterCmd::createDelete( Cmd_ptr& cmd, const std::vector<std::string>& optio
 void AlterCmd::createChange( Cmd_ptr& cmd, std::vector<std::string>& options, std::vector<std::string>& paths) const
 {
    // options[0] = change
-   // options[1] = variable | clock_type, clock_gain | clock_date | event | meter | label | trigger | complete | repeat | limit_max | limit_value | defstatus  ]
+   // options[1] = variable | clock_type | clock_gain | clock_date | clock_sync | event | meter | label | trigger | complete | repeat | limit_max | limit_value | defstatus  ]
    // options[2] = name
    // options[3] = value
 
@@ -709,7 +713,7 @@ void AlterCmd::createChange( Cmd_ptr& cmd, std::vector<std::string>& options, st
 
 		case AlterCmd::CLOCK_TYPE: {
 			if (options.size() != 3) {
-				ss << "AlterCmd: change: expected at least four args i.e. change clock_type [ hybrid | real ] <path_to_node>";
+				ss << "AlterCmd: change: expected at least four args i.e. change clock_type [ hybrid | real ] <path_to_suite>";
 				ss << " but found only " << (options.size() + paths.size()) << " arguments\n"
 				   << dump_args(options,paths) << "\n";
 				throw std::runtime_error( ss.str() );
@@ -724,7 +728,7 @@ void AlterCmd::createChange( Cmd_ptr& cmd, std::vector<std::string>& options, st
 
       case AlterCmd::CLOCK_DATE: {
          if (options.size() != 3) {
-            ss << "AlterCmd: change clock_date : expected at least four args :  change clock_date day.month.year <path_to_node>";
+            ss << "AlterCmd: change clock_date : expected at least four args :  change clock_date day.month.year <path_to_suite>";
             ss << " but found only " << (options.size() + paths.size()) << " arguments\n" << dump_args(options,paths) << "\n";
             throw std::runtime_error( ss.str() );
          }
@@ -744,7 +748,7 @@ void AlterCmd::createChange( Cmd_ptr& cmd, std::vector<std::string>& options, st
 
 		case AlterCmd::CLOCK_GAIN: {
 			if (options.size() != 3) {
-				ss << "AlterCmd: change clock_gain : expected four args i.e. change clock_gain <int> <path_to_node> ";
+				ss << "AlterCmd: change clock_gain : expected four args i.e. change clock_gain <int> <path_to_suite> ";
 				ss << " but found " << (options.size() + paths.size()) << " arguments. The actual gain must be convertible to an integer\n";
 				ss << dump_args(options,paths) << "\n";
 				throw std::runtime_error( ss.str() );
@@ -758,6 +762,15 @@ void AlterCmd::createChange( Cmd_ptr& cmd, std::vector<std::string>& options, st
 				throw std::runtime_error( ss.str() );
 			}
 			break; }
+
+      case AlterCmd::CLOCK_SYNC: {
+         if (options.size() != 2) {
+            ss << "AlterCmd: change clock_sync : expected three args i.e. change clock_sync  <path_to_suite> ";
+            ss << " but found " << (options.size() + paths.size()) << " arguments.\n";
+            ss << dump_args(options,paths) << "\n";
+            throw std::runtime_error( ss.str() );
+         }
+         break; }
 
 		case AlterCmd::EVENT: {
 		   if (options.size() != 3 && options.size() != 4) {

@@ -385,6 +385,7 @@ public:
    void changeClockType(const std::string& theType);
    void changeClockDate(const std::string& theDate);
    void changeClockGain(const std::string& theIntGain);
+   void changeClockSync();
    void changeEvent(const std::string& name,const std::string& setOrClear = "");
    void changeEvent(const std::string& name,bool value);
    void changeMeter(const std::string& name,const std::string& value);
