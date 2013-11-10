@@ -86,6 +86,17 @@ BOOST_AUTO_TEST_CASE( test_alter_cmd_for_clock_type_hybrid )
       TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(s->absNodePath(),AlterCmd::CLOCK_TYPE,"hybrid","")));
       clock_ptr v = s->clockAttr();
       BOOST_CHECK_MESSAGE( v && v->hybrid() , "expected clock to be added and be hybrid");
+
+      // When we reque, the suite calendar should align to todays date and time
+      TestHelper::invokeRequest(&defs,Cmd_ptr( new RequeueNodeCmd("/" + s->name())));
+
+      boost::posix_time::ptime date_now = Calendar::second_clock_time();
+      int day_of_month = date_now.date().day();
+      int month        = date_now.date().month();
+      int year         = date_now.date().year();
+      BOOST_CHECK_MESSAGE( s->calendar().day_of_month() == day_of_month, "Calendar should be updated after re-queue/begin. Expected " << day_of_month << " but found " << s->calendar().day_of_month());
+      BOOST_CHECK_MESSAGE( s->calendar().month() == month, "Calendar should be updated after re-queue/begin. Expected " << month << " but found " << s->calendar().month());
+      BOOST_CHECK_MESSAGE( s->calendar().year() == year, "Calendar should be updated after re-queued/begin");
    }
 }
 
@@ -105,6 +116,46 @@ BOOST_AUTO_TEST_CASE( test_alter_cmd_for_clock_type_real )
       TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(s->absNodePath(),AlterCmd::CLOCK_TYPE,"real","")));
       clock_ptr v = s->clockAttr();
       BOOST_CHECK_MESSAGE( v && !v->hybrid() , "expected clock to be added and be real");
+
+      // When we reque, the suite calendar should align to todays date and time
+      TestHelper::invokeRequest(&defs,Cmd_ptr( new RequeueNodeCmd("/" + s->name())));
+
+      boost::posix_time::ptime date_now = Calendar::second_clock_time();
+      int day_of_month = date_now.date().day();
+      int month        = date_now.date().month();
+      int year         = date_now.date().year();
+      BOOST_CHECK_MESSAGE( s->calendar().day_of_month() == day_of_month, "Calendar should be updated after re-queue/begin. Expected " << day_of_month << " but found " << s->calendar().day_of_month());
+      BOOST_CHECK_MESSAGE( s->calendar().month() == month, "Calendar should be updated after re-queue/begin. Expected " << month << " but found " << s->calendar().month());
+      BOOST_CHECK_MESSAGE( s->calendar().year() == year, "Calendar should be updated after re-queued/begin");
+   }
+}
+
+BOOST_AUTO_TEST_CASE( test_alter_cmd_for_clock_type_real_2 )
+{
+   cout << "Base:: ...test_alter_cmd_for_clock_type_real_2\n";
+
+   // Add a suite with a hybrid clock set to the past, on switch to real time, should have todays date
+   Defs defs;
+   suite_ptr s = defs.add_suite("suite");
+   ClockAttr clockAttr(true); // add hybrid clock
+   clockAttr.date(1,1,2009);
+   s->addClock( clockAttr );
+
+   BOOST_REQUIRE_MESSAGE( s->clockAttr(), "Expected clock");
+   BOOST_REQUIRE_MESSAGE( s->clockAttr()->hybrid(), "Expected hybrid clock");
+
+   {  // Change clock type =====================================================================================================
+      defs.beginAll();
+      TestStateChanged changed(s);
+      TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(s->absNodePath(),AlterCmd::CLOCK_TYPE,"real","")));
+      clock_ptr v = s->clockAttr();
+      BOOST_CHECK_MESSAGE( v && !v->hybrid() , "expected clock to be added and be real");
+
+      // When we reque, the data should be unchanged
+      TestHelper::invokeRequest(&defs,Cmd_ptr( new RequeueNodeCmd("/" + s->name())));
+      BOOST_CHECK_MESSAGE( s->calendar().day_of_month() == 1, "Calendar should be updated after re-queue/begin. Expected day of month " << 1 << " but found " << s->calendar().day_of_month());
+      BOOST_CHECK_MESSAGE( s->calendar().month() == 1, "Calendar should be updated after re-queue/begin. Expected month " << 1 << " but found " << s->calendar().month());
+      BOOST_CHECK_MESSAGE( s->calendar().year() == 2009, "Calendar should be updated after re-queued/begin, Expected year " << 2009 << " but found " << s->calendar().year());
    }
 }
 
@@ -144,8 +195,7 @@ BOOST_AUTO_TEST_CASE( test_alter_cmd_for_clock_gain )
    // In this test the suite has NO Clock attribute. It should get added automatically
    Defs defs;
    std::string suitename = "suite";
-   suite_ptr s = Suite::create(suitename);
-   defs.addSuite( s );
+   suite_ptr s = defs.add_suite(suitename);
    BOOST_CHECK_MESSAGE( !s->clockAttr(), "Expected no clock");
 
    {  // Change clock gain  =====================================================================================================
