@@ -305,6 +305,20 @@ menus::~menus()
 {
 }
 
+void menus::write()
+{
+  int lineno = 0;
+  char *line;
+  std::ofstream outfile;
+  std::string fname = directory::user() + std::string("/ecflowview.menu");
+  outfile.open(fname.c_str());
+  std::cerr << "# creating menu file " << fname << "\n";
+  while ((line = defaultMenu[lineno])) {
+    outfile << line << "\n";
+    lineno++;
+  } 
+}
+
 void menus::fillList(Widget list)
 {
   XECFDEBUG printf("# menus::fill %p\n",list);
@@ -387,8 +401,8 @@ int menu::init(int page, bool def) {
      0          tmp  user
      1          sys  both, user overwrites
   */
-  std::string path = directory::system();
-  // std::string path = "/usr/local/apps/sms/lib";     
+  std::string path;
+  path = directory::user();   path = directory::user(); 
   path += "/";
   path += name;
   const char* fname = path.c_str();
@@ -398,7 +412,8 @@ int menu::init(int page, bool def) {
     read = true; 
   } else std::cerr << "# menu file not found: " << fname << "\n";
  
-  path = directory::user();
+  path = directory::user(); 
+  path = directory::system();
   path += "/";
   path += name;
   fname = path.c_str();

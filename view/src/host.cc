@@ -119,6 +119,7 @@
 #include <assert.h>
 #include <boost/bind.hpp>
 
+#include "menus.h"
 /* #include <proc/readproc.h> */
 
 class SelectNode {
@@ -509,7 +510,9 @@ void host::dir( node& n, const char* path, lister<ecf_dir>& l )
 
          char* c = basename;
          while ( *c ) {
-            if (*c == '.') *c = 0;
+	   if (*c == '.') {
+	     if (*(c+1)) { *(c+1) = 0; break; } /* 201311 Pontus Request */
+	     else { *c = 0; } }
             c++;
          }
 
@@ -578,6 +581,8 @@ int ehost::command( const std::string& str )
          return 1;
       else
          return 0;
+   } else if (str == "write menu") {
+     menus::write(); return 0;
    }
 
    int e = 0, ac = 0;
@@ -915,7 +920,6 @@ int host::do_comp( node* into, node* from ,
                     const std::string a, const std::string b )
 {
    if (!into || !from) return 0;
-   // execl("/bin/sh", "sh", "-c", argv, NULL); 
    std::stringstream out;
    out << "${COMPARE:=/home/ma/map/bin/compare.sh} " << 
      from->full_name() << ":";
