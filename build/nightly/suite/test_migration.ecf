@@ -24,7 +24,7 @@ else
       /usr/local/apps/ecflow/$version/bin/ecflow_client $LOG --migrate > /var/tmp/ma0/ECFLOW_TEST/migration/$host.$port.def
       
       # This will generate a file, with .mig extention
-      python Pyext/migrate/ecflow_migrate.py /var/tmp/ma0/ECFLOW_TEST/migration/$host.$port.def
+      python Pyext/migrate/ecflow_migrate.py --d /var/tmp/ma0/ECFLOW_TEST/migration/$host.$port.def
       
       # rm unused file, to stop test_migration from processing it.
       rm -rf /var/tmp/ma0/ECFLOW_TEST/migration/$host.$port.def
