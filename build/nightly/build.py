@@ -127,8 +127,8 @@ def add_cray_gnu_compiler_variables( cray_gnu ):
     cray_gnu.add_variable("PRGENV","PrgEnv-gnu")
     cray_gnu.add_variable("SITE_CONFIG","$WK/build/site_config/site-config-cray-gcc.jam")
     cray_gnu.add_variable("ROOT_WK","/perm/ma/ma0/workspace/GNU")
-
-    # cray_gnu.add_variable("TEMPLATE_DEPTH","c++-template-depth=512") # needed for gnu/4.8.1
+    # cray_gnu.add_variable("CUSTOM_BJAM_ARGS","c++-template-depth=512") # needed for gnu/4.8.1
+    # cray_gnu.add_variable("CUSTOM_BJAM_ARGS","toolset=cray cxxflags=-fPIC")  
 
 def add_cray_intel_compiler_variables( cray_intel ):
     cray_intel.add_variable("COMPILER_TEST_PATH","intel-linux/$mode")
@@ -137,6 +137,7 @@ def add_cray_intel_compiler_variables( cray_intel ):
     cray_intel.add_variable("PRGENV","PrgEnv-intel")
     cray_intel.add_variable("SITE_CONFIG","$WK/build/site_config/site-config-cray-intel.jam")
     cray_intel.add_variable("ROOT_WK","/perm/ma/ma0/workspace/INTEL")
+    # cray_gnu.add_variable("CUSTOM_BJAM_ARGS","toolset=intel cxxflags=-fPIC")  
 
 def add_cray_cray_compiler_variables( cray_cray ):
     cray_cray.add_variable("COMPILER_TEST_PATH","cray/$mode")
@@ -145,6 +146,7 @@ def add_cray_cray_compiler_variables( cray_cray ):
     cray_cray.add_variable("PRGENV","PrgEnv-cray")
     cray_cray.add_variable("SITE_CONFIG","$WK/build/site_config/site-config-cray-cray.jam")
     cray_cray.add_variable("ROOT_WK","/perm/ma/ma0/workspace/CRAY")
+    # cray_gnu.add_variable("CUSTOM_BJAM_ARGS","toolset=cray cxxflags=-fPIC")  
 
 def add_remote_cray_variables( cray ):
     # re use axel scripts for trap.h. rcp.eh etc,  
@@ -194,7 +196,7 @@ def add_redhat_variables( redhat ):
     redhat.add_variable("BOOST_DIR","/vol/ecf/redhat/boost")
     redhat.add_variable("ARCH","redhat")
     redhat.add_variable("SITE_CONFIG","$WK/build/site_config/site-config-Linux64.jam")
-    redhat.add_variable("TEMPLATE_DEPTH","c++-template-depth=512")
+    redhat.add_variable("CUSTOM_BJAM_ARGS","c++-template-depth=512")
  
 def add_remote_opensuse103_variables( opensuse103 ):
     opensuse103.add_variable("ECF_KILL_CMD","rsh %REMOTE_HOST% \"kill -15 %ECF_RID%\"") 
