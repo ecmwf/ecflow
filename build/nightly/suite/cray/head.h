@@ -59,12 +59,10 @@ ulimit
 export PATH=/usr/local/apps/python/current/bin:$PATH
 
 # ===================================================================================
-# Load the right environment, first unload all
-module unload PrgEnv-cray
-module unload PrgEnv-intel
-module unload PrgEnv-gnu
+# Load the right environment, default is awlays cray
+#
+module swap PrgEnv-cray %PRGENV%
 
-%MODULE_LOAD%
 
 # For gnu, we will use gnu 4.6.3
 if [[ "$PE_ENV" = GNU ]] ; then

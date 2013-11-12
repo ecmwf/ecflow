@@ -124,7 +124,7 @@ def add_cray_gnu_compiler_variables( cray_gnu ):
     cray_gnu.add_variable("COMPILER_TEST_PATH","gcc-4.6.3/$mode")
     cray_gnu.add_variable("COMPILER_VERSION","gcc-4.6.3")
     cray_gnu.add_variable("TOOLSET","gcc")
-    cray_gnu.add_variable("MODULE_LOAD","module load PrgEnv-gnu")
+    cray_gnu.add_variable("PRGENV","PrgEnv-gnu")
     cray_gnu.add_variable("SITE_CONFIG","$WK/build/site_config/site-config-cray-gcc.jam")
     cray_gnu.add_variable("ROOT_WK","/perm/ma/ma0/workspace/GNU")
 
@@ -134,7 +134,7 @@ def add_cray_intel_compiler_variables( cray_intel ):
     cray_intel.add_variable("COMPILER_TEST_PATH","intel-linux/$mode")
     cray_intel.add_variable("COMPILER_VERSION","intel-linux")
     cray_intel.add_variable("TOOLSET","intel")
-    cray_intel.add_variable("MODULE_LOAD","module load PrgEnv-intel")
+    cray_intel.add_variable("PRGENV","PrgEnv-intel")
     cray_intel.add_variable("SITE_CONFIG","$WK/build/site_config/site-config-cray-intel.jam")
     cray_intel.add_variable("ROOT_WK","/perm/ma/ma0/workspace/INTEL")
 
@@ -142,7 +142,7 @@ def add_cray_cray_compiler_variables( cray_cray ):
     cray_cray.add_variable("COMPILER_TEST_PATH","cray/$mode")
     cray_cray.add_variable("COMPILER_VERSION","cray")
     cray_cray.add_variable("TOOLSET","cray")
-    cray_cray.add_variable("MODULE_LOAD","module load PrgEnv-cray")
+    cray_cray.add_variable("PRGENV","PrgEnv-cray")
     cray_cray.add_variable("SITE_CONFIG","$WK/build/site_config/site-config-cray-cray.jam")
     cray_cray.add_variable("ROOT_WK","/perm/ma/ma0/workspace/CRAY")
 
