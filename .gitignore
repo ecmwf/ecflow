@@ -1,14 +1,18 @@
-bin/
-ecbuild/
-swap
+# eclipse
+.settings/
+.pydevproject
 
+# cmake
+ecbuild/
+
+# ecflow 
+bin/
+swap
 *.job0
 *.job1
 *.job2
 *.job3
-
 *.1
-
 *.dat
 *.def_log
 *.glog
