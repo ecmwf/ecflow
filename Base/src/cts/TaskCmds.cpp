@@ -117,17 +117,24 @@ bool TaskCmd::authenticate(AbstractServer* as, STC_Cmd_ptr& theReply) const
   	/// Handle corner case ,where we have two jobs with different process id, but same password
   	/// Can happen if jobs is started externally,
 	/// or via test(i.e submit 1,sumbit 2(force)) before job1 active its password is overridden
+   bool submittable_allready_aborted = false;
    bool submittable_allready_active = false;
    bool submittable_allready_complete = false;
    bool password_missmatch = false;
    bool pid_missmatch = false;
-
    if ( submittable_->state() == NState::COMPLETE) {
 #ifdef DEBUG_ZOMBIE
       std::cout << ": submittable_->state() == NState::COMPLETE)";
 #endif
-      // If Task state is complete, and we receive **any* child command then it is a zombie
+      // If Task state is complete, and we receive **any** child command then it is a zombie
       submittable_allready_complete = true;
+   }
+   if ( submittable_->state() == NState::ABORTED) {
+#ifdef DEBUG_ZOMBIE
+      std::cout << ": submittable_->state() == NState::ABORTED)";
+#endif
+      // If Task state is aborted, and we receive **any** child command then it is a zombie
+      submittable_allready_aborted = true;
    }
   	if ((child_type() == Child::INIT) && (submittable_->state() == NState::ACTIVE)) {
 #ifdef DEBUG_ZOMBIE
@@ -155,7 +162,7 @@ bool TaskCmd::authenticate(AbstractServer* as, STC_Cmd_ptr& theReply) const
     std::cout << "\n";
 #endif
 
-  	if (  password_missmatch || pid_missmatch || submittable_allready_active || submittable_allready_complete) {
+  	if (password_missmatch || pid_missmatch || submittable_allready_active || submittable_allready_complete || submittable_allready_aborted){
 		/// If the task has adopted we return true, and carry on as normal
       std::string action_taken;
   		if (!as->zombie_ctrl().handle_zombie(submittable_,this,action_taken,theReply)) {
@@ -169,6 +176,7 @@ bool TaskCmd::authenticate(AbstractServer* as, STC_Cmd_ptr& theReply) const
          ss << " : " << path_to_submittable_ << " : " << process_or_remote_id_ << " : " << jobs_password_;
          if (submittable_allready_active)   ss << " : already active";
          if (submittable_allready_complete) ss << " : already complete";
+         if (submittable_allready_aborted)  ss << " : already aborted";
          if (password_missmatch) ss << " : password miss-match[ task:"<< submittable_->jobsPassword()<<" child:" << jobs_password_ << " ]";
          if (pid_missmatch)      ss << " : pid miss-match[ task:"<< submittable_->process_or_remote_id()<<" child:" << process_or_remote_id_ << " ]";
          ss << " : action taken(" << action_taken << ")";
