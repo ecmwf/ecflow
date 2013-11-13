@@ -156,7 +156,7 @@ def add_remote_cray_variables( cray ):
     cray.add_variable("ECF_INCLUDE", "/home/ma/emos/def/cray/include")
     
     # for cray we need to use logsrvr in order to see the job output
-    cray.add_variable("ECF_LOGHOST","cct")
+    cray.add_variable("ECF_LOGHOST","cctdtn1")
     cray.add_variable("ECF_LOGPORT","9316")   
     
     # Set the remote location for output, LOGDIR needed by queing system
@@ -593,9 +593,9 @@ def add_suite_variables( suite ):
     suite.add_variable("WK",WK)
     suite.add_variable("BOOST_DIR","/var/tmp/ma0/boost")
     suite.add_variable("PYTHON_VERSION","2.7")
-    suite.add_variable("SET_TO_TEST_SCRIPT","false")
+    suite.add_variable("SET_TO_TEST_SCRIPT","false") 
     suite.add_variable("BUILD_ECFLOWVIEW","true")
-    suite.add_variable("GIT_BRANCH","develop")  # when makeing a relase switch to master
+    suite.add_variable("GIT_BRANCH","release/4.0.0")  # when makeing a relase switch to release/<release version> otherwise develop
 
     # automatically fob all zombies when compiling ecflow 
     child_list = []

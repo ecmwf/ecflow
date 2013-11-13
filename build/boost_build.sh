@@ -56,12 +56,10 @@ if test_uname Linux ; then
        if [ "$PE_ENV" = INTEL ] ; then
          layout=versioned  
          tool=intel
-         # cp $WK/build/site_config/site-config-cray-intel.jam $BOOST_ROOT/tools/build/v2/site-config.jam
        fi
        if [ "$PE_ENV" = CRAY ] ; then
          tool=cray
          layout=versioned  
-         # cp $WK/build/site_config/site-config-cray-cray.jam $BOOST_ROOT/tools/build/v2/site-config.jam
        fi
     else
        cp $WK/build/site_config/site-config-Linux64.jam $BOOST_ROOT/tools/build/v2/site-config.jam  
