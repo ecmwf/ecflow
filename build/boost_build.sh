@@ -42,6 +42,7 @@ test_uname ()
 # On *CRAY* we can have 3 compilers we will use the versioned for CRAY and INTEL library
 layout=tagged
 
+CXXFLAGS=
 if test_uname Linux ; then
   tool=gcc
   X64=$(uname -m)
@@ -50,16 +51,17 @@ if test_uname Linux ; then
     # PE_ENV is defined in cray environment, at least on sandy bridge
     if [[ "$PE_ENV" = GNU || "$PE_ENV" = INTEL || "$PE_ENV" = CRAY ]]
     then
-       cp $WK/build/site_config/site-config-cray-gcc.jam $BOOST_ROOT/tools/build/v2/site-config.jam
+       CXXFLAGS=cxxflags=-fPIC
+       cp $WK/build/site_config/site-config-cray.jam $BOOST_ROOT/tools/build/v2/site-config.jam
        if [ "$PE_ENV" = INTEL ] ; then
          layout=versioned  
          tool=intel
-         cp $WK/build/site_config/site-config-cray-intel.jam $BOOST_ROOT/tools/build/v2/site-config.jam
+         # cp $WK/build/site_config/site-config-cray-intel.jam $BOOST_ROOT/tools/build/v2/site-config.jam
        fi
        if [ "$PE_ENV" = CRAY ] ; then
          tool=cray
          layout=versioned  
-         cp $WK/build/site_config/site-config-cray-cray.jam $BOOST_ROOT/tools/build/v2/site-config.jam
+         # cp $WK/build/site_config/site-config-cray-cray.jam $BOOST_ROOT/tools/build/v2/site-config.jam
        fi
     else
        cp $WK/build/site_config/site-config-Linux64.jam $BOOST_ROOT/tools/build/v2/site-config.jam  
@@ -108,25 +110,25 @@ echo "using compiler $tool with build $1 variants "
 # ========================================================================
 # Note: boost thread *ONLY* need to test multi-threaded server See: define ECFLOW_MT
 # ========================================================================
-./bjam --build-dir=./tmpBuildDir toolset=$tool stage link=static --layout=$layout --with-system variant=debug 
-./bjam --build-dir=./tmpBuildDir toolset=$tool stage link=static --layout=$layout --with-date_time variant=debug 
-./bjam --build-dir=./tmpBuildDir toolset=$tool stage link=static --layout=$layout --with-filesystem variant=debug   
-./bjam --build-dir=./tmpBuildDir toolset=$tool stage link=static --layout=$layout --with-program_options variant=debug 
-./bjam --build-dir=./tmpBuildDir toolset=$tool stage link=static --layout=$layout --with-serialization  variant=debug 
-./bjam --build-dir=./tmpBuildDir toolset=$tool stage link=static --layout=$layout --with-test variant=debug  
-./bjam --build-dir=./tmpBuildDir toolset=$tool stage link=static --layout=$layout --with-thread variant=debug  
+./bjam --build-dir=./tmpBuildDir toolset=$tool $CXXFLAGS stage link=static --layout=$layout --with-system variant=debug 
+./bjam --build-dir=./tmpBuildDir toolset=$tool $CXXFLAGS stage link=static --layout=$layout --with-date_time variant=debug 
+./bjam --build-dir=./tmpBuildDir toolset=$tool $CXXFLAGS stage link=static --layout=$layout --with-filesystem variant=debug   
+./bjam --build-dir=./tmpBuildDir toolset=$tool $CXXFLAGS stage link=static --layout=$layout --with-program_options variant=debug 
+./bjam --build-dir=./tmpBuildDir toolset=$tool $CXXFLAGS stage link=static --layout=$layout --with-serialization  variant=debug 
+./bjam --build-dir=./tmpBuildDir toolset=$tool $CXXFLAGS stage link=static --layout=$layout --with-test variant=debug  
+./bjam --build-dir=./tmpBuildDir toolset=$tool $CXXFLAGS stage link=static --layout=$layout --with-thread variant=debug  
 
 
 # ========================================================================
 # Note: boost thread *ONLY* need to test multi-threaded server See: define ECFLOW_MT
 # ========================================================================
-./bjam --build-dir=./tmpBuildDir toolset=$tool stage link=static --layout=$layout --with-system variant=release 
-./bjam --build-dir=./tmpBuildDir toolset=$tool stage link=static --layout=$layout --with-date_time variant=release  
-./bjam --build-dir=./tmpBuildDir toolset=$tool stage link=static --layout=$layout --with-filesystem variant=release   
-./bjam --build-dir=./tmpBuildDir toolset=$tool stage link=static --layout=$layout --with-program_options variant=release 
-./bjam --build-dir=./tmpBuildDir toolset=$tool stage link=static --layout=$layout --with-serialization  variant=release 
-./bjam --build-dir=./tmpBuildDir toolset=$tool stage link=static --layout=$layout --with-test variant=release  
-./bjam --build-dir=./tmpBuildDir toolset=$tool stage link=static --layout=$layout --with-thread variant=release  
+./bjam --build-dir=./tmpBuildDir toolset=$tool $CXXFLAGS stage link=static --layout=$layout --with-system variant=release 
+./bjam --build-dir=./tmpBuildDir toolset=$tool $CXXFLAGS stage link=static --layout=$layout --with-date_time variant=release  
+./bjam --build-dir=./tmpBuildDir toolset=$tool $CXXFLAGS stage link=static --layout=$layout --with-filesystem variant=release   
+./bjam --build-dir=./tmpBuildDir toolset=$tool $CXXFLAGS stage link=static --layout=$layout --with-program_options variant=release 
+./bjam --build-dir=./tmpBuildDir toolset=$tool $CXXFLAGS stage link=static --layout=$layout --with-serialization  variant=release 
+./bjam --build-dir=./tmpBuildDir toolset=$tool $CXXFLAGS stage link=static --layout=$layout --with-test variant=release  
+./bjam --build-dir=./tmpBuildDir toolset=$tool $CXXFLAGS stage link=static --layout=$layout --with-thread variant=release  
 
 #
 # Note:  Currently the boost python is built under bin.v2/, but seems to follow its own way
@@ -140,6 +142,6 @@ echo "using compiler $tool with build $1 variants "
 # It appears that by not using tagged, we can copy the libs created in bin.v2/      
 # how ever we need tagged to create two separate libs
 #
-#./bjam toolset=$tool --layout=tagged link=shared --with-python variant=debug
-#./bjam toolset=$tool --layout=tagged link=shared --with-python variant=release
+#./bjam toolset=$tool --layout=tagged $CXXFLAGS link=shared --with-python variant=debug
+#./bjam toolset=$tool --layout=tagged $CXXFLAGS link=shared --with-python variant=release
  
