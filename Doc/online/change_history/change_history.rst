@@ -9,6 +9,11 @@
 ==================
 
 4.0.0 (production, November 2013)
+   - ecflowview    : add %VARIABLE% syntax in ecflowview.menu
+                     add Web Menu (second level access to manual, script, job, output)
+                     add '.' as part of the task name to filter directory content in output window
+                     add write ecflowview.menu menu
+                     TimeLine accessible from Menu for server node and task node  
    - ecflowview    : logout-login fix
    - ecflowview    : Support to allow new clients to interact with old servers
    - ecflowview    : ECFLOW-71 error in ecflow on delete using GUID

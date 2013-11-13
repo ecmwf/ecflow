@@ -56,6 +56,7 @@ public:
 	static void fillList(Widget); 
 
 	static void realize();
+	static void write();
 
 	static int version(int rel, int maj, int min);
 
