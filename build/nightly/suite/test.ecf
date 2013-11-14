@@ -212,7 +212,9 @@ else
       set -eux
    fi
    
-   $BOOST_ROOT/bjam variant=$mode test-all
+   # On cray we need CUSTOM_BJAM_ARGS i.e for toolset=intel cxxflags=-fPIC otherwise, it will rebuild Pyext directory with default compiler
+   # hence thses flags need to be same used in build.ecf
+   $BOOST_ROOT/bjam %CUSTOM_BJAM_ARGS:% variant=$mode test-all
    
    cd ..
    
