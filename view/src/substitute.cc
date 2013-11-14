@@ -80,7 +80,6 @@ const char* substitute::scan(const char* cmd,node* n)
 	  while(s) {
 	    if(s->name_ == word) {
 	      strcpy(word,s->eval(n).c_str());
-	      // std::cout << "# substituted\n";
 	      break;
 	    }
 	    s = s->next();
@@ -115,7 +114,7 @@ const char* substitute::scan(const char* cmd,node* n)
     i += strlen(word);
   }
  
-  std::cout << "# substituted:" << buf << "-" << word << "-" << edit <<"-\n";
+  // std::cout << "# substituted:" << buf << "-" << word << "-" << edit <<"-\n";
   buf[i] = 0;
   return buf;
 }
