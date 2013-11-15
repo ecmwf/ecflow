@@ -595,7 +595,7 @@ def add_suite_variables( suite ):
     suite.add_variable("PYTHON_VERSION","2.7")
     suite.add_variable("SET_TO_TEST_SCRIPT","false") 
     suite.add_variable("BUILD_ECFLOWVIEW","true")
-    suite.add_variable("GIT_BRANCH","release/4.0.0")  # when makeing a relase switch to release/<release version> otherwise develop
+    suite.add_variable("GIT_BRANCH","develop")  # when makeing a relase switch to release/<release version> otherwise develop
 
     # automatically fob all zombies when compiling ecflow 
     child_list = []
