@@ -140,8 +140,11 @@ project site-config
 # using toolset-name : version :invocation-command : options ;
 #   where options allows <cflags, cxxflags, compileflags and linkflags >
 #
-using gcc         : : : <cxxflags>-fPIC ;
- 
+#using gcc         : : : <cxxflags>-fPIC ;
+#using cray        : : : <cxxflags>-fPIC ;
+#using intel-linux : : : <cxxflags>-fPIC ;
+
+
 # For cray use the 'CC' wrapper script, however this assumes you linking with MPI, then barf's
 # using gcc : : CC : <cxxflags>-fPIC ;
 #
