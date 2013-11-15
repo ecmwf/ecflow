@@ -183,7 +183,7 @@ void SNewsCmd::init(
       std::stringstream ss;
       ss << " [server handle(" << max_client_handle_state_change_no << ","
          << max_client_handle_modify_change_no << ") server(" << Ecf::state_change_no() << "," << Ecf::modify_change_no()
-         << ") : *Large* scale changes (new handle or suites added/removed) :NEWS]";
+         << ") : *Large* scale changes (new handle or suites added or removed) :NEWS]";
       log_append(ss.str());
 #else
       log_append("");

@@ -50,6 +50,8 @@ public:
    virtual void collateChanges(DefsDelta&) const;
    void set_memento(const SubmittableMemento* m) { Submittable::set_memento(m); }
 
+   virtual node_ptr find_node_up_the_tree(const std::string& name) const;
+
    // Pure node Functions that are not implemented for aliases
    virtual node_ptr find_relative_node(const std::vector<std::string>&) {return node_ptr();}
 

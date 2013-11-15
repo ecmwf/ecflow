@@ -75,16 +75,13 @@ BOOST_AUTO_TEST_CASE( test_today_single_slot )
       boost::posix_time::ptime theLocalTime = boost::posix_time::ptime(date(2010,6,21),time_duration(10,0,0));
       boost::posix_time::ptime time_minus_hour =  theLocalTime -  hours(1);
 
-      std::auto_ptr< Suite > suite( new Suite( "test_today_single_slot" ) );
+      suite_ptr suite = theDefs.add_suite( "test_today_single_slot");
       ClockAttr clockAttr(theLocalTime,false,true/*positive gain*/);
       suite->addClock( clockAttr );
 
-      std::auto_ptr< Family > fam( new Family( "family" ) );
-      std::auto_ptr< Task > task( new Task( "t"  ) );
+      family_ptr fam = suite->add_family( "family");
+      task_ptr task = fam->add_task( "t");
       task->addToday( ecf::TodayAttr(ecf::TimeSlot(time_minus_hour.time_of_day())) );
-      fam->addTask( task );
-      suite->addFamily( fam );
-      theDefs.addSuite( suite );
    }
 
    // The test harness will create corresponding directory structure
@@ -121,13 +118,13 @@ BOOST_AUTO_TEST_CASE( test_today_relative_time_series )
    {
       // Initialise clock with todays date and time, then create a today attribute
       // with a time series, so that task runs 3 times
-      std::auto_ptr< Suite > suite( new Suite( "test_today_relative_time_series" ) );
       ClockAttr clockAttr(Calendar::second_clock_time());
-      suite->addClock( clockAttr );
+      suite_ptr suite = theDefs.add_suite( "test_today_relative_time_series");
       suite->add_variable("SLEEPTIME",boost::lexical_cast<std::string>(TestFixture::job_submission_interval()-1));
+      suite->addClock( clockAttr );
 
-      std::auto_ptr< Family > fam( new Family( "family" ) );
-      std::auto_ptr< Task > task( new Task( "t" ) );
+      family_ptr fam = suite->add_family( "family");
+      task_ptr task = fam->add_task( "t");
       task->addToday( ecf::TodayAttr(
                ecf::TimeSlot(0,1),
                ecf::TimeSlot(0,7),
@@ -136,9 +133,6 @@ BOOST_AUTO_TEST_CASE( test_today_relative_time_series )
       )
       );
       task->addVerify( VerifyAttr(NState::COMPLETE,3) );      // task should complete 3 times
-      fam->addTask( task );
-      suite->addFamily( fam );
-      theDefs.addSuite( suite );
    }
 
    // The test harness will create corresponding directory structure
@@ -178,13 +172,15 @@ BOOST_AUTO_TEST_CASE( test_today_real_time_series )
       boost::posix_time::ptime time1 = theLocalTime + minutes(1);
       boost::posix_time::ptime time2 = theLocalTime + minutes(7);
 
-      std::auto_ptr< Suite > suite( new Suite( "test_today_real_time_series" ) );
+      suite_ptr suite = theDefs.add_suite( "test_today_real_time_series");
       ClockAttr clockAttr(theLocalTime);
       suite->addClock( clockAttr );
       suite->add_variable("SLEEPTIME",boost::lexical_cast<std::string>(TestFixture::job_submission_interval()-1));
+      suite->addVerify( VerifyAttr(NState::COMPLETE,1) );
 
-      std::auto_ptr< Family > fam( new Family( "family" ) );
-      std::auto_ptr< Task > task( new Task( "t"  ) );
+      family_ptr fam = suite->add_family( "family");
+      fam->addVerify( VerifyAttr(NState::COMPLETE,1) );
+      task_ptr task = fam->add_task( "t");
       task->addToday( ecf::TodayAttr(
                ecf::TimeSlot(time1.time_of_day()),
                ecf::TimeSlot(time2.time_of_day()),
@@ -192,11 +188,6 @@ BOOST_AUTO_TEST_CASE( test_today_real_time_series )
       )
       );
       task->addVerify( VerifyAttr(NState::COMPLETE,3) );      // task should complete 3 times
-      fam->addTask( task );
-      fam->addVerify( VerifyAttr(NState::COMPLETE,1) );
-      suite->addFamily( fam );
-      suite->addVerify( VerifyAttr(NState::COMPLETE,1) );
-      theDefs.addSuite( suite );
    }
 
    // The test harness will create corresponding directory structure

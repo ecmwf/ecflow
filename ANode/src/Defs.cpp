@@ -181,7 +181,9 @@ void Defs::updateCalendar( const ecf::CalendarUpdateParams & calUpdateParams)
 	/// Collate any auto cancelled nodes as a result of calendar update
 	std::vector<node_ptr> auto_cancelled_nodes;
 
+	// updateCalendarCount_ is only used in *test*
 	updateCalendarCount_++;
+
 	size_t theSize = suiteVec_.size();
 	for(size_t s = 0; s < theSize; s++) {
 		suiteVec_[s]->updateCalendar( calUpdateParams, auto_cancelled_nodes);
@@ -206,6 +208,9 @@ void Defs::absorb(Defs* input_defs, bool force)
 	if (input_defs == this) {
 		return;
 	}
+
+	// updateCalendarCount_ is *only* used in test, reset whenever a new defs is loaded
+	updateCalendarCount_ = 0;
 
 	// We must make a copy, otherwise we are iterating over a vector that is being deleted
 	std::vector<suite_ptr> suiteVecCopy = input_defs->suiteVec();
@@ -292,11 +297,6 @@ void Defs::add_suite_only(suite_ptr s, size_t position)
    }
    Ecf::incr_modify_change_no();
    client_suite_mgr_.suite_added_in_defs(s);
-}
-
-void Defs::addSuite(std::auto_ptr<Suite> s)
-{
-	addSuite( suite_ptr(s) );
 }
 
 suite_ptr Defs::removeSuite(suite_ptr s)

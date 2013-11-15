@@ -45,7 +45,8 @@ public:
 
 class ServerEnvironment : private boost::noncopyable {
 public:
-	ServerEnvironment(int argc, char* argv[]);
+   ServerEnvironment(int argc, char* argv[]);
+   ServerEnvironment(int argc, char* argv[], const std::string& path_to_config_file); // *only used in test*
 	~ServerEnvironment();
 
 	/// return true if option are valid false and error message otherwise
@@ -68,6 +69,12 @@ public:
 	/// Return true if job generation is enabled. By default job generation is enabled however
 	/// for test/debug we can elect to disable, it.
 	bool jobGeneration() const { return jobGeneration_;}
+
+   /// Forward compatibility allow old clients to talk to new server
+	/// Temp: This allows ecflow  to be built. i.e we have old clients(3.0.x), installed on different machines
+	///       they need to talk to new server. (i.e since we can't change the old clients)
+   /// This is controlled with ECF_ALLOW_OLD_CLIENT_NEW_SERVER
+   int allow_old_client_new_server() const { return allow_old_client_new_server_;}
 
 
 	/// Whenever we save the checkpt, we time how long this takes.
@@ -164,8 +171,10 @@ public:
 	std::string dump() const;
 
 private:
+   void init(int argc, char* argv[], const std::string& path_to_config_file);
+
 	///  defaults are read from a config file
-	void read_config_file(std::string& log_file_name);
+	void read_config_file(std::string& log_file_name,const std::string& path_to_config_file);
 
 	/// Get the standard environment variables, overwrite any settings from config file
 	void read_environment_variables(std::string& log_file_name);
@@ -193,6 +202,7 @@ private:
    bool help_option_;
    bool version_option_;
 	bool reply_back_if_ok_;
+	int allow_old_client_new_server_;
  	ecf::CheckPt::Mode checkMode_;
 	std::string ecfHome_;
 	std::string ecf_checkpt_file_;

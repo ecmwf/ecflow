@@ -53,6 +53,9 @@ public:
 	bool startStopWithServer() const { return startStopWithServer_; }
  	void hybrid( bool f );
 
+ 	// clear local attributes so, than when we re-queue suite, we sync with computer clock
+ 	void sync();
+
    void init_calendar(ecf::Calendar&);
    void begin_calendar(ecf::Calendar&);
 

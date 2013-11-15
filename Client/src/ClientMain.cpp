@@ -19,11 +19,13 @@
 int main( int argc, char* argv[] ) {
 
 	/// By default, error condition will throw exception.
-	ClientInvoker client;
-	client.set_cli(true); // output log and file commands to standard out
-	try { (void) client.invoke(argc,argv); }
+	try {
+	   ClientInvoker client;
+	   client.set_cli(true); // output log and file commands to standard out
+	   (void) client.invoke(argc,argv);
+	}
 	catch (std::exception& e ) {
-		std::cerr << e.what();
+		std::cerr << e.what() << "\n";
 		return 1;
 	}
 	return 0;

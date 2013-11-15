@@ -77,8 +77,10 @@ public:
 	void calendarChanged( const ecf::Calendar& c ); // can set attribute free
 	void resetRelativeDuration();
 
-	void reset(const ecf::Calendar& c) { clearFree(); timeSeries_.reset(c); }       // updates state_change_no_
- 	void requeue(const ecf::Calendar& c) {  clearFree(); timeSeries_.requeue(c);} // updates state_change_no_
+	void reset(const ecf::Calendar& c)
+	      { clearFree(); timeSeries_.reset(c); }       // updates state_change_no_
+ 	void requeue(const ecf::Calendar& c,bool reset_next_time_slot = true)
+ 	      { clearFree(); timeSeries_.requeue(c,reset_next_time_slot);} // updates state_change_no_
 
 	void miss_next_time_slot(); // updates state_change_no_
 	void setFree();   // ensures that isFree() always returns true, updates state_change_no_

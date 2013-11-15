@@ -126,7 +126,6 @@ public:
    /// Add a suite to the definition, will throw std::runtime_error if duplicate
    suite_ptr add_suite(const std::string& name);
    void addSuite(suite_ptr,size_t position = std::numeric_limits<std::size_t>::max());
-   void addSuite(std::auto_ptr<Suite>);
    size_t child_position(const Node*) const;
 
    /// Externs refer to Nodes or, variable, events, meter, repeat, or generated variable

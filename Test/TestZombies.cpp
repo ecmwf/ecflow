@@ -67,8 +67,9 @@ namespace fs = boost::filesystem;
 #define DO_TEST6 1
 #define DO_TEST7 1
 #define DO_TEST8 1
-//#define DO_TEST9 1   Need to make reliable
-#define DO_TEST10 1
+#define DO_TEST9 1
+//#define DO_TEST10 1 Need to make reliable
+#define DO_TEST11 1
 
 BOOST_GLOBAL_FIXTURE( TestFixture );
 
@@ -441,6 +442,11 @@ static void create_and_start_test(Defs& theDefs, const std::string& suite_name, 
       std::string path = "/" + suite_name;
       theClient.force(path,"complete",true/*recursive*/);
    }
+   else if (create_zombies_with == "aborted") {
+
+      std::string path = "/" + suite_name;
+      theClient.force(path,"aborted",true/*recursive*/);
+   }
    else {
       BOOST_REQUIRE_MESSAGE(false,"Create zombies via " << create_zombies_with << " unrecognised");
    }
@@ -780,6 +786,35 @@ BOOST_AUTO_TEST_CASE( test_ecf_zombie_creation_via_complete )
 #endif
 
 #ifdef DO_TEST9
+BOOST_AUTO_TEST_CASE( test_ecf_zombie_creation_via_abort )
+{
+   DurationTimer timer;
+   std::string suite_name  = "test_ecf_zombie_creation_via_abort";
+   cout << "Test:: ..." << suite_name << " " << flush;
+   TestClean clean_at_start_and_end;
+
+   // This command creates user zombies up front, these may not have a pid, if task in submitted state
+   create_and_start_test(suite_name,"aborted");
+
+   /// Since we have set tasks to complete, we should only have *ONE* set of zombies
+   // expect NUM_OF_TASKS zombies, ie because we have NUM_OF_TASKS tasks
+   ClientInvoker theClient;
+   check_expected_no_of_zombies(NUM_OF_TASKS,theClient);
+
+   // Fob all the zombies child commands allowing them to finish
+   (void) ZombieUtil::do_zombie_user_action(User::FOB, NUM_OF_TASKS, timeout,theClient);
+   // int no_of_fobed_zombies = ZombieUtil::do_zombie_user_action(User::FOB, NUM_OF_TASKS, timeout,theClient);
+   // BOOST_CHECK_MESSAGE(no_of_fobed_zombies == NUM_OF_TASKS,"Expected " << NUM_OF_TASKS << " Fobed zombies but found " << no_of_fobed_zombies);
+
+   // Wait for zombies to complete, they should get removed automatically
+   wait_for_no_zombies(theClient, timeout);
+
+   cout << timer.duration() << "\n";
+}
+#endif
+
+
+#ifdef DO_TEST10
 BOOST_AUTO_TEST_CASE( test_zombie_inheritance )
 {
    DurationTimer timer;
@@ -815,8 +850,8 @@ BOOST_AUTO_TEST_CASE( test_zombie_inheritance )
 }
 #endif
 
-#ifdef DO_TEST10
 
+#ifdef DO_TEST11
 static int wait_for_killed_zombies(ClientInvoker& theClient, int no_of_tasks, int max_time_to_wait)
 {
 #ifdef DEBUG_ZOMBIE

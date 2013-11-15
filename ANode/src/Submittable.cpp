@@ -534,6 +534,16 @@ void Submittable::kill(const std::string& zombie_pid)
          return;
       }
 
+      // *** Generated variables are *NOT* persisted.                                     ***
+      // *** Hence if we have recovered from a check point file, then they will be empty. ***
+      // *** i.e terminate server with active jobs, restart from saved check_pt file
+      // *** and then try to kill the active job, will get an exception( see below) since
+      // *** Generated variable ECF_RID will be empty.
+      if (!sub_gen_variables_) {
+         // std::cout << "Generated variables empty, regenerating !!!!!\n";
+         update_generated_variables();
+      }
+
       /// If we are in active state, then ECF_RID must have been setup
       /// This is typically used in the KILL CMD, make sure its there
       if (state() == NState::ACTIVE && genvar_ecfrid().theValue().empty() ) {
@@ -562,7 +572,7 @@ void Submittable::kill(const std::string& zombie_pid)
 
    if (!variableSubsitution(ecf_kill_cmd)) {
       std::stringstream ss;
-      ss << "Submittable::kill: Variable substitution failed for ECF_KILL_CMD, on task " << absNodePath() << "\n";
+      ss << "Submittable::kill: Variable substitution failed for ECF_KILL_CMD(" << ecf_kill_cmd << ") on task " << absNodePath() << "\n";
       throw std::runtime_error( ss.str() );
    }
 
@@ -583,6 +593,16 @@ void Submittable::status()
       return;
    }
 
+   // *** Generated variables are *NOT* persisted.                                     ***
+   // *** Hence if we have recovered from a check point file, then they will be empty. ***
+   // *** i.e terminate server with active jobs, restart from saved check_pt file
+   // *** and then try to kill/status the active job, will get an exception(see below) since
+   // *** Generated variable ECF_RID will be empty.
+   if (!sub_gen_variables_) {
+      //std::cout << "Generated variables empty, regenerating !!!!!\n";
+      update_generated_variables();
+   }
+
    /// If we are in active state, then ECF_RID must have been setup
    if (state() == NState::ACTIVE && genvar_ecfrid().theValue().empty()) {
       std::stringstream ss;
@@ -599,7 +619,7 @@ void Submittable::status()
 
    if (!variableSubsitution(ecf_status_cmd)) {
       std::stringstream ss;
-      ss << "Submittable::status: Variable substitution failed for ECF_STATUS_CMD, on task " << absNodePath() << "\n";
+      ss << "Submittable::status: Variable substitution failed for ECF_STATUS_CMD(" << ecf_status_cmd << ") on task " << absNodePath() << "\n";
       throw std::runtime_error( ss.str() );
    }
 

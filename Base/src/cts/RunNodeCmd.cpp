@@ -81,8 +81,8 @@ STC_Cmd_ptr RunNodeCmd::doHandleRequest(AbstractServer* as) const
 
 	   if (force_) as->zombie_ctrl().add_user_zombies(node);
 
-	   // Avoid re-running the task again.
-      node->set_no_requeue_if_single_time_dependency();
+	   // Avoid re-running the task again on the same time slot
+      node->set_no_requeue_if_single_time_dependency(true /* miss next time slot */);
 
 	   if (!node->run(jobsParam, force_)) {
          LOG(Log::ERR,"RunNodeCmd: Failed for " << paths_[i] << " : " << jobsParam.getErrorMsg());
@@ -99,7 +99,7 @@ STC_Cmd_ptr RunNodeCmd::doHandleRequest(AbstractServer* as) const
 
 const char* RunNodeCmd::arg()  { return CtsApi::runArg();}
 const char* RunNodeCmd::desc() {
-   return   "Ignore triggers, limits, time or date dependencies, just run the Task.\n"
+   return  "Ignore triggers, limits, time or date dependencies, just run the Task.\n"
             "When a job completes, it may be automatically re-queued if it has a cron\n"
             "or multiple time dependencies. In the specific case where a task has a SINGLE\n"
             "time dependency and we want to avoid re-running the task then\n"
@@ -113,7 +113,15 @@ const char* RunNodeCmd::desc() {
             "         This can result in zombie creation\n"
             "  arg2 = node path(s). The paths must begin with a leading '/' character.\n"
             "         If the path is /suite/family will recursively run all tasks\n"
-            "         When providing multiple paths avoid running the same task twice"
+            "         When providing multiple paths avoid running the same task twice\n"
+            "Example:\n"
+            "  --run /suite/t1                 # run task t1\n"
+            "Effect:\n"
+            "  task t1; time 12:00             # will complete if run manually\n"
+            "  task t2; time 10:00 13:00 01:00 # will run 4 times before completing\n"
+            "  When we have a time range(i.e as shown with task t2), then next time slot\n"
+            "  is incremented for each run, until it expires, and the task completes.\n"
+            "  Use the Why command, to show next run time (i.e. next time slot)"
             ;
 }
 

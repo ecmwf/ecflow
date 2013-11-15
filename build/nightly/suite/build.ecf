@@ -25,13 +25,35 @@ minor=$(grep   "Version::minor_"   ACore/src/Version.cpp  | cut -d= -s -f2 | sed
 # =================================================================================
 # Environment used by ecflow
 # Hack for ecflow extension:
-# Note: The environment variable ARCH is used to conditionally compile ecflowview
 #
 # In order to embed the path to boost python in ecflow extension
 # we must build with ECFLOW_INSTALL_DIR & ECFLOW_PYTHON_INSTALL_DIR set
 #===================================================================================
 export ECFLOW_INSTALL_DIR=/usr/local/apps/ecflow/$release.$major.$minor
+
+# ===================================================================================
+# for cray, can have 3 different compiler, and multiple versions
+# *HOWEVER* we only install using the GNU compiler.
+# Note: we would only use:
+#       export ECFLOW_INSTALL_DIR=/usr/local/apps/ecflow/$release.$major.$minor/$PE_ENV/$COMPILER_VERSION
+# If we had libraries to install.
+# Hence for ecflow we will stick with: /usr/local/apps/ecflow/<version>
+# ===================================================================================
+#if [[ %ARCH% = cray ]] ; then
+#   if [[ "$PE_ENV" = CRAY ]] ; then
+#      export COMPILER_VERSION=$(echo $CRAY_CC_VERSION | sed 's/\.//' | cut -c1-2)
+#   fi
+#   if [[ "$PE_ENV" = INTEL ]] ; then
+#      export COMPILER_VERSION=$(icc -dumpversion | sed 's/\.//' | cut -c1-3)
+#   fi
+#   if [[ "$PE_ENV" = GNU ]] ; then
+#      export COMPILER_VERSION=$(gcc -dumpversion | sed 's/\.//' | cut -c1-2)
+#   fi
+#   export ECFLOW_INSTALL_DIR=/usr/local/apps/ecflow/$release.$major.$minor/$PE_ENV/$COMPILER_VERSION
+#fi
+
 export ECFLOW_PYTHON_INSTALL_DIR=$ECFLOW_INSTALL_DIR/lib/python%PYTHON_VERSION%/site-packages/ecflow 
+
 
 # bjam use ARCH environment to determine if the ecflowview should be built
 if [[ %BUILD_ECFLOWVIEW% = "true" ]] ; then
@@ -51,7 +73,7 @@ if [[ %SET_TO_TEST_SCRIPT% = true ]] ; then
    echo "Test only"
 else
    # TEST should be set to -n if defined
-   $BOOST_ROOT/bjam %TEMPLATE_DEPTH:% variant=%MODE% -j%NO_OF_CORES% %TEST:% -d2
+   $BOOST_ROOT/bjam %CUSTOM_BJAM_ARGS:% variant=%MODE% -j%NO_OF_CORES% %TEST:% -d2
 fi
  
 #==================================================================================

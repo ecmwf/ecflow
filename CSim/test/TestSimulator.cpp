@@ -48,11 +48,7 @@ void simulate(const std::string& directory, bool pass)
 	for ( fs::directory_iterator dir_itr( full_path ); dir_itr != end_iter; ++dir_itr ) {
 
 		try {
-#if BOOST_FILESYSTEM_VERSION == 3
          fs::path relPath(directory + "/" + dir_itr->path().filename().string());
-#else
-         fs::path relPath(directory + "/" + dir_itr->path().filename());
-#endif
 
  			// recurse down directories
 		    if ( is_directory(dir_itr->status()) )  {
@@ -62,11 +58,7 @@ void simulate(const std::string& directory, bool pass)
 
 		    // Only simulate file with .def file extension, i.e. ignore log files.
 // 			cout << "path = " << relPath << "\n";
-#if BOOST_FILESYSTEM_VERSION == 3
           if (File::getExt(relPath.filename().string()) != "def" && File::getExt(relPath.filename().string()) != "got") continue;
-#else
-		    if (File::getExt(relPath.leaf()) != "def" && File::getExt(relPath.leaf()) != "got") continue;
-#endif
 
 //			std::cout << "...............Simulating file " << relPath.string() << "\n";
 		    Simulator simulator;

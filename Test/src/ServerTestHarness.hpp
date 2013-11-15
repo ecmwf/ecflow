@@ -61,11 +61,11 @@ public:
 	// map.first = absolute task path
 	// map.second =  sms file string
 #if defined(AIX)
+   void run(Defs&, const std::string& defs_file, const std::map<std::string,std::string>&, int timeout = 120, bool waitForTestCompletion = true);
+   void run(Defs&, const std::string& defs_file, int timeout = 120,bool waitForTestCompletion = true);
+#elif defined(HPUX)
    void run(Defs&, const std::string& defs_file, const std::map<std::string,std::string>&, int timeout = 100, bool waitForTestCompletion = true);
    void run(Defs&, const std::string& defs_file, int timeout = 100,bool waitForTestCompletion = true);
-#elif defined(HPUX)
-   void run(Defs&, const std::string& defs_file, const std::map<std::string,std::string>&, int timeout = 90, bool waitForTestCompletion = true);
-   void run(Defs&, const std::string& defs_file, int timeout = 90,bool waitForTestCompletion = true);
 #else
  	void run(Defs&, const std::string& defs_file, const std::map<std::string,std::string>&, int timeout = 40, bool waitForTestCompletion = true);
 	void run(Defs&, const std::string& defs_file, int timeout = 40,bool waitForTestCompletion = true);

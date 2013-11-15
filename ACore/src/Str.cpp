@@ -121,6 +121,25 @@ bool Str::replace_all(std::string& subject, const std::string& search, const std
    return replaced;
 }
 
+bool Str::extract_data_member_value(const std::string& str, const std::string& data_member_name, std::string& data_member_value)
+{
+   //        012345678901234567,
+   //    str=cmd 1 user:mao
+   //    data_member_name=user:
+   //    data_member_value=ma0
+   std::string::size_type start = str.find(data_member_name);
+   if (start != std::string::npos) {
+      start += data_member_name.size();
+      data_member_value.clear();
+      for(size_t i = start; i < str.size(); i++) {
+         if (str[i] == ' ') break;
+         data_member_value += str[i];
+      }
+      return true;
+   }
+   return false;
+}
+
 
 void Str::replaceall(std::string& subject, const std::string& search, const std::string& replace)
 {

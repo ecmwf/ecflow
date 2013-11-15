@@ -32,6 +32,7 @@ list( APPEND tests
         TestDefsCheck    
         TestDerivable     
         TestError        
+        TestFind        
         TestGetAllTasks   
         TestJobGeneration 
         TestParent        

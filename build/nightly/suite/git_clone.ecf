@@ -22,6 +22,9 @@ else
    # clone from stash repository
    git clone ssh://git@software.ecmwf.int:7999/ecflow/ecflow.git
    
+   # Update by pulling branch. used 'master' when making a release otherwise use 'develop'
+   cd ecflow
+   git pull origin %GIT_BRANCH%   
 fi
 
 %include <tail.h>

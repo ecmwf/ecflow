@@ -68,7 +68,24 @@ test_uname ()
 
 if test_uname Linux ; then
 
+   TOOLSET=
+   CXXFLAGS=
    compiler=gcc-$(gcc -dumpversion)
+   
+   # When on cray check PE_ENV for environment
+   if [[ "$PE_ENV" = INTEL || "$PE_ENV" = CRAY || "$PE_ENV" = GNU ]]
+   then
+       CXXFLAGS=cxxflags=-fPIC
+       TOOLSET=toolset=gcc
+       if [ "$PE_ENV" = INTEL ] ; then
+         compiler=intel-linux
+         TOOLSET=toolset=intel
+       fi
+       if [ "$PE_ENV" = CRAY ] ; then
+         compiler=cray
+         TOOLSET=toolset=cray
+       fi
+   fi   
    
    # Allow the compiler to be overridden on linux
    if [ ${#compiler_arg} -ne 0 ] ; then
@@ -97,7 +114,7 @@ if test_uname Linux ; then
    
    # run python/C++ test
    cd Pyext
-   $BOOST_ROOT/bjam variant=$mode test-all $TEST_OPTS
+   $BOOST_ROOT/bjam $TOOLSET $CXXFLAGS variant=$mode test-all $TEST_OPTS
    cd ..
    
    if [[ x$DISPLAY == x  ]]; then

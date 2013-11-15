@@ -1,13 +1,36 @@
 ############################################################################################
-# cmake
-#   options:
+# cmake options:
+#
 #       -DCMAKE_BUILD_TYPE=Debug|RelWithDebInfo|Release|Production
 #       -DCMAKE_INSTALL_PREFIX=/path/to/install
+#
+#       -DCMAKE_MODULE_PATH=/path/to/ecbuild/cmake
 #
 #       -DCMAKE_C_COMPILER=gcc
 #       -DCMAKE_C_COMPILER=g++
 #
 #       -DCMAKE_PREFIX_PATH=/path/to/jasper:/path/to/any/package/out/of/place
+#       -DBUILD_SHARED_LIBS=OFF
+# ========================================================
+# Usage instructions:
+#
+# cd $WK
+# mkdir ecbuild
+# cd ecbuild
+# Build debug and release in same tree
+# mkdir debug
+# mkdir release
+# cd debug
+#  
+#/usr/local/apps/cmake/current/bin/cmake ../../  \
+#         -DCMAKE_BUILD_TYPE=Debug \
+#         -DCMAKE_MODULE_PATH=/usr/local/apps/ecbuild/1.2.0/share/ecbuild/cmake \
+#         -DPYTHON_LIBRARY=/usr/local/apps/python/current/lib/libpython2.7.a \
+#         -DPYTHON_INCLUDE_DIR=/usr/local/apps/python/current/include/python2.7 \
+#         -DPYTHON_EXECUTABLE=/usr/local/apps/python/current/bin/python2.7 
+#
+#############################################################
+
 
 cmake_minimum_required( VERSION 2.6.4 FATAL_ERROR )
 
@@ -30,7 +53,7 @@ ecbuild_find_python( VERSION 2.7 )
 # set(Boost_USE_STATIC_LIBS        ON)
 set(Boost_USE_MULTITHREADED      ON)
 # set(Boost_NO_SYSTEM_PATHS        ON)
-find_package( Boost 1.47.0 COMPONENTS python serialization system thread unit_test_framework test_exec_monitor filesystem program_options date_time )
+find_package( Boost 1.53.0 COMPONENTS python serialization system thread unit_test_framework test_exec_monitor filesystem program_options date_time )
 
 list( APPEND Ecflow_Boost_LIBS 
     ${Boost_SERIALIZATION_LIBRARY}
@@ -41,8 +64,13 @@ list( APPEND Ecflow_Boost_LIBS
     ${Boost_DATE_TIME_LIBRARY}
 )
 
-list( APPEND Ecflow_Test_LIBS ${Ecflow_Boost_LIBS} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} ${Boost_TEST_EXEC_MONITOR_LIBRARY} )
+list( APPEND Ecflow_Test_LIBS 
+      ${Ecflow_Boost_LIBS} 
+      ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} 
+      ${Boost_TEST_EXEC_MONITOR_LIBRARY} )
 
+##############################################################################
+# debug
 if( CMAKE_BUILD_TYPE MATCHES "[Dd][Ee][Bb][Uu][Gg]" )
     message( "INFO: DEBUG BUILD" )
     # for debug type builds, turn on verbose makefiles
@@ -55,6 +83,9 @@ if( CMAKE_BUILD_TYPE MATCHES "[Dd][Ee][Bb][Uu][Gg]" )
     ADD_DEFINITIONS( -DDEBUG )
 endif()
 
+###############################################################################
+# build source code
+
 add_subdirectory( ACore )
 add_subdirectory( ANattr )
 add_subdirectory( ANode )
@@ -66,14 +97,15 @@ add_subdirectory( Server )
 add_subdirectory( Test )
 add_subdirectory( TestEcfSms )
 add_subdirectory( Pyext )
-
 add_subdirectory( view )
 
 # configure_file( cmake/ecbase_config.h.in  ${CMAKE_BINARY_DIR}/ecbase_config.h )
 
 ############################################################################################
-# finalize
+# final
 
+# prepares a tar.gz of your sources and/or binaries
 ecbuild_install_project( NAME ecFlow )
 
+# print the summary of the configuration
 ecbuild_print_summary()

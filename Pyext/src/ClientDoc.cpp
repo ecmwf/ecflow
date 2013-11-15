@@ -534,6 +534,13 @@ const char* ClientDoc::run(){
             "       ci.run(path_list)                      # run all tasks specified in the paths\n"
             "   except RuntimeError, e:\n"
             "       print str(e)\n"
+            "\nEffect::\n\n"
+            "   Lets see the effect of run command on the following defs::\n\n"
+            "   suite s1\n"
+            "      task t1; time 10:00             # will complete straight away\n"
+            "      task t2; time 10:00 13:00 01:00 # will re-queue 3 times and complete on fourth run\n\n"
+            "In the last case (task t2) after each run the next time slot is incremented.\n"
+            "This can be seen by calling the Why command."
             ;
 }
 
@@ -940,6 +947,7 @@ const char* ClientDoc::alter(){
             " change variable name value    # Find the specified variable, and set the new value.\n"
             " change clock_type name        # The name must be one of 'hybrid' or 'real'.\n"
             " change clock_gain name        # The gain must be convertible to an integer.\n"
+            " change clock_sync name        # Sync suite calendar with the computer.\n"
             " change event name(optional )  # if no name specified the event is set, otherwise name must be 'set' or 'clear'\n"
             " change meter name value       # The meter value must be convertible to an integer, and between meter min-max range.\n"
             " change label name value       # sets the label\n"
@@ -992,6 +1000,14 @@ const char* ClientDoc::force_state(){
             "       ci.force_state(paths,State.complete)\n"
             "   except RuntimeError, e:\n"
             "       print str(e)\n"
+            "\nEffect::\n\n"
+            "   Lets see the effect of forcing complete on the following defs::\n\n"
+            "   suite s1\n"
+            "      task t1; time 10:00             # will complete straight away\n"
+            "      task t2; time 10:00 13:00 01:00 # will re-queue 3 times and complete on fourth \n\n"
+            "In the last case (task t2) after each force complete, the next time slot is incremented.\n"
+            "This can be seen by calling the Why command."
+
             ;
 }
 

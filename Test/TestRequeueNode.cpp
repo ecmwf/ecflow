@@ -65,20 +65,18 @@ BOOST_AUTO_TEST_CASE( test_requeue_node )
 	int taskSize = 2; // on linux 1024 tasks take ~4 seconds for job submission
   	Defs theDefs;
  	{
-		std::auto_ptr< Suite > suite( new Suite( "test_reque" ) );
- 		std::auto_ptr< Family > fam( new Family( "family" ) );
+      suite_ptr suite = theDefs.add_suite(  "test_reque" );
+ 		suite->addRepeat( RepeatInteger("VAR",0,1,1)); // repeat suite 2 times
+ 		suite->addVerify( VerifyAttr(NState::COMPLETE,1) ); // Test will complete, when suite completes, hence will only repeat suite once.
+      family_ptr fam = suite->add_family("family" );
  		fam->addRepeat( RepeatInteger("VAR",0,1,1));    // repeat family 2 times
 		fam->addVerify( VerifyAttr(NState::COMPLETE,2) );
   		for(int i=0; i < taskSize; i++) {
-  			std::auto_ptr< Task > task( new Task( "t" + boost::lexical_cast<std::string>(i) ) );
+  		   task_ptr task = fam->add_task( "t" +   boost::lexical_cast<std::string>(i));
   			task->addVerify( VerifyAttr(NState::COMPLETE,4) );      // task should complete 4 times
-  			fam->addTask( task );
  		}
- 		suite->addRepeat( RepeatInteger("VAR",0,1,1)); // repeat suite 2 times
- 		suite->addFamily( fam );
- 		suite->addVerify( VerifyAttr(NState::COMPLETE,1) );
-		theDefs.addSuite( suite );
  	}
+
  	// The test harness will create corresponding directory structure
  	// and populate with standard sms files.
   	ServerTestHarness serverTestHarness(false/*do verification*/);

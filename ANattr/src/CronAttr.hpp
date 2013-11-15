@@ -45,11 +45,12 @@ public:
 	void addTimeSeries( const TimeSeries& ts ) { timeSeries_ = ts;}
 	void add_time_series( int h, int m, bool relative = false ) { timeSeries_ = TimeSeries(h,m,relative);}
 
+	// Once a cron is free its stays free, until re-queue is called
 	void calendarChanged( const ecf::Calendar& c ); // can set attribute free
 	void resetRelativeDuration();
 
 	void reset(const ecf::Calendar& c);
-	void requeue(const ecf::Calendar& c);
+	void requeue(const ecf::Calendar& c,bool reset_next_time_slot = true);
 
    void miss_next_time_slot();
 	void setFree();   // ensures that isFree() always returns true

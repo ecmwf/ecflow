@@ -15,6 +15,7 @@
 #include <boost/test/unit_test.hpp>
 #include "boost/filesystem/operations.hpp"
 #include "boost/filesystem/path.hpp"
+#include "boost/make_shared.hpp"
 
 #include "MyDefsFixture.hpp"
 #include "ServerToClientResponse.hpp"
@@ -127,7 +128,7 @@ static void populateCmdVec(std::vector<Cmd_ptr>& cmd_vec, std::vector<STC_Cmd_pt
 	cmd_vec.push_back( Cmd_ptr( new AlterCmd("/suiteName",AlterCmd::ADD_TODAY,"10:00 20:00 00:30")));
 	cmd_vec.push_back( Cmd_ptr( new PlugCmd()));
 
-	std::auto_ptr<GroupCTSCmd>  theGroupCmd( new GroupCTSCmd());
+	boost::shared_ptr<GroupCTSCmd>  theGroupCmd = boost::make_shared<GroupCTSCmd>();
    theGroupCmd->addChild(  Cmd_ptr( new BeginCmd("suiteName"))  );
    theGroupCmd->addChild(  Cmd_ptr( new BeginCmd("EmptySuite"))  );
    theGroupCmd->addChild(  Cmd_ptr( new ServerVersionCmd())  );
@@ -174,7 +175,7 @@ static void populateCmdVec(std::vector<Cmd_ptr>& cmd_vec, std::vector<STC_Cmd_pt
  	BOOST_CHECK_MESSAGE(theGroupCmd->task_cmd(),"Expected task_cmd() to return true");
 	BOOST_CHECK_MESSAGE(theGroupCmd->terminate_cmd(),"Expected terminate_cmd() to return true");
 	BOOST_CHECK_MESSAGE(theGroupCmd->group_cmd(),"Expected group_cmd() to return true");
-	cmd_vec.push_back( Cmd_ptr(theGroupCmd.release()) );
+	cmd_vec.push_back( theGroupCmd );
 
 
 	// Server --> Client commands
@@ -189,7 +190,7 @@ static void populateCmdVec(std::vector<Cmd_ptr>& cmd_vec, std::vector<STC_Cmd_pt
    stc_cmd_vec.push_back( STC_Cmd_ptr( new DefsCmd(mock_server)));
    stc_cmd_vec.push_back( STC_Cmd_ptr( new SNodeCmd(mock_server,node_ptr()) ));
 
-	std::auto_ptr<GroupSTCCmd>  theSTCGroupCmd( new GroupSTCCmd());
+	boost::shared_ptr<GroupSTCCmd>  theSTCGroupCmd = boost::make_shared<GroupSTCCmd>() ;
 	theSTCGroupCmd->addChild(  STC_Cmd_ptr( new ErrorCmd())  );
 	theSTCGroupCmd->addChild(  STC_Cmd_ptr( new StcCmd(StcCmd::OK))  );
 	theSTCGroupCmd->addChild(  STC_Cmd_ptr( new StcCmd(StcCmd::BLOCK_CLIENT_SERVER_HALTED))  );
@@ -198,7 +199,7 @@ static void populateCmdVec(std::vector<Cmd_ptr>& cmd_vec, std::vector<STC_Cmd_pt
    theSTCGroupCmd->addChild(  STC_Cmd_ptr( new SServerLoadCmd())  );
    theSTCGroupCmd->addChild(  STC_Cmd_ptr( new DefsCmd(mock_server)));
    theSTCGroupCmd->addChild(  STC_Cmd_ptr( new SNodeCmd(mock_server,node_ptr())));
-	stc_cmd_vec.push_back( STC_Cmd_ptr(theSTCGroupCmd.release()) );
+	stc_cmd_vec.push_back( theSTCGroupCmd );
 }
 
 static void test_persistence(const Defs& theFixtureDefs )

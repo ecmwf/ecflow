@@ -54,6 +54,10 @@ const std::string Version::TAG = " (debug)";  // Old tag: beta(debug)
 const std::string Version::TAG = ""; // Old tag: beta
 #endif
 
+
+// See: http://www.cmake.org/cmake/help/cmake_tutorial.html
+// For defining version numbers. This is done is a separate file
+// that is then included
 std::string Version::description()
 {
    std::stringstream ss;
@@ -113,6 +117,10 @@ std::string Version::compiler()
    //  To find the list of defines for clang use:
    //  echo | /usr/local/apps/clang/current/bin/clang++ -dM -E -
    ss << "clang " << __clang_major__ << "." <<  __clang_minor__ ;
+#elif defined(__INTEL_COMPILER)
+   ss << "intel " <<  __INTEL_COMPILER;
+#elif defined(_CRAYC)
+   ss << "cray " <<  _CRAYC;
 #else
    ss << "gcc " << __GNUC__ << "." << __GNUC_MINOR__ << "." << __GNUC_PATCHLEVEL__;
 #endif

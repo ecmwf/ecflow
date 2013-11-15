@@ -230,10 +230,13 @@ bool ZombieCtrl::handle_user_actions(
 	const std::string& process_password = task_cmd->jobs_password();
 	const std::string& process_or_remote_id = task_cmd->process_or_remote_id();
 
+	if (theZombie.manual_user_action()) action_taken = "manual-";
+	else action_taken = "automatic-";
+
 	// *ADOPT* If zombie is set to adopt, copy over password and carry on as >NORMAL< , i.e. we return true
 	if ( task && theZombie.adopt()) {
 
-	   action_taken = "adopt";
+	   action_taken += "adopt";
 		/// Zombie was marked to adopt. password copied over, and zombie removed
 		/// *MUST* use the password of the process, and *NOT* the zombie
 		/// Since next time process communicates, it will be *WITH* the process password
@@ -261,7 +264,7 @@ bool ZombieCtrl::handle_user_actions(
 	// *FOB*
 	if (theZombie.fob()) {
 		/// Means return as if everything is OK. hence ClientInvoker will *NOT* block, and job can continue.
-      action_taken = "fob";
+      action_taken += "fob";
 
 		/// On the child COMPLETE/ABORT cmd, remove the zombie:
       /// *****************************************************************************************
@@ -296,7 +299,7 @@ bool ZombieCtrl::handle_user_actions(
 #ifdef DEBUG_ZOMBIE
 		std::cout << " >>>FAIL<<< zombies_.size(" << zombies_.size() << ")\n";
 #endif
-      action_taken = "fail";
+      action_taken += "fail";
 		theReply = PreAllocatedReply::error_cmd("[ authentication failed ] Request set to FAIL via zombie setting");
 		return false;
 	}
@@ -312,17 +315,17 @@ bool ZombieCtrl::handle_user_actions(
       if (task) {
          if (!task->flag().is_set(ecf::Flag::KILLED)) {
 
-            action_taken = "kill & fob";
+            action_taken += "kill & fob";
 
             // Kill the task, separate process, will typically send kill -15 to script.
             task->kill(theZombie.process_or_remote_id());
          }
          else {
-            action_taken = "kill(already killed, fobing instead)";
+            action_taken += "kill(already killed, fobing instead)";
          }
       }
       else  {
-         action_taken = "kill(no task, fobing instead)";
+         action_taken += "kill(no task, fobing instead)";
       }
 #ifdef DEBUG_ZOMBIE
       std::cout << " >>>KILL<<< zombies_.size(" << zombies_.size() << ")\n";
@@ -334,7 +337,7 @@ bool ZombieCtrl::handle_user_actions(
 	// *REMOVE* Typically Removal is immediate(i.e. via ZombieCmd), However this could have been set via ZombieAttribute
 	if (theZombie.remove()) {
 		/// Ask ClientInvoker to continue blocking, Zombie may re-appear
-      action_taken = "remove";
+      action_taken += "remove";
 		bool remove_ok = remove(path_to_task, process_or_remote_id, process_password);
       if (!remove_ok)  remove_ok = remove_by_path(path_to_task);
 
@@ -351,7 +354,7 @@ bool ZombieCtrl::handle_user_actions(
 	std::cout << ": BLOCKING\n";
 #endif
 	// i.e it will make several attempts , and then start contacting servers in the hosts file.
-   action_taken = "block";
+   action_taken += "block";
 	theReply = PreAllocatedReply::block_client_zombie_cmd();
 	return false;
 }

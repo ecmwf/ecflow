@@ -29,13 +29,13 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/tuple/tuple.hpp>
 
-#include "boost_archive.hpp" // collates boost archive includes
 #include "Log.hpp"
+#include "Str.hpp"
+#include "Ecf.hpp"
 #include "Serialization.hpp"
 
 #ifdef DEBUG
 //#define DEBUG_CONNECTION 1
-//#include "Ecf.hpp"
 //#define DEBUG_CONNECTION_MEMORY 1
 #endif
 
@@ -54,8 +54,12 @@
  */
 class connection {
 public:
-	/// Constructor.
-	connection(boost::asio::io_service& io_service) : socket_(io_service)
+	/// Allow tentative support for new client to talk to old server
+   /// by changing the boost serialisation archive version, hence tentative
+	connection(boost::asio::io_service& io_service)
+    : allow_new_client_old_server_(0),
+      allow_old_client_new_server_(0),
+      socket_(io_service)
 	{
 #ifdef DEBUG_CONNECTION
 		std::cout << "Connection::connection\n";
@@ -74,6 +78,13 @@ public:
 		return socket_;
 	}
 
+	// support for forward compatibility, by changing boost archive version, used in client context
+   void allow_new_client_old_server(int f)  { allow_new_client_old_server_ = f;}
+
+   // support for forward compatibility, by changing boost archive version, used in server context
+   void allow_old_client_new_server(int f)  { allow_old_client_new_server_ = f;}
+
+
 	/// Asynchronously write a data structure to the socket.
 	template<typename T, typename Handler>
 	void async_write(const T& t, Handler handler) {
@@ -84,9 +95,21 @@ public:
 		// Serialise the data first so we know how large it is.
 		try {
 		   ecf::save_as_string(outbound_data_,t);
+
+         if (allow_new_client_old_server_ != 0 && !Ecf::server()) {
+            // Client context, forward compatibility, new client -> old server(* assumes old server is boost lib version 9 *)
+            ecf::boost_archive::replace_version(outbound_data_,allow_new_client_old_server_);
+         }
+
+         // Server context: To allow build of ecflow, i.e old clients 3.0.x, installed on machines hpux,aix,etc
+         // need to communicate to *new* server 4.0.0,  new server (boost 1.53:10) ) --> (old_client:boost_1.47:9)
+         // Note: the read below, will have determined the actual archive version used.
+         if (Ecf::server() && allow_old_client_new_server_ != 0 ) {
+            ecf::boost_archive::replace_version(outbound_data_,allow_old_client_new_server_);
+         }
+
 		} catch (const boost::archive::archive_exception& ae ) {
-		   // Unable to decode data.
-		   // Something went wrong, inform the caller.
+		   // Unable to decode data. Something went wrong, inform the caller.
 		   ecf::LogToCout logToCout;
 		   LOG(ecf::Log::ERR,"Connection::async_write boost::archive::archive_exception " << ae.what());
 		   boost::system::error_code error(boost::asio::error::invalid_argument);
@@ -184,49 +207,70 @@ private:
 
 	/// Handle a completed read of message data.
 	template<typename T, typename Handler>
-	void handle_read_data(const boost::system::error_code& e, T& t,
-			boost::tuple<Handler> handler) {
+	void handle_read_data(const boost::system::error_code& e, T& t, boost::tuple<Handler> handler)
+	{
 		if (e) {
 			boost::get<0>(handler)(e);
 		} else {
 			// Extract the data structure from the data just received.
 			try {
 				std::string archive_data(&inbound_data_[0], inbound_data_.size());
+
 #ifdef DEBUG_CONNECTION_MEMORY
 				if (Ecf::server()) std::cout << "server::";
 				else               std::cout << "client::";
 				std::cout << "handle_read_data inbound_data_.size(" << inbound_data_.size() << ")\n";
 #endif
 
-				std::istringstream archive_stream(archive_data);
+				ecf::restore_from_string(archive_data,t);
 
-#if defined(BINARY_ARCHIVE)
-				// std::cout << "handle_read_data Archive BINARY\n";
-				boost::archive::binary_iarchive archive( archive_stream );
-				archive >> t;
+	         // Server context: To allow build of ecflow, i.e old clients 3.0.x, installed on machines hpux,aix,etc
+	         // need to communicate to *new* server 4.0.0,   new server (boost 1.53:10) ) --> (old_client:boost_1.47:9)
+	         if (Ecf::server() && allow_old_client_new_server_ != 0 ) {
+	            // get the actual version used, and *re-use* when replying back to *old* client
+	            int archive_version_in_data = ecf::boost_archive::extract_version(archive_data);
+	            int current_archive_version = ecf::boost_archive::version();
+	            if ( current_archive_version != archive_version_in_data ) {
+	               allow_old_client_new_server_ = archive_version_in_data;
+	            }
+	            else {
+	               // compatible, don't bother changing the write format
+	               allow_old_client_new_server_ = 0;
+	            }
+ 	         }
+			}
+			catch (const boost::archive::archive_exception& ae ) {
 
-#elif defined(PORTABLE_BINARY_ARCHIVE)
-				//	std::cout << "handle_read_data Archive PORTABLE_BINARY\n";
-				portable_binary_iarchive archive( archive_stream );
-				archive >> t;
-
-#elif defined(EOS_PORTABLE_BINARY_ARCHIVE)
-            // std::cout << "handle_read_data Archive EOS_PORTABLE_BINARY\n";
-            eos::portable_iarchive archive( archive_stream );
-            archive >> t;
-#else
-            // std::cout << "handle_read_data Archive TEXT\n";
-           boost::archive::text_iarchive archive( archive_stream );
-           archive >> t;
-#endif
-			} catch (const boost::archive::archive_exception& ae ) {
-				// Unable to decode data.
+			   // Log anyway so we know client <--> server incompatible
 				ecf::LogToCout logToCout;
 				LOG(ecf::Log::ERR,"Connection::handle_read_data boost::archive::archive_exception " << ae.what());
+
+			   // two context, client code or server, before giving up, try
+			   // - Client context, new server  -> old client (* assumes old client updated, with this code *)
+			   // - Server context, new client  -> old server (* assumes old server updated, with this code *)
+            // Match up the boost archive version in the string archive_data with current version
+            std::string archive_data(&inbound_data_[0], inbound_data_.size());
+			   int current_archive_version = ecf::boost_archive::version();
+			   int archive_version_in_data = ecf::boost_archive::extract_version(archive_data);
+			   if (current_archive_version != archive_version_in_data ) {
+			      if (ecf::boost_archive::replace_version(archive_data,current_archive_version)) {
+
+			         try {
+			            ecf::restore_from_string(archive_data,t);
+			            // It worked
+			            boost::get<0>(handler)(e);
+			            return;
+			         }
+			         catch (...) {}  // fall through and return error code
+			      }
+			   }
+
+				// Unable to decode data.
 				boost::system::error_code error( boost::asio::error::invalid_argument);
 				boost::get<0>(handler)(error);
 				return;
-			} catch (std::exception& ) {
+			}
+			catch (std::exception& ) {
 				// Unable to decode data.
 				ecf::LogToCout logToCout;
 				LOG(ecf::Log::ERR,"Connection::handle_read_data Unable to decode data");
@@ -241,6 +285,8 @@ private:
 	}
 
 private:
+   int allow_new_client_old_server_;
+   int allow_old_client_new_server_;
 	boost::asio::ip::tcp::socket socket_;/// The underlying socket.
 	std::string outbound_header_;        /// Holds an out-bound header.
 	std::string outbound_data_;          /// Holds the out-bound data.

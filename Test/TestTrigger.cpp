@@ -67,22 +67,19 @@ BOOST_AUTO_TEST_CASE( test_triggers_and_meters )
 	std::string taskName = "model";
   	Defs theDefs;
  	{
-		std::auto_ptr< Suite > suite( new Suite( "test_triggers_and_meters" ) );
- 		std::auto_ptr< Family > fam( new Family( "family" ) );
-		std::auto_ptr< Task > taskModel( new Task(taskName ));
-		taskModel->addMeter( Meter(meterName,0,100,100) ); // ServerTestHarness will add correct ecf
- 		fam->addTask( taskModel );
+      suite_ptr suite = theDefs.add_suite( "test_triggers_and_meters");
+		suite->addVerify( VerifyAttr(NState::COMPLETE,1) );
+      family_ptr fam = suite->add_family( "family");
 		fam->addVerify( VerifyAttr(NState::COMPLETE,1) );
 
+      task_ptr taskModel = fam->add_task(taskName);
+		taskModel->addMeter( Meter(meterName,0,100,100) ); // ServerTestHarness will add correct ecf
+
   		for(int i=0; i < taskSize; i++) {
-  			std::auto_ptr< Task > task( new Task( "t" + boost::lexical_cast<std::string>(i*10 + 10) ) );
+  			task_ptr task = fam->add_task( "t" + boost::lexical_cast<std::string>(i*10 + 10) );
   			task->addVerify( VerifyAttr(NState::COMPLETE,1) );
    		task->add_trigger(  taskName + Str::COLON() + meterName + " ge " + boost::lexical_cast<std::string>(i*10 + 10) );
-  			fam->addTask( task );
  		}
- 		suite->addFamily( fam );
-		suite->addVerify( VerifyAttr(NState::COMPLETE,1) );
-		theDefs.addSuite( suite );
  	}
 
  	// The test harness will create corresponding directory structure & default ecf file

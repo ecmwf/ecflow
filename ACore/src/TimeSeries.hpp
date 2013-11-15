@@ -65,7 +65,7 @@ public:
 	void reset(const ecf::Calendar& c);
 
 	/// Increment time series. Will find the next time slot after current calendar
-	void requeue(const ecf::Calendar& c);
+	void requeue(const ecf::Calendar& c,bool reset_next_time_slot = true);
 
 	/// if relativeToSuiteStart returns the relative duration, else returns calendar suite time of day.
 	/// The returned resolution is in minutes
@@ -113,8 +113,9 @@ public:
   	std::string dump() const;
  	bool checkInvariants(std::string& errormsg) const;
 
-	/// expects HH:MM or +HH:MM will throw std:runtime_error for errors
-	static bool getTime(const std::string& time, int& hour, int& min);
+	/// expects HH:MM or +HH:MM will throw std:runtime_error for errors,
+ 	/// *if* hour not in range(0-24), minutes(0-59), *and* check_time parameter is enabled
+	static bool getTime(const std::string& time, int& hour, int& min, bool check_time = true);
 
 	/// extract string like
 	///     time +00:00 20:00 00:10 # this is a comment which will be ignored. index = 1
@@ -135,7 +136,12 @@ public:
 	static void parse_state(size_t index,const std::vector<std::string>& lineTokens, ecf::TimeSeries& ts);
 	void set_isValid(bool b) { isValid_= b;} // for test only
 	void set_next_time_slot( const TimeSlot& ts) { nextTimeSlot_ = ts; } // needed for test only
+	const TimeSlot& get_next_time_slot() const { return nextTimeSlot_;}
+
+	// Is the time still valid, return false means time has expired.
+	bool is_valid() const { return isValid_;}
 private:
+
 	static void testTime(int hour, int minute);
 
 	// HANDLE CASE WHERE FINISH MINUTES IS NOT DIVISIBLE BY THE INCREMENT

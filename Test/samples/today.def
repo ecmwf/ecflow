@@ -1,0 +1,65 @@
+suite today
+  clock real
+  family time_range
+   task t
+     today 07:00 23:00 00:30
+   task t2
+     today 09:00 23:00 00:05
+   task t3
+     today 13:00
+   task t4
+     today 23:00
+   task t5
+      today 13:00
+      today 14:00
+      today 15:00
+      today 16:00
+      today 17:00
+  endfamily
+   family t1
+      task t1
+         today 00:01
+         today 23:59
+     task t2
+         today 09:00
+         today 12:00
+     task t3
+         today 12:00
+         today 18:00
+     task t4
+         today 18:00
+         today 23:00
+     task t5
+         today 10:00
+    task t6
+         today 11:00
+    task t7
+         today 12:00
+    task t8
+         today 13:00
+    task t9
+         today 14:00
+    task t10
+         today 15:00
+    task t11
+         today 16:00
+    task t12
+         today 17:00
+    task t13
+         today 18:00
+    task t14
+         today 19:00
+    task t15
+         today 20:00
+    task t16
+         today 21:00
+    task t17
+         today 22:00
+    task t18
+         today 23:00
+    task t19
+         today 23:00
+    task t20
+         today 00:00
+   endfamily
+endsuite

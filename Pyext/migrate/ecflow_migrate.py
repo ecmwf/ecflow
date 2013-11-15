@@ -12,9 +12,10 @@
 # nor does it submit to any jurisdiction.
 #////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 
-import os       # for getenv
-import shutil   # used to remove directory tree
-import argparse # for argument parsing     
+import os          # for getenv
+import shutil      # used to remove directory tree
+#import argparse   # requires python 2.7
+import getopt, sys # for argument parsing  
 
 class Migrator(object):
     def __init__(self, list_of_input_lines):
@@ -200,76 +201,99 @@ def do_migrate(defs_file):
         
     return migration_count 
 
-if __name__ == "__main__":
-    
-    DESC = """This python file is used to *FIX* migration bugs, when migrating from one release of ecflow to another
-  The typical migration path is:
+def usage():
+    DESC = """\nThis python file is used to *FIX* migration bugs, when migrating from one release of ecflow to another.
 
-    Migration is required when the release number changes:
-        <release-number>.<major>.<minor>
-            6.1.7   ->  7.0.0
-        as the checkpoint files are not compatible.
-
-        To actually migrate to a newer version of ecflow, follow these steps:
+ Migration may be required when the release number changes:
+ <release-number>.<major>.<minor>
+    6.1.7   ->  7.0.0
+ as the checkpoint files *may* not be compatible. 
+        
+ This can be *checked* before hand. By attempting to load the check pt into the new server. 
+ On the old server run:
+    ecflow_client --check_pt  # this will write out a checkpt file  
+ Now copy this file to a separate directory, and start the *new* server using the same port number
+ If no errors are reported, you do not need to migrate.  
+ If loading the checkpt file into the new server fails for any reason then
+ then please follow these steps.
 
  Steps for Old server:
    o shutdown
         # ecflow_client --shutdown
    o suspend all suites
         # CL="ecflow_client --port 32222 --host vsms1"
-       # for s in $($CL --suites); do $CL --suspend /$s; done
+        # for s in $($CL --suites); do $CL --suspend /$s; done
    o wait for active/submitted tasks to complete
    o halt the server
-       # ecflow_client --halt
+        # ecflow_client --halt
    o Use --migrate to dump state and structure to a file
-       # ecflow_client --migrate > all_suites.def
+        # ecflow_client --migrate > all_suites.def
    o terminate server *or* leave server running but start new server on different machine
      to avoid port number clash.
    o remove checkpt and backup checkpt files, to prevent new server from loading them
      *Only* applicable if starting new server on same machine
+   o Run this script 
+     python ecflow_migrate.py -d all_suites.def
+     This will fix any issues associated with reloading this defs into the new server.
+     It write a file called 'all_suites.mig', which we will need to load into the new server. 
+     See below.
 
  Steps for New server:
    o start server
    o load the migration file
-       # ecflow_client --load all_suites.def
+       # ecflow_client --load all_suites.mig
    o set server running:
        # ecflow_client --restart
    o resume suspended suites
        # CL="ecflow_client --port 32222 --host vsms1"
        # for s in $($CL --suites); do $CL --resume /$s; done
 
- 
+
  There could be bugs with *old* "ecflow_client --migrate > all_suites.def"
  This file, will fix any bugs associated --migrate, so that the subsequent
- load with  *new* client (ecflow_client --load all_suites.def) will work
-
- Issue 1: In release prior to 3.1.8, the --migrate in some cases
-          would generate a task where the abort reason could span multiple lines
-          This messed up the subsequent, --load.
-          i.e
-   task task # passwd:jxX0gIbR abort<:   Script for /suite/family/task can not be found:
-   ECF_SCRIPT(/tmp/map/work/p4/merlin/workspace/MyProject/Pyext/test/data/CUSTOMER/ECF_HOME/suite/family/task.sms) does not exist:
-   Variable ECF_FETCH not defined:
-   Variable ECF_FILES not defined:
-   Search of directory ECF_HOME(/tmp/map/work/p4/merlin/workspace/MyProject/Pyext/test/data/CUSTOMER/ECF_HOME) failed:
-   >abort try:2 state:aborted dur:02:19:57 flag:task_aborted,no_script
-      edit VARIABLE 'VALUE'
-
-   The fix will ensure that:
-     1/ abort<:    and >abort, are all placed on the same line.
+ load with  *new* client (ecflow_client --load all_suites.mig) will work
 
  Usage:
-    python migrate.py <filename>
-    python migrate.py all_suites.def 
+    python ecflow_migrate.py --defs_file <filename>
+    python ecflow_migrate.py --d <filename>
+    python ecflow_migrate.py --defs_file all_suites.def 
     
-    The fixed definition is written as <filename.mig, i.e. all_suites.mig
+    The fixed definition is written as filename.mig, i.e. all_suites.mig
     """
-
-    PARSER = argparse.ArgumentParser(description=DESC,  
-                                     formatter_class=argparse.RawDescriptionHelpFormatter)
-    PARSER.add_argument('defs_file',  help="The definition file to *fix* for migration")
-    ARGS = PARSER.parse_args()
-    ARGS.defs_file = os.path.expandvars(ARGS.defs_file) # expand references to any environment variables
-    print ARGS    
-    do_migrate( ARGS.defs_file )
+    return DESC;
     
+    
+if __name__ == "__main__":
+    
+#     PARSER = argparse.ArgumentParser(description=usage(),  
+#                                      formatter_class=argparse.RawDescriptionHelpFormatter)
+#     PARSER.add_argument('defs_file',  help="The definition file to *fix* for migration")
+#     ARGS = PARSER.parse_args()
+#     ARGS.defs_file = os.path.expandvars(ARGS.defs_file) # expand references to any environment variables
+#     print ARGS    
+#     do_migrate( ARGS.defs_file )
+    
+    try:
+        opts, args = getopt.getopt(sys.argv[1:], "hd", ["help", "defs_file="])
+    except getopt.GetoptError as err:
+        # print help information and exit:
+        print(err) # will print something like "option -a not recognised"
+        print usage()
+        sys.exit(2)
+        
+    defs_file = None
+    for o, a in opts:
+        if o in ("-h", "--help"):
+            print usage()
+            sys.exit()
+        elif o in ("-d", "--defs_file"):
+            defs_file = a
+        else:
+            assert False, "un-handled option"
+    
+    if defs_file == None:
+        print "Please enter path to the defs file i.e ecflow_migrate --d ./defs_file.def"
+        sys.exit(1)
+        
+    defs_file = os.path.expandvars(defs_file); # expand references to any environment variables
+    do_migrate( defs_file )

@@ -61,23 +61,51 @@ void save_as_string(std::string& outbound_data, const T& t)
    boost::archive::binary_oarchive archive( archive_stream );
    archive << t;
    outbound_data = archive_stream.str();
-   //             std::cout << "async_write BINARY " << outbound_data_ << "\n";
+   //             std::cout << "save_as_string BINARY " << outbound_data_ << "\n";
 #elif defined(PORTABLE_BINARY_ARCHIVE)
    portable_binary_oarchive archive( archive_stream );
    archive << t;
    outbound_data = archive_stream.str();
-   //             std::cout << "async_write PORTABLE_BINARY " << outbound_data_ << "\n";
+   //             std::cout << "save_as_string PORTABLE_BINARY " << outbound_data_ << "\n";
 #elif defined(EOS_PORTABLE_BINARY_ARCHIVE)
    eos::portable_oarchive archive( archive_stream );
    archive << t;
    outbound_data = archive_stream.str();
-   //             std::cout << "async_write EOS_PORTABLE_BINARY " << outbound_data_ << "\n";
+   //             std::cout << "save_as_string EOS_PORTABLE_BINARY " << outbound_data_ << "\n";
 #else
    boost::archive::text_oarchive archive( archive_stream );
    archive << t;
    outbound_data = archive_stream.str();
 #endif
 }
+
+template< typename T >
+void restore_from_string(const std::string& archive_data, T& t)
+{
+   std::istringstream archive_stream(archive_data);
+
+#if defined(BINARY_ARCHIVE)
+   // std::cout << "restore_from_string Archive BINARY\n";
+   boost::archive::binary_iarchive archive( archive_stream );
+
+#elif defined(PORTABLE_BINARY_ARCHIVE)
+   // std::cout << "restore_from_string Archive PORTABLE_BINARY\n";
+   portable_binary_iarchive archive( archive_stream );
+
+#elif defined(EOS_PORTABLE_BINARY_ARCHIVE)
+   // std::cout << "restore_from_string Archive EOS_PORTABLE_BINARY\n";
+   eos::portable_iarchive archive( archive_stream );
+
+#else
+   // std::cout << "restore_from_string Archive TEXT\n";
+   boost::archive::text_iarchive archive( archive_stream );
+
+#endif
+
+   archive >> t;
+}
+
+
 
 template< typename T >
 void restore(const std::string& fileName, T& restored, ecf::Archive::Type at = ecf::Archive::default_archive())

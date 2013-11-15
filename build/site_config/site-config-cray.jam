@@ -52,6 +52,63 @@ lib boost_program_options : : <variant>release <file>$(BOOST_ROOT)/stage/lib/lib
 lib boost_filesystem      : : <variant>release <file>$(BOOST_ROOT)/stage/lib/libboost_filesystem-mt.a ;
 lib boost_datetime        : : <variant>release <file>$(BOOST_ROOT)/stage/lib/libboost_date_time-mt.a ;
 
+# INTEL ================================================================================================
+lib boost_serialization : :   <toolset>intel <variant>debug <file>$(BOOST_ROOT)/stage/lib/libboost_serialization-il-mt-d-1_53.a ;
+lib boost_system : :          <toolset>intel <variant>debug <file>$(BOOST_ROOT)/stage/lib/libboost_system-il-mt-d-1_53.a ;
+lib boost_thread : :          <toolset>intel <variant>debug <file>$(BOOST_ROOT)/stage/lib/libboost_thread-il-mt-d-1_53.a ;
+lib boost_test   : :          <toolset>intel <variant>debug <file>$(BOOST_ROOT)/stage/lib/libboost_unit_test_framework-il-mt-d-1_53.a ;
+lib boost_test_monitor : :    <toolset>intel <variant>debug <file>$(BOOST_ROOT)/stage/lib/libboost_test_exec_monitor-il-mt-d-1_53.a ;
+lib boost_program_options : : <toolset>intel <variant>debug <file>$(BOOST_ROOT)/stage/lib/libboost_program_options-il-mt-d-1_53.a ;
+lib boost_filesystem      : : <toolset>intel <variant>debug <file>$(BOOST_ROOT)/stage/lib/libboost_filesystem-il-mt-d-1_53.a ;
+lib boost_datetime        : : <toolset>intel <variant>debug <file>$(BOOST_ROOT)/stage/lib/libboost_date_time-il-mt-d-1_53.a ;
+
+lib boost_serialization : :   <toolset>intel <variant>profile <file>$(BOOST_ROOT)/stage/lib/libboost_serialization-il-mt-1_53.a ;
+lib boost_system : :          <toolset>intel <variant>profile <file>$(BOOST_ROOT)/stage/lib/libboost_system-il-mt-1_53.a ;
+lib boost_thread : :          <toolset>intel <variant>profile <file>$(BOOST_ROOT)/stage/lib/libboost_thread-il-mt-1_53.a ;
+lib boost_test   : :          <toolset>intel <variant>profile <file>$(BOOST_ROOT)/stage/lib/libboost_unit_test_framework-il-mt-1_53.a ;
+lib boost_test_monitor : :    <toolset>intel <variant>profile <file>$(BOOST_ROOT)/stage/lib/libboost_test_exec_monitor-il-mt-1_53.a ;
+lib boost_program_options : : <toolset>intel <variant>profile <file>$(BOOST_ROOT)/stage/lib/libboost_program_options-il-mt-1_53.a ;
+lib boost_filesystem      : : <toolset>intel <variant>profile <file>$(BOOST_ROOT)/stage/lib/libboost_filesystem-il-mt-1_53.a ;
+lib boost_datetime        : : <toolset>intel <variant>profile <file>$(BOOST_ROOT)/stage/lib/libboost_date_time-il-mt-1_53.a ;
+
+lib boost_serialization : :   <toolset>intel <variant>release <file>$(BOOST_ROOT)/stage/lib/libboost_serialization-il-mt-1_53.a ;
+lib boost_system : :          <toolset>intel <variant>release <file>$(BOOST_ROOT)/stage/lib/libboost_system-il-mt-1_53.a ;
+lib boost_thread : :          <toolset>intel <variant>release <file>$(BOOST_ROOT)/stage/lib/libboost_thread-il-mt-1_53.a ;
+lib boost_test   : :          <toolset>intel <variant>release <file>$(BOOST_ROOT)/stage/lib/libboost_unit_test_framework-il-mt-1_53.a ;
+lib boost_test_monitor : :    <toolset>intel <variant>release <file>$(BOOST_ROOT)/stage/lib/libboost_test_exec_monitor-il-mt-1_53.a ;
+lib boost_program_options : : <toolset>intel <variant>release <file>$(BOOST_ROOT)/stage/lib/libboost_program_options-il-mt-1_53.a ;
+lib boost_filesystem      : : <toolset>intel <variant>release <file>$(BOOST_ROOT)/stage/lib/libboost_filesystem-il-mt-1_53.a ;
+lib boost_datetime        : : <toolset>intel <variant>release <file>$(BOOST_ROOT)/stage/lib/libboost_date_time-il-mt-1_53.a ;
+
+# CRAY ================================================================================================
+lib boost_serialization : :   <toolset>cray <variant>debug <file>$(BOOST_ROOT)/stage/lib/libboost_serialization-mt-d-1_53.a ;
+lib boost_system : :          <toolset>cray <variant>debug <file>$(BOOST_ROOT)/stage/lib/libboost_system-mt-d-1_53.a ;
+lib boost_thread : :          <toolset>cray <variant>debug <file>$(BOOST_ROOT)/stage/lib/libboost_thread-mt-d-1_53.a ;
+lib boost_test   : :          <toolset>cray <variant>debug <file>$(BOOST_ROOT)/stage/lib/libboost_unit_test_framework-mt-d-1_53.a ;
+lib boost_test_monitor : :    <toolset>cray <variant>debug <file>$(BOOST_ROOT)/stage/lib/libboost_test_exec_monitor-mt-d-1_53.a ;
+lib boost_program_options : : <toolset>cray <variant>debug <file>$(BOOST_ROOT)/stage/lib/libboost_program_options-mt-d-1_53.a ;
+lib boost_filesystem      : : <toolset>cray <variant>debug <file>$(BOOST_ROOT)/stage/lib/libboost_filesystem-mt-d-1_53.a ;
+lib boost_datetime        : : <toolset>cray <variant>debug <file>$(BOOST_ROOT)/stage/lib/libboost_date_time-mt-d-1_53.a ;
+
+lib boost_serialization : :   <toolset>cray <variant>profile <file>$(BOOST_ROOT)/stage/lib/libboost_serialization-mt-1_53.a ;
+lib boost_system : :          <toolset>cray <variant>profile <file>$(BOOST_ROOT)/stage/lib/libboost_system-mt-1_53.a ;
+lib boost_thread : :          <toolset>cray <variant>profile <file>$(BOOST_ROOT)/stage/lib/libboost_thread-mt-1_53.a ;
+lib boost_test   : :          <toolset>cray <variant>profile <file>$(BOOST_ROOT)/stage/lib/libboost_unit_test_framework-mt-1_53.a ;
+lib boost_test_monitor : :    <toolset>cray <variant>profile <file>$(BOOST_ROOT)/stage/lib/libboost_test_exec_monitor-mt-1_53.a ;
+lib boost_program_options : : <toolset>cray <variant>profile <file>$(BOOST_ROOT)/stage/lib/libboost_program_options-mt-1_53.a ;
+lib boost_filesystem      : : <toolset>cray <variant>profile <file>$(BOOST_ROOT)/stage/lib/libboost_filesystem-mt-1_53.a ;
+lib boost_datetime        : : <toolset>cray <variant>profile <file>$(BOOST_ROOT)/stage/lib/libboost_date_time-mt-1_53.a ;
+
+lib boost_serialization : :   <toolset>cray <variant>release <file>$(BOOST_ROOT)/stage/lib/libboost_serialization-mt-1_53.a ;
+lib boost_system : :          <toolset>cray <variant>release <file>$(BOOST_ROOT)/stage/lib/libboost_system-mt-1_53.a ;
+lib boost_thread : :          <toolset>cray <variant>release <file>$(BOOST_ROOT)/stage/lib/libboost_thread-mt-1_53.a ;
+lib boost_test   : :          <toolset>cray <variant>release <file>$(BOOST_ROOT)/stage/lib/libboost_unit_test_framework-mt-1_53.a ;
+lib boost_test_monitor : :    <toolset>cray <variant>release <file>$(BOOST_ROOT)/stage/lib/libboost_test_exec_monitor-mt-1_53.a ;
+lib boost_program_options : : <toolset>cray <variant>release <file>$(BOOST_ROOT)/stage/lib/libboost_program_options-mt-1_53.a ;
+lib boost_filesystem      : : <toolset>cray <variant>release <file>$(BOOST_ROOT)/stage/lib/libboost_filesystem-mt-1_53.a ;
+lib boost_datetime        : : <toolset>cray <variant>release <file>$(BOOST_ROOT)/stage/lib/libboost_date_time-mt-1_53.a ;
+
+
 # ******************** CRAY Compiler specific ************************************
 # The customer may be able to work around this by adding
 #
@@ -73,7 +130,7 @@ lib boost_datetime        : : <variant>release <file>$(BOOST_ROOT)/stage/lib/lib
 # ***********************************************************************************
 project site-config 
     : requirements <include>$(BOOST_ROOT)  
-    : requirements <define>BOOST_ASIO_DISABLE_FENCED_BLOCK
+    : requirements <toolset>cray:<define>BOOST_ASIO_DISABLE_FENCED_BLOCK
     ;
 
 # On linux 64, because most of the static library's, are placed in a shared libs(ecflow.so)
@@ -83,10 +140,10 @@ project site-config
 # using toolset-name : version :invocation-command : options ;
 #   where options allows <cflags, cxxflags, compileflags and linkflags >
 #
-using cray        : : : <cxxflags>-fPIC ;
 #using gcc         : : : <cxxflags>-fPIC ;
-#using gcc : 4.7.2 : :   <cxxflags>-fPIC <cxxflags>-std=gnu++11 <cxxflags>-ftemplate-depth=512 ;
+#using cray        : : : <cxxflags>-fPIC ;
 #using intel-linux : : : <cxxflags>-fPIC ;
+
 
 # For cray use the 'CC' wrapper script, however this assumes you linking with MPI, then barf's
 # using gcc : : CC : <cxxflags>-fPIC ;

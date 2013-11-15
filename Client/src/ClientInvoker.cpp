@@ -94,6 +94,16 @@ void ClientInvoker::set_host_port(const std::string& host, const std::string& po
 	clientEnv_.set_host_port(host,port);
 }
 
+void ClientInvoker::allow_new_client_old_server(int archive_version_of_old_server)
+{
+   clientEnv_.allow_new_client_old_server(archive_version_of_old_server);
+}
+
+int ClientInvoker::allow_new_client_old_server() const
+{
+   return clientEnv_.allow_new_client_old_server();
+}
+
 void ClientInvoker::taskPath(const std::string& s) {
 	assert(!s.empty());
 	test_ = true;
@@ -275,6 +285,7 @@ int ClientInvoker::do_invoke_cmd(Cmd_ptr cts_cmd) const
 
 					boost::asio::io_service io_service;
 					Client theClient( io_service, cts_cmd , clientEnv_.host(), clientEnv_.port(), clientEnv_.connect_timeout() );
+					if (clientEnv_.allow_new_client_old_server() != 0) theClient.allow_new_client_old_server(clientEnv_.allow_new_client_old_server());
 					io_service.run();
 					if (clientEnv_.debug()) cout << "ClientInvoker: >>> After: io_service.run() <<<\n";
 
@@ -283,6 +294,12 @@ int ClientInvoker::do_invoke_cmd(Cmd_ptr cts_cmd) const
 						/// will return false if further action required
 						if (theClient.handle_server_response( server_reply_, clientEnv_.debug() )) {
 							// The normal response.  RoundTriprecorder will record in rtt_
+
+						   // If the command was a delete_all command, reset client_handle
+						   if (cts_cmd->delete_all_cmd()) {
+						      ClientInvoker* non_const_this = const_cast<ClientInvoker*>(this);
+						      non_const_this->reset();
+						   }
 							return 0; // the normal exit path
 						}
 					}

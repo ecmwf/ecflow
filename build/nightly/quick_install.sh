@@ -38,6 +38,7 @@ ecflow_client --terminate=yes --port=4141
 # =======================================================================
 rm -rf `hostname`.4141.*
 
+export ECF_ALLOW_OLD_CLIENT_NEW_SERVER=9
 ecflow_server --port=4141 --reply_back_if_ok &
 sleep 4
 

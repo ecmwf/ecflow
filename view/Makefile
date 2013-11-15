@@ -44,17 +44,13 @@ menuclean:
 	mkdir $(DIRRC)
 
 parse:
-	p4 edit src/menul.c src/menuy.c 
 	cd src && lex  -t menul.l > menul.c && yacc  menuy.y && mv -f y.tab.c menuy.c && cd ../
 
 menu-full: menu parse all rel 
 
 menu:
-	p4 edit src/ecflowview.menu.h
 	sh src/menu2c.sh  < src/ecflowview.menu > src/ecflowview.menu.h
 	cp -f src/ecflowview.menu $(DIRRC)/.
-
-	p4 edit src/xcdp.menu.h
 	sh src/menu2c.sh < src/xcdp.menu  > src/xcdp.menu.h
 	cp -f src/xcdp.menu $(DIRRC)/.
 
@@ -82,15 +78,9 @@ calib:
 
 SUITE=test_suite
 load:	
-	 # $(CLNT) --replace /$(SUITE) tool/$(SUITE).exp
-	 # $(CLNT) --replace /test_ui tool/test.def
 	 $(CLNT) --replace /gui tool/test.def
-
 	 $(CLNT2) --host badger --port 31415 --group="get; show" > badger.def
 	 $(CLNT) --load badger.def
-
-	 # cd /var/tmp/map/work/p4/metapps/suites/o/def && make
-	 # cd /var/tmp/map/work/p4/metapps/suites/o/def && make test
 
 boot:
 	 - $(CLNT) --load tool/3199.exp

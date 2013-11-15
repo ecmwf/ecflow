@@ -159,6 +159,18 @@ BOOST_AUTO_TEST_CASE( test_variable_substitution_double_micro )
    BOOST_CHECK_MESSAGE(s->variableSubsitution(cmd)," substitution failed");
    BOOST_CHECK_MESSAGE( cmd == expected, "expected '" << expected << "' but found '" << cmd << "'");
 
+   cmd = "%%%"; expected = "%%";
+   BOOST_CHECK_MESSAGE(s->variableSubsitution(cmd)," substitution failed");
+   BOOST_CHECK_MESSAGE( cmd == expected, "expected '" << expected << "' but found '" << cmd << "'");
+
+   cmd = "%%%%"; expected = "%%";
+   BOOST_CHECK_MESSAGE(s->variableSubsitution(cmd)," substitution failed");
+   BOOST_CHECK_MESSAGE( cmd == expected, "expected '" << expected << "' but found '" << cmd << "'");
+
+   cmd = "%%%%%"; expected = "%%%";
+   BOOST_CHECK_MESSAGE(s->variableSubsitution(cmd)," substitution failed");
+   BOOST_CHECK_MESSAGE( cmd == expected, "expected '" << expected << "' but found '" << cmd << "'");
+
    cmd = "date +%%Y.%%m.%%d"; expected = "date +%Y.%m.%d";
    BOOST_CHECK_MESSAGE(s->variableSubsitution(cmd),"substitution failed");
    BOOST_CHECK_MESSAGE( cmd == expected, "expected '" << expected << "' but found '" << cmd << "'");

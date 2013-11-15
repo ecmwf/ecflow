@@ -35,5 +35,16 @@ suite cron
 
    task cron11
       cron 00:00 23:59 00:01  #  run every minute
+      
+   family f1
+      cron -d 22 12:00
+      task t1
+      task t2
+   endfamily
+   family f2
+      cron -d 8 12:00
+      task t1
+      task t2
+   endfamily
    
 endsuite

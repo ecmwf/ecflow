@@ -68,6 +68,28 @@ fi
 
 install_arg=install-all
 
+# ==============================================================================
+# In order to embedd boost_python path in the ecflow extension, we need
+# ECFLOW_INSTALL_DIR to be set correctly, when building the extension
+# Hacky work around since, <dll-path> does not work for a relink at install time.
+# Set install directory for ecflow & embedding of boost python extension
+# ===============================================================================
+cd $WK
+
+# Determine the release,major,minor numbers for this version 
+release=$(grep "Version::release_" ACore/src/Version.cpp  | cut -d= -s -f2 | sed 's/;//g' | sed 's/ //g')
+major=$(grep   "Version::major_"   ACore/src/Version.cpp  | cut -d= -s -f2 | sed 's/;//g' | sed 's/ //g')
+minor=$(grep   "Version::minor_"   ACore/src/Version.cpp  | cut -d= -s -f2 | sed 's/;//g' | sed 's/ //g' | sed 's/"//g' )
+ECFLOW_VERSION=$release.$major.$minor
+   
+export ECFLOW_INSTALL_DIR=${ECFLOW_INSTALL_DIR:-/usr/local/apps/ecflow/$release.$major.$minor}
+
+# =============================================================================
+# Required for cray, since we allow multiple compilers
+# =============================================================================
+TOOLSET=
+CXXFLAGS=
+
 # ======================================================================
 # We do NOT install on the LOCAL build machine, since that will not have
 # the correct embedded paths with ecflow.so (i.e for boost python )
@@ -108,6 +130,22 @@ then
       export WK=/vol/ecf/cluster/ecflow
    fi
   
+elif [[ "$ARCH" = cray ]] ; then 
+
+   TOOLSET=toolset=gcc
+   CXXFLAGS=cxxflags=-fPIC
+   if [[ "$PE_ENV" = CRAY ]] ; then
+      echo "The PE_ENV=CRAY, For ecflow we only support install with PE_ENV=GNU"
+      exit 1
+   fi
+   if [[ "$PE_ENV" = INTEL ]] ; then
+      echo "The PE_ENV=INTEL, For ecflow we only support install with PE_ENV=GNU"
+      exit 1
+   fi
+   
+   export WK=/perm/ma/ma0/workspace/$PE_ENV/ecflow
+   export BOOST_ROOT=/perm/ma/ma0/boost/$BOOST_VERSION
+
 elif [[ "$ARCH" = hpia64 ]] ; then 
 
    # ======================================================================
@@ -145,33 +183,25 @@ elif [[ "$ARCH" = rs6000 ]] ; then
    export WK=/emos_data/ecflow/rs6000/xlc/ecflow    
 fi
 
+# =======================================================================================
+# Python
+# ========================================================================================
+export ECFLOW_PYTHON_INSTALL_DIR=$ECFLOW_INSTALL_DIR/lib/python2.7/site-packages/ecflow 
 
-# ==========================================================================
-# In order to embedd boost_python path in the ecflow extension, we need
-# ECFLOW_INSTALL_DIR to be set correctly, when building the extension
-# Hacky work around since, <dll-path> does not work for a relink at install time.
-# Set install directory for ecflow & embedding of boost python extension
-# ===============================================================================
-cd $WK
 
-# Determine the release,major,minor numbers for this version 
-release=$(grep "Version::release_" ACore/src/Version.cpp  | cut -d= -s -f2 | sed 's/;//g' | sed 's/ //g')
-major=$(grep   "Version::major_"   ACore/src/Version.cpp  | cut -d= -s -f2 | sed 's/;//g' | sed 's/ //g')
-minor=$(grep   "Version::minor_"   ACore/src/Version.cpp  | cut -d= -s -f2 | sed 's/;//g' | sed 's/ //g' | sed 's/"//g' )
-ECFLOW_VERSION=$release.$major.$minor
-   
-export ECFLOW_INSTALL_DIR=${ECFLOW_INSTALL_DIR:-/usr/local/apps/ecflow/$release.$major.$minor}
-export ECFLOW_PYTHON_INSTALL_DIR=$ECFLOW_INSTALL_DIR/lib/python2.7/site-packages/ecflow ;
-   
 # ============================================================================
 # INSTALL
 # ============================================================================
-$BOOST_ROOT/bjam -d2 variant=$mode_arg $test_arg $install_arg
+$BOOST_ROOT/bjam $TOOLSET $CXXFLAGS -d2 variant=$mode_arg $test_arg $install_arg
    
+# ===========================================================================
 # install system files for ecmwf configuration: servers list + menu
-DEST=$ECFLOW_INSTALL_DIR/lib/.
-cp -f $WK/build/servers $WK/view/src/ecflowview.menu $DEST/.
-chmod 644 $DEST/servers $DEST/ecflowview.menu
+# ===========================================================================
+if [[ "$test_arg" = "" ]] ; then
+   DEST=$ECFLOW_INSTALL_DIR/lib
+   cp -f $WK/build/servers $WK/view/src/ecflowview.menu $DEST/.
+   chmod 644 $DEST/servers $DEST/ecflowview.menu
+fi
    
 # ============================================================================ 
 # Copy over release from c2a -> c2b

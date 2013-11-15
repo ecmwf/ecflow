@@ -77,17 +77,14 @@ BOOST_AUTO_TEST_CASE( test_single_real_time )
       //       we will find that state change happens at job submission interval,
       //       and hence skews time series.  Which can leave state in a queued state,
       //       and hence test never completes
-      std::auto_ptr< Suite > suite( new Suite( "test_time_single_slot" ) );
+      suite_ptr suite = theDefs.add_suite("test_time_single_slot");
       ClockAttr clockAttr(theLocalTime);
       suite->addClock( clockAttr );
 
-      std::auto_ptr< Family > fam( new Family( "family" ) );
-      std::auto_ptr< Task > task( new Task( "t" ) );
+      family_ptr fam = suite->add_family("family");
+      task_ptr task = fam->add_task("t");
       task->addTime( ecf::TimeAttr(ecf::TimeSlot(time1.time_of_day())));
       task->addVerify( VerifyAttr(NState::COMPLETE,1) );      // task should complete 1 times
-      fam->addTask( task );
-      suite->addFamily( fam );
-      theDefs.addSuite( suite );
    }
 
    // The test harness will create corresponding directory structure
@@ -108,7 +105,8 @@ BOOST_AUTO_TEST_CASE( test_time_multiple_single_slot )
    // for each time attribute leave GAP of 3 * job submission interval
    // on slow systems submitted->active->complete > TestFixture::job_submission_interval()
    // Also the task duration must be greater than job_submission_interval,  otherwise
-   // we will get multiple invocation for the same time step
+   // we will get multiple invocation for the same time step.
+   // *sometimes* just submitted->active can take many times job submission interval.
 
    //# Note: we have to use relative paths, since these tests are relocatable
    //suite test_time_multiple_single_slot
@@ -127,23 +125,20 @@ BOOST_AUTO_TEST_CASE( test_time_multiple_single_slot )
       // with todays time + minute.
       boost::posix_time::ptime theLocalTime = boost::posix_time::ptime(date(2010,6,21),time_duration(10,0,0));
       boost::posix_time::ptime time1 = theLocalTime + minutes(1);
-      boost::posix_time::ptime time2 = theLocalTime + minutes(4);
-      boost::posix_time::ptime time3 = theLocalTime + minutes(7);
+      boost::posix_time::ptime time2 = time1 + minutes(TestFixture::job_submission_interval());
+      boost::posix_time::ptime time3 = time2 + minutes(TestFixture::job_submission_interval());
 
-      std::auto_ptr< Suite > suite( new Suite( "test_time_multiple_single_slot" ) );
+      suite_ptr suite = theDefs.add_suite("test_time_multiple_single_slot");
       ClockAttr clockAttr(theLocalTime);
       suite->addClock( clockAttr );
-      suite->add_variable("SLEEPTIME",boost::lexical_cast<std::string>(TestFixture::job_submission_interval()-1));
+      suite->add_variable("SLEEPTIME","1");
 
-      std::auto_ptr< Family > fam( new Family( "family" ) );
-      std::auto_ptr< Task > task( new Task( "t" ) );
+      family_ptr fam = suite->add_family("family");
+      task_ptr task = fam->add_task("t");
       task->addTime( ecf::TimeAttr( ecf::TimeSlot(time1.time_of_day()) )  );
       task->addTime( ecf::TimeAttr( ecf::TimeSlot(time2.time_of_day()) )  );
       task->addTime( ecf::TimeAttr( ecf::TimeSlot(time3.time_of_day()) )  );
       task->addVerify( VerifyAttr(NState::COMPLETE,3) );      // task should complete 3 times
-      fam->addTask( task );
-      suite->addFamily( fam );
-      theDefs.addSuite( suite );
    }
 
    // The test harness will create corresponding directory structure
@@ -181,13 +176,13 @@ BOOST_AUTO_TEST_CASE( test_time_relative_time_series )
    {
       // Initialise clock with todays date and time, then create a time attribute
       // with a time series, so that task runs 3 times relative to suite start
-      std::auto_ptr< Suite > suite( new Suite( "test_time_relative_time_series" ) );
+      suite_ptr suite = theDefs.add_suite("test_time_relative_time_series");
       ClockAttr clockAttr(Calendar::second_clock_time());
       suite->addClock( clockAttr );
       suite->add_variable("SLEEPTIME",boost::lexical_cast<std::string>(TestFixture::job_submission_interval()-1));
 
-      std::auto_ptr< Family > fam( new Family( "family" ) );
-      std::auto_ptr< Task > task( new Task( "t" ) );
+      family_ptr fam = suite->add_family("family");
+      task_ptr task = fam->add_task("t");
       task->addTime( ecf::TimeAttr(
                ecf::TimeSlot(0,1),
                ecf::TimeSlot(0,7),
@@ -196,9 +191,6 @@ BOOST_AUTO_TEST_CASE( test_time_relative_time_series )
       )
       );
       task->addVerify( VerifyAttr(NState::COMPLETE,3) );      // task should complete 3 times
-      fam->addTask( task );
-      suite->addFamily( fam );
-      theDefs.addSuite( suite );
    }
 
    // The test harness will create corresponding directory structure
@@ -237,10 +229,10 @@ BOOST_AUTO_TEST_CASE( test_time_real_series )
       // with a time series, so that task runs 3 times
       boost::posix_time::ptime theLocalTime = boost::posix_time::ptime(date(2010,6,21),time_duration(10,0,0));
       boost::posix_time::ptime time1 = theLocalTime + minutes(1);
-      boost::posix_time::ptime time2 = theLocalTime + minutes(7);
+      boost::posix_time::ptime time2 = time1 + minutes(TestFixture::job_submission_interval()*2);
 
       suite_ptr suite = theDefs.add_suite("test_time_real_series");
-      suite->add_variable("SLEEPTIME",boost::lexical_cast<std::string>(TestFixture::job_submission_interval()-1));
+      suite->add_variable("SLEEPTIME","1");
 
       ClockAttr clockAttr(theLocalTime,false);
       suite->addClock( clockAttr );
@@ -250,9 +242,13 @@ BOOST_AUTO_TEST_CASE( test_time_real_series )
       task->addTime( ecf::TimeAttr(
                ecf::TimeSlot(time1.time_of_day()),
                ecf::TimeSlot(time2.time_of_day()),
-               ecf::TimeSlot(0,3)
+               ecf::TimeSlot(0,TestFixture::job_submission_interval())
       ));
       task->addVerify( VerifyAttr(NState::COMPLETE,3) );      // task should complete 3 times
+      // 1 +    7  + 13
+      // 1 + (2*n) + (2*n) = 1 + 4n
+      // start = 1, finish = 13, when n=3, when n = job submission interval
+      // to complete 3 times, we must use interval of n*2
    }
 
    // The test harness will create corresponding directory structure

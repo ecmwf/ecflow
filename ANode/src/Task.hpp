@@ -63,6 +63,8 @@ public:
    /// Overidden from Submittable
    virtual const std::string& script_extension() const;
 
+   virtual node_ptr find_node_up_the_tree(const std::string& name) const;
+
    /// Added for consistency, really used to find relative nodes, aliases should never, be in referenced nodes
    virtual node_ptr find_relative_node(const std::vector<std::string>& pathToNode) { return node_ptr();}
 

@@ -21,7 +21,7 @@
 
 * ecfFlow consists of two tar files i.e. :
    
-   * :file:`boost_1_53_0.tar.gz`
+   * :file:`boost_1_47_0.tar.gz`
    * :file:`ecflow_2_0_31.tar.gz`
    
 * Create a directory for the build::
@@ -32,20 +32,20 @@
    
 * Un-zip then un-tar the two file files::
 
-   # gunzip boost_1_53_0.tar.gz
+   # gunzip boost_1_47_0.tar.gz
    # gunzip ecflow_2_0_31.tar.gz
-   # tar -xf boost_1_53_0.tar
+   # tar -xf boost_1_47_0.tar
    # tar -xf ecflow_2_0_31.tar
    
 * You should have two directories created::
 
-   boost_1_53_0
+   boost_1_47_0
    ecflow_2_0_31
    
 * Create two environment variables. These are used by some of scripts::
 
    > export WK=/tmp/ecflow_build/ecflow_2_0_31
-   > export BOOST_ROOT=/tmp/ecflow_build/boost_1_53_0
+   > export BOOST_ROOT=/tmp/ecflow_build/boost_1_47_0
    
    
 * | For installation the following environment variables are required.

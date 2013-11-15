@@ -133,7 +133,7 @@ public:
    /// This is applied *up* the hierarchy until we *hit* a node with a repeat or Cron attribute
    /// This is done since repeat and cron can be used to reset the NO_REQUE_IF_SINGLE_TIME_DEP flags
    /// This functionality is only required during interactive force or run
-   void set_no_requeue_if_single_time_dependency();
+   void set_no_requeue_if_single_time_dependency(bool miss_next_time_slot);
 
    /// Recursively run the tasks under this node, ignore suspend,limits,triggers, and time dependencies
    /// if force is set, run even if task is submitted or active. (will create zombies)
@@ -385,6 +385,7 @@ public:
    void changeClockType(const std::string& theType);
    void changeClockDate(const std::string& theDate);
    void changeClockGain(const std::string& theIntGain);
+   void changeClockSync();
    void changeEvent(const std::string& name,const std::string& setOrClear = "");
    void changeEvent(const std::string& name,bool value);
    void changeMeter(const std::string& name,const std::string& value);
@@ -432,6 +433,10 @@ public:
    void set_memento(const FlagMemento* );
 
    // Find functions: ============================================================
+   // Will search for a node by name(ie not a path) first on siblings, then on a parent
+   // then up the node tree, will stop at the suite .
+   virtual node_ptr find_node_up_the_tree(const std::string& name) const = 0;
+
    // This is used to find relative nodes.
    virtual node_ptr find_relative_node(const std::vector<std::string>& pathToNode) = 0;
 

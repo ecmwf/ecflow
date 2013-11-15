@@ -95,6 +95,7 @@ menu 'MAIN'
 
   (ALL,ALL,'-',SEPARATOR ,'',YES)
   (SUITE|FAMILY|TASK, ALL, 'Web...', 'ecflow_client --url <full_name> ', '', YES)
+  (TASK, ALL, 'Web', MENU)
 
   (ALL,ALL,'-',SEPARATOR)
 
@@ -159,6 +160,15 @@ menu 'MAIN'
   (ALL,ALL,'-',SEPARATOR)
   (SERVER, ALL ,  'Options...',  WINDOW(Options)  )
   (SERVER, ALL ,  'Extra',  MENU  )
+}
+
+menu 'Web' 
+{
+  (TASK, ALL, 'Man', 'sh firefox <full_name> %MANPATH%', '', YES)
+  (TASK, ALL, 'Script', 'sh echo xterm -e vim <full_name>:%ECF_SCRIPT% ', '', YES)
+  (TASK, ALL, 'Job', 'sh echo xterm -e vim <full_name>:%ECF_JOB% ', '', YES)
+  (TASK, ALL, 'Output', 'sh echo xterm -e vim <full_name>:%ECF_JOBOUT% ', '', YES)
+  (TASK, ALL , 'TimeLine...', WINDOW(Timeline))
 }
 
 !==============================================================================
@@ -291,6 +301,7 @@ menu "Extra"
   ! (SERVER|SUITE,ALL,'tail log', 'sh /usr/bin/xterm -e rsh %ECF_NODE% tail -f %ECF_HOME%/%ECF_LOG%&')
 (SERVER|SUITE,ALL,'tail log', 'sh /usr/bin/xterm -e tail -f /tmp/$USER/$HOST*.ecf.log&')
   (ALL,ALL,'-',SEPARATOR)
+  (SERVER|SUITE,ALL,'overwrite', 'write menu')
   (SERVER|SUITE,ALL,'edit menu', 'sh /usr/bin/xterm -e vi ~/.ecflowrc/ecflowview.menu')
   (SERVER|SUITE,ALL,'bkup menu', 'sh /bin/cp ~/.ecflowrc/ecflowview.menu ~/.ecflowrc/ecflowview.menu.bak')
   (SERVER|SUITE,ALL,'rm   menu', 'sh /bin/rm ~/.ecflowrc/ecflowview.menu')
@@ -314,13 +325,14 @@ menu "Extra"
 
 menu "Windows"
 {
-  (SERVER, ALL , 'Info...', WINDOW(Info))
-  (SERVER, ALL , 'Man...',  WINDOW(Manual))
-  (SERVER, ALL , 'Var...',  WINDOW(Variables))
-  (SERVER, ALL , 'Msg...',  WINDOW(Messages))
-  (SERVER, ALL , 'Why...',  WINDOW(Why))
+  (SERVER, ALL , 'Info...',      WINDOW(Info))
+  (SERVER, ALL , 'Man...',       WINDOW(Manual))
+  (SERVER, ALL , 'Var...',       WINDOW(Variables))
+  (SERVER, ALL , 'Msg...',       WINDOW(Messages))
+  (SERVER, ALL , 'Why...',       WINDOW(Why))
   (SERVER, ALL , 'Triggers...',  WINDOW(Triggers))
-  (SERVER, ALL , 'Check...',  WINDOW(Check))
-  (SERVER, ALL , 'Jobstatus...',  WINDOW(Jobstatus))
+  (SERVER, ALL , 'Check...',     WINDOW(Check))
+  (SERVER, ALL , 'Jobstatus...', WINDOW(Jobstatus))
+  (SERVER, ALL , 'TimeLine...',  WINDOW(Timeline))
 }
 

@@ -1,0 +1,137 @@
+Client Server protocol
+======================
+
+Issues: 
+   The client server protocol is based on boost serialisation.
+   However with different version of boost, the archive version is updated.
+   This means that forward compatibility is not maintained, even with no
+   change in the format.
+   
+   Hence a new client/ecflowview will not be able to communicate with an old server.
+   
+   The following message is issued by the old server, when a new client connects
+      Connection::handle_read_data boost::archive::archive_exception unsupported version
+      server::handle_read: Invalid argument
+   This happens because it can not decode the message.
+   Currently no error message is sent back to the client.
+   
+Approach:
+====================================================================================
+In the short term we use option 1.
+  Should this be with boost 1.47 or boost 1.53 ?
+  Since we will provide some backward compatibility, will aim for boost 1.53
+  Hence new release should be 4.0.0
+  
+
+In the longer term we will use approach 3:
+  This will *still* need to able talk to old server.
+   
+   
+Options:
+1/ Modify boost archive version, when client->server comms fails.
+====================================================================================== 
+  At the Client end manually adjust the archive version, before it is sent to the server.
+   Could also be done at the server end, however we do not want to make, changes
+   that could affect server performance.
++ requires no change to old released server/ ecflow versions
++ least amount of work. Changes required to Connection/Client/ClientInvoker/host.pp(ecflowview)
+  This would be a hack, that require changing the message, for each client call. 
++ Only modify archive version when needed
+  
+- If client->server message format, changed, this solution will fail.
+- May affect client performance, since string will need modifying. 
+- Even then boost serialisation library may change in a future release.
+- PlugCmd  ????
+     
+        
+2/ Change the client->server protocol only:
+===================================================================================
++ The server->client, should be ok, since boost support backward compatibility.
++ Will require data driven api.
+        command name=value, name=value, name=value.
+  This will support forward compatibility. If an old server receives a command
+  it does not understand, it will be ignored. 
++ Additionally  new name/value, as arguments can be added, without affecting old servers.
+
+- Issue of loading defs from new client to old server, will still remain.
+
+  
+  WBS:
+  - Give preference to those client/server commands, used by the viewer
+  - The following commands, will be troublesome:
+  
+    LoadDefsCommand,ReplaceNodeCmd, MoveCommand
+    
+    if we stick with boost serialisation we will still hit issue with archive version:
+    
+       boost 1.47:    22 serialization::archive 9 0 0 2400 0 0 1 1
+       boost 1.53:    22 serialization::archive 10 0 0 2400 0 0 1 1
+       
+    Hence for these command, we could update the *client* side, to
+    replace the archive version '9' with '10'.
+    This is not a guaranteed fix, since future boost version may change
+    serialisation. Hence we will need to write tests fo this
+    
+
+3/ change client<->server protocol
+====================================================================================
++ most flexible.
+- most amount of work
+- transfer of defs from server<->client, will pose a problem
+- Issue of loading defs from new client to old server, will still remain. 
+- server to client comms, using simple data driven approach will not work, for
+  hierarchical objects. i.e like suite and family, memento. This will require,
+  xml.json,yaml type solution. 
+
+  This could be got round by using a hybrid approach :
+       <version><\n>
+       <command><\n>
+       <boost-string>
+  
+  i.e
+       v1
+       load
+       22 serialization::archive 9 0 0 2400 0 0 1 1
+       
+  This allows us to separate the command, from the serialisation.
+  There will be small penalty on parsing however.
+  In the future we could an alternative to boost.
+  
+  *****************************
+  In addition we wil still need to support old format, so that new client can
+  take to old server.
+  However for the viwer & command line, we may need an environment variable
+  to allow new client to talk to old server.
+  *****************************
+
+Clients
+=================================================================================
+
+ecflowview:
+   - This is the biggest concern:
+   
+command line:
+   - User should be able to control the version of the client, to make sure
+     its the same as the server.
+   
+Job file:
+    By using %ECF_VERSION% in the job file, we can ensure that client version
+    is in sync with server.
+    
+Python api:
+   - User should be able to control the version of the client, to make sure
+     its the same as the server. Depends on ecflow.so, hence PYTHONPATH
+     needs to point to a ecflow.so, which is the same as the server.
+   
+        
+Testing
+===========================================================================
+- new client --> old server
+- new server --> old client
+- test ecflowview, new server old client
+- 2 protocols ? boost & data driven ?
+
+Future
+===========================================================================
+- The boost xml archives, there are proposed patches that handle, forward
+  compatibility. Needs investigation.

@@ -107,6 +107,7 @@ public:
    virtual bool ping_cmd() const { return false;}
    virtual bool why_cmd( std::string& ) const { return false;}
    virtual bool show_cmd() const { return false ;}
+   virtual bool delete_all_cmd() const { return false ;}
 
    // CLIENT side Parse and command construction, create can throw std::runtime_error for errors
    virtual const char* theArg() const = 0;  // used for argument parsing
@@ -843,6 +844,7 @@ public:
    virtual std::ostream& print(std::ostream& os) const;
    virtual bool equals(ClientToServerCmd*) const;
    virtual bool isWrite() const;
+   virtual bool delete_all_cmd() const;
 
    virtual const char* theArg() const;
    virtual void addOption(boost::program_options::options_description& desc) const;
@@ -1402,7 +1404,7 @@ public:
       DEL_INLIMIT, DEL_ZOMBIE, DELETE_ATTR_ND };
 
    enum Change_attr_type  { VARIABLE, CLOCK_TYPE, CLOCK_DATE, CLOCK_GAIN,  EVENT, METER, LABEL,
-      TRIGGER, COMPLETE, REPEAT, LIMIT_MAX, LIMIT_VAL, DEFSTATUS, CHANGE_ATTR_ND };
+      TRIGGER, COMPLETE, REPEAT, LIMIT_MAX, LIMIT_VAL, DEFSTATUS, CHANGE_ATTR_ND, CLOCK_SYNC };
 
    enum Add_attr_type  {  ADD_TIME, ADD_TODAY, ADD_DATE, ADD_DAY, ADD_ZOMBIE, ADD_VARIABLE, ADD_ATTR_ND };
 

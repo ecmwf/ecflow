@@ -46,6 +46,12 @@ public:
    static bool replace_all(std::string& jobLine, const std::string& stringToFind, const std::string& stringToRplace);
    static void replaceall(std::string& jobLine, const std::string& stringToFind, const std::string& stringToRplace);
 
+   // extract data member value, ie given a string of the form:
+   //   str=cmd a b fred:value
+   //   data_member_name=fred:
+   //   extract value
+   static bool extract_data_member_value(const std::string& str, const std::string& data_member_name, std::string& data_member_value);
+
 	/// split string using default delimiters of space and tab as a separator;
 	/// The split is based on *ANY* of the characters in the delimiters.
 	/// **** Hence a delimiter of "==" will still split "a = complete"

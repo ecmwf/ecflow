@@ -36,6 +36,13 @@ public:
 	/// will throw std::runtime_error for errors
 	bool handle_server_response( ServerReply&,  bool debug ) const;
 
+
+   // support for forward compatibility, by changing boost archive version
+	// By default 0 means, and need to be explicitly enabled. The integer must correspond with
+	// the archive version of the old server. for boost 1.47 this was 9
+   // Chosen to change client side only
+   void allow_new_client_old_server(int f)  { connection_.allow_new_client_old_server(f);}
+
 private:
 
 	void start(boost::asio::ip::tcp::resolver::iterator);

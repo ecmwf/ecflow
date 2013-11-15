@@ -48,11 +48,7 @@ void test_white_list_files(const std::string& directory, bool pass)
 	{
 		try
 		{
-#if BOOST_FILESYSTEM_VERSION == 3
          fs::path relPath(directory + "/" + dir_itr->path().filename().string());
-#else
- 			fs::path relPath(directory + "/" + dir_itr->path().filename());
-#endif
 
  			// recurse down directories
 		    if ( fs::is_directory(dir_itr->status()) )  {

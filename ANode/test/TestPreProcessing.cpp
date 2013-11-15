@@ -95,11 +95,7 @@ void autoDiscoverVariables(const std::string& directory, std::set<std::string>& 
 	fs::directory_iterator end_iter;
 	for ( fs::directory_iterator dir_itr( full_path ); dir_itr != end_iter; ++dir_itr ) {
 		try {
-#if BOOST_FILESYSTEM_VERSION == 3
          fs::path relPath(directory + "/" + dir_itr->path().filename().string());
-#else
- 			fs::path relPath(directory + "/" + dir_itr->path().filename());
-#endif
 
  			// recurse down directories
 		    if ( fs::is_directory(dir_itr->status()) )  {

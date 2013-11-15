@@ -346,6 +346,19 @@ void Task::getAllSubmittables(std::vector<Submittable*>& vec) const
    }
 }
 
+node_ptr Task::find_node_up_the_tree(const std::string& name) const
+{
+   size_t vec_size = aliases_.size();
+   for(size_t i = 0; i < vec_size; i++) {
+      if (aliases_[i]->name() == name ) {
+         return aliases_[i];
+      }
+   }
+   Node* the_parent = parent();
+   if (the_parent) return the_parent->find_node_up_the_tree(name);
+   return node_ptr();
+}
+
 void Task::get_all_active_submittables(std::vector<Submittable*>& vec) const
 {
    // See notes: getAllSubmittables, about reserve

@@ -70,7 +70,7 @@ class TestMigrate318(unittest.TestCase):
         # remove the generated file
         os.remove("migrate/aborted_reason_bug.mig")
          
-# # ===============================================================================================
+# ===============================================================================================
  
     def test_normal_label(self):
         list_of_defs_lines = ["# 3.1.2","label name \"value\"\n" ]      

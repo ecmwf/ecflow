@@ -301,14 +301,35 @@ bool Gnuplot::extract_suite_path(
    if ( forward_slash != std::string::npos) {
 
       std::string path;
-      if (child_cmd) path = line.substr(forward_slash);
-      else {
-         // find the space after the path
-         size_t space_pos = line.find(" ",forward_slash);
-         if (space_pos != std::string::npos) {
-            path = line.substr(forward_slash,space_pos);
+      if (child_cmd) {
+
+         // For labels ignore paths in the label part
+         // MSG:[14:55:04 17.10.2013] chd:label progress 'core/nodeattr/nodeAParser' /suite/build/cray/cray_gnu/build_release/test
+         if (line.find("chd:label") != std::string::npos) {
+            size_t last_tick = line.rfind("'");
+            if ( last_tick != std::string::npos ) {
+               size_t the_forward_slash = line.find('/',last_tick);
+               if (the_forward_slash != std::string::npos) {
+                  forward_slash = the_forward_slash;
+               }
+            }
          }
+         path = line.substr(forward_slash);
       }
+      else {
+         // Ignore the --news command, they dont have a path, hence i.e to ignore line like:
+         //  MSG:[09:36:05 22.10.2013] --news=1 36506 6  :ma0 [server handle(36508,7) server(36508,7)
+         //                     : *Large* scale changes (new handle or suites added/removed) :NEWS]
+         //   the /removed was being interpreted as a suite
+         if (line.find("--news") != std::string::npos) return false;
+      }
+
+      // find the space after the path
+      size_t space_pos = line.find(" ",forward_slash);
+      if (space_pos != std::string::npos &&  space_pos > forward_slash) {
+         path = line.substr(forward_slash,space_pos-forward_slash);
+      }
+
       if (!path.empty()) {
 
          std::vector<std::string> theNodeNames; theNodeNames.reserve(4);
@@ -322,6 +343,7 @@ bool Gnuplot::extract_suite_path(
                   return true;
                }
             }
+
             suite_vec.push_back( SuiteLoad(theNodeNames[0]) );
             column_index = suite_vec.size() - 1;
             return true;

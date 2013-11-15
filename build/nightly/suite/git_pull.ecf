@@ -14,8 +14,8 @@ if [[ %SET_TO_TEST_SCRIPT% = true ]] ; then
    echo "Test only"
 else
 
-   # Update prodgen by pulling from the master repository
-   git pull origin master 
+   # Update by pulling branch. used 'master' when making a release otherwise use 'develop'
+   git pull origin %GIT_BRANCH%   
 fi
 
 %include <tail.h>

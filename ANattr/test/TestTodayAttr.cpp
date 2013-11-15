@@ -77,7 +77,7 @@ BOOST_AUTO_TEST_CASE( test_today_attr)
          day_changed = calendar.dayChanged();
       }
       boost::posix_time::time_duration time = calendar.suiteTime().time_of_day();
-      // cout << time << " day_changed(" << day_changed << ")\n";
+//      cout << time << " day_changed(" << day_changed << ")\n";
 
       timeSeries.calendarChanged( calendar );
       timeSeries2.calendarChanged( calendar );
@@ -95,8 +95,8 @@ BOOST_AUTO_TEST_CASE( test_today_attr)
             for(size_t i = 0; i < timeSeries_free_slots.size(); i++) {
                if (time == timeSeries_free_slots[i]) { matches_free_slot = true; break; }
             }
+            // no else branch since once today is free it stays free, unti re-queue
             if (matches_free_slot) BOOST_CHECK_MESSAGE(timeSeries.isFree(calendar),timeSeries.toString() << " should be free at time " << time );
-            else                   BOOST_CHECK_MESSAGE(!timeSeries.isFree(calendar),timeSeries.toString() << " should be fail at time " << time );
 
             /// At the last time checkForRequeue should return false; This ensures that value will
             /// not get incremented and so, should leave node in the complete state.
@@ -131,8 +131,6 @@ BOOST_AUTO_TEST_CASE( test_today_attr)
                if (time == timeSeries2_free_slots[i]) { matches_free_slot = true; break; }
             }
             if (matches_free_slot) BOOST_CHECK_MESSAGE(timeSeries2.isFree(calendar),timeSeries2.toString() << " should be free at time " << time );
-            else                   BOOST_CHECK_MESSAGE(!timeSeries2.isFree(calendar),timeSeries2.toString() << " should be fail at time " << time );
-
 
             /// At the last time checkForRequeue should return false; This ensures that value will
             /// not get incremented and so, should leave node in the complete state.
@@ -153,8 +151,6 @@ BOOST_AUTO_TEST_CASE( test_today_attr)
          // Once a today time series is free, it stays free
          BOOST_CHECK_MESSAGE(timeSeries2.isFree(calendar),timeSeries2.toString() << " should be holding at time " << time );
       }
-
-
 
       // Single slot
       if (!day_changed) {

@@ -166,17 +166,33 @@ void TimeSeries::reset(const ecf::Calendar& c)
  	isValid_ = true;
  	nextTimeSlot_ = start_;
 
+	(void)resetRelativeDuration();
+
+	// Note: **difference between reset and re-queue,
+	//  Hence if at begin(), time slot same as current time, allow job to run.
+	//  reset  : while( current_time >  nextTimeSlot_.duration()) {  // need for why command
+	//              if (current_time >  start_.duration() ) {
+	//  requeue: while( current_time >= nextTimeSlot_.duration()) {
+	//              if (current_time >= start_.duration() ) {
+
    // Update nextTimeSlot_ so that why command works out of the box, when nodes have been begun.
-   // *if* the current time is at the start do *not* increment nextTimeSlot_, otherwise we will mist first time slot
+   // *if* the current time is *AT* the start do *not* increment nextTimeSlot_, otherwise we will miss first time slot
+ 	time_duration current_time = duration(c);
    if (hasIncrement()) {
-      time_duration current_time = duration(c);
       while( current_time > nextTimeSlot_.duration()) {
          time_duration value = nextTimeSlot_.duration();
          value += incr_.duration();
          nextTimeSlot_ = TimeSlot(value.hours(),value.minutes());
       }
+      if (nextTimeSlot_.duration() > finish_.duration()) {
+         isValid_ = false;  // time has expired
+      }
    }
-	(void)resetRelativeDuration();
+   else {
+      if (current_time > start_.duration() ) {
+         isValid_ = false; // time has expired
+      }
+   }
 
 #ifdef DEBUG_TIME_SERIES
 	LogToCout toCoutAsWell;
@@ -184,13 +200,15 @@ void TimeSeries::reset(const ecf::Calendar& c)
 #endif
 }
 
-void TimeSeries::requeue(const ecf::Calendar& c)
+void TimeSeries::requeue(const ecf::Calendar& c,bool reset_next_time_slot)
 {
    // *RESET* to handle case where time slot has been advanced, but at requeue it must be reset
    // This is important otherwise user can never reset and time slot that had been advanced
    // by using miss_next_time_slot()
-   isValid_ = true;
-   nextTimeSlot_ = start_;
+   if (reset_next_time_slot) {
+      isValid_ = true;
+      nextTimeSlot_ = start_;
+   }
 
 	//   time 13:00 // nextTimeSlot_ is initialised to 13:00, on TimeSeries::requeue() invalidate time series
 	//              // to stop multiple job submissions on same time slot
@@ -210,8 +228,7 @@ void TimeSeries::requeue(const ecf::Calendar& c)
    time_duration current_time = duration(c);
 	if (!hasIncrement()) {
 		if (current_time >= start_.duration() ) {
-			isValid_ = false;
-
+			isValid_ = false; // time has expired
 #ifdef DEBUG_TIME_SERIES
 	 	 	LOG(Log::DBG,"      TimeSeries::increment (duration(c) >= start_.duration() ) "  << toString() << " duration=" << to_simple_string(duration(c)));
 #endif
@@ -241,7 +258,7 @@ void TimeSeries::requeue(const ecf::Calendar& c)
 	}
 
  	if (nextTimeSlot_.duration() > finish_.duration()) {
-		isValid_ = false;
+		isValid_ = false;  // time has expired
 #ifdef DEBUG_TIME_SERIES
  	 	LOG(Log::DBG,"      TimeSeries::increment "  << toString());
 #endif
@@ -256,6 +273,7 @@ bool TimeSeries::isFree(const ecf::Calendar& calendar) const
 #endif
 
 	if (!isValid_) {
+	   // time has expired, hence time is not free
 #ifdef DEBUG_TIME_SERIES_IS_FREE
    	 	LOG(Log::DBG,"TimeSeries::isFree (!isValid_) HOLDING "  << toString());
 #endif
@@ -334,12 +352,17 @@ bool TimeSeries::match_duration_with_time_series(const boost::posix_time::time_d
 void TimeSeries::miss_next_time_slot()
 {
    if ( !hasIncrement()) {
+      // single slot, does not have a next time slot, hence expire time
       isValid_ = false;
    }
    else {
       time_duration value = nextTimeSlot_.duration();
       value += incr_.duration();
       nextTimeSlot_ = TimeSlot(value.hours(),value.minutes());
+      if (nextTimeSlot_.duration() > finish_.duration()) {
+         // time has expired,
+         isValid_ = false;
+      }
    }
 }
 
@@ -348,10 +371,14 @@ bool TimeSeries::checkForRequeue( const ecf::Calendar& calendar, const TimeSlot&
    // ************************************************************************
    // THIS IS CALLED IN THE CONTEXT WHERE NODE HAS COMPLETED.
    // RETURNING TRUE FROM HERE WILL FORCE NODE TO QUEUED STATE
-   // HENCE THIS FUNCTION MUST RETURN FALSE, WHEN END OF TIME SLOT HAS BEEN REACHED
+   // HENCE THIS FUNCTION MUST RETURN FALSE, WHEN END OF TIME SLOT HAS BEEN REACHED/expired
+   // The resolution is in minutes
    // *************************************************************************
 
-   // The resolution is in minutes
+   if (!isValid_) {
+      // time has expired, hence can no longer re-queues, i.e no future time dependency
+      return false;
+   }
 
    if ( hasIncrement()) {
       // Note if we are equal to the finish and were called as part of completeCmd
@@ -362,8 +389,7 @@ bool TimeSeries::checkForRequeue( const ecf::Calendar& calendar, const TimeSlot&
 
       // If the current value is greater that finish, then returning true would increment
       // value past the end, and force node state to be stuck in state queue.
-      // To counter this when value == finish we return false;
-      if ( nextTimeSlot_.duration() >= finish_.duration() ) {
+      if ( nextTimeSlot_.duration() > finish_.duration() ) {
          return false;
       }
 
@@ -623,9 +649,11 @@ void TimeSeries::parse_state(size_t index,const std::vector<std::string>& lineTo
          if (lineTokens[i].find("nextTimeSlot") != std::string::npos) {
             std::string nextTimeSlot;
             if (Extract::split_get_second(lineTokens[i],nextTimeSlot,'/')) {
+               // Note: we do *not* check for valid time since nextTimeSlot, can be incremented past 24 hours, ie
+               // cron 00:00 18:00 06:00 # isValid:false nextTimeSlot/24:00
                int startHour = -1;
                int startMin = -1;
-               getTime( nextTimeSlot, startHour, startMin );
+               getTime( nextTimeSlot, startHour, startMin, false/*check_time*/);
                ts.nextTimeSlot_ = TimeSlot(startHour, startMin);
             }
             else throw std::runtime_error("TimeSeries::parse_state: could not extract state.");
@@ -697,7 +725,7 @@ ecf::TimeSeries TimeSeries::create( size_t& index,const std::vector<std::string>
 	return TimeSeries(start,relative);
 }
 
-bool TimeSeries::getTime(const std::string& time, int& hour, int& min)
+bool TimeSeries::getTime(const std::string& time, int& hour, int& min,bool check_time)
 {
 	// HH:MM
 	// +HH:MM  for other clients
@@ -720,7 +748,7 @@ bool TimeSeries::getTime(const std::string& time, int& hour, int& min)
    hour = Extract::theInt(theHour,"TimeSeries::getTime: hour must be a integer : " + theHour);
 	min =  Extract::theInt(theMin,"TimeSeries::getTime: minute must be integer : " + theMin);
 
-	testTime(hour,min);
+	if (check_time) testTime(hour,min);
 	return relative;
 }
 

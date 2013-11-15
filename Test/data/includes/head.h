@@ -29,6 +29,10 @@ export ECF_RID=$$
 # Here we give the current PID.
 
 
+# allow where applicable for new clients to talk to old servers
+%ECF_ALLOW_NEW_CLIENT_OLD_SERVER:%
+
+
 # Defined a error hanlder
 ERROR() {
 	echo "ERROR called"

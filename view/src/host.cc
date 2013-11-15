@@ -119,6 +119,7 @@
 #include <assert.h>
 #include <boost/bind.hpp>
 
+#include "menus.h"
 /* #include <proc/readproc.h> */
 
 class SelectNode {
@@ -160,29 +161,38 @@ private:
 host::host( const std::string& name, const std::string& host, int number )
          : timeout(5),
 #ifdef alpha
-                  configurable(name),
+	   configurable(name),
 #endif
-                  observable(), host_(host), number_(number), name_(name), connected_(false), after_command_(
-                           true), passwd_("-none-"), timeout_(this, "timeout", 5), maximum_(
-                           this, "maximum", 60), drift_(this, "drift", true), connect_(this,
-                                                                                       "connect",
-                                                                                       false), suites_(
-                           this, "suites", std::vector<std::string>()), aborted_(this, "aborted",
-                                                                                 true), restarted_(
-                           this, "restarted", true), late_(this, "late", true), poll_(this, "poll",
-                                                                                      true), direct_read_(
-                           this, "direct_read", true), new_suites_(this, "new_suites", true), zombie_(
-                           this, "zombie", false), aliases_(this, "aliases", false), to_check_(
-                           this, "to_check", false), chkmail_(true), top_(0), tree_(0), mail_(0), last_(
-                           0), history_len_(100)
+	   observable(), 
+	   host_(host), 
+	   number_(number), 
+	   name_(name), 
+	   connected_(false), 
+	   after_command_(true), 
+	   passwd_("-none-"), 
+	   timeout_(this, "timeout", 5), 
+	   maximum_(this, "maximum", 60), 
+	   drift_(this, "drift", true), 
+	   connect_(this,"connect",false), 
+	   suites_(this, "suites", std::vector<std::string>()), 
+	   aborted_(this, "aborted", true), 
+	   restarted_(this, "restarted", true), 
+	   late_(this, "late", true), 
+	   poll_(this, "poll", true), 
+	   direct_read_(this, "direct_read", true), 
+	   new_suites_(this, "new_suites", true), 
+	   zombie_(this, "zombie", false), 
+	   aliases_(this, "aliases", false), 
+	   to_check_(this, "to_check", false), 
+	   chkmail_(true), top_(0), tree_(0), mail_(0), 
+	   last_(0), history_len_(100)
 	 , updating_(false)
 {
    if (number < 1) return; // dummy server OK;
 
-   if (number_) {
-      tree_ = tree::new_tree(this);
-      gui::add_host(name);
-   }
+   if (number_) { 
+     tree_=tree::new_tree(this);
+     gui::add_host(name); }
 
    if (timeout_ < 1) timeout_ = 1;
    if (maximum_ < 1) maximum_ = 1;
@@ -192,7 +202,7 @@ host::host( const std::string& name, const std::string& host, int number )
 
 host::~host()
 {
-  if (tree_) delete tree_;
+  if (tree_) { delete tree_; }
 }
 
 ehost::ehost( const std::string& name, const std::string& h, int number )
@@ -300,7 +310,7 @@ void host::logout()
    searchable::active (False);
    connected_ = false;
 
-   if (tree_ != 0x0) {
+   if (tree_) {
       tree_->connected(False);
       tree_->xd_hide();
    }
@@ -321,7 +331,7 @@ void ehost::logout()
    if (!connected_) return;
 
    try {
-      if (client_.client_handle() != 0)
+      if (client_.client_handle())
          client_.ch1_drop();
    }
    catch ( std::exception &e ) {
@@ -500,7 +510,9 @@ void host::dir( node& n, const char* path, lister<ecf_dir>& l )
 
          char* c = basename;
          while ( *c ) {
-            if (*c == '.') *c = 0;
+	   if (*c == '.') {
+	     if (*(c+1)) { *(c+1) = 0; break; } /* 201311 Pontus Request */
+	     else { *c = 0; } }
             c++;
          }
 
@@ -569,6 +581,8 @@ int ehost::command( const std::string& str )
          return 1;
       else
          return 0;
+   } else if (str == "write menu") {
+     menus::write(); return 0;
    }
 
    int e = 0, ac = 0;
@@ -717,7 +731,7 @@ void ehost::reset( bool full, bool sync )
 	  // get all suite previously registered in GUI, and register
 	  // them with the server The associated handle is retained in
 	  // client_
-	  if (client_.client_handle() != 0) {
+	  if (client_.client_handle()) {
 	    try {
 	      client_.ch1_drop();
 	    } catch ( std::exception &e ) {
@@ -731,7 +745,7 @@ void ehost::reset( bool full, bool sync )
       }
    } catch ( std::exception &e ) {
      XECFDEBUG std::cerr << "# reset exception " << e.what() << "\n";
-     if (0x0 != client_.defs().get()) {
+     if (client_.defs().get()) {
        gui::error("host::reset-reg-error: %s", e.what());
      }
    }
@@ -822,7 +836,7 @@ void ehost::changed( resource& r )
       // automatically added to handle. It should only be called if
       // suites had previously been registered
       try {
-         if (client_.client_handle() != 0) {
+         if (client_.client_handle()) {
             client_.ch1_auto_add(new_suites_);
          }
          else {
@@ -857,7 +871,7 @@ void host::redraw(bool create)
     // assert(ChangeMgrSingleton::instance()->no_of_def_observers() == 0);
      }
     create_tree(0, 0, 0);
-  } else if (tree_ != 0x0) 
+  } else if (tree_) 
     tree_->update_tree(true);
   if (top_) 
     top_->reset();
@@ -906,7 +920,6 @@ int host::do_comp( node* into, node* from ,
                     const std::string a, const std::string b )
 {
    if (!into || !from) return 0;
-   // execl("/bin/sh", "sh", "-c", argv, NULL); 
    std::stringstream out;
    out << "${COMPARE:=/home/ma/map/bin/compare.sh} " << 
      from->full_name() << ":";
@@ -982,11 +995,11 @@ int host::do_plug( node* into, node* from )
                         from->type_name(), from->name().c_str(), sp.c_str(), si.c_str())) return 1;
    }
 
-   if (destination->status() != 0) {
+   if (destination->status()) {
       gui::error("# Cannot get status for %s. Pluging aborted.", destination->name());
       return 1;
    }
-   if (source->status() != 0) {
+   if (source->status()) {
       gui::error("Cannot get status for %s. Pluging aborted.", source->name());
       return 1;
    }
@@ -1161,10 +1174,49 @@ bool check_version( const char* v1, const char* v2 )
    return true;
 }
 
+void get_server_version(ClientInvoker& client, std::string& server_version)
+{
+   int archive_version_of_old_server = client.allow_new_client_old_server();
+   try {
+      // ECF_ALLOW_NEW_CLIENT_OLD_SERVER is really for ecflow_client command line
+      // It will have been read in as a part of the ClientInvoker constructor.
+      // So lets assume the client/server are compatible *first*
+      client.allow_new_client_old_server(0); // assume client <-> server are compatible
+
+      client.server_version();
+      server_version = client.server_reply().get_string();
+
+      if (server_version.empty()) {
+         // Could not get server version, maybe client/server boost archive version are incompatible
+         if (archive_version_of_old_server == 0) {
+            // assume new client --> old server (old server assumed to be built with boost 1.47)
+            // environment ECF_ALLOW_NEW_CLIENT_OLD_SERVER was not specified, hence assume boost 1.47 archive used in old server
+            archive_version_of_old_server = ecf::boost_archive::version_1_47();
+         }
+         client.allow_new_client_old_server(archive_version_of_old_server);
+
+         // try again
+         client.server_version();
+         server_version = client.server_reply().get_string();
+      }
+   }
+   catch (...)  {
+      // assume new client old server. See notes above
+      if (archive_version_of_old_server == 0) archive_version_of_old_server = ecf::boost_archive::version_1_47();
+      client.allow_new_client_old_server( archive_version_of_old_server );
+
+      // try again
+      client.server_version();
+      server_version = client.server_reply().get_string();
+   }
+}
+
 void ehost::login()
 {
    gui::message("Login to %s", name());
    host::logout();
+   host::login();
+   reset(true, true);
 
    client_.set_throw_on_error(true);
    try {
@@ -1177,14 +1229,13 @@ void ehost::login()
          return;
       }
 
-      client_.server_version();
-      std::string version = client_.server_reply().get_string();
+      // if we can not get the server version, attempt forward compatibility
+      std::string server_version;
+      get_server_version(client_,server_version);
 
-      if (!check_version(version.c_str(), ecf::Version::raw().c_str())) {
-        if (!confirm::ask(false, "%s (%s@%d): version mismatch, server is %s, client is %s\ntry to connect anyway?", name(),
-                          machine(), number(),
-                          version.c_str(),
-                          ecf::Version::raw().c_str())) {
+      if (!check_version(server_version.c_str(), ecf::Version::raw().c_str())) {
+        if (!confirm::ask(false, "%s (%s@%d): version mismatch, server is %s, client is %s\ntry to connect anyway?", 
+                          name(), machine(), number(), server_version.c_str(), ecf::Version::raw().c_str())) {
           connect_ = false;
           connected_ = false;
           return;
@@ -1194,7 +1245,7 @@ void ehost::login()
       connected_ = true;
 
       if (!tree_) tree_ = tree::new_tree(this);
-      // reset(true); // done later with update (test empty server)
+      reset(true); // done later with update (test empty server)
 
       enable();
       if (tree_ != 0x0) {
@@ -1211,11 +1262,9 @@ void ehost::login()
       if (!tree_) return;
       if (connected_) {
          tree_->update_tree(false);
-      }
-      else {
-         tree_->connected(False);
-         if (!top_) 
-           top_ = make_xnode<Defs>(0x0, 0, *this);
+      } else {
+	tree_->connected(False);
+	if (!top_) top_ = make_xnode<Defs>(0x0, 0, *this);
       }
    }
 
@@ -1369,33 +1418,37 @@ void ehost::suites( int which, std::vector<std::string>& l )
             break;
          case SUITES_REG:
             gui::message("%s: registering to suites", name());
-	    suites_ = l;
-	    try {
-	      if (l.empty()) {
-		client_.reset();
-		if (client_.client_handle() != 0) {
-		  try {
-		    client_.ch1_drop();
-		  } catch ( std::exception &e ) {
-		    std::cout << "# no drop possible: " << e.what() << "\n";
-		  }
-		}
-	      }
-	      client_.ch_register(new_suites_, suites_);
-	      status();
-	      redraw();	    
-	    } catch ( std::exception &e ) {
-	      gui::error("host::suites-reg-error: %s", e.what());
-	    }	     	 
-	   break;
-      default:
-	gui::message("%s: suites, what?");
-	break;
+            suites_ = l;
+            try {
+               if (l.empty()) {
+                  if (client_.client_handle() != 0) {
+                     try {
+                        client_.ch1_drop();
+                     }
+                     catch ( std::exception &e ) {
+                        std::cout << "# no drop possible: " << e.what() << "\n";
+                     }
+                  }
+                  // reset handle to zero , and clear the defs
+                  client_.reset();
+               }
+               client_.ch_register(new_suites_, suites_);
+               status();
+               redraw();
+            }
+            catch ( std::exception &e ) {
+               gui::error("host::suites-reg-error: %s", e.what());
+            }
+            break;
+         default:
+            gui::message("%s: suites, what?");
+            break;
       }
-   } catch ( std::exception &e ) {
-     if (0x0 != client_.defs().get()) { /* ignore empty server */
-       gui::error("host::suites-error: %s", e.what());
-     }
+   }
+   catch ( std::exception &e ) {
+      if (client_.defs().get()) { /* ignore empty server */
+         gui::error("host::suites-error: %s", e.what());
+      }
    }
 }
 
@@ -1457,7 +1510,7 @@ void ehost::update_reg_suites(bool get_ch_suites) {
 int ehost::update()
 {
   if (updating_) return 0; // SUP-423
-  Updating update(this);  // SUP-423
+  Updating update(this);   // SUP-423
   SelectNode select(this);
 
    int err = -1;
@@ -1647,7 +1700,7 @@ bool ehost::connect_mngt( bool connect )
       gui::message(e.what());
    }
 
-   if (tree_ != 0x0) tree_->connected(rc);
+   if (tree_) tree_->connected(rc);
    if (!rc) gui::logout(name());
    return rc;
 }

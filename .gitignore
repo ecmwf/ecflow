@@ -1,13 +1,18 @@
+# eclipse
+.settings/
+.pydevproject
+
+# cmake
+ecbuild/
+
+# ecflow 
 bin/
 swap
-
 *.job0
 *.job1
 *.job2
 *.job3
-
 *.1
-
 *.dat
 *.def_log
 *.glog
@@ -30,3 +35,4 @@ gmon.out
 /eurydice.3141.ecf.check
 /eurydice.3141.ecf.log
 /eurydice.3141.ecf.check.b
+/gnuplot.script

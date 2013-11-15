@@ -133,6 +133,15 @@ void ClockAttr::hybrid( bool f ) {
    state_change_no_ =  Ecf::incr_state_change_no();
 }
 
+void ClockAttr::sync() {
+   // When begin_calendar() is called we will sync with computer clock.
+   gain_ = 0;
+   day_ = 0;
+   month_ = 0 ;
+   year_ = 0;
+   state_change_no_ =  Ecf::incr_state_change_no();
+}
+
 void ClockAttr::init_calendar(ecf::Calendar& calendar)
 {
 	Calendar::Clock_t clockType = (hybrid_) ? Calendar::HYBRID : Calendar::REAL;

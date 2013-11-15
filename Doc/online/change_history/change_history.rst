@@ -8,13 +8,36 @@
 **Change History**
 ==================
 
-4.0.0 (production, October 2013)
-   - ecflow_client : Updated parsing to allow suite to have labels
-   - ecflow_client : Moved to boost 1.53
-   - ecflow_server : Moved to boost 1.53
-   - *             : Update ecflow_migrate to take into account label's that have new lines
-   - *             : Migrated source control management from perforce to git, and up updated build scripts
-   
+4.0.0 (production, November 2013)
+   - ecflowview    : add %VARIABLE% syntax in ecflowview.menu
+                     add Web Menu (second level access to manual, script, job, output)
+                     add '.' as part of the task name to filter directory content in output window
+                     add write ecflowview.menu menu
+                     TimeLine accessible from Menu for server node and task node  
+   - ecflowview    : logout-login fix
+   - ecflowview    : Support to allow new clients to interact with old servers
+   - ecflowview    : ECFLOW-71 error in ecflow on delete using GUID
+   - ecflow_server : SUP-688 time and event dependency
+   - ecflow_server : Change Force and Run commands, to work similar to SMS, they now advance the next time slot
+   - ecflow_server : Abort followed by child 'complete', now treated as a zombie.
+   - ecflow_server : Pre-processor: %%%% should be replaced with %%, and not %
+   - ecflow_server : Fixed cron/time(with time series) on a family, once free should stay free, until re-queued
+   - ecflow_server : SUP-681 ecflow_server crash. server_enviroment.cfg, should not have quotes for the value parts
+   - ecflow_server : added 'alter change clock_sync', to allow suite calendar to sync with computer
+   - ecflow_server : Updated kill and status commands, to automatically generate variables like ECF_RID. Allow 'kill' straight after checkpoint recovery.
+   - ecflow_client : Updated suite definition parser, to allow suites to have labels
+   - ecflow_client : Fix bug in the display of zombies. Action shown in log file did not match, command line display, when zombie attributes used.
+   - ecflow_client : Updated zombie display, to prepend manual or automatic in front of action, i.e manual-fob.
+                     This distinguishes between action taken by the user, from automatic action, especially when zombie attributes are used.
+   - ecflow_client : Fix bug in --server_load, where suite paths were not extracted correctly
+   - ecflow.so     : Added new python function to Node(find_node_up_the_tree()), to make it easier to add triggers.
+   - *             : Fix --migrate bugs: to take into account label's that have new lines
+   - *             : Fix --migrate bugs: (reading history with group commands, group separator ';' treated as newline 
+                     in error during parse. DefsStructureParser.cpp)
+   - *             : Migrated source control management from perforce to git, and updated build scripts
+   - *             : Updated build scripts to allow compilation and regression tests on cray XC30
+   - *             : switch to boost 1.53, and removed use of std::auto_ptr and replaced with boost:;shared_ptr in the tests
+
 3.1.9: (production, September 2013)
    - ecflowview    : fix crash in the preference dialog
    - ecflow_client : Change parsing for aliases variables. No longer check variable names.
@@ -22,7 +45,7 @@
    - ecflow_server : Changed Pre-process to ignore generated variables SUITE,FAMILY,TASK in %comment %end(user variables)
  
 3.1.8: (production, September 2013)
-   - ecflow_server : Fix --migrate bugs(reading cron state, and reading message history)
+   - ecflow_server : Fix --migrate bugs: (reading cron state, and reading message history)
    - ecflow_server : Fix --migrate bugs: task, aborted reason, should not have \n. Need to use migrate.py, as fix.
    - ecflow_server : Changed --version to print date and time of compilation
    - ecflow_client : Update Repeat attribute to be able to return index_or_value(), Needed by ecflowview

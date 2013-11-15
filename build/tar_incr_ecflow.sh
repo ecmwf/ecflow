@@ -76,7 +76,7 @@ gzip incr.tar
 # Remove the link
 rm ecflow  
 
-BOOST_VERSION=boost_1_53_0
+BOOST_VERSION=boost_1_47_0
 
 # ===============================================================================
 # copy to c2a/power7 ***** hard coded boost root *****
