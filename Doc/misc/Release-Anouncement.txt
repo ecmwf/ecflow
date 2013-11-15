@@ -107,7 +107,6 @@ The user manual(word and pdf formats) are available from:
 
 The online documentation and tutorial are accessible from:
 
-   http://intra.ecmwf.int/metapps/manuals/ecflow
    http://software.ecmwf.int/wiki/display/ECFLOW/Home
 
 Tar file

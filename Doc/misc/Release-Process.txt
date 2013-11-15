@@ -12,23 +12,25 @@
       Make sure fixed bugs are recorded/closed.
  ************************************************************
 
+Intra - net
+=================================================================
+OLD Intranet site no longer active::
+   http://intra.ecmwf.int/metapps/manuals/ecflow
+
+
 Process
-=======
+==================================================================
 
 0/ Check we are not in a high risk period ???
-0/ Tag the release
-   git tag -a <release-number> -m "ecflow release-number"
-   git tag
-   git show <release number>
-   
-0/ Update Documentation
 
+0/ Update Documentation
+   
   - Internal wiki:  http://wedit.ecmwf.int/publications/manuals/ecflow/
       cd $WK/Doc/online
       make clean; make html
       sitecopy -u ecflow
 
-  - External Doc:
+  - External Doc/Conflence:
     Rely on Daniel, to update ??
     Need automated way:
     - Just need to update python API.
@@ -65,7 +67,13 @@ Process
    mail group:  ecflow_int@lists.ecmwf.int 
    Use: Release-Anouncement.txt
   
-  
+0/ Tag the release
+   This should now be automatic when using git flow:
+   Alternatively use:
+      git tag -a <release-number> -m "ecflow release-number"
+      git tag
+      git show <release number>
+   
  
 IMPORTANT: To copy ecflow onto c2a please do the following
 ============================================================
