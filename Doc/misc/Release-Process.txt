@@ -21,11 +21,18 @@ OLD Intranet site no longer active::
 Process
 ==================================================================
 
-0/ Check we are not in a high risk period ???
+0/ **** Check we are not in a high risk period ???
+
+0/ **** *ONLY* switch current link, after warning production, and sending mail
+   **** If we have any scripts in production that are using 
+   ****      /usr/local/apps/ecflow/current
+   **** These make break.
+   **** This is very important        
 
 0/ Update Documentation
    
-  - Internal wiki:  http://wedit.ecmwf.int/publications/manuals/ecflow/
+  -  ***** this is broken, need new intra-net page
+     Internal wiki:  http://wedit.ecmwf.int/publications/manuals/ecflow/
       cd $WK/Doc/online
       make clean; make html
       sitecopy -u ecflow
