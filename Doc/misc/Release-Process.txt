@@ -23,11 +23,16 @@ Process
 
 0/ **** Check we are not in a high risk period ???
 
-0/ **** *ONLY* switch current link, after warning production, and sending mail
+0/ **** DO ***NOT*** switch current link ****************
+   **** User support will do this, during an arranged system session
+   **** This is because we have member states, using it for their operations.
+   
    **** If we have any scripts in production that are using 
-   ****      /usr/local/apps/ecflow/current
+   ****    /usr/local/apps/ecflow/current
    **** These make break.
-   **** This is very important        
+   **** This is **very** important      
+   **** IDEALLY we need to educate member states *NOT* to use 
+   ****     /usr/local/apps/ecflow/current  
 
 0/ Update Documentation
    
