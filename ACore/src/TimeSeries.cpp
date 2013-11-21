@@ -441,7 +441,7 @@ void TimeSeries::why(const ecf::Calendar& c, std::string& theReasonWhy) const
 
 
 	TimeSlot currentTime = TimeSlot(duration(c));
-	ss << ", current time is ";
+	ss << ", current suite time is ";
 	if (relativeToSuiteStart_) ss << "+";
 	ss << currentTime.toString()  << " )";
 	theReasonWhy += ss.str();
