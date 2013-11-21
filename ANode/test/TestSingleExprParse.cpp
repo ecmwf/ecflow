@@ -23,6 +23,9 @@
 using namespace std;
 
 
+// DEBUG AID: to see the expression tree, invert the expected evaluation
+//            so that test fail's
+
 BOOST_AUTO_TEST_SUITE( NodeTestSuite )
 
 BOOST_AUTO_TEST_CASE( test_single_expression )
