@@ -865,7 +865,7 @@ std::ostream& AstNode::print( std::ostream& os ) const {
 		os << DState::toString(  refNode->dstate()  ) << "(" << static_cast<int>( refNode->dstate()) << ")\n";
 	}
 	else {
-		Indentor::indent( os ) << "# LEAF_NODE node_(NULL ) nodePath_('" << nodePath_ << "') ";
+		Indentor::indent( os ) << "# LEAF_NODE node_(NULL) nodePath_('" << nodePath_ << "') ";
  		os << DState::toString( DState::UNKNOWN  ) << "(" << static_cast<int>(DState::UNKNOWN) << ")\n";
 	}
 	return os;
@@ -1086,9 +1086,12 @@ std::ostream& VariableHelper::print( 	std::ostream& os ) const
 	Indentor::indent( os ) << "# " << astVariable_->nodePath() << Str::COLON() << astVariable_->name();
 
 	if ( theReferenceNode_ ) {
-		os << "(";
+		os << " (";
 		theReferenceNode_->findExprVariableAndPrint(astVariable_->name(), os);
 		os << ")";
+	}
+	else {
+	   os << " referencedNode(NULL) nodePath_('" << astVariable_->nodePath() << "') value(0)";
 	}
 	os << "\n";
  	return os;
