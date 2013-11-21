@@ -8,6 +8,9 @@
 **Change History**
 ==================
 
+4.0.1 (production, January 2014)
+   - ecflow_client    : minor change --get_state so that we print NULL when referenced node not accessible
+
 4.0.0 (production, November 2013)
    - ecflowview    : add %VARIABLE% syntax in ecflowview.menu
                      add Web Menu (second level access to manual, script, job, output)
