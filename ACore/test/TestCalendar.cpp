@@ -30,6 +30,41 @@ using namespace boost::gregorian;
 
 BOOST_AUTO_TEST_SUITE( CoreTestSuite )
 
+
+//static boost::posix_time::time_duration diff_d(boost::posix_time::time_duration t1, boost::posix_time::time_duration t2)
+//{
+//   // t2 > t1 otherwise assume we have gone over midnight
+//   if (t2 > t1) return t2 - t1;
+//
+//   boost::posix_time::time_duration midnight(24,0,0);
+//   boost::posix_time::time_duration diff_from_midnight = midnight - t1;
+//   std::cout << to_simple_string(diff_from_midnight) << "\n";
+//
+//   return diff_from_midnight + t2;
+//}
+//
+//BOOST_AUTO_TEST_CASE( test_calendar_3 )
+//{
+//   cout << "ACore:: ...test_calendar_3\n";
+//
+//   Calendar calendar;
+//   BOOST_CHECK_MESSAGE(calendar.hybrid(),"Default calendar type should be hybrid");
+//
+//   // init the calendar to 2009, Feb, 10th,  15 minutes past midnight
+//
+//   boost::posix_time::time_duration t1(23,0,0);
+//   boost::posix_time::time_duration t2(1,0,0);
+//   boost::posix_time::time_duration expected(2,0,0);
+////    std::cout << to_simple_string(t1) << "\n";
+////    std::cout << to_simple_string(t2) << "\n";
+////    std::cout << to_simple_string(t1 - t2) << "\n";
+////    std::cout << to_simple_string(t2 - t1) << "\n";
+//
+//   BOOST_CHECK_MESSAGE(diff_d(t1,t2) == expected," Expected " << to_simple_string(expected) << " but found " << to_simple_string(diff_d(t1,t2)));
+//}
+
+
+
 BOOST_AUTO_TEST_CASE( test_calendar_state_parsing )
 {
 	cout << "ACore:: ...test_calendar_state_parsing\n";
