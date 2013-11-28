@@ -347,15 +347,23 @@ void simple_node::info(std::ostream& f)
   f << type_name() << " " << name() << "\n";
   {
     if (owner_.get()) {
-      // owner_.get()->print(f);
+
+      if (owner_->type() == NODE_SUITE) {
+	Suite* suite = dynamic_cast<Suite*>(owner_->get_node());
+	// f << "clock    : "; 
+	if (suite->clockAttr()) {
+	  suite->clockAttr().get()->print(f); // f << "\n";
+	}
+      }
+
       int defs = owner_.get()->defstatus();
       if (defs != STATUS_QUEUED && defs != STATUS_UNKNOWN)
         f << inc << "defstatus " << ecf::status_name[defs] << "\n";
 
       Node* node = owner_.get()->get_node();
       if (node) {
-        if (node->repeat().toString() != "") // repeat
-          f << inc << node->repeat().toString() << "\n";
+        // if (node->repeat().toString() != "") // repeat // duplicated on suite node
+        //  f << inc << node->repeat().toString() << "\n";
 
         /* zombies attribute */
         const std::vector<ZombieAttr> & vect = node->zombies();
@@ -612,9 +620,9 @@ void simple_node::triggers(trigger_lister& tlr)
       find_in_kids(*this,kids(),tlr);
   }
 
-int simple_node::status_time() const { 
+boost::posix_time::time_duration simple_node::status_time() const { 
   if (owner_) return owner_->status_time();
-  return 0;
+  return boost::posix_time::time_duration(0,0,0);
 }
 
 int simple_node::flags()  const { 

@@ -54,6 +54,24 @@ static void             Redisplay();
 static void compute_rect(SimpleTreeWidget,Node*,int,int,int,int,int,XRectangle*);
 static void set_positions(SimpleTreeWidget,long*,long*);
 /* static void change_vertical(SimpleTreeWidget tw, Node *w,Boolean v); ??? */
+#ifdef linux
+/* putting this into comments makes ctrl-left button for collector
+   disappear !! */
+static char defaultTranslations[] = "\
+ Shift<Btn5Down>: increment(1)\n       Shift<Btn4Down>: increment(-1)  \n\
+      <Btn5Down>: increment(10)\n           <Btn4Down>: increment(-10) \n\
+<BtnDown>:DrawingAreaInput()\n\
+<BtnUp>:DrawingAreaInput()\n\
+<Key>osfActivate:DrawingAreaInput()\n\
+~s ~m ~a <Key>Return:DrawingAreaInput()\n\
+~s ~m ~a <Key>space:DrawingAreaInput()\n\
+<Key>F1:DrawingAreaInput()\n\
+<Key>F2:DrawingAreaInput()\n";
+#else
+
+#define defaultTranslations XmInheritTranslations
+
+#endif
 
 static XtResource resources[] = {
 	{XtNhorizontalSpace,XtCSpace,XtRDimension,sizeof(Dimension),
@@ -62,6 +80,12 @@ static XtResource resources[] = {
 	XtOffset(SimpleTreeWidget, simpletree.v_min_space), XtRString,"2"  },
 
 };
+
+// https://software.ecmwf.int/issues/browse/SUP-646
+static void xincrement();
+static XtActionsRec actionsList[] = {
+    { "increment",(XtActionProc) xincrement},
+}; // 
 
 SimpleTreeClassRec simpletreeClassRec = {
 	{
@@ -75,8 +99,8 @@ SimpleTreeClassRec simpletreeClassRec = {
 	Initialize,                       /* initialize         */
 	NULL,                             /* initialize_hook    */
 	XtInheritRealize,                 /* realize            */
-	NULL,                             /* actions            */
-        0,                                /* num_actions        */
+	actionsList, /*NULL,                 actions            */
+        XtNumber(actionsList),            /* num_actions        */
 	resources,                        /* resources          */
 	XtNumber(resources),              /* num_resources      */
 	NULLQUARK,                        /* xrm_class          */
@@ -96,7 +120,8 @@ SimpleTreeClassRec simpletreeClassRec = {
 	NULL,                             /* accept_focus       */
 	XtVersion,                        /* version            */
 	NULL,                             /* callback_private   */
-	XtInheritTranslations,            /* tm_table           */
+	defaultTranslations,              /* tm_table           */
+	/* XtInheritTranslations,            tm_table           */
 	NULL,                             /* query_geometry     */
 	XtInheritDisplayAccelerator,      /* display_accelerator*/
 	NULL,                             /* extension          */
@@ -549,4 +574,83 @@ Widget CreateTree(Widget par,char *nam,ArgList al,int ac)
 
 static void Print (SimpleTreeWidget w, FILE *f)
 {
+}
+
+static void xincrement (h, event, args, n_args)
+Widget   h;
+XEvent        *event;
+char          *args[];
+int            n_args;
+{
+#ifdef MOTIF
+#define SetArg(a,b)  XtSetArg(al[ac],a,b);ac++
+#define GetValues(w) XtGetValues(w,al,ac);ac=0
+#define SetValues(w) XtSetValues(w,al,ac);ac=0
+
+  Widget clip = XtParent(h);
+  Widget swin;
+  Widget v_scroll;
+
+  int ac = 0, arg;
+  Position        x_parent,y_parent, dh=0, dv=0;  
+  Arg al[5];
+
+  if(!clip) return;
+  swin = XtParent(clip);
+
+  if(!(swin = XtParent(swin))) return;
+  while (swin && !XmIsScrolledWindow(swin)) {
+    swin = XtParent(swin); 
+  }
+
+  /* printf("# SimpleTree swin %s\n",XtName(swin));  */
+  /* while (clip) { */
+  /*   printf("# SimpleTree clip %s\n",XtName(clip));  */
+  /*   clip = XtParent(clip);  */
+  /* } */
+  if(!swin) return;
+  {
+    int min, max, value, slider_size, inc, page_inc;
+    ac = 0;
+    XtSetArg(al[ac],XmNverticalScrollBar, &v_scroll );ac++;
+    XtGetValues(swin,al,ac);
+  
+    ac = 0;
+    XtSetArg(al[ac], XmNminimum,&min); ac++;
+    XtSetArg(al[ac], XmNmaximum,&max); ac++;   
+    XtGetValues(v_scroll, al, ac);
+    XmScrollBarGetValues(v_scroll,&value,&slider_size,&inc,&page_inc);
+
+    ac = 0;
+    XtSetArg(al[ac],XmNx,&x_parent);ac++;
+    XtSetArg(al[ac],XmNy,&y_parent);ac++;
+    XtGetValues(swin,al,ac);
+
+    arg = atoi(args[0]);
+    dh = (abs(arg) > 5) ? page_inc : inc;
+
+    if (arg < 0) {
+      if (value - dh < min)
+        value = min;
+      else
+        value -= dh;
+    } else {
+      if (value + dh > max)
+        value = max;
+      else
+        value += dh;
+    }
+
+    {
+      Position x = x_parent-dh;
+      Position y = y_parent-dv;
+
+      ac = 0;
+      XtSetArg(al[ac],XmNx,x);ac++;
+      XtSetArg(al[ac],XmNy,y);ac++;
+      XtSetValues(swin,al,ac);
+      XmScrollBarSetValues(v_scroll,value,slider_size, inc, page_inc,TRUE);
+    }
+  }
+#endif
 }

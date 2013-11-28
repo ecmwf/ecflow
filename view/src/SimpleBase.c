@@ -40,8 +40,9 @@ static Boolean          SetValues();
 /* putting this into comments makes ctrl-left button for collector
    disappear !! */
 static char defaultTranslations[] = "\
-<BtnDown>:DrawingAreaInput()\n\
-<BtnUp>:DrawingAreaInput()\n\
+ Shift<Btn5Down>: increment(1)\n       Shift<Btn4Down>: increment(-1)  \n\
+      <Btn5Down>: increment(10)\n           <Btn4Down>: increment(-10) \n\
+<BtnDown>:DrawingAreaInput()\n              <BtnUp>:DrawingAreaInput()\n\
 <Key>osfActivate:DrawingAreaInput()\n\
 ~s ~m ~a <Key>Return:DrawingAreaInput()\n\
 ~s ~m ~a <Key>space:DrawingAreaInput()\n\
@@ -1243,7 +1244,6 @@ int            n_args;
 
   Widget clip = XtParent(h);
   Widget swin;
-
   Widget v_scroll;
 
   int ac = 0;
@@ -1262,14 +1262,14 @@ int            n_args;
 
   int arg;
 
-  printf("1\n");
+  /* printf("## mouse 1\n"); */
   if(!clip) return;
   swin = XtParent(clip);
-  printf("2\n");
+  /* printf("## mouse 2\n"); */
   if(!swin || !XmIsScrolledWindow(swin)) return;
-  printf("3\n");
+  /* printf("## mouse 3\n"); */
   if (n_args != 1) return;
-  printf("4\n");
+
   SetArg(XmNverticalScrollBar  , &v_scroll);
   GetValues(swin);
   
