@@ -123,6 +123,7 @@ tar --exclude=*.check --exclude=*.check.b \
     --exclude=include \
     --exclude=test_bench \
     --exclude=nightly \
+    --exclude=online \
     --exclude=RemoteSystemsTempFiles \
     --exclude=Xcdp \
     --exclude=xcdp \

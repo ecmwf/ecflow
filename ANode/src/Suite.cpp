@@ -316,13 +316,14 @@ void Suite::collateChanges(DefsDelta& changes) const
 #endif
 	// Optimising updates:
 	// Problem:
-	//    User has requested 1 second updated in the viewer. We used only add SuiteCalendarMemento
-	//    when there were changes in the suite. However this causes the suite in the
-	//    viewer to *refresh*.  However when there no changes in the suite, we did not
-	//    bother with creating a SuiteCalendarMemento. This reduces network traffic.
+	//    User has requested 1 second updated in the viewer. We used add SuiteCalendarMemento
+	//    when ever there were changes in the suite. However this causes the suite in the
+	//    viewer to *refresh* to often.
 	//
 	// Soln 1:
-	//   Use calendar_change_no_ = Ecf::incr_state_change_no();
+	//   Use:
+	//      calendar_change_no_ = Ecf::incr_state_change_no();
+	//
 	//   plus only create SuiteCalendarMemento, where are suite changes *AND*
 	//   calendar has actually changed.
 	//   - This fixes the problem, at the expense of *always* creating a SuiteCalendarMemento
@@ -334,11 +335,13 @@ void Suite::collateChanges(DefsDelta& changes) const
 	//     even when there are **no other** changes
 	//
    // Soln 2:
-	//  Use calendar_change_no_ = Ecf::state_change_no() + 1
-	//  We mimick updating Ecf::state_change_no() this we can create memento when required
-	//  They should however not be recognised as state change.
-	//  + This fixes the problem, and the regression test will also work
+	//    Use:
+	//       calendar_change_no_ = Ecf::state_change_no() + 1
 	//
+	//    We mimick updating Ecf::state_change_no(), thus we can create memento when required
+	//    They should however not be recognised as state change.
+	//    + This fixes the problem, and the regression test will also work
+	//    This is the solution that has been implemented
 
 	// ********************************************************************
 	// Note: we separate determining incremental changes from the traversal
@@ -365,9 +368,11 @@ void Suite::collateChanges(DefsDelta& changes) const
 	NodeContainer::collateChanges(changes);
 
 	/// *ONLY* create SuiteCalendarMemento, if something changed in the suite.
-	/// Additionally calendar_change_no_ updates should not register as a state change,  i.e for tests
+	/// Additionally calendar_change_no_ updates should not register as a state change, i.e for tests
    /// SuiteCalendarMemento is need so that WhyCmd can work on the client side.
    /// Need to use new compound since the suite may not have change, but it children may have.
+	/// Hence as side affect why command with reference to time will only be accurate
+	/// after some kind of state change. Discussed with Axel, who was happy with this.
    size_t after = changes.size();
    if (before != after && calendar_change_no_ > changes.client_state_change_no()) {
       compound_memento_ptr compound_ptr =  boost::make_shared<CompoundMemento>(absNodePath());

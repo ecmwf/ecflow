@@ -84,6 +84,11 @@ ECFLOW_VERSION=$release.$major.$minor
    
 export ECFLOW_INSTALL_DIR=${ECFLOW_INSTALL_DIR:-/usr/local/apps/ecflow/$release.$major.$minor}
 
+# =============================================================================
+# Required for cray, since we allow multiple compilers
+# =============================================================================
+TOOLSET=
+CXXFLAGS=
 
 # ======================================================================
 # We do NOT install on the LOCAL build machine, since that will not have
@@ -127,6 +132,8 @@ then
   
 elif [[ "$ARCH" = cray ]] ; then 
 
+   TOOLSET=toolset=gcc
+   CXXFLAGS=cxxflags=-fPIC
    if [[ "$PE_ENV" = CRAY ]] ; then
       echo "The PE_ENV=CRAY, For ecflow we only support install with PE_ENV=GNU"
       exit 1
@@ -185,7 +192,7 @@ export ECFLOW_PYTHON_INSTALL_DIR=$ECFLOW_INSTALL_DIR/lib/python2.7/site-packages
 # ============================================================================
 # INSTALL
 # ============================================================================
-$BOOST_ROOT/bjam -d2 variant=$mode_arg $test_arg $install_arg
+$BOOST_ROOT/bjam $TOOLSET $CXXFLAGS -d2 variant=$mode_arg $test_arg $install_arg
    
 # ===========================================================================
 # install system files for ecmwf configuration: servers list + menu

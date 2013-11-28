@@ -146,7 +146,7 @@ def add_cray_cray_compiler_variables( cray_cray ):
     cray_cray.add_variable("PRGENV","PrgEnv-cray")
     cray_cray.add_variable("SITE_CONFIG","$WK/build/site_config/site-config-cray.jam")
     cray_cray.add_variable("ROOT_WK","/perm/ma/ma0/workspace/CRAY")
-    cray_cray.add_variable("CUSTOM_BJAM_ARGS","toolset=cray cxxflags=-fPIC")  
+    cray_cray.add_variable("CUSTOM_BJAM_ARGS","toolset=cray cxxflags=-hPIC")  
 
 def add_remote_cray_variables( cray ):
     # re use axel scripts for trap.h. rcp.eh etc,  
@@ -595,7 +595,7 @@ def add_suite_variables( suite ):
     suite.add_variable("PYTHON_VERSION","2.7")
     suite.add_variable("SET_TO_TEST_SCRIPT","false") 
     suite.add_variable("BUILD_ECFLOWVIEW","true")
-    suite.add_variable("GIT_BRANCH","release/4.0.0")  # when makeing a relase switch to release/<release version> otherwise develop
+    suite.add_variable("GIT_BRANCH","develop")  # when makeing a relase switch to release/<release version> otherwise develop
 
     # automatically fob all zombies when compiling ecflow 
     child_list = []
