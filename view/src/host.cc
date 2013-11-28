@@ -1486,11 +1486,6 @@ void ehost::update_reg_suites(bool get_ch_suites) {
 	client_.server_reply().get_client_handle_suites();
       for (size_t i=0; i < vct.size(); ++i) {
 	if (vct[i].first == (unsigned int) client_.client_handle()) {
-#ifdef DEBUG
-	  for (size_t j=0; j < vct[i].second.size(); ++j) {
-	    std::cout << vct[i].second[j] << std::endl;	      
-	  }	  
-#endif
 	  suites_ = vct[i].second;
 	  break;
 	}		

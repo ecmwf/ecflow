@@ -55,7 +55,7 @@ public:
   
   virtual int tryno()  const;
   virtual int flags() const;
-  virtual int status_time() const;
+  virtual boost::posix_time::time_duration status_time() const;
   
   virtual Boolean isMigrated() const  { return ecfFlag(FLAG_MIGRATED); }
   virtual Boolean isLate() const      { return ecfFlag(FLAG_LATE);     }
@@ -123,6 +123,8 @@ class suite_node : public simple_node {
 #endif
   virtual Boolean show_it() const;
   virtual Boolean visible() const;
+
+  // virtual void info(std::ostream&);
 };
 
 class family_node : public simple_node {

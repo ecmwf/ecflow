@@ -47,6 +47,7 @@
 #include "str.h"
 #include "option.h"
 #include "array.h"
+#include <Suite.hpp>
 
 class node_data {
 
@@ -793,11 +794,21 @@ bool node::is_my_parent(node* p) const
   return false;
 }
 
+#include <boost/date_time/posix_time/posix_time.hpp>
 void node::info(std::ostream& f)
 {
+  using namespace boost::posix_time;
+  using namespace boost::gregorian;
+
   f << "name     : " << name() << "\n";
   f << "type     : " << type_name() << "\n";
   f << "status   : " << status_name() << "\n";
+
+  if (owner_) {
+    if (owner_->type() == NODE_TASK && 
+	owner_->status_time() != boost::posix_time::time_duration(0,0,0)) {
+      // f << "at       : " << to_simple_string(owner_->status_time()) << "\n"; // https://software.ecmwf.int/issues/browse/SUP-649
+    }}
   f << "----------\n";
   //    1234567890
 }
