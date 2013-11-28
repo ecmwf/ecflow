@@ -97,7 +97,7 @@ public:
 		HYBRID      // date does not change, but will support day change. See Above.
 	};
 
-	/// Defaults to the HYBRID clock
+	/// Defaults to the REAL clock
 	Calendar();
 	Calendar(const Calendar&);
 	Calendar& operator=( const Calendar&);
@@ -110,7 +110,7 @@ public:
   	void init(Clock_t clock, bool startStopWithServer = false);
 
    // for test init and begin calendar
-   void init(const boost::posix_time::ptime& time, Clock_t clock = Calendar::HYBRID, bool startStopWithServer = false);
+   void init(const boost::posix_time::ptime& time, Clock_t clock = Calendar::REAL, bool startStopWithServer = false);
 
    /// Start the Calendar.  Parameter time can include gain.
    void begin(const boost::posix_time::ptime& time);

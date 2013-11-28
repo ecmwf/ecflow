@@ -10,7 +10,8 @@
 
 4.0.1 (production, January 2014)
    - ecflow_client    : minor change --get_state so that we print NULL when referenced node not accessible
-   - doc              : Online removed form tar file, replaced with ecflow confluence page
+   - ecflow_server    : default clock changed from hybrid to real. (Avoid confusion with cron, date, day, set to complete)
+   - doc              : Online removed from tar file, replaced with ecflow confluence page
 
 4.0.0 (production, November 2013)
    - ecflowview    : add %VARIABLE% syntax in ecflowview.menu

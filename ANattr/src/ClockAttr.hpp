@@ -38,9 +38,9 @@ class ClockAttr {
 public:
 	/// The following constructor is used for test only. It allows us to
 	/// create a clock attribute initialised with given date and time
-	ClockAttr(const boost::posix_time::ptime&, bool hybrid = true, bool positiveGain = true);
-	ClockAttr(int day, int month, int year, bool hybrid = true );
-	ClockAttr(bool hybrid = true);
+	ClockAttr(const boost::posix_time::ptime&, bool hybrid = false, bool positiveGain = true);
+	ClockAttr(int day, int month, int year, bool hybrid = false );
+	ClockAttr(bool hybrid = false);
 
 	std::ostream& print(std::ostream&) const;
 	bool operator==(const ClockAttr& rhs) const;

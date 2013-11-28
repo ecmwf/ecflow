@@ -275,7 +275,7 @@ BOOST_AUTO_TEST_CASE( test_multiple_times_and_dates_hybrid )
       boost::posix_time::time_duration td_plus_10_minute  =  theLocalTime.time_of_day() +  minutes(10);
 
       suite_ptr suite = theDefs.add_suite("test_multiple_times_and_dates_hybrid");
-      suite->addClock( ClockAttr(theLocalTime) ); // defaults to hybrid
+      suite->addClock( ClockAttr(theLocalTime,true) ); // true means use hybrid clock
 
       family_ptr fam = suite->add_family("family");
       task_ptr task = fam->add_task("t");

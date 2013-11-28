@@ -28,7 +28,7 @@ using namespace boost::posix_time;
 namespace ecf {
 
 Calendar::Calendar()
-: ctype_(Calendar::HYBRID),
+: ctype_(Calendar::REAL),
   dayChanged_(false),
   startStopWithServer_(false),
   day_of_week_(-1),

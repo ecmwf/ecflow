@@ -131,6 +131,7 @@ BOOST_AUTO_TEST_CASE( test_repeat_date  )
  	cout << "Simulator:: ...test_repeat_date\n";
 
  	//suite suite
+ 	// clock real <today date + time>
  	//	family family
 	//	    repeat date YMD 20091001  20091015 1  # yyyymmdd
 	//   	task t<n>
@@ -142,7 +143,7 @@ BOOST_AUTO_TEST_CASE( test_repeat_date  )
    Defs theDefs;
  	{
  	 	boost::posix_time::ptime   theLocalTime =  Calendar::second_clock_time();
-		ClockAttr clockAttr(theLocalTime );
+		ClockAttr clockAttr(theLocalTime);
    	suite_ptr suite = theDefs.add_suite("test_repeat_date");
 		suite->addVerify( VerifyAttr(NState::COMPLETE,1) );
   		suite->addClock( clockAttr );
@@ -169,6 +170,7 @@ BOOST_AUTO_TEST_CASE( test_repeat_date_2  )
  	cout << "Simulator:: ...test_repeat_date_for_loop\n";
 
  	//suite suite
+ 	// clock real <todays date>
 	//	repeat date YMD 20091001  20091005 1  # yyyymmdd
  	//	family family
 	//	    repeat date YMD 20091001  20091005 1  # yyyymmdd

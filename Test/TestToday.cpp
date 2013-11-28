@@ -108,7 +108,7 @@ BOOST_AUTO_TEST_CASE( test_today_relative_time_series )
    //suite test_today_relative_time_series
    //	edit SLEEPTIME 1
    //	edit ECF_INCLUDE $ECF_HOME/includes
-   //  clock real <todays date>
+   // clock real <todays date>
    //	family family
    //   	task t1
    //       today <start> <finish> <incr>
@@ -118,9 +118,9 @@ BOOST_AUTO_TEST_CASE( test_today_relative_time_series )
    {
       // Initialise clock with todays date and time, then create a today attribute
       // with a time series, so that task runs 3 times
-      ClockAttr clockAttr(Calendar::second_clock_time());
       suite_ptr suite = theDefs.add_suite( "test_today_relative_time_series");
       suite->add_variable("SLEEPTIME",boost::lexical_cast<std::string>(TestFixture::job_submission_interval()-1));
+      ClockAttr clockAttr(Calendar::second_clock_time(),false);
       suite->addClock( clockAttr );
 
       family_ptr fam = suite->add_family( "family");
@@ -173,7 +173,7 @@ BOOST_AUTO_TEST_CASE( test_today_real_time_series )
       boost::posix_time::ptime time2 = theLocalTime + minutes(7);
 
       suite_ptr suite = theDefs.add_suite( "test_today_real_time_series");
-      ClockAttr clockAttr(theLocalTime);
+      ClockAttr clockAttr(theLocalTime,false);
       suite->addClock( clockAttr );
       suite->add_variable("SLEEPTIME",boost::lexical_cast<std::string>(TestFixture::job_submission_interval()-1));
       suite->addVerify( VerifyAttr(NState::COMPLETE,1) );
