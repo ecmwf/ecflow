@@ -5,6 +5,7 @@
 # ======================================================================
 export WK=%WK%
 
+default_old_version=3.1.9
       
 if [[ %SET_TO_TEST_SCRIPT% = true ]] ; then
    echo "Test only"
@@ -20,6 +21,10 @@ else
       
       # determine version
       version=$(ecflow_client $LOG --server_version)
+      if [[ "$version" = "" ]]; then
+         version=default_old_version
+      fi
+      
       echo $nick $host $port $version
       /usr/local/apps/ecflow/$version/bin/ecflow_client $LOG --migrate > /var/tmp/ma0/ECFLOW_TEST/migration/$host.$port.def
       
