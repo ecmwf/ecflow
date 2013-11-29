@@ -106,6 +106,13 @@ class TestMigrate318(unittest.TestCase):
                  
         # remove the generated file
         os.remove("migrate/label_bug.mig")
+
+    def test_migrate_variable_file(self):
+        migration_count = ecflow_migrate.do_migrate("migrate/variable_bug.def")
+        self.assertEqual(migration_count,1,"Expected defs file to be migrated")
+                 
+        # remove the generated file
+        os.remove("migrate/variable_bug.mig")
  
 # ====================================================================================================
 # test both together
