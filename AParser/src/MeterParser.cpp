@@ -30,10 +30,6 @@ bool MeterParser::doParse( const std::string& line, std::vector<std::string >& l
 		throw std::runtime_error("MeterParser::doParse: Could not add meter as node stack is empty at line: " + line );
 	}
 
- 	if ( nodeStack_top()->isSuite() ) {
-		throw std::runtime_error("MeterParser::doParse: Can not add meter to a Suite: " + line );
- 	}
-
 	int min = Extract::theInt( lineTokens[2], "Invalid meter : " + line );
 	int max = Extract::theInt( lineTokens[3], "Invalid meter : " + line );
 	int colorChange = Extract::optionalInt( lineTokens, 4, 0, "Invalid meter : " + line );
