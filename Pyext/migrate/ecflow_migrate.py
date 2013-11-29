@@ -165,6 +165,60 @@ class MigrateForLabel(Migrator):
            
         return migrated
      
+class MigrateForVariable(Migrator):
+    """Fix bug where variable value has new lines, and hence spills over to next line
+       This will remove place newline back onto the same line
+    """
+    def __init__(self, list_of_input_lines):
+        Migrator.__init__(self, list_of_input_lines)
+ 
+    def _migration_hook(self,default_version_number):
+        """
+        The correct format is where variable in on the same line
+            edit EMOS_TYPE '  family prod_wparam
+  endfamily
+'         
+        """
+        #count = 0;
+        no_of_label_quotes = 0
+        migrated = False
+        start_line_append = ""
+        for line in self.list_of_input_lines:
+            #count =  count + 1
+            #print str(count) + ": " + line
+            #if count == 383119:
+            #    print "debug mee"
+            if len(start_line_append) > 0:
+                no_of_label_quotes += line.count("'")
+                start_line_append += line
+                if no_of_label_quotes % 2 == 0:
+                    # even number of quotes
+                    self.list_of_output_lines.append(start_line_append) # preserve last '\n'  
+                    start_line_append = ""
+                    no_of_label_quotes = 0 
+                else:
+                    start_line_append = start_line_append.rstrip('\n')
+                continue            
+            else:
+            
+                # process line, avoid ECF_URL_CMD as that could by error have uneven number of "'' i.e
+                #   edit ECF_URL_CMD '${BROWSER:=firefox} -remote 'openURL(%URL%'
+                # hence we use 
+                #    if no_of_label_quotes == 1: 
+                # instead of
+                #    if no_of_label_quotes % 2 == 0:
+                tokens = line.split()
+                if len(tokens) >= 3 and tokens[0] == "edit":
+                    no_of_label_quotes = line.count("'")
+                    if no_of_label_quotes == 1: 
+                        start_line_append = line
+                        start_line_append = start_line_append.rstrip('\n')
+                        migrated = True
+                        continue
+                  
+            self.list_of_output_lines.append(line)
+           
+        return migrated
      
     
 def do_migrate(defs_file):
@@ -193,6 +247,14 @@ def do_migrate(defs_file):
             # did migration, update input lines for next migration
             list_of_input_lines = label_migrator.output_lines()
         list_of_output_lines = label_migrator.output_lines()
+
+
+        variable_migrator = MigrateForVariable(list_of_input_lines)
+        if variable_migrator.migrate(401):
+            migration_count += 1
+            # did migration, update input lines for next migration
+            list_of_input_lines = variable_migrator.output_lines()
+        list_of_output_lines = variable_migrator.output_lines()
             
         output_file_object.writelines(list_of_output_lines)
     finally:

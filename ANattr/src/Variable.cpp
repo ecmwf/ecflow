@@ -66,10 +66,17 @@ std::string Variable::toString() const
    ret += "edit ";
    ret += name_;
    ret += " '";
-   ret += value_;
+   if (value_.find("\n") == std::string::npos) ret += value_;
+   else {
+      // replace \n, otherwise re-parse will fail
+      std::string value = value_;
+      Str::replaceall(value,"\n","\\n");
+      ret += value;
+   }
    ret += "'";
    return ret;
 }
+
 
 std::string Variable::dump() const
 {
