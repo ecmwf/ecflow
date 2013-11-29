@@ -360,6 +360,7 @@ public:
       addParser( new EventParser(p) );
       addParser( new LabelParser(p) );
       addParser( new CalendarParser(p) );
+      addParser( new MeterParser(p) );
  	}
 
 	virtual bool doParse(const std::string& line, std::vector<std::string>& lineTokens) {
