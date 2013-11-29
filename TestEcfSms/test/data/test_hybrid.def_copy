@@ -3,6 +3,7 @@
 # For old sms define the environment variable TEST_HOME
 #setenv -i TEST_HOME 
 suite test 
+    clock hybrid
     edit ECF_INCLUDE TestEcfSms/test/data/includes
     edit ECF_HOME    TestEcfSms/test/data 
     limit l2 2
