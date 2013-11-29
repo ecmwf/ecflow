@@ -22,7 +22,7 @@ else
       # determine version
       version=$(ecflow_client $LOG --server_version)
       if [[ "$version" = "" ]]; then
-         version=default_old_version
+         version=$default_old_version
       fi
       
       echo $nick $host $port $version
