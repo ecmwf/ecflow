@@ -824,7 +824,7 @@ template<> boost::posix_time::time_duration ecf_concrete_node<Suite>::status_tim
 template<> boost::posix_time::time_duration ecf_concrete_node<Node>::status_time() const
 { 
   if (owner_) 
-    return owner_->get_state().second; // .total_seconds();
+    return owner_->state_change_time().time_of_day(); // .total_seconds();
   return boost::posix_time::time_duration(0,0,0); 
 }
 

@@ -215,7 +215,7 @@ public:
    /// The State represent the life cycle changes of a node.
    NState::State state() const { return state_.first.state(); }
 
-   /// return the state and duration time when the state change happened
+   /// return the state and duration time(relative to when suite was begun) when the state change happened
    std::pair<NState,boost::posix_time::time_duration> get_state() const { return state_;}
 
    /// Set the state, this can have side affects. To handle state changes
@@ -234,6 +234,10 @@ public:
    /// Set state only, has no side effects
    void setStateOnly(NState::State s, bool force = false);
    virtual void setStateOnlyHierarchically(NState::State s, bool force = false) { setStateOnly(s,force); }
+
+   /// This returns the time of state change: (relative to real time when the suite calendar was begun)
+   /// The returned time is *real time/computer UTC time* and *not* suite real time.
+   boost::posix_time::ptime state_change_time() const;
 
    /// Sets the default status the node should have when the begin/re-queue is called
    /// *Distinguish* between adding a def status and changing it.

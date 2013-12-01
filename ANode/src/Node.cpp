@@ -675,6 +675,15 @@ void Node::setStateOnly(NState::State newState, bool force)
    }
 }
 
+boost::posix_time::ptime Node::state_change_time() const
+{
+   const Calendar& calendar = suite()->calendar();
+   boost::posix_time::ptime the_state_change_time = calendar.begin_time();
+   the_state_change_time += state_.second; // state_.second is calendar duration relative to calendar begin_time
+   return the_state_change_time;
+}
+
+
 DState::State Node::dstate() const {
 
    switch ( state() ) {

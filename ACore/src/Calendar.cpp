@@ -127,6 +127,12 @@ void Calendar::init(Clock_t clock, bool startStopWithServer)
    startStopWithServer_ = startStopWithServer;
 }
 
+void Calendar::init(const boost::posix_time::ptime& time, Clock_t clock, bool startStopWithServer)
+{
+   init(clock,startStopWithServer);
+   begin(time);
+}
+
 /// Start the Calendar.  Parameter time can include gain.
 void Calendar::begin(const boost::posix_time::ptime& the_time)
 {
@@ -141,12 +147,6 @@ void Calendar::begin(const boost::posix_time::ptime& the_time)
 
    // Cache the most common requests
    update_cache();
-}
-
-void Calendar::init(const boost::posix_time::ptime& time, Clock_t clock, bool startStopWithServer)
-{
-   init(clock,startStopWithServer);
-   begin(time);
 }
 
 void Calendar::update( const ecf::CalendarUpdateParams & calUpdateParams )
