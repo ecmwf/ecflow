@@ -805,9 +805,10 @@ void node::info(std::ostream& f)
   f << "status   : " << status_name() << "\n";
 
   if (owner_) {
-    if (owner_->type() == NODE_TASK) {
-       boost::posix_time::time_duration state_change_time = owner_->status_time();
-       if (state_change_time != boost::posix_time::time_duration(0,0,0)) {
+    // if (owner_->type() == NODE_TASK ) 
+    {
+       boost::posix_time::ptime state_change_time = owner_->status_time();
+       if (!state_change_time.is_special()) {
           f << "at       : " << to_simple_string(state_change_time) << "\n"; // https://software.ecmwf.int/issues/browse/SUP-649
        }
     }

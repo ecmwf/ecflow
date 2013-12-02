@@ -818,14 +818,22 @@ const std::string ecf_concrete_node<const std::pair<std::string, std::string> >
 template<> int ecf_concrete_node<const Event>::status() const
 { return owner_ ? owner_->value() : 0; }
 
-template<> boost::posix_time::time_duration ecf_concrete_node<Suite>::status_time() const
-{ return boost::posix_time::time_duration(0,0,0); }
+template<> boost::posix_time::ptime ecf_concrete_node<Suite>::status_time() const
+{   
+  if (owner_) return owner_->state_change_time(); 
+  return boost::posix_time::ptime(); 
+}
 
-template<> boost::posix_time::time_duration ecf_concrete_node<Node>::status_time() const
+template<> boost::posix_time::ptime ecf_concrete_node<Family>::status_time() const
+{   
+  if (owner_) return owner_->state_change_time(); 
+  return boost::posix_time::ptime(); 
+}
+
+template<> boost::posix_time::ptime ecf_concrete_node<Node>::status_time() const
 { 
-  if (owner_) 
-    return owner_->state_change_time().time_of_day(); // .total_seconds();
-  return boost::posix_time::time_duration(0,0,0); 
+  if (owner_) return owner_->state_change_time(); 
+  return boost::posix_time::ptime(); 
 }
 
 template<> int ecf_concrete_node<Suite>::status() const

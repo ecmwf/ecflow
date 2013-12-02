@@ -190,8 +190,8 @@ class ecf_node : public observable {
    virtual const std::string toString() const { return none(); }
    // virtual const std::string substitute(const std::string& cmd) const { return cmd; }
    virtual int status() const { return STATUS_UNKNOWN; }
-   virtual boost::posix_time::time_duration status_time() const 
-     { return boost::posix_time::time_duration(0,0,0); }
+   virtual boost::posix_time::ptime status_time() const 
+     { return boost::posix_time::ptime(); }
    virtual int defstatus() const { return STATUS_QUEUED; }
    virtual int tryno()  { return 0; }
    virtual const std::string& name() const      { return name_; }
@@ -277,8 +277,8 @@ class ecf_concrete_node : public ecf_node, public AbstractObserver
    // virtual const std::string substitute(const std::string& cmd) const { return cmd; }
    virtual int status()    const { return STATUS_UNKNOWN; }
    virtual int defstatus() const { return STATUS_QUEUED; }
-   virtual boost::posix_time::time_duration status_time() const 
-     { return boost::posix_time::time_duration(0,0,0); }
+   virtual boost::posix_time::ptime status_time() const 
+     { return boost::posix_time::ptime(); }
    virtual int tryno()  { return 0; }
    virtual int type() const { return NODE_UNKNOWN; }
    virtual int flags() const { return 0; }

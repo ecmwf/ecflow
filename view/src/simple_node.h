@@ -55,7 +55,7 @@ public:
   
   virtual int tryno()  const;
   virtual int flags() const;
-  virtual boost::posix_time::time_duration status_time() const;
+  virtual boost::posix_time::ptime status_time() const;
   
   virtual Boolean isMigrated() const  { return ecfFlag(FLAG_MIGRATED); }
   virtual Boolean isLate() const      { return ecfFlag(FLAG_LATE);     }

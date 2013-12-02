@@ -620,9 +620,9 @@ void simple_node::triggers(trigger_lister& tlr)
       find_in_kids(*this,kids(),tlr);
   }
 
-boost::posix_time::time_duration simple_node::status_time() const { 
+boost::posix_time::ptime simple_node::status_time() const { 
   if (owner_) return owner_->status_time();
-  return boost::posix_time::time_duration(0,0,0);
+  return boost::posix_time::ptime();
 }
 
 int simple_node::flags()  const { 
