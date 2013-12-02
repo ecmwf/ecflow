@@ -9,11 +9,12 @@
 ==================
 
 4.0.1 (production, January 2014)
-   - ecflow_client    : minor change --get_state so that we print NULL when referenced node not accessible
-   - ecflow_client    : allow meter on suite when loading the definition.
-   - ecflow_server    : default clock changed from hybrid to real. (Avoid confusion with cron, date, day, set to complete)
-   - doc              : Online removed from tar file, replaced with ecflow confluence page
-   - *                : Fix --migrate bugs: to take into account variable values that have new lines
+   - ecflow_client  : minor change --get_state so that we print NULL when referenced node not accessible
+   - ecflow_client  : allow meter on suite when loading the definition.
+   - ecflow_server  : default clock changed from hybrid to real. (Avoid confusion with cron, date, day, set to complete)
+   - ecflowview     : The info page updated to show time/date of the state change for a Node.
+   - doc            : Online removed from tar file, replaced with ecflow confluence page
+   - *              : Fix --migrate bugs: to take into account variable values that have new lines
 
 4.0.0 (production, November 2013)
    - ecflowview    : add %VARIABLE% syntax in ecflowview.menu
