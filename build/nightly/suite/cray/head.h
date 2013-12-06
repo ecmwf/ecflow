@@ -61,7 +61,7 @@ export PATH=/usr/local/apps/python/current/bin:$PATH
 # ===================================================================================
 # Load the right environment, default is awlays cray
 #
-module swap PrgEnv-cray %PRGENV%
+module swap PrgEnv-cray %PRGENV:%
 
 
 # For gnu, we will use gnu 4.6.3

@@ -13,6 +13,12 @@ else
       export PATH=/usr/local/apps/intel/composer_xe_2013.3.163/bin:$PATH
       sh -x iccvars.sh intel64
    fi
+   
+   CXXFLAGS=
+   if [[ %ARCH% = cray ]] ; then
+      CXXFLAGS=cxxflags=-fPIC
+      # on CRAY gnu has layout tagged, and intel and cray have layout versioned
+   fi
 
    # ========================================================================
    # Build the boost libs used by ecflow
@@ -26,24 +32,24 @@ else
    #rm -rf bin.v2
    
    # ========================================================================
-   # Note: boost thread *ONLY* need to *test* multi-threaded server
+   # Note: boost thread *ONLY* needed to *test* multi-threaded server
    # ========================================================================
    
-   ./bjam --build-dir=./tmpBuildDir toolset=%TOOLSET% stage link=static --layout=tagged --with-system variant=debug 
-   ./bjam --build-dir=./tmpBuildDir toolset=%TOOLSET% stage link=static --layout=tagged --with-date_time variant=debug 
-   ./bjam --build-dir=./tmpBuildDir toolset=%TOOLSET% stage link=static --layout=tagged --with-filesystem variant=debug   
-   ./bjam --build-dir=./tmpBuildDir toolset=%TOOLSET% stage link=static --layout=tagged --with-program_options variant=debug 
-   ./bjam --build-dir=./tmpBuildDir toolset=%TOOLSET% stage link=static --layout=tagged --with-serialization  variant=debug 
-   ./bjam --build-dir=./tmpBuildDir toolset=%TOOLSET% stage link=static --layout=tagged --with-thread variant=debug  
-   ./bjam --build-dir=./tmpBuildDir toolset=%TOOLSET% stage link=static --layout=tagged --with-test variant=debug  
+   ./bjam --build-dir=./tmpBuildDir toolset=%TOOLSET% $CXXFLAGS stage link=static --layout=%LAYOUT% --with-system variant=debug 
+   ./bjam --build-dir=./tmpBuildDir toolset=%TOOLSET% $CXXFLAGS stage link=static --layout=%LAYOUT% --with-date_time variant=debug 
+   ./bjam --build-dir=./tmpBuildDir toolset=%TOOLSET% $CXXFLAGS stage link=static --layout=%LAYOUT% --with-filesystem variant=debug   
+   ./bjam --build-dir=./tmpBuildDir toolset=%TOOLSET% $CXXFLAGS stage link=static --layout=%LAYOUT% --with-program_options variant=debug 
+   ./bjam --build-dir=./tmpBuildDir toolset=%TOOLSET% $CXXFLAGS stage link=static --layout=%LAYOUT% --with-serialization  variant=debug 
+   ./bjam --build-dir=./tmpBuildDir toolset=%TOOLSET% $CXXFLAGS stage link=static --layout=%LAYOUT% --with-thread variant=debug  
+   ./bjam --build-dir=./tmpBuildDir toolset=%TOOLSET% $CXXFLAGS stage link=static --layout=%LAYOUT% --with-test variant=debug  
    
-   ./bjam --build-dir=./tmpBuildDir toolset=%TOOLSET% stage link=static --layout=tagged --with-system variant=release 
-   ./bjam --build-dir=./tmpBuildDir toolset=%TOOLSET% stage link=static --layout=tagged --with-date_time variant=release  
-   ./bjam --build-dir=./tmpBuildDir toolset=%TOOLSET% stage link=static --layout=tagged --with-filesystem variant=release   
-   ./bjam --build-dir=./tmpBuildDir toolset=%TOOLSET% stage link=static --layout=tagged --with-program_options variant=release 
-   ./bjam --build-dir=./tmpBuildDir toolset=%TOOLSET% stage link=static --layout=tagged --with-serialization  variant=release 
-   ./bjam --build-dir=./tmpBuildDir toolset=%TOOLSET% stage link=static --layout=tagged --with-thread variant=release  
-   ./bjam --build-dir=./tmpBuildDir toolset=%TOOLSET% stage link=static --layout=tagged --with-test variant=release  
+   ./bjam --build-dir=./tmpBuildDir toolset=%TOOLSET% $CXXFLAGS stage link=static --layout=%LAYOUT% --with-system variant=release 
+   ./bjam --build-dir=./tmpBuildDir toolset=%TOOLSET% $CXXFLAGS stage link=static --layout=%LAYOUT% --with-date_time variant=release  
+   ./bjam --build-dir=./tmpBuildDir toolset=%TOOLSET% $CXXFLAGS stage link=static --layout=%LAYOUT% --with-filesystem variant=release   
+   ./bjam --build-dir=./tmpBuildDir toolset=%TOOLSET% $CXXFLAGS stage link=static --layout=%LAYOUT% --with-program_options variant=release 
+   ./bjam --build-dir=./tmpBuildDir toolset=%TOOLSET% $CXXFLAGS stage link=static --layout=%LAYOUT% --with-serialization  variant=release 
+   ./bjam --build-dir=./tmpBuildDir toolset=%TOOLSET% $CXXFLAGS stage link=static --layout=%LAYOUT% --with-thread variant=release  
+   ./bjam --build-dir=./tmpBuildDir toolset=%TOOLSET% $CXXFLAGS stage link=static --layout=%LAYOUT% --with-test variant=release  
 fi
 
 %include <tail.h>
