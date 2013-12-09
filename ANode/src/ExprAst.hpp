@@ -166,7 +166,7 @@ public:
    virtual AstDivide* clone() const;
 	virtual bool evaluate() const { return true;}
    virtual bool check(std::string& error_msg) const;
-	virtual int value() const { assert(right_->value() != 0); return  (left_->value() / right_->value()) ;}
+	virtual int value() const; // Log error if right hand side has value of zero
 	virtual std::ostream& print(std::ostream& os) const;
    virtual void print_flat(std::ostream&,bool add_brackets = false) const;
 	virtual std::string type() const { return stype();}
@@ -195,7 +195,7 @@ public:
    virtual AstModulo* clone() const;
    virtual bool check(std::string& error_msg) const;
    virtual bool evaluate() const { return true;}
-   virtual int value() const { assert(right_->value() != 0); return  (left_->value() % right_->value()) ;}
+   virtual int value() const; // Log error if right hand side has value of zero
    virtual std::ostream& print(std::ostream& os) const;
    virtual void print_flat(std::ostream&,bool add_brackets = false) const;
    virtual std::string type() const { return stype();}

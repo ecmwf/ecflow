@@ -304,8 +304,10 @@ BOOST_AUTO_TEST_CASE( test_trigger_expression_divide_by_zero )
    // value.second = result of expected evaluation
    map<string,std::pair<string,bool> > exprMap;
 
-   exprMap["./a:YMD % 0 == 0"] = std::make_pair(AstEqual::stype(),false);
-   exprMap["./a:YMD / 0 == 0"] = std::make_pair(AstEqual::stype(),false);
+   // Divide by zero or modulo by zero would lead to run-time crash
+   // However the Ast::evaluate() checks for this, and return zero for the whole expression i.e ./a:YMD % 0 returns 0
+   exprMap["./a:YMD % 0 == 0"] = std::make_pair(AstEqual::stype(),true);
+   exprMap["./a:YMD / 0 == 0"] = std::make_pair(AstEqual::stype(),true);
 
 
    std::pair<string, std::pair<string,bool> > p;
@@ -317,12 +319,14 @@ BOOST_AUTO_TEST_CASE( test_trigger_expression_divide_by_zero )
       BOOST_REQUIRE_MESSAGE(ok,errorMsg);
 
       string expectedRootType       = p.second.first;
+      bool expectedEvaluationResult = p.second.second;
 
       Ast* top = theExprParser.getAst();
       BOOST_REQUIRE_MESSAGE( top ,"No abstract syntax tree");
       BOOST_CHECK_MESSAGE( top->left() ,"No root created");
       BOOST_CHECK_MESSAGE( top->left()->isRoot() ,"First child of top should be a root");
       BOOST_CHECK_MESSAGE( top->left()->type() == expectedRootType,"expected root type " << expectedRootType << " but found " << top->left()->type());
+      BOOST_CHECK_MESSAGE( expectedEvaluationResult == top->evaluate(),"evaluation not as expected for " << *top);
 
       // expect check to fail, due to divide/modulo by zero
       std::string error_msg;
