@@ -15,6 +15,7 @@
    - ecflow_server  : Added support for % in trigger and complete expression, and divide/modulo by zero check
    - ecflowview     : The info page updated to show time/date of the state change for a Node.
    - doc            : Online removed from tar file, replaced with ecflow confluence page
+   - ecflow.so      : ECFLOW-91 ecFlow python API - method signatures for ecflow.Cron.set_time_series()
    - *              : Fix --migrate bugs: to take into account variable values that have new lines
 
 4.0.0 (production, November 2013)
