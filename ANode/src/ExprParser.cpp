@@ -122,7 +122,8 @@ struct ExpressionGrammer : public grammar<ExpressionGrammer>
 	static const int plus_ID      = 41;
 	static const int minus_ID     = 42;
 	static const int multiply_ID  = 43;
-	static const int divide_ID    = 44;
+   static const int divide_ID    = 44;
+   static const int modulo_ID    = 45;
 
     template <typename ScannerT>
     struct definition {
@@ -131,6 +132,7 @@ struct ExpressionGrammer : public grammar<ExpressionGrammer>
         rule<ScannerT,parser_tag<minus_ID> > minus;
         rule<ScannerT,parser_tag<multiply_ID> > multiply;
         rule<ScannerT,parser_tag<divide_ID> > divide;
+        rule<ScannerT,parser_tag<modulo_ID> > modulo;
 
         rule<ScannerT,parser_tag<equal_1_ID> > equal_1;
         rule<ScannerT,parser_tag<equal_2_ID> > equal_2;
@@ -228,8 +230,9 @@ struct ExpressionGrammer : public grammar<ExpressionGrammer>
         	 plus = root_node_d [ str_p("+") ];
         	 minus = root_node_d [ str_p("-") ];
         	 divide = root_node_d [ str_p("/") ];
-        	 multiply = root_node_d [ str_p("*") ];
-        	 operators = plus | minus | divide | multiply;
+          multiply = root_node_d [ str_p("*") ];
+          modulo = root_node_d [ str_p("%") ];
+        	 operators = plus | minus | divide | multiply | modulo ;
 
         	 equal_1 = root_node_d [ str_p("==") ];
         	 equal_2 = root_node_d [ str_p("eq") ];
@@ -576,7 +579,8 @@ AstRoot* createRootNode(const tree_iter_t& i,  const std::map< parser_id, std::s
 
 	if ( i->value.id() == ExpressionGrammer::minus_ID ) return new AstMinus();
 	if ( i->value.id() == ExpressionGrammer::multiply_ID ) return new AstMultiply();
-	if ( i->value.id() == ExpressionGrammer::divide_ID ) return new AstDivide();
+   if ( i->value.id() == ExpressionGrammer::divide_ID ) return new AstDivide();
+   if ( i->value.id() == ExpressionGrammer::modulo_ID ) return new AstModulo();
 	LOG_ASSERT(false,"");
 	return NULL;
 }

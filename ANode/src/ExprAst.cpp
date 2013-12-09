@@ -57,6 +57,14 @@ bool AstTop::evaluate() const
 	return false;
 }
 
+bool AstTop::check(std::string& error_msg) const
+{
+   if (root_) {
+      return root_->check(error_msg);
+   }
+   return true;
+}
+
 std::ostream& AstTop::print(std::ostream& os) const
 {
 	Indentor in;
@@ -117,6 +125,14 @@ void AstRoot::accept(ExprAstVisitor& v)
 	left_->accept(v);
 	if (right_) right_->accept(v); // right_ is empty for Not
 }
+
+bool AstRoot::check(std::string& error_msg) const
+{
+   if (left_ && !left_->check(error_msg)) return false;
+   if (right_ && !right_->check(error_msg)) return false;
+   return true;
+}
+
 
 void AstRoot::addChild( Ast* n )
 {
@@ -291,6 +307,7 @@ std::string AstMinus::expression(bool why) const
  	return ret;
 }
 
+
 void AstDivide::accept(ExprAstVisitor& v)
 {
 	AstRoot::accept(v);
@@ -303,6 +320,15 @@ AstDivide* AstDivide::clone() const
    if (right_) ast->addChild( right_->clone() );
    return ast;
 }
+bool AstDivide::check(std::string& error_msg) const
+{
+   if (right_ && right_->value() == 0) {
+      error_msg = "Divide by zero in trigger expression";
+      return false;
+   }
+   return true;
+}
+
 std::ostream& AstDivide::print( std::ostream& os ) const {
 	Indentor::indent( os ) << "# DIVIDE value(" << value() << ")";
 	if (!left_) os << " # ERROR has no left_";
@@ -325,6 +351,7 @@ std::string AstDivide::expression(bool why) const
 	if (right_) ret += right_->expression(why);
  	return ret;
 }
+
 
 void AstMultiply::accept(ExprAstVisitor& v)
 {
@@ -361,6 +388,49 @@ std::string AstMultiply::expression(bool why) const
  	return ret;
 }
 
+
+void AstModulo::accept(ExprAstVisitor& v)
+{
+   AstRoot::accept(v);
+   v.visitModulo(this);
+}
+AstModulo* AstModulo::clone() const
+{
+   AstModulo* ast = new AstModulo();
+   if (left_) ast->addChild( left_->clone() );
+   if (right_) ast->addChild( right_->clone() );
+   return ast;
+}
+bool AstModulo::check(std::string& error_msg) const
+{
+   if (right_ && right_->value() == 0) {
+      error_msg = "Modulo by zero in trigger expression";
+      return false;
+   }
+   return true;
+}
+std::ostream& AstModulo::print( std::ostream& os ) const {
+   Indentor::indent( os ) << "# Modulo value(" << value() << ")";
+   if (!left_) os << " # ERROR has no left_";
+   if (!right_) os << " # ERROR has no right_";
+   os << "\n";
+   return AstRoot::print( os );
+}
+void AstModulo::print_flat(std::ostream& os,bool add_bracket) const {
+   if (add_bracket) os << "(";
+   if (left_) left_->print_flat(os,add_bracket);
+   os << " % ";
+   if (right_) right_->print_flat(os,add_bracket);
+   if (add_bracket) os << ")";
+}
+std::string AstModulo::expression(bool why) const
+{
+   std::string ret;
+   if (left_) ret += left_->expression(why);
+   ret  += " % ";
+   if (right_) ret += right_->expression(why);
+   return ret;
+}
 ////////////////////////////////////////////////////////////////////////////////////
 
 void AstAnd::accept(ExprAstVisitor& v)
@@ -1105,6 +1175,7 @@ std::ostream& operator<<( std::ostream& os, const AstPlus& d ) {return d.print( 
 std::ostream& operator<<( std::ostream& os, const AstMinus& d ) {return d.print( os );}
 std::ostream& operator<<( std::ostream& os, const AstDivide& d ) {return d.print( os );}
 std::ostream& operator<<( std::ostream& os, const AstMultiply& d ) {return d.print( os );}
+std::ostream& operator<<( std::ostream& os, const AstModulo& d ) {return d.print( os );}
 std::ostream& operator<<( std::ostream& os, const AstAnd& d ) {return d.print( os );}
 std::ostream& operator<<( std::ostream& os, const AstOr& d ) {return d.print( os );}
 std::ostream& operator<<( std::ostream& os, const AstEqual& d ) {return d.print( os );}

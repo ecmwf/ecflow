@@ -32,6 +32,7 @@ void AstAnalyserVisitor::visitPlus(AstPlus*) {}
 void AstAnalyserVisitor::visitMinus(AstMinus*) {}
 void AstAnalyserVisitor::visitDivide(AstDivide*) {}
 void AstAnalyserVisitor::visitMultiply(AstMultiply*) {}
+void AstAnalyserVisitor::visitModulo(AstModulo*) {}
 void AstAnalyserVisitor::visitOr(AstOr*) {}
 void AstAnalyserVisitor::visitEqual(AstEqual*) {}
 void AstAnalyserVisitor::visitNotEqual(AstNotEqual*) {}

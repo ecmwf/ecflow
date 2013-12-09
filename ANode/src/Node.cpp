@@ -1104,8 +1104,21 @@ bool Node::check(std::string& errorMsg, std::string& warningMsg) const
 
    /// Make Sure: To sure capture parser errors:
    /// defs which fail parse errors should not be allowed to be loaded into the server
-   (void)completeAst(errorMsg);
-   (void)triggerAst(errorMsg);
+   /// Even if the code parses, check the expression for divide by zero, for divide and modulo operators
+   AstTop* ctop = completeAst(errorMsg);
+   if (ctop && !ctop->check(errorMsg)) {
+      errorMsg += " ";
+      if (completeExpr_) errorMsg += completeExpr_->expression();
+      errorMsg += " on ";
+      errorMsg += debugNodePath();
+   }
+   AstTop* ttop = triggerAst(errorMsg);
+   if (ttop && !ttop->check(errorMsg)) {
+      errorMsg += " ";
+      if (triggerExpr_) errorMsg += triggerExpr_->expression();
+      errorMsg += " on ";
+      errorMsg += debugNodePath();
+   }
 
 
    // capture node path resolve errors

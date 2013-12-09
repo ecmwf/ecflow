@@ -43,7 +43,9 @@ public:
 	virtual bool isRoot() const { return false; }
 	virtual AstTop* isTop() const { return NULL; }
 	virtual bool empty() const { return true; }
-	virtual int value() const { assert(false); return 0;} // only valid for leaf or operators
+   virtual int value() const { assert(false); return 0;} // only valid for leaf or operators
+   virtual bool check(std::string& error_msg) const { return true; } // check divide or modulo by zero
+
    virtual std::ostream& print(std::ostream&) const = 0;
    virtual void print_flat(std::ostream&,bool add_brackets = false) const = 0;    // used for test
 	virtual bool why(std::string& /*theReasonWhy*/) const { return false;}
@@ -72,6 +74,8 @@ public:
  	virtual void addChild(Ast* r) { root_ = r;}
 	virtual AstTop* isTop() const { return const_cast<AstTop*>(this); }
  	virtual bool evaluate() const;
+   virtual bool check(std::string& error_msg) const;
+
 	virtual bool empty() const { return (root_) ? false : true ; }
 	virtual std::ostream& print(std::ostream&) const ;
    virtual void print_flat(std::ostream&,bool add_brackets = false) const;
@@ -93,6 +97,7 @@ public:
    AstRoot() :left_(NULL), right_(NULL) {}
 	virtual ~AstRoot();
 
+   virtual bool check(std::string& error_msg) const;
 	virtual void accept(ecf::ExprAstVisitor&);
 	virtual void addChild(Ast* n);
  	virtual Ast* left() const { return left_;}
@@ -160,12 +165,13 @@ public:
 	virtual void accept(ecf::ExprAstVisitor&);
    virtual AstDivide* clone() const;
 	virtual bool evaluate() const { return true;}
+   virtual bool check(std::string& error_msg) const;
 	virtual int value() const { assert(right_->value() != 0); return  (left_->value() / right_->value()) ;}
 	virtual std::ostream& print(std::ostream& os) const;
    virtual void print_flat(std::ostream&,bool add_brackets = false) const;
 	virtual std::string type() const { return stype();}
 	virtual std::string expression(bool why = false) const;
- 	static std::string stype() { return "minus";}
+ 	static std::string stype() { return "divide";}
 };
 
 class AstMultiply : public AstRoot {
@@ -179,7 +185,22 @@ public:
    virtual void print_flat(std::ostream&,bool add_brackets = false) const;
 	virtual std::string type() const { return stype();}
 	virtual std::string expression(bool why = false) const;
-	static std::string stype() { return "minus";}
+	static std::string stype() { return "multiply";}
+};
+
+class AstModulo : public AstRoot {
+public:
+   AstModulo(){}
+   virtual void accept(ecf::ExprAstVisitor&);
+   virtual AstModulo* clone() const;
+   virtual bool check(std::string& error_msg) const;
+   virtual bool evaluate() const { return true;}
+   virtual int value() const { assert(right_->value() != 0); return  (left_->value() % right_->value()) ;}
+   virtual std::ostream& print(std::ostream& os) const;
+   virtual void print_flat(std::ostream&,bool add_brackets = false) const;
+   virtual std::string type() const { return stype();}
+   virtual std::string expression(bool why = false) const;
+   static std::string stype() { return "modulo";}
 };
 
 
@@ -475,6 +496,7 @@ std::ostream& operator<<(std::ostream& os, const AstPlus&);
 std::ostream& operator<<(std::ostream& os, const AstMinus&);
 std::ostream& operator<<(std::ostream& os, const AstMultiply&);
 std::ostream& operator<<(std::ostream& os, const AstDivide&);
+std::ostream& operator<<(std::ostream& os, const AstModulo&);
 std::ostream& operator<<(std::ostream& os, const AstAnd&);
 std::ostream& operator<<(std::ostream& os, const AstOr&);
 std::ostream& operator<<(std::ostream& os, const AstEqual&);

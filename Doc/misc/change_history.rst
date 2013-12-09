@@ -12,6 +12,7 @@
    - ecflow_client  : minor change --get_state so that we print NULL when referenced node not accessible
    - ecflow_client  : allow meter on suite when loading the definition.
    - ecflow_server  : default clock changed from hybrid to real. (Avoid confusion with cron, date, day, set to complete)
+   - ecflow_server  : Added support for % in trigger and complete expression, and divide/modulo by zero check
    - ecflowview     : The info page updated to show time/date of the state change for a Node.
    - doc            : Online removed from tar file, replaced with ecflow confluence page
    - *              : Fix --migrate bugs: to take into account variable values that have new lines
