@@ -10,10 +10,12 @@
 
 4.0.1 (production, January 2014)
    - ecflow_client  : minor change --get_state so that we print NULL when referenced node not accessible
-   - ecflow_client  : allow meter on suite when loading the definition.
+   - ecflow_client  : allow meter on suite's when loading the definition.
    - ecflow_server  : default clock changed from hybrid to real. (Avoid confusion with cron, date, day, set to complete)
-   - ecflow_server  : Added support for % in trigger and complete expression, and divide/modulo by zero check
-   - ecflowview     : The info page updated to show time/date of the state change for a Node.
+   - ecflow_server  : Added support for % in trigger and complete expression and static checking for modulo by zero
+   - ecflow_server  : Added run time divide/modulo by zero check for Trigger evaluation 
+   - ecflowview     : The info page updated to show time/date of a state change for a Node.(suite,family,task)
+                      More general fix related to : ECFLOW-83 Add timestamp to aborted task window
    - doc            : Online removed from tar file, replaced with ecflow confluence page
    - ecflow.so      : ECFLOW-91 ecFlow python API - method signatures for ecflow.Cron.set_time_series()
    - *              : Fix --migrate bugs: to take into account variable values that have new lines
