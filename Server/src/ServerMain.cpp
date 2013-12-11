@@ -17,6 +17,7 @@
 #include "Server.hpp"
 #include "Log.hpp"
 #include "ServerEnvironment.hpp"
+
 using namespace ecf;
 using namespace std;
 
@@ -35,7 +36,7 @@ int main( int argc, char* argv[] ) {
       }
 
       if (server_environment.debug()) cout << "Server started: ------------------------------------------------>port:" << server_environment.port() <<  endl;
-      server theServer( server_environment ); // This can throw exception, bind address in use.
+      Server theServer( server_environment ); // This can throw exception, bind address in use.
       for(;;) {
          try {
             theServer.run();

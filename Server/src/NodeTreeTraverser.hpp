@@ -27,12 +27,12 @@
 #include <boost/noncopyable.hpp>
 #include <boost/date_time/posix_time/posix_time_types.hpp>
 
-class server;
+class Server;
 class ServerEnvironment;
 
 class NodeTreeTraverser : private boost::noncopyable {
 public:
-	NodeTreeTraverser(  server* s,  boost::asio::io_service& io, const ServerEnvironment& serverEnv);
+	NodeTreeTraverser(  Server* s,  boost::asio::io_service& io, const ServerEnvironment& serverEnv);
 	~NodeTreeTraverser();
 
 	/// If first time Starts traversing Node tree and resolving dependencies.
@@ -69,7 +69,7 @@ private:
 	void update_suite_calendar_and_traverse_node_tree(boost::posix_time::ptime& time_now);
 	void traverse_node_tree_and_job_generate();
 
-	server* server_;
+	Server* server_;
 	const ServerEnvironment& serverEnv_;
  	boost::asio::deadline_timer timer_;
 	boost::posix_time::ptime last_time_;        // ensure poll is in sync
