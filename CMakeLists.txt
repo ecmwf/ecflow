@@ -40,6 +40,8 @@ set( CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH} 
 
 include( ecbuild_system )
 
+option( ENABLE_VIEWER    "enable the Qt version of ecflowview"  ON )
+
 ###############################################################################
 # local project
 
@@ -98,6 +100,10 @@ add_subdirectory( Test )
 add_subdirectory( TestEcfSms )
 add_subdirectory( Pyext )
 add_subdirectory( view )
+
+if(ENABLE_VIEWER)
+    add_subdirectory( Viewer )
+endif()
 
 # configure_file( cmake/ecbase_config.h.in  ${CMAKE_BINARY_DIR}/ecbase_config.h )
 
