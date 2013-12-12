@@ -456,14 +456,14 @@ static void Redisplay (SimpleTimeWidget w, XEvent *event, Region region)
 	for (i = 0; i < w -> simplebase.count; i++)
 	{
 
-		Node *n = w -> simplebase.nodes + i;
+		NodeStruct *n = w -> simplebase.nodes + i;
 		int j;
 		if(!n->managed)
 			continue;
 
 		for (j = 0; j < n->kcnt; j++)
 		{
-			Node *c = &KIDS(w,n,j);
+			NodeStruct *c = &KIDS(w,n,j);
 
 			if(!c->managed)
 				continue;
@@ -503,7 +503,7 @@ static void Print(SimpleTimeWidget w,FILE *f)
 }
 
 
-static void calc_arc(SimpleTimeWidget tw,Node* w,int arc)
+static void calc_arc(SimpleTimeWidget tw,NodeStruct* w,int arc)
 {
 	int j;
 	if(w->misc[ARC] == -1 && w->managed)
@@ -511,13 +511,13 @@ static void calc_arc(SimpleTimeWidget tw,Node* w,int arc)
 		w->misc[ARC] = arc;
 		for (j = 0; j < w->kcnt; j++)
 		{
-			Node *c = &KIDS(tw,w,j);
+			NodeStruct *c = &KIDS(tw,w,j);
 			calc_arc(tw,c,arc);
 		}
 
 		for (j = 0; j < w->pcnt; j++)
 		{
-			Node *c = &PARENTS(tw,w,j);
+			NodeStruct *c = &PARENTS(tw,w,j);
 			calc_arc(tw,c,arc);
 		}
 
@@ -552,7 +552,7 @@ static void Layout(Widget w,long *maxWidth,long *maxHeight)
 
 	for(i=0;i<tw->simplebase.count;i++)
 	{
-		Node  *w = tw->simplebase.nodes + i;
+		NodeStruct  *w = tw->simplebase.nodes + i;
 		if(!w->managed) continue;
 
 		w->misc[ARC] = -1;
@@ -568,7 +568,7 @@ static void Layout(Widget w,long *maxWidth,long *maxHeight)
 
 	for(i=0;i<tw->simplebase.count;i++)
 	{
-		Node  *w = tw->simplebase.nodes + i;
+		NodeStruct  *w = tw->simplebase.nodes + i;
 		if(!w->managed) continue;
 		if(w->misc[ARC] == -1)
 			calc_arc(tw,w,arc++);
@@ -618,7 +618,7 @@ static void Layout(Widget w,long *maxWidth,long *maxHeight)
 
 	for(i=0;i<tw->simplebase.count;i++)
 	{
-		Node  *w = tw->simplebase.nodes + i;
+		NodeStruct  *w = tw->simplebase.nodes + i;
 		if(!w->managed) continue;
 
 		
@@ -644,7 +644,7 @@ static void Layout(Widget w,long *maxWidth,long *maxHeight)
 void TimeSetTime(Widget _w,int n,DateTime dt)
 {
 	SimpleTimeWidget tw = (SimpleTimeWidget)_w;
-	Node *w = tw->simplebase.nodes + n;
+	NodeStruct *w = tw->simplebase.nodes + n;
 
 	w->misc[DATE] = date_to_julian(dt.date);
 	w->misc[TIME] = time_to_sec(dt.time);
@@ -684,7 +684,7 @@ void TimeSetTime(Widget _w,int n,DateTime dt)
 DateTime TimeGetTime(Widget _w,int n)
 {
 	SimpleTimeWidget tw = (SimpleTimeWidget)_w;
-	Node *w = tw->simplebase.nodes + n;
+	NodeStruct *w = tw->simplebase.nodes + n;
 	DateTime dt;
 
 	dt.date = julian_to_date(w->misc[DATE]);
@@ -773,7 +773,7 @@ void *TimeFindByY(Widget _w,XEvent *ev)
 	int i;
 	for(i = 0; i < w->simplebase.count;i++)
 	{
-		Node *n = w->simplebase.nodes + i;
+		NodeStruct *n = w->simplebase.nodes + i;
 		if(n->managed)
 			if(
 			/* ev->xbutton.x >= n->r.x && ev->xbutton.x <= n->r.x + n->r.width && */
