@@ -26,8 +26,8 @@ void printNode(node_ptr node, int indent)
 
     //NodeContainer *nodeContainer = &node;
     std::vector<node_ptr> nodes;
-    node->get_all_nodes(nodes);
-    for (size_t n = 1; n < nodes.size(); n++) // starts at 1 because it includes the current node
+    node->immediateChildren(nodes);
+    for (size_t n = 0; n < nodes.size(); n++) // starts at 1 because it includes the current node
     {
         printNode(nodes[n], indent+2);
     }
