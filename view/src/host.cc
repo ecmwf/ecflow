@@ -1308,8 +1308,9 @@ tmp_file ehost::file( node& n, std::string name )
          else if (name == "ECF_JOBOUT")
             client_.file(n.full_name(), "jobout");
          else {
-            gui::message("host::file: unknown file type %s", name.c_str());
-            return tmp_file(NULL);
+	   client_.file(n.full_name(), "jobout");
+	   /* gui::message("host::file: unknown file type %s", name.c_str());
+	      return tmp_file(NULL); */
          }
 
          // Do *not* assign 'client_.server_reply().get_string()' to a separate string, since
