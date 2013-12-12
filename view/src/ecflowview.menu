@@ -164,10 +164,10 @@ menu 'MAIN'
 
 menu 'Web' 
 {
-  (TASK, ALL, 'Man', 'sh firefox <full_name> %MANPATH%', '', YES)
-  (TASK, ALL, 'Script', 'sh echo xterm -e vim <full_name>:%ECF_SCRIPT% ', '', YES)
-  (TASK, ALL, 'Job', 'sh echo xterm -e vim <full_name>:%ECF_JOB% ', '', YES)
-  (TASK, ALL, 'Output', 'sh echo xterm -e vim <full_name>:%ECF_JOBOUT% ', '', YES)
+  (TASK, ALL, 'Man', 'sh firefox %ECF_URL_BASE%/%ECF_URL%', '', YES)
+  (TASK, ALL, 'Script', 'sh xterm -T Script -e vim %ECF_SCRIPT%', '', YES)
+  (TASK, ALL, 'Job', 'sh xterm -T Job -e vim %ECF_JOB%', '', YES)
+  (TASK, ALL, 'Output', 'sh xterm -T Output -e vim %ECF_JOBOUT%', '', YES)
   (TASK, ALL , 'TimeLine...', WINDOW(Timeline))
 }
 
