@@ -18,8 +18,8 @@
 
 ViewerMainWindow::ViewerMainWindow()
 {
-    textEditor_ = new QPlainTextEdit;
-    setCentralWidget(textEditor_);
+    treeWidget_ = new QTreeWidget;
+    setCentralWidget(treeWidget_);
 }
 
 
@@ -46,12 +46,15 @@ void ViewerMainWindow::printDefTree(const std::string &server, int port)
 	for (size_t s = 0; s < numSuites; s++)
     {
         QString suiteName(suites[s]->name().c_str());
-        textEditor_->insertPlainText(suiteName + " (SUITE)\n");
+        QTreeWidgetItem *suiteItem = new QTreeWidgetItem;
+        suiteItem->setText(s, suiteName);
+        treeWidget_->insertTopLevelItem(s, suiteItem);
+        suiteItem->setExpanded(true);
+
         const std::vector<node_ptr> &nodes = suites[s]->nodeVec();
         for (size_t n = 0; n < nodes.size(); n++)
         {
-            printNode(nodes[n], 2);
-            //std::cout << "  NODE: " << nodes[n]->name() << std::endl;
+            printNode(nodes[n], 2, suiteItem);
         }
     }
 
@@ -59,7 +62,7 @@ void ViewerMainWindow::printDefTree(const std::string &server, int port)
 }
 
 
-void ViewerMainWindow::printNode(node_ptr node, int indent)
+void ViewerMainWindow::printNode(node_ptr node, int indent, QTreeWidgetItem *parent)
 {
     QString spaces;
     for (size_t i = 0; i < indent; i++)
@@ -75,14 +78,16 @@ void ViewerMainWindow::printNode(node_ptr node, int indent)
         description += " (TASK)";
 
     QString nodeName(node->name().c_str());
-    textEditor_->insertPlainText(spaces + nodeName + description + "\n");
 
-    //NodeContainer *nodeContainer = &node;
+    QTreeWidgetItem *nodeItem = new QTreeWidgetItem(parent);
+    nodeItem->setText(0, nodeName);
+    nodeItem->setExpanded(true);
+
     std::vector<node_ptr> nodes;
     node->immediateChildren(nodes);
     for (size_t n = 0; n < nodes.size(); n++) // starts at 1 because it includes the current node
     {
-        printNode(nodes[n], indent+2);
+        printNode(nodes[n], indent+2, nodeItem);
     }
 
 }
