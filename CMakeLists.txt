@@ -71,6 +71,12 @@ list( APPEND Ecflow_Test_LIBS
       ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} 
       ${Boost_TEST_EXEC_MONITOR_LIBRARY} )
 
+
+if(ENABLE_VIEWER)
+    find_package(Qt4 REQUIRED QtCore QtGui)
+endif()
+
+
 ##############################################################################
 # debug
 if( CMAKE_BUILD_TYPE MATCHES "[Dd][Ee][Bb][Uu][Gg]" )
