@@ -374,7 +374,7 @@ STC_Cmd_ptr AlterCmd::doHandleRequest(AbstractServer* as) const
 const char* AlterCmd::arg()  { return CtsApi::alterArg();}
 const char* AlterCmd::desc() {
             /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
-   return   "Alter the node according to the options.\n"
+   return  "Alter the node according to the options.\n"
             "To add/delete/change server variables use '/' for the path.\n"
             "  arg1 = [ delete | change | add | set_flag | clear_flag]\n"
             "           one option must be specified\n"
@@ -383,7 +383,9 @@ const char* AlterCmd::desc() {
             "             label | trigger | complete | repeat | limit | inlimit | limit_path | zombie ]\n"
             "         For change:\n"
             "           [ variable | clock_type | clock_gain | clock_date | clock_sync  | event | meter | label |\n"
-            "             trigger  | complete   | repeat     | limit_max  | limit_value | defstatus  ]\n"
+            "             trigger  | complete   | repeat     | limit_max  | limit_value | defstatus ]\n"
+            "             *NOTE* If the clock is changed, then the suite will need to be re-queued in order for\n"
+            "             the change to take effect.\n"
             "         For add:\n"
             "           [ variable | time | today | date | day | zombie ]\n"
             "         For set_flag and clear_flag:\n"
@@ -397,8 +399,6 @@ const char* AlterCmd::desc() {
             "         specifies the new value only used for 'change'\n"
             "         values with spaces must be quoted\n"
             "  arg5 = paths : At lease one path required. The paths must start with a leading '/' character\n\n"
-            "NOTE: If the clock is changed, then the suite will need to be re-queued in order for the change\n"
-            "to take effect."
             ;
 }
 
