@@ -266,7 +266,6 @@ void Calendar::update(const boost::posix_time::ptime& time_now)
 
 boost::gregorian::date Calendar::date() const
 {
-	if ( ctype_ == Calendar::HYBRID) return initTime_.date();
 	return suiteTime_.date();
 }
 
