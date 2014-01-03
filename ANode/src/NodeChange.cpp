@@ -14,7 +14,7 @@
 //============================================================================
 #include <boost/lexical_cast.hpp>
 
-#include "Suite.hpp"
+#include "Node.hpp"
 #include "ExprAst.hpp"
 #include "Stl.hpp"
 #include "NState.hpp"
@@ -35,93 +35,6 @@ void Node::changeVariable(const std::string& name,const std::string& value)
 		}
 	}
  	throw std::runtime_error("Node::changeVariable: Could not find variable " + name);
-}
-
-void Node::changeClockType(const std::string& clockType)
-{
-   // ISSUES:
-   // If we have a clock, then changing the date, can only have an effect, is suite is re-queued
-   // This then initialises the calendar with the clock attribute
-   if (clockType != "hybrid" && clockType != "real") {
-		throw std::runtime_error("Node::changeClockType: expected clock type to be 'hybrid' or 'real'  but found " + clockType);
-	}
-
-   clock_ptr clock = suite()->clockAttr();
-	if (!clock.get()) {
-	   suite()->addClock( ClockAttr( clockType == "hybrid") ); // will update state change_no
-	   return;
-	}
-
-	clock->hybrid( clockType == "hybrid" ); // will update state change_no
-
-#ifdef DEBUG_STATE_CHANGE_NO
-	std::cout << "Node::changeClockType\n";
-#endif
-}
-
-void Node::changeClockDate(const std::string& theDate)
-{
-   // See ISSUES: Node::changeClockType
-   int day,month,year;
-   DateAttr::getDate(theDate,day,month,year);
-   if (day == 0 || month == 0 || year == 0)  throw std::runtime_error("Node::changeClockDate Invalid clock date:" + theDate );
-
-   clock_ptr clock = suite()->clockAttr();
-   if (!clock.get())  {
-      suite()->addClock( ClockAttr(day,month,year) ); // will update state change_no
-      return;
-   }
-
-   clock->date(day,month,year); // this will check the date and update state change_no
-
-#ifdef DEBUG_STATE_CHANGE_NO
-   std::cout << "Node::changeClockType\n";
-#endif
-}
-
-void Node::changeClockGain(const std::string& gain)
-{
-   // See: ISSUES on Node::changeClockDate
-	long theGain = 0;
- 	try {
- 		theGain = boost::lexical_cast< long >( gain );
-	}
-	catch ( boost::bad_lexical_cast& ) {
- 		throw std::runtime_error( "Node::changeClockGain: value '" + gain + "' is not convertible to an long, for suite " + suite()->name());
-	}
-
-	clock_ptr clock = suite()->clockAttr();
-   if (!clock.get())  {
-      suite()->addClock( ClockAttr() ); // will update state change_no
-      clock = suite()->clockAttr();
-   }
-
-	if (theGain > 0) {
-		clock->set_gain_in_seconds( theGain, true);  // will update state change_no
-	}
-	else {
-		clock->set_gain_in_seconds( theGain, false); // will update state change_no
-	}
-
-#ifdef DEBUG_STATE_CHANGE_NO
-	std::cout << "Node::changeClockGain\n";
-#endif
-}
-
-void Node::changeClockSync()
-{
-   clock_ptr clock = suite()->clockAttr();
-   if (!clock.get())  {
-      suite()->addClock( ClockAttr() ); // will update state change_no
-   }
-   else {
-      // clear so that on re-queue we sync with computer
-      clock->sync();
-   }
-
-#ifdef DEBUG_STATE_CHANGE_NO
-   std::cout << "Node::changeClockSync\n";
-#endif
 }
 
 bool Node::set_event(const std::string& event_name_or_number ,bool value)

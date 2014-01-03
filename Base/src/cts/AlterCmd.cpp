@@ -320,10 +320,10 @@ STC_Cmd_ptr AlterCmd::doHandleRequest(AbstractServer* as) const
       try {
          switch (change_attr_type_) {
             case AlterCmd::VARIABLE:    node->changeVariable(name_,value_); break;
-            case AlterCmd::CLOCK_TYPE:  node->changeClockType(name_); break;  // node must be a suite, value must [hybrid|real| virtual]
-            case AlterCmd::CLOCK_DATE:  node->changeClockDate(name_); break;  // Expecting day.month.year: node must be a suite, value must [hybrid|real| virtual]
-            case AlterCmd::CLOCK_GAIN:  node->changeClockGain(name_); break;  // node must be a suite, value must be int
-            case AlterCmd::CLOCK_SYNC:  node->changeClockSync(); break;       // node must be a suite, sync clock with computer
+            case AlterCmd::CLOCK_TYPE:  node->suite()->changeClockType(name_); break;  // node must be a suite, value must [hybrid|real| virtual]
+            case AlterCmd::CLOCK_DATE:  node->suite()->changeClockDate(name_); break;  // Expecting day.month.year: node must be a suite, value must [hybrid|real| virtual]
+            case AlterCmd::CLOCK_GAIN:  node->suite()->changeClockGain(name_); break;  // node must be a suite, value must be int
+            case AlterCmd::CLOCK_SYNC:  node->suite()->changeClockSync(); break;       // node must be a suite, sync clock with computer
             case AlterCmd::EVENT:       node->changeEvent(name_,value_);break;  // if value is empty just set, [1|0] or name [set | clear]
             case AlterCmd::METER:       node->changeMeter(name_,value_); break;
             case AlterCmd::LABEL:       node->changeLabel(name_,value_); break;

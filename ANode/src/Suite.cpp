@@ -271,6 +271,70 @@ void Suite::changeClock( const ClockAttr& c)
  	addClock( c , false);
 }
 
+void Suite::changeClockType(const std::string& clockType)
+{
+   // ISSUES:
+   // If we have a clock, then changing the date, can only have an effect, is suite is re-queued
+   // This then initialises the calendar with the clock attribute
+   if (clockType != "hybrid" && clockType != "real") {
+      throw std::runtime_error("Suite::changeClockType: expected clock type to be 'hybrid' or 'real'  but found " + clockType);
+   }
+
+   if (clockAttr_.get()) {
+      clockAttr_->hybrid( clockType == "hybrid" ); // will update state change_no
+   }
+   else {
+      addClock( ClockAttr( clockType == "hybrid") ); // will update state change_no
+   }
+}
+
+void Suite::changeClockDate(const std::string& theDate)
+{
+   // See ISSUES: Suite::changeClockType
+   int day,month,year;
+   DateAttr::getDate(theDate,day,month,year);
+   if (day == 0 || month == 0 || year == 0)  throw std::runtime_error("Suite::changeClockDate Invalid clock date:" + theDate );
+
+   if (clockAttr_.get())  {
+      clockAttr_->date(day,month,year);      // this will check the date and update state change_no
+   }
+   else {
+      addClock( ClockAttr(day,month,year) ); // will update state change_no
+   }
+}
+
+void Suite::changeClockGain(const std::string& gain)
+{
+   // See: ISSUES on Suite::changeClockType
+   long theGain = 0;
+   try { theGain = boost::lexical_cast< long >( gain ); }
+   catch ( boost::bad_lexical_cast& ) {
+      throw std::runtime_error( "Suite::changeClockGain: value '" + gain + "' is not convertible to an long, for suite " + name());
+   }
+
+   if (!clockAttr_.get())  {
+      addClock( ClockAttr() ); // will update state change_no
+   }
+
+   if (theGain > 0) {
+      clockAttr_->set_gain_in_seconds( theGain, true);  // will update state change_no
+   }
+   else {
+      clockAttr_->set_gain_in_seconds( theGain, false); // will update state change_no
+   }
+}
+
+void Suite::changeClockSync()
+{
+   // See: ISSUES on Suite::changeClockType
+   if (clockAttr_.get()) {
+      clockAttr_->sync();     // clear so that on re-queue we sync with computer, + will update state change_no
+   }
+   else {
+      addClock( ClockAttr() ); // will update state change_no
+   }
+}
+
 bool Suite::checkInvariants(std::string& errorMsg) const
 {
 	if (!calendar_.checkInvariants(errorMsg)) {

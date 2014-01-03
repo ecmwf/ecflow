@@ -78,6 +78,10 @@ public:
 
    void addClock( const ClockAttr& , bool initialize_calendar = true); // throw std::run_time if more than one clock is added
    void changeClock( const ClockAttr& );
+   void changeClockType(const std::string& theType);
+   void changeClockDate(const std::string& theDate);
+   void changeClockGain(const std::string& theIntGain);
+   void changeClockSync();
 
    /// return the suites calendar
    const ecf::Calendar& calendar() const { return calendar_;}

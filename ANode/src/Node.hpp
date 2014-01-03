@@ -386,10 +386,6 @@ public:
    // Change functions: ================================================================
    /// returns true the change was made else false, Can throw std::runtime_error for parse errors
    void changeVariable(const std::string& name,const std::string& value);
-   void changeClockType(const std::string& theType);
-   void changeClockDate(const std::string& theDate);
-   void changeClockGain(const std::string& theIntGain);
-   void changeClockSync();
    void changeEvent(const std::string& name,const std::string& setOrClear = "");
    void changeEvent(const std::string& name,bool value);
    void changeMeter(const std::string& name,const std::string& value);
