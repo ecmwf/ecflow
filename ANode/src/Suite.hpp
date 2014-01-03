@@ -107,6 +107,7 @@ public:
 
 private:
    void begin_calendar();
+   void handle_clock_attribute_change();
    virtual std::string write_state() const;
 
    friend class boost::serialization::access;

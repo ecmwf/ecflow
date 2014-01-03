@@ -274,18 +274,37 @@ void Suite::changeClock( const ClockAttr& c)
 void Suite::changeClockType(const std::string& clockType)
 {
    // ISSUES:
-   // If we have a clock, then changing the date, can only have an effect, is suite is re-queued
-   // This then initialises the calendar with the clock attribute
+   // Whenever the user *alters* the clock attributes, it needs to be followed by a re-queue of the suite, because:
+   //   o/ if we change from real ->hybrid, then we need to set cron, etc time based nodes to complete
+   //      Since we could have running tasks, it is up to user to decide when.
+   //   o/ If we change from hybrid ->real, then Node with cron attributes etc, need to be requeued.
+   //   o/ Any relative times are no longer valid
+   //   o/ Time attributes will be incorrect, and hence may fail/pass incorrectly during dependency evaluation.
+   //   o/ Why command may be wrong
+   //
+   //
+   // *IF* the user *forgets* to do this, it can cause spurious errors, hence to *minimise* these
+   // the best we can do is to :
+   //   o/ re-sync suite calendar for clock attribute
+   //   o/ re-queue all time based attributes, *avoiding*
+   //      change of state when switching to hybrid clock (i.e due to day,date,cron time attrs)
+   // This is handled in handle_clock_attribute_change()
+   //
+
    if (clockType != "hybrid" && clockType != "real") {
       throw std::runtime_error("Suite::changeClockType: expected clock type to be 'hybrid' or 'real'  but found " + clockType);
    }
 
+   SuiteChanged1 changed(this);
    if (clockAttr_.get()) {
       clockAttr_->hybrid( clockType == "hybrid" ); // will update state change_no
    }
    else {
       addClock( ClockAttr( clockType == "hybrid") ); // will update state change_no
    }
+
+   // re-sync suite calendar for clock attribute, re-queue all time based attributes
+   handle_clock_attribute_change();
 }
 
 void Suite::changeClockDate(const std::string& theDate)
@@ -295,12 +314,15 @@ void Suite::changeClockDate(const std::string& theDate)
    DateAttr::getDate(theDate,day,month,year);
    if (day == 0 || month == 0 || year == 0)  throw std::runtime_error("Suite::changeClockDate Invalid clock date:" + theDate );
 
+   SuiteChanged1 changed(this);
    if (clockAttr_.get())  {
       clockAttr_->date(day,month,year);      // this will check the date and update state change_no
    }
    else {
       addClock( ClockAttr(day,month,year) ); // will update state change_no
    }
+
+   handle_clock_attribute_change();
 }
 
 void Suite::changeClockGain(const std::string& gain)
@@ -312,6 +334,7 @@ void Suite::changeClockGain(const std::string& gain)
       throw std::runtime_error( "Suite::changeClockGain: value '" + gain + "' is not convertible to an long, for suite " + name());
    }
 
+   SuiteChanged1 changed(this);
    if (!clockAttr_.get())  {
       addClock( ClockAttr() ); // will update state change_no
    }
@@ -322,18 +345,42 @@ void Suite::changeClockGain(const std::string& gain)
    else {
       clockAttr_->set_gain_in_seconds( theGain, false); // will update state change_no
    }
+
+   handle_clock_attribute_change();
 }
 
 void Suite::changeClockSync()
 {
    // See: ISSUES on Suite::changeClockType
+   SuiteChanged1 changed(this);
    if (clockAttr_.get()) {
       clockAttr_->sync();     // clear so that on re-queue we sync with computer, + will update state change_no
    }
    else {
       addClock( ClockAttr() ); // will update state change_no
    }
+
+   handle_clock_attribute_change();
 }
+
+void Suite::handle_clock_attribute_change()
+{
+   // re-queue time could cause thousands of mementos to be created, to avoid this we
+   // update the modify change number.
+   Ecf::incr_modify_change_no();
+
+   // Since the suite clock attribute has changed, re-sync the suite calendar
+   begin_calendar();
+
+   // re-queue all the time attributes, since clock attribute has changed, avoid changing node state.
+   // Note: when switching to hybrid clock the re-queue of time dependencies will
+   //       *not* mark hybrid (day,date,cron) as complete
+   //       since these nodes could be in a active/submitted state.
+   NodeContainer::requeue_time_attrs();
+
+   update_generated_variables();
+}
+
 
 bool Suite::checkInvariants(std::string& errorMsg) const
 {

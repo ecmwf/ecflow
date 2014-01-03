@@ -158,7 +158,10 @@ void Node::begin()
    for(size_t i = 0; i < limitVec_.size(); i++)   { limitVec_[i]->reset(); }
 
    // Let time base attributes use, relative duration if applicable
-   if (time_dep_attrs_) time_dep_attrs_->begin();
+   if (time_dep_attrs_) {
+      time_dep_attrs_->begin();
+      time_dep_attrs_->markHybridTimeDependentsAsComplete();
+   }
 
    // DO *NOT* call update_generated_variables(). Called on a type specific bases, for begin
    // Typically we need only call update_generated_variables() for a task, at job creation time.
@@ -207,8 +210,21 @@ void Node::requeue( bool resetRepeats, int clear_suspended_in_child_nodes)
    /// on this function to clear the time dependencies so they *HOLD* the task.
    ///
    /// If we have done an interactive run or complete, *dont* increment next_time_slot_
-   if (time_dep_attrs_) time_dep_attrs_->requeue(reset_next_time_slot);
+   if (time_dep_attrs_) {
+      time_dep_attrs_->requeue(reset_next_time_slot);
+      time_dep_attrs_->markHybridTimeDependentsAsComplete();
+   }
 }
+
+
+void Node::requeue_time_attrs()
+{
+   // Note: we *dont* mark hybrid time dependencies as complete.
+   //       i.e. since this is called during alter command, it could be that
+   //        the task is in a submitted or active state.
+   if (time_dep_attrs_) time_dep_attrs_->requeue(true);
+}
+
 
 void Node::set_no_requeue_if_single_time_dependency(bool miss_next_time_slot)
 {

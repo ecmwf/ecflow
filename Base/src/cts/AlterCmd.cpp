@@ -385,7 +385,7 @@ const char* AlterCmd::desc() {
             "           [ variable | clock_type | clock_gain | clock_date | clock_sync  | event | meter | label |\n"
             "             trigger  | complete   | repeat     | limit_max  | limit_value | defstatus ]\n"
             "             *NOTE* If the clock is changed, then the suite will need to be re-queued in order for\n"
-            "             the change to take effect.\n"
+            "             the change to take effect fully.\n"
             "         For add:\n"
             "           [ variable | time | today | date | day | zombie ]\n"
             "         For set_flag and clear_flag:\n"

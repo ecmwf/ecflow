@@ -113,7 +113,6 @@ public:
 
    void clear(); /// Clear *ALL* internal attributes
 
-private:
 
    /// Under the hybrid calendar some time dependent attributes may not be applicable
    /// i.e if day,date,cron attributes does correspond to 24 hours of today, then we
