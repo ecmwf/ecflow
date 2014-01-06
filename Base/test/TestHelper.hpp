@@ -44,6 +44,10 @@ public:
 		if (check_change_numbers) {
 		   BOOST_CHECK_MESSAGE( state_change_no != Ecf::state_change_no() ||  modify_change_no != Ecf::modify_change_no(),
 		                        "State & modify change numbers unaltered by command " << cmd_request);
+
+		   // Some tests(TestSSyncCmd_CH1.cpp), create defs where invariants like change numbers are deliberately different
+		   std::string error_msg;
+	      BOOST_CHECK_MESSAGE(defs->checkInvariants(error_msg),"invokeRequest checkInvariants failed " << error_msg << " for cmd " << cmd_request );
 		}
 	}
 

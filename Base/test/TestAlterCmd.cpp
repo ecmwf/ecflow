@@ -80,6 +80,8 @@ BOOST_AUTO_TEST_CASE( test_alter_cmd_for_clock_type_hybrid )
    defs.addSuite( s );
 
    BOOST_CHECK_MESSAGE( !s->clockAttr(), "Expected no clock");
+   std::string error_msg;
+   BOOST_CHECK_MESSAGE(defs.checkInvariants(error_msg),"checkInvariants failed " << error_msg);
 
    {  // Change clock type =====================================================================================================
       defs.beginAll();
@@ -96,6 +98,7 @@ BOOST_AUTO_TEST_CASE( test_alter_cmd_for_clock_type_hybrid )
       BOOST_CHECK_MESSAGE( s->calendar().day_of_month() == day_of_month, "Calendar should be updated after re-queue/begin. Expected " << day_of_month << " but found " << s->calendar().day_of_month());
       BOOST_CHECK_MESSAGE( s->calendar().month() == month, "Calendar should be updated after re-queue/begin. Expected " << month << " but found " << s->calendar().month());
       BOOST_CHECK_MESSAGE( s->calendar().year() == year, "Calendar should be updated after re-queued/begin");
+      BOOST_CHECK_MESSAGE(defs.checkInvariants(error_msg),"checkInvariants failed " << error_msg);
    }
 }
 
@@ -109,6 +112,7 @@ BOOST_AUTO_TEST_CASE( test_alter_cmd_for_clock_type_real )
    suite_ptr s = defs.add_suite("suite");
 
    BOOST_CHECK_MESSAGE( !s->clockAttr(), "Expected no clock");
+   std::string error_msg; BOOST_CHECK_MESSAGE(defs.checkInvariants(error_msg),"checkInvariants failed " << error_msg);
 
    {  // Change clock type =====================================================================================================
       defs.beginAll();
@@ -125,6 +129,7 @@ BOOST_AUTO_TEST_CASE( test_alter_cmd_for_clock_type_real )
       BOOST_CHECK_MESSAGE( s->calendar().day_of_month() == day_of_month, "Calendar should be updated after re-queue/begin. Expected " << day_of_month << " but found " << s->calendar().day_of_month());
       BOOST_CHECK_MESSAGE( s->calendar().month() == month, "Calendar should be updated after re-queue/begin. Expected " << month << " but found " << s->calendar().month());
       BOOST_CHECK_MESSAGE( s->calendar().year() == year, "Calendar should be updated after re-queued/begin");
+      BOOST_CHECK_MESSAGE(defs.checkInvariants(error_msg),"checkInvariants failed " << error_msg);
    }
 }
 
@@ -143,6 +148,7 @@ BOOST_AUTO_TEST_CASE( test_alter_cmd_for_clock_sync )
 
    BOOST_REQUIRE_MESSAGE( s->clockAttr(), "Expected clock");
    BOOST_REQUIRE_MESSAGE( s->clockAttr()->hybrid(), "Expected hybrid clock");
+   std::string error_msg; BOOST_CHECK_MESSAGE(defs.checkInvariants(error_msg),"checkInvariants failed " << error_msg);
 
    {  // Change clock type =====================================================================================================
       defs.beginAll();
@@ -156,6 +162,7 @@ BOOST_AUTO_TEST_CASE( test_alter_cmd_for_clock_sync )
       BOOST_CHECK_MESSAGE( s->calendar().day_of_month() == 1, "Calendar should be updated after re-queue/begin. Expected day of month " << 1 << " but found " << s->calendar().day_of_month());
       BOOST_CHECK_MESSAGE( s->calendar().month() == 1, "Calendar should be updated after re-queue/begin. Expected month " << 1 << " but found " << s->calendar().month());
       BOOST_CHECK_MESSAGE( s->calendar().year() == 2009, "Calendar should be updated after re-queued/begin, Expected year " << 2009 << " but found " << s->calendar().year());
+      BOOST_CHECK_MESSAGE(defs.checkInvariants(error_msg),"checkInvariants failed " << error_msg);
 
       // After a clk sync, data should match computer
       TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(s->absNodePath(),AlterCmd::CLOCK_SYNC,"","")));
@@ -167,6 +174,7 @@ BOOST_AUTO_TEST_CASE( test_alter_cmd_for_clock_sync )
       BOOST_CHECK_MESSAGE( s->calendar().day_of_month() == day_of_month, "Calendar should be updated after re-queue/begin. Expected " << day_of_month << " but found " << s->calendar().day_of_month());
       BOOST_CHECK_MESSAGE( s->calendar().month() == month, "Calendar should be updated after re-queue/begin. Expected " << month << " but found " << s->calendar().month());
       BOOST_CHECK_MESSAGE( s->calendar().year() == year, "Calendar should be updated after re-queued/begin");
+      BOOST_CHECK_MESSAGE(defs.checkInvariants(error_msg),"checkInvariants failed " << error_msg);
    }
 }
 
@@ -178,6 +186,7 @@ BOOST_AUTO_TEST_CASE( test_alter_cmd_for_clock_date )
    Defs defs;
    suite_ptr s = defs.add_suite("suite");
    BOOST_CHECK_MESSAGE( !s->clockAttr(), "Expected no clock");
+   std::string error_msg; BOOST_CHECK_MESSAGE(defs.checkInvariants(error_msg),"checkInvariants failed " << error_msg);
 
    // Change clock date =====================================================================================================
    TestStateChanged changed(s);
@@ -207,6 +216,7 @@ BOOST_AUTO_TEST_CASE( test_alter_cmd_for_clock_date )
       BOOST_CHECK_MESSAGE( s->calendar().day_of_month() == day_of_month, "Calendar should be updated after re-queue/begin. Expected " << day_of_month << " but found " << s->calendar().day_of_month());
       BOOST_CHECK_MESSAGE( s->calendar().month() == month, "Calendar should be updated after re-queue/begin. Expected " << month << " but found " << s->calendar().month());
       BOOST_CHECK_MESSAGE( s->calendar().year() == year, "Calendar should be updated after re-queued/begin");
+      BOOST_CHECK_MESSAGE(defs.checkInvariants(error_msg),"checkInvariants failed " << error_msg);
    }
 }
 
@@ -219,6 +229,7 @@ BOOST_AUTO_TEST_CASE( test_alter_cmd_for_clock_gain )
    std::string suitename = "suite";
    suite_ptr s = defs.add_suite(suitename);
    BOOST_CHECK_MESSAGE( !s->clockAttr(), "Expected no clock");
+   std::string error_msg; BOOST_CHECK_MESSAGE(defs.checkInvariants(error_msg),"checkInvariants failed " << error_msg);
 
    {  // Change clock gain  =====================================================================================================
       TestStateChanged changed(s);
@@ -256,6 +267,7 @@ BOOST_AUTO_TEST_CASE( test_alter_cmd_for_clock_gain )
          BOOST_CHECK_MESSAGE( s->calendar().day_of_month() == day_of_month, "Calendar should be updated after re-queue/begin. Expected " << day_of_month << " but found " << s->calendar().day_of_month());
          BOOST_CHECK_MESSAGE( s->calendar().month() == month, "Calendar should be updated after re-queue/begin. Expected " << month << " but found " << s->calendar().month());
          BOOST_CHECK_MESSAGE( s->calendar().year() == year, "Calendar should be updated after re-queued/begin");
+         BOOST_CHECK_MESSAGE(defs.checkInvariants(error_msg),"checkInvariants failed " << error_msg);
       }
    }
 }
@@ -277,6 +289,8 @@ BOOST_AUTO_TEST_CASE( test_alter_cmd )
       s->addDefStatus(DState::SUSPENDED); // avoid AlterCmd from job submission
       defs.addSuite( s );
    }
+
+   std::string error_msg; BOOST_CHECK_MESSAGE(defs.checkInvariants(error_msg),"checkInvariants failed " << error_msg);
 
    { // Change server state. This will cause Flag::MESSAGE to be set on the defs
       TestDefsStateChanged chenged(&defs);

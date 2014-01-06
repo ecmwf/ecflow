@@ -39,8 +39,15 @@ BOOST_AUTO_TEST_CASE( test_node_begin_reque_hybrid )
    cron.addWeekDays(week_days);
    cron.add_time_series(10,10,true);
 
-   task_ptr t1 = f1->add_task("t1"); t1->addDay( DayAttr(DayAttr::MONDAY));
-   task_ptr t2 = f1->add_task("t2"); t2->addDate( DateAttr(1,1,2014));
+   // For task t1 which has day attribute. For this test to succeed the day must not match today day.
+   // So that under the hybrid clock, its is set to complete
+   boost::gregorian::date todays_date = Calendar::second_clock_time().date();
+   int todays_day_as_number = todays_date.day_of_week().as_number();
+   int tommorrow = todays_day_as_number + 1;
+   if (tommorrow > 6) tommorrow = 0;
+
+   task_ptr t1 = f1->add_task("t1"); t1->addDay( DayAttr( DayAttr::Day_t(tommorrow) ));
+   task_ptr t2 = f1->add_task("t2"); t2->addDate( DateAttr(0,0,2014));
    task_ptr t3 = f1->add_task("t3"); t3->addCron( cron );
 
    // begin the suite, Under hybrid clock, nodes with day,date and cron attributes should be marked as complete

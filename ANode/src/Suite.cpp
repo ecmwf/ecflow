@@ -137,7 +137,6 @@ void Suite::begin_calendar()
 	else {
 	   calendar_.begin(Calendar::second_clock_time());
 	}
-   calendar_change_no_ = Ecf::state_change_no() + 1; // ** See: collateChanges **
 }
 
 void Suite::updateCalendar( const ecf::CalendarUpdateParams & calParams, std::vector<node_ptr>& auto_cancelled_nodes )
@@ -387,6 +386,13 @@ bool Suite::checkInvariants(std::string& errorMsg) const
 	if (!calendar_.checkInvariants(errorMsg)) {
 		return false;
 	}
+   if (clockAttr_.get()) {
+      if ( calendar().hybrid() != clockAttr_->hybrid()) {
+         errorMsg += "Calendar and Clock attribute must be in sync, clock types differs";
+         return false;
+      }
+   }
+
 	if (Ecf::server()) {
 	   if (state_change_no_ > Ecf::state_change_no() ) {
 	      std::stringstream ss;
