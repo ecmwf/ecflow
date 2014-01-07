@@ -388,7 +388,9 @@ bool Suite::checkInvariants(std::string& errorMsg) const
 	}
    if (clockAttr_.get()) {
       if ( calendar().hybrid() != clockAttr_->hybrid()) {
-         errorMsg += "Calendar and Clock attribute must be in sync, clock types differs";
+         std::stringstream ss;
+         ss << "Suite:" << name() << " Calendar(hybrid(" << calendar().hybrid() << ")) and Clock attribute((hybrid(" << clockAttr_->hybrid() << ")) must be in sync, clock types differs";
+         errorMsg += ss.str();
          return false;
       }
    }
@@ -516,7 +518,14 @@ void Suite::set_memento( const SuiteCalendarMemento* memento ) {
 #ifdef DEBUG_MEMENTO
 	std::cout << "Suite::set_memento( const SuiteCalendarMemento* ) " << debugNodePath() << "\n";
 #endif
+
+	// The calendar does *NOT* persist the calendar type (hybrid/real) since we can derive this for clock attribute
+	// Hence make sure calendar/clock are in sync. part of the suite invariants
 	calendar_ = memento->calendar_;
+   if  (clockAttr_.get()) {
+      if (clockAttr_->hybrid()) calendar_.set_clock_type(ecf::Calendar::HYBRID);
+      else                      calendar_.set_clock_type(ecf::Calendar::REAL);
+   }
 }
 
 // generated variables ---------------------------------------------------------------------

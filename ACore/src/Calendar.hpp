@@ -169,6 +169,9 @@ public:
 
 	bool checkInvariants(std::string& errorMsg) const;
 
+	// allow Suite memento to update calendar type
+	void set_clock_type( Clock_t  ct) { ctype_ = ct;}
+
 	/// Will return either second_clock::universal_time()/UTC ( the other alternative is second_clock::local_time() )
 	/// This is because boost deadline timer is based on UTC clock
 	/// >>> The deadline_timer typedef is based on a UTC clock, and all operations (expires_at, expires_from_now) work in UTC time.

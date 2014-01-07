@@ -26,9 +26,13 @@
 #include "NodeFwd.hpp"
 #include "SuiteChanged.hpp"
 #include "ChangeMgrSingleton.hpp"
+#include "CalendarUpdateParams.hpp"
 
 using namespace std;
 using namespace ecf;
+using namespace boost::gregorian;
+using namespace boost::posix_time;
+
 
 BOOST_AUTO_TEST_SUITE( BaseTestSuite )
 
@@ -37,15 +41,21 @@ typedef boost::function<void (defs_ptr)> defs_change_cmd;
 
 /// Re-use the same test scaffold to modify and then resync, by passing
 /// in a function that will modify the defs
-static void test_sync_scaffold( defs_change_cmd the_defs_change_command, const std::string& test_name, bool full_sync = false)
+static void test_sync_scaffold(
+         defs_change_cmd the_defs_change_command,
+         const std::string& test_name,
+         bool full_sync = false,
+         bool start_with_begin = false)
 {
 	MyDefsFixture clientFixture;
 	MyDefsFixture serverFixture;
 	defs_ptr server_defs = serverFixture.create_defs();
+	if ( start_with_begin ) server_defs->beginAll();
 	server_defs->set_server().set_state( SState::HALTED);  // if defs default state is RUNNING, whereas for server it is HALTED
 
  	ServerReply server_reply;
    defs_ptr client_defs = clientFixture.create_defs();
+   if ( start_with_begin ) client_defs->beginAll();
    client_defs->set_server().set_state( SState::HALTED); // if defs default state is RUNNING, whereas for server it is HALTED
 	server_reply.set_client_defs(  client_defs );
 
@@ -74,10 +84,16 @@ static void test_sync_scaffold( defs_change_cmd the_defs_change_command, const s
 	unsigned int client_handle = 0;
    SNewsCmd news_cmd(client_handle, client_state_change_no,  client_modify_change_no, &mock_server );
    SSyncCmd cmd(client_handle, client_state_change_no,  client_modify_change_no, &mock_server );
+
+   std::string error_msg;
+   BOOST_REQUIRE_MESSAGE( server_defs->checkInvariants(error_msg),"Test:" << test_name << ": Invariants failed: " << error_msg);
    BOOST_CHECK_MESSAGE( news_cmd.get_news(), "Test:" << test_name << ": Expected server to change");
    BOOST_CHECK_MESSAGE( cmd.do_sync( server_reply ),"Test:" << test_name << ": Expected server to change");
 	BOOST_CHECK_MESSAGE( server_reply.in_sync(),     "Test:" << test_name << ": Expected server to change");
 	BOOST_CHECK_MESSAGE( server_reply.full_sync() == full_sync,"Test:" << test_name << ": Expected sync not as expected");
+
+	error_msg.clear();
+   BOOST_REQUIRE_MESSAGE( server_reply.client_defs()->checkInvariants(error_msg),"Test:" << test_name << ": Invariants failed: " << error_msg);
 
 	Ecf::set_debug_equality(true);
 	BOOST_CHECK_MESSAGE( *server_defs == *server_reply.client_defs(),"Test:" << test_name << ": Server and client should be same after sync" );
@@ -171,18 +187,51 @@ void remove_a_family(defs_ptr defs) {
 }
 
 
-void change_clock(defs_ptr defs) {
-
+void change_clock_gain(defs_ptr defs) {
   	BOOST_FOREACH(suite_ptr suite, defs->suiteVec()) {
 		if (suite->clockAttr().get()) {
 			SuiteChanged changed(suite);
- 			suite_ptr non_const_suite = defs->findSuite( suite->name() );
- 			non_const_suite->changeClockGain("100001");
-			non_const_suite->changeClockType("hybrid");
-			non_const_suite->changeClockType("real");
+ 			suite->changeClockGain("100001");
 		}
  	}
 }
+void change_clock_type_to_real(defs_ptr defs) {
+
+   BOOST_FOREACH(suite_ptr suite, defs->suiteVec()) {
+      if (suite->clockAttr().get()) {
+         SuiteChanged changed(suite);
+         suite->changeClockType("real");
+      }
+   }
+}
+void change_clock_type_to_hybrid(defs_ptr defs) {
+
+   BOOST_FOREACH(suite_ptr suite, defs->suiteVec()) {
+      if (suite->clockAttr().get()) {
+         SuiteChanged changed(suite);
+         suite->changeClockType("hybrid");
+      }
+   }
+}
+void change_clock_date(defs_ptr defs) {
+
+   BOOST_FOREACH(suite_ptr suite, defs->suiteVec()) {
+      if (suite->clockAttr().get()) {
+         SuiteChanged changed(suite);
+         suite->changeClockDate("1.1.2001");
+      }
+   }
+}
+void change_clock_sync(defs_ptr defs) {
+
+   BOOST_FOREACH(suite_ptr suite, defs->suiteVec()) {
+      if (suite->clockAttr().get()) {
+         SuiteChanged changed(suite);
+         suite->changeClockSync();
+      }
+   }
+}
+
 
 /// This has been split into two functions, as changing both together could mask an error
 /// i.e found bug where we forgot to update state_change number when changing the limit
@@ -224,6 +273,26 @@ void update_repeat(defs_ptr defs) {
       }
    }
 }
+
+void update_calendar(defs_ptr defs) {
+
+   // The calendar is *only* updated if the suite have been begun. Hence make sure this test scaffold
+   // starts the test, with all the suites in a begun state
+   CalendarUpdateParams p( Calendar::second_clock_time(), minutes(1), true /* server running */, false/* for Test*/ );
+   defs->updateCalendar(p);
+
+   // Currently updating the calendar, does not cause change, Hence force a change
+   BOOST_FOREACH(suite_ptr suite, defs->suiteVec()) {
+      SuiteChanged changed(suite);
+      suite->add_variable("name","value");
+   }
+
+   // Note: In the real server, persisting that calendar, the clock type is not persisted.
+   //       i.e when we have hybrid calendar, when restored on the client side it will be 'real' clock since
+   //       that is the default now. This is not correct and will fail invariant checking.
+   //       however the memento should reset clock type on the calenadar form the clok attribute.
+}
+
 
 void delete_suite(defs_ptr defs) {
    std::vector<suite_ptr> vec =  defs->suiteVec();
@@ -274,35 +343,41 @@ BOOST_AUTO_TEST_CASE( test_ssync_cmd  )
 	// To DEBUG: enable the defines in Memento.hpp
 	cout << "Base:: ...test_ssync_cmd\n";
    test_sync_scaffold(update_repeat,"update_repeat");
-//   test_sync_scaffold(delete_some_attributes,"delete_some_attributes");
-//	test_sync_scaffold(add_some_attributes,"add_some_attributes");
-//   test_sync_scaffold(begin,"begin",true /* expect full_sync */);
-//   test_sync_scaffold(add_alias,"add_alias");
-//   test_sync_scaffold(remove_all_aliases,"remove_all_aliases");
-//   test_sync_scaffold(remove_all_tasks,"remove_all_tasks");
-//   test_sync_scaffold(remove_a_family,"remove_a_family");
-//   test_sync_scaffold(change_clock,"change_clock");
-//   test_sync_scaffold(change_limit_max,"change_limit_max");
-//   test_sync_scaffold(change_limit_value,"change_limit_value");
-//   test_sync_scaffold(delete_suite,"delete_suite", true /* expect full_sync */);
-//
-//   // Test Changes in Defs
-//   // The default server state is HALTED, hence setting to halted will not show a change
-//   test_sync_scaffold(set_server_state_shutdown,"set_server_state_shutdown");
-//   test_sync_scaffold(set_server_state_running,"set_server_state_running");
-//
-//   test_sync_scaffold(add_server_variable,"add_server_variable");
-//   test_sync_scaffold(change_server_variable,"change_server_variable");
-//   test_sync_scaffold(delete_server_variable,"delete_server_variable");
-//
-//   test_sync_scaffold(reorder_suites,"reorder_suites");
-//
-//   test_sync_scaffold(set_defs_flag,"set_defs_flag");
-//   test_sync_scaffold(set_defs_state,"set_defs_state");
+   test_sync_scaffold(delete_some_attributes,"delete_some_attributes");
+	test_sync_scaffold(add_some_attributes,"add_some_attributes");
+   test_sync_scaffold(begin,"begin",true /* expect full_sync */);
+   test_sync_scaffold(add_alias,"add_alias");
+   test_sync_scaffold(remove_all_aliases,"remove_all_aliases");
+   test_sync_scaffold(remove_all_tasks,"remove_all_tasks");
+   test_sync_scaffold(remove_a_family,"remove_a_family");
+   test_sync_scaffold(change_clock_gain,"change_clock_gain", true  /* expect full_sync */);
+   test_sync_scaffold(change_clock_type_to_real,"change_clock_type_to_real", true  /* expect full_sync */);
+   test_sync_scaffold(change_clock_type_to_hybrid,"change_clock_type_to_hybrid", true  /* expect full_sync */);
+   test_sync_scaffold(change_clock_date,"change_clock_date", true  /* expect full_sync */);
+   test_sync_scaffold(change_clock_sync,"change_clock_sync", true  /* expect full_sync */);
+   test_sync_scaffold(update_calendar,"update_calendar", false/* expect full_sync */, true /* start test with begin */ );
+   test_sync_scaffold(change_limit_max,"change_limit_max");
+   test_sync_scaffold(change_limit_value,"change_limit_value");
+   test_sync_scaffold(delete_suite,"delete_suite", true /* expect full_sync */);
+
+   // Test Changes in Defs
+   // The default server state is HALTED, hence setting to halted will not show a change
+   test_sync_scaffold(set_server_state_shutdown,"set_server_state_shutdown");
+   test_sync_scaffold(set_server_state_running,"set_server_state_running");
+
+   test_sync_scaffold(add_server_variable,"add_server_variable");
+   test_sync_scaffold(change_server_variable,"change_server_variable");
+   test_sync_scaffold(delete_server_variable,"delete_server_variable");
+
+   test_sync_scaffold(reorder_suites,"reorder_suites");
+
+   test_sync_scaffold(set_defs_flag,"set_defs_flag");
+   test_sync_scaffold(set_defs_state,"set_defs_state");
 
 	/// Keep valgrind happy
 	ChangeMgrSingleton::destroy();
 }
 
 BOOST_AUTO_TEST_SUITE_END()
+
 
