@@ -389,7 +389,7 @@ bool Suite::checkInvariants(std::string& errorMsg) const
    if (clockAttr_.get()) {
       if ( calendar().hybrid() != clockAttr_->hybrid()) {
          std::stringstream ss;
-         ss << "Suite:" << name() << " Calendar(hybrid(" << calendar().hybrid() << ")) and Clock attribute((hybrid(" << clockAttr_->hybrid() << ")) must be in sync, clock types differs";
+         ss << "Suite:" << name() << " Calendar(hybrid(" << calendar().hybrid() << ")) and Clock attribute(hybrid(" << clockAttr_->hybrid() << ")) must be in sync, clock types differs";
          errorMsg += ss.str();
          return false;
       }
