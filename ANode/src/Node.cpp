@@ -304,6 +304,12 @@ void Node::requeueOrSetMostSignificantStateUpNodeTree()
 
    if (computedStateOfImmediateChildren == NState::COMPLETE ) {
 
+       // set most significant state of my immediate children
+       // Record: That Suite/Family completed.
+       if ( computedStateOfImmediateChildren !=  state() )  {
+          setStateOnly( computedStateOfImmediateChildren );
+       }
+
       // For automated re-queue do *not* clear suspended state in *child* nodes
       int clear_suspended_in_child_nodes = -1;
 
@@ -337,12 +343,11 @@ void Node::requeueOrSetMostSignificantStateUpNodeTree()
       }
    }
 
-   // set most significant state  of my immediate children
-   // A Family is *NOT* complete until it has gone through all of its repeat
-   // Hence deliberetly placed after requue
+   // In case compute state is other that COMPLETE, update. i,e for Family/Suite
    if ( computedStateOfImmediateChildren !=  state() )  {
       setStateOnly( computedStateOfImmediateChildren );
    }
+
 
    // recurse up the node tree
    Node* theParentNode = parent();

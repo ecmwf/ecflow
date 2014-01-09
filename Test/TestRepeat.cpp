@@ -75,11 +75,11 @@ BOOST_AUTO_TEST_CASE( test_repeat_integer )
   	Defs theDefs;
  	{
       suite_ptr suite = theDefs.add_suite( "test_repeat_integer" );
- 		suite->addVerify( VerifyAttr(NState::COMPLETE,1) ); // test will complete, when suite completes, hence only *one* complete not two
  		suite->addRepeat( RepeatInteger("VAR",0,1,1)); // repeat suite 2 times,
+ 		suite->addVerify( VerifyAttr(NState::COMPLETE,2) );
       family_ptr fam = suite->add_family("family");
  		fam->addRepeat( RepeatInteger("VAR",0,1,1));    // repeat family 2 times
-		fam->addVerify( VerifyAttr(NState::COMPLETE,2) );
+		fam->addVerify( VerifyAttr(NState::COMPLETE,4) );
   		for(int i=0; i < taskSize; i++) {
   		   task_ptr task = fam->add_task ( "t" + boost::lexical_cast<std::string>(i) );
   			task->addVerify( VerifyAttr(NState::COMPLETE,4) );      // task should complete 4 times
@@ -113,14 +113,14 @@ BOOST_AUTO_TEST_CASE( test_repeat_date )
    int taskSize = 2;
    Defs theDefs;  {
       suite_ptr suite = theDefs.add_suite("test_repeat_date");
+      suite->addVerify( VerifyAttr(NState::COMPLETE,1) );
       family_ptr fam = suite->add_family("family" );
       fam->addRepeat( RepeatDate("DATE",20110630,20110704));
-      fam->addVerify( VerifyAttr(NState::COMPLETE,1) );
+      fam->addVerify( VerifyAttr(NState::COMPLETE,5) );
       for(int i=0; i < taskSize; i++) {
          task_ptr task = fam->add_task( "t" + boost::lexical_cast<std::string>(i) );
          task->addVerify( VerifyAttr(NState::COMPLETE,5) );
       }
-      suite->addVerify( VerifyAttr(NState::COMPLETE,1) );
    }
 
    // The test harness will create corresponding directory structure
