@@ -15,7 +15,8 @@
 
 #include <iostream>
 #include <fstream>
-#include <stdlib.h>
+#include <stdlib.h>    // for getenv()
+
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/operations.hpp>
 #include <boost/test/unit_test.hpp>
@@ -242,6 +243,28 @@ static void test_invariants(defs_ptr the_defs, const std::string& title) {
    BOOST_CHECK_MESSAGE( the_defs->checkInvariants(errorMsg),title << " Invariants failed " << errorMsg);
 }
 
+bool verify_attribute_verification()
+{
+   // In  version 4.0.1: We changed the way families changed states. i.e families will now change to state complete
+   // before being requeued. See ECFLOW-96 Families with loops(cron/repeat) should log complete
+   // This meant that when we run the migration tests, i.e new client with old server (with new test)
+   // It would fail some the test, during verify attribute verification. ie. where we count the number of times
+   // a node completes. To enable these tests to still run, we will disable verify attribute verification
+   static bool allow_verification = true;
+
+   if (!allow_verification) {
+      //std::cout << "Disable verify attribute verification ------------------------------------------\n";
+      return false;
+   }
+   char* the_env = getenv("DISABLE_VERIFY_ATTRIBUTE_VERIFICATION");
+   if (the_env) {
+      std::cout << "Disable verify attribute verification *************************************************************\n";
+      allow_verification= false;
+      return false;
+   }
+   return true;
+}
+
 defs_ptr
 ServerTestHarness::testWaiter(const ClientInvoker& theClient,
          const Defs& theClientDefs,
@@ -396,7 +419,7 @@ ServerTestHarness::testWaiter(const ClientInvoker& theClient,
 #endif
          if ( (full_defs->suiteVec().size() == completeSuiteCnt)  && (hasAutoCancel == 0)) {
 
-            if ( verifyAttr ) {
+            if ( verifyAttr && verify_attribute_verification()) {
                // Do verification of expected state changes
                string localErrorMessage;
                BOOST_REQUIRE_MESSAGE(full_defs->verification(localErrorMessage),localErrorMessage << "\n" << *full_defs.get());

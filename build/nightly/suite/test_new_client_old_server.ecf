@@ -25,8 +25,12 @@ else
    Client/bin/%COMPILER_VERSION%/release/tclient
    
    # 4.0.1: Not all tests pass, since we now set families to complete, when used in repeat loop
+   #        See: ECFLOW-96 Families with loops(cron/repeat) should log complete
    #        and hence fail the verification, which counts number of times that a node should complete
    #        Need to have a mechanism that disables 'complete' state verification
+   #        Currently this done by setting an environment variable
+   # When/If we release ecflow version 5.0, we can remove environment variable, and associated logic.
+   export DISABLE_VERIFY_ATTRIBUTE_VERIFICATION=1
    Test/bin/%COMPILER_VERSION%/release/server-test
    
    # Allow test to be rerun. This can fail
