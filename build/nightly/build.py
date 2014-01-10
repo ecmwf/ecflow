@@ -263,47 +263,6 @@ def add_aix_power7_variables( aix_power7 ) :
     aix_power7.add_variable("BUILD_ECFLOWVIEW","false")  # dont build on this platform
 
 
-def add_remote_aix_rs6000_variables( aix_rs6000 ) :
-    aix_rs6000.add_variable("ECF_JOB_CMD",    "/home/ma/emos/bin/smssubmit %USER% %SCHOST% %ECF_JOB% %ECF_JOBOUT%")
-    aix_rs6000.add_variable("ECF_KILL_CMD",   "/home/ma/emos/bin/smskill   %USER% %SCHOST% %ECF_RID% %ECF_JOB% > %ECF_JOB%.kill 2>&1")
-    aix_rs6000.add_variable("ECF_STATUS_CMD", "/home/ma/emos/bin/smsstatus %USER% %SCHOST% %ECF_RID% %ECF_JOB% > %ECF_JOB%.stat 2>&1")
-    aix_rs6000.add_variable("QUEUE","ns")
-    aix_rs6000.add_variable("ACCOUNT","ecodmdma")
-    aix_rs6000.add_variable("SCHOST","ecgate")    # Super Computer HOST
-    aix_rs6000.add_variable("WSHOST",os.uname()[1])     # Work Space HOST
-    aix_rs6000.add_variable("ECF_TRIES","7")      # Since ecgate times out with CPU limit exceeded
-    aix_rs6000.add_variable("ECF_INCLUDE",  WK + "/build/nightly/suite/aix_rs6000_xlc/includes")
-    aix_rs6000.add_variable("COMPILER_VERSION","vacpp12100")
-    aix_rs6000.add_variable("COMPILER_TEST_PATH","vacpp/$mode/threading-multi")
-    aix_rs6000.add_variable("TOOLSET","vacpp")
-    
-def add_aix_rs6000_variables( aix_rs6000 ) :
-    aix_rs6000.add_variable("REMOTE_HOST","ecgate")
-    aix_rs6000.add_variable("ROOT_WK","/emos_data/ecflow/rs6000/xlc")
-    aix_rs6000.add_variable("BOOST_DIR","/emos_data/ecflow/rs6000/xlc/boost")
-    aix_rs6000.add_variable("ARCH","rs6000")
-    aix_rs6000.add_variable("SITE_CONFIG","$WK/build/site_config/site-config-AIX-rs6000.jam")
-
-
-def add_remote_aix_gcc_variables( aix_gcc ) :
-    aix_gcc.add_variable("ECF_JOB_CMD",    "/home/ma/emos/bin/smssubmit %USER% %SCHOST% %ECF_JOB% %ECF_JOBOUT%")
-    aix_gcc.add_variable("ECF_KILL_CMD",   "/home/ma/emos/bin/smskill   %USER% %SCHOST% %ECF_RID% %ECF_JOB% > %ECF_JOB%.kill 2>&1")
-    aix_gcc.add_variable("ECF_STATUS_CMD", "/home/ma/emos/bin/smsstatus %USER% %SCHOST% %ECF_RID% %ECF_JOB% > %ECF_JOB%.stat 2>&1")
-    aix_gcc.add_variable("QUEUE","ns")
-    aix_gcc.add_variable("ACCOUNT","ecodmdma")
-    aix_gcc.add_variable("SCHOST","ecgate")    # Super Computer HOST
-    aix_gcc.add_variable("WSHOST",os.uname()[1])     # Work Space HOST
-    aix_gcc.add_variable("ECF_TRIES","7")      # Since ecgate times out with CPU limit exceeded
-    aix_gcc.add_variable("COMPILER_TEST_PATH","gcc-4.5.0/$mode")
-    aix_gcc.add_variable("TOOLSET","gcc")
-     
-def add_aix_gcc_variables( aix_gcc ) :
-    aix_gcc.add_variable("REMOTE_HOST","ecgate")
-    aix_gcc.add_variable("ROOT_WK","/emos_data/ecflow/rs6000/gcc")
-    aix_gcc.add_variable("BOOST_DIR","/emos_data/ecflow/rs6000/gcc/boost")
-    aix_gcc.add_variable("ARCH","rs6000")
-    aix_gcc.add_variable("SITE_CONFIG","$WK/build/site_config/site-config-AIX-gcc.jam")
-
 def add_build_debug( parent ): 
     f = parent.add_family("build_debug")
     f.add_trigger("cp_site_config == complete and git_clone == complete")
@@ -311,7 +270,7 @@ def add_build_debug( parent ):
     f.add_task("build")
     task_test = f.add_task("test")
     # on IBM we do the debug build first
-    if parent.name() == "aix_power7" or parent.name() == "aix_rs6000_xlc" or parent.name() == "hpux" :
+    if parent.name() == "aix_power7" or parent.name() == "hpux" :
         task_test.add_trigger("build == complete")
     else:
         task_test.add_trigger("build == complete and (../build_release/test == complete or ../build_release/test == aborted)")
@@ -327,7 +286,7 @@ def add_build_release( parent ):
     
     task_test = f.add_task("test")
     # on IBM/HPUX we do the debug build first, it's a *lot* faster
-    if parent.name() == "aix_power7" or parent.name() == "aix_rs6000_xlc" or parent.name() == "hpux" :
+    if parent.name() == "aix_power7" or parent.name() == "hpux" :
         task_test.add_trigger("build == complete and (../build_debug/test == complete or ../build_debug/test == aborted)")
     elif parent.name() == "linux64intel":
         # Both linux64 and linux64intel are same machine, to avoid starting server on same port add a dependency
@@ -366,8 +325,8 @@ def add_build_and_test_tasks( parent ) :
     cp_site_config = parent.add_task("cp_site_config")
     add_local_job_variables(cp_site_config) # run locally
             
-    # On aix/xlc do the debug build first, its a lot faster, than build release
-    if parent.name() == "aix_power7" or parent.name() == "aix_rs6000_xlc" or parent.name() == "hpux" :
+    # On aix and hpux do the debug build first, its a lot faster, than build release
+    if parent.name() == "aix_power7" or parent.name() == "hpux" :
         add_build_debug( parent )
         add_build_release( parent )
     else:
@@ -504,20 +463,7 @@ def build_aix_power7( parent ) :
     add_git_tasks( aix_power7 )
     add_build_and_test_tasks( aix_power7 )
     
-def build_aix_rs6000_xlc( parent ) :
-    aix_rs6000 = parent.add_family("aix_rs6000_xlc")
-    add_aix_rs6000_variables(aix_rs6000)
-    add_remote_aix_rs6000_variables(aix_rs6000)
-    add_git_tasks( aix_rs6000 )  
-    add_build_and_test_tasks( aix_rs6000 )
 
-def build_aix_gcc(parent) :
-    aix_gcc = parent.add_family("aix_gcc")
-    add_aix_gcc_variables( aix_gcc )
-    add_remote_aix_gcc_variables( aix_gcc )
-    add_git_tasks( aix_gcc )
-    add_build_and_test_tasks( aix_gcc )
-  
 def add_boost_tasks( family ):
     boost_remove = family.add_task("boost_remove")  
     boost_copy_gzip = family.add_task("boost_copy_gzip")  
@@ -617,10 +563,6 @@ def build_boost( boost ):
     add_remote_aix_power7_variables(family)
     add_boost_tasks( family )
     
-    family = boost.add_family("aix_rs6000")
-    add_aix_rs6000_variables(family)
-    add_remote_aix_rs6000_variables(family)
-    add_boost_tasks( family )
     
 def add_suite_variables( suite ):
     suite.add_variable("ECFLOW_TAR_DIR","/var/tmp/ma0/clientRoot/workspace")
@@ -690,9 +632,7 @@ with defs.add_suite("suite") as suite:
         build_opensuse103( build )
         build_hpux(build)
         build_aix_power7(build)
-        build_aix_rs6000_xlc(build)
-        #build_aix_gcc(build)
-
+  
 #ecflow.PrintStyle.set_style(ecflow.Style.STATE)
 #print defs
 
