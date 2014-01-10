@@ -23,6 +23,10 @@ else
    export ECF_ALLOW_NEW_CLIENT_OLD_SERVER=9
    export ECF_NODE=localhost
    Client/bin/%COMPILER_VERSION%/release/tclient
+   
+   # 4.0.1: Not all tests pass, since we now set families to complete, when used in repeat loop
+   #        and hence fail the verification, which counts number of times that a node should complete
+   #        Need to have a mechanism that disables 'complete' state verification
    Test/bin/%COMPILER_VERSION%/release/server-test
    
    # Allow test to be rerun. This can fail
