@@ -69,3 +69,6 @@ if [[ "$PE_ENV" = GNU ]] ; then
    %MODULE_LOAD_GCC%
 fi
 
+#
+set -e;
+trap ERROR 0
