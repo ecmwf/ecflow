@@ -26,6 +26,7 @@ ecbuild_add_library( TARGET   libharness
 list( APPEND test_srcs
 ./TestAbortCmd.cpp
 ./TestAlias.cpp
+./TestClkSync.cpp
 ./TestComplete.cpp
 ./TestCron.cpp
 ./TestCtsWaitCmd.cpp
