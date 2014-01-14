@@ -168,36 +168,6 @@ elif test_uname AIX ; then
    echo "Testing: $ARCH variant=$mode"
    if test "$ARCH" = rs6000 
    then
-      # GCC =========================================================================
-      # Need to change LANG else we get a crash
-      #export LANG=C
-      #compiler=gcc-4.5.0
-     
-      #echo "*****************************************"
-      #echo "Testing: variant=$mode compiler=$compiler"
-      #echo "*****************************************"
-
-      #ACore/bin/$compiler/$mode/coretest  --log_level=message
-      #ANattr/bin/$compiler/$mode/nodeattrtest  --log_level=message
-      #ANode/bin/$compiler/$mode/nodetest  --log_level=message
-      #AParser/bin/$compiler/$mode/tparser  --log_level=message
-      #AParser/bin/$compiler/$mode/tsingle          --log_level=message
-      #Base/bin/$compiler/$mode/basetest     --log_level=message
-      #Client/bin/$compiler/$mode/tclient     --log_level=message
-      #Server/bin/$compiler/$mode/tserver       --log_level=message
-      #CSim/bin/$compiler/$mode/testsimulator  --log_level=message
-      #if [[ "$safe" = no ]] ; then
-         #Test/bin/$compiler/$mode/server-test           --log_level=message
-         #Test/bin/$compiler/$mode/test-zombies  --log_level=message
-      #fi
-   
-      # run python/C++ test
-      #cd Pyext
-      #$BOOST_ROOT/bjam variant=$mode test-all
-      #cd ..
- 
-      #TestEcfSms/bin/$compiler/$mode/smsecftest  --log_level=message
-      
       # XLC ============================================================
       ACore/bin/vacpp/$mode/threading-multi/coretest  --log_level=message $TEST_OPTS
       ANattr/bin/vacpp/$mode/threading-multi/nodeattrtest  --log_level=message $TEST_OPTS
