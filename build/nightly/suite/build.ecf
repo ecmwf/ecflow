@@ -72,7 +72,7 @@ echo $PATH
 if [[ %SET_TO_TEST_SCRIPT% = true ]] ; then
    echo "Test only"
 else
-   if [[ %CMAKE:% = CMAKE ]] ; then
+   if [[ %CMAKE:boost% = CMAKE ]] ; then
       # CMAKE ===========================================================
       rm -rf ecbuild/%MODE% || true
       mkdir -p ecbuild/%MODE%
