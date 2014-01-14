@@ -72,8 +72,34 @@ echo $PATH
 if [[ %SET_TO_TEST_SCRIPT% = true ]] ; then
    echo "Test only"
 else
-   # TEST should be set to -n if defined
-   $BOOST_ROOT/bjam %CUSTOM_BJAM_ARGS:% variant=%MODE% -j%NO_OF_CORES% %TEST:% -d2
+   if [[ %CMAKE:% = CMAKE ]] ; then
+      # CMAKE ===========================================================
+      rm -rf ecbuild/%MODE% || true
+      mkdir -p ecbuild/%MODE%
+      cd ecbuild/%MODE%
+      
+      cmake_build_type=
+      if [[ %MODE% = debug ]] ; then
+         cmake_build_type=Debug
+      else
+         cmake_build_type=Production
+      fi
+      
+      /usr/local/apps/cmake/current/bin/cmake ../../  \
+         -DCMAKE_BUILD_TYPE=$cmake_build_type \
+         -DCMAKE_MODULE_PATH=/usr/local/apps/ecbuild/current/share/ecbuild/cmake \
+         -DPYTHON_LIBRARY=/usr/local/apps/python/current/lib/libpython2.7.a \
+         -DPYTHON_INCLUDE_DIR=/usr/local/apps/python/current/include/python2.7 \
+         -DPYTHON_EXECUTABLE=/usr/local/apps/python/current/bin/python2.7 
+         
+      make -j4
+   else
+         
+      # BOOST Build =====================================================
+   
+      # TEST should be set to -n if defined
+      $BOOST_ROOT/bjam %CUSTOM_BJAM_ARGS:% variant=%MODE% -j%NO_OF_CORES% %TEST:% -d2
+   fi
 fi
  
 #==================================================================================

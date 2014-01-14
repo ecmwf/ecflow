@@ -317,7 +317,7 @@ def add_build_and_test_tasks( parent ) :
     clean_task = parent.add_task("clean")
     clean_task.add_defstatus( ecflow.DState.complete )
     
-    if parent.name() != "localhost" and  parent.name() != "localhost_clang" :
+    if parent.name() != "localhost" and parent.name() != "localhost_clang"  and parent.name() != "localhost_cmake":
         cp_install = parent.add_task("cp_install")
         cp_install.add_defstatus( ecflow.DState.complete )
         add_local_job_variables(cp_install) # run locally
@@ -354,6 +354,19 @@ def build_localhost( parent ) :
     task.add_trigger("test_migration == complete or test_migration == aborted")
     task.add_variable("OLD_VERSION","3.1.9")
 
+def build_localhost_cmake( parent ) :
+    # Hence left out test_client_performance and test_server_performance
+    localhost_cmake = parent.add_family("localhost_cmake")
+    localhost_cmake.add_variable("CMAKE","CMAKE")
+    
+    if (parent.name() == "build") :
+        localhost_cmake.add_trigger("localhost == complete || localhost == aborted")
+    add_localhost_variables(localhost_cmake)
+    
+    add_git_tasks( localhost_cmake , True)
+
+    add_build_and_test_tasks( localhost_cmake )
+
 def build_localhost_clang( parent ) :
     # Currently clang based profile builds, have a memory fault. 
     # Hence left out test_client_performance and test_server_performance
@@ -362,7 +375,7 @@ def build_localhost_clang( parent ) :
     localhost_clang.add_variable("BOOST_VERSION","boost_1_53_0")
 
     if (parent.name() == "build") :
-        localhost_clang.add_trigger("localhost == complete || localhost == aborted")
+        localhost_clang.add_trigger("localhost_cmake == complete || localhost_cmake == aborted")
     add_localhost_clang_variables(localhost_clang)
     
     add_git_tasks( localhost_clang , True)
@@ -623,6 +636,7 @@ with defs.add_suite("suite") as suite:
         add_hpux_variables( cp_tar_to_hpux )
     
         build_localhost( build )
+        build_localhost_cmake( build )
         build_localhost_clang( build )
         build_linux_64( build )
         build_linux_64_intel( build )
