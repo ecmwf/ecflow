@@ -24,10 +24,13 @@
 #  
 #/usr/local/apps/cmake/current/bin/cmake ../../  \
 #         -DCMAKE_BUILD_TYPE=Debug \
-#         -DCMAKE_MODULE_PATH=/usr/local/apps/ecbuild/1.2.0/share/ecbuild/cmake \
+#         -DCMAKE_MODULE_PATH=/usr/local/apps/ecbuild/current/share/ecbuild/cmake \
 #         -DPYTHON_LIBRARY=/usr/local/apps/python/current/lib/libpython2.7.a \
 #         -DPYTHON_INCLUDE_DIR=/usr/local/apps/python/current/include/python2.7 \
-#         -DPYTHON_EXECUTABLE=/usr/local/apps/python/current/bin/python2.7 
+#         -DPYTHON_EXECUTABLE=/usr/local/apps/python/current/bin/python2.7 \
+#         -DCMAKE_INSTALL_PREFIX=/usr/local/apps/ecflow/$(cat ../../VERSION.cmake | awk '{print $3}'|sed 's/["]//g')
+#
+#         -DCMAKE_INSTALL_PREFIX=/var/tmp/ma0/cmake/ecflow/4.0.1
 #
 #############################################################
 
@@ -50,10 +53,11 @@ ecbuild_declare_project()
 
 ecbuild_find_python( VERSION 2.7 )
 
-# set(Boost_USE_STATIC_LIBS        ON)
+# set(Boost_USE_STATIC_LIBS      ON)
 set(Boost_USE_MULTITHREADED      ON)
-# set(Boost_NO_SYSTEM_PATHS        ON)
+# set(Boost_NO_SYSTEM_PATHS      ON)
 find_package( Boost 1.53.0 COMPONENTS python serialization system thread unit_test_framework test_exec_monitor filesystem program_options date_time )
+#find_package(Boost 1.53.0 EXACT REQUIRED COMPONENTS python)
 
 list( APPEND Ecflow_Boost_LIBS 
     ${Boost_SERIALIZATION_LIBRARY}
@@ -101,6 +105,31 @@ add_subdirectory( view )
 
 # configure_file( cmake/ecbase_config.h.in  ${CMAKE_BINARY_DIR}/ecbase_config.h )
 
+
+# =========================================================================================
+# install 
+# =========================================================================================
+# install scripts
+install (FILES  
+            ${CMAKE_SOURCE_DIR}/tools/ecflow_logsvr.pl
+            ${CMAKE_SOURCE_DIR}/tools/ecflow_logsvr.sh
+            ${CMAKE_SOURCE_DIR}/tools/ecflow_start.sh
+            ${CMAKE_SOURCE_DIR}/tools/ecflow_stop.sh
+            ${CMAKE_SOURCE_DIR}/tools/noconnect.sh
+            ${CMAKE_SOURCE_DIR}/Pyext/migrate/ecflow_migrate.py
+         DESTINATION bin
+         PERMISSIONS OWNER_READ GROUP_READ WORLD_READ OWNER_EXECUTE GROUP_EXECUTE WORLD_EXECUTE
+        )
+
+# install documentation         
+install (FILES  
+            ${CMAKE_SOURCE_DIR}/Doc/user-manual/client_options.docx  
+            ${CMAKE_SOURCE_DIR}/Doc/user-manual/user_manual.docx    
+            ${CMAKE_SOURCE_DIR}/Doc/user-manual/user_manual.pdf    
+         DESTINATION doc/ecflow
+         PERMISSIONS OWNER_READ GROUP_READ WORLD_READ OWNER_EXECUTE GROUP_EXECUTE WORLD_EXECUTE
+        )
+         
 ############################################################################################
 # final
 

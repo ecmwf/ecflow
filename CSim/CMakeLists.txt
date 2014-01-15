@@ -7,15 +7,16 @@ list( APPEND srcs
    src/SimulatorVisitor.cpp
 )
 ecbuild_add_library( TARGET libsimu
-                   TYPE     STATIC
-                   SOURCES  ${srcs}
-                   LIBS     core nodeattr node libparser ${Ecflow_Boost_LIBS}
-                   INCLUDES ../ACore/src 
-                            ../ANattr/src
-                            ../ANode/src
-                            ../AParser/src
-                            ../Base/src
-                            ${Boost_INCLUDE_DIRS} )
+                     NOINSTALL
+                     TYPE     STATIC
+                     SOURCES  ${srcs}
+                     LIBS     core nodeattr node libparser ${Ecflow_Boost_LIBS}
+                     INCLUDES ../ACore/src 
+                              ../ANattr/src
+                              ../ANode/src
+                              ../AParser/src
+                              ../Base/src
+                              ${Boost_INCLUDE_DIRS} )
 
 
 list( APPEND test_srcs

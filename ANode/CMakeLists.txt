@@ -5,12 +5,13 @@
 file( GLOB srcs RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "src/*.cpp" )
 
 ecbuild_add_library( TARGET   node
-                   TYPE     STATIC
-                   SOURCES  ${srcs}
-                   LIBS     core nodeattr ${Ecflow_Boost_LIBS}
-                   INCLUDES ../ACore/src 
-                            ../ANattr/src
-                            ${Boost_INCLUDE_DIRS} )
+                     NOINSTALL
+                     TYPE     STATIC
+                     SOURCES  ${srcs}
+                     LIBS     core nodeattr ${Ecflow_Boost_LIBS}
+                     INCLUDES ../ACore/src 
+                              ../ANattr/src
+                              ${Boost_INCLUDE_DIRS} )
 
 # Use following to populate list: 
 #  cd $WK/ANode                      

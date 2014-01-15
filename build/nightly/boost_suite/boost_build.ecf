@@ -50,6 +50,11 @@ else
    ./bjam --build-dir=./tmpBuildDir toolset=%TOOLSET% $CXXFLAGS stage link=static --layout=%LAYOUT% --with-serialization  variant=release 
    ./bjam --build-dir=./tmpBuildDir toolset=%TOOLSET% $CXXFLAGS stage link=static --layout=%LAYOUT% --with-thread variant=release  
    ./bjam --build-dir=./tmpBuildDir toolset=%TOOLSET% $CXXFLAGS stage link=static --layout=%LAYOUT% --with-test variant=release  
+   
+   # Build boost python in the same, as building $WK/Pyext
+   ./bjam toolset=%TOOLSET% link=shared variant=debug   $CXXFLAGS stage --layout=%LAYOUT% threading=single --with-python
+   ./bjam toolset=%TOOLSET% link=shared variant=release $CXXFLAGS stage --layout=%LAYOUT% threading=single --with-python
+ 
 fi
 
 %include <tail.h>

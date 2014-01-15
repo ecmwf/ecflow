@@ -5,6 +5,19 @@
 ## granted to it by virtue of its status as an intergovernmental organisation 
 ## nor does it submit to any jurisdiction. 
 
+# ===============================================================================
+# Error to watch out for:
+# error: No best alternative for /python_for_extensions
+#    next alternative: required properties: <python>2.7 <target-os>linux
+#        matched
+#    next alternative: required properties: <python>2.7 <target-os>linux
+#        matched
+# 
+# Please check if you have more than one 'using python' in configuration files.
+# Please check site-config.jam, user-config.jam and project-config.jam and 
+# remove duplicated 'using python'
+# ===============================================================================
+        
 #
 # jamfile for installing, building exposing c++ library to python.
 # and for testing embedded python
