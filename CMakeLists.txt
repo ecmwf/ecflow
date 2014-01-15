@@ -27,8 +27,10 @@
 #         -DCMAKE_MODULE_PATH=/usr/local/apps/ecbuild/current/share/ecbuild/cmake \
 #         -DPYTHON_LIBRARY=/usr/local/apps/python/current/lib/libpython2.7.a \
 #         -DPYTHON_INCLUDE_DIR=/usr/local/apps/python/current/include/python2.7 \
-#         -DPYTHON_EXECUTABLE=/usr/local/apps/python/current/bin/python2.7 
+#         -DPYTHON_EXECUTABLE=/usr/local/apps/python/current/bin/python2.7 \
 #         -DCMAKE_INSTALL_PREFIX=/usr/local/apps/ecflow/$(cat ../../VERSION.cmake | awk '{print $3}'|sed 's/["]//g')
+#
+#         -DCMAKE_INSTALL_PREFIX=/var/tmp/ma0/cmake/ecflow/4.0.1
 #
 #############################################################
 
