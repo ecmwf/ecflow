@@ -5,13 +5,14 @@
 file( GLOB srcs RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "src/*.cpp" )
 
 ecbuild_add_library( TARGET   libparser
-                   TYPE     STATIC
-                   SOURCES  ${srcs}
-                   LIBS     core nodeattr node ${Ecflow_Boost_LIBS}
-                   INCLUDES ../ACore/src 
-                            ../ANattr/src
-                            ../ANode/src
-                            ${Boost_INCLUDE_DIRS} )
+                     NOINSTALL
+                     TYPE     STATIC
+                     SOURCES  ${srcs}
+                     LIBS     core nodeattr node ${Ecflow_Boost_LIBS}
+                     INCLUDES ../ACore/src 
+                              ../ANattr/src
+                              ../ANode/src
+                              ${Boost_INCLUDE_DIRS} )
 
 # ===================================================================
 # Use following to populate list: 

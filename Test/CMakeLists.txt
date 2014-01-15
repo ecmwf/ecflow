@@ -6,6 +6,7 @@
 file( GLOB srcs RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "src/*.cpp" )
  
 ecbuild_add_library( TARGET   libharness
+                     NOINSTALL
                    TYPE     STATIC
                    SOURCES  ${srcs}
                    LIBS     core nodeattr node libparser base libclient ${Ecflow_Boost_LIBS}

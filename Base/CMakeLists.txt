@@ -63,17 +63,18 @@
 )
 
 ecbuild_add_library( TARGET   base
-                   TYPE     STATIC
-                   SOURCES  ${srcs}
-                   LIBS     core nodeattr node libparser ${Ecflow_Boost_LIBS}
-                   INCLUDES ../ACore/src 
-                            ../ANattr/src
-                            ../ANode/src
-                            ../AParser/src
-                            ../Base/src
-                            ../Base/src/cts
-                            ../Base/src/stc
-                            ${Boost_INCLUDE_DIRS} )
+                     NOINSTALL
+                     TYPE     STATIC
+                     SOURCES  ${srcs}
+                     LIBS     core nodeattr node libparser ${Ecflow_Boost_LIBS}
+                     INCLUDES ../ACore/src 
+                              ../ANattr/src
+                              ../ANode/src
+                              ../AParser/src
+                              ../Base/src
+                              ../Base/src/cts
+                              ../Base/src/stc
+                              ${Boost_INCLUDE_DIRS} )
 
  
 list( APPEND test_srcs

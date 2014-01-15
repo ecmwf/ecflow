@@ -13,17 +13,18 @@ list( APPEND srcs
    src/ServerOptions.cpp
 )
 ecbuild_add_library( TARGET libserver
-                   TYPE     STATIC
-                   SOURCES  ${srcs}
-                   LIBS     core nodeattr node libparser base ${Ecflow_Boost_LIBS}
-                   INCLUDES ../ACore/src 
-                            ../ANattr/src
-                            ../ANode/src
-                            ../AParser/src
-                            ../Base/src
-                            ../Base/src/cts
-                            ../Base/src/stc
-                            ${Boost_INCLUDE_DIRS} )
+                     NOINSTALL
+                     TYPE     STATIC
+                     SOURCES  ${srcs}
+                     LIBS     core nodeattr node libparser base ${Ecflow_Boost_LIBS}
+                     INCLUDES ../ACore/src 
+                              ../ANattr/src
+                              ../ANode/src
+                              ../AParser/src
+                              ../Base/src
+                              ../Base/src/cts
+                              ../Base/src/stc
+                              ${Boost_INCLUDE_DIRS} )
 
 # =======================================================
 # EXE ecflow_server
@@ -32,7 +33,7 @@ ecbuild_add_executable( TARGET   ecflow_server
                         LIBS     core nodeattr node libparser base libserver pthread ${Ecflow_Boost_LIBS}
                         INCLUDES src
                                  ${Boost_INCLUDE_DIRS} 
-                     )
+                      )
                           
 # ================================================================================                         
 # TEST
@@ -43,3 +44,8 @@ ecbuild_add_test( TARGET tserver
                          ../ACore/src 
                           ${Boost_INCLUDE_DIRS} 
               )
+
+# ===================================================================
+# install
+# ===================================================================
+install (TARGETS ecflow_server DESTINATION bin)
