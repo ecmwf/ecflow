@@ -51,13 +51,21 @@ ecbuild_declare_project()
 ###############################################################################
 # find packages
 
+# Python ----------------------------------------------------------------------
 ecbuild_find_python( VERSION 2.7 )
+message( STATUS "PYTHON_EXECUTABLE    : ${PYTHON_EXECUTABLE}")
+message( STATUS "PYTHON_INCLUDE_DIRS  : ${PYTHON_INCLUDE_DIRS}")
+message( STATUS "PYTHON_LIBRARIES     : ${PYTHON_LIBRARIES}")
+
+# Boost ----------------------------------------------------------------------
 
 # set(Boost_USE_STATIC_LIBS      ON)
 set(Boost_USE_MULTITHREADED      ON)
-# set(Boost_NO_SYSTEM_PATHS      ON)
-find_package( Boost 1.53.0 COMPONENTS python serialization system thread unit_test_framework test_exec_monitor filesystem program_options date_time )
+set(Boost_NO_SYSTEM_PATHS        ON)
+
+find_package( Boost 1.53.0 REQUIRED COMPONENTS python serialization system thread unit_test_framework test_exec_monitor filesystem program_options date_time )
 #find_package(Boost 1.53.0 EXACT REQUIRED COMPONENTS python)
+message( STATUS "Boost_LIBRARIES     : ${Boost_LIBRARIES}" )
 
 list( APPEND Ecflow_Boost_LIBS 
     ${Boost_SERIALIZATION_LIBRARY}
