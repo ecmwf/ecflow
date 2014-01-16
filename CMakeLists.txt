@@ -34,8 +34,10 @@
 #
 #############################################################
 
-
 cmake_minimum_required( VERSION 2.6.4 FATAL_ERROR )
+
+#ecbuild_requires_macro_version( 1.5)
+
 
 project( ecflow CXX )
 
