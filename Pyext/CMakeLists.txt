@@ -8,7 +8,7 @@ message(${PYTHON_EXECUTABLE})
 
 ecbuild_add_library( TARGET   ecflow
                      NOINSTALL
-                     TYPE     SHARED
+                     TYPE     MODULE
                      SOURCES  ${srcs}
                      LIBS     ${Ecflow_Boost_LIBS} ${Boost_PYTHON_LIBRARY} ${PYTHON_LIBRARIES}
                      INCLUDES ../ACore/src 
