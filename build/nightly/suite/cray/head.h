@@ -18,14 +18,16 @@ set -x # echo script lines as they are executed
 # from the ecflow regression tests. which also use ecflow_client, instead we explicitly
 # set the host,port and rid on each ecflow_client call,
 # i.e  --host=%ECF_NODE% --port=%ECF_PORT%
+# This should be done in <trap.h> above
 # This is only required because we are using ecflow to test ecflow
-#unset ECF_PORT
-#unset ECF_NODE
-#unset ECF_RID
-#unset ECF_HOME
-#unset ECF_HOSTFILE
-#unset ECF_JOBOUT
-#unset ECF_OUT
+unset ECF_PORT
+unset ECF_NODE
+unset ECF_RID
+unset ECF_HOME
+unset ECF_HOSTFILE
+unset ECF_JOBOUT
+unset ECF_OUT
+
 
 # ============================================================================
 # Defines the variables that are needed for any communication with ECF

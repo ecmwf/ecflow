@@ -197,19 +197,19 @@ else
    
    run_test CSim testsimulator
    
-   
-   #============================ Server  ========================================
-   ecflow_client --meter=progress 35             --host=%ECF_NODE% --port=%ECF_PORT%  
-   ecflow_client --label=progress Server         --host=%ECF_NODE% --port=%ECF_PORT%
-   
-   run_test Server tserver
-   
-   
+
    #============================ Parser a big file  ========================================
-   ecflow_client --meter=progress 40             --host=%ECF_NODE% --port=%ECF_PORT%  
+   ecflow_client --meter=progress 35             --host=%ECF_NODE% --port=%ECF_PORT%  
    ecflow_client --label=progress ParseMega      --host=%ECF_NODE% --port=%ECF_PORT%  
    
    run_test AParser tsingle
+
+   
+   #============================ Server  ========================================
+   ecflow_client --meter=progress 45             --host=%ECF_NODE% --port=%ECF_PORT%  
+   ecflow_client --label=progress Server         --host=%ECF_NODE% --port=%ECF_PORT%
+   
+   run_test Server tserver
    
    
    #============================ Client ========================================
@@ -243,6 +243,7 @@ else
    ecflow_client --label=progress Zombies   --host=%ECF_NODE% --port=%ECF_PORT% 
    
    run_test Test test-zombies
+   
    
    
    #============================ Python ========================================
@@ -304,7 +305,8 @@ else
    
       #rm -rf bin/*.test   
    
-      # On cray we need CUSTOM_BJAM_ARGS i.e for toolset=intel cxxflags=-fPIC otherwise, it will rebuild Pyext directory with default compiler
+      # On cray we need CUSTOM_BJAM_ARGS i.e for toolset=intel cxxflags=-fPIC otherwise, 
+      # it will rebuild Pyext directory with default compiler
       # hence thses flags need to be same used in build.ecf
       $BOOST_ROOT/bjam %CUSTOM_BJAM_ARGS:% variant=$mode test-all
    fi   
