@@ -1569,12 +1569,13 @@ int ehost::update()
 	      update_reg_suites(false); // new suite may have been added
 	      reset(false, false); // SUP-398
 	    } else {
-	      gui::message("%s: updating status", name());
-	      XECFDEBUG std::cout << "# " << name() << ": small update\n";
-	      if (tree_) 
-		{} // tree_->update_tree(false); // isn t it done with node redraw?
-	    }
-	    err = 0;
+              gui::message("%s: updating status", name());
+              XECFDEBUG std::cout << "# " << name() << ": small update\n";
+              if (tree_) 
+                tree_->update_tree(false); // fp:60043 Issue with Ecflow updating on console VM
+              // redraw(false); // too much blinking with this
+            }
+            err = 0;
             break;
          default:
             break;
