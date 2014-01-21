@@ -50,14 +50,25 @@ include( ecbuild_system )
 
 ecbuild_declare_project()
 
+
+###############################################################################
+# some variables of this project
+
+option( ENABLE_PYTHON         "enable python interface"   ON  )
+
 ###############################################################################
 # find packages
 
 # Python ----------------------------------------------------------------------
-ecbuild_find_python( VERSION 2.7 )
+if(ENABLE_PYTHON)
+   ecbuild_find_python( VERSION 2.7 REQUIRED )
+else() 
+   ecbuild_find_python( VERSION 2.7 )
+endif()
 message( STATUS "PYTHON_EXECUTABLE    : ${PYTHON_EXECUTABLE}")
 message( STATUS "PYTHON_INCLUDE_DIRS  : ${PYTHON_INCLUDE_DIRS}")
 message( STATUS "PYTHON_LIBRARIES     : ${PYTHON_LIBRARIES}")
+ 
 
 # Boost ----------------------------------------------------------------------
 
@@ -97,8 +108,13 @@ if( CMAKE_BUILD_TYPE MATCHES "[Dd][Ee][Bb][Uu][Gg]" )
     ADD_DEFINITIONS( -DDEBUG )
 endif()
 
+
 ###############################################################################
 # build source code
+
+# compile with fPIC on linux, need for ecflow.so. 
+# This could be switched off for, Server,/View, since that is not used in ecflow.so
+#cmake_add_cxx_flags("-fPIC")
 
 add_subdirectory( ACore )
 add_subdirectory( ANattr )

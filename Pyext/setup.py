@@ -1,6 +1,7 @@
 from distutils.core import setup, Extension
 import os
 
+# See: http://docs.python.org/2/distutils/apiref.html?highlight=extension#distutils.core.Extension
 
 def get_ecflow_version():
     "This will extract version from the source code"
@@ -45,23 +46,23 @@ extension_name    = 'ecflow'
 extension_version = ecflow_version
  
 # define the directories to search for include files
-# to get this to work, you may need to include the path
-# to your boost installation. Mine was in '/usr/local/include', hence the corresponding entry.
+# to get this to work, you will need to include the path
+# to your boost installation.  
 work_space=os.getenv("WK") 
 boost_root=os.getenv("BOOST_ROOT") 
 boost_python_dir = boost_root + "/stage/lib"
 
 # Now all the ecflow includes
-core_include = work_space + "/ACore/src";
-anattr_include = work_space + "/ANattr/src";
-anode_include = work_space + "/ANode/src";
-parser_include = work_space + "/AParser/src";
-base_include = work_space + "/Base/src";
+core_include     = work_space + "/ACore/src";
+anattr_include   = work_space + "/ANattr/src";
+anode_include    = work_space + "/ANode/src";
+parser_include   = work_space + "/AParser/src";
+base_include     = work_space + "/Base/src";
 base_cts_include = work_space + "/Base/src/cts";
 base_stc_include = work_space + "/Base/src/stc";
-csim_include = work_space + "/CSim/src";
-client_include = work_space + "/Client/src";
-pyext_include = work_space + "/Pyext/src";
+csim_include     = work_space + "/CSim/src";
+client_include   = work_space + "/Client/src";
+pyext_include    = work_space + "/Pyext/src";
 include_dirs = [ core_include, 
                  anattr_include, 
                  anode_include,
@@ -85,22 +86,24 @@ libsim_dir = work_space + '/ecbuild/debug/CSim/'
 libclient_dir = work_space + '/ecbuild/debug/Client/'
 library_dirs = [  libcore_dir,libnodeattr_dir,libnode_dir,libparser_dir, libbase_dir, libsim_dir, libclient_dir, boost_python_dir  ]
 
+# define any runtime dependencies. This will setup RPATH
+runtime_libs = [ boost_python_dir ]
 
-# define the libraries to link with the boost python library
+# define the libraries to link with this includes the boost lib
 libcore =  'core'
 libnodeattr = 'nodeattr'
 libnode = 'node'
 libparser =  'libparser'
 libbase =   'base'
 libsim =   'libsimu'
-libclient = 'client'
+libclient = 'libclient'
 libraries = [ libcore , libnodeattr, libnode, libparser, libbase, libsim, libclient,
               'boost_system-mt',
               'boost_serialization-mt',
               'boost_filesystem-mt',
               'boost_program_options-mt',
               'boost_date_time-mt', 
-              'boost_python-mt',  ]
+              'boost_python-mt' ]
  
 # define the source files for the extension
 source_files = [ 'src/BoostPythonUtil.cpp', 
@@ -116,4 +119,4 @@ source_files = [ 'src/BoostPythonUtil.cpp',
                  'src/NodeAttrDoc.cpp' ]
  
 # create the extension and add it to the python distribution
-setup( name=extension_name, version=extension_version, ext_modules=[Extension( extension_name, source_files, include_dirs=include_dirs, library_dirs=library_dirs, libraries=libraries )] )
+setup( name=extension_name, version=extension_version, ext_modules=[Extension( extension_name, source_files, include_dirs=include_dirs, library_dirs=library_dirs, runtime_library_dirs=runtime_libs, libraries=libraries )] )

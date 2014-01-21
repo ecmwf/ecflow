@@ -59,10 +59,10 @@ ecbuild_add_test( TARGET TestMigrate
                   ARGS ${CMAKE_CURRENT_SOURCE_DIR}/migrate/TestMigrate.py
                   ENVIRONMENT "PYTHONPATH=${CMAKE_BINARY_DIR}/lib" )
 
+
 # ==========================================================================
 # install
 # ==========================================================================
-
 set(PYTHON_SITE "lib/python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}/site-packages" )
 set(PYTHON_DEST "${PYTHON_SITE}/ecflow" )
 
@@ -72,7 +72,28 @@ install( TARGETS ecflow       DESTINATION ${PYTHON_DEST}
 install( FILES   ecflow/__init__.py  DESTINATION ${PYTHON_DEST} )
 
 
-#SET(COPY_TO_PATH ${PYTHON_DEST}/ecflow.so )
-#ADD_CUSTOM_COMMAND(TARGET ecflow POST_BUILD
-#                   COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:ecflow>  ${COPY_TO_PATH}
-#                   COMMENT "Copying 'ecflow' library to '${COPY_TO_PATH}'")
+##############################################################################
+# Install using setup.py
+
+#if (ENABLE_PYTHON)
+#    message(STATUS "python found, install python extension")
+#
+#    #set(SETUP_PY_IN "${CMAKE_CURRENT_SOURCE_DIR}/setup.py.in")
+#    set(SETUP_PY    "${CMAKE_CURRENT_BINARY_DIR}/setup.py")
+#    set(DEPS        "${CMAKE_CURRENT_SOURCE_DIR}/ecflow/__init__.py")
+#    set(OUTPUT      "${CMAKE_CURRENT_BINARY_DIR}/build/timestamp")
+
+#    # configure_file(${SETUP_PY_IN} ${SETUP_PY})
+
+#    add_custom_command(OUTPUT ${OUTPUT}
+#                       # COMMAND ${PYTHON} ${SETUP_PY} build
+#                       COMMAND ${CMAKE_COMMAND} -E touch ${OUTPUT}
+#                       DEPENDS ${DEPS})
+#
+#    add_custom_target(target ALL DEPENDS ${OUTPUT})
+#
+#    install(CODE "execute_process(COMMAND ${PYTHON} ${SETUP_PY} install)")
+#endif()
+
+
+ 
