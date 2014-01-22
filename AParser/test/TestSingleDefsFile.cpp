@@ -137,7 +137,7 @@ BOOST_AUTO_TEST_CASE( test_single_defs )
    double checkExprAndLimits = 0.1;
    double expectedTimeForFindAllPaths = 0.58;
    double expectedTimeForDefsPersistOnly = 0.5 ;
-   double expectedTimeForDefsPersistAndReload = 1.4;
+   double expectedTimeForDefsPersistAndReload = 1.5;
    double expectedTimeForCheckPtPersistAndReload = 1.6;
 #endif
 #endif
