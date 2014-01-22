@@ -20,13 +20,13 @@ set -x # echo script lines as they are executed
 # i.e  --host=%ECF_NODE% --port=%ECF_PORT%
 # This should be done in <trap.h> above
 # This is only required because we are using ecflow to test ecflow
-unset ECF_PORT
-unset ECF_NODE
-unset ECF_RID
-unset ECF_HOME
-unset ECF_HOSTFILE
-unset ECF_JOBOUT
-unset ECF_OUT
+#unset ECF_PORT
+#unset ECF_NODE
+#unset ECF_RID
+#unset ECF_HOME
+#unset ECF_HOSTFILE
+#unset ECF_JOBOUT
+#unset ECF_OUT
 
 
 # ============================================================================
