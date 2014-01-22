@@ -38,7 +38,6 @@ list( APPEND tests
         TestJobGeneration 
         TestParent        
         TestRepeatArithmetic
-        TestServerGetDefs
         TestSimulator  
         TestTraversal     
         TestUserManual    
