@@ -70,13 +70,16 @@ message( STATUS "PYTHON_LIBRARIES     : ${PYTHON_LIBRARIES}")
 
 # Boost ----------------------------------------------------------------------
 
-ecbuild_add_extra_search_paths( boost )
+# If this is enable then can not find boost libs using env BOOST_ROOT ?
+#ecbuild_add_extra_search_paths( boost )
 
 # set(Boost_USE_STATIC_LIBS      ON)
 set(Boost_USE_MULTITHREADED      ON)
 set(Boost_NO_SYSTEM_PATHS        ON)
+set(Boost_DETAILED_FAILURE_MSG   ON)
+#set(Boost_DEBUG                 ON)
 
-find_package( Boost 1.50.0 REQUIRED COMPONENTS python serialization system thread unit_test_framework test_exec_monitor filesystem program_options date_time )
+find_package( Boost 1.53.0 COMPONENTS python serialization system thread unit_test_framework test_exec_monitor filesystem program_options date_time )
 #find_package(Boost 1.53.0 EXACT REQUIRED COMPONENTS python)
 
 message( STATUS "Boost_LIBRARIES     : ${Boost_LIBRARIES}" )
