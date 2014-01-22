@@ -333,9 +333,19 @@ std::string TestFixture::local_ecf_home()
 
 std::string TestFixture::includes()
 {
-   // re-use the includes in Test/data/includes for GUI/ecflowview
-   if (boost::filesystem::current_path().stem() == project_test_dir_ ) return "data/includes";
- 	return project_test_dir_ + "/data/includes";
+   // Get to the workspace directory, Then set the path the includes directory
+   fs::path current_path = fs::current_path();
+   //std::cout << "\ncurrent_path = " << current_path << " ------------------------------------------------------\n";
+   while(current_path.stem() != "ecflow") {
+     //std::cout << "current_path = " << current_path << " **********************************************\n";
+      current_path = current_path.parent_path();
+   }
+
+   current_path += "/" + project_test_dir_;
+   current_path += "/data/includes";
+   //std::cout << "current_path = " << current_path << " ==============================================\n";
+   std::string includes_path = current_path.string();
+   return includes_path;
 }
 
 

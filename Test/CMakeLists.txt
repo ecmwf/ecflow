@@ -72,15 +72,16 @@ ecbuild_add_test( TARGET  test-zombies
                           ../Base/src
                           ../Client/src
                           ${Boost_INCLUDE_DIRS} )
-                          
-ecbuild_add_test( TARGET  singletest
-                SOURCES   ./TestSingle.cpp
-                LIBS      core nodeattr node libparser base libclient libharness pthread ${Ecflow_Test_LIBS}
-                INCLUDES  src
-                          ../ACore/src 
-                          ../ANattr/src
-                          ../ANode/src
-                          ../ANode/test
-                          ../Base/src
-                          ${Boost_INCLUDE_DIRS} )
+
+# This test runs forever, hence not suitable for unit test.                          
+#ecbuild_add_test( TARGET  singletest
+#                SOURCES   ./TestSingle.cpp
+#                LIBS      core nodeattr node libparser base libclient libharness pthread ${Ecflow_Test_LIBS}
+#                INCLUDES  src
+#                          ../ACore/src 
+#                          ../ANattr/src
+#                          ../ANode/src
+#                          ../ANode/test
+#                          ../Base/src
+#                          ${Boost_INCLUDE_DIRS} )
 
