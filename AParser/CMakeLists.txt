@@ -57,14 +57,16 @@ ecbuild_add_test( TARGET   tsingle
 #
 list( APPEND t3_src test/ParseTimer.cpp  test/PersistHelper.cpp )                    
 ecbuild_add_test( TARGET   parse_timer
-                SOURCES  ${t3_src}
-                LIBS     core nodeattr node libparser ${Ecflow_Test_LIBS}
-                INCLUDES  src
+                  ARGS     ${CMAKE_CURRENT_SOURCE_DIR}/test/data/single_defs/mega.def
+                  SOURCES  ${t3_src}
+                  LIBS     core nodeattr node libparser ${Ecflow_Test_LIBS}
+                  INCLUDES  src
                           ../ACore/src 
                           ../ANattr/src
                           ../ANode/src
                           ../ANode/test
-                          ${Boost_INCLUDE_DIRS} )
+                          ${Boost_INCLUDE_DIRS} 
+                 )
 
 
 #
@@ -72,13 +74,15 @@ ecbuild_add_test( TARGET   parse_timer
 #
 list( APPEND t4_src test/ParseOnly.cpp )                    
 ecbuild_add_test( TARGET   parse_only
-                SOURCES  ${t4_src}
-                LIBS     core nodeattr node libparser ${Ecflow_Test_LIBS}
-                INCLUDES  src
-                          ../ACore/src 
-                          ../ANattr/src
-                          ../ANode/src
-                          ../ANode/test
-                          ${Boost_INCLUDE_DIRS} )
+                  ARGS     ${CMAKE_CURRENT_SOURCE_DIR}/test/data/single_defs/mega.def
+                  SOURCES  ${t4_src}
+                  LIBS     core nodeattr node libparser ${Ecflow_Test_LIBS}
+                  INCLUDES src
+                            ../ACore/src 
+                            ../ANattr/src
+                            ../ANode/src
+                            ../ANode/test
+                           ${Boost_INCLUDE_DIRS} 
+                 )
 
  
