@@ -36,20 +36,18 @@
 
 cmake_minimum_required( VERSION 2.6.4 FATAL_ERROR )
 
-#ecbuild_requires_macro_version( 1.5)
-
-
 project( ecflow CXX )
 
-set( CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH} )
+set( CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/../ecbuild/cmake")
 
 include( ecbuild_system )
+
+ecbuild_requires_macro_version( 1.2 )
 
 ###############################################################################
 # local project
 
 ecbuild_declare_project()
-
 
 ###############################################################################
 # some variables of this project
@@ -72,12 +70,15 @@ message( STATUS "PYTHON_LIBRARIES     : ${PYTHON_LIBRARIES}")
 
 # Boost ----------------------------------------------------------------------
 
+ecbuild_add_extra_search_paths( boost )
+
 # set(Boost_USE_STATIC_LIBS      ON)
 set(Boost_USE_MULTITHREADED      ON)
 set(Boost_NO_SYSTEM_PATHS        ON)
 
-find_package( Boost 1.53.0 REQUIRED COMPONENTS python serialization system thread unit_test_framework test_exec_monitor filesystem program_options date_time )
+find_package( Boost 1.50.0 REQUIRED COMPONENTS python serialization system thread unit_test_framework test_exec_monitor filesystem program_options date_time )
 #find_package(Boost 1.53.0 EXACT REQUIRED COMPONENTS python)
+
 message( STATUS "Boost_LIBRARIES     : ${Boost_LIBRARIES}" )
 
 list( APPEND Ecflow_Boost_LIBS 
@@ -99,13 +100,13 @@ list( APPEND Ecflow_Test_LIBS
 if( CMAKE_BUILD_TYPE MATCHES "[Dd][Ee][Bb][Uu][Gg]" )
     message( "INFO: DEBUG BUILD" )
     # for debug type builds, turn on verbose makefiles
-    # SET(CMAKE_VERBOSE_MAKEFILE ON)
+    # set(CMAKE_VERBOSE_MAKEFILE ON)
 
     # Tell other CMake files that we're doing a debug build
-    SET( DEBUG_BUILD 1 )
+    set( DEBUG_BUILD 1 )
 
     # Tell C/C++ that we're doing a debug build
-    ADD_DEFINITIONS( -DDEBUG )
+    add_definitions( -DDEBUG )
 endif()
 
 
