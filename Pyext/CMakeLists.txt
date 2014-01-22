@@ -6,11 +6,11 @@ message(${PYTHON_INCLUDE_DIRS})
 message(${PYTHON_LIBRARIES})
 message(${PYTHON_EXECUTABLE})
 
+#                     NOINSTALL
 ecbuild_add_library( TARGET   ecflow
-                     NOINSTALL
                      TYPE     MODULE
                      SOURCES  ${srcs}
-                     LIBS     ${Ecflow_Boost_LIBS} ${Boost_PYTHON_LIBRARY} ${PYTHON_LIBRARIES}
+                     LIBS     core nodeattr node libparser base libsimu libclient ${Ecflow_Boost_LIBS} ${Boost_PYTHON_LIBRARY} ${PYTHON_LIBRARIES}
                      INCLUDES ../ACore/src 
                             ../ANattr/src
                             ../ANode/src
