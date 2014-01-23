@@ -331,11 +331,9 @@ if [[ %CMAKE:boost% = CMAKE ]] ; then
    cd $WK
    cd ecbuild/%MODE%
       
-   # hack to get the cmake python tests to run
-   cp lib/libecflow.so lib/ecflow.so
-      
    # -V verbose, show test output
-   ctest -V
+   # --output-on-failure only show output on failure
+   ctest --output-on-failure
 fi
 
 # ========================= all test complete ==========================================

@@ -22,6 +22,9 @@ ecbuild_add_library( TARGET   ecflow
                             ../CSim/src
                             ${Boost_INCLUDE_DIRS} ${PYTHON_INCLUDE_DIRS} )
 
+# by default cmake add prefix 'lib', we don't want this hence disable
+set_target_properties(ecflow PROPERTIES PREFIX "")
+
 ### tests 
 
 list( APPEND tests
