@@ -19,7 +19,10 @@
 import ecflow
  
 if __name__ == "__main__":
-    
+    print "####################################################################"
+    print "Running ecflow version " + ecflow.Client().version() 
+    print "####################################################################"
+ 
     defs = ecflow.Defs()
     s1 = defs.add_suite("s1");
     t1 = s1.add_task("t1").add_repeat( ecflow.RepeatDate("YMD",20090101,20091231,1) );

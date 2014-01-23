@@ -16,7 +16,7 @@
 import os
 import shutil   # used to remove directory tree
 
-from ecflow import Defs, JobCreationCtrl, TaskVec, File
+from ecflow import Defs, JobCreationCtrl, TaskVec, File, Client
 
 
 def create_defs(ecf_home,task_vec):
@@ -84,6 +84,9 @@ def get_workspace_dir():
     return cwd
 
 if __name__ == "__main__":
+    print "####################################################################"
+    print "Running ecflow version " + Client().version() 
+    print "####################################################################"
  
     workspace = get_workspace_dir();
     print workspace

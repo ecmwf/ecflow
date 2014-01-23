@@ -12,21 +12,14 @@ set -x # echo script lines as they are executed
 # ===================================================================================
 # re-use standard emos headers. i.e <qsub.h>, <trap.h>.
 # However these define variables that effect the test
-# Hence we need to unset. See below
-
+# These should be unset as appropriate in test.ecf
+#
 # Note: We do *NOT* _export_ ECF_PORT,ECF_NODE,ECF_RID to avoid interferences
 # from the ecflow regression tests. which also use ecflow_client, instead we explicitly
 # set the host,port and rid on each ecflow_client call,
 # i.e  --host=%ECF_NODE% --port=%ECF_PORT%
 # This should be done in <trap.h> above
 # This is only required because we are using ecflow to test ecflow
-#unset ECF_PORT
-#unset ECF_NODE
-#unset ECF_RID
-#unset ECF_HOME
-#unset ECF_HOSTFILE
-#unset ECF_JOBOUT
-#unset ECF_OUT
 
 
 # ============================================================================

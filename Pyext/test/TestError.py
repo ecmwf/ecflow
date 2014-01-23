@@ -16,7 +16,7 @@
 import os
 from ecflow import Date, Meter, Event, Clock, Variable, Label, Limit, InLimit, \
                    RepeatDate, RepeatEnumerated, RepeatInteger, RepeatString, \
-                   Task, Family, Suite, Defs
+                   Task, Family, Suite, Defs, Client
 
 def check_date(day,month,year):
     try:    
@@ -138,7 +138,10 @@ def check_defs(path_to_defs):
         return False
           
 if __name__ == "__main__":
-    
+    print "####################################################################"
+    print "Running ecflow version " + Client().version() 
+    print "####################################################################"
+ 
     # Names with leading '.' should not be allowed. Will interfere with triggers
     # Empty names not allowed
     # Spaces not allowed

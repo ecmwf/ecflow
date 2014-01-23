@@ -1309,7 +1309,10 @@ def clean_up(port):
         pass
         
 if __name__ == "__main__":
-    
+    print "####################################################################"
+    print "Running ecflow version " + Client().version() 
+    print "####################################################################"
+
     # server independent tests
     test_set_host_port();
     

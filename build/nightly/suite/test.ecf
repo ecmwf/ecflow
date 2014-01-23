@@ -155,6 +155,16 @@ set -x # echo script lines as they are executed
 
    if [[ %CMAKE:boost% = CMAKE ]] ; then
       run_test_cmake $1 $2
+      
+      ############################################################
+      # now run the ctest, which will run python tests.
+      cd ecbuild/%MODE%
+      
+      # hack to get the cmake python tests to run
+      cp ecbuild/%MODE%/lib/libecflow.so ecbuild/%MODE%/lib/ecflow.so
+      
+      # -V verbose, show test output
+      ctest -V
    else
       run_test_boost $1 $2
    fi
@@ -209,6 +219,15 @@ else
    ecflow_client --meter=progress 45             --host=%ECF_NODE% --port=%ECF_PORT%  
    ecflow_client --label=progress Server         --host=%ECF_NODE% --port=%ECF_PORT%
    
+   if [[ %ARCH% = cray ]] ; then
+      unset ECF_HOME
+      unset ECF_PORT
+      unset ECF_NODE
+      #unset ECF_RID
+      #unset ECF_HOSTFILE
+      #unset ECF_JOBOUT
+      #unset ECF_OUT
+   fi
    run_test Server tserver
    
    
