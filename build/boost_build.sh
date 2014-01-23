@@ -136,9 +136,11 @@ echo "using compiler $tool with build $1 variants "
 #*** boost python in $BOOST_ROOT/bin.v2/
 #*** It appears to build boost python single threaded. (i.e you do not see threading-multi) in the directory path.
 #
-# To prebuild the boost python, hence we need to do the following:
+# To prebuild the boost python, hence we need to do the following: For now build both variants, keeps cmake happy! (i.e when finding libs)
 #
 ./bjam toolset=$tool link=shared variant=debug   $CXXFLAGS stage --layout=$layout threading=single --with-python
 ./bjam toolset=$tool link=shared variant=release $CXXFLAGS stage --layout=$layout threading=single --with-python
- 
+./bjam toolset=$tool link=shared variant=debug   $CXXFLAGS stage --layout=$layout threading=multi --with-python
+./bjam toolset=$tool link=shared variant=release $CXXFLAGS stage --layout=$layout threading=multi --with-python
+
  

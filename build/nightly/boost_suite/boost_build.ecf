@@ -54,6 +54,8 @@ else
    # Build boost python in the same, as building $WK/Pyext
    ./bjam toolset=%TOOLSET% link=shared variant=debug   $CXXFLAGS stage --layout=%LAYOUT% threading=single --with-python
    ./bjam toolset=%TOOLSET% link=shared variant=release $CXXFLAGS stage --layout=%LAYOUT% threading=single --with-python
+   ./bjam toolset=%TOOLSET% link=shared variant=debug   $CXXFLAGS stage --layout=%LAYOUT% threading=multi --with-python
+   ./bjam toolset=%TOOLSET% link=shared variant=release $CXXFLAGS stage --layout=%LAYOUT% threading=multi --with-python
  
 fi
 
