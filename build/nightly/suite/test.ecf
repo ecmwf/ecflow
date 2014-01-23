@@ -155,16 +155,6 @@ set -x # echo script lines as they are executed
 
    if [[ %CMAKE:boost% = CMAKE ]] ; then
       run_test_cmake $1 $2
-      
-      ############################################################
-      # now run the ctest, which will run python tests.
-      cd ecbuild/%MODE%
-      
-      # hack to get the cmake python tests to run
-      cp ecbuild/%MODE%/lib/libecflow.so ecbuild/%MODE%/lib/ecflow.so
-      
-      # -V verbose, show test output
-      ctest -V
    else
       run_test_boost $1 $2
    fi
@@ -264,7 +254,6 @@ else
    run_test Test test-zombies
    
    
-   
    #============================ Python ========================================
    # placed last since bjam invocation appears to hang occasionally on HPUX/ecgate
    
@@ -329,9 +318,27 @@ else
       # hence thses flags need to be same used in build.ecf
       $BOOST_ROOT/bjam %CUSTOM_BJAM_ARGS:% variant=$mode test-all
    fi   
-   
-   # ========================= all test complete ==========================================
-   ecflow_client --meter=progress 100 --host=%ECF_NODE% --port=%ECF_PORT% 
 fi
+
+############################################################################
+# ctest
+############################################################################
+if [[ %CMAKE:boost% = CMAKE ]] ; then
+
+   ecflow_client --label=progress ctest   --host=%ECF_NODE% --port=%ECF_PORT% 
+
+   # now run the ctest, which will run python tests.
+   cd $WK
+   cd ecbuild/%MODE%
+      
+   # hack to get the cmake python tests to run
+   cp lib/libecflow.so lib/ecflow.so
+      
+   # -V verbose, show test output
+   ctest -V
+fi
+
+# ========================= all test complete ==========================================
+ecflow_client --meter=progress 100 --host=%ECF_NODE% --port=%ECF_PORT% 
 
 %include <tail.h>

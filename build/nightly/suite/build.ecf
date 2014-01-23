@@ -92,7 +92,7 @@ else
          -DPYTHON_INCLUDE_DIR=/usr/local/apps/python/current/include/python2.7 \
          -DPYTHON_EXECUTABLE=/usr/local/apps/python/current/bin/python2.7 
          
-      make -j4
+      make -j%NO_OF_CORES%
    else
          
       # BOOST Build =====================================================
