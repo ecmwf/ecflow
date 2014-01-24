@@ -327,10 +327,20 @@ if [[ %CMAKE:boost% = CMAKE ]] ; then
 
    ecflow_client --label=progress ctest   --host=%ECF_NODE% --port=%ECF_PORT% 
 
+   # The following lines are required for aborting a test, function ERROR must be defined
+   trap '{ echo "Error in function"; ERROR; }' 0 1 2 3 4 5 6 7 8 10 12 13 15
+   set -e # stop shell, on error
+   set -x # echo script lines as they are executed
+
    # now run the ctest, which will run python tests.
    cd $WK
    cd ecbuild/%MODE%
-      
+     
+   #  Uset ECF variables that could be used in ecf tests
+   unset ECF_HOME
+   unset ECF_PORT
+   unset ECF_NODE
+   
    # -V verbose, show test output
    # --output-on-failure only show output on failure
    ctest --output-on-failure

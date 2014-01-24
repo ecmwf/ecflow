@@ -101,8 +101,8 @@ Cmd_ptr ClientOptions::parse(int argc, char* argv[],ClientEnvironment* env) cons
    if (!host.empty() || !port.empty()) {
       if (host.empty()) host = env->hostSpecified();       // get the environment variable ECF_NODE
       if (port.empty()) port = env->portSpecified();       // get the environment variable ECF_PORT
-      if (host.empty()) host = Str::LOCALHOST();           // if ECF_NODE not specified default to local host
-      if (port.empty()) port = Str::DEFAULT_PORT_NUMBER(); // if ECF_PORT not specified default to 3141
+      if (host.empty()) host = Str::LOCALHOST();           // if ECF_NODE not specified default to localhost
+      if (port.empty()) port = Str::DEFAULT_PORT_NUMBER(); // if ECF_PORT not specified use default
       env->set_host_port(host,port);
    }
    if ( vm.count( "rid" ) ) {
