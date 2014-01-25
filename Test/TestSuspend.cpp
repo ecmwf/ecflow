@@ -21,12 +21,12 @@
 #include <boost/date_time/posix_time/posix_time_types.hpp>
 
 #include "ServerTestHarness.hpp"
+#include "TestFixture.hpp"
 #include "Defs.hpp"
 #include "Suite.hpp"
 #include "Family.hpp"
 #include "Task.hpp"
 #include "DurationTimer.hpp"
-#include "ClientInvoker.hpp"
 #include "PrintStyle.hpp"
 #include "AssertTimer.hpp"
 
@@ -44,13 +44,14 @@ static int timeout = 20 ;
 
 BOOST_AUTO_TEST_SUITE( TestSuite )
 
-static void waitForTimeDependenciesToBeFree(int max_time_to_wait,ClientInvoker& theClient)
+static void waitForTimeDependenciesToBeFree(int max_time_to_wait)
 {
    // wait for a period of time, while time dependencies fire.
+   TestFixture::client().set_throw_on_error( false );
    AssertTimer assertTimer(max_time_to_wait,false); // Bomb out after n seconds, fall back if test fail
    while (1) {
-      BOOST_REQUIRE_MESSAGE(theClient.sync_local() == 0,"sync_local failed should return 0\n" << theClient.errorMsg());
-      defs_ptr defs = theClient.defs();
+      BOOST_REQUIRE_MESSAGE(TestFixture::client().sync_local() == 0,"sync_local failed should return 0\n" << TestFixture::client().errorMsg());
+      defs_ptr defs = TestFixture::client().defs();
       vector<Task*> tasks; defs->getAllTasks(tasks);
       size_t taskTimeDepIsFree = 0 ;
       BOOST_FOREACH(Task* task, tasks) {
@@ -128,18 +129,18 @@ BOOST_AUTO_TEST_CASE( test_shutdown )
    // Shutdown the server. The time dependencies *should* still be handled
    // *** If this test fails, in that we fail to restart() server it will mess up
    // *** any following test.
-   ClientInvoker theClient ;
-   BOOST_REQUIRE_MESSAGE( theClient.shutdownServer() == 0,CtsApi::shutdownServer() << " failed should return 0.\n" << theClient.errorMsg());
+   TestFixture::client().set_throw_on_error( false );
+   BOOST_REQUIRE_MESSAGE( TestFixture::client().shutdownServer() == 0,CtsApi::shutdownServer() << " failed should return 0.\n" << TestFixture::client().errorMsg());
 
    // wait for a period of time, while time dependencies fire.
-   (void)waitForTimeDependenciesToBeFree(timeout, theClient );
+   (void)waitForTimeDependenciesToBeFree(timeout );
 
    // restart server, all jobs should be launched straight away
-   BOOST_REQUIRE_MESSAGE( theClient.restartServer() == 0,CtsApi::restartServer() << " failed should return 0.\n" << theClient.errorMsg());
+   BOOST_REQUIRE_MESSAGE( TestFixture::client().restartServer() == 0,CtsApi::restartServer() << " failed should return 0.\n" << TestFixture::client().errorMsg());
 
    // Wait for submitted jobs in restart server to complete
    bool verifyAttrInServer = true;
-   defs_ptr serverDefs = serverTestHarness.testWaiter(theClient,theDefs,timeout,verifyAttrInServer);
+   defs_ptr serverDefs = serverTestHarness.testWaiter(theDefs,timeout,verifyAttrInServer);
    BOOST_REQUIRE_MESSAGE(serverDefs.get()," Failed to return server after restartServer");
 
    //	cout << "Printing Defs \n";
@@ -204,18 +205,18 @@ BOOST_AUTO_TEST_CASE( test_suspend_node )
                          false/* don't wait for test to finish */);
 
    // SUSPEND the family. The time dependencies *should* still be handled
-   ClientInvoker theClient ;
-   BOOST_REQUIRE_MESSAGE( theClient.suspend("/test_suspend_node/family") == 0,CtsApi::to_string(CtsApi::suspend("/test_suspend_node/family")) << " failed should return 0.\n" << theClient.errorMsg());
+   TestFixture::client().set_throw_on_error( false );
+   BOOST_REQUIRE_MESSAGE( TestFixture::client().suspend("/test_suspend_node/family") == 0,CtsApi::to_string(CtsApi::suspend("/test_suspend_node/family")) << " failed should return 0.\n" << TestFixture::client().errorMsg());
 
    // wait for a period of time, while time dependencies fire.
-   waitForTimeDependenciesToBeFree(timeout, theClient );
+   waitForTimeDependenciesToBeFree(timeout);
 
    // RESUME the family, all jobs should be launched straight away, since time dependencies should be free
-   BOOST_REQUIRE_MESSAGE( theClient.resume("/test_suspend_node/family") == 0,CtsApi::to_string(CtsApi::resume("/test_suspend_node/family")) << " failed should return 0.\n" << theClient.errorMsg());
+   BOOST_REQUIRE_MESSAGE( TestFixture::client().resume("/test_suspend_node/family") == 0,CtsApi::to_string(CtsApi::resume("/test_suspend_node/family")) << " failed should return 0.\n" << TestFixture::client().errorMsg());
 
    // Wait for submitted jobs to complete
    bool verifyAttrInServer = true;
-   defs_ptr serverDefs = serverTestHarness.testWaiter(theClient,theDefs,timeout,verifyAttrInServer);
+   defs_ptr serverDefs = serverTestHarness.testWaiter(theDefs,timeout,verifyAttrInServer);
    BOOST_REQUIRE_MESSAGE(serverDefs.get()," Failed to return server after restartServer");
 
    //	cout << "Printing Defs \n";

@@ -29,7 +29,6 @@
 #include "Task.hpp"
 #include "DurationTimer.hpp"
 #include "AssertTimer.hpp"
-#include "ClientInvoker.hpp"
 
 using namespace std;
 using namespace ecf;
@@ -67,13 +66,12 @@ static void create_defs(Defs& theDefs, const std::string& suite_name)
 
 static bool wait_for_state(
          std::vector< std::pair<std::string,NState::State> >& path_state_vec,
-         int max_time_to_wait,
-         ClientInvoker& theClient)
+         int max_time_to_wait )
 {
    AssertTimer assertTimer(max_time_to_wait,false); // Bomb out after n seconds, fall back if test fail
    while (1) {
-      BOOST_REQUIRE_MESSAGE(theClient.sync_local() == 0, "sync_local failed should return 0\n" << theClient.errorMsg());
-      defs_ptr defs = theClient.defs();
+      BOOST_REQUIRE_MESSAGE(TestFixture::client().sync_local() == 0, "sync_local failed should return 0\n" << TestFixture::client().errorMsg());
+      defs_ptr defs = TestFixture::client().defs();
       bool all_states_ok = true;
       for(size_t i =0; i < path_state_vec.size(); ++i) {
          node_ptr node = defs->findAbsNode( path_state_vec[i].first );
@@ -162,16 +160,15 @@ BOOST_AUTO_TEST_CASE( test_wait_cmd_parse_fail )
    serverTestHarness.run(theDefs,ServerTestHarness::testDataDefsLocation("test_wait_cmd_parse_fail.def"), taskEcfFileMap,1 /*timeout*/,  false/* don't wait for test to finish */);
 
    // wait for family1 and family2 to complete
-   ClientInvoker theClient ;
    std::vector< std::pair<std::string,NState::State> > path_state_vec;
    path_state_vec.push_back( std::make_pair( std::string("/test_wait_cmd_parse_fail/family1"), NState::COMPLETE) );
    path_state_vec.push_back( std::make_pair( std::string("/test_wait_cmd_parse_fail/family2"), NState::COMPLETE) );
-   wait_for_state(path_state_vec,10,theClient);
+   wait_for_state(path_state_vec,10);
 
    // wait for 'wait' task to abort
    path_state_vec.clear();
    path_state_vec.push_back( std::make_pair( std::string("/test_wait_cmd_parse_fail/family0/wait"), NState::ABORTED) );
-   wait_for_state(path_state_vec,10,theClient);
+   wait_for_state(path_state_vec,10);
 
    cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount() << ")\n";
 }
@@ -203,16 +200,15 @@ BOOST_AUTO_TEST_CASE( test_wait_cmd_non_existant_paths )
    serverTestHarness.run(theDefs,ServerTestHarness::testDataDefsLocation("test_wait_cmd_non_existant_paths.def"), taskEcfFileMap,1 /*timeout*/,  false/* don't wait for test to finish */);
 
    // wait for family1 and family2 to complete
-   ClientInvoker theClient ;
    std::vector< std::pair<std::string,NState::State> > path_state_vec;
    path_state_vec.push_back( std::make_pair( std::string("/test_wait_cmd_non_existant_paths/family1"), NState::COMPLETE) );
    path_state_vec.push_back( std::make_pair( std::string("/test_wait_cmd_non_existant_paths/family2"), NState::COMPLETE) );
-   wait_for_state(path_state_vec,10,theClient);
+   wait_for_state(path_state_vec,10);
 
    // wait for 'wait' task to abort
    path_state_vec.clear();
    path_state_vec.push_back( std::make_pair( std::string("/test_wait_cmd_non_existant_paths/family0/wait"), NState::ABORTED) );
-   wait_for_state(path_state_vec,10,theClient);
+   wait_for_state(path_state_vec,10);
 
    cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount() << ")\n";
 }

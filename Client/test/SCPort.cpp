@@ -14,11 +14,12 @@
 // Description :
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 
-#include <iostream>
 #include <boost/lexical_cast.hpp>
 #include <boost/test/unit_test.hpp>
+#include <iostream>
 #include "SCPort.hpp"
 #include "Str.hpp"
+#include "EcfPortLock.hpp"
 
 //#define FIND_FREE_PORT 1
 
@@ -29,9 +30,16 @@
 
 namespace ecf {
 
-// init the globals. Note we start on 3142, so that in the case where we already
+// init the globals. Note we dont use 3141, so that in the case where we already
 // have a remote/local server started external to the test, it does not clash
+// Also debug and release version use different port numbers to avoid clashes, if both tests run at same time
+
+#ifdef DEBUG
+int SCPort::thePort_ = 3161;
+#else
 int SCPort::thePort_ = 3142;
+#endif
+
 
 std::string SCPort::next()
 {
@@ -68,9 +76,12 @@ std::string SCPort::next()
       }
 #endif
 
-      std::string thePort = boost::lexical_cast< std::string >(  thePort_ );
-		thePort_++;
+      while (!EcfPortLock::is_free(thePort_)) {
+         thePort_++;
+      }
+
 		// std::cout << "SCPort::next() = " << thePort << "\n";
+      std::string thePort = boost::lexical_cast< std::string >(  thePort_ );
 		return thePort;
 	}
 	catch ( boost::bad_lexical_cast& ) {

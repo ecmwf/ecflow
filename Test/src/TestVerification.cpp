@@ -24,7 +24,6 @@
 #include "TestVerification.hpp"
 #include "ServerTestHarness.hpp"
 #include "TestFixture.hpp"
-#include "ClientInvoker.hpp"
 #include "ClientToServerCmd.hpp"
 
 #include "Defs.hpp"
@@ -55,11 +54,10 @@ void createNewLogFileFromServer(const std::string& newLog)
 	 }
 
 	 // write log file to disk, for analysing and comparison
-	 ClientInvoker theClient ;
-	 BOOST_REQUIRE_MESSAGE( theClient.getLog() == 0,  "get log failed should return 0 ");
+	 BOOST_REQUIRE_MESSAGE( TestFixture::client().getLog() == 0,  "get log failed should return 0 ");
 	 ofstream log(newLog.c_str(),ios::out);
 	 BOOST_CHECK_MESSAGE(log," Failed to create log file " << newLog)	;
-	 log << theClient.get_string();
+	 log << TestFixture::client().get_string();
 	 log.close();
 }
 

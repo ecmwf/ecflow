@@ -25,14 +25,16 @@ rm -rf view/bin
    
 # remove generated files
 rm -rf Doc/online/_build/*
-rm -rf Test/data/ECF_HOME_debug
-rm -rf Test/data/ECF_HOME_release
-rm -rf view/data/ECF_HOME_debug
-rm -rf view/data/ECF_HOME_release
+rm -rf Test/data/ECF_HOME_debug*
+rm -rf Test/data/ECF_HOME_release*
+rm -rf view/data/ECF_HOME_debug*
+rm -rf view/data/ECF_HOME_release*
 rm -rf AParser/test/data/single_defs/mega.def_log
 rm -rf Pyext/test.def
 rm -rf bin
 rm -rf RemoteSystemsTempFiles
+rm -rf *.dat
+rm -rf *.log
 
 find . -name \*~ -exec rm -rf \*~ {} \; -print
 find . -name \*.mk -exec rm -rf \*.mk {} \; -print
@@ -53,8 +55,10 @@ find . -name core -exec rm -rf core {} \; -print
 find . -name `hostname`.*.ecf.* -exec rm -rf `hostname`.*.ecf.* {} \; -print
 find . -name callgrind.out.\* -exec rm -rf callgrind.out.\* {} \; -print
 find . -name massif.out.\* -exec rm -rf massif.out.* {} \; -print
-rm -rf rtt.dat
 
 # remove any defs file at the workspace level. There should not be any
 rm -rf *.def
    
+# Remove any lock file create by tests which used EcfPortLock.hpp
+rm -rf *.lock
+

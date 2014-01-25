@@ -24,7 +24,6 @@ public:
    static int do_zombie_user_action(ecf::User::Action uc,
                                     int expected_action_cnt,
                                     int max_time_to_wait,
-                                    ClientInvoker& theClient,
                                     bool fail_if_to_long = true);
 };
 

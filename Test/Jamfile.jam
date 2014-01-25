@@ -33,7 +33,8 @@ lib libharness : [ glob src/*.cpp ]
                 <include>../AParser/src 
                 <include>../Base/src 
           	    <include>../Base/test 
-          	    <include>../Client/src 
+                <include>../Client/src 
+                <include>../Client/test 
                 <variant>debug:<define>DEBUG
                 <link>static
                 <use>/theCore//core

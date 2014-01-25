@@ -273,7 +273,8 @@ def add_build_debug( parent ):
     if parent.name() == "aix_power7" or parent.name() == "hpux" :
         task_test.add_trigger("build == complete")
     else:
-        task_test.add_trigger("build == complete and (../build_release/test == complete or ../build_release/test == aborted)")
+        task_test.add_trigger("build == complete")
+        #task_test.add_trigger("build == complete and (../build_release/test == complete or ../build_release/test == aborted)")
     task_test.add_label("progress","")
     task_test.add_meter("progress",0,100,100)
      
@@ -287,14 +288,15 @@ def add_build_release( parent ):
     task_test = f.add_task("test")
     # on IBM/HPUX we do the debug build first, it's a *lot* faster
     if parent.name() == "aix_power7" or parent.name() == "hpux" :
-        task_test.add_trigger("build == complete and (../build_debug/test == complete or ../build_debug/test == aborted)")
+        task_test.add_trigger("build == complete")
+        #task_test.add_trigger("build == complete and (../build_debug/test == complete or ../build_debug/test == aborted)")
     elif parent.name() == "linux64intel":
         # Both linux64 and linux64intel are same machine, to avoid starting server on same port add a dependency
-        task_test.add_trigger("build == complete and ( /suite/build/linux64/build_debug/test == complete or /suite/build/linux64/build_debug/test == aborted)")
+        task_test.add_trigger("build == complete")
+        #task_test.add_trigger("build == complete and ( /suite/build/linux64/build_debug/test == complete or /suite/build/linux64/build_debug/test == aborted)")
     else :
         task_test.add_trigger("build == complete")
   
-
     task_test.add_label("progress","")
     task_test.add_meter("progress",0,100,100)
     
@@ -352,7 +354,7 @@ def build_localhost( parent ) :
     localhost.add_task("test_migration").add_trigger("test_performance == complete or test_server_performance == aborted")
     task = localhost.add_task("test_new_client_old_server")
     task.add_trigger("test_migration == complete or test_migration == aborted")
-    task.add_variable("OLD_VERSION","3.1.9")
+    task.add_variable("OLD_VERSION","4.0.0")
 
 def build_localhost_cmake( parent ) :
     # Hence left out test_client_performance and test_server_performance

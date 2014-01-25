@@ -14,13 +14,13 @@
 // Description :
 //============================================================================
 #include "ServerTestHarness.hpp"
+#include "TestFixture.hpp"
 
 #include "Defs.hpp"
 #include "Suite.hpp"
 #include "Family.hpp"
 #include "Task.hpp"
 #include "DurationTimer.hpp"
-#include "ClientInvoker.hpp"
 #include "PrintStyle.hpp"
 
 #include <boost/test/unit_test.hpp>
@@ -83,13 +83,13 @@ BOOST_AUTO_TEST_CASE( test_requeue_node )
  	serverTestHarness.run(theDefs,ServerTestHarness::testDataDefsLocation("test_reque.def") );
 
  	// Now re-queue the whole suite
-	ClientInvoker theClient ;
-   BOOST_REQUIRE_MESSAGE( theClient.requeue("/test_reque") == 0,CtsApi::to_string(CtsApi::requeue("/test_reque","")) << " failed should return 0.\n" << theClient.errorMsg());
+	TestFixture::client().set_throw_on_error( true );
+   TestFixture::client().requeue("/test_reque");
 
    // Wait for test to finish
  	int timeout = 30;
 	bool verifyAttrInServer = false;
-	defs_ptr serverDefs = serverTestHarness.testWaiter(theClient,theDefs,timeout,verifyAttrInServer);
+	defs_ptr serverDefs = serverTestHarness.testWaiter(theDefs,timeout,verifyAttrInServer);
 	BOOST_REQUIRE_MESSAGE(serverDefs.get()," Failed to return server after re-queue");
 
 //	cout << "Printing Defs \n";

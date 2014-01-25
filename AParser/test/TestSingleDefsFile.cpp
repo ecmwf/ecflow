@@ -175,7 +175,11 @@ BOOST_AUTO_TEST_CASE( test_single_defs )
 
    {
       // Test time for persisting to defs file only
+#ifdef DEBUG
+      std::string tmpFilename = "tmp_d.def";
+#else
       std::string tmpFilename = "tmp.def";
+#endif
 
       timer.restart();
       PrintStyle style(PrintStyle::DEFS);

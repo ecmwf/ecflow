@@ -21,13 +21,13 @@
 #include <boost/date_time/posix_time/posix_time_types.hpp>
 
 #include "ServerTestHarness.hpp"
+#include "TestFixture.hpp"
 
 #include "Defs.hpp"
 #include "Suite.hpp"
 #include "Family.hpp"
 #include "Task.hpp"
 #include "DurationTimer.hpp"
-#include "ClientInvoker.hpp"
 #include "PrintStyle.hpp"
 #include "ClientToServerCmd.hpp"
 #include "AssertTimer.hpp"
@@ -44,13 +44,13 @@ BOOST_AUTO_TEST_SUITE( TestSuite )
 static unsigned int waitForWhy(const std::string& path, const std::string& why, int max_time_to_wait)
 {
    unsigned int updateCalendarCount = 0;
-   ClientInvoker theClient;
+   TestFixture::client().set_throw_on_error( false );
    AssertTimer assertTimer(max_time_to_wait,false); // Bomb out after n seconds, fall back if test fail
    while (1) {
 
       /// Why command relies on the Suite serializing the calendar. If this is changed we need to get the full defs
-      BOOST_REQUIRE_MESSAGE(theClient.sync_local() == 0, "sync_local failed should return 0\n" << theClient.errorMsg());
-      defs_ptr server_defs = theClient.defs();
+      BOOST_REQUIRE_MESSAGE(TestFixture::client().sync_local() == 0, "sync_local failed should return 0\n" << TestFixture::client().errorMsg());
+      defs_ptr server_defs = TestFixture::client().defs();
       updateCalendarCount = server_defs->updateCalendarCount();
 
       WhyCmd whyCmd( server_defs, path);
@@ -334,12 +334,12 @@ BOOST_AUTO_TEST_CASE( test_why_limit )
 
    // The main check is over. Wait for jobs to complete
    int updateCalendarCount = 0;
-   ClientInvoker theClient ;
+   TestFixture::client().set_throw_on_error(false) ;
    {
       AssertTimer assertTimer(50,false); // Bomb out after n seconds, fall back if test fail
       while (1) {
-         BOOST_REQUIRE_MESSAGE(theClient.getDefs() == 0,CtsApi::get() << " failed should return 0\n" << theClient.errorMsg());
-         defs_ptr defs = theClient.defs();
+         BOOST_REQUIRE_MESSAGE(TestFixture::client().getDefs() == 0,CtsApi::get() << " failed should return 0\n" << TestFixture::client().errorMsg());
+         defs_ptr defs = TestFixture::client().defs();
          updateCalendarCount = defs->updateCalendarCount();
          bool wait = false;
          vector<Task*> tasks; defs->getAllTasks(tasks);

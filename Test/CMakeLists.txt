@@ -19,6 +19,7 @@ ecbuild_add_library( TARGET   libharness
                             ../Base/src/stc
                             ../Base/test
                             ../Client/src
+                            ../Client/test
                             ${Boost_INCLUDE_DIRS} )
 
 

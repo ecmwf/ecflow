@@ -22,6 +22,7 @@
 #include "boost/filesystem/operations.hpp"
 #include "Str.hpp"
 #include "Host.hpp"
+#include "EcfPortLock.hpp"
 
 class TerminateServer {
 public:
@@ -45,7 +46,11 @@ public:
          BOOST_REQUIRE_MESSAGE( theClient.wait_for_server_death(),"Failed to terminate server after 60 seconds\n");
 		}
 
-		// Remove generated file un comment for debug
+		// remove port file. This prevented multiple different process from opening servers with same port number
+      ecf::EcfPortLock::remove( port );
+
+
+		// Remove generated file comment for debug
 	 	ecf::Host h;
 		boost::filesystem::remove(h.ecf_log_file(port));
       BOOST_CHECK_MESSAGE(!boost::filesystem::exists(h.ecf_log_file(port)), "log file " << h.ecf_log_file(port) << " not deleted\n");

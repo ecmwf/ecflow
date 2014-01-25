@@ -24,17 +24,23 @@ rm -rf incr.tar.gz
 # Test/data/ECF_HOME is used by Test to recursively generate directory structure
 # and populate with *DEF* file, and job output, etc, hence exclude this directory
 #
-rm -rf $WK/Test/data/ECF_HOME_debug
-rm -rf $WK/Test/data/ECF_HOME_release
+rm -rf $WK/Test/data/ECF_HOME_debug*
+rm -rf $WK/Test/data/ECF_HOME_release*
 rm -rf $WK/AParser/test/data/single_defs/mega.def_log
 rm -rf $WK/Pyext/test.def
 rm -rf $WK/TestEcfSms/test/data/test_real.def
 rm -rf $WK/TestEcfSms/test/data/test_hybrid.def
 
+# Remove any lock file create by tests which used EcfPortLock.hpp
+rm -rf $WK/*.lock
+
+
 # ==============================================================================================
 # TAR
 # temporarily create a symbolic link, so that tar file matches directory ecflow.
 # ==============================================================================================
+cd $WK
+cd ..
 ln -s ecflow ecflow
 
 # Recursively find in directory MyProject all writable:

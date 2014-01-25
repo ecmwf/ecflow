@@ -22,15 +22,14 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/date_time/posix_time/posix_time_types.hpp>
 
-#include "TestFixture.hpp"
 #include "ServerTestHarness.hpp"
+#include "TestFixture.hpp"
 
 #include "Defs.hpp"
 #include "Suite.hpp"
 #include "Family.hpp"
 #include "Task.hpp"
 #include "DurationTimer.hpp"
-#include "ClientInvoker.hpp"
 #include "PrintStyle.hpp"
 #include "ClientToServerCmd.hpp"
 #include "DefsStructureParser.hpp"
@@ -56,75 +55,76 @@ std::vector<std::string> to_string_vec(const std::vector<node_ptr>& sv) {
    return r;
 }
 
-void test_ordering(ClientInvoker& theClient) {
+void test_ordering() {
 
+   TestFixture::client().set_throw_on_error(true);
    std::vector<std::string> str_a_b_c; str_a_b_c.push_back("a"); str_a_b_c.push_back("b"); str_a_b_c.push_back("c");
    std::vector<std::string> str_c_b_a; str_c_b_a.push_back("c"); str_c_b_a.push_back("b"); str_c_b_a.push_back("a");
    std::vector<std::string> str_b_c_a; str_b_c_a.push_back("b"); str_b_c_a.push_back("c"); str_b_c_a.push_back("a");
    std::vector<std::string> str_b_a_c; str_b_a_c.push_back("b"); str_b_a_c.push_back("a"); str_b_a_c.push_back("c");
    std::vector<std::string> str_a_c_b; str_a_c_b.push_back("a"); str_a_c_b.push_back("c"); str_a_c_b.push_back("b");
-   theClient.sync_local();  // First sync_local will do a full sync
+   TestFixture::client().sync_local();  // First sync_local will do a full sync
    {
       // TEST SUITE ORDERING
-      theClient.order("/a",NOrder::toString(NOrder::ORDER));
-      theClient.sync_local();
-      BOOST_CHECK_MESSAGE(!theClient.server_reply().full_sync(),"Expected incremental sync");
-      BOOST_CHECK_MESSAGE(to_string_vec(theClient.defs()->suiteVec()) ==  str_c_b_a, "Order not as expected");
+      TestFixture::client().order("/a",NOrder::toString(NOrder::ORDER));
+      TestFixture::client().sync_local();
+      BOOST_CHECK_MESSAGE(!TestFixture::client().server_reply().full_sync(),"Expected incremental sync");
+      BOOST_CHECK_MESSAGE(to_string_vec(TestFixture::client().defs()->suiteVec()) ==  str_c_b_a, "Order not as expected");
 
 
-      theClient.order("/a",NOrder::toString(NOrder::ALPHA));
-      theClient.sync_local();
-      BOOST_CHECK_MESSAGE(!theClient.server_reply().full_sync(),"Expected incremental sync");
-      BOOST_CHECK_MESSAGE(to_string_vec(theClient.defs()->suiteVec()) ==  str_a_b_c, "Order not as expected");
+      TestFixture::client().order("/a",NOrder::toString(NOrder::ALPHA));
+      TestFixture::client().sync_local();
+      BOOST_CHECK_MESSAGE(!TestFixture::client().server_reply().full_sync(),"Expected incremental sync");
+      BOOST_CHECK_MESSAGE(to_string_vec(TestFixture::client().defs()->suiteVec()) ==  str_a_b_c, "Order not as expected");
 
 
-      theClient.order("/a",NOrder::toString(NOrder::BOTTOM));
-      theClient.sync_local();
-      BOOST_CHECK_MESSAGE(!theClient.server_reply().full_sync(),"Expected incremental sync");
-      BOOST_CHECK_MESSAGE(to_string_vec(theClient.defs()->suiteVec()) ==  str_b_c_a, "Order not as expected");
+      TestFixture::client().order("/a",NOrder::toString(NOrder::BOTTOM));
+      TestFixture::client().sync_local();
+      BOOST_CHECK_MESSAGE(!TestFixture::client().server_reply().full_sync(),"Expected incremental sync");
+      BOOST_CHECK_MESSAGE(to_string_vec(TestFixture::client().defs()->suiteVec()) ==  str_b_c_a, "Order not as expected");
 
-      theClient.order("/a",NOrder::toString(NOrder::ALPHA));
-      theClient.order("/a",NOrder::toString(NOrder::DOWN));
-      theClient.sync_local();
-      BOOST_CHECK_MESSAGE(!theClient.server_reply().full_sync(),"Expected incremental sync");
-      BOOST_CHECK_MESSAGE(to_string_vec(theClient.defs()->suiteVec()) ==  str_b_a_c, "Order not as expected");
+      TestFixture::client().order("/a",NOrder::toString(NOrder::ALPHA));
+      TestFixture::client().order("/a",NOrder::toString(NOrder::DOWN));
+      TestFixture::client().sync_local();
+      BOOST_CHECK_MESSAGE(!TestFixture::client().server_reply().full_sync(),"Expected incremental sync");
+      BOOST_CHECK_MESSAGE(to_string_vec(TestFixture::client().defs()->suiteVec()) ==  str_b_a_c, "Order not as expected");
 
-      theClient.order("/a",NOrder::toString(NOrder::ALPHA));
-      theClient.order("/c",NOrder::toString(NOrder::UP));
-      theClient.sync_local();
-      BOOST_CHECK_MESSAGE(!theClient.server_reply().full_sync(),"Expected incremental sync");
-      BOOST_CHECK_MESSAGE(to_string_vec(theClient.defs()->suiteVec()) ==  str_a_c_b, "Order not as expected");
+      TestFixture::client().order("/a",NOrder::toString(NOrder::ALPHA));
+      TestFixture::client().order("/c",NOrder::toString(NOrder::UP));
+      TestFixture::client().sync_local();
+      BOOST_CHECK_MESSAGE(!TestFixture::client().server_reply().full_sync(),"Expected incremental sync");
+      BOOST_CHECK_MESSAGE(to_string_vec(TestFixture::client().defs()->suiteVec()) ==  str_a_c_b, "Order not as expected");
    }
    {
       // TEST FAMILY ordering
-      theClient.order("/a/a",NOrder::toString(NOrder::ORDER));
-      theClient.sync_local();
-      BOOST_CHECK_MESSAGE(!theClient.server_reply().full_sync(),"Expected incremental sync");
-      BOOST_CHECK_MESSAGE(to_string_vec(theClient.defs()->suiteVec()[0]->nodeVec()) ==  str_c_b_a, "Order not as expected");
+      TestFixture::client().order("/a/a",NOrder::toString(NOrder::ORDER));
+      TestFixture::client().sync_local();
+      BOOST_CHECK_MESSAGE(!TestFixture::client().server_reply().full_sync(),"Expected incremental sync");
+      BOOST_CHECK_MESSAGE(to_string_vec(TestFixture::client().defs()->suiteVec()[0]->nodeVec()) ==  str_c_b_a, "Order not as expected");
 
 
-      theClient.order("/a/a",NOrder::toString(NOrder::ALPHA));
-      theClient.sync_local();
-      BOOST_CHECK_MESSAGE(!theClient.server_reply().full_sync(),"Expected incremental sync");
-      BOOST_CHECK_MESSAGE(to_string_vec(theClient.defs()->suiteVec()[0]->nodeVec()) ==  str_a_b_c, "Order not as expected");
+      TestFixture::client().order("/a/a",NOrder::toString(NOrder::ALPHA));
+      TestFixture::client().sync_local();
+      BOOST_CHECK_MESSAGE(!TestFixture::client().server_reply().full_sync(),"Expected incremental sync");
+      BOOST_CHECK_MESSAGE(to_string_vec(TestFixture::client().defs()->suiteVec()[0]->nodeVec()) ==  str_a_b_c, "Order not as expected");
 
 
-      theClient.order("/a/a",NOrder::toString(NOrder::BOTTOM));
-      theClient.sync_local();
-      BOOST_CHECK_MESSAGE(!theClient.server_reply().full_sync(),"Expected incremental sync");
-      BOOST_CHECK_MESSAGE(to_string_vec(theClient.defs()->suiteVec()[0]->nodeVec()) ==  str_b_c_a, "Order not as expected");
+      TestFixture::client().order("/a/a",NOrder::toString(NOrder::BOTTOM));
+      TestFixture::client().sync_local();
+      BOOST_CHECK_MESSAGE(!TestFixture::client().server_reply().full_sync(),"Expected incremental sync");
+      BOOST_CHECK_MESSAGE(to_string_vec(TestFixture::client().defs()->suiteVec()[0]->nodeVec()) ==  str_b_c_a, "Order not as expected");
 
-      theClient.order("/a/a",NOrder::toString(NOrder::ALPHA));
-      theClient.order("/a/a",NOrder::toString(NOrder::DOWN));
-      theClient.sync_local();
-      BOOST_CHECK_MESSAGE(!theClient.server_reply().full_sync(),"Expected incremental sync");
-      BOOST_CHECK_MESSAGE(to_string_vec(theClient.defs()->suiteVec()[0]->nodeVec()) ==  str_b_a_c, "Order not as expected");
+      TestFixture::client().order("/a/a",NOrder::toString(NOrder::ALPHA));
+      TestFixture::client().order("/a/a",NOrder::toString(NOrder::DOWN));
+      TestFixture::client().sync_local();
+      BOOST_CHECK_MESSAGE(!TestFixture::client().server_reply().full_sync(),"Expected incremental sync");
+      BOOST_CHECK_MESSAGE(to_string_vec(TestFixture::client().defs()->suiteVec()[0]->nodeVec()) ==  str_b_a_c, "Order not as expected");
 
-      theClient.order("/a/a",NOrder::toString(NOrder::ALPHA));
-      theClient.order("/a/c",NOrder::toString(NOrder::UP));
-      theClient.sync_local();
-      BOOST_CHECK_MESSAGE(!theClient.server_reply().full_sync(),"Expected incremental sync");
-      BOOST_CHECK_MESSAGE(to_string_vec(theClient.defs()->suiteVec()[0]->nodeVec()) ==  str_a_c_b, "Order not as expected");
+      TestFixture::client().order("/a/a",NOrder::toString(NOrder::ALPHA));
+      TestFixture::client().order("/a/c",NOrder::toString(NOrder::UP));
+      TestFixture::client().sync_local();
+      BOOST_CHECK_MESSAGE(!TestFixture::client().server_reply().full_sync(),"Expected incremental sync");
+      BOOST_CHECK_MESSAGE(to_string_vec(TestFixture::client().defs()->suiteVec()[0]->nodeVec()) ==  str_a_c_b, "Order not as expected");
    }
 }
 
@@ -157,8 +157,7 @@ BOOST_AUTO_TEST_CASE( test_change_order )
             false/* don't wait for test to finish */);
 
 
-   ClientInvoker theClient;
-   test_ordering(theClient);
+   test_ordering();
 
    cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount() << ")\n";
 }
@@ -194,23 +193,23 @@ BOOST_AUTO_TEST_CASE( test_handle_change_order )
             false/* don't wait for test to finish */);
 
 
-   ClientInvoker theClient;
-   theClient.sync_local();  // First sync_local will do a full sync
+   TestFixture::client().set_throw_on_error( true );
+   TestFixture::client().sync_local();  // First sync_local will do a full sync
    {
       // register suites a,b,c
       std::vector<std::string> suites_a_b_c; suites_a_b_c.push_back("a"); suites_a_b_c.push_back("b"); suites_a_b_c.push_back("c");
-      theClient.ch_register(false/*add new suites to handle*/,suites_a_b_c);
+      TestFixture::client().ch_register(false/*add new suites to handle*/,suites_a_b_c);
 
       // Check the sync_local() does a full sync for our handle
-      theClient.sync_local();
-      BOOST_CHECK_MESSAGE(theClient.server_reply().in_sync(),"Expected to be in sync after syn_local()");
-      BOOST_CHECK_MESSAGE(theClient.server_reply().full_sync(),"Expected a full_sync() after registering");
-      BOOST_CHECK_MESSAGE(theClient.defs()->suiteVec().size() == 3,"Expected sync to return 3 suites.");
+      TestFixture::client().sync_local();
+      BOOST_CHECK_MESSAGE(TestFixture::client().server_reply().in_sync(),"Expected to be in sync after syn_local()");
+      BOOST_CHECK_MESSAGE(TestFixture::client().server_reply().full_sync(),"Expected a full_sync() after registering");
+      BOOST_CHECK_MESSAGE(TestFixture::client().defs()->suiteVec().size() == 3,"Expected sync to return 3 suites.");
    }
 
    // Do same test, this time sync_local will only return suite a,b,c (i.e suite d,e not registered and hence left out)
    // Ording should still be applied to the whole suite.
-   test_ordering(theClient);
+   test_ordering();
 
    cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount() << ")\n";
 }

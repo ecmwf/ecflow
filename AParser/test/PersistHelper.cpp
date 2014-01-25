@@ -34,7 +34,11 @@ bool PersistHelper::test_persist_and_reload( const Defs& theInMemoryDefs, PrintS
 	errorMsg_.clear();
 	file_size_ = 0;
 
+#ifdef DEBUG
+	std::string tmpFilename = "tmp_d.def";
+#else
 	std::string tmpFilename = "tmp.def";
+#endif
 	{
 	   // The file MUST be written in the *SAME* form that it was read
 	   // Otherwise they will not compare:
@@ -66,7 +70,11 @@ bool PersistHelper::test_state_persist_and_reload_with_checkpt(const Defs& theIn
    errorMsg_.clear();
    file_size_ = 0;
 
+#ifdef DEBUG
+   std::string tmpFilename = "tmp_d.def";
+#else
    std::string tmpFilename = "tmp.def";
+#endif
    {
       // The file MUST be written in the *SAME* form that it was read
       // Otherwise they will not compare:
@@ -178,7 +186,11 @@ bool PersistHelper::reload_from_checkpt_file(const Defs& theInMemoryDefs,
                                              ecf::Archive::Type at)
 {
    // make sure edit history is saved
+#ifdef DEBUG
+   std::string tmpCheckPt_file = "tmp.check_debug";
+#else
    std::string tmpCheckPt_file = "tmp.check";
+#endif
    theInMemoryDefs.save_as_checkpt(tmpCheckPt_file,at);
 
    try  {

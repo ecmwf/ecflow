@@ -47,6 +47,11 @@ echo "mode=$mode compiler=$compiler_arg safe=$safe"
 # remove python test, so that they are rerun
 cd $WK
 rm -rf Pyext/bin/*.test   
+
+# Remove any lock file create by tests which used EcfPortLock.hpp
+# ** However DO *NOT* remove this locks for in ecflow test.ecf
+# ** as they allow the debug and release test to run at the same time.
+rm -rf *.lock
  
 # Check that a command is in the PATH.
 test_path ()

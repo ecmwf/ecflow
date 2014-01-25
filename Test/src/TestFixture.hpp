@@ -23,6 +23,7 @@
 // i.e order of initialisation issues
 //============================================================================
 
+#include "ClientInvoker.hpp"
 #include <string>
 class Defs;
 
@@ -76,6 +77,9 @@ struct TestFixture {
 	/// Location of the includes used in the ecf file
 	static std::string includes();
 
+	// Use for all comms with server
+	static ClientInvoker& client() { return theClient_;}
+
 private:
 
 	static std::string local_ecf_home();
@@ -84,10 +88,11 @@ private:
 
 private:
 
+   static ClientInvoker theClient_;
 	static std::string scratchSmsHome_;
 	static std::string host_;
 	static std::string port_;
-   static std::string test_dir_;
+   static std::string test_dir_;          // used when we have an external server, different platform
    static std::string project_test_dir_;  // "Test" or "view"
 };
 
