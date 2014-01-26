@@ -100,7 +100,7 @@ BOOST_AUTO_TEST_CASE( test_restore_defs_from_check_pt )
    BOOST_REQUIRE_MESSAGE(TestFixture::client().checkPtDefs(ecf::CheckPt::NEVER) == 0,CtsApi::checkPtDefs(ecf::CheckPt::NEVER) << " failed should return 0\n" << TestFixture::client().errorMsg());
 
    Host h;
-   std::string check_pt_file_name = h.ecf_checkpt_file(ClientEnvironment::portSpecified());
+   std::string check_pt_file_name = h.ecf_checkpt_file(TestFixture::port());
 
    // make sure we have a valid definition with at least one suite before start
    BOOST_REQUIRE_MESSAGE( TestFixture::client().getDefs() == 0, "Expected getDefs() to succeed\n");

@@ -79,6 +79,7 @@ struct TestFixture {
 
 	// Use for all comms with server
 	static ClientInvoker& client() { return theClient_;}
+	static std::string port() { return port_;}
 
 private:
 

@@ -102,7 +102,7 @@ def test_version(ci):
     assert client_version == server_version, "Expected client version(" + client_version +") and server version(" +  server_version + ") to match\n";
     
 def test_client_get_server_defs(ci):
-    print ci.version();
+    print "Client version is " + ci.version();
     print "test_client_get_server_defs"
     ci.delete_all() # start fresh
     ci.load(create_defs())  
@@ -1297,17 +1297,47 @@ def test_client_delete_node_multiple_paths(ci):
         assert node == None , "Expected not to find task " + task.get_abs_node_path()  + " as it should have been deleted:\n" + str(ci.get_defs())   
     
 
-
+# =======================================================================================
+class EcfPortLock(object):
+    """allow debug and release version of python tests to run at the same
+    time, buy generating a unique port each time"""
+    def __init__(self):
+        pass
     
+    def find_free_port(self,seed_port):
+        port = seed_port
+        while (self._is_free(port) == False):
+            port = port + 1
+        # create a lock file
+        self._create(str(port))
+        return str(port)  
+          
+    def remove(self,port):
+        os.remove(self._lock_file(port))
+    
+    def _create(self,port):
+        file = self._lock_file(port)
+        open(file,'a').close()
+    
+    def _is_free(self,port):
+        if os.path.exists(self._lock_file(port)):
+            return False
+        return True
+        
+    def _lock_file(self,port):
+        lock_file = str(port) + ".lock"
+        return lock_file
+        
+        
 def clean_up(port):
     try:
         os.remove(log_file_path(port))
         os.remove(checkpt_file_path(port))
         os.remove(backup_checkpt_file_path(port))
-        os.remove(white_list_file_path(port))          
+        os.remove(white_list_file_path(port))   
     except:
         pass
-        
+               
 if __name__ == "__main__":
     print "####################################################################"
     print "Running ecflow version " + Client().version() 
@@ -1316,28 +1346,30 @@ if __name__ == "__main__":
     # server independent tests
     test_set_host_port();
     
+    # server dependent tests
+    lock_file = EcfPortLock()
+    port = lock_file.find_free_port(3150)  # use 3150 as the seed port
+    print "Creating client: on port " + port
+    
     # Only worth doing this test, if the server is running
-    print "Creating client: on port 3150"
     # ON HPUX, have only one connection attempt, sometimes fails
     #ci.set_connection_attempts(1)     # improve responsiveness only make 1 attempt to connect to server
     #ci.set_retry_connection_period(0) # Only applicable when make more than one attempt. Added to check api.
-
-    port = "3150"
     ci = Client("localhost", port)
-    print "About to ping localhost:3150"
+    print "About to ping localhost:" + port
     try:
         ci.ping() 
-        print "------- Server all ready running------"
+        print "------- Server all ready running ------"
     except RuntimeError, e:
         
+        print "------- Server *NOT* running ------" + str(e);
+        print "------- Start the server on port " + port + " ---------"  
         clean_up(port)
     
-        print "------- Server *NOT* running------" + str(e);
-        print "------- Start the server ---------"  
         server_exe = File.find_server();
         assert len(server_exe) != 0, "Could not locate the server executable"
         
-        server_exe += " --port=3150 --ecfinterval=4 &"
+        server_exe += " --port=" + port + " --ecfinterval=4 &"
         print "TestClient.py: Starting server ", server_exe
         os.system(server_exe) 
         
@@ -1347,6 +1379,7 @@ if __name__ == "__main__":
         else:
             print "Server failed to start after 60 second !!!!!!"
             assert False , "Server failed to start after 60 second !!!!!!"
+            
     try:
         print "run the tests" 
         test_version(ci)
@@ -1409,6 +1442,7 @@ if __name__ == "__main__":
 
         print "All Tests pass"    
     finally:
-        print "Kill the server"
+        print "Kill the server, and clean up log file, check pt files and lock files used in test"
         ci.terminate_server()  
         clean_up(port)
+        lock_file.remove(port)
