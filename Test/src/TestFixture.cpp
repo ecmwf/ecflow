@@ -152,15 +152,34 @@ void TestFixture::init(const std::string& project_test_dir)
    else {
       // For local host start by removing log file. Server invocation should create a new log file
       boost::filesystem::remove( boost::filesystem::path( pathToLogFile() ) );
+      host_ = Str::LOCALHOST();
 
       // Create a unique port number, allowing debug and release to run at the same time
+      // Note: linux64 and intel, can run on same machine, on different workspace
+      // Hence the lock file is not sufficient. Hence we will make a client server call.
+      cout << "Find free port to start server, starting with port " << port_ << "\n";
       int the_port = boost::lexical_cast<int>(port_);
       while (!EcfPortLock::is_free(the_port)) the_port++;
-      port_ = boost::lexical_cast<std::string>(the_port);
+      ClientInvoker client;
+      client.set_retry_connection_period(1); // avoid long wait
+      client.set_connection_attempts(1);     // avoid long wait
+      while (1) {
+         port_ = boost::lexical_cast<std::string>(the_port);
+         try {
+            cout << "   Trying to connect to server on '" << host_ << ":" << port_ << "'\n";
+            client.set_host_port(host_,port_);
+            client.server_version();
+            cout << "   Connected to server on port " << port_ << " trying next port\n";
+            the_port++;
+         }
+         catch ( std::runtime_error& e) {
+            cout << "   Found free port " << port_ << "\n";
+            break;
+         }
+      }
       EcfPortLock::create(port_);
 
       // host_ is empty update to localhost, **since** port may have changed, update ClinetInvoker
-      host_ = Str::LOCALHOST();
       theClient_.set_host_port(host_,port_);
 
       // Remove the generated check point files, at start of test, otherwise server will load check point file
