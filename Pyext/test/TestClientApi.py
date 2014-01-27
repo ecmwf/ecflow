@@ -14,6 +14,8 @@
 import time
 import os
 import pwd
+import fcntl
+from datetime import datetime
 from socket import gethostname 
 import shutil   # used to remove directory tree
 from ecflow import Defs, Clock, DState,  Style, State, RepeatDate, PrintStyle, File, Client, SState, \
@@ -22,6 +24,7 @@ from ecflow import Defs, Clock, DState,  Style, State, RepeatDate, PrintStyle, F
 def ecf_home(): 
     # the_port is global
     # debug_build() is defined for ecflow. Used in test to distinguish debug/release ecflow
+    # Vary ECF_HOME based on debug/release/port allowing multiple invocations of these tests
     if debug_build():
         return os.getcwd() + "/test/data/ecf_home_debug_" + str(the_port)
     return os.getcwd() + "/test/data/ecf_home_release_" + str(the_port)
@@ -1313,37 +1316,46 @@ class EcfPortLock(object):
     def find_free_port(self,seed_port):
         print "EcfPortLock:find_free_port starting with " + str(seed_port)
         port = seed_port
-        while (self._is_free(port) == False):
+        while 1:
+            if self._free_port(port) == True:
+                print "   *FOUND* free server port " + str(port)
+                if self._do_lock(port) == True:
+                    break;
+            else:
+                 print "   *Server* port " + str(port) + " busy, trying next port"
             port = port + 1
             
-        ci = Client()
-        while 1:
-            try:
-                print "Connecting to server on port " + str(port)
-                ci.set_host_port("localhost",str(port))
-                ci.ping() 
-                port = port +1
-                print "Connected to server on port " + str(port) + " trying next port"
-            except RuntimeError, e:
-                print "Found free port " + str(port)
-                break;
-                  
-        # create a lock file
-        self._create(str(port))
         return str(port)  
-          
+    
+    def _free_port(self,port):
+        try:
+            ci = Client()
+            ci.set_host_port("localhost",str(port))
+            ci.ping() 
+            return False
+        except RuntimeError, e:
+            return True
+            
+    def _do_lock(self,port):
+        file = self._lock_file(port)
+        try:
+            fp = open(file, 'w') 
+            try:
+                fcntl.lockf(fp, fcntl.LOCK_EX | fcntl.LOCK_NB)
+                self.lock_file_fp = fp
+                print "   *LOCKED* file " + file
+                return True;
+            except IOError:
+                print "   Could *NOT* lock file " + file + " trying next port"
+                return False
+        except IOError, e:
+             print "   Could not open file " + file + " for write trying next port"
+             return False
+        
     def remove(self,port):
+        self.lock_file_fp.close()
         os.remove(self._lock_file(port))
     
-    def _create(self,port):
-        file = self._lock_file(port)
-        open(file,'a').close()
-    
-    def _is_free(self,port):
-        if os.path.exists(self._lock_file(port)):
-            return False
-        return True
-        
     def _lock_file(self,port):
         lock_file = str(port) + ".lock"
         return lock_file
@@ -1371,13 +1383,15 @@ if __name__ == "__main__":
     # server independent tests
     test_set_host_port();
     
+    seed_port = 3151
+    #if debug_build(): seed_port = 3150
+    
     # server dependent tests
     lock_file = EcfPortLock()
     global the_port
-    the_port = lock_file.find_free_port(3150)  # use 3150 as the seed port
+    the_port = lock_file.find_free_port(seed_port)   
     print "Creating client: on port " + the_port
-    time.sleep(2)
-    
+     
     # Only worth doing this test, if the server is running
     # ON HPUX, have only one connection attempt, sometimes fails
     #ci.set_connection_attempts(1)     # improve responsiveness only make 1 attempt to connect to server
@@ -1388,8 +1402,7 @@ if __name__ == "__main__":
         ci.ping() 
         print "------- Server all ready running *UNEXPECTED* ------"
     except RuntimeError, e:
-        
-        print "------- Server *NOT* running as *EXPECTED* ------ " + str(e);
+        print "------- Server *NOT* running as *EXPECTED* ------ " 
         print "------- Start the server on port " + the_port + " ---------"  
         clean_up(the_port)
     
