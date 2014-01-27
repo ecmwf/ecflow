@@ -18,6 +18,7 @@ import shutil   # used to remove directory tree
 
 from ecflow import Defs, JobCreationCtrl, TaskVec, File, Client
 
+def ecf_includes() :  return os.getcwd() + "/test/data/includes"
 
 def create_defs(ecf_home,task_vec):
     defs = Defs();
@@ -25,7 +26,7 @@ def create_defs(ecf_home,task_vec):
     suite.add_variable("ECF_HOME",ecf_home);
     suite.add_variable("ECF_CLIENT_EXE_PATH",File.find_client());
     suite.add_variable("SLEEPTIME","1");
-    suite.add_variable("ECF_INCLUDE",ecf_home + "/includes");
+    suite.add_variable("ECF_INCLUDE",ecf_includes());
     
     fam =  suite.add_family("family")
     t1 = fam.add_task("t1")

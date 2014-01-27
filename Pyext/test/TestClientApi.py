@@ -17,10 +17,16 @@ import pwd
 from socket import gethostname 
 import shutil   # used to remove directory tree
 from ecflow import Defs, Clock, DState,  Style, State, RepeatDate, PrintStyle, File, Client, SState, \
-                   JobCreationCtrl, CheckPt, Cron
+                   JobCreationCtrl, CheckPt, Cron, debug_build
 
+def ecf_home(): 
+    # the_port is global
+    # debug_build() is defined for ecflow. Used in test to distinguish debug/release ecflow
+    if debug_build():
+        return os.getcwd() + "/test/data/ecf_home_debug_" + str(the_port)
+    return os.getcwd() + "/test/data/ecf_home_release_" + str(the_port)
 
-def ecf_home(): return os.getcwd() + "/test/data/ECF_HOME"
+def ecf_includes() :  return os.getcwd() + "/test/data/includes"
 
 def create_defs(name=""):
     defs = Defs()
@@ -32,7 +38,7 @@ def create_defs(name=""):
     suite.add_variable("ECF_HOME", ecfhome);
     suite.add_variable("ECF_CLIENT_EXE_PATH", File.find_client());
     suite.add_variable("SLEEP", "1");  # not strictly required since default is 1 second
-    suite.add_variable("ECF_INCLUDE", ecfhome + "/includes");
+    suite.add_variable("ECF_INCLUDE", ecf_includes());
 
     family = suite.add_family("f1")
     family.add_task("t1")
@@ -122,7 +128,7 @@ def test_client_new_log(ci, port):
     
     ci.new_log("./test_client_new_log.log") 
     ci.flush_log() # close log file and force write to disk
-    assert os.path.exists("./test_client_new_log.log"), " New log does not exist"
+    assert os.path.exists("./test_client_new_log.log"), "New log does not exist"
     
     # reset new log to original
     ci.new_log(log_file_path(port)) 
@@ -441,7 +447,7 @@ def test_client_free_dep(ci):
     suite.add_variable("ECF_HOME", ecfhome);
     suite.add_variable("ECF_CLIENT_EXE_PATH", File.find_client());
     suite.add_variable("SLEEPTIME", "1");
-    suite.add_variable("ECF_INCLUDE", ecfhome + "/includes");
+    suite.add_variable("ECF_INCLUDE", ecf_includes());
     family = suite.add_family("f1")
     family.add_task("t1").add_time("00:01")
     family.add_task("t2").add_date(day,month,year)
@@ -1305,9 +1311,23 @@ class EcfPortLock(object):
         pass
     
     def find_free_port(self,seed_port):
+        print "EcfPortLock:find_free_port starting with " + str(seed_port)
         port = seed_port
         while (self._is_free(port) == False):
             port = port + 1
+            
+        ci = Client()
+        while 1:
+            try:
+                print "Connecting to server on port " + str(port)
+                ci.set_host_port("localhost",str(port))
+                ci.ping() 
+                port = port +1
+                print "Connected to server on port " + str(port) + " trying next port"
+            except RuntimeError, e:
+                print "Found free port " + str(port)
+                break;
+                  
         # create a lock file
         self._create(str(port))
         return str(port)  
@@ -1330,13 +1350,18 @@ class EcfPortLock(object):
         
         
 def clean_up(port):
-    try:
-        os.remove(log_file_path(port))
-        os.remove(checkpt_file_path(port))
-        os.remove(backup_checkpt_file_path(port))
-        os.remove(white_list_file_path(port))   
-    except:
-        pass
+    try: os.remove(log_file_path(port))
+    except: pass
+    try: os.remove(checkpt_file_path(port))
+    except: pass
+    try: os.remove(backup_checkpt_file_path(port))
+    except: pass
+    try: os.remove(white_list_file_path(port))  
+    except: pass
+    try: 
+        print "Removing ECF_HOME " + ecf_home()
+        shutil.rmtree(ecf_home(),True)   # True means ignore errors  
+    except: pass
                
 if __name__ == "__main__":
     print "####################################################################"
@@ -1348,28 +1373,30 @@ if __name__ == "__main__":
     
     # server dependent tests
     lock_file = EcfPortLock()
-    port = lock_file.find_free_port(3150)  # use 3150 as the seed port
-    print "Creating client: on port " + port
+    global the_port
+    the_port = lock_file.find_free_port(3150)  # use 3150 as the seed port
+    print "Creating client: on port " + the_port
+    time.sleep(2)
     
     # Only worth doing this test, if the server is running
     # ON HPUX, have only one connection attempt, sometimes fails
     #ci.set_connection_attempts(1)     # improve responsiveness only make 1 attempt to connect to server
     #ci.set_retry_connection_period(0) # Only applicable when make more than one attempt. Added to check api.
-    ci = Client("localhost", port)
-    print "About to ping localhost:" + port
+    ci = Client("localhost", the_port)
+    print "About to ping localhost:" + the_port
     try:
         ci.ping() 
-        print "------- Server all ready running ------"
+        print "------- Server all ready running *UNEXPECTED* ------"
     except RuntimeError, e:
         
-        print "------- Server *NOT* running ------" + str(e);
-        print "------- Start the server on port " + port + " ---------"  
-        clean_up(port)
+        print "------- Server *NOT* running as *EXPECTED* ------ " + str(e);
+        print "------- Start the server on port " + the_port + " ---------"  
+        clean_up(the_port)
     
         server_exe = File.find_server();
         assert len(server_exe) != 0, "Could not locate the server executable"
         
-        server_exe += " --port=" + port + " --ecfinterval=4 &"
+        server_exe += " --port=" + the_port + " --ecfinterval=4 &"
         print "TestClient.py: Starting server ", server_exe
         os.system(server_exe) 
         
@@ -1385,9 +1412,9 @@ if __name__ == "__main__":
         test_version(ci)
         PrintStyle.set_style( Style.STATE ) # show node state 
         test_client_get_server_defs(ci)             
-        test_client_new_log(ci, port)             
-        test_client_clear_log(ci, port)             
-        test_client_log_msg(ci, port)             
+        test_client_new_log(ci, the_port)             
+        test_client_clear_log(ci, the_port)             
+        test_client_log_msg(ci, the_port)             
         
         test_client_restart_server(ci)             
         test_client_halt_server(ci)             
@@ -1395,10 +1422,10 @@ if __name__ == "__main__":
     
         test_client_load_in_memory_defs(ci)             
         test_client_load_from_disk(ci)             
-        test_client_checkpt(ci, port)             
-        test_client_restore_from_checkpt(ci, port)             
+        test_client_checkpt(ci, the_port)             
+        test_client_restore_from_checkpt(ci, the_port)             
          
-        test_client_reload_wl_file(ci, port)             
+        test_client_reload_wl_file(ci, the_port)             
  
         test_client_run(ci)  
         test_client_run_with_multiple_paths(ci)     
@@ -1440,9 +1467,9 @@ if __name__ == "__main__":
  
         test_client_stats(ci)             
 
-        print "All Tests pass"    
+        print "All Tests pass ======================================================================"    
     finally:
-        print "Kill the server, and clean up log file, check pt files and lock files used in test"
+        print "Finally, Kill the server, and clean up log file, check pt files and lock files used in test"
         ci.terminate_server()  
-        clean_up(port)
-        lock_file.remove(port)
+        clean_up(the_port)
+        lock_file.remove(the_port)
