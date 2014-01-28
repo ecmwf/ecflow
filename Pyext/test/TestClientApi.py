@@ -1383,10 +1383,11 @@ if __name__ == "__main__":
     # server independent tests
     test_set_host_port();
     
-    seed_port = 3151
-    #if debug_build(): seed_port = 3150
-    
+    # =========================================================================
     # server dependent tests
+    seed_port = 3151
+    if debug_build(): seed_port = 3150
+    
     lock_file = EcfPortLock()
     global the_port
     the_port = lock_file.find_free_port(seed_port)   
@@ -1482,7 +1483,7 @@ if __name__ == "__main__":
 
         print "All Tests pass ======================================================================"    
     finally:
-        print "Finally, Kill the server, and clean up log file, check pt files and lock files used in test"
+        print "Finally, Kill the server, clean up log file, check pt files and lock files used in test"
         ci.terminate_server()  
         clean_up(the_port)
         lock_file.remove(the_port)
