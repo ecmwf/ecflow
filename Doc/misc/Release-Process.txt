@@ -36,16 +36,11 @@ Process
 
 0/ Update Documentation
    
-  -  ***** this is broken, need new intra-net page
-     Internal wiki:  http://wedit.ecmwf.int/publications/manuals/ecflow/
-      cd $WK/Doc/online
-      make clean; make html
-      sitecopy -u ecflow
+  - https://software.ecmwf.int/wiki/display/ECFLOW/Change+History
 
-  - External Doc/Conflence:
-    Rely on Daniel, to update ??
-    Need automated way:
+  - Need automated way:
     - Just need to update python API.
+    - cd $WK/Doc/online; make clean; make html
 
 0/ *Before* each release, make sure the ecflow tar file is
    copied to $SCRATCH and inform Daniel. This will allow
@@ -53,6 +48,8 @@ Process
 
    This is important, so that release, used internally is in
    sync with release given to users. 
+   
+   - ** Check the size of tar file **, ensure that have not included redundant files.
    <Inform Daniel>
    
 0/ Inform user support so that they can update the module functionality
@@ -81,6 +78,9 @@ Process
   
 0/ Tag the release
    This should now be automatic when using git flow:
+   i.e 
+       git flow start release 4.0.1
+       git flow finish release 4.0.1
    Alternatively use:
       git tag -a <release-number> -m "ecflow release-number"
       git tag
