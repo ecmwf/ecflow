@@ -43,7 +43,6 @@ BOOST_AUTO_TEST_CASE( test_simple_cmd )
 	//	endsuite
 	Defs defs;
 	string suite_f_t1 = "suite/f/t1";
-	string suite_f_t2 = "suite/f/t2";
  	std::string suitename = "suite";
 	family_ptr f = Family::create("f");
 	task_ptr t1 = Task::create("t1");

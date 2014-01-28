@@ -589,7 +589,6 @@ void ZombieCtrl::killCli( const std::string& path_to_task,  Submittable* task) {
    Zombie& theExistingZombie = find_by_path( path_to_task );
    if ( theExistingZombie.empty() ) {
       throw std::runtime_error("ZombieCtrl::killCli: Can't kill, could not locate zombie(and hence pid) for path: " + path_to_task );
-      return;
    }
    task->kill(theExistingZombie.process_or_remote_id());
    theExistingZombie.set_kill();

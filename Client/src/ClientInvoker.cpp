@@ -823,7 +823,6 @@ int ClientInvoker::requeue( const std::vector<std::string>& paths,  const std::s
       if (option == "abort") the_option = RequeueNodeCmd::ABORT;
       else if (option == "force") the_option = RequeueNodeCmd::FORCE;
       else {
-         std::stringstream ss;
          server_reply_.set_error_msg("ecflow:ClientInvoker::requeue: Expected option = [ force | abort ]");
          if (on_error_throw_exception_) {
             throw std::runtime_error(server_reply_.error_msg());
