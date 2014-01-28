@@ -23,12 +23,14 @@ rm -rf *lock
 rm -rf *log
 rm -rf *.check
 rm -rf *.def
+rm -rf rtt.dat
 rm -rf Test/data/ECF_HOME_debug*
 rm -rf Test/data/ECF_HOME_release*
 rm -rf view/data/ECF_HOME_debug*
 rm -rf view/data/ECF_HOME_release*
 rm -rf AParser/test/data/single_defs/mega.def_log
 rm -rf Pyext/test.def
+rm -rf Pyext/build
 
 # ================================================================================
 # Remove generated files before taring ecFlow  
@@ -106,6 +108,7 @@ tar --exclude=*.check --exclude=*.check.b \
     --exclude=*.ddoc \
     --exclude=.p4config \
     --exclude=SCRATCH \
+    --exclude=New_viewer \
     --exclude=_build --exclude=func_spec --exclude=misc --exclude=newsletter --exclude=presentations --exclude=seminar --exclude=tac --exclude=Thumbs.db \
     --exclude=.pydevproject \
     --exclude=.git \
@@ -125,8 +128,6 @@ tar --exclude=*.check --exclude=*.check.b \
     --exclude=nightly \
     --exclude=online \
     --exclude=RemoteSystemsTempFiles \
-    --exclude=Xcdp \
-    --exclude=xcdp \
     -cf $ECFLOWTAR $ECFLOW_WS_DIR/.
 
 # Remove the link
