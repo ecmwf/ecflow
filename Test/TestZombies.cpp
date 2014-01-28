@@ -96,9 +96,8 @@ static void dump_tasks(const vector<Task*>& tasks) {
 
 static bool waitForTaskStates(WaitType num_of_tasks,NState::State state1,NState::State state2, int max_time_to_wait)
 {
-   std::string wait_type_str = (num_of_tasks == SINGLE ) ? "SINGLE" : "ALL";
-
 #ifdef DEBUG_ZOMBIE
+   std::string wait_type_str = (num_of_tasks == SINGLE ) ? "SINGLE" : "ALL";
    if ( num_of_tasks == SINGLE) {
       if (state1 == state2) std::cout << "\n   Waiting for SINGLE task to reach state " << NState::toString(state1) << "\n";
       else                  std::cout << "\n   Waiting for SINGLE task to reach state " << NState::toString(state1) << " || " << NState::toString(state2)  << "\n";

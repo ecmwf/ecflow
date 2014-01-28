@@ -61,32 +61,32 @@ void createNewLogFileFromServer(const std::string& newLog)
 	 log.close();
 }
 
-void createNewLogFileByCopy(const std::string& newLog)
-{
- 	std::string smsLog = TestFixture::pathToLogFile();
-
-	try {
-		// remove old log file if it exists, otherwise copy_file, wont work
-		if ( fs::exists( newLog ) ) {
- 			BOOST_CHECK_MESSAGE(fs::remove(fs::path(newLog)),"Failed to delete " << newLog);
-		}
-
-		// copy ecf.log -> <defsfilename>.log
- 		BOOST_CHECK_MESSAGE(fs::exists(smsLog),"File " << smsLog << " does not exist, can't copy to " << newLog);
-
-		// make sure the log file is NOT empty.
-		BOOST_CHECK_MESSAGE(fs::file_size( smsLog ) != 0,"Log file " << smsLog << " is empty.");
-
-		fs::copy_file( smsLog, newLog );
-
-  		BOOST_CHECK_MESSAGE(fs::file_size(smsLog) == fs::file_size(newLog),
- 		                   smsLog << " file size:" << fs::file_size( smsLog )
- 		                   << " is not same as " << newLog << " file_size:" << fs::file_size(newLog));
-	}
-	catch ( ... ) {
-		BOOST_CHECK_MESSAGE(false,"Unknown exception could not copy log file " << TestFixture::pathToLogFile() << " ---> " << newLog);
-	}
-}
+//void createNewLogFileByCopy(const std::string& newLog)
+//{
+// 	std::string smsLog = TestFixture::pathToLogFile();
+//
+//	try {
+//		// remove old log file if it exists, otherwise copy_file, wont work
+//		if ( fs::exists( newLog ) ) {
+// 			BOOST_CHECK_MESSAGE(fs::remove(fs::path(newLog)),"Failed to delete " << newLog);
+//		}
+//
+//		// copy ecf.log -> <defsfilename>.log
+// 		BOOST_CHECK_MESSAGE(fs::exists(smsLog),"File " << smsLog << " does not exist, can't copy to " << newLog);
+//
+//		// make sure the log file is NOT empty.
+//		BOOST_CHECK_MESSAGE(fs::file_size( smsLog ) != 0,"Log file " << smsLog << " is empty.");
+//
+//		fs::copy_file( smsLog, newLog );
+//
+//  		BOOST_CHECK_MESSAGE(fs::file_size(smsLog) == fs::file_size(newLog),
+// 		                   smsLog << " file size:" << fs::file_size( smsLog )
+// 		                   << " is not same as " << newLog << " file_size:" << fs::file_size(newLog));
+//	}
+//	catch ( ... ) {
+//		BOOST_CHECK_MESSAGE(false,"Unknown exception could not copy log file " << TestFixture::pathToLogFile() << " ---> " << newLog);
+//	}
+//}
 
 
 std::string TestVerification::locate_log_file(const std::string& defs_filename )

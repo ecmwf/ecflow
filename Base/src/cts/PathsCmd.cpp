@@ -262,7 +262,6 @@ STC_Cmd_ptr PathsCmd::doHandleRequest(AbstractServer* as) const
          std::vector<std::string> vec; vec.reserve(edit_history.size());
          std::copy(edit_history.begin(),edit_history.end(),std::back_inserter(vec));
          return PreAllocatedReply::string_vec_cmd(vec);
-         break;
       }
 
       case PathsCmd::NO_CMD: assert(false); break;

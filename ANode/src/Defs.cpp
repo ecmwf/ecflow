@@ -124,7 +124,6 @@ void Defs::check_job_creation(  job_creation_ctrl_ptr jobCtrl )
    // Do *not* modify suspended state of child nodes
    int clear_suspended_in_child_nodes = -1;
 
-	std::string errorMsg;
  	if (jobCtrl->node_path().empty()) {
 
  		size_t theSize = suiteVec_.size();
@@ -483,7 +482,7 @@ std::ostream& Defs::print(std::ostream& os) const
 	}
 
 	set<string>::const_iterator extern_end = externs_.end();
-	for(set<string>::const_iterator i = externs_.begin(); i != extern_end; i++) {
+	for(set<string>::const_iterator i = externs_.begin(); i != extern_end; ++i) {
       os << "extern " << *i << "\n";
 	}
 	size_t the_size = suiteVec_.size();
@@ -528,10 +527,10 @@ std::string Defs::write_state() const
    if (PrintStyle::getStyle() == PrintStyle::MIGRATE || save_edit_history_) {
       Indentor in;
       std::map<std::string, std::deque<std::string> >::const_iterator i;
-      for(i=edit_history_.begin(); i != edit_history_.end(); i++) {
+      for(i=edit_history_.begin(); i != edit_history_.end(); ++i) {
          Indentor::indent( os ) << "history " << (*i).first << " ";// node path
          const std::deque<std::string>& vec = (*i).second;   // list of requests
-         for(std::deque<std::string>::const_iterator c = vec.begin(); c != vec.end(); c++) {
+         for(std::deque<std::string>::const_iterator c = vec.begin(); c != vec.end(); ++c) {
             os << "\b" << *c;
          }
          os << "\n";
@@ -876,7 +875,6 @@ bool Defs::replaceChild(const std::string& path,
 	}
 
 	/// REPLACE ===========================================================
-	std::string warningMsg;
  	if (!createNodesAsNeeded || serverNode.get()) {
 		// Then the child must exist in the server defs (i.e. this)
 		if (! serverNode.get() ) {
@@ -1088,7 +1086,7 @@ void Defs::order(Node* immediateChild, NOrder::Order ord)
 {
 	switch (ord) {
 		case NOrder::TOP:  {
-			for(std::vector<suite_ptr>::iterator i = suiteVec_.begin(); i != suiteVec_.end(); i++) {
+			for(std::vector<suite_ptr>::iterator i = suiteVec_.begin(); i != suiteVec_.end(); ++i) {
 				suite_ptr s = (*i);
 				if (s.get() == immediateChild) {
 					suiteVec_.erase(i);
@@ -1099,10 +1097,9 @@ void Defs::order(Node* immediateChild, NOrder::Order ord)
  				}
 			}
          throw std::runtime_error("Defs::order: TOP, immediate child suite not found");
- 			break;
 		}
 		case NOrder::BOTTOM:  {
-			for(std::vector<suite_ptr>::iterator i = suiteVec_.begin(); i != suiteVec_.end(); i++) {
+			for(std::vector<suite_ptr>::iterator i = suiteVec_.begin(); i != suiteVec_.end(); ++i) {
 				suite_ptr s = (*i);
 				if (s.get() == immediateChild) {
 					suiteVec_.erase(i);
@@ -1113,7 +1110,6 @@ void Defs::order(Node* immediateChild, NOrder::Order ord)
  				}
 			}
          throw std::runtime_error("Defs::order: BOTTOM, immediate child suite not found");
-			break;
 		}
 		case NOrder::ALPHA:  {
  			std::sort(suiteVec_.begin(),suiteVec_.end(),
@@ -1148,7 +1144,6 @@ void Defs::order(Node* immediateChild, NOrder::Order ord)
 		      }
 		   }
 		   throw std::runtime_error("Defs::order: UP, immediate child suite not found");
-		   break;
 		}
 		case NOrder::DOWN: {
 		   for(size_t t = 0; t  < suiteVec_.size();t++) {
@@ -1165,7 +1160,6 @@ void Defs::order(Node* immediateChild, NOrder::Order ord)
 		      }
 		   }
          throw std::runtime_error("Defs::order: DOWN, immediate child suite not found");
-			break;
 		}
 	}
 }

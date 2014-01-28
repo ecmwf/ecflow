@@ -643,8 +643,6 @@ void EcfFile::variableSubstituition(JobsParam& jobsParam)
    string ecfMicro = ecfMicroCache_;
 
    char microChar = ecfMicro[0];
-   std::string doubleEcfMicro = ecfMicro;
-   doubleEcfMicro += ecfMicro;  // %%
 
    // We need a stack to properly implement nopp. This is required since we need to pair
    // the %end, with nopp. i.e need to handle
@@ -689,8 +687,6 @@ void EcfFile::variableSubstituition(JobsParam& jobsParam)
             }
             ecfMicro = tokens[1];
             microChar = ecfMicro[0];
-            doubleEcfMicro = microChar;
-            doubleEcfMicro += microChar;
             continue; // no point in doing variable subs on %ecfmicro ^
          }
       }
@@ -777,8 +773,6 @@ bool EcfFile::get_used_variables(NameValueMap& used_variables, std::string& erro
    string ecfMicro = ecfMicroCache_;
 
    char microChar = ecfMicro[0];
-   std::string doubleEcfMicro = ecfMicro;
-   doubleEcfMicro += ecfMicro;  // %%
 
    // We need a stack to properly implement nopp. This is required since we need to pair
    // the %end, with nopp. i.e need to handle
@@ -826,8 +820,6 @@ bool EcfFile::get_used_variables(NameValueMap& used_variables, std::string& erro
             }
             ecfMicro = tokens[1];
             microChar = ecfMicro[0];
-            doubleEcfMicro = microChar;
-            doubleEcfMicro += microChar;
             continue;
          }
       }

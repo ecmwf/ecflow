@@ -230,7 +230,7 @@ void NodeContainer::order(Node* immediateChild, NOrder::Order ord)
 	SuiteChanged1 changed(suite());
 	switch (ord) {
 		case NOrder::TOP:  {
-			for(std::vector<node_ptr>::iterator i = nodeVec_.begin(); i != nodeVec_.end(); i++) {
+			for(std::vector<node_ptr>::iterator i = nodeVec_.begin(); i != nodeVec_.end(); ++i) {
  				if ((*i).get() == immediateChild) {
  					node_ptr node = (*i);
 					nodeVec_.erase(i);
@@ -240,7 +240,6 @@ void NodeContainer::order(Node* immediateChild, NOrder::Order ord)
  				}
 			}
 			throw std::runtime_error("NodeContainer::order TOP, immediate child not found");
-			break;
 		}
 		case NOrder::BOTTOM:  {
 			for(std::vector<node_ptr>::iterator i = nodeVec_.begin(); i != nodeVec_.end(); i++) {
@@ -253,7 +252,6 @@ void NodeContainer::order(Node* immediateChild, NOrder::Order ord)
  				}
 			}
          throw std::runtime_error("NodeContainer::order BOTTOM, immediate child not found");
-			break;
 		}
 		case NOrder::ALPHA:  {
 			std::sort(nodeVec_.begin(),nodeVec_.end(),
@@ -270,7 +268,6 @@ void NodeContainer::order(Node* immediateChild, NOrder::Order ord)
 			                          boost::bind(&Node::name,_2)));
          order_state_change_no_ = Ecf::incr_state_change_no();
 			break;
-
 		}
 		case NOrder::UP:  {
 			for(size_t t = 0; t  < nodeVec_.size();t++) {
@@ -286,7 +283,6 @@ void NodeContainer::order(Node* immediateChild, NOrder::Order ord)
  				}
 			}
          throw std::runtime_error("NodeContainer::order UP, immediate child not found");
-			break;
 		}
 		case NOrder::DOWN: {
 		   for(size_t t = 0; t  < nodeVec_.size();t++) {
@@ -302,7 +298,6 @@ void NodeContainer::order(Node* immediateChild, NOrder::Order ord)
 		      }
 		   }
          throw std::runtime_error("NodeContainer::order DOWN, immediate child not found");
-			break;
 		}
 	}
 }

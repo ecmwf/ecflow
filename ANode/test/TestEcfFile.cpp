@@ -51,7 +51,6 @@ BOOST_AUTO_TEST_CASE( test_ecf_file_with_bad_ECF_MICRO )
 
    task_ptr task_t1;
    task_ptr task_t2;
-   std::pair<std::string,std::string> p;
    Defs theDefs; {
       suite_ptr suite = theDefs.add_suite("suite");
       task_t1 = suite->add_task( "t1" );  task_t1->add_variable("ECF_MICRO","");

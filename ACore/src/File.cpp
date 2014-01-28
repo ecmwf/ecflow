@@ -250,7 +250,7 @@ bool File::find(
 
 		if ( fs::is_directory( itr->status() ) ) {
 
-			if ( find( itr->path(), file_name, path_found ) )
+			if ( File::find( itr->path(), file_name, path_found ) )
 				return true;
 		}
 	   else if ( itr->path().filename() == file_name ) // see below
