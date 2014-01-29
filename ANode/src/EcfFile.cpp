@@ -427,7 +427,7 @@ bool EcfFile::preProcess(std::vector<std::string>& script_lines, std::string& er
          Str::split( script_lines[i], tokens );
 
          // Handle ecfmicro replacement ================================================================================
-         if (script_lines[i].find(T_ECFMICRO) != string::npos) {
+         if (script_lines[i].find(T_ECFMICRO) == 1) {    // %ecfmicro #
             // keep %ecfmicro in jobs file later processing, i.e for comments/manuals
 
             if (tokens.size() < 2) {
@@ -677,7 +677,7 @@ void EcfFile::variableSubstituition(JobsParam& jobsParam)
             continue;
          }
 
-         if (jobLines_[i].find(T_ECFMICRO) == 1) {
+         if (jobLines_[i].find(T_ECFMICRO) == 1) {   // %ecfmicro #
 
             tokens.clear();
             Str::split( jobLines_[i], tokens );
@@ -810,7 +810,7 @@ bool EcfFile::get_used_variables(NameValueMap& used_variables, std::string& erro
             continue;
          }
 
-         if (!nopp && jobLines_[i].find(T_ECFMICRO) == 1) {
+         if (!nopp && jobLines_[i].find(T_ECFMICRO) == 1) {  // %ecfmicro #
 
             tokens.clear();
             Str::split( jobLines_[i], tokens );
@@ -967,11 +967,36 @@ bool EcfFile::extractManual(const std::vector< std::string >& lines,
          std::vector< std::string >& theManualLines,
          std::string& errormsg) const
 {
+   // Note: we have already done pre-processing, ie since the manual is obtained after
+   // all the includes have been pre-procssed, hence most errors should have been caught
+   // get the cached ECF_MICRO variable, typically its one char.
+   string ecfMicro = ecfMicroCache_;
+   std::vector<std::string> tokens;
+
    bool add = false;
    for (std::vector< std::string >::const_iterator i = lines.begin(); i!= lines.end(); ++i){
-      if ( (*i).find( T_MANUAL ) == 1 )     { add = true;  continue; }
-      if ( add && (*i).find( T_END ) == 1 ) { add = false; continue; }
-      if ( add)                             { theManualLines.push_back(*i); }
+      if ( (*i).find(ecfMicro) == 0) {
+         if ( (*i).find( T_MANUAL ) == 1 )     { add = true;  continue; }
+         if ( add && (*i).find( T_END ) == 1 ) { add = false; continue; }
+
+         if ((*i).find(T_ECFMICRO) == 1) {  // %ecfmicro #
+            tokens.clear();
+            Str::split( (*i), tokens );
+            if (tokens.size() < 2) {
+               std::stringstream ss; ss << "ecfmicro does not have a replacement character, in " << script_path_or_cmd_;
+               errormsg += ss.str();
+               return false;
+            }
+            ecfMicro = tokens[1];
+            if (ecfMicro.size() > 2) {
+               std::stringstream ss; ss << "Expected ecfmicro replacement to be a single character, but found '" << ecfMicro << "' " <<  ecfMicro.size() << " in file : " << script_path_or_cmd_;
+               errormsg += ss.str();
+               return false;
+            }
+            continue;
+         }
+      }
+      if (add) { theManualLines.push_back(*i); }
    }
    if (add) {
       std::stringstream ss; ss << "Unterminated manual. Matching 'end' is missing, for file " << script_path_or_cmd_;

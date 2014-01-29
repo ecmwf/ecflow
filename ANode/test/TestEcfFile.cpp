@@ -256,11 +256,13 @@ BOOST_AUTO_TEST_CASE( test_ecf_file )
 
    // generate the ecf file;
    string header = "%include <head.h>\n\n";
-   string manual_head ="%manual\n";
-   string manual_body = "The contents of the manual\n";
-   string manual_tail ="%end\n\n";
-   string comment_head ="%comment\n";
-   string comment_body = "The contents of the comment\n";
+   string manual_head = "%manual\n";
+   string manual_body = " manual. The contents of the manual\n";
+   manual_body +=       " end.\n";
+   string manual_tail = "%end\n\n";
+   string comment_head = "%comment\n";
+   string comment_body = " comment. The contents of the comment\n";
+   comment_body +=       " end.\n";
    string comment_tail ="%end\n\n";
    string ecf_body; {
       std::pair<std::string,std::string> p;
@@ -295,12 +297,13 @@ BOOST_AUTO_TEST_CASE( test_ecf_file )
 
    /// Test manual extraction
    /// The manual is manual of all the pre-processed includes
-   std::string expected_manual = "#This is the manual from the head.h file\nThe contents of the manual\n#This is the manual from the tail.h file\n";
+   /// Test: SUP-762 Lines starting with "manually" are not shown in manual
+   std::string expected_manual = "#This is the manual from the head.h file\n manual. The contents of the manual\n end.\n#This is the manual from the tail.h file\n";
 
    string theExtractedManual;
    try { ecfFile.manual(theExtractedManual); }
    catch (std::exception &e) { BOOST_CHECK_MESSAGE(false,e.what()); }
-   BOOST_CHECK_MESSAGE( theExtractedManual == expected_manual, "Expected '" << expected_manual << "' but found '" << theExtractedManual << "'");
+   BOOST_CHECK_MESSAGE( theExtractedManual == expected_manual, "Expected \n'" << expected_manual << "' but found \n'" << theExtractedManual << "'");
 
 
    /// Test script extraction
