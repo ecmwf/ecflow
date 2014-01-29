@@ -1126,7 +1126,7 @@ void EcfFile::removeCommentAndManual()
              if (nopp) continue;
 
              // cerr << "EcfFile::removeCommentAndManual erase = " << erase << " " << *i << "\n";
-             jobLines_.erase( i ); i--; // remove %comment
+             jobLines_.erase( i-- ); // remove %comment
              if (erase) {
                 std::stringstream ss; ss << "EcfFile::removeCommentAndManual: Embedded comments are not allowed in " << script_path_or_cmd_;
                 throw std::runtime_error( ss.str() );
@@ -1139,7 +1139,7 @@ void EcfFile::removeCommentAndManual()
              if (nopp) continue;
 
              // cerr << "EcfFile::removeCommentAndManual erase = " << erase << " " << *i << "\n";
-             jobLines_.erase( i ); i--; // remove  %manual
+             jobLines_.erase( i-- );  // remove  %manual
              if (erase) {
                 std::stringstream ss; ss << "EcfFile::removeCommentAndManual: Embedded manuals are not allowed in " << script_path_or_cmd_;
                 throw std::runtime_error( ss.str() );
@@ -1154,7 +1154,7 @@ void EcfFile::removeCommentAndManual()
              else {
 //                cerr << "EcfFile::removeCommentAndManual erase = " << erase << " " << *i << "\n";
                 if (erase) {
-                   jobLines_.erase( i ); i--; // remove %end associated with %comment and %manual
+                   jobLines_.erase( i-- ); // remove %end associated with %comment and %manual
                    erase = false;
                 }
              }
@@ -1176,8 +1176,7 @@ void EcfFile::removeCommentAndManual()
 
        //  remove all line between %comment and %end | %manual and %end
        if (erase) {
-          jobLines_.erase( i );
-          i--;
+          jobLines_.erase( i-- );
        }
    }
 
@@ -1215,7 +1214,7 @@ void EcfFile::remove_nopp_end_tokens()
 
           if ((*i).find(T_NOOP) == 1) {
              pp_stack.push_back(NOPP); nopp = true;
-             jobLines_.erase( i ); i--;     // remove %nopp
+             jobLines_.erase( i-- );      // remove %nopp
               if (erase) {
                  std::stringstream ss; ss << "Embedded nopp are not allowed " << script_path_or_cmd_;
                  throw std::runtime_error("EcfFile::remove_nopp_end_tokens: failed " + ss.str());
@@ -1230,7 +1229,7 @@ void EcfFile::remove_nopp_end_tokens()
              last_directive = pp_stack.back(); pp_stack.pop_back();
              if (last_directive == NOPP) {
                 nopp = false;
-                jobLines_.erase( i ); i--;          // remove %end associated with %nopp
+                jobLines_.erase( i-- );        // remove %end associated with %nopp
                 erase = false;
              }
              continue;
@@ -1246,7 +1245,7 @@ void EcfFile::remove_nopp_end_tokens()
              }
 
              ecfMicro = tokens[1];         // override ecfMicro char
-             jobLines_.erase( i ); i--;    // remove %ecfmicro &
+             jobLines_.erase( i-- );       // remove %ecfmicro &
              continue;
           }
       }

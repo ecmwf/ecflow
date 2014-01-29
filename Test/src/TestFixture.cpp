@@ -353,7 +353,8 @@ std::string TestFixture::includes()
       current_path = current_path.parent_path();
    }
 
-   current_path += "/" + project_test_dir_;
+   current_path += "/";
+   current_path += project_test_dir_;
    current_path += "/data/includes";
    //std::cout << "current_path = " << current_path << " ==============================================\n";
    std::string includes_path = current_path.string();

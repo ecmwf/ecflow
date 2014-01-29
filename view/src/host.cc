@@ -356,7 +356,7 @@ tmp_file host::jobcheck( node& n, const std::string &cmd )
 tmp_file ehost::jobcheck( node& n, const std::string &cmd )
 {
    std::string subcmd = n.variable(cmd);
-   std::string user = n.variable("USER");
+   //std::string user = n.variable("USER");
    std::string job = n.variable("ECF_JOB");
    std::string stat = job + ".stat";
    if (n.__node__()) 
@@ -492,8 +492,6 @@ void host::dir( node& n, const char* path, lister<ecf_dir>& l )
    }
 
    if (path && direct_read_) {
-      char basename[1024];
-      char dirname[1024];
 
       const char* p = path;
       const char* q = 0;
@@ -504,15 +502,17 @@ void host::dir( node& n, const char* path, lister<ecf_dir>& l )
       }
 
       if (q) {
+         char basename[1024];
+         char dirname[1024];
          strcpy(dirname, path);
          dirname[q - path] = 0;
          strcpy(basename, q + 1);
 
          char* c = basename;
          while ( *c ) {
-	   if (*c == '.') {
-	     if (*(c+1)) { *(c+1) = 0; break; } /* 201311 Pontus Request */
-	     else { *c = 0; } }
+            if (*c == '.') {
+               if (*(c+1)) { *(c+1) = 0; break; } /* 201311 Pontus Request */
+               else { *c = 0; } }
             c++;
          }
 
@@ -852,7 +852,7 @@ void ehost::changed( resource& r )
 void host::redraw(bool create)
 {
   if (create) {
-    SelectNode(this);
+    SelectNode select(this);
      XECFDEBUG {
        std::cout << ChangeMgrSingleton::instance()->no_of_node_observers() 
 		 << std::endl
@@ -917,7 +917,7 @@ void host::comp( node* from, const char* a, const char* b )
 }
 
 int host::do_comp( node* into, node* from , 
-                    const std::string a, const std::string b )
+                    const std::string& a, const std::string& b )
 {
    if (!into || !from) return 0;
    std::stringstream out;
@@ -1078,31 +1078,31 @@ tmp_file host::sfile( node& n, std::string name )
    return tmp_file((const char*) NULL);
 }
 
-bool ecf_guess_name( node& n, char* fn )
-{
-   int tn = atoi(n.variable("ECF_TRYNO").c_str());
-   std::string home = n.variable("ECF_HOME");
-   const char *suite = n.variable("SUITE").c_str();
-   const char *family = n.variable("FAMILY").c_str();
-   const char *task = n.variable("TASK").c_str();
-   std::string jout = n.variable("ECF_JOBOUT", true);
-
-   if (home == ecf_node::none()) home = n.variable("SMSHOME", true);
-   if (jout == ecf_node::none()) jout = n.variable("SMSJOBOUT", true);
-
-   sprintf(fn, "%s", jout.c_str());
-   if (access(fn, R_OK) == 0) {
-      return true;
-   }
-   sprintf(fn, "/%s/%s/%s/%s.%d", home.c_str(), suite, family, task, tn > 0 ? tn : 1);
-
-   if (access(fn, R_OK) == 0) {
-      return true;
-   }
-   sprintf(fn, "/%s/%s.old/%s/%s.%d", home.c_str(), suite, family, task, tn > 0 ? tn : 1);
-
-   return access(fn, R_OK) == 0;
-}
+//bool ecf_guess_name( node& n, char* fn )
+//{
+//   int tn = atoi(n.variable("ECF_TRYNO").c_str());
+//   std::string home = n.variable("ECF_HOME");
+//   const char *suite = n.variable("SUITE").c_str();
+//   const char *family = n.variable("FAMILY").c_str();
+//   const char *task = n.variable("TASK").c_str();
+//   std::string jout = n.variable("ECF_JOBOUT", true);
+//
+//   if (home == ecf_node::none()) home = n.variable("SMSHOME", true);
+//   if (jout == ecf_node::none()) jout = n.variable("SMSJOBOUT", true);
+//
+//   sprintf(fn, "%s", jout.c_str());
+//   if (access(fn, R_OK) == 0) {
+//      return true;
+//   }
+//   sprintf(fn, "/%s/%s/%s/%s.%d", home.c_str(), suite, family, task, tn > 0 ? tn : 1);
+//
+//   if (access(fn, R_OK) == 0) {
+//      return true;
+//   }
+//   sprintf(fn, "/%s/%s.old/%s/%s.%d", home.c_str(), suite, family, task, tn > 0 ? tn : 1);
+//
+//   return access(fn, R_OK) == 0;
+//}
 
 const str& host::timefile()
 {
@@ -1396,8 +1396,8 @@ void ehost::send( node& n, Boolean alias, Boolean run, NameValueVec& v, const ch
    catch ( std::exception &e ) {
       gui::error("host::send-error: %s", e.what());
    }
-   content.clear();
    status();
+   fclose(f);
 }
 
 const std::vector<std::string>& host::suites() const

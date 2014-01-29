@@ -256,13 +256,12 @@ int ClientInvoker::do_invoke_cmd(Cmd_ptr cts_cmd) const
 	unsigned int retry_connection_period = retry_connection_period_;
 	if (cts_cmd->ping_cmd()) retry_connection_period = 1;
 
-
-	/// report this message at least once. So client has a clue what's going on
-   bool report_block_client_on_home_server = false;
-   bool report_block_client_server_halted = false;
-   bool report_block_client_zombie_detected = false;
-
 	try {
+	   /// report this message at least once. So client has a clue what's going on
+	   bool report_block_client_on_home_server = false;
+	   bool report_block_client_server_halted = false;
+	   bool report_block_client_zombie_detected = false;
+
 		// We do not want to loop over the sms host list indefinitely hence we use a timer.
 		// The time out period is supplied via ClientEnvironment
 		bool never_polled = true; // don't wait for the first host only subsequent ones
@@ -841,7 +840,6 @@ int ClientInvoker::requeue( const std::string& absNodePath, const std::string& o
       if (option == "abort") the_option = RequeueNodeCmd::ABORT;
       else if (option == "force") the_option = RequeueNodeCmd::FORCE;
       else {
-         std::stringstream ss;
          server_reply_.set_error_msg("ecflow:ClientInvoker::requeue: Expected option = [ force | abort ]");
          if (on_error_throw_exception_) throw std::runtime_error(server_reply_.error_msg());
          return 1;

@@ -47,7 +47,7 @@ node_ptr add_variable_dict(node_ptr self,const boost::python::dict& dict) {
    BoostPythonUtil::dict_to_str_vec(dict,vec);
    std::vector<std::pair<std::string,std::string> >::iterator i;
    std::vector<std::pair<std::string,std::string> >::iterator vec_end = vec.end();
-   for(i = vec.begin(); i != vec_end; i++) {
+   for(i = vec.begin(); i != vec_end; ++i) {
       self->add_variable((*i).first,(*i).second);
    }
    return self;

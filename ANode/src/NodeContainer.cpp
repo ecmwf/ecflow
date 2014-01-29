@@ -242,7 +242,7 @@ void NodeContainer::order(Node* immediateChild, NOrder::Order ord)
 			throw std::runtime_error("NodeContainer::order TOP, immediate child not found");
 		}
 		case NOrder::BOTTOM:  {
-			for(std::vector<node_ptr>::iterator i = nodeVec_.begin(); i != nodeVec_.end(); i++) {
+			for(std::vector<node_ptr>::iterator i = nodeVec_.begin(); i != nodeVec_.end(); ++i) {
  				if ((*i).get() == immediateChild) {
  					node_ptr node = (*i);
 					nodeVec_.erase(i);

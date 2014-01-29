@@ -44,7 +44,7 @@ private:
   const std::string name_;
   // int  type_;
   int type() const { return NODE_UNKNOWN; } 
-  int  status_;
+  //int  status_;
   virtual void perlify(FILE*); 
 };
 
