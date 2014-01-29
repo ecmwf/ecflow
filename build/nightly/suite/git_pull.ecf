@@ -4,24 +4,6 @@
 # Run LOCALLY and REMOTELY
 # ==============================================================
 
-%ecfmicro *
-*manual
- Test ecfmicro with manual and comment
- Requeue all ecFlow tasks under time control. This task can be triggered
- manually for user controlled runs. For operational runs it is started
- automatically.
-*end
-
-*comment
- Test ecfmicro with manual and comment
- Requeue all ecFlow tasks under time control. This task can be triggered
- comment for user controlled runs. For operational runs it is started
- automatically.
- end
-*end
-*ecfmicro %
-
-
 #===============================================================
 # defines variable PG   
 #===============================================================
