@@ -103,12 +103,11 @@ void log_event::load(host& h,const char* name,bool reset)
       char* vartmp = getenv("TMPDIR");
       
       char buf[1024];
-      int i = 0;
       const char* p = name;
       
       while(*p)
 	{
-	  i = 0;
+	  int i = 0;
 	  while(*p && *p != ' ')
 	    buf[i++] = *p++;
 	  buf[i] = 0;

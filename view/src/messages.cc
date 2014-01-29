@@ -63,7 +63,7 @@ void messages::show(node& n)
   
   while (it != l.end()) {
     fprintf(f, "%s\n", it->c_str());
-    it++;
+    ++it;
   }
   fclose(f);
   

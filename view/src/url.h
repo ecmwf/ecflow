@@ -22,6 +22,7 @@ class node;
 
 class text_translator {
 public:
+   virtual ~text_translator() {}
 	virtual void save(FILE*,const char*) = 0;
 };
 
