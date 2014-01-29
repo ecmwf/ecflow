@@ -580,7 +580,11 @@ BOOST_AUTO_TEST_CASE( test_manual_files )
       std::string manual;
       EcfFile ecf_file = task_t1->locatedEcfFile(); // will throw std::runtime_error for errors
       ecf_file.manual(manual);                      // will throw std::runtime_error for errors
-      BOOST_CHECK_MESSAGE(!manual.empty(),"Manual not found");
+      BOOST_REQUIRE_MESSAGE(!manual.empty(),"Manual not found");
+      BOOST_CHECK_MESSAGE(manual.find("ECF_MICRO=%") != std::string::npos,"Variable pre-processing failed during manual extraction");
+      BOOST_CHECK_MESSAGE(manual.find("manual-1") != std::string::npos,"Pre-processing of ecfmicro in manuals failed, expected to find string 'manual-1'\n" << manual);
+      BOOST_CHECK_MESSAGE(manual.find("end-1") != std::string::npos,"Pre-processing of ecfmicro in manuals failed, expected to find string 'end-1'\n" << manual);
+      BOOST_CHECK_MESSAGE(manual.find("Test manual files are pre-processed") != std::string::npos,"%include <manual.h> pre-processing failed inside manual->end\n" << manual);
    }
 
    {
