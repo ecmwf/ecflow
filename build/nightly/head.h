@@ -49,10 +49,9 @@ elif [[ %ARCH% = hpux ]] ; then
    # We pick aCC compiler from /usr/local/bin
    # On HPUX which and whence report different paths, hence beware. whence on HPUX is more reliable ?
    #
-   # NOTE: /opt/python/usr/local/bin provides path to 2.5 PYTHON interpreter. Hence make sure it comes first
-   #  This is what 'using python' will pick up and add to the include path
+   # NOTE: /opt/python/usr/local/bin provides path to 2.5 PYTHON interpreter.
    #
-   export PATH=/opt/python/usr/local/bin:/bin:/usr/bin:$PATH
+   export PATH=/usr/local/apps/python/2.7/bin/python:/bin:/usr/bin:$PATH
 
 elif [[ %ARCH% = opensuse103  ]] ; then
 

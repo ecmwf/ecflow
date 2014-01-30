@@ -117,11 +117,11 @@ using testing ;
 # - If you change python version ,remember to change: $WK/build/install_ecflow.sh: ECFLOW_PYTHON_INSTALL_DIR
 #
 
-#using python
-#     :                                        # version
-#     : /usr/local/apps/python/2.7/bin/python  # cmd-or-prefix (for python 2.5 use )/opt/python/usr/local/bin/python
-#     : # includes  
-#     : # libraries
-#     : # condition
-#     ;
+using python
+     :                                        # version
+     : /usr/local/apps/python/2.7/bin/python  # cmd-or-prefix (for python 2.5 use )/opt/python/usr/local/bin/python
+     : # includes  
+     : # libraries
+     : # condition
+     ;
 
