@@ -41,6 +41,10 @@ Process
   - Need automated way:
     - Just need to update python API.
     - cd $WK/Doc/online; make clean; make html
+    
+0/ If you build on cct-login, then copy build to cca.
+
+   scp -r 4.0.1 emos@cca:/usr/local/apps/ecflow 
 
 0/ *Before* each release, make sure the ecflow tar file is
    copied to $SCRATCH and inform Daniel. This will allow
