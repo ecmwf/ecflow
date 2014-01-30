@@ -234,7 +234,7 @@ def do_migrate(defs_file):
         
         list_of_output_lines = []
         abort_migrator = MigrateForTaskAbort(list_of_input_lines)
-        if abort_migrator.migrate(318):
+        if abort_migrator.migrate(401):
             migration_count += 1
             # did migration, update input lines for next migration
             list_of_input_lines = abort_migrator.output_lines()
