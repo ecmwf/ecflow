@@ -79,7 +79,7 @@ def get_workspace_dir():
     while (1):
         head, tail = os.path.split(cwd)
         #print "tail:" + tail
-        if tail == "ecflow" :
+        if tail.find("ecflow") != -1 :
             return cwd
         cwd = head
     return cwd
