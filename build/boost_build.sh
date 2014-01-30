@@ -108,25 +108,25 @@ echo "using compiler $tool with build $1 variants "
 # ========================================================================
 # Note: boost thread *ONLY* need to test multi-threaded server See: define ECFLOW_MT
 # ========================================================================
-./bjam --build-dir=./tmpBuildDir toolset=$tool $CXXFLAGS stage link=static --layout=$layout --with-system variant=debug 
-./bjam --build-dir=./tmpBuildDir toolset=$tool $CXXFLAGS stage link=static --layout=$layout --with-date_time variant=debug 
-./bjam --build-dir=./tmpBuildDir toolset=$tool $CXXFLAGS stage link=static --layout=$layout --with-filesystem variant=debug   
-./bjam --build-dir=./tmpBuildDir toolset=$tool $CXXFLAGS stage link=static --layout=$layout --with-program_options variant=debug 
-./bjam --build-dir=./tmpBuildDir toolset=$tool $CXXFLAGS stage link=static --layout=$layout --with-serialization  variant=debug 
-./bjam --build-dir=./tmpBuildDir toolset=$tool $CXXFLAGS stage link=static --layout=$layout --with-test variant=debug  
-./bjam --build-dir=./tmpBuildDir toolset=$tool $CXXFLAGS stage link=static --layout=$layout --with-thread variant=debug  
+./bjam --build-dir=./tmpBuildDir toolset=$tool $CXXFLAGS stage link=static --layout=$layout --with-system variant=debug -j2
+./bjam --build-dir=./tmpBuildDir toolset=$tool $CXXFLAGS stage link=static --layout=$layout --with-date_time variant=debug -j2
+./bjam --build-dir=./tmpBuildDir toolset=$tool $CXXFLAGS stage link=static --layout=$layout --with-filesystem variant=debug  -j2
+./bjam --build-dir=./tmpBuildDir toolset=$tool $CXXFLAGS stage link=static --layout=$layout --with-program_options variant=debug -j2
+./bjam --build-dir=./tmpBuildDir toolset=$tool $CXXFLAGS stage link=static --layout=$layout --with-serialization  variant=debug -j2
+./bjam --build-dir=./tmpBuildDir toolset=$tool $CXXFLAGS stage link=static --layout=$layout --with-test variant=debug  -j2
+./bjam --build-dir=./tmpBuildDir toolset=$tool $CXXFLAGS stage link=static --layout=$layout --with-thread variant=debug  -j2
 
 
 # ========================================================================
 # Note: boost thread *ONLY* need to test multi-threaded server See: define ECFLOW_MT
 # ========================================================================
-./bjam --build-dir=./tmpBuildDir toolset=$tool $CXXFLAGS stage link=static --layout=$layout --with-system variant=release 
-./bjam --build-dir=./tmpBuildDir toolset=$tool $CXXFLAGS stage link=static --layout=$layout --with-date_time variant=release  
-./bjam --build-dir=./tmpBuildDir toolset=$tool $CXXFLAGS stage link=static --layout=$layout --with-filesystem variant=release   
-./bjam --build-dir=./tmpBuildDir toolset=$tool $CXXFLAGS stage link=static --layout=$layout --with-program_options variant=release 
-./bjam --build-dir=./tmpBuildDir toolset=$tool $CXXFLAGS stage link=static --layout=$layout --with-serialization  variant=release 
-./bjam --build-dir=./tmpBuildDir toolset=$tool $CXXFLAGS stage link=static --layout=$layout --with-test variant=release  
-./bjam --build-dir=./tmpBuildDir toolset=$tool $CXXFLAGS stage link=static --layout=$layout --with-thread variant=release  
+./bjam --build-dir=./tmpBuildDir toolset=$tool $CXXFLAGS stage link=static --layout=$layout --with-system variant=release -j2
+./bjam --build-dir=./tmpBuildDir toolset=$tool $CXXFLAGS stage link=static --layout=$layout --with-date_time variant=release  -j2
+./bjam --build-dir=./tmpBuildDir toolset=$tool $CXXFLAGS stage link=static --layout=$layout --with-filesystem variant=release   -j2
+./bjam --build-dir=./tmpBuildDir toolset=$tool $CXXFLAGS stage link=static --layout=$layout --with-program_options variant=release -j2
+./bjam --build-dir=./tmpBuildDir toolset=$tool $CXXFLAGS stage link=static --layout=$layout --with-serialization  variant=release -j2
+./bjam --build-dir=./tmpBuildDir toolset=$tool $CXXFLAGS stage link=static --layout=$layout --with-test variant=release  -j2
+./bjam --build-dir=./tmpBuildDir toolset=$tool $CXXFLAGS stage link=static --layout=$layout --with-thread variant=release  -j2
 
 
 # ================================================================================
@@ -138,9 +138,9 @@ echo "using compiler $tool with build $1 variants "
 #
 # To prebuild the boost python, hence we need to do the following: For now build both variants, keeps cmake happy! (i.e when finding libs)
 #
-./bjam toolset=$tool link=shared variant=debug   $CXXFLAGS stage --layout=$layout threading=single --with-python
-./bjam toolset=$tool link=shared variant=release $CXXFLAGS stage --layout=$layout threading=single --with-python
-./bjam toolset=$tool link=shared variant=debug   $CXXFLAGS stage --layout=$layout threading=multi --with-python
-./bjam toolset=$tool link=shared variant=release $CXXFLAGS stage --layout=$layout threading=multi --with-python
+./bjam toolset=$tool link=shared variant=debug   $CXXFLAGS stage --layout=$layout threading=single --with-python -d2 -j2
+./bjam toolset=$tool link=shared variant=release $CXXFLAGS stage --layout=$layout threading=single --with-python -d2 -j2
+./bjam toolset=$tool link=shared variant=debug   $CXXFLAGS stage --layout=$layout threading=multi --with-python -d2 -j2
+./bjam toolset=$tool link=shared variant=release $CXXFLAGS stage --layout=$layout threading=multi --with-python -d2 -j2
 
  
