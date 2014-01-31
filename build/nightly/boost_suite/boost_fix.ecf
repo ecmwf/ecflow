@@ -61,14 +61,10 @@ else
    if [[ %BOOST_VERSION% = boost_1_53_0 ]] ; then
    
       if [[ %ARCH% = hpux ]] ; then
+      
          # Hack for utf8_codecvt_facet due to compiler build error on ACC
-         cp $WK/build/hpux_fix/boost_1_51_0/utf8_codecvt_facet.ipp  $BOOST_ROOT/boost/detail/.
+         cp $WK/build/hpux_fix/boost_1_53_0/utf8_codecvt_facet.ipp  $BOOST_ROOT/boost/detail/
          
-         # Hack because:
-         #   more than one instance of overloaded function "throw_exception" matches the argument list
-         #
-         cp $WK/build/hpux_fix/boost_1_53_0/smart_cast.hpp  $BOOST_ROOT/boost/serialization/.
-
       fi
       
      if [[ %ARCH% = rs6000 || %ARCH% = ibm_power6 || %ARCH% = ibm_power7 ]] ; then
