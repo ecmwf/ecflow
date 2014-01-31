@@ -23,7 +23,7 @@ fi
 mode=debug
 compiler_arg=
 safe=no
-while [ "$#" != 0 ] ; do   
+while [ "$#" -ne 0 ] ; do   
    if [ "$1" = debug -o "$1" = release -o "$1" = profile ] ; then
       mode=$1
    elif [ "$1" = safe ] ; then  
