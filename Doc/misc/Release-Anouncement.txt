@@ -1,5 +1,5 @@
  ======================================================================================
-Subject: New beta/test release of ecFlow now available
+Subject: New release of ecFlow now available  
 
 A new version of the ecFlow(4.0.1) has been released:
 
@@ -16,31 +16,13 @@ on the following platforms:
    o linux cluster   (lxa/lxb)
    o HPUX            (itanium)
    o AIX/ibm_power7  (c2a/c2b)
-   o cct             (cray XC30) 
+   o cct/cca         (cray XC30) 
  
 The release includes the following changes:
 
-    ecflowview     : tree refresh for operators setting footprint:60043 Issue with Ecflow updating on console VM
-    ecflowview     : SUP-656 multiple variables can be used in menu definition file, remove use of <fullname>  https://software.ecmwf.int/issues/browse/SUP-656
-    ecflowview     : access to output files from server, when no direct access
-    ecflowview     : The info page updated to show time/date of a state change for a Node.(suite,family,task)
-                     More general fix related to : ECFLOW-83 Add timestamp to aborted task window
-    ecflow_client  : minor change --get_state so that we print NULL when referenced node not accessible
-    ecflow_client  : allow meter on suite's when loading the definition
-    ecflow_server  : default clock changed from hybrid to real. (Avoid confusion with cron, date, day, set to complete)
-    ecflow_server  : Added support for % in trigger and complete expression and static checking for modulo by zero
 
-    ecflow_server  : Added run time divide/modulo by zero check for Trigger evaluation
-    ecflow_server  : Modified alter(change clock), so that we sync clock attribute, with suite calendar immediately.
-    ecflow_server  : ECFLOW-96 Families with loops(cron/repeat) should log complete
-    doc            : Online documentation removed from tar file, replaced with ecflow confluence page
-    ecflow.so      : ECFLOW-91 ecFlow python API - method signatures for ecflow.Cron.set_time_series()
-    ecflow.so      : Extend python interface to allow access to generated variables for suite,family and task.
-     *             : Fix --migrate bugs: to take into account variable values that have new lines
-    ecflow_start.sh: ECFLOW-97 ecflow_start.sh prepends /usr/bin to the PATH, breaking the "module" system in ecgate
  
- 
-To use a specific version:
+To use a specific version (this is the *recommended* way):
 
    export ECFLOW_VERSION=4.0.1
    use ecflow
@@ -59,7 +41,7 @@ To use the latest ecFlow on linux/HPUX/ecgate call:
    Please note that the latest version of ecflow can change at any
    time, so it is advisable to specify the version for long term usage.
 
-   On CRAY(cct),AIX(c2a/c2b) and redhat/RHEL(ecgb):
+   On CRAY(cct/cca),AIX(c2a/c2b) and redhat/RHEL(ecgb):
 
    Please use the module functionality  i.e
       module avail ecflow
@@ -91,7 +73,7 @@ Documentation
 =======================================================================
 The user manual(word and pdf formats) are available from:
 
-   /usr/local/apps/ecflow/current/doc
+   /usr/local/apps/ecflow/4.0.1/doc
 
 The online documentation and tutorial are accessible from:
 

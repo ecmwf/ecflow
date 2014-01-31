@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 ## Copyright 2009-2012 ECMWF. 
 ## This software is licensed under the terms of the Apache Licence version 2.0 

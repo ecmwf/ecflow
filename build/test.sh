@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 ## Copyright 2009-2012 ECMWF. 
 ## This software is licensed under the terms of the Apache Licence version 2.0 
@@ -8,7 +8,7 @@
 ## nor does it submit to any jurisdiction. 
 
 #===================================================================
-# Run all the ecflow tests 
+# Run all the ecflow tests, note use !/bin/bash to keep rpm happy, it uses bash
 #===================================================================
 
 if [ "$#" -gt 3 ] ; then
