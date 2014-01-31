@@ -51,7 +51,7 @@ elif [[ %ARCH% = hpux ]] ; then
    #
    # NOTE: /opt/python/usr/local/bin provides path to 2.5 PYTHON interpreter.
    #
-   export PATH=/usr/local/apps/python/2.7/bin/python:/bin:/usr/bin:$PATH
+   export PATH=/usr/local/apps/python/2.7/bin:/bin:/usr/bin:$PATH
 
 elif [[ %ARCH% = opensuse103  ]] ; then
 
