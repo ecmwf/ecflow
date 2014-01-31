@@ -13,7 +13,7 @@
 
 if [ "$#" -gt 3 ] ; then
    echo "Maximum of 3 arguments expected"
-   echo " arg1-mode    (optional) default = debug,    valid values = [ default | release ]"
+   echo " arg1-mode    (optional) default = debug,    valid values = [ debug | release ]"
    echo " arg2-compiler(optional) default = linux/gcc-4.2.1"
    echo " arg3-safe    (optional) default = no, valid values = [ no | safe ],"
    echo "                                   safe means only run deterministic tests"
