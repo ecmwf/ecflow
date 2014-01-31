@@ -7,14 +7,14 @@
 // nor does it submit to any jurisdiction.
 //============================================================================
 
-#include "TreeNodeModel.hpp"
+#include "TableNodeModel.hpp"
 
 #include <QDebug>
 
 #include "ServerHandler.hpp"
 #include "ViewConfig.hpp"
 
-TreeNodeModel::TreeNodeModel(QObject *parent) : QAbstractItemModel(parent)
+TableNodeModel::TableNodeModel(QObject *parent) : QAbstractItemModel(parent)
 {
 	for(unsigned int i=0; i < ServerHandler::servers().size(); i++)
 	{
@@ -22,23 +22,23 @@ TreeNodeModel::TreeNodeModel(QObject *parent) : QAbstractItemModel(parent)
 	}
 }
 
-bool TreeNodeModel::hasData() const
+bool TableNodeModel::hasData() const
 {
 	return servers_.size() >0;
 }
 
-void TreeNodeModel::dataIsAboutToChange()
+void TableNodeModel::dataIsAboutToChange()
 {
 	beginResetModel();
 }
 
-void TreeNodeModel::addServer(ServerHandler *server)
+void TableNodeModel::addServer(ServerHandler *server)
 {
 	servers_ << server;
 }
 
 
-/*void TreeNodeModel::setRootNode(const std::string &server,serverMvQOgcNode *root)
+/*void TableNodeModel::setRootNode(const std::string &server,serverMvQOgcNode *root)
 {
 	root_=root;
 
@@ -47,12 +47,12 @@ void TreeNodeModel::addServer(ServerHandler *server)
 }*/
 
 
-int TreeNodeModel::columnCount( const QModelIndex& /*parent */ ) const
+int TableNodeModel::columnCount( const QModelIndex& /*parent */ ) const
 {
    	 return 3;
 }
 
-int TreeNodeModel::rowCount( const QModelIndex& parent) const
+int TableNodeModel::rowCount( const QModelIndex& parent) const
 {
 	//qDebug() << "<< rowCount" << parent;
 
@@ -93,7 +93,7 @@ int TreeNodeModel::rowCount( const QModelIndex& parent) const
 }
 
 
-QVariant TreeNodeModel::data( const QModelIndex& index, int role ) const
+QVariant TableNodeModel::data( const QModelIndex& index, int role ) const
 {
 	//Data lookup can be costly so we immediately return a default value for all
 	//the cases where the default should be used.
@@ -114,7 +114,7 @@ QVariant TreeNodeModel::data( const QModelIndex& index, int role ) const
 	return nodeData(index,role);
 }
 
-QVariant TreeNodeModel::serverData(const QModelIndex& index,int role) const
+QVariant TableNodeModel::serverData(const QModelIndex& index,int role) const
 {
 	if(index.column() == 0)
 	{
@@ -129,7 +129,7 @@ QVariant TreeNodeModel::serverData(const QModelIndex& index,int role) const
 	return QVariant();
 }
 
-QVariant TreeNodeModel::nodeData(const QModelIndex& index, int role) const
+QVariant TableNodeModel::nodeData(const QModelIndex& index, int role) const
 {
 	Node* node=nodeFromIndex(index);
 	if(!node)
@@ -153,7 +153,7 @@ QVariant TreeNodeModel::nodeData(const QModelIndex& index, int role) const
 	return QVariant();
 }
 
-QVariant TreeNodeModel::headerData( const int section, const Qt::Orientation orient , const int role ) const
+QVariant TableNodeModel::headerData( const int section, const Qt::Orientation orient , const int role ) const
 {
 	if ( orient != Qt::Horizontal || role != Qt::DisplayRole )
       		  return QAbstractItemModel::headerData( section, orient, role );
@@ -169,7 +169,7 @@ QVariant TreeNodeModel::headerData( const int section, const Qt::Orientation ori
     return QVariant();
 }
 
-QModelIndex TreeNodeModel::index( int row, int column, const QModelIndex & parent ) const
+QModelIndex TableNodeModel::index( int row, int column, const QModelIndex & parent ) const
 {
 	if(!hasData() || row < 0 || column < 0)
 	{
@@ -226,7 +226,7 @@ QModelIndex TreeNodeModel::index( int row, int column, const QModelIndex & paren
    virtual Suite* isSuite() const  { return NULL;}
 */
 
-bool TreeNodeModel::isServer(const QModelIndex & index) const
+bool TableNodeModel::isServer(const QModelIndex & index) const
 {
 	//For servers the internal id is set to their position in servers_ + 1
 	if(index.isValid())
@@ -238,7 +238,7 @@ bool TreeNodeModel::isServer(const QModelIndex & index) const
 }
 
 
-ServerHandler* TreeNodeModel::indexToServer(const QModelIndex & index) const
+ServerHandler* TableNodeModel::indexToServer(const QModelIndex & index) const
 {
 	//For servers the internal id is set to their position in servers_ + 1
 	if(index.isValid())
@@ -251,7 +251,7 @@ ServerHandler* TreeNodeModel::indexToServer(const QModelIndex & index) const
 }
 
 
-Node* TreeNodeModel::nodeFromIndex( const QModelIndex & index) const
+Node* TableNodeModel::nodeFromIndex( const QModelIndex & index) const
 {
 	if(index.isValid())
 	{
@@ -264,7 +264,7 @@ Node* TreeNodeModel::nodeFromIndex( const QModelIndex & index) const
 	return NULL;
 }
 
-QModelIndex TreeNodeModel::parent(const QModelIndex &child) const
+QModelIndex TableNodeModel::parent(const QModelIndex &child) const
 {
 	//If the child is a server the parent is the root
 	if(isServer(child))
@@ -323,7 +323,7 @@ QModelIndex TreeNodeModel::parent(const QModelIndex &child) const
 
 }
 
-QModelIndex TreeNodeModel::indexFromNode(Node* node) const
+QModelIndex TableNodeModel::indexFromNode(Node* node) const
 {
 	/*if(node != 0 && node->parent() != 0)
 	{

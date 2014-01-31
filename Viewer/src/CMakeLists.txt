@@ -3,11 +3,13 @@ set(viewer_srcs
     ViewerMain.cpp
     MainWindow.cpp
     NodePanel.cpp
+    NodePathWidget.cpp
     NodeViewBase.cpp
     NodeViewHandler.cpp
     NodeWidget.cpp
     ServerHandler.cpp
     TabWidget.cpp 
+    TableNodeModel.cpp
     TreeNodeModel.cpp
     TreeNodeView.cpp
     ViewConfig.cpp)
@@ -15,7 +17,7 @@ set(viewer_srcs
 
 include(${QT_USE_FILE})
 
-QT4_WRAP_CPP(VIEWER_MOC MainWindow.hpp NodePanel.hpp NodeWidget.hpp TabWidget.hpp)
+QT4_WRAP_CPP(VIEWER_MOC MainWindow.hpp NodePanel.hpp NodePathWidget.hpp NodeWidget.hpp TabWidget.hpp)
 QT4_ADD_RESOURCES (VIEWER_RES viewer.qrc)
 QT4_WRAP_UI       (VIEWER_FORMS_HEADERS MainWindow.ui)
 
