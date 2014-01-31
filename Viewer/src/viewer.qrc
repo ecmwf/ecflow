@@ -1,0 +1,8 @@
+<RCC>
+  <qresource prefix="viewer">
+    <file>../images/close.svg</file>
+    <file>../images/configure.svg</file>
+    <file>../images/exit.svg</file>
+    <file alias="add_tab.svg">../images/add_tab.svg</file>
+  </qresource>
+</RCC>
