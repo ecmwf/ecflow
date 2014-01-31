@@ -117,10 +117,12 @@ if test_uname Linux ; then
       Test/bin/$compiler/$mode/test-zombies  --log_level=message $TEST_OPTS
    fi
    
-   # run python/C++ test
-   cd Pyext
-   $BOOST_ROOT/bjam $TOOLSET $CXXFLAGS variant=$mode test-all $TEST_OPTS
-   cd ..
+   if [ "$safe" = no ] ; then
+      # run python/C++ test
+      cd Pyext
+      $BOOST_ROOT/bjam $TOOLSET $CXXFLAGS variant=$mode test-all $TEST_OPTS
+      cd ..
+   fi
    
    if [ x$DISPLAY = x  ]; then
        echo "DISPLAY variable is not defined, ecflowview is not tested..."
@@ -144,7 +146,9 @@ elif test_uname HP-UX ; then
    ANattr/bin/acc/$mode/threading-multi/nodeattrtest  --log_level=message $TEST_OPTS
    ANode/bin/acc/$mode/threading-multi/nodetest  --log_level=message $TEST_OPTS
    AParser/bin/acc/$mode/threading-multi/tparser  --log_level=message $TEST_OPTS
-   AParser/bin/acc/$mode/threading-multi/tsingle  --log_level=message $TEST_OPTS
+   if [ "$safe" = no ] ; then
+      AParser/bin/acc/$mode/threading-multi/tsingle  --log_level=message $TEST_OPTS
+   fi
    Base/bin/acc/$mode/threading-multi/basetest  --log_level=message $TEST_OPTS
    Client/bin/acc/$mode/threading-multi/tclient  --log_level=message $TEST_OPTS
    Server/bin/acc/$mode/threading-multi/tserver  --log_level=message $TEST_OPTS
@@ -154,13 +158,15 @@ elif test_uname HP-UX ; then
       Test/bin/acc/$mode/threading-multi/test-zombies  --log_level=message $TEST_OPTS
    fi
    
-   # run python/C++ test, use test to bypass 'with' statement tests
-   cd Pyext
-   $BOOST_ROOT/bjam variant=$mode test $TEST_OPTS
+   if [ "$safe" = no ] ; then
+      # run python/C++ test, use test to bypass 'with' statement tests
+      cd Pyext
+      $BOOST_ROOT/bjam variant=$mode test $TEST_OPTS
+      cd ..
+   fi
 
    if [ "$safe" = no ] ; then
       # Allow this test to be dissabled it can take a while
-      cd ..
       if [ -n "$ECF_DISABLE_SMS_TEST" ] ; then   
          echo "Ignore SMS to ecf comparison test"
       else
@@ -171,73 +177,36 @@ elif test_uname HP-UX ; then
 elif test_uname AIX ; then
 
    echo "Testing: $ARCH variant=$mode"
-   if test "$ARCH" = rs6000 
-   then
-      # XLC ============================================================
-      ACore/bin/vacpp/$mode/threading-multi/coretest  --log_level=message $TEST_OPTS
-      ANattr/bin/vacpp/$mode/threading-multi/nodeattrtest  --log_level=message $TEST_OPTS
-      ANode/bin/vacpp/$mode/threading-multi/nodetest  --log_level=message $TEST_OPTS
-      AParser/bin/vacpp/$mode/threading-multi/tparser  --log_level=message $TEST_OPTS
+   
+   ACore/bin/vacpp/$mode/threading-multi/coretest  --log_level=message $TEST_OPTS
+   ANattr/bin/vacpp/$mode/threading-multi/nodeattrtest  --log_level=message $TEST_OPTS
+   ANode/bin/vacpp/$mode/threading-multi/nodetest  --log_level=message $TEST_OPTS
+   AParser/bin/vacpp/$mode/threading-multi/tparser  --log_level=message $TEST_OPTS
+   if [ "$safe" = no ] ; then
       AParser/bin/vacpp/$mode/threading-multi/tsingle  --log_level=message $TEST_OPTS
-      Base/bin/vacpp/$mode/threading-multi/basetest  --log_level=message $TEST_OPTS
-      Client/bin/vacpp/$mode/threading-multi/tclient  --log_level=message $TEST_OPTS
-      Server/bin/vacpp/$mode/threading-multi/tserver  --log_level=message $TEST_OPTS
-      CSim/bin/vacpp/$mode/threading-multi/testsimulator  --log_level=message $TEST_OPTS
-      
+   fi
+   Base/bin/vacpp/$mode/threading-multi/basetest  --log_level=message $TEST_OPTS
+   Client/bin/vacpp/$mode/threading-multi/tclient  --log_level=message $TEST_OPTS
+   Server/bin/vacpp/$mode/threading-multi/tserver  --log_level=message $TEST_OPTS
+   CSim/bin/vacpp/$mode/threading-multi/testsimulator  --log_level=message $TEST_OPTS
+   if [ "$safe" = no ] ; then
+      Test/bin/vacpp/$mode/threading-multi/server-test  --log_level=message $TEST_OPTS
+      Test/bin/vacpp/$mode/threading-multi/test-zombies  --log_level=message $TEST_OPTS
+   fi
+
+   if [ "$safe" = no ] ; then
       # run python/C++ test
       cd Pyext
       $BOOST_ROOT/bjam variant=$mode test-all $TEST_OPTS
       cd ..
-      
-      if [ "$safe" = no ] ; then
-         # on ECGATE port 3141 appear to be reused.
-         export ECF_PORT=3142
-         Test/bin/vacpp/$mode/threading-multi/server-test  --log_level=message $TEST_OPTS
-         Test/bin/vacpp/$mode/threading-multi/test-zombies  --log_level=message $TEST_OPTS
-      fi
-      
-      if [ x$DISPLAY = x ]; then
-         echo "DISPLAY variable is not defined, ecflowview is not tested..."
+   fi
+   
+   if [ "$safe" = no ] ; then
+      # Allow this test to be dissabled it can take a while
+      if [ -n "$ECF_DISABLE_SMS_TEST" ] ; then   
+         echo "Ignore SMS to ecf comparison test"
       else
-         view/bin/vacpp/$mode/threading-multi/test-view  --log_level=message $TEST_OPTS
-      fi
-   
-      if [ "$safe" = no ] ; then
-         # Allow this test to be dissabled it can take a while
-         if [ -n "$ECF_DISABLE_SMS_TEST" ] ; then   
-            echo "Ignore SMS to ecf comparison test"
-         else
-            TestEcfSms/bin/vacpp/$mode/threading-multi/smsecftest  --log_level=message $TEST_OPTS
-         fi
-      fi
-   else
-   
-      ACore/bin/vacpp/$mode/threading-multi/coretest  --log_level=message $TEST_OPTS
-      ANattr/bin/vacpp/$mode/threading-multi/nodeattrtest  --log_level=message $TEST_OPTS
-      ANode/bin/vacpp/$mode/threading-multi/nodetest  --log_level=message $TEST_OPTS
-      AParser/bin/vacpp/$mode/threading-multi/tparser  --log_level=message $TEST_OPTS
-      AParser/bin/vacpp/$mode/threading-multi/tsingle  --log_level=message $TEST_OPTS
-      Base/bin/vacpp/$mode/threading-multi/basetest  --log_level=message $TEST_OPTS
-      Client/bin/vacpp/$mode/threading-multi/tclient  --log_level=message $TEST_OPTS
-      Server/bin/vacpp/$mode/threading-multi/tserver  --log_level=message $TEST_OPTS
-      CSim/bin/vacpp/$mode/threading-multi/testsimulator  --log_level=message $TEST_OPTS
-      if [ "$safe" = no ] ; then
-         Test/bin/vacpp/$mode/threading-multi/server-test  --log_level=message $TEST_OPTS
-         Test/bin/vacpp/$mode/threading-multi/test-zombies  --log_level=message $TEST_OPTS
-      fi
-   
-      # run python/C++ test
-      cd Pyext
-      $BOOST_ROOT/bjam variant=$mode test-all $TEST_OPTS
-      
-      if [ "$safe" = no ] ; then
-         # Allow this test to be dissabled it can take a while
-         cd ..
-         if [ -n "$ECF_DISABLE_SMS_TEST" ] ; then   
-            echo "Ignore SMS to ecf comparison test"
-         else
-            TestEcfSms/bin/vacpp/$mode/threading-multi/smsecftest  --log_level=message $TEST_OPTS
-         fi
+         TestEcfSms/bin/vacpp/$mode/threading-multi/smsecftest  --log_level=message $TEST_OPTS
       fi
    fi
 fi
