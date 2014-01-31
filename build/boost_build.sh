@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 ## Copyright 2009-2012 ECMWF. 
 ## This software is licensed under the terms of the Apache Licence version 2.0 
@@ -49,17 +49,17 @@ if test_uname Linux ; then
   if [ "$X64" = x86_64 ]
   then
     # PE_ENV is defined in cray environment, at least on sandy bridge
-    if [[ "$PE_ENV" = GNU || "$PE_ENV" = INTEL || "$PE_ENV" = CRAY ]]
+    if [ "$PE_ENV" = GNU -o "$PE_ENV" = INTEL -o "$PE_ENV" = CRAY ]
     then
        CXXFLAGS=cxxflags=-fPIC
        cp $WK/build/site_config/site-config-cray.jam $BOOST_ROOT/tools/build/v2/site-config.jam
        if [ "$PE_ENV" = INTEL ] ; then
-         layout=versioned  
-         tool=intel
+          layout=versioned  
+          tool=intel
        fi
        if [ "$PE_ENV" = CRAY ] ; then
-         tool=cray
-         layout=versioned  
+          tool=cray
+          layout=versioned  
        fi
     else
        cp $WK/build/site_config/site-config-Linux64.jam $BOOST_ROOT/tools/build/v2/site-config.jam  
@@ -79,16 +79,6 @@ elif test_uname AIX ; then
    # on c1a
    tool=vacpp
    cp $WK/build/site_config/site-config-AIX.jam $BOOST_ROOT/tools/build/v2/site-config.jam
- 
-   if test "$ARCH" = rs6000 
-   then
-     tool=vacpp
-     cp $WK/build/site_config/site-config-AIX-rs6000.jam $BOOST_ROOT/tools/build/v2/site-config.jam
-   
-     # On ecgate however can't get gcc to work on AIX
-     #tool=gcc
-     #cp $WK/build/site_config/site-config-AIX-gcc.jam $BOOST_ROOT/tools/build/v2/site-config.jam
-   fi
 fi
 
 # Only uncomment for debugging this script
