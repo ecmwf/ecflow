@@ -13,10 +13,13 @@
 
 #  Test the error and waning checks defined in the defs work
 
-from ecflow import  Defs, Limit, InLimit
+from ecflow import  Defs, Limit, InLimit, Client
             
 if __name__ == "__main__":
-    
+    print "####################################################################"
+    print "Running ecflow version " + Client().version() 
+    print "####################################################################"
+     
     defs = Defs()
     suite = defs.add_suite("s1");
     suite.add_task("t1").add_trigger("t2 == active)")   

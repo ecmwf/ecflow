@@ -15,6 +15,7 @@ list( APPEND srcs
    src/UrlCmd.cpp
 )
 ecbuild_add_library( TARGET libclient
+                     NOINSTALL
                    TYPE     STATIC
                    SOURCES  ${srcs}
                    LIBS     core nodeattr node libparser base ${Ecflow_Boost_LIBS}
@@ -112,3 +113,8 @@ ecbuild_add_test( TARGET test_migration
                          ../Client/src
                          ${Boost_INCLUDE_DIRS} 
                )
+
+# ===================================================================
+# install
+# ===================================================================
+install (TARGETS ecflow_client DESTINATION bin)

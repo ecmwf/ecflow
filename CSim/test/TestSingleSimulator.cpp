@@ -75,7 +75,7 @@ BOOST_AUTO_TEST_CASE( test_repeat_with_cron  )
 
       family_ptr f = suite->add_family( "f" );
       f->addRepeat( RepeatDate("YMD",20091001,20091004,1));  // repeat contents 4 times
-      f->addVerify( VerifyAttr(NState::COMPLETE,1) );          // family completes once
+      f->addVerify( VerifyAttr(NState::COMPLETE,4) );
 
       family_ptr family_plot = f->add_family( "plot" );
       family_plot->add_complete(  "plot/finish ==  complete");

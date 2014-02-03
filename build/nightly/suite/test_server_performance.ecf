@@ -16,7 +16,6 @@ else
    # Clear up
    rm -rf `hostname`.*
    
-   
    # test server for memory leaks, & give it time to start
    Server/bin/%COMPILER_VERSION%/profile/ecflow_server --ecfinterval=3 &
    sleep 10

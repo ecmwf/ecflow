@@ -12,7 +12,7 @@
 #////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 
 # Simple check for get all tasks
-from ecflow import Defs
+from ecflow import Defs, Client
   
 def create_defs():
     defs = Defs()
@@ -64,7 +64,10 @@ def test_get_all_nodes(defs):
     print "test_get_all_nodes PASSED"
 
 if __name__ == "__main__":
-
+    print "####################################################################"
+    print "Running ecflow version " + Client().version() 
+    print "####################################################################"
+ 
     test_get_all_tasks(create_defs())
     test_get_all_nodes(create_defs())
     print "All Tests pass"    

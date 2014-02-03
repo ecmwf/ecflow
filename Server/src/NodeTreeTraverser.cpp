@@ -38,7 +38,7 @@ using namespace boost::posix_time;
 // Hence we poll every second, and check it against the minute boundary
 // ************************************************************************
 
-NodeTreeTraverser::NodeTreeTraverser(   server* s,
+NodeTreeTraverser::NodeTreeTraverser( Server* s,
  										boost::asio::io_service& io,
 										const ServerEnvironment& serverEnv)
 : server_( s ),

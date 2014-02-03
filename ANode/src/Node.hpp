@@ -129,6 +129,12 @@ public:
    /// We use -1 to mean leave suspended state as is
    virtual void requeue(bool resetRepeats, int clear_suspended_in_child_nodes);
 
+   /// Re queue the time based attributes only.
+   /// Used as a part of Alter (clock) functionality.
+   /// Note: Under the hybrid clock this will not mark node as complete, (if we have day,date,cron attributes)
+   /// Since alter clock, should not change node state. This is left for user to re-queue the suite
+   virtual void requeue_time_attrs();
+
    /// Set a flag that ensures that a node with a single time dependency is NOT automatically re-queued
    /// This is applied *up* the hierarchy until we *hit* a node with a repeat or Cron attribute
    /// This is done since repeat and cron can be used to reset the NO_REQUE_IF_SINGLE_TIME_DEP flags
@@ -386,10 +392,6 @@ public:
    // Change functions: ================================================================
    /// returns true the change was made else false, Can throw std::runtime_error for parse errors
    void changeVariable(const std::string& name,const std::string& value);
-   void changeClockType(const std::string& theType);
-   void changeClockDate(const std::string& theDate);
-   void changeClockGain(const std::string& theIntGain);
-   void changeClockSync();
    void changeEvent(const std::string& name,const std::string& setOrClear = "");
    void changeEvent(const std::string& name,bool value);
    void changeMeter(const std::string& name,const std::string& value);

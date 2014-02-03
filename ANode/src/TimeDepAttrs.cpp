@@ -42,8 +42,6 @@ void TimeDepAttrs::begin()
 
    for(size_t i = 0; i < days_.size(); i++)      {  days_[i].clearFree(); }
    for(size_t i = 0; i < dates_.size(); i++)     { dates_[i].clearFree(); }
-
-   markHybridTimeDependentsAsComplete();
 }
 
 void TimeDepAttrs::requeue(bool reset_next_time_slot) {
@@ -59,8 +57,6 @@ void TimeDepAttrs::requeue(bool reset_next_time_slot) {
 
    for(size_t i = 0; i < days_.size(); i++)      {  days_[i].clearFree(); }
    for(size_t i = 0; i < dates_.size(); i++)     { dates_[i].clearFree(); }
-
-   markHybridTimeDependentsAsComplete();
 }
 
 void TimeDepAttrs::calendarChanged(const ecf::Calendar& c )

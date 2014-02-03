@@ -27,12 +27,12 @@
 #include <boost/noncopyable.hpp>
 #include <boost/asio.hpp>
 
-class server;
 class ServerEnvironment;
+class Server;
 
 class CheckPtSaver : private boost::noncopyable {
 public:
-	CheckPtSaver(  server* s,   boost::asio::io_service& io, const ServerEnvironment*);
+	CheckPtSaver(  Server* s,   boost::asio::io_service& io, const ServerEnvironment*);
 	~CheckPtSaver();
 
 	/// Start periodical save of the checkpoint file
@@ -75,7 +75,7 @@ private:
 	/// This avoids writing out a checkpt file, unnecessarily & filling up log file
 	void periodicSaveCheckPt(const boost::system::error_code& error);
 
-	server* server_;
+	Server* server_;
  	boost::asio::deadline_timer timer_;
    bool firstTime_;
   	bool running_;

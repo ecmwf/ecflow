@@ -66,6 +66,10 @@ def simulate_deadlock():
     os.remove("defs.flat")
 
 if __name__ == "__main__":
+    print "####################################################################"
+    print "Running ecflow version " + ecflow.Client().version() 
+    print "####################################################################"
+ 
     simulate_defs_with_time()
     simulate_deadlock()
     print "All Tests pass"

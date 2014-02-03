@@ -24,6 +24,7 @@
 #include "ClientInvoker.hpp"
 #include "Str.hpp"
 #include "File.hpp"
+#include "EcfPortLock.hpp"
 #include "Host.hpp"
 
 class InvokeServer : private boost::noncopyable {
@@ -86,6 +87,9 @@ public:
 		std::string theServerInvokePath = ecf::File::find_ecf_server_path();
 		BOOST_REQUIRE_MESSAGE(!theServerInvokePath.empty(),"InvokeServer::doStart: The server program could not be found");
       BOOST_REQUIRE_MESSAGE(boost::filesystem::exists(theServerInvokePath),"InvokeServer::doStart: server exe does not exist at:" << theServerInvokePath);
+
+		// Create a port file. To avoid creating multiple servers on the same port number
+		ecf::EcfPortLock::create( port );
 
 		// Make sure server starts in the background to avoid hanging test
 		theServerInvokePath += " --port=" + port;

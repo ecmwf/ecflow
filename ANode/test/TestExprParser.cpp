@@ -63,6 +63,7 @@ BOOST_AUTO_TEST_CASE( test_expression_parser_basic )
    vec.push_back("./a:YMD + ./b:YMD < 5");
    vec.push_back("./a:YMD / ./b:YMD < 5");
    vec.push_back("./a:YMD * ./b:YMD < 5");
+   vec.push_back("./a:YMD % ./b:YMD < 5");
    vec.push_back("inigroup:YMD == ! 1");
    vec.push_back("inigroup:YMD == ! 0");
 
@@ -254,6 +255,17 @@ BOOST_AUTO_TEST_CASE( test_parser_good_expressions )
  	exprMap["t:step + 20 ge t:step1 - 20"] = std::make_pair(AstGreaterEqual::stype(),true);
  	exprMap["(t:step + 20) ge (t:step1 - 20)"] = std::make_pair(AstGreaterEqual::stype(),true);
 
+ 	// Note: t:step will evaluate to 0,  0 % number  == 0, however 20 % 0 is a runtime error, same as divide by zero
+   exprMap["t:step % 20 < 19"] = std::make_pair(AstLessThan::stype(),true);
+   exprMap["t:step % 10 == 0"] = std::make_pair(AstEqual::stype(),true);
+   exprMap["t:step % 20 ge 19"] = std::make_pair(AstGreaterEqual::stype(),false);
+   exprMap["(t:step % 20) ge 19"] = std::make_pair(AstGreaterEqual::stype(),false);
+   exprMap["t:step % 20 ge 120"] = std::make_pair(AstGreaterEqual::stype(),false);
+   exprMap["t:step % 20 ge 120"] = std::make_pair(AstGreaterEqual::stype(),false);
+   exprMap["t:step % 20 ge t:step1 - 20"] = std::make_pair(AstGreaterEqual::stype(),true);
+   exprMap["(t:step % 20) ge (t:step1 - 20)"] = std::make_pair(AstGreaterEqual::stype(),true);
+   exprMap["(t:step % 20) == (t:step1 % 10)"] = std::make_pair(AstEqual::stype(),true);
+
  	exprMap["( obs:YMD le  ( main:YMD + 1)) and ../make/setup eq complete and  ( obs:YMD le /o/lag:YMD)"] = std::make_pair(AstAnd::stype(),false);
  	exprMap["( stage eq complete or ./stage:YMD gt ./retrieve:YMD) and ( ./retrieve:YMD - ./load:YMD lt 5)"] = std::make_pair(AstAnd::stype(),false);
  	exprMap["./a:YMD - ./b:YMD lt 5"] = std::make_pair(AstLessThan::stype(),true);
@@ -276,7 +288,50 @@ BOOST_AUTO_TEST_CASE( test_parser_good_expressions )
  		BOOST_CHECK_MESSAGE( top->left()->isRoot() ,"First child of top should be a root");
  		BOOST_CHECK_MESSAGE( top->left()->type() == expectedRootType,"expected root type " << expectedRootType << " but found " << top->left()->type());
  		BOOST_CHECK_MESSAGE( expectedEvaluationResult == top->evaluate(),"evaluation not as expected for " << *top);
+
+ 		std::string error_msg;
+      BOOST_CHECK_MESSAGE(  top->check(error_msg),error_msg << ":  Check failed for " << *top);
 	}
+}
+
+
+BOOST_AUTO_TEST_CASE( test_trigger_expression_divide_by_zero )
+{
+   std::cout <<  "ANode:: ...test_trigger_expression_divide_by_zero\n";
+
+   // The map key  = trigger expression,
+   // value.first  = type of the expected root abstract syntax tree
+   // value.second = result of expected evaluation
+   map<string,std::pair<string,bool> > exprMap;
+
+   // Divide by zero or modulo by zero would lead to run-time crash
+   // However the Ast::evaluate() checks for this, and return zero for the whole expression i.e ./a:YMD % 0 returns 0
+   exprMap["./a:YMD % 0 == 0"] = std::make_pair(AstEqual::stype(),true);
+   exprMap["./a:YMD / 0 == 0"] = std::make_pair(AstEqual::stype(),true);
+
+
+   std::pair<string, std::pair<string,bool> > p;
+   BOOST_FOREACH(p, exprMap ) {
+
+      ExprParser theExprParser(p.first);
+      std::string errorMsg;
+      bool ok = theExprParser.doParse(errorMsg);
+      BOOST_REQUIRE_MESSAGE(ok,errorMsg);
+
+      string expectedRootType       = p.second.first;
+      bool expectedEvaluationResult = p.second.second;
+
+      Ast* top = theExprParser.getAst();
+      BOOST_REQUIRE_MESSAGE( top ,"No abstract syntax tree");
+      BOOST_CHECK_MESSAGE( top->left() ,"No root created");
+      BOOST_CHECK_MESSAGE( top->left()->isRoot() ,"First child of top should be a root");
+      BOOST_CHECK_MESSAGE( top->left()->type() == expectedRootType,"expected root type " << expectedRootType << " but found " << top->left()->type());
+      BOOST_CHECK_MESSAGE( expectedEvaluationResult == top->evaluate(),"evaluation not as expected for " << *top);
+
+      // expect check to fail, due to divide/modulo by zero
+      std::string error_msg;
+      BOOST_CHECK_MESSAGE( !top->check(error_msg),error_msg << ":  Check failed for " << *top);
+   }
 }
 
 BOOST_AUTO_TEST_CASE( test_parser_bad_expressions )
@@ -294,6 +349,7 @@ BOOST_AUTO_TEST_CASE( test_parser_bad_expressions )
 	exprvec.push_back("a:eventname == ");
    exprvec.push_back("a:eventname !  set");
    exprvec.push_back("a:eventname ! = set");
+   exprvec.push_back("a:eventname %");
  	exprvec.push_back("a:metername  100");
    exprvec.push_back(". == complete");
    exprvec.push_back("/ == complete");
@@ -313,7 +369,8 @@ BOOST_AUTO_TEST_CASE( test_parser_bad_expressions )
    exprvec.push_back("../../.a == complete");
 	exprvec.push_back("..a/b == aborted");
 	exprvec.push_back("..a/b/c == aborted");
-	exprvec.push_back("a == complete and");
+   exprvec.push_back("a == complete and");
+   exprvec.push_back("a %");
 	exprvec.push_back("(a == complete   b == complete)");
 	exprvec.push_back("a == complete and  b == complete)");
 	exprvec.push_back("(a == complete and  b == complete");

@@ -51,9 +51,9 @@ static void             insert_new_node();
 static void             delete_node();*/
 static void Layout(Widget,long*,long*);
 static void             Redisplay();
-static void compute_rect(SimpleTreeWidget,Node*,int,int,int,int,int,XRectangle*);
+static void compute_rect(SimpleTreeWidget,NodeStruct*,int,int,int,int,int,XRectangle*);
 static void set_positions(SimpleTreeWidget,long*,long*);
-/* static void change_vertical(SimpleTreeWidget tw, Node *w,Boolean v); ??? */
+/* static void change_vertical(SimpleTreeWidget tw, NodeStruct *w,Boolean v); ??? */
 #ifdef linux
 /* putting this into comments makes ctrl-left button for collector
    disappear !! */
@@ -203,7 +203,7 @@ SimpleTreeWidget request, SimpleTreeWidget new)
 }
 
 
-static int first_kid(SimpleTreeWidget w,Node *n)
+static int first_kid(SimpleTreeWidget w,NodeStruct *n)
 {
 	int i;
 	for(i=0;i<n->kcnt;i++)
@@ -212,7 +212,7 @@ static int first_kid(SimpleTreeWidget w,Node *n)
 	return -1;
 }
 
-static int last_kid(SimpleTreeWidget w,Node *n)
+static int last_kid(SimpleTreeWidget w,NodeStruct *n)
 {
 	int i;
 
@@ -248,7 +248,7 @@ static void Redisplay (SimpleTreeWidget w, XEvent *event, Region region)
 	int lkid;
 
 #if 0
-	Node    *child;
+	NodeStruct    *child;
 	XEvent  ev;
 	XmRegion r = (XmRegion)region;
 
@@ -275,7 +275,7 @@ static void Redisplay (SimpleTreeWidget w, XEvent *event, Region region)
 
 	for (i = 0; i < w -> simplebase.count; i++)
 	{
-		Node *child = w -> simplebase.nodes + i;
+		NodeStruct *child = w -> simplebase.nodes + i;
 
 		fkid = first_kid(w,child);
 
@@ -380,7 +380,7 @@ static void Layout(Widget w,long *maxWidth,long *maxHeight)
 
 	for(i=0;i<tw->simplebase.count;i++)
 	{
-		Node *w = tw->simplebase.nodes + i;
+		NodeStruct *w = tw->simplebase.nodes + i;
 		h_max = MAX(h_max,w->r.height); /* just a try */
 		w_max = MAX(w_max,w->r.width);
 	}
@@ -394,7 +394,7 @@ static void Layout(Widget w,long *maxWidth,long *maxHeight)
 	{
 		for(i=0;i<tw->simplebase.count;i++)
 		{
-			Node *w = tw->simplebase.nodes + i;
+			NodeStruct *w = tw->simplebase.nodes + i;
 			if(w->managed && (w->pcnt == 0))
 			{
 				XRectangle r;
@@ -415,7 +415,7 @@ static void Layout(Widget w,long *maxWidth,long *maxHeight)
 			Boolean v = (*maxWidth == 0);
 			for(i=0;i<tw->simplebase.count;i++)
 			{
-				Node *w = tw->simplebase.nodes + i;
+				NodeStruct *w = tw->simplebase.nodes + i;
 				if(w->managed && (w->pcnt == 0))
 					change_vertical(tw,w,!v);
 			}
@@ -428,7 +428,7 @@ static void Layout(Widget w,long *maxWidth,long *maxHeight)
 }
 
 #if 0
-static void change_vertical(SimpleTreeWidget tw, Node *w,Boolean v)
+static void change_vertical(SimpleTreeWidget tw, NodeStruct *w,Boolean v)
 {
 	int i;
 	if(w->misc[LAYOUT] != v )
@@ -457,7 +457,7 @@ static void union_rect(XRectangle *r1,XRectangle *r2,XRectangle *r3)
 }
 
 
-static void compute_rect(SimpleTreeWidget tw,Node *w,
+static void compute_rect(SimpleTreeWidget tw,NodeStruct *w,
 	int x,int y,int dx,int dy,int h,XRectangle *rect)
 {
 	int i;
@@ -475,7 +475,7 @@ static void compute_rect(SimpleTreeWidget tw,Node *w,
 
 	for(i = 0; i < w->kcnt; i++)
 	{
-		Node *z = &KIDS(tw,w,i);
+		NodeStruct *z = &KIDS(tw,w,i);
 		if(z->managed)
 		{
 			if(z->kcnt) /* && !w->misc[LAYOUT]) */
@@ -486,7 +486,7 @@ static void compute_rect(SimpleTreeWidget tw,Node *w,
 
 	for(i = 0; i < w->kcnt; i++)
 	{
-		Node *z = &KIDS(tw,w,i);
+		NodeStruct *z = &KIDS(tw,w,i);
 		if(z->managed)
 		{
 			XRectangle r;
@@ -523,7 +523,7 @@ static void set_positions(SimpleTreeWidget tw,long *maxWidth, long *maxHeight)
 
 	for(i=0;i<tw->simplebase.count;i++)
 	{
-		Node *w = tw->simplebase.nodes + i;
+		NodeStruct *w = tw->simplebase.nodes + i;
 
 		if(w->managed)
 		{
@@ -561,7 +561,7 @@ static void set_positions(SimpleTreeWidget tw,long *maxWidth, long *maxHeight)
 void NodeTreeFlip(Widget _w,int node)
 {
     SimpleTreeWidget w = (SimpleTreeWidget)_w;
-	Node *p = w->simplebase.nodes + node;
+	NodeStruct *p = w->simplebase.nodes + node;
 	if( node < 0 || node >= w->simplebase.count) return;
 	p->misc[LAYOUT] = !p->misc[LAYOUT];
 	NodeNewSize(_w,node);

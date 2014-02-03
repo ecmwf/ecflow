@@ -23,13 +23,13 @@
 #include <boost/date_time/posix_time/posix_time_types.hpp>
 
 #include "ServerTestHarness.hpp"
+#include "TestFixture.hpp"
 #include "Defs.hpp"
 #include "Suite.hpp"
 #include "Family.hpp"
 #include "Task.hpp"
 #include "DurationTimer.hpp"
 #include "AssertTimer.hpp"
-#include "ClientInvoker.hpp"
 
 using namespace std;
 using namespace ecf;
@@ -39,12 +39,13 @@ using namespace boost::posix_time;
 BOOST_AUTO_TEST_SUITE( TestSuite )
 
 
-static void wait_for_cron( int max_time_to_wait, const std::string& path, ClientInvoker& theClient)
+static void wait_for_cron( int max_time_to_wait, const std::string& path)
 {
    AssertTimer assertTimer(max_time_to_wait,false); // Bomb out after n seconds, fall back if test fail
+   TestFixture::client().set_throw_on_error( false );
    while (1) {
-      BOOST_REQUIRE_MESSAGE(theClient.sync_local() == 0, "sync_local failed should return 0\n" << theClient.errorMsg());
-      defs_ptr defs = theClient.defs();
+      BOOST_REQUIRE_MESSAGE(TestFixture::client().sync_local() == 0, "sync_local failed should return 0\n" << TestFixture::client().errorMsg());
+      defs_ptr defs = TestFixture::client().defs();
       if (defs) {
          node_ptr node = defs->findAbsNode(path);
          BOOST_REQUIRE_MESSAGE(node, "Could not find task at path " << path );
@@ -135,8 +136,7 @@ BOOST_AUTO_TEST_CASE( test_cron_time_series )
    serverTestHarness.run(theDefs, ServerTestHarness::testDataDefsLocation("test_cron_time_series.def"),1 /* timeout ignored*/, false /*waitForTestCompletion*/);
 
    // crons are *infinite*, just wait for cron to complete 3 times
-   ClientInvoker theClient ;
-   wait_for_cron(40,path,theClient);
+   wait_for_cron(40,path);
 
    cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount() << ")\n";
 }

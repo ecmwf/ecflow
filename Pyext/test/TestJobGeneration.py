@@ -16,8 +16,9 @@
 import os
 import shutil   # used to remove directory tree
 
-from ecflow import Defs, JobCreationCtrl, TaskVec, File
+from ecflow import Defs, JobCreationCtrl, TaskVec, File, Client
 
+def ecf_includes() :  return os.getcwd() + "/test/data/includes"
 
 def create_defs(ecf_home,task_vec):
     defs = Defs();
@@ -25,7 +26,7 @@ def create_defs(ecf_home,task_vec):
     suite.add_variable("ECF_HOME",ecf_home);
     suite.add_variable("ECF_CLIENT_EXE_PATH",File.find_client());
     suite.add_variable("SLEEPTIME","1");
-    suite.add_variable("ECF_INCLUDE",ecf_home + "/includes");
+    suite.add_variable("ECF_INCLUDE",ecf_includes());
     
     fam =  suite.add_family("family")
     t1 = fam.add_task("t1")
@@ -67,40 +68,58 @@ def check_jobs(task_vec, ecf_home):
             print "Found job file " + the_job_file
         else:
             assert False, "Could not find job file " + the_job_file
-   
-if __name__ == "__main__":
- 
+
+
+def get_parent_dir(file_path):
+    return os.path.dirname(file_path)
+
+def get_workspace_dir():
     cwd = os.getcwd()
-    #print cwd
-    ecf_home = cwd + "/test/data/ECF_HOME"
+    #print "get_workspace_dir from: " + cwd
+    while (1):
+        head, tail = os.path.split(cwd)
+        #print "tail:" + tail
+        if tail == "ecflow" :
+            return cwd
+        cwd = head
+    return cwd
+
+if __name__ == "__main__":
+    print "####################################################################"
+    print "Running ecflow version " + Client().version() 
+    print "####################################################################"
+ 
+    workspace = get_workspace_dir();
+    print workspace
+    
+    ecf_home = workspace + "/Pyext/test/data/ECF_HOME"
     task_vec = TaskVec()
     defs = create_defs(ecf_home,task_vec)
     print str(defs)
 
-    # Generate jobs for *ALL* tasks, to default locations ECF_HOME/ECF_NAME.job0 
+    print "Generate jobs for *ALL* tasks, to default locations ECF_HOME/ECF_NAME.job0" 
     print defs.check_job_creation()   
     check_jobs(task_vec,ecf_home)
     delete_jobs(task_vec,ecf_home)
        
-    # Generate jobs for *ALL* tasks, to default locations ECF_HOME/ECF_NAME.job0 
+    print "\nGenerate jobs for *ALL* tasks, to default locations ECF_HOME/ECF_NAME.job0"
     job_ctrl = JobCreationCtrl()
     defs.check_job_creation( job_ctrl )       
     print job_ctrl.get_error_msg()
     check_jobs(task_vec,ecf_home)
     delete_jobs(task_vec,ecf_home)
     
-    # Generate jobs for all nodes, under path, to default locations ECF_HOME/ECF_NAME.job0     
+    print "\nGenerate jobs for all nodes, under path, to default locations ECF_HOME/ECF_NAME.job0"    
     job_ctrl = JobCreationCtrl()
     job_ctrl.set_node_path( task_vec[0].get_abs_node_path() )    
     defs.check_job_creation(job_ctrl)       
     print job_ctrl.get_error_msg();
     delete_jobs(task_vec,ecf_home)
    
-   
-    # Generate jobs for all tasks, to the specified directory
+    print "\nGenerate jobs for all tasks, to the specified directory"
     # Directory will automatically created under the provided directory
     job_ctrl = JobCreationCtrl()
-    job_ctrl.set_dir_for_job_creation(cwd + "/test/data")  # generate jobs file under this directory
+    job_ctrl.set_dir_for_job_creation(workspace + "/Pyext/test/data")  # generate jobs file under this directory
     defs.check_job_creation(job_ctrl)
     print job_ctrl.get_error_msg()
     

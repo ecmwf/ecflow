@@ -41,12 +41,13 @@
 
 class ServerEnvironment;
 
-class server : public AbstractServer {
+
+class Server : public AbstractServer {
 public:
    /// Constructor opens the acceptor and starts waiting for the first incoming
    /// connection.
-   server(ServerEnvironment&);
-   virtual ~server();
+   Server(ServerEnvironment&);
+   virtual ~Server();
 
    /// Start the server
    /// The Server::run/io_service::run() call will block until all asynchronous operations
@@ -155,4 +156,4 @@ private:
    std::string userWhoHasLock_;
 };
 
-#endif /* SERVER_HPP_ */
+#endif

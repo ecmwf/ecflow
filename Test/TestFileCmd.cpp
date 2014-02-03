@@ -21,13 +21,13 @@
 #include <boost/date_time/posix_time/posix_time_types.hpp>
 
 #include "ServerTestHarness.hpp"
+#include "TestFixture.hpp"
 
 #include "Defs.hpp"
 #include "Suite.hpp"
 #include "Family.hpp"
 #include "Task.hpp"
 #include "DurationTimer.hpp"
-#include "ClientInvoker.hpp"
 #include "ClientToServerCmd.hpp"
 #include "File.hpp"
 
@@ -84,8 +84,7 @@ BOOST_AUTO_TEST_CASE( test_file_cmd )
    // Now invoke the file command to extract <ecffile,job file,job output, manual >
    // If the requests succeeded the client needs to create a temporary file, and populate it with
    // the contents of the string returned from the server
-   ClientInvoker theClient ;
-   theClient.set_throw_on_error(false);
+   TestFixture::client().set_throw_on_error(false);
 
    std::vector<Node*> nodeVec;
    theDefs.getAllNodes(nodeVec);
@@ -100,7 +99,7 @@ BOOST_AUTO_TEST_CASE( test_file_cmd )
          std::vector<std::string> theArgs = CtsApi::file(nodePath,file_type,"10000");
          std::string args; for(size_t x = 0; x < theArgs.size(); x++) { args += theArgs[x]; args += " "; }
 
-         int theResult =  theClient.file(nodePath,file_type,"10000");
+         int theResult =  TestFixture::client().file(nodePath,file_type,"10000");
 //         cout << "nodePath = " << nodePath << " fileType = " << file_type << " args passed = " << args << " pass = " << theResult << "\n";
 
          /// Expect KILL and STAT file types to fail, i.e since we have not called those commands
@@ -111,15 +110,15 @@ BOOST_AUTO_TEST_CASE( test_file_cmd )
 
          if (node->isSubmittable() || fileTypesVec[i] == CFileCmd::MANUAL) {
             // For suite and families only manual is valid
-            BOOST_CHECK_MESSAGE(  theResult == 0,args << " failed for Node should return 0.\n" << theClient.errorMsg());
-            BOOST_CHECK_MESSAGE(  !theClient.get_string().empty()," file contents empty for  " << args );
+            BOOST_CHECK_MESSAGE(  theResult == 0,args << " failed for Node should return 0.\n" << TestFixture::client().errorMsg());
+            BOOST_CHECK_MESSAGE(  !TestFixture::client().get_string().empty()," file contents empty for  " << args );
          }
          else {
             // Should fail
             BOOST_CHECK_MESSAGE( theResult != 0, args << " Expected failure for node " << node->debugNodePath() << " with file= " << CFileCmd::toString(fileTypesVec[i]) );
             if (theResult == 0 ) {
                std::cout << "Found file contents:''\n";
-               std::cout << theClient.get_string();
+               std::cout << TestFixture::client().get_string();
                std::cout << "''\n";
             }
          }

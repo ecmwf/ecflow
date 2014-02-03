@@ -19,9 +19,12 @@ print ecflow.Defs.__doc__
 from ecflow import Suite, Family, Task, Defs, Clock, DState, PartExpression, Variable, Limit, InLimit, \
                    Date, Day, Event, Meter, Label, Autocancel, Days, TimeSlot, TimeSeries, Style, State, \
                    RepeatString, RepeatDate, RepeatInteger, RepeatDay, RepeatEnumerated, \
-                   Verify, PrintStyle, Time, Today, Late, Cron 
+                   Verify, PrintStyle, Time, Today, Late, Cron, Client
 
 if __name__ == "__main__":
+    print "####################################################################"
+    print "Running ecflow version " + Client().version() 
+    print "####################################################################"
     
     suite = Suite("s1")
     assert (isinstance(suite, ecflow.Suite)), "Expected suite"

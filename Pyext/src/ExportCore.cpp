@@ -44,8 +44,20 @@ using namespace boost::python;
 using namespace std;
 using namespace ecf;
 
+bool debug_build()
+{
+#ifdef NDEBUG
+   return false;
+#else
+   return true;
+#endif
+}
+
 void export_Core()
 {
+   // For use in test only
+   def("debug_build",debug_build);
+
 	class_<File, boost::noncopyable >("File", "Utility class, Used in test only.")
             .def("find_server", &File::find_ecf_server_path, "Provides pathname to the server")  .staticmethod("find_server")
             .def("find_client", &File::find_ecf_client_path, "Provides pathname to the client")  .staticmethod("find_client")

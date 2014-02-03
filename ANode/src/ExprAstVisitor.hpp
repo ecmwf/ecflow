@@ -29,6 +29,7 @@ class AstPlus;
 class AstMinus;
 class AstDivide;
 class AstMultiply;
+class AstModulo;
 class AstOr;
 class AstEqual;
 class AstNotEqual;
@@ -57,7 +58,8 @@ public:
  	virtual void visitPlus(AstPlus*) = 0;
  	virtual void visitMinus(AstMinus*) = 0;
  	virtual void visitDivide(AstDivide*) = 0;
- 	virtual void visitMultiply(AstMultiply*) = 0;
+   virtual void visitMultiply(AstMultiply*) = 0;
+   virtual void visitModulo(AstModulo*) = 0;
  	virtual void visitOr(AstOr*) = 0;
  	virtual void visitEqual(AstEqual*) = 0;
  	virtual void visitNotEqual(AstNotEqual*) = 0;
@@ -88,7 +90,8 @@ public:
  	virtual void visitPlus(AstPlus*){}
  	virtual void visitMinus(AstMinus*){}
  	virtual void visitDivide(AstDivide*){}
- 	virtual void visitMultiply(AstMultiply*){}
+   virtual void visitMultiply(AstMultiply*){}
+   virtual void visitModulo(AstModulo*){}
  	virtual void visitOr(AstOr*){}
  	virtual void visitEqual(AstEqual*){}
  	virtual void visitNotEqual(AstNotEqual*){}
@@ -121,7 +124,8 @@ public:
  	virtual void visitPlus(AstPlus*){}
  	virtual void visitMinus(AstMinus*){}
  	virtual void visitDivide(AstDivide*){}
- 	virtual void visitMultiply(AstMultiply*){}
+   virtual void visitMultiply(AstMultiply*){}
+   virtual void visitModulo(AstModulo*){}
  	virtual void visitOr(AstOr*){}
  	virtual void visitEqual(AstEqual*){}
  	virtual void visitNotEqual(AstNotEqual*){}

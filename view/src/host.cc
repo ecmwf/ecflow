@@ -1308,8 +1308,9 @@ tmp_file ehost::file( node& n, std::string name )
          else if (name == "ECF_JOBOUT")
             client_.file(n.full_name(), "jobout");
          else {
-            gui::message("host::file: unknown file type %s", name.c_str());
-            return tmp_file(NULL);
+	   client_.file(n.full_name(), "jobout");
+	   /* gui::message("host::file: unknown file type %s", name.c_str());
+	      return tmp_file(NULL); */
          }
 
          // Do *not* assign 'client_.server_reply().get_string()' to a separate string, since
@@ -1568,12 +1569,13 @@ int ehost::update()
 	      update_reg_suites(false); // new suite may have been added
 	      reset(false, false); // SUP-398
 	    } else {
-	      gui::message("%s: updating status", name());
-	      XECFDEBUG std::cout << "# " << name() << ": small update\n";
-	      if (tree_) 
-		{} // tree_->update_tree(false); // isn t it done with node redraw?
-	    }
-	    err = 0;
+              gui::message("%s: updating status", name());
+              XECFDEBUG std::cout << "# " << name() << ": small update\n";
+              if (tree_) 
+                tree_->update_tree(false); // fp:60043 Issue with Ecflow updating on console VM
+              // redraw(false); // too much blinking with this
+            }
+            err = 0;
             break;
          default:
             break;

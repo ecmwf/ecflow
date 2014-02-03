@@ -75,7 +75,7 @@ int TreeNodeModel::rowCount( const QModelIndex& parent) const
 	{
 			if(ServerHandler *server=indexToServer(parent))
 			{
-				defs_ptr defs = server->defs();
+				//defs_ptr defs = server->defs();
 				return server->suiteNum();
 			}
 	}

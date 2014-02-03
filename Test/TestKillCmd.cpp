@@ -21,13 +21,13 @@
 #include <boost/date_time/posix_time/posix_time_types.hpp>
 
 #include "ServerTestHarness.hpp"
+#include "TestFixture.hpp"
 
 #include "Defs.hpp"
 #include "Suite.hpp"
 #include "Family.hpp"
 #include "Task.hpp"
 #include "DurationTimer.hpp"
-#include "ClientInvoker.hpp"
 #include "PrintStyle.hpp"
 #include "ClientToServerCmd.hpp"
 #include "AssertTimer.hpp"
@@ -44,7 +44,7 @@ BOOST_AUTO_TEST_SUITE( TestSuite  )
 
 // forward declare functions
 static bool kill_cmd(bool kill_task);
-static bool waitForTaskState(NState::State state, int max_time_to_wait,ClientInvoker& theClient);
+static bool waitForTaskState(NState::State state, int max_time_to_wait);
 
 // test:: test the kill command. Create a task that runs a long time
 // The associated job is then killed. This should leave task in aborted state
@@ -108,24 +108,24 @@ static bool kill_cmd(bool kill_task)
 
 
    // cout << "test_kill_cmd Waiting for task to become active\n";
-   ClientInvoker theClient ;
-   (void)waitForTaskState(NState::ACTIVE,10, theClient );
+   TestFixture::client().set_throw_on_error(false);
+   (void)waitForTaskState(NState::ACTIVE,10);
 
 
    // cout << "test_kill_cmd Now kill the active jobs\n";
-   BOOST_REQUIRE_MESSAGE( theClient.kill(kill_path) == 0,CtsApi::to_string(CtsApi::kill(kill_path)) << " failed should return 0.\n" << theClient.errorMsg());
+   BOOST_REQUIRE_MESSAGE( TestFixture::client().kill(kill_path) == 0,CtsApi::to_string(CtsApi::kill(kill_path)) << " failed should return 0.\n" << TestFixture::client().errorMsg());
 
 
    // cout << "test_kill_cmd Wait for the task to be aborted\n";
-   return waitForTaskState(NState::ABORTED,20, theClient );
+   return waitForTaskState(NState::ABORTED,20 );
 }
 
-static bool waitForTaskState(NState::State state, int max_time_to_wait,ClientInvoker& theClient)
+static bool waitForTaskState(NState::State state, int max_time_to_wait)
 {
    AssertTimer assertTimer(max_time_to_wait,false); // Bomb out after n seconds, fall back if test fail
    while (1) {
-      BOOST_REQUIRE_MESSAGE(theClient.sync_local() == 0, "sync_local failed should return 0\n" << theClient.errorMsg());
-      defs_ptr defs = theClient.defs();
+      BOOST_REQUIRE_MESSAGE(TestFixture::client().sync_local() == 0, "sync_local failed should return 0\n" << TestFixture::client().errorMsg());
+      defs_ptr defs = TestFixture::client().defs();
       vector<Task*> tasks; defs->getAllTasks(tasks);
       BOOST_FOREACH(Task* task, tasks) {
          if (task->state() == state) {

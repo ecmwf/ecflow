@@ -1,0 +1,9 @@
+suite suiteName
+    family f1
+      task a
+      event event
+      task b
+            trigger ((/suiteName/f1/a:event / 0) == 0)   # divide by zero
+    endfamily
+endsuite
+

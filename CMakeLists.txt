@@ -24,22 +24,25 @@
 #  
 #/usr/local/apps/cmake/current/bin/cmake ../../  \
 #         -DCMAKE_BUILD_TYPE=Debug \
-#         -DCMAKE_MODULE_PATH=/usr/local/apps/ecbuild/1.2.0/share/ecbuild/cmake \
+#         -DCMAKE_MODULE_PATH=/usr/local/apps/ecbuild/current/share/ecbuild/cmake \
 #         -DPYTHON_LIBRARY=/usr/local/apps/python/current/lib/libpython2.7.a \
 #         -DPYTHON_INCLUDE_DIR=/usr/local/apps/python/current/include/python2.7 \
-#         -DPYTHON_EXECUTABLE=/usr/local/apps/python/current/bin/python2.7 
+#         -DPYTHON_EXECUTABLE=/usr/local/apps/python/current/bin/python2.7 \
+#         -DCMAKE_INSTALL_PREFIX=/usr/local/apps/ecflow/$(cat ../../VERSION.cmake | awk '{print $3}'|sed 's/["]//g')
+#
+#         -DCMAKE_INSTALL_PREFIX=/var/tmp/ma0/cmake/ecflow/4.0.1
 #
 #############################################################
-
 
 cmake_minimum_required( VERSION 2.6.4 FATAL_ERROR )
 
 project( ecflow CXX )
 
-set( CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH} )
+set( CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/../ecbuild/cmake")
 
 include( ecbuild_system )
 
+ecbuild_requires_macro_version( 1.2 )
 option( ENABLE_VIEWER    "enable the Qt version of ecflowview"  ON )
 
 ###############################################################################
@@ -48,14 +51,39 @@ option( ENABLE_VIEWER    "enable the Qt version of ecflowview"  ON )
 ecbuild_declare_project()
 
 ###############################################################################
+# some variables of this project
+
+option( ENABLE_PYTHON         "enable python interface"   ON  )
+
+###############################################################################
 # find packages
 
-ecbuild_find_python( VERSION 2.7 )
+# Python ----------------------------------------------------------------------
+if(ENABLE_PYTHON)
+   ecbuild_find_python( VERSION 2.7 REQUIRED )
+else() 
+   ecbuild_find_python( VERSION 2.7 )
+endif()
+message( STATUS "PYTHON_EXECUTABLE    : ${PYTHON_EXECUTABLE}")
+message( STATUS "PYTHON_INCLUDE_DIRS  : ${PYTHON_INCLUDE_DIRS}")
+message( STATUS "PYTHON_LIBRARIES     : ${PYTHON_LIBRARIES}")
+ 
 
-# set(Boost_USE_STATIC_LIBS        ON)
+# Boost ----------------------------------------------------------------------
+
+# If this is enable then can not find boost libs using env BOOST_ROOT ?
+#ecbuild_add_extra_search_paths( boost )
+
+# set(Boost_USE_STATIC_LIBS      ON)
 set(Boost_USE_MULTITHREADED      ON)
-# set(Boost_NO_SYSTEM_PATHS        ON)
+set(Boost_NO_SYSTEM_PATHS        ON)
+set(Boost_DETAILED_FAILURE_MSG   ON)
+#set(Boost_DEBUG                 ON)
+
 find_package( Boost 1.53.0 COMPONENTS python serialization system thread unit_test_framework test_exec_monitor filesystem program_options date_time )
+#find_package(Boost 1.53.0 EXACT REQUIRED COMPONENTS python)
+
+message( STATUS "Boost_LIBRARIES     : ${Boost_LIBRARIES}" )
 
 list( APPEND Ecflow_Boost_LIBS 
     ${Boost_SERIALIZATION_LIBRARY}
@@ -82,17 +110,22 @@ endif()
 if( CMAKE_BUILD_TYPE MATCHES "[Dd][Ee][Bb][Uu][Gg]" )
     message( "INFO: DEBUG BUILD" )
     # for debug type builds, turn on verbose makefiles
-    # SET(CMAKE_VERBOSE_MAKEFILE ON)
+    # set(CMAKE_VERBOSE_MAKEFILE ON)
 
     # Tell other CMake files that we're doing a debug build
-    SET( DEBUG_BUILD 1 )
+    set( DEBUG_BUILD 1 )
 
     # Tell C/C++ that we're doing a debug build
-    ADD_DEFINITIONS( -DDEBUG )
+    add_definitions( -DDEBUG )
 endif()
+
 
 ###############################################################################
 # build source code
+
+# compile with fPIC on linux, need for ecflow.so *install*
+# This could be switched off for, Server,/View, since that is not used in ecflow.so
+cmake_add_cxx_flags("-fPIC")
 
 add_subdirectory( ACore )
 add_subdirectory( ANattr )
@@ -113,6 +146,31 @@ endif()
 
 # configure_file( cmake/ecbase_config.h.in  ${CMAKE_BINARY_DIR}/ecbase_config.h )
 
+
+# =========================================================================================
+# install 
+# =========================================================================================
+# install scripts
+install (FILES  
+            ${CMAKE_SOURCE_DIR}/tools/ecflow_logsvr.pl
+            ${CMAKE_SOURCE_DIR}/tools/ecflow_logsvr.sh
+            ${CMAKE_SOURCE_DIR}/tools/ecflow_start.sh
+            ${CMAKE_SOURCE_DIR}/tools/ecflow_stop.sh
+            ${CMAKE_SOURCE_DIR}/tools/noconnect.sh
+            ${CMAKE_SOURCE_DIR}/Pyext/migrate/ecflow_migrate.py
+         DESTINATION bin
+         PERMISSIONS OWNER_READ GROUP_READ WORLD_READ OWNER_EXECUTE GROUP_EXECUTE WORLD_EXECUTE
+        )
+
+# install documentation         
+install (FILES  
+            ${CMAKE_SOURCE_DIR}/Doc/user-manual/client_options.docx  
+            ${CMAKE_SOURCE_DIR}/Doc/user-manual/user_manual.docx    
+            ${CMAKE_SOURCE_DIR}/Doc/user-manual/user_manual.pdf    
+         DESTINATION doc/ecflow
+         PERMISSIONS OWNER_READ GROUP_READ WORLD_READ OWNER_EXECUTE GROUP_EXECUTE WORLD_EXECUTE
+        )
+         
 ############################################################################################
 # final
 

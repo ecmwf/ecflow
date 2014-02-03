@@ -124,6 +124,7 @@ def add_cray_gnu_compiler_variables( cray_gnu ):
     cray_gnu.add_variable("COMPILER_TEST_PATH","gcc-4.6.3/$mode")
     cray_gnu.add_variable("COMPILER_VERSION","gcc-4.6.3")
     cray_gnu.add_variable("TOOLSET","gcc")
+    cray_gnu.add_variable("LAYOUT","tagged")
     cray_gnu.add_variable("PRGENV","PrgEnv-gnu")
     cray_gnu.add_variable("SITE_CONFIG","$WK/build/site_config/site-config-cray.jam")
     cray_gnu.add_variable("ROOT_WK","/perm/ma/ma0/workspace/GNU")
@@ -134,6 +135,7 @@ def add_cray_intel_compiler_variables( cray_intel ):
     cray_intel.add_variable("COMPILER_TEST_PATH","intel-linux/$mode")
     cray_intel.add_variable("COMPILER_VERSION","intel-linux")
     cray_intel.add_variable("TOOLSET","intel")
+    cray_intel.add_variable("LAYOUT","versioned")
     cray_intel.add_variable("PRGENV","PrgEnv-intel")
     cray_intel.add_variable("SITE_CONFIG","$WK/build/site_config/site-config-cray.jam")
     cray_intel.add_variable("ROOT_WK","/perm/ma/ma0/workspace/INTEL")
@@ -143,10 +145,11 @@ def add_cray_cray_compiler_variables( cray_cray ):
     cray_cray.add_variable("COMPILER_TEST_PATH","cray/$mode")
     cray_cray.add_variable("COMPILER_VERSION","cray")
     cray_cray.add_variable("TOOLSET","cray")
+    cray_cray.add_variable("LAYOUT","versioned")
     cray_cray.add_variable("PRGENV","PrgEnv-cray")
     cray_cray.add_variable("SITE_CONFIG","$WK/build/site_config/site-config-cray.jam")
     cray_cray.add_variable("ROOT_WK","/perm/ma/ma0/workspace/CRAY")
-    cray_cray.add_variable("CUSTOM_BJAM_ARGS","toolset=cray cxxflags=-hPIC")  
+    cray_cray.add_variable("CUSTOM_BJAM_ARGS","toolset=cray cxxflags=-fPIC")  
 
 def add_remote_cray_variables( cray ):
     # re use axel scripts for trap.h. rcp.eh etc,  
@@ -166,7 +169,7 @@ def add_remote_cray_variables( cray ):
 
     cray.add_variable("ECF_KILL_CMD",   "/home/ma/emos/bin/smssubmit.cray %USER% %SCHOST% %ECF_RID% %ECF_JOB% %ECF_JOBOUT% kill")
     cray.add_variable("ECF_STATUS_CMD", "/home/ma/emos/bin/smssubmit.cray %USER% %SCHOST% %ECF_RID% %ECF_JOB% %ECF_JOBOUT% stat")
-    cray.add_variable("ECF_JOB_CMD",   "/home/ma/emos/bin/smssubmit.cray  %USER% %SCHOST% %ECF_JOB% %ECF_JOBOUT%")
+    cray.add_variable("ECF_JOB_CMD",    "/home/ma/emos/bin/smssubmit.cray %USER% %SCHOST% %ECF_JOB% %ECF_JOBOUT%")
 
     cray.add_variable("QUEUE","ns")
     cray.add_variable("ACCOUNT","ecodmdma")
@@ -260,47 +263,6 @@ def add_aix_power7_variables( aix_power7 ) :
     aix_power7.add_variable("BUILD_ECFLOWVIEW","false")  # dont build on this platform
 
 
-def add_remote_aix_rs6000_variables( aix_rs6000 ) :
-    aix_rs6000.add_variable("ECF_JOB_CMD",    "/home/ma/emos/bin/smssubmit %USER% %SCHOST% %ECF_JOB% %ECF_JOBOUT%")
-    aix_rs6000.add_variable("ECF_KILL_CMD",   "/home/ma/emos/bin/smskill   %USER% %SCHOST% %ECF_RID% %ECF_JOB% > %ECF_JOB%.kill 2>&1")
-    aix_rs6000.add_variable("ECF_STATUS_CMD", "/home/ma/emos/bin/smsstatus %USER% %SCHOST% %ECF_RID% %ECF_JOB% > %ECF_JOB%.stat 2>&1")
-    aix_rs6000.add_variable("QUEUE","ns")
-    aix_rs6000.add_variable("ACCOUNT","ecodmdma")
-    aix_rs6000.add_variable("SCHOST","ecgate")    # Super Computer HOST
-    aix_rs6000.add_variable("WSHOST",os.uname()[1])     # Work Space HOST
-    aix_rs6000.add_variable("ECF_TRIES","7")      # Since ecgate times out with CPU limit exceeded
-    aix_rs6000.add_variable("ECF_INCLUDE",  WK + "/build/nightly/suite/aix_rs6000_xlc/includes")
-    aix_rs6000.add_variable("COMPILER_VERSION","vacpp12100")
-    aix_rs6000.add_variable("COMPILER_TEST_PATH","vacpp/$mode/threading-multi")
-    aix_rs6000.add_variable("TOOLSET","vacpp")
-    
-def add_aix_rs6000_variables( aix_rs6000 ) :
-    aix_rs6000.add_variable("REMOTE_HOST","ecgate")
-    aix_rs6000.add_variable("ROOT_WK","/emos_data/ecflow/rs6000/xlc")
-    aix_rs6000.add_variable("BOOST_DIR","/emos_data/ecflow/rs6000/xlc/boost")
-    aix_rs6000.add_variable("ARCH","rs6000")
-    aix_rs6000.add_variable("SITE_CONFIG","$WK/build/site_config/site-config-AIX-rs6000.jam")
-
-
-def add_remote_aix_gcc_variables( aix_gcc ) :
-    aix_gcc.add_variable("ECF_JOB_CMD",    "/home/ma/emos/bin/smssubmit %USER% %SCHOST% %ECF_JOB% %ECF_JOBOUT%")
-    aix_gcc.add_variable("ECF_KILL_CMD",   "/home/ma/emos/bin/smskill   %USER% %SCHOST% %ECF_RID% %ECF_JOB% > %ECF_JOB%.kill 2>&1")
-    aix_gcc.add_variable("ECF_STATUS_CMD", "/home/ma/emos/bin/smsstatus %USER% %SCHOST% %ECF_RID% %ECF_JOB% > %ECF_JOB%.stat 2>&1")
-    aix_gcc.add_variable("QUEUE","ns")
-    aix_gcc.add_variable("ACCOUNT","ecodmdma")
-    aix_gcc.add_variable("SCHOST","ecgate")    # Super Computer HOST
-    aix_gcc.add_variable("WSHOST",os.uname()[1])     # Work Space HOST
-    aix_gcc.add_variable("ECF_TRIES","7")      # Since ecgate times out with CPU limit exceeded
-    aix_gcc.add_variable("COMPILER_TEST_PATH","gcc-4.5.0/$mode")
-    aix_gcc.add_variable("TOOLSET","gcc")
-     
-def add_aix_gcc_variables( aix_gcc ) :
-    aix_gcc.add_variable("REMOTE_HOST","ecgate")
-    aix_gcc.add_variable("ROOT_WK","/emos_data/ecflow/rs6000/gcc")
-    aix_gcc.add_variable("BOOST_DIR","/emos_data/ecflow/rs6000/gcc/boost")
-    aix_gcc.add_variable("ARCH","rs6000")
-    aix_gcc.add_variable("SITE_CONFIG","$WK/build/site_config/site-config-AIX-gcc.jam")
-
 def add_build_debug( parent ): 
     f = parent.add_family("build_debug")
     f.add_trigger("cp_site_config == complete and git_clone == complete")
@@ -308,10 +270,11 @@ def add_build_debug( parent ):
     f.add_task("build")
     task_test = f.add_task("test")
     # on IBM we do the debug build first
-    if parent.name() == "aix_power7" or parent.name() == "aix_rs6000_xlc" or parent.name() == "hpux" :
+    if parent.name() == "aix_power7" or parent.name() == "hpux" :
         task_test.add_trigger("build == complete")
     else:
-        task_test.add_trigger("build == complete and (../build_release/test == complete or ../build_release/test == aborted)")
+        task_test.add_trigger("build == complete")
+        #task_test.add_trigger("build == complete and (../build_release/test == complete or ../build_release/test == aborted)")
     task_test.add_label("progress","")
     task_test.add_meter("progress",0,100,100)
      
@@ -324,15 +287,16 @@ def add_build_release( parent ):
     
     task_test = f.add_task("test")
     # on IBM/HPUX we do the debug build first, it's a *lot* faster
-    if parent.name() == "aix_power7" or parent.name() == "aix_rs6000_xlc" or parent.name() == "hpux" :
-        task_test.add_trigger("build == complete and (../build_debug/test == complete or ../build_debug/test == aborted)")
+    if parent.name() == "aix_power7" or parent.name() == "hpux" :
+        task_test.add_trigger("build == complete")
+        #task_test.add_trigger("build == complete and (../build_debug/test == complete or ../build_debug/test == aborted)")
     elif parent.name() == "linux64intel":
         # Both linux64 and linux64intel are same machine, to avoid starting server on same port add a dependency
-        task_test.add_trigger("build == complete and ( /suite/build/linux64/build_debug/test == complete or /suite/build/linux64/build_debug/test == aborted)")
+        task_test.add_trigger("build == complete")
+        #task_test.add_trigger("build == complete and ( /suite/build/linux64/build_debug/test == complete or /suite/build/linux64/build_debug/test == aborted)")
     else :
         task_test.add_trigger("build == complete")
   
-
     task_test.add_label("progress","")
     task_test.add_meter("progress",0,100,100)
     
@@ -355,7 +319,7 @@ def add_build_and_test_tasks( parent ) :
     clean_task = parent.add_task("clean")
     clean_task.add_defstatus( ecflow.DState.complete )
     
-    if parent.name() != "localhost" and  parent.name() != "localhost_clang" :
+    if parent.name() != "localhost" and parent.name() != "localhost_clang"  and parent.name() != "localhost_cmake":
         cp_install = parent.add_task("cp_install")
         cp_install.add_defstatus( ecflow.DState.complete )
         add_local_job_variables(cp_install) # run locally
@@ -363,8 +327,8 @@ def add_build_and_test_tasks( parent ) :
     cp_site_config = parent.add_task("cp_site_config")
     add_local_job_variables(cp_site_config) # run locally
             
-    # On aix/xlc do the debug build first, its a lot faster, than build release
-    if parent.name() == "aix_power7" or parent.name() == "aix_rs6000_xlc" or parent.name() == "hpux" :
+    # On aix and hpux do the debug build first, its a lot faster, than build release
+    if parent.name() == "aix_power7" or parent.name() == "hpux" :
         add_build_debug( parent )
         add_build_release( parent )
     else:
@@ -390,7 +354,20 @@ def build_localhost( parent ) :
     localhost.add_task("test_migration").add_trigger("test_performance == complete or test_server_performance == aborted")
     task = localhost.add_task("test_new_client_old_server")
     task.add_trigger("test_migration == complete or test_migration == aborted")
-    task.add_variable("OLD_VERSION","3.1.9")
+    task.add_variable("OLD_VERSION","4.0.0")
+
+def build_localhost_cmake( parent ) :
+    # Hence left out test_client_performance and test_server_performance
+    localhost_cmake = parent.add_family("localhost_cmake")
+    localhost_cmake.add_variable("CMAKE","CMAKE")
+    
+    if (parent.name() == "build") :
+        localhost_cmake.add_trigger("localhost == complete || localhost == aborted")
+    add_localhost_variables(localhost_cmake)
+    
+    add_git_tasks( localhost_cmake , True)
+
+    add_build_and_test_tasks( localhost_cmake )
 
 def build_localhost_clang( parent ) :
     # Currently clang based profile builds, have a memory fault. 
@@ -400,7 +377,7 @@ def build_localhost_clang( parent ) :
     localhost_clang.add_variable("BOOST_VERSION","boost_1_53_0")
 
     if (parent.name() == "build") :
-        localhost_clang.add_trigger("localhost == complete || localhost == aborted")
+        localhost_clang.add_trigger("localhost_cmake == complete || localhost_cmake == aborted")
     add_localhost_clang_variables(localhost_clang)
     
     add_git_tasks( localhost_clang , True)
@@ -501,20 +478,7 @@ def build_aix_power7( parent ) :
     add_git_tasks( aix_power7 )
     add_build_and_test_tasks( aix_power7 )
     
-def build_aix_rs6000_xlc( parent ) :
-    aix_rs6000 = parent.add_family("aix_rs6000_xlc")
-    add_aix_rs6000_variables(aix_rs6000)
-    add_remote_aix_rs6000_variables(aix_rs6000)
-    add_git_tasks( aix_rs6000 )  
-    add_build_and_test_tasks( aix_rs6000 )
 
-def build_aix_gcc(parent) :
-    aix_gcc = parent.add_family("aix_gcc")
-    add_aix_gcc_variables( aix_gcc )
-    add_remote_aix_gcc_variables( aix_gcc )
-    add_git_tasks( aix_gcc )
-    add_build_and_test_tasks( aix_gcc )
-  
 def add_boost_tasks( family ):
     boost_remove = family.add_task("boost_remove")  
     boost_copy_gzip = family.add_task("boost_copy_gzip")  
@@ -534,6 +498,7 @@ def add_boost_tasks( family ):
 def build_boost( boost ):
     boost.add_defstatus( ecflow.DState.suspended );
     boost.add_variable("BOOST_VERSION",BOOST_VERSION)
+    boost.add_variable("LAYOUT","tagged")
     
     family = boost.add_family("localhost")
     add_localhost_variables(family)
@@ -562,7 +527,42 @@ def build_boost( boost ):
     add_redhat_variables(family)
     add_remote_redhat_variables(family)
     add_boost_tasks( family )
+    
+    
+    family = boost.add_family("cray")
+    add_cray_variables(family)
+    add_remote_cray_variables(family)
+    add_cray_gnu_compiler_variables(family)
 
+    boost_remove = family.add_task("boost_remove")  
+    boost_copy_gzip = family.add_task("boost_copy_gzip")  
+    boost_copy_gzip.add_trigger("boost_remove == complete")
+    add_local_job_variables(boost_copy_gzip)  # this is run locally
+    boost_untar = family.add_task("boost_untar")
+    boost_untar.add_trigger("boost_copy_gzip == complete")
+    boost_bjam = family.add_task("boost_bjam")
+    boost_bjam.add_trigger("boost_untar == complete")
+    boost_fix = family.add_task("boost_fix")
+    boost_fix.add_trigger("boost_bjam == complete")
+    boost_site_config = family.add_task("boost_site_config")
+    boost_site_config.add_trigger("boost_fix == complete")
+    
+    family_cray_gnu = family.add_family("cray_gnu")
+    add_cray_gnu_compiler_variables(family_cray_gnu)
+    boost_build = family_cray_gnu.add_task("boost_build")
+    boost_build.add_trigger("../boost_site_config == complete")
+    
+    family_cray_intel = family.add_family("cray_intel")
+    add_cray_intel_compiler_variables(family_cray_intel)
+    boost_build = family_cray_intel.add_task("boost_build")
+    boost_build.add_trigger("../boost_site_config == complete")
+    
+    family_cray_cray = family.add_family("cray_cray")
+    add_cray_cray_compiler_variables(family_cray_cray)
+    boost_build = family_cray_cray.add_task("boost_build")
+    boost_build.add_trigger("../boost_site_config == complete")
+    
+    
     family = boost.add_family("opensuse103")
     add_opensuse103_variables(family)
     add_remote_opensuse103_variables(family)
@@ -578,10 +578,6 @@ def build_boost( boost ):
     add_remote_aix_power7_variables(family)
     add_boost_tasks( family )
     
-    family = boost.add_family("aix_rs6000")
-    add_aix_rs6000_variables(family)
-    add_remote_aix_rs6000_variables(family)
-    add_boost_tasks( family )
     
 def add_suite_variables( suite ):
     suite.add_variable("ECFLOW_TAR_DIR","/var/tmp/ma0/clientRoot/workspace")
@@ -642,6 +638,7 @@ with defs.add_suite("suite") as suite:
         add_hpux_variables( cp_tar_to_hpux )
     
         build_localhost( build )
+        build_localhost_cmake( build )
         build_localhost_clang( build )
         build_linux_64( build )
         build_linux_64_intel( build )
@@ -651,9 +648,7 @@ with defs.add_suite("suite") as suite:
         build_opensuse103( build )
         build_hpux(build)
         build_aix_power7(build)
-        build_aix_rs6000_xlc(build)
-        #build_aix_gcc(build)
-
+  
 #ecflow.PrintStyle.set_style(ecflow.Style.STATE)
 #print defs
 

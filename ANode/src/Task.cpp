@@ -661,7 +661,9 @@ bool Task::checkInvariants(std::string& errorMsg) const
    size_t vec_size = aliases_.size();
    for(size_t t = 0; t < vec_size; t++) {
       if (aliases_[t]->parent() != this) {
-         errorMsg += "Task::checkInvariants alias parent() not correct. See task : " + absNodePath();
+         std::stringstream ss;
+         ss << "Task::checkInvariants alias(" << aliases_[t]->name() << ") parent() not correct. See task : " << absNodePath();
+         errorMsg += ss.str();
          return false;
       }
       if (!aliases_[t]->checkInvariants(errorMsg)) {

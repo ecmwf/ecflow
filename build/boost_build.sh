@@ -128,18 +128,19 @@ echo "using compiler $tool with build $1 variants "
 ./bjam --build-dir=./tmpBuildDir toolset=$tool $CXXFLAGS stage link=static --layout=$layout --with-test variant=release  
 ./bjam --build-dir=./tmpBuildDir toolset=$tool $CXXFLAGS stage link=static --layout=$layout --with-thread variant=release  
 
+
+# ================================================================================
+# Build python
+# ================================================================================
+#*** If the boost python HAS not been built, and we build in $WK/Pyext, then it will build 
+#*** boost python in $BOOST_ROOT/bin.v2/
+#*** It appears to build boost python single threaded. (i.e you do not see threading-multi) in the directory path.
 #
-# Note:  Currently the boost python is built under bin.v2/, but seems to follow its own way
-#        It makes *no* mention of threading. At boost_root level we can also build at bin.v2/
-#        by using:
-#  bjam toolset=gcc --with-python link=shared variant=debug   --layout=$layout  --> stage/lib/libboost_python-mt-d.so
-#  bjam toolset=gcc --with-python link=shared variant=release --layout=$layout  --> stage/lib/libboost_python-mt.so.1.43.0
-#        adding or not including --threading=single has *NO* effect 
-#        Note: the build above places the shared libs in stage/lib.
-# Trying to share libs, with python extensions, currently we have two boost python builds
-# It appears that by not using tagged, we can copy the libs created in bin.v2/      
-# how ever we need tagged to create two separate libs
+# To prebuild the boost python, hence we need to do the following: For now build both variants, keeps cmake happy! (i.e when finding libs)
 #
-#./bjam toolset=$tool --layout=tagged $CXXFLAGS link=shared --with-python variant=debug
-#./bjam toolset=$tool --layout=tagged $CXXFLAGS link=shared --with-python variant=release
+./bjam toolset=$tool link=shared variant=debug   $CXXFLAGS stage --layout=$layout threading=single --with-python
+./bjam toolset=$tool link=shared variant=release $CXXFLAGS stage --layout=$layout threading=single --with-python
+./bjam toolset=$tool link=shared variant=debug   $CXXFLAGS stage --layout=$layout threading=multi --with-python
+./bjam toolset=$tool link=shared variant=release $CXXFLAGS stage --layout=$layout threading=multi --with-python
+
  

@@ -5,6 +5,19 @@
 ## granted to it by virtue of its status as an intergovernmental organisation 
 ## nor does it submit to any jurisdiction. 
 
+# ===============================================================================
+# Error to watch out for:
+# error: No best alternative for /python_for_extensions
+#    next alternative: required properties: <python>2.7 <target-os>linux
+#        matched
+#    next alternative: required properties: <python>2.7 <target-os>linux
+#        matched
+# 
+# Please check if you have more than one 'using python' in configuration files.
+# Please check site-config.jam, user-config.jam and project-config.jam and 
+# remove duplicated 'using python'
+# ===============================================================================
+        
 #
 # jamfile for installing, building exposing c++ library to python.
 # and for testing embedded python
@@ -239,14 +252,15 @@ run-test TestDerivable     : ecflow [ glob test/TestDerivable.py ] ;
 run-test TestWith          : ecflow [ glob test/TestWith.py ] ;
 run-test TestFind          : ecflow [ glob test/TestFind.py ] ;
 run-test TestMigrate       : ecflow [ glob migrate/TestMigrate.py ] ;
-run-test TestRepeatArithmetic : ecflow [ glob test/TestRepeatArithmetic.py ] ;
+run-test TestRepeatArithmetic :  ecflow [ glob test/TestRepeatArithmetic.py ] ;
+run-test TestGeneratedVariable : ecflow [ glob test/TestGeneratedVariable.py ] ;
 
 # A target that runs all the tests. 
 # Note test_embed & test_embed_ecf commented out since we dont use this functionality
 alias test-all
  :  TestUserManual TestJobGeneration TestClientApi TestDefs TestError TestTraversal TestDefsCheck 
     TestSimulator TestAddDelete TestAddDeleteFunc TestAddNodeFunc TestParent TestGetAllTasks TestDerivable 
-    TestMigrate TestRepeatArithmetic TestWith TestFind
+    TestMigrate TestRepeatArithmetic TestWith TestFind TestGeneratedVariable
     # test_embed test_embed_ecf 
     ;
    
@@ -254,7 +268,7 @@ alias test-all
 explicit test-all
     TestUserManual TestJobGeneration TestClientApi TestDefs TestError TestTraversal TestDefsCheck 
     TestSimulator TestAddDelete TestAddDeleteFunc TestAddNodeFunc TestParent TestGetAllTasks TestDerivable 
-    TestMigrate TestRepeatArithmetic TestWith TestFind
+    TestMigrate TestRepeatArithmetic TestWith TestFind TestGeneratedVariable
     # test_embed test_embed_ecf 
     ;
  

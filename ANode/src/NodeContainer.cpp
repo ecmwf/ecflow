@@ -88,6 +88,15 @@ void NodeContainer::requeue(bool resetRepeats, int clear_suspended_in_child_node
    handle_defstatus_propagation();
 }
 
+void NodeContainer::requeue_time_attrs()
+{
+   Node::requeue_time_attrs();
+   size_t node_vec_size = nodeVec_.size();
+   for(size_t t = 0; t < node_vec_size; t++) {
+      nodeVec_[t]->requeue_time_attrs();
+   }
+}
+
 void NodeContainer::handle_defstatus_propagation()
 {
    if ( defStatus_ == DState::COMPLETE ) {

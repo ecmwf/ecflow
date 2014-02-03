@@ -206,7 +206,7 @@ BOOST_AUTO_TEST_CASE( test_server_config_file )
          continue;
       }
       if (string("ECF_PORT") == p.first) {
-         BOOST_CHECK_MESSAGE(p.second == "3141","for ECF_PORT expected " <<  3141 << " but found " << p.second);
+         BOOST_CHECK_MESSAGE(p.second == Str::DEFAULT_PORT_NUMBER(),"for ECF_PORT expected " <<  Str::DEFAULT_PORT_NUMBER() << " but found " << p.second);
          continue;
       }
       if (string("ECF_CHECKINTERVAL") == p.first) {
@@ -258,7 +258,7 @@ BOOST_AUTO_TEST_CASE( test_server_config_file )
 
    // tear down remove the log file created by ServerEnvironment
    Host host;
-   fs::remove(host.ecf_log_file("3141"));
+   fs::remove(host.ecf_log_file(Str::DEFAULT_PORT_NUMBER()));
 }
 
 

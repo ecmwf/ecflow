@@ -34,7 +34,7 @@ typedef struct Link {
 	int   link_data;
 } Link;
 
-typedef struct Node {
+typedef struct NodeStruct {
     XRectangle   r;
     XtPointer    user_data;
     DrawProc     draw;
@@ -54,7 +54,7 @@ typedef struct Node {
     Boolean      is_group;
 	int          group;
 #endif
-} Node;
+} NodeStruct;
 
 typedef struct _SimpleBaseClassPart {
     PrintProc       print;
@@ -77,7 +77,7 @@ typedef struct {
 
     int            max;
     int            count;
-    Node           *nodes;
+    NodeStruct           *nodes;
 
 	LinkData       *links;
 	int             link_max;
@@ -120,11 +120,11 @@ int  sb_new_dummy_node(SimpleBaseWidget w);
 void sb_clear_dummy_nodes(SimpleBaseWidget w);
 int  sb_insert_dummy_node(SimpleBaseWidget w,int p,int k);
 
-int sb_find_kid_index(SimpleBaseWidget w,Node* p,Node *k);
-int sb_find_parent_index(SimpleBaseWidget w,Node* k,Node *p);
+int sb_find_kid_index(SimpleBaseWidget w,NodeStruct* p,NodeStruct *k);
+int sb_find_parent_index(SimpleBaseWidget w,NodeStruct* k,NodeStruct *p);
 
 
-Boolean sb_is_dummy(SimpleBaseWidget w,Node*p);
+Boolean sb_is_dummy(SimpleBaseWidget w,NodeStruct*p);
 
 
 #endif
