@@ -121,7 +121,9 @@ echo "using compiler $tool with build $1 variants "
 
 # Allow python to be disabled  
 if [ -n "$ECF_NO_PYTHON" ] ; then   
-   echo "Ignore boost python"
+   echo "****************************************************************************"
+   echo "Ignore boost python. ECF_NO_PYTHON set."
+   echo "****************************************************************************"
 else
    # ================================================================================
    # Build python
