@@ -119,18 +119,23 @@ echo "using compiler $tool with build $1 variants "
 ./bjam --build-dir=./tmpBuildDir toolset=$tool $CXXFLAGS stage link=static --layout=$layout --with-thread variant=release  -j2
 
 
-# ================================================================================
-# Build python
-# ================================================================================
-#*** If the boost python HAS not been built, and we build in $WK/Pyext, then it will build 
-#*** boost python in $BOOST_ROOT/bin.v2/
-#*** It appears to build boost python single threaded. (i.e you do not see threading-multi) in the directory path.
-#
-# To prebuild the boost python, hence we need to do the following: For now build both variants, keeps cmake happy! (i.e when finding libs)
-#
-./bjam toolset=$tool link=shared variant=debug   $CXXFLAGS stage --layout=$layout threading=single --with-python -d2 -j2
-./bjam toolset=$tool link=shared variant=release $CXXFLAGS stage --layout=$layout threading=single --with-python -d2 -j2
-./bjam toolset=$tool link=shared variant=debug   $CXXFLAGS stage --layout=$layout threading=multi --with-python -d2 -j2
-./bjam toolset=$tool link=shared variant=release $CXXFLAGS stage --layout=$layout threading=multi --with-python -d2 -j2
+# Allow python to be disabled  
+if [ -n "$ECF_NO_PYTHON" ] ; then   
+   echo "Ignore boost python"
+else
+   # ================================================================================
+   # Build python
+   # ================================================================================
+   #*** If the boost python HAS not been built, and we build in $WK/Pyext, then it will build 
+   #*** boost python in $BOOST_ROOT/bin.v2/
+   #*** It appears to build boost python single threaded. (i.e you do not see threading-multi) in the directory path.
+   #
+   # To prebuild the boost python, hence we need to do the following: For now build both variants, keeps cmake happy! (i.e when finding libs)
+   #
+   ./bjam toolset=$tool link=shared variant=debug   $CXXFLAGS stage --layout=$layout threading=single --with-python -d2 -j2
+   ./bjam toolset=$tool link=shared variant=release $CXXFLAGS stage --layout=$layout threading=single --with-python -d2 -j2
+   ./bjam toolset=$tool link=shared variant=debug   $CXXFLAGS stage --layout=$layout threading=multi --with-python -d2 -j2
+   ./bjam toolset=$tool link=shared variant=release $CXXFLAGS stage --layout=$layout threading=multi --with-python -d2 -j2
+fi
 
  
