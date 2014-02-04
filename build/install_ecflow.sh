@@ -175,12 +175,7 @@ elif [[ "$ARCH" = ibm_power7 ]] ; then
    export BOOST_ROOT=/s2o1/emos_data/ecflow/boost/$BOOST_VERSION;  
    export WK=/s2o1/emos_data/ecflow/ecflow 
    
-   install_arg=install 
-   
-elif [[ "$ARCH" = rs6000 ]] ; then 
-
-   export BOOST_ROOT=/emos_data/ecflow/rs6000/xlc/boost/$BOOST_VERSION;  
-   export WK=/emos_data/ecflow/rs6000/xlc/ecflow    
+   install_arg=install     
 fi
 
 # =======================================================================================

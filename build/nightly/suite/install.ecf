@@ -39,10 +39,6 @@ else
    
       rsh -l emos opensuse103 "$WK/build/install_ecflow.sh release"
    
-   elif [[ %ARCH% = rs6000  ]] ; then
-   
-      rsh -l emos  ecgate "$WK/build/install_ecflow.sh release"
-   
    elif [[ %ARCH% = ibm_power6  ]] ; then
    
       rsh -l emos  c1b "$WK/build/install_ecflow.sh release"

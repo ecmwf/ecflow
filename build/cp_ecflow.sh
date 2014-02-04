@@ -53,27 +53,6 @@ BOOST_TAR_GZ_FILE=/var/tmp/ma0/boost/boost_$BOOST_VERSION.tar.gz
 
 
 # ===============================================================================================
-# IBM/ECGATE:  rs6000: GCC :  shared file system, home dir is accessible from ecgate
-# ===============================================================================================
-#HOST=ecgate
-#ROOT_DIR=/emos_data/ecflow/rs6000/gcc
-#ecrcp $ECFLOWTAR.gz         $HOST:$ROOT_DIR/
-#rsh $HOST "cd $ROOT_DIR; rm -rf $ECFLOW; rm $ECFLOWTAR; gunzip $ECFLOWTAR.gz; tar -xf $ECFLOWTAR"
-
-# ===============================================================================================
-# IBM/ECGATE: rs6000: XLC-v11.2  :  shared file system, home dir is accessible from ecgate
-# ===============================================================================================
-HOST=ecgate
-ROOT_DIR=/emos_data/ecflow/rs6000/xlc
-rsh $HOST "cd $ROOT_DIR; rm -rf ecflow_*"  
-ecrcp $ECFLOWTAR.gz         $HOST:$ROOT_DIR/
-rsh $HOST "cd $ROOT_DIR; gunzip $ECFLOWTAR.gz; tar -xf $ECFLOWTAR"
-
-BOOST_DIR=$ROOT_DIR/boost
-rcp $WK/build/site_config/site-config-AIX-rs6000.jam   $HOST:$BOOST_DIR/boost_$BOOST_VERSION/tools/build/v2/site-config.jam
-
-
-# ===============================================================================================
 # IBM-AIX: ibm_power6:   
 # ===============================================================================================
 HOST=c1b

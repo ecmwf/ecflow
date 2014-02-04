@@ -20,25 +20,6 @@ cd $WK
 BOOST_VERSION=1_48_0
  
 # ===============================================================================================
-# IBM/ECGATE:  rs6000: GCC :  shared file system, home dir is accessible from ecgate
-# ===============================================================================================
-#HOST=ecgate
-#ROOT_DIR=/emos_data/ecflow/rs6000/gcc
-
-#BOOST_DIR=$ROOT_DIR/boost
-#rsh $HOST "cd $BOOST_DIR; gunzip boost_$BOOST_VERSION.tar.gz; tar -xf boost_$BOOST_VERSION.tar"
-  
-# ===============================================================================================
-# IBM/ECGATE: rs6000: XLC-v11.2  :  shared file system, home dir is accessible from ecgate
-# ===============================================================================================
-HOST=ecgate
-ROOT_DIR=/emos_data/ecflow/rs6000/xlc
-
-BOOST_DIR=$ROOT_DIR/boost
-rsh $HOST "cd $BOOST_DIR; gunzip boost_$BOOST_VERSION.tar.gz; tar -xf boost_$BOOST_VERSION.tar"
- 
-
-# ===============================================================================================
 # IBM-AIX: ibm_power6:   
 # ===============================================================================================
 HOST=c1b

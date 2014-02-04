@@ -21,7 +21,7 @@ else
          cp $WK/build/hpux_fix/utf8_codecvt_facet.cpp  $BOOST_ROOT/libs/detail/.
       fi
       
-      if [[ %ARCH% = rs6000 || %ARCH% = ibm_power6 || %ARCH% = ibm_power7 ]] ; then
+      if [[ %ARCH% = ibm_power6 || %ARCH% = ibm_power7 ]] ; then
          # Fix bug where release version crashes due to bug in Serialization/compiler
          # See file $WK/build/aix_fix/README
          cp $WK/build/aix_fix/singleton.hpp $BOOST_ROOT/boost/serialization/.
@@ -42,7 +42,7 @@ else
          cp $WK/build/hpux_fix/cstdint.hpp  $BOOST_ROOT/boost/.
       fi
       
-      if [[ %ARCH% = rs6000 || %ARCH% = ibm_power6 || %ARCH% = ibm_power7 ]] ; then
+      if [[ %ARCH% = ibm_power6 || %ARCH% = ibm_power7 ]] ; then
          # Fix bug where release version crashes due to bug in Serialization/compiler
          # See file $WK/build/aix_fix/README
          cp $WK/build/aix_fix/singleton.hpp $BOOST_ROOT/boost/serialization/.
@@ -73,7 +73,7 @@ else
          
       fi
       
-     if [[ %ARCH% = rs6000 || %ARCH% = ibm_power6 || %ARCH% = ibm_power7 ]] ; then
+     if [[ %ARCH% = ibm_power6 || %ARCH% = ibm_power7 ]] ; then
          # Fix bug with thread.cpp    
          # See file $WK/build/aix_fix/boost_1_53_0/README 
          cp $WK/build/aix_fix/boost_1_53_0/thread.cpp  $BOOST_ROOT/libs/thread/src/pthread/ 
