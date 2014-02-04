@@ -83,16 +83,7 @@ BOOST_AUTO_TEST_CASE( test_single_defs )
    // Change for file_iterator to plain string halved the time taken to load operation suite
    boost::timer timer; // measures CPU, replace with cpu_timer with boost > 1.51, measures cpu & elapsed
 #ifdef DEBUG
-#if defined(AIX_RS6000)
-   double expectedTimeForParse = 25.0;
-   double expectedTimeForParseOnly = 17.0;
-   double expectedTimeForResolveDependencies = 4.5; // this is time for 10 job submissions
-   double checkExprAndLimits = 2.0;
-   double expectedTimeForFindAllPaths = 9.2;
-   double expectedTimeForDefsPersistOnly = 18 ;
-   double expectedTimeForDefsPersistAndReload = 31;
-   double expectedTimeForCheckPtPersistAndReload = 44;
-#elif defined(HPUX) || defined(AIX) || defined(AIX_GCC) && !defined(AIX_RS6000)
+#if defined(HPUX) || defined(AIX)
    double expectedTimeForParse = 15.0;
    double expectedTimeForParseOnly = 10.0;
    double expectedTimeForResolveDependencies = 3.5; // this is time for 10 job submissions
@@ -112,16 +103,7 @@ BOOST_AUTO_TEST_CASE( test_single_defs )
    double expectedTimeForCheckPtPersistAndReload = 8.0;
 #endif
 #else
-#if defined(AIX_RS6000)
-   double expectedTimeForParse = 8.0;
-   double expectedTimeForParseOnly = 4.5;
-   double expectedTimeForResolveDependencies = 4.5; // this is time for 10 job submissions
-   double checkExprAndLimits = 2.0;
-   double expectedTimeForFindAllPaths = 4.2;
-   double expectedTimeForDefsPersistOnly = 2.5 ;
-   double expectedTimeForDefsPersistAndReload = 9;
-   double expectedTimeForCheckPtPersistAndReload = 18;
-#elif defined(HPUX) || defined(AIX) || defined(AIX_GCC) && !defined(AIX_RS6000)
+#if defined(HPUX) || defined(AIX)
    double expectedTimeForParse = 7.8;
    double expectedTimeForParseOnly = 5.0;
    double expectedTimeForResolveDependencies = 3.5; // this is time for 10 job submissions
