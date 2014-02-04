@@ -346,17 +346,11 @@ std::string TestFixture::local_ecf_home()
 std::string TestFixture::includes()
 {
    // Get to the workspace directory, Then set the path to the includes directory
-   fs::path current_path = fs::current_path();
-   //std::cout << "\ncurrent_path = " << current_path << " ------------------------------------------------------\n";
-   while(current_path.stem() != "ecflow") {
-     //std::cout << "current_path = " << current_path << " **********************************************\n";
-      current_path = current_path.parent_path();
-   }
-
-   current_path += "/" + project_test_dir_;
-   current_path += "/data/includes";
-   //std::cout << "current_path = " << current_path << " ==============================================\n";
-   std::string includes_path = current_path.string();
+   std::string includes_path = File::workspace_dir();
+   includes_path += "/";
+   includes_path += project_test_dir_;
+   includes_path += "/data/includes";
+   //std::cout << "includes_path = " << includes_path << " ==============================================\n";
    return includes_path;
 }
 

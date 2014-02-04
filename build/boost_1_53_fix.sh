@@ -35,18 +35,13 @@ if test_uname Linux ; then
 elif test_uname HP-UX ; then
 
   # Hack for utf8_codecvt_facet due to compiler build error on ACC
-  cp $WK/build/hpux_fix/utf8_codecvt_facet.cpp  $BOOST_ROOT/libs/detail/
+  cp $WK/build/hpux_fix/boost_1_53_0/utf8_codecvt_facet.ipp  $BOOST_ROOT/boost/detail/.
 
-  # Hack because boost::int8_t was being interpreted as a char,
-  # This cause duplicate class definition during template instantiation.
-  # in the file ./boost/numeric/conversion/detail/preprocessed/numeric_cast_traits.hpp
-  # See:: https://svn.boost.org/trac/boost/attachment/ticket/6158/cstdint_patch.diff
-  cp $WK/build/hpux_fix/cstdint.hpp  $BOOST_ROOT/boost/
-
+  # Seems to only affect debug build of ecflow(serialisation) on HP-UX
   # Hack because:
   #   more than one instance of overloaded function "throw_exception" matches the argument list
   #
-  cp $WK/build/hpux_fix/boost_1_53_0/smart_cast.hpp  $BOOST_ROOT/boost/serialization/
+  cp $WK/build/hpux_fix/boost_1_53_0/smart_cast.hpp  $BOOST_ROOT/boost/serialization/.
    
 elif test_uname AIX ; then  
    

@@ -145,9 +145,8 @@ void limit_node::info(std::ostream& f)
     f << "maximum  : " << maximum()  << "\n";
     //    1234567890
   
-    if(list.size() > 0)
-      f << "\nNodes in this limit_node:" 
-	<< "\n-------------------------\n";
+    if(!list.empty())
+      f << "\nNodes in this limit_node:" << "\n-------------------------\n";
     
     for (it = list.begin(); it != list.end(); ++it) {    
       f << *it;

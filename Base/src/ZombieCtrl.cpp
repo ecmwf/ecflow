@@ -247,7 +247,7 @@ bool ZombieCtrl::handle_user_actions(
 		/// matching by password/process id may fail, hence remove by path
 		bool remove_ok = remove(path_to_task, process_or_remote_id, process_password );
 		if (!remove_ok) {
-		   remove_ok = remove_by_path(path_to_task);
+		   (void) remove_by_path(path_to_task);
 		}
 
 		/// Clear the zombie flag
@@ -275,7 +275,7 @@ bool ZombieCtrl::handle_user_actions(
 
 			bool remove_ok = remove(path_to_task, process_or_remote_id, process_password );
 	      if (!remove_ok) {
-	         remove_ok = remove_by_path(path_to_task);
+	         (void)remove_by_path(path_to_task);
 	      }
 
 			/// Clear the zombie flag
@@ -339,7 +339,7 @@ bool ZombieCtrl::handle_user_actions(
 		/// Ask ClientInvoker to continue blocking, Zombie may re-appear
       action_taken += "remove";
 		bool remove_ok = remove(path_to_task, process_or_remote_id, process_password);
-      if (!remove_ok)  remove_ok = remove_by_path(path_to_task);
+      if (!remove_ok)  (void)remove_by_path(path_to_task);
 
 #ifdef DEBUG_ZOMBIE
 		std::cout << " >>>REMOVE<<< zombies_.size(" << zombies_.size() << ") : BLOCKING ";
@@ -433,8 +433,7 @@ void ZombieCtrl::remove_stale_zombies( const boost::posix_time::ptime& time_now 
 #ifdef DEBUG_ZOMBIE
 			std::cout << "   ZombieCtrl::remove_stale_zombies " << (*i) << "\n";
 #endif
-			zombies_.erase(i);
-			i--;
+			zombies_.erase(i--);
 		}
  	}
 }
@@ -589,7 +588,6 @@ void ZombieCtrl::killCli( const std::string& path_to_task,  Submittable* task) {
    Zombie& theExistingZombie = find_by_path( path_to_task );
    if ( theExistingZombie.empty() ) {
       throw std::runtime_error("ZombieCtrl::killCli: Can't kill, could not locate zombie(and hence pid) for path: " + path_to_task );
-      return;
    }
    task->kill(theExistingZombie.process_or_remote_id());
    theExistingZombie.set_kill();

@@ -110,7 +110,8 @@ std::string Gnuplot::create_gnuplot_file(
       /// We are only interested in Commands (i.e MSG:), and not state changes
       if (line.empty())  continue;
       if (line[0] != 'M')  continue;
-      if (line.find("MSG:") != 0)  continue;
+      std::string::size_type msg_pos = line.find("MSG:");
+      if (msg_pos != 0)  continue;
 
       bool child_cmd = false;
       bool user_cmd = false;

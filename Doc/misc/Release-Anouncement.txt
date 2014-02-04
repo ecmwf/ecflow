@@ -1,13 +1,13 @@
  ======================================================================================
-Subject: New beta/test release of ecFlow now available
+Subject: New release of ecFlow now available  
 
-A new version of the ecFlow(4.0.0) has been released:
+A new version of the ecFlow(4.0.1) has been released:
 
 #Please be aware that A new ecflow release candidate is planned.
 #If you are using the test version then the link will
 #be changed.
 
-This release is accessible from: /usr/local/apps/ecflow/4.0.0
+This release is accessible from: /usr/local/apps/ecflow/4.0.1
 on the following platforms:
 
    o linux 10.3      (garm)
@@ -16,16 +16,15 @@ on the following platforms:
    o linux cluster   (lxa/lxb)
    o HPUX            (itanium)
    o AIX/ibm_power7  (c2a/c2b)
-   o AIX/rs6000      (ecgate)
-   o cct             (cray XC30) 
+   o cct/cca         (cray XC30) 
  
 The release includes the following changes:
 
- 
- 
-To use a specific version:
 
-   export ECFLOW_VERSION=4.0.0
+ 
+To use a specific version (this is the *recommended* way):
+
+   export ECFLOW_VERSION=4.0.1
    use ecflow
    
 To use the latest test version:
@@ -42,12 +41,12 @@ To use the latest ecFlow on linux/HPUX/ecgate call:
    Please note that the latest version of ecflow can change at any
    time, so it is advisable to specify the version for long term usage.
 
-   On CRAY(cct),AIX(c2a/c2b) and redhat/RHEL(ecgb):
+   On CRAY(cct/cca),AIX(c2a/c2b) and redhat/RHEL(ecgb):
 
    Please use the module functionality  i.e
       module avail ecflow
       module unload ecflow 
-      module load ecflow/4.0.0
+      module load ecflow/4.0.1
                   
             
 Compatibility
@@ -56,7 +55,7 @@ The client/Server from one release should not be mixed with another.
 To avoid this problem it is *highly* recommended that you use a 
 specific version:
 
-   export ECFLOW_VERSION=4.0.0
+   export ECFLOW_VERSION=4.0.1
    use ecflow
 
 Additionally references to ecflow_client in the scripts(.ecf) should use
@@ -74,7 +73,7 @@ Documentation
 =======================================================================
 The user manual(word and pdf formats) are available from:
 
-   /usr/local/apps/ecflow/current/doc
+   /usr/local/apps/ecflow/4.0.1/doc
 
 The online documentation and tutorial are accessible from:
 

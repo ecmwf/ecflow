@@ -66,16 +66,9 @@ private:
 
    static std::string port_file(const std::string& the_port)
    {
-      // We need the *SAME* location so that different process find the same file.
-      // Get to the workspace directory
-      boost::filesystem::path current_path = boost::filesystem::current_path();
-      //std::cout << "\ncurrent_path = " << current_path << " ------------------------------------------------------\n";
-      while(current_path.stem() != "ecflow") {
-         //std::cout << "current_path = " << current_path << " **********************************************\n";
-         current_path = current_path.parent_path();
-      }
-
-      std::string path = current_path.string();
+      // We need the *SAME* location so that different process find the same file. Get to the workspace directory
+      std::string path = File::workspace_dir();
+      //std::cout << "\nworkspace_dir = " << path << " ------------------------------------------------------\n";
       path += "/ECF_PORT_used_";
       path += the_port;
       path += ".lock";

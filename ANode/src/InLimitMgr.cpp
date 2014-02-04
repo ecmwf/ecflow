@@ -239,8 +239,6 @@ void InLimitMgr::why(std::vector<std::string>& vec) const
 	std::cout << "InLimitMgr::why " << node_->debugNodePath() << "\n";
 #endif
 
-	std::stringstream ss;
-
  	// Note: if this correspond to a leaf node, like a task. Then it may not be
  	// sufficient to just check in limits at this level. Will need to look up hierarchy.
  	if (inLimit()) {

@@ -105,7 +105,6 @@ STC_Cmd_ptr ClientHandleCmd::doHandleRequest(AbstractServer* as) const
 //#endif
 			// return the handle to the client
 		 	return PreAllocatedReply::client_handle_cmd(client_handle) ;
-  			break;
 		}
 
  		case ClientHandleCmd::DROP: {
@@ -114,7 +113,6 @@ STC_Cmd_ptr ClientHandleCmd::doHandleRequest(AbstractServer* as) const
 
          // return the 0 handle to the client. The client stores the handle locally. Reset to zero.
          return PreAllocatedReply::client_handle_cmd(0) ;
-  			break;
  		}
 
       case ClientHandleCmd::DROP_USER: {

@@ -721,7 +721,7 @@ private:
          if (time_dep_attrs_)  time_dep_attrs_->set_node(this);
          if (child_attrs_) child_attrs_->set_node(this);
          if (misc_attrs_) misc_attrs_->set_node(this);
-         for(std::vector<limit_ptr>::iterator i = limitVec_.begin(); i!= limitVec_.end(); i++)  (*i)->set_node(this);
+         for(std::vector<limit_ptr>::iterator i = limitVec_.begin(); i!= limitVec_.end(); ++i)  (*i)->set_node(this);
       }
    }
 };

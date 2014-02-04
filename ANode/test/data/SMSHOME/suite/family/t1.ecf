@@ -38,7 +38,7 @@
 	ECF_INCLUDE   = %ECF_INCLUDE:<not defined yet>%
 	ECF_FETCH     = %ECF_FETCH:<not defined yet>%
 	ECF_OUT       = %ECF_OUT:<not defined yet>%
-	ECF_MICRO     = %ECF_MICRO%
+	ECF_MICRO=%ECF_MICRO%
 %end
 
 #============================================================
@@ -55,9 +55,20 @@ echo end of job
 
 %include <tail.h>
 
+# This is used in TestEcfFile.cpp
+# o check we handle ecfmicro when extracting manuals
+# o ensure we only handle manual/end if preceded with current ecfmicro char
+# o Pre-process %includes in manual, treat contents as manual contents
+%ecfmicro *
+*manual
+*include <manual.h>
+ manual-1
+ end-1
+*end
+*ecfmicro %
 
 %manual
-	Rest of the manual page is placed here, closer to the code
+Rest of the manual page is placed here, closer to the code
 %end
 %comment
   Comment start

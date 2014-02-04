@@ -464,9 +464,8 @@ bool ExprParser::doParse(std::string& errorMsg)
 	// and storing then Abstract Syntax tree( via cloning ) using a map
 	// This saves a huge amount of CPU time in re-parsing using spirit classic.
 	// =========================================================================
-	std::auto_ptr<AstTop> ast_top = ExprDuplicate::find(expr_);
-	if (ast_top.get()) {
-		ast_ = ast_top;
+	ast_ = ExprDuplicate::find(expr_);
+	if (ast_.get()) {
 		return true;
 	}
 

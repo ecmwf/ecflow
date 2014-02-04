@@ -63,12 +63,12 @@ BOOST_AUTO_TEST_CASE( test_file_cmd )
    //  endfamily
    //endsuite
 
-   int taskSize = 2; // on linux 1024 tasks take ~4 seconds for job submission
    Defs theDefs;
    {
       suite_ptr suite = theDefs.add_suite("test_file_cmd");
       suite->addVerify( VerifyAttr(NState::COMPLETE,1) );
       family_ptr fam = suite->add_family("family");
+      int taskSize = 2; // on linux 1024 tasks take ~4 seconds for job submission
       for(int i=0; i < taskSize; i++) {
          task_ptr task = fam->add_task("t" +  boost::lexical_cast<std::string>(i));
          task->addVerify( VerifyAttr(NState::COMPLETE,1) );

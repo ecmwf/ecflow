@@ -149,8 +149,8 @@ std::string Submittable::write_state() const
    // as they can mess up the parsing on reload.
    if ( !abortedReason_.empty() ) {
       std::string the_abort_reason = abortedReason_;
-      Str::replace(the_abort_reason,"\n","");
-      Str::replace(the_abort_reason,";"," ");
+      Str::replaceall(the_abort_reason,"\n","\\n");
+      Str::replaceall(the_abort_reason,";"," ");
       ss << " abort<:" << the_abort_reason << ">abort";
    }
    if ( tryNo_ != 0)  ss << " try:" << tryNo_;

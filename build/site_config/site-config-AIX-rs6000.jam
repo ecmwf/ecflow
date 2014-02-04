@@ -109,11 +109,11 @@ using testing ;
 # Assuming /usr/local/apps/python/2.7/bin/python is 32 bit python
 # - If you change python version ,remember to change: $WK/build/install_ecflow.sh: ECFLOW_PYTHON_INSTALL_DIR
 
-using python
-     : 2.7                                    # version
-     : /usr/local/apps/python/2.7/bin/python  # cmd-or-prefix a (previously we used: /usr/local/apps/python/current-32bit/bin/python )
-     :                                        # includes  
-     :                                        # libraries
-     :                                        # condition
-     ;
+#using python
+#     : 2.7                                    # version
+#     : /usr/local/apps/python/2.7/bin/python  # cmd-or-prefix a (previously we used: /usr/local/apps/python/current-32bit/bin/python )
+#     :                                        # includes  
+#     :                                        # libraries
+#     :                                        # condition
+#     ;
 

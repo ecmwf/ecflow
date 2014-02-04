@@ -427,7 +427,7 @@ bool EcfFile::preProcess(std::vector<std::string>& script_lines, std::string& er
          Str::split( script_lines[i], tokens );
 
          // Handle ecfmicro replacement ================================================================================
-         if (script_lines[i].find(T_ECFMICRO) != string::npos) {
+         if (script_lines[i].find(T_ECFMICRO) == 1) {    // %ecfmicro #
             // keep %ecfmicro in jobs file later processing, i.e for comments/manuals
 
             if (tokens.size() < 2) {
@@ -643,8 +643,6 @@ void EcfFile::variableSubstituition(JobsParam& jobsParam)
    string ecfMicro = ecfMicroCache_;
 
    char microChar = ecfMicro[0];
-   std::string doubleEcfMicro = ecfMicro;
-   doubleEcfMicro += ecfMicro;  // %%
 
    // We need a stack to properly implement nopp. This is required since we need to pair
    // the %end, with nopp. i.e need to handle
@@ -679,7 +677,7 @@ void EcfFile::variableSubstituition(JobsParam& jobsParam)
             continue;
          }
 
-         if (jobLines_[i].find(T_ECFMICRO) == 1) {
+         if (jobLines_[i].find(T_ECFMICRO) == 1) {   // %ecfmicro #
 
             tokens.clear();
             Str::split( jobLines_[i], tokens );
@@ -689,8 +687,6 @@ void EcfFile::variableSubstituition(JobsParam& jobsParam)
             }
             ecfMicro = tokens[1];
             microChar = ecfMicro[0];
-            doubleEcfMicro = microChar;
-            doubleEcfMicro += microChar;
             continue; // no point in doing variable subs on %ecfmicro ^
          }
       }
@@ -777,8 +773,6 @@ bool EcfFile::get_used_variables(NameValueMap& used_variables, std::string& erro
    string ecfMicro = ecfMicroCache_;
 
    char microChar = ecfMicro[0];
-   std::string doubleEcfMicro = ecfMicro;
-   doubleEcfMicro += ecfMicro;  // %%
 
    // We need a stack to properly implement nopp. This is required since we need to pair
    // the %end, with nopp. i.e need to handle
@@ -816,7 +810,7 @@ bool EcfFile::get_used_variables(NameValueMap& used_variables, std::string& erro
             continue;
          }
 
-         if (!nopp && jobLines_[i].find(T_ECFMICRO) == 1) {
+         if (!nopp && jobLines_[i].find(T_ECFMICRO) == 1) {  // %ecfmicro #
 
             tokens.clear();
             Str::split( jobLines_[i], tokens );
@@ -826,8 +820,6 @@ bool EcfFile::get_used_variables(NameValueMap& used_variables, std::string& erro
             }
             ecfMicro = tokens[1];
             microChar = ecfMicro[0];
-            doubleEcfMicro = microChar;
-            doubleEcfMicro += microChar;
             continue;
          }
       }
@@ -975,11 +967,36 @@ bool EcfFile::extractManual(const std::vector< std::string >& lines,
          std::vector< std::string >& theManualLines,
          std::string& errormsg) const
 {
+   // Note: we have already done pre-processing, ie since the manual is obtained after
+   // all the includes have been pre-procssed, hence most errors should have been caught
+   // get the cached ECF_MICRO variable, typically its one char.
+   string ecfMicro = ecfMicroCache_;
+   std::vector<std::string> tokens;
+
    bool add = false;
    for (std::vector< std::string >::const_iterator i = lines.begin(); i!= lines.end(); ++i){
-      if ( (*i).find( T_MANUAL ) == 1 )     { add = true;  continue; }
-      if ( add && (*i).find( T_END ) == 1 ) { add = false; continue; }
-      if ( add)                             { theManualLines.push_back(*i); }
+      if ( (*i).find(ecfMicro) == 0) {
+         if ( (*i).find( T_MANUAL ) == 1 )     { add = true;  continue; }
+         if ( add && (*i).find( T_END ) == 1 ) { add = false; continue; }
+
+         if ((*i).find(T_ECFMICRO) == 1) {  // %ecfmicro #
+            tokens.clear();
+            Str::split( (*i), tokens );
+            if (tokens.size() < 2) {
+               std::stringstream ss; ss << "ecfmicro does not have a replacement character, in " << script_path_or_cmd_;
+               errormsg += ss.str();
+               return false;
+            }
+            ecfMicro = tokens[1];
+            if (ecfMicro.size() > 2) {
+               std::stringstream ss; ss << "Expected ecfmicro replacement to be a single character, but found '" << ecfMicro << "' " <<  ecfMicro.size() << " in file : " << script_path_or_cmd_;
+               errormsg += ss.str();
+               return false;
+            }
+            continue;
+         }
+      }
+      if (add) { theManualLines.push_back(*i); }
    }
    if (add) {
       std::stringstream ss; ss << "Unterminated manual. Matching 'end' is missing, for file " << script_path_or_cmd_;
@@ -1134,7 +1151,7 @@ void EcfFile::removeCommentAndManual()
              if (nopp) continue;
 
              // cerr << "EcfFile::removeCommentAndManual erase = " << erase << " " << *i << "\n";
-             jobLines_.erase( i ); i--; // remove %comment
+             jobLines_.erase( i-- ); // remove %comment
              if (erase) {
                 std::stringstream ss; ss << "EcfFile::removeCommentAndManual: Embedded comments are not allowed in " << script_path_or_cmd_;
                 throw std::runtime_error( ss.str() );
@@ -1147,7 +1164,7 @@ void EcfFile::removeCommentAndManual()
              if (nopp) continue;
 
              // cerr << "EcfFile::removeCommentAndManual erase = " << erase << " " << *i << "\n";
-             jobLines_.erase( i ); i--; // remove  %manual
+             jobLines_.erase( i-- );  // remove  %manual
              if (erase) {
                 std::stringstream ss; ss << "EcfFile::removeCommentAndManual: Embedded manuals are not allowed in " << script_path_or_cmd_;
                 throw std::runtime_error( ss.str() );
@@ -1162,7 +1179,7 @@ void EcfFile::removeCommentAndManual()
              else {
 //                cerr << "EcfFile::removeCommentAndManual erase = " << erase << " " << *i << "\n";
                 if (erase) {
-                   jobLines_.erase( i ); i--; // remove %end associated with %comment and %manual
+                   jobLines_.erase( i-- ); // remove %end associated with %comment and %manual
                    erase = false;
                 }
              }
@@ -1184,8 +1201,7 @@ void EcfFile::removeCommentAndManual()
 
        //  remove all line between %comment and %end | %manual and %end
        if (erase) {
-          jobLines_.erase( i );
-          i--;
+          jobLines_.erase( i-- );
        }
    }
 
@@ -1223,7 +1239,7 @@ void EcfFile::remove_nopp_end_tokens()
 
           if ((*i).find(T_NOOP) == 1) {
              pp_stack.push_back(NOPP); nopp = true;
-             jobLines_.erase( i ); i--;     // remove %nopp
+             jobLines_.erase( i-- );      // remove %nopp
               if (erase) {
                  std::stringstream ss; ss << "Embedded nopp are not allowed " << script_path_or_cmd_;
                  throw std::runtime_error("EcfFile::remove_nopp_end_tokens: failed " + ss.str());
@@ -1238,7 +1254,7 @@ void EcfFile::remove_nopp_end_tokens()
              last_directive = pp_stack.back(); pp_stack.pop_back();
              if (last_directive == NOPP) {
                 nopp = false;
-                jobLines_.erase( i ); i--;          // remove %end associated with %nopp
+                jobLines_.erase( i-- );        // remove %end associated with %nopp
                 erase = false;
              }
              continue;
@@ -1254,7 +1270,7 @@ void EcfFile::remove_nopp_end_tokens()
              }
 
              ecfMicro = tokens[1];         // override ecfMicro char
-             jobLines_.erase( i ); i--;    // remove %ecfmicro &
+             jobLines_.erase( i-- );       // remove %ecfmicro &
              continue;
           }
       }

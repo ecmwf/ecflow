@@ -121,7 +121,7 @@ STC_Cmd_ptr EditScriptCmd::doHandleRequest(AbstractServer* as) const
 			std::string ret_file_contents;
 			ecf_file.edit_used_variables(ret_file_contents);
 			return PreAllocatedReply::string_cmd(ret_file_contents);
- 			break;}
+ 		}
 
 
 		case EditScriptCmd::PREPROCESS: {
@@ -134,7 +134,7 @@ STC_Cmd_ptr EditScriptCmd::doHandleRequest(AbstractServer* as) const
   			std::string ret_file_contents ;
  			ecf_file.pre_process(ret_file_contents);
 			return PreAllocatedReply::string_cmd(ret_file_contents);
-  			break; }
+  		}
 
 
 		case EditScriptCmd::PREPROCESS_USER_FILE: {
@@ -146,7 +146,7 @@ STC_Cmd_ptr EditScriptCmd::doHandleRequest(AbstractServer* as) const
   			std::string ret_file_contents ;
  			ecf_file.pre_process(user_file_contents_,ret_file_contents);
 			return PreAllocatedReply::string_cmd(ret_file_contents);
-  			break; }
+  		}
 
 
 		case EditScriptCmd::SUBMIT: {
@@ -363,7 +363,7 @@ void EditScriptCmd::create( 	Cmd_ptr& cmd,
 	 		// Convert MAP to Vec
 	 		NameValueVec used_variables_as_vec;
 	 		std::pair<std::string, std::string> pair;
-	 		BOOST_FOREACH(pair, used_variables_as_vec) { used_variables_as_vec.push_back( std::make_pair(pair.first,pair.second) ); }
+	 		BOOST_FOREACH(pair, used_variables_as_map) { used_variables_as_vec.push_back( std::make_pair(pair.first,pair.second) ); }
 
 	 		if (edit_type == EditScriptCmd::SUBMIT) {
 	 			cmd = Cmd_ptr( new EditScriptCmd( path_to_task, used_variables_as_vec ) ); //SUMBIT

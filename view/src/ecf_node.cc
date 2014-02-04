@@ -991,11 +991,10 @@ const std::string & ExpressionWrapper::toString() const
 }
 
 void ecf_node::delvars() {
-  std::vector<boost::shared_ptr<ecf_node> >::iterator run, mem;
-  for (size_t i = 0; i < kids_.size(); i++) {
-    if (kids_[i]->type() == NODE_VARIABLE) {
-      kids_.erase(kids_.begin() + i);
-    } 
+   for (size_t i = 0; i < kids_.size(); i++) {
+      if (kids_[i]->type() == NODE_VARIABLE) {
+         kids_.erase(kids_.begin() + i);
+      }
    }
 }
 
@@ -1139,7 +1138,7 @@ void ecf_concrete_node<Defs>::update(const Defs* n,
 
     XECFDEBUG {
       for (std::vector<suite_ptr>::const_iterator i = n->suiteVec().begin();
-           i != n->suiteVec().end(); i++) {
+           i != n->suiteVec().end(); ++i) {
         std::cout << "suite name " << (*i)->name() << "\n";
       }}
     serv.redraw(true);   

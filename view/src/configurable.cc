@@ -16,6 +16,8 @@
 // Description : 
 //=============================================================================================
 
+configurable::~configurable() {}
+
 void configurable::changed(resource&)
 {
 }

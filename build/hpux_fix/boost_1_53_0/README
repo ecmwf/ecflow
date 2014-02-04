@@ -20,3 +20,5 @@ Due to following compile error:
                       if ( tmp == 0 ) throw_exception(std::bad_cast());
                                       ^
    
+ODD: recompiling boost 1.53 did not show this problem ???????????
+     hence keep just in case.

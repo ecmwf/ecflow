@@ -51,7 +51,6 @@ BOOST_AUTO_TEST_CASE( test_ecf_file_with_bad_ECF_MICRO )
 
    task_ptr task_t1;
    task_ptr task_t2;
-   std::pair<std::string,std::string> p;
    Defs theDefs; {
       suite_ptr suite = theDefs.add_suite("suite");
       task_t1 = suite->add_task( "t1" );  task_t1->add_variable("ECF_MICRO","");
@@ -257,11 +256,13 @@ BOOST_AUTO_TEST_CASE( test_ecf_file )
 
    // generate the ecf file;
    string header = "%include <head.h>\n\n";
-   string manual_head ="%manual\n";
-   string manual_body = "The contents of the manual\n";
-   string manual_tail ="%end\n\n";
-   string comment_head ="%comment\n";
-   string comment_body = "The contents of the comment\n";
+   string manual_head = "%manual\n";
+   string manual_body = " manual. The contents of the manual\n";
+   manual_body +=       " end.\n";
+   string manual_tail = "%end\n\n";
+   string comment_head = "%comment\n";
+   string comment_body = " comment. The contents of the comment\n";
+   comment_body +=       " end.\n";
    string comment_tail ="%end\n\n";
    string ecf_body; {
       std::pair<std::string,std::string> p;
@@ -296,12 +297,13 @@ BOOST_AUTO_TEST_CASE( test_ecf_file )
 
    /// Test manual extraction
    /// The manual is manual of all the pre-processed includes
-   std::string expected_manual = "#This is the manual from the head.h file\nThe contents of the manual\n#This is the manual from the tail.h file\n";
+   /// Test: SUP-762 Lines starting with "manually" are not shown in manual
+   std::string expected_manual = "#This is the manual from the head.h file\n manual. The contents of the manual\n end.\n#This is the manual from the tail.h file\n";
 
    string theExtractedManual;
    try { ecfFile.manual(theExtractedManual); }
    catch (std::exception &e) { BOOST_CHECK_MESSAGE(false,e.what()); }
-   BOOST_CHECK_MESSAGE( theExtractedManual == expected_manual, "Expected '" << expected_manual << "' but found '" << theExtractedManual << "'");
+   BOOST_CHECK_MESSAGE( theExtractedManual == expected_manual, "Expected \n'" << expected_manual << "' but found \n'" << theExtractedManual << "'");
 
 
    /// Test script extraction
@@ -578,7 +580,11 @@ BOOST_AUTO_TEST_CASE( test_manual_files )
       std::string manual;
       EcfFile ecf_file = task_t1->locatedEcfFile(); // will throw std::runtime_error for errors
       ecf_file.manual(manual);                      // will throw std::runtime_error for errors
-      BOOST_CHECK_MESSAGE(!manual.empty(),"Manual not found");
+      BOOST_REQUIRE_MESSAGE(!manual.empty(),"Manual not found");
+      BOOST_CHECK_MESSAGE(manual.find("ECF_MICRO=%") != std::string::npos,"Variable pre-processing failed during manual extraction");
+      BOOST_CHECK_MESSAGE(manual.find("manual-1") != std::string::npos,"Pre-processing of ecfmicro in manuals failed, expected to find string 'manual-1'\n" << manual);
+      BOOST_CHECK_MESSAGE(manual.find("end-1") != std::string::npos,"Pre-processing of ecfmicro in manuals failed, expected to find string 'end-1'\n" << manual);
+      BOOST_CHECK_MESSAGE(manual.find("Test manual files are pre-processed") != std::string::npos,"%include <manual.h> pre-processing failed inside manual->end\n" << manual);
    }
 
    {

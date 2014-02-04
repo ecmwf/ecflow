@@ -28,7 +28,7 @@
 
 class substitute : public extent<substitute> {
 public:
-  substitute(const std::string);
+  substitute(const std::string&);
 
   ~substitute(); // Change to virtual if base class
   virtual const std::string eval(node*) = 0;
@@ -49,7 +49,7 @@ class proc_substitute : public substitute {
   typedef const std::string& (node::*procc)() const; procc procc_;
   const std::string eval(node* n) { return (n->*procc_)(); }
 public:
- proc_substitute(const std::string name,procc p): substitute(name), procc_(p) 
+ proc_substitute(const std::string& name,procc p): substitute(name), procc_(p)
   {}
 };
 #endif

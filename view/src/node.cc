@@ -507,29 +507,29 @@ node* node::find(ecf_node* n)
 }
 
 static node* finder(const std::string& name, const node* start) {
-  node *k = 0;
-  node *n = const_cast<node*> (start);
-  while (n) {
-    if (n->type() == NODE_TRIGGER || n->type() == NODE_COMPLETE) {
-      if (n->definition() == name)	
-	return n;
-      else if (n->__node__()->name() == name)	
-	return n;   
-      else if (n->__node__()->toString() == name)	
-	return n;   
-      ecf_node *owner = n->__node__();
-      if (owner) {
-	ExpressionWrapper *exp = dynamic_cast<ecf_concrete_node<ExpressionWrapper>*> (owner)
-	  ->get();
-	if (exp && exp->expression() == name)
-	  return n;
+   node *n = const_cast<node*> (start);
+   while (n) {
+      if (n->type() == NODE_TRIGGER || n->type() == NODE_COMPLETE) {
+         if (n->definition() == name)
+            return n;
+         else if (n->__node__()->name() == name)
+            return n;
+         else if (n->__node__()->toString() == name)
+            return n;
+         ecf_node *owner = n->__node__();
+         if (owner) {
+            ExpressionWrapper *exp = dynamic_cast<ecf_concrete_node<ExpressionWrapper>*> (owner)
+	           ->get();
+            if (exp && exp->expression() == name)
+               return n;
+         }
       }
-    }
-    if ((k = finder(name, n->kids())))
-      return k;
-    n = n->next();
-  }
-  return 0;
+      node *k = 0;
+      if ((k = finder(name, n->kids())))
+         return k;
+      n = n->next();
+   }
+   return 0;
 }
 
 node* node::find_trigger(const std::string& name) const

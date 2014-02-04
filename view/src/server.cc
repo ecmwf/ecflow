@@ -98,8 +98,6 @@ server::server(int port):
 	}
 
 	signal(SIGPIPE,SIG_IGN);
-
-
 }
 
 server::~server()
@@ -109,9 +107,7 @@ server::~server()
 
 void server::run()
 {
-
 	struct sockaddr_in from;
-	int snew;
 //#ifdef AIX
 //	unsigned long fromlen;
 //#else
@@ -132,7 +128,7 @@ void server::run()
 
 	for(;;)
 	{
-
+	   int snew;
 		fromlen = sizeof(from);
 		if((snew = accept(soc_, (struct sockaddr*)&from, &fromlen))<0)
 		{

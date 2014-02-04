@@ -120,7 +120,7 @@ STC_Cmd_ptr CtsCmd::doHandleRequest(AbstractServer* as) const
    switch (api_) {
       case CtsCmd::GET_ZOMBIES: {
          as->update_stats().zombie_get_++;
-         return PreAllocatedReply::zombie_get_cmd( as );break;
+         return PreAllocatedReply::zombie_get_cmd( as );
       }
 
       case CtsCmd::RESTORE_DEFS_FROM_CHECKPT: {
@@ -133,7 +133,6 @@ STC_Cmd_ptr CtsCmd::doHandleRequest(AbstractServer* as) const
          as->update_stats().restart_server_++;
          as->restart();
          return doJobSubmission( as );
-         break;
       }
       case CtsCmd::SHUTDOWN_SERVER:  as->update_stats().shutdown_server_++; as->shutdown();  break;
       case CtsCmd::HALT_SERVER:      as->update_stats().halt_server_++;     as->halted();   break;
