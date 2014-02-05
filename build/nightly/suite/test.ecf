@@ -191,7 +191,19 @@ else
       
       # -V verbose, show test output
       # --output-on-failure only show output on failure
-      ctest --output-on-failure
+      if [[ %ECF_TRYNO% -eq 1 ]] ; then
+         ctest --output-on-failure
+      else
+         # this does not work
+         # ctest --rerun-failed --output-on-failure
+         #
+         # Create a file('FailedTests.log') with all the failed tests
+         cmake -P $WK/CMAKE_failed_tests.txt
+         sleep 4
+         
+         # Only run the failed test. Note: if FailedTests.log is empty then all tests are run
+         ctest -I FailedTests.log --output-on-failure
+      fi
       
    else
       ############################################################################
