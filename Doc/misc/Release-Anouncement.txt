@@ -20,8 +20,7 @@ on the following platforms:
  
 The release includes the following changes:
  
- 
- 
+
  
  
 To use a specific version (this is the *recommended* way):
