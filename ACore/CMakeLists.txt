@@ -14,6 +14,6 @@ ecbuild_add_library( TARGET core
 file( GLOB test_srcs RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "test/*.cpp" )
 
 ecbuild_add_test( TARGET   coretest
-                SOURCES  ${test_srcs}
-                LIBS     core  ${Ecflow_Test_LIBS}
-                INCLUDES src ${Boost_INCLUDE_DIRS} )
+                  SOURCES  ${test_srcs}
+                  LIBS     core  ${Ecflow_Test_LIBS}
+                  INCLUDES src ${Boost_INCLUDE_DIRS} )

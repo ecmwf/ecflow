@@ -21,6 +21,7 @@ swap
 # hack to ignore naw.def.glog
 **/naw.def.glog
  
+*.lock
 *.log
 *.so
 *.pyc
