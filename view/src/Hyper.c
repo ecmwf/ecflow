@@ -839,7 +839,6 @@ int            n_args;
 
   Arg al[5];
 
-  int arg;
   // https://software.ecmwf.int/issues/browse/SUP-646
 
   /* printf("## mouse 1\n"); */
@@ -872,7 +871,7 @@ int            n_args;
     GetValues(v_scroll);
     /* XmScrollBarGetValues(v_scroll, value, slider_size, inc, page_inc); */
     
-    arg = atoi(args[0]);
+    int arg = atoi(args[0]);
     dh = (abs(arg) > 5) ? page_inc : inc;
 
     if (arg < 0) {

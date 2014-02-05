@@ -62,7 +62,6 @@ BOOST_AUTO_TEST_CASE( test_triggers_and_meters )
 	//      ....
  	//  	endfamily
 	//endsuite
-	int taskSize = 9; // on linux 1024 tasks take ~4 seconds for job submission
 	std::string meterName = "file";
 	std::string taskName = "model";
   	Defs theDefs;
@@ -75,6 +74,7 @@ BOOST_AUTO_TEST_CASE( test_triggers_and_meters )
       task_ptr taskModel = fam->add_task(taskName);
 		taskModel->addMeter( Meter(meterName,0,100,100) ); // ServerTestHarness will add correct ecf
 
+		int taskSize = 9; // on linux 1024 tasks take ~4 seconds for job submission
   		for(int i=0; i < taskSize; i++) {
   			task_ptr task = fam->add_task( "t" + boost::lexical_cast<std::string>(i*10 + 10) );
   			task->addVerify( VerifyAttr(NState::COMPLETE,1) );

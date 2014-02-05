@@ -274,8 +274,7 @@ void System::processTerminatedChildren()
             }
 
             // remove the process since it has terminated
-            processVec_.erase(i);
-            i--;
+            processVec_.erase(i--);
 			}
 			else if ( WIFSIGNALED( (*i).status_) ) {
 
@@ -284,8 +283,7 @@ void System::processTerminatedChildren()
 			   died( (*i).absNodePath_, ss.str());
 
             // remove the process since it has terminated
-            processVec_.erase(i);
-            i--;
+            processVec_.erase(i--);
 			}
 			else if ( WIFSTOPPED( (*i).status_) ) {
 

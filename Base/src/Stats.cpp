@@ -128,7 +128,7 @@ void Stats::update_for_serialisation()
    int request = 0;
    int seconds = 0;
    std::deque<std::pair<int,int> >::reverse_iterator rend = request_vec_.rend();
-   for(std::deque<std::pair<int,int> >::reverse_iterator i = request_vec_.rbegin(); i != rend; i++ ) {
+   for(std::deque<std::pair<int,int> >::reverse_iterator i = request_vec_.rbegin(); i != rend; ++i) {
       count++;
       request += (*i).first;
       seconds += (*i).second;

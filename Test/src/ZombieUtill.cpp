@@ -38,7 +38,13 @@ void ZombieUtil::test_clean_up(int timeout) {
       cout << "\n***** test_clean_up: found\n" << Zombie::pretty_print( zombies , 9) << "\n, attempting to *fob* then *remove* ...\n";
 
       int no_fobed = do_zombie_user_action(User::FOB, zombies.size(), timeout, false /* don't fail if it takes to long */);
-      if (no_fobed) { cout << "   Fobed " << no_fobed << " left over zombies. Attempting to remove, sleep first\n"; sleep(5);}
+
+      // In order to FOB, we must wait, till a child command, talks to the server.
+      int wait = 5;
+#if defined(HPUX) || defined(AIX)
+      wait += 5; // On these platforms wait longer,
+#endif
+      if (no_fobed) { cout << "   Fobed " << no_fobed << " left over zombies. sleeping for " << wait << "s before attempting to remove\n"; sleep(wait);}
       (void) do_zombie_user_action(User::REMOVE, no_fobed, timeout, false /* don't fail if it takes to long */);
    }
 }

@@ -577,7 +577,7 @@ void Task::order(Node* immediateChild, NOrder::Order ord)
    SuiteChanged1 changed(suite());
    switch (ord) {
       case NOrder::TOP:  {
-         for(std::vector<alias_ptr>::iterator i = aliases_.begin(); i != aliases_.end(); i++) {
+         for(std::vector<alias_ptr>::iterator i = aliases_.begin(); i != aliases_.end(); ++i) {
             if ((*i).get() == immediateChild) {
                alias_ptr node = (*i);
                aliases_.erase(i);
@@ -587,10 +587,9 @@ void Task::order(Node* immediateChild, NOrder::Order ord)
             }
          }
          throw std::runtime_error("Task::order TOP, immediate child not found");
-         break;
       }
       case NOrder::BOTTOM:  {
-         for(std::vector<alias_ptr>::iterator i = aliases_.begin(); i != aliases_.end(); i++) {
+         for(std::vector<alias_ptr>::iterator i = aliases_.begin(); i != aliases_.end(); ++i) {
             if ((*i).get() == immediateChild) {
                alias_ptr node = (*i);
                aliases_.erase(i);
@@ -600,7 +599,6 @@ void Task::order(Node* immediateChild, NOrder::Order ord)
             }
          }
          throw std::runtime_error("Task::order BOTTOM, immediate child not found");
-         break;
       }
       case NOrder::ALPHA:  {
          std::sort(aliases_.begin(),aliases_.end(),
@@ -617,7 +615,6 @@ void Task::order(Node* immediateChild, NOrder::Order ord)
                                    boost::bind(&Node::name,_2)));
          order_state_change_no_ = Ecf::incr_state_change_no();
          break;
-
       }
       case NOrder::UP:  {
          for(size_t t = 0; t  < aliases_.size();t++) {
@@ -633,7 +630,6 @@ void Task::order(Node* immediateChild, NOrder::Order ord)
             }
          }
          throw std::runtime_error("Task::order UP, immediate child not found");
-         break;
       }
       case NOrder::DOWN: {
          for(size_t t = 0; t  < aliases_.size();t++) {
@@ -649,7 +645,6 @@ void Task::order(Node* immediateChild, NOrder::Order ord)
             }
          }
          throw std::runtime_error("Task::order DOWN, immediate child not found");
-         break;
       }
    }
 }

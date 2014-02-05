@@ -163,6 +163,7 @@ protected:
 
   action() : widget_(0),item_(0) {}
 public:
+   virtual ~action() {}
 	void owner(item* i) { item_ = i; }
 
 	virtual void create(Widget, item *) = 0;
@@ -401,8 +402,7 @@ int menu::init(int page, bool def) {
      0          tmp  user
      1          sys  both, user overwrites
   */
-  std::string path;
-  path = directory::user();   path = directory::user(); 
+  std::string path = directory::user();
   path += "/";
   path += name;
   const char* fname = path.c_str();
@@ -412,7 +412,6 @@ int menu::init(int page, bool def) {
     read = true; 
   } else std::cerr << "# menu file not found: " << fname << "\n";
  
-  path = directory::user(); 
   path = directory::system();
   path += "/";
   path += name;

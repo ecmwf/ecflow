@@ -591,21 +591,21 @@ void simple_node::triggers(trigger_lister& tlr)
        tlr.next_node( *(*sit), 0, trigger_lister::normal, *sit);
      }
      
-      for (node *n = this->kids(); n ; n = n->next()) {
+     for (node *n = this->kids(); n ; n = n->next()) {
         int type = n->type();
-        node *xn = 0; 
         {
-          ecf_concrete_node<InLimit const> *c =
-            dynamic_cast<ecf_concrete_node<InLimit const>*> (n->__node__());
-          InLimit const * i = c ? c->get() : 0;
-          if (i) {
-            if ((xn = find_limit(i->pathToNode(), i->name())))
-              tlr.next_node(*xn,0,trigger_lister::normal,xn);
-          }
+           ecf_concrete_node<InLimit const> *c =
+                    dynamic_cast<ecf_concrete_node<InLimit const>*> (n->__node__());
+           InLimit const * i = c ? c->get() : 0;
+           if (i) {
+              node *xn = 0;
+              if ((xn = find_limit(i->pathToNode(), i->name())))
+                 tlr.next_node(*xn,0,trigger_lister::normal,xn);
+           }
         } 
         if (type == NODE_DATE || type == NODE_TIME)
-          tlr.next_node(*n,0,trigger_lister::normal,n);
-      }
+           tlr.next_node(*n,0,trigger_lister::normal,n);
+     }
     }
   } 
    if(tlr.parents()) {

@@ -151,7 +151,7 @@ defs_ptr ClientSuites::create_defs(defs_ptr server_defs) const
    std::vector<HSuite>::const_iterator suites_end = suites_.end();
    if (suites_.size() == server_defs->suiteVec().size()) {
       size_t real_suite_count = 0;
-      for(std::vector<HSuite>::const_iterator i = suites_.begin(); i != suites_end; i++) {
+      for(std::vector<HSuite>::const_iterator i = suites_.begin(); i != suites_end; ++i) {
          suite_ptr suite = (*i).weak_suite_ptr_.lock();
          if (suite.get()) real_suite_count++;
       }
@@ -201,7 +201,7 @@ defs_ptr ClientSuites::create_defs(defs_ptr server_defs) const
    the_max_modify_change_no = std::max( the_max_modify_change_no,  modify_change_no_  );
 
    // Suites should already be in order
-   for(std::vector<HSuite>::const_iterator i = suites_.begin(); i != suites_end; i++) {
+   for(std::vector<HSuite>::const_iterator i = suites_.begin(); i != suites_end; ++i) {
       suite_ptr suite = (*i).weak_suite_ptr_.lock();
       if (suite.get()) {
 
@@ -265,7 +265,7 @@ void ClientSuites::suites(std::vector<std::string>& names) const
 {
    names.reserve(suites_.size());
    std::vector<HSuite>::const_iterator suites_end = suites_.end();
-   for(std::vector<HSuite>::const_iterator i = suites_.begin(); i != suites_end; i++) {
+   for(std::vector<HSuite>::const_iterator i = suites_.begin(); i != suites_end; ++i) {
        names.push_back( (*i).name_ );
    }
 }
@@ -281,7 +281,7 @@ std::string ClientSuites::dump() const
       << ") suites_.size(" << suites_.size() << ") suites(";
 
    std::vector<HSuite>::const_iterator suites_end = suites_.end();
-   for(std::vector<HSuite>::const_iterator i = suites_.begin(); i != suites_end; i++) {
+   for(std::vector<HSuite>::const_iterator i = suites_.begin(); i != suites_end; ++i) {
       suite_ptr suite = (*i).weak_suite_ptr_.lock();
       if (suite.get()) {
          ss << " " << suite->name();
@@ -301,7 +301,7 @@ void ClientSuites::update_suite_order()
    size_t server_suite_vec_size = server_suite_vec.size();
 
    std::vector<HSuite>::iterator suites_end = suites_.end();
-   for(std::vector<HSuite>::iterator i = suites_.begin(); i != suites_end; i++) {
+   for(std::vector<HSuite>::iterator i = suites_.begin(); i != suites_end; ++i) {
       for(size_t s = 0;  s < server_suite_vec_size; s++) {
          if ((*i).name_ == server_suite_vec[s]->name()) {
             (*i).index_ = static_cast<int>(s);
@@ -320,7 +320,7 @@ void ClientSuites::update_suite_order()
 std::vector<HSuite>::iterator ClientSuites::find_suite(const std::string& name)
 {
    std::vector<HSuite>::iterator suites_end = suites_.end();
-   for(std::vector<HSuite>::iterator i = suites_.begin(); i != suites_end; i++) {
+   for(std::vector<HSuite>::iterator i = suites_.begin(); i != suites_end; ++i) {
       if ((*i).name_ == name) {
          return i;
       }

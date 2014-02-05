@@ -108,7 +108,7 @@ BOOST_AUTO_TEST_CASE( test_autocancel_ast_node_reset )
    {
       std::set<Node*> theSet;
       theDefs.getAllAstNodes(theSet);
-      BOOST_CHECK_MESSAGE(theSet.size() == 0,"Expected to have 0 AST nodes in trigger/complete expressions but found " << theSet.size());
+      BOOST_CHECK_MESSAGE(theSet.empty(),"Expected to have 0 AST nodes in trigger/complete expressions but found " << theSet.size());
    }
 }
 

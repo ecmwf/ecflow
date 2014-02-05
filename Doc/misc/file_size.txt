@@ -15,12 +15,6 @@ debug  -ecflow_server - 136M             95M
 release-ecflow_client - 14M              8.4M
 release-ecflow_server - 15M              8.6M
 
-rs6000-v12
-debug  -ecflow_client - 216M             177M
-debug  -ecflow_server - 226M             186M
-release-ecflow_client - 29M               24M
-release-ecflow_server - 29M               25M
-
 power6-v12
 debug  -ecflow_client - 223M
 debug  -ecflow_server - 233M

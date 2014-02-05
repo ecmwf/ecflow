@@ -104,12 +104,12 @@ private:
 	bool day_of_month_matches(int) const;
 	bool month_matches(int) const;
 
-	int max_month() const;
-	int max_day_of_month() const;
-	int max_day_of_week() const;
-	int min_month() const;
-	int min_day_of_month() const;
-	int min_day_of_week() const;
+//	int max_month() const;
+//	int max_day_of_month() const;
+//	int max_day_of_week() const;
+//	int min_month() const;
+//	int min_day_of_month() const;
+//	int min_day_of_week() const;
 
 	boost::gregorian::date  last_day_of_month(const ecf::Calendar& calendar) const;
 	boost::gregorian::date  next_date(const ecf::Calendar& calendar) const;

@@ -44,7 +44,6 @@ std::string TestFixture::host_;
 std::string TestFixture::port_;
 std::string TestFixture::test_dir_;
 std::string TestFixture::project_test_dir_ = "Test";
-ClientInvoker TestFixture::theClient_;
 
 using namespace std;
 using namespace ecf;
@@ -78,6 +77,13 @@ TestFixture::TestFixture()
    init("Test");
 }
 
+ClientInvoker& TestFixture::client()
+{
+   static ClientInvoker theClient_;
+   return theClient_;
+}
+
+
 void TestFixture::init(const std::string& project_test_dir)
 {
    TestFixture::project_test_dir_ = project_test_dir;
@@ -102,7 +108,7 @@ void TestFixture::init(const std::string& project_test_dir)
    std::cout << "TestFixture::TestFixture()  jobSubmissionInterval = " << job_submission_interval() << "\n";
    if (!host_.empty() && host_ != Str::LOCALHOST()) {
 
-      theClient_.set_host_port(host_,port_);
+      client().set_host_port(host_,port_);
       std::cout << "   EXTERNAL SERVER running on _ANOTHER_ PLATFORM, assuming " << host_ << ":" << port_ << " copying test data ...\n";
 
       // Must use a file system accessible from the server. Use $SCRATCH
@@ -136,7 +142,7 @@ void TestFixture::init(const std::string& project_test_dir)
    }
    else if (!host_.empty() && host_ == Str::LOCALHOST()) {
 
-      theClient_.set_host_port(host_,port_);
+      client().set_host_port(host_,port_);
       std::cout << "   EXTERNAL SERVER running on _SAME_ PLATFORM. Assuming " << host_ << ":" << port_ << "\n";
 
       // log file may have been deleted, by previous tests. Create a new log file
@@ -145,8 +151,8 @@ void TestFixture::init(const std::string& project_test_dir)
          log_path += "/MyProject/";
          log_path += TestFixture::pathToLogFile();
          std::cout << "No log file: Creating new log(via remote server) file " << log_path  << "\n";
-         theClient_.new_log( log_path );
-         theClient_.logMsg("Created new log file. msg sent to force new log file to be written to disk");
+         client().new_log( log_path );
+         client().logMsg("Created new log file. msg sent to force new log file to be written to disk");
       }
    }
    else {
@@ -164,7 +170,7 @@ void TestFixture::init(const std::string& project_test_dir)
       EcfPortLock::create(port_);
 
       // host_ is empty update to localhost, **since** port may have changed, update ClinetInvoker
-      theClient_.set_host_port(host_,port_);
+      client().set_host_port(host_,port_);
 
       // Remove the generated check point files, at start of test, otherwise server will load check point file
       Host h;
@@ -185,8 +191,8 @@ void TestFixture::init(const std::string& project_test_dir)
    /// Assume remote/local server started on the default port
    /// Either way, we wait for 60 seconds for server, for it to respond to pings
    /// This is important when server is started locally. We must wait for it to come alive.
-   if (!theClient_.wait_for_server_reply()) {
-      cout << "Ping server on " << host_ << Str::COLON() << port_ << " failed. Is the server running ? " << theClient_.errorMsg() << "\n";
+   if (!client().wait_for_server_reply()) {
+      cout << "Ping server on " << host_ << Str::COLON() << port_ << " failed. Is the server running ? " << client().errorMsg() << "\n";
       assert(false);
    }
 
@@ -217,20 +223,20 @@ TestFixture::~TestFixture()
 #endif
 
       // Print the server suites
-      theClient_.set_cli(true); // so server stats are written to standard out
-      theClient_.set_throw_on_error( false ); // destructors should not allow exception propagation
-      if (theClient_.suites() != 0) {
-         std::cout << "TestFixture::~TestFixture(): ClientInvoker " << CtsApi::suites() << " failed: " << theClient_.errorMsg() << "\n";
+      client().set_cli(true); // so server stats are written to standard out
+      client().set_throw_on_error( false ); // destructors should not allow exception propagation
+      if (client().suites() != 0) {
+         std::cout << "TestFixture::~TestFixture(): ClientInvoker " << CtsApi::suites() << " failed: " << client().errorMsg() << "\n";
       }
 
       // Print the server stats
-      if (theClient_.stats() != 0) {
-         std::cout << "TestFixture::~TestFixture(): ClientInvoker " << CtsApi::stats() << " failed: " << theClient_.errorMsg() << "\n";
+      if (client().stats() != 0) {
+         std::cout << "TestFixture::~TestFixture(): ClientInvoker " << CtsApi::stats() << " failed: " << client().errorMsg() << "\n";
       }
 
       // Kill the server, as all suites are complete. will work for local or external
-      if (theClient_.terminateServer() != 0) {
-         std::cout << "TestFixture::~TestFixture():  ClientInvoker " << CtsApi::terminateServer() << " failed: " << theClient_.errorMsg() << "\n";
+      if (client().terminateServer() != 0) {
+         std::cout << "TestFixture::~TestFixture():  ClientInvoker " << CtsApi::terminateServer() << " failed: " << client().errorMsg() << "\n";
          EcfPortLock::remove( port_ );
          assert(false);
       }
@@ -266,7 +272,7 @@ TestFixture::~TestFixture()
 int TestFixture::job_submission_interval()
 {
    int jobSubmissionInterval = 3 ;
-#if defined(HPUX) || defined(AIX) || defined(AIX_GCC) && !defined(AIX_RS6000)
+#if defined(HPUX) || defined(AIX)
    jobSubmissionInterval += 3;
 #endif
    return jobSubmissionInterval;
@@ -304,7 +310,7 @@ std::string TestFixture::theClientExePath()
 void TestFixture::clearLog() {
 
 	// Can't remove log on remote server, just clear the log file
-   theClient_.clearLog();
+   client().clearLog();
 }
 
 std::string TestFixture::pathToLogFile()
@@ -346,17 +352,11 @@ std::string TestFixture::local_ecf_home()
 std::string TestFixture::includes()
 {
    // Get to the workspace directory, Then set the path to the includes directory
-   fs::path current_path = fs::current_path();
-   //std::cout << "\ncurrent_path = " << current_path << " ------------------------------------------------------\n";
-   while(current_path.stem() != "ecflow") {
-     //std::cout << "current_path = " << current_path << " **********************************************\n";
-      current_path = current_path.parent_path();
-   }
-
-   current_path += "/" + project_test_dir_;
-   current_path += "/data/includes";
-   //std::cout << "current_path = " << current_path << " ==============================================\n";
-   std::string includes_path = current_path.string();
+   std::string includes_path = File::workspace_dir();
+   includes_path += "/";
+   includes_path += project_test_dir_;
+   includes_path += "/data/includes";
+   //std::cout << "includes_path = " << includes_path << " ==============================================\n";
    return includes_path;
 }
 

@@ -598,7 +598,6 @@ void AlterCmd::createDelete( Cmd_ptr& cmd, const std::vector<std::string>& optio
 			}
 			case AlterCmd::DEL_EVENT:    {
             if (!name.empty()) {
-
                Event check(name);  // will throw if not valid
             }
 			   break;
@@ -656,7 +655,6 @@ void AlterCmd::createDelete( Cmd_ptr& cmd, const std::vector<std::string>& optio
             }
             cmd = Cmd_ptr( new AlterCmd(altered_path,theAttrType, name, path_value  ) );
             return;
-            break;
          }
          case AlterCmd::DELETE_ATTR_ND: break;
  		}

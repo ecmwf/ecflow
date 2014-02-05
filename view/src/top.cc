@@ -450,29 +450,28 @@ void top::releaseCB(Widget w,XtPointer)
 
 void top::helpCB(Widget w,XtPointer)
 {
-  const char *link="http://intra.ecmwf.int/metapps/manuals/ecflow/index.html";
-  // const char *jira="http://software.ecmwf.int/issues/browse/ECFLOW";
-  // const char *link="http://wedit.ecmwf.int/publications/manuals/ecFlow";
-  char cmd[1024];
-  FILE *f = 0;
-  
-  gui::message("ecFlowView help (ECFLOWVIEW_HELP); press button\n");
-  snprintf(cmd, 1024, "${ECFLOWVIEW_HELP:=firefox --new-tab %s}\n", link);
-  std::cerr << "#INF: " << cmd;
+   const char *link="http://intra.ecmwf.int/metapps/manuals/ecflow/index.html";
+   // const char *jira="http://software.ecmwf.int/issues/browse/ECFLOW";
+   // const char *link="http://wedit.ecmwf.int/publications/manuals/ecFlow";
+   char cmd[1024];
 
-  if (1) 
-    system(cmd);
-  else {
-    f = popen(cmd,"r");
-    if(!f) {
-      gui::error("Cannot access : %s", link);
-      return;
-    } else if (!pclose(f)) {
-    } else {
-      gui::error("Cannot access : %s", link);
-      return;
-    }
-  }
+   gui::message("ecFlowView help (ECFLOWVIEW_HELP); press button\n");
+   snprintf(cmd, 1024, "${ECFLOWVIEW_HELP:=firefox --new-tab %s}\n", link);
+   std::cerr << "#INF: " << cmd;
+
+   if (1)
+      system(cmd);
+   else {
+      FILE* f = popen(cmd,"r");
+      if(!f) {
+         gui::error("Cannot access : %s", link);
+         return;
+      } else if (!pclose(f)) {
+      } else {
+         gui::error("Cannot access : %s", link);
+         return;
+      }
+   }
 }
 
 void top::prefCB(Widget w,XtPointer)

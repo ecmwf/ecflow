@@ -57,7 +57,7 @@ panel* panel_factory::create_all(panel_window& w,Widget parent)
 			panel* x = factories_[i]->create(w,parent);
 			XtManageChild(x->widget());
 
-			if(x && x->tools())
+			if(x->tools())
 				tip::makeTips(x->tools());
 
 			x->next_ = first;

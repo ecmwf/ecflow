@@ -291,7 +291,7 @@ bool ClientEnvironment::parseHostsFile(std::string& errorMsg)
 	// If no port is specified we default to port read in from the environment
 	// if that was not specified we default to Str::DEFAULT_PORT_NUMBER()
 	std::vector<std::string>::iterator theEnd = lines.end();
-	for(std::vector<std::string>::iterator i = lines.begin(); i!= theEnd; i++ ) {
+	for(std::vector<std::string>::iterator i = lines.begin(); i!= theEnd; ++i) {
 
 		std::vector< std::string > tokens;
 		Str::split((*i),tokens);

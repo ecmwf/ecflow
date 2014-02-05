@@ -44,7 +44,7 @@ set -x # echo script lines as they are executed
    # we use TOOLSET since its possible to get different compilers on the same platform
    # If ever use different versions of the same compiler may need COMPILER_VERSION
    #
-   if [[ ^ARCH^ = ibm_power* || ^ARCH^ = rs6000 ]] ; then
+   if [[ ^ARCH^ = ibm_power* ]] ; then
    
       exe_time=`/opt/freeware/bin/date +%s -r $1/bin/^COMPILER_TEST_PATH^/$2`
       passed_file_time=0
@@ -101,7 +101,7 @@ set -x # echo script lines as they are executed
    # we use TOOLSET since its possible to get different compilers on the same platform
    # If ever use different versions of the same compiler may need COMPILER_VERSION
    #
-   if [[ ^ARCH^ = ibm_power* || ^ARCH^ = rs6000 ]] ; then
+   if [[ ^ARCH^ = ibm_power* ]] ; then
    
       exe_time=`/opt/freeware/bin/date +%s -r ecbuild/^MODE^/$1/$2`
       passed_file_time=0
@@ -227,7 +227,7 @@ else
    
    # HACK for IBM which sets ECF_RID, unset before running client server tests
    # Not defined for other platforms
-   if [[ %ARCH% = ibm_power* || %ARCH% = rs6000 ]] ; then
+   if [[ %ARCH% = ibm_power* ]] ; then
       unset ECF_RID
    fi
    
@@ -238,7 +238,7 @@ else
    ecflow_client --meter=progress 60     --host=%ECF_NODE% --port=%ECF_PORT%  
    ecflow_client --label=progress Test   --host=%ECF_NODE% --port=%ECF_PORT%  
    
-   if [[ %ARCH% = rs6000 || %ARCH% = opensuse113 || %ARCH% = opensuse103 || %ARCH% = redhat ]] ; then
+   if [[ %ARCH% = opensuse113 || %ARCH% = opensuse103 || %ARCH% = redhat ]] ; then
       # On ECGATE/opensuse113 port 3141 is already used ???
       # linux64 and linux64intel, run at the same time, hence use ECF_PORT=3142 for linux64intel
       export ECF_PORT=3142

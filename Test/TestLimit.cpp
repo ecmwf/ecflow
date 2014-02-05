@@ -78,7 +78,6 @@ BOOST_AUTO_TEST_CASE( test_limit )
  	//	   		task t3
  	//	   endfamily
 	//	endsuite
-	int taskSize = 3;
 
   	Defs theDefs;
  	{
@@ -92,6 +91,7 @@ BOOST_AUTO_TEST_CASE( test_limit )
       family_ptr fam = suite->add_family("family");
 		fam->addInLimit(InLimit("fast",pathToLimit));
 		fam->addVerify( VerifyAttr(NState::COMPLETE,1) );
+		int taskSize = 3;
  		for(int i=0; i < taskSize; i++) {
  		   task_ptr task = fam->add_task( "t" + boost::lexical_cast<std::string>(i) );
  			task->addVerify( VerifyAttr(NState::COMPLETE,1) );

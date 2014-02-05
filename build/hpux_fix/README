@@ -5,7 +5,8 @@
 ## granted to it by virtue of its status as an intergovernmental organisation 
 ## nor does it submit to any jurisdiction. 
 
-Compilation problems with: <boost_root>/libs/detail/utf8_codecvt_facet.cpp
+Compilation problems with: <boost_root>/boost/detail/utf8_codecvt_facet.ipp ( boost 1.53/1.51)
+was prevously file         <boost_root>/libs/detail/utf8_codecvt_facet.cpp  ( boost 1.42 --> 1.48)
 ==========================================================================
 
 This needs to be fixed to boost versions:
@@ -13,8 +14,10 @@ This needs to be fixed to boost versions:
     1.43:
     1.44: (not tested)
     1.45:
+    1.51
+    1.53
 
-acc version 6 compiler problems with <boost_root>/libs/detail/utf8_codecvt_facet.cpp
+Affects filesystem,program_options,serialisation
 
 Work around is to rewrite "get_cont_octet_out_count_impl"
 ignoring the preprocessor directives (which are window specific anyway)
@@ -33,8 +36,11 @@ acc.compile.c++ tmpBuildDir/boost/bin.v2/libs/filesystem/build/acc/debug/link-st
 "./libs/detail/utf8_codecvt_facet.cpp", line 255: error #2014-D: extra text after expected end of preprocessing directive
   #elif WCHAR_MAX > 0x10000
 
- 
-The actual file <boost_root>/libs/detail/utf8_codecvt_facet.cpp
+
+
+File:                     <boost_root>/boost/detail/utf8_codecvt_facet.ipp ( boost 1.53/1.51)
+was prevously file         <boost_root>/libs/detail/utf8_codecvt_facet.cpp  ( boost 1.42 --> 1.48)
+
 appears to have been changed in boost 1.40
 for the function  get_cont_octet_out_count_impl
 

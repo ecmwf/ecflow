@@ -60,7 +60,6 @@ BOOST_AUTO_TEST_CASE( test_repeat_integer  )
 
 	// Each task/job should be run *4* times, according to the repeats
 	// Mimics nested loops
- 	int taskSize = 2;
  	Defs theDefs;
  	{
       suite_ptr suite = theDefs.add_suite("suite");
@@ -69,6 +68,7 @@ BOOST_AUTO_TEST_CASE( test_repeat_integer  )
       family_ptr fam = suite->add_family( "family" );
  	   fam->addRepeat( RepeatInteger("VAR",0,1,1));    // repeat contents 2 times
  	   fam->addVerify( VerifyAttr(NState::COMPLETE,4) ); // verify family repeats 2 times
+ 	   int taskSize = 2;
  	   for(int i=0; i < taskSize; i++) {
  	      task_ptr t = fam->add_task( "t" + boost::lexical_cast<std::string>(i) );
  	      t->addVerify( VerifyAttr(NState::COMPLETE,4) ); // Each task should run 4 times

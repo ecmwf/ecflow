@@ -20,17 +20,7 @@ export TMPDIR=${TMPDIR:-UNDEFINED}
 export HOST=${HOST:-`hostname`}
 export NPES=${NPES:-0}
 
-if [[ $ARCH = rs6000 ]] ; then
-  export EMOS_TMPDIR=/emos_data/tmpdir/%TASK%_%ECF_TRYNO%.$$
-  if [[ "$TMPDIR" != "UNDEFINED" && -d $TMPDIR ]] ; then
-    cd $TMPDIR/..
-    /bin/rm -rf $TMPDIR
-  fi
-  export TMPDIR=$EMOS_TMPDIR
-  [[ -d $TMPDIR ]] || mkdir -p $TMPDIR
-  export USE_EMOS_TMP="true"
-  cd $TMPDIR
-elif [[ $ARCH = linux ]] ; then
+if [[ $ARCH = linux ]] ; then
   export EMOS_TMPDIR=/var/tmp/tmpdir/%TASK%_%ECF_TRYNO%.$$
   export TMPDIR=$EMOS_TMPDIR
   [[ -d $TMPDIR ]] || mkdir -p $TMPDIR

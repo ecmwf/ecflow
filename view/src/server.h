@@ -20,8 +20,7 @@ class server {
 public:
 
 	server(int port);
-
-	~server(); // Change to virtual if base class
+	virtual ~server();
 
 	void run();
 	virtual void serve(int) = 0;

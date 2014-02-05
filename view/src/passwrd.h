@@ -84,8 +84,6 @@ private:
 	passwrd& operator=(const passwrd&);
 
 
-	char *u_;
-	char *p_;
 
 // -- Methods
 

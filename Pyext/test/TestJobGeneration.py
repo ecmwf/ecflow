@@ -51,11 +51,13 @@ def delete_jobs(task_vec, ecf_home):
         the_job_file = ecf_home + task.get_abs_node_path() + ".job" + task.get_try_no()
         if os.path.exists(the_job_file) :
             print "removing file " + the_job_file
-            os.remove(the_job_file)
+            try: os.remove(the_job_file)
+            except: pass
         man_file = ecf_home + task.get_abs_node_path() + ".man"  
         if os.path.exists(man_file) :
             print "removing man_file " + man_file
-            os.remove(man_file)
+            try: os.remove(man_file)
+            except: pass
    
 def check_jobs(task_vec, ecf_home):
     print "Check job file exists"
@@ -79,7 +81,7 @@ def get_workspace_dir():
     while (1):
         head, tail = os.path.split(cwd)
         #print "tail:" + tail
-        if tail == "ecflow" :
+        if tail.find("ecflow") != -1 :
             return cwd
         cwd = head
     return cwd
@@ -139,5 +141,6 @@ if __name__ == "__main__":
         shutil.rmtree(job_ctrl.get_dir_for_job_creation())     
     
         delete_jobs(task_vec,ecf_home)
+        print "All test pass"
     except RuntimeError, e:
         print "failed: " + str(e)    

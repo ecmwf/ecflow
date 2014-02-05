@@ -78,7 +78,7 @@ struct TestFixture {
 	static std::string includes();
 
 	// Use for all comms with server
-	static ClientInvoker& client() { return theClient_;}
+	static ClientInvoker& client();
 	static std::string port() { return port_;}
 
 private:
@@ -89,7 +89,6 @@ private:
 
 private:
 
-   static ClientInvoker theClient_;
 	static std::string scratchSmsHome_;
 	static std::string host_;
 	static std::string port_;

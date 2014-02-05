@@ -123,7 +123,8 @@ using testing ;
 # - Tested with new v11 nas v12 compilers
 # - If you change python version ,remember to change: $WK/build/install_ecflow.sh: ECFLOW_PYTHON_INSTALL_DIR
 #
-using python : 2.7 ;
+
+#using python : 2.7 ;
 
 # ================================================================================
 # Link with FDB  (PRODGEN)

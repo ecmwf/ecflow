@@ -275,21 +275,6 @@ HPUX/release
  time for deleting all nodes = 0.84
  Total elapsed time = 45 seconds
  
-rs6000/release
- AParser:: ...test_single_defs AParser/test/data/single_defs/mega.def file_size(6723372)
- Parsing Node tree and AST creation time                         = 4.65479 < limit(8)
- Parsing Node tree *only* time                                   = 2.88915 < limit(4.5)
- Test all paths can be found. time taken                         = 2.15203 < limit(4.2)
- Persist only, time taken                                        = 1.3826 < limit(2.5)
- Persist and reload(DEFS) and compare, time taken                = 6.64453 < limit(9) file_size(6669201)
- Persist and reload(STATE) and compare, time taken               = 8.46131 file_size(12036681)
- Persist and reload(MIGRATE) and compare, time taken             = 4.80021 < limit(9) file_size(6669220)
- Checkpt(EOS_PORTABLE_BINARY) and reload and compare, time taken = 2.88234 < limit(18) file_size(5679418)
- time for 10 jobSubmissions:0.557259s jobs:1054 < limit(4.5)
- time for Defs::check (  inlimit resolution) = 0.114702 < limit(2)
- time for deleting all nodes = 0.834757
- Total elapsed time = 37 seconds
-
 power6/release
  AParser:: ...test_single_defs AParser/test/data/single_defs/mega.def file_size(6723372)
  Parsing Node tree and AST creation time                         = 3.42329 < limit(7.8)

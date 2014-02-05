@@ -21,6 +21,7 @@ class resource;
 
 class configurable {
 public:
+   virtual ~configurable();
 	virtual void changed(resource&);
 
 #ifdef alpha

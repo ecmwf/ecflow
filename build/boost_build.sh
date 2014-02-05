@@ -49,17 +49,17 @@ if test_uname Linux ; then
   if [ "$X64" = x86_64 ]
   then
     # PE_ENV is defined in cray environment, at least on sandy bridge
-    if [[ "$PE_ENV" = GNU || "$PE_ENV" = INTEL || "$PE_ENV" = CRAY ]]
+    if [ "$PE_ENV" = GNU -o "$PE_ENV" = INTEL -o "$PE_ENV" = CRAY ]
     then
        CXXFLAGS=cxxflags=-fPIC
        cp $WK/build/site_config/site-config-cray.jam $BOOST_ROOT/tools/build/v2/site-config.jam
        if [ "$PE_ENV" = INTEL ] ; then
-         layout=versioned  
-         tool=intel
+          layout=versioned  
+          tool=intel
        fi
        if [ "$PE_ENV" = CRAY ] ; then
-         tool=cray
-         layout=versioned  
+          tool=cray
+          layout=versioned  
        fi
     else
        cp $WK/build/site_config/site-config-Linux64.jam $BOOST_ROOT/tools/build/v2/site-config.jam  
@@ -79,16 +79,6 @@ elif test_uname AIX ; then
    # on c1a
    tool=vacpp
    cp $WK/build/site_config/site-config-AIX.jam $BOOST_ROOT/tools/build/v2/site-config.jam
- 
-   if test "$ARCH" = rs6000 
-   then
-     tool=vacpp
-     cp $WK/build/site_config/site-config-AIX-rs6000.jam $BOOST_ROOT/tools/build/v2/site-config.jam
-   
-     # On ecgate however can't get gcc to work on AIX
-     #tool=gcc
-     #cp $WK/build/site_config/site-config-AIX-gcc.jam $BOOST_ROOT/tools/build/v2/site-config.jam
-   fi
 fi
 
 # Only uncomment for debugging this script
@@ -108,39 +98,46 @@ echo "using compiler $tool with build $1 variants "
 # ========================================================================
 # Note: boost thread *ONLY* need to test multi-threaded server See: define ECFLOW_MT
 # ========================================================================
-./bjam --build-dir=./tmpBuildDir toolset=$tool $CXXFLAGS stage link=static --layout=$layout --with-system variant=debug 
-./bjam --build-dir=./tmpBuildDir toolset=$tool $CXXFLAGS stage link=static --layout=$layout --with-date_time variant=debug 
-./bjam --build-dir=./tmpBuildDir toolset=$tool $CXXFLAGS stage link=static --layout=$layout --with-filesystem variant=debug   
-./bjam --build-dir=./tmpBuildDir toolset=$tool $CXXFLAGS stage link=static --layout=$layout --with-program_options variant=debug 
-./bjam --build-dir=./tmpBuildDir toolset=$tool $CXXFLAGS stage link=static --layout=$layout --with-serialization  variant=debug 
-./bjam --build-dir=./tmpBuildDir toolset=$tool $CXXFLAGS stage link=static --layout=$layout --with-test variant=debug  
-./bjam --build-dir=./tmpBuildDir toolset=$tool $CXXFLAGS stage link=static --layout=$layout --with-thread variant=debug  
+./bjam --build-dir=./tmpBuildDir toolset=$tool $CXXFLAGS stage link=static --layout=$layout --with-system variant=debug -j2
+./bjam --build-dir=./tmpBuildDir toolset=$tool $CXXFLAGS stage link=static --layout=$layout --with-date_time variant=debug -j2
+./bjam --build-dir=./tmpBuildDir toolset=$tool $CXXFLAGS stage link=static --layout=$layout --with-filesystem variant=debug  -j2
+./bjam --build-dir=./tmpBuildDir toolset=$tool $CXXFLAGS stage link=static --layout=$layout --with-program_options variant=debug -j2
+./bjam --build-dir=./tmpBuildDir toolset=$tool $CXXFLAGS stage link=static --layout=$layout --with-serialization  variant=debug -j2
+./bjam --build-dir=./tmpBuildDir toolset=$tool $CXXFLAGS stage link=static --layout=$layout --with-test variant=debug  -j2
+./bjam --build-dir=./tmpBuildDir toolset=$tool $CXXFLAGS stage link=static --layout=$layout --with-thread variant=debug  -j2
 
 
 # ========================================================================
 # Note: boost thread *ONLY* need to test multi-threaded server See: define ECFLOW_MT
 # ========================================================================
-./bjam --build-dir=./tmpBuildDir toolset=$tool $CXXFLAGS stage link=static --layout=$layout --with-system variant=release 
-./bjam --build-dir=./tmpBuildDir toolset=$tool $CXXFLAGS stage link=static --layout=$layout --with-date_time variant=release  
-./bjam --build-dir=./tmpBuildDir toolset=$tool $CXXFLAGS stage link=static --layout=$layout --with-filesystem variant=release   
-./bjam --build-dir=./tmpBuildDir toolset=$tool $CXXFLAGS stage link=static --layout=$layout --with-program_options variant=release 
-./bjam --build-dir=./tmpBuildDir toolset=$tool $CXXFLAGS stage link=static --layout=$layout --with-serialization  variant=release 
-./bjam --build-dir=./tmpBuildDir toolset=$tool $CXXFLAGS stage link=static --layout=$layout --with-test variant=release  
-./bjam --build-dir=./tmpBuildDir toolset=$tool $CXXFLAGS stage link=static --layout=$layout --with-thread variant=release  
+./bjam --build-dir=./tmpBuildDir toolset=$tool $CXXFLAGS stage link=static --layout=$layout --with-system variant=release -j2
+./bjam --build-dir=./tmpBuildDir toolset=$tool $CXXFLAGS stage link=static --layout=$layout --with-date_time variant=release  -j2
+./bjam --build-dir=./tmpBuildDir toolset=$tool $CXXFLAGS stage link=static --layout=$layout --with-filesystem variant=release   -j2
+./bjam --build-dir=./tmpBuildDir toolset=$tool $CXXFLAGS stage link=static --layout=$layout --with-program_options variant=release -j2
+./bjam --build-dir=./tmpBuildDir toolset=$tool $CXXFLAGS stage link=static --layout=$layout --with-serialization  variant=release -j2
+./bjam --build-dir=./tmpBuildDir toolset=$tool $CXXFLAGS stage link=static --layout=$layout --with-test variant=release  -j2
+./bjam --build-dir=./tmpBuildDir toolset=$tool $CXXFLAGS stage link=static --layout=$layout --with-thread variant=release  -j2
 
 
-# ================================================================================
-# Build python
-# ================================================================================
-#*** If the boost python HAS not been built, and we build in $WK/Pyext, then it will build 
-#*** boost python in $BOOST_ROOT/bin.v2/
-#*** It appears to build boost python single threaded. (i.e you do not see threading-multi) in the directory path.
-#
-# To prebuild the boost python, hence we need to do the following: For now build both variants, keeps cmake happy! (i.e when finding libs)
-#
-./bjam toolset=$tool link=shared variant=debug   $CXXFLAGS stage --layout=$layout threading=single --with-python
-./bjam toolset=$tool link=shared variant=release $CXXFLAGS stage --layout=$layout threading=single --with-python
-./bjam toolset=$tool link=shared variant=debug   $CXXFLAGS stage --layout=$layout threading=multi --with-python
-./bjam toolset=$tool link=shared variant=release $CXXFLAGS stage --layout=$layout threading=multi --with-python
+# Allow python to be disabled  
+if [ -n "$ECF_NO_PYTHON" ] ; then   
+   echo "****************************************************************************"
+   echo "Ignore boost python. ECF_NO_PYTHON set."
+   echo "****************************************************************************"
+else
+   # ================================================================================
+   # Build python
+   # ================================================================================
+   #*** If the boost python HAS not been built, and we build in $WK/Pyext, then it will build 
+   #*** boost python in $BOOST_ROOT/bin.v2/
+   #*** It appears to build boost python single threaded. (i.e you do not see threading-multi) in the directory path.
+   #
+   # To prebuild the boost python, hence we need to do the following: For now build both variants, keeps cmake happy! (i.e when finding libs)
+   #
+   ./bjam toolset=$tool link=shared variant=debug   $CXXFLAGS stage --layout=$layout threading=single --with-python -d2 -j2
+   ./bjam toolset=$tool link=shared variant=release $CXXFLAGS stage --layout=$layout threading=single --with-python -d2 -j2
+   ./bjam toolset=$tool link=shared variant=debug   $CXXFLAGS stage --layout=$layout threading=multi --with-python -d2 -j2
+   ./bjam toolset=$tool link=shared variant=release $CXXFLAGS stage --layout=$layout threading=multi --with-python -d2 -j2
+fi
 
  

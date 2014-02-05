@@ -29,9 +29,8 @@ extern "C" {
 #include "xec.h"
 }
 
-// substitute::substitute(const char* name): name_(name) {}
 static char* debug = getenv("DEBUG");
-substitute::substitute(const std::string name):
+substitute::substitute(const std::string& name):
   name_(name)
 {
 }

@@ -34,9 +34,10 @@ public:
 	               bool disable_job_generation = false,
                   bool remove_checkpt_file_before_server_start = true,
                   bool remove_checkpt_file_after_server_exit = true
-	             ) : port_(port),remove_checkpt_file_after_server_exit_(remove_checkpt_file_after_server_exit)  {
-
- 		host_ = ClientEnvironment::hostSpecified();
+	             ) : port_(port),
+	                 host_(ClientEnvironment::hostSpecified()),
+	                 remove_checkpt_file_after_server_exit_(remove_checkpt_file_after_server_exit)
+   {
 		if (host_.empty()) {
 			if(!msg.empty()) std::cout << msg << "   port(" << port_ << ")\n";
 
