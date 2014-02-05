@@ -343,6 +343,7 @@ def build_localhost( parent ) :
     
     add_git_tasks( localhost , True)
 
+    localhost.add_task("cppcheck") 
     add_build_and_test_tasks( localhost )
     add_build_profile( localhost )
     
