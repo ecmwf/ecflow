@@ -289,6 +289,9 @@ BOOST_AUTO_TEST_CASE( test_str_replace_all )
 
    testStr = "This\n is\n a\n string\n";
    test_replace_all(testStr,"\n","\\n","This\\n is\\n a\\n string\\n");
+
+   testStr = "This\n is\n a\n string\n";
+   test_replace_all(testStr,"\n","","This is a string");
 }
 
 BOOST_AUTO_TEST_CASE( test_str_to_int )

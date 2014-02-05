@@ -14,11 +14,14 @@
 # code for testing with statement
 # In our case it provides the ability to indent
 
-from ecflow import Defs, Suite, Family 
+from ecflow import Defs, Suite, Family, Client
 import sys
     
 if __name__ == "__main__":
-
+    print "####################################################################"
+    print "Running ecflow version " + Client().version() 
+    print "####################################################################"
+ 
     version = sys.version_info;
     if  version[1] < 7 : 
         print "This test only run with python version 2.7, but found : " + str(version)

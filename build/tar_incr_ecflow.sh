@@ -24,17 +24,23 @@ rm -rf incr.tar.gz
 # Test/data/ECF_HOME is used by Test to recursively generate directory structure
 # and populate with *DEF* file, and job output, etc, hence exclude this directory
 #
-rm -rf $WK/Test/data/ECF_HOME_debug
-rm -rf $WK/Test/data/ECF_HOME_release
+rm -rf $WK/Test/data/ECF_HOME_debug*
+rm -rf $WK/Test/data/ECF_HOME_release*
 rm -rf $WK/AParser/test/data/single_defs/mega.def_log
 rm -rf $WK/Pyext/test.def
 rm -rf $WK/TestEcfSms/test/data/test_real.def
 rm -rf $WK/TestEcfSms/test/data/test_hybrid.def
 
+# Remove any lock file create by tests which used EcfPortLock.hpp
+rm -rf $WK/*.lock
+
+
 # ==============================================================================================
 # TAR
 # temporarily create a symbolic link, so that tar file matches directory ecflow.
 # ==============================================================================================
+cd $WK
+cd ..
 ln -s ecflow ecflow
 
 # Recursively find in directory MyProject all writable:
@@ -119,14 +125,6 @@ scp incr.tar.gz                       ecgb:/vol/ecf/redhat
 ssh ecgb "cd /vol/ecf/redhat/; rm -rf untar_incr_ecflow.sh"
 scp $WK/build/untar_incr_ecflow.sh    ecgb:/vol/ecf/redhat/
 ssh ecgb "cd /vol/ecf/redhat/; chmod 755 untar_incr_ecflow.sh; sh -x untar_incr_ecflow.sh"
-
-# ===============================================================================
-# IBM/ECGATE:   
-# ===============================================================================
-rcp incr.tar.gz                       ecgate:/emos_data/ecflow/rs6000/xlc
-rsh ecgate "cd /emos_data/ecflow/rs6000/xlc/; rm -rf untar_incr_ecflow.sh"
-rcp $WK/build/untar_incr_ecflow.sh    ecgate:/emos_data/ecflow/rs6000/xlc
-rsh ecgate "cd /emos_data/ecflow/rs6000/xlc; chmod 755 untar_incr_ecflow.sh; sh -x untar_incr_ecflow.sh"
 
 # =================================================================================
 # HPUX: Note $SCRATCH is a very slow system

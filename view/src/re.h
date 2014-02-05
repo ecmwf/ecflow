@@ -21,7 +21,7 @@ class re {
 	regex_t re_;
 	char *loc_;
 public:
-	re(const char* r)  { regcomp(&re_,r,0); }
+	re(const char* r): loc_(0) { regcomp(&re_,r,0); }
 
 	~re() { regfree(&re_); }
 

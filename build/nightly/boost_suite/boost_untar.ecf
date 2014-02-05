@@ -41,7 +41,7 @@ else
          fi
          
          if [ -e %BOOST_VERSION%.tar ] ; then
-            if [[ %ARCH% = rs6000 || %ARCH% = ibm_power6 || %ARCH% = ibm_power7 ]]  
+            if [[ %ARCH% = ibm_power6 || %ARCH% = ibm_power7 ]]  
             then
                gtar -xf %BOOST_VERSION%.tar
             else

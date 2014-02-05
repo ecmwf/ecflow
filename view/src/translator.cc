@@ -192,7 +192,7 @@ str translator<t_vs, str>::operator()(t_vs x)
 {
   str s, space = " ";
   t_vs::iterator j;
-  for (j = x.begin(); j != x.end(); j++) {
+  for (j = x.begin(); j != x.end(); ++j) {
     s += str(j->c_str());
     if(j != x.end()) 
       s += space;

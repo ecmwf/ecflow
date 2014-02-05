@@ -139,6 +139,11 @@ void export_NodeAttr()
    .def("empty",    &Variable::empty,   "Return true if the variable is empty. Used when returning a Null variable, from a find")
  	;
 
+   // We need to return pass a list of Variable as arguments, to retrieve the generated variables
+   class_<std::vector<Variable> >("VariableList", "Hold a list of Variables")
+               .def(vector_indexing_suite<std::vector<Variable> >()) ;
+
+
 	class_<Label>("Label",NodeAttrDoc::label_doc(),init<std::string, std::string>())
 	.def(self == self )                                    // __eq__
 	.def("__str__",   &Label::toString)                    // __str__

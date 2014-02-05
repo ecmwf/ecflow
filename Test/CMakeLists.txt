@@ -6,6 +6,7 @@
 file( GLOB srcs RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "src/*.cpp" )
  
 ecbuild_add_library( TARGET   libharness
+                     NOINSTALL
                    TYPE     STATIC
                    SOURCES  ${srcs}
                    LIBS     core nodeattr node libparser base libclient ${Ecflow_Boost_LIBS}
@@ -18,6 +19,7 @@ ecbuild_add_library( TARGET   libharness
                             ../Base/src/stc
                             ../Base/test
                             ../Client/src
+                            ../Client/test
                             ${Boost_INCLUDE_DIRS} )
 
 
@@ -26,6 +28,7 @@ ecbuild_add_library( TARGET   libharness
 list( APPEND test_srcs
 ./TestAbortCmd.cpp
 ./TestAlias.cpp
+./TestClkSync.cpp
 ./TestComplete.cpp
 ./TestCron.cpp
 ./TestCtsWaitCmd.cpp
@@ -70,15 +73,16 @@ ecbuild_add_test( TARGET  test-zombies
                           ../Base/src
                           ../Client/src
                           ${Boost_INCLUDE_DIRS} )
-                          
-ecbuild_add_test( TARGET  singletest
-                SOURCES   ./TestSingle.cpp
-                LIBS      core nodeattr node libparser base libclient libharness pthread ${Ecflow_Test_LIBS}
-                INCLUDES  src
-                          ../ACore/src 
-                          ../ANattr/src
-                          ../ANode/src
-                          ../ANode/test
-                          ../Base/src
-                          ${Boost_INCLUDE_DIRS} )
+
+# This test runs forever, hence not suitable for unit test.                          
+#ecbuild_add_test( TARGET  singletest
+#                SOURCES   ./TestSingle.cpp
+#                LIBS      core nodeattr node libparser base libclient libharness pthread ${Ecflow_Test_LIBS}
+#                INCLUDES  src
+#                          ../ACore/src 
+#                          ../ANattr/src
+#                          ../ANode/src
+#                          ../ANode/test
+#                          ../Base/src
+#                          ${Boost_INCLUDE_DIRS} )
 

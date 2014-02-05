@@ -194,7 +194,10 @@ def all_files(root, patterns='*', single_level=False, yield_folders=False):
             break    
         
 if __name__ == "__main__":
-
+    print "####################################################################"
+    print "Running ecflow version " + ecflow.Client().version() 
+    print "####################################################################"
+ 
     cwd = os.getcwd()
     #print cwd
     #print "split = " + str(os.path.split(cwd))

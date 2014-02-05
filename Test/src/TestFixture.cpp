@@ -23,7 +23,6 @@
 #include "TestFixture.hpp"
 #include "Defs.hpp"
 #include "Task.hpp"
-#include "ClientInvoker.hpp"
 #include "ClientEnvironment.hpp" // needed for static ClientEnvironment::hostSpecified(); ONLY
 #include "File.hpp"
 #include "TestHelper.hpp"
@@ -33,8 +32,13 @@
 #include "Host.hpp"
 #include "ChangeMgrSingleton.hpp" // keep valgrind happy
 #include "Rtt.hpp"
+#include "EcfPortLock.hpp"
 
+#ifdef DEBUG
 std::string rtt_filename = "rtt.dat";
+#else
+std::string rtt_filename = "rtt_d.dat";
+#endif
 std::string TestFixture::scratchSmsHome_ = "";
 std::string TestFixture::host_;
 std::string TestFixture::port_;
@@ -73,6 +77,13 @@ TestFixture::TestFixture()
    init("Test");
 }
 
+ClientInvoker& TestFixture::client()
+{
+   static ClientInvoker theClient_;
+   return theClient_;
+}
+
+
 void TestFixture::init(const std::string& project_test_dir)
 {
    TestFixture::project_test_dir_ = project_test_dir;
@@ -89,15 +100,16 @@ void TestFixture::init(const std::string& project_test_dir)
    PrintStyle::setStyle(PrintStyle::STATE);
 
    // Let first see if we need do anything. If ECF_NODE is specified (ie the name
-   // of the machine, which has the sms server), only then do we need to do anything.
+   // of the machine, which has the ecflow server), only then do we need to do anything.
    // The server must have access to the file system specified by ECF_HOME.
    // This becomes an issue when the server is on a different machine
    host_ = ClientEnvironment::hostSpecified();
    port_ = ClientEnvironment::portSpecified(); // returns ECF_PORT, otherwise Str::DEFAULT_PORT_NUMBER
-   std::cout << "TestFixture::TestFixture() " << host_ << Str::COLON() << port_ << " jobSubmissionInterval = " << job_submission_interval() << "\n";
+   std::cout << "TestFixture::TestFixture()  jobSubmissionInterval = " << job_submission_interval() << "\n";
    if (!host_.empty() && host_ != Str::LOCALHOST()) {
 
-      std::cout << "   EXTERNAL SERVER running on _ANOTHER_ PLATFORM, assuming started on port " << port_ << " copying test data ...\n";
+      client().set_host_port(host_,port_);
+      std::cout << "   EXTERNAL SERVER running on _ANOTHER_ PLATFORM, assuming " << host_ << ":" << port_ << " copying test data ...\n";
 
       // Must use a file system accessible from the server. Use $SCRATCH
       // Duplicate test data, required to scratch area and reset ECF_HOME
@@ -130,7 +142,8 @@ void TestFixture::init(const std::string& project_test_dir)
    }
    else if (!host_.empty() && host_ == Str::LOCALHOST()) {
 
-      std::cout << "   EXTERNAL SERVER running on _SAME_ PLATFORM. Assuming started on port " << port_ << "\n";
+      client().set_host_port(host_,port_);
+      std::cout << "   EXTERNAL SERVER running on _SAME_ PLATFORM. Assuming " << host_ << ":" << port_ << "\n";
 
       // log file may have been deleted, by previous tests. Create a new log file
       if ( !fs::exists( TestFixture::pathToLogFile() )) {
@@ -138,15 +151,26 @@ void TestFixture::init(const std::string& project_test_dir)
          log_path += "/MyProject/";
          log_path += TestFixture::pathToLogFile();
          std::cout << "No log file: Creating new log(via remote server) file " << log_path  << "\n";
-         ClientInvoker theClient(host_,port_);
-         theClient.new_log( log_path );
-         theClient.logMsg("Created new log file. msg sent to force new log file to be written to disk");
+         client().new_log( log_path );
+         client().logMsg("Created new log file. msg sent to force new log file to be written to disk");
       }
    }
    else {
-
       // For local host start by removing log file. Server invocation should create a new log file
       boost::filesystem::remove( boost::filesystem::path( pathToLogFile() ) );
+      host_ = Str::LOCALHOST();
+
+      // Create a unique port number, allowing debug and release to run at the same time
+      // Note: linux64 and linux64intel, can run on same machine, on different workspace
+      // Hence the lock file is not sufficient. Hence we will make a client server call.
+      cout << "Find free port to start server, starting with port " << port_ << "\n";
+      int the_port = boost::lexical_cast<int>(port_);
+      while (!EcfPortLock::is_free(the_port)) the_port++;
+      port_ = ClientInvoker::find_free_port(the_port,true /*show debug output */);
+      EcfPortLock::create(port_);
+
+      // host_ is empty update to localhost, **since** port may have changed, update ClinetInvoker
+      client().set_host_port(host_,port_);
 
       // Remove the generated check point files, at start of test, otherwise server will load check point file
       Host h;
@@ -163,25 +187,18 @@ void TestFixture::init(const std::string& project_test_dir)
       std::cout << "   ECF_NODE not specified, starting LOCAL " << theServerInvokePath << "\n";
    }
 
-   // Ping the server to see if its running
-   std::string theHost = host_;
-   if (theHost.empty()) {
-      // No ECF_NODE specified. Provide a host so that Ping works
-      theHost = Str::LOCALHOST();
-   }
-
+   /// Ping the server to see if its running
    /// Assume remote/local server started on the default port
    /// Either way, we wait for 60 seconds for server, for it to respond to pings
    /// This is important when server is started locally. We must wait for it to come alive.
-   ClientInvoker theClient(theHost,port_);
-   if (!theClient.wait_for_server_reply()) {
-      cout << "Ping server on " << theHost << Str::COLON() << port_ << " failed. Is the server running ? " << theClient.errorMsg() << "\n";
+   if (!client().wait_for_server_reply()) {
+      cout << "Ping server on " << host_ << Str::COLON() << port_ << " failed. Is the server running ? " << client().errorMsg() << "\n";
       assert(false);
    }
 
    // Log file must exist, otherwise test will not work. Log file required for comparison
    if ( !fs::exists( TestFixture::pathToLogFile() )) {
-      cout << "Logile file " << TestFixture::pathToLogFile() << " does not exist\n";
+      cout << "Log file " << TestFixture::pathToLogFile() << " does not exist\n";
       assert(false);
    }
 }
@@ -190,11 +207,10 @@ void TestFixture::init(const std::string& project_test_dir)
 TestFixture::~TestFixture()
 {
 	// Note: Global fixture Destructor can not use BOOST macro
-  	std::cout << "TestFixture::~TestFixture() " << host_ << "\n";
+  	std::cout << "TestFixture::~TestFixture() " << host_ << ":" << port_ << "\n";
 
    // destructors should not allow exception propagation
    try {
-
 #ifndef DEBUG_HOST_SERVER
       if (!host_.empty() && boost::filesystem::exists(test_dir_)) {
          boost::filesystem::remove_all(test_dir_);
@@ -207,21 +223,21 @@ TestFixture::~TestFixture()
 #endif
 
       // Print the server suites
-      ClientInvoker theClient ;
-      theClient.set_cli(true); // so server stats are written to standard out
-      theClient.set_throw_on_error( false ); // destructors should not allow exception propagation
-      if (theClient.suites() != 0) {
-         std::cout << "TestFixture::~TestFixture(): ClientInvoker " << CtsApi::suites() << " failed: " << theClient.errorMsg() << "\n";
+      client().set_cli(true); // so server stats are written to standard out
+      client().set_throw_on_error( false ); // destructors should not allow exception propagation
+      if (client().suites() != 0) {
+         std::cout << "TestFixture::~TestFixture(): ClientInvoker " << CtsApi::suites() << " failed: " << client().errorMsg() << "\n";
       }
 
       // Print the server stats
-      if (theClient.stats() != 0) {
-         std::cout << "TestFixture::~TestFixture(): ClientInvoker " << CtsApi::stats() << " failed: " << theClient.errorMsg() << "\n";
+      if (client().stats() != 0) {
+         std::cout << "TestFixture::~TestFixture(): ClientInvoker " << CtsApi::stats() << " failed: " << client().errorMsg() << "\n";
       }
 
       // Kill the server, as all suites are complete. will work for local or external
-      if (theClient.terminateServer() != 0) {
-         std::cout << "TestFixture::~TestFixture():  ClientInvoker " << CtsApi::terminateServer() << " failed: " << theClient.errorMsg() << "\n";
+      if (client().terminateServer() != 0) {
+         std::cout << "TestFixture::~TestFixture():  ClientInvoker " << CtsApi::terminateServer() << " failed: " << client().errorMsg() << "\n";
+         EcfPortLock::remove( port_ );
          assert(false);
       }
       sleep(1); // allow time to update log file
@@ -231,6 +247,9 @@ TestFixture::~TestFixture()
       boost::filesystem::remove(host.ecf_log_file(port_));
       boost::filesystem::remove(host.ecf_checkpt_file(port_));
       boost::filesystem::remove(host.ecf_backup_checkpt_file(port_));
+
+      // remove the lock file
+      EcfPortLock::remove( port_ );
 
       // keep valgrind happy
       ChangeMgrSingleton::destroy();
@@ -253,7 +272,7 @@ TestFixture::~TestFixture()
 int TestFixture::job_submission_interval()
 {
    int jobSubmissionInterval = 3 ;
-#if defined(HPUX) || defined(AIX) || defined(AIX_GCC) && !defined(AIX_RS6000)
+#if defined(HPUX) || defined(AIX)
    jobSubmissionInterval += 3;
 #endif
    return jobSubmissionInterval;
@@ -291,8 +310,7 @@ std::string TestFixture::theClientExePath()
 void TestFixture::clearLog() {
 
 	// Can't remove log on remote server, just clear the log file
-	ClientInvoker theClient ;
-   theClient.clearLog();
+   client().clearLog();
 }
 
 std::string TestFixture::pathToLogFile()
@@ -333,9 +351,13 @@ std::string TestFixture::local_ecf_home()
 
 std::string TestFixture::includes()
 {
-   // re-use the includes in Test/data/includes for GUI/ecflowview
-   if (boost::filesystem::current_path().stem() == project_test_dir_ ) return "data/includes";
- 	return project_test_dir_ + "/data/includes";
+   // Get to the workspace directory, Then set the path to the includes directory
+   std::string includes_path = File::workspace_dir();
+   includes_path += "/";
+   includes_path += project_test_dir_;
+   includes_path += "/data/includes";
+   //std::cout << "includes_path = " << includes_path << " ==============================================\n";
+   return includes_path;
 }
 
 

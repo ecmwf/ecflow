@@ -175,6 +175,7 @@ file( GLOB libxec_srcs  RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "src/libxec/*.c"   
 file( GLOB libui_srcs   RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "src/libui/*.cc"   )
 
 ecbuild_add_library(TARGET  libecflowview
+                   NOINSTALL
                    TYPE     STATIC
                    SOURCES  
                             ${srcs_cc} ${srcs_c} ${srcs_cpp} ${libicon_srcs} ${libxec_srcs} ${libui_srcs}
@@ -207,3 +208,16 @@ ecbuild_add_executable( TARGET   ecflowview
                         INCLUDES src
                                  ${Boost_INCLUDE_DIRS} 
                      )
+
+
+# ===================================================================
+# install
+# ===================================================================
+install (TARGETS ecflowview DESTINATION bin)
+                     
+install (FILES  ${CMAKE_SOURCE_DIR}/view/src/ecflowview.menu 
+                ${CMAKE_SOURCE_DIR}/build/servers
+         DESTINATION lib
+         PERMISSIONS OWNER_READ GROUP_READ WORLD_READ OWNER_EXECUTE GROUP_EXECUTE WORLD_EXECUTE
+        )
+         

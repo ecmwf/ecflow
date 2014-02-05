@@ -137,7 +137,6 @@ void Suite::begin_calendar()
 	else {
 	   calendar_.begin(Calendar::second_clock_time());
 	}
-   calendar_change_no_ = Ecf::state_change_no() + 1; // ** See: collateChanges **
 }
 
 void Suite::updateCalendar( const ecf::CalendarUpdateParams & calParams, std::vector<node_ptr>& auto_cancelled_nodes )
@@ -271,11 +270,131 @@ void Suite::changeClock( const ClockAttr& c)
  	addClock( c , false);
 }
 
+void Suite::changeClockType(const std::string& clockType)
+{
+   // ISSUES:
+   // Whenever the user *alters* the clock attributes, it needs to be followed by a re-queue of the suite, because:
+   //   o/ if we change from real ->hybrid, then we need to set cron, etc time based nodes to complete
+   //      Since we could have running tasks, it is up to user to decide when.
+   //   o/ If we change from hybrid ->real, then Node with cron attributes etc, need to be requeued.
+   //   o/ Any relative times are no longer valid
+   //   o/ Time attributes will be incorrect, and hence may fail/pass incorrectly during dependency evaluation.
+   //   o/ Why command may be wrong
+   //
+   //
+   // *IF* the user *forgets* to do this, it can cause spurious errors, hence to *minimise* these
+   // the best we can do is to :
+   //   o/ re-sync suite calendar for clock attribute
+   //   o/ re-queue all time based attributes, *avoiding*
+   //      change of state when switching to hybrid clock (i.e due to day,date,cron time attrs)
+   // This is handled in handle_clock_attribute_change()
+   //
+
+   if (clockType != "hybrid" && clockType != "real") {
+      throw std::runtime_error("Suite::changeClockType: expected clock type to be 'hybrid' or 'real'  but found " + clockType);
+   }
+
+   SuiteChanged1 changed(this);
+   if (clockAttr_.get()) {
+      clockAttr_->hybrid( clockType == "hybrid" ); // will update state change_no
+   }
+   else {
+      addClock( ClockAttr( clockType == "hybrid") ); // will update state change_no
+   }
+
+   // re-sync suite calendar for clock attribute, re-queue all time based attributes
+   handle_clock_attribute_change();
+}
+
+void Suite::changeClockDate(const std::string& theDate)
+{
+   // See ISSUES: Suite::changeClockType
+   int day,month,year;
+   DateAttr::getDate(theDate,day,month,year);
+   if (day == 0 || month == 0 || year == 0)  throw std::runtime_error("Suite::changeClockDate Invalid clock date:" + theDate );
+
+   SuiteChanged1 changed(this);
+   if (clockAttr_.get())  {
+      clockAttr_->date(day,month,year);      // this will check the date and update state change_no
+   }
+   else {
+      addClock( ClockAttr(day,month,year) ); // will update state change_no
+   }
+
+   handle_clock_attribute_change();
+}
+
+void Suite::changeClockGain(const std::string& gain)
+{
+   // See: ISSUES on Suite::changeClockType
+   long theGain = 0;
+   try { theGain = boost::lexical_cast< long >( gain ); }
+   catch ( boost::bad_lexical_cast& ) {
+      throw std::runtime_error( "Suite::changeClockGain: value '" + gain + "' is not convertible to an long, for suite " + name());
+   }
+
+   SuiteChanged1 changed(this);
+   if (!clockAttr_.get())  {
+      addClock( ClockAttr() ); // will update state change_no
+   }
+
+   if (theGain > 0) {
+      clockAttr_->set_gain_in_seconds( theGain, true);  // will update state change_no
+   }
+   else {
+      clockAttr_->set_gain_in_seconds( theGain, false); // will update state change_no
+   }
+
+   handle_clock_attribute_change();
+}
+
+void Suite::changeClockSync()
+{
+   // See: ISSUES on Suite::changeClockType
+   SuiteChanged1 changed(this);
+   if (clockAttr_.get()) {
+      clockAttr_->sync();     // clear so that on re-queue we sync with computer, + will update state change_no
+   }
+   else {
+      addClock( ClockAttr() ); // will update state change_no
+   }
+
+   handle_clock_attribute_change();
+}
+
+void Suite::handle_clock_attribute_change()
+{
+   // re-queue time could cause thousands of mementos to be created, to avoid this we
+   // update the modify change number.
+   Ecf::incr_modify_change_no();
+
+   // Since the suite clock attribute has changed, re-sync the suite calendar
+   begin_calendar();
+
+   // re-queue all the time attributes, since clock attribute has changed, avoid changing node state.
+   // Note: when switching to hybrid clock the re-queue of time dependencies will
+   //       *not* mark hybrid (day,date,cron) as complete
+   //       since these nodes could be in a active/submitted state.
+   NodeContainer::requeue_time_attrs();
+
+   update_generated_variables();
+}
+
+
 bool Suite::checkInvariants(std::string& errorMsg) const
 {
 	if (!calendar_.checkInvariants(errorMsg)) {
 		return false;
 	}
+   if (clockAttr_.get()) {
+      if ( calendar().hybrid() != clockAttr_->hybrid()) {
+         std::stringstream ss;
+         ss << "Suite:" << name() << " Calendar(hybrid(" << calendar().hybrid() << ")) and Clock attribute(hybrid(" << clockAttr_->hybrid() << ")) must be in sync, clock types differs";
+         errorMsg += ss.str();
+         return false;
+      }
+   }
+
 	if (Ecf::server()) {
 	   if (state_change_no_ > Ecf::state_change_no() ) {
 	      std::stringstream ss;
@@ -316,13 +435,14 @@ void Suite::collateChanges(DefsDelta& changes) const
 #endif
 	// Optimising updates:
 	// Problem:
-	//    User has requested 1 second updated in the viewer. We used only add SuiteCalendarMemento
-	//    when there were changes in the suite. However this causes the suite in the
-	//    viewer to *refresh*.  However when there no changes in the suite, we did not
-	//    bother with creating a SuiteCalendarMemento. This reduces network traffic.
+	//    User has requested 1 second updated in the viewer. We used add SuiteCalendarMemento
+	//    when ever there were changes in the suite. However this causes the suite in the
+	//    viewer to *refresh* to often.
 	//
 	// Soln 1:
-	//   Use calendar_change_no_ = Ecf::incr_state_change_no();
+	//   Use:
+	//      calendar_change_no_ = Ecf::incr_state_change_no();
+	//
 	//   plus only create SuiteCalendarMemento, where are suite changes *AND*
 	//   calendar has actually changed.
 	//   - This fixes the problem, at the expense of *always* creating a SuiteCalendarMemento
@@ -334,11 +454,13 @@ void Suite::collateChanges(DefsDelta& changes) const
 	//     even when there are **no other** changes
 	//
    // Soln 2:
-	//  Use calendar_change_no_ = Ecf::state_change_no() + 1
-	//  We mimick updating Ecf::state_change_no() this we can create memento when required
-	//  They should however not be recognised as state change.
-	//  + This fixes the problem, and the regression test will also work
+	//    Use:
+	//       calendar_change_no_ = Ecf::state_change_no() + 1
 	//
+	//    We mimick updating Ecf::state_change_no(), thus we can create memento when required
+	//    They should however not be recognised as state change.
+	//    + This fixes the problem, and the regression test will also work
+	//    This is the solution that has been implemented
 
 	// ********************************************************************
 	// Note: we separate determining incremental changes from the traversal
@@ -365,9 +487,11 @@ void Suite::collateChanges(DefsDelta& changes) const
 	NodeContainer::collateChanges(changes);
 
 	/// *ONLY* create SuiteCalendarMemento, if something changed in the suite.
-	/// Additionally calendar_change_no_ updates should not register as a state change,  i.e for tests
+	/// Additionally calendar_change_no_ updates should not register as a state change, i.e for tests
    /// SuiteCalendarMemento is need so that WhyCmd can work on the client side.
    /// Need to use new compound since the suite may not have change, but it children may have.
+	/// Hence as side affect why command with reference to time will only be accurate
+	/// after some kind of state change. Discussed with Axel, who was happy with this.
    size_t after = changes.size();
    if (before != after && calendar_change_no_ > changes.client_state_change_no()) {
       compound_memento_ptr compound_ptr =  boost::make_shared<CompoundMemento>(absNodePath());
@@ -394,7 +518,14 @@ void Suite::set_memento( const SuiteCalendarMemento* memento ) {
 #ifdef DEBUG_MEMENTO
 	std::cout << "Suite::set_memento( const SuiteCalendarMemento* ) " << debugNodePath() << "\n";
 #endif
+
+	// The calendar does *NOT* persist the calendar type (hybrid/real) since we can derive this for clock attribute
+	// Hence make sure calendar/clock are in sync. part of the suite invariants
 	calendar_ = memento->calendar_;
+   if  (clockAttr_.get()) {
+      if (clockAttr_->hybrid()) calendar_.set_clock_type(ecf::Calendar::HYBRID);
+      else                      calendar_.set_clock_type(ecf::Calendar::REAL);
+   }
 }
 
 // generated variables ---------------------------------------------------------------------

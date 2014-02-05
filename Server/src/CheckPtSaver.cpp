@@ -41,7 +41,7 @@ using namespace ecf;
 
 //-------------------------------------------------------------------------------------
 CheckPtSaver::CheckPtSaver(
-         server* s,
+         Server* s,
          boost::asio::io_service& io,
          const ServerEnvironment* serverEnv )
 : server_( s ),

@@ -1,0 +1,6 @@
+suite suiteName
+      task a
+         meter meter 0 100 100
+      task b
+            trigger /suiteName/a:meter % 0 >= 0   # modulo by zero, should failed check
+endsuite

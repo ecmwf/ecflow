@@ -49,7 +49,7 @@ BOOST_AUTO_TEST_CASE( test_meter )
 	cout << "Simulator:: ...test_meter\n";
 
 	//suite suite
-	//  clock hybrid <todays date>
+	// clock real <todays date>
 	//	family family
 	//   	task fc
 	//         meter hour 0 240

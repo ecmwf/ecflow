@@ -158,7 +158,10 @@ void Node::begin()
    for(size_t i = 0; i < limitVec_.size(); i++)   { limitVec_[i]->reset(); }
 
    // Let time base attributes use, relative duration if applicable
-   if (time_dep_attrs_) time_dep_attrs_->begin();
+   if (time_dep_attrs_) {
+      time_dep_attrs_->begin();
+      time_dep_attrs_->markHybridTimeDependentsAsComplete();
+   }
 
    // DO *NOT* call update_generated_variables(). Called on a type specific bases, for begin
    // Typically we need only call update_generated_variables() for a task, at job creation time.
@@ -207,8 +210,21 @@ void Node::requeue( bool resetRepeats, int clear_suspended_in_child_nodes)
    /// on this function to clear the time dependencies so they *HOLD* the task.
    ///
    /// If we have done an interactive run or complete, *dont* increment next_time_slot_
-   if (time_dep_attrs_) time_dep_attrs_->requeue(reset_next_time_slot);
+   if (time_dep_attrs_) {
+      time_dep_attrs_->requeue(reset_next_time_slot);
+      time_dep_attrs_->markHybridTimeDependentsAsComplete();
+   }
 }
+
+
+void Node::requeue_time_attrs()
+{
+   // Note: we *dont* mark hybrid time dependencies as complete.
+   //       i.e. since this is called during alter command, it could be that
+   //        the task is in a submitted or active state.
+   if (time_dep_attrs_) time_dep_attrs_->requeue(true);
+}
+
 
 void Node::set_no_requeue_if_single_time_dependency(bool miss_next_time_slot)
 {
@@ -288,6 +304,12 @@ void Node::requeueOrSetMostSignificantStateUpNodeTree()
 
    if (computedStateOfImmediateChildren == NState::COMPLETE ) {
 
+       // set most significant state of my immediate children
+       // Record: That Suite/Family completed.
+       if ( computedStateOfImmediateChildren !=  state() )  {
+          setStateOnly( computedStateOfImmediateChildren );
+       }
+
       // For automated re-queue do *not* clear suspended state in *child* nodes
       int clear_suspended_in_child_nodes = -1;
 
@@ -321,12 +343,11 @@ void Node::requeueOrSetMostSignificantStateUpNodeTree()
       }
    }
 
-   // set most significant state  of my immediate children
-   // A Family is *NOT* complete until it has gone through all of its repeat
-   // Hence deliberetly placed after requue
+   // In case compute state is other that COMPLETE, update. i,e for Family/Suite
    if ( computedStateOfImmediateChildren !=  state() )  {
       setStateOnly( computedStateOfImmediateChildren );
    }
+
 
    // recurse up the node tree
    Node* theParentNode = parent();
@@ -674,6 +695,15 @@ void Node::setStateOnly(NState::State newState, bool force)
       }
    }
 }
+
+boost::posix_time::ptime Node::state_change_time() const
+{
+   const Calendar& calendar = suite()->calendar();
+   boost::posix_time::ptime the_state_change_time = calendar.begin_time();
+   the_state_change_time += state_.second; // state_.second is calendar duration relative to calendar begin_time
+   return the_state_change_time;
+}
+
 
 DState::State Node::dstate() const {
 
@@ -1095,8 +1125,21 @@ bool Node::check(std::string& errorMsg, std::string& warningMsg) const
 
    /// Make Sure: To sure capture parser errors:
    /// defs which fail parse errors should not be allowed to be loaded into the server
-   (void)completeAst(errorMsg);
-   (void)triggerAst(errorMsg);
+   /// Even if the code parses, check the expression for divide by zero, for divide and modulo operators
+   AstTop* ctop = completeAst(errorMsg);
+   if (ctop && !ctop->check(errorMsg)) {
+      errorMsg += " ";
+      if (completeExpr_) errorMsg += completeExpr_->expression();
+      errorMsg += " on ";
+      errorMsg += debugNodePath();
+   }
+   AstTop* ttop = triggerAst(errorMsg);
+   if (ttop && !ttop->check(errorMsg)) {
+      errorMsg += " ";
+      if (triggerExpr_) errorMsg += triggerExpr_->expression();
+      errorMsg += " on ";
+      errorMsg += debugNodePath();
+   }
 
 
    // capture node path resolve errors

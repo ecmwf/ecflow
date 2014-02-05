@@ -5,6 +5,19 @@
 ## granted to it by virtue of its status as an intergovernmental organisation 
 ## nor does it submit to any jurisdiction. 
 
+# ===============================================================================
+# Error to watch out for:
+# error: No best alternative for /python_for_extensions
+#    next alternative: required properties: <python>2.7 <target-os>linux
+#        matched
+#    next alternative: required properties: <python>2.7 <target-os>linux
+#        matched
+# 
+# Please check if you have more than one 'using python' in configuration files.
+# Please check site-config.jam, user-config.jam and project-config.jam and 
+# remove duplicated 'using python'
+# ===============================================================================
+        
 #
 # jamfile for installing, building exposing c++ library to python.
 # and for testing embedded python
@@ -239,48 +252,15 @@ run-test TestDerivable     : ecflow [ glob test/TestDerivable.py ] ;
 run-test TestWith          : ecflow [ glob test/TestWith.py ] ;
 run-test TestFind          : ecflow [ glob test/TestFind.py ] ;
 run-test TestMigrate       : ecflow [ glob migrate/TestMigrate.py ] ;
-run-test TestRepeatArithmetic : ecflow [ glob test/TestRepeatArithmetic.py ] ;
+run-test TestRepeatArithmetic :  ecflow [ glob test/TestRepeatArithmetic.py ] ;
+run-test TestGeneratedVariable : ecflow [ glob test/TestGeneratedVariable.py ] ;
 
-# declare test for online tutorial examples
-run-test t1       : ecflow [ glob ../Doc/online/tutorial/getting_started/src/defining-a-new_suite.py ] ;
-run-test t2       : ecflow [ glob ../Doc/online/tutorial/getting_started/src/checking-job-creation.py ] ;
-run-test t2_1     : ecflow [ glob ../Doc/online/tutorial/getting_started/src/load-the-file.py ] ;
-run-test t2_2     : ecflow [ glob ../Doc/online/tutorial/getting_started/src/starting-the-suite.py ] ;
-run-test t2_3     : ecflow [ glob ../Doc/online/tutorial/getting_started/src/understanding-the-client.py ] ;
-run-test t3       : ecflow [ glob ../Doc/online/tutorial/going_further/src/add-a-complete.py ] ;
-run-test t4       : ecflow [ glob ../Doc/online/tutorial/going_further/src/add-a-meter.py ] ;
-run-test t5       : ecflow [ glob ../Doc/online/tutorial/going_further/src/add-an-event.py ] ;
-run-test t6       : ecflow [ glob ../Doc/online/tutorial/going_further/src/add-another-task.py ] ;
-run-test t7       : ecflow [ glob ../Doc/online/tutorial/going_further/src/add-another-task-client.py ] ;
-run-test t7_1     : ecflow [ glob ../Doc/online/tutorial/going_further/src/add-another-task-client_1.py ] ;
-run-test t8       : ecflow [ glob ../Doc/online/tutorial/going_further/src/add-a-time-dependency.py ] ;
-run-test t9       : ecflow [ glob ../Doc/online/tutorial/going_further/src/add-trigger.py ] ;
-run-test t10      : ecflow [ glob ../Doc/online/tutorial/going_further/src/ecf-variables.py ] ;
-run-test t11      : ecflow [ glob ../Doc/online/tutorial/going_further/src/families.py ] ;
-run-test t12      : ecflow [ glob ../Doc/online/tutorial/going_further/src/variable-inheritance.py ] ;
-run-test t12_with : ecflow [ glob ../Doc/online/tutorial/going_further/src/indentation.py ] ;
-run-test t13      : ecflow [ glob ../Doc/online/tutorial/advanced_topics/src/labels.py ] ;
-run-test t14      : ecflow [ glob ../Doc/online/tutorial/advanced_topics/src/limits.py ] ;
-run-test t15      : ecflow [ glob ../Doc/online/tutorial/advanced_topics/src/repeat.py ] ;
-run-test t16      : ecflow [ glob ../Doc/online/tutorial/advanced_topics/src/running-the-jobs.py ] ;
-run-test t17      : ecflow [ glob ../Doc/online/tutorial/advanced_topics/src/using-python-scripting.py ] ;
-run-test t18      : ecflow [ glob ../Doc/online/tutorial/advanced_topics/src/using-python-scripting-1.py ] ;
-run-test t18_1    : ecflow [ glob ../Doc/online/tutorial/advanced_topics/src/object-oriented-suites.py ] ;
-run-test t19      : ecflow [ glob ../Doc/online/tutorial/exercises/src/back-archiving.py ] ;
-run-test t20      : ecflow [ glob ../Doc/online/tutorial/exercises/src/data-acquisition.py ] ;
-run-test t21      : ecflow [ glob ../Doc/online/tutorial/exercises/src/operational-suite.py ] ;
-run-test t22      : ecflow [ glob ../Doc/online/cookbook/src/print-all-states.py ] ;
-run-test t23      : ecflow [ glob ../Doc/online/cookbook/src/monitor-task.py ] ;
-run-test t24      : ecflow [ glob ../Doc/online/cookbook/src/traverse_defs.py ] ;
-run-test t25      : ecflow [ glob test/CleanupOnlineTutorial.py ] ;
-  
 # A target that runs all the tests. 
 # Note test_embed & test_embed_ecf commented out since we dont use this functionality
 alias test-all
  :  TestUserManual TestJobGeneration TestClientApi TestDefs TestError TestTraversal TestDefsCheck 
     TestSimulator TestAddDelete TestAddDeleteFunc TestAddNodeFunc TestParent TestGetAllTasks TestDerivable 
-    TestMigrate TestRepeatArithmetic TestWith TestFind
-    t1 t2 t2_1 t2_2 t2_3 t3 t4 t5 t6 t7 t7_1 t8 t9 t10 t11 t12 t12_with t13 t14 t15 t16 t17 t18 t18_1 t19 t20 t21 t22 t23 t24 t25
+    TestMigrate TestRepeatArithmetic TestWith TestFind TestGeneratedVariable
     # test_embed test_embed_ecf 
     ;
    
@@ -288,8 +268,7 @@ alias test-all
 explicit test-all
     TestUserManual TestJobGeneration TestClientApi TestDefs TestError TestTraversal TestDefsCheck 
     TestSimulator TestAddDelete TestAddDeleteFunc TestAddNodeFunc TestParent TestGetAllTasks TestDerivable 
-    TestMigrate TestRepeatArithmetic TestWith TestFind
-    t1 t2 t2_1 t2_2 t2_3 t3 t4 t5 t6 t7 t7_1 t8 t9 t10 t11 t12 t12_with t13 t14 t15 t16 t17 t18 t18_1 t19 t20 t21 t22 t23 t24 t25
+    TestMigrate TestRepeatArithmetic TestWith TestFind TestGeneratedVariable
     # test_embed test_embed_ecf 
     ;
  

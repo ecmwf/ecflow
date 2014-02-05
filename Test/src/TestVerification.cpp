@@ -24,7 +24,6 @@
 #include "TestVerification.hpp"
 #include "ServerTestHarness.hpp"
 #include "TestFixture.hpp"
-#include "ClientInvoker.hpp"
 #include "ClientToServerCmd.hpp"
 
 #include "Defs.hpp"
@@ -55,40 +54,39 @@ void createNewLogFileFromServer(const std::string& newLog)
 	 }
 
 	 // write log file to disk, for analysing and comparison
-	 ClientInvoker theClient ;
-	 BOOST_REQUIRE_MESSAGE( theClient.getLog() == 0,  "get log failed should return 0 ");
+	 BOOST_REQUIRE_MESSAGE( TestFixture::client().getLog() == 0,  "get log failed should return 0 ");
 	 ofstream log(newLog.c_str(),ios::out);
 	 BOOST_CHECK_MESSAGE(log," Failed to create log file " << newLog)	;
-	 log << theClient.get_string();
+	 log << TestFixture::client().get_string();
 	 log.close();
 }
 
-void createNewLogFileByCopy(const std::string& newLog)
-{
- 	std::string smsLog = TestFixture::pathToLogFile();
-
-	try {
-		// remove old log file if it exists, otherwise copy_file, wont work
-		if ( fs::exists( newLog ) ) {
- 			BOOST_CHECK_MESSAGE(fs::remove(fs::path(newLog)),"Failed to delete " << newLog);
-		}
-
-		// copy ecf.log -> <defsfilename>.log
- 		BOOST_CHECK_MESSAGE(fs::exists(smsLog),"File " << smsLog << " does not exist, can't copy to " << newLog);
-
-		// make sure the log file is NOT empty.
-		BOOST_CHECK_MESSAGE(fs::file_size( smsLog ) != 0,"Log file " << smsLog << " is empty.");
-
-		fs::copy_file( smsLog, newLog );
-
-  		BOOST_CHECK_MESSAGE(fs::file_size(smsLog) == fs::file_size(newLog),
- 		                   smsLog << " file size:" << fs::file_size( smsLog )
- 		                   << " is not same as " << newLog << " file_size:" << fs::file_size(newLog));
-	}
-	catch ( ... ) {
-		BOOST_CHECK_MESSAGE(false,"Unknown exception could not copy log file " << TestFixture::pathToLogFile() << " ---> " << newLog);
-	}
-}
+//void createNewLogFileByCopy(const std::string& newLog)
+//{
+// 	std::string smsLog = TestFixture::pathToLogFile();
+//
+//	try {
+//		// remove old log file if it exists, otherwise copy_file, wont work
+//		if ( fs::exists( newLog ) ) {
+// 			BOOST_CHECK_MESSAGE(fs::remove(fs::path(newLog)),"Failed to delete " << newLog);
+//		}
+//
+//		// copy ecf.log -> <defsfilename>.log
+// 		BOOST_CHECK_MESSAGE(fs::exists(smsLog),"File " << smsLog << " does not exist, can't copy to " << newLog);
+//
+//		// make sure the log file is NOT empty.
+//		BOOST_CHECK_MESSAGE(fs::file_size( smsLog ) != 0,"Log file " << smsLog << " is empty.");
+//
+//		fs::copy_file( smsLog, newLog );
+//
+//  		BOOST_CHECK_MESSAGE(fs::file_size(smsLog) == fs::file_size(newLog),
+// 		                   smsLog << " file size:" << fs::file_size( smsLog )
+// 		                   << " is not same as " << newLog << " file_size:" << fs::file_size(newLog));
+//	}
+//	catch ( ... ) {
+//		BOOST_CHECK_MESSAGE(false,"Unknown exception could not copy log file " << TestFixture::pathToLogFile() << " ---> " << newLog);
+//	}
+//}
 
 
 std::string TestVerification::locate_log_file(const std::string& defs_filename )

@@ -15,7 +15,8 @@
 
 #include <iostream>
 #include <fstream>
-#include <stdlib.h>
+#include <stdlib.h>    // for getenv()
+
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/operations.hpp>
 #include <boost/test/unit_test.hpp>
@@ -36,7 +37,6 @@
 #include "PrintStyle.hpp"
 #include "WhyCmd.hpp"
 #include "Ecf.hpp"
-#include "ClientInvoker.hpp"
 #include "Str.hpp"
 
 using namespace std;
@@ -128,10 +128,9 @@ ServerTestHarness::doRun(Defs& theClientDefs, const std::map<std::string,std::st
    // ECF_ALLOW_NEW_CLIENT_OLD_SERVER was set, if it was, we need to update the generated .ecf scripts
    // to embed this variable, this will allow  *new child commands* to talk to old servers
    int allow_new_client_old_server = 0;
-   ClientInvoker theClient ;
-   if (theClient.allow_new_client_old_server() != 0) {
+   if (TestFixture::client().allow_new_client_old_server() != 0) {
       // need export ECF_ALLOW_NEW_CLIENT_OLD_SERVER
-      allow_new_client_old_server = theClient.allow_new_client_old_server();
+      allow_new_client_old_server = TestFixture::client().allow_new_client_old_server();
    }
 
 
@@ -193,45 +192,45 @@ ServerTestHarness::doRun(Defs& theClientDefs, const std::map<std::string,std::st
 #ifdef DEBUG_TEST_HARNESS
    cout << "   ServerTestHarness::new_log_file_path = " << new_log_file_path << "\n";
 #endif
-   theClient.new_log( new_log_file_path );
-   theClient.clearLog();
+   TestFixture::client().new_log( new_log_file_path );
+   TestFixture::client().clearLog();
 
 
 #ifdef DEBUG_TEST_HARNESS
    cout << "   ServerTestHarness::doRun: Delete all nodes in server. Using force to allow as many tests as possible\n";
 #endif
-   BOOST_REQUIRE_MESSAGE(theClient.delete_all(true/*force, even if it creates zombies*/) == 0,CtsApi::to_string(CtsApi::delete_node()) << " failed should return 0. Should Delete ALL existing defs in the server\n" << theClient.errorMsg());
+   BOOST_REQUIRE_MESSAGE(TestFixture::client().delete_all(true/*force, even if it creates zombies*/) == 0,CtsApi::to_string(CtsApi::delete_node()) << " failed should return 0. Should Delete ALL existing defs in the server\n" << TestFixture::client().errorMsg());
 
 
 #ifdef DEBUG_TEST_HARNESS
    cout << "   ServerTestHarness::doRun: Load new defs in the server\n";
 #endif
    if ( load_defs_from_disk ) {
-      BOOST_REQUIRE_MESSAGE(theClient.loadDefs( defs_filename_ ) == 0,"load defs failed should return 0. Should Load defs file " << defs_filename_ << " into the server from current working directory\n" << theClient.errorMsg());
+      BOOST_REQUIRE_MESSAGE(TestFixture::client().loadDefs( defs_filename_ ) == 0,"load defs failed should return 0. Should Load defs file " << defs_filename_ << " into the server from current working directory\n" << TestFixture::client().errorMsg());
    }
    else {
       // load expects a defs_ptr
       defs_ptr defs(&theClientDefs,null_deleter());
-      BOOST_REQUIRE_MESSAGE(theClient.load( defs ) == 0,"load defs failed should return 0. Should Load defs file " << defs_filename_ << " into the server\n" << theClient.errorMsg());
+      BOOST_REQUIRE_MESSAGE(TestFixture::client().load( defs ) == 0,"load defs failed should return 0. Should Load defs file " << defs_filename_ << " into the server\n" << TestFixture::client().errorMsg());
    }
 
 #ifdef DEBUG_TEST_HARNESS
    cout << "   ServerTestHarness::doRun: Restart server \n";
 #endif
-   BOOST_REQUIRE_MESSAGE(theClient.restartServer() == 0,CtsApi::restartServer() << " failed should return 0. Should restart the server via a client command\n" << theClient.errorMsg());
+   BOOST_REQUIRE_MESSAGE(TestFixture::client().restartServer() == 0,CtsApi::restartServer() << " failed should return 0. Should restart the server via a client command\n" << TestFixture::client().errorMsg());
 
 
 #ifdef DEBUG_TEST_HARNESS
    cout << "   ServerTestHarness::doRun: Calling begin on suite " << suiteName << "\n";
 #endif
-   BOOST_REQUIRE_MESSAGE(theClient.begin( suiteName ) == 0,CtsApi::begin( suiteName ) << " failed should return 0. Should Begin the suite " <<  suiteName << "\n" << theClient.errorMsg());
+   BOOST_REQUIRE_MESSAGE(TestFixture::client().begin( suiteName ) == 0,CtsApi::begin( suiteName ) << " failed should return 0. Should Begin the suite " <<  suiteName << "\n" << TestFixture::client().errorMsg());
 
 
    if (waitForTestCompletion) {
 #ifdef DEBUG_TEST_HARNESS
       cout << "   ServerTestHarness::doRun: Waiting for test to finish\n";
 #endif
-      return testWaiter(theClient,theClientDefs,timeout,true /* test against verification attributes on defs */);
+      return testWaiter(theClientDefs,timeout,true /* test against verification attributes on defs */);
    }
    return defs_ptr();
 }
@@ -242,11 +241,30 @@ static void test_invariants(defs_ptr the_defs, const std::string& title) {
    BOOST_CHECK_MESSAGE( the_defs->checkInvariants(errorMsg),title << " Invariants failed " << errorMsg);
 }
 
+bool verify_attribute_verification()
+{
+   // In  version 4.0.1: We changed the way families changed states. i.e families will now change to state complete
+   // before being requeued. See ECFLOW-96 Families with loops(cron/repeat) should log complete
+   // This meant that when we run the migration tests, i.e new client with old server (with new test)
+   // It would fail some the test, during verify attribute verification. ie. where we count the number of times
+   // a node completes. To enable these tests to still run, we will disable verify attribute verification
+   static bool allow_verification = true;
+
+   if (!allow_verification) {
+      //std::cout << "Disable verify attribute verification ------------------------------------------\n";
+      return false;
+   }
+   char* the_env = getenv("DISABLE_VERIFY_ATTRIBUTE_VERIFICATION");
+   if (the_env) {
+      std::cout << "Disable verify attribute verification *************************************************************\n";
+      allow_verification= false;
+      return false;
+   }
+   return true;
+}
+
 defs_ptr
-ServerTestHarness::testWaiter(const ClientInvoker& theClient,
-         const Defs& theClientDefs,
-         int timeout,
-         bool verifyAttr)
+ServerTestHarness::testWaiter( const Defs& theClientDefs, int timeout, bool verifyAttr)
 {
 #ifdef DEBUG_TEST_HARNESS
    cout << "ServerTestHarness::testWaiter \n";
@@ -257,7 +275,7 @@ ServerTestHarness::testWaiter(const ClientInvoker& theClient,
    int counter = 0;
 #endif
 
-   BOOST_REQUIRE_MESSAGE(theClient.client_handle() == 0,"Client handle expected to be zero but found " << theClient.client_handle());
+   BOOST_REQUIRE_MESSAGE(TestFixture::client().client_handle() == 0,"Client handle expected to be zero but found " << TestFixture::client().client_handle());
 
    /// This function will test sync'ing. by getting the sync and full defs, then comparing them
    AssertTimer assertTimer(timeout,false); // Bomb out after n seconds, fall back if test fail
@@ -283,9 +301,9 @@ ServerTestHarness::testWaiter(const ClientInvoker& theClient,
          // Calling getDefs will also force a flush of the log file. This is required since we
          // copy the log file locally on the shared file system for cross platform testing
          // ******************************************************************************
-         BOOST_REQUIRE_MESSAGE(theClient.getDefs() == 0,CtsApi::get() << " failed should return 0 " << theClient.errorMsg());
-         full_defs =  theClient.defs();
-         incremental_defs = theClient.defs();
+         BOOST_REQUIRE_MESSAGE(TestFixture::client().getDefs() == 0,CtsApi::get() << " failed should return 0 " << TestFixture::client().errorMsg());
+         full_defs =  TestFixture::client().defs();
+         incremental_defs = TestFixture::client().defs();
          BOOST_REQUIRE_MESSAGE( full_defs.get(),"get command failed to get node tree from server");
          BOOST_REQUIRE_MESSAGE( incremental_defs.get(),"get command failed to get node tree from server");
 
@@ -294,25 +312,25 @@ ServerTestHarness::testWaiter(const ClientInvoker& theClient,
          test_invariants(full_defs,"First time for getting full defs");
       }
       else {
-         BOOST_REQUIRE_MESSAGE(theClient.news(full_defs) == 0, "news failed should return 0 " << theClient.errorMsg());
-         server_changed = theClient.get_news();
+         BOOST_REQUIRE_MESSAGE(TestFixture::client().news(full_defs) == 0, "news failed should return 0 " << TestFixture::client().errorMsg());
+         server_changed = TestFixture::client().get_news();
          //			std::cout << "server_changed = " << server_changed << "\n";
          if ( server_changed ) {
 
             // Get the incremental changes **FIRST** and compare this with the full defs later on
-            BOOST_REQUIRE_MESSAGE(theClient.sync(incremental_defs) == 0, "sync failed should return 0 " << theClient.errorMsg());
-            BOOST_CHECK_MESSAGE(theClient.in_sync(), "in_sync expected to return true, when we have changes in server");
+            BOOST_REQUIRE_MESSAGE(TestFixture::client().sync(incremental_defs) == 0, "sync failed should return 0 " << TestFixture::client().errorMsg());
+            BOOST_CHECK_MESSAGE(TestFixture::client().in_sync(), "in_sync expected to return true, when we have changes in server");
             test_invariants(incremental_defs,"After syncing with incremental defs.");
 
             // get the FULL defs
-            BOOST_REQUIRE_MESSAGE(theClient.getDefs() == 0,CtsApi::get() << " failed should return 0 " << theClient.errorMsg());
-            full_defs =  theClient.defs();
+            BOOST_REQUIRE_MESSAGE(TestFixture::client().getDefs() == 0,CtsApi::get() << " failed should return 0 " << TestFixture::client().errorMsg());
+            full_defs =  TestFixture::client().defs();
             BOOST_REQUIRE_MESSAGE( full_defs.get(),"get command failed to get node tree from server");
             test_invariants(full_defs,"After getting the full defs.");
 
             // **** NOTE ****: There could have been state change between the calls:
-            // **************: 	  theClient.sync(incremental_defs)
-            // **************:    theClient.getDefs()
+            // **************: 	 TestFixture::client().sync(incremental_defs)
+            // **************:    TestFixture::client().getDefs()
             // **************: hence we can only compare, incremental and full defs if
             // **************: state and modification numbers are the same:
             BOOST_REQUIRE_MESSAGE(incremental_defs.get() != full_defs.get()," Expected two different defs trees ");
@@ -396,7 +414,7 @@ ServerTestHarness::testWaiter(const ClientInvoker& theClient,
 #endif
          if ( (full_defs->suiteVec().size() == completeSuiteCnt)  && (hasAutoCancel == 0)) {
 
-            if ( verifyAttr ) {
+            if ( verifyAttr && verify_attribute_verification()) {
                // Do verification of expected state changes
                string localErrorMessage;
                BOOST_REQUIRE_MESSAGE(full_defs->verification(localErrorMessage),localErrorMessage << "\n" << *full_defs.get());

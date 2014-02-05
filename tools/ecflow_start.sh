@@ -20,7 +20,6 @@
 ###        to make a unique port number.
 
 #==========================================================================
-PATH=/usr/local/bin:/usr/bin:$PATH
 export TZ=GMT LANG= # en_GB.UTF-8 unset, use locale -a to list available locales
 host=$(hostname)
 force=true

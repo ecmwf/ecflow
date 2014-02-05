@@ -4,6 +4,21 @@ import ecflow_migrate
 import unittest
 import filecmp
 
+def get_parent_dir(file_path):
+    return os.path.dirname(file_path)
+
+def get_workspace_dir():
+    cwd = os.getcwd()
+    #print "get_workspace_dir from: " + cwd
+    while (1):
+        head, tail = os.path.split(cwd)
+        #print "tail:" + tail
+        if tail.find("ecflow") != -1 :
+            return cwd
+        cwd = head
+    return cwd
+
+
 # These tests the migration for  ecflow < 318 to ecflow 318
 #
 # In ecflow_client --migrate, we can get abort reason to span multiple line, hence messing up load
@@ -11,10 +26,15 @@ import filecmp
 class TestMigrate318(unittest.TestCase):
     def setUp(self):
         # perform setup actions if any
-        pass
+        self.workspace_dir = get_workspace_dir()
+        #print "setup : " + self.workspace_dir
+        
     def tearDown(self):
         # Perform clean -up actions if any
         pass
+    
+    def locate(self,file):
+        return self.workspace_dir + "/Pyext/" + file
     
     def testMigrateVersionNumber(self):
         list_of_defs_lines =[ "# 3.1.2"]
@@ -27,11 +47,11 @@ class TestMigrate318(unittest.TestCase):
         self.assertEqual(mig.version_number_as_integer(10), 10,"Expected 10, since valid version not provided")
 
     def test_no_migration(self):
-        migration_count = ecflow_migrate.do_migrate("migrate/no_migration.def")
+        migration_count = ecflow_migrate.do_migrate(self.locate("migrate/no_migration.def"))
         self.assertEqual(migration_count,0,"Expected no migration")
-        self.assertTrue(filecmp.cmp("migrate/no_migration.def","migrate/no_migration.mig"))
+        self.assertTrue(filecmp.cmp(self.locate("migrate/no_migration.def"),self.locate("migrate/no_migration.mig")))
         # remove the generated file
-        os.remove("migrate/no_migration.mig")
+        os.remove(self.locate("migrate/no_migration.mig"))
  
 # ==============================================================================================
     # Test for abort bug
@@ -64,11 +84,11 @@ class TestMigrate318(unittest.TestCase):
         self.assertEqual(abort_migrator.output_lines(),expected_output_lines)
           
     def test_migrate_abort_file(self):
-        migration_count = ecflow_migrate.do_migrate("migrate/aborted_reason_bug.def")
+        migration_count = ecflow_migrate.do_migrate(self.locate("migrate/aborted_reason_bug.def"))
         self.assertEqual(migration_count,1,"Expected defs file to be migrated")
                  
         # remove the generated file
-        os.remove("migrate/aborted_reason_bug.mig")
+        os.remove(self.locate("migrate/aborted_reason_bug.mig"))
          
 # ===============================================================================================
  
@@ -101,21 +121,28 @@ class TestMigrate318(unittest.TestCase):
  
  
     def test_migrate_label_file(self):
-        migration_count = ecflow_migrate.do_migrate("migrate/label_bug.def")
+        migration_count = ecflow_migrate.do_migrate(self.locate("migrate/label_bug.def"))
         self.assertEqual(migration_count,1,"Expected defs file to be migrated")
                  
         # remove the generated file
-        os.remove("migrate/label_bug.mig")
+        os.remove(self.locate("migrate/label_bug.mig"))
+
+    def test_migrate_variable_file(self):
+        migration_count = ecflow_migrate.do_migrate(self.locate("migrate/variable_bug.def"))
+        self.assertEqual(migration_count,1,"Expected defs file to be migrated")
+                 
+        # remove the generated file
+        os.remove(self.locate("migrate/variable_bug.mig"))
  
 # ====================================================================================================
 # test both together
  
     def test_migrate_abort_and_label(self):
-        migration_count = ecflow_migrate.do_migrate("migrate/abort_and_label_bug.def")
+        migration_count = ecflow_migrate.do_migrate(self.locate("migrate/abort_and_label_bug.def"))
         self.assertEqual(migration_count,2,"Expected 2 migrations, one for abort and one for label")
                  
         # remove the generated file
-        os.remove("migrate/abort_and_label_bug.mig")
+        os.remove(self.locate("migrate/abort_and_label_bug.mig"))
          
 
 

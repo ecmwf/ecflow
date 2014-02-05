@@ -49,59 +49,56 @@ void variables::clear()
 
 void variables::show(node& n)
 {
-	loading_ = true;
+   loading_ = true;
 
-	int varsize = 0;
-	int valsize = 0;
-	char fmt1[256];
-	char fmt2[256];
-	char buffer[1024];
-	node* m = &n;
+   int varsize = 0;
+   int valsize = 0;
+   char fmt1[256];
+   char fmt2[256];
+   node* m = &n;
 
-	XtSetSensitive(edit_,True);
-	XmListDeleteAllItems(list_);
+   XtSetSensitive(edit_,True);
+   XmListDeleteAllItems(list_);
 
-	while(m != 0) {
-	  for (node* run = m->kids(); run; run = run->next())
-	    if (run->type() == NODE_VARIABLE) {
-	      varsize = std::max(varsize, (int) run->name().size());
-	      valsize = std::max(valsize, (int) ((variable_node*) run)->get_var().size());
-	    }	  
-	  m = m->parent();
-	}
+   while(m != 0) {
+      for (node* run = m->kids(); run; run = run->next())
+         if (run->type() == NODE_VARIABLE) {
+            varsize = std::max(varsize, (int) run->name().size());
+            valsize = std::max(valsize, (int) ((variable_node*) run)->get_var().size());
+         }
+      m = m->parent();
+   }
 
-	if(!varsize) return;
-	sprintf(fmt1,"(%%-%ds = %%-%ds)",varsize,valsize);
-	sprintf(fmt2," %%-%ds = %%-%ds ",varsize,valsize);
-	{
-	  node *m = &n;
-	  while(m != 0) {
-	  sprintf(buffer,"Variables defined for %s %s",
-		  m->type_name(), m->name().c_str());
+   if(!varsize) return;
+   sprintf(fmt1,"(%%-%ds = %%-%ds)",varsize,valsize);
+   sprintf(fmt2," %%-%ds = %%-%ds ",varsize,valsize);
+   {
+      char buffer[1024];
+      node *m = &n;
+      while(m != 0) {
+         sprintf(buffer,"Variables defined for %s %s", m->type_name(), m->name().c_str());
 
-	  xec_AddFontListItem(list_,buffer,1);
-	  {
-	    for (node* run = m->kids(); run; run = run->next())
-	      if (run->type() == NODE_VARIABLE && run->isGenVariable(0)) {
-		if (run->name() == "ECF_PASS") continue;
-		else if (run->name() == "SMSPASS") continue;
-		sprintf(buffer,fmt1, run->name().c_str(),
-			((variable_node*)run)->get_var().c_str());
-		xec_AddFontListItem(list_,buffer,0);
-	      }	   
-	  }
-	  {
-	    for (node* run = m->kids(); run; run = run->next())
-	      if (run->type() == NODE_VARIABLE && ! run->isGenVariable(0)) {
-		sprintf(buffer,fmt2,run->name().c_str(),
-			((variable_node*)run)->get_var().c_str());
-		xec_AddFontListItem(list_,buffer,0);
-	      }
-	  }
-	  m=m->parent();
-	  }
-	}
-	loading_ = false;
+         xec_AddFontListItem(list_,buffer,1);
+         {
+            for (node* run = m->kids(); run; run = run->next())
+               if (run->type() == NODE_VARIABLE && run->isGenVariable(0)) {
+                  if (run->name() == "ECF_PASS") continue;
+                  else if (run->name() == "SMSPASS") continue;
+                  sprintf(buffer,fmt1, run->name().c_str(), ((variable_node*)run)->get_var().c_str());
+                  xec_AddFontListItem(list_,buffer,0);
+               }
+         }
+         {
+            for (node* run = m->kids(); run; run = run->next())
+               if (run->type() == NODE_VARIABLE && ! run->isGenVariable(0)) {
+                  sprintf(buffer,fmt2,run->name().c_str(), ((variable_node*)run)->get_var().c_str());
+                  xec_AddFontListItem(list_,buffer,0);
+               }
+         }
+         m=m->parent();
+      }
+   }
+   loading_ = false;
 }
 
 Boolean variables::enabled(node& n)

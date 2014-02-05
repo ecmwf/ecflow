@@ -30,17 +30,52 @@ using namespace boost::gregorian;
 
 BOOST_AUTO_TEST_SUITE( CoreTestSuite )
 
+
+//static boost::posix_time::time_duration diff_d(boost::posix_time::time_duration t1, boost::posix_time::time_duration t2)
+//{
+//   // t2 > t1 otherwise assume we have gone over midnight
+//   if (t2 > t1) return t2 - t1;
+//
+//   boost::posix_time::time_duration midnight(24,0,0);
+//   boost::posix_time::time_duration diff_from_midnight = midnight - t1;
+//   std::cout << to_simple_string(diff_from_midnight) << "\n";
+//
+//   return diff_from_midnight + t2;
+//}
+//
+//BOOST_AUTO_TEST_CASE( test_calendar_3 )
+//{
+//   cout << "ACore:: ...test_calendar_3\n";
+//
+//   Calendar calendar;
+//   BOOST_CHECK_MESSAGE(calendar.hybrid(),"Default calendar type should be hybrid");
+//
+//   // init the calendar to 2009, Feb, 10th,  15 minutes past midnight
+//
+//   boost::posix_time::time_duration t1(23,0,0);
+//   boost::posix_time::time_duration t2(1,0,0);
+//   boost::posix_time::time_duration expected(2,0,0);
+////    std::cout << to_simple_string(t1) << "\n";
+////    std::cout << to_simple_string(t2) << "\n";
+////    std::cout << to_simple_string(t1 - t2) << "\n";
+////    std::cout << to_simple_string(t2 - t1) << "\n";
+//
+//   BOOST_CHECK_MESSAGE(diff_d(t1,t2) == expected," Expected " << to_simple_string(expected) << " but found " << to_simple_string(diff_d(t1,t2)));
+//}
+
+
+
 BOOST_AUTO_TEST_CASE( test_calendar_state_parsing )
 {
 	cout << "ACore:: ...test_calendar_state_parsing\n";
 
 	Calendar calendar;
-	BOOST_CHECK_MESSAGE(calendar.hybrid(),"Default calendar type should be hybrid");
+	BOOST_CHECK_MESSAGE(!calendar.hybrid(),"Default calendar type should be real");
 
 	// init the calendar to 2009, Feb, 10th, then write out the state
  	boost::gregorian::date theDate(2009,2,10);
  	ptime time(theDate, hours(23) + minutes(59));
-	calendar.init(time);
+	calendar.init(time, Calendar::REAL);
 	std::string calendar_state = calendar.write_state();
 
 	// read the state, into a different calendar & compare
@@ -48,7 +83,7 @@ BOOST_AUTO_TEST_CASE( test_calendar_state_parsing )
 	Str::split(calendar_state,lineTokens);
 	Calendar calendar2;
 	calendar2.read_state(calendar_state,lineTokens);
-   BOOST_CHECK_MESSAGE(calendar == calendar2,"Calendar should be the same");
+   BOOST_CHECK_MESSAGE(calendar == calendar2,"Calendar should be the same\n" << calendar.toString() << "\n" << calendar2.toString());
 
    // Update calendar.
  	calendar.update(minutes(2));
@@ -67,13 +102,13 @@ BOOST_AUTO_TEST_CASE( test_calendar_1 )
    cout << "ACore:: ...test_calendar_1\n";
 
    Calendar calendar;
-   BOOST_CHECK_MESSAGE(calendar.hybrid(),"Default calendar type should be hybrid");
+   BOOST_CHECK_MESSAGE(!calendar.hybrid(),"Default calendar type should be real");
 
    // init the calendar to 2009, Feb, 10th,  15 minutes past midnight
    boost::gregorian::date theDate(2009,2,10);
    ptime time(theDate, hours(23) + minutes(59));
-   calendar.init(time, Calendar::REAL);
-   BOOST_CHECK_MESSAGE(!calendar.hybrid(),"init failed to reset calendar type");
+   calendar.init(time, Calendar::HYBRID);
+   BOOST_CHECK_MESSAGE(calendar.hybrid(),"init failed to reset calendar type");
 
    calendar.update(minutes(2));
 }
@@ -84,7 +119,7 @@ BOOST_AUTO_TEST_CASE( test_calendar )
 	cout << "ACore:: ...test_calendar_basic\n";
 
 	Calendar calendar;
-	BOOST_CHECK_MESSAGE(calendar.hybrid(),"Default calendar type should be hybrid");
+	BOOST_CHECK_MESSAGE(!calendar.hybrid(),"Default calendar type should be real");
 
 	// init the calendar to 2009, Feb, 10th,  15 minutes past midnight
  	boost::gregorian::date theDate(2009,2,10);
@@ -331,8 +366,8 @@ BOOST_AUTO_TEST_CASE( test_calendar_hybrid )
 
 	// init the calendar to 2009, Feb, 10th,  0 minutes past midnight
 	Calendar calendar;
-	calendar.init(ptime(date(2010,2,10), minutes(0)));
-	BOOST_CHECK_MESSAGE(calendar.hybrid(),"Default calendar type should be hybrid");
+	calendar.init(ptime(date(2010,2,10), minutes(0)),Calendar::HYBRID);
+	BOOST_CHECK_MESSAGE(calendar.hybrid(),"calendar type should be hybrid");
 
 
 	std::string expectedTime = "2010-Feb-10 00:00:00";
@@ -392,9 +427,9 @@ BOOST_AUTO_TEST_CASE( test_day_changed_for_hybrid )
 	cout << "ACore:: ...test_day_changed_for_hybrid\n";
 
 	// init the calendar to 2009, Feb, 10th,  0 minutes past midnight
-	Calendar calendar;
-	calendar.init(ptime(date(2010,2,10), minutes(0)));
- 	BOOST_CHECK_MESSAGE(calendar.hybrid(),"calendar type should be real");
+	Calendar calendar; // default clock is real
+	calendar.init(ptime(date(2010,2,10), minutes(0)),Calendar::HYBRID);
+ 	BOOST_CHECK_MESSAGE(calendar.hybrid(),"calendar type should be hybrid");
 
  	// HYBRID calendars allow for day change but not date.
  	std::string expected_date = to_simple_string(calendar.date());

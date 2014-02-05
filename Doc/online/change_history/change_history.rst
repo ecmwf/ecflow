@@ -8,6 +8,9 @@
 **Change History**
 ==================
 
+4.0.1 (production, January 2014)
+   - ecflow_client    : minor change --get_state so that we print NULL when referenced node not accessible
+
 4.0.0 (production, November 2013)
    - ecflowview    : add %VARIABLE% syntax in ecflowview.menu
                      add Web Menu (second level access to manual, script, job, output)
@@ -178,7 +181,7 @@
    - ECFLOW-50   ecflowview doesn't show output of task 
    - ECFLOW-49   ecflowview doesn't show server if no suite is running 
    - Added support for python 2.7 on HPUX
-   - AIX rs6000,power6,power7 now built with v12 c++ compiler
+   - AIX power6,power7 now built with v12 c++ compiler
    - Changed suites in handles so that they are always in same order as def suites
    - Added edit history functionality for the server/defs node. 
    - Reduced memory usage, when nodes don't have trigger/complete expressions
@@ -332,7 +335,7 @@
 
    - Changed help structure, added summary 
    - Changed Jamroot.jam to conditionally build ecflowview on 
-     Linux and rs6000 platforms only. 
+     Linux and some AIX platforms only. 
      Uses ARCH environment variable
    - Doc: Changed installation to include PDF version of user manual
      Fixed: ECFLOW-20 The only installed documentation in 

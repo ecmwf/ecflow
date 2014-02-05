@@ -25,7 +25,7 @@
 using namespace std;
 using namespace ecf;
 
-BOOST_AUTO_TEST_SUITE( ANattrTestSuite )
+BOOST_AUTO_TEST_SUITE( NodeTestSuite )
 
 BOOST_AUTO_TEST_CASE( test_limit_basics )
 {

@@ -48,7 +48,7 @@ using namespace ecf;
 #define DONT_REPLY_IF_OK 1
 
 /// Constructor opens the acceptor and starts waiting for the first incoming connection.
-server::server( ServerEnvironment& serverEnv ) :
+Server::Server( ServerEnvironment& serverEnv ) :
    io_service_(),
    signals_(io_service_),
    acceptor_(io_service_),
@@ -66,7 +66,7 @@ server::server( ServerEnvironment& serverEnv ) :
    std::cout << "Server: thread pool size = " << thread_pool_size_ << endl;
 #endif
 
-   if (serverEnv_.debug()) cout << "-->server::server starting server on port "
+   if (serverEnv_.debug()) cout << "-->Server::server starting server on port "
                                 << serverEnv.port()
 #ifdef ECFLOW_MT
                                 << " thread pool size = " << thread_pool_size_
@@ -76,7 +76,7 @@ server::server( ServerEnvironment& serverEnv ) :
    // Register to handle the signals.
    // Support for emergency check pointing during system session.
    signals_.add(SIGTERM);
-   signals_.async_wait(boost::bind(&server::sigterm_signal_handler, this));
+   signals_.async_wait(boost::bind(&Server::sigterm_signal_handler, this));
 
 
    // Open the acceptor with the option to reuse the address (i.e. SO_REUSEADDR).
@@ -113,21 +113,21 @@ server::server( ServerEnvironment& serverEnv ) :
    start_accept();
 }
 
-server::~server()
+Server::~Server()
 {
-   if (serverEnv_.debug()) cout << "<--server::~server exiting server on port " << serverEnv_.port() << endl;
+   if (serverEnv_.debug()) cout << "<--Server::~server exiting server on port " << serverEnv_.port() << endl;
 
    defs_.reset();
 
 #ifdef DEBUG
    if ( defs_.use_count() != 0) {
-      cout << "server::~server() defs_.use_count() = " << defs_.use_count() << " something is still hold onto the defs, asserting\n";
+      cout << "Server::~server() defs_.use_count() = " << defs_.use_count() << " something is still hold onto the defs, asserting\n";
    }
 #endif
    assert(defs_.use_count() == 0);
 }
 
-void server::run()
+void Server::run()
 {
   // The io_service::run() call will block until all asynchronous operations
   // have finished. While the server is running, there is always at least one
@@ -151,34 +151,34 @@ void server::run()
 #endif
 }
 
-void server::start_accept()
+void Server::start_accept()
 {
 #ifdef ECFLOW_MT
-   if (serverEnv_.debug()) cout << boost::this_thread::get_id() << "   server::start_accept()" << endl;
+   if (serverEnv_.debug()) cout << boost::this_thread::get_id() << "   Server::start_accept()" << endl;
    new_connection_.reset(new CConnection(io_service_, this));
    acceptor_.async_accept(new_connection_->socket(),
-                          boost::bind(&server::handle_accept, this,
+                          boost::bind(&Server::handle_accept, this,
                                       boost::asio::placeholders::error));
 #else
-   if (serverEnv_.debug()) cout << "   server::start_accept()" << endl;
+   if (serverEnv_.debug()) cout << "   Server::start_accept()" << endl;
    connection_ptr new_conn( new connection( io_service_ ) );
    if (serverEnv_.allow_old_client_new_server() !=0 ) {
       new_conn->allow_old_client_new_server(serverEnv_.allow_old_client_new_server());
    }
    acceptor_.async_accept( new_conn->socket(),
-                           boost::bind( &server::handle_accept, this,
+                           boost::bind( &Server::handle_accept, this,
                                  boost::asio::placeholders::error,
                                  new_conn ) );
 #endif
 }
 
 #ifdef ECFLOW_MT
-void server::handle_accept(const boost::system::error_code& e)
+void Server::handle_accept(const boost::system::error_code& e)
 {
    // Check whether the server was stopped by a signal before this completion
    // handler had a chance to run.
    if (!acceptor_.is_open()) {
-      if (serverEnv_.debug()) cout << boost::this_thread::get_id() << "   server::handle_accept:  acceptor is closed, returning\n";
+      if (serverEnv_.debug()) cout << boost::this_thread::get_id() << "   Server::handle_accept:  acceptor is closed, returning\n";
       return;
    }
 
@@ -187,38 +187,38 @@ void server::handle_accept(const boost::system::error_code& e)
    }
    else {
       LogToCout toCoutAsWell;
-      LOG(Log::ERR, "server::handle_accept error occurred : " <<  e.message());
+      LOG(Log::ERR, "Server::handle_accept error occurred : " <<  e.message());
    }
 
    start_accept();
 }
 #else
-void server::handle_accept( const boost::system::error_code& e, connection_ptr conn )
+void Server::handle_accept( const boost::system::error_code& e, connection_ptr conn )
 {
    // Check whether the server was stopped by a signal before this completion
    // handler had a chance to run.
    if (!acceptor_.is_open()) {
-      if (serverEnv_.debug()) cout << "   server::handle_accept:  acceptor is closed, returning\n";
+      if (serverEnv_.debug()) cout << "   Server::handle_accept:  acceptor is closed, returning\n";
       return;
    }
 
    if ( !e ) {
       // Read and interpret message from the client
-      if (serverEnv_.debug()) cout << "   server::handle_accept\n";
+      if (serverEnv_.debug()) cout << "   Server::handle_accept\n";
 
       // Successfully accepted a new connection. Determine what the
       // client sent to us. The connection::async_read() function will
       // automatically. serialise the inbound_request_ data structure for us.
       conn->async_read( inbound_request_,
-                     boost::bind( &server::handle_read, this,
+                     boost::bind( &Server::handle_read, this,
                                 boost::asio::placeholders::error,conn ) );
    }
    else {
-      if (serverEnv_.debug()) cout << "   server::handle_accept " << e.message() << "\n";
+      if (serverEnv_.debug()) cout << "   Server::handle_accept " << e.message() << "\n";
       if (e != boost::asio::error::operation_aborted) {
          // An error occurred. Log it
          LogToCout toCoutAsWell;
-         LOG(Log::ERR, "   server::handle_accept error occurred  " <<  e.message());
+         LOG(Log::ERR, "   Server::handle_accept error occurred  " <<  e.message());
       }
    }
 
@@ -231,7 +231,7 @@ void server::handle_accept( const boost::system::error_code& e, connection_ptr c
    start_accept();
 }
 
-void server::handle_read(  const boost::system::error_code& e,connection_ptr conn )
+void Server::handle_read(  const boost::system::error_code& e,connection_ptr conn )
 {
    /// Handle completion of a write operation.
    // **********************************************************************************
@@ -240,7 +240,7 @@ void server::handle_read(  const boost::system::error_code& e,connection_ptr con
    if ( !e ) {
 
       // See what kind of message we got from the client
-      if (serverEnv_.debug()) std::cout << "   server::handle_read : client request " << inbound_request_ << "\n";
+      if (serverEnv_.debug()) std::cout << "   Server::handle_read : client request " << inbound_request_ << "\n";
 
       try {
          // Service the in bound request, handling the request will populate the outbound_response_
@@ -258,7 +258,7 @@ void server::handle_read(  const boost::system::error_code& e,connection_ptr con
       if (!serverEnv_.reply_back_if_ok()) {
          if (!inbound_request_.terminateRequest() && outbound_response_.get_cmd()->isOkCmd()) {
             // cleanly close down the connection
-            if (serverEnv_.debug()) cout << "   server::handle_read: NOT replying with since request is OK\n";
+            if (serverEnv_.debug()) cout << "   Server::handle_read: NOT replying with since request is OK\n";
             conn->socket().shutdown(boost::asio::ip::tcp::socket::shutdown_both);
             conn->socket().close();
             return;
@@ -267,7 +267,7 @@ void server::handle_read(  const boost::system::error_code& e,connection_ptr con
 #endif
       // *Reply* back to the client:
       conn->async_write( outbound_response_,
-                          boost::bind(&server::handle_write,
+                          boost::bind(&Server::handle_write,
                                     this,
                                     boost::asio::placeholders::error,
                                     conn ) );
@@ -275,28 +275,28 @@ void server::handle_read(  const boost::system::error_code& e,connection_ptr con
    else {
       // An error occurred.
       // o/ If client has been killed/disconnected/timed out
-      //       server::handle_read : End of file
+      //       Server::handle_read : End of file
       //
       // o/ If a *new* client talks to an *old* server, with an unrecognised request/command
       //    we will see:
       //       Connection::handle_read_data boost::archive::archive_exception unregistered class
-      //       server::handle_read : Invalid argument
+      //       Server::handle_read : Invalid argument
       LogToCout toCoutAsWell;
-      LOG(Log::ERR, "server::handle_read: " <<  e.message());
+      LOG(Log::ERR, "Server::handle_read: " <<  e.message());
    }
 }
 
-void server::handle_write( const boost::system::error_code& e, connection_ptr conn )
+void Server::handle_write( const boost::system::error_code& e, connection_ptr conn )
 {
    // Handle completion of a write operation.
    // Nothing to do. The socket will be closed automatically when the last
    // reference to the connection object goes away.
    if (serverEnv_.debug())
-      cout << "   server::handle_write: client request " << inbound_request_ << " replying with  " << outbound_response_ << "\n";
+      cout << "   Server::handle_write: client request " << inbound_request_ << " replying with  " << outbound_response_ << "\n";
 
    if (e) {
       ecf::LogToCout logToCout;
-      std::stringstream ss; ss << "server::handle_write: " << e.message() << " : for request " << inbound_request_;
+      std::stringstream ss; ss << "Server::handle_write: " << e.message() << " : for request " << inbound_request_;
       log(Log::ERR,ss.str());
       return;
    }
@@ -313,7 +313,7 @@ void server::handle_write( const boost::system::error_code& e, connection_ptr co
    conn->socket().shutdown(boost::asio::ip::tcp::socket::shutdown_both,ec);
    if (ec) {
       ecf::LogToCout logToCout;
-      std::stringstream ss; ss << "server::handle_write: socket shutdown both failed: " << ec.message() << " : for request " << inbound_request_;
+      std::stringstream ss; ss << "Server::handle_write: socket shutdown both failed: " << ec.message() << " : for request " << inbound_request_;
       log(Log::ERR,ss.str());
       return;
    }
@@ -324,26 +324,26 @@ void server::handle_write( const boost::system::error_code& e, connection_ptr co
    //           we do this by checking that the out bound response was ok
    //           i.e a read only user should not be allowed to terminate server.
    if (inbound_request_.terminateRequest() && outbound_response_.get_cmd()->isOkCmd()) {
-      if (serverEnv_.debug()) cout << "   <--server::handle_write exiting server via terminate() port " << serverEnv_.port() << endl;
+      if (serverEnv_.debug()) cout << "   <--Server::handle_write exiting server via terminate() port " << serverEnv_.port() << endl;
       terminate();
    }
 }
 #endif
 
 
-void server::terminate()
+void Server::terminate()
 {
    // The server is terminated by cancelling all outstanding asynchronous
    // operations. Once all operations have finished the io_service::run() call  will exit.
-   if (serverEnv_.debug()) cout << "   server::terminate(): posting call to server::handle_terminate \n";
+   if (serverEnv_.debug()) cout << "   Server::terminate(): posting call to Server::handle_terminate \n";
 
-   // Post a call to the stop function so that server::stop() is safe to call from any thread.
-   io_service_.post(boost::bind(&server::handle_terminate, this));
+   // Post a call to the stop function so that Server::stop() is safe to call from any thread.
+   io_service_.post(boost::bind(&Server::handle_terminate, this));
 }
 
-void server::handle_terminate()
+void Server::handle_terminate()
 {
-   if (serverEnv_.debug()) cout << boost::this_thread::get_id() << "   server::handle_terminate() : cancelling checkpt and traverser timers, and signals\n";
+   if (serverEnv_.debug()) cout << boost::this_thread::get_id() << "   Server::handle_terminate() : cancelling checkpt and traverser timers, and signals\n";
 
    // Cancel signal
    signals_.clear();
@@ -361,7 +361,7 @@ void server::handle_terminate()
 
 // ============================== other privates ===========================================
 
-void server::load_check_pt_file_on_startup()
+void Server::load_check_pt_file_on_startup()
 {
    // On start up we want different behaviour.
    // If check pt file exists and we can't load then we want to exit
@@ -386,7 +386,7 @@ void server::load_check_pt_file_on_startup()
    }
 }
 
-void server::loadCheckPtFile()
+void Server::loadCheckPtFile()
 {
    // if the check point file starts with an absolute file load that first
    // otherwise check in ECF_HOME then load it. Repeat for back up check point file
@@ -401,9 +401,9 @@ void server::loadCheckPtFile()
    }
 }
 
-bool server::restore_from_checkpt(const std::string& filename,bool& failed)
+bool Server::restore_from_checkpt(const std::string& filename,bool& failed)
 {
-   // cout << "server::restore_from_checkpt " <<  filename;
+   // cout << "Server::restore_from_checkpt " <<  filename;
    failed = false;
    if (fs::exists(filename)) {
       // cout << " file exists\n";
@@ -418,12 +418,12 @@ bool server::restore_from_checkpt(const std::string& filename,bool& failed)
             // change state
             defs_ = defs;
             update_defs_server_state();           // works on def_
-            //cout << "server::restore_from_checkpt SUCCEDED found " << defs_->suiteVec().size() << " suites\n";
+            //cout << "Server::restore_from_checkpt SUCCEDED found " << defs_->suiteVec().size() << " suites\n";
             return true;
          }
          defs_->restore_from_checkpt(filename);   // this can throw
          update_defs_server_state();              // works on def_
-         //cout << "server::restore_from_checkpt SUCCEDED found " << defs_->suiteVec().size() << " suites\n";
+         //cout << "Server::restore_from_checkpt SUCCEDED found " << defs_->suiteVec().size() << " suites\n";
          return true;
       }
       catch (exception& e) {
@@ -437,7 +437,7 @@ bool server::restore_from_checkpt(const std::string& filename,bool& failed)
    return false;
 }
 
-void server::update_defs_server_state()
+void Server::update_defs_server_state()
 {
    /// The Job submission interval, and host port are not persisted, on the DEFS
    /// Hence when restoring from a checkpoint file, Be sure to update server state
@@ -466,7 +466,7 @@ void server::update_defs_server_state()
    }
 }
 
-void server::set_server_state(SState::State ss)
+void Server::set_server_state(SState::State ss)
 {
    serverState_ = ss;
    stats().status_ = static_cast<int>(serverState_);
@@ -478,7 +478,7 @@ void server::set_server_state(SState::State ss)
 /// AbstractServer function.
 /// ======================================================================================
 
-void server::create_defs()
+void Server::create_defs()
 {
    if (!defs_.get()) {
       defs_ = Defs::create();
@@ -486,22 +486,22 @@ void server::create_defs()
    }
 }
 
-std::pair<std::string,std::string> server::hostPort() const
+std::pair<std::string,std::string> Server::hostPort() const
 {
    return serverEnv_.hostPort();
 }
 
-void server::updateDefs( defs_ptr defs, bool force)
+void Server::updateDefs( defs_ptr defs, bool force)
 {
    if (defs_.get() == NULL) {
-      if (serverEnv_.debug()) cout << "   server::updateDefs: First time load of Node tree. Updating defs with server environment\n";
+      if (serverEnv_.debug()) cout << "   Server::updateDefs: First time load of Node tree. Updating defs with server environment\n";
 
       defs_ = defs;
 
       update_defs_server_state(); // Do any *one* time setup on the defs
    }
    else {
-      if (serverEnv_.debug()) std::cout << "   server::updateDefs: Loading new suites\n";
+      if (serverEnv_.debug()) std::cout << "   Server::updateDefs: Loading new suites\n";
 
       // After the absorb, input defs will be left with NO suites.
       defs_->absorb(defs.get(),force);
@@ -513,19 +513,19 @@ void server::updateDefs( defs_ptr defs, bool force)
    }
 }
 
-void server::clear_defs()
+void Server::clear_defs()
 {
-   if (serverEnv_.debug()) cout << "   server::clear_defs()\n";
+   if (serverEnv_.debug()) cout << "   Server::clear_defs()\n";
 
    if (defs_.get()) {
       defs_->clear();
    }
 }
 
-void server::checkPtDefs(ecf::CheckPt::Mode m, int check_pt_interval, int check_pt_save_time_alarm)
+void Server::checkPtDefs(ecf::CheckPt::Mode m, int check_pt_interval, int check_pt_save_time_alarm)
 {
    if (serverEnv_.debug())
-      cout << "   server::checkPtDefs() mode(" << m << ") check_pt_interval(" << check_pt_interval << ") check_pt_save_time_alarm(" << check_pt_save_time_alarm << ")\n";
+      cout << "   Server::checkPtDefs() mode(" << m << ") check_pt_interval(" << check_pt_interval << ") check_pt_save_time_alarm(" << check_pt_save_time_alarm << ")\n";
 
    if (m == ecf::CheckPt::UNDEFINED && check_pt_interval == 0 && check_pt_save_time_alarm == 0) {
       checkPtSaver_.explicitSave();  // will always save
@@ -546,9 +546,9 @@ void server::checkPtDefs(ecf::CheckPt::Mode m, int check_pt_interval, int check_
    }
 }
 
-void server::restore_defs_from_checkpt()
+void Server::restore_defs_from_checkpt()
 {
-   if (serverEnv_.debug()) cout << "   server::restore_defs_from_checkpt()\n";
+   if (serverEnv_.debug()) cout << "   Server::restore_defs_from_checkpt()\n";
 
    if (serverState_ != SState::HALTED ) {
       throw std::runtime_error( "Can not restore from checkpt the server must be halted first");
@@ -562,27 +562,27 @@ void server::restore_defs_from_checkpt()
    loadCheckPtFile();
 }
 
-void server::nodeTreeStateChanged()
+void Server::nodeTreeStateChanged()
 {
-   if (serverEnv_.debug()) cout << "   server::nodeTreeStateChanged()\n";
+   if (serverEnv_.debug()) cout << "   Server::nodeTreeStateChanged()\n";
 
    // will only actually save if configuration allows it
    checkPtSaver_.saveIfAllowed();
 }
 
-bool server::allowTaskCommunication() const
+bool Server::allowTaskCommunication() const
 {
    return (serverState_ != SState::HALTED) ? true : false;
 }
 
 
-void server::shutdown()
+void Server::shutdown()
 {
    ///           User Request    Task Request   Job Scheduling   Check-pointing
    /// RUNNING      yes               yes              yes            yes
    /// SHUTDOWN     yes               yes              no             yes
    /// HALTED       yes               no               no             no
-   if (serverEnv_.debug()) cout << "   server::shutdown. Stop Scheduling new jobs only\n";
+   if (serverEnv_.debug()) cout << "   Server::shutdown. Stop Scheduling new jobs only\n";
 
    // Stop server from creating new jobs. Don't stop the checkPtSaver_ since
    // the jobs communication with server can still change state. Which we want
@@ -598,13 +598,13 @@ void server::shutdown()
    set_server_state(SState::SHUTDOWN);
 }
 
-void server::halted()
+void Server::halted()
 {
    ///           User Request    Task Request   Job Scheduling   Check-pointing
    /// RUNNING      yes               yes              yes            yes
    /// SHUTDOWN     yes               yes              no             yes
    /// HALTED       yes               no               no             no
-   if (serverEnv_.debug()) cout << "   server::halted. Stop Scheduling new jobs *and* block task communication. Stop check pointing. Only accept user request\n";
+   if (serverEnv_.debug()) cout << "   Server::halted. Stop Scheduling new jobs *and* block task communication. Stop check pointing. Only accept user request\n";
 
    // Stop server from creating new jobs. i.e Job scheduling.
    traverser_.stop();
@@ -623,13 +623,13 @@ void server::halted()
    set_server_state(SState::HALTED);
 }
 
-void server::restart()
+void Server::restart()
 {
    ///           User Request    Task Request   Job Scheduling   Check-pointing
    /// RUNNING      yes               yes              yes            yes
    /// SHUTDOWN     yes               yes              no             yes
    /// HALTED       yes               no               no             no
-   if (serverEnv_.debug()) std::cout << "   server::restart\n";
+   if (serverEnv_.debug()) std::cout << "   Server::restart\n";
 
    // The server state *MUST* be set, *before* traverser_.start(), since that can kick off job traversal.
    // Job Scheduling can only be done under RUNNING state, hence must be before traverser_.start();
@@ -642,26 +642,26 @@ void server::restart()
    checkPtSaver_.start();
 }
 
-bool server::reloadWhiteListFile(std::string& errorMsg)
+bool Server::reloadWhiteListFile(std::string& errorMsg)
 {
-   if (serverEnv_.debug()) cout << "   server::reloadWhiteListFile\n";
+   if (serverEnv_.debug()) cout << "   Server::reloadWhiteListFile\n";
 
    return serverEnv_.reloadWhiteListFile(errorMsg);
 }
 
-bool server::authenticateUser(const std::string& user)
+bool Server::authenticateUser(const std::string& user)
 {
    return serverEnv_.authenticateUser(user);
 }
 
-bool server::authenticateWriteAccess(const std::string& user,  bool client_request_can_change_server_state )
+bool Server::authenticateWriteAccess(const std::string& user,  bool client_request_can_change_server_state )
 {
    return serverEnv_.authenticateWriteAccess(user, client_request_can_change_server_state);
 }
 
-bool server::lock(const std::string& user)
+bool Server::lock(const std::string& user)
 {
-   if (serverEnv_.debug()) std::cout << "   server::lock " << user << "\n";
+   if (serverEnv_.debug()) std::cout << "   Server::lock " << user << "\n";
 
    if (userWhoHasLock_.empty()) {
       userWhoHasLock_ = user;
@@ -675,59 +675,59 @@ bool server::lock(const std::string& user)
    }
    return false;
 }
-void server::unlock()
+void Server::unlock()
 {
-   if (serverEnv_.debug()) std::cout << "   server::unlock " << userWhoHasLock_ << "\n";
+   if (serverEnv_.debug()) std::cout << "   Server::unlock " << userWhoHasLock_ << "\n";
 
    userWhoHasLock_.clear();
    stats().locked_by_user_.clear();
    if ( serverState_ == SState::SHUTDOWN ) restart();
 }
-const std::string& server::lockedUser() const
+const std::string& Server::lockedUser() const
 {
    return userWhoHasLock_;
 }
 
-bool server::allow_job_creation_during_tree_walk() const
+bool Server::allow_job_creation_during_tree_walk() const
 {
    return serverEnv_.jobGeneration();
 }
 
-int server::poll_interval() const
+int Server::poll_interval() const
 {
    return serverEnv_.submitJobsInterval();
 }
 
-void server::debug_server_on()
+void Server::debug_server_on()
 {
    serverEnv_.set_debug(true);
 }
 
-void server::debug_server_off()
+void Server::debug_server_off()
 {
    serverEnv_.set_debug(false);
 }
 
-bool server::debug() const
+bool Server::debug() const
 {
    return serverEnv_.debug();
 }
 
-void server::sigterm_signal_handler()
+void Server::sigterm_signal_handler()
 {
    if (io_service_.stopped()) {
-      if (serverEnv_.debug()) cout << "-->server::sigterm_signal_handler(): io_service is stopped returning " << endl;
+      if (serverEnv_.debug()) cout << "-->Server::sigterm_signal_handler(): io_service is stopped returning " << endl;
       return;
    }
 
-   if (serverEnv_.debug()) cout << "server::sigterm_signal_handler(): Received SIGTERM : starting check pointing" << endl;
-   ecf::log(Log::MSG,"server::sigterm_signal_handler(): Received SIGTERM : starting check pointing");
+   if (serverEnv_.debug()) cout << "Server::sigterm_signal_handler(): Received SIGTERM : starting check pointing" << endl;
+   ecf::log(Log::MSG,"Server::sigterm_signal_handler(): Received SIGTERM : starting check pointing");
 
    checkPtDefs();
 
-   ecf::log(Log::MSG,"server::sigterm_signal_handler(): finished check pointing");
-   if (serverEnv_.debug()) cout << "server::sigterm_signal_handler(): finished check pointing" << endl;
+   ecf::log(Log::MSG,"Server::sigterm_signal_handler(): finished check pointing");
+   if (serverEnv_.debug()) cout << "Server::sigterm_signal_handler(): finished check pointing" << endl;
 
    // We need re-wait each time signal handler is called
-   signals_.async_wait(boost::bind(&server::sigterm_signal_handler, this));
+   signals_.async_wait(boost::bind(&Server::sigterm_signal_handler, this));
 }

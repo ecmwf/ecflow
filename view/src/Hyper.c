@@ -84,8 +84,8 @@ static char defaultTranslations[] =
 "     <Btn1Down>:select()\n                 <Btn1Up>: activate()\n\
       <Motion>:cursor()\n\
       <Btn2Down>:select()\n                 <Btn2Up>: activate() \n\
- Shift<Btn5Down>: increment(-1)\n       Shift<Btn4Down>: increment(1)  \n\
-      <Btn5Down>: increment(-10)\n           <Btn4Down>: increment(10) \n";
+ Shift<Btn5Down>: increment(1)\n       Shift<Btn4Down>: increment(-1)  \n\
+      <Btn5Down>: increment(10)\n           <Btn4Down>: increment(-10) \n";
 
 static XtActionsRec actionsList[] = {
     { "select",   (XtActionProc) xselect},
@@ -821,7 +821,6 @@ int            n_args;
 
   Widget clip = XtParent(h);
   Widget swin;
-
   Widget v_scroll;
 
   int ac = 0;
@@ -840,16 +839,18 @@ int            n_args;
 
   Arg al[5];
 
-  int arg;
+  // https://software.ecmwf.int/issues/browse/SUP-646
 
-  printf("1\n");
+  /* printf("## mouse 1\n"); */
   if(!clip) return;
   swin = XtParent(clip);
-  printf("2\n");
-  if(!swin || !XmIsScrolledWindow(swin)) return;
-  printf("3\n");
-  if (n_args != 1) return;
-  printf("4\n");
+
+  /* printf("## mouse 2\n"); */
+  // if(!swin || !XmIsScrolledWindow(swin)) return;
+  if(!swin) return;
+
+  /* printf("## mouse 3\n"); */
+  // 20131126 if (n_args != 1) return;
   SetArg(XmNverticalScrollBar  , &v_scroll);
   GetValues(swin);
   
@@ -858,8 +859,8 @@ int            n_args;
     int max = 80; 
     int value = 0;
     int slider_size = 80;
-    int inc = 1;
-    int page_inc = 1;
+    int inc = 10;
+    int page_inc = 100;
     SetArg(XmNminimum,&min); /* ??? */
     SetArg(XmNmaximum,&max);    
     SetArg(XmNvalue,&value);    
@@ -870,7 +871,7 @@ int            n_args;
     GetValues(v_scroll);
     /* XmScrollBarGetValues(v_scroll, value, slider_size, inc, page_inc); */
     
-    arg = atoi(args[0]);
+    int arg = atoi(args[0]);
     dh = (abs(arg) > 5) ? page_inc : inc;
 
     if (arg < 0) {

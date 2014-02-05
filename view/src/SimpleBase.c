@@ -40,8 +40,9 @@ static Boolean          SetValues();
 /* putting this into comments makes ctrl-left button for collector
    disappear !! */
 static char defaultTranslations[] = "\
-<BtnDown>:DrawingAreaInput()\n\
-<BtnUp>:DrawingAreaInput()\n\
+ Shift<Btn5Down>: increment(1)\n       Shift<Btn4Down>: increment(-1)  \n\
+      <Btn5Down>: increment(10)\n           <Btn4Down>: increment(-10) \n\
+<BtnDown>:DrawingAreaInput()\n              <BtnUp>:DrawingAreaInput()\n\
 <Key>osfActivate:DrawingAreaInput()\n\
 ~s ~m ~a <Key>Return:DrawingAreaInput()\n\
 ~s ~m ~a <Key>space:DrawingAreaInput()\n\
@@ -251,7 +252,7 @@ Boolean   *continue_dispatch;
 static void time_out(SimpleBaseWidget w,XtIntervalId id)
 {
 	if( w->simplebase.selected >= 0 && w->simplebase.selected < w->simplebase.count) {
-		Node *n = w->simplebase.nodes +  w->simplebase.selected;
+		NodeStruct *n = w->simplebase.nodes +  w->simplebase.selected;
 
 		if(XtIsRealized((Widget) w) && n->managed)
 		{
@@ -399,7 +400,7 @@ static void Destroy(SimpleBaseWidget w)
 static void selection(SimpleBaseWidget w)
 {
 	if( w->simplebase.selected >= 0 && w->simplebase.selected < w->simplebase.count) {
-		Node *n = w->simplebase.nodes +  w->simplebase.selected;
+		NodeStruct *n = w->simplebase.nodes +  w->simplebase.selected;
 		if(n->managed)
 		{
 			XDrawRectangle(XtDisplay(w),XtWindow(w),
@@ -415,7 +416,7 @@ static void selection(SimpleBaseWidget w)
 static void clear(SimpleBaseWidget w)
 {
 	if( w->simplebase.selected >= 0 && w->simplebase.selected < w->simplebase.count) {
-		Node *n = w->simplebase.nodes +  w->simplebase.selected;
+		NodeStruct *n = w->simplebase.nodes +  w->simplebase.selected;
 		if(n->managed)
 		{
 			XClearArea(XtDisplay(w),XtWindow(w),
@@ -440,7 +441,7 @@ void NodesRedraw(SimpleBaseWidget w,XEvent *event, Region region)
 
 	for(i = 0; i < w->simplebase.count;i++)
 	{
-		Node *n = w->simplebase.nodes + i;
+		NodeStruct *n = w->simplebase.nodes + i;
 		if(n->managed)
 				if(XRectInRegion(region, n->r.x, n->r.y, n->r.width, n->r.height))
 					n->draw((Widget)w,&n->r,n->user_data);
@@ -454,7 +455,7 @@ void NodesRedraw(SimpleBaseWidget w,XEvent *event, Region region)
 
 #if 0
 	if( w->simplebase.selected >= 0 && w->simplebase.selected < w->simplebase.count) {
-		Node *n = w->simplebase.nodes +  w->simplebase.selected;
+		NodeStruct *n = w->simplebase.nodes +  w->simplebase.selected;
 		if(n->managed)
 			if(XRectInRegion(region, n->r.x-1, n->r.y-1, n->r.width+2, n->r.height+2))
 			{
@@ -492,15 +493,15 @@ static int new_link_data(SimpleBaseWidget w)
 int NodeCreate(Widget _w,DrawProc draw,SizeProc size,void *data)
 {
 	SimpleBaseWidget w = (SimpleBaseWidget)_w;
-	Node *n;
+	NodeStruct *n;
 	if(w->simplebase.count >= w->simplebase.max)
 	{
 		w->simplebase.max += w->simplebase.max/2 + 128;
 		w->simplebase.nodes = 
-		    (Node*)XtRealloc((XtPointer)w->simplebase.nodes,
-		    w->simplebase.max*sizeof(Node));
+		    (NodeStruct*)XtRealloc((XtPointer)w->simplebase.nodes,
+		    w->simplebase.max*sizeof(NodeStruct));
 		memset(w->simplebase.nodes + w->simplebase.count, 0,
-		    (w->simplebase.max - w->simplebase.count)*sizeof(Node));
+		    (w->simplebase.max - w->simplebase.count)*sizeof(NodeStruct));
 	}
 
 	n = &w->simplebase.nodes[w->simplebase.count];
@@ -582,7 +583,7 @@ void NodeChanged(Widget _w,int node)
 
 	if(XtIsRealized((Widget)w))
 	{
-		Node *p = w->simplebase.nodes + node;
+		NodeStruct *p = w->simplebase.nodes + node;
 		if(p->managed) 
 		{
 			/* printf("XClearArea 2 %s\n",XtName(w)); */
@@ -607,7 +608,7 @@ void *NodeFind(Widget _w,XEvent *ev)
 	int i;
 	for(i = 0; i < w->simplebase.count;i++)
 	{
-		Node *n = w->simplebase.nodes + i;
+		NodeStruct *n = w->simplebase.nodes + i;
 		if(n->managed)
 			if(ev->xbutton.x >= n->r.x && ev->xbutton.x <= n->r.x + n->r.width &&
 			    ev->xbutton.y >= n->r.y && ev->xbutton.y <= n->r.y + n->r.height)
@@ -633,7 +634,7 @@ void SimpleBaseShow(Widget _w,XRectangle* r,XEvent* ev)
 	Widget scroll_window = NULL;
 	Arg al[5];
 	int ac;
-	/* Node *w; */
+	/* NodeStruct *w; */
         Position x_node ,y_node;
 	Dimension h_node,w_node;
 
@@ -746,7 +747,7 @@ void SimpleBaseShow(Widget _w,XRectangle* r,XEvent* ev)
 void NodeShow(Widget _w,int node)
 {
 	SimpleBaseWidget sw = (SimpleBaseWidget)_w;
-	Node *w;
+	NodeStruct *w;
 
 	if( node < 0 || node >= sw->simplebase.count) return;
 	w = sw->simplebase.nodes + node;
@@ -761,7 +762,7 @@ void NodeHideAll(Widget _w)
 	int i;
 	for(i = 0; i < w->simplebase.count;i++)
 	{
-		Node *n = w->simplebase.nodes + i;
+		NodeStruct *n = w->simplebase.nodes + i;
 		n->managed = False;
 	}
 	NodeUpdate(_w);
@@ -773,7 +774,7 @@ Boolean NodeVisibility(Widget _w,int node,Boolean vis)
 	if (!w) {
 	  return False;
 	}
-	Node *p = w->simplebase.nodes + node;
+	NodeStruct *p = w->simplebase.nodes + node;
 	if( node < 0 || node >= w->simplebase.count) return vis;
 	if (0 == p) { 
 	  fprintf(stderr, "unexpected\n");
@@ -809,7 +810,7 @@ void NodeNewSize(Widget _w,int node)
 {
 	XRectangle next,old;
 	SimpleBaseWidget w = (SimpleBaseWidget)_w;
-	Node *p ;
+	NodeStruct *p ;
 	if( w == 0 || node < 0 || node >= w->simplebase.count) return;
 
 	p = w->simplebase.nodes + node;
@@ -870,7 +871,7 @@ void NodeReset(Widget _w)
 	int i;
 	for(i = 0; i < w->simplebase.count;i++)
 	{
-		Node *n = w->simplebase.nodes + i;
+		NodeStruct *n = w->simplebase.nodes + i;
 		if(n->parents) XtFree((XtPointer)n->parents);
 		if(n->kids) XtFree((XtPointer)n->kids);
 	}
@@ -878,7 +879,7 @@ void NodeReset(Widget _w)
 	w->simplebase.link_count    = 0;
 	w->simplebase.selected = -1;
 	w->simplebase.focus    = -1;
-	memset(w->simplebase.nodes,0,w->simplebase.max*sizeof(Node));
+	memset(w->simplebase.nodes,0,w->simplebase.max*sizeof(NodeStruct));
 	memset(w->simplebase.links,0,w->simplebase.link_max*sizeof(LinkData));
 	NodeUpdate(_w);
 }
@@ -890,10 +891,10 @@ void NodeReserve(Widget _w,int count)
 	{
 		w->simplebase.max = count;
 		w->simplebase.nodes = 
-		    (Node*)XtRealloc((XtPointer)w->simplebase.nodes,
-		    w->simplebase.max*sizeof(Node));
+		    (NodeStruct*)XtRealloc((XtPointer)w->simplebase.nodes,
+		    w->simplebase.max*sizeof(NodeStruct));
 		memset(w->simplebase.nodes + w->simplebase.count, 0,
-		    (w->simplebase.max - w->simplebase.count)*sizeof(Node));
+		    (w->simplebase.max - w->simplebase.count)*sizeof(NodeStruct));
 	}
 }
 
@@ -902,8 +903,8 @@ void NodeAddRelation(Widget _w,int pnode,int knode)
 {
 	int i;
 	SimpleBaseWidget w = (SimpleBaseWidget)_w;
-	Node *p = w->simplebase.nodes + pnode;
-	Node *k = w->simplebase.nodes + knode;
+	NodeStruct *p = w->simplebase.nodes + pnode;
+	NodeStruct *k = w->simplebase.nodes + knode;
 
 	if( pnode < 0 || pnode >= w->simplebase.count) return;
 	if( knode < 0 || knode >= w->simplebase.count) return;
@@ -937,8 +938,8 @@ void* NodeGetRelationData(Widget _w,int pnode,int knode)
 {
 	int i;
 	SimpleBaseWidget w = (SimpleBaseWidget)_w;
-	Node *p = w->simplebase.nodes + pnode;
-	/* Node *k = w->simplebase.nodes + knode; */
+	NodeStruct *p = w->simplebase.nodes + pnode;
+	/* NodeStruct *k = w->simplebase.nodes + knode; */
 
 	if( pnode < 0 || pnode >= w->simplebase.count) return 0;
 	if( knode < 0 || knode >= w->simplebase.count) return 0;
@@ -955,7 +956,7 @@ void* NodeGetRelationData(Widget _w,int pnode,int knode)
 	/* Check for dummies */
 	for(i = 0 ; i < p->kcnt; i++)
 	{
-		Node* z = &KIDS(w,p,i);
+		NodeStruct* z = &KIDS(w,p,i);
 		if(sb_is_dummy(w,z))
 		{
 			void *d = NodeGetRelationData(_w,NODE_TO_INDEX(w,z),knode);
@@ -971,8 +972,8 @@ void* NodeSetRelationData(Widget _w,int pnode,int knode,void *data)
 {
 	int i;
 	SimpleBaseWidget w = (SimpleBaseWidget)_w;
-	Node *p = w->simplebase.nodes + pnode;
-	/* Node *k = w->simplebase.nodes + knode; */
+	NodeStruct *p = w->simplebase.nodes + pnode;
+	/* NodeStruct *k = w->simplebase.nodes + knode; */
 
 	if( pnode < 0 || pnode >= w->simplebase.count) return 0;
 	if( knode < 0 || knode >= w->simplebase.count) return 0;
@@ -996,8 +997,8 @@ GC NodeSetRelationGC(Widget _w,int pnode,int knode,GC rgc)
 {
 	int i;
 	SimpleBaseWidget w = (SimpleBaseWidget)_w;
-	Node *p = w->simplebase.nodes + pnode;
-	/* Node *k = w->simplebase.nodes + knode; */
+	NodeStruct *p = w->simplebase.nodes + pnode;
+	/* NodeStruct *k = w->simplebase.nodes + knode; */
 	GC gc = w->simplebase.gc;
 
 	if( pnode < 0 || pnode >= w->simplebase.count) return gc;
@@ -1068,11 +1069,11 @@ int sb_new_dummy_node(SimpleBaseWidget gw)
 	int i;
 	int n = gw->simplebase.count;
 	/* int more = 0; */
-	Node* z = 0;
+	NodeStruct* z = 0;
 
 	for(i=0; i < n; i++)
 	{
-		Node* w = gw->simplebase.nodes + i;
+		NodeStruct* w = gw->simplebase.nodes + i;
 		if(w->draw == drawDummy && !w->managed)
 		{
 			printf("Recycle dummy %d\n",i);
@@ -1114,11 +1115,11 @@ void sb_clear_dummy_nodes(SimpleBaseWidget gw)
 
 	for(i=0; i < n; i++)
 	{
-		Node* w = gw->simplebase.nodes + i;
+		NodeStruct* w = gw->simplebase.nodes + i;
 		if(w->draw == drawDummy && w->managed)
 		{
-			Node *p = INDEX_TO_NODE(gw,w->parents[0].node);
-			Node *k = INDEX_TO_NODE(gw,w->kids[0].node);
+			NodeStruct *p = INDEX_TO_NODE(gw,w->parents[0].node);
+			NodeStruct *k = INDEX_TO_NODE(gw,w->kids[0].node);
 			int j;
 
 			cnt++;
@@ -1150,12 +1151,12 @@ void sb_clear_dummy_nodes(SimpleBaseWidget gw)
 
 int sb_insert_dummy_node(SimpleBaseWidget gw,int np,int nk)
 {
-	Node *p = INDEX_TO_NODE(gw,np);
-	Node *k = INDEX_TO_NODE(gw,nk);
+	NodeStruct *p = INDEX_TO_NODE(gw,np);
+	NodeStruct *k = INDEX_TO_NODE(gw,nk);
 	int a = sb_find_kid_index(gw,p,k);
 	int b = sb_find_parent_index(gw,k,p);
 	int x;
-	Node *z;
+	NodeStruct *z;
 
 	if(a == -1)
 	{
@@ -1190,7 +1191,7 @@ int sb_insert_dummy_node(SimpleBaseWidget gw,int np,int nk)
 	return x;
 }
 
-int sb_find_kid_index(SimpleBaseWidget w,Node* p,Node *k)
+int sb_find_kid_index(SimpleBaseWidget w,NodeStruct* p,NodeStruct *k)
 {
 	int i;
 	int x = NODE_TO_INDEX(w,k);
@@ -1202,7 +1203,7 @@ int sb_find_kid_index(SimpleBaseWidget w,Node* p,Node *k)
 	return -1;
 }
 
-int sb_find_parent_index(SimpleBaseWidget w,Node* k,Node *p)
+int sb_find_parent_index(SimpleBaseWidget w,NodeStruct* k,NodeStruct *p)
 {
 	int i;
 	int x = NODE_TO_INDEX(w,p);
@@ -1214,7 +1215,7 @@ int sb_find_parent_index(SimpleBaseWidget w,Node* k,Node *p)
 	return -1;
 }
 
-Boolean sb_is_dummy(SimpleBaseWidget w,Node* n)
+Boolean sb_is_dummy(SimpleBaseWidget w,NodeStruct* n)
 {
 	return n->draw == drawDummy;
 }
@@ -1243,33 +1244,30 @@ int            n_args;
 
   Widget clip = XtParent(h);
   Widget swin;
-
   Widget v_scroll;
 
   int ac = 0;
 
-  Position    x_grep,y_grep;
-  Dimension   h_grep,w_grep;
-  Position    x_clip,y_clip;
-  Dimension   h_clip,w_clip;
-  Position    dv=0,dh=0;
-  int min,max;
-  int v_val,v_size,v_inc,v_page;
-  int h_val,h_size,h_inc,h_page;
-  Position x,y;
+//  Position    x_grep,y_grep;
+//  Dimension   h_grep,w_grep;
+//  Position    x_clip,y_clip;
+//  Dimension   h_clip,w_clip;
+//  Position    dv=0,dh=0;
+//  int min,max;
+//  int v_val,v_size,v_inc,v_page;
+//  int h_val,h_size,h_inc,h_page;
+//  Position x,y;
   
   Arg al[5];
 
-  int arg;
-
-  printf("1\n");
+  /* printf("## mouse 1\n"); */
   if(!clip) return;
   swin = XtParent(clip);
-  printf("2\n");
+  /* printf("## mouse 2\n"); */
   if(!swin || !XmIsScrolledWindow(swin)) return;
-  printf("3\n");
+  /* printf("## mouse 3\n"); */
   if (n_args != 1) return;
-  printf("4\n");
+
   SetArg(XmNverticalScrollBar  , &v_scroll);
   GetValues(swin);
   
@@ -1285,7 +1283,7 @@ int            n_args;
     GetValues(v_scroll);
     /* XmScrollBarGetValues(v_scroll, value, slider_size, inc, page_inc); */
     
-    arg = atoi(args[0]);
+    int arg = atoi(args[0]);
     dh = (abs(arg) > 5) ? page_inc : inc;
 
     if (arg < 0) {

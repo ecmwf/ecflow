@@ -80,6 +80,8 @@ BOOST_AUTO_TEST_CASE( test_alter_cmd_for_clock_type_hybrid )
    defs.addSuite( s );
 
    BOOST_CHECK_MESSAGE( !s->clockAttr(), "Expected no clock");
+   std::string error_msg;
+   BOOST_CHECK_MESSAGE(defs.checkInvariants(error_msg),"checkInvariants failed " << error_msg);
 
    {  // Change clock type =====================================================================================================
       defs.beginAll();
@@ -88,9 +90,7 @@ BOOST_AUTO_TEST_CASE( test_alter_cmd_for_clock_type_hybrid )
       clock_ptr v = s->clockAttr();
       BOOST_CHECK_MESSAGE( v && v->hybrid() , "expected clock to be added and be hybrid");
 
-      // When we reque, the suite calendar should align to todays date and time
-      TestHelper::invokeRequest(&defs,Cmd_ptr( new RequeueNodeCmd("/" + s->name())));
-
+      // Altering the suite clock attributes, should force suite calendar to  align to todays date and time
       boost::posix_time::ptime date_now = Calendar::second_clock_time();
       int day_of_month = date_now.date().day();
       int month        = date_now.date().month();
@@ -98,6 +98,7 @@ BOOST_AUTO_TEST_CASE( test_alter_cmd_for_clock_type_hybrid )
       BOOST_CHECK_MESSAGE( s->calendar().day_of_month() == day_of_month, "Calendar should be updated after re-queue/begin. Expected " << day_of_month << " but found " << s->calendar().day_of_month());
       BOOST_CHECK_MESSAGE( s->calendar().month() == month, "Calendar should be updated after re-queue/begin. Expected " << month << " but found " << s->calendar().month());
       BOOST_CHECK_MESSAGE( s->calendar().year() == year, "Calendar should be updated after re-queued/begin");
+      BOOST_CHECK_MESSAGE(defs.checkInvariants(error_msg),"checkInvariants failed " << error_msg);
    }
 }
 
@@ -111,6 +112,7 @@ BOOST_AUTO_TEST_CASE( test_alter_cmd_for_clock_type_real )
    suite_ptr s = defs.add_suite("suite");
 
    BOOST_CHECK_MESSAGE( !s->clockAttr(), "Expected no clock");
+   std::string error_msg; BOOST_CHECK_MESSAGE(defs.checkInvariants(error_msg),"checkInvariants failed " << error_msg);
 
    {  // Change clock type =====================================================================================================
       defs.beginAll();
@@ -119,9 +121,7 @@ BOOST_AUTO_TEST_CASE( test_alter_cmd_for_clock_type_real )
       clock_ptr v = s->clockAttr();
       BOOST_CHECK_MESSAGE( v && !v->hybrid() , "expected clock to be added and be real");
 
-      // When we reque, the suite calendar should align to todays date and time
-      TestHelper::invokeRequest(&defs,Cmd_ptr( new RequeueNodeCmd("/" + s->name())));
-
+      // Altering the suite clock attributes, should force suite calendar to  align to todays date and time
       boost::posix_time::ptime date_now = Calendar::second_clock_time();
       int day_of_month = date_now.date().day();
       int month        = date_now.date().month();
@@ -129,6 +129,7 @@ BOOST_AUTO_TEST_CASE( test_alter_cmd_for_clock_type_real )
       BOOST_CHECK_MESSAGE( s->calendar().day_of_month() == day_of_month, "Calendar should be updated after re-queue/begin. Expected " << day_of_month << " but found " << s->calendar().day_of_month());
       BOOST_CHECK_MESSAGE( s->calendar().month() == month, "Calendar should be updated after re-queue/begin. Expected " << month << " but found " << s->calendar().month());
       BOOST_CHECK_MESSAGE( s->calendar().year() == year, "Calendar should be updated after re-queued/begin");
+      BOOST_CHECK_MESSAGE(defs.checkInvariants(error_msg),"checkInvariants failed " << error_msg);
    }
 }
 
@@ -147,6 +148,7 @@ BOOST_AUTO_TEST_CASE( test_alter_cmd_for_clock_sync )
 
    BOOST_REQUIRE_MESSAGE( s->clockAttr(), "Expected clock");
    BOOST_REQUIRE_MESSAGE( s->clockAttr()->hybrid(), "Expected hybrid clock");
+   std::string error_msg; BOOST_CHECK_MESSAGE(defs.checkInvariants(error_msg),"checkInvariants failed " << error_msg);
 
    {  // Change clock type =====================================================================================================
       defs.beginAll();
@@ -160,12 +162,10 @@ BOOST_AUTO_TEST_CASE( test_alter_cmd_for_clock_sync )
       BOOST_CHECK_MESSAGE( s->calendar().day_of_month() == 1, "Calendar should be updated after re-queue/begin. Expected day of month " << 1 << " but found " << s->calendar().day_of_month());
       BOOST_CHECK_MESSAGE( s->calendar().month() == 1, "Calendar should be updated after re-queue/begin. Expected month " << 1 << " but found " << s->calendar().month());
       BOOST_CHECK_MESSAGE( s->calendar().year() == 2009, "Calendar should be updated after re-queued/begin, Expected year " << 2009 << " but found " << s->calendar().year());
+      BOOST_CHECK_MESSAGE(defs.checkInvariants(error_msg),"checkInvariants failed " << error_msg);
 
       // After a clk sync, data should match computer
       TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(s->absNodePath(),AlterCmd::CLOCK_SYNC,"","")));
-
-      // When we reque, the suite calendar should align to todays date and time
-      TestHelper::invokeRequest(&defs,Cmd_ptr( new RequeueNodeCmd("/" + s->name())));
 
       boost::posix_time::ptime date_now = Calendar::second_clock_time();
       int day_of_month = date_now.date().day();
@@ -174,6 +174,7 @@ BOOST_AUTO_TEST_CASE( test_alter_cmd_for_clock_sync )
       BOOST_CHECK_MESSAGE( s->calendar().day_of_month() == day_of_month, "Calendar should be updated after re-queue/begin. Expected " << day_of_month << " but found " << s->calendar().day_of_month());
       BOOST_CHECK_MESSAGE( s->calendar().month() == month, "Calendar should be updated after re-queue/begin. Expected " << month << " but found " << s->calendar().month());
       BOOST_CHECK_MESSAGE( s->calendar().year() == year, "Calendar should be updated after re-queued/begin");
+      BOOST_CHECK_MESSAGE(defs.checkInvariants(error_msg),"checkInvariants failed " << error_msg);
    }
 }
 
@@ -185,6 +186,7 @@ BOOST_AUTO_TEST_CASE( test_alter_cmd_for_clock_date )
    Defs defs;
    suite_ptr s = defs.add_suite("suite");
    BOOST_CHECK_MESSAGE( !s->clockAttr(), "Expected no clock");
+   std::string error_msg; BOOST_CHECK_MESSAGE(defs.checkInvariants(error_msg),"checkInvariants failed " << error_msg);
 
    // Change clock date =====================================================================================================
    TestStateChanged changed(s);
@@ -192,11 +194,11 @@ BOOST_AUTO_TEST_CASE( test_alter_cmd_for_clock_date )
    clock_ptr v = s->clockAttr();
    BOOST_CHECK_MESSAGE( v.get(), "expected clock to be added");
 
-   // Check that calendar is not updated until suite is re-queued
+   // Check that calendar is updated  by the Alter
    {
-      BOOST_CHECK_MESSAGE( s->calendar().day_of_month() == -1, "Calendar should *NOT* not be updated until suite is re-queued ");
-      BOOST_CHECK_MESSAGE( s->calendar().month() == -1, "Calendar should *NOT* not be updated until suite is re-queued ");
-      BOOST_CHECK_MESSAGE( s->calendar().year() == -1, "Calendar should *NOT* not be updated until suite is re-queued ");
+      BOOST_CHECK_MESSAGE( s->calendar().day_of_month() == 12, "Calendar should be updated");
+      BOOST_CHECK_MESSAGE( s->calendar().month() == 12, "Calendar should be updated");
+      BOOST_CHECK_MESSAGE( s->calendar().year() == 2012, "Calendar should be updated");
 
       defs.beginAll();
       TestHelper::invokeRequest(&defs,Cmd_ptr( new RequeueNodeCmd(s->absNodePath())));
@@ -204,9 +206,9 @@ BOOST_AUTO_TEST_CASE( test_alter_cmd_for_clock_date )
       BOOST_CHECK_MESSAGE( s->calendar().month() == 12, "Calendar should be updated after re-queued");
       BOOST_CHECK_MESSAGE( s->calendar().year() == 2012, "Calendar should be updated after re-queued");
 
-      // Now re sync with the computers clock,When we reque, the suite calendar should align to todays date and time
+      // Now re sync with the computers clock, the suite calendar should align to todays date and time
       TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(s->absNodePath(),AlterCmd::CLOCK_SYNC,"","")));
-      TestHelper::invokeRequest(&defs,Cmd_ptr( new RequeueNodeCmd("/" + s->name())));
+
       boost::posix_time::ptime date_now = Calendar::second_clock_time();
       int day_of_month = date_now.date().day();
       int month        = date_now.date().month();
@@ -214,6 +216,7 @@ BOOST_AUTO_TEST_CASE( test_alter_cmd_for_clock_date )
       BOOST_CHECK_MESSAGE( s->calendar().day_of_month() == day_of_month, "Calendar should be updated after re-queue/begin. Expected " << day_of_month << " but found " << s->calendar().day_of_month());
       BOOST_CHECK_MESSAGE( s->calendar().month() == month, "Calendar should be updated after re-queue/begin. Expected " << month << " but found " << s->calendar().month());
       BOOST_CHECK_MESSAGE( s->calendar().year() == year, "Calendar should be updated after re-queued/begin");
+      BOOST_CHECK_MESSAGE(defs.checkInvariants(error_msg),"checkInvariants failed " << error_msg);
    }
 }
 
@@ -226,6 +229,7 @@ BOOST_AUTO_TEST_CASE( test_alter_cmd_for_clock_gain )
    std::string suitename = "suite";
    suite_ptr s = defs.add_suite(suitename);
    BOOST_CHECK_MESSAGE( !s->clockAttr(), "Expected no clock");
+   std::string error_msg; BOOST_CHECK_MESSAGE(defs.checkInvariants(error_msg),"checkInvariants failed " << error_msg);
 
    {  // Change clock gain  =====================================================================================================
       TestStateChanged changed(s);
@@ -234,16 +238,8 @@ BOOST_AUTO_TEST_CASE( test_alter_cmd_for_clock_gain )
       BOOST_CHECK_MESSAGE( v.get(), "expected clock to be added");
       BOOST_CHECK_MESSAGE( v && v->gain() == 86400 , "expected clock gain to be 86400 but found " << v->gain());
 
-      // Check that calendar is not updated until suite is re-queued
+      // Check that calendar is updated by the alter
       {
-         BOOST_CHECK_MESSAGE( s->calendar().day_of_month() == -1, "Calendar should *NOT* not be updated until suite is re-queued");
-         BOOST_CHECK_MESSAGE( s->calendar().month() == -1, "Calendar should *NOT* not be updated until suite is re-queued");
-         BOOST_CHECK_MESSAGE( s->calendar().year() == -1, "Calendar should *NOT* not be updated until suite is re-queued");
-
-         // This should init calendar with todays date + 86400 seconds. i.e +1 day.
-         defs.beginAll();
-         TestHelper::invokeRequest(&defs,Cmd_ptr( new RequeueNodeCmd("/" + suitename)));
-
          // add one day, to current date, to simulate a gain of 24 hours
          boost::posix_time::ptime date_now = Calendar::second_clock_time();
          boost::gregorian::date newDate = date_now.date();
@@ -252,19 +248,26 @@ BOOST_AUTO_TEST_CASE( test_alter_cmd_for_clock_gain )
          int day_of_month = newDate.day();
          int month        = newDate.month();
          int year         = newDate.year();
+         BOOST_CHECK_MESSAGE( s->calendar().day_of_month() == day_of_month, "Calendar should be updated after alter. Expected " << day_of_month << " but found " << s->calendar().day_of_month());
+         BOOST_CHECK_MESSAGE( s->calendar().month() == month, "Calendar should be updated after alter. Expected " << month << " but found " << s->calendar().month());
+         BOOST_CHECK_MESSAGE( s->calendar().year() == year, "Calendar should be updated after alter");
+
+         // This should init calendar with todays date + 86400 seconds. i.e +1 day.
+         defs.beginAll();
+         TestHelper::invokeRequest(&defs,Cmd_ptr( new RequeueNodeCmd("/" + suitename)));
          BOOST_CHECK_MESSAGE( s->calendar().day_of_month() == day_of_month, "Calendar should be updated after re-queue/begin. Expected " << day_of_month << " but found " << s->calendar().day_of_month());
          BOOST_CHECK_MESSAGE( s->calendar().month() == month, "Calendar should be updated after re-queue/begin. Expected " << month << " but found " << s->calendar().month());
          BOOST_CHECK_MESSAGE( s->calendar().year() == year, "Calendar should be updated after re-queued/begin");
 
          // Now re sync with the computers clock,When we reque, the suite calendar should align to todays date and time
          TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(s->absNodePath(),AlterCmd::CLOCK_SYNC,"","")));
-         TestHelper::invokeRequest(&defs,Cmd_ptr( new RequeueNodeCmd("/" + s->name())));
          day_of_month = date_now.date().day();
          month        = date_now.date().month();
          year         = date_now.date().year();
          BOOST_CHECK_MESSAGE( s->calendar().day_of_month() == day_of_month, "Calendar should be updated after re-queue/begin. Expected " << day_of_month << " but found " << s->calendar().day_of_month());
          BOOST_CHECK_MESSAGE( s->calendar().month() == month, "Calendar should be updated after re-queue/begin. Expected " << month << " but found " << s->calendar().month());
          BOOST_CHECK_MESSAGE( s->calendar().year() == year, "Calendar should be updated after re-queued/begin");
+         BOOST_CHECK_MESSAGE(defs.checkInvariants(error_msg),"checkInvariants failed " << error_msg);
       }
    }
 }
@@ -277,7 +280,7 @@ BOOST_AUTO_TEST_CASE( test_alter_cmd )
    suite_ptr s = Suite::create("suite");
    task_ptr task = Task::create("t1");
    {
-      ClockAttr clockAttr(false);
+      ClockAttr clockAttr(false); // real clock
       clockAttr.date(1,1,2009);
       clockAttr.set_gain_in_seconds(3600);
       clockAttr.startStopWithServer(true);
@@ -286,6 +289,8 @@ BOOST_AUTO_TEST_CASE( test_alter_cmd )
       s->addDefStatus(DState::SUSPENDED); // avoid AlterCmd from job submission
       defs.addSuite( s );
    }
+
+   std::string error_msg; BOOST_CHECK_MESSAGE(defs.checkInvariants(error_msg),"checkInvariants failed " << error_msg);
 
    { // Change server state. This will cause Flag::MESSAGE to be set on the defs
       TestDefsStateChanged chenged(&defs);
@@ -331,23 +336,21 @@ BOOST_AUTO_TEST_CASE( test_alter_cmd )
       BOOST_CHECK_MESSAGE( defs.get_edit_history(s->absNodePath()).size() == 1,
                            "expected edit_history of 1 to be added but found " <<  defs.get_edit_history(s->absNodePath()).size());
 
-      // Check that calendar is not update until suite is requed
+      // Check that calendar is in sync with clock attribute after the alter
       {
-         BOOST_CHECK_MESSAGE( s->calendar().hybrid() == false, "expected calendar to be real, Calendar not updated until suite is re-queued");
-         TestHelper::invokeRequest(&defs,Cmd_ptr( new RequeueNodeCmd(s->absNodePath())));
-         BOOST_CHECK_MESSAGE( s->calendar().hybrid() == true, "expected calendar to be re-initialised to be hybrid after requeue of suite");
+         BOOST_CHECK_MESSAGE( s->calendar().hybrid() == s->clockAttr()->hybrid(), "Calendar and Clock attribute must be in sync after alter");
+         BOOST_CHECK_MESSAGE( s->calendar().hybrid() == true, "expected calendar to be re-initialised to be hybrid after alter");
       }
 
       TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(s->absNodePath(),AlterCmd::CLOCK_TYPE,"real","")));
       BOOST_CHECK_MESSAGE( v && !v->hybrid() , "expected clock to be real");
-      BOOST_CHECK_MESSAGE( defs.get_edit_history(s->absNodePath()).size() == 3,
-                           "expected edit_history of 3 to be added but found " <<  defs.get_edit_history(s->absNodePath()).size());
+      BOOST_CHECK_MESSAGE( defs.get_edit_history(s->absNodePath()).size() == 2,
+                           "expected edit_history of 2 to be added but found " <<  defs.get_edit_history(s->absNodePath()).size());
 
-      // Check that calendar is not update until suite is re-queued
+      // Check that calendar is in sync with clock attribute after the alter
       {
-         BOOST_CHECK_MESSAGE( s->calendar().hybrid() == true, "expected calendar to be hybrid, Calendar not updated until suite is re-queued");
-         TestHelper::invokeRequest(&defs,Cmd_ptr( new RequeueNodeCmd(s->absNodePath())));
-         BOOST_CHECK_MESSAGE( s->calendar().hybrid() == false, "expected calendar to be re-initialised to be real after requeue of suite");
+         BOOST_CHECK_MESSAGE( s->calendar().hybrid() == s->clockAttr()->hybrid(), "Calendar and Clock attribute must be in sync after alter");
+         BOOST_CHECK_MESSAGE( s->calendar().hybrid() == false, "expected calendar to be re-initialised to be real after alter");
       }
    }
 
@@ -356,15 +359,11 @@ BOOST_AUTO_TEST_CASE( test_alter_cmd )
       TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(s->absNodePath(),AlterCmd::CLOCK_DATE,"12.12.2012","")));
       clock_ptr v = s->clockAttr();
       BOOST_CHECK_MESSAGE( (v->day() == 12 && v->month() == 12 && v->year() == 2012) , "expected clock date to be 12.12.2012 but found " << v->toString());
-      BOOST_CHECK_MESSAGE( defs.get_edit_history(s->absNodePath()).size() == 5,
-                           "expected edit_history of 5 to be added but found " <<  defs.get_edit_history(s->absNodePath()).size());
+      BOOST_CHECK_MESSAGE( defs.get_edit_history(s->absNodePath()).size() == 3,
+                           "expected edit_history of 3 to be added but found " <<  defs.get_edit_history(s->absNodePath()).size());
 
-      // Check that calendar is not updated until suite is re-queued
+      // Check that calendar is updated after alter
       {
-         BOOST_CHECK_MESSAGE( s->calendar().day_of_month() == 1, "Calendar should *NOT* not be updated until suite is re-queued");
-         BOOST_CHECK_MESSAGE( s->calendar().month() == 1, "Calendar should *NOT* not be updated until suite is re-queued");
-         BOOST_CHECK_MESSAGE( s->calendar().year() == 2009, "Calendar should *NOT* not be updated until suite is re-queued");
-         TestHelper::invokeRequest(&defs,Cmd_ptr( new RequeueNodeCmd(s->absNodePath())));
          BOOST_CHECK_MESSAGE( s->calendar().day_of_month() == 12, "Calendar should be updated after re-queued");
          BOOST_CHECK_MESSAGE( s->calendar().month() == 12, "Calendar should be updated after re-queued");
          BOOST_CHECK_MESSAGE( s->calendar().year() == 2012, "Calendar should be updated after re-queued");
@@ -376,15 +375,11 @@ BOOST_AUTO_TEST_CASE( test_alter_cmd )
       TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(s->absNodePath(),AlterCmd::CLOCK_GAIN,"86400",""))); // add 24 hours in seconds
       clock_ptr v = s->clockAttr();
       BOOST_CHECK_MESSAGE( v && v->gain() == 86400 , "expected clock gain to be 3333 but found " << v->gain());
-      BOOST_CHECK_MESSAGE( defs.get_edit_history(s->absNodePath()).size() == 7,
-                           "expected edit_history of 7 to be added but found " <<  defs.get_edit_history(s->absNodePath()).size());
+      BOOST_CHECK_MESSAGE( defs.get_edit_history(s->absNodePath()).size() == 4,
+                           "expected edit_history of 4 to be added but found " <<  defs.get_edit_history(s->absNodePath()).size());
 
-      // Check that calendar is not updated until suite is re-queued
+      // Check that calendar is updated after the alter
       {
-         BOOST_CHECK_MESSAGE( s->calendar().day_of_month() == 12, "Calendar should *NOT* not be updated until suite is re-queued");
-         BOOST_CHECK_MESSAGE( s->calendar().month() == 12, "Calendar should *NOT* not be updated until suite is re-queued");
-         BOOST_CHECK_MESSAGE( s->calendar().year() == 2012, "Calendar should *NOT* not be updated until suite is re-queued");
-         TestHelper::invokeRequest(&defs,Cmd_ptr( new RequeueNodeCmd(s->absNodePath())));
          BOOST_CHECK_MESSAGE( s->calendar().day_of_month() == 13, "Calendar should be updated after re-queued");
          BOOST_CHECK_MESSAGE( s->calendar().month() == 12, "Calendar should be updated after re-queued");
          BOOST_CHECK_MESSAGE( s->calendar().year() == 2012, "Calendar should be updated after re-queued");
@@ -402,7 +397,7 @@ BOOST_AUTO_TEST_CASE( test_alter_cmd )
       BOOST_CHECK_MESSAGE( s->days().size() == 1, "expected 1 day to be added but found " <<  s->days().size());
       BOOST_CHECK_MESSAGE( s->timeVec().size() == 1, "expected 1 time to be added but found " <<  s->timeVec().size());
       BOOST_CHECK_MESSAGE( s->todayVec().size() == 1, "expected 1 today attr, to be added but found " <<  s->todayVec().size());
-      BOOST_CHECK_MESSAGE( defs.get_edit_history(s->absNodePath()).size() == 12, "expected edit_history of 12 to be added but found " <<  defs.get_edit_history(s->absNodePath()).size());
+      BOOST_CHECK_MESSAGE( defs.get_edit_history(s->absNodePath()).size() == 8, "expected edit_history of 8 to be added but found " <<  defs.get_edit_history(s->absNodePath()).size());
    }
    {
       TestStateChanged changed(s);
@@ -414,7 +409,7 @@ BOOST_AUTO_TEST_CASE( test_alter_cmd )
       BOOST_CHECK_MESSAGE( s->days().size() == 0, "expected 0 day       but found " <<  s->days().size());
       BOOST_CHECK_MESSAGE( s->timeVec().size() == 0, "expected 0 time   but found " <<  s->timeVec().size());
       BOOST_CHECK_MESSAGE( s->todayVec().size() == 0, "expected 0 today but found " <<  s->todayVec().size());
-      BOOST_CHECK_MESSAGE( defs.get_edit_history(s->absNodePath()).size() == 16, "expected edit_history of 16 to be added but found " <<  defs.get_edit_history(s->absNodePath()).size());
+      BOOST_CHECK_MESSAGE( defs.get_edit_history(s->absNodePath()).size() == 12, "expected edit_history of 12 to be added but found " <<  defs.get_edit_history(s->absNodePath()).size());
    }
 
    {   // test delete all
@@ -426,7 +421,7 @@ BOOST_AUTO_TEST_CASE( test_alter_cmd )
       TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(s->absNodePath(),AlterCmd::ADD_TIME,"23:00")));
       TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(s->absNodePath(),AlterCmd::ADD_TIME,"23:00")));
       TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(s->absNodePath(),AlterCmd::ADD_TODAY,"02:00")));
-      BOOST_CHECK_MESSAGE( defs.get_edit_history(s->absNodePath()).size() == 20, "expected edit_history of 20 to be added but found " <<  defs.get_edit_history(s->absNodePath()).size());
+      BOOST_CHECK_MESSAGE( defs.get_edit_history(s->absNodePath()).size() == 19, "expected edit_history of 19 to be added but found " <<  defs.get_edit_history(s->absNodePath()).size());
 
       TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(s->absNodePath(),AlterCmd::DEL_DATE)));
       TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(s->absNodePath(),AlterCmd::DEL_DAY)));

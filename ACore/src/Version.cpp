@@ -47,7 +47,7 @@ namespace ecf {
 // ********************************************************************
 const int Version::release_ = 4;
 const int Version::major_= 0;
-const std::string Version::minor_ = "0" ;
+const std::string Version::minor_ = "1" ;
 #ifdef DEBUG
 const std::string Version::TAG = " (debug)";  // Old tag: beta(debug)
 #else

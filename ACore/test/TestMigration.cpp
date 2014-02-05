@@ -47,7 +47,7 @@ BOOST_AUTO_TEST_CASE( test_migration_restore_1_9 )
    Calendar calendar;
    boost::gregorian::date theDate(2011,2,10);
    ptime time(theDate, hours(23) + minutes(59));
-   calendar.init(time, Calendar::HYBRID);  // Calendar type is derived from the clock attribute & hence is not persisted
+   calendar.init(time, Calendar::REAL);  // Calendar type is derived from the clock attribute & hence is not persisted
    Ecf::set_debug_equality(true);
 
 #ifdef UPDATE_TESTS

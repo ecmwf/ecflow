@@ -80,6 +80,7 @@ protected:
   static int port_max;
 public:
   static host* make_host(std::string name, std::string machine, int port);
+  virtual ~host_maker() {}
 };
 
 template<class T> 
@@ -93,6 +94,7 @@ public:
 class host_lister {
 public:
 	virtual void next(host&) = 0;
+	virtual ~host_lister() {}
 };
 
 
@@ -189,7 +191,7 @@ class host : public extent<host>
 	virtual str logfile() const ;
 	static int do_plug(node*,node*);
 	static int do_comp(node*,node*, 
-                            const std::string kind, const std::string meth);
+                            const std::string& kind, const std::string& meth);
 
 	// From timeout
 	void run();

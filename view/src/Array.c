@@ -248,10 +248,10 @@ static void new_layout(ArrayWidget tw,Boolean move_children,Boolean geometry)
 	Dimension width,height;
 	Dimension ww=0,wh=0,oww=0,owh=0;
 	int i;
-	int cnt = 20;
 
 	if(tw->array.round)
 	{
+	   int cnt = 20;
 		int m = 0, n = 0;
 		int xmarg = 0;
 		int ymarg = 0;

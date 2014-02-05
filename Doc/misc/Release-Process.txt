@@ -21,19 +21,30 @@ OLD Intranet site no longer active::
 Process
 ==================================================================
 
-0/ Check we are not in a high risk period ???
+0/ **** Check we are not in a high risk period ???
+
+0/ **** DO ***NOT*** switch current link ****************
+   **** User support will do this, during an arranged system session
+   **** This is because we have member states, using it for their operations.
+   
+   **** If we have any scripts in production that are using 
+   ****    /usr/local/apps/ecflow/current
+   **** These make break.
+   **** This is **very** important      
+   **** IDEALLY we need to educate member states *NOT* to use 
+   ****     /usr/local/apps/ecflow/current  
 
 0/ Update Documentation
    
-  - Internal wiki:  http://wedit.ecmwf.int/publications/manuals/ecflow/
-      cd $WK/Doc/online
-      make clean; make html
-      sitecopy -u ecflow
+  - https://software.ecmwf.int/wiki/display/ECFLOW/Change+History
 
-  - External Doc/Conflence:
-    Rely on Daniel, to update ??
-    Need automated way:
+  - Need automated way:
     - Just need to update python API.
+    - cd $WK/Doc/online; make clean; make html
+    
+0/ If you build on cct-login, then copy build to cca.
+
+   scp -r 4.0.1 emos@cca:/usr/local/apps/ecflow 
 
 0/ *Before* each release, make sure the ecflow tar file is
    copied to $SCRATCH and inform Daniel. This will allow
@@ -41,6 +52,8 @@ Process
 
    This is important, so that release, used internally is in
    sync with release given to users. 
+   
+   - ** Check the size of tar file **, ensure that have not included redundant files.
    <Inform Daniel>
    
 0/ Inform user support so that they can update the module functionality
@@ -69,6 +82,9 @@ Process
   
 0/ Tag the release
    This should now be automatic when using git flow:
+   i.e 
+       git flow start release 4.0.1
+       git flow finish release 4.0.1
    Alternatively use:
       git tag -a <release-number> -m "ecflow release-number"
       git tag

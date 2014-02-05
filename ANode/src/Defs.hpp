@@ -93,7 +93,6 @@ public:
     /// If ECF_CLIENT_EXE_PATH variable is added, child command will use this, otherwise
     /// will use ecflow_client, and assume this accessible on the path.
     /// Will not generated scripts for tasks with ECF_DUMMY_TASK specified.
-   void do_generate_scripts( const std::map<std::string,std::string>& override) const;
    void generate_scripts() const;
 
    /// Update calendar and time dependent variables. This must be called by the polling mechanism,
@@ -289,6 +288,7 @@ public:
    void read_history(const std::string& line,const std::vector<std::string>& lineTokens);
    bool compare_edit_history(const Defs&) const;
 private:
+   void do_generate_scripts( const std::map<std::string,std::string>& override) const;
    std::string write_state() const;
    void collate_defs_changes_only(DefsDelta&) const;
    void setupDefaultEnv();

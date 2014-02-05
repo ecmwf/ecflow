@@ -129,6 +129,12 @@ public:
    /// We use -1 to mean leave suspended state as is
    virtual void requeue(bool resetRepeats, int clear_suspended_in_child_nodes);
 
+   /// Re queue the time based attributes only.
+   /// Used as a part of Alter (clock) functionality.
+   /// Note: Under the hybrid clock this will not mark node as complete, (if we have day,date,cron attributes)
+   /// Since alter clock, should not change node state. This is left for user to re-queue the suite
+   virtual void requeue_time_attrs();
+
    /// Set a flag that ensures that a node with a single time dependency is NOT automatically re-queued
    /// This is applied *up* the hierarchy until we *hit* a node with a repeat or Cron attribute
    /// This is done since repeat and cron can be used to reset the NO_REQUE_IF_SINGLE_TIME_DEP flags
@@ -215,7 +221,7 @@ public:
    /// The State represent the life cycle changes of a node.
    NState::State state() const { return state_.first.state(); }
 
-   /// return the state and duration time when the state change happened
+   /// return the state and duration time(relative to when suite was begun) when the state change happened
    std::pair<NState,boost::posix_time::time_duration> get_state() const { return state_;}
 
    /// Set the state, this can have side affects. To handle state changes
@@ -234,6 +240,10 @@ public:
    /// Set state only, has no side effects
    void setStateOnly(NState::State s, bool force = false);
    virtual void setStateOnlyHierarchically(NState::State s, bool force = false) { setStateOnly(s,force); }
+
+   /// This returns the time of state change: (relative to real time when the suite calendar was begun)
+   /// The returned time is *real time/computer UTC time* and *not* suite real time.
+   boost::posix_time::ptime state_change_time() const;
 
    /// Sets the default status the node should have when the begin/re-queue is called
    /// *Distinguish* between adding a def status and changing it.
@@ -382,10 +392,6 @@ public:
    // Change functions: ================================================================
    /// returns true the change was made else false, Can throw std::runtime_error for parse errors
    void changeVariable(const std::string& name,const std::string& value);
-   void changeClockType(const std::string& theType);
-   void changeClockDate(const std::string& theDate);
-   void changeClockGain(const std::string& theIntGain);
-   void changeClockSync();
    void changeEvent(const std::string& name,const std::string& setOrClear = "");
    void changeEvent(const std::string& name,bool value);
    void changeMeter(const std::string& name,const std::string& value);
@@ -715,7 +721,7 @@ private:
          if (time_dep_attrs_)  time_dep_attrs_->set_node(this);
          if (child_attrs_) child_attrs_->set_node(this);
          if (misc_attrs_) misc_attrs_->set_node(this);
-         for(std::vector<limit_ptr>::iterator i = limitVec_.begin(); i!= limitVec_.end(); i++)  (*i)->set_node(this);
+         for(std::vector<limit_ptr>::iterator i = limitVec_.begin(); i!= limitVec_.end(); ++i)  (*i)->set_node(this);
       }
    }
 };

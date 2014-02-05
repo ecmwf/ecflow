@@ -14,9 +14,17 @@
 # code for testing addition and deletion 
 #
 import ecflow
-    
+import sys
+import os
+ 
 if __name__ == "__main__":
     
+    print "####################################################################"
+    print "Running ecflow version " + ecflow.Client().version()  
+    print "PYTHONPATH: " + str(os.environ['PYTHONPATH'].split(os.pathsep))
+    print "sys.path:   " + str(sys.path)
+    print "####################################################################"
+ 
     #===========================================================================
     # Defs: add and delete *USER* variables
     #===========================================================================

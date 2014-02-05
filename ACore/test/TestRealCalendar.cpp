@@ -260,7 +260,7 @@ BOOST_AUTO_TEST_CASE( test_REAL_calendar_hybrid_date )
 
 	// init the calendar to 2009, Feb, 10th,  0 minutes past midnight
 	Calendar calendar;
-	calendar.init(ptime(date(2010,2,10), minutes(0)));
+	calendar.init(ptime(date(2010,2,10), minutes(0)), Calendar::HYBRID);
 
 
 	std::string expectedDate = "2010-Feb-10";
@@ -325,7 +325,7 @@ BOOST_AUTO_TEST_CASE( test_REAL_day_changed_for_hybrid )
 
 	// init the calendar to 2009, Feb, 10th,  0 minutes past midnight
 	Calendar calendar;
-	calendar.init(ptime(date(2010,2,10), minutes(0)));
+	calendar.init(ptime(date(2010,2,10), minutes(0)),Calendar::HYBRID);
  	BOOST_CHECK_MESSAGE(calendar.hybrid(),"calendar type should be real");
 
  	// HYBRID calendars allow for day change but not date.

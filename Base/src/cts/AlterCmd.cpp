@@ -320,10 +320,10 @@ STC_Cmd_ptr AlterCmd::doHandleRequest(AbstractServer* as) const
       try {
          switch (change_attr_type_) {
             case AlterCmd::VARIABLE:    node->changeVariable(name_,value_); break;
-            case AlterCmd::CLOCK_TYPE:  node->changeClockType(name_); break;  // node must be a suite, value must [hybrid|real| virtual]
-            case AlterCmd::CLOCK_DATE:  node->changeClockDate(name_); break;  // Expecting day.month.year: node must be a suite, value must [hybrid|real| virtual]
-            case AlterCmd::CLOCK_GAIN:  node->changeClockGain(name_); break;  // node must be a suite, value must be int
-            case AlterCmd::CLOCK_SYNC:  node->changeClockSync(); break;       // node must be a suite, sync clock with computer
+            case AlterCmd::CLOCK_TYPE:  node->suite()->changeClockType(name_); break;  // node must be a suite, value must [hybrid|real| virtual]
+            case AlterCmd::CLOCK_DATE:  node->suite()->changeClockDate(name_); break;  // Expecting day.month.year: node must be a suite, value must [hybrid|real| virtual]
+            case AlterCmd::CLOCK_GAIN:  node->suite()->changeClockGain(name_); break;  // node must be a suite, value must be int
+            case AlterCmd::CLOCK_SYNC:  node->suite()->changeClockSync(); break;       // node must be a suite, sync clock with computer
             case AlterCmd::EVENT:       node->changeEvent(name_,value_);break;  // if value is empty just set, [1|0] or name [set | clear]
             case AlterCmd::METER:       node->changeMeter(name_,value_); break;
             case AlterCmd::LABEL:       node->changeLabel(name_,value_); break;
@@ -374,7 +374,7 @@ STC_Cmd_ptr AlterCmd::doHandleRequest(AbstractServer* as) const
 const char* AlterCmd::arg()  { return CtsApi::alterArg();}
 const char* AlterCmd::desc() {
             /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
-   return   "Alter the node according to the options.\n"
+   return  "Alter the node according to the options.\n"
             "To add/delete/change server variables use '/' for the path.\n"
             "  arg1 = [ delete | change | add | set_flag | clear_flag]\n"
             "           one option must be specified\n"
@@ -383,7 +383,9 @@ const char* AlterCmd::desc() {
             "             label | trigger | complete | repeat | limit | inlimit | limit_path | zombie ]\n"
             "         For change:\n"
             "           [ variable | clock_type | clock_gain | clock_date | clock_sync  | event | meter | label |\n"
-            "             trigger  | complete   | repeat     | limit_max  | limit_value | defstatus  ]\n"
+            "             trigger  | complete   | repeat     | limit_max  | limit_value | defstatus ]\n"
+            "             *NOTE* If the clock is changed, then the suite will need to be re-queued in order for\n"
+            "             the change to take effect fully.\n"
             "         For add:\n"
             "           [ variable | time | today | date | day | zombie ]\n"
             "         For set_flag and clear_flag:\n"
@@ -397,8 +399,6 @@ const char* AlterCmd::desc() {
             "         specifies the new value only used for 'change'\n"
             "         values with spaces must be quoted\n"
             "  arg5 = paths : At lease one path required. The paths must start with a leading '/' character\n\n"
-            "NOTE: If the clock is changed, then the suite will need to be re-queued in order for the change\n"
-            "to take effect."
             ;
 }
 
@@ -598,7 +598,6 @@ void AlterCmd::createDelete( Cmd_ptr& cmd, const std::vector<std::string>& optio
 			}
 			case AlterCmd::DEL_EVENT:    {
             if (!name.empty()) {
-
                Event check(name);  // will throw if not valid
             }
 			   break;
@@ -656,7 +655,6 @@ void AlterCmd::createDelete( Cmd_ptr& cmd, const std::vector<std::string>& optio
             }
             cmd = Cmd_ptr( new AlterCmd(altered_path,theAttrType, name, path_value  ) );
             return;
-            break;
          }
          case AlterCmd::DELETE_ATTR_ND: break;
  		}

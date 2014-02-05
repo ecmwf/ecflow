@@ -51,9 +51,27 @@ static void             insert_new_node();
 static void             delete_node();*/
 static void Layout(Widget,long*,long*);
 static void             Redisplay();
-static void compute_rect(SimpleTreeWidget,Node*,int,int,int,int,int,XRectangle*);
+static void compute_rect(SimpleTreeWidget,NodeStruct*,int,int,int,int,int,XRectangle*);
 static void set_positions(SimpleTreeWidget,long*,long*);
-/* static void change_vertical(SimpleTreeWidget tw, Node *w,Boolean v); ??? */
+/* static void change_vertical(SimpleTreeWidget tw, NodeStruct *w,Boolean v); ??? */
+#ifdef linux
+/* putting this into comments makes ctrl-left button for collector
+   disappear !! */
+static char defaultTranslations[] = "\
+ Shift<Btn5Down>: increment(1)\n       Shift<Btn4Down>: increment(-1)  \n\
+      <Btn5Down>: increment(10)\n           <Btn4Down>: increment(-10) \n\
+<BtnDown>:DrawingAreaInput()\n\
+<BtnUp>:DrawingAreaInput()\n\
+<Key>osfActivate:DrawingAreaInput()\n\
+~s ~m ~a <Key>Return:DrawingAreaInput()\n\
+~s ~m ~a <Key>space:DrawingAreaInput()\n\
+<Key>F1:DrawingAreaInput()\n\
+<Key>F2:DrawingAreaInput()\n";
+#else
+
+#define defaultTranslations XmInheritTranslations
+
+#endif
 
 static XtResource resources[] = {
 	{XtNhorizontalSpace,XtCSpace,XtRDimension,sizeof(Dimension),
@@ -62,6 +80,12 @@ static XtResource resources[] = {
 	XtOffset(SimpleTreeWidget, simpletree.v_min_space), XtRString,"2"  },
 
 };
+
+// https://software.ecmwf.int/issues/browse/SUP-646
+static void xincrement();
+static XtActionsRec actionsList[] = {
+    { "increment",(XtActionProc) xincrement},
+}; // 
 
 SimpleTreeClassRec simpletreeClassRec = {
 	{
@@ -75,8 +99,8 @@ SimpleTreeClassRec simpletreeClassRec = {
 	Initialize,                       /* initialize         */
 	NULL,                             /* initialize_hook    */
 	XtInheritRealize,                 /* realize            */
-	NULL,                             /* actions            */
-        0,                                /* num_actions        */
+	actionsList, /*NULL,                 actions            */
+        XtNumber(actionsList),            /* num_actions        */
 	resources,                        /* resources          */
 	XtNumber(resources),              /* num_resources      */
 	NULLQUARK,                        /* xrm_class          */
@@ -96,7 +120,8 @@ SimpleTreeClassRec simpletreeClassRec = {
 	NULL,                             /* accept_focus       */
 	XtVersion,                        /* version            */
 	NULL,                             /* callback_private   */
-	XtInheritTranslations,            /* tm_table           */
+	defaultTranslations,              /* tm_table           */
+	/* XtInheritTranslations,            tm_table           */
 	NULL,                             /* query_geometry     */
 	XtInheritDisplayAccelerator,      /* display_accelerator*/
 	NULL,                             /* extension          */
@@ -178,7 +203,7 @@ SimpleTreeWidget request, SimpleTreeWidget new)
 }
 
 
-static int first_kid(SimpleTreeWidget w,Node *n)
+static int first_kid(SimpleTreeWidget w,NodeStruct *n)
 {
 	int i;
 	for(i=0;i<n->kcnt;i++)
@@ -187,7 +212,7 @@ static int first_kid(SimpleTreeWidget w,Node *n)
 	return -1;
 }
 
-static int last_kid(SimpleTreeWidget w,Node *n)
+static int last_kid(SimpleTreeWidget w,NodeStruct *n)
 {
 	int i;
 
@@ -223,7 +248,7 @@ static void Redisplay (SimpleTreeWidget w, XEvent *event, Region region)
 	int lkid;
 
 #if 0
-	Node    *child;
+	NodeStruct    *child;
 	XEvent  ev;
 	XmRegion r = (XmRegion)region;
 
@@ -250,7 +275,7 @@ static void Redisplay (SimpleTreeWidget w, XEvent *event, Region region)
 
 	for (i = 0; i < w -> simplebase.count; i++)
 	{
-		Node *child = w -> simplebase.nodes + i;
+		NodeStruct *child = w -> simplebase.nodes + i;
 
 		fkid = first_kid(w,child);
 
@@ -355,7 +380,7 @@ static void Layout(Widget w,long *maxWidth,long *maxHeight)
 
 	for(i=0;i<tw->simplebase.count;i++)
 	{
-		Node *w = tw->simplebase.nodes + i;
+		NodeStruct *w = tw->simplebase.nodes + i;
 		h_max = MAX(h_max,w->r.height); /* just a try */
 		w_max = MAX(w_max,w->r.width);
 	}
@@ -369,7 +394,7 @@ static void Layout(Widget w,long *maxWidth,long *maxHeight)
 	{
 		for(i=0;i<tw->simplebase.count;i++)
 		{
-			Node *w = tw->simplebase.nodes + i;
+			NodeStruct *w = tw->simplebase.nodes + i;
 			if(w->managed && (w->pcnt == 0))
 			{
 				XRectangle r;
@@ -390,7 +415,7 @@ static void Layout(Widget w,long *maxWidth,long *maxHeight)
 			Boolean v = (*maxWidth == 0);
 			for(i=0;i<tw->simplebase.count;i++)
 			{
-				Node *w = tw->simplebase.nodes + i;
+				NodeStruct *w = tw->simplebase.nodes + i;
 				if(w->managed && (w->pcnt == 0))
 					change_vertical(tw,w,!v);
 			}
@@ -403,7 +428,7 @@ static void Layout(Widget w,long *maxWidth,long *maxHeight)
 }
 
 #if 0
-static void change_vertical(SimpleTreeWidget tw, Node *w,Boolean v)
+static void change_vertical(SimpleTreeWidget tw, NodeStruct *w,Boolean v)
 {
 	int i;
 	if(w->misc[LAYOUT] != v )
@@ -432,7 +457,7 @@ static void union_rect(XRectangle *r1,XRectangle *r2,XRectangle *r3)
 }
 
 
-static void compute_rect(SimpleTreeWidget tw,Node *w,
+static void compute_rect(SimpleTreeWidget tw,NodeStruct *w,
 	int x,int y,int dx,int dy,int h,XRectangle *rect)
 {
 	int i;
@@ -450,7 +475,7 @@ static void compute_rect(SimpleTreeWidget tw,Node *w,
 
 	for(i = 0; i < w->kcnt; i++)
 	{
-		Node *z = &KIDS(tw,w,i);
+		NodeStruct *z = &KIDS(tw,w,i);
 		if(z->managed)
 		{
 			if(z->kcnt) /* && !w->misc[LAYOUT]) */
@@ -461,7 +486,7 @@ static void compute_rect(SimpleTreeWidget tw,Node *w,
 
 	for(i = 0; i < w->kcnt; i++)
 	{
-		Node *z = &KIDS(tw,w,i);
+		NodeStruct *z = &KIDS(tw,w,i);
 		if(z->managed)
 		{
 			XRectangle r;
@@ -498,7 +523,7 @@ static void set_positions(SimpleTreeWidget tw,long *maxWidth, long *maxHeight)
 
 	for(i=0;i<tw->simplebase.count;i++)
 	{
-		Node *w = tw->simplebase.nodes + i;
+		NodeStruct *w = tw->simplebase.nodes + i;
 
 		if(w->managed)
 		{
@@ -536,7 +561,7 @@ static void set_positions(SimpleTreeWidget tw,long *maxWidth, long *maxHeight)
 void NodeTreeFlip(Widget _w,int node)
 {
     SimpleTreeWidget w = (SimpleTreeWidget)_w;
-	Node *p = w->simplebase.nodes + node;
+	NodeStruct *p = w->simplebase.nodes + node;
 	if( node < 0 || node >= w->simplebase.count) return;
 	p->misc[LAYOUT] = !p->misc[LAYOUT];
 	NodeNewSize(_w,node);
@@ -549,4 +574,83 @@ Widget CreateTree(Widget par,char *nam,ArgList al,int ac)
 
 static void Print (SimpleTreeWidget w, FILE *f)
 {
+}
+
+static void xincrement (h, event, args, n_args)
+Widget   h;
+XEvent        *event;
+char          *args[];
+int            n_args;
+{
+#ifdef MOTIF
+#define SetArg(a,b)  XtSetArg(al[ac],a,b);ac++
+#define GetValues(w) XtGetValues(w,al,ac);ac=0
+#define SetValues(w) XtSetValues(w,al,ac);ac=0
+
+  Widget clip = XtParent(h);
+  Widget swin;
+  Widget v_scroll;
+
+  int ac = 0, arg;
+  Position        x_parent,y_parent, dh=0, dv=0;  
+  Arg al[5];
+
+  if(!clip) return;
+  swin = XtParent(clip);
+
+  if(!(swin = XtParent(swin))) return;
+  while (swin && !XmIsScrolledWindow(swin)) {
+    swin = XtParent(swin); 
+  }
+
+  /* printf("# SimpleTree swin %s\n",XtName(swin));  */
+  /* while (clip) { */
+  /*   printf("# SimpleTree clip %s\n",XtName(clip));  */
+  /*   clip = XtParent(clip);  */
+  /* } */
+  if(!swin) return;
+  {
+    int min, max, value, slider_size, inc, page_inc;
+    ac = 0;
+    XtSetArg(al[ac],XmNverticalScrollBar, &v_scroll );ac++;
+    XtGetValues(swin,al,ac);
+  
+    ac = 0;
+    XtSetArg(al[ac], XmNminimum,&min); ac++;
+    XtSetArg(al[ac], XmNmaximum,&max); ac++;   
+    XtGetValues(v_scroll, al, ac);
+    XmScrollBarGetValues(v_scroll,&value,&slider_size,&inc,&page_inc);
+
+    ac = 0;
+    XtSetArg(al[ac],XmNx,&x_parent);ac++;
+    XtSetArg(al[ac],XmNy,&y_parent);ac++;
+    XtGetValues(swin,al,ac);
+
+    arg = atoi(args[0]);
+    dh = (abs(arg) > 5) ? page_inc : inc;
+
+    if (arg < 0) {
+      if (value - dh < min)
+        value = min;
+      else
+        value -= dh;
+    } else {
+      if (value + dh > max)
+        value = max;
+      else
+        value += dh;
+    }
+
+    {
+      Position x = x_parent-dh;
+      Position y = y_parent-dv;
+
+      ac = 0;
+      XtSetArg(al[ac],XmNx,x);ac++;
+      XtSetArg(al[ac],XmNy,y);ac++;
+      XtSetValues(swin,al,ac);
+      XmScrollBarSetValues(v_scroll,value,slider_size, inc, page_inc,TRUE);
+    }
+  }
+#endif
 }

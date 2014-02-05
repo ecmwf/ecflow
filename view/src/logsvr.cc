@@ -170,8 +170,9 @@ tmp_file logsvr::getfile(std::string name)
 		if(fwrite(buf,1,len,f) != len)
 		{
 			char buf[2048];
-			sprintf(buf,"Write errot on %s",out.c_str());
-			gui::syserr(buf); 
+			sprintf(buf,"Write error on %s",out.c_str());
+			gui::syserr(buf);
+			fclose(f);
 			return empty;
 		}
 		total += len;

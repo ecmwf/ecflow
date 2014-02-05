@@ -684,6 +684,22 @@ bool ecf_concrete_node<Node>::hasTime() {
 }
 
 template<>
+bool ecf_concrete_node<Suite>::hasTime() {
+  return owner_ ? (owner_->timeVec().size() > 0 ||
+                   owner_->todayVec().size() > 0 ||
+                   owner_->crons().size() > 0) 
+    : false;
+}
+
+template<>
+bool ecf_concrete_node<Family>::hasTime() {
+  return owner_ ? (owner_->timeVec().size() > 0 ||
+                   owner_->todayVec().size() > 0 ||
+                   owner_->crons().size() > 0) 
+    : false;
+}
+
+template<>
 bool ecf_concrete_node<Node>::hasTrigger() {
   return owner_ ? (owner_->triggerAst() || 
                    owner_->completeAst()) 
@@ -696,6 +712,21 @@ bool ecf_concrete_node<Node>::hasDate() {
                    owner_->dates().size() > 0) 
     : false;
 }
+
+template<>
+bool ecf_concrete_node<Suite>::hasDate() {
+  return owner_ ? (owner_->days().size() > 0 || 
+                   owner_->dates().size() > 0) 
+    : false;
+}
+
+template<>
+bool ecf_concrete_node<Family>::hasDate() {
+  return owner_ ? (owner_->days().size() > 0 || 
+                   owner_->dates().size() > 0) 
+    : false;
+}
+
 
 template<> ecf_concrete_node<const Event>::
 ecf_concrete_node(const Event* owner,ecf_node* parent, const char c) 
@@ -787,15 +818,22 @@ const std::string ecf_concrete_node<const std::pair<std::string, std::string> >
 template<> int ecf_concrete_node<const Event>::status() const
 { return owner_ ? owner_->value() : 0; }
 
-template<> int ecf_concrete_node<Suite>::status_time() const
-{ return 0; }
+template<> boost::posix_time::ptime ecf_concrete_node<Suite>::status_time() const
+{   
+  if (owner_) return owner_->state_change_time(); 
+  return boost::posix_time::ptime(); 
+}
 
-template<> int ecf_concrete_node<Node>::status_time() const
+template<> boost::posix_time::ptime ecf_concrete_node<Family>::status_time() const
+{   
+  if (owner_) return owner_->state_change_time(); 
+  return boost::posix_time::ptime(); 
+}
+
+template<> boost::posix_time::ptime ecf_concrete_node<Node>::status_time() const
 { 
-  if (owner_) { 
-     return owner_->get_state().second.total_seconds();
-  }
-  return 0; 
+  if (owner_) return owner_->state_change_time(); 
+  return boost::posix_time::ptime(); 
 }
 
 template<> int ecf_concrete_node<Suite>::status() const
@@ -953,11 +991,10 @@ const std::string & ExpressionWrapper::toString() const
 }
 
 void ecf_node::delvars() {
-  std::vector<boost::shared_ptr<ecf_node> >::iterator run, mem;
-  for (size_t i = 0; i < kids_.size(); i++) {
-    if (kids_[i]->type() == NODE_VARIABLE) {
-      kids_.erase(kids_.begin() + i);
-    } 
+   for (size_t i = 0; i < kids_.size(); i++) {
+      if (kids_[i]->type() == NODE_VARIABLE) {
+         kids_.erase(kids_.begin() + i);
+      }
    }
 }
 
@@ -1101,7 +1138,7 @@ void ecf_concrete_node<Defs>::update(const Defs* n,
 
     XECFDEBUG {
       for (std::vector<suite_ptr>::const_iterator i = n->suiteVec().begin();
-           i != n->suiteVec().end(); i++) {
+           i != n->suiteVec().end(); ++i) {
         std::cout << "suite name " << (*i)->name() << "\n";
       }}
     serv.redraw(true);   

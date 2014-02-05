@@ -97,7 +97,7 @@ public:
 		HYBRID      // date does not change, but will support day change. See Above.
 	};
 
-	/// Defaults to the HYBRID clock
+	/// Defaults to the REAL clock
 	Calendar();
 	Calendar(const Calendar&);
 	Calendar& operator=( const Calendar&);
@@ -110,7 +110,7 @@ public:
   	void init(Clock_t clock, bool startStopWithServer = false);
 
    // for test init and begin calendar
-   void init(const boost::posix_time::ptime& time, Clock_t clock = Calendar::HYBRID, bool startStopWithServer = false);
+   void init(const boost::posix_time::ptime& time, Clock_t clock = Calendar::REAL, bool startStopWithServer = false);
 
    /// Start the Calendar.  Parameter time can include gain.
    void begin(const boost::posix_time::ptime& time);
@@ -145,6 +145,12 @@ public:
  	// duration since last call to init, essentially suite duration
 	const boost::posix_time::time_duration& duration() const { return duration_;}
 
+	/// return real time, when the calendar was begun/initialised.
+	/// This is used to update the duration_, which is recorded for each state change in the node
+	/// Hence to when we can compute when a state change occurred by using:
+	///   boost::posix_time::ptime time_of_state_change = begin_time() + node->get_state().second(duration)
+   const boost::posix_time::ptime& begin_time() const { return initLocalTime_;}
+
  	/// return the date, for real calendar this corresponds to the date on suiteTime_
  	/// for hybrid,  the date does not change, and hence we return date for initTime_
 	boost::gregorian::date date() const;
@@ -162,6 +168,9 @@ public:
    void read_state(const std::string& line,const std::vector<std::string>& lineTokens);
 
 	bool checkInvariants(std::string& errorMsg) const;
+
+	// allow Suite memento to update calendar type
+	void set_clock_type( Clock_t  ct) { ctype_ = ct;}
 
 	/// Will return either second_clock::universal_time()/UTC ( the other alternative is second_clock::local_time() )
 	/// This is because boost deadline timer is based on UTC clock
@@ -185,13 +194,13 @@ private:
 	void assign( const Calendar& rhs);
 
 	Clock_t                          ctype_;      // *NOT* persisted: can be derived from suite clock attribute
- 	boost::posix_time::ptime         initTime_;   // When calendar was started
+ 	boost::posix_time::ptime         initTime_;   // When calendar was started, suite time(could be in the past OR real time)
  	boost::posix_time::ptime         suiteTime_;  // The suite time, ** IGNORE for HYBRID **
-	boost::posix_time::time_duration duration_;   // duration since last call to init, for kept for reference ONLY
+	boost::posix_time::time_duration duration_;   // duration since last call to init/begin, used on Node for late and autocancel
  	bool                             dayChanged_;
  	bool                             startStopWithServer_; //*NOT* persisted: false means real time calendar,  can be derived from suite clock attribute
 
-  	boost::posix_time::ptime         initLocalTime_;   // Real Time: When calendar was started
+  	boost::posix_time::ptime         initLocalTime_;   // Real Time: When calendar was started, used to work out duration_
  	boost::posix_time::ptime         lastTime_;        // Real Time: Used to calculate calendarIncrement
 
 	boost::posix_time::time_duration calendarIncrement_;

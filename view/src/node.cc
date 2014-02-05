@@ -47,6 +47,7 @@
 #include "str.h"
 #include "option.h"
 #include "array.h"
+#include <Suite.hpp>
 
 class node_data {
 
@@ -506,29 +507,29 @@ node* node::find(ecf_node* n)
 }
 
 static node* finder(const std::string& name, const node* start) {
-  node *k = 0;
-  node *n = const_cast<node*> (start);
-  while (n) {
-    if (n->type() == NODE_TRIGGER || n->type() == NODE_COMPLETE) {
-      if (n->definition() == name)	
-	return n;
-      else if (n->__node__()->name() == name)	
-	return n;   
-      else if (n->__node__()->toString() == name)	
-	return n;   
-      ecf_node *owner = n->__node__();
-      if (owner) {
-	ExpressionWrapper *exp = dynamic_cast<ecf_concrete_node<ExpressionWrapper>*> (owner)
-	  ->get();
-	if (exp && exp->expression() == name)
-	  return n;
+   node *n = const_cast<node*> (start);
+   while (n) {
+      if (n->type() == NODE_TRIGGER || n->type() == NODE_COMPLETE) {
+         if (n->definition() == name)
+            return n;
+         else if (n->__node__()->name() == name)
+            return n;
+         else if (n->__node__()->toString() == name)
+            return n;
+         ecf_node *owner = n->__node__();
+         if (owner) {
+            ExpressionWrapper *exp = dynamic_cast<ecf_concrete_node<ExpressionWrapper>*> (owner)
+	           ->get();
+            if (exp && exp->expression() == name)
+               return n;
+         }
       }
-    }
-    if ((k = finder(name, n->kids())))
-      return k;
-    n = n->next();
-  }
-  return 0;
+      node *k = 0;
+      if ((k = finder(name, n->kids())))
+         return k;
+      n = n->next();
+   }
+   return 0;
 }
 
 node* node::find_trigger(const std::string& name) const
@@ -793,11 +794,25 @@ bool node::is_my_parent(node* p) const
   return false;
 }
 
+#include <boost/date_time/posix_time/posix_time.hpp>
 void node::info(std::ostream& f)
 {
+  using namespace boost::posix_time;
+  using namespace boost::gregorian;
+
   f << "name     : " << name() << "\n";
   f << "type     : " << type_name() << "\n";
   f << "status   : " << status_name() << "\n";
+
+  if (owner_) {
+    // if (owner_->type() == NODE_TASK ) 
+    {
+       boost::posix_time::ptime state_change_time = owner_->status_time();
+       if (!state_change_time.is_special()) {
+          f << "at       : " << to_simple_string(state_change_time) << "\n"; // https://software.ecmwf.int/issues/browse/SUP-649
+       }
+    }
+  }
   f << "----------\n";
   //    1234567890
 }

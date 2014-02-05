@@ -57,6 +57,14 @@ bool AstTop::evaluate() const
 	return false;
 }
 
+bool AstTop::check(std::string& error_msg) const
+{
+   if (root_) {
+      return root_->check(error_msg);
+   }
+   return true;
+}
+
 std::ostream& AstTop::print(std::ostream& os) const
 {
 	Indentor in;
@@ -116,6 +124,13 @@ void AstRoot::accept(ExprAstVisitor& v)
 	v.visitRoot(this);
 	left_->accept(v);
 	if (right_) right_->accept(v); // right_ is empty for Not
+}
+
+bool AstRoot::check(std::string& error_msg) const
+{
+   if (left_ && !left_->check(error_msg)) return false;
+   if (right_ && !right_->check(error_msg)) return false;
+   return true;
 }
 
 void AstRoot::addChild( Ast* n )
@@ -253,6 +268,8 @@ std::string AstPlus::expression(bool why) const
  	return ret;
 }
 
+////////////////////////////////////////////////////////////////////////////////////
+
 void AstMinus::accept(ExprAstVisitor& v)
 {
 	AstRoot::accept(v);
@@ -266,6 +283,7 @@ AstMinus* AstMinus::clone() const
    if (right_) ast->addChild( right_->clone() );
    return ast;
 }
+
 std::ostream& AstMinus::print( std::ostream& os ) const {
 	Indentor::indent( os ) << "# MINUS value(" << value() << ")";
 	if (!left_) os << " # ERROR has no left_";
@@ -291,11 +309,14 @@ std::string AstMinus::expression(bool why) const
  	return ret;
 }
 
+////////////////////////////////////////////////////////////////////////////////////
+
 void AstDivide::accept(ExprAstVisitor& v)
 {
 	AstRoot::accept(v);
 	v.visitDivide(this);
 }
+
 AstDivide* AstDivide::clone() const
 {
    AstDivide* ast = new AstDivide();
@@ -303,13 +324,32 @@ AstDivide* AstDivide::clone() const
    if (right_) ast->addChild( right_->clone() );
    return ast;
 }
+
+bool AstDivide::check(std::string& error_msg) const
+{
+   if (right_ && right_->value() == 0) {
+      error_msg = "Divide by zero in trigger expression";
+      return false;
+   }
+   return true;
+}
+
+int AstDivide::value() const {
+   if (right_->value() == 0) {
+      log(Log::ERR,"Divide by zero in trigger/complete expression");
+      return 0;
+   }
+   return (left_->value() / right_->value()) ;
+}
+
 std::ostream& AstDivide::print( std::ostream& os ) const {
 	Indentor::indent( os ) << "# DIVIDE value(" << value() << ")";
-	if (!left_) os << " # ERROR has no left_";
+	if (!left_)  os << " # ERROR has no left_";
 	if (!right_) os << " # ERROR has no right_";
 	os << "\n";
 	return AstRoot::print( os );
 }
+
 void AstDivide::print_flat(std::ostream& os,bool add_bracket) const {
    if (add_bracket) os << "(";
    if (left_) left_->print_flat(os,add_bracket);
@@ -317,6 +357,7 @@ void AstDivide::print_flat(std::ostream& os,bool add_bracket) const {
    if (right_) right_->print_flat(os,add_bracket);
    if (add_bracket) os << ")";
 }
+
 std::string AstDivide::expression(bool why) const
 {
  	std::string ret;
@@ -326,11 +367,14 @@ std::string AstDivide::expression(bool why) const
  	return ret;
 }
 
+////////////////////////////////////////////////////////////////////////////////////
+
 void AstMultiply::accept(ExprAstVisitor& v)
 {
 	AstRoot::accept(v);
 	v.visitMultiply(this);
 }
+
 AstMultiply* AstMultiply::clone() const
 {
    AstMultiply* ast = new AstMultiply();
@@ -338,13 +382,15 @@ AstMultiply* AstMultiply::clone() const
    if (right_) ast->addChild( right_->clone() );
    return ast;
 }
+
 std::ostream& AstMultiply::print( std::ostream& os ) const {
 	Indentor::indent( os ) << "# MULTIPLY value(" << value() << ")";
-	if (!left_) os << " # ERROR has no left_";
+	if (!left_)  os << " # ERROR has no left_";
 	if (!right_) os << " # ERROR has no right_";
 	os << "\n";
 	return AstRoot::print( os );
 }
+
 void AstMultiply::print_flat(std::ostream& os,bool add_bracket) const {
    if (add_bracket) os << "(";
    if (left_) left_->print_flat(os,add_bracket);
@@ -352,6 +398,7 @@ void AstMultiply::print_flat(std::ostream& os,bool add_bracket) const {
    if (right_) right_->print_flat(os,add_bracket);
    if (add_bracket) os << ")";
 }
+
 std::string AstMultiply::expression(bool why) const
 {
  	std::string ret;
@@ -363,11 +410,71 @@ std::string AstMultiply::expression(bool why) const
 
 ////////////////////////////////////////////////////////////////////////////////////
 
+void AstModulo::accept(ExprAstVisitor& v)
+{
+   AstRoot::accept(v);
+   v.visitModulo(this);
+}
+
+AstModulo* AstModulo::clone() const
+{
+   AstModulo* ast = new AstModulo();
+   if (left_) ast->addChild( left_->clone() );
+   if (right_) ast->addChild( right_->clone() );
+   return ast;
+}
+
+bool AstModulo::check(std::string& error_msg) const
+{
+   if (right_ && right_->value() == 0) {
+      error_msg = "Modulo by zero in trigger expression";
+      return false;
+   }
+   return true;
+}
+
+int AstModulo::value() const
+{
+   if (right_->value() == 0) {
+      log(Log::ERR,"Modulo by zero in trigger/complete expression");
+      return 0;
+   }
+   return (left_->value() % right_->value());
+}
+
+std::ostream& AstModulo::print( std::ostream& os ) const {
+   Indentor::indent( os ) << "# Modulo value(" << value() << ")";
+   if (!left_) os << " # ERROR has no left_";
+   if (!right_) os << " # ERROR has no right_";
+   os << "\n";
+   return AstRoot::print( os );
+}
+
+void AstModulo::print_flat(std::ostream& os,bool add_bracket) const {
+   if (add_bracket) os << "(";
+   if (left_) left_->print_flat(os,add_bracket);
+   os << " % ";
+   if (right_) right_->print_flat(os,add_bracket);
+   if (add_bracket) os << ")";
+}
+
+std::string AstModulo::expression(bool why) const
+{
+   std::string ret;
+   if (left_) ret += left_->expression(why);
+   ret  += " % ";
+   if (right_) ret += right_->expression(why);
+   return ret;
+}
+
+////////////////////////////////////////////////////////////////////////////////////
+
 void AstAnd::accept(ExprAstVisitor& v)
 {
 	AstRoot::accept(v);
 	v.visitAnd(this);
 }
+
 AstAnd* AstAnd::clone() const
 {
    AstAnd* ast = new AstAnd();
@@ -383,6 +490,7 @@ std::ostream& AstAnd::print( std::ostream& os ) const {
 	os << "\n";
 	return AstRoot::print( os );
 }
+
 void AstAnd::print_flat(std::ostream& os,bool add_bracket) const {
    if (add_bracket) os << "(";
    if (left_) left_->print_flat(os,add_bracket);
@@ -408,6 +516,7 @@ void AstOr::accept(ExprAstVisitor& v)
 	AstRoot::accept(v);
 	v.visitOr(this);
 }
+
 AstOr* AstOr::clone() const
 {
    AstOr* ast = new AstOr();
@@ -423,6 +532,7 @@ std::ostream& AstOr::print( std::ostream& os ) const {
 	os << "\n";
 	return AstRoot::print( os );
 }
+
 void AstOr::print_flat(std::ostream& os,bool add_bracket) const {
    if (add_bracket) os << "(";
    if (left_) left_->print_flat(os,add_bracket);
@@ -448,6 +558,7 @@ void AstEqual::accept(ExprAstVisitor& v)
 	AstRoot::accept(v);
 	v.visitEqual(this);
 }
+
 AstEqual* AstEqual::clone() const
 {
    AstEqual* ast = new AstEqual();
@@ -463,6 +574,7 @@ std::ostream& AstEqual::print( std::ostream& os ) const {
 	os << "\n";
 	return AstRoot::print( os );
 }
+
 void AstEqual::print_flat(std::ostream& os,bool add_bracket) const {
    if (add_bracket) os << "(";
    if (left_) left_->print_flat(os,add_bracket);
@@ -470,6 +582,7 @@ void AstEqual::print_flat(std::ostream& os,bool add_bracket) const {
    if (right_) right_->print_flat(os,add_bracket);
    if (add_bracket) os << ")";
 }
+
 std::string AstEqual::expression(bool why) const
 {
  	std::string ret("(");
@@ -502,6 +615,7 @@ std::ostream& AstNotEqual::print( std::ostream& os ) const {
 	os << "\n";
 	return AstRoot::print( os );
 }
+
 void AstNotEqual::print_flat(std::ostream& os,bool add_bracket) const {
    if (add_bracket) os << "(";
    if (left_) left_->print_flat(os,add_bracket);
@@ -509,6 +623,7 @@ void AstNotEqual::print_flat(std::ostream& os,bool add_bracket) const {
    if (right_) right_->print_flat(os,add_bracket);
    if (add_bracket) os << ")";
 }
+
 std::string AstNotEqual::expression(bool why) const
 {
  	std::string ret("(");
@@ -865,7 +980,7 @@ std::ostream& AstNode::print( std::ostream& os ) const {
 		os << DState::toString(  refNode->dstate()  ) << "(" << static_cast<int>( refNode->dstate()) << ")\n";
 	}
 	else {
-		Indentor::indent( os ) << "# LEAF_NODE node_(NULL ) nodePath_('" << nodePath_ << "') ";
+		Indentor::indent( os ) << "# LEAF_NODE node_(NULL) nodePath_('" << nodePath_ << "') ";
  		os << DState::toString( DState::UNKNOWN  ) << "(" << static_cast<int>(DState::UNKNOWN) << ")\n";
 	}
 	return os;
@@ -1086,9 +1201,12 @@ std::ostream& VariableHelper::print( 	std::ostream& os ) const
 	Indentor::indent( os ) << "# " << astVariable_->nodePath() << Str::COLON() << astVariable_->name();
 
 	if ( theReferenceNode_ ) {
-		os << "(";
+		os << " (";
 		theReferenceNode_->findExprVariableAndPrint(astVariable_->name(), os);
 		os << ")";
+	}
+	else {
+	   os << " referencedNode(NULL) nodePath_('" << astVariable_->nodePath() << "') value(0)";
 	}
 	os << "\n";
  	return os;
@@ -1102,6 +1220,7 @@ std::ostream& operator<<( std::ostream& os, const AstPlus& d ) {return d.print( 
 std::ostream& operator<<( std::ostream& os, const AstMinus& d ) {return d.print( os );}
 std::ostream& operator<<( std::ostream& os, const AstDivide& d ) {return d.print( os );}
 std::ostream& operator<<( std::ostream& os, const AstMultiply& d ) {return d.print( os );}
+std::ostream& operator<<( std::ostream& os, const AstModulo& d ) {return d.print( os );}
 std::ostream& operator<<( std::ostream& os, const AstAnd& d ) {return d.print( os );}
 std::ostream& operator<<( std::ostream& os, const AstOr& d ) {return d.print( os );}
 std::ostream& operator<<( std::ostream& os, const AstEqual& d ) {return d.print( os );}

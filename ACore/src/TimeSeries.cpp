@@ -441,7 +441,7 @@ void TimeSeries::why(const ecf::Calendar& c, std::string& theReasonWhy) const
 
 
 	TimeSlot currentTime = TimeSlot(duration(c));
-	ss << ", current time is ";
+	ss << ", current suite time is ";
 	if (relativeToSuiteStart_) ss << "+";
 	ss << currentTime.toString()  << " )";
 	theReasonWhy += ss.str();
@@ -676,10 +676,6 @@ ecf::TimeSeries TimeSeries::create( size_t& index,const std::vector<std::string>
 	assert( index < lineTokens.size() );
 	int startHour = -1;
 	int startMin = -1;
-	int finishHour = -1;
-	int finishMin = -1;
-	int incrHour = -1;
-	int incrMin = -1;
 
 	// cron 10:00 20:00 01:00
 	// index is on 10:00, ie index should have value of 1 in this case
@@ -700,11 +696,15 @@ ecf::TimeSeries TimeSeries::create( size_t& index,const std::vector<std::string>
 		// cron 10:00 20:00 01:00
 		if ( index+1 >= lineTokens.size() ) throw std::runtime_error( "TimeSeries::create: Invalid time series :");
 
+		int finishHour = -1;
+		int finishMin = -1;
 		getTime( lineTokens[index], finishHour, finishMin );
 		TimeSlot finish( finishHour, finishMin );
 
 		index++;
 
+	   int incrHour = -1;
+	   int incrMin = -1;
 		getTime( lineTokens[index], incrHour, incrMin );
  		TimeSlot incr( incrHour, incrMin );
 

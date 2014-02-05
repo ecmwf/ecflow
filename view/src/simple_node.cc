@@ -347,15 +347,23 @@ void simple_node::info(std::ostream& f)
   f << type_name() << " " << name() << "\n";
   {
     if (owner_.get()) {
-      // owner_.get()->print(f);
+
+      if (owner_->type() == NODE_SUITE) {
+	Suite* suite = dynamic_cast<Suite*>(owner_->get_node());
+	// f << "clock    : "; 
+	if (suite->clockAttr()) {
+	  suite->clockAttr().get()->print(f); // f << "\n";
+	}
+      }
+
       int defs = owner_.get()->defstatus();
       if (defs != STATUS_QUEUED && defs != STATUS_UNKNOWN)
         f << inc << "defstatus " << ecf::status_name[defs] << "\n";
 
       Node* node = owner_.get()->get_node();
       if (node) {
-        if (node->repeat().toString() != "") // repeat
-          f << inc << node->repeat().toString() << "\n";
+        // if (node->repeat().toString() != "") // repeat // duplicated on suite node
+        //  f << inc << node->repeat().toString() << "\n";
 
         /* zombies attribute */
         const std::vector<ZombieAttr> & vect = node->zombies();
@@ -469,6 +477,7 @@ public:
   virtual void visitMinus(AstMinus*){}
   virtual void visitDivide(AstDivide*){}
   virtual void visitMultiply(AstMultiply*){}
+  virtual void visitModulo(AstModulo*){}
   virtual void visitOr(AstOr*){}
   virtual void visitEqual(AstEqual*){}
   virtual void visitNotEqual(AstNotEqual*){}
@@ -582,21 +591,21 @@ void simple_node::triggers(trigger_lister& tlr)
        tlr.next_node( *(*sit), 0, trigger_lister::normal, *sit);
      }
      
-      for (node *n = this->kids(); n ; n = n->next()) {
+     for (node *n = this->kids(); n ; n = n->next()) {
         int type = n->type();
-        node *xn = 0; 
         {
-          ecf_concrete_node<InLimit const> *c =
-            dynamic_cast<ecf_concrete_node<InLimit const>*> (n->__node__());
-          InLimit const * i = c ? c->get() : 0;
-          if (i) {
-            if ((xn = find_limit(i->pathToNode(), i->name())))
-              tlr.next_node(*xn,0,trigger_lister::normal,xn);
-          }
+           ecf_concrete_node<InLimit const> *c =
+                    dynamic_cast<ecf_concrete_node<InLimit const>*> (n->__node__());
+           InLimit const * i = c ? c->get() : 0;
+           if (i) {
+              node *xn = 0;
+              if ((xn = find_limit(i->pathToNode(), i->name())))
+                 tlr.next_node(*xn,0,trigger_lister::normal,xn);
+           }
         } 
         if (type == NODE_DATE || type == NODE_TIME)
-          tlr.next_node(*n,0,trigger_lister::normal,n);
-      }
+           tlr.next_node(*n,0,trigger_lister::normal,n);
+     }
     }
   } 
    if(tlr.parents()) {
@@ -612,9 +621,9 @@ void simple_node::triggers(trigger_lister& tlr)
       find_in_kids(*this,kids(),tlr);
   }
 
-int simple_node::status_time() const { 
+boost::posix_time::ptime simple_node::status_time() const { 
   if (owner_) return owner_->status_time();
-  return 0;
+  return boost::posix_time::ptime();
 }
 
 int simple_node::flags()  const { 

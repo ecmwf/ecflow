@@ -155,7 +155,8 @@ public:
 
 	virtual int type()   const;
 	virtual int status() const;
-	virtual int status_time() const { return 0; }
+	virtual boost::posix_time::ptime status_time() const 
+	  { return boost::posix_time::ptime(); }
 
 	virtual int tryno()  const { return 0; }
 	virtual int flags()  const { return 0; }

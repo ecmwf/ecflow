@@ -20,11 +20,11 @@
 #include "Suite.hpp"
 #include "Family.hpp"
 #include "Task.hpp"
-#include "ClientInvoker.hpp"
 #include "PrintStyle.hpp"
 #include "ClientToServerCmd.hpp"
 #include "AssertTimer.hpp"
 #include "Zombie.hpp"
+#include "TestFixture.hpp"
 
 using namespace std;
 using namespace ecf;
@@ -32,19 +32,24 @@ using namespace ecf;
 void ZombieUtil::test_clean_up(int timeout) {
 
    // try to tidy up. Avoid leaving zombie process that mess up tests
-   ClientInvoker theClient;
-   theClient.zombieGet();
-   std::vector<Zombie> zombies = theClient.server_reply().zombies();
+   TestFixture::client().zombieGet();
+   std::vector<Zombie> zombies = TestFixture::client().server_reply().zombies();
    if (!zombies.empty()) {
       cout << "\n***** test_clean_up: found\n" << Zombie::pretty_print( zombies , 9) << "\n, attempting to *fob* then *remove* ...\n";
 
-      int no_fobed = do_zombie_user_action(User::FOB, zombies.size(), timeout,theClient, false /* don't fail if it takes to long */);
-      if (no_fobed) { cout << "   Fobed " << no_fobed << " left over zombies. Attempting to remove, sleep first\n"; sleep(5);}
-      (void) do_zombie_user_action(User::REMOVE, no_fobed, timeout,theClient, false /* don't fail if it takes to long */);
+      int no_fobed = do_zombie_user_action(User::FOB, zombies.size(), timeout, false /* don't fail if it takes to long */);
+
+      // In order to FOB, we must wait, till a child command, talks to the server.
+      int wait = 5;
+#if defined(HPUX) || defined(AIX)
+      wait += 5; // On these platforms wait longer,
+#endif
+      if (no_fobed) { cout << "   Fobed " << no_fobed << " left over zombies. sleeping for " << wait << "s before attempting to remove\n"; sleep(wait);}
+      (void) do_zombie_user_action(User::REMOVE, no_fobed, timeout, false /* don't fail if it takes to long */);
    }
 }
 
-int ZombieUtil::do_zombie_user_action(User::Action uc, int expected_action_cnt, int max_time_to_wait,ClientInvoker& theClient, bool fail_if_to_long)
+int ZombieUtil::do_zombie_user_action(User::Action uc, int expected_action_cnt, int max_time_to_wait, bool fail_if_to_long)
 {
    /// return the number of zombies set to user action;
 #ifdef DEBUG_ZOMBIE
@@ -55,14 +60,14 @@ int ZombieUtil::do_zombie_user_action(User::Action uc, int expected_action_cnt, 
    std::vector<Zombie> action_set_zombies;
    AssertTimer assertTimer(max_time_to_wait,false); // Bomb out after n seconds, fall back if test fail
    while (1) {
-      BOOST_REQUIRE_MESSAGE(theClient.zombieGet() == 0, "zombieGet failed should return 0\n" << theClient.errorMsg());
-      std::vector<Zombie> zombies = theClient.server_reply().zombies();
+      BOOST_REQUIRE_MESSAGE(TestFixture::client().zombieGet() == 0, "zombieGet failed should return 0\n" << TestFixture::client().errorMsg());
+      std::vector<Zombie> zombies = TestFixture::client().server_reply().zombies();
       bool continue_looping = false;
       BOOST_FOREACH(const Zombie& z, zombies) {
          switch (uc) {
             case User::FOB: {
                if (!z.fob()) {
-                  theClient.zombieFob(z); // UNBLOCK, child commands, allow zombie to complete, will clear server_reply().zombies()
+                  TestFixture::client().zombieFob(z); // UNBLOCK, child commands, allow zombie to complete, will clear server_reply().zombies()
                   continue_looping = true;
                   action_set++;
                   action_set_zombies.push_back(z);
@@ -71,7 +76,7 @@ int ZombieUtil::do_zombie_user_action(User::Action uc, int expected_action_cnt, 
             }
             case User::FAIL: {
                if (!z.fail()) {
-                  theClient.zombieFail(z); // UNBLOCK, child commands, allow zombie to complete, will clear server_reply().zombies()
+                  TestFixture::client().zombieFail(z); // UNBLOCK, child commands, allow zombie to complete, will clear server_reply().zombies()
                   continue_looping = true;
                   action_set++;
                   action_set_zombies.push_back(z);
@@ -80,7 +85,7 @@ int ZombieUtil::do_zombie_user_action(User::Action uc, int expected_action_cnt, 
             }
             case User::ADOPT: {
                if (!z.adopt()) {
-                  theClient.zombieAdopt(z); // UNBLOCK, child commands, allow zombie to complete, will clear server_reply().zombies()
+                  TestFixture::client().zombieAdopt(z); // UNBLOCK, child commands, allow zombie to complete, will clear server_reply().zombies()
                   continue_looping = true;
                   action_set++;
                   action_set_zombies.push_back(z);
@@ -89,7 +94,7 @@ int ZombieUtil::do_zombie_user_action(User::Action uc, int expected_action_cnt, 
             }
             case User::REMOVE: {
                if (!z.remove()) {             // should always return false
-                  theClient.zombieRemove(z);  // This should be immediate, and is not remembered
+                  TestFixture::client().zombieRemove(z);  // This should be immediate, and is not remembered
                   continue_looping = true;
                   action_set++;
                   action_set_zombies.push_back(z);
@@ -98,7 +103,7 @@ int ZombieUtil::do_zombie_user_action(User::Action uc, int expected_action_cnt, 
             }
             case User::BLOCK:  {
                if (!z.block()) {
-                  theClient.zombieBlock(z);
+                  TestFixture::client().zombieBlock(z);
                   continue_looping = true;
                   action_set++;
                   action_set_zombies.push_back(z);
@@ -107,7 +112,7 @@ int ZombieUtil::do_zombie_user_action(User::Action uc, int expected_action_cnt, 
             }
             case User::KILL:  {
                 if (!z.kill()) {
-                   theClient.zombieKill(z);
+                   TestFixture::client().zombieKill(z);
                    continue_looping = true;
                    action_set++;
                    action_set_zombies.push_back(z);
@@ -148,8 +153,8 @@ int ZombieUtil::do_zombie_user_action(User::Action uc, int expected_action_cnt, 
    // return the real state of the server zombies.
    // *** Note: remove is immediate hence z.remove() below is not valid
    action_set = 0;
-   BOOST_REQUIRE_MESSAGE(theClient.zombieGet() == 0, "zombieGet failed should return 0\n" << theClient.errorMsg());
-   std::vector<Zombie> zombies = theClient.server_reply().zombies();
+   BOOST_REQUIRE_MESSAGE(TestFixture::client().zombieGet() == 0, "zombieGet failed should return 0\n" << TestFixture::client().errorMsg());
+   std::vector<Zombie> zombies = TestFixture::client().server_reply().zombies();
    BOOST_FOREACH(const Zombie& z, zombies) {
       switch (uc) {
          case User::FOB:    { if (z.fob())    action_set++; break; }

@@ -83,10 +83,9 @@ public:
 
 	/// This function is used for waiting for test to finish
 	/// returns the defs from the server at test completeion
-	defs_ptr testWaiter(const ClientInvoker& theClient,
-	                                   const Defs& theClientDefs,// The defs on the client side
- 	                                   int timeout,              // How long should we wait for test to finish
- 	                                   bool verifyAttr);         // Test verification use verify attributes on defs
+	defs_ptr testWaiter( const Defs& theClientDefs,// The defs on the client side
+ 	                      int timeout,              // How long should we wait for test to finish
+ 	                      bool verifyAttr);         // Test verification use verify attributes on defs
 
 	/// for debug return the number of times the calendar was updated in the server
 	unsigned int serverUpdateCalendarCount() const { return serverUpdateCalendarCount_;}

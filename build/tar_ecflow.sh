@@ -18,12 +18,19 @@ set -u # fail when using an undefined variable
 # and populate with defs file, and job output, etc, hence exclude this directory
 # ===============================================================================
 cd $WK
-rm -rf Test/data/ECF_HOME_debug
-rm -rf Test/data/ECF_HOME_release
-rm -rf view/data/ECF_HOME_debug
-rm -rf view/data/ECF_HOME_release
+rm -rf *.dat
+rm -rf *lock
+rm -rf *log
+rm -rf *.check
+rm -rf *.def
+rm -rf rtt.dat
+rm -rf Test/data/ECF_HOME_debug*
+rm -rf Test/data/ECF_HOME_release*
+rm -rf view/data/ECF_HOME_debug*
+rm -rf view/data/ECF_HOME_release*
 rm -rf AParser/test/data/single_defs/mega.def_log
 rm -rf Pyext/test.def
+rm -rf Pyext/build
 
 # ================================================================================
 # Remove generated files before taring ecFlow  
@@ -53,11 +60,6 @@ find . -name core -exec rm -rf core {} \; -print
 find . -name `hostname`.*.ecf.* -exec rm -rf `hostname`.*.ecf.* {} \; -print
 find . -name callgrind.out.\* -exec rm -rf callgrind.out.\* {} \; -print
 find . -name massif.out.\* -exec rm -rf massif.out.* {} \; -print
-rm -rf rtt.dat
-
-# remove any defs file at the workspace level. There should not be any
-rm -rf *.def
-
 
 # ======================================================================
 # Create the tar file name based on the version
@@ -106,6 +108,7 @@ tar --exclude=*.check --exclude=*.check.b \
     --exclude=*.ddoc \
     --exclude=.p4config \
     --exclude=SCRATCH \
+    --exclude=New_viewer \
     --exclude=_build --exclude=func_spec --exclude=misc --exclude=newsletter --exclude=presentations --exclude=seminar --exclude=tac --exclude=Thumbs.db \
     --exclude=.pydevproject \
     --exclude=.git \
@@ -123,9 +126,8 @@ tar --exclude=*.check --exclude=*.check.b \
     --exclude=include \
     --exclude=test_bench \
     --exclude=nightly \
+    --exclude=online \
     --exclude=RemoteSystemsTempFiles \
-    --exclude=Xcdp \
-    --exclude=xcdp \
     -cf $ECFLOWTAR $ECFLOW_WS_DIR/.
 
 # Remove the link

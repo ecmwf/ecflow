@@ -305,7 +305,7 @@ SimpleGraphWidget current, request, new;
 
 
 
-//static int first_kid(SimpleGraphWidget w,Node *n)
+//static int first_kid(SimpleGraphWidget w,NodeStruct *n)
 //{
 //	int i;
 //	for(i=0;i<n->pcnt;i++)
@@ -314,7 +314,7 @@ SimpleGraphWidget current, request, new;
 //	return -1;
 //}
 //
-//static int last_kid(SimpleGraphWidget w,Node *n)
+//static int last_kid(SimpleGraphWidget w,NodeStruct *n)
 //{
 //	int i;
 //
@@ -578,7 +578,7 @@ static int smallest(int x, int y,XPoint* p, int n)
 
 static int line_find(SimpleGraphWidget w,XEvent* event,
 XRectangle *from,XRectangle *to,
-Node* n1,Node* n2)
+NodeStruct* n1,NodeStruct* n2)
 {
 
 #if TOP_BOTTOM
@@ -648,7 +648,7 @@ static void Redisplay (SimpleGraphWidget w, XEvent *event, Region region)
 	for (i = 0; i < w -> simplebase.count; i++)
 	{
 
-		Node *child = w -> simplebase.nodes + i;
+		NodeStruct *child = w -> simplebase.nodes + i;
 		if((child)->managed)
 			XUnionRectWithRegion(&child->r,rg,rg);
 	}
@@ -661,13 +661,13 @@ static void Redisplay (SimpleGraphWidget w, XEvent *event, Region region)
 	for (i = 0; i < w -> simplebase.count; i++)
 	{
 
-		Node *n = w -> simplebase.nodes + i;
+		NodeStruct *n = w -> simplebase.nodes + i;
 		if(!n->managed)
 			continue;
 
 		for (j = 0; j < n->kcnt; j++)
 		{
-			Node *c = &KIDS(w,n,j);
+			NodeStruct *c = &KIDS(w,n,j);
 			int k = 0;
 
 			if(!c->managed)
@@ -697,19 +697,19 @@ static void bezier_find(SimpleGraphWidget w,XEvent *event)
 	/* int fkid; */
 	int m = 0;
 	int min = 32000;
-	Node* m1 = 0 ;
-	Node *m2 = 0;
+	NodeStruct* m1 = 0 ;
+	NodeStruct *m2 = 0;
 	LinkCallbackStruct cb;
 
 	for (i = 0; i < w -> simplebase.count; i++)
 	{
-		Node *n = w -> simplebase.nodes + i;
+		NodeStruct *n = w -> simplebase.nodes + i;
 		if(!n->managed)
 			continue;
 
 		for (j = 0; j < n->kcnt; j++)
 		{
-			Node *c = &KIDS(w,n,j);
+			NodeStruct *c = &KIDS(w,n,j);
 			if(!c->managed)
 				continue;
 
@@ -750,7 +750,7 @@ static void Layout(Widget w,long *maxWidth,long *maxHeight)
 }
 
 
-static int calc_level(SimpleGraphWidget w,Node *n)
+static int calc_level(SimpleGraphWidget w,NodeStruct *n)
 {
 
 	int i;
@@ -762,7 +762,7 @@ static int calc_level(SimpleGraphWidget w,Node *n)
 
 	for(i=0;i<n->pcnt;i++)
 	{
-		Node *p = &PARENTS(w,n,i);
+		NodeStruct *p = &PARENTS(w,n,i);
 		if(MANAGED(p))
 		{
 			int lev = calc_level(w,p) + 1;
@@ -777,7 +777,7 @@ static int calc_level(SimpleGraphWidget w,Node *n)
 
 }
 
-static void set_arc(SimpleGraphWidget w,Node *n,int arc)
+static void set_arc(SimpleGraphWidget w,NodeStruct *n,int arc)
 {
 
 	int i;
@@ -789,7 +789,7 @@ static void set_arc(SimpleGraphWidget w,Node *n,int arc)
 
 	for(i=0;i<n->pcnt;i++)
 	{
-		Node *p = &PARENTS(w,n,i);
+		NodeStruct *p = &PARENTS(w,n,i);
 		if(MANAGED(p))
 			set_arc(w,p,arc);
 	}
@@ -798,7 +798,7 @@ static void set_arc(SimpleGraphWidget w,Node *n,int arc)
 
 }
 
-static int calc_arc(SimpleGraphWidget w,Node *n)
+static int calc_arc(SimpleGraphWidget w,NodeStruct *n)
 {
 
 	int i;
@@ -811,7 +811,7 @@ static int calc_arc(SimpleGraphWidget w,Node *n)
 	{
 		for(i=0;i<n->pcnt;i++)
 		{
-			Node *p = &PARENTS(w,n,i);
+			NodeStruct *p = &PARENTS(w,n,i);
 			if(MANAGED(p))
 			{
 				int b = calc_arc(w,p);
@@ -829,8 +829,8 @@ static SimpleGraphWidget sort;
 
 static int by_arc(const void* n1,const void* n2)
 {
-	Node *w1 = sort->simplebase.nodes + *(int*)n1;
-	Node *w2 = sort->simplebase.nodes + *(int*)n2;
+	NodeStruct *w1 = sort->simplebase.nodes + *(int*)n1;
+	NodeStruct *w2 = sort->simplebase.nodes + *(int*)n2;
 	if(w1->misc[LEVEL] != w2->misc[LEVEL])
 		return w1->misc[LEVEL] - w2->misc[LEVEL];
 
@@ -840,8 +840,8 @@ static int by_arc(const void* n1,const void* n2)
 
 static int by_x(const void *n1,const void *n2)
 {
-	Node *w1 = sort->simplebase.nodes + *(int*)n1;
-	Node *w2 = sort->simplebase.nodes + *(int*)n2;
+	NodeStruct *w1 = sort->simplebase.nodes + *(int*)n1;
+	NodeStruct *w2 = sort->simplebase.nodes + *(int*)n2;
 
 	if(w1->misc[LEVEL] != w2->misc[LEVEL])
 		return w1->misc[LEVEL] - w2->misc[LEVEL];
@@ -853,20 +853,20 @@ static int by_x(const void *n1,const void *n2)
 
 static int by_level(const void *n1,const void *n2)
 {
-	Node *w1 = sort->simplebase.nodes + *(int*)n1;
-	Node *w2 = sort->simplebase.nodes + *(int*)n2;
+	NodeStruct *w1 = sort->simplebase.nodes + *(int*)n1;
+	NodeStruct *w2 = sort->simplebase.nodes + *(int*)n2;
 
 	return w1->misc[LEVEL] - w2->misc[LEVEL];
 
 }
 
 
-static int no_parents(SimpleGraphWidget w,Node *n)
+static int no_parents(SimpleGraphWidget w,NodeStruct *n)
 {
 	int i;
 
 	for(i=0;i<n->pcnt;i++) {
-		Node *p = &PARENTS(w,n,i);
+		NodeStruct *p = &PARENTS(w,n,i);
 		if(MANAGED(p)) return FALSE;
 	}
 
@@ -874,11 +874,11 @@ static int no_parents(SimpleGraphWidget w,Node *n)
 
 }
 
-static int no_kidss(SimpleGraphWidget w,Node *n)
+static int no_kidss(SimpleGraphWidget w,NodeStruct *n)
 {
 	int i;
 	for(i=0;i<n->kcnt;i++) {
-		Node *p = &KIDS(w,n,i);
+		NodeStruct *p = &KIDS(w,n,i);
 		if(MANAGED(p)) return FALSE;
 	}
 
@@ -887,14 +887,14 @@ static int no_kidss(SimpleGraphWidget w,Node *n)
 }
 
 
-static void calc_level_pass2(SimpleGraphWidget w,Node *n)
+static void calc_level_pass2(SimpleGraphWidget w,NodeStruct *n)
 {
 	int i;
 	int lvl1 = 12000;
 
 	for(i=0;i<n->kcnt;i++)
 	{
-		Node *p = &KIDS(w,n,i);
+		NodeStruct *p = &KIDS(w,n,i);
 		if(MANAGED(p))
 			lvl1 = MIN(lvl1,p->misc[LEVEL]);
 	}
@@ -914,7 +914,7 @@ int max_in_a_level,int no_levels,int num_nodes,int v_dist)
 
 	for(i=0;i<num_nodes;i++)
 	{
-		Node *n = gw->simplebase.nodes + nodes[i];
+		NodeStruct *n = gw->simplebase.nodes + nodes[i];
 		n->TMPX = positions[n->misc[LEVEL]];
 		positions[n->misc[LEVEL]] += (max / levels[n->misc[LEVEL]]);
 	}
@@ -928,7 +928,7 @@ static int add_node(SimpleGraphWidget w,int n,int m,int lvl)
 	return x;
 }
 
-static int add_dummies(SimpleGraphWidget w,Node *n)
+static int add_dummies(SimpleGraphWidget w,NodeStruct *n)
 {
 	int i;
 	int more = 0;
@@ -939,7 +939,7 @@ static int add_dummies(SimpleGraphWidget w,Node *n)
 
 	for(i=0;i<n->kcnt;i++)
 	{
-		Node *p = &KIDS(w,n,i);
+		NodeStruct *p = &KIDS(w,n,i);
 
 		if(MANAGED(p))
 		{
@@ -980,7 +980,7 @@ static int add_dummy_nodes(SimpleGraphWidget gw)
 
 	for(i=0; i < n; i++)
 	{
-		Node *w = gw->simplebase.nodes + i;
+		NodeStruct *w = gw->simplebase.nodes + i;
 		if(MANAGED(w))
 			more = add_dummies(gw,w) || more;
 	}
@@ -1012,7 +1012,7 @@ static void compute_positions(SimpleGraphWidget gw,int dummy)
 	int v_dist = 10;
 	int h_dist = 10;
 	int chg = TRUE;
-	Node* focus = (gw->simplebase.focus>=0)? (gw->simplebase.nodes + 
+	NodeStruct* focus = (gw->simplebase.focus>=0)? (gw->simplebase.nodes +
 	    gw->simplebase.focus) : 0;
 
 	sort = gw;
@@ -1021,7 +1021,7 @@ static void compute_positions(SimpleGraphWidget gw,int dummy)
 	num_nodes = 0;
 	for(i=0;i<n;i++)
 	{
-		Node *w = gw->simplebase.nodes + i;
+		NodeStruct *w = gw->simplebase.nodes + i;
 		if(MANAGED(w)) num_nodes++;
 		w->misc[LEVEL] = w->misc[ARC] = -1;
 		w->misc[VISIT] = False;
@@ -1042,7 +1042,7 @@ static void compute_positions(SimpleGraphWidget gw,int dummy)
 	num_nodes=0;
 	for(i=0;i<n;i++)
 	{
-		Node *w = gw->simplebase.nodes + i;
+		NodeStruct *w = gw->simplebase.nodes + i;
 		if(MANAGED(w)) nodes[num_nodes++] = i;
 		w->misc[LEVEL] = 0;
 	}
@@ -1050,7 +1050,7 @@ static void compute_positions(SimpleGraphWidget gw,int dummy)
 
 	for(i=0;i<num_nodes;i++)
 	{
-		Node *w = gw->simplebase.nodes + nodes[i];
+		NodeStruct *w = gw->simplebase.nodes + nodes[i];
 		calc_level(gw,w);
 		w->misc[ARC] = arc++;
 
@@ -1063,7 +1063,7 @@ static void compute_positions(SimpleGraphWidget gw,int dummy)
 
 	for(i=0;i<num_nodes;i++)
 	{
-		Node *w = gw->simplebase.nodes + nodes[i];
+		NodeStruct *w = gw->simplebase.nodes + nodes[i];
 		if (no_parents(gw,w) && !no_kidss(gw,w))
 			calc_level_pass2(gw,w);
 	}
@@ -1086,7 +1086,7 @@ static void compute_positions(SimpleGraphWidget gw,int dummy)
 
 	for(i=0;i<num_nodes;i++)
 	{
-		Node *w = gw->simplebase.nodes + nodes[i];
+		NodeStruct *w = gw->simplebase.nodes + nodes[i];
 		levels[w->misc[LEVEL]]++;
 
 		if(levels[w->misc[LEVEL]] > max_in_a_level)
@@ -1121,7 +1121,7 @@ static void compute_positions(SimpleGraphWidget gw,int dummy)
 
 	for(i=0;i<num_nodes;i++)
 	{
-		Node *w = gw->simplebase.nodes + nodes[i];
+		NodeStruct *w = gw->simplebase.nodes + nodes[i];
 		w->TMPY = heights[w->misc[LEVEL]];
 		/* printf("node y = %d %d\n",w->misc[LEVEL],w->TMPY); */
 	}
@@ -1130,11 +1130,11 @@ static void compute_positions(SimpleGraphWidget gw,int dummy)
 	for(a=0;a<2;a++)
 	{
 		for(i=0;i<num_nodes;i++) {
-			Node *w = gw->simplebase.nodes + nodes[i];
+			NodeStruct *w = gw->simplebase.nodes + nodes[i];
 			if(no_kidss(gw,w)) calc_arc(gw,w);
 		}
 		for(i=0;i<num_nodes;i++){
-			Node *w = gw->simplebase.nodes + nodes[i];
+			NodeStruct *w = gw->simplebase.nodes + nodes[i];
 			if(no_kidss(gw,w)) set_arc(gw,w,w->misc[ARC]);
 		}
 	}
@@ -1163,14 +1163,14 @@ static void compute_positions(SimpleGraphWidget gw,int dummy)
 				int j;
 				int n = 0;
 				int x = 0;
-				Node *w = gw->simplebase.nodes + nodes[i];
+				NodeStruct *w = gw->simplebase.nodes + nodes[i];
 				if( (max_level != w->misc[LEVEL]) ^ move_it)
 				{
 
 
 					for(j=0;j<w->pcnt;j++)
 					{
-						Node *p = &PARENTS(gw,w,j);
+						NodeStruct *p = &PARENTS(gw,w,j);
 						if(MANAGED(p) && p != focus)
 						{
 							x += p->TMPX;
@@ -1181,7 +1181,7 @@ static void compute_positions(SimpleGraphWidget gw,int dummy)
 
 					for(j=0;j<w->kcnt;j++)
 					{
-						Node *p = &KIDS(gw,w,j);
+						NodeStruct *p = &KIDS(gw,w,j);
 						if(MANAGED(p) && p != focus)
 						{
 							x += p->TMPX;
@@ -1203,8 +1203,8 @@ static void compute_positions(SimpleGraphWidget gw,int dummy)
 			{
 				chg = FALSE;
 				for(i=1;i<num_nodes;i++) {
-					Node *w = gw->simplebase.nodes + nodes[i];
-					Node *z = gw->simplebase.nodes + nodes[i-1];
+					NodeStruct *w = gw->simplebase.nodes + nodes[i];
+					NodeStruct *z = gw->simplebase.nodes + nodes[i-1];
 					if(z->misc[LEVEL] == w->misc[LEVEL])
 						if(w->TMPX-z->TMPX< widths[w->misc[LEVEL]])
 						{
@@ -1225,7 +1225,7 @@ static void compute_positions(SimpleGraphWidget gw,int dummy)
 
 	for(i=1;i<num_nodes;i++)
 	{
-		Node *w = gw->simplebase.nodes + nodes[i];
+		NodeStruct *w = gw->simplebase.nodes + nodes[i];
 		if(w->tmpx<minx) minx = w->tmpx;
 		if(w->tmpy<miny) miny = w->tmpy;
 	}
@@ -1235,7 +1235,7 @@ static void compute_positions(SimpleGraphWidget gw,int dummy)
 
 	for(i=0;i<num_nodes;i++)
 	{
-		Node *w = gw->simplebase.nodes + nodes[i];
+		NodeStruct *w = gw->simplebase.nodes + nodes[i];
 		w->tmpx -= minx;
 		w->tmpy -= miny;
 	}
@@ -1257,8 +1257,8 @@ static SimpleGraphWidget sort_widget = 0;
 
 static int left_to_right(const void *a,const void *b)
 {
-	Node *na = sort_widget->simplebase.nodes + ((Link*)a)->node;
-	Node *nb = sort_widget->simplebase.nodes + ((Link*)b)->node;
+	NodeStruct *na = sort_widget->simplebase.nodes + ((Link*)a)->node;
+	NodeStruct *nb = sort_widget->simplebase.nodes + ((Link*)b)->node;
 	return na->r.x - nb->r.x;
 }
 
@@ -1269,7 +1269,7 @@ static void set_positions(SimpleGraphWidget gw, long *maxWidth,long *maxHeight)
 
 	for(i=0;i<gw->simplebase.count;i++)
 	{
-		Node *w = gw->simplebase.nodes + i;
+		NodeStruct *w = gw->simplebase.nodes + i;
 		if(w->managed )
 		{
 			{
@@ -1285,7 +1285,7 @@ static void set_positions(SimpleGraphWidget gw, long *maxWidth,long *maxHeight)
 				int	y = w->tmpy;
 				for(j=0;j<gw->simplebase.count;j++)
 				{
-					Node *v = gw->simplebase.nodes + j;
+					NodeStruct *v = gw->simplebase.nodes + j;
 					if(v->managed && v->group == i)
 					{
 						v->r.x = x;
@@ -1302,7 +1302,7 @@ static void set_positions(SimpleGraphWidget gw, long *maxWidth,long *maxHeight)
 sort_widget = gw;
 for(i=0;i<gw->simplebase.count;i++)
 {
-	Node *w = gw->simplebase.nodes + i;
+	NodeStruct *w = gw->simplebase.nodes + i;
 	qsort(w->parents,w->pcnt,sizeof(Link),left_to_right);
 	qsort(w->kids,w->kcnt,sizeof(Link),left_to_right);
 }

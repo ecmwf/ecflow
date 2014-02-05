@@ -250,7 +250,7 @@ bool File::find(
 
 		if ( fs::is_directory( itr->status() ) ) {
 
-			if ( find( itr->path(), file_name, path_found ) )
+			if ( File::find( itr->path(), file_name, path_found ) )
 				return true;
 		}
 	   else if ( itr->path().filename() == file_name ) // see below
@@ -283,6 +283,24 @@ void File::findAll(
  		}
 	}
 }
+
+
+std::string File::workspace_dir()
+{
+   // We need the *SAME* location so that different process find the same file. Get to the workspace directory
+   boost::filesystem::path current_path = boost::filesystem::current_path();
+   std::string stem = current_path.stem().string();
+   int count = 0;
+   while( stem.find("ecflow") == std::string::npos) {
+      current_path = current_path.parent_path();
+      stem = current_path.stem().string();
+      count++;
+      if (count == 10000) throw std::runtime_error("File::workspace_dir() failed to find ecflow in a directory name, up the directory tree");
+   }
+   std::string the_workspace_dir = current_path.string();  // cos string is returned by reference
+   return the_workspace_dir;
+}
+
 
 std::string File::findPath(
                   const boost::filesystem::path& dir_path,    // from this directory downwards

@@ -39,7 +39,8 @@ public:
  	virtual void visitPlus(AstPlus*);
  	virtual void visitMinus(AstMinus*);
  	virtual void visitDivide(AstDivide*);
- 	virtual void visitMultiply(AstMultiply*);
+   virtual void visitMultiply(AstMultiply*);
+   virtual void visitModulo(AstModulo*);
  	virtual void visitOr(AstOr*);
  	virtual void visitEqual(AstEqual*);
  	virtual void visitNotEqual(AstNotEqual*);

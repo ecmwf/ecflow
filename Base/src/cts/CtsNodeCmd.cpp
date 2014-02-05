@@ -47,7 +47,7 @@ std::ostream& CtsNodeCmd::print(std::ostream& os) const
 #ifdef DEBUG
          if (Ecf::server()) ss << " [server(" << Ecf::state_change_no() << " " << Ecf::modify_change_no() << ")]";
 #endif
-         return user_cmd(os,ss.str()); break;
+         return user_cmd(os,ss.str());
       }
       case CtsNodeCmd::GET_STATE:          return user_cmd(os,CtsApi::get_state(absNodePath_)); break;
       case CtsNodeCmd::MIGRATE:            return user_cmd(os,CtsApi::migrate(absNodePath_)); break;
@@ -134,7 +134,6 @@ STC_Cmd_ptr CtsNodeCmd::doHandleRequest(AbstractServer* as) const
          // however request for a particular node, thats not there, treated as an error
          node_ptr theNodeToReturn = find_node(as,absNodePath_);
          return PreAllocatedReply::node_cmd(as,theNodeToReturn);
-         break;
       }
 
       case CtsNodeCmd::CHECK_JOB_GEN_ONLY:  {

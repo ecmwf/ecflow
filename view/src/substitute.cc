@@ -29,9 +29,8 @@ extern "C" {
 #include "xec.h"
 }
 
-// substitute::substitute(const char* name): name_(name) {}
-
-substitute::substitute(const std::string name):
+static char* debug = getenv("DEBUG");
+substitute::substitute(const std::string& name):
   name_(name)
 {
 }
@@ -43,28 +42,24 @@ substitute::~substitute()
 const char* substitute::scan(const char* cmd,node* n)
 {
   static char buf[1024];
-  int i = 0, j = 0, k= 0;
+  int i = 0, j = 0, k= 0, cont = 1;
   char word[1024], edit[1024];
   bool var = false, col = false;
   substitute* s;
-  
   word[0] = 0; edit[0] = 0;
 
-  while(*cmd) {
-    switch(*cmd) {
-    case '%': // micro // accept <fullname>:%variable_name% syntax for menus
-      if ((cmd-1) && *(cmd-1)!=':') break;
-      col = ! col;
-      if (col) { k = 0; }
-      else { edit[k++] = 0; 
-	s = first();
-	i -= strlen(word) + 1; buf[i] = 0; // erase path
-	strcpy(edit,n->variable(edit, true).c_str());
-	strcat(buf, edit); i += strlen(edit);
-	k = 0;       
-      }
-      break;
+  if (debug) std::cout << "# substituted1:" << cmd << "\n";
+  std::string replace (cmd);
+  if (replace.find("%") != std::string::npos) {
+    n->__node__()-> get_node()-> variableSubsitution(replace);
+    strcat(buf, replace.c_str());
+    if (debug) std::cout << "# substituted2:" << replace << "\n";
+    if (debug) std::cout << "# substituted2:" << buf << "\n";
+    return buf;
+  }
 
+  while(*cmd && cont) {
+    switch(*cmd) {
     case '<':
 	  var       = true;
 	  j         = 0;
@@ -88,7 +83,7 @@ const char* substitute::scan(const char* cmd,node* n)
 	  buf[i] = 0;
 	  strcat(buf,word);
 	  i += strlen(word);
-	  // std::cout << "# substituted:" << buf << "-" << word <<"-\n";
+	  if (debug) std::cout << "# substituted:" << buf << "-" << word <<"-\n";
 	  j = 0;
 	  break;
 	  
@@ -114,7 +109,7 @@ const char* substitute::scan(const char* cmd,node* n)
     i += strlen(word);
   }
  
-  // std::cout << "# substituted:" << buf << "-" << word << "-" << edit <<"-\n";
+  if (debug) std::cout << "# substituted:" << buf << "-" << word << "-" << edit <<"-\n";
   buf[i] = 0;
   return buf;
 }

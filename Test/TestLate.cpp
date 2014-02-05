@@ -29,7 +29,6 @@
 #include "Family.hpp"
 #include "Task.hpp"
 #include "DurationTimer.hpp"
-#include "ClientInvoker.hpp"
 #include "PrintStyle.hpp"
 #include "ClientToServerCmd.hpp"
 #include "DefsStructureParser.hpp"
@@ -69,11 +68,11 @@ BOOST_AUTO_TEST_CASE( test_late )
    ServerTestHarness serverTestHarness(false/*do verification*/,false/* dont do standard verification */);
    serverTestHarness.run(theDefs,ServerTestHarness::testDataDefsLocation("test_late.def"));
 
-   ClientInvoker theClient;
-   theClient.sync_local();
-   BOOST_CHECK_MESSAGE( theClient.defs(),"Expected defs");
+   TestFixture::client().set_throw_on_error(true);
+   TestFixture::client().sync_local();
+   BOOST_CHECK_MESSAGE( TestFixture::client().defs(),"Expected defs");
 
-   node_ptr node = theClient.defs()->findAbsNode("/test_late/t1");
+   node_ptr node = TestFixture::client().defs()->findAbsNode("/test_late/t1");
    BOOST_CHECK_MESSAGE( node,"Expected task to be found");
 
    ecf::LateAttr* late = node->get_late();

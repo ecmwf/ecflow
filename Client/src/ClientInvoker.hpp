@@ -160,6 +160,9 @@ public:
 	int news(defs_ptr& client_defs) const;
 	int news_local() const;
 
+	// find free port on local host. Not 100% accurate, use in test
+	static std::string find_free_port(int seed_port_number, bool debug = false);
+
  	bool wait_for_server_reply(int time_out = 60) const; // wait for server reply, returning false means timed out.
    bool wait_for_server_death(int time_out = 60) const; // wait for server reply, returning true means server died,false means timed out.
 	int restartServer() const;

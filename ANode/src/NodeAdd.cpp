@@ -174,6 +174,10 @@ void Node::addLabel( const Label& l)
 
 void Node::addMeter( const Meter& m)
 {
+//   if ( isSuite() ) {
+//      throw std::runtime_error("Node::addMeter: Can not add meter to a Suite");
+//   }
+
    if (child_attrs_) {
       child_attrs_->addMeter(m); // can throw
       return;

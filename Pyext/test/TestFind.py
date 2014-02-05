@@ -13,7 +13,7 @@
 
 #  code for testing pointers and hierarchy in python
 
-from ecflow import Suite, Family, Task, Defs
+from ecflow import Suite, Family, Task, Defs, Client
 
 def create_defs(name=""):
     defs = Defs()
@@ -31,7 +31,10 @@ def create_defs(name=""):
     
     
 if __name__ == "__main__":    
-  
+    print "####################################################################"
+    print "Running ecflow version " + Client().version() 
+    print "####################################################################"
+ 
     defs = create_defs();
     tasks = defs.get_all_tasks()
     assert len(tasks) == 4, "Expected four tasks, but found " + str(len(tasks))

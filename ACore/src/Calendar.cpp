@@ -28,7 +28,7 @@ using namespace boost::posix_time;
 namespace ecf {
 
 Calendar::Calendar()
-: ctype_(Calendar::HYBRID),
+: ctype_(Calendar::REAL),
   dayChanged_(false),
   startStopWithServer_(false),
   day_of_week_(-1),
@@ -127,6 +127,12 @@ void Calendar::init(Clock_t clock, bool startStopWithServer)
    startStopWithServer_ = startStopWithServer;
 }
 
+void Calendar::init(const boost::posix_time::ptime& time, Clock_t clock, bool startStopWithServer)
+{
+   init(clock,startStopWithServer);
+   begin(time);
+}
+
 /// Start the Calendar.  Parameter time can include gain.
 void Calendar::begin(const boost::posix_time::ptime& the_time)
 {
@@ -141,12 +147,6 @@ void Calendar::begin(const boost::posix_time::ptime& the_time)
 
    // Cache the most common requests
    update_cache();
-}
-
-void Calendar::init(const boost::posix_time::ptime& time, Clock_t clock, bool startStopWithServer)
-{
-   init(clock,startStopWithServer);
-   begin(time);
 }
 
 void Calendar::update( const ecf::CalendarUpdateParams & calUpdateParams )
@@ -266,7 +266,6 @@ void Calendar::update(const boost::posix_time::ptime& time_now)
 
 boost::gregorian::date Calendar::date() const
 {
-	if ( ctype_ == Calendar::HYBRID) return initTime_.date();
 	return suiteTime_.date();
 }
 

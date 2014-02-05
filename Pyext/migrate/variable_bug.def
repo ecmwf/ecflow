@@ -1,0 +1,11 @@
+# 3.0.0
+suite s
+   task q2diss
+      defstatus complete
+      late -s +00:05 -c +00:15
+      trigger pdb==complete 
+      edit ECF_URL_CMD '${BROWSER:=firefox} -remote 'openURL(%URL%'
+      edit EMOS_TYPE '  family prod_wparam
+  endfamily
+'
+endsuite

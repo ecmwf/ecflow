@@ -60,19 +60,19 @@ BOOST_AUTO_TEST_CASE( test_repeat_integer  )
 
 	// Each task/job should be run *4* times, according to the repeats
 	// Mimics nested loops
- 	int taskSize = 2;
  	Defs theDefs;
  	{
       suite_ptr suite = theDefs.add_suite("suite");
+ 	   suite->addRepeat( RepeatInteger("VAR",0,1,1));      // repeat contents 2 times
+ 	   suite->addVerify( VerifyAttr(NState::COMPLETE,2) );
       family_ptr fam = suite->add_family( "family" );
  	   fam->addRepeat( RepeatInteger("VAR",0,1,1));    // repeat contents 2 times
- 	   fam->addVerify( VerifyAttr(NState::COMPLETE,2) ); // verify family repeats 2 times
+ 	   fam->addVerify( VerifyAttr(NState::COMPLETE,4) ); // verify family repeats 2 times
+ 	   int taskSize = 2;
  	   for(int i=0; i < taskSize; i++) {
  	      task_ptr t = fam->add_task( "t" + boost::lexical_cast<std::string>(i) );
  	      t->addVerify( VerifyAttr(NState::COMPLETE,4) ); // Each task should run 4 times
  	   }
- 	   suite->addRepeat( RepeatInteger("VAR",0,1,1));     // repeat contents 2 times
- 	   suite->addVerify( VerifyAttr(NState::COMPLETE,1) );  // suite complete once all repeats are done
  	   //		cout << theDefs << "\n";
  	}
 
@@ -105,12 +105,12 @@ BOOST_AUTO_TEST_CASE( test_repeat_integer_relative  )
 		clockAttr.date(12,10,2009); // 12 October 2009 was a Monday
       suite_ptr suite = theDefs.add_suite("test_repeat_integer_relative");
   		suite->addClock( clockAttr );
- 		suite->addRepeat( RepeatInteger("VAR",0,1,1));     // repeat contents 2 times
- 		suite->addVerify( VerifyAttr(NState::COMPLETE,1) );  // suite complete once all repeats are done
+ 		suite->addRepeat( RepeatInteger("VAR",0,1,1));      // repeat contents 2 times
+ 		suite->addVerify( VerifyAttr(NState::COMPLETE,2) );
 
       family_ptr fam = suite->add_family( "family" );
- 		fam->addRepeat( RepeatInteger("VAR",0,1,1));    // repeat contents 2 times
- 		fam->addVerify( VerifyAttr(NState::COMPLETE,2) ); // verify family repeats 2 times
+ 		fam->addRepeat( RepeatInteger("VAR",0,1,1));      // repeat contents 2 times
+ 		fam->addVerify( VerifyAttr(NState::COMPLETE,4) );
 
  		task_ptr t = fam->add_task("t1");
  		t->addTime( ecf::TimeAttr( TimeSlot(0,2), true /*relative*/ ) );
@@ -131,6 +131,7 @@ BOOST_AUTO_TEST_CASE( test_repeat_date  )
  	cout << "Simulator:: ...test_repeat_date\n";
 
  	//suite suite
+ 	// clock real <today date + time>
  	//	family family
 	//	    repeat date YMD 20091001  20091015 1  # yyyymmdd
 	//   	task t<n>
@@ -142,14 +143,14 @@ BOOST_AUTO_TEST_CASE( test_repeat_date  )
    Defs theDefs;
  	{
  	 	boost::posix_time::ptime   theLocalTime =  Calendar::second_clock_time();
-		ClockAttr clockAttr(theLocalTime );
+		ClockAttr clockAttr(theLocalTime);
    	suite_ptr suite = theDefs.add_suite("test_repeat_date");
 		suite->addVerify( VerifyAttr(NState::COMPLETE,1) );
   		suite->addClock( clockAttr );
 
       family_ptr fam = suite->add_family( "family" );
  		fam->addRepeat( RepeatDate("YMD",20091001,20091015,1));  // repeat contents 15 times
-		fam->addVerify( VerifyAttr(NState::COMPLETE,1) );
+		fam->addVerify( VerifyAttr(NState::COMPLETE,15) );
 
       task_ptr task = fam->add_task("t");
 		task->addTime( ecf::TimeAttr( TimeSlot(10,0) ) );
@@ -169,6 +170,7 @@ BOOST_AUTO_TEST_CASE( test_repeat_date_2  )
  	cout << "Simulator:: ...test_repeat_date_for_loop\n";
 
  	//suite suite
+ 	// clock real <todays date>
 	//	repeat date YMD 20091001  20091005 1  # yyyymmdd
  	//	family family
 	//	    repeat date YMD 20091001  20091005 1  # yyyymmdd
@@ -185,12 +187,12 @@ BOOST_AUTO_TEST_CASE( test_repeat_date_2  )
 
       suite_ptr suite = theDefs.add_suite("test_repeat_date_for_loop");
 		suite->addRepeat( RepeatDate("YMD",20091001,20091005,1));  // repeat contents 5 times
-		suite->addVerify( VerifyAttr(NState::COMPLETE,1) );          // suite completes 1 time
+		suite->addVerify( VerifyAttr(NState::COMPLETE,5) );
   		suite->addClock( clockAttr );
 
       family_ptr fam = suite->add_family( "family" );
  		fam->addRepeat( RepeatDate("YMD",20091001,20091005,1));  // repeat contents 5 times
-		fam->addVerify( VerifyAttr(NState::COMPLETE,5) );          // family completes 5 times
+		fam->addVerify( VerifyAttr(NState::COMPLETE,25) );
 
       task_ptr task = fam->add_task("t");
 		task->addTime( ecf::TimeAttr( TimeSlot(10,0) ) );
@@ -236,7 +238,7 @@ BOOST_AUTO_TEST_CASE( test_repeat_with_cron  )
 
       family_ptr f = suite->add_family( "f" );
  		f->addRepeat( RepeatDate("YMD",20091001,20091004,1));  // repeat contents 4 times
- 		f->addVerify( VerifyAttr(NState::COMPLETE,1) );          // family completes once
+ 		f->addVerify( VerifyAttr(NState::COMPLETE,4) );
 
       family_ptr family_plot = f->add_family( "plot" );
  		family_plot->add_complete(  "plot/finish ==  complete");
@@ -285,8 +287,8 @@ BOOST_AUTO_TEST_CASE( test_repeat_enumerated )
       theEnums.push_back("bill");   // index 2
 
       family_ptr fam = suite->add_family( "family" );
-      fam->addRepeat( RepeatEnumerated("ENUM",theEnums));  // repeat contents 2 times
-      fam->addVerify( VerifyAttr(NState::COMPLETE,1) );      // family completes once
+      fam->addRepeat( RepeatEnumerated("ENUM",theEnums));  // repeat contents 3 times
+      fam->addVerify( VerifyAttr(NState::COMPLETE,3) );
 
       task_ptr task = fam->add_task("t1");
       task->addVerify( VerifyAttr(NState::COMPLETE,3) );
@@ -334,7 +336,7 @@ BOOST_AUTO_TEST_CASE( test_repeat_string )
 
       family_ptr fam = suite->add_family( "family" );
  	   fam->addRepeat( RepeatString("STRING",theStrings));  // repeat contents 2 times
- 	   fam->addVerify( VerifyAttr(NState::COMPLETE,1) );    // family completes once
+ 	   fam->addVerify( VerifyAttr(NState::COMPLETE,2) );
 
       task_ptr task = fam->add_task("t1");
  	   task->addVerify( VerifyAttr(NState::COMPLETE,2) );

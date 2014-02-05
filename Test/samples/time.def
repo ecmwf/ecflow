@@ -15,6 +15,9 @@ suite time
       time 15:00
       time 16:00
       time 17:00
+    task every_minute
+     time 00:01 23:59 00:01
+     edit SLEEP 90          # task takes longer than one minute
   endfamily
   family f
      task t1

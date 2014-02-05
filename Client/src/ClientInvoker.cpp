@@ -256,13 +256,12 @@ int ClientInvoker::do_invoke_cmd(Cmd_ptr cts_cmd) const
 	unsigned int retry_connection_period = retry_connection_period_;
 	if (cts_cmd->ping_cmd()) retry_connection_period = 1;
 
-
-	/// report this message at least once. So client has a clue what's going on
-   bool report_block_client_on_home_server = false;
-   bool report_block_client_server_halted = false;
-   bool report_block_client_zombie_detected = false;
-
 	try {
+	   /// report this message at least once. So client has a clue what's going on
+	   bool report_block_client_on_home_server = false;
+	   bool report_block_client_server_halted = false;
+	   bool report_block_client_zombie_detected = false;
+
 		// We do not want to loop over the sms host list indefinitely hence we use a timer.
 		// The time out period is supplied via ClientEnvironment
 		bool never_polled = true; // don't wait for the first host only subsequent ones
@@ -823,7 +822,6 @@ int ClientInvoker::requeue( const std::vector<std::string>& paths,  const std::s
       if (option == "abort") the_option = RequeueNodeCmd::ABORT;
       else if (option == "force") the_option = RequeueNodeCmd::FORCE;
       else {
-         std::stringstream ss;
          server_reply_.set_error_msg("ecflow:ClientInvoker::requeue: Expected option = [ force | abort ]");
          if (on_error_throw_exception_) {
             throw std::runtime_error(server_reply_.error_msg());
@@ -842,7 +840,6 @@ int ClientInvoker::requeue( const std::string& absNodePath, const std::string& o
       if (option == "abort") the_option = RequeueNodeCmd::ABORT;
       else if (option == "force") the_option = RequeueNodeCmd::FORCE;
       else {
-         std::stringstream ss;
          server_reply_.set_error_msg("ecflow:ClientInvoker::requeue: Expected option = [ force | abort ]");
          if (on_error_throw_exception_) throw std::runtime_error(server_reply_.error_msg());
          return 1;
@@ -1037,6 +1034,37 @@ std::string ClientInvoker::client_env_host_port() const
    host_port += Str::COLON();
    host_port += clientEnv_.port();
    return host_port;
+}
+
+std::string ClientInvoker::find_free_port(int seed_port_number, bool debug)
+{
+   // Ping failed, We need to distinguish between:
+   //    a/ Server does not exist : <FREE> port
+   //    b/ Address in use        : <BUSY> port on existing server
+   // Using server_version() but then get error messages
+   // ******** Until this is done we can't implement port hopping **********
+
+   if (debug) cout << "ClientInvoker::find_free_port: starting with port " << seed_port_number << "\n";
+   int the_port = seed_port_number;
+   std::string free_port;
+   ClientInvoker client;
+   client.set_retry_connection_period(1); // avoid long wait
+   client.set_connection_attempts(1);     // avoid long wait
+   while (1) {
+      free_port = boost::lexical_cast<std::string>(the_port);
+      try {
+         if (debug) cout << "   Trying to connect to server on '" << Str::LOCALHOST() << ":" << free_port << "'\n";
+         client.set_host_port(Str::LOCALHOST(),free_port);
+         client.pingServer();
+         if (debug) cout << "   Connected to server on port " << free_port << " trying next port\n";
+         the_port++;
+      }
+      catch ( std::runtime_error& e) {
+         if (debug) cout << "   Found free port " << free_port << "\n";
+         break;
+      }
+   }
+   return free_port;
 }
 
 bool ClientInvoker::wait_for_server_reply(int time_out) const

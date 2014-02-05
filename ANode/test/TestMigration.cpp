@@ -35,7 +35,7 @@ namespace fs = boost::filesystem;
 // If you are updating the tests, *MAKE SURE* to check out test/data/migration/* files
 //#define UPDATE_TESTS 1
 
-BOOST_AUTO_TEST_SUITE( ANattrTestSuite )
+BOOST_AUTO_TEST_SUITE( NodeTestSuite )
 
 //
 // These test are used for future release. They help to ensure that we have

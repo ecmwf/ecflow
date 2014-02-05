@@ -78,7 +78,7 @@ BOOST_AUTO_TEST_CASE( test_single_real_time )
       //       and hence skews time series.  Which can leave state in a queued state,
       //       and hence test never completes
       suite_ptr suite = theDefs.add_suite("test_time_single_slot");
-      ClockAttr clockAttr(theLocalTime);
+      ClockAttr clockAttr(theLocalTime,false);
       suite->addClock( clockAttr );
 
       family_ptr fam = suite->add_family("family");
@@ -129,7 +129,7 @@ BOOST_AUTO_TEST_CASE( test_time_multiple_single_slot )
       boost::posix_time::ptime time3 = time2 + minutes(TestFixture::job_submission_interval());
 
       suite_ptr suite = theDefs.add_suite("test_time_multiple_single_slot");
-      ClockAttr clockAttr(theLocalTime);
+      ClockAttr clockAttr(theLocalTime,false);
       suite->addClock( clockAttr );
       suite->add_variable("SLEEPTIME","1");
 
@@ -177,7 +177,7 @@ BOOST_AUTO_TEST_CASE( test_time_relative_time_series )
       // Initialise clock with todays date and time, then create a time attribute
       // with a time series, so that task runs 3 times relative to suite start
       suite_ptr suite = theDefs.add_suite("test_time_relative_time_series");
-      ClockAttr clockAttr(Calendar::second_clock_time());
+      ClockAttr clockAttr(Calendar::second_clock_time(),false);
       suite->addClock( clockAttr );
       suite->add_variable("SLEEPTIME",boost::lexical_cast<std::string>(TestFixture::job_submission_interval()-1));
 

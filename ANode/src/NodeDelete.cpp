@@ -226,11 +226,9 @@ void Node::delete_limit_path(const std::string& name,const std::string& path)
 {
    if (name.empty()) {
       throw std::runtime_error("Node::delete_limit_path: the limit name must be provided");
-      return;
    }
    if (path.empty()) {
       throw std::runtime_error("Node::delete_limit_path: the limit path must be provided");
-      return;
    }
 
    size_t theSize = limitVec_.size();

@@ -18,24 +18,8 @@ cd $WK
 # =============================================================================================
 # The *NEXT* version of boost
 # =============================================================================================
-BOOST_VERSION=1_51_0
+BOOST_VERSION=1_53_0
 BOOST_TAR_GZ_FILE=/var/tmp/ma0/boost/boost_$BOOST_VERSION.tar.gz
-
-# ===============================================================================================
-# IBM/ECGATE:  rs6000: GCC :  shared file system, home dir is accessible from ecgate
-# ===============================================================================================
-#HOST=ecgate
-#ROOT_DIR=/emos_data/ecflow/rs6000/gcc
-#BOOST_DIR=$ROOT_DIR/boost
-#ecrcp $BOOST_TAR_GZ_FILE  $HOST:$BOOST_DIR/
- 
-# ===============================================================================================
-# IBM/ECGATE: rs6000: XLC-v11.2  :  shared file system, home dir is accessible from ecgate
-# ===============================================================================================
-HOST=ecgate
-ROOT_DIR=/emos_data/ecflow/rs6000/xlc
-BOOST_DIR=$ROOT_DIR/boost
-ecrcp $BOOST_TAR_GZ_FILE  $HOST:$BOOST_DIR/
 
 # ===============================================================================================
 # IBM-AIX: ibm_power6:   
