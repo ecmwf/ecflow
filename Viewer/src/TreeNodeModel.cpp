@@ -56,7 +56,6 @@ int TreeNodeModel::rowCount( const QModelIndex& parent) const
 {
 	//qDebug() << "<< rowCount" << parent;
 
-
 	if(!hasData())
 	{
 		return 0;
@@ -79,7 +78,7 @@ int TreeNodeModel::rowCount( const QModelIndex& parent) const
 				return server->suiteNum();
 			}
 	}
-	else if(Node* parentNode=nodeFromIndex(parent))
+	else if(Node* parentNode=indexToNode(parent))
 	{
 		std::vector<node_ptr> nodes;
 		parentNode->immediateChildren(nodes);
@@ -131,7 +130,7 @@ QVariant TreeNodeModel::serverData(const QModelIndex& index,int role) const
 
 QVariant TreeNodeModel::nodeData(const QModelIndex& index, int role) const
 {
-	Node* node=nodeFromIndex(index);
+	Node* node=indexToNode(index);
 	if(!node)
 		return QVariant();
 
@@ -197,7 +196,6 @@ QModelIndex TreeNodeModel::index( int row, int column, const QModelIndex & paren
 		//The parent is a server: this is a suite
 		if(ServerHandler* server=indexToServer(parent))
 		{
-				//For suite nodes we store the
 				defs_ptr defs = server->defs();
 			    const std::vector<suite_ptr> &suites = defs->suiteVec();
 			    return createIndex(row,column,suites.at(row).get());
@@ -205,7 +203,7 @@ QModelIndex TreeNodeModel::index( int row, int column, const QModelIndex & paren
 		//Non suite nodes
 		else
 		{
-				Node* parentNode=nodeFromIndex(parent);
+				Node* parentNode=indexToNode(parent);
 				std::vector<node_ptr> nodes;
 				parentNode->immediateChildren(nodes);
 				if(static_cast<int>(nodes.size()) > row)
@@ -250,8 +248,7 @@ ServerHandler* TreeNodeModel::indexToServer(const QModelIndex & index) const
 	return NULL;
 }
 
-
-Node* TreeNodeModel::nodeFromIndex( const QModelIndex & index) const
+Node* TreeNodeModel::indexToNode( const QModelIndex & index) const
 {
 	if(index.isValid())
 	{
@@ -271,7 +268,7 @@ QModelIndex TreeNodeModel::parent(const QModelIndex &child) const
 		return QModelIndex();
 
 	//Get the parent node
-	Node* node=nodeFromIndex(child);
+	Node* node=indexToNode(child);
 	if(!node)
 		return QModelIndex();
 

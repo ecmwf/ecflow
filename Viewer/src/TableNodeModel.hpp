@@ -31,7 +31,7 @@ public:
 	ServerHandler* indexToServer(const QModelIndex & index) const;
 
 	QModelIndex indexFromNode(Node*) const;
-	Node* nodeFromIndex( const QModelIndex & index) const;
+	Node* indexToNode( const QModelIndex & index) const;
 
 protected:
 	QVariant serverData(const QModelIndex& index,int role) const;

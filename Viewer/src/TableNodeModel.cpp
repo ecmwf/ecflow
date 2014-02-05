@@ -79,7 +79,7 @@ int TableNodeModel::rowCount( const QModelIndex& parent) const
 				return server->suiteNum();
 			}
 	}
-	else if(Node* parentNode=nodeFromIndex(parent))
+	else if(Node* parentNode=indexToNode(parent))
 	{
 		std::vector<node_ptr> nodes;
 		parentNode->immediateChildren(nodes);
@@ -131,7 +131,7 @@ QVariant TableNodeModel::serverData(const QModelIndex& index,int role) const
 
 QVariant TableNodeModel::nodeData(const QModelIndex& index, int role) const
 {
-	Node* node=nodeFromIndex(index);
+	Node* node=indexToNode(index);
 	if(!node)
 		return QVariant();
 
@@ -205,7 +205,7 @@ QModelIndex TableNodeModel::index( int row, int column, const QModelIndex & pare
 		//Non suite nodes
 		else
 		{
-				Node* parentNode=nodeFromIndex(parent);
+				Node* parentNode=indexToNode(parent);
 				std::vector<node_ptr> nodes;
 				parentNode->immediateChildren(nodes);
 				if(static_cast<int>(nodes.size()) > row)
@@ -251,7 +251,7 @@ ServerHandler* TableNodeModel::indexToServer(const QModelIndex & index) const
 }
 
 
-Node* TableNodeModel::nodeFromIndex( const QModelIndex & index) const
+Node* TableNodeModel::indexToNode( const QModelIndex & index) const
 {
 	if(index.isValid())
 	{
@@ -271,7 +271,7 @@ QModelIndex TableNodeModel::parent(const QModelIndex &child) const
 		return QModelIndex();
 
 	//Get the parent node
-	Node* node=nodeFromIndex(child);
+	Node* node=indexToNode(child);
 	if(!node)
 		return QModelIndex();
 

@@ -11,6 +11,7 @@
 #define SERVERHANDLER_HPP_
 
 #include <string>
+#include <vector>
 #include "Defs.hpp"
 
 class ClientInvoker;
@@ -29,6 +30,7 @@ public:
 
 		static const std::vector<ServerHandler*>& servers() {return servers_;}
 		static ServerHandler* addServer(const std::string &server, int port);
+		static void command(std::vector<ServerHandler*>,std::vector<Node*>,std::string);
 
 protected:
 		std::string name_;

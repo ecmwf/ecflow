@@ -12,6 +12,7 @@
 #include "Defs.hpp"
 #include "ClientInvoker.hpp"
 
+#include <iostream>
 #include <sstream>
 
 std::vector<ServerHandler*> ServerHandler::servers_;
@@ -50,7 +51,10 @@ int ServerHandler::suiteNum()  const
 	if(client_)
 	{
 			defs_ptr defs = client_->defs();
-			return static_cast<int>(defs->suiteVec().size());
+			if(defs != NULL)
+			{
+				return static_cast<int>(defs->suiteVec().size());
+			}
 	}
 	return 0;
 }
@@ -59,6 +63,12 @@ defs_ptr ServerHandler::defs()
 {
 	if(client_)
 			return client_->defs();
+}
+
+void ServerHandler::command(std::vector<ServerHandler*>,std::vector<Node*>,std::string cmd)
+{
+
+
 }
 
 

@@ -9,18 +9,112 @@
 
 #include "TreeNodeView.hpp"
 
+#include <QDebug>
+#include <QScrollBar>
+
 #include "Defs.hpp"
 #include "ClientInvoker.hpp"
+#include "Node.hpp"
 
+#include "ActionHandler.hpp"
+#include "ServerHandler.hpp"
 #include "TreeNodeModel.hpp"
+
 
 TreeNodeView::TreeNodeView(QString ,QWidget* parent) : QTreeView(parent)
 {
 		model_=new TreeNodeModel(this);
 		setModel(model_);
 
+
+		//Context menu
+		setContextMenuPolicy(Qt::CustomContextMenu);
+
+		connect(this, SIGNAL(customContextMenuRequested(const QPoint &)),
+		                this, SLOT(slotContextMenu(const QPoint &)));
+
+		//Selection
+		connect(this,SIGNAL(clicked(const QModelIndex&)),
+				this,SLOT(slotSelectItem(const QModelIndex)));
+
+		connect(this,SIGNAL(doubleClicked(const QModelIndex&)),
+				this,SLOT(slotDoubleClickItem(const QModelIndex)));
+
+		actionHandler_=new ActionHandler(this);
+
 		expandAll();
+
+
 }
+//Collects the selected list of indexes
+QModelIndexList TreeNodeView::selectedList()
+{
+  	QModelIndexList lst;
+  	foreach(QModelIndex idx,selectedIndexes())
+	  	if(idx.column() == 0)
+		  	lst << idx;
+	return lst;
+}
+
+void TreeNodeView::slotSelectItem(const QModelIndex&)
+{
+}
+
+
+void TreeNodeView::slotDoubleClickItem(const QModelIndex&)
+{
+}
+
+void TreeNodeView::slotContextMenu(const QPoint &position)
+{
+	QModelIndexList lst=selectedList();
+	//QModelIndex index=indexAt(position);
+	QPoint scrollOffset(horizontalScrollBar()->value(),verticalScrollBar()->value());
+
+	handleContextMenu(indexAt(position),lst,mapToGlobal(position),position+scrollOffset,this);
+}
+
+
+void TreeNodeView::handleContextMenu(QModelIndex indexClicked,QModelIndexList indexLst,QPoint globalPos,QPoint widgetPos,QWidget *widget)
+{
+  	//Node actions
+  	if(indexClicked.isValid() && indexClicked.column() == 0)   //indexLst[0].isValid() && indexLst[0].column() == 0)
+	{
+	  	qDebug() << "context menu" << indexClicked;
+
+  		std::vector<Node*> nodeLst;
+	  	std::vector<ServerHandler*> serverLst;
+		for(int i=0; i < indexLst.count(); i++)
+		{
+	  		if(model_->isServer(indexLst[i]))
+	  		{
+	  				if(ServerHandler *s=model_->indexToServer(indexLst[i]))
+	  				{
+	  					serverLst.push_back(s);
+	  					qDebug() << "  --> server" << s->name().c_str();
+	  				}
+	  		}
+	  		else
+	  		{
+	  				if(Node *n=model_->indexToNode(indexLst[i]))
+	  				{
+	  						nodeLst.push_back(n);
+	  						qDebug() << "  -->node" << n->name().c_str();
+	  				}
+	  		}
+		}
+
+		actionHandler_->contextMenu(serverLst,nodeLst,globalPos);
+	}
+
+	//Desktop actions
+	else
+	{
+	}
+}
+
+
+
 
 /*
 void TreeNodeView::printDefTree(const std::string &server, int port)

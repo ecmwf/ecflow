@@ -15,18 +15,29 @@
 
 #include "NodeViewBase.hpp"
 
+class ActionHandler;
 class TreeNodeModel;
 
 class TreeNodeView : public QTreeView, public NodeViewBase
 {
+Q_OBJECT
+
 public:
 		TreeNodeView(QString,QWidget *parent=0);
 		//TreeNodeView::printDefTree(const std::string &server, int port);
 		//TreeNodeView::printNode(node_ptr node, int indent, QTreeWidgetItem *parent)
 
-protected:
-		TreeNodeModel *model_;
+public slots:
+	void slotSelectItem(const QModelIndex&);
+	void slotDoubleClickItem(const QModelIndex&);
+	void slotContextMenu(const QPoint &position);
 
+protected:
+		QModelIndexList selectedList();
+		void handleContextMenu(QModelIndex indexClicked,QModelIndexList indexLst,QPoint globalPos,QPoint widgetPos,QWidget *widget);
+
+		TreeNodeModel *model_;
+		ActionHandler* actionHandler_;
 };
 
 
