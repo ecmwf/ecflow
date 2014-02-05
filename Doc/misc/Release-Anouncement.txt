@@ -19,29 +19,27 @@ on the following platforms:
    o cct/cca         (cray XC30) 
  
 The release includes the following changes:
-
-
+ 
+ 
+ 
+ 
  
 To use a specific version (this is the *recommended* way):
 
    export ECFLOW_VERSION=4.0.1
    use ecflow
    
+   This will setup the PATHS for client server and python extension
+   Note: The GUI(ecflowview) is only available on linux  
+   Please note that the latest version of ecflow can change at any
+   time, so it is advisable to specify the version for long term usage.
+
 To use the latest test version:
 
    export ECFLOW_VERSION=test
    use ecflow
    
-To use the latest ecFlow on linux/HPUX/ecgate call:
-
-   use ecflow
-   
-   This will setup the PATHS for client server and python extension
-   Note: The GUI(ecflowview) is only available on linux and ecgate.
-   Please note that the latest version of ecflow can change at any
-   time, so it is advisable to specify the version for long term usage.
-
-   On CRAY(cct/cca),AIX(c2a/c2b) and redhat/RHEL(ecgb):
+To use the latest ecFlow CRAY(cct/cca),AIX(c2a/c2b) and redhat/RHEL(ecgb):
 
    Please use the module functionality  i.e
       module avail ecflow
@@ -63,6 +61,10 @@ the server variable %ECF_VERSION% to locate the executable, this ensures
 that client version is in sync with the server i.e
 
    /usr/local/apps/ecflow/%ECF_VERSION%/bin/ecflow_client --complete
+   
+or:
+
+  module load ecflow/%ECF_VERSION%
 
 Please see:
    https://software.ecmwf.int/wiki/display/ECFLOW/Release+process
