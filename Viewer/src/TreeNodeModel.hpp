@@ -5,8 +5,11 @@
 
 #include <vector>
 
+#include "ViewNodeInfo.hpp"
+
 class Node;
 class ServerHandler;
+
 
 class TreeNodeModel : public QAbstractItemModel
 {
@@ -23,20 +26,25 @@ public:
    	QModelIndex index (int, int, const QModelIndex& parent = QModelIndex() ) const;
    	QModelIndex parent (const QModelIndex & ) const;
 
-	bool hasData() const;
 	void addServer(ServerHandler *);
+	void setRootNode(Node *node);
 	void dataIsAboutToChange();
-	//void setRootNode(MvQOgcNode*);
+	ViewNodeInfo_ptr nodeInfo(const QModelIndex& index) const;
+
+protected:
+	bool hasData() const;
 	bool isServer(const QModelIndex & index) const;
 	ServerHandler* indexToServer(const QModelIndex & index) const;
-
+	QModelIndex serverToIndex(ServerHandler*) const;
 	QModelIndex indexFromNode(Node*) const;
 	Node* indexToNode( const QModelIndex & index) const;
 
-protected:
 	QVariant serverData(const QModelIndex& index,int role) const;
 	QVariant nodeData(const QModelIndex& index,int role) const;
+	Node *rootNode(ServerHandler*) const;
+
 	QList<ServerHandler*> servers_;
+	QMap<ServerHandler*,Node*> rootNodes_;
 
 };
 

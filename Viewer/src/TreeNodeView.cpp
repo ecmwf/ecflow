@@ -12,12 +12,11 @@
 #include <QDebug>
 #include <QScrollBar>
 
-#include "Defs.hpp"
-#include "ClientInvoker.hpp"
-#include "Node.hpp"
+//#include "Defs.hpp"
+//#include "ClientInvoker.hpp"
+//#include "Node.hpp"
 
 #include "ActionHandler.hpp"
-#include "ServerHandler.hpp"
 #include "TreeNodeModel.hpp"
 
 
@@ -58,8 +57,16 @@ QModelIndexList TreeNodeView::selectedList()
 
 void TreeNodeView::slotSelectItem(const QModelIndex&)
 {
+	QModelIndexList lst=selectedIndexes();
+	if(lst.count() > 0)
+	{
+		ViewNodeInfo_ptr info=model_->nodeInfo(lst.front());
+		if(!info->isEmpty())
+		{
+			emit selectionChanged(info);
+		}
+	}
 }
-
 
 void TreeNodeView::slotDoubleClickItem(const QModelIndex&)
 {
@@ -82,29 +89,15 @@ void TreeNodeView::handleContextMenu(QModelIndex indexClicked,QModelIndexList in
 	{
 	  	qDebug() << "context menu" << indexClicked;
 
-  		std::vector<Node*> nodeLst;
-	  	std::vector<ServerHandler*> serverLst;
+  		std::vector<ViewNodeInfo_ptr> nodeLst;
 		for(int i=0; i < indexLst.count(); i++)
 		{
-	  		if(model_->isServer(indexLst[i]))
-	  		{
-	  				if(ServerHandler *s=model_->indexToServer(indexLst[i]))
-	  				{
-	  					serverLst.push_back(s);
-	  					qDebug() << "  --> server" << s->name().c_str();
-	  				}
-	  		}
-	  		else
-	  		{
-	  				if(Node *n=model_->indexToNode(indexLst[i]))
-	  				{
-	  						nodeLst.push_back(n);
-	  						qDebug() << "  -->node" << n->name().c_str();
-	  				}
-	  		}
+			ViewNodeInfo_ptr info=model_->nodeInfo(indexLst[i]);
+			if(!info->isEmpty())
+				nodeLst.push_back(info);
 		}
 
-		actionHandler_->contextMenu(serverLst,nodeLst,globalPos);
+		actionHandler_->contextMenu(nodeLst,globalPos);
 	}
 
 	//Desktop actions
@@ -113,7 +106,19 @@ void TreeNodeView::handleContextMenu(QModelIndex indexClicked,QModelIndexList in
 	}
 }
 
+void TreeNodeView::slotViewCommand(std::vector<ViewNodeInfo_ptr> nodeLst,QString cmd)
+{
 
+	if(nodeLst.size() == 0)
+		return;
+
+	if(cmd == "set_as_root")
+	{
+		qDebug() << "set as root";
+		model_->setRootNode(nodeLst.at(0)->node());
+		expandAll();
+	}
+}
 
 
 /*

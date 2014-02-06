@@ -14,6 +14,8 @@
 #include <vector>
 #include "Defs.hpp"
 
+#include "ViewNodeInfo.hpp"
+
 class ClientInvoker;
 
 class ServerHandler
@@ -25,12 +27,17 @@ public:
 		const std::string name() const {return name_;}
 		const std::string longName() const {return longName_;}
 		int port() const {return port_;}
-		defs_ptr defs();
+		defs_ptr defs() const;
 		int suiteNum() const;
+		Node* suiteAt(int) const;
 
 		static const std::vector<ServerHandler*>& servers() {return servers_;}
 		static ServerHandler* addServer(const std::string &server, int port);
-		static void command(std::vector<ServerHandler*>,std::vector<Node*>,std::string);
+		static int numOfImmediateChildren(Node*);
+		static Node* immediateChildAt(Node *parent,int pos);
+		static void command(std::vector<ViewNodeInfo_ptr>,std::string);
+		static ServerHandler* find(const std::string& longName);
+		static ServerHandler* find(Node *node);
 
 protected:
 		std::string name_;

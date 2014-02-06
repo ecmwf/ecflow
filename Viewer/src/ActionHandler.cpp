@@ -4,12 +4,15 @@
 #include <QMenu>
 #include "ServerHandler.hpp"
 
-ActionHandler::ActionHandler(QWidget *view) : parent_(view)
+ActionHandler::ActionHandler(QWidget *view) : QObject(view), parent_(view)
 {
+	connect(this,SIGNAL(viewCommand(std::vector<ViewNodeInfo_ptr>,QString)),
+			parent_,SLOT(slotViewCommand(std::vector<ViewNodeInfo_ptr>,QString)));
+
 	//makeShortcut();
 }
 
-void ActionHandler::contextMenu(std::vector<ServerHandler*> serverLst,std::vector<Node*> nodesLst,QPoint pos)
+void ActionHandler::contextMenu(std::vector<ViewNodeInfo_ptr> nodesLst,QPoint pos)
 {
 	QMenu *menu=new QMenu(parent_);
 
@@ -21,9 +24,18 @@ void ActionHandler::contextMenu(std::vector<ServerHandler*> serverLst,std::vecto
 	ac=new QAction("Submit",parent_);
 	acLst << ac;
 
+	ac=new QAction("Set as root",parent_);
+		acLst << ac;
+
 	if(QAction* res=QMenu::exec(acLst,pos,0,parent_))
 	{
-		ServerHandler::command(serverLst,nodesLst,res->iconText().toStdString());
+
+		if(res->iconText() == "Set as root")
+		{
+			emit viewCommand(nodesLst,"set_as_root");
+		}
+		else
+			ServerHandler::command(nodesLst,res->iconText().toStdString());
 	}
 
 	delete menu;

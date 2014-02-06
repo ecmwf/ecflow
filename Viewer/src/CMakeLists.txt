@@ -13,12 +13,13 @@ set(viewer_srcs
     TableNodeModel.cpp
     TreeNodeModel.cpp
     TreeNodeView.cpp
-    ViewConfig.cpp)
+    ViewConfig.cpp
+    ViewNodeInfo.cpp)
 
 
 include(${QT_USE_FILE})
 
-QT4_WRAP_CPP(VIEWER_MOC MainWindow.hpp NodePanel.hpp NodePathWidget.hpp NodeWidget.hpp TabWidget.hpp TreeNodeView.hpp)
+QT4_WRAP_CPP(VIEWER_MOC ActionHandler.hpp MainWindow.hpp NodePanel.hpp NodePathWidget.hpp NodeWidget.hpp TabWidget.hpp TreeNodeView.hpp)
 QT4_ADD_RESOURCES (VIEWER_RES viewer.qrc)
 QT4_WRAP_UI       (VIEWER_FORMS_HEADERS MainWindow.ui)
 

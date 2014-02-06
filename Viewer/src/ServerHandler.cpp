@@ -37,6 +37,14 @@ ServerHandler::ServerHandler(const std::string& name, int port) :
 
 	client_->sync_local();
 
+	//Set server name and pot in defs
+	defs_ptr defs = client_->defs();
+	if(defs != NULL)
+	{
+		ServerState& st=defs->set_server();
+		st.add_or_update_user_variables("longName",longName_);
+	}
+
 	servers_.push_back(this);
 }
 
@@ -59,16 +67,82 @@ int ServerHandler::suiteNum()  const
 	return 0;
 }
 
-defs_ptr ServerHandler::defs()
+Node* ServerHandler::suiteAt(int pos) const
+{
+	defs_ptr d = defs();
+	if(d != NULL)
+	{
+		const std::vector<suite_ptr> &suites = d->suiteVec();
+		return (pos >=0 && pos < suites.size())?suites.at(pos).get():NULL;
+	}
+
+	return NULL;
+}
+
+Node* ServerHandler::immediateChildAt(Node *parent,int pos)
+{
+	if(!parent || pos <0) return NULL;
+
+	std::vector<node_ptr> nodes;
+	parent->immediateChildren(nodes);
+	if(static_cast<int>(nodes.size()) > pos)
+		return nodes.at(pos).get();
+
+	return NULL;
+}
+
+defs_ptr ServerHandler::defs() const
 {
 	if(client_)
 			return client_->defs();
 }
 
-void ServerHandler::command(std::vector<ServerHandler*>,std::vector<Node*>,std::string cmd)
+
+int ServerHandler::numOfImmediateChildren(Node *node)
 {
+	if(!node) return 0;
+
+	std::vector<node_ptr> nodes;
+	node->immediateChildren(nodes);
+	return static_cast<int>(nodes.size());
+}
+
+void ServerHandler::command(std::vector<ViewNodeInfo_ptr> info,std::string cmd)
+{
+	std::cout << "command: " << cmd << std::endl;
+	for(int i=0; i < info.size(); i++)
+	{
+			if(info[i]->isNode())
+			{
+					std::cout << "  --> for node: " << info[i]->node()->absNodePath() <<   " (server: " << info[i]->server()->longName() << ")" << std::endl;
+			}
+			else if(info[i]->isServer())
+			{
+					std::cout << "  --> for server: " << info[i]->server()->longName() << std::endl;
+			}
+	}
+}
 
 
+ServerHandler* ServerHandler::find(const std::string& longName)
+{
+	for(std::vector<ServerHandler*>::const_iterator it=servers_.begin(); it != servers_.end();it++)
+			if((*it)->longName() == longName)
+					return *it;
+	return NULL;
+}
+
+ServerHandler* ServerHandler::find(Node *node)
+{
+	if(node)
+	{
+		if(Defs* defs = node->defs())
+		{
+			const ServerState& st=defs->server();
+			return ServerHandler::find(st.find_variable("longName"));
+		}
+	}
+	return NULL;
 }
 
 

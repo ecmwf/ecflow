@@ -8,33 +8,34 @@
 //
 //============================================================================
 
-#ifndef ACTIONHANDLER_HPP_
-#define ACTIONHANDLER_HPP_
+#ifndef VIEWNODEINFO_HPP_
+#define VIEWNODEINFO_HPP_
 
-#include <QPoint>
-#include <QObject>
+#include <cstddef>
+#include <boost/shared_ptr.hpp>
 
-#include <vector>
-
-#include "ViewNodeInfo.hpp"
-
-class QWidget;
 class Node;
+
 class ServerHandler;
 
-class ActionHandler : public QObject
+class ViewNodeInfo
 {
-Q_OBJECT
 public:
-		ActionHandler(QWidget*);
+		ViewNodeInfo();
+		ViewNodeInfo(Node*,ServerHandler* server=NULL);
+		ViewNodeInfo(ServerHandler*);
 
-		void contextMenu(std::vector<ViewNodeInfo_ptr>,QPoint);
-signals:
-	    void viewCommand(std::vector<ViewNodeInfo_ptr>,QString);
+		bool isNode() const;
+		bool isServer() const;
+		bool isEmpty() const;
+		Node* node() const;
+		ServerHandler* server() const;
 
-protected:
-		QWidget *parent_;
-
+private:
+		Node* node_;
+		mutable ServerHandler* server_;
 };
+
+typedef boost::shared_ptr<ViewNodeInfo>   ViewNodeInfo_ptr;
 
 #endif

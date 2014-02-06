@@ -15,6 +15,8 @@
 
 #include "NodeViewBase.hpp"
 
+#include "ViewNodeInfo.hpp"
+
 class ActionHandler;
 class TreeNodeModel;
 
@@ -31,6 +33,10 @@ public slots:
 	void slotSelectItem(const QModelIndex&);
 	void slotDoubleClickItem(const QModelIndex&);
 	void slotContextMenu(const QPoint &position);
+	void slotViewCommand(std::vector<ViewNodeInfo_ptr>,QString);
+
+signals:
+	void selectionChanged(ViewNodeInfo_ptr);
 
 protected:
 		QModelIndexList selectedList();
