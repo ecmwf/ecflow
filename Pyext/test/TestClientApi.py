@@ -141,7 +141,8 @@ def test_client_new_log(ci, port):
     try:     log_text = log_file.read();     # assume log file not to big
     finally: log_file.close();
     assert log_text.find("--ping") != -1, "Expected to find --ping in log file"
-    os.remove("./test_client_new_log.log")
+    try: os.remove("./test_client_new_log.log")
+    except: pass
 
 
 def test_client_clear_log(ci, port):

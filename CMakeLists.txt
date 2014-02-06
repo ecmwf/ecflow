@@ -73,9 +73,9 @@ message( STATUS "PYTHON_LIBRARIES     : ${PYTHON_LIBRARIES}")
 # If this is enable then can not find boost libs using env BOOST_ROOT ?
 #ecbuild_add_extra_search_paths( boost )
 
-# For local boost_root I do not set Boost_USE_STATIC_LIBS, but it still links statis
+# For local boost_root I do not set Boost_USE_STATIC_LIBS, but it still links boost libs statically
 # for external boost root its need to be explicitly enabled ?
-set(Boost_USE_STATIC_LIBS        ON)
+#set(Boost_USE_STATIC_LIBS        ON)
 set(Boost_USE_MULTITHREADED      ON)
 set(Boost_NO_SYSTEM_PATHS        ON)
 set(Boost_DETAILED_FAILURE_MSG   ON)
