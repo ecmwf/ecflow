@@ -38,7 +38,6 @@ def get_ecflow_version( work_space ):
     return ecflow_version
         
 WK=os.getenv("WK") 
-BOOST_VERSION="boost_1_53_0"
 
 ecflow_version_list = get_ecflow_version( WK )
 assert len(ecflow_version_list) == 3, "Expected version to have release, major,minor"
@@ -62,6 +61,7 @@ def add_localhost_variables( localhost ):
     localhost.add_variable("COMPILER_TEST_PATH","gcc-4.5/$mode")
     localhost.add_variable("COMPILER_VERSION","gcc-4.5")
     localhost.add_variable("TOOLSET","gcc")
+    localhost.add_variable("BOOTSTRAP_TOOLSET","gcc")
     localhost.add_variable("ARCH","opensuse113")
     localhost.add_variable("SITE_CONFIG","$WK/build/site_config/site-config-Linux64.jam")
     add_local_job_variables( localhost )
@@ -70,8 +70,11 @@ def add_localhost_clang_variables( localhost_clang ):
     localhost_clang.add_variable("COMPILER_TEST_PATH","clang-linux-3.2/$mode")
     localhost_clang.add_variable("COMPILER_VERSION","clang-linux-3.2")
     localhost_clang.add_variable("TOOLSET","clang")
+    localhost_clang.add_variable("BOOTSTRAP_TOOLSET","gcc")  # can't seem to build jam with clang, using gcc instead
+    localhost_clang.add_variable("REMOTE_COPY","cp")
     localhost_clang.add_variable("ARCH","opensuse113")
     localhost_clang.add_variable("SITE_CONFIG","$WK/build/site_config/site-config-Linux64-clang.jam")
+    localhost_clang.add_variable("BOOST_DIR","/var/tmp/ma0/boost/clang")
     add_local_job_variables( localhost_clang )
 
 def add_remote_linux_64_variables( linux_64 ): 
@@ -80,6 +83,7 @@ def add_remote_linux_64_variables( linux_64 ):
     linux_64.add_variable("COMPILER_TEST_PATH","gcc-4.3/$mode")
     linux_64.add_variable("COMPILER_VERSION","gcc-4.3")
     linux_64.add_variable("TOOLSET","gcc")
+    linux_64.add_variable("BOOTSTRAP_TOOLSET","gcc")
     linux_64.add_variable("NO_OF_CORES","8")
     
 def add_remote_linux_64_intel_variables( linux_64 ): 
@@ -88,6 +92,7 @@ def add_remote_linux_64_intel_variables( linux_64 ):
     linux_64.add_variable("COMPILER_TEST_PATH","intel-linux/$mode")
     linux_64.add_variable("COMPILER_VERSION","intel-linux")
     linux_64.add_variable("TOOLSET","intel")  # intel-linux
+    linux_64.add_variable("BOOTSTRAP_TOOLSET","gcc")
     linux_64.add_variable("NO_OF_CORES","8")
 
 def add_linux_64_variables( linux_64 ): 
@@ -103,8 +108,6 @@ def add_linux_64_intel_variables( linux_64_intel ):
     linux_64_intel.add_variable("BOOST_DIR","/vol/ecf/cluster/intel/boost")
     linux_64_intel.add_variable("ARCH","linux64intel")
     linux_64_intel.add_variable("SITE_CONFIG","$WK/build/site_config/site-config-Linux64-intel.jam")
-    linux_64_intel.add_variable("BOOST_VERSION","boost_1_53_0")  
-
 
 def add_remote_opensuse113_variables( opensuse113 ):
     opensuse113.add_variable("ECF_KILL_CMD","ssh  %USER%@%REMOTE_HOST% \"kill -15 %ECF_RID%\"") 
@@ -112,6 +115,8 @@ def add_remote_opensuse113_variables( opensuse113 ):
     opensuse113.add_variable("COMPILER_TEST_PATH","gcc-4.5/$mode")
     opensuse113.add_variable("COMPILER_VERSION","gcc-4.5")
     opensuse113.add_variable("TOOLSET","gcc")
+    opensuse113.add_variable("BOOTSTRAP_TOOLSET","gcc")
+    opensuse113.add_variable("REMOTE_COPY","scp")
 
 def add_opensuse113_variables( opensuse113 ):
     opensuse113.add_variable("REMOTE_HOST","opensuse113")
@@ -124,6 +129,7 @@ def add_cray_gnu_compiler_variables( cray_gnu ):
     cray_gnu.add_variable("COMPILER_TEST_PATH","gcc-4.6.3/$mode")
     cray_gnu.add_variable("COMPILER_VERSION","gcc-4.6.3")
     cray_gnu.add_variable("TOOLSET","gcc")
+    cray_gnu.add_variable("BOOTSTRAP_TOOLSET","gcc")
     cray_gnu.add_variable("LAYOUT","tagged")
     cray_gnu.add_variable("PRGENV","PrgEnv-gnu")
     cray_gnu.add_variable("SITE_CONFIG","$WK/build/site_config/site-config-cray.jam")
@@ -135,6 +141,7 @@ def add_cray_intel_compiler_variables( cray_intel ):
     cray_intel.add_variable("COMPILER_TEST_PATH","intel-linux/$mode")
     cray_intel.add_variable("COMPILER_VERSION","intel-linux")
     cray_intel.add_variable("TOOLSET","intel")
+    cray_intel.add_variable("BOOTSTRAP_TOOLSET","intel")
     cray_intel.add_variable("LAYOUT","versioned")
     cray_intel.add_variable("PRGENV","PrgEnv-intel")
     cray_intel.add_variable("SITE_CONFIG","$WK/build/site_config/site-config-cray.jam")
@@ -145,6 +152,7 @@ def add_cray_cray_compiler_variables( cray_cray ):
     cray_cray.add_variable("COMPILER_TEST_PATH","cray/$mode")
     cray_cray.add_variable("COMPILER_VERSION","cray")
     cray_cray.add_variable("TOOLSET","cray")
+    cray_cray.add_variable("BOOTSTRAP_TOOLSET","cray")
     cray_cray.add_variable("LAYOUT","versioned")
     cray_cray.add_variable("PRGENV","PrgEnv-cray")
     cray_cray.add_variable("SITE_CONFIG","$WK/build/site_config/site-config-cray.jam")
@@ -158,6 +166,8 @@ def add_remote_cray_variables( cray ):
     cray.add_variable("SMSPASS", "0")
     cray.add_variable("ECF_INCLUDE", "/home/ma/emos/def/cray/include")
     
+    cray.add_variable("REMOTE_COPY","scp")
+
     # for cray we need to use logsrvr in order to see the job output
     cray.add_variable("ECF_LOGHOST","cctdtn1")
     cray.add_variable("ECF_LOGPORT","9316")   
@@ -192,6 +202,9 @@ def add_remote_redhat_variables( redhat ):
     redhat.add_variable("COMPILER_TEST_PATH","gcc-4.4.7/$mode")
     redhat.add_variable("COMPILER_VERSION","gcc-4.4.7")
     redhat.add_variable("TOOLSET","gcc")
+    redhat.add_variable("BOOTSTRAP_TOOLSET","gcc")
+    redhat.add_variable("REMOTE_COPY","scp")
+
 
 def add_redhat_variables( redhat ):
     redhat.add_variable("REMOTE_HOST","ecgb")
@@ -207,6 +220,7 @@ def add_remote_opensuse103_variables( opensuse103 ):
     opensuse103.add_variable("COMPILER_TEST_PATH","gcc-4.2.1/$mode")
     opensuse103.add_variable("COMPILER_VERSION","gcc-4.2.1")
     opensuse103.add_variable("TOOLSET","gcc")
+    opensuse103.add_variable("BOOTSTRAP_TOOLSET","gcc")
 
 def add_opensuse103_variables( opensuse103 ):
     opensuse103.add_variable("REMOTE_HOST","opensuse103")
@@ -220,7 +234,8 @@ def add_remote_hpux_variables( hpux ):
     hpux.add_variable("ECF_JOB_CMD","rsh %REMOTE_HOST% -l %USER%  '%ECF_JOB% > %ECF_JOBOUT%  2>&1'")
     hpux.add_variable("COMPILER_TEST_PATH","acc/$mode/threading-multi")
     hpux.add_variable("TOOLSET","acc")
-    
+    hpux.add_variable("BOOTSTRAP_TOOLSET","gcc")  # build bjam with acc does not work
+
 def add_hpux_variables( hpux ):
     hpux.add_variable("REMOTE_HOST","itanium")
     hpux.add_variable("ROOT_WK","/scratch/ma/emos/ma0/hpia64")
@@ -253,7 +268,8 @@ def add_remote_aix_power7_variables( aix_power7 ) :
     aix_power7.add_variable("COMPILER_VERSION","c++/vacpp/12.1.0.0")  # c++/vacpp/11.1.0.1 c++/vacpp/12.1.0.0
     aix_power7.add_variable("COMPILER_TEST_PATH","vacpp/$mode/threading-multi")
     aix_power7.add_variable("TOOLSET","vacpp")
-    
+    aix_power7.add_variable("BOOTSTRAP_TOOLSET","vacpp")
+
 def add_aix_power7_variables( aix_power7 ) :
     aix_power7.add_variable("REMOTE_HOST","c2a")
     aix_power7.add_variable("ROOT_WK","/s2o1/emos_data/ecflow")
@@ -374,12 +390,10 @@ def build_localhost_clang( parent ) :
     # Currently clang based profile builds, have a memory fault. 
     # Hence left out test_client_performance and test_server_performance
     localhost_clang = parent.add_family("localhost_clang")
-    localhost_clang.add_variable("BOOST_DIR","/var/tmp/ma0/boost/clang")
-    localhost_clang.add_variable("BOOST_VERSION","boost_1_53_0")
+    add_localhost_clang_variables(localhost_clang)
 
     if (parent.name() == "build") :
         localhost_clang.add_trigger("localhost_cmake == complete || localhost_cmake == aborted")
-    add_localhost_clang_variables(localhost_clang)
     
     add_git_tasks( localhost_clang , True)
 
@@ -429,7 +443,6 @@ def build_cray_gnu( parent ) :
     
 def build_cray_intel( parent ) :
     cray = parent.add_family("cray_intel")
-    cray.add_variable("BOOST_VERSION","boost_1_53_0")
     cray.add_trigger("cray_gnu == complete or cray_gnu == aborted")
     add_cray_variables(cray)
     add_cray_intel_compiler_variables(cray)
@@ -439,7 +452,6 @@ def build_cray_intel( parent ) :
     
 def build_cray_cray( parent ) :
     cray = parent.add_family("cray_cray")
-    cray.add_variable("BOOST_VERSION","boost_1_53_0")
     cray.add_trigger("cray_intel == complete or cray_intel == aborted")
     add_cray_variables(cray)
     add_cray_cray_compiler_variables(cray)
@@ -498,7 +510,6 @@ def add_boost_tasks( family ):
         
 def build_boost( boost ):
     boost.add_defstatus( ecflow.DState.suspended );
-    boost.add_variable("BOOST_VERSION",BOOST_VERSION)
     boost.add_variable("LAYOUT","tagged")
     
     family = boost.add_family("localhost")
@@ -592,7 +603,7 @@ def add_suite_variables( suite ):
     suite.add_variable("PYTHON_VERSION","2.7")
     suite.add_variable("SET_TO_TEST_SCRIPT","false") 
     suite.add_variable("BUILD_ECFLOWVIEW","true")
-    suite.add_variable("GIT_BRANCH","develop")  # when makeing a relase switch to release/<release version> otherwise develop
+    suite.add_variable("GIT_BRANCH","develop")  # when makeing a relase switch to release/<release version>, otherwise develop
 
     # automatically fob all zombies when compiling ecflow 
     child_list = []
@@ -608,14 +619,17 @@ defs.add_variable("ECFLOW_TAR_DIR","/var/tmp/ma0/clientRoot/workspace")
  
 print "build boost"
 with defs.add_suite("boost_suite") as boost_suite:
+    boost_suite.add_variable("BOOST_VERSION","boost_1_55_0")
+    boost_suite.add_variable("REMOTE_COPY","rcp")
     boost_suite.add_variable("ECF_FILES",os.getenv("SCRATCH") + "/nightly/boost_suite")
     add_suite_variables(boost_suite)
     build_boost(boost_suite)
 
 print "incremental and full builds on all platforms"
 with defs.add_suite("suite") as suite:
+    suite.add_variable("REMOTE_COPY","rcp")
     suite.add_variable("ECF_FILES",os.getenv("SCRATCH") + "/nightly/suite")
-    suite.add_variable("BOOST_VERSION",BOOST_VERSION)
+    suite.add_variable("BOOST_VERSION","boost_1_53_0")
     add_suite_variables(suite)
 
     with suite.add_family("build") as build:
