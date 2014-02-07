@@ -123,6 +123,10 @@ void export_Core()
 	.staticmethod("debug_equality")
 	.def("set_debug_equality", &Ecf::set_debug_equality,"Set debugging for equality")
 	.staticmethod("set_debug_equality")
+   .def("debug_level", &Ecf::debug_level,"Returns integer showing debug level. debug_level > 0 will disable some warning messages")
+   .staticmethod("debug_level")
+   .def("set_debug_level", &Ecf::set_debug_level,"Set debug level. debug_level > 0 will disable some warning messages")
+   .staticmethod("set_debug_level")
  	;
 
 	enum_<NState::State>("State",

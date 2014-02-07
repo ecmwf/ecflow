@@ -24,6 +24,7 @@
 #include "ClientToServerCmd.hpp"
 #include "File.hpp"
 #include "Str.hpp"
+#include "Ecf.hpp"
 
 using namespace ecf;
 using namespace std;
@@ -235,6 +236,12 @@ void ClientEnvironment::read_environment_variables()
 	if (getenv("ECF_DENIED")) denied_ = true;
 	if (getenv("NO_ECF")) no_ecf_ = true;
 	if (getenv("ECF_DEBUG_CLIENT")) debug_ = true;
+
+   char *debug_level = getenv("ECF_DEBUG_LEVEL");
+   if (debug_level) {
+      try { Ecf::set_debug_level(boost::lexical_cast<unsigned int>(debug_level)); }
+      catch (...) { throw std::runtime_error("The environment variable ECF_DEBUG_LEVEL must be an unsigned integer."); }
+   }
 
 	char *allow_new_client_old_server = getenv("ECF_ALLOW_NEW_CLIENT_OLD_SERVER");
 	if (allow_new_client_old_server) {
