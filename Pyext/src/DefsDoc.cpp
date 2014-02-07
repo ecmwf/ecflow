@@ -305,7 +305,6 @@ const char* DefsDoc::add_extern_doc()
             "  void auto_add_externs(bool remove_existing_externs_first )\n"
             "\nUsage::\n\n"
             "  defs = Defs(\"file.def\")\n"
-            "  ... populate the defs\n"
             "  ...\n"
             "  defs.auto_add_externs(True)   # remove existing extern first.\n"
             ;
