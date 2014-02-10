@@ -70,7 +70,7 @@ exe ecflowview
      <linkflags>-lXext
      <linkflags>-lXt
      <linkflags>-lX11
-     <linkflags>-lfl
+#     <linkflags>-lfl
    ;
 
    
@@ -97,4 +97,3 @@ exe test-view : [ glob test/*.cpp  ]
            <include>../Test/src 
            <variant>debug:<define>DEBUG
         ;
-# ibis:/var/tmp/map/work/p4/merlin/workspace/MyProject/build $ cp site_config/site-config-Linux64.jam /tmp/map/work/boost_1_47_0/tools/build/v2/site-config.jam 

@@ -227,19 +227,20 @@ ecbuild_add_library(TARGET  libecflowview
                             ${MOTIF_INCLUDE_DIR}
                    )
 
-# =======================================================
+# =======================================================================
 # EXE ecflowview
-#    o 'crypt'  Does not appear to be used           ?
+#    o crypt    Does not appear to be used           ?
 #    o Xp       libxprint does not appear to be used ?
-#  
-#
+#    o fl       fast lexical analyser generator, not used ?
+# ========================================================================
+
 ecbuild_add_executable( TARGET    ecflowview
                         SOURCES   src/ecflowview.cc
 						      CONDITION X11_FOUND AND CMAKE_THREAD_LIBS_INIT
                         LIBS      libecflowview core nodeattr node libparser base libclient 
-                                  ${CMAKE_THREAD_LIBS_INIT} ${Ecflow_Boost_LIBS}
+                                  ${CMAKE_THREAD_LIBS_INIT} 
+                                  ${Ecflow_Boost_LIBS}
                                   ${X11_LIBRARIES} ${X11_Xext_LIB} ${MOTIF_LIBRARIES} ${X11_Xpm_LIB} ${X11_Xt_LIB} 
-                                  fl
                                   ${CMATH_LIBRARIES}
                         INCLUDES  src
                                   ${X11_INCLUDE_DIR}
@@ -247,6 +248,10 @@ ecbuild_add_executable( TARGET    ecflowview
                                   ${Boost_INCLUDE_DIRS} 
                      )
 
+
+# ===================================================================
+# test
+# ===================================================================
 
 ecbuild_add_test( TARGET  test-view
                 SOURCES   test/TestRunner.cpp test/TestView.cpp
