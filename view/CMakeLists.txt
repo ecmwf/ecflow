@@ -159,7 +159,6 @@ list( APPEND srcs_cc
 )
 
 list( APPEND srcs_c
-   src/Array.c
    src/Hyper.c
    src/SimpleBase.c
    src/SimpleGraph.c
