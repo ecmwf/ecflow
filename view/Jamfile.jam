@@ -60,13 +60,13 @@ exe ecflowview
      <define>unix
      <linkflags>-lm 
      <linkflags>-g
-     <linkflags>-lcrypt
+#     <linkflags>-lcrypt
      <toolset>gcc:<linkflags>-L$(MOTIF_LIBRARY)
      <dll-path>$(MOTIF_LIBRARY)
      <linkflags>-L/usr/X11R6/lib
      <linkflags>-lXpm
      <linkflags>-lXm
-     <linkflags>-lXp
+#     <linkflags>-lXp
      <linkflags>-lXext
      <linkflags>-lXt
      <linkflags>-lX11
