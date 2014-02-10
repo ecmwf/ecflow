@@ -173,8 +173,19 @@ file( GLOB libicon_srcs RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "src/libicon/*.cc" 
 file( GLOB libxec_srcs  RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "src/libxec/*.c"   )
 file( GLOB libui_srcs   RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "src/libui/*.cc"   )
 
+find_package( X11 )
+
+debug_var( X11_INCLUDE_DIR )
+debug_var( X11_LIBRARIES )
+
+find_package( CMath )
+
+set( CMAKE_THREAD_PREFER_PTHREAD TRUE )
+find_package( Threads )
+
 ecbuild_add_library(TARGET  libecflowview
                    NOINSTALL
+				   CONDITION X11_FOUND AND CMAKE_THREAD_LIBS_INIT
                    TYPE     STATIC
                    SOURCES  
                             ${srcs_cc} ${srcs_c} ${srcs_cpp} ${libicon_srcs} ${libxec_srcs} ${libui_srcs}
@@ -198,13 +209,16 @@ ecbuild_add_library(TARGET  libecflowview
 
 # =======================================================
 # EXE ecflowview
+
 add_definitions( -D_GNU_SOURCE -DUNIX -Dunix -Dlinux )
 ecbuild_add_executable( TARGET   ecflowview
                         SOURCES  src/ecflowview.cc
+						CONDITION X11_FOUND AND CMAKE_THREAD_LIBS_INIT
                         LIBS     core nodeattr node libparser base libclient 
-                                 libecflowview pthread ${Ecflow_Boost_LIBS}
-                                 m crypt dl Xpm Xm Xp Xext Xt X11 fl
+                                 libecflowview ${CMAKE_THREAD_LIBS_INIT} ${Ecflow_Boost_LIBS}
+                                 ${CMATH_LIBRARIES} crypt dl ${X11_LIBRARIES} fl
                         INCLUDES src
+								 ${X11_INCLUDE_DIR}
                                  ${Boost_INCLUDE_DIRS} 
                      )
 
@@ -212,7 +226,6 @@ ecbuild_add_executable( TARGET   ecflowview
 # ===================================================================
 # install
 # ===================================================================
-install (TARGETS ecflowview DESTINATION bin)
                      
 install (FILES  ${CMAKE_SOURCE_DIR}/view/src/ecflowview.menu 
                 ${CMAKE_SOURCE_DIR}/build/servers
