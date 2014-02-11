@@ -29,7 +29,7 @@ list( APPEND test_srcs
    test/TestToday.cpp
    test/TestAnalysis.cpp
 )
-ecbuild_add_test( TARGET   testsimulator
+ecbuild_add_test( TARGET   c_csim
                 SOURCES  ${test_srcs}
                 LIBS     core nodeattr node libparser base libsimu pthread ${Ecflow_Test_LIBS}
                 INCLUDES  src
@@ -41,7 +41,7 @@ ecbuild_add_test( TARGET   testsimulator
                           ${Boost_INCLUDE_DIRS} )
 
 
-ecbuild_add_test( TARGET   testsingle
+ecbuild_add_test( TARGET   c_csim_single
                 SOURCES  test/TestSingleSimulator.cpp test/TestUtil.cpp
                 LIBS     core nodeattr node libparser base libsimu pthread ${Ecflow_Test_LIBS}
                 INCLUDES  src

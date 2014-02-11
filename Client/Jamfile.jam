@@ -79,7 +79,7 @@ exe ecflow_client : [ glob src/*Main.cpp ]
 # Tests for client. All test source code, by pulling in libclient we avoid 
 # linking with ClientMain.cpp
 #
-exe tclient : [ glob test/*.cpp : test/TestSinglePerf.cpp test/TestMigration.cpp ]  
+exe s_client : [ glob test/*.cpp : test/TestSinglePerf.cpp test/TestMigration.cpp ]  
 	       pthread
            /theCore//core
            /theNodeAttr//nodeattr
@@ -98,7 +98,7 @@ exe tclient : [ glob test/*.cpp : test/TestSinglePerf.cpp test/TestMigration.cpp
            <variant>debug:<define>DEBUG
 	     ;
 	     
-exe test_large_defs_perf : [ glob test/TestSinglePerf.cpp  ]   [ glob test/SCPort.cpp  ]
+exe perf_test_large_defs : [ glob test/TestSinglePerf.cpp  ]   [ glob test/SCPort.cpp  ]
            /theCore//core
            /theNodeAttr//nodeattr
            /theNode//node

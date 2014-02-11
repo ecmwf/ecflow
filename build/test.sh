@@ -101,20 +101,20 @@ if test_uname Linux ; then
    echo "Testing: variant=$mode compiler=$compiler"
    echo "*****************************************"
 
-   ACore/bin/$compiler/$mode/coretest  --log_level=message $TEST_OPTS
-   ANattr/bin/$compiler/$mode/nodeattrtest  --log_level=message $TEST_OPTS
-   ANode/bin/$compiler/$mode/nodetest  --log_level=message $TEST_OPTS
-   AParser/bin/$compiler/$mode/tparser  --log_level=message $TEST_OPTS
+   ACore/bin/$compiler/$mode/u_acore  --log_level=message $TEST_OPTS
+   ANattr/bin/$compiler/$mode/u_anattr  --log_level=message $TEST_OPTS
+   ANode/bin/$compiler/$mode/u_anode  --log_level=message $TEST_OPTS
+   AParser/bin/$compiler/$mode/u_aparser  --log_level=message $TEST_OPTS
    if [ "$safe" = no ] ; then
-      AParser/bin/$compiler/$mode/tsingle          --log_level=message $TEST_OPTS
+      AParser/bin/$compiler/$mode/perf_aparser          --log_level=message $TEST_OPTS
    fi
-   Base/bin/$compiler/$mode/basetest     --log_level=message $TEST_OPTS
-   Client/bin/$compiler/$mode/tclient     --log_level=message $TEST_OPTS
-   Server/bin/$compiler/$mode/tserver       --log_level=message $TEST_OPTS
-   CSim/bin/$compiler/$mode/testsimulator  --log_level=message $TEST_OPTS
+   Base/bin/$compiler/$mode/u_base     --log_level=message $TEST_OPTS
+   Client/bin/$compiler/$mode/s_client     --log_level=message $TEST_OPTS
+   Server/bin/$compiler/$mode/u_server       --log_level=message $TEST_OPTS
+   CSim/bin/$compiler/$mode/c_csim  --log_level=message $TEST_OPTS
    if [ "$safe" = no ] ; then
-      Test/bin/$compiler/$mode/server-test  --log_level=message $TEST_OPTS
-      Test/bin/$compiler/$mode/test-zombies  --log_level=message $TEST_OPTS
+      Test/bin/$compiler/$mode/s_test  --log_level=message $TEST_OPTS
+      Test/bin/$compiler/$mode/s_test_zombies  --log_level=message $TEST_OPTS
    fi
    
    if [ "$safe" = no ] ; then
@@ -133,20 +133,20 @@ if test_uname Linux ; then
 elif test_uname HP-UX ; then
 
    echo "Testing: variant=$mode"
-   ACore/bin/acc/$mode/threading-multi/coretest  --log_level=message $TEST_OPTS
-   ANattr/bin/acc/$mode/threading-multi/nodeattrtest  --log_level=message $TEST_OPTS
-   ANode/bin/acc/$mode/threading-multi/nodetest  --log_level=message $TEST_OPTS
-   AParser/bin/acc/$mode/threading-multi/tparser  --log_level=message $TEST_OPTS
+   ACore/bin/acc/$mode/threading-multi/u_acore  --log_level=message $TEST_OPTS
+   ANattr/bin/acc/$mode/threading-multi/u_anattr  --log_level=message $TEST_OPTS
+   ANode/bin/acc/$mode/threading-multi/u_anode  --log_level=message $TEST_OPTS
+   AParser/bin/acc/$mode/threading-multi/u_aparser  --log_level=message $TEST_OPTS
    if [ "$safe" = no ] ; then
-      AParser/bin/acc/$mode/threading-multi/tsingle  --log_level=message $TEST_OPTS
+      AParser/bin/acc/$mode/threading-multi/perf_aparser  --log_level=message $TEST_OPTS
    fi
-   Base/bin/acc/$mode/threading-multi/basetest  --log_level=message $TEST_OPTS
-   Client/bin/acc/$mode/threading-multi/tclient  --log_level=message $TEST_OPTS
-   Server/bin/acc/$mode/threading-multi/tserver  --log_level=message $TEST_OPTS
-   CSim/bin/acc/$mode/threading-multi/testsimulator  --log_level=message $TEST_OPTS
+   Base/bin/acc/$mode/threading-multi/u_base  --log_level=message $TEST_OPTS
+   Client/bin/acc/$mode/threading-multi/s_client  --log_level=message $TEST_OPTS
+   Server/bin/acc/$mode/threading-multi/u_server  --log_level=message $TEST_OPTS
+   CSim/bin/acc/$mode/threading-multi/c_csim  --log_level=message $TEST_OPTS
    if [ "$safe" = no ] ; then
-      Test/bin/acc/$mode/threading-multi/server-test  --log_level=message $TEST_OPTS
-      Test/bin/acc/$mode/threading-multi/test-zombies  --log_level=message $TEST_OPTS
+      Test/bin/acc/$mode/threading-multi/s_test  --log_level=message $TEST_OPTS
+      Test/bin/acc/$mode/threading-multi/s_test_zombies  --log_level=message $TEST_OPTS
    fi
    
    if [ "$safe" = no ] ; then
@@ -160,20 +160,20 @@ elif test_uname AIX ; then
 
    echo "Testing: $ARCH variant=$mode"
    
-   ACore/bin/vacpp/$mode/threading-multi/coretest  --log_level=message $TEST_OPTS
-   ANattr/bin/vacpp/$mode/threading-multi/nodeattrtest  --log_level=message $TEST_OPTS
-   ANode/bin/vacpp/$mode/threading-multi/nodetest  --log_level=message $TEST_OPTS
-   AParser/bin/vacpp/$mode/threading-multi/tparser  --log_level=message $TEST_OPTS
+   ACore/bin/vacpp/$mode/threading-multi/u_acore  --log_level=message $TEST_OPTS
+   ANattr/bin/vacpp/$mode/threading-multi/u_anattr  --log_level=message $TEST_OPTS
+   ANode/bin/vacpp/$mode/threading-multi/u_anode  --log_level=message $TEST_OPTS
+   AParser/bin/vacpp/$mode/threading-multi/u_aparser  --log_level=message $TEST_OPTS
    if [ "$safe" = no ] ; then
-      AParser/bin/vacpp/$mode/threading-multi/tsingle  --log_level=message $TEST_OPTS
+      AParser/bin/vacpp/$mode/threading-multi/perf_aparser  --log_level=message $TEST_OPTS
    fi
-   Base/bin/vacpp/$mode/threading-multi/basetest  --log_level=message $TEST_OPTS
-   Client/bin/vacpp/$mode/threading-multi/tclient  --log_level=message $TEST_OPTS
-   Server/bin/vacpp/$mode/threading-multi/tserver  --log_level=message $TEST_OPTS
-   CSim/bin/vacpp/$mode/threading-multi/testsimulator  --log_level=message $TEST_OPTS
+   Base/bin/vacpp/$mode/threading-multi/u_base  --log_level=message $TEST_OPTS
+   Client/bin/vacpp/$mode/threading-multi/s_client  --log_level=message $TEST_OPTS
+   Server/bin/vacpp/$mode/threading-multi/u_server  --log_level=message $TEST_OPTS
+   CSim/bin/vacpp/$mode/threading-multi/c_csim  --log_level=message $TEST_OPTS
    if [ "$safe" = no ] ; then
-      Test/bin/vacpp/$mode/threading-multi/server-test  --log_level=message $TEST_OPTS
-      Test/bin/vacpp/$mode/threading-multi/test-zombies  --log_level=message $TEST_OPTS
+      Test/bin/vacpp/$mode/threading-multi/s_test  --log_level=message $TEST_OPTS
+      Test/bin/vacpp/$mode/threading-multi/s_test_zombies  --log_level=message $TEST_OPTS
    fi
 
    if [ "$safe" = no ] ; then

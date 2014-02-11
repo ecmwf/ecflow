@@ -49,7 +49,7 @@ list( APPEND test_srcs
 ./TestWhyCmd.cpp
 ./Test_Time.cpp
 )
-ecbuild_add_test( TARGET server-test
+ecbuild_add_test( TARGET s_test
                 SOURCES  ${test_srcs}
                 LIBS     core nodeattr node libparser base libclient libharness pthread ${Ecflow_Test_LIBS}
                 INCLUDES  src
@@ -62,7 +62,7 @@ ecbuild_add_test( TARGET server-test
                           ${Boost_INCLUDE_DIRS} )
 
 
-ecbuild_add_test( TARGET  test-zombies
+ecbuild_add_test( TARGET  s_test_zombies
                 SOURCES   ./TestZombies.cpp
                 LIBS      core nodeattr node libparser base libclient libharness pthread ${Ecflow_Test_LIBS}
                 INCLUDES  src

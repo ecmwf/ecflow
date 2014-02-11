@@ -36,7 +36,7 @@ lib node : [ glob src/*.cpp ]
 # This is *ONLY* required when the define ECFLOW_MT is used, (used by Signal.cpp)
 lib pthread ;
 
-exe nodetest : [ glob test/*.cpp : test/TestSingleExprParse.cpp ]
+exe u_anode : [ glob test/*.cpp : test/TestSingleExprParse.cpp ]
            pthread
            /theCore//core
            /theNodeAttr//nodeattr
@@ -50,7 +50,7 @@ exe nodetest : [ glob test/*.cpp : test/TestSingleExprParse.cpp ]
 	      ;
 	     
 	     
-exe stest : test/TestSingleExprParse.cpp
+exe u_anode_stest : test/TestSingleExprParse.cpp
            pthread
            /theCore//core
            /theNodeAttr//nodeattr

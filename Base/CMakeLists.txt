@@ -93,7 +93,7 @@ list( APPEND test_srcs
    test/TestSSyncCmd.cpp
    test/TestSSyncCmdOrder.cpp
 )
-ecbuild_add_test( TARGET  basetest
+ecbuild_add_test( TARGET  u_base
                 SOURCES   ${test_srcs}
                 LIBS      core nodeattr node libparser base pthread ${Ecflow_Test_LIBS}
                 INCLUDES  src

@@ -48,7 +48,7 @@ list( APPEND test_srcs
  test/TestMigration.cpp
 )
 
-ecbuild_add_test(TARGET  nodetest
+ecbuild_add_test(TARGET  u_anode
                 SOURCES  ${test_srcs}
                 LIBS     core nodeattr node ${Ecflow_Test_LIBS}
                 INCLUDES src
@@ -58,7 +58,7 @@ ecbuild_add_test(TARGET  nodetest
 
 
 list( APPEND stest_srcs   test/TestSingleExprParse.cpp )                    
-ecbuild_add_test( TARGET  stest
+ecbuild_add_test( TARGET  u_anode_stest
                 SOURCES   ${stest_srcs}
                 LIBS      core nodeattr node ${Ecflow_Test_LIBS}
                 INCLUDES  src

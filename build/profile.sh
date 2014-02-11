@@ -19,41 +19,41 @@ echo "gprof: variant=profile compiler=$compiler"
 
 #
 cd ACore
-bin/$compiler/profile/coretest
-gprof bin/$compiler/profile/coretest   gmon.out   >   gprof.out
+bin/$compiler/profile/u_acore
+gprof bin/$compiler/profile/u_acore   gmon.out   >   gprof.out
 
 cd ../ANattr
-bin/$compiler/profile/nodeattrtest
-gprof bin/$compiler/profile/nodeattrtest gmon.out   >   gprof.out
+bin/$compiler/profile/u_anattr
+gprof bin/$compiler/profile/u_anattr gmon.out   >   gprof.out
 
 cd ../ANode
-bin/$compiler/profile/nodetest
-gprof bin/$compiler/profile/nodetest gmon.out   >   gprof.out
+bin/$compiler/profile/u_anode
+gprof bin/$compiler/profile/u_anode gmon.out   >   gprof.out
 
 cd ../AParser
-bin/$compiler/profile/tparser
-gprof bin/$compiler/profile/tparser gmon.out   >   gprof.out
+bin/$compiler/profile/u_aparser
+gprof bin/$compiler/profile/u_aparser gmon.out   >   gprof.out
 
 cd ../Base
-bin/$compiler/profile/basetest
-gprof bin/$compiler/profile/basetest gmon.out   >   gprof.out
+bin/$compiler/profile/u_base
+gprof bin/$compiler/profile/u_base gmon.out   >   gprof.out
 
 cd ../Client
-bin/$compiler/profile/tclient
-gprof bin/$compiler/profile/tclient gmon.out   >   gprof.out
+bin/$compiler/profile/s_client
+gprof bin/$compiler/profile/s_client gmon.out   >   gprof.out
 
 cd ../Server
-bin/$compiler/profile/tserver
-gprof bin/$compiler/profile/tserver gmon.out   >   gprof.out
+bin/$compiler/profile/u_server
+gprof bin/$compiler/profile/u_server gmon.out   >   gprof.out
 
 cd ../Test
 bin/$compiler/profile/test
 gprof bin/$compiler/profile/test gmon.out   >   gprof.out
 
 cd ../Simulator
-bin/$compiler/profile/testsimulator
-gprof bin/$compiler/profile/testsimulator gmon.out   >   gprof.out
+bin/$compiler/profile/c_csim
+gprof bin/$compiler/profile/c_csim gmon.out   >   gprof.out
 
 cd ../AParser
-bin/$compiler/profile/tsingle
-gprof bin/$compiler/profile/tsingle gmon.out   >   gprof.out
+bin/$compiler/profile/perf_aparser
+gprof bin/$compiler/profile/perf_aparser gmon.out   >   gprof.out

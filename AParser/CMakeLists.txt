@@ -26,7 +26,7 @@ list( APPEND test_srcs
    test/TestParser.cpp
    test/TestVariableParsing.cpp
 )
-ecbuild_add_test( TARGET tparser
+ecbuild_add_test( TARGET u_aparser
                 SOURCES  ${test_srcs}
                 LIBS     core nodeattr node libparser ${Ecflow_Test_LIBS}
                 INCLUDES src
@@ -42,7 +42,7 @@ ecbuild_add_test( TARGET tparser
 # Tests parser for a single defs file but with a range of tests
 #
 list( APPEND t2_src test/TestSingleDefsFile.cpp test/PersistHelper.cpp )                    
-ecbuild_add_test( TARGET   tsingle
+ecbuild_add_test( TARGET   perf_aparser
                 SOURCES  ${t2_src}
                 LIBS     core nodeattr node libparser ${Ecflow_Test_LIBS}
                 INCLUDES  src
@@ -56,7 +56,7 @@ ecbuild_add_test( TARGET   tsingle
 # Timer for arbitary defs file,  
 #
 list( APPEND t3_src test/ParseTimer.cpp  test/PersistHelper.cpp )                    
-ecbuild_add_test( TARGET   parse_timer
+ecbuild_add_test( TARGET   perf_aparser_timer
                   ARGS     ${CMAKE_CURRENT_SOURCE_DIR}/test/data/single_defs/mega.def
                   SOURCES  ${t3_src}
                   LIBS     core nodeattr node libparser ${Ecflow_Test_LIBS}
@@ -73,7 +73,7 @@ ecbuild_add_test( TARGET   parse_timer
 # Tests parser for a single defs file.  
 #
 list( APPEND t4_src test/ParseOnly.cpp )                    
-ecbuild_add_test( TARGET   parse_only
+ecbuild_add_test( TARGET   perf_aparser_only
                   ARGS     ${CMAKE_CURRENT_SOURCE_DIR}/test/data/single_defs/mega.def
                   SOURCES  ${t4_src}
                   LIBS     core nodeattr node libparser ${Ecflow_Test_LIBS}

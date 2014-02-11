@@ -74,7 +74,7 @@ exe ecflow_server : [ glob src/*Main.cpp ]
 # Test for server
 # IMPORTANT: server *MUST* not link with client or include any of the client code
 #
-exe tserver : [ glob test/*.cpp ]
+exe u_server : [ glob test/*.cpp ]
             pthread
              /theCore//core
              /theNodeAttr//nodeattr

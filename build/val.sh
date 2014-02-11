@@ -31,13 +31,13 @@ echo "valgrind: variant=$mode compiler=$compiler"
 # valgrind Server/bin/$compiler/$mode/ecflow_server --interval=3
 # Then restart this shell
 
-valgrind --leak-check=full --show-reachable=yes ACore/bin/$compiler/$mode/coretest
-valgrind --leak-check=full --show-reachable=yes ANattr/bin/$compiler/$mode/nodeattrtest
-valgrind --leak-check=full --show-reachable=yes ANode/bin/$compiler/$mode/nodetest
-valgrind --leak-check=full --show-reachable=yes AParser/bin/$compiler/$mode/tparser
-valgrind --leak-check=full --show-reachable=yes Base/bin/$compiler/$mode/basetest
-valgrind --leak-check=full --show-reachable=yes Client/bin/$compiler/$mode/tclient
-valgrind --leak-check=full --show-reachable=yes Server/bin/$compiler/$mode/tserver
-valgrind --leak-check=full --show-reachable=yes --num-callers=30 Test/bin/$compiler/$mode/server-test
-valgrind --leak-check=full --show-reachable=yes --num-callers=30 Test/bin/$compiler/$mode/test-zombies
-valgrind --leak-check=full --show-reachable=yes CSim/bin/$compiler/$mode/testsimulator
+valgrind --leak-check=full --show-reachable=yes ACore/bin/$compiler/$mode/u_acore
+valgrind --leak-check=full --show-reachable=yes ANattr/bin/$compiler/$mode/u_anattr
+valgrind --leak-check=full --show-reachable=yes ANode/bin/$compiler/$mode/u_anode
+valgrind --leak-check=full --show-reachable=yes AParser/bin/$compiler/$mode/u_aparser
+valgrind --leak-check=full --show-reachable=yes Base/bin/$compiler/$mode/u_base
+valgrind --leak-check=full --show-reachable=yes Client/bin/$compiler/$mode/s_client
+valgrind --leak-check=full --show-reachable=yes Server/bin/$compiler/$mode/u_server
+valgrind --leak-check=full --show-reachable=yes --num-callers=30 Test/bin/$compiler/$mode/s_test
+valgrind --leak-check=full --show-reachable=yes --num-callers=30 Test/bin/$compiler/$mode/s_test_zombies
+valgrind --leak-check=full --show-reachable=yes CSim/bin/$compiler/$mode/c_csim

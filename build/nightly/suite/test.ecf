@@ -210,27 +210,27 @@ else
       # Boost unit,integration,regression tests
       ############################################################################
 
-      run_test ACore coretest
-      run_test ANattr nodeattrtest
-      run_test ANode nodetest
-      run_test AParser tparser
+      run_test ACore u_acore
+      run_test ANattr u_anattr
+      run_test ANode u_anode
+      run_test AParser u_aparser
       
       ecflow_client --meter=progress 20             --host=%ECF_NODE% --port=%ECF_PORT%  
       ecflow_client --label=progress Base           --host=%ECF_NODE% --port=%ECF_PORT%
       
-      run_test Base basetest
+      run_test Base u_base
       
       #============================ simulator  ========================================
       ecflow_client --meter=progress 25             --host=%ECF_NODE% --port=%ECF_PORT%  
       ecflow_client --label=progress Simulator      --host=%ECF_NODE% --port=%ECF_PORT%  
       
-      run_test CSim testsimulator
+      run_test CSim c_csim
       
       #============================ Parser a big file  ========================================
       ecflow_client --meter=progress 35             --host=%ECF_NODE% --port=%ECF_PORT%  
       ecflow_client --label=progress ParseMega      --host=%ECF_NODE% --port=%ECF_PORT%  
       
-      run_test AParser tsingle
+      run_test AParser perf_aparser
    
       #============================ Server  ========================================
       ecflow_client --meter=progress 45             --host=%ECF_NODE% --port=%ECF_PORT%  
@@ -241,7 +241,7 @@ else
          unset ECF_PORT
          unset ECF_NODE
       fi
-      run_test Server tserver
+      run_test Server u_server
       
       
       #============================ Client ========================================
@@ -254,7 +254,7 @@ else
          unset ECF_RID
       fi
       
-      run_test Client tclient
+      run_test Client s_client
       
       
       #============================ Test ========================================
@@ -267,14 +267,14 @@ else
          export ECF_PORT=3142
       fi
       
-      run_test Test server-test
+      run_test Test s_test
       
       
       #============================ Test zombies ========================================
       ecflow_client --meter=progress 80        --host=%ECF_NODE% --port=%ECF_PORT%  
       ecflow_client --label=progress Zombies   --host=%ECF_NODE% --port=%ECF_PORT% 
       
-      run_test Test test-zombies
+      run_test Test s_test_zombies
       
       
       #============================ Python ========================================

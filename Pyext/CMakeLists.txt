@@ -6,7 +6,6 @@ message(${PYTHON_INCLUDE_DIRS})
 message(${PYTHON_LIBRARIES})
 message(${PYTHON_EXECUTABLE})
 
-#                     NOINSTALL
 ecbuild_add_library( TARGET   ecflow
                      TYPE     MODULE
                      SOURCES  ${srcs}
@@ -28,24 +27,24 @@ set_target_properties(ecflow PROPERTIES PREFIX "")
 ### tests 
 
 list( APPEND tests
-        TestAddDelete   
-        TestAddDeleteFunc 
-        TestAddNodeFunc  
-        TestClientApi    
-        TestDefs         
-        TestDefsCheck    
-        TestDerivable   
-        TestEcf  
-        TestError        
-        TestFind        
-        TestGetAllTasks   
-        TestJobGeneration 
-        TestParent        
-        TestRepeatArithmetic
-        TestSimulator  
-        TestTraversal     
-        TestUserManual    
-        TestWith         
+        py_u_TestAddDelete   
+        py_u_TestAddDeleteFunc 
+        py_u_TestAddNodeFunc  
+        py_s_TestClientApi    
+        py_u_TestDefs         
+        py_u_TestDefsCheck    
+        py_u_TestDerivable   
+        py_u_TestEcf  
+        py_u_TestError        
+        py_u_TestFind        
+        py_u_TestGetAllTasks   
+        py_u_TestJobGeneration 
+        py_u_TestParent        
+        py_u_TestRepeatArithmetic
+        py_u_TestSimulator  
+        py_u_TestTraversal     
+        py_u_TestUserManual    
+        py_u_TestWith         
 )
 
 foreach( test ${tests} )
@@ -57,9 +56,9 @@ foreach( test ${tests} )
 endforeach()
 
 
-ecbuild_add_test( TARGET TestMigrate
+ecbuild_add_test( TARGET py_u_TestMigrate
                   TYPE PYTHON 
-                  ARGS ${CMAKE_CURRENT_SOURCE_DIR}/migrate/TestMigrate.py
+                  ARGS ${CMAKE_CURRENT_SOURCE_DIR}/migrate/py_u_TestMigrate.py
                   ENVIRONMENT "PYTHONPATH=${CMAKE_BINARY_DIR}/lib" )
 
 

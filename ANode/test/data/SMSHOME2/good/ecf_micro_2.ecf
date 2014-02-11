@@ -1,7 +1,7 @@
 
 
 %ecfmicro ^
-exe_time=`date +%s -r ACore/bin/^COMPILER_TEST_PATH:gcc^/coretest`
+exe_time=`date +%s -r ACore/bin/^COMPILER_TEST_PATH:gcc^/u_acore`
 ^ecfmicro %
 
 

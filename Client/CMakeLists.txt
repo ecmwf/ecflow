@@ -61,7 +61,7 @@ list( APPEND test_srcs
  test/TestUrlCmd.cpp
  test/TestWhiteListFile.cpp
 )
-ecbuild_add_test( TARGET  tclient
+ecbuild_add_test( TARGET  s_client
                 SOURCES   ${test_srcs}
                 LIBS      core nodeattr node libparser base libclient pthread ${Ecflow_Test_LIBS}
                 INCLUDES  src
@@ -79,7 +79,7 @@ ecbuild_add_test( TARGET  tclient
 # 
 # Simple stand alone test
 #
-ecbuild_add_test( TARGET   test_large_defs_perf 
+ecbuild_add_test( TARGET   perf_test_large_defs 
                 SOURCES  test/TestSinglePerf.cpp test/SCPort.cpp
                 LIBS     core nodeattr node libparser base libclient pthread ${Ecflow_Test_LIBS}
                 INCLUDES  src

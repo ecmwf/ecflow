@@ -37,7 +37,7 @@ ecbuild_add_executable( TARGET   ecflow_server
                           
 # ================================================================================                         
 # TEST
-ecbuild_add_test( TARGET tserver
+ecbuild_add_test( TARGET u_server
                 SOURCES  test/TestServerEnvironment.cpp
                 LIBS     core nodeattr node libparser base libserver pthread ${Ecflow_Test_LIBS}
                 INCLUDES src

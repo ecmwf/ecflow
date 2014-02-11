@@ -18,7 +18,21 @@ import shutil   # used to remove directory tree
 
 from ecflow import Defs, JobCreationCtrl, TaskVec, File, Client
 
-def ecf_includes() :  return os.getcwd() + "/test/data/includes"
+def get_parent_dir(file_path):
+    return os.path.dirname(file_path)
+
+def get_workspace_dir():
+    cwd = os.getcwd()
+    #print "get_workspace_dir from: " + cwd
+    while (1):
+        head, tail = os.path.split(cwd)
+        #print "tail:" + tail
+        if tail.find("ecflow") != -1 :
+            return cwd
+        cwd = head
+    return cwd
+
+def ecf_includes() :  return get_workspace_dir() + "/Pyext" + "/test/data/includes"
 
 def create_defs(ecf_home,task_vec):
     defs = Defs();
@@ -72,19 +86,7 @@ def check_jobs(task_vec, ecf_home):
             assert False, "Could not find job file " + the_job_file
 
 
-def get_parent_dir(file_path):
-    return os.path.dirname(file_path)
 
-def get_workspace_dir():
-    cwd = os.getcwd()
-    #print "get_workspace_dir from: " + cwd
-    while (1):
-        head, tail = os.path.split(cwd)
-        #print "tail:" + tail
-        if tail.find("ecflow") != -1 :
-            return cwd
-        cwd = head
-    return cwd
 
 if __name__ == "__main__":
     print "####################################################################"

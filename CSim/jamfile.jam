@@ -56,7 +56,7 @@ lib libsimu : [ glob src/*.cpp ]
 # Test for simulator
 # IMPORTANT: server *MUST* not link with client or include any of the client code
 #
-exe testsimulator : [ glob test/*.cpp : test/TestSingleSimulator.cpp ]
+exe c_csim : [ glob test/*.cpp : test/TestSingleSimulator.cpp ]
  	         pthread
              /theCore//core
              /theNodeAttr//nodeattr
@@ -77,7 +77,7 @@ exe testsimulator : [ glob test/*.cpp : test/TestSingleSimulator.cpp ]
 # Test for single simulator. Use for developing the tests
 # IMPORTANT: server *MUST* not link with client or include any of the client code
 #
-exe testsingle : [ glob test/TestSingleSimulator.cpp test/TestUtil.cpp ]
+exe c_csim_single : [ glob test/TestSingleSimulator.cpp test/TestUtil.cpp ]
  	         pthread
              /theCore//core
              /theNodeAttr//nodeattr
