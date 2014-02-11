@@ -28,7 +28,7 @@ int main(int argc, char **argv)
 
     QApplication app(argc, argv);
 
-    ServerHandler::addServer(argv[1],atoi(argv[2]));
+    ServerHandler::addServer(argv[1],argv[2]);
 
     MainWindow::init();
 
