@@ -131,7 +131,6 @@ add_subdirectory( Client )
 add_subdirectory( CSim )
 add_subdirectory( Server )
 add_subdirectory( Test )
-add_subdirectory( TestEcfSms )
 add_subdirectory( Pyext )
 add_subdirectory( view )
 

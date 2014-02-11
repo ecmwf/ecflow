@@ -583,8 +583,7 @@ static std::string find_bjam_ecf_server_path()
    fs::path current_path = fs::current_path();
    if ( current_path.stem() == "Test"
       || current_path.stem() == "Client"
-         || current_path.stem() == "Pyext"
-         || current_path.stem() == "TestEcfSms" )
+         || current_path.stem() == "Pyext" )
       binDir = "../Server/bin/";
    else binDir = "Server/bin/";
 
@@ -678,8 +677,7 @@ static std::string find_bjam_ecf_client_path()
    fs::path current_path = fs::current_path();
    if ( current_path.stem() == "Test"
          || current_path.stem() == "Client"
-         || current_path.stem() == "Pyext"
-         || current_path.stem() == "TestEcfSms" )
+         || current_path.stem() == "Pyext"  )
       binDir = "../Client/bin/";
    else binDir = "Client/bin/";
 

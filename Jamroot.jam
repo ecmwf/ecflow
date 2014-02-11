@@ -19,7 +19,6 @@ build-project Client ;
 build-project CSim ;
 build-project Server ;
 build-project Test ;
-build-project TestEcfSms ;
 
 # The gui is not built on HPUX and IBM(power6) platforms
 import os ;

@@ -130,15 +130,6 @@ if test_uname Linux ; then
        view/bin/$compiler/$mode/test-view  --log_level=message $TEST_OPTS
    fi
    
-   if [ "$safe" = no ] ; then
-      # Allow this test to be disabled it can take a while
-      if [ -n "$ECF_DISABLE_SMS_TEST" ] ; then   
-         echo "Ignore SMS to ecf comparison test"
-      else
-         TestEcfSms/bin/$compiler/$mode/smsecftest  --log_level=message $TEST_OPTS
-      fi
-   fi
-   
 elif test_uname HP-UX ; then
 
    echo "Testing: variant=$mode"
@@ -165,15 +156,6 @@ elif test_uname HP-UX ; then
       cd ..
    fi
 
-   if [ "$safe" = no ] ; then
-      # Allow this test to be dissabled it can take a while
-      if [ -n "$ECF_DISABLE_SMS_TEST" ] ; then   
-         echo "Ignore SMS to ecf comparison test"
-      else
-         TestEcfSms/bin/acc/$mode/threading-multi/smsecftest  --log_level=message $TEST_OPTS
-      fi
-   fi
- 
 elif test_uname AIX ; then
 
    echo "Testing: $ARCH variant=$mode"
@@ -199,14 +181,5 @@ elif test_uname AIX ; then
       cd Pyext
       $BOOST_ROOT/bjam variant=$mode test-all $TEST_OPTS
       cd ..
-   fi
-   
-   if [ "$safe" = no ] ; then
-      # Allow this test to be dissabled it can take a while
-      if [ -n "$ECF_DISABLE_SMS_TEST" ] ; then   
-         echo "Ignore SMS to ecf comparison test"
-      else
-         TestEcfSms/bin/vacpp/$mode/threading-multi/smsecftest  --log_level=message $TEST_OPTS
-      fi
    fi
 fi
