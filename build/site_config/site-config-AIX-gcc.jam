@@ -22,14 +22,14 @@
 #   o Built boost lib's debug & release
 #     Did at one time manage to build boost, but tring to build agian get:
 #       bjam --build-dir=./tmpBuildDir toolset=gcc stage link=static --layout=tagged --with-system variant=debug
-#       /wsscratch/ma/emos/ma0/rs6000/boost/boost_1_45_0/tools/build/v2/site-config.jam:90: in modules.load
+#       boost_1_45_0/tools/build/v2/site-config.jam:90: in modules.load
 #       rule http://gcc.gnu.org/ml/libstdc++/2007-05/msg00012.html unknown in module site-config.
-#       /wsscratch/ma/emos/ma0/rs6000/boost/boost_1_45_0/tools/build/v2/build-system.jam:257: in load-config
-#       /wsscratch/ma/emos/ma0/rs6000/boost/boost_1_45_0/tools/build/v2/build-system.jam:361: in load-configuration-files
-#       /wsscratch/ma/emos/ma0/rs6000/boost/boost_1_45_0/tools/build/v2/build-system.jam:554: in load
-#       /wsscratch/ma/emos/ma0/rs6000/boost/boost_1_45_0/tools/build/v2/kernel/modules.jam:283: in import
-#       /wsscratch/ma/emos/ma0/rs6000/boost/boost_1_45_0/tools/build/v2/kernel/bootstrap.jam:142: in boost-build
-#       /wsscratch/ma/emos/ma0/rs6000/boost/boost_1_45_0/boost-build.jam:17: in module scope
+#       boost/boost_1_45_0/tools/build/v2/build-system.jam:257: in load-config
+#       boost/boost_1_45_0/tools/build/v2/build-system.jam:361: in load-configuration-files
+#       boost/boost_1_45_0/tools/build/v2/build-system.jam:554: in load
+#       /boost/boost_1_45_0/tools/build/v2/kernel/modules.jam:283: in import
+#       /boost/boost_1_45_0/tools/build/v2/kernel/bootstrap.jam:142: in boost-build
+#       /boost/boost_1_45_0/boost-build.jam:17: in module scope
 #
 #   o Built some of projects ok, i.e like ACore
 #     Forced to link with -pthread, due to undefined symbols( even if not explicitly used)

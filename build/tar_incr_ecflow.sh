@@ -126,14 +126,6 @@ ssh ecgb "cd /vol/ecf/redhat/; rm -rf untar_incr_ecflow.sh"
 scp $WK/build/untar_incr_ecflow.sh    ecgb:/vol/ecf/redhat/
 ssh ecgb "cd /vol/ecf/redhat/; chmod 755 untar_incr_ecflow.sh; sh -x untar_incr_ecflow.sh"
 
-# ===============================================================================
-# IBM/ECGATE:   
-# ===============================================================================
-rcp incr.tar.gz                       ecgate:/emos_data/ecflow/rs6000/xlc
-rsh ecgate "cd /emos_data/ecflow/rs6000/xlc/; rm -rf untar_incr_ecflow.sh"
-rcp $WK/build/untar_incr_ecflow.sh    ecgate:/emos_data/ecflow/rs6000/xlc
-rsh ecgate "cd /emos_data/ecflow/rs6000/xlc; chmod 755 untar_incr_ecflow.sh; sh -x untar_incr_ecflow.sh"
-
 # =================================================================================
 # HPUX: Note $SCRATCH is a very slow system
 # =================================================================================

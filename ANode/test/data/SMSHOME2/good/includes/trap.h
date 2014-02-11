@@ -114,10 +114,6 @@ ERROR() {
   exit 1
 }
 
-if [[ "$ARCH" != rs6000 ]] ; then
-  chmod 644 %LOGDIR%%ECF_NAME%.%ECF_TRYNO%
-fi
-
 if [[ $ARCH == hpia64 ]]; then
   export SMS_SIGNAL_LIST='1 2 3 4 5 6 7 8 10 12 13 15 24 30 33'
 elif [[ $ARCH == ibm_power* ]]; then

@@ -1,0 +1,16 @@
+%include <head.h>
+
+# ======================================================================
+# Run LOCALLY
+# ======================================================================
+export WK=%WK%
+ 
+cd $WK
+
+if [[ %SET_TO_TEST_SCRIPT% = true ]] ; then
+   echo "Test only"
+else
+   /usr/local/apps/cppcheck/current/bin/cppcheck .   
+fi
+
+%include <tail.h>

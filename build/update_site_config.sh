@@ -71,15 +71,6 @@ elif test_uname AIX ; then
    tool=vacpp
    cp $WK/build/site_config/site-config-AIX.jam $BOOST_ROOT/tools/build/v2/site-config.jam
  
-   if test "$ARCH" = rs6000 
-   then
-     tool=vacpp
-     cp $WK/build/site_config/site-config-AIX-rs6000.jam $BOOST_ROOT/tools/build/v2/site-config.jam
-   
-     # On ecgate however can't get gcc to work on AIX
-     #tool=gcc
-     #cp $WK/build/site_config/site-config-AIX-gcc.jam $BOOST_ROOT/tools/build/v2/site-config.jam
-   fi
 fi
 
  

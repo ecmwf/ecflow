@@ -106,7 +106,7 @@ The GUI must be updated to support:
 Regression/Unit Tests
 =====================
 The test that includes aliases must run on:
-   - AIX, ibm_power6 and rs6000 platforms
+   - AIX, 
    - HPUX
    - Linux(SUSE 10.3 and 11.3) gcc 4.2.1 and gcc 4.5
 

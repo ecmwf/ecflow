@@ -211,10 +211,7 @@ PSDIR=/ws/scratch/ma/emos/ps
 #
 # On linux cluster we use the default one
 #=======================================================================
-if [[ $ARCH = rs6000 ]]; then
-   METVIEW_TMPDIR=/plotprod/data/metview_tmpdir
-   [[ ! $EXPVER -eq 1 ]] && METVIEW_TMPDIR=/eplot/data/metview_tmpdir
-fi
+
 
 
 #=======================================================================
@@ -224,7 +221,7 @@ fi
 VPP_MBX_SIZE=1000000
 MBX_SIZE=1000000
 MPP_TYPE=2
-if [[ $ARCH = @(ibm_power*|rs6000) ]] ; then
+if [[ $ARCH = @(ibm_power*) ]] ; then
   MBX_SIZE=64000000
 fi
 
@@ -236,7 +233,7 @@ fi
 [[ $RESOL = 399 ]] && NRESOL=200
 
 
-if [[ $ARCH = @(rs6000|ibm_power*) ]] ; then
+if [[ $ARCH = @(ibm_power*) ]] ; then
   CC=xlc_r
   FRT=xlf90
   FRT77=xlf
@@ -255,7 +252,7 @@ fi
 
 if [[ $ARCH = ibm_power4 ]] ; then
   USE=xlf_11102
-elif [[ $ARCH = @(ibm_power6|rs6000) ]] ; then
+elif [[ $ARCH = @(ibm_power6) ]] ; then
   USE=standard
 fi
 
@@ -311,7 +308,7 @@ NEWFDIR() {
 }
 
 CHECK_DIR(){
-  if [[ $ARCH = ibm_power* ]] || [[ $ARCH = rs6000 ]] ; then
+  if [[ $ARCH = ibm_power* ]]  ; then
     trap '{ echo "Error in function"; exit 1; }' 0 $SMS_SIGNAL_LIST
   fi
   set -xeu
@@ -506,10 +503,6 @@ fi
 # This is of course only on the servers
 #=======================================================================
 MAGICS=%MAGICS:magics_emos%
-if [[ $ARCH = rs6000 ]]; then
-   use $MAGICS
-   [[ ! $MAGICS = magics_emos ]] || MAGLIB=$MAGEMOS
-fi
 
 #=======================================================================
 # We use an operation only Metview version to be on the safe side.
