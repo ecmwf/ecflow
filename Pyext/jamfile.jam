@@ -254,13 +254,14 @@ run-test TestFind          : ecflow [ glob test/TestFind.py ] ;
 run-test TestMigrate       : ecflow [ glob migrate/TestMigrate.py ] ;
 run-test TestRepeatArithmetic :  ecflow [ glob test/TestRepeatArithmetic.py ] ;
 run-test TestGeneratedVariable : ecflow [ glob test/TestGeneratedVariable.py ] ;
+run-test TestEcf : ecflow [ glob test/TestEcf.py ] ;
 
 # A target that runs all the tests. 
 # Note test_embed & test_embed_ecf commented out since we dont use this functionality
 alias test-all
  :  TestUserManual TestJobGeneration TestClientApi TestDefs TestError TestTraversal TestDefsCheck 
     TestSimulator TestAddDelete TestAddDeleteFunc TestAddNodeFunc TestParent TestGetAllTasks TestDerivable 
-    TestMigrate TestRepeatArithmetic TestWith TestFind TestGeneratedVariable
+    TestMigrate TestRepeatArithmetic TestWith TestFind TestGeneratedVariable TestEcf
     # test_embed test_embed_ecf 
     ;
    
@@ -268,7 +269,7 @@ alias test-all
 explicit test-all
     TestUserManual TestJobGeneration TestClientApi TestDefs TestError TestTraversal TestDefsCheck 
     TestSimulator TestAddDelete TestAddDeleteFunc TestAddNodeFunc TestParent TestGetAllTasks TestDerivable 
-    TestMigrate TestRepeatArithmetic TestWith TestFind TestGeneratedVariable
+    TestMigrate TestRepeatArithmetic TestWith TestFind TestGeneratedVariable TestEcf
     # test_embed test_embed_ecf 
     ;
  

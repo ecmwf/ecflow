@@ -306,7 +306,7 @@ const char* DefsDoc::add_extern_doc()
             "\nUsage::\n\n"
             "  defs = Defs(\"file.def\")\n"
             "  ...\n"
-            "  defs.auto_add_extern(True)   # remove existing extern first.\n"
+            "  defs.auto_add_externs(True)   # remove existing extern first.\n"
             ;
 }
 

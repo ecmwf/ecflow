@@ -40,7 +40,12 @@ else
    # use [[ ]] for string comparison
    if [[ "%REMOTE_HOST:%" != "" ]] ; then
    
-      rcp $BOOST_TAR_GZ_FILE  %REMOTE_HOST:%:%BOOST_DIR%/.
+      %REMOTE_COPY% $BOOST_TAR_GZ_FILE  %REMOTE_HOST:%:%BOOST_DIR%/.
+   fi
+   
+   # clang is build locally.
+   if [[ %BOOST_DIR% = "/var/tmp/ma0/boost/clang" ]] ; then
+      cp $BOOST_TAR_GZ_FILE  %BOOST_DIR%/.
    fi
 fi
 

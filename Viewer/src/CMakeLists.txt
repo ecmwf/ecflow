@@ -38,7 +38,7 @@ ecbuild_add_executable( TARGET   ecflowviewer
                                  ${Boost_INCLUDE_DIRS} 
 				 ${CMAKE_CURRENT_BINARY_DIR}
                         LIBS     core nodeattr node libparser base libclient 
-                                 libecflowview pthread ${Ecflow_Boost_LIBS}
-                                 m crypt dl Xpm Xm Xp Xext Xt X11 fl
+                                 pthread ${Ecflow_Boost_LIBS}
+                                 m crypt dl fl
                                  ${QT_LIBRARIES}
                      )

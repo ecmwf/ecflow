@@ -34,7 +34,8 @@ list( APPEND tests
         TestClientApi    
         TestDefs         
         TestDefsCheck    
-        TestDerivable     
+        TestDerivable   
+        TestEcf  
         TestError        
         TestFind        
         TestGetAllTasks   

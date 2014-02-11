@@ -1,6 +1,7 @@
 # eclipse
 .settings/
 .pydevproject
+.cproject
 
 # cmake
 ecbuild/
@@ -21,6 +22,7 @@ swap
 # hack to ignore naw.def.glog
 **/naw.def.glog
  
+*.lock
 *.log
 *.so
 *.pyc

@@ -19,12 +19,12 @@ else
    if [[ %ARCH% = hpux ]] ; then
       # on HPUX -e does not work
       if [ ! -r bjam ] ; then
-         # On HPUX using acc to build bjam fail, using gcc instead
-         sh -x bootstrap.sh --with-toolset=gcc
+         # On HPUX using acc to build bjam fails, use gcc instead
+         sh -x ./bootstrap.sh --with-toolset=%BOOTSTRAP_TOOLSET%
       fi
    else
       if [ ! -e bjam ] ; then
-         sh -x bootstrap.sh --with-toolset=%TOOLSET%
+         sh -x ./bootstrap.sh --with-toolset=%BOOTSTRAP_TOOLSET%
       fi
    fi
 fi

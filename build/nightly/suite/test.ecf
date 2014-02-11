@@ -44,7 +44,7 @@ set -x # echo script lines as they are executed
    # we use TOOLSET since its possible to get different compilers on the same platform
    # If ever use different versions of the same compiler may need COMPILER_VERSION
    #
-   if [[ ^ARCH^ = ibm_power* || ^ARCH^ = rs6000 ]] ; then
+   if [[ ^ARCH^ = ibm_power* ]] ; then
    
       exe_time=`/opt/freeware/bin/date +%s -r $1/bin/^COMPILER_TEST_PATH^/$2`
       passed_file_time=0
@@ -82,7 +82,7 @@ set -x # echo script lines as they are executed
 # ================================================================================
 run_test_cmake()
 {
-   # Run the test, if the test passes don't rerun again
+   # Run cmake test, if the test passes don't rerun again
    # This is done by touching a file named after the test and mode(debug or release)
    # This makes the test pass file unique.
    # if test executable is newer then the test pass file then rerun test
@@ -101,7 +101,7 @@ set -x # echo script lines as they are executed
    # we use TOOLSET since its possible to get different compilers on the same platform
    # If ever use different versions of the same compiler may need COMPILER_VERSION
    #
-   if [[ ^ARCH^ = ibm_power* || ^ARCH^ = rs6000 ]] ; then
+   if [[ ^ARCH^ = ibm_power* ]] ; then
    
       exe_time=`/opt/freeware/bin/date +%s -r ecbuild/^MODE^/$1/$2`
       passed_file_time=0
@@ -153,11 +153,12 @@ trap '{ echo "Error in function"; ERROR; }' 0 1 2 3 4 5 6 7 8 10 12 13 15
 set -e # stop shell, on error
 set -x # echo script lines as they are executed
 
-   if [[ %CMAKE:boost% = CMAKE ]] ; then
-      run_test_cmake $1 $2
-   else
+   # This was enable because this allowed us to only run the failed tests
+   #if [[ %CMAKE:boost% = CMAKE ]] ; then
+   #   run_test_cmake $1 $2
+   #else
       run_test_boost $1 $2
-   fi
+   #fi
 
    # required for aborting form errors
    set -e; trap 0; return 0 ##### reset trap
@@ -168,182 +169,177 @@ set -x # echo script lines as they are executed
 if [[ %SET_TO_TEST_SCRIPT% = true ]] ; then
    echo "Test only"
 else
-   #============================ core ===================================
-   run_test ACore coretest
+   if [[ %CMAKE:boost% = CMAKE ]] ; then
+      ############################################################################
+      # ctest
+      ############################################################################
+      ecflow_client --label=progress ctest   --host=%ECF_NODE% --port=%ECF_PORT% 
    
+      # The following lines are required for aborting a test, function ERROR must be defined
+      trap '{ echo "Error in function"; ERROR; }' 0 1 2 3 4 5 6 7 8 10 12 13 15
+      set -e # stop shell, on error
+      set -x # echo script lines as they are executed
    
-   #============================ node attr ===================================
-   run_test ANattr nodeattrtest
-   
-   
-   #============================ node  ========================================
-   run_test ANode nodetest
-   
-   
-   #============================ parser  ========================================
-   run_test AParser tparser
-   
-   
-   #============================ base  ========================================
-   ecflow_client --meter=progress 20             --host=%ECF_NODE% --port=%ECF_PORT%  
-   ecflow_client --label=progress Base           --host=%ECF_NODE% --port=%ECF_PORT%
-   
-   run_test Base basetest
-   
-   
-   #============================ simulator  ========================================
-   ecflow_client --meter=progress 25             --host=%ECF_NODE% --port=%ECF_PORT%  
-   ecflow_client --label=progress Simulator      --host=%ECF_NODE% --port=%ECF_PORT%  
-   
-   run_test CSim testsimulator
-   
-
-   #============================ Parser a big file  ========================================
-   ecflow_client --meter=progress 35             --host=%ECF_NODE% --port=%ECF_PORT%  
-   ecflow_client --label=progress ParseMega      --host=%ECF_NODE% --port=%ECF_PORT%  
-   
-   run_test AParser tsingle
-
-   
-   #============================ Server  ========================================
-   ecflow_client --meter=progress 45             --host=%ECF_NODE% --port=%ECF_PORT%  
-   ecflow_client --label=progress Server         --host=%ECF_NODE% --port=%ECF_PORT%
-   
-   if [[ %ARCH% = cray ]] ; then
+      # now run the ctest, which will run python tests.
+      cd $WK
+      cd ecbuild/%MODE%
+        
+      #  Uset ECF variables that could be used in ecf tests
       unset ECF_HOME
       unset ECF_PORT
       unset ECF_NODE
-      #unset ECF_RID
-      #unset ECF_HOSTFILE
-      #unset ECF_JOBOUT
-      #unset ECF_OUT
-   fi
-   run_test Server tserver
-   
-   
-   #============================ Client ========================================
-   ecflow_client --meter=progress 45             --host=%ECF_NODE% --port=%ECF_PORT%  
-   ecflow_client --label=progress Client         --host=%ECF_NODE% --port=%ECF_PORT% 
-   
-   # HACK for IBM which sets ECF_RID, unset before running client server tests
-   # Not defined for other platforms
-   if [[ %ARCH% = ibm_power* || %ARCH% = rs6000 ]] ; then
-      unset ECF_RID
-   fi
-   
-   run_test Client tclient
-   
-   
-   #============================ Test ========================================
-   ecflow_client --meter=progress 60     --host=%ECF_NODE% --port=%ECF_PORT%  
-   ecflow_client --label=progress Test   --host=%ECF_NODE% --port=%ECF_PORT%  
-   
-   if [[ %ARCH% = rs6000 || %ARCH% = opensuse113 || %ARCH% = opensuse103 || %ARCH% = redhat ]] ; then
-      # On ECGATE/opensuse113 port 3141 is already used ???
-      # linux64 and linux64intel, run at the same time, hence use ECF_PORT=3142 for linux64intel
-      export ECF_PORT=3142
-   fi
-   
-   run_test Test server-test
-   
-   
-   #============================ Test zombies ========================================
-   ecflow_client --meter=progress 80        --host=%ECF_NODE% --port=%ECF_PORT%  
-   ecflow_client --label=progress Zombies   --host=%ECF_NODE% --port=%ECF_PORT% 
-   
-   run_test Test test-zombies
-   
-   
-   #============================ Python ========================================
-   # placed last since bjam invocation appears to hang occasionally on HPUX/ecgate
-   
-   ecflow_client --meter=progress 90       --host=%ECF_NODE% --port=%ECF_PORT%  
-   ecflow_client --label=progress Python   --host=%ECF_NODE% --port=%ECF_PORT%  
-   
-   cd Pyext
-   
-   # make sure path to the interpreter is accessible.
-   # This can be hard coded in site-config.jam i.e via using python
-   # Or amend the path here
-   
-   if [[ %ARCH% = linux64 ]] ; then
-      #
-      # NOTE: /usr/local/bin provides path to 2.7 PYTHON interpreter
-      #       *MAKE* sure it becomes *BEFORE* /usr/bin as that points to python 2.6
-      #        This is what 'using python' will pick up and add to the include path
-      #
-      export PATH=/usr/local/bin:$PATH 
       
-   elif [[ %ARCH% = opensuse113  ]] ; then
-   
-      export PATH=/usr/local/bin:$PATH
+      # -V verbose, show test output
+      # --output-on-failure only show output on failure
+      if [[ %ECF_TRYNO% -eq 1 ]] ; then
+         ctest --output-on-failure
+      else
+         # this does not work
+         # ctest --rerun-failed --output-on-failure
+         #
+         # Create a file('FailedTests.log') with all the failed tests
+         cmake -P $WK/CMAKE_failed_tests.txt
+         sleep 4
+         
+         # Only run the failed test. Note: if FailedTests.log is empty then all tests are run
+         ctest -I FailedTests.log --output-on-failure
+      fi
       
-   elif [[ %ARCH% = redhat  ]] ; then
-   
-      export PATH=/usr/local/apps:$PATH
+   else
+      ############################################################################
+      # Boost unit,integration,regression tests
+      ############################################################################
+
+      run_test ACore coretest
+      run_test ANattr nodeattrtest
+      run_test ANode nodetest
+      run_test AParser tparser
       
-   elif [[ %ARCH% = opensuse103  ]] ; then
-   
-      #
-      # NOTE: /usr/local/apps/python/2.7.2-01/bin/ provides path to PYTHON interpreter
-      #       This is what 'using python' will pick up and add to the include path
-      #
-      export PATH=/usr/local/apps/python/2.7.2-01/bin/:/usr/local/bin:$PATH
+      ecflow_client --meter=progress 20             --host=%ECF_NODE% --port=%ECF_PORT%  
+      ecflow_client --label=progress Base           --host=%ECF_NODE% --port=%ECF_PORT%
       
-   elif [[ %ARCH% = linux64intel  ]] ; then
-   
-      #
-      # NOTE: /usr/local/apps/python/2.7.2-01/bin/ provides path to PYTHON interpreter
-      #       This is what 'using python' will pick up and add to the include path
-      #
-      export PATH=/usr/local/apps/python/2.7.2-01/bin/:/usr/local/bin:$PATH
-      export PATH=/usr/local/apps/intel/composer_xe_2013.3.163/bin:$PATH
+      run_test Base basetest
       
-      # ensure any variable exported will form part of this script.
-      # Ignore errors in the script, re-enable afterwards.
-      # If all else fails we only need LD_LIBRARY_PATH
-      #   export LD_LIBRARY_PATH=/gpfs/usr/local/apps/intel/composer_xe_2013.3.163/composer_xe_2013.3.163/ipp/../compiler/lib/intel64:/gpfs/usr/local/apps/intel/composer_xe_2013.3.163/composer_xe_2013.3.163/ipp/lib/intel64:/opt/intel/mic/coi/host-linux-release/lib:/opt/intel/mic/myo/lib:/gpfs/usr/local/apps/intel/composer_xe_2013.3.163/composer_xe_2013.3.163/compiler/lib/intel64:/gpfs/usr/local/apps/intel/composer_xe_2013.3.163/composer_xe_2013.3.163/mkl/lib/intel64:/gpfs/usr/local/apps/intel/composer_xe_2013.3.163/composer_xe_2013.3.163/tbb/lib/intel64/gcc4.1
-      # Needed so that we can find libimf.so
-      set +eux
-      . iccvars.sh intel64
-      set -eux
-   fi
+      #============================ simulator  ========================================
+      ecflow_client --meter=progress 25             --host=%ECF_NODE% --port=%ECF_PORT%  
+      ecflow_client --label=progress Simulator      --host=%ECF_NODE% --port=%ECF_PORT%  
+      
+      run_test CSim testsimulator
+      
+      #============================ Parser a big file  ========================================
+      ecflow_client --meter=progress 35             --host=%ECF_NODE% --port=%ECF_PORT%  
+      ecflow_client --label=progress ParseMega      --host=%ECF_NODE% --port=%ECF_PORT%  
+      
+      run_test AParser tsingle
    
-   if [[ %CMAKE:boost% != CMAKE ]] ; then
-   
+      #============================ Server  ========================================
+      ecflow_client --meter=progress 45             --host=%ECF_NODE% --port=%ECF_PORT%  
+      ecflow_client --label=progress Server         --host=%ECF_NODE% --port=%ECF_PORT%
+      
+      if [[ %ARCH% = cray ]] ; then
+         unset ECF_HOME
+         unset ECF_PORT
+         unset ECF_NODE
+      fi
+      run_test Server tserver
+      
+      
+      #============================ Client ========================================
+      ecflow_client --meter=progress 45             --host=%ECF_NODE% --port=%ECF_PORT%  
+      ecflow_client --label=progress Client         --host=%ECF_NODE% --port=%ECF_PORT% 
+      
+      # HACK for IBM which sets ECF_RID, unset before running client server tests
+      # Not defined for other platforms
+      if [[ %ARCH% = ibm_power* ]] ; then
+         unset ECF_RID
+      fi
+      
+      run_test Client tclient
+      
+      
+      #============================ Test ========================================
+      ecflow_client --meter=progress 60     --host=%ECF_NODE% --port=%ECF_PORT%  
+      ecflow_client --label=progress Test   --host=%ECF_NODE% --port=%ECF_PORT%  
+      
+      if [[ %ARCH% = opensuse113 || %ARCH% = opensuse103 || %ARCH% = redhat ]] ; then
+         # On ECGATE/opensuse113 port 3141 is already used ???
+         # linux64 and linux64intel, run at the same time, hence use ECF_PORT=3142 for linux64intel
+         export ECF_PORT=3142
+      fi
+      
+      run_test Test server-test
+      
+      
+      #============================ Test zombies ========================================
+      ecflow_client --meter=progress 80        --host=%ECF_NODE% --port=%ECF_PORT%  
+      ecflow_client --label=progress Zombies   --host=%ECF_NODE% --port=%ECF_PORT% 
+      
+      run_test Test test-zombies
+      
+      
+      #============================ Python ========================================
+      # placed last since bjam invocation appears to hang occasionally on HPUX
+      
+      ecflow_client --meter=progress 90       --host=%ECF_NODE% --port=%ECF_PORT%  
+      ecflow_client --label=progress Python   --host=%ECF_NODE% --port=%ECF_PORT%  
+      
+      cd Pyext
+      
+      # make sure path to the interpreter is accessible.
+      # This can be hard coded in site-config.jam i.e via using python
+      # Or amend the path here
+      
+      if [[ %ARCH% = linux64 ]] ; then
+         #
+         # NOTE: /usr/local/bin provides path to 2.7 PYTHON interpreter
+         #       *MAKE* sure it becomes *BEFORE* /usr/bin as that points to python 2.6
+         #        This is what 'using python' will pick up and add to the include path
+         #
+         export PATH=/usr/local/bin:$PATH 
+         
+      elif [[ %ARCH% = opensuse113  ]] ; then
+      
+         export PATH=/usr/local/bin:$PATH
+         
+      elif [[ %ARCH% = redhat  ]] ; then
+      
+         export PATH=/usr/local/apps:$PATH
+         
+      elif [[ %ARCH% = opensuse103  ]] ; then
+      
+         #
+         # NOTE: /usr/local/apps/python/2.7.2-01/bin/ provides path to PYTHON interpreter
+         #       This is what 'using python' will pick up and add to the include path
+         #
+         export PATH=/usr/local/apps/python/2.7.2-01/bin/:/usr/local/bin:$PATH
+         
+      elif [[ %ARCH% = linux64intel  ]] ; then
+      
+         #
+         # NOTE: /usr/local/apps/python/2.7.2-01/bin/ provides path to PYTHON interpreter
+         #       This is what 'using python' will pick up and add to the include path
+         #
+         export PATH=/usr/local/apps/python/2.7.2-01/bin/:/usr/local/bin:$PATH
+         export PATH=/usr/local/apps/intel/composer_xe_2013.3.163/bin:$PATH
+         
+         # ensure any variable exported will form part of this script.
+         # Ignore errors in the script, re-enable afterwards.
+         # If all else fails we only need LD_LIBRARY_PATH
+         #   export LD_LIBRARY_PATH=/gpfs/usr/local/apps/intel/composer_xe_2013.3.163/composer_xe_2013.3.163/ipp/../compiler/lib/intel64:/gpfs/usr/local/apps/intel/composer_xe_2013.3.163/composer_xe_2013.3.163/ipp/lib/intel64:/opt/intel/mic/coi/host-linux-release/lib:/opt/intel/mic/myo/lib:/gpfs/usr/local/apps/intel/composer_xe_2013.3.163/composer_xe_2013.3.163/compiler/lib/intel64:/gpfs/usr/local/apps/intel/composer_xe_2013.3.163/composer_xe_2013.3.163/mkl/lib/intel64:/gpfs/usr/local/apps/intel/composer_xe_2013.3.163/composer_xe_2013.3.163/tbb/lib/intel64/gcc4.1
+         # Needed so that we can find libimf.so
+         set +eux
+         . iccvars.sh intel64
+         set -eux
+      fi
+      
+      
       #rm -rf bin/*.test   
-   
+      
       # On cray we need CUSTOM_BJAM_ARGS i.e for toolset=intel cxxflags=-fPIC otherwise, 
       # it will rebuild Pyext directory with default compiler
       # hence thses flags need to be same used in build.ecf
       $BOOST_ROOT/bjam %CUSTOM_BJAM_ARGS:% variant=$mode test-all
-   fi   
-fi
-
-############################################################################
-# ctest
-############################################################################
-if [[ %CMAKE:boost% = CMAKE ]] ; then
-
-   ecflow_client --label=progress ctest   --host=%ECF_NODE% --port=%ECF_PORT% 
-
-   # The following lines are required for aborting a test, function ERROR must be defined
-   trap '{ echo "Error in function"; ERROR; }' 0 1 2 3 4 5 6 7 8 10 12 13 15
-   set -e # stop shell, on error
-   set -x # echo script lines as they are executed
-
-   # now run the ctest, which will run python tests.
-   cd $WK
-   cd ecbuild/%MODE%
-     
-   #  Uset ECF variables that could be used in ecf tests
-   unset ECF_HOME
-   unset ECF_PORT
-   unset ECF_NODE
-   
-   # -V verbose, show test output
-   # --output-on-failure only show output on failure
-   ctest --output-on-failure
+   fi
 fi
 
 # ========================= all test complete ==========================================

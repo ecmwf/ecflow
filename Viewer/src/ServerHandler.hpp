@@ -30,6 +30,8 @@ public:
 		defs_ptr defs() const;
 		int suiteNum() const;
 		Node* suiteAt(int) const;
+		int update();
+		void setUpdatingStatus(bool newStatus) {updating_ = newStatus;}
 
 		static const std::vector<ServerHandler*>& servers() {return servers_;}
 		static ServerHandler* addServer(const std::string &server, int port);
@@ -38,14 +40,18 @@ public:
 		static void command(std::vector<ViewNodeInfo_ptr>,std::string);
 		static ServerHandler* find(const std::string& longName);
 		static ServerHandler* find(Node *node);
+		static void addServerCommand(const std::string &name, const std::string command);
+		static std::string resolveServerCommand(const std::string &name);
 
 protected:
 		std::string name_;
 		int port_;
 		ClientInvoker *client_;
 		std::string longName_;
+		bool updating_;
 
 		static std::vector<ServerHandler*> servers_;
+		static std::map<std::string, std::string> commands_;
 };
 
 

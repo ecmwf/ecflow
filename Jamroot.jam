@@ -25,7 +25,7 @@ build-project TestEcfSms ;
 import os ;
 ARCH = [ os.environ ARCH ] ;
 ARCH default = UNDEF ;  # if arch not defined set as UNDEF, otherwise if $(ARCH) will be true
-build_gui = linux rs6000 cray other_gui_arch ;
+build_gui = linux cray other_gui_arch ;
 # echo "ARCH =  $(ARCH)" ;
 if $(ARCH) in $(build_gui) {
    build-project view ;
