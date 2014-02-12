@@ -79,6 +79,7 @@ else
    if [[ %CMAKE:boost% = CMAKE ]] ; then
    
       # CMAKE ===========================================================
+      pwd
       mkdir -p ecbuild/%MODE% 
       cd ecbuild/%MODE%
       
@@ -98,10 +99,25 @@ else
          CMAKE_MODULE_PATH=%ROOT_WK:%/ecbuild/cmake
       fi
       
-      /usr/local/apps/cmake/current/bin/cmake ../../  \
+      if [[ %TOOLSET% = intel ]]; then
+          /usr/local/apps/cmake/current/bin/cmake ../../  \
+         -DCMAKE_BUILD_TYPE=$cmake_build_type \
+         -DCMAKE_MODULE_PATH=$CMAKE_MODULE_PATH \
+         -DCMAKE_INSTALL_PREFIX=/usr/local/apps/ecflow/$ecflow_version \
+         -DCMAKE_C_COMPILER=icc  -DCMAKE_CXX_COMPILER=icpc 
+      elif [[ %TOOLSET% = clang ]]; then
+          /usr/local/apps/cmake/current/bin/cmake ../../  \
+         -DCMAKE_BUILD_TYPE=$cmake_build_type \
+         -DCMAKE_MODULE_PATH=$CMAKE_MODULE_PATH \
+         -DCMAKE_INSTALL_PREFIX=/usr/local/apps/ecflow/$ecflow_version \
+         -DCMAKE_C_COMPILER=clang  -DCMAKE_CXX_COMPILER=clang++       
+      else
+         /usr/local/apps/cmake/current/bin/cmake ../../  \
          -DCMAKE_BUILD_TYPE=$cmake_build_type \
          -DCMAKE_MODULE_PATH=$CMAKE_MODULE_PATH \
          -DCMAKE_INSTALL_PREFIX=/usr/local/apps/ecflow/$ecflow_version
+      fi
+         
          
          #-DPYTHON_LIBRARY=/usr/local/apps/python/current/lib/libpython2.7.a \
          #-DPYTHON_INCLUDE_DIR=/usr/local/apps/python/current/include/python2.7 \

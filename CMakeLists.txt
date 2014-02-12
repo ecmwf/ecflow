@@ -120,7 +120,7 @@ endif()
 
 # compile with fPIC on linux, need for ecflow.so *install*
 # This could be switched off for, Server,/View, since that is not used in ecflow.so
-cmake_add_cxx_flags("-fPIC")
+#cmake_add_cxx_flags("-fPIC")
 
 add_subdirectory( ACore )
 add_subdirectory( ANattr )
