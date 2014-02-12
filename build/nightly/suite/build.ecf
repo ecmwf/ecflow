@@ -117,13 +117,14 @@ else
          -DCMAKE_MODULE_PATH=$CMAKE_MODULE_PATH \
          -DCMAKE_INSTALL_PREFIX=/usr/local/apps/ecflow/$ecflow_version
       fi
-         
-         
-         #-DPYTHON_LIBRARY=/usr/local/apps/python/current/lib/libpython2.7.a \
-         #-DPYTHON_INCLUDE_DIR=/usr/local/apps/python/current/include/python2.7 \
-         #-DPYTHON_EXECUTABLE=/usr/local/apps/python/current/bin/python2.7 
-         
-      make -j%NO_OF_CORES%
+                  
+      
+      if [[ %ECF_TRYNO% -eq 1 ]] ; then
+         make -j%NO_OF_CORES%
+      else
+         make -j%NO_OF_CORES% VERBOSE=1     
+      fi
+      
    else
          
       # BOOST Build =====================================================
