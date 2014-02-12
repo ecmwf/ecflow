@@ -22,9 +22,19 @@ else
    # clone from stash repository
    /usr/local/apps/git/current/bin/git clone ssh://git@software.ecmwf.int:7999/ecflow/ecflow.git
    
-   # Checkout the branch  'master' when making a release otherwise use 'develop'
+   # Checkout the branch  'release/<number>' when making a release otherwise use 'develop'
    cd ecflow
    /usr/local/apps/git/current/bin/git checkout %GIT_BRANCH%   
+   cd ..
+   
+   # ===============================================================================
+   # Checkout ecbuild, this is the build system. We have another ecbuild inside ecflow for compile
+   # Note: when we clone, the default branch is master.
+   # ===============================================================================
+   rm -rf ecbuild
+   /usr/local/apps/git/current/bin/git clone ssh://git@software.ecmwf.int:7999/ecsdk/ecbuild.git
+   cd ecbuild   
+   /usr/local/apps/git/current/bin/git checkout develop 
 fi
 
 %include <tail.h>
