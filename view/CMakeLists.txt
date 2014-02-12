@@ -183,7 +183,7 @@ debug_var( X11_Xt_LIB )
 debug_var( X11_Xpm_INCLUDE_PATH )
 debug_var( X11_Xpm_LIB )
 
-find_package( MOTIF )
+find_package( Motif )
 debug_var( MOTIF_INCLUDE_DIR )
 debug_var( MOTIF_LIBRARIES )  
 if ( NOT MOTIF_FOUND )
