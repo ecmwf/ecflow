@@ -166,6 +166,26 @@ set -x # echo script lines as they are executed
 
 # ============================================================================
 
+if [[ %ARCH% = linux64intel  ]] ; then
+   #
+   # NOTE: /usr/local/apps/python/2.7.2-01/bin/ provides path to PYTHON interpreter
+   #       This is what 'using python' will pick up and add to the include path
+   #
+   export PATH=/usr/local/apps/intel/composer_xe_2013.3.163/bin:$PATH
+   
+   # ensure any variable exported will form part of this script.
+   # Ignore errors in the script, re-enable afterwards.
+   # If all else fails we only need LD_LIBRARY_PATH
+   #   export LD_LIBRARY_PATH=/gpfs/usr/local/apps/intel/composer_xe_2013.3.163/composer_xe_2013.3.163/ipp/../compiler/lib/intel64:/gpfs/usr/local/apps/intel/composer_xe_2013.3.163/composer_xe_2013.3.163/ipp/lib/intel64:/opt/intel/mic/coi/host-linux-release/lib:/opt/intel/mic/myo/lib:/gpfs/usr/local/apps/intel/composer_xe_2013.3.163/composer_xe_2013.3.163/compiler/lib/intel64:/gpfs/usr/local/apps/intel/composer_xe_2013.3.163/composer_xe_2013.3.163/mkl/lib/intel64:/gpfs/usr/local/apps/intel/composer_xe_2013.3.163/composer_xe_2013.3.163/tbb/lib/intel64/gcc4.1
+   #
+   # Needed so that we can find (intel)libimf.so, which is loaded when call ecflow python extension
+   set +eux
+   . iccvars.sh intel64
+   set -eux
+fi
+      
+# =================================================================================
+
 if [[ %SET_TO_TEST_SCRIPT% = true ]] ; then
    echo "Test only"
 else
@@ -192,7 +212,10 @@ else
       # -V verbose, show test output
       # --output-on-failure only show output on failure
       if [[ %ECF_TRYNO% -eq 1 ]] ; then
-         ctest --output-on-failure
+         ctest -R u_ --output-on-failure
+         ctest -R c_ --output-on-failure
+         ctest -R s_ --output-on-failure
+         ctest -R perf_ --output-on-failure
       else
          # this does not work
          # ctest --rerun-failed --output-on-failure
@@ -202,7 +225,8 @@ else
          sleep 4
          
          # Only run the failed test. Note: if FailedTests.log is empty then all tests are run
-         ctest -I FailedTests.log --output-on-failure
+         # -VV extra verbose
+         ctest -I FailedTests.log --VV
       fi
       
    else
@@ -287,24 +311,6 @@ else
       
       # make sure path to the interpreter is accessible.
       echo $PATH
-      
-      if [[ %ARCH% = linux64intel  ]] ; then
-      
-         #
-         # NOTE: /usr/local/apps/python/2.7.2-01/bin/ provides path to PYTHON interpreter
-         #       This is what 'using python' will pick up and add to the include path
-         #
-         export PATH=/usr/local/apps/intel/composer_xe_2013.3.163/bin:$PATH
-         
-         # ensure any variable exported will form part of this script.
-         # Ignore errors in the script, re-enable afterwards.
-         # If all else fails we only need LD_LIBRARY_PATH
-         #   export LD_LIBRARY_PATH=/gpfs/usr/local/apps/intel/composer_xe_2013.3.163/composer_xe_2013.3.163/ipp/../compiler/lib/intel64:/gpfs/usr/local/apps/intel/composer_xe_2013.3.163/composer_xe_2013.3.163/ipp/lib/intel64:/opt/intel/mic/coi/host-linux-release/lib:/opt/intel/mic/myo/lib:/gpfs/usr/local/apps/intel/composer_xe_2013.3.163/composer_xe_2013.3.163/compiler/lib/intel64:/gpfs/usr/local/apps/intel/composer_xe_2013.3.163/composer_xe_2013.3.163/mkl/lib/intel64:/gpfs/usr/local/apps/intel/composer_xe_2013.3.163/composer_xe_2013.3.163/tbb/lib/intel64/gcc4.1
-         # Needed so that we can find libimf.so
-         set +eux
-         . iccvars.sh intel64
-         set -eux
-      fi
       
       #rm -rf bin/*.test   
       
