@@ -23,9 +23,12 @@ set -u # fail when using an undefined variable
 # Determine ecflow build directory name: see ACore/doc/extracting_version_number.ddoc
 # ========================================================================
 cd $WK
-release=$(grep "Version::release_" ACore/src/Version.cpp  | cut -d= -s -f2 | sed 's/;//g' | sed 's/ //g')
-major=$(grep   "Version::major_"   ACore/src/Version.cpp  | cut -d= -s -f2 | sed 's/;//g' | sed 's/ //g')
-minor=$(grep   "Version::minor_"   ACore/src/Version.cpp  | cut -d= -s -f2 | sed 's/;//g' | sed 's/ //g' | sed 's/"//g' )
+
+ecflow_version=$(cat $WK/VERSION.cmake | awk '{print $3}'|sed 's/["]//g')
+release=$(echo $ecflow_version | cut -d. -f1)
+major=$(echo $ecflow_version   | cut -d. -f2)
+minor=$(echo $ecflow_version   | cut -d. -f3)
+
 ECFLOW_WS_DIR=ecflow_${release}_${major}_${minor}_doc
 
 

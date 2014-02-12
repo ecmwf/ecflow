@@ -4,35 +4,32 @@ import os
 # See: http://docs.python.org/2/distutils/apiref.html?highlight=extension#distutils.core.Extension
 
 def get_ecflow_version():
-    "This will extract version from the source code"
-    "expecting string of form: const int Version::release_ = 1;"
-    "expecting string of form: const int Version::major_ = 9;"
-    "expecting string of form: const int Version::minor_ = 0;"
-    "will return string of form `ecflow_1_9_15`"
-    work_space=os.getenv("WK") 
-    file = work_space + "/ACore/src/Version.cpp"
-    version_cpp = open(file,'r')
-    try :
-        release = "";  major = "";  minor = ""
-        # search for release, major, minor
-        for line in version_cpp :
-            equal_pos = line.find("=")
-            semi_colon_pos = line.find(";")
-            if equal_pos != -1 and semi_colon_pos != -1:
-                part = line[equal_pos+1:semi_colon_pos]
-                part = part.strip()
-                if line.find("Version::release_") != -1: release = part; continue
-                if line.find("Version::major_")   != -1: major = part;   continue
-                if line.find("Version::minor_")   != -1: minor = part.replace('"',''); break; # minor is a string, remove quotes
-    finally:
-        version_cpp.close();
-        
+    "This will extract ecFlow version from the source code."
+    "If that fails it will look at /usr/local/apps/ecflow/current directory"
+    "The version is defined in the file VERSION.cmake"
+    "expecting string of form:  'set( ${PROJECT_NAME}_VERSION_STR  '4.0.1' )' "
+    "will return a list of form `[4,0,1]`"
+    work_space=os.getenv("WK")
+    file = work_space + "/VERSION.cmake"
     ecflow_version = []
-    ecflow_version.append(release)
-    ecflow_version.append(major)
-    ecflow_version.append(minor)
-    return ecflow_version
+    if os.path.exists(file):
+        version_cpp = open(file,'r')
+        try :
+           for line in version_cpp :
+               first_quote = line.find('"')
+               second_quote = line.find('"',first_quote+1)
+               if first_quote != -1 and second_quote != -1:
+                   part = line[first_quote+1:second_quote]
+                   ecflow_version = part.split(".")
+                   break;
+        finally:
+            version_cpp.close();
         
+        #print "Extracted ecflow version '" + str(ecflow_version) + "' from " + file 
+        return ecflow_version
+    else:
+        assert False, "Could not determine version"
+    
 ecflow_version_list = get_ecflow_version()
 assert len(ecflow_version_list) == 3, "Expected version to have release, major,minor"
 ecflow_build_dir_version =  "ecflow_" + ecflow_version_list[0] + "_" + ecflow_version_list[1] + "_" + ecflow_version_list[2]

@@ -199,11 +199,16 @@ void time_load_and_downloads(
 
 BOOST_AUTO_TEST_CASE( test_perf_for_large_defs )
 {
-   /// This will remove checkpt and backup , to avoid server from loading it. (i.e from previous test)
-   InvokeServer invokeServer("Client:: ...test_perf_for_large_defs:",SCPort::next());
+   if (fs::exists("/var/tmp/ma0/BIG_DEFS")) {
+      /// This will remove checkpt and backup , to avoid server from loading it. (i.e from previous test)
+      InvokeServer invokeServer("Client:: ...test_perf_for_large_defs:",SCPort::next());
 
-   ClientInvoker theClient(invokeServer.host(), invokeServer.port());
-   time_load_and_downloads(theClient,invokeServer.host(), invokeServer.port(),"/var/tmp/ma0/BIG_DEFS");
+      ClientInvoker theClient(invokeServer.host(), invokeServer.port());
+      time_load_and_downloads(theClient,invokeServer.host(), invokeServer.port(),"/var/tmp/ma0/BIG_DEFS");
+   }
+   else {
+      std::cout << "Ingoring test, since directory /var/tmp/ma0/BIG_DEFS does not exist";
+   }
 }
 
 BOOST_AUTO_TEST_SUITE_END()

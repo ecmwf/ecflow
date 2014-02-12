@@ -14,8 +14,10 @@ if [[ %SET_TO_TEST_SCRIPT% = true ]] ; then
    echo "Test only"
 else
 
+   cd ../ecbuild
+
    # Update by pulling branch. used 'master' when making a release otherwise use 'develop'
-   /usr/local/apps/git/current/bin/git pull origin %GIT_BRANCH%   
+   /usr/local/apps/git/current/bin/git pull origin %ECBUILD_GIT_BRANCH%   
 fi
 
 %include <tail.h>

@@ -83,7 +83,7 @@ BOOST_AUTO_TEST_CASE( test_single_defs )
    // Change for file_iterator to plain string halved the time taken to load operation suite
    boost::timer timer; // measures CPU, replace with cpu_timer with boost > 1.51, measures cpu & elapsed
 #ifdef DEBUG
-#if defined(HPUX) || defined(AIX)
+#if defined(HPUX) || defined(_AIX)
    double expectedTimeForParse = 15.0;
    double expectedTimeForParseOnly = 10.0;
    double expectedTimeForResolveDependencies = 3.5; // this is time for 10 job submissions
@@ -103,7 +103,7 @@ BOOST_AUTO_TEST_CASE( test_single_defs )
    double expectedTimeForCheckPtPersistAndReload = 8.0;
 #endif
 #else
-#if defined(HPUX) || defined(AIX)
+#if defined(HPUX) || defined(_AIX)
    double expectedTimeForParse = 7.8;
    double expectedTimeForParseOnly = 5.0;
    double expectedTimeForResolveDependencies = 3.5; // this is time for 10 job submissions

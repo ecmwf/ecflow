@@ -15,7 +15,7 @@ def get_ecflow_version( work_space ):
     "This will extract ecFlow version from the source code."
     "If that fails it will look at /usr/local/apps/ecflow/current directory"
     "The version is defined in the file VERSION.cmake"
-    "expecting string of form:  'set( ${PROJECT_NAME}_VERSION_STR  "4.0.1" )' "
+    "expecting string of form:  'set( ${PROJECT_NAME}_VERSION_STR  '4.0.1' )' "
     "will return a list of form `[4,0,1]`"
     file = work_space + "/VERSION.cmake"
     ecflow_version = []

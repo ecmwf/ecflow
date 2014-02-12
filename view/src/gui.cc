@@ -87,7 +87,7 @@ void split_msg(std::string& msg) {
   }
 }
 
-#if !defined(AIX)
+#if !defined(_AIX)
 static tidy_gui_resources tgr;
 #endif
 

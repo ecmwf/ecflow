@@ -9,33 +9,29 @@ import ecflow
 # The two have to be separate. The installed version is used to test.
 
 def get_ecflow_version( work_space ):
-    "This will extract version from the source code"
-    "expecting string of form: const int Version::release_ = 1;"
-    "expecting string of form: const int Version::major_ = 9;"
-    "expecting string of form: const int Version::minor_ = 0;"
-    "will return string of form `ecflow_1_9_15`"
-    file = work_space + "/ACore/src/Version.cpp"
-    version_cpp = open(file,'r')
-    try :
-        release = "";  major = "";  minor = ""
-        # search for release, major, minor
-        for line in version_cpp :
-            equal_pos = line.find("=")
-            semi_colon_pos = line.find(";")
-            if equal_pos != -1 and semi_colon_pos != -1:
-                part = line[equal_pos+1:semi_colon_pos]
-                part = part.strip()
-                if line.find("Version::release_") != -1: release = part; continue
-                if line.find("Version::major_")   != -1: major = part;   continue
-                if line.find("Version::minor_")   != -1: minor = part.replace('"',''); break; # minor is a string, remove quotes
-    finally:
-        version_cpp.close();
-        
+    "This will extract ecFlow version from the source code."
+    "The version is defined in the file VERSION.cmake"
+    "expecting string of form:  'set( ${PROJECT_NAME}_VERSION_STR  '4.0.1' )' "
+    "will return a list of form `[4,0,1]`"
+    file = work_space + "/VERSION.cmake"
     ecflow_version = []
-    ecflow_version.append(release)
-    ecflow_version.append(major)
-    ecflow_version.append(minor)
-    return ecflow_version
+    if os.path.exists(file):
+        version_cpp = open(file,'r')
+        try :
+           for line in version_cpp :
+               first_quote = line.find('"')
+               second_quote = line.find('"',first_quote+1)
+               if first_quote != -1 and second_quote != -1:
+                   part = line[first_quote+1:second_quote]
+                   ecflow_version = part.split(".")
+                   break;
+        finally:
+            version_cpp.close();
+        
+        print "Extracted ecflow version '" + str(ecflow_version) + "' from " + file 
+        return ecflow_version
+    assert False, "could not determine version"
+    
         
 WK=os.getenv("WK") 
 
@@ -281,7 +277,7 @@ def add_aix_power7_variables( aix_power7 ) :
 
 def add_build_debug( parent ): 
     f = parent.add_family("build_debug")
-    f.add_trigger("cp_site_config == complete and git_clone == complete")
+    f.add_trigger("cp_site_config == complete and git_clone_ecflow == complete and git_clone_ecbuild == complete")
     f.add_variable("MODE","debug")
     f.add_task("build")
     task_test = f.add_task("test")
@@ -297,7 +293,7 @@ def add_build_debug( parent ):
 
 def add_build_release( parent ):
     f = parent.add_family("build_release")
-    f.add_trigger("cp_site_config == complete and git_clone == complete")
+    f.add_trigger("cp_site_config == complete and git_clone_ecflow == complete and git_clone_ecbuild == complete")
     f.add_variable("MODE","release")
     task_build = f.add_task("build")
     
@@ -317,11 +313,17 @@ def add_build_release( parent ):
     task_test.add_meter("progress",0,100,100)
     
 def add_git_tasks( parent , set_git_clone_def_status = False ) :
-    git_clone = parent.add_task("git_clone")
+    git_clone_ecflow = parent.add_task("git_clone_ecflow")
     if set_git_clone_def_status :
-        git_clone.add_defstatus( ecflow.DState.complete )
-    git_pull = parent.add_task("git_pull")
-    git_pull.add_defstatus( ecflow.DState.complete )
+        git_clone_ecflow.add_defstatus( ecflow.DState.complete )
+    git_pull_ecflow = parent.add_task("git_pull_ecflow")
+    git_pull_ecflow.add_defstatus( ecflow.DState.complete )
+
+    git_clone_ecbuild = parent.add_task("git_clone_ecbuild")
+    if set_git_clone_def_status :
+        git_clone_ecbuild.add_defstatus( ecflow.DState.complete )
+    git_clone_ecbuild = parent.add_task("git_pull_ecbuild")
+    git_clone_ecbuild.add_defstatus( ecflow.DState.complete )
 
             
 def add_build_profile( parent ):
@@ -407,6 +409,7 @@ def build_localhost_clang( parent ) :
 
 def build_linux_64( parent ) :
     linux_64 = parent.add_family("linux64")
+    linux_64.add_variable("CMAKE","CMAKE")
     add_linux_64_variables(linux_64)
     add_remote_linux_64_variables(linux_64)
     add_git_tasks( linux_64 )
@@ -414,6 +417,7 @@ def build_linux_64( parent ) :
     
 def build_linux_64_intel( parent ) :
     linux_64 = parent.add_family("linux64intel")
+    linux_64.add_variable("CMAKE","CMAKE")
     add_linux_64_intel_variables(linux_64)
     add_remote_linux_64_intel_variables(linux_64)
     add_git_tasks( linux_64 )
@@ -421,6 +425,7 @@ def build_linux_64_intel( parent ) :
     
 def build_opensuse113( parent ) :
     opensuse113 = parent.add_family("opensuse113")
+    opensuse113.add_variable("CMAKE","CMAKE")
     add_opensuse113_variables(opensuse113)
     add_remote_opensuse113_variables(opensuse113)
     add_git_tasks( opensuse113 )
@@ -428,6 +433,7 @@ def build_opensuse113( parent ) :
     
 def build_redhat( parent ) :
     redhat = parent.add_family("redhat")
+    redhat.add_variable("CMAKE","CMAKE")
     add_redhat_variables(redhat)
     add_remote_redhat_variables(redhat)
     add_git_tasks( redhat )
@@ -452,6 +458,7 @@ def build_cray_intel( parent ) :
     
 def build_cray_cray( parent ) :
     cray = parent.add_family("cray_cray")
+    cray.add_defstatus( ecflow.DState.suspended ) # suspend since does not compile
     cray.add_trigger("cray_intel == complete or cray_intel == aborted")
     add_cray_variables(cray)
     add_cray_cray_compiler_variables(cray)
@@ -462,12 +469,14 @@ def build_cray_cray( parent ) :
 def build_cray( parent ) :
     cray = parent.add_family("cray")
     cray.add_variable("NO_OF_CORES","2") # temp until stings get sorted on cray
+    cray.add_variable("CMAKE","CMAKE")
     build_cray_gnu( cray)
     build_cray_intel( cray)
     build_cray_cray( cray)
     
 def build_opensuse103( parent ) :
     opensuse103 = parent.add_family("opensuse103")
+    opensuse103.add_variable("CMAKE","CMAKE")
     add_opensuse103_variables(opensuse103)
     add_remote_opensuse103_variables(opensuse103)
     add_git_tasks( opensuse103 )
@@ -486,6 +495,7 @@ def build_hpux( parent ):
 
 def build_aix_power7( parent ) :
     aix_power7 = parent.add_family("aix_power7")
+    aix_power7.add_variable("CMAKE","CMAKE")
     add_aix_power7_variables( aix_power7 )
     add_remote_aix_power7_variables( aix_power7 )
     add_git_tasks( aix_power7 )
@@ -603,7 +613,8 @@ def add_suite_variables( suite ):
     suite.add_variable("PYTHON_VERSION","2.7")
     suite.add_variable("SET_TO_TEST_SCRIPT","false") 
     suite.add_variable("BUILD_ECFLOWVIEW","true")
-    suite.add_variable("GIT_BRANCH","develop")  # when makeing a relase switch to release/<release version>, otherwise develop
+    suite.add_variable("ECFLOW_GIT_BRANCH","develop")  # when makeing a relase switch to release/<release version>, otherwise develop
+    suite.add_variable("ECBUILD_GIT_BRANCH","develop")   
 
     # automatically fob all zombies when compiling ecflow 
     child_list = []
@@ -637,13 +648,16 @@ with defs.add_suite("suite") as suite:
         build.add_time("18:15")
         build.add_defstatus( ecflow.DState.suspended );
     
-        git_pull = build.add_task("git_pull")
-        git_pull.add_variable("ARCH","opensuse113")
-        git_pull.add_variable("LOCAL_HOST",os.uname()[1]) # run this locally
+        git_pull_ecflow = build.add_task("git_pull_ecflow")
+        git_pull_ecflow.add_variable("ARCH","opensuse113")
+        git_pull_ecflow.add_variable("LOCAL_HOST",os.uname()[1]) # run this locally
+        git_pull_ecbuild = build.add_task("git_pull_ecbuild")
+        git_pull_ecbuild.add_variable("ARCH","opensuse113")
+        git_pull_ecbuild.add_variable("LOCAL_HOST",os.uname()[1]) # run this locally
 
     
         tar_fam = build.add_family("tar")
-        tar_fam.add_trigger("git_pull == complete")
+        tar_fam.add_trigger("git_pull_ecflow == complete and git_pull_ecbuild == complete")
     
         create_tar = tar_fam.add_task("create_tar")
         create_tar.add_variable("ARCH","opensuse113")

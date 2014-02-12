@@ -65,7 +65,7 @@ void extent<T>::delete_all()
 }
 
 // gcc is broken
-#if defined (__GNUC__) || defined (hpux) || defined(mips) || defined(AIX)
+#if defined (__GNUC__) || defined (hpux) || defined(mips) || defined(_AIX)
 #define IMP(T)
 #else
 #define IMP(T) extent<T>* extent<T>::first_;extent<T>* extent<T>::last_;

@@ -77,7 +77,7 @@ constant ECFLOW_PYTHON_INSTALL_DIR : $(python_install_dir) ;
 #      bjam -d2 install-viewer
 #
 # Make sure for ECMWF that ECFLOW_INSTALL_DIR leaf directory encompasses version number
-# that ties up with ACore/src/Version.cpp
+# that ties up with $WK/VERSION.cmake
 #
  
 # Do no call this on the command line, prefer bjam install-all || install-viewer

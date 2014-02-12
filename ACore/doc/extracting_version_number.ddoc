@@ -30,3 +30,11 @@ echo $ECFLOW
 //                            ( 9 )
 //                            ( 0 )
 // sed 's/"//g'               # remove quotes from the minor string
+
+# ==============================================================================================
+# Change to extracting from cmake
+#
+ecflow_version=$(cat $WK/VERSION.cmake | awk '{print $3}'|sed 's/["]//g')
+release=$(echo $ecflow_version | cut -d. -f1)
+major=$(echo $ecflow_version   | cut -d. -f2)
+minor=$(echo $ecflow_version   | cut -d. -f3)

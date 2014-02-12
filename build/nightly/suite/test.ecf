@@ -286,40 +286,14 @@ else
       cd Pyext
       
       # make sure path to the interpreter is accessible.
-      # This can be hard coded in site-config.jam i.e via using python
-      # Or amend the path here
+      echo $PATH
       
-      if [[ %ARCH% = linux64 ]] ; then
-         #
-         # NOTE: /usr/local/bin provides path to 2.7 PYTHON interpreter
-         #       *MAKE* sure it becomes *BEFORE* /usr/bin as that points to python 2.6
-         #        This is what 'using python' will pick up and add to the include path
-         #
-         export PATH=/usr/local/bin:$PATH 
-         
-      elif [[ %ARCH% = opensuse113  ]] ; then
-      
-         export PATH=/usr/local/bin:$PATH
-         
-      elif [[ %ARCH% = redhat  ]] ; then
-      
-         export PATH=/usr/local/apps:$PATH
-         
-      elif [[ %ARCH% = opensuse103  ]] ; then
+      if [[ %ARCH% = linux64intel  ]] ; then
       
          #
          # NOTE: /usr/local/apps/python/2.7.2-01/bin/ provides path to PYTHON interpreter
          #       This is what 'using python' will pick up and add to the include path
          #
-         export PATH=/usr/local/apps/python/2.7.2-01/bin/:/usr/local/bin:$PATH
-         
-      elif [[ %ARCH% = linux64intel  ]] ; then
-      
-         #
-         # NOTE: /usr/local/apps/python/2.7.2-01/bin/ provides path to PYTHON interpreter
-         #       This is what 'using python' will pick up and add to the include path
-         #
-         export PATH=/usr/local/apps/python/2.7.2-01/bin/:/usr/local/bin:$PATH
          export PATH=/usr/local/apps/intel/composer_xe_2013.3.163/bin:$PATH
          
          # ensure any variable exported will form part of this script.
@@ -331,7 +305,6 @@ else
          . iccvars.sh intel64
          set -eux
       fi
-      
       
       #rm -rf bin/*.test   
       

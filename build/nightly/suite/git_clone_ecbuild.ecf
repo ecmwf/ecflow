@@ -1,0 +1,32 @@
+%include <head.h>
+
+if [[ "%LOCAL_HOST:%" != ""  ]] ; then
+
+   # ======================================================================
+   # Run LOCALLY
+   # ======================================================================
+   cd %WK%
+   cd ../ecbuild
+   
+   # Update by pulling from the master repository
+   /usr/local/apps/git/current/bin/git checkout %ECBUILD_GIT_BRANCH%   
+      
+else
+   # ======================================================================
+   # Run REMOTELY
+   # ======================================================================
+   cd %ROOT_WK:%
+   
+   # ===============================================================================
+   # Checkout ecbuild, this is the build system. We have another ecbuild inside ecflow for compile
+   # Note: when we clone, the default branch is master.
+   # ===============================================================================
+   rm -rf ecbuild
+   /usr/local/apps/git/current/bin/git clone ssh://git@software.ecmwf.int:7999/ecsdk/ecbuild.git
+   
+   cd ecbuild   
+   /usr/local/apps/git/current/bin/git checkout  %ECBUILD_GIT_BRANCH%   
+fi
+
+%include <tail.h>
+ 

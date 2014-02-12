@@ -26,33 +26,24 @@ def get_installed_ecflow_version():
 def get_ecflow_version( work_space ):
     "This will extract ecFlow version from the source code."
     "If that fails it will look at /usr/local/apps/ecflow/current directory"
-    "The version is defined in the file /ACore/src/Version.cpp"
-    "expecting string of form: const int Version::release_ = 1;"
-    "expecting string of form: const int Version::major_ = 9;"
-    "expecting string of form: const int Version::minor_ = 0;"
-    "will return a list of form `[2,0,24]`"
-    file = work_space + "/ACore/src/Version.cpp"
+    "The version is defined in the file VERSION.cmake"
+    "expecting string of form:  'set( ${PROJECT_NAME}_VERSION_STR  '4.0.1' )' "
+    "will return a list of form `[4,0,1]`"
+    file = work_space + "/VERSION.cmake"
+    ecflow_version = []
     if os.path.exists(file):
         version_cpp = open(file,'r')
         try :
-           release = "";  major = "";  minor = ""
-           # search for release, major, minor
            for line in version_cpp :
-               equal_pos = line.find("=")
-               semi_colon_pos = line.find(";")
-               if equal_pos != -1 and semi_colon_pos != -1:
-                   part = line[equal_pos+1:semi_colon_pos]
-                   part = part.strip()
-                   if line.find("Version::release_") != -1: release = part; continue
-                   if line.find("Version::major_")   != -1: major = part;   continue
-                   if line.find("Version::minor_")   != -1: minor = part.replace('"',''); break; # minor is a string, remove quotes
+               first_quote = line.find('"')
+               second_quote = line.find('"',first_quote+1)
+               if first_quote != -1 and second_quote != -1:
+                   part = line[first_quote+1:second_quote]
+                   ecflow_version = part.split(".")
+                   break;
         finally:
             version_cpp.close();
         
-        ecflow_version = []
-        ecflow_version.append(release)
-        ecflow_version.append(major)
-        ecflow_version.append(minor)
         print "Extracted ecflow version '" + str(ecflow_version) + "' from " + file 
         return ecflow_version
     else:

@@ -31,7 +31,7 @@
 
 #ifdef DEBUG
 
-#if defined(HPUX) || defined(AIX)
+#if defined(HPUX) || defined(_AIX)
 #define RETRY_CONNECTION_PERIOD 2
 #define NEXT_HOST_POLL_PERIOD 2
 #else

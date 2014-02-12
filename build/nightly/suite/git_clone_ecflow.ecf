@@ -8,7 +8,7 @@ if [[ "%LOCAL_HOST:%" != ""  ]] ; then
    cd %WK%
       
    # Update by pulling from the master repository
-   /usr/local/apps/git/current/bin/git checkout %GIT_BRANCH%   
+   /usr/local/apps/git/current/bin/git checkout %ECFLOW_GIT_BRANCH%   
       
 else
    # ======================================================================
@@ -19,22 +19,12 @@ else
    # remove existing ecflow, the .git should be in ecflow/.git
    rm -rf ecflow
    
-   # clone from stash repository
+   # clone from stash repository, this will default to the master branch
    /usr/local/apps/git/current/bin/git clone ssh://git@software.ecmwf.int:7999/ecflow/ecflow.git
    
    # Checkout the branch  'release/<number>' when making a release otherwise use 'develop'
    cd ecflow
-   /usr/local/apps/git/current/bin/git checkout %GIT_BRANCH%   
-   cd ..
-   
-   # ===============================================================================
-   # Checkout ecbuild, this is the build system. We have another ecbuild inside ecflow for compile
-   # Note: when we clone, the default branch is master.
-   # ===============================================================================
-   rm -rf ecbuild
-   /usr/local/apps/git/current/bin/git clone ssh://git@software.ecmwf.int:7999/ecsdk/ecbuild.git
-   cd ecbuild   
-   /usr/local/apps/git/current/bin/git checkout develop 
+   /usr/local/apps/git/current/bin/git checkout %ECFLOW_GIT_BRANCH%   
 fi
 
 %include <tail.h>

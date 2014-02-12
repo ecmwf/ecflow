@@ -77,9 +77,10 @@ install_arg=install-all
 cd $WK
 
 # Determine the release,major,minor numbers for this version 
-release=$(grep "Version::release_" ACore/src/Version.cpp  | cut -d= -s -f2 | sed 's/;//g' | sed 's/ //g')
-major=$(grep   "Version::major_"   ACore/src/Version.cpp  | cut -d= -s -f2 | sed 's/;//g' | sed 's/ //g')
-minor=$(grep   "Version::minor_"   ACore/src/Version.cpp  | cut -d= -s -f2 | sed 's/;//g' | sed 's/ //g' | sed 's/"//g' )
+ecflow_version=$(cat $WK/VERSION.cmake | awk '{print $3}'|sed 's/["]//g')
+release=$(echo $ecflow_version | cut -d. -f1)
+major=$(echo $ecflow_version   | cut -d. -f2)
+minor=$(echo $ecflow_version   | cut -d. -f3)
 ECFLOW_VERSION=$release.$major.$minor
    
 export ECFLOW_INSTALL_DIR=${ECFLOW_INSTALL_DIR:-/usr/local/apps/ecflow/$release.$major.$minor}

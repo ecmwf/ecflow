@@ -60,7 +60,7 @@ public:
 	// the map allows a sms file string to be associated with a task path
 	// map.first = absolute task path
 	// map.second =  sms file string
-#if defined(AIX)
+#if defined(_AIX)
    void run(Defs&, const std::string& defs_file, const std::map<std::string,std::string>&, int timeout = 120, bool waitForTestCompletion = true);
    void run(Defs&, const std::string& defs_file, int timeout = 120,bool waitForTestCompletion = true);
 #elif defined(HPUX)

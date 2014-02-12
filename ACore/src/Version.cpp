@@ -108,7 +108,7 @@ std::string Version::boost()
 std::string Version::compiler()
 {
    std::stringstream ss;
-#if defined(AIX)
+#if defined(_AIX)
    ss << "aix " << __IBMCPP__ ;
 #elif defined(HPUX)
    ss << "aCC " << __HP_aCC ;   // type aCC +help, this will show compiler manual, search for Predefined Macros

@@ -14,7 +14,7 @@
 /*=============================================================================================*/
 
 %{
-#if defined(linux) || defined(mips) || defined(hpux) || defined(AIX)
+#if defined(linux) || defined(mips) || defined(hpux) || defined(_AIX)
 int yylineno;
 #define NEWLINE yylineno++
 #else
@@ -32,7 +32,7 @@ p4 edit src/menul.c src/menuy.c && cd src && lex  -t menul.l > menul.c && yacc  
 ecflow_client | xargs addr2line -e ecflow_client -f
 */
 
-#if defined (linux) || defined(alpha) || defined(SVR4) || defined(SGI) || defined(AIX)
+#if defined (linux) || defined(alpha) || defined(SVR4) || defined(SGI) || defined(_AIX)
 #define yyinput input
 #endif
 

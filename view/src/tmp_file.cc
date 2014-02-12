@@ -89,7 +89,7 @@ tmp_file& tmp_file::operator=(const tmp_file& other)
   return *this;
 }
 
-#if defined(linux) || defined(AIX)
+#if defined(linux) || defined(_AIX)
 
 char * tmpnam(char *) __THROW {
   char *path = getenv("SCRATCH");

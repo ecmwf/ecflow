@@ -7,9 +7,10 @@ export WK=%WK%
 # Determine version number: see ACore/doc/extracting_version_number.ddoc
 # ======================================================================
 cd $WK
-release=$(grep "Version::release_" ACore/src/Version.cpp  | cut -d= -s -f2 | sed 's/;//g' | sed 's/ //g')
-major=$(grep   "Version::major_"   ACore/src/Version.cpp  | cut -d= -s -f2 | sed 's/;//g' | sed 's/ //g')
-minor=$(grep   "Version::minor_"   ACore/src/Version.cpp  | cut -d= -s -f2 | sed 's/;//g' | sed 's/ //g' | sed 's/"//g' )
+ecflow_version=$(cat $WK/VERSION.cmake | awk '{print $3}'|sed 's/["]//g')
+release=$(echo $ecflow_version | cut -d. -f1)
+major=$(echo $ecflow_version   | cut -d. -f2)
+minor=$(echo $ecflow_version   | cut -d. -f3)
 ECFLOW=ecflow_${release}_${major}_${minor}
 ECFLOWTAR=$ECFLOW.tar
 

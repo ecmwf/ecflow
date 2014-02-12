@@ -41,7 +41,7 @@ void ZombieUtil::test_clean_up(int timeout) {
 
       // In order to FOB, we must wait, till a child command, talks to the server.
       int wait = 5;
-#if defined(HPUX) || defined(AIX)
+#if defined(HPUX) || defined(_AIX)
       wait += 5; // On these platforms wait longer,
 #endif
       if (no_fobed) { cout << "   Fobed " << no_fobed << " left over zombies. sleeping for " << wait << "s before attempting to remove\n"; sleep(wait);}
