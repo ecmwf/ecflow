@@ -10,7 +10,7 @@ ecbuild_add_library( TARGET libsimu
                      NOINSTALL
                      TYPE     STATIC
                      SOURCES  ${srcs}
-                     LIBS     core nodeattr node libparser ${Ecflow_Boost_LIBS}
+                     LIBS     core nodeattr node libparser  
                      INCLUDES ../ACore/src 
                               ../ANattr/src
                               ../ANode/src

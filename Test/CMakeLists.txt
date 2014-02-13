@@ -9,7 +9,7 @@ ecbuild_add_library( TARGET   libharness
                      NOINSTALL
                    TYPE     STATIC
                    SOURCES  ${srcs}
-                   LIBS     core nodeattr node libparser base libclient ${Ecflow_Boost_LIBS}
+                   LIBS     core nodeattr node libparser base libclient  
                    INCLUDES ../ACore/src 
                             ../ANattr/src
                             ../ANode/src
