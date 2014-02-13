@@ -24,40 +24,43 @@ local BOOST_ROOT = [ os.environ BOOST_ROOT ] ;
 # Boost libraries referenced in client/server programs
 # assumes --layout=tagged for the debug release and profile variant
 #
-lib boost_serialization : :   <variant>debug <file>$(BOOST_ROOT)/stage/lib/libboost_serialization-mt-d.a ;
-lib boost_system : :          <variant>debug <file>$(BOOST_ROOT)/stage/lib/libboost_system-mt-d.a ;
-lib boost_thread : :          <variant>debug <file>$(BOOST_ROOT)/stage/lib/libboost_thread-mt-d.a ;
-lib boost_test   : :          <variant>debug <file>$(BOOST_ROOT)/stage/lib/libboost_unit_test_framework-mt-d.a ;
-lib boost_test_monitor : :    <variant>debug <file>$(BOOST_ROOT)/stage/lib/libboost_test_exec_monitor-mt-d.a ;
-lib boost_program_options : : <variant>debug <file>$(BOOST_ROOT)/stage/lib/libboost_program_options-mt-d.a ;
-lib boost_filesystem      : : <variant>debug <file>$(BOOST_ROOT)/stage/lib/libboost_filesystem-mt-d.a ;
-lib boost_datetime        : : <variant>debug <file>$(BOOST_ROOT)/stage/lib/libboost_date_time-mt-d.a ;
-
-# profile uses release libs
-lib boost_serialization : :   <variant>profile <file>$(BOOST_ROOT)/stage/lib/libboost_serialization-mt.a ;
-lib boost_system : :          <variant>profile <file>$(BOOST_ROOT)/stage/lib/libboost_system-mt.a ;
-lib boost_thread : :          <variant>profile <file>$(BOOST_ROOT)/stage/lib/libboost_thread-mt.a ;
-lib boost_test   : :          <variant>profile <file>$(BOOST_ROOT)/stage/lib/libboost_unit_test_framework-mt.a ;
-lib boost_test_monitor : :    <variant>profile <file>$(BOOST_ROOT)/stage/lib/libboost_test_exec_monitor-mt.a ;
-lib boost_program_options : : <variant>profile <file>$(BOOST_ROOT)/stage/lib/libboost_program_options-mt.a ;
-lib boost_filesystem      : : <variant>profile <file>$(BOOST_ROOT)/stage/lib/libboost_filesystem-mt.a ;
-lib boost_datetime        : : <variant>profile <file>$(BOOST_ROOT)/stage/lib/libboost_date_time-mt.a ;
-
-lib boost_serialization : :   <variant>release <file>$(BOOST_ROOT)/stage/lib/libboost_serialization-mt.a ;
-lib boost_system : :          <variant>release <file>$(BOOST_ROOT)/stage/lib/libboost_system-mt.a ;
-lib boost_thread : :          <variant>release <file>$(BOOST_ROOT)/stage/lib/libboost_thread-mt.a ;
-lib boost_test   : :          <variant>release <file>$(BOOST_ROOT)/stage/lib/libboost_unit_test_framework-mt.a ;
-lib boost_test_monitor : :    <variant>release <file>$(BOOST_ROOT)/stage/lib/libboost_test_exec_monitor-mt.a ;
-lib boost_program_options : : <variant>release <file>$(BOOST_ROOT)/stage/lib/libboost_program_options-mt.a ;
-lib boost_filesystem      : : <variant>release <file>$(BOOST_ROOT)/stage/lib/libboost_filesystem-mt.a ;
-lib boost_datetime        : : <variant>release <file>$(BOOST_ROOT)/stage/lib/libboost_date_time-mt.a ;
-
-# INTEL ================================================================================================
 
 VERSION_TAG = 1_53 ;
 switch $(BOOST_ROOT) {
    case *boost_1_55_0 : VERSION_TAG = 1_55 ;
 }
+
+GCC_TAG = gcc46 ;
+
+lib boost_serialization : :   <variant>debug <file>$(BOOST_ROOT)/stage/lib/libboost_serialization-$(GCC_TAG)-mt-$(VERSION_TAG)d.a ;
+lib boost_system : :          <variant>debug <file>$(BOOST_ROOT)/stage/lib/libboost_system-$(GCC_TAG)-mt-$(VERSION_TAG)d.a ;
+lib boost_thread : :          <variant>debug <file>$(BOOST_ROOT)/stage/lib/libboost_thread-$(GCC_TAG)-mt-$(VERSION_TAG)d.a ;
+lib boost_test   : :          <variant>debug <file>$(BOOST_ROOT)/stage/lib/libboost_unit_test_framework-$(GCC_TAG)-mt-$(VERSION_TAG)d.a ;
+lib boost_test_monitor : :    <variant>debug <file>$(BOOST_ROOT)/stage/lib/libboost_test_exec_monitor-$(GCC_TAG)-mt-$(VERSION_TAG)d.a ;
+lib boost_program_options : : <variant>debug <file>$(BOOST_ROOT)/stage/lib/libboost_program_options-$(GCC_TAG)-mt-$(VERSION_TAG)d.a ;
+lib boost_filesystem      : : <variant>debug <file>$(BOOST_ROOT)/stage/lib/libboost_filesystem-$(GCC_TAG)-mt-$(VERSION_TAG)d.a ;
+lib boost_datetime        : : <variant>debug <file>$(BOOST_ROOT)/stage/lib/libboost_date_time-$(GCC_TAG)-mt-$(VERSION_TAG)d.a ;
+
+# profile uses release libs
+lib boost_serialization : :   <variant>profile <file>$(BOOST_ROOT)/stage/lib/libboost_serialization-$(GCC_TAG)-mt-$(VERSION_TAG).a ;
+lib boost_system : :          <variant>profile <file>$(BOOST_ROOT)/stage/lib/libboost_system-$(GCC_TAG)-mt-$(VERSION_TAG).a ;
+lib boost_thread : :          <variant>profile <file>$(BOOST_ROOT)/stage/lib/libboost_thread-$(GCC_TAG)-mt-$(VERSION_TAG).a ;
+lib boost_test   : :          <variant>profile <file>$(BOOST_ROOT)/stage/lib/libboost_unit_test_framework-$(GCC_TAG)-mt-$(VERSION_TAG).a ;
+lib boost_test_monitor : :    <variant>profile <file>$(BOOST_ROOT)/stage/lib/libboost_test_exec_monitor-$(GCC_TAG)-mt-$(VERSION_TAG).a ;
+lib boost_program_options : : <variant>profile <file>$(BOOST_ROOT)/stage/lib/libboost_program_options-$(GCC_TAG)-mt-$(VERSION_TAG).a ;
+lib boost_filesystem      : : <variant>profile <file>$(BOOST_ROOT)/stage/lib/libboost_filesystem-$(GCC_TAG)-mt-$(VERSION_TAG).a ;
+lib boost_datetime        : : <variant>profile <file>$(BOOST_ROOT)/stage/lib/libboost_date_time-$(GCC_TAG)-mt-$(VERSION_TAG).a ;
+
+lib boost_serialization : :   <variant>release <file>$(BOOST_ROOT)/stage/lib/libboost_serialization-$(GCC_TAG)-mt-$(VERSION_TAG).a ;
+lib boost_system : :          <variant>release <file>$(BOOST_ROOT)/stage/lib/libboost_system-$(GCC_TAG)-mt-$(VERSION_TAG).a ;
+lib boost_thread : :          <variant>release <file>$(BOOST_ROOT)/stage/lib/libboost_thread-$(GCC_TAG)-mt-$(VERSION_TAG).a ;
+lib boost_test   : :          <variant>release <file>$(BOOST_ROOT)/stage/lib/libboost_unit_test_framework-$(GCC_TAG)-mt-$(VERSION_TAG).a ;
+lib boost_test_monitor : :    <variant>release <file>$(BOOST_ROOT)/stage/lib/libboost_test_exec_monitor-$(GCC_TAG)-mt-$(VERSION_TAG).a ;
+lib boost_program_options : : <variant>release <file>$(BOOST_ROOT)/stage/lib/libboost_program_options-$(GCC_TAG)-mt-$(VERSION_TAG).a ;
+lib boost_filesystem      : : <variant>release <file>$(BOOST_ROOT)/stage/lib/libboost_filesystem-$(GCC_TAG)-mt-$(VERSION_TAG).a ;
+lib boost_datetime        : : <variant>release <file>$(BOOST_ROOT)/stage/lib/libboost_date_time-$(GCC_TAG)-mt-$(VERSION_TAG).a ;
+
+# INTEL ================================================================================================
 
 lib boost_serialization : :   <toolset>intel <variant>debug <file>$(BOOST_ROOT)/stage/lib/libboost_serialization-il-mt-d-$(VERSION_TAG).a ;
 lib boost_system : :          <toolset>intel <variant>debug <file>$(BOOST_ROOT)/stage/lib/libboost_system-il-mt-d-$(VERSION_TAG).a ;

@@ -126,7 +126,7 @@ def add_cray_gnu_compiler_variables( cray_gnu ):
     cray_gnu.add_variable("COMPILER_VERSION","gcc-4.6.3")
     cray_gnu.add_variable("TOOLSET","gcc")
     cray_gnu.add_variable("BOOTSTRAP_TOOLSET","gcc")
-    cray_gnu.add_variable("LAYOUT","tagged")
+    cray_gnu.add_variable("LAYOUT","versioned")
     cray_gnu.add_variable("PRGENV","PrgEnv-gnu")
     cray_gnu.add_variable("SITE_CONFIG","$WK/build/site_config/site-config-cray.jam")
     cray_gnu.add_variable("ROOT_WK","/perm/ma/ma0/workspace/GNU")
@@ -630,7 +630,7 @@ defs.add_variable("ECFLOW_TAR_DIR","/var/tmp/ma0/clientRoot/workspace")
  
 print "build boost"
 with defs.add_suite("boost_suite") as boost_suite:
-    boost_suite.add_variable("BOOST_VERSION","boost_1_55_0")
+    boost_suite.add_variable("BOOST_VERSION","boost_1_53_0")
     boost_suite.add_variable("REMOTE_COPY","rcp")
     boost_suite.add_variable("ECF_FILES",os.getenv("SCRATCH") + "/nightly/boost_suite")
     add_suite_variables(boost_suite)
