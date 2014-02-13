@@ -10,6 +10,7 @@
 #ifndef SERVERHANDLER_HPP_
 #define SERVERHANDLER_HPP_
 
+#include <utility>
 #include <string>
 #include <vector>
 #include "Defs.hpp"
@@ -21,12 +22,12 @@ class ClientInvoker;
 class ServerHandler
 {
 public:
-		ServerHandler(const std::string& name, int port);
+		ServerHandler(const std::string& name,const std::string&  port);
 		~ServerHandler();
 
 		const std::string name() const {return name_;}
 		const std::string longName() const {return longName_;}
-		int port() const {return port_;}
+		const std::string& port() const {return port_;}
 		defs_ptr defs() const;
 		int suiteNum() const;
 		Node* suiteAt(int) const;
@@ -34,19 +35,20 @@ public:
 		void setUpdatingStatus(bool newStatus) {updating_ = newStatus;}
 
 		static const std::vector<ServerHandler*>& servers() {return servers_;}
-		static ServerHandler* addServer(const std::string &server, int port);
+		static ServerHandler* addServer(const std::string &server, const std::string &port);
 		static int numOfImmediateChildren(Node*);
 		static Node* immediateChildAt(Node *parent,int pos);
 		static void command(std::vector<ViewNodeInfo_ptr>,std::string);
 		static ServerHandler* find(const std::string& longName);
+		static ServerHandler* find(const std::pair<std::string,std::string>& hostPort);
 		static ServerHandler* find(Node *node);
 		static void addServerCommand(const std::string &name, const std::string command);
 		static std::string resolveServerCommand(const std::string &name);
 
 protected:
 		std::string name_;
-		int port_;
-		ClientInvoker *client_;
+		std::string port_;
+		ClientInvoker* client_;
 		std::string longName_;
 		bool updating_;
 

@@ -15,22 +15,19 @@
 #include "ArgvCreator.hpp"
 
 #include <iostream>
-#include <sstream>
 
 std::vector<ServerHandler*> ServerHandler::servers_;
 std::map<std::string, std::string> ServerHandler::commands_;
 
-ServerHandler::ServerHandler(const std::string& name, int port) :
+ServerHandler::ServerHandler(const std::string& name, const std::string& port) :
    name_(name),
    port_(port),
    client_(0),
    updating_(false)
 {
-	std::stringstream ss;
-	ss << port_;
-	longName_=name_ + "@" + ss.str();
+	longName_=name_ + "@" + port_;
 
-	client_=new ClientInvoker(name, port);
+	client_=new ClientInvoker(name,port);
 	//client_->allow_new_client_old_server(1);
 	//client_->allow_new_client_old_server(9);
 
@@ -46,7 +43,7 @@ ServerHandler::ServerHandler(const std::string& name, int port) :
 	if(defs != NULL)
 	{
 		ServerState& st=defs->set_server();
-		st.add_or_update_user_variables("longName",longName_);
+		st.hostPort(std::make_pair(name_,port_));
 	}
 
 	servers_.push_back(this);
@@ -61,8 +58,13 @@ ServerHandler::ServerHandler(const std::string& name, int port) :
 	}
 }
 
+ServerHandler::~ServerHandler()
+{
+	if(client_)
+			delete client_;
+}
 
-ServerHandler* ServerHandler::addServer(const std::string& name, int port)
+ServerHandler* ServerHandler::addServer(const std::string& name, const std::string& port)
 {
 		ServerHandler* sh=new ServerHandler(name,port);
 		return sh;
@@ -282,6 +284,14 @@ ServerHandler* ServerHandler::find(const std::string& longName)
 	return NULL;
 }
 
+ServerHandler* ServerHandler::find(const std::pair<std::string,std::string>& hostPort)
+{
+	for(std::vector<ServerHandler*>::const_iterator it=servers_.begin(); it != servers_.end();it++)
+			if((*it)->name_ == hostPort.first && (*it)->port_ == hostPort.second)
+					return *it;
+	return NULL;
+}
+
 ServerHandler* ServerHandler::find(Node *node)
 {
 	if(node)
@@ -289,7 +299,7 @@ ServerHandler* ServerHandler::find(Node *node)
 		if(Defs* defs = node->defs())
 		{
 			const ServerState& st=defs->server();
-			return ServerHandler::find(st.find_variable("longName"));
+			return ServerHandler::find(st.hostPort());
 		}
 	}
 	return NULL;
