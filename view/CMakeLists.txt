@@ -186,12 +186,8 @@ debug_var( X11_Xpm_LIB )
 find_package( Motif )
 debug_var( MOTIF_INCLUDE_DIR )
 debug_var( MOTIF_LIBRARIES )  
-if ( NOT MOTIF_FOUND )
-   MESSAGE( "Overriding motif library" )
-   set(MOTIF_LIBRARIES "/usr/lib64/libXm.so.4" )
-endif()
-debug_var( MOTIF_LIBRARIES )  
-
+ 
+ 
 # =======================================================================================
 find_package( CMath )
 

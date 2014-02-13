@@ -200,7 +200,7 @@ else
       set -e # stop shell, on error
       set -x # echo script lines as they are executed
    
-      # now run the ctest, which will run python tests.
+      # now run the ctest, which will also run python tests.
       cd $WK
       cd ecbuild/%MODE%
         
@@ -209,13 +209,18 @@ else
       unset ECF_PORT
       unset ECF_NODE
       
+      # Use the ctest in /usr/local/apps/cmake/current/bin
+      export PATH=/usr/local/apps/cmake/current/bin:$PATH
+            
       # -V verbose, show test output
+      # -VV extra verbose 
       # --output-on-failure only show output on failure
+      #
       if [[ %ECF_TRYNO% -eq 1 ]] ; then
-         ctest -R u_ --output-on-failure
-         ctest -R c_ --output-on-failure
-         ctest -R s_ --output-on-failure
-         ctest -R perf_ --output-on-failure
+         ctest -R u_ -V
+         ctest -R c_ -V
+         ctest -R s_ -V
+         ctest -R perf_ -V
       else
          # this does not work
          # ctest --rerun-failed --output-on-failure
@@ -226,7 +231,7 @@ else
          
          # Only run the failed test. Note: if FailedTests.log is empty then all tests are run
          # -VV extra verbose
-         ctest -I FailedTests.log --VV
+         ctest -I FailedTests.log -VV
       fi
       
    else
