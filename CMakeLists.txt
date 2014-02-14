@@ -98,7 +98,18 @@ list( APPEND Ecflow_Boost_LIBS
 list( APPEND Ecflow_Test_LIBS 
       ${Ecflow_Boost_LIBS} 
       ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} 
-      ${Boost_TEST_EXEC_MONITOR_LIBRARY} )
+      ${Boost_TEST_EXEC_MONITOR_LIBRARY} 
+    )
+      
+list( APPEND Ecflow_Test_LIBS_no_thread
+      ${Boost_SERIALIZATION_LIBRARY}
+      ${Boost_SYSTEM_LIBRARY}
+      ${Boost_FILESYSTEM_LIBRARY}
+      ${Boost_PROGRAM_OPTIONS_LIBRARY}
+      ${Boost_DATE_TIME_LIBRARY}
+      ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} 
+      ${Boost_TEST_EXEC_MONITOR_LIBRARY} 
+    )
 
 ##############################################################################
 # debug
