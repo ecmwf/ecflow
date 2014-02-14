@@ -30,7 +30,14 @@ ecbuild_add_library( TARGET libserver
 # EXE ecflow_server
 ecbuild_add_executable( TARGET   ecflow_server
                         SOURCES  src/ServerMain.cpp
-                        LIBS     core nodeattr node libparser base libserver pthread ${Ecflow_Boost_LIBS}
+                        LIBS     core nodeattr node libparser base libserver 
+                                 pthread 
+                                 ${Boost_SYSTEM_LIBRARY}
+                                 ${Boost_THREAD_LIBRARY}
+                                 ${Boost_SERIALIZATION_LIBRARY}
+                                 ${Boost_FILESYSTEM_LIBRARY}
+                                 ${Boost_DATE_TIME_LIBRARY}
+                                 ${Boost_PROGRAM_OPTIONS_LIBRARY}
                         INCLUDES src
                                  ${Boost_INCLUDE_DIRS} 
                       )
@@ -39,7 +46,15 @@ ecbuild_add_executable( TARGET   ecflow_server
 # TEST
 ecbuild_add_test( TARGET u_server
                 SOURCES  test/TestServerEnvironment.cpp
-                LIBS     core nodeattr node libparser base libserver pthread ${Ecflow_Test_LIBS}
+                LIBS     core nodeattr node libparser base libserver 
+                         pthread 
+                         ${Boost_SYSTEM_LIBRARY}
+                         ${Boost_THREAD_LIBRARY}
+                         ${Boost_SERIALIZATION_LIBRARY}
+                         ${Boost_FILESYSTEM_LIBRARY}
+                         ${Boost_DATE_TIME_LIBRARY}
+                         ${Boost_PROGRAM_OPTIONS_LIBRARY}
+                         ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} 
                 INCLUDES src
                          ../ACore/src 
                           ${Boost_INCLUDE_DIRS} 

@@ -91,8 +91,8 @@ exe test-view : [ glob test/*.cpp  ]
            /site-config//boost_serialization
            /site-config//boost_filesystem
            /site-config//boost_program_options
-           /site-config//boost_test
            /site-config//boost_datetime
+           /site-config//boost_test
          : <include>../Base/test 
            <include>../Test/src 
            <variant>debug:<define>DEBUG

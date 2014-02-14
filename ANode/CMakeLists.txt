@@ -8,7 +8,11 @@ ecbuild_add_library( TARGET   node
                      NOINSTALL
                      TYPE     STATIC
                      SOURCES  ${srcs}
-                     LIBS     core nodeattr ${Ecflow_Boost_LIBS}
+                     LIBS     core nodeattr 
+                              ${Boost_SYSTEM_LIBRARY}
+                              ${Boost_SERIALIZATION_LIBRARY}
+                              ${Boost_FILESYSTEM_LIBRARY}
+                              ${Boost_DATE_TIME_LIBRARY}  
                      INCLUDES ../ACore/src 
                               ../ANattr/src
                               ${Boost_INCLUDE_DIRS} )
@@ -50,7 +54,12 @@ list( APPEND test_srcs
 
 ecbuild_add_test(TARGET  u_anode
                 SOURCES  ${test_srcs}
-                LIBS     core nodeattr node ${Ecflow_Test_LIBS}
+                LIBS     core nodeattr node 
+                           ${Boost_SYSTEM_LIBRARY}
+                           ${Boost_SERIALIZATION_LIBRARY}
+                           ${Boost_FILESYSTEM_LIBRARY}
+                           ${Boost_DATE_TIME_LIBRARY}  
+                           ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} 
                 INCLUDES src
                          ../ACore/src 
                          ../ANattr/src
@@ -60,7 +69,12 @@ ecbuild_add_test(TARGET  u_anode
 list( APPEND stest_srcs   test/TestSingleExprParse.cpp )                    
 ecbuild_add_test( TARGET  u_anode_stest
                 SOURCES   ${stest_srcs}
-                LIBS      core nodeattr node ${Ecflow_Test_LIBS}
+                LIBS      core nodeattr node
+                           ${Boost_SYSTEM_LIBRARY}
+                           ${Boost_SERIALIZATION_LIBRARY}
+                           ${Boost_FILESYSTEM_LIBRARY}
+                           ${Boost_DATE_TIME_LIBRARY}  
+                           ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} 
                 INCLUDES  src
                           ../ACore/src 
                           ../ANattr/src

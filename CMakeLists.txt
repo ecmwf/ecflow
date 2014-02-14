@@ -83,33 +83,29 @@ set(Boost_DETAILED_FAILURE_MSG   ON)
 
 find_package( Boost 1.53.0 COMPONENTS python serialization system thread unit_test_framework test_exec_monitor filesystem program_options date_time )
 #find_package(Boost 1.53.0 EXACT REQUIRED COMPONENTS python)
+#
+# Available boost lib should be referenced as:
+#
+#    ${Boost_SYSTEM_LIBRARY}
+#    ${Boost_SERIALIZATION_LIBRARY}
+#    ${Boost_THREAD_LIBRARY}
+#    ${Boost_FILESYSTEM_LIBRARY}
+#    ${Boost_PROGRAM_OPTIONS_LIBRARY}
+#    ${Boost_DATE_TIME_LIBRARY}
+#
+#    ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} 
+#    ${Boost_TEST_EXEC_MONITOR_LIBRARY} 
 
 message( STATUS "Boost_LIBRARIES     : ${Boost_LIBRARIES}" )
 
-list( APPEND Ecflow_Boost_LIBS 
-    ${Boost_SERIALIZATION_LIBRARY}
-    ${Boost_SYSTEM_LIBRARY}
-    ${Boost_THREAD_LIBRARY}
-    ${Boost_FILESYSTEM_LIBRARY}
-    ${Boost_PROGRAM_OPTIONS_LIBRARY}
-    ${Boost_DATE_TIME_LIBRARY}
-)
-
-list( APPEND Ecflow_Test_LIBS 
-      ${Ecflow_Boost_LIBS} 
-      ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} 
-      ${Boost_TEST_EXEC_MONITOR_LIBRARY} 
-    )
-      
-list( APPEND Ecflow_Test_LIBS_no_thread
-      ${Boost_SERIALIZATION_LIBRARY}
-      ${Boost_SYSTEM_LIBRARY}
-      ${Boost_FILESYSTEM_LIBRARY}
-      ${Boost_PROGRAM_OPTIONS_LIBRARY}
-      ${Boost_DATE_TIME_LIBRARY}
-      ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} 
-      ${Boost_TEST_EXEC_MONITOR_LIBRARY} 
-    )
+#list( APPEND Ecflow_Boost_LIBS
+#    ${Boost_SERIALIZATION_LIBRARY}
+#    ${Boost_SYSTEM_LIBRARY}
+#    ${Boost_THREAD_LIBRARY}
+#    ${Boost_FILESYSTEM_LIBRARY}
+#    ${Boost_PROGRAM_OPTIONS_LIBRARY}
+#    ${Boost_DATE_TIME_LIBRARY}
+#)
 
 ##############################################################################
 # debug

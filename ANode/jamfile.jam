@@ -44,8 +44,8 @@ exe u_anode : [ glob test/*.cpp : test/TestSingleExprParse.cpp ]
            /site-config//boost_system
            /site-config//boost_serialization
            /site-config//boost_filesystem
-           /site-config//boost_test
            /site-config//boost_datetime
+           /site-config//boost_test
          : <variant>debug:<define>DEBUG
 	      ;
 	     
@@ -58,7 +58,7 @@ exe u_anode_stest : test/TestSingleExprParse.cpp
            /site-config//boost_system
            /site-config//boost_serialization
            /site-config//boost_filesystem
-           /site-config//boost_test
            /site-config//boost_datetime
+           /site-config//boost_test
          : <variant>debug:<define>DEBUG
  	     ;

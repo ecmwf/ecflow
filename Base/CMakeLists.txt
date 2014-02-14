@@ -95,7 +95,13 @@ list( APPEND test_srcs
 )
 ecbuild_add_test( TARGET  u_base
                 SOURCES   ${test_srcs}
-                LIBS      core nodeattr node libparser base pthread ${Ecflow_Test_LIBS}
+                LIBS      core nodeattr node libparser base pthread 
+                           ${Boost_SYSTEM_LIBRARY}
+                           ${Boost_SERIALIZATION_LIBRARY}
+                           ${Boost_FILESYSTEM_LIBRARY}
+                           ${Boost_DATE_TIME_LIBRARY}  
+                           ${Boost_PROGRAM_OPTIONS_LIBRARY}
+                           ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} 
                 INCLUDES  src
                           ../ACore/src 
                           ../ANattr/src

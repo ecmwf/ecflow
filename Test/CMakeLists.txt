@@ -51,7 +51,14 @@ list( APPEND test_srcs
 )
 ecbuild_add_test( TARGET s_test
                 SOURCES  ${test_srcs}
-                LIBS     core nodeattr node libparser base libclient libharness pthread ${Ecflow_Test_LIBS}
+                LIBS     core nodeattr node libparser base libclient libharness 
+                         pthread 
+                         ${Boost_SYSTEM_LIBRARY}
+                         ${Boost_SERIALIZATION_LIBRARY}
+                         ${Boost_FILESYSTEM_LIBRARY}
+                         ${Boost_PROGRAM_OPTIONS_LIBRARY}
+                         ${Boost_DATE_TIME_LIBRARY}
+                         ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} 
                 INCLUDES  src
                           ../ACore/src 
                           ../ANattr/src
@@ -64,7 +71,14 @@ ecbuild_add_test( TARGET s_test
 
 ecbuild_add_test( TARGET  s_test_zombies
                 SOURCES   ./TestZombies.cpp
-                LIBS      core nodeattr node libparser base libclient libharness pthread ${Ecflow_Test_LIBS}
+                LIBS      core nodeattr node libparser base libclient libharness 
+                          pthread 
+                          ${Boost_SYSTEM_LIBRARY}
+                          ${Boost_SERIALIZATION_LIBRARY}
+                          ${Boost_FILESYSTEM_LIBRARY}
+                          ${Boost_PROGRAM_OPTIONS_LIBRARY}
+                          ${Boost_DATE_TIME_LIBRARY}
+                          ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} 
                 INCLUDES  src
                           ../ACore/src 
                           ../ANattr/src
@@ -77,7 +91,14 @@ ecbuild_add_test( TARGET  s_test_zombies
 # This test runs forever, hence not suitable for unit test.                          
 #ecbuild_add_test( TARGET  singletest
 #                SOURCES   ./TestSingle.cpp
-#                LIBS      core nodeattr node libparser base libclient libharness pthread ${Ecflow_Test_LIBS}
+#                LIBS      core nodeattr node libparser base libclient libharness 
+#                          pthread 
+#                          ${Boost_SYSTEM_LIBRARY}
+#                          ${Boost_SERIALIZATION_LIBRARY}
+#                          ${Boost_FILESYSTEM_LIBRARY}
+#                          ${Boost_PROGRAM_OPTIONS_LIBRARY}
+#                          ${Boost_DATE_TIME_LIBRARY}
+#                          ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}                      
 #                INCLUDES  src
 #                          ../ACore/src 
 #                          ../ANattr/src
@@ -85,4 +106,3 @@ ecbuild_add_test( TARGET  s_test_zombies
 #                          ../ANode/test
 #                          ../Base/src
 #                          ${Boost_INCLUDE_DIRS} )
-

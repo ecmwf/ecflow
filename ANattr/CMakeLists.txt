@@ -16,7 +16,12 @@ file( GLOB test_srcs RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "test/*.cpp" )
 
 ecbuild_add_test( TARGET   u_anattr
                   SOURCES  ${test_srcs}
-                  LIBS     core nodeattr  ${Ecflow_Test_LIBS}
+                  LIBS     core nodeattr
+                           ${Boost_SYSTEM_LIBRARY}
+                           ${Boost_SERIALIZATION_LIBRARY}
+                           ${Boost_FILESYSTEM_LIBRARY}
+                           ${Boost_DATE_TIME_LIBRARY}  
+                           ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} 
                   INCLUDES ../ACore/src src 
                            ${Boost_INCLUDE_DIRS} 
                  )

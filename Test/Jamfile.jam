@@ -66,8 +66,8 @@ exe s_test : [ glob Test*.cpp : TestSingle.cpp TestZombies.cpp ]
            /site-config//boost_serialization
            /site-config//boost_filesystem
            /site-config//boost_program_options
-           /site-config//boost_test
            /site-config//boost_datetime
+           /site-config//boost_test
          : <include>../Base/test 
            <variant>debug:<define>DEBUG
  	     ;
@@ -86,8 +86,8 @@ exe s_test_zombies : [ glob TestZombies.cpp  ]
            /site-config//boost_serialization
            /site-config//boost_filesystem
            /site-config//boost_program_options
-           /site-config//boost_test
            /site-config//boost_datetime
+           /site-config//boost_test
          : <include>../Base/test 
            <variant>debug:<define>DEBUG
         ;
@@ -106,8 +106,8 @@ exe singletest : [ glob TestSingle.cpp  ]
            /site-config//boost_serialization
            /site-config//boost_filesystem
            /site-config//boost_program_options
-           /site-config//boost_test
            /site-config//boost_datetime
+           /site-config//boost_test
          : <include>../Base/test 
            <variant>debug:<define>DEBUG
  	     ;

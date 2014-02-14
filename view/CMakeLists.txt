@@ -234,8 +234,12 @@ ecbuild_add_executable( TARGET    ecflowview
                         SOURCES   src/ecflowview.cc
 						      CONDITION X11_FOUND AND CMAKE_THREAD_LIBS_INIT
                         LIBS      libecflowview core nodeattr node libparser base libclient 
+                                  ${Boost_SYSTEM_LIBRARY}
+                                  ${Boost_SERIALIZATION_LIBRARY}
+                                  ${Boost_FILESYSTEM_LIBRARY}
+                                  ${Boost_PROGRAM_OPTIONS_LIBRARY}
+                                  ${Boost_DATE_TIME_LIBRARY}
                                   ${CMAKE_THREAD_LIBS_INIT} 
-                                  ${Ecflow_Boost_LIBS}
                                   ${X11_LIBRARIES} ${X11_Xext_LIB} ${MOTIF_LIBRARIES} ${X11_Xpm_LIB} ${X11_Xt_LIB} 
                                   ${CMATH_LIBRARIES}
                         INCLUDES  src
@@ -251,7 +255,14 @@ ecbuild_add_executable( TARGET    ecflowview
 
 ecbuild_add_test( TARGET  test-view
                 SOURCES   test/TestRunner.cpp test/TestView.cpp
-                LIBS      core nodeattr node libparser base libclient libharness ${CMAKE_THREAD_LIBS_INIT} ${Ecflow_Test_LIBS}
+                LIBS      libharness libclient base libparser node nodeattr core  
+                          ${CMAKE_THREAD_LIBS_INIT}
+                          ${Boost_SYSTEM_LIBRARY}
+                          ${Boost_SERIALIZATION_LIBRARY}
+                          ${Boost_FILESYSTEM_LIBRARY}
+                          ${Boost_DATE_TIME_LIBRARY}
+                          ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} 
+                          ${Boost_PROGRAM_OPTIONS_LIBRARY}
                 INCLUDES  src
                           ../ACore/src 
                           ../ANattr/src
