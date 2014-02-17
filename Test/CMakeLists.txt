@@ -9,7 +9,7 @@ ecbuild_add_library( TARGET   libharness
                      NOINSTALL
                    TYPE     STATIC
                    SOURCES  ${srcs}
-                   LIBS     core nodeattr node libparser base libclient  
+                   LIBS     libclient base libparser node nodeattr core    
                    INCLUDES ../ACore/src 
                             ../ANattr/src
                             ../ANode/src
@@ -50,15 +50,10 @@ list( APPEND test_srcs
 ./Test_Time.cpp
 )
 ecbuild_add_test( TARGET s_test
+                  BOOST
                 SOURCES  ${test_srcs}
-                LIBS     core nodeattr node libparser base libclient libharness 
+                LIBS     libharness 
                          pthread 
-                         ${Boost_SYSTEM_LIBRARY}
-                         ${Boost_SERIALIZATION_LIBRARY}
-                         ${Boost_FILESYSTEM_LIBRARY}
-                         ${Boost_PROGRAM_OPTIONS_LIBRARY}
-                         ${Boost_DATE_TIME_LIBRARY}
-                         ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} 
                 INCLUDES  src
                           ../ACore/src 
                           ../ANattr/src
@@ -70,15 +65,10 @@ ecbuild_add_test( TARGET s_test
 
 
 ecbuild_add_test( TARGET  s_test_zombies
+                  BOOST
                 SOURCES   ./TestZombies.cpp
-                LIBS      core nodeattr node libparser base libclient libharness 
+                LIBS      libharness 
                           pthread 
-                          ${Boost_SYSTEM_LIBRARY}
-                          ${Boost_SERIALIZATION_LIBRARY}
-                          ${Boost_FILESYSTEM_LIBRARY}
-                          ${Boost_PROGRAM_OPTIONS_LIBRARY}
-                          ${Boost_DATE_TIME_LIBRARY}
-                          ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} 
                 INCLUDES  src
                           ../ACore/src 
                           ../ANattr/src
@@ -90,15 +80,10 @@ ecbuild_add_test( TARGET  s_test_zombies
 
 # This test runs forever, hence not suitable for unit test.                          
 #ecbuild_add_test( TARGET  singletest
+#                  BOOST
 #                SOURCES   ./TestSingle.cpp
-#                LIBS      core nodeattr node libparser base libclient libharness 
-#                          pthread 
-#                          ${Boost_SYSTEM_LIBRARY}
-#                          ${Boost_SERIALIZATION_LIBRARY}
-#                          ${Boost_FILESYSTEM_LIBRARY}
-#                          ${Boost_PROGRAM_OPTIONS_LIBRARY}
-#                          ${Boost_DATE_TIME_LIBRARY}
-#                          ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}                      
+#                LIBS      libharness 
+#                          pthread                
 #                INCLUDES  src
 #                          ../ACore/src 
 #                          ../ANattr/src

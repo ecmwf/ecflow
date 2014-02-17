@@ -8,7 +8,7 @@ ecbuild_add_library( TARGET   libparser
                      NOINSTALL
                      TYPE     STATIC
                      SOURCES  ${srcs}
-                     LIBS     core nodeattr node  
+                     LIBS     node nodeattr core     
                      INCLUDES ../ACore/src 
                               ../ANattr/src
                               ../ANode/src
@@ -27,13 +27,9 @@ list( APPEND test_srcs
    test/TestVariableParsing.cpp
 )
 ecbuild_add_test( TARGET u_aparser
+                  BOOST
                 SOURCES  ${test_srcs}
-                LIBS     core nodeattr node libparser 
-                           ${Boost_SYSTEM_LIBRARY}
-                           ${Boost_SERIALIZATION_LIBRARY}
-                           ${Boost_FILESYSTEM_LIBRARY}
-                           ${Boost_DATE_TIME_LIBRARY}  
-                           ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} 
+                LIBS     libparser 
                 INCLUDES src
                          ../ACore/src 
                          ../ANattr/src
@@ -48,13 +44,9 @@ ecbuild_add_test( TARGET u_aparser
 #
 list( APPEND t2_src test/TestSingleDefsFile.cpp test/PersistHelper.cpp )                    
 ecbuild_add_test( TARGET   perf_aparser
+                  BOOST
                 SOURCES  ${t2_src}
-                LIBS     core nodeattr node libparser
-                           ${Boost_SYSTEM_LIBRARY}
-                           ${Boost_SERIALIZATION_LIBRARY}
-                           ${Boost_FILESYSTEM_LIBRARY}
-                           ${Boost_DATE_TIME_LIBRARY}  
-                           ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} 
+                LIBS     libparser
                 INCLUDES  src
                           ../ACore/src 
                           ../ANattr/src
@@ -69,11 +61,7 @@ list( APPEND t3_src test/ParseTimer.cpp  test/PersistHelper.cpp )
 ecbuild_add_test( TARGET   perf_aparser_timer
                   ARGS     ${CMAKE_CURRENT_SOURCE_DIR}/test/data/single_defs/mega.def
                   SOURCES  ${t3_src}
-                  LIBS     core nodeattr node libparser 
-                           ${Boost_SYSTEM_LIBRARY}
-                           ${Boost_SERIALIZATION_LIBRARY}
-                           ${Boost_FILESYSTEM_LIBRARY}
-                           ${Boost_DATE_TIME_LIBRARY}  
+                  LIBS     libparser 
                   INCLUDES  src
                           ../ACore/src 
                           ../ANattr/src
@@ -90,11 +78,7 @@ list( APPEND t4_src test/ParseOnly.cpp )
 ecbuild_add_test( TARGET   perf_aparser_only
                   ARGS     ${CMAKE_CURRENT_SOURCE_DIR}/test/data/single_defs/mega.def
                   SOURCES  ${t4_src}
-                  LIBS     core nodeattr node libparser
-                           ${Boost_SYSTEM_LIBRARY}
-                           ${Boost_SERIALIZATION_LIBRARY}
-                           ${Boost_FILESYSTEM_LIBRARY}
-                           ${Boost_DATE_TIME_LIBRARY}  
+                  LIBS     libparser
                   INCLUDES src
                             ../ACore/src 
                             ../ANattr/src

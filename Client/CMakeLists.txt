@@ -18,7 +18,7 @@ ecbuild_add_library( TARGET libclient
                      NOINSTALL
                    TYPE     STATIC
                    SOURCES  ${srcs}
-                   LIBS     core nodeattr node libparser base  
+                   LIBS     base libparser node nodeattr core      
                    INCLUDES ../ACore/src 
                             ../ANattr/src
                             ../ANode/src
@@ -33,12 +33,8 @@ ecbuild_add_library( TARGET libclient
 
 ecbuild_add_executable( TARGET   ecflow_client
                         SOURCES  src/ClientMain.cpp
-                        LIBS     core nodeattr node libparser base libclient pthread 
-                                 ${Boost_SYSTEM_LIBRARY}
-                                 ${Boost_SERIALIZATION_LIBRARY}
-                                 ${Boost_FILESYSTEM_LIBRARY}
-                                 ${Boost_PROGRAM_OPTIONS_LIBRARY}
-                                 ${Boost_DATE_TIME_LIBRARY}                                  
+                        LIBS     libclient 
+                                 pthread                              
                         INCLUDES src
                                  ${Boost_INCLUDE_DIRS} 
                      )
@@ -67,14 +63,10 @@ list( APPEND test_srcs
  test/TestWhiteListFile.cpp
 )
 ecbuild_add_test( TARGET  s_client
+                  BOOST
                 SOURCES   ${test_srcs}
-                LIBS      core nodeattr node libparser base libclient pthread 
-                           ${Boost_SYSTEM_LIBRARY}
-                           ${Boost_SERIALIZATION_LIBRARY}
-                           ${Boost_FILESYSTEM_LIBRARY}
-                           ${Boost_PROGRAM_OPTIONS_LIBRARY}
-                           ${Boost_DATE_TIME_LIBRARY}
-                           ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} 
+                LIBS       libclient 
+                           pthread 
                 INCLUDES  src
                           ../ACore/src 
                           ../ANattr/src
@@ -91,14 +83,10 @@ ecbuild_add_test( TARGET  s_client
 # Simple stand alone test
 #
 ecbuild_add_test( TARGET   perf_test_large_defs 
+                  BOOST
                 SOURCES  test/TestSinglePerf.cpp test/SCPort.cpp
-                LIBS     core nodeattr node libparser base libclient pthread 
-                           ${Boost_SYSTEM_LIBRARY}
-                           ${Boost_SERIALIZATION_LIBRARY}
-                           ${Boost_FILESYSTEM_LIBRARY}
-                           ${Boost_PROGRAM_OPTIONS_LIBRARY}
-                           ${Boost_DATE_TIME_LIBRARY}
-                           ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} 
+                LIBS       libclient 
+                           pthread 
                 INCLUDES  src
                           ../ACore/src 
                           ../ANattr/src
@@ -116,14 +104,10 @@ ecbuild_add_test( TARGET   perf_test_large_defs
 # test migration
 #
 ecbuild_add_test( TARGET test_migration
-                SOURCES  test/TestMigration.cpp test/SCPort.cpp
-                LIBS     core nodeattr node libparser base libclient pthread 
-                           ${Boost_SYSTEM_LIBRARY}
-                           ${Boost_SERIALIZATION_LIBRARY}
-                           ${Boost_FILESYSTEM_LIBRARY}
-                           ${Boost_PROGRAM_OPTIONS_LIBRARY}
-                           ${Boost_DATE_TIME_LIBRARY}
-                           ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} 
+                  BOOST
+                SOURCES   test/TestMigration.cpp test/SCPort.cpp
+                LIBS       libclient 
+                           pthread 
                 INCLUDES src
                          ../ACore/src 
                          ../ANattr/src

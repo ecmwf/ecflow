@@ -10,7 +10,7 @@ ecbuild_add_library( TARGET libsimu
                      NOINSTALL
                      TYPE     STATIC
                      SOURCES  ${srcs}
-                     LIBS     core nodeattr node libparser  
+                     LIBS     libparser node nodeattr core    
                      INCLUDES ../ACore/src 
                               ../ANattr/src
                               ../ANode/src
@@ -30,14 +30,10 @@ list( APPEND test_srcs
    test/TestAnalysis.cpp
 )
 ecbuild_add_test( TARGET   c_csim
+                  BOOST
                 SOURCES  ${test_srcs}
-                LIBS     core nodeattr node libparser base libsimu pthread 
-                         ${Boost_SYSTEM_LIBRARY}
-                         ${Boost_SERIALIZATION_LIBRARY}
-                         ${Boost_FILESYSTEM_LIBRARY}
-                         ${Boost_DATE_TIME_LIBRARY}
-                         ${Boost_PROGRAM_OPTIONS_LIBRARY}
-                         ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} 
+                LIBS     libsimu        
+                         pthread 
                 INCLUDES  src
                           ../ACore/src 
                           ../ANattr/src
@@ -48,14 +44,10 @@ ecbuild_add_test( TARGET   c_csim
 
 
 ecbuild_add_test( TARGET   c_csim_single
+                  BOOST
                 SOURCES   test/TestSingleSimulator.cpp test/TestUtil.cpp
-                LIBS      core nodeattr node libparser base libsimu pthread 
-                          ${Boost_SYSTEM_LIBRARY}
-                          ${Boost_SERIALIZATION_LIBRARY}
-                          ${Boost_FILESYSTEM_LIBRARY}
-                          ${Boost_DATE_TIME_LIBRARY}
-                          ${Boost_PROGRAM_OPTIONS_LIBRARY}
-                          ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} 
+                LIBS      libsimu   
+                          pthread 
                 INCLUDES  src
                           ../ACore/src 
                           ../ANattr/src
