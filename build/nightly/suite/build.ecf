@@ -111,13 +111,19 @@ else
          -DCMAKE_MODULE_PATH=$CMAKE_MODULE_PATH \
          -DCMAKE_INSTALL_PREFIX=/usr/local/apps/ecflow/$ecflow_version \
          -DCMAKE_C_COMPILER=clang  -DCMAKE_CXX_COMPILER=clang++       
+      elif [[ %TOOLSET% = vacpp ]]; then
+         # use xlC_r as that will automatically add -lpthreads, which is used some of boost libs
+          /usr/local/apps/cmake/current/bin/cmake ../../  \
+         -DCMAKE_BUILD_TYPE=$cmake_build_type \
+         -DCMAKE_MODULE_PATH=$CMAKE_MODULE_PATH \
+         -DCMAKE_INSTALL_PREFIX=/usr/local/apps/ecflow/$ecflow_version \
+         -DCMAKE_C_COMPILER=xlC  -DCMAKE_CXX_COMPILER=xlC_r      
       else
          /usr/local/apps/cmake/current/bin/cmake ../../  \
          -DCMAKE_BUILD_TYPE=$cmake_build_type \
          -DCMAKE_MODULE_PATH=$CMAKE_MODULE_PATH \
          -DCMAKE_INSTALL_PREFIX=/usr/local/apps/ecflow/$ecflow_version
       fi
-                  
       
       if [[ %ECF_TRYNO% -eq 1 ]] ; then
          make -j%NO_OF_CORES%

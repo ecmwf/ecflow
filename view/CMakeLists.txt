@@ -201,7 +201,7 @@ find_package( Threads )
 add_definitions( -D_GNU_SOURCE -DUNIX -Dunix -Dlinux )
 
 ecbuild_add_library(TARGET  libecflowview
-				       CONDITION X11_FOUND AND CMAKE_THREAD_LIBS_INIT
+				       CONDITION MOTIF_FOUND AND X11_FOUND AND CMAKE_THREAD_LIBS_INIT
                    SOURCES  
                              ${srcs_cc} ${srcs_c} ${srcs_cpp} ${libicon_srcs} ${libxec_srcs} ${libui_srcs}
                    TEMPLATES
