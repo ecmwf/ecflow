@@ -218,7 +218,6 @@ ecbuild_add_library(TARGET  libecflowview
                             ../Base/src/cts
                             ../Base/src/stc
                             ../Client/src
-                            ${Boost_INCLUDE_DIRS} 
                             ${X11_INCLUDE_DIR}
                             ${MOTIF_INCLUDE_DIR}
                    )
@@ -232,7 +231,7 @@ ecbuild_add_library(TARGET  libecflowview
 
 ecbuild_add_executable( TARGET    ecflowview
                         SOURCES   src/ecflowview.cc
-						      CONDITION X11_FOUND AND CMAKE_THREAD_LIBS_INIT
+						      CONDITION MOTIF_FOUND AND X11_FOUND AND CMAKE_THREAD_LIBS_INIT
                         LIBS      libecflowview  libclient base libparser node nodeattr core
                                   ${CMAKE_THREAD_LIBS_INIT} 
                                   ${X11_LIBRARIES} ${X11_Xext_LIB} ${MOTIF_LIBRARIES} ${X11_Xpm_LIB} ${X11_Xt_LIB} 
@@ -252,7 +251,6 @@ ecbuild_add_test( TARGET  test-view
                   BOOST
                 SOURCES   test/TestRunner.cpp test/TestView.cpp
                 LIBS      libharness    
-                          ${CMAKE_THREAD_LIBS_INIT}
                 INCLUDES  src
                           ../ACore/src 
                           ../ANattr/src

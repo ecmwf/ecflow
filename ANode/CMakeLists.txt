@@ -11,7 +11,7 @@ ecbuild_add_library( TARGET   node
                      LIBS     nodeattr core
                      INCLUDES ../ACore/src 
                               ../ANattr/src
-                              ${Boost_INCLUDE_DIRS} )
+                    )
 
 # Use following to populate list: 
 #  cd $WK/ANode                      
@@ -55,7 +55,7 @@ ecbuild_add_test(TARGET  u_anode
                  INCLUDES src
                           ../ACore/src 
                           ../ANattr/src
-                          ${Boost_INCLUDE_DIRS} )
+                 )
 
 
 list( APPEND stest_srcs   test/TestSingleExprParse.cpp )                    
@@ -66,4 +66,5 @@ ecbuild_add_test( TARGET  u_anode_stest
                 INCLUDES  src
                           ../ACore/src 
                           ../ANattr/src
-                          ${Boost_INCLUDE_DIRS} )
+                          ${Boost_INCLUDE_DIRS} 
+                 )

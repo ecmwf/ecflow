@@ -17,8 +17,8 @@ ecbuild_add_library( TARGET libserver
                      TYPE     STATIC
                      SOURCES  ${srcs}
                      LIBS     base libparser node nodeattr core
-                              ${Boost_THREAD_LIBRARY}  
-                              pthread  
+                              ${Boost_THREAD_LIBRARY}
+                              pthread
                      INCLUDES ../ACore/src 
                               ../ANattr/src
                               ../ANode/src
@@ -26,7 +26,7 @@ ecbuild_add_library( TARGET libserver
                               ../Base/src
                               ../Base/src/cts
                               ../Base/src/stc
-                              ${Boost_INCLUDE_DIRS} )
+                     )
 
 # =======================================================
 # EXE ecflow_server
@@ -39,13 +39,13 @@ ecbuild_add_executable( TARGET   ecflow_server
                           
 # ================================================================================                         
 # TEST
-ecbuild_add_test( TARGET u_server
-                  BOOST
-                SOURCES  test/TestServerEnvironment.cpp
-                LIBS     libserver  
-                INCLUDES src
-                         ../ACore/src 
-                          ${Boost_INCLUDE_DIRS} 
+ecbuild_add_test( TARGET   u_server
+                  BOOST  
+                  SOURCES  test/TestServerEnvironment.cpp
+                  LIBS     libserver  
+                  INCLUDES src
+                           ../ACore/src 
+                           ${Boost_INCLUDE_DIRS} 
               )
 
 # ===================================================================

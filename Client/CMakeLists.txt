@@ -18,7 +18,8 @@ ecbuild_add_library( TARGET libclient
                      NOINSTALL
                    TYPE     STATIC
                    SOURCES  ${srcs}
-                   LIBS     base libparser node nodeattr core      
+                   LIBS     base libparser node nodeattr core 
+                            pthread
                    INCLUDES ../ACore/src 
                             ../ANattr/src
                             ../ANode/src
@@ -26,7 +27,7 @@ ecbuild_add_library( TARGET libclient
                             ../Base/src
                             ../Base/src/cts
                             ../Base/src/stc
-                            ${Boost_INCLUDE_DIRS} )
+                )
 
 # ========================================================================
 # EXE ecflow_client
@@ -34,7 +35,6 @@ ecbuild_add_library( TARGET libclient
 ecbuild_add_executable( TARGET   ecflow_client
                         SOURCES  src/ClientMain.cpp
                         LIBS     libclient 
-                                 pthread                              
                         INCLUDES src
                                  ${Boost_INCLUDE_DIRS} 
                      )
@@ -66,7 +66,6 @@ ecbuild_add_test( TARGET  s_client
                   BOOST
                 SOURCES   ${test_srcs}
                 LIBS       libclient 
-                           pthread 
                 INCLUDES  src
                           ../ACore/src 
                           ../ANattr/src
@@ -77,7 +76,7 @@ ecbuild_add_test( TARGET  s_client
                           ../Base/src/stc
                           ../Base/test 
                           ../Client/src
-                          ${Boost_INCLUDE_DIRS} )
+                 )
 
 # 
 # Simple stand alone test
@@ -86,7 +85,6 @@ ecbuild_add_test( TARGET   perf_test_large_defs
                   BOOST
                 SOURCES  test/TestSinglePerf.cpp test/SCPort.cpp
                 LIBS       libclient 
-                           pthread 
                 INCLUDES  src
                           ../ACore/src 
                           ../ANattr/src
@@ -107,7 +105,6 @@ ecbuild_add_test( TARGET test_migration
                   BOOST
                 SOURCES   test/TestMigration.cpp test/SCPort.cpp
                 LIBS       libclient 
-                           pthread 
                 INCLUDES src
                          ../ACore/src 
                          ../ANattr/src

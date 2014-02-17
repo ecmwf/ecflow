@@ -9,7 +9,7 @@ ecbuild_add_library( TARGET   libharness
                      NOINSTALL
                    TYPE     STATIC
                    SOURCES  ${srcs}
-                   LIBS     libclient base libparser node nodeattr core    
+                   LIBS     libclient base libparser node nodeattr core  
                    INCLUDES ../ACore/src 
                             ../ANattr/src
                             ../ANode/src
@@ -20,7 +20,7 @@ ecbuild_add_library( TARGET   libharness
                             ../Base/test
                             ../Client/src
                             ../Client/test
-                            ${Boost_INCLUDE_DIRS} )
+                     )
 
 
 # =================================================================
@@ -53,7 +53,6 @@ ecbuild_add_test( TARGET s_test
                   BOOST
                 SOURCES  ${test_srcs}
                 LIBS     libharness 
-                         pthread 
                 INCLUDES  src
                           ../ACore/src 
                           ../ANattr/src
@@ -68,7 +67,6 @@ ecbuild_add_test( TARGET  s_test_zombies
                   BOOST
                 SOURCES   ./TestZombies.cpp
                 LIBS      libharness 
-                          pthread 
                 INCLUDES  src
                           ../ACore/src 
                           ../ANattr/src
@@ -83,7 +81,6 @@ ecbuild_add_test( TARGET  s_test_zombies
 #                  BOOST
 #                SOURCES   ./TestSingle.cpp
 #                LIBS      libharness 
-#                          pthread                
 #                INCLUDES  src
 #                          ../ACore/src 
 #                          ../ANattr/src

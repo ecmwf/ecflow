@@ -12,7 +12,7 @@ ecbuild_add_library( TARGET   libparser
                      INCLUDES ../ACore/src 
                               ../ANattr/src
                               ../ANode/src
-                              ${Boost_INCLUDE_DIRS} )
+                     )
 
 # ===================================================================
 # Use following to populate list: 
@@ -67,7 +67,6 @@ ecbuild_add_test( TARGET   perf_aparser_timer
                           ../ANattr/src
                           ../ANode/src
                           ../ANode/test
-                          ${Boost_INCLUDE_DIRS} 
                  )
 
 

@@ -9,7 +9,6 @@ ecbuild_add_library( TARGET   nodeattr
                      SOURCES  ${srcs}
                      LIBS     core  
                      INCLUDES ../ACore/src 
-                              ${Boost_INCLUDE_DIRS} 
                     )
 
 file( GLOB test_srcs RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "test/*.cpp" )

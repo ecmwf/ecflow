@@ -40,7 +40,7 @@ ecbuild_add_test( TARGET   c_csim
                           ../ANode/src
                           ../ANode/test
                           ../Base/src
-                          ${Boost_INCLUDE_DIRS} )
+                 )
 
 
 ecbuild_add_test( TARGET   c_csim_single
