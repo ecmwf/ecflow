@@ -87,7 +87,7 @@ else
       if [[ %MODE% = debug ]] ; then
          cmake_build_type=Debug
       else
-         cmake_build_type=Production
+         cmake_build_type=Release
       fi
       
        
