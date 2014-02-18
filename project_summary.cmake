@@ -10,5 +10,6 @@ if(Boost_FOUND)
     message( STATUS "          libs    : [${Boost_DATE_TIME_LIBRARY}]" )
     message( STATUS "          libs    : [${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}]" )
     message( STATUS "          libs    : [${Boost_TEST_EXEC_MONITOR_LIBRARY}]" )
+    message( STATUS "          libs    : [${Boost_PYTHON_LIBRARY}]" )
 endif()
 

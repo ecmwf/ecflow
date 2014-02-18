@@ -11,12 +11,13 @@ ecbuild_add_library( TARGET libsimu
                      TYPE     STATIC
                      SOURCES  ${srcs}
                      LIBS     libparser node nodeattr core    
-                     INCLUDES ../ACore/src 
+                     INCLUDES src
+                              ../ACore/src 
                               ../ANattr/src
                               ../ANode/src
                               ../AParser/src
                               ../Base/src
-                              ${Boost_INCLUDE_DIRS} )
+                    )
 
 
 list( APPEND test_srcs
@@ -31,27 +32,18 @@ list( APPEND test_srcs
 )
 ecbuild_add_test( TARGET   c_csim
                   BOOST
-                SOURCES  ${test_srcs}
-                LIBS     libsimu        
-                         pthread 
-                INCLUDES  src
-                          ../ACore/src 
-                          ../ANattr/src
-                          ../ANode/src
-                          ../ANode/test
-                          ../Base/src
+                  SOURCES  ${test_srcs}
+                  LIBS     libsimu        
+                           pthread 
+                  INCLUDES ../ANode/test
+                           ${Boost_INCLUDE_DIRS} 
                  )
 
-
-ecbuild_add_test( TARGET   c_csim_single
+ecbuild_add_test( TARGET    c_csim_single
                   BOOST
-                SOURCES   test/TestSingleSimulator.cpp test/TestUtil.cpp
-                LIBS      libsimu   
-                          pthread 
-                INCLUDES  src
-                          ../ACore/src 
-                          ../ANattr/src
-                          ../ANode/src
-                          ../ANode/test
-                          ../Base/src
-                          ${Boost_INCLUDE_DIRS} )
+                  SOURCES   test/TestSingleSimulator.cpp test/TestUtil.cpp
+                  LIBS      libsimu   
+                            pthread 
+                  INCLUDES  ../ANode/test
+                            ${Boost_INCLUDE_DIRS} 
+                   )

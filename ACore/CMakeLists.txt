@@ -10,7 +10,8 @@ ecbuild_add_library( TARGET core
                      NOINSTALL
                      TYPE     STATIC
                      SOURCES  ${srcs}
-                     INCLUDES ${Boost_INCLUDE_DIRS} 
+                     INCLUDES src
+                              ${Boost_INCLUDE_DIRS} 
                      LIBS     ${Boost_SERIALIZATION_LIBRARY}
                               ${Boost_SYSTEM_LIBRARY}
                               ${Boost_FILESYSTEM_LIBRARY}
@@ -25,5 +26,4 @@ ecbuild_add_test( TARGET   u_acore
                   BOOST
                   SOURCES  ${test_srcs}
                   LIBS     core                           
-                  INCLUDES src 
                 )

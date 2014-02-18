@@ -68,14 +68,15 @@ ecbuild_add_library( TARGET   base
                      SOURCES  ${srcs}
                      LIBS     libparser node nodeattr core 
                               ${Boost_PROGRAM_OPTIONS_LIBRARY}    
-                     INCLUDES ../ACore/src 
+                     INCLUDES src
+                              ../ACore/src 
                               ../ANattr/src
                               ../ANode/src
                               ../AParser/src
                               ../Base/src
                               ../Base/src/cts
                               ../Base/src/stc
-                              ${Boost_INCLUDE_DIRS} )
+                     )
 
  
 list( APPEND test_srcs
@@ -94,18 +95,11 @@ list( APPEND test_srcs
    test/TestSSyncCmd.cpp
    test/TestSSyncCmdOrder.cpp
 )
-ecbuild_add_test( TARGET  u_base
+ecbuild_add_test( TARGET    u_base
                   BOOST
-                SOURCES   ${test_srcs}
-                LIBS       base       
-                           pthread 
-                 INCLUDES  src
-                          ../ACore/src 
-                          ../ANattr/src
-                          ../ANode/src
-                          ../ANode/test
-                          ../Base/src
-                          ../Base/src/cts
-                          ../Base/src/stc
-                          ${Boost_INCLUDE_DIRS} 
+                  SOURCES   ${test_srcs}
+                  LIBS      base       
+                            pthread 
+                  INCLUDES ../ANode/test
+                           ${Boost_INCLUDE_DIRS} 
                   )

@@ -20,7 +20,8 @@ ecbuild_add_library( TARGET libclient
                    SOURCES  ${srcs}
                    LIBS     base libparser node nodeattr core 
                             pthread
-                   INCLUDES ../ACore/src 
+                   INCLUDES src
+                            ../ACore/src 
                             ../ANattr/src
                             ../ANode/src
                             ../AParser/src
@@ -35,9 +36,8 @@ ecbuild_add_library( TARGET libclient
 ecbuild_add_executable( TARGET   ecflow_client
                         SOURCES  src/ClientMain.cpp
                         LIBS     libclient 
-                        INCLUDES src
-                                 ${Boost_INCLUDE_DIRS} 
-                     )
+                        INCLUDES ${Boost_INCLUDE_DIRS} 
+                      )
                           
 # ================================================================================                         
 # TEST
@@ -62,20 +62,13 @@ list( APPEND test_srcs
  test/TestUrlCmd.cpp
  test/TestWhiteListFile.cpp
 )
-ecbuild_add_test( TARGET  s_client
+ecbuild_add_test( TARGET    s_client
                   BOOST
-                SOURCES   ${test_srcs}
-                LIBS       libclient 
-                INCLUDES  src
-                          ../ACore/src 
-                          ../ANattr/src
-                          ../ANode/src
-                          ../ANode/test
-                          ../Base/src
-                          ../Base/src/cts
-                          ../Base/src/stc
-                          ../Base/test 
-                          ../Client/src
+                  SOURCES   ${test_srcs}
+                  LIBS      libclient 
+                  INCLUDES  ../ANode/test
+                            ../Base/test 
+                            ${Boost_INCLUDE_DIRS} 
                  )
 
 # 
@@ -83,40 +76,24 @@ ecbuild_add_test( TARGET  s_client
 #
 ecbuild_add_test( TARGET   perf_test_large_defs 
                   BOOST
-                SOURCES  test/TestSinglePerf.cpp test/SCPort.cpp
-                LIBS       libclient 
-                INCLUDES  src
-                          ../ACore/src 
-                          ../ANattr/src
-                          ../ANode/src
-                          ../ANode/test
-                          ../Base/src
-                          ../Base/src/cts
-                          ../Base/src/stc
-                          ../Base/test 
-                          ../Client/src
-                          ${Boost_INCLUDE_DIRS} 
-               )
+                  SOURCES  test/TestSinglePerf.cpp test/SCPort.cpp
+                  LIBS     libclient 
+                  INCLUDES ../ANode/test
+                           ../Base/test 
+                           ${Boost_INCLUDE_DIRS} 
+                )
                
 # 
 # test migration
 #
 ecbuild_add_test( TARGET test_migration
                   BOOST
-                SOURCES   test/TestMigration.cpp test/SCPort.cpp
-                LIBS       libclient 
-                INCLUDES src
-                         ../ACore/src 
-                         ../ANattr/src
-                         ../ANode/src
-                         ../ANode/test
-                         ../Base/src
-                         ../Base/src/cts
-                         ../Base/src/stc
-                         ../Base/test 
-                         ../Client/src
-                         ${Boost_INCLUDE_DIRS} 
-               )
+                  SOURCES  test/TestMigration.cpp test/SCPort.cpp
+                  LIBS     libclient 
+                  INCLUDES ../ANode/test
+                           ../Base/test 
+                           ${Boost_INCLUDE_DIRS} 
+                )
 
 # ===================================================================
 # install

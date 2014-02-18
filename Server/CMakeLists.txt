@@ -19,7 +19,8 @@ ecbuild_add_library( TARGET libserver
                      LIBS     base libparser node nodeattr core
                               ${Boost_THREAD_LIBRARY}
                               pthread
-                     INCLUDES ../ACore/src 
+                     INCLUDES src
+                              ../ACore/src 
                               ../ANattr/src
                               ../ANode/src
                               ../AParser/src
@@ -33,9 +34,8 @@ ecbuild_add_library( TARGET libserver
 ecbuild_add_executable( TARGET   ecflow_server
                         SOURCES  src/ServerMain.cpp
                         LIBS     libserver    
-                        INCLUDES src
-                                 ${Boost_INCLUDE_DIRS} 
-                      )
+                        INCLUDES ${Boost_INCLUDE_DIRS} 
+                       )
                           
 # ================================================================================                         
 # TEST
@@ -43,9 +43,7 @@ ecbuild_add_test( TARGET   u_server
                   BOOST  
                   SOURCES  test/TestServerEnvironment.cpp
                   LIBS     libserver  
-                  INCLUDES src
-                           ../ACore/src 
-                           ${Boost_INCLUDE_DIRS} 
+                  INCLUDES ${Boost_INCLUDE_DIRS} 
               )
 
 # ===================================================================

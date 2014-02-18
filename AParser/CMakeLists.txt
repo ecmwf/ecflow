@@ -9,7 +9,8 @@ ecbuild_add_library( TARGET   libparser
                      TYPE     STATIC
                      SOURCES  ${srcs}
                      LIBS     node nodeattr core     
-                     INCLUDES ../ACore/src 
+                     INCLUDES src
+                              ../ACore/src 
                               ../ANattr/src
                               ../ANode/src
                      )
@@ -26,18 +27,12 @@ list( APPEND test_srcs
    test/TestParser.cpp
    test/TestVariableParsing.cpp
 )
-ecbuild_add_test( TARGET u_aparser
+ecbuild_add_test( TARGET   u_aparser
                   BOOST
-                SOURCES  ${test_srcs}
-                LIBS     libparser 
-                INCLUDES src
-                         ../ACore/src 
-                         ../ANattr/src
-                         ../ANode/src
-                         ${Boost_INCLUDE_DIRS} 
+                  SOURCES  ${test_srcs}
+                  LIBS     libparser 
+                  INCLUDES ${Boost_INCLUDE_DIRS} 
                  )
-
-
 
 #
 # Tests parser for a single defs file but with a range of tests
@@ -45,14 +40,10 @@ ecbuild_add_test( TARGET u_aparser
 list( APPEND t2_src test/TestSingleDefsFile.cpp test/PersistHelper.cpp )                    
 ecbuild_add_test( TARGET   perf_aparser
                   BOOST
-                SOURCES  ${t2_src}
-                LIBS     libparser
-                INCLUDES  src
-                          ../ACore/src 
-                          ../ANattr/src
-                          ../ANode/src
-                          ../ANode/test
-                          ${Boost_INCLUDE_DIRS} )
+                  SOURCES  ${t2_src}
+                  LIBS     libparser
+                  INCLUDES ${Boost_INCLUDE_DIRS} 
+                )
 
 #
 # Timer for arbitary defs file,  
@@ -62,11 +53,8 @@ ecbuild_add_test( TARGET   perf_aparser_timer
                   ARGS     ${CMAKE_CURRENT_SOURCE_DIR}/test/data/single_defs/mega.def
                   SOURCES  ${t3_src}
                   LIBS     libparser 
-                  INCLUDES  src
-                          ../ACore/src 
-                          ../ANattr/src
-                          ../ANode/src
-                          ../ANode/test
+                  INCLUDES ../ANode/test
+                           ${Boost_INCLUDE_DIRS} 
                  )
 
 
@@ -78,11 +66,7 @@ ecbuild_add_test( TARGET   perf_aparser_only
                   ARGS     ${CMAKE_CURRENT_SOURCE_DIR}/test/data/single_defs/mega.def
                   SOURCES  ${t4_src}
                   LIBS     libparser
-                  INCLUDES src
-                            ../ACore/src 
-                            ../ANattr/src
-                            ../ANode/src
-                            ../ANode/test
+                  INCLUDES ../ANode/test
                            ${Boost_INCLUDE_DIRS} 
                  )
 

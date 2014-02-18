@@ -9,7 +9,8 @@ ecbuild_add_library( TARGET   node
                      TYPE     STATIC
                      SOURCES  ${srcs}
                      LIBS     nodeattr core
-                     INCLUDES ../ACore/src 
+                     INCLUDES src
+                              ../ACore/src 
                               ../ANattr/src
                     )
 
@@ -52,19 +53,13 @@ ecbuild_add_test(TARGET  u_anode
                  BOOST
                  SOURCES  ${test_srcs}
                  LIBS     node  
-                 INCLUDES src
-                          ../ACore/src 
-                          ../ANattr/src
                  )
 
 
 list( APPEND stest_srcs   test/TestSingleExprParse.cpp )                    
 ecbuild_add_test( TARGET  u_anode_stest
                   BOOST
-                SOURCES   ${stest_srcs}
-                LIBS      node 
-                INCLUDES  src
-                          ../ACore/src 
-                          ../ANattr/src
-                          ${Boost_INCLUDE_DIRS} 
+                  SOURCES   ${stest_srcs}
+                  LIBS      node 
+                  INCLUDES  ${Boost_INCLUDE_DIRS} 
                  )
