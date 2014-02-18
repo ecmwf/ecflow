@@ -14,12 +14,12 @@
 # code for testing with statement
 # In our case it provides the ability to indent
 
-from ecflow import Defs, Suite, Family, Client
+from ecflow import Defs, Suite, Family, Client, debug_build
 import sys
     
 if __name__ == "__main__":
     print "####################################################################"
-    print "Running ecflow version " + Client().version() 
+    print "Running ecflow version " + Client().version() + " debug build(" + str(debug_build()) +")"
     print "####################################################################"
  
     version = sys.version_info;

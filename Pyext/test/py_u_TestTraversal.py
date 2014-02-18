@@ -195,7 +195,7 @@ def all_files(root, patterns='*', single_level=False, yield_folders=False):
         
 if __name__ == "__main__":
     print "####################################################################"
-    print "Running ecflow version " + ecflow.Client().version() 
+    print "Running ecflow version " + ecflow.Client().version() + " debug build(" + str(ecflow.debug_build()) +")"
     print "####################################################################"
  
     cwd = os.getcwd()

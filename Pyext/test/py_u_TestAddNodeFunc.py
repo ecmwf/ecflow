@@ -10,7 +10,7 @@
 # granted to it by virtue of its status as an intergovernmental organisation
 # nor does it submit to any jurisdiction.
 #////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
-from ecflow import Defs, Client
+from ecflow import Defs, Client, debug_build
      
 def create_defs_sequentially():
     local_defs = Defs()
@@ -49,7 +49,7 @@ def create_defs_functionally():
     
 if __name__ == "__main__":
     print "####################################################################"
-    print "Running ecflow version " + Client().version() 
+    print "Running ecflow version " + Client().version()  + " debug build(" + str(debug_build()) +")"
     print "####################################################################"
 
     #

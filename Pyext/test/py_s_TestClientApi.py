@@ -1378,7 +1378,7 @@ def clean_up(port):
                
 if __name__ == "__main__":
     print "####################################################################"
-    print "Running ecflow version " + Client().version() 
+    print "Running ecflow version " + Client().version() + " debug build(" + str(debug_build()) +")"
     print "####################################################################"
 
     # server independent tests
@@ -1424,6 +1424,7 @@ if __name__ == "__main__":
             
     try:
         print "run the tests" 
+
         test_version(ci)
         PrintStyle.set_style( Style.STATE ) # show node state 
         test_client_get_server_defs(ci)             

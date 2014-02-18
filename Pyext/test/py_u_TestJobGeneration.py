@@ -16,7 +16,7 @@
 import os
 import shutil   # used to remove directory tree
 
-from ecflow import Defs, JobCreationCtrl, TaskVec, File, Client
+from ecflow import Defs, JobCreationCtrl, TaskVec, File, Client, debug_build
 
 def get_parent_dir(file_path):
     return os.path.dirname(file_path)
@@ -90,7 +90,7 @@ def check_jobs(task_vec, ecf_home):
 
 if __name__ == "__main__":
     print "####################################################################"
-    print "Running ecflow version " + Client().version() 
+    print "Running ecflow version " + Client().version() + " debug build(" + str(debug_build()) +")"
     print "####################################################################"
  
     workspace = get_workspace_dir();

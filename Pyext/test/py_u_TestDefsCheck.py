@@ -13,11 +13,11 @@
 
 #  Test the error and waning checks defined in the defs work
 
-from ecflow import  Defs, Limit, InLimit, Client
+from ecflow import  Defs, Limit, InLimit, Client, debug_build
             
 if __name__ == "__main__":
     print "####################################################################"
-    print "Running ecflow version " + Client().version() 
+    print "Running ecflow version " + Client().version() + " debug build(" + str(debug_build()) +")"
     print "####################################################################"
      
     defs = Defs()

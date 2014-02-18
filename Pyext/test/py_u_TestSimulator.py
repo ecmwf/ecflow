@@ -67,7 +67,7 @@ def simulate_deadlock():
 
 if __name__ == "__main__":
     print "####################################################################"
-    print "Running ecflow version " + ecflow.Client().version() 
+    print "Running ecflow version " + ecflow.Client().version() + " debug build(" + str(ecflow.debug_build()) +")"
     print "####################################################################"
  
     simulate_defs_with_time()

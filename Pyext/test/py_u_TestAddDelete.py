@@ -20,7 +20,7 @@ import os
 if __name__ == "__main__":
     
     print "####################################################################"
-    print "Running ecflow version " + ecflow.Client().version()  
+    print "Running ecflow version " + ecflow.Client().version()  + " debug build(" + str(ecflow.debug_build()) +")"
     print "PYTHONPATH: " + str(os.environ['PYTHONPATH'].split(os.pathsep))
     print "sys.path:   " + str(sys.path)
     print "####################################################################"

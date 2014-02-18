@@ -46,6 +46,14 @@ if ! [ python.configured ]
 {
     # ECHO "notice: no Python configured in user-config.jam" ;
     # ECHO "notice: will use default configuration" ;
+    # We will typically place this in user-congig/site-config.jam
+    #using python
+    #     :  # version
+    #     :  # cmd-or-prefix
+    #     :  # includes
+    #     :  # libraries
+    #     :  # condition
+    #     ;
     using python ;
 }
 

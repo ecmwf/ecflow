@@ -19,11 +19,11 @@ print ecflow.Defs.__doc__
 from ecflow import Suite, Family, Task, Defs, Clock, DState, PartExpression, Variable, Limit, InLimit, \
                    Date, Day, Event, Meter, Label, Autocancel, Days, TimeSlot, TimeSeries, Style, State, \
                    RepeatString, RepeatDate, RepeatInteger, RepeatDay, RepeatEnumerated, \
-                   Verify, PrintStyle, Time, Today, Late, Cron, Client
+                   Verify, PrintStyle, Time, Today, Late, Cron, Client, debug_build
 
 if __name__ == "__main__":
     print "####################################################################"
-    print "Running ecflow version " + Client().version() 
+    print "Running ecflow version " + Client().version() + " debug build(" + str(debug_build()) +")"
     print "####################################################################"
     
     suite = Suite("s1")
@@ -168,26 +168,30 @@ if __name__ == "__main__":
     assert defs.find_suite("sffff1") == None, "Should not be able to find suite of name sfffff1"
         
     # save the defs file as a check point file and restore it again
-    checkpt_file = "Hello.check"
+    checkpt_file = "py_u_TestDefs.check"
+    defs_file = "py_u_TestDefs.def"
+    if debug_build() :
+        checkpt_file = "py_u_TestDefs_debug.check"
+        defs_file = "py_u_TestDefs_debug.def"
     defs.save_as_checkpt(checkpt_file);
     
     restored_checkpt_defs = Defs()
     restored_checkpt_defs.restore_from_checkpt(checkpt_file)
     
     print "Save and restore as Defs ******************************************************"
-    defs.save_as_defs("fred.def")           # default is to save as DEFS
-    restored_from_defs = Defs( "fred.def" ) # restore the defs
+    defs.save_as_defs(defs_file)           # default is to save as DEFS
+    restored_from_defs = Defs( defs_file ) # restore the defs
 
-    defs.save_as_defs("fred.def",Style.DEFS)
-    restored_from_defs = Defs( "fred.def" ) # restore the defs
+    defs.save_as_defs(defs_file,Style.DEFS)
+    restored_from_defs = Defs( defs_file ) # restore the defs
             
     print "Save and restore using STATE ******************************************************"
-    defs.save_as_defs("fred.def",Style.STATE)
-    restored_from_defs = Defs( "fred.def" ) # restore the defs
+    defs.save_as_defs(defs_file,Style.STATE)
+    restored_from_defs = Defs( defs_file ) # restore the defs
 
     print "Save and restore using MIGRATE ******************************************************"
-    defs.save_as_defs("fred.def",Style.MIGRATE)
-    restored_from_defs = Defs( "fred.def" ) # restore the defs
+    defs.save_as_defs(defs_file,Style.MIGRATE)
+    restored_from_defs = Defs( defs_file ) # restore the defs
     assert restored_checkpt_defs == restored_from_defs ,"File should be the same"
 
         
@@ -211,5 +215,5 @@ if __name__ == "__main__":
      
     # Comment this out if you want to see what the file looked like
     os.remove(checkpt_file)
-    os.remove("fred.def")
+    os.remove(defs_file)
     print "All tests pass"

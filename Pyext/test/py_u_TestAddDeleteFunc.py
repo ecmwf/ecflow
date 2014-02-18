@@ -15,13 +15,13 @@
 from ecflow import Defs, Suite, Variable, Limit, InLimit, Task, PartExpression, \
                    Event, Meter, Label, RepeatInteger, RepeatEnumerated, RepeatDate, RepeatString, \
                    TimeSlot, TimeSeries, Today, Time, Date, Day, Days, Cron, Autocancel, Late, \
-                   DState, Clock, ChildCmdType, ZombieType, ZombieAttr, ZombieUserActionType, Client
+                   DState, Clock, ChildCmdType, ZombieType, ZombieAttr, ZombieUserActionType, Client, debug_build
         
     
 if __name__ == "__main__":
 
     print "####################################################################"
-    print "Running ecflow version " + Client().version() 
+    print "Running ecflow version " + Client().version()  + " debug build(" + str(debug_build()) +")"
     print "####################################################################"
     
     #

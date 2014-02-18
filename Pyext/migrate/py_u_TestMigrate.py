@@ -51,7 +51,8 @@ class TestMigrate318(unittest.TestCase):
         self.assertEqual(migration_count,0,"Expected no migration")
         self.assertTrue(filecmp.cmp(self.locate("migrate/no_migration.def"),self.locate("migrate/no_migration.mig")))
         # remove the generated file
-        os.remove(self.locate("migrate/no_migration.mig"))
+        try: os.remove(self.locate("migrate/no_migration.mig"))
+        except: pass
  
 # ==============================================================================================
     # Test for abort bug
@@ -88,7 +89,8 @@ class TestMigrate318(unittest.TestCase):
         self.assertEqual(migration_count,1,"Expected defs file to be migrated")
                  
         # remove the generated file
-        os.remove(self.locate("migrate/aborted_reason_bug.mig"))
+        try: os.remove(self.locate("migrate/aborted_reason_bug.mig"))
+        except: pass
          
 # ===============================================================================================
  
@@ -125,14 +127,16 @@ class TestMigrate318(unittest.TestCase):
         self.assertEqual(migration_count,1,"Expected defs file to be migrated")
                  
         # remove the generated file
-        os.remove(self.locate("migrate/label_bug.mig"))
+        try: os.remove(self.locate("migrate/label_bug.mig"))
+        except: pass
 
     def test_migrate_variable_file(self):
         migration_count = ecflow_migrate.do_migrate(self.locate("migrate/variable_bug.def"))
         self.assertEqual(migration_count,1,"Expected defs file to be migrated")
                  
         # remove the generated file
-        os.remove(self.locate("migrate/variable_bug.mig"))
+        try: os.remove(self.locate("migrate/variable_bug.mig"))
+        except: pass
  
 # ====================================================================================================
 # test both together
@@ -142,7 +146,8 @@ class TestMigrate318(unittest.TestCase):
         self.assertEqual(migration_count,2,"Expected 2 migrations, one for abort and one for label")
                  
         # remove the generated file
-        os.remove(self.locate("migrate/abort_and_label_bug.mig"))
+        try: os.remove(self.locate("migrate/abort_and_label_bug.mig"))
+        except: pass
          
 
 
