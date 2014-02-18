@@ -106,22 +106,4 @@ using acc : : : <compileflags>+W2236,2461,2191,2815,4232,4189
           
 using testing ;
 
-# ========================== PYTHON  ======================================================
-
-# Compiling with boost python with python 2.5 is ok, however with python 2.7
-# We see the following warnings:
-#
-# "/usr/local/apps/python/2.7/include/python2.7/pyconfig.h", line 1155: 
-#   warning #2047-D: incompatible redefinition of macro "_POSIX_C_SOURCE"
-#
 # - If you change python version ,remember to change: $WK/build/install_ecflow.sh: ECFLOW_PYTHON_INSTALL_DIR
-#
-
-#using python
-#     :                                        # version
-#     : /usr/local/apps/python/2.7/bin/python  # cmd-or-prefix (for python 2.5 use )/opt/python/usr/local/bin/python
-#     : # includes  
-#     : # libraries
-#     : # condition
-#     ;
-

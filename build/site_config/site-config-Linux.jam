@@ -69,19 +69,6 @@ project site-config
 using gcc ;
 using testing ;
 
-# ========================= PYTHON ===================================================
-
-# Since we are not hard wiring the path to the python interpreter, the unit tests will use $PATH
-# - If you change python version ,remember to change: $WK/build/install_ecflow.sh: ECFLOW_PYTHON_INSTALL_DIR
-
-#using python
-#     :  # version
-#     :  # cmd-or-prefix
-#     :  # includes
-#     :  # libraries
-#     :  # condition
-#     ;
-
 # ==================== ECFLOWVIEW =======================================================
 
 local motif_library = [ os.environ MOTIF_LIBRARY ] ;

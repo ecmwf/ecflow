@@ -93,38 +93,6 @@ project site-config
 using vacpp ;
 using testing ;
 
-# ========================== PYTHON  ================================
-# Buy using a specific version we don't need to update $PATH, 
-# when python tests invoked from scripts
-#
-# Notes for python 2.5
-# --------------------
-# need to add additional include for pyconfig.hpp since we have 
-# one for python32 and another one for python64. 
-# Typically there is only _one_ in  the python includes dir)
-#
-# This is the path that is added by default! /usr/local/include/python2.5 
-# however then it fails to find file <pyconfig.h>, this is defined in /usr/local/python64/include/python2.5/ 
-# however if we provide this include, it overrides the default as well hence we
-# need to provide *both*  
-#
-#using python
-#     : 2.5                                                                 # version
-#     : /usr/local/python64/bin/python                                      # cmd-or-prefix
-#     : /usr/local/include/python2.5 /usr/local/python64/include/python2.5/ # includes  
-#     :                                                                     # libraries
-#     :                                                                     # condition
-#     ;
-#
-# Notes for python 2.7
-# ---------------------
-# - Works in debug & release mode, unlike 2.5
-# - Tested with new v11 nas v12 compilers
-# - If you change python version ,remember to change: $WK/build/install_ecflow.sh: ECFLOW_PYTHON_INSTALL_DIR
-#
-
-#using python : 2.7 ;
-
 # ================================================================================
 # Link with FDB  (PRODGEN)
  
