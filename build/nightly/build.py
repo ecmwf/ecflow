@@ -165,7 +165,7 @@ def add_remote_cray_variables( cray ):
     cray.add_variable("REMOTE_COPY","scp")
 
     # for cray we need to use logsrvr in order to see the job output
-    cray.add_variable("ECF_LOGHOST","cctdtn1")
+    cray.add_variable("ECF_LOGHOST","cct")  # cctdtn1
     cray.add_variable("ECF_LOGPORT","9316")   
     
     # Set the remote location for output, LOGDIR needed by queing system
