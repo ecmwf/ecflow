@@ -30,7 +30,7 @@ cmake_build_type=
 if [[ $1 = debug ]] ; then
     cmake_build_type=Debug
 else
-    cmake_build_type=Production
+    cmake_build_type=Release
 fi
 
 cmake ../.. -DCMAKE_BUILD_TYPE=$cmake_build_type \
