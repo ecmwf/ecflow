@@ -11,8 +11,8 @@ ecbuild_add_library( TARGET core
                      TYPE     STATIC
                      SOURCES  ${srcs}
                      INCLUDES ${Boost_INCLUDE_DIRS} 
-                     LIBS     ${Boost_SYSTEM_LIBRARY}
-                              ${Boost_SERIALIZATION_LIBRARY}
+                     LIBS     ${Boost_SERIALIZATION_LIBRARY}
+                              ${Boost_SYSTEM_LIBRARY}
                               ${Boost_FILESYSTEM_LIBRARY}
                               ${Boost_DATE_TIME_LIBRARY}  
                     )

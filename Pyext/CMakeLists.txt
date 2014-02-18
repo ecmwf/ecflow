@@ -9,7 +9,7 @@ message(${PYTHON_EXECUTABLE})
 ecbuild_add_library( TARGET   ecflow
                      TYPE     MODULE
                      SOURCES  ${srcs}
-                     LIBS     libclient libsimu base libparser node nodeattr core  
+                     LIBS     libclient libsimu base libparser node nodeattr core
                               ${Boost_PYTHON_LIBRARY} 
                               ${PYTHON_LIBRARIES}
                      INCLUDES ../ACore/src 
@@ -21,6 +21,7 @@ ecbuild_add_library( TARGET   ecflow
                             ../Base/src/stc
                             ../Client/src
                             ../CSim/src
+                            ${Boost_INCLUDE_DIRS}
                             ${PYTHON_INCLUDE_DIRS} 
                     )
 
