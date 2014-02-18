@@ -44,14 +44,16 @@ local dest_dir = [ os.environ ECFLOW_DESTDIR ] ;
 dest_dir default = "" ;
 constant ECFLOW_DESTDIR : $(dest_dir) ;
 
+local ECFLOW_VERSION = [ SHELL "cd $(TOP); ./version.sh" ] ;
 local install_dir = [ os.environ ECFLOW_INSTALL_DIR ] ;
-install_dir default = "/usr/local/apps/ecflow" ; 
+install_dir default = "/usr/local/apps/ecflow/$(ECFLOW_VERSION)" ; 
 constant ECFLOW_INSTALL_DIR : $(install_dir) ;
 
 local python_install_dir = [ os.environ ECFLOW_PYTHON_INSTALL_DIR ] ;
-python_install_dir default = $(install_dir)/lib ; 
+python_install_dir default = $(install_dir)/lib/python2.7/site-packages/ecflow ; 
 constant ECFLOW_PYTHON_INSTALL_DIR : $(python_install_dir) ;
 
+#echo "ECFLOW_VERSION            = '$(ECFLOW_VERSION)'" ;
 #echo "ECFLOW_DESTDIR            = '$(ECFLOW_DESTDIR)'" ;
 #echo "ECFLOW_INSTALL_DIR        = '$(ECFLOW_INSTALL_DIR)'" ;
 #echo "ECFLOW_PYTHON_INSTALL_DIR = '$(ECFLOW_PYTHON_INSTALL_DIR)'" ;
