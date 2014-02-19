@@ -34,6 +34,5 @@ else
 fi
 
 cmake ../.. -DCMAKE_BUILD_TYPE=$cmake_build_type \
-            -DCMAKE_MODULE_PATH=$WK/../ecbuild/cmake  \
             -DCMAKE_INSTALL_PREFIX=/var/tmp/ma0/cmake/ecflow/$(cat ../../VERSION.cmake | awk '{print $3}'|sed 's/["]//g')
 
