@@ -11,8 +11,12 @@ import ecflow
 def get_ecflow_version( work_space ):
     "This will extract ecFlow version from the source code."
     "The version is defined in the file VERSION.cmake"
-    "expecting string of form:  'set( ${PROJECT_NAME}_VERSION_STR  '4.0.1' )' "
-    "will return a list of form `[4,0,1]`"
+    "expecting string of form:"
+    "set( ECFLOW_RELEASE  \"4\" )"
+    "set( ECFLOW_MAJOR    \"0\" )"
+    "set( ECFLOW_MINOR    \"2\" )"
+    "set( ${PROJECT_NAME}_VERSION_STR  \"${ECFLOW_RELEASE}.${ECFLOW_MAJOR}.${ECFLOW_MINOR}\" )"
+    "will return a list of form `[4,0,2]`"
     file = work_space + "/VERSION.cmake"
     ecflow_version = []
     if os.path.exists(file):
@@ -21,10 +25,12 @@ def get_ecflow_version( work_space ):
            for line in version_cpp :
                first_quote = line.find('"')
                second_quote = line.find('"',first_quote+1)
-               if first_quote != -1 and second_quote != -1:
+               if first_quote != -1 and second_quote != -1 :
                    part = line[first_quote+1:second_quote]
-                   ecflow_version = part.split(".")
-                   break;
+                   print "part = " + part
+                   ecflow_version.append(part);
+                   if len(ecflow_version) == 3:  
+                      break;
         finally:
             version_cpp.close();
         
@@ -409,7 +415,6 @@ def build_localhost_clang( parent ) :
 
 def build_linux_64( parent ) :
     linux_64 = parent.add_family("linux64")
-    linux_64.add_variable("CMAKE","CMAKE")
     add_linux_64_variables(linux_64)
     add_remote_linux_64_variables(linux_64)
     add_git_tasks( linux_64 )
@@ -417,7 +422,6 @@ def build_linux_64( parent ) :
     
 def build_linux_64_intel( parent ) :
     linux_64 = parent.add_family("linux64intel")
-    linux_64.add_variable("CMAKE","CMAKE")
     add_linux_64_intel_variables(linux_64)
     add_remote_linux_64_intel_variables(linux_64)
     add_git_tasks( linux_64 )
@@ -425,7 +429,6 @@ def build_linux_64_intel( parent ) :
     
 def build_opensuse113( parent ) :
     opensuse113 = parent.add_family("opensuse113")
-    opensuse113.add_variable("CMAKE","CMAKE")
     add_opensuse113_variables(opensuse113)
     add_remote_opensuse113_variables(opensuse113)
     add_git_tasks( opensuse113 )
@@ -433,7 +436,6 @@ def build_opensuse113( parent ) :
     
 def build_redhat( parent ) :
     redhat = parent.add_family("redhat")
-    redhat.add_variable("CMAKE","CMAKE")
     add_redhat_variables(redhat)
     add_remote_redhat_variables(redhat)
     add_git_tasks( redhat )
@@ -469,14 +471,12 @@ def build_cray_cray( parent ) :
 def build_cray( parent ) :
     cray = parent.add_family("cray")
     cray.add_variable("NO_OF_CORES","2") # temp until stings get sorted on cray
-    cray.add_variable("CMAKE","CMAKE")
     build_cray_gnu( cray)
     build_cray_intel( cray)
     build_cray_cray( cray)
     
 def build_opensuse103( parent ) :
     opensuse103 = parent.add_family("opensuse103")
-    opensuse103.add_variable("CMAKE","CMAKE")
     add_opensuse103_variables(opensuse103)
     add_remote_opensuse103_variables(opensuse103)
     add_git_tasks( opensuse103 )
@@ -484,8 +484,8 @@ def build_opensuse103( parent ) :
 
 def build_hpux( parent ):
     hpux = parent.add_family("hpux")
-    if (parent.name() == "build") :
-        hpux.add_trigger("tar/cp_tar_to_hpux == complete")
+    if (parent.name() == "remote") :
+        hpux.add_trigger("../tar/cp_tar_to_hpux == complete")
     else :
         hpux.add_trigger("/suite/build_incr/incr_tar_and_cp  == complete")
     add_hpux_variables( hpux )
@@ -495,7 +495,6 @@ def build_hpux( parent ):
 
 def build_aix_power7( parent ) :
     aix_power7 = parent.add_family("aix_power7")
-    aix_power7.add_variable("CMAKE","CMAKE")
     add_aix_power7_variables( aix_power7 )
     add_remote_aix_power7_variables( aix_power7 )
     add_git_tasks( aix_power7 )
@@ -655,7 +654,6 @@ with defs.add_suite("suite") as suite:
         git_pull_ecbuild.add_variable("ARCH","opensuse113")
         git_pull_ecbuild.add_variable("LOCAL_HOST",os.uname()[1]) # run this locally
 
-    
         tar_fam = build.add_family("tar")
         tar_fam.add_trigger("git_pull_ecflow == complete and git_pull_ecbuild == complete")
     
@@ -666,18 +664,22 @@ with defs.add_suite("suite") as suite:
         cp_tar_to_hpux.add_trigger("create_tar == complete")
         add_hpux_variables( cp_tar_to_hpux )
     
-        build_localhost( build )
-        build_localhost_cmake( build )
-        build_localhost_clang( build )
-        build_linux_64( build )
-        build_linux_64_intel( build )
-        build_opensuse113( build )
-        build_redhat( build )
-        build_cray( build )
-        build_opensuse103( build )
-        build_hpux(build)
-        build_aix_power7(build)
-  
+        with build.add_family("local") as local:
+            build_localhost( local )
+            build_localhost_cmake( local )
+            build_localhost_clang( local )
+
+        with build.add_family("remote") as remote:
+            remote.add_variable("CMAKE","CMAKE")
+            build_linux_64( remote )
+            build_linux_64_intel( remote )
+            build_opensuse113( remote )
+            build_redhat( remote )
+            build_cray( remote )
+            build_opensuse103( remote )
+            build_hpux(remote)
+            build_aix_power7(remote)
+        
 #ecflow.PrintStyle.set_style(ecflow.Style.STATE)
 #print defs
 
