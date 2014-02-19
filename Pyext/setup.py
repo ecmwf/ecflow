@@ -5,10 +5,13 @@ import os
 
 def get_ecflow_version():
     "This will extract ecFlow version from the source code."
-    "If that fails it will look at /usr/local/apps/ecflow/current directory"
     "The version is defined in the file VERSION.cmake"
-    "expecting string of form:  'set( ${PROJECT_NAME}_VERSION_STR  '4.0.1' )' "
-    "will return a list of form `[4,0,1]`"
+    "expecting string of form:"
+    "set( ECFLOW_RELEASE  \"4\" )"
+    "set( ECFLOW_MAJOR    \"0\" )"
+    "set( ECFLOW_MINOR    \"2\" )"
+    "set( ${PROJECT_NAME}_VERSION_STR  \"${ECFLOW_RELEASE}.${ECFLOW_MAJOR}.${ECFLOW_MINOR}\" )"
+    "will return a list of form `[4,0,2]`" 
     work_space=os.getenv("WK")
     file = work_space + "/VERSION.cmake"
     ecflow_version = []
@@ -18,17 +21,17 @@ def get_ecflow_version():
            for line in version_cpp :
                first_quote = line.find('"')
                second_quote = line.find('"',first_quote+1)
-               if first_quote != -1 and second_quote != -1:
+               if first_quote != -1 and second_quote != -1 :
                    part = line[first_quote+1:second_quote]
-                   ecflow_version = part.split(".")
-                   break;
+                   ecflow_version.append(part);
+                   if len(ecflow_version) == 3:  
+                      break;
         finally:
             version_cpp.close();
         
-        #print "Extracted ecflow version '" + str(ecflow_version) + "' from " + file 
+        print "Extracted ecflow version '" + str(ecflow_version) + "' from " + file 
         return ecflow_version
-    else:
-        assert False, "Could not determine version"
+    assert False, "could not determine version"
     
 ecflow_version_list = get_ecflow_version()
 assert len(ecflow_version_list) == 3, "Expected version to have release, major,minor"

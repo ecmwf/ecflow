@@ -24,10 +24,9 @@ set -u # fail when using an undefined variable
 # ========================================================================
 cd $WK
 
-ecflow_version=$(cat $WK/VERSION.cmake | awk '{print $3}'|sed 's/["]//g')
-release=$(echo $ecflow_version | cut -d. -f1)
-major=$(echo $ecflow_version   | cut -d. -f2)
-minor=$(echo $ecflow_version   | cut -d. -f3)
+release=$(cat VERSION.cmake | grep 'set( ECFLOW_RELEASE' | awk '{print $3}'| sed 's/["]//g')
+major=$(cat VERSION.cmake   | grep 'set( ECFLOW_MAJOR'   | awk '{print $3}'| sed 's/["]//g')
+minor=$(cat VERSION.cmake   | grep 'set( ECFLOW_MINOR'   | awk '{print $3}'| sed 's/["]//g')
 
 ECFLOW_WS_DIR=ecflow_${release}_${major}_${minor}_doc
 

@@ -2,6 +2,9 @@
 # If new src or test is added make sure you touch this file
 #
 
+# We place generated file in /ACore/src/ so that we can still use boost build
+configure_file( ecflow_version.h.in ${CMAKE_SOURCE_DIR}/ACore/src/ecflow_version.h )
+
 # Use transitive nature: i.e if any lib/exe uses lib core, they
 # will also inherit the boost libs.
 #

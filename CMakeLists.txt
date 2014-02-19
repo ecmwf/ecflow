@@ -21,14 +21,18 @@
 # mkdir debug
 # mkdir release
 # cd debug
-#  
+#
+# release=$(cat VERSION.cmake | grep 'set( ECFLOW_RELEASE' | awk '{print $3}'| sed 's/["]//g')
+# major=$(cat VERSION.cmake   | grep 'set( ECFLOW_MAJOR'   | awk '{print $3}'| sed 's/["]//g')
+# minor=$(cat VERSION.cmake   | grep 'set( ECFLOW_MINOR'   | awk '{print $3}'| sed 's/["]//g')
+#
 #/usr/local/apps/cmake/current/bin/cmake ../../  \
 #         -DCMAKE_BUILD_TYPE=Debug \
 #         -DCMAKE_MODULE_PATH=/usr/local/apps/ecbuild/current/share/ecbuild/cmake \
 #         -DPYTHON_LIBRARY=/usr/local/apps/python/current/lib/libpython2.7.a \
 #         -DPYTHON_INCLUDE_DIR=/usr/local/apps/python/current/include/python2.7 \
 #         -DPYTHON_EXECUTABLE=/usr/local/apps/python/current/bin/python2.7 \
-#         -DCMAKE_INSTALL_PREFIX=/usr/local/apps/ecflow/$(cat ../../VERSION.cmake | awk '{print $3}'|sed 's/["]//g')
+#         -DCMAKE_INSTALL_PREFIX=/usr/local/apps/ecflow/$release.$major.$minor
 #
 #         -DCMAKE_INSTALL_PREFIX=/var/tmp/ma0/cmake/ecflow/4.0.1
 #
@@ -49,6 +53,13 @@ ecbuild_requires_macro_version( 1.2 )
 # local project
 
 ecbuild_declare_project()
+
+# Get the ecflow version specified in 'VERSION.cmake'. This is only accessible after ecbuild_declare_project()
+message( STATUS "ECFLOW_RELEASE    : ${ECFLOW_RELEASE}" )
+message( STATUS "ECFLOW_MAJOR      : ${ECFLOW_MAJOR}" )
+message( STATUS "ECFLOW_MINOR      : ${ECFLOW_MINOR}" )
+message( STATUS "ECFLOW_VERSION    : ${ECFLOW_VERSION_STR}" )
+
 
 ###############################################################################
 # some variables of this project
@@ -126,10 +137,6 @@ endif()
 ###############################################################################
 # build source code
 
-# compile with fPIC on linux, need for ecflow.so *install*
-# This could be switched off for, Server,/View, since that is not used in ecflow.so
-#cmake_add_cxx_flags("-fPIC")
-
 add_subdirectory( ACore )
 add_subdirectory( ANattr )
 add_subdirectory( ANode )
@@ -144,6 +151,10 @@ add_subdirectory( view )
 
 # configure_file( cmake/ecbase_config.h.in  ${CMAKE_BINARY_DIR}/ecbase_config.h )
 
+# Directories not need in the distribution tar ball!
+ecbuild_add_resources( TARGET build_nightly DONT_PACK_DIRS build/nightly)
+ecbuild_add_resources( TARGET SCRATCH DONT_PACK_DIRS SCRATCH)
+ecbuild_add_resources( TARGET Doc DONT_PACK_DIRS Doc/func_spec Doc/misc Doc/newsletter Doc/online Doc/presentations Doc/tac)
 
 # =========================================================================================
 # install 

@@ -33,6 +33,10 @@ else
     cmake_build_type=Release
 fi
 
+release=$(cat VERSION.cmake | grep 'set( ECFLOW_RELEASE' | awk '{print $3}'| sed 's/["]//g')
+major=$(cat VERSION.cmake   | grep 'set( ECFLOW_MAJOR'   | awk '{print $3}'| sed 's/["]//g')
+minor=$(cat VERSION.cmake   | grep 'set( ECFLOW_MINOR'   | awk '{print $3}'| sed 's/["]//g')
+
 cmake ../.. -DCMAKE_BUILD_TYPE=$cmake_build_type \
-            -DCMAKE_INSTALL_PREFIX=/var/tmp/ma0/cmake/ecflow/$(cat ../../VERSION.cmake | awk '{print $3}'|sed 's/["]//g')
+            -DCMAKE_INSTALL_PREFIX=/var/tmp/ma0/cmake/ecflow/$release.$major.$minor
 
