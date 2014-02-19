@@ -84,8 +84,18 @@ use-project boost
 #       Currently option 2-4 didn't work!
 #      *** This should have been added to site-config.jam file **
 #      prevously we had:   : requirements <toolset>vacpp:<linkflags>-bbigtoc  
+#
+#  If we use:
+#  : requirements <library>/boost/python//boost_python 
+#       THEN we will depend on $BOOST_ROOT/bin.v2/...
+#       This will be automatically compiled if it does not exist
+#  : requirements <library>/site-config//boost_python
+#       THEN use the boost python in $BOOST_ROOT/stage/lib/
+#       This is also expects  we have defined boost_python in site-config.jam/user-config.jam
+#       
 project
-  : requirements <library>/boost/python//boost_python 
+#   : requirements <library>/boost/python//boost_python 
+    : requirements <library>/site-config//boost_python
   ;
 
 # ======================== libs ============================================
