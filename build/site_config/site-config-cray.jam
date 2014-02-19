@@ -32,15 +32,15 @@ switch $(BOOST_ROOT) {
 
 GCC_TAG = gcc46 ;
 
-lib boost_serialization : :   <variant>debug <file>$(BOOST_ROOT)/stage/lib/libboost_serialization-$(GCC_TAG)-mt-$(VERSION_TAG)d.a ;
-lib boost_system : :          <variant>debug <file>$(BOOST_ROOT)/stage/lib/libboost_system-$(GCC_TAG)-mt-$(VERSION_TAG)d.a ;
-lib boost_thread : :          <variant>debug <file>$(BOOST_ROOT)/stage/lib/libboost_thread-$(GCC_TAG)-mt-$(VERSION_TAG)d.a ;
-lib boost_test   : :          <variant>debug <file>$(BOOST_ROOT)/stage/lib/libboost_unit_test_framework-$(GCC_TAG)-mt-$(VERSION_TAG)d.a ;
-lib boost_test_monitor : :    <variant>debug <file>$(BOOST_ROOT)/stage/lib/libboost_test_exec_monitor-$(GCC_TAG)-mt-$(VERSION_TAG)d.a ;
-lib boost_program_options : : <variant>debug <file>$(BOOST_ROOT)/stage/lib/libboost_program_options-$(GCC_TAG)-mt-$(VERSION_TAG)d.a ;
-lib boost_filesystem      : : <variant>debug <file>$(BOOST_ROOT)/stage/lib/libboost_filesystem-$(GCC_TAG)-mt-$(VERSION_TAG)d.a ;
-lib boost_datetime        : : <variant>debug <file>$(BOOST_ROOT)/stage/lib/libboost_date_time-$(GCC_TAG)-mt-$(VERSION_TAG)d.a ;
-lib boost_python          : : <variant>debug <file>$(BOOST_ROOT)/stage/lib/libboost_python-$(GCC_TAG)-mt-$(VERSION_TAG)d.so ;
+lib boost_serialization : :   <variant>debug <file>$(BOOST_ROOT)/stage/lib/libboost_serialization-$(GCC_TAG)-mt-d-$(VERSION_TAG).a ;
+lib boost_system : :          <variant>debug <file>$(BOOST_ROOT)/stage/lib/libboost_system-$(GCC_TAG)-mt-d-$(VERSION_TAG).a ;
+lib boost_thread : :          <variant>debug <file>$(BOOST_ROOT)/stage/lib/libboost_thread-$(GCC_TAG)-mt-d-$(VERSION_TAG).a ;
+lib boost_test   : :          <variant>debug <file>$(BOOST_ROOT)/stage/lib/libboost_unit_test_framework-$(GCC_TAG)-mt-d-$(VERSION_TAG).a ;
+lib boost_test_monitor : :    <variant>debug <file>$(BOOST_ROOT)/stage/lib/libboost_test_exec_monitor-$(GCC_TAG)-mt-d-$(VERSION_TAG).a ;
+lib boost_program_options : : <variant>debug <file>$(BOOST_ROOT)/stage/lib/libboost_program_options-$(GCC_TAG)-mt-d-$(VERSION_TAG).a ;
+lib boost_filesystem      : : <variant>debug <file>$(BOOST_ROOT)/stage/lib/libboost_filesystem-$(GCC_TAG)-mt-d-$(VERSION_TAG).a ;
+lib boost_datetime        : : <variant>debug <file>$(BOOST_ROOT)/stage/lib/libboost_date_time-$(GCC_TAG)-mt-d-$(VERSION_TAG).a ;
+lib boost_python          : : <variant>debug <file>$(BOOST_ROOT)/stage/lib/libboost_python-$(GCC_TAG)-mt-d-$(VERSION_TAG).so ;
 
 # profile uses release libs
 lib boost_serialization : :   <variant>profile <file>$(BOOST_ROOT)/stage/lib/libboost_serialization-$(GCC_TAG)-mt-$(VERSION_TAG).a ;
