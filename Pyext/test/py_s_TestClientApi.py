@@ -500,6 +500,11 @@ def test_client_stats(ci):
     print "test_client_stats"
     ci.stats()  # writes to standard out
             
+def test_client_debug_server_on_off(ci):
+    print "test_client_debug_server_on_off"
+    ci.debug_server_on()  # writes to standard out
+    ci.debug_server_off()  
+
 
 def test_client_check(ci):
     print "test_client_check"
@@ -1482,6 +1487,7 @@ if __name__ == "__main__":
         test_client_check(ci)  
  
         test_client_stats(ci)             
+        test_client_debug_server_on_off(ci)             
 
         print "All Tests pass ======================================================================"    
     finally:

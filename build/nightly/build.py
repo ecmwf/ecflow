@@ -361,8 +361,8 @@ def add_build_and_test_tasks( parent ) :
 
 def build_localhost( parent ) :
     localhost = parent.add_family("localhost")
-    if (parent.name() == "build") :
-        localhost.add_trigger("tar/create_tar == active or tar/create_tar == complete")
+    if (parent.name() == "local") :
+        localhost.add_trigger("../tar/create_tar == active or  ../tar/create_tar == complete")
     add_localhost_variables(localhost)
     
     add_git_tasks( localhost , True)
@@ -386,7 +386,7 @@ def build_localhost_cmake( parent ) :
     localhost_cmake = parent.add_family("localhost_cmake")
     localhost_cmake.add_variable("BUILD_TYPE","cmake")
     
-    if (parent.name() == "build") :
+    if (parent.name() == "local") :
         localhost_cmake.add_trigger("localhost == complete || localhost == aborted")
     add_localhost_variables(localhost_cmake)
     
@@ -400,7 +400,7 @@ def build_localhost_clang( parent ) :
     localhost_clang = parent.add_family("localhost_clang")
     add_localhost_clang_variables(localhost_clang)
 
-    if (parent.name() == "build") :
+    if (parent.name() == "local") :
         localhost_clang.add_trigger("localhost_cmake == complete || localhost_cmake == aborted")
     
     add_git_tasks( localhost_clang , True)
