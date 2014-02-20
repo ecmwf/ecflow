@@ -134,10 +134,10 @@ else
    #
    # To prebuild the boost python, hence we need to do the following: For now build both variants, keeps cmake happy! (i.e when finding libs)
    #
-   ./bjam toolset=$tool link=shared variant=debug   $CXXFLAGS stage --layout=$layout threading=single --with-python -d2 -j2
-   ./bjam toolset=$tool link=shared variant=release $CXXFLAGS stage --layout=$layout threading=single --with-python -d2 -j2
    ./bjam toolset=$tool link=shared variant=debug   $CXXFLAGS stage --layout=$layout threading=multi --with-python -d2 -j2
    ./bjam toolset=$tool link=shared variant=release $CXXFLAGS stage --layout=$layout threading=multi --with-python -d2 -j2
+   ./bjam toolset=$tool link=static variant=debug   $CXXFLAGS stage --layout=$layout threading=multi --with-python -d2 -j2
+   ./bjam toolset=$tool link=static variant=release $CXXFLAGS stage --layout=$layout threading=multi --with-python -d2 -j2
 fi
 
  

@@ -7,7 +7,8 @@
 
 # =============================================================================
 # This jam file, allows for creation of ecflow python extension module, where
-# we have a STATIC link to boost python 
+# we have a SHARED link to boost python, additionally boost python is
+# installed, and a rpath is set to it.
 # ===============================================================================
 
 # ===============================================================================
@@ -43,6 +44,8 @@ use-project theClient    : ../Client ;
 use-project theSimulator : ../CSim ;
 
 # Make the definition of the python-extension rule available
+# Somehow this bjam causes boost python libs to be built under $BOOST_ROOT/bin.v2
+# How can I get it to use boost python that was built with all the other boost libs ???
 import python ;
 
 if ! [ python.configured ]
@@ -68,6 +71,39 @@ use-project boost
   : $(BOOST_ROOT) ;
 
 
+# ===================== project settings =================================
+# Set up the project-wide requirements that everything uses the
+# boost_python library from the project whose global ID is /boost/python.
+#
+# AIX: need to add additional include for pyconfig.hpp since we have 
+#      one for python32 and another one for python64. 
+#      (Typically there is only _one_ in  the python includes dir)
+#      *** This should have been added to site-config.jam file **
+#
+# AIX: we get TOC overflow, because compiler/linker has 64k limit on
+#      the number of global symbols. Options are use:
+#       0/ Break up shared lib
+#       1/ -bbigtoc to overcome at the cost of performance degradation
+#       2/ --qipa=level=0 if this fails try
+#       3/ --qipa=level=1 if this fails try
+#       4/ --qipa=level=2 if this fails, revert to -bbigtoc
+#       Currently option 2-4 didn't work!
+#      *** This should have been added to site-config.jam file **
+#      prevously we had:   : requirements <toolset>vacpp:<linkflags>-bbigtoc  
+#
+#  If we use:
+#  : requirements <library>/boost/python//boost_python 
+#       THEN we will depend on $BOOST_ROOT/bin.v2/...
+#       This will be automatically compiled if it does not exist
+#  : requirements <library>/site-config//boost_python
+#       THEN use the boost python in $BOOST_ROOT/stage/lib/
+#       This is also expects  we have defined boost_python in site-config.jam/user-config.jam
+#       
+project
+#   : requirements <library>/boost/python//boost_python 
+    : requirements <library>/site-config//boost_python
+  ;
+
 # ======================== libs ============================================
 # HPUX:  ADD standard libs. They don't get added by default ?
 #        Also on HPUX the shared libs appears reversed, and don't appear
@@ -76,6 +112,8 @@ use-project boost
 #        but only for HPUX/acc toolset
 # <ALL>: It appears the pthread lib is automatically added. i.e >lib pthread ;
 #
+# Note:  <toolset>vacpp:<linkflags>-bbigtoc  was required for 
+#            ecgate(rs6000) ONLY and not c1b(ibm_power6)
 
 lib std_v2 ;
 lib stream ;
@@ -100,9 +138,12 @@ python-extension ecflow : [ glob src/*.cpp ]
     /site-config//boost_filesystem
     /site-config//boost_program_options
     /site-config//boost_datetime
-    /site-config//boost_python_static
     : <variant>debug:<define>DEBUG
       <toolset>acc:<library>hpux_std_libs  
+      <toolset>acc:<linkflags>-L$(ECFLOW_PYTHON_INSTALL_DIR)
+      <toolset>vacpp:<linkflags>-L$(ECFLOW_PYTHON_INSTALL_DIR)
+      <toolset>vacpp:<linkflags>-bbigtoc
+      <dll-path>$(ECFLOW_PYTHON_INSTALL_DIR)
     ;
 
 # ========================================================================
@@ -119,6 +160,66 @@ install ecflow/ : ecflow  ;
 # ========================================================================
 # INSTALLATION:
 # ========================================================================
+# <dll-path> specify the path which will be used at runtime to search for dynamic libraries
+# it is like using rpath, i.e. to hard code a directory, when doing a runtime search for a library
+# <dll-path>$(ECFLOW_PYTHON_INSTALL_DIR), is used, to dynamically load boost-python shared library
+# Requested by User Support, to avoid having user add LD_LIBRARY_PATH to their environment
+#
+# *HOWEVER* this does not work at install time, and must be done at link time. See below
+#
+# The tests(run-test) *BELOW* specify LD_LIBRARY_PATH and hence override <dll-path>
+# 
+# Linux: ldd <extension>
+#           If the embedded object is not accessible, it just shows "=>not found"
+#           In our case the boost python shared lib may not exist until added at install time.
+#           *** Hence ldd can be very misleading ***
+#           *** Also if LD_LIBRARY_PATH is set *and* path exist, this will be shown & hence hide embedded paths ***
+#
+#        objdump -p  <extension>     // detailed dump, *SHOWS* the embedded paths, and search order
+#           shared library dynamic path search:
+#              LD_LIBRARY_PATH    enabled  first
+#              embedded path      enabled  second   
+#
+# HPUX:  ldd <extension>
+#        chatr <extension>           // detailed dump, *SHOWS* search path and embedded path
+#           shared library dynamic path search:
+#              LD_LIBRARY_PATH    enabled  first
+#              SHLIB_PATH         enabled  second
+#              embedded path      enabled  third   
+#
+# AIX:  ldd  <extension>
+#       dump -H <extension>
+#
+# NOTE: <linkflags>-L$(ECFLOW_PYTHON_INSTALL_DIR)
+#       <dll-path>$(ECFLOW_PYTHON_INSTALL_DIR)
+#      is ONLY required during install. 
+#      However install does not appear to force a relink. 
+#      The bjam documentations suggests that <dll-path> is only required at install. 
+#      But that does not work, since we don't appear to relink. It *ONLY* works with exe's and not shared libs
+#      As a result tried to use <dll-path> at link time, with mixed results:
+#             hardcode-dll-paths    install                          link
+#      Linux:  does not work,       <dll-path> does not work         <dll-path> works
+#      HPUX:   works                <dll-path> does not work         <dll-path> does not work
+#                                                                    adding -L/path added, but get ignored by -L 
+#                                                                    allready there on development path 
+#      AIX:    does not work        <dll-path> does not work         <dll-path> does not work
+#                                                                    -L/path however does
+# Bjam documentation suggest hardcode-dll-paths has a default value of true,
+# this however can only be seen on HPUX. Tried combination of:
+#     <toolset>acc:<hardcode-dll-paths>false
+#     <toolset>acc:<linkflags>-L$(ECFLOW_PYTHON_INSTALL_DIR)
+# Again no effect:
+#
+# Tried using:  bjam install-py dll-path=/var/tmp/ma0/ecflow/1.9.15/lib/python2.5/site-packages/ecflow -d2
+# This will ONLY work if the extension needs building, will not work for installing as emos
+# as emos will not have permission to write into workspace first.
+#
+# >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+# The hacky workaround is to use <dll-path> when building the extension. This requires
+# that ECFLOW_INSTALL_DIR is correctly set, which requires that ECFLOW_INSTALL_DIR
+# is correctly set. i.e during the build and NOT just install
+# >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
 # - install __init__.py file. 
 # - This install is referenced in JamRoot.jam
 install install-py1
@@ -128,11 +229,12 @@ install install-py1
 
 # - <dll-path> for install Left in, in case its fixed in the future. 
 # - This install is referenced in JamRoot.jam
-# - <install-dependencies>on will also install boost_python shared lib and add repath to it.
 install install-py 
    : ecflow
-   : <install-type>PYTHON_EXTENSION 
+   : <install-dependencies>on 
+     <install-type>PYTHON_EXTENSION 
      <install-type>SHARED_LIB 
+     <dll-path>$(ECFLOW_PYTHON_INSTALL_DIR)
      <location>$(ECFLOW_DESTDIR)$(ECFLOW_PYTHON_INSTALL_DIR)
    ;
 

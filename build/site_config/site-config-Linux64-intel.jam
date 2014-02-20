@@ -32,6 +32,7 @@ lib boost_program_options : : <variant>debug <file>$(BOOST_ROOT)/stage/lib/libbo
 lib boost_filesystem      : : <variant>debug <file>$(BOOST_ROOT)/stage/lib/libboost_filesystem-mt-d.a ;
 lib boost_datetime        : : <variant>debug <file>$(BOOST_ROOT)/stage/lib/libboost_date_time-mt-d.a ;
 lib boost_python          : : <variant>debug <file>$(BOOST_ROOT)/stage/lib/libboost_python-mt-d.so ;
+lib boost_python_static   : : <variant>debug <file>$(BOOST_ROOT)/stage/lib/libboost_python-mt-d.a ;
 
 # profile uses release libs
 lib boost_serialization : :   <variant>profile <file>$(BOOST_ROOT)/stage/lib/libboost_serialization-mt.a ;
@@ -43,6 +44,7 @@ lib boost_program_options : : <variant>profile <file>$(BOOST_ROOT)/stage/lib/lib
 lib boost_filesystem      : : <variant>profile <file>$(BOOST_ROOT)/stage/lib/libboost_filesystem-mt.a ;
 lib boost_datetime        : : <variant>profile <file>$(BOOST_ROOT)/stage/lib/libboost_date_time-mt.a ;
 lib boost_python          : : <variant>profile <file>$(BOOST_ROOT)/stage/lib/libboost_python-mt.so ;
+lib boost_python_static   : : <variant>profile <file>$(BOOST_ROOT)/stage/lib/libboost_python-mt.a ;
 
 lib boost_serialization : :   <variant>release <file>$(BOOST_ROOT)/stage/lib/libboost_serialization-mt.a ;
 lib boost_system : :          <variant>release <file>$(BOOST_ROOT)/stage/lib/libboost_system-mt.a ;
@@ -53,6 +55,7 @@ lib boost_program_options : : <variant>release <file>$(BOOST_ROOT)/stage/lib/lib
 lib boost_filesystem      : : <variant>release <file>$(BOOST_ROOT)/stage/lib/libboost_filesystem-mt.a ;
 lib boost_datetime        : : <variant>release <file>$(BOOST_ROOT)/stage/lib/libboost_date_time-mt.a ;
 lib boost_python          : : <variant>release <file>$(BOOST_ROOT)/stage/lib/libboost_python-mt.so ;
+lib boost_python_static   : : <variant>release <file>$(BOOST_ROOT)/stage/lib/libboost_python-mt.a ;
 
 #
 # Notice: we don't add  requirements <library>pthread , because
