@@ -11,20 +11,19 @@
 #
 #       -DCMAKE_PREFIX_PATH=/path/to/jasper:/path/to/any/package/out/of/place
 #       -DBUILD_SHARED_LIBS=OFF
-# ========================================================
+# =========================================================================================
 # Usage instructions:
 #
 # cd $WK
-# mkdir ecbuild
-# cd ecbuild
-# Build debug and release in same tree
-# mkdir debug
-# mkdir release
-# cd debug
-#
 # release=$(cat VERSION.cmake | grep 'set( ECFLOW_RELEASE' | awk '{print $3}'| sed 's/["]//g')
 # major=$(cat VERSION.cmake   | grep 'set( ECFLOW_MAJOR'   | awk '{print $3}'| sed 's/["]//g')
 # minor=$(cat VERSION.cmake   | grep 'set( ECFLOW_MINOR'   | awk '{print $3}'| sed 's/["]//g')
+#
+# mkdir ecbuild
+# cd ecbuild
+# mkdir debug
+# mkdir release
+# cd debug
 #
 #/usr/local/apps/cmake/current/bin/cmake ../../  \
 #         -DCMAKE_BUILD_TYPE=Debug \
@@ -54,33 +53,37 @@ ecbuild_requires_macro_version( 1.2 )
 
 ecbuild_declare_project()
 
+# =========================================================================================
+# VERSION  
 # Get the ecflow version specified in 'VERSION.cmake'. This is only accessible after ecbuild_declare_project()
+# The ecflow version cofig is done in ACore directory
+# =========================================================================================
+
 message( STATUS "ECFLOW_RELEASE    : ${ECFLOW_RELEASE}" )
 message( STATUS "ECFLOW_MAJOR      : ${ECFLOW_MAJOR}" )
 message( STATUS "ECFLOW_MINOR      : ${ECFLOW_MINOR}" )
 message( STATUS "ECFLOW_VERSION    : ${ECFLOW_VERSION_STR}" )
 
-
-###############################################################################
+# =========================================================================================
+# Python  
+# =========================================================================================
 # some variables of this project
 
 option( ENABLE_PYTHON         "enable python interface"   ON  )
 
-###############################################################################
-# find packages
-
-# Python ----------------------------------------------------------------------
 if(ENABLE_PYTHON)
    ecbuild_find_python( VERSION 2.7 REQUIRED )
 else() 
    ecbuild_find_python( VERSION 2.7 )
 endif()
+
 message( STATUS "PYTHON_EXECUTABLE    : ${PYTHON_EXECUTABLE}")
 message( STATUS "PYTHON_INCLUDE_DIRS  : ${PYTHON_INCLUDE_DIRS}")
 message( STATUS "PYTHON_LIBRARIES     : ${PYTHON_LIBRARIES}")
  
-
-# Boost ----------------------------------------------------------------------
+# =========================================================================================
+# Boost  
+# =========================================================================================
 
 # If this is enable then can not find boost libs using env BOOST_ROOT ?
 #ecbuild_add_extra_search_paths( boost )
@@ -118,8 +121,9 @@ message( STATUS "Boost_LIBRARIES     : ${Boost_LIBRARIES}" )
 #    ${Boost_DATE_TIME_LIBRARY}
 #)
 
-##############################################################################
+# =========================================================================================
 # debug
+# =========================================================================================
 if( CMAKE_BUILD_TYPE MATCHES "[Dd][Ee][Bb][Uu][Gg]" )
     message( "INFO: DEBUG BUILD" )
     # for debug type builds, turn on verbose makefiles
@@ -133,8 +137,9 @@ if( CMAKE_BUILD_TYPE MATCHES "[Dd][Ee][Bb][Uu][Gg]" )
 endif()
 
 
-###############################################################################
+# =========================================================================================
 # build source code
+# =========================================================================================
 
 add_subdirectory( ACore )
 add_subdirectory( ANattr )
@@ -147,8 +152,6 @@ add_subdirectory( Server )
 add_subdirectory( Test )
 add_subdirectory( Pyext )
 add_subdirectory( view )
-
-# configure_file( cmake/ecbase_config.h.in  ${CMAKE_BINARY_DIR}/ecbase_config.h )
 
 # Directories not need in the distribution tar ball!
 ecbuild_add_resources( TARGET build_nightly DONT_PACK_DIRS build/nightly)
@@ -178,9 +181,10 @@ install (FILES
          DESTINATION doc/ecflow
          PERMISSIONS OWNER_READ GROUP_READ WORLD_READ OWNER_EXECUTE GROUP_EXECUTE WORLD_EXECUTE
         )
-         
-############################################################################################
+        
+# =========================================================================================
 # final
+# =========================================================================================
 
 # prepares a tar.gz of your sources and/or binaries
 ecbuild_install_project( NAME ecFlow )
