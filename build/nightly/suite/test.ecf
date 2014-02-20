@@ -154,7 +154,7 @@ set -e # stop shell, on error
 set -x # echo script lines as they are executed
 
    # This was enable because this allowed us to only run the failed tests
-   #if [[ %CMAKE:boost% = CMAKE ]] ; then
+   #if [[ %BUILD_TYPE:boost% = cmake ]] ; then
    #   run_test_cmake $1 $2
    #else
       run_test_boost $1 $2
@@ -189,7 +189,7 @@ fi
 if [[ %SET_TO_TEST_SCRIPT% = true ]] ; then
    echo "Test only"
 else
-   if [[ %CMAKE:boost% = CMAKE ]] ; then
+   if [[ %BUILD_TYPE:boost% = cmake ]] ; then
       ############################################################################
       # ctest
       ############################################################################
@@ -239,9 +239,9 @@ else
       # Boost unit,integration,regression tests
       ############################################################################
 
-      run_test ACore u_acore
-      run_test ANattr u_anattr
-      run_test ANode u_anode
+      run_test ACore   u_acore
+      run_test ANattr  u_anattr
+      run_test ANode   u_anode
       run_test AParser u_aparser
       
       ecflow_client --meter=progress 20             --host=%ECF_NODE% --port=%ECF_PORT%  

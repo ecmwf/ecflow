@@ -384,7 +384,7 @@ def build_localhost( parent ) :
 def build_localhost_cmake( parent ) :
     # Hence left out test_client_performance and test_server_performance
     localhost_cmake = parent.add_family("localhost_cmake")
-    localhost_cmake.add_variable("CMAKE","CMAKE")
+    localhost_cmake.add_variable("BUILD_TYPE","cmake")
     
     if (parent.name() == "build") :
         localhost_cmake.add_trigger("localhost == complete || localhost == aborted")
@@ -460,7 +460,7 @@ def build_cray_intel( parent ) :
     
 def build_cray_cray( parent ) :
     cray = parent.add_family("cray_cray")
-    cray.add_defstatus( ecflow.DState.suspended ) # suspend since does not compile
+    cray.add_defstatus( ecflow.DState.complete ) # complete since does not compile
     cray.add_trigger("cray_intel == complete or cray_intel == aborted")
     add_cray_variables(cray)
     add_cray_cray_compiler_variables(cray)
@@ -484,6 +484,8 @@ def build_opensuse103( parent ) :
 
 def build_hpux( parent ):
     hpux = parent.add_family("hpux")
+    hpux.add_variable("BUILD_TYPE","boost")
+
     if (parent.name() == "remote") :
         hpux.add_trigger("../tar/cp_tar_to_hpux == complete")
     else :
@@ -670,14 +672,14 @@ with defs.add_suite("suite") as suite:
             build_localhost_clang( local )
 
         with build.add_family("remote") as remote:
-            remote.add_variable("CMAKE","CMAKE")
+            remote.add_variable("BUILD_TYPE","cmake")
             build_linux_64( remote )
             build_linux_64_intel( remote )
             build_opensuse113( remote )
             build_redhat( remote )
             build_cray( remote )
             build_opensuse103( remote )
-            build_hpux(remote)
+            build_hpux(remote) # this is build with boost build
             build_aix_power7(remote)
         
 #ecflow.PrintStyle.set_style(ecflow.Style.STATE)
