@@ -82,49 +82,38 @@ else
       mkdir -p ecbuild/%MODE% 
       cd ecbuild/%MODE%
       
-      cmake_build_type=
-      if [[ %MODE% = debug ]] ; then
-         cmake_build_type=Debug
-      else
-         cmake_build_type=Release
-      fi
-      
-       
-      # work out path to CMAKE_MODULE_PATH
-      CMAKE_MODULE_PATH=/usr/local/apps/ecbuild/current/share/ecbuild/cmake
-      if [[ "%LOCAL_HOST:%" != ""  ]] ; then
-         CMAKE_MODULE_PATH=%WK%/../ecbuild/cmake
-      else
-         CMAKE_MODULE_PATH=%ROOT_WK:%/ecbuild/cmake
-      fi
-      
-      if [[ %TOOLSET% = intel ]]; then
-          /usr/local/apps/cmake/current/bin/cmake ../../  \
-         -DCMAKE_BUILD_TYPE=$cmake_build_type \
-         -DCMAKE_MODULE_PATH=$CMAKE_MODULE_PATH \
-         -DCMAKE_INSTALL_PREFIX=/usr/local/apps/ecflow/$ecflow_version \
-         -DCMAKE_C_COMPILER=icc  -DCMAKE_CXX_COMPILER=icpc 
-      elif [[ %TOOLSET% = clang ]]; then
-          /usr/local/apps/cmake/current/bin/cmake ../../  \
-         -DCMAKE_BUILD_TYPE=$cmake_build_type \
-         -DCMAKE_MODULE_PATH=$CMAKE_MODULE_PATH \
-         -DCMAKE_INSTALL_PREFIX=/usr/local/apps/ecflow/$ecflow_version \
-         -DCMAKE_C_COMPILER=clang  -DCMAKE_CXX_COMPILER=clang++       
-      elif [[ %TOOLSET% = vacpp ]]; then
-         # use xlC_r as that will automatically add -lpthreads, which is used some of boost libs
-          /usr/local/apps/cmake/current/bin/cmake ../../  \
-         -DCMAKE_BUILD_TYPE=$cmake_build_type \
-         -DCMAKE_MODULE_PATH=$CMAKE_MODULE_PATH \
-         -DCMAKE_INSTALL_PREFIX=/usr/local/apps/ecflow/$ecflow_version \
-         -DCMAKE_C_COMPILER=xlC  -DCMAKE_CXX_COMPILER=xlC_r      
-      else
-         /usr/local/apps/cmake/current/bin/cmake ../../  \
-         -DCMAKE_BUILD_TYPE=$cmake_build_type \
-         -DCMAKE_MODULE_PATH=$CMAKE_MODULE_PATH \
-         -DCMAKE_INSTALL_PREFIX=/usr/local/apps/ecflow/$ecflow_version
-      fi
-      
       if [[ %ECF_TRYNO% -eq 1 ]] ; then
+      
+         cmake_build_type=
+         if [[ %MODE% = debug ]] ; then
+            cmake_build_type=Debug
+         else
+            cmake_build_type=Release
+         fi
+         
+         if [[ %TOOLSET% = intel ]]; then
+            /usr/local/apps/cmake/current/bin/cmake ../../  \
+            -DCMAKE_BUILD_TYPE=$cmake_build_type \
+            -DCMAKE_INSTALL_PREFIX=/usr/local/apps/ecflow/$ecflow_version \
+            -DCMAKE_C_COMPILER=icc  -DCMAKE_CXX_COMPILER=icpc 
+         elif [[ %TOOLSET% = clang ]]; then
+            /usr/local/apps/cmake/current/bin/cmake ../../  \
+            -DCMAKE_BUILD_TYPE=$cmake_build_type \
+            -DCMAKE_INSTALL_PREFIX=/usr/local/apps/ecflow/$ecflow_version \
+            -DCMAKE_C_COMPILER=clang  -DCMAKE_CXX_COMPILER=clang++       
+         elif [[ %TOOLSET% = vacpp ]]; then
+            # use xlC_r as that will automatically add -lpthreads, which is used some of boost libs
+            /usr/local/apps/cmake/current/bin/cmake ../../  \
+            -DCMAKE_BUILD_TYPE=$cmake_build_type \
+            -DCMAKE_INSTALL_PREFIX=/usr/local/apps/ecflow/$ecflow_version \
+            -DCMAKE_C_COMPILER=xlC  -DCMAKE_CXX_COMPILER=xlC_r \ 
+            -DPYTHON_LIBRARIES=/usr/local/apps/python/2.7.2-01/lib/python2.7/config/
+         else
+            /usr/local/apps/cmake/current/bin/cmake ../../  \
+            -DCMAKE_BUILD_TYPE=$cmake_build_type \
+            -DCMAKE_INSTALL_PREFIX=/usr/local/apps/ecflow/$ecflow_version
+         fi
+      
          make -j%NO_OF_CORES%
       else
          make -j%NO_OF_CORES% VERBOSE=1     
