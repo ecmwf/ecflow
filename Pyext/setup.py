@@ -2,9 +2,11 @@ from distutils.core import setup, Extension
 import os
 import sys
 import glob
-from numpy.f2py.crackfortran import endifpattern
+
 # ========================================================================
 # Usage:
+#   cd $WK; cd Pyext;
+#   rm -rf build/   # for a clean build
 #   python setup.py build_ext
 #   python setup.py install
 # Test:
@@ -133,14 +135,17 @@ libraries = [ 'core' , 'nodeattr', 'node', 'libparser', 'base', 'libsimu', 'libc
 extra_compile_args = []
 extra_link_args = []
 if sys.platform.startswith("aix"):
-   #extra_compile_args =  [ '-qsuppress=1540-0198', '-O3', '-qstrict', '-qfuncsect', '-qeh', '-qrtti'  ]
-   extra_compile_args = [ '-qsuppress=1540-0198',  '-qNOOPTimize', '-qnoinline', '-qfullpath', '-qfuncsect', '-qeh', '-qrtti' ]
+   extra_compile_args =  [ '-qsuppress=1540-0198', '-O3', '-qstrict', '-qfuncsect', '-qeh', '-qrtti'  ]
+   #extra_compile_args = [ '-qsuppress=1540-0198',  '-qNOOPTimize', '-qnoinline', '-qfullpath', '-qfuncsect', '-qeh', '-qrtti' ]
    extra_link_args= [ '-lpthread', '-ldl', '-bbigtoc' ]  # '-G', '-noipath', 
  
 
 # create the extension and add it to the python distribution
+# o glob.glob(os.path.join('src', '*.cpp'))
+#   This expand the list of cpp files that need to be compiled
+#
 # The configuation below creates:
-#  lib/python2.7/site-packages/ecflow/ecflow.so
+#   lib/python2.7/site-packages/ecflow/ecflow.so
 #                                     __init__.py               
 setup( name='ecflow', 
        version=ecflow_version, 
@@ -148,7 +153,7 @@ setup( name='ecflow',
        package_dir={'ecflow': 'ecflow'},
        ext_modules=[ Extension( 
                               'ecflow.ecflow', 
-                              glob.glob(os.path.join('src', '*.cpp')) , 
+                              glob.glob(os.path.join('src', '*.cpp')), 
                               include_dirs=include_dirs, 
                               library_dirs=library_dirs, 
                               libraries=libraries,
