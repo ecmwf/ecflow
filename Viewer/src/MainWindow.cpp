@@ -8,6 +8,7 @@
 //
 //============================================================================
 
+#include <QActionGroup>
 #include <QApplication>
 #include <QCloseEvent>
 #include <QMessageBox>
@@ -28,6 +29,18 @@ MainWindow::MainWindow(QStringList idLst,QWidget *parent) : QMainWindow(parent)
 {
     setupUi(this);
     
+
+    //Create action group for view mode
+    //The order of the actions in the group must reflect the order in
+    //the Viewer::NodeViewMode enum!!!!
+    viewModeAg_=new QActionGroup(this);
+    viewModeAg_->setExclusive(true);
+    viewModeAg_->addAction(actionTreeView);
+    viewModeAg_->addAction(actionTableView);
+
+    connect(viewModeAg_,SIGNAL(triggered(QAction*)),
+    		this,SLOT(slotViewMode(QAction*)));
+
     //Create the main layout
     QVBoxLayout* layout=new QVBoxLayout();
     QWidget *w=new QWidget(this);
@@ -38,6 +51,10 @@ MainWindow::MainWindow(QStringList idLst,QWidget *parent) : QMainWindow(parent)
     nodePanel_=new NodePanel(this);
     layout->addWidget(nodePanel_);
     
+    connect(nodePanel_,SIGNAL(currentWidgetChanged()),
+    		this,SLOT(slotCurrentChangedInPanel()));
+
+
     //File menu
 
     /*connect(actionNewTab,SIGNAL(triggered()),
@@ -89,6 +106,38 @@ void MainWindow::on_actionQuit_triggered()
 {
 	MainWindow::aboutToQuit(this);
 }
+
+
+void MainWindow::slotViewMode(QAction* action)
+{
+	if(action->isChecked())
+	{
+			int index=viewModeAg_->actions().indexOf(action);
+			if(index >=0)
+				nodePanel_->setViewMode(static_cast<Viewer::ViewMode>(index));
+	}
+}
+
+void MainWindow::slotCurrentChangedInPanel()
+{
+	 //breadcrumbs_->setPath(folderPanel_->currentFolder());
+  	 //slotUpdateNavigationActions(folderPanel_->folderNavigation());
+	 syncViewModeAg(nodePanel_->viewMode());
+	 //updateIconSizeActionState();
+	 //updateSearchPanel();
+}
+
+//This functions syncs the toggle state of the action group
+void MainWindow::syncViewModeAg(Viewer::ViewMode mode)
+{
+	//It is safe to call setChecked() because the QActionGroup in this case
+	//does not emit the triggered() signal
+
+	int index=static_cast<int>(mode);
+	if(index >=0 && index < viewModeAg_->actions().count())
+		viewModeAg_->actions().at(index)->setChecked(true);
+}
+
 
 //==============================================================
 //

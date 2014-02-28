@@ -13,7 +13,7 @@
 
 namespace Viewer
 {
-    enum ViewMode {NoViewMode,TreeViewMode,TableViewMode};
+    enum ViewMode {TreeViewMode,TableViewMode,NoViewMode,};
 }
 
 #endif

@@ -35,16 +35,16 @@ void TableNodeModel::dataIsAboutToChange()
 void TableNodeModel::addServer(ServerHandler *server)
 {
 	servers_ << server;
+	rootNodes_[servers_.back()] = NULL;
 }
 
-
-/*void TableNodeModel::setRootNode(const std::string &server,serverMvQOgcNode *root)
+Node * TableNodeModel::rootNode(ServerHandler* server) const
 {
-	root_=root;
-
-	//Reset the model (views will be notified)
-	endResetModel();
-}*/
+	QMap<ServerHandler*,Node*>::const_iterator it=rootNodes_.find(server);
+	if(it != rootNodes_.end())
+		return it.value();
+	return NULL;
+}
 
 
 int TableNodeModel::columnCount( const QModelIndex& /*parent */ ) const
@@ -54,42 +54,46 @@ int TableNodeModel::columnCount( const QModelIndex& /*parent */ ) const
 
 int TableNodeModel::rowCount( const QModelIndex& parent) const
 {
-	//qDebug() << "<< rowCount" << parent;
-
-
+	//There are no servers
 	if(!hasData())
 	{
 		return 0;
 	}
+	//We use only column 0
 	else if(parent.column() > 0)
 	{
 		return 0;
 	}
-	//Parent is the root
+	//Parent is the root: the item must be a server!
 	else if(!parent.isValid())
 	{
 			//qDebug() << "rowCount" << parent << servers_.count();
 			return servers_.count();
 	}
+	//The parent is a server
 	else if(isServer(parent))
 	{
-			if(ServerHandler *server=indexToServer(parent))
+		if(ServerHandler *server=indexToServer(parent))
+		{
+			//There is a rootNode for the server
+			if(Node *rn=rootNode(server))
 			{
-				defs_ptr defs = server->defs();
+				return 1;
+			}
+			//We show the whole tree for the server
+			else
+			{
 				return server->suiteNum();
 			}
+		}
 	}
+	//The parent is a node
 	else if(Node* parentNode=indexToNode(parent))
 	{
-		std::vector<node_ptr> nodes;
-		parentNode->immediateChildren(nodes);
-		//qDebug() << "rowCount" << parent << nodes.size();
-
-		return static_cast<int>(nodes.size());
+		return 0;
 	}
 
 	return 0;
-
 }
 
 
@@ -169,6 +173,7 @@ QVariant TableNodeModel::headerData( const int section, const Qt::Orientation or
     return QVariant();
 }
 
+
 QModelIndex TableNodeModel::index( int row, int column, const QModelIndex & parent ) const
 {
 	if(!hasData() || row < 0 || column < 0)
@@ -178,13 +183,14 @@ QModelIndex TableNodeModel::index( int row, int column, const QModelIndex & pare
 
 	//qDebug() << "index" << row << column << parent;
 
-
 	//When parent is the root this index refers to a server
 	if(!parent.isValid())
 	{
 		//For the server the internalId is its row index + 1
 		if(row < servers_.count())
+		{
 			return createIndex(row,column,row+1);
+		}
 		else
 			return QModelIndex();
 	}
@@ -194,22 +200,31 @@ QModelIndex TableNodeModel::index( int row, int column, const QModelIndex & pare
 	{
 		node_ptr childNode;
 
-		//The parent is a server: this is a suite
+		//The parent is a server
 		if(ServerHandler* server=indexToServer(parent))
 		{
-				//For suite nodes we store the
-				defs_ptr defs = server->defs();
-			    const std::vector<suite_ptr> &suites = defs->suiteVec();
-			    return createIndex(row,column,suites.at(row).get());
+			//If there is a rootnode for the server
+			if(Node *rn=rootNode(server))
+			{
+				//qDebug() << "  -->rootNode" << rn->absNodePath().c_str();
+				return createIndex(row,column,rn);
+			}
+			//There is no root node: we show the whole tree for the server.
+			//So this item must be a suite!
+			else
+			{
+				if(Node *suite=server->suiteAt(row))
+				{
+					return createIndex(row,column,suite);
+				}
+				else
+					return QModelIndex();
+			}
 		}
-		//Non suite nodes
+		//Parent is not the server: the parent must be another node
 		else
 		{
-				Node* parentNode=indexToNode(parent);
-				std::vector<node_ptr> nodes;
-				parentNode->immediateChildren(nodes);
-				if(static_cast<int>(nodes.size()) > row)
-					return createIndex(row,column,nodes.at(row).get());
+			return QModelIndex();
 		}
 	}
 
@@ -217,14 +232,54 @@ QModelIndex TableNodeModel::index( int row, int column, const QModelIndex & pare
 
 }
 
-/*
-   virtual Task* isTask() const   { return NULL;}
-   virtual Alias* isAlias() const { return NULL;}
-   virtual Submittable* isSubmittable() const { return NULL;}
-   virtual NodeContainer* isNodeContainer() const { return NULL;}
-   virtual Family* isFamily() const { return NULL;}
-   virtual Suite* isSuite() const  { return NULL;}
-*/
+QModelIndex TableNodeModel::parent(const QModelIndex &child) const
+{
+	//If the child is a server the parent is the root
+	if(isServer(child))
+		return QModelIndex();
+
+	//Get the node
+	Node* node=indexToNode(child);
+	if(!node)
+		return QModelIndex();
+
+	//Check if it is a rootNode
+	QMapIterator<ServerHandler*, Node*> it(rootNodes_);
+	while(it.hasNext())
+	{
+		it.next();
+
+		//For a rootnode the parent is the server
+		if(it.value() == node)
+		{
+			return serverToIndex(it.key());
+		}
+	}
+
+	//The node is not a rootnode
+
+	//Get the parent node
+	Node *parentNode=node->parent();
+
+	//If there is no parent node it is a suite so its parent is a server
+	if(!parentNode)
+	{
+		return serverToIndex(ServerHandler::find(node));
+	}
+	//else it is a non-suite node so its parent must be another node
+	else
+	{
+		return QModelIndex();
+	}
+
+	return QModelIndex();
+}
+
+//----------------------------------------------
+//
+// Server to index mapping and lookup
+//
+//----------------------------------------------
 
 bool TableNodeModel::isServer(const QModelIndex & index) const
 {
@@ -250,6 +305,15 @@ ServerHandler* TableNodeModel::indexToServer(const QModelIndex & index) const
 	return NULL;
 }
 
+QModelIndex TableNodeModel::serverToIndex(ServerHandler* server) const
+{
+	//For servers the internal id is set to their position in servers_ + 1
+	int i;
+	if((i=servers_.indexOf(server))!= -1)
+			return createIndex(i,0,i+1);
+
+	return QModelIndex();
+}
 
 Node* TableNodeModel::indexToNode( const QModelIndex & index) const
 {
@@ -264,64 +328,29 @@ Node* TableNodeModel::indexToNode( const QModelIndex & index) const
 	return NULL;
 }
 
-QModelIndex TableNodeModel::parent(const QModelIndex &child) const
+
+ViewNodeInfo_ptr TableNodeModel::nodeInfo(const QModelIndex& index) const
 {
-	//If the child is a server the parent is the root
-	if(isServer(child))
-		return QModelIndex();
-
-	//Get the parent node
-	Node* node=indexToNode(child);
-	if(!node)
-		return QModelIndex();
-
-	Node *parentNode=node->parent();
-
-	//If there is no parent node it is a suite so its parent is a server
-	if(!parentNode)
+	if(!index.isValid())
 	{
-		//We need to find out which server is the parent
-		for(int i=0; i < servers_.count(); i++)
-		{
-			defs_ptr defs = servers_.at(i)->defs();
-			const std::vector<suite_ptr> &suites = defs->suiteVec();
-			for(int j=0; j < suites.size(); j++)
-			{
-					if(suites[j].get() == node)
-						return createIndex(i,0,i+1);
-			}
-		}
-		return QModelIndex();
+		ViewNodeInfo_ptr res(new ViewNodeInfo());
+		return res;
 	}
-	//else it is a non-suite node so its parent must be another node
+
+	ServerHandler *server=indexToServer(index);
+	if(server)
+	{
+		ViewNodeInfo_ptr res(new ViewNodeInfo(server));
+		return res;
+	}
 	else
 	{
-		//Node *grandParentNode=parentNode->parent();
-		//if(!grandParentNode)
-		//	return QModelIndex();
-
-		size_t pos=parentNode->position();
-		if(pos != std::numeric_limits<std::size_t>::max())
-			return createIndex(pos,0,parentNode);
-
+		Node* node=indexToNode(index);
+		ViewNodeInfo_ptr res(new ViewNodeInfo(node));
+		return res;
 	}
-
-	return QModelIndex();
-
-		/*Node *grandParentNode=parentNode->parent();
-		if(!grandParentNode)
-			return QModelIndex();
-
-
-
-		std::vector<node_ptr> nodes;
-		grandParentNode->immediateChildren(nodes);
-		for(size_t i=0; i < nodes.count(); i++)
-				if(parentNode==childNode=nodes.at(i))
-						return createIndex(node->position(),0,parentNode);*/
-
-
 }
+
 
 QModelIndex TableNodeModel::indexFromNode(Node* node) const
 {

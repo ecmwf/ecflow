@@ -11,6 +11,7 @@
 
 #include "NodeWidget.hpp"
 #include "NodeViewHandler.hpp"
+#include "TableNodeView.hpp"
 #include "TreeNodeView.hpp"
 
 #include <QStackedLayout>
@@ -50,10 +51,10 @@ NodeWidget::NodeWidget(QString rootNode, QWidget *parent) :
 
 	// Detailed view
 
-	/*detailedView_= new MvQDetailedFolderView(folderModel_,desktopActions,this);
-	views_->add(MvQ::DetailedViewMode,detailedView_,detailedView_);
+	TableNodeView *tableView=new TableNodeView("",this);
+	views_->add(Viewer::TableViewMode,tableView,tableView);
 
-	connect(detailedView_,SIGNAL(currentFolderChanged(Folder*)),
+	/*connect(detailedView_,SIGNAL(currentFolderChanged(Folder*)),
 		this,SLOT(slotFolderReplacedInView(Folder*)));
 
 	connect(detailedView_,SIGNAL(iconCommandRequested(QString,IconObjectH)),
@@ -98,7 +99,6 @@ QString NodeWidget::currentFolderName()
 {
 	slotFolderReplacedInView(folder);
 }*/
-
 
 //------------------------
 // Rescan

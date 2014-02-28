@@ -10,10 +10,15 @@
 #ifndef NODEVIEWBASE_HPP_
 #define NODEVIEWBASE_HPP_
 
+#include "Viewer.hpp"
+
 class NodeViewBase
 {
 public:
 		NodeViewBase();
+
+protected:
+		Viewer::ViewMode id_;
 
 };
 

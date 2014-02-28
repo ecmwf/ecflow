@@ -172,6 +172,21 @@ void  NodePanel::slotNewTab()
 	}*/
 }
 
+
+void NodePanel::setViewMode(Viewer::ViewMode mode)
+{
+	NodeWidget *w=currentNodeWidget();
+	if(w) w->setViewMode(mode);
+	//setDefaults(this);
+}
+
+Viewer::ViewMode NodePanel::viewMode()
+{
+  	NodeWidget *w=currentNodeWidget();
+	return (w)?w->viewMode():Viewer::NoViewMode;
+}
+
+
 /*void NodePanel::slotNewWindow(bool)
 {
 	//MainWindow::openWindow("",this);

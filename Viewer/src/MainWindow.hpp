@@ -17,7 +17,9 @@
 #include "ui_MainWindow.h"
 
 #include "Defs.hpp"
+#include "Viewer.hpp"
 
+class QActionGroup;
 class NodePanel;
 
 class MainWindow : public QMainWindow, private Ui::MainWindow  
@@ -40,10 +42,15 @@ protected slots:
 	void on_actionNewWindow_triggered();
 	void on_actionClose_triggered();
 	void on_actionQuit_triggered();
+	void slotViewMode(QAction*);
+	void slotCurrentChangedInPanel();
 
 private:
     void init(MainWindow*);
     void closeEvent(QCloseEvent*);
+
+    void syncViewModeAg(Viewer::ViewMode);
+
     void writeSettings(QSettings &settings);
     void readSettings(QSettings &settings);
 
@@ -56,6 +63,8 @@ private:
     static void save(MainWindow *);
     static MainWindow* findWindow(QWidget *childW);
 
+
+    QActionGroup *viewModeAg_;
     NodePanel* nodePanel_;
 
     static bool quitStarted_;
