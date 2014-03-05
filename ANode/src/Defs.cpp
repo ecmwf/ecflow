@@ -906,6 +906,7 @@ bool Defs::replaceChild(const std::string& path,
 
 	 	client_node_to_add->set_most_significant_state_up_node_tree();
 
+	 	// The changes have been made, do a sanity test, check trigger expressions
 	 	std::string warning_msg;
 	 	return client_node_to_add->suite()->check(errorMsg,warning_msg);
  	}
@@ -934,6 +935,7 @@ bool Defs::replaceChild(const std::string& path,
  		LOG_ASSERT( addOk ,"");
  		client_suite_to_add->set_most_significant_state_up_node_tree();
 
+      // The changes have been made, do a sanity test, check trigger expressions
  	   std::string warning_msg;
  	   return client_suite_to_add->suite()->check(errorMsg,warning_msg);
 	}
@@ -971,6 +973,7 @@ bool Defs::replaceChild(const std::string& path,
 	LOG_ASSERT( addOk,"" );
 	client_node_to_add->set_most_significant_state_up_node_tree();
 
+   // The changes have been made, do a sanity test, check trigger expressions
 	std::string warning_msg;
 	return client_node_to_add->suite()->check(errorMsg,warning_msg);
 }
