@@ -5,8 +5,8 @@
 #  
 if [ "$#" -gt 1 ] ; then
    echo "cmake expects 1 argument i.e"
-   echo "  cmake debug"
-   echo "  cmake release"
+   echo "  cmake.sh debug"
+   echo "  cmake.sh release"
    exit 1
 fi
 if [[ "$1" != debug && "$1" != release  ]] ; then
@@ -22,7 +22,10 @@ set -x # echo script lines as they are executed
 
 # ===================================================================
 cd $WK
- 
+release=$(cat VERSION.cmake | grep 'set( ECFLOW_RELEASE' | awk '{print $3}'| sed 's/["]//g')
+major=$(cat VERSION.cmake   | grep 'set( ECFLOW_MAJOR'   | awk '{print $3}'| sed 's/["]//g')
+minor=$(cat VERSION.cmake   | grep 'set( ECFLOW_MINOR'   | awk '{print $3}'| sed 's/["]//g')
+
 mkdir -p ecbuild/$1
 cd ecbuild/$1
       
@@ -32,10 +35,6 @@ if [[ $1 = debug ]] ; then
 else
     cmake_build_type=Release
 fi
-
-release=$(cat VERSION.cmake | grep 'set( ECFLOW_RELEASE' | awk '{print $3}'| sed 's/["]//g')
-major=$(cat VERSION.cmake   | grep 'set( ECFLOW_MAJOR'   | awk '{print $3}'| sed 's/["]//g')
-minor=$(cat VERSION.cmake   | grep 'set( ECFLOW_MINOR'   | awk '{print $3}'| sed 's/["]//g')
 
 cmake ../.. -DCMAKE_BUILD_TYPE=$cmake_build_type \
             -DCMAKE_INSTALL_PREFIX=/var/tmp/ma0/cmake/ecflow/$release.$major.$minor

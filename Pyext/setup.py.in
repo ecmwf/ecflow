@@ -6,11 +6,16 @@ import glob
 
 # ========================================================================
 # Usage:
-#   cd $WK; cd ecbuild/release/Pyext; make
+#   cd $WK; cd ecbuild/release/; sh -x ../../cmake.sh release; make ; make install
+#   calling 'sh -x ../../cmake.sh release' will generate steup.py from setup.py.in
+# Issues:
+#   Can not test cmake install, since it will always install to 
+#     /usr/local/apps/python/current/lib/python2.7/site-packages/ecflow
+#
+# To test install manually, we can:
+#   cd $WK/Pyext
 #   rm -rf build/   # for a clean build
 #   python setup.py build_ext
-#   python setup.py install
-# Test:
 #   python setup.py install --home=~
 #
 # See: http://docs.python.org/2/distutils/apiref.html?highlight=extension#distutils.core.Extension
@@ -26,7 +31,7 @@ import glob
 #        .main                     [12]    ER PR crt0_64.s(/lib/crt0_64.o)
 #                                          00000070 .text    R_RBR    [34]    .__start
 # This is because it is missing -G (generate dynamic library)
-# When we manually add -G, sucessfull link(ecflow.so)
+# When we manually add -G, we sucessfully link(ecflow.so)
 #
 #      Both of these can be fixed, by overriding the Link line with:
 #      export LDSHARED="xlC_r -G -Wl,-bI:/usr/local/apps/python/2.7.2-01/lib/python2.7/config/python.exp"
@@ -49,9 +54,9 @@ import glob
 #     DESTINATION ${CMAKE_BINARY_DIR}
 #     FILE_PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ
 #     GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
-#
+# ============================================================================
         
-#===============================================================================================
+#=============================================================================
 # define the directories to search for include files
 # to get this to work, you will need to include the path
 # to your boost installation and  ecflow includes
