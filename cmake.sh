@@ -36,6 +36,14 @@ else
     cmake_build_type=Release
 fi
 
-cmake ../.. -DCMAKE_BUILD_TYPE=$cmake_build_type \
-            -DCMAKE_INSTALL_PREFIX=/var/tmp/ma0/cmake/ecflow/$release.$major.$minor
+#
+# -DCMAKE_PYTHON_INSTALL_TYPE = [ local | setup ]
+# -DCMAKE_PYTHON_INSTALL_PREFIX should *only* used when using python setup.py (CMAKE_PYTHON_INSTALL_TYPE=setup)
+#   *AND* for testing python install to local directory
+#
 
+cmake ../.. -DCMAKE_BUILD_TYPE=$cmake_build_type \
+            -DCMAKE_INSTALL_PREFIX=/var/tmp/ma0/cmake/ecflow/$release.$major.$minor \
+            -DCMAKE_PYTHON_INSTALL_TYPE=local 
+            #-DCMAKE_PYTHON_INSTALL_PREFIX=/var/tmp/ma0/cmake/ecflow/$release.$major.$minor/lib/python2.7/site-packages/ecflow
+        

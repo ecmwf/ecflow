@@ -113,10 +113,17 @@ else
             -DCMAKE_BUILD_TYPE=$cmake_build_type \
             -DCMAKE_INSTALL_PREFIX=/usr/local/apps/ecflow/$ecflow_version
          fi
+      fi
       
-         make -j%NO_OF_CORES%
+      if [[ %TOOLSET% = vacpp ]]; then
+         # Hack required for python extension
+         export LDSHARED="xlC_r -G -Wl,-bI:/usr/local/apps/python/2.7.2-01/lib/python2.7/config/python.exp"
+      fi
+
+      if [[ %ECF_TRYNO% -eq 1 ]] ; then
+         make -j%NO_OF_CORES%    
       else
-         make -j%NO_OF_CORES% VERBOSE=1     
+         make -j%NO_OF_CORES% VERBOSE=1             
       fi
       
    else
