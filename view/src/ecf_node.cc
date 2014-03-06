@@ -353,9 +353,6 @@ void ecf_concrete_node<Suite>::make_subtree() {
   else if (n->begun())
     n->update_generated_variables();
 
-  full_name_ = owner_->absNodePath();
-  ChangeMgrSingleton::instance()->attach(owner_, this);  
-
   full_name_ = owner_->absNodePath(); // "/" + n->name();
   ChangeMgrSingleton::instance()->attach(owner_, this); 
   std::vector<node_ptr> kids; n->immediateChildren(kids);
