@@ -31,6 +31,7 @@ public:
 		defs_ptr defs() const;
 		int suiteNum() const;
 		Node* suiteAt(int) const;
+		int indexOfSuite(Node* node);
 		int update();
 		void setUpdatingStatus(bool newStatus) {updating_ = newStatus;}
 
@@ -38,12 +39,14 @@ public:
 		static ServerHandler* addServer(const std::string &server, const std::string &port);
 		static int numOfImmediateChildren(Node*);
 		static Node* immediateChildAt(Node *parent,int pos);
+		static int indexOfImmediateChild(Node *node);
 		static void command(std::vector<ViewNodeInfo_ptr>,std::string);
 		static ServerHandler* find(const std::string& longName);
 		static ServerHandler* find(const std::pair<std::string,std::string>& hostPort);
 		static ServerHandler* find(Node *node);
 		static void addServerCommand(const std::string &name, const std::string command);
 		static std::string resolveServerCommand(const std::string &name);
+		static void updateAll();
 
 protected:
 		std::string name_;

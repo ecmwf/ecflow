@@ -11,14 +11,34 @@
 
 #include <QDebug>
 
+#include "ChangeMgrSingleton.hpp"
 #include "ServerHandler.hpp"
 #include "ViewConfig.hpp"
 
 TableNodeModel::TableNodeModel(QObject *parent) : QAbstractItemModel(parent)
 {
-	for(unsigned int i=0; i < ServerHandler::servers().size(); i++)
+	for(unsigned int i=0; i < 1; i++)
 	{
-			servers_ << ServerHandler::servers().at(i);
+				servers_ << ServerHandler::servers().at(i);
+				//initObserver(servers_.back());
+	}
+
+}
+
+void TableNodeModel::initObserver(ServerHandler* server)
+{
+	defs_ptr d = server->defs();
+	if(d == NULL)
+		return;
+
+	const std::vector<suite_ptr> &suites = d->suiteVec();
+	for(unsigned int i=0; i < suites.size();i++)
+	{
+		std::set<Node*> nodes;
+		suites.at(i)->allChildren(nodes);
+		for(std::set<Node*>::iterator it=nodes.begin(); it != nodes.end(); it++)
+			ChangeMgrSingleton::instance()->attach((*it),this);
+
 	}
 }
 
@@ -54,6 +74,7 @@ int TableNodeModel::columnCount( const QModelIndex& /*parent */ ) const
 
 int TableNodeModel::rowCount( const QModelIndex& parent) const
 {
+
 	//There are no servers
 	if(!hasData())
 	{
@@ -352,18 +373,62 @@ ViewNodeInfo_ptr TableNodeModel::nodeInfo(const QModelIndex& index) const
 }
 
 
-QModelIndex TableNodeModel::indexFromNode(Node* node) const
+QModelIndex TableNodeModel::nodeToIndex(Node* node, int column) const
 {
-	/*if(node != 0 && node->parent() != 0)
+	if(!node)
+			return QModelIndex();
+
+	if(node->parent() != 0)
+	{
+		int row=ServerHandler::indexOfImmediateChild(node);
+		if(row != -1)
+		{
+				return createIndex(row,column,node);
+		}
+	}
+	else
+	{
+		return QModelIndex();
+	}
+
+
+
+		/*if(node != 0 && node->parent() != 0)
 	{
 		int row=node->parent()->children().indexOf(node);
 		if(row != -1)
 		{
 			return createIndex(row,0,node);
 		}
-	}*/
+	}
 
-	return QModelIndex();
+	return QModelIndex();*/
 }
+
+void TableNodeModel::update(const Node* node, const std::vector<ecf::Aspect::Type>& types)
+{
+		if(node==NULL)
+			return;
+
+		qDebug() << "TableNodeModel::observer" << QString::fromStdString(node->name());
+		for(unsigned int i=0; i < types.size(); i++)
+			qDebug() << "  type:" << types.at(i);
+
+		Node* nc=const_cast<Node*>(node);
+
+		QModelIndex index1=nodeToIndex(nc,0);
+		QModelIndex index2=nodeToIndex(nc,2);
+
+		Node *nd1=indexToNode(index1);
+		Node *nd2=indexToNode(index2);
+
+		qDebug() << "indexes" << index1 << index2;
+		qDebug() << "index pointers " << index1.internalPointer() << index2.internalPointer();
+		qDebug() << QString::fromStdString(nd1->name()) << QString::fromStdString(nd2->name());
+
+		emit dataChanged(index1,index2);
+
+}
+
 
 

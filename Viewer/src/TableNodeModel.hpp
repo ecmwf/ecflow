@@ -6,11 +6,12 @@
 #include <vector>
 
 #include "ViewNodeInfo.hpp"
+#include "AbstractObserver.hpp"
 
 class Node;
 class ServerHandler;
 
-class TableNodeModel : public QAbstractItemModel
+class TableNodeModel : public QAbstractItemModel, public AbstractObserver
 {
 
 public:
@@ -29,12 +30,18 @@ public:
 	void dataIsAboutToChange();
 	ViewNodeInfo_ptr nodeInfo(const QModelIndex& index) const;
 
+	//From AbstractObserver
+	void update(const Node*, const std::vector<ecf::Aspect::Type>&);
+	void update(const Defs*, const std::vector<ecf::Aspect::Type>&)  {};
+
+
 protected:
-	bool hasData() const;
+	void initObserver(ServerHandler* server);
+    bool hasData() const;
 	bool isServer(const QModelIndex & index) const;
 	ServerHandler* indexToServer(const QModelIndex & index) const;
 	QModelIndex serverToIndex(ServerHandler*) const;
-	QModelIndex indexFromNode(Node*) const;
+	QModelIndex nodeToIndex(Node*,int) const;
 	Node* indexToNode( const QModelIndex & index) const;
 
 	QVariant serverData(const QModelIndex& index,int role) const;

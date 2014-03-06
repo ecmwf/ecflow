@@ -16,6 +16,7 @@ class NodeViewBase
 {
 public:
 		NodeViewBase();
+		virtual void reload()=0;
 
 protected:
 		Viewer::ViewMode id_;

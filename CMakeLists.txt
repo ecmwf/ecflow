@@ -103,7 +103,7 @@ list( APPEND Ecflow_Test_LIBS
 
 
 if(ENABLE_VIEWER)
-    find_package(Qt4 REQUIRED QtCore QtGui)
+    find_package(Qt4 REQUIRED QtCore QtGui )
 endif()
 
 

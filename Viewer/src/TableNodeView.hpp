@@ -28,6 +28,7 @@ public:
 		TableNodeView(QString,QWidget *parent=0);
 		//TableNodeView::printDefTree(const std::string &server, int port);
 		//TableNodeView::printNode(node_ptr node, int indent, QTreeWidgetItem *parent)
+		void reload() {};
 
 public slots:
 	void slotSelectItem(const QModelIndex&);

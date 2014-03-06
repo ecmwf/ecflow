@@ -12,6 +12,7 @@
 #define TreeNodeView_HPP_
 
 #include <QTreeView>
+#include <QStyledItemDelegate>
 
 #include "NodeViewBase.hpp"
 
@@ -19,6 +20,17 @@
 
 class ActionHandler;
 class TreeNodeModel;
+class TreeNodeFilterModel;
+
+
+class TreeNodeViewDelegate : public QStyledItemDelegate
+{
+public:
+	TreeNodeViewDelegate(QWidget *parent=0);
+	void paint(QPainter *painter,const QStyleOptionViewItem &option,
+		           const QModelIndex& index) const;
+};
+
 
 class TreeNodeView : public QTreeView, public NodeViewBase
 {
@@ -28,12 +40,14 @@ public:
 		TreeNodeView(QString,QWidget *parent=0);
 		//TreeNodeView::printDefTree(const std::string &server, int port);
 		//TreeNodeView::printNode(node_ptr node, int indent, QTreeWidgetItem *parent)
+		void reload();
 
 public slots:
 	void slotSelectItem(const QModelIndex&);
 	void slotDoubleClickItem(const QModelIndex&);
 	void slotContextMenu(const QPoint &position);
 	void slotViewCommand(std::vector<ViewNodeInfo_ptr>,QString);
+
 
 signals:
 	void selectionChanged(ViewNodeInfo_ptr);
@@ -43,6 +57,7 @@ protected:
 		void handleContextMenu(QModelIndex indexClicked,QModelIndexList indexLst,QPoint globalPos,QPoint widgetPos,QWidget *widget);
 
 		TreeNodeModel *model_;
+		TreeNodeFilterModel *filterModel_;
 		ActionHandler* actionHandler_;
 };
 

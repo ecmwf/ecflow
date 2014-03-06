@@ -10,6 +10,7 @@
 #include "TreeNodeView.hpp"
 
 #include <QDebug>
+#include <QPainter>
 #include <QScrollBar>
 
 //#include "Defs.hpp"
@@ -19,12 +20,35 @@
 #include "ActionHandler.hpp"
 #include "TreeNodeModel.hpp"
 
+TreeNodeViewDelegate::TreeNodeViewDelegate(QWidget *parent) : QStyledItemDelegate(parent)
+{
+}
+
+void TreeNodeViewDelegate::paint(QPainter *painter,const QStyleOptionViewItem &option,
+		           const QModelIndex& index) const
+{
+	qDebug() << "delegate paint";
+	QStyledItemDelegate::paint(painter,option,index);
+}
 
 TreeNodeView::TreeNodeView(QString ,QWidget* parent) : QTreeView(parent)
 {
 		model_=new TreeNodeModel(this);
-		setModel(model_);
 
+		filterModel_=new TreeNodeFilterModel(this);
+		filterModel_->setSourceModel(model_);
+		filterModel_->setDynamicSortFilter(true);
+
+		setModel(filterModel_);
+
+		TreeNodeViewDelegate *delegate=new TreeNodeViewDelegate(this);
+		setItemDelegate(delegate);
+
+		//setRootIsDecorated(false);
+		setAllColumnsShowFocus(true);
+	    setUniformRowHeights(true);
+	    setMouseTracking(true);
+		setSelectionMode(QAbstractItemView::ExtendedSelection);
 
 		//Context menu
 		setContextMenuPolicy(Qt::CustomContextMenu);
@@ -42,7 +66,6 @@ TreeNodeView::TreeNodeView(QString ,QWidget* parent) : QTreeView(parent)
 		actionHandler_=new ActionHandler(this);
 
 		expandAll();
-
 
 }
 //Collects the selected list of indexes
@@ -92,7 +115,7 @@ void TreeNodeView::handleContextMenu(QModelIndex indexClicked,QModelIndexList in
   		std::vector<ViewNodeInfo_ptr> nodeLst;
 		for(int i=0; i < indexLst.count(); i++)
 		{
-			ViewNodeInfo_ptr info=model_->nodeInfo(indexLst[i]);
+			ViewNodeInfo_ptr info=model_->nodeInfo(filterModel_->mapToSource(indexLst[i]));
 			if(!info->isEmpty())
 				nodeLst.push_back(info);
 		}
@@ -119,6 +142,14 @@ void TreeNodeView::slotViewCommand(std::vector<ViewNodeInfo_ptr> nodeLst,QString
 		expandAll();
 	}
 }
+
+
+void TreeNodeView::reload()
+{
+	model_->reload();
+	expandAll();
+}
+
 
 
 /*

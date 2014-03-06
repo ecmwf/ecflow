@@ -11,18 +11,62 @@
 
 #include <QDebug>
 
+#include "ChangeMgrSingleton.hpp"
+
 #include "ServerHandler.hpp"
 #include "ViewConfig.hpp"
 
 
 TreeNodeModel::TreeNodeModel(QObject *parent) : QAbstractItemModel(parent)
 {
+	init();
+}
+
+void TreeNodeModel::init()
+{
 	for(unsigned int i=0; i < ServerHandler::servers().size(); i++)
 	{
-			servers_ << ServerHandler::servers().at(i);
-			rootNodes_[servers_.back()] = NULL;
+			ServerHandler *server=ServerHandler::servers().at(i);
+			initObserver(server);
+
+			servers_ << server;
+			rootNodes_[server] = NULL;
 	}
 }
+
+void TreeNodeModel::initObserver(ServerHandler* server)
+{
+	defs_ptr d = server->defs();
+	if(d == NULL)
+		return;
+
+	const std::vector<suite_ptr> &suites = d->suiteVec();
+	for(unsigned int i=0; i < suites.size();i++)
+	{
+		ChangeMgrSingleton::instance()->attach(suites.at(i).get(),this);
+
+		std::set<Node*> nodes;
+		suites.at(i)->allChildren(nodes);
+		for(std::set<Node*>::iterator it=nodes.begin(); it != nodes.end(); it++)
+			ChangeMgrSingleton::instance()->attach((*it),this);
+
+	}
+}
+
+void TreeNodeModel::clean()
+{
+	servers_.clear();
+	rootNodes_.clear();
+}
+
+void TreeNodeModel::reload()
+{
+	beginResetModel();
+	clean();
+	init();
+	endResetModel();
+}
+
 
 bool TreeNodeModel::hasData() const
 {
@@ -118,6 +162,15 @@ int TreeNodeModel::rowCount( const QModelIndex& parent) const
 	return 0;
 }
 
+Qt::ItemFlags TreeNodeModel::flags ( const QModelIndex & index) const
+{
+	Qt::ItemFlags defaultFlags;
+
+	defaultFlags=Qt::ItemIsEnabled | Qt::ItemIsSelectable;
+
+	return defaultFlags;
+}
+
 QVariant TreeNodeModel::data( const QModelIndex& index, int role ) const
 {
 	//Data lookup can be costly so we immediately return a default value for all
@@ -164,8 +217,8 @@ QVariant TreeNodeModel::nodeData(const QModelIndex& index, int role) const
 	{
 		switch(index.column())
 		{
-		case 0: return QString::fromStdString(node->name());
-		case 1: return ViewConfig::Instance()->stateName(node->dstate());
+		case 0:	 return QString::fromStdString(node->name());
+		case 1:  return ViewConfig::Instance()->stateName(node->dstate());
 		case 2: return QString::fromStdString(node->absNodePath());
 		default: return QVariant();
 		}
@@ -235,6 +288,7 @@ QModelIndex TreeNodeModel::index( int row, int column, const QModelIndex & paren
 			{
 				if(Node *suite=server->suiteAt(row))
 				{
+					//ChangeMgrSingleton::instance()->attach(suite,this);
 					return createIndex(row,column,suite);
 				}
 				else
@@ -247,7 +301,8 @@ QModelIndex TreeNodeModel::index( int row, int column, const QModelIndex & paren
 				Node* parentNode=indexToNode(parent);
 				if(Node *n=ServerHandler::immediateChildAt(parentNode,row))
 				{
-						return createIndex(row,column,n);
+					//ChangeMgrSingleton::instance()->attach(n,this);
+					return createIndex(row,column,n);
 
 				}
 				else
@@ -382,18 +437,64 @@ ViewNodeInfo_ptr TreeNodeModel::nodeInfo(const QModelIndex& index) const
 }
 
 
-QModelIndex TreeNodeModel::indexFromNode(Node* node) const
+QModelIndex TreeNodeModel::nodeToIndex(Node* node, int column) const
 {
-	/*if(node != 0 && node->parent() != 0)
+	if(!node)
+		return QModelIndex();
+
+	if(node->parent() != 0)
 	{
-		int row=node->parent()->children().indexOf(node);
+		int row=ServerHandler::indexOfImmediateChild(node);
 		if(row != -1)
 		{
-			return createIndex(row,0,node);
+					return createIndex(row,column,node);
 		}
-	}*/
+	}
+	else
+	{
+			if(ServerHandler* server=ServerHandler::find(node))
+			{
+				int row=server->indexOfSuite(node);
+				if(row != -1)
+						return createIndex(row,column,node);
+			}
+	}
 
 	return QModelIndex();
+}
+
+
+void TreeNodeModel::update(const Node* node, const std::vector<ecf::Aspect::Type>& types)
+{
+	if(node==NULL)
+		return;
+
+	qDebug() << "observer is called" << QString::fromStdString(node->name());
+	for(unsigned int i=0; i < types.size(); i++)
+		qDebug() << "  type:" << types.at(i);
+
+	Node* nc=const_cast<Node*>(node);
+
+	QModelIndex index1=nodeToIndex(nc,0);
+	QModelIndex index2=nodeToIndex(nc,2);
+
+	Node *nd1=indexToNode(index1);
+	Node *nd2=indexToNode(index2);
+
+	//qDebug() << "indexes" << index1 << index2;
+	//qDebug() << "index pointers " << index1.internalPointer() << index2.internalPointer();
+	qDebug() << "    --->" << QString::fromStdString(nd1->name()) << QString::fromStdString(nd2->name());
+
+	emit dataChanged(index1,index2);
+}
+
+TreeNodeFilterModel::TreeNodeFilterModel(QObject *parent) : QSortFilterProxyModel(parent)
+{
+}
+
+bool TreeNodeFilterModel::filterAcceptsRow(int,const QModelIndex &) const
+{
+	return true;
 }
 
 

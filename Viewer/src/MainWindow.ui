@@ -90,6 +90,8 @@
    </attribute>
    <addaction name="actionTreeView"/>
    <addaction name="actionTableView"/>
+   <addaction name="actionRefresh"/>
+   <addaction name="actionReset"/>
   </widget>
   <action name="actionClose">
    <property name="icon">
@@ -166,6 +168,29 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+2</string>
+   </property>
+  </action>
+  <action name="actionRefresh">
+   <property name="icon">
+    <iconset resource="viewer.qrc">
+     <normaloff>:/viewer/images/reload.svg</normaloff>:/viewer/images/reload.svg</iconset>
+   </property>
+   <property name="text">
+    <string>Refresh</string>
+   </property>
+   <property name="toolTip">
+    <string>Refresh</string>
+   </property>
+   <property name="shortcut">
+    <string>F5</string>
+   </property>
+  </action>
+  <action name="actionReset">
+   <property name="text">
+    <string>actionReset</string>
+   </property>
+   <property name="toolTip">
+    <string>Reset</string>
    </property>
   </action>
  </widget>

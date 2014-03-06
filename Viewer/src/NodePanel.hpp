@@ -31,6 +31,7 @@ public:
 	NodeWidget* addWidget(QString);
 	void addWidget();
 	void resetWidgets(QStringList);
+	void reload();
 	void writeSettings(QSettings &);
 	void readSettings(QSettings &);
 
@@ -39,7 +40,6 @@ public slots:
 
 	//void slotIconCommand(QString,IconObjectH);
 	//void slotDesktopCommand(QString,QPoint);
-	void slotReload(bool);
 	void slotNewTab();
 	//void slotNewWindow(bool);
 

@@ -13,6 +13,7 @@
 #include "ClientInvoker.hpp"
 #include "Str.hpp"
 #include "ArgvCreator.hpp"
+#include "MainWindow.hpp"
 
 #include <iostream>
 
@@ -95,6 +96,22 @@ Node* ServerHandler::suiteAt(int pos) const
 	return NULL;
 }
 
+int ServerHandler::indexOfSuite(Node* node)
+{
+	defs_ptr d = defs();
+	if(d != NULL)
+	{
+			const std::vector<suite_ptr> &suites = d->suiteVec();
+			for(unsigned int i=0; i < suites.size(); i++)
+					if(suites.at(i).get() == node)
+							return i;
+		}
+
+	return -1;
+
+
+}
+
 Node* ServerHandler::immediateChildAt(Node *parent,int pos)
 {
 	if(!parent || pos <0) return NULL;
@@ -123,6 +140,28 @@ int ServerHandler::numOfImmediateChildren(Node *node)
 	return static_cast<int>(nodes.size());
 }
 
+int ServerHandler::indexOfImmediateChild(Node *node)
+{
+	if(!node) return 0;
+
+	std::vector<node_ptr> nodes;
+	if(node->parent())
+	{
+			node->parent()->immediateChildren(nodes);
+			for(unsigned int i=0; i < nodes.size(); i++)
+				if(nodes.at(i).get() == node)
+						return i;
+	}
+
+	return -1;
+}
+
+void ServerHandler::updateAll()
+{
+	for(std::vector<ServerHandler*>::const_iterator it=servers_.begin(); it != servers_.end();it++)
+			(*it)->update();
+}
+
 
 // see view/host.cc / ehost::update() for full code
 int ServerHandler::update()
@@ -149,6 +188,8 @@ int ServerHandler::update()
 	{
 		case ServerReply::NO_NEWS:
 			std::cout << "No news from server" << std::endl;
+			setUpdatingStatus(false);
+			//MainWindow::reload();
 			return 0;
 			break;
 
@@ -156,6 +197,8 @@ int ServerHandler::update()
 
 		case ServerReply::NEWS:
 			client_->sync_local();
+			setUpdatingStatus(false);
+			//MainWindow::reload();
 			return 0;
 			break;
 
@@ -164,7 +207,7 @@ int ServerHandler::update()
 			break;
 	}
 
-
+	//MainWindow::reload();
 
 /*
       switch ( client_.server_reply().get_news() ) {
@@ -218,6 +261,8 @@ int ServerHandler::update()
       gui::message("host::news-error: %s",e.what());
       XECFDEBUG std::cerr << "# host::news-error: " << e.what() << "\n";
    }*/
+
+   setUpdatingStatus(false);
    return err;
 }
 

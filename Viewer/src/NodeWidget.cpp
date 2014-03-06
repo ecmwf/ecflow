@@ -107,6 +107,8 @@ QString NodeWidget::currentFolderName()
 void NodeWidget::reload()
 {
 	//MvQFolderWatcher::reload(this);
+	views_->currentBase()->reload();
+
 }
 
 //------------------------

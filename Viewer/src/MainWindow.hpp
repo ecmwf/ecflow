@@ -36,12 +36,15 @@ public:
     static void showWindows();
     static void openWindow(QString id,QWidget *fromW=0);
     static void openWindow(QStringList id,QWidget *fromW=0);
+    static void reload();
 
 protected slots:
 	void on_actionNewTab_triggered();
 	void on_actionNewWindow_triggered();
 	void on_actionClose_triggered();
 	void on_actionQuit_triggered();
+	void on_actionRefresh_triggered();
+	void on_actionReset_triggered();
 	void slotViewMode(QAction*);
 	void slotCurrentChangedInPanel();
 
@@ -50,6 +53,7 @@ private:
     void closeEvent(QCloseEvent*);
 
     void syncViewModeAg(Viewer::ViewMode);
+    void reloadContents();
 
     void writeSettings(QSettings &settings);
     void readSettings(QSettings &settings);

@@ -40,6 +40,19 @@ TableNodeView::TableNodeView(QString ,QWidget* parent) : QTreeView(parent)
 
 		actionHandler_=new ActionHandler(this);
 
+
+		setRootIsDecorated(false);
+		setAllColumnsShowFocus(true);
+		setUniformRowHeights(true);
+		setMouseTracking(true);
+		setSelectionMode(QAbstractItemView::ExtendedSelection);
+
+		setDragEnabled(true);
+		setAcceptDrops(true);
+		setDropIndicatorShown(true);
+	    setDragDropMode(QAbstractItemView::DragDrop);
+
+
 		expandAll();
 
 

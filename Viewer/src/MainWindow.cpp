@@ -19,6 +19,7 @@
 
 #include "MainWindow.hpp"
 #include "NodePanel.hpp"
+#include "ServerHandler.hpp"
 
 //Initialise static variables
 bool MainWindow::quitStarted_=false;
@@ -29,6 +30,7 @@ MainWindow::MainWindow(QStringList idLst,QWidget *parent) : QMainWindow(parent)
 {
     setupUi(this);
     
+    setAttribute(Qt::WA_DeleteOnClose);
 
     //Create action group for view mode
     //The order of the actions in the group must reflect the order in
@@ -107,6 +109,17 @@ void MainWindow::on_actionQuit_triggered()
 	MainWindow::aboutToQuit(this);
 }
 
+void MainWindow::on_actionRefresh_triggered()
+{
+	ServerHandler::updateAll();
+}
+
+void MainWindow::on_actionReset_triggered()
+{
+	ServerHandler::updateAll();
+	MainWindow::reload();
+
+}
 
 void MainWindow::slotViewMode(QAction* action)
 {
@@ -136,6 +149,11 @@ void MainWindow::syncViewModeAg(Viewer::ViewMode mode)
 	int index=static_cast<int>(mode);
 	if(index >=0 && index < viewModeAg_->actions().count())
 		viewModeAg_->actions().at(index)->setChecked(true);
+}
+
+void MainWindow::reloadContents()
+{
+	nodePanel_->reload();
 }
 
 
@@ -390,6 +408,15 @@ void MainWindow::init()
 	}
 
 }
+
+void MainWindow::reload()
+{
+	foreach(MainWindow *w,windows_)
+	{
+		w->reloadContents();
+	}
+}
+
 
 void MainWindow::save(MainWindow *topWin)
 {

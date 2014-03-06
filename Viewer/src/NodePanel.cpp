@@ -217,11 +217,18 @@ Viewer::FolderViewMode NodePanel::viewMode()
 //
 //==========================================================
 
-void NodePanel::slotReload(bool)
+void NodePanel::reload()
 {
-	NodeWidget *w=currentNodeWidget();
-	if(w) w->reload();
+	for(int i=0; i < count(); i++)
+	{
+		if(QWidget *w=widget(i))
+		{
+			if(NodeWidget* nw=static_cast<NodeWidget*>(w))
+				nw->reload();
+		}
+	}
 }
+
 
 //==========================================================
 //
