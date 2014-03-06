@@ -35,7 +35,7 @@ void CompoundMemento::incremental_sync(defs_ptr client_def) const
 
 	node_ptr node = client_def->findAbsNode(absNodePath_);
  	if (!node.get()) {
- 		if ( absNodePath_ != Str::ROOT_PATH()) throw std::runtime_error("CompoundMemento::sync: could not find path " + absNodePath_ );
+ 		if ( absNodePath_ != Str::ROOT_PATH()) throw std::runtime_error("CompoundMemento::incremental_sync: could not find path " + absNodePath_ );
 
 #ifdef DEBUG_MEMENTO
  		cout << "CompoundMemento::incremental_sync(defs_ptr client_def)  ROOT_PATH \n";
