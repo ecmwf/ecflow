@@ -7,8 +7,12 @@ else
    # Run as REMOTE_HOST. i.e %REMOTE_HOST:%
    # ==========================================================
    
-   cd %BOOST_DIR%
-   rm -rf %BOOST_VERSION% || true ;
+   if [[ -e %BOOST_DIR% ]]; then
+      cd %BOOST_DIR%
+      rm -rf %BOOST_VERSION% || true ;
+   else
+      mkdir -p %BOOST_DIR%
+   fi
 fi
 
 %include <tail.h>
