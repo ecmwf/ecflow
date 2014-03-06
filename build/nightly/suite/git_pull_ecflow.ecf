@@ -15,7 +15,7 @@ if [[ %SET_TO_TEST_SCRIPT% = true ]] ; then
 else
 
    # Update by pulling branch. used 'master' when making a release otherwise use 'develop'
-   /usr/local/apps/git/current/bin/git pull origin %ECFLOW_GIT_BRANCH%   
+   %GIT% pull origin %ECFLOW_GIT_BRANCH%   
 fi
 
 %include <tail.h>

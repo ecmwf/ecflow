@@ -8,7 +8,7 @@ if [[ "%LOCAL_HOST:%" != ""  ]] ; then
    cd %WK%
       
    # Update by pulling from the master repository
-   /usr/local/apps/git/current/bin/git checkout %ECFLOW_GIT_BRANCH%   
+   %GIT% checkout %ECFLOW_GIT_BRANCH%   
       
 else
    # ======================================================================
@@ -20,11 +20,11 @@ else
    rm -rf ecflow
    
    # clone from stash repository, this will default to the master branch
-   /usr/local/apps/git/current/bin/git clone ssh://git@software.ecmwf.int:7999/ecflow/ecflow.git
+   %GIT% clone ssh://git@software.ecmwf.int:7999/ecflow/ecflow.git
    
    # Checkout the branch  'release/<number>' when making a release otherwise use 'develop'
    cd ecflow
-   /usr/local/apps/git/current/bin/git checkout %ECFLOW_GIT_BRANCH%   
+   %GIT% checkout %ECFLOW_GIT_BRANCH%   
 fi
 
 %include <tail.h>

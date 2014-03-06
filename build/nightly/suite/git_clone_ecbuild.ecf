@@ -9,7 +9,7 @@ if [[ "%LOCAL_HOST:%" != ""  ]] ; then
    cd ../ecbuild
    
    # Update by pulling from the master repository
-   /usr/local/apps/git/current/bin/git checkout %ECBUILD_GIT_BRANCH%   
+   %GIT% checkout %ECBUILD_GIT_BRANCH%   
       
 else
    # ======================================================================
@@ -22,10 +22,10 @@ else
    # Note: when we clone, the default branch is master.
    # ===============================================================================
    rm -rf ecbuild
-   /usr/local/apps/git/current/bin/git clone ssh://git@software.ecmwf.int:7999/ecsdk/ecbuild.git
+   %GIT% clone ssh://git@software.ecmwf.int:7999/ecsdk/ecbuild.git
    
    cd ecbuild   
-   /usr/local/apps/git/current/bin/git checkout  %ECBUILD_GIT_BRANCH%   
+   %GIT% checkout  %ECBUILD_GIT_BRANCH%   
 fi
 
 %include <tail.h>

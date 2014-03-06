@@ -130,8 +130,8 @@ def add_opensuse113_variables( opensuse113 ):
 def add_remote_opensuse131_variables( opensuse131 ):
     opensuse131.add_variable("ECF_KILL_CMD","ssh  %USER%@%REMOTE_HOST% \"kill -15 %ECF_RID%\"") 
     opensuse131.add_variable("ECF_JOB_CMD","ssh  %USER%@%REMOTE_HOST% '%ECF_JOB% > %ECF_JOBOUT%  2>&1'")
-    opensuse131.add_variable("COMPILER_TEST_PATH","gcc-4.5/$mode")
-    opensuse131.add_variable("COMPILER_VERSION","gcc-4.5")
+    opensuse131.add_variable("COMPILER_TEST_PATH","gcc-4.8/$mode")
+    opensuse131.add_variable("COMPILER_VERSION","gcc-4.8")
     opensuse131.add_variable("TOOLSET","gcc")
     opensuse131.add_variable("BOOTSTRAP_TOOLSET","gcc")
     opensuse131.add_variable("REMOTE_COPY","scp")
@@ -453,7 +453,7 @@ def build_opensuse113( parent ) :
 def build_opensuse131( parent ) :
     opensuse131 = parent.add_family("opensuse131")
     add_opensuse131_variables(opensuse131)
-    add_remote_opensuse113_variables(opensuse131)
+    add_remote_opensuse131_variables(opensuse131)
     add_git_tasks( opensuse131 )
     add_build_and_test_tasks( opensuse131 )
     
@@ -639,6 +639,8 @@ def add_suite_variables( suite ):
     suite.add_variable("WK",WK)
     suite.add_variable("BOOST_DIR","/var/tmp/ma0/boost")
     suite.add_variable("PYTHON_VERSION","2.7")
+    suite.add_variable("CMAKE","/usr/local/apps/cmake/current/bin/cmake")
+    suite.add_variable("GIT","/usr/local/apps/git/current/bin/git")
     suite.add_variable("SET_TO_TEST_SCRIPT","false") 
     suite.add_variable("BUILD_ECFLOWVIEW","true")
     suite.add_variable("ECFLOW_GIT_BRANCH","develop")  # when makeing a relase switch to release/<release version>, otherwise develop

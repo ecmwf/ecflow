@@ -92,24 +92,24 @@ else
          fi
          
          if [[ %TOOLSET% = intel ]]; then
-            /usr/local/apps/cmake/current/bin/cmake ../../  \
+            %CMAKE% ../../  \
             -DCMAKE_BUILD_TYPE=$cmake_build_type \
             -DCMAKE_INSTALL_PREFIX=/usr/local/apps/ecflow/$ecflow_version \
             -DCMAKE_C_COMPILER=icc  -DCMAKE_CXX_COMPILER=icpc 
          elif [[ %TOOLSET% = clang ]]; then
-            /usr/local/apps/cmake/current/bin/cmake ../../  \
+            %CMAKE% ../../  \
             -DCMAKE_BUILD_TYPE=$cmake_build_type \
             -DCMAKE_INSTALL_PREFIX=/usr/local/apps/ecflow/$ecflow_version \
             -DCMAKE_C_COMPILER=clang  -DCMAKE_CXX_COMPILER=clang++       
          elif [[ %TOOLSET% = vacpp ]]; then
             # use xlC_r as that will automatically add -lpthreads, which is used some of boost libs
-            /usr/local/apps/cmake/current/bin/cmake ../../  \
+            %CMAKE% ../../  \
             -DCMAKE_BUILD_TYPE=$cmake_build_type \
             -DCMAKE_INSTALL_PREFIX=/usr/local/apps/ecflow/$ecflow_version \
             -DCMAKE_C_COMPILER=xlC  -DCMAKE_CXX_COMPILER=xlC_r \ 
             -DPYTHON_LIBRARIES=/usr/local/apps/python/2.7.2-01/lib/python2.7/config/
          else
-            /usr/local/apps/cmake/current/bin/cmake ../../  \
+            %CMAKE% ../../  \
             -DCMAKE_BUILD_TYPE=$cmake_build_type \
             -DCMAKE_INSTALL_PREFIX=/usr/local/apps/ecflow/$ecflow_version
          fi
@@ -118,6 +118,7 @@ else
       if [[ %TOOLSET% = vacpp ]]; then
          # Hack required for python extension
          export LDSHARED="xlC_r -G -Wl,-bI:/usr/local/apps/python/2.7.2-01/lib/python2.7/config/python.exp"
+         export LD_SHARED="xlC_r -G -Wl,-bI:/usr/local/apps/python/2.7.2-01/lib/python2.7/config/python.exp"
       fi
 
       if [[ %ECF_TRYNO% -eq 1 ]] ; then

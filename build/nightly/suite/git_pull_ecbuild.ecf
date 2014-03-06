@@ -17,7 +17,7 @@ else
    cd ../ecbuild
 
    # Update by pulling branch. used 'master' when making a release otherwise use 'develop'
-   /usr/local/apps/git/current/bin/git pull origin %ECBUILD_GIT_BRANCH%   
+   %GIT% pull origin %ECBUILD_GIT_BRANCH%   
 fi
 
 %include <tail.h>
