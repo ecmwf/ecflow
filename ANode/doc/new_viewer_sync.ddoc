@@ -1,0 +1,56 @@
+Changes to support syncing with the new viewer
+===============================================
+
+Requirements:
+  o Need to attach new observer for Defs only.
+    This implies the update mechanism will supply the Node the changed and Aspects
+  o Need to attach mutiple observers
+  
+Changes required:
+  o No longer Need ChangeMgrSingleton, we will add observers directly to the Defs.
+  o Need to store aspects on the Defs. 
+  o To avoid overhead of obtained the defs
+    for each memento, we will store a defs pointer, on the memento for eacy access.
+ 
+Issues:
+  o The biggest issue to notification when a node is deleted.
+    i.e on the client side each delete of task,familiy,suite, will need
+    traverse up the hieraarchy to get th defs, in order to do the notification.
+    
+    Hence this wll affect all deletion of Defs, and not just the GUI. defs.
+   
+    o One time traverse the defs, and create a defs ptr cache on a Node ?
+      This need only be done for the GUI/Defs.
+      What if new Nodes added ? i.e full sync will need to traverse each time.
+      Could be hidden behind defs() function, as a cache.
+      
+Implementation:
+
+Defs:
+   void attach(DefsObserver*);      
+   void dettach(DefsObserver*);  
+   void notify(Defs* theChanged, Node* theChanged,  const std::vector<ecf::Aspect::Type>&)
+   void notify_delete(Defs*);
+   void notify_delete(Node*); // This is going to expensive ?
+   
+   /// The cummulated aspect are sent, when we do a the real notification
+   void add_aspect(ecf::Aspect::Type aspect) { aspects_vec_.push_back(aspect) ;}
+   void clear_aspect() { aspects_vec_.clear();}
+   
+private:
+   std::vector<ecf::Aspect::Type> aspects_vec_;
+   
+----------------------------------------------------------------------   
+   
+class DefsObserver {
+public:
+   virtual ~DefsObserver() {}
+
+   virtual void update(const Defs*, const Node*, const std::vector<ecf::Aspect::Type>&) = 0;
+
+   /// After this call, the node will be deleted, hence observers must *NOT* use the pointers
+   virtual void update_delete(const Node*) {}
+   virtual void update_delete(const Defs*) {}
+};
+    
+-----------------------------------------------------------------------
