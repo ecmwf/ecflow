@@ -12,7 +12,8 @@ on the following platforms:
 
    o linux 10.3      (garm)
    o linux 11.3      (anubis/opensuse113)
-   o redhat/RHEL 6.4 (ecgb)
+   o linux 13.1      (opensuse131)
+   o redhat/RHEL 6.4 (ecgb,sappa,sappb)
    o linux cluster   (lxa/lxb)
    o HPUX            (itanium)
    o AIX/ibm_power7  (c2a/c2b)

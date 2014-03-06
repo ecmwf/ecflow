@@ -127,6 +127,22 @@ def add_opensuse113_variables( opensuse113 ):
     opensuse113.add_variable("ARCH","opensuse113")
     opensuse113.add_variable("SITE_CONFIG","$WK/build/site_config/site-config-Linux64.jam")
 
+def add_remote_opensuse131_variables( opensuse131 ):
+    opensuse131.add_variable("ECF_KILL_CMD","ssh  %USER%@%REMOTE_HOST% \"kill -15 %ECF_RID%\"") 
+    opensuse131.add_variable("ECF_JOB_CMD","ssh  %USER%@%REMOTE_HOST% '%ECF_JOB% > %ECF_JOBOUT%  2>&1'")
+    opensuse131.add_variable("COMPILER_TEST_PATH","gcc-4.5/$mode")
+    opensuse131.add_variable("COMPILER_VERSION","gcc-4.5")
+    opensuse131.add_variable("TOOLSET","gcc")
+    opensuse131.add_variable("BOOTSTRAP_TOOLSET","gcc")
+    opensuse131.add_variable("REMOTE_COPY","scp")
+
+def add_opensuse131_variables( opensuse131 ):
+    opensuse131.add_variable("REMOTE_HOST","opensuse131")
+    opensuse131.add_variable("ROOT_WK","/vol/ecf/opensuse131")
+    opensuse131.add_variable("BOOST_DIR","/vol/ecf/opensuse131/boost")
+    opensuse131.add_variable("ARCH","opensuse131")
+    opensuse131.add_variable("SITE_CONFIG","$WK/build/site_config/site-config-Linux64.jam")
+
 def add_cray_gnu_compiler_variables( cray_gnu ):
     cray_gnu.add_variable("COMPILER_TEST_PATH","gcc-4.6.3/$mode")
     cray_gnu.add_variable("COMPILER_VERSION","gcc-4.6.3")
@@ -434,6 +450,13 @@ def build_opensuse113( parent ) :
     add_git_tasks( opensuse113 )
     add_build_and_test_tasks( opensuse113 )
     
+def build_opensuse131( parent ) :
+    opensuse131 = parent.add_family("opensuse131")
+    add_opensuse131_variables(opensuse131)
+    add_remote_opensuse113_variables(opensuse131)
+    add_git_tasks( opensuse131 )
+    add_build_and_test_tasks( opensuse131 )
+    
 def build_redhat( parent ) :
     redhat = parent.add_family("redhat")
     add_redhat_variables(redhat)
@@ -545,12 +568,16 @@ def build_boost( boost ):
     add_opensuse113_variables(family)
     add_remote_opensuse113_variables(family)
     add_boost_tasks( family )
+    
+    family = boost.add_family("opensuse131")
+    add_opensuse131_variables(family)
+    add_remote_opensuse131_variables(family)
+    add_boost_tasks( family )
 
     family = boost.add_family("redhat")
     add_redhat_variables(family)
     add_remote_redhat_variables(family)
     add_boost_tasks( family )
-    
     
     family = boost.add_family("cray")
     add_cray_variables(family)
@@ -676,6 +703,7 @@ with defs.add_suite("suite") as suite:
             build_linux_64( remote )
             build_linux_64_intel( remote )
             build_opensuse113( remote )
+            build_opensuse131( remote )
             build_redhat( remote )
             build_cray( remote )
             build_opensuse103( remote )
