@@ -142,6 +142,7 @@ def add_opensuse131_variables( opensuse131 ):
     opensuse131.add_variable("BOOST_DIR","/vol/ecf/opensuse131/boost")
     opensuse131.add_variable("ARCH","opensuse131")
     opensuse131.add_variable("SITE_CONFIG","$WK/build/site_config/site-config-Linux64.jam")
+    opensuse131.add_variable("CUSTOM_BJAM_ARGS","c++-template-depth=512")   # needed for gcc 4.8.1
 
 def add_cray_gnu_compiler_variables( cray_gnu ):
     cray_gnu.add_variable("COMPILER_TEST_PATH","gcc-4.6.3/$mode")
