@@ -702,7 +702,7 @@ with defs.add_suite("suite") as suite:
             build_localhost_clang( local )
 
         with build.add_family("remote") as remote:
-            remote.add_variable("BUILD_TYPE","cmake")
+            remote.add_variable("BUILD_TYPE","boost")  # choose between [  cmake | boost ]
             build_linux_64( remote )
             build_linux_64_intel( remote )
             build_opensuse113( remote )
