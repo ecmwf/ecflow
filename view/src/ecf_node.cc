@@ -217,7 +217,7 @@ void ecf_concrete_node<Defs>::why(std::ostream &f) const
 }
 
 #define UNLINK(T) template<> void ecf_concrete_node<T>::unlink(bool detach) \
-{ if (!owner_) return; if (detach) ChangeMgrSingleton::instance()->detach(owner_); owner_ = 0x0; }
+{ if (!owner_) return; if (detach) ChangeMgrSingleton::instance()->detach(owner_,this); owner_ = 0x0; }
 UNLINK(Alias)
 UNLINK(Task)
 UNLINK(Family)

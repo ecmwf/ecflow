@@ -18,7 +18,10 @@
 #include "Node.hpp"
 #include "Defs.hpp"
 
-//#define DEBUG_ME 1
+using namespace std;
+
+//#define DEBUG_DEFS 1
+//#define DEBUG_NODE 1
 
 ChangeMgrSingleton* ChangeMgrSingleton::instance_ =  NULL;
 
@@ -31,140 +34,173 @@ ChangeMgrSingleton* ChangeMgrSingleton::instance()
 ChangeMgrSingleton* ChangeMgrSingleton::exists() { return instance_; }
 
 
-void ChangeMgrSingleton::attach(Node* n,AbstractObserver* a)
+void ChangeMgrSingleton::attach(Node* node,AbstractObserver* a)
 {
-	assert( n != NULL);
-	assert( a != NULL);
-	map_.insert( std::make_pair(n,a) );
+	assert( node );
+	assert( a );
+
+	node_obs_map_.insert(std::make_pair(node,a));
+
+#ifdef DEBUG_NODE
+	cout << "ChangeMgrSingleton::attach(Node*,AbstractObserver*) " << node->absNodePath() << "  obs " << a << " node_obs_map_.size() " << node_obs_map_.size() << "\n";
+#endif
 }
 
-void ChangeMgrSingleton::attach(Defs* n,AbstractObserver* a)
+void ChangeMgrSingleton::attach(Defs* defs,AbstractObserver* a)
 {
-	assert( n != NULL);
-	assert( a != NULL);
-	defs_map_.insert( std::make_pair(n,a) );
+	assert( defs );
+	assert( a );
+	defs_obs_vec_.push_back(std::make_pair(defs,a));
+
+#ifdef DEBUG_DEFS
+   cout << "ChangeMgrSingleton::attach(Defs*,AbstractObserver*) obs " << a << " defs_obs_vec_.size() " << defs_obs_vec_.size() << "\n";
+#endif
 }
 
-void ChangeMgrSingleton::detach(Node* n)
+void ChangeMgrSingleton::detach(Node* node,AbstractObserver* a)
 {
-	assert( n != NULL);
-	NodeObserverMap_t::iterator i = map_.find(n);
-	if (i != map_.end()) {
-		map_.erase(i);
-		return;
-	}
-#ifdef DEBUG_ME
-	if (!map_.empty()) {
-		if (n) std::cout << "ChangeMgrSingleton::detach could not detach node " << n->debugNodePath() << "\n";
-		else   std::cout << "ChangeMgrSingleton::detach given a NULL Node\n";
+   assert( node);
+   assert( a );
+
+   // equal_range(b) returns pair<iterator,iterator> representing the range of elements with key(Node*)
+   typedef multimap<Node*, AbstractObserver*>::iterator iterator;
+   std::pair<iterator, iterator> iter_pair = node_obs_map_.equal_range(node);
+
+   // Loop through range of maps of key Node
+   for (iterator it = iter_pair.first; it != iter_pair.second; ++it) {
+       if (it->second == a) {
+          node_obs_map_.erase(it);
+          return;
+       }
+   }
+
+#ifdef DEBUG_NODE
+	if (!node_obs_map_.empty()) {
+		if (node) std::cout << "ChangeMgrSingleton::detach could not detach node " << node->debugNodePath() << "\n";
+		else     std::cout << "ChangeMgrSingleton::detach given a NULL Node\n";
 	}
 #endif
 }
 
-void ChangeMgrSingleton::detach(Defs* n)
+void ChangeMgrSingleton::detach(Defs* defs,AbstractObserver* a)
 {
-	assert( n != NULL);
-	DefsObserverMap_t::iterator i = defs_map_.find(n);
-	if (i != defs_map_.end()) {
-		defs_map_.erase(i);
-		return;
-	}
-#ifdef DEBUG_ME
-	if (!defs_map_.empty()) {
-		if (n) std::cout << "ChangeMgrSingleton::detach(Defs*) Error: could not detach Defs ??? \n";
-		else   std::cout << "ChangeMgrSingleton::detach(Defs*) Error: given a NULL Defs ???\n";
-	}
+   assert( defs );
+   assert( a );
+
+   std::vector< std::pair<Defs*,AbstractObserver*> >::iterator i;
+   for(i = defs_obs_vec_.begin(); i != defs_obs_vec_.end(); ++i) {
+      if ((*i).first == defs && (*i).second == a) {
+         defs_obs_vec_.erase(i);
+
+#ifdef DEBUG_DEFS
+   cout << "ChangeMgrSingleton::detach(Defs*,AbstractObserver*)  obs " << a << " defs_obs_vec_.size()= " << defs_obs_vec_.size() << "\n";
 #endif
+         return;
+      }
+   }
+
+   if (!defs_obs_vec_.empty()) {
+      if (defs) std::cout << "ChangeMgrSingleton::detach(Defs*) Error: could not detach Defs, was it observred ?\n";
+      else      std::cout << "ChangeMgrSingleton::detach(Defs*) Error: given a NULL Defs ???\n";
+   }
 }
 
-void ChangeMgrSingleton::notify(node_ptr n)
+void ChangeMgrSingleton::notify(node_ptr node)
 {
-	NodeObserverMap_t::iterator i = map_.find(n.get());
-	if (i != map_.end()) {
-		(*i).second->update(n.get(),aspects_vec_);
-		notify_end();
-		return;
-	}
+   assert(node.get());
+
+#ifdef DEBUG_NODE
+   cout << "ChangeMgrSingleton::notify(Node*)";
+   if (n) cout << " node " << node->absNodePath() << "\n";
+   else   cout << " **NULL** node\n";
+#endif
+
+   // equal_range(b) returns pair<iterator,iterator> representing the range of element with key node
+   typedef multimap<Node*, AbstractObserver*>::iterator iterator;
+   std::pair<iterator, iterator> iter_pair = node_obs_map_.equal_range(node.get());
+
+   // Loop through range of maps of key Node
+   for (iterator it = iter_pair.first; it != iter_pair.second; ++it) {
+      it->second->update(node.get(),aspects_vec_);
+   }
+
 	// ************************************************************************
 	// The GUI only attach's to nodes that are displayed. WE may well get
 	// notification to nodes that are not attached. Hence this is not an error
 	// ************************************************************************
-
-#ifdef DEBUG_ME
-	if (!map_.empty()) {
-	   /// Note: we don't deference the pointer, it may be corrupted ???
-		if (n.get()) std::cout << "ChangeMgrSingleton::notify : received notification for node " << n->debugNodePath() << " thats not being observed\n";
-		else         std::cout << "ChangeMgrSingleton::notify : Error: given a NULL Node\n";
-	}
-#endif
 }
 
 void ChangeMgrSingleton::notify(defs_ptr defs)
 {
-	DefsObserverMap_t::iterator i = defs_map_.find(defs.get());
-	if (i != defs_map_.end()) {
-		(*i).second->update(defs.get(),aspects_vec_);
-      notify_end();
-		return;
-	}
-
-#ifdef DEBUG_ME
-	if (!defs_map_.empty()) {
-		if (defs.get()) std::cout << "ChangeMgrSingleton::notify could not notify Defs that is not being observed\n";
-		else            std::cout << "ChangeMgrSingleton::notify given a NULL defs\n";
-	}
+#ifdef DEBUG_DEFS
+   cout << "ChangeMgrSingleton::notify(Defs*)\n";
 #endif
+   assert(defs.get());
+   std::vector< std::pair<Defs*,AbstractObserver*> >::iterator i;
+   for(i = defs_obs_vec_.begin(); i != defs_obs_vec_.end(); ++i) {
+      if ((*i).first == defs.get()) {
+         (*i).second->update(defs.get(),aspects_vec_);
+      }
+   }
 }
 
-void ChangeMgrSingleton::notify_delete(Node* n)
+void ChangeMgrSingleton::notify_delete(Node* node)
 {
-   NodeObserverMap_t::iterator i = map_.find(n);
-   if (i != map_.end()) {
+#ifdef DEBUG_NODE
+   cout << "ChangeMgrSingleton::notify_delete(Node*)  node " << node->absNodePath() << "\n";
+#endif
 
-      /// This must call detach(Node*)
-      (*i).second->update_delete(n);
+   // equal_range(b) returns pair<iterator,iterator> representing the range of element with key node
+   typedef multimap<Node*, AbstractObserver*>::iterator iterator;
+   std::pair<iterator, iterator> iter_pair = node_obs_map_.equal_range(node);
 
-      /// Check to make sure that the Observer called detach
-      /// We can not call detach ourselves, since the the client needs to
-      /// call detach in the case where the graphical tree is destroyed by user
-      /// In this case the Subject/Node is being deleted.
-      assert(map_.find(n) == map_.end());
-
-      return;
+   // Loop through range of maps of key Node
+   // Client code should detach
+   for (iterator it = iter_pair.first; it != iter_pair.second; ++it) {
+      it->second->update_delete(node);
    }
 
-#ifdef DEBUG_ME
-   if (!map_.empty()) {
-      /// Its not safe to call debugNodePath()/absNodePath() since that will traverse the parent
-      /// This may not be safe during a delete.
-      if (n) std::cout << "ChangeMgrSingleton::notify_delete : Node is not observed : " << n->name() << "\n";
-      else   std::cout << "ChangeMgrSingleton::notify_delete : Error: given a NULL Node\n";
-   }
+   /// Check to make sure that derived Observer called detach
+   /// We can not call detach ourselves, since the the client needs to
+   /// call detach in the case where the graphical tree is destroyed by user
+   /// In this case the Subject/Node is being deleted.
+   assert(node_obs_map_.find(node) == node_obs_map_.end());
+
+#ifdef DEBUG_NODE
+   cout << "   ChangeMgrSingleton::notify_delete(Node*) node_obs_map_.size()= " << node_obs_map_.size() << "\n";
 #endif
 }
 
 void ChangeMgrSingleton::notify_delete(Defs* defs)
 {
-   DefsObserverMap_t::iterator i = defs_map_.find(defs);
-   if (i != defs_map_.end()) {
+#ifdef DEBUG_DEFS
+   cout << "ChangeMgrSingleton::notify_delete(Defs*)\n";
+#endif
+   assert(defs);
 
-      /// This must call detach(Defs*)
-      (*i).second->update_delete(defs);
+   // make a copy, so that observers avoid modifying the vector we are iterating over
+   std::vector< std::pair<Defs*,AbstractObserver*> > defs_obs_vec_copy = defs_obs_vec_;
 
-      /// Check to make sure that the Observer called detach
-      /// We can not call detach ourselves, since the the client needs to
-      /// call detach in the case where the graphical tree is destroyed by user
-      /// In this case the Subject/Node is being deleted.
-      assert(defs_map_.find(defs) == defs_map_.end());
+   std::vector< std::pair<Defs*,AbstractObserver*> >::iterator i;
+   for(i = defs_obs_vec_copy.begin(); i != defs_obs_vec_copy.end(); ++i) {
+      if ((*i).first == defs) {
 
-      return;
+         /// This must call ChangeMgrSingleton::detach(Defs* defs,AbstractObserver* a)
+         (*i).second->update_delete(defs);
+      }
    }
 
-#ifdef DEBUG_ME
-   if (!defs_map_.empty()) {
-      if (defs) std::cout << "ChangeMgrSingleton::notify_delete: Defs is not being observed:\n";
-      else      std::cout << "ChangeMgrSingleton::notify_delete given a NULL defs\n";
+   /// Check to make sure that the Observer called detach
+   /// We can not call detach ourselves, since the the client needs to
+   /// call detach in the case where the graphical tree is destroyed by user
+   /// In this case the Subject/Node is being deleted.
+   for(i = defs_obs_vec_.begin(); i != defs_obs_vec_.end(); ++i) {
+      if ((*i).first == defs) {
+         assert(false); // client code forgot to detach
+      }
    }
+#ifdef DEBUG_DEFS
+   cout << "   ChangeMgrSingleton::notify_delete(Defs*) defs_obs_vec_.size()= " << defs_obs_vec_.size() << "\n";
 #endif
 }
 

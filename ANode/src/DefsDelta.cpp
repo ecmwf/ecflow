@@ -13,14 +13,14 @@
 // Description :
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 #include <boost/bind.hpp>
-
 #include "DefsDelta.hpp"
+#include "ChangeMgrSingleton.hpp"
 using namespace std;
 
 //===============================================================
 // DefsDelta
 
-/// Defs delat can be re-used. reset all data members
+/// Defs delta can be re-used. reset all data members
 void DefsDelta::init(unsigned int client_state_change_no)
 {
 	client_state_change_no_ = client_state_change_no;
@@ -34,6 +34,10 @@ void DefsDelta::init(unsigned int client_state_change_no)
 bool DefsDelta::incremental_sync(defs_ptr client_def) const
 {
 	if (!client_def.get()) return false;
+
+   /// - Sets notification flag, so that observers can also query if they are in
+   ///   the middle of notification.
+   ChangeMgrStartNotification start_notification;
 
 	// Update the client defs with latest server *handle* based state change/modify number
 	// to keep pace with the state changes. Passed back later on, to get further changes

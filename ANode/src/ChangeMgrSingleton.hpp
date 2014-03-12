@@ -35,23 +35,22 @@ public:
 	// Returns the ChangeMgr singleton without creating it
    static ChangeMgrSingleton* exists();
 
-	/// Attach interest in incremental change to the node
+	/// Attach/detatch interest in incremental change
 	void attach(Node*,AbstractObserver*);
 	void attach(Defs*,AbstractObserver*);
+	void detach(Node*,AbstractObserver*);
+	void detach(Defs*,AbstractObserver*);
 
 	/// Used in debug:
-   size_t no_of_node_observers() const { return map_.size(); }
-   size_t no_of_def_observers() const { return defs_map_.size(); }
-
-	/// Detach interest in incremental changes to the node
-	void detach(Node*);
-	void detach(Defs*);
+   size_t no_of_node_observers() const { return node_obs_map_.size(); }
+   size_t no_of_def_observers() const { return defs_obs_vec_.size(); }
 
 	/// returns true if we are in a notification. Help client code to avoid infinite cycles
 	bool in_notification() const { return in_notification_;}
 
 	/// The cumulated aspect are sent, when we do a the real notification
-	void add_aspect(ecf::Aspect::Type aspect) { aspects_vec_.push_back(aspect) ;}
+   void add_aspect(ecf::Aspect::Type aspect) { aspects_vec_.push_back(aspect); }
+   void clear_aspects() { aspects_vec_.clear(); }
 
 	/// Notify observer of a incremental change to Node
 	/// Will return true for in_notification()
@@ -74,17 +73,16 @@ private:
 	ChangeMgrSingleton();
 	~ChangeMgrSingleton();
 
-   /// Start of notifications: We clear out an aspect:
+   /// Start of notifications:
    ///   Aspect sent upon  notify(node_ptr); notify(defs_ptr);
-   void notify_start() { in_notification_ = true; aspects_vec_.clear(); }
+   void notify_start() { in_notification_ = true; }
 	void notify_end() { in_notification_ = false; }
 
 private:
-	std::map<Node*,AbstractObserver*> map_;
-	typedef std::map<Node*,AbstractObserver*>  NodeObserverMap_t;
+	// Allow multiple observers per subject
+	std::multimap<Node*,AbstractObserver*> node_obs_map_;
 
-	std::map<Defs*,AbstractObserver*> defs_map_;
-	typedef std::map<Defs*,AbstractObserver*>  DefsObserverMap_t;
+	std::vector< std::pair<Defs*,AbstractObserver*> > defs_obs_vec_;
 
 	std::vector<ecf::Aspect::Type> aspects_vec_;
    static ChangeMgrSingleton* instance_;
