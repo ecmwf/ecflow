@@ -93,7 +93,7 @@ void ChangeMgrSingleton::detach(Defs* defs,AbstractObserver* a)
          defs_obs_vec_.erase(i);
 
 #ifdef DEBUG_DEFS
-   cout << "ChangeMgrSingleton::detach(Defs*,AbstractObserver*)  obs " << a << " defs_obs_vec_.size()= " << defs_obs_vec_.size() << "\n";
+         cout << "ChangeMgrSingleton::detach(Defs*,AbstractObserver*)  obs " << a << " defs_obs_vec_.size()= " << defs_obs_vec_.size() << "\n";
 #endif
          return;
       }

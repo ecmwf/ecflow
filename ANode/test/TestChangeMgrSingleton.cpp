@@ -79,8 +79,8 @@ BOOST_AUTO_TEST_CASE( test_change_mgr_singleton )
    }
 
    {
-      // Create node tree, Note using node_ptr can extend the life of the Node, hence we use
-      // scoping,
+      // Create node tree
+      // **** Note using node_ptr can extend the life of the Node, hence we use scoping ***
       Defs* theDefs = new Defs;
       std::vector<MyObserver*> obs_vec;
       {
@@ -116,7 +116,8 @@ BOOST_AUTO_TEST_CASE( test_change_mgr_singleton )
          }
       }
 
-      // At delete time make sure no node_ptr are in scope as they can, affect Node deletion
+      // make sure no node_ptr are in scope as they can *delay*
+      // the destructor to the end of the scope, and hence affect this test
       delete theDefs;
       BOOST_CHECK_MESSAGE(ChangeMgrSingleton::instance()->no_of_node_observers() == 0,"Expected no observer but found " << ChangeMgrSingleton::instance()->no_of_node_observers());
 
