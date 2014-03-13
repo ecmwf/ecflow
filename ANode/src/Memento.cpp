@@ -26,12 +26,10 @@ Memento::~Memento() {}
 // ===============================================================
 void CompoundMemento::incremental_sync(defs_ptr client_def) const
 {
-   /// - Clear out aspects, for this Node.
+   /// Clear out aspects, for this Memento.
    ///   Aspects are added to ChangeMgrSingleton, via do_incremental_* functions
-   ///   AND in *this* function when node attributes have added or deleted.
-   /// - Sets notification flag, so that observers can also query if they are in
-   ///   the middle of notification. Destructor switch's off notification.
-   ChangeMgrStartNotification start_notification;
+   ///   AND in *this* function when node attributes have been added or deleted.
+   ChangeMgrSingleton::instance()->clear_aspects();
 
 	node_ptr node = client_def->findAbsNode(absNodePath_);
  	if (!node.get()) {
