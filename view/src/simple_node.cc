@@ -949,7 +949,7 @@ void simple_node::genvars(std::vector<Variable>& var)
     if (run->type() == NODE_VARIABLE) {
       if (run->name() == "") std::cerr << "# empty variable!\n";
       else if (run->isGenVariable(0))
-        var.push_back(Variable(run->name(), ((variable_node*) run)->get_var()));
+        var.push_back(Variable(run->name(), ((variable_node*) run)->get_var(), false/*dont check names*/));
     }
   }
   return;
@@ -961,7 +961,7 @@ void simple_node::variables(std::vector<Variable>& var)
     if (run->type() == NODE_VARIABLE){ 
       if (run->name() == "") std::cerr << "# empty variable!\n";
       else if (!run->isGenVariable(0)) {
-        var.push_back(Variable(run->name(), ((variable_node*) run)->get_var()));
+        var.push_back(Variable(run->name(), ((variable_node*) run)->get_var(), false/*dont check names*/));
       }
   }
 }
