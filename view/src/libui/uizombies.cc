@@ -43,12 +43,13 @@ void zombies_form_c::create (Widget parent, char *widget_name)
 	ac = 0;
 	_xd_rootwidget = zombies_form;
 	XtSetArg(al[ac], XmNautoUnmanage, FALSE); ac++;
-	form2 = XmCreateForm ( zombies_form, "form2", al, ac );
-	ac = 0;
-	XtSetArg(al[ac], XmNlistSizePolicy, XmRESIZE_IF_POSSIBLE); ac++;
-	list_ = XmCreateScrolledList ( form2, "list_", al, ac );
-	ac = 0;
-	scrolledList1 = XtParent ( list_ );
+       form2 = XmCreateForm ( zombies_form, "form2", al, ac );
+       ac = 0;
+       XtSetArg(al[ac], XmNlistSizePolicy, XmRESIZE_IF_POSSIBLE); ac++;
+       XtSetArg(al[ac], XmNselectionPolicy, XmMULTIPLE_SELECT); ac++;
+       list_ = XmCreateScrolledList ( form2, "list_", al, ac );
+       ac = 0;
+       scrolledList1 = XtParent ( list_ );
 
 	XtSetArg(al[ac], XmNentryAlignment, XmALIGNMENT_CENTER); ac++;
 	buttons_ = XmCreateRowColumn ( form2, "buttons_", al, ac );
