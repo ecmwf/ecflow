@@ -79,7 +79,6 @@ BOOST_AUTO_TEST_CASE( test_change_mgr_singleton )
    }
 
    {
-      // Create node tree
       // **** Note using node_ptr can extend the life of the Node, hence we use scoping ***
       Defs* theDefs = new Defs;
       std::vector<MyObserver*> obs_vec;
@@ -91,8 +90,7 @@ BOOST_AUTO_TEST_CASE( test_change_mgr_singleton )
          }
 
          // get all nodes and observer them.
-         std::vector<node_ptr> node_vec;
-         theDefs->get_all_nodes(node_vec);
+         std::vector<node_ptr> node_vec; theDefs->get_all_nodes(node_vec);
 
          // Need to make sure life time of observer is greater than Node tree
          for(size_t i = 0; i < node_vec.size(); ++i) {

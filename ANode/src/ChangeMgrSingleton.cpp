@@ -61,6 +61,12 @@ void ChangeMgrSingleton::detach(Node* node,AbstractObserver* a)
 {
    assert( node);
    assert( a );
+#ifdef DEBUG_NODE
+   cout << "ChangeMgrSingleton::detach(Node*) observer=" << a;
+   if (node) cout << " node " << node->absNodePath() << "\n";
+   else   cout << " **NULL** node\n";
+#endif
+
 
    // equal_range(b) returns pair<iterator,iterator> representing the range of elements with key(Node*)
    typedef multimap<Node*, AbstractObserver*>::iterator iterator;
@@ -69,7 +75,9 @@ void ChangeMgrSingleton::detach(Node* node,AbstractObserver* a)
    // Loop through range of maps of key Node
    for (iterator it = iter_pair.first; it != iter_pair.second; ++it) {
        if (it->second == a) {
-          node_obs_map_.erase(it);
+          // We do not delete, to avoid iterator invalidation, during notify_delete()
+          // node_obs_map_.erase(it);
+          it->second = NULL;
           return;
        }
    }
@@ -111,7 +119,7 @@ void ChangeMgrSingleton::notify(node_ptr node)
 
 #ifdef DEBUG_NODE
    cout << "ChangeMgrSingleton::notify(Node*)";
-   if (n) cout << " node " << node->absNodePath() << "\n";
+   if (node) cout << " node " << node->absNodePath() << "\n";
    else   cout << " **NULL** node\n";
 #endif
 
@@ -150,21 +158,38 @@ void ChangeMgrSingleton::notify_delete(Node* node)
    cout << "ChangeMgrSingleton::notify_delete(Node*)  node " << node->absNodePath() << "\n";
 #endif
 
+   // *************************************************************************
+   // When we call update_delete() it will call detach(..) and hence modify
+   // the container we are iterator over.
+   // How do we avoid avoid iterator invaldation ?
+   //   a/ Make a copy of the container in this function.
+   //      This works, however for large design, it is a performance killer
+   //   b/ Allow detach(..) to NULL out the observer, hence we don't invalidate
+   //      the iterators. The key will then we deleted in this function.
+   // *************************************************************************
+
    // equal_range(b) returns pair<iterator,iterator> representing the range of element with key node
    typedef multimap<Node*, AbstractObserver*>::iterator iterator;
    std::pair<iterator, iterator> iter_pair = node_obs_map_.equal_range(node);
 
-   // Loop through range of maps of key Node
-   // Client code should detach
+   // Loop through range of maps of key Node: Client code should detach.
    for (iterator it = iter_pair.first; it != iter_pair.second; ++it) {
-      it->second->update_delete(node);
+      if (it->second) it->second->update_delete(node);
    }
 
    /// Check to make sure that derived Observer called detach
    /// We can not call detach ourselves, since the the client needs to
    /// call detach in the case where the graphical tree is destroyed by user
    /// In this case the Subject/Node is being deleted.
-   assert(node_obs_map_.find(node) == node_obs_map_.end());
+#ifdef DEBUG_NODE
+   iter_pair = node_obs_map_.equal_range(node);
+   for (iterator it = iter_pair.first; it != iter_pair.second; ++it) {
+      assert( it->second == NULL);
+   }
+#endif
+
+   // Delete the key
+   node_obs_map_.erase(node);
 
 #ifdef DEBUG_NODE
    cout << "   ChangeMgrSingleton::notify_delete(Node*) node_obs_map_.size()= " << node_obs_map_.size() << "\n";
