@@ -636,10 +636,15 @@ void ecf_concrete_node<Suite>::update(const Node* n,
   const_cast<Node*> (n)->set_graphic_ptr(xnode()); /* ??? */
 
   if (is_reset(aspect)) {  
-    host& serv = node_->serv(); 
-    serv.redraw(true);   
-    return;
+
+     Updating::set_full_redraw();
+     /*
+     host& serv = node_->serv();
+     serv.redraw(true);
+     */
+     return;
   }
+
   if (owner_->begun()) owner_->update_generated_variables();
   { node_->update(-1, -1, -1); node_->notify_observers(); node_->redraw();
   }
@@ -1132,16 +1137,22 @@ void ecf_concrete_node<Defs>::update(const Defs* n,
   if (!owner_) return;     
   if (!node_) return;
   if (is_reset(aspect)) {  
-    host& serv = node_->serv();
 
-    XECFDEBUG {
-      for (std::vector<suite_ptr>::const_iterator i = n->suiteVec().begin();
-           i != n->suiteVec().end(); ++i) {
-        std::cout << "suite name " << (*i)->name() << "\n";
-      }}
-    serv.redraw(true);   
-    return;
+     Updating::set_full_redraw();
+
+     XECFDEBUG {
+        for (std::vector<suite_ptr>::const_iterator i = n->suiteVec().begin();
+                 i != n->suiteVec().end(); ++i) {
+           std::cout << "suite name " << (*i)->name() << "\n";
+        }}
+
+     /*
+     host& serv = node_->serv();
+     serv.redraw(true);
+     */
+     return;
   }
+
   { node_->update(-1, -1, -1); node_->notify_observers(); node_->redraw(); }
 }
 
