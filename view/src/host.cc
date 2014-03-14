@@ -126,60 +126,52 @@ bool Updating::do_full_redraw_ = false;
 
 class SelectNode {
 public:
-  SelectNode(host* h) : host_(h)  {
-    selected_ = selection::current_node();
-    current_ = selected_ ? selected_->full_name() : "";
-  }
+   SelectNode( host* h )
+            : host_(h)
+   {
+      selected_ = selection::current_node();
+      current_ = selected_ ? selected_->full_name() : "";
+   }
 
-  ~SelectNode() {
-    if (selection::current_node() != selected_ && !current_.empty()) {
-      if ((selected_ = host_->top()->find(current_)))
-	 selection::notify_new_selection(selected_);
-    }
+   ~SelectNode()
+   {
+      if (selection::current_node() != selected_ && !current_.empty()) {
+         if ((selected_ = host_->top()->find(current_))) selection::notify_new_selection(selected_);
+      }
 
-  }
+   }
 
 private:
-  host *host_;
-  node *selected_;
-  std::string current_;
+   host *host_;
+   node *selected_;
+   std::string current_;
 };
 
 host::host( const std::string& name, const std::string& host, int number )
          : timeout(5),
 #ifdef alpha
-	   configurable(name),
+                  configurable(name),
 #endif
-	   observable(), 
-	   host_(host), 
-	   number_(number), 
-	   name_(name), 
-	   connected_(false), 
-	   after_command_(true), 
-	   passwd_("-none-"), 
-	   timeout_(this, "timeout", 5), 
-	   maximum_(this, "maximum", 60), 
-	   drift_(this, "drift", true), 
-	   connect_(this,"connect",false), 
-	   suites_(this, "suites", std::vector<std::string>()), 
-	   aborted_(this, "aborted", true), 
-	   restarted_(this, "restarted", true), 
-	   late_(this, "late", true), 
-	   poll_(this, "poll", true), 
-	   direct_read_(this, "direct_read", true), 
-	   new_suites_(this, "new_suites", true), 
-	   zombie_(this, "zombie", false), 
-	   aliases_(this, "aliases", false), 
-	   to_check_(this, "to_check", false), 
-	   chkmail_(true), top_(0), tree_(0), mail_(0), 
-	   last_(0), history_len_(100)
-	 , updating_(false)
+                  observable(), host_(host), number_(number), name_(name), connected_(false), after_command_(
+                           true), passwd_("-none-"), timeout_(this, "timeout", 5), maximum_(
+                           this, "maximum", 60), drift_(this, "drift", true), connect_(this,
+                                                                                       "connect",
+                                                                                       false), suites_(
+                           this, "suites", std::vector<std::string>()), aborted_(this, "aborted",
+                                                                                 true), restarted_(
+                           this, "restarted", true), late_(this, "late", true), poll_(this, "poll",
+                                                                                      true), direct_read_(
+                           this, "direct_read", true), new_suites_(this, "new_suites", true), zombie_(
+                           this, "zombie", false), aliases_(this, "aliases", false), to_check_(
+                           this, "to_check", false), chkmail_(true), top_(0), tree_(0), mail_(0), last_(
+                           0), history_len_(100), updating_(false)
 {
    if (number < 1) return; // dummy server OK;
 
-   if (number_) { 
-     tree_=tree::new_tree(this);
-     gui::add_host(name); }
+   if (number_) {
+      tree_ = tree::new_tree(this);
+      gui::add_host(name);
+   }
 
    if (timeout_ < 1) timeout_ = 1;
    if (maximum_ < 1) maximum_ = 1;
@@ -189,7 +181,9 @@ host::host( const std::string& name, const std::string& host, int number )
 
 host::~host()
 {
-  if (tree_) { delete tree_; }
+   if (tree_) {
+      delete tree_;
+   }
 }
 
 ehost::ehost( const std::string& name, const std::string& h, int number )
@@ -294,7 +288,7 @@ void host::search( node_lister& s )
 void host::logout()
 {
    if (connected_) gui::logout(name());
-   searchable::active (False);
+   searchable::active(False);
    connected_ = false;
 
    if (tree_) {
@@ -318,8 +312,7 @@ void ehost::logout()
    if (!connected_) return;
 
    try {
-      if (client_.client_handle())
-         client_.ch1_drop();
+      if (client_.client_handle()) client_.ch1_drop();
    }
    catch ( std::exception &e ) {
       gui::message("host::logout-error: %s", e.what());
@@ -337,7 +330,7 @@ void host::run()
 
 tmp_file host::jobcheck( node& n, const std::string &cmd )
 {
-  return tmp_file(NULL);
+   return tmp_file(NULL);
 }
 
 tmp_file ehost::jobcheck( node& n, const std::string &cmd )
@@ -346,13 +339,11 @@ tmp_file ehost::jobcheck( node& n, const std::string &cmd )
    //std::string user = n.variable("USER");
    std::string job = n.variable("ECF_JOB");
    std::string stat = job + ".stat";
-   if (n.__node__()) 
-     if (n.__node__()->get_node()) 
-       n.__node__()->
-	 get_node()->variableSubsitution(subcmd);
-  std::string check = "sh " + subcmd;
-  command(check);
-  return tmp_file(stat.c_str(), false);
+   if (n.__node__()) if (n.__node__()->get_node()) n.__node__()->get_node()->variableSubsitution(
+            subcmd);
+   std::string check = "sh " + subcmd;
+   command(check);
+   return tmp_file(stat.c_str(), false);
 }
 
 tmp_file host::jobstatus( node& n, const std::string &cmd )
@@ -366,9 +357,9 @@ tmp_file ehost::jobstatus( node& n, const std::string &cmd )
    return tmp_file(0);
 }
 
-bool host::zombies( int mode, const char* name)
+bool host::zombies( int mode, const char* name )
 {
-  return false;
+   return false;
 }
 
 const std::vector<std::string>& ehost::messages( const node&n ) const
@@ -388,30 +379,35 @@ const std::vector<std::string>& host::messages( const node&n ) const
    return vct;
 }
 
-bool host::get_zombies_list( std::vector<std::string>& list ) { return true; }
+bool host::get_zombies_list( std::vector<std::string>& list )
+{
+   return true;
+}
 
 bool ehost::get_zombies_list( std::vector<std::string>& list )
 {
-  gui::message("%s: fetching zombies_panel", this->name());
-  try {
-    client_.zombieGet();
-  } catch ( std::exception &e ) {
-    gui::message("host::zombies-error: %s", e.what());
-    return false;
-  }
-  std::vector<Zombie> vect = client_.server_reply().zombies();
-  
-  if (vect.size() == 0) { 
-    gui::message("%s: No zombies at the moment", this->name());
-    return false;
-  }
+   gui::message("%s: fetching zombies_panel", this->name());
+   try {
+      client_.zombieGet();
+   }
+   catch ( std::exception &e ) {
+      gui::message("host::zombies-error: %s", e.what());
+      return false;
+   }
+   std::vector<Zombie> vect = client_.server_reply().zombies();
 
-  std::sort(vect.begin(),vect.end(),
-	    boost::bind(std::less<int>(),
-			boost::bind(&Zombie::calls,_1),
-			boost::bind(&Zombie::calls,_2)));
-  Zombie::pretty_print(vect, list);
-  return true;
+   if (vect.size() == 0) {
+      gui::message("%s: No zombies at the moment", this->name());
+      return false;
+   }
+
+   std::sort(
+            vect.begin(),
+            vect.end(),
+            boost::bind(std::less<int>(), boost::bind(&Zombie::calls, _1),
+                        boost::bind(&Zombie::calls, _2)));
+   Zombie::pretty_print(vect, list);
+   return true;
 }
 
 bool ehost::zombies( int mode, const char* name )
@@ -451,30 +447,30 @@ bool ehost::zombies( int mode, const char* name )
 
 void ehost::dir( node& n, const char* path, lister<ecf_dir>& l )
 {
-  loghost_ = n.variable("ECF_LOGHOST", true);
-  logport_ = n.variable("ECF_LOGPORT");
-  if (loghost_ == ecf_node::none()) {
-    loghost_ = n.variable("LOGHOST", true);
-    logport_ = n.variable("LOGPORT");
-  }
-  std::string::size_type pos = loghost_.find(n.variable("ECF_MICRO"));
-  if(std::string::npos != pos) return; 
-  host::dir(n, path, l);
+   loghost_ = n.variable("ECF_LOGHOST", true);
+   logport_ = n.variable("ECF_LOGPORT");
+   if (loghost_ == ecf_node::none()) {
+      loghost_ = n.variable("LOGHOST", true);
+      logport_ = n.variable("LOGPORT");
+   }
+   std::string::size_type pos = loghost_.find(n.variable("ECF_MICRO"));
+   if (std::string::npos != pos) return;
+   host::dir(n, path, l);
 }
 
 void host::dir( node& n, const char* path, lister<ecf_dir>& l )
 {
-  gui::message("%s: fetching file list", name());
-  if (loghost_ != ecf_node::none()) {
-    logsvr the_log_server(loghost_, logport_);
+   gui::message("%s: fetching file list", name());
+   if (loghost_ != ecf_node::none()) {
+      logsvr the_log_server(loghost_, logport_);
 
-    if (the_log_server.ok()) {
-      std::auto_ptr<ecf_dir> dir(the_log_server.getdir(path));
-      
-      if (dir.get()) {
-        l.scan(dir.get());
-        return;
-      }
+      if (the_log_server.ok()) {
+         std::auto_ptr<ecf_dir> dir(the_log_server.getdir(path));
+
+         if (dir.get()) {
+            l.scan(dir.get());
+            return;
+         }
       }
    }
 
@@ -498,8 +494,14 @@ void host::dir( node& n, const char* path, lister<ecf_dir>& l )
          char* c = basename;
          while ( *c ) {
             if (*c == '.') {
-               if (*(c+1)) { *(c+1) = 0; break; } /* 201311 Pontus Request */
-               else { *c = 0; } }
+               if (*(c + 1)) {
+                  *(c + 1) = 0;
+                  break;
+               } /* 201311 Pontus Request */
+               else {
+                  *c = 0;
+               }
+            }
             c++;
          }
 
@@ -528,9 +530,9 @@ tmp_file host::job( node& n )
 
 int host::status()
 {
-  int e = update();
-  frequency(timeout_);
-  return e;
+   int e = update();
+   frequency(timeout_);
+   return e;
 }
 
 void host::check_mail()
@@ -545,7 +547,7 @@ int ehost::command( const char* cmd, ... )
 
    va_start(ap, cmd);
    av[ac++] = strdup(cmd);
-   while ( (s = va_arg(ap,char*) ) )
+   while ( (s = va_arg(ap, char*)) )
       av[ac++] = strdup(s);
    va_end(ap);
 
@@ -568,8 +570,10 @@ int ehost::command( const std::string& str )
          return 1;
       else
          return 0;
-   } else if (str == "write menu") {
-     menus::write(); return 0;
+   }
+   else if (str == "write menu") {
+      menus::write();
+      return 0;
    }
 
    int e = 0, ac = 0;
@@ -649,106 +653,114 @@ void mem_use( double& vmu, double& res )
 
 bool ehost::create_tree( int hh, int min, int sec )
 {
-  int then_sec = 0;
-  XECFDEBUG {
-    time_t now; time(&now); struct tm* then = localtime(&now);
-    then_sec = then->tm_sec;
-    gui::message("%s: build %02d:%02d:%02d", name(), 
-		 then->tm_hour, then->tm_min, then->tm_sec);
-    if (sec != then->tm_sec) {
-      printf("# time get: %02d:%02d:%02d %s\n", hh, min, sec, name());
-      printf("# time got: %02d:%02d:%02d %s\n", 
-	     then->tm_hour, then->tm_min, then->tm_sec, name());
-    }}
+   int then_sec = 0;
+   XECFDEBUG {
+      time_t now;
+      time(&now);
+      struct tm* then = localtime(&now);
+      then_sec = then->tm_sec;
+      gui::message("%s: build %02d:%02d:%02d", name(), then->tm_hour, then->tm_min, then->tm_sec);
+      if (sec != then->tm_sec) {
+         printf("# time get: %02d:%02d:%02d %s\n", hh, min, sec, name());
+         printf("# time got: %02d:%02d:%02d %s\n", then->tm_hour, then->tm_min, then->tm_sec,
+                name());
+      }
+   }
 
-  node *top = make_xnode<Defs>(client_.defs().get(), 0x0, *this);
-     
-  XECFDEBUG { 
-    time_t nnow; time(&nnow); struct tm* next = localtime(&nnow);
-    if (then_sec != next->tm_sec) 
-      printf("# time blt: %02d:%02d:%02d %s\n", next->tm_hour,
-	     next->tm_min, next->tm_sec, name());
-    gui::message("%s: built %02d:%02d:%02d", name(), 
-		 next->tm_hour, next->tm_min, next->tm_sec);
-  }
+   node *top = make_xnode<Defs>(client_.defs().get(), 0x0, *this);
 
-  if (!top) return false;
-  if (top_) {
-    top->scan(top_);
-    node::destroy(top_);
-  }
-  top_ = top;   
-  top_->active(poll_);
-  notify_observers();
-  top_->up_to_date();
-  
-  redraw();
-  XECFDEBUG { double vmu, res; mem_use(vmu, res); 
-    std::cout << "# usage: " << vmu << res << "\n"; }
-  return true;
+   XECFDEBUG {
+      time_t nnow;
+      time(&nnow);
+      struct tm* next = localtime(&nnow);
+      if (then_sec != next->tm_sec) printf("# time blt: %02d:%02d:%02d %s\n", next->tm_hour,
+                                           next->tm_min, next->tm_sec, name());
+      gui::message("%s: built %02d:%02d:%02d", name(), next->tm_hour, next->tm_min, next->tm_sec);
+   }
+
+   if (!top) return false;
+   if (top_) {
+      top->scan(top_);
+      node::destroy(top_);
+   }
+   top_ = top;
+   top_->active(poll_);
+   notify_observers();
+   top_->up_to_date();
+
+   redraw();
+   XECFDEBUG {
+      double vmu, res;
+      mem_use(vmu, res);
+      std::cout << "# usage: " << vmu << res << "\n";
+   }
+   return true;
 }
 
 void ehost::reset( bool full, bool sync )
 {
    if (!connected_ || !connect_) return;
-   time_t now; time(&now); struct tm* curr = localtime(&now);
-   gui::message("%s: full tree %02d:%02d:%02d", name(),
-                curr->tm_hour, curr->tm_min, curr->tm_sec);
+   time_t now;
+   time(&now);
+   struct tm* curr = localtime(&now);
+   gui::message("%s: full tree %02d:%02d:%02d", name(), curr->tm_hour, curr->tm_min, curr->tm_sec);
    SelectNode select(this);
    try {
       if (!tree_) tree_ = tree::new_tree(this);
 
       if (full) {
-	const std::vector<std::string>& s = suites_;
-	if (top_) {
-	  if (top_->__node__()) {
-	    top_->__node__()->nokids();
-	    top_->__node__()->unlink();
-	  }
-	    node::destroy(top_);
-	    top_ = 0x0;
-	}
-	notify_observers();
-	  
-	if (!s.empty()) { 
-	//   /* registering with empty set would lead 
-	//      to retrieve all server content,
-	//      opposive of expected result */
-	// } else 	
-	  // get all suite previously registered in GUI, and register
-	  // them with the server The associated handle is retained in
-	  // client_
-	  if (client_.client_handle()) {
-	    try {
-	      client_.ch1_drop();
-	    } catch ( std::exception &e ) {
-	      std::cout << "# no drop possible: " << e.what() << "\n";
-	    }
-	  }
-	  client_.reset(); // reset client handle + defs     
-	  // This will add a new handle to client_
-	  client_.ch_register(new_suites_, s);	    
-	}
+         const std::vector<std::string>& s = suites_;
+         if (top_) {
+            if (top_->__node__()) {
+               top_->__node__()->nokids();
+               top_->__node__()->unlink();
+            }
+            node::destroy(top_);
+            top_ = 0x0;
+         }
+         notify_observers();
+
+         if (!s.empty()) {
+            //   /* registering with empty set would lead
+            //      to retrieve all server content,
+            //      opposive of expected result */
+            // } else
+            // get all suite previously registered in GUI, and register
+            // them with the server The associated handle is retained in
+            // client_
+            if (client_.client_handle()) {
+               try {
+                  client_.ch1_drop();
+               }
+               catch ( std::exception &e ) {
+                  std::cout << "# no drop possible: " << e.what() << "\n";
+               }
+            }
+            client_.reset(); // reset client handle + defs
+            // This will add a new handle to client_
+            client_.ch_register(new_suites_, s);
+         }
       }
-   } catch ( std::exception &e ) {
-     XECFDEBUG std::cerr << "# reset exception " << e.what() << "\n";
-     if (client_.defs().get()) {
-       gui::error("host::reset-reg-error: %s", e.what());
-     }
    }
-   
-   int hour=0, min=0, sec=0;
+   catch ( std::exception &e ) {
+      XECFDEBUG std::cerr << "# reset exception " << e.what() << "\n";
+      if (client_.defs().get()) {
+         gui::error("host::reset-reg-error: %s", e.what());
+      }
+   }
+
+   int hour = 0, min = 0, sec = 0;
    XECFDEBUG {
-     time_t now; time(&now); struct tm* curr = localtime(&now);
-     hour=curr->tm_hour, min=curr->tm_min, sec=curr->tm_sec;
-     gui::message("%s: start %02d:%02d:%02d", name(), 
-		  hour, min, sec);
+      time_t now;
+      time(&now);
+      struct tm* curr = localtime(&now);
+      hour = curr->tm_hour, min = curr->tm_min, sec = curr->tm_sec;
+      gui::message("%s: start %02d:%02d:%02d", name(), hour, min, sec);
    }
- 
+
    try {
-     if (sync)
-       client_.sync_local(); // this returns full defs
-      searchable::active (False);
+      if (sync) client_.sync_local(); // this returns full defs
+      searchable::active(False);
       create_tree(hour, min, sec);
    }
    catch ( std::exception &e ) {
@@ -756,19 +768,20 @@ void ehost::reset( bool full, bool sync )
       gui::error("host::reset-sync-error: %s", e.what());
       const std::vector<std::string>& s = suites_;
       /* load one set
-	 then another
-	 checkpoint
-	 kill the server
-	 then restart the server
-	 + view update command */
+       then another
+       checkpoint
+       kill the server
+       then restart the server
+       + view update command */
       try {
-	client_.reset();
-	client_.ch_register(new_suites_, s);
-      } catch ( std::exception &e ) {
-	gui::error("host::reset-register-error: %s", e.what());
+         client_.reset();
+         client_.ch_register(new_suites_, s);
+      }
+      catch ( std::exception &e ) {
+         gui::error("host::reset-register-error: %s", e.what());
       }
    }
-   searchable::active (True);
+   searchable::active(True);
 }
 
 void host::aborted( node& n )
@@ -804,8 +817,7 @@ void host::to_check( node& n )
 
 void host::changed( resource& r )
 {
-   if (&r == &timeout_) 
-     frequency(timeout_);
+   if (&r == &timeout_) frequency(timeout_);
 }
 
 void ehost::changed( resource& r )
@@ -836,32 +848,26 @@ void ehost::changed( resource& r )
    }
 }
 
-void host::redraw(bool create)
+void host::redraw( bool create )
 {
-  if (create) {
-    SelectNode select(this);
-     XECFDEBUG {
-       std::cout << ChangeMgrSingleton::instance()->no_of_node_observers() 
-		 << std::endl
-		 << ChangeMgrSingleton::instance()->no_of_def_observers() 
-		 << std::endl;
-     }
+   if (create) {
+      SelectNode select(this);
+      XECFDEBUG {
+         std::cout << ChangeMgrSingleton::instance()->no_of_node_observers() << std::endl
+                   << ChangeMgrSingleton::instance()->no_of_def_observers() << std::endl;
+      }
 
-    if (top_) 
-      top_->unlink(true);
-     XECFDEBUG {
-       std::cout << ChangeMgrSingleton::instance()->no_of_node_observers() 
-		 << std::endl
-		 << ChangeMgrSingleton::instance()->no_of_def_observers() 
-		 << std::endl;
-    // assert(ChangeMgrSingleton::instance()->no_of_node_observers() == 0);
-    // assert(ChangeMgrSingleton::instance()->no_of_def_observers() == 0);
-     }
-    create_tree(0, 0, 0);
-  } else if (tree_) 
-    tree_->update_tree(true);
-  if (top_) 
-    top_->reset();
+      if (top_) top_->unlink(true);
+      XECFDEBUG {
+         std::cout << ChangeMgrSingleton::instance()->no_of_node_observers() << std::endl
+                   << ChangeMgrSingleton::instance()->no_of_def_observers() << std::endl;
+         // assert(ChangeMgrSingleton::instance()->no_of_node_observers() == 0);
+         // assert(ChangeMgrSingleton::instance()->no_of_def_observers() == 0);
+      }
+      create_tree(0, 0, 0);
+   }
+   else if (tree_) tree_->update_tree(true);
+   if (top_) top_->reset();
 }
 
 str host::logfile() const
@@ -900,43 +906,35 @@ void host::plug( node* from )
 
 void host::comp( node* from, const char* a, const char* b )
 {
-  do_comp(selection::current_node(), from, a, b);
+   do_comp(selection::current_node(), from, a, b);
 }
 
-int host::do_comp( node* into, node* from , 
-                    const std::string& a, const std::string& b )
+int host::do_comp( node* into, node* from, const std::string& a, const std::string& b )
 {
    if (!into || !from) return 0;
    std::stringstream out;
-   out << "${COMPARE:=/home/ma/map/bin/compare.sh} " << 
-     from->full_name() << ":";
+   out << "${COMPARE:=/home/ma/map/bin/compare.sh} " << from->full_name() << ":";
    if (from->variable("ECF_NODE") != "(none)") {
-     out << from->variable("ECF_NODE") << ":" << 
-     from->variable("ECF_PORT") << ":" << 
-     from->variable("ECF_LOGHOST", true) << ":" <<  
-     from->variable("ECF_LOGPORT", true) << ":" << 
-       from->variable("ECF_JOBOUT", true) << " \t";
-   } else {
-     out << from->variable("SMSNODE") << ":" << 
-       from->variable("SMS_PROG") << ":" << 
-       from->variable("SMSLOGHOST", true) << ":" <<  
-       from->variable("SMSLOGPORT", true) << ":" << 
-       from->variable("SMSJOBOUT", true) << " \t";
+      out << from->variable("ECF_NODE") << ":" << from->variable("ECF_PORT") << ":"
+          << from->variable("ECF_LOGHOST", true) << ":" << from->variable("ECF_LOGPORT", true)
+          << ":" << from->variable("ECF_JOBOUT", true) << " \t";
+   }
+   else {
+      out << from->variable("SMSNODE") << ":" << from->variable("SMS_PROG") << ":"
+          << from->variable("SMSLOGHOST", true) << ":" << from->variable("SMSLOGPORT", true) << ":"
+          << from->variable("SMSJOBOUT", true) << " \t";
    }
 
    out << into->full_name() << ":";
    if (into->variable("ECF_NODE") != "(none)") {
-     out << into->variable("ECF_NODE") << ":" << 
-       into->variable("ECF_PORT") << ":" << 
-       into->variable("ECF_LOGHOST", true)  << ":" << 
-       into->variable("ECF_LOGPORT", true) << ":" << 
-       into->variable("ECF_JOBOUT", true) << " \t";
-   } else {
-     out << into->variable("SMSNODE") << ":" << 
-       into->variable("SMS_PROG") << ":" << 
-       into->variable("SMSLOGHOST", true)  << ":" << 
-       into->variable("SMSLOGPORT", true) << ":" << 
-       into->variable("SMSJOBOUT", true) << " \t";
+      out << into->variable("ECF_NODE") << ":" << into->variable("ECF_PORT") << ":"
+          << into->variable("ECF_LOGHOST", true) << ":" << into->variable("ECF_LOGPORT", true)
+          << ":" << into->variable("ECF_JOBOUT", true) << " \t";
+   }
+   else {
+      out << into->variable("SMSNODE") << ":" << into->variable("SMS_PROG") << ":"
+          << into->variable("SMSLOGHOST", true) << ":" << into->variable("SMSLOGPORT", true) << ":"
+          << into->variable("SMSJOBOUT", true) << " \t";
    }
    out << a << " \t" << b << "\n";
    const std::string cmd = out.str();
@@ -944,9 +942,9 @@ int host::do_comp( node* into, node* from ,
 
    int pid = fork();
    if (pid == 0) { /* the child */
-     execl("/bin/sh", "sh", "-c", cmd.c_str(), NULL); 
-     _exit(127);
-     return 0;
+      execl("/bin/sh", "sh", "-c", cmd.c_str(), NULL);
+      _exit(127);
+      return 0;
    }
    if (pid == -1) return 1;
    return 0;
@@ -995,7 +993,7 @@ int host::do_plug( node* into, node* from )
    std::string cmd;
 
    if (!(nfrom->status() == STATUS_SUSPENDED)) {
-     if (source->command(clientName, "--suspend", nfrom->full_name().c_str(), 0x0)) {
+      if (source->command(clientName, "--suspend", nfrom->full_name().c_str(), 0x0)) {
          gui::error("Cannot suspend %s. Pluging aborted", sf.c_str());
          return 1;
       }
@@ -1026,29 +1024,27 @@ int host::do_plug( node* into, node* from )
 
 tmp_file ehost::sfile( node& n, std::string name )
 {
-  loghost_ = n.variable("ECF_LOGHOST", true);
-  logport_ = n.variable("ECF_LOGPORT");
-  if (loghost_ == ecf_node::none()) {
-    loghost_ = n.variable("LOGHOST", true);
-    logport_ = n.variable("LOGPORT");
-  }
-  return host::sfile(n, name);
+   loghost_ = n.variable("ECF_LOGHOST", true);
+   logport_ = n.variable("ECF_LOGPORT");
+   if (loghost_ == ecf_node::none()) {
+      loghost_ = n.variable("LOGHOST", true);
+      logport_ = n.variable("LOGPORT");
+   }
+   return host::sfile(n, name);
 }
 
 tmp_file host::sfile( node& n, std::string name )
 {
-   if (name == ecf_node::none()) 
-     return tmp_file((const char*) NULL);
+   if (name == ecf_node::none()) return tmp_file((const char*) NULL);
    const char *cname = name.c_str();
 
    std::string::size_type pos = loghost_.find(n.variable("ECF_MICRO"));
-   if(std::string::npos == pos && loghost_ != ecf_node::none()) {
-     logsvr the_log_server(loghost_, logport_);
-     if (the_log_server.ok()) {
-       tmp_file tmp = the_log_server.getfile(name);
-       if (access(tmp.c_str(), R_OK) == 0) 
-         return tmp;
-     }
+   if (std::string::npos == pos && loghost_ != ecf_node::none()) {
+      logsvr the_log_server(loghost_, logport_);
+      if (the_log_server.ok()) {
+         tmp_file tmp = the_log_server.getfile(name);
+         if (access(tmp.c_str(), R_OK) == 0) return tmp;
+      }
    }
 
    if ((access(cname, R_OK) == 0)) {
@@ -1161,7 +1157,7 @@ bool check_version( const char* v1, const char* v2 )
    return true;
 }
 
-void get_server_version(ClientInvoker& client, std::string& server_version)
+void get_server_version( ClientInvoker& client, std::string& server_version )
 {
    int archive_version_of_old_server = client.allow_new_client_old_server();
    try {
@@ -1187,10 +1183,10 @@ void get_server_version(ClientInvoker& client, std::string& server_version)
          server_version = client.server_reply().get_string();
       }
    }
-   catch (...)  {
+   catch ( ... ) {
       // assume new client old server. See notes above
       if (archive_version_of_old_server == 0) archive_version_of_old_server = ecf::boost_archive::version_1_47();
-      client.allow_new_client_old_server( archive_version_of_old_server );
+      client.allow_new_client_old_server(archive_version_of_old_server);
 
       // try again
       client.server_version();
@@ -1210,23 +1206,26 @@ void ehost::login()
       client_.set_host_port(machine(), boost::lexical_cast<std::string>(number()));
       if (!connect_mngt(true)) {
          gui::message("%s: no reply", name());
-         logout();         
-	 connected_ = false; // tree_->connected(false); 
-	 connect_ = false; 
+         logout();
+         connected_ = false; // tree_->connected(false);
+         connect_ = false;
          return;
       }
 
       // if we can not get the server version, attempt forward compatibility
       std::string server_version;
-      get_server_version(client_,server_version);
+      get_server_version(client_, server_version);
 
       if (!check_version(server_version.c_str(), ecf::Version::raw().c_str())) {
-        if (!confirm::ask(false, "%s (%s@%d): version mismatch, server is %s, client is %s\ntry to connect anyway?", 
-                          name(), machine(), number(), server_version.c_str(), ecf::Version::raw().c_str())) {
-          connect_ = false;
-          connected_ = false;
-          return;
-        }
+         if (!confirm::ask(
+                  false,
+                  "%s (%s@%d): version mismatch, server is %s, client is %s\ntry to connect anyway?",
+                  name(), machine(), number(), server_version.c_str(),
+                  ecf::Version::raw().c_str())) {
+            connect_ = false;
+            connected_ = false;
+            return;
+         }
       }
       connect_ = true;
       connected_ = true;
@@ -1241,17 +1240,18 @@ void ehost::login()
          redraw();
       }
       gui::login(name());
-      searchable::active (True);
+      searchable::active(True);
    }
    catch ( std::exception& e ) {
-      searchable::active (False);
+      searchable::active(False);
       gui::error("Login to %s failed (%s)", name(), e.what());
       if (!tree_) return;
       if (connected_) {
          tree_->update_tree(false);
-      } else {
-	tree_->connected(False);
-	if (!top_) top_ = make_xnode<Defs>(0x0, 0, *this);
+      }
+      else {
+         tree_->connected(False);
+         if (!top_) top_ = make_xnode<Defs>(0x0, 0, *this);
       }
    }
 
@@ -1266,26 +1266,27 @@ tmp_file host::file( node& n, std::string name )
 tmp_file ehost::file( node& n, std::string name )
 {
    if (name == "ECF_SCRIPT" || name == "ECF_JOB") {
-   } else if (name != ecf_node::none()) { // Try logserver
-     loghost_ = n.variable("ECF_LOGHOST", true);
+   }
+   else if (name != ecf_node::none()) { // Try logserver
+      loghost_ = n.variable("ECF_LOGHOST", true);
       logport_ = n.variable("ECF_LOGPORT");
       if (loghost_ == ecf_node::none()) {
-        loghost_ = n.variable("LOGHOST", true);
-        logport_ = n.variable("LOGPORT");
+         loghost_ = n.variable("LOGHOST", true);
+         logport_ = n.variable("LOGPORT");
       }
       std::string::size_type pos = loghost_.find(n.variable("ECF_MICRO"));
-      if(std::string::npos == pos && loghost_ != ecf_node::none()) {
+      if (std::string::npos == pos && loghost_ != ecf_node::none()) {
          logsvr the_log_server(loghost_, logport_);
          if (the_log_server.ok()) {
             tmp_file tmp = the_log_server.getfile(name); // allow more than latest output
-            if (access(tmp.c_str(), R_OK) == 0) 
-              return tmp;
+            if (access(tmp.c_str(), R_OK) == 0) return tmp;
          }
-      }   
+      }
    }
    if (direct_read_ && (access(name.c_str(), R_OK) == 0)) {
-     return tmp_file(name.c_str(), false);
-   } else {
+      return tmp_file(name.c_str(), false);
+   }
+   else {
       gui::message("%s: fetching %s", this->name(), name.c_str());
       try {
          if (name == "ECF_SCRIPT")
@@ -1295,9 +1296,9 @@ tmp_file ehost::file( node& n, std::string name )
          else if (name == "ECF_JOBOUT")
             client_.file(n.full_name(), "jobout");
          else {
-	   client_.file(n.full_name(), "jobout");
-	   /* gui::message("host::file: unknown file type %s", name.c_str());
-	      return tmp_file(NULL); */
+            client_.file(n.full_name(), "jobout");
+            /* gui::message("host::file: unknown file type %s", name.c_str());
+             return tmp_file(NULL); */
          }
 
          // Do *not* assign 'client_.server_reply().get_string()' to a separate string, since
@@ -1442,7 +1443,7 @@ void ehost::suites( int which, std::vector<std::string>& l )
 
 void host::suites( node* n, bool one )
 /* register only one suite with menu hide-other-suites (right-mouse-button,
-   on the server area, close to server node, not on the node itself */
+ on the server area, close to server node, not on the node itself */
 {
    while ( n ) {
       if (n->type() == NODE_SUITE) {
@@ -1462,64 +1463,69 @@ int host::update()
 }
 extern XtAppContext app_context;
 
-void ehost::update_reg_suites(bool get_ch_suites) {
-  if (new_suites_) { // SUP-398 // temporary add higher load on the server
-    if(get_ch_suites) {
-      try {
-	client_.ch_suites();
-      } catch ( std::exception& e ) {
-	gui::message("host::update-reg-suite-error: %s",e.what());
+void ehost::update_reg_suites( bool get_ch_suites )
+{
+   if (new_suites_) { // SUP-398 // temporary add higher load on the server
+      if (get_ch_suites) {
+         try {
+            client_.ch_suites();
+         }
+         catch ( std::exception& e ) {
+            gui::message("host::update-reg-suite-error: %s", e.what());
+         }
+         const std::vector<std::pair<unsigned int, std::vector<std::string> > >& vct = client_.server_reply().get_client_handle_suites();
+         for(size_t i = 0; i < vct.size(); ++i) {
+            if (vct[i].first == (unsigned int) client_.client_handle()) {
+               suites_ = vct[i].second;
+               break;
+            }
+         }
       }
-      const std::vector<std::pair<unsigned int, std::vector<std::string> > >& vct = 
-	client_.server_reply().get_client_handle_suites();
-      for (size_t i=0; i < vct.size(); ++i) {
-	if (vct[i].first == (unsigned int) client_.client_handle()) {
-	  suites_ = vct[i].second;
-	  break;
-	}		
+      else {
+         const std::vector<suite_ptr>& suites_vec = client_.defs()->suiteVec();
+         std::vector<std::string> suites;
+         suites.reserve(suites_vec.size());
+         for(size_t i = 0; i < suites_vec.size(); ++i) {
+            suites.push_back(suites_vec[i]->name());
+         }
+         suites_ = suites;
       }
-    } else {
-      const std::vector<suite_ptr>& suites_vec = client_.defs()->suiteVec();
-      std::vector<std::string> suites; suites.reserve(suites_vec.size());
-      for (size_t i=0; i < suites_vec.size(); ++i) {
-	suites.push_back(suites_vec[i]->name());
-      }
-      suites_ = suites;
-    }
-  } 
+   }
 }
-
 
 int ehost::update()
 {
-  if (updating_) return 0; // SUP-423
-  Updating update(this);   // SUP-423
-  SelectNode select(this);
+   if (updating_) return 0; // SUP-423
+   Updating update(this);   // SUP-423
+   SelectNode select(this);
 
    int err = -1;
    if (!connected_) return err;
 
-   gui::watch (True);
+   gui::watch(True);
    last_ = ::time(0);
 
    try {
-     if (app_context)
-       XtAppAddTimeOut(app_context, 20 * 1000, NULL, NULL);
+      if (app_context) XtAppAddTimeOut(app_context, 20 * 1000, NULL, NULL);
 
-      time_t now; time(&now); struct tm* curr = localtime(&now);
-      gui::message("%s: checking status %02d:%02d:%02d", name(), 
-                   curr->tm_hour, curr->tm_min, curr->tm_sec);
+      time_t now;
+      time(&now);
+      struct tm* curr = localtime(&now);
+      gui::message("%s: checking status %02d:%02d:%02d", name(), curr->tm_hour, curr->tm_min,
+                   curr->tm_sec);
       client_.news_local(); // call the server
       if (tree_) tree_->connected(True);
 
       XECFDEBUG {
-         struct tm* next; time_t now; time(&now);
+         struct tm* next;
+         time_t now;
+         time(&now);
          next = localtime(&now);
          if (curr->tm_sec != next->tm_sec) {
-	   printf("# time chk: %02d:%02d:%02d %s\n", curr->tm_hour, curr->tm_min, curr->tm_sec,
-		  name());
-	   printf("# time nws: %02d:%02d:%02d %s\n", next->tm_hour, next->tm_min, next->tm_sec,
-		  name());
+            printf("# time chk: %02d:%02d:%02d %s\n", curr->tm_hour, curr->tm_min, curr->tm_sec,
+                   name());
+            printf("# time nws: %02d:%02d:%02d %s\n", next->tm_hour, next->tm_min, next->tm_sec,
+                   name());
          }
       }
       switch ( client_.server_reply().get_news() ) {
@@ -1528,52 +1534,54 @@ int ehost::update()
             if (top_) top_->up_to_date();
             return 0;
             break;
-      case ServerReply::DO_FULL_SYNC: // 4 calls to the server:
-	/* ch_suites + drop + reg_suites + sync_local */
-	gui::message("::fullsync\n");
-	if (top_) top_->up_to_date();
-	update_reg_suites(true); 
-	reset(true);
-	return 0;
-	break;
-      case ServerReply::NO_DEFS:
-	reset(true);
-	return 0;
-	break;
-      case ServerReply::NEWS:
+         case ServerReply::DO_FULL_SYNC: // 4 calls to the server:
+            /* ch_suites + drop + reg_suites + sync_local */
+            gui::message("::fullsync\n");
+            if (top_) top_->up_to_date();
+            update_reg_suites(true);
+            reset(true);
+            return 0;
+            break;
+         case ServerReply::NO_DEFS:
+            reset(true);
+            return 0;
+            break;
+         case ServerReply::NEWS:
             // there were some kind of changes in the server
             // request the changes from the server & sync with
             // defs on client_
-            client_.sync_local();      
-	    // full_sync==true:  no notification on the GUI side
+            client_.sync_local();
+            // full_sync==true:  no notification on the GUI side
 
-	    // full_sync==false: incremental change, notification
-	    // received through ::update (ecf_node)
+            // full_sync==false: incremental change, notification
+            // received through ::update (ecf_node)
 
-	    gui::message("%s: receiving status", name());
-	    
-	    if (client_.server_reply().full_sync()) {
-	      update_reg_suites(false); // new suite may have been added
-	      reset(false, false); // SUP-398
-	    } else {
-              gui::message("%s: updating status", name());
-              XECFDEBUG std::cout << "# " << name() << ": small update\n";
+            gui::message("%s: receiving status", name());
 
-	      if (Updating::full_redraw()) {
-		redraw(true);
-	      } else if (tree_) 
-                tree_->update_tree(false); // fp:60043 Issue with Ecflow updating on console VM
-              // redraw(false); // too much blinking with this
+            if (client_.server_reply().full_sync()) {
+               update_reg_suites(false); // new suite may have been added
+               reset(false, false); // SUP-398
+            }
+            else {
+               gui::message("%s: updating status", name());
+               XECFDEBUG std::cout << "# " << name() << ": small update\n";
+
+               if (Updating::full_redraw()) {
+                  redraw(true);
+               }
+               else if (tree_) tree_->update_tree(false); // fp:60043 Issue with Ecflow updating on console VM
+               // redraw(false); // too much blinking with this
             }
             err = 0;
             break;
          default:
             break;
       }
-   } catch ( std::exception& e ) {
+   }
+   catch ( std::exception& e ) {
       if (tree_ != 0x0) tree_->connected(False);
       err = -1;
-      gui::message("host::news-error: %s",e.what());
+      gui::message("host::news-error: %s", e.what());
       XECFDEBUG std::cerr << "# host::news-error: " << e.what() << "\n";
    }
    return err;
@@ -1629,8 +1637,7 @@ int ehost::command( int argc, char **argv )
       }
       if (pid == -1) return 1;
    }
-   if (after_command_) 
-     status();
+   if (after_command_) status();
 
    return result;
 }
@@ -1647,7 +1654,7 @@ std::list<std::string>& ehost::history( std::string& last )
       client_.getLog(history_len_);
       boost::split(hist_, client_.server_reply().get_string(), boost::is_any_of("\n"));
    }
-   catch( std::exception& e) {
+   catch ( std::exception& e ) {
       gui::message("history failed: ", e.what());
    }
    return hist_;
@@ -1722,7 +1729,7 @@ host* host_maker::make_host( std::string name, std::string machine, int port )
       if (it != map_.end())
          out = it->second->make(name, machine, port);
       else XECFDEBUG std::cerr << "# cannot create shost " << name << "\t" << machine << "\t"
-               << port << "\n";
+                               << port << "\n";
    }
 
    return out;
@@ -1738,12 +1745,15 @@ void host::login( const std::string& name, int num )
    if (h) h->login();
 }
 
-void ehost::stats(std::ostream& buf) {
-  gui::message("%s: fetching stats", name());
-  // std::stringstream buf; 
-  try {
-    client_.stats(); 
-    client_.server_reply().stats().show(buf);
-    // f.push(buf.str());
-  } catch (std::exception& e ) { }
+void ehost::stats( std::ostream& buf )
+{
+   gui::message("%s: fetching stats", name());
+   // std::stringstream buf;
+   try {
+      client_.stats();
+      client_.server_reply().stats().show(buf);
+      // f.push(buf.str());
+   }
+   catch ( std::exception& e ) {
+   }
 }
