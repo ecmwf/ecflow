@@ -4,14 +4,14 @@
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 // Name        :
 // Author      : Avi
-// Revision    : $Revision: #10 $ 
+// Revision    : $Revision: #10 $
 //
-// Copyright 2009-2012 ECMWF. 
-// This software is licensed under the terms of the Apache Licence version 2.0 
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
-// In applying this licence, ECMWF does not waive the privileges and immunities 
-// granted to it by virtue of its status as an intergovernmental organisation 
-// nor does it submit to any jurisdiction. 
+// Copyright 2009-2012 ECMWF.
+// This software is licensed under the terms of the Apache Licence version 2.0
+// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+// In applying this licence, ECMWF does not waive the privileges and immunities
+// granted to it by virtue of its status as an intergovernmental organisation
+// nor does it submit to any jurisdiction.
 //
 // Description :
 //               Used on the client side, to notify any registered observers of
@@ -30,61 +30,66 @@
 
 class ChangeMgrSingleton : private boost::noncopyable {
 public:
-	static ChangeMgrSingleton* instance();
+   static ChangeMgrSingleton* instance();
 
-	// Returns the ChangeMgr singleton without creating it
+   // Returns the ChangeMgr singleton without creating it
    static ChangeMgrSingleton* exists();
 
-	/// Attach/detatch interest in incremental change
-	void attach(Node*,AbstractObserver*);
-	void attach(Defs*,AbstractObserver*);
+   /// Attach/detach interest in incremental change to the node
+   void attach(Node*,AbstractObserver*);
+   void attach(Defs*,AbstractObserver*);
 	void detach(Node*,AbstractObserver*);
 	void detach(Defs*,AbstractObserver*);
 
-	/// Used in debug:
-   size_t no_of_node_observers() const { return node_obs_map_.size(); }
-   size_t no_of_def_observers() const { return defs_obs_vec_.size(); }
+   /// Used in debug:
+   size_t no_of_node_observers() const { return map_.size(); }
+   size_t no_of_def_observers() const { return defs_map_.size(); }
 
-	/// returns true if we are in a notification. Help client code to avoid infinite cycles
-	bool in_notification() const { return in_notification_;}
+   /// Detach interest in incremental changes to the node
+   void detach(Node*);
+   void detach(Defs*);
 
-	/// The cumulated aspect are sent, when we do a the real notification
-   void add_aspect(ecf::Aspect::Type aspect) { aspects_vec_.push_back(aspect); }
+   /// returns true if we are in a notification. Help client code to avoid infinite cycles
+   bool in_notification() const { return in_notification_;}
+
+   /// The cumulated aspect are sent, when we do a the real notification
+   void add_aspect(ecf::Aspect::Type aspect) { aspects_vec_.push_back(aspect) ;}
    void clear_aspects() { aspects_vec_.clear(); }
 
-	/// Notify observer of a incremental change to Node
-	/// Will return true for in_notification()
-	void notify(node_ptr);
-
-	/// Notify observer of a incremental change to Defs,
-	/// Currently state or suspended attribute changes
+   /// Notify observer of a incremental change to Node
    /// Will return true for in_notification()
-	void notify(defs_ptr);
+   void notify(node_ptr);
 
-	/// Inform observers when the subject is about to be deleted
-	/// The Observers *MUST* remember to call detach
+   /// Notify observer of a incremental change to Defs,
+   /// Currently state or suspended attribute changes
+   /// Will return true for in_notification()
+   void notify(defs_ptr);
+
+   /// Inform observers when the subject is about to be deleted
+   /// The Observers *MUST* remember to call detach
    void notify_delete(Node*);
    void notify_delete(Defs*);
 
-	static void destroy();
+   static void destroy();
 
 private:
 
-	ChangeMgrSingleton();
-	~ChangeMgrSingleton();
+   ChangeMgrSingleton();
+   ~ChangeMgrSingleton();
 
    /// Start of notifications:
    ///   Aspect sent upon  notify(node_ptr); notify(defs_ptr);
    void notify_start() { in_notification_ = true; }
-	void notify_end() { in_notification_ = false; }
+   void notify_end() { in_notification_ = false; }
 
 private:
-	// Allow multiple observers per subject
-	std::multimap<Node*,AbstractObserver*> node_obs_map_;
+   std::map<Node*,AbstractObserver*> map_;
+   typedef std::map<Node*,AbstractObserver*>  NodeObserverMap_t;
 
-	std::vector< std::pair<Defs*,AbstractObserver*> > defs_obs_vec_;
+   std::map<Defs*,AbstractObserver*> defs_map_;
+   typedef std::map<Defs*,AbstractObserver*>  DefsObserverMap_t;
 
-	std::vector<ecf::Aspect::Type> aspects_vec_;
+   std::vector<ecf::Aspect::Type> aspects_vec_;
    static ChangeMgrSingleton* instance_;
 
    bool in_notification_;

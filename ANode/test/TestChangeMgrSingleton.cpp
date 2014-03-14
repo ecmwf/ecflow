@@ -61,9 +61,9 @@ BOOST_AUTO_TEST_CASE( test_change_mgr_singleton )
       MyObserver defs_obs(theDefs.get());
       BOOST_CHECK_MESSAGE(ChangeMgrSingleton::instance()->no_of_def_observers() == 1,"Expected one observer");
 
-      MyObserver defs_obs2(theDefs.get());
-      MyObserver defs_obs3(theDefs.get());
-      BOOST_CHECK_MESSAGE(ChangeMgrSingleton::instance()->no_of_def_observers() == 3,"Expected 3 observer");
+//      MyObserver defs_obs2(theDefs.get());
+//      MyObserver defs_obs3(theDefs.get());
+//      BOOST_CHECK_MESSAGE(ChangeMgrSingleton::instance()->no_of_def_observers() == 3,"Expected 3 observer");
 
       ChangeMgrSingleton::instance()->notify(theDefs);
       ChangeMgrSingleton::instance()->notify(theDefs);
@@ -71,8 +71,8 @@ BOOST_AUTO_TEST_CASE( test_change_mgr_singleton )
       ChangeMgrSingleton::instance()->notify(theDefs);
       ChangeMgrSingleton::instance()->notify(theDefs);
       BOOST_CHECK_MESSAGE( defs_obs.update_count() == 5,"Expected 5 update");
-      BOOST_CHECK_MESSAGE( defs_obs2.update_count() == 5,"Expected 5 update");
-      BOOST_CHECK_MESSAGE( defs_obs3.update_count() == 5,"Expected 5 update");
+//      BOOST_CHECK_MESSAGE( defs_obs2.update_count() == 5,"Expected 5 update");
+//      BOOST_CHECK_MESSAGE( defs_obs3.update_count() == 5,"Expected 5 update");
 
       theDefs.reset();
       BOOST_CHECK_MESSAGE(ChangeMgrSingleton::instance()->no_of_def_observers() == 0,"Expected no observer");
@@ -98,11 +98,11 @@ BOOST_AUTO_TEST_CASE( test_change_mgr_singleton )
          }
          BOOST_CHECK_MESSAGE(ChangeMgrSingleton::instance()->no_of_node_observers() == 3,"Expected 3 observer");
 
-         // Now add another set of observers
-         for(size_t i = 0; i < node_vec.size(); ++i) {
-            obs_vec.push_back( new MyObserver( node_vec[i].get() ) );
-         }
-         BOOST_CHECK_MESSAGE(ChangeMgrSingleton::instance()->no_of_node_observers() == 6,"Expected 6 observer");
+//         // Now add another set of observers
+//         for(size_t i = 0; i < node_vec.size(); ++i) {
+//            obs_vec.push_back( new MyObserver( node_vec[i].get() ) );
+//         }
+//         BOOST_CHECK_MESSAGE(ChangeMgrSingleton::instance()->no_of_node_observers() == 6,"Expected 6 observer");
 
          // Do some updates
          for(size_t i = 0; i < node_vec.size(); ++i) {
