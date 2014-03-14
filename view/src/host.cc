@@ -122,6 +122,8 @@
 #include "menus.h"
 /* #include <proc/readproc.h> */
 
+bool Updating::do_full_redraw_ = false;
+
 class SelectNode {
 public:
   SelectNode(host* h) : host_(h)  {
@@ -141,21 +143,6 @@ private:
   host *host_;
   node *selected_;
   std::string current_;
-};
-
-
-class Updating {
-public:
-  Updating(host* h) : host_(h) {
-    host_->updating(true);
-  }
-
-  ~Updating() {
-    host_->updating(false);
-  }
-
-private:
-  host* host_;
 };
 
 host::host( const std::string& name, const std::string& host, int number )
@@ -1571,7 +1558,10 @@ int ehost::update()
 	    } else {
               gui::message("%s: updating status", name());
               XECFDEBUG std::cout << "# " << name() << ": small update\n";
-              if (tree_) 
+
+	      if (Updating::full_redraw()) {
+		redraw(true);
+	      } else if (tree_) 
                 tree_->update_tree(false); // fp:60043 Issue with Ecflow updating on console VM
               // redraw(false); // too much blinking with this
             }

@@ -565,8 +565,9 @@ void ecf_concrete_node<Node>::update(const Node* n,
   }
 
   if (is_reset(aspect)) {
-      host& serv = node_->serv();
-      serv.redraw(true);   
+     /* host& serv = node_->serv();      
+	serv.redraw(true);   */
+     Updating::set_full_redraw();
     return;
   } else {
     node_->delvars();
