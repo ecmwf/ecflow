@@ -38,6 +38,7 @@ void ChangeMgrSingleton::attach(Node* node,AbstractObserver* a)
 {
 	assert( node );
 	assert( a );
+   assert( !updating_); // should not attach/detach in middle of updating, invalidates iterators
 
 	node_obs_map_.insert(std::make_pair(node,a));
 
@@ -61,12 +62,13 @@ void ChangeMgrSingleton::detach(Node* node,AbstractObserver* a)
 {
    assert( node);
    assert( a );
+   assert( !updating_); // should not attach/detach in middle of updating, invalidates iterators
+
 #ifdef DEBUG_NODE
    cout << "ChangeMgrSingleton::detach(Node*) observer=" << a;
    if (node) cout << " node " << node->absNodePath() << "\n";
    else   cout << " **NULL** node\n";
 #endif
-
 
    // equal_range(b) returns pair<iterator,iterator> representing the range of elements with key(Node*)
    typedef multimap<Node*, AbstractObserver*>::iterator iterator;
@@ -123,6 +125,8 @@ void ChangeMgrSingleton::notify(node_ptr node)
    else   cout << " **NULL** node\n";
 #endif
 
+   ChangeMgrStartUpdating updating;
+
    // equal_range(b) returns pair<iterator,iterator> representing the range of element with key node
    typedef multimap<Node*, AbstractObserver*>::iterator iterator;
    std::pair<iterator, iterator> iter_pair = node_obs_map_.equal_range(node.get());
@@ -145,6 +149,7 @@ void ChangeMgrSingleton::notify(defs_ptr defs)
    cout << "ChangeMgrSingleton::notify(Defs*)\n";
 #endif
    assert(defs.get());
+
    std::vector< std::pair<Defs*,AbstractObserver*> >::iterator i;
    for(i = defs_obs_vec_.begin(); i != defs_obs_vec_.end(); ++i) {
       if ((*i).first == defs.get()) {
@@ -236,5 +241,5 @@ void ChangeMgrSingleton::destroy()
 	instance_ = NULL;
 }
 
-ChangeMgrSingleton::ChangeMgrSingleton() : in_notification_(false) {}
+ChangeMgrSingleton::ChangeMgrSingleton() : in_notification_(false), updating_(false) {}
 ChangeMgrSingleton::~ChangeMgrSingleton() {}

@@ -78,6 +78,9 @@ private:
    void notify_start() { in_notification_ = true; }
 	void notify_end() { in_notification_ = false; }
 
+   void update_start() { updating_ = true; }
+   void update_end() { updating_ = false; }
+
 private:
 	// Allow multiple observers per subject
 	std::multimap<Node*,AbstractObserver*> node_obs_map_;
@@ -88,6 +91,7 @@ private:
    static ChangeMgrSingleton* instance_;
 
    bool in_notification_;
+   bool updating_;
    friend class ChangeMgrStartNotification;
 };
 
@@ -97,6 +101,14 @@ class ChangeMgrStartNotification : private boost::noncopyable {
 public:
    ChangeMgrStartNotification() { ChangeMgrSingleton::instance()->notify_start();}
    ~ChangeMgrStartNotification() { ChangeMgrSingleton::instance()->notify_end();}
+};
+
+// Start notification. End notification automatically signalled, Even if exception raised.
+// Note: notify_end() is also called in notify(node_ptr), notify(defs_ptr)
+class ChangeMgrStartUpdating : private boost::noncopyable {
+public:
+   ChangeMgrStartUpdating() { ChangeMgrSingleton::instance()->update_start();}
+   ~ChangeMgrStartUpdating() { ChangeMgrSingleton::instance()->update_end();}
 };
 
 #endif
