@@ -145,7 +145,6 @@ public:
       if (kind_ == 'c') return node_->completeAst();
       return node_->triggerAst();
    }
-   ;
 };
 
 class ecf_node : public observable {
@@ -260,7 +259,7 @@ public:
    virtual void why( std::ostream & ) const
    {
    }
-   ;
+
    virtual std::string get_var( const std::string& name, bool is_gen = false,
                                 bool substitute = false )
    {
@@ -339,7 +338,6 @@ public:
    virtual void set_graphic_ptr( node* )
    {
    }
-   ;
 
    T* get() const
    {
@@ -404,7 +402,6 @@ public:
    virtual void make_subtree()
    {
    }
-   ;
 
    virtual std::ostream& print( std::ostream& s ) const
    {
@@ -448,7 +445,7 @@ public:
    virtual void why( std::ostream & ) const
    {
    }
-   ;
+
    virtual std::string get_var( const std::string& name, bool is_gen = false,
                                 bool substitute = false )
    {
@@ -505,7 +502,6 @@ private:
       }
       return reset;
    }
-
 };
 
 template<class T>
