@@ -102,7 +102,6 @@ void ChangeMgrSingleton::notify(node_ptr n)
    NodeObserverMap_t::iterator i = map_.find(n.get());
    if (i != map_.end()) {
       (*i).second->update(n.get(),aspects_vec_);
-      notify_end();
       return;
    }
    // ************************************************************************
@@ -124,7 +123,6 @@ void ChangeMgrSingleton::notify(defs_ptr defs)
    DefsObserverMap_t::iterator i = defs_map_.find(defs.get());
    if (i != defs_map_.end()) {
       (*i).second->update(defs.get(),aspects_vec_);
-      notify_end();
       return;
    }
 
