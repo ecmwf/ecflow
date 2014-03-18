@@ -560,17 +560,18 @@ void ecf_concrete_node<Node>::update(const Node* n,
 {
   if (!owner_) return; 
   if (!node_) return;
-  if (owner_->suite()->begun()) {
-    owner_->update_generated_variables();   
-  }
-
   if (is_reset(aspect)) {
-     /* host& serv = node_->serv();      
-	serv.redraw(true);   */
+     /*
+      host& serv = node_->serv();
+	   serv.redraw(true);
+	   */
      Updating::set_full_redraw();
     return;
   } else {
     node_->delvars();
+    if (owner_->suite()->begun()) {
+      owner_->update_generated_variables();
+    }
     std::vector<Variable> gvar; 
     n->gen_variables(gvar);
     std::vector<Variable>::const_iterator it, gvar_end;
