@@ -379,12 +379,10 @@ template <class T>
 void make_kids_list(ecf_node* parent, 
                     const std::vector<boost::shared_ptr<T> >& v) 
 {
-  int count = 0;
   for(typename std::vector<boost::shared_ptr<T> >::
         const_reverse_iterator j = v.rbegin(); j != v.rend() ; 
       ++j) {
     parent->add_kid(make_node((*j).get(), parent));
-    count++;
   }
 }
 
