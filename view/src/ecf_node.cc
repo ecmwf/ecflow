@@ -318,10 +318,14 @@ void ecf_concrete_node<Node>::make_subtree() {
   make_kids_list(this,n->limits());
   make_kids_list(this,n->inlimits());
   
-  if (n->get_trigger())    
-    add_kid(make_node(new ExpressionWrapper(n, 't'), this, 't'));
-  if (n->get_complete())   
-    add_kid(make_node(new ExpressionWrapper(n, 'c'), this, 'c'));
+  if (n->get_trigger()) { 
+    trigger_ = new ExpressionWrapper(n, 't');
+    add_kid(make_node(trigger_, this, 't'));
+  }
+  if (n->get_complete()) {
+    complete_ = new ExpressionWrapper(n, 'c');
+    add_kid(make_node(complete_, this, 'c'));
+  }
 
   if (n->get_late() != 0x0) { add_kid(make_node(n->get_late(), this)); }
 
@@ -390,10 +394,14 @@ void ecf_concrete_node<Suite>::make_subtree() {
   make_kids_list(this,n->limits());
   make_kids_list(this,n->inlimits());
   
-  if (n->get_trigger())    
-    add_kid(make_node(new ExpressionWrapper(n, 't'), this, 't'));
-  if (n->get_complete())   
-    add_kid(make_node(new ExpressionWrapper(n, 'c'), this, 'c'));
+  if (n->get_trigger()) { 
+    trigger_ = new ExpressionWrapper(n, 't');
+    add_kid(make_node(trigger_, this, 't'));
+  }
+  if (n->get_complete()) {
+    complete_ = new ExpressionWrapper(n, 'c');
+    add_kid(make_node(complete_, this, 'c'));
+  }
 
   if (n->get_late() != 0x0) { add_kid(make_node(n->get_late(), this)); }
   if ((!n->repeat().empty())) {
