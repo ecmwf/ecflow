@@ -98,6 +98,7 @@ void ecf_node::update(const Defs*, const std::vector<ecf::Aspect::Type>&)
 
 void ecf_node::update_delete(const Node* n) { 
   if (node_) node_->unlink(); 
+  if (!node_) return;
   node *parent = node_->parent();
   node_->visibility(False);
   node_->remove();
@@ -155,6 +156,7 @@ ecf_node::ecf_node(ecf_node* parent, const std::string& name, char k)
 
 ecf_node::~ecf_node() 
 {  
+  // std::cerr << "# eode del: " << full_name_ << std::endl;
   nokids(true);
   unlink();
 }
@@ -1115,8 +1117,6 @@ void ecf_concrete_node<Defs>::make_subtree() {
   if (!n) return;
   ChangeMgrSingleton::instance()->attach(owner_, this); 
   make_kids_list(this,n->suiteVec());
-  // make_kids_list(this,n->server().user_variables());
-  // make_kids_list(this,n->server().server_variables());
 
   std::vector<Variable>::const_iterator it;
   std::vector<Variable> gvar;

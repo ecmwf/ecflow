@@ -47,6 +47,11 @@ void variables::clear()
 	loading_ = false;
 }
 
+struct cless_than {
+    inline bool operator() (const Variable& v1,  const Variable& v2)    {
+      return (v1.name() < v2.name()); } 
+};
+
 void variables::show(node& n)
 {
    loading_ = true;
@@ -59,12 +64,45 @@ void variables::show(node& n)
 
    XtSetSensitive(edit_,True);
    XmListDeleteAllItems(list_);
+   std::vector<Variable> gvar; 
+   std::vector<Variable>::const_iterator it, gvar_end;
+   ecf_node* prox;
+   Node* ecf;
 
    while(m != 0) {
-      for (node* run = m->kids(); run; run = run->next())
+     /* for (node* run = m->kids(); run; run = run->next())
          if (run->type() == NODE_VARIABLE) {
             varsize = std::max(varsize, (int) run->name().size());
             valsize = std::max(valsize, (int) ((variable_node*) run)->get_var().size());
+	    } */
+         {
+	   prox = m->__node__();
+	   if (!prox) return;
+
+	   if (dynamic_cast<ecf_concrete_node<Node>*>(prox)) {
+	     ecf = dynamic_cast<ecf_concrete_node<Node>*>(prox)->get();
+	   } else if (dynamic_cast<ecf_concrete_node<Task>*>(prox)) {
+	     ecf = dynamic_cast<ecf_concrete_node<Task>*>(prox)->get();
+	   } else if (dynamic_cast<ecf_concrete_node<Family>*>(prox)) {
+	     ecf = dynamic_cast<ecf_concrete_node<Family>*>(prox)->get();
+	   } else if (dynamic_cast<ecf_concrete_node<Suite>*>(prox)) {
+	     ecf = dynamic_cast<ecf_concrete_node<Suite>*>(prox)->get();
+	   }
+	   if (!ecf) return;
+	   ecf->gen_variables(gvar);
+	   for (it = gvar.begin(); it != gvar.end(); ++it) {
+	     varsize = std::max(varsize, (int) (*it).name().size());
+	     valsize = std::max(varsize, (int) (*it).theValue().size());
+	   }
+
+	   gvar.clear();
+	   gvar = ecf->variables();
+	   gvar_end = gvar.end();
+	   for (it = gvar.begin(); it != gvar_end; ++it) {
+	     varsize = std::max(varsize, (int) (*it).name().size());
+	     valsize = std::max(varsize, (int) (*it).theValue().size());
+	   }
+	   gvar.clear();
          }
       m = m->parent();
    }
@@ -77,23 +115,38 @@ void variables::show(node& n)
       node *m = &n;
       while(m != 0) {
          sprintf(buffer,"Variables defined for %s %s", m->type_name(), m->name().c_str());
-
          xec_AddFontListItem(list_,buffer,1);
          {
-            for (node* run = m->kids(); run; run = run->next())
-               if (run->type() == NODE_VARIABLE && run->isGenVariable(0)) {
-                  if (run->name() == "ECF_PASS") continue;
-                  else if (run->name() == "SMSPASS") continue;
-                  sprintf(buffer,fmt1, run->name().c_str(), ((variable_node*)run)->get_var().c_str());
-                  xec_AddFontListItem(list_,buffer,0);
-               }
-         }
-         {
-            for (node* run = m->kids(); run; run = run->next())
-               if (run->type() == NODE_VARIABLE && ! run->isGenVariable(0)) {
-                  sprintf(buffer,fmt2,run->name().c_str(), ((variable_node*)run)->get_var().c_str());
-                  xec_AddFontListItem(list_,buffer,0);
-               }
+	   prox = m->__node__();
+	   if (!prox) break;
+
+	   if (dynamic_cast<ecf_concrete_node<Node>*>(prox)) {
+	     ecf = dynamic_cast<ecf_concrete_node<Node>*>(prox)->get();
+	   } else if (dynamic_cast<ecf_concrete_node<Task>*>(prox)) {
+	     ecf = dynamic_cast<ecf_concrete_node<Task>*>(prox)->get();
+	   } else if (dynamic_cast<ecf_concrete_node<Family>*>(prox)) {
+	     ecf = dynamic_cast<ecf_concrete_node<Family>*>(prox)->get();
+	   } else if (dynamic_cast<ecf_concrete_node<Suite>*>(prox)) {
+	     ecf = dynamic_cast<ecf_concrete_node<Suite>*>(prox)->get();
+	   }
+	   if (!ecf) break;
+	   ecf->gen_variables(gvar);
+	   for (it = gvar.begin(); it != gvar.end(); ++it) {
+	     if ((*it).name() == "" || *it == Variable::EMPTY() || (*it).name() == "ECF_PASS") 
+	       continue;
+	     sprintf(buffer,fmt1, (*it).name().c_str(), (*it).theValue().c_str());
+	     xec_AddFontListItem(list_,buffer,0);
+	   }
+	   gvar.clear();
+
+	   gvar = ecf->variables();
+	   std::sort(gvar.begin(),gvar.end(),cless_than());
+	   gvar_end = gvar.end();
+	   for (it = gvar.begin(); it != gvar_end; ++it) {
+	     sprintf(buffer,fmt2,(*it).name().c_str(), (*it).theValue().c_str());
+	     xec_AddFontListItem(list_,buffer,0);
+	   }
+	   gvar.clear();
          }
          m=m->parent();
       }
@@ -229,12 +282,15 @@ void variables::deleteCB( Widget, XtPointer )
     char *name = XmTextGetString(name_);  
     const char* fullname = get_node()->full_name().c_str();
     if(confirm::ask(False,"Delete variable %s for node %s",name, fullname)) {
-      if (get_node()->__node__()) /* ecflow */
-	get_node()->serv().command(clientName, "--alter", "delete", "variable",
-				   name, fullname, NULL);
-      else
-	get_node()->serv().command("alter", "-vr", fullname, name, NULL);
-    }
+      // repeat get_node while suite may have been cancelled by another
+      // while answering this question
+      if (get_node()){
+	if (get_node()->__node__()) /* ecflow */
+	  get_node()->serv().command(clientName, "--alter", "delete", "variable",
+				     name, fullname, NULL);
+	else
+	  get_node()->serv().command("alter", "-vr", fullname, name, NULL);
+      }}
     XtFree(name);
     update();
   }

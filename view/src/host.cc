@@ -258,7 +258,10 @@ host* host::find( const std::string& name )
 node* host::find( const std::string& sms, const std::string& n )
 {
    host* h = find(sms);
-   return (h && h->top_) ? h->top_->find(n.c_str()) : 0x0;
+   if (h && h->top_) 
+     return h->top_->find(n.c_str());
+
+   return 0x0;
 }
 
 void host::status( Boolean force )
@@ -1569,7 +1572,8 @@ int ehost::update()
                if (Updating::full_redraw()) {
                   redraw(true);
                }
-               else if (tree_) tree_->update_tree(false); // fp:60043 Issue with Ecflow updating on console VM
+               else if (tree_) tree_->update_tree(false); 
+	       // fp:60043 Issue with Ecflow updating on console VM
                // redraw(false); // too much blinking with this
             }
             err = 0;

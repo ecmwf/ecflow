@@ -23,7 +23,7 @@
 
 const Label& label_node::get() {
   ecf_concrete_node<const Label>* base = 
-    dynamic_cast<ecf_concrete_node<const Label>*> (owner_.get());
+    dynamic_cast<ecf_concrete_node<const Label>*> (owner_);
   if (base) return *(base->get());
   if (parent() && parent()->__node__())
     return parent()->__node__()->get_label(name());

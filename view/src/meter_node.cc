@@ -35,7 +35,7 @@ meter_node::meter_node(host& h,ecf_node* n)
 
 const Meter&  meter_node::get() const {
   ecf_concrete_node<const Meter>* base = 
-    dynamic_cast<ecf_concrete_node<const Meter>*> (owner_.get());
+    dynamic_cast<ecf_concrete_node<const Meter>*> (owner_);
   if (base) return *(base->get());
   if (parent() && parent()->__node__())
       return parent()->__node__()->get_meter(name_);

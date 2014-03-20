@@ -299,9 +299,9 @@ Boolean simple_node::isDefComplete() const {
   }
 #endif
   if (!owner_) return False;
-  else if (!owner_.get()) 
+  else if (!owner_) 
     return False;
-  else if (owner_.get()->defstatus() == STATUS_COMPLETE) 
+  else if (owner_->defstatus() == STATUS_COMPLETE) 
     return True;
   Node* ecf = __node__() ? __node__()->get_node() : 0;
   if (ecf) {
@@ -310,9 +310,6 @@ Boolean simple_node::isDefComplete() const {
       if (t->evaluate())
         return True;
   }
-  // if (ecf_node::none() != owner_.get()->get_var("ECF_DUMMY_TASK"))
-  //   return True;
-
   return False;
 }
 
@@ -346,7 +343,7 @@ void simple_node::info(std::ostream& f)
   node::info(f);
   f << type_name() << " " << name() << "\n";
   {
-    if (owner_.get()) {
+    if (owner_) {
 
       if (owner_->type() == NODE_SUITE) {
 	Suite* suite = dynamic_cast<Suite*>(owner_->get_node());
@@ -356,11 +353,11 @@ void simple_node::info(std::ostream& f)
 	}
       }
 
-      int defs = owner_.get()->defstatus();
+      int defs = owner_->defstatus();
       if (defs != STATUS_QUEUED && defs != STATUS_UNKNOWN)
         f << inc << "defstatus " << ecf::status_name[defs] << "\n";
 
-      Node* node = owner_.get()->get_node();
+      Node* node = owner_->get_node();
       if (node) {
         // if (node->repeat().toString() != "") // repeat // duplicated on suite node
         //  f << inc << node->repeat().toString() << "\n";
@@ -572,7 +569,7 @@ void simple_node::triggers(trigger_lister& tlr)
     }
     else 
 #endif
-    if (owner_.get()) {
+    if (owner_) {
      if (type() != NODE_SUPER && type() != NODE_SUITE) {
        Node* ecf = __node__() ? __node__()->get_node() : 0;
        std::set<node*> theSet;

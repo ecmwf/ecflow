@@ -24,6 +24,7 @@ class ecf_node;
 #include <ChangeMgrSingleton.hpp>
 class node;
 #include <boost/shared_ptr.hpp>
+#include <boost/enable_shared_from_this.hpp>
 
 #if 0
 struct ext_node;
@@ -147,7 +148,9 @@ public:
    }
 };
 
-class ecf_node : public observable {
+class ecf_node : public boost::enable_shared_from_this<ecf_node>
+ , public observable 
+{
 private:
    ecf_node* parent_;
 
@@ -308,7 +311,7 @@ template<class T>
 class ecf_concrete_node : public ecf_node, public AbstractObserver {
 private:
    T* owner_;
-
+   ExpressionWrapper *trigger_, *complete_;
 private:
    ecf_concrete_node( const ecf_concrete_node& );
    ecf_concrete_node& operator=( const ecf_concrete_node& );
@@ -321,7 +324,10 @@ protected:
 
 public:
    ecf_concrete_node( T* owner, ecf_node* parent, char c = 'd' )
-            : ecf_node(parent, owner ? owner->name() : ecf_node::none(), c), owner_(owner)
+     : ecf_node(parent, owner ? owner->name() : ecf_node::none(), c)
+     , owner_(owner)
+     , trigger_(0x0)
+     , complete_(0x0)
    {
       if (0 && parent) {
          full_name_ = parent->full_name();
@@ -333,6 +339,8 @@ public:
    ~ecf_concrete_node()
    {
       unlink();
+      delete trigger_;
+      delete complete_;
    }
 
    virtual void set_graphic_ptr( node* )
