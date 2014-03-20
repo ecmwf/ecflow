@@ -46,6 +46,8 @@ using namespace ecf;
 using namespace std;
 
 //#define DEBUG_JOB_SUBMISSION 1
+//#define DEBUG_MEMENTO 1
+
 Defs::Defs() :
    state_change_no_(0),
    modify_change_no_( 0 ),
@@ -1228,7 +1230,6 @@ void Defs::collateChanges(unsigned int client_handle, DefsDelta& incremental_cha
       client_suite_mgr_.collateChanges(client_handle,incremental_changes);
    }
 }
-
 
 void Defs::collate_defs_changes_only(DefsDelta& incremental_changes) const
 {

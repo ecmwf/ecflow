@@ -283,7 +283,7 @@ void Node::incremental_changes( DefsDelta& changes, compound_memento_ptr& comp) 
 void Node::set_memento(const StateMemento* memento) {
 
 #ifdef DEBUG_MEMENTO
-	std::cout << "Node::set_memento(const StateMemento* memento) " << debugNodePath() << "\n";
+	std::cout << "Node::set_memento(const StateMemento* memento) " << debugNodePath() << "  " << NState::toString(memento->state_) << "\n";
 #endif
 	setStateOnly( memento->state_ );
 }
