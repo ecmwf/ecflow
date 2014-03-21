@@ -1,16 +1,16 @@
 //=============================================================================================
-// Name        : 
-// Author      : 
-// Revision    : $Revision: #19 $ 
+// Name        :
+// Author      :
+// Revision    : $Revision: #19 $
 //
-// Copyright 2009-2012 ECMWF. 
-// This software is licensed under the terms of the Apache Licence version 2.0 
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
-// In applying this licence, ECMWF does not waive the privileges and immunities 
-// granted to it by virtue of its status as an intergovernmental organisation 
-// nor does it submit to any jurisdiction. 
+// Copyright 2009-2012 ECMWF.
+// This software is licensed under the terms of the Apache Licence version 2.0
+// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+// In applying this licence, ECMWF does not waive the privileges and immunities
+// granted to it by virtue of its status as an intergovernmental organisation
+// nor does it submit to any jurisdiction.
 //
-// Description : 
+// Description :
 //=============================================================================================
 
 #include "variables.h"
@@ -67,6 +67,8 @@ void variables::show( node& n )
    XmListDeleteAllItems(list_);
    std::vector<Variable> gvar;
    std::vector<Variable>::const_iterator it, gvar_end;
+   ecf_node* prox;
+   Node* ecf = 0;
 
    while ( m != 0 ) {
       /* for (node* run = m->kids(); run; run = run->next())
@@ -75,10 +77,9 @@ void variables::show( node& n )
        valsize = std::max(valsize, (int) ((variable_node*) run)->get_var().size());
        } */
       {
-         ecf_node* prox = m->__node__();
+         prox = m->__node__();
          if (!prox) return;
 
-         Node* ecf = 0;
          if (dynamic_cast<ecf_concrete_node<Node>*>(prox)) {
             ecf = dynamic_cast<ecf_concrete_node<Node>*>(prox)->get();
          }
@@ -92,20 +93,20 @@ void variables::show( node& n )
             ecf = dynamic_cast<ecf_concrete_node<Suite>*>(prox)->get();
          }
          if (!ecf) return;
+
+         gvar.clear();
          ecf->gen_variables(gvar);
          for(it = gvar.begin(); it != gvar.end(); ++it) {
             varsize = std::max(varsize, (int) (*it).name().size());
             valsize = std::max(varsize, (int) (*it).theValue().size());
          }
 
-         gvar.clear();
          gvar = ecf->variables();
          gvar_end = gvar.end();
          for(it = gvar.begin(); it != gvar_end; ++it) {
             varsize = std::max(varsize, (int) (*it).name().size());
             valsize = std::max(varsize, (int) (*it).theValue().size());
          }
-         gvar.clear();
       }
       m = m->parent();
    }
@@ -120,10 +121,9 @@ void variables::show( node& n )
          sprintf(buffer, "Variables defined for %s %s", m->type_name(), m->name().c_str());
          xec_AddFontListItem(list_, buffer, 1);
          {
-            ecf_node* prox = m->__node__();
+            prox = m->__node__();
             if (!prox) break;
 
-            Node* ecf = 0;
             if (dynamic_cast<ecf_concrete_node<Node>*>(prox)) {
                ecf = dynamic_cast<ecf_concrete_node<Node>*>(prox)->get();
             }
@@ -137,13 +137,14 @@ void variables::show( node& n )
                ecf = dynamic_cast<ecf_concrete_node<Suite>*>(prox)->get();
             }
             if (!ecf) break;
+
+            gvar.clear();
             ecf->gen_variables(gvar);
             for(it = gvar.begin(); it != gvar.end(); ++it) {
                if ((*it).name() == "" || *it == Variable::EMPTY() || (*it).name() == "ECF_PASS") continue;
                sprintf(buffer, fmt1, (*it).name().c_str(), (*it).theValue().c_str());
                xec_AddFontListItem(list_, buffer, 0);
             }
-            gvar.clear();
 
             gvar = ecf->variables();
             std::sort(gvar.begin(), gvar.end(), cless_than());
@@ -152,7 +153,6 @@ void variables::show( node& n )
                sprintf(buffer, fmt2, (*it).name().c_str(), (*it).theValue().c_str());
                xec_AddFontListItem(list_, buffer, 0);
             }
-            gvar.clear();
          }
          m = m->parent();
       }
