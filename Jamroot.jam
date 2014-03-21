@@ -19,7 +19,6 @@ build-project Client ;
 build-project CSim ;
 build-project Server ;
 build-project Test ;
-build-project TestEcfSms ;
 
 # The gui is not built on HPUX and IBM(power6) platforms
 import os ;
@@ -45,14 +44,16 @@ local dest_dir = [ os.environ ECFLOW_DESTDIR ] ;
 dest_dir default = "" ;
 constant ECFLOW_DESTDIR : $(dest_dir) ;
 
+local ECFLOW_VERSION = [ SHELL "cd $(TOP); ./version.sh" ] ;
 local install_dir = [ os.environ ECFLOW_INSTALL_DIR ] ;
-install_dir default = "/usr/local/apps/ecflow" ; 
+install_dir default = "/usr/local/apps/ecflow/$(ECFLOW_VERSION)" ; 
 constant ECFLOW_INSTALL_DIR : $(install_dir) ;
 
 local python_install_dir = [ os.environ ECFLOW_PYTHON_INSTALL_DIR ] ;
-python_install_dir default = $(install_dir)/lib ; 
+python_install_dir default = $(install_dir)/lib/python2.7/site-packages/ecflow ; 
 constant ECFLOW_PYTHON_INSTALL_DIR : $(python_install_dir) ;
 
+#echo "ECFLOW_VERSION            = '$(ECFLOW_VERSION)'" ;
 #echo "ECFLOW_DESTDIR            = '$(ECFLOW_DESTDIR)'" ;
 #echo "ECFLOW_INSTALL_DIR        = '$(ECFLOW_INSTALL_DIR)'" ;
 #echo "ECFLOW_PYTHON_INSTALL_DIR = '$(ECFLOW_PYTHON_INSTALL_DIR)'" ;
@@ -78,7 +79,7 @@ constant ECFLOW_PYTHON_INSTALL_DIR : $(python_install_dir) ;
 #      bjam -d2 install-viewer
 #
 # Make sure for ECMWF that ECFLOW_INSTALL_DIR leaf directory encompasses version number
-# that ties up with ACore/src/Version.cpp
+# that ties up with $WK/VERSION.cmake
 #
  
 # Do no call this on the command line, prefer bjam install-all || install-viewer

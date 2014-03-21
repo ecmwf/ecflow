@@ -211,7 +211,6 @@ ServerEnvironment::~ServerEnvironment()
 bool ServerEnvironment::valid(std::string& errorMsg) const
 {
    /// This must be called *AFTER* the constructor
- 	if (debug()) dump();
 
  	if (serverHost_.empty()) {
   		errorMsg = "Could not determine the server host.";
@@ -324,7 +323,7 @@ bool ServerEnvironment::valid(std::string& errorMsg) const
 	bool parse_result  = theFile.parse(nonConstThis->validUsers_,errorMsg);
 
    if (debug()) {
-      dump_valid_users();
+      std::cout << dump_valid_users() << "\n";
    }
 	return parse_result;
 }
@@ -583,7 +582,6 @@ std::string ServerEnvironment::dump() const
 	ss << "ECF_URL_BASE = '" << urlBase_ << "'\n";
 	ss << "ECF_URL = '" << url_ << "'\n";
 	ss << "ECF_MICRO = '" << ecf_micro_ << "'\n";
-   ss << "ECF_LISTS = '" << ecf_white_list_file_ << "'\n";
    ss << "check pt save time alarm " << checkpt_save_time_alarm_ << "\n";
    ss << "Job generation " << jobGeneration_ << "\n";
    ss << "Server host name " << serverHost_ << "\n";
@@ -600,11 +598,12 @@ std::string ServerEnvironment::dump() const
 std::string ServerEnvironment::dump_valid_users() const
 {
    std::stringstream ss;
-   if (validUsers_.empty()) ss << "No users specified. Everyone has read/write access\n";
+   ss << "ECF_LISTS = '" << ecf_white_list_file_ << "'\n";
+   if (validUsers_.empty()) ss << " No users specified. Everyone has read/write access\n";
 
    std::map<std::string,bool>::const_iterator i;
    for(i=validUsers_.begin(); i!= validUsers_.end(); ++i) {
-      ss << "User: " << (*i).first;
+      ss << " User: " << (*i).first;
       if ((*i).second) ss << " has read/write access\n";
       else            ss << " has read access only\n";
    }

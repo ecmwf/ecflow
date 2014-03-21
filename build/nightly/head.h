@@ -28,20 +28,53 @@ export PID_RID=$$
 # Shorten normal timeout for child commands to one hour
 export ECF_TIMEOUT=3600
 
-###################################################################################
+#==================================================================================================
 
 export BOOST_ROOT=%BOOST_DIR%/%BOOST_VERSION%
 ECFLOW_INSTALL_PATH=%ECFLOW_LAST_INSTALLED_VERSION%
 
-####################################################################################
+#==================================================================================================
 
 # Used to locate ecrcp,python and ecflow_client
 export PATH=/usr/local/bin:$ECFLOW_INSTALL_PATH/bin:$PATH
 
-if [[ %ARCH% = redhat ]] ; then
+# ==================================================================================================
+# make sure path to the python interpreter is accessible.
+# Boost: This can be hard coded in site-config.jam i.e via using python Or amend the path here
+# cmake: allow cmake to work out python path
 
-   # where to find python
-   export PATH=/usr/local/apps/python/2.7.3-02/bin:$PATH
+if [[ %ARCH% = linux64 ]] ; then
+   #
+   # NOTE: /usr/local/bin provides path to 2.7 PYTHON interpreter
+   #       *MAKE* sure it becomes *BEFORE* /usr/bin as that points to python 2.6
+   #        This is what 'using python' will pick up and add to the include path
+   #
+   export PATH=/usr/local/apps/python/2.7/bin:$PATH
+
+elif [[ %ARCH% = opensuse113  ]] ; then
+
+   export PATH=/usr/local/apps/python/2.7/bin:$PATH
+#export PATH=/usr/local/bin:$PATH
+
+elif [[ %ARCH% = redhat  ]] ; then
+
+   export PATH=/usr/local/apps/python/2.7/bin:$PATH
+
+elif [[ %ARCH% = opensuse103  ]] ; then
+
+   #
+   # NOTE: /usr/local/apps/python/2.7.2-01/bin/ provides path to PYTHON interpreter
+   #       This is what 'using python' will pick up and add to the include path
+   #
+   export PATH=/usr/local/apps/python/2.7.2-01/bin/:/usr/local/bin:$PATH
+
+elif [[ %ARCH% = linux64intel  ]] ; then
+
+   #
+   # NOTE: /usr/local/apps/python/2.7/bin/ provides path to PYTHON interpreter
+   #       This is what 'using python' will pick up and add to the include path
+   #
+   export PATH=/usr/local/apps/python/2.7/bin/:/usr/local/bin:$PATH
 
 elif [[ %ARCH% = hpux ]] ; then
 
@@ -59,8 +92,9 @@ elif [[ %ARCH% = opensuse103  ]] ; then
    # NOTE: /usr/local/apps/python/2.7.2-01/bin/ provides path to PYTHON interpreter
    #       This is what 'using python' will pick up and add to the include path
    #
-   export PATH=/usr/local/apps/gcc/4.2.1/ILP32/bin:/usr/local/apps/python/2.7.2-01/bin:$PATH
+   export PATH=/usr/local/apps/gcc/4.2.1/ILP32/bin:/usr/local/apps/python/2.7/bin:$PATH
 fi
+
 
 # -----------------------------------------------------------------------
 # Check paths especially for python

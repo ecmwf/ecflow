@@ -35,7 +35,7 @@ using namespace ecf;
 using namespace boost::gregorian;
 using namespace boost::posix_time;
 
-#if defined(AIX)
+#if defined(_AIX)
 static int timeout = 30 ;
 #else
 static int timeout = 20 ;

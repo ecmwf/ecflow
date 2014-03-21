@@ -31,7 +31,7 @@ dummy_node::dummy_node(const std::string name)
 {
   next_          = head_;
   head_          = this;
-  owner_ = boost::shared_ptr<ecf_node>(new ecf_concrete_node<dummy_node> (this, 0));
+  owner_ = new ecf_concrete_node<dummy_node> (this, 0);
 }
 
 dummy_node::~dummy_node()
@@ -56,6 +56,3 @@ void dummy_node::info(std::ostream&)
 void dummy_node::perlify(FILE* f) 
 {
 }
-
-// template<> void ecf_concrete_node<dummy_node>::set_graphic_ptr(node* n){}
-

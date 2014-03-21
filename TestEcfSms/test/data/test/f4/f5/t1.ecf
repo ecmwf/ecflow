@@ -1,4 +1,0 @@
-%include <head.h> 
-smslabel info "My name is %NAME%" "My value is %VALUE%" "My date is %DATE%" 
-sleep %SLEEP% 
-%include <tail.h>

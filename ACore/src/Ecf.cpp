@@ -17,6 +17,7 @@
 
 bool Ecf::server_ =  false;
 bool Ecf::debug_equality_ = false;
+unsigned int Ecf::debug_level_ = 0;
 unsigned int Ecf::state_change_no_ = 0;
 unsigned int Ecf::modify_change_no_ = 0;
 

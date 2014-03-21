@@ -44,8 +44,9 @@ void zombies_panel::create (Widget parent, char *widget_name )
 
 void zombies_panel::clear()
 {
-	XmListDeleteAllItems(list_);
-	XtSetSensitive(buttons_,False);
+       selection_.clear();
+       XmListDeleteAllItems(list_);
+       XtSetSensitive(buttons_,False);
 }
 
 void zombies_panel::show(node& n)
@@ -74,42 +75,47 @@ void zombies_panel::browseCB( Widget, XtPointer data)
   char *p = xec_GetString(cb->item);
   if(name_) XtFree(name_);
   name_ = XtNewString(node::find_name(p));
+  if (name_) 
+    selection_.insert(name_);
   XtSetSensitive(buttons_,name_ != 0);
   XtFree(p);
 }
 
-void zombies_panel::deleteCB( Widget, XtPointer )
+void zombies_panel::deleteCB( Widget, XtPointer data)
 {
-	call(ZOMBIE_DELETE);
+  call(ZOMBIE_DELETE, data);
 }
 
-void zombies_panel::acceptCB( Widget, XtPointer )
+void zombies_panel::acceptCB( Widget, XtPointer data)
 {
-	call(ZOMBIE_FOB);
+  call(ZOMBIE_FOB, data);
 }
 
-void zombies_panel::rescueCB( Widget, XtPointer )
+void zombies_panel::rescueCB( Widget, XtPointer data)
 {
-	call(ZOMBIE_RESCUE);
+  call(ZOMBIE_RESCUE, data);
 }
 
-void zombies_panel::terminateCB( Widget, XtPointer )
+void zombies_panel::terminateCB( Widget, XtPointer data)
 {
-	call(ZOMBIE_FAIL);
+  call(ZOMBIE_FAIL, data);
 }
 
-void zombies_panel::killCB( Widget, XtPointer )
+void zombies_panel::killCB( Widget, XtPointer data)
 {
-	call(ZOMBIE_KILL);
+  call(ZOMBIE_KILL, data);
 }
 
-void zombies_panel::call(int mode)
+void zombies_panel::call(int mode, XtPointer data)
 {
   if(!name_)
     XtSetSensitive(buttons_,false);
 
   if(get_node()) {
-    get_node()->serv().zombies(mode,name_);
+    std::set<std::string>::const_iterator item;
+    for (item = selection_.begin(); item != selection_.end(); ++item)
+      get_node()->serv().zombies(mode, (*item).c_str());
+
   } else 
     clear();
   

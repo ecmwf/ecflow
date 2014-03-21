@@ -1,8 +1,0 @@
-%include <head.h>
-echo "I will now sleep for %SLEEP% seconds"
-sleep %SLEEP%
-smsevent a       # Set the first event 
-sleep %SLEEP%    # Sleep a bit more 
-smsevent b       # Set the second event 
-sleep %SLEEP%    # A last nap... 
-%include <tail.h>

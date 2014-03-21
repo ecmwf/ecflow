@@ -13,10 +13,13 @@ def get_installed_ecflow_version():
     
 def get_ecflow_version( work_space ):
     "This will extract ecFlow version from the source code."
-    "If that fails it will look at /usr/local/apps/ecflow/current directory"
     "The version is defined in the file VERSION.cmake"
-    "expecting string of form:  'set( ${PROJECT_NAME}_VERSION_STR  "4.0.1" )' "
-    "will return a list of form `[4,0,1]`"
+    "expecting string of form:"
+    "set( ECFLOW_RELEASE  \"4\" )"
+    "set( ECFLOW_MAJOR    \"0\" )"
+    "set( ECFLOW_MINOR    \"2\" )"
+    "set( ${PROJECT_NAME}_VERSION_STR  \"${ECFLOW_RELEASE}.${ECFLOW_MAJOR}.${ECFLOW_MINOR}\" )"
+    "will return a list of form `[4,0,2]`"
     file = work_space + "/VERSION.cmake"
     ecflow_version = []
     if os.path.exists(file):
@@ -25,15 +28,17 @@ def get_ecflow_version( work_space ):
            for line in version_cpp :
                first_quote = line.find('"')
                second_quote = line.find('"',first_quote+1)
-               if first_quote != -1 and second_quote != -1:
+               if first_quote != -1 and second_quote != -1 :
                    part = line[first_quote+1:second_quote]
-                   ecflow_version = part.split(".")
-                   break;
+                   print "part = " + part
+                   ecflow_version.append(part);
+                   if len(ecflow_version) == 3:  
+                      break;
         finally:
             version_cpp.close();
         
         print "Extracted ecflow version '" + str(ecflow_version) + "' from " + file 
-        return ecflow_version
+        return ecflow_version 
     else:
         return get_installed_ecflow_version()
     

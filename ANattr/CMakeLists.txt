@@ -7,12 +7,16 @@ ecbuild_add_library( TARGET   nodeattr
                      NOINSTALL
                      TYPE     STATIC
                      SOURCES  ${srcs}
-                     LIBS     core ${Ecflow_Boost_LIBS}
-                     INCLUDES ../ACore/src ${Boost_INCLUDE_DIRS} )
+                     LIBS     core  
+                     INCLUDES src
+                              ../ACore/src 
+                    )
 
 file( GLOB test_srcs RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "test/*.cpp" )
 
-ecbuild_add_test( TARGET   nodeattrtest
-                SOURCES  ${test_srcs}
-                LIBS     core nodeattr  ${Ecflow_Test_LIBS}
-                INCLUDES ../ACore/src src ${Boost_INCLUDE_DIRS} )
+ecbuild_add_test( TARGET   u_anattr
+                  BOOST
+                  SOURCES  ${test_srcs}
+                  LIBS     nodeattr
+                  INCLUDES ${Boost_INCLUDE_DIRS} 
+                 )

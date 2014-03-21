@@ -28,8 +28,6 @@ rm -rf $WK/Test/data/ECF_HOME_debug*
 rm -rf $WK/Test/data/ECF_HOME_release*
 rm -rf $WK/AParser/test/data/single_defs/mega.def_log
 rm -rf $WK/Pyext/test.def
-rm -rf $WK/TestEcfSms/test/data/test_real.def
-rm -rf $WK/TestEcfSms/test/data/test_hybrid.def
 
 # Remove any lock file create by tests which used EcfPortLock.hpp
 rm -rf $WK/*.lock

@@ -20,14 +20,14 @@ fi
 compiler=gcc-$(gcc -dumpversion)
 echo "valgrind: variant=$mode compiler=$compiler"
 
-valgrind --tool=massif ACore/bin/$compiler/$mode/coretest
-valgrind --tool=massif ANattr/bin/$compiler/$mode/nodeattrtest
-valgrind --tool=massif ANode/bin/$compiler/$mode/nodetest
-valgrind --tool=massif AParser/bin/$compiler/$mode/tparser
-valgrind --tool=massif Base/bin/$compiler/$mode/basetest
-valgrind --tool=massif Client/bin/$compiler/$mode/tclient
-valgrind --tool=massif Server/bin/$compiler/$mode/tserver
-valgrind --tool=massif Test/bin/$compiler/$mode/test
-valgrind --tool=massif Simulator/bin/$compiler/$mode/testsimulator
-#valgrind --tool=massif AParser/bin/$compiler/$mode/tsingle
+valgrind --tool=massif ACore/bin/$compiler/$mode/u_acore
+valgrind --tool=massif ANattr/bin/$compiler/$mode/u_anattr
+valgrind --tool=massif ANode/bin/$compiler/$mode/u_anode
+valgrind --tool=massif AParser/bin/$compiler/$mode/u_aparser
+valgrind --tool=massif Base/bin/$compiler/$mode/u_base
+valgrind --tool=massif Client/bin/$compiler/$mode/s_client
+valgrind --tool=massif Server/bin/$compiler/$mode/u_server
+valgrind --tool=massif Test/bin/$compiler/$mode/s_test
+valgrind --tool=massif Simulator/bin/$compiler/$mode/c_csim
+#valgrind --tool=massif AParser/bin/$compiler/$mode/perf_aparser
 

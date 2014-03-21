@@ -79,7 +79,7 @@ extern int yylineno;
  void yylex(void);
 #endif
 
-#if defined(AIX) 
+#if defined(_AIX)
  extern char yytext[];
  int yydebug;
 #elif defined(hpux) 

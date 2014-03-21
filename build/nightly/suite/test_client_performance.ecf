@@ -13,7 +13,7 @@ else
    # Clear up
    rm -rf `hostname`.*
    
-   Client/bin/%COMPILER_VERSION%/profile/tclient
+   Client/bin/%COMPILER_VERSION%/profile/s_client
    
    # Move gmon file to Client. Easier for eclipse 
    mv gmon.out Client/.

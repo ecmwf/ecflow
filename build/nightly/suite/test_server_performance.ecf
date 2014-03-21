@@ -21,8 +21,8 @@ else
    sleep 10
 
    export ECF_NODE=localhost
-   Client/bin/%COMPILER_VERSION%/release/tclient
-   Test/bin/%COMPILER_VERSION%/release/server-test
+   Client/bin/%COMPILER_VERSION%/release/s_client
+   Test/bin/%COMPILER_VERSION%/release/s_test
    
    # wait for server to exit  
    sleep 2

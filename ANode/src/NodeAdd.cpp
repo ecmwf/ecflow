@@ -30,7 +30,8 @@ void Node::addVariable(const Variable& v )
       if (varVec_[i].name() == variable_name) {
          // Variable already exist, *UPDATE* its value
          varVec_[i].set_value(v.theValue());
-         std::cout << "Node::addVariable: Variable of name '" << v.name() << "' already exist for node " << debugNodePath() << " updating with value '" << v.theValue() << "'\n";
+         if (0 == Ecf::debug_level())
+            std::cout << "Node::addVariable: Variable of name '" << v.name() << "' already exist for node " << debugNodePath() << " updating with value '" << v.theValue() << "'\n";
          return;
       }
    }

@@ -36,6 +36,9 @@ using namespace std;
 using namespace boost;
 namespace fs = boost::filesystem;
 
+//#define DEBUG_SERVER_PATH 1
+//#define DEBUG_CLIENT_PATH 1
+
 namespace ecf {
 
 size_t File::MAX_LINES() { return 10000; }
@@ -578,15 +581,16 @@ bool File::removeDir( const boost::filesystem::path& p)
 
 static std::string find_bjam_ecf_server_path()
 {
-   // bjam uses in source tree, for build
-   std::string binDir;
-   fs::path current_path = fs::current_path();
-   if ( current_path.stem() == "Test"
-      || current_path.stem() == "Client"
-         || current_path.stem() == "Pyext"
-         || current_path.stem() == "TestEcfSms" )
-      binDir = "../Server/bin/";
-   else binDir = "Server/bin/";
+#ifdef DEBUG_SERVER_PATH
+   cout << " File::find_ecf_server_path() using bjam\n";
+#endif
+
+   // bjam uses in source tree, for build, which is in the workspace dir
+   std::string bin_dir = File::workspace_dir() + "/Server/bin/";
+
+#ifdef DEBUG_SERVER_PATH
+   cout << "  Searching under: " << bin_dir << "\n";
+#endif
 
    // We need to take into account that on linux, we may have the GNU and CLANG executables
    // Hence we need to distinguish between them.
@@ -600,7 +604,7 @@ static std::string find_bjam_ecf_server_path()
    required_path_tokens.push_back(std::string("clang"));
 #endif
 
-   return File::findPath( binDir, Ecf::SERVER_NAME(), required_path_tokens );
+   return File::findPath( bin_dir, Ecf::SERVER_NAME(), required_path_tokens );
 
 #else
 
@@ -609,7 +613,7 @@ static std::string find_bjam_ecf_server_path()
    required_path_tokens.push_back(std::string("clang"));
 #endif
 
-   std::string path = File::findPath( binDir, Ecf::SERVER_NAME(), required_path_tokens );
+   std::string path = File::findPath( bin_dir, Ecf::SERVER_NAME(), required_path_tokens );
    if (path.empty()) {
 
       required_path_tokens.clear();
@@ -618,13 +622,12 @@ static std::string find_bjam_ecf_server_path()
       required_path_tokens.push_back(std::string("clang"));
 #endif
 
-      path = File::findPath( binDir, Ecf::SERVER_NAME(), required_path_tokens );
+      path = File::findPath( bin_dir, Ecf::SERVER_NAME(), required_path_tokens );
    }
    return path;
 #endif
 }
 
-//#define DEBUG_SERVER_PATH 1
 
 std::string File::find_ecf_server_path()
 {
@@ -664,24 +667,18 @@ std::string File::find_ecf_server_path()
 #endif
    }
 
-#ifdef DEBUG_SERVER_PATH
-   cout << " File::find_ecf_server_path() using bjam\n";
-#endif
    return find_bjam_ecf_server_path();
 }
 
 
 static std::string find_bjam_ecf_client_path()
 {
+#ifdef DEBUG_CLIENT_PATH
+   cout << " find_bjam_ecf_client_path \n";
+#endif
+
    // Bjam uses, in source build
-   std::string binDir;
-   fs::path current_path = fs::current_path();
-   if ( current_path.stem() == "Test"
-         || current_path.stem() == "Client"
-         || current_path.stem() == "Pyext"
-         || current_path.stem() == "TestEcfSms" )
-      binDir = "../Client/bin/";
-   else binDir = "Client/bin/";
+   std::string binDir = File::workspace_dir() + "/Client/bin/";
 
    // We need to take into account that on linux, we may have the GNU and CLANG executables
    // Hence we need to distinguish between them.
@@ -718,9 +715,6 @@ static std::string find_bjam_ecf_client_path()
    return path;
 #endif
 }
-
-
-//#define DEBUG_CLIENT_PATH 1
 
 std::string File::find_ecf_client_path()
 {

@@ -286,7 +286,7 @@ public:
 	void remove_node_info(const str&);
 	void remove_node_info(node_info*);
 
-	ecf_node* __node__() const { if (tree_) return 0x0; return owner_.get(); }
+	ecf_node* __node__() const { if (tree_) return 0x0; return owner_; }
 	bool ondemand(bool full=false); 
 protected:
 	node(host&,ecf_node*);
@@ -295,7 +295,7 @@ protected:
 
 	node*     next_;
 	node*     kids_;
-	boost::shared_ptr<ecf_node> owner_;
+	ecf_node *owner_;
 	host&     host_;
 	Boolean   folded_;
 

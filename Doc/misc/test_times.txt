@@ -210,7 +210,7 @@ AParser:: ...test_single_defs AParser/test/data/single_defs/mega.def file_size(6
  time for deleting all nodes                                = 0.12
  Total elapsed time = 6 seconds
 
-AParser/bin/gcc-4.2.1/release/parse_timer /var/tmp/ma0/BIG_DEFS/3199.def
+AParser/bin/gcc-4.2.1/release/perf_aparser_timer /var/tmp/ma0/BIG_DEFS/3199.def
  Parsing Node tree and AST creation time         = 4.59 parse(1)
  Checkpt(TEXT_ARCHIVE) and reload , time taken   = 8.08 file_size(55960852)  result(1) msg()
 
@@ -218,7 +218,7 @@ Client:
  Server handled 1000 commands                          in boost_timer(0.31) DurationTimer(00:00:00.472479)
  Server handled 1000 commands using 125 group requests in boost_timer(0.25) DurationTimer(00:00:00.338411)
  
-Client/bin/gcc-4.2.1/release/tsingle 
+Client/bin/gcc-4.2.1/release/perf_aparser 
    /var/tmp/ma0/BIG_DEFS/3199.def Delete:0 Load:13 Begin:4  
                                    Download(Sync):8, 0, 0, 0, 0  
                                    Download(Sync-FULL):4, 4, 4, 4, 5 Avg:4.2  
@@ -231,7 +231,7 @@ Client/bin/gcc-4.2.1/release/tsingle
 EOS_PORTABLE_BINARY_ARCHIVE/release
 ====================================================================================================
 
-AParser/bin/gcc-4.2.1/release/parse_timer /var/tmp/ma0/BIG_DEFS/3199.def
+AParser/bin/gcc-4.2.1/release/perf_aparser_timer /var/tmp/ma0/BIG_DEFS/3199.def
  Parsing Node tree and AST creation time                        = 5.39 parse(1)
  Checkpt(EOS_PORTABLE_BINARY_ARCHIVE) and reload , time taken   = 7.2 file_size(44381690)  result(1) msg()
 

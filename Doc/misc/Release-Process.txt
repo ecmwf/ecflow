@@ -90,6 +90,10 @@ Process
       git tag
       git show <release number>
    
+sappa/sappb
+==========================================================
+These are same as redhat, hence copy to sappa/sappb
+
  
 IMPORTANT: To copy ecflow onto c2a please do the following
 ============================================================

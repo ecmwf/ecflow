@@ -35,7 +35,7 @@
 #include "CheckPt.hpp"
 #include "PreAllocatedReply.hpp"
 
-#if defined(AIX) && !defined(DEBUG)
+#if defined(_AIX) && !defined(DEBUG)
 // Required for MoveCmd for release mode of v11.1 compiler
 #include "Defs.hpp"
 #include "Suite.hpp"

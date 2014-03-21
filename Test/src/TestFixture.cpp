@@ -272,7 +272,7 @@ TestFixture::~TestFixture()
 int TestFixture::job_submission_interval()
 {
    int jobSubmissionInterval = 3 ;
-#if defined(HPUX) || defined(AIX)
+#if defined(HPUX) || defined(_AIX)
    jobSubmissionInterval += 3;
 #endif
    return jobSubmissionInterval;

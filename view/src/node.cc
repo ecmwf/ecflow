@@ -170,6 +170,7 @@ node::node(host& h,ecf_node* owner)
 
 node::~node()
 {
+  // std::cerr << "# node del: " << full_name() << std::endl;
   if (data_) delete data_;
   data_ = 0x0;
 }
@@ -1025,21 +1026,6 @@ const std::string& node::parent_name() const
 }
 
 void node::delvars() {
-  node *run, *lag;
-  if (0x0 == kids()) return;
-  while ((run = kids()) && run->type() == NODE_VARIABLE) {    
-    kids_ = kids_->next_;
-    delete run;
-  }
-  lag = kids();
-  for (run = kids(); run; run = lag->next()) {
-    if (run->type() == NODE_VARIABLE) {
-      lag->next_ = run->next();
-      delete run;
-    } else {
-      lag = run;
-    }
-  }
 }
 
 void node::unlink(bool detach) { 

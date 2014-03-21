@@ -90,13 +90,18 @@ void do_test_migration(
 
 BOOST_AUTO_TEST_CASE( test_migration )
 {
-   /// This will remove checkpt and backup , to avoid server from loading it. (i.e from previous test)
-   InvokeServer invokeServer("Client:: ...test_migration:",SCPort::next());
+   if (fs::exists("/var/tmp/ma0/ECFLOW_TEST/migration")) {
+      /// This will remove checkpt and backup , to avoid server from loading it. (i.e from previous test)
+      InvokeServer invokeServer("Client:: ...test_migration:",SCPort::next());
 
-   ClientInvoker theClient(invokeServer.host(), invokeServer.port());
-   int error_cnt = 0;
-   do_test_migration(theClient,invokeServer.host(), invokeServer.port(),"/var/tmp/ma0/ECFLOW_TEST/migration",error_cnt);
-   BOOST_REQUIRE_MESSAGE( error_cnt == 0, "Migration test failed " << error_cnt << " times " );
+      ClientInvoker theClient(invokeServer.host(), invokeServer.port());
+      int error_cnt = 0;
+      do_test_migration(theClient,invokeServer.host(), invokeServer.port(),"/var/tmp/ma0/ECFLOW_TEST/migration",error_cnt);
+      BOOST_REQUIRE_MESSAGE( error_cnt == 0, "Migration test failed " << error_cnt << " times " );
+   }
+   else {
+      std::cout << "Ignoring test, since directory '/var/tmp/ma0/ECFLOW_TEST/migration' not found\n";
+   }
 }
 
 BOOST_AUTO_TEST_SUITE_END()

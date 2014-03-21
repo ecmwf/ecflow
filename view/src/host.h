@@ -213,6 +213,8 @@ class host : public extent<host>
 	host(const host&);
 	host& operator=(const host&);
 
+	void destroy_top(node*) const;
+
 	str     host_;
 	int     number_;
 
@@ -319,6 +321,30 @@ public:
    host_locker( host* h );
    ~host_locker();
    int err() { return e_; }
+};
+
+class Updating {
+public:
+ Updating(host* h) : host_(h) {
+    do_full_redraw_ = false;
+    host_->updating(true);
+  }
+
+  ~Updating() {
+    host_->updating(false);
+  }
+
+  static void set_full_redraw() {
+    do_full_redraw_ = true;
+  }
+
+  static bool full_redraw() {
+    return do_full_redraw_;
+  }
+
+private:
+  host* host_;
+  static bool do_full_redraw_;
 };
 
 #endif

@@ -208,7 +208,7 @@ BOOST_AUTO_TEST_CASE( test_server_stress_test_2 )
 
 #if defined(HPUX)
    int load = 10;  // On non linux systems use different load otherwise it takes to long
-#elif defined(AIX)
+#elif defined(_AIX)
    int load = 100; // On non linux systems use different load otherwise it takes to long
 #else
    int load = 167;

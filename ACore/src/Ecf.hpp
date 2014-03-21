@@ -52,6 +52,10 @@ public:
 	static bool debug_equality() { return debug_equality_;}
 	static void set_debug_equality(bool f) { debug_equality_ = f;}
 
+	// ECFLOW-99
+   static unsigned int debug_level() { return debug_level_;}
+   static void set_debug_level(unsigned int level) { debug_level_ = level;}
+
    static const char* SERVER_NAME();
    static const char* CLIENT_NAME();
 
@@ -68,10 +72,11 @@ public:
 
 private:
 
-	Ecf() {}
+	Ecf(){}
 	static bool server_;
 	static bool debug_equality_;
-	static unsigned int state_change_no_;
+   static unsigned int debug_level_;
+   static unsigned int state_change_no_;
 	static unsigned int modify_change_no_;
 };
 

@@ -14,6 +14,7 @@
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 #include <sstream>
 #include "Version.hpp"
+#include "ecflow_version.h"
 #include <boost/version.hpp>
 
 namespace ecf {
@@ -45,9 +46,6 @@ namespace ecf {
 //
 // **Please update file history.ddoc with the changed made for each release ***
 // ********************************************************************
-const int Version::release_ = 4;
-const int Version::major_= 0;
-const std::string Version::minor_ = "1" ;
 #ifdef DEBUG
 const std::string Version::TAG = " (debug)";  // Old tag: beta(debug)
 #else
@@ -61,7 +59,7 @@ const std::string Version::TAG = ""; // Old tag: beta
 std::string Version::description()
 {
    std::stringstream ss;
-   ss << "Ecflow" << Version::TAG << " version(" << Version::release_ << "." << Version::major_ << "." << Version::minor_;
+   ss << "Ecflow" << Version::TAG << " version(" << ECFLOW_RELEASE << "." << ECFLOW_MAJOR << "." << ECFLOW_MINOR;
 
    ss << ") boost(" << Version::boost() << ")";
    std::string the_comp = compiler();
@@ -85,14 +83,14 @@ std::string Version::description()
 std::string Version::version()
 {
    std::stringstream ss;
-   ss << "ecflow_" << Version::release_ << "_" << Version::major_ << "_" << Version::minor_;
+   ss << "ecflow_" << ECFLOW_RELEASE << "_" << ECFLOW_MAJOR << "_" << ECFLOW_MINOR;
    return ss.str();
 }
 
 std::string Version::raw()
 {
    std::stringstream ss;
-   ss << Version::release_ << "." << Version::major_ << "." << Version::minor_;
+   ss << ECFLOW_RELEASE << "." << ECFLOW_MAJOR << "." << ECFLOW_MINOR;
    return ss.str();
 }
 
@@ -108,7 +106,7 @@ std::string Version::boost()
 std::string Version::compiler()
 {
    std::stringstream ss;
-#if defined(AIX)
+#if defined(_AIX)
    ss << "aix " << __IBMCPP__ ;
 #elif defined(HPUX)
    ss << "aCC " << __HP_aCC ;   // type aCC +help, this will show compiler manual, search for Predefined Macros

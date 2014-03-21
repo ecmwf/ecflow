@@ -239,7 +239,9 @@ void export_Client()
    .def("resume" ,          &resumes)
    .def("delete" ,          &ClientInvoker::delete_node,     (bp::arg("abs_node_path"),bp::arg("force")=false), ClientDoc::delete_node())
    .def("delete" ,          &delete_node,                    (bp::arg("paths"),bp::arg("force")=false))
-	.def("delete_all",       &ClientInvoker::delete_all,      (bp::arg("force")=false),                          ClientDoc::delete_all())
+   .def("delete_all",       &ClientInvoker::delete_all,      (bp::arg("force")=false),                          ClientDoc::delete_all())
+   .def("debug_server_on",  &ClientInvoker::debug_server_on,  "Enable server debug, Will dump to standard out on server host.")
+   .def("debug_server_off", &ClientInvoker::debug_server_off, "Disable server debug")
 	;
 
 	class_<WhyCmd,  boost::noncopyable >( "WhyCmd",

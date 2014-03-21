@@ -159,7 +159,6 @@ list( APPEND srcs_cc
 )
 
 list( APPEND srcs_c
-   src/Array.c
    src/Hyper.c
    src/SimpleBase.c
    src/SimpleGraph.c
@@ -174,50 +173,100 @@ file( GLOB libicon_srcs RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "src/libicon/*.cc" 
 file( GLOB libxec_srcs  RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "src/libxec/*.c"   )
 file( GLOB libui_srcs   RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "src/libui/*.cc"   )
 
-ecbuild_add_library(TARGET  libecflowview
-                   NOINSTALL
-                   TYPE     STATIC
-                   SOURCES  
-                            ${srcs_cc} ${srcs_c} ${srcs_cpp} ${libicon_srcs} ${libxec_srcs} ${libui_srcs}
-                   LIBS     
-                            core nodeattr node libparser base libclient ${Ecflow_Boost_LIBS}
-                   TEMPLATES
-                            src/array.cc
-                   INCLUDES 
-                            src/libicon
-                            src/libxec
-                            src/libui
-                            ../ACore/src 
-                            ../ANattr/src
-                            ../ANode/src
-                            ../AParser/src
-                            ../Base/src
-                            ../Base/src/cts
-                            ../Base/src/stc
-                            ../Client/src
-                            ${Boost_INCLUDE_DIRS} )
+# ======================================================================================
 
-# =======================================================
-# EXE ecflowview
+find_package( X11 )
+debug_var( X11_INCLUDE_DIR )
+debug_var( X11_LIBRARIES )  
+debug_var( X11_Xt_INCLUDE_PATH )
+debug_var( X11_Xt_LIB )
+debug_var( X11_Xpm_INCLUDE_PATH )
+debug_var( X11_Xpm_LIB )
+
+find_package( Motif )
+debug_var( MOTIF_INCLUDE_DIR )
+debug_var( MOTIF_LIBRARIES )  
+ 
+ 
+# =======================================================================================
+find_package( CMath )
+
+set( CMAKE_THREAD_PREFER_PTHREAD TRUE )
+find_package( Threads )
+
+
+# =========================================================================================
+# libecflowview needs to be compiled as dynamic lin  otherwise the icons do not appear.
+#
 add_definitions( -D_GNU_SOURCE -DUNIX -Dunix -Dlinux )
-ecbuild_add_executable( TARGET   ecflowview
-                        SOURCES  src/ecflowview.cc
-                        LIBS     core nodeattr node libparser base libclient 
-                                 libecflowview pthread ${Ecflow_Boost_LIBS}
-                                 m crypt dl Xpm Xm Xp Xext Xt X11 fl
-                        INCLUDES src
-                                 ${Boost_INCLUDE_DIRS} 
+
+ecbuild_add_library(TARGET    libecflowview
+				        CONDITION MOTIF_FOUND AND X11_FOUND AND CMAKE_THREAD_LIBS_INIT
+                    SOURCES  
+                              ${srcs_cc} ${srcs_c} ${srcs_cpp} ${libicon_srcs} ${libxec_srcs} ${libui_srcs}
+                    TEMPLATES
+                              src/array.cc
+                    INCLUDES 
+                              src
+                              src/libicon
+                              src/libxec
+                              src/libui
+                              ../ACore/src 
+                              ../ANattr/src
+                              ../ANode/src
+                              ../AParser/src
+                              ../Base/src
+                              ../Base/src/cts
+                              ../Base/src/stc
+                              ../Client/src
+                              ${X11_INCLUDE_DIR}
+                              ${MOTIF_INCLUDE_DIR}
+                   )
+
+# =======================================================================
+# EXE ecflowview
+#    o crypt    Does not appear to be used           ?
+#    o Xp       libxprint does not appear to be used ?
+#    o fl       fast lexical analyser generator, not used ?
+# ========================================================================
+
+ecbuild_add_executable( TARGET    ecflowview
+                        SOURCES   
+                                  src/ecflowview.cc
+						      CONDITION 
+						                MOTIF_FOUND AND X11_FOUND AND CMAKE_THREAD_LIBS_INIT
+                        LIBS      
+                                  libecflowview  libclient base libparser node nodeattr core
+                                  ${CMAKE_THREAD_LIBS_INIT} 
+                                  ${X11_LIBRARIES} ${X11_Xext_LIB} ${MOTIF_LIBRARIES} ${X11_Xpm_LIB} ${X11_Xt_LIB} 
+                                  ${CMATH_LIBRARIES}
+                        INCLUDES  
+                                  ${X11_INCLUDE_DIR}
+                                  ${MOTIF_INCLUDE_DIR}
+                                  ${Boost_INCLUDE_DIRS} 
                      )
 
 
 # ===================================================================
+# test
+# ===================================================================
+
+ecbuild_add_test( TARGET  test-view
+                  BOOST
+                  CONDITION MOTIF_FOUND AND X11_FOUND AND CMAKE_THREAD_LIBS_INIT
+                  SOURCES   test/TestRunner.cpp test/TestView.cpp
+                  LIBS      libharness    
+                  INCLUDES  ../Test/src
+                            ${Boost_INCLUDE_DIRS} 
+                )
+                          
+# ===================================================================
 # install
 # ===================================================================
-install (TARGETS ecflowview DESTINATION bin)
                      
-install (FILES  ${CMAKE_SOURCE_DIR}/view/src/ecflowview.menu 
-                ${CMAKE_SOURCE_DIR}/build/servers
-         DESTINATION lib
-         PERMISSIONS OWNER_READ GROUP_READ WORLD_READ OWNER_EXECUTE GROUP_EXECUTE WORLD_EXECUTE
+install ( FILES       ${CMAKE_SOURCE_DIR}/view/src/ecflowview.menu 
+                      ${CMAKE_SOURCE_DIR}/build/servers
+          DESTINATION lib
+          PERMISSIONS OWNER_READ GROUP_READ WORLD_READ OWNER_EXECUTE GROUP_EXECUTE WORLD_EXECUTE
         )
-         
+        

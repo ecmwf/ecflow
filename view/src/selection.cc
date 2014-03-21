@@ -90,7 +90,7 @@ void selection::notify_new_selection(node* n)
   
   // printf("selection is %s %s %02d\n", n->full_name().c_str(), n->type_name(), n->type());
   
-  if(!n->selectable())
+  if(!n->selectable()) 
     return;
   
   selection* w = first();

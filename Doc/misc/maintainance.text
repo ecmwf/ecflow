@@ -26,6 +26,7 @@ When changing the version change:
     - Create a new shell, since new shell will parse $WK/Core/src/Version.cpp to extract version
     - $WK/build/install_ecflow.sh
     - $WK/ACore/src/Version.cpp
+    - $WK/cmake.version
 
 
 Making a release
