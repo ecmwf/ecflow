@@ -106,25 +106,25 @@ void variables::show( node& n )
             ecf->gen_variables(gvar);
             for(it = gvar.begin(); it != gvar.end(); ++it) {
                varsize = std::max(varsize, (int) (*it).name().size());
-               valsize = std::max(varsize, (int) (*it).theValue().size());
+               valsize = std::max(valsize, (int) (*it).theValue().size());
             }
 
             gvar = ecf->variables();
             for(it = gvar.begin(); it != gvar.end(); ++it) {
                varsize = std::max(varsize, (int) (*it).name().size());
-               valsize = std::max(varsize, (int) (*it).theValue().size());
+               valsize = std::max(valsize, (int) (*it).theValue().size());
             }
          }
          if (defs) {
             const std::vector<Variable>& gvar = defs->server().user_variables();
             for(it = gvar.begin(); it != gvar.end(); ++it) {
                 varsize = std::max(varsize, (int) (*it).name().size());
-                valsize = std::max(varsize, (int) (*it).theValue().size());
+                valsize = std::max(valsize, (int) (*it).theValue().size());
             }
             const std::vector<Variable>& var = defs->server().server_variables();
             for(it = var.begin(); it != var.end(); ++it) {
                 varsize = std::max(varsize, (int) (*it).name().size());
-                valsize = std::max(varsize, (int) (*it).theValue().size());
+                valsize = std::max(valsize, (int) (*it).theValue().size());
             }
          }
       }
