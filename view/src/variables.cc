@@ -34,6 +34,7 @@ variables::variables( panel_window& w )
 
 variables::~variables()
 {
+   clear();
 }
 
 void variables::clear()
@@ -68,7 +69,6 @@ void variables::show( node& n )
    std::vector<Variable> gvar;
    std::vector<Variable>::const_iterator it, gvar_end;
    ecf_node* prox;
-   Node* ecf = 0;
 
    while ( m != 0 ) {
       /* for (node* run = m->kids(); run; run = run->next())
@@ -80,6 +80,8 @@ void variables::show( node& n )
          prox = m->__node__();
          if (!prox) return;
 
+         Defs* defs = 0;
+         Node* ecf = 0;
          if (dynamic_cast<ecf_concrete_node<Node>*>(prox)) {
             ecf = dynamic_cast<ecf_concrete_node<Node>*>(prox)->get();
          }
@@ -92,20 +94,38 @@ void variables::show( node& n )
          else if (dynamic_cast<ecf_concrete_node<Suite>*>(prox)) {
             ecf = dynamic_cast<ecf_concrete_node<Suite>*>(prox)->get();
          }
-         if (!ecf) return;
-
-         gvar.clear();
-         ecf->gen_variables(gvar);
-         for(it = gvar.begin(); it != gvar.end(); ++it) {
-            varsize = std::max(varsize, (int) (*it).name().size());
-            valsize = std::max(varsize, (int) (*it).theValue().size());
+         else if (dynamic_cast<ecf_concrete_node<Defs>*>(prox)) {
+            defs = dynamic_cast<ecf_concrete_node<Defs>*>(prox)->get();
+         }
+         if (!ecf && !defs) {
+            break;
          }
 
-         gvar = ecf->variables();
-         gvar_end = gvar.end();
-         for(it = gvar.begin(); it != gvar_end; ++it) {
-            varsize = std::max(varsize, (int) (*it).name().size());
-            valsize = std::max(varsize, (int) (*it).theValue().size());
+         if (ecf ) {
+            gvar.clear();
+            ecf->gen_variables(gvar);
+            for(it = gvar.begin(); it != gvar.end(); ++it) {
+               varsize = std::max(varsize, (int) (*it).name().size());
+               valsize = std::max(varsize, (int) (*it).theValue().size());
+            }
+
+            gvar = ecf->variables();
+            for(it = gvar.begin(); it != gvar.end(); ++it) {
+               varsize = std::max(varsize, (int) (*it).name().size());
+               valsize = std::max(varsize, (int) (*it).theValue().size());
+            }
+         }
+         if (defs) {
+            const std::vector<Variable>& gvar = defs->server().user_variables();
+            for(it = gvar.begin(); it != gvar.end(); ++it) {
+                varsize = std::max(varsize, (int) (*it).name().size());
+                valsize = std::max(varsize, (int) (*it).theValue().size());
+            }
+            const std::vector<Variable>& var = defs->server().server_variables();
+            for(it = var.begin(); it != var.end(); ++it) {
+                varsize = std::max(varsize, (int) (*it).name().size());
+                valsize = std::max(varsize, (int) (*it).theValue().size());
+            }
          }
       }
       m = m->parent();
@@ -124,6 +144,8 @@ void variables::show( node& n )
             prox = m->__node__();
             if (!prox) break;
 
+            Defs* defs = 0;
+            Node* ecf = 0;
             if (dynamic_cast<ecf_concrete_node<Node>*>(prox)) {
                ecf = dynamic_cast<ecf_concrete_node<Node>*>(prox)->get();
             }
@@ -136,22 +158,41 @@ void variables::show( node& n )
             else if (dynamic_cast<ecf_concrete_node<Suite>*>(prox)) {
                ecf = dynamic_cast<ecf_concrete_node<Suite>*>(prox)->get();
             }
-            if (!ecf) break;
-
-            gvar.clear();
-            ecf->gen_variables(gvar);
-            for(it = gvar.begin(); it != gvar.end(); ++it) {
-               if ((*it).name() == "" || *it == Variable::EMPTY() || (*it).name() == "ECF_PASS") continue;
-               sprintf(buffer, fmt1, (*it).name().c_str(), (*it).theValue().c_str());
-               xec_AddFontListItem(list_, buffer, 0);
+            else if (dynamic_cast<ecf_concrete_node<Defs>*>(prox)) {
+                defs = dynamic_cast<ecf_concrete_node<Defs>*>(prox)->get();
             }
+            if (!ecf && !defs) break;
 
-            gvar = ecf->variables();
-            std::sort(gvar.begin(), gvar.end(), cless_than());
-            gvar_end = gvar.end();
-            for(it = gvar.begin(); it != gvar_end; ++it) {
-               sprintf(buffer, fmt2, (*it).name().c_str(), (*it).theValue().c_str());
-               xec_AddFontListItem(list_, buffer, 0);
+            if (ecf) {
+               gvar.clear();
+               ecf->gen_variables(gvar);
+               for(it = gvar.begin(); it != gvar.end(); ++it) {
+                  if ((*it).name() == "" || *it == Variable::EMPTY() || (*it).name() == "ECF_PASS") continue;
+                  sprintf(buffer, fmt1, (*it).name().c_str(), (*it).theValue().c_str());
+                  xec_AddFontListItem(list_, buffer, 0);
+               }
+
+               gvar = ecf->variables();
+               std::sort(gvar.begin(), gvar.end(), cless_than());
+               gvar_end = gvar.end();
+               for(it = gvar.begin(); it != gvar_end; ++it) {
+                  sprintf(buffer, fmt2, (*it).name().c_str(), (*it).theValue().c_str());
+                  xec_AddFontListItem(list_, buffer, 0);
+               }
+            }
+            if (defs) {
+               gvar = defs->server().server_variables();
+               for(it = gvar.begin(); it !=  gvar.end(); ++it) {
+                  sprintf(buffer, fmt1, (*it).name().c_str(), (*it).theValue().c_str());
+                  xec_AddFontListItem(list_, buffer, 0);
+               }
+
+               gvar = defs->server().user_variables();
+               std::sort(gvar.begin(), gvar.end(), cless_than());
+               for(it = gvar.begin(); it !=  gvar.end(); ++it) {
+                  sprintf(buffer, fmt2, (*it).name().c_str(), (*it).theValue().c_str());
+                  xec_AddFontListItem(list_, buffer, 0);
+               }
             }
          }
          m = m->parent();

@@ -299,24 +299,29 @@ void host::logout()
       tree_->xd_hide();
    }
 
-   if (top_) {
-      if (top_->__node__()) {
-         top_->__node__()->nokids();
-         top_->__node__()->unlink();
-      }
-      node::destroy(top_);
-      top_ = 0x0;
-   }
+   destroy_top(top_);
+   top_ = 0x0;
+
    notify_observers();
+}
+
+void host::destroy_top(node* the_top) const
+{
+   if (the_top) {
+      if (the_top->__node__()) {
+         the_top->__node__()->nokids(); // Suites + all children
+         the_top->__node__()->unlink();
+         delete the_top->__node__(); // Defs
+      }
+      node::destroy(the_top);
+   }
 }
 
 void ehost::logout()
 {
    if (!connected_) return;
 
-   try {
-      if (client_.client_handle()) client_.ch1_drop();
-   }
+   try {  client_.ch1_drop(); }
    catch ( std::exception &e ) {
       gui::message("host::logout-error: %s", e.what());
    }
@@ -684,7 +689,7 @@ bool ehost::create_tree( int hh, int min, int sec )
    if (!top) return false;
    if (top_) {
       top->scan(top_);
-      node::destroy(top_);
+      destroy_top(top_);
    }
    top_ = top;
    top_->active(poll_);
@@ -713,14 +718,8 @@ void ehost::reset( bool full, bool sync )
 
       if (full) {
          const std::vector<std::string>& s = suites_;
-         if (top_) {
-            if (top_->__node__()) {
-               top_->__node__()->nokids();
-               top_->__node__()->unlink();
-            }
-            node::destroy(top_);
-            top_ = 0x0;
-         }
+         destroy_top(top_);
+         top_ = 0x0;
          notify_observers();
 
          if (!s.empty()) {
@@ -731,14 +730,11 @@ void ehost::reset( bool full, bool sync )
             // get all suite previously registered in GUI, and register
             // them with the server The associated handle is retained in
             // client_
-            if (client_.client_handle()) {
-               try {
-                  client_.ch1_drop();
-               }
-               catch ( std::exception &e ) {
-                  std::cout << "# no drop possible: " << e.what() << "\n";
-               }
+            try { client_.ch1_drop(); }
+            catch ( std::exception &e ) {
+               std::cout << "# no drop possible: " << e.what() << "\n";
             }
+
             client_.reset(); // reset client handle + defs
             // This will add a new handle to client_
             client_.ch_register(new_suites_, s);
@@ -1413,14 +1409,11 @@ void ehost::suites( int which, std::vector<std::string>& l )
             suites_ = l;
             try {
                if (l.empty()) {
-                  if (client_.client_handle() != 0) {
-                     try {
-                        client_.ch1_drop();
-                     }
-                     catch ( std::exception &e ) {
-                        std::cout << "# no drop possible: " << e.what() << "\n";
-                     }
+                  try { client_.ch1_drop(); }
+                  catch ( std::exception &e ) {
+                     std::cout << "# no drop possible: " << e.what() << "\n";
                   }
+
                   // reset handle to zero , and clear the defs
                   client_.reset();
                }

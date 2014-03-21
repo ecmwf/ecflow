@@ -162,6 +162,8 @@ protected:
 
    const std::string name_;
 
+   ExpressionWrapper *trigger_;
+   ExpressionWrapper *complete_;
    friend class ecf_node_maker;
 
    void counter();
@@ -187,7 +189,9 @@ public:
    void nokids( bool own = false );
 
    void add_kid( ecf_node* k );
+#ifdef BRIDGE
    void* user_ptr;
+#endif
 
    virtual int type() const = 0;
    virtual int flags() const = 0;
@@ -311,7 +315,6 @@ template<class T>
 class ecf_concrete_node : public ecf_node, public AbstractObserver {
 private:
    T* owner_;
-   ExpressionWrapper *trigger_, *complete_;
 private:
    ecf_concrete_node( const ecf_concrete_node& );
    ecf_concrete_node& operator=( const ecf_concrete_node& );
@@ -326,8 +329,6 @@ public:
    ecf_concrete_node( T* owner, ecf_node* parent, char c = 'd' )
      : ecf_node(parent, owner ? owner->name() : ecf_node::none(), c)
      , owner_(owner)
-     , trigger_(0x0)
-     , complete_(0x0)
    {
       if (0 && parent) {
          full_name_ = parent->full_name();
@@ -339,8 +340,6 @@ public:
    ~ecf_concrete_node()
    {
       unlink();
-      delete trigger_;
-      delete complete_;
    }
 
    virtual void set_graphic_ptr( node* )

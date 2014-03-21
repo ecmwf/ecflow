@@ -213,6 +213,8 @@ class host : public extent<host>
 	host(const host&);
 	host& operator=(const host&);
 
+	void destroy_top(node*) const;
+
 	str     host_;
 	int     number_;
 
