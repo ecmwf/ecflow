@@ -67,8 +67,6 @@ void variables::show( node& n )
    XmListDeleteAllItems(list_);
    std::vector<Variable> gvar;
    std::vector<Variable>::const_iterator it, gvar_end;
-   ecf_node* prox;
-   Node* ecf;
 
    while ( m != 0 ) {
       /* for (node* run = m->kids(); run; run = run->next())
@@ -77,9 +75,10 @@ void variables::show( node& n )
        valsize = std::max(valsize, (int) ((variable_node*) run)->get_var().size());
        } */
       {
-         prox = m->__node__();
+         ecf_node* prox = m->__node__();
          if (!prox) return;
 
+         Node* ecf = 0;
          if (dynamic_cast<ecf_concrete_node<Node>*>(prox)) {
             ecf = dynamic_cast<ecf_concrete_node<Node>*>(prox)->get();
          }
@@ -121,9 +120,10 @@ void variables::show( node& n )
          sprintf(buffer, "Variables defined for %s %s", m->type_name(), m->name().c_str());
          xec_AddFontListItem(list_, buffer, 1);
          {
-            prox = m->__node__();
+            ecf_node* prox = m->__node__();
             if (!prox) break;
 
+            Node* ecf = 0;
             if (dynamic_cast<ecf_concrete_node<Node>*>(prox)) {
                ecf = dynamic_cast<ecf_concrete_node<Node>*>(prox)->get();
             }
