@@ -1,5 +1,5 @@
 suite suiteName
-   time 19:00                   # suites dont have a time
+   time 19:00                   # suites don't have a time, See  ECFLOW-106 Times/Dates attributes attached to suite node
    family familyName0	
    endfamily
 endsuite

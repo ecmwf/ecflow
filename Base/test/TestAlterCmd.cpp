@@ -277,17 +277,15 @@ BOOST_AUTO_TEST_CASE( test_alter_cmd )
    cout << "Base:: ...test_alter_cmd\n";
 
    Defs defs;
-   suite_ptr s = Suite::create("suite");
-   task_ptr task = Task::create("t1");
+   suite_ptr s = defs.add_suite("suite");
+   task_ptr task = s->add_task("t1");
    {
       ClockAttr clockAttr(false); // real clock
       clockAttr.date(1,1,2009);
       clockAttr.set_gain_in_seconds(3600);
       clockAttr.startStopWithServer(true);
       s->addClock( clockAttr );
-      s->addTask( task );
       s->addDefStatus(DState::SUSPENDED); // avoid AlterCmd from job submission
-      defs.addSuite( s );
    }
 
    std::string error_msg; BOOST_CHECK_MESSAGE(defs.checkInvariants(error_msg),"checkInvariants failed " << error_msg);
@@ -389,51 +387,55 @@ BOOST_AUTO_TEST_CASE( test_alter_cmd )
    // test add, the deleting of a specific attribute
    {
       TestStateChanged changed(s);
-      TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(s->absNodePath(),AlterCmd::ADD_DATE,"12.12.2010")));
-      TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(s->absNodePath(),AlterCmd::ADD_DAY,"sunday")));
-      TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(s->absNodePath(),AlterCmd::ADD_TIME,"23:00")));
-      TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(s->absNodePath(),AlterCmd::ADD_TODAY,"23:00")));
-      BOOST_CHECK_MESSAGE( s->dates().size() == 1, "expected 1 date to be added but found " <<  s->dates().size());
-      BOOST_CHECK_MESSAGE( s->days().size() == 1, "expected 1 day to be added but found " <<  s->days().size());
-      BOOST_CHECK_MESSAGE( s->timeVec().size() == 1, "expected 1 time to be added but found " <<  s->timeVec().size());
-      BOOST_CHECK_MESSAGE( s->todayVec().size() == 1, "expected 1 today attr, to be added but found " <<  s->todayVec().size());
-      BOOST_CHECK_MESSAGE( defs.get_edit_history(s->absNodePath()).size() == 8, "expected edit_history of 8 to be added but found " <<  defs.get_edit_history(s->absNodePath()).size());
+      TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(task->absNodePath(),AlterCmd::ADD_DATE,"12.12.2010")));
+      TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(task->absNodePath(),AlterCmd::ADD_DAY,"sunday")));
+      TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(task->absNodePath(),AlterCmd::ADD_TIME,"23:00")));
+      TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(task->absNodePath(),AlterCmd::ADD_TODAY,"23:00")));
+      BOOST_CHECK_MESSAGE( task->dates().size() == 1, "expected 1 date to be added but found " <<  s->dates().size());
+      BOOST_CHECK_MESSAGE( task->days().size() == 1, "expected 1 day to be added but found " <<  s->days().size());
+      BOOST_CHECK_MESSAGE( task->timeVec().size() == 1, "expected 1 time to be added but found " <<  s->timeVec().size());
+      BOOST_CHECK_MESSAGE( task->todayVec().size() == 1, "expected 1 today attr, to be added but found " <<  s->todayVec().size());
+      BOOST_CHECK_MESSAGE( defs.get_edit_history(task->absNodePath()).size() == 4, "expected edit_history of 4 to be added but found " <<  defs.get_edit_history(task->absNodePath()).size());
    }
    {
       TestStateChanged changed(s);
-      TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(s->absNodePath(),AlterCmd::DEL_DATE,"12.12.2010")));
-      TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(s->absNodePath(),AlterCmd::DEL_DAY,"sunday")));
-      TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(s->absNodePath(),AlterCmd::DEL_TIME,"23:00")));
-      TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(s->absNodePath(),AlterCmd::DEL_TODAY,"23:00")));
-      BOOST_CHECK_MESSAGE( s->dates().size() == 0, "expected 0 dates,   but found " <<  s->dates().size());
-      BOOST_CHECK_MESSAGE( s->days().size() == 0, "expected 0 day       but found " <<  s->days().size());
-      BOOST_CHECK_MESSAGE( s->timeVec().size() == 0, "expected 0 time   but found " <<  s->timeVec().size());
-      BOOST_CHECK_MESSAGE( s->todayVec().size() == 0, "expected 0 today but found " <<  s->todayVec().size());
-      BOOST_CHECK_MESSAGE( defs.get_edit_history(s->absNodePath()).size() == 12, "expected edit_history of 12 to be added but found " <<  defs.get_edit_history(s->absNodePath()).size());
+      TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(task->absNodePath(),AlterCmd::DEL_DATE,"12.12.2010")));
+      TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(task->absNodePath(),AlterCmd::DEL_DAY,"sunday")));
+      TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(task->absNodePath(),AlterCmd::DEL_TIME,"23:00")));
+      TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(task->absNodePath(),AlterCmd::DEL_TODAY,"23:00")));
+      BOOST_CHECK_MESSAGE( task->dates().size() == 0, "expected 0 dates,   but found " <<  s->dates().size());
+      BOOST_CHECK_MESSAGE( task->days().size() == 0, "expected 0 day       but found " <<  s->days().size());
+      BOOST_CHECK_MESSAGE( task->timeVec().size() == 0, "expected 0 time   but found " <<  s->timeVec().size());
+      BOOST_CHECK_MESSAGE( task->todayVec().size() == 0, "expected 0 today but found " <<  s->todayVec().size());
+      BOOST_CHECK_MESSAGE( defs.get_edit_history(task->absNodePath()).size() == 8, "expected edit_history of 8 to be added but found " <<  defs.get_edit_history(task->absNodePath()).size());
    }
 
    {   // test delete all
       TestStateChanged changed(s);
-      TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(s->absNodePath(),AlterCmd::ADD_DATE,"12.12.2010")));
-      TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(s->absNodePath(),AlterCmd::ADD_DATE,"12.*.2010")));
-      TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(s->absNodePath(),AlterCmd::ADD_DAY,"sunday")));
-      TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(s->absNodePath(),AlterCmd::ADD_DAY,"monday")));
-      TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(s->absNodePath(),AlterCmd::ADD_TIME,"23:00")));
-      TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(s->absNodePath(),AlterCmd::ADD_TIME,"23:00")));
-      TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(s->absNodePath(),AlterCmd::ADD_TODAY,"02:00")));
-      BOOST_CHECK_MESSAGE( defs.get_edit_history(s->absNodePath()).size() == 19, "expected edit_history of 19 to be added but found " <<  defs.get_edit_history(s->absNodePath()).size());
+      TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(task->absNodePath(),AlterCmd::ADD_DATE,"12.12.2010")));
+      TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(task->absNodePath(),AlterCmd::ADD_DATE,"12.*.2010")));
+      TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(task->absNodePath(),AlterCmd::ADD_DATE,"8.*.2010")));
+      TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(task->absNodePath(),AlterCmd::ADD_DAY,"sunday")));
+      TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(task->absNodePath(),AlterCmd::ADD_DAY,"monday")));
+      TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(task->absNodePath(),AlterCmd::ADD_DAY,"tuesday")));
+      TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(task->absNodePath(),AlterCmd::ADD_TIME,"09:00")));
+      TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(task->absNodePath(),AlterCmd::ADD_TIME,"22:00")));
+      TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(task->absNodePath(),AlterCmd::ADD_TIME,"23:00")));
+      TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(task->absNodePath(),AlterCmd::ADD_TODAY,"02:00")));
+      TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(task->absNodePath(),AlterCmd::ADD_TODAY,"03:00")));
+      BOOST_CHECK_MESSAGE( defs.get_edit_history(task->absNodePath()).size() == 19, "expected edit_history of 19 to be added but found " <<  defs.get_edit_history(task->absNodePath()).size());
 
-      TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(s->absNodePath(),AlterCmd::DEL_DATE)));
-      TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(s->absNodePath(),AlterCmd::DEL_DAY)));
-      TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(s->absNodePath(),AlterCmd::DEL_TIME)));
-      TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(s->absNodePath(),AlterCmd::DEL_TODAY)));
-      BOOST_CHECK_MESSAGE( s->dates().size() == 0, "expected 0 dates,   but found " <<  s->dates().size());
-      BOOST_CHECK_MESSAGE( s->days().size() == 0, "expected 0 day       but found " <<  s->days().size());
-      BOOST_CHECK_MESSAGE( s->timeVec().size() == 0, "expected 0 time   but found " <<  s->timeVec().size());
-      BOOST_CHECK_MESSAGE( s->todayVec().size() == 0, "expected 0 today but found " <<  s->todayVec().size());
+      TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(task->absNodePath(),AlterCmd::DEL_DATE)));
+      TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(task->absNodePath(),AlterCmd::DEL_DAY)));
+      TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(task->absNodePath(),AlterCmd::DEL_TIME)));
+      TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(task->absNodePath(),AlterCmd::DEL_TODAY)));
+      BOOST_CHECK_MESSAGE( task->dates().size() == 0, "expected 0 dates,   but found " <<  s->dates().size());
+      BOOST_CHECK_MESSAGE( task->days().size() == 0, "expected 0 day       but found " <<  s->days().size());
+      BOOST_CHECK_MESSAGE( task->timeVec().size() == 0, "expected 0 time   but found " <<  s->timeVec().size());
+      BOOST_CHECK_MESSAGE( task->todayVec().size() == 0, "expected 0 today but found " <<  s->todayVec().size());
 
       /// Edit history should be truncated to max of 20
-      BOOST_CHECK_MESSAGE( defs.get_edit_history(s->absNodePath()).size() == 20, "expected edit_history to be truncated to 20, but found " <<  defs.get_edit_history(s->absNodePath()).size());
+      BOOST_CHECK_MESSAGE( defs.get_edit_history(task->absNodePath()).size() == 20, "expected edit_history to be truncated to 20, but found " <<  defs.get_edit_history(task->absNodePath()).size());
    }
 
    {   // test add variables
