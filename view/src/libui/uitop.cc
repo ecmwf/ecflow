@@ -1013,7 +1013,7 @@ XtAppContext app_context;
 Display *display;
 // sym_entry_type *rp = NULL;
 
-int main (int argc, char **argv)
+int main(int argc, char **argv)
 {
   XtSetLanguageProc ((XtAppContext) NULL, 
 		     (XtLanguageProc) NULL, 

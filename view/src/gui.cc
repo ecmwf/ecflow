@@ -151,7 +151,7 @@ void gui::clear()
 }
 
 
-static Pixel pixel(const char* name)
+Pixel pixel(const char* name)
 {
 	static str grey("grey");
 

@@ -24,6 +24,8 @@ class resource;
 class interface;
 class node;
 
+Pixel pixel(const char* name);
+
 class gui {
 public:
 

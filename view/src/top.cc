@@ -187,20 +187,32 @@ void top::create(Display *display, char *app_name,
 
 	Dimension w,h;
 	Position x,y, ac = 0;
+	char color[20] = "#e5e5e5\0";
+	// int size = 1+ (int) strlen(color);
 	w = top_width;
 	h = top_height;
 	x = top_xoff;
 	y = top_yoff;
+	globals::set_resource("background", pixel(color));
 
 	while (ac < app_argc) {
 	  /* accept command line directives for display */
-	  if (!strncmp("-geometry",app_argv[ac],9)) {	  
+	  if (!strncmp("-geometry=",app_argv[ac],10)) {	  
 	    int ww=0, hh=0, xx=0, yy=0;
 	    sscanf(app_argv[ac], "-geometry=%dx%d+%d+%d", &ww, &hh, &xx, &yy);
 	    fprintf(stdout, "# geometry: %dx%d+%d+%d\n", ww, hh, xx, yy);
 	    w=ww; h=hh; x=xx; y=yy;
-	  } 
-	  else if (!strncmp("-rc=",app_argv[ac],4)) {	         
+	  } else if (!strncmp("-bg=",app_argv[ac],4)) {
+	    sscanf(app_argv[ac], "-bg=%s", color);
+	    globals::set_resource("background", pixel(color));
+	    // size= (int)strlen(color)+1;
+	    fprintf(stdout, "# color: %s %d\n", color, (int)pixel(color));
+	  }  else if (!strncmp("-background=",app_argv[ac],12)) {
+	    sscanf(app_argv[ac], "-background=%s", color);
+	    // size= (int)strlen(color)+1;
+	    globals::set_resource("background", pixel(color));
+	    fprintf(stdout, "# color: %s %d\n", color, (int)pixel(color));
+	  } else if (!strncmp("-rc=",app_argv[ac],4)) {	         
 	    char rcdir[1024] = { 0 };
 	    sscanf(app_argv[1], "-rc=%s", rcdir);
 	    if (rcdir[0] != 0) {
@@ -216,8 +228,9 @@ void top::create(Display *display, char *app_name,
 		XmNheight,h,
 		XmNx, x,
 		XmNy, y,
+                XmNbackground, globals::get_resource("background", (int)pixel(color)),
+		// XtVaTypedArg, XmNbackground, XmRString, color, size, // 201403
 		NULL);
-
 #if 0
 	XtGetApplicationResources(_xd_rootwidget,
 				  (XtPointer)&globals,
