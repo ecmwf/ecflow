@@ -99,7 +99,6 @@ static option<int> top_width(globals::instance(), "top_width",500);
 static option<int> top_height(globals::instance(),"top_height",500);
 static option<int> top_xoff(globals::instance(),"top_xoff",0);
 static option<int> top_yoff(globals::instance(),"top_yoff",0);
-static option<str> top_bg(globals::instance(),"top_bg","#e5e5e5");
 
 
 top::top():
@@ -189,7 +188,7 @@ void top::create(Display *display, char *app_name,
 	Dimension w,h;
 	Position x,y, ac = 0;
 	char color[20] = "#e5e5e5\0";
-	int size = 1+ (int) strlen(color);
+	// int size = 1+ (int) strlen(color);
 	w = top_width;
 	h = top_height;
 	x = top_xoff;
@@ -205,13 +204,12 @@ void top::create(Display *display, char *app_name,
 	    w=ww; h=hh; x=xx; y=yy;
 	  } else if (!strncmp("-bg=",app_argv[ac],4)) {
 	    sscanf(app_argv[ac], "-bg=%s", color);
-	    top_bg = color;
 	    globals::set_resource("background", pixel(color));
-	    size= (int)strlen(color)+1;
+	    // size= (int)strlen(color)+1;
 	    fprintf(stdout, "# color: %s %d\n", color, (int)pixel(color));
 	  }  else if (!strncmp("-background=",app_argv[ac],12)) {
 	    sscanf(app_argv[ac], "-background=%s", color);
-	    size= (int)strlen(color)+1;
+	    // size= (int)strlen(color)+1;
 	    globals::set_resource("background", pixel(color));
 	    fprintf(stdout, "# color: %s %d\n", color, (int)pixel(color));
 	  } else if (!strncmp("-rc=",app_argv[ac],4)) {	         
@@ -230,11 +228,9 @@ void top::create(Display *display, char *app_name,
 		XmNheight,h,
 		XmNx, x,
 		XmNy, y,
-		      // XtVaTypedArg, XmNbackground, XmRString, color, size, // 201403
+                XmNbackground, globals::get_resource("background", (int)pixel(color)),
+		// XtVaTypedArg, XmNbackground, XmRString, color, size, // 201403
 		NULL);
-	XtVaSetValues(this->form_,XmNbackground, 
-		      globals::get_resource("background", 229*255*255+229*255+229),NULL);
-
 #if 0
 	XtGetApplicationResources(_xd_rootwidget,
 				  (XtPointer)&globals,
