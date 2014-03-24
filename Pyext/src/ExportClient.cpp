@@ -244,6 +244,15 @@ void export_Client()
    .def("debug_server_off", &ClientInvoker::debug_server_off, "Disable server debug")
 	;
 
+//   .def("init",             &ClientInvoker::initTask,    "Child command,notify server job has started")
+//   .def("abort",            &ClientInvoker::abortTask,   "Child command,notify server job has aborted")
+//   .def("event",            &ClientInvoker::eventTask,   "Child command,notify server event occurred")
+//   .def("meter",            &ClientInvoker::meterTask,   "Child command,notify server meter changed")
+//   .def("label",            &ClientInvoker::labelTask,   "Child command,notify server label changed")
+//   .def("wait",             &ClientInvoker::waitTask,    "Child command,notify server wait for expression to come true")
+//   .def("complete",         &ClientInvoker::completeTask,"Child command,notify server job has complete")
+
+
 	class_<WhyCmd,  boost::noncopyable >( "WhyCmd",
 	         "The why command reports, the reason why a node is not running.\n\n"
 	         "It needs the  definition structure and the path to node\n"
