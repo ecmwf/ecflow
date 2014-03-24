@@ -20,9 +20,9 @@ from ecflow import Defs, Suite, Variable, Limit, InLimit, Task, PartExpression, 
     
 if __name__ == "__main__":
 
-    print "####################################################################"
+    print "######################################################################################"
     print "Running ecflow version " + Client().version()  + " debug build(" + str(debug_build()) +")"
-    print "####################################################################"
+    print "######################################################################################"
     
     #
     # Test for: See  ECFLOW-106 Times/Dates attributes attached to suite node
