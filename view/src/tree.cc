@@ -42,6 +42,9 @@
 #ifndef tmp_file_H
 #include "tmp_file.h"
 #endif
+#ifndef globals_H
+#include "globals.h"
+#endif
 
 #include "ecf_node.h"
 
@@ -312,9 +315,10 @@ void tree::showCB( Widget, XtPointer )
 
 void tree::connected(Boolean ok)
 {
-  if(ok) 
+  if(ok) {
     XtVaSetValues(tree_,XmNbackgroundPixmap,XmUNSPECIFIED_PIXMAP,NULL);
-  else {
+    XtVaSetValues(tree_,XmNbackground, globals::get_resource("background", 229*255*255+229*255+229), NULL); /* e5e5e5, 229 */
+  } else {
     Pixel fg,bg;
     XtVaGetValues(tree_,XmNforeground, &fg, XmNbackground, &bg,NULL);
     XtVaSetValues(tree_,XmNbackgroundPixmap,
