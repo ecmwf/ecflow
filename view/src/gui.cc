@@ -151,7 +151,7 @@ void gui::clear()
 }
 
 
-Pixel pixel(const char* name)
+Pixel gui::pixel(const char* name)
 {
 	static str grey("grey");
 
@@ -224,15 +224,15 @@ static XmFontList font(const char* name)
 
 inline GC makegc(const char* p)
 {
-	return makegc(pixel(p));
+  return makegc(gui::pixel(p));
 }
 
 static Pixel *status_colors = 0;
 
 char *ecf_colors_name[]
 = { (char*)"unknown", (char*)"suspended", (char*)"complete", (char*)"queued", (char*)"submitted", (char*)"active",
-      (char*)"aborted", (char*)"shutdown",  (char*)"halted"  ,  
-    (char*)"meter_low"  ,      (char*)"threshold"  ,   (char*)"event"  ,  
+    (char*)"aborted", (char*)"shutdown",  (char*)"halted"  ,  
+    (char*)"meter_low",(char*)"threshold"  ,   (char*)"event"  ,  
     NULL };
 
 Pixel gui::colors(unsigned int n)
@@ -241,7 +241,7 @@ Pixel gui::colors(unsigned int n)
 	{
           status_colors = new Pixel[XtNumber(::ecf_colors_name)];
           for(unsigned int i = 0 ; i < XtNumber(::ecf_colors_name); i++)
-            status_colors[i] = pixel(::ecf_colors_name[i]);
+            status_colors[i] = gui::pixel(::ecf_colors_name[i]);
 	}
 	return status_colors[n];
 }

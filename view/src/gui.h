@@ -24,8 +24,6 @@ class resource;
 class interface;
 class node;
 
-Pixel pixel(const char* name);
-
 class gui {
 public:
 
@@ -63,6 +61,8 @@ public:
 	static GC         colorGC(unsigned int);
 
 	static void set_interface(interface*);
+	static Pixel pixel(const char* name);
+
 
 	//------------------------------------------------------
 
