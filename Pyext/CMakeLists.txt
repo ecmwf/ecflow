@@ -35,6 +35,7 @@ list( APPEND tests
         py_u_TestAddDeleteFunc 
         py_u_TestAddNodeFunc  
         py_s_TestClientApi    
+        py_s_TestPythonChildApi
         py_u_TestDefs         
         py_u_TestDefsCheck    
         py_u_TestDerivable   

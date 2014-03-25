@@ -146,6 +146,19 @@ public:
 	int completeTask() const
 	   { return invoke(TaskApi::complete()); }
 
+	// Support for python child commands
+	void set_child_path(const std::string& path);
+	void set_child_password(const std::string& pass);
+	void set_child_pid(const std::string& pid);
+	void set_child_try_no(unsigned int try_no);
+	void child_init();
+	void child_abort(const std::string& reason  = "");
+	void child_event(const std::string& event_name_or_number);
+	void child_meter(const std::string& meter_name, int meter_value);
+	void child_label(const std::string& label_name, const std::string& label_value);
+	void child_wait(const std::string& on_expression);
+	void child_complete();
+
 	// ********************************************************************************
 	// The client api. Mirrors CtsApi on the whole
 	int getDefs() const;
@@ -296,6 +309,7 @@ private:
    int do_invoke_cmd(Cmd_ptr) const;
 	int load_in_memory_defs( const defs_ptr& clientDefs, bool force) const; /// For clients that want to load a in memory definition into the server.
  	std::string client_env_host_port() const;
+ 	void check_child_parameters() const;
 
 private:
    friend class RoundTripRecorder;
@@ -307,6 +321,11 @@ private:
 	bool testInterface_;                   // used in testing only
 	unsigned int connection_attempts_;     // No of attempts to establish connection with the server
 	unsigned int retry_connection_period_; // No of seconds to wait before trying to connect in case of failure.
+
+	std::string child_task_path_;                // support for python child commands
+	std::string child_task_password_;            // support for python child commands
+	std::string  child_task_pid_;                // support for python child commands
+	int  child_task_try_no_;                     // support for python child commands
 
 	mutable boost::posix_time::time_duration rtt_;// record latency for each cmd.
 	mutable boost::posix_time::ptime start_time_; // Used for time out and measuring latency
