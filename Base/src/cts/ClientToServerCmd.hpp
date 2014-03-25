@@ -290,9 +290,7 @@ public:
             const std::string& jobsPassword,
             const std::string& process_or_remote_id,
             int try_no,
-            const std::string& expression)
-   : TaskCmd(pathToTask,jobsPassword,process_or_remote_id,try_no), expression_(expression) {}
-
+            const std::string& expression);
    CtsWaitCmd() : TaskCmd()  {}
 
    const std::string& expression() const { return expression_;}

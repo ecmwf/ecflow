@@ -52,14 +52,14 @@ using namespace boost::posix_time;
 // class ClientInvoker
 ClientInvoker::ClientInvoker()
 : on_error_throw_exception_(true), cli_(false), test_(false),testInterface_(false),
-  connection_attempts_(2),retry_connection_period_(RETRY_CONNECTION_PERIOD)
+  connection_attempts_(2),retry_connection_period_(RETRY_CONNECTION_PERIOD),child_task_try_no_(0)
 {
 	if (clientEnv_.debug()) cout << "\nClientInvoker::ClientInvoker():============================start============================================\n";
 }
 
 ClientInvoker::ClientInvoker(const std::string& host_port)
 : on_error_throw_exception_(true), cli_(false), test_(false),testInterface_(false),
-  connection_attempts_(2),retry_connection_period_(RETRY_CONNECTION_PERIOD)
+  connection_attempts_(2),retry_connection_period_(RETRY_CONNECTION_PERIOD),child_task_try_no_(0)
 {
    if (clientEnv_.debug()) cout << "\nClientInvoker::ClientInvoker():============================start============================================\n";
    // assume format <host>:<port>
@@ -1144,6 +1144,97 @@ int ClientInvoker::load_in_memory_defs( const defs_ptr& clientDefs, bool force) 
    }
 
    return invoke( Cmd_ptr( new LoadDefsCmd( clientDefs, force /*force overwrite suite of same name*/) ) );
+}
+
+
+// ==========================================================================
+// Python child support
+// ==========================================================================
+void ClientInvoker::set_child_path(const std::string& path)
+{
+   child_task_path_ = path;
+}
+void ClientInvoker::set_child_password(const std::string& pass)
+{
+   child_task_password_ = pass;
+}
+void ClientInvoker::set_child_pid(const std::string& pid)
+{
+   child_task_pid_ = pid;
+}
+void ClientInvoker::set_child_try_no(unsigned int try_no)
+{
+   child_task_try_no_ = try_no;
+}
+void ClientInvoker::set_child_timeout(unsigned int seconds )
+{
+   clientEnv_.set_child_cmd_timeout(seconds);
+}
+
+
+void ClientInvoker::check_child_parameters() const
+{
+   if (clientEnv_.debug()) {
+      std::cout << "  child_task_path_ = '" << child_task_path_ << "'\n";
+      std::cout << "  child_task_password_ = '" << child_task_password_ << "'\n";
+      std::cout << "  child_task_pid_ = '" << child_task_pid_ << "'\n";
+      std::cout << "  child_task_try_no_ = " << child_task_try_no_ << "\n";
+   }
+   if (child_task_path_.empty()) throw std::runtime_error("Child Path not set");
+   if (child_task_password_.empty()) throw std::runtime_error("Child password not set");
+   if (child_task_pid_.empty())  throw std::runtime_error("Child pid not set");
+   if (child_task_try_no_ == 0)  throw std::runtime_error("Child try_no not set");
+}
+
+void ClientInvoker::child_init()
+{
+   check_child_parameters();
+   on_error_throw_exception_ = true; // for python always throw exception
+   invoke( Cmd_ptr( new InitCmd(child_task_path_, child_task_password_, child_task_pid_, child_task_try_no_  ) ) );
+}
+
+void ClientInvoker::child_abort(const std::string& reason )
+{
+   check_child_parameters();
+   on_error_throw_exception_ = true; // for python always throw exception
+   invoke( Cmd_ptr( new AbortCmd(child_task_path_, child_task_password_, child_task_pid_, child_task_try_no_,reason  ) ) );
+}
+
+void ClientInvoker::child_event(const std::string& event_name_or_number)
+{
+   check_child_parameters();
+   on_error_throw_exception_ = true; // for python always throw exception
+   invoke( Cmd_ptr( new EventCmd(child_task_path_, child_task_password_, child_task_pid_, child_task_try_no_,event_name_or_number  ) ) );
+}
+
+void ClientInvoker::child_meter(const std::string& meter_name, int meter_value)
+{
+   if (meter_name.empty())  throw std::runtime_error("Meter name not set");
+   check_child_parameters();
+   on_error_throw_exception_ = true; // for python always throw exception
+   invoke( Cmd_ptr( new MeterCmd(child_task_path_, child_task_password_, child_task_pid_, child_task_try_no_,meter_name,meter_value  ) ) );
+}
+
+void ClientInvoker::child_label(const std::string& label_name, const std::string& label_value)
+{
+   if (label_name.empty()) throw std::runtime_error("Label name not set");
+   check_child_parameters();
+   on_error_throw_exception_ = true; // for python always throw exception
+   invoke( Cmd_ptr( new LabelCmd(child_task_path_, child_task_password_, child_task_pid_, child_task_try_no_,label_name,label_value  ) ) );
+}
+
+void ClientInvoker::child_wait(const std::string& expression)
+{
+   check_child_parameters();
+   on_error_throw_exception_ = true; // for python always throw exception
+   invoke( Cmd_ptr( new CtsWaitCmd(child_task_path_, child_task_password_, child_task_pid_, child_task_try_no_, expression ) ) );
+}
+
+void ClientInvoker::child_complete()
+{
+   check_child_parameters();
+   on_error_throw_exception_ = true; // for python always throw exception
+   invoke( Cmd_ptr( new CompleteCmd(child_task_path_, child_task_password_, child_task_pid_, child_task_try_no_  ) ) );
 }
 
 // ==========================================================================

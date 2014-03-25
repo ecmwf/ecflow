@@ -145,6 +145,9 @@ void alter(ClientInvoker* self,
           const std::string& name = "",
           const std::string& value = "") { self->alter(path,alterType,attrType,name,value);  }
 
+void set_child_pid(ClientInvoker* self,int pid) { self->set_child_pid( boost::lexical_cast<std::string>(pid)); }
+
+
 void export_Client()
 {
  	class_<ClientInvoker, boost::noncopyable >("Client",ClientDoc::class_client())
@@ -242,16 +245,21 @@ void export_Client()
    .def("delete_all",       &ClientInvoker::delete_all,      (bp::arg("force")=false),                          ClientDoc::delete_all())
    .def("debug_server_on",  &ClientInvoker::debug_server_on,  "Enable server debug, Will dump to standard out on server host.")
    .def("debug_server_off", &ClientInvoker::debug_server_off, "Disable server debug")
+
+   .def("set_child_path",      &ClientInvoker::set_child_path ,   "Set the path to the task, obtained from server using %ECF_NAME%")
+   .def("set_child_password",  &ClientInvoker::set_child_password,"Set the password, needed for authentication, provided by the server using %ECF_PASS%")
+   .def("set_child_pid",       &ClientInvoker::set_child_pid,     "Set the process id of this job" )
+   .def("set_child_pid",       &set_child_pid,                    "Set the process id of this job" )
+   .def("set_child_try_no",    &ClientInvoker::set_child_try_no,  "Set the try no, i.e the number of times this job has run, obtained from the server, using %ECF_TRYNO%")
+   .def("set_child_timeout",   &ClientInvoker::set_child_timeout, "Set timeout if child can not connect to server, default is 24 hours. The input is required to be in seconds")
+   .def("child_init",          &ClientInvoker::child_init,    "Child command,notify server job has started")
+   .def("child_abort",         &ClientInvoker::child_abort,  (bp::arg("reason")=""), "Child command,notify server job has aborted, can provide an optional reason")
+   .def("child_event",         &ClientInvoker::child_event,   "Child command,notify server event occurred, requires the event name")
+   .def("child_meter",         &ClientInvoker::child_meter,   "Child command,notify server meter changed, requires meter name and value")
+   .def("child_label",         &ClientInvoker::child_label,   "Child command,notify server label changed, requires label name, and new value")
+   .def("child_wait",          &ClientInvoker::child_wait,    "Child command,wait for expression to come true")
+   .def("child_complete",      &ClientInvoker::child_complete,"Child command,notify server job has complete")
 	;
-
-//   .def("init",             &ClientInvoker::initTask,    "Child command,notify server job has started")
-//   .def("abort",            &ClientInvoker::abortTask,   "Child command,notify server job has aborted")
-//   .def("event",            &ClientInvoker::eventTask,   "Child command,notify server event occurred")
-//   .def("meter",            &ClientInvoker::meterTask,   "Child command,notify server meter changed")
-//   .def("label",            &ClientInvoker::labelTask,   "Child command,notify server label changed")
-//   .def("wait",             &ClientInvoker::waitTask,    "Child command,notify server wait for expression to come true")
-//   .def("complete",         &ClientInvoker::completeTask,"Child command,notify server job has complete")
-
 
 	class_<WhyCmd,  boost::noncopyable >( "WhyCmd",
 	         "The why command reports, the reason why a node is not running.\n\n"
