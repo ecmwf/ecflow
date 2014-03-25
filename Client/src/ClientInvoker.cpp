@@ -1166,6 +1166,11 @@ void ClientInvoker::set_child_try_no(unsigned int try_no)
 {
    child_task_try_no_ = try_no;
 }
+void ClientInvoker::set_child_timeout(unsigned int seconds )
+{
+   clientEnv_.set_child_cmd_timeout(seconds);
+}
+
 
 void ClientInvoker::check_child_parameters() const
 {

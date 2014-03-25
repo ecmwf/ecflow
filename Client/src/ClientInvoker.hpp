@@ -128,8 +128,7 @@ public:
 	const std::string& errorMsg() const { return server_reply_.error_msg();}
 
 	// ***************************************************************************
-	// Task/child based api. Only added here for test. Do *not* add to python api
-	// since they should only be called from within jobs file
+	// Task/child based api. Only added here for test.
 	// Relies on environment for the other args
 	int initTask(const std::string& process_id)const
 	   { return invoke(TaskApi::init(process_id)); }
@@ -146,11 +145,12 @@ public:
 	int completeTask() const
 	   { return invoke(TaskApi::complete()); }
 
-	// Support for python child commands
+	// Support for python child commands, and python jobs
 	void set_child_path(const std::string& path);
 	void set_child_password(const std::string& pass);
 	void set_child_pid(const std::string& pid);
 	void set_child_try_no(unsigned int try_no);
+	void set_child_timeout(unsigned int seconds ); // ECF_TIMEOUT default is 24 hours allow python jobs to override
 	void child_init();
 	void child_abort(const std::string& reason  = "");
 	void child_event(const std::string& event_name_or_number);
