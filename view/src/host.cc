@@ -129,14 +129,16 @@ public:
    SelectNode( host* h )
             : host_(h)
    {
-      selected_ = selection::current_node();
-      current_ = selected_ ? selected_->full_name() : "";
+     // selected_ = selection::current_node();
+     current_ = selection::current_path(); // selected_ ? selected_->full_name() : "";
    }
 
    ~SelectNode()
    {
       if (selection::current_node() != selected_ && !current_.empty()) {
-         if ((selected_ = host_->top()->find(current_))) selection::notify_new_selection(selected_);
+	if (host_ && host_->top() && 
+	    (selected_ = host_->top()->find(current_))) 
+	   selection::notify_new_selection(selected_);
       }
 
    }
