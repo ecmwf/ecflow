@@ -50,10 +50,10 @@ def create_defs(name=""):
     task.add_meter("meter", 0, 100)
     task.add_label("label_name", "value")
 
+    family.add_task("t2")  # test wait
+
     return defs;
     
-
-def get_username(): return pwd.getpwuid(os.getuid())[ 0 ]
 
 def log_file_path(port): return "./" + gethostname() + "." + port + ".ecf.log"
 def checkpt_file_path(port): return "./" + gethostname() + "." + port + ".ecf.check"
@@ -66,11 +66,10 @@ def test_client_run(ci):
     suite = defs.find_suite("test_client_run")
     suite.add_defstatus(DState.suspended)
 
-    # create the ecf file
+    # create the ecf file /test_client_run/f1/t1
     dir = ecf_home() + "/test_client_run/f1"
     if not os.path.exists(dir): os.makedirs(dir)
     file = dir + "/t1.ecf"
-    
     contents = "%include <head.h>\n\n"
     contents += "print 'doing some work'\n"
     contents += "try:\n"
@@ -80,7 +79,17 @@ def test_client_run(ci):
     contents += "except:\n"
     contents += "    ci.child_abort()\n\n"
     contents += "%include <tail.h>\n"
-     
+    open(file,'w').write(contents)
+      
+    # create the ecf file /test_client_run/f1/t2
+    file = dir + "/t2.ecf"
+    contents = "%include <head.h>\n\n"
+    contents += "print 'doing some work'\n"
+    contents += "try:\n"
+    contents += "    ci.child_wait('/test_client_run/f1/t1 == complete')\n"
+    contents += "except:\n"
+    contents += "    ci.child_abort()\n\n"
+    contents += "%include <tail.h>\n"
     open(file,'w').write(contents)
       
     ci.restart_server()
