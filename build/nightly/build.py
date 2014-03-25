@@ -446,6 +446,7 @@ def build_linux_64_intel( parent ) :
     
 def build_opensuse113( parent ) :
     opensuse113 = parent.add_family("opensuse113")
+    opensuse113.add_variable("GIT","git")   # hack 
     add_opensuse113_variables(opensuse113)
     add_remote_opensuse113_variables(opensuse113)
     add_git_tasks( opensuse113 )
@@ -571,6 +572,7 @@ def build_boost( boost ):
     add_boost_tasks( family )
     
     family = boost.add_family("opensuse131")
+    family.add_variable("GIT","git")   # hack 
     add_opensuse131_variables(family)
     add_remote_opensuse131_variables(family)
     add_boost_tasks( family )
