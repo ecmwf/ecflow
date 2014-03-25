@@ -41,7 +41,6 @@ def create_defs(name=""):
     
     ecfhome = ecf_home();
     suite.add_variable("ECF_HOME", ecfhome);
-    suite.add_variable("SLEEP", "1");  # not strictly required since default is 1 second
     suite.add_variable("ECF_INCLUDE", ecf_includes());
 
     family = suite.add_family("f1")
@@ -70,7 +69,7 @@ def test_client_run(ci):
     dir = ecf_home() + "/test_client_run/f1"
     if not os.path.exists(dir): os.makedirs(dir)
     file = dir + "/t1.ecf"
-    contents = "%include <head.h>\n\n"
+    contents = "%include <head.py>\n\n"
     contents += "print 'doing some work'\n"
     contents += "try:\n"
     contents += "    ci.child_event('event_fred')\n"
@@ -78,18 +77,18 @@ def test_client_run(ci):
     contents += "    ci.child_label('label_name','100')\n"
     contents += "except:\n"
     contents += "    ci.child_abort()\n\n"
-    contents += "%include <tail.h>\n"
+    contents += "%include <tail.py>\n"
     open(file,'w').write(contents)
       
     # create the ecf file /test_client_run/f1/t2
     file = dir + "/t2.ecf"
-    contents = "%include <head.h>\n\n"
+    contents = "%include <head.py>\n\n"
     contents += "print 'doing some work'\n"
     contents += "try:\n"
     contents += "    ci.child_wait('/test_client_run/f1/t1 == complete')\n"
     contents += "except:\n"
     contents += "    ci.child_abort()\n\n"
-    contents += "%include <tail.h>\n"
+    contents += "%include <tail.py>\n"
     open(file,'w').write(contents)
       
     ci.restart_server()
