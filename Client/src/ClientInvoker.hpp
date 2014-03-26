@@ -63,6 +63,8 @@ public:
 	/// if connection fails. hence will bomb out earlier
 	/// If applied to child command's will continue attempting this host/port until timeout
 	void set_host_port(const std::string& h, const std::string& p);
+   const std::string& host() const;
+   const std::string& port() const;
 
 	/// Whenever there is a connections failure we wait a number of seconds
 	/// before trying again. ( i.e. to get round glitches in the network.)

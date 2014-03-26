@@ -94,6 +94,15 @@ void ClientInvoker::set_host_port(const std::string& host, const std::string& po
 	clientEnv_.set_host_port(host,port);
 }
 
+const std::string& ClientInvoker::host() const
+{
+   return clientEnv_.host();
+}
+const std::string& ClientInvoker::port() const
+{
+   return clientEnv_.port();
+}
+
 void ClientInvoker::allow_new_client_old_server(int archive_version_of_old_server)
 {
    clientEnv_.allow_new_client_old_server(archive_version_of_old_server);
