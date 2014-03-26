@@ -356,6 +356,25 @@ void CompleteCmd::create( 	Cmd_ptr& cmd,
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
 
+CtsWaitCmd::CtsWaitCmd(const std::string& pathToTask,
+          const std::string& jobsPassword,
+          const std::string& process_or_remote_id,
+          int try_no,
+          const std::string& expression)
+ : TaskCmd(pathToTask,jobsPassword,process_or_remote_id,try_no), expression_(expression)
+{
+   // Parse expression to make sure its valid
+   PartExpression exp(expression);
+   string parseErrorMsg;
+   std::auto_ptr<AstTop> ast = exp.parseExpressions( parseErrorMsg );
+   if (!ast.get()) {
+
+      assert( !parseErrorMsg.empty() );
+      std::stringstream ss; ss << "CtsWaitCmd: Failed to parse expression '" << expression << "'.  " << parseErrorMsg;
+      throw std::runtime_error( ss.str() );
+   }
+}
+
 std::ostream& CtsWaitCmd::print(std::ostream& os) const
 {
 	return os << Str::CHILD_CMD() << "wait " << expression_ << " " << path_to_node();
@@ -444,21 +463,9 @@ void CtsWaitCmd::create( 	Cmd_ptr& cmd,
 		<< ") try_no(" << clientEnv->task_try_no()
 		<< ") expression(" << expression << ")\n";
 
-
 	std::string errorMsg;
 	if ( !clientEnv->checkTaskPathAndPassword(errorMsg) ) {
 	 	throw std::runtime_error( "CtsWaitCmd: " + errorMsg );
-	}
-
- 	// Parse expression to make sure its valid
- 	PartExpression exp(expression);
- 	string parseErrorMsg;
-	std::auto_ptr<AstTop> ast = exp.parseExpressions( parseErrorMsg );
-	if (!ast.get()) {
-
-		assert( !parseErrorMsg.empty() );
-		std::stringstream ss; ss << "CtsWaitCmd: Failed to parse expression '" << expression << "'.  " << parseErrorMsg;
-	 	throw std::runtime_error( ss.str() );
 	}
 
 	cmd = Cmd_ptr( new CtsWaitCmd( clientEnv->task_path(),

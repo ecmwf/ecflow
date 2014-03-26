@@ -63,6 +63,8 @@ public:
 	/// if connection fails. hence will bomb out earlier
 	/// If applied to child command's will continue attempting this host/port until timeout
 	void set_host_port(const std::string& h, const std::string& p);
+   const std::string& host() const;
+   const std::string& port() const;
 
 	/// Whenever there is a connections failure we wait a number of seconds
 	/// before trying again. ( i.e. to get round glitches in the network.)
@@ -128,8 +130,7 @@ public:
 	const std::string& errorMsg() const { return server_reply_.error_msg();}
 
 	// ***************************************************************************
-	// Task/child based api. Only added here for test. Do *not* add to python api
-	// since they should only be called from within jobs file
+	// Task/child based api. Only added here for test.
 	// Relies on environment for the other args
 	int initTask(const std::string& process_id)const
 	   { return invoke(TaskApi::init(process_id)); }
@@ -145,6 +146,20 @@ public:
       { return invoke(TaskApi::wait(on_expression)); }
 	int completeTask() const
 	   { return invoke(TaskApi::complete()); }
+
+	// Support for python child commands, and python jobs
+	void set_child_path(const std::string& path);
+	void set_child_password(const std::string& pass);
+	void set_child_pid(const std::string& pid);
+	void set_child_try_no(unsigned int try_no);
+	void set_child_timeout(unsigned int seconds ); // ECF_TIMEOUT default is 24 hours allow python jobs to override
+	void child_init();
+	void child_abort(const std::string& reason  = "");
+	void child_event(const std::string& event_name_or_number);
+	void child_meter(const std::string& meter_name, int meter_value);
+	void child_label(const std::string& label_name, const std::string& label_value);
+	void child_wait(const std::string& on_expression);
+	void child_complete();
 
 	// ********************************************************************************
 	// The client api. Mirrors CtsApi on the whole
@@ -296,6 +311,7 @@ private:
    int do_invoke_cmd(Cmd_ptr) const;
 	int load_in_memory_defs( const defs_ptr& clientDefs, bool force) const; /// For clients that want to load a in memory definition into the server.
  	std::string client_env_host_port() const;
+ 	void check_child_parameters() const;
 
 private:
    friend class RoundTripRecorder;
@@ -307,6 +323,11 @@ private:
 	bool testInterface_;                   // used in testing only
 	unsigned int connection_attempts_;     // No of attempts to establish connection with the server
 	unsigned int retry_connection_period_; // No of seconds to wait before trying to connect in case of failure.
+
+	std::string child_task_path_;                // support for python child commands
+	std::string child_task_password_;            // support for python child commands
+	std::string  child_task_pid_;                // support for python child commands
+	int  child_task_try_no_;                     // support for python child commands
 
 	mutable boost::posix_time::time_duration rtt_;// record latency for each cmd.
 	mutable boost::posix_time::ptime start_time_; // Used for time out and measuring latency
