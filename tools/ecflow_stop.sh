@@ -26,9 +26,11 @@ export TZ=GMT LANG=en_GB.UTG-8
 host=$(hostname)
 backup_server=false
 
-if [ $host = ecga* ] ; then 
-  host=ecgate
-fi
+case $host in 
+sappa*) host=sappa;;
+sappb*) host=sappb;;
+ecga*)  host=ecgate;;
+esac
 
 #==========================================================================
 # Syntax
@@ -86,8 +88,12 @@ echo "Checking if the server is already running on $host:$port_number"
 
 export ECF_PORT=$port_number
 export ECF_NODE=$host
+set -x
+rcdir=$HOME/.ecflowrc
+fname=$rcdir/$(echo $ECF_NODE | cut -c1-5).$USER.$ECF_PORT # OK as long as ecgate node is under 10
+if [[ -f $fname ]]; then host=$(cat $fname); fi
 
-ecflow_client --ping 
+ecflow_client --host $host --ping 
 if [ $? -eq 1 ]; then
   echo "";
   echo "... The server on $host:$port_number has already been stopped" 
@@ -98,8 +104,8 @@ fi
 echo "";
 echo Halting, check pointing and terminating the server
 
-ecflow_client --halt=yes
-ecflow_client --check_pt
-ecflow_client --terminate=yes
+ecflow_client  --host $host --halt=yes
+ecflow_client  --host $host --check_pt
+ecflow_client  --host $host --terminate=yes
 
 exit 0
