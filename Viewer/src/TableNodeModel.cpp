@@ -69,7 +69,7 @@ Node * TableNodeModel::rootNode(ServerHandler* server) const
 
 int TableNodeModel::columnCount( const QModelIndex& /*parent */ ) const
 {
-   	 return 3;
+   	 return 2;
 }
 
 int TableNodeModel::rowCount( const QModelIndex& parent) const
@@ -104,12 +104,13 @@ int TableNodeModel::rowCount( const QModelIndex& parent) const
 			//We show the whole tree for the server
 			else
 			{
-				return server->suiteNum();
+				return server->numberOfNodes();
 			}
 		}
 	}
+
 	//The parent is a node
-	else if(Node* parentNode=indexToNode(parent))
+	else
 	{
 		return 0;
 	}
@@ -164,9 +165,8 @@ QVariant TableNodeModel::nodeData(const QModelIndex& index, int role) const
 	{
 		switch(index.column())
 		{
-		case 0: return QString::fromStdString(node->name());
+		case 0: return QString::fromStdString(node->absNodePath());
 		case 1: return ViewConfig::Instance()->stateName(node->dstate());
-		case 2: return QString::fromStdString(node->absNodePath());
 		default: return QVariant();
 		}
 	}
@@ -187,7 +187,6 @@ QVariant TableNodeModel::headerData( const int section, const Qt::Orientation or
 	{
    	case 0: return tr("Node");
    	case 1: return tr("Status");
-   	case 2: return tr("Path");
    	default: return QVariant();
    	}
 
@@ -234,12 +233,8 @@ QModelIndex TableNodeModel::index( int row, int column, const QModelIndex & pare
 			//So this item must be a suite!
 			else
 			{
-				if(Node *suite=server->suiteAt(row))
-				{
-					return createIndex(row,column,suite);
-				}
-				else
-					return QModelIndex();
+				if(Node *node=server->findNode(row))
+					return createIndex(row,column,node);
 			}
 		}
 		//Parent is not the server: the parent must be another node
@@ -280,9 +275,11 @@ QModelIndex TableNodeModel::parent(const QModelIndex &child) const
 	//The node is not a rootnode
 
 	//Get the parent node
+	return serverToIndex(ServerHandler::find(node));
+
 	Node *parentNode=node->parent();
 
-	//If there is no parent node it is a suite so its parent is a server
+	/*//If there is no parent node it is a suite so its parent is a server
 	if(!parentNode)
 	{
 		return serverToIndex(ServerHandler::find(node));
@@ -291,7 +288,7 @@ QModelIndex TableNodeModel::parent(const QModelIndex &child) const
 	else
 	{
 		return QModelIndex();
-	}
+	}*/
 
 	return QModelIndex();
 }

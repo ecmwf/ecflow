@@ -32,6 +32,11 @@ public:
 		int suiteNum() const;
 		Node* suiteAt(int) const;
 		int indexOfSuite(Node* node);
+
+		int numberOfNodes();
+		Node* findNode(int globalIndex);
+		Node* findNode(int globalIndex,int& total,Node *parent);
+
 		int update();
 		void setUpdatingStatus(bool newStatus) {updating_ = newStatus;}
 

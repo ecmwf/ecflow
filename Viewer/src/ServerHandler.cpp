@@ -112,6 +112,73 @@ int ServerHandler::indexOfSuite(Node* node)
 
 }
 
+int ServerHandler::numberOfNodes()
+{
+	int num=0;
+	defs_ptr d = defs();
+	if(d != NULL)
+	{
+			const std::vector<suite_ptr> &suites = d->suiteVec();
+			for(unsigned int i=0; i < suites.size(); i++)
+			{
+				num+=1;
+				std::set<Node*> n;
+				suites.at(i)->allChildren(n);
+				num+=static_cast<int>(n.size());
+			}
+		}
+
+	return num;
+}
+
+Node* ServerHandler::findNode(int globalIndex)
+{
+	defs_ptr d=defs();
+	if(d == NULL)
+			return 0;
+
+	int total=0;
+	const std::vector<suite_ptr> &suites = d->suiteVec();
+	for(unsigned int i=0; i < suites.size();i++)
+	{
+			if(total == globalIndex)
+					return suites.at(i).get();
+
+			total+=1;
+
+			Node *n=findNode(globalIndex,total,suites.at(i).get());
+			if(n)
+				return n;
+	}
+
+	return 0;
+}
+
+Node* ServerHandler::findNode(int globalIndex,int& total,Node *parent)
+{
+	std::vector<node_ptr> nodes;
+	parent->immediateChildren(nodes);
+	if(globalIndex < total+nodes.size())
+	{
+		int pos=globalIndex-total;
+		return nodes.at(pos).get();
+	}
+	else
+	{
+		total+=nodes.size();
+		for(unsigned int i=0; i < nodes.size();i++)
+		{
+			Node *n=findNode(globalIndex,total,nodes.at(i).get());
+			if(n)
+				return n;
+		}
+	}
+
+	return 0;
+}
+
+
+
 Node* ServerHandler::immediateChildAt(Node *parent,int pos)
 {
 	if(!parent || pos <0) return NULL;
