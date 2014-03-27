@@ -34,18 +34,20 @@ def create_defs(name,the_port):
     suite.add_variable("ECF_INCLUDE", ecf_includes());
 
     family = suite.add_family("f1")
+    family.add_variable("ECF_JOB_CMD","python %ECF_JOB% 1> %ECF_JOBOUT% 2>&1")
+
     task = family.add_task("t1")
     task.add_event("event_fred")
     task.add_meter("meter", 0, 100)
     task.add_label("label_name", "value")
 
     family.add_task("t2")  # test wait
-
+ 
     return defs;
     
 
 def test_client_run(ci):            
-    print "test_client_run " + ci.get_host() + ":" + str(ci.get_port())
+    print "\ntest_client_run " + ci.get_host() + ":" + str(ci.get_port())
     print " ECF_HOME(" + Test.ecf_home(ci.get_port()) + ")"
     print " ECF_INCLUDES(" + ecf_includes() + ")"
     ci.delete_all()     
@@ -63,49 +65,52 @@ def test_client_run(ci):
     contents += "    ci.child_event('event_fred')\n"
     contents += "    ci.child_meter('meter',100)\n"
     contents += "    ci.child_label('label_name','100')\n"
+    contents += "    print 'Finished event,meter and label child commands'\n"
     contents += "except:\n"
     contents += "    ci.child_abort()\n\n"
     contents += "%include <tail.py>\n"
     open(file,'w').write(contents)
-    print "Creating file " + file
+    print " Created file " + file
       
     # create the ecf file /test_client_run/f1/t2
     file = dir + "/t2.ecf"
     contents = "%include <head.py>\n\n"
-    contents += "print 'doing some work'\n"
+    contents += "print 'Waiting for /test_client_run/f1/t1 == complete'\n"
     contents += "try:\n"
     contents += "    ci.child_wait('/test_client_run/f1/t1 == complete')\n"
+    contents += "    print 'Finished waiting'\n"
     contents += "except:\n"
     contents += "    ci.child_abort()\n\n"
     contents += "%include <tail.py>\n"
     open(file,'w').write(contents)
-    print "Creating file " + file
+    print " Created file " + file
       
     ci.restart_server()
     ci.load(defs)           
     ci.begin_all_suites()
     ci.run("/test_client_run", False)
-    
+    print " Running the test, wait for suite to complete ..."  
+
     count = 0
     while 1:
         count += 1
         ci.sync_local() # get the changes, synced with local defs
         suite = ci.get_defs().find_suite("test_client_run")
-        assert suite != None, "Expected to find suite test_client_run:\n" + str(ci.get_defs())
+        assert suite != None, " Expected to find suite test_client_run:\n" + str(ci.get_defs())
         if suite.get_state() == State.complete:
             break;
         if suite.get_state() == State.aborted:
             print defs;
-            assert False,"Suite aborted \n"  
+            assert False," Suite aborted \n"  
         time.sleep(2)
         if count > 20:
-            assert False, "test_client_run aborted after " + str(count) + " loops:\n" + str(ci.get_defs())
+            assert False, " test_client_run aborted after " + str(count) + " loops:\n" + str(ci.get_defs())
         
     ci.log_msg("Looped " + str(count) + " times")
     
     if not Test.debugging():
-        print "**********************************************************************************************************"
         dir_to_remove = Test.ecf_home(ci.get_port()) + "/" + "test_client_run"
+        print " Test OK: removing directory " + dir_to_remove
         shutil.rmtree(dir_to_remove)      
         
 if __name__ == "__main__":
@@ -114,6 +119,6 @@ if __name__ == "__main__":
     print "####################################################################"
 
     with Test.Server() as ci:
-        PrintStyle.set_style( Style.MIGRATE ) # show node state 
+        PrintStyle.set_style( Style.STATE ) # show node state 
         test_client_run(ci)  
-        print "All Tests pass ======================================================================"    
+        print "\nAll Tests pass ======================================================================"    

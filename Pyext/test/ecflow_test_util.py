@@ -50,6 +50,7 @@ def backup_checkpt_file_path(port): return "./" + gethostname() + "." + port + "
 def white_list_file_path(port): return "./" + gethostname() + "." + port + ".ecf.lists"
 
 def clean_up(port):
+    print "   clean_up " + port
     try: os.remove(log_file_path(port))
     except: pass
     try: os.remove(checkpt_file_path(port))
@@ -59,10 +60,13 @@ def clean_up(port):
     try: os.remove(white_list_file_path(port))  
     except: pass
     if not debugging():
+        print "   Attempting to Removing ECF_HOME " + ecf_home(port)
         try: 
-            print "Removing ECF_HOME " + Test.ecf_home(port)
-            shutil.rmtree(Test.ecf_home(port),True)   # True means ignore errors  
-        except: pass
+            shutil.rmtree(ecf_home(port),True)   # True means ignore errors 
+            print "   Remove OK" 
+        except: 
+            print "   Remove Failed" 
+            pass
                
         
 # =======================================================================================
@@ -70,10 +74,11 @@ class EcfPortLock(object):
     """allow debug and release version of python tests to run at the same
     time, buy generating a unique port each time"""
     def __init__(self):
+        print "   EcfPortLock:__init__"
         pass
     
     def find_free_port(self,seed_port):
-        print "EcfPortLock:find_free_port starting with " + str(seed_port)
+        print "   EcfPortLock:find_free_port starting with " + str(seed_port)
         port = seed_port
         while 1:
             if self._free_port(port) == True:
@@ -123,8 +128,9 @@ class EcfPortLock(object):
 
 class Server(object):
     """TestServer: allow debug and release version of python tests to run at the same
-    time, buy generating a unique port each time"""
+    time, by generating a unique port each time"""
     def __init__(self):
+        print "Server:__init__: Starting server"      
         if not debugging():
             seed_port = 3153
             if debug_build(): seed_port = 3152
@@ -132,18 +138,16 @@ class Server(object):
             self.the_port = self.lock_file.find_free_port(seed_port)   
         else:
             self.the_port = "3152"
-
-        print "Creating client: on port " + str(self.the_port)
      
         # Only worth doing this test, if the server is running
         # ON HPUX, have only one connection attempt, sometimes fails
         #ci.set_connection_attempts(1)     # improve responsiveness only make 1 attempt to connect to server
         #ci.set_retry_connection_period(0) # Only applicable when make more than one attempt. Added to check api.
         self.ci = Client("localhost", self.the_port)
-        print "About to ping localhost:" + self.the_port       
      
     def __enter__(self):
         try:
+            print "Server:__enter__: About to ping localhost:" + self.the_port       
             self.ci.ping() 
             print "------- Server all ready running *UNEXPECTED* ------"
         except RuntimeError, e:
@@ -167,14 +171,17 @@ class Server(object):
             
         print "run the tests" 
 
-        # return the Client, that can talg to the server
+        # return the Client, that can call to the server
         return self.ci
     
     def __exit__(self,exctype,value,tb):
-        print "Finally, Kill the server, clean up log file, check pt files and lock files used in test"
+        print "Server:__exit__: Kill the server, clean up log file, check pt files and lock files, ECF_HOME"
         if not debugging():
+            print "   Terminate server"
             self.ci.terminate_server()  
+            print "   Terminate server OK"
             clean_up(str(self.the_port))
+            print "   Remove lock file"
             self.lock_file.remove(self.the_port)
         return False
         
