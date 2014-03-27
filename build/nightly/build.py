@@ -660,7 +660,23 @@ def add_suite_variables( suite ):
 # ================================================================================    
 defs = ecflow.Defs()
 defs.add_variable("ECFLOW_TAR_DIR","/var/tmp/ma0/clientRoot/workspace")
- 
+
+print "build experiment"
+with defs.add_suite("experiment") as experiment:
+    experiment.add_defstatus( ecflow.DState.suspended )
+    experiment.add_variable("ECF_HOME", os.getenv("SCRATCH") + "/nightly")
+    experiment.add_variable("ECF_INCLUDE",os.getenv("SCRATCH") + "/nightly")
+    experiment.add_variable("ECF_FILES",os.getenv("SCRATCH") + "/nightly/experiment")
+    experiment.add_variable("ECF_JOB_CMD","python %ECF_JOB% 1> %ECF_JOBOUT% 2>&1")
+    with experiment.add_task("exp") as task:
+        task.add_event("event_fred")
+        task.add_meter("meter", 0, 100)
+        task.add_label("label_name", "value")
+    with experiment.add_task("exp2") as task:
+        task.add_event("event_fred")
+        task.add_meter("meter", 0, 100)
+        task.add_label("label_name", "value")
+
 print "build boost"
 with defs.add_suite("boost_suite") as boost_suite:
     boost_suite.add_variable("BOOST_VERSION","boost_1_53_0")

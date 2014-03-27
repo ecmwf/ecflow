@@ -479,7 +479,7 @@ void CtsWaitCmd::create( 	Cmd_ptr& cmd,
 
 std::ostream& AbortCmd::print(std::ostream& os) const
 {
-   return os << Str::CHILD_CMD() << "abort " << path_to_node();
+   return os << Str::CHILD_CMD() << "abort " << path_to_node() << "  " << reason_;
 }
 
 bool AbortCmd::equals(ClientToServerCmd* rhs) const
