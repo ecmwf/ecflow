@@ -80,6 +80,10 @@ NodeWidget *NodePanel::addWidget(QString id)
 
 	addTab(nw,pix,name);
 
+
+	connect(nw,SIGNAL(selectionChanged(ViewNodeInfo_ptr)),
+			this,SIGNAL(selectionChanged(ViewNodeInfo_ptr)));
+
 	/*connect(fw,SIGNAL(pathChanged()),
 		this,SLOT(slotPathChanged()));
 

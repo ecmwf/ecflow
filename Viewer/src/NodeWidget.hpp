@@ -15,6 +15,8 @@
 #include <QSettings>
 #include <QWidget>
 
+#include "ViewNodeInfo.hpp"
+
 class NodeViewHandler;
 
 class NodeWidget : public QWidget
@@ -43,6 +45,7 @@ signals:
 	//void desktopCommandRequested(QString,QPoint);
 	//void itemInfoChanged(QString);
 	//void pathChanged();
+    void selectionChanged(ViewNodeInfo_ptr);
 
 private:
 	//QModelIndex changeFolder(const QModelIndex&);

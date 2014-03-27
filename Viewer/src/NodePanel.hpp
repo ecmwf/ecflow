@@ -14,6 +14,7 @@
 
 #include "Viewer.hpp"
 #include "TabWidget.hpp"
+#include "ViewNodeInfo.hpp"
 
 class NodeWidget;
 
@@ -46,6 +47,7 @@ public slots:
 signals:
 	void itemInfoChanged(QString);
 	void currentWidgetChanged();
+	void selectionChanged(ViewNodeInfo_ptr);
 
 protected:
 	void tabBarCommand(QString, int);

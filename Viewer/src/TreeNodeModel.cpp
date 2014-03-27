@@ -223,7 +223,7 @@ QVariant TreeNodeModel::nodeData(const QModelIndex& index, int role) const
 		default: return QVariant();
 		}
 	}
-	else if(role == Qt::BackgroundRole)
+	else if(index.column() == 0 && role == Qt::BackgroundRole)
 	{
 		return ViewConfig::Instance()->stateColour(node->dstate());
 	}

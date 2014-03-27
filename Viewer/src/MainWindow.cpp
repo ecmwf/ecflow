@@ -18,6 +18,7 @@
 #include "ClientInvoker.hpp"
 
 #include "MainWindow.hpp"
+#include "InfoPanel.hpp"
 #include "NodePanel.hpp"
 #include "ServerHandler.hpp"
 
@@ -56,6 +57,13 @@ MainWindow::MainWindow(QStringList idLst,QWidget *parent) : QMainWindow(parent)
     connect(nodePanel_,SIGNAL(currentWidgetChanged()),
     		this,SLOT(slotCurrentChangedInPanel()));
 
+
+    //Info panel
+    InfoPanel* infoPanel=new InfoPanel(this);
+    layout->addWidget(infoPanel);
+
+    connect(nodePanel_,SIGNAL(selectionChanged(ViewNodeInfo_ptr)),
+    		infoPanel,SLOT(slotReload(ViewNodeInfo_ptr)));
 
     //File menu
 

@@ -37,6 +37,10 @@ NodeWidget::NodeWidget(QString rootNode, QWidget *parent) :
 	TreeNodeView *treeView= new TreeNodeView("",this);
 	views_->add(Viewer::TreeViewMode,treeView,treeView);
 
+
+	connect(treeView,SIGNAL(selectionChanged(ViewNodeInfo_ptr)),
+			this,SIGNAL(selectionChanged(ViewNodeInfo_ptr)));
+
 	/*connect(iconView_,SIGNAL(currentFolderChanged(Folder*)),
 		this,SLOT(slotFolderReplacedInView(Folder*)));
 

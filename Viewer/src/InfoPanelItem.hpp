@@ -5,16 +5,23 @@
 // In applying this licence, ECMWF does not waive the privileges and immunities
 // granted to it by virtue of its status as an intergovernmental organisation
 // nor does it submit to any jurisdiction.
-//
 //============================================================================
 
-#ifndef VIEWER_HPP_
-#define VIEWER_HPP_
+#ifndef INFOPANELITEM_HPP_
+#define INFOPANELITEM_HPP_
 
-namespace Viewer
+#include "ViewNodeInfo.hpp"
+
+class QWidget;
+
+class InfoPanelItem
 {
-    enum ViewMode {TreeViewMode,TableViewMode,NoViewMode,};
-    enum ItemRole {InfoRole,ManualRole,ScriptRole,JobRole,OutputRole,WhyRole,TriggersRole,TimelineRole,VariableRole,EditRole,MessageRole};
-}
+public:
+	InfoPanelItem(){};
+	virtual ~InfoPanelItem(){};
+
+	virtual void reload(ViewNodeInfo_ptr node)=0;
+	virtual QWidget* realWidget()=0;
+};
 
 #endif
