@@ -326,8 +326,7 @@ public:
             const std::string& jobsPassword,
             const std::string& process_or_remote_id,
             int try_no = 1,
-            const std::string& reason = "")
-   :TaskCmd(pathToTask,jobsPassword,process_or_remote_id,try_no), reason_(reason) {}
+            const std::string& reason = "");
    AbortCmd() : TaskCmd() {}
 
    const std::string& reason() const {return reason_; }

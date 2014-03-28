@@ -1,4 +1,4 @@
-import os, time, signal
+import os, time, signal, sys
 import ecflow
  
 print "PYTHONPATH====================================================="
@@ -44,10 +44,11 @@ class Client(object):
       print "Client:__exit__: ex_type:" + str(ex_type) + " value:" + str(value) + "\n" + str(tb)
       if ex_type != None:
          self.ci.child_abort("Aborted with exception type " + str(ex_type) + str(value))
+         return False
       self.ci.child_complete()
       return False
         
-
+# This will also handle call to sys.exit(), i.e Client.__exit__ will still be called.
 with Client() as ci:
    for i in range(1,100):
       print "At value " + str(i)
