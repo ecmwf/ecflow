@@ -319,8 +319,6 @@ void tree::connected(Boolean ok)
 {
   if(ok) {
     XtVaSetValues(tree_,XmNbackgroundPixmap,XmUNSPECIFIED_PIXMAP,NULL);
-    str color = option<str>(globals::instance(), "background", "grey90");
-    if (0) XtVaSetValues(tree_,XmNbackground, gui::pixel(color.c_str()), NULL);
   } else {
     Pixel fg,bg;
     XtVaGetValues(tree_,XmNforeground, &fg, XmNbackground, &bg,NULL);
