@@ -84,7 +84,7 @@ public:
 
 	node* next()  const { return next_; }
 	node* kids()  const { return kids_; }
-	host& serv() const { return host_; }
+	host& serv()  const { return host_; }
 
 	virtual node* parent() const;
 

@@ -126,27 +126,30 @@ bool Updating::do_full_redraw_ = false;
 
 class SelectNode {
 public:
-   SelectNode( host* h )
-            : host_(h)
+   SelectNode(host*)
    {
      // selected_ = selection::current_node();
+     server = selection::current_node() ? &selection::current_node()->serv() : 0x0;
      current_ = selection::current_path(); // selected_ ? selected_->full_name() : "";
    }
 
    ~SelectNode()
    {
-      if (selection::current_node() != selected_ && !current_.empty()) {
-	if (host_ && host_->top() && 
-	    (selected_ = host_->top()->find(current_))) 
-	   selection::notify_new_selection(selected_);
-      }
-
+      if (selected_ &&
+	  selection::current_node() != selected_ && 
+	  !current_.empty()) {
+	node *n = server ? server->top()->find(current_) : 0x0;
+	if (n) if (selected_ != n) {
+	    selected_ = n;
+	    selection::notify_new_selection(n);
+	  }
+      }   
    }
 
 private:
-   host *host_;
-   node *selected_;
-   std::string current_;
+  host *server;
+  node *selected_;
+  std::string current_;
 };
 
 host::host( const std::string& name, const std::string& host, int number )
@@ -336,6 +339,16 @@ void host::run()
    if (!poll_) return;
    update();
    if (drift_) drift(5, maximum_ * 60);
+}
+
+tmp_file host::file( node& n, std::string name )
+{
+   return tmp_file(NULL);
+}
+
+tmp_file host::edit( node& n, std::list<Variable>& l, Boolean preproc )
+{
+   return tmp_file(NULL);
 }
 
 tmp_file host::jobcheck( node& n, const std::string &cmd )
@@ -852,7 +865,7 @@ void ehost::changed( resource& r )
 void host::redraw( bool create )
 {
    if (create) {
-      SelectNode select(this);
+     SelectNode select(this);
       XECFDEBUG {
          std::cout << ChangeMgrSingleton::instance()->no_of_node_observers() << std::endl
                    << ChangeMgrSingleton::instance()->no_of_def_observers() << std::endl;
@@ -1259,16 +1272,28 @@ void ehost::login()
    update();
 }
 
-tmp_file host::file( node& n, std::string name )
-{
-   return tmp_file(NULL);
-}
-
 tmp_file ehost::file( node& n, std::string name )
 {
-   if (name == "ECF_SCRIPT" || name == "ECF_JOB") {
-   }
-   else if (name != ecf_node::none()) { // Try logserver
+  std::string error;
+  if (name == "ECF_SCRIPT") {
+    error = "no script!\n"
+      "check ECF_FILES or ECF_HOME directories, for read access\n"
+      "check for file presence and read access below files directory\n"
+      "or this may be a 'dummy' task.\n";    
+  } else if (name == "ECF_JOB") {
+    if (std::string::npos != n.variable(name).find(".job0")) {
+	error = "job0: no job to be generated yet!";
+	return tmp_file(error);
+      } else 
+	  error = "no script!\n"
+      "check ECF_HOME,directory for read/write access\n"
+      "check for file presence and read access below\n"
+      "The file may have been deleted\n"
+      "or this may be a 'dummy' task.\n";    
+  } else if (boost::algorithm::ends_with(name, ".0")) {
+    error = "no output to be expected when TRYNO is 0!\n";
+    return tmp_file(error);
+  } else if (name != ecf_node::none()) { // Try logserver
       loghost_ = n.variable("ECF_LOGHOST", true);
       logport_ = n.variable("ECF_LOGPORT");
       if (loghost_ == ecf_node::none()) {
@@ -1286,8 +1311,7 @@ tmp_file ehost::file( node& n, std::string name )
    }
    if (direct_read_ && (access(name.c_str(), R_OK) == 0)) {
       return tmp_file(name.c_str(), false);
-   }
-   else {
+   } else {
       gui::message("%s: fetching %s", this->name(), name.c_str());
       try {
          if (name == "ECF_SCRIPT")
@@ -1298,41 +1322,48 @@ tmp_file ehost::file( node& n, std::string name )
             client_.file(n.full_name(), "jobout");
          else {
             client_.file(n.full_name(), "jobout");
-            /* gui::message("host::file: unknown file type %s", name.c_str());
-             return tmp_file(NULL); */
          }
 
          // Do *not* assign 'client_.server_reply().get_string()' to a separate string, since
          // in the case of job output the string could be several megabytes.
          return tmp_file(client_.server_reply().get_string());
-      }
-      catch ( std::exception &e ) {
+      } catch ( std::exception &e ) {
          gui::message("host::file-error: %s", e.what());
       }
    }
 
-   return tmp_file(NULL);
-}
-
-tmp_file host::edit( node& n, std::list<Variable>& l, Boolean preproc )
-{
-   return tmp_file(NULL);
+   return tmp_file(error);
 }
 
 tmp_file ehost::edit( node& n, std::list<Variable>& l, Boolean preproc )
 {
    gui::message("%s: fetching source", name());
+   int rc = 0;
    try {
       if (preproc)
-         client_.edit_script_preprocess(n.full_name());
+         rc = client_.edit_script_preprocess(n.full_name());
       else
-         client_.edit_script_edit(n.full_name());
+         rc = client_.edit_script_edit(n.full_name());
       return tmp_file(client_.server_reply().get_string());
+   } catch ( std::exception &e ) {
+       gui::error("host::edit-error: %s", e.what());
+   } catch ( ... ) {
+       gui::error("host::edit-error");
    }
-   catch ( std::exception &e ) {
-      gui::error("host::edit-error: %s", e.what());
-   }
-   return tmp_file(NULL);
+  std::string error = "no script!\n"
+"\n"
+"check server->History:\n"
+"\tsome suite variable may be 'unterminated' (micro character missing) in script or include files\n"
+"\tcheck duplicate occurences of micro character when it is expected in the job (%% becomes %)\n"
+"\tuse %nopp ... %end or %includenopp <file.h> to disable job preprocessing where needed\n"
+"\tan include file may not be found\n"
+"check ECF_FILE directory is accessible, by opening the Script panel\n"
+"check ECF_INCLUDE directory is accessible from the server\n"
+"\tit must contain the included files (or links)\n"
+"client must be capable to create temporary file:\n"
+"\tcheck /tmp directory with write access, and space available,\n"
+"or preprocessed file may be truncated beyond some size.\n";
+   return tmp_file(error);
 }
 
 tmp_file host::manual( node& n )
@@ -1360,11 +1391,13 @@ tmp_file ehost::manual( node& n )
    return tmp_file(man);
 }
 
-void host::send( node& n, Boolean alias, Boolean run, NameValueVec& v, const char* file )
+void host::send( node& n, Boolean alias, Boolean run, NameValueVec& v, 
+		 const char* file )
 {
 }
 
-void ehost::send( node& n, Boolean alias, Boolean run, NameValueVec& v, const char* file )
+void ehost::send( node& n, Boolean alias, Boolean run, NameValueVec& v, 
+		  const char* file )
 {
    std::vector<std::string> content;
    char line[4096];
@@ -1493,13 +1526,12 @@ void ehost::update_reg_suites( bool get_ch_suites )
 
 int ehost::update()
 {
-   if (updating_) return 0; // SUP-423
-   Updating update(this);   // SUP-423
-   SelectNode select(this);
-
    int err = -1;
    if (!connected_) return err;
 
+   SelectNode select(this);
+   if (updating_) return 0; // SUP-423
+   Updating update(this);   // SUP-423
    gui::watch(True);
    last_ = ::time(0);
 
