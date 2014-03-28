@@ -377,14 +377,64 @@ void simple_node::info(std::ostream& f)
       f << inc << "# " << type_name() << " " << this->name() << " is " << status_name() 
         << "\n";
     }   
+  {
+    std::vector<Variable> gvar;
+    std::vector<Variable>::const_iterator it, gvar_end;
+    ecf_node* prox = __node__();
+    if (!prox) return;
+
+         Defs* defs = 0;
+         Node* ecf = 0;
+         if (dynamic_cast<ecf_concrete_node<Node>*>(prox)) {
+            ecf = dynamic_cast<ecf_concrete_node<Node>*>(prox)->get();
+         }
+         else if (dynamic_cast<ecf_concrete_node<Task>*>(prox)) {
+            ecf = dynamic_cast<ecf_concrete_node<Task>*>(prox)->get();
+         }
+         else if (dynamic_cast<ecf_concrete_node<Family>*>(prox)) {
+            ecf = dynamic_cast<ecf_concrete_node<Family>*>(prox)->get();
+         }
+         else if (dynamic_cast<ecf_concrete_node<Suite>*>(prox)) {
+            ecf = dynamic_cast<ecf_concrete_node<Suite>*>(prox)->get();
+         }
+         else if (dynamic_cast<ecf_concrete_node<Defs>*>(prox)) {
+            defs = dynamic_cast<ecf_concrete_node<Defs>*>(prox)->get();
+         }
+         if (!ecf && !defs) {
+	   return;
+         }
+
+         if (ecf ) {
+            gvar.clear();
+            ecf->gen_variables(gvar);
+            for(it = gvar.begin(); it != gvar.end(); ++it) {
+	      f << inc << "# edit " << (*it).name() << " '" << (*it).theValue() << "'\n";
+            }
+
+            gvar = ecf->variables();
+            for(it = gvar.begin(); it != gvar.end(); ++it) {
+	      f << inc << "edit " << (*it).name() << " '" << (*it).theValue() << "'\n";
+            }
+         }
+         if (defs) {
+            const std::vector<Variable>& gvar = defs->server().user_variables();
+            for(it = gvar.begin(); it != gvar.end(); ++it) {
+	      f << inc << "# edit " << (*it).name() << " '" << (*it).theValue() << "'\n";
+            }
+            const std::vector<Variable>& var = defs->server().server_variables();
+            for(it = var.begin(); it != var.end(); ++it) {
+	      f << inc << "edit " << (*it).name() << " '" << (*it).theValue() << "'\n";
+            }
+         }}
+
   for (node *run=kids(); run; run=run->next()) 
     if (run->type() == NODE_VARIABLE) {
-      variable_node *var = dynamic_cast<variable_node*> (run);
+      /* variable_node *var = dynamic_cast<variable_node*> (run);
       if (var && var->name() == "") { f << inc << "# empty variable!" << "\n"; continue; }
       if (var->isGenVariable(0x0))
         f << inc << "# edit " << run->name() << " '" << var->get_var() << "'" << "\n";
       else 
-        f << inc << "edit " << run->name() << " '" << var->get_var() << "'" << "\n";
+      f << inc << "edit " << run->name() << " '" << var->get_var() << "'" << "\n";*/
     } else { 
       f << inc;
       int i = run->type();

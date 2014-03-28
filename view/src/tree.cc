@@ -122,7 +122,9 @@ void tree::notification(observable* o)
 
 	build_tree(h->top(),-1);
 
-	node *n = selection::current_node();
+	// node *n = selection::current_node();
+	if (!h->top()) return;
+	node* n = h->top()->find(selection::current_path());
 	if(n) show_node(*n);
 
 	update_all(false);
