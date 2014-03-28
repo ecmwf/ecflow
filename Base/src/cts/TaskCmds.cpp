@@ -477,6 +477,21 @@ void CtsWaitCmd::create( 	Cmd_ptr& cmd,
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
 
+AbortCmd::AbortCmd(const std::string& pathToTask,
+         const std::string& jobsPassword,
+         const std::string& process_or_remote_id,
+         int try_no,
+         const std::string& reason)
+:TaskCmd(pathToTask,jobsPassword,process_or_remote_id,try_no), reason_(reason)
+{
+   if (!reason_.empty()) {
+      // Do not use "\n" | ';' in abortedReason_, as this can mess up, --migrate output
+      // Which would then affect --load.
+      Str::replace(reason_,"\n","");
+      Str::replace(reason_,";"," ");
+   }
+}
+
 std::ostream& AbortCmd::print(std::ostream& os) const
 {
    return os << Str::CHILD_CMD() << "abort " << path_to_node() << "  " << reason_;
@@ -505,6 +520,7 @@ STC_Cmd_ptr AbortCmd::doHandleRequest(AbstractServer* as) const
 
 		string theReason = reason_;
 		if ( theReason.empty() ) theReason = "Trap raised in job file";
+
 		submittable_->aborted(theReason);  // will set task->set_state(NState::ABORTED);
 	}
 
