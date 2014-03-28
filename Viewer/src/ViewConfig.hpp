@@ -38,10 +38,14 @@ protected:
 class VParameter
 {
 public:
-		VParameter(QString name,QString label,QString tooltip,QVariant def) :
-			   name_(name), label_(label), tooltip_(tooltip), default_(def), value_(def) {}
+		VParameter(QString name,QString shortName,QString label,QString tooltip,QVariant def) :
+			   name_(name), shortName_(shortName), label_(label), toolTip_(tooltip), default_(def), value_(def) {}
+
+
 
 		QString name() const {return name_;}
+		QString shortName() const {return shortName_;}
+		QString toolTip() const {return toolTip_;}
 		QColor toColour() const {return value_.value<QColor>();}
 		QFont toFont() const {return value_.value<QFont>();}
 		QString toString() const {return value_.toString();}
@@ -49,8 +53,9 @@ public:
 
 protected:
 		QString name_;
+		QString shortName_;
 		QString label_;
-		QString tooltip_;
+		QString toolTip_;
 		QVariant default_;
 		QVariant value_;
 };
@@ -66,6 +71,7 @@ public:
 
 		QColor   stateColour(DState::State) const;
 		QString  stateName(DState::State) const;
+		QString  stateShortName(DState::State) const;
 		QColor   colour(PaletteItem) const;
 		QFont    font(FontItem) const;
 
@@ -73,6 +79,7 @@ protected:
 		ViewConfig();
 
 		QString name(PaletteItem) const;
+		QString shortName(PaletteItem) const;
 
 		static ViewConfig* instance_;
 		std::map<PaletteItem,VParameter*> colour_;

@@ -18,6 +18,7 @@
 #include "ClientInvoker.hpp"
 
 #include "MainWindow.hpp"
+#include "FilterWidget.hpp"
 #include "InfoPanel.hpp"
 #include "NodePanel.hpp"
 #include "ServerHandler.hpp"
@@ -43,6 +44,12 @@ MainWindow::MainWindow(QStringList idLst,QWidget *parent) : QMainWindow(parent)
 
     connect(viewModeAg_,SIGNAL(triggered(QAction*)),
     		this,SLOT(slotViewMode(QAction*)));
+
+
+    //Filter widget in toolbar
+    filterWidget_=new FilterWidget(this);
+    viewToolBar->addWidget(filterWidget_);
+
 
     //Create the main layout
     QVBoxLayout* layout=new QVBoxLayout();
