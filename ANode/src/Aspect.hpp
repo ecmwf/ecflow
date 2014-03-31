@@ -26,7 +26,12 @@ namespace ecf {
 class Aspect : private boost::noncopyable {
 public:
    enum Type { NOT_DEFINED, ORDER, ADD_REMOVE_NODE, ADD_REMOVE_ATTR,
-               METER_CHANGED, EVENT_CHANGED, LABEL_CHANGED, LIMIT_CHANGED };
+                METER, EVENT, LABEL, LIMIT, STATE, DEFSTATUS, SUSPENDED,
+                SERVER_STATE, SERVER_VARIABLE, EXPR_TRIGGER, EXPR_COMPLETE, REPEAT,
+                INLIMIT, NODE_VARIABLE, LATE, TODAY, TIME,DAY, CRON, DATE,
+                ZOMBIE, FLAG, SUBMITTABLE, SUITE_CLOCK, SUITE_BEGIN, SUITE_CALENDAR,
+                ALIAS_NUMBER
+              };
 
 private:
    Aspect();

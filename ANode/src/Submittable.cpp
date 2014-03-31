@@ -37,6 +37,7 @@
 #include "Ecf.hpp"
 #include "DefsDelta.hpp"
 #include "Extract.hpp"
+#include "ChangeMgrSingleton.hpp"
 
 namespace fs = boost::filesystem;
 using namespace ecf;
@@ -731,6 +732,8 @@ void Submittable::set_memento(const SubmittableMemento* memento)
 #ifdef DEBUG_MEMENTO
    std::cout << "Submittable::set_memento(const SubmittableMemento*) " << debugNodePath() << "\n";
 #endif
+
+   ChangeMgrSingleton::instance()->add_aspect(ecf::Aspect::SUBMITTABLE);
 
    jobsPassword_ = memento->jobsPassword_;
    process_or_remote_id_ = memento->process_or_remote_id_;

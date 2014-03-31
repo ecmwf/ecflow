@@ -626,16 +626,16 @@ void ecf_concrete_node<Node>::update(const Node* n,
    unsigned int is_meter = 0, is_label = 0, is_event = 0, is_limit = 0;
    for(std::vector<ecf::Aspect::Type>::const_iterator it = aspect.begin(); it != aspect.end(); ++it)
       switch ( *it ) {
-         case ecf::Aspect::METER_CHANGED:
+         case ecf::Aspect::METER:
             is_meter++;
             break;
-         case ecf::Aspect::LABEL_CHANGED:
+         case ecf::Aspect::LABEL:
             is_label++;
             break;
-         case ecf::Aspect::EVENT_CHANGED:
+         case ecf::Aspect::EVENT:
             is_event++;
             break;
-         case ecf::Aspect::LIMIT_CHANGED:
+         case ecf::Aspect::LIMIT:
             is_limit++;
             break;
          default:

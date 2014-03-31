@@ -1288,6 +1288,7 @@ void Defs::set_memento(const StateMemento* memento) {
 #ifdef DEBUG_MEMENTO
 	std::cout << "Defs::set_memento(const StateMemento* memento)\n";
 #endif
+   ChangeMgrSingleton::instance()->add_aspect(ecf::Aspect::STATE);
 	set_state( memento->state_ );
 }
 
@@ -1295,6 +1296,7 @@ void Defs::set_memento( const ServerStateMemento* memento ) {
 #ifdef DEBUG_MEMENTO
 	std::cout << "Defs::set_memento(const ServerStateMemento* memento)\n";
 #endif
+   ChangeMgrSingleton::instance()->add_aspect(ecf::Aspect::SERVER_STATE);
 	server_.set_state( memento->state_ );
 }
 
@@ -1346,6 +1348,7 @@ void Defs::set_memento( const FlagMemento* memento ) {
 #ifdef DEBUG_MEMENTO
    std::cout << "Defs::set_memento(const FlagMemento* memento)\n";
 #endif
+   ChangeMgrSingleton::instance()->add_aspect(ecf::Aspect::FLAG);
    flag_.set_flag( memento->flag_.flag() );
 }
 
