@@ -212,9 +212,11 @@ void EcfFile::create_job( JobsParam& jobsParam)
    cout << "EcfFile::createJob task " << node_->absNodePath() << " script_path_or_cmd_ = " << script_path_or_cmd_ << "\n";
 #endif
 
+   // NOTE: When editing pure python jobs, we may have *NO* variable specified, but only user_edit_file
+   //       hence whenever we have user_edit_file, we should follow the else part below
    std::string error_msg;
    std::vector<std::string> lines;
-   if (jobsParam.user_edit_variables().empty()) {
+   if (jobsParam.user_edit_variables().empty() && jobsParam.user_edit_file().empty()) {
       /// The typical *NORMAL* path
       if (!open_script_file(script_path_or_cmd_, EcfFile::SCRIPT, lines,  error_msg)) {
          throw std::runtime_error("EcfFile::create_job: failed " + error_msg );

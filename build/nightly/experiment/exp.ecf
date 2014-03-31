@@ -43,7 +43,7 @@ try:
    ci.child_init();
    print "child init ok"
   
-   for i in range(1,100):
+   for i in range(1,10):
       print "At value " + str(i)
       ci.child_meter('meter',i)
       ci.child_label('label_name', "value_" + str(i))
