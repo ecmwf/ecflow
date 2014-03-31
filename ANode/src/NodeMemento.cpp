@@ -562,6 +562,7 @@ void Node::set_memento( const NodeZombieMemento* memento ) {
 
    // Zombie attributes should always be via ADD_REMOVE_ATTR
    // See Node::incremental_changes
+   // Since there is no state to change
 
    /// remove existing attribute of same type, as duplicate of same type not allowed
    delete_zombie( memento->attr_.zombie_type());
