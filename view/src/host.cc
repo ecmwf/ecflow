@@ -126,30 +126,30 @@ bool Updating::do_full_redraw_ = false;
 
 class SelectNode {
 public:
-   SelectNode(host*)
+  SelectNode(const std::string& name)
    {
-     // selected_ = selection::current_node();
-     server = selection::current_node() ? &selection::current_node()->serv() : 0x0;
-     current_ = selection::current_path(); // selected_ ? selected_->full_name() : "";
+     node* n = selection::current_node();
+     if (!n) return;
+     if (name == n->serv().name()) {
+       hostname_ = n->serv().name();
+       current_ = selection::current_path();
+     }
    }
 
    ~SelectNode()
    {
-      if (selected_ &&
-	  selection::current_node() != selected_ && 
-	  !current_.empty()) {
-	node *n = server ? server->top()->find(current_) : 0x0;
-	if (n) if (selected_ != n) {
-	    selected_ = n;
-	    selection::notify_new_selection(n);
-	  }
-      }   
+     if (hostname_.empty()) return;
+     host* h = host::find(hostname_);
+     if (h && !current_.empty()) {
+       node *n = h->top()->find(current_);
+       if (n) {
+	  selection::notify_new_selection(n);
+	}
+     }  
    }
 
 private:
-  host *server;
-  node *selected_;
-  std::string current_;
+  std::string current_, hostname_;
 };
 
 host::host( const std::string& name, const std::string& host, int number )
@@ -260,9 +260,9 @@ host* host::find( const std::string& name )
    return 0;
 }
 
-node* host::find( const std::string& sms, const std::string& n )
+node* host::find( const std::string& hostname, const std::string& n )
 {
-   host* h = find(sms);
+   host* h = find(hostname);
    if (h && h->top_) 
      return h->top_->find(n.c_str());
 
@@ -727,7 +727,7 @@ void ehost::reset( bool full, bool sync )
    time(&now);
    struct tm* curr = localtime(&now);
    gui::message("%s: full tree %02d:%02d:%02d", name(), curr->tm_hour, curr->tm_min, curr->tm_sec);
-   SelectNode select(this);
+   SelectNode select(this->name());
    try {
       if (!tree_) tree_ = tree::new_tree(this);
 
@@ -865,7 +865,7 @@ void ehost::changed( resource& r )
 void host::redraw( bool create )
 {
    if (create) {
-     SelectNode select(this);
+     SelectNode select(this->name());
       XECFDEBUG {
          std::cout << ChangeMgrSingleton::instance()->no_of_node_observers() << std::endl
                    << ChangeMgrSingleton::instance()->no_of_def_observers() << std::endl;
@@ -1529,7 +1529,7 @@ int ehost::update()
    int err = -1;
    if (!connected_) return err;
 
-   SelectNode select(this);
+   SelectNode select(this->name());
    if (updating_) return 0; // SUP-423
    Updating update(this);   // SUP-423
    gui::watch(True);
