@@ -1304,9 +1304,12 @@ void Defs::set_memento( const ServerVariableMemento* memento ) {
 #ifdef DEBUG_MEMENTO
    std::cout << "Defs::set_memento(const ServerVariableMemento* memento)\n";
 #endif
+
    if (server_.user_variables().size() != memento->serverEnv_.size()) {
       ChangeMgrSingleton::instance()->add_aspect(ecf::Aspect::ADD_REMOVE_ATTR);
    }
+
+   ChangeMgrSingleton::instance()->add_aspect(ecf::Aspect::SERVER_VARIABLE);
 
    server_.set_user_variables( memento->serverEnv_);
 }
