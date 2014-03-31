@@ -426,7 +426,8 @@ void Node::set_memento( const NodeInLimitMemento* memento ) {
 #ifdef DEBUG_MEMENTO
 	std::cout << "Node::set_memento(const NodeInLimitMemento* memento) " << debugNodePath() << "\n";
 #endif
-   ChangeMgrSingleton::instance()->add_aspect(ecf::Aspect::INLIMIT);
+
+   // ADD_REMOVE_ATTR aspect only, since no state
 
 	addInLimit(memento->inlimit_);
 }
