@@ -100,6 +100,12 @@ install install-view64
 	  <dll-path>$(ECFLOW_INSTALL_DIR)/lib64
 	;	
 
+install install-view-files
+    : [ glob view/servers ]
+      [ glob view/src/ecflowview.menu ]
+    : <location>$(ECFLOW_DESTDIR)/$(ECFLOW_INSTALL_DIR)/lib
+    ;
+    
 install install-server
 	: Server//ecflow_server 
 	: <location>$(ECFLOW_DESTDIR)/$(ECFLOW_INSTALL_DIR)/bin
@@ -112,7 +118,7 @@ install install-client
 
 install install-tools
 	: [ glob tools/*.sh ]
-          [ glob tools/*.pl ]
+      [ glob tools/*.pl ]
 	: <location>$(ECFLOW_DESTDIR)/$(ECFLOW_INSTALL_DIR)/bin
 	;
 
@@ -145,18 +151,20 @@ alias install :
 	;
 alias install-viewer :
 	install-view
+	install-view-files
 	;
 alias install-viewer64 :
 	install-view64
+    install-view-files
  	;
 alias install-all :
 	install
-   install-viewer
-   ;
+    install-viewer
+    ;
 alias install-all64 :
 	install
-   install-viewer64
-   ;
+    install-viewer64
+    ;
 
 # make install explicit, otherwise we end installing for all calls to bjam
 explicit install-server ;
@@ -166,6 +174,7 @@ explicit install-view ;
 explicit install-viewer ;
 explicit install-view64 ;
 explicit install-viewer64 ;
+explicit install-view-files ;
 explicit install-doc ;
 explicit install-migrate ;
 explicit install ;

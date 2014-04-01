@@ -265,7 +265,7 @@ ecbuild_add_test( TARGET  test-view
 # ===================================================================
                      
 install ( FILES       ${CMAKE_SOURCE_DIR}/view/src/ecflowview.menu 
-                      ${CMAKE_SOURCE_DIR}/build/servers
+                      ${CMAKE_SOURCE_DIR}/view/servers
           DESTINATION lib
           PERMISSIONS OWNER_READ GROUP_READ WORLD_READ OWNER_EXECUTE GROUP_EXECUTE WORLD_EXECUTE
         )
