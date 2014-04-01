@@ -262,6 +262,7 @@ class host : public extent<host>
 	virtual bool connect_mngt(bool connect);
 
 	bool updating_; // SUP-423
+	option<int>       jobfile_length_;
  public:
 	void updating(bool b) { updating_ = b; }
         virtual void stats(std::ostream& f) { };

@@ -153,23 +153,39 @@ private:
 };
 
 host::host( const std::string& name, const std::string& host, int number )
-         : timeout(5),
+         : timeout(5)
 #ifdef alpha
-                  configurable(name),
+	 , configurable(name),
 #endif
-                  observable(), host_(host), number_(number), name_(name), connected_(false), after_command_(
-                           true), passwd_("-none-"), timeout_(this, "timeout", 5), maximum_(
-                           this, "maximum", 60), drift_(this, "drift", true), connect_(this,
-                                                                                       "connect",
-                                                                                       false), suites_(
-                           this, "suites", std::vector<std::string>()), aborted_(this, "aborted",
-                                                                                 true), restarted_(
-                           this, "restarted", true), late_(this, "late", true), poll_(this, "poll",
-                                                                                      true), direct_read_(
-                           this, "direct_read", true), new_suites_(this, "new_suites", true), zombie_(
-                           this, "zombie", false), aliases_(this, "aliases", false), to_check_(
-                           this, "to_check", false), chkmail_(true), top_(0), tree_(0), mail_(0), last_(
-                           0), history_len_(100), updating_(false)
+	 , observable()
+	 , host_(host)
+	 , number_(number)
+	 , name_(name)
+	 , connected_(false)
+	 , after_command_(true)
+	 , passwd_("-none-")
+	 , timeout_(this, "timeout", 5)
+	 , maximum_(this, "maximum", 60)
+	 , drift_(this, "drift", true)
+	 , connect_(this, "connect", false)
+	 , suites_(this, "suites", std::vector<std::string>())
+	 , aborted_(this, "aborted", true)
+	 , restarted_(this, "restarted", true)
+	 , late_(this, "late", true)
+	 , poll_(this, "poll", true)
+	 , direct_read_(this, "direct_read", true)
+	 , new_suites_(this, "new_suites", true)
+	 , zombie_(this, "zombie", false)
+	 , aliases_(this, "aliases", false)
+	 , to_check_(this, "to_check", false)
+	 , chkmail_(true)
+	 , top_(0)
+	 , tree_(0)
+	 , mail_(0)
+	 , last_(0)
+	 , history_len_(100)
+	 , updating_(false)
+	 , jobfile_length_(this, "jobfile_length", 10000)
 {
    if (number < 1) return; // dummy server OK;
 
@@ -1316,8 +1332,10 @@ tmp_file ehost::file( node& n, std::string name )
       try {
          if (name == "ECF_SCRIPT")
             client_.file(n.full_name(), "script");
-         else if (name == "ECF_JOB")
-            client_.file(n.full_name(), "job");
+         else if (name == "ECF_JOB") {
+	   client_.file(n.full_name(), "job", 
+			boost::lexical_cast<std::string>(jobfile_length_));
+	 }
          else if (name == "ECF_JOBOUT")
             client_.file(n.full_name(), "jobout");
          else {
