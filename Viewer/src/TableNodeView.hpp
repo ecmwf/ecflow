@@ -18,17 +18,18 @@
 #include "ViewNodeInfo.hpp"
 
 class ActionHandler;
+class FilterData;
 class TableNodeModel;
+class TableNodeFilterModel;
 
 class TableNodeView : public QTreeView, public NodeViewBase
 {
 Q_OBJECT
 
 public:
-		TableNodeView(QString,QWidget *parent=0);
-		//TableNodeView::printDefTree(const std::string &server, int port);
-		//TableNodeView::printNode(node_ptr node, int indent, QTreeWidgetItem *parent)
-		void reload() {};
+	TableNodeView(QString,FilterData*,QWidget *parent=0);
+	void reload() {};
+	QWidget* realWidget();
 
 public slots:
 	void slotSelectItem(const QModelIndex&);
@@ -40,11 +41,12 @@ signals:
 	void selectionChanged(ViewNodeInfo_ptr);
 
 protected:
-		QModelIndexList selectedList();
-		void handleContextMenu(QModelIndex indexClicked,QModelIndexList indexLst,QPoint globalPos,QPoint widgetPos,QWidget *widget);
+	QModelIndexList selectedList();
+	void handleContextMenu(QModelIndex indexClicked,QModelIndexList indexLst,QPoint globalPos,QPoint widgetPos,QWidget *widget);
 
-		TableNodeModel *model_;
-		ActionHandler* actionHandler_;
+	TableNodeModel *model_;
+	TableNodeFilterModel* filterModel_;
+	ActionHandler* actionHandler_;
 };
 
 

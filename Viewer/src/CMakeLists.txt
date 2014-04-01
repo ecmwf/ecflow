@@ -2,6 +2,7 @@
 set(viewer_srcs   
     ViewerMain.cpp
     ActionHandler.cpp
+    FilterData.cpp
     FilterWidget.cpp
     InfoPanel.cpp
     MainWindow.cpp

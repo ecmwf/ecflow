@@ -10,6 +10,8 @@
 //============================================================================
 
 #include "NodeWidget.hpp"
+
+#include "FilterData.hpp"
 #include "NodeViewHandler.hpp"
 #include "TableNodeView.hpp"
 #include "TreeNodeView.hpp"
@@ -17,9 +19,12 @@
 #include <QStackedLayout>
 #include <QVBoxLayout>
 
-NodeWidget::NodeWidget(QString rootNode, QWidget *parent) :
-        QWidget(parent)
+NodeWidget::NodeWidget(QString rootNode,QWidget *parent) :
+        QWidget(parent),
+        filterData_(0)
 {
+	//Filterdata
+	filterData_=new FilterData;
 
 	// Layout
 	QVBoxLayout *mainLayout = new QVBoxLayout(this);
@@ -34,9 +39,8 @@ NodeWidget::NodeWidget(QString rootNode, QWidget *parent) :
 	views_=new NodeViewHandler(centralLayout);
 
 	//Tree view
-	TreeNodeView *treeView= new TreeNodeView("",this);
-	views_->add(Viewer::TreeViewMode,treeView,treeView);
-
+	TreeNodeView *treeView= new TreeNodeView("",filterData_,this);
+	views_->add(Viewer::TreeViewMode,treeView);
 
 	connect(treeView,SIGNAL(selectionChanged(ViewNodeInfo_ptr)),
 			this,SIGNAL(selectionChanged(ViewNodeInfo_ptr)));
@@ -55,8 +59,8 @@ NodeWidget::NodeWidget(QString rootNode, QWidget *parent) :
 
 	// Detailed view
 
-	TableNodeView *tableView=new TableNodeView("",this);
-	views_->add(Viewer::TableViewMode,tableView,tableView);
+	TableNodeView *tableView=new TableNodeView("",filterData_,this);
+	views_->add(Viewer::TableViewMode,tableView);
 
 	/*connect(detailedView_,SIGNAL(currentFolderChanged(Folder*)),
 		this,SLOT(slotFolderReplacedInView(Folder*)));
@@ -81,6 +85,8 @@ NodeWidget::NodeWidget(QString rootNode, QWidget *parent) :
 NodeWidget::~NodeWidget()
 {
 	//MvQFolderWatcher::remove(this);
+	if(filterData_)
+		delete filterData_;
 }
 
 /*Folder* NodeWidget::currentFolder()

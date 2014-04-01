@@ -13,9 +13,9 @@
 
 #include "ChangeMgrSingleton.hpp"
 
+#include "FilterData.hpp"
 #include "ServerHandler.hpp"
 #include "ViewConfig.hpp"
-
 
 TreeNodeModel::TreeNodeModel(QObject *parent) : QAbstractItemModel(parent)
 {
@@ -176,7 +176,7 @@ QVariant TreeNodeModel::data( const QModelIndex& index, int role ) const
 	//Data lookup can be costly so we immediately return a default value for all
 	//the cases where the default should be used.
 	if( !index.isValid() ||
-	   (role != Qt::DisplayRole && role != Qt::ToolTipRole && role != Qt::BackgroundRole))
+	   (role != Qt::DisplayRole && role != Qt::ToolTipRole && role != Qt::BackgroundRole && role != FilterRole))
     {
 		return QVariant();
 	}
@@ -194,7 +194,10 @@ QVariant TreeNodeModel::data( const QModelIndex& index, int role ) const
 
 QVariant TreeNodeModel::serverData(const QModelIndex& index,int role) const
 {
-	if(index.column() == 0)
+	if(role == FilterRole)
+		return -1;
+
+	else if(index.column() == 0)
 	{
 		if(ServerHandler *server=indexToServer(index))
 		{
@@ -222,6 +225,10 @@ QVariant TreeNodeModel::nodeData(const QModelIndex& index, int role) const
 		case 2: return QString::fromStdString(node->absNodePath());
 		default: return QVariant();
 		}
+	}
+	else if(role == FilterRole)
+	{
+			return static_cast<int>(node->dstate());
 	}
 	else if(index.column() == 0 && role == Qt::BackgroundRole)
 	{
@@ -488,13 +495,45 @@ void TreeNodeModel::update(const Node* node, const std::vector<ecf::Aspect::Type
 	emit dataChanged(index1,index2);
 }
 
-TreeNodeFilterModel::TreeNodeFilterModel(QObject *parent) : QSortFilterProxyModel(parent)
+
+
+
+
+
+TreeNodeFilterModel::TreeNodeFilterModel(FilterData* filterData,QObject *parent) :
+		QSortFilterProxyModel(parent),
+		filterData_(filterData)
 {
+	filterData_->addObserver(this);
 }
 
-bool TreeNodeFilterModel::filterAcceptsRow(int,const QModelIndex &) const
+TreeNodeFilterModel::~TreeNodeFilterModel()
 {
-	return true;
+	filterData_->removeObserver(this);
+}
+
+void TreeNodeFilterModel::notifyFilterChanged()
+{
+	invalidateFilter();
+}
+
+bool TreeNodeFilterModel::filterAcceptsRow(int sourceRow,const QModelIndex& sourceParent) const
+{
+	if(!filterData_->isNodeStateFiltered())
+		return true;
+
+	QModelIndex index = sourceModel()->index(sourceRow, 1, sourceParent);
+	const std::set<DState::State> ns=filterData_->nodeState();
+	int intSt=sourceModel()->data(index,TreeNodeModel::FilterRole).toInt();
+	if(intSt<0)
+			return true;
+	else
+	{
+		DState::State st=static_cast<DState::State>(intSt);
+		if(ns.find(st) != ns.end())
+			return true;
+	}
+	return false;
 }
 
 

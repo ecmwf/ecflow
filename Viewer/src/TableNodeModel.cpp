@@ -12,6 +12,7 @@
 #include <QDebug>
 
 #include "ChangeMgrSingleton.hpp"
+#include "FilterData.hpp"
 #include "ServerHandler.hpp"
 #include "ViewConfig.hpp"
 
@@ -124,7 +125,7 @@ QVariant TableNodeModel::data( const QModelIndex& index, int role ) const
 	//Data lookup can be costly so we immediately return a default value for all
 	//the cases where the default should be used.
 	if( !index.isValid() ||
-	   (role != Qt::DisplayRole && role != Qt::ToolTipRole && role != Qt::BackgroundRole))
+	   (role != Qt::DisplayRole && role != Qt::ToolTipRole && role != Qt::BackgroundRole && role != FilterRole))
     {
 		return QVariant();
 	}
@@ -142,7 +143,10 @@ QVariant TableNodeModel::data( const QModelIndex& index, int role ) const
 
 QVariant TableNodeModel::serverData(const QModelIndex& index,int role) const
 {
-	if(index.column() == 0)
+	if(role == FilterRole)
+			return -1;
+
+	else if(index.column() == 0)
 	{
 		if(ServerHandler *server=indexToServer(index))
 		{
@@ -174,6 +178,8 @@ QVariant TableNodeModel::nodeData(const QModelIndex& index, int role) const
 	{
 		return ViewConfig::Instance()->stateColour(node->dstate());
 	}
+	else if(role == FilterRole)
+		return static_cast<int>(node->dstate());
 
 	return QVariant();
 }
@@ -426,6 +432,45 @@ void TableNodeModel::update(const Node* node, const std::vector<ecf::Aspect::Typ
 		emit dataChanged(index1,index2);
 
 }
+
+
+TableNodeFilterModel::TableNodeFilterModel(FilterData* filterData,QObject *parent) :
+		QSortFilterProxyModel(parent),
+		filterData_(filterData)
+{
+	filterData_->addObserver(this);
+}
+
+TableNodeFilterModel::~TableNodeFilterModel()
+{
+	filterData_->removeObserver(this);
+}
+
+void TableNodeFilterModel::notifyFilterChanged()
+{
+	invalidateFilter();
+}
+
+bool TableNodeFilterModel::filterAcceptsRow(int sourceRow,const QModelIndex& sourceParent) const
+{
+	if(!filterData_->isNodeStateFiltered())
+		return true;
+
+	QModelIndex index = sourceModel()->index(sourceRow, 1, sourceParent);
+	const std::set<DState::State> ns=filterData_->nodeState();
+	int intSt=sourceModel()->data(index,TableNodeModel::FilterRole).toInt();
+	if(intSt<0)
+			return true;
+	else
+	{
+		DState::State st=static_cast<DState::State>(intSt);
+		if(ns.find(st) != ns.end())
+			return true;
+	}
+	return false;
+}
+
+
 
 
 

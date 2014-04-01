@@ -17,6 +17,7 @@
 #include "ViewNodeInfo.hpp"
 
 class NodeWidget;
+class FilterData;
 
 class NodePanel : public TabWidget
 {
@@ -29,7 +30,9 @@ public:
 	void setViewMode(Viewer::ViewMode);
 	Viewer::ViewMode viewMode();
 
-	NodeWidget* addWidget(QString);
+	FilterData* filterData();
+
+	NodeWidget* currentNodeWidget();
 	void addWidget();
 	void resetWidgets(QStringList);
 	void reload();
@@ -50,13 +53,9 @@ signals:
 	void selectionChanged(ViewNodeInfo_ptr);
 
 protected:
+	NodeWidget* addWidget(QString);
 	void tabBarCommand(QString, int);
 	NodeWidget* nodeWidget(int index);
-	NodeWidget* currentNodeWidget();
-
-	//MvQContextItemSet* cmSet();
-	NodeWidget* currentFolderWidget();
-	NodeWidget* folderWidget(int);
 };
 
 #endif

@@ -17,6 +17,7 @@
 #include "DState.hpp"
 
 class QToolButton;
+class FilterData;
 
 class FilterWidget : public QWidget
 {
@@ -24,6 +25,7 @@ Q_OBJECT
 
 public:
 	FilterWidget(QWidget* parent=0);
+	void reload(FilterData*);
 
 protected slots:
 	void slotChanged(bool);
@@ -35,6 +37,7 @@ private:
 	QToolButton* createButton(QString,QString,QColor);
 
 	QMap<DState::State,QToolButton*> items_;
+	FilterData* data_;
 };
 
 #endif

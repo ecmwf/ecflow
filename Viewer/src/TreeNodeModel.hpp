@@ -6,9 +6,11 @@
 
 #include <vector>
 
+#include "FilterDataObserver.hpp"
 #include "ViewNodeInfo.hpp"
 #include "AbstractObserver.hpp"
 
+class FilterData;
 class Node;
 class ServerHandler;
 
@@ -18,6 +20,8 @@ class TreeNodeModel : public QAbstractItemModel, public AbstractObserver
 Q_OBJECT
 public:
    	TreeNodeModel(QObject *parent=0);
+
+   	enum CustomItemRole {FilterRole = Qt::UserRole+1};
 
    	int columnCount (const QModelIndex& parent = QModelIndex() ) const;
    	int rowCount (const QModelIndex& parent = QModelIndex() ) const;
@@ -62,13 +66,19 @@ protected:
 
 };
 
-class TreeNodeFilterModel : public QSortFilterProxyModel
+class TreeNodeFilterModel : public QSortFilterProxyModel, public FilterDataObserver
 {
 public:
-	TreeNodeFilterModel(QObject *parent=0);
+	TreeNodeFilterModel(FilterData*,QObject *parent=0);
+	~TreeNodeFilterModel();
 
 	bool filterAcceptsRow(int,const QModelIndex &) const;
 
+	//Observer method
+	void notifyFilterChanged();
+
+protected:
+	FilterData *filterData_;
 };
 
 

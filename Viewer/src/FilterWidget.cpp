@@ -7,15 +7,17 @@
 // nor does it submit to any jurisdiction.
 //============================================================================
 
-
 #include "FilterWidget.hpp"
 
 #include <QHBoxLayout>
 #include <QToolButton>
 
+#include "FilterData.hpp"
 #include "ViewConfig.hpp"
 
-FilterWidget::FilterWidget(QWidget *parent) : QWidget(parent)
+FilterWidget::FilterWidget(QWidget *parent) :
+   QWidget(parent),
+   data_(0)
 {
 	QHBoxLayout *hb=new QHBoxLayout();
 	setLayout(hb);
@@ -34,7 +36,8 @@ FilterWidget::FilterWidget(QWidget *parent) : QWidget(parent)
 		//states_[]
 		hb->addWidget(tb);
 
-		connect(tb,SIGNAL(toggled(bool)),
+		//It will not be emitted when setChecked is called!
+		connect(tb,SIGNAL(clicked(bool)),
 				this,SLOT(slotChanged(bool)));
 
 	}
@@ -48,7 +51,6 @@ QToolButton* FilterWidget::createButton(QString label,QString tooltip,QColor col
 	tb->setText(label);
 	tb->setToolTip(tooltip);
 
-
 	QString s; //="QToolButton {border-radius: 0px;  padding: 2px;; border: black;}";
 
 	s+="QToolButton::checked {background: rgb(" +
@@ -60,17 +62,38 @@ QToolButton* FilterWidget::createButton(QString label,QString tooltip,QColor col
 	return tb;
 }
 
+void FilterWidget::reload(FilterData* filterData)
+{
+	data_=filterData;
+
+	const std::set<DState::State>& ns=data_->nodeState();
+
+	QMapIterator<DState::State,QToolButton*> it(items_);
+	while (it.hasNext())
+	{
+		it.next();
+		if(ns.find(it.key()) != ns.end())
+		{
+			it.value()->setChecked(true);
+		}
+		else
+		{
+			it.value()->setChecked(false);
+		}
+	}
+}
+
 void FilterWidget::slotChanged(bool)
 {
-	QSet<DState::State> filter;
+	std::set<DState::State> filter;
 	QMapIterator<DState::State,QToolButton*> it(items_);
 	while (it.hasNext())
 	{
 	     it.next();
 	     if(it.value()->isChecked())
-	    		 filter << it.key();
+	    		 filter.insert(it.key());
 	}
 
-
-	emit filterChanged(filter);
+	if(data_)
+			data_->setNodeState(filter);
 }

@@ -27,15 +27,14 @@ TreeNodeViewDelegate::TreeNodeViewDelegate(QWidget *parent) : QStyledItemDelegat
 void TreeNodeViewDelegate::paint(QPainter *painter,const QStyleOptionViewItem &option,
 		           const QModelIndex& index) const
 {
-	qDebug() << "delegate paint";
 	QStyledItemDelegate::paint(painter,option,index);
 }
 
-TreeNodeView::TreeNodeView(QString ,QWidget* parent) : QTreeView(parent)
+TreeNodeView::TreeNodeView(QString ,FilterData* filterData,QWidget* parent) : QTreeView(parent)
 {
 		model_=new TreeNodeModel(this);
 
-		filterModel_=new TreeNodeFilterModel(this);
+		filterModel_=new TreeNodeFilterModel(filterData,this);
 		filterModel_->setSourceModel(model_);
 		filterModel_->setDynamicSortFilter(true);
 
@@ -68,6 +67,12 @@ TreeNodeView::TreeNodeView(QString ,QWidget* parent) : QTreeView(parent)
 		expandAll();
 
 }
+
+QWidget* TreeNodeView::realWidget()
+{
+	return this;
+}
+
 //Collects the selected list of indexes
 QModelIndexList TreeNodeView::selectedList()
 {

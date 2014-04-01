@@ -16,10 +16,12 @@ class NodeViewHandler
 public:
     NodeViewHandler(QStackedLayout*);
 
-	void add(Viewer::ViewMode,NodeViewBase*,QWidget*);
+	void add(Viewer::ViewMode,NodeViewBase*);
 	Viewer::ViewMode currentMode() const {return currentMode_;}
-	void setCurrentMode(Viewer::ViewMode);
+	bool setCurrentMode(Viewer::ViewMode);
+	bool setCurrentMode(int);
 	NodeViewBase* currentBase() const {return base(currentMode_);}
+	QList<QWidget*> uniqueWidgets();
 
 private:
 	NodeViewBase* base(Viewer::ViewMode) const;
@@ -28,6 +30,7 @@ private:
 	Viewer::ViewMode  currentMode_;
   	std::map<Viewer::ViewMode,NodeViewBase*> bases_;
 	std::map<Viewer::ViewMode,QWidget*> widgets_;
+	std::map<Viewer::ViewMode,int> indexes_;
 	QStackedLayout* stacked_;
 };
 
