@@ -56,6 +56,7 @@ exe ecflowview
      <include>../view/src/libui	
      <define>_GNU_SOURCE
      <define>linux
+     <define>SHARED_DIR='\"$(ECFLOW_INSTALL_DIR)/share/ecflow\"'
      <define>UNIX
      <define>unix
      <linkflags>-lm 

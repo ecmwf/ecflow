@@ -24,6 +24,10 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include "ecflowview.h"
+#ifndef SHARED_DIR
+#error
+#endif
+
 
 const char* directory::user()
 {
@@ -50,7 +54,9 @@ const char* directory::system()
     else	
       // strcpy(x,"/usr/local/lib/ecflowview");
       // strcpy(x,"/usr/local/apps/sms/lib/ecflow");
-      strcpy(x,"/usr/local/apps/ecflow/current/lib");
+      // strcpy(x,"/usr/local/apps/ecflow/current/lib");
+      strcpy(x,SHARED_DIR);
+    // strcpy(x,"/usr/local/apps/ecflow/current/share");
   }
   return x;
 }
