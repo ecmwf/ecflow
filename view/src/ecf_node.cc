@@ -620,48 +620,33 @@ void ecf_concrete_node<Node>::update(const Node* n,
       }
 
    const_cast<Node*>(n)->set_graphic_ptr(xnode());
-   for(std::vector<ecf::Aspect::Type>::const_iterator it = aspect.begin(); it != aspect.end(); ++it)
+   for(std::vector<ecf::Aspect::Type>::const_iterator it = aspect.begin(); it != aspect.end(); ++it) {
+     int  kind = 0;
       switch ( *it ) {
          case ecf::Aspect::METER:
-	   for(node *xn = node_->kids(); xn; xn = xn->next())
-	     if (xn) if (xn->type() == NODE_METER) {
-		 xn->update(-1, -1, -1);
-		 xn->redraw();
-	       }
+	   kind = NODE_METER;
             break;
-         case ecf::Aspect::LABEL:
-	   for(node *xn = node_->kids(); xn; xn = xn->next())
-	     if (xn) if (xn->type() == NODE_LABEL) {
-		 xn->update(-1, -1, -1);
-		 xn->redraw();
-	       }
+         case ecf::Aspect::LABEL: 	   
+	   kind = NODE_LABEL;
             break;
          case ecf::Aspect::EVENT:
-	   for(node *xn = node_->kids(); xn; xn = xn->next())
-	     if (xn) if (xn->type() == NODE_EVENT) {
-		 xn->update(-1, -1, -1);
-		 xn->redraw();
-	       }
+	   kind = NODE_EVENT;
             break;
          case ecf::Aspect::LIMIT:
+	   kind = NODE_LIMIT;
+	   break;
+      default: 
+	   continue;
+      }
+      if (kind)
 	   for(node *xn = node_->kids(); xn; xn = xn->next())
-	     if (xn) if (xn->type() == NODE_LIMIT) {
+	     if (xn) if (xn->type() == kind) {
 		 xn->update(-1, -1, -1);
 		 xn->redraw();
 	       }
-            break;
-      default: continue;
-      }
-
-   if (aspect.size() > 1 || aspect.size() == 0) { 
-      for(node *xn = node_->kids(); xn; xn = xn->next()) {
-         xn->update(-1, -1, -1);
-         xn->notify_observers();
-         xn->redraw();
-      }
-     node_->notify_observers();
-     node_->redraw();
    }
+   node_->notify_observers();
+   node_->redraw();
 }
 
 template<> 
