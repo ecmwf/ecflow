@@ -33,9 +33,11 @@ using namespace boost;
 namespace po = boost::program_options;
 namespace fs = boost::filesystem;
 
-CFileCmd::CFileCmd(const std::string& pathToNode, const std::string& file_type, const std::string& the_max_lines)
+CFileCmd::CFileCmd(const std::string& pathToNode, const std::string& file_type, const std::string& input_max_lines)
 : file_(ECF), pathToNode_(pathToNode), max_lines_(File::MAX_LINES())
 {
+   // std::cout << "CFileCmd::CFileCmd the_max_lines " << the_max_lines << "\n";
+
    if (file_type == "script") file_ = CFileCmd::ECF;
    else if (file_type == "job") file_ = CFileCmd::JOB;
    else if (file_type == "jobout") file_ = CFileCmd::JOBOUT;
@@ -48,11 +50,16 @@ CFileCmd::CFileCmd(const std::string& pathToNode, const std::string& file_type, 
       throw std::runtime_error( ss.str() );
    }
 
-   if (!the_max_lines.empty()){
-      try { max_lines_ =  boost::lexical_cast<int>( the_max_lines ); }
+   if (!input_max_lines.empty()){
+      try {
+         // Note: max_lines_ if type size_t, hence we cast to int to check for negative numbers
+         int the_max_lines =  boost::lexical_cast<int>( input_max_lines );
+         if (the_max_lines <= 0)  the_max_lines = File::MAX_LINES();
+         max_lines_ = the_max_lines;
+      }
       catch ( boost::bad_lexical_cast& e) {
          std::stringstream ss;
-         ss << "CFileCmd::CFileCmd: The third argument(" << the_max_lines << ") must be convertible to an integer\n";
+         ss << "CFileCmd::CFileCmd: The third argument(" << input_max_lines << ") must be convertible to an integer\n";
          throw std::runtime_error(ss.str());
       }
    }
