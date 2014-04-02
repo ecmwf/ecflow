@@ -198,7 +198,9 @@ find_package( Threads )
 # =========================================================================================
 # libecflowview needs to be compiled as dynamic lin  otherwise the icons do not appear.
 #
-add_definitions( -D_GNU_SOURCE -DUNIX -Dunix -Dlinux )
+# Note: -DECFLOW_SHARED_DIR is *ONLY* required for one file view/src/directory.cc
+#
+add_definitions( -D_GNU_SOURCE -DUNIX -Dunix -Dlinux -DECFLOW_SHARED_DIR="${CMAKE_INSTALL_PREFIX}/share/ecflow" )
 
 ecbuild_add_library(TARGET    libecflowview
 				        CONDITION MOTIF_FOUND AND X11_FOUND AND CMAKE_THREAD_LIBS_INIT
@@ -266,7 +268,7 @@ ecbuild_add_test( TARGET  test-view
                      
 install ( FILES       ${CMAKE_SOURCE_DIR}/view/src/ecflowview.menu 
                       ${CMAKE_SOURCE_DIR}/view/servers
-          DESTINATION lib
+          DESTINATION share/ecflow
           PERMISSIONS OWNER_READ GROUP_READ WORLD_READ OWNER_EXECUTE GROUP_EXECUTE WORLD_EXECUTE
         )
         

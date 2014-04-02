@@ -190,11 +190,10 @@ export ECFLOW_PYTHON_INSTALL_DIR=$ECFLOW_INSTALL_DIR/lib/python2.7/site-packages
 $BOOST_ROOT/bjam $TOOLSET $CXXFLAGS -d2 variant=$mode_arg $test_arg $install_arg
    
 # ===========================================================================
-# install system files viewer : servers list + menu, should in Jamfiles, however
-# check permissions
+# Update permissions, for viewer files
 # ===========================================================================
 if [[ "$test_arg" = "" ]] ; then
-   DEST=$ECFLOW_INSTALL_DIR/lib
+   DEST=$ECFLOW_INSTALL_DIR/share/ecflow
    chmod 644 $DEST/servers $DEST/ecflowview.menu
 fi
    
