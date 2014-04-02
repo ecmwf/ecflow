@@ -13,11 +13,40 @@
 #include <utility>
 #include <string>
 #include <vector>
+
+#include <QThread>
+
 #include "Defs.hpp"
 
 #include "ViewNodeInfo.hpp"
 
+
 class ClientInvoker;
+
+// -------------------------------------------------------
+// ServerComThread - a class to handler communication with
+// an ecflow server.
+// -------------------------------------------------------
+
+class ServerComThread : public QThread
+{
+	Q_OBJECT
+
+public:
+	ServerComThread();
+
+	void setCommunicationParameters(ClientInvoker *ci, const std::vector<std::string> command);
+	void stop();
+
+protected:
+	void run();
+
+private:
+	ClientInvoker *ci_;
+	std::vector<std::string> command_;
+};
+
+
 
 class ServerHandler
 {
@@ -37,6 +66,8 @@ public:
 		Node* findNode(int globalIndex);
 		Node* findNode(int globalIndex,int& total,Node *parent);
 
+		bool communicating() {return communicating_;}
+
 		int update();
 		void setUpdatingStatus(bool newStatus) {updating_ = newStatus;}
 
@@ -54,14 +85,24 @@ public:
 		static void updateAll();
 
 protected:
+
+		void setCommunicatingStatus(bool c) {communicating_ = c;}
+
 		std::string name_;
 		std::string port_;
 		ClientInvoker* client_;
 		std::string longName_;
 		bool updating_;
+		bool communicating_;
 
 		static std::vector<ServerHandler*> servers_;
 		static std::map<std::string, std::string> commands_;
+
+private:
+
+		ServerComThread *comThread();
+
+		ServerComThread *comThread_;
 };
 
 

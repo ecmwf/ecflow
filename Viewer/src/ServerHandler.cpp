@@ -11,8 +11,8 @@
 
 #include "Defs.hpp"
 #include "ClientInvoker.hpp"
-#include "Str.hpp"
 #include "ArgvCreator.hpp"
+#include "Str.hpp"
 #include "MainWindow.hpp"
 
 #include <iostream>
@@ -24,7 +24,9 @@ ServerHandler::ServerHandler(const std::string& name, const std::string& port) :
    name_(name),
    port_(port),
    client_(0),
-   updating_(false)
+   updating_(false),
+   communicating_(false),
+   comThread_(0)
 {
 	longName_=name_ + "@" + port_;
 
@@ -57,12 +59,23 @@ ServerHandler::ServerHandler(const std::string& name, const std::string& port) :
 		addServerCommand("Requeue", "ecflow_client --requeue force <full_name>");
 		addServerCommand("Execute", "ecflow_client --run <full_name>");
 	}
+
+
+	// XXX we may not always want to create a thread here because of resource
+	// issues; another strategy would be to create threads on demand, only
+	// when server communication is about to start
+	comThread_ = new ServerComThread();
+
 }
 
 ServerHandler::~ServerHandler()
 {
 	if(client_)
-			delete client_;
+		delete client_;
+
+	if (comThread_)
+		delete comThread_;
+
 }
 
 ServerHandler* ServerHandler::addServer(const std::string& name, const std::string& port)
@@ -334,7 +347,10 @@ int ServerHandler::update()
 }
 
 
-
+ServerComThread *ServerHandler::comThread()
+{
+	return comThread_;
+}
 
 void ServerHandler::command(std::vector<ViewNodeInfo_ptr> info,std::string cmd)
 {
@@ -374,9 +390,11 @@ void ServerHandler::command(std::vector<ViewNodeInfo_ptr> info,std::string cmd)
 			std::vector<std::string> strs;
 			std::string delimiters(" ");
 			ecf::Str::split(realCommand, strs, delimiters);
-			ArgvCreator argvCreator(strs);
 			ServerHandler* serverHandler = info[i]->server();
-			serverHandler->client_->invoke(argvCreator.argc(), argvCreator.argv());
+
+			// set up and run the thread for server communication
+			serverHandler->comThread()->setCommunicationParameters(serverHandler->client_, strs);
+			serverHandler->comThread()->start();
 
 			serverHandler->update();
 		}
@@ -482,3 +500,30 @@ std::string ServerHandler::resolveServerCommand(const std::string &name)
         }
     }
  */
+
+
+
+// ---------------
+// ServerComThread
+// ---------------
+
+
+ServerComThread::ServerComThread()
+{
+}
+
+void ServerComThread::setCommunicationParameters(ClientInvoker *ci, const std::vector<std::string> command)
+{
+	command_ = command;
+	ci_      = ci;
+}
+
+
+void ServerComThread::run()
+{
+	// call the client invoker with the saved command
+
+	ArgvCreator argvCreator(command_);
+	ci_->invoke(argvCreator.argc(), argvCreator.argv());
+}
+
