@@ -441,6 +441,15 @@ ServerHandler* ServerHandler::find(const std::pair<std::string,std::string>& hos
 	return NULL;
 }
 
+ServerHandler* ServerHandler::find(const std::string& name,const std::string& port)
+{
+	for(std::vector<ServerHandler*>::const_iterator it=servers_.begin(); it != servers_.end();it++)
+			if((*it)->name_ == name && (*it)->port_ == port)
+					return *it;
+	return NULL;
+}
+
+
 ServerHandler* ServerHandler::find(Node *node)
 {
 	if(node)

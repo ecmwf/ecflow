@@ -7,30 +7,37 @@
 // nor does it submit to any jurisdiction.
 //============================================================================
 
-#ifndef FILTERDATA_HPP_
-#define FILTERDATA_HPP_
+#ifndef SERVERLIST_HPP_
+#define SERVERLIST_HPP_
 
-#include <set>
+#include <string>
 #include <vector>
 
-#include "FilterDataObserver.hpp"
-#include "DState.hpp"
+class ServerItem;
 
-class FilterData
+
+class ServerList
 {
 public:
-	FilterData();
-	const std::set<DState::State>& nodeState() const {return nodeState_;}
-	void setNodeState(const std::set<DState::State>& ns);
-	bool isNodeStateFiltered() const;
-	void addObserver(FilterDataObserver*);
-	void removeObserver(FilterDataObserver*);
+	static ServerList* Instance();
+
+	int count() const {return static_cast<int>(items_.size());}
+	ServerItem* item(int);
+	ServerItem* add(const std::string&,const std::string&,const std::string&);
+	ServerItem* add(const std::string&);
+	void remove(ServerItem*);
+	void rescan();
 
 private:
-	void broadcastChange();
+	ServerList();
 
-	std::set<DState::State> nodeState_;
-	std::vector<FilterDataObserver*> observers_;
+	void readRcFile();
+	void readSystemFile();
+
+	static ServerList* instance_;
+	std::vector<ServerItem*> items_;
+
 };
+
 
 #endif

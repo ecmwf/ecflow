@@ -11,7 +11,9 @@
 #include <QActionGroup>
 #include <QApplication>
 #include <QCloseEvent>
+#include <QDialog>
 #include <QMessageBox>
+#include <QSplitter>
 #include <QVBoxLayout>
 
 #include "Defs.hpp"
@@ -22,6 +24,7 @@
 #include "InfoPanel.hpp"
 #include "NodePanel.hpp"
 #include "ServerHandler.hpp"
+#include "ServerWidget.hpp"
 
 //Initialise static variables
 bool MainWindow::quitStarted_=false;
@@ -57,9 +60,13 @@ MainWindow::MainWindow(QStringList idLst,QWidget *parent) : QMainWindow(parent)
     w->setLayout(layout);
     setCentralWidget(w);
 
+    QSplitter *sp=new QSplitter(Qt::Vertical,this);
+    layout->addWidget(sp);
+
+
     //Create a node panel
     nodePanel_=new NodePanel(this);
-    layout->addWidget(nodePanel_);
+    sp->addWidget(nodePanel_);
     
     connect(nodePanel_,SIGNAL(currentWidgetChanged()),
     		this,SLOT(slotCurrentChangedInPanel()));
@@ -70,7 +77,7 @@ MainWindow::MainWindow(QStringList idLst,QWidget *parent) : QMainWindow(parent)
 
     //Info panel
     InfoPanel* infoPanel=new InfoPanel(this);
-    layout->addWidget(infoPanel);
+    sp->addWidget(infoPanel);
 
     connect(nodePanel_,SIGNAL(selectionChanged(ViewNodeInfo_ptr)),
     		infoPanel,SLOT(slotReload(ViewNodeInfo_ptr)));
@@ -136,6 +143,25 @@ void MainWindow::on_actionReset_triggered()
 {
 	ServerHandler::updateAll();
 	MainWindow::reload();
+}
+
+void MainWindow::on_actionServers_triggered()
+{
+	ServerDialog dialog(nodePanel_->serverFilter(),this);
+
+	if(dialog.exec() == QDialog::Accepted)
+	{
+		  		//const IconClass &kind=dialog.selected();
+				//kind.createOne(folder,pos.x(),pos.y());
+				////showLastCreated();
+    }
+
+
+	/*QDialog *d=new QDialog(this);
+	QVBoxLayout *vb=new QVBoxLayout;
+	d->setLayout(vb);
+	vb->addWidget(new ServerWidget(d));
+	d->exec();*/
 
 }
 
@@ -152,7 +178,7 @@ void MainWindow::slotViewMode(QAction* action)
 void MainWindow::slotCurrentChangedInPanel()
 {
 	syncViewModeAg(nodePanel_->viewMode());
-	filterWidget_->reload(nodePanel_->filterData());
+	filterWidget_->reload(nodePanel_->viewFilter());
 
 	//breadcrumbs_->setPath(folderPanel_->currentFolder());
   	 //slotUpdateNavigationActions(folderPanel_->folderNavigation());

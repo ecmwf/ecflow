@@ -6,20 +6,21 @@
 
 #include <vector>
 
-#include "FilterDataObserver.hpp"
+#include "ServerFilterObserver.hpp"
+#include "ViewFilterObserver.hpp"
 #include "ViewNodeInfo.hpp"
 #include "AbstractObserver.hpp"
 
-class FilterData;
 class Node;
+class ServerFilter;
 class ServerHandler;
+class ViewFilter;
 
-
-class TreeNodeModel : public QAbstractItemModel, public AbstractObserver
+class TreeNodeModel : public QAbstractItemModel, public AbstractObserver, public ServerFilterObserver
 {
 Q_OBJECT
 public:
-   	TreeNodeModel(QObject *parent=0);
+   	TreeNodeModel(ServerFilter*,QObject *parent=0);
 
    	enum CustomItemRole {FilterRole = Qt::UserRole+1};
 
@@ -43,6 +44,9 @@ public:
 	void update(const Node*, const std::vector<ecf::Aspect::Type>&);
 	void update(const Defs*, const std::vector<ecf::Aspect::Type>&)  {};
 
+	//From ServerFilterObserver
+	void notifyServerFilterChanged();
+
 signals:
 	void changed();
 
@@ -63,13 +67,14 @@ protected:
 
 	QList<ServerHandler*> servers_;
 	QMap<ServerHandler*,Node*> rootNodes_;
+	ServerFilter* serverFilter_;
 
 };
 
-class TreeNodeFilterModel : public QSortFilterProxyModel, public FilterDataObserver
+class TreeNodeFilterModel : public QSortFilterProxyModel, public ViewFilterObserver
 {
 public:
-	TreeNodeFilterModel(FilterData*,QObject *parent=0);
+	TreeNodeFilterModel(ViewFilter*,QObject *parent=0);
 	~TreeNodeFilterModel();
 
 	bool filterAcceptsRow(int,const QModelIndex &) const;
@@ -78,7 +83,7 @@ public:
 	void notifyFilterChanged();
 
 protected:
-	FilterData *filterData_;
+	ViewFilter *viewFilter_;
 };
 
 

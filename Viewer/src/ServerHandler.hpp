@@ -86,6 +86,7 @@ public:
 		static void command(std::vector<ViewNodeInfo_ptr>,std::string);
 		static ServerHandler* find(const std::string& longName);
 		static ServerHandler* find(const std::pair<std::string,std::string>& hostPort);
+		static ServerHandler* find(const std::string& name, const std::string& port);
 		static ServerHandler* find(Node *node);
 		static void addServerCommand(const std::string &name, const std::string command);
 		static std::string resolveServerCommand(const std::string &name);

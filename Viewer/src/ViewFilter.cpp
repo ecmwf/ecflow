@@ -7,11 +7,11 @@
 // nor does it submit to any jurisdiction.
 //============================================================================
 
-#include "FilterData.hpp"
+#include "ViewFilter.hpp"
 
 #include <algorithm>
 
-FilterData::FilterData()
+ViewFilter::ViewFilter()
 {
 		nodeState_.insert(DState::UNKNOWN);
 		nodeState_.insert(DState::SUSPENDED);
@@ -22,33 +22,33 @@ FilterData::FilterData()
 		nodeState_.insert(DState::ABORTED);
 }
 
-void FilterData::setNodeState(const std::set<DState::State>& ns)
+void ViewFilter::setNodeState(const std::set<DState::State>& ns)
 {
 		nodeState_=ns;
 		broadcastChange();
 }
 
-bool FilterData::isNodeStateFiltered() const
+bool ViewFilter::isNodeStateFiltered() const
 {
 	return (nodeState_.size() != 7);
 }
 
-void FilterData::broadcastChange()
+void ViewFilter::broadcastChange()
 {
-	for(std::vector<FilterDataObserver*>::iterator it=observers_.begin(); it != observers_.end(); it++)
+	for(std::vector<ViewFilterObserver*>::iterator it=observers_.begin(); it != observers_.end(); it++)
 	{
 		(*it)->notifyFilterChanged();
 	}
 }
 
-void  FilterData::addObserver(FilterDataObserver* obs)
+void  ViewFilter::addObserver(ViewFilterObserver* obs)
 {
 	observers_.push_back(obs);
 }
 
-void  FilterData::removeObserver(FilterDataObserver* obs)
+void  ViewFilter::removeObserver(ViewFilterObserver* obs)
 {
-	std::vector<FilterDataObserver*>::iterator it=std::find(observers_.begin(),observers_.end(),obs);
+	std::vector<ViewFilterObserver*>::iterator it=std::find(observers_.begin(),observers_.end(),obs);
 	if(it != observers_.end())
 		observers_.erase(it);
 }

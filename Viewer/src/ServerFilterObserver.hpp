@@ -7,37 +7,16 @@
 // nor does it submit to any jurisdiction.
 //============================================================================
 
-#ifndef FILTERWIDGET_HPP_
-#define FILTERWIDGET_HPP_
+#ifndef SERVERFILTEROBSERVER_HPP_
+#define SERVERFILTEROBSERVER_HPP_
 
-#include <QMap>
-#include <QSet>
-#include <QWidget>
-
-#include "DState.hpp"
-
-class QToolButton;
-class ViewFilter;
-
-class FilterWidget : public QWidget
+class ServerFilterObserver
 {
-Q_OBJECT
-
 public:
-	FilterWidget(QWidget* parent=0);
-	void reload(ViewFilter*);
-
-protected slots:
-	void slotChanged(bool);
-
-signals:
-	void filterChanged(QSet<DState::State>);
-
-private:
-	QToolButton* createButton(QString,QString,QColor);
-
-	QMap<DState::State,QToolButton*> items_;
-	ViewFilter* data_;
+	ServerFilterObserver(){};
+	virtual ~ServerFilterObserver(){};
+	virtual void notifyServerFilterChanged()=0;
 };
+
 
 #endif
