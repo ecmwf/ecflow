@@ -103,11 +103,13 @@ if __name__ == "__main__":
             print "No ecf_home specified. Please specify a writable directory"
             exit(1)
         ARGS.ecf_home = os.getenv("WK") + "/Pyext/test/data/CUSTOMER/ECF_HOME"
+        if ARGS.verbose:
+            print "Workspace is defined" 
+            print "using /Client/bin/gcc\-4.5/debug/ecflow_client"
+
     if ARGS.verbose:
-        print "Workspace is defined" 
         print "Using ECF_HOME=" + ARGS.ecf_home
-        print "using /Client/bin/gcc\-4.5/debug/ecflow_client"
-        
+         
     if ARGS.verbose: 
         print "\nloading the definition from the input arguments(" + ARGS.defs_file + ")\n"
     try:
@@ -165,16 +167,16 @@ if __name__ == "__main__":
         CL.ping() 
 
         if ARGS.verbose: 
-            print "start the server running"
+            print "Server is already running. re-start the server"
         CL.restart_server() 
 
         if ARGS.verbose: 
-            print "Remove suites associated with this DEFS, allows rerun"
-        try:
-            for suite in DEFS.suites:
+            print "Remove suites associated with this DEFS, allows rerun *******************************************"
+        for suite in DEFS.suites:
+            try:
                 CL.delete(suite.get_abs_node_path(), True)
-        except RuntimeError, ex:
-            pass # For first run this will fail, hence ignore
+            except RuntimeError, ex:
+                pass # For first run this will fail, hence ignore
         
         if ARGS.verbose: 
             print "Load the definition into " + ARGS.host + ":" + ARGS.port
