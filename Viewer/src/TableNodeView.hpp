@@ -18,7 +18,7 @@
 #include "ViewNodeInfo.hpp"
 
 class ActionHandler;
-class FilterData;
+class ViewFilter;
 class TableNodeModel;
 class TableNodeFilterModel;
 
@@ -27,7 +27,7 @@ class TableNodeView : public QTreeView, public NodeViewBase
 Q_OBJECT
 
 public:
-	TableNodeView(QString,FilterData*,QWidget *parent=0);
+	TableNodeView(QString,ViewFilter*,QWidget *parent=0);
 	void reload() {};
 	QWidget* realWidget();
 

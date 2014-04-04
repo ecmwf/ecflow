@@ -12,7 +12,7 @@
 #include <QDebug>
 
 #include "ChangeMgrSingleton.hpp"
-#include "FilterData.hpp"
+#include "ViewFilter.hpp"
 #include "ServerHandler.hpp"
 #include "ViewConfig.hpp"
 
@@ -434,16 +434,16 @@ void TableNodeModel::update(const Node* node, const std::vector<ecf::Aspect::Typ
 }
 
 
-TableNodeFilterModel::TableNodeFilterModel(FilterData* filterData,QObject *parent) :
+TableNodeFilterModel::TableNodeFilterModel(ViewFilter* filterData,QObject *parent) :
 		QSortFilterProxyModel(parent),
-		filterData_(filterData)
+		viewFilter_(filterData)
 {
-	filterData_->addObserver(this);
+	viewFilter_->addObserver(this);
 }
 
 TableNodeFilterModel::~TableNodeFilterModel()
 {
-	filterData_->removeObserver(this);
+	viewFilter_->removeObserver(this);
 }
 
 void TableNodeFilterModel::notifyFilterChanged()
@@ -453,11 +453,11 @@ void TableNodeFilterModel::notifyFilterChanged()
 
 bool TableNodeFilterModel::filterAcceptsRow(int sourceRow,const QModelIndex& sourceParent) const
 {
-	if(!filterData_->isNodeStateFiltered())
+	if(!viewFilter_->isNodeStateFiltered())
 		return true;
 
 	QModelIndex index = sourceModel()->index(sourceRow, 1, sourceParent);
-	const std::set<DState::State> ns=filterData_->nodeState();
+	const std::set<DState::State> ns=viewFilter_->nodeState();
 	int intSt=sourceModel()->data(index,TableNodeModel::FilterRole).toInt();
 	if(intSt<0)
 			return true;

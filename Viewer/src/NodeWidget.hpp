@@ -17,8 +17,10 @@
 
 #include "ViewNodeInfo.hpp"
 
-class FilterData;
+class ServerFilter;
+class ViewFilter;
 class NodeViewHandler;
+class ServerViewItem;
 
 class NodeWidget : public QWidget
 {
@@ -32,7 +34,8 @@ public:
 
 	Viewer::ViewMode viewMode();
 	void setViewMode(Viewer::ViewMode);
-	FilterData* filterData() const {return filterData_;}
+	ServerFilter* serverFilter() const {return serverFilter_;}
+	ViewFilter* viewFilter() const {return viewFilter_;}
 
 	void writeSettings(QSettings &);
 	void readSettings(QSettings &);
@@ -52,7 +55,8 @@ private:
 	//QModelIndex changeFolder(const QModelIndex&);
 
 	NodeViewHandler* views_;
-	FilterData* filterData_;
+	ViewFilter* viewFilter_;
+	ServerFilter* serverFilter_;
 };
 
 #endif

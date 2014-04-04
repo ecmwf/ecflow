@@ -12,7 +12,7 @@
 #include <QHBoxLayout>
 #include <QToolButton>
 
-#include "FilterData.hpp"
+#include "ViewFilter.hpp"
 #include "ViewConfig.hpp"
 
 FilterWidget::FilterWidget(QWidget *parent) :
@@ -62,7 +62,7 @@ QToolButton* FilterWidget::createButton(QString label,QString tooltip,QColor col
 	return tb;
 }
 
-void FilterWidget::reload(FilterData* filterData)
+void FilterWidget::reload(ViewFilter* filterData)
 {
 	data_=filterData;
 

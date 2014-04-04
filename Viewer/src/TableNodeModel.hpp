@@ -6,11 +6,11 @@
 
 #include <vector>
 
-#include "FilterDataObserver.hpp"
+#include "ViewFilterObserver.hpp"
 #include "ViewNodeInfo.hpp"
 #include "AbstractObserver.hpp"
 
-class FilterData;
+class ViewFilter;
 class Node;
 class ServerHandler;
 
@@ -59,10 +59,10 @@ protected:
 };
 
 
-class TableNodeFilterModel : public QSortFilterProxyModel, public FilterDataObserver
+class TableNodeFilterModel : public QSortFilterProxyModel, public ViewFilterObserver
 {
 public:
-	TableNodeFilterModel(FilterData*,QObject *parent=0);
+	TableNodeFilterModel(ViewFilter*,QObject *parent=0);
 	~TableNodeFilterModel();
 
 	bool filterAcceptsRow(int,const QModelIndex &) const;
@@ -71,7 +71,7 @@ public:
 	void notifyFilterChanged();
 
 protected:
-	FilterData *filterData_;
+	ViewFilter *viewFilter_;
 };
 
 

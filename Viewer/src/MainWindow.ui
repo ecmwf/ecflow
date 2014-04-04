@@ -92,6 +92,7 @@
    <addaction name="actionTableView"/>
    <addaction name="actionRefresh"/>
    <addaction name="actionReset"/>
+   <addaction name="actionServers"/>
   </widget>
   <action name="actionClose">
    <property name="icon">
@@ -191,6 +192,14 @@
    </property>
    <property name="toolTip">
     <string>Reset</string>
+   </property>
+  </action>
+  <action name="actionServers">
+   <property name="text">
+    <string>Servers</string>
+   </property>
+   <property name="toolTip">
+    <string>Server selection</string>
    </property>
   </action>
  </widget>

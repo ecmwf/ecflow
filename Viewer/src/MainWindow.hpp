@@ -22,6 +22,7 @@
 class QActionGroup;
 class FilterWidget;
 class NodePanel;
+class ServerDialog;
 
 class MainWindow : public QMainWindow, private Ui::MainWindow  
 {
@@ -46,6 +47,7 @@ protected slots:
 	void on_actionQuit_triggered();
 	void on_actionRefresh_triggered();
 	void on_actionReset_triggered();
+	void on_actionServers_triggered();
 	void slotViewMode(QAction*);
 	void slotCurrentChangedInPanel();
 
@@ -72,6 +74,7 @@ private:
     QActionGroup *viewModeAg_;
     FilterWidget* filterWidget_;
     NodePanel* nodePanel_;
+    ServerDialog* serverDialog_;
 
     static bool quitStarted_;
     static QList<MainWindow*> windows_;

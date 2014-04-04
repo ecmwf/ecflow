@@ -9,6 +9,7 @@
 
 #include "TreeNodeView.hpp"
 
+#include <QApplication>
 #include <QDebug>
 #include <QPainter>
 #include <QScrollBar>
@@ -22,19 +23,124 @@
 
 TreeNodeViewDelegate::TreeNodeViewDelegate(QWidget *parent) : QStyledItemDelegate(parent)
 {
+	hoverPen_=QPen(QColor(201,201,201));
+	hoverBrush_=QBrush(QColor(250,250,250,210));
+	selectPen_=QPen(QColor(125,162,206));
+	selectBrush_=QBrush(QColor(193,220,252,210));
+
+	/*QString group("itemview_main");
+	editPen_=QPen(MvQTheme::colour(group,"edit_pen"));
+	editBrush_=MvQTheme::brush(group,"edit_brush");
+	hoverPen_=QPen(MvQTheme::colour(group,"hover_pen"));
+	hoverBrush_=MvQTheme::brush(group,"hover_brush");
+	selectPen_=QPen(MvQTheme::colour(group,"select_pen"));
+	selectBrush_=MvQTheme::brush(group,"select_brush");*/
+
 }
 
 void TreeNodeViewDelegate::paint(QPainter *painter,const QStyleOptionViewItem &option,
 		           const QModelIndex& index) const
 {
-	QStyledItemDelegate::paint(painter,option,index);
+	//Background
+	QStyleOptionViewItemV4 vopt(option);
+	initStyleOption(&vopt, index);
+
+	const QStyle *style = vopt.widget ? vopt.widget->style() : QApplication::style();
+	const QWidget* widget = vopt.widget;
+
+	//Save painter state
+	painter->save();
+
+	if(index.column() == 0)
+	{
+		QRect fullRect=QRect(0,option.rect.y(),painter->device()->width(),option.rect.height());
+
+		if(option.state & QStyle::State_Selected)
+		{
+			//QRect fillRect=option.rect.adjusted(0,1,-1,-textRect.height()-1);
+			painter->fillRect(fullRect,selectBrush_);
+			painter->setPen(selectPen_);
+			painter->drawLine(fullRect.topLeft(),fullRect.topRight());
+			painter->drawLine(fullRect.bottomLeft(),fullRect.bottomRight());
+		}
+		else if(option.state & QStyle::State_MouseOver)
+		{
+			//QRect fillRect=option.rect.adjusted(0,1,-1,-1);
+			painter->fillRect(fullRect,hoverBrush_);
+			painter->setPen(hoverPen_);
+			painter->drawLine(fullRect.topLeft(),fullRect.topRight());
+			painter->drawLine(fullRect.bottomLeft(),fullRect.bottomRight());
+		}
+
+	}
+
+	if(index.column() == 0)
+	{
+		QString text=index.data(Qt::DisplayRole).toString();
+		QColor bg=index.data(Qt::BackgroundRole).value<QColor>();
+
+		QFont font;
+		QFontMetrics fm(font);
+		int textWidth=fm.width(text);
+		int offset=2;
+
+		//QRect fillRect=QRect(option.rect.x(),option.rect.y(),painter->device()->width(),option.rect.height());
+
+		QRect textRect = style->subElementRect(QStyle::SE_ItemViewItemText, &vopt, widget);
+		textRect.setWidth(textWidth);
+
+		QRect fillRect=textRect.adjusted(-offset,1,2*offset,-2);
+		textRect.moveLeft(textRect.x()+offset);
+
+		if(fillRect.left() < option.rect.right())
+		{
+			if(fillRect.right()>=option.rect.right())
+				fillRect.setRight(option.rect.right());
+
+			painter->fillRect(fillRect,bg);
+					painter->setPen(QColor(180,180,180));
+					painter->drawRect(fillRect);
+
+			if(textRect.left() < option.rect.right())
+			{
+				if(textRect.right()>=option.rect.right())
+					textRect.setRight(option.rect.right());
+
+				if(bg == QColor(Qt::red))
+					painter->setPen(Qt::white);
+				else
+					painter->setPen(Qt::black);
+				painter->drawText(textRect,Qt::AlignLeft | Qt::AlignVCenter,text);
+			}
+		}
+	}
+	else if(index.column() < 3)
+	{
+		QString text=index.data(Qt::DisplayRole).toString();
+		QRect textRect = style->subElementRect(QStyle::SE_ItemViewItemText, &vopt, widget);
+		painter->setPen(Qt::black);
+		painter->drawText(textRect,Qt::AlignLeft | Qt::AlignVCenter,text);
+
+	}
+
+	painter->restore();
+
+	//else
+	//	QStyledItemDelegate::paint(painter,option,index);
 }
 
-TreeNodeView::TreeNodeView(QString ,FilterData* filterData,QWidget* parent) : QTreeView(parent)
+QSize TreeNodeViewDelegate::sizeHint(const QStyleOptionViewItem & option, const QModelIndex & index ) const
 {
-		model_=new TreeNodeModel(this);
+	QSize size=QStyledItemDelegate::sizeHint(option,index);
+	return size+QSize(0,4);
+}
 
-		filterModel_=new TreeNodeFilterModel(filterData,this);
+
+TreeNodeView::TreeNodeView(QString ,ServerFilter* serverFilter,ViewFilter* viewFilter,QWidget* parent) : QTreeView(parent)
+{
+		model_=new TreeNodeModel(serverFilter,this);
+
+		filterModel_=new TreeNodeFilterModel(viewFilter,this);
 		filterModel_->setSourceModel(model_);
 		filterModel_->setDynamicSortFilter(true);
 

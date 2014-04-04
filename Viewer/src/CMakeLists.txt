@@ -2,7 +2,6 @@
 set(viewer_srcs   
     ViewerMain.cpp
     ActionHandler.cpp
-    FilterData.cpp
     FilterWidget.cpp
     InfoPanel.cpp
     MainWindow.cpp
@@ -12,6 +11,11 @@ set(viewer_srcs
     NodeViewHandler.cpp
     NodeWidget.cpp
     ServerHandler.cpp
+    ServerFilter.cpp
+    ServerItem.cpp
+    ServerList.cpp
+    ServerListModel.cpp
+    ServerWidget.cpp
     TabWidget.cpp 
     TableNodeModel.cpp
     TableNodeView.cpp
@@ -20,14 +24,15 @@ set(viewer_srcs
     VariableModel.cpp
     VariableItemWidget.cpp
     ViewConfig.cpp
+    ViewFilter.cpp
     ViewNodeInfo.cpp)
 
 
 include(${QT_USE_FILE})
 
-QT4_WRAP_CPP(VIEWER_MOC ActionHandler.hpp FilterWidget.hpp InfoPanel.hpp MainWindow.hpp NodePanel.hpp NodePathWidget.hpp NodeWidget.hpp TabWidget.hpp TableNodeView.hpp TreeNodeModel.hpp TreeNodeView.hpp VariableItemWidget.hpp)
+QT4_WRAP_CPP(VIEWER_MOC ActionHandler.hpp FilterWidget.hpp InfoPanel.hpp MainWindow.hpp NodePanel.hpp NodePathWidget.hpp NodeWidget.hpp ServerWidget.hpp TabWidget.hpp TableNodeView.hpp TreeNodeModel.hpp TreeNodeView.hpp VariableItemWidget.hpp)
 QT4_ADD_RESOURCES (VIEWER_RES viewer.qrc)
-QT4_WRAP_UI       (VIEWER_FORMS_HEADERS MainWindow.ui)
+QT4_WRAP_UI       (VIEWER_FORMS_HEADERS MainWindow.ui ServerWidget.ui)
 
 
 ecbuild_add_executable( TARGET   ecflowviewer

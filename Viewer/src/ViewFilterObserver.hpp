@@ -7,14 +7,14 @@
 // nor does it submit to any jurisdiction.
 //============================================================================
 
-#ifndef FILTERDATAOBSERVER_HPP_
-#define FILTERDATAOBSERVER_HPP_
+#ifndef VIEWFILTEROBSERVER_HPP_
+#define VIEWFILTEROBSERVER_HPP_
 
-class FilterDataObserver
+class ViewFilterObserver
 {
 public:
-	FilterDataObserver(){};
-	virtual ~FilterDataObserver(){};
+	ViewFilterObserver(){};
+	virtual ~ViewFilterObserver(){};
 	virtual void notifyFilterChanged()=0;
 };
 

@@ -11,6 +11,8 @@
 #ifndef TreeNodeView_HPP_
 #define TreeNodeView_HPP_
 
+#include <QBrush>
+#include <QPen>
 #include <QTreeView>
 #include <QStyledItemDelegate>
 
@@ -19,7 +21,8 @@
 #include "ViewNodeInfo.hpp"
 
 class ActionHandler;
-class FilterData;
+class ServerFilter;
+class ViewFilter;
 class TreeNodeModel;
 class TreeNodeFilterModel;
 
@@ -30,6 +33,13 @@ public:
 	TreeNodeViewDelegate(QWidget *parent=0);
 	void paint(QPainter *painter,const QStyleOptionViewItem &option,
 		           const QModelIndex& index) const;
+	QSize sizeHint(const QStyleOptionViewItem & option, const QModelIndex & index ) const;
+
+protected:
+	QPen hoverPen_;
+	QBrush hoverBrush_;
+	QPen selectPen_;
+	QBrush selectBrush_;
 };
 
 
@@ -38,7 +48,7 @@ class TreeNodeView : public QTreeView, public NodeViewBase
 Q_OBJECT
 
 public:
-	TreeNodeView(QString,FilterData*,QWidget *parent=0);
+	TreeNodeView(QString,ServerFilter*,ViewFilter*,QWidget *parent=0);
 	void reload();
 	QWidget* realWidget();
 

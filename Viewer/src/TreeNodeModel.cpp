@@ -13,25 +13,60 @@
 
 #include "ChangeMgrSingleton.hpp"
 
-#include "FilterData.hpp"
+#include "ServerFilter.hpp"
 #include "ServerHandler.hpp"
 #include "ViewConfig.hpp"
+#include "ViewFilter.hpp"
 
-TreeNodeModel::TreeNodeModel(QObject *parent) : QAbstractItemModel(parent)
+TreeNodeModel::TreeNodeModel(ServerFilter* serverFilter,QObject *parent) :
+   QAbstractItemModel(parent),
+   serverFilter_(serverFilter)
 {
+	serverFilter_->addObserver(this);
 	init();
+}
+
+
+void TreeNodeModel::notifyServerFilterChanged()
+{
+	beginResetModel();
+	clean();
+
+	for(unsigned int i=0; i < serverFilter_->servers().size(); i++)
+	{
+			ServerHandler *server=ServerHandler::find(serverFilter_->servers().at(i)->host(),
+					serverFilter_->servers().at(i)->port());
+			//initObserver(server);
+
+			servers_ << server;
+			rootNodes_[server] = NULL;
+	}
+
+	endResetModel();
 }
 
 void TreeNodeModel::init()
 {
-	for(unsigned int i=0; i < ServerHandler::servers().size(); i++)
+	/*for(unsigned int i=0; i < ServerHandler::servers().size(); i++)
 	{
 			ServerHandler *server=ServerHandler::servers().at(i);
 			initObserver(server);
 
 			servers_ << server;
 			rootNodes_[server] = NULL;
-	}
+	}*/
+
+	for(unsigned int i=0; i < serverFilter_->servers().size(); i++)
+		{
+				ServerHandler *server=ServerHandler::find(serverFilter_->servers().at(i)->host(),
+						serverFilter_->servers().at(i)->port());
+				initObserver(server);
+
+				servers_ << server;
+				rootNodes_[server] = NULL;
+		}
+
+
 }
 
 void TreeNodeModel::initObserver(ServerHandler* server)
@@ -196,6 +231,11 @@ QVariant TreeNodeModel::serverData(const QModelIndex& index,int role) const
 {
 	if(role == FilterRole)
 		return -1;
+
+	else if(index.column() == 0 && role == Qt::BackgroundRole)
+	{
+			return ViewConfig::Instance()->stateColour(DState::UNKNOWN);
+	}
 
 	else if(index.column() == 0)
 	{
@@ -500,16 +540,16 @@ void TreeNodeModel::update(const Node* node, const std::vector<ecf::Aspect::Type
 
 
 
-TreeNodeFilterModel::TreeNodeFilterModel(FilterData* filterData,QObject *parent) :
+TreeNodeFilterModel::TreeNodeFilterModel(ViewFilter* filterData,QObject *parent) :
 		QSortFilterProxyModel(parent),
-		filterData_(filterData)
+		viewFilter_(filterData)
 {
-	filterData_->addObserver(this);
+	viewFilter_->addObserver(this);
 }
 
 TreeNodeFilterModel::~TreeNodeFilterModel()
 {
-	filterData_->removeObserver(this);
+	viewFilter_->removeObserver(this);
 }
 
 void TreeNodeFilterModel::notifyFilterChanged()
@@ -519,11 +559,11 @@ void TreeNodeFilterModel::notifyFilterChanged()
 
 bool TreeNodeFilterModel::filterAcceptsRow(int sourceRow,const QModelIndex& sourceParent) const
 {
-	if(!filterData_->isNodeStateFiltered())
+	if(!viewFilter_->isNodeStateFiltered())
 		return true;
 
 	QModelIndex index = sourceModel()->index(sourceRow, 1, sourceParent);
-	const std::set<DState::State> ns=filterData_->nodeState();
+	const std::set<DState::State> ns=viewFilter_->nodeState();
 	int intSt=sourceModel()->data(index,TreeNodeModel::FilterRole).toInt();
 	if(intSt<0)
 			return true;

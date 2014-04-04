@@ -7,37 +7,30 @@
 // nor does it submit to any jurisdiction.
 //============================================================================
 
-#ifndef FILTERWIDGET_HPP_
-#define FILTERWIDGET_HPP_
+#ifndef VIEWFILTER_HPP_
+#define VIEWFILTER_HPP_
 
-#include <QMap>
-#include <QSet>
-#include <QWidget>
+#include <set>
+#include <vector>
 
+#include "ViewFilterObserver.hpp"
 #include "DState.hpp"
 
-class QToolButton;
-class ViewFilter;
-
-class FilterWidget : public QWidget
+class ViewFilter
 {
-Q_OBJECT
-
 public:
-	FilterWidget(QWidget* parent=0);
-	void reload(ViewFilter*);
-
-protected slots:
-	void slotChanged(bool);
-
-signals:
-	void filterChanged(QSet<DState::State>);
+	ViewFilter();
+	const std::set<DState::State>& nodeState() const {return nodeState_;}
+	void setNodeState(const std::set<DState::State>& ns);
+	bool isNodeStateFiltered() const;
+	void addObserver(ViewFilterObserver*);
+	void removeObserver(ViewFilterObserver*);
 
 private:
-	QToolButton* createButton(QString,QString,QColor);
+	void broadcastChange();
 
-	QMap<DState::State,QToolButton*> items_;
-	ViewFilter* data_;
+	std::set<DState::State> nodeState_;
+	std::vector<ViewFilterObserver*> observers_;
 };
 
 #endif

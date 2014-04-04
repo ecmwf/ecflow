@@ -189,10 +189,16 @@ Viewer::ViewMode NodePanel::viewMode()
 	return (w)?w->viewMode():Viewer::NoViewMode;
 }
 
-FilterData* NodePanel::filterData()
+ViewFilter* NodePanel::viewFilter()
 {
   	NodeWidget *w=currentNodeWidget();
-	return (w)?w->filterData():0;
+	return (w)?w->viewFilter():0;
+}
+
+ServerFilter* NodePanel::serverFilter()
+{
+  	NodeWidget *w=currentNodeWidget();
+	return (w)?w->serverFilter():0;
 }
 
 /*void NodePanel::slotNewWindow(bool)
