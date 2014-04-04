@@ -98,12 +98,15 @@ if __name__ == "__main__":
     print ARGS    
     
     # If running on local work space, use /Pyext/test/data/CUSTOMER/ECF_HOME as ecf_home
-    if os.getenv("WK") != None:
+    if not ARGS.ecf_home:
+        if os.getenv("WK") == None:
+            print "No ecf_home specified. Please specify a writable directory"
+            exit(1)
         ARGS.ecf_home = os.getenv("WK") + "/Pyext/test/data/CUSTOMER/ECF_HOME"
-        if ARGS.verbose:
-            print "Workspace is defined" 
-            print "Using ECF_HOME=" + ARGS.ecf_home
-            print "using /Client/bin/gcc\-4.5/debug/ecflow_client"
+    if ARGS.verbose:
+        print "Workspace is defined" 
+        print "Using ECF_HOME=" + ARGS.ecf_home
+        print "using /Client/bin/gcc\-4.5/debug/ecflow_client"
         
     if ARGS.verbose: 
         print "\nloading the definition from the input arguments(" + ARGS.defs_file + ")\n"
