@@ -18,6 +18,7 @@
 #include "ClientInvoker.hpp"
 
 #include "MainWindow.hpp"
+#include "FilterWidget.hpp"
 #include "InfoPanel.hpp"
 #include "NodePanel.hpp"
 #include "ServerHandler.hpp"
@@ -44,6 +45,12 @@ MainWindow::MainWindow(QStringList idLst,QWidget *parent) : QMainWindow(parent)
     connect(viewModeAg_,SIGNAL(triggered(QAction*)),
     		this,SLOT(slotViewMode(QAction*)));
 
+
+    //Filter widget in toolbar
+    filterWidget_=new FilterWidget(this);
+    viewToolBar->addWidget(filterWidget_);
+
+
     //Create the main layout
     QVBoxLayout* layout=new QVBoxLayout();
     QWidget *w=new QWidget(this);
@@ -56,6 +63,9 @@ MainWindow::MainWindow(QStringList idLst,QWidget *parent) : QMainWindow(parent)
     
     connect(nodePanel_,SIGNAL(currentWidgetChanged()),
     		this,SLOT(slotCurrentChangedInPanel()));
+
+    connect(filterWidget_,SIGNAL(filterChanged(QSet<DState::State>)),
+        	nodePanel_,SLOT(slotFilterChanged(QSet<DState::State>)));
 
 
     //Info panel
@@ -141,9 +151,12 @@ void MainWindow::slotViewMode(QAction* action)
 
 void MainWindow::slotCurrentChangedInPanel()
 {
-	 //breadcrumbs_->setPath(folderPanel_->currentFolder());
+	syncViewModeAg(nodePanel_->viewMode());
+	filterWidget_->reload(nodePanel_->filterData());
+
+	//breadcrumbs_->setPath(folderPanel_->currentFolder());
   	 //slotUpdateNavigationActions(folderPanel_->folderNavigation());
-	 syncViewModeAg(nodePanel_->viewMode());
+
 	 //updateIconSizeActionState();
 	 //updateSearchPanel();
 }

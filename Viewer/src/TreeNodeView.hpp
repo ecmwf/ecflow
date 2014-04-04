@@ -19,6 +19,7 @@
 #include "ViewNodeInfo.hpp"
 
 class ActionHandler;
+class FilterData;
 class TreeNodeModel;
 class TreeNodeFilterModel;
 
@@ -37,10 +38,9 @@ class TreeNodeView : public QTreeView, public NodeViewBase
 Q_OBJECT
 
 public:
-		TreeNodeView(QString,QWidget *parent=0);
-		//TreeNodeView::printDefTree(const std::string &server, int port);
-		//TreeNodeView::printNode(node_ptr node, int indent, QTreeWidgetItem *parent)
-		void reload();
+	TreeNodeView(QString,FilterData*,QWidget *parent=0);
+	void reload();
+	QWidget* realWidget();
 
 public slots:
 	void slotSelectItem(const QModelIndex&);
@@ -48,17 +48,16 @@ public slots:
 	void slotContextMenu(const QPoint &position);
 	void slotViewCommand(std::vector<ViewNodeInfo_ptr>,QString);
 
-
 signals:
 	void selectionChanged(ViewNodeInfo_ptr);
 
 protected:
-		QModelIndexList selectedList();
-		void handleContextMenu(QModelIndex indexClicked,QModelIndexList indexLst,QPoint globalPos,QPoint widgetPos,QWidget *widget);
+	QModelIndexList selectedList();
+	void handleContextMenu(QModelIndex indexClicked,QModelIndexList indexLst,QPoint globalPos,QPoint widgetPos,QWidget *widget);
 
-		TreeNodeModel *model_;
-		TreeNodeFilterModel *filterModel_;
-		ActionHandler* actionHandler_;
+	TreeNodeModel *model_;
+	TreeNodeFilterModel *filterModel_;
+	ActionHandler* actionHandler_;
 };
 
 

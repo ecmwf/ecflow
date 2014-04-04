@@ -7,25 +7,37 @@
 // nor does it submit to any jurisdiction.
 //============================================================================
 
-#ifndef NODEVIEWBASE_HPP_
-#define NODEVIEWBASE_HPP_
+#ifndef FILTERWIDGET_HPP_
+#define FILTERWIDGET_HPP_
 
-#include "Viewer.hpp"
+#include <QMap>
+#include <QSet>
+#include <QWidget>
 
-class QWidget;
+#include "DState.hpp"
 
-class NodeViewBase
+class QToolButton;
+class FilterData;
+
+class FilterWidget : public QWidget
 {
+Q_OBJECT
+
 public:
-		NodeViewBase();
-		virtual ~NodeViewBase(){};
+	FilterWidget(QWidget* parent=0);
+	void reload(FilterData*);
 
-		virtual void reload()=0;
-		virtual QWidget* realWidget()=0;
+protected slots:
+	void slotChanged(bool);
 
-protected:
-		Viewer::ViewMode id_;
+signals:
+	void filterChanged(QSet<DState::State>);
 
+private:
+	QToolButton* createButton(QString,QString,QColor);
+
+	QMap<DState::State,QToolButton*> items_;
+	FilterData* data_;
 };
 
 #endif

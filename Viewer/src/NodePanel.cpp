@@ -12,7 +12,6 @@
 #include "NodeWidget.hpp"
 #include "MainWindow.hpp"
 
-
 NodePanel::NodePanel(QWidget* parent) :
   TabWidget(parent)
 
@@ -190,6 +189,11 @@ Viewer::ViewMode NodePanel::viewMode()
 	return (w)?w->viewMode():Viewer::NoViewMode;
 }
 
+FilterData* NodePanel::filterData()
+{
+  	NodeWidget *w=currentNodeWidget();
+	return (w)?w->filterData():0;
+}
 
 /*void NodePanel::slotNewWindow(bool)
 {

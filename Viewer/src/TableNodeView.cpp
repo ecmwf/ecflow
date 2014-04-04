@@ -20,10 +20,15 @@
 #include "TableNodeModel.hpp"
 
 
-TableNodeView::TableNodeView(QString ,QWidget* parent) : QTreeView(parent)
+TableNodeView::TableNodeView(QString ,FilterData* filterData, QWidget* parent) : QTreeView(parent)
 {
 		model_=new TableNodeModel(this);
-		setModel(model_);
+
+		filterModel_=new TableNodeFilterModel(filterData,this);
+		filterModel_->setSourceModel(model_);
+		filterModel_->setDynamicSortFilter(true);
+
+		setModel(filterModel_);
 
 		//Context menu
 		setContextMenuPolicy(Qt::CustomContextMenu);
@@ -57,6 +62,12 @@ TableNodeView::TableNodeView(QString ,QWidget* parent) : QTreeView(parent)
 
 
 }
+
+QWidget* TableNodeView::realWidget()
+{
+	return this;
+}
+
 //Collects the selected list of indexes
 QModelIndexList TableNodeView::selectedList()
 {
@@ -72,7 +83,7 @@ void TableNodeView::slotSelectItem(const QModelIndex&)
 	QModelIndexList lst=selectedIndexes();
 	if(lst.count() > 0)
 	{
-		ViewNodeInfo_ptr info=model_->nodeInfo(lst.front());
+		ViewNodeInfo_ptr info=model_->nodeInfo(filterModel_->mapToSource(lst.front()));
 		if(!info->isEmpty())
 		{
 			emit selectionChanged(info);
@@ -96,26 +107,26 @@ void TableNodeView::slotContextMenu(const QPoint &position)
 
 void TableNodeView::handleContextMenu(QModelIndex indexClicked,QModelIndexList indexLst,QPoint globalPos,QPoint widgetPos,QWidget *widget)
 {
-  	//Node actions
-  	if(indexClicked.isValid() && indexClicked.column() == 0)   //indexLst[0].isValid() && indexLst[0].column() == 0)
-	{
-	  	qDebug() << "context menu" << indexClicked;
-
-  		std::vector<ViewNodeInfo_ptr> nodeLst;
-		for(int i=0; i < indexLst.count(); i++)
+	//Node actions
+	  	if(indexClicked.isValid() && indexClicked.column() == 0)   //indexLst[0].isValid() && indexLst[0].column() == 0)
 		{
-			ViewNodeInfo_ptr info=model_->nodeInfo(indexLst[i]);
-			if(!info->isEmpty())
-				nodeLst.push_back(info);
+		  	qDebug() << "context menu" << indexClicked;
+
+	  		std::vector<ViewNodeInfo_ptr> nodeLst;
+			for(int i=0; i < indexLst.count(); i++)
+			{
+				ViewNodeInfo_ptr info=model_->nodeInfo(filterModel_->mapToSource(indexLst[i]));
+				if(!info->isEmpty())
+					nodeLst.push_back(info);
+			}
+
+			actionHandler_->contextMenu(nodeLst,globalPos);
 		}
 
-		actionHandler_->contextMenu(nodeLst,globalPos);
-	}
-
-	//Desktop actions
-	else
-	{
-	}
+		//Desktop actions
+		else
+		{
+		}
 }
 
 void TableNodeView::slotViewCommand(std::vector<ViewNodeInfo_ptr> nodeLst,QString cmd)

@@ -18,26 +18,26 @@ ViewConfig* ViewConfig::instance_=0;
 ViewConfig::ViewConfig()
 {
 	//Colour params
-	colour_[Unknown]= new VParameter("unknown","","",QColor(200,200,200));
-	colour_[Complete]= new VParameter("complete","","",QColor(255,255,255));
-	colour_[Queued]= new VParameter("queued","","",QColor(224,240,255));
-	colour_[Aborted]= new VParameter("aborted","","",QColor(255,0,0));
-	colour_[Submitted]= new VParameter("submitted","","",QColor(224,240,255));
-	colour_[Active]= new VParameter("active","","",QColor(0,255,0));
-	colour_[Suspended]= new VParameter("suspended","","",QColor(255,166,0));
+	colour_[Unknown]= new VParameter("unknown","Un","","unknown",QColor(220,220,220));
+	colour_[Complete]= new VParameter("complete","C","","complete",QColor(255,255,0));
+	colour_[Queued]= new VParameter("queued","Q","","queued",QColor(224,240,255));
+	colour_[Aborted]= new VParameter("aborted","Ab","","aborted",QColor(255,0,0));
+	colour_[Submitted]= new VParameter("submitted","Sb","","submitted",QColor(64,224,208));
+	colour_[Active]= new VParameter("active","Ac","","active",QColor(0,255,0));
+	colour_[Suspended]= new VParameter("suspended","Sp","","suspended",QColor(255,166,0));
 	//colour_[Active]= new VParameter("active","","",QColor(200,200,200));
 
-	colour_[Halted]= new VParameter("suspended","","",QColor(200,200,200));
-	colour_[Shutdown]= new VParameter("suspended","","",QColor(200,200,200));
-	colour_[Meter]= new VParameter("suspended","","",QColor(200,200,200));
-	colour_[Threshold]= new VParameter("suspended","","",QColor(200,200,200));
-	colour_[Event]= new VParameter("suspended","","",QColor(200,200,200));
+	colour_[Halted]= new VParameter("suspended","","","",QColor(200,200,200));
+	colour_[Shutdown]= new VParameter("suspended","","","",QColor(200,200,200));
+	colour_[Meter]= new VParameter("suspended","","","",QColor(200,200,200));
+	colour_[Threshold]= new VParameter("suspended","","","",QColor(200,200,200));
+	colour_[Event]= new VParameter("suspended","","","",QColor(200,200,200));
 
 	//Font params
-	font_[NormalFont]=new VParameter("normal","","",QFont());
-	font_[BoldFont]=new VParameter("normal","","",QFont());
-	font_[SmallFont]=new VParameter("normal","","",QFont());
-	font_[SmallBoldFont]=new VParameter("normal","","",QFont());
+	font_[NormalFont]=new VParameter("normal","","","",QFont());
+	font_[BoldFont]=new VParameter("normal","","","",QFont());
+	font_[SmallFont]=new VParameter("normal","","","",QFont());
+	font_[SmallBoldFont]=new VParameter("normal","","","",QFont());
 
 	stateMap_[DState::UNKNOWN]=Unknown;
 	stateMap_[DState::COMPLETE]=Complete;
@@ -72,6 +72,14 @@ QString ViewConfig::stateName(DState::State st) const
 		return QString();
 }
 
+QString ViewConfig::stateShortName(DState::State st) const
+{
+		std::map<DState::State,PaletteItem>::const_iterator it=stateMap_.find(st);
+		if(it != stateMap_.end())
+				return shortName(it->second);
+		return QString();
+}
+
 QColor ViewConfig::colour(PaletteItem item) const
 {
 		std::map<PaletteItem,VParameter*>::const_iterator it=colour_.find(item);
@@ -100,4 +108,12 @@ QString ViewConfig::name(PaletteItem item) const
 		return QString();
 }
 
-
+QString ViewConfig::shortName(PaletteItem item) const
+{
+		std::map<PaletteItem,VParameter*>::const_iterator it=colour_.find(item);
+		if(it != colour_.end())
+		{
+				return it->second->shortName();
+		}
+		return QString();
+}

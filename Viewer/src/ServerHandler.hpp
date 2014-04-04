@@ -33,9 +33,13 @@ class ServerComThread : public QThread
 	Q_OBJECT
 
 public:
+	enum ComType {COMMAND, NEWS, SYNC};
+
 	ServerComThread();
 
-	void setCommunicationParameters(ClientInvoker *ci, const std::vector<std::string> command);
+	void sendCommand(ClientInvoker *ci, ServerComThread::ComType comType);
+	void setCommandString(const std::vector<std::string> command);
+	ComType commandType();
 	void stop();
 
 protected:
@@ -44,12 +48,15 @@ protected:
 private:
 	ClientInvoker *ci_;
 	std::vector<std::string> command_;
+	ComType comType_;
 };
 
 
 
-class ServerHandler
+class ServerHandler : public QObject // ingerits from QObject in order to gain signal/slots
 {
+	Q_OBJECT
+
 public:
 		ServerHandler(const std::string& name,const std::string&  port);
 		~ServerHandler();
@@ -97,6 +104,10 @@ protected:
 
 		static std::vector<ServerHandler*> servers_;
 		static std::map<std::string, std::string> commands_;
+
+private slots:
+
+		void commandSent();  // invoked when a command has finished being sent to the server
 
 private:
 

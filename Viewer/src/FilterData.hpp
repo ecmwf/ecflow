@@ -7,25 +7,30 @@
 // nor does it submit to any jurisdiction.
 //============================================================================
 
-#ifndef NODEVIEWBASE_HPP_
-#define NODEVIEWBASE_HPP_
+#ifndef FILTERDATA_HPP_
+#define FILTERDATA_HPP_
 
-#include "Viewer.hpp"
+#include <set>
+#include <vector>
 
-class QWidget;
+#include "FilterDataObserver.hpp"
+#include "DState.hpp"
 
-class NodeViewBase
+class FilterData
 {
 public:
-		NodeViewBase();
-		virtual ~NodeViewBase(){};
+	FilterData();
+	const std::set<DState::State>& nodeState() const {return nodeState_;}
+	void setNodeState(const std::set<DState::State>& ns);
+	bool isNodeStateFiltered() const;
+	void addObserver(FilterDataObserver*);
+	void removeObserver(FilterDataObserver*);
 
-		virtual void reload()=0;
-		virtual QWidget* realWidget()=0;
+private:
+	void broadcastChange();
 
-protected:
-		Viewer::ViewMode id_;
-
+	std::set<DState::State> nodeState_;
+	std::vector<FilterDataObserver*> observers_;
 };
 
 #endif

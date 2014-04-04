@@ -16,14 +16,35 @@
 
 NodeViewHandler::NodeViewHandler(QStackedLayout* p) : stacked_(p)
 {
-	currentMode_=Viewer::NoViewMode;
+	currentMode_=Viewer::TreeViewMode;
 }
 
-void NodeViewHandler::add(Viewer::ViewMode mode,NodeViewBase* b,QWidget* w)
+void NodeViewHandler::add(Viewer::ViewMode mode,NodeViewBase* b)
 {
-  	bases_[mode]=b;
+	//Check if the same widget/base has been already set for another mode
+	Viewer::ViewMode parentMode=mode;
+	for(std::map<Viewer::ViewMode,NodeViewBase*>::const_iterator it=bases_.begin(); it != bases_.end() ; it++)
+		if(it->second == b)
+		{
+			parentMode=it->first;
+			break;
+		}
+
+	bases_[mode]=b;
+	QWidget *w=b->realWidget();
 	widgets_[mode]=w;
-	stacked_->addWidget(w);
+
+	int cnt=stacked_->count();
+	if(parentMode == mode)
+	{
+		stacked_->addWidget(w);
+		indexes_[mode]=cnt;
+	}
+	//If the widget is already in the stack we just register its layout index
+	else
+	{
+		indexes_[mode]=indexes_[parentMode];
+	}
 }
 
 NodeViewBase* NodeViewHandler::base(Viewer::ViewMode mode) const
@@ -38,36 +59,81 @@ QWidget* NodeViewHandler::widget(Viewer::ViewMode mode)
 	return (it != widgets_.end())?it->second:0;
 }
 
-void NodeViewHandler::setCurrentMode(Viewer::ViewMode mode)
+bool NodeViewHandler::setCurrentMode(Viewer::ViewMode mode)
 {
-	if(mode==Viewer::NoViewMode)
-	  	mode=Viewer::TreeViewMode;
+	bool retVal=false;
 
-	if(mode == currentMode_)
-	  	return;
-
-	NodeViewBase* b=base(currentMode_);
-
-	NodeViewBase* bNew=base(mode);
-	QWidget* wNew=widget(mode);
-
-	//Set the mode
-	currentMode_=mode;
-
-	//Update the view
-	if(wNew && bNew)
+	//Check if currentMode is valid
+	if(bases_.find(currentMode_) == bases_.end())
 	{
-	  	wNew->setEnabled(true);
-		//if(b) bNew->changeFolder(b->currentFolder());
+		//If the currentMode is invalid we set it to icon view
+		currentMode_=Viewer::TreeViewMode;
 
-		//Set layout
-		stacked_->setCurrentWidget(wNew);
+		//Check if there is icon view
+		if(bases_.find(currentMode_) == bases_.end())
+		{
+			//If there area any views defined we set current to the first
+			if(bases_.size() > 0)
+				currentMode_=bases_.begin()->first;
+			//Otherwise something really bad happened!
+			else
+				return false;
+		}
 	}
 
+	if(mode != currentMode_ && bases_.find(mode) != bases_.end())
+	{
+		QWidget* wNew=widget(mode);
+
+		//Set the mode
+		currentMode_=mode;
+
+		//Update the view
+		if(wNew)
+		{
+				wNew->setEnabled(true);
+		}
+	}
+
+	//Update the folder in the current view
+	if(NodeViewBase* b=base(currentMode_))
+	{
+		//If changing the folder is successfull it calls reset and returns true
+		//retVal=b->changeFolder(folder,iconSize);
+		//We need to reset if the
+		//folder change was not successful (we stayed in the same folder)
+		if(!retVal)
+		{
+			//b->doReset();
+		}
+	}
+
+	//Set the layout
+	stacked_->setCurrentIndex(indexes_[currentMode_]);
+
 	//Disable the other views
+	QWidget *currentWidget=widget(currentMode_);
 	for(std::map<Viewer::ViewMode,QWidget*>::iterator it=widgets_.begin(); it != widgets_.end(); it++)
-	  	if(it->first != currentMode_ && it->second)
-		  	it->second->setEnabled(false);
+		  if(it->first != currentMode_ && it->second && it->second != currentWidget)
+			  it->second->setEnabled(false);
+
+	return retVal;
+}
+
+bool NodeViewHandler::setCurrentMode(int id)
+{
+	Viewer::ViewMode m=static_cast<Viewer::ViewMode>(id); //need a proper way to do it
+	return setCurrentMode(m);
 }
 
 
+QList<QWidget*> NodeViewHandler::uniqueWidgets()
+{
+  	QList<QWidget*> lst;
+  	for(std::map<Viewer::ViewMode,QWidget*>::iterator it=widgets_.begin(); it != widgets_.end(); it++)
+	{
+	  	if(lst.indexOf(it->second) == -1)
+	  		lst << it->second;
+	}
+	return lst;
+}

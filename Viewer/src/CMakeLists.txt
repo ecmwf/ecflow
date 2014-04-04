@@ -2,6 +2,8 @@
 set(viewer_srcs   
     ViewerMain.cpp
     ActionHandler.cpp
+    FilterData.cpp
+    FilterWidget.cpp
     InfoPanel.cpp
     MainWindow.cpp
     NodePanel.cpp
@@ -24,6 +26,7 @@ set(viewer_srcs
 include(${QT_USE_FILE})
 
 QT4_WRAP_CPP(VIEWER_MOC ActionHandler.hpp
+                        FilterWidget.hpp
                         InfoPanel.hpp
                         MainWindow.hpp
                         NodePanel.hpp

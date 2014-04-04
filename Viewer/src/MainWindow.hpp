@@ -20,6 +20,7 @@
 #include "Viewer.hpp"
 
 class QActionGroup;
+class FilterWidget;
 class NodePanel;
 
 class MainWindow : public QMainWindow, private Ui::MainWindow  
@@ -69,6 +70,7 @@ private:
 
 
     QActionGroup *viewModeAg_;
+    FilterWidget* filterWidget_;
     NodePanel* nodePanel_;
 
     static bool quitStarted_;

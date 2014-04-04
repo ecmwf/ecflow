@@ -7,25 +7,16 @@
 // nor does it submit to any jurisdiction.
 //============================================================================
 
-#ifndef NODEVIEWBASE_HPP_
-#define NODEVIEWBASE_HPP_
+#ifndef FILTERDATAOBSERVER_HPP_
+#define FILTERDATAOBSERVER_HPP_
 
-#include "Viewer.hpp"
-
-class QWidget;
-
-class NodeViewBase
+class FilterDataObserver
 {
 public:
-		NodeViewBase();
-		virtual ~NodeViewBase(){};
-
-		virtual void reload()=0;
-		virtual QWidget* realWidget()=0;
-
-protected:
-		Viewer::ViewMode id_;
-
+	FilterDataObserver(){};
+	virtual ~FilterDataObserver(){};
+	virtual void notifyFilterChanged()=0;
 };
+
 
 #endif
