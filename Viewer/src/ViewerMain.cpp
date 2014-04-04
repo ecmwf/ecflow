@@ -13,11 +13,15 @@
 
 #include <QApplication>
 
+#include "Version.hpp"
 #include "MainWindow.hpp"
 #include "ServerHandler.hpp"
 
 int main(int argc, char **argv)
 {
+
+	std::cout << ecf::Version::description()  << "\n";  // print the version information
+
 
     if (argc != 3)
     {

@@ -11,8 +11,8 @@
 
 #include "Defs.hpp"
 #include "ClientInvoker.hpp"
-#include "Str.hpp"
 #include "ArgvCreator.hpp"
+#include "Str.hpp"
 #include "MainWindow.hpp"
 
 #include <iostream>
@@ -24,7 +24,9 @@ ServerHandler::ServerHandler(const std::string& name, const std::string& port) :
    name_(name),
    port_(port),
    client_(0),
-   updating_(false)
+   updating_(false),
+   communicating_(false),
+   comThread_(0)
 {
 	longName_=name_ + "@" + port_;
 
@@ -57,12 +59,24 @@ ServerHandler::ServerHandler(const std::string& name, const std::string& port) :
 		addServerCommand("Requeue", "ecflow_client --requeue force <full_name>");
 		addServerCommand("Execute", "ecflow_client --run <full_name>");
 	}
+
+
+	// XXX we may not always want to create a thread here because of resource
+	// issues; another strategy would be to create threads on demand, only
+	// when server communication is about to start
+	comThread_ = new ServerComThread();
+	connect(comThread(), SIGNAL(finished()), this, SLOT(commandSent()));
+
 }
 
 ServerHandler::~ServerHandler()
 {
 	if(client_)
-			delete client_;
+		delete client_;
+
+	if (comThread_)
+		delete comThread_;
+
 }
 
 ServerHandler* ServerHandler::addServer(const std::string& name, const std::string& port)
@@ -233,6 +247,24 @@ void ServerHandler::updateAll()
 // see view/host.cc / ehost::update() for full code
 int ServerHandler::update()
 {
+
+	// do not try to update if already updating
+
+	if (updating_)
+		return 0;
+
+
+
+	// we trigger a refresh by asking for the news; then 
+	// ServerHandler::commandSent() handles the rest of the communication
+
+	setUpdatingStatus(true);
+	comThread()->sendCommand(client_, ServerComThread::NEWS);
+
+	int err = 0; // do we need this?
+
+
+/*
 	// do not try to update if already updating
 	if (updating_)
 		return 0;
@@ -275,7 +307,7 @@ int ServerHandler::update()
 	}
 
 	//MainWindow::reload();
-
+*/
 /*
       switch ( client_.server_reply().get_news() ) {
          case ServerReply::NO_NEWS:
@@ -334,7 +366,10 @@ int ServerHandler::update()
 }
 
 
-
+ServerComThread *ServerHandler::comThread()
+{
+	return comThread_;
+}
 
 void ServerHandler::command(std::vector<ViewNodeInfo_ptr> info,std::string cmd)
 {
@@ -374,11 +409,13 @@ void ServerHandler::command(std::vector<ViewNodeInfo_ptr> info,std::string cmd)
 			std::vector<std::string> strs;
 			std::string delimiters(" ");
 			ecf::Str::split(realCommand, strs, delimiters);
-			ArgvCreator argvCreator(strs);
 			ServerHandler* serverHandler = info[i]->server();
-			serverHandler->client_->invoke(argvCreator.argc(), argvCreator.argv());
 
-			serverHandler->update();
+			// set up and run the thread for server communication
+			serverHandler->comThread()->setCommandString(strs);
+			serverHandler->comThread()->sendCommand(serverHandler->client_, ServerComThread::COMMAND);
+
+			//serverHandler->update();
 		}
 	}
 	else
@@ -491,3 +528,150 @@ std::string ServerHandler::resolveServerCommand(const std::string &name)
         }
     }
  */
+
+
+
+void ServerHandler::commandSent()
+{
+	std::cout << "ServerHandler::commandSent" << "\n";
+
+	// which type of command was sent? What we do now will depend on that.
+
+	switch (comThread()->commandType())
+	{
+		case ServerComThread::COMMAND:
+		{
+			// a command was sent - we should now check whether there have been
+			// any updates on the server (there should have been, because we
+			// just did something!)
+
+			std::cout << "Send command to server" << std::endl;
+			comThread()->sendCommand(client_, ServerComThread::NEWS);
+			break;
+		}
+
+		case  ServerComThread::NEWS:
+		{
+			// we've just asked the server if anything has changed - has it?
+
+			switch (client_->server_reply().get_news())
+			{
+				case ServerReply::NO_NEWS:
+				{
+					// no news, nothing to do
+					std::cout << "No news from server" << std::endl;
+					setUpdatingStatus(false);  // finished updating
+					break;
+				}
+
+				case ServerReply::NEWS:
+				{
+					// yes, something's changed - synchronise with the server
+
+					std::cout << "News from server - send sync command" << std::endl;
+					comThread()->sendCommand(client_, ServerComThread::SYNC);
+					break;
+				}
+
+				default:
+				{
+					break;
+				}
+			}
+
+			break;
+		}
+		
+		case ServerComThread::SYNC:
+		{
+			// yes, something's changed - synchronise with the server
+
+			std::cout << "We've synced" << std::endl;
+			setUpdatingStatus(false);  // finished updating
+			break;
+		}
+
+		default:
+		{
+			break;
+		}
+
+	}
+
+}
+
+
+
+// ------------------------------------------------------------
+//                         ServerComThread
+// ------------------------------------------------------------
+
+
+
+ServerComThread::ServerComThread()
+{
+}
+
+void ServerComThread::setCommandString(const std::vector<std::string> command)
+{
+	command_ = command;
+}
+
+void ServerComThread::sendCommand(ClientInvoker *ci, ServerComThread::ComType comType)
+{
+	// do not execute thread if already running
+
+	if (isRunning())
+	{
+		std::cout << "ServerComThread::sendCommand - thread already running, will not execute command" << std::endl;
+	}
+	else
+	{
+		ci_      = ci;
+		comType_ = comType;
+		start();  // start the thread execution
+	}
+}
+
+ServerComThread::ComType ServerComThread::commandType()
+{
+	return comType_;
+}
+
+void ServerComThread::run()
+{
+
+	std::cout << "  ServerComThread::run start" << "\n";
+
+	switch (comType_)
+	{
+		case COMMAND:
+		{
+			// call the client invoker with the saved command
+			std::cout << "    COMMAND" << "\n";
+			ArgvCreator argvCreator(command_);
+			ci_->invoke(argvCreator.argc(), argvCreator.argv());
+			break;
+		}
+
+		case NEWS:
+		{
+			std::cout << "    NEWS" << "\n";
+			ci_->news_local(); // call the server
+			break;
+		}
+
+		case SYNC:
+		{
+			std::cout << "    SYNC" << "\n";
+			ci_->sync_local();
+			break;
+		}
+
+		default:
+		{
+		}
+	}
+	std::cout << "  ServerComThread::run finished" << "\n";
+}
+
