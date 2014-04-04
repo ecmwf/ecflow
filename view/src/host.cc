@@ -1291,13 +1291,18 @@ void ehost::login()
 tmp_file ehost::file( node& n, std::string name )
 {
   std::string error;
+   bool read = direct_read_;
   if (name == "ECF_SCRIPT") {
     error = "no script!\n"
       "check ECF_FILES or ECF_HOME directories, for read access\n"
       "check for file presence and read access below files directory\n"
       "or this may be a 'dummy' task.\n";    
   } else if (name == "ECF_JOB") {
-    if (std::string::npos != n.variable(name).find(".job0")) {
+    std::string filename = n.variable(name);
+    if (read && (access(filename.c_str(), R_OK) == 0))
+      return tmp_file(filename.c_str(), false);
+
+    if (std::string::npos != filename.find(".job0")) {
 	error = "job0: no job to be generated yet!";
 	return tmp_file(error);
       } else 
@@ -1325,7 +1330,7 @@ tmp_file ehost::file( node& n, std::string name )
          }
       }
    }
-   if (direct_read_ && (access(name.c_str(), R_OK) == 0)) {
+   if (read && (access(name.c_str(), R_OK) == 0)) {
       return tmp_file(name.c_str(), false);
    } else {
       gui::message("%s: fetching %s", this->name(), name.c_str());
