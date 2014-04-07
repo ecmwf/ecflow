@@ -379,7 +379,7 @@ def add_build_and_test_tasks( parent ) :
 def build_localhost( parent ) :
     localhost = parent.add_family("localhost")
     if (parent.name() == "local") :
-        localhost.add_trigger("../tar/create_tar == active or  ../tar/create_tar == complete")
+        localhost.add_trigger("../tar/create_tar == complete")
     add_localhost_variables(localhost)
     
     add_git_tasks( localhost , True)

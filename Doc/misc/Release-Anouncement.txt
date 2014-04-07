@@ -1,13 +1,13 @@
  ======================================================================================
 Subject: New release of ecFlow now available  
 
-A new version of the ecFlow(4.0.1) has been released:
+A new version of the ecFlow(4.0.2) has been released:
 
 #Please be aware that A new ecflow release candidate is planned.
 #If you are using the test version then the link will
 #be changed.
 
-This release is accessible from: /usr/local/apps/ecflow/4.0.1
+This release is accessible from: /usr/local/apps/ecflow/4.0.2
 on the following platforms:
 
    o linux 10.3      (garm)
@@ -26,7 +26,7 @@ The release includes the following changes:
  
 To use a specific version (this is the *recommended* way):
 
-   export ECFLOW_VERSION=4.0.1
+   export ECFLOW_VERSION=4.0.2
    use ecflow
    
    This will setup the PATHS for client server and python extension
@@ -44,7 +44,7 @@ To use the latest ecFlow CRAY(cct/cca),AIX(c2a/c2b) and redhat/RHEL(ecgb):
    Please use the module functionality  i.e
       module avail ecflow
       module unload ecflow 
-      module load ecflow/4.0.1
+      module load ecflow/4.0.2
                   
             
 Compatibility
@@ -53,7 +53,7 @@ The client/Server from one release should not be mixed with another.
 To avoid this problem it is *highly* recommended that you use a 
 specific version:
 
-   export ECFLOW_VERSION=4.0.1
+   export ECFLOW_VERSION=4.0.2
    use ecflow
 
 Additionally references to ecflow_client in the scripts(.ecf) should use
@@ -75,7 +75,7 @@ Documentation
 =======================================================================
 The user manual(word and pdf formats) are available from:
 
-   /usr/local/apps/ecflow/4.0.1/doc
+   /usr/local/apps/ecflow/4.0.2/doc
 
 The online documentation and tutorial are accessible from:
 

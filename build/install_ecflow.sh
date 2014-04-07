@@ -82,7 +82,7 @@ major=$(cat VERSION.cmake   | grep 'set( ECFLOW_MAJOR'   | awk '{print $3}'| sed
 minor=$(cat VERSION.cmake   | grep 'set( ECFLOW_MINOR'   | awk '{print $3}'| sed 's/["]//g')
 ECFLOW_VERSION=$release.$major.$minor
    
-export ECFLOW_INSTALL_DIR=${ECFLOW_INSTALL_DIR:-/usr/local/apps/ecflow/$release.$major.$minor}
+export ECFLOW_INSTALL_DIR=${ECFLOW_INSTALL_DIR:-/usr/local/apps/ecflow/${release}.${major}.${minor}}
 
 # =============================================================================
 # Required for cray, since we allow multiple compilers
@@ -112,6 +112,11 @@ then
    
       export BOOST_ROOT=/vol/ecf/opensuse113/boost/$BOOST_VERSION; 
       export WK=/vol/ecf/opensuse113/ecflow
+
+   elif [ "$OS_VERSION" = opensuse131 ] ; then
+   
+      export BOOST_ROOT=/vol/ecf/opensuse131/boost/$BOOST_VERSION; 
+      export WK=/vol/ecf/opensuse131/ecflow
       
    elif [ "$OS_VERSION" = opensuse103 ] ; then 
    
@@ -156,16 +161,6 @@ elif [[ "$ARCH" = hpia64 ]] ; then
    export WK=$NEW_SCRATCH/$ARCH/ecflow   
       
    install_arg=install 
-   
-elif [[ "$ARCH" = ibm_power6 ]] ; then 
-
-   # ======================================================================
-   # AIX:   We don't install ecflowview on AIX, no x-windows
-   # ======================================================================
-   export BOOST_ROOT=/s1a/emos_esuite/emos_data/sms/boost/$BOOST_VERSION;  
-   export WK=/s1a/emos_esuite/emos_data/sms/ecflow 
-   
-   install_arg=install 
 
 elif [[ "$ARCH" = ibm_power7 ]] ; then 
 
@@ -189,13 +184,6 @@ export ECFLOW_PYTHON_INSTALL_DIR=$ECFLOW_INSTALL_DIR/lib/python2.7/site-packages
 # ============================================================================
 $BOOST_ROOT/bjam $TOOLSET $CXXFLAGS -d2 variant=$mode_arg $test_arg $install_arg
    
-# ===========================================================================
-# Update permissions, for viewer files
-# ===========================================================================
-if [[ "$test_arg" = "" ]] ; then
-   DEST=$ECFLOW_INSTALL_DIR/share/ecflow
-   chmod 644 $DEST/servers $DEST/ecflowview.menu
-fi
    
 # ============================================================================ 
 # Copy over release from c2a -> c2b
