@@ -82,7 +82,7 @@ major=$(cat VERSION.cmake   | grep 'set( ECFLOW_MAJOR'   | awk '{print $3}'| sed
 minor=$(cat VERSION.cmake   | grep 'set( ECFLOW_MINOR'   | awk '{print $3}'| sed 's/["]//g')
 ECFLOW_VERSION=$release.$major.$minor
    
-export ECFLOW_INSTALL_DIR=${ECFLOW_INSTALL_DIR:-/usr/local/apps/ecflow/$(release).$(major).$(minor)}
+export ECFLOW_INSTALL_DIR=${ECFLOW_INSTALL_DIR:-/usr/local/apps/ecflow/${release}.${major}.${minor}}
 
 # =============================================================================
 # Required for cray, since we allow multiple compilers
