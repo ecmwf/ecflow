@@ -42,9 +42,23 @@ Process
     - Just need to update python API.
     - cd $WK/Doc/online; make clean; make html
     
-0/ If you build on cct-login, then copy build to cca.
+0/ CRAY: If you build on cct-login, then copy build to cca.
 
-   scp -r 4.0.1 emos@cca:/usr/local/apps/ecflow 
+         scp -r 4.0.2 emos@cca:/usr/local/apps/ecflow 
+      
+   READHAT: If we built on ecgb/readhat we can cop release to sappa/sappab 
+  
+         scp -r 4.0.2 emos@sappa:/usr/local/apps/ecflow/.
+         scp -r 4.0.2 emos@sappb:/usr/local/apps/ecflow/.
+      
+    IBM:  copy ecflow onto c2b please do the following
+ 
+        cd /usr/local/apps/ecflow
+        ecrcp -avr 4.0.2 emos@c2b:/usr/local/apps/ecflow/.
+ 
+
+*Make* sure destination has a trailing '/.' otherwise you
+can end up renaming.
 
 0/ *Before* each release, make sure the ecflow tar file is
    copied to $SCRATCH and inform Daniel. This will allow
@@ -90,25 +104,6 @@ Process
       git tag
       git show <release number>
    
-sappa/sappb
-==========================================================
-These are same as redhat, hence copy to sappa/sappb
-
- 
-IMPORTANT: To copy ecflow onto c2a please do the following
-============================================================
-# rlogin c2b
-# su emos
-# cd /usr/local/apps/ecflow
-# ecrcp -avr 3.0.rc2 emos@c1a:/usr/local/apps/ecflow/.
-# 
-# rlogin c2a
-# su emos
-# rm current
-# ln -s 3.0.rc2 current
-
-*Make* sure destination has a trailing '/.' otherwise you
-can end up renaming.
 
    
 ecflow users group   ecflow_int@lists.ecmwf.int  
