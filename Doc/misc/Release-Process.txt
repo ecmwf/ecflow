@@ -12,15 +12,15 @@
       Make sure fixed bugs are recorded/closed.
  ************************************************************
 
-Intra - net
+Intra- net
 =================================================================
 OLD Intranet site no longer active::
+
    http://intra.ecmwf.int/metapps/manuals/ecflow
 
 
 Process
 ==================================================================
-
 0/ **** Check we are not in a high risk period ???
 
 0/ **** DO ***NOT*** switch current link ****************
