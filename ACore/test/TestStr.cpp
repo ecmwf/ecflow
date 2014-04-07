@@ -90,6 +90,26 @@ BOOST_AUTO_TEST_CASE( test_str )
 		expected = test;
 		BOOST_CHECK_MESSAGE(!Str::truncate_at_start(test,9) && test==expected,"Expected:\n" << expected << "\nbut found:\n" << test);
 	}
+   {
+      string test;
+      BOOST_CHECK_MESSAGE(!Str::truncate_at_end(test,7),"Empty string should return false");
+
+      test= "this\nis\na\nstring\nwith\nlots\nof\nnew\nline";
+      string expected = "this\n";
+      BOOST_CHECK_MESSAGE(Str::truncate_at_end(test,1) && test==expected,"Expected:\n" << expected << "\nbut found:\n" << test);
+
+      test= "this\nis\na\nstring\nwith\nlots\nof\nnew\nline";
+      expected = "this\nis\n";
+      BOOST_CHECK_MESSAGE(Str::truncate_at_end(test,2) && test==expected,"Expected:\n" << expected << "\nbut found:\n" << test);
+
+      test= "this\nis\na\nstring\nwith\nlots\nof\nnew\nline";
+      expected= "this\nis\na\nstring\nwith\nlots\nof\n";
+      BOOST_CHECK_MESSAGE(Str::truncate_at_end(test,7) && test==expected,"Expected:\n" << expected << "\nbut found:\n" << test);
+
+      test= "this\nis\na\nstring\nwith\nlots\nof\nnew\nline";
+      expected = test;
+      BOOST_CHECK_MESSAGE(!Str::truncate_at_end(test,9) && test==expected,"Expected:\n" << expected << "\nbut found:\n" << test);
+   }
 }
 
 static void check(const std::string& line,

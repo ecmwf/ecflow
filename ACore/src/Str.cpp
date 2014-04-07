@@ -291,4 +291,21 @@ bool Str::truncate_at_start(  std::string& fileContents, size_t max_lines)
 	return false;
 }
 
+bool Str::truncate_at_end(  std::string& fileContents, size_t max_lines)
+{
+   if (fileContents.empty()) return false;
+
+   /// Truncate from the back
+   size_t no_of_new_lines = 0;
+   size_t the_size = fileContents.size();
+   for(size_t i =0; i < the_size; ++i) {
+      if (fileContents[i] == '\n') no_of_new_lines++;
+      if ( no_of_new_lines >=  max_lines) {
+         fileContents.erase(fileContents.begin()+i+1,fileContents.end()); //skip new line at end of file
+         return true;
+      }
+   }
+   return false;
+}
+
 }

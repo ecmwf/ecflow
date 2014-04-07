@@ -38,7 +38,11 @@ public:
 	/// typically 24 hours in a real environment. It is this long to allow operators to
 	/// recover from any crashes.
 	/// for the CHILD/task commands *ONLY*
+	/// Can be overriden by  changing environment variable ECF_TIMEOUT
 	long max_child_cmd_timeout() const  { return timeout_; }
+
+	/// Allow pur python jobs to override the ECF_TIMEOUT
+	void set_child_cmd_timeout(unsigned int t) { timeout_ = t; }
 
    /// The timeout feature allow the client to fail gracefully in the case
    /// where the server has died/crashed. The timeout will ensure the socket is closed.

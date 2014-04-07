@@ -100,7 +100,6 @@ static option<int> top_height(globals::instance(),"top_height",500);
 static option<int> top_xoff(globals::instance(),"top_xoff",0);
 static option<int> top_yoff(globals::instance(),"top_yoff",0);
 
-
 top::top():
 	timeout(60)
 {
@@ -187,6 +186,9 @@ void top::create(Display *display, char *app_name,
 
 	Dimension w,h;
 	Position x,y, ac = 0;
+	char color[20];
+	snprintf(color, 20, "#e5e5e5e5e5e5");
+
 	w = top_width;
 	h = top_height;
 	x = top_xoff;
@@ -194,13 +196,24 @@ void top::create(Display *display, char *app_name,
 
 	while (ac < app_argc) {
 	  /* accept command line directives for display */
-	  if (!strncmp("-geometry",app_argv[ac],9)) {	  
+	  if (!strncmp("-geometry=",app_argv[ac],10)) {	  
 	    int ww=0, hh=0, xx=0, yy=0;
 	    sscanf(app_argv[ac], "-geometry=%dx%d+%d+%d", &ww, &hh, &xx, &yy);
 	    fprintf(stdout, "# geometry: %dx%d+%d+%d\n", ww, hh, xx, yy);
 	    w=ww; h=hh; x=xx; y=yy;
-	  } 
-	  else if (!strncmp("-rc=",app_argv[ac],4)) {	         
+	  } else if (!strncmp("-b",app_argv[ac],2)) {
+	      if (!strncmp("-bg=",app_argv[ac],4)) {
+		sscanf(app_argv[ac], "-bg=%s", color);
+	      } else if (!strncmp("-background=",app_argv[ac],12)) {
+		sscanf(app_argv[ac], "-background=%s", color);
+	      } 
+		
+	      std::string res = "ecFlowview*background: ";
+	      res += color;
+	      std::cout << "# bg color change: " << res << "\n";
+	      db = XrmGetStringDatabase(res.c_str());
+	      XrmSetDatabase(display,db);
+	  } else if (!strncmp("-rc=",app_argv[ac],4)) {	         
 	    char rcdir[1024] = { 0 };
 	    sscanf(app_argv[1], "-rc=%s", rcdir);
 	    if (rcdir[0] != 0) {
@@ -208,16 +221,18 @@ void top::create(Display *display, char *app_name,
 	      putenv((char*) var.c_str());
 	      fprintf(stdout, "# rcdir: %s\n", rcdir);
 	    }
+	  }
+	  ac++;
 	}
-	ac++;
-	}
+
 	XtVaSetValues(this->form_,
 		XmNwidth, w,
 		XmNheight,h,
 		XmNx, x,
 		XmNy, y,
+// XmNbackground, (int)pixel(color),
+// XtVaTypedArg, XmNbackground, XmRString, color.c_str(), size, // 201403
 		NULL);
-
 #if 0
 	XtGetApplicationResources(_xd_rootwidget,
 				  (XtPointer)&globals,

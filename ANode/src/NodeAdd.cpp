@@ -110,6 +110,11 @@ void Node::addTime(const ecf::TimeAttr& t)
 #ifdef DEBUG_STATE_CHANGE_NO
 	std::cout << "Node::addTime\n";
 #endif
+
+   if (isSuite()) {
+      throw std::runtime_error("Can not add time based dependency on a suite");
+   }
+
    if (!time_dep_attrs_) time_dep_attrs_ = new TimeDepAttrs(this);
    time_dep_attrs_->addTime(t);  // will call  Ecf::incr_state_change_no();
 }
@@ -119,6 +124,11 @@ void Node::addToday(const ecf::TodayAttr& t)
 #ifdef DEBUG_STATE_CHANGE_NO
 	std::cout << "Node::addToday()\n";
 #endif
+
+   if (isSuite()) {
+      throw std::runtime_error("Can not add time based dependency on a suite");
+   }
+
    if (!time_dep_attrs_) time_dep_attrs_ = new TimeDepAttrs(this);
    time_dep_attrs_->addToday(t); // will call  Ecf::incr_state_change_no();
 }
@@ -129,6 +139,11 @@ void Node::addDate( const DateAttr& d)
 	std::cout << "Node::addDate()\n";
 #endif
 
+	// By disallowing what effect would if have on existing suites ?
+   if (isSuite()) {
+      throw std::runtime_error("Can not add time based dependency on a suite"); // Added at 4.0.2
+   }
+
    if (!time_dep_attrs_) time_dep_attrs_ = new TimeDepAttrs(this);
    time_dep_attrs_->addDate(d); // will call  Ecf::incr_state_change_no();
 }
@@ -138,6 +153,11 @@ void Node::addDay( const DayAttr& d)
 #ifdef DEBUG_STATE_CHANGE_NO
 	std::cout << "Node::addDay\n";
 #endif
+
+   // By disallowing what effect would if have on existing suites ?
+   if (isSuite()) {
+      throw std::runtime_error("Can not add time based dependency on a suite"); // Added at 4.0.2
+   }
 
    if (!time_dep_attrs_) time_dep_attrs_ = new TimeDepAttrs(this);
    time_dep_attrs_->addDay(d); // will call  Ecf::incr_state_change_no();

@@ -379,7 +379,7 @@ def add_build_and_test_tasks( parent ) :
 def build_localhost( parent ) :
     localhost = parent.add_family("localhost")
     if (parent.name() == "local") :
-        localhost.add_trigger("../tar/create_tar == active or  ../tar/create_tar == complete")
+        localhost.add_trigger("../tar/create_tar == complete")
     add_localhost_variables(localhost)
     
     add_git_tasks( localhost , True)
@@ -453,6 +453,7 @@ def build_opensuse113( parent ) :
     
 def build_opensuse131( parent ) :
     opensuse131 = parent.add_family("opensuse131")
+    opensuse131.add_variable("GIT","git")   # hack 
     add_opensuse131_variables(opensuse131)
     add_remote_opensuse131_variables(opensuse131)
     add_git_tasks( opensuse131 )
@@ -571,6 +572,7 @@ def build_boost( boost ):
     add_boost_tasks( family )
     
     family = boost.add_family("opensuse131")
+    family.add_variable("GIT","git")   # hack 
     add_opensuse131_variables(family)
     add_remote_opensuse131_variables(family)
     add_boost_tasks( family )
@@ -658,7 +660,23 @@ def add_suite_variables( suite ):
 # ================================================================================    
 defs = ecflow.Defs()
 defs.add_variable("ECFLOW_TAR_DIR","/var/tmp/ma0/clientRoot/workspace")
- 
+
+print "build experiment"
+with defs.add_suite("experiment") as experiment:
+    experiment.add_defstatus( ecflow.DState.suspended )
+    experiment.add_variable("ECF_HOME", os.getenv("SCRATCH") + "/nightly")
+    experiment.add_variable("ECF_INCLUDE",os.getenv("SCRATCH") + "/nightly")
+    experiment.add_variable("ECF_FILES",os.getenv("SCRATCH") + "/nightly/experiment")
+    experiment.add_variable("ECF_JOB_CMD","python %ECF_JOB% 1> %ECF_JOBOUT% 2>&1")
+    with experiment.add_task("exp") as task:
+        task.add_event("event_fred")
+        task.add_meter("meter", 0, 100)
+        task.add_label("label_name", "value")
+    with experiment.add_task("exp2") as task:
+        task.add_event("event_fred")
+        task.add_meter("meter", 0, 100)
+        task.add_label("label_name", "value")
+
 print "build boost"
 with defs.add_suite("boost_suite") as boost_suite:
     boost_suite.add_variable("BOOST_VERSION","boost_1_53_0")

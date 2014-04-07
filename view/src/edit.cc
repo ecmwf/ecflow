@@ -81,36 +81,24 @@ void edit::show(node& n)
   FILE *f = fdopen(fid, "w");
 
   if(!f) {
-    // gui::syserr(v.c_str());
     gui::syserr(tmpname);
     return;
   }
   
   std::list<Variable> vl; // FILL handle vl
-  tmp_file t (n.serv().edit(n,vl,preproc_));
+  tmp_file tmp(NULL);
+  tmp = n.serv().edit(n, vl, preproc_);
   
   if(fclose(f)) {
-    // gui::syserr(v.c_str());
     gui::syserr(tmpname);
     return;    
   }
 
-  if (0) {
-    const std::string& mv = n.__node__() ? 
-      n.variable("ECF_MICRO") : n.variable("SMSMICRO");
-    const char * mic = (mv.size() == 1) ? mv.c_str() : micro;
-    sprintf(kStart, "%s%s", mic, sStart);
-    sprintf(kEnd,   "%s%s", mic, sEnd);	  
-    xec_LoadText(text_,kStart,True);
-    xec_LoadText(text_,kEnd,True);
-  }
-  
-  // xec_LoadText(text_,v.c_str(),True);
-  xec_LoadText(text_,tmpname,True);
-  xec_LoadText(text_,t.c_str(),True);
+  xec_LoadText(text_, tmpname, True);
+  xec_LoadText(text_, tmp.c_str(), True);
   
   XmTextSetInsertionPosition(text_,0);
-  XmTextShowPosition(text_,0);
+  XmTextShowPosition(text_, 0);
   
   loading_ = False;
 }

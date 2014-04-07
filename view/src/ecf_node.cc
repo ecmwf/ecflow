@@ -585,8 +585,7 @@ void ecf_concrete_node<Node>::update(const Node* n,
       Updating::set_full_redraw();
       return;
    }
-   else {
-      node_->delvars();
+   node_->delvars();
       if (owner_->suite()->begun()) {
          owner_->update_generated_variables();
       }
@@ -617,51 +616,37 @@ void ecf_concrete_node<Node>::update(const Node* n,
          }
          ecf_node *run = make_node(*it, this);
          add_kid(run);
-         node_->insert(run->create_node(node_->serv()));
+         node_->insert(run->create_node(node_->serv()));      
       }
-   }
 
    const_cast<Node*>(n)->set_graphic_ptr(xnode());
-
-   unsigned int is_meter = 0, is_label = 0, is_event = 0, is_limit = 0;
-   for(std::vector<ecf::Aspect::Type>::const_iterator it = aspect.begin(); it != aspect.end(); ++it)
+   for(std::vector<ecf::Aspect::Type>::const_iterator it = aspect.begin(); it != aspect.end(); ++it) {
+     int  kind = 0;
       switch ( *it ) {
-         case ecf::Aspect::METER_CHANGED:
-            is_meter++;
+         case ecf::Aspect::METER:
+	   kind = NODE_METER;
             break;
-         case ecf::Aspect::LABEL_CHANGED:
-            is_label++;
+         case ecf::Aspect::LABEL: 	   
+	   kind = NODE_LABEL;
             break;
-         case ecf::Aspect::EVENT_CHANGED:
-            is_event++;
+         case ecf::Aspect::EVENT:
+	   kind = NODE_EVENT;
             break;
-         case ecf::Aspect::LIMIT_CHANGED:
-            is_limit++;
-            break;
-         default:
-            break;
+         case ecf::Aspect::LIMIT:
+	   kind = NODE_LIMIT;
+	   break;
+      default: 
+	   continue;
       }
-   if (xnode()->status() != STATUS_QUEUED && aspect.size() > 0
-            && is_meter + is_label + is_event + is_limit == aspect.size()) {
-      for(node *xn = node_->kids(); xn; xn = xn->next())
-         if (xn) if ((xn->type() == NODE_LABEL and is_label)
-                  || (xn->type() == NODE_METER and is_meter)
-                  || (xn->type() == NODE_EVENT and is_event)
-                  || (xn->type() == NODE_LIMIT and is_limit)) {
-            xn->update(-1, -1, -1);
-            xn->redraw();
-         }
+      if (kind)
+	   for(node *xn = node_->kids(); xn; xn = xn->next())
+	     if (xn) if (xn->type() == kind) {
+		 xn->update(-1, -1, -1);
+		 xn->redraw();
+	       }
    }
-   else {
-      node_->update(-1, -1, -1);
-      for(node *xn = node_->kids(); xn; xn = xn->next()) {
-         xn->update(-1, -1, -1);
-         xn->notify_observers();
-         xn->redraw();
-      }
-      node_->notify_observers();
-      node_->redraw();
-   }
+   node_->notify_observers();
+   node_->redraw();
 }
 
 template<> 

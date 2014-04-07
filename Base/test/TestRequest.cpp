@@ -121,11 +121,11 @@ static void populateCmdVec(std::vector<Cmd_ptr>& cmd_vec, std::vector<STC_Cmd_pt
 	cmd_vec.push_back( Cmd_ptr( new CFileCmd("/suiteName",CFileCmd::JOBOUT,100)));
 	cmd_vec.push_back( Cmd_ptr( new CFileCmd("/suiteName",CFileCmd::MANUAL,100)));
    cmd_vec.push_back( Cmd_ptr( new EditScriptCmd()));
-	cmd_vec.push_back( Cmd_ptr( new AlterCmd("/suiteName",AlterCmd::ADD_DATE,"12.*.*")));
-	cmd_vec.push_back( Cmd_ptr( new AlterCmd("/suiteName",AlterCmd::ADD_DAY,"sunday")));
-	cmd_vec.push_back( Cmd_ptr( new AlterCmd("/suiteName",AlterCmd::ADD_TIME,"+12:00")));
-	cmd_vec.push_back( Cmd_ptr( new AlterCmd("/suiteName",AlterCmd::ADD_TIME,"+10:00 20:00 00:30")));
-	cmd_vec.push_back( Cmd_ptr( new AlterCmd("/suiteName",AlterCmd::ADD_TODAY,"10:00 20:00 00:30")));
+	cmd_vec.push_back( Cmd_ptr( new AlterCmd("/suiteName/t1",AlterCmd::ADD_DATE,"12.*.*")));
+	cmd_vec.push_back( Cmd_ptr( new AlterCmd("/suiteName/t1",AlterCmd::ADD_DAY,"sunday")));
+	cmd_vec.push_back( Cmd_ptr( new AlterCmd("/suiteName/t1",AlterCmd::ADD_TIME,"+12:00")));
+	cmd_vec.push_back( Cmd_ptr( new AlterCmd("/suiteName/t1",AlterCmd::ADD_TIME,"+10:00 20:00 00:30")));
+	cmd_vec.push_back( Cmd_ptr( new AlterCmd("/suiteName/t1",AlterCmd::ADD_TODAY,"10:00 20:00 00:30")));
 	cmd_vec.push_back( Cmd_ptr( new PlugCmd()));
 
 	boost::shared_ptr<GroupCTSCmd>  theGroupCmd = boost::make_shared<GroupCTSCmd>();

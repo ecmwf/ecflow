@@ -53,10 +53,14 @@ local python_install_dir = [ os.environ ECFLOW_PYTHON_INSTALL_DIR ] ;
 python_install_dir default = $(install_dir)/lib/python2.7/site-packages/ecflow ; 
 constant ECFLOW_PYTHON_INSTALL_DIR : $(python_install_dir) ;
 
+# Used for ecflowview files
+constant ECFLOW_SHARED_DIR : $(ECFLOW_DESTDIR)$(ECFLOW_INSTALL_DIR)/share/ecflow ;
+
 #echo "ECFLOW_VERSION            = '$(ECFLOW_VERSION)'" ;
 #echo "ECFLOW_DESTDIR            = '$(ECFLOW_DESTDIR)'" ;
 #echo "ECFLOW_INSTALL_DIR        = '$(ECFLOW_INSTALL_DIR)'" ;
 #echo "ECFLOW_PYTHON_INSTALL_DIR = '$(ECFLOW_PYTHON_INSTALL_DIR)'" ;
+#echo  "ECFLOW_SHARED_DIR        = '$(ECFLOW_SHARED_DIR)'" ;
 
 #
 # Allow the installation directory be be defined externally, by the environment variable ECFLOW_INSTALL_DIR
@@ -100,6 +104,12 @@ install install-view64
 	  <dll-path>$(ECFLOW_INSTALL_DIR)/lib64
 	;	
 
+install install-view-files
+    : [ glob view/servers ]
+      [ glob view/src/ecflowview.menu ]
+    : <location>$(ECFLOW_SHARED_DIR)
+    ;
+    
 install install-server
 	: Server//ecflow_server 
 	: <location>$(ECFLOW_DESTDIR)/$(ECFLOW_INSTALL_DIR)/bin
@@ -112,7 +122,7 @@ install install-client
 
 install install-tools
 	: [ glob tools/*.sh ]
-          [ glob tools/*.pl ]
+      [ glob tools/*.pl ]
 	: <location>$(ECFLOW_DESTDIR)/$(ECFLOW_INSTALL_DIR)/bin
 	;
 
@@ -145,9 +155,11 @@ alias install :
 	;
 alias install-viewer :
 	install-view
+	install-view-files
 	;
 alias install-viewer64 :
 	install-view64
+   install-view-files
  	;
 alias install-all :
 	install
@@ -166,6 +178,7 @@ explicit install-view ;
 explicit install-viewer ;
 explicit install-view64 ;
 explicit install-viewer64 ;
+explicit install-view-files ;
 explicit install-doc ;
 explicit install-migrate ;
 explicit install ;

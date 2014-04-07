@@ -25,6 +25,7 @@
 #include <sys/types.h>
 #include "ecflowview.h"
 
+
 const char* directory::user()
 {
 	static char x[1024] = {0};
@@ -41,6 +42,7 @@ const char* directory::user()
 	return x;
 }
 
+// ECFLOW_SHARED_DIR is a define, where 'server'file is installed
 const char* directory::system()
 {
   static char x[1024] = {0};
@@ -48,10 +50,10 @@ const char* directory::system()
     if(getenv("ECFLOWVIEW_HOME"))
       strcpy(x,getenv("ECFLOWVIEW_HOME"));
     else	
-      // strcpy(x,"/usr/local/lib/ecflowview");
-      // strcpy(x,"/usr/local/apps/sms/lib/ecflow");
-      strcpy(x,"/usr/local/apps/ecflow/current/lib");
+      strcpy(x,ECFLOW_SHARED_DIR);
   }
+
+  //std::cout << "system dir  = " << x << "\n";
   return x;
 }
 

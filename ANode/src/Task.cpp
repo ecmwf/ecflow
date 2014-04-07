@@ -770,6 +770,7 @@ void Task::set_memento( const AliasChildrenMemento* memento ) {
 #ifdef DEBUG_MEMENTO
    std::cout << "Task::set_memento( const AliasChildrenMemento* ) " << debugNodePath() << "\n";
 #endif
+
    ChangeMgrSingleton::instance()->add_aspect(ecf::Aspect::ADD_REMOVE_NODE);
    aliases_ = memento->children_;
 
@@ -784,5 +785,7 @@ void Task::set_memento( const AliasNumberMemento* memento ) {
 #ifdef DEBUG_MEMENTO
    std::cout << "Task::set_memento( const AliasNumberMemento* ) " << debugNodePath() << "\n";
 #endif
+
+   ChangeMgrSingleton::instance()->add_aspect(ecf::Aspect::ALIAS_NUMBER);
    alias_no_ = memento->alias_no_;
 }

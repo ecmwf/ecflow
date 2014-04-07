@@ -106,20 +106,55 @@ export ECF_LISTS=${ECF_LISTS:-$ECF_HOME/ecf.lists}
 # ===============================================================================
 # Update kill and status command for ecgate
 
-if [ $host = ecga* ] ; then 
-    # ECF_JOB_CMD='%ECF_JOB% 1> %ECF_JOBOUT% 2>&1 &'
-    # ECF_JOB_CMD='${ECF_JOB:=/home/ma/emos/bin/ecfsubmit} %USER% %HOST% %ECF_JOB% %ECF_JOBOUT% > %ECF_JOB%.subm 2>&1'
+rcdir=$HOME/.ecflowrc
+fname=$rcdir/$(echo $host | cut -c1-5).$USER.$ECF_PORT # OK as long as ecgate node is under 10
+mkdir -p $rcdir
+ecflow_client --port $ECF_PORT --host $(cat $fname) --ping  && echo "server is already started" && exit 0 || :
+
+case $host in
+ sappa*) 
+if [[ $(ssh sappa hostname) != $host ]]; then
+  echo "please start ecflow on the generic node only"; 
+  exit 1; 
+fi
+
+echo "$host" > $fname
+host=sappa
+  file=$HOME/.ecfhostfile_sappa
+  touch $file
+  grep sappa00 $file || cat >> $file <<EOF
+sappa00
+sappa01
+sappa02
+sappa03
+EOF
+;;
+ sappb*) 
+if [[ $(ssh sappb hostname) != $host ]]; then
+  echo "please start ecflow on the generic node only"; 
+  exit 1; 
+fi
+
+echo "$host" > $fname
+host=sappb
+  file=$HOME/.ecfhostfile_sappb
+  touch $file
+  grep sappb00 $file || cat >> $file <<EOF
+sappb00
+sappb01
+sappb02
+sappb03
+EOF
+;;
+ ecga*)
+    echo "$host" > $fname
+    host=ecgate
     ECF_KILL_CMD='${ECF_KILL:=/home/ma/emos/bin/ecfkill} %USER% %HOST% %ECF_RID% %ECF_JOB% > %ECF_JOB%.kill 2>&1'
     ECF_STATUS_CMD='${ECF_STAT:=/home/ma/emos/bin/ecfstatus} %USER% %HOST% %ECF_RID% %ECF_JOB% > %ECF_JOB%.stat 2>&1'
     export ECF_KILL_CMD ECF_STATUS_CMD
-fi
-
 
 # ===============================================================================
 # Update host and create hosts file
-
-if [ $host = ecga* ] ; then 
-  host=ecgate
 
   file=$HOME/.ecfhostfile
   grep ecga00 $file || ( cat >> $file <<EOF
@@ -141,7 +176,8 @@ EOF
   nick=ecgate1
   grep "^ecgate " $file || echo "ecgate  ecgate  $ECF_PORT" >> $file
   grep "^$nick  " $file || echo "$nick $nick $ECF_PORT" >> $file
-fi
+;;
+esac
  
 date -u
 

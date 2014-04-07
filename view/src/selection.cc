@@ -21,15 +21,17 @@
 class selection_observer :public observer {
 	node* n_;
 
+  std::string location;
 	void gone(observable*);
 	void adoption(observable*,observable*);
 	void notification(observable*);
 
 public:
 
-	selection_observer() : n_(0) {}
-	void  set(node*);
-	node* get() { return n_; }
+  selection_observer() : n_(0), location ("") {}
+  void  set(node*);
+  node* get() { return n_; }
+  const std::string path() { return location; }
 };
 
 static selection_observer current;
@@ -47,8 +49,10 @@ void selection_observer::set(node* n)
 	n_ = n;
 	observe(n_);
 
-	if(n_) 
+	if(n_) {
 	  observe((&n_->serv()));
+	  location = n_->full_name();
+	}
 }
 
 void selection_observer::adoption(observable* o,observable* n)
@@ -90,8 +94,7 @@ void selection::notify_new_selection(node* n)
   
   // printf("selection is %s %s %02d\n", n->full_name().c_str(), n->type_name(), n->type());
   
-  if(!n->selectable()) 
-    return;
+  // if(!n->selectable()) return;
   
   selection* w = first();
   
@@ -136,4 +139,8 @@ node *selection::current_node()
   return current.get();
 }
 
+const std::string selection::current_path()
+{
+  return current.path();
+}
 IMP(selection)

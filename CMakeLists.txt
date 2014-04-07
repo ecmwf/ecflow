@@ -59,10 +59,11 @@ ecbuild_declare_project()
 # The ecflow version cofig is done in ACore directory
 # =========================================================================================
 
-message( STATUS "ECFLOW_RELEASE    : ${ECFLOW_RELEASE}" )
-message( STATUS "ECFLOW_MAJOR      : ${ECFLOW_MAJOR}" )
-message( STATUS "ECFLOW_MINOR      : ${ECFLOW_MINOR}" )
-message( STATUS "ECFLOW_VERSION    : ${ECFLOW_VERSION_STR}" )
+message( STATUS "CMAKE_INSTALL_PREFIX : ${CMAKE_INSTALL_PREFIX}" )
+message( STATUS "ECFLOW_RELEASE       : ${ECFLOW_RELEASE}" )
+message( STATUS "ECFLOW_MAJOR         : ${ECFLOW_MAJOR}" )
+message( STATUS "ECFLOW_MINOR         : ${ECFLOW_MINOR}" )
+message( STATUS "ECFLOW_VERSION       : ${ECFLOW_VERSION_STR}" )
 
 # =========================================================================================
 # Python  

@@ -157,13 +157,15 @@ local rule run-test ( test-name : sources + )
 # Declare test targets; 
 # Note cant run TestWith until all plarforms support with statement, i.e python 2.6 or greater
 #                       
-run-test TestClientApi     : ecflow [ glob test/py_s_TestClientApi.py ] ;
-run-test TestDefs          : ecflow [ glob test/py_u_TestDefs.py ] ;
-run-test TestError         : ecflow [ glob test/py_u_TestError.py ] ;
-run-test TestTraversal     : ecflow [ glob test/py_u_TestTraversal.py ] ;
-run-test TestDefsCheck     : ecflow [ glob test/py_u_TestDefsCheck.py ] ;
-run-test TestSimulator     : ecflow [ glob test/py_u_TestSimulator.py ] ;
-run-test TestAddDelete     : ecflow [ glob test/py_u_TestAddDelete.py ] ;
+run-test TestClientApi      : ecflow [ glob test/py_s_TestClientApi.py ] ;
+run-test TestPythonChildApi : ecflow [ glob test/py_s_TestPythonChildApi.py ] ;
+run-test TestDefs           : ecflow [ glob test/py_u_TestDefs.py ] ;
+run-test TestError          : ecflow [ glob test/py_u_TestError.py ] ;
+run-test TestTraversal      : ecflow [ glob test/py_u_TestTraversal.py ] ;
+run-test TestDefsCheck      : ecflow [ glob test/py_u_TestDefsCheck.py ] ;
+run-test TestSimulator      : ecflow [ glob test/py_u_TestSimulator.py ] ;
+run-test TestAddDelete      : ecflow [ glob test/py_u_TestAddDelete.py ] ;
+run-test TestAddDeleteError : ecflow [ glob test/py_u_TestAddDeleteError.py ] ;
 run-test TestAddDeleteFunc : ecflow [ glob test/py_u_TestAddDeleteFunc.py ] ;
 run-test TestAddNodeFunc   : ecflow [ glob test/py_u_TestAddNodeFunc.py ] ;
 run-test TestParent        : ecflow [ glob test/py_u_TestParent.py ] ;
@@ -181,17 +183,19 @@ run-test TestEcf               : ecflow [ glob test/py_u_TestEcf.py ] ;
 # A target that runs all the tests. 
 # Note test_embed & test_embed_ecf commented out since we dont use this functionality
 alias test-all
- :  TestUserManual TestJobGeneration TestClientApi TestDefs TestError TestTraversal TestDefsCheck 
-    TestSimulator TestAddDelete TestAddDeleteFunc TestAddNodeFunc TestParent TestGetAllTasks TestDerivable 
-    TestMigrate TestRepeatArithmetic TestWith TestFind TestGeneratedVariable TestEcf
+ :  TestUserManual TestJobGeneration  TestDefs TestError TestTraversal TestDefsCheck 
+    TestSimulator TestAddDelete TestAddDeleteError TestAddDeleteFunc TestAddNodeFunc TestParent TestGetAllTasks 
+    TestDerivable  TestMigrate TestRepeatArithmetic TestWith TestFind TestGeneratedVariable TestEcf
+    TestClientApi TestPythonChildApi
     # test_embed test_embed_ecf 
     ;
    
 # Only run tests when explicitly requested
 explicit test-all
-    TestUserManual TestJobGeneration TestClientApi TestDefs TestError TestTraversal TestDefsCheck 
-    TestSimulator TestAddDelete TestAddDeleteFunc TestAddNodeFunc TestParent TestGetAllTasks TestDerivable 
-    TestMigrate TestRepeatArithmetic TestWith TestFind TestGeneratedVariable TestEcf
+    TestUserManual TestJobGeneration TestDefs TestError TestTraversal TestDefsCheck 
+    TestSimulator TestAddDelete TestAddDeleteError TestAddDeleteFunc TestAddNodeFunc TestParent TestGetAllTasks 
+    TestDerivable TestMigrate TestRepeatArithmetic TestWith TestFind TestGeneratedVariable TestEcf
+    TestClientApi TestPythonChildApi
     # test_embed test_embed_ecf 
     ;
  

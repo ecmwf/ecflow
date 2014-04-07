@@ -19,6 +19,7 @@
 #ifndef extent_H
 #include "extent.h"
 #endif
+#include <string>
 
 class host;
 class node;
@@ -38,8 +39,9 @@ public:
 	static void notify_selection_cleared();
 
 	static node* menu_node();
-	static void menu_node(node*);
+	static void  menu_node(node*);
 	static node* current_node();
+	static const std::string current_path();
 
 private:
 
