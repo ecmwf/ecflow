@@ -113,7 +113,7 @@ then
       export BOOST_ROOT=/vol/ecf/opensuse113/boost/$BOOST_VERSION; 
       export WK=/vol/ecf/opensuse113/ecflow
 
-   if [ "$OS_VERSION" = opensuse131 ] ; then
+   elif [ "$OS_VERSION" = opensuse131 ] ; then
    
       export BOOST_ROOT=/vol/ecf/opensuse131/boost/$BOOST_VERSION; 
       export WK=/vol/ecf/opensuse131/ecflow
