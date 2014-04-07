@@ -80,6 +80,7 @@ can end up renaming.
    appear in the top half of the latest news
 
 0/ Update release:
+   ** Go to "Tools->Attachments", then load the gzip file. *****
    0 release: This uploads the release zip file: making it accessible to member states
    http://software.ecmwf.int/wiki/display/ECFLOW/Releases
    
