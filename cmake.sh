@@ -42,7 +42,8 @@ fi
 #   *AND* for testing python install to local directory
 #
 
-cmake ../.. -DCMAKE_BUILD_TYPE=$cmake_build_type \
+cmake ../.. -DCMAKE_MODULE_PATH=$WK/../ecbuild/cmake \
+            -DCMAKE_BUILD_TYPE=$cmake_build_type \
             -DCMAKE_INSTALL_PREFIX=/var/tmp/ma0/cmake/ecflow/$release.$major.$minor \
             -DCMAKE_PYTHON_INSTALL_TYPE=local 
             #-DCMAKE_PYTHON_INSTALL_PREFIX=/var/tmp/ma0/cmake/ecflow/$release.$major.$minor/lib/python2.7/site-packages/ecflow
