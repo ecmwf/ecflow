@@ -386,7 +386,23 @@ bool TimeDepAttrs::timeDependenciesFree() const
       for(size_t i=0;i<crons_.size();i++)    { if (crons_[i].isFree(calendar))    {if ( noOfTimeDependencies == 1) return true;oneCronIsFree = true;break;}}
       for(size_t i=0;i<dates_.size();i++)    { if (dates_[i].isFree(calendar))    {if ( noOfTimeDependencies == 1) return true;oneDateIsFree = true;break;}}
       for(size_t i=0;i<days_.size();i++)     { if (days_[i].isFree(calendar))     {if ( noOfTimeDependencies == 1) return true;oneDayIsFree = true;break;}}
-      for(size_t i=0;i<todayVec_.size();i++) { if (todayVec_[i].isFree(calendar)) {if ( noOfTimeDependencies == 1) return true;oneTodayIsFree = true;break;}}
+
+      if (!todayVec_.empty()) {
+         // : single Today: (single-time)   is free, if calendar time >= today_time
+         // : single Today: (range)         is free, if calendar time == (one of the time ranges)
+         // : multi Today : (single | range)is free, if calendar time == (one of the time ranges | tody_time)
+         if (todayVec_.size() == 1 ) {
+            // Single Today Attribute: could be single slot or range
+            if (todayVec_[0].isFree(calendar)) { if ( noOfTimeDependencies == 1) return true;oneTodayIsFree = true;}
+         }
+         else {
+            // Multiple Today Attributes, each could single, or range
+            for(size_t i=0;i<todayVec_.size();i++) {
+               if (todayVec_[i].isFreeMultipleContext(calendar)) {if ( noOfTimeDependencies == 1) return true;oneTodayIsFree = true;break;}
+            }
+         }
+      }
+
 
       if ( oneDateIsFree || oneDayIsFree || oneTodayIsFree ||  oneTimeIsFree || oneCronIsFree) {
          if ( noOfTimeDependencies > 1 ) {

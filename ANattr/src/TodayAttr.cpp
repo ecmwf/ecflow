@@ -127,20 +127,10 @@ bool TodayAttr::is_free(const ecf::Calendar& calendar) const
          return true;
       }
    }
-   else {
 
-      if (timeSeries_.duration(calendar) > timeSeries_.finish().duration() ) {
-         return true;
-      }
-   }
-
-   // For time series, this  is already handle by timeSeries_
-   if (timeSeries_.isFree(calendar)) {
-      return true;
-   }
-
-// LOG(Log::DBG,"   TodayAttr::isFree HOLDING calendar_duration > timeSeries_.start()");
-   return false;
+   // For time series(/range), this  is already handle by timeSeries_
+   // If timer expired return false. otherwise must match one time slot in the range/series
+   return timeSeries_.isFree(calendar);
 }
 
 bool TodayAttr::why(const ecf::Calendar& c, std::string& theReasonWhy) const

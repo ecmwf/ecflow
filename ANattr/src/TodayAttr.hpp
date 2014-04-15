@@ -122,7 +122,17 @@ public:
 	void clearFree();             // resets the free flag, updates state_change_no_
 	bool isSetFree() const { return makeFree_; }
 
+	// This is used when we have a *single* today attribute
+   //  single-slot   is free, if calendar time >= today_time
+   //  (range)       is free, if calendar time == (one of the time ranges)
    bool isFree(const ecf::Calendar&) const;
+
+   // This is used when we have a *multiple* today attribute
+   // (single | range) is free, if calendar time == (one of the time ranges)
+   // if timer *expired* returns false
+   bool isFreeMultipleContext(const ecf::Calendar& c) const { return timeSeries_.isFree(c); }
+
+
    bool checkForRequeue( const ecf::Calendar& c,const TimeSlot& the_min,const TimeSlot& the_max) const
 	{ return timeSeries_.checkForRequeue(c,the_min,the_max);}
 	void min_max_time_slots(TimeSlot& the_min, TimeSlot& the_max) const {timeSeries_.min_max_time_slots(the_min,the_max);}
