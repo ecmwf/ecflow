@@ -89,7 +89,7 @@ if __name__ == "__main__":
                         help="The port on the host, defaults to 3141")
     PARSER.add_argument('--path', default="/",   
                         help="replace only the node path in the suite")
-    PARSER.add_argument('--ecf_home', default="CUSTOMER/ECF_HOME",
+    PARSER.add_argument('--ecf_home', default=os.getcwd() + "/CUSTOMER/ECF_HOME",
                         help="Directory to be used for generated scripts(ECF_HOME), defaults to ./CUSTOMER/ECF_HOME")
     PARSER.add_argument('--verbose', nargs='?', default=False, const=True, type=bool,
                         help="Show verbose output")
