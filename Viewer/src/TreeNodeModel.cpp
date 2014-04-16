@@ -71,7 +71,8 @@ void TreeNodeModel::init()
 
 void TreeNodeModel::initObserver(ServerHandler* server)
 {
-	defs_ptr d = server->defs();
+	ServerDefsAccess defsAccess(server);  // will reliquish its resources on destruction
+	defs_ptr d = defsAccess.defs();
 	if(d == NULL)
 		return;
 
@@ -183,7 +184,7 @@ int TreeNodeModel::rowCount( const QModelIndex& parent) const
 			//We show the whole tree for the server
 			else
 			{
-				return server->suiteNum();
+				return server->numSuites();
 			}
 		}
 	}

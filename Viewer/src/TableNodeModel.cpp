@@ -28,7 +28,8 @@ TableNodeModel::TableNodeModel(QObject *parent) : QAbstractItemModel(parent)
 
 void TableNodeModel::initObserver(ServerHandler* server)
 {
-	defs_ptr d = server->defs();
+	ServerDefsAccess defsAccess(server);  // will reliquish its resources on destruction
+	defs_ptr d = defsAccess.defs();
 	if(d == NULL)
 		return;
 

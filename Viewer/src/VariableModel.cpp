@@ -76,7 +76,8 @@ int VariableModel::rowCount( const QModelIndex& parent) const
 	{
 		if(server_)
 		{
-		    return static_cast<int>(server_->defs()->server().server_variables().size());
+			ServerDefsAccess defsAccess(server_);  // will reliquish its resources on destruction
+			return static_cast<int>(defsAccess.defs()->server().server_variables().size());
 		}
 	}
 	//The parent is a node
@@ -235,7 +236,8 @@ QVariant VariableModel::variableData(ServerHandler *server,const QModelIndex& in
 	if(!server || role != Qt::DisplayRole)
 			return QVariant();
 
-	const std::vector<Variable>& v=server->defs()->server().server_variables();
+	ServerDefsAccess defsAccess(server);  // will reliquish its resources on destruction
+	const std::vector<Variable>& v=defsAccess.defs()->server().server_variables();
 	if(index.row() >=0 && index.row() < v.size())
 	{
 		if(index.column() == 0)

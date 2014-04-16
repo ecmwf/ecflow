@@ -42,11 +42,14 @@ ServerHandler::ServerHandler(const std::string& name, const std::string& port) :
 	client_->sync_local();
 
 	//Set server name and pot in defs
-	defs_ptr defs = client_->defs();
-	if(defs != NULL)
 	{
-		ServerState& st=defs->set_server();
-		st.hostPort(std::make_pair(name_,port_));
+		ServerDefsAccess defsAccess(this);  // will reliquish its resources on destruction
+		defs_ptr defs = defsAccess.defs();
+		if(defs != NULL)
+		{
+			ServerState& st=defs->set_server();
+			st.hostPort(std::make_pair(name_,port_));
+		}
 	}
 
 	servers_.push_back(this);
@@ -85,22 +88,24 @@ ServerHandler* ServerHandler::addServer(const std::string& name, const std::stri
 		return sh;
 }
 
-int ServerHandler::suiteNum()  const
+int ServerHandler::numSuites()
 {
 	if(client_)
 	{
-			defs_ptr defs = client_->defs();
-			if(defs != NULL)
-			{
-				return static_cast<int>(defs->suiteVec().size());
-			}
+		ServerDefsAccess defsAccess(this);  // will reliquish its resources on destruction
+		defs_ptr defs = defsAccess.defs();
+		if(defs != NULL)
+		{
+			return static_cast<int>(defs->suiteVec().size());
+		}
 	}
 	return 0;
 }
 
-Node* ServerHandler::suiteAt(int pos) const
+Node* ServerHandler::suiteAt(int pos)
 {
-	defs_ptr d = defs();
+	ServerDefsAccess defsAccess(this);  // will reliquish its resources on destruction
+	defs_ptr d = defsAccess.defs();
 	if(d != NULL)
 	{
 		const std::vector<suite_ptr> &suites = d->suiteVec();
@@ -112,7 +117,8 @@ Node* ServerHandler::suiteAt(int pos) const
 
 int ServerHandler::indexOfSuite(Node* node)
 {
-	defs_ptr d = defs();
+	ServerDefsAccess defsAccess(this);  // will reliquish its resources on destruction
+	defs_ptr d = defsAccess.defs();
 	if(d != NULL)
 	{
 			const std::vector<suite_ptr> &suites = d->suiteVec();
@@ -129,7 +135,8 @@ int ServerHandler::indexOfSuite(Node* node)
 int ServerHandler::numberOfNodes()
 {
 	int num=0;
-	defs_ptr d = defs();
+	ServerDefsAccess defsAccess(this);  // will reliquish its resources on destruction
+	defs_ptr d = defsAccess.defs();
 	if(d != NULL)
 	{
 			const std::vector<suite_ptr> &suites = d->suiteVec();
@@ -147,7 +154,8 @@ int ServerHandler::numberOfNodes()
 
 Node* ServerHandler::findNode(int globalIndex)
 {
-	defs_ptr d=defs();
+	ServerDefsAccess defsAccess(this);  // will reliquish its resources on destruction
+	defs_ptr d=defsAccess.defs();
 	if(d == NULL)
 			return 0;
 
@@ -205,10 +213,22 @@ Node* ServerHandler::immediateChildAt(Node *parent,int pos)
 	return NULL;
 }
 
-defs_ptr ServerHandler::defs() const
+defs_ptr ServerHandler::defs()
 {
 	if(client_)
-			return client_->defs();
+	{
+		return client_->defs();
+	}
+	else
+	{
+		defs_ptr null;
+		return null;
+	}
+}
+
+void ServerHandler::releaseDefs()
+{
+	defsMutex_.unlock();   // unlock addess to the defs for this thread
 }
 
 
@@ -464,6 +484,12 @@ ServerHandler* ServerHandler::find(Node *node)
 }
 
 
+// called by ChangeMgrSingleton when the definition is about to be updated
+void ServerHandler::update(const Defs*, const std::vector<ecf::Aspect::Type>&)
+{
+}
+
+
 
 void ServerHandler::addServerCommand(const std::string &name, const std::string command)
 {
@@ -673,5 +699,30 @@ void ServerComThread::run()
 		}
 	}
 	std::cout << "  ServerComThread::run finished" << "\n";
+}
+
+
+
+// ------------------------------------------------------------
+//                         ServerDefsAccess
+// ------------------------------------------------------------
+
+
+ServerDefsAccess::ServerDefsAccess(ServerHandler *server) :
+	server_(server)
+{
+	server_->defsMutex_.lock();  // lock the resource on construction
+}
+
+
+ServerDefsAccess::~ServerDefsAccess()
+{
+	server_->defsMutex_.unlock();  // unlock the resource on destruction
+}
+
+
+defs_ptr ServerDefsAccess::defs()
+{
+	return server_->defs();		// the resource will always be locked when we use it
 }
 

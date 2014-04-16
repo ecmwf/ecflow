@@ -15,8 +15,10 @@
 #include <vector>
 
 #include <QThread>
+#include <QMutex>
 
 #include "Defs.hpp"
+#include "AbstractObserver.hpp"
 
 #include "ViewNodeInfo.hpp"
 
@@ -53,9 +55,11 @@ private:
 
 
 
-class ServerHandler : public QObject // ingerits from QObject in order to gain signal/slots
+class ServerHandler : public QObject, public AbstractObserver
 {
-	Q_OBJECT
+	Q_OBJECT   // ingerits from QObject in order to gain signal/slots
+
+	friend class ServerDefsAccess;
 
 public:
 		ServerHandler(const std::string& name,const std::string&  port);
@@ -64,9 +68,8 @@ public:
 		const std::string name() const {return name_;}
 		const std::string longName() const {return longName_;}
 		const std::string& port() const {return port_;}
-		defs_ptr defs() const;
-		int suiteNum() const;
-		Node* suiteAt(int) const;
+		int numSuites();
+		Node* suiteAt(int);
 		int indexOfSuite(Node* node);
 
 		int numberOfNodes();
@@ -77,6 +80,7 @@ public:
 
 		int update();
 		void setUpdatingStatus(bool newStatus) {updating_ = newStatus;}
+		void releaseDefs();
 
 		static const std::vector<ServerHandler*>& servers() {return servers_;}
 		static ServerHandler* addServer(const std::string &server, const std::string &port);
@@ -91,6 +95,10 @@ public:
 		static void addServerCommand(const std::string &name, const std::string command);
 		static std::string resolveServerCommand(const std::string &name);
 		static void updateAll();
+
+		//From AbstractObserver
+		void update(const Node*, const std::vector<ecf::Aspect::Type>&) {};
+		void update(const Defs*, const std::vector<ecf::Aspect::Type>&);
 
 protected:
 
@@ -112,10 +120,35 @@ private slots:
 
 private:
 
+		defs_ptr defs();
 		ServerComThread *comThread();
 
 		ServerComThread *comThread_;
+		QMutex           defsMutex_;
 };
+
+
+// -------------------------------------------------------------------------
+// ServerDefsAccess - a class to manage access to the server definition tree
+// - required for multi-threaded access
+// -------------------------------------------------------------------------
+
+class ServerDefsAccess
+{
+
+public:
+
+	ServerDefsAccess(ServerHandler *server);
+	~ServerDefsAccess();
+
+	defs_ptr defs();
+
+
+private:
+
+	ServerHandler *server_;
+};
+
 
 
 #endif
