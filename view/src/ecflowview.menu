@@ -169,6 +169,8 @@ menu 'Web'
   (TASK, ALL, 'Job', 'sh xterm -T Job -e vim %ECF_JOB%', '', YES)
   (TASK, ALL, 'Output', 'sh xterm -T Output -e vim %ECF_JOBOUT%', '', YES)
   (TASK, ALL , 'TimeLine...', WINDOW(Timeline))
+  ! request from Lidström Jonas https://software.ecmwf.int/issues/browse/SUP-829
+  (TASK, ALL,  'Details', 'sh  xterm -T Details-%ECF_NAME% -e "grep %ECF_NAME% %ECF_LOG% ; read"') 
 }
 
 !==============================================================================
