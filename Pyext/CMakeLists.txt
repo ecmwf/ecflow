@@ -25,8 +25,17 @@ ecbuild_add_library( TARGET   ecflow
                             ${PYTHON_INCLUDE_DIRS} 
                     )
 
+#
+# Override default behaviour that add RPATHS during install
+# The only thing that seem to work is set INSTALL_RPATH to ""
+# Using SKIP_BUILD_RPATH,BUILD_WITH_INSTALL_RPATH,INSTALL_RPATH_USE_LINK_PATH
+# had no effect
+#         
 # by default cmake add prefix 'lib', we don't want this hence disable
-set_target_properties(ecflow PROPERTIES PREFIX "")
+set_target_properties(ecflow PROPERTIES 
+                             PREFIX ""
+                             INSTALL_RPATH ""
+                     )
 
 ### tests 
 
