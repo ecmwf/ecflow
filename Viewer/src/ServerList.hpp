@@ -23,16 +23,22 @@ public:
 
 	int count() const {return static_cast<int>(items_.size());}
 	ServerItem* item(int);
-	ServerItem* add(const std::string&,const std::string&,const std::string&);
-	ServerItem* add(const std::string&);
-	void remove(ServerItem*);
+
 	void rescan();
+	void update(const std::vector<ServerItem*>&);
+	void save();
 
 private:
 	ServerList();
+	~ServerList();
 
-	void readRcFile();
-	void readSystemFile();
+	ServerItem* add(const std::string&,const std::string&,const std::string&);
+	ServerItem* add(const std::string&);
+	void add(ServerItem*);
+
+	bool load();
+	bool readRcFile();
+	bool readSystemFile();
 
 	static ServerList* instance_;
 	std::vector<ServerItem*> items_;

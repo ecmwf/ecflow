@@ -15,6 +15,37 @@
 
 class ServerFilter;
 class ServerItem;
+class ServerModelData;
+
+class ServerModelItem
+{
+	ServerModelItem(ServerItem* s,bool st) : server(s), status(st) {};
+
+	//~ServerModelItem();
+	ServerItem* server;
+	bool status;
+
+};
+
+class ServerSelectionData
+{
+public:
+	ServerSelectionData(ServerFilter *);
+	~ServerSelectionData();
+
+	const std::vector<ServerItem*>& selectedServers();
+	const std::vector<ServerItem*>& allServers();
+	bool selected(int);
+	ServerItem* server(int);
+
+	void add();
+	void remove();
+	int count() {return static_cast<int>(items_.size());}
+
+protected:
+	std::vector<ServerModelItem> items_;
+};
+
 
 class ServerListModel : public QAbstractItemModel
 {
@@ -36,11 +67,10 @@ public:
 
 	Qt::ItemFlags flags ( const QModelIndex &) const;
 
-	const std::vector<ServerItem*> selection() const {return selection_;}
+	const std::vector<ServerItem*> items() const;
 
 protected:
-	std::vector<ServerItem*> selection_;
-
+	ServerModelData *data_;
 };
 
 #endif

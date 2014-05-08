@@ -15,15 +15,65 @@
 
 #include <QDebug>
 
-ServerListModel::ServerListModel(ServerFilter * filter,QObject *parent) :
-  QAbstractItemModel(parent)
+//======================================
+//
+// ServerSelectionData
+//
+//======================================
+
+ServerSelectionData::ServerSelectionData(ServerFilter * filter)
 {
+	for(int i=0; i < ServerList::Instance()->count(); i++)
+	{
+		items_.push_back(ServerModelItem(ServerList::Instance()->item(i)->clone(),false));
+	}
+
 	if(filter)
 	{
 		for(unsigned int i=0; i < filter->servers().size(); i++)
 		{
-			selection_.push_back(filter->servers().at(i)->clone());
+			bool found=false;
+			for(std::vector<ServerModelItem>::iterator it=items_.begin(); it !=items_.end(); it++)
+			{
+						if((*it).server->match(filter->servers().at(i)))
+						{
+							(*it).status=true;
+							found = true;
+							break;
+						}
+				}
+				if(!found)
+				{
+					items_.push_back(ServerModelItem(filter->servers().at(i)->clone(),true));
+				}
+			}
 		}
+}
+
+ServerItem* ServerSelectionData::server(int index)
+{
+	if(index >=0 && index < items_.size())
+		return items_.at(index).server;
+	return 0;
+}
+
+bool ServerSelectionData::selected(int index)
+{
+	if(index >=0 && index < items_.size())
+		return items_.at(index).status;
+	return 0;
+}
+
+//======================================
+//
+// ServerListModel
+//
+//======================================
+
+ServerListModel::ServerListModel(ServerFilter * filter,QObject *parent) :
+  QAbstractItemModel(parent)
+{
+	data_=new ServerModelData(filter);
 		/*
 		const std::vector<ServerFilterItem*>& sv=filter->servers();
 		for(std::vector<ServerFilterItem*>::const_iterator it=filter->servers().begin(); it != filter->servers().end(); it++)
@@ -36,8 +86,7 @@ ServerListModel::ServerListModel(ServerFilter * filter,QObject *parent) :
 
 ServerListModel::~ServerListModel()
 {
-	foreach(ServerItem* s,selection_)
-		delete s;
+	delete data_;
 }
 
 int ServerListModel::columnCount(const QModelIndex& parent) const
@@ -48,7 +97,7 @@ int ServerListModel::columnCount(const QModelIndex& parent) const
 int ServerListModel::rowCount(const QModelIndex& parent) const
 {
 	if(!parent.isValid())
-		return ServerList::Instance()->count();
+		return data_->count();
 
 	return 0;
 }
@@ -62,7 +111,7 @@ QVariant ServerListModel::data(const QModelIndex& index, int role) const
 
 	}
 
-	ServerItem* item=ServerList::Instance()->item(index.row());
+	ServerItem* item=data_->server(index.row());
 	if(!item)
 		return QVariant();
 
@@ -80,12 +129,7 @@ QVariant ServerListModel::data(const QModelIndex& index, int role) const
 	{
 		if(index.column() == 0)
 		{
-			for(std::vector<ServerItem*>::const_iterator it=selection_.begin(); it != selection_.end(); it++)
-			{
-				if((*it)->match(item))
-						return true;
-			}
-			return false;
+			return data_->selected(index.row());
 		}
 	}
 
