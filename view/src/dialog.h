@@ -44,7 +44,7 @@ private:
 	virtual void okCB( Widget, XtPointer ) ;
 };
 
-#if defined(__GNUC__) || defined(hpux) || defined(AIX)
+#if defined(__GNUC__) || defined(hpux) || defined(_AIX)
 #include "dialog.cc"
 #endif
 #endif

@@ -12,7 +12,7 @@ To run individual tests.
 
 i.e.
 
-bin/gcc-4.5/debug/coretest --log_level=test_suite --run_test=CoreTestSuite/test_log
+bin/gcc-4.5/debug/u_acore --log_level=test_suite --run_test=CoreTestSuite/test_log
 
 To run Multiple tests in the same test suite
 ============================================
@@ -21,7 +21,7 @@ To run Multiple tests in the same test suite
 
 i.e 
 
-bin/gcc-4.5/debug/coretest --log_level=test_suite --run_test=CoreTestSuite/test_log,test_log_append
+bin/gcc-4.5/debug/u_acore --log_level=test_suite --run_test=CoreTestSuite/test_log,test_log_append
 
 
 If you have Multiple test suites,

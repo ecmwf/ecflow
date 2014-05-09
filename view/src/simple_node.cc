@@ -299,9 +299,9 @@ Boolean simple_node::isDefComplete() const {
   }
 #endif
   if (!owner_) return False;
-  else if (!owner_.get()) 
+  else if (!owner_) 
     return False;
-  else if (owner_.get()->defstatus() == STATUS_COMPLETE) 
+  else if (owner_->defstatus() == STATUS_COMPLETE) 
     return True;
   Node* ecf = __node__() ? __node__()->get_node() : 0;
   if (ecf) {
@@ -310,9 +310,6 @@ Boolean simple_node::isDefComplete() const {
       if (t->evaluate())
         return True;
   }
-  // if (ecf_node::none() != owner_.get()->get_var("ECF_DUMMY_TASK"))
-  //   return True;
-
   return False;
 }
 
@@ -346,7 +343,7 @@ void simple_node::info(std::ostream& f)
   node::info(f);
   f << type_name() << " " << name() << "\n";
   {
-    if (owner_.get()) {
+    if (owner_) {
 
       if (owner_->type() == NODE_SUITE) {
 	Suite* suite = dynamic_cast<Suite*>(owner_->get_node());
@@ -356,11 +353,11 @@ void simple_node::info(std::ostream& f)
 	}
       }
 
-      int defs = owner_.get()->defstatus();
+      int defs = owner_->defstatus();
       if (defs != STATUS_QUEUED && defs != STATUS_UNKNOWN)
         f << inc << "defstatus " << ecf::status_name[defs] << "\n";
 
-      Node* node = owner_.get()->get_node();
+      Node* node = owner_->get_node();
       if (node) {
         // if (node->repeat().toString() != "") // repeat // duplicated on suite node
         //  f << inc << node->repeat().toString() << "\n";
@@ -380,14 +377,64 @@ void simple_node::info(std::ostream& f)
       f << inc << "# " << type_name() << " " << this->name() << " is " << status_name() 
         << "\n";
     }   
+  {
+    std::vector<Variable> gvar;
+    std::vector<Variable>::const_iterator it, gvar_end;
+    ecf_node* prox = __node__();
+    if (!prox) return;
+
+         Defs* defs = 0;
+         Node* ecf = 0;
+         if (dynamic_cast<ecf_concrete_node<Node>*>(prox)) {
+            ecf = dynamic_cast<ecf_concrete_node<Node>*>(prox)->get();
+         }
+         else if (dynamic_cast<ecf_concrete_node<Task>*>(prox)) {
+            ecf = dynamic_cast<ecf_concrete_node<Task>*>(prox)->get();
+         }
+         else if (dynamic_cast<ecf_concrete_node<Family>*>(prox)) {
+            ecf = dynamic_cast<ecf_concrete_node<Family>*>(prox)->get();
+         }
+         else if (dynamic_cast<ecf_concrete_node<Suite>*>(prox)) {
+            ecf = dynamic_cast<ecf_concrete_node<Suite>*>(prox)->get();
+         }
+         else if (dynamic_cast<ecf_concrete_node<Defs>*>(prox)) {
+            defs = dynamic_cast<ecf_concrete_node<Defs>*>(prox)->get();
+         }
+         if (!ecf && !defs) {
+	   return;
+         }
+
+         if (ecf ) {
+            gvar.clear();
+            ecf->gen_variables(gvar);
+            for(it = gvar.begin(); it != gvar.end(); ++it) {
+	      f << inc << "# edit " << (*it).name() << " '" << (*it).theValue() << "'\n";
+            }
+
+            gvar = ecf->variables();
+            for(it = gvar.begin(); it != gvar.end(); ++it) {
+	      f << inc << "edit " << (*it).name() << " '" << (*it).theValue() << "'\n";
+            }
+         }
+         if (defs) {
+            const std::vector<Variable>& gvar = defs->server().user_variables();
+            for(it = gvar.begin(); it != gvar.end(); ++it) {
+	      f << inc << "# edit " << (*it).name() << " '" << (*it).theValue() << "'\n";
+            }
+            const std::vector<Variable>& var = defs->server().server_variables();
+            for(it = var.begin(); it != var.end(); ++it) {
+	      f << inc << "edit " << (*it).name() << " '" << (*it).theValue() << "'\n";
+            }
+         }}
+
   for (node *run=kids(); run; run=run->next()) 
     if (run->type() == NODE_VARIABLE) {
-      variable_node *var = dynamic_cast<variable_node*> (run);
+      /* variable_node *var = dynamic_cast<variable_node*> (run);
       if (var && var->name() == "") { f << inc << "# empty variable!" << "\n"; continue; }
       if (var->isGenVariable(0x0))
         f << inc << "# edit " << run->name() << " '" << var->get_var() << "'" << "\n";
       else 
-        f << inc << "edit " << run->name() << " '" << var->get_var() << "'" << "\n";
+      f << inc << "edit " << run->name() << " '" << var->get_var() << "'" << "\n";*/
     } else { 
       f << inc;
       int i = run->type();
@@ -572,7 +619,7 @@ void simple_node::triggers(trigger_lister& tlr)
     }
     else 
 #endif
-    if (owner_.get()) {
+    if (owner_) {
      if (type() != NODE_SUPER && type() != NODE_SUITE) {
        Node* ecf = __node__() ? __node__()->get_node() : 0;
        std::set<node*> theSet;
@@ -949,7 +996,7 @@ void simple_node::genvars(std::vector<Variable>& var)
     if (run->type() == NODE_VARIABLE) {
       if (run->name() == "") std::cerr << "# empty variable!\n";
       else if (run->isGenVariable(0))
-        var.push_back(Variable(run->name(), ((variable_node*) run)->get_var()));
+        var.push_back(Variable(run->name(), ((variable_node*) run)->get_var(), false/*dont check names*/));
     }
   }
   return;
@@ -961,7 +1008,7 @@ void simple_node::variables(std::vector<Variable>& var)
     if (run->type() == NODE_VARIABLE){ 
       if (run->name() == "") std::cerr << "# empty variable!\n";
       else if (!run->isGenVariable(0)) {
-        var.push_back(Variable(run->name(), ((variable_node*) run)->get_var()));
+        var.push_back(Variable(run->name(), ((variable_node*) run)->get_var(), false/*dont check names*/));
       }
   }
 }

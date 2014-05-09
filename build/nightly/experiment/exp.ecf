@@ -1,0 +1,58 @@
+import os, time, signal
+import ecflow
+ 
+print "PYTHONPATH====================================================="
+print os.environ['PYTHONPATH'].split(os.pathsep)
+
+def create_client():
+   print "Creating Client"
+   ci = ecflow.Client()
+   ci.set_host_port("%ECF_NODE%","%ECF_PORT%")
+   ci.set_child_pid(os.getpid())
+   ci.set_child_path("%ECF_NAME%")
+   ci.set_child_password("%ECF_PASS%")
+   ci.set_child_try_no(%ECF_TRYNO%)
+   
+   print "Only wait 20 seconds, if the server cannot be contacted (note default is 24 hours) before failing"
+   ci.set_child_timeout(20) 
+   return ci
+   
+def signal_handler(signum, frame):
+    print 'Aborting: Signal handler called with signal ', signum
+    ci = create_client()
+    ci.child_abort("Signal handler called with signal " + str(signum));
+    
+signal.signal (signal.SIGINT,  signal_handler) 
+signal.signal (signal.SIGHUP,  signal_handler)
+signal.signal (signal.SIGQUIT, signal_handler)
+signal.signal (signal.SIGILL,  signal_handler)
+signal.signal (signal.SIGTRAP, signal_handler)
+signal.signal (signal.SIGIOT,  signal_handler)
+signal.signal (signal.SIGBUS,  signal_handler)
+signal.signal (signal.SIGFPE,  signal_handler)
+signal.signal (signal.SIGUSR1, signal_handler)
+signal.signal (signal.SIGUSR2, signal_handler)
+signal.signal (signal.SIGPIPE, signal_handler)
+signal.signal (signal.SIGTERM, signal_handler)
+signal.signal (signal.SIGXCPU, signal_handler)
+signal.signal (signal.SIGPWR,  signal_handler)
+
+
+ci = create_client();
+try:
+   ci.child_init();
+   print "child init ok"
+  
+   for i in range(1,10):
+      print "At value " + str(i)
+      ci.child_meter('meter',i)
+      ci.child_label('label_name', "value_" + str(i))
+      time.sleep(1)
+      
+   ci.child_event('event_fred')
+   print "Finished event,meter and label child commands"
+   
+   ci.child_complete()
+except:
+   ci.child_abort()
+   

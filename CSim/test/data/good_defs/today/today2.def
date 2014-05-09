@@ -1,0 +1,15 @@
+suite s1
+   clock real 1.10.2009  # need to define a date , otherwise we start at current time, and hence test will vary
+   task t1                   
+      today 20:00                         
+      verify complete:1
+   task t2
+      today 15:00            
+      today 16:00                         
+      today 17:00                         
+      today 18:00                         
+      today 19:00                         
+      today 20:00                         
+      verify complete:6
+endsuite
+

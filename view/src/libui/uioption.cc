@@ -78,11 +78,18 @@ void option_form_c::create (Widget parent, char *widget_name)
 	Widget toggle8 = (Widget)NULL;
 	Widget separator6 = (Widget)NULL;
 	Widget label4 = (Widget)NULL;
-	Widget label6 = (Widget)NULL;
-	Widget label7 = (Widget)NULL;
+        Widget label6 = (Widget)NULL;
+        Widget label7 = (Widget)NULL;
 
-	if ( !widget_name )
-		widget_name = "Server options";
+        Widget label20 = (Widget)NULL;
+        Widget label21 = (Widget)NULL;
+        Widget form21 = (Widget)NULL;
+        Widget toggle20 = (Widget)NULL;
+        Widget separator20 = (Widget)NULL;
+
+
+        if ( !widget_name )
+                widget_name = "Server options";
 
 	XtSetArg(al[ac], XmNautoUnmanage, FALSE); ac++;
 	option_form = XmCreateForm ( parent, widget_name, al, ac );
@@ -157,7 +164,7 @@ void option_form_c::create (Widget parent, char *widget_name)
 	ac = 0;
 	frame3 = XmCreateFrame ( form_, "frame3", al, ac );
 	XtSetArg(al[ac], XmNchildType, XmFRAME_TITLE_CHILD); ac++;
-	label8 = XmCreateLabel ( frame3, "Misc.", al, ac );
+	label8 = XmCreateLabel ( frame3, "Miscellaneous:", al, ac );
 	ac = 0;
 	form10 = XmCreateForm ( frame3, "form10", al, ac );
 	form11 = XmCreateForm ( form10, "form11", al, ac );
@@ -167,23 +174,46 @@ void option_form_c::create (Widget parent, char *widget_name)
 	ac = 0;
 	XtSetArg(al[ac], XmNorientation, XmVERTICAL); ac++;
 	separator8 = XmCreateSeparator ( form11, "separator8", al, ac );
-	ac = 0;
-	XtSetArg(al[ac], XmNalignment, XmALIGNMENT_BEGINNING); ac++;
-	new_suites = XmCreateToggleButton ( form11, "new_suites", al, ac );
-	ac = 0;
-	form12 = XmCreateForm ( form10, "form12", al, ac );
-	XtSetArg(al[ac], XmNindicatorType, XmONE_OF_MANY); ac++;
-	XtSetArg(al[ac], XmNset, FALSE); ac++;
-	toggle10 = XmCreateToggleButtonGadget ( form12, "@direct_read", al, ac );
+        ac = 0;
+        XtSetArg(al[ac], XmNalignment, XmALIGNMENT_BEGINNING); ac++;
+        new_suites = XmCreateToggleButton ( form11, "new_suites", al, ac );
+
+        ac = 0;
+        form12 = XmCreateForm ( form10, "form12", al, ac );
+        XtSetArg(al[ac], XmNindicatorType, XmONE_OF_MANY); ac++;
+        XtSetArg(al[ac], XmNset, FALSE); ac++;
+        toggle10 = XmCreateToggleButtonGadget ( form12, "@direct_read", al, ac );
 	ac = 0;
 	XtSetArg(al[ac], XmNorientation, XmVERTICAL); ac++;
 	separator9 = XmCreateSeparator ( form12, "separator9", al, ac );
-	ac = 0;
-	XtSetArg(al[ac], XmNalignment, XmALIGNMENT_BEGINNING); ac++;
-	direct_read = XmCreateToggleButton ( form12, "direct_read", al, ac );
-	ac = 0;
-	frame2 = XmCreateFrame ( form_, "frame2", al, ac );
-	XtSetArg(al[ac], XmNchildType, XmFRAME_TITLE_CHILD); ac++;
+        ac = 0;
+        XtSetArg(al[ac], XmNalignment, XmALIGNMENT_BEGINNING); ac++;
+        direct_read = XmCreateToggleButton ( form12, "direct_read", al, ac );
+
+        /* 201404 */
+        ac = 0;
+        // form20 = XmCreateForm ( form10, "form20", al, ac );
+        form21 = XmCreateForm ( form10, "form21", al, ac );
+        XtSetArg(al[ac], XmNindicatorType, XmONE_OF_MANY); ac++;
+        XtSetArg(al[ac], XmNset, FALSE); ac++;
+        toggle20 = XmCreateToggleButtonGadget ( form21, "@jobfile_length", al, ac );
+        ac = 0;
+        XtSetArg(al[ac], XmNorientation, XmVERTICAL); ac++;
+        separator20 = XmCreateSeparator ( form21, "separator20", al, ac );
+
+        ac = 0;
+        XtSetArg(al[ac], XmNalignment, XmALIGNMENT_BEGINNING); ac++;
+        label20 = XmCreateLabel ( form21, "Job file maximum length", al, ac );
+        ac = 0;
+        jobfile_length = XmCreateTextField ( form21, "jobfile_length", al, ac );
+        XtSetArg(al[ac], XmNalignment, XmALIGNMENT_BEGINNING); ac++;
+        label21 = XmCreateLabel ( form21, "lines", al, ac );
+        ac = 0;
+        /* */
+
+        ac = 0;
+        frame2 = XmCreateFrame ( form_, "frame2", al, ac );
+        XtSetArg(al[ac], XmNchildType, XmFRAME_TITLE_CHILD); ac++;
 	label2 = XmCreateLabel ( frame2, "Get server status:", al, ac );
 	ac = 0;
 	form2 = XmCreateForm ( frame2, "form2", al, ac );
@@ -417,14 +447,16 @@ void option_form_c::create (Widget parent, char *widget_name)
 	XtSetArg(al[ac], XmNleftAttachment, XmATTACH_WIDGET); ac++;
 	XtSetArg(al[ac], XmNleftOffset, 4); ac++;
 	XtSetArg(al[ac], XmNleftWidget, separator2); ac++;
-	XtSetArg(al[ac], XmNrightAttachment, XmATTACH_FORM); ac++;
-	XtSetValues ( late,al, ac );
-	ac = 0;
-	XtAddCallback (toggle5, XmNvalueChangedCallback,&option_form_c:: useCB, (XtPointer) this);
-	XtAddCallback (late, XmNvalueChangedCallback,&option_form_c:: changedCB, (XtPointer) this);
-	children[ac++] = toggle5;
-	children[ac++] = separator2;
-	children[ac++] = late;
+        XtSetArg(al[ac], XmNrightAttachment, XmATTACH_FORM); ac++;
+        XtSetValues ( late,al, ac );
+        ac = 0;
+        XtAddCallback (toggle5, XmNvalueChangedCallback,
+                       &option_form_c:: useCB, (XtPointer) this);
+        XtAddCallback (late, XmNvalueChangedCallback,
+                       &option_form_c:: changedCB, (XtPointer) this);
+        children[ac++] = toggle5;
+        children[ac++] = separator2;
+        children[ac++] = late;
 	XtManageChildren(children, ac);
 
 	ac = 0;
@@ -451,16 +483,16 @@ void option_form_c::create (Widget parent, char *widget_name)
 	XtSetArg(al[ac], XmNleftAttachment, XmATTACH_WIDGET); ac++;
 	XtSetArg(al[ac], XmNleftOffset, 4); ac++;
 	XtSetArg(al[ac], XmNleftWidget, separator13); ac++;
-	XtSetArg(al[ac], XmNrightAttachment, XmATTACH_FORM); ac++;
-	XtSetValues ( zombied,al, ac );
-	ac = 0;
-	XtAddCallback (toggle13, XmNvalueChangedCallback,&option_form_c:: useCB, 
-                       (XtPointer) this);
-	XtAddCallback (zombied, XmNvalueChangedCallback,&option_form_c:: changedCB, 
-                       (XtPointer) this);
-	children[ac++] = toggle13;
-	children[ac++] = separator13;
-	children[ac++] = zombied;
+        XtSetArg(al[ac], XmNrightAttachment, XmATTACH_FORM); ac++;
+        XtSetValues ( zombied,al, ac );
+        ac = 0;
+        XtAddCallback (toggle13, XmNvalueChangedCallback,
+                       &option_form_c:: useCB, (XtPointer) this);
+        XtAddCallback (zombied, XmNvalueChangedCallback,
+                       &option_form_c:: changedCB, (XtPointer) this);
+        children[ac++] = toggle13;
+        children[ac++] = separator13;
+        children[ac++] = zombied;
 	XtManageChildren(children, ac);
 
         
@@ -487,17 +519,16 @@ void option_form_c::create (Widget parent, char *widget_name)
 	XtSetArg(al[ac], XmNleftAttachment, XmATTACH_WIDGET); ac++;
 	XtSetArg(al[ac], XmNleftOffset, 4); ac++;
 	XtSetArg(al[ac], XmNleftWidget, separator14); ac++;
-	XtSetArg(al[ac], XmNrightAttachment, XmATTACH_FORM); ac++;
-	XtSetValues ( aliases,al, ac );
-	ac = 0;
-	XtAddCallback (toggle14, XmNvalueChangedCallback,&option_form_c:: useCB, 
-                       (XtPointer) this);
-	XtAddCallback (aliases, 
-                       XmNvalueChangedCallback,&option_form_c:: changedCB, 
-                       (XtPointer) this);
+        XtSetArg(al[ac], XmNrightAttachment, XmATTACH_FORM); ac++;
+        XtSetValues ( aliases,al, ac );
+        ac = 0;
+        XtAddCallback (toggle14, XmNvalueChangedCallback,
+                       &option_form_c:: useCB, (XtPointer) this);
+        XtAddCallback (aliases,  XmNvalueChangedCallback,
+                       &option_form_c:: changedCB, (XtPointer) this);
 
-	children[ac++] = toggle14;
-	children[ac++] = separator14;
+        children[ac++] = toggle14;
+        children[ac++] = separator14;
 	children[ac++] = aliases;
 	XtManageChildren(children, ac);
 
@@ -512,23 +543,94 @@ void option_form_c::create (Widget parent, char *widget_name)
 	children[ac++] = label1;
 	children[ac++] = form1;
 	XtManageChildren(children, ac);
-	ac = 0;
 
+	ac = 0;
 	XtSetArg(al[ac], XmNtopAttachment, XmATTACH_FORM); ac++;
 	XtSetArg(al[ac], XmNleftAttachment, XmATTACH_FORM); ac++;
 	XtSetArg(al[ac], XmNrightAttachment, XmATTACH_FORM); ac++;
 	XtSetValues ( form11,al, ac );
-	ac = 0;
+        ac = 0;
 
-	XtSetArg(al[ac], XmNtopAttachment, XmATTACH_WIDGET); ac++;
-	XtSetArg(al[ac], XmNtopWidget, form11); ac++;
-	XtSetArg(al[ac], XmNleftAttachment, XmATTACH_FORM); ac++;
-	XtSetArg(al[ac], XmNrightAttachment, XmATTACH_FORM); ac++;
-	XtSetValues ( form12,al, ac );
-	ac = 0;
+        XtSetArg(al[ac], XmNtopAttachment, XmATTACH_WIDGET); ac++;
+        XtSetArg(al[ac], XmNtopWidget, form11); ac++;
+        XtSetArg(al[ac], XmNleftAttachment, XmATTACH_FORM); ac++;
+        XtSetArg(al[ac], XmNrightAttachment, XmATTACH_FORM); ac++;
+        XtSetValues ( form12,al, ac );
+        ac = 0;
 
-	XtSetArg(al[ac], XmNtopAttachment, XmATTACH_FORM); ac++;
-	XtSetArg(al[ac], XmNbottomAttachment, XmATTACH_FORM); ac++;
+        /* 201404 */
+        XtSetArg(al[ac], XmNtopAttachment, XmATTACH_WIDGET); ac++;
+        XtSetArg(al[ac], XmNtopWidget, form12); ac++;
+        XtSetArg(al[ac], XmNleftAttachment, XmATTACH_FORM); ac++;
+        XtSetArg(al[ac], XmNrightAttachment, XmATTACH_FORM); ac++;
+        XtSetValues ( form21,al, ac );
+        ac = 0;
+
+        XtSetArg(al[ac], XmNtopAttachment, XmATTACH_FORM); ac++;
+        XtSetArg(al[ac], XmNbottomAttachment, XmATTACH_FORM); ac++;
+        XtSetArg(al[ac], XmNbottomOffset, 0); ac++;
+        XtSetArg(al[ac], XmNleftAttachment, XmATTACH_FORM); ac++;
+        XtSetValues ( toggle20,al, ac );
+        ac = 0;
+
+        XtSetArg(al[ac], XmNtopAttachment, XmATTACH_FORM); ac++;
+        XtSetArg(al[ac], XmNtopOffset, 4); ac++;
+        XtSetArg(al[ac], XmNbottomAttachment, XmATTACH_FORM); ac++;
+        XtSetArg(al[ac], XmNbottomOffset, 4); ac++;
+        XtSetArg(al[ac], XmNleftAttachment, XmATTACH_WIDGET); ac++;
+        XtSetArg(al[ac], XmNleftOffset, 4); ac++;
+        XtSetArg(al[ac], XmNleftWidget, toggle20); ac++;
+        XtSetArg(al[ac], XmNrightAttachment, XmATTACH_NONE); ac++;
+        XtSetValues ( separator20,al, ac );
+        ac = 0;
+
+        XtSetArg(al[ac], XmNtopAttachment, XmATTACH_FORM); ac++;
+        XtSetArg(al[ac], XmNbottomAttachment, XmATTACH_FORM); ac++;
+        XtSetArg(al[ac], XmNbottomOffset, 0); ac++;
+        XtSetArg(al[ac], XmNleftAttachment, XmATTACH_WIDGET); ac++;
+        XtSetArg(al[ac], XmNleftOffset, 4); ac++;
+        XtSetArg(al[ac], XmNleftWidget, separator20); ac++;
+        XtSetArg(al[ac], XmNrightAttachment, XmATTACH_NONE); ac++;
+        XtSetValues ( label20,al, ac );
+        ac = 0;
+
+        XtSetArg(al[ac], XmNtopAttachment, XmATTACH_FORM); ac++;
+        XtSetArg(al[ac], XmNtopOffset, 0); ac++;
+        XtSetArg(al[ac], XmNbottomAttachment, XmATTACH_FORM); ac++;
+        XtSetArg(al[ac], XmNbottomOffset, 0); ac++;
+        XtSetArg(al[ac], XmNleftAttachment, XmATTACH_WIDGET); ac++;
+        XtSetArg(al[ac], XmNleftOffset, 0); ac++;
+        XtSetArg(al[ac], XmNleftWidget, label20); ac++;
+        XtSetArg(al[ac], XmNrightAttachment, XmATTACH_WIDGET); ac++;
+        XtSetArg(al[ac], XmNrightOffset, 0); ac++;
+        XtSetArg(al[ac], XmNrightWidget, label21); ac++;
+        XtSetValues ( jobfile_length,al, ac );
+        ac = 0;
+
+        XtSetArg(al[ac], XmNtopAttachment, XmATTACH_FORM); ac++;
+        XtSetArg(al[ac], XmNtopOffset, 0); ac++;
+        XtSetArg(al[ac], XmNbottomAttachment, XmATTACH_FORM); ac++;
+        XtSetArg(al[ac], XmNbottomOffset, 0); ac++;
+        XtSetArg(al[ac], XmNleftAttachment, XmATTACH_NONE); ac++;
+        XtSetArg(al[ac], XmNrightAttachment, XmATTACH_FORM); ac++;
+        XtSetArg(al[ac], XmNrightOffset, 0); ac++;
+        XtSetValues ( label21,al, ac );
+        ac = 0;
+        XtAddCallback (toggle20, XmNvalueChangedCallback,
+                       &option_form_c:: useCB, (XtPointer) this);
+        XtAddCallback (jobfile_length, XmNactivateCallback,
+                       &option_form_c:: changedCB, (XtPointer) this);
+        children[ac++] = toggle20;
+        children[ac++] = separator20;
+        children[ac++] = label20;
+        children[ac++] = jobfile_length;
+        children[ac++] = label21;
+        XtManageChildren(children, ac);
+        ac = 0;
+        /* */
+
+        XtSetArg(al[ac], XmNtopAttachment, XmATTACH_FORM); ac++;
+        XtSetArg(al[ac], XmNbottomAttachment, XmATTACH_FORM); ac++;
 	XtSetArg(al[ac], XmNleftAttachment, XmATTACH_FORM); ac++;
 	XtSetValues ( toggle3,al, ac );
 	ac = 0;
@@ -549,14 +651,16 @@ void option_form_c::create (Widget parent, char *widget_name)
 	XtSetArg(al[ac], XmNleftAttachment, XmATTACH_WIDGET); ac++;
 	XtSetArg(al[ac], XmNleftOffset, 4); ac++;
 	XtSetArg(al[ac], XmNleftWidget, separator8); ac++;
-	XtSetArg(al[ac], XmNrightAttachment, XmATTACH_FORM); ac++;
-	XtSetValues ( new_suites,al, ac );
-	ac = 0;
-	XtAddCallback (toggle3, XmNvalueChangedCallback,&option_form_c:: useCB, (XtPointer) this);
-	XtAddCallback (new_suites, XmNvalueChangedCallback,&option_form_c:: changedCB, (XtPointer) this);
-	children[ac++] = toggle3;
-	children[ac++] = separator8;
-	children[ac++] = new_suites;
+        XtSetArg(al[ac], XmNrightAttachment, XmATTACH_FORM); ac++;
+        XtSetValues ( new_suites,al, ac );
+        ac = 0;
+        XtAddCallback (toggle3, XmNvalueChangedCallback,
+                       &option_form_c:: useCB, (XtPointer) this);
+        XtAddCallback (new_suites, XmNvalueChangedCallback,
+                       &option_form_c:: changedCB, (XtPointer) this);
+        children[ac++] = toggle3;
+        children[ac++] = separator8;
+        children[ac++] = new_suites;
 	XtManageChildren(children, ac);
 	ac = 0;
 
@@ -582,19 +686,22 @@ void option_form_c::create (Widget parent, char *widget_name)
 	XtSetArg(al[ac], XmNleftAttachment, XmATTACH_WIDGET); ac++;
 	XtSetArg(al[ac], XmNleftOffset, 4); ac++;
 	XtSetArg(al[ac], XmNleftWidget, separator9); ac++;
-	XtSetArg(al[ac], XmNrightAttachment, XmATTACH_FORM); ac++;
-	XtSetValues ( direct_read,al, ac );
-	ac = 0;
-	XtAddCallback (toggle10, XmNvalueChangedCallback,&option_form_c:: useCB, (XtPointer) this);
-	XtAddCallback (direct_read, XmNvalueChangedCallback,&option_form_c:: changedCB, (XtPointer) this);
-	children[ac++] = toggle10;
-	children[ac++] = separator9;
-	children[ac++] = direct_read;
-	XtManageChildren(children, ac);
-	ac = 0;
-	children[ac++] = form11;
-	children[ac++] = form12;
-	XtManageChildren(children, ac);
+        XtSetArg(al[ac], XmNrightAttachment, XmATTACH_FORM); ac++;
+        XtSetValues ( direct_read,al, ac );
+        ac = 0;
+        XtAddCallback (toggle10, XmNvalueChangedCallback,
+                       &option_form_c:: useCB, (XtPointer) this);
+        XtAddCallback (direct_read, XmNvalueChangedCallback,
+                       &option_form_c:: changedCB, (XtPointer) this);
+        children[ac++] = toggle10;
+        children[ac++] = separator9;
+        children[ac++] = direct_read;
+        XtManageChildren(children, ac);
+        ac = 0;
+        children[ac++] = form11;
+        children[ac++] = form12;
+        children[ac++] = form21;
+        XtManageChildren(children, ac);
 	ac = 0;
 	children[ac++] = label8;
 	children[ac++] = form10;

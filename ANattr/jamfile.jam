@@ -32,7 +32,7 @@ lib nodeattr : [ glob src/*.cpp ]
 # boost_datetime is only required for formatting. i.e to call to_simple_string
 #  cerr <<  to_simple_string(calendar.suiteTime()) << "\n";
 #
-exe nodeattrtest : [ glob test/*.cpp ]
+exe u_anattr : [ glob test/*.cpp ]
            /theCore//core
            nodeattr
            /site-config//boost_system

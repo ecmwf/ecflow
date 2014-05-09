@@ -42,6 +42,9 @@
 #ifndef tmp_file_H
 #include "tmp_file.h"
 #endif
+#ifndef globals_H
+#include "globals.h"
+#endif
 
 #include "ecf_node.h"
 
@@ -119,7 +122,9 @@ void tree::notification(observable* o)
 
 	build_tree(h->top(),-1);
 
-	node *n = selection::current_node();
+	// node *n = selection::current_node();
+	if (!h->top()) return;
+	node* n = h->top()->find(selection::current_path());
 	if(n) show_node(*n);
 
 	update_all(false);
@@ -312,9 +317,9 @@ void tree::showCB( Widget, XtPointer )
 
 void tree::connected(Boolean ok)
 {
-  if(ok) 
+  if(ok) {
     XtVaSetValues(tree_,XmNbackgroundPixmap,XmUNSPECIFIED_PIXMAP,NULL);
-  else {
+  } else {
     Pixel fg,bg;
     XtVaGetValues(tree_,XmNforeground, &fg, XmNbackground, &bg,NULL);
     XtVaSetValues(tree_,XmNbackgroundPixmap,

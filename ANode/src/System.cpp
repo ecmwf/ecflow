@@ -27,6 +27,7 @@
 #include "Signal.hpp"
 #include "Defs.hpp"
 #include "Submittable.hpp"
+#include "SuiteChanged.hpp"
 #include "Log.hpp"
 
 //#define DEBUG_FORK 1
@@ -391,6 +392,12 @@ void System::died( const std::string& absNodePath, const std::string& reason)
 #endif
 		return;
 	}
+
+	// This function can get called at any time.
+	// AND out of context of any command, hence we must handle case where Suite handles are used.
+	// Otherwise the view will not know about aborted states.
+	// ECFLOW-104 aborted state for a task following an error at submission
+	SuiteChanged1 changed(submittable->suite());
 
 	submittable->flag().set(ecf::Flag::JOBCMD_FAILED);
 

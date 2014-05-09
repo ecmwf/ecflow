@@ -8,10 +8,11 @@ ecbuild_add_library( TARGET   node
                      NOINSTALL
                      TYPE     STATIC
                      SOURCES  ${srcs}
-                     LIBS     core nodeattr ${Ecflow_Boost_LIBS}
-                     INCLUDES ../ACore/src 
+                     LIBS     nodeattr core
+                     INCLUDES src
+                              ../ACore/src 
                               ../ANattr/src
-                              ${Boost_INCLUDE_DIRS} )
+                    )
 
 # Use following to populate list: 
 #  cd $WK/ANode                      
@@ -48,20 +49,17 @@ list( APPEND test_srcs
  test/TestMigration.cpp
 )
 
-ecbuild_add_test(TARGET  nodetest
-                SOURCES  ${test_srcs}
-                LIBS     core nodeattr node ${Ecflow_Test_LIBS}
-                INCLUDES src
-                         ../ACore/src 
-                         ../ANattr/src
-                         ${Boost_INCLUDE_DIRS} )
+ecbuild_add_test(TARGET  u_anode
+                 BOOST
+                 SOURCES  ${test_srcs}
+                 LIBS     node  
+                 )
 
 
 list( APPEND stest_srcs   test/TestSingleExprParse.cpp )                    
-ecbuild_add_test( TARGET  stest
-                SOURCES   ${stest_srcs}
-                LIBS      core nodeattr node ${Ecflow_Test_LIBS}
-                INCLUDES  src
-                          ../ACore/src 
-                          ../ANattr/src
-                          ${Boost_INCLUDE_DIRS} )
+ecbuild_add_test( TARGET  u_anode_stest
+                  BOOST
+                  SOURCES   ${stest_srcs}
+                  LIBS      node 
+                  INCLUDES  ${Boost_INCLUDE_DIRS} 
+                 )

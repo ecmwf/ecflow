@@ -283,8 +283,9 @@ void Node::incremental_changes( DefsDelta& changes, compound_memento_ptr& comp) 
 void Node::set_memento(const StateMemento* memento) {
 
 #ifdef DEBUG_MEMENTO
-	std::cout << "Node::set_memento(const StateMemento* memento) " << debugNodePath() << "\n";
+	std::cout << "Node::set_memento(const StateMemento* memento) " << debugNodePath() << "  " << NState::toString(memento->state_) << "\n";
 #endif
+   ChangeMgrSingleton::instance()->add_aspect(ecf::Aspect::STATE);
 	setStateOnly( memento->state_ );
 }
 
@@ -293,6 +294,7 @@ void Node::set_memento( const NodeDefStatusDeltaMemento* memento ) {
 #ifdef DEBUG_MEMENTO
 	std::cout << "Node::set_memento(const NodeDefStatusDeltaMemento* memento) " << debugNodePath() << "\n";
 #endif
+   ChangeMgrSingleton::instance()->add_aspect(ecf::Aspect::DEFSTATUS);
 	defStatus_.setState(  memento->state_ );
 }
 
@@ -301,6 +303,7 @@ void Node::set_memento( const SuspendedMemento* memento ) {
 #ifdef DEBUG_MEMENTO
 	std::cout << "Node::set_memento(const SuspendedMemento* memento) " << debugNodePath() << "\n";
 #endif
+   ChangeMgrSingleton::instance()->add_aspect(ecf::Aspect::SUSPENDED);
 	if (memento->suspended_) suspend();
 	else                     clearSuspended();
 }
@@ -349,10 +352,13 @@ void Node::set_memento( const NodeTriggerMemento* memento ) {
 #endif
 
 	if (triggerExpr_) {
+	   ChangeMgrSingleton::instance()->add_aspect(ecf::Aspect::EXPR_TRIGGER);
 		if (memento->exp_.isFree()) freeTrigger();
 		else                        clearTrigger();
 		return;
 	}
+
+	// ADD_REMOVE_ATTR aspect
 	add_trigger_expression( memento->exp_);
 }
 
@@ -363,10 +369,13 @@ void Node::set_memento( const NodeCompleteMemento* memento ) {
 #endif
 
 	if (completeExpr_) {
+	   ChangeMgrSingleton::instance()->add_aspect(ecf::Aspect::EXPR_COMPLETE);
 		if (memento->exp_.isFree()) freeComplete();
 		else                        clearComplete();
 		return;
 	}
+
+   // ADD_REMOVE_ATTR aspect
 	add_complete_expression( memento->exp_);
 }
 
@@ -377,6 +386,8 @@ void Node::set_memento( const NodeRepeatMemento* memento ) {
 #endif
 
 	if (!repeat_.empty()) {
+	   ChangeMgrSingleton::instance()->add_aspect(ecf::Aspect::REPEAT);
+
       // Note: the node is incremented one past, the last value
       // In Node we increment() then check for validity
       // hence the_new_value may be outside of the valid range.
@@ -388,6 +399,8 @@ void Node::set_memento( const NodeRepeatMemento* memento ) {
 		// repeat_ = memento->repeat_;
  		return;
 	}
+
+   // ADD_REMOVE_ATTR aspect
 	addRepeat(memento->repeat_);
 }
 
@@ -399,10 +412,12 @@ void Node::set_memento( const NodeLimitMemento* memento ) {
 
 	limit_ptr limit = find_limit(memento->limit_.name());
 	if (limit.get())  {
-      ChangeMgrSingleton::instance()->add_aspect(ecf::Aspect::LIMIT_CHANGED);
+      ChangeMgrSingleton::instance()->add_aspect(ecf::Aspect::LIMIT);
 	   limit->set_state(  memento->limit_.theLimit(), memento->limit_.value(), memento->limit_.paths() );
 		return;
 	}
+
+   // ADD_REMOVE_ATTR aspect
 	addLimit(memento->limit_);
 }
 
@@ -411,6 +426,8 @@ void Node::set_memento( const NodeInLimitMemento* memento ) {
 #ifdef DEBUG_MEMENTO
 	std::cout << "Node::set_memento(const NodeInLimitMemento* memento) " << debugNodePath() << "\n";
 #endif
+
+   // ADD_REMOVE_ATTR aspect only, since no state
 
 	addInLimit(memento->inlimit_);
 }
@@ -421,14 +438,17 @@ void Node::set_memento( const NodeVariableMemento* memento ) {
 	std::cout << "Node::set_memento(const NodeVariableMemento* memento) " << debugNodePath() << "\n";
 #endif
 
+
 	size_t theSize = varVec_.size();
 	for(size_t i = 0; i < theSize; i++) {
 		if (varVec_[i].name() == memento->var_.name()) {
 			varVec_[i].set_value( memento->var_.theValue() );
+			ChangeMgrSingleton::instance()->add_aspect(ecf::Aspect::NODE_VARIABLE);
 			return;
 		}
  	}
 
+	// ADD_REMOVE_ATTR aspect
  	addVariable(memento->var_);
 }
 
@@ -439,9 +459,12 @@ void Node::set_memento( const NodeLateMemento* memento ) {
 #endif
 
 	if (lateAttr_) {
+	   ChangeMgrSingleton::instance()->add_aspect(ecf::Aspect::LATE);
 		lateAttr_->setLate(memento->late_.isLate());
 		return;
 	}
+
+   // ADD_REMOVE_ATTR aspect
 	addLate(memento->late_);
 }
 
@@ -452,8 +475,11 @@ void Node::set_memento( const NodeTodayMemento* memento ) {
 #endif
 
    if (time_dep_attrs_ && time_dep_attrs_->set_memento(memento) ) {
+      ChangeMgrSingleton::instance()->add_aspect(ecf::Aspect::TODAY);
       return;
    }
+
+   // ADD_REMOVE_ATTR aspect
 	addToday(memento->attr_);
 }
 
@@ -464,8 +490,11 @@ void Node::set_memento( const NodeTimeMemento* memento ) {
 #endif
 
    if (time_dep_attrs_ && time_dep_attrs_->set_memento(memento) ) {
+      ChangeMgrSingleton::instance()->add_aspect(ecf::Aspect::TIME);
       return;
    }
+
+   // ADD_REMOVE_ATTR aspect
 	addTime(memento->attr_);
 }
 
@@ -475,9 +504,13 @@ void Node::set_memento( const NodeDayMemento* memento ) {
 	std::cout << "Node::set_memento(const NodeDayMemento* memento) " << debugNodePath() << "\n";
 #endif
 
+
    if (time_dep_attrs_ && time_dep_attrs_->set_memento(memento) ) {
+      ChangeMgrSingleton::instance()->add_aspect(ecf::Aspect::DAY);
       return;
    }
+
+   // ADD_REMOVE_ATTR aspect
 	addDay(memento->attr_);
 }
 
@@ -488,8 +521,11 @@ void Node::set_memento( const NodeDateMemento* memento ) {
 #endif
 
    if (time_dep_attrs_ && time_dep_attrs_->set_memento(memento) ) {
+      ChangeMgrSingleton::instance()->add_aspect(ecf::Aspect::DATE);
       return;
    }
+
+   // ADD_REMOVE_ATTR aspect
    addDate(memento->attr_);
 }
 
@@ -499,9 +535,13 @@ void Node::set_memento( const NodeCronMemento* memento ) {
 	std::cout << "Node::set_memento(const NodeCronMemento* memento) " << debugNodePath() << "\n";
 #endif
 
+
    if (time_dep_attrs_ && time_dep_attrs_->set_memento(memento) ) {
+      ChangeMgrSingleton::instance()->add_aspect(ecf::Aspect::CRON);
       return;
    }
+
+   // ADD_REMOVE_ATTR aspect
 	addCron(memento->attr_);
 }
 
@@ -510,6 +550,8 @@ void Node::set_memento( const FlagMemento* memento ) {
 #ifdef DEBUG_MEMENTO
 	std::cout << "Node::set_memento(const FlagMemento* memento) " << debugNodePath() << "\n";
 #endif
+   ChangeMgrSingleton::instance()->add_aspect(ecf::Aspect::FLAG);
+
 	flag_.set_flag( memento->flag_.flag() );
 }
 
@@ -518,6 +560,11 @@ void Node::set_memento( const NodeZombieMemento* memento ) {
 #ifdef DEBUG_MEMENTO
    std::cout << "Node::set_memento(const NodeZombieMemento* memento) " << debugNodePath() << "\n";
 #endif
+
+   // Zombie attributes should always be via ADD_REMOVE_ATTR
+   // See Node::incremental_changes
+   // Since there is no state to change
+
    /// remove existing attribute of same type, as duplicate of same type not allowed
    delete_zombie( memento->attr_.zombie_type());
    addZombie(memento->attr_);

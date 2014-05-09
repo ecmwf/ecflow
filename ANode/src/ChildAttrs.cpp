@@ -494,8 +494,9 @@ void ChildAttrs::set_memento( const NodeEventMemento* memento ) {
 #ifdef DEBUG_MEMENTO
    std::cout << "ChildAttrs::set_memento(const NodeEventMemento* memento) " << node_->debugNodePath() << "\n";
 #endif
+
    if (set_event(memento->event_.name_or_number(),  memento->event_.value())) {
-      ChangeMgrSingleton::instance()->add_aspect(ecf::Aspect::EVENT_CHANGED);
+      ChangeMgrSingleton::instance()->add_aspect(ecf::Aspect::EVENT);
       return;
    }
    addEvent( memento->event_);
@@ -506,8 +507,9 @@ void ChildAttrs::set_memento( const NodeMeterMemento* memento ) {
 #ifdef DEBUG_MEMENTO
    std::cout << "ChildAttrs::set_memento(const NodeMeterMemento* memento) " << node_->debugNodePath() << "\n";
 #endif
+
    if (set_meter(memento->meter_.name(), memento->meter_.value())) {
-      ChangeMgrSingleton::instance()->add_aspect(ecf::Aspect::METER_CHANGED);
+      ChangeMgrSingleton::instance()->add_aspect(ecf::Aspect::METER);
       return;
    }
    addMeter(memento->meter_);
@@ -518,11 +520,12 @@ void ChildAttrs::set_memento( const NodeLabelMemento* memento ) {
 #ifdef DEBUG_MEMENTO
    std::cout << "ChildAttrs::set_memento(const NodeLabelMemento* memento) " << node_->debugNodePath() << "\n";
 #endif
+
    size_t theSize = labels_.size();
    for(size_t i = 0; i < theSize; i++) {
       if (labels_[i].name() == memento->label_.name()) {
          labels_[i] = memento->label_;
-         ChangeMgrSingleton::instance()->add_aspect(ecf::Aspect::LABEL_CHANGED);
+         ChangeMgrSingleton::instance()->add_aspect(ecf::Aspect::LABEL);
          return;
       }
    }

@@ -9,33 +9,35 @@ import ecflow
 # The two have to be separate. The installed version is used to test.
 
 def get_ecflow_version( work_space ):
-    "This will extract version from the source code"
-    "expecting string of form: const int Version::release_ = 1;"
-    "expecting string of form: const int Version::major_ = 9;"
-    "expecting string of form: const int Version::minor_ = 0;"
-    "will return string of form `ecflow_1_9_15`"
-    file = work_space + "/ACore/src/Version.cpp"
-    version_cpp = open(file,'r')
-    try :
-        release = "";  major = "";  minor = ""
-        # search for release, major, minor
-        for line in version_cpp :
-            equal_pos = line.find("=")
-            semi_colon_pos = line.find(";")
-            if equal_pos != -1 and semi_colon_pos != -1:
-                part = line[equal_pos+1:semi_colon_pos]
-                part = part.strip()
-                if line.find("Version::release_") != -1: release = part; continue
-                if line.find("Version::major_")   != -1: major = part;   continue
-                if line.find("Version::minor_")   != -1: minor = part.replace('"',''); break; # minor is a string, remove quotes
-    finally:
-        version_cpp.close();
-        
+    "This will extract ecFlow version from the source code."
+    "The version is defined in the file VERSION.cmake"
+    "expecting string of form:"
+    "set( ECFLOW_RELEASE  \"4\" )"
+    "set( ECFLOW_MAJOR    \"0\" )"
+    "set( ECFLOW_MINOR    \"2\" )"
+    "set( ${PROJECT_NAME}_VERSION_STR  \"${ECFLOW_RELEASE}.${ECFLOW_MAJOR}.${ECFLOW_MINOR}\" )"
+    "will return a list of form `[4,0,2]`"
+    file = work_space + "/VERSION.cmake"
     ecflow_version = []
-    ecflow_version.append(release)
-    ecflow_version.append(major)
-    ecflow_version.append(minor)
-    return ecflow_version
+    if os.path.exists(file):
+        version_cpp = open(file,'r')
+        try :
+           for line in version_cpp :
+               first_quote = line.find('"')
+               second_quote = line.find('"',first_quote+1)
+               if first_quote != -1 and second_quote != -1 :
+                   part = line[first_quote+1:second_quote]
+                   print "part = " + part
+                   ecflow_version.append(part);
+                   if len(ecflow_version) == 3:  
+                      break;
+        finally:
+            version_cpp.close();
+        
+        print "Extracted ecflow version '" + str(ecflow_version) + "' from " + file 
+        return ecflow_version
+    assert False, "could not determine version"
+    
         
 WK=os.getenv("WK") 
 
@@ -125,12 +127,29 @@ def add_opensuse113_variables( opensuse113 ):
     opensuse113.add_variable("ARCH","opensuse113")
     opensuse113.add_variable("SITE_CONFIG","$WK/build/site_config/site-config-Linux64.jam")
 
+def add_remote_opensuse131_variables( opensuse131 ):
+    opensuse131.add_variable("ECF_KILL_CMD","ssh  %USER%@%REMOTE_HOST% \"kill -15 %ECF_RID%\"") 
+    opensuse131.add_variable("ECF_JOB_CMD","ssh  %USER%@%REMOTE_HOST% '%ECF_JOB% > %ECF_JOBOUT%  2>&1'")
+    opensuse131.add_variable("COMPILER_TEST_PATH","gcc-4.8/$mode")
+    opensuse131.add_variable("COMPILER_VERSION","gcc-4.8")
+    opensuse131.add_variable("TOOLSET","gcc")
+    opensuse131.add_variable("BOOTSTRAP_TOOLSET","gcc")
+    opensuse131.add_variable("REMOTE_COPY","scp")
+
+def add_opensuse131_variables( opensuse131 ):
+    opensuse131.add_variable("REMOTE_HOST","opensuse131")
+    opensuse131.add_variable("ROOT_WK","/vol/ecf/opensuse131")
+    opensuse131.add_variable("BOOST_DIR","/vol/ecf/opensuse131/boost")
+    opensuse131.add_variable("ARCH","opensuse131")
+    opensuse131.add_variable("SITE_CONFIG","$WK/build/site_config/site-config-Linux64.jam")
+    opensuse131.add_variable("CUSTOM_BJAM_ARGS","c++-template-depth=512")   # needed for gcc 4.8.1
+
 def add_cray_gnu_compiler_variables( cray_gnu ):
     cray_gnu.add_variable("COMPILER_TEST_PATH","gcc-4.6.3/$mode")
     cray_gnu.add_variable("COMPILER_VERSION","gcc-4.6.3")
     cray_gnu.add_variable("TOOLSET","gcc")
     cray_gnu.add_variable("BOOTSTRAP_TOOLSET","gcc")
-    cray_gnu.add_variable("LAYOUT","tagged")
+    cray_gnu.add_variable("LAYOUT","versioned")
     cray_gnu.add_variable("PRGENV","PrgEnv-gnu")
     cray_gnu.add_variable("SITE_CONFIG","$WK/build/site_config/site-config-cray.jam")
     cray_gnu.add_variable("ROOT_WK","/perm/ma/ma0/workspace/GNU")
@@ -169,7 +188,7 @@ def add_remote_cray_variables( cray ):
     cray.add_variable("REMOTE_COPY","scp")
 
     # for cray we need to use logsrvr in order to see the job output
-    cray.add_variable("ECF_LOGHOST","cctdtn1")
+    cray.add_variable("ECF_LOGHOST","cct")  # cctdtn1
     cray.add_variable("ECF_LOGPORT","9316")   
     
     # Set the remote location for output, LOGDIR needed by queing system
@@ -281,7 +300,7 @@ def add_aix_power7_variables( aix_power7 ) :
 
 def add_build_debug( parent ): 
     f = parent.add_family("build_debug")
-    f.add_trigger("cp_site_config == complete and git_clone == complete")
+    f.add_trigger("cp_site_config == complete and git_clone_ecflow == complete and git_clone_ecbuild == complete")
     f.add_variable("MODE","debug")
     f.add_task("build")
     task_test = f.add_task("test")
@@ -297,7 +316,7 @@ def add_build_debug( parent ):
 
 def add_build_release( parent ):
     f = parent.add_family("build_release")
-    f.add_trigger("cp_site_config == complete and git_clone == complete")
+    f.add_trigger("cp_site_config == complete and git_clone_ecflow == complete and git_clone_ecbuild == complete")
     f.add_variable("MODE","release")
     task_build = f.add_task("build")
     
@@ -317,11 +336,17 @@ def add_build_release( parent ):
     task_test.add_meter("progress",0,100,100)
     
 def add_git_tasks( parent , set_git_clone_def_status = False ) :
-    git_clone = parent.add_task("git_clone")
+    git_clone_ecflow = parent.add_task("git_clone_ecflow")
     if set_git_clone_def_status :
-        git_clone.add_defstatus( ecflow.DState.complete )
-    git_pull = parent.add_task("git_pull")
-    git_pull.add_defstatus( ecflow.DState.complete )
+        git_clone_ecflow.add_defstatus( ecflow.DState.complete )
+    git_pull_ecflow = parent.add_task("git_pull_ecflow")
+    git_pull_ecflow.add_defstatus( ecflow.DState.complete )
+
+    git_clone_ecbuild = parent.add_task("git_clone_ecbuild")
+    if set_git_clone_def_status :
+        git_clone_ecbuild.add_defstatus( ecflow.DState.complete )
+    git_clone_ecbuild = parent.add_task("git_pull_ecbuild")
+    git_clone_ecbuild.add_defstatus( ecflow.DState.complete )
 
             
 def add_build_profile( parent ):
@@ -353,8 +378,8 @@ def add_build_and_test_tasks( parent ) :
 
 def build_localhost( parent ) :
     localhost = parent.add_family("localhost")
-    if (parent.name() == "build") :
-        localhost.add_trigger("tar/create_tar == active or tar/create_tar == complete")
+    if (parent.name() == "local") :
+        localhost.add_trigger("../tar/create_tar == complete")
     add_localhost_variables(localhost)
     
     add_git_tasks( localhost , True)
@@ -376,9 +401,9 @@ def build_localhost( parent ) :
 def build_localhost_cmake( parent ) :
     # Hence left out test_client_performance and test_server_performance
     localhost_cmake = parent.add_family("localhost_cmake")
-    localhost_cmake.add_variable("CMAKE","CMAKE")
+    localhost_cmake.add_variable("BUILD_TYPE","cmake")
     
-    if (parent.name() == "build") :
+    if (parent.name() == "local") :
         localhost_cmake.add_trigger("localhost == complete || localhost == aborted")
     add_localhost_variables(localhost_cmake)
     
@@ -392,7 +417,7 @@ def build_localhost_clang( parent ) :
     localhost_clang = parent.add_family("localhost_clang")
     add_localhost_clang_variables(localhost_clang)
 
-    if (parent.name() == "build") :
+    if (parent.name() == "local") :
         localhost_clang.add_trigger("localhost_cmake == complete || localhost_cmake == aborted")
     
     add_git_tasks( localhost_clang , True)
@@ -426,6 +451,14 @@ def build_opensuse113( parent ) :
     add_git_tasks( opensuse113 )
     add_build_and_test_tasks( opensuse113 )
     
+def build_opensuse131( parent ) :
+    opensuse131 = parent.add_family("opensuse131")
+    opensuse131.add_variable("GIT","git")   # hack 
+    add_opensuse131_variables(opensuse131)
+    add_remote_opensuse131_variables(opensuse131)
+    add_git_tasks( opensuse131 )
+    add_build_and_test_tasks( opensuse131 )
+    
 def build_redhat( parent ) :
     redhat = parent.add_family("redhat")
     add_redhat_variables(redhat)
@@ -452,6 +485,7 @@ def build_cray_intel( parent ) :
     
 def build_cray_cray( parent ) :
     cray = parent.add_family("cray_cray")
+    cray.add_defstatus( ecflow.DState.complete ) # complete since does not compile
     cray.add_trigger("cray_intel == complete or cray_intel == aborted")
     add_cray_variables(cray)
     add_cray_cray_compiler_variables(cray)
@@ -475,8 +509,10 @@ def build_opensuse103( parent ) :
 
 def build_hpux( parent ):
     hpux = parent.add_family("hpux")
-    if (parent.name() == "build") :
-        hpux.add_trigger("tar/cp_tar_to_hpux == complete")
+    hpux.add_variable("BUILD_TYPE","boost")
+
+    if (parent.name() == "remote") :
+        hpux.add_trigger("../tar/cp_tar_to_hpux == complete")
     else :
         hpux.add_trigger("/suite/build_incr/incr_tar_and_cp  == complete")
     add_hpux_variables( hpux )
@@ -534,12 +570,17 @@ def build_boost( boost ):
     add_opensuse113_variables(family)
     add_remote_opensuse113_variables(family)
     add_boost_tasks( family )
+    
+    family = boost.add_family("opensuse131")
+    family.add_variable("GIT","git")   # hack 
+    add_opensuse131_variables(family)
+    add_remote_opensuse131_variables(family)
+    add_boost_tasks( family )
 
     family = boost.add_family("redhat")
     add_redhat_variables(family)
     add_remote_redhat_variables(family)
     add_boost_tasks( family )
-    
     
     family = boost.add_family("cray")
     add_cray_variables(family)
@@ -601,9 +642,12 @@ def add_suite_variables( suite ):
     suite.add_variable("WK",WK)
     suite.add_variable("BOOST_DIR","/var/tmp/ma0/boost")
     suite.add_variable("PYTHON_VERSION","2.7")
+    suite.add_variable("CMAKE","/usr/local/apps/cmake/current/bin/cmake")
+    suite.add_variable("GIT","/usr/local/apps/git/current/bin/git")
     suite.add_variable("SET_TO_TEST_SCRIPT","false") 
     suite.add_variable("BUILD_ECFLOWVIEW","true")
-    suite.add_variable("GIT_BRANCH","develop")  # when makeing a relase switch to release/<release version>, otherwise develop
+    suite.add_variable("ECFLOW_GIT_BRANCH","develop")  # when makeing a relase switch to release/<release version>, otherwise develop
+    suite.add_variable("ECBUILD_GIT_BRANCH","develop")   
 
     # automatically fob all zombies when compiling ecflow 
     child_list = []
@@ -616,10 +660,26 @@ def add_suite_variables( suite ):
 # ================================================================================    
 defs = ecflow.Defs()
 defs.add_variable("ECFLOW_TAR_DIR","/var/tmp/ma0/clientRoot/workspace")
- 
+
+print "build experiment"
+with defs.add_suite("experiment") as experiment:
+    experiment.add_defstatus( ecflow.DState.suspended )
+    experiment.add_variable("ECF_HOME", os.getenv("SCRATCH") + "/nightly")
+    experiment.add_variable("ECF_INCLUDE",os.getenv("SCRATCH") + "/nightly")
+    experiment.add_variable("ECF_FILES",os.getenv("SCRATCH") + "/nightly/experiment")
+    experiment.add_variable("ECF_JOB_CMD","python %ECF_JOB% 1> %ECF_JOBOUT% 2>&1")
+    with experiment.add_task("exp") as task:
+        task.add_event("event_fred")
+        task.add_meter("meter", 0, 100)
+        task.add_label("label_name", "value")
+    with experiment.add_task("exp2") as task:
+        task.add_event("event_fred")
+        task.add_meter("meter", 0, 100)
+        task.add_label("label_name", "value")
+
 print "build boost"
 with defs.add_suite("boost_suite") as boost_suite:
-    boost_suite.add_variable("BOOST_VERSION","boost_1_55_0")
+    boost_suite.add_variable("BOOST_VERSION","boost_1_53_0")
     boost_suite.add_variable("REMOTE_COPY","rcp")
     boost_suite.add_variable("ECF_FILES",os.getenv("SCRATCH") + "/nightly/boost_suite")
     add_suite_variables(boost_suite)
@@ -637,13 +697,15 @@ with defs.add_suite("suite") as suite:
         build.add_time("18:15")
         build.add_defstatus( ecflow.DState.suspended );
     
-        git_pull = build.add_task("git_pull")
-        git_pull.add_variable("ARCH","opensuse113")
-        git_pull.add_variable("LOCAL_HOST",os.uname()[1]) # run this locally
+        git_pull_ecflow = build.add_task("git_pull_ecflow")
+        git_pull_ecflow.add_variable("ARCH","opensuse113")
+        git_pull_ecflow.add_variable("LOCAL_HOST",os.uname()[1]) # run this locally
+        git_pull_ecbuild = build.add_task("git_pull_ecbuild")
+        git_pull_ecbuild.add_variable("ARCH","opensuse113")
+        git_pull_ecbuild.add_variable("LOCAL_HOST",os.uname()[1]) # run this locally
 
-    
         tar_fam = build.add_family("tar")
-        tar_fam.add_trigger("git_pull == complete")
+        tar_fam.add_trigger("git_pull_ecflow == complete and git_pull_ecbuild == complete")
     
         create_tar = tar_fam.add_task("create_tar")
         create_tar.add_variable("ARCH","opensuse113")
@@ -652,18 +714,23 @@ with defs.add_suite("suite") as suite:
         cp_tar_to_hpux.add_trigger("create_tar == complete")
         add_hpux_variables( cp_tar_to_hpux )
     
-        build_localhost( build )
-        build_localhost_cmake( build )
-        build_localhost_clang( build )
-        build_linux_64( build )
-        build_linux_64_intel( build )
-        build_opensuse113( build )
-        build_redhat( build )
-        build_cray( build )
-        build_opensuse103( build )
-        build_hpux(build)
-        build_aix_power7(build)
-  
+        with build.add_family("local") as local:
+            build_localhost( local )
+            build_localhost_cmake( local )
+            build_localhost_clang( local )
+
+        with build.add_family("remote") as remote:
+            remote.add_variable("BUILD_TYPE","boost")  # choose between [  cmake | boost ]
+            build_linux_64( remote )
+            build_linux_64_intel( remote )
+            build_opensuse113( remote )
+            build_opensuse131( remote )
+            build_redhat( remote )
+            build_cray( remote )
+            build_opensuse103( remote )
+            build_hpux(remote) # this is build with boost build
+            build_aix_power7(remote)
+        
 #ecflow.PrintStyle.set_style(ecflow.Style.STATE)
 #print defs
 

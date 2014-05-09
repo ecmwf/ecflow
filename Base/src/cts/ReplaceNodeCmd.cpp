@@ -170,7 +170,11 @@ const char* ReplaceNodeCmd::desc() {
             "- The node path(arg1) does not exist in the provided client definition(arg2)\n"
             "- The client definition(arg2) must be free of errors\n"
             "- If the third argument is not provided, then node path(arg1) must exist in the server\n"
-            "- Nodes to be replaced are in active/submitted state, in which case arg4(force) can be used\n"
+            "- Nodes to be replaced are in active/submitted state, in which case arg4(force) can be used\n\n"
+            "After replace is done, we check trigger expressions. These are reported to standard output.\n"
+            "It is up to the user to correct invalid trigger expressions, otherwise the tasks will *not* run.\n"
+            "Please note, you can use --check to check trigger expression and limits in the server.\n"
+            "For more information use --help check.\n\n"
             "Usage:\n"
             "  --replace=/suite/f1/t1 /tmp/client.def  parent      # Add/replace node tree /suite/f1/t1\n"
             "  --replace=/suite/f1/t1 /tmp/client.def  false force # replace t1 even if its active or submitted";

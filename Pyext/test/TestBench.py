@@ -89,7 +89,7 @@ if __name__ == "__main__":
                         help="The port on the host, defaults to 3141")
     PARSER.add_argument('--path', default="/",   
                         help="replace only the node path in the suite")
-    PARSER.add_argument('--ecf_home', default="CUSTOMER/ECF_HOME",
+    PARSER.add_argument('--ecf_home', default=os.getcwd() + "/CUSTOMER/ECF_HOME",
                         help="Directory to be used for generated scripts(ECF_HOME), defaults to ./CUSTOMER/ECF_HOME")
     PARSER.add_argument('--verbose', nargs='?', default=False, const=True, type=bool,
                         help="Show verbose output")
@@ -98,13 +98,18 @@ if __name__ == "__main__":
     print ARGS    
     
     # If running on local work space, use /Pyext/test/data/CUSTOMER/ECF_HOME as ecf_home
-    if os.getenv("WK") != None:
+    if not ARGS.ecf_home:
+        if os.getenv("WK") == None:
+            print "No ecf_home specified. Please specify a writable directory"
+            exit(1)
         ARGS.ecf_home = os.getenv("WK") + "/Pyext/test/data/CUSTOMER/ECF_HOME"
         if ARGS.verbose:
             print "Workspace is defined" 
-            print "Using ECF_HOME=" + ARGS.ecf_home
             print "using /Client/bin/gcc\-4.5/debug/ecflow_client"
-        
+
+    if ARGS.verbose:
+        print "Using ECF_HOME=" + ARGS.ecf_home
+         
     if ARGS.verbose: 
         print "\nloading the definition from the input arguments(" + ARGS.defs_file + ")\n"
     try:
@@ -162,16 +167,16 @@ if __name__ == "__main__":
         CL.ping() 
 
         if ARGS.verbose: 
-            print "start the server running"
+            print "Server is already running. re-start the server"
         CL.restart_server() 
 
         if ARGS.verbose: 
-            print "Remove suites associated with this DEFS, allows rerun"
-        try:
-            for suite in DEFS.suites:
+            print "Remove suites associated with this DEFS, allows rerun *******************************************"
+        for suite in DEFS.suites:
+            try:
                 CL.delete(suite.get_abs_node_path(), True)
-        except RuntimeError, ex:
-            pass # For first run this will fail, hence ignore
+            except RuntimeError, ex:
+                pass # For first run this will fail, hence ignore
         
         if ARGS.verbose: 
             print "Load the definition into " + ARGS.host + ":" + ARGS.port

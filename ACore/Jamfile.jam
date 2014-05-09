@@ -35,7 +35,7 @@ lib core : [ glob src/*.cpp ]
 # boost_datetime is only required for formatting. i.e to call to_simple_string
 #  cerr <<  to_simple_string(calendar.suiteTime()) << "\n";
 #
-exe coretest : [ glob test/*.cpp ]
+exe u_acore : [ glob test/*.cpp ]
            core
            /site-config//boost_system
            /site-config//boost_filesystem

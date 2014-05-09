@@ -213,6 +213,8 @@ class host : public extent<host>
 	host(const host&);
 	host& operator=(const host&);
 
+	void destroy_top(node*) const;
+
 	str     host_;
 	int     number_;
 
@@ -260,6 +262,7 @@ class host : public extent<host>
 	virtual bool connect_mngt(bool connect);
 
 	bool updating_; // SUP-423
+	option<int>       jobfile_length_;
  public:
 	void updating(bool b) { updating_ = b; }
         virtual void stats(std::ostream& f) { };
@@ -319,6 +322,30 @@ public:
    host_locker( host* h );
    ~host_locker();
    int err() { return e_; }
+};
+
+class Updating {
+public:
+ Updating(host* h) : host_(h) {
+    do_full_redraw_ = false;
+    host_->updating(true);
+  }
+
+  ~Updating() {
+    host_->updating(false);
+  }
+
+  static void set_full_redraw() {
+    do_full_redraw_ = true;
+  }
+
+  static bool full_redraw() {
+    return do_full_redraw_;
+  }
+
+private:
+  host* host_;
+  static bool do_full_redraw_;
 };
 
 #endif

@@ -1,5 +1,4 @@
 suite suiteName
-   day monday
    family familyName0
    	  day tuesday
       task taskName0
@@ -13,7 +12,7 @@ suite suiteName
    endfamily
 endsuite
 
-suite s1; day monday;family familyName0 ; day tuesday
+suite s1; family familyName0 ; day tuesday
       task taskName0
    	  		day wednesday
       task fred
@@ -21,7 +20,7 @@ suite s1; day monday;family familyName0 ; day tuesday
    	  		day friday
    	  		day saturday
    	  		day sunday
-       endtask
+      endtask
    endfamily
 endsuite
 

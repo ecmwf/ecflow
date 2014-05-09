@@ -25,6 +25,8 @@ lib boost_test_monitor : :    <variant>debug <file>$(BOOST_ROOT)/stage/lib/libbo
 lib boost_program_options : : <variant>debug <file>$(BOOST_ROOT)/stage/lib/libboost_program_options-mt-d.a ;
 lib boost_filesystem      : : <variant>debug <file>$(BOOST_ROOT)/stage/lib/libboost_filesystem-mt-d.a ;
 lib boost_datetime        : : <variant>debug <file>$(BOOST_ROOT)/stage/lib/libboost_date_time-mt-d.a ;
+lib boost_python          : : <variant>debug <file>$(BOOST_ROOT)/stage/lib/libboost_python-mt-d.so ;
+lib boost_python_static   : : <variant>debug <file>$(BOOST_ROOT)/stage/lib/libboost_python-mt-d.a ;
 
 lib boost_serialization : :   <variant>release <file>$(BOOST_ROOT)/stage/lib/libboost_serialization-mt.a ;
 lib boost_system : :          <variant>release <file>$(BOOST_ROOT)/stage/lib/libboost_system-mt.a ;
@@ -34,6 +36,8 @@ lib boost_test_monitor : :    <variant>release <file>$(BOOST_ROOT)/stage/lib/lib
 lib boost_program_options : : <variant>release <file>$(BOOST_ROOT)/stage/lib/libboost_program_options-mt.a ;
 lib boost_filesystem      : : <variant>release <file>$(BOOST_ROOT)/stage/lib/libboost_filesystem-mt.a ;
 lib boost_datetime        : : <variant>release <file>$(BOOST_ROOT)/stage/lib/libboost_date_time-mt.a ;
+lib boost_python          : : <variant>release <file>$(BOOST_ROOT)/stage/lib/libboost_python-mt.so ;
+lib boost_python_static   : : <variant>release <file>$(BOOST_ROOT)/stage/lib/libboost_python-mt.a ;
 
 # Lib for run time checks, use for debug builds only
 lib rtc : :  <variant>debug <file>/opt/langtools/lib/hpux32/librtc.so ;
@@ -106,22 +110,4 @@ using acc : : : <compileflags>+W2236,2461,2191,2815,4232,4189
           
 using testing ;
 
-# ========================== PYTHON  ======================================================
-
-# Compiling with boost python with python 2.5 is ok, however with python 2.7
-# We see the following warnings:
-#
-# "/usr/local/apps/python/2.7/include/python2.7/pyconfig.h", line 1155: 
-#   warning #2047-D: incompatible redefinition of macro "_POSIX_C_SOURCE"
-#
 # - If you change python version ,remember to change: $WK/build/install_ecflow.sh: ECFLOW_PYTHON_INSTALL_DIR
-#
-
-#using python
-#     :                                        # version
-#     : /usr/local/apps/python/2.7/bin/python  # cmd-or-prefix (for python 2.5 use )/opt/python/usr/local/bin/python
-#     : # includes  
-#     : # libraries
-#     : # condition
-#     ;
-

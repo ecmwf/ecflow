@@ -51,7 +51,7 @@ lib base : [ glob src/*.cpp ] [ glob src/cts/*.cpp ] [ glob src/stc/*.cpp ]
 #
 lib pthread ;
 
-exe basetest : [ glob test/*.cpp  ]
+exe u_base : [ glob test/*.cpp  ]
            /theCore//core
            /theNodeAttr//nodeattr
            /theNode//node

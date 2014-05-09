@@ -11,13 +11,16 @@
 #
 #       -DCMAKE_PREFIX_PATH=/path/to/jasper:/path/to/any/package/out/of/place
 #       -DBUILD_SHARED_LIBS=OFF
-# ========================================================
+# =========================================================================================
 # Usage instructions:
 #
 # cd $WK
+# release=$(cat VERSION.cmake | grep 'set( ECFLOW_RELEASE' | awk '{print $3}'| sed 's/["]//g')
+# major=$(cat VERSION.cmake   | grep 'set( ECFLOW_MAJOR'   | awk '{print $3}'| sed 's/["]//g')
+# minor=$(cat VERSION.cmake   | grep 'set( ECFLOW_MINOR'   | awk '{print $3}'| sed 's/["]//g')
+#
 # mkdir ecbuild
 # cd ecbuild
-# Build debug and release in same tree
 # mkdir debug
 # mkdir release
 # cd debug
@@ -28,7 +31,7 @@
 #         -DPYTHON_LIBRARY=/usr/local/apps/python/current/lib/libpython2.7.a \
 #         -DPYTHON_INCLUDE_DIR=/usr/local/apps/python/current/include/python2.7 \
 #         -DPYTHON_EXECUTABLE=/usr/local/apps/python/current/bin/python2.7 \
-#         -DCMAKE_INSTALL_PREFIX=/usr/local/apps/ecflow/$(cat ../../VERSION.cmake | awk '{print $3}'|sed 's/["]//g')
+#         -DCMAKE_INSTALL_PREFIX=/usr/local/apps/ecflow/$release.$major.$minor
 #
 #         -DCMAKE_INSTALL_PREFIX=/var/tmp/ma0/cmake/ecflow/4.0.1
 #
@@ -38,7 +41,8 @@ cmake_minimum_required( VERSION 2.6.4 FATAL_ERROR )
 
 project( ecflow CXX )
 
-set( CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/../ecbuild/cmake")
+#set( CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/../ecbuild/cmake")
+message( STATUS "CMAKE_MODULE_PATH    : ${CMAKE_MODULE_PATH}")
 
 include( ecbuild_system )
 
@@ -50,33 +54,44 @@ option( ENABLE_VIEWER    "enable the Qt version of ecflowview"  ON )
 
 ecbuild_declare_project()
 
-###############################################################################
+# =========================================================================================
+# VERSION  
+# Get the ecflow version specified in 'VERSION.cmake'. This is only accessible after ecbuild_declare_project()
+# The ecflow version cofig is done in ACore directory
+# =========================================================================================
+
+message( STATUS "CMAKE_INSTALL_PREFIX : ${CMAKE_INSTALL_PREFIX}" )
+message( STATUS "ECFLOW_RELEASE       : ${ECFLOW_RELEASE}" )
+message( STATUS "ECFLOW_MAJOR         : ${ECFLOW_MAJOR}" )
+message( STATUS "ECFLOW_MINOR         : ${ECFLOW_MINOR}" )
+message( STATUS "ECFLOW_VERSION       : ${ECFLOW_VERSION_STR}" )
+
+# =========================================================================================
+# Python  
+# =========================================================================================
 # some variables of this project
 
 option( ENABLE_PYTHON         "enable python interface"   ON  )
 
-###############################################################################
-# find packages
-
-# Python ----------------------------------------------------------------------
 if(ENABLE_PYTHON)
    ecbuild_find_python( VERSION 2.7 REQUIRED )
 else() 
    ecbuild_find_python( VERSION 2.7 )
 endif()
+
 message( STATUS "PYTHON_EXECUTABLE    : ${PYTHON_EXECUTABLE}")
 message( STATUS "PYTHON_INCLUDE_DIRS  : ${PYTHON_INCLUDE_DIRS}")
 message( STATUS "PYTHON_LIBRARIES     : ${PYTHON_LIBRARIES}")
  
-
-# Boost ----------------------------------------------------------------------
+# =========================================================================================
+# Boost  
+# =========================================================================================
 
 # If this is enable then can not find boost libs using env BOOST_ROOT ?
 #ecbuild_add_extra_search_paths( boost )
 
-# For local boost_root I do not set Boost_USE_STATIC_LIBS, but it still links boost libs statically
-# for external boost root its need to be explicitly enabled ?
-#set(Boost_USE_STATIC_LIBS        ON)
+# To use static boost python ensure that Boost_USE_STATIC_LIBS is set on.
+set(Boost_USE_STATIC_LIBS        ON)
 set(Boost_USE_MULTITHREADED      ON)
 set(Boost_NO_SYSTEM_PATHS        ON)
 set(Boost_DETAILED_FAILURE_MSG   ON)
@@ -84,31 +99,43 @@ set(Boost_DETAILED_FAILURE_MSG   ON)
 
 find_package( Boost 1.53.0 COMPONENTS python serialization system thread unit_test_framework test_exec_monitor filesystem program_options date_time )
 #find_package(Boost 1.53.0 EXACT REQUIRED COMPONENTS python)
+#
+# Available boost lib should be referenced as:
+#
+#    ${Boost_SYSTEM_LIBRARY}
+#    ${Boost_SERIALIZATION_LIBRARY}
+#    ${Boost_THREAD_LIBRARY}
+#    ${Boost_FILESYSTEM_LIBRARY}
+#    ${Boost_PROGRAM_OPTIONS_LIBRARY}
+#    ${Boost_DATE_TIME_LIBRARY}
+#
+#    ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} 
+#    ${Boost_TEST_EXEC_MONITOR_LIBRARY} 
 
 message( STATUS "Boost_LIBRARIES     : ${Boost_LIBRARIES}" )
 
-list( APPEND Ecflow_Boost_LIBS 
-    ${Boost_SERIALIZATION_LIBRARY}
-    ${Boost_SYSTEM_LIBRARY}
-    ${Boost_THREAD_LIBRARY}
-    ${Boost_FILESYSTEM_LIBRARY}
-    ${Boost_PROGRAM_OPTIONS_LIBRARY}
-    ${Boost_DATE_TIME_LIBRARY}
-)
+#list( APPEND Ecflow_Boost_LIBS
+#    ${Boost_SERIALIZATION_LIBRARY}
+#    ${Boost_SYSTEM_LIBRARY}
+#    ${Boost_THREAD_LIBRARY}
+#    ${Boost_FILESYSTEM_LIBRARY}
+#    ${Boost_PROGRAM_OPTIONS_LIBRARY}
+#    ${Boost_DATE_TIME_LIBRARY}
+#)
 
-list( APPEND Ecflow_Test_LIBS 
-      ${Ecflow_Boost_LIBS} 
-      ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} 
-      ${Boost_TEST_EXEC_MONITOR_LIBRARY} )
 
+# =========================================================================================
+# Qt
+# =========================================================================================
 
 if(ENABLE_VIEWER)
     find_package(Qt4 REQUIRED QtCore QtGui )
 endif()
 
 
-##############################################################################
+# =========================================================================================
 # debug
+# =========================================================================================
 if( CMAKE_BUILD_TYPE MATCHES "[Dd][Ee][Bb][Uu][Gg]" )
     message( "INFO: DEBUG BUILD" )
     # for debug type builds, turn on verbose makefiles
@@ -122,12 +149,9 @@ if( CMAKE_BUILD_TYPE MATCHES "[Dd][Ee][Bb][Uu][Gg]" )
 endif()
 
 
-###############################################################################
+# =========================================================================================
 # build source code
-
-# compile with fPIC on linux, need for ecflow.so *install*
-# This could be switched off for, Server,/View, since that is not used in ecflow.so
-cmake_add_cxx_flags("-fPIC")
+# =========================================================================================
 
 add_subdirectory( ACore )
 add_subdirectory( ANattr )
@@ -138,7 +162,6 @@ add_subdirectory( Client )
 add_subdirectory( CSim )
 add_subdirectory( Server )
 add_subdirectory( Test )
-add_subdirectory( TestEcfSms )
 add_subdirectory( Pyext )
 add_subdirectory( view )
 
@@ -146,8 +169,11 @@ if(ENABLE_VIEWER)
     add_subdirectory( Viewer )
 endif()
 
-# configure_file( cmake/ecbase_config.h.in  ${CMAKE_BINARY_DIR}/ecbase_config.h )
 
+# Directories not need in the distribution tar ball!
+ecbuild_add_resources( TARGET build_nightly DONT_PACK_DIRS build/nightly)
+ecbuild_add_resources( TARGET SCRATCH DONT_PACK_DIRS SCRATCH)
+ecbuild_add_resources( TARGET Doc DONT_PACK_DIRS Doc/func_spec Doc/misc Doc/newsletter Doc/online Doc/presentations Doc/tac)
 
 # =========================================================================================
 # install 
@@ -173,8 +199,9 @@ install (FILES
          PERMISSIONS OWNER_READ GROUP_READ WORLD_READ OWNER_EXECUTE GROUP_EXECUTE WORLD_EXECUTE
         )
          
-############################################################################################
+# =========================================================================================
 # final
+# =========================================================================================
 
 # prepares a tar.gz of your sources and/or binaries
 ecbuild_install_project( NAME ecFlow )

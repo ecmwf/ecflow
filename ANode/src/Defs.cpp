@@ -46,6 +46,8 @@ using namespace ecf;
 using namespace std;
 
 //#define DEBUG_JOB_SUBMISSION 1
+//#define DEBUG_MEMENTO 1
+
 Defs::Defs() :
    state_change_no_(0),
    modify_change_no_( 0 ),
@@ -906,6 +908,7 @@ bool Defs::replaceChild(const std::string& path,
 
 	 	client_node_to_add->set_most_significant_state_up_node_tree();
 
+	 	// The changes have been made, do a sanity test, check trigger expressions
 	 	std::string warning_msg;
 	 	return client_node_to_add->suite()->check(errorMsg,warning_msg);
  	}
@@ -934,6 +937,7 @@ bool Defs::replaceChild(const std::string& path,
  		LOG_ASSERT( addOk ,"");
  		client_suite_to_add->set_most_significant_state_up_node_tree();
 
+      // The changes have been made, do a sanity test, check trigger expressions
  	   std::string warning_msg;
  	   return client_suite_to_add->suite()->check(errorMsg,warning_msg);
 	}
@@ -971,6 +975,7 @@ bool Defs::replaceChild(const std::string& path,
 	LOG_ASSERT( addOk,"" );
 	client_node_to_add->set_most_significant_state_up_node_tree();
 
+   // The changes have been made, do a sanity test, check trigger expressions
 	std::string warning_msg;
 	return client_node_to_add->suite()->check(errorMsg,warning_msg);
 }
@@ -1226,7 +1231,6 @@ void Defs::collateChanges(unsigned int client_handle, DefsDelta& incremental_cha
    }
 }
 
-
 void Defs::collate_defs_changes_only(DefsDelta& incremental_changes) const
 {
    // ************************************************************************************************
@@ -1284,6 +1288,7 @@ void Defs::set_memento(const StateMemento* memento) {
 #ifdef DEBUG_MEMENTO
 	std::cout << "Defs::set_memento(const StateMemento* memento)\n";
 #endif
+   ChangeMgrSingleton::instance()->add_aspect(ecf::Aspect::STATE);
 	set_state( memento->state_ );
 }
 
@@ -1291,6 +1296,7 @@ void Defs::set_memento( const ServerStateMemento* memento ) {
 #ifdef DEBUG_MEMENTO
 	std::cout << "Defs::set_memento(const ServerStateMemento* memento)\n";
 #endif
+   ChangeMgrSingleton::instance()->add_aspect(ecf::Aspect::SERVER_STATE);
 	server_.set_state( memento->state_ );
 }
 
@@ -1298,6 +1304,13 @@ void Defs::set_memento( const ServerVariableMemento* memento ) {
 #ifdef DEBUG_MEMENTO
    std::cout << "Defs::set_memento(const ServerVariableMemento* memento)\n";
 #endif
+
+   if (server_.user_variables().size() != memento->serverEnv_.size()) {
+      ChangeMgrSingleton::instance()->add_aspect(ecf::Aspect::ADD_REMOVE_ATTR);
+   }
+
+   ChangeMgrSingleton::instance()->add_aspect(ecf::Aspect::SERVER_VARIABLE);
+
    server_.set_user_variables( memento->serverEnv_);
 }
 
@@ -1338,6 +1351,7 @@ void Defs::set_memento( const FlagMemento* memento ) {
 #ifdef DEBUG_MEMENTO
    std::cout << "Defs::set_memento(const FlagMemento* memento)\n";
 #endif
+   ChangeMgrSingleton::instance()->add_aspect(ecf::Aspect::FLAG);
    flag_.set_flag( memento->flag_.flag() );
 }
 

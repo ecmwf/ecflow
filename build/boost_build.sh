@@ -52,14 +52,14 @@ if test_uname Linux ; then
     if [ "$PE_ENV" = GNU -o "$PE_ENV" = INTEL -o "$PE_ENV" = CRAY ]
     then
        CXXFLAGS=cxxflags=-fPIC
+       layout=versioned  
+       
        cp $WK/build/site_config/site-config-cray.jam $BOOST_ROOT/tools/build/v2/site-config.jam
        if [ "$PE_ENV" = INTEL ] ; then
-          layout=versioned  
           tool=intel
        fi
        if [ "$PE_ENV" = CRAY ] ; then
           tool=cray
-          layout=versioned  
        fi
     else
        cp $WK/build/site_config/site-config-Linux64.jam $BOOST_ROOT/tools/build/v2/site-config.jam  
@@ -134,10 +134,10 @@ else
    #
    # To prebuild the boost python, hence we need to do the following: For now build both variants, keeps cmake happy! (i.e when finding libs)
    #
-   ./bjam toolset=$tool link=shared variant=debug   $CXXFLAGS stage --layout=$layout threading=single --with-python -d2 -j2
-   ./bjam toolset=$tool link=shared variant=release $CXXFLAGS stage --layout=$layout threading=single --with-python -d2 -j2
    ./bjam toolset=$tool link=shared variant=debug   $CXXFLAGS stage --layout=$layout threading=multi --with-python -d2 -j2
    ./bjam toolset=$tool link=shared variant=release $CXXFLAGS stage --layout=$layout threading=multi --with-python -d2 -j2
+   ./bjam toolset=$tool link=static variant=debug   $CXXFLAGS stage --layout=$layout threading=multi --with-python -d2 -j2
+   ./bjam toolset=$tool link=static variant=release $CXXFLAGS stage --layout=$layout threading=multi --with-python -d2 -j2
 fi
 
  

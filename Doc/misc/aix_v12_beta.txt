@@ -43,7 +43,7 @@ private:
       // This seems to fix, bug with release version of v11.1
       // Serialisation via base pointer is broken with release mode of v11.1 compiler and requires this hack.
       // i.e explicit type registration.
-//#if defined(AIX) && !defined(DEBUG)
+//#if defined(_AIX) && !defined(DEBUG)
 //       ar.register_type(static_cast<RepeatDate *>(NULL));
 //       ar.register_type(static_cast<RepeatInteger *>(NULL));
 //       ar.register_type(static_cast<RepeatEnumerated *>(NULL));
@@ -115,7 +115,7 @@ private:
    template<class Archive>
    void serialize(Archive & ar, const unsigned int /*version*/) {
 
-//#if defined(AIX) && !defined(DEBUG)
+//#if defined(_AIX) && !defined(DEBUG)
 //      // ** On AIX debug mode, implicit type registration via BOOST_CLASS_EXPORT works
 //      // ** however in release mode, this fails, hence as a work
 //      // ** around we do explicit type registration for both debug/release modes.

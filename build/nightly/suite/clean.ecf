@@ -13,18 +13,21 @@ cd $WK
 if [[ %SET_TO_TEST_SCRIPT% = true ]] ; then
    echo "Test only"
 else
-   rm -rf ACore/bin
-   rm -rf ANattr/bin
-   rm -rf ANode/bin 
-   rm -rf AParser/bin 
-   rm -rf Base/bin
-   rm -rf CSim/bin
-   rm -rf Client/bin 
-   rm -rf Server/bin 
-   rm -rf Test/bin
-   rm -rf TestEcfSms/bin 
-   rm -rf Pyext/bin 
-   rm -rf view/bin 
+   if [[ %BUILD_TYPE:boost% = cmake ]] ; then
+      rm -rf ecbuild || true   
+   else
+      rm -rf ACore/bin
+      rm -rf ANattr/bin
+      rm -rf ANode/bin 
+      rm -rf AParser/bin 
+      rm -rf Base/bin
+      rm -rf CSim/bin
+      rm -rf Client/bin 
+      rm -rf Server/bin 
+      rm -rf Test/bin
+      rm -rf Pyext/bin 
+      rm -rf view/bin 
+   fi
 fi
 
 %include <tail.h>

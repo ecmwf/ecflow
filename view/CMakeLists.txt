@@ -183,15 +183,11 @@ debug_var( X11_Xt_LIB )
 debug_var( X11_Xpm_INCLUDE_PATH )
 debug_var( X11_Xpm_LIB )
 
-find_package( MOTIF )
+find_package( Motif )
 debug_var( MOTIF_INCLUDE_DIR )
 debug_var( MOTIF_LIBRARIES )  
-if ( NOT MOTIF_FOUND )
-   MESSAGE( "Overriding motif library" )
-   set(MOTIF_LIBRARIES "/usr/lib64/libXm.so.4" )
-endif()
-debug_var( MOTIF_LIBRARIES )  
-
+ 
+ 
 # =======================================================================================
 find_package( CMath )
 
@@ -202,29 +198,31 @@ find_package( Threads )
 # =========================================================================================
 # libecflowview needs to be compiled as dynamic lin  otherwise the icons do not appear.
 #
-add_definitions( -D_GNU_SOURCE -DUNIX -Dunix -Dlinux )
+# Note: -DECFLOW_SHARED_DIR is *ONLY* required for one file view/src/directory.cc
+#
+add_definitions( -D_GNU_SOURCE -DUNIX -Dunix -Dlinux -DECFLOW_SHARED_DIR="${CMAKE_INSTALL_PREFIX}/share/ecflow" )
 
-ecbuild_add_library(TARGET  libecflowview
-				       CONDITION X11_FOUND AND CMAKE_THREAD_LIBS_INIT
-                   SOURCES  
-                             ${srcs_cc} ${srcs_c} ${srcs_cpp} ${libicon_srcs} ${libxec_srcs} ${libui_srcs}
-                   TEMPLATES
-                             src/array.cc
-                   INCLUDES 
-                            src/libicon
-                            src/libxec
-                            src/libui
-                            ../ACore/src 
-                            ../ANattr/src
-                            ../ANode/src
-                            ../AParser/src
-                            ../Base/src
-                            ../Base/src/cts
-                            ../Base/src/stc
-                            ../Client/src
-                            ${Boost_INCLUDE_DIRS} 
-                            ${X11_INCLUDE_DIR}
-                            ${MOTIF_INCLUDE_DIR}
+ecbuild_add_library(TARGET    libecflowview
+				        CONDITION MOTIF_FOUND AND X11_FOUND AND CMAKE_THREAD_LIBS_INIT
+                    SOURCES  
+                              ${srcs_cc} ${srcs_c} ${srcs_cpp} ${libicon_srcs} ${libxec_srcs} ${libui_srcs}
+                    TEMPLATES
+                              src/array.cc
+                    INCLUDES 
+                              src
+                              src/libicon
+                              src/libxec
+                              src/libui
+                              ../ACore/src 
+                              ../ANattr/src
+                              ../ANode/src
+                              ../AParser/src
+                              ../Base/src
+                              ../Base/src/cts
+                              ../Base/src/stc
+                              ../Client/src
+                              ${X11_INCLUDE_DIR}
+                              ${MOTIF_INCLUDE_DIR}
                    )
 
 # =======================================================================
@@ -235,14 +233,16 @@ ecbuild_add_library(TARGET  libecflowview
 # ========================================================================
 
 ecbuild_add_executable( TARGET    ecflowview
-                        SOURCES   src/ecflowview.cc
-						      CONDITION X11_FOUND AND CMAKE_THREAD_LIBS_INIT
-                        LIBS      libecflowview core nodeattr node libparser base libclient 
+                        SOURCES   
+                                  src/ecflowview.cc
+						      CONDITION 
+						                MOTIF_FOUND AND X11_FOUND AND CMAKE_THREAD_LIBS_INIT
+                        LIBS      
+                                  libecflowview  libclient base libparser node nodeattr core
                                   ${CMAKE_THREAD_LIBS_INIT} 
-                                  ${Ecflow_Boost_LIBS}
                                   ${X11_LIBRARIES} ${X11_Xext_LIB} ${MOTIF_LIBRARIES} ${X11_Xpm_LIB} ${X11_Xt_LIB} 
                                   ${CMATH_LIBRARIES}
-                        INCLUDES  src
+                        INCLUDES  
                                   ${X11_INCLUDE_DIR}
                                   ${MOTIF_INCLUDE_DIR}
                                   ${Boost_INCLUDE_DIRS} 
@@ -254,25 +254,21 @@ ecbuild_add_executable( TARGET    ecflowview
 # ===================================================================
 
 ecbuild_add_test( TARGET  test-view
-                SOURCES   test/TestRunner.cpp test/TestView.cpp
-                LIBS      core nodeattr node libparser base libclient libharness ${CMAKE_THREAD_LIBS_INIT} ${Ecflow_Test_LIBS}
-                INCLUDES  src
-                          ../ACore/src 
-                          ../ANattr/src
-                          ../ANode/src
-                          ../Base/src
-                          ../Base/test
-                          ../Test/src
-                          ${Boost_INCLUDE_DIRS} )
+                  BOOST
+                  CONDITION MOTIF_FOUND AND X11_FOUND AND CMAKE_THREAD_LIBS_INIT
+                  SOURCES   test/TestRunner.cpp test/TestView.cpp
+                  LIBS      libharness    
+                  INCLUDES  ../Test/src
+                            ${Boost_INCLUDE_DIRS} 
+                )
                           
-
 # ===================================================================
 # install
 # ===================================================================
                      
-install (FILES  ${CMAKE_SOURCE_DIR}/view/src/ecflowview.menu 
-                ${CMAKE_SOURCE_DIR}/build/servers
-         DESTINATION lib
-         PERMISSIONS OWNER_READ GROUP_READ WORLD_READ OWNER_EXECUTE GROUP_EXECUTE WORLD_EXECUTE
+install ( FILES       ${CMAKE_SOURCE_DIR}/view/src/ecflowview.menu 
+                      ${CMAKE_SOURCE_DIR}/view/servers
+          DESTINATION share/ecflow
+          PERMISSIONS OWNER_READ GROUP_READ WORLD_READ OWNER_EXECUTE GROUP_EXECUTE WORLD_EXECUTE
         )
-         
+        

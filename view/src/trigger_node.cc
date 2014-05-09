@@ -32,9 +32,9 @@ trigger_node::trigger_node(host& h,ecf_node* n)
 
 const AstTop* trigger_node::get() const
 {
-  if (!owner_.get()) return 0x0;
+  if (!owner_) return 0x0;
   return dynamic_cast<ecf_concrete_node<ExpressionWrapper>*>
-    (owner_.get())->get()->get_ast_top();
+    (owner_)->get()->get_ast_top();
 }
 
 xmstring trigger_node::make_label_tree()

@@ -1,5 +1,7 @@
 suite suiteName
-   date *.*.2009
+   task a
+      date *.*.2009
+   endtask
    family familyName0
    	  date 1.*.2009
       task taskName0
@@ -10,7 +12,8 @@ suite suiteName
    endfamily
 endsuite
 
-suite s1;date *.*.2009; family familyName0
+suite s1;
+   family familyName0
    	  date 1.*.2009
       task taskName0
    	  		date 1.12.2009
