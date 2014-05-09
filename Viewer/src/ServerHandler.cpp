@@ -279,7 +279,7 @@ int ServerHandler::update()
 	// ServerHandler::commandSent() handles the rest of the communication
 
 	setUpdatingStatus(true);
-	comThread()->sendCommand(client_, ServerComThread::NEWS);
+	comThread()->sendCommand(this, client_, ServerComThread::NEWS);
 
 	int err = 0; // do we need this?
 
@@ -433,7 +433,7 @@ void ServerHandler::command(std::vector<ViewNodeInfo_ptr> info,std::string cmd)
 
 			// set up and run the thread for server communication
 			serverHandler->comThread()->setCommandString(strs);
-			serverHandler->comThread()->sendCommand(serverHandler->client_, ServerComThread::COMMAND);
+			serverHandler->comThread()->sendCommand(serverHandler, serverHandler->client_, ServerComThread::COMMAND);
 
 			//serverHandler->update();
 		}
@@ -472,6 +472,9 @@ ServerHandler* ServerHandler::find(const std::string& name,const std::string& po
 
 ServerHandler* ServerHandler::find(Node *node)
 {
+	// XXXXX here we should protect access to the definitions, but we
+	// don't yet know which defs we are accessing!
+
 	if(node)
 	{
 		if(Defs* defs = node->defs())
@@ -572,7 +575,7 @@ void ServerHandler::commandSent()
 			// just did something!)
 
 			std::cout << "Send command to server" << std::endl;
-			comThread()->sendCommand(client_, ServerComThread::NEWS);
+			comThread()->sendCommand(this, client_, ServerComThread::NEWS);
 			break;
 		}
 
@@ -595,7 +598,7 @@ void ServerHandler::commandSent()
 					// yes, something's changed - synchronise with the server
 
 					std::cout << "News from server - send sync command" << std::endl;
-					comThread()->sendCommand(client_, ServerComThread::SYNC);
+					comThread()->sendCommand(this, client_, ServerComThread::SYNC);
 					break;
 				}
 
@@ -643,7 +646,7 @@ void ServerComThread::setCommandString(const std::vector<std::string> command)
 	command_ = command;
 }
 
-void ServerComThread::sendCommand(ClientInvoker *ci, ServerComThread::ComType comType)
+void ServerComThread::sendCommand(ServerHandler *server, ClientInvoker *ci, ServerComThread::ComType comType)
 {
 	// do not execute thread if already running
 
@@ -653,6 +656,7 @@ void ServerComThread::sendCommand(ClientInvoker *ci, ServerComThread::ComType co
 	}
 	else
 	{
+		server_  = server;
 		ci_      = ci;
 		comType_ = comType;
 		start();  // start the thread execution
@@ -689,6 +693,7 @@ void ServerComThread::run()
 
 		case SYNC:
 		{
+			ServerDefsAccess defsAccess(server_);
 			std::cout << "    SYNC" << "\n";
 			ci_->sync_local();
 			break;
