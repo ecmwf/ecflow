@@ -13,6 +13,9 @@
 #include <string>
 #include <vector>
 
+#include <cstddef>
+#include <boost/shared_ptr.hpp>
+
 class ServerItem
 {
 public:
@@ -36,6 +39,8 @@ protected:
 	std::string host_;
 	std::string port_;
 };
+
+typedef boost::shared_ptr<ServerItem>   ServerItem_ptr;
 
 /*class ServerViewItem: public ServerItem
 {

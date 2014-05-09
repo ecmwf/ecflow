@@ -12,11 +12,36 @@
 
 #include <QDebug>
 
-ViewConfig* ViewConfig::instance_=0;
+#include <stdlib.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
 
+ViewConfig* ViewConfig::instance_=0;
 
 ViewConfig::ViewConfig()
 {
+	//Set configuration directory name and create it.
+	if(char *h=getenv("HOME"))
+	{
+		configDir_=std::string(h);
+		configDir_+="/.ecflowview";
+		if(access(configDir_.c_str(),F_OK) != 0 )
+		{
+			if(mkdir(configDir_.c_str(),0777) == -1)
+			{
+				//error
+			}
+		}
+	}
+
+	//Set rc directory name and create it.
+	if(char *h=getenv("HOME"))
+	{
+		rcDir_=std::string(h);
+		rcDir_+="/.ecflowrc";
+	}
+
 	//Colour params
 	colour_[Unknown]= new VParameter("unknown","Un","","unknown",QColor(220,220,220));
 	colour_[Complete]= new VParameter("complete","C","","complete",QColor(255,255,0));

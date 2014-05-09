@@ -24,7 +24,7 @@
 #include "InfoPanel.hpp"
 #include "NodePanel.hpp"
 #include "ServerHandler.hpp"
-#include "ServerWidget.hpp"
+#include "ServerDialog.hpp"
 
 //Initialise static variables
 bool MainWindow::quitStarted_=false;

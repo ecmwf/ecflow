@@ -74,6 +74,8 @@ public:
 		QString  stateShortName(DState::State) const;
 		QColor   colour(PaletteItem) const;
 		QFont    font(FontItem) const;
+		const std::string& configDir() const {return configDir_;}
+		const std::string& rcDir() const {return rcDir_;}
 
 protected:
 		ViewConfig();
@@ -82,6 +84,9 @@ protected:
 		QString shortName(PaletteItem) const;
 
 		static ViewConfig* instance_;
+
+		std::string configDir_;
+		std::string rcDir_;
 		std::map<PaletteItem,VParameter*> colour_;
 		std::map<FontItem,VParameter*> font_;
 		std::map<DState::State,PaletteItem> stateMap_;
