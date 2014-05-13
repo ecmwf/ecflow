@@ -255,16 +255,20 @@ void Node::calendarChanged(
       time_dep_attrs_->calendarChanged(c);
    }
 
+   checkForLateness(c);
+
+   if (checkForAutoCancel(c)) {
+      auto_cancelled_nodes.push_back(shared_from_this());
+   }
+}
+
+void Node::checkForLateness(const ecf::Calendar& c)
+{
    if (lateAttr_) {
       lateAttr_->checkForLateness(state_, c);
       if (lateAttr_->isLate()) {
          flag().set(ecf::Flag::LATE);
       }
-   }
-
-
-   if (checkForAutoCancel(c)) {
-      auto_cancelled_nodes.push_back(shared_from_this());
    }
 }
 
@@ -396,10 +400,19 @@ void Node::resetRelativeDuration()
 // Returning false, *STOPS* further traversal *DOWN* the node tree
 bool Node::resolveDependencies(JobsParam& jobsParam)
 {
+   // This function is called:
+   //    a/ Periodically by the server, i.e every minute
+   //    b/ Asyncrousnly, after child command, via job submission
 #ifdef DEBUG_DEPENDENCIES
    LogToCout toCoutAsWell; cout << "\n";
    LOG(Log::DBG,"   " << debugNodePath() << "::resolveDependencies " << NState::toString(state()) << " AT " << suite()->calendar().toString());
 #endif
+
+   // Improve the granularity for the check for lateness (during job submission). See SUP-873 "late" functionality
+   if (lateAttr_) {
+      // since the suite() traverse up the tree, only call when have a late attribute
+      checkForLateness(suite()->calendar());
+   }
 
    if (isSuspended()) {
 #ifdef DEBUG_DEPENDENCIES

@@ -623,6 +623,8 @@ private: // alow simulator access
    AstTop* completeAst(std::string& errorMsg) const;   // Will create AST on demand
    AstTop* triggerAst(std::string& errorMsg) const;    // Will create AST on demand
 
+   void checkForLateness( const ecf::Calendar& );
+
 private: // All mementos access
    friend class CompoundMemento;
    void clear(); /// Clear *ALL* internal attributes
