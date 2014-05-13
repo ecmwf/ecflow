@@ -105,6 +105,9 @@ static struct {
 };
 
 simple_node::simple_node(host& h,ecf_node* n) : node(h,n)
+					      , old_status_(-1)
+					      , old_tryno_(-1)
+					      , old_flags_(-1)
 {
 }
 
@@ -113,6 +116,9 @@ const int kPixSize = 16;
 #ifdef BRIDGE
 simple_node::simple_node(host& h,sms_node* n, char b) 
   : node(h,n,b)
+  , old_status_(-1)
+  , old_tryno_(-1)
+  , old_flags_(-1)
 {
   insert(node::create(h,(sms_node*)n->label));
   insert(node::create(h,(sms_node*)n->meter));

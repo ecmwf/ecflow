@@ -90,7 +90,7 @@ public:
  protected:
   
   virtual void perlify(FILE*);
-  
+  int old_status_, old_tryno_, old_flags_;
  private:
   
   simple_node(const simple_node&);

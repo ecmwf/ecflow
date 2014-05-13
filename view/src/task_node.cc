@@ -99,34 +99,38 @@ inline bool is_to_check(int f) { return (f& FLAG_ISSET(FLAG_TO_CHECK));}
 
 void task_node::check(int oldstatus,int oldtryno,int oldflags)
 {
-	if(status() != oldstatus && status() == STATUS_ABORTED)
+  
+	if(status() != old_status_ && status() == STATUS_ABORTED)
 		serv().aborted(*this);
 
-	if(tryno() > 1 && tryno() != oldtryno && (
+	if(tryno() > 1 && tryno() != old_tryno_ && (
 		status() == STATUS_SUBMITTED || 
 		status() == STATUS_ACTIVE))
 		serv().restarted(*this);
 
-	if(is_late(flags()) != is_late(oldflags)) {
+	if(is_late(flags()) != is_late(old_flags_)) {
 		if(is_late(flags()))
                   serv().late(*this);
 		else
                   late::hide(*this);
 	}
 
-	if(is_zombie(flags()) != is_zombie(oldflags)) {
+	if(is_zombie(flags()) != is_zombie(old_flags_)) {
 		if(is_zombie(flags()))
                   serv().zombie(*this);
 		else
                   zombie::hide(*this);
 	}
 
-	if(is_to_check(flags()) != is_to_check(oldflags)) {
+	if(is_to_check(flags()) != is_to_check(old_flags_)) {
 		if(is_to_check(flags()))
                   serv().to_check(*this);
 		else
                   to_check::hide(*this);
 	}
+	old_flags_ = flags();
+	old_status_ = status();
+	old_tryno_ = tryno();
 }
 
 void task_node::aborted(std::ostream& f)

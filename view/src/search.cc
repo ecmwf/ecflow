@@ -131,7 +131,6 @@ void search::next(node& n)
 	if(name_) ok = ok && n.match(name_);
 	// if(timed_since_ > -1) ok = ok && (timed_since_ < n.status_time());
 	// if(timed_from_ < 86400*3) ok = ok && (timed_from_ > n.status_time());
-
 	//	if (ok) fprintf(stdout, "# next: %s, %d, %d, %d\n", n.full_name().c_str(), 
 	//		n.status_time(), timed_since_, from_from_);
 //	printf(" %d\n",ok);
