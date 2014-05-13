@@ -122,18 +122,15 @@ void search::show()
 void search::next(node& n)
 {
 	bool ok = true;
-
-//	printf("-> %s ",n.full_name());
-
 	ok = ok && check(n,status_flags_);
 	ok = ok && check(n,special_flags_);	
-	ok = ok && check(n,type_flags_);
+	ok = ok && check(n,type_flags_);	
 	if(name_) ok = ok && n.match(name_);
-	// if(timed_since_ > -1) ok = ok && (timed_since_ < n.status_time());
-	// if(timed_from_ < 86400*3) ok = ok && (timed_from_ > n.status_time());
-	//	if (ok) fprintf(stdout, "# next: %s, %d, %d, %d\n", n.full_name().c_str(), 
-	//		n.status_time(), timed_since_, from_from_);
-//	printf(" %d\n",ok);
+	if (n.type() == NODE_TASK ||n.type() == NODE_FAMILY || n.type() == NODE_SUITE) {
+	  boost::posix_time::ptime now(boost::posix_time::second_clock::local_time());
+	  int diff = (now - n.status_time()).total_seconds();
+	  ok = ok && (-1 < timed_since_ && timed_since_ < diff) && diff < timed_from_;
+	}
 	if(ok) result::show(n);
 }
 
