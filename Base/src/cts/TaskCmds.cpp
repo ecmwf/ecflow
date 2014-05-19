@@ -356,6 +356,25 @@ void CompleteCmd::create( 	Cmd_ptr& cmd,
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
 
+CtsWaitCmd::CtsWaitCmd(const std::string& pathToTask,
+          const std::string& jobsPassword,
+          const std::string& process_or_remote_id,
+          int try_no,
+          const std::string& expression)
+ : TaskCmd(pathToTask,jobsPassword,process_or_remote_id,try_no), expression_(expression)
+{
+   // Parse expression to make sure its valid
+   PartExpression exp(expression);
+   string parseErrorMsg;
+   std::auto_ptr<AstTop> ast = exp.parseExpressions( parseErrorMsg );
+   if (!ast.get()) {
+
+      assert( !parseErrorMsg.empty() );
+      std::stringstream ss; ss << "CtsWaitCmd: Failed to parse expression '" << expression << "'.  " << parseErrorMsg;
+      throw std::runtime_error( ss.str() );
+   }
+}
+
 std::ostream& CtsWaitCmd::print(std::ostream& os) const
 {
 	return os << Str::CHILD_CMD() << "wait " << expression_ << " " << path_to_node();
@@ -444,21 +463,9 @@ void CtsWaitCmd::create( 	Cmd_ptr& cmd,
 		<< ") try_no(" << clientEnv->task_try_no()
 		<< ") expression(" << expression << ")\n";
 
-
 	std::string errorMsg;
 	if ( !clientEnv->checkTaskPathAndPassword(errorMsg) ) {
 	 	throw std::runtime_error( "CtsWaitCmd: " + errorMsg );
-	}
-
- 	// Parse expression to make sure its valid
- 	PartExpression exp(expression);
- 	string parseErrorMsg;
-	std::auto_ptr<AstTop> ast = exp.parseExpressions( parseErrorMsg );
-	if (!ast.get()) {
-
-		assert( !parseErrorMsg.empty() );
-		std::stringstream ss; ss << "CtsWaitCmd: Failed to parse expression '" << expression << "'.  " << parseErrorMsg;
-	 	throw std::runtime_error( ss.str() );
 	}
 
 	cmd = Cmd_ptr( new CtsWaitCmd( clientEnv->task_path(),
@@ -470,9 +477,24 @@ void CtsWaitCmd::create( 	Cmd_ptr& cmd,
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
 
+AbortCmd::AbortCmd(const std::string& pathToTask,
+         const std::string& jobsPassword,
+         const std::string& process_or_remote_id,
+         int try_no,
+         const std::string& reason)
+:TaskCmd(pathToTask,jobsPassword,process_or_remote_id,try_no), reason_(reason)
+{
+   if (!reason_.empty()) {
+      // Do not use "\n" | ';' in abortedReason_, as this can mess up, --migrate output
+      // Which would then affect --load.
+      Str::replace(reason_,"\n","");
+      Str::replace(reason_,";"," ");
+   }
+}
+
 std::ostream& AbortCmd::print(std::ostream& os) const
 {
-   return os << Str::CHILD_CMD() << "abort " << path_to_node();
+   return os << Str::CHILD_CMD() << "abort " << path_to_node() << "  " << reason_;
 }
 
 bool AbortCmd::equals(ClientToServerCmd* rhs) const
@@ -498,6 +520,7 @@ STC_Cmd_ptr AbortCmd::doHandleRequest(AbstractServer* as) const
 
 		string theReason = reason_;
 		if ( theReason.empty() ) theReason = "Trap raised in job file";
+
 		submittable_->aborted(theReason);  // will set task->set_state(NState::ABORTED);
 	}
 

@@ -1,0 +1,13 @@
+suite suiteName
+   clock real 1.10.2009  # need to define a date , otherwise we start at current time, and hence test will vary
+   task t1
+      today 10:00 11:00 01:00
+      verify complete:2     
+   task t2
+      today 10:00 11:00 00:30
+      verify complete:3    
+   task t3
+      today 09:00
+      today 10:00 11:00 00:30
+      verify complete:4   
+endsuite

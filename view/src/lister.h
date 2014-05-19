@@ -29,7 +29,7 @@ template<class T>
 bool lister<T>::compare(T& a,T& b)  
 { return strcmp(a.name().c_str(),b.name().c_str()) < 0; }
 
-#if defined(__GNUC__) || defined(hpux) || defined(AIX)
+#if defined(__GNUC__) || defined(hpux) || defined(_AIX)
 #include "lister.cc"
 #endif
 

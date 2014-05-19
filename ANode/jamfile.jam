@@ -36,7 +36,7 @@ lib node : [ glob src/*.cpp ]
 # This is *ONLY* required when the define ECFLOW_MT is used, (used by Signal.cpp)
 lib pthread ;
 
-exe nodetest : [ glob test/*.cpp : test/TestSingleExprParse.cpp ]
+exe u_anode : [ glob test/*.cpp : test/TestSingleExprParse.cpp ]
            pthread
            /theCore//core
            /theNodeAttr//nodeattr
@@ -44,13 +44,13 @@ exe nodetest : [ glob test/*.cpp : test/TestSingleExprParse.cpp ]
            /site-config//boost_system
            /site-config//boost_serialization
            /site-config//boost_filesystem
-           /site-config//boost_test
            /site-config//boost_datetime
+           /site-config//boost_test
          : <variant>debug:<define>DEBUG
 	      ;
 	     
 	     
-exe stest : test/TestSingleExprParse.cpp
+exe u_anode_stest : test/TestSingleExprParse.cpp
            pthread
            /theCore//core
            /theNodeAttr//nodeattr
@@ -58,7 +58,7 @@ exe stest : test/TestSingleExprParse.cpp
            /site-config//boost_system
            /site-config//boost_serialization
            /site-config//boost_filesystem
-           /site-config//boost_test
            /site-config//boost_datetime
+           /site-config//boost_test
          : <variant>debug:<define>DEBUG
  	     ;

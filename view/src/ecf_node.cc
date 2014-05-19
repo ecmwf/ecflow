@@ -54,7 +54,6 @@ void ecf_node::update(const Node* n, const std::vector<ecf::Aspect::Type>&)
 {
   if (!node_) return;
   /* ok node create through node replace is simple update */
-  std::vector<node_ptr> kids; n->immediateChildren(kids);
   node_->update(-1, -1, -1); 
   node_->notify_observers(); 
   node_->redraw();
@@ -97,7 +96,8 @@ void ecf_node::update(const Defs*, const std::vector<ecf::Aspect::Type>&)
 }
 
 void ecf_node::update_delete(const Node* n) { 
-  if (node_) node_->unlink(); 
+  if (!node_) return;
+  node_->unlink();
   node *parent = node_->parent();
   node_->visibility(False);
   node_->remove();
@@ -130,19 +130,23 @@ const Repeat& ecf_node::crd() { static const Repeat REPEAT = Repeat( RepeatInteg
 node* ecf_node_maker::make_xnode(host& h, ecf_node* n, std::string type)
 { 
    if (!n) return NULL;
-   node* out = NULL; 
-   
+   node* out = NULL;
+
    if (n->type() >= 0 && n->type() < NODE_MAX && builders()[n->type()]) {
-     if (n->type() == NODE_REPEAT) out = map()[type]->make(h,n);
-     else                          out = builders()[n->type()]->make(h,n);
-     n->set_graphic_ptr(out);
-   } else {
-     std::cout << "!!!" << n->full_name() << n->type()
-               << " " << n->name() << " " << n->type_name() << "\n";
-     if (map()[type]) {
-       out = map()[type]->make(h,n); assert(out); n->set_graphic_ptr(out);
-       std::cout << "!!!ok\n";
-     }
+      if (n->type() == NODE_REPEAT)
+         out = map()[type]->make(h, n);
+      else
+         out = builders()[n->type()]->make(h, n);
+      n->set_graphic_ptr(out);
+   }
+   else {
+      std::cout << "!!!" << n->full_name() << n->type() << " " << n->name() << " " << n->type_name() << "\n";
+      if (map()[type]) {
+         out = map()[type]->make(h, n);
+         assert(out);
+         n->set_graphic_ptr(out);
+         std::cout << "!!!ok\n";
+      }
    }
    return out;
 }
@@ -150,13 +154,18 @@ node* ecf_node_maker::make_xnode(host& h, ecf_node* n, std::string type)
 ecf_node::ecf_node(ecf_node* parent, const std::string& name, char k) 
   : parent_(parent), node_(0), kind_(k) 
   , name_(name)
+  , trigger_(0)
+  , complete_(0)
 {
 }
 
 ecf_node::~ecf_node() 
 {  
+  // std::cerr << "# eode del: " << full_name_ << std::endl;
   nokids(true);
   unlink();
+  delete trigger_;
+  delete complete_;
 }
 
 node* ecf_node::create_tree(host& h, node* xnode) {
@@ -217,7 +226,7 @@ void ecf_concrete_node<Defs>::why(std::ostream &f) const
 }
 
 #define UNLINK(T) template<> void ecf_concrete_node<T>::unlink(bool detach) \
-{ if (!owner_) return; if (detach) ChangeMgrSingleton::instance()->detach(owner_); owner_ = 0x0; }
+{ if (!owner_) return; if (detach) ChangeMgrSingleton::instance()->detach(owner_,this); owner_ = 0x0; }
 UNLINK(Alias)
 UNLINK(Task)
 UNLINK(Family)
@@ -236,9 +245,12 @@ struct cless_than {
 
 template<> 
 void ecf_concrete_node<Alias>::make_subtree() {
+
+  if (!owner_) return;
   Alias* n = owner_; 
-  if (!n) return;
+
   full_name_ = owner_->absNodePath();
+
   ChangeMgrSingleton::instance()->attach(owner_, this);  
   n->update_generated_variables();
   
@@ -269,9 +281,9 @@ void ecf_concrete_node<Alias>::make_subtree() {
 
 template<> 
 void ecf_concrete_node<Node>::make_subtree() {
+
+  if (!owner_) return;
   Node* n = owner_; 
-  if (!n) return;
-  else if (!owner_) return;
 
   full_name_ = owner_->absNodePath();
   ChangeMgrSingleton::instance()->attach(owner_, this);  
@@ -290,7 +302,7 @@ void ecf_concrete_node<Node>::make_subtree() {
 
   std::vector<Variable>::const_iterator it;
   for (it = gvar.begin(); it != gvar.end(); ++it)
-    if ((*it).name() == "" || !(*it == Variable::EMPTY()))
+    if (!(*it == Variable::EMPTY()))
       add_kid(make_node(*it, this, 'g'));
     else std::cerr << "# empty variable\n";
 
@@ -316,10 +328,14 @@ void ecf_concrete_node<Node>::make_subtree() {
   make_kids_list(this,n->limits());
   make_kids_list(this,n->inlimits());
   
-  if (n->get_trigger())    
-    add_kid(make_node(new ExpressionWrapper(n, 't'), this, 't'));
-  if (n->get_complete())   
-    add_kid(make_node(new ExpressionWrapper(n, 'c'), this, 'c'));
+  if (n->get_trigger()) { 
+    trigger_ = new ExpressionWrapper(n, 't');
+    add_kid(make_node(trigger_, this, 't'));
+  }
+  if (n->get_complete()) {
+    complete_ = new ExpressionWrapper(n, 'c');
+    add_kid(make_node(complete_, this, 'c'));
+  }
 
   if (n->get_late() != 0x0) { add_kid(make_node(n->get_late(), this)); }
 
@@ -348,16 +364,15 @@ void ecf_concrete_node<Node>::make_subtree() {
 template<> 
 void ecf_concrete_node<Suite>::make_subtree() {
 
+  if (!owner_) return;
   Suite* n = owner_; 
-  if (!n) return;
-  else if (n->begun())
+  if (n->begun())
     n->update_generated_variables();
 
-  full_name_ = owner_->absNodePath();
-  ChangeMgrSingleton::instance()->attach(owner_, this);  
-
   full_name_ = owner_->absNodePath(); // "/" + n->name();
+
   ChangeMgrSingleton::instance()->attach(owner_, this); 
+
   std::vector<node_ptr> kids; n->immediateChildren(kids);
   make_kids_list(this,kids);
   
@@ -366,7 +381,7 @@ void ecf_concrete_node<Suite>::make_subtree() {
 
   std::vector<Variable>::const_iterator it;
   for (it = gvar.begin(); it != gvar.end(); ++it)
-    if ((*it).name() == "" || !(*it == Variable::EMPTY()))
+    if (!(*it == Variable::EMPTY()))
       add_kid(make_node(*it, this, 'g'));
     else std::cerr << "# empty variable\n";
 
@@ -391,10 +406,14 @@ void ecf_concrete_node<Suite>::make_subtree() {
   make_kids_list(this,n->limits());
   make_kids_list(this,n->inlimits());
   
-  if (n->get_trigger())    
-    add_kid(make_node(new ExpressionWrapper(n, 't'), this, 't'));
-  if (n->get_complete())   
-    add_kid(make_node(new ExpressionWrapper(n, 'c'), this, 'c'));
+  if (n->get_trigger()) { 
+    trigger_ = new ExpressionWrapper(n, 't');
+    add_kid(make_node(trigger_, this, 't'));
+  }
+  if (n->get_complete()) {
+    complete_ = new ExpressionWrapper(n, 'c');
+    add_kid(make_node(complete_, this, 'c'));
+  }
 
   if (n->get_late() != 0x0) { add_kid(make_node(n->get_late(), this)); }
   if ((!n->repeat().empty())) {
@@ -451,7 +470,7 @@ const std::string& ecf_concrete_node<Suite>::variable(const std::string& name) c
   if (!owner_) 
     return ecf_node::none();
 
-  const Variable & var = owner_->findVariable(name);
+  const Variable& var = owner_->findVariable(name);
   if (!var.empty())
     return var.theValue();
 
@@ -533,13 +552,8 @@ std::ostream& ecf_concrete_node<Node>::print(std::ostream& s) const
   return s; 
 }
 
-template<>void ecf_concrete_node<Defs>::print(std::ostream& s)
-{ 
-}
-
-template<>void ecf_concrete_node<Node>::print(std::ostream& s)
-{ 
-}
+template<>void ecf_concrete_node<Defs>::print(std::ostream& s){ }
+template<>void ecf_concrete_node<Node>::print(std::ostream& s){ }
 
 template<> const std::string& ecf_concrete_node<Defs>::full_name() const
 { return ecf_node::slash(); }
@@ -554,6 +568,10 @@ void hide(node* n) {
 
 void ecf_node::nokids(bool own) { 
   if (node_) { node::destroy(node_->kids_); node_->kids_ = 0x0; }
+
+  for (size_t i = 0; i < kids_.size(); i++) {
+     delete kids_[i];
+  }
   kids_.clear();
 }
 
@@ -561,72 +579,74 @@ template<>
 void ecf_concrete_node<Node>::update(const Node* n, 
                                      const std::vector<ecf::Aspect::Type>& aspect)
 {
-  if (!owner_) return; 
-  if (!node_) return;
-  if (owner_->suite()->begun()) {
-    owner_->update_generated_variables();   
-  }
-
-  if (is_reset(aspect)) {
-      host& serv = node_->serv();
-      serv.redraw(true);   
-    return;
-  } else {
-    node_->delvars();
-    std::vector<Variable> gvar; 
-    n->gen_variables(gvar);
-    std::vector<Variable>::const_iterator it, gvar_end;
-    for (it = gvar.begin(); it != gvar.end(); ++it) {
-      if ((*it).name() == "" || *it == Variable::EMPTY())
-        { std::cerr << "# empty variable\n"; continue; }
-      ecf_node *run = make_node(*it, this, 'g');
-      add_kid(run);
-      node_->insert(run->create_node(node_->serv()));
-    }    
+   if (!owner_) return;
+   if (!node_) return;
+   if (is_reset(aspect)) {
+      Updating::set_full_redraw();
+      return;
+   }
+   node_->delvars();
+      if (owner_->suite()->begun()) {
+         owner_->update_generated_variables();
+      }
+      std::vector<Variable> gvar;
+      n->gen_variables(gvar);
+      std::vector<Variable>::const_iterator it, gvar_end;
+      for(it = gvar.begin(); it != gvar.end(); ++it) {
+         if ((*it).name() == "" || *it == Variable::EMPTY()) {
+            std::cerr << "# empty variable\n";
+            continue;
+         }
+         ecf_node *run = make_node(*it, this, 'g');
+         add_kid(run);
+         node_->insert(run->create_node(node_->serv()));
+      }
 
 #ifdef SORT_VAR
-    gvar = n->variables(); /* expensive */
-    std::sort(gvar.begin(),gvar.end(),cless_than());
-    gvar_end = gvar.end();
-    for (it = gvar.begin(); it != gvar_end; ++it) {
+      gvar = n->variables(); /* expensive */
+      std::sort(gvar.begin(), gvar.end(), cless_than());
+      gvar_end = gvar.end();
+      for(it = gvar.begin(); it != gvar_end; ++it) {
 #else
-    for (it = n->variables().begin(); it != n->variables().end(); ++it) {
+      for (it = n->variables().begin(); it != n->variables().end(); ++it) {
 #endif
-      if ((*it).name() == "" || *it == Variable::EMPTY())
-        { std::cerr << "# empty variable\n"; continue; }
-      ecf_node *run = make_node(*it, this);
-      add_kid(run);
-      node_->insert(run->create_node(node_->serv()));
-    }
-  }
-   assert(xnode());   
-   const_cast<Node*> (n)->set_graphic_ptr(xnode());
+         if ((*it).name() == "" || *it == Variable::EMPTY()) {
+            std::cerr << "# empty variable\n";
+            continue;
+         }
+         ecf_node *run = make_node(*it, this);
+         add_kid(run);
+         node_->insert(run->create_node(node_->serv()));      
+      }
 
-   unsigned int is_meter=0, is_label=0, is_event=0, is_limit=0;
-   for (std::vector<ecf::Aspect::Type>::const_iterator it = aspect.begin(); 
-        it != aspect.end(); ++it) 
-     switch (*it) {
-     case ecf::Aspect::METER_CHANGED: is_meter++; break;
-     case ecf::Aspect::LABEL_CHANGED: is_label++; break;
-     case ecf::Aspect::EVENT_CHANGED: is_event++; break;
-     case ecf::Aspect::LIMIT_CHANGED: is_limit++; break;
-     default: break; }
-   if (xnode()->status() != STATUS_QUEUED && aspect.size() > 0 &&
-       is_meter + is_label + is_event + is_limit == aspect.size()) {    
-     for(node *xn = node_->kids(); xn; xn = xn->next()) 
-       if (xn) if ((xn->type() == NODE_LABEL and is_label) ||
-                   (xn->type() == NODE_METER and is_meter) ||
-                   (xn->type() == NODE_EVENT and is_event) ||
-                   (xn->type() == NODE_LIMIT and is_limit))
-                 { xn->update(-1,-1,-1); xn->redraw(); }       
-   } else 
-     { 
-       node_->update(-1, -1, -1);
-       for(node *xn = node_->kids(); xn; xn = xn->next()) 
-         { xn->update(-1,-1,-1); xn->notify_observers(); xn->redraw(); }
-       node_->notify_observers();     
-       node_->redraw();
-     }
+   const_cast<Node*>(n)->set_graphic_ptr(xnode());
+   for(std::vector<ecf::Aspect::Type>::const_iterator it = aspect.begin(); it != aspect.end(); ++it) {
+     int  kind = 0;
+      switch ( *it ) {
+         case ecf::Aspect::METER:
+	   kind = NODE_METER;
+            break;
+         case ecf::Aspect::LABEL: 	   
+	   kind = NODE_LABEL;
+            break;
+         case ecf::Aspect::EVENT:
+	   kind = NODE_EVENT;
+            break;
+         case ecf::Aspect::LIMIT:
+	   kind = NODE_LIMIT;
+	   break;
+      default: 
+	   continue;
+      }
+      if (kind)
+	   for(node *xn = node_->kids(); xn; xn = xn->next())
+	     if (xn) if (xn->type() == kind) {
+		 xn->update(-1, -1, -1);
+		 xn->redraw();
+	       }
+   }
+   node_->notify_observers();
+   node_->redraw();
 }
 
 template<> 
@@ -638,13 +658,17 @@ void ecf_concrete_node<Suite>::update(const Node* n,
   const_cast<Node*> (n)->set_graphic_ptr(xnode()); /* ??? */
 
   if (is_reset(aspect)) {  
-    host& serv = node_->serv(); 
-    serv.redraw(true);   
-    return;
+
+     Updating::set_full_redraw();
+     return;
   }
-  if (owner_->begun()) owner_->update_generated_variables();
-  { node_->update(-1, -1, -1); node_->notify_observers(); node_->redraw();
-  }
+
+  if (owner_->begun())
+     owner_->update_generated_variables();
+
+  node_->update(-1, -1, -1);
+  node_->notify_observers();
+  node_->redraw();
 }
 
 template<>
@@ -893,7 +917,8 @@ template<>int ecf_concrete_node<Node>::type() const {
   else if (owner_->isAlias())  rc = NODE_ALIAS;
   else if (owner_->isTask())   rc = NODE_TASK;
   else if (owner_->isSuite())  rc = NODE_SUITE;
-  return rc; }
+  return rc;
+}
 
 template<>int ecf_concrete_node<Alias>::type() const { return NODE_ALIAS; }
 template<>int ecf_concrete_node<Suite>::type() const { return NODE_SUITE; }
@@ -941,15 +966,10 @@ template<> int ecf_concrete_node<external>::type() const { return NODE_UNKNOWN; 
 template<> 
 int ecf_concrete_node<Node>::tryno() {
    int num = -1;
-   if (type() == NODE_TASK) {
-     Task* t = dynamic_cast<Task*>(owner_);
-     if (!t) return num;
-     num=t->try_no();
-   }
-   if (type() == NODE_ALIAS) {
-     Alias* t = dynamic_cast<Alias*>(owner_);
-     if (!t) return num;
-     num=t->try_no();
+   if (owner_) {
+      Submittable* submittable = owner_->isSubmittable();
+      if ( submittable )
+         num = submittable->try_no();
    }
    return num;
 }
@@ -1003,39 +1023,41 @@ std::string ecf_concrete_node<Suite>::get_var(const std::string& name,
                                               bool is_gen,
                                               bool substitute) 
 {   
-  if (!is_gen) { // user variable have priority
-    Variable var = owner_->findVariable(name);
-    if (!var.empty()) {
-      std::string value = var.theValue();
-      if (substitute)
-        owner_->variableSubsitution(value);
-      return value; 
-    }
-  }
-  if ((!owner_->repeat().empty()) && name == owner_->repeat().name()) {
-    return owner_->repeat().valueAsString();
-  }
-  return owner_->findGenVariable(name).theValue();
+   if (!is_gen) { // user variable have priority
+      const Variable& var = owner_->findVariable(name);
+      if (!var.empty()) {
+         std::string value = var.theValue();
+         if (substitute)
+            owner_->variableSubsitution(value);
+         return value;
+      }
+   }
+   if ((!owner_->repeat().empty()) && name == owner_->repeat().name()) {
+      return owner_->repeat().valueAsString();
+   }
+   return owner_->findGenVariable(name).theValue();
 }
+
 template<>
 std::string ecf_concrete_node<Node>::get_var(const std::string& name, 
                                              bool is_gen,
                                              bool substitute) 
-{ 
-  if (!is_gen) { // user variable have priority 
-    Variable var = owner_->findVariable(name);
-    if (!var.empty()) {
-      std::string value = var.theValue();
-      if (substitute) 
-        owner_->variableSubsitution(value);
-      return value; 
-    }
-  }
-  if ((!owner_->repeat().empty()) && name == owner_->repeat().name()) {
-    return owner_->repeat().valueAsString();
-  }
-  return owner_->findGenVariable(name).theValue();
+                                             {
+   if (!is_gen) { // user variable have priority
+      const Variable& var = owner_->findVariable(name);
+      if (!var.empty()) {
+         std::string value = var.theValue();
+         if (substitute)
+            owner_->variableSubsitution(value);
+         return value;
+      }
+   }
+   if ((!owner_->repeat().empty()) && name == owner_->repeat().name()) {
+      return owner_->repeat().valueAsString();
+   }
+   return owner_->findGenVariable(name).theValue();
 }
+
 template<>
 std::string ecf_concrete_node<Defs>::get_var(const std::string& name, 
                                              bool is_gen,
@@ -1106,23 +1128,20 @@ const std::string ecf_node::type_name() const { return ecf_node_name(type()); }
 
 template<>
 void ecf_concrete_node<Defs>::make_subtree() {
-  Defs* n = owner_;
   full_name_ = "/";
-  if (!n) return;
-  ChangeMgrSingleton::instance()->attach(owner_, this); 
-  make_kids_list(this,n->suiteVec());
-  // make_kids_list(this,n->server().user_variables());
-  // make_kids_list(this,n->server().server_variables());
+  if (!owner_) return;
 
-  std::vector<Variable>::const_iterator it;
-  std::vector<Variable> gvar;
-  gvar = n->server().user_variables();
+  ChangeMgrSingleton::instance()->attach(owner_, this); 
+  make_kids_list(this,owner_->suiteVec());
+
+  std::vector<Variable> gvar = owner_->server().user_variables();
   std::sort(gvar.begin(),gvar.end(),cless_than());
   make_kids_list(this,gvar);
 
-  gvar = n->server().server_variables();
+  std::vector<Variable>::const_iterator it;
+  gvar = owner_->server().server_variables();
   for (it = gvar.begin(); it != gvar.end(); ++it)
-    if ((*it).name() == "" || !(*it == Variable::EMPTY()))
+    if (!(*it == Variable::EMPTY()))
       add_kid(make_node(*it, this, 'g'));
     else std::cerr << "# empty variable\n";
 }
@@ -1134,16 +1153,18 @@ void ecf_concrete_node<Defs>::update(const Defs* n,
   if (!owner_) return;     
   if (!node_) return;
   if (is_reset(aspect)) {  
-    host& serv = node_->serv();
 
-    XECFDEBUG {
-      for (std::vector<suite_ptr>::const_iterator i = n->suiteVec().begin();
-           i != n->suiteVec().end(); ++i) {
-        std::cout << "suite name " << (*i)->name() << "\n";
-      }}
-    serv.redraw(true);   
-    return;
+     Updating::set_full_redraw();
+
+     XECFDEBUG {
+        for (std::vector<suite_ptr>::const_iterator i = n->suiteVec().begin();
+                 i != n->suiteVec().end(); ++i) {
+           std::cout << "suite name " << (*i)->name() << "\n";
+        }}
+
+     return;
   }
+
   { node_->update(-1, -1, -1); node_->notify_observers(); node_->redraw(); }
 }
 

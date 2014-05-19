@@ -73,9 +73,10 @@ public:
 	/// will return numeric_limits<int>::max() for invalid conversions
 	static int to_int( const std::string&, int error_return = std::numeric_limits<int>::max() );
 
-	/// Truncate the input string at the start if exceeds max_lines_ newlines
+	/// Truncate the input string at the start/end if exceeds max_lines_ newlines
 	/// returns true if truncated false otherwise
-	static bool truncate_at_start(  std::string& fileContents, size_t max_lines_);
+   static bool truncate_at_start(  std::string& fileContents, size_t max_lines_);
+   static bool truncate_at_end(  std::string& fileContents, size_t max_lines_);
 
 	/// Only use strcmp if the first characters are the same
 	static int local_strcmp(const char* s, const char* t)

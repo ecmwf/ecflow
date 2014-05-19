@@ -41,12 +41,12 @@ int xnode::getBox(Widget w)
 
 void xnode::drawCB(Widget w,XRectangle* r,void *data)
 {
-    ((xnode*)data)->draw(w,r);
+  if (data) ((xnode*)data)->draw(w,r);
 }
 
 void xnode::sizeCB(Widget w,XRectangle* r,void *data)
 {
-    ((xnode*)data)->size(w,r);
+  if (data) ((xnode*)data)->size(w,r);
 }
 
 void xnode::select()

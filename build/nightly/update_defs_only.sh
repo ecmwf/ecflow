@@ -11,6 +11,7 @@ cd $SCRATCH
 
 # Generate the defs
 python $WK/build/nightly/build.py
+cat build.def
 
 # load the generated defs, *ASSUMES* server is running
 python $WK/build/nightly/load.py

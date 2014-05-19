@@ -70,9 +70,6 @@ BOOST_AUTO_TEST_CASE( test_ecf_simple_include_file )
    // is not found in ECF_INCLUDE we then look at ECF_HOME
    cout << "ANode:: ...test_ecf_simple_include_file\n";
 
-   // SET ECF_HOME
-   std::string ecf_home = File::test_data("ANode/test/data","ANode");
-
    // Create the defs file corresponding to the text below
    //suite suite
    //  edit ECF_INCLUDE $ECF_HOME/includes
@@ -90,6 +87,7 @@ BOOST_AUTO_TEST_CASE( test_ecf_simple_include_file )
 
    // Override ECF_HOME. ECF_HOME is as default location for .ecf files, when ECF_INCLUDE not specified
    // or when file does not exist in ECF_INCLUDE
+   std::string ecf_home = File::test_data("ANode/test/data","ANode");
    theDefs.set_server().add_or_update_user_variables(Str::ECF_HOME(),ecf_home);
 
    /// begin , will cause creation of generated variables. The generated variables
@@ -132,6 +130,187 @@ BOOST_AUTO_TEST_CASE( test_ecf_simple_include_file )
 
    std::string expected_job_file_contents = "#head.h\n#body\n#tail.h";
    BOOST_CHECK_MESSAGE(job_file_contents == expected_job_file_contents ,"Expected\n" <<expected_job_file_contents << "' but found \n" <<  job_file_contents << "'");
+
+   /// Remove all the generated files
+   boost::filesystem::remove_all( ecf_home + suite->absNodePath() );
+}
+
+BOOST_AUTO_TEST_CASE( test_ecf_simple_used_variables )
+{
+   // Test that used variables are as expected
+   // This should PRUNE the generated variables from the used variables list
+   // Additionally it should NOT affect variables like ESUITE but should ignore generated variable SUITE
+   // See File: ANode/test/data/includes/used_variables.h
+   cout << "ANode:: ...test_ecf_simple_used_variables\n";
+
+   // Create the defs file corresponding to the text below
+   //suite suite
+   //  edit ECF_INCLUDE $ECF_HOME/includes
+   //  task t1
+   //endsuite
+
+   // Create a defs file, where the task name mirrors the ecf files in the given directory
+   task_ptr task_t1;
+   suite_ptr suite;
+   Defs theDefs; {
+      suite = theDefs.add_suite("suite");
+      suite->addVariable( Variable( Str::ECF_INCLUDE(), "$ECF_HOME/includes" ) );
+      suite->add_variable("ESUITE","suite");
+      task_t1 = suite->add_family("f1")->add_task( "t1" );
+   }
+
+   // Override ECF_HOME. ECF_HOME is as default location for .ecf files, when ECF_INCLUDE not specified
+   // or when file does not exist in ECF_INCLUDE
+   std::string ecf_home = File::test_data("ANode/test/data","ANode");
+   theDefs.set_server().add_or_update_user_variables(Str::ECF_HOME(),ecf_home);
+
+   /// begin , will cause creation of generated variables. The generated variables
+   /// are use in client scripts and used to locate the sms files
+   theDefs.beginAll();
+
+   // generate the ecf file;
+   string ecf_file = "%include <used_variables.h>\n";
+   string ecf_file_location = ecf_home  + task_t1->absNodePath() + File::ECF_EXTN();
+   // cout << "file_location = " << ecf_file_location << "\n";
+   BOOST_CHECK_MESSAGE(File::createMissingDirectories(ecf_file_location),"Could not create missing dir\n");
+
+   string errormsg;
+   BOOST_CHECK_MESSAGE(File::create(ecf_file_location, ecf_file, errormsg), errormsg);
+   BOOST_CHECK_MESSAGE(fs::exists(ecf_file_location), "Expected File " << ecf_file_location << " to exist");
+
+   // Create the generated variables
+   task_t1->update_generated_variables();
+
+   /// Now finally the test
+   EcfFile ecfFile(task_t1.get(),ecf_file_location);
+
+   string file_with_used_variables;
+   ecfFile.edit_used_variables(file_with_used_variables);
+   string expected_used_variables = "%comment - ecf user variables\nESUITE = suite\n%end - ecf user variables\n%include <used_variables.h>\n";
+   BOOST_CHECK_MESSAGE(file_with_used_variables==expected_used_variables,"Expected\n" << expected_used_variables << "\nBut found:\n" << file_with_used_variables);
+
+   /// Remove all the generated files
+   boost::filesystem::remove_all( ecf_home + suite->absNodePath() );
+}
+
+BOOST_AUTO_TEST_CASE( test_ecf_simple_used_variables_with_comments )
+{
+   // Test that used variables are as expected
+   // This should PRUNE the generated variables from the used variables list
+   // Additionally it should NOT affect variables like ETASK but should ignore generated variable TASK
+   // See File: ANode/test/data/includes/used_variables_with_comments.h
+   //
+   // This WILL test that when we have user comment and manuals, we can still extract user variables
+   // Those variable defined within comments and manuals that are not defined should be ignored
+   cout << "ANode:: ...test_ecf_simple_used_variables_with_comments\n";
+
+   // SET ECF_HOME
+   std::string ecf_home = File::test_data("ANode/test/data","ANode");
+
+   // Create the defs file corresponding to the text below
+   //suite suite
+   //  edit ECF_INCLUDE $ECF_HOME/includes
+   //  task t1
+   //endsuite
+
+   // Create a defs file, where the task name mirrors the ecf files in the given directory
+   task_ptr task_t1;
+   suite_ptr suite;
+   Defs theDefs; {
+      suite = theDefs.add_suite("suite");
+      suite->addVariable( Variable( Str::ECF_INCLUDE(), "$ECF_HOME/includes" ) );
+      suite->add_variable("ETASK","suite");
+      suite->add_variable("FRED","fred");
+      task_t1 = suite->add_family("f1")->add_task( "t1" );
+   }
+
+   // Override ECF_HOME. ECF_HOME is as default location for .ecf files, when ECF_INCLUDE not specified
+   // or when file does not exist in ECF_INCLUDE
+   theDefs.set_server().add_or_update_user_variables(Str::ECF_HOME(),ecf_home);
+
+   /// begin , will cause creation of generated variables. The generated variables
+   /// are use in client scripts and used to locate the sms files
+   theDefs.beginAll();
+
+   // generate the ecf file;
+   string ecf_file = "%include <used_variables_with_comments.h>\n";
+   string ecf_file_location = ecf_home  + task_t1->absNodePath() + File::ECF_EXTN();
+   // cout << "file_location = " << ecf_file_location << "\n";
+   BOOST_CHECK_MESSAGE(File::createMissingDirectories(ecf_file_location),"Could not create missing dir\n");
+
+   string errormsg;
+   BOOST_CHECK_MESSAGE(File::create(ecf_file_location, ecf_file, errormsg), errormsg);
+   BOOST_CHECK_MESSAGE(fs::exists(ecf_file_location), "Expected File " << ecf_file_location << " to exist");
+
+   // Create the generated variables
+   task_t1->update_generated_variables();
+
+   /// Now finally the test
+   EcfFile ecfFile(task_t1.get(),ecf_file_location);
+
+   string file_with_used_variables;
+   ecfFile.edit_used_variables(file_with_used_variables);
+   string expected_used_variables = "%comment - ecf user variables\nETASK = suite\nFRED = fred\n%end - ecf user variables\n%include <used_variables_with_comments.h>\n";
+   BOOST_CHECK_MESSAGE(file_with_used_variables==expected_used_variables,"Expected\n" << expected_used_variables << "\nBut found:\n" << file_with_used_variables);
+
+   /// Remove all the generated files
+   boost::filesystem::remove_all( ecf_home + suite->absNodePath() );
+}
+
+
+BOOST_AUTO_TEST_CASE( test_ecf_simple_used_variables_errors )
+{
+   // Test that used variables are as expected
+   // This is similar to test_ecf_simple_used_variables_with_comments
+   // BUT we DO NOT define variable FRED, hence we expect failure
+   cout << "ANode:: ...test_ecf_simple_used_variables_errors\n";
+
+   // SET ECF_HOME
+   std::string ecf_home = File::test_data("ANode/test/data","ANode");
+
+   // Create the defs file corresponding to the text below
+   //suite suite
+   //  edit ECF_INCLUDE $ECF_HOME/includes
+   //  task t1
+   //endsuite
+
+   // Create a defs file, where the task name mirrors the ecf files in the given directory
+   task_ptr task_t1;
+   suite_ptr suite;
+   Defs theDefs; {
+      suite = theDefs.add_suite("suite");
+      suite->addVariable( Variable( Str::ECF_INCLUDE(), "$ECF_HOME/includes" ) );
+      suite->add_variable("ETASK","suite");
+      task_t1 = suite->add_family("f1")->add_task( "t1" );
+   }
+
+   // Override ECF_HOME. ECF_HOME is as default location for .ecf files, when ECF_INCLUDE not specified
+   // or when file does not exist in ECF_INCLUDE
+   theDefs.set_server().add_or_update_user_variables(Str::ECF_HOME(),ecf_home);
+
+   /// begin , will cause creation of generated variables. The generated variables
+   /// are use in client scripts and used to locate the sms files
+   theDefs.beginAll();
+
+   // generate the ecf file;
+   string ecf_file = "%include <used_variables_with_comments.h>\n";
+   string ecf_file_location = ecf_home  + task_t1->absNodePath() + File::ECF_EXTN();
+   // cout << "file_location = " << ecf_file_location << "\n";
+   BOOST_CHECK_MESSAGE(File::createMissingDirectories(ecf_file_location),"Could not create missing dir\n");
+
+   string errormsg;
+   BOOST_CHECK_MESSAGE(File::create(ecf_file_location, ecf_file, errormsg), errormsg);
+   BOOST_CHECK_MESSAGE(fs::exists(ecf_file_location), "Expected File " << ecf_file_location << " to exist");
+
+   // Create the generated variables
+   task_t1->update_generated_variables();
+
+   /// Now finally the test
+   EcfFile ecfFile(task_t1.get(),ecf_file_location);
+
+   // Expect a throw since %FRED% is not defined, on the suite, but exists in used_variables_with_comments.h
+   string file_with_used_variables;
+   BOOST_REQUIRE_THROW(ecfFile.edit_used_variables(file_with_used_variables),std::runtime_error);
 
    /// Remove all the generated files
    boost::filesystem::remove_all( ecf_home + suite->absNodePath() );

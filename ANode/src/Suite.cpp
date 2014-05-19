@@ -504,6 +504,8 @@ void Suite::set_memento( const SuiteClockMemento* memento ) {
 #ifdef DEBUG_MEMENTO
 	std::cout << "Suite::set_memento( const SuiteClockMemento*) " << debugNodePath() << "\n";
 #endif
+   ChangeMgrSingleton::instance()->add_aspect(ecf::Aspect::SUITE_CLOCK);
+
  	changeClock(memento->clockAttr_);
 }
 
@@ -511,6 +513,8 @@ void Suite::set_memento( const SuiteBeginDeltaMemento* memento ) {
 #ifdef DEBUG_MEMENTO
 	std::cout << "Suite::set_memento( const SuiteBeginDeltaMemento* ) " << debugNodePath() << "\n";
 #endif
+   ChangeMgrSingleton::instance()->add_aspect(ecf::Aspect::SUITE_BEGIN);
+
 	begun_ = memento->begun_;
 }
 
@@ -518,6 +522,8 @@ void Suite::set_memento( const SuiteCalendarMemento* memento ) {
 #ifdef DEBUG_MEMENTO
 	std::cout << "Suite::set_memento( const SuiteCalendarMemento* ) " << debugNodePath() << "\n";
 #endif
+
+   ChangeMgrSingleton::instance()->add_aspect(ecf::Aspect::SUITE_CALENDAR);
 
 	// The calendar does *NOT* persist the calendar type (hybrid/real) since we can derive this for clock attribute
 	// Hence make sure calendar/clock are in sync. part of the suite invariants

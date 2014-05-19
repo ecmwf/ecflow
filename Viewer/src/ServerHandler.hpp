@@ -24,6 +24,7 @@
 
 
 class ClientInvoker;
+class ServerHandler;
 
 // -------------------------------------------------------
 // ServerComThread - a class to handler communication with
@@ -39,7 +40,7 @@ public:
 
 	ServerComThread();
 
-	void sendCommand(ClientInvoker *ci, ServerComThread::ComType comType);
+	void sendCommand(ServerHandler *server, ClientInvoker *ci, ServerComThread::ComType comType);
 	void setCommandString(const std::vector<std::string> command);
 	ComType commandType();
 	void stop();
@@ -48,6 +49,7 @@ protected:
 	void run();
 
 private:
+	ServerHandler *server_;
 	ClientInvoker *ci_;
 	std::vector<std::string> command_;
 	ComType comType_;

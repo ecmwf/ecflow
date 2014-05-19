@@ -212,9 +212,11 @@ void EcfFile::create_job( JobsParam& jobsParam)
    cout << "EcfFile::createJob task " << node_->absNodePath() << " script_path_or_cmd_ = " << script_path_or_cmd_ << "\n";
 #endif
 
+   // NOTE: When editing pure python jobs, we may have *NO* variable specified, but only user_edit_file
+   //       hence whenever we have user_edit_file, we should follow the else part below
    std::string error_msg;
    std::vector<std::string> lines;
-   if (jobsParam.user_edit_variables().empty()) {
+   if (jobsParam.user_edit_variables().empty() && jobsParam.user_edit_file().empty()) {
       /// The typical *NORMAL* path
       if (!open_script_file(script_path_or_cmd_, EcfFile::SCRIPT, lines,  error_msg)) {
          throw std::runtime_error("EcfFile::create_job: failed " + error_msg );
@@ -641,7 +643,6 @@ void EcfFile::variableSubstituition(JobsParam& jobsParam)
 
    // get the cached ECF_MICRO variable, typically its one char.
    string ecfMicro = ecfMicroCache_;
-
    char microChar = ecfMicro[0];
 
    // We need a stack to properly implement nopp. This is required since we need to pair
@@ -650,7 +651,6 @@ void EcfFile::variableSubstituition(JobsParam& jobsParam)
    // %comment
    // %end      // this is paired with comment
    // %end      // This is paired with nopp
-   int last_directive = -1;
    const int NOPP = 0;
    const int COMMENT = 1;
    const int MANUAL = 2;
@@ -672,7 +672,7 @@ void EcfFile::variableSubstituition(JobsParam& jobsParam)
          if (jobLines_[i].find(T_MANUAL)  == 1) { pp_stack.push_back(MANUAL); continue;  }
          if (jobLines_[i].find(T_END) == 1) {
             if (pp_stack.empty()) throw std::runtime_error("EcfFile::variableSubstituition: failed unpaired %end");
-            last_directive = pp_stack.back(); pp_stack.pop_back();
+            int last_directive = pp_stack.back(); pp_stack.pop_back();
             if (last_directive == NOPP) nopp = false;
             continue;
          }
@@ -701,6 +701,8 @@ void EcfFile::variableSubstituition(JobsParam& jobsParam)
 
             // Allow variable substitution in comment and manual blocks.
             // But if it fails, don't report as an error
+            int last_directive = -1;
+            if (!pp_stack.empty()) last_directive = pp_stack.back();
             if ( last_directive == COMMENT || last_directive == MANUAL) continue;
 
             std::stringstream ss;  ss << "EcfFile::variableSubstituition: failed : '" << jobLines_[i] << "'";
@@ -752,10 +754,12 @@ void EcfFile::get_used_variables(std::string& used_variables) const
          if ( item.first.find(Str::ECF_PORT())    != std::string::npos) continue;
          if ( item.first.find(Str::ECF_NODE())    != std::string::npos) continue;
          if ( item.first.find(Str::ECF_NAME())    != std::string::npos) continue;
-         if ( item.first.find(Str::TASK())        != std::string::npos) continue;
-         if ( item.first.find(Str::FAMILY())      != std::string::npos) continue;
-         if ( item.first.find("FAMILY1")          != std::string::npos) continue;
-         if ( item.first.find(Str::SUITE())       != std::string::npos) continue;
+
+         // We must use exact match, to avoid user variables like ESUITE,EFAMILY,ETASK
+         if ( item.first == Str::TASK())  continue;
+         if ( item.first == Str::FAMILY()) continue;
+         if ( item.first == "FAMILY1")     continue;
+         if ( item.first == Str::SUITE())  continue;
          used_variables += item.first;
          used_variables += " = ";
          used_variables += item.second;
@@ -780,7 +784,6 @@ bool EcfFile::get_used_variables(NameValueMap& used_variables, std::string& erro
    // %comment
    // %end      // this is paired with comment
    // %end      // This is paired with nopp
-   int last_directive = -1;
    const int NOPP = 0;
    const int COMMENT = 1;
    const int MANUAL = 2;
@@ -805,7 +808,7 @@ bool EcfFile::get_used_variables(NameValueMap& used_variables, std::string& erro
          if (jobLines_[i].find(T_MANUAL)  == 1) { pp_stack.push_back(MANUAL); continue;  }
          if (jobLines_[i].find(T_END) == 1) {
             if (pp_stack.empty()) throw std::runtime_error("EcfFile::get_used_variables: failed  unpaired %end");
-            last_directive = pp_stack.back(); pp_stack.pop_back();
+            int last_directive = pp_stack.back(); pp_stack.pop_back();
             if (last_directive == NOPP) nopp = false;
             continue;
          }
@@ -834,6 +837,8 @@ bool EcfFile::get_used_variables(NameValueMap& used_variables, std::string& erro
 
             // Allow variable substitution in comment and manual blocks.
             // But if it fails, dont report as an error
+            int last_directive = -1;
+            if (!pp_stack.empty()) last_directive = pp_stack.back();
             if ( last_directive == COMMENT || last_directive == MANUAL) continue;
 
             ss << "Variable find failed for '" << jobLines_[i] << "'  microChar='" << microChar << "' ";
@@ -1129,7 +1134,6 @@ void EcfFile::removeCommentAndManual()
    // %comment
    // %end      // this is paired with comment
    // %end      // This is paired with nopp
-   int last_directive = -1;
    const int NOPP = 0;
    const int COMMENT = 1;
    const int MANUAL = 2;
@@ -1174,7 +1178,7 @@ void EcfFile::removeCommentAndManual()
           }
           if ((*i).find(T_END) == 1) {
              if (pp_stack.empty()) throw std::runtime_error("EcfFile::removeCommentAndManual: failed  unpaired %end");
-             last_directive = pp_stack.back(); pp_stack.pop_back();
+             int last_directive = pp_stack.back(); pp_stack.pop_back();
              if (last_directive == NOPP) nopp = false;
              else {
 //                cerr << "EcfFile::removeCommentAndManual erase = " << erase << " " << *i << "\n";
@@ -1223,7 +1227,6 @@ void EcfFile::remove_nopp_end_tokens()
    // %comment
    // %end      // this is paired with comment **** this should stay ****
    // %end      // This is paired with nopp    **** this should be deleted ****
-   int last_directive = -1;
    const int NOPP = 0;
    const int COMMENT = 1;
    const int MANUAL = 2;
@@ -1251,7 +1254,7 @@ void EcfFile::remove_nopp_end_tokens()
           if ((*i).find(T_MANUAL)  == 1) { pp_stack.push_back(MANUAL); continue;  }
           if ((*i).find(T_END) == 1) {
              if (pp_stack.empty()) throw std::runtime_error("EcfFile::remove_nopp_end_tokens: failed  unpaired %end");
-             last_directive = pp_stack.back(); pp_stack.pop_back();
+             int last_directive = pp_stack.back(); pp_stack.pop_back();
              if (last_directive == NOPP) {
                 nopp = false;
                 jobLines_.erase( i-- );        // remove %end associated with %nopp

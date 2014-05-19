@@ -1,5 +1,6 @@
 suite suiteName
-   date 1.14.2009         # month should be in range 1-12
-   
+   task a
+      date 1.14.2009         # month should be in range 1-12
+   endtask
 endsuite
 

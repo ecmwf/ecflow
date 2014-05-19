@@ -170,6 +170,7 @@ node::node(host& h,ecf_node* owner)
 
 node::~node()
 {
+  // std::cerr << "# node del: " << full_name() << std::endl;
   if (data_) delete data_;
   data_ = 0x0;
 }
@@ -663,17 +664,36 @@ const std::vector<std::string>& node::messages() const
 } 
 
 //============================================================
+node* node_find(node* n, std::string path) {
+  std::string::size_type pos = path.find("/");
+  std::string::size_type beg = 0;
+  if (!n) return n;
+  while (path[beg] == '/') ++beg;
+  node *kid = n->kids();
+  while (kid) {
+    if (kid->type() != NODE_SUITE && 
+	kid->type() != NODE_FAMILY && 
+	kid->type() != NODE_TASK ) {kid = kid->next(); continue;}
+    if (kid->name() == path.substr(beg, pos-beg)) {
+      if (pos ==  std::string::npos)
+	return kid;
+      else 
+	return node_find(kid, path.substr(pos));
+    }
+    kid = kid->next();      
+  }
+  return kid;
+}
 
 node* node::find(const std::string name) 
 {
   node * top = 0x0;
-  node * item = 0x0;
-  ecf_concrete_node<Defs> * ecfn = 0x0;
   node_ptr ptr;
   std::string::size_type pos = name.find(":");
   if (pos == std::string::npos) { // not an attribute
+    ecf_concrete_node<Defs> * ecfn = 0x0;
     if (0x0 != (top = serv().top())) {
-    ecfn = dynamic_cast<ecf_concrete_node<Defs>* >(top->__node__());
+    ecfn = dynamic_cast<ecf_concrete_node<Defs>*>(top->__node__());
     if (0x0 != ecfn) // ok with a node, NOK with attribute
       ptr = const_cast<Defs*>(ecfn->get())->findAbsNode(name);    
     }
@@ -687,10 +707,15 @@ node* node::find(const std::string name)
     return 0x0;
   }
   if (0x0 != ptr.get()) {
-    item = (node*) ptr.get()->graphic_ptr(); 
-  }
-  if (item == 0x0) std::cout << "# not found\n";
-  return item;
+    return (node*) ptr.get()->graphic_ptr(); 
+  } 
+  else if (name == "/") 
+    return serv().top();
+
+  return node_find(serv().top(), name);
+  /*   if (item == 0x0) 
+    std::cout << "# not found:" << name << "\n";
+    return item; */
 }
 
 //============================================================
@@ -1025,21 +1050,6 @@ const std::string& node::parent_name() const
 }
 
 void node::delvars() {
-  node *run, *lag;
-  if (0x0 == kids()) return;
-  while ((run = kids()) && run->type() == NODE_VARIABLE) {    
-    kids_ = kids_->next_;
-    delete run;
-  }
-  lag = kids();
-  for (run = kids(); run; run = lag->next()) {
-    if (run->type() == NODE_VARIABLE) {
-      lag->next_ = run->next();
-      delete run;
-    } else {
-      lag = run;
-    }
-  }
 }
 
 void node::unlink(bool detach) { 

@@ -33,8 +33,8 @@ Limit* limit_node::get() const {
 #ifdef BRIDGE
   if (tree_) return 0x0;
 #endif
-  if (!owner_.get()) return 0x0;
-  return dynamic_cast<ecf_concrete_node<Limit>*>(owner_.get())->get();
+  if (!owner_) return 0x0;
+  return dynamic_cast<ecf_concrete_node<Limit>*>(owner_)->get();
 }
 
 xmstring limit_node::make_label_tree()

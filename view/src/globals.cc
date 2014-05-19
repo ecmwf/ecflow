@@ -36,6 +36,7 @@ static option<bool> s10(globals::instance(),"zombied",false);
 static option<bool> s11(globals::instance(),"aliases",false);
 
 static option<bool> e1(globals::instance(),"send_as_alias",false);
+static option<int> s12(globals::instance(),"jobfile_length",10000);
 
 // User
 

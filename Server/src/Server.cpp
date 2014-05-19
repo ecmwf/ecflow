@@ -258,7 +258,7 @@ void Server::handle_read(  const boost::system::error_code& e,connection_ptr con
       if (!serverEnv_.reply_back_if_ok()) {
          if (!inbound_request_.terminateRequest() && outbound_response_.get_cmd()->isOkCmd()) {
             // cleanly close down the connection
-            if (serverEnv_.debug()) cout << "   Server::handle_read: NOT replying with since request is OK\n";
+            if (serverEnv_.debug()) cout << "   Server::handle_read: NOT replying, since request is OK\n";
             conn->socket().shutdown(boost::asio::ip::tcp::socket::shutdown_both);
             conn->socket().close();
             return;
@@ -701,6 +701,8 @@ int Server::poll_interval() const
 void Server::debug_server_on()
 {
    serverEnv_.set_debug(true);
+   std::cout << "\nEnable DEBUG, start with DUMP of server environment:\n\n";
+   std::cout << serverEnv_.dump() << "\n";
 }
 
 void Server::debug_server_off()

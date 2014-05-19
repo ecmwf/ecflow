@@ -1,0 +1,71 @@
+# ====================================================================
+# The class Client can be placed in head.py, since it is 
+# common to all jobs
+# ====================================================================
+import os, time, signal, sys
+import ecflow
+ 
+print "PYTHONPATH====================================================="
+print os.environ['PYTHONPATH'].split(os.pathsep)
+
+class Client(object):
+   def __init__(self):
+      print "Creating Client"
+      self.ci = ecflow.Client()
+      self.ci.set_host_port("%ECF_NODE%","%ECF_PORT%")
+      self.ci.set_child_pid(os.getpid())
+      self.ci.set_child_path("%ECF_NAME%")
+      self.ci.set_child_password("%ECF_PASS%")
+      self.ci.set_child_try_no(%ECF_TRYNO%)
+   
+      print "Only wait 20 seconds, if the server cannot be contacted (note default is 24 hours) before failing"
+      self.ci.set_child_timeout(20) 
+    
+      signal.signal(signal.SIGINT,  self.signal_handler) 
+      signal.signal(signal.SIGHUP,  self.signal_handler)
+      signal.signal(signal.SIGQUIT, self.signal_handler)
+      signal.signal(signal.SIGILL,  self.signal_handler)
+      signal.signal(signal.SIGTRAP, self.signal_handler)
+      signal.signal(signal.SIGIOT,  self.signal_handler)
+      signal.signal(signal.SIGBUS,  self.signal_handler)
+      signal.signal(signal.SIGFPE,  self.signal_handler)
+      signal.signal(signal.SIGUSR1, self.signal_handler)
+      signal.signal(signal.SIGUSR2, self.signal_handler)
+      signal.signal(signal.SIGPIPE, self.signal_handler)
+      signal.signal(signal.SIGTERM, self.signal_handler)
+      signal.signal(signal.SIGXCPU, self.signal_handler)
+      signal.signal(signal.SIGPWR,  self.signal_handler)
+    
+   def signal_handler(self,signum, frame):
+      print 'Aborting: Signal handler called with signal ', signum
+      self.ci.child_abort("Signal handler called with signal " + str(signum));
+    
+   def __enter__(self):
+      self.ci.child_init()
+      return self.ci
+    
+   def __exit__(self,ex_type,value,tb):
+      print "Client:__exit__: ex_type:" + str(ex_type) + " value:" + str(value) + "\n" + str(tb)
+      if ex_type != None:
+         self.ci.child_abort("Aborted with exception type " + str(ex_type) + str(value))
+         return False
+      self.ci.child_complete()
+      return False
+        
+        
+        
+# =============================================================================
+# Job specific code:
+#    This uses Client, to job start/finish/abort and signal trapping
+with Client() as ci:
+
+   # This will also handle call to sys.exit(), i.e Client.__exit__ will still be called.
+   for i in range(1,100):
+      print "At value " + str(i)
+      ci.child_meter('meter',i)
+      ci.child_label('label_name', "value_" + str(i))
+      time.sleep(1)
+      
+   ci.child_event('event_fred')
+   print "Finished event,meter and label child commands"
+  

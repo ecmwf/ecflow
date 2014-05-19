@@ -42,7 +42,7 @@ private:
 	void put(const T&);
 };
 
-#if defined(__GNUC__) || defined(hpux) || defined(AIX)
+#if defined(__GNUC__) || defined(hpux) || defined(_AIX)
 #include "option.cc"
 #endif
 #endif

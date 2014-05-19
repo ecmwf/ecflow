@@ -35,7 +35,7 @@ lib pthread ;
 #
 # Tests for parser.  Exclude file test/TestSingleDefsFile.cpp
 #
-exe tparser : [ glob test/*.cpp : test/TestSingleDefsFile.cpp test/ParseOnly.cpp test/ParseTimer.cpp ] 
+exe u_aparser : [ glob test/*.cpp : test/TestSingleDefsFile.cpp test/ParseOnly.cpp test/ParseTimer.cpp ] 
            pthread 
            /theCore//core
            /theNodeAttr//nodeattr
@@ -53,7 +53,7 @@ exe tparser : [ glob test/*.cpp : test/TestSingleDefsFile.cpp test/ParseOnly.cpp
 #
 # Tests parser for a single defs file.  
 #
-exe tsingle : test/TestSingleDefsFile.cpp test/PersistHelper.cpp 
+exe perf_aparser : test/TestSingleDefsFile.cpp test/PersistHelper.cpp 
            pthread
            /theCore//core
            /theNodeAttr//nodeattr
@@ -71,7 +71,7 @@ exe tsingle : test/TestSingleDefsFile.cpp test/PersistHelper.cpp
 #
 # Timer for arbitary defs file,  
 #
-exe parse_timer : test/ParseTimer.cpp  test/PersistHelper.cpp
+exe perf_aparser_timer : test/ParseTimer.cpp  test/PersistHelper.cpp
            pthread
            /theCore//core
            /theNodeAttr//nodeattr
@@ -88,7 +88,7 @@ exe parse_timer : test/ParseTimer.cpp  test/PersistHelper.cpp
 #
 # Tests parser for a single defs file.  
 #
-exe parse_only : test/ParseOnly.cpp   
+exe perf_aparser_only : test/ParseOnly.cpp   
            pthread
            /theCore//core
            /theNodeAttr//nodeattr

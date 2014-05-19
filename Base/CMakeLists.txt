@@ -66,15 +66,17 @@ ecbuild_add_library( TARGET   base
                      NOINSTALL
                      TYPE     STATIC
                      SOURCES  ${srcs}
-                     LIBS     core nodeattr node libparser ${Ecflow_Boost_LIBS}
-                     INCLUDES ../ACore/src 
+                     LIBS     libparser node nodeattr core 
+                              ${Boost_PROGRAM_OPTIONS_LIBRARY}    
+                     INCLUDES src
+                              ../ACore/src 
                               ../ANattr/src
                               ../ANode/src
                               ../AParser/src
                               ../Base/src
                               ../Base/src/cts
                               ../Base/src/stc
-                              ${Boost_INCLUDE_DIRS} )
+                     )
 
  
 list( APPEND test_srcs
@@ -93,16 +95,11 @@ list( APPEND test_srcs
    test/TestSSyncCmd.cpp
    test/TestSSyncCmdOrder.cpp
 )
-ecbuild_add_test( TARGET  basetest
-                SOURCES   ${test_srcs}
-                LIBS      core nodeattr node libparser base pthread ${Ecflow_Test_LIBS}
-                INCLUDES  src
-                          ../ACore/src 
-                          ../ANattr/src
-                          ../ANode/src
-                          ../ANode/test
-                          ../Base/src
-                          ../Base/src/cts
-                          ../Base/src/stc
-                          ${Boost_INCLUDE_DIRS} 
+ecbuild_add_test( TARGET    u_base
+                  BOOST
+                  SOURCES   ${test_srcs}
+                  LIBS      base       
+                            pthread 
+                  INCLUDES ../ANode/test
+                           ${Boost_INCLUDE_DIRS} 
                   )

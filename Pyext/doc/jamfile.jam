@@ -1,0 +1,299 @@
+## Copyright 2009-2012 ECMWF. 
+## This software is licensed under the terms of the Apache Licence version 2.0 
+## which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
+## In applying this licence, ECMWF does not waive the privileges and immunities 
+## granted to it by virtue of its status as an intergovernmental organisation 
+## nor does it submit to any jurisdiction. 
+
+# =============================================================================
+# This jam file, allows for creation of ecflow python extension module, where
+# we have a SHARED link to boost python, additionally boost python is
+# installed, and a rpath is set to it.
+# ===============================================================================
+
+# ===============================================================================
+# Error to watch out for:
+# error: No best alternative for /python_for_extensions
+#    next alternative: required properties: <python>2.7 <target-os>linux
+#        matched
+#    next alternative: required properties: <python>2.7 <target-os>linux
+#        matched
+# 
+# Please check if you have more than one 'using python' in configuration files.
+# Please check site-config.jam, user-config.jam and project-config.jam and 
+# remove duplicated 'using python'
+# ===============================================================================
+        
+#
+# jamfile for installing, building exposing c++ library to python.
+# and for testing embedded python
+#
+# Use of <dll-path> should force a relink. But this *ONLY* works for executables
+# and *NOT* shared libraries. The HACKY work around is use <dll-path> when 
+# building the extension. Hence this requires that ECFLOW_INSTALL_DIR 
+# is correctly set during build time. Yuk. 
+#
+project thePyext ;
+
+use-project theCore      : ../ACore ;
+use-project theNodeAttr  : ../ANattr ;
+use-project theNode      : ../ANode ;
+use-project theParser    : ../AParser ;
+use-project theBase      : ../Base ;
+use-project theClient    : ../Client ;
+use-project theSimulator : ../CSim ;
+
+# Make the definition of the python-extension rule available
+# Somehow this bjam causes boost python libs to be built under $BOOST_ROOT/bin.v2
+# How can I get it to use boost python that was built with all the other boost libs ???
+import python ;
+
+if ! [ python.configured ]
+{
+    # ECHO "notice: no Python configured in user-config.jam" ;
+    # ECHO "notice: will use default configuration" ;
+    # We will typically place this in user-congig/site-config.jam
+    #using python
+    #     :  # version
+    #     :  # cmd-or-prefix
+    #     :  # includes
+    #     :  # libraries
+    #     :  # condition
+    #     ;
+    using python ;
+}
+
+# Specify the path to the Boost project.  If you move this project,
+# adjust this path to refer to the Boost root directory.
+import os ;
+local BOOST_ROOT = [ os.environ BOOST_ROOT ] ;
+use-project boost
+  : $(BOOST_ROOT) ;
+
+
+# ===================== project settings =================================
+# Set up the project-wide requirements that everything uses the
+# boost_python library from the project whose global ID is /boost/python.
+#
+# AIX: need to add additional include for pyconfig.hpp since we have 
+#      one for python32 and another one for python64. 
+#      (Typically there is only _one_ in  the python includes dir)
+#      *** This should have been added to site-config.jam file **
+#
+# AIX: we get TOC overflow, because compiler/linker has 64k limit on
+#      the number of global symbols. Options are use:
+#       0/ Break up shared lib
+#       1/ -bbigtoc to overcome at the cost of performance degradation
+#       2/ --qipa=level=0 if this fails try
+#       3/ --qipa=level=1 if this fails try
+#       4/ --qipa=level=2 if this fails, revert to -bbigtoc
+#       Currently option 2-4 didn't work!
+#      *** This should have been added to site-config.jam file **
+#      prevously we had:   : requirements <toolset>vacpp:<linkflags>-bbigtoc  
+#
+#  If we use:
+#  : requirements <library>/boost/python//boost_python 
+#       THEN we will depend on $BOOST_ROOT/bin.v2/...
+#       This will be automatically compiled if it does not exist
+#  : requirements <library>/site-config//boost_python
+#       THEN use the boost python in $BOOST_ROOT/stage/lib/
+#       This is also expects  we have defined boost_python in site-config.jam/user-config.jam
+#       
+project
+#   : requirements <library>/boost/python//boost_python 
+    : requirements <library>/site-config//boost_python
+  ;
+
+# ======================== libs ============================================
+# HPUX:  ADD standard libs. They don't get added by default ?
+#        Also on HPUX the shared libs appears reversed, and don't appear
+#        in the order specified weird ?
+#        Notice the use of <library> to add additional library on the link line
+#        but only for HPUX/acc toolset
+# <ALL>: It appears the pthread lib is automatically added. i.e >lib pthread ;
+#
+# Note:  <toolset>vacpp:<linkflags>-bbigtoc  was required for 
+#            ecgate(rs6000) ONLY and not c1b(ibm_power6)
+
+lib std_v2 ;
+lib stream ;
+lib Csup ;
+lib unwind ;
+lib m ;
+alias hpux_std_libs : std_v2 stream Csup unwind m ;
+
+# ========================================================================
+# Extension:  Declare a Python extension called ecflow.  
+# ========================================================================
+python-extension ecflow : [ glob src/*.cpp ]
+    /theCore//core
+    /theNodeAttr//nodeattr
+    /theNode//node
+    /theParser//libparser
+    /theBase//base
+    /theClient//libclient
+    /theSimulator//libsimu
+    /site-config//boost_system
+    /site-config//boost_serialization
+    /site-config//boost_filesystem
+    /site-config//boost_program_options
+    /site-config//boost_datetime
+    : <variant>debug:<define>DEBUG
+      <toolset>acc:<library>hpux_std_libs  
+      <toolset>acc:<linkflags>-L$(ECFLOW_PYTHON_INSTALL_DIR)
+      <toolset>vacpp:<linkflags>-L$(ECFLOW_PYTHON_INSTALL_DIR)
+      <toolset>vacpp:<linkflags>-bbigtoc
+      <dll-path>$(ECFLOW_PYTHON_INSTALL_DIR)
+    ;
+
+# ========================================================================
+# Documentation: 
+# ========================================================================
+# Place the shared library 'ecflow' into the ecflow/ directory. 
+# - *REQUIRED* for sphinx-build. Documentation generation  See Doc/online/conf.py
+#   We use this as first place to look for c++ extension
+# - avoids hard wired dependency on compiler path
+# - Picks up latest changes
+install ecflow/ : ecflow  ;
+
+
+# ========================================================================
+# INSTALLATION:
+# ========================================================================
+# <dll-path> specify the path which will be used at runtime to search for dynamic libraries
+# it is like using rpath, i.e. to hard code a directory, when doing a runtime search for a library
+# <dll-path>$(ECFLOW_PYTHON_INSTALL_DIR), is used, to dynamically load boost-python shared library
+# Requested by User Support, to avoid having user add LD_LIBRARY_PATH to their environment
+#
+# *HOWEVER* this does not work at install time, and must be done at link time. See below
+#
+# The tests(run-test) *BELOW* specify LD_LIBRARY_PATH and hence override <dll-path>
+# 
+# Linux: ldd <extension>
+#           If the embedded object is not accessible, it just shows "=>not found"
+#           In our case the boost python shared lib may not exist until added at install time.
+#           *** Hence ldd can be very misleading ***
+#           *** Also if LD_LIBRARY_PATH is set *and* path exist, this will be shown & hence hide embedded paths ***
+#
+#        objdump -p  <extension>     // detailed dump, *SHOWS* the embedded paths, and search order
+#           shared library dynamic path search:
+#              LD_LIBRARY_PATH    enabled  first
+#              embedded path      enabled  second   
+#
+# HPUX:  ldd <extension>
+#        chatr <extension>           // detailed dump, *SHOWS* search path and embedded path
+#           shared library dynamic path search:
+#              LD_LIBRARY_PATH    enabled  first
+#              SHLIB_PATH         enabled  second
+#              embedded path      enabled  third   
+#
+# AIX:  ldd  <extension>
+#       dump -H <extension>
+#
+# NOTE: <linkflags>-L$(ECFLOW_PYTHON_INSTALL_DIR)
+#       <dll-path>$(ECFLOW_PYTHON_INSTALL_DIR)
+#      is ONLY required during install. 
+#      However install does not appear to force a relink. 
+#      The bjam documentations suggests that <dll-path> is only required at install. 
+#      But that does not work, since we don't appear to relink. It *ONLY* works with exe's and not shared libs
+#      As a result tried to use <dll-path> at link time, with mixed results:
+#             hardcode-dll-paths    install                          link
+#      Linux:  does not work,       <dll-path> does not work         <dll-path> works
+#      HPUX:   works                <dll-path> does not work         <dll-path> does not work
+#                                                                    adding -L/path added, but get ignored by -L 
+#                                                                    allready there on development path 
+#      AIX:    does not work        <dll-path> does not work         <dll-path> does not work
+#                                                                    -L/path however does
+# Bjam documentation suggest hardcode-dll-paths has a default value of true,
+# this however can only be seen on HPUX. Tried combination of:
+#     <toolset>acc:<hardcode-dll-paths>false
+#     <toolset>acc:<linkflags>-L$(ECFLOW_PYTHON_INSTALL_DIR)
+# Again no effect:
+#
+# Tried using:  bjam install-py dll-path=/var/tmp/ma0/ecflow/1.9.15/lib/python2.5/site-packages/ecflow -d2
+# This will ONLY work if the extension needs building, will not work for installing as emos
+# as emos will not have permission to write into workspace first.
+#
+# >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+# The hacky workaround is to use <dll-path> when building the extension. This requires
+# that ECFLOW_INSTALL_DIR is correctly set, which requires that ECFLOW_INSTALL_DIR
+# is correctly set. i.e during the build and NOT just install
+# >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+# - install __init__.py file. 
+# - This install is referenced in JamRoot.jam
+install install-py1
+   : [ glob ecflow/*.py ] 
+   : <location>$(ECFLOW_DESTDIR)/$(ECFLOW_PYTHON_INSTALL_DIR)
+   ;
+
+# - <dll-path> for install Left in, in case its fixed in the future. 
+# - This install is referenced in JamRoot.jam
+install install-py 
+   : ecflow
+   : <install-dependencies>on 
+     <install-type>PYTHON_EXTENSION 
+     <install-type>SHARED_LIB 
+     <dll-path>$(ECFLOW_PYTHON_INSTALL_DIR)
+     <location>$(ECFLOW_DESTDIR)$(ECFLOW_PYTHON_INSTALL_DIR)
+   ;
+
+# make install explicit, otherwise we end installing for all calls to bjam
+explicit install-py1 ;
+explicit install-py  ;
+
+
+# ========================================================================
+# TESTING: unit-tests and test for python fragments in online tutorial
+# ========================================================================
+import testing ;
+
+# A little "rule" (function) to clean up the syntax of declaring tests
+# of these extension modules.
+local rule run-test ( test-name : sources + )
+{
+    testing.make-test run-pyd : $(sources) : : $(test-name) ;
+}
+
+#
+# Declare test targets; 
+# Note cant run TestWith until all plarforms support with statement, i.e python 2.6 or greater
+#                       
+run-test TestClientApi     : ecflow [ glob test/py_s_TestClientApi.py ] ;
+run-test TestDefs          : ecflow [ glob test/py_u_TestDefs.py ] ;
+run-test TestError         : ecflow [ glob test/py_u_TestError.py ] ;
+run-test TestTraversal     : ecflow [ glob test/py_u_TestTraversal.py ] ;
+run-test TestDefsCheck     : ecflow [ glob test/py_u_TestDefsCheck.py ] ;
+run-test TestSimulator     : ecflow [ glob test/py_u_TestSimulator.py ] ;
+run-test TestAddDelete     : ecflow [ glob test/py_u_TestAddDelete.py ] ;
+run-test TestAddDeleteFunc : ecflow [ glob test/py_u_TestAddDeleteFunc.py ] ;
+run-test TestAddNodeFunc   : ecflow [ glob test/py_u_TestAddNodeFunc.py ] ;
+run-test TestParent        : ecflow [ glob test/py_u_TestParent.py ] ;
+run-test TestUserManual    : ecflow [ glob test/py_u_TestUserManual.py ] ;
+run-test TestJobGeneration : ecflow [ glob test/py_u_TestJobGeneration.py ] ;
+run-test TestGetAllTasks   : ecflow [ glob test/py_u_TestGetAllTasks.py ] ;
+run-test TestDerivable     : ecflow [ glob test/py_u_TestDerivable.py ] ;
+run-test TestWith          : ecflow [ glob test/py_u_TestWith.py ] ;
+run-test TestFind          : ecflow [ glob test/py_u_TestFind.py ] ;
+run-test TestMigrate       : ecflow [ glob migrate/py_u_TestMigrate.py ] ;
+run-test TestRepeatArithmetic  :  ecflow [ glob test/py_u_TestRepeatArithmetic.py ] ;
+run-test TestGeneratedVariable : ecflow [ glob test/py_u_TestGeneratedVariable.py ] ;
+run-test TestEcf               : ecflow [ glob test/py_u_TestEcf.py ] ;
+
+# A target that runs all the tests. 
+# Note test_embed & test_embed_ecf commented out since we dont use this functionality
+alias test-all
+ :  TestUserManual TestJobGeneration TestClientApi TestDefs TestError TestTraversal TestDefsCheck 
+    TestSimulator TestAddDelete TestAddDeleteFunc TestAddNodeFunc TestParent TestGetAllTasks TestDerivable 
+    TestMigrate TestRepeatArithmetic TestWith TestFind TestGeneratedVariable TestEcf
+    # test_embed test_embed_ecf 
+    ;
+   
+# Only run tests when explicitly requested
+explicit test-all
+    TestUserManual TestJobGeneration TestClientApi TestDefs TestError TestTraversal TestDefsCheck 
+    TestSimulator TestAddDelete TestAddDeleteFunc TestAddNodeFunc TestParent TestGetAllTasks TestDerivable 
+    TestMigrate TestRepeatArithmetic TestWith TestFind TestGeneratedVariable TestEcf
+    # test_embed test_embed_ecf 
+    ;
+ 

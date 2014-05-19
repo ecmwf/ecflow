@@ -1,0 +1,6 @@
+suite suiteName
+   today 19:00                   # suites dont have a today, See  ECFLOW-106 Times/Dates attributes attached to suite node
+   family familyName0   
+   endfamily
+endsuite
+

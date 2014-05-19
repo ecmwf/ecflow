@@ -35,7 +35,7 @@
 #include "CheckPt.hpp"
 #include "PreAllocatedReply.hpp"
 
-#if defined(AIX) && !defined(DEBUG)
+#if defined(_AIX) && !defined(DEBUG)
 // Required for MoveCmd for release mode of v11.1 compiler
 #include "Defs.hpp"
 #include "Suite.hpp"
@@ -290,9 +290,7 @@ public:
             const std::string& jobsPassword,
             const std::string& process_or_remote_id,
             int try_no,
-            const std::string& expression)
-   : TaskCmd(pathToTask,jobsPassword,process_or_remote_id,try_no), expression_(expression) {}
-
+            const std::string& expression);
    CtsWaitCmd() : TaskCmd()  {}
 
    const std::string& expression() const { return expression_;}
@@ -328,8 +326,7 @@ public:
             const std::string& jobsPassword,
             const std::string& process_or_remote_id,
             int try_no = 1,
-            const std::string& reason = "")
-   :TaskCmd(pathToTask,jobsPassword,process_or_remote_id,try_no), reason_(reason) {}
+            const std::string& reason = "");
    AbortCmd() : TaskCmd() {}
 
    const std::string& reason() const {return reason_; }

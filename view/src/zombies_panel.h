@@ -7,6 +7,8 @@
 #include "panel.h"
 #endif
 
+#include <set>
+
 //=============================================================================================
 // Name        : 
 // Author      : 
@@ -42,16 +44,18 @@ private:
 	zombies_panel(const zombies_panel&);
 	zombies_panel& operator=(const zombies_panel&);
 
-	char* name_;
+        char* name_;
 
-	void call(int);
+        void call(int, XtPointer);
 
-	virtual void browseCB( Widget, XtPointer );
-	virtual void deleteCB( Widget, XtPointer );
+        virtual void browseCB( Widget, XtPointer );
+        virtual void deleteCB( Widget, XtPointer );
 	virtual void acceptCB( Widget, XtPointer );
-	virtual void rescueCB( Widget, XtPointer );
-	virtual void terminateCB( Widget, XtPointer );
-	virtual void killCB( Widget, XtPointer );
+        virtual void rescueCB( Widget, XtPointer );
+        virtual void terminateCB( Widget, XtPointer );
+        virtual void killCB( Widget, XtPointer );
+
+        std::set<std::string> selection_;
 };
 
 inline void destroy(zombies_panel**) {}

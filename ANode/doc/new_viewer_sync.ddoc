@@ -1,0 +1,81 @@
+Changes to support syncing with the new viewer
+===============================================
+
+Questions:
+  o Does the new viewer need to know when its in notification ?
+    Was only added to old viewer as a debug aid.
+  o How will the new viewer employ multi-threading.
+
+Requirements:
+  o Need to attach new observer for Defs only.
+    This implies the update mechanism will supply the Node, and the changed Aspects
+  o Need to attach multiple observers
+  
+Design choice 1:  
+-----------------------------------------------------------------------------------------
+  Changes required:
+  o No longer Need ChangeMgrSingleton, we will add observers directly to the Defs.
+  o Need to store aspects on the Defs. 
+  
+  + Classic observer:
+  + Different defs are independent hence Updates could be done in parallel.
+  - The biggest issue, handling node deletion notification.
+    i.e on the client side each delete of task,family,suite, will need
+    traverse up the hierarchy to get the defs, in order to do the notification.
+  - In order to set the aspects, we need to access defs.
+    This means traversing up the node tree for each Change.
+    Alternativly we could cache defs on the aspects, for easy access.
+    
+    Hence this will affect all deletion of Defs, and not just the GUI. defs.
+    Partly mitigated since we need only do this on the client side.
+   
+    o One time traverse the defs, and create a defs ptr cache on a Node ?
+      This need only be done for the GUI/Defs.
+      What if new Nodes added ? i.e full sync will need to traverse each time.
+      Could be hidden behind defs() function, as a cache.
+      
+      
+Design Choice 2:
+----------------------------------------------------------------------------------------     
+  o Continue to use Change Mgr singleton
+  o Store aspects on Change Mgr Singleton
+  o Change implementation to allow multiple observers for a Defs.
+  
+  + Defs is not burdened with notification mechanism.
+  + The defs/Node deletion can be predicated by ChangeMgrSingleton:
+      if (!Ecf::server() && ChangeMgrSingleton::exists()) {
+         ChangeMgrSingleton::instance()->notify_delete( this );
+      }
+  +/- One update mechanism for all definitions, hence update are serial
+  +/- Node Deletion:
+      Will still need the defs in order to compute the corresponding observer.
+      
+-------------------------------------------------------------------------------------------
+   Implementation:
+
+   Defs:
+      void attach(DefsObserver*);      
+      void dettach(DefsObserver*);  
+      void notify(Defs* theChanged, Node* theChanged,  const std::vector<ecf::Aspect::Type>&)
+      void notify_delete(Defs*);
+      void notify_delete(Node*); // This is going to expensive ?
+      
+      /// The cummulated aspect are sent, when we do a the real notification
+      void add_aspect(ecf::Aspect::Type aspect) { aspects_vec_.push_back(aspect) ;}
+      void clear_aspect() { aspects_vec_.clear();}
+      
+   private:
+      std::vector<ecf::Aspect::Type> aspects_vec_;
+   
+   -------------------------------------------------
+   class DefsObserver {
+   public:
+      virtual ~DefsObserver() {}
+   
+      virtual void update(const Defs*, const Node*, const std::vector<ecf::Aspect::Type>&) = 0;
+   
+      /// After this call, the node will be deleted, hence observers must *NOT* use the pointers
+      virtual void update_delete(const Node*) {}
+      virtual void update_delete(const Defs*) {}
+   };
+    

@@ -61,6 +61,8 @@ public:
 	static GC         colorGC(unsigned int);
 
 	static void set_interface(interface*);
+	static Pixel pixel(const char* name);
+
 
 	//------------------------------------------------------
 

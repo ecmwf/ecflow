@@ -27,6 +27,7 @@ protected:
 	Widget timeout;
 	Widget drift;
 	Widget maximum;
+	Widget jobfile_length;
 public:
 	static void useCB( Widget, XtPointer, XtPointer );
 	virtual void useCB( Widget, XtPointer ) = 0;

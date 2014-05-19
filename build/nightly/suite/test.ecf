@@ -154,7 +154,7 @@ set -e # stop shell, on error
 set -x # echo script lines as they are executed
 
    # This was enable because this allowed us to only run the failed tests
-   #if [[ %CMAKE:boost% = CMAKE ]] ; then
+   #if [[ %BUILD_TYPE:boost% = cmake ]] ; then
    #   run_test_cmake $1 $2
    #else
       run_test_boost $1 $2
@@ -166,10 +166,30 @@ set -x # echo script lines as they are executed
 
 # ============================================================================
 
+if [[ %ARCH% = linux64intel  ]] ; then
+   #
+   # NOTE: /usr/local/apps/python/2.7.2-01/bin/ provides path to PYTHON interpreter
+   #       This is what 'using python' will pick up and add to the include path
+   #
+   export PATH=/usr/local/apps/intel/composer_xe_2013.3.163/bin:$PATH
+   
+   # ensure any variable exported will form part of this script.
+   # Ignore errors in the script, re-enable afterwards.
+   # If all else fails we only need LD_LIBRARY_PATH
+   #   export LD_LIBRARY_PATH=/gpfs/usr/local/apps/intel/composer_xe_2013.3.163/composer_xe_2013.3.163/ipp/../compiler/lib/intel64:/gpfs/usr/local/apps/intel/composer_xe_2013.3.163/composer_xe_2013.3.163/ipp/lib/intel64:/opt/intel/mic/coi/host-linux-release/lib:/opt/intel/mic/myo/lib:/gpfs/usr/local/apps/intel/composer_xe_2013.3.163/composer_xe_2013.3.163/compiler/lib/intel64:/gpfs/usr/local/apps/intel/composer_xe_2013.3.163/composer_xe_2013.3.163/mkl/lib/intel64:/gpfs/usr/local/apps/intel/composer_xe_2013.3.163/composer_xe_2013.3.163/tbb/lib/intel64/gcc4.1
+   #
+   # Needed so that we can find (intel)libimf.so, which is loaded when call ecflow python extension
+   set +eux
+   . iccvars.sh intel64
+   set -eux
+fi
+      
+# =================================================================================
+
 if [[ %SET_TO_TEST_SCRIPT% = true ]] ; then
    echo "Test only"
 else
-   if [[ %CMAKE:boost% = CMAKE ]] ; then
+   if [[ %BUILD_TYPE:boost% = cmake ]] ; then
       ############################################################################
       # ctest
       ############################################################################
@@ -180,7 +200,7 @@ else
       set -e # stop shell, on error
       set -x # echo script lines as they are executed
    
-      # now run the ctest, which will run python tests.
+      # now run the ctest, which will also run python tests.
       cd $WK
       cd ecbuild/%MODE%
         
@@ -189,10 +209,18 @@ else
       unset ECF_PORT
       unset ECF_NODE
       
+      # Use the ctest in /usr/local/apps/cmake/current/bin
+      export PATH=/usr/local/apps/cmake/current/bin:$PATH
+            
       # -V verbose, show test output
+      # -VV extra verbose 
       # --output-on-failure only show output on failure
+      #
       if [[ %ECF_TRYNO% -eq 1 ]] ; then
-         ctest --output-on-failure
+         ctest -R u_ -V
+         ctest -R c_ -V
+         ctest -R s_ -V
+         ctest -R perf_ -V
       else
          # this does not work
          # ctest --rerun-failed --output-on-failure
@@ -202,7 +230,8 @@ else
          sleep 4
          
          # Only run the failed test. Note: if FailedTests.log is empty then all tests are run
-         ctest -I FailedTests.log --output-on-failure
+         # -VV extra verbose
+         ctest -I FailedTests.log -VV
       fi
       
    else
@@ -210,27 +239,27 @@ else
       # Boost unit,integration,regression tests
       ############################################################################
 
-      run_test ACore coretest
-      run_test ANattr nodeattrtest
-      run_test ANode nodetest
-      run_test AParser tparser
+      run_test ACore   u_acore
+      run_test ANattr  u_anattr
+      run_test ANode   u_anode
+      run_test AParser u_aparser
       
       ecflow_client --meter=progress 20             --host=%ECF_NODE% --port=%ECF_PORT%  
       ecflow_client --label=progress Base           --host=%ECF_NODE% --port=%ECF_PORT%
       
-      run_test Base basetest
+      run_test Base u_base
       
       #============================ simulator  ========================================
       ecflow_client --meter=progress 25             --host=%ECF_NODE% --port=%ECF_PORT%  
       ecflow_client --label=progress Simulator      --host=%ECF_NODE% --port=%ECF_PORT%  
       
-      run_test CSim testsimulator
+      run_test CSim c_csim
       
       #============================ Parser a big file  ========================================
       ecflow_client --meter=progress 35             --host=%ECF_NODE% --port=%ECF_PORT%  
       ecflow_client --label=progress ParseMega      --host=%ECF_NODE% --port=%ECF_PORT%  
       
-      run_test AParser tsingle
+      run_test AParser perf_aparser
    
       #============================ Server  ========================================
       ecflow_client --meter=progress 45             --host=%ECF_NODE% --port=%ECF_PORT%  
@@ -241,7 +270,7 @@ else
          unset ECF_PORT
          unset ECF_NODE
       fi
-      run_test Server tserver
+      run_test Server u_server
       
       
       #============================ Client ========================================
@@ -254,7 +283,7 @@ else
          unset ECF_RID
       fi
       
-      run_test Client tclient
+      run_test Client s_client
       
       
       #============================ Test ========================================
@@ -267,14 +296,14 @@ else
          export ECF_PORT=3142
       fi
       
-      run_test Test server-test
+      run_test Test s_test
       
       
       #============================ Test zombies ========================================
       ecflow_client --meter=progress 80        --host=%ECF_NODE% --port=%ECF_PORT%  
       ecflow_client --label=progress Zombies   --host=%ECF_NODE% --port=%ECF_PORT% 
       
-      run_test Test test-zombies
+      run_test Test s_test_zombies
       
       
       #============================ Python ========================================
@@ -286,52 +315,7 @@ else
       cd Pyext
       
       # make sure path to the interpreter is accessible.
-      # This can be hard coded in site-config.jam i.e via using python
-      # Or amend the path here
-      
-      if [[ %ARCH% = linux64 ]] ; then
-         #
-         # NOTE: /usr/local/bin provides path to 2.7 PYTHON interpreter
-         #       *MAKE* sure it becomes *BEFORE* /usr/bin as that points to python 2.6
-         #        This is what 'using python' will pick up and add to the include path
-         #
-         export PATH=/usr/local/bin:$PATH 
-         
-      elif [[ %ARCH% = opensuse113  ]] ; then
-      
-         export PATH=/usr/local/bin:$PATH
-         
-      elif [[ %ARCH% = redhat  ]] ; then
-      
-         export PATH=/usr/local/apps:$PATH
-         
-      elif [[ %ARCH% = opensuse103  ]] ; then
-      
-         #
-         # NOTE: /usr/local/apps/python/2.7.2-01/bin/ provides path to PYTHON interpreter
-         #       This is what 'using python' will pick up and add to the include path
-         #
-         export PATH=/usr/local/apps/python/2.7.2-01/bin/:/usr/local/bin:$PATH
-         
-      elif [[ %ARCH% = linux64intel  ]] ; then
-      
-         #
-         # NOTE: /usr/local/apps/python/2.7.2-01/bin/ provides path to PYTHON interpreter
-         #       This is what 'using python' will pick up and add to the include path
-         #
-         export PATH=/usr/local/apps/python/2.7.2-01/bin/:/usr/local/bin:$PATH
-         export PATH=/usr/local/apps/intel/composer_xe_2013.3.163/bin:$PATH
-         
-         # ensure any variable exported will form part of this script.
-         # Ignore errors in the script, re-enable afterwards.
-         # If all else fails we only need LD_LIBRARY_PATH
-         #   export LD_LIBRARY_PATH=/gpfs/usr/local/apps/intel/composer_xe_2013.3.163/composer_xe_2013.3.163/ipp/../compiler/lib/intel64:/gpfs/usr/local/apps/intel/composer_xe_2013.3.163/composer_xe_2013.3.163/ipp/lib/intel64:/opt/intel/mic/coi/host-linux-release/lib:/opt/intel/mic/myo/lib:/gpfs/usr/local/apps/intel/composer_xe_2013.3.163/composer_xe_2013.3.163/compiler/lib/intel64:/gpfs/usr/local/apps/intel/composer_xe_2013.3.163/composer_xe_2013.3.163/mkl/lib/intel64:/gpfs/usr/local/apps/intel/composer_xe_2013.3.163/composer_xe_2013.3.163/tbb/lib/intel64/gcc4.1
-         # Needed so that we can find libimf.so
-         set +eux
-         . iccvars.sh intel64
-         set -eux
-      fi
-      
+      echo $PATH
       
       #rm -rf bin/*.test   
       

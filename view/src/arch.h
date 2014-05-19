@@ -13,7 +13,7 @@
 /* Description :                                                                               */
 /*=============================================================================================*/
 
-#if defined(__GNUC__) || defined(AIX) || defined(alpha)
+#if defined(__GNUC__) || defined(_AIX) || defined(alpha)
 #define _(z) z
 #else
 #define _(z)

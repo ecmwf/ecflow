@@ -45,10 +45,6 @@ private:
 
 	static const std::string TAG; // alpha, beta, release
 
-	static const int release_;
-	static const int major_;
-	static const std::string minor_;
-
 private:
    /// return version of the boost library
    static std::string boost();
