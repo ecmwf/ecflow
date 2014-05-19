@@ -20,42 +20,25 @@
 
 #include "DState.hpp"
 
-/*
-class StateAttribute
-{
-public:
-		StateAttribute(QString name,QColor colour=QColor()) : name_(name), colour_(colour) {};
-		QColor colour() const {return colour_;}
-		QString name() const {return name_;}
-		void colour(QColor c) {colour_=c;}
-
-protected:
-		QString name_;
-		QColor colour_;
-};
-*/
-
 class VParameter
 {
 public:
-		VParameter(QString name,QString shortName,QString label,QString tooltip,QVariant def) :
-			   name_(name), shortName_(shortName), label_(label), toolTip_(tooltip), default_(def), value_(def) {}
-
-
+		VParameter(QString name,const std::map<QString,QString>& attr);
 
 		QString name() const {return name_;}
-		QString shortName() const {return shortName_;}
-		QString toolTip() const {return toolTip_;}
+		QString attribute(QString);
+		QVariant value() const {return value_;}
+
 		QColor toColour() const {return value_.value<QColor>();}
 		QFont toFont() const {return value_.value<QFont>();}
 		QString toString() const {return value_.toString();}
 		int toInt() const {return value_.toInt();}
 
 protected:
+		QColor toColour(QString);
+
 		QString name_;
-		QString shortName_;
-		QString label_;
-		QString toolTip_;
+		std::map<QString,QString> attr_;
 		QVariant default_;
 		QVariant value_;
 };
@@ -66,30 +49,26 @@ class ViewConfig
 public:
 		static ViewConfig* Instance();
 
-		enum PaletteItem {Unknown,Suspended,Complete,Queued,Submitted,Active,Aborted,Halted,Shutdown,Meter,Threshold,Event};
-		enum FontItem {NormalFont,BoldFont,SmallFont,SmallBoldFont};
-
 		QColor   stateColour(DState::State) const;
 		QString  stateName(DState::State) const;
 		QString  stateShortName(DState::State) const;
-		QColor   colour(PaletteItem) const;
-		QFont    font(FontItem) const;
+		QColor   colour(QString) const;
+
 		const std::string& configDir() const {return configDir_;}
 		const std::string& rcDir() const {return rcDir_;}
 
 protected:
 		ViewConfig();
 
-		QString name(PaletteItem) const;
-		QString shortName(PaletteItem) const;
+		void readParams(const std::string&);
 
 		static ViewConfig* instance_;
 
 		std::string configDir_;
 		std::string rcDir_;
-		std::map<PaletteItem,VParameter*> colour_;
-		std::map<FontItem,VParameter*> font_;
-		std::map<DState::State,PaletteItem> stateMap_;
+
+		std::map<DState::State,VParameter*> stateParams_;
+		std::map<QString,VParameter*> params_;
 
 };
 
