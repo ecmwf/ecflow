@@ -110,7 +110,8 @@ public:
    bool operator<(const TodayAttr& rhs) const { return timeSeries_ < rhs.timeSeries_; }
 	bool structureEquals(const TodayAttr& rhs) const;
 
-	void calendarChanged( const ecf::Calendar& c );  // can set attribute free
+   /// This can set attribute as free, once free its stays free, until re-queue/reset
+	void calendarChanged( const ecf::Calendar& c );
 	void resetRelativeDuration();
 
 	void reset(const ecf::Calendar& c) { clearFree(); timeSeries_.reset(c);}       // updates state_change_no_
@@ -119,7 +120,6 @@ public:
 
 	void miss_next_time_slot(); // updates state_change_no_
 	void setFree();               // ensures that isFree() always returns true, updates state_change_no_
-	void clearFree();             // resets the free flag, updates state_change_no_
 	bool isSetFree() const { return makeFree_; }
 
 	// This is used when we have a *single* today attribute
@@ -153,6 +153,7 @@ public:
 	const TimeSeries& time_series() const { return timeSeries_; }
 
 private:
+	void clearFree();             // resets the free flag, updates state_change_no_
 	bool is_free(const ecf::Calendar&) const; // ignores makeFree_
 
 private:

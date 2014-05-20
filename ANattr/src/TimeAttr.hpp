@@ -84,7 +84,6 @@ public:
 
 	void miss_next_time_slot(); // updates state_change_no_
 	void setFree();   // ensures that isFree() always returns true, updates state_change_no_
-	void clearFree(); // resets the free flag, updates state_change_no_
 	bool isSetFree() const { return makeFree_; }
  	bool isFree(const ecf::Calendar&) const;
    bool checkForRequeue( const ecf::Calendar& c,const TimeSlot& the_min,const TimeSlot& the_max) const
@@ -108,6 +107,7 @@ public:
 	const TimeSeries& time_series() const { return timeSeries_; }
 
 private:
+	void clearFree(); // resets the free flag, updates state_change_no_
    bool is_free(const ecf::Calendar&) const; // ignores makeFree_
 
 private:
