@@ -1558,6 +1558,7 @@ void Node::why(std::vector<std::string>& vec) const
       vec.push_back(ss.str());
 
       // When task is active/submitted no point, going any further.
+      // However for FAMILY/SUITE we still need to proceed
       if (isTask()) return;
    }
 
