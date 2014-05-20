@@ -334,6 +334,10 @@ void Node::requeueOrSetMostSignificantStateUpNodeTree()
             /// Note: Going down hierarchy is wasted if there are no relative time attributes
             resetRelativeDuration();
 
+            // For automated re-queue *DUE* to Repeats,  *CLEAR* any user interaction that would miss the next time slots
+            // enable after adding test:
+            // flag().clear(Flag::NO_REQUE_IF_SINGLE_TIME_DEP);
+
             requeue( false /* don't reset repeats */,clear_suspended_in_child_nodes );
             set_most_significant_state_up_node_tree();
             return;
@@ -1550,9 +1554,11 @@ void Node::why(std::vector<std::string>& vec) const
    }
    else if (state() != NState::QUEUED && state() != NState::ABORTED) {
       std::stringstream ss;
-      ss << "The node '" << debugNodePath() << "' (" << NState::toString(state()) << ")  ' is not queued or aborted.";
+      ss << "The node '" << debugNodePath() << "' (" << NState::toString(state()) << ") is not queued or aborted.";
       vec.push_back(ss.str());
-      return;
+
+      // When task is active/submitted no point, going any further.
+      if (isTask()) return;
    }
 
    // Check  limits using in limit manager
