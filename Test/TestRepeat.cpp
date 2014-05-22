@@ -13,23 +13,28 @@
 //
 // Description :
 //============================================================================
+#include <iostream>
+#include <fstream>
+#include <stdlib.h>
+
+#include "boost/filesystem/operations.hpp"
+#include "boost/filesystem/path.hpp"
+#include <boost/test/unit_test.hpp>
+#include <boost/lexical_cast.hpp>
+#include <boost/date_time/posix_time/posix_time_types.hpp>
+
 #include "ServerTestHarness.hpp"
+#include "TestFixture.hpp"
 
 #include "Defs.hpp"
 #include "Suite.hpp"
 #include "Family.hpp"
 #include "Task.hpp"
 #include "DurationTimer.hpp"
+#include "WhyCmd.hpp"
 
-#include "boost/filesystem/operations.hpp"
-#include "boost/filesystem/path.hpp"
-#include <boost/test/unit_test.hpp>
-#include <boost/lexical_cast.hpp>
-
-#include <iostream>
-#include <fstream>
-#include <stdlib.h>
-
+using namespace boost::gregorian;
+using namespace boost::posix_time;
 using namespace std;
 using namespace ecf;
 namespace fs = boost::filesystem;
@@ -216,6 +221,90 @@ BOOST_AUTO_TEST_CASE( test_repeat_defstatus )
  	serverTestHarness.run(theDefs,ServerTestHarness::testDataDefsLocation("test_repeat_defstatus.def"));
 	cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount() << ")\n";
 }
+
+// re-enable when we have sorted out how to handle missing time slots
+// and the presence of repeats
+//BOOST_AUTO_TEST_CASE( test_repeat_clears_user_edit )
+//{
+//   DurationTimer timer;
+//   cout << "Test:: ...test_repeat_clears_user_edit " << flush;
+//   TestClean clean_at_start_and_end;
+//
+//   // ********************************************************************************
+//   // IMPORTANT: A family will only complete when it has reached the end of the repeats
+//   // *********************************************************************************
+//
+//   // Create the defs file corresponding to the text below
+//   // ECF_HOME variable is automatically added by the test harness.
+//   // ECF_INCLUDE variable is automatically added by the test harness.
+//   // SLEEPTIME variable is automatically added by the test harness.
+//   // ECF_CLIENT_EXE_PATH variable is automatically added by the test harness.
+//   //                     This is substituted in sms includes
+//   //                     Allows test to run without requiring installation
+//
+//   //# Note: we have to use relative paths, since these tests are relocatable
+//   //suite test_repeat_clears_user_edit
+//   // edit SLEEPTIME 1
+//   // edit ECF_INCLUDE $ECF_HOME/includes
+//   // family family
+//   //    repeat integer VAR 0 1     # run at 0, 1     2 times
+//   //    task t<n>
+//   //       time <current time>
+//   //    endfamily
+//   //endsuite
+//
+//   Defs theDefs;
+//   task_ptr task;
+//   {
+//      boost::posix_time::ptime theLocalTime = boost::posix_time::ptime(date(2010,6,21),time_duration(10,0,0));
+//      boost::posix_time::ptime time1 = theLocalTime +  minutes(3);
+//
+//      suite_ptr suite = theDefs.add_suite( "test_repeat_clears_user_edit" );
+//      ClockAttr clockAttr(theLocalTime,false);
+//      suite->addClock( clockAttr );
+//
+//      suite->addDefStatus(DState::SUSPENDED);
+//      family_ptr fam = suite->add_family("family");
+//      fam->addRepeat( RepeatInteger("VAR",0,1,1));    // repeat family 2 times
+//      task = fam->add_task ( "t1" );
+//      task->addTime( ecf::TimeAttr(ecf::TimeSlot(time1.time_of_day())));
+//      task->addVerify( VerifyAttr(NState::COMPLETE,1) );
+//
+//      cout << theDefs << "\n";
+//   }
+//
+//   // The test harness will create corresponding directory structure
+//   // and populate with standard sms files.
+//   ServerTestHarness serverTestHarness(false/*do log file verification*/);
+//   serverTestHarness.run(theDefs, ServerTestHarness::testDataDefsLocation("test_repeat_integer.def"), 40, false /* waitFortestcompletion */);
+//
+//   // USER EDIT, on task with a time.
+//   // Force task with the time to complete, this should invalidate the time, so time runs tomorrow
+//   // Hence it should hold since it will wait for tommorrow.
+//   // HOWEVER the repeat requeue should clear the time, that we can still run today
+//   TestFixture::client().force(task->absNodePath(),"complete",true);
+//
+//   TestFixture::client().set_throw_on_error( false );
+//   BOOST_REQUIRE_MESSAGE(TestFixture::client().sync_local() == 0, "sync_local failed should return 0\n" << TestFixture::client().errorMsg());
+//   defs_ptr server_defs = TestFixture::client().defs();
+//   node_ptr the_task = server_defs->findAbsNode(task->absNodePath());
+//   BOOST_REQUIRE_MESSAGE(the_task, "Task " << task->absNodePath() << " not found");
+//
+//   WhyCmd whyCmd( server_defs, the_task->absNodePath());
+//   std::string reason = whyCmd.why();
+//   std::cout << reason;
+//
+//   // resume the suspend suite
+//   TestFixture::client().resume("/test_repeat_clears_user_edit");
+//
+//   // Wait for test to finish
+//   int timeout = 20;
+//   bool verifyAttrInServer = false;
+//   defs_ptr serverDefs = serverTestHarness.testWaiter(theDefs,timeout,verifyAttrInServer);
+//   BOOST_REQUIRE_MESSAGE(serverDefs.get()," Failed to return server after wait");
+//
+//   cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount() << ")\n";
+//}
 
 
 BOOST_AUTO_TEST_SUITE_END()

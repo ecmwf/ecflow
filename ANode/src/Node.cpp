@@ -234,6 +234,7 @@ void Node::set_no_requeue_if_single_time_dependency(bool miss_next_time_slot)
 
    if (miss_next_time_slot && time_dep_attrs_) time_dep_attrs_->miss_next_time_slot();
 
+   // Why do we need to go up the hierarchy ?
    Node* theParent = parent();
    while (theParent) {
       if (!theParent->repeat().empty()) {
@@ -334,9 +335,16 @@ void Node::requeueOrSetMostSignificantStateUpNodeTree()
             /// Note: Going down hierarchy is wasted if there are no relative time attributes
             resetRelativeDuration();
 
-            // For automated re-queue *DUE* to Repeats,  *CLEAR* any user interaction that would miss the next time slots
-            // enable after adding test:
-            // flag().clear(Flag::NO_REQUE_IF_SINGLE_TIME_DEP);
+            // For automated re-queue *DUE* to Repeats, *CLEAR* any user interaction that would miss the next time slots. *Down* the hierarchy
+            // This handles the case where a user, has manually intervened (i.e via run or complete) and we had a time attribute
+            // That time attribute will have expired, typically we show next day. In the case where we have a parent repeat
+            // we need to clear the flag, otherwise the task/family with time based attribute would wait for next day.
+//            flag().clear(Flag::NO_REQUE_IF_SINGLE_TIME_DEP);
+//            std::vector<node_ptr> children;
+//            immediateChildren(children);
+//            for(size_t i =0; i < children.size(); i++) {
+//               children[i]->flag().clear(Flag::NO_REQUE_IF_SINGLE_TIME_DEP);
+//            }
 
             requeue( false /* don't reset repeats */,clear_suspended_in_child_nodes );
             set_most_significant_state_up_node_tree();
