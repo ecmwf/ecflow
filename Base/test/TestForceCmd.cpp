@@ -51,8 +51,8 @@ BOOST_AUTO_TEST_CASE( test_force_cmd )
    TestHelper::invokeRequest(the_defs.get(),Cmd_ptr( new ForceCmd(t1->absNodePath(),"complete",true /*recursive */, false /* set Repeat to last value */)));
    TestHelper::test_state(t1,NState::COMPLETE);
    BOOST_CHECK_MESSAGE(t1->get_flag().is_set(ecf::Flag::NO_REQUE_IF_SINGLE_TIME_DEP),"Expected ecf::Flag::NO_REQUE_IF_SINGLE_TIME_DEP to be set");
-   BOOST_CHECK_MESSAGE(f1->get_flag().is_set(ecf::Flag::NO_REQUE_IF_SINGLE_TIME_DEP),"Expected ecf::Flag::NO_REQUE_IF_SINGLE_TIME_DEP to be set");
-   BOOST_CHECK_MESSAGE(s1->get_flag().is_set(ecf::Flag::NO_REQUE_IF_SINGLE_TIME_DEP),"Expected ecf::Flag::NO_REQUE_IF_SINGLE_TIME_DEP to be set");
+   BOOST_CHECK_MESSAGE(!f1->get_flag().is_set(ecf::Flag::NO_REQUE_IF_SINGLE_TIME_DEP),"Expected ecf::Flag::NO_REQUE_IF_SINGLE_TIME_DEP to be set");
+   BOOST_CHECK_MESSAGE(!s1->get_flag().is_set(ecf::Flag::NO_REQUE_IF_SINGLE_TIME_DEP),"Expected ecf::Flag::NO_REQUE_IF_SINGLE_TIME_DEP to be set");
 
    TestHelper::invokeRequest(the_defs.get(),Cmd_ptr( new ForceCmd(s1->absNodePath(),"complete",true /*recursive */, false /* set Repeat to last value */)));
    TestHelper::test_state(s1,NState::COMPLETE);

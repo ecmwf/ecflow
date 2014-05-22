@@ -88,8 +88,8 @@ STC_Cmd_ptr ForceCmd::doHandleRequest(AbstractServer* as) const
 
  	   if (is_node_state) {
  	      /// We want this to have side effects. i.e bubble up state and re-queue if complete and has repeat's
- 	      /// **** However if state is SET to complete, and we only have a single time-dependency
- 	      /// **** we need to mark the time dependency as free, otherwise, it will be automatically reset to QUEUED state
+ 	      /// **** However if state is SET to complete, we want to MISS the next time slot.
+ 	      /// **** we need to mark the time dependency as *expired*, otherwise, it will be automatically reset to QUEUED state
  	      /// **** Additionally whenever we have set state to complete, need to miss the next time slot.
  	      NState::State new_state = NState::toState(stateOrEvent_);
  	      node->set_no_requeue_if_single_time_dependency(new_state == NState::COMPLETE);
@@ -138,11 +138,10 @@ const char* ForceCmd::desc() {
    return
             "Force a node to a given state, or set its event.\n"
             "When a task is set to complete, it may be automatically re-queued if it has\n"
-            "multiple time dependencies. In the specific case where a task has a SINGLE\n"
-            "time dependency and we want to interactively set it to complete\n"
-            "a flag is set so that it is not automatically re-queued when set to complete.\n"
-            "The flag is applied up the node hierarchy until we reach a node with a Repeat\n"
-            "or cron attribute. This behaviour allow Repeat values to be incremented interactively.\n"
+            "multiple future time dependencies. However each time we force a complete it will\n"
+            "expire any time based attribute on that node. When the last time based attribute\n"
+            "expires, the node will stay in a complete state.\n"
+            "This behaviour allow Repeat values to be incremented interactively.\n"
             "A repeat attribute is incremented when all the child nodes are complete\n"
             "in this case the child nodes are automatically re-queued.\n"
             "  arg1 = [ unknown | complete | queued | submitted | active | aborted | clear | set ]\n"
