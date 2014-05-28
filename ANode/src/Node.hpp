@@ -298,6 +298,7 @@ public:
    const std::vector<ecf::CronAttr>&   crons()    const;
    const std::vector<VerifyAttr>&      verifys()  const;
    const std::vector<ZombieAttr>&      zombies()  const;
+   TimeDepAttrs*  get_time_dep_attrs() const { return time_dep_attrs_;} // can be NULL
    ecf::LateAttr* get_late() const { return lateAttr_;}
    ecf::AutoCancelAttr*  get_autocancel() const { return autoCancel_;}
    ecf::Flag&       flag()           { return flag_;}
