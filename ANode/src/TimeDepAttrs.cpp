@@ -423,6 +423,57 @@ bool TimeDepAttrs::timeDependenciesFree() const
    return false;
 }
 
+bool TimeDepAttrs::time_today_cron_is_free() const
+{
+   if (!timeVec_.empty() || !todayVec_.empty() || !crons_.empty()) {
+
+      int noOfTimeDependencies = 0;
+      if (!timeVec_.empty())  noOfTimeDependencies++;
+      if (!todayVec_.empty()) noOfTimeDependencies++;
+      if (!crons_.empty())    noOfTimeDependencies++;
+
+      bool oneTodayIsFree = false;
+      bool oneTimeIsFree = false;
+      bool oneCronIsFree = false;
+
+      const Calendar& calendar = node_->suite()->calendar();
+      for(size_t i=0;i<timeVec_.size();i++)  { if (timeVec_[i].isFree(calendar))  {if ( noOfTimeDependencies == 1) return true;oneTimeIsFree = true;break;}}
+      for(size_t i=0;i<crons_.size();i++)    { if (crons_[i].isFree(calendar))    {if ( noOfTimeDependencies == 1) return true;oneCronIsFree = true;break;}}
+
+      if (!todayVec_.empty()) {
+         // : single Today: (single-time)   is free, if calendar time >= today_time
+         // : single Today: (range)         is free, if calendar time == (one of the time ranges)
+         // : multi Today : (single | range)is free, if calendar time == (one of the time ranges | tody_time)
+         if (todayVec_.size() == 1 ) {
+            // Single Today Attribute: could be single slot or range
+            if (todayVec_[0].isFree(calendar)) { if ( noOfTimeDependencies == 1) return true;oneTodayIsFree = true;}
+         }
+         else {
+            // Multiple Today Attributes, each could single, or range
+            for(size_t i=0;i<todayVec_.size();i++) {
+               if (todayVec_[i].isFreeMultipleContext(calendar)) {if ( noOfTimeDependencies == 1) return true;oneTodayIsFree = true;break;}
+            }
+         }
+      }
+
+
+      if ( oneTodayIsFree ||  oneTimeIsFree || oneCronIsFree) {
+         if ( noOfTimeDependencies > 1 ) {
+            // *When* we have multiple time dependencies of *different types* then the results
+            // *MUST* be anded for the node to be free.
+            if (!todayVec_.empty() && !oneTodayIsFree) return false;
+            if (!timeVec_.empty() && !oneTimeIsFree) return false;
+            if (!crons_.empty() && !oneCronIsFree) return false;
+
+            // We will only get here, if we have a multiple time dependencies and they are free
+            return true;
+         }
+      }
+   }
+
+   return false;
+}
+
 std::ostream& TimeDepAttrs::print(std::ostream& os) const
 {
    BOOST_FOREACH(const ecf::TimeAttr& t, timeVec_)  { t.print(os);    }

@@ -167,7 +167,6 @@ public:
 	virtual Boolean hasDate() const     { return False; }
 	virtual Boolean hasTime() const     { return False; }
 
-	virtual Boolean hasDateHolding() const     { return False; }
 	virtual Boolean hasTimeHolding() const     { return False; }
 
 	virtual Boolean hasManual() const   { return False; }

@@ -38,7 +38,6 @@ public:
   virtual Boolean hasDate() const;
   virtual Boolean hasTime() const;
 
-  virtual Boolean hasDateHolding() const;
   virtual Boolean hasTimeHolding() const;
 
   virtual Boolean hasManual() const;

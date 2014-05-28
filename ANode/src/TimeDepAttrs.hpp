@@ -50,6 +50,7 @@ public:
    bool checkInvariants(std::string& errorMsg) const;
 
    bool timeDependenciesFree() const;
+   bool time_today_cron_is_free() const; /* used by viewer */
 
    // returns true this node has time dependencies. NOTE: Does not look at children
    bool hasDayDateDependencies() const;
