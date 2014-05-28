@@ -37,6 +37,10 @@ public:
   virtual Boolean hasTriggers() const;
   virtual Boolean hasDate() const;
   virtual Boolean hasTime() const;
+
+  virtual Boolean hasDateHolding() const;
+  virtual Boolean hasTimeHolding() const;
+
   virtual Boolean hasManual() const;
   virtual Boolean isSimpleNode() const { return True; }
   virtual Boolean isGenVariable(const char*);

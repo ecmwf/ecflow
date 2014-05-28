@@ -67,8 +67,7 @@ static struct {
 } pix[] = {
   {(char*)"waiting", 0, 0, new procFlag(&node::isWaiting), show::waiting_icon},
   
-  {(char*)"clock", 0, 0, new procFlag(&node::hasTime), show::time_icon},
-  
+  {(char*)"clock", 0, 0, new procFlag(&node::hasTime), show::time_icon},  
   {(char*)"calendar", 0, 0, new procFlag(&node::hasDate), show::date_icon},
   
   {(char*)"late", 0, 0, new procFlag(&node::isLate), show::late_icon},
@@ -101,6 +100,9 @@ static struct {
   {(char*)"folded", 0, 0, new procFlag(&node::isFolded), 0},
 
   {(char*)"locked", 0, 0, new procFlag(&node::isLocked), 0}, /* --- shall appear last */
+
+  // {(char*)"clock_holding", 0, 0, new procFlag(&node::hasTime), show::time_icon},  
+  // {(char*)"calendar_holding", 0, 0, new procFlag(&node::hasDateHolding), show::date_holding_icon},
 
 };
 
@@ -265,11 +267,12 @@ Boolean simple_node::hasTriggers() const
   return owner_ ? owner_->hasTrigger() : False;
 }
 
-Boolean simple_node::hasTime() const  
+Boolean simple_node::hasTime() const /* time is free , yellow background icon */
 { 
 #ifdef BRIDGE 
   if (tree_) return tree_->time != 0;
 #endif
+  // if (hasTimeHolding()) return False;
   return owner_ ? owner_->hasTime() : False;
 }
 
@@ -279,6 +282,23 @@ Boolean simple_node::hasDate() const
   if (tree_) return tree_->date != 0;
 #endif
   return owner_ ? owner_->hasDate() : False;
+}
+
+Boolean simple_node::hasDateHolding() const 
+{
+  /* if (owner_)
+    if (owner_->get_node())
+    return owner_->get_node()->isDateFree(); */
+  return False;
+}
+
+Boolean simple_node::hasTimeHolding() const /* grey */
+{
+  if (owner_)
+    if (owner_->hasTime())
+      if (owner_->get_node())
+	return !owner_->get_node()->isTimeFree();
+  return False;
 }
 
 Boolean simple_node::hasZombieAttr() const  
@@ -412,6 +432,12 @@ void simple_node::info(std::ostream& f)
 
          if (ecf ) {
             gvar.clear();
+
+	    if (ecf->hasTimeDependencies()) {	      
+	      f << inc << "# time-date-dependencies: ";
+	      if (ecf->isTimeFree()) f << "free\n"; 
+	      else f << "holding\n"; 
+	    }
             ecf->gen_variables(gvar);
             for(it = gvar.begin(); it != gvar.end(); ++it) {
 	      f << inc << "# edit " << (*it).name() << " '" << (*it).theValue() << "'\n";
@@ -448,6 +474,7 @@ void simple_node::info(std::ostream& f)
                       i == NODE_TASK  || i == NODE_ALIAS))
         f << run->type_name() << " ";
       f << run->toString() << "\n";
+      // f << run->dump() << "\n";
     }
   f << "end" << type_name() << " # " << name() << "\n";
 }

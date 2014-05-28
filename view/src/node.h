@@ -166,6 +166,10 @@ public:
 	virtual Boolean hasTriggers() const { return False; }
 	virtual Boolean hasDate() const     { return False; }
 	virtual Boolean hasTime() const     { return False; }
+
+	virtual Boolean hasDateHolding() const     { return False; }
+	virtual Boolean hasTimeHolding() const     { return False; }
+
 	virtual Boolean hasManual() const   { return False; }
 	virtual Boolean hasInfo() const     { return True;  }
 	virtual Boolean isMigrated() const  { return False; }

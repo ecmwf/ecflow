@@ -275,6 +275,7 @@ public:
    /// returns true if this node OR any of its children
    /// has cron,time,day,date or today time dependencies
    virtual bool hasTimeDependencies() const { return (time_dep_attrs_) ? true : false; }
+   bool isTimeFree() const { return (time_dep_attrs_) ? time_dep_attrs_->timeDependenciesFree() : false;}
 
 
    /// A hierarchical function
