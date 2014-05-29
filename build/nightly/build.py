@@ -248,21 +248,6 @@ def add_opensuse103_variables( opensuse103 ):
     opensuse103.add_variable("ARCH","opensuse103")
     opensuse103.add_variable("SITE_CONFIG","$WK/build/site_config/site-config-Linux.jam")
      
-def add_remote_hpux_variables( hpux ):
-    hpux.add_variable("ECF_KILL_CMD","rsh %REMOTE_HOST% \"kill -s 15 %ECF_RID%\"") 
-    hpux.add_variable("ECF_JOB_CMD","rsh %REMOTE_HOST% -l %USER%  '%ECF_JOB% > %ECF_JOBOUT%  2>&1'")
-    hpux.add_variable("COMPILER_TEST_PATH","acc/$mode/threading-multi")
-    hpux.add_variable("TOOLSET","acc")
-    hpux.add_variable("BOOTSTRAP_TOOLSET","gcc")  # build bjam with acc does not work
-
-def add_hpux_variables( hpux ):
-    hpux.add_variable("REMOTE_HOST","itanium")
-    hpux.add_variable("ROOT_WK","/scratch/ma/emos/ma0/hpia64")
-    hpux.add_variable("BOOST_DIR","/scratch/ma/emos/ma0/hpia64/boost")
-    hpux.add_variable("ARCH","hpux")
-    hpux.add_variable("SITE_CONFIG","$WK/build/site_config/site-config-HPUX.jam")
-    hpux.add_variable("BUILD_ECFLOWVIEW","false")  # dont build on this platform
-
 def add_remote_aix_power7_variables( aix_power7 ) :
     # for c2a we need to use logsrvr in order to see the job output
     aix_power7.add_variable("ECF_LOGHOST","c2a")
@@ -305,7 +290,7 @@ def add_build_debug( parent ):
     f.add_task("build")
     task_test = f.add_task("test")
     # on IBM we do the debug build first
-    if parent.name() == "aix_power7" or parent.name() == "hpux" :
+    if parent.name() == "aix_power7" :
         task_test.add_trigger("build == complete")
     else:
         task_test.add_trigger("build == complete")
@@ -321,8 +306,8 @@ def add_build_release( parent ):
     task_build = f.add_task("build")
     
     task_test = f.add_task("test")
-    # on IBM/HPUX we do the debug build first, it's a *lot* faster
-    if parent.name() == "aix_power7" or parent.name() == "hpux" :
+    # on IBM we do the debug build first, it's a *lot* faster
+    if parent.name() == "aix_power7" :
         task_test.add_trigger("build == complete")
         #task_test.add_trigger("build == complete and (../build_debug/test == complete or ../build_debug/test == aborted)")
     elif parent.name() == "linux64intel":
@@ -368,8 +353,8 @@ def add_build_and_test_tasks( parent ) :
     cp_site_config = parent.add_task("cp_site_config")
     add_local_job_variables(cp_site_config) # run locally
             
-    # On aix and hpux do the debug build first, its a lot faster, than build release
-    if parent.name() == "aix_power7" or parent.name() == "hpux" :
+    # On aix do the debug build first, its a lot faster, than build release
+    if parent.name() == "aix_power7" :
         add_build_debug( parent )
         add_build_release( parent )
     else:
@@ -507,19 +492,6 @@ def build_opensuse103( parent ) :
     add_git_tasks( opensuse103 )
     add_build_and_test_tasks( opensuse103 )
 
-def build_hpux( parent ):
-    hpux = parent.add_family("hpux")
-    hpux.add_variable("BUILD_TYPE","boost")
-
-    if (parent.name() == "remote") :
-        hpux.add_trigger("../tar/cp_tar_to_hpux == complete")
-    else :
-        hpux.add_trigger("/suite/build_incr/incr_tar_and_cp  == complete")
-    add_hpux_variables( hpux )
-    add_remote_hpux_variables( hpux )
-    add_git_tasks( hpux , True) #  git not available on HP-UX, hence set git_clone to def-status complete
-    add_build_and_test_tasks( hpux )
-
 def build_aix_power7( parent ) :
     aix_power7 = parent.add_family("aix_power7")
     add_aix_power7_variables( aix_power7 )
@@ -614,18 +586,12 @@ def build_boost( boost ):
     add_cray_cray_compiler_variables(family_cray_cray)
     boost_build = family_cray_cray.add_task("boost_build")
     boost_build.add_trigger("../boost_site_config == complete")
-    
-    
+
     family = boost.add_family("opensuse103")
     add_opensuse103_variables(family)
     add_remote_opensuse103_variables(family)
     add_boost_tasks( family )
     
-    family = boost.add_family("hpux");
-    add_hpux_variables(family)
-    add_remote_hpux_variables(family)
-    add_boost_tasks( family )
- 
     family = boost.add_family("aix_power7")
     add_aix_power7_variables(family)
     add_remote_aix_power7_variables(family)
@@ -710,10 +676,6 @@ with defs.add_suite("suite") as suite:
         create_tar = tar_fam.add_task("create_tar")
         create_tar.add_variable("ARCH","opensuse113")
     
-        cp_tar_to_hpux = tar_fam.add_task("cp_tar_to_hpux")
-        cp_tar_to_hpux.add_trigger("create_tar == complete")
-        add_hpux_variables( cp_tar_to_hpux )
-    
         with build.add_family("local") as local:
             build_localhost( local )
             build_localhost_cmake( local )
@@ -728,7 +690,6 @@ with defs.add_suite("suite") as suite:
             build_redhat( remote )
             build_cray( remote )
             build_opensuse103( remote )
-            build_hpux(remote) # this is build with boost build
             build_aix_power7(remote)
         
 #ecflow.PrintStyle.set_style(ecflow.Style.STATE)
