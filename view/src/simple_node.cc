@@ -67,7 +67,7 @@ static struct {
 } pix[] = {
   {(char*)"waiting", 0, 0, new procFlag(&node::isWaiting), show::waiting_icon},
   
-  {(char*)"clock", 0, 0, new procFlag(&node::hasTime), show::time_icon},  
+  {(char*)"clock", 0, 0, new procFlag(&node::hasTimeHolding), show::time_icon},  
   {(char*)"calendar", 0, 0, new procFlag(&node::hasDate), show::date_icon},
   
   {(char*)"late", 0, 0, new procFlag(&node::isLate), show::late_icon},
@@ -101,8 +101,7 @@ static struct {
 
   {(char*)"locked", 0, 0, new procFlag(&node::isLocked), 0}, /* --- shall appear last */
 
-  // {(char*)"clock_holding", 0, 0, new procFlag(&node::hasTime), show::time_icon},  
-  // {(char*)"calendar_holding", 0, 0, new procFlag(&node::hasDateHolding), show::date_holding_icon},
+  {(char*)"clock_free", 0, 0, new procFlag(&node::hasTime), show::time_icon},
 
 };
 
@@ -272,7 +271,7 @@ Boolean simple_node::hasTime() const /* time is free , yellow background icon */
 #ifdef BRIDGE 
   if (tree_) return tree_->time != 0;
 #endif
-  // if (hasTimeHolding()) return False;
+  if (hasTimeHolding()) return False;
   return owner_ ? owner_->hasTime() : False;
 }
 
@@ -284,20 +283,16 @@ Boolean simple_node::hasDate() const
   return owner_ ? owner_->hasDate() : False;
 }
 
-Boolean simple_node::hasDateHolding() const 
-{
-  /* if (owner_)
-    if (owner_->get_node())
-    return owner_->get_node()->isDateFree(); */
-  return False;
-}
-
 Boolean simple_node::hasTimeHolding() const /* grey */
 {
   if (owner_)
-    if (owner_->hasTime())
-      if (owner_->get_node())
-	return !owner_->get_node()->isTimeFree();
+    if (owner_->hasTime()) {
+      Node *node = owner_->get_node();
+      if (!node) return False;
+      TimeDepAttrs *attr = node->get_time_dep_attrs();
+      if (!attr) return False;
+      return !attr->time_today_cron_is_free();
+    }
   return False;
 }
 
