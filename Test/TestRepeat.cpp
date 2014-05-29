@@ -33,6 +33,7 @@
 #include "DurationTimer.hpp"
 #include "WhyCmd.hpp"
 #include "PrintStyle.hpp"
+#include "Str.hpp"
 
 using namespace boost::gregorian;
 using namespace boost::posix_time;
@@ -233,6 +234,15 @@ BOOST_AUTO_TEST_CASE( test_repeat_clears_user_edit )
    DurationTimer timer;
    cout << "Test:: ...test_repeat_clears_user_edit " << flush;
    TestClean clean_at_start_and_end;
+
+   // The functionality where the Repeat requeue clears NO_REQUE_IF_SINGLE_TIME_DEP  was added in version 4.0.3
+   // Hence we need to disable this test, if the server version is less 403
+   // Since these tests can also be used to test backward compatibility. i.e new client old server
+   int the_server_version = TestFixture::server_version() ;
+   if (the_server_version < 403 ) {
+      cout << " SKIPPING, since this test requires server version >= 403, current server version is " << the_server_version << "\n";
+      return;
+   }
 
    //# Note: we have to use relative paths, since these tests are relocatable
    //suite test_repeat_clears_user_edit

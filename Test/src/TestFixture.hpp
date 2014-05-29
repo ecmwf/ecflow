@@ -77,6 +77,10 @@ struct TestFixture {
 	/// Location of the includes used in the ecf file
 	static std::string includes();
 
+	/// returns the server version as an integer.
+	/// This allows as to ignore some tests, when testing old servers.(with new clients).
+	static int server_version();
+
 	// Use for all comms with server
 	static ClientInvoker& client();
 	static std::string port() { return port_;}

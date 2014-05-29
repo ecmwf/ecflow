@@ -29,7 +29,7 @@ else
    
    # 4.0.1: Not all tests pass, since we now set families to complete, when used in repeat loop
    #        See: ECFLOW-96 Families with loops(cron/repeat) should log complete
-   #        and hence fail the verification, which counts number of times that a node should complete
+   #        and hence tests fail verification, which counts number of times that a node should complete
    #        Need to have a mechanism that disables 'complete' state verification
    #        Currently this done by setting an environment variable
    # When/If we release ecflow version 5.0, we can remove environment variable, and associated logic.
