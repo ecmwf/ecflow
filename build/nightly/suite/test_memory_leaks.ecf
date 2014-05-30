@@ -9,16 +9,16 @@ if [[ %SET_TO_TEST_SCRIPT% = true ]] ; then
    echo "Test only"
 else
    cd $WK;
-   valgrind --leak-check=full --show-reachable=yes ACore/bin/%COMPILER_VERSION%/release/u_acore
-   valgrind --leak-check=full --show-reachable=yes ANattr/bin/%COMPILER_VERSION%/release/u_anattr
-   valgrind --leak-check=full --show-reachable=yes ANode/bin/%COMPILER_VERSION%/release/u_anode
-   valgrind --leak-check=full --show-reachable=yes AParser/bin/%COMPILER_VERSION%/release/u_aparser
-   valgrind --leak-check=full --show-reachable=yes Base/bin/%COMPILER_VERSION%/release/u_base
-   valgrind --leak-check=full --show-reachable=yes Client/bin/%COMPILER_VERSION%/release/s_client
-   valgrind --leak-check=full --show-reachable=yes Server/bin/%COMPILER_VERSION%/release/u_server
-   valgrind --leak-check=full --show-reachable=yes --num-callers=30 Test/bin/%COMPILER_VERSION%/release/s_test
-   valgrind --leak-check=full --show-reachable=yes --num-callers=30 Test/bin/%COMPILER_VERSION%/release/s_test_zombies
-   valgrind --leak-check=full --show-reachable=yes CSim/bin/%COMPILER_VERSION%/release/c_csim
+   valgrind --leak-check=full --show-reachable=yes --error-exitcode=1 ACore/bin/%COMPILER_VERSION%/release/u_acore
+   valgrind --leak-check=full --show-reachable=yes --error-exitcode=1 ANattr/bin/%COMPILER_VERSION%/release/u_anattr
+   valgrind --leak-check=full --show-reachable=yes --error-exitcode=1 ANode/bin/%COMPILER_VERSION%/release/u_anode
+   valgrind --leak-check=full --show-reachable=yes --error-exitcode=1 AParser/bin/%COMPILER_VERSION%/release/u_aparser
+   valgrind --leak-check=full --show-reachable=yes --error-exitcode=1 Base/bin/%COMPILER_VERSION%/release/u_base
+   valgrind --leak-check=full --show-reachable=yes --error-exitcode=1 Client/bin/%COMPILER_VERSION%/release/s_client
+   valgrind --leak-check=full --show-reachable=yes --error-exitcode=1 Server/bin/%COMPILER_VERSION%/release/u_server
+   valgrind --leak-check=full --show-reachable=yes --num-callers=30 --error-exitcode=1 Test/bin/%COMPILER_VERSION%/release/s_test
+   valgrind --leak-check=full --show-reachable=yes --num-callers=30 --error-exitcode=1 Test/bin/%COMPILER_VERSION%/release/s_test_zombies
+   valgrind --leak-check=full --show-reachable=yes --error-exitcode=1 CSim/bin/%COMPILER_VERSION%/release/c_csim
 fi
 
 %include <tail.h>
