@@ -31,6 +31,13 @@ echo "valgrind: variant=$mode compiler=$compiler"
 # valgrind Server/bin/$compiler/$mode/ecflow_server --interval=3
 # Then restart this shell
 
+ 64 down vote accepted
+   
+
+# Use the valgrind option --track-origins=yes to have it track the origin of uninitialized values. 
+# This will make it slower and take more memory, but can be very helpful if you need to track down 
+# the origin of an uninitialized value.
+
 valgrind --num-callers=24 --leak-check=full --show-reachable=yes ACore/bin/$compiler/$mode/u_acore
 valgrind --num-callers=24 --leak-check=full --show-reachable=yes ANattr/bin/$compiler/$mode/u_anattr
 valgrind --num-callers=24 --leak-check=full --show-reachable=yes ANode/bin/$compiler/$mode/u_anode
