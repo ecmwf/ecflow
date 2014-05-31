@@ -86,8 +86,7 @@ message( STATUS "PYTHON_LIBRARIES     : ${PYTHON_LIBRARIES}")
 # Boost  
 # =========================================================================================
 
-# If this is enable then can not find boost libs using env BOOST_ROOT ?
-#ecbuild_add_extra_search_paths( boost )
+ecbuild_add_extra_search_paths( boost ) # also respects BOOST_ROOT
 
 # To use static boost python ensure that Boost_USE_STATIC_LIBS is set on.
 set(Boost_USE_STATIC_LIBS        OFF)
@@ -126,15 +125,18 @@ message( STATUS "Boost_LIBRARIES     : ${Boost_LIBRARIES}" )
 # debug
 # =========================================================================================
 if( CMAKE_BUILD_TYPE MATCHES "[Dd][Ee][Bb][Uu][Gg]" )
-    message( "INFO: DEBUG BUILD" )
+
+	message( STATUS "INFO: DEBUG BUILD" )
+
     # for debug type builds, turn on verbose makefiles
     # set(CMAKE_VERBOSE_MAKEFILE ON)
 
     # Tell other CMake files that we're doing a debug build
-    set( DEBUG_BUILD 1 )
+	# set( DEBUG_BUILD 1 ) -- not used anymore
 
     # Tell C/C++ that we're doing a debug build
     add_definitions( -DDEBUG )
+
 endif()
 
 
@@ -163,7 +165,7 @@ ecbuild_add_resources( TARGET Doc DONT_PACK_DIRS Doc/func_spec Doc/misc Doc/news
 # install 
 # =========================================================================================
 # install scripts
-install (FILES  
+install( FILES
             ${CMAKE_SOURCE_DIR}/tools/ecflow_logsvr.pl
             ${CMAKE_SOURCE_DIR}/tools/ecflow_logsvr.sh
             ${CMAKE_SOURCE_DIR}/tools/ecflow_start.sh
@@ -175,7 +177,7 @@ install (FILES
         )
 
 # install documentation         
-install (FILES  
+install( FILES
             ${CMAKE_SOURCE_DIR}/Doc/user-manual/client_options.docx  
             ${CMAKE_SOURCE_DIR}/Doc/user-manual/user_manual.docx    
             ${CMAKE_SOURCE_DIR}/Doc/user-manual/user_manual.pdf    
