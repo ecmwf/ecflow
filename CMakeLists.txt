@@ -78,10 +78,6 @@ else()
    ecbuild_find_python( VERSION 2.7 )
 endif()
 
-message( STATUS "PYTHON_EXECUTABLE    : ${PYTHON_EXECUTABLE}")
-message( STATUS "PYTHON_INCLUDE_DIRS  : ${PYTHON_INCLUDE_DIRS}")
-message( STATUS "PYTHON_LIBRARIES     : ${PYTHON_LIBRARIES}")
- 
 # =========================================================================================
 # Boost  
 # =========================================================================================

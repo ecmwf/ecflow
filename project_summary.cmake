@@ -13,3 +13,9 @@ if(Boost_FOUND)
     message( STATUS "          libs    : [${Boost_PYTHON_LIBRARY}]" )
 endif()
 
+if( PYTHONINTERP_FOUND )
+	message( STATUS "Python exec     : ${PYTHON_EXECUTABLE}" )
+	message( STATUS "       include  : ${PYTHON_INCLUDE_DIRS}" )
+	message( STATUS "       libs     : ${PYTHON_LIBRARIES}" )
+endif()
+

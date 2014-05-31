@@ -1,14 +1,11 @@
 ### ecflow python bindings
 
 file( GLOB srcs RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "src/*.cpp" "src/*.hpp" )
-#find_package(PythonLibs)
-message(${PYTHON_INCLUDE_DIRS})
-message(${PYTHON_LIBRARIES})
-message(${PYTHON_EXECUTABLE})
 
 ecbuild_add_library( TARGET   ecflow
                      TYPE     MODULE
                      SOURCES  ${srcs}
+					 CONDITION PYTHONLIBS_FOUND
                      LIBS     libclient libsimu base libparser node nodeattr core
                               ${Boost_PYTHON_LIBRARY} 
                               ${PYTHON_LIBRARIES}
@@ -79,13 +76,13 @@ ecbuild_add_test( TARGET py_u_TestMigrate
 # ==========================================================================
 # install
 # ==========================================================================
-if (ENABLE_PYTHON)
+if( ENABLE_PYTHON )
 
-   message(STATUS "python found,  CMAKE_PYTHON_INSTALL_TYPE=${CMAKE_PYTHON_INSTALL_TYPE}")
+   message( STATUS "python found,  CMAKE_PYTHON_INSTALL_TYPE=${CMAKE_PYTHON_INSTALL_TYPE}")
 
    # CMAKE_PYTHON_INSTALL_TYPE = [ local | setup ]
    
-   if (CMAKE_PYTHON_INSTALL_TYPE MATCHES  "local"  OR NOT DEFINED CMAKE_PYTHON_INSTALL_TYPE)
+   if( CMAKE_PYTHON_INSTALL_TYPE MATCHES  "local"  OR NOT DEFINED CMAKE_PYTHON_INSTALL_TYPE )
    
       message(STATUS "python install *LOCAL* ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
       set(PYTHON_SITE "lib/python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}/site-packages" )
@@ -123,11 +120,12 @@ if (ENABLE_PYTHON)
 
       install(CODE "execute_process(COMMAND ${PYTHON} ${SETUP_PY} build_ext)")
     
-      if (DEFINED CMAKE_PYTHON_INSTALL_PREFIX)
+	  if( DEFINED CMAKE_PYTHON_INSTALL_PREFIX )
          message(STATUS "custom/*test* python install prefix defined CMAKE_PYTHON_INSTALL_PREFIX=${CMAKE_PYTHON_INSTALL_PREFIX}")
          install(CODE "execute_process(COMMAND ${PYTHON} ${SETUP_PY} install -f --prefix=${CMAKE_PYTHON_INSTALL_PREFIX})")
       else()
          install(CODE "execute_process(COMMAND ${PYTHON} ${SETUP_PY} install)")
       endif()
    endif()
+
 endif()
