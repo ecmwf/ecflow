@@ -91,7 +91,6 @@ ecbuild_add_test( TARGET    s_client
                   LIBS      libclient 
                   INCLUDES  ../ANode/test
                             ../Base/test 
-                            ${Boost_INCLUDE_DIRS} 
                  )
 
 # 
@@ -103,7 +102,6 @@ ecbuild_add_test( TARGET   perf_test_large_defs
                   LIBS     libclient 
                   INCLUDES ../ANode/test
                            ../Base/test 
-                           ${Boost_INCLUDE_DIRS} 
                 )
                
 # 
@@ -115,7 +113,6 @@ ecbuild_add_test( TARGET test_migration
                   LIBS     libclient 
                   INCLUDES ../ANode/test
                            ../Base/test 
-                           ${Boost_INCLUDE_DIRS} 
                 )
 
 # ===================================================================

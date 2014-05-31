@@ -68,7 +68,6 @@ ecbuild_add_test( TARGET   u_server
                   BOOST  
                   SOURCES  test/TestServerEnvironment.cpp
                   LIBS     libserver  
-                  INCLUDES ${Boost_INCLUDE_DIRS} 
               )
 
 # ===================================================================

@@ -61,5 +61,4 @@ ecbuild_add_test( TARGET  u_anode_stest
                   BOOST
                   SOURCES   ${stest_srcs}
                   LIBS      node 
-                  INCLUDES  ${Boost_INCLUDE_DIRS} 
                  )

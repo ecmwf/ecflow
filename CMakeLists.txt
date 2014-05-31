@@ -37,16 +37,16 @@
 #
 #############################################################
 
-cmake_minimum_required( VERSION 2.6.4 FATAL_ERROR )
+cmake_minimum_required( VERSION 2.8.4 FATAL_ERROR )
 
 project( ecflow CXX )
 
 set( CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/../ecbuild/cmake")
-message( STATUS "CMAKE_MODULE_PATH    : ${CMAKE_MODULE_PATH}")
+# message( STATUS "CMAKE_MODULE_PATH    : ${CMAKE_MODULE_PATH}")
 
 include( ecbuild_system )
 
-ecbuild_requires_macro_version( 1.2 )
+ecbuild_requires_macro_version( 1.3 )
 
 ###############################################################################
 # local project
@@ -90,7 +90,7 @@ message( STATUS "PYTHON_LIBRARIES     : ${PYTHON_LIBRARIES}")
 #ecbuild_add_extra_search_paths( boost )
 
 # To use static boost python ensure that Boost_USE_STATIC_LIBS is set on.
-set(Boost_USE_STATIC_LIBS        ON)
+set(Boost_USE_STATIC_LIBS        OFF)
 set(Boost_USE_MULTITHREADED      ON)
 set(Boost_NO_SYSTEM_PATHS        ON)
 set(Boost_DETAILED_FAILURE_MSG   ON)

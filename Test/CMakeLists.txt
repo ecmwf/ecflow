@@ -55,14 +55,12 @@ ecbuild_add_test( TARGET s_test
                   BOOST
                   SOURCES  ${test_srcs}
                   LIBS     libharness 
-                  INCLUDES ${Boost_INCLUDE_DIRS} 
                 )
 
 ecbuild_add_test( TARGET  s_test_zombies
                   BOOST
                   SOURCES   ./TestZombies.cpp
                   LIBS      libharness 
-                  INCLUDES  ${Boost_INCLUDE_DIRS} 
                 )
 
 # This test runs forever, hence not suitable for unit test.                          
@@ -70,5 +68,4 @@ ecbuild_add_test( TARGET  s_test_zombies
 #                  BOOST
 #                  SOURCES   ./TestSingle.cpp
 #                  LIBS      libharness 
-#                  INCLUDES  ${Boost_INCLUDE_DIRS}
 #               )
