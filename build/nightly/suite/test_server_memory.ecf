@@ -17,7 +17,7 @@ else
    rm -rf `hostname`.*
    
    # test server for memory leaks, & give it time to start
-   valgrind --leak-check=full --show-reachable=yes Server/bin/%COMPILER_VERSION%/release/ecflow_server --ecfinterval=3 &
+   valgrind --leak-check=full --show-reachable=yes --error-exitcode=1 Server/bin/%COMPILER_VERSION%/release/ecflow_server --ecfinterval=3 &
    sleep 10
 
    export ECF_NODE=localhost
