@@ -373,8 +373,15 @@ def build_localhost( parent ) :
     add_build_and_test_tasks( localhost )
     add_build_profile( localhost )
     
-    localhost.add_task("test_memory_leaks").add_trigger("build_release == complete and build_debug == complete")
-    localhost.add_task("test_server_memory").add_trigger("test_memory_leaks == complete or test_memory_leaks == aborted")
+    # allow module functionality,to load latest valgrind, by sourcing .profile
+    task = localhost.add_task("test_memory_leaks")
+    task.add_variable("ECF_JOB_CMD","rsh %LOCAL_HOST% -l %USER% 'source ~/.profile; %ECF_JOB% > %ECF_JOBOUT% 2>&1'")
+    task.add_trigger("build_release == complete and build_debug == complete")
+    
+    task = localhost.add_task("test_server_memory")
+    task.add_variable("ECF_JOB_CMD","rsh %LOCAL_HOST% -l %USER% 'source ~/.profile; %ECF_JOB% > %ECF_JOBOUT% 2>&1'")
+    task.add_trigger("test_memory_leaks == complete or test_memory_leaks == aborted")
+    
     localhost.add_task("test_client_performance").add_trigger("test_server_memory == complete or test_server_memory == aborted")
     localhost.add_task("test_server_performance").add_trigger("test_client_performance == complete or test_client_performance == aborted")
     localhost.add_task("test_performance").add_trigger("test_server_performance == complete or test_server_performance == aborted")

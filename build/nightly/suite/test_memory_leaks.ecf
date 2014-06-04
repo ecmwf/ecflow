@@ -9,6 +9,9 @@ if [[ %SET_TO_TEST_SCRIPT% = true ]] ; then
    echo "Test only"
 else
 
+   # Load the latest valgrind. module is support by sourceing .profile, in ECF_JOB_CMD
+   module load valgrind/3.9.0
+
 # user options for Memcheck:
 #    --leak-check=no|summary|full     search for memory leaks at exit?  [summary]
 #    --leak-resolution=low|med|high   differentiation of leak stack traces [high]

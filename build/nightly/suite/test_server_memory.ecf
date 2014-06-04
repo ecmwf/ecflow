@@ -16,12 +16,17 @@ else
    # Clear up
    rm -rf `hostname`.*
    
+   # Load the latest valgrind. module is support by sourceing .profile, in ECF_JOB_CMD
+   module load valgrind/3.9.0
+   
    # test server for memory leaks, & give it time to start
    valgrind --leak-check=full --show-reachable=yes --error-exitcode=1 Server/bin/%COMPILER_VERSION%/release/ecflow_server --ecfinterval=3 &
    sleep 10
 
    export ECF_NODE=localhost
    Client/bin/%COMPILER_VERSION%/release/s_client
+   
+   # This test will terminate the server at the end of the test
    Test/bin/%COMPILER_VERSION%/release/s_test
    
    # wait for server to exit & valgrind report
