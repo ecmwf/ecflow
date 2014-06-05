@@ -34,6 +34,7 @@ static defs_ptr create_defs()
    suite_ptr suite = theDefs->add_suite( "s1" ) ;
    family_ptr f1  = suite->add_family( "f1" ) ;
    task_ptr t1 = f1->add_task("t1");
+   t1->addTime( TimeAttr(10,30));
    t1->add_alias_only();
    task_ptr t2 = f1->add_task("t2");
    t2->add_alias_only();
@@ -48,11 +49,20 @@ BOOST_AUTO_TEST_CASE( test_force_cmd )
    node_ptr s1 = the_defs->findAbsNode("/s1");
    node_ptr f1 = the_defs->findAbsNode("/s1/f1");
    node_ptr t1 = the_defs->findAbsNode("/s1/f1/t1");
+   node_ptr t2 = the_defs->findAbsNode("/s1/f1/t2");
+
    TestHelper::invokeRequest(the_defs.get(),Cmd_ptr( new ForceCmd(t1->absNodePath(),"complete",true /*recursive */, false /* set Repeat to last value */)));
    TestHelper::test_state(t1,NState::COMPLETE);
    BOOST_CHECK_MESSAGE(t1->get_flag().is_set(ecf::Flag::NO_REQUE_IF_SINGLE_TIME_DEP),"Expected ecf::Flag::NO_REQUE_IF_SINGLE_TIME_DEP to be set");
-   BOOST_CHECK_MESSAGE(!f1->get_flag().is_set(ecf::Flag::NO_REQUE_IF_SINGLE_TIME_DEP),"Expected ecf::Flag::NO_REQUE_IF_SINGLE_TIME_DEP to be set");
-   BOOST_CHECK_MESSAGE(!s1->get_flag().is_set(ecf::Flag::NO_REQUE_IF_SINGLE_TIME_DEP),"Expected ecf::Flag::NO_REQUE_IF_SINGLE_TIME_DEP to be set");
+   BOOST_CHECK_MESSAGE(!f1->get_flag().is_set(ecf::Flag::NO_REQUE_IF_SINGLE_TIME_DEP),"Expected ecf::Flag::NO_REQUE_IF_SINGLE_TIME_DEP to be NOT set");
+   BOOST_CHECK_MESSAGE(!s1->get_flag().is_set(ecf::Flag::NO_REQUE_IF_SINGLE_TIME_DEP),"Expected ecf::Flag::NO_REQUE_IF_SINGLE_TIME_DEP to be NOT set");
+
+   TestHelper::invokeRequest(the_defs.get(),Cmd_ptr( new ForceCmd(t2->absNodePath(),"complete",true /*recursive */, false /* set Repeat to last value */)));
+   TestHelper::test_state(t2,NState::COMPLETE);
+   BOOST_CHECK_MESSAGE(!t2->get_flag().is_set(ecf::Flag::NO_REQUE_IF_SINGLE_TIME_DEP),"Expected ecf::Flag::NO_REQUE_IF_SINGLE_TIME_DEP to be NOT set since there are NO time depedencies");
+   BOOST_CHECK_MESSAGE(!f1->get_flag().is_set(ecf::Flag::NO_REQUE_IF_SINGLE_TIME_DEP),"Expected ecf::Flag::NO_REQUE_IF_SINGLE_TIME_DEP to be NOT set");
+   BOOST_CHECK_MESSAGE(!s1->get_flag().is_set(ecf::Flag::NO_REQUE_IF_SINGLE_TIME_DEP),"Expected ecf::Flag::NO_REQUE_IF_SINGLE_TIME_DEP to be NOT set");
+
 
    TestHelper::invokeRequest(the_defs.get(),Cmd_ptr( new ForceCmd(s1->absNodePath(),"complete",true /*recursive */, false /* set Repeat to last value */)));
    TestHelper::test_state(s1,NState::COMPLETE);
@@ -62,6 +72,7 @@ BOOST_AUTO_TEST_CASE( test_force_cmd )
    int clear_suspended_in_child_nodes = 0;
    s1->requeue(true,clear_suspended_in_child_nodes);
    BOOST_CHECK_MESSAGE(!t1->get_flag().is_set(ecf::Flag::NO_REQUE_IF_SINGLE_TIME_DEP),"Expected ecf::Flag::NO_REQUE_IF_SINGLE_TIME_DEP to be clear after requeue");
+   BOOST_CHECK_MESSAGE(!t2->get_flag().is_set(ecf::Flag::NO_REQUE_IF_SINGLE_TIME_DEP),"Expected ecf::Flag::NO_REQUE_IF_SINGLE_TIME_DEP to be clear after requeue");
    BOOST_CHECK_MESSAGE(!f1->get_flag().is_set(ecf::Flag::NO_REQUE_IF_SINGLE_TIME_DEP),"Expected ecf::Flag::NO_REQUE_IF_SINGLE_TIME_DEP to be clear after requeue");
    BOOST_CHECK_MESSAGE(!s1->get_flag().is_set(ecf::Flag::NO_REQUE_IF_SINGLE_TIME_DEP),"Expected ecf::Flag::NO_REQUE_IF_SINGLE_TIME_DEP to be clear after requeue");
 

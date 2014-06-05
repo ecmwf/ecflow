@@ -135,11 +135,10 @@ public:
    /// Since alter clock, should not change node state. This is left for user to re-queue the suite
    virtual void requeue_time_attrs();
 
-   /// Set a flag that ensures that a node with a single time dependency is NOT automatically re-queued
-   /// This is applied *up* the hierarchy until we *hit* a node with a repeat or Cron attribute
-   /// This is done since repeat and cron can be used to reset the NO_REQUE_IF_SINGLE_TIME_DEP flags
    /// This functionality is only required during interactive force or run
-   void set_no_requeue_if_single_time_dependency(bool miss_next_time_slot);
+   /// Avoid running the task on the same time slot, by missing the next time slot.
+   /// Requires we set a flag, to avoid the requeue resetting the time slots
+   void miss_next_time_slot();
 
    /// Recursively run the tasks under this node, ignore suspend,limits,triggers, and time dependencies
    /// if force is set, run even if task is submitted or active. (will create zombies)

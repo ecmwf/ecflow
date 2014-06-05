@@ -92,7 +92,9 @@ STC_Cmd_ptr ForceCmd::doHandleRequest(AbstractServer* as) const
  	      /// **** we need to mark the time dependency as *expired*, otherwise, it will be automatically reset to QUEUED state
  	      /// **** Additionally whenever we have set state to complete, need to miss the next time slot.
  	      NState::State new_state = NState::toState(stateOrEvent_);
- 	      node->set_no_requeue_if_single_time_dependency(new_state == NState::COMPLETE);
+ 	      if (new_state == NState::COMPLETE)  {
+ 	         node->miss_next_time_slot();
+ 	      }
 
  	      if (recursive_) node->set_state_hierarchically( new_state, true /* force */ );
  	      else            node->set_state( new_state, true /* force */  );

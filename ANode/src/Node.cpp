@@ -192,7 +192,7 @@ void Node::requeue( bool resetRepeats, int clear_suspended_in_child_nodes)
    // allow next time on time based attributes to be incremented and *not* reset,
    // when force and run commands used
    bool reset_next_time_slot = true;
-   if (flag().is_set(ecf::Flag::NO_REQUE_IF_SINGLE_TIME_DEP)) {
+   if (time_dep_attrs_ && flag().is_set(ecf::Flag::NO_REQUE_IF_SINGLE_TIME_DEP)) {
       reset_next_time_slot =  false;
    }
    flag_.reset();
@@ -226,10 +226,9 @@ void Node::requeue_time_attrs()
 }
 
 
-void Node::set_no_requeue_if_single_time_dependency(bool miss_next_time_slot)
+void Node::miss_next_time_slot()
 {
-//   cout << "Node::set_no_requeue_if_single_time_dependency() " << absNodePath() << "\n";
-   SuiteChanged0 changed(shared_from_this());
+//   cout << "Node::miss_next_time_slot() " << absNodePath() << "\n";
 
    // Why do we need to set this flag ?
    // This is really required when we have multiple time based attributes.
@@ -245,9 +244,12 @@ void Node::set_no_requeue_if_single_time_dependency(bool miss_next_time_slot)
    // hence, no clearing of NO_REQUE_IF_SINGLE_TIME_DEP flag.
    // This will then be up to any top level parent that has a Repeat/cron to force a requeue
    // when all the children are complete.
-   flag().set(Flag::NO_REQUE_IF_SINGLE_TIME_DEP);
+   if ( time_dep_attrs_) {
+      SuiteChanged0 changed(shared_from_this());
+      flag().set(Flag::NO_REQUE_IF_SINGLE_TIME_DEP);
 
-   if (miss_next_time_slot && time_dep_attrs_) time_dep_attrs_->miss_next_time_slot();
+      time_dep_attrs_->miss_next_time_slot();
+   }
 }
 
 void Node::calendarChanged(

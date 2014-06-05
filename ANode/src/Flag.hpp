@@ -35,8 +35,6 @@ namespace  ecf {
 /// If the node has a time dependency, which is holding it
 /// would automatically set to re-queue state. To avoid this in the interactive case
 /// we will use the flag NO_REQUE_IF_SINGLE_TIME_DEP
-/// This is applied *up* the hierarchy until we *hit* a node with a repeat or Cron attribute
-/// This is done since repeat and cron can be used to reset the NO_REQUE_IF_SINGLE_TIME_DEP flags
 /// This functionality is only required during interactive force or run
 
 class Flag {
