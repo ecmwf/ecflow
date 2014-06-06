@@ -394,7 +394,7 @@ bool TimeSeries::checkForRequeue( const ecf::Calendar& calendar, const TimeSlot&
       }
 
       time_duration calendar_duration = duration(calendar);
-      if (calendar_duration >= start_.duration() && calendar_duration < lastTimeSlot_) {
+      if ( calendar_duration < lastTimeSlot_) {
          return true;
       }
       return false;
@@ -413,7 +413,7 @@ bool TimeSeries::checkForRequeue( const ecf::Calendar& calendar, const TimeSlot&
 
    // The the_min/the_max takes into account *all* start/finish Time and Today attributes
    time_duration calendar_duration = duration(calendar);
-   if (calendar_duration >= the_min.duration() && calendar_duration < the_max.duration()) {
+   if (calendar_duration < the_max.duration()) {
       return true;
    }
 

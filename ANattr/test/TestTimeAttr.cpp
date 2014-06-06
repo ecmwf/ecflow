@@ -80,11 +80,10 @@ BOOST_AUTO_TEST_CASE( test_time_attr)
    bool day_changed = false; // after midnight make sure we keep day_changed
    for(int m=1; m < 96; m++) {
       calendar.update( time_duration( minutes(30) ) );
-      if (!day_changed) {
-         day_changed = calendar.dayChanged();
-      }
+      if (!day_changed) day_changed = calendar.dayChanged();
+
       boost::posix_time::time_duration time = calendar.suiteTime().time_of_day();
-      // cout << time << " day_changed(" << day_changed << ")\n";
+//      cout << time << " day_changed(" << day_changed << ")\n";
 
       timeSeries.calendarChanged( calendar );
       timeSeries2.calendarChanged( calendar );
@@ -94,7 +93,7 @@ BOOST_AUTO_TEST_CASE( test_time_attr)
 
       if (time < timeSeries.time_series().start().duration()) {
          BOOST_CHECK_MESSAGE(!timeSeries.isFree(calendar),timeSeries.toString() << " should NOT be free at time " << time );
-         BOOST_CHECK_MESSAGE(!timeSeries.checkForRequeue(calendar,t1_min,t1_max),timeSeries.toString() << " should fail at " << time );
+         BOOST_CHECK_MESSAGE(timeSeries.checkForRequeue(calendar,t1_min,t1_max),timeSeries.toString() << " should pass at " << time );
       }
       else if (time >= timeSeries.time_series().start().duration() && time <=timeSeries.time_series().finish().duration()) {
 
@@ -122,7 +121,7 @@ BOOST_AUTO_TEST_CASE( test_time_attr)
 
       if (time < timeSeries2.time_series().start().duration()) {
          BOOST_CHECK_MESSAGE(!timeSeries2.isFree(calendar),timeSeries2.toString() << " should NOT be free at time " << time );
-         BOOST_CHECK_MESSAGE(!timeSeries2.checkForRequeue(calendar,t2_min,t2_max),timeSeries2.toString() << " should fail at " << time );
+         BOOST_CHECK_MESSAGE(timeSeries2.checkForRequeue(calendar,t2_min,t2_max),timeSeries2.toString() << " should pass at " << time );
       }
       else if (time >= timeSeries2.time_series().start().duration() && time <=timeSeries2.time_series().finish().duration()) {
 
@@ -149,7 +148,7 @@ BOOST_AUTO_TEST_CASE( test_time_attr)
       }
 
 
-      // Single slot, Once a single slot if Free it *stays* free until explicitly requeued, (i.e by parent repeat/cron)
+      // Single slot, Once a single slot is Free it *stays* free until explicitly requeued, (i.e by parent repeat/cron)
       if (!day_changed) {
          if (time < timeSeries3.time_series().start().duration()) {
             BOOST_CHECK_MESSAGE(!timeSeries3.isFree(calendar),timeSeries3.toString() << " should be fail at time " << time );
@@ -188,7 +187,6 @@ BOOST_AUTO_TEST_CASE( test_time_attr)
        timeSeries2.requeue( calendar );
 
        // Do not requeue time 00, and time 15, so that we can check for free
-
    }
 }
 
@@ -311,7 +309,7 @@ BOOST_AUTO_TEST_CASE( test_time_attr_multiples )
       timeSeries3.calendarChanged( calendar );
 
       if (!day_changed) {
-         if ( time >= t1_min.duration() && time < t1_max.duration()) {
+         if ( time < t1_max.duration()) {
             BOOST_CHECK_MESSAGE(timeSeries.checkForRequeue(calendar,t1_min,t1_max),timeSeries.toString() << " checkForRequeue should pass at " << time );
             BOOST_CHECK_MESSAGE(timeSeries2.checkForRequeue(calendar,t1_min,t1_max),timeSeries2.toString() << " checkForRequeue should pass at " << time );
             BOOST_CHECK_MESSAGE(timeSeries3.checkForRequeue(calendar,t1_min,t1_max),timeSeries3.toString() << " checkForRequeue should pass at " << time );

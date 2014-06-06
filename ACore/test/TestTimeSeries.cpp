@@ -187,9 +187,13 @@ BOOST_AUTO_TEST_CASE( test_time_series_increment_real )
 		timeSeries2.calendarChanged( c );
 		timeSeries3.calendarChanged( c );
 
-//		cerr << "hour = " << hour << " calendar_duration " << to_simple_string(timeSeries.duration(calendar))
+//		cerr << "hour = " << hour << " calendar_duration " << to_simple_string(timeSeries.duration(c))
 //		    << " timeSeries=" << timeSeries.toString() << " timeSeries2=" << timeSeries2.toString() << " timeSeries3=" << timeSeries3.toString() << "\n";
-		if (hour >= timeSeries.start().hour() && hour <=timeSeries.finish().hour()) {
+		if (hour < timeSeries.start().hour()) {
+         BOOST_CHECK_MESSAGE(timeSeries.checkForRequeue(c,t1_min,t1_max)," Time series " << timeSeries.toString() << "checkForRequeue should pass at " << hour );
+         BOOST_CHECK_MESSAGE(!timeSeries.isFree(c),"Time series " << timeSeries.toString() << " should NOT be free at hour " << hour );
+		}
+		else if (hour >= timeSeries.start().hour() && hour <= timeSeries.finish().hour()) {
 			BOOST_CHECK_MESSAGE(timeSeries.isFree(c),"Time series " << timeSeries.toString() << " should be free at hour " << hour );
 
 			/// At the last hour checkForRequeue should return false; This ensures that value will
@@ -207,7 +211,11 @@ BOOST_AUTO_TEST_CASE( test_time_series_increment_real )
 		}
 
 
-		if (hour >= timeSeries2.start().hour() && hour <=timeSeries2.finish().hour()) {
+      if (hour < timeSeries2.start().hour()) {
+         BOOST_CHECK_MESSAGE(timeSeries2.checkForRequeue(c,t1_min,t1_max)," Time series " << timeSeries2.toString() << "checkForRequeue should pass at " << hour );
+         BOOST_CHECK_MESSAGE(!timeSeries2.isFree(c),"Time series " << timeSeries2.toString() << " should NOT be free at hour " << hour );
+      }
+      else if (hour >= timeSeries2.start().hour() && hour <=timeSeries2.finish().hour()) {
 			BOOST_CHECK_MESSAGE(timeSeries2.isFree(c),"Time series " << timeSeries2.toString() << " should be free at hour " << hour );
 
 			/// At the last hour checkForRequeue should return false;
@@ -263,8 +271,8 @@ BOOST_AUTO_TEST_CASE( test_time_series_finish_not_divisble_by_increment )
    BOOST_CHECK_MESSAGE(t1_min == TimeSlot(0,0) && t1_max == TimeSlot(23,59),"Not as expected");
    BOOST_CHECK_MESSAGE(t2_min == TimeSlot(0,30) && t2_max == TimeSlot(23,59),"Not as expected");
 
- 	time_duration last = hours(23) + minutes(50);  // last valid date is 23:50
-	time_duration last2 = hours(20) + minutes(30);  // last valid date is 20:30
+ 	time_duration last = hours(23) + minutes(50);  // last valid time is 23:50
+	time_duration last2 = hours(20) + minutes(30);  // last valid time is 20:30
 
  	for(int hour=0; hour < 24; hour++) {
  		for( int minute=0; minute<60; minute++) {
@@ -275,16 +283,20 @@ BOOST_AUTO_TEST_CASE( test_time_series_finish_not_divisble_by_increment )
  				timeSeries2.reset(calendar);
  			}
 
- 			if ( calendar.suiteTime().time_of_day() >= timeSeries.start().duration() &&
- 				 calendar.suiteTime().time_of_day() < last	) {
+ 			if ( calendar.suiteTime().time_of_day() < timeSeries.start().duration()) {
+            BOOST_CHECK_MESSAGE(timeSeries.checkForRequeue(calendar,t1_min,t1_max)," expected " << timeSeries.toString() << " checkForRequeue to pass at " << to_simple_string(calendar.suiteTime()) );
+ 			}
+ 			else if ( calendar.suiteTime().time_of_day() >= timeSeries.start().duration() && calendar.suiteTime().time_of_day() < last	) {
      			BOOST_CHECK_MESSAGE(timeSeries.checkForRequeue(calendar,t1_min,t1_max)," expected " << timeSeries.toString() << " checkForRequeue to pass at " << to_simple_string(calendar.suiteTime()) );
   			}
   			else {
      			BOOST_CHECK_MESSAGE(!timeSeries.checkForRequeue(calendar,t1_min,t1_max)," expected " << timeSeries.toString() << " checkForRequeue to fail at " << to_simple_string(calendar.suiteTime()) );
   			}
 
- 			if ( calendar.suiteTime().time_of_day() >= timeSeries2.start().duration() &&
- 				 calendar.suiteTime().time_of_day() < last2	) {
+         if ( calendar.suiteTime().time_of_day() < timeSeries2.start().duration()) {
+            BOOST_CHECK_MESSAGE(timeSeries2.checkForRequeue(calendar,t2_min,t2_max)," expected " << timeSeries2.toString() << " checkForRequeue to pass at " << to_simple_string(calendar.suiteTime()) );
+         }
+         else if ( calendar.suiteTime().time_of_day() >= timeSeries2.start().duration() && calendar.suiteTime().time_of_day() < last2	) {
      			BOOST_CHECK_MESSAGE(timeSeries2.checkForRequeue(calendar,t2_min,t2_max)," expected " << timeSeries2.toString() << " checkForRequeue to pass at " << to_simple_string(calendar.suiteTime()) );
   			}
   			else {

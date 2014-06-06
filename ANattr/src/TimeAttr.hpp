@@ -28,8 +28,9 @@
 ///                                               isFree:hhhhhhhhhhhhhhhhh
 ///                                               Begin:
 ///                                               V
-///checkForReque:hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh   for 10:00 or 11:00 by themselves
-///checkForReque:hhhhhhhhhhhhhhhhhrrrrrrrrrrrrhhhhhhhhhhhhhhhhhhhhhhh   for both 10:00 and 11:000 together
+///checkForReque:rrrrrrrrrrrrrrrrhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh   10:00
+///checkForReque:rrrrrrrrrrrrrrrrrrrrrrrrrrrrrhhhhhhhhhhhhhhhhhhhhhhh   11:00
+///checkForReque:rrrrrrrrrrrrrrrrrrrrrrrrrrrrrhhhhhhhhhhhhhhhhhhhhhhh   for both 10:00 and 11:000 together
 ///       isFree:hhhhhhhhhhhhhhhhffffffffffffffffffffffffffffffffffff   *once* free we stay free (single slot *only*)
 ///       begin :                |                           |
 ///        V                     |                           |
@@ -38,7 +39,7 @@
 //
 ///                                                     isFree:hhhhhhhhhhhhhhhhhh
 ///                                                      V
-///   CheckForReque:hhhhhhhrrrrrrrrrrrrrrrrrrrrrrrrrhhhhhhhhhhhhhhhhhhhhhhhhhhhhh
+///   CheckForReque:rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrhhhhhhhhhhhhhhhhhhhhhhhhhhhhh
 ///          isFree:hhhhhhhFhhhhFhhhhFhhhhFhhhhFhhhhFhhhhhhhhhhhhhhhhhhhhhhhhhhhh
 ///            V           |    |    |    |    |    |        |
 /// Time   ================o====|====|====|====|====0========0====================
