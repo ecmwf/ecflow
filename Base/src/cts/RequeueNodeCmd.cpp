@@ -99,6 +99,7 @@ STC_Cmd_ptr RequeueNodeCmd::doHandleRequest(AbstractServer* as) const
 	            return PreAllocatedReply::ok_cmd();
 	         }
 	      }
+
 	      // The NO_REQUE_IF_SINGLE_TIME_DEP is typically cleared at the *end* requeue, however there are cases
 	      // where we need to reset it *BEFORE* re-queue. Since it is tied to missing the next time slot
 	      // i.e take this case:
@@ -109,6 +110,12 @@ STC_Cmd_ptr RequeueNodeCmd::doHandleRequest(AbstractServer* as) const
 	      // Hence *any* *MANUAL* reque afterward will cause NOT reset the next valid time slot.
 	      // So we explicitly set it here.
 	      theNodeToRequeue->flag().clear(Flag::NO_REQUE_IF_SINGLE_TIME_DEP );
+	      std::vector<Node*> all_nodes_under_node_to_requeue;
+	      theNodeToRequeue->getAllNodes(all_nodes_under_node_to_requeue);
+         for(size_t i=0; i < all_nodes_under_node_to_requeue.size(); i++) {
+            all_nodes_under_node_to_requeue[i]->flag().clear(Flag::NO_REQUE_IF_SINGLE_TIME_DEP );
+         }
+
 	      theNodeToRequeue->requeue(  true /* reset repeats */, clear_suspended_in_child_nodes );
 	      theNodeToRequeue->set_most_significant_state_up_node_tree();
 	   }

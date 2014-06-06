@@ -357,6 +357,10 @@ void Node::requeueOrSetMostSignificantStateUpNodeTree()
          }
       }
 
+      /// If user has *INTERACTIVLY* forced changed in state to complete *OR* run the job.
+      /// This would cause Node to miss the next time slot. i.e expire the time slot
+      /// In which case testTimeDependenciesForRequeue should return false for a single time/today dependency
+      /// and not requeue the node.
       if (time_dep_attrs_ && time_dep_attrs_->testTimeDependenciesForRequeue()) {
          requeue( false /* don't reset repeats */, clear_suspended_in_child_nodes);
          set_most_significant_state_up_node_tree();
