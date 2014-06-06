@@ -1589,7 +1589,6 @@ void Node::why(std::vector<std::string>& vec) const
    prefix += " (";
    prefix += NState::toString(state());
    prefix += ") ";
-   std::string postFix;
 
    if (time_dep_attrs_) {
 #ifdef DEBUG_WHY
@@ -1608,7 +1607,7 @@ void Node::why(std::vector<std::string>& vec) const
 #ifdef DEBUG_WHY
       std::cout << "   Node::why " << debugNodePath() << " checking trigger dependencies\n";
 #endif
-      postFix.clear();
+      std::string postFix;
       if (triggerAst()->why(postFix)) { vec.push_back(prefix + postFix); }
    }
 }
