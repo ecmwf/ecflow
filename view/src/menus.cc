@@ -742,7 +742,7 @@ flags* new_userFlag(int a)             { return new userFlag(a); }
 
 flags* new_procFlag_node_hasTriggers() { return new procFlag(&node::hasTriggers); }
 flags* new_procFlag_node_hasDate() { return  new procFlag(&node::hasDate); }
-flags* new_procFlag_node_hasTime() { return  new procFlag(&node::hasTime); }
+flags* new_procFlag_node_hasTime() { return  new procFlag(&node::hasTimeHolding); }
 flags* new_procFlag_node_isMigrated() { return new procFlag(&node::isMigrated); }
 flags* new_procFlag_node_isLocked() { return  new procFlag(&node::isLocked); }
 flags* new_procFlag_node_hasText() { return  new procFlag(&node::hasText); }
