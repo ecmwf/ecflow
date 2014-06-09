@@ -187,15 +187,28 @@ void Node::requeue( bool resetRepeats, int clear_suspended_in_child_nodes)
    // For example because of repeats, time,today or cron
    if (resetRepeats) repeat_.reset(); // if repeat is empty reset() does nothing
 
-   bool edit_history_set = flag().is_set(ecf::Flag::MESSAGE);
 
-   // allow next time on time based attributes to be incremented and *not* reset,
-   // when force and run commands used
-   bool reset_next_time_slot = true;
-   if (time_dep_attrs_ && flag().is_set(ecf::Flag::NO_REQUE_IF_SINGLE_TIME_DEP)) {
-      reset_next_time_slot =  false;
+   /// If a job takes longer than it slots, then that slot is missed, and next slot is used
+   /// Note we do *NOT* reset for requeue as we want to advance the valid time slots.
+   /// *NOTE* Update calendar will *free* time dependencies *even* time series. They rely
+   /// on this function to clear the time dependencies so they *HOLD* the task.
+   if ( time_dep_attrs_ ) {
+
+      /// If we have done an interactive run or complete, *dont* increment next_time_slot_
+      /// allow next time on time based attributes to be incremented and *not* reset,
+      /// when force and run commands used
+      bool reset_next_time_slot = true;
+      if (flag().is_set(ecf::Flag::NO_REQUE_IF_SINGLE_TIME_DEP)) {
+         reset_next_time_slot =  false;
+      }
+
+      time_dep_attrs_->requeue(reset_next_time_slot);
+      time_dep_attrs_->markHybridTimeDependentsAsComplete();
    }
-   flag_.reset();
+
+   // reset the flags, however remember if edit were made
+   bool edit_history_set = flag().is_set(ecf::Flag::MESSAGE);
+   flag_.reset();   // will CLEAR NO_REQUE_IF_SINGLE_TIME_DEP
    if (edit_history_set) flag().set(ecf::Flag::MESSAGE);
 
 
@@ -203,17 +216,6 @@ void Node::requeue( bool resetRepeats, int clear_suspended_in_child_nodes)
    if (child_attrs_) child_attrs_->requeue();
 
    for(size_t i = 0; i < limitVec_.size(); i++) { limitVec_[i]->reset(); }
-
-   /// If a job takes longer than it slots, then that slot is missed, and next slot is used
-   /// Note we do *NOT* reset for requeue as we want to advance the valid time slots.
-   /// *NOTE* Update calendar will *free* time dependencies *even* time series. They rely
-   /// on this function to clear the time dependencies so they *HOLD* the task.
-   ///
-   /// If we have done an interactive run or complete, *dont* increment next_time_slot_
-   if (time_dep_attrs_) {
-      time_dep_attrs_->requeue(reset_next_time_slot);
-      time_dep_attrs_->markHybridTimeDependentsAsComplete();
-   }
 }
 
 
@@ -230,8 +232,8 @@ void Node::miss_next_time_slot()
 {
 //   cout << "Node::miss_next_time_slot() " << absNodePath() << "\n";
 
-   // Why do we need to set this flag ?
-   // This is really required when we have multiple time based attributes.
+   // Why do we need to set NO_REQUE_IF_SINGLE_TIME_DEP flag ?
+   // This is required when we have time based attributes, which we want to miss.
    //    time 10:00
    //    time 12:00
    // If we call this function before 10:00, we want to miss the next time slot (i.e. 10:00)
@@ -241,7 +243,7 @@ void Node::miss_next_time_slot()
    // Note: requeue will *always* clear NO_REQUE_IF_SINGLE_TIME_DEP afterwards.
    //
    // In the case above when we reach the last time slot, there is *NO* automatic requeue, and
-   // hence, no clearing of NO_REQUE_IF_SINGLE_TIME_DEP flag.
+   // hence, *no* clearing of NO_REQUE_IF_SINGLE_TIME_DEP flag.
    // This will then be up to any top level parent that has a Repeat/cron to force a requeue
    // when all the children are complete.
    if ( time_dep_attrs_) {
