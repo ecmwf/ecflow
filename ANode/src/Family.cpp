@@ -68,9 +68,9 @@ void Family::begin()
    update_generated_variables();
 }
 
-void Family::requeue(bool resetRepeats, int clear_suspended_in_child_nodes)
+void Family::requeue(bool resetRepeats, int clear_suspended_in_child_nodes, bool reset_next_time_slot)
 {
-   NodeContainer::requeue(resetRepeats,clear_suspended_in_child_nodes);
+   NodeContainer::requeue(resetRepeats,clear_suspended_in_child_nodes,reset_next_time_slot);
    update_generated_variables();
 }
 

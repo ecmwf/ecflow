@@ -127,7 +127,17 @@ public:
    /// However we will preserve def status.
    /// If a user re-queues a node that is suspended then it stays suspended
    /// We use -1 to mean leave suspended state as is
-   virtual void requeue(bool resetRepeats, int clear_suspended_in_child_nodes);
+   ///
+   /// When the user issues force-complete or run interactive commands, we want to miss
+   /// the next-time slot. (i.e to avoid running the job again).
+   /// This is done by using NO_REQUE_IF_SINGLE_TIME_DEP flag.
+   /// The flag remain set until we get to *this* function. We use it to avoid
+   /// resetting the time slots, effectively missing the next time slot. we then clear the flag.
+   /// However if the JOB *abort* we clear NO_REQUE_IF_SINGLE_TIME_DEP
+   /// Otherwise if we run again, we miss additional time slots necessarily
+   virtual void requeue(bool resetRepeats,
+                          int clear_suspended_in_child_nodes,
+                          bool reset_next_time_slot);
 
    /// Re queue the time based attributes only.
    /// Used as a part of Alter (clock) functionality.
@@ -279,6 +289,7 @@ public:
 
    /// A hierarchical function
    virtual bool hasAutoCancel() const { return (autoCancel_) ? true : false;}
+
 
    // Access functions: ======================================================
    const std::string& name() const { return name_; }

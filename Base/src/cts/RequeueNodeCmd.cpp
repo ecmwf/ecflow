@@ -84,8 +84,9 @@ STC_Cmd_ptr RequeueNodeCmd::doHandleRequest(AbstractServer* as) const
 	      theNodeToRequeue->getAllTasks(taskVec);
 	      for(size_t i=0; i < taskVec.size(); i++) {
 	         if (taskVec[i]->state() == NState::ABORTED) {
-	            taskVec[i]->flag().clear(Flag::NO_REQUE_IF_SINGLE_TIME_DEP );
-	            taskVec[i]->requeue( true /* reset repeats */,clear_suspended_in_child_nodes);
+	            taskVec[i]->requeue( true /* reset repeats */,
+	                                 clear_suspended_in_child_nodes,
+	                                 true /* reset_next_time_slot */);
 	            taskVec[i]->set_most_significant_state_up_node_tree(); // can be waste full
 	         }
 	      }
@@ -107,16 +108,11 @@ STC_Cmd_ptr RequeueNodeCmd::doHandleRequest(AbstractServer* as) const
 	      // If we force complete, we set NO_REQUE_IF_SINGLE_TIME_DEP, which is used to advance next valid time slot
 	      // (i.e no reset), however when we reach the *end* time i.e 15:00
 	      // calling force complete now leaves node in a complete state and with NO_REQUE_IF_SINGLE_TIME_DEP set.
-	      // Hence *any* *MANUAL* reque afterward will cause NOT reset the next valid time slot.
-	      // So we explicitly set it here.
-	      theNodeToRequeue->flag().clear(Flag::NO_REQUE_IF_SINGLE_TIME_DEP );
-	      std::vector<Node*> all_nodes_under_node_to_requeue;
-	      theNodeToRequeue->getAllNodes(all_nodes_under_node_to_requeue);
-         for(size_t i=0; i < all_nodes_under_node_to_requeue.size(); i++) {
-            all_nodes_under_node_to_requeue[i]->flag().clear(Flag::NO_REQUE_IF_SINGLE_TIME_DEP );
-         }
-
-	      theNodeToRequeue->requeue(  true /* reset repeats */, clear_suspended_in_child_nodes );
+	      // Therefore *any* *MANUAL* re-queue afterward will NOT reset the next valid time slot.
+	      // To overcome this manual re-queue will always clear NO_REQUE_IF_SINGLE_TIME_DEP and hence reset next valid time slot
+	      theNodeToRequeue->requeue( true /* reset repeats */,
+	                                 clear_suspended_in_child_nodes,
+	                                 true /* reset_next_time_slot */ );
 	      theNodeToRequeue->set_most_significant_state_up_node_tree();
 	   }
 	   else if ( option_ == RequeueNodeCmd::FORCE) {
@@ -128,8 +124,9 @@ STC_Cmd_ptr RequeueNodeCmd::doHandleRequest(AbstractServer* as) const
 	      // The GUI: that calls this command should call a separate request
 	      // the returns the active/submitted tasks first. This can then be
 	      // presented to the user, who can elect to kill them if required.
-         theNodeToRequeue->flag().clear(Flag::NO_REQUE_IF_SINGLE_TIME_DEP );
-	      theNodeToRequeue->requeue(  true /* reset repeats */, clear_suspended_in_child_nodes );
+	      theNodeToRequeue->requeue(  true /* reset repeats */,
+	                                  clear_suspended_in_child_nodes,
+	                                  true /* reset_next_time_slot */ );
 	      theNodeToRequeue->set_most_significant_state_up_node_tree();
 	   }
 	}

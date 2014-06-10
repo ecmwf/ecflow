@@ -282,7 +282,10 @@ void Task::begin()
 #endif
 }
 
-void Task::requeue(bool resetRepeats, int clear_suspended_in_child_nodes)
+void Task::requeue(
+         bool resetRepeats,
+         int clear_suspended_in_child_nodes,
+         bool reset_next_time_slot)
 {
    if (aliases_.empty()) {
       if (alias_no_ != 0) {
@@ -290,7 +293,9 @@ void Task::requeue(bool resetRepeats, int clear_suspended_in_child_nodes)
       }
    }
 
-	Submittable::requeue(resetRepeats,clear_suspended_in_child_nodes);
+	Submittable::requeue(resetRepeats,
+	                     clear_suspended_in_child_nodes,
+	                     reset_next_time_slot);
 
 #ifdef DEBUG_STATE_CHANGE_NO
 	std::cout << "Task::requeue\n";

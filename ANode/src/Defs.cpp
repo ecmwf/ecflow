@@ -136,7 +136,7 @@ void Defs::check_job_creation(  job_creation_ctrl_ptr jobCtrl )
  			suiteVec_[s]->check_job_creation( jobCtrl ) ;
 
  			/// reset the state
-         suiteVec_[s]->requeue(true,clear_suspended_in_child_nodes);
+         suiteVec_[s]->requeue(true,clear_suspended_in_child_nodes,true);
          suiteVec_[s]->reset_begin();
          suiteVec_[s]->setStateOnlyHierarchically( NState::UNKNOWN );
  		}
@@ -151,7 +151,7 @@ void Defs::check_job_creation(  job_creation_ctrl_ptr jobCtrl )
 			node->check_job_creation( jobCtrl );
 
 			/// reset the state
-         node->requeue(true,clear_suspended_in_child_nodes);
+         node->requeue(true,clear_suspended_in_child_nodes,true);
          node->suite()->reset_begin();
          node->setStateOnlyHierarchically( NState::UNKNOWN );
 		}
@@ -432,7 +432,9 @@ void Defs::requeue()
    int clear_suspended_in_child_nodes = 0;
    size_t theSuiteVecSize = suiteVec_.size();
    for(size_t s = 0; s < theSuiteVecSize; s++) {
-      suiteVec_[s]->requeue( true /* reset repeats */,clear_suspended_in_child_nodes);
+      suiteVec_[s]->requeue( true /* reset repeats */,
+                             clear_suspended_in_child_nodes,
+                             true /* reset_next_time_slot */);
    }
 
    set_most_significant_state();

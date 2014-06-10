@@ -90,7 +90,6 @@ STC_Cmd_ptr ForceCmd::doHandleRequest(AbstractServer* as) const
  	      /// We want this to have side effects. i.e bubble up state and re-queue if complete and has repeat's
  	      /// **** However if state is SET to complete, we want to MISS the next time slot.
  	      /// **** we need to mark the time dependency as *expired*, otherwise, it will be automatically reset to QUEUED state
- 	      /// **** Additionally whenever we have set state to complete, need to miss the next time slot.
  	      NState::State new_state = NState::toState(stateOrEvent_);
  	      if (new_state == NState::COMPLETE)  {
  	         node->miss_next_time_slot();

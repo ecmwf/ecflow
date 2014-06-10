@@ -70,7 +70,7 @@ BOOST_AUTO_TEST_CASE( test_force_cmd )
    TestHelper::test_state(t1,NState::COMPLETE);
 
    int clear_suspended_in_child_nodes = 0;
-   s1->requeue(true,clear_suspended_in_child_nodes);
+   s1->requeue(true,clear_suspended_in_child_nodes,false);
    BOOST_CHECK_MESSAGE(!t1->get_flag().is_set(ecf::Flag::NO_REQUE_IF_SINGLE_TIME_DEP),"Expected ecf::Flag::NO_REQUE_IF_SINGLE_TIME_DEP to be clear after requeue");
    BOOST_CHECK_MESSAGE(!t2->get_flag().is_set(ecf::Flag::NO_REQUE_IF_SINGLE_TIME_DEP),"Expected ecf::Flag::NO_REQUE_IF_SINGLE_TIME_DEP to be clear after requeue");
    BOOST_CHECK_MESSAGE(!f1->get_flag().is_set(ecf::Flag::NO_REQUE_IF_SINGLE_TIME_DEP),"Expected ecf::Flag::NO_REQUE_IF_SINGLE_TIME_DEP to be clear after requeue");
@@ -696,6 +696,149 @@ BOOST_AUTO_TEST_CASE( test_force_interactive_next_time_slot_4 )
    TestHelper::test_state(t1,NState::QUEUED);
    BOOST_CHECK_MESSAGE(!t1->get_flag().is_set(ecf::Flag::NO_REQUE_IF_SINGLE_TIME_DEP),"Expected ecf::Flag::NO_REQUE_IF_SINGLE_TIME_DEP to be clear");
    BOOST_CHECK_MESSAGE( next_time_slot == TimeSlot(11,0),"After Re-queue, Expected next time slot of 11:00 but found " << next_time_slot.toString());
+}
+
+
+BOOST_AUTO_TEST_CASE( test_force_interactive_next_time_slot_for_cron )
+{
+   // This test is custom. When the user interactively forces a node to the complete state,
+   // But where the user has a time range. In this case the node should complete and then
+   // requee and miss the next time slot. If this is repeated, eventually we should reach the
+   // end of the time slot.
+   //
+   // When the node is then requeed check that the next time slot has been correctly reset.
+   cout << "Base:: ...test_force_interactive_next_time_slot_for_cron\n";
+
+   //   suite s1
+   //       task t1
+   //          cron 10:00 13:00 01:00
+   //   endsuite
+   Defs the_defs;
+   suite_ptr suite = the_defs.add_suite("s1");
+   ClockAttr clockAttr(15,12,2010,false);
+   clockAttr.set_gain(9/*hour*/,30/*minutes*/); // start at 09:30
+   suite->addClock( clockAttr );
+
+   task_ptr t1 = suite->add_task("t1");
+   ecf::CronAttr cronAttr;
+   cronAttr.addTimeSeries(TimeSlot(10,0),TimeSlot(13,0),TimeSlot(1,0));
+   t1->addCron(cronAttr);
+
+   // before test flags should be clear
+   BOOST_CHECK_MESSAGE(!t1->get_flag().is_set(ecf::Flag::NO_REQUE_IF_SINGLE_TIME_DEP),"Expected ecf::Flag::NO_REQUE_IF_SINGLE_TIME_DEP to be clear,before test");
+
+   /// begin the suite
+   TestHelper::invokeRequest(&the_defs,Cmd_ptr( new BeginCmd("s1",false)));
+   TestHelper::test_state(t1,NState::QUEUED);
+//   PrintStyle::setStyle(PrintStyle::STATE);
+//   cout << the_defs << "\n";
+
+   // since we started at 09:30 the next time slot should be 10:00
+   const TimeSlot& next_time_slot  = t1->crons().back().time_series().get_next_time_slot();
+   BOOST_CHECK_MESSAGE( next_time_slot == TimeSlot(10,0),"Expected next time slot of 10:00 but found " << next_time_slot.toString());
+
+   // Force the task t1 to complete state. Since we have a future time dependency, we should get re-queued again
+   // It should also advance the next time slot
+   TestHelper::invokeRequest(&the_defs,Cmd_ptr( new ForceCmd(t1->absNodePath(),"complete",false /*recursive */, false /* set Repeat to last value */)));
+   TestHelper::test_state(t1,NState::QUEUED);
+   BOOST_CHECK_MESSAGE(!t1->get_flag().is_set(ecf::Flag::NO_REQUE_IF_SINGLE_TIME_DEP),"Expected ecf::Flag::NO_REQUE_IF_SINGLE_TIME_DEP to be clear, after a requeue");
+   BOOST_CHECK_MESSAGE( next_time_slot == TimeSlot(11,0),"Expected next time slot of 11:00 but found " << next_time_slot.toString());
+
+   // Repeat, to make sure next_time_slot is advanced
+   TestHelper::invokeRequest(&the_defs,Cmd_ptr( new ForceCmd(t1->absNodePath(),"complete",false /*recursive */, false /* set Repeat to last value */)));
+   TestHelper::test_state(t1,NState::QUEUED);
+   BOOST_CHECK_MESSAGE(!t1->get_flag().is_set(ecf::Flag::NO_REQUE_IF_SINGLE_TIME_DEP),"Expected ecf::Flag::NO_REQUE_IF_SINGLE_TIME_DEP to be clear, after a requeue");
+   BOOST_CHECK_MESSAGE( next_time_slot == TimeSlot(12,0),"Expected next time slot of 12:00 but found " << next_time_slot.toString());
+
+   // Repeat, to make sure next_time_slot is advanced
+   TestHelper::invokeRequest(&the_defs,Cmd_ptr( new ForceCmd(t1->absNodePath(),"complete",false /*recursive */, false /* set Repeat to last value */)));
+   TestHelper::test_state(t1,NState::QUEUED);
+   BOOST_CHECK_MESSAGE(!t1->get_flag().is_set(ecf::Flag::NO_REQUE_IF_SINGLE_TIME_DEP),"Expected ecf::Flag::NO_REQUE_IF_SINGLE_TIME_DEP to be clear, after a requeue");
+   BOOST_CHECK_MESSAGE( next_time_slot == TimeSlot(13,0),"Expected next time slot of 13:00 but found " << next_time_slot.toString());
+
+   // Repeat, ** THIS time we have *exceeded* the time range, However the cron *ALWAYS* re-queues
+   //         Additionally since there is no reque we expect NO_REQUE_IF_SINGLE_TIME_DEP to remain set
+   TestHelper::invokeRequest(&the_defs,Cmd_ptr( new ForceCmd(t1->absNodePath(),"complete",false /*recursive */, false /* set Repeat to last value */)));
+   TestHelper::test_state(t1,NState::QUEUED);
+   BOOST_CHECK_MESSAGE(!t1->get_flag().is_set(ecf::Flag::NO_REQUE_IF_SINGLE_TIME_DEP),"Expected ecf::Flag::NO_REQUE_IF_SINGLE_TIME_DEP to be clear, after a requeue");
+   BOOST_CHECK_MESSAGE( next_time_slot == TimeSlot(14,0),"Expected next time slot of 14:00 but found " << next_time_slot.toString());
+
+   /// we will now Re-queue, Since the time is still 09:30, we expect next_time slot to be 10:00 and not 14:00
+   TestHelper::invokeRequest(&the_defs,Cmd_ptr( new RequeueNodeCmd(t1->absNodePath())));
+   TestHelper::test_state(t1,NState::QUEUED);
+   BOOST_CHECK_MESSAGE(!t1->get_flag().is_set(ecf::Flag::NO_REQUE_IF_SINGLE_TIME_DEP),"Expected ecf::Flag::NO_REQUE_IF_SINGLE_TIME_DEP to be clear");
+   BOOST_CHECK_MESSAGE( next_time_slot == TimeSlot(10,0),"After Re-queue, Expected next time slot of 10:00 but found " << next_time_slot.toString());
+}
+
+
+BOOST_AUTO_TEST_CASE( test_force_interactive_next_time_slot_for_cron_on_family )
+{
+   // This test is custom. When the user interactively forces a node to the complete state,
+   // But where the user has a time range. In this case the node should complete and then
+   // requee and miss the next time slot. If this is repeated, eventually we should reach the
+   // end of the time slot.
+   //
+   // When the node is then requeed check that the next time slot has been correctly reset.
+   cout << "Base:: ...test_force_interactive_next_time_slot_for_cron_on_family\n";
+
+   //   suite s1
+   //     family
+   //       cron 10:00 13:00 01:00
+   //       task t1
+   //          time 11:00
+   //       task t2
+   //          time 12:00
+   //   endsuite
+   Defs the_defs;
+   suite_ptr suite = the_defs.add_suite("s1");
+   ClockAttr clockAttr(15,12,2010,false);
+   clockAttr.set_gain(9/*hour*/,30/*minutes*/); // start at 09:30
+   suite->addClock( clockAttr );
+
+   family_ptr f1 = suite->add_family("f1");
+   ecf::CronAttr cronAttr;
+   cronAttr.addTimeSeries(TimeSlot(10,0),TimeSlot(13,0),TimeSlot(1,0));
+   f1->addCron(cronAttr);
+
+   task_ptr t1 = f1->add_task("t1");
+   t1->addTime( TimeAttr(11,0) );
+
+   task_ptr t2 = f1->add_task("t2");
+   t2->addTime( TimeAttr(12,0) );
+
+   // before test flags should be clear
+   BOOST_CHECK_MESSAGE(!f1->get_flag().is_set(ecf::Flag::NO_REQUE_IF_SINGLE_TIME_DEP),"Expected ecf::Flag::NO_REQUE_IF_SINGLE_TIME_DEP to be clear,before test");
+   BOOST_CHECK_MESSAGE(!t1->get_flag().is_set(ecf::Flag::NO_REQUE_IF_SINGLE_TIME_DEP),"Expected ecf::Flag::NO_REQUE_IF_SINGLE_TIME_DEP to be clear,before test");
+   BOOST_CHECK_MESSAGE(!t2->get_flag().is_set(ecf::Flag::NO_REQUE_IF_SINGLE_TIME_DEP),"Expected ecf::Flag::NO_REQUE_IF_SINGLE_TIME_DEP to be clear,before test");
+
+   /// begin the suite
+   TestHelper::invokeRequest(&the_defs,Cmd_ptr( new BeginCmd("s1",false)));
+   TestHelper::test_state(t1,NState::QUEUED);
+   TestHelper::test_state(t2,NState::QUEUED);
+//   PrintStyle::setStyle(PrintStyle::STATE);
+//   cout << the_defs << "\n";
+
+   // since we started at 09:30 the next time slot should be 11:00
+   const TimeSlot& t1_next_time_slot  = t1->timeVec().back().time_series().get_next_time_slot();
+   const TimeSlot& t2_next_time_slot  = t2->timeVec().back().time_series().get_next_time_slot();
+   BOOST_CHECK_MESSAGE( t1_next_time_slot == TimeSlot(11,0),"Expected next time slot of 11:00 but found " << t1_next_time_slot.toString());
+   BOOST_CHECK_MESSAGE( t2_next_time_slot == TimeSlot(12,0),"Expected next time slot of 12:00 but found " << t2_next_time_slot.toString());
+
+   // Force the task t1 & t2 to complete state. Since we only have a single time dependency it should expire
+   // It should also advance the next time slot
+   TestHelper::invokeRequest(&the_defs,Cmd_ptr( new ForceCmd(t1->absNodePath(),"complete",false /*recursive */, false /* set Repeat to last value */)));
+   TestHelper::test_state(t1,NState::COMPLETE);
+   TestHelper::test_state(t2,NState::QUEUED);
+   BOOST_CHECK_MESSAGE( ! t1->timeVec().back().time_series().is_valid(),"Expected 11:00 time slot to be expired ");
+
+   // Forcing t2 to complete as well should, end up requeueing t1,t2 due to parent cron
+   TestHelper::invokeRequest(&the_defs,Cmd_ptr( new ForceCmd(t2->absNodePath(),"complete",false /*recursive */, false /* set Repeat to last value */)));
+   TestHelper::test_state(t1,NState::QUEUED);
+   TestHelper::test_state(t2,NState::QUEUED);
+   BOOST_CHECK_MESSAGE( t1->timeVec().back().time_series().is_valid(),"Expected 11:00 time slot to be valid ");
+   BOOST_CHECK_MESSAGE( t2->timeVec().back().time_series().is_valid(),"Expected 12:00 time slot to be valid ");
+   BOOST_CHECK_MESSAGE(!t1->get_flag().is_set(ecf::Flag::NO_REQUE_IF_SINGLE_TIME_DEP),"Expected ecf::Flag::NO_REQUE_IF_SINGLE_TIME_DEP to be clear");
+   BOOST_CHECK_MESSAGE(!t2->get_flag().is_set(ecf::Flag::NO_REQUE_IF_SINGLE_TIME_DEP),"Expected ecf::Flag::NO_REQUE_IF_SINGLE_TIME_DEP to be clear");
 
    /// Destroy System singleton to avoid valgrind from complaining
    System::destroy();

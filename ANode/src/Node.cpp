@@ -170,7 +170,10 @@ void Node::begin()
    // Hence to avoid excessive memory consumption, they are created on demand
 }
 
-void Node::requeue( bool resetRepeats, int clear_suspended_in_child_nodes)
+void Node::requeue(
+         bool resetRepeats,
+         int clear_suspended_in_child_nodes,
+         bool do_reset_next_time_slot)
 {
 #ifdef DEBUG_REQUEUE
    LOG(Log::DBG,"      Node::requeue() " << absNodePath() << " resetRepeats = " << resetRepeats);
@@ -183,8 +186,6 @@ void Node::requeue( bool resetRepeats, int clear_suspended_in_child_nodes)
    clearTrigger();
    clearComplete();
 
-   // Requeue is called when we want to rerun tasks.
-   // For example because of repeats, time,today or cron
    if (resetRepeats) repeat_.reset(); // if repeat is empty reset() does nothing
 
 
@@ -194,17 +195,29 @@ void Node::requeue( bool resetRepeats, int clear_suspended_in_child_nodes)
    /// on this function to clear the time dependencies so they *HOLD* the task.
    if ( time_dep_attrs_ ) {
 
-      /// If we have done an interactive run or complete, *dont* increment next_time_slot_
-      /// allow next time on time based attributes to be incremented and *not* reset,
-      /// when force and run commands used
+      /// Requeue has several contexts:
+      ///   1/ manual requeue
+      ///   2/ automated requeue due to repeats
+      ///   3/ automated requeue due to time dependencies
+      /// For manual and automated reueue due to repeat's we always clear Flag::NO_REQUE_IF_SINGLE_TIME_DEP
+      /// since in those context we do NOT want miss any time slots
       bool reset_next_time_slot = true;
-      if (flag().is_set(ecf::Flag::NO_REQUE_IF_SINGLE_TIME_DEP)) {
-         reset_next_time_slot =  false;
+      if (do_reset_next_time_slot) {
+         reset_next_time_slot = true;
+      }
+      else {
+         if (flag().is_set(Flag::NO_REQUE_IF_SINGLE_TIME_DEP)) {
+            /// If we have done an interactive run or complete, *dont* increment next_time_slot_
+            /// allow next time on time based attributes to be incremented and *not* reset,
+            /// when force and run commands used
+            reset_next_time_slot = false;
+         }
       }
 
       time_dep_attrs_->requeue(reset_next_time_slot);
       time_dep_attrs_->markHybridTimeDependentsAsComplete();
    }
+
 
    // reset the flags, however remember if edit were made
    bool edit_history_set = flag().is_set(ecf::Flag::MESSAGE);
@@ -230,12 +243,11 @@ void Node::requeue_time_attrs()
 
 void Node::miss_next_time_slot()
 {
-//   cout << "Node::miss_next_time_slot() " << absNodePath() << "\n";
-
    // Why do we need to set NO_REQUE_IF_SINGLE_TIME_DEP flag ?
    // This is required when we have time based attributes, which we want to miss.
    //    time 10:00
    //    time 12:00
+   // Essentially this avoids an automated job run, *IF* the job was run manually for a given time slot.
    // If we call this function before 10:00, we want to miss the next time slot (i.e. 10:00)
    // and want to *requeue*, for 12:00 time slot. However at re-queue, we need to ensure
    // we do *not* reset the 10:00 time slot. hence by setting NO_REQUE_IF_SINGLE_TIME_DEP
@@ -245,7 +257,10 @@ void Node::miss_next_time_slot()
    // In the case above when we reach the last time slot, there is *NO* automatic requeue, and
    // hence, *no* clearing of NO_REQUE_IF_SINGLE_TIME_DEP flag.
    // This will then be up to any top level parent that has a Repeat/cron to force a requeue
-   // when all the children are complete.
+   // when all the children are complete. *or* user does a manual re-queue
+   //
+   // Additionally if the job *aborts*, we clear NO_REQUE_IF_SINGLE_TIME_DEP if it was set.
+   // Otherwise if manually run again, we will miss further time slots.
    if ( time_dep_attrs_) {
       SuiteChanged0 changed(shared_from_this());
       flag().set(Flag::NO_REQUE_IF_SINGLE_TIME_DEP);
@@ -346,14 +361,9 @@ void Node::requeueOrSetMostSignificantStateUpNodeTree()
             // This handles the case where a user, has manually intervened (i.e via run or complete) and we had a time attribute
             // That time attribute will have expired, typically we show next day. In the case where we have a parent repeat
             // we need to clear the flag, otherwise the task/family with time based attribute would wait for next day.
-            flag().clear(Flag::NO_REQUE_IF_SINGLE_TIME_DEP);
-            std::vector<node_ptr> children;
-            immediateChildren(children);
-            for(size_t i=0; i < children.size(); i++) {
-               children[i]->flag().clear(Flag::NO_REQUE_IF_SINGLE_TIME_DEP);
-            }
-
-            requeue( false /* don't reset repeats */,clear_suspended_in_child_nodes );
+            requeue( false /* don't reset repeats */,
+                     clear_suspended_in_child_nodes,
+                     true /* reset_next_time_slot */ );
             set_most_significant_state_up_node_tree();
             return;
          }
@@ -364,7 +374,20 @@ void Node::requeueOrSetMostSignificantStateUpNodeTree()
       /// In which case testTimeDependenciesForRequeue should return false for a single time/today dependency
       /// and not requeue the node.
       if (time_dep_attrs_ && time_dep_attrs_->testTimeDependenciesForRequeue()) {
-         requeue( false /* don't reset repeats */, clear_suspended_in_child_nodes);
+
+         // This is the only place we do not explicitly reset_next_time_slot
+         bool reset_next_time_slot = false;
+
+         // Remove effects of RUN and Force complete interactive commands, *BUT* only if *not* applied to this cron
+         if (!time_dep_attrs_->crons().empty()) {
+            if (!flag().is_set(ecf::Flag::NO_REQUE_IF_SINGLE_TIME_DEP)) {
+                reset_next_time_slot = true ;
+            }
+         }
+
+         requeue( false /* don't reset repeats */,
+                  clear_suspended_in_child_nodes,
+                  reset_next_time_slot  );
          set_most_significant_state_up_node_tree();
          return;
       }
