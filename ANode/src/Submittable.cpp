@@ -87,21 +87,6 @@ void Submittable::complete()
 
 void Submittable::aborted(const std::string& reason)
 {
-   /// The flag: NO_REQUE_IF_SINGLE_TIME_DEP is *only* set when doing an
-   ///           interactive force complete or run command.
-   /// If the job aborted, we need to clear NO_REQUE_IF_SINGLE_TIME_DEP, i.e
-   ///     time 10:00
-   ///     time 11:00
-   /// If at 9.00am we used the run command, we want to miss the 10:00 time slot.
-   /// However if the manual/interactive run at 9.00 fails, and we run again,
-   /// we also miss 11:00 time slot.
-   /// To avoid this if the job aborts, we clear NO_REQUE_IF_SINGLE_TIME_DEP flag.
-   /// and reset time based attributes
-   if (flag().is_set(ecf::Flag::NO_REQUE_IF_SINGLE_TIME_DEP)) {
-      flag().clear(ecf::Flag::NO_REQUE_IF_SINGLE_TIME_DEP);
-      requeue_time_attrs();
-   }
-
    // Called during *abnormal* child termination
    // This will bubble the state, and decrement any limits
    set_aborted_only(reason);

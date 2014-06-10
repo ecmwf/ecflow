@@ -262,10 +262,23 @@ void Node::miss_next_time_slot()
    // Additionally if the job *aborts*, we clear NO_REQUE_IF_SINGLE_TIME_DEP if it was set.
    // Otherwise if manually run again, we will miss further time slots.
    if ( time_dep_attrs_) {
-      SuiteChanged0 changed(shared_from_this());
-      flag().set(Flag::NO_REQUE_IF_SINGLE_TIME_DEP);
 
-      time_dep_attrs_->miss_next_time_slot();
+      /// Handle abort
+      /// The flag: NO_REQUE_IF_SINGLE_TIME_DEP is *only* set when doing an interactive force complete or run command.
+      /// What happens if the job aborts during the run command ?
+      ///     time 10:00
+      ///     time 11:00
+      /// If at 9.00am we used the run command, we want to miss the 10:00 time slot.
+      /// However if the run at 9.00 fails, and we run again, we also miss 11:00 time slot.
+      /// During the run the flag is still set.
+      /// Hence *ONLY* miss the next time slot *IF* Flag::NO_REQUE_IF_SINGLE_TIME_DEP is NOT set
+      if (!flag().is_set(Flag::NO_REQUE_IF_SINGLE_TIME_DEP)) {
+
+         SuiteChanged0 changed(shared_from_this());
+         flag().set(Flag::NO_REQUE_IF_SINGLE_TIME_DEP);
+
+         time_dep_attrs_->miss_next_time_slot();
+      }
    }
 }
 

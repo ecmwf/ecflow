@@ -47,6 +47,7 @@ list( APPEND test_srcs
  test/TestAlias.cpp
  test/TestZombies.cpp
  test/TestMigration.cpp
+ test/TestMissNextTimeSlot.cpp
 )
 
 ecbuild_add_test(TARGET  u_anode

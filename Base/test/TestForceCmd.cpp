@@ -342,7 +342,14 @@ BOOST_AUTO_TEST_CASE( test_force_interactive_next_time_slot )
    // It should also advance the next time slot
    TestHelper::invokeRequest(&the_defs,Cmd_ptr( new ForceCmd(t1->absNodePath(),"complete",false /*recursive */, false /* set Repeat to last value */)));
    TestHelper::test_state(t1,NState::COMPLETE);
-   BOOST_CHECK_MESSAGE(t1->get_flag().is_set(ecf::Flag::NO_REQUE_IF_SINGLE_TIME_DEP),"Expected ecf::Flag::NO_REQUE_IF_SINGLE_TIME_DEP to be set");
+   BOOST_CHECK_MESSAGE( !t1->timeVec().back().time_series().is_valid(),"Expected 10:00 time slot to have expired");
+   BOOST_CHECK_MESSAGE( t1->get_flag().is_set(ecf::Flag::NO_REQUE_IF_SINGLE_TIME_DEP),"Expected ecf::Flag::NO_REQUE_IF_SINGLE_TIME_DEP to be set");
+
+   // call again should, should be do difference
+   TestHelper::invokeRequest(&the_defs,Cmd_ptr( new ForceCmd(t1->absNodePath(),"complete",false /*recursive */, false /* set Repeat to last value */)));
+   TestHelper::test_state(t1,NState::COMPLETE);
+   BOOST_CHECK_MESSAGE( !t1->timeVec().back().time_series().is_valid(),"Expected 10:00 time slot to have expired");
+   BOOST_CHECK_MESSAGE( t1->get_flag().is_set(ecf::Flag::NO_REQUE_IF_SINGLE_TIME_DEP),"Expected ecf::Flag::NO_REQUE_IF_SINGLE_TIME_DEP to be set");
 
    /// we will now Re-queue, Since the time is still 09:30, we expect next_time slot to be 10:00
    TestHelper::invokeRequest(&the_defs,Cmd_ptr( new RequeueNodeCmd(t1->absNodePath())));
