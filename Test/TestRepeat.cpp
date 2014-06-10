@@ -228,7 +228,7 @@ BOOST_AUTO_TEST_CASE( test_repeat_defstatus )
 BOOST_AUTO_TEST_CASE( test_repeat_clears_user_edit )
 {
    // Tests code:: Node::requeueOrSetMostSignificantStateUpNodeTree()
-   // In *PARTICLAUR* THE REQUE caused by the repeat, this ensures we clear NO_REQUE_IF_SINGLE_TIME_DEP
+   // In *PARTICULAR* THE REQUE caused by the repeat, this ensures we clear NO_REQUE_IF_SINGLE_TIME_DEP
    // So that the effect of manual run/force complete are negated via automated re-queue caused by a REPEAT
 
    DurationTimer timer;
@@ -299,7 +299,7 @@ BOOST_AUTO_TEST_CASE( test_repeat_clears_user_edit )
 #ifdef DEBUG_ME
    TestFixture::client().sync_local();
    server_defs = TestFixture::client().defs();
-   cout << "At after 2 force complete ============================================\n";
+   cout << "After 2 force complete ============================================\n";
    cout << server_defs  << "\n";
 
    node_ptr the_task = server_defs->findAbsNode(task->absNodePath());
