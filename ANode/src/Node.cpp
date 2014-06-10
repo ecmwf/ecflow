@@ -1569,6 +1569,8 @@ void Node::top_down_why(std::vector<std::string>& theReasonWhy) const
 
 void Node::bottom_up_why(std::vector<std::string>& theReasonWhy) const
 {
+   defs()->why(theReasonWhy);
+
    std::vector<Node*> vec;
    vec.push_back(const_cast<Node*>(this));
    Node* theParent = parent();
@@ -1580,7 +1582,6 @@ void Node::bottom_up_why(std::vector<std::string>& theReasonWhy) const
    for(vector<Node*>::reverse_iterator r = vec.rbegin(); r!=r_end; ++r) {
       (*r)->why(theReasonWhy);
    }
-   defs()->why(theReasonWhy);
 }
 
 void Node::why(std::vector<std::string>& vec) const
