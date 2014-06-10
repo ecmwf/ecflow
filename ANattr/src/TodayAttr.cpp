@@ -147,15 +147,18 @@ bool TodayAttr::why(const ecf::Calendar& c, std::string& theReasonWhy) const
          return true;
       }
 
+      // calendar_time >= timeSeries_.start().duration()
       if (timeSeries_.hasIncrement()) {
-         if (calendar_time > timeSeries_.start().duration() && calendar_time < timeSeries_.finish().duration()) {
+         if (calendar_time < timeSeries_.finish().duration()) {
             timeSeries_.why(c, theReasonWhy);
             return true;
          }
       }
+      // calendar_time >= timeSeries_.start().duration() && calendar_time >= timeSeries_.finish().duration()
+      // past the end of time slot, find next valid date
    }
 
-   // the time has expired, report for the next day
+   // the today has expired, report for the next day
 
    // For a single slot, we are always free after single slot time, hence we must look for tomorrow.
    // If we are in series then, we past the last time slot

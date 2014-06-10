@@ -255,12 +255,14 @@ bool CronAttr::why(const ecf::Calendar& c, std::string& theReasonWhy) const
  	       return true;
  	   }
 
+ 	   // calendar_time >= timeSeries_.start().duration()
  	   if (timeSeries_.hasIncrement()) {
- 	      if (calendar_time > timeSeries_.start().duration() && calendar_time < timeSeries_.finish().duration()) {
+ 	      if (calendar_time < timeSeries_.finish().duration()) {
  	          timeSeries_.why(c, theReasonWhy);
  	          return true;
  	      }
  	   }
+ 	   // calendar_time >= timeSeries_.start().duration() && calendar_time >= timeSeries_.finish().duration()
   		// past the end of time slot, find next valid date
   	}
 
@@ -301,7 +303,7 @@ bool CronAttr::isFree(const ecf::Calendar& c) const
 
 	if (!timeSeries_.isFree(c))  return false;
 
-	// Ok time series if Free
+	// Ok time series is Free
 
 	// ********************************************************************
 	// IMPORTANT: when we have multiple week days, days of month and months

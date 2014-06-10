@@ -131,10 +131,7 @@ void TimeAttr::miss_next_time_slot()
 
 bool TimeAttr::why(const ecf::Calendar& c, std::string& theReasonWhy) const
 {
-	if (isFree(c))  {
-	   return false;
-	}
-
+	if (isFree(c)) return false;
 	theReasonWhy += " is time dependent";
 
 	// Check to see if time has expired, if has not, then report why
@@ -146,18 +143,21 @@ bool TimeAttr::why(const ecf::Calendar& c, std::string& theReasonWhy) const
 	      return true;
 	   }
 
+	   // calendar_time >= timeSeries_.start().duration()
 	   if (timeSeries_.hasIncrement()) {
-	      if (calendar_time > timeSeries_.start().duration() && calendar_time < timeSeries_.finish().duration()) {
+	      if (calendar_time < timeSeries_.finish().duration()) {
 	         timeSeries_.why(c, theReasonWhy);
 	         return true;
 	      }
 	   }
+      // calendar_time >= timeSeries_.start().duration() && calendar_time >= timeSeries_.finish().duration()
+      // past the end of time slot, find next valid date
 	}
 
 	// the time has expired, report for the next day
 
 	// For a single slot, we are always free after single slot time, hence we must look for tomorrow.
-	// If we are in series then, we past the last time slot
+	// If we are in series then, we are past the last time slot
    // Find the next date that matches
    boost::gregorian::date_duration one_day(1);
    boost::gregorian::date the_next_date = c.date();  // todays date
