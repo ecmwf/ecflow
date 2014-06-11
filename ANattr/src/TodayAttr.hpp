@@ -130,6 +130,12 @@ public:
    // This is used when we have a *multiple* today attribute
    // (single | range) is free, if calendar time == (one of the time ranges)
    // if timer *expired* returns false
+   //     task t1
+   //        today 09:00
+   //        today 10:00
+   // If current times is 11:00, then we will return false.
+   // since both 09:00 and 10:00 have expired
+   // Multiple single today, should behave like a today with a range.
    bool isFreeMultipleContext(const ecf::Calendar& c) const { return timeSeries_.isFree(c); }
 
 
