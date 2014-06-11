@@ -245,6 +245,116 @@ BOOST_AUTO_TEST_CASE( test_time_series_increment_real )
 	}
 }
 
+BOOST_AUTO_TEST_CASE( test_time_series_requeueable_and_compute_next_time_slot )
+{
+   cout << "ACore:: ...test_time_series_requeueable_and_compute_next_time_slot\n";
+
+   // Test time series with  a calendar, we update calendar then
+   // test time series requeueable(), and compute_next_time_slot
+   // This are used with the WHY command
+   Calendar c;
+   c.init(ptime(date(2010,2,10), minutes(0)), Calendar::REAL);
+
+
+   // Create a test when we can match a time series. Need to sync hour with suite time
+   // at hour 1, suite time should also be 01:00, for test to work
+   //
+   // Create the time series: start  10:00
+   //                         finish 20:00
+   //                         incr    1:00
+   TimeSeries timeSeries(TimeSlot(10,0), TimeSlot(20,0), TimeSlot(1,0), true/* relative */);
+   TimeSeries timeSeries2(TimeSlot(11,0), TimeSlot(15,0), TimeSlot(1,0), true/* relative */);
+   TimeSeries timeSeries3(TimeSlot(15,0),  true/* relative */);
+
+   for(int hour=1; hour < 24; hour++) {
+      // Update calendar every hour, then see we can match time series,
+      c.update( time_duration( hours(1) ) );
+      timeSeries.calendarChanged( c );
+      timeSeries2.calendarChanged( c );
+      timeSeries3.calendarChanged( c );
+
+//    cerr << "hour = " << hour << " calendar_duration " << to_simple_string(timeSeries.duration(c))
+//        << " timeSeries=" << timeSeries.toString() << " timeSeries2=" << timeSeries2.toString() << " timeSeries3=" << timeSeries3.toString() << "\n";
+      if (hour < timeSeries.start().hour()) {
+         TimeSlot next_time_slot = timeSeries.compute_next_time_slot(c);
+         TimeSlot expected(10,0);
+         BOOST_CHECK_MESSAGE(next_time_slot ==expected," Time series " << timeSeries.toString() << " at " << hour << " expected next time slot at " << expected.toString() << " but found " << next_time_slot.toString());
+         BOOST_CHECK_MESSAGE(timeSeries.requeueable(c),"Time series " << timeSeries.toString() << " should be requeueable at hour " << hour );
+      }
+      else if (hour == timeSeries.start().hour() ) {
+         TimeSlot next_time_slot = timeSeries.compute_next_time_slot(c);
+         TimeSlot expected(11,0);
+         BOOST_CHECK_MESSAGE(next_time_slot == expected," Time series " << timeSeries.toString() << " at " << hour << " expected next time slot at " << expected.toString() << " but found " << next_time_slot.toString());
+         BOOST_CHECK_MESSAGE(timeSeries.requeueable(c),"Time series " << timeSeries.toString() << " should be requeueable at hour " << hour );
+      }
+      else if (hour > timeSeries.start().hour() &&  hour < timeSeries.finish().hour()) {
+         TimeSlot next_time_slot = timeSeries.compute_next_time_slot(c);
+         TimeSlot expected(hour+1,0);
+         BOOST_CHECK_MESSAGE(next_time_slot == expected," Time series " << timeSeries.toString() << " at " << hour << " expected next time slot at " << expected.toString() << " but found " << next_time_slot.toString());
+         BOOST_CHECK_MESSAGE(timeSeries.requeueable(c),"Time series " << timeSeries.toString() << " should be requeueable at hour " << hour );
+      }
+      else if (hour == timeSeries.finish().hour()) {
+         TimeSlot next_time_slot = timeSeries.compute_next_time_slot(c);
+         BOOST_CHECK_MESSAGE(next_time_slot.isNULL()," Time series " << timeSeries.toString() << " at " << hour << " expected next time slot  to be NULL");
+         BOOST_CHECK_MESSAGE(!timeSeries.requeueable(c),"Time series " << timeSeries.toString() << " should NOT be requeueable at hour " << hour );
+      }
+      else if (hour > timeSeries.finish().hour()) {
+         TimeSlot next_time_slot = timeSeries.compute_next_time_slot(c);
+         BOOST_CHECK_MESSAGE(next_time_slot.isNULL()," Time series " << timeSeries.toString() << " at " << hour << " expected next time slot to be NULL");
+         BOOST_CHECK_MESSAGE(!timeSeries.requeueable(c),"Time series " << timeSeries.toString() << " should NOT be requeueable at hour " << hour );
+      }
+
+
+      if (hour < timeSeries2.start().hour()) {
+         TimeSlot next_time_slot = timeSeries2.compute_next_time_slot(c);
+         TimeSlot expected(11,0);
+         BOOST_CHECK_MESSAGE(next_time_slot ==expected," Time series " << timeSeries2.toString() << " at " << hour << " expected next time slot at " << expected.toString() << " but found " << next_time_slot.toString());
+         BOOST_CHECK_MESSAGE(timeSeries2.requeueable(c),"Time series " << timeSeries2.toString() << " should be requeueable at hour " << hour );
+      }
+      else if (hour == timeSeries2.start().hour() ) {
+         TimeSlot next_time_slot = timeSeries2.compute_next_time_slot(c);
+         TimeSlot expected(12,0);
+         BOOST_CHECK_MESSAGE(next_time_slot == expected," Time series " << timeSeries2.toString() << " at " << hour << " expected next time slot at " << expected.toString() << " but found " << next_time_slot.toString());
+         BOOST_CHECK_MESSAGE(timeSeries2.requeueable(c),"Time series " << timeSeries2.toString() << " should NOT be requeueable at hour " << hour );
+      }
+      else if (hour > timeSeries2.start().hour() &&  hour < timeSeries2.finish().hour()) {
+         TimeSlot next_time_slot = timeSeries2.compute_next_time_slot(c);
+         TimeSlot expected(hour+1,0);
+         BOOST_CHECK_MESSAGE(next_time_slot == expected," Time series " << timeSeries2.toString() << " at " << hour << " expected next time slot at " << expected.toString() << " but found " << next_time_slot.toString());
+         BOOST_CHECK_MESSAGE(timeSeries2.requeueable(c),"Time series " << timeSeries2.toString() << " should be requeueable at hour " << hour );
+      }
+      else if (hour == timeSeries2.finish().hour()) {
+         TimeSlot next_time_slot = timeSeries2.compute_next_time_slot(c);
+         BOOST_CHECK_MESSAGE(next_time_slot.isNULL()," Time series " << timeSeries2.toString() << " at " << hour << " expected next time slot  to be NULL");
+         BOOST_CHECK_MESSAGE(!timeSeries2.requeueable(c),"Time series " << timeSeries2.toString() << " should NOT be requeueable at hour " << hour );
+      }
+      else if (hour > timeSeries2.finish().hour()) {
+         TimeSlot next_time_slot = timeSeries2.compute_next_time_slot(c);
+         BOOST_CHECK_MESSAGE(next_time_slot.isNULL()," Time series " << timeSeries2.toString() << " at " << hour << " expected next time slot to be NULL");
+         BOOST_CHECK_MESSAGE(!timeSeries2.requeueable(c),"Time series " << timeSeries2.toString() << " should NOT be requeueable at hour " << hour );
+      }
+
+
+      if (hour < timeSeries3.start().hour()) {
+         TimeSlot next_time_slot = timeSeries3.compute_next_time_slot(c);
+         TimeSlot expected(15,0);
+         BOOST_CHECK_MESSAGE(next_time_slot ==expected," Time series " << timeSeries3.toString() << " at " << hour << " expected next time slot at " << expected.toString() << " but found " << next_time_slot.toString());
+         BOOST_CHECK_MESSAGE(timeSeries3.requeueable(c),"Time series " << timeSeries3.toString() << " should be requeueable at hour " << hour );
+      }
+      else if (hour == timeSeries3.start().hour() ) {
+         TimeSlot next_time_slot = timeSeries3.compute_next_time_slot(c);
+         BOOST_CHECK_MESSAGE(next_time_slot.isNULL()," Time series " << timeSeries3.toString() << " at " << hour << " expected next time slot to be NULL");
+         BOOST_CHECK_MESSAGE(!timeSeries3.requeueable(c),"Time series " << timeSeries3.toString() << " should NOT be requeueable at hour " << hour );
+      }
+      else if (hour > timeSeries3.start().hour()) {
+         TimeSlot next_time_slot = timeSeries3.compute_next_time_slot(c);
+         BOOST_CHECK_MESSAGE(next_time_slot.isNULL()," Time series " << timeSeries3.toString() << " at " << hour << " expected next time slot to be NULL");
+         BOOST_CHECK_MESSAGE(!timeSeries3.requeueable(c),"Time series " << timeSeries3.toString() << " should NOT be requeueable at hour " << hour );
+      }
+   }
+}
+
+
 BOOST_AUTO_TEST_CASE( test_time_series_finish_not_divisble_by_increment )
 {
 	cout << "ACore:: ...test_time_series_finish_not_divisble_by_increment\n";

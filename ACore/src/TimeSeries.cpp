@@ -265,6 +265,41 @@ void TimeSeries::requeue(const ecf::Calendar& c,bool reset_next_time_slot)
  	}
 }
 
+TimeSlot TimeSeries::compute_next_time_slot(const ecf::Calendar& c) const
+{
+   // This functionality needs to mirror TimeSeries::requeue
+   time_duration current_time = duration(c);
+   if (!hasIncrement()) {
+      if (current_time >= start_.duration() ) {
+         return TimeSlot(); // time has expired
+      }
+      return start_;
+   }
+
+   TimeSlot nextTimeSlot = start_;
+   while( current_time >= nextTimeSlot.duration()) {
+      time_duration value = nextTimeSlot.duration();
+      value += incr_.duration();
+      nextTimeSlot = TimeSlot(value.hours(),value.minutes());
+   }
+
+   if (nextTimeSlot.duration() > finish_.duration()) {
+      return TimeSlot();  // time has expired
+   }
+   return nextTimeSlot;
+}
+
+bool TimeSeries::requeueable(const ecf::Calendar& c) const
+{
+   boost::posix_time::time_duration calendar_time = duration(c);
+   if (calendar_time < start().duration()) return true;
+   if (hasIncrement()) {
+      if (calendar_time < finish().duration()) {
+         return true;
+      }
+   }
+   return false;
+}
 
 bool TimeSeries::isFree(const ecf::Calendar& calendar) const
 {
@@ -303,6 +338,7 @@ bool TimeSeries::isFree(const ecf::Calendar& calendar) const
 //	}
 	return ret;
 }
+
 
 bool TimeSeries::match_duration_with_time_series(const boost::posix_time::time_duration& relative_or_real_td) const
 {
