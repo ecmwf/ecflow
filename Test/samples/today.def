@@ -21,6 +21,9 @@ suite today
       task t1
          today 00:01
          today 23:59
+      task t1_1
+         today 09:01
+         today 09:30
      task t2
          today 09:00
          today 12:00
@@ -34,8 +37,12 @@ suite today
          today 10:00
     task t6
          today 11:00
+         today 11:30
     task t7
          today 12:00
+         today 12:30
+         today 13:30
+         today 14:30
     task t8
          today 13:00
     task t9
