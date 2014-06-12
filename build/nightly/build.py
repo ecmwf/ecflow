@@ -159,8 +159,8 @@ def add_cray_gnu_compiler_variables( cray_gnu ):
         cray_gnu.add_variable("COMPILER_TEST_PATH","gcc-4.6.3/$mode")
         cray_gnu.add_variable("COMPILER_VERSION","gcc-4.6.3")
     else:
-        cray_gnu.add_variable("COMPILER_TEST_PATH","gcc-4.8.1/$mode")
-        cray_gnu.add_variable("COMPILER_VERSION","gcc-4.8.1")
+        cray_gnu.add_variable("COMPILER_TEST_PATH","gcc-4.8.2/$mode")
+        cray_gnu.add_variable("COMPILER_VERSION","gcc-4.8.2")
         
     cray_gnu.add_variable("TOOLSET","gcc")
     cray_gnu.add_variable("BOOTSTRAP_TOOLSET","gcc")
@@ -234,12 +234,13 @@ def add_cray_variables( cray ):
     cray.add_variable("ECF_HOME", os.getenv("SCRATCH") + "/nightly/suite/cray")
     cray.add_variable("BOOST_DIR","/perm/ma/ma0/boost")
     cray.add_variable("ARCH","cray")
+    cray.add_variable("MODULE_LOAD_CRAY_COMPILER","module load cce/8.3.0.186")
     if is_cray_cct( cray ):
         cray.add_variable("REMOTE_HOST","cct")
         cray.add_variable("MODULE_LOAD_GCC","module load gcc/4.6.3")
     else:
         cray.add_variable("REMOTE_HOST","cca")
-        cray.add_variable("MODULE_LOAD_GCC","module load gcc/4.8.1")
+        cray.add_variable("MODULE_LOAD_GCC","module load gcc/4.8.2")
     
     
 def add_remote_redhat_variables( redhat ):
@@ -556,7 +557,19 @@ def add_boost_tasks( family ):
     boost_build.add_trigger("boost_site_config == complete")
         
 def add_cray_boost_tasks( family ):
-    add_boost_tasks(family)
+    boost_remove = family.add_task("boost_remove")  
+    boost_copy_gzip = family.add_task("boost_copy_gzip")  
+    boost_copy_gzip.add_trigger("boost_remove == complete")
+    add_local_job_variables(boost_copy_gzip)  # this is run locally
+    boost_untar = family.add_task("boost_untar")
+    boost_untar.add_trigger("boost_copy_gzip == complete")
+    boost_bjam = family.add_task("boost_bjam")
+    boost_bjam.add_trigger("boost_untar == complete")
+    boost_fix = family.add_task("boost_fix")
+    boost_fix.add_trigger("boost_bjam == complete")
+    boost_site_config = family.add_task("boost_site_config")
+    boost_site_config.add_trigger("boost_fix == complete")
+    
     family_cray_gnu = family.add_family("cray_gnu")
     add_cray_gnu_compiler_variables(family_cray_gnu)
     boost_build = family_cray_gnu.add_task("boost_build")
@@ -682,7 +695,7 @@ with defs.add_suite("experiment") as experiment:
 
 print "build boost"
 with defs.add_suite("boost_suite") as boost_suite:
-    boost_suite.add_variable("BOOST_VERSION","boost_1_53_0")
+    boost_suite.add_variable("BOOST_VERSION","boost_1_55_0")
     boost_suite.add_variable("REMOTE_COPY","rcp")
     boost_suite.add_variable("ECF_FILES",os.getenv("SCRATCH") + "/nightly/boost_suite")
     add_suite_variables(boost_suite)

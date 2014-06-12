@@ -54,7 +54,7 @@ ulimit
 export PATH=/usr/local/apps/python/current/bin:$PATH
 
 # ===================================================================================
-# Load the right environment, default is awlays cray
+# Load the right environment, default is always cray
 #
 module swap PrgEnv-cray %PRGENV:%
 
@@ -62,6 +62,12 @@ module swap PrgEnv-cray %PRGENV:%
 # For gnu, we will use gnu 4.6.3
 if [[ "$PE_ENV" = GNU ]] ; then
    %MODULE_LOAD_GCC%
+fi
+
+# Allow cray compiler to be changed
+if [[ "$PE_ENV" = CRAY ]] ; then
+   module unload cce
+   %MODULE_LOAD_CRAY_COMPILER%
 fi
 
 #
