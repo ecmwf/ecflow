@@ -68,6 +68,12 @@ fi
 if [[ "$PE_ENV" = CRAY ]] ; then
    module unload cce
    %MODULE_LOAD_CRAY_COMPILER%
+
+   # This seems to interfere with the linking causing undefines
+   #/opt/cray/libsci/12.1.3/CRAY/81/sandybridge/lib/libsci_cray_mp.so: undefined reference to `__ALLOCATE'
+   #/opt/cray/libsci/12.1.3/CRAY/81/sandybridge/lib/libsci_cray_mp.so: undefined reference to `_GET_ENVIRONMENT_VARIABLE'
+   #/opt/cray/libsci/12.1.3/CRAY/81/sandybridge/lib/libsci_cray_mp.so: undefined reference to `__MAXLOC_F08'
+   module unload cray-libsci/12.1.3
 fi
 
 #
