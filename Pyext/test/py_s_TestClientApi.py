@@ -309,7 +309,7 @@ def test_client_run(ci):
         assert suite != None, "Expected to find suite test_client_run:\n" + str(ci.get_defs())
         if suite.get_state() == State.complete:
             break;
-        time.sleep(2)
+        time.sleep(3)
         if count > 20:
             assert False, "test_client_run aborted after " + str(count) + " loops:\n" + str(ci.get_defs())
         
@@ -345,8 +345,8 @@ def test_client_run_with_multiple_paths(ci):
         assert suite != None, "Expected to find suite test_client_run_with_multiple_paths:\n" + str(ci.get_defs())
         if suite.get_state() == State.complete:
             break;
-        time.sleep(2)
-        if count > 12:
+        time.sleep(3)
+        if count > 20:
             assert False, "test_client_run_with_multiple_paths aborted after " + str(count) + " loops:\n" + str(ci.get_defs())
         
     ci.log_msg("Looped " + str(count) + " times")
@@ -478,7 +478,7 @@ def test_client_free_dep(ci):
         suite = ci.get_defs().find_suite("test_client_free_dep")
         if suite.get_state() == State.complete:
             break;
-        time.sleep(2)       
+        time.sleep(3)       
             
     dir_to_remove = Test.ecf_home(the_port) + "/" + "test_client_free_dep"
     shutil.rmtree(dir_to_remove)             

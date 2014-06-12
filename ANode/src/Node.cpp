@@ -170,7 +170,10 @@ void Node::begin()
    // Hence to avoid excessive memory consumption, they are created on demand
 }
 
-void Node::requeue( bool resetRepeats, int clear_suspended_in_child_nodes)
+void Node::requeue(
+         bool resetRepeats,
+         int clear_suspended_in_child_nodes,
+         bool do_reset_next_time_slot)
 {
 #ifdef DEBUG_REQUEUE
    LOG(Log::DBG,"      Node::requeue() " << absNodePath() << " resetRepeats = " << resetRepeats);
@@ -183,19 +186,42 @@ void Node::requeue( bool resetRepeats, int clear_suspended_in_child_nodes)
    clearTrigger();
    clearComplete();
 
-   // Requeue is called when we want to rerun tasks.
-   // For example because of repeats, time,today or cron
    if (resetRepeats) repeat_.reset(); // if repeat is empty reset() does nothing
 
-   bool edit_history_set = flag().is_set(ecf::Flag::MESSAGE);
 
-   // allow next time on time based attributes to be incremented and *not* reset,
-   // when force and run commands used
-   bool reset_next_time_slot = true;
-   if (flag().is_set(ecf::Flag::NO_REQUE_IF_SINGLE_TIME_DEP)) {
-      reset_next_time_slot =  false;
+   /// If a job takes longer than it slots, then that slot is missed, and next slot is used
+   /// Note we do *NOT* reset for requeue as we want to advance the valid time slots.
+   /// *NOTE* Update calendar will *free* time dependencies *even* time series. They rely
+   /// on this function to clear the time dependencies so they *HOLD* the task.
+   if ( time_dep_attrs_ ) {
+
+      /// Requeue has several contexts:
+      ///   1/ manual requeue
+      ///   2/ automated requeue due to repeats
+      ///   3/ automated requeue due to time dependencies
+      /// For manual and automated reueue due to repeat's we always clear Flag::NO_REQUE_IF_SINGLE_TIME_DEP
+      /// since in those context we do NOT want miss any time slots
+      bool reset_next_time_slot = true;
+      if (do_reset_next_time_slot) {
+         reset_next_time_slot = true;
+      }
+      else {
+         if (flag().is_set(Flag::NO_REQUE_IF_SINGLE_TIME_DEP)) {
+            /// If we have done an interactive run or complete, *dont* increment next_time_slot_
+            /// allow next time on time based attributes to be incremented and *not* reset,
+            /// when force and run commands used
+            reset_next_time_slot = false;
+         }
+      }
+
+      time_dep_attrs_->requeue(reset_next_time_slot);
+      time_dep_attrs_->markHybridTimeDependentsAsComplete();
    }
-   flag_.reset();
+
+
+   // reset the flags, however remember if edit were made
+   bool edit_history_set = flag().is_set(ecf::Flag::MESSAGE);
+   flag_.reset();   // will CLEAR NO_REQUE_IF_SINGLE_TIME_DEP
    if (edit_history_set) flag().set(ecf::Flag::MESSAGE);
 
 
@@ -203,17 +229,6 @@ void Node::requeue( bool resetRepeats, int clear_suspended_in_child_nodes)
    if (child_attrs_) child_attrs_->requeue();
 
    for(size_t i = 0; i < limitVec_.size(); i++) { limitVec_[i]->reset(); }
-
-   /// If a job takes longer than it slots, then that slot is missed, and next slot is used
-   /// Note we do *NOT* reset for requeue as we want to advance the valid time slots.
-   /// *NOTE* Update calendar will *free* time dependencies *even* time series. They rely
-   /// on this function to clear the time dependencies so they *HOLD* the task.
-   ///
-   /// If we have done an interactive run or complete, *dont* increment next_time_slot_
-   if (time_dep_attrs_) {
-      time_dep_attrs_->requeue(reset_next_time_slot);
-      time_dep_attrs_->markHybridTimeDependentsAsComplete();
-   }
 }
 
 
@@ -226,24 +241,44 @@ void Node::requeue_time_attrs()
 }
 
 
-void Node::set_no_requeue_if_single_time_dependency(bool miss_next_time_slot)
+void Node::miss_next_time_slot()
 {
-//   cout << "Node::set_no_requeue_if_single_time_dependency() " << absNodePath() << "\n";
-   SuiteChanged0 changed(shared_from_this());
-   flag().set(Flag::NO_REQUE_IF_SINGLE_TIME_DEP);
+   // Why do we need to set NO_REQUE_IF_SINGLE_TIME_DEP flag ?
+   // This is required when we have time based attributes, which we want to miss.
+   //    time 10:00
+   //    time 12:00
+   // Essentially this avoids an automated job run, *IF* the job was run manually for a given time slot.
+   // If we call this function before 10:00, we want to miss the next time slot (i.e. 10:00)
+   // and want to *requeue*, for 12:00 time slot. However at re-queue, we need to ensure
+   // we do *not* reset the 10:00 time slot. hence by setting NO_REQUE_IF_SINGLE_TIME_DEP
+   // we allow requeue to query this flag, and hence avoid resetting the time based attribute
+   // Note: requeue will *always* clear NO_REQUE_IF_SINGLE_TIME_DEP afterwards.
+   //
+   // In the case above when we reach the last time slot, there is *NO* automatic requeue, and
+   // hence, *no* clearing of NO_REQUE_IF_SINGLE_TIME_DEP flag.
+   // This will then be up to any top level parent that has a Repeat/cron to force a requeue
+   // when all the children are complete. *or* user does a manual re-queue
+   //
+   // Additionally if the job *aborts*, we clear NO_REQUE_IF_SINGLE_TIME_DEP if it was set.
+   // Otherwise if manually run again, we will miss further time slots.
+   if ( time_dep_attrs_) {
 
-   if (miss_next_time_slot && time_dep_attrs_) time_dep_attrs_->miss_next_time_slot();
+      /// Handle abort
+      /// The flag: NO_REQUE_IF_SINGLE_TIME_DEP is *only* set when doing an interactive force complete or run command.
+      /// What happens if the job aborts during the run command ?
+      ///     time 10:00
+      ///     time 11:00
+      /// If at 9.00am we used the run command, we want to miss the 10:00 time slot.
+      /// However if the run at 9.00 fails, and we run again, we also miss 11:00 time slot.
+      /// During the run the flag is still set.
+      /// Hence *ONLY* miss the next time slot *IF* Flag::NO_REQUE_IF_SINGLE_TIME_DEP is NOT set
+      if (!flag().is_set(Flag::NO_REQUE_IF_SINGLE_TIME_DEP)) {
 
-   Node* theParent = parent();
-   while (theParent) {
-      if (!theParent->repeat().empty()) {
-         break;
+         SuiteChanged0 changed(shared_from_this());
+         flag().set(Flag::NO_REQUE_IF_SINGLE_TIME_DEP);
+
+         time_dep_attrs_->miss_next_time_slot();
       }
-      if (!theParent->crons().empty()) {
-         break;
-      }
-      theParent->set_no_requeue_if_single_time_dependency(false);
-      theParent = theParent->parent();
    }
 }
 
@@ -255,16 +290,20 @@ void Node::calendarChanged(
       time_dep_attrs_->calendarChanged(c);
    }
 
+   checkForLateness(c);
+
+   if (checkForAutoCancel(c)) {
+      auto_cancelled_nodes.push_back(shared_from_this());
+   }
+}
+
+void Node::checkForLateness(const ecf::Calendar& c)
+{
    if (lateAttr_) {
       lateAttr_->checkForLateness(state_, c);
       if (lateAttr_->isLate()) {
          flag().set(ecf::Flag::LATE);
       }
-   }
-
-
-   if (checkForAutoCancel(c)) {
-      auto_cancelled_nodes.push_back(shared_from_this());
    }
 }
 
@@ -330,14 +369,38 @@ void Node::requeueOrSetMostSignificantStateUpNodeTree()
             /// Note: Going down hierarchy is wasted if there are no relative time attributes
             resetRelativeDuration();
 
-            requeue( false /* don't reset repeats */,clear_suspended_in_child_nodes );
+            // Remove effects of RUN and Force complete interactive commands
+            // For automated re-queue *DUE* to Repeats, *CLEAR* any user interaction that would miss the next time slots. *Down* the hierarchy
+            // This handles the case where a user, has manually intervened (i.e via run or complete) and we had a time attribute
+            // That time attribute will have expired, typically we show next day. In the case where we have a parent repeat
+            // we need to clear the flag, otherwise the task/family with time based attribute would wait for next day.
+            requeue( false /* don't reset repeats */,
+                     clear_suspended_in_child_nodes,
+                     true /* reset_next_time_slot */ );
             set_most_significant_state_up_node_tree();
             return;
          }
       }
 
+      /// If user has *INTERACTIVLY* forced changed in state to complete *OR* run the job.
+      /// This would cause Node to miss the next time slot. i.e expire the time slot
+      /// In which case testTimeDependenciesForRequeue should return false for a single time/today dependency
+      /// and not requeue the node.
       if (time_dep_attrs_ && time_dep_attrs_->testTimeDependenciesForRequeue()) {
-         requeue( false /* don't reset repeats */, clear_suspended_in_child_nodes);
+
+         // This is the only place we do not explicitly reset_next_time_slot
+         bool reset_next_time_slot = false;
+
+         // Remove effects of RUN and Force complete interactive commands, *BUT* only if *not* applied to this cron
+         if (!time_dep_attrs_->crons().empty()) {
+            if (!flag().is_set(ecf::Flag::NO_REQUE_IF_SINGLE_TIME_DEP)) {
+                reset_next_time_slot = true ;
+            }
+         }
+
+         requeue( false /* don't reset repeats */,
+                  clear_suspended_in_child_nodes,
+                  reset_next_time_slot  );
          set_most_significant_state_up_node_tree();
          return;
       }
@@ -396,10 +459,19 @@ void Node::resetRelativeDuration()
 // Returning false, *STOPS* further traversal *DOWN* the node tree
 bool Node::resolveDependencies(JobsParam& jobsParam)
 {
+   // This function is called:
+   //    a/ Periodically by the server, i.e every minute
+   //    b/ Asyncrousnly, after child command, via job submission
 #ifdef DEBUG_DEPENDENCIES
    LogToCout toCoutAsWell; cout << "\n";
    LOG(Log::DBG,"   " << debugNodePath() << "::resolveDependencies " << NState::toString(state()) << " AT " << suite()->calendar().toString());
 #endif
+
+   // Improve the granularity for the check for lateness (during job submission). See SUP-873 "late" functionality
+   if (lateAttr_) {
+      // since the suite() traverse up the tree, only call when have a late attribute
+      checkForLateness(suite()->calendar());
+   }
 
    if (isSuspended()) {
 #ifdef DEBUG_DEPENDENCIES
@@ -1510,6 +1582,8 @@ void Node::top_down_why(std::vector<std::string>& theReasonWhy) const
 
 void Node::bottom_up_why(std::vector<std::string>& theReasonWhy) const
 {
+   defs()->why(theReasonWhy);
+
    std::vector<Node*> vec;
    vec.push_back(const_cast<Node*>(this));
    Node* theParent = parent();
@@ -1521,7 +1595,6 @@ void Node::bottom_up_why(std::vector<std::string>& theReasonWhy) const
    for(vector<Node*>::reverse_iterator r = vec.rbegin(); r!=r_end; ++r) {
       (*r)->why(theReasonWhy);
    }
-   defs()->why(theReasonWhy);
 }
 
 void Node::why(std::vector<std::string>& vec) const
@@ -1537,9 +1610,12 @@ void Node::why(std::vector<std::string>& vec) const
    }
    else if (state() != NState::QUEUED && state() != NState::ABORTED) {
       std::stringstream ss;
-      ss << "The node '" << debugNodePath() << "' (" << NState::toString(state()) << ")  ' is not queued or aborted.";
+      ss << "The node '" << debugNodePath() << "' (" << NState::toString(state()) << ") is not queued or aborted.";
       vec.push_back(ss.str());
-      return;
+
+      // When task is active/submitted no point, going any further.
+      // However for FAMILY/SUITE we still need to proceed
+      if (isTask()) return;
    }
 
    // Check  limits using in limit manager
@@ -1552,7 +1628,6 @@ void Node::why(std::vector<std::string>& vec) const
    prefix += " (";
    prefix += NState::toString(state());
    prefix += ") ";
-   std::string postFix;
 
    if (time_dep_attrs_) {
 #ifdef DEBUG_WHY
@@ -1571,7 +1646,7 @@ void Node::why(std::vector<std::string>& vec) const
 #ifdef DEBUG_WHY
       std::cout << "   Node::why " << debugNodePath() << " checking trigger dependencies\n";
 #endif
-      postFix.clear();
+      std::string postFix;
       if (triggerAst()->why(postFix)) { vec.push_back(prefix + postFix); }
    }
 }

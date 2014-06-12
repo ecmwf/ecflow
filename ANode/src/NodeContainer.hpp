@@ -28,7 +28,9 @@ public:
 	virtual void accept(ecf::NodeTreeVisitor&);
 	virtual void acceptVisitTraversor(ecf::NodeTreeVisitor& v);
 	virtual void begin();
-	virtual void requeue(bool resetRepeats, int clear_suspended_in_child_nodes);
+	virtual void requeue( bool resetRepeats,
+	                        int clear_suspended_in_child_nodes,
+	                        bool reset_next_time_slot);
    virtual void requeue_time_attrs();
 	virtual void resetRelativeDuration();
 	virtual bool run(JobsParam& jobsParam, bool force);

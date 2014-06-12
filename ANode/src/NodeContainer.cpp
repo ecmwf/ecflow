@@ -72,10 +72,14 @@ void NodeContainer::begin()
  	handle_defstatus_propagation();
 }
 
-void NodeContainer::requeue(bool resetRepeats, int clear_suspended_in_child_nodes)
+void NodeContainer::requeue(
+         bool resetRepeats,
+         int clear_suspended_in_child_nodes,
+         bool reset_next_time_slot
+         )
 {
 //	LOG(Log::DBG,"   " << debugType() << "::requeue() " << absNodePath() << " resetRepeats = " << resetRepeats);
-	Node::requeue(resetRepeats,clear_suspended_in_child_nodes);
+	Node::requeue(resetRepeats,clear_suspended_in_child_nodes,reset_next_time_slot);
 
 	// For negative numbers, do nothing, i.e do not clear
 	if (clear_suspended_in_child_nodes >=0) clear_suspended_in_child_nodes++;
@@ -83,7 +87,8 @@ void NodeContainer::requeue(bool resetRepeats, int clear_suspended_in_child_node
  	size_t node_vec_size = nodeVec_.size();
  	for(size_t t = 0; t < node_vec_size; t++) {
  	   nodeVec_[t]->requeue(true /*reset child repeats. Moot for tasks*/,
- 	                        clear_suspended_in_child_nodes);
+ 	                        clear_suspended_in_child_nodes,
+ 	                        reset_next_time_slot);
  	}
    handle_defstatus_propagation();
 }

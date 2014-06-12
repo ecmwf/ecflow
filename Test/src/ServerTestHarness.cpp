@@ -43,8 +43,9 @@ using namespace std;
 using namespace ecf;
 namespace fs = boost::filesystem;
 
+//#define DEBUG_TEST_WAITER 1
+//#define DEBUG_TEST_WAITER_DEFS 1
 //#define DEBUG_TEST_HARNESS 1
-//#define DEBUG_DEFS 1
 //#define DEBUG_DIFF 1
 
 ServerTestHarness::ServerTestHarness( bool doLogFileVerification, bool standardVerification   )
@@ -266,7 +267,7 @@ bool verify_attribute_verification()
 defs_ptr
 ServerTestHarness::testWaiter( const Defs& theClientDefs, int timeout, bool verifyAttr)
 {
-#ifdef DEBUG_TEST_HARNESS
+#ifdef DEBUG_TEST_WAITER
    cout << "ServerTestHarness::testWaiter \n";
 #endif
 
@@ -290,7 +291,9 @@ ServerTestHarness::testWaiter( const Defs& theClientDefs, int timeout, bool veri
    // How do we terminate this test?
    // The test succeeds if the suite state is complete,
    while( 1 ) {
-  		//std::cout << "sleepTime = " << sleepTime << "\n";
+#ifdef DEBUG_TEST_WAITER
+  		std::cout << "sleepTime = " << sleepTime << "\n";
+#endif
       sleep(sleepTime);    // avoid calling get excessively, by using sleep
       DurationTimer timer; // automatically adjust sleep time
 
@@ -344,7 +347,9 @@ ServerTestHarness::testWaiter( const Defs& theClientDefs, int timeout, bool veri
                Ecf::set_debug_equality(false); // only has affect in DEBUG build
             }
             else {
-               // std::cout << "***** ServerTestHarness::testWaiter: State change between getting incremental and full defs\n";
+#ifdef DEBUG_TEST_WAITER
+               std::cout << "***** ServerTestHarness::testWaiter: State change between getting incremental and full defs\n";
+#endif
             }
          }
       }
@@ -405,8 +410,8 @@ ServerTestHarness::testWaiter( const Defs& theClientDefs, int timeout, bool veri
             if (s->hasAutoCancel()) hasAutoCancel++;
          }
 
-#ifdef DEBUG_DEFS
-         cout << "Printing Defs \n";
+#ifdef DEBUG_TEST_WAITER_DEFS
+         cout << "\nPrinting Defs ==================================================================================\n";
          std::cout << *full_defs.get();
          cout << "completeSuiteCnt = " << completeSuiteCnt
                   << " full_defs->suiteVec().size() = " <<  full_defs->suiteVec().size()

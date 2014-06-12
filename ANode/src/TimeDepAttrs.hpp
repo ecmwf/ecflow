@@ -35,9 +35,16 @@ public:
    // needed by node serialisation
    void set_node(Node* n) { node_ = n; }
 
-
    void begin();
+
+   /// If a job takes longer than it slots, then that slot is missed, and next slot is used
+   /// Note we do *NOT* reset for requeue as we want to advance the valid time slots.
+   /// *NOTE* Update calendar will *free* time dependencies *even* time series. They rely
+   /// on this function to clear the time dependencies so they *HOLD* the task.
+   ///
+   /// If we have done an interactive run or complete, *dont* increment next_time_slot_
    void requeue(bool reset_next_time_slot);
+
    void miss_next_time_slot();
    void freeHoldingDateDependencies();
    void freeHoldingTimeDependencies();
@@ -50,8 +57,9 @@ public:
    bool checkInvariants(std::string& errorMsg) const;
 
    bool timeDependenciesFree() const;
+   bool time_today_cron_is_free() const; /* used by viewer */
 
-   // returns true this node has time dependencies. NOTE: Does not look at children
+   // returns true if this node has time dependencies. NOTE: Does not look at children
    bool hasDayDateDependencies() const;
 
    // Access functions: ======================================================

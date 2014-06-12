@@ -147,28 +147,46 @@ bool TodayAttr::why(const ecf::Calendar& c, std::string& theReasonWhy) const
          return true;
       }
 
+      // calendar_time >= timeSeries_.start().duration()
       if (timeSeries_.hasIncrement()) {
-         if (calendar_time > timeSeries_.start().duration() && calendar_time < timeSeries_.finish().duration()) {
+         if (calendar_time < timeSeries_.finish().duration()) {
             timeSeries_.why(c, theReasonWhy);
             return true;
          }
       }
+      // calendar_time >= timeSeries_.start().duration() && calendar_time >= timeSeries_.finish().duration()
+      // past the end of time slot, hence this should not hold job generation,
    }
 
-   // the time has expired, report for the next day
+   // the today has expired,
+   theReasonWhy += " ( '";
+   theReasonWhy += toString();
+   theReasonWhy += "' has expired,";
 
-   // For a single slot, we are always free after single slot time, hence we must look for tomorrow.
-   // If we are in series then, we past the last time slot
-   // Find the next date that matches
-   boost::gregorian::date_duration one_day(1);
-   boost::gregorian::date the_next_date = c.date();  // todays date
-   the_next_date += one_day;                         // add one day, so its in the future
+   // take into account, user can use run/force complete to miss time slots
+   bool do_a_requeue = timeSeries_.requeueable(c);
+   if (do_a_requeue) {
+      TimeSlot the_next_time_slot = timeSeries_.compute_next_time_slot(c);
+      if (the_next_time_slot.isNULL() || !timeSeries_.hasIncrement() ) {
+         theReasonWhy += " *re-queue* to run at this time";
+      }
+      else {
+         theReasonWhy += " *re-queue* to run at";
+         theReasonWhy += the_next_time_slot.toString() ;
+      }
+   }
+   else {
+      boost::gregorian::date_duration one_day(1);
+      boost::gregorian::date the_next_date = c.date();  // todays date
+      the_next_date += one_day;                         // add one day, so its in the future
 
-   theReasonWhy += " ( next run is at ";
-   theReasonWhy += timeSeries_.start().toString();
-   theReasonWhy += " ";
-   theReasonWhy += to_simple_string( the_next_date );
+      theReasonWhy += " next run tomorrow at ";
+      theReasonWhy += timeSeries_.start().toString();
+      theReasonWhy += " ";
+      theReasonWhy += to_simple_string( the_next_date );
+   }
    theReasonWhy += " )";
+
    return true;
 }
 

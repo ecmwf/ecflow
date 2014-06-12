@@ -245,7 +245,6 @@ ecbuild_add_executable( TARGET    ecflowview
                         INCLUDES  
                                   ${X11_INCLUDE_DIR}
                                   ${MOTIF_INCLUDE_DIR}
-                                  ${Boost_INCLUDE_DIRS} 
                      )
 
 
@@ -259,7 +258,6 @@ ecbuild_add_test( TARGET  test-view
                   SOURCES   test/TestRunner.cpp test/TestView.cpp
                   LIBS      libharness    
                   INCLUDES  ../Test/src
-                            ${Boost_INCLUDE_DIRS} 
                 )
                           
 # ===================================================================

@@ -37,11 +37,22 @@ else
    else
 
       # Note: we deal with different version, by removing ecflow_* first
-      rsh %REMOTE_HOST% "cd $ROOT_DIR; rm -rf ecflow*"
+      if [[ %ARCH% = hpux ]] ; then
+         # hpux is on scratch, no need to rsh
+         cd $ROOT_DIR; rm -rf ecflow*
 
-      # cd to where tar file directory resides
-      cd %ECFLOW_TAR_DIR%
-      ecrcp $ECFLOWTAR.gz  %REMOTE_HOST%:$ROOT_DIR/
-      rsh %REMOTE_HOST% "cd $ROOT_DIR; gunzip $ECFLOWTAR.gz; tar -xf $ECFLOWTAR; mv $ECFLOW ecflow"
+        # cd to where tar file directory resides
+        cd %ECFLOW_TAR_DIR%
+        scp $ECFLOWTAR.gz $ROOT_DIR/
+        cd $ROOT_DIR; gunzip $ECFLOWTAR.gz; tar -xf $ECFLOWTAR; mv $ECFLOW ecflow
+
+      else
+         rsh %REMOTE_HOST% "cd $ROOT_DIR; rm -rf ecflow*"
+
+         # cd to where tar file directory resides
+         cd %ECFLOW_TAR_DIR%
+         ecrcp $ECFLOWTAR.gz  %REMOTE_HOST%:$ROOT_DIR/
+         rsh %REMOTE_HOST% "cd $ROOT_DIR; gunzip $ECFLOWTAR.gz; tar -xf $ECFLOWTAR; mv $ECFLOW ecflow"
+      fi
    fi
 fi
