@@ -24,7 +24,7 @@
 # mkdir debug
 # mkdir release
 # cd debug
-#  
+#
 #/usr/local/apps/cmake/current/bin/cmake ../../  \
 #         -DCMAKE_BUILD_TYPE=Debug \
 #         -DCMAKE_MODULE_PATH=/usr/local/apps/ecbuild/current/share/ecbuild/cmake \
@@ -37,12 +37,12 @@
 #
 #############################################################
 
-cmake_minimum_required( VERSION 2.6.4 FATAL_ERROR )
+cmake_minimum_required( VERSION 2.8.4 FATAL_ERROR )
 
 project( ecflow CXX )
 
-#set( CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/../ecbuild/cmake")
-message( STATUS "CMAKE_MODULE_PATH    : ${CMAKE_MODULE_PATH}")
+set( CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/../ecbuild/cmake")
+# message( STATUS "CMAKE_MODULE_PATH    : ${CMAKE_MODULE_PATH}")
 
 include( ecbuild_system )
 
@@ -79,19 +79,14 @@ else()
    ecbuild_find_python( VERSION 2.7 )
 endif()
 
-message( STATUS "PYTHON_EXECUTABLE    : ${PYTHON_EXECUTABLE}")
-message( STATUS "PYTHON_INCLUDE_DIRS  : ${PYTHON_INCLUDE_DIRS}")
-message( STATUS "PYTHON_LIBRARIES     : ${PYTHON_LIBRARIES}")
- 
 # =========================================================================================
 # Boost  
 # =========================================================================================
 
-# If this is enable then can not find boost libs using env BOOST_ROOT ?
-#ecbuild_add_extra_search_paths( boost )
+ecbuild_add_extra_search_paths( boost ) # also respects BOOST_ROOT
 
 # To use static boost python ensure that Boost_USE_STATIC_LIBS is set on.
-set(Boost_USE_STATIC_LIBS        ON)
+set(Boost_USE_STATIC_LIBS        OFF)
 set(Boost_USE_MULTITHREADED      ON)
 set(Boost_NO_SYSTEM_PATHS        ON)
 set(Boost_DETAILED_FAILURE_MSG   ON)
@@ -137,15 +132,18 @@ endif()
 # debug
 # =========================================================================================
 if( CMAKE_BUILD_TYPE MATCHES "[Dd][Ee][Bb][Uu][Gg]" )
-    message( "INFO: DEBUG BUILD" )
+
+	message( STATUS "INFO: DEBUG BUILD" )
+
     # for debug type builds, turn on verbose makefiles
     # set(CMAKE_VERBOSE_MAKEFILE ON)
 
     # Tell other CMake files that we're doing a debug build
-    set( DEBUG_BUILD 1 )
+	# set( DEBUG_BUILD 1 ) -- not used anymore
 
     # Tell C/C++ that we're doing a debug build
     add_definitions( -DDEBUG )
+
 endif()
 
 
@@ -198,7 +196,7 @@ install (FILES
          DESTINATION doc/ecflow
          PERMISSIONS OWNER_READ GROUP_READ WORLD_READ OWNER_EXECUTE GROUP_EXECUTE WORLD_EXECUTE
         )
-         
+        
 # =========================================================================================
 # final
 # =========================================================================================

@@ -585,6 +585,7 @@ void ecf_concrete_node<Node>::update(const Node* n,
       Updating::set_full_redraw();
       return;
    }
+   
    node_->delvars();
       if (owner_->suite()->begun()) {
          owner_->update_generated_variables();
@@ -620,6 +621,7 @@ void ecf_concrete_node<Node>::update(const Node* n,
       }
 
    const_cast<Node*>(n)->set_graphic_ptr(xnode());
+   int tot = 0;
    for(std::vector<ecf::Aspect::Type>::const_iterator it = aspect.begin(); it != aspect.end(); ++it) {
      int  kind = 0;
       switch ( *it ) {
@@ -638,6 +640,7 @@ void ecf_concrete_node<Node>::update(const Node* n,
       default: 
 	   continue;
       }
+      ++tot;
       if (kind)
 	   for(node *xn = node_->kids(); xn; xn = xn->next())
 	     if (xn) if (xn->type() == kind) {
@@ -645,6 +648,9 @@ void ecf_concrete_node<Node>::update(const Node* n,
 		 xn->redraw();
 	       }
    }
+   if (tot==1) return;
+
+   node_->update(-1, -1, -1); // call pop up window with check
    node_->notify_observers();
    node_->redraw();
 }

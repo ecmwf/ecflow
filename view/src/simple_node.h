@@ -37,6 +37,9 @@ public:
   virtual Boolean hasTriggers() const;
   virtual Boolean hasDate() const;
   virtual Boolean hasTime() const;
+
+  virtual Boolean hasTimeHolding() const;
+
   virtual Boolean hasManual() const;
   virtual Boolean isSimpleNode() const { return True; }
   virtual Boolean isGenVariable(const char*);
@@ -90,7 +93,7 @@ public:
  protected:
   
   virtual void perlify(FILE*);
-  
+  int old_status_, old_tryno_, old_flags_;
  private:
   
   simple_node(const simple_node&);

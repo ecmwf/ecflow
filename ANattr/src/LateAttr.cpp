@@ -84,14 +84,14 @@ void LateAttr::checkForLateness( const std::pair<NState,boost::posix_time::time_
 	if (state.first == NState::SUBMITTED || state.first == NState::QUEUED) {
 		// Submitted is always relative, ASSUME this means relative to suite start
 		if (state.first == NState::SUBMITTED && !submitted_.isNULL()) {
-			if ( calendar.duration() > submitted_.duration()  ) {
+			if ( calendar.duration() >= submitted_.duration()  ) {
 	 			setLate(true);
  				return;
 			}
 		}
 
 		// In Submitted or queued state, check for active, in REAL time
- 		if (!active_.isNULL() && calendar.suiteTime().time_of_day() > active_.duration()) {
+ 		if (!active_.isNULL() && calendar.suiteTime().time_of_day() >= active_.duration()) {
  			setLate(true);
 		}
  	}
@@ -99,14 +99,14 @@ void LateAttr::checkForLateness( const std::pair<NState,boost::posix_time::time_
 		if ( completeIsRelative_) {
 			// to check for complete, we need the duration when state went into active state
 			// state.second is when state went ACTIVE, relative to suite start
- 			boost::posix_time::time_duration runtime =  calendar.duration() - state.second ;
-			if ( runtime > complete_.duration()) {
+ 			boost::posix_time::time_duration runtime = calendar.duration() - state.second ;
+			if ( runtime >= complete_.duration()) {
 				setLate(true);
  			}
 		}
 		else {
 			// Real time
- 			if (calendar.suiteTime().time_of_day() > complete_.duration()) {
+ 			if (calendar.suiteTime().time_of_day() >= complete_.duration()) {
  				setLate(true);
 			}
 		}

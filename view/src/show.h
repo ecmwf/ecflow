@@ -72,7 +72,7 @@ public:
 		migrated_icon,
 		message_icon,
 
-                defstatus_icon, zombie_icon,
+                defstatus_icon, zombie_icon, // time_holding_icon, date_holding_icon
                 all, none
 	};
 

@@ -23,6 +23,8 @@ else
          # NOTE: uses SSH
          scp %SITE_CONFIG%   $remote_host:%BOOST_DIR%/%BOOST_VERSION%/tools/build/v2/site-config.jam
       fi
+   elif [[ %ARCH% = hpux ]] ; then
+      scp %SITE_CONFIG%   %BOOST_DIR%/%BOOST_VERSION%/tools/build/v2/site-config.jam
    else
       rcp %SITE_CONFIG%   $remote_host:$root_wk/boost/%BOOST_VERSION%/tools/build/v2/site-config.jam
    fi

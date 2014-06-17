@@ -190,12 +190,9 @@ void CronAttr::clearFree() {
 
 void CronAttr::miss_next_time_slot()
 {
-   // A cron attribute with a single time slot is repeated indefinitely hence always re-queue
-   // hence only miss a time slot when we have a time series
-   if (timeSeries_.hasIncrement()) {
-      timeSeries_.miss_next_time_slot();
-      state_change_no_ = Ecf::incr_state_change_no();
-   }
+   // A cron attribute with a single time slot is repeated indefinitely hence always re-queues
+   timeSeries_.miss_next_time_slot();
+   state_change_no_ = Ecf::incr_state_change_no();
 }
 
 // **************************************************************************************
@@ -242,31 +239,50 @@ bool CronAttr::why(const ecf::Calendar& c, std::string& theReasonWhy) const
 	//  1/ Not on a valid time slot in the time series
 	//  *OR*
 	//  2/ Logical *AND* of day of week, day of month, or month returned false
-	theReasonWhy += " is cron dependent ";
+	theReasonWhy += " is cron dependent";
 
 	// Lets say that the time series was NOT free.
 	// First check if week day, day of month, month, matches
  	if ( is_day_of_week_day_of_month_and_month_free(c)) {
 
- 	   // This can apply to single and series
- 	   boost::posix_time::time_duration calendar_time = timeSeries_.duration(c);
- 	   if (calendar_time < timeSeries_.start().duration()) {
- 	       timeSeries_.why(c, theReasonWhy);
- 	       return true;
- 	   }
+ 	   if (timeSeries_.is_valid()) {
 
- 	   if (timeSeries_.hasIncrement()) {
- 	      if (calendar_time > timeSeries_.start().duration() && calendar_time < timeSeries_.finish().duration()) {
- 	          timeSeries_.why(c, theReasonWhy);
- 	          return true;
+ 	      // This can apply to single and series
+ 	      boost::posix_time::time_duration calendar_time = timeSeries_.duration(c);
+ 	      if (calendar_time < timeSeries_.start().duration()) {
+ 	         timeSeries_.why(c, theReasonWhy);
+ 	         return true;
+ 	      }
+
+ 	      // calendar_time >= timeSeries_.start().duration()
+ 	      if (timeSeries_.hasIncrement()) {
+ 	         if (calendar_time < timeSeries_.finish().duration()) {
+ 	            timeSeries_.why(c, theReasonWhy);
+ 	            return true;
+ 	         }
  	      }
  	   }
+ 	   // calendar_time >= timeSeries_.start().duration() && calendar_time >= timeSeries_.finish().duration()
   		// past the end of time slot, find next valid date
   	}
 
+   // take into account, user can use run/force complete to miss time slots
+   bool do_a_requeue = timeSeries_.requeueable(c);
+   if (do_a_requeue) {
+      TimeSlot the_next_time_slot = timeSeries_.compute_next_time_slot(c);
+      if (the_next_time_slot.isNULL() ) {
+         theReasonWhy += " ( *re-queue* to run at this time ";
+      }
+      else {
+         theReasonWhy += " ( *re-queue* to run at ";
+         theReasonWhy += the_next_time_slot.toString() ;
+      }
+   }
+
   	// Find the *NEXT* date that matches, and use the first time slot
  	boost::gregorian::date the_next_date = next_date(c);
- 	theReasonWhy += " ( next run is at ";
+ 	if ( do_a_requeue ) theReasonWhy += ", otherwise next run is at ";
+ 	else                theReasonWhy += " ( next run is at ";
  	theReasonWhy += timeSeries_.start().toString();
  	theReasonWhy += " ";
  	theReasonWhy += to_simple_string( the_next_date );
@@ -301,7 +317,7 @@ bool CronAttr::isFree(const ecf::Calendar& c) const
 
 	if (!timeSeries_.isFree(c))  return false;
 
-	// Ok time series if Free
+	// Ok time series is Free
 
 	// ********************************************************************
 	// IMPORTANT: when we have multiple week days, days of month and months

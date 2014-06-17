@@ -187,9 +187,13 @@ BOOST_AUTO_TEST_CASE( test_time_series_increment_real )
 		timeSeries2.calendarChanged( c );
 		timeSeries3.calendarChanged( c );
 
-//		cerr << "hour = " << hour << " calendar_duration " << to_simple_string(timeSeries.duration(calendar))
+//		cerr << "hour = " << hour << " calendar_duration " << to_simple_string(timeSeries.duration(c))
 //		    << " timeSeries=" << timeSeries.toString() << " timeSeries2=" << timeSeries2.toString() << " timeSeries3=" << timeSeries3.toString() << "\n";
-		if (hour >= timeSeries.start().hour() && hour <=timeSeries.finish().hour()) {
+		if (hour < timeSeries.start().hour()) {
+         BOOST_CHECK_MESSAGE(timeSeries.checkForRequeue(c,t1_min,t1_max)," Time series " << timeSeries.toString() << "checkForRequeue should pass at " << hour );
+         BOOST_CHECK_MESSAGE(!timeSeries.isFree(c),"Time series " << timeSeries.toString() << " should NOT be free at hour " << hour );
+		}
+		else if (hour >= timeSeries.start().hour() && hour <= timeSeries.finish().hour()) {
 			BOOST_CHECK_MESSAGE(timeSeries.isFree(c),"Time series " << timeSeries.toString() << " should be free at hour " << hour );
 
 			/// At the last hour checkForRequeue should return false; This ensures that value will
@@ -207,7 +211,11 @@ BOOST_AUTO_TEST_CASE( test_time_series_increment_real )
 		}
 
 
-		if (hour >= timeSeries2.start().hour() && hour <=timeSeries2.finish().hour()) {
+      if (hour < timeSeries2.start().hour()) {
+         BOOST_CHECK_MESSAGE(timeSeries2.checkForRequeue(c,t1_min,t1_max)," Time series " << timeSeries2.toString() << "checkForRequeue should pass at " << hour );
+         BOOST_CHECK_MESSAGE(!timeSeries2.isFree(c),"Time series " << timeSeries2.toString() << " should NOT be free at hour " << hour );
+      }
+      else if (hour >= timeSeries2.start().hour() && hour <=timeSeries2.finish().hour()) {
 			BOOST_CHECK_MESSAGE(timeSeries2.isFree(c),"Time series " << timeSeries2.toString() << " should be free at hour " << hour );
 
 			/// At the last hour checkForRequeue should return false;
@@ -237,6 +245,116 @@ BOOST_AUTO_TEST_CASE( test_time_series_increment_real )
 	}
 }
 
+BOOST_AUTO_TEST_CASE( test_time_series_requeueable_and_compute_next_time_slot )
+{
+   cout << "ACore:: ...test_time_series_requeueable_and_compute_next_time_slot\n";
+
+   // Test time series with  a calendar, we update calendar then
+   // test time series requeueable(), and compute_next_time_slot
+   // This are used with the WHY command
+   Calendar c;
+   c.init(ptime(date(2010,2,10), minutes(0)), Calendar::REAL);
+
+
+   // Create a test when we can match a time series. Need to sync hour with suite time
+   // at hour 1, suite time should also be 01:00, for test to work
+   //
+   // Create the time series: start  10:00
+   //                         finish 20:00
+   //                         incr    1:00
+   TimeSeries timeSeries(TimeSlot(10,0), TimeSlot(20,0), TimeSlot(1,0), true/* relative */);
+   TimeSeries timeSeries2(TimeSlot(11,0), TimeSlot(15,0), TimeSlot(1,0), true/* relative */);
+   TimeSeries timeSeries3(TimeSlot(15,0),  true/* relative */);
+
+   for(int hour=1; hour < 24; hour++) {
+      // Update calendar every hour, then see we can match time series,
+      c.update( time_duration( hours(1) ) );
+      timeSeries.calendarChanged( c );
+      timeSeries2.calendarChanged( c );
+      timeSeries3.calendarChanged( c );
+
+//    cerr << "hour = " << hour << " calendar_duration " << to_simple_string(timeSeries.duration(c))
+//        << " timeSeries=" << timeSeries.toString() << " timeSeries2=" << timeSeries2.toString() << " timeSeries3=" << timeSeries3.toString() << "\n";
+      if (hour < timeSeries.start().hour()) {
+         TimeSlot next_time_slot = timeSeries.compute_next_time_slot(c);
+         TimeSlot expected(10,0);
+         BOOST_CHECK_MESSAGE(next_time_slot ==expected," Time series " << timeSeries.toString() << " at " << hour << " expected next time slot at " << expected.toString() << " but found " << next_time_slot.toString());
+         BOOST_CHECK_MESSAGE(timeSeries.requeueable(c),"Time series " << timeSeries.toString() << " should be requeueable at hour " << hour );
+      }
+      else if (hour == timeSeries.start().hour() ) {
+         TimeSlot next_time_slot = timeSeries.compute_next_time_slot(c);
+         TimeSlot expected(11,0);
+         BOOST_CHECK_MESSAGE(next_time_slot == expected," Time series " << timeSeries.toString() << " at " << hour << " expected next time slot at " << expected.toString() << " but found " << next_time_slot.toString());
+         BOOST_CHECK_MESSAGE(timeSeries.requeueable(c),"Time series " << timeSeries.toString() << " should be requeueable at hour " << hour );
+      }
+      else if (hour > timeSeries.start().hour() &&  hour < timeSeries.finish().hour()) {
+         TimeSlot next_time_slot = timeSeries.compute_next_time_slot(c);
+         TimeSlot expected(hour+1,0);
+         BOOST_CHECK_MESSAGE(next_time_slot == expected," Time series " << timeSeries.toString() << " at " << hour << " expected next time slot at " << expected.toString() << " but found " << next_time_slot.toString());
+         BOOST_CHECK_MESSAGE(timeSeries.requeueable(c),"Time series " << timeSeries.toString() << " should be requeueable at hour " << hour );
+      }
+      else if (hour == timeSeries.finish().hour()) {
+         TimeSlot next_time_slot = timeSeries.compute_next_time_slot(c);
+         BOOST_CHECK_MESSAGE(next_time_slot.isNULL()," Time series " << timeSeries.toString() << " at " << hour << " expected next time slot  to be NULL");
+         BOOST_CHECK_MESSAGE(!timeSeries.requeueable(c),"Time series " << timeSeries.toString() << " should NOT be requeueable at hour " << hour );
+      }
+      else if (hour > timeSeries.finish().hour()) {
+         TimeSlot next_time_slot = timeSeries.compute_next_time_slot(c);
+         BOOST_CHECK_MESSAGE(next_time_slot.isNULL()," Time series " << timeSeries.toString() << " at " << hour << " expected next time slot to be NULL");
+         BOOST_CHECK_MESSAGE(!timeSeries.requeueable(c),"Time series " << timeSeries.toString() << " should NOT be requeueable at hour " << hour );
+      }
+
+
+      if (hour < timeSeries2.start().hour()) {
+         TimeSlot next_time_slot = timeSeries2.compute_next_time_slot(c);
+         TimeSlot expected(11,0);
+         BOOST_CHECK_MESSAGE(next_time_slot ==expected," Time series " << timeSeries2.toString() << " at " << hour << " expected next time slot at " << expected.toString() << " but found " << next_time_slot.toString());
+         BOOST_CHECK_MESSAGE(timeSeries2.requeueable(c),"Time series " << timeSeries2.toString() << " should be requeueable at hour " << hour );
+      }
+      else if (hour == timeSeries2.start().hour() ) {
+         TimeSlot next_time_slot = timeSeries2.compute_next_time_slot(c);
+         TimeSlot expected(12,0);
+         BOOST_CHECK_MESSAGE(next_time_slot == expected," Time series " << timeSeries2.toString() << " at " << hour << " expected next time slot at " << expected.toString() << " but found " << next_time_slot.toString());
+         BOOST_CHECK_MESSAGE(timeSeries2.requeueable(c),"Time series " << timeSeries2.toString() << " should NOT be requeueable at hour " << hour );
+      }
+      else if (hour > timeSeries2.start().hour() &&  hour < timeSeries2.finish().hour()) {
+         TimeSlot next_time_slot = timeSeries2.compute_next_time_slot(c);
+         TimeSlot expected(hour+1,0);
+         BOOST_CHECK_MESSAGE(next_time_slot == expected," Time series " << timeSeries2.toString() << " at " << hour << " expected next time slot at " << expected.toString() << " but found " << next_time_slot.toString());
+         BOOST_CHECK_MESSAGE(timeSeries2.requeueable(c),"Time series " << timeSeries2.toString() << " should be requeueable at hour " << hour );
+      }
+      else if (hour == timeSeries2.finish().hour()) {
+         TimeSlot next_time_slot = timeSeries2.compute_next_time_slot(c);
+         BOOST_CHECK_MESSAGE(next_time_slot.isNULL()," Time series " << timeSeries2.toString() << " at " << hour << " expected next time slot  to be NULL");
+         BOOST_CHECK_MESSAGE(!timeSeries2.requeueable(c),"Time series " << timeSeries2.toString() << " should NOT be requeueable at hour " << hour );
+      }
+      else if (hour > timeSeries2.finish().hour()) {
+         TimeSlot next_time_slot = timeSeries2.compute_next_time_slot(c);
+         BOOST_CHECK_MESSAGE(next_time_slot.isNULL()," Time series " << timeSeries2.toString() << " at " << hour << " expected next time slot to be NULL");
+         BOOST_CHECK_MESSAGE(!timeSeries2.requeueable(c),"Time series " << timeSeries2.toString() << " should NOT be requeueable at hour " << hour );
+      }
+
+
+      if (hour < timeSeries3.start().hour()) {
+         TimeSlot next_time_slot = timeSeries3.compute_next_time_slot(c);
+         TimeSlot expected(15,0);
+         BOOST_CHECK_MESSAGE(next_time_slot ==expected," Time series " << timeSeries3.toString() << " at " << hour << " expected next time slot at " << expected.toString() << " but found " << next_time_slot.toString());
+         BOOST_CHECK_MESSAGE(timeSeries3.requeueable(c),"Time series " << timeSeries3.toString() << " should be requeueable at hour " << hour );
+      }
+      else if (hour == timeSeries3.start().hour() ) {
+         TimeSlot next_time_slot = timeSeries3.compute_next_time_slot(c);
+         BOOST_CHECK_MESSAGE(next_time_slot.isNULL()," Time series " << timeSeries3.toString() << " at " << hour << " expected next time slot to be NULL");
+         BOOST_CHECK_MESSAGE(!timeSeries3.requeueable(c),"Time series " << timeSeries3.toString() << " should NOT be requeueable at hour " << hour );
+      }
+      else if (hour > timeSeries3.start().hour()) {
+         TimeSlot next_time_slot = timeSeries3.compute_next_time_slot(c);
+         BOOST_CHECK_MESSAGE(next_time_slot.isNULL()," Time series " << timeSeries3.toString() << " at " << hour << " expected next time slot to be NULL");
+         BOOST_CHECK_MESSAGE(!timeSeries3.requeueable(c),"Time series " << timeSeries3.toString() << " should NOT be requeueable at hour " << hour );
+      }
+   }
+}
+
+
 BOOST_AUTO_TEST_CASE( test_time_series_finish_not_divisble_by_increment )
 {
 	cout << "ACore:: ...test_time_series_finish_not_divisble_by_increment\n";
@@ -263,8 +381,8 @@ BOOST_AUTO_TEST_CASE( test_time_series_finish_not_divisble_by_increment )
    BOOST_CHECK_MESSAGE(t1_min == TimeSlot(0,0) && t1_max == TimeSlot(23,59),"Not as expected");
    BOOST_CHECK_MESSAGE(t2_min == TimeSlot(0,30) && t2_max == TimeSlot(23,59),"Not as expected");
 
- 	time_duration last = hours(23) + minutes(50);  // last valid date is 23:50
-	time_duration last2 = hours(20) + minutes(30);  // last valid date is 20:30
+ 	time_duration last = hours(23) + minutes(50);  // last valid time is 23:50
+	time_duration last2 = hours(20) + minutes(30);  // last valid time is 20:30
 
  	for(int hour=0; hour < 24; hour++) {
  		for( int minute=0; minute<60; minute++) {
@@ -275,16 +393,20 @@ BOOST_AUTO_TEST_CASE( test_time_series_finish_not_divisble_by_increment )
  				timeSeries2.reset(calendar);
  			}
 
- 			if ( calendar.suiteTime().time_of_day() >= timeSeries.start().duration() &&
- 				 calendar.suiteTime().time_of_day() < last	) {
+ 			if ( calendar.suiteTime().time_of_day() < timeSeries.start().duration()) {
+            BOOST_CHECK_MESSAGE(timeSeries.checkForRequeue(calendar,t1_min,t1_max)," expected " << timeSeries.toString() << " checkForRequeue to pass at " << to_simple_string(calendar.suiteTime()) );
+ 			}
+ 			else if ( calendar.suiteTime().time_of_day() >= timeSeries.start().duration() && calendar.suiteTime().time_of_day() < last	) {
      			BOOST_CHECK_MESSAGE(timeSeries.checkForRequeue(calendar,t1_min,t1_max)," expected " << timeSeries.toString() << " checkForRequeue to pass at " << to_simple_string(calendar.suiteTime()) );
   			}
   			else {
      			BOOST_CHECK_MESSAGE(!timeSeries.checkForRequeue(calendar,t1_min,t1_max)," expected " << timeSeries.toString() << " checkForRequeue to fail at " << to_simple_string(calendar.suiteTime()) );
   			}
 
- 			if ( calendar.suiteTime().time_of_day() >= timeSeries2.start().duration() &&
- 				 calendar.suiteTime().time_of_day() < last2	) {
+         if ( calendar.suiteTime().time_of_day() < timeSeries2.start().duration()) {
+            BOOST_CHECK_MESSAGE(timeSeries2.checkForRequeue(calendar,t2_min,t2_max)," expected " << timeSeries2.toString() << " checkForRequeue to pass at " << to_simple_string(calendar.suiteTime()) );
+         }
+         else if ( calendar.suiteTime().time_of_day() >= timeSeries2.start().duration() && calendar.suiteTime().time_of_day() < last2	) {
      			BOOST_CHECK_MESSAGE(timeSeries2.checkForRequeue(calendar,t2_min,t2_max)," expected " << timeSeries2.toString() << " checkForRequeue to pass at " << to_simple_string(calendar.suiteTime()) );
   			}
   			else {

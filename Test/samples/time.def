@@ -57,12 +57,15 @@ suite time
          time 12:00
     task t8
          time 13:00
+         time 15:00
     task t9
          time 14:00
     task t10
          time 15:00
     task t11
          time 16:00
+         time 17:00
+         time 18:00
     task t12
          time 17:00
     task t13

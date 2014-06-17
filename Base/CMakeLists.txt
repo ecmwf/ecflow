@@ -101,5 +101,4 @@ ecbuild_add_test( TARGET    u_base
                   LIBS      base       
                             pthread 
                   INCLUDES ../ANode/test
-                           ${Boost_INCLUDE_DIRS} 
                   )

@@ -54,7 +54,6 @@ public:
 
    void miss_next_time_slot();
 	void setFree();   // ensures that isFree() always returns true
-	void clearFree(); // resets the free flag
 	bool isSetFree() const { return makeFree_; }
   	bool isFree( const ecf::Calendar&) const;
 	bool checkForRequeue( const ecf::Calendar&) const;
@@ -98,6 +97,7 @@ public:
  	static CronAttr create(const std::string& cronString);
 
 private:
+	void clearFree(); // resets the free flag
    bool is_day_of_week_day_of_month_and_month_free( const ecf::Calendar&) const;
 
 	bool week_day_matches(int) const;

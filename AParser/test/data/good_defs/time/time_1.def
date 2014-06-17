@@ -1,8 +1,15 @@
 suite suiteName
-   family familyName0
+   family f1
+      task t1
    		time 15:00
    		time 00:00 23:59 00:30
-        time 00:00 06:59 00:30
+         time 00:00 06:59 00:30
+      task t2
+         time 17:00
+      task t3
+         time 18:00
+         time 19:00
+         time 20:00
    endfamily
 endsuite
 

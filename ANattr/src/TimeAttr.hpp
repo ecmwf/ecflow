@@ -28,8 +28,9 @@
 ///                                               isFree:hhhhhhhhhhhhhhhhh
 ///                                               Begin:
 ///                                               V
-///checkForReque:hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh   for 10:00 or 11:00 by themselves
-///checkForReque:hhhhhhhhhhhhhhhhhrrrrrrrrrrrrhhhhhhhhhhhhhhhhhhhhhhh   for both 10:00 and 11:000 together
+///checkForReque:rrrrrrrrrrrrrrrrhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh   10:00
+///checkForReque:rrrrrrrrrrrrrrrrrrrrrrrrrrrrrhhhhhhhhhhhhhhhhhhhhhhh   11:00
+///checkForReque:rrrrrrrrrrrrrrrrrrrrrrrrrrrrrhhhhhhhhhhhhhhhhhhhhhhh   for both 10:00 and 11:000 together
 ///       isFree:hhhhhhhhhhhhhhhhffffffffffffffffffffffffffffffffffff   *once* free we stay free (single slot *only*)
 ///       begin :                |                           |
 ///        V                     |                           |
@@ -38,7 +39,7 @@
 //
 ///                                                     isFree:hhhhhhhhhhhhhhhhhh
 ///                                                      V
-///   CheckForReque:hhhhhhhrrrrrrrrrrrrrrrrrrrrrrrrrhhhhhhhhhhhhhhhhhhhhhhhhhhhhh
+///   CheckForReque:rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrhhhhhhhhhhhhhhhhhhhhhhhhhhhhh
 ///          isFree:hhhhhhhFhhhhFhhhhFhhhhFhhhhFhhhhFhhhhhhhhhhhhhhhhhhhhhhhhhhhh
 ///            V           |    |    |    |    |    |        |
 /// Time   ================o====|====|====|====|====0========0====================
@@ -84,7 +85,6 @@ public:
 
 	void miss_next_time_slot(); // updates state_change_no_
 	void setFree();   // ensures that isFree() always returns true, updates state_change_no_
-	void clearFree(); // resets the free flag, updates state_change_no_
 	bool isSetFree() const { return makeFree_; }
  	bool isFree(const ecf::Calendar&) const;
    bool checkForRequeue( const ecf::Calendar& c,const TimeSlot& the_min,const TimeSlot& the_max) const
@@ -108,6 +108,7 @@ public:
 	const TimeSeries& time_series() const { return timeSeries_; }
 
 private:
+	void clearFree(); // resets the free flag, updates state_change_no_
    bool is_free(const ecf::Calendar&) const; // ignores makeFree_
 
 private:

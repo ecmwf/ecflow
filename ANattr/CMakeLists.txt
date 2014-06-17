@@ -18,5 +18,4 @@ ecbuild_add_test( TARGET   u_anattr
                   BOOST
                   SOURCES  ${test_srcs}
                   LIBS     nodeattr
-                  INCLUDES ${Boost_INCLUDE_DIRS} 
                  )

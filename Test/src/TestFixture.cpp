@@ -372,6 +372,16 @@ std::string TestFixture::taskAbsNodePath(const Defs& theDefs, const std::string&
 	}
 
 	cout << "TestFixture::taskAbsNodePath: assert failed: Could not find task " << taskName << "\n";
-	assert(false); // cound not find the task ??
+	assert(false); // could not find the task ??
 	return string();
+}
+
+int TestFixture::server_version()
+{
+   client().server_version();
+   std::string the_server_version_str = TestFixture::client().get_string();
+   //cout << "\nserver_version_str = " << the_server_version_str << "\n";
+   BOOST_REQUIRE_MESSAGE( Str::replace_all(the_server_version_str,".",""),"failed to find '.' in server version string " << TestFixture::client().get_string());
+   int the_server_version = boost::lexical_cast<int>(the_server_version_str);
+   return the_server_version;
 }
