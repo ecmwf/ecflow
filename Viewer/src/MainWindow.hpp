@@ -17,6 +17,7 @@
 #include "ui_MainWindow.h"
 
 #include "Defs.hpp"
+#include "SessionHandler.hpp"
 #include "Viewer.hpp"
 
 class QActionGroup;
@@ -39,6 +40,7 @@ public:
     static void openWindow(QString id,QWidget *fromW=0);
     static void openWindow(QStringList id,QWidget *fromW=0);
     static void reload();
+    static void saveSession(SessionItem*);
 
 protected slots:
 	void on_actionNewTab_triggered();
