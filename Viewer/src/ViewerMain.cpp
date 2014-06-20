@@ -13,9 +13,12 @@
 
 #include <QApplication>
 
+#include "File.hpp"
 #include "Version.hpp"
 #include "MainWindow.hpp"
 #include "ServerHandler.hpp"
+#include "MenuHandler.hpp"
+#include "DirectoryHandler.hpp"
 
 int main(int argc, char **argv)
 {
@@ -33,6 +36,12 @@ int main(int argc, char **argv)
     QApplication app(argc, argv);
 
     ServerHandler::addServer(argv[1],argv[2]);
+
+    // load the configurable menu items
+    DirectoryHandler::setExePath(std::string(argv[0]));  // we need to tell the Directory class where we started from
+    std::string menuFilename("ecflowview_menus.json");
+    std::string menuPath = DirectoryHandler::concatenate(DirectoryHandler::etcDir(), menuFilename);
+    MenuHandler::readMenuConfigFile(menuPath);
 
     MainWindow::init();
 

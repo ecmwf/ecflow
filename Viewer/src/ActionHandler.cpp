@@ -3,6 +3,7 @@
 #include <QAction>
 #include <QMenu>
 #include "ServerHandler.hpp"
+#include "MenuHandler.hpp"
 
 ActionHandler::ActionHandler(QWidget *view) : QObject(view), parent_(view)
 {
@@ -14,6 +15,23 @@ ActionHandler::ActionHandler(QWidget *view) : QObject(view), parent_(view)
 
 void ActionHandler::contextMenu(std::vector<ViewNodeInfo_ptr> nodesLst,QPoint pos)
 {
+
+
+    QAction *action = MenuHandler::invokeMenu("Node", nodesLst,pos,  parent_);
+
+    if(action)
+    {
+        if(action->iconText() == "Set as root")
+        {
+            emit viewCommand(nodesLst,"set_as_root");
+        }
+        else
+        {
+            ServerHandler::command(nodesLst,action->iconText().toStdString());
+        }
+    }
+
+/*
 	QMenu *menu=new QMenu(parent_);
 
 	QList<QAction*> acLst;
@@ -39,5 +57,5 @@ void ActionHandler::contextMenu(std::vector<ViewNodeInfo_ptr> nodesLst,QPoint po
 	}
 
 	delete menu;
-
+*/
 }

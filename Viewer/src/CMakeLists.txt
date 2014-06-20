@@ -2,9 +2,11 @@
 set(viewer_srcs   
     ViewerMain.cpp
     ActionHandler.cpp
+    DirectoryHandler.cpp
     FilterWidget.cpp
     InfoPanel.cpp
     MainWindow.cpp
+    MenuHandler.cpp
     NodePanel.cpp
     NodePathWidget.cpp
     NodeViewBase.cpp
