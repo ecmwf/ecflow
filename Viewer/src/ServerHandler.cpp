@@ -58,11 +58,11 @@ ServerHandler::ServerHandler(const std::string& name, const std::string& port) :
 
 	// populate the map of server commands - in the future this will be done when
 	// the configuration file is parsed
-	if (commands_.empty())
-	{
-		addServerCommand("Requeue", "ecflow_client --requeue force <full_name>");
-		addServerCommand("Execute", "ecflow_client --run <full_name>");
-	}
+	//if (commands_.empty())
+	//{
+	//	addServerCommand("Requeue", "ecflow_client --requeue force <full_name>");
+	//	addServerCommand("Execute", "ecflow_client --run <full_name>");
+	//}
 
 
 	// XXX we may not always want to create a thread here because of resource

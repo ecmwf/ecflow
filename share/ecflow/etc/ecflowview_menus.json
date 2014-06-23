@@ -1,0 +1,79 @@
+{
+    "file_id" : "ecflowview menu configuration",
+
+    "file_version" : "1.0",
+
+    "menus" :
+    [
+        {
+            "name"    : "Node",
+            "modes"   : ["Context", "Bar"]
+        },
+
+        {
+            "name"    : "Delete",
+            "modes"   : ["Submenu"],
+            "parent"  : "Node"
+        }
+
+    ],
+
+
+
+    "menu_items" :
+    [
+
+        {
+            "name"           : "Execute",
+            "menu"           : "Node",
+            "valid_types"    : ["task", "alias"],
+            "valid_states"   : ["complete", "unknown", "queued", "aborted", "suspended"],
+            "command"        : "ecflow_client --run <full_name>"
+        },
+
+        {
+            "name"           : "Set complete",
+            "menu"           : "Node",
+            "valid_types"    : ["task", "alias"],
+            "valid_states"   : ["submitted", "active"],
+            "command"        : "ecflow_client --force complete <full_name>",
+            "question"       : "Have you checked that the job is not active anymore (jobstatus)?",
+            "default_answer" : "Yes"
+        },
+
+        {
+            "name"           : "Suspend",
+            "menu"           : "Node",
+            "valid_types"    : ["all"],
+            "valid_states"   : ["not suspended"],
+            "command"        : "ecflow_client --suspend <full_name>"
+        },
+
+        {
+            "name"           : "Delete",
+            "menu"           : "Node",
+            "valid_types"    : ["suite", "task", "family"],
+            "valid_states"   : ["queued"],
+            "valid_attrs"    : ["has_triggers", "has_time", "has_date"],
+            "command"        : "None",
+            "submenu"        : "Delete"
+        },
+
+        {
+            "name"           : "Set as root",
+            "menu"           : "Node",
+            "valid_types"    : ["suite", "task", "family"]
+        },
+
+        {
+            "name"           : "All dependencies",
+            "menu"           : "Delete",
+            "valid_types"    : ["task", "alias"],
+            "valid_states"   : ["submitted", "active"],
+            "valid_attrs"    : ["has_triggers", "has_time", "has_date"],
+            "command"        : "ecflow_client --free-dep all <full_name>"
+        }
+
+    ]
+
+}

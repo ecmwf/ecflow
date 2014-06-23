@@ -2,12 +2,14 @@
 set(viewer_srcs   
     ViewerMain.cpp
     ActionHandler.cpp
+    DirectoryHandler.cpp
     FilterWidget.cpp
     InfoItemWidget.cpp
     InfoPanel.cpp 
     InfoPanelItem.cpp
     JobItemWidget.cpp
     MainWindow.cpp
+    MenuHandler.cpp
     MessageItemWidget.cpp
     NodePanel.cpp
     NodePathWidget.cpp
