@@ -35,6 +35,8 @@ suite today
          today 23:00
      task t5
          today 10:00
+     task t5_1
+         today 08:00    
     task t6
          today 11:00
          today 11:30
