@@ -13,7 +13,7 @@
 
 namespace Viewer
 {
-    enum ViewMode {TreeViewMode,TableViewMode,NoViewMode,};
+    enum ViewMode {TreeViewMode,TableViewMode,NoViewMode};
     enum ItemRole {InfoRole,ManualRole,ScriptRole,JobRole,OutputRole,WhyRole,TriggersRole,TimelineRole,VariableRole,EditRole,MessageRole};
 }
 

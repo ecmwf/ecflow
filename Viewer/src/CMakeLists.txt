@@ -1,17 +1,23 @@
 
 set(viewer_srcs   
     ViewerMain.cpp
+    AbstractNodeModel.cpp
     ActionHandler.cpp
     DirectoryHandler.cpp
     FilterWidget.cpp
-    InfoPanel.cpp
+    InfoItemWidget.cpp
+    InfoPanel.cpp 
+    InfoPanelItem.cpp
+    JobItemWidget.cpp
     MainWindow.cpp
     MenuHandler.cpp
+    MessageItemWidget.cpp
     NodePanel.cpp
     NodePathWidget.cpp
     NodeViewBase.cpp
     NodeViewHandler.cpp
     NodeWidget.cpp
+    ScriptItemWidget.cpp
     ServerHandler.cpp
     ServerFilter.cpp
     ServerItem.cpp
@@ -32,7 +38,8 @@ set(viewer_srcs
 
 include(${QT_USE_FILE})
 
-QT4_WRAP_CPP(VIEWER_MOC ActionHandler.hpp
+QT4_WRAP_CPP(VIEWER_MOC AbstractNodeModel.hpp
+					    ActionHandler.hpp
                         FilterWidget.hpp
                         InfoPanel.hpp
                         MainWindow.hpp
@@ -42,8 +49,7 @@ QT4_WRAP_CPP(VIEWER_MOC ActionHandler.hpp
                         ServerHandler.hpp
                         ServerDialog.hpp
                         TabWidget.hpp
-                        TableNodeView.hpp
-                        TreeNodeModel.hpp
+                        TableNodeView.hpp                      
                         TreeNodeView.hpp
                         UserMessage.hpp
                         VariableItemWidget.hpp)

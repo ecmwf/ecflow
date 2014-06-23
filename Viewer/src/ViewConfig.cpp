@@ -11,16 +11,83 @@
 #include "ViewConfig.hpp"
 
 #include <QDebug>
+#include <QRegExp>
 
 #include <stdlib.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
 
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/json_parser.hpp>
+
 ViewConfig* ViewConfig::instance_=0;
+
+//============================================
+//
+// VParameter
+//
+//============================================
+
+VParameter::VParameter(QString name,const std::map<QString,QString>& attr) : name_(name), attr_(attr)
+{
+	if(attribute("type") == "colour")
+	{
+		default_=toColour(attribute("default"));
+	}
+	value_=default_;
+}
+
+QString VParameter::attribute(QString name)
+{
+	std::map<QString,QString>::iterator it=attr_.find(name);
+	if(it != attr_.end())
+		return it->second;
+
+	return QString();
+}
+
+QColor VParameter::toColour(QString name)
+{
+	qDebug() << name;
+	QColor col;
+	QRegExp rx("rgb\\((\\d+),(\\d+),(\\d+)");
+
+	if(rx.indexIn(name) > -1 && rx.captureCount() == 3)
+	{
+	  	col=QColor(rx.cap(1).toInt(),
+			      rx.cap(2).toInt(),
+			      rx.cap(3).toInt());
+
+	}
+
+	qDebug() << col;
+
+	return col;
+}
+
+//============================================
+//
+// ViewConfig
+//
+//============================================
 
 ViewConfig::ViewConfig()
 {
+	//Read parameters into a map
+	std::string sysDir("/home/graphics/cgr/ecflowview_config.options");
+	readParams(sysDir);
+
+	//Store state params in a map. In order to make it work the state parameter names read
+	//from the param file must match the names State::toString() returns!
+	std::vector<DState::State> sv=DState::states();
+	for(std::vector<DState::State>::const_iterator it=sv.begin(); it != sv.end(); it++)
+	{
+		std::map<QString,VParameter*>::iterator itP=params_.find(QString::fromStdString(DState::toString(*it)));
+		if(itP != params_.end())
+			stateParams_[*it]=itP->second;
+	}
+
 	//Set configuration directory name and create it.
 	if(char *h=getenv("HOME"))
 	{
@@ -41,104 +108,122 @@ ViewConfig::ViewConfig()
 		rcDir_=std::string(h);
 		rcDir_+="/.ecflowrc";
 	}
-
-	//Colour params
-	colour_[Unknown]= new VParameter("unknown","Un","","unknown",QColor(220,220,220));
-	colour_[Complete]= new VParameter("complete","C","","complete",QColor(255,255,0));
-	colour_[Queued]= new VParameter("queued","Q","","queued",QColor(224,240,255));
-	colour_[Aborted]= new VParameter("aborted","Ab","","aborted",QColor(255,0,0));
-	colour_[Submitted]= new VParameter("submitted","Sb","","submitted",QColor(64,224,208));
-	colour_[Active]= new VParameter("active","Ac","","active",QColor(0,255,0));
-	colour_[Suspended]= new VParameter("suspended","Sp","","suspended",QColor(255,166,0));
-	//colour_[Active]= new VParameter("active","","",QColor(200,200,200));
-
-	colour_[Halted]= new VParameter("suspended","","","",QColor(200,200,200));
-	colour_[Shutdown]= new VParameter("suspended","","","",QColor(200,200,200));
-	colour_[Meter]= new VParameter("suspended","","","",QColor(200,200,200));
-	colour_[Threshold]= new VParameter("suspended","","","",QColor(200,200,200));
-	colour_[Event]= new VParameter("suspended","","","",QColor(200,200,200));
-
-	//Font params
-	font_[NormalFont]=new VParameter("normal","","","",QFont());
-	font_[BoldFont]=new VParameter("normal","","","",QFont());
-	font_[SmallFont]=new VParameter("normal","","","",QFont());
-	font_[SmallBoldFont]=new VParameter("normal","","","",QFont());
-
-	stateMap_[DState::UNKNOWN]=Unknown;
-	stateMap_[DState::COMPLETE]=Complete;
-	stateMap_[DState::QUEUED]=Queued;
-	stateMap_[DState::ABORTED]=Aborted;
-	stateMap_[DState::SUBMITTED]=Submitted;
-	stateMap_[DState::ACTIVE]=Active;
-	stateMap_[DState::SUSPENDED]=Suspended;
-
 }
 
 ViewConfig* ViewConfig::Instance()
 {
-		if(!instance_)
-				instance_=new ViewConfig();
-		return instance_;
+	if(!instance_)
+			instance_=new ViewConfig();
+	return instance_;
 }
+
+/*
+bool ViewConfig::load(const std::string& name)
+{
+	profileName_=name;
+	profileDir_=configDir_+ "/" + profileName + ".prof";
+
+	QFile file(QString::fromStdString(profileFile_));
+	if(!file.open(QIODevice::ReadOnly | QIODevice::Text))
+	{
+		return false;
+	}
+
+	//Local to config
+	//read colour
+	//read font
+	//read server
+
+	//read tabs
+	tabFile_=profileDir_+ "/" + "tabs.txt";
+
+	return true;
+}
+
+bool ViewConfig::save(const std::string& name)
+{
+	profileName_=name;
+	profileDir_=configDir_+ "/" + profileName + ".prof";
+
+	QFile file(QString::fromStdString(profileFile_));
+	if(!file.open(QIODevice::Writeonly | QIODevice::Text))
+	{
+		return false;
+	}
+
+	//Local to config
+	//read colour
+	//read font
+	//read server
+
+	//read tabs
+	tabFile_=profileDir_+ "/" + "tabs.txt";
+
+	return true;
+}
+*/
 
 QColor ViewConfig::stateColour(DState::State st) const
 {
-		std::map<DState::State,PaletteItem>::const_iterator it=stateMap_.find(st);
-		if(it != stateMap_.end())
-				return colour(it->second);
-		return QColor();
+	std::map<DState::State,VParameter*>::const_iterator it=stateParams_.find(st);
+	if(it != stateParams_.end())
+			return it->second->toColour();
+	return QColor();
 }
 
 QString ViewConfig::stateName(DState::State st) const
 {
-		std::map<DState::State,PaletteItem>::const_iterator it=stateMap_.find(st);
-		if(it != stateMap_.end())
-				return name(it->second);
-		return QString();
+	std::map<DState::State,VParameter*>::const_iterator it=stateParams_.find(st);
+	if(it != stateParams_.end())
+			return it->second->name();
+	return QString();
 }
 
 QString ViewConfig::stateShortName(DState::State st) const
 {
-		std::map<DState::State,PaletteItem>::const_iterator it=stateMap_.find(st);
-		if(it != stateMap_.end())
-				return shortName(it->second);
-		return QString();
+	std::map<DState::State,VParameter*>::const_iterator it=stateParams_.find(st);
+	if(it != stateParams_.end())
+			return it->second->attribute("shortname");
+	return QString();
 }
 
-QColor ViewConfig::colour(PaletteItem item) const
+QColor ViewConfig::colour(QString parName) const
 {
-		std::map<PaletteItem,VParameter*>::const_iterator it=colour_.find(item);
-		if(it != colour_.end())
+	std::map<QString,VParameter*>::const_iterator it=params_.find(parName);
+	if(it != params_.end())
+			return it->second->toColour();
+	return QColor();
+}
+
+void ViewConfig::readParams(const std::string& parFile)
+{
+	//Parse param file using the boost JSON property tree parser
+	using boost::property_tree::ptree;
+	ptree pt;
+
+	try
+	{
+		read_json(parFile,pt);
+	}
+	catch (const boost::property_tree::json_parser::json_parser_error& e)
+	{
+		//QMessageBox::warning(0, QString("Metview"),
+		//				 tr("Error, unable to parse JSON response from server"));
+		return;
+	}
+
+	// for each parameter
+	for(ptree::const_iterator itPar = pt.begin(); itPar != pt.end(); ++itPar)
+	{
+		QString name=QString::fromStdString(itPar->first);
+		ptree const &parPt = itPar->second;
+
+		std::map<QString,QString> vals;
+		for(ptree::const_iterator itV = parPt.begin(); itV != parPt.end(); ++itV)
 		{
-				return it->second->toColour();
+			vals[QString::fromStdString(itV->first)]=QString::fromStdString(itV->second.get_value<std::string>());
 		}
-		return QColor();
-}
-
-QFont ViewConfig::font(FontItem item) const
-{
-		std::map<FontItem,VParameter*>::const_iterator it=font_.find(item);
-		if(it != font_.end())
-				return it->second->toFont();
-		return QFont();
-}
-
-QString ViewConfig::name(PaletteItem item) const
-{
-		std::map<PaletteItem,VParameter*>::const_iterator it=colour_.find(item);
-		if(it != colour_.end())
-		{
-				return it->second->name();
-		}
-		return QString();
-}
-
-QString ViewConfig::shortName(PaletteItem item) const
-{
-		std::map<PaletteItem,VParameter*>::const_iterator it=colour_.find(item);
-		if(it != colour_.end())
-		{
-				return it->second->shortName();
-		}
-		return QString();
+		VParameter *par=new VParameter(name,vals);
+		params_[name]=par;
+	}
 }

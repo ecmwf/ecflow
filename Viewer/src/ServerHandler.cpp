@@ -12,7 +12,9 @@
 #include "ServerHandler.hpp"
 
 #include "Defs.hpp"
+#include "ChangeMgrSingleton.hpp"
 #include "ClientInvoker.hpp"
+#include "File.hpp"
 #include "ArgvCreator.hpp"
 #include "Str.hpp"
 #include "MainWindow.hpp"
@@ -260,6 +262,190 @@ int ServerHandler::indexOfImmediateChild(Node *node)
 	return -1;
 }
 
+const std::vector<std::string>& ServerHandler::messages(Node* node)
+{
+	try
+	{
+	      client_->edit_history(node->absNodePath());
+	}
+	catch ( std::exception &e )
+	{
+	      //gui::message("host::messages: %s", e.what());
+	}
+	return client_->server_reply().get_string_vec();
+}
+
+
+bool ServerHandler::readFile(Node *n,const std::string& id,
+		     std::string& fileName,std::string& txt,std::string& errTxt)
+{
+  	if(id == "ECF_SCRIPT")
+  	{
+    	errTxt = "no script!\n"
+      		"check ECF_FILES or ECF_HOME directories, for read access\n"
+      		"check for file presence and read access below files directory\n"
+      		"or this may be a 'dummy' task.\n";
+
+    	n->findGenVariableValue(id,fileName);
+  	}
+  	else if(id == "ECF_JOB")
+  	{
+  		errTxt = "no script!\n"
+  		      		"check ECF_FILES or ECF_HOME directories, for read access\n"
+  		      		"check for file presence and read access below files directory\n"
+  		      		"or this may be a 'dummy' task.\n";
+
+  		n->findGenVariableValue(id,fileName);
+  	}
+
+  	//Try to read file
+  	if(ecf::File::open(fileName,txt))
+  	{
+  		return true;
+  	}
+  	else
+  	{
+  		//gui::message("%s: fetching %s", this->name(), name.c_str());
+  	    try
+  	    {
+  	    	if (id == "ECF_SCRIPT")
+  	      			client_->file(n->absNodePath(), "script");
+  	    	else if (id == "ECF_JOB")
+  	      	{
+  	      		client_->file(n->absNodePath(), "job");
+  	      		//boost::lexical_cast<std::string>(jobfile_length_));
+  	      	}
+  	      	else if (id == "ECF_JOBOUT")
+  	      	{
+  	      		client_->file(n->absNodePath(), "jobout");
+  	      	}
+  	      	else
+  	      	{
+  	      		client_->file(n->absNodePath(), "jobout");
+  	      	}
+
+  	      	// Do *not* assign 'client_.server_reply().get_string()' to a separate string, since
+  	      	// in the case of job output the string could be several megabytes.
+  	      	txt=client_->server_reply().get_string();
+
+  	    	//return tmp_file(client_->server_reply().get_string());
+  	   }
+  	   catch(std::exception &e )
+  	   {
+  	         //gui::message("host::file-error: %s", e.what());
+  		   	return false;
+  	   }
+  	}
+
+  	return false;
+
+  	/*
+  	else if(id == "ECF_JOB")
+  	{
+    	n->findGenVariableValue(name,fileName);
+
+    	if (read && (access(fileName.c_str(), R_OK) == 0))
+    		//return tmp_file(fileName.c_str(), false);
+    		return true;
+
+    	if(std::string::npos != fileName.find(".job0"))
+    	{
+			error = "job0: no job to be generated yet!";
+			return false;
+      	}
+      	else
+	  	{
+	  			error = "no script!\n"
+      			"check ECF_HOME,directory for read/write access\n"
+      			"check for file presence and read access below\n"
+      			"The file may have been deleted\n"
+      			"or this may be a 'dummy' task.\n";
+      	}
+  	}
+  	else if(boost::algorithm::ends_with(name, ".0"))
+  	{
+    	error = "no output to be expected when TRYNO is 0!\n";
+    	return false;
+  	}
+  	else //if (name != ecf_node::none())
+  	{
+  		// Try logserver
+      	loghost_ = n.variable("ECF_LOGHOST", true);
+      	logport_ = n.variable("ECF_LOGPORT");
+      	if (loghost_ == ecf_node::none())
+      	{
+         	loghost_ = n.variable("LOGHOST", true);
+         	logport_ = n.variable("LOGPORT");
+    	}
+
+   		std::string::size_type pos = loghost_.find(n.variable("ECF_MICRO"));
+      	if (std::string::npos == pos && loghost_ != ecf_node::none())
+      	{
+         	logsvr the_log_server(loghost_, logport_);
+         	if (the_log_server.ok())
+         	{
+            	tmp_file tmp = the_log_server.getfile(name); // allow more than latest output
+            	if (access(tmp.c_str(), R_OK) == 0) return tmp;
+         	}
+      	}
+
+
+  /* if (read && (access(name.c_str(), R_OK) == 0))
+   {
+		return tmp_file(name.c_str(), false);
+   }
+   else
+   {
+      	//gui::message("%s: fetching %s", this->name(), name.c_str());
+      	try
+      	{
+      		if (name == "ECF_SCRIPT")
+      			client_->file(n->absNodePath(), "script");
+      		else if (name == "ECF_JOB")
+      		{
+      			client_->file(n->absNodePath(), "job");
+      			//boost::lexical_cast<std::string>(jobfile_length_));
+      		}
+      		else if (name == "ECF_JOBOUT")
+      		{
+      			client_->file(n->absNodePath(), "jobout");
+      		}
+      		else
+      		{
+      			client_->file(n->absNodePath(), "jobout");
+      		}
+
+      		// Do *not* assign 'client_.server_reply().get_string()' to a separate string, since
+      		// in the case of job output the string could be several megabytes.
+      		return tmp_file(client_->server_reply().get_string());
+      	}
+      	catch ( std::exception &e )
+      	{
+         //gui::message("host::file-error: %s", e.what());
+      	}
+   }
+
+   //return tmp_file(error);*/
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 void ServerHandler::updateAll()
 {
 	for(std::vector<ServerHandler*>::const_iterator it=servers_.begin(); it != servers_.end();it++)
@@ -490,6 +676,19 @@ ServerHandler* ServerHandler::find(Node *node)
 }
 
 
+void ServerHandler::addNodeObserver(QObject* obs)
+{
+		connect(comThread_,SIGNAL(nodeChanged(const Node*, const std::vector<ecf::Aspect::Type>&)),
+				obs,SLOT(slotNodeChanged(const Node*, const std::vector<ecf::Aspect::Type>&)));
+}
+
+void ServerHandler::removeNodeObserver(QObject* obs)
+{
+		disconnect(comThread_,SIGNAL(nodeChanged(const Node*, const std::vector<ecf::Aspect::Type>&)),
+				obs,SLOT(slotNodeChanged(const Node*, const std::vector<ecf::Aspect::Type>&)));
+}
+
+
 // called by ChangeMgrSingleton when the definition is about to be updated
 void ServerHandler::update(const Defs*, const std::vector<ecf::Aspect::Type>&)
 {
@@ -640,7 +839,7 @@ void ServerHandler::commandSent()
 
 
 
-ServerComThread::ServerComThread()
+ServerComThread::ServerComThread() : server_(0)
 {
 }
 
@@ -659,6 +858,10 @@ void ServerComThread::sendCommand(ServerHandler *server, ClientInvoker *ci, Serv
 	}
 	else
 	{
+
+		if(!server_ && server)
+			initObserver(server);
+
 		server_  = server;
 		ci_      = ci;
 		comType_ = comType;
@@ -720,7 +923,33 @@ void ServerComThread::run()
 	std::cout << "  ServerComThread::run finished" << "\n";
 }
 
+void ServerComThread::initObserver(ServerHandler* server)
+{
+	ServerDefsAccess defsAccess(server);  // will reliquish its resources on destruction
+	defs_ptr d = defsAccess.defs();
+	if(d == NULL)
+		return;
 
+	const std::vector<suite_ptr> &suites = d->suiteVec();
+	for(unsigned int i=0; i < suites.size();i++)
+	{
+		ChangeMgrSingleton::instance()->attach(suites.at(i).get(),this);
+
+		std::set<Node*> nodes;
+		suites.at(i)->allChildren(nodes);
+		for(std::set<Node*>::iterator it=nodes.begin(); it != nodes.end(); it++)
+			ChangeMgrSingleton::instance()->attach((*it),this);
+
+	}
+}
+
+void ServerComThread::update(const Node* node, const std::vector<ecf::Aspect::Type>& types)
+{
+	if(node==NULL)
+		return;
+
+	emit nodeChanged(node,types);
+}
 
 // ------------------------------------------------------------
 //                         ServerDefsAccess

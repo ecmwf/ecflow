@@ -31,7 +31,7 @@ class ServerHandler;
 // an ecflow server.
 // -------------------------------------------------------
 
-class ServerComThread : public QThread
+class ServerComThread : public QThread, public AbstractObserver
 {
 	Q_OBJECT
 
@@ -45,8 +45,16 @@ public:
 	ComType commandType();
 	void stop();
 
+	//From AbstractObserver
+	void update(const Node*, const std::vector<ecf::Aspect::Type>&);
+	void update(const Defs*, const std::vector<ecf::Aspect::Type>&)  {};
+
+signals:
+	void nodeChanged(const Node*, const std::vector<ecf::Aspect::Type>&);
+
 protected:
 	void run();
+	void initObserver(ServerHandler* server);
 
 private:
 	ServerHandler *server_;
@@ -84,6 +92,10 @@ public:
 		void setUpdatingStatus(bool newStatus) {updating_ = newStatus;}
 		void releaseDefs();
 
+		const std::vector<std::string>& messages(Node* node);
+		bool readFile(Node *n,const std::string& id,
+				     std::string& fileName,std::string& txt,std::string& errTxt);
+
 		static const std::vector<ServerHandler*>& servers() {return servers_;}
 		static ServerHandler* addServer(const std::string &server, const std::string &port);
 		static int numOfImmediateChildren(Node*);
@@ -101,6 +113,9 @@ public:
 		//From AbstractObserver
 		void update(const Node*, const std::vector<ecf::Aspect::Type>&) {};
 		void update(const Defs*, const std::vector<ecf::Aspect::Type>&);
+
+		void addNodeObserver(QObject* obs);
+		void removeNodeObserver(QObject* obs);
 
 protected:
 

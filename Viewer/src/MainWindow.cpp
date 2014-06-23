@@ -464,6 +464,14 @@ void MainWindow::reload()
 	}
 }
 
+void MainWindow::saveSession(SessionItem* s)
+{
+
+
+
+}
+
+
 
 void MainWindow::save(MainWindow *topWin)
 {

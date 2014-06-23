@@ -24,11 +24,11 @@ class InfoPanelItemHandler
 friend class InfoPanel;
 
 public:
-		InfoPanelItemHandler(Viewer::ItemRole role,QString name,InfoPanelItem* item) :
-			role_(role), label_(name), item_(item) {}
+		InfoPanelItemHandler(QString id,QString name,InfoPanelItem* item) :
+			id_(id), label_(name), item_(item) {}
 
-		bool match(QList<Viewer::ItemRole> roles) const;
-		Viewer::ItemRole role() const {return role_;}
+		bool match(QStringList ids) const;
+		QString id() const {return id_;}
 		InfoPanelItem* item() const {return item_;}
 		QWidget* widget();
 
@@ -36,7 +36,7 @@ protected:
 		void addToTab(QTabWidget *);
 
 private:
-		Viewer::ItemRole role_;
+		QString id_;
 		QString label_;
 		InfoPanelItem* item_;
 };
@@ -52,15 +52,18 @@ public:
 
 public slots:
 	void slotReload(ViewNodeInfo_ptr node);
+	void slotCurrentWidgetChanged(int);
 
 protected:
-	void adjustToRoles(QList<Viewer::ItemRole>);
+	void adjust(QStringList);
 	InfoPanelItemHandler* findHandler(QWidget* w);
-	InfoPanelItemHandler* findHandler(Viewer::ItemRole);
+	InfoPanelItemHandler* findHandler(QString id);
 	InfoPanelItem* findItem(QWidget* w);
+	InfoPanelItemHandler* createHandler(QString id);
 
 	QTabWidget *tab_;
 	QList<InfoPanelItemHandler*> items_;
+	ViewNodeInfo_ptr currentNode_;
 };
 
 #endif
