@@ -81,3 +81,13 @@ void VariableItemWidget::reload(ViewNodeInfo_ptr info)
 	view_->reload(info);
 }
 
+void VariableItemWidget::clearContents()
+{
+	loaded_=false;
+}
+
+
+static InfoPanelItemMaker<VariableItemWidget> maker1("variable");
+
+
+

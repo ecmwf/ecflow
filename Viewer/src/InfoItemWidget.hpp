@@ -8,45 +8,25 @@
 //
 //============================================================================
 
-#ifndef VARIABLEITEMWIDGET_HPP_
-#define VARIABLEITEMWIDGET_HPP_
+#ifndef INFOITEMWIDGET_HPP_
+#define INFOITEMWIDGET_HPP_
 
-#include <QTreeView>
+#include <QPlainTextEdit>
 
 #include "InfoPanelItem.hpp"
 #include "ViewNodeInfo.hpp"
 
-class VariableModel;
-
-class VariableView : public QTreeView
-{
-Q_OBJECT
-
-public:
-		VariableView(QWidget *parent=0);
-		//void reload();
-		void reload(ViewNodeInfo_ptr);
-
-public slots:
-	void slotSelectItem(const QModelIndex&);
-
-protected:
-	VariableModel *model_;
-};
-
-
-class VariableItemWidget : public QWidget, public InfoPanelItem
+class InfoItemWidget : public QPlainTextEdit, public InfoPanelItem
 {
 public:
-	VariableItemWidget(QWidget *parent=0);
+	InfoItemWidget(QWidget *parent=0);
 
 	void reload(ViewNodeInfo_ptr);
 	QWidget* realWidget();
 	void clearContents();
 
-
-protected:
-	VariableView *view_;
+private:
+	void info(Node* node,std::stringstream& f);
 
 };
 

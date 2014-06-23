@@ -3,13 +3,18 @@ set(viewer_srcs
     ViewerMain.cpp
     ActionHandler.cpp
     FilterWidget.cpp
-    InfoPanel.cpp
+    InfoItemWidget.cpp
+    InfoPanel.cpp 
+    InfoPanelItem.cpp
+    JobItemWidget.cpp
     MainWindow.cpp
+    MessageItemWidget.cpp
     NodePanel.cpp
     NodePathWidget.cpp
     NodeViewBase.cpp
     NodeViewHandler.cpp
     NodeWidget.cpp
+    ScriptItemWidget.cpp
     ServerHandler.cpp
     ServerFilter.cpp
     ServerItem.cpp

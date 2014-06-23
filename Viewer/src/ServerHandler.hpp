@@ -84,6 +84,10 @@ public:
 		void setUpdatingStatus(bool newStatus) {updating_ = newStatus;}
 		void releaseDefs();
 
+		const std::vector<std::string>& messages(Node* node);
+		bool readFile(Node *n,const std::string& id,
+				     std::string& fileName,std::string& txt,std::string& errTxt);
+
 		static const std::vector<ServerHandler*>& servers() {return servers_;}
 		static ServerHandler* addServer(const std::string &server, const std::string &port);
 		static int numOfImmediateChildren(Node*);
