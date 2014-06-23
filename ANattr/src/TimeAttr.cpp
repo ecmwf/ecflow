@@ -132,7 +132,7 @@ void TimeAttr::miss_next_time_slot()
 bool TimeAttr::why(const ecf::Calendar& c, std::string& theReasonWhy) const
 {
 	if (isFree(c)) return false;
-	theReasonWhy += " is time dependent";
+	theReasonWhy += "is time dependent";
 
 	// Check to see if time has expired, if has not, then report why
 	if (timeSeries_.is_valid()) {
