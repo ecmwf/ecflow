@@ -239,7 +239,7 @@ bool CronAttr::why(const ecf::Calendar& c, std::string& theReasonWhy) const
 	//  1/ Not on a valid time slot in the time series
 	//  *OR*
 	//  2/ Logical *AND* of day of week, day of month, or month returned false
-	theReasonWhy += " is cron dependent";
+	theReasonWhy += "is cron dependent";
 
 	// Lets say that the time series was NOT free.
 	// First check if week day, day of month, month, matches
@@ -268,7 +268,7 @@ bool CronAttr::why(const ecf::Calendar& c, std::string& theReasonWhy) const
 
    // take into account, user can use run/force complete to miss time slots
    bool do_a_requeue = timeSeries_.requeueable(c);
-   if (do_a_requeue) {
+   if (do_a_requeue && weekDays_.empty() && daysOfMonth_.empty() && months_.empty()) {
       TimeSlot the_next_time_slot = timeSeries_.compute_next_time_slot(c);
       if (the_next_time_slot.isNULL() ) {
          theReasonWhy += " ( *re-queue* to run at this time ";
@@ -277,12 +277,15 @@ bool CronAttr::why(const ecf::Calendar& c, std::string& theReasonWhy) const
          theReasonWhy += " ( *re-queue* to run at ";
          theReasonWhy += the_next_time_slot.toString() ;
       }
+
+      theReasonWhy += ", otherwise next run is at ";
+   }
+   else {
+      theReasonWhy += " ( next run is at ";
    }
 
   	// Find the *NEXT* date that matches, and use the first time slot
  	boost::gregorian::date the_next_date = next_date(c);
- 	if ( do_a_requeue ) theReasonWhy += ", otherwise next run is at ";
- 	else                theReasonWhy += " ( next run is at ";
  	theReasonWhy += timeSeries_.start().toString();
  	theReasonWhy += " ";
  	theReasonWhy += to_simple_string( the_next_date );
