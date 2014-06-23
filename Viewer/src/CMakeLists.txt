@@ -10,6 +10,7 @@ set(viewer_srcs
     InfoPanelItem.cpp
     JobItemWidget.cpp
     MainWindow.cpp
+    ManualItemWidget.cpp 
     MenuHandler.cpp
     MessageItemWidget.cpp
     NodePanel.cpp
