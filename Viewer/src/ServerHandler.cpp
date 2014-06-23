@@ -10,6 +10,7 @@
 #include "ServerHandler.hpp"
 
 #include "Defs.hpp"
+#include "ChangeMgrSingleton.hpp"
 #include "ClientInvoker.hpp"
 #include "File.hpp"
 #include "ArgvCreator.hpp"
@@ -672,6 +673,19 @@ ServerHandler* ServerHandler::find(Node *node)
 }
 
 
+void ServerHandler::addNodeObserver(QObject* obs)
+{
+		connect(comThread_,SIGNAL(nodeChanged(const Node*, const std::vector<ecf::Aspect::Type>&)),
+				obs,SLOT(slotNodeChanged(const Node*, const std::vector<ecf::Aspect::Type>&)));
+}
+
+void ServerHandler::removeNodeObserver(QObject* obs)
+{
+		disconnect(comThread_,SIGNAL(nodeChanged(const Node*, const std::vector<ecf::Aspect::Type>&)),
+				obs,SLOT(slotNodeChanged(const Node*, const std::vector<ecf::Aspect::Type>&)));
+}
+
+
 // called by ChangeMgrSingleton when the definition is about to be updated
 void ServerHandler::update(const Defs*, const std::vector<ecf::Aspect::Type>&)
 {
@@ -822,7 +836,7 @@ void ServerHandler::commandSent()
 
 
 
-ServerComThread::ServerComThread()
+ServerComThread::ServerComThread() : server_(0)
 {
 }
 
@@ -841,6 +855,10 @@ void ServerComThread::sendCommand(ServerHandler *server, ClientInvoker *ci, Serv
 	}
 	else
 	{
+
+		if(!server_ && server)
+			initObserver(server);
+
 		server_  = server;
 		ci_      = ci;
 		comType_ = comType;
@@ -891,7 +909,33 @@ void ServerComThread::run()
 	std::cout << "  ServerComThread::run finished" << "\n";
 }
 
+void ServerComThread::initObserver(ServerHandler* server)
+{
+	ServerDefsAccess defsAccess(server);  // will reliquish its resources on destruction
+	defs_ptr d = defsAccess.defs();
+	if(d == NULL)
+		return;
 
+	const std::vector<suite_ptr> &suites = d->suiteVec();
+	for(unsigned int i=0; i < suites.size();i++)
+	{
+		ChangeMgrSingleton::instance()->attach(suites.at(i).get(),this);
+
+		std::set<Node*> nodes;
+		suites.at(i)->allChildren(nodes);
+		for(std::set<Node*>::iterator it=nodes.begin(); it != nodes.end(); it++)
+			ChangeMgrSingleton::instance()->attach((*it),this);
+
+	}
+}
+
+void ServerComThread::update(const Node* node, const std::vector<ecf::Aspect::Type>& types)
+{
+	if(node==NULL)
+		return;
+
+	emit nodeChanged(node,types);
+}
 
 // ------------------------------------------------------------
 //                         ServerDefsAccess

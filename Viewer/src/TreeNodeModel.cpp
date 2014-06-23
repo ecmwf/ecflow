@@ -18,133 +18,18 @@
 #include "ViewConfig.hpp"
 #include "ViewFilter.hpp"
 
+//=======================================
+//
+// TreeNodeModel
+//
+//=======================================
+
+
 TreeNodeModel::TreeNodeModel(ServerFilter* serverFilter,QObject *parent) :
-   QAbstractItemModel(parent),
-   serverFilter_(serverFilter)
+   AbstractNodeModel(serverFilter,parent)
 {
-	serverFilter_->addObserver(this);
-	init();
-}
-
-
-void TreeNodeModel::notifyServerFilterChanged()
-{
-	beginResetModel();
-	clean();
-
-	for(unsigned int i=0; i < serverFilter_->servers().size(); i++)
-	{
-			ServerHandler *server=ServerHandler::find(serverFilter_->servers().at(i)->host(),
-					serverFilter_->servers().at(i)->port());
-			//initObserver(server);
-
-			servers_ << server;
-			rootNodes_[server] = NULL;
-	}
-
-	endResetModel();
-}
-
-void TreeNodeModel::init()
-{
-	/*for(unsigned int i=0; i < ServerHandler::servers().size(); i++)
-	{
-			ServerHandler *server=ServerHandler::servers().at(i);
-			initObserver(server);
-
-			servers_ << server;
-			rootNodes_[server] = NULL;
-	}*/
-
-	for(unsigned int i=0; i < serverFilter_->servers().size(); i++)
-		{
-				ServerHandler *server=ServerHandler::find(serverFilter_->servers().at(i)->host(),
-						serverFilter_->servers().at(i)->port());
-				initObserver(server);
-
-				servers_ << server;
-				rootNodes_[server] = NULL;
-		}
-
 
 }
-
-void TreeNodeModel::initObserver(ServerHandler* server)
-{
-	ServerDefsAccess defsAccess(server);  // will reliquish its resources on destruction
-	defs_ptr d = defsAccess.defs();
-	if(d == NULL)
-		return;
-
-	const std::vector<suite_ptr> &suites = d->suiteVec();
-	for(unsigned int i=0; i < suites.size();i++)
-	{
-		ChangeMgrSingleton::instance()->attach(suites.at(i).get(),this);
-
-		std::set<Node*> nodes;
-		suites.at(i)->allChildren(nodes);
-		for(std::set<Node*>::iterator it=nodes.begin(); it != nodes.end(); it++)
-			ChangeMgrSingleton::instance()->attach((*it),this);
-
-	}
-}
-
-void TreeNodeModel::clean()
-{
-	servers_.clear();
-	rootNodes_.clear();
-}
-
-void TreeNodeModel::reload()
-{
-	beginResetModel();
-	clean();
-	init();
-	endResetModel();
-}
-
-
-bool TreeNodeModel::hasData() const
-{
-	return servers_.size() >0;
-}
-
-void TreeNodeModel::dataIsAboutToChange()
-{
-	beginResetModel();
-}
-
-void TreeNodeModel::addServer(ServerHandler *server)
-{
-	servers_ << server;
-	rootNodes_[servers_.back()] = NULL;
-}
-
-
-Node * TreeNodeModel::rootNode(ServerHandler* server) const
-{
-	QMap<ServerHandler*,Node*>::const_iterator it=rootNodes_.find(server);
-	if(it != rootNodes_.end())
-		return it.value();
-	return NULL;
-}
-
-
-void TreeNodeModel::setRootNode(Node *node)
-{
-	if(ServerHandler *server=ServerHandler::find(node))
-	{
-		beginResetModel();
-
-		rootNodes_[server]=node;
-
-		//Reset the model (views will be notified)
-		endResetModel();
-
-		qDebug() << "setRootNode finished";
-	}
-}
-
 
 int TreeNodeModel::columnCount( const QModelIndex& /*parent */ ) const
 {
@@ -462,29 +347,6 @@ Node* TreeNodeModel::indexToNode( const QModelIndex & index) const
 }
 
 
-ViewNodeInfo_ptr TreeNodeModel::nodeInfo(const QModelIndex& index) const
-{
-	if(!index.isValid())
-	{
-		ViewNodeInfo_ptr res(new ViewNodeInfo());
-		return res;
-	}
-
-	ServerHandler *server=indexToServer(index);
-	if(server)
-	{
-		ViewNodeInfo_ptr res(new ViewNodeInfo(server));
-		return res;
-	}
-	else
-	{
-		Node* node=indexToNode(index);
-		ViewNodeInfo_ptr res(new ViewNodeInfo(node));
-		return res;
-	}
-}
-
-
 QModelIndex TreeNodeModel::nodeToIndex(Node* node, int column) const
 {
 	if(!node)
@@ -512,34 +374,11 @@ QModelIndex TreeNodeModel::nodeToIndex(Node* node, int column) const
 }
 
 
-void TreeNodeModel::update(const Node* node, const std::vector<ecf::Aspect::Type>& types)
-{
-	if(node==NULL)
-		return;
-
-	qDebug() << "observer is called" << QString::fromStdString(node->name());
-	for(unsigned int i=0; i < types.size(); i++)
-		qDebug() << "  type:" << types.at(i);
-
-	Node* nc=const_cast<Node*>(node);
-
-	QModelIndex index1=nodeToIndex(nc,0);
-	QModelIndex index2=nodeToIndex(nc,2);
-
-	Node *nd1=indexToNode(index1);
-	Node *nd2=indexToNode(index2);
-
-	//qDebug() << "indexes" << index1 << index2;
-	//qDebug() << "index pointers " << index1.internalPointer() << index2.internalPointer();
-	qDebug() << "    --->" << QString::fromStdString(nd1->name()) << QString::fromStdString(nd2->name());
-
-	emit dataChanged(index1,index2);
-}
-
-
-
-
-
+//=======================================
+//
+// TreeNodeFilterModel
+//
+//=======================================
 
 TreeNodeFilterModel::TreeNodeFilterModel(ViewFilter* filterData,QObject *parent) :
 		QSortFilterProxyModel(parent),

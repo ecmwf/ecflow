@@ -20,9 +20,9 @@
 #include "TableNodeModel.hpp"
 
 
-TableNodeView::TableNodeView(QString ,ViewFilter* filterData, QWidget* parent) : QTreeView(parent)
+TableNodeView::TableNodeView(QString ,ServerFilter* serverFilter,ViewFilter* filterData, QWidget* parent) : QTreeView(parent)
 {
-		model_=new TableNodeModel(this);
+		model_=new TableNodeModel(serverFilter,this);
 
 		filterModel_=new TableNodeFilterModel(filterData,this);
 		filterModel_->setSourceModel(model_);

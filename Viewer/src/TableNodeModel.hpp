@@ -6,22 +6,19 @@
 
 #include <vector>
 
+#include "AbstractNodeModel.hpp"
 #include "ViewFilterObserver.hpp"
 #include "ViewNodeInfo.hpp"
-#include "AbstractObserver.hpp"
 
 class ViewFilter;
 class Node;
+class ServerFilter;
 class ServerHandler;
 
-
-class TableNodeModel : public QAbstractItemModel, public AbstractObserver
+class TableNodeModel : public AbstractNodeModel
 {
-
 public:
-   	TableNodeModel(QObject *parent=0);
-
-	enum CustomItemRole {FilterRole = Qt::UserRole+1};
+   	TableNodeModel(ServerFilter* serverFilter,QObject *parent=0);
 
 	int columnCount (const QModelIndex& parent = QModelIndex() ) const;
    	int rowCount (const QModelIndex& parent = QModelIndex() ) const;
@@ -32,30 +29,15 @@ public:
    	QModelIndex index (int, int, const QModelIndex& parent = QModelIndex() ) const;
    	QModelIndex parent (const QModelIndex & ) const;
 
-	void addServer(ServerHandler *);
-	void dataIsAboutToChange();
-	ViewNodeInfo_ptr nodeInfo(const QModelIndex& index) const;
-
-	//From AbstractObserver
-	void update(const Node*, const std::vector<ecf::Aspect::Type>&);
-	void update(const Defs*, const std::vector<ecf::Aspect::Type>&)  {};
-
-
 protected:
-	void initObserver(ServerHandler* server);
-    bool hasData() const;
 	bool isServer(const QModelIndex & index) const;
 	ServerHandler* indexToServer(const QModelIndex & index) const;
 	QModelIndex serverToIndex(ServerHandler*) const;
-	QModelIndex nodeToIndex(Node*,int) const;
+	QModelIndex nodeToIndex(Node*,int column=0) const;
 	Node* indexToNode( const QModelIndex & index) const;
 
 	QVariant serverData(const QModelIndex& index,int role) const;
 	QVariant nodeData(const QModelIndex& index,int role) const;
-	Node *rootNode(ServerHandler*) const;
-
-	QList<ServerHandler*> servers_;
-	QMap<ServerHandler*,Node*> rootNodes_;
 };
 
 

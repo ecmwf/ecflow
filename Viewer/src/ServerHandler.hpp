@@ -31,7 +31,7 @@ class ServerHandler;
 // an ecflow server.
 // -------------------------------------------------------
 
-class ServerComThread : public QThread
+class ServerComThread : public QThread, public AbstractObserver
 {
 	Q_OBJECT
 
@@ -45,8 +45,16 @@ public:
 	ComType commandType();
 	void stop();
 
+	//From AbstractObserver
+	void update(const Node*, const std::vector<ecf::Aspect::Type>&);
+	void update(const Defs*, const std::vector<ecf::Aspect::Type>&)  {};
+
+signals:
+	void nodeChanged(const Node*, const std::vector<ecf::Aspect::Type>&);
+
 protected:
 	void run();
+	void initObserver(ServerHandler* server);
 
 private:
 	ServerHandler *server_;
@@ -105,6 +113,9 @@ public:
 		//From AbstractObserver
 		void update(const Node*, const std::vector<ecf::Aspect::Type>&) {};
 		void update(const Defs*, const std::vector<ecf::Aspect::Type>&);
+
+		void addNodeObserver(QObject* obs);
+		void removeNodeObserver(QObject* obs);
 
 protected:
 

@@ -73,8 +73,12 @@ NodeWidget::NodeWidget(QString rootNode,QWidget *parent) :
 
 	// Detailed view
 
-	TableNodeView *tableView=new TableNodeView("",viewFilter_,this);
+	TableNodeView *tableView=new TableNodeView("",serverFilter_,viewFilter_,this);
 	views_->add(Viewer::TableViewMode,tableView);
+
+	connect(tableView,SIGNAL(selectionChanged(ViewNodeInfo_ptr)),
+			this,SIGNAL(selectionChanged(ViewNodeInfo_ptr)));
+
 
 	/*connect(detailedView_,SIGNAL(currentFolderChanged(Folder*)),
 		this,SLOT(slotFolderReplacedInView(Folder*)));

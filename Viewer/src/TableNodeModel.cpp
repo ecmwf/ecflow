@@ -16,58 +16,16 @@
 #include "ServerHandler.hpp"
 #include "ViewConfig.hpp"
 
-TableNodeModel::TableNodeModel(QObject *parent) : QAbstractItemModel(parent)
+//=======================================================
+//
+// TableNodeModel
+//
+//=======================================================
+
+TableNodeModel::TableNodeModel(ServerFilter* serverFilter,QObject *parent) :
+	AbstractNodeModel(serverFilter,parent)
 {
-	for(unsigned int i=0; i < 1; i++)
-	{
-				servers_ << ServerHandler::servers().at(i);
-				//initObserver(servers_.back());
-	}
-
 }
-
-void TableNodeModel::initObserver(ServerHandler* server)
-{
-	ServerDefsAccess defsAccess(server);  // will reliquish its resources on destruction
-	defs_ptr d = defsAccess.defs();
-	if(d == NULL)
-		return;
-
-	const std::vector<suite_ptr> &suites = d->suiteVec();
-	for(unsigned int i=0; i < suites.size();i++)
-	{
-		std::set<Node*> nodes;
-		suites.at(i)->allChildren(nodes);
-		for(std::set<Node*>::iterator it=nodes.begin(); it != nodes.end(); it++)
-			ChangeMgrSingleton::instance()->attach((*it),this);
-
-	}
-}
-
-bool TableNodeModel::hasData() const
-{
-	return servers_.size() >0;
-}
-
-void TableNodeModel::dataIsAboutToChange()
-{
-	beginResetModel();
-}
-
-void TableNodeModel::addServer(ServerHandler *server)
-{
-	servers_ << server;
-	rootNodes_[servers_.back()] = NULL;
-}
-
-Node * TableNodeModel::rootNode(ServerHandler* server) const
-{
-	QMap<ServerHandler*,Node*>::const_iterator it=rootNodes_.find(server);
-	if(it != rootNodes_.end())
-		return it.value();
-	return NULL;
-}
-
 
 int TableNodeModel::columnCount( const QModelIndex& /*parent */ ) const
 {
@@ -353,30 +311,6 @@ Node* TableNodeModel::indexToNode( const QModelIndex & index) const
 	return NULL;
 }
 
-
-ViewNodeInfo_ptr TableNodeModel::nodeInfo(const QModelIndex& index) const
-{
-	if(!index.isValid())
-	{
-		ViewNodeInfo_ptr res(new ViewNodeInfo());
-		return res;
-	}
-
-	ServerHandler *server=indexToServer(index);
-	if(server)
-	{
-		ViewNodeInfo_ptr res(new ViewNodeInfo(server));
-		return res;
-	}
-	else
-	{
-		Node* node=indexToNode(index);
-		ViewNodeInfo_ptr res(new ViewNodeInfo(node));
-		return res;
-	}
-}
-
-
 QModelIndex TableNodeModel::nodeToIndex(Node* node, int column) const
 {
 	if(!node)
@@ -390,49 +324,15 @@ QModelIndex TableNodeModel::nodeToIndex(Node* node, int column) const
 				return createIndex(row,column,node);
 		}
 	}
-	else
-	{
-		return QModelIndex();
-	}
 
-
-
-		/*if(node != 0 && node->parent() != 0)
-	{
-		int row=node->parent()->children().indexOf(node);
-		if(row != -1)
-		{
-			return createIndex(row,0,node);
-		}
-	}
-
-	return QModelIndex();*/
+	return QModelIndex();
 }
 
-void TableNodeModel::update(const Node* node, const std::vector<ecf::Aspect::Type>& types)
-{
-		if(node==NULL)
-			return;
-
-		qDebug() << "TableNodeModel::observer" << QString::fromStdString(node->name());
-		for(unsigned int i=0; i < types.size(); i++)
-			qDebug() << "  type:" << types.at(i);
-
-		Node* nc=const_cast<Node*>(node);
-
-		QModelIndex index1=nodeToIndex(nc,0);
-		QModelIndex index2=nodeToIndex(nc,2);
-
-		Node *nd1=indexToNode(index1);
-		Node *nd2=indexToNode(index2);
-
-		qDebug() << "indexes" << index1 << index2;
-		qDebug() << "index pointers " << index1.internalPointer() << index2.internalPointer();
-		qDebug() << QString::fromStdString(nd1->name()) << QString::fromStdString(nd2->name());
-
-		emit dataChanged(index1,index2);
-
-}
+//=======================================================
+//
+// TableNodeFilterModel
+//
+//=======================================================
 
 
 TableNodeFilterModel::TableNodeFilterModel(ViewFilter* filterData,QObject *parent) :
