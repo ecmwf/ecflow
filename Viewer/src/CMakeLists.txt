@@ -32,7 +32,8 @@ set(viewer_srcs
     VariableItemWidget.cpp
     ViewConfig.cpp
     ViewFilter.cpp
-    ViewNodeInfo.cpp)
+    ViewNodeInfo.cpp
+    WhyItemWidget.cpp)
 
 
 include(${QT_USE_FILE})
