@@ -7,6 +7,8 @@
 // nor does it submit to any jurisdiction.
 //============================================================================
 
+#include <QMessageBox>
+
 #include "ServerHandler.hpp"
 
 #include "Defs.hpp"
@@ -14,6 +16,7 @@
 #include "ArgvCreator.hpp"
 #include "Str.hpp"
 #include "MainWindow.hpp"
+#include "UserMessage.hpp"
 
 #include <iostream>
 
@@ -680,7 +683,18 @@ void ServerComThread::run()
 			// call the client invoker with the saved command
 			std::cout << "    COMMAND" << "\n";
 			ArgvCreator argvCreator(command_);
-			ci_->invoke(argvCreator.argc(), argvCreator.argv());
+			try
+ 			{
+				ci_->invoke(argvCreator.argc(), argvCreator.argv());
+ 			}
+ 			catch(std::exception& e)
+ 			{
+				std::string errorMessage = e.what();
+				UserMessage::message(UserMessage::ERROR, true, errorMessage);
+				//QMessageBox::warning(0, QString("Ecflowview"),
+				//		QString("Error sending command to server")
+				//		+ " : " + errorMessage.c_str());
+ 			}
 			break;
 		}
 

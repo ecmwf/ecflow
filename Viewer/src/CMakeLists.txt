@@ -22,6 +22,7 @@ set(viewer_srcs
     TableNodeView.cpp
     TreeNodeModel.cpp
     TreeNodeView.cpp
+    UserMessage.cpp
     VariableModel.cpp
     VariableItemWidget.cpp
     ViewConfig.cpp
@@ -44,6 +45,7 @@ QT4_WRAP_CPP(VIEWER_MOC ActionHandler.hpp
                         TableNodeView.hpp
                         TreeNodeModel.hpp
                         TreeNodeView.hpp
+                        UserMessage.hpp
                         VariableItemWidget.hpp)
 
 QT4_ADD_RESOURCES (VIEWER_RES viewer.qrc)

@@ -1,3 +1,6 @@
+#ifndef USER_MESSAGE_HPP_
+#define USER_MESSAGE_HPP_
+
 //============================================================================
 // Copyright 2014 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
@@ -7,3 +10,22 @@
 // nor does it submit to any jurisdiction.
 //============================================================================
 
+#include <QObject>
+
+#include <string>
+
+
+class UserMessage : public QObject
+{
+Q_OBJECT
+public:
+    UserMessage() {};
+
+    enum MessageType {INFO, WARN, ERROR, DBG};  // note: cannot have DEBUG because of possible -DDEBUG in cpp!
+
+    static void message(MessageType type, bool popup, const std::string message);
+
+};
+
+
+#endif
