@@ -32,7 +32,7 @@ void ViewerMainWindow::printDefTree(const std::string &server, int port)
     std::string server_version;
     client.server_version();
     server_version = client.server_reply().get_string();
-    std::cout << "ecflow server version: " << server_version << "\n";
+    UserMessage::message(UserMessage::DBG, false, std::string("ecflow server version: ") + server_version);
 
 
     client.sync_local();
@@ -42,7 +42,8 @@ void ViewerMainWindow::printDefTree(const std::string &server, int port)
 
 
 	size_t numSuites = suites.size();
-    std::cout << "Num suites: " << numSuites << std::endl;
+    UserMessage::message(UserMessage::DBG, false, std::string("Num suites: ") + numSuites);
+
 	for (size_t s = 0; s < numSuites; s++)
     {
         QString suiteName(suites[s]->name().c_str());

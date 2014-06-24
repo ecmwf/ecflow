@@ -42,6 +42,14 @@
         },
 
         {
+            "name"           : "Begin",
+            "menu"           : "Node",
+            "valid_types"    : ["suite"],
+            "valid_states"   : ["unknown", "complete"],
+            "command"        : "ecflow_client --begin <node_name>"
+        },
+
+        {
             "name"           : "Suspend",
             "menu"           : "Node",
             "valid_types"    : ["all"],

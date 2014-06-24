@@ -21,6 +21,7 @@
 
 #include "MenuHandler.hpp"
 #include "ServerHandler.hpp"
+#include "UserMessage.hpp"
 
 
 std::vector<Menu> MenuHandler::menus_;
@@ -52,9 +53,7 @@ bool MenuHandler::readMenuConfigFile(const std::string &configFile)
 	catch (const boost::property_tree::json_parser::json_parser_error& e)
 	{
         std::string errorMessage = e.what();
-		QMessageBox::warning(0, QString("Ecflowview"),
-							 QString("Error, unable to parse JSON menu file")
-                             + " : " + errorMessage.c_str());
+        UserMessage::message(UserMessage::ERROR, true, std::string("Error, unable to parse JSON menu file : " + errorMessage));
 		return false;
     }
 
@@ -68,7 +67,7 @@ bool MenuHandler::readMenuConfigFile(const std::string &configFile)
 
         if (itTopLevel->first == "menus")
         {
-            std::cout << "Menus:" << std::endl;
+            UserMessage::message(UserMessage::DBG, false, std::string("Menus:"));
 
             ptree const &menusDef = itTopLevel->second;
 
@@ -79,7 +78,7 @@ bool MenuHandler::readMenuConfigFile(const std::string &configFile)
                 ptree const &menuDef = itMenus->second;
 
                 std::string cname = menuDef.get("name", "NoName");
-                std::cout << "  " << cname << std::endl;
+                UserMessage::message(UserMessage::DBG, false, std::string("  ") + cname);
                 Menu menu(cname);
 
                 //ptree const &menuModesDef = menuDef.get_child("modes");
@@ -98,7 +97,7 @@ bool MenuHandler::readMenuConfigFile(const std::string &configFile)
 
         else if (itTopLevel->first == "menu_items")
         {
-            std::cout << "Menu items:" << std::endl;
+            UserMessage::message(UserMessage::DBG, false, std::string("Menu items:"));
 
             ptree const &itemsDef = itTopLevel->second;
 
@@ -173,8 +172,8 @@ bool MenuHandler::addItemToMenu(MenuItem *item, const std::string &menuName)
     }
     else
     {
-        std::cout << "Could not find menu called " << menuName << " to add item "
-                  << item->name() << " to." << std::endl;
+        UserMessage::message(UserMessage::ERROR, false, std::string("Could not find menu called " + 
+                             menuName + " to add item " + item->name() + " to."));
         return false;
     }
 }

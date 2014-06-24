@@ -51,6 +51,7 @@ public:
 
 signals:
 	void nodeChanged(const Node*, const std::vector<ecf::Aspect::Type>&);
+	void errorMessage(std::string message);
 
 protected:
 	void run();
@@ -135,6 +136,7 @@ protected:
 private slots:
 
 		void commandSent();  // invoked when a command has finished being sent to the server
+		void errorMessage(std::string message); // invoked when an error message is received
 
 private:
 
