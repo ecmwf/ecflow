@@ -22,6 +22,8 @@
 
 #include <iostream>
 
+#include <boost/algorithm/string/predicate.hpp>
+
 std::vector<ServerHandler*> ServerHandler::servers_;
 std::map<std::string, std::string> ServerHandler::commands_;
 
@@ -46,7 +48,7 @@ ServerHandler::ServerHandler(const std::string& name, const std::string& port) :
 
 	client_->sync_local();
 
-	//Set server name and pot in defs
+	//Set server name and port in defs
 	{
 		ServerDefsAccess defsAccess(this);  // will reliquish its resources on destruction
 		defs_ptr defs = defsAccess.defs();
@@ -304,12 +306,24 @@ bool ServerHandler::readFile(Node *n,const std::string& id,
   	}
   	else if(id == "ECF_JOB")
   	{
+  		n->findGenVariableValue(id,fileName);
+
+  		if(std::string::npos != fileName.find(".job0"))
+  	    {
+  				errTxt = "job0: no job to be generated yet!";
+  				return false;
+  	    }
+
   		errTxt = "no script!\n"
   		      		"check ECF_FILES or ECF_HOME directories, for read access\n"
   		      		"check for file presence and read access below files directory\n"
   		      		"or this may be a 'dummy' task.\n";
 
-  		n->findGenVariableValue(id,fileName);
+  	}
+  	else if(boost::algorithm::ends_with(id, ".0"))
+  	{
+    	errTxt = "no output to be expected when TRYNO is 0!\n";
+    	return false;
   	}
 
   	//Try to read file
@@ -331,6 +345,7 @@ bool ServerHandler::readFile(Node *n,const std::string& id,
   	      	}
   	      	else if (id == "ECF_JOBOUT")
   	      	{
+  	      		std::cout << "jobout " << n->absNodePath() << std::endl;
   	      		client_->file(n->absNodePath(), "jobout");
   	      	}
   	      	else
@@ -342,7 +357,9 @@ bool ServerHandler::readFile(Node *n,const std::string& id,
   	      	// in the case of job output the string could be several megabytes.
   	      	txt=client_->server_reply().get_string();
 
-  	    	//return tmp_file(client_->server_reply().get_string());
+  	      	std::cout << "txt " << txt << std::endl;
+
+  	      	//return tmp_file(client_->server_reply().get_string());
   	   }
   	   catch(std::exception &e )
   	   {
@@ -351,7 +368,7 @@ bool ServerHandler::readFile(Node *n,const std::string& id,
   	   }
   	}
 
-  	return false;
+  	return true;
 
   	/*
   	else if(id == "ECF_JOB")

@@ -8,25 +8,21 @@
 //
 //============================================================================
 
-#ifndef INFOITEMWIDGET_HPP_
-#define INFOITEMWIDGET_HPP_
+#ifndef OUTPUTITEMWIDGET_HPP_
+#define OUTPUTITEMWIDGET_HPP_
 
 #include "InfoPanelItem.hpp"
 #include "TextItemWidget.hpp"
 #include "ViewNodeInfo.hpp"
 
-class InfoItemWidget : public TextItemWidget, public InfoPanelItem
+class OutputItemWidget : public TextItemWidget, public InfoPanelItem
 {
 public:
-	InfoItemWidget(QWidget *parent=0);
+	OutputItemWidget(QWidget *parent=0);
 
 	void reload(ViewNodeInfo_ptr);
 	QWidget* realWidget();
 	void clearContents();
-
-private:
-	void info(ServerHandler*,Node* node,std::stringstream& f);
-
 };
 
 #endif

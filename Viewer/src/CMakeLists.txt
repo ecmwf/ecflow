@@ -19,6 +19,7 @@ set(viewer_srcs
     NodeViewBase.cpp
     NodeViewHandler.cpp
     NodeWidget.cpp
+    OutputItemWidget.cpp
     PlainTextSearchLine.cpp
     ScriptItemWidget.cpp
     ServerHandler.cpp
@@ -30,6 +31,7 @@ set(viewer_srcs
     TableNodeModel.cpp
     TableNodeView.cpp
     TextItemWidget.cpp
+    TriggerItemWidget.cpp
     TreeNodeModel.cpp
     TreeNodeView.cpp
     UserMessage.cpp

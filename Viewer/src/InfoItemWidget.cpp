@@ -15,6 +15,8 @@
 #include "Suite.hpp"
 #include "Variable.hpp"
 
+#include "ServerHandler.hpp"
+
 #include "boost/date_time/posix_time/posix_time.hpp"
 
 //========================================================
@@ -39,9 +41,10 @@ void InfoItemWidget::reload(ViewNodeInfo_ptr nodeInfo)
 	if(nodeInfo->isNode())
 	{
 		Node* n=nodeInfo->node();
+		ServerHandler *server=nodeInfo->server();
 
 		std::stringstream ss;
-		info(n,ss);
+		info(server,n,ss);
 
 		QString s=QString::fromStdString(ss.str());
 		textEdit_->setPlainText(s);
@@ -62,7 +65,7 @@ void InfoItemWidget::clearContents()
 	textEdit_->clear();
 }
 
-void InfoItemWidget::info(Node* node,std::stringstream& f)
+void InfoItemWidget::info(ServerHandler *server,Node* node,std::stringstream& f)
 {
 	//taken from task_node.cc
 
@@ -121,8 +124,8 @@ void InfoItemWidget::info(Node* node,std::stringstream& f)
     std::vector<Variable> gvar;
     std::vector<Variable>::const_iterator gvar_end;
 
-
-    Defs* defs = node->defs();
+    ServerDefsAccess defsAc(server);
+    defs_ptr defs = defsAc.defs();
 
     if(node->hasTimeDependencies())
     {
