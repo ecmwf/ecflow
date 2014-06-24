@@ -214,7 +214,7 @@ QModelIndex AbstractNodeModel::nodeToIndex(Node* node, int column) const
 	return QModelIndex();
 }
 
-void AbstractNodeModel::slotUpdateNode(const Node* node, const std::vector<ecf::Aspect::Type>& types)
+void AbstractNodeModel::slotNodeChanged(const Node* node, const std::vector<ecf::Aspect::Type>& types)
 {
 	if(node==NULL)
 		return;

@@ -1,5 +1,7 @@
 <RCC>
   <qresource prefix="viewer">
+    <file>../images/arrow_up.svg</file>
+    <file>../images/arrow_down.svg</file>
     <file>../images/add.svg</file>
     <file>../images/close.svg</file>
     <file>../images/configure.svg</file>

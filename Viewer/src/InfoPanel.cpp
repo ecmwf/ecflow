@@ -61,7 +61,7 @@ InfoPanel::InfoPanel(QWidget* parent) :
 
 	//Check which roles are allowed
 	QStringList ids;
-	ids << "info" << "variable" << "message" << "script" << "job";
+	ids << "info" << "variable" << "message" << "script" << "job" << "why" << "manual";
 
 	//Set tabs according to the current set of roles
 	adjust(ids);
@@ -81,7 +81,7 @@ void InfoPanel::slotReload(ViewNodeInfo_ptr node)
 
 	//Check which roles are allowed
 	QStringList ids;
-	ids << "info" << "variable" << "message" << "script" << "job";
+	ids << "info" << "variable" << "message" << "script" << "job" << "why" << "manual";
 
 	//Set tabs according to the current set of roles
 	adjust(ids);

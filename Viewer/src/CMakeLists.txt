@@ -2,6 +2,7 @@
 set(viewer_srcs   
     ViewerMain.cpp
     AbstractNodeModel.cpp
+    AbstractSearchLine.cpp
     ActionHandler.cpp
     DirectoryHandler.cpp
     FilterWidget.cpp
@@ -10,6 +11,7 @@ set(viewer_srcs
     InfoPanelItem.cpp
     JobItemWidget.cpp
     MainWindow.cpp
+    ManualItemWidget.cpp 
     MenuHandler.cpp
     MessageItemWidget.cpp
     NodePanel.cpp
@@ -17,6 +19,7 @@ set(viewer_srcs
     NodeViewBase.cpp
     NodeViewHandler.cpp
     NodeWidget.cpp
+    PlainTextSearchLine.cpp
     ScriptItemWidget.cpp
     ServerHandler.cpp
     ServerFilter.cpp
@@ -26,6 +29,7 @@ set(viewer_srcs
     TabWidget.cpp 
     TableNodeModel.cpp
     TableNodeView.cpp
+    TextItemWidget.cpp
     TreeNodeModel.cpp
     TreeNodeView.cpp
     UserMessage.cpp
@@ -33,12 +37,14 @@ set(viewer_srcs
     VariableItemWidget.cpp
     ViewConfig.cpp
     ViewFilter.cpp
-    ViewNodeInfo.cpp)
+    ViewNodeInfo.cpp
+    WhyItemWidget.cpp)
 
 
 include(${QT_USE_FILE})
 
 QT4_WRAP_CPP(VIEWER_MOC AbstractNodeModel.hpp
+					    AbstractSearchLine.hpp
 					    ActionHandler.hpp
                         FilterWidget.hpp
                         InfoPanel.hpp
@@ -46,6 +52,7 @@ QT4_WRAP_CPP(VIEWER_MOC AbstractNodeModel.hpp
                         NodePanel.hpp
                         NodePathWidget.hpp
                         NodeWidget.hpp
+                        PlainTextSearchLine.hpp
                         ServerHandler.hpp
                         ServerDialog.hpp
                         TabWidget.hpp
@@ -55,7 +62,7 @@ QT4_WRAP_CPP(VIEWER_MOC AbstractNodeModel.hpp
                         VariableItemWidget.hpp)
 
 QT4_ADD_RESOURCES (VIEWER_RES viewer.qrc)
-QT4_WRAP_UI       (VIEWER_FORMS_HEADERS MainWindow.ui ServerDialog.ui ServerItemDialog.ui)
+QT4_WRAP_UI       (VIEWER_FORMS_HEADERS MainWindow.ui SearchLineWidget.ui ServerDialog.ui ServerItemDialog.ui TextItemWidget.ui)
 
 
 ecbuild_add_executable( TARGET   ecflowviewer

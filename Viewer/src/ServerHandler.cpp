@@ -442,7 +442,28 @@ bool ServerHandler::readFile(Node *n,const std::string& id,
    //return tmp_file(error);*/
 }
 
+bool ServerHandler::readManual(Node *n,std::string& fileName,std::string& txt,std::string& errTxt)
+{
+   //gui::message("%s: fetching manual", name());
+	try
+	{
+		client_->file(n->absNodePath(), "manual");
+		txt=client_->server_reply().get_string();
+		if(txt.empty())
+		{
+			errTxt = "no manual...";
+			return false;
+		}
+		return true;
+	}
+	catch ( std::exception &e )
+	{
+		//gui::message("host::manual-error: %s", e.what());
+	}
 
+	errTxt = "no manual...";
+	return false;
+}
 
 
 
