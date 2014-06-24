@@ -24,7 +24,7 @@
 //
 //========================================================
 
-WhyItemWidget::WhyItemWidget(QWidget *parent) : QPlainTextEdit(parent)
+WhyItemWidget::WhyItemWidget(QWidget *parent) : TextItemWidget(parent)
 {
 }
 
@@ -41,18 +41,18 @@ void WhyItemWidget::reload(ViewNodeInfo_ptr nodeInfo)
 		Node* n=nodeInfo->node();
 
 		QString txt;
-		setPlainText(why(n));
+		textEdit_->setPlainText(why(n));
 	}
 	else
 	{
-		clear();
+		textEdit_->clear();
 	}
 }
 
 void WhyItemWidget::clearContents()
 {
 	loaded_=false;
-	clear();
+	textEdit_->clear();
 }
 
 QString WhyItemWidget::why(Node* n) const

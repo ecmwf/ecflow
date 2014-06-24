@@ -6,14 +6,27 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>637</width>
-    <height>633</height>
+    <width>755</width>
+    <height>313</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Select servers</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_2">
+   <item>
+    <spacer name="horizontalSpacer">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>40</width>
+       <height>20</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
    <item>
     <layout class="QVBoxLayout" name="verticalLayout">
      <item>
@@ -27,7 +40,7 @@
           <string>...</string>
          </property>
          <property name="icon">
-          <iconset resource="viewer.qrc">
+          <iconset>
            <normaloff>:/viewer/images/configure.svg</normaloff>:/viewer/images/configure.svg</iconset>
          </property>
          <property name="autoRaise">
@@ -44,7 +57,7 @@
           <string>...</string>
          </property>
          <property name="icon">
-          <iconset resource="viewer.qrc">
+          <iconset>
            <normaloff>:/viewer/images/add.svg</normaloff>:/viewer/images/add.svg</iconset>
          </property>
          <property name="autoRaise">
@@ -61,7 +74,7 @@
           <string>...</string>
          </property>
          <property name="icon">
-          <iconset resource="viewer.qrc">
+          <iconset>
            <normaloff>:/viewer/images/close.svg</normaloff>:/viewer/images/close.svg</iconset>
          </property>
          <property name="autoRaise">
@@ -78,7 +91,7 @@
           <string>...</string>
          </property>
          <property name="icon">
-          <iconset resource="viewer.qrc">
+          <iconset>
            <normaloff>:/viewer/images/reload.svg</normaloff>:/viewer/images/reload.svg</iconset>
          </property>
          <property name="autoRaise">
@@ -86,23 +99,16 @@
          </property>
         </widget>
        </item>
-       <item>
-        <spacer name="horizontalSpacer">
-         <property name="orientation">
-          <enum>Qt::Horizontal</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>40</width>
-           <height>20</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
       </layout>
      </item>
      <item>
       <widget class="QTreeView" name="serverView">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
        <property name="rootIsDecorated">
         <bool>false</bool>
        </property>

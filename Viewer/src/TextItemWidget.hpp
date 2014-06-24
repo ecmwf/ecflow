@@ -8,28 +8,17 @@
 //
 //============================================================================
 
-#ifndef WHYITEMWIDGET_HPP_
-#define WHYITEMWIDGET_HPP_
+#ifndef TEXTITEMWIDGET_HPP_
+#define TEXTITEMWIDGET_HPP_
 
-#include <QPlainTextEdit>
+#include <QWidget>
 
-#include "InfoPanelItem.hpp"
-#include "TextItemWidget.hpp"
-#include "ViewNodeInfo.hpp"
+#include "ui_TextItemWidget.h"
 
-class WhyItemWidget : public TextItemWidget, public InfoPanelItem
+class TextItemWidget : public QWidget, protected Ui::TextItemWidget
 {
 public:
-	WhyItemWidget(QWidget *parent=0);
-
-	void reload(ViewNodeInfo_ptr);
-	QWidget* realWidget();
-	void clearContents();
-
-private:
-	QString why(Node* n) const;
-
-
+	TextItemWidget(QWidget *parent=0);
 };
 
 #endif

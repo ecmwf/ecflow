@@ -5,32 +5,37 @@
 // In applying this licence, ECMWF does not waive the privileges and immunities
 // granted to it by virtue of its status as an intergovernmental organisation
 // nor does it submit to any jurisdiction.
-//
 //============================================================================
 
-#ifndef WHYITEMWIDGET_HPP_
-#define WHYITEMWIDGET_HPP_
+#ifndef ABSTRACTSEARCHLINE_HPP_
+#define ABSTRACTSEARCHLINE_HPP_
 
-#include <QPlainTextEdit>
+#include "ui_SearchLineWidget.h"
 
-#include "InfoPanelItem.hpp"
-#include "TextItemWidget.hpp"
-#include "ViewNodeInfo.hpp"
+#include <QWidget>
 
-class WhyItemWidget : public TextItemWidget, public InfoPanelItem
+class AbstractSearchLine : public QWidget, protected Ui::SearchLineWidget
 {
+   Q_OBJECT
+
 public:
-	WhyItemWidget(QWidget *parent=0);
+	AbstractSearchLine(QWidget *parent=0);
+	~AbstractSearchLine();
+	virtual void clear();
 
-	void reload(ViewNodeInfo_ptr);
-	QWidget* realWidget();
-	void clearContents();
+public slots:
+	virtual void slotFind(QString)=0;
+	virtual void slotFindNext()=0;
+	virtual void slotFindPrev()=0;
 
-private:
-	QString why(Node* n) const;
+protected:
+	void updateButtons(bool);
 
+	bool status_;
 
+	QColor   oriColour_;
+	QColor   redColour_;
+	QColor   greenColour_;
 };
 
 #endif
-
