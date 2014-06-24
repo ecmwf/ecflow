@@ -42,7 +42,7 @@ ServerHandler::ServerHandler(const std::string& name, const std::string& port) :
 	std::string server_version;
 	client_->server_version();
 	server_version = client_->server_reply().get_string();
-	std::cout << "ecflow server version: " << server_version << "\n";
+	UserMessage::message(UserMessage::DBG, false, std::string("ecflow server version: ") + server_version);
 
 	client_->sync_local();
 
@@ -55,6 +55,13 @@ ServerHandler::ServerHandler(const std::string& name, const std::string& port) :
 			ServerState& st=defs->set_server();
 			st.hostPort(std::make_pair(name_,port_));
 		}
+	}
+
+
+	// we'll need to pass std::strings via signals and slots for error messages
+	if (servers_.empty())
+	{
+		qRegisterMetaType<std::string>("std::string");
 	}
 
 	servers_.push_back(this);
@@ -74,6 +81,7 @@ ServerHandler::ServerHandler(const std::string& name, const std::string& port) :
 	// when server communication is about to start
 	comThread_ = new ServerComThread();
 	connect(comThread(), SIGNAL(finished()), this, SLOT(commandSent()));
+	connect(comThread(), SIGNAL(errorMessage(std::string)), this, SLOT(errorMessage(std::string)));
 
 }
 
@@ -273,6 +281,12 @@ const std::vector<std::string>& ServerHandler::messages(Node* node)
 	      //gui::message("host::messages: %s", e.what());
 	}
 	return client_->server_reply().get_string_vec();
+}
+
+
+void ServerHandler::errorMessage(std::string message)
+{
+	UserMessage::message(UserMessage::ERROR, true, message);
 }
 
 
@@ -586,8 +600,7 @@ void ServerHandler::command(std::vector<ViewNodeInfo_ptr> info,std::string cmd)
 
 	if (!realCommand.empty())
 	{
-		std::cout << "command: " << cmd << " (real: " << realCommand << ")" << std::endl;
-
+		UserMessage::message(UserMessage::DBG, false, std::string("command: ") + cmd + " (real: " + realCommand + ")");
 
 		for(int i=0; i < info.size(); i++)
 		{
@@ -595,12 +608,12 @@ void ServerHandler::command(std::vector<ViewNodeInfo_ptr> info,std::string cmd)
 			if(info[i]->isNode())
 			{
 				nodeName = info[i]->node()->absNodePath();
-				std::cout << "  --> for node: " << nodeName <<   " (server: " << info[i]->server()->longName() << ")" << std::endl;
+				UserMessage::message(UserMessage::DBG, false, std::string("  --> for node: ") + nodeName + " (server: " + info[i]->server()->longName() + ")");
 			}
 			else if(info[i]->isServer())
 			{
 				nodeName = info[i]->server()->longName();
-				std::cout << "  --> for server: " << nodeName << std::endl;
+				UserMessage::message(UserMessage::DBG, false, std::string("  --> for server: ") + nodeName);
 			}
 
 			std::string placeholder("<full_name>");
@@ -608,7 +621,7 @@ void ServerHandler::command(std::vector<ViewNodeInfo_ptr> info,std::string cmd)
 			if (pos != std::string::npos)
 			{
 				realCommand.replace(pos,placeholder.length(),nodeName);
-				std::cout << "final command: " << realCommand << std::endl;
+				UserMessage::message(UserMessage::DBG, false, std::string("final command: ") + realCommand);
 			}
 
 
@@ -716,7 +729,7 @@ std::string ServerHandler::resolveServerCommand(const std::string &name)
 	else
 	{
 		realCommand = "";
-		std::cout << " Command: " << name << " is not registered" << std::endl;
+		UserMessage::message(UserMessage::WARN, true, std::string("Command: ") + name + " is not registered" );
 	}
 
 	return realCommand;
@@ -764,7 +777,7 @@ std::string ServerHandler::resolveServerCommand(const std::string &name)
 
 void ServerHandler::commandSent()
 {
-	std::cout << "ServerHandler::commandSent" << "\n";
+	UserMessage::message(UserMessage::DBG, false, std::string("ServerHandler::commandSent"));
 
 	// which type of command was sent? What we do now will depend on that.
 
@@ -776,7 +789,7 @@ void ServerHandler::commandSent()
 			// any updates on the server (there should have been, because we
 			// just did something!)
 
-			std::cout << "Send command to server" << std::endl;
+			UserMessage::message(UserMessage::DBG, false, std::string("Send command to server"));
 			comThread()->sendCommand(this, client_, ServerComThread::NEWS);
 			break;
 		}
@@ -790,7 +803,7 @@ void ServerHandler::commandSent()
 				case ServerReply::NO_NEWS:
 				{
 					// no news, nothing to do
-					std::cout << "No news from server" << std::endl;
+					UserMessage::message(UserMessage::DBG, false, std::string("No news from server"));
 					setUpdatingStatus(false);  // finished updating
 					break;
 				}
@@ -799,7 +812,7 @@ void ServerHandler::commandSent()
 				{
 					// yes, something's changed - synchronise with the server
 
-					std::cout << "News from server - send sync command" << std::endl;
+					UserMessage::message(UserMessage::DBG, false, std::string("News from server - send sync command"));
 					comThread()->sendCommand(this, client_, ServerComThread::SYNC);
 					break;
 				}
@@ -817,7 +830,7 @@ void ServerHandler::commandSent()
 		{
 			// yes, something's changed - synchronise with the server
 
-			std::cout << "We've synced" << std::endl;
+			UserMessage::message(UserMessage::DBG, false, std::string("We've synced"));
 			setUpdatingStatus(false);  // finished updating
 			break;
 		}
@@ -854,7 +867,7 @@ void ServerComThread::sendCommand(ServerHandler *server, ClientInvoker *ci, Serv
 
 	if (isRunning())
 	{
-		std::cout << "ServerComThread::sendCommand - thread already running, will not execute command" << std::endl;
+		UserMessage::message(UserMessage::ERROR, true, std::string("ServerComThread::sendCommand - thread already running, will not execute command"));
 	}
 	else
 	{
@@ -877,50 +890,53 @@ ServerComThread::ComType ServerComThread::commandType()
 void ServerComThread::run()
 {
 
-	std::cout << "  ServerComThread::run start" << "\n";
+	UserMessage::message(UserMessage::DBG, false, std::string("  ServerComThread::run start"));
 
-	switch (comType_)
-	{
-		case COMMAND:
+	try
+ 	{
+		switch (comType_)
 		{
-			// call the client invoker with the saved command
-			std::cout << "    COMMAND" << "\n";
-			ArgvCreator argvCreator(command_);
-			try
- 			{
+			case COMMAND:
+			{
+				// call the client invoker with the saved command
+				UserMessage::message(UserMessage::DBG, false, std::string("    COMMAND"));
+				ArgvCreator argvCreator(command_);
 				ci_->invoke(argvCreator.argc(), argvCreator.argv());
- 			}
- 			catch(std::exception& e)
- 			{
-				std::string errorMessage = e.what();
-				UserMessage::message(UserMessage::ERROR, true, errorMessage);
-				//QMessageBox::warning(0, QString("Ecflowview"),
-				//		QString("Error sending command to server")
-				//		+ " : " + errorMessage.c_str());
- 			}
-			break;
-		}
 
-		case NEWS:
-		{
-			std::cout << "    NEWS" << "\n";
-			ci_->news_local(); // call the server
-			break;
-		}
+				break;
+			}
 
-		case SYNC:
-		{
-			ServerDefsAccess defsAccess(server_);
-			std::cout << "    SYNC" << "\n";
-			ci_->sync_local();
-			break;
-		}
+			case NEWS:
+			{
+				UserMessage::message(UserMessage::DBG, false, std::string("    NEWS"));
+				ci_->news_local(); // call the server
+				break;
+			}
 
-		default:
-		{
+			case SYNC:
+			{
+				ServerDefsAccess defsAccess(server_);
+				UserMessage::message(UserMessage::DBG, false, std::string("    SYNC"));
+				ci_->sync_local();
+				break;
+			}
+
+			default:
+			{
+			}
 		}
 	}
-	std::cout << "  ServerComThread::run finished" << "\n";
+
+	catch(std::exception& e)
+	{
+		// note that we need to emit a signal rather than directly call a message function
+		// because we can't call Qt widgets from a worker thread
+
+		std::string message = e.what();
+		emit errorMessage(message);
+	}
+
+	UserMessage::message(UserMessage::DBG, false, std::string("  ServerComThread::run finished"));
 }
 
 void ServerComThread::initObserver(ServerHandler* server)

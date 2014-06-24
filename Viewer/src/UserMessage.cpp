@@ -8,15 +8,37 @@
 // nor does it submit to any jurisdiction.
 //============================================================================
 
+#include <iostream>
+
 #include <QMessageBox>
 
 #include "UserMessage.hpp"
 
+bool UserMessage::echoToCout_ = true;  // XXX should be false to start with
 
+
+UserMessage::UserMessage()
+{
+}
 
 void UserMessage::message(MessageType type, bool popup, const std::string message)
 {
-/*    if (popup)
+
+    if (echoToCout_)
+    {
+        switch (type)
+        {
+            case INFO:  std::cout << "INFO  : "; break;
+            case WARN:  std::cout << "WARN  : "; break;
+            case ERROR: std::cout << "ERROR : "; break;
+            case DBG:   std::cout << "DEBUG : "; break;
+            default:    std::cout << "      : "; break;
+        }
+
+        std::cout << message << std::endl;
+    }
+
+    if (popup)
     {
         QMessageBox::Icon icon;
         switch (type)
@@ -33,9 +55,6 @@ void UserMessage::message(MessageType type, bool popup, const std::string messag
         QMessageBox box(icon, title, qmsg);
         box.exec();
     }
-    else
-    {
-    }*/
 
 }
 
