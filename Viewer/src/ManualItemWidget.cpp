@@ -9,14 +9,8 @@
 
 #include "ManualItemWidget.hpp"
 
-#include "Defs.hpp"
-#include "DState.hpp"
 #include "Node.hpp"
 #include "ServerHandler.hpp"
-#include "Suite.hpp"
-#include "Variable.hpp"
-
-#include "boost/date_time/posix_time/posix_time.hpp"
 
 //========================================================
 //
@@ -24,7 +18,7 @@
 //
 //========================================================
 
-ManualItemWidget::ManualItemWidget(QWidget *parent) : QPlainTextEdit(parent)
+ManualItemWidget::ManualItemWidget(QWidget *parent) :TextItemWidget(parent)
 {
 }
 
@@ -45,21 +39,21 @@ void ManualItemWidget::reload(ViewNodeInfo_ptr nodeInfo)
 		if(ServerHandler* s=nodeInfo->server())
 		{
 			if(s->readManual(n,fName,msg,err))
-				setPlainText(QString::fromStdString(msg));
+				textEdit_->setPlainText(QString::fromStdString(msg));
 			else
-				setPlainText(QString::fromStdString(err));
+				textEdit_->setPlainText(QString::fromStdString(err));
 		}
 	}
 	else
 	{
-		clear();
+		textEdit_->clear();
 	}
 }
 
 void ManualItemWidget::clearContents()
 {
 	loaded_=false;
-	clear();
+	textEdit_->clear();
 }
 
 static InfoPanelItemMaker<ManualItemWidget> maker1("manual");

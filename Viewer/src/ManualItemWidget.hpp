@@ -11,12 +11,11 @@
 #ifndef MANUALITEMWIDGET_HPP_
 #define MANUALITEMWIDGET_HPP_
 
-#include <QPlainTextEdit>
-
 #include "InfoPanelItem.hpp"
+#include "TextItemWidget.hpp"
 #include "ViewNodeInfo.hpp"
 
-class ManualItemWidget : public QPlainTextEdit, public InfoPanelItem
+class ManualItemWidget : public TextItemWidget, public InfoPanelItem
 {
 public:
 	ManualItemWidget(QWidget *parent=0);

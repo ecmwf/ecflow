@@ -11,12 +11,11 @@
 #ifndef JOBITEMWIDGET_HPP_
 #define JOBITEMWIDGET_HPP_
 
-#include <QPlainTextEdit>
-
 #include "InfoPanelItem.hpp"
+#include "TextItemWidget.hpp"
 #include "ViewNodeInfo.hpp"
 
-class JobItemWidget : public QPlainTextEdit, public InfoPanelItem
+class JobItemWidget : public TextItemWidget, public InfoPanelItem
 {
 public:
 	JobItemWidget(QWidget *parent=0);

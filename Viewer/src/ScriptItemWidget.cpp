@@ -9,14 +9,8 @@
 
 #include "ScriptItemWidget.hpp"
 
-#include "Defs.hpp"
-#include "DState.hpp"
 #include "Node.hpp"
 #include "ServerHandler.hpp"
-#include "Suite.hpp"
-#include "Variable.hpp"
-
-#include "boost/date_time/posix_time/posix_time.hpp"
 
 //========================================================
 //
@@ -24,7 +18,7 @@
 //
 //========================================================
 
-ScriptItemWidget::ScriptItemWidget(QWidget *parent) : QPlainTextEdit(parent)
+ScriptItemWidget::ScriptItemWidget(QWidget *parent) : TextItemWidget(parent)
 {
 }
 
@@ -46,23 +40,21 @@ void ScriptItemWidget::reload(ViewNodeInfo_ptr nodeInfo)
 		if(ServerHandler* s=nodeInfo->server())
 		{
 			if(s->readFile(n,"ECF_SCRIPT",fName,msg,err))
-				setPlainText(QString::fromStdString(msg));
+				textEdit_->setPlainText(QString::fromStdString(msg));
 			else
-				setPlainText(QString::fromStdString(err));	
+				textEdit_->setPlainText(QString::fromStdString(err));	
 		}		
 	}
 	else
 	{
-		clear();
+		textEdit_->clear();
 	}
 }
 
 void ScriptItemWidget::clearContents()
 {
 	loaded_=false;
-	clear();
+	textEdit_->clear();
 }
-
-
 
 static InfoPanelItemMaker<ScriptItemWidget> maker1("script");

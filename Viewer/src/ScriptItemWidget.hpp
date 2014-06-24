@@ -11,12 +11,11 @@
 #ifndef SCRIPTITEMWIDGET_HPP_
 #define SCRIPTITEMWIDGET_HPP_
 
-#include <QPlainTextEdit>
-
 #include "InfoPanelItem.hpp"
+#include "TextItemWidget.hpp"
 #include "ViewNodeInfo.hpp"
 
-class ScriptItemWidget : public QPlainTextEdit, public InfoPanelItem
+class ScriptItemWidget : public TextItemWidget, public InfoPanelItem
 {
 public:
 	ScriptItemWidget(QWidget *parent=0);

@@ -9,14 +9,7 @@
 
 #include "WhyItemWidget.hpp"
 
-#include "Defs.hpp"
-#include "DState.hpp"
 #include "Node.hpp"
-#include "ServerHandler.hpp"
-#include "Suite.hpp"
-#include "Variable.hpp"
-
-#include "boost/date_time/posix_time/posix_time.hpp"
 
 //========================================================
 //

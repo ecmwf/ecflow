@@ -9,14 +9,8 @@
 
 #include "MessageItemWidget.hpp"
 
-#include "Defs.hpp"
-#include "DState.hpp"
 #include "Node.hpp"
 #include "ServerHandler.hpp"
-#include "Suite.hpp"
-#include "Variable.hpp"
-
-#include "boost/date_time/posix_time/posix_time.hpp"
 
 //========================================================
 //
@@ -24,7 +18,7 @@
 //
 //========================================================
 
-MessageItemWidget::MessageItemWidget(QWidget *parent) : QPlainTextEdit(parent)
+MessageItemWidget::MessageItemWidget(QWidget *parent) : TextItemWidget(parent)
 {
 }
 
@@ -50,11 +44,11 @@ void MessageItemWidget::reload(ViewNodeInfo_ptr nodeInfo)
 			}
 		}
 
-		setPlainText(txt);
+		textEdit_->setPlainText(txt);
 	}
 	else
 	{
-		clear();
+		textEdit_->clear();
 	}
 
 }
@@ -62,7 +56,7 @@ void MessageItemWidget::reload(ViewNodeInfo_ptr nodeInfo)
 void MessageItemWidget::clearContents()
 {
 	loaded_=false;
-	clear();
+	textEdit_->clear();
 }
 static InfoPanelItemMaker<MessageItemWidget> maker1("message");
 

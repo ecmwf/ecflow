@@ -23,7 +23,7 @@
 //
 //========================================================
 
-InfoItemWidget::InfoItemWidget(QWidget *parent) : QPlainTextEdit(parent)
+InfoItemWidget::InfoItemWidget(QWidget *parent) : TextItemWidget(parent)
 {
 }
 
@@ -44,14 +44,14 @@ void InfoItemWidget::reload(ViewNodeInfo_ptr nodeInfo)
 		info(n,ss);
 
 		QString s=QString::fromStdString(ss.str());
-		setPlainText(s);
+		textEdit_->setPlainText(s);
 
 	 //std::stringstream ss;
 	 //n.info(ss);
 	}
 	else
 	{
-		clear();
+		textEdit_->clear();
 	}
 
 }
@@ -59,7 +59,7 @@ void InfoItemWidget::reload(ViewNodeInfo_ptr nodeInfo)
 void InfoItemWidget::clearContents()
 {
 	loaded_=false;
-	clear();
+	textEdit_->clear();
 }
 
 void InfoItemWidget::info(Node* node,std::stringstream& f)

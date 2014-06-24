@@ -11,12 +11,11 @@
 #ifndef MESSAGEITEMWIDGET_HPP_
 #define MESSAGEITEMWIDGET_HPP_
 
-#include <QPlainTextEdit>
-
 #include "InfoPanelItem.hpp"
+#include "TextItemWidget.hpp"
 #include "ViewNodeInfo.hpp"
 
-class MessageItemWidget : public QPlainTextEdit, public InfoPanelItem
+class MessageItemWidget : public TextItemWidget, public InfoPanelItem
 {
 public:
 	MessageItemWidget(QWidget *parent=0);
