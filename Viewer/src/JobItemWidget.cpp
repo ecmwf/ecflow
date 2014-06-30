@@ -12,6 +12,7 @@
 #include "Node.hpp"
 #include "ServerHandler.hpp"
 
+
 //========================================================
 //
 // JobItemWidget
@@ -30,18 +31,14 @@ QWidget* JobItemWidget::realWidget()
 void JobItemWidget::reload(ViewNodeInfo_ptr nodeInfo)
 {
 	loaded_=true;
+
 	if(nodeInfo->isNode())
 	{
 		Node* n=nodeInfo->node();
-
-		QString txt;
-		std::string fName,msg,err;
 		if(ServerHandler* s=nodeInfo->server())
 		{
-			if(s->readFile(n,"ECF_JOB",fName,msg,err))
-				textEdit_->setPlainText(QString::fromStdString(msg));
-			else
-				textEdit_->setPlainText(QString::fromStdString(err));
+			NodeInfoQuery_ptr query(new NodeInfoQuery(n,NodeInfoQuery::JOB,this));
+			s->query(query);
 		}
 	}
 	else
@@ -54,6 +51,24 @@ void JobItemWidget::clearContents()
 {
 	loaded_=false;
 	textEdit_->clear();
+}
+
+
+void JobItemWidget::queryFinished(NodeInfoQuery_ptr reply)
+{
+	std::cout << "reply for job" << std::endl;
+
+	if(reply && reply->sender() == this)
+	{
+		if(reply->done())
+		{
+			textEdit_->setPlainText(QString::fromStdString(reply->text()));
+		}
+		else
+		{
+			textEdit_->setPlainText(QString::fromStdString(reply->errorText()));
+		}
+	}
 }
 
 static InfoPanelItemMaker<JobItemWidget> maker1("job");

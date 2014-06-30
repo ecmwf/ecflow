@@ -12,10 +12,11 @@
 #define MANUALITEMWIDGET_HPP_
 
 #include "InfoPanelItem.hpp"
+#include "NodeInfoQuery.hpp"
 #include "TextItemWidget.hpp"
 #include "ViewNodeInfo.hpp"
 
-class ManualItemWidget : public TextItemWidget, public InfoPanelItem
+class ManualItemWidget : public TextItemWidget, public InfoPanelItem, public NodeInfoAccessor
 {
 public:
 	ManualItemWidget(QWidget *parent=0);
@@ -23,6 +24,9 @@ public:
 	void reload(ViewNodeInfo_ptr);
 	QWidget* realWidget();
 	void clearContents();
+
+	//From NodeInfoAccessor
+	void queryFinished(NodeInfoQuery_ptr);
 };
 
 #endif

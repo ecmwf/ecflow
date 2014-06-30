@@ -5,35 +5,28 @@
 // In applying this licence, ECMWF does not waive the privileges and immunities
 // granted to it by virtue of its status as an intergovernmental organisation
 // nor does it submit to any jurisdiction.
-//
 //============================================================================
 
-#ifndef JOBITEMWIDGET_HPP_
-#define JOBITEMWIDGET_HPP_
-
-#include "InfoPanelItem.hpp"
 #include "NodeInfoQuery.hpp"
-#include "TextItemWidget.hpp"
-#include "ViewNodeInfo.hpp"
 
-#include "ServerHandler.hpp"
+#include "File.hpp"
 
-class JobItemWidget : public TextItemWidget, public InfoPanelItem, public NodeInfoAccessor
+bool NodeInfoQuery::readFile()
 {
-public:
-	JobItemWidget(QWidget *parent=0);
+	if(!fileName_.empty() &&
+	   ecf::File::open(fileName_,text_))
+	{
+		return true;
+	}
 
-	void reload(ViewNodeInfo_ptr);
-	QWidget* realWidget();
-	void clearContents();
+	return false;
+}
 
-	//From NodeInfoAccessor
-	void queryFinished(NodeInfoQuery_ptr);
-
-private:
-	void info(Node* node,std::stringstream& f);
-
-};
-
-#endif
-
+void NodeInfoQuery::text(const std::vector<std::string>& msg)
+{
+	text_.clear();
+	for(std::vector<std::string>::const_iterator it=msg.begin(); it != msg.end(); it++)
+	{
+			text_+=*it + "\n";
+	}
+}

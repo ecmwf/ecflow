@@ -12,6 +12,8 @@
 #include "Node.hpp"
 #include "ServerHandler.hpp"
 
+#include <QDebug>
+
 //========================================================
 //
 // ManualItemWidget
@@ -33,15 +35,10 @@ void ManualItemWidget::reload(ViewNodeInfo_ptr nodeInfo)
 	if(nodeInfo->isNode())
 	{
 		Node* n=nodeInfo->node();
-
-		QString txt;
-		std::string fName,msg,err;
 		if(ServerHandler* s=nodeInfo->server())
 		{
-			if(s->readManual(n,fName,msg,err))
-				textEdit_->setPlainText(QString::fromStdString(msg));
-			else
-				textEdit_->setPlainText(QString::fromStdString(err));
+			NodeInfoQuery_ptr query(new NodeInfoQuery(n,NodeInfoQuery::MANUAL,this));
+			s->query(query);
 		}
 	}
 	else
@@ -54,6 +51,21 @@ void ManualItemWidget::clearContents()
 {
 	loaded_=false;
 	textEdit_->clear();
+}
+
+void ManualItemWidget::queryFinished(NodeInfoQuery_ptr reply)
+{
+	if(reply && reply->sender() == this)
+	{
+		if(reply->done())
+		{
+			textEdit_->setPlainText(QString::fromStdString(reply->text()));
+		}
+		else
+		{
+			textEdit_->setPlainText(QString::fromStdString(reply->errorText()));
+		}
+	}
 }
 
 static InfoPanelItemMaker<ManualItemWidget> maker1("manual");

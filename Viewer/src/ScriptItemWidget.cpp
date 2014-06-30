@@ -35,15 +35,15 @@ void ScriptItemWidget::reload(ViewNodeInfo_ptr nodeInfo)
 	{
 		Node* n=nodeInfo->node();
 
-		QString txt;
-		std::string fName,msg,err;
-		if(ServerHandler* s=nodeInfo->server())
+		if(nodeInfo->isNode())
 		{
-			if(s->readFile(n,"ECF_SCRIPT",fName,msg,err))
-				textEdit_->setPlainText(QString::fromStdString(msg));
-			else
-				textEdit_->setPlainText(QString::fromStdString(err));	
-		}		
+			Node* n=nodeInfo->node();
+			if(ServerHandler* s=nodeInfo->server())
+			{
+				NodeInfoQuery_ptr query(new NodeInfoQuery(n,NodeInfoQuery::SCRIPT,this));
+				s->query(query);
+			}
+		}	
 	}
 	else
 	{
@@ -56,5 +56,21 @@ void ScriptItemWidget::clearContents()
 	loaded_=false;
 	textEdit_->clear();
 }
+
+void ScriptItemWidget::queryFinished(NodeInfoQuery_ptr reply)
+{
+	if(reply && reply->sender() == this)
+	{
+		if(reply->done())
+		{
+			textEdit_->setPlainText(QString::fromStdString(reply->text()));
+		}
+		else
+		{
+			textEdit_->setPlainText(QString::fromStdString(reply->errorText()));
+		}
+	}
+}
+
 
 static InfoPanelItemMaker<ScriptItemWidget> maker1("script");

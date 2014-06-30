@@ -23,7 +23,7 @@ public:
     static std::string shareDir()  {return shareDir_;};
     static std::string etcDir()    {return etcDir_;};
     static std::string concatenate(const std::string &path1, const std::string &path2);
-
+    static void findFiles(const std::string &dirPath,const std::string &startsWith);
 
 private:
     static std::string shareDir_;

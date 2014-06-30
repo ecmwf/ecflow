@@ -27,6 +27,7 @@
 std::vector<ServerHandler*> ServerHandler::servers_;
 std::map<std::string, std::string> ServerHandler::commands_;
 
+
 ServerHandler::ServerHandler(const std::string& name, const std::string& port) :
    name_(name),
    port_(port),
@@ -64,6 +65,7 @@ ServerHandler::ServerHandler(const std::string& name, const std::string& port) :
 	if (servers_.empty())
 	{
 		qRegisterMetaType<std::string>("std::string");
+		qRegisterMetaType<NodeInfoQuery_ptr>("NodeInfoQuery_ptr");
 	}
 
 	servers_.push_back(this);
@@ -84,6 +86,7 @@ ServerHandler::ServerHandler(const std::string& name, const std::string& port) :
 	comThread_ = new ServerComThread();
 	connect(comThread(), SIGNAL(finished()), this, SLOT(commandSent()));
 	connect(comThread(), SIGNAL(errorMessage(std::string)), this, SLOT(errorMessage(std::string)));
+	connect(comThread(), SIGNAL(queryFinished(NodeInfoQuery_ptr)), this, SLOT(queryFinished(NodeInfoQuery_ptr)));
 
 }
 
@@ -285,12 +288,119 @@ const std::vector<std::string>& ServerHandler::messages(Node* node)
 	return client_->server_reply().get_string_vec();
 }
 
-
 void ServerHandler::errorMessage(std::string message)
 {
 	UserMessage::message(UserMessage::ERROR, true, message);
 }
 
+
+//-------------------------------------------------------------
+//
+// Query for node information. It might use the client invoker's
+// threaded communication!
+//
+//--------------------------------------------------------------
+
+
+void ServerHandler::queryFinished(NodeInfoQuery_ptr reply)
+{
+	reply->sender()->queryFinished(reply);
+}
+
+void ServerHandler::query(NodeInfoQuery_ptr req)
+{
+	switch(req->type())
+	{
+	case NodeInfoQuery::SCRIPT:
+		return script(req);
+		break;
+	case NodeInfoQuery::JOB:
+		return job(req);
+		break;
+	case NodeInfoQuery::JOBOUT:
+		return jobout(req);
+		break;
+	case NodeInfoQuery::MANUAL:
+		return manual(req);
+		break;
+	case NodeInfoQuery::MESSAGE:
+		return messages(req);
+		break;
+	}
+}
+
+void ServerHandler::messages(NodeInfoQuery_ptr req)
+{
+	comThread()->sendCommand(this,client_,ServerComThread::HISTORY,req);
+}
+
+void ServerHandler::script(NodeInfoQuery_ptr req)
+{
+	static std::string errText="no script!\n"
+		      		"check ECF_FILES or ECF_HOME directories, for read access\n"
+		      		"check for file presence and read access below files directory\n"
+		      		"or this may be a 'dummy' task.\n";
+
+	req->ecfVar("ECF_SCRIPT");
+	req->ciPar("script");
+
+	file(req,errText);
+}
+
+void ServerHandler::job(NodeInfoQuery_ptr req)
+{
+	static std::string errText="no script!\n"
+		      		"check ECF_FILES or ECF_HOME directories, for read access\n"
+		      		"check for file presence and read access below files directory\n"
+		      		"or this may be a 'dummy' task.\n";
+
+	req->ecfVar("ECF_JOB");
+	req->ciPar("job");
+
+	file(req,errText);
+}
+
+void ServerHandler::jobout(NodeInfoQuery_ptr req)
+{
+	static std::string errText="no job output...";
+
+	req->ecfVar("ECF_JOBOUT");
+	req->ciPar("jobout");
+
+	file(req,errText);
+}
+
+void ServerHandler::manual(NodeInfoQuery_ptr req)
+{
+	std::string errText="no manual ...";
+	req->ciPar("manual");
+
+	file(req,errText);
+}
+
+void ServerHandler::file(NodeInfoQuery_ptr req,const std::string& errText)
+{
+	std::string fileName;
+	if(!req->ecfVar().empty())
+	{
+		req->node()->findGenVariableValue(req->ecfVar(),fileName);
+		req->fileName(fileName);
+	}
+
+	//We try to read the file from the local disk
+	if(req->readFile())
+	{
+	  		req->done(true);
+			emit queryFinished(req);
+			return;
+	}
+	//If not on local disc we try the client invoker
+	else
+	{
+		// set up and run the thread for server communication
+		comThread()->sendCommand(this,client_,ServerComThread::FILE,req);
+	}
+}
 
 bool ServerHandler::readFile(Node *n,const std::string& id,
 		     std::string& fileName,std::string& txt,std::string& errTxt)
@@ -481,20 +591,6 @@ bool ServerHandler::readManual(Node *n,std::string& fileName,std::string& txt,st
 	errTxt = "no manual...";
 	return false;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -883,14 +979,14 @@ void ServerHandler::commandSent()
 }
 
 
-
 // ------------------------------------------------------------
 //                         ServerComThread
 // ------------------------------------------------------------
 
 
-
-ServerComThread::ServerComThread() : server_(0)
+ServerComThread::ServerComThread() :
+		server_(0),
+		ci_(0)
 {
 }
 
@@ -919,6 +1015,32 @@ void ServerComThread::sendCommand(ServerHandler *server, ClientInvoker *ci, Serv
 		start();  // start the thread execution
 	}
 }
+
+void ServerComThread::sendCommand(ServerHandler *server, ClientInvoker *ci, ServerComThread::ComType comType,
+									NodeInfoQuery_ptr query)
+{
+	// do not execute thread if already running
+
+	if (isRunning())
+	{
+		UserMessage::message(UserMessage::ERROR, true, std::string("ServerComThread::sendCommand - thread already running, will not execute command"));
+	}
+	else
+	{
+
+		//if(!server_ && server)
+		//	initObserver(server);
+
+		server_  = server;
+		ci_      = ci;
+		comType_ = comType;
+		query_=query;
+
+		start();  // start the thread execution
+	}
+}
+
+
 
 ServerComThread::ComType ServerComThread::commandType()
 {
@@ -959,6 +1081,24 @@ void ServerComThread::run()
 				break;
 			}
 
+			case FILE:
+			{
+				UserMessage::message(UserMessage::DBG, false, std::string("    FILE"));
+				ci_->file(query_->node()->absNodePath(),query_->ciPar());
+				query_->text(ci_->server_reply().get_string());
+				query_->done(true);
+				break;
+			}
+
+			case HISTORY:
+			{
+				UserMessage::message(UserMessage::DBG, false, std::string("    HISTORY"));
+				ci_->edit_history(query_->node()->absNodePath());
+				query_->text(ci_->server_reply().get_string_vec());
+				query_->done(true);
+				break;
+			}
+
 			default:
 			{
 			}
@@ -973,6 +1113,13 @@ void ServerComThread::run()
 		std::string message = e.what();
 		emit errorMessage(message);
 	}
+
+	if(comType_ == FILE || comType_ == HISTORY)
+	{
+		emit queryFinished(query_);
+		query_.reset();
+	}
+
 
 	UserMessage::message(UserMessage::DBG, false, std::string("  ServerComThread::run finished"));
 }

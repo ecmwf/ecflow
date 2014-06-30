@@ -8,7 +8,12 @@
 //
 //============================================================================
 
+
+#include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/path.hpp>
+#include <boost/foreach.hpp>
+
+#include <boost/algorithm/string/predicate.hpp>
 
 #include "DirectoryHandler.hpp"
 
@@ -49,4 +54,22 @@ std::string DirectoryHandler::concatenate(const std::string &path1, const std::s
     boost::filesystem::path p2(path2);
     boost::filesystem::path result = p1 /= p2;
     return result.string();
+}
+
+
+void DirectoryHandler::findFiles(const std::string &dirPath,const std::string &startsWith)
+{
+	boost::filesystem::path path(dirPath);
+
+    boost::filesystem::directory_iterator it(path), eod;
+
+    BOOST_FOREACH(boost::filesystem::path const &p, std::make_pair(it, eod ))
+    {
+        if(is_regular_file(p) && boost::algorithm::starts_with(p.filename().string(),startsWith))
+        {
+            std::string filename = p.filename().string();
+        }
+    }
+
+
 }

@@ -34,14 +34,10 @@ void OutputItemWidget::reload(ViewNodeInfo_ptr nodeInfo)
 	{
 		Node* n=nodeInfo->node();
 
-		QString txt;
-		std::string fName,msg,err;
 		if(ServerHandler* s=nodeInfo->server())
 		{
-			if(s->readFile(n,"ECF_JOBOUT",fName,msg,err))
-				textEdit_->setPlainText(QString::fromStdString(msg));
-			else
-				textEdit_->setPlainText(QString::fromStdString(err));
+			NodeInfoQuery_ptr query(new NodeInfoQuery(n,NodeInfoQuery::JOBOUT,this));
+			s->query(query);
 		}
 	}
 	else
@@ -56,37 +52,19 @@ void OutputItemWidget::clearContents()
 	textEdit_->clear();
 }
 
-static InfoPanelItemMaker<OutputItemWidget> maker1("output");
-
-/*
-std::string filename(Node *n)
+void OutputItemWidget::queryFinished(NodeInfoQuery_ptr reply)
 {
-	std::string jobout;
-	n->findGenVariableValue("ECF_JOBOUT",jobout);
-
-
-	//output variable may contain micro
-
-	if(file_) free(file_);
-	file_ = strdup(jobout.c_str());
-	load(n);
-	XmListDeleteAllItems(list_);
-
-	output_lister ol(list_);
-	n.serv().dir(n,file_,ol);
-
-	std::string remote = n.variable("ECF_OUT");
-	std::string job    = n.variable("ECF_JOB");
-
-	if (!remote.empty() && !job.empty()) {
-   // display both remote and local dir
-	if (remote == job)
+	if(reply && reply->sender() == this)
 	{
-		output_lister rem(list_);
-		n.serv().dir(n,job.c_str(),rem);
+		if(reply->done())
+		{
+			textEdit_->setPlainText(QString::fromStdString(reply->text()));
+		}
+		else
+		{
+			textEdit_->setPlainText(QString::fromStdString(reply->errorText()));
+		}
 	}
- }
- new search_me(*this);
+}
 
-*/
-
+static InfoPanelItemMaker<OutputItemWidget> maker1("output");

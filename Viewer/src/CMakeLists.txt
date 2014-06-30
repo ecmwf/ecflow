@@ -14,6 +14,7 @@ set(viewer_srcs
     ManualItemWidget.cpp 
     MenuHandler.cpp
     MessageItemWidget.cpp
+    NodeInfoQuery.cpp
     NodePanel.cpp
     NodePathWidget.cpp
     NodeViewBase.cpp

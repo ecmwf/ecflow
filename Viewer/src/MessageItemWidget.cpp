@@ -33,18 +33,11 @@ void MessageItemWidget::reload(ViewNodeInfo_ptr nodeInfo)
 	if(nodeInfo->isNode())
 	{
 		Node* n=nodeInfo->node();
-
-		QString txt;
 		if(ServerHandler* s=nodeInfo->server())
 		{
-			const std::vector<std::string>& msg=s->messages(n);
-			for(std::vector<std::string>::const_iterator it=msg.begin(); it != msg.end(); it++)
-			{
-				txt+=QString::fromStdString(*it) + "\n";
-			}
+			NodeInfoQuery_ptr query(new NodeInfoQuery(n,NodeInfoQuery::MESSAGE,this));
+			s->query(query);
 		}
-
-		textEdit_->setPlainText(txt);
 	}
 	else
 	{
@@ -58,5 +51,21 @@ void MessageItemWidget::clearContents()
 	loaded_=false;
 	textEdit_->clear();
 }
+
+void MessageItemWidget::queryFinished(NodeInfoQuery_ptr reply)
+{
+	if(reply && reply->sender() == this)
+	{
+		if(reply->done())
+		{
+			textEdit_->setPlainText(QString::fromStdString(reply->text()));
+		}
+		else
+		{
+			textEdit_->setPlainText(QString::fromStdString(reply->errorText()));
+		}
+	}
+}
+
 static InfoPanelItemMaker<MessageItemWidget> maker1("message");
 

@@ -20,8 +20,8 @@
 #include "Defs.hpp"
 #include "AbstractObserver.hpp"
 
+#include "NodeInfoQuery.hpp"
 #include "ViewNodeInfo.hpp"
-
 
 class ClientInvoker;
 class ServerHandler;
@@ -36,11 +36,12 @@ class ServerComThread : public QThread, public AbstractObserver
 	Q_OBJECT
 
 public:
-	enum ComType {COMMAND, NEWS, SYNC};
+	enum ComType {COMMAND, NEWS, SYNC, FILE, HISTORY};
 
 	ServerComThread();
 
 	void sendCommand(ServerHandler *server, ClientInvoker *ci, ServerComThread::ComType comType);
+	void sendCommand(ServerHandler *server, ClientInvoker *ci, ServerComThread::ComType comType,NodeInfoQuery_ptr);
 	void setCommandString(const std::vector<std::string> command);
 	ComType commandType();
 	void stop();
@@ -52,6 +53,7 @@ public:
 signals:
 	void nodeChanged(const Node*, const std::vector<ecf::Aspect::Type>&);
 	void errorMessage(std::string message);
+	void queryFinished(NodeInfoQuery_ptr);
 
 protected:
 	void run();
@@ -62,6 +64,7 @@ private:
 	ClientInvoker *ci_;
 	std::vector<std::string> command_;
 	ComType comType_;
+	NodeInfoQuery_ptr query_;
 };
 
 
@@ -92,6 +95,14 @@ public:
 		int update();
 		void setUpdatingStatus(bool newStatus) {updating_ = newStatus;}
 		void releaseDefs();
+
+		void query(NodeInfoQuery_ptr);
+		void messages(NodeInfoQuery_ptr req);
+		void script(NodeInfoQuery_ptr req);
+		void job(NodeInfoQuery_ptr req);
+		void jobout(NodeInfoQuery_ptr req);
+	    void manual(NodeInfoQuery_ptr req);
+	    void file(NodeInfoQuery_ptr req,const std::string& errText);
 
 		const std::vector<std::string>& messages(Node* node);
 		bool readFile(Node *n,const std::string& id,
@@ -137,6 +148,7 @@ private slots:
 
 		void commandSent();  // invoked when a command has finished being sent to the server
 		void errorMessage(std::string message); // invoked when an error message is received
+		void queryFinished(NodeInfoQuery_ptr); //invoked when a reply is received from from the server/thread
 
 private:
 
