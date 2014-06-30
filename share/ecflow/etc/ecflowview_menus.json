@@ -7,13 +7,13 @@
     [
         {
             "name"    : "Node",
-            "modes"   : ["Context", "Bar"]
+            "modes"   : ["Context", "Bar"],
+            "parent"  : "None"
         },
 
         {
             "name"    : "Delete",
-            "modes"   : ["Submenu"],
-            "parent"  : "Node"
+            "modes"   : ["Submenu"]
         }
 
     ],
@@ -26,7 +26,7 @@
         {
             "name"           : "Execute",
             "menu"           : "Node",
-            "valid_types"    : ["task", "alias"],
+            "valid_types"    : ["task", "alias", "family"],
             "valid_states"   : ["complete", "unknown", "queued", "aborted", "suspended"],
             "command"        : "ecflow_client --run <full_name>"
         },
@@ -59,12 +59,12 @@
 
         {
             "name"           : "Delete",
+            "type"           : "Submenu",
             "menu"           : "Node",
             "valid_types"    : ["suite", "task", "family"],
             "valid_states"   : ["queued"],
             "valid_attrs"    : ["has_triggers", "has_time", "has_date"],
-            "command"        : "None",
-            "submenu"        : "Delete"
+            "command"        : "None"
         },
 
         {
@@ -76,8 +76,8 @@
         {
             "name"           : "All dependencies",
             "menu"           : "Delete",
-            "valid_types"    : ["task", "alias"],
-            "valid_states"   : ["submitted", "active"],
+            "valid_types"    : ["all"],
+            "valid_states"   : ["all"],
             "valid_attrs"    : ["has_triggers", "has_time", "has_date"],
             "command"        : "ecflow_client --free-dep all <full_name>"
         }

@@ -39,6 +39,11 @@ public:
 
 
     void setCommand(const std::string &command) {command_ = command;};
+    bool compatibleWithNode(ViewNodeInfo_ptr nodeInfo);
+    void addValidType(std::string type);
+    void addValidState(std::string type);
+    void setAsSubMenu() {isSubMenu_ = true;};
+    bool isSubMenu()    {return isSubMenu_;};
     std::string &name()   {return name_;};
     QAction     *action() {return action_;};
 
@@ -51,8 +56,10 @@ private:
     std::string question_;
     std::string defaultAnswer_;
 
-    std::vector<NodeType> validNodeTypes_;
-    std::vector<DState>   validNodeStates_;
+    std::vector<NodeType>      validNodeTypes_;
+    std::vector<DState::State> validNodeStates_;
+    
+    bool isSubMenu_;
 
     QAction *action_;
 };

@@ -738,25 +738,29 @@ void ServerHandler::command(std::vector<ViewNodeInfo_ptr> info,std::string cmd)
 
 		for(int i=0; i < info.size(); i++)
 		{
-			std::string nodeName;
+			std::string nodeFullName;
+			std::string nodeName = info[i]->node()->name();
 			if(info[i]->isNode())
 			{
-				nodeName = info[i]->node()->absNodePath();
-				UserMessage::message(UserMessage::DBG, false, std::string("  --> for node: ") + nodeName + " (server: " + info[i]->server()->longName() + ")");
+				nodeFullName = info[i]->node()->absNodePath();
+				UserMessage::message(UserMessage::DBG, false, std::string("  --> for node: ") + nodeFullName + " (server: " + info[i]->server()->longName() + ")");
 			}
 			else if(info[i]->isServer())
 			{
-				nodeName = info[i]->server()->longName();
-				UserMessage::message(UserMessage::DBG, false, std::string("  --> for server: ") + nodeName);
+				nodeFullName = info[i]->server()->longName();
+				UserMessage::message(UserMessage::DBG, false, std::string("  --> for server: ") + nodeFullName);
 			}
 
+
+			// replace placeholders with real node names
+
 			std::string placeholder("<full_name>");
-			size_t pos = realCommand.find(placeholder);
-			if (pos != std::string::npos)
-			{
-				realCommand.replace(pos,placeholder.length(),nodeName);
-				UserMessage::message(UserMessage::DBG, false, std::string("final command: ") + realCommand);
-			}
+			ecf::Str::replace_all(realCommand, placeholder, nodeFullName);
+
+			placeholder = "<node_name>";
+			ecf::Str::replace_all(realCommand, placeholder, nodeName);
+
+			UserMessage::message(UserMessage::DBG, false, std::string("final command: ") + realCommand);
 
 
 			// get the command into the right format by first splitting into tokens
