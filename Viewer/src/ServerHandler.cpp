@@ -731,6 +731,7 @@ ServerComThread *ServerHandler::comThread()
 void ServerHandler::command(std::vector<ViewNodeInfo_ptr> info,std::string cmd)
 {
 	std::string realCommand = resolveServerCommand(cmd);
+	std::vector<ServerHandler *> targetServers;
 
 	if (!realCommand.empty())
 	{
@@ -740,25 +741,43 @@ void ServerHandler::command(std::vector<ViewNodeInfo_ptr> info,std::string cmd)
 		{
 			std::string nodeFullName;
 			std::string nodeName = info[i]->node()->name();
+
 			if(info[i]->isNode())
 			{
 				nodeFullName = info[i]->node()->absNodePath();
-				UserMessage::message(UserMessage::DBG, false, std::string("  --> for node: ") + nodeFullName + " (server: " + info[i]->server()->longName() + ")");
+				//UserMessage::message(UserMessage::DBG, false, std::string("  --> for node: ") + nodeFullName + " (server: " + info[i]->server()->longName() + ")");
 			}
 			else if(info[i]->isServer())
 			{
 				nodeFullName = info[i]->server()->longName();
-				UserMessage::message(UserMessage::DBG, false, std::string("  --> for server: ") + nodeFullName);
+				//UserMessage::message(UserMessage::DBG, false, std::string("  --> for server: ") + nodeFullName);
 			}
 
+			info[i]->server()->targetNodeNames_     += " " + nodeName;      // build up the list of nodes for each server
+			info[i]->server()->targetNodeFullNames_ += " " + nodeFullName;  // build up the list of nodes for each server
+
+
+			// add this to our list of target servers?
+			if (std::find(targetServers.begin(), targetServers.end(), info[i]->server()) == targetServers.end())
+			{
+				targetServers.push_back(info[i]->server());
+			}
+		}
+
+
+		// for each target server, construct and send its command
+
+		for (size_t s = 0; s < targetServers.size(); s++)
+		{
+			ServerHandler* serverHandler = targetServers[s];
 
 			// replace placeholders with real node names
 
 			std::string placeholder("<full_name>");
-			ecf::Str::replace_all(realCommand, placeholder, nodeFullName);
+			ecf::Str::replace_all(realCommand, placeholder, serverHandler->targetNodeFullNames_);
 
 			placeholder = "<node_name>";
-			ecf::Str::replace_all(realCommand, placeholder, nodeName);
+			ecf::Str::replace_all(realCommand, placeholder, serverHandler->targetNodeNames_);
 
 			UserMessage::message(UserMessage::DBG, false, std::string("final command: ") + realCommand);
 
@@ -769,18 +788,20 @@ void ServerHandler::command(std::vector<ViewNodeInfo_ptr> info,std::string cmd)
 			std::vector<std::string> strs;
 			std::string delimiters(" ");
 			ecf::Str::split(realCommand, strs, delimiters);
-			ServerHandler* serverHandler = info[i]->server();
 
 			// set up and run the thread for server communication
 			serverHandler->comThread()->setCommandString(strs);
 			serverHandler->comThread()->sendCommand(serverHandler, serverHandler->client_, ServerComThread::COMMAND);
 
+
+			serverHandler->targetNodeNames_.clear();      // reset the target node names for next time
+			serverHandler->targetNodeFullNames_.clear();  // reset the target node names for next time
 			//serverHandler->update();
 		}
 	}
 	else
 	{
-		// XXX TODO: inform the user that this command is not recognised
+		UserMessage::message(UserMessage::ERROR, true, std::string("command ") + cmd + " is not recognised. Check the menu definition.");
 	}
 }
 

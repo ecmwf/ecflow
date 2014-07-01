@@ -157,6 +157,11 @@ private:
 
 		ServerComThread *comThread_;
 		QMutex           defsMutex_;
+
+
+		std::string targetNodeNames_;      // used when building up a command in ServerHandler::command
+		std::string targetNodeFullNames_;  // used when building up a command in ServerHandler::command
+
 };
 
 
