@@ -34,7 +34,8 @@ ServerHandler::ServerHandler(const std::string& name, const std::string& port) :
    client_(0),
    updating_(false),
    communicating_(false),
-   comThread_(0)
+   comThread_(0),
+   refreshIntervalInSeconds_(10)
 {
 	longName_=name_ + "@" + port_;
 
@@ -88,6 +89,10 @@ ServerHandler::ServerHandler(const std::string& name, const std::string& port) :
 	connect(comThread(), SIGNAL(errorMessage(std::string)), this, SLOT(errorMessage(std::string)));
 	connect(comThread(), SIGNAL(queryFinished(NodeInfoQuery_ptr)), this, SLOT(queryFinished(NodeInfoQuery_ptr)));
 
+
+	// set the timer for refreshing the server info
+   	connect(&refreshTimer_, SIGNAL(timeout()), this, SLOT(refreshServerInfo()));
+	resetRefreshTimer();
 }
 
 ServerHandler::~ServerHandler()
@@ -99,6 +104,24 @@ ServerHandler::~ServerHandler()
 		delete comThread_;
 
 }
+
+
+void ServerHandler::resetRefreshTimer()
+{
+	// interval of -1 means don't use a timer
+
+	if (refreshIntervalInSeconds_ != -1)
+	{
+		refreshTimer_.stop();
+		refreshTimer_.setInterval(refreshIntervalInSeconds_*1000);
+		refreshTimer_.start();
+	}
+	else
+	{
+		refreshTimer_.stop();
+	}
+}
+
 
 ServerHandler* ServerHandler::addServer(const std::string& name, const std::string& port)
 {
@@ -597,7 +620,10 @@ bool ServerHandler::readManual(Node *n,std::string& fileName,std::string& txt,st
 void ServerHandler::updateAll()
 {
 	for(std::vector<ServerHandler*>::const_iterator it=servers_.begin(); it != servers_.end();it++)
-			(*it)->update();
+	{
+		(*it)->update();
+		(*it)->resetRefreshTimer();  // to avoid too many server requests
+	}
 }
 
 
@@ -720,6 +746,12 @@ int ServerHandler::update()
 
    setUpdatingStatus(false);
    return err;
+}
+
+void ServerHandler::refreshServerInfo()
+{
+	UserMessage::message(UserMessage::DBG, false, std::string("auto refreshing server info for ") + name());
+	update();
 }
 
 

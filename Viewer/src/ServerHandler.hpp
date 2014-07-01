@@ -16,6 +16,7 @@
 
 #include <QThread>
 #include <QMutex>
+#include <QTimer>
 
 #include "Defs.hpp"
 #include "AbstractObserver.hpp"
@@ -96,6 +97,7 @@ public:
 		void setUpdatingStatus(bool newStatus) {updating_ = newStatus;}
 		void releaseDefs();
 
+		void resetRefreshTimer();
 		void query(NodeInfoQuery_ptr);
 		void messages(NodeInfoQuery_ptr req);
 		void script(NodeInfoQuery_ptr req);
@@ -148,7 +150,9 @@ private slots:
 
 		void commandSent();  // invoked when a command has finished being sent to the server
 		void errorMessage(std::string message); // invoked when an error message is received
-		void queryFinished(NodeInfoQuery_ptr); //invoked when a reply is received from from the server/thread
+		void queryFinished(NodeInfoQuery_ptr);  // invoked when a reply is received from from the server/thread
+		void refreshServerInfo();
+
 
 private:
 
@@ -161,6 +165,9 @@ private:
 
 		std::string targetNodeNames_;      // used when building up a command in ServerHandler::command
 		std::string targetNodeFullNames_;  // used when building up a command in ServerHandler::command
+
+		int refreshIntervalInSeconds_;
+		QTimer refreshTimer_;
 
 };
 
