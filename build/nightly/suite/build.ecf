@@ -94,26 +94,26 @@ else
          if [[ %TOOLSET% = intel ]]; then
             %CMAKE% ../../  \
             -DCMAKE_BUILD_TYPE=$cmake_build_type \
-            -DBOOST_ROOT=%BOOST_DIR%/%BOOST_VERSION \
+            -DBOOST_ROOT=%BOOST_DIR%/%BOOST_VERSION% \
             -DCMAKE_INSTALL_PREFIX=/usr/local/apps/ecflow/$ecflow_version \
             -DCMAKE_C_COMPILER=icc  -DCMAKE_CXX_COMPILER=icpc 
          elif [[ %TOOLSET% = clang ]]; then
             %CMAKE% ../../  \
             -DCMAKE_BUILD_TYPE=$cmake_build_type \
-            -DBOOST_ROOT=%BOOST_DIR%/%BOOST_VERSION \
+            -DBOOST_ROOT=%BOOST_DIR%/%BOOST_VERSION% \
             -DCMAKE_INSTALL_PREFIX=/usr/local/apps/ecflow/$ecflow_version \
             -DCMAKE_C_COMPILER=clang  -DCMAKE_CXX_COMPILER=clang++       
          elif [[ %TOOLSET% = vacpp ]]; then
             # use xlC_r as that will automatically add -lpthreads, which is used some of boost libs
             %CMAKE% ../../  \
             -DCMAKE_BUILD_TYPE=$cmake_build_type \
-            -DBOOST_ROOT=%BOOST_DIR%/%BOOST_VERSION \
+            -DBOOST_ROOT=%BOOST_DIR%/%BOOST_VERSION% \
             -DCMAKE_INSTALL_PREFIX=/usr/local/apps/ecflow/$ecflow_version \
             -DCMAKE_C_COMPILER=xlC  -DCMAKE_CXX_COMPILER=xlC_r \ 
             -DPYTHON_LIBRARIES=/usr/local/apps/python/2.7.2-01/lib/python2.7/config/
          else
             %CMAKE% ../../  \
-            -DBOOST_ROOT=%BOOST_DIR%/%BOOST_VERSION \
+            -DBOOST_ROOT=%BOOST_DIR%/%BOOST_VERSION% \
             -DCMAKE_BUILD_TYPE=$cmake_build_type \
             -DCMAKE_INSTALL_PREFIX=/usr/local/apps/ecflow/$ecflow_version
          fi
