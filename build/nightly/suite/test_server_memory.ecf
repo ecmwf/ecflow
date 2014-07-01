@@ -16,7 +16,11 @@ else
    # Clear up
    rm -rf `hostname`.*
    
-   # Load the latest valgrind. module is support by sourceing .profile, in ECF_JOB_CMD
+   # Load the latest valgrind. 
+   # Enable module capability for korn shell 
+   # The alternative is to source .profile, in ECF_JOB_CMD, however that affect all jobs, i.e.
+   #     task.add_variable("ECF_JOB_CMD","rsh %LOCAL_HOST% -l %USER% 'source ~/.profile; %ECF_JOB% > %ECF_JOBOUT% 2>&1'")
+   source /usr/local/apps/module/init/ksh
    module load valgrind/3.9.0
    
    # test server for memory leaks, & give it time to start
