@@ -32,6 +32,14 @@
         },
 
         {
+            "name"           : "Requeue",
+            "menu"           : "Node",
+            "valid_types"    : ["task", "suite", "family"],
+            "valid_states"   : ["complete", "unknown", "queued", "aborted", "suspended"],
+            "command"        : "ecflow_client --requeue force <full_name>"
+        },
+
+        {
             "name"           : "Set complete",
             "menu"           : "Node",
             "valid_types"    : ["task", "alias"],
@@ -65,6 +73,11 @@
             "valid_states"   : ["queued"],
             "valid_attrs"    : ["has_triggers", "has_time", "has_date"],
             "command"        : "None"
+        },
+
+        {
+            "name"           : "-",
+            "menu"           : "Node"
         },
 
         {

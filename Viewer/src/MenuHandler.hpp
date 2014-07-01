@@ -44,6 +44,7 @@ public:
     void addValidState(std::string type);
     void setAsSubMenu() {isSubMenu_ = true;};
     bool isSubMenu()    {return isSubMenu_;};
+    bool isDivider()    {return isDivider_;};
     std::string &name()   {return name_;};
     QAction     *action() {return action_;};
 
@@ -60,6 +61,7 @@ private:
     std::vector<DState::State> validNodeStates_;
     
     bool isSubMenu_;
+    bool isDivider_;
 
     QAction *action_;
 };

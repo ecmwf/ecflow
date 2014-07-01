@@ -17,6 +17,8 @@
 
 #include <QMessageBox>
 #include <QMenu>
+#include <QLabel>
+#include <QWidgetAction>
 #include <QDebug>
 
 #include "MenuHandler.hpp"
@@ -266,6 +268,36 @@ QMenu *Menu::generateMenu(std::vector<ViewNodeInfo_ptr> nodes, QWidget *parent)
     QMenu *qmenu=new QMenu(parent);	
     qmenu->setTitle(QString::fromStdString(name()));
 
+    //qmenu->setWindowFlags(Qt::Tool);
+    //qmenu->setWindowTitle("my title");
+
+
+    // add an inactive action(!) to the top of the menu in order to show which
+    // node has been selected
+
+    if (nodes.size() == 1)
+    {
+        /*
+        QLabel *nodeLabel = new QLabel(QString::fromStdString((*nodes[0]).node()->name()));
+        nodeLabel->setStyleSheet("QLabel { background-color : red; color : blue; }");
+        nodeLabel->setAlignment(Qt::AlignHCenter);
+        
+        nodeLabel->setObjectName("nodeLabel");
+        QWidgetAction *action = new QWidgetAction(0);
+        action->setDefaultWidget(nodeLabel);
+        */
+
+        QAction *action = new QAction(0);
+        action->setText(QString::fromStdString((*nodes[0]).node()->name()));
+        qmenu->addAction(action);
+        action->setParent(parent);
+        action->setEnabled(false);
+        QFont menuTitleFont;
+        menuTitleFont.setBold(true);
+        menuTitleFont.setItalic(true);
+        action->setFont(menuTitleFont);
+    }
+
 
     for (std::vector<MenuItem*>::iterator itItems = items_.begin(); itItems != items_.end(); ++itItems)
     {
@@ -289,6 +321,10 @@ QMenu *Menu::generateMenu(std::vector<ViewNodeInfo_ptr> nodes, QWidget *parent)
                     QMenu *subMenu = menu->generateMenu(nodes, 0);
                     qmenu->addMenu(subMenu);
                 }
+            }
+            else if  ((*itItems)->isDivider())
+            {
+                qmenu->addSeparator();
             }
             else
             {
@@ -318,10 +354,17 @@ QMenu *Menu::generateMenu(std::vector<ViewNodeInfo_ptr> nodes, QWidget *parent)
 // MenuItem class functions
 // ------------------------
 
-MenuItem::MenuItem(const std::string &name) : name_(name), action_(0), isSubMenu_(false)
+MenuItem::MenuItem(const std::string &name) : name_(name), action_(0), isSubMenu_(false), isDivider_(false)
 {
-    action_ = new QAction(0);
-    action_->setText(QString(name.c_str()));
+    if (name == "-")
+    {
+        isDivider_ = true;
+    }
+    else
+    {
+        action_ = new QAction(0);
+        action_->setText(QString(name.c_str()));
+    }
 }
 
 
