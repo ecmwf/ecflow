@@ -695,7 +695,7 @@ with defs.add_suite("experiment") as experiment:
 
 print "build boost"
 with defs.add_suite("boost_suite") as boost_suite:
-    boost_suite.add_variable("BOOST_VERSION","boost_1_55_0")
+    boost_suite.add_variable("BOOST_VERSION","boost_1_53_0")
     boost_suite.add_variable("REMOTE_COPY","rcp")
     boost_suite.add_variable("ECF_FILES",os.getenv("SCRATCH") + "/nightly/boost_suite")
     add_suite_variables(boost_suite)
