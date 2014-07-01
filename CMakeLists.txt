@@ -80,17 +80,22 @@ else()
 endif()
 
 # =========================================================================================
-# Boost  
+# Boost
+# Jira ISSUE:   ECBUILD-40 ecbuild 1.3.2 ignores -DBOOST_ROOT
+#     setting  -DBOOST_ROOT=/var/tmp/ma0/boost/boost_1_53_0
+#     Does not appear to be honored. ?
+#     It always seem to use boost in /usr/local/apps
 # =========================================================================================
 
 ecbuild_add_extra_search_paths( boost ) # also respects BOOST_ROOT
 
+# Ecflow test require statics libs, otherwise get double free, error.
 # To use static boost python ensure that Boost_USE_STATIC_LIBS is set on.
-set(Boost_USE_STATIC_LIBS        OFF)
+set(Boost_USE_STATIC_LIBS        ON)
 set(Boost_USE_MULTITHREADED      ON)
 set(Boost_NO_SYSTEM_PATHS        ON)
 set(Boost_DETAILED_FAILURE_MSG   ON)
-#set(Boost_DEBUG                 ON)
+set(Boost_DEBUG                 ON)
 
 find_package( Boost 1.53.0 COMPONENTS python serialization system thread unit_test_framework test_exec_monitor filesystem program_options date_time )
 #find_package(Boost 1.53.0 EXACT REQUIRED COMPONENTS python)
@@ -109,14 +114,6 @@ find_package( Boost 1.53.0 COMPONENTS python serialization system thread unit_te
 
 message( STATUS "Boost_LIBRARIES     : ${Boost_LIBRARIES}" )
 
-#list( APPEND Ecflow_Boost_LIBS
-#    ${Boost_SERIALIZATION_LIBRARY}
-#    ${Boost_SYSTEM_LIBRARY}
-#    ${Boost_THREAD_LIBRARY}
-#    ${Boost_FILESYSTEM_LIBRARY}
-#    ${Boost_PROGRAM_OPTIONS_LIBRARY}
-#    ${Boost_DATE_TIME_LIBRARY}
-#)
 
 
 # =========================================================================================

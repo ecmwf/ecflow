@@ -4,6 +4,9 @@ suite cron
    
    task cron1
       cron -w 0 , 1, 2 -m 5, 6, 7 , 8,9,10      10:00  20:00  01:00  # run every sunday, between May-Aug, every hour between 10am and 8pm
+
+   task cron1_1
+      cron -w 0,1,2 -m 9,10  10:00  14:00  01:00  
       
    task cron2
          cron 23:00                              # run every day at 23:00

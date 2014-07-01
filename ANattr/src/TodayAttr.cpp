@@ -136,7 +136,7 @@ bool TodayAttr::is_free(const ecf::Calendar& calendar) const
 bool TodayAttr::why(const ecf::Calendar& c, std::string& theReasonWhy) const
 {
    if (isFree(c)) return false;
-   theReasonWhy += " is today dependent";
+   theReasonWhy += "is today dependent";
 
    // Check to see if time has expired, if has not, then report why
    if (timeSeries_.is_valid()) {

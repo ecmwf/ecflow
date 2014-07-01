@@ -144,9 +144,24 @@ def add_opensuse131_variables( opensuse131 ):
     opensuse131.add_variable("SITE_CONFIG","$WK/build/site_config/site-config-Linux64.jam")
     opensuse131.add_variable("CUSTOM_BJAM_ARGS","c++-template-depth=512")   # needed for gcc 4.8.1
 
+def is_cray_cct( node ):
+    if (node.name() == "cray_cct"):
+        return True
+    parent = node.get_parent();
+    while parent:
+        if (parent.name() == "cray_cct"):
+            return True
+        parent = parent.get_parent()
+    return False
+    
 def add_cray_gnu_compiler_variables( cray_gnu ):
-    cray_gnu.add_variable("COMPILER_TEST_PATH","gcc-4.6.3/$mode")
-    cray_gnu.add_variable("COMPILER_VERSION","gcc-4.6.3")
+    if is_cray_cct( cray_gnu ):
+        cray_gnu.add_variable("COMPILER_TEST_PATH","gcc-4.6.3/$mode")
+        cray_gnu.add_variable("COMPILER_VERSION","gcc-4.6.3")
+    else:
+        cray_gnu.add_variable("COMPILER_TEST_PATH","gcc-4.8.2/$mode")
+        cray_gnu.add_variable("COMPILER_VERSION","gcc-4.8.2")
+        
     cray_gnu.add_variable("TOOLSET","gcc")
     cray_gnu.add_variable("BOOTSTRAP_TOOLSET","gcc")
     cray_gnu.add_variable("LAYOUT","versioned")
@@ -188,7 +203,11 @@ def add_remote_cray_variables( cray ):
     cray.add_variable("REMOTE_COPY","scp")
 
     # for cray we need to use logsrvr in order to see the job output
-    cray.add_variable("ECF_LOGHOST","cct")  # cctdtn1
+    if is_cray_cct(cray):
+        cray.add_variable("ECF_LOGHOST","cct")  # cctdtn1
+    else:
+        cray.add_variable("ECF_LOGHOST","cca-il2")  # cctdtn1
+
     cray.add_variable("ECF_LOGPORT","9316")   
     
     # Set the remote location for output, LOGDIR needed by queing system
@@ -203,16 +222,25 @@ def add_remote_cray_variables( cray ):
     cray.add_variable("QUEUE","ns")
     cray.add_variable("ACCOUNT","ecodmdma")
     #cray.add_variable("STHOST","/s2o1")  # Needed by qsub.h
-    cray.add_variable("SCHOST","cct")    # Super Computer HOST
+    if is_cray_cct(cray):
+        cray.add_variable("SCHOST","cct")    # Super Computer HOST
+    else:
+        cray.add_variable("SCHOST","cca")    # Super Computer HOST
+        
     cray.add_variable("WSHOST",os.uname()[1])  # Work Space HOST
 
 def add_cray_variables( cray ):
     # Look for includes in ECF_INCLUDES, and the ECF_HOME
     cray.add_variable("ECF_HOME", os.getenv("SCRATCH") + "/nightly/suite/cray")
-    cray.add_variable("REMOTE_HOST","cct")
     cray.add_variable("BOOST_DIR","/perm/ma/ma0/boost")
     cray.add_variable("ARCH","cray")
-    cray.add_variable("MODULE_LOAD_GCC","module load gcc/4.6.3")
+    cray.add_variable("MODULE_LOAD_CRAY_COMPILER","module load cce/8.3.0.186")
+    if is_cray_cct( cray ):
+        cray.add_variable("REMOTE_HOST","cct")
+        cray.add_variable("MODULE_LOAD_GCC","module load gcc/4.6.3")
+    else:
+        cray.add_variable("REMOTE_HOST","cca")
+        cray.add_variable("MODULE_LOAD_GCC","module load gcc/4.8.2")
     
     
 def add_remote_redhat_variables( redhat ):
@@ -223,7 +251,6 @@ def add_remote_redhat_variables( redhat ):
     redhat.add_variable("TOOLSET","gcc")
     redhat.add_variable("BOOTSTRAP_TOOLSET","gcc")
     redhat.add_variable("REMOTE_COPY","scp")
-
 
 def add_redhat_variables( redhat ):
     redhat.add_variable("REMOTE_HOST","ecgb")
@@ -373,15 +400,8 @@ def build_localhost( parent ) :
     add_build_and_test_tasks( localhost )
     add_build_profile( localhost )
     
-    # allow module functionality,to load latest valgrind, by sourcing .profile
-    task = localhost.add_task("test_memory_leaks")
-    task.add_variable("ECF_JOB_CMD","rsh %LOCAL_HOST% -l %USER% 'source ~/.profile; %ECF_JOB% > %ECF_JOBOUT% 2>&1'")
-    task.add_trigger("build_release == complete and build_debug == complete")
-    
-    task = localhost.add_task("test_server_memory")
-    task.add_variable("ECF_JOB_CMD","rsh %LOCAL_HOST% -l %USER% 'source ~/.profile; %ECF_JOB% > %ECF_JOBOUT% 2>&1'")
-    task.add_trigger("test_memory_leaks == complete or test_memory_leaks == aborted")
-    
+    localhost.add_task("test_memory_leaks").add_trigger("build_release == complete and build_debug == complete")
+    localhost.add_task("test_server_memory").add_trigger("test_memory_leaks == complete or test_memory_leaks == aborted")
     localhost.add_task("test_client_performance").add_trigger("test_server_memory == complete or test_server_memory == aborted")
     localhost.add_task("test_server_performance").add_trigger("test_client_performance == complete or test_client_performance == aborted")
     localhost.add_task("test_performance").add_trigger("test_server_performance == complete or test_server_performance == aborted")
@@ -486,8 +506,14 @@ def build_cray_cray( parent ) :
     add_build_and_test_tasks( cray )
     
 def build_cray( parent ) :
-    cray = parent.add_family("cray")
-    cray.add_variable("NO_OF_CORES","2") # temp until stings get sorted on cray
+    cray = parent.add_family("cray_cct")
+    cray.add_variable("NO_OF_CORES","2") # temp until things get sorted on cray
+    build_cray_gnu( cray)
+    build_cray_intel( cray)
+    build_cray_cray( cray)
+    
+    cray = parent.add_family("cray_cca")
+    cray.add_variable("NO_OF_CORES","2") # temp until things get sorted on cray
     build_cray_gnu( cray)
     build_cray_intel( cray)
     build_cray_cray( cray)
@@ -523,6 +549,36 @@ def add_boost_tasks( family ):
     boost_build = family.add_task("boost_build")
     boost_build.add_trigger("boost_site_config == complete")
         
+def add_cray_boost_tasks( family ):
+    boost_remove = family.add_task("boost_remove")  
+    boost_copy_gzip = family.add_task("boost_copy_gzip")  
+    boost_copy_gzip.add_trigger("boost_remove == complete")
+    add_local_job_variables(boost_copy_gzip)  # this is run locally
+    boost_untar = family.add_task("boost_untar")
+    boost_untar.add_trigger("boost_copy_gzip == complete")
+    boost_bjam = family.add_task("boost_bjam")
+    boost_bjam.add_trigger("boost_untar == complete")
+    boost_fix = family.add_task("boost_fix")
+    boost_fix.add_trigger("boost_bjam == complete")
+    boost_site_config = family.add_task("boost_site_config")
+    boost_site_config.add_trigger("boost_fix == complete")
+    
+    family_cray_gnu = family.add_family("cray_gnu")
+    add_cray_gnu_compiler_variables(family_cray_gnu)
+    boost_build = family_cray_gnu.add_task("boost_build")
+    boost_build.add_trigger("../boost_site_config == complete")
+    
+    family_cray_intel = family.add_family("cray_intel")
+    add_cray_intel_compiler_variables(family_cray_intel)
+    boost_build = family_cray_intel.add_task("boost_build")
+    boost_build.add_trigger("../boost_site_config == complete")
+    
+    family_cray_cray = family.add_family("cray_cray")
+    add_cray_cray_compiler_variables(family_cray_cray)
+    boost_build = family_cray_cray.add_task("boost_build")
+    boost_build.add_trigger("../boost_site_config == complete")
+
+
 def build_boost( boost ):
     boost.add_defstatus( ecflow.DState.suspended );
     boost.add_variable("LAYOUT","tagged")
@@ -561,39 +617,19 @@ def build_boost( boost ):
     add_remote_redhat_variables(family)
     add_boost_tasks( family )
     
-    family = boost.add_family("cray")
+    family = boost.add_family("cray_cct")
     add_cray_variables(family)
     add_remote_cray_variables(family)
     add_cray_gnu_compiler_variables(family)
+    add_cray_boost_tasks(family)
 
-    boost_remove = family.add_task("boost_remove")  
-    boost_copy_gzip = family.add_task("boost_copy_gzip")  
-    boost_copy_gzip.add_trigger("boost_remove == complete")
-    add_local_job_variables(boost_copy_gzip)  # this is run locally
-    boost_untar = family.add_task("boost_untar")
-    boost_untar.add_trigger("boost_copy_gzip == complete")
-    boost_bjam = family.add_task("boost_bjam")
-    boost_bjam.add_trigger("boost_untar == complete")
-    boost_fix = family.add_task("boost_fix")
-    boost_fix.add_trigger("boost_bjam == complete")
-    boost_site_config = family.add_task("boost_site_config")
-    boost_site_config.add_trigger("boost_fix == complete")
-    
-    family_cray_gnu = family.add_family("cray_gnu")
-    add_cray_gnu_compiler_variables(family_cray_gnu)
-    boost_build = family_cray_gnu.add_task("boost_build")
-    boost_build.add_trigger("../boost_site_config == complete")
-    
-    family_cray_intel = family.add_family("cray_intel")
-    add_cray_intel_compiler_variables(family_cray_intel)
-    boost_build = family_cray_intel.add_task("boost_build")
-    boost_build.add_trigger("../boost_site_config == complete")
-    
-    family_cray_cray = family.add_family("cray_cray")
-    add_cray_cray_compiler_variables(family_cray_cray)
-    boost_build = family_cray_cray.add_task("boost_build")
-    boost_build.add_trigger("../boost_site_config == complete")
+    family = boost.add_family("cray_cca")
+    add_cray_variables(family)
+    add_remote_cray_variables(family)
+    add_cray_gnu_compiler_variables(family)
+    add_cray_boost_tasks(family)
 
+ 
     family = boost.add_family("opensuse103")
     add_opensuse103_variables(family)
     add_remote_opensuse103_variables(family)
