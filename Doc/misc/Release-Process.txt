@@ -46,7 +46,7 @@ Process
 
          scp -r 4.0.2 emos@cca:/usr/local/apps/ecflow 
       
-   READHAT: If we built on ecgb/readhat we can cop release to sappa/sappab 
+   READHAT: If we built on ecgb/readhat we can copy release to sappa/sappab 
   
          scp -r 4.0.2 emos@sappa:/usr/local/apps/ecflow/.
          scp -r 4.0.2 emos@sappb:/usr/local/apps/ecflow/.
