@@ -1642,12 +1642,19 @@ void Node::why(std::vector<std::string>& vec) const
    // The complete expression is used to set node to complete, when it evaluates and hence
    // should not prevent further tree walking. evaluate each leaf branch
    // **************************************************************************************
-   if (triggerAst())  {
+   AstTop* theTriggerAst = triggerAst();
+   if (theTriggerAst) {
+      // Note 1: A trigger can be freed by the ForceCmd
+      // Note 2: if we have a non NULL trigger ast, we must have trigger expression
+      // Note 3: The freed state is stored on the expression ( i.e *NOT* on the ast (abstract syntax tree) )
+      if (!triggerExpr_->isFree() ) {
+
 #ifdef DEBUG_WHY
-      std::cout << "   Node::why " << debugNodePath() << " checking trigger dependencies\n";
+         std::cout << "   Node::why " << debugNodePath() << " checking trigger dependencies\n";
 #endif
-      std::string postFix;
-      if (triggerAst()->why(postFix)) { vec.push_back(prefix + postFix); }
+         std::string postFix;
+         if (theTriggerAst->why(postFix)) { vec.push_back(prefix + postFix); }
+      }
    }
 }
 
