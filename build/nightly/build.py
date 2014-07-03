@@ -188,8 +188,10 @@ def add_cray_gnu_compiler_variables( cray_gnu ):
     cray_gnu.add_variable("PRGENV","PrgEnv-gnu")
     cray_gnu.add_variable("SITE_CONFIG","$WK/build/site_config/site-config-cray.jam")
     cray_gnu.add_variable("ROOT_WK","/perm/ma/ma0/workspace/GNU")
-    # cray_gnu.add_variable("CUSTOM_BJAM_ARGS","toolset=gcc cxxflags=-fPIC c++-template-depth=512") # needed for gnu/4.8.1
-    cray_gnu.add_variable("CUSTOM_BJAM_ARGS","toolset=gcc cxxflags=-fPIC")  
+    if is_cray_cct( cray_gnu ):
+        cray_gnu.add_variable("CUSTOM_BJAM_ARGS","toolset=gcc cxxflags=-fPIC")  
+    else:
+        cray_gnu.add_variable("CUSTOM_BJAM_ARGS","toolset=gcc cxxflags=-fPIC c++-template-depth=512") # needed for gnu/4.8.2
 
 def add_cray_intel_compiler_variables( cray_intel ):
     cray_intel.add_variable("COMPILER_TEST_PATH","intel-linux/$mode")
