@@ -896,19 +896,19 @@ std::ostream& NodeContainer::print(std::ostream& os) const
 
 bool NodeContainer::checkInvariants(std::string& errorMsg) const
 {
-	if (!Node::checkInvariants(errorMsg)) return false;
+   if (!Node::checkInvariants(errorMsg)) return false;
 
- 	size_t node_vec_size = nodeVec_.size();
-	for(size_t t = 0; t < node_vec_size; t++) {
-		if (nodeVec_[t]->parent() != this) {
-			errorMsg += "NodeContainer::checkInvariants task parent() not correct";
-			return false;
-		}
-	    if (!nodeVec_[t]->checkInvariants(errorMsg)) {
- 	    	return false;
-	    }
-	}
-	return true;
+   size_t node_vec_size = nodeVec_.size();
+   for(size_t t = 0; t < node_vec_size; t++) {
+      if (nodeVec_[t]->parent() != this) {
+         errorMsg += "NodeContainer::checkInvariants family/task parent() not correct";
+         return false;
+      }
+      if (!nodeVec_[t]->checkInvariants(errorMsg)) {
+         return false;
+      }
+   }
+   return true;
 }
 
 void NodeContainer::verification(std::string& errorMsg) const
