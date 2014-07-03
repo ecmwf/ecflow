@@ -51,11 +51,6 @@ Process
          scp -r 4.0.2 emos@sappa:/usr/local/apps/ecflow/.
          scp -r 4.0.2 emos@sappb:/usr/local/apps/ecflow/.
       
-    IBM:  copy ecflow onto c2b please do the following
- 
-        cd /usr/local/apps/ecflow
-        ecrcp -avr 4.0.2 emos@c2b:/usr/local/apps/ecflow/.
- 
 
 *Make* sure destination has a trailing '/.' otherwise you
 can end up renaming.
