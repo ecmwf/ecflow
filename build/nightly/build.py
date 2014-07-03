@@ -87,7 +87,19 @@ def add_remote_linux_64_variables( linux_64 ):
     linux_64.add_variable("TOOLSET","gcc")
     linux_64.add_variable("BOOTSTRAP_TOOLSET","gcc")
     linux_64.add_variable("NO_OF_CORES","8")
-    
+
+def add_remote_linux_64_lxop_variables( linux_64 ): 
+    linux_64.add_variable("ECF_KILL_CMD","/home/ma/emos/bin/smssubmit.cray %USER% %ECF_RID% %SCHOST% %ECF_JOB% %ECF_JOBOUT%") 
+    linux_64.add_variable("ECF_JOB_CMD", "/home/ma/emos/bin/smssubmit.cray %USER% %SCHOST% %ECF_JOB% %ECF_JOBOUT%")
+    linux_64.add_variable("COMPILER_TEST_PATH","gcc-4.3/$mode")
+    linux_64.add_variable("COMPILER_VERSION","gcc-4.3")
+    linux_64.add_variable("TOOLSET","gcc")
+    linux_64.add_variable("BOOTSTRAP_TOOLSET","gcc")
+    linux_64.add_variable("NO_OF_CORES","8")
+    linux_64.add_variable("SCHOST","lxop")    # Super Computer HOST
+    linux_64.add_variable("QUEUE","test")    # for PBS
+    linux_64.add_variable("ECF_OUT","/gpfs/lxop/build/ecflow")
+
 def add_remote_linux_64_intel_variables( linux_64 ): 
     linux_64.add_variable("ECF_KILL_CMD","rsh %REMOTE_HOST% \"kill -15 %ECF_RID%\"") 
     linux_64.add_variable("ECF_JOB_CMD","rsh %REMOTE_HOST% -l %USER%  '%ECF_JOB% > %ECF_JOBOUT%  2>&1'")
@@ -104,6 +116,14 @@ def add_linux_64_variables( linux_64 ):
     linux_64.add_variable("ARCH","linux64")
     linux_64.add_variable("SITE_CONFIG","$WK/build/site_config/site-config-Linux64.jam")
     
+def add_linux_64_lxop_variables( linux_64 ): 
+    linux_64.add_variable("REMOTE_HOST","lxop")
+    linux_64.add_variable("ROOT_WK","/gpfs/lxop/build/builds")
+    linux_64.add_variable("BOOST_DIR","/gpfs/lxop/build/builds/boost")
+    linux_64.add_variable("ARCH","linux64")
+    linux_64.add_variable("SITE_CONFIG","$WK/build/site_config/site-config-Linux64.jam")
+    linux_64.add_variable("GIT","/usr/local/bin/git")   # /usr/local/apps/git/current/bin/git not installed yet
+
 def add_linux_64_intel_variables( linux_64_intel ): 
     linux_64_intel.add_variable("REMOTE_HOST","lxb")
     linux_64_intel.add_variable("ROOT_WK","/vol/ecf/cluster/intel")
@@ -448,6 +468,13 @@ def build_linux_64( parent ) :
     add_remote_linux_64_variables(linux_64)
     add_git_tasks( linux_64 )
     add_build_and_test_tasks( linux_64 )
+
+def build_linux_64_lxop( parent ) :
+    linux_64 = parent.add_family("linux64_lxop")
+    add_linux_64_lxop_variables(linux_64)
+    add_remote_linux_64_lxop_variables(linux_64)
+    add_git_tasks( linux_64 )
+    add_build_and_test_tasks( linux_64 )
     
 def build_linux_64_intel( parent ) :
     linux_64 = parent.add_family("linux64intel")
@@ -596,6 +623,11 @@ def build_boost( boost ):
     add_remote_linux_64_variables(family)
     add_boost_tasks( family )
 
+    family = boost.add_family("linux64_lxop")
+    add_linux_64_lxop_variables(family)
+    add_remote_linux_64_lxop_variables(family)
+    add_boost_tasks( family )
+
     family = boost.add_family("linux64intel")
     add_linux_64_intel_variables(family)
     add_remote_linux_64_intel_variables(family)
@@ -727,6 +759,7 @@ with defs.add_suite("suite") as suite:
         with build.add_family("remote") as remote:
             remote.add_variable("BUILD_TYPE","boost")  # choose between [  cmake | boost ]
             build_linux_64( remote )
+            build_linux_64_lxop( remote )
             build_linux_64_intel( remote )
             build_opensuse113( remote )
             build_opensuse131( remote )
