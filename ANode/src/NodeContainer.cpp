@@ -505,11 +505,11 @@ void NodeContainer::addTask(task_ptr t,size_t position)
 	add_task_only( t, position);
 }
 
-void NodeContainer::add_task_only( task_ptr t,size_t position)
+void NodeContainer::add_task_only( task_ptr t, size_t position)
 {
    if (t->parent()) {
       std::stringstream ss;
-      ss << "Add Task failed: A task of name '" << t->name() << "' already owned by another node " << debugNodePath();
+      ss << debugNodePath() << ": Add Task failed: A task of name '" << t->name() << "' is already owned by another node" ;
       throw std::runtime_error( ss.str() );
    }
 
@@ -522,11 +522,12 @@ void NodeContainer::add_task_only( task_ptr t,size_t position)
    }
    add_remove_state_change_no_ = Ecf::incr_state_change_no();
 }
-void NodeContainer::add_family_only( family_ptr f,size_t position)
+
+void NodeContainer::add_family_only( family_ptr f, size_t position)
 {
    if (f->parent()) {
       std::stringstream ss;
-      ss << "Add Family failed: A family of name '" << f->name() << "' already owned by another node " << debugNodePath();
+      ss << debugNodePath() << ": Add Family failed: A family of name '" << f->name() << "' is already owned by another node";
       throw std::runtime_error( ss.str() );
    }
 
