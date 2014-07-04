@@ -54,7 +54,7 @@ SuiteChanged0::SuiteChanged0(node_ptr s)
 SuiteChanged0::~SuiteChanged0()
 {
 	node_ptr node = node_.lock();
-	if (node.get()) {
+	if (node.get() && suite_) {
 		if ( modify_change_no_ != Ecf::modify_change_no() ) {
  			suite_->set_modify_change_no(Ecf::modify_change_no());
  			//std::cout << "SuiteChanged0::~SuiteChanged0() modify_ changed \n";
