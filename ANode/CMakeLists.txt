@@ -45,6 +45,7 @@ list( APPEND test_srcs
  test/TestOrder.cpp
  test/TestInLimit.cpp
  test/TestAlias.cpp
+ test/TestAdd.cpp
  test/TestZombies.cpp
  test/TestMigration.cpp
  test/TestMissNextTimeSlot.cpp

@@ -384,6 +384,7 @@ node_ptr NodeContainer::removeChild(Node* child)
  	for(size_t t = 0; t < node_vec_size; t++)     {
  		if (nodeVec_[t].get() == child) {
  			node_ptr node = boost::dynamic_pointer_cast<Node>(nodeVec_[t]);
+ 			child->set_parent(NULL); // must set to NULL, allows it to be re-added to different parent
  			nodeVec_.erase( nodeVec_.begin() + t);
  			add_remove_state_change_no_ = Ecf::incr_state_change_no();
  			return node ;
@@ -506,6 +507,12 @@ void NodeContainer::addTask(task_ptr t,size_t position)
 
 void NodeContainer::add_task_only( task_ptr t,size_t position)
 {
+   if (t->parent()) {
+      std::stringstream ss;
+      ss << "Add Task failed: A task of name '" << t->name() << "' already owned by another node " << debugNodePath();
+      throw std::runtime_error( ss.str() );
+   }
+
    t->set_parent(this);
    if (position >= nodeVec_.size()) {
       nodeVec_.push_back( t );
@@ -517,14 +524,20 @@ void NodeContainer::add_task_only( task_ptr t,size_t position)
 }
 void NodeContainer::add_family_only( family_ptr f,size_t position)
 {
-    f->set_parent(this);
-    if (position >= nodeVec_.size()) {
-       nodeVec_.push_back( f );
-    }
-    else {
-       nodeVec_.insert( nodeVec_.begin() + position, f);
-    }
-    add_remove_state_change_no_ = Ecf::incr_state_change_no();
+   if (f->parent()) {
+      std::stringstream ss;
+      ss << "Add Family failed: A family of name '" << f->name() << "' already owned by another node " << debugNodePath();
+      throw std::runtime_error( ss.str() );
+   }
+
+   f->set_parent(this);
+   if (position >= nodeVec_.size()) {
+      nodeVec_.push_back( f );
+   }
+   else {
+      nodeVec_.insert( nodeVec_.begin() + position, f);
+   }
+   add_remove_state_change_no_ = Ecf::incr_state_change_no();
 }
 
 
@@ -955,6 +968,7 @@ bool NodeContainer::doDeleteChild(Node* child)
 	std::vector<node_ptr>::iterator theTaskEnd = nodeVec_.end();
  	for(std::vector<node_ptr>::iterator t = nodeVec_.begin(); t!=theTaskEnd; ++t) {
  		if ( (*t).get() == child) {
+ 		   child->set_parent(NULL); // must set to NULL, allow it to be re-added to different parent
   			nodeVec_.erase(t);
          add_remove_state_change_no_ = Ecf::incr_state_change_no();
          set_most_significant_state_up_node_tree();
