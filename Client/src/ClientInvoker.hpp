@@ -100,6 +100,7 @@ public:
 	void set_jobs_password(const std::string&);
  	void setEnv( const std::vector<std::pair<std::string,std::string> >& e);
  	void testInterface(); // allow cmd construction to be aware thats it under test
+   const std::string& process_or_remote_id() const;
 
  	/// record each request its arguments and the round trip time to and from server
  	/// If the file can not opened for create/append then an runtime error exception is thrown
