@@ -217,6 +217,11 @@ then
          cd /usr/local/apps/ecflow
          scp -r $ECFLOW_VERSION emos@sappa:/usr/local/apps/ecflow/.
          scp -r $ECFLOW_VERSION emos@sappb:/usr/local/apps/ecflow/.
+      
+      elif [ "$OS_VERSION" = sles11 ] ; then 
+   
+         # lxab: copy over to lxop, until we can build on there
+         scp -r $ECFLOW_VERSION emos@lxop:/usr/local/apps/ecflow/.
       fi
    fi
 fi
