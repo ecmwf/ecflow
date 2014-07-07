@@ -36,7 +36,7 @@ public:
 	void notifyServerFilterChanged();
 
 public slots:
-	void slotNodeChanged(const Node*, const std::vector<ecf::Aspect::Type>&);
+	void slotNodeChanged(const Node*, QList<ecf::Aspect::Type>);
 
 signals:
 	void changed();

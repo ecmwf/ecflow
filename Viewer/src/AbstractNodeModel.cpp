@@ -214,22 +214,28 @@ QModelIndex AbstractNodeModel::nodeToIndex(Node* node, int column) const
 	return QModelIndex();
 }
 
-void AbstractNodeModel::slotNodeChanged(const Node* node, const std::vector<ecf::Aspect::Type>& types)
+void AbstractNodeModel::slotNodeChanged(const Node* node, QList<ecf::Aspect::Type> types)
 {
 	if(node==NULL)
 		return;
 
 	qDebug() << "observer is called" << QString::fromStdString(node->name());
-	for(unsigned int i=0; i < types.size(); i++)
-		qDebug() << "  type:" << types.at(i);
+	/*for(unsigned int i=0; i < types.size(); i++)
+		qDebug() << "  type:" << types.at(i);*/
 
 	Node* nc=const_cast<Node*>(node);
 
 	QModelIndex index1=nodeToIndex(nc,0);
 	QModelIndex index2=nodeToIndex(nc,2);
 
+	if(!index1.isValid() || !index2.isValid())
+		return;
+
 	Node *nd1=indexToNode(index1);
 	Node *nd2=indexToNode(index2);
+
+	if(!nd1 || !nd2)
+		return;
 
 	//qDebug() << "indexes" << index1 << index2;
 	//qDebug() << "index pointers " << index1.internalPointer() << index2.internalPointer();

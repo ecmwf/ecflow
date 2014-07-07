@@ -417,3 +417,76 @@ bool TreeNodeFilterModel::filterAcceptsRow(int sourceRow,const QModelIndex& sour
 }
 
 
+
+
+/*
+static std::map<Node*,bool> nodeVec;
+
+void filter(const std::set<DState::State> ns)
+{
+	ServerHandler *server;
+	for(unsigned int i=0; i < server->numSuites();i++)
+	{
+		std::set<Node*> nodes;
+		server->suiteAt(i)->allChildren(nodes);
+		for(std::set<Node*>::iterator it=nodes.begin(); it != nodes.end(); it++)
+		{
+			filter(*it,ns);
+		}
+	}
+}
+
+bool filter(Node *node,const std::set<DState::State> ns)
+{
+	std::vector<node_ptr> nodes;
+	node->immediateChildren(nodes);
+
+	if(nodes.size()==0)
+	{
+		DState::State st=node->dstate();
+		if(ns.find(st) != ns.end())
+		{
+			nodeVec[node]=true;
+			return true;
+		}
+		else
+		{
+			nodeVec[node]=false;
+			return false;
+		}
+	}
+
+
+	for(unsigned int i=0; i < nodes.size(); i++)
+	{
+		`````````````````
+	}
+}
+
+
+const std::vector<suite_ptr> &suites = d->suiteVec();
+	for(unsigned int i=0; i < suites.size();i++)
+	{
+		ChangeMgrSingleton::instance()->attach(suites.at(i).get(),this);
+
+		std::set<Node*> nodes;
+		suites.at(i)->allChildren(nodes);
+		for(std::set<Node*>::iterator it=nodes.begin(); it != nodes.end(); it++)
+			ChangeMgrSingleton::instance()->attach((*it),this);
+
+	}
+
+
+	std::vector<node_ptr> nodes;
+		if(node->parent())
+		{
+				node->parent()->immediateChildren(nodes);
+				for(unsigned int i=0; i < nodes.size(); i++)
+					if(nodes.at(i).get() == node)
+							return i;
+		}
+
+
+
+*/
+

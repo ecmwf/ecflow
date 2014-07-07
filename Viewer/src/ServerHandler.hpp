@@ -52,7 +52,7 @@ public:
 	void update(const Defs*, const std::vector<ecf::Aspect::Type>&)  {};
 
 signals:
-	void nodeChanged(const Node*, const std::vector<ecf::Aspect::Type>&);
+	void nodeChanged(const Node*, QList<ecf::Aspect::Type>);
 	void errorMessage(std::string message);
 	void queryFinished(NodeInfoQuery_ptr);
 
@@ -70,7 +70,7 @@ private:
 
 
 
-class ServerHandler : public QObject, public AbstractObserver
+class ServerHandler : public QObject
 {
 	Q_OBJECT   // ingerits from QObject in order to gain signal/slots
 
@@ -126,8 +126,8 @@ public:
 		static void updateAll();
 
 		//From AbstractObserver
-		void update(const Node*, const std::vector<ecf::Aspect::Type>&) {};
-		void update(const Defs*, const std::vector<ecf::Aspect::Type>&);
+		//void update(const Node*, const std::vector<ecf::Aspect::Type>&) {};
+		//void update(const Defs*, const std::vector<ecf::Aspect::Type>&);
 
 		void addNodeObserver(QObject* obs);
 		void removeNodeObserver(QObject* obs);

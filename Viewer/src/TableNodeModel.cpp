@@ -300,6 +300,8 @@ QModelIndex TableNodeModel::serverToIndex(ServerHandler* server) const
 
 Node* TableNodeModel::indexToNode( const QModelIndex & index) const
 {
+	return NULL;
+
 	if(index.isValid())
 	{
 		if(!isServer(index))
@@ -313,6 +315,8 @@ Node* TableNodeModel::indexToNode( const QModelIndex & index) const
 
 QModelIndex TableNodeModel::nodeToIndex(Node* node, int column) const
 {
+	return QModelIndex();
+
 	if(!node)
 			return QModelIndex();
 

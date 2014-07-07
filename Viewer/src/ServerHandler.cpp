@@ -67,6 +67,7 @@ ServerHandler::ServerHandler(const std::string& name, const std::string& port) :
 	{
 		qRegisterMetaType<std::string>("std::string");
 		qRegisterMetaType<NodeInfoQuery_ptr>("NodeInfoQuery_ptr");
+		qRegisterMetaType<QList<ecf::Aspect::Type> >("QList<ecf::Aspect::Type>");
 	}
 
 	servers_.push_back(this);
@@ -882,21 +883,24 @@ ServerHandler* ServerHandler::find(Node *node)
 
 void ServerHandler::addNodeObserver(QObject* obs)
 {
-		connect(comThread_,SIGNAL(nodeChanged(const Node*, const std::vector<ecf::Aspect::Type>&)),
-				obs,SLOT(slotNodeChanged(const Node*, const std::vector<ecf::Aspect::Type>&)));
+		connect(comThread_,SIGNAL(nodeChanged(const Node*, QList<ecf::Aspect::Type>)),
+				obs,SLOT(slotNodeChanged(const Node*, QList<ecf::Aspect::Type>)));
+
+		connect(comThread_,SIGNAL(nodeChanged(const Node*)),
+					obs,SLOT(slotNodeChanged(const Node*)));
 }
 
 void ServerHandler::removeNodeObserver(QObject* obs)
 {
-		disconnect(comThread_,SIGNAL(nodeChanged(const Node*, const std::vector<ecf::Aspect::Type>&)),
-				obs,SLOT(slotNodeChanged(const Node*, const std::vector<ecf::Aspect::Type>&)));
+		disconnect(comThread_,SIGNAL(nodeChanged(const Node*, QList<ecf::Aspect::Type>)),
+				obs,SLOT(slotNodeChanged(const Node*, QList<ecf::Aspect::Type>)));
 }
 
 
 // called by ChangeMgrSingleton when the definition is about to be updated
-void ServerHandler::update(const Defs*, const std::vector<ecf::Aspect::Type>&)
+/*void ServerHandler::update(const Defs*, const std::vector<ecf::Aspect::Type>&)
 {
-}
+}*/
 
 
 
@@ -1206,7 +1210,13 @@ void ServerComThread::update(const Node* node, const std::vector<ecf::Aspect::Ty
 	if(node==NULL)
 		return;
 
-	emit nodeChanged(node,types);
+	QList<ecf::Aspect::Type> v;
+	for(std::vector<ecf::Aspect::Type>::const_iterator it=types.begin(); it != types.end(); it++)
+			v << *it;
+
+	//UserMessage::message(UserMessage::DBG, false, std::string("Thread update: ") + node->name());
+
+	emit nodeChanged(node,v);
 }
 
 // ------------------------------------------------------------
