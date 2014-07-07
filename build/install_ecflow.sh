@@ -196,13 +196,13 @@ $BOOST_ROOT/bjam $TOOLSET $CXXFLAGS -d2 variant=$mode_arg $test_arg $install_arg
 # Copy over release from cct -> cca
 # *Make* sure destination has a trailing '/.' otherwise you can end up renaming.
 # ============================================================================
-if [[ "$ARCH" = cray ]] ; then 
-
-   if [[ "$test_arg" = "" ]] ; then
-      cd /usr/local/apps/ecflow
-      scp -r $ECFLOW_VERSION emos@cca:/usr/local/apps/ecflow/.
-   fi
-fi  
+#if [[ "$ARCH" = cray ]] ; then 
+#
+#   if [[ "$test_arg" = "" ]] ; then
+#      cd /usr/local/apps/ecflow
+#      scp -r $ECFLOW_VERSION emos@cca:/usr/local/apps/ecflow/.
+#   fi
+#fi  
 
 # ============================================================================ 
 # Copy over release from ecgb(redhat) -> sappa and sappb
