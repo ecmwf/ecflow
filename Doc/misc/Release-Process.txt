@@ -42,14 +42,24 @@ Process
     - Just need to update python API.
     - cd $WK/Doc/online; make clean; make html
     
+    Sometimes this crashes, Just re-build Pyext, and try again.
+       rm -rf Pyext/bin
+       bjam -j8
+    
 0/ CRAY: If you build on cct-login, then copy build to cca.
 
-         scp -r 4.0.2 emos@cca:/usr/local/apps/ecflow 
+         cd /usr/local/apps/ecflow
+         scp -r 4.0.3 emos@cca:/usr/local/apps/ecflow/.
       
    READHAT: If we built on ecgb/readhat we can copy release to sappa/sappab 
   
-         scp -r 4.0.2 emos@sappa:/usr/local/apps/ecflow/.
-         scp -r 4.0.2 emos@sappb:/usr/local/apps/ecflow/.
+         scp -r 4.0.3 emos@sappa:/usr/local/apps/ecflow/.
+         scp -r 4.0.3 emos@sappb:/usr/local/apps/ecflow/.
+      
+   LXab:  copy -> LXOP (until we can build independently on LXOP)
+   
+         cd /usr/local/apps/ecflow
+         scp -r 4.0.3 emos@lxop:/usr/local/apps/ecflow/. 
       
 
 *Make* sure destination has a trailing '/.' otherwise you
@@ -65,7 +75,8 @@ can end up renaming.
    - ** Check the size of tar file **, ensure that have not included redundant files.
    <Inform Daniel>
    
-0/ Inform user support so that they can update the module functionality
+0/ Inform user support so that they can update the module functionality.
+   This is mostly automated a part from c2a.
 
 0/ Update WIKI:
    This announces the changes in the release
