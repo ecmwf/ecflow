@@ -99,6 +99,8 @@ def add_remote_linux_64_lxop_variables( linux_64 ):
     linux_64.add_variable("SCHOST","lxop")    # Super Computer HOST
     linux_64.add_variable("QUEUE","test")    # for PBS
     linux_64.add_variable("ECF_OUT","/gpfs/lxop/build/ecflow")
+    linux_64.add_variable("ECF_LOGHOST","lxop")   
+    linux_64.add_variable("ECF_LOGPORT","9316")   
 
 def add_remote_linux_64_intel_variables( linux_64 ): 
     linux_64.add_variable("ECF_KILL_CMD","rsh %REMOTE_HOST% \"kill -15 %ECF_RID%\"") 
