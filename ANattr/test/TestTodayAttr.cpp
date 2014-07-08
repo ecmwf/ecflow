@@ -87,7 +87,7 @@ BOOST_AUTO_TEST_CASE( test_today_attr)
 
          if (time < timeSeries.time_series().start().duration()) {
             BOOST_CHECK_MESSAGE(!timeSeries.isFree(calendar),timeSeries.toString() << " should NOT be free at time " << time );
-            BOOST_CHECK_MESSAGE(!timeSeries.checkForRequeue(calendar,t1_min,t1_max),timeSeries.toString() << " should fail at " << time );
+            BOOST_CHECK_MESSAGE(timeSeries.checkForRequeue(calendar,t1_min,t1_max),timeSeries.toString() << " should pass at " << time );
          }
          else if (time >= timeSeries.time_series().start().duration() && time <=timeSeries.time_series().finish().duration()) {
 
@@ -122,7 +122,7 @@ BOOST_AUTO_TEST_CASE( test_today_attr)
       if (!day_changed) {
          if (time < timeSeries2.time_series().start().duration()) {
             BOOST_CHECK_MESSAGE(!timeSeries2.isFree(calendar),timeSeries2.toString() << " should NOT be free at time " << time );
-            BOOST_CHECK_MESSAGE(!timeSeries2.checkForRequeue(calendar,t2_min,t2_max),timeSeries2.toString() << " should fail at " << time );
+            BOOST_CHECK_MESSAGE(timeSeries2.checkForRequeue(calendar,t2_min,t2_max),timeSeries2.toString() << " should pass at " << time );
          }
          else if (time >= timeSeries2.time_series().start().duration() && time <=timeSeries2.time_series().finish().duration()) {
 

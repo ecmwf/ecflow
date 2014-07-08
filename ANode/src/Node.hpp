@@ -127,7 +127,17 @@ public:
    /// However we will preserve def status.
    /// If a user re-queues a node that is suspended then it stays suspended
    /// We use -1 to mean leave suspended state as is
-   virtual void requeue(bool resetRepeats, int clear_suspended_in_child_nodes);
+   ///
+   /// When the user issues force-complete or run interactive commands, we want to miss
+   /// the next-time slot. (i.e to avoid running the job again).
+   /// This is done by using NO_REQUE_IF_SINGLE_TIME_DEP flag.
+   /// The flag remain set until we get to *this* function. We use it to avoid
+   /// resetting the time slots, effectively missing the next time slot. we then clear the flag.
+   /// However if the JOB *abort* we clear NO_REQUE_IF_SINGLE_TIME_DEP
+   /// Otherwise if we run again, we miss additional time slots necessarily
+   virtual void requeue(bool resetRepeats,
+                          int clear_suspended_in_child_nodes,
+                          bool reset_next_time_slot);
 
    /// Re queue the time based attributes only.
    /// Used as a part of Alter (clock) functionality.
@@ -135,11 +145,10 @@ public:
    /// Since alter clock, should not change node state. This is left for user to re-queue the suite
    virtual void requeue_time_attrs();
 
-   /// Set a flag that ensures that a node with a single time dependency is NOT automatically re-queued
-   /// This is applied *up* the hierarchy until we *hit* a node with a repeat or Cron attribute
-   /// This is done since repeat and cron can be used to reset the NO_REQUE_IF_SINGLE_TIME_DEP flags
    /// This functionality is only required during interactive force or run
-   void set_no_requeue_if_single_time_dependency(bool miss_next_time_slot);
+   /// Avoid running the task on the same time slot, by missing the next time slot.
+   /// Requires we set a flag, to avoid the requeue resetting the time slots
+   void miss_next_time_slot();
 
    /// Recursively run the tasks under this node, ignore suspend,limits,triggers, and time dependencies
    /// if force is set, run even if task is submitted or active. (will create zombies)
@@ -275,10 +284,12 @@ public:
    /// returns true if this node OR any of its children
    /// has cron,time,day,date or today time dependencies
    virtual bool hasTimeDependencies() const { return (time_dep_attrs_) ? true : false; }
+   bool isTimeFree() const { return (time_dep_attrs_) ? time_dep_attrs_->timeDependenciesFree() : false;}
 
 
    /// A hierarchical function
    virtual bool hasAutoCancel() const { return (autoCancel_) ? true : false;}
+
 
    // Access functions: ======================================================
    const std::string& name() const { return name_; }
@@ -297,6 +308,7 @@ public:
    const std::vector<ecf::CronAttr>&   crons()    const;
    const std::vector<VerifyAttr>&      verifys()  const;
    const std::vector<ZombieAttr>&      zombies()  const;
+   TimeDepAttrs*  get_time_dep_attrs() const { return time_dep_attrs_;} // can be NULL
    ecf::LateAttr* get_late() const { return lateAttr_;}
    ecf::AutoCancelAttr*  get_autocancel() const { return autoCancel_;}
    ecf::Flag&       flag()           { return flag_;}
@@ -622,6 +634,8 @@ private: // alow simulator access
 
    AstTop* completeAst(std::string& errorMsg) const;   // Will create AST on demand
    AstTop* triggerAst(std::string& errorMsg) const;    // Will create AST on demand
+
+   void checkForLateness( const ecf::Calendar& );
 
 private: // All mementos access
    friend class CompoundMemento;

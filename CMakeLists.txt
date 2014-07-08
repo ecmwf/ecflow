@@ -37,16 +37,16 @@
 #
 #############################################################
 
-cmake_minimum_required( VERSION 2.6.4 FATAL_ERROR )
+cmake_minimum_required( VERSION 2.8.4 FATAL_ERROR )
 
 project( ecflow CXX )
 
 set( CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/../ecbuild/cmake")
-message( STATUS "CMAKE_MODULE_PATH    : ${CMAKE_MODULE_PATH}")
+# message( STATUS "CMAKE_MODULE_PATH    : ${CMAKE_MODULE_PATH}")
 
 include( ecbuild_system )
 
-ecbuild_requires_macro_version( 1.2 )
+ecbuild_requires_macro_version( 1.3 )
 
 ###############################################################################
 # local project
@@ -78,23 +78,23 @@ else()
    ecbuild_find_python( VERSION 2.7 )
 endif()
 
-message( STATUS "PYTHON_EXECUTABLE    : ${PYTHON_EXECUTABLE}")
-message( STATUS "PYTHON_INCLUDE_DIRS  : ${PYTHON_INCLUDE_DIRS}")
-message( STATUS "PYTHON_LIBRARIES     : ${PYTHON_LIBRARIES}")
- 
 # =========================================================================================
-# Boost  
+# Boost
+# Jira ISSUE:   ECBUILD-40 ecbuild 1.3.2 ignores -DBOOST_ROOT
+#     setting  -DBOOST_ROOT=/var/tmp/ma0/boost/boost_1_53_0
+#     Does not appear to be honored. ?
+#     It always seem to use boost in /usr/local/apps
 # =========================================================================================
 
-# If this is enable then can not find boost libs using env BOOST_ROOT ?
-#ecbuild_add_extra_search_paths( boost )
+ecbuild_add_extra_search_paths( boost ) # also respects BOOST_ROOT
 
+# Ecflow test require statics libs, otherwise get double free, error.
 # To use static boost python ensure that Boost_USE_STATIC_LIBS is set on.
 set(Boost_USE_STATIC_LIBS        ON)
 set(Boost_USE_MULTITHREADED      ON)
 set(Boost_NO_SYSTEM_PATHS        ON)
 set(Boost_DETAILED_FAILURE_MSG   ON)
-#set(Boost_DEBUG                 ON)
+set(Boost_DEBUG                 ON)
 
 find_package( Boost 1.53.0 COMPONENTS python serialization system thread unit_test_framework test_exec_monitor filesystem program_options date_time )
 #find_package(Boost 1.53.0 EXACT REQUIRED COMPONENTS python)
@@ -113,28 +113,23 @@ find_package( Boost 1.53.0 COMPONENTS python serialization system thread unit_te
 
 message( STATUS "Boost_LIBRARIES     : ${Boost_LIBRARIES}" )
 
-#list( APPEND Ecflow_Boost_LIBS
-#    ${Boost_SERIALIZATION_LIBRARY}
-#    ${Boost_SYSTEM_LIBRARY}
-#    ${Boost_THREAD_LIBRARY}
-#    ${Boost_FILESYSTEM_LIBRARY}
-#    ${Boost_PROGRAM_OPTIONS_LIBRARY}
-#    ${Boost_DATE_TIME_LIBRARY}
-#)
 
 # =========================================================================================
 # debug
 # =========================================================================================
 if( CMAKE_BUILD_TYPE MATCHES "[Dd][Ee][Bb][Uu][Gg]" )
-    message( "INFO: DEBUG BUILD" )
+
+	message( STATUS "INFO: DEBUG BUILD" )
+
     # for debug type builds, turn on verbose makefiles
     # set(CMAKE_VERBOSE_MAKEFILE ON)
 
     # Tell other CMake files that we're doing a debug build
-    set( DEBUG_BUILD 1 )
+	# set( DEBUG_BUILD 1 ) -- not used anymore
 
     # Tell C/C++ that we're doing a debug build
     add_definitions( -DDEBUG )
+
 endif()
 
 
@@ -163,7 +158,7 @@ ecbuild_add_resources( TARGET Doc DONT_PACK_DIRS Doc/func_spec Doc/misc Doc/news
 # install 
 # =========================================================================================
 # install scripts
-install (FILES  
+install( FILES
             ${CMAKE_SOURCE_DIR}/tools/ecflow_logsvr.pl
             ${CMAKE_SOURCE_DIR}/tools/ecflow_logsvr.sh
             ${CMAKE_SOURCE_DIR}/tools/ecflow_start.sh
@@ -175,7 +170,7 @@ install (FILES
         )
 
 # install documentation         
-install (FILES  
+install( FILES
             ${CMAKE_SOURCE_DIR}/Doc/user-manual/client_options.docx  
             ${CMAKE_SOURCE_DIR}/Doc/user-manual/user_manual.docx    
             ${CMAKE_SOURCE_DIR}/Doc/user-manual/user_manual.pdf    

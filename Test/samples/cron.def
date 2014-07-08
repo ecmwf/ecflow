@@ -4,6 +4,9 @@ suite cron
    
    task cron1
       cron -w 0 , 1, 2 -m 5, 6, 7 , 8,9,10      10:00  20:00  01:00  # run every sunday, between May-Aug, every hour between 10am and 8pm
+
+   task cron1_1
+      cron -w 0,1,2 -m 9,10  10:00  14:00  01:00  
       
    task cron2
          cron 23:00                              # run every day at 23:00
@@ -47,4 +50,54 @@ suite cron
       task t2
    endfamily
    
+   family t1
+      task t1
+         cron 00:01
+         cron 23:59
+         
+     task t2
+         cron 09:00
+         cron 12:00
+
+     task t3
+         cron 12:00
+         cron 18:00
+
+     task t4
+         cron 18:00
+         cron 23:00
+         
+     task t5
+         cron 10:00
+    task t6
+         cron 11:00
+    task t7
+         cron 12:00
+    task t8
+         cron 13:00
+    task t9
+         cron 14:00
+    task t10
+         cron 15:00
+    task t11
+         cron 16:00
+    task t12
+         cron 17:00
+    task t13
+         cron 18:00
+    task t14
+         cron 19:00
+    task t15
+         cron 20:00
+    task t16
+         cron 21:00
+    task t17
+         cron 22:00
+    task t18
+         cron 23:00
+    task t19
+         cron 23:00
+    task t20
+         cron 00:00   
+   endfamily          
 endsuite

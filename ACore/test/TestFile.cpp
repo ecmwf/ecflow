@@ -244,7 +244,7 @@ BOOST_AUTO_TEST_CASE( test_create_missing_directories )
    std::string dir_remove = rootPath + "/dir0";
    {
       // Test basics first, expect "ACore/test/data/dir0/dir1/dir2/dir3/dir4/dir5" to be created
-      BOOST_CHECK_MESSAGE(File::createMissingDirectories(expected),"expected file to be created");
+      BOOST_CHECK_MESSAGE(File::createMissingDirectories(expected),expected << " expected directories to be created");
       BOOST_CHECK_MESSAGE(fs::exists(expected),expected << " directory not created");
 
       // remove the directory
@@ -263,7 +263,7 @@ BOOST_AUTO_TEST_CASE( test_create_missing_directories )
    {
       // Test "ACore/test/data/dir0/dir1/dir2/dir3/dir4/dir5/fred.ecf" to be created
       std::string dir_with_file = expected + "/fred.ecf";
-      BOOST_CHECK_MESSAGE(File::createMissingDirectories(dir_with_file),"expected file to be created");
+      BOOST_CHECK_MESSAGE(File::createMissingDirectories(dir_with_file),"Expected '" <<  dir_with_file << "' to be created");
       BOOST_CHECK_MESSAGE(fs::exists(expected),expected << " directory not created");
 
       // remove the directory

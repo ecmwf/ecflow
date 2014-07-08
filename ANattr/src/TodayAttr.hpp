@@ -110,7 +110,8 @@ public:
    bool operator<(const TodayAttr& rhs) const { return timeSeries_ < rhs.timeSeries_; }
 	bool structureEquals(const TodayAttr& rhs) const;
 
-	void calendarChanged( const ecf::Calendar& c );  // can set attribute free
+   /// This can set attribute as free, once free its stays free, until re-queue/reset
+	void calendarChanged( const ecf::Calendar& c );
 	void resetRelativeDuration();
 
 	void reset(const ecf::Calendar& c) { clearFree(); timeSeries_.reset(c);}       // updates state_change_no_
@@ -119,10 +120,25 @@ public:
 
 	void miss_next_time_slot(); // updates state_change_no_
 	void setFree();               // ensures that isFree() always returns true, updates state_change_no_
-	void clearFree();             // resets the free flag, updates state_change_no_
 	bool isSetFree() const { return makeFree_; }
 
+	// This is used when we have a *single* today attribute
+   //  single-slot   is free, if calendar time >= today_time
+   //  (range)       is free, if calendar time == (one of the time ranges)
    bool isFree(const ecf::Calendar&) const;
+
+   // This is used when we have a *multiple* today attribute
+   // (single | range) is free, if calendar time == (one of the time ranges)
+   // if timer *expired* returns false
+   //     task t1
+   //        today 09:00
+   //        today 10:00
+   // If current times is 11:00, then we will return false.
+   // since both 09:00 and 10:00 have expired
+   // Multiple single today, should behave like a today with a range.
+   bool isFreeMultipleContext(const ecf::Calendar& c) const { return timeSeries_.isFree(c); }
+
+
    bool checkForRequeue( const ecf::Calendar& c,const TimeSlot& the_min,const TimeSlot& the_max) const
 	{ return timeSeries_.checkForRequeue(c,the_min,the_max);}
 	void min_max_time_slots(TimeSlot& the_min, TimeSlot& the_max) const {timeSeries_.min_max_time_slots(the_min,the_max);}
@@ -143,6 +159,7 @@ public:
 	const TimeSeries& time_series() const { return timeSeries_; }
 
 private:
+	void clearFree();             // resets the free flag, updates state_change_no_
 	bool is_free(const ecf::Calendar&) const; // ignores makeFree_
 
 private:

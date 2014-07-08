@@ -92,6 +92,15 @@ else
          #
          cp $WK/build/hpux_fix/boost_1_53_0/smart_cast.hpp  $BOOST_ROOT/boost/serialization/.
       fi
+      
+      if [[ %ARCH% = cray ]] ; then
+      
+         cp $WK/build/cray_fix/boost_1_55_0/smalldiff $BOOST_ROOT/.
+         cd $BOOST_ROOT
+         patch -p0 < smalldiff
+         
+         cp $WK/build/cray_fix/boost_1_55_0/cray.hpp  $BOOST_ROOT/boost/config/compiler/.
+      fi
    fi
 fi
 

@@ -67,10 +67,19 @@ public:
 	/// Increment time series. Will find the next time slot after current calendar
 	void requeue(const ecf::Calendar& c,bool reset_next_time_slot = true);
 
+	// Since we can miss next time slot , allow its computation for the
+	// use with why command, returns a NULL timeslot if next time is invalid
+	// This functionality will mirror the requeue(..) function
+   TimeSlot compute_next_time_slot(const ecf::Calendar& c) const;
+
+   // Return true calendar is before or within scheduled time
+   bool requeueable(const ecf::Calendar& c) const;
+
 	/// if relativeToSuiteStart returns the relative duration, else returns calendar suite time of day.
 	/// The returned resolution is in minutes
  	boost::posix_time::time_duration duration(const ecf::Calendar& calendar ) const;
 
+ 	/// If time has expired, returns false
 	/// Note: relative means relative to suite start, or relative to the beginning
 	///       of repeated node.
  	/// Is of the form hh:mm.   This means relative has a range 00:00->99.59

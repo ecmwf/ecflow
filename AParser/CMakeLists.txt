@@ -31,7 +31,6 @@ ecbuild_add_test( TARGET   u_aparser
                   BOOST
                   SOURCES  ${test_srcs}
                   LIBS     libparser 
-                  INCLUDES ${Boost_INCLUDE_DIRS} 
                  )
 
 #
@@ -42,7 +41,6 @@ ecbuild_add_test( TARGET   perf_aparser
                   BOOST
                   SOURCES  ${t2_src}
                   LIBS     libparser
-                  INCLUDES ${Boost_INCLUDE_DIRS} 
                 )
 
 #

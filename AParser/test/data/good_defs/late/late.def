@@ -1,4 +1,4 @@
-suite suiteName
+suite late
    family familyName
       task t1
       		late -s +00:15 -a 20:00 -c +02:00
@@ -8,6 +8,8 @@ suite suiteName
       		late -c +02:00 -a 20:00  -s +00:15
       task t4
             late  -s 00:02 -c +00:05
+      task t5
+            late  -s 00:01 -a 14:30 -c +00:01
     endfamily
 endsuite
 

@@ -176,72 +176,40 @@ bool TimeDepAttrs::testTimeDependenciesForRequeue() const
    }
 
 
-   /// If user has *INTERACTIVLY* forced changed  in state to complete *OR* run the job.
-   /// Then avoid automated re-queue *ONLY* when we have a *SINGLE* time slot.
-   /// This allows node to stay in the state complete, and hence allows repeats to update.
-   int noOfTimeDependencies = 0;
-   if (node_->flag_.is_set(Flag::NO_REQUE_IF_SINGLE_TIME_DEP)) {
-
-      // If we have *multiple* single slot or time range, *ALLOW* for re-queue
-      if (timeVec_.size() == 1) {
-         if (!timeVec_[0].time_series().hasIncrement()) {
-            // a *single* time slot and *not* a range, hence don't re-queue, if NO_REQUE_IF_SINGLE_TIME_DEP set
-            noOfTimeDependencies++;
-         }
-      }
-      if (todayVec_.size() == 1) {
-         if (!todayVec_[0].time_series().hasIncrement()) {
-            // a *single* time slot and *not* a range, hence don't re-queue, , if NO_REQUE_IF_SINGLE_TIME_DEP set
-            noOfTimeDependencies++;
-         }
-      }
-      noOfTimeDependencies += dates_.size();
-      noOfTimeDependencies += days_.size();
+   if (!timeVec_.empty()) {
+      TimeSlot the_min,the_max; // Needs to handle multiple single slot time attributes
+      BOOST_FOREACH(const ecf::TimeAttr& time, timeVec_) { time.min_max_time_slots(the_min,the_max);}
+      BOOST_FOREACH(const ecf::TimeAttr& time, timeVec_) {
+         if (time.checkForRequeue(calendar,the_min,the_max)) {
 #ifdef DEBUG_REQUEUE
-      LOG(Log::DBG,"   TimeDepAttrs::testTimeDependenciesForRequeue() " << node_->debugNodePath() << " Flag::NO_REQUE_IF_SINGLE_TIME_DEP " << noOfTimeDependencies);
+            LOG(Log::DBG,"   TimeDepAttrs::testTimeDependenciesForRequeue() " << node_->debugNodePath() << " for time " << time.toString());
 #endif
-   }
-
-   {
-      if (!timeVec_.empty()) {
-         if ( noOfTimeDependencies == 1)  return false; // NO_REQUE_IF_SINGLE_TIME_DEP
-
-         TimeSlot the_min,the_max; // Needs to handle multiple single slot time attributes
-         BOOST_FOREACH(const ecf::TimeAttr& time, timeVec_) { time.min_max_time_slots(the_min,the_max);}
-         BOOST_FOREACH(const ecf::TimeAttr& time, timeVec_) {
-            if (time.checkForRequeue(calendar,the_min,the_max)) {
-#ifdef DEBUG_REQUEUE
-               LOG(Log::DBG,"   TimeDepAttrs::testTimeDependenciesForRequeue() " << node_->debugNodePath() << " for time " << time.toString());
-#endif
-               return true;
-            }
+            return true;
          }
       }
    }
-   {
-      if (!todayVec_.empty()) {
-         if ( noOfTimeDependencies == 1)  return false;  // NO_REQUE_IF_SINGLE_TIME_DEP
 
-         TimeSlot the_min,the_max; // Needs to handle multiple single slot today attributes
-         BOOST_FOREACH(const ecf::TodayAttr& today,todayVec_)  { today.min_max_time_slots(the_min,the_max);}
-         BOOST_FOREACH(const ecf::TodayAttr& today,todayVec_) {
-            if (today.checkForRequeue(calendar,the_min,the_max)) {
+
+   if (!todayVec_.empty()) {
+      TimeSlot the_min,the_max; // Needs to handle multiple single slot today attributes
+      BOOST_FOREACH(const ecf::TodayAttr& today,todayVec_)  { today.min_max_time_slots(the_min,the_max);}
+      BOOST_FOREACH(const ecf::TodayAttr& today,todayVec_) {
+         if (today.checkForRequeue(calendar,the_min,the_max)) {
 #ifdef DEBUG_REQUEUE
-               LOG(Log::DBG,"   TimeDepAttrs::testTimeDependenciesForRequeue() " << node_->debugNodePath() << " for today " << today.toString());
+            LOG(Log::DBG,"   TimeDepAttrs::testTimeDependenciesForRequeue() " << node_->debugNodePath() << " for today " << today.toString());
 #endif
-               return true;;
-            }
+            return true;;
          }
       }
    }
+
 
    // **********************************************************************
-   // IF We get here there are **NO** time/today dependencies which are free
+   // If we get here there are **NO** time/today/cron dependencies which are free
    // We now need to determine if this node has a future time dependency which
    // should re-queue this node
    // *********************************************************************
    BOOST_FOREACH(const DateAttr& date, dates_ ) {
-      if ( noOfTimeDependencies == 1) return false;  // NO_REQUE_IF_SINGLE_TIME_DEP
       if (date.checkForRequeue(calendar)) {
 #ifdef DEBUG_REQUEUE
          LOG(Log::DBG,"   TimeDepAttrs::testTimeDependenciesForRequeue() " << node_->debugNodePath() << " for date " << date.toString());
@@ -251,7 +219,6 @@ bool TimeDepAttrs::testTimeDependenciesForRequeue() const
    }
 
    BOOST_FOREACH(const DayAttr& day, days_ ) {
-      if ( noOfTimeDependencies == 1) return false; // NO_REQUE_IF_SINGLE_TIME_DEP
       if (day.checkForRequeue(calendar)) {
 #ifdef DEBUG_REQUEUE
          LOG(Log::DBG,"   TimeDepAttrs::testTimeDependenciesForRequeue() " << node_->debugNodePath() << " for day " << day.toString());
@@ -386,7 +353,23 @@ bool TimeDepAttrs::timeDependenciesFree() const
       for(size_t i=0;i<crons_.size();i++)    { if (crons_[i].isFree(calendar))    {if ( noOfTimeDependencies == 1) return true;oneCronIsFree = true;break;}}
       for(size_t i=0;i<dates_.size();i++)    { if (dates_[i].isFree(calendar))    {if ( noOfTimeDependencies == 1) return true;oneDateIsFree = true;break;}}
       for(size_t i=0;i<days_.size();i++)     { if (days_[i].isFree(calendar))     {if ( noOfTimeDependencies == 1) return true;oneDayIsFree = true;break;}}
-      for(size_t i=0;i<todayVec_.size();i++) { if (todayVec_[i].isFree(calendar)) {if ( noOfTimeDependencies == 1) return true;oneTodayIsFree = true;break;}}
+
+      if (!todayVec_.empty()) {
+         // : single Today: (single-time)   is free, if calendar time >= today_time
+         // : single Today: (range)         is free, if calendar time == (one of the time ranges)
+         // : multi Today : (single | range)is free, if calendar time == (one of the time ranges | tody_time)
+         if (todayVec_.size() == 1 ) {
+            // Single Today Attribute: could be single slot or range
+            if (todayVec_[0].isFree(calendar)) { if ( noOfTimeDependencies == 1) return true;oneTodayIsFree = true;}
+         }
+         else {
+            // Multiple Today Attributes, each could single, or range
+            for(size_t i=0;i<todayVec_.size();i++) {
+               if (todayVec_[i].isFreeMultipleContext(calendar)) {if ( noOfTimeDependencies == 1) return true;oneTodayIsFree = true;break;}
+            }
+         }
+      }
+
 
       if ( oneDateIsFree || oneDayIsFree || oneTodayIsFree ||  oneTimeIsFree || oneCronIsFree) {
          if ( noOfTimeDependencies > 1 ) {
@@ -394,6 +377,57 @@ bool TimeDepAttrs::timeDependenciesFree() const
             // *MUST* be anded for the node to be free.
             if (!dates_.empty() && !oneDateIsFree) return false;
             if (!days_.empty() && !oneDayIsFree) return false;
+            if (!todayVec_.empty() && !oneTodayIsFree) return false;
+            if (!timeVec_.empty() && !oneTimeIsFree) return false;
+            if (!crons_.empty() && !oneCronIsFree) return false;
+
+            // We will only get here, if we have a multiple time dependencies and they are free
+            return true;
+         }
+      }
+   }
+
+   return false;
+}
+
+bool TimeDepAttrs::time_today_cron_is_free() const
+{
+   if (!timeVec_.empty() || !todayVec_.empty() || !crons_.empty()) {
+
+      int noOfTimeDependencies = 0;
+      if (!timeVec_.empty())  noOfTimeDependencies++;
+      if (!todayVec_.empty()) noOfTimeDependencies++;
+      if (!crons_.empty())    noOfTimeDependencies++;
+
+      bool oneTodayIsFree = false;
+      bool oneTimeIsFree = false;
+      bool oneCronIsFree = false;
+
+      const Calendar& calendar = node_->suite()->calendar();
+      for(size_t i=0;i<timeVec_.size();i++)  { if (timeVec_[i].isFree(calendar))  {if ( noOfTimeDependencies == 1) return true;oneTimeIsFree = true;break;}}
+      for(size_t i=0;i<crons_.size();i++)    { if (crons_[i].isFree(calendar))    {if ( noOfTimeDependencies == 1) return true;oneCronIsFree = true;break;}}
+
+      if (!todayVec_.empty()) {
+         // : single Today: (single-time)   is free, if calendar time >= today_time
+         // : single Today: (range)         is free, if calendar time == (one of the time ranges)
+         // : multi Today : (single | range)is free, if calendar time == (one of the time ranges | tody_time)
+         if (todayVec_.size() == 1 ) {
+            // Single Today Attribute: could be single slot or range
+            if (todayVec_[0].isFree(calendar)) { if ( noOfTimeDependencies == 1) return true;oneTodayIsFree = true;}
+         }
+         else {
+            // Multiple Today Attributes, each could single, or range
+            for(size_t i=0;i<todayVec_.size();i++) {
+               if (todayVec_[i].isFreeMultipleContext(calendar)) {if ( noOfTimeDependencies == 1) return true;oneTodayIsFree = true;break;}
+            }
+         }
+      }
+
+
+      if ( oneTodayIsFree ||  oneTimeIsFree || oneCronIsFree) {
+         if ( noOfTimeDependencies > 1 ) {
+            // *When* we have multiple time dependencies of *different types* then the results
+            // *MUST* be anded for the node to be free.
             if (!todayVec_.empty() && !oneTodayIsFree) return false;
             if (!timeVec_.empty() && !oneTimeIsFree) return false;
             if (!crons_.empty() && !oneCronIsFree) return false;

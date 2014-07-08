@@ -30,14 +30,17 @@ namespace  ecf {
 /// Typically the user may want to force a node to complete, if they are trying
 /// to update the repeat variable.
 ///
-/// In either case when a node is complete, it is automatically re-queued *IF* we
-/// have a *repeat* or *time* dependencies that are still holding.
-/// If the node has a time dependency, which is holding it
-/// would automatically set to re-queue state. To avoid this in the interactive case
-/// we will use the flag NO_REQUE_IF_SINGLE_TIME_DEP
-/// This is applied *up* the hierarchy until we *hit* a node with a repeat or Cron attribute
-/// This is done since repeat and cron can be used to reset the NO_REQUE_IF_SINGLE_TIME_DEP flags
+/// In either case  we need to miss a time slot, this is done by setting the
+/// NO_REQUE_IF_SINGLE_TIME_DEP, then at REQUE time we query the flag, if it was set
+/// we avoid resetting the time slots. effectively missing the next time slot.
+///
 /// This functionality is only required during interactive force or run
+/// However if the job aborted, we need to clear NO_REQUE_IF_SINGLE_TIME_DEP, i.e
+///     time 10:00
+///     time 11:00
+/// If at 9.00am use the run command, we want to miss the 10:00 time slot.
+/// However if the run at 9.00 fails, and we run again, we also miss 11:00 time slot
+/// to avoid this if the job aborts, we clear NO_REQUE_IF_SINGLE_TIME_DEP flag.
 
 class Flag {
 public:

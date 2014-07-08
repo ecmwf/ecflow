@@ -87,7 +87,19 @@ def add_remote_linux_64_variables( linux_64 ):
     linux_64.add_variable("TOOLSET","gcc")
     linux_64.add_variable("BOOTSTRAP_TOOLSET","gcc")
     linux_64.add_variable("NO_OF_CORES","8")
-    
+
+def add_remote_linux_64_lxop_variables( linux_64 ): 
+    linux_64.add_variable("ECF_KILL_CMD","/home/ma/emos/bin/smssubmit.cray %USER% %ECF_RID% %SCHOST% %ECF_JOB% %ECF_JOBOUT%") 
+    linux_64.add_variable("ECF_JOB_CMD", "/home/ma/emos/bin/smssubmit.cray %USER% %SCHOST% %ECF_JOB% %ECF_JOBOUT%")
+    linux_64.add_variable("COMPILER_TEST_PATH","gcc-4.3/$mode")
+    linux_64.add_variable("COMPILER_VERSION","gcc-4.3")
+    linux_64.add_variable("TOOLSET","gcc")
+    linux_64.add_variable("BOOTSTRAP_TOOLSET","gcc")
+    linux_64.add_variable("NO_OF_CORES","8")
+    linux_64.add_variable("SCHOST","lxop")    # Super Computer HOST
+    linux_64.add_variable("QUEUE","test")    # for PBS
+    linux_64.add_variable("ECF_OUT","/gpfs/lxop/build/ecflow")
+
 def add_remote_linux_64_intel_variables( linux_64 ): 
     linux_64.add_variable("ECF_KILL_CMD","rsh %REMOTE_HOST% \"kill -15 %ECF_RID%\"") 
     linux_64.add_variable("ECF_JOB_CMD","rsh %REMOTE_HOST% -l %USER%  '%ECF_JOB% > %ECF_JOBOUT%  2>&1'")
@@ -104,6 +116,14 @@ def add_linux_64_variables( linux_64 ):
     linux_64.add_variable("ARCH","linux64")
     linux_64.add_variable("SITE_CONFIG","$WK/build/site_config/site-config-Linux64.jam")
     
+def add_linux_64_lxop_variables( linux_64 ): 
+    linux_64.add_variable("REMOTE_HOST","lxop")
+    linux_64.add_variable("ROOT_WK","/gpfs/lxop/build/builds")
+    linux_64.add_variable("BOOST_DIR","/gpfs/lxop/build/builds/boost")
+    linux_64.add_variable("ARCH","linux64")
+    linux_64.add_variable("SITE_CONFIG","$WK/build/site_config/site-config-Linux64.jam")
+    linux_64.add_variable("GIT","/usr/local/bin/git")   # /usr/local/apps/git/current/bin/git not installed yet
+
 def add_linux_64_intel_variables( linux_64_intel ): 
     linux_64_intel.add_variable("REMOTE_HOST","lxb")
     linux_64_intel.add_variable("ROOT_WK","/vol/ecf/cluster/intel")
@@ -144,17 +164,34 @@ def add_opensuse131_variables( opensuse131 ):
     opensuse131.add_variable("SITE_CONFIG","$WK/build/site_config/site-config-Linux64.jam")
     opensuse131.add_variable("CUSTOM_BJAM_ARGS","c++-template-depth=512")   # needed for gcc 4.8.1
 
+def is_cray_cct( node ):
+    if (node.name() == "cray_cct"):
+        return True
+    parent = node.get_parent();
+    while parent:
+        if (parent.name() == "cray_cct"):
+            return True
+        parent = parent.get_parent()
+    return False
+    
 def add_cray_gnu_compiler_variables( cray_gnu ):
-    cray_gnu.add_variable("COMPILER_TEST_PATH","gcc-4.6.3/$mode")
-    cray_gnu.add_variable("COMPILER_VERSION","gcc-4.6.3")
+    #if is_cray_cct( cray_gnu ):
+    #    cray_gnu.add_variable("COMPILER_TEST_PATH","gcc-4.6.3/$mode")
+    #    cray_gnu.add_variable("COMPILER_VERSION","gcc-4.6.3")
+    #else:
+    cray_gnu.add_variable("COMPILER_TEST_PATH","gcc-4.8.2/$mode")
+    cray_gnu.add_variable("COMPILER_VERSION","gcc-4.8.2")
+        
     cray_gnu.add_variable("TOOLSET","gcc")
     cray_gnu.add_variable("BOOTSTRAP_TOOLSET","gcc")
     cray_gnu.add_variable("LAYOUT","versioned")
     cray_gnu.add_variable("PRGENV","PrgEnv-gnu")
     cray_gnu.add_variable("SITE_CONFIG","$WK/build/site_config/site-config-cray.jam")
     cray_gnu.add_variable("ROOT_WK","/perm/ma/ma0/workspace/GNU")
-    # cray_gnu.add_variable("CUSTOM_BJAM_ARGS","toolset=gcc cxxflags=-fPIC c++-template-depth=512") # needed for gnu/4.8.1
-    cray_gnu.add_variable("CUSTOM_BJAM_ARGS","toolset=gcc cxxflags=-fPIC")  
+    #if is_cray_cct( cray_gnu ):
+    #    cray_gnu.add_variable("CUSTOM_BJAM_ARGS","toolset=gcc cxxflags=-fPIC")  
+    #else:
+    cray_gnu.add_variable("CUSTOM_BJAM_ARGS","toolset=gcc cxxflags=-fPIC c++-template-depth=512") # needed for gnu/4.8.2
 
 def add_cray_intel_compiler_variables( cray_intel ):
     cray_intel.add_variable("COMPILER_TEST_PATH","intel-linux/$mode")
@@ -188,7 +225,11 @@ def add_remote_cray_variables( cray ):
     cray.add_variable("REMOTE_COPY","scp")
 
     # for cray we need to use logsrvr in order to see the job output
-    cray.add_variable("ECF_LOGHOST","cct")  # cctdtn1
+    if is_cray_cct(cray):
+        cray.add_variable("ECF_LOGHOST","cct")  # cctdtn1
+    else:
+        cray.add_variable("ECF_LOGHOST","cca-il2")  # cctdtn1
+
     cray.add_variable("ECF_LOGPORT","9316")   
     
     # Set the remote location for output, LOGDIR needed by queing system
@@ -203,16 +244,25 @@ def add_remote_cray_variables( cray ):
     cray.add_variable("QUEUE","ns")
     cray.add_variable("ACCOUNT","ecodmdma")
     #cray.add_variable("STHOST","/s2o1")  # Needed by qsub.h
-    cray.add_variable("SCHOST","cct")    # Super Computer HOST
+    if is_cray_cct(cray):
+        cray.add_variable("SCHOST","cct")    # Super Computer HOST
+    else:
+        cray.add_variable("SCHOST","cca")    # Super Computer HOST
+        
     cray.add_variable("WSHOST",os.uname()[1])  # Work Space HOST
 
 def add_cray_variables( cray ):
     # Look for includes in ECF_INCLUDES, and the ECF_HOME
     cray.add_variable("ECF_HOME", os.getenv("SCRATCH") + "/nightly/suite/cray")
-    cray.add_variable("REMOTE_HOST","cct")
     cray.add_variable("BOOST_DIR","/perm/ma/ma0/boost")
     cray.add_variable("ARCH","cray")
-    cray.add_variable("MODULE_LOAD_GCC","module load gcc/4.6.3")
+    cray.add_variable("MODULE_LOAD_CRAY_COMPILER","module load cce/8.3.0.186")
+    if is_cray_cct( cray ):
+        cray.add_variable("REMOTE_HOST","cct")
+        cray.add_variable("MODULE_LOAD_GCC","module load gcc/4.6.3")
+    else:
+        cray.add_variable("REMOTE_HOST","cca")
+        cray.add_variable("MODULE_LOAD_GCC","module load gcc/4.8.2")
     
     
 def add_remote_redhat_variables( redhat ):
@@ -223,7 +273,6 @@ def add_remote_redhat_variables( redhat ):
     redhat.add_variable("TOOLSET","gcc")
     redhat.add_variable("BOOTSTRAP_TOOLSET","gcc")
     redhat.add_variable("REMOTE_COPY","scp")
-
 
 def add_redhat_variables( redhat ):
     redhat.add_variable("REMOTE_HOST","ecgb")
@@ -248,21 +297,6 @@ def add_opensuse103_variables( opensuse103 ):
     opensuse103.add_variable("ARCH","opensuse103")
     opensuse103.add_variable("SITE_CONFIG","$WK/build/site_config/site-config-Linux.jam")
      
-def add_remote_hpux_variables( hpux ):
-    hpux.add_variable("ECF_KILL_CMD","rsh %REMOTE_HOST% \"kill -s 15 %ECF_RID%\"") 
-    hpux.add_variable("ECF_JOB_CMD","rsh %REMOTE_HOST% -l %USER%  '%ECF_JOB% > %ECF_JOBOUT%  2>&1'")
-    hpux.add_variable("COMPILER_TEST_PATH","acc/$mode/threading-multi")
-    hpux.add_variable("TOOLSET","acc")
-    hpux.add_variable("BOOTSTRAP_TOOLSET","gcc")  # build bjam with acc does not work
-
-def add_hpux_variables( hpux ):
-    hpux.add_variable("REMOTE_HOST","itanium")
-    hpux.add_variable("ROOT_WK","/scratch/ma/emos/ma0/hpia64")
-    hpux.add_variable("BOOST_DIR","/scratch/ma/emos/ma0/hpia64/boost")
-    hpux.add_variable("ARCH","hpux")
-    hpux.add_variable("SITE_CONFIG","$WK/build/site_config/site-config-HPUX.jam")
-    hpux.add_variable("BUILD_ECFLOWVIEW","false")  # dont build on this platform
-
 def add_remote_aix_power7_variables( aix_power7 ) :
     # for c2a we need to use logsrvr in order to see the job output
     aix_power7.add_variable("ECF_LOGHOST","c2a")
@@ -305,7 +339,7 @@ def add_build_debug( parent ):
     f.add_task("build")
     task_test = f.add_task("test")
     # on IBM we do the debug build first
-    if parent.name() == "aix_power7" or parent.name() == "hpux" :
+    if parent.name() == "aix_power7" :
         task_test.add_trigger("build == complete")
     else:
         task_test.add_trigger("build == complete")
@@ -321,8 +355,8 @@ def add_build_release( parent ):
     task_build = f.add_task("build")
     
     task_test = f.add_task("test")
-    # on IBM/HPUX we do the debug build first, it's a *lot* faster
-    if parent.name() == "aix_power7" or parent.name() == "hpux" :
+    # on IBM we do the debug build first, it's a *lot* faster
+    if parent.name() == "aix_power7" :
         task_test.add_trigger("build == complete")
         #task_test.add_trigger("build == complete and (../build_debug/test == complete or ../build_debug/test == aborted)")
     elif parent.name() == "linux64intel":
@@ -368,8 +402,8 @@ def add_build_and_test_tasks( parent ) :
     cp_site_config = parent.add_task("cp_site_config")
     add_local_job_variables(cp_site_config) # run locally
             
-    # On aix and hpux do the debug build first, its a lot faster, than build release
-    if parent.name() == "aix_power7" or parent.name() == "hpux" :
+    # On aix do the debug build first, its a lot faster, than build release
+    if parent.name() == "aix_power7" :
         add_build_debug( parent )
         add_build_release( parent )
     else:
@@ -436,6 +470,13 @@ def build_linux_64( parent ) :
     add_remote_linux_64_variables(linux_64)
     add_git_tasks( linux_64 )
     add_build_and_test_tasks( linux_64 )
+
+def build_linux_64_lxop( parent ) :
+    linux_64 = parent.add_family("linux64_lxop")
+    add_linux_64_lxop_variables(linux_64)
+    add_remote_linux_64_lxop_variables(linux_64)
+    add_git_tasks( linux_64 )
+    add_build_and_test_tasks( linux_64 )
     
 def build_linux_64_intel( parent ) :
     linux_64 = parent.add_family("linux64intel")
@@ -494,8 +535,14 @@ def build_cray_cray( parent ) :
     add_build_and_test_tasks( cray )
     
 def build_cray( parent ) :
-    cray = parent.add_family("cray")
-    cray.add_variable("NO_OF_CORES","2") # temp until stings get sorted on cray
+    cray = parent.add_family("cray_cct")
+    cray.add_variable("NO_OF_CORES","2") # temp until things get sorted on cray
+    build_cray_gnu( cray)
+    build_cray_intel( cray)
+    build_cray_cray( cray)
+    
+    cray = parent.add_family("cray_cca")
+    cray.add_variable("NO_OF_CORES","2") # temp until things get sorted on cray
     build_cray_gnu( cray)
     build_cray_intel( cray)
     build_cray_cray( cray)
@@ -506,19 +553,6 @@ def build_opensuse103( parent ) :
     add_remote_opensuse103_variables(opensuse103)
     add_git_tasks( opensuse103 )
     add_build_and_test_tasks( opensuse103 )
-
-def build_hpux( parent ):
-    hpux = parent.add_family("hpux")
-    hpux.add_variable("BUILD_TYPE","boost")
-
-    if (parent.name() == "remote") :
-        hpux.add_trigger("../tar/cp_tar_to_hpux == complete")
-    else :
-        hpux.add_trigger("/suite/build_incr/incr_tar_and_cp  == complete")
-    add_hpux_variables( hpux )
-    add_remote_hpux_variables( hpux )
-    add_git_tasks( hpux , True) #  git not available on HP-UX, hence set git_clone to def-status complete
-    add_build_and_test_tasks( hpux )
 
 def build_aix_power7( parent ) :
     aix_power7 = parent.add_family("aix_power7")
@@ -544,49 +578,7 @@ def add_boost_tasks( family ):
     boost_build = family.add_task("boost_build")
     boost_build.add_trigger("boost_site_config == complete")
         
-def build_boost( boost ):
-    boost.add_defstatus( ecflow.DState.suspended );
-    boost.add_variable("LAYOUT","tagged")
-    
-    family = boost.add_family("localhost")
-    add_localhost_variables(family)
-    add_boost_tasks( family )
-
-    family = boost.add_family("localhost_clang")
-    add_localhost_clang_variables(family)
-    add_boost_tasks( family )
-     
-    family = boost.add_family("linux64")
-    add_linux_64_variables(family)
-    add_remote_linux_64_variables(family)
-    add_boost_tasks( family )
-
-    family = boost.add_family("linux64intel")
-    add_linux_64_intel_variables(family)
-    add_remote_linux_64_intel_variables(family)
-    add_boost_tasks( family )
-
-    family = boost.add_family("opensuse113")
-    add_opensuse113_variables(family)
-    add_remote_opensuse113_variables(family)
-    add_boost_tasks( family )
-    
-    family = boost.add_family("opensuse131")
-    family.add_variable("GIT","git")   # hack 
-    add_opensuse131_variables(family)
-    add_remote_opensuse131_variables(family)
-    add_boost_tasks( family )
-
-    family = boost.add_family("redhat")
-    add_redhat_variables(family)
-    add_remote_redhat_variables(family)
-    add_boost_tasks( family )
-    
-    family = boost.add_family("cray")
-    add_cray_variables(family)
-    add_remote_cray_variables(family)
-    add_cray_gnu_compiler_variables(family)
-
+def add_cray_boost_tasks( family ):
     boost_remove = family.add_task("boost_remove")  
     boost_copy_gzip = family.add_task("boost_copy_gzip")  
     boost_copy_gzip.add_trigger("boost_remove == complete")
@@ -614,18 +606,69 @@ def build_boost( boost ):
     add_cray_cray_compiler_variables(family_cray_cray)
     boost_build = family_cray_cray.add_task("boost_build")
     boost_build.add_trigger("../boost_site_config == complete")
+
+
+def build_boost( boost ):
+    boost.add_defstatus( ecflow.DState.suspended );
+    boost.add_variable("LAYOUT","tagged")
     
+    family = boost.add_family("localhost")
+    add_localhost_variables(family)
+    add_boost_tasks( family )
+
+    family = boost.add_family("localhost_clang")
+    add_localhost_clang_variables(family)
+    add_boost_tasks( family )
+     
+    family = boost.add_family("linux64")
+    add_linux_64_variables(family)
+    add_remote_linux_64_variables(family)
+    add_boost_tasks( family )
+
+    family = boost.add_family("linux64_lxop")
+    add_linux_64_lxop_variables(family)
+    add_remote_linux_64_lxop_variables(family)
+    add_boost_tasks( family )
+
+    family = boost.add_family("linux64intel")
+    add_linux_64_intel_variables(family)
+    add_remote_linux_64_intel_variables(family)
+    add_boost_tasks( family )
+
+    family = boost.add_family("opensuse113")
+    add_opensuse113_variables(family)
+    add_remote_opensuse113_variables(family)
+    add_boost_tasks( family )
     
+    family = boost.add_family("opensuse131")
+    family.add_variable("GIT","git")   # hack 
+    add_opensuse131_variables(family)
+    add_remote_opensuse131_variables(family)
+    add_boost_tasks( family )
+
+    family = boost.add_family("redhat")
+    add_redhat_variables(family)
+    add_remote_redhat_variables(family)
+    add_boost_tasks( family )
+    
+    family = boost.add_family("cray_cct")
+    add_cray_variables(family)
+    add_remote_cray_variables(family)
+    add_cray_gnu_compiler_variables(family)
+    add_cray_boost_tasks(family)
+
+    family = boost.add_family("cray_cca")
+    add_cray_variables(family)
+    add_remote_cray_variables(family)
+    add_cray_gnu_compiler_variables(family)
+    add_cray_boost_tasks(family)
+
+ 
     family = boost.add_family("opensuse103")
     add_opensuse103_variables(family)
     add_remote_opensuse103_variables(family)
     add_boost_tasks( family )
     
-    family = boost.add_family("hpux");
-    add_hpux_variables(family)
-    add_remote_hpux_variables(family)
-    add_boost_tasks( family )
- 
     family = boost.add_family("aix_power7")
     add_aix_power7_variables(family)
     add_remote_aix_power7_variables(family)
@@ -646,7 +689,7 @@ def add_suite_variables( suite ):
     suite.add_variable("GIT","/usr/local/apps/git/current/bin/git")
     suite.add_variable("SET_TO_TEST_SCRIPT","false") 
     suite.add_variable("BUILD_ECFLOWVIEW","true")
-    suite.add_variable("ECFLOW_GIT_BRANCH","develop")  # when makeing a relase switch to release/<release version>, otherwise develop
+    suite.add_variable("ECFLOW_GIT_BRANCH","release/4.0.3")  # when makeing a relase switch to release/<release version>, otherwise develop
     suite.add_variable("ECBUILD_GIT_BRANCH","develop")   
 
     # automatically fob all zombies when compiling ecflow 
@@ -710,10 +753,6 @@ with defs.add_suite("suite") as suite:
         create_tar = tar_fam.add_task("create_tar")
         create_tar.add_variable("ARCH","opensuse113")
     
-        cp_tar_to_hpux = tar_fam.add_task("cp_tar_to_hpux")
-        cp_tar_to_hpux.add_trigger("create_tar == complete")
-        add_hpux_variables( cp_tar_to_hpux )
-    
         with build.add_family("local") as local:
             build_localhost( local )
             build_localhost_cmake( local )
@@ -722,13 +761,13 @@ with defs.add_suite("suite") as suite:
         with build.add_family("remote") as remote:
             remote.add_variable("BUILD_TYPE","boost")  # choose between [  cmake | boost ]
             build_linux_64( remote )
+            build_linux_64_lxop( remote )
             build_linux_64_intel( remote )
             build_opensuse113( remote )
             build_opensuse131( remote )
             build_redhat( remote )
             build_cray( remote )
             build_opensuse103( remote )
-            build_hpux(remote) # this is build with boost build
             build_aix_power7(remote)
         
 #ecflow.PrintStyle.set_style(ecflow.Style.STATE)

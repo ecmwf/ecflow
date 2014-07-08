@@ -21,17 +21,18 @@ namespace ecf {
 
 // ********************************************************************
 // IMPORTANT:
-// The version number is extracted externally
+// The version number is extracted externally.
 //   see ACore/doc/extracting_version_number.ddoc
-// Hence whenever you change the version, check it can be extracted
-// calling the code specified in extracting_version_number.ddoc
-// on the command line.
-// It is also extracted by python, check build/nightly/build.py
+//
+//   See ACore/src/ecflow_version.h"
+//   This file is generated cmake from $WK/VERSION.cmake
+//
+// It is also extracted by python, from VERSION.CMAKE check build/nightly/build.py
 // This minimises the places where we have hard code the version number.
 //
 // When changing the version change remember to:
 //    - re-login into remote system to update ECFLOW_INSTALL_DIR & ECFLOW_PYTHON_INSTALL_DIR
-//               required for interactive install
+//      required for interactive install
 //
 // To Install a new version on all the different platforms:
 //  . build/nightly/quick_install_.sh

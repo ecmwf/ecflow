@@ -348,22 +348,42 @@ std::string File::findPath(
    return std::string();
 }
 
-
+//#define INTEL_DEBUG_ME 1
 bool File::createMissingDirectories(const std::string& pathToFileOrDir)
 {
+#ifdef INTEL_DEBUG_ME
+   std::cout << "File::createMissingDirectories  " << pathToFileOrDir << std::endl;
+#endif
 	if (pathToFileOrDir.empty()) return false;
 
 	// Avoid making unnecessary system calls, by checking to see if directory exists first
    fs::path fs_path(pathToFileOrDir);
    if (fs_path.extension().empty()) {
+
+#ifdef INTEL_DEBUG_ME
+      std::cout << "   pure directory no extension" << std::endl;
+#endif
       // pure directory
       if (fs::exists(pathToFileOrDir)) {
+
+#ifdef INTEL_DEBUG_ME
+         std::cout << "   " << pathToFileOrDir << " already exists " << std::endl;
+#endif
+
          return true;
       }
    }
    else {
+
+#ifdef INTEL_DEBUG_ME
+      std::cout << "   pure directory *has* extension" << std::endl;
+#endif
       // could be /tmp/fred/sms.job, see if /tmp/fred exists
       if (fs::exists(fs_path.parent_path())) {
+
+#ifdef INTEL_DEBUG_ME
+         std::cout << "   " << pathToFileOrDir << " already exists " << std::endl;
+#endif
          return true;
       }
    }
@@ -373,10 +393,17 @@ bool File::createMissingDirectories(const std::string& pathToFileOrDir)
 	try {
 		if ( !thePath.empty() ) {
 
+#ifdef INTEL_DEBUG_ME
+         std::cout << "   last file " << thePath.back() << std::endl;
+#endif
+
 			// pathToFileOrDir is of form: /tmp/fred/sms.job
 			//   we should only create directories for /tmp/fred
 			if ( thePath.back().find( "." ) != std::string::npos ) {
 				// assume the last token represents a file, hence dont create a directory
+#ifdef INTEL_DEBUG_ME
+	         std::cout << "   last file " << thePath.back() << " has a *dot* ignoring "<< std::endl;
+#endif
 				thePath.pop_back();
 			}
 
@@ -388,22 +415,39 @@ bool File::createMissingDirectories(const std::string& pathToFileOrDir)
 			for (size_t i = 0; i < thePath.size(); i++) {
 				pathToCreate += thePath[i];
 				if ( !fs::exists( pathToCreate ) ) {
+#ifdef INTEL_DEBUG_ME
+	            std::cout << "   " << pathToCreate << " does not exist, creating directory " << std::endl;
+#endif
 					fs::create_directory( pathToCreate );
 				}
 				pathToCreate += Str::PATH_SEPERATOR();
 			}
 		}
 		else {
+#ifdef INTEL_DEBUG_ME
+         std::cout << "   NO path component in " << pathToFileOrDir <<  std::endl;
+#endif
+
 			if ( pathToFileOrDir.find( "." ) != std::string::npos ) {
 				// assume represents a file, hence don't create a directory fred.job1
+#ifdef INTEL_DEBUG_ME
+	         std::cout << "   assuming " << pathToFileOrDir << " is a file, found a dot, returning without creating dir " <<  std::endl;
+#endif
 				return true;
 			}
 
 			// assume is a dir
+#ifdef INTEL_DEBUG_ME
+         std::cout << "   about to create dir " <<  pathToFileOrDir << std::endl;
+#endif
+
 			fs::create_directory( pathToFileOrDir );
 		}
 	}
-	catch ( const std::exception & ) {
+	catch ( const std::exception & ex ) {
+#ifdef INTEL_DEBUG_ME
+	   std::cout << "   Exception " << ex.what() << " could not create dir " << pathToFileOrDir << std::endl;
+#endif
 		return false;
 	}
 	return true;

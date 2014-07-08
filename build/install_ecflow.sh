@@ -133,6 +133,13 @@ then
       # lxab this is still opensuse113
       export BOOST_ROOT=/vol/ecf/cluster/boost/$BOOST_VERSION;  
       export WK=/vol/ecf/cluster/ecflow
+      
+   elif [ "$OS_VERSION" = "" ] ; then 
+   
+      # lxop does not define OS_VERSION ?????
+      export BOOST_ROOT=/gpfs/lxop/build/builds/boost/$BOOST_VERSION;  
+      export WK=/gpfs/lxop/build/builds/ecflow
+      
    fi
   
 elif [[ "$ARCH" = cray ]] ; then 
@@ -186,17 +193,38 @@ $BOOST_ROOT/bjam $TOOLSET $CXXFLAGS -d2 variant=$mode_arg $test_arg $install_arg
    
    
 # ============================================================================ 
-# Copy over release from c2a -> c2b
-#
+# Copy over release from cct -> cca
 # *Make* sure destination has a trailing '/.' otherwise you can end up renaming.
-# =============================================================================
-if [[ "$ARCH" = ibm_power7 ]] ; then 
+# ============================================================================
+#if [[ "$ARCH" = cray ]] ; then 
+#
+#   if [[ "$test_arg" = "" ]] ; then
+#      cd /usr/local/apps/ecflow
+#      scp -r $ECFLOW_VERSION emos@cca:/usr/local/apps/ecflow/.
+#   fi
+#fi  
 
-   if [[ "$test_arg" = "" ]] ; then
-      cd /usr/local/apps/ecflow
-      ecrcp -avr $ECFLOW_VERSION emos@c2b:/usr/local/apps/ecflow/.
+# ============================================================================ 
+# Copy over release from ecgb(redhat) -> sappa and sappb
+# *Make* sure destination has a trailing '/.' otherwise you can end up renaming.
+# ============================================================================
+if [[ "$ARCH" = "Linux" ]] || [[ "$ARCH" = "linux" ]] 
+then  
+   if [ "$OS_VERSION" = opensuse131 ] ; then
+   
+      if [[ "$test_arg" = "" ]] ; then
+         # sappa/sappb are same as ecgb/redhat
+         cd /usr/local/apps/ecflow
+         scp -r $ECFLOW_VERSION emos@sappa:/usr/local/apps/ecflow/.
+         scp -r $ECFLOW_VERSION emos@sappb:/usr/local/apps/ecflow/.
+      
+      elif [ "$OS_VERSION" = sles11 ] ; then 
+   
+         # lxab: copy over to lxop, until we can build on there
+         scp -r $ECFLOW_VERSION emos@lxop:/usr/local/apps/ecflow/.
+      fi
    fi
-fi  
+fi
 
 if [[ "$test_arg" = "" ]] ; then
    #==========================================================================

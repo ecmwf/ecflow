@@ -67,8 +67,7 @@ static struct {
 } pix[] = {
   {(char*)"waiting", 0, 0, new procFlag(&node::isWaiting), show::waiting_icon},
   
-  {(char*)"clock", 0, 0, new procFlag(&node::hasTime), show::time_icon},
-  
+  {(char*)"clock", 0, 0, new procFlag(&node::hasTimeHolding), show::time_icon},  
   {(char*)"calendar", 0, 0, new procFlag(&node::hasDate), show::date_icon},
   
   {(char*)"late", 0, 0, new procFlag(&node::isLate), show::late_icon},
@@ -102,9 +101,14 @@ static struct {
 
   {(char*)"locked", 0, 0, new procFlag(&node::isLocked), 0}, /* --- shall appear last */
 
+  {(char*)"clock_free", 0, 0, new procFlag(&node::hasTime), show::time_icon},
+
 };
 
 simple_node::simple_node(host& h,ecf_node* n) : node(h,n)
+					      , old_status_(-1)
+					      , old_tryno_(-1)
+					      , old_flags_(-1)
 {
 }
 
@@ -113,6 +117,9 @@ const int kPixSize = 16;
 #ifdef BRIDGE
 simple_node::simple_node(host& h,sms_node* n, char b) 
   : node(h,n,b)
+  , old_status_(-1)
+  , old_tryno_(-1)
+  , old_flags_(-1)
 {
   insert(node::create(h,(sms_node*)n->label));
   insert(node::create(h,(sms_node*)n->meter));
@@ -259,11 +266,12 @@ Boolean simple_node::hasTriggers() const
   return owner_ ? owner_->hasTrigger() : False;
 }
 
-Boolean simple_node::hasTime() const  
+Boolean simple_node::hasTime() const /* time is free , yellow background icon */
 { 
 #ifdef BRIDGE 
   if (tree_) return tree_->time != 0;
 #endif
+  if (hasTimeHolding()) return False;
   return owner_ ? owner_->hasTime() : False;
 }
 
@@ -273,6 +281,19 @@ Boolean simple_node::hasDate() const
   if (tree_) return tree_->date != 0;
 #endif
   return owner_ ? owner_->hasDate() : False;
+}
+
+Boolean simple_node::hasTimeHolding() const /* grey */
+{
+  if (owner_)
+    if (owner_->hasTime()) {
+      Node *node = owner_->get_node();
+      if (!node) return False;
+      TimeDepAttrs *attr = node->get_time_dep_attrs();
+      if (!attr) return False;
+      return !attr->time_today_cron_is_free();
+    }
+  return False;
 }
 
 Boolean simple_node::hasZombieAttr() const  
@@ -406,6 +427,12 @@ void simple_node::info(std::ostream& f)
 
          if (ecf ) {
             gvar.clear();
+
+	    if (ecf->hasTimeDependencies()) {	      
+	      f << inc << "# time-date-dependencies: ";
+	      if (ecf->isTimeFree()) f << "free\n"; 
+	      else f << "holding\n"; 
+	    }
             ecf->gen_variables(gvar);
             for(it = gvar.begin(); it != gvar.end(); ++it) {
 	      f << inc << "# edit " << (*it).name() << " '" << (*it).theValue() << "'\n";
@@ -442,6 +469,7 @@ void simple_node::info(std::ostream& f)
                       i == NODE_TASK  || i == NODE_ALIAS))
         f << run->type_name() << " ";
       f << run->toString() << "\n";
+      // f << run->dump() << "\n";
     }
   f << "end" << type_name() << " # " << name() << "\n";
 }

@@ -3,6 +3,11 @@ set -e # stop the shell on first error
 set -u # fail when using an undefined variable
 set -x # echo script lines as they are executed
 
+# ----------------------------------------------------------------------
+# LXOP: specific ??
+# ----------------------------------------------------------------------
+# QSUB -q %QUEUE:test%
+
 # -----------------------------------------------------------------------------------------
 # **NOTE** do not use -e for file existence it WONT work on HPUX/HP_UX, use -r
 # -----------------------------------------------------------------------------------------

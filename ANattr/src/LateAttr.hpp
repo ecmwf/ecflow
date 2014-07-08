@@ -23,11 +23,21 @@
 namespace ecf { class Calendar;} // forward declare class
 
 namespace ecf {
-
+/// ========================================================================
 /// Use compiler ,  destructor, assignment, copy constructor,
+///
 /// The late late attribute will not work correctly when the suites clock
 /// start and stops with the server. Since the late relies on real time
 /// for some of its functionality.
+/// -s submitted: The time node can stay submitted (format [+]hh:mm). submitted is always
+///               relative, so + is simple ignored, if present. If the node stays submitted
+///               longer than the time specified, the late flag is set
+/// -a Active   : The time of day the node must have become active (format hh:mm). If the node
+///               is still queued or submitted, the late flag is set
+/// -a Complete : The time node must become complete (format {+}hh:mm). If relative, time is
+///               taken form the time the node became actice, otherwise node must be complete by
+///               the time given.
+/// ===========================================================================
 class LateAttr  {
 public:
 	LateAttr();

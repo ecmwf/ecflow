@@ -54,7 +54,7 @@ ulimit
 export PATH=/usr/local/apps/python/current/bin:$PATH
 
 # ===================================================================================
-# Load the right environment, default is awlays cray
+# Load the right environment, default is always cray
 #
 module swap PrgEnv-cray %PRGENV:%
 
@@ -62,6 +62,18 @@ module swap PrgEnv-cray %PRGENV:%
 # For gnu, we will use gnu 4.6.3
 if [[ "$PE_ENV" = GNU ]] ; then
    %MODULE_LOAD_GCC%
+fi
+
+# Allow cray compiler to be changed
+if [[ "$PE_ENV" = CRAY ]] ; then
+   module unload cce
+   %MODULE_LOAD_CRAY_COMPILER%
+
+   # This seems to interfere with the linking causing undefines
+   #/opt/cray/libsci/12.1.3/CRAY/81/sandybridge/lib/libsci_cray_mp.so: undefined reference to `__ALLOCATE'
+   #/opt/cray/libsci/12.1.3/CRAY/81/sandybridge/lib/libsci_cray_mp.so: undefined reference to `_GET_ENVIRONMENT_VARIABLE'
+   #/opt/cray/libsci/12.1.3/CRAY/81/sandybridge/lib/libsci_cray_mp.so: undefined reference to `__MAXLOC_F08'
+   module unload cray-libsci/12.1.3
 fi
 
 #

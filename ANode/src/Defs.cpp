@@ -136,7 +136,7 @@ void Defs::check_job_creation(  job_creation_ctrl_ptr jobCtrl )
  			suiteVec_[s]->check_job_creation( jobCtrl ) ;
 
  			/// reset the state
-         suiteVec_[s]->requeue(true,clear_suspended_in_child_nodes);
+         suiteVec_[s]->requeue(true,clear_suspended_in_child_nodes,true);
          suiteVec_[s]->reset_begin();
          suiteVec_[s]->setStateOnlyHierarchically( NState::UNKNOWN );
  		}
@@ -151,7 +151,7 @@ void Defs::check_job_creation(  job_creation_ctrl_ptr jobCtrl )
 			node->check_job_creation( jobCtrl );
 
 			/// reset the state
-         node->requeue(true,clear_suspended_in_child_nodes);
+         node->requeue(true,clear_suspended_in_child_nodes,true);
          node->suite()->reset_begin();
          node->setStateOnlyHierarchically( NState::UNKNOWN );
 		}
@@ -289,6 +289,12 @@ void Defs::addSuite(suite_ptr s, size_t position)
 
 void Defs::add_suite_only(suite_ptr s, size_t position)
 {
+   if (s->defs()) {
+      std::stringstream ss;
+      ss << "Add Suite failed: The suite of name '" << s->name() << "' already owned by another Defs ";
+      throw std::runtime_error( ss.str() );
+   }
+
    s->set_defs(this);
    if (position >= suiteVec_.size()) {
       suiteVec_.push_back(s);
@@ -304,6 +310,7 @@ suite_ptr Defs::removeSuite(suite_ptr s)
 {
 	std::vector<suite_ptr>::iterator i = std::find(suiteVec_.begin(), suiteVec_.end(),s);
  	if ( i != suiteVec_.end()) {
+ 	   s->set_defs(NULL);              // allows suite to added to different defs
 		suiteVec_.erase(i);             // iterator invalidated
 	 	Ecf::incr_modify_change_no();
 	 	client_suite_mgr_.suite_deleted_in_defs(s); // must be after Ecf::incr_modify_change_no();
@@ -334,6 +341,7 @@ node_ptr Defs::removeChild(Node* child)
  	for(size_t t = 0; t < vecSize; t++)     {
  		if (suiteVec_[t].get() == child) {
  		 	Ecf::incr_modify_change_no();
+ 		   suiteVec_[t]->set_defs(NULL); // Must be set to NULL, allows suite to be added to different defs
  		 	client_suite_mgr_.suite_deleted_in_defs(suiteVec_[t]); // must be after Ecf::incr_modify_change_no();
  			node_ptr node = boost::dynamic_pointer_cast<Node>(suiteVec_[t]);
  			suiteVec_.erase( suiteVec_.begin() + t);
@@ -432,7 +440,9 @@ void Defs::requeue()
    int clear_suspended_in_child_nodes = 0;
    size_t theSuiteVecSize = suiteVec_.size();
    for(size_t s = 0; s < theSuiteVecSize; s++) {
-      suiteVec_[s]->requeue( true /* reset repeats */,clear_suspended_in_child_nodes);
+      suiteVec_[s]->requeue( true /* reset repeats */,
+                             clear_suspended_in_child_nodes,
+                             true /* reset_next_time_slot */);
    }
 
    set_most_significant_state();
@@ -831,6 +841,7 @@ bool Defs::doDeleteChild(Node* nodeToBeDeleted)
  		if ( (*s).get() == nodeToBeDeleted) {
   		 	Ecf::incr_modify_change_no();
   		 	client_suite_mgr_.suite_deleted_in_defs(*s); // must be after Ecf::incr_modify_change_no();
+  		 	(*s)->set_defs(NULL); // Must be set to NULL, allows re-added to a different defs
   			suiteVec_.erase(s);
   			set_most_significant_state(); // must be after suiteVec_.erase(s);
   			return true;

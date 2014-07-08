@@ -15,6 +15,7 @@
 #
 import os ;
 local BOOST_ROOT = [ os.environ BOOST_ROOT ] ;
+local MACHINE_NAME = [ os.environ MACHINE_NAME ] ;
 
 #
 # --layout=system    -> libboost_system.a (default)
@@ -25,12 +26,16 @@ local BOOST_ROOT = [ os.environ BOOST_ROOT ] ;
 # assumes --layout=tagged for the debug release and profile variant
 #
 
+GCC_TAG = gcc46 ;
 VERSION_TAG = 1_53 ;
 switch $(BOOST_ROOT) {
    case *boost_1_55_0 : VERSION_TAG = 1_55 ;
 }
 
-GCC_TAG = gcc46 ;
+switch $(MACHINE_NAME) {
+   case cca : GCC_TAG = gcc48 ;
+}
+
 
 lib boost_serialization : :   <variant>debug <file>$(BOOST_ROOT)/stage/lib/libboost_serialization-$(GCC_TAG)-mt-d-$(VERSION_TAG).a ;
 lib boost_system : :          <variant>debug <file>$(BOOST_ROOT)/stage/lib/libboost_system-$(GCC_TAG)-mt-d-$(VERSION_TAG).a ;
