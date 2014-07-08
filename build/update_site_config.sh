@@ -33,24 +33,22 @@ test_uname ()
 }
 
 if test_uname Linux ; then
-
   tool=gcc
   X64=$(uname -m)
   if [ "$X64" = x86_64 ]
   then
     # PE_ENV is defined in cray environment, at least on sandy bridge
-    if [[ "$PE_ENV" = GNU || "$PE_ENV" = INTEL || "$PE_ENV" = CRAY ]]
+    if [ "$PE_ENV" = GNU -o "$PE_ENV" = INTEL -o "$PE_ENV" = CRAY ]
     then
-       if [ "$PE_ENV" = GNU ] ; then
-          cp $WK/build/site_config/site-config-Linux64.jam $BOOST_ROOT/tools/build/v2/site-config.jam  
-       fi
+       CXXFLAGS=cxxflags=-fPIC
+       layout=versioned  
+       
+       cp $WK/build/site_config/site-config-cray.jam $BOOST_ROOT/tools/build/v2/site-config.jam
        if [ "$PE_ENV" = INTEL ] ; then
-         tool=intel
-         cp $WK/build/site_config/site-config-Linux64-intel.jam $BOOST_ROOT/tools/build/v2/site-config.jam  
+          tool=intel
        fi
        if [ "$PE_ENV" = CRAY ] ; then
-         tool=cray
-         cp $WK/build/site_config/site-config-cray.jam $BOOST_ROOT/tools/build/v2/site-config.jam  
+          tool=cray
        fi
     else
        cp $WK/build/site_config/site-config-Linux64.jam $BOOST_ROOT/tools/build/v2/site-config.jam  

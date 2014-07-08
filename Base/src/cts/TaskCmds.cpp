@@ -260,7 +260,8 @@ void InitCmd::create( 	Cmd_ptr& cmd,
 		<< ") clientEnv->jobs_password(" << clientEnv->jobs_password()
 		<< ") clientEnv->process_or_remote_id(" << clientEnv->process_or_remote_id()
 		<< ") clientEnv->task_try_no(" << clientEnv->task_try_no()
-		<< ") process_or_remote_id(" << process_or_remote_id
+      << ") process_or_remote_id(" << process_or_remote_id
+      << ") clientEnv->under_test(" << clientEnv->under_test()
 		<< ")\n";
 
 	std::string errorMsg;
@@ -269,7 +270,8 @@ void InitCmd::create( 	Cmd_ptr& cmd,
 	}
 
 	/// if ECF_RID is specified then it *MUST* be the same as input argument
- 	if (!clientEnv->process_or_remote_id().empty() && clientEnv->process_or_remote_id() != process_or_remote_id) {
+	/// On cca we ECF_RID can be specified under test, and therefore fail this check, hence we use clientEnv->under_test()
+ 	if (!clientEnv->under_test() && !clientEnv->process_or_remote_id().empty() && clientEnv->process_or_remote_id() != process_or_remote_id) {
  		std::stringstream ss;
  		ss << "remote id(" << process_or_remote_id << ") passed as an argument, not the same the client environment ECF_RID(" << clientEnv->process_or_remote_id() << ")";
 		throw std::runtime_error(ss.str());

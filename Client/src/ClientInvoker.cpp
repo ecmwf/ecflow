@@ -135,6 +135,11 @@ void ClientInvoker::testInterface() {
    clientEnv_.set_test();
 }
 
+const std::string& ClientInvoker::process_or_remote_id() const
+{
+   return clientEnv_.process_or_remote_id();
+}
+
 void ClientInvoker::enable_logging(const std::string& log_file_name)
 {
    Rtt::create(log_file_name);

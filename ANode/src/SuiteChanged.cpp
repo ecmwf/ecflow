@@ -46,6 +46,7 @@ SuiteChanged::~SuiteChanged()
 // ============================================================================
 SuiteChanged0::SuiteChanged0(node_ptr s)
 : node_(s),
+  suite_(s->suite()),
   state_change_no_(Ecf::state_change_no()),
   modify_change_no_(Ecf::modify_change_no())
   {}
@@ -53,13 +54,13 @@ SuiteChanged0::SuiteChanged0(node_ptr s)
 SuiteChanged0::~SuiteChanged0()
 {
 	node_ptr node = node_.lock();
-	if (node.get()) {
+	if (node.get() && suite_) {
 		if ( modify_change_no_ != Ecf::modify_change_no() ) {
- 			node->suite()->set_modify_change_no(Ecf::modify_change_no());
+ 			suite_->set_modify_change_no(Ecf::modify_change_no());
  			//std::cout << "SuiteChanged0::~SuiteChanged0() modify_ changed \n";
 		}
 		if ( state_change_no_ != Ecf::state_change_no() ) {
- 			node->suite()->set_state_change_no(Ecf::state_change_no());
+ 			suite_->set_state_change_no(Ecf::state_change_no());
  			//std::cout << "SuiteChanged0::~SuiteChanged0() state changed \n";
 		}
 	}
