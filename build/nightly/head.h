@@ -6,7 +6,11 @@ set -x # echo script lines as they are executed
 # ----------------------------------------------------------------------
 # LXOP: specific ??
 # ----------------------------------------------------------------------
+if [[ $HOST = lxop* ]]; then
 # QSUB -q %QUEUE:test%
+  ln -sf $(echo ${PBS_NODEFILE:=} | sed -e 's:aux:spool:').OU %ECF_JOBOUT%.running
+fi
+
 
 # -----------------------------------------------------------------------------------------
 # **NOTE** do not use -e for file existence it WONT work on HPUX/HP_UX, use -r
