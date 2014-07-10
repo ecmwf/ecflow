@@ -18,6 +18,7 @@
 #include "ViewConfig.hpp"
 #include "ViewFilter.hpp"
 
+
 //=======================================
 //
 // TreeNodeModel
@@ -50,34 +51,28 @@ int TreeNodeModel::rowCount( const QModelIndex& parent) const
 	{
 		return 0;
 	}
-	//Parent is the root: the item must be a server!
+	//Parent is the root
 	else if(!parent.isValid())
 	{
-			//qDebug() << "rowCount" << parent << servers_.count();
-			return servers_.count();
+		//qDebug() << "rowCount" << parent << servers_.count();
+		return servers_.count();
 	}
 	//The parent is a server
 	else if(isServer(parent))
 	{
 		if(ServerHandler *server=indexToServer(parent))
 		{
-			//There is a rootNode for the server
-			if(Node *rn=rootNode(server))
-			{
-				return 1;
-			}
 			//We show the whole tree for the server
-			else
-			{
-				return server->numSuites();
-			}
+			//qDebug() << "  -->suiteNum" <<server->numSuites();
+			return server->numSuites();
 		}
 	}
 	//The parent is a node
 	else if(Node* parentNode=indexToNode(parent))
 	{
-		//qDebug() << "  -->node" << ServerHandler::numOfImmediateChildren(parentNode);
-		return ServerHandler::numOfImmediateChildren(parentNode);
+		//qDebug() << "  -->node" << parentNode->name().c_str() << ServerHandler::numOfImmediateChildren(parentNode);
+		int num=attributesNum(parentNode);
+		return num+ServerHandler::numOfImmediateChildren(parentNode);
 	}
 
 	return 0;
@@ -102,15 +97,19 @@ QVariant TreeNodeModel::data( const QModelIndex& index, int role ) const
 		return QVariant();
 	}
 
-	//qDebug() << "data" << index << role;
-
 	//Server
+	int id;
 	if(isServer(index))
 	{
 		return serverData(index,role);
 	}
+	else if(isNode(index))
+		return nodeData(index,role);
+	else if(isAttribute(index))
+		return QVariant(); //attributesData(index,role);
 
-	return nodeData(index,role);
+
+	return QVariant();
 }
 
 QVariant TreeNodeModel::serverData(const QModelIndex& index,int role) const
@@ -154,7 +153,7 @@ QVariant TreeNodeModel::nodeData(const QModelIndex& index, int role) const
 	}
 	else if(role == FilterRole)
 	{
-			return static_cast<int>(node->dstate());
+		return QVariant(servers_.isFiltered(node));
 	}
 	else if(index.column() == 0 && role == Qt::BackgroundRole)
 	{
@@ -187,59 +186,30 @@ QModelIndex TreeNodeModel::index( int row, int column, const QModelIndex & paren
 		return QModelIndex();
 	}
 
-	//qDebug() << "index" << row << column << parent;
-
 	//When parent is the root this index refers to a server
 	if(!parent.isValid())
 	{
-		//For the server the internalId is its row index + 1
+		//For the server the internal pointer is NULL
 		if(row < servers_.count())
 		{
-			return createIndex(row,column,row+1);
+			void* p=NULL;
+			return createIndex(row,column,(void*)NULL);
 		}
-		else
-			return QModelIndex();
 	}
 
-	//We are under one of the servers
+	//Here we are under one of the servers
 	else
 	{
-		node_ptr childNode;
-
-		//The parent is a server
+		//The parent is a server: this index refers to a suite. We set the
+		//server as an internal pointer
 		if(ServerHandler* server=indexToServer(parent))
 		{
-			//If there is a rootnode for the server
-			if(Node *rn=rootNode(server))
-			{
-				//qDebug() << "  -->rootNode" << rn->absNodePath().c_str();
-				return createIndex(row,column,rn);
-			}
-			//There is no root node: we show the whole tree for the server.
-			//So this item must be a suite!
-			else
-			{
-				if(Node *suite=server->suiteAt(row))
-				{
-					//ChangeMgrSingleton::instance()->attach(suite,this);
-					return createIndex(row,column,suite);
-				}
-				else
-					return QModelIndex();
-			}
+			return createIndex(row,column,server);
 		}
 		//Parent is not the server: the parent must be another node
-		else
+		else if(Node* parentNode=indexToNode(parent))
 		{
-				Node* parentNode=indexToNode(parent);
-				if(Node *n=ServerHandler::immediateChildAt(parentNode,row))
-				{
-					//ChangeMgrSingleton::instance()->attach(n,this);
-					return createIndex(row,column,n);
-
-				}
-				else
-					return QModelIndex();
+			return createIndex(row,column,parentNode);
 		}
 	}
 
@@ -253,41 +223,45 @@ QModelIndex TreeNodeModel::parent(const QModelIndex &child) const
 	if(isServer(child))
 		return QModelIndex();
 
-	//Get the node
-	Node* node=indexToNode(child);
-	if(!node)
-		return QModelIndex();
 
-	//Check if it is a rootNode
-	QMapIterator<ServerHandler*, Node*> it(rootNodes_);
-	while(it.hasNext())
+	//Child is a suite. Its internal pointer points to a server.
+	if(ServerHandler *s=servers_.server(child.internalPointer()))
 	{
-		it.next();
-
-		//For a rootnode the parent is the server
-		if(it.value() == node)
-		{
-			return serverToIndex(it.key());
-		}
+		//The parent is a server
+		int serverIdx=servers_.index(s);
+		return createIndex(serverIdx,0,(void*)NULL);
 	}
 
-	//The node is not a rootnode
-
-	//Get the parent node
-	Node *parentNode=node->parent();
-
-	//If there is no parent node it is a suite so its parent is a server
-	if(!parentNode)
+	//Child is a non-suite node or an attribute. Its internal pointer points to the parent node.
+	else if(Node *parentNode=static_cast<Node*>(child.internalPointer()))
 	{
-		return serverToIndex(ServerHandler::find(node));
-	}
-	//else it is a non-suite node so its parent must be another node
-	else
-	{
-		size_t pos=parentNode->position();
-		if(pos != std::numeric_limits<std::size_t>::max())
-			return createIndex(pos,0,parentNode);
+			//Child is a Node
+			if(child.row() >= attributesNum(parentNode))
+			{
+				//The parent is a suite: its internal pointer is the server
+				if(parentNode->isSuite())
+				{
+					if(ServerHandler* server=ServerHandler::find(parentNode))
+					{
+						return createIndex(server->indexOfSuite(parentNode),0,server);
+					}
+				}
+				//The parent is a non-suite node: its internal pointer
+				//is its parent (i.e.. the grandparent)
+				else if(Node *grandParentNode=parentNode->parent())
+				{
+					size_t pos=parentNode->position();
+					if(pos != std::numeric_limits<std::size_t>::max())
+						return createIndex(pos,0,grandParentNode);
+				}
+			}
 
+			//Child is an attribute
+			else
+			{
+				return QModelIndex();
+
+			}
 	}
 
 	return QModelIndex();
@@ -301,25 +275,33 @@ QModelIndex TreeNodeModel::parent(const QModelIndex &child) const
 
 bool TreeNodeModel::isServer(const QModelIndex & index) const
 {
-	//For servers the internal id is set to their position in servers_ + 1
+	return (index.isValid() && index.internalPointer() == NULL);
+}
+
+bool TreeNodeModel::isNode(const QModelIndex & index) const
+{
+	return (indexToNode(index) != NULL);
+}
+
+bool TreeNodeModel::isAttribute(const QModelIndex & index) const
+{
 	if(index.isValid())
 	{
-		int id=index.internalId()-1;
-		return (id >=0 && id < servers_.count());
+		//int id=index.internalId()-1;
+		//return id > 1000;
 	}
 	return false;
 }
 
-
 ServerHandler* TreeNodeModel::indexToServer(const QModelIndex & index) const
 {
-	//For servers the internal id is set to their position in servers_ + 1
+	//For servers the internal id is a nul pointer
 	if(index.isValid())
 	{
-		int id=index.internalId()-1;
-		if(id >=0 && id < servers_.count())
-				return servers_.at(id);
+		if(index.internalPointer() == NULL)
+			return servers_.server(index.row());
 	}
+
 	return NULL;
 }
 
@@ -327,51 +309,127 @@ QModelIndex TreeNodeModel::serverToIndex(ServerHandler* server) const
 {
 	//For servers the internal id is set to their position in servers_ + 1
 	int i;
-	if((i=servers_.indexOf(server))!= -1)
-			return createIndex(i,0,i+1);
+	if((i=servers_.index(server))!= -1)
+			return createIndex(i,0,(void*)NULL);
 
 	return QModelIndex();
 }
 
 Node* TreeNodeModel::indexToNode( const QModelIndex & index) const
 {
-	if(index.isValid())
+	if(index.isValid() && !isServer(index))
 	{
-		if(!isServer(index))
+		//If suite (the internal pointer points to a server id pointer
+		if(ServerHandler *s=servers_.server(index.internalPointer()))
 		{
-			return static_cast<Node*>(index.internalPointer());
+			return s->suiteAt(index.row()).get();
 		}
-
+		//Other nodes
+		else if(Node *parentNode=static_cast<Node*>(index.internalPointer()))
+		{
+			if(index.row() >= attributesNum(parentNode))
+			{
+				return ServerHandler::immediateChildAt(parentNode,index.row());
+			}
+		}
 	}
+
 	return NULL;
 }
-
 
 QModelIndex TreeNodeModel::nodeToIndex(Node* node, int column) const
 {
 	if(!node)
 		return QModelIndex();
 
-	if(node->parent() != 0)
+	//If the node is a suite
+	if(node->isSuite())
+	{
+		if(ServerHandler* server=ServerHandler::find(node))
+		{
+				int row=server->indexOfSuite(node);
+				if(row != -1)
+						return createIndex(row,column,server);
+		}
+	}
+
+	//Other nodes
+	else if(Node *parentNode=node->parent())
 	{
 		int row=ServerHandler::indexOfImmediateChild(node);
 		if(row != -1)
 		{
-					return createIndex(row,column,node);
-		}
-	}
-	else
-	{
-			if(ServerHandler* server=ServerHandler::find(node))
+			if(row != -1)
 			{
-				int row=server->indexOfSuite(node);
-				if(row != -1)
-						return createIndex(row,column,node);
+				return createIndex(row,column,parentNode);
 			}
+		}
 	}
 
 	return QModelIndex();
 }
+
+
+
+void TreeNodeModel::setFilter(const std::set<DState::State>& ns)
+{
+	servers_.clearFilter();
+
+	for(int i=0; i < servers_.count(); i++)
+	{
+		ServerHandler *server=servers_.server(i);
+		QList<Node*> filterVec;
+
+		for(unsigned int j=0; j < server->numSuites();j++)
+		{
+			filter(server->suiteAt(j),ns,filterVec);
+		}
+
+		servers_.nodeFilter(i,filterVec);
+
+	}
+}
+
+bool TreeNodeModel::filter(node_ptr node,const std::set<DState::State>& ns,QList<Node*>& filterVec)
+{
+	bool ok=false;
+	DState::State st=node->dstate();
+	if(ns.find(st) != ns.end())
+	{
+			ok=true;
+	}
+
+	std::vector<node_ptr> nodes;
+	node->immediateChildren(nodes);
+
+	for(std::vector<node_ptr>::iterator it=nodes.begin(); it != nodes.end(); it++)
+	{
+		if(filter(*it,ns,filterVec) == true && ok == false)
+		{
+			ok=true;
+		}
+	}
+
+	if(!ok)
+		filterVec << node.get();
+
+	return ok;
+}
+
+
+int TreeNodeModel::attributesNum(Node *node) const
+{
+	return 0;
+
+	if(node)
+	{
+		std::vector<Variable> v;
+		node->gen_variables(v);
+		return static_cast<int>(v.size());
+	}
+	return 0;
+}
+
 
 
 //=======================================
@@ -394,6 +452,9 @@ TreeNodeFilterModel::~TreeNodeFilterModel()
 
 void TreeNodeFilterModel::notifyFilterChanged()
 {
+	if(TreeNodeModel* m=static_cast<TreeNodeModel*>(sourceModel()))
+		m->setFilter(viewFilter_->nodeState());
+
 	invalidateFilter();
 }
 
@@ -403,90 +464,6 @@ bool TreeNodeFilterModel::filterAcceptsRow(int sourceRow,const QModelIndex& sour
 		return true;
 
 	QModelIndex index = sourceModel()->index(sourceRow, 1, sourceParent);
-	const std::set<DState::State> ns=viewFilter_->nodeState();
-	int intSt=sourceModel()->data(index,TreeNodeModel::FilterRole).toInt();
-	if(intSt<0)
-			return true;
-	else
-	{
-		DState::State st=static_cast<DState::State>(intSt);
-		if(ns.find(st) != ns.end())
-			return true;
-	}
-	return false;
+	return sourceModel()->data(index,TreeNodeModel::FilterRole).toBool();
 }
-
-
-
-
-/*
-static std::map<Node*,bool> nodeVec;
-
-void filter(const std::set<DState::State> ns)
-{
-	ServerHandler *server;
-	for(unsigned int i=0; i < server->numSuites();i++)
-	{
-		std::set<Node*> nodes;
-		server->suiteAt(i)->allChildren(nodes);
-		for(std::set<Node*>::iterator it=nodes.begin(); it != nodes.end(); it++)
-		{
-			filter(*it,ns);
-		}
-	}
-}
-
-bool filter(Node *node,const std::set<DState::State> ns)
-{
-	std::vector<node_ptr> nodes;
-	node->immediateChildren(nodes);
-
-	if(nodes.size()==0)
-	{
-		DState::State st=node->dstate();
-		if(ns.find(st) != ns.end())
-		{
-			nodeVec[node]=true;
-			return true;
-		}
-		else
-		{
-			nodeVec[node]=false;
-			return false;
-		}
-	}
-
-
-	for(unsigned int i=0; i < nodes.size(); i++)
-	{
-		`````````````````
-	}
-}
-
-
-const std::vector<suite_ptr> &suites = d->suiteVec();
-	for(unsigned int i=0; i < suites.size();i++)
-	{
-		ChangeMgrSingleton::instance()->attach(suites.at(i).get(),this);
-
-		std::set<Node*> nodes;
-		suites.at(i)->allChildren(nodes);
-		for(std::set<Node*>::iterator it=nodes.begin(); it != nodes.end(); it++)
-			ChangeMgrSingleton::instance()->attach((*it),this);
-
-	}
-
-
-	std::vector<node_ptr> nodes;
-		if(node->parent())
-		{
-				node->parent()->immediateChildren(nodes);
-				for(unsigned int i=0; i < nodes.size(); i++)
-					if(nodes.at(i).get() == node)
-							return i;
-		}
-
-
-
-*/
 

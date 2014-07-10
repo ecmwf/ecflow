@@ -225,7 +225,7 @@ QModelIndex TableNodeModel::parent(const QModelIndex &child) const
 		return QModelIndex();
 
 	//Check if it is a rootNode
-	QMapIterator<ServerHandler*, Node*> it(rootNodes_);
+	/*QMapIterator<ServerHandler*, Node*> it(rootNodes_);
 	while(it.hasNext())
 	{
 		it.next();
@@ -235,7 +235,7 @@ QModelIndex TableNodeModel::parent(const QModelIndex &child) const
 		{
 			return serverToIndex(it.key());
 		}
-	}
+	}*/
 
 	//The node is not a rootnode
 
@@ -282,8 +282,7 @@ ServerHandler* TableNodeModel::indexToServer(const QModelIndex & index) const
 	if(index.isValid())
 	{
 		int id=index.internalId()-1;
-		if(id >=0 && id < servers_.count())
-				return servers_.at(id);
+		return servers_.server(id);
 	}
 	return NULL;
 }
@@ -292,7 +291,7 @@ QModelIndex TableNodeModel::serverToIndex(ServerHandler* server) const
 {
 	//For servers the internal id is set to their position in servers_ + 1
 	int i;
-	if((i=servers_.indexOf(server))!= -1)
+	if((i=servers_.index(server))!= -1)
 			return createIndex(i,0,i+1);
 
 	return QModelIndex();

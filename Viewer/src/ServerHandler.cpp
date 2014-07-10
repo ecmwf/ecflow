@@ -72,7 +72,6 @@ ServerHandler::ServerHandler(const std::string& name, const std::string& port) :
 
 	servers_.push_back(this);
 
-
 	// populate the map of server commands - in the future this will be done when
 	// the configuration file is parsed
 	//if (commands_.empty())
@@ -103,7 +102,6 @@ ServerHandler::~ServerHandler()
 
 	if (comThread_)
 		delete comThread_;
-
 }
 
 
@@ -144,17 +142,17 @@ int ServerHandler::numSuites()
 	return 0;
 }
 
-Node* ServerHandler::suiteAt(int pos)
+node_ptr ServerHandler::suiteAt(int pos)
 {
 	ServerDefsAccess defsAccess(this);  // will reliquish its resources on destruction
 	defs_ptr d = defsAccess.defs();
 	if(d != NULL)
 	{
 		const std::vector<suite_ptr> &suites = d->suiteVec();
-		return (pos >=0 && pos < suites.size())?suites.at(pos).get():NULL;
+		return (pos >=0 && pos < suites.size())?suites.at(pos):node_ptr();
 	}
 
-	return NULL;
+	return node_ptr();
 }
 
 int ServerHandler::indexOfSuite(Node* node)
@@ -886,8 +884,6 @@ void ServerHandler::addNodeObserver(QObject* obs)
 		connect(comThread_,SIGNAL(nodeChanged(const Node*, QList<ecf::Aspect::Type>)),
 				obs,SLOT(slotNodeChanged(const Node*, QList<ecf::Aspect::Type>)));
 
-		connect(comThread_,SIGNAL(nodeChanged(const Node*)),
-					obs,SLOT(slotNodeChanged(const Node*)));
 }
 
 void ServerHandler::removeNodeObserver(QObject* obs)

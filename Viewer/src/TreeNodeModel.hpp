@@ -30,15 +30,24 @@ public:
    	QModelIndex index (int, int, const QModelIndex& parent = QModelIndex() ) const;
    	QModelIndex parent (const QModelIndex & ) const;
 
+   void setFilter(const std::set<DState::State>& ns);
+
 protected:
 	bool isServer(const QModelIndex & index) const;
+	bool isNode(const QModelIndex & index) const;
+	bool isAttribute(const QModelIndex & index) const;
+
 	ServerHandler* indexToServer(const QModelIndex & index) const;
 	QModelIndex serverToIndex(ServerHandler*) const;
 	QModelIndex nodeToIndex(Node*,int column=0) const;
 	Node* indexToNode( const QModelIndex & index) const;
 
+	int attributesNum(Node*) const;
+
 	QVariant serverData(const QModelIndex& index,int role) const;
 	QVariant nodeData(const QModelIndex& index,int role) const;
+
+	bool filter(node_ptr node,const std::set<DState::State>& ns,QList<Node*>& filterVec);
 };
 
 

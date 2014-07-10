@@ -18,6 +18,75 @@
 #include "ViewConfig.hpp"
 #include "ViewFilter.hpp"
 
+bool NodeModelServerItem::isFiltered(Node* node) const
+{
+	return (nodeFilter_.indexOf(node) == -1);
+}
+
+
+ServerHandler* NodeModelServers::server(int n) const
+{
+	return (n >=0 && n < items_.count())?items_.at(n).server_:0;
+}
+
+
+ServerHandler* NodeModelServers::server(void* idPointer) const
+{
+	for(int i=0; i < items_.count(); i++)
+		if(items_.at(i).server_ == idPointer)
+			return items_.at(i).server_;
+
+	return NULL;
+}
+
+
+int NodeModelServers::index(ServerHandler* s) const
+{
+	for(int i=0; i < items_.count(); i++)
+		if(items_.at(i).server_ == s)
+			return i;
+	return -1;
+}
+
+void NodeModelServers::add(ServerHandler *server)
+{
+	items_ << NodeModelServerItem(server);
+}
+
+void NodeModelServers::clearFilter()
+{
+	foreach(NodeModelServerItem item,items_)
+	{
+		item.nodeFilter_.clear();
+	}
+}
+
+void NodeModelServers::nodeFilter(int n,QList<Node*> vec)
+{
+	if(n >=0 && n < items_.count())
+	{
+		items_[n].nodeFilter_=vec;
+	}
+}
+
+bool NodeModelServers::isFiltered(Node *node) const
+{
+	ServerHandler* server=ServerHandler::find(node);
+	int id=index(server);
+	if(id != -1)
+	{
+		return items_.at(id).isFiltered(node);
+	}
+
+	return true;
+}
+
+//=======================================
+//
+//  AbstractNodeModel
+//
+//=======================================
+
 AbstractNodeModel::AbstractNodeModel(ServerFilter* serverFilter,QObject *parent) :
    QAbstractItemModel(parent),
    serverFilter_(serverFilter)
@@ -40,25 +109,23 @@ void AbstractNodeModel::init()
 {
 	for(unsigned int i=0; i < serverFilter_->servers().size(); i++)
 	{
-				ServerHandler *server=ServerHandler::find(serverFilter_->servers().at(i)->host(),
-						serverFilter_->servers().at(i)->port());
+			ServerHandler *server=ServerHandler::find(serverFilter_->servers().at(i)->host(),
+					serverFilter_->servers().at(i)->port());
 
-				server->addNodeObserver(this);
+			server->addNodeObserver(this);
 
-				servers_ << server;
-				rootNodes_[server] = NULL;
+			servers_.add(server);
 	}
 }
 
 void AbstractNodeModel::clean()
 {
-	foreach(ServerHandler* s,servers_)
+	for(int i=0; i < servers_.count(); i++)
 	{
-		s->removeNodeObserver(this);
+		servers_.server(i)->removeNodeObserver(this);
 	}
 
 	servers_.clear();
-	rootNodes_.clear();
 }
 
 void AbstractNodeModel::reload()
@@ -72,7 +139,7 @@ void AbstractNodeModel::reload()
 
 bool AbstractNodeModel::hasData() const
 {
-	return servers_.size() >0;
+	return servers_.count() >0;
 }
 
 void AbstractNodeModel::dataIsAboutToChange()
@@ -82,23 +149,23 @@ void AbstractNodeModel::dataIsAboutToChange()
 
 void AbstractNodeModel::addServer(ServerHandler *server)
 {
-	servers_ << server;
-	rootNodes_[servers_.back()] = NULL;
+	//servers_ << server;
+	//rootNodes_[servers_.back()] = NULL;
 }
 
 
 Node * AbstractNodeModel::rootNode(ServerHandler* server) const
 {
-	QMap<ServerHandler*,Node*>::const_iterator it=rootNodes_.find(server);
+	/*QMap<ServerHandler*,Node*>::const_iterator it=rootNodes_.find(server);
 	if(it != rootNodes_.end())
-		return it.value();
+		return it.value();*/
 	return NULL;
 }
 
 
 void AbstractNodeModel::setRootNode(Node *node)
 {
-	if(ServerHandler *server=ServerHandler::find(node))
+	/*if(ServerHandler *server=ServerHandler::find(node))
 	{
 		beginResetModel();
 
@@ -108,7 +175,7 @@ void AbstractNodeModel::setRootNode(Node *node)
 		endResetModel();
 
 		qDebug() << "setRootNode finished";
-	}
+	}*/
 }
 
 //----------------------------------------------
@@ -116,54 +183,6 @@ void AbstractNodeModel::setRootNode(Node *node)
 // Server to index mapping and lookup
 //
 //----------------------------------------------
-
-bool AbstractNodeModel::isServer(const QModelIndex & index) const
-{
-	//For servers the internal id is set to their position in servers_ + 1
-	if(index.isValid())
-	{
-		int id=index.internalId()-1;
-		return (id >=0 && id < servers_.count());
-	}
-	return false;
-}
-
-
-ServerHandler* AbstractNodeModel::indexToServer(const QModelIndex & index) const
-{
-	//For servers the internal id is set to their position in servers_ + 1
-	if(index.isValid())
-	{
-		int id=index.internalId()-1;
-		if(id >=0 && id < servers_.count())
-				return servers_.at(id);
-	}
-	return NULL;
-}
-
-QModelIndex AbstractNodeModel::serverToIndex(ServerHandler* server) const
-{
-	//For servers the internal id is set to their position in servers_ + 1
-	int i;
-	if((i=servers_.indexOf(server))!= -1)
-			return createIndex(i,0,i+1);
-
-	return QModelIndex();
-}
-
-Node* AbstractNodeModel::indexToNode( const QModelIndex & index) const
-{
-	if(index.isValid())
-	{
-		if(!isServer(index))
-		{
-			return static_cast<Node*>(index.internalPointer());
-		}
-
-	}
-	return NULL;
-}
-
 
 ViewNodeInfo_ptr AbstractNodeModel::nodeInfo(const QModelIndex& index) const
 {
@@ -187,32 +206,6 @@ ViewNodeInfo_ptr AbstractNodeModel::nodeInfo(const QModelIndex& index) const
 	}
 }
 
-
-QModelIndex AbstractNodeModel::nodeToIndex(Node* node, int column) const
-{
-	if(!node)
-		return QModelIndex();
-
-	if(node->parent() != 0)
-	{
-		int row=ServerHandler::indexOfImmediateChild(node);
-		if(row != -1)
-		{
-					return createIndex(row,column,node);
-		}
-	}
-	else
-	{
-			if(ServerHandler* server=ServerHandler::find(node))
-			{
-				int row=server->indexOfSuite(node);
-				if(row != -1)
-						return createIndex(row,column,node);
-			}
-	}
-
-	return QModelIndex();
-}
 
 void AbstractNodeModel::slotNodeChanged(const Node* node, QList<ecf::Aspect::Type> types)
 {

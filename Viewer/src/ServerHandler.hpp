@@ -84,7 +84,7 @@ public:
 		const std::string longName() const {return longName_;}
 		const std::string& port() const {return port_;}
 		int numSuites();
-		Node* suiteAt(int);
+		node_ptr suiteAt(int);
 		int indexOfSuite(Node* node);
 
 		int numberOfNodes();
