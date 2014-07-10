@@ -4,6 +4,7 @@
 #include <QMenu>
 #include "ServerHandler.hpp"
 #include "MenuHandler.hpp"
+#include "CustomCommandDialog.hpp"
 
 ActionHandler::ActionHandler(QWidget *view) : QObject(view), parent_(view)
 {
@@ -15,8 +16,6 @@ ActionHandler::ActionHandler(QWidget *view) : QObject(view), parent_(view)
 
 void ActionHandler::contextMenu(std::vector<ViewNodeInfo_ptr> nodesLst,QPoint pos)
 {
-
-
     QAction *action = MenuHandler::invokeMenu("Node", nodesLst,pos,  parent_);
 
     if(action)
@@ -25,9 +24,17 @@ void ActionHandler::contextMenu(std::vector<ViewNodeInfo_ptr> nodesLst,QPoint po
         {
             emit viewCommand(nodesLst,"set_as_root");
         }
+        else if(action->iconText() == "Custom")
+        {
+            CustomCommandDialog customCommandDialog(0);
+            if (customCommandDialog.exec() == QDialog::Accepted)
+            {
+                ServerHandler::command(nodesLst, customCommandDialog.command().toStdString(), false);
+            }
+        }
         else
         {
-            ServerHandler::command(nodesLst,action->iconText().toStdString());
+            ServerHandler::command(nodesLst,action->iconText().toStdString(), true);
         }
     }
 

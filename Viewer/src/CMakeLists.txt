@@ -4,6 +4,8 @@ set(viewer_srcs
     AbstractNodeModel.cpp
     AbstractSearchLine.cpp
     ActionHandler.cpp
+    CommandDesignerWidget.cpp
+    CustomCommandDialog.cpp
     DirectoryHandler.cpp
     FilterWidget.cpp
     InfoItemWidget.cpp
@@ -49,6 +51,8 @@ include(${QT_USE_FILE})
 QT4_WRAP_CPP(VIEWER_MOC AbstractNodeModel.hpp
 					    AbstractSearchLine.hpp
 					    ActionHandler.hpp
+                        CommandDesignerWidget.hpp
+                        CustomCommandDialog.hpp
                         FilterWidget.hpp
                         InfoPanel.hpp
                         MainWindow.hpp
@@ -65,7 +69,7 @@ QT4_WRAP_CPP(VIEWER_MOC AbstractNodeModel.hpp
                         VariableItemWidget.hpp)
 
 QT4_ADD_RESOURCES (VIEWER_RES viewer.qrc)
-QT4_WRAP_UI       (VIEWER_FORMS_HEADERS MainWindow.ui SearchLineWidget.ui ServerDialog.ui ServerItemDialog.ui TextItemWidget.ui)
+QT4_WRAP_UI       (VIEWER_FORMS_HEADERS CommandDesignerWidget.ui CustomCommandDialog.ui MainWindow.ui SearchLineWidget.ui ServerDialog.ui ServerItemDialog.ui TextItemWidget.ui)
 
 
 ecbuild_add_executable( TARGET   ecflowviewer

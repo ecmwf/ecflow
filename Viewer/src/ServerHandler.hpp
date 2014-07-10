@@ -116,7 +116,7 @@ public:
 		static int numOfImmediateChildren(Node*);
 		static Node* immediateChildAt(Node *parent,int pos);
 		static int indexOfImmediateChild(Node *node);
-		static void command(std::vector<ViewNodeInfo_ptr>,std::string);
+		static void command(std::vector<ViewNodeInfo_ptr>,std::string, bool resolve);
 		static ServerHandler* find(const std::string& longName);
 		static ServerHandler* find(const std::pair<std::string,std::string>& hostPort);
 		static ServerHandler* find(const std::string& name, const std::string& port);
