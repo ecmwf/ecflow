@@ -761,9 +761,16 @@ ServerComThread *ServerHandler::comThread()
 	return comThread_;
 }
 
-void ServerHandler::command(std::vector<ViewNodeInfo_ptr> info,std::string cmd)
+void ServerHandler::command(std::vector<ViewNodeInfo_ptr> info, std::string cmd, bool resolve)
 {
-	std::string realCommand = resolveServerCommand(cmd);
+	std::string realCommand;
+
+	// is this a shortcut name for a command, or the actual command itself?
+	if (resolve)
+		realCommand = resolveServerCommand(cmd);
+	else
+		realCommand = cmd;
+
 	std::vector<ServerHandler *> targetServers;
 
 	if (!realCommand.empty())

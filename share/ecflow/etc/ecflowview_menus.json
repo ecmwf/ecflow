@@ -93,8 +93,20 @@
             "valid_states"   : ["all"],
             "valid_attrs"    : ["has_triggers", "has_time", "has_date"],
             "command"        : "ecflow_client --free-dep all <full_name>"
-        }
+        },
 
+        {
+            "name"           : "-",
+            "menu"           : "Node"
+        },
+
+        {
+            "name"           : "Custom...",
+            "menu"           : "Node",
+            "valid_types"    : ["all"],
+            "valid_states"   : ["all"],
+            "command"        : "CUSTOM_COMMAND"
+        }
     ]
 
 }
