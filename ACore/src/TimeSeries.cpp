@@ -114,7 +114,7 @@ TimeSeries::TimeSeries(const TimeSlot& start, const TimeSlot& finish, const Time
  	compute_last_time_slot();
 
 #ifdef DEBUG_TIME_SERIES
-	cout << "TimeSeries::TimeSeries "  << toString() << "\n";
+	cout << "TimeSeries::TimeSeries "  << dump() << "\n";
 #endif
 }
 
@@ -156,7 +156,7 @@ bool TimeSeries::resetRelativeDuration()
 	   return true;
 	}
 #ifdef DEBUG_TIME_SERIES
-	cout << "TimeSeries::resetRelativeDuration "  << toString() << "\n";
+	cout << "TimeSeries::resetRelativeDuration "  << dump() << "\n";
 #endif
 	return false;
 }
@@ -196,7 +196,7 @@ void TimeSeries::reset(const ecf::Calendar& c)
 
 #ifdef DEBUG_TIME_SERIES
 	LogToCout toCoutAsWell;
-	LOG(Log::DBG,"      TimeSeries::reset   "  << toString());
+	LOG(Log::DBG,"      TimeSeries::reset   "  << dump());
 #endif
 }
 
@@ -310,7 +310,7 @@ bool TimeSeries::isFree(const ecf::Calendar& calendar) const
 	if (!isValid_) {
 	   // time has expired, hence time is not free
 #ifdef DEBUG_TIME_SERIES_IS_FREE
-   	 	LOG(Log::DBG,"TimeSeries::isFree (!isValid_) HOLDING "  << toString());
+   	 	LOG(Log::DBG,"TimeSeries::isFree (!isValid_) HOLDING "  << dump());
 #endif
 		return false;
 	}
@@ -351,13 +351,13 @@ bool TimeSeries::match_duration_with_time_series(const boost::posix_time::time_d
 		time_duration start_td = start_.duration();
 		if ( relative_or_real_td.hours() == start_td.hours() && relative_or_real_td.minutes() == start_td.minutes()) {
 #ifdef DEBUG_TIME_SERIES_IS_FREE
-			LOG(Log::DBG,"TimeSeries::match_duration_with_time_series " << toString() << " FREE at " << to_simple_string(relative_or_real_td));
+			LOG(Log::DBG,"TimeSeries::match_duration_with_time_series " << dump() << " FREE at " << to_simple_string(relative_or_real_td));
 #endif
 			return true;
 		}
 
 #ifdef DEBUG_TIME_SERIES_IS_FREE
-		LOG(Log::DBG,"TimeSeries::match_duration_with_time_series " << toString() << " HOLDING at " << to_simple_string(relative_or_real_td));
+		LOG(Log::DBG,"TimeSeries::match_duration_with_time_series " << dump() << " HOLDING at " << to_simple_string(relative_or_real_td));
 #endif
  		return false;
 	}
@@ -371,7 +371,7 @@ bool TimeSeries::match_duration_with_time_series(const boost::posix_time::time_d
 
 		if ( hours ==  nextTimeSlot_td.hours() && minutes == nextTimeSlot_td.minutes()) {
 #ifdef DEBUG_TIME_SERIES_IS_FREE
-			LOG(Log::DBG,"TimeSeries::match_duration_with_time_series (nextTimeSlot_td == duration)  " << toString()
+			LOG(Log::DBG,"TimeSeries::match_duration_with_time_series (nextTimeSlot_td == duration)  " << dump()
 			    			    << " FREE at " << to_simple_string(relative_or_real_td));
 #endif
  			return true;
@@ -380,7 +380,7 @@ bool TimeSeries::match_duration_with_time_series(const boost::posix_time::time_d
 	}
 
 #ifdef DEBUG_TIME_SERIES
-	LOG(Log::DBG,"TimeSeries::matches HOLDING (nextTimeSlot_td > endDuration)  " << toString() << " HOLDING at " << to_simple_string(relative_or_real_td));
+	LOG(Log::DBG,"TimeSeries::matches HOLDING (nextTimeSlot_td > endDuration)  " << dump() << " HOLDING at " << to_simple_string(relative_or_real_td));
 #endif
  	return false;
 }
