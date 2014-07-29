@@ -237,10 +237,12 @@ const char* InitCmd::desc() {
             "Mark task as started(active). For use in the '.ecf' script file *only*\n"
             "Hence the context is supplied via environment variables.\n"
             "  arg = process_or_remote_id. The process id of the job or remote_id\n"
-            "                              Using remote id allows the jobs to be killed\n"
+            "                              Using remote id allows the jobs to be killed\n\n"
+            "If this child command is a zombie, then the default action will be to *block*.\n"
+            "The default can be overridden by using zombie attributes.\n"
+            "Otherwise the blocking period is defined by ECF_TIMEOUT.\n\n"
             "Usage:\n"
             "  ecflow_client --init=$$"
-
  	;
 }
 
@@ -323,9 +325,12 @@ const char* CompleteCmd::desc()
 {
 	return
 	         "Mark task as complete. For use in the '.ecf' script file *only*\n"
-	         "Hence the context is supplied via environment variables\n"
-            "Usage:\n"
-            "  ecflow_client --complete"
+	         "Hence the context is supplied via environment variables\n\n"
+	         "If this child command is a zombie, then the default action will be to *block*.\n"
+	         "The default can be overridden by using zombie attributes.\n"
+	         "Otherwise the blocking period is defined by ECF_TIMEOUT.\n\n"
+	         "Usage:\n"
+	         "  ecflow_client --complete"
 	         ;
 }
 
@@ -538,7 +543,10 @@ const char* AbortCmd::desc() {
             "Mark task as aborted. For use in the '.ecf' script file *only*\n"
             "Hence the context is supplied via environment variables\n"
             "  arg1 = (optional) string(reason)\n"
-            "         Optionally provide a reason why the abort was raised\n"
+            "         Optionally provide a reason why the abort was raised\n\n"
+            "If this child command is a zombie, then the default action will be to *block*.\n"
+            "The default can be overridden by using zombie attributes.\n"
+            "Otherwise the blocking period is defined by ECF_TIMEOUT.\n\n"
             "Usage:\n"
             "  ecflow_client --abort=reasonX"
             ;
@@ -613,7 +621,10 @@ const char* EventCmd::desc() {
    return
             "Change event. For use in the '.ecf' script file *only*\n"
             "Hence the context is supplied via environment variables\n"
-            "  arg1(string | int) = event-name\n"
+            "  arg1(string | int) = event-name\n\n"
+            "If this child command is a zombie, then the default action will be to *fob*,\n"
+            "i.e allow the ecflow client command to complete without an error\n"
+            "The default can be overridden by using zombie attributes.\n\n"
             "Usage:\n"
             "  ecflow_client --event=ev"
             ;
@@ -683,7 +694,7 @@ STC_Cmd_ptr MeterCmd::doHandleRequest(AbstractServer* as) const
 
 	      Meter& the_meter = submittable_->find_meter(name_);
 	      if (the_meter.empty()) {
-	         LOG(Log::WAR,"MeterCmd::doHandleRequest: failed as meter '"  << name_ << "' does not exist on task " << path_to_node());
+	         LOG(Log::ERR,"MeterCmd::doHandleRequest: failed as meter '"  << name_ << "' does not exist on task " << path_to_node());
 	         return PreAllocatedReply::ok_cmd();
 	      }
 
@@ -692,7 +703,7 @@ STC_Cmd_ptr MeterCmd::doHandleRequest(AbstractServer* as) const
 		   the_meter.set_value(value_);
 		}
 		catch (std::exception& e) {
-         LOG(Log::WAR,"MeterCmd::doHandleRequest: failed for task " << path_to_node() << ". " << e.what());
+         LOG(Log::ERR,"MeterCmd::doHandleRequest: failed for task " << path_to_node() << ". " << e.what());
          return PreAllocatedReply::ok_cmd();
 		}
 	}
@@ -708,7 +719,10 @@ const char* MeterCmd::desc() {
             "Change meter. For use in the '.ecf' script file *only*\n"
             "Hence the context is supplied via environment variables\n"
             "  arg1(string) = meter-name\n"
-            "  arg2(int)    = the new meter value\n"
+            "  arg2(int)    = the new meter value\n\n"
+            "If this child command is a zombie, then the default action will be to *fob*,\n"
+            "i.e allow the ecflow client command to complete without an error\n"
+            "The default can be overridden by using zombie attributes.\n\n"
             "Usage:\n"
             "  ecflow_client --meter=my_meter 20"
             ;
@@ -806,9 +820,12 @@ const char* LabelCmd::desc() {
             "Hence the context is supplied via environment variables\n"
             "  arg1 = label-name\n"
             "  arg2 = The new label value\n"
-            "         The labels values can be single or multi-line(space separated quoted strings)\n"
+            "         The labels values can be single or multi-line(space separated quoted strings)\n\n"
+            "If this child command is a zombie, then the default action will be to *fob*,\n"
+            "i.e allow the ecflow client command to complete without an error\n"
+            "The default can be overridden by using zombie attributes.\n\n"
             "Usage:\n"
-            "  ecflow_client --label=progressed to task merlin"
+            "  ecflow_client --label=progressed merlin"
             ;
 }
 
