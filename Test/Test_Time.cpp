@@ -40,7 +40,7 @@ BOOST_AUTO_TEST_SUITE( TestSuite )
 BOOST_AUTO_TEST_CASE( test_single_real_time )
 {
    DurationTimer timer;
-   cout << "Test:: ...test_time_single_slot " << flush;
+   cout << "Test:: ...test_single_real_time " << flush;
    TestClean clean_at_start_and_end;
 
    // Create the defs file corresponding to the text below
@@ -77,7 +77,7 @@ BOOST_AUTO_TEST_CASE( test_single_real_time )
       //       we will find that state change happens at job submission interval,
       //       and hence skews time series.  Which can leave state in a queued state,
       //       and hence test never completes
-      suite_ptr suite = theDefs.add_suite("test_time_single_slot");
+      suite_ptr suite = theDefs.add_suite("test_single_real_time");
       ClockAttr clockAttr(theLocalTime,false);
       suite->addClock( clockAttr );
 
@@ -90,7 +90,7 @@ BOOST_AUTO_TEST_CASE( test_single_real_time )
    // The test harness will create corresponding directory structure
    // and populate with standard ecf files.
    ServerTestHarness serverTestHarness(false/*do log file verification*/,false/* dont do standard verification */);
-   serverTestHarness.run(theDefs,ServerTestHarness::testDataDefsLocation("test_time_single_slot.def"));
+   serverTestHarness.run(theDefs,ServerTestHarness::testDataDefsLocation("test_single_real_time.def"));
 
    cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount() << ")\n";
 }
