@@ -16,27 +16,27 @@
 #include "ServerFilter.hpp"
 #include "TableNodeView.hpp"
 #include "TreeNodeView.hpp"
-#include "ViewFilter.hpp"
+#include "VFilter.hpp"
 
 #include <QStackedLayout>
 #include <QVBoxLayout>
 
 NodeWidget::NodeWidget(QString rootNode,QWidget *parent) :
         QWidget(parent),
-        viewFilter_(0),
-        serverFilter_(0)
+        config_(0)
+
 {
 	//Filters
-	viewFilter_=new ViewFilter;
+	config_=new VConfig;
 
 	//Servers
-	serverFilter_=new ServerFilter;
+	ServerFilter* serverFilter=config_->serverFilter();
 	for(unsigned int i=0; i < ServerHandler::servers().size(); i++)
 	{
 		if(ServerHandler *server=ServerHandler::servers().at(i))
 		{
 			ServerItem item(server->longName(),server->name(),server->port());
-			serverFilter_->addServer(&item);
+			serverFilter->addServer(&item);
 		}
 	}
 
@@ -53,7 +53,7 @@ NodeWidget::NodeWidget(QString rootNode,QWidget *parent) :
 	views_=new NodeViewHandler(centralLayout);
 
 	//Tree view
-	TreeNodeView *treeView= new TreeNodeView("",serverFilter_,viewFilter_,this);
+	TreeNodeView *treeView= new TreeNodeView("",config_,this);
 	views_->add(Viewer::TreeViewMode,treeView);
 
 	connect(treeView,SIGNAL(selectionChanged(ViewNodeInfo_ptr)),
@@ -73,7 +73,7 @@ NodeWidget::NodeWidget(QString rootNode,QWidget *parent) :
 
 	// Detailed view
 
-	TableNodeView *tableView=new TableNodeView("",serverFilter_,viewFilter_,this);
+	TableNodeView *tableView=new TableNodeView("",config_,this);
 	views_->add(Viewer::TableViewMode,tableView);
 
 	connect(tableView,SIGNAL(selectionChanged(ViewNodeInfo_ptr)),
@@ -103,8 +103,7 @@ NodeWidget::NodeWidget(QString rootNode,QWidget *parent) :
 NodeWidget::~NodeWidget()
 {
 	//MvQFolderWatcher::remove(this);
-	if(viewFilter_)
-		delete viewFilter_;
+	delete config_;
 }
 
 /*Folder* NodeWidget::currentFolder()

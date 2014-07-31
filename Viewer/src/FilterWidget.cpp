@@ -9,17 +9,115 @@
 
 #include "FilterWidget.hpp"
 
+#include <QDebug>
 #include <QHBoxLayout>
 #include <QToolButton>
 
-#include "ViewFilter.hpp"
-#include "ViewConfig.hpp"
+#include "VState.hpp"
+#include "VAttribute.hpp"
+#include "VIcon.hpp"
+#include "VFilter.hpp"
+
+//===========================================
+//
+// AbstractFilterMenu
+//
+//===========================================
+
+AbstractFilterMenu::AbstractFilterMenu(QMenu * parent,const std::vector<VParam*>& pars) :
+ 	menu_(parent),
+	filter_(NULL)
+{
+	for(std::vector<VParam*>::const_iterator it=pars.begin(); it != pars.end(); it++)
+	{
+		addAction((*it)->text("label"),VParam::toInt((*it)->type()));
+	}
+}
+
+void AbstractFilterMenu::addAction(QString name,int id)
+{
+	QAction *ac = new QAction(this);
+	ac->setText(name);
+	ac->setData(id);
+	ac->setCheckable(true);
+	ac->setChecked(false);
+
+	menu_->addAction(ac);
+
+	//It will not be emitted when setChecked is called!
+    connect(ac,SIGNAL(triggered(bool)),
+					this,SLOT(slotChanged(bool)));
+}
+
+void AbstractFilterMenu::slotChanged(bool)
+{
+	std::set<VParam::Type> items;
+	foreach(QAction* ac,menu_->actions())
+	{
+		if(!ac->isSeparator())
+		{
+			if(ac->isChecked())
+					items.insert(VParam::toType(ac->data().toInt()));
+		}
+	}
+
+	if(filter_)
+		filter_->current(items);
+}
+
+void AbstractFilterMenu::reload(VFilter* filter)
+{
+	filter_=filter;
+	foreach(QAction* ac,menu_->actions())
+	{
+		if(!ac->isSeparator())
+		{
+			VParam::Type type=VParam::toType(ac->data().toInt());
+			ac->setChecked(filter_->isSet(type));
+		}
+	}
+}
+
+
+
+//===========================================
+//
+// StateFilterMenu
+//
+//===========================================
+
+StateFilterMenu::StateFilterMenu(QMenu * parent) :
+		AbstractFilterMenu(parent,VState::filterItems())
+{
+}
+
+//===========================================
+//
+// AttributeFilterMenu
+//
+//===========================================
+
+AttributeFilterMenu::AttributeFilterMenu(QMenu * parent) :
+		AbstractFilterMenu(parent,VAttribute::filterItems())
+{
+}
+
+//===========================================
+//
+// IconFilterMenu
+//
+//===========================================
+
+IconFilterMenu::IconFilterMenu(QMenu * parent) :
+		AbstractFilterMenu(parent,VIcon::filterItems())
+{
+}
 
 FilterWidget::FilterWidget(QWidget *parent) :
    QWidget(parent),
    data_(0)
 {
-	QHBoxLayout *hb=new QHBoxLayout();
+	/*QHBoxLayout *hb=new QHBoxLayout();
 	setLayout(hb);
 
 	hb->setContentsMargins(0,0,0,0);
@@ -40,7 +138,7 @@ FilterWidget::FilterWidget(QWidget *parent) :
 		connect(tb,SIGNAL(clicked(bool)),
 				this,SLOT(slotChanged(bool)));
 
-	}
+	}*/
 }
 
 QToolButton* FilterWidget::createButton(QString label,QString tooltip,QColor col)
@@ -62,30 +160,26 @@ QToolButton* FilterWidget::createButton(QString label,QString tooltip,QColor col
 	return tb;
 }
 
-void FilterWidget::reload(ViewFilter* filterData)
+void FilterWidget::reload(VFilter* filterData)
 {
 	data_=filterData;
 
-	const std::set<DState::State>& ns=data_->nodeState();
+	/*const StateFilter& filter=data_->stateFilter();
 
 	QMapIterator<DState::State,QToolButton*> it(items_);
 	while (it.hasNext())
 	{
 		it.next();
-		if(ns.find(it.key()) != ns.end())
-		{
+		if(filter.find(it.key()) != filter.end())
 			it.value()->setChecked(true);
-		}
 		else
-		{
 			it.value()->setChecked(false);
-		}
-	}
+	}*/
 }
 
 void FilterWidget::slotChanged(bool)
 {
-	std::set<DState::State> filter;
+	/*StateFilter filter;
 	QMapIterator<DState::State,QToolButton*> it(items_);
 	while (it.hasNext())
 	{
@@ -95,5 +189,5 @@ void FilterWidget::slotChanged(bool)
 	}
 
 	if(data_)
-			data_->setNodeState(filter);
+			data_->stateFilter(filter);*/
 }

@@ -2,25 +2,21 @@
 #define ABSTRACTNODEMODEL_H
 
 #include <QAbstractItemModel>
-#include <QSortFilterProxyModel>
+#include <QSet>
 
 #include <set>
 #include <vector>
 
 #include "Aspect.hpp"
-#include "DState.hpp"
-#include "Node.hpp"
-#include "ServerFilterObserver.hpp"
-#include "ViewFilterObserver.hpp"
+#include "VConfig.hpp"
 #include "ViewNodeInfo.hpp"
 
-class ViewFilter;
 class Node;
-class ServerFilter;
+
 class ServerHandler;
+class VFilter;
 
 class AbstractNodeModel;
-
 
 class NodeModelServerItem
 {
@@ -32,7 +28,7 @@ public:
 
 protected:
 	ServerHandler *server_;
-	QList<Node*> nodeFilter_;
+	QSet<Node*> nodeFilter_;
 	Node* rootNode_;
 
 	QList<NodeModelServerItem*> children_;
@@ -49,7 +45,7 @@ public:
 	int count() const {return items_.count();}
 	void clear() {items_.clear();}
 	void clearFilter();
-	void nodeFilter(int i,QList<Node*>);
+	void nodeFilter(int i,QSet<Node*>);
 	bool isFiltered(Node *node) const;
 
 protected:
@@ -57,12 +53,12 @@ protected:
 };
 
 
-class AbstractNodeModel : public QAbstractItemModel, public ServerFilterObserver
+class AbstractNodeModel : public QAbstractItemModel, public VConfigObserver
 {
 	Q_OBJECT
 
 public:
-	AbstractNodeModel(ServerFilter*,QObject *parent=0);
+	AbstractNodeModel(VConfig*,QObject *parent=0);
    	virtual ~AbstractNodeModel();
 
    	enum CustomItemRole {FilterRole = Qt::UserRole+1};
@@ -72,16 +68,19 @@ public:
 	void dataIsAboutToChange();
 	ViewNodeInfo_ptr nodeInfo(const QModelIndex& index) const;
 	void reload();
-	virtual void setFilter(const std::set<DState::State>& ns) {};
 
-	//From ServerFilterObserver
-	void notifyServerFilterChanged();
+	//From ConfigObserver
+	void notifyConfigChanged(ServerFilter*);
+	void notifyConfigChanged(StateFilter*) {};
+	void notifyConfigChanged(AttributeFilter*) {};
+	void notifyConfigChanged(IconFilter*) {};
 
 public slots:
 	void slotNodeChanged(const Node*, QList<ecf::Aspect::Type>);
 
 signals:
 	void changed();
+	void filterChanged();
 
 protected:
 	void init();
@@ -99,10 +98,10 @@ protected:
 
 	Node *rootNode(ServerHandler*) const;
 
-	virtual bool filter(node_ptr node,const std::set<DState::State>& ns,QList<Node*> filterVec) {return true;}
+	//virtual bool filter(node_ptr node,const std::set<DState::State>& ns,QSet<Node*> filterSet) {return true;}
 
 	NodeModelServers servers_;
-	ServerFilter* serverFilter_;
+	VConfig* config_;
 };
 
 #endif

@@ -18,17 +18,16 @@
 #include "ViewNodeInfo.hpp"
 
 class ActionHandler;
-class ServerFilter;
-class ViewFilter;
 class TableNodeModel;
-class TableNodeFilterModel;
+class NodeFilterModel;
+class VConfig;
 
 class TableNodeView : public QTreeView, public NodeViewBase
 {
 Q_OBJECT
 
 public:
-	TableNodeView(QString,ServerFilter* serverFilter,ViewFilter*,QWidget *parent=0);
+	TableNodeView(QString,VConfig*,QWidget *parent=0);
 	void reload() {};
 	QWidget* realWidget();
 
@@ -46,7 +45,7 @@ protected:
 	void handleContextMenu(QModelIndex indexClicked,QModelIndexList indexLst,QPoint globalPos,QPoint widgetPos,QWidget *widget);
 
 	TableNodeModel *model_;
-	TableNodeFilterModel* filterModel_;
+	NodeFilterModel* filterModel_;
 	ActionHandler* actionHandler_;
 };
 

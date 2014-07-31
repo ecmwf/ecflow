@@ -2,15 +2,10 @@
 #define TABLENODEMODEL_H
 
 #include <QAbstractItemModel>
-#include <QSortFilterProxyModel>
-
-#include <vector>
 
 #include "AbstractNodeModel.hpp"
-#include "ViewFilterObserver.hpp"
 #include "ViewNodeInfo.hpp"
 
-class ViewFilter;
 class Node;
 class ServerFilter;
 class ServerHandler;
@@ -18,7 +13,7 @@ class ServerHandler;
 class TableNodeModel : public AbstractNodeModel
 {
 public:
-   	TableNodeModel(ServerFilter* serverFilter,QObject *parent=0);
+   	TableNodeModel(VConfig* config,QObject *parent=0);
 
 	int columnCount (const QModelIndex& parent = QModelIndex() ) const;
    	int rowCount (const QModelIndex& parent = QModelIndex() ) const;
@@ -39,26 +34,6 @@ protected:
 	QVariant serverData(const QModelIndex& index,int role) const;
 	QVariant nodeData(const QModelIndex& index,int role) const;
 };
-
-
-class TableNodeFilterModel : public QSortFilterProxyModel, public ViewFilterObserver
-{
-public:
-	TableNodeFilterModel(ViewFilter*,QObject *parent=0);
-	~TableNodeFilterModel();
-
-	bool filterAcceptsRow(int,const QModelIndex &) const;
-
-	//Observer method
-	void notifyFilterChanged();
-
-protected:
-	ViewFilter *viewFilter_;
-};
-
-
-
-
 
 
 #endif

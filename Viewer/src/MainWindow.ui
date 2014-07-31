@@ -65,7 +65,29 @@
      <addaction name="actionTreeView"/>
      <addaction name="actionTableView"/>
     </widget>
+    <widget class="QMenu" name="menuType">
+     <property name="tearOffEnabled">
+      <bool>true</bool>
+     </property>
+     <property name="title">
+      <string>Type</string>
+     </property>
+    </widget>
+    <widget class="QMenu" name="menuIcon">
+     <property name="title">
+      <string>Icon</string>
+     </property>
+    </widget>
+    <widget class="QMenu" name="menuState">
+     <property name="title">
+      <string>State</string>
+     </property>
+    </widget>
     <addaction name="menuView_mode"/>
+    <addaction name="separator"/>
+    <addaction name="menuState"/>
+    <addaction name="menuType"/>
+    <addaction name="menuIcon"/>
    </widget>
    <widget class="QMenu" name="menu_Help">
     <property name="title">
@@ -200,6 +222,21 @@
    </property>
    <property name="toolTip">
     <string>Server selection</string>
+   </property>
+  </action>
+  <action name="actionA">
+   <property name="text">
+    <string>a</string>
+   </property>
+  </action>
+  <action name="actionA_2">
+   <property name="text">
+    <string>a</string>
+   </property>
+  </action>
+  <action name="actionSd">
+   <property name="text">
+    <string>sd</string>
    </property>
   </action>
  </widget>

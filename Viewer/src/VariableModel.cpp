@@ -9,17 +9,17 @@
 
 #include "VariableModel.hpp"
 
+#include <QColor>
 #include <QDebug>
 
 #include "ServerHandler.hpp"
-#include "ViewConfig.hpp"
 
 VariableModel::VariableModel(QObject *parent) :
           QAbstractItemModel(parent),
           server_(0)
 {
-
 }
+
 bool VariableModel::hasData() const
 {
 	return (nodes_.size()  >0 || server_ != NULL);

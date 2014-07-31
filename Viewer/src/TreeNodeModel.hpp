@@ -2,23 +2,22 @@
 #define TREENODEMODEL_H
 
 #include <QAbstractItemModel>
-#include <QSortFilterProxyModel>
-
-#include <vector>
 
 #include "AbstractNodeModel.hpp"
-#include "ViewFilterObserver.hpp"
+#include "Node.hpp"
+#include "VAttribute.hpp"
+#include "Viewer.hpp"
 #include "ViewNodeInfo.hpp"
 
-class Node;
 class ServerFilter;
 class ServerHandler;
-class ViewFilter;
 
 class TreeNodeModel : public AbstractNodeModel
 {
+Q_OBJECT
+
 public:
-   	TreeNodeModel(ServerFilter*,QObject *parent=0);
+   	TreeNodeModel(VConfig*,QObject *parent=0);
 
    	int columnCount (const QModelIndex& parent = QModelIndex() ) const;
    	int rowCount (const QModelIndex& parent = QModelIndex() ) const;
@@ -30,9 +29,15 @@ public:
    	QModelIndex index (int, int, const QModelIndex& parent = QModelIndex() ) const;
    	QModelIndex parent (const QModelIndex & ) const;
 
-   void setFilter(const std::set<DState::State>& ns);
+   	//VFilterGroup Observer
+    void notifyConfigChanged(StateFilter*);
+    void notifyConfigChanged(AttributeFilter*);
+    void notifyConfigChanged(IconFilter*);
 
-protected:
+signals:
+	void filterChanged();
+
+private:
 	bool isServer(const QModelIndex & index) const;
 	bool isNode(const QModelIndex & index) const;
 	bool isAttribute(const QModelIndex & index) const;
@@ -42,32 +47,12 @@ protected:
 	QModelIndex nodeToIndex(Node*,int column=0) const;
 	Node* indexToNode( const QModelIndex & index) const;
 
-	int attributesNum(Node*) const;
-
 	QVariant serverData(const QModelIndex& index,int role) const;
 	QVariant nodeData(const QModelIndex& index,int role) const;
+	QVariant attributesData(const QModelIndex& index,int role) const;
 
-	bool filter(node_ptr node,const std::set<DState::State>& ns,QList<Node*>& filterVec);
+	bool filterState(node_ptr node,QSet<Node*>& filterSet);
 };
-
-
-class TreeNodeFilterModel : public QSortFilterProxyModel, public ViewFilterObserver
-{
-public:
-	TreeNodeFilterModel(ViewFilter*,QObject *parent=0);
-	~TreeNodeFilterModel();
-
-	bool filterAcceptsRow(int,const QModelIndex &) const;
-
-	//Observer method
-	void notifyFilterChanged();
-
-protected:
-	ViewFilter *viewFilter_;
-};
-
-
-
 
 
 #endif

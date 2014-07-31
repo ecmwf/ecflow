@@ -11,6 +11,7 @@
 #include <QActionGroup>
 #include <QApplication>
 #include <QCloseEvent>
+#include <QComboBox>
 #include <QDialog>
 #include <QMessageBox>
 #include <QSplitter>
@@ -25,11 +26,11 @@
 #include "NodePanel.hpp"
 #include "ServerHandler.hpp"
 #include "ServerDialog.hpp"
+#include "VConfig.hpp"
 
 //Initialise static variables
 bool MainWindow::quitStarted_=false;
 QList<MainWindow*> MainWindow::windows_;
-
 
 MainWindow::MainWindow(QStringList idLst,QWidget *parent) : QMainWindow(parent)
 {
@@ -50,8 +51,8 @@ MainWindow::MainWindow(QStringList idLst,QWidget *parent) : QMainWindow(parent)
 
 
     //Filter widget in toolbar
-    filterWidget_=new FilterWidget(this);
-    viewToolBar->addWidget(filterWidget_);
+    //filterWidget_=new FilterWidget(this);
+    //viewToolBar->addWidget(filterWidget_);
 
 
     //Create the main layout
@@ -63,6 +64,10 @@ MainWindow::MainWindow(QStringList idLst,QWidget *parent) : QMainWindow(parent)
     QSplitter *sp=new QSplitter(Qt::Vertical,this);
     layout->addWidget(sp);
 
+    //View menu
+    stateFilterMenu_=new StateFilterMenu(menuState);
+    attrFilterMenu_=new AttributeFilterMenu(menuType);
+    iconFilterMenu_=new IconFilterMenu(menuIcon);
 
     //Create a node panel
     nodePanel_=new NodePanel(this);
@@ -71,8 +76,13 @@ MainWindow::MainWindow(QStringList idLst,QWidget *parent) : QMainWindow(parent)
     connect(nodePanel_,SIGNAL(currentWidgetChanged()),
     		this,SLOT(slotCurrentChangedInPanel()));
 
-    connect(filterWidget_,SIGNAL(filterChanged(QSet<DState::State>)),
-        	nodePanel_,SLOT(slotFilterChanged(QSet<DState::State>)));
+    //connect(filterWidget_,SIGNAL(filterChanged(QSet<DState::State>)),
+    //    	nodePanel_,SLOT(slotFilterChanged(QSet<DState::State>)));
+
+
+    //connect(attFilter_,SIGNAL(currentIndexChanged(int)),
+    //       nodePanel_,SLOT(slotAttFilterChanged(int)));
+
 
 
     //Info panel
@@ -147,7 +157,7 @@ void MainWindow::on_actionReset_triggered()
 
 void MainWindow::on_actionServers_triggered()
 {
-	ServerDialog dialog(nodePanel_->serverFilter(),this);
+	ServerDialog dialog(nodePanel_->config()->serverFilter(),this);
 
 	if(dialog.exec() == QDialog::Accepted)
 	{
@@ -178,8 +188,14 @@ void MainWindow::slotViewMode(QAction* action)
 void MainWindow::slotCurrentChangedInPanel()
 {
 	syncViewModeAg(nodePanel_->viewMode());
-	filterWidget_->reload(nodePanel_->viewFilter());
+	//filterWidget_->reload(nodePanel_->viewFilter());
 
+	if(VConfig *config=	nodePanel_->config())
+	{
+		stateFilterMenu_->reload(config->stateFilter());
+		attrFilterMenu_->reload(config->attributeFilter());
+		iconFilterMenu_->reload(config->iconFilter());
+	}
 	//breadcrumbs_->setPath(folderPanel_->currentFolder());
   	 //slotUpdateNavigationActions(folderPanel_->folderNavigation());
 

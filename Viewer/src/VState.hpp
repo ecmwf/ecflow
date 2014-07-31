@@ -5,32 +5,42 @@
 // In applying this licence, ECMWF does not waive the privileges and immunities
 // granted to it by virtue of its status as an intergovernmental organisation
 // nor does it submit to any jurisdiction.
+//
 //============================================================================
 
-#ifndef VIEWFILTER_HPP_
-#define VIEWFILTER_HPP_
+#ifndef VSTATE_HPP_
+#define VSTATE_HPP_
 
 #include <set>
 #include <vector>
+#include <string>
 
-#include "ViewFilterObserver.hpp"
-#include "DState.hpp"
+#include "NState.hpp"
+#include "VParam.hpp"
 
-class ViewFilter
+class Node;
+
+class VState : public VParam
 {
 public:
-	ViewFilter();
-	const std::set<DState::State>& nodeState() const {return nodeState_;}
-	void setNodeState(const std::set<DState::State>& ns);
-	bool isNodeStateFiltered() const;
-	void addObserver(ViewFilterObserver*);
-	void removeObserver(ViewFilterObserver*);
+	VState(QString name,VParam::Type,NState::State);
+	VState(QString name,VParam::Type);
+
+	QColor  colour() const;
+
+	static QString toName(Node*);
+	static QColor  toColour(Node* n);
+	static VParam::Type toType(Node *n);
+
+	static std::vector<VParam*> filterItems();
+
+	static void init();
 
 private:
-	void broadcastChange();
+	static VState* find(Node *n);
+	static VState* find(VParam::Type);
 
-	std::set<DState::State> nodeState_;
-	std::vector<ViewFilterObserver*> observers_;
+	static std::vector<VState*> items_;
 };
 
 #endif

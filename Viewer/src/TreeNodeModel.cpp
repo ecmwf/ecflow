@@ -15,9 +15,10 @@
 
 #include "ServerFilter.hpp"
 #include "ServerHandler.hpp"
-#include "ViewConfig.hpp"
-#include "ViewFilter.hpp"
-
+#include "VFilter.hpp"
+#include "VState.hpp"
+#include "VAttribute.hpp"
+#include "VIcon.hpp"
 
 //=======================================
 //
@@ -26,8 +27,9 @@
 //=======================================
 
 
-TreeNodeModel::TreeNodeModel(ServerFilter* serverFilter,QObject *parent) :
-   AbstractNodeModel(serverFilter,parent)
+TreeNodeModel::TreeNodeModel(VConfig* config,QObject *parent) :
+   AbstractNodeModel(config,parent)
+
 {
 
 }
@@ -71,7 +73,7 @@ int TreeNodeModel::rowCount( const QModelIndex& parent) const
 	else if(Node* parentNode=indexToNode(parent))
 	{
 		//qDebug() << "  -->node" << parentNode->name().c_str() << ServerHandler::numOfImmediateChildren(parentNode);
-		int num=attributesNum(parentNode);
+		int num=VAttribute::totalNum(parentNode);
 		return num+ServerHandler::numOfImmediateChildren(parentNode);
 	}
 
@@ -92,7 +94,8 @@ QVariant TreeNodeModel::data( const QModelIndex& index, int role ) const
 	//Data lookup can be costly so we immediately return a default value for all
 	//the cases where the default should be used.
 	if( !index.isValid() ||
-	   (role != Qt::DisplayRole && role != Qt::ToolTipRole && role != Qt::BackgroundRole && role != FilterRole))
+	   (role != Qt::DisplayRole && role != Qt::ToolTipRole && role != Qt::BackgroundRole &&
+	    role != FilterRole && role != Qt::DecorationRole))
     {
 		return QVariant();
 	}
@@ -106,20 +109,22 @@ QVariant TreeNodeModel::data( const QModelIndex& index, int role ) const
 	else if(isNode(index))
 		return nodeData(index,role);
 	else if(isAttribute(index))
-		return QVariant(); //attributesData(index,role);
-
+		return attributesData(index,role);
 
 	return QVariant();
 }
 
 QVariant TreeNodeModel::serverData(const QModelIndex& index,int role) const
 {
-	if(role == FilterRole)
-		return -1;
+	if(role == Qt::DecorationRole)
+			return QVariant();
 
+	if(role == FilterRole)
+		return true;
 	else if(index.column() == 0 && role == Qt::BackgroundRole)
 	{
-			return ViewConfig::Instance()->stateColour(DState::UNKNOWN);
+			//return ViewConfig::Instance()->stateColour(DState::UNKNOWN);
+		    return Qt::gray;
 	}
 
 	else if(index.column() == 0)
@@ -146,7 +151,7 @@ QVariant TreeNodeModel::nodeData(const QModelIndex& index, int role) const
 		switch(index.column())
 		{
 		case 0:	 return QString::fromStdString(node->name());
-		case 1:  return ViewConfig::Instance()->stateName(node->dstate());
+		case 1: return VState::toName(node);
 		case 2: return QString::fromStdString(node->absNodePath());
 		default: return QVariant();
 		}
@@ -157,7 +162,66 @@ QVariant TreeNodeModel::nodeData(const QModelIndex& index, int role) const
 	}
 	else if(index.column() == 0 && role == Qt::BackgroundRole)
 	{
-		return ViewConfig::Instance()->stateColour(node->dstate());
+		return VState::toColour(node);
+	}
+	else if(index.column() == 0 && role == Qt::DecorationRole)
+	{
+		if(config_->iconFilter()->isEmpty())
+			return QVariant();
+		else
+			return VIcon::pixmap(node,config_->iconFilter());
+	}
+
+	return QVariant();
+}
+
+//=======================================================================
+//
+// Attributes data
+//
+//=======================================================================
+
+QVariant TreeNodeModel::attributesData(const QModelIndex& index, int role) const
+{
+	if(role == Qt::DecorationRole)
+			return QVariant();
+
+	if(index.column()!=0)
+		return QVariant();
+
+	if(role != Qt::BackgroundRole && role != FilterRole && role != Qt::DisplayRole)
+		return QVariant();
+
+	if(role == Qt::BackgroundRole)
+		return QColor(220,220,220);
+
+
+	if(role == FilterRole)
+	{
+		if(config_->attributeFilter()->isEmpty())
+			return QVariant(false);
+	}
+
+	//Here we have to be sure this is an attribute!
+	Node *node=static_cast<Node*>(index.internalPointer());
+	if(!node)
+		return QVariant();
+
+	QStringList attrData;
+	VParam::Type type;
+	VAttribute::getData(node,index.row(),type,attrData);
+
+	if(role == FilterRole)
+	{
+		if(config_->attributeFilter()->isSet(type))
+		{
+			return QVariant(true);
+		}
+		return QVariant(false);
+	}
+	else if(role == Qt::DisplayRole)
+	{
+		return attrData;
 	}
 
 	return QVariant();
@@ -235,33 +299,22 @@ QModelIndex TreeNodeModel::parent(const QModelIndex &child) const
 	//Child is a non-suite node or an attribute. Its internal pointer points to the parent node.
 	else if(Node *parentNode=static_cast<Node*>(child.internalPointer()))
 	{
-			//Child is a Node
-			if(child.row() >= attributesNum(parentNode))
+		//The parent is a suite: its internal pointer is the server
+		if(parentNode->isSuite())
+		{
+			if(ServerHandler* server=ServerHandler::find(parentNode))
 			{
-				//The parent is a suite: its internal pointer is the server
-				if(parentNode->isSuite())
-				{
-					if(ServerHandler* server=ServerHandler::find(parentNode))
-					{
-						return createIndex(server->indexOfSuite(parentNode),0,server);
-					}
-				}
-				//The parent is a non-suite node: its internal pointer
-				//is its parent (i.e.. the grandparent)
-				else if(Node *grandParentNode=parentNode->parent())
-				{
-					size_t pos=parentNode->position();
-					if(pos != std::numeric_limits<std::size_t>::max())
-						return createIndex(pos,0,grandParentNode);
-				}
+				return createIndex(server->indexOfSuite(parentNode),0,server);
 			}
-
-			//Child is an attribute
-			else
-			{
-				return QModelIndex();
-
-			}
+		}
+		//The parent is a non-suite node: its internal pointer
+		//is its parent (i.e.. the grandparent)
+		else if(Node *grandParentNode=parentNode->parent())
+		{
+			size_t pos=parentNode->position();
+			if(pos != std::numeric_limits<std::size_t>::max())
+				return createIndex(pos+VAttribute::totalNum(grandParentNode),0,grandParentNode);
+		}
 	}
 
 	return QModelIndex();
@@ -285,12 +338,7 @@ bool TreeNodeModel::isNode(const QModelIndex & index) const
 
 bool TreeNodeModel::isAttribute(const QModelIndex & index) const
 {
-	if(index.isValid())
-	{
-		//int id=index.internalId()-1;
-		//return id > 1000;
-	}
-	return false;
+	return (index.isValid() && !isNode(index) && !isServer(index));
 }
 
 ServerHandler* TreeNodeModel::indexToServer(const QModelIndex & index) const
@@ -327,9 +375,10 @@ Node* TreeNodeModel::indexToNode( const QModelIndex & index) const
 		//Other nodes
 		else if(Node *parentNode=static_cast<Node*>(index.internalPointer()))
 		{
-			if(index.row() >= attributesNum(parentNode))
+			int attNum=VAttribute::totalNum(parentNode);
+			if(index.row() >= attNum)
 			{
-				return ServerHandler::immediateChildAt(parentNode,index.row());
+				return ServerHandler::immediateChildAt(parentNode,index.row()-attNum);
 			}
 		}
 	}
@@ -359,42 +408,60 @@ QModelIndex TreeNodeModel::nodeToIndex(Node* node, int column) const
 		int row=ServerHandler::indexOfImmediateChild(node);
 		if(row != -1)
 		{
-			if(row != -1)
-			{
-				return createIndex(row,column,parentNode);
-			}
+			int attNum=VAttribute::totalNum(parentNode);
+			row+=attNum;
+			return createIndex(row,column,parentNode);
 		}
 	}
 
 	return QModelIndex();
 }
 
+//----------------------------------------
+// Filter
+//----------------------------------------
 
+void TreeNodeModel::notifyConfigChanged(AttributeFilter*)
+{
+	//Notify the filter model
+	emit filterChanged();
+}
 
-void TreeNodeModel::setFilter(const std::set<DState::State>& ns)
+void TreeNodeModel::notifyConfigChanged(IconFilter*)
+{
+	//Notify the filter model
+	emit filterChanged();
+}
+
+void TreeNodeModel::notifyConfigChanged(StateFilter*)
 {
 	servers_.clearFilter();
+
+	//If all states are visible
+	if(config_->stateFilter()->isComplete())
+		return;
 
 	for(int i=0; i < servers_.count(); i++)
 	{
 		ServerHandler *server=servers_.server(i);
-		QList<Node*> filterVec;
+		QSet<Node*> filterSet;
 
 		for(unsigned int j=0; j < server->numSuites();j++)
 		{
-			filter(server->suiteAt(j),ns,filterVec);
+			filterState(server->suiteAt(j),filterSet);
 		}
 
-		servers_.nodeFilter(i,filterVec);
-
+		servers_.nodeFilter(i,filterSet);
 	}
+
+	//Notify the filter model
+	emit filterChanged();
 }
 
-bool TreeNodeModel::filter(node_ptr node,const std::set<DState::State>& ns,QList<Node*>& filterVec)
+bool TreeNodeModel::filterState(node_ptr node,QSet<Node*>& filterSet)
 {
 	bool ok=false;
-	DState::State st=node->dstate();
-	if(ns.find(st) != ns.end())
+	if(config_->stateFilter()->isSet(VState::toType(node.get())))
 	{
 			ok=true;
 	}
@@ -404,66 +471,16 @@ bool TreeNodeModel::filter(node_ptr node,const std::set<DState::State>& ns,QList
 
 	for(std::vector<node_ptr>::iterator it=nodes.begin(); it != nodes.end(); it++)
 	{
-		if(filter(*it,ns,filterVec) == true && ok == false)
+		if(filterState(*it,filterSet) == true && ok == false)
 		{
 			ok=true;
 		}
 	}
 
 	if(!ok)
-		filterVec << node.get();
+		filterSet << node.get();
 
 	return ok;
 }
 
-
-int TreeNodeModel::attributesNum(Node *node) const
-{
-	return 0;
-
-	if(node)
-	{
-		std::vector<Variable> v;
-		node->gen_variables(v);
-		return static_cast<int>(v.size());
-	}
-	return 0;
-}
-
-
-
-//=======================================
-//
-// TreeNodeFilterModel
-//
-//=======================================
-
-TreeNodeFilterModel::TreeNodeFilterModel(ViewFilter* filterData,QObject *parent) :
-		QSortFilterProxyModel(parent),
-		viewFilter_(filterData)
-{
-	viewFilter_->addObserver(this);
-}
-
-TreeNodeFilterModel::~TreeNodeFilterModel()
-{
-	viewFilter_->removeObserver(this);
-}
-
-void TreeNodeFilterModel::notifyFilterChanged()
-{
-	if(TreeNodeModel* m=static_cast<TreeNodeModel*>(sourceModel()))
-		m->setFilter(viewFilter_->nodeState());
-
-	invalidateFilter();
-}
-
-bool TreeNodeFilterModel::filterAcceptsRow(int sourceRow,const QModelIndex& sourceParent) const
-{
-	if(!viewFilter_->isNodeStateFiltered())
-		return true;
-
-	QModelIndex index = sourceModel()->index(sourceRow, 1, sourceParent);
-	return sourceModel()->data(index,TreeNodeModel::FilterRole).toBool();
-}
 

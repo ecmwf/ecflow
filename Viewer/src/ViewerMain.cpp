@@ -19,6 +19,9 @@
 #include "ServerHandler.hpp"
 #include "MenuHandler.hpp"
 #include "DirectoryHandler.hpp"
+#include "VAttribute.hpp"
+#include "VIcon.hpp"
+#include "VState.hpp"
 
 int main(int argc, char **argv)
 {
@@ -37,12 +40,24 @@ int main(int argc, char **argv)
 
     ServerHandler::addServer(argv[1],argv[2]);
 
-    // load the configurable menu items
-    DirectoryHandler::setExePath(std::string(argv[0]));  // we need to tell the Directory class where we started from
+    //Initialise the config and other paths
+    DirectoryHandler::init(std::string(argv[0]));  // we need to tell the Directory class where we started from
+
+    //Load the configurable menu items
     std::string menuFilename("ecflowview_menus.json");
     std::string menuPath = DirectoryHandler::concatenate(DirectoryHandler::etcDir(), menuFilename);
     MenuHandler::readMenuConfigFile(menuPath);
 
+    //Initialise the node/serverstate description
+    VState::init();
+
+    //Initialise the node attributes description
+    VAttribute::init();
+
+    //Initialise the node icon description
+    VIcon::init();
+
+    //Build the GUI
     MainWindow::init();
 
     //add splash screen here
@@ -53,8 +68,7 @@ int main(int argc, char **argv)
 
     //MainWindow.printDefTree(argv[1], atoi(argv[2]));
 
-
-
+    //Show all the windows
     MainWindow::showWindows();
 
     return app.exec();

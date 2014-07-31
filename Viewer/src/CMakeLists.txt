@@ -16,7 +16,8 @@ set(viewer_srcs
     ManualItemWidget.cpp 
     MenuHandler.cpp
     MessageItemWidget.cpp
-    NodeInfoQuery.cpp
+    NodeFilterModel.cpp
+    NodeInfoQuery.cpp    
     NodePanel.cpp
     NodePathWidget.cpp
     NodeViewBase.cpp
@@ -37,11 +38,16 @@ set(viewer_srcs
     TriggerItemWidget.cpp
     TreeNodeModel.cpp
     TreeNodeView.cpp
+    TreeNodeViewDelegate.cpp
     UserMessage.cpp
+    VAttribute.cpp   
+    VConfig.cpp
+    VIcon.cpp
+    VFilter.cpp
+    VParam.cpp
+    VState.cpp
     VariableModel.cpp
     VariableItemWidget.cpp
-    ViewConfig.cpp
-    ViewFilter.cpp
     ViewNodeInfo.cpp
     WhyItemWidget.cpp)
 
@@ -56,6 +62,7 @@ QT4_WRAP_CPP(VIEWER_MOC AbstractNodeModel.hpp
                         FilterWidget.hpp
                         InfoPanel.hpp
                         MainWindow.hpp
+                        NodeFilterModel.hpp
                         NodePanel.hpp
                         NodePathWidget.hpp
                         NodeWidget.hpp
@@ -65,6 +72,7 @@ QT4_WRAP_CPP(VIEWER_MOC AbstractNodeModel.hpp
                         TabWidget.hpp
                         TableNodeView.hpp                      
                         TreeNodeView.hpp
+                        TreeNodeModel.hpp
                         UserMessage.hpp
                         VariableItemWidget.hpp)
 

@@ -15,14 +15,12 @@
 
 #include "ServerFilter.hpp"
 #include "ServerHandler.hpp"
-#include "ViewConfig.hpp"
-#include "ViewFilter.hpp"
+#include "VFilter.hpp"
 
 bool NodeModelServerItem::isFiltered(Node* node) const
 {
-	return (nodeFilter_.indexOf(node) == -1);
+	return !nodeFilter_.contains(node);
 }
-
 
 ServerHandler* NodeModelServers::server(int n) const
 {
@@ -61,11 +59,11 @@ void NodeModelServers::clearFilter()
 	}
 }
 
-void NodeModelServers::nodeFilter(int n,QList<Node*> vec)
+void NodeModelServers::nodeFilter(int n,QSet<Node*> s)
 {
 	if(n >=0 && n < items_.count())
 	{
-		items_[n].nodeFilter_=vec;
+		items_[n].nodeFilter_=s;
 	}
 }
 
@@ -87,33 +85,32 @@ bool NodeModelServers::isFiltered(Node *node) const
 //
 //=======================================
 
-AbstractNodeModel::AbstractNodeModel(ServerFilter* serverFilter,QObject *parent) :
+AbstractNodeModel::AbstractNodeModel(VConfig * config,QObject *parent) :
    QAbstractItemModel(parent),
-   serverFilter_(serverFilter)
+   config_(config)
 {
-	serverFilter_->addObserver(this);
+	config_->addObserver(this);
 	init();
 }
 
 AbstractNodeModel::~AbstractNodeModel()
 {
+	config_->removeObserver(this);
 	clean();
 }
 
-void AbstractNodeModel::notifyServerFilterChanged()
+void AbstractNodeModel::notifyConfigChanged(ServerFilter*)
 {
 	reload();
 }
 
 void AbstractNodeModel::init()
 {
-	for(unsigned int i=0; i < serverFilter_->servers().size(); i++)
+	ServerFilter *filter=config_->serverFilter();
+	for(unsigned int i=0; i < filter->servers().size(); i++)
 	{
-			ServerHandler *server=ServerHandler::find(serverFilter_->servers().at(i)->host(),
-					serverFilter_->servers().at(i)->port());
-
+			ServerHandler *server=ServerHandler::find(filter->servers().at(i)->host(),filter->servers().at(i)->port());
 			server->addNodeObserver(this);
-
 			servers_.add(server);
 	}
 }
