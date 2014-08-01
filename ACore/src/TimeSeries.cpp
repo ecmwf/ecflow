@@ -134,17 +134,17 @@ void TimeSeries::compute_last_time_slot()
 
 bool TimeSeries::calendarChanged( const ecf::Calendar& c )
 {
-	if ( relativeToSuiteStart_ ) {
+   if ( relativeToSuiteStart_ ) {
       relativeDuration_ += c.calendarIncrement();
       return true;
-	}
+   }
 	else if (c.dayChanged()) {
 
-		// Note: we don't call reset(), as that would :
-	   //  - init the relativeDuration_ as well
-	 	nextTimeSlot_ = start_;
-	 	isValid_ = true;
-		return true;
+	   // Clear expired flag and next slot. Needed since requue will expire flag when past time slot
+	   // Hence we need something to reset. Otherwise for next day isFree will always return false;
+      isValid_ = true;
+      nextTimeSlot_ = start_;
+      return true;
 	}
    return false;
 }
@@ -179,6 +179,11 @@ void TimeSeries::reset(const ecf::Calendar& c)
    // *if* the current time is *AT* the start do *not* increment nextTimeSlot_, otherwise we will miss first time slot
  	time_duration current_time = duration(c);
    if (hasIncrement()) {
+
+      // only used when we have a series
+      suiteTimeAtReque_ = TimeSlot(c.suiteTime().time_of_day());
+      //cout << "TimeSeries::reset  suiteTimeAtReque_: " << suiteTimeAtReque_ << " =====================================================\n";
+
       while( current_time > nextTimeSlot_.duration()) {
          time_duration value = nextTimeSlot_.duration();
          value += incr_.duration();
@@ -202,6 +207,8 @@ void TimeSeries::reset(const ecf::Calendar& c)
 
 void TimeSeries::requeue(const ecf::Calendar& c,bool reset_next_time_slot)
 {
+   // cout << "TimeSeries::requeue " << c.toString()  << "\n";
+
    // *RESET* to handle case where time slot has been advanced, but at requeue it must be reset
    // This is important otherwise user can never reset and time slot that had been advanced
    // by using miss_next_time_slot()
@@ -236,6 +243,10 @@ void TimeSeries::requeue(const ecf::Calendar& c,bool reset_next_time_slot)
 		return;
 	}
 
+	// only used when we have a series
+   suiteTimeAtReque_ = TimeSlot(c.suiteTime().time_of_day());
+//   cout << "TimeSeries::requeue suiteTimeAtReque_: " << suiteTimeAtReque_ << " =====================================================\n";
+
 	// the nextTimeSlot_ needs to be set to a multiple of incr
 	// However the nextTimeSlot_ can not just be incremented by incr
 	// since we can't assume that a task completes within the given time slots
@@ -258,7 +269,8 @@ void TimeSeries::requeue(const ecf::Calendar& c,bool reset_next_time_slot)
 	}
 
  	if (nextTimeSlot_.duration() > finish_.duration()) {
-		isValid_ = false;  // time has expired
+		isValid_ = false;              // time has expired
+	   suiteTimeAtReque_ = TimeSlot(); // expire for new requeue
 #ifdef DEBUG_TIME_SERIES
  	 	LOG(Log::DBG,"      TimeSeries::increment "  << toString());
 #endif
@@ -405,11 +417,12 @@ void TimeSeries::miss_next_time_slot()
 bool TimeSeries::checkForRequeue( const ecf::Calendar& calendar, const TimeSlot& the_min, const TimeSlot& the_max) const
 {
    // ************************************************************************
-   // THIS IS CALLED IN THE CONTEXT WHERE NODE HAS COMPLETED.
+   // THIS IS CALLED IN THE CONTEXT WHERE NODE HAS COMPLETED. Hence ****asyncronous****
    // RETURNING TRUE FROM HERE WILL FORCE NODE TO QUEUED STATE
    // HENCE THIS FUNCTION MUST RETURN FALSE, WHEN END OF TIME SLOT HAS BEEN REACHED/expired
    // The resolution is in minutes
    // *************************************************************************
+   //cout << "TimeSeries::checkForRequeue " << calendar.toString() << "\n";
 
    if (!isValid_) {
       // time has expired, hence can no longer re-queues, i.e no future time dependency
@@ -427,6 +440,22 @@ bool TimeSeries::checkForRequeue( const ecf::Calendar& calendar, const TimeSlot&
       // value past the end, and force node state to be stuck in state queue.
       if ( nextTimeSlot_.duration() > finish_.duration() ) {
          return false;
+      }
+
+      // ECFLOW-130 jobs that start before midnight and finish after midnight should not requeue
+      if (!suiteTimeAtReque_.isNULL()){
+         TimeSlot suiteTimeNow(calendar.suiteTime().time_of_day());
+         //cout << "TimeSeries::checkForRequeue suiteTimeNow = " << suiteTimeNow << " =====================================================\n";
+         // we use >= specifically for unit test, to pass.
+         if ( suiteTimeNow >= suiteTimeAtReque_) {
+            // normal flow, i.e same day
+            suiteTimeAtReque_ = TimeSlot(); // make NULL, allow reque to reset.
+         }
+         else {
+            // The day changed between (requeue/reset):->queued->submitted->active->complete->(checkForRequeue)
+            //cout << "TimeSeries::checkForRequeue day changed =====================================================\n";
+            return false;
+         }
       }
 
       time_duration calendar_duration = duration(calendar);

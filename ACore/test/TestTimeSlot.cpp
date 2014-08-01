@@ -37,47 +37,73 @@ BOOST_AUTO_TEST_CASE( test_time_slot )
 {
    cout << "ACore:: ...test_time_slot\n";
 
-   // test equality and inequality and < and >
+   // test timeslot operator
    {
       TimeSlot x;
       TimeSlot y;
+      BOOST_CHECK_MESSAGE( x.isNULL(),"Expected NULL");
+      BOOST_CHECK_MESSAGE( y.isNULL(),"Expected NULL");
       BOOST_CHECK_MESSAGE( x == y,"Equality operator expected to succeed");
       BOOST_CHECK_MESSAGE( !(x < y),"Less than operator expected to fail");
       BOOST_CHECK_MESSAGE( !(x > y),"Greater than operator expected to fail");
+      BOOST_CHECK_MESSAGE( x <= y,"<= operator expected to succeed");
+      BOOST_CHECK_MESSAGE( x >= y,">= operator expected to succeed");
+      BOOST_CHECK_MESSAGE( y <= x,"<= operator expected to succeed");
+      BOOST_CHECK_MESSAGE( y >= x,">= operator expected to succeed");
 
       TimeSlot a(10,12);
       TimeSlot b(10,12);
+      BOOST_CHECK_MESSAGE( !a.isNULL(),"Expected NOT NULL");
+      BOOST_CHECK_MESSAGE( !b.isNULL(),"Expected NOT NULL");
       BOOST_CHECK_MESSAGE( a == b,"Equality operator expected to succeed");
       BOOST_CHECK_MESSAGE( !(a < b),"Less than operator expected to fail");
       BOOST_CHECK_MESSAGE( !(a > b),"Greater than operator expected to fail");
+      BOOST_CHECK_MESSAGE( a <= b,"<= operator expected to succeed");
+      BOOST_CHECK_MESSAGE( a >= b,">= operator expected to succeed");
+      BOOST_CHECK_MESSAGE( b <= a,"<= operator expected to succeed");
+      BOOST_CHECK_MESSAGE( b >= a,">= operator expected to succeed");
 
       TimeSlot c(0,0);
       TimeSlot d(0,0);
+      BOOST_CHECK_MESSAGE( !c.isNULL(),"Expected NOT NULL");
+      BOOST_CHECK_MESSAGE( !d.isNULL(),"Expected NOT NULL");
       BOOST_CHECK_MESSAGE( c == d,"Equality operator expected to succeed");
       BOOST_CHECK_MESSAGE( !(c < d),"Less than operator expected to fail");
       BOOST_CHECK_MESSAGE( !(c > d),"Greater than operator expected to fail");
+      BOOST_CHECK_MESSAGE( c <= d,"<= operator expected to succeed");
+      BOOST_CHECK_MESSAGE( c >= d,">= operator expected to succeed");
+      BOOST_CHECK_MESSAGE( d <= c,"<= operator expected to succeed");
+      BOOST_CHECK_MESSAGE( d >= c,">= operator expected to succeed");
 
       TimeSlot a1(10,1);
       TimeSlot b1(10,12);
+      BOOST_CHECK_MESSAGE( !a1.isNULL(),"Expected NOT NULL");
+      BOOST_CHECK_MESSAGE( !b1.isNULL(),"Expected NOT NULL");
       BOOST_CHECK_MESSAGE( a1 != b1,"Equality operator expected to fail");
       BOOST_CHECK_MESSAGE( a1 < b1,"Less than operator expected to succeed");
       BOOST_CHECK_MESSAGE( !(a1 > b1),"Greater than operator expected to fail");
+      BOOST_CHECK_MESSAGE( !(a1 >= b1),">= than operator expected to fail");
       BOOST_CHECK_MESSAGE( b1 > a1,"Greater than operator expected to succeed");
+      BOOST_CHECK_MESSAGE( b1 >= a1,">= expected to succeed");
 
       TimeSlot xx(10,1);
       TimeSlot yy(23,12);
       BOOST_CHECK_MESSAGE( xx != yy,"Equality operator expected to fail");
       BOOST_CHECK_MESSAGE( xx < yy,"Less than operator expected to succeed");
+      BOOST_CHECK_MESSAGE( xx <= yy,"<= operator expected to succeed");
       BOOST_CHECK_MESSAGE( yy > xx,"Greater than operator expected to succeed");
+      BOOST_CHECK_MESSAGE( yy >= xx,">= operator expected to succeed");
       BOOST_CHECK_MESSAGE( !(xx > yy),"Greater than operator expected to fail");
+      BOOST_CHECK_MESSAGE( !(xx >= yy),">= operator expected to fail");
 
       TimeSlot x1(11,0);
       TimeSlot y1(10,0);
       BOOST_CHECK_MESSAGE( x1 != y1,"Equality operator expected to fail");
       BOOST_CHECK_MESSAGE( !(x1 < y1),"Less than operator expected to fail");
+      BOOST_CHECK_MESSAGE( !(x1 <= y1),"<= operator expected to fail");
       BOOST_CHECK_MESSAGE( x1 > y1,"Greater than operator expected to succced");
+      BOOST_CHECK_MESSAGE( x1 >= y1,">= operator expected to succced");
    }
-
 }
 
 BOOST_AUTO_TEST_SUITE_END()

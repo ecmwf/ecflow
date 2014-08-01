@@ -179,6 +179,10 @@ BOOST_AUTO_TEST_CASE( test_time_series_increment_real )
    BOOST_CHECK_MESSAGE(t2_min == TimeSlot(11,0) && t2_max == TimeSlot(15,0),"Not as expected");
    BOOST_CHECK_MESSAGE(t3_min == TimeSlot(15,0) && t3_max == TimeSlot(15,0),"Not as expected");
 
+   // Follow normal process
+   timeSeries.reset( c );
+   timeSeries2.reset( c );
+   timeSeries3.reset( c );
 
 	for(int hour=1; hour < 24; hour++) {
 		// Update calendar every hour, then see we can match time series, *RELATIVE* to suite start
@@ -384,36 +388,49 @@ BOOST_AUTO_TEST_CASE( test_time_series_finish_not_divisble_by_increment )
  	time_duration last = hours(23) + minutes(50);  // last valid time is 23:50
 	time_duration last2 = hours(20) + minutes(30);  // last valid time is 20:30
 
+	// follow normal process
+   timeSeries.reset(calendar);
+   timeSeries2.reset(calendar);
+
  	for(int hour=0; hour < 24; hour++) {
  		for( int minute=0; minute<60; minute++) {
 
  			calendar.update( minutes(1) );
- 			if (calendar.dayChanged()) {
- 				timeSeries.reset(calendar);
- 				timeSeries2.reset(calendar);
- 			}
+         timeSeries.calendarChanged(calendar);
+         timeSeries2.calendarChanged(calendar);
 
- 			if ( calendar.suiteTime().time_of_day() < timeSeries.start().duration()) {
+ 			//cout << to_simple_string(calendar.suiteTime()) << "\n";
+
+ 			if (calendar.dayChanged()) {
+            BOOST_CHECK_MESSAGE(timeSeries.checkForRequeue(calendar,t1_min,t1_max)," expected " << timeSeries.toString() << " checkForRequeue to pass at " << to_simple_string(calendar.suiteTime()));
+ 			}
+ 			else if ( calendar.suiteTime().time_of_day() < timeSeries.start().duration()) {
             BOOST_CHECK_MESSAGE(timeSeries.checkForRequeue(calendar,t1_min,t1_max)," expected " << timeSeries.toString() << " checkForRequeue to pass at " << to_simple_string(calendar.suiteTime()) );
  			}
  			else if ( calendar.suiteTime().time_of_day() >= timeSeries.start().duration() && calendar.suiteTime().time_of_day() < last	) {
-     			BOOST_CHECK_MESSAGE(timeSeries.checkForRequeue(calendar,t1_min,t1_max)," expected " << timeSeries.toString() << " checkForRequeue to pass at " << to_simple_string(calendar.suiteTime()) );
+     			BOOST_CHECK_MESSAGE(timeSeries.checkForRequeue(calendar,t1_min,t1_max)," expected " << timeSeries.toString() << " checkForRequeue to pass at " << to_simple_string(calendar.suiteTime())  );
   			}
   			else {
      			BOOST_CHECK_MESSAGE(!timeSeries.checkForRequeue(calendar,t1_min,t1_max)," expected " << timeSeries.toString() << " checkForRequeue to fail at " << to_simple_string(calendar.suiteTime()) );
   			}
 
-         if ( calendar.suiteTime().time_of_day() < timeSeries2.start().duration()) {
+         if (calendar.dayChanged()) {
+            BOOST_CHECK_MESSAGE(timeSeries2.checkForRequeue(calendar,t2_min,t2_max)," expected " << timeSeries2.toString() << " checkForRequeue to pass at " << to_simple_string(calendar.suiteTime()));
+         }
+         else if ( calendar.suiteTime().time_of_day() < timeSeries2.start().duration()) {
             BOOST_CHECK_MESSAGE(timeSeries2.checkForRequeue(calendar,t2_min,t2_max)," expected " << timeSeries2.toString() << " checkForRequeue to pass at " << to_simple_string(calendar.suiteTime()) );
          }
          else if ( calendar.suiteTime().time_of_day() >= timeSeries2.start().duration() && calendar.suiteTime().time_of_day() < last2	) {
-     			BOOST_CHECK_MESSAGE(timeSeries2.checkForRequeue(calendar,t2_min,t2_max)," expected " << timeSeries2.toString() << " checkForRequeue to pass at " << to_simple_string(calendar.suiteTime()) );
+     			BOOST_CHECK_MESSAGE(timeSeries2.checkForRequeue(calendar,t2_min,t2_max)," expected " << timeSeries2.toString() << " checkForRequeue to pass at " << to_simple_string(calendar.suiteTime()));
   			}
   			else {
-     			BOOST_CHECK_MESSAGE(!timeSeries2.checkForRequeue(calendar,t2_min,t2_max)," expected " << timeSeries2.toString() << " checkForRequeue to fail at " << to_simple_string(calendar.suiteTime()) );
+     			BOOST_CHECK_MESSAGE(!timeSeries2.checkForRequeue(calendar,t2_min,t2_max)," expected " << timeSeries2.toString() << " checkForRequeue to fail at " << to_simple_string(calendar.suiteTime()));
   			}
 
- 			timeSeries.requeue( calendar );
+//         if (calendar.dayChanged()) {
+//            timeSeries.reset(calendar);
+//            timeSeries2.reset(calendar);
+//         }
  		}
  	}
 }
