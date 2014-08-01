@@ -112,6 +112,14 @@ can end up renaming.
       git show <release number>
    
 
+0/ AFTER the release increment the version number in $WK/VERSION.cmake
+   THEN, run:
+     sh -x $WK/cmake.sh debug
+     
+     This will update the version number for $WK/ACore/src/ecflow_version.h
+     This file is included in $WK/ACore/src/Version.cpp
+     
+     Then check this file in for, for the other platforms.
    
 ecflow users group   ecflow_int@lists.ecmwf.int  
 =====================================================================
