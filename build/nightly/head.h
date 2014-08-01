@@ -6,6 +6,7 @@ set -x # echo script lines as they are executed
 # ----------------------------------------------------------------------
 # LXOP: specific ??
 # ----------------------------------------------------------------------
+HOST=${HOST:=$(uname -n)}
 if [[ $HOST = lxop* ]]; then
 # QSUB -q %QUEUE:test%
   ln -sf $(echo ${PBS_NODEFILE:=} | sed -e 's:aux:spool:').OU %ECF_JOBOUT%.running
