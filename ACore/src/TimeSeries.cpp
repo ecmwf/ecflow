@@ -189,7 +189,7 @@ void TimeSeries::reset(const ecf::Calendar& c)
          value += incr_.duration();
          nextTimeSlot_ = TimeSlot(value.hours(),value.minutes());
       }
-      if (nextTimeSlot_.duration() > finish_.duration()) {
+      if (nextTimeSlot_ > finish_) {
          isValid_ = false;  // time has expired
       }
    }
@@ -268,7 +268,7 @@ void TimeSeries::requeue(const ecf::Calendar& c,bool reset_next_time_slot)
 #endif
 	}
 
- 	if (nextTimeSlot_.duration() > finish_.duration()) {
+ 	if (nextTimeSlot_ > finish_) {
 		isValid_ = false;              // time has expired
 	   suiteTimeAtReque_ = TimeSlot(); // expire for new requeue
 #ifdef DEBUG_TIME_SERIES
@@ -295,7 +295,7 @@ TimeSlot TimeSeries::compute_next_time_slot(const ecf::Calendar& c) const
       nextTimeSlot = TimeSlot(value.hours(),value.minutes());
    }
 
-   if (nextTimeSlot.duration() > finish_.duration()) {
+   if (nextTimeSlot > finish_) {
       return TimeSlot();  // time has expired
    }
    return nextTimeSlot;
@@ -407,7 +407,7 @@ void TimeSeries::miss_next_time_slot()
       time_duration value = nextTimeSlot_.duration();
       value += incr_.duration();
       nextTimeSlot_ = TimeSlot(value.hours(),value.minutes());
-      if (nextTimeSlot_.duration() > finish_.duration()) {
+      if (nextTimeSlot_ > finish_) {
          // time has expired,
          isValid_ = false;
       }
@@ -438,7 +438,7 @@ bool TimeSeries::checkForRequeue( const ecf::Calendar& calendar, const TimeSlot&
 
       // If the current value is greater that finish, then returning true would increment
       // value past the end, and force node state to be stuck in state queue.
-      if ( nextTimeSlot_.duration() > finish_.duration() ) {
+      if ( nextTimeSlot_ > finish_ ) {
          return false;
       }
 
