@@ -129,12 +129,11 @@ BOOST_AUTO_TEST_CASE( test_repeat_integer_relative  )
 BOOST_AUTO_TEST_CASE( test_repeat_date  )
 {
  	cout << "Simulator:: ...test_repeat_date\n";
-
  	//suite suite
- 	// clock real <today date + time>
+ 	// clock real <fixed date + time>
  	//	family family
-	//	    repeat date YMD 20091001  20091015 1  # yyyymmdd
-	//   	task t<n>
+	//	   repeat date YMD 20091001  20091015 1  # yyyymmdd
+	//   	task t
 	//      	time 10:00
  	//  	endfamily
 	//endsuite
@@ -142,8 +141,8 @@ BOOST_AUTO_TEST_CASE( test_repeat_date  )
 	// Each task should be run 15 times, ie every day at 10.00 am from  1st Oct->15 October 15 times
    Defs theDefs;
  	{
- 	 	boost::posix_time::ptime   theLocalTime =  Calendar::second_clock_time();
-		ClockAttr clockAttr(theLocalTime);
+      ClockAttr clockAttr;
+      clockAttr.date(1,10,2009);
    	suite_ptr suite = theDefs.add_suite("test_repeat_date");
 		suite->addVerify( VerifyAttr(NState::COMPLETE,1) );
   		suite->addClock( clockAttr );
