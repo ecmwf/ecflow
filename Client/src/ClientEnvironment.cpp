@@ -61,12 +61,12 @@ ClientEnvironment::ClientEnvironment()
   allow_new_client_old_server_(0)
 {
 #ifdef DEBUG_ECFLOW_136
-   cout << "ClientEnvironment::ClientEnvironment()\n";
+   cout << "ClientEnvironment::ClientEnvironment()" << std::endl;
    debug_ = true;
 #endif
 	init();
 #ifdef DEBUG_ECFLOW_136
-   cout << "ClientEnvironment::ClientEnvironment()  END\n";
+   cout << "ClientEnvironment::ClientEnvironment()  END" << std::endl;
 #endif
 }
 
@@ -95,7 +95,7 @@ void ClientEnvironment::init()
 {
 	read_environment_variables();
 #ifdef DEBUG_ENVIRONMENT
-	std::cout << toString() << "\n";
+	std::cout << toString() << std::endl;
 #endif
 
 	// If no host specified default to local host and default port number

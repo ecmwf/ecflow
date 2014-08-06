@@ -21,7 +21,7 @@
 int main( int argc, char* argv[] ) {
 
 #ifdef DEBUG_ECFLOW_136
-   std::cout << "main\n";
+   std::cout << "main" << std::endl;
 #endif
 
 	/// By default, error condition will throw exception.
@@ -31,7 +31,7 @@ int main( int argc, char* argv[] ) {
 	   (void) client.invoke(argc,argv);
 	}
 	catch (std::exception& e ) {
-		std::cerr << e.what() << "\n";
+		std::cerr << e.what() << std::endl;
 		return 1;
 	}
 	return 0;
