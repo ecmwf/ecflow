@@ -42,7 +42,6 @@ using namespace boost;
 #endif
 
 //#define DEBUG_ENVIRONMENT 1
-#define DEBUG_ECFLOW_136 1
 
 template<class T>
 ostream& operator<<(ostream& os, const vector<T>& v)
@@ -60,14 +59,7 @@ ClientEnvironment::ClientEnvironment()
   host_vec_index_(0),
   allow_new_client_old_server_(0)
 {
-#ifdef DEBUG_ECFLOW_136
-   cout << "ClientEnvironment::ClientEnvironment()" << std::endl;
-   debug_ = true;
-#endif
 	init();
-#ifdef DEBUG_ECFLOW_136
-   cout << "ClientEnvironment::ClientEnvironment()  END" << std::endl;
-#endif
 }
 
 // test constructor
