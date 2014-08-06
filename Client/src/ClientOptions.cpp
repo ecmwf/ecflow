@@ -34,9 +34,14 @@ namespace po = boost::program_options;
 static const char* client_env_description();
 static const char* client_task_env_description();
 
+#define DEBUG_ECFLOW_136 1
 
 ClientOptions::ClientOptions()
 {
+#ifdef DEBUG_ECFLOW_136
+   cout << "ClientOptions::ClientOptions()\n";
+#endif
+
    // This could have been moved to parse(). However since the same ClienttInvoker can be
    // be used for multiple commands. We have separated out the parts the need only be done once.
    // hence improving the performance:
@@ -57,6 +62,10 @@ ClientOptions::ClientOptions()
             "port: If specified will override the environment variable ECF_PORT and default port number of 3141");
    desc_->add_options()("host",po::value< string >()->implicit_value( string("") ),
             "host: If specified will override the environment variable ECF_NODE and default host, localhost");
+
+#ifdef DEBUG_ECFLOW_136
+   cout << "ClientOptions::ClientOptions() END\n";
+#endif
 }
 
 ClientOptions::~ClientOptions()

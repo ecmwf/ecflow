@@ -16,7 +16,13 @@
 #include "ClientInvoker.hpp"
 #include <iostream>
 
+#define DEBUG_ECFLOW_136 1
+
 int main( int argc, char* argv[] ) {
+
+#ifdef DEBUG_ECFLOW_136
+   std::cout << "main\n";
+#endif
 
 	/// By default, error condition will throw exception.
 	try {

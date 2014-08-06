@@ -44,6 +44,8 @@
 #define NEXT_HOST_POLL_PERIOD 30
 #endif
 
+#define DEBUG_ECFLOW_136 1
+
 using namespace std;
 using namespace ecf;
 using namespace boost::posix_time;
@@ -163,6 +165,10 @@ void ClientInvoker::set_connection_attempts( unsigned int attempts)
 
 int ClientInvoker::invoke(int argc, char* argv[]) const
 {
+#ifdef DEBUG_ECFLOW_136
+   cout << "ClientInvoker::invoke\n";
+#endif
+
    // Allow request to logged & allow logging of round trip time, Hence must be placed *before* RoundTripRecorder
    RequestLogger request_logger(this);
 
@@ -181,6 +187,9 @@ int ClientInvoker::invoke(int argc, char* argv[]) const
 		// read in program option, and construct the client to server commands from them.
 		// This will extract host/port from the environment/ args
 		// This will throw std::runtime_error for invalid arguments or options
+#ifdef DEBUG_ECFLOW_136
+ 	   cout << "ClientInvoker::invoke parse arguments\n";
+#endif
 		cts_cmd = args_.parse(argc,argv,&clientEnv_);
 
 		// For --help and --debug, --load defs check_only no command is created
