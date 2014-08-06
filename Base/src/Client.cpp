@@ -52,7 +52,7 @@ Client::Client( boost::asio::io_service& io_service,
 	}
 
 #ifdef DEBUG_CLIENT
-   std::cout << "   Client::Client() timeout(" << timeout_ << ") " << host_ << ":" << port_ << " "; cmd_ptr->print(std::cout); std::cout << "\n";
+   std::cout << "   Client::Client() timeout(" << timeout_ << ") " << host_ << ":" << port_ << " "; cmd_ptr->print(std::cout); std::cout << std::endl;
 #endif
 
   	outbound_request_.set_cmd( cmd_ptr );
@@ -71,7 +71,7 @@ Client::Client( boost::asio::io_service& io_service,
 
 Client::~Client() {
 #ifdef DEBUG_CLIENT
-	std::cout << "   Client::~Client(): connection_.socket().is_open()=" << connection_.socket().is_open() << "\n";
+	std::cout << "   Client::~Client(): connection_.socket().is_open()=" << connection_.socket().is_open() << std::endl;
 #endif
 }
 
@@ -96,7 +96,7 @@ bool Client::start_connect(boost::asio::ip::tcp::resolver::iterator endpoint_ite
    if ( endpoint_iterator != boost::asio::ip::tcp::resolver::iterator() )
    {
 #ifdef DEBUG_CLIENT
-      std::cout << "   Client::start_connect: Trying " << endpoint_iterator->endpoint() << "...\n";
+      std::cout << "   Client::start_connect: Trying " << endpoint_iterator->endpoint() << "..." << std::endl;
 #endif
 
       // expires_from_now cancels any pending asynchronous waits, and returns the number of asynchronous waits that were cancelled.
@@ -126,7 +126,7 @@ void Client::handle_connect(  const boost::system::error_code& e,
                         boost::asio::ip::tcp::resolver::iterator endpoint_iterator )
 {
 #ifdef DEBUG_CLIENT
-   std::cout << "   Client::handle_connect stopped_=" << stopped_ << "\n";
+   std::cout << "   Client::handle_connect stopped_=" << stopped_ << std::endl;
 #endif
 
   if (stopped_)
@@ -138,7 +138,7 @@ void Client::handle_connect(  const boost::system::error_code& e,
   if (!connection_.socket().is_open())
   {
 #ifdef DEBUG_CLIENT
-     std::cout << "   Client::handle_connect: *Connect timeout*:  Trying next end point\n";
+     std::cout << "   Client::handle_connect: *Connect timeout*:  Trying next end point" << std::endl;
 #endif
      // Try the next available end point.
      if (!start_connect( ++endpoint_iterator)) {
@@ -153,7 +153,7 @@ void Client::handle_connect(  const boost::system::error_code& e,
   else if (e) {
 
 #ifdef DEBUG_CLIENT
-     std::cout << "   Client::handle_connect Connect error: " << e.message() << " . Trying next end point\n";
+     std::cout << "   Client::handle_connect Connect error: " << e.message() << " . Trying next end point" << std::endl;
 #endif
 
      // Some kind of error. We need to close the socket used in the previous connection attempt
@@ -170,7 +170,7 @@ void Client::handle_connect(  const boost::system::error_code& e,
   }
   else {
 #ifdef DEBUG_CLIENT
-     std::cout << "   Client::handle_connect **Successfully** established connection to the server: Sending Out bound request = " << outbound_request_ << "\n";
+     std::cout << "   Client::handle_connect **Successfully** established connection to the server: Sending Out bound request = " << outbound_request_ << std::endl;
 #endif
      // **Successfully** established connection to the server
      // Start operation to *SEND* a request to the server
@@ -198,7 +198,7 @@ void Client::start_write()
 void Client::handle_write( const boost::system::error_code& e )
 {
 #ifdef DEBUG_CLIENT
-      std::cout << "   Client::handle_write stopped_ = " << stopped_ << "\n";
+      std::cout << "   Client::handle_write stopped_ = " << stopped_ << std::endl;
 #endif
    if (stopped_)
        return;
@@ -206,7 +206,7 @@ void Client::handle_write( const boost::system::error_code& e )
 	if ( !e ) {
 
 #ifdef DEBUG_CLIENT
-		std::cout << "   Client::handle_write OK: Check for server reply\n";
+		std::cout << "   Client::handle_write OK: Check for server reply" << std::endl;
 #endif
 		// Check to see if the server was happy with our request.
 		// If all is OK, the server may choose not to reply(cuts down on network traffic)
@@ -247,7 +247,7 @@ void Client::start_read()
 void Client::handle_read( const boost::system::error_code& e )
 {
 #ifdef DEBUG_CLIENT
-      std::cout << "   Client::handle_read stopped_ = " << stopped_ << "\n";
+      std::cout << "   Client::handle_read stopped_ = " << stopped_ << std::endl;
 #endif
    if (stopped_)
        return;
@@ -283,7 +283,7 @@ void Client::handle_read( const boost::system::error_code& e )
 		}
 		else {
 #ifdef DEBUG_CLIENT
-			std::cout << "   Client::handle_read: No reply from server: Treat as OK\n";
+			std::cout << "   Client::handle_read: No reply from server: Treat as OK" << std::endl;
 #endif
 			// Treat a  *no* reply as OK, so that handle_server_response() returns OK
 			inbound_response_.set_cmd( STC_Cmd_ptr(new StcCmd(StcCmd::OK)) );
@@ -311,7 +311,7 @@ void Client::stop()
 /// Handle completion of a read operation.
 bool Client::handle_server_response( ServerReply& server_reply, bool debug ) const
 {
-	if (debug) std::cout << "   Client::handle_server_response\n";
+	if (debug) std::cout << "   Client::handle_server_response" << std::endl;
 	return inbound_response_.handle_server_response(server_reply, outbound_request_.get_cmd(), debug);
 }
 
@@ -320,7 +320,7 @@ void Client::check_deadline()
 #ifdef DEBUG_CLIENT
       std::cout << "   Client::check_deadline stopped_=" << stopped_
                 << " expires(" << to_simple_string(deadline_.expires_at())
-                << ") time now(" << to_simple_string(boost::asio::deadline_timer::traits_type::now()) << ")\n";
+                << ") time now(" << to_simple_string(boost::asio::deadline_timer::traits_type::now()) << ")" << std::endl;
 #endif
    if (stopped_)
       return;
@@ -331,7 +331,7 @@ void Client::check_deadline()
    if (deadline_.expires_at() <= boost::asio::deadline_timer::traits_type::now())
    {
 #ifdef DEBUG_CLIENT
-      std::cout << "   Client::check_deadline timed out \n";
+      std::cout << "   Client::check_deadline timed out" << std::endl;
 #endif
 
       // The deadline has passed. The socket is closed so that any outstanding
