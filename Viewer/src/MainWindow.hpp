@@ -21,6 +21,7 @@
 #include "Viewer.hpp"
 
 class QActionGroup;
+class AbstractFilterMenu;
 class FilterWidget;
 class NodePanel;
 class ServerDialog;
@@ -74,8 +75,10 @@ private:
     static void save(MainWindow *);
     static MainWindow* findWindow(QWidget *childW);
 
-
     QActionGroup *viewModeAg_;
+    AbstractFilterMenu* stateFilterMenu_;
+    AbstractFilterMenu* attrFilterMenu_;
+    AbstractFilterMenu* iconFilterMenu_;
     FilterWidget* filterWidget_;
     NodePanel* nodePanel_;
     ServerDialog* serverDialog_;

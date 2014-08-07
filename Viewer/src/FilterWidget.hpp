@@ -11,13 +11,54 @@
 #define FILTERWIDGET_HPP_
 
 #include <QMap>
+#include <QMenu>
 #include <QSet>
 #include <QWidget>
 
 #include "DState.hpp"
 
 class QToolButton;
-class ViewFilter;
+class VParam;
+class VFilter;
+
+
+class AbstractFilterMenu : public QObject
+{
+Q_OBJECT
+
+public:
+	AbstractFilterMenu(QMenu* parent,const std::vector<VParam*>&);
+	void reload(VFilter*);
+
+protected slots:
+	void slotChanged(bool);
+
+protected:
+	void addAction(QString name,int id);
+
+	QMenu*  menu_;
+	VFilter* filter_;
+};
+
+class StateFilterMenu : public AbstractFilterMenu
+{
+public:
+	StateFilterMenu(QMenu* parent);
+};
+
+class AttributeFilterMenu : public AbstractFilterMenu
+{
+public:
+	AttributeFilterMenu(QMenu* parent);
+};
+
+class IconFilterMenu : public AbstractFilterMenu
+{
+public:
+	IconFilterMenu(QMenu* parent);
+};
+
+
 
 class FilterWidget : public QWidget
 {
@@ -25,7 +66,7 @@ Q_OBJECT
 
 public:
 	FilterWidget(QWidget* parent=0);
-	void reload(ViewFilter*);
+	void reload(VFilter*);
 
 protected slots:
 	void slotChanged(bool);
@@ -37,7 +78,7 @@ private:
 	QToolButton* createButton(QString,QString,QColor);
 
 	QMap<DState::State,QToolButton*> items_;
-	ViewFilter* data_;
+	VFilter* data_;
 };
 
 #endif

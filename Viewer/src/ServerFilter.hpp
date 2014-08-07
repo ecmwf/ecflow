@@ -14,7 +14,7 @@
 
 #include "Node.hpp"
 #include "ServerItem.hpp"
-#include "ServerFilterObserver.hpp"
+#include "VConfig.hpp"
 
 class ServerHandler;
 
@@ -37,10 +37,12 @@ protected:
 };
 
 
-class ServerFilter
+class ServerFilter : public VConfigItem
 {
+friend class VConfig;
+
 public:
-	ServerFilter();
+	ServerFilter(VConfig*);
 
 	const std::vector<ServerFilterItem*> servers() const {return servers_;}
 	ServerFilterItem* addServer(ServerItem*,bool broadcast=true);
@@ -48,14 +50,12 @@ public:
 	bool match(ServerItem*);
 	void update(const std::vector<ServerItem*>&);
 
-	void addObserver(ServerFilterObserver*);
-	void removeObserver(ServerFilterObserver*);
+protected:
+	void notifyOwner();
+
 
 private:
-	void broadcastChange();
-
 	std::vector<ServerFilterItem*> servers_;
-	std::vector<ServerFilterObserver*> observers_;
 };
 
 #endif

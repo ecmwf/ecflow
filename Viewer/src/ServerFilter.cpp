@@ -51,7 +51,7 @@ void ServerFilterItem::removeFromSuiteFilter(node_ptr suite)
 //
 //==============================================
 
-ServerFilter::ServerFilter()
+ServerFilter::ServerFilter(VConfig *owner) : VConfigItem(owner)
 {
 }
 
@@ -64,7 +64,7 @@ ServerFilterItem* ServerFilter::addServer(ServerItem *item,bool broadcast)
 			{
 					servers_.push_back(s);
 					if(broadcast)
-						broadcastChange();
+						notifyOwner();
 					return s;
 			}
 			else
@@ -79,24 +79,9 @@ void ServerFilter::removeServer(ServerItem *item)
 
 }
 
-void ServerFilter::broadcastChange()
+void ServerFilter::notifyOwner()
 {
-	for(std::vector<ServerFilterObserver*>::iterator it=observers_.begin(); it != observers_.end(); it++)
-	{
-		(*it)->notifyServerFilterChanged();
-	}
-}
-
-void ServerFilter::addObserver(ServerFilterObserver* obs)
-{
-	observers_.push_back(obs);
-}
-
-void ServerFilter::removeObserver(ServerFilterObserver* obs)
-{
-	std::vector<ServerFilterObserver*>::iterator it=std::find(observers_.begin(),observers_.end(),obs);
-	if(it != observers_.end())
-		observers_.erase(it);
+	owner_->changed(this);
 }
 
 bool ServerFilter::match(ServerItem* item)
@@ -157,7 +142,7 @@ void  ServerFilter::update(const std::vector<ServerItem*>& items)
 	}
 
 	if(changed)
-		broadcastChange();
+		notifyOwner();
 
 }
 

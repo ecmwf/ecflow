@@ -17,8 +17,7 @@
 #include "ViewNodeInfo.hpp"
 
 class NodeWidget;
-class ServerFilter;
-class ViewFilter;
+class VConfig;
 
 class NodePanel : public TabWidget
 {
@@ -31,8 +30,7 @@ public:
 	void setViewMode(Viewer::ViewMode);
 	Viewer::ViewMode viewMode();
 
-	ServerFilter* serverFilter();
-	ViewFilter* viewFilter();
+	VConfig* config();
 
 	NodeWidget* currentNodeWidget();
 	void addWidget();

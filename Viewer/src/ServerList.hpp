@@ -41,7 +41,9 @@ private:
 	bool readSystemFile();
 
 	static ServerList* instance_;
+
 	std::vector<ServerItem*> items_;
+	std::string serversPath_;
 
 };
 

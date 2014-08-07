@@ -18,6 +18,8 @@ class Node;
 
 class ServerHandler;
 
+typedef bool (*HasProc)(Node*);
+
 class ViewNodeInfo
 {
 public:
@@ -39,3 +41,4 @@ private:
 typedef boost::shared_ptr<ViewNodeInfo>   ViewNodeInfo_ptr;
 
 #endif
+

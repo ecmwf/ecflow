@@ -16,28 +16,53 @@
 #include <boost/algorithm/string/predicate.hpp>
 
 #include "DirectoryHandler.hpp"
-
+#include "UserMessage.hpp"
 
 std::string DirectoryHandler::shareDir_;
 std::string DirectoryHandler::etcDir_;
-std::string DirectoryHandler::userConfigDir_;
-std::string DirectoryHandler::userRcDir_;
-
+std::string DirectoryHandler::configDir_;
+std::string DirectoryHandler::rcDir_;
 
 DirectoryHandler::DirectoryHandler()
 {
 }
 
-
 // -----------------------------------------------------------------------------
-// DirectoryHandler::setExePath
-// if we tell this class where the executable started from, then it can work out
+// DirectoryHandler::init
+// We set all the directory paths containing any of the config files used by the viewer.
+// If we tell this class where the executable started from, then it can work out
 // where all the other directories are
 // -----------------------------------------------------------------------------
 
-void DirectoryHandler::setExePath(std::string exePath)
+void DirectoryHandler::init(std::string exePath)
 {
-    // use boost functions to extract the directories
+	//Sets paths in the home directory
+	if(char *h=getenv("HOME"))
+	{
+		boost::filesystem::path homeDir(h);
+		boost::filesystem::path configDir = homeDir  /= ".ecflowview";
+		boost::filesystem::path rcDir = homeDir  /= ".ecflowrc";
+
+		configDir_=configDir.string();
+		rcDir_=rcDir.string();
+
+		//Create configDir if if does not exist
+		if(!boost::filesystem::exists(configDir))
+		{
+			try
+			{
+				boost::filesystem::create_directory(configDir);
+			}
+			catch(const boost::filesystem::filesystem_error& err)
+			{
+				UserMessage::message(UserMessage::ERROR, true,
+								std::string("Could not create configDir: " + configDir_ + " reason: " + err.what()));
+			}
+		}
+	}
+
+
+	//Sets paths in the system directory
     boost::filesystem::path path(exePath);
     boost::filesystem::path binDir   = path.parent_path();
     boost::filesystem::path rootDir  = binDir.parent_path();
@@ -47,31 +72,6 @@ void DirectoryHandler::setExePath(std::string exePath)
 
     shareDir_ = shareDir.string();
     etcDir_   = etcDir.string();
-
-
-    // Set configuration directory name and create it.
-
-    if(char *h = getenv("HOME"))
-    {
-        boost::filesystem::path home(h);
-        boost::filesystem::path configDir = home /= ".ecflowview";
-        userConfigDir_ = configDir.string();
-
-        boost::system::error_code ec;
-        if (!is_directory(configDir, ec))
-        {
-            //if(mkdir(userConfigDir_.c_str(),0777) == -1)
-            if (!create_directory(configDir))
-            {
-                //error
-            }
-        }
-
-        // Set (old) rc directory name and create it.
-
-        boost::filesystem::path rcDir = home /= ".ecflowrc";
-        userRcDir_ = rcDir.string();
-    }
 }
 
 

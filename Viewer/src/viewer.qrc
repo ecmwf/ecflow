@@ -1,5 +1,14 @@
 <RCC>
   <qresource prefix="viewer">
+    <file alias="icon_calendar.png">../images/icon_calendar.png</file>
+    <file alias="icon_clock.png">../images/icon_clock.png</file>
+    <file alias="icon_complete.png">../images/icon_complete.png</file>
+    <file>../images/icon_defstatus.png</file>
+    <file alias="icon_late.png">../images/icon_late.png</file>
+    <file alias="icon_message.png">../images/icon_message.png</file>
+    <file alias="icon_rerun.png">../images/icon_rerun.png</file>
+    <file alias="icon_Z.png">../images/icon_Z.png</file>
+    <file alias="icon_waiting.png">../images/icon_waiting.png</file>
     <file>../images/arrow_up.svg</file>
     <file>../images/arrow_down.svg</file>
     <file>../images/add.svg</file>

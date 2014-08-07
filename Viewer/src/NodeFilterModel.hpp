@@ -7,16 +7,27 @@
 // nor does it submit to any jurisdiction.
 //============================================================================
 
-#ifndef VIEWFILTEROBSERVER_HPP_
-#define VIEWFILTEROBSERVER_HPP_
+#ifndef NODEFILTERMODEL_H
+#define NODEFILTERMODEL_H
 
-class ViewFilterObserver
+#include <QSortFilterProxyModel>
+
+class NodeFilterModel : public QSortFilterProxyModel
 {
-public:
-	ViewFilterObserver(){};
-	virtual ~ViewFilterObserver(){};
-	virtual void notifyFilterChanged()=0;
-};
+Q_OBJECT
 
+public:
+	NodeFilterModel(QObject *parent=0);
+	~NodeFilterModel();
+
+	bool filterAcceptsRow(int,const QModelIndex &) const;
+
+	//From QSortFilterProxyModel
+	void setSourceModel(QAbstractItemModel*);
+
+public slots:
+	void slotFilterChanged();
+
+};
 
 #endif

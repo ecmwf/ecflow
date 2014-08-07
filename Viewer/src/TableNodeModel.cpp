@@ -12,9 +12,8 @@
 #include <QDebug>
 
 #include "ChangeMgrSingleton.hpp"
-#include "ViewFilter.hpp"
 #include "ServerHandler.hpp"
-#include "ViewConfig.hpp"
+#include "VState.hpp"
 
 //=======================================================
 //
@@ -22,8 +21,8 @@
 //
 //=======================================================
 
-TableNodeModel::TableNodeModel(ServerFilter* serverFilter,QObject *parent) :
-	AbstractNodeModel(serverFilter,parent)
+TableNodeModel::TableNodeModel(VConfig* config,QObject *parent) :
+	AbstractNodeModel(config,parent)
 {
 }
 
@@ -51,7 +50,8 @@ int TableNodeModel::rowCount( const QModelIndex& parent) const
 			//qDebug() << "rowCount" << parent << servers_.count();
 			return servers_.count();
 	}
-	//The parent is a server
+	//The parent is a server	VFilter *f=config->stateFilter();
+
 	else if(isServer(parent))
 	{
 		if(ServerHandler *server=indexToServer(parent))
@@ -129,13 +129,13 @@ QVariant TableNodeModel::nodeData(const QModelIndex& index, int role) const
 		switch(index.column())
 		{
 		case 0: return QString::fromStdString(node->absNodePath());
-		case 1: return ViewConfig::Instance()->stateName(node->dstate());
+		case 1: return VState::toName(node);
 		default: return QVariant();
 		}
 	}
 	else if(role == Qt::BackgroundRole)
 	{
-		return ViewConfig::Instance()->stateColour(node->dstate());
+		return VState::toColour(node);
 	}
 	else if(role == FilterRole)
 		return static_cast<int>(node->dstate());
@@ -330,50 +330,6 @@ QModelIndex TableNodeModel::nodeToIndex(Node* node, int column) const
 
 	return QModelIndex();
 }
-
-//=======================================================
-//
-// TableNodeFilterModel
-//
-//=======================================================
-
-
-TableNodeFilterModel::TableNodeFilterModel(ViewFilter* filterData,QObject *parent) :
-		QSortFilterProxyModel(parent),
-		viewFilter_(filterData)
-{
-	viewFilter_->addObserver(this);
-}
-
-TableNodeFilterModel::~TableNodeFilterModel()
-{
-	viewFilter_->removeObserver(this);
-}
-
-void TableNodeFilterModel::notifyFilterChanged()
-{
-	invalidateFilter();
-}
-
-bool TableNodeFilterModel::filterAcceptsRow(int sourceRow,const QModelIndex& sourceParent) const
-{
-	if(!viewFilter_->isNodeStateFiltered())
-		return true;
-
-	QModelIndex index = sourceModel()->index(sourceRow, 1, sourceParent);
-	const std::set<DState::State> ns=viewFilter_->nodeState();
-	int intSt=sourceModel()->data(index,TableNodeModel::FilterRole).toInt();
-	if(intSt<0)
-			return true;
-	else
-	{
-		DState::State st=static_cast<DState::State>(intSt);
-		if(ns.find(st) != ns.end())
-			return true;
-	}
-	return false;
-}
-
 
 
 

@@ -17,14 +17,15 @@
 //#include "Node.hpp"
 
 #include "ActionHandler.hpp"
+#include "NodeFilterModel.hpp"
 #include "TableNodeModel.hpp"
 
 
-TableNodeView::TableNodeView(QString ,ServerFilter* serverFilter,ViewFilter* filterData, QWidget* parent) : QTreeView(parent)
+TableNodeView::TableNodeView(QString ,VConfig* config, QWidget* parent) : QTreeView(parent)
 {
-		model_=new TableNodeModel(serverFilter,this);
+		model_=new TableNodeModel(config,this);
 
-		filterModel_=new TableNodeFilterModel(filterData,this);
+		filterModel_=new NodeFilterModel(this);
 		filterModel_->setSourceModel(model_);
 		filterModel_->setDynamicSortFilter(true);
 
@@ -56,7 +57,6 @@ TableNodeView::TableNodeView(QString ,ServerFilter* serverFilter,ViewFilter* fil
 		setAcceptDrops(true);
 		setDropIndicatorShown(true);
 	    setDragDropMode(QAbstractItemView::DragDrop);
-
 
 		expandAll();
 
