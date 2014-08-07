@@ -26,7 +26,7 @@
 #include "UserMessage.hpp"
 
 
-std::vector<Menu> MenuHandler::menus_;
+std::vector<Menu *> MenuHandler::menus_;
 
 
 MenuHandler::MenuHandler()
@@ -81,7 +81,7 @@ bool MenuHandler::readMenuConfigFile(const std::string &configFile)
 
                 std::string cname = menuDef.get("name", "NoName");
                 UserMessage::message(UserMessage::DBG, false, std::string("  ") + cname);
-                Menu menu(cname);
+                Menu *menu = new Menu(cname);
 
                 //ptree const &menuModesDef = menuDef.get_child("modes");
 
@@ -190,11 +190,11 @@ bool MenuHandler::readMenuConfigFile(const std::string &configFile)
 
 Menu *MenuHandler::findMenu(const std::string &name)
 {
-    for (std::vector<Menu>::iterator itMenus = menus_.begin(); itMenus != menus_.end(); ++itMenus)
+    for (std::vector<Menu *>::iterator itMenus = menus_.begin(); itMenus != menus_.end(); ++itMenus)
     {
-        if ((*itMenus).name() == name)
+        if ((*itMenus)->name() == name)
         {
-            return &(*itMenus);
+            return (*itMenus);
         }
     }
 
@@ -374,6 +374,13 @@ MenuItem::~MenuItem()
         delete action_;
 }
 
+void MenuItem::setCommand(const std::string &command)
+{
+    command_ = command;
+
+    if (action_)
+        action_->setStatusTip(QString(command.c_str()));  // so we see the command in the status bar
+};
 
 // adds an entry to the list of valid node types for this menu item
 void MenuItem::addValidType(std::string type)

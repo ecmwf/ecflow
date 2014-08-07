@@ -20,15 +20,18 @@ public:
     DirectoryHandler();
 
     static void setExePath(const std::string exePath);
-    static std::string shareDir()  {return shareDir_;};
-    static std::string etcDir()    {return etcDir_;};
+    static std::string shareDir()      {return shareDir_;};
+    static std::string etcDir()        {return etcDir_;};
+    static std::string userConfigDir() {return userConfigDir_;};
+    static std::string userRcDir()     {return userRcDir_;};
     static std::string concatenate(const std::string &path1, const std::string &path2);
     static void findFiles(const std::string &dirPath,const std::string &startsWith);
 
 private:
     static std::string shareDir_;
     static std::string etcDir_;
-
+    static std::string userConfigDir_;
+    static std::string userRcDir_;
 };
 
 

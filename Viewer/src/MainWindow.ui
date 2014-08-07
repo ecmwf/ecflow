@@ -53,6 +53,7 @@
      <string>&amp;Edit</string>
     </property>
     <addaction name="actionPreferences"/>
+    <addaction name="actionConfigureNodeMenu"/>
    </widget>
    <widget class="QMenu" name="menuView">
     <property name="title">
@@ -93,6 +94,17 @@
    <addaction name="actionRefresh"/>
    <addaction name="actionReset"/>
    <addaction name="actionServers"/>
+  </widget>
+  <widget class="QToolBar" name="toolBar">
+   <property name="windowTitle">
+    <string>toolBar</string>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
   </widget>
   <action name="actionClose">
    <property name="icon">
@@ -200,6 +212,11 @@
    </property>
    <property name="toolTip">
     <string>Server selection</string>
+   </property>
+  </action>
+  <action name="actionConfigureNodeMenu">
+   <property name="text">
+    <string>Configure Node &amp;Menu</string>
    </property>
   </action>
  </widget>

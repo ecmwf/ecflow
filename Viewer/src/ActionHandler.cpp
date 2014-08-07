@@ -24,7 +24,7 @@ void ActionHandler::contextMenu(std::vector<ViewNodeInfo_ptr> nodesLst,QPoint po
         {
             emit viewCommand(nodesLst,"set_as_root");
         }
-        else if(action->iconText() == "Custom")
+        else if(action->iconText() == "Custom")  // would expect this to be 'Custom...' but it's just 'Custom'
         {
             CustomCommandDialog customCommandDialog(0);
             if (customCommandDialog.exec() == QDialog::Accepted)

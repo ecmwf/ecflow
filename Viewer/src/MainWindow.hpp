@@ -50,6 +50,8 @@ protected slots:
 	void on_actionRefresh_triggered();
 	void on_actionReset_triggered();
 	void on_actionServers_triggered();
+	void on_actionConfigureNodeMenu_triggered();
+
 	void slotViewMode(QAction*);
 	void slotCurrentChangedInPanel();
 

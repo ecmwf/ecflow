@@ -25,6 +25,7 @@
 #include "NodePanel.hpp"
 #include "ServerHandler.hpp"
 #include "ServerDialog.hpp"
+#include "MenuConfigDialog.hpp"
 
 //Initialise static variables
 bool MainWindow::quitStarted_=false;
@@ -164,6 +165,17 @@ void MainWindow::on_actionServers_triggered()
 	d->exec();*/
 
 }
+
+void MainWindow::on_actionConfigureNodeMenu_triggered()
+{
+    MenuConfigDialog menuConfigDialog;
+    
+	if(menuConfigDialog.exec() == QDialog::Accepted)
+	{
+    }
+}
+
+
 
 void MainWindow::slotViewMode(QAction* action)
 {

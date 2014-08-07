@@ -38,7 +38,7 @@ public:
     enum NodeType {SERVER, SUITE, FAMILY, TASK, ALIAS};
 
 
-    void setCommand(const std::string &command) {command_ = command;};
+    void setCommand(const std::string &command);
     bool compatibleWithNode(ViewNodeInfo_ptr nodeInfo);
     void addValidType(std::string type);
     void addValidState(std::string type);
@@ -84,6 +84,7 @@ public:
     std::string &name()       {return name_;};
     void addItem(MenuItem *item) {items_.push_back(item);};
     QMenu *generateMenu(std::vector<ViewNodeInfo_ptr> nodes, QWidget *parent);
+    std::vector<MenuItem *>& items() {return items_;};
 
 
 private:
@@ -111,11 +112,11 @@ public:
     static bool addItemToMenu(MenuItem *item, const std::string &menuName);
     static Menu *findMenu(const std::string &name);
     static MenuItem* newItem(const std::string &name);
+    static void addMenu(Menu *menu) {menus_.push_back(menu);};
 
 private:
-    static std::vector<Menu> menus_;
+    static std::vector<Menu *> menus_;
     //static std::vector<MenuItem> items_;
-    static void addMenu(Menu &menu) {menus_.push_back(menu);};
 
 };
 

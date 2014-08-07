@@ -14,6 +14,7 @@ set(viewer_srcs
     JobItemWidget.cpp
     MainWindow.cpp
     ManualItemWidget.cpp 
+    MenuConfigDialog.cpp
     MenuHandler.cpp
     MessageItemWidget.cpp
     NodeInfoQuery.cpp
@@ -56,6 +57,7 @@ QT4_WRAP_CPP(VIEWER_MOC AbstractNodeModel.hpp
                         FilterWidget.hpp
                         InfoPanel.hpp
                         MainWindow.hpp
+                        MenuConfigDialog.hpp
                         NodePanel.hpp
                         NodePathWidget.hpp
                         NodeWidget.hpp
@@ -69,7 +71,7 @@ QT4_WRAP_CPP(VIEWER_MOC AbstractNodeModel.hpp
                         VariableItemWidget.hpp)
 
 QT4_ADD_RESOURCES (VIEWER_RES viewer.qrc)
-QT4_WRAP_UI       (VIEWER_FORMS_HEADERS CommandDesignerWidget.ui CustomCommandDialog.ui MainWindow.ui SearchLineWidget.ui ServerDialog.ui ServerItemDialog.ui TextItemWidget.ui)
+QT4_WRAP_UI       (VIEWER_FORMS_HEADERS CommandDesignerWidget.ui CustomCommandDialog.ui MainWindow.ui MenuConfigDialog.ui SearchLineWidget.ui ServerDialog.ui ServerItemDialog.ui TextItemWidget.ui)
 
 
 ecbuild_add_executable( TARGET   ecflowviewer

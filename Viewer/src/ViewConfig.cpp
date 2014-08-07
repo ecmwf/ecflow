@@ -87,27 +87,6 @@ ViewConfig::ViewConfig()
 		if(itP != params_.end())
 			stateParams_[*it]=itP->second;
 	}
-
-	//Set configuration directory name and create it.
-	if(char *h=getenv("HOME"))
-	{
-		configDir_=std::string(h);
-		configDir_+="/.ecflowview";
-		if(access(configDir_.c_str(),F_OK) != 0 )
-		{
-			if(mkdir(configDir_.c_str(),0777) == -1)
-			{
-				//error
-			}
-		}
-	}
-
-	//Set rc directory name and create it.
-	if(char *h=getenv("HOME"))
-	{
-		rcDir_=std::string(h);
-		rcDir_+="/.ecflowrc";
-	}
 }
 
 ViewConfig* ViewConfig::Instance()

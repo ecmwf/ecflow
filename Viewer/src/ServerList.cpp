@@ -18,6 +18,7 @@
 
 #include "ServerItem.hpp"
 #include "ViewConfig.hpp"
+#include "DirectoryHandler.hpp"
 
 ServerList* ServerList::instance_=0;
 
@@ -98,7 +99,7 @@ void ServerList::update(const std::vector<ServerItem*>& items)
 
 bool ServerList::load()
 {
-	std::string path(ViewConfig::Instance()->configDir());
+	std::string path(DirectoryHandler::userConfigDir());
 	path+="/servers.txt";
 
 	std::ifstream in(path.c_str());
@@ -129,7 +130,7 @@ bool ServerList::load()
 
 void ServerList::save()
 {
-	std::string path(ViewConfig::Instance()->configDir());
+	std::string path(DirectoryHandler::userConfigDir());
 	path+="/servers.txt";
 
 	std::ofstream out;
@@ -149,7 +150,7 @@ void ServerList::save()
 
 bool ServerList::readRcFile()
 {
-	std::string path(ViewConfig::Instance()->rcDir());
+	std::string path(DirectoryHandler::userRcDir());
 	path+="/servers";
 
 	std::ifstream in(path.c_str());

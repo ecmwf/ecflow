@@ -20,6 +20,8 @@
 
 std::string DirectoryHandler::shareDir_;
 std::string DirectoryHandler::etcDir_;
+std::string DirectoryHandler::userConfigDir_;
+std::string DirectoryHandler::userRcDir_;
 
 
 DirectoryHandler::DirectoryHandler()
@@ -45,6 +47,31 @@ void DirectoryHandler::setExePath(std::string exePath)
 
     shareDir_ = shareDir.string();
     etcDir_   = etcDir.string();
+
+
+    // Set configuration directory name and create it.
+
+    if(char *h = getenv("HOME"))
+    {
+        boost::filesystem::path home(h);
+        boost::filesystem::path configDir = home /= ".ecflowview";
+        userConfigDir_ = configDir.string();
+
+        boost::system::error_code ec;
+        if (!is_directory(configDir, ec))
+        {
+            //if(mkdir(userConfigDir_.c_str(),0777) == -1)
+            if (!create_directory(configDir))
+            {
+                //error
+            }
+        }
+
+        // Set (old) rc directory name and create it.
+
+        boost::filesystem::path rcDir = home /= ".ecflowrc";
+        userRcDir_ = rcDir.string();
+    }
 }
 
 

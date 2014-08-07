@@ -54,18 +54,12 @@ public:
 		QString  stateShortName(DState::State) const;
 		QColor   colour(QString) const;
 
-		const std::string& configDir() const {return configDir_;}
-		const std::string& rcDir() const {return rcDir_;}
-
 protected:
 		ViewConfig();
 
 		void readParams(const std::string&);
 
 		static ViewConfig* instance_;
-
-		std::string configDir_;
-		std::string rcDir_;
 
 		std::map<DState::State,VParameter*> stateParams_;
 		std::map<QString,VParameter*> params_;
