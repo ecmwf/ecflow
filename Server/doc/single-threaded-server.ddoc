@@ -1,0 +1,9 @@
+
+TODO
+========================================
+
+If we have single threaded server, and do not want cost of mutex,lock, etc
+we should compile with:
+
+  o try compiling with -DBOOST_ASIO_DISABLE_THREADS.
+
