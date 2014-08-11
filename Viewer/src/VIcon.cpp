@@ -101,10 +101,11 @@ std::vector<VParam*> VIcon::filterItems()
 
 //Create the pixmap containing all the relevant icons for the given node according to the filter.
 
-QPixmap VIcon::pixmap(Node *node,VFilter *filter)
+QVariantList VIcon::pixmapList(Node *node,VFilter *filter)
 {
+	QVariantList lst;
 	if(!node)
-		return QPixmap();
+		return lst;
 
 	for(std::vector<VIcon*>::const_iterator it=items_.begin(); it != items_.end(); it++)
 	{
@@ -113,12 +114,12 @@ QPixmap VIcon::pixmap(Node *node,VFilter *filter)
 				VIcon *v=*it;
 				if((*(v->testProc_))(node) )
 				{
-					return *((*it)->pixmap(16));
+					lst << *((*it)->pixmap(16));
 				}
 			}
 	}
 
-	return QPixmap();
+	return lst;
 }
 
 bool  VIcon::testWait(Node *n)

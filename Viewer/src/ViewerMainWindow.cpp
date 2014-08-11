@@ -58,8 +58,6 @@ void ViewerMainWindow::printDefTree(const std::string &server, int port)
             printNode(nodes[n], 2, suiteItem);
         }
     }
-
-
 }
 
 

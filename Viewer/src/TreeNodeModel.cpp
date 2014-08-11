@@ -95,7 +95,7 @@ QVariant TreeNodeModel::data( const QModelIndex& index, int role ) const
 	//the cases where the default should be used.
 	if( !index.isValid() ||
 	   (role != Qt::DisplayRole && role != Qt::ToolTipRole && role != Qt::BackgroundRole &&
-	    role != FilterRole && role != Qt::DecorationRole))
+	    role != FilterRole && role != IconRole))
     {
 		return QVariant();
 	}
@@ -116,7 +116,7 @@ QVariant TreeNodeModel::data( const QModelIndex& index, int role ) const
 
 QVariant TreeNodeModel::serverData(const QModelIndex& index,int role) const
 {
-	if(role == Qt::DecorationRole)
+	if(role == IconRole)
 			return QVariant();
 
 	if(role == FilterRole)
@@ -164,12 +164,12 @@ QVariant TreeNodeModel::nodeData(const QModelIndex& index, int role) const
 	{
 		return VState::toColour(node);
 	}
-	else if(index.column() == 0 && role == Qt::DecorationRole)
+	else if(index.column() == 0 && role == IconRole)
 	{
 		if(config_->iconFilter()->isEmpty())
 			return QVariant();
 		else
-			return VIcon::pixmap(node,config_->iconFilter());
+			return VIcon::pixmapList(node,config_->iconFilter());
 	}
 
 	return QVariant();
@@ -183,7 +183,7 @@ QVariant TreeNodeModel::nodeData(const QModelIndex& index, int role) const
 
 QVariant TreeNodeModel::attributesData(const QModelIndex& index, int role) const
 {
-	if(role == Qt::DecorationRole)
+	if(role == IconRole)
 			return QVariant();
 
 	if(index.column()!=0)

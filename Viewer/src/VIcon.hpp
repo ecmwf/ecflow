@@ -31,7 +31,7 @@ public:
 	~VIcon();
 
 	static std::vector<VParam*> filterItems();
-	static QPixmap pixmap(Node *node,VFilter *filter);
+	static QVariantList pixmapList(Node *node,VFilter *filter);
 	static void init();
 
 	static bool  testWait(Node *n);

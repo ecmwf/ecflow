@@ -13,13 +13,8 @@
 #include <QDebug>
 #include <QPainter>
 
-#include "VAttribute.hpp"
-#include "Viewer.hpp"
-
-//#include "Defs.hpp"
-//#include "ClientInvoker.hpp"
-//#include "Node.hpp"
-
+#include "AbstractNodeModel.hpp"
+#include "VParam.hpp"
 
 TreeNodeViewDelegate::TreeNodeViewDelegate(QWidget *parent) : QStyledItemDelegate(parent)
 {
@@ -92,40 +87,40 @@ void TreeNodeViewDelegate::paint(QPainter *painter,const QStyleOptionViewItem &o
 			{
 				switch(lst.at(0).toInt())
 				{
-				case VAttribute::MeterAttribute:
+				case VParam::MeterAttribute:
 					renderMeter(painter,lst,textRect,option.rect);
 					break;
-				case VAttribute::LabelAttribute:
+				case VParam::LabelAttribute:
 					renderLabel(painter,lst,textRect,option.rect);
 					break;
-				case VAttribute::EventAttribute:
+				case VParam::EventAttribute:
 					renderEvent(painter,lst,textRect,option.rect);
 					break;
-				case VAttribute::VarAttribute:
+				case VParam::VarAttribute:
 					renderVar(painter,lst,textRect,option.rect);
 					break;
-				case VAttribute::GenVarAttribute:
+				case VParam::GenVarAttribute:
 					renderGenVar(painter,lst,textRect,option.rect);
 					break;
-				case VAttribute::LimitAttribute:
+				case VParam::LimitAttribute:
 					renderLimit(painter,lst,textRect,option.rect);
 					break;
-				case VAttribute::LimiterAttribute:
+				case VParam::LimiterAttribute:
 					renderLimiter(painter,lst,textRect,option.rect);
 					break;
-				case VAttribute::TriggerAttribute:
+				case VParam::TriggerAttribute:
 					renderTrigger(painter,lst,textRect,option.rect);
 					break;
-				case VAttribute::TimeAttribute:
+				case VParam::TimeAttribute:
 					renderTime(painter,lst,textRect,option.rect);
 					break;
-				case VAttribute::DateAttribute:
+				case VParam::DateAttribute:
 					renderDate(painter,lst,textRect,option.rect);
 					break;
-				case VAttribute::RepeatAttribute:
+				case VParam::RepeatAttribute:
 					renderRepeat(painter,lst,textRect,option.rect);
 					break;
-				case VAttribute::LateAttribute:
+				case VParam::LateAttribute:
 					renderLate(painter,lst,textRect,option.rect);
 					break;
 				default:
@@ -194,12 +189,19 @@ void TreeNodeViewDelegate::renderNode(QPainter *painter,const QModelIndex& index
 
 			painter->drawText(textRect,Qt::AlignLeft | Qt::AlignVCenter,text);
 
-			QVariant va=index.data(Qt::DecorationRole);
-			if(va.type() == QVariant::Pixmap)
+			QVariant va=index.data(AbstractNodeModel::IconRole);
+			if(va.type() == QVariant::List)
 			{
-				QPixmap pix=va.value<QPixmap>();
-				QRect pixRect(fillRect.topRight(),pix.size());
-				painter->drawPixmap(pixRect,pix);
+				QVariantList lst=va.toList();
+				int xp=fillRect.topRight().x()+5;
+				int yp=fillRect.topRight().y();
+				for(int i=0; i < lst.count(); i++)
+				{
+					QPixmap pix=lst[i].value<QPixmap>();
+					QRect pixRect(xp,yp,pix.width(),pix.height());
+					painter->drawPixmap(pixRect,pix);
+					xp+=pix.width();
+				}
 			}
 		}
 	}

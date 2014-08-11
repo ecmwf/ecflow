@@ -61,7 +61,7 @@ public:
 	AbstractNodeModel(VConfig*,QObject *parent=0);
    	virtual ~AbstractNodeModel();
 
-   	enum CustomItemRole {FilterRole = Qt::UserRole+1};
+   	enum CustomItemRole {FilterRole = Qt::UserRole+1, IconRole = Qt::UserRole+2};
 
 	void addServer(ServerHandler *);
 	void setRootNode(Node *node);
