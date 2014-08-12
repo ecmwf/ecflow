@@ -963,12 +963,24 @@ def test_client_alter_change(ci):
     trigger = task_t1.get_trigger()
     assert trigger.get_expression() == "t2 == aborted", "Expected alter of trigger to be 't2 == aborted' but found " + trigger.get_expression()
 
+    ci.alter(t1,"change","trigger","/s1/f1/t2 == complete")   
+    ci.sync_local()
+    task_t1 = ci.get_defs().find_abs_node(t1)
+    trigger = task_t1.get_trigger()
+    assert trigger.get_expression() == "/s1/f1/t2 == complete", "Expected alter of trigger to be '/s1/f1/t2 == complete' but found " + trigger.get_expression()
+
     ci.alter(t1,"change","complete","t2 == aborted")   
     ci.sync_local()
     task_t1 = ci.get_defs().find_abs_node(t1)
     complete = task_t1.get_complete()
     assert complete.get_expression() == "t2 == aborted", "Expected alter of complete to be 't2 == aborted' but found " + complete.get_expression()
- 
+
+    ci.alter(t1,"change","complete","/s1/f1/t2 == active")   
+    ci.sync_local()
+    task_t1 = ci.get_defs().find_abs_node(t1)
+    complete = task_t1.get_complete()
+    assert complete.get_expression() == "/s1/f1/t2 == active", "Expected alter of complete to be '/s1/f1/t2 == active' but found " + complete.get_expression()
+
     ci.alter(t1,"change","limit_max","limit", "2")   
     ci.sync_local()
     task_t1 = ci.get_defs().find_abs_node(t1)
