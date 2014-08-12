@@ -90,6 +90,7 @@ std::ostream& UserCmd::user_cmd(std::ostream& os, const std::string& the_cmd) co
    return os << the_cmd << " :" << user();
 }
 
+//#define DEBUG_ME 1
 
 void UserCmd::split_args_to_options_and_paths(
           const std::vector<std::string>& args,
@@ -102,6 +103,13 @@ void UserCmd::split_args_to_options_and_paths(
       if (args[i][0] == '/') paths.push_back(args[i]);
       else                   options.push_back(args[i]);
    }
+
+#ifdef DEBUG_ME
+   std::cout << "split_args_to_options_and_paths\n";
+   for(size_t i = 0; i < args.size(); ++i) { std::cout << "args[" << i << "]=" <<args[i] << "\n"; }
+   for(size_t i = 0; i < options.size(); ++i) { std::cout << "options[" << i << "]=" << options[i] << "\n"; }
+   for(size_t i = 0; i < paths.size(); ++i) { std::cout << "paths[" << i << "]=" << paths[i] << "\n"; }
+#endif
 }
 
 int UserCmd::time_out_for_load_sync_and_get() const { return 600; }
