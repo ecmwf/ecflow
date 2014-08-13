@@ -790,7 +790,7 @@ void AlterCmd::createChange( Cmd_ptr& cmd, std::vector<std::string>& options, st
 		   // The name could be an integer
 		   try { boost::lexical_cast< int >( name ); }
 		   catch ( boost::bad_lexical_cast& ) {
-		      // name is not an integer, make if its a name, its valid
+		      // name is not an integer, check name is valid
 		      Event check_name(name); // will throw if name is not valid
 		   }
 		   break; }
