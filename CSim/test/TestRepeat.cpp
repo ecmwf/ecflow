@@ -238,7 +238,7 @@ BOOST_AUTO_TEST_CASE( test_repeat_date_for_loop2  )
       task_ptr task = fam->add_task("t");
       task->addTime( ecf::TimeAttr( TimeSlot(10,0) ) );
       task->addTime( ecf::TimeAttr( TimeSlot(11,0) ) );
-      task->addVerify( VerifyAttr(NState::COMPLETE,55) );     // task should complete 50 times
+      task->addVerify( VerifyAttr(NState::COMPLETE,50) );     // task should complete 50 times
 
 //    cout << theDefs << "\n";
    }
