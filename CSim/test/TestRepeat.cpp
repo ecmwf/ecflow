@@ -181,12 +181,13 @@ BOOST_AUTO_TEST_CASE( test_repeat_date_for_loop  )
 	// Each task should be run 5 * 5= 25 times, ie every day from from 1st Oct -> 5 Oct 5*5 times
    Defs theDefs;
  	{
- 	 	boost::posix_time::ptime   theLocalTime =  Calendar::second_clock_time();
-		ClockAttr clockAttr(theLocalTime );
-
       suite_ptr suite = theDefs.add_suite("test_repeat_date_for_loop");
 		suite->addRepeat( RepeatDate("YMD",20091001,20091005,1));  // repeat contents 5 times
 		suite->addVerify( VerifyAttr(NState::COMPLETE,5) );
+
+      // start at specific time other wise time dependent checks will not verify
+		ClockAttr clockAttr;
+		clockAttr.date(1,10,2009);
   		suite->addClock( clockAttr );
 
       family_ptr fam = suite->add_family( "family" );
@@ -204,6 +205,7 @@ BOOST_AUTO_TEST_CASE( test_repeat_date_for_loop  )
 	std::string errorMsg;
 	BOOST_CHECK_MESSAGE(simulator.run(theDefs, TestUtil::testDataLocation("test_repeat_date_for_loop.def"), errorMsg),errorMsg);
 }
+
 
 BOOST_AUTO_TEST_CASE( test_repeat_date_for_loop2  )
 {
@@ -223,12 +225,13 @@ BOOST_AUTO_TEST_CASE( test_repeat_date_for_loop2  )
    // Each task should be run 5 * 5 * 2 = 50 times, ie every day from from 1st Oct -> 5 Oct 5*5 times * 2 time slots
    Defs theDefs;
    {
-      boost::posix_time::ptime   theLocalTime =  Calendar::second_clock_time();
-      ClockAttr clockAttr(theLocalTime );
-
+      // start at specific time other wise time dependent checks will not verify
       suite_ptr suite = theDefs.add_suite("test_repeat_date_for_loop2");
       suite->addRepeat( RepeatDate("YMD",20091001,20091005,1));  // repeat contents 5 times
       suite->addVerify( VerifyAttr(NState::COMPLETE,5) );
+
+      ClockAttr clockAttr;
+      clockAttr.date(1,10,2009);
       suite->addClock( clockAttr );
 
       family_ptr fam = suite->add_family( "family" );
@@ -240,7 +243,7 @@ BOOST_AUTO_TEST_CASE( test_repeat_date_for_loop2  )
       task->addTime( ecf::TimeAttr( TimeSlot(11,0) ) );
       task->addVerify( VerifyAttr(NState::COMPLETE,50) );     // task should complete 50 times
 
-//    cout << theDefs << "\n";
+      // cout << theDefs << "\n";
    }
 
    Simulator simulator;
