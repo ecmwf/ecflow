@@ -14,19 +14,15 @@ else
    Client/bin/%COMPILER_VERSION%/release/ecflow_client --version
    
    # Allow test to be rerun, by killing the OLD server, This can fail
-   /usr/local/apps/ecflow/%OLD_VERSION%/bin/ecflow_client --terminate yes || true
+   /usr/local/apps/ecflow/4.0.0/bin/ecflow_client --terminate yes || true
    
    # Clear up
    rm -rf `hostname`.*
    
    # START the server with OLD version
-   /usr/local/apps/ecflow/%OLD_VERSION%/bin/ecflow_server --ecfinterval=3 &
+   /usr/local/apps/ecflow/4.0.0/bin/ecflow_server --ecfinterval=3 &
    sleep 10
 
-   if [[ "%OLD_VERSION%" = "3.1.9" ]] ; then
-      export ECF_ALLOW_NEW_CLIENT_OLD_SERVER=9
-   fi
-   
    # RUN test with new client and OLD server
    export ECF_NODE=localhost
    Client/bin/%COMPILER_VERSION%/release/s_client
@@ -39,14 +35,13 @@ else
    #        Need to have a mechanism that disables 'complete' state verification
    #        Currently this done by setting an environment variable
    # When/If we release ecflow version 5.0, we can remove environment variable, and associated logic.
-   if [[ "%OLD_VERSION%" = "3.1.9" || "%OLD_VERSION%" = "4.0.0" || "%OLD_VERSION%" = "4.0.1" ]] ; then
-      export DISABLE_VERIFY_ATTRIBUTE_VERIFICATION=1
-   fi
+   export DISABLE_VERIFY_ATTRIBUTE_VERIFICATION=1
+  
    
    Test/bin/%COMPILER_VERSION%/release/s_test
    
    # Allow test to be rerun. by killing the OLD server, This can fail
-   /usr/local/apps/ecflow/%OLD_VERSION%/bin/ecflow_client --terminate yes || true
+   /usr/local/apps/ecflow/4.0.0/bin/ecflow_client --terminate yes || true
    
    # Clear up
    rm -rf `hostname`.*
