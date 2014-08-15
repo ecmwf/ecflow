@@ -267,6 +267,12 @@ BOOST_AUTO_TEST_CASE( test_single_real_time_near_midnight )
    cout << "Test:: ...test_single_real_time_near_midnight " << flush;
    TestClean clean_at_start_and_end;
 
+//   int the_server_version = TestFixture::server_version() ;
+//   if (the_server_version < 404 ) {
+//      cout << " SKIPPING, since this test requires server version >= 404, current server version is " << the_server_version << "\n";
+//      return;
+//   }
+
    //# Note: we have to use relative paths, since these tests are relocatable
    //suite suite
    // edit SLEEPTIME 4
