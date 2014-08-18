@@ -34,6 +34,7 @@ switch $(BOOST_ROOT) {
 
 switch $(MACHINE_NAME) {
    case cca : GCC_TAG = gcc48 ;
+   case ccb : GCC_TAG = gcc48 ;
 }
 
 
