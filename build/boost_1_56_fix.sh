@@ -14,4 +14,5 @@
 # See: https://svn.boost.org/trac/boost/ticket/10348
 cp $WK/build/fix/boost_1_56_0/shared_ptr_helper.hpp  $BOOST_ROOT/boost/serialization/.
 
-  
+# Location of bootstrap.jam has changed
+cp $WK/build/fix/boost-build.jam    $WK/.
