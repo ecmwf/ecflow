@@ -102,6 +102,15 @@ else
          cp $WK/build/cray_fix/boost_1_55_0/cray.hpp  $BOOST_ROOT/boost/config/compiler/.
       fi
    fi
+   
+   if [[ %BOOST_VERSION% = boost_1_56_0 ]] ; then
+
+      # Crickey! boost shared_ptr_helper forgot two extra includes, for all platforms !
+      cp $WK/build/fix/boost_1_56_0/shared_ptr_helper.hpp  $BOOST_ROOT/boost/serialization/.
+      
+      # Location of bootstrap.jam has also changed,  need to change boost
+      cp $WK/build/fix/boost-build.jam    $WK/.
+   fi
 fi
 
 %include <tail.h>
