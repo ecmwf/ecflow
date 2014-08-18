@@ -175,7 +175,17 @@ def is_cray_cct( node ):
             return True
         parent = parent.get_parent()
     return False
-    
+
+def is_cray_cca( node ):
+    if (node.name() == "cray_cca"):
+        return True
+    parent = node.get_parent();
+    while parent:
+        if (parent.name() == "cray_cca"):
+            return True
+        parent = parent.get_parent()
+    return False
+
 def add_cray_gnu_compiler_variables( cray_gnu ):
     #if is_cray_cct( cray_gnu ):
     #    cray_gnu.add_variable("COMPILER_TEST_PATH","gcc-4.6.3/$mode")
@@ -228,9 +238,15 @@ def add_remote_cray_variables( cray ):
 
     # for cray we need to use logsrvr in order to see the job output
     if is_cray_cct(cray):
-        cray.add_variable("ECF_LOGHOST","cct")  # cctdtn1
+        cray.add_variable("ECF_LOGHOST","cct")   
+        cray.add_variable("SCHOST","cct")    # Super Computer HOST
     else:
-        cray.add_variable("ECF_LOGHOST","cca-il2")  # cctdtn1
+        if is_cray_cca(cray):
+            cray.add_variable("SCHOST","cca")    # Super Computer HOST
+            cray.add_variable("ECF_LOGHOST","cca-il2")  
+        else:
+            cray.add_variable("ECF_LOGHOST","ccb-il2")   # or use ccb-log1
+            cray.add_variable("SCHOST","ccb")    # Super Computer HOST
 
     cray.add_variable("ECF_LOGPORT","9316")   
     
@@ -246,11 +262,6 @@ def add_remote_cray_variables( cray ):
     cray.add_variable("QUEUE","ns")
     cray.add_variable("ACCOUNT","ecodmdma")
     #cray.add_variable("STHOST","/s2o1")  # Needed by qsub.h
-    if is_cray_cct(cray):
-        cray.add_variable("SCHOST","cct")    # Super Computer HOST
-    else:
-        cray.add_variable("SCHOST","cca")    # Super Computer HOST
-        
     cray.add_variable("WSHOST",os.uname()[1])  # Work Space HOST
 
 def add_cray_variables( cray ):
@@ -258,14 +269,18 @@ def add_cray_variables( cray ):
     cray.add_variable("ECF_HOME", os.getenv("SCRATCH") + "/nightly/suite/cray")
     cray.add_variable("BOOST_DIR","/perm/ma/ma0/boost")
     cray.add_variable("ARCH","cray")
-    cray.add_variable("MODULE_LOAD_CRAY_COMPILER","module load cce/8.3.0.186")
+    #cray.add_variable("MODULE_LOAD_CRAY_COMPILER","module load cce/8.3.0.186")
+    cray.add_variable("MODULE_LOAD_CRAY_COMPILER","module load cce/8.3.1")
     if is_cray_cct( cray ):
         cray.add_variable("REMOTE_HOST","cct")
         cray.add_variable("MODULE_LOAD_GCC","module load gcc/4.6.3")
     else:
-        cray.add_variable("REMOTE_HOST","cca")
         cray.add_variable("MODULE_LOAD_GCC","module load gcc/4.8.2")
-    
+        if is_cray_cca( cray ):
+            cray.add_variable("REMOTE_HOST","cca")
+        else:
+            cray.add_variable("REMOTE_HOST","ccb")
+
     
 def add_remote_redhat_variables( redhat ):
     redhat.add_variable("ECF_KILL_CMD","ssh  %USER%@%REMOTE_HOST% \"kill -15 %ECF_RID%\"") 
@@ -545,7 +560,15 @@ def build_cray( parent ) :
     build_cray_intel( cray)
     build_cray_cray( cray)
     
+    # build on either cca | ccb  *NOT* both, since they share a common filesystem
     cray = parent.add_family("cray_cca")
+    cray.add_variable("NO_OF_CORES","2") # temp until things get sorted on cray
+    build_cray_gnu( cray)
+    build_cray_intel( cray)
+    build_cray_cray( cray)
+    
+    cray = parent.add_family("cray_ccb")
+    cray.add_defstatus( ecflow.DState.suspended ) 
     cray.add_variable("NO_OF_CORES","2") # temp until things get sorted on cray
     build_cray_gnu( cray)
     build_cray_intel( cray)
