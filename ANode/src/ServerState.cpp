@@ -13,6 +13,7 @@
 // Description :
 //============================================================================
 #include <assert.h>
+#include <iostream>
 #include "ServerState.hpp"
 #include "Str.hpp"
 #include "Log.hpp"
