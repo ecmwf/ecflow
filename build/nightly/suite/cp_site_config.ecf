@@ -11,6 +11,11 @@ else
    remote_host=%REMOTE_HOST:%
    root_wk=%ROOT_WK:/var/tmp/ma0%
    
+   BOOST_SITE_CONFIG_LOC=tools/build/v2/site-config.jam
+   if [[ %BOOST_VERSION% = boost_1_56_0 ]] ; then
+      BOOST_SITE_CONFIG_LOC=tools/build/src/site-config.jam
+   fi
+   
    # ============================================================================================
    # Update site config.jam. Note  %SITE_CONFIG% needs WK to be defined/exported
    # ============================================================================================
@@ -18,15 +23,15 @@ else
    
       if [[ "$remote_host" = "" ]] 
       then
-          cp %SITE_CONFIG%   %BOOST_DIR%/%BOOST_VERSION%/tools/build/v2/site-config.jam
+          cp %SITE_CONFIG%   %BOOST_DIR%/%BOOST_VERSION%/$BOOST_SITE_CONFIG_LOC
       else      
          # NOTE: uses SSH
-         scp %SITE_CONFIG%   $remote_host:%BOOST_DIR%/%BOOST_VERSION%/tools/build/v2/site-config.jam
+         scp %SITE_CONFIG%   $remote_host:%BOOST_DIR%/%BOOST_VERSION%/$BOOST_SITE_CONFIG_LOC
       fi
    elif [[ %ARCH% = hpux ]] ; then
-      scp %SITE_CONFIG%   %BOOST_DIR%/%BOOST_VERSION%/tools/build/v2/site-config.jam
+      scp %SITE_CONFIG%   %BOOST_DIR%/%BOOST_VERSION%/$BOOST_SITE_CONFIG_LOC
    else
-      rcp %SITE_CONFIG%   $remote_host:$root_wk/boost/%BOOST_VERSION%/tools/build/v2/site-config.jam
+      rcp %SITE_CONFIG%   $remote_host:$root_wk/boost/%BOOST_VERSION%/$BOOST_SITE_CONFIG_LOC
    fi
 fi
 
