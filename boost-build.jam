@@ -1,3 +1,5 @@
+
+
 # Copyright (C) 2002-2003 David Abrahams.
 # Copyright (C) 2002-2003 Vladimir Prus.
 # Copyright (C) 2003,2007 Rene Rivera.
@@ -11,8 +13,7 @@
 # option, the version included with the Boost library distribution is used (as
 # opposed to any other Boost Build version installed on the user's sytem).
 
-#BOOST_ROOT = $(.boost-build-file:D) ;
 BOOST_BUILD = [ MATCH --boost-build=(.*) : $(ARGV) ] ;
-#BOOST_BUILD ?= /var/tmp/ma0/boost/boost_1_45_0/tools/build/v2 ;
 BOOST_BUILD ?= $(BOOST_ROOT)/tools/build/v2 ;
+#BOOST_BUILD ?= $(BOOST_ROOT)/tools/build/src ;
 boost-build $(BOOST_BUILD) ;
