@@ -779,6 +779,9 @@ boost::posix_time::ptime Node::state_change_time() const
 
 DState::State Node::dstate() const {
 
+   // ECFLOW-139, check for suspended must be done first
+   if (isSuspended()) return DState::SUSPENDED;
+
    switch ( state() ) {
       case NState::COMPLETE:  return DState::COMPLETE; break;
       case NState::ABORTED:   return DState::ABORTED; break;
@@ -787,7 +790,6 @@ DState::State Node::dstate() const {
       case NState::QUEUED:    return DState::QUEUED; break;
       case NState::UNKNOWN:   return DState::UNKNOWN; break;
    }
-   if (isSuspended()) return DState::SUSPENDED;
    return DState::UNKNOWN;
 }
 

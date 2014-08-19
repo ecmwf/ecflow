@@ -20,6 +20,7 @@ import shutil   # used to remove directory tree
 import ecflow_test_util as Test
 from ecflow import Defs, Clock, DState,  Style, State, RepeatDate, PrintStyle, File, Client, SState, \
                    JobCreationCtrl, CheckPt, Cron, debug_build
+#from __builtin__ import None
 
 def ecf_includes() :  return os.getcwd() + "/test/data/includes"
 
@@ -1043,25 +1044,25 @@ def test_client_force(ci):
         ci.force_state(t1,state) 
         ci.sync_local()
         task = ci.get_defs().find_abs_node(t1)
-        assert task.get_state() == state, "Expected state " + state + " but found " + task.get_state()       
+        assert task.get_state() == state, "Expected state " + state + " but found " + str(task.get_state())      
     for state in state_list:
         ci.force_state( path_list,state) 
         ci.sync_local()
         for path in path_list:
             task = ci.get_defs().find_abs_node(path)
-            assert task.get_state() == state, "Expected state " + state + " but found " + task.get_state()       
+            assert task.get_state() == state, "Expected state " + state + " but found " + str(task.get_state())     
  
     for state in state_list:
         ci.force_state_recursive("/test_client_force",state) 
         ci.sync_local()
         task = ci.get_defs().find_abs_node(t1)
-        assert task.get_state() == state, "Expected state " + state + " but found " + task.get_state()
+        assert task.get_state() == state, "Expected state " + state + " but found " + str(task.get_state())
     suite_paths = [ "/test_client_force"]
     for state in state_list:
         ci.force_state_recursive( suite_paths,state) 
         ci.sync_local()
         task = ci.get_defs().find_abs_node(t1)
-        assert task.get_state() == state, "Expected state " + state + " but found " + task.get_state()            
+        assert task.get_state() == state, "Expected state " + state + " but found " + str(task.get_state())           
     
     event_states = [ "set", "clear" ]
     for ev_state in event_states:
@@ -1312,6 +1313,47 @@ def test_client_delete_node_multiple_paths(ci):
         assert node == None , "Expected not to find task " + task.get_abs_node_path()  + " as it should have been deleted:\n" + str(ci.get_defs())   
     
 
+def test_client_check_defstatus(ci):            
+    print "test_client_check_defstatus"
+    ci.delete_all()     
+    defs = create_defs("test_client_check_defstatus")  
+    
+    # stop defs form running when begin is called.
+    suite = defs.find_suite("test_client_check_defstatus")
+    suite.add_defstatus(DState.suspended)
+
+    t1 = "/test_client_check_defstatus/f1/t1"
+    t2 = "/test_client_check_defstatus/f1/t2"
+    task_t1 = defs.find_abs_node(t1)
+    task_t1.add_defstatus(DState.suspended)
+    
+    defs.generate_scripts();
+    
+    job_ctrl = JobCreationCtrl()
+    defs.check_job_creation(job_ctrl)       
+    assert len(job_ctrl.get_error_msg()) == 0, job_ctrl.get_error_msg()
+    
+    ci.restart_server()
+    ci.load(defs)           
+    ci.begin_all_suites()
+     
+    ci.sync_local() # get the changes, synced with local defs
+    print ci.get_defs();
+    task_t1 = ci.get_defs().find_abs_node(t1)
+    task_t2 = ci.get_defs().find_abs_node(t2)
+    assert task_t1 != None,"Could not find t1"
+    assert task_t2 != None,"Could not find t2"
+  
+    assert task_t1.get_state() == State.queued, "Expected state queued but found " + str(task_t1.get_state())
+    assert task_t2.get_state() == State.queued, "Expected state queued " + str(task_t2.get_state())
+
+    assert task_t1.get_dstate() == DState.suspended, "Expected state suspended but found " + str(task_t1.get_state())
+    assert task_t2.get_dstate() == DState.queued, "Expected state queued but found " + str(task_t2.get_state())
+   
+    dir_to_remove = Test.ecf_home(the_port) + "/" + "test_client_check_defstatus"
+    shutil.rmtree(dir_to_remove)      
+    
+    
 if __name__ == "__main__":
     print "####################################################################"
     print "Running ecflow version " + Client().version() + " debug build(" + str(debug_build()) +")"
@@ -1378,6 +1420,7 @@ if __name__ == "__main__":
         test_client_delete_node_multiple_paths(ci)             
 
         test_client_check(ci)  
+        test_client_check_defstatus(ci)  
  
         test_client_stats(ci)             
         test_client_debug_server_on_off(ci)             
