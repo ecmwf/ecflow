@@ -266,8 +266,8 @@ BOOST_AUTO_TEST_CASE( test_single_real_time_near_midnight )
    DurationTimer timer;
    cout << "Test:: ...test_single_real_time_near_midnight " << flush;
    int the_server_version = TestFixture::server_version() ;
-   if (the_server_version < 404 ) {
-      cout << " SKIPPING, since this test requires server version >= 404, current server version is " << the_server_version << "\n";
+   if (the_server_version == 403 ) {
+      cout << " SKIPPING, This test does not work with 403, current server version is " << the_server_version << "\n";
       return;
    }
 
@@ -322,8 +322,8 @@ BOOST_AUTO_TEST_CASE( test_time_real_series_near_midnight )
    DurationTimer timer;
    cout << "Test:: ...test_time_real_series_near_midnight " << flush;
    int the_server_version = TestFixture::server_version() ;
-   if (the_server_version < 404 ) {
-      cout << " SKIPPING, since this test requires server version >= 404, current server version is " << the_server_version << "\n";
+   if (the_server_version == 403 ) {
+      cout << " SKIPPING, This test does not work with 403, current server version is " << the_server_version << "\n";
       return;
    }
 
