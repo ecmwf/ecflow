@@ -80,7 +80,7 @@ BOOST_AUTO_TEST_CASE( test_handle )
    }
 
    // The test harness will create corresponding directory structure & default ecf file
-   ServerTestHarness serverTestHarness( false,/*do log file verification*/ false /* standardVerification*/ );
+   ServerTestHarness serverTestHarness;
    serverTestHarness.run(theDefs,
                         ServerTestHarness::testDataDefsLocation("test_handle.def"),
                         1 /*timeout*/,
@@ -206,7 +206,7 @@ BOOST_AUTO_TEST_CASE( test_handle_sync )
    }
 
    // The test harness will create corresponding directory structure & default ecf file
-   ServerTestHarness serverTestHarness( false, /*do log file verification*/ false /* standardVerification*/ );
+   ServerTestHarness serverTestHarness;
    serverTestHarness.run(theDefs,
                          ServerTestHarness::testDataDefsLocation("test_handle_sync.def"),
                          1 /*timeout*/,
@@ -333,7 +333,7 @@ BOOST_AUTO_TEST_CASE( test_handle_add_remove_add )
 
    // The test harness will create corresponding directory structure & default ecf file
    // ADD
-   ServerTestHarness serverTestHarness( false, /*do log file verification*/ false /* standardVerification*/ );
+   ServerTestHarness serverTestHarness;
    serverTestHarness.run(*theDefs,
                          ServerTestHarness::testDataDefsLocation("test_handle_sync.def"),
                          1 /*timeout*/,

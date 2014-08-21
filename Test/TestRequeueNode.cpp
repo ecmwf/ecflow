@@ -79,7 +79,7 @@ BOOST_AUTO_TEST_CASE( test_requeue_node )
 
  	// The test harness will create corresponding directory structure
  	// and populate with standard sms files.
-  	ServerTestHarness serverTestHarness(false/*do verification*/);
+   ServerTestHarness serverTestHarness;
  	serverTestHarness.run(theDefs,ServerTestHarness::testDataDefsLocation("test_reque.def") );
 
  	// Now re-queue the whole suite

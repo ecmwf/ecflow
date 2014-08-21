@@ -95,7 +95,7 @@ BOOST_AUTO_TEST_CASE( test_repeat_integer )
 
  	// The test harness will create corresponding directory structure
  	// and populate with standard sms files.
-  	ServerTestHarness serverTestHarness(false/*do log file verification*/);
+   ServerTestHarness serverTestHarness;
  	serverTestHarness.run(theDefs, ServerTestHarness::testDataDefsLocation("test_repeat_integer.def"));
 
 	cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount() << ")\n";
@@ -132,7 +132,7 @@ BOOST_AUTO_TEST_CASE( test_repeat_date )
 
    // The test harness will create corresponding directory structure
    // and populate with standard sms files.
-   ServerTestHarness serverTestHarness(false/*do log file verification*/);
+   ServerTestHarness serverTestHarness;
    serverTestHarness.run(theDefs, ServerTestHarness::testDataDefsLocation("test_repeat_date.def"));
 
    cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount() << ")\n";
@@ -173,7 +173,7 @@ BOOST_AUTO_TEST_CASE( test_repeat_enumerator )
 
    // The test harness will create corresponding directory structure
    // and populate with standard ecf files.
-   ServerTestHarness serverTestHarness(false/*do log file verification*/);
+   ServerTestHarness serverTestHarness;
    serverTestHarness.run(theDefs, ServerTestHarness::testDataDefsLocation("test_repeat_enumerator.def") );
 
    cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount() << ")\n";
@@ -219,7 +219,7 @@ BOOST_AUTO_TEST_CASE( test_repeat_defstatus )
  		}
  	}
 
-   ServerTestHarness serverTestHarness(false/*do log file verification*/);
+   ServerTestHarness serverTestHarness;
  	serverTestHarness.run(theDefs,ServerTestHarness::testDataDefsLocation("test_repeat_defstatus.def"));
 	cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount() << ")\n";
 }
@@ -277,7 +277,7 @@ BOOST_AUTO_TEST_CASE( test_repeat_clears_user_edit )
 
    // The test harness will create corresponding directory structure
    // and populate with standard sms files.
-   ServerTestHarness serverTestHarness(false/*do log file verification*/);
+   ServerTestHarness serverTestHarness;
    serverTestHarness.run(theDefs, ServerTestHarness::testDataDefsLocation("test_repeat_integer.def"), 40, false /* waitFortestcompletion */);
 
 #ifdef DEBUG_ME

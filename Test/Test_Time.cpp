@@ -90,7 +90,7 @@ BOOST_AUTO_TEST_CASE( test_single_real_time )
 
    // The test harness will create corresponding directory structure
    // and populate with standard ecf files.
-   ServerTestHarness serverTestHarness(false/*do log file verification*/,false/* dont do standard verification */);
+   ServerTestHarness serverTestHarness;
    serverTestHarness.run(theDefs,ServerTestHarness::testDataDefsLocation("test_single_real_time.def"));
 
    cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount() << ")\n";
@@ -144,7 +144,7 @@ BOOST_AUTO_TEST_CASE( test_time_multiple_single_slot )
 
    // The test harness will create corresponding directory structure
    // and populate with standard ecf files.
-   ServerTestHarness serverTestHarness(false/*do log file verification*/,false/* dont do standard verification */);
+   ServerTestHarness serverTestHarness;
    serverTestHarness.run(theDefs,ServerTestHarness::testDataDefsLocation("test_time_multiple_single_slot.def"));
 
    cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount() << ")\n";
@@ -196,7 +196,7 @@ BOOST_AUTO_TEST_CASE( test_time_relative_time_series )
 
    // The test harness will create corresponding directory structure
    // and populate with standard ecf files.
-   ServerTestHarness serverTestHarness(false/*do log file verification*/,false/* dont do standard verification */);
+   ServerTestHarness serverTestHarness;
    serverTestHarness.run(theDefs, ServerTestHarness::testDataDefsLocation("test_time_relative_time_series.def"));
 
    cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount() << ")\n";
@@ -254,7 +254,7 @@ BOOST_AUTO_TEST_CASE( test_time_real_series )
 
    // The test harness will create corresponding directory structure
    // and populate with standard sms files.
-   ServerTestHarness serverTestHarness(false/*do log file verification*/,false/* dont do standard verification */);
+   ServerTestHarness serverTestHarness;
    //serverTestHarness.add_default_sleep_time(false); // avoid missing time steps due to submit->active->complete > job submission interval
    serverTestHarness.run(theDefs, ServerTestHarness::testDataDefsLocation("test_time_real_series.def"));
 
@@ -304,7 +304,7 @@ BOOST_AUTO_TEST_CASE( test_single_real_time_near_midnight )
    }
 
    // The test harness will create corresponding directory structure and populate with standard ecf files.
-   ServerTestHarness serverTestHarness(false/*do log file verification*/,false/* dont do standard verification */);
+   ServerTestHarness serverTestHarness;
    serverTestHarness.run(theDefs,ServerTestHarness::testDataDefsLocation("test_single_real_time_near_midnight.def"));
 
 #ifdef DEBUG_ME
@@ -372,7 +372,7 @@ BOOST_AUTO_TEST_CASE( test_time_real_series_near_midnight )
    }
 
    // The test harness will create corresponding directory structure and populate with standard ecf files.
-   ServerTestHarness serverTestHarness(false/*do log file verification*/,false/* dont do standard verification */);
+   ServerTestHarness serverTestHarness;
    serverTestHarness.run(theDefs, ServerTestHarness::testDataDefsLocation("test_time_real_series_near_midnight.def"));
 
 #ifdef DEBUG_ME

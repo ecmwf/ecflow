@@ -65,7 +65,7 @@ BOOST_AUTO_TEST_CASE( test_late )
       task->addLate( lateAttr );
    }
 
-   ServerTestHarness serverTestHarness(false/*do verification*/,false/* dont do standard verification */);
+   ServerTestHarness serverTestHarness;
    serverTestHarness.run(theDefs,ServerTestHarness::testDataDefsLocation("test_late.def"));
 
    TestFixture::client().set_throw_on_error(true);

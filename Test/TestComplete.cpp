@@ -99,10 +99,8 @@ BOOST_AUTO_TEST_CASE( test_complete )
 		task_t2->addVerify( VerifyAttr(NState::COMPLETE,2) );
  	}
 
-	// With repeat the task do not follow the normal life cycle changes
-	// hence we will only compare with golden reference log file.
  	// The test harness will create corresponding directory structure & default ecf file
- 	ServerTestHarness serverTestHarness(true/*do log file verification*/,false/* dont do standard verification */);
+   ServerTestHarness serverTestHarness;
  	serverTestHarness.run(theDefs, ServerTestHarness::testDataDefsLocation("test_complete.def") );
 
 	cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount() << ")\n";
@@ -138,7 +136,7 @@ BOOST_AUTO_TEST_CASE( test_complete_does_not_hold )
       t2->addVerify( VerifyAttr(NState::COMPLETE,1) );
    }
 
-   ServerTestHarness serverTestHarness(false/*do log file verification*/,false/* dont do standard verification */);
+   ServerTestHarness serverTestHarness;
    serverTestHarness.run(theDefs, ServerTestHarness::testDataDefsLocation("test_complete_does_not_hold.def") );
 
    cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount() << ")\n";
@@ -171,7 +169,7 @@ BOOST_AUTO_TEST_CASE( test_complete_with_empty_family )
       fam->add_task("t2")->addVerify( VerifyAttr(NState::COMPLETE,1) );
    }
 
-   ServerTestHarness serverTestHarness(false/*do log file verification*/,false/* dont do standard verification */);
+   ServerTestHarness serverTestHarness;
    serverTestHarness.run(theDefs, ServerTestHarness::testDataDefsLocation("test_complete_with_empty_family.def") );
 
    cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount() << ")\n";

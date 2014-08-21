@@ -35,7 +35,6 @@
 #include "ClientToServerCmd.hpp"
 #include "DefsStructureParser.hpp"
 #include "AssertTimer.hpp"
-#include "TestVerification.hpp"
 #include "File.hpp"
 
 using namespace std;
@@ -71,7 +70,7 @@ BOOST_AUTO_TEST_CASE( test_mega_def )
    std::string errorMsg,warningMsg;
    BOOST_REQUIRE_MESSAGE(checkPtParser.doParse(errorMsg,warningMsg),errorMsg);
 
-   ServerTestHarness serverTestHarness( false /*doVerification*/, false /* standardVerification*/);
+   ServerTestHarness serverTestHarness;
    serverTestHarness.check_task_duration_less_than_server_poll(false); // Add variable CHECK_TASK_DURATION_LESS_THAN_SERVER_POLL
    serverTestHarness.run(theDefs,path,std::numeric_limits<int>::max()/*timeout*/  );
 
@@ -109,7 +108,7 @@ BOOST_AUTO_TEST_CASE( test_mega_def )
 //      //      suite->addRepeat( RepeatDate("YMD",19000101,99991201,1) );
 //   }
 //
-//   ServerTestHarness serverTestHarness( false /*doVerification*/, false /* standardVerification*/);
+//   ServerTestHarness serverTestHarness;
 //   serverTestHarness.check_task_duration_less_than_server_poll(false); // Add variable CHECK_TASK_DURATION_LESS_THAN_SERVER_POLL
 //   DurationTimer timer;
 //   serverTestHarness.run(theDefs,ServerTestHarness::testDataDefsLocation(test_name + ".def"), std::numeric_limits<int>::max()/*timeout*/  );

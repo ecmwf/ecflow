@@ -39,7 +39,6 @@
 #include "ClientToServerCmd.hpp"
 #include "DefsStructureParser.hpp"
 #include "AssertTimer.hpp"
-#include "TestVerification.hpp"
 #include "Str.hpp"
 #include "NOrder.hpp"
 
@@ -104,7 +103,7 @@ BOOST_AUTO_TEST_CASE( test_alias )
    }
 
    // The test harness will create corresponding directory structure & default ecf file
-   ServerTestHarness serverTestHarness( false /*doLogFileVerification*/, true/* standardVerification*/);
+   ServerTestHarness serverTestHarness;
    serverTestHarness.run(theDefs,ServerTestHarness::testDataDefsLocation("test_alias.def"));
 
    // After the task has completed create a Alias
