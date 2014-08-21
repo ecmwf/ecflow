@@ -17,6 +17,7 @@ import pwd
 from datetime import datetime
 import shutil   # used to remove directory tree
 
+# ecflow_test_util, see File ecflow_test_util.py
 import ecflow_test_util as Test
 from ecflow import Defs, Clock, DState,  Style, State, RepeatDate, PrintStyle, File, Client, SState, \
                    JobCreationCtrl, CheckPt, Cron, debug_build
