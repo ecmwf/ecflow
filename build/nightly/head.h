@@ -12,11 +12,6 @@ if [[ $HOST = lxop* ]]; then
   ln -sf $(echo ${PBS_NODEFILE:=} | sed -e 's:aux:spool:').OU %ECF_JOBOUT%.running
 fi
 
-
-# -----------------------------------------------------------------------------------------
-# **NOTE** do not use -e for file existence it WONT work on HPUX/HP_UX, use -r
-# -----------------------------------------------------------------------------------------
-
 # ============================================================================
 # Defines the variables that are needed for any communication with ECF
 #
