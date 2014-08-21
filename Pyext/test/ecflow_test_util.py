@@ -49,7 +49,7 @@ def checkpt_file_path(port): return "./" + gethostname() + "." + port + ".ecf.ch
 def backup_checkpt_file_path(port): return "./" + gethostname() + "." + port + ".ecf.check.b"
 def white_list_file_path(port): return "./" + gethostname() + "." + port + ".ecf.lists"
 
-def clean_up(port):
+def clean_up_server(port):
     print "   clean_up " + port
     try: os.remove(log_file_path(port))
     except: pass
@@ -59,15 +59,15 @@ def clean_up(port):
     except: pass
     try: os.remove(white_list_file_path(port))  
     except: pass
-    if not debugging():
-        print "   Attempting to Removing ECF_HOME " + ecf_home(port)
-        try: 
-            shutil.rmtree(ecf_home(port),True)   # True means ignore errors 
-            print "   Remove OK" 
-        except: 
-            print "   Remove Failed" 
-            pass
-               
+    
+def clean_up_data(port):
+    print "   Attempting to Removing ECF_HOME " + ecf_home(port)
+    try: 
+        shutil.rmtree(ecf_home(port),True)   # True means ignore errors 
+        print "   Remove OK" 
+    except: 
+        print "   Remove Failed" 
+        pass
         
 # =======================================================================================
 class EcfPortLock(object):
@@ -140,7 +140,7 @@ class Server(object):
             self.the_port = "3152"
      
         # Only worth doing this test, if the server is running
-        # ON HPUX, have only one connection attempt, sometimes fails
+        # ON HPUX, having only one connection attempt, sometimes fails
         #ci.set_connection_attempts(1)     # improve responsiveness only make 1 attempt to connect to server
         #ci.set_retry_connection_period(0) # Only applicable when make more than one attempt. Added to check api.
         self.ci = Client("localhost", self.the_port)
@@ -149,27 +149,28 @@ class Server(object):
         try:
             print "Server:__enter__: About to ping localhost:" + self.the_port       
             self.ci.ping() 
-            print "------- Server all ready running *UNEXPECTED* ------"
+            print "   ------- Server all ready running *UNEXPECTED* ------"
         except RuntimeError, e:
-            print "------- Server *NOT* running as *EXPECTED* ------ " 
-            print "------- Start the server on port " + self.the_port + " ---------"  
-            clean_up(str(self.the_port))
+            print "   ------- Server not running as *EXPECTED* ------ " 
+            print "   ------- Start the server on port " + self.the_port + " ---------"  
+            clean_up_server(str(self.the_port))
+            clean_up_data(str(self.the_port))
     
             server_exe = File.find_server();
             assert len(server_exe) != 0, "Could not locate the server executable"
         
             server_exe += " --port=" + self.the_port + " --ecfinterval=4 &"
-            print "TestClient.py: Starting server ", server_exe
+            print "   TestClient.py: Starting server ", server_exe
             os.system(server_exe) 
         
-            print "allow time for server to start"
+            print "   Allow time for server to start"
             if self.ci.wait_for_server_reply() :
-                print "Server has started"
+                print "   Server has started"
             else:
-                print "Server failed to start after 60 second !!!!!!"
+                print "   Server failed to start after 60 second !!!!!!"
                 assert False , "Server failed to start after 60 second !!!!!!"
             
-        print "run the tests" 
+        print "   Run the tests, leaving Server:__enter__:" 
 
         # return the Client, that can call to the server
         return self.ci
@@ -187,8 +188,11 @@ class Server(object):
         print "   Terminate server OK ================================================="
         print "   Remove lock file"
         self.lock_file.remove(self.the_port)
-        if not debugging() and exctype == None:
-            clean_up(str(self.the_port))
+        clean_up_server(str(self.the_port))
+        
+        # Do not clean up data, if an assert was raised. This allow debug
+        if exctype == None:
+            clean_up_data(str(self.the_port))
         return False
         
   
