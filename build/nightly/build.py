@@ -562,13 +562,13 @@ def build_cray( parent ) :
     
     # build on either cca | ccb  *NOT* both, since they share a common filesystem
     cray = parent.add_family("cray_cca")
+    cray.add_defstatus( ecflow.DState.suspended ) 
     cray.add_variable("NO_OF_CORES","2") # temp until things get sorted on cray
     build_cray_gnu( cray)
     build_cray_intel( cray)
     build_cray_cray( cray)
     
     cray = parent.add_family("cray_ccb")
-    cray.add_defstatus( ecflow.DState.suspended ) 
     cray.add_variable("NO_OF_CORES","2") # temp until things get sorted on cray
     build_cray_gnu( cray)
     build_cray_intel( cray)
