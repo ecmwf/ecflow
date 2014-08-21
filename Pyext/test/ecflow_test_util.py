@@ -176,10 +176,9 @@ class Server(object):
     
     def __exit__(self,exctype,value,tb):
         print "Server:__exit__: Kill the server, clean up log file, check pt files and lock files, ECF_HOME"
-        print "Server:__exit__(exctype,value,tb):";
-        print exctype
-        print value
-        print tb
+        print "exctype:"; print exctype
+        print "value:"; print value
+        print "tb:"; print tb
         if not debugging():
             print "   Terminate server"
             self.ci.terminate_server()  
