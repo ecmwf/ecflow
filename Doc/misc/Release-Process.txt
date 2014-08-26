@@ -21,6 +21,13 @@ OLD Intranet site no longer active::
 
 Process
 ==================================================================
+
+0/ git flow start release 4.0.5
+
+   Push to branch onto stash, otherwise the we can not pull, from the remote machines
+   - In eclipse, you *may* have to push this branch first
+     Team->Push Branch
+
 0/ **** Check we are not in a high risk period ???
 
 0/ **** DO ***NOT*** switch current link ****************
@@ -101,16 +108,9 @@ can end up renaming.
    mail group:  ecflow_int@lists.ecmwf.int 
    Use: Release-Anouncement.txt
   
-0/ Tag the release
-   This should now be automatic when using git flow:
-   i.e 
-       git flow start release 4.0.1
-       git flow finish release 4.0.1
-   Alternatively use:
-      git tag -a <release-number> -m "ecflow release-number"
-      git tag
-      git show <release number>
-   
+0/ Tag the release, This should now be automatic when using git flow:
+       git flow finish release 4.0.5
+ 
 0/ AFTER the release increment the version number in $WK/VERSION.cmake
    THEN, run:
      sh -x $WK/cmake.sh debug
