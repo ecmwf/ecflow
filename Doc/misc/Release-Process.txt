@@ -111,7 +111,6 @@ can end up renaming.
       git tag
       git show <release number>
    
-
 0/ AFTER the release increment the version number in $WK/VERSION.cmake
    THEN, run:
      sh -x $WK/cmake.sh debug
@@ -138,3 +137,4 @@ Burton Paul
 Dando Paul
 Lucas, Dominique
 
+====================================================
