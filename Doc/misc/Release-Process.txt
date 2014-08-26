@@ -27,6 +27,7 @@ Process
    Push to branch onto stash, otherwise the we can not pull, from the remote machines
    - In eclipse, you *may* have to push this branch first
      Team->Push Branch
+     *otherwise* the option Team->Push Upstream  may well be greyed out.
 
 0/ **** Check we are not in a high risk period ???
 
