@@ -725,6 +725,7 @@ def add_suite_variables( suite ):
     suite.add_zombie(ecflow.ZombieAttr(ecflow.ZombieType.user, child_list, ecflow.ZombieUserActionType.fob, 0))
     suite.add_zombie(ecflow.ZombieAttr(ecflow.ZombieType.path, child_list, ecflow.ZombieUserActionType.fob, 0))
     
+
 # ================================================================================
 # Defs
 # ================================================================================    
