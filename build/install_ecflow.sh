@@ -108,6 +108,7 @@ then
    # =====================================================================
    # LINUX
    # =====================================================================
+   hostname=$(hostname)
    if [ "$OS_VERSION" = opensuse113 ] ; then
    
       export BOOST_ROOT=/vol/ecf/opensuse113/boost/$BOOST_VERSION; 
@@ -134,7 +135,7 @@ then
       export BOOST_ROOT=/vol/ecf/cluster/boost/$BOOST_VERSION;  
       export WK=/vol/ecf/cluster/ecflow
       
-   elif [ "$OS_VERSION" = "" ] ; then 
+   elif [[ $hostname == @(lxop*) ]] ; then 
    
       # lxop does not define OS_VERSION ?????
       export BOOST_ROOT=/gpfs/lxop/build/builds/boost/$BOOST_VERSION;  
