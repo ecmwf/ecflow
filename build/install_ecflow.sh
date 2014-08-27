@@ -108,39 +108,41 @@ then
    # =====================================================================
    # LINUX
    # =====================================================================
-   hostname=$(hostname)
-   if [ "$OS_VERSION" = opensuse113 ] ; then
+   
+   # lxop does not define OS_VERSION ?????, hence default to empty string
+   : ${OS_VERSION:=""}
+   
+   if [[ "$OS_VERSION" = opensuse113 ]] ; then
    
       export BOOST_ROOT=/vol/ecf/opensuse113/boost/$BOOST_VERSION; 
       export WK=/vol/ecf/opensuse113/ecflow
 
-   elif [ "$OS_VERSION" = opensuse131 ] ; then
+   elif [[ "$OS_VERSION" = opensuse131 ]] ; then
    
       export BOOST_ROOT=/vol/ecf/opensuse131/boost/$BOOST_VERSION; 
       export WK=/vol/ecf/opensuse131/ecflow
       
-   elif [ "$OS_VERSION" = opensuse103 ] ; then 
+   elif [[ "$OS_VERSION" = opensuse103 ]] ; then 
    
       export BOOST_ROOT=/vol/ecf/opensuse103/boost/$BOOST_VERSION;  
       export WK=/vol/ecf/opensuse103/ecflow
       
-   elif [ "$OS_VERSION" = rhel6 ] ; then 
+   elif [[ "$OS_VERSION" = rhel6 ]] ; then 
 
       export BOOST_ROOT=/vol/ecf/redhat/boost/$BOOST_VERSION;  
       export WK=/vol/ecf/redhat/ecflow
    
-   elif [ "$OS_VERSION" = sles11 ] ; then 
+   elif [[ "$OS_VERSION" = sles11 ]] ; then 
    
       # lxab this is still opensuse113
       export BOOST_ROOT=/vol/ecf/cluster/boost/$BOOST_VERSION;  
       export WK=/vol/ecf/cluster/ecflow
       
-   elif [[ $hostname == @(lxop*) ]] ; then 
+   elif [[ "$OS_VERSION" = "" ]] ; then 
    
       # lxop does not define OS_VERSION ?????
       export BOOST_ROOT=/gpfs/lxop/build/builds/boost/$BOOST_VERSION;  
       export WK=/gpfs/lxop/build/builds/ecflow
-      
    fi
   
 elif [[ "$ARCH" = cray ]] ; then 
