@@ -136,13 +136,6 @@ void Parser::popToContainerNode()
  	}
 }
 
-void Parser::popToFamily()
-{
-	while ( !nodeStack().empty() &&  !nodeStack_top()->isFamily() ) {
- 	     nodeStack().pop(); // keep poping till we get to family
- 	}
-}
-
 #ifdef SHOW_PARSER_STATS
 void Parser::printStats()
 {
