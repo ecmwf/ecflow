@@ -7,12 +7,8 @@
 ## granted to it by virtue of its status as an intergovernmental organisation 
 ## nor does it submit to any jurisdiction. 
 
-# This file is used paths up version of the boost libs
 # This script Use $BOOST_ROOT and $WK environment variable
 # Assumes boost version 1.56
 
 # See: https://svn.boost.org/trac/boost/ticket/10348
 cp $WK/build/fix/boost_1_56_0/shared_ptr_helper.hpp  $BOOST_ROOT/boost/serialization/.
-
-# Location of bootstrap.jam has changed
-cp $WK/build/fix/boost-build.jam    $WK/.
