@@ -58,7 +58,6 @@ protected:
 	void addParser(Parser* p);
 	void popNode() const;
 	void popToContainerNode();
-	void popToFamily();
 	void dump(const std::vector<std::string>& lineTokens) const;
 	void reserve_vec(int res) { expectedParsers_.reserve(res); }
 

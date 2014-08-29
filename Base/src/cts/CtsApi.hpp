@@ -207,7 +207,6 @@ public:
 	static const char* plugArg();
 	static const char* reloadwsfileArg();
 	static const char* groupArg();
-	static const char* logArg();
 	static const char* forceDependencyEvalArg();
 	static const char* alterArg();
 	static const char* edit_script_arg();

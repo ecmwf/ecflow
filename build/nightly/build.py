@@ -187,12 +187,12 @@ def is_cray_cca( node ):
     return False
 
 def add_cray_gnu_compiler_variables( cray_gnu ):
-    #if is_cray_cct( cray_gnu ):
-    #    cray_gnu.add_variable("COMPILER_TEST_PATH","gcc-4.6.3/$mode")
-    #    cray_gnu.add_variable("COMPILER_VERSION","gcc-4.6.3")
-    #else:
-    cray_gnu.add_variable("COMPILER_TEST_PATH","gcc-4.8.2/$mode")
-    cray_gnu.add_variable("COMPILER_VERSION","gcc-4.8.2")
+    if is_cray_cct( cray_gnu ):
+        cray_gnu.add_variable("COMPILER_TEST_PATH","gcc-4.6.3/$mode")
+        cray_gnu.add_variable("COMPILER_VERSION","gcc-4.6.3")
+    else:
+        cray_gnu.add_variable("COMPILER_TEST_PATH","gcc-4.8.2/$mode")
+        cray_gnu.add_variable("COMPILER_VERSION","gcc-4.8.2")
         
     cray_gnu.add_variable("TOOLSET","gcc")
     cray_gnu.add_variable("BOOTSTRAP_TOOLSET","gcc")
@@ -200,10 +200,10 @@ def add_cray_gnu_compiler_variables( cray_gnu ):
     cray_gnu.add_variable("PRGENV","PrgEnv-gnu")
     cray_gnu.add_variable("SITE_CONFIG","$WK/build/site_config/site-config-cray.jam")
     cray_gnu.add_variable("ROOT_WK","/perm/ma/ma0/workspace/GNU")
-    #if is_cray_cct( cray_gnu ):
-    #    cray_gnu.add_variable("CUSTOM_BJAM_ARGS","toolset=gcc cxxflags=-fPIC")  
-    #else:
-    cray_gnu.add_variable("CUSTOM_BJAM_ARGS","toolset=gcc cxxflags=-fPIC c++-template-depth=512") # needed for gnu/4.8.2
+    if is_cray_cct( cray_gnu ):
+        cray_gnu.add_variable("CUSTOM_BJAM_ARGS","toolset=gcc cxxflags=-fPIC")  
+    else:
+        cray_gnu.add_variable("CUSTOM_BJAM_ARGS","toolset=gcc cxxflags=-fPIC c++-template-depth=512") # needed for gnu/4.8.2
 
 def add_cray_intel_compiler_variables( cray_intel ):
     cray_intel.add_variable("COMPILER_TEST_PATH","intel-linux/$mode")
@@ -269,7 +269,6 @@ def add_cray_variables( cray ):
     cray.add_variable("ECF_HOME", os.getenv("SCRATCH") + "/nightly/suite/cray")
     cray.add_variable("BOOST_DIR","/perm/ma/ma0/boost")
     cray.add_variable("ARCH","cray")
-    #cray.add_variable("MODULE_LOAD_CRAY_COMPILER","module load cce/8.3.0.186")
     cray.add_variable("MODULE_LOAD_CRAY_COMPILER","module load cce/8.3.1")
     if is_cray_cct( cray ):
         cray.add_variable("REMOTE_HOST","cct")
@@ -716,7 +715,7 @@ def add_suite_variables( suite ):
     suite.add_variable("GIT","/usr/local/apps/git/current/bin/git")
     suite.add_variable("SET_TO_TEST_SCRIPT","false") 
     suite.add_variable("BUILD_ECFLOWVIEW","true")
-    suite.add_variable("ECFLOW_GIT_BRANCH","develop")  # when makeing a relase switch to release/<release version>, otherwise develop
+    suite.add_variable("ECFLOW_GIT_BRANCH","release/4.0.4")  # when makeing a relase switch to release/<release version>, otherwise develop
     suite.add_variable("ECBUILD_GIT_BRANCH","develop")   
 
     # automatically fob all zombies when compiling ecflow 
@@ -725,6 +724,7 @@ def add_suite_variables( suite ):
     suite.add_zombie(ecflow.ZombieAttr(ecflow.ZombieType.user, child_list, ecflow.ZombieUserActionType.fob, 0))
     suite.add_zombie(ecflow.ZombieAttr(ecflow.ZombieType.path, child_list, ecflow.ZombieUserActionType.fob, 0))
     
+
 # ================================================================================
 # Defs
 # ================================================================================    

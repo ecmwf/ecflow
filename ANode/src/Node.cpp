@@ -94,15 +94,6 @@ Node::~Node() {
    delete misc_attrs_;
 }
 
-bool Node::doDelete( Node* nodeToBeDeleted )
-{
-   Node* theParent = nodeToBeDeleted->parent();
-   if ( theParent ) return theParent->doDeleteChild( nodeToBeDeleted );
-
-   Defs* theDefs = nodeToBeDeleted->defs();
-   return theDefs->doDeleteChild( nodeToBeDeleted );
-}
-
 bool Node::isParentSuspended() const
 {
    Node* theParent = parent();

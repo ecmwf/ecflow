@@ -21,6 +21,14 @@ OLD Intranet site no longer active::
 
 Process
 ==================================================================
+
+0/ git flow start release 4.0.5
+
+   Push branch onto stash, otherwise the we can not pull, from the remote machines
+   - In eclipse, you *may* have to push this branch first
+     Team->Push Branch
+     *otherwise* the option Team->Push Upstream  may well be greyed out.
+
 0/ **** Check we are not in a high risk period ???
 
 0/ **** DO ***NOT*** switch current link ****************
@@ -46,20 +54,15 @@ Process
        rm -rf Pyext/bin
        bjam -j8
     
-0/ CRAY: If you build on cct-login, then copy build to cca.
+0/ CRAY: If you build on cct-login, then copy build to cca/ccb
 
          cd /usr/local/apps/ecflow
-         scp -r 4.0.3 emos@cca:/usr/local/apps/ecflow/.
+         scp -r 4.0.4 emos@cca:/usr/local/apps/ecflow/.
       
    READHAT: If we built on ecgb/readhat we can copy release to sappa/sappab 
   
-         scp -r 4.0.3 emos@sappa:/usr/local/apps/ecflow/.
-         scp -r 4.0.3 emos@sappb:/usr/local/apps/ecflow/.
-      
-   LXab:  copy -> LXOP (until we can build independently on LXOP)
-   
-         cd /usr/local/apps/ecflow
-         scp -r 4.0.3 emos@lxop:/usr/local/apps/ecflow/. 
+         scp -r 4.0.4 emos@sappa:/usr/local/apps/ecflow/.
+         scp -r 4.0.4 emos@sappb:/usr/local/apps/ecflow/.
       
 
 *Make* sure destination has a trailing '/.' otherwise you
@@ -86,7 +89,7 @@ can end up renaming.
    appear in the top half of the latest news
 
 0/ Update release:
-   ** Go to "Tools->Attachments", then load the gzip file. *****
+   ** Go to "Tools->Attachments", then load the gzip file:  Go to the bottom of the page *****
    0 release: This uploads the release zip file: making it accessible to member states
    http://software.ecmwf.int/wiki/display/ECFLOW/Releases
    
@@ -101,17 +104,9 @@ can end up renaming.
    mail group:  ecflow_int@lists.ecmwf.int 
    Use: Release-Anouncement.txt
   
-0/ Tag the release
-   This should now be automatic when using git flow:
-   i.e 
-       git flow start release 4.0.1
-       git flow finish release 4.0.1
-   Alternatively use:
-      git tag -a <release-number> -m "ecflow release-number"
-      git tag
-      git show <release number>
-   
-
+0/ Tag the release, This should now be automatic when using git flow:
+       git flow finish release 4.0.5
+ 
 0/ AFTER the release increment the version number in $WK/VERSION.cmake
    THEN, run:
      sh -x $WK/cmake.sh debug
@@ -138,3 +133,4 @@ Burton Paul
 Dando Paul
 Lucas, Dominique
 
+====================================================
