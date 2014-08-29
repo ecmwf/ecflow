@@ -208,6 +208,7 @@ else
       unset ECF_HOME
       unset ECF_PORT
       unset ECF_NODE
+      unset ECF_RID
       
       # Use the ctest in /usr/local/apps/cmake/current/bin
       export PATH=/usr/local/apps/cmake/current/bin:$PATH
@@ -265,10 +266,12 @@ else
       ecflow_client --meter=progress 45             --host=%ECF_NODE% --port=%ECF_PORT%  
       ecflow_client --label=progress Server         --host=%ECF_NODE% --port=%ECF_PORT%
       
+      # ECF_RID can be set for Cray, this can mess up python tests, hence unset
       if [[ %ARCH% = cray ]] ; then
          unset ECF_HOME
          unset ECF_PORT
          unset ECF_NODE
+         unset ECF_RID
       fi
       run_test Server u_server
       

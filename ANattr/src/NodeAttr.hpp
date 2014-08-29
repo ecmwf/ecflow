@@ -25,7 +25,6 @@
 #include <boost/serialization/serialization.hpp>
 #include <boost/serialization/set.hpp>            // no need to include <set>
 #include <boost/serialization/string.hpp>         // no need to include <string>
-#include <boost/serialization/weak_ptr.hpp>
 #include <boost/serialization/level.hpp>
 #include <boost/serialization/tracking.hpp>
 

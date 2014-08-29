@@ -90,18 +90,36 @@ std::ostream& UserCmd::user_cmd(std::ostream& os, const std::string& the_cmd) co
    return os << the_cmd << " :" << user();
 }
 
+//#define DEBUG_ME 1
 
 void UserCmd::split_args_to_options_and_paths(
           const std::vector<std::string>& args,
           std::vector<std::string>& options,
           std::vector<std::string>& paths)
 {
+   // ** ECFLOW-137 **, if the trigger expression have a leading '/' then it gets parsed into the paths
+   //                   vector and not options
+   // This is because boost program options does *NOT* seem to preserve the leading quotes around the
+   // trigger/complete expression,  i.e "/suite/t2 == complete"   is read as /suite/t2 == complete
+   // However in paths  we do expect to see any spaces
+
    size_t vec_size = args.size();
    for(size_t i = 0; i < vec_size; i++) {
       if (args[i].empty()) continue;
-      if (args[i][0] == '/') paths.push_back(args[i]);
-      else                   options.push_back(args[i]);
+      if (args[i][0] == '/' && args[i].find(" ") == std::string::npos) {
+         paths.push_back(args[i]);
+      }
+      else {
+         options.push_back(args[i]);
+      }
    }
+
+#ifdef DEBUG_ME
+   std::cout << "split_args_to_options_and_paths\n";
+   for(size_t i = 0; i < args.size(); ++i) { std::cout << "args[" << i << "]=" <<args[i] << "\n"; }
+   for(size_t i = 0; i < options.size(); ++i) { std::cout << "options[" << i << "]=" << options[i] << "\n"; }
+   for(size_t i = 0; i < paths.size(); ++i) { std::cout << "paths[" << i << "]=" << paths[i] << "\n"; }
+#endif
 }
 
 int UserCmd::time_out_for_load_sync_and_get() const { return 600; }

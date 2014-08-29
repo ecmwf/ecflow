@@ -209,14 +209,15 @@ BOOST_AUTO_TEST_CASE( test_server_stress_test_2 )
 #if defined(HPUX)
    int load = 10;  // On non linux systems use different load otherwise it takes to long
 #elif defined(_AIX)
-   int load = 100; // On non linux systems use different load otherwise it takes to long
+   int load = 65; // On non linux systems use different load otherwise it takes to long
 #else
-   int load = 167;
+   int load = 136;
 #endif
 
    boost::timer boost_timer; // measures CPU, replace with cpu_timer with boost > 1.51, measures cpu & elapsed
    DurationTimer duration_timer;
    ClientInvoker theClient(invokeServer.host(), invokeServer.port());
+   theClient.set_throw_on_error(false);
    for(int i = 0; i < load; i++) {
 
       BOOST_REQUIRE_MESSAGE( theClient.pingServer() == 0, " ping should return 0\n" << theClient.errorMsg());
@@ -230,7 +231,22 @@ BOOST_AUTO_TEST_CASE( test_server_stress_test_2 )
       BOOST_REQUIRE_MESSAGE( theClient.stats() == 0,CtsApi::stats() << " should return 0\n" << theClient.errorMsg());
       BOOST_REQUIRE_MESSAGE( theClient.suites() == 0,CtsApi::suites() << " should return 0\n" << theClient.errorMsg());
       BOOST_REQUIRE_MESSAGE( theClient.server_version() == 0,CtsApi::server_version() << " should return 0\n" << theClient.errorMsg());
-      BOOST_REQUIRE_MESSAGE( theClient.debug_server_off() == 0,CtsApi::debug_server_off() << " should return 0\n" << theClient.errorMsg()); //12
+      BOOST_REQUIRE_MESSAGE( theClient.debug_server_off() == 0,CtsApi::debug_server_off() << " should return 0\n" << theClient.errorMsg());
+      BOOST_REQUIRE_MESSAGE( theClient.check("/suite1") == 0,"check should return 0\n" << theClient.errorMsg()); //13
+
+      BOOST_REQUIRE_MESSAGE( theClient.logMsg("start") == 0,"log msg should return 0\n" << theClient.errorMsg());
+      BOOST_REQUIRE_MESSAGE( theClient.get_log_path() == 0,"get_log_path should return 0\n" << theClient.errorMsg());
+      BOOST_REQUIRE_MESSAGE( theClient.getLog(1) == 0,"get_log last line should return 0\n" << theClient.errorMsg());
+      BOOST_REQUIRE_MESSAGE( theClient.flushLog() == 0,"flushLog should return 0\n" << theClient.errorMsg());
+
+      BOOST_REQUIRE_MESSAGE( theClient.force("/suite1","unknown",true) == 0,"check should return 0\n" << theClient.errorMsg());
+      BOOST_REQUIRE_MESSAGE( theClient.force("/suite1","complete",true) == 0,"check should return 0\n" << theClient.errorMsg());
+      BOOST_REQUIRE_MESSAGE( theClient.force("/suite1","submitted",true) == 0,"check should return 0\n" << theClient.errorMsg());
+      BOOST_REQUIRE_MESSAGE( theClient.force("/suite1","active",true) == 0,"check should return 0\n" << theClient.errorMsg());
+      BOOST_REQUIRE_MESSAGE( theClient.force("/suite1","aborted",true) == 0,"check should return 0\n" << theClient.errorMsg());
+      BOOST_REQUIRE_MESSAGE( theClient.force("/suite1","queued",true) == 0,"check should return 0\n" << theClient.errorMsg());
+      BOOST_REQUIRE_MESSAGE( theClient.force("/suite1/family1/a:myEvent","set") == 0,"check should return 0\n" << theClient.errorMsg());
+      BOOST_REQUIRE_MESSAGE( theClient.force("/suite1/family1/a:myEvent","clear") == 0,"check should return 0\n" << theClient.errorMsg());
 
       BOOST_REQUIRE_MESSAGE( theClient.zombieGet() == 0,CtsApi::zombieGet() << " should return 0\n" << theClient.errorMsg());
       BOOST_REQUIRE_MESSAGE( theClient.zombieFob(z) == 0,    " should return 0\n" << theClient.errorMsg());
@@ -293,7 +309,7 @@ BOOST_AUTO_TEST_CASE( test_server_stress_test_2 )
       BOOST_REQUIRE_MESSAGE( theClient.defs().get(),"Server returned a NULL defs");
       BOOST_REQUIRE_MESSAGE( theClient.defs()->suiteVec().size() >= 1,"  no suite ?");
    }
-   cout << " Server handled " << load * 61
+   cout << " Server handled " << load * 74
         << " requests in boost_timer(" << boost_timer.elapsed()
         << ") DurationTimer(" << to_simple_string(duration_timer.elapsed())
         << ")" << endl;

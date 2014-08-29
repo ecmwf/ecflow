@@ -76,6 +76,11 @@ BOOST_AUTO_TEST_CASE( test_time_attr)
 //   for(size_t i = 0; i < timeSeries_free_slots.size(); i++)  cout << timeSeries_free_slots[i] << " ";
 //   cout << "\n";
 
+   // follow normal process
+   timeSeries.reset( calendar );
+   timeSeries2.reset( calendar );
+   timeSeries3.reset( calendar );
+   timeSeries4.reset( calendar );
 
    bool day_changed = false; // after midnight make sure we keep day_changed
    for(int m=1; m < 96; m++) {
@@ -83,17 +88,21 @@ BOOST_AUTO_TEST_CASE( test_time_attr)
       if (!day_changed) day_changed = calendar.dayChanged();
 
       boost::posix_time::time_duration time = calendar.suiteTime().time_of_day();
-//      cout << time << " day_changed(" << day_changed << ")\n";
+      //cout << time << " day_changed(" << day_changed << ")\n";
 
       timeSeries.calendarChanged( calendar );
       timeSeries2.calendarChanged( calendar );
       timeSeries3.calendarChanged( calendar );
       timeSeries4.calendarChanged( calendar );
 
+      //cout << to_simple_string(calendar.suiteTime()) << "\n";
 
-      if (time < timeSeries.time_series().start().duration()) {
+      if (calendar.dayChanged()) {
+         BOOST_CHECK_MESSAGE(timeSeries.checkForRequeue(calendar,t1_min,t1_max)," expected " << timeSeries.toString() << " checkForRequeue to pass at " << to_simple_string(calendar.suiteTime()));
+      }
+      else if (time < timeSeries.time_series().start().duration()) {
          BOOST_CHECK_MESSAGE(!timeSeries.isFree(calendar),timeSeries.toString() << " should NOT be free at time " << time );
-         BOOST_CHECK_MESSAGE(timeSeries.checkForRequeue(calendar,t1_min,t1_max),timeSeries.toString() << " should pass at " << time );
+         BOOST_CHECK_MESSAGE(timeSeries.checkForRequeue(calendar,t1_min,t1_max),timeSeries.toString() << " checkForRequeue should pass at " << time );
       }
       else if (time >= timeSeries.time_series().start().duration() && time <=timeSeries.time_series().finish().duration()) {
 
@@ -119,9 +128,12 @@ BOOST_AUTO_TEST_CASE( test_time_attr)
       }
 
 
-      if (time < timeSeries2.time_series().start().duration()) {
+      if (calendar.dayChanged()) {
+         BOOST_CHECK_MESSAGE(timeSeries2.checkForRequeue(calendar,t2_min,t2_max)," expected " << timeSeries2.toString() << " checkForRequeue to pass at " << to_simple_string(calendar.suiteTime()));
+      }
+      else if (time < timeSeries2.time_series().start().duration()) {
          BOOST_CHECK_MESSAGE(!timeSeries2.isFree(calendar),timeSeries2.toString() << " should NOT be free at time " << time );
-         BOOST_CHECK_MESSAGE(timeSeries2.checkForRequeue(calendar,t2_min,t2_max),timeSeries2.toString() << " should pass at " << time );
+         BOOST_CHECK_MESSAGE(timeSeries2.checkForRequeue(calendar,t2_min,t2_max),timeSeries2.toString() << " checkForRequeue should pass at " << time );
       }
       else if (time >= timeSeries2.time_series().start().duration() && time <=timeSeries2.time_series().finish().duration()) {
 

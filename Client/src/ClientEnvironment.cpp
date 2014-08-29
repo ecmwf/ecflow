@@ -50,6 +50,7 @@ ostream& operator<<(ostream& os, const vector<T>& v)
     return os;
 }
 
+
 ClientEnvironment::ClientEnvironment()
 : AbstractClientEnv(),
   task_try_num_(1),timeout_(MAX_TIMEOUT),connect_timeout_(0),
@@ -86,7 +87,7 @@ void ClientEnvironment::init()
 {
 	read_environment_variables();
 #ifdef DEBUG_ENVIRONMENT
-	std::cout << toString() << "\n";
+	std::cout << toString() << std::endl;
 #endif
 
 	// If no host specified default to local host and default port number

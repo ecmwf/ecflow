@@ -87,11 +87,12 @@ menu 'MAIN'
 
   (ALL,ALL,'-',SEPARATOR)
 
-  (SUITE|TASK|FAMILY,(QUEUED) & (HAS_TRIGGERS|HAS_TIME|HAS_DATE),'Delete',MENU)
+  (SUITE|TASK|FAMILY,(QUEUED|SUSPENDED) & (HAS_TRIGGERS|HAS_TIME|HAS_DATE),'Delete',MENU)
   (NODE|ALIAS,ALL,'Special', MENU)
   (NODE& ADMIN, ALL,'Force', MENU)
- !! (NODE& ADMIN, ALL,'Forcex', MENU)
-    ((NODE|ALIAS)& ADMIN, ALL,'Order', MENU)
+  (NODE& ADMIN, ALL,'Forcex', MENU)
+  (NODE& ADMIN, ALL,'Defstatus', MENU)
+  ((NODE|ALIAS)& ADMIN, ALL,'Order', MENU)
 
   (ALL,ALL,'-',SEPARATOR ,'',YES)
   (SUITE|FAMILY|TASK, ALL, 'Web...', 'ecflow_client --url <full_name> ', '', YES)
@@ -196,25 +197,6 @@ menu 'Status'
 }
 
 !==============================================================================
-! Force submenu
-!==============================================================================
-
-menu 'Forcex'
-{
-  (TASK, ~UNKNOWN, 'Unknown',  'ecflow_client --force <full_name> unknown',  '',YES)
-
-  (TASK, ~COMPLETE, 'Complete', 'ecflow_client --force complete <full_name>', 
-	'Have you tried the new menu <Set complete>',YES)
-
-  (TASK, ~QUEUED,   'Queued',   'ecflow_client --force queued <full_name>',   
-	'Have you tried the new menu <Rerun>',YES)
-
-  (TASK, ~SUBMITTED,'Submitted','ecflow_client --force submitted <full_name>','',YES)
-  (TASK, ~ACTIVE,   'Active',   'ecflow_client --force active <full_name>',   '',YES)
-  (TASK, ~ABORTED,  'Aborted',  'ecflow_client --force aborted <full_name>',  '',YES)
-}
-
-!==============================================================================
 ! Suite submenu
 !==============================================================================
 
@@ -249,6 +231,11 @@ menu "Order"
   (ALL,ALL,'Alphabetically','ecflow_client --order <full_name> alpha')
 }
 
+menu "Forcex"
+{
+  (TASK, ALL,  'AbortedFree',  'ecflow_client --force aborted <full_name>; ecflow_client --alter add variable ECF_PASS FREE <full_name>')
+}
+
 menu "Force"
 {
   (NODE, ~UNKNOWN, 'Unknown',   'ecflow_client --force unknown recursive <full_name>')
@@ -262,6 +249,12 @@ menu "Force"
   (NODE, ~ACTIVE,   'Active',   'ecflow_client --force active recursive <full_name>')
   (NODE, ~ABORTED,  'Aborted',  'ecflow_client --force aborted recursive <full_name>', 
    'Check running/queued jobs and Confirm force submitted of <full_name>', YES)
+}
+
+menu "Defstatus"
+{
+  (NODE, ALL, 'Complete', 'ecflow_client --alter change defstatus complete <full_name>')
+  (NODE, ALL< 'Queued', 'ecflow_client --alter change defstatus queued <full_name>')
 }
 
 menu "Special"
@@ -283,7 +276,7 @@ menu "Special"
 
 !  (ALL,ALL,'-',SEPARATOR)
 !  ((SUITE|FAMILY) & ADMIN, SELECTION, 'Plug into selected node', PLUG)
-  ((SUITE|FAMILY), SELECTION, 'Plug into selected node', PLUG)
+  ((SUITE|FAMILY|TASK), SELECTION, 'Plug into selected node', PLUG)
   (TASK|ALIAS, SELECTION, 'Compare Edit (vs selected)', COMP( 'compare' , 'edit' ))
   (TASK|ALIAS, SELECTION, 'Compare EditPP (vs selected)', COMP( 'compare' , 'editpp'))
   (TASK|ALIAS, SELECTION, 'Compare output (vs selected)', COMP('compare' , 'output'))

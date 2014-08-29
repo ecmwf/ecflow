@@ -47,6 +47,8 @@
 logsvr::logsvr(std::string host,std::string cport):
 	soc_(-1)
 {
+  struct hostent *ht = gethostbyname( host.c_str() );
+  if (ht == NULL) { soc_ = -1; return; }
   connect(host,!cport.empty() ? atoi(cport.c_str()) : 19999);
 }
 

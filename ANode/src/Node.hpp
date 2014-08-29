@@ -70,8 +70,6 @@ public:
    /// The Parent Must set the parent pointer. For a Suite however this will be NULL
    void set_parent(Node* p) { parent_ = p; }
 
-   static bool doDelete(Node*);
-
    // Server called functions:
    /// Required when we have time attributes, when time related attribute are free they stay free
    virtual void calendarChanged(const ecf::Calendar&, std::vector<node_ptr>& auto_cancelled_nodes);

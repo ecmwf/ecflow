@@ -6,11 +6,11 @@ set -x # echo script lines as they are executed
 # ----------------------------------------------------------------------
 # LXOP: specific ??
 # ----------------------------------------------------------------------
+HOST=${HOST:=$(uname -n)}
+if [[ $HOST = lxop* ]]; then
 # QSUB -q %QUEUE:test%
-
-# -----------------------------------------------------------------------------------------
-# **NOTE** do not use -e for file existence it WONT work on HPUX/HP_UX, use -r
-# -----------------------------------------------------------------------------------------
+  ln -sf $(echo ${PBS_NODEFILE:=} | sed -e 's:aux:spool:').OU %ECF_JOBOUT%.running
+fi
 
 # ============================================================================
 # Defines the variables that are needed for any communication with ECF
@@ -80,16 +80,6 @@ elif [[ %ARCH% = linux64intel  ]] ; then
    #       This is what 'using python' will pick up and add to the include path
    #
    export PATH=/usr/local/apps/python/2.7/bin/:/usr/local/bin:$PATH
-
-elif [[ %ARCH% = hpux ]] ; then
-
-   # we need pick the 'ar' in /bin rather than /usr/bin otherwise we get unsatisfied symbols
-   # We pick aCC compiler from /usr/local/bin
-   # On HPUX which and whence report different paths, hence beware. whence on HPUX is more reliable ?
-   #
-   # NOTE: /opt/python/usr/local/bin provides path to 2.5 PYTHON interpreter.
-   #
-   export PATH=/usr/local/apps/python/2.7/bin:/bin:/usr/bin:$PATH
 
 elif [[ %ARCH% = opensuse103  ]] ; then
 

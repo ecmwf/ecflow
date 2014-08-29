@@ -349,7 +349,22 @@ bool ZombieCtrl::handle_user_actions(
 	   return false;
 	}
 
-	// *BLOCK* is the default
+	// *DEFAULT*:
+	//       Label,event,meter       : fob
+	//       init,complete,abort,wait: block
+	if (task_cmd->child_type() == Child::LABEL ||
+	    task_cmd->child_type() == Child::EVENT ||
+	    task_cmd->child_type() == Child::METER) {
+
+      /// Means return as if everything is OK. hence ClientInvoker will *NOT* block, and job can continue.
+#ifdef DEBUG_ZOMBIE
+   std::cout << ": FOB\n";
+#endif
+	   action_taken += "fob";
+      theReply = PreAllocatedReply::ok_cmd();
+      return false;
+	}
+
 #ifdef DEBUG_ZOMBIE
 	std::cout << ": BLOCKING\n";
 #endif

@@ -790,7 +790,7 @@ void AlterCmd::createChange( Cmd_ptr& cmd, std::vector<std::string>& options, st
 		   // The name could be an integer
 		   try { boost::lexical_cast< int >( name ); }
 		   catch ( boost::bad_lexical_cast& ) {
-		      // name is not an integer, make if its a name, its valid
+		      // name is not an integer, check name is valid
 		      Event check_name(name); // will throw if name is not valid
 		   }
 		   break; }
@@ -828,6 +828,17 @@ void AlterCmd::createChange( Cmd_ptr& cmd, std::vector<std::string>& options, st
 			break; }
 
 		case AlterCmd::TRIGGER: {
+		   // ECFLOW-137, if the expression contains a leading '/' and *no* spaces,
+		   //             then it will get treated as a path and not an option
+		   // i.e     change trigger 'expression'    <path_to_node>
+		   //         change trigger "/suite/task:a" /path/to/a/node
+		   // Note boost program options will remove the quotes around the expression
+		   //      hence its difficult to say what is an option and what is a path.
+		   //      However since we expect 3 options, work around the problem
+		   if (options.size() == 2 && paths.size() == 2) {
+            options.push_back(paths[0]);
+            paths.erase(paths.begin()); // remove first path, since it has been added to options
+		   }
 			if (options.size() != 3) {
 				ss << "AlterCmd: change: expected four args : change trigger 'expression' <path_to_node>";
 				ss << " but found " << (options.size() + paths.size()) << " arguments. The trigger expression must be quoted\n";
@@ -848,6 +859,10 @@ void AlterCmd::createChange( Cmd_ptr& cmd, std::vector<std::string>& options, st
 			break; }
 
 		case AlterCmd::COMPLETE: {
+         if (options.size() == 2 && paths.size() == 2) {
+            options.push_back(paths[0]);
+            paths.erase(paths.begin()); // remove first path, since it has been added to options
+         }
 			if (options.size() != 3) {
 				ss << "AlterCmd: change complete: expected four args: change complete 'expression'  <path_to_node> ";
 				ss << " but found " << (options.size() + paths.size()) << " arguments. The expression must be quoted\n";
@@ -861,7 +876,7 @@ void AlterCmd::createChange( Cmd_ptr& cmd, std::vector<std::string>& options, st
 		 	string parseErrorMsg;
 			std::auto_ptr<AstTop> ast = exp.parseExpressions( parseErrorMsg );
 			if (!ast.get()) {
-				ss << "AlterCmd: complete: Failed to parse expression '" << name << "'.  " << parseErrorMsg << "\n";
+				ss << "AlterCmd: change complete: Failed to parse expression '" << name << "'.  " << parseErrorMsg << "\n";
 				ss << dump_args(options,paths) << "\n";
 				throw std::runtime_error( ss.str() );
 			}

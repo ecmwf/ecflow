@@ -77,7 +77,7 @@ BOOST_AUTO_TEST_CASE( test_file_cmd )
 
    // The test harness will create corresponding directory structure
    // and populate with standard ecf files AND will generate man files for node containers
-   ServerTestHarness serverTestHarness(false/*do log file verification*/);
+   ServerTestHarness serverTestHarness;
    serverTestHarness.generateManFileForNodeContainers();
    serverTestHarness.run(theDefs,ServerTestHarness::testDataDefsLocation("test_file_cmd.def"));
 

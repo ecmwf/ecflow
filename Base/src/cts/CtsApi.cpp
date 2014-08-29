@@ -678,7 +678,6 @@ std::vector<std::string> CtsApi::new_log(const std::string& new_path) {
 std::string CtsApi::clearLog()     { return "--log=clear"; }
 std::string CtsApi::flushLog()     { return "--log=flush"; }
 std::string CtsApi::get_log_path() { return "--log=path"; }
-const char* CtsApi::logArg() { return "log";}
 
 
 std::string CtsApi::forceDependencyEval() { return "--force-dep-eval";}

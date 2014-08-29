@@ -99,6 +99,8 @@ def add_remote_linux_64_lxop_variables( linux_64 ):
     linux_64.add_variable("SCHOST","lxop")    # Super Computer HOST
     linux_64.add_variable("QUEUE","test")    # for PBS
     linux_64.add_variable("ECF_OUT","/gpfs/lxop/build/ecflow")
+    linux_64.add_variable("ECF_LOGHOST","lxop")   
+    linux_64.add_variable("ECF_LOGPORT","9316")   
 
 def add_remote_linux_64_intel_variables( linux_64 ): 
     linux_64.add_variable("ECF_KILL_CMD","rsh %REMOTE_HOST% \"kill -15 %ECF_RID%\"") 
@@ -173,14 +175,24 @@ def is_cray_cct( node ):
             return True
         parent = parent.get_parent()
     return False
-    
+
+def is_cray_cca( node ):
+    if (node.name() == "cray_cca"):
+        return True
+    parent = node.get_parent();
+    while parent:
+        if (parent.name() == "cray_cca"):
+            return True
+        parent = parent.get_parent()
+    return False
+
 def add_cray_gnu_compiler_variables( cray_gnu ):
-    #if is_cray_cct( cray_gnu ):
-    #    cray_gnu.add_variable("COMPILER_TEST_PATH","gcc-4.6.3/$mode")
-    #    cray_gnu.add_variable("COMPILER_VERSION","gcc-4.6.3")
-    #else:
-    cray_gnu.add_variable("COMPILER_TEST_PATH","gcc-4.8.2/$mode")
-    cray_gnu.add_variable("COMPILER_VERSION","gcc-4.8.2")
+    if is_cray_cct( cray_gnu ):
+        cray_gnu.add_variable("COMPILER_TEST_PATH","gcc-4.6.3/$mode")
+        cray_gnu.add_variable("COMPILER_VERSION","gcc-4.6.3")
+    else:
+        cray_gnu.add_variable("COMPILER_TEST_PATH","gcc-4.8.2/$mode")
+        cray_gnu.add_variable("COMPILER_VERSION","gcc-4.8.2")
         
     cray_gnu.add_variable("TOOLSET","gcc")
     cray_gnu.add_variable("BOOTSTRAP_TOOLSET","gcc")
@@ -188,10 +200,10 @@ def add_cray_gnu_compiler_variables( cray_gnu ):
     cray_gnu.add_variable("PRGENV","PrgEnv-gnu")
     cray_gnu.add_variable("SITE_CONFIG","$WK/build/site_config/site-config-cray.jam")
     cray_gnu.add_variable("ROOT_WK","/perm/ma/ma0/workspace/GNU")
-    #if is_cray_cct( cray_gnu ):
-    #    cray_gnu.add_variable("CUSTOM_BJAM_ARGS","toolset=gcc cxxflags=-fPIC")  
-    #else:
-    cray_gnu.add_variable("CUSTOM_BJAM_ARGS","toolset=gcc cxxflags=-fPIC c++-template-depth=512") # needed for gnu/4.8.2
+    if is_cray_cct( cray_gnu ):
+        cray_gnu.add_variable("CUSTOM_BJAM_ARGS","toolset=gcc cxxflags=-fPIC")  
+    else:
+        cray_gnu.add_variable("CUSTOM_BJAM_ARGS","toolset=gcc cxxflags=-fPIC c++-template-depth=512") # needed for gnu/4.8.2
 
 def add_cray_intel_compiler_variables( cray_intel ):
     cray_intel.add_variable("COMPILER_TEST_PATH","intel-linux/$mode")
@@ -226,9 +238,15 @@ def add_remote_cray_variables( cray ):
 
     # for cray we need to use logsrvr in order to see the job output
     if is_cray_cct(cray):
-        cray.add_variable("ECF_LOGHOST","cct")  # cctdtn1
+        cray.add_variable("ECF_LOGHOST","cct")   
+        cray.add_variable("SCHOST","cct")    # Super Computer HOST
     else:
-        cray.add_variable("ECF_LOGHOST","cca-il2")  # cctdtn1
+        if is_cray_cca(cray):
+            cray.add_variable("SCHOST","cca")    # Super Computer HOST
+            cray.add_variable("ECF_LOGHOST","cca-il2")  
+        else:
+            cray.add_variable("ECF_LOGHOST","ccb-il2")   # or use ccb-log1
+            cray.add_variable("SCHOST","ccb")    # Super Computer HOST
 
     cray.add_variable("ECF_LOGPORT","9316")   
     
@@ -244,11 +262,6 @@ def add_remote_cray_variables( cray ):
     cray.add_variable("QUEUE","ns")
     cray.add_variable("ACCOUNT","ecodmdma")
     #cray.add_variable("STHOST","/s2o1")  # Needed by qsub.h
-    if is_cray_cct(cray):
-        cray.add_variable("SCHOST","cct")    # Super Computer HOST
-    else:
-        cray.add_variable("SCHOST","cca")    # Super Computer HOST
-        
     cray.add_variable("WSHOST",os.uname()[1])  # Work Space HOST
 
 def add_cray_variables( cray ):
@@ -256,14 +269,17 @@ def add_cray_variables( cray ):
     cray.add_variable("ECF_HOME", os.getenv("SCRATCH") + "/nightly/suite/cray")
     cray.add_variable("BOOST_DIR","/perm/ma/ma0/boost")
     cray.add_variable("ARCH","cray")
-    cray.add_variable("MODULE_LOAD_CRAY_COMPILER","module load cce/8.3.0.186")
+    cray.add_variable("MODULE_LOAD_CRAY_COMPILER","module load cce/8.3.1")
     if is_cray_cct( cray ):
         cray.add_variable("REMOTE_HOST","cct")
         cray.add_variable("MODULE_LOAD_GCC","module load gcc/4.6.3")
     else:
-        cray.add_variable("REMOTE_HOST","cca")
         cray.add_variable("MODULE_LOAD_GCC","module load gcc/4.8.2")
-    
+        if is_cray_cca( cray ):
+            cray.add_variable("REMOTE_HOST","cca")
+        else:
+            cray.add_variable("REMOTE_HOST","ccb")
+
     
 def add_remote_redhat_variables( redhat ):
     redhat.add_variable("ECF_KILL_CMD","ssh  %USER%@%REMOTE_HOST% \"kill -15 %ECF_RID%\"") 
@@ -428,10 +444,12 @@ def build_localhost( parent ) :
     localhost.add_task("test_server_performance").add_trigger("test_client_performance == complete or test_client_performance == aborted")
     localhost.add_task("test_performance").add_trigger("test_server_performance == complete or test_server_performance == aborted")
     localhost.add_task("test_migration").add_trigger("test_performance == complete or test_server_performance == aborted")
-    task = localhost.add_task("test_new_client_old_server")
-    task.add_trigger("test_migration == complete or test_migration == aborted")
-    task.add_variable("OLD_VERSION","4.0.0")
-
+    localhost.add_task("test_new_client_old_server_319").add_trigger("test_migration == complete or test_migration == aborted")
+    localhost.add_task("test_new_client_old_server_400").add_trigger("test_new_client_old_server_319 == complete or test_new_client_old_server_319 == aborted")
+    localhost.add_task("test_new_client_old_server_401").add_trigger("test_new_client_old_server_400 == complete or test_new_client_old_server_400 == aborted")
+    localhost.add_task("test_new_client_old_server_402").add_trigger("test_new_client_old_server_401 == complete or test_new_client_old_server_401 == aborted")
+    localhost.add_task("test_new_client_old_server_403").add_trigger("test_new_client_old_server_402 == complete or test_new_client_old_server_402 == aborted")
+ 
 def build_localhost_cmake( parent ) :
     # Hence left out test_client_performance and test_server_performance
     localhost_cmake = parent.add_family("localhost_cmake")
@@ -541,7 +559,15 @@ def build_cray( parent ) :
     build_cray_intel( cray)
     build_cray_cray( cray)
     
+    # build on either cca | ccb  *NOT* both, since they share a common filesystem
     cray = parent.add_family("cray_cca")
+    cray.add_defstatus( ecflow.DState.suspended ) 
+    cray.add_variable("NO_OF_CORES","2") # temp until things get sorted on cray
+    build_cray_gnu( cray)
+    build_cray_intel( cray)
+    build_cray_cray( cray)
+    
+    cray = parent.add_family("cray_ccb")
     cray.add_variable("NO_OF_CORES","2") # temp until things get sorted on cray
     build_cray_gnu( cray)
     build_cray_intel( cray)
@@ -689,7 +715,7 @@ def add_suite_variables( suite ):
     suite.add_variable("GIT","/usr/local/apps/git/current/bin/git")
     suite.add_variable("SET_TO_TEST_SCRIPT","false") 
     suite.add_variable("BUILD_ECFLOWVIEW","true")
-    suite.add_variable("ECFLOW_GIT_BRANCH","release/4.0.3")  # when makeing a relase switch to release/<release version>, otherwise develop
+    suite.add_variable("ECFLOW_GIT_BRANCH","release/4.0.4")  # when makeing a relase switch to release/<release version>, otherwise develop
     suite.add_variable("ECBUILD_GIT_BRANCH","develop")   
 
     # automatically fob all zombies when compiling ecflow 
@@ -698,6 +724,7 @@ def add_suite_variables( suite ):
     suite.add_zombie(ecflow.ZombieAttr(ecflow.ZombieType.user, child_list, ecflow.ZombieUserActionType.fob, 0))
     suite.add_zombie(ecflow.ZombieAttr(ecflow.ZombieType.path, child_list, ecflow.ZombieUserActionType.fob, 0))
     
+
 # ================================================================================
 # Defs
 # ================================================================================    
@@ -709,16 +736,22 @@ with defs.add_suite("experiment") as experiment:
     experiment.add_defstatus( ecflow.DState.suspended )
     experiment.add_variable("ECF_HOME", os.getenv("SCRATCH") + "/nightly")
     experiment.add_variable("ECF_INCLUDE",os.getenv("SCRATCH") + "/nightly")
-    experiment.add_variable("ECF_FILES",os.getenv("SCRATCH") + "/nightly/experiment")
-    experiment.add_variable("ECF_JOB_CMD","python %ECF_JOB% 1> %ECF_JOBOUT% 2>&1")
     with experiment.add_task("exp") as task:
         task.add_event("event_fred")
         task.add_meter("meter", 0, 100)
         task.add_label("label_name", "value")
+        task.add_variable("ECF_JOB_CMD","python %ECF_JOB% 1> %ECF_JOBOUT% 2>&1")
     with experiment.add_task("exp2") as task:
         task.add_event("event_fred")
         task.add_meter("meter", 0, 100)
         task.add_label("label_name", "value")
+        task.add_variable("ECF_JOB_CMD","python %ECF_JOB% 1> %ECF_JOBOUT% 2>&1")
+    with experiment.add_task("exp3") as task:
+        task.add_label("sleeping", "value")
+        task.add_variable("BOOST_VERSION","boost_1_53_0")
+        task.add_variable("BOOST_DIR","/var/tmp/ma0/boost")
+        task.add_variable("ECFLOW_LAST_INSTALLED_VERSION","/usr/local/apps/ecflow/current") 
+        task.add_variable("ARCH","opensuse113")
 
 print "build boost"
 with defs.add_suite("boost_suite") as boost_suite:

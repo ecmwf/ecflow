@@ -258,7 +258,7 @@ int ClientInvoker::invoke(Cmd_ptr cts_cmd) const
 
 int ClientInvoker::do_invoke_cmd(Cmd_ptr cts_cmd) const
 {
-	if (clientEnv_.debug()) cout << "\necflow:ClientInvoker::do_invoke_cmd on_error_throw_exception_(" << on_error_throw_exception_ << ")================================\n";
+	if (clientEnv_.debug()) cout << "\necflow:ClientInvoker::do_invoke_cmd on_error_throw_exception_(" << on_error_throw_exception_ << ")================================" << std::endl;
 	if (clientEnv_.no_ecf())  return 0; // success If NO_ECF set then abort immediately. returning success. Useful in testing  jobs stand-alone.
 	if (testInterface_) return 0;       // The testInterface_ flag allows testing of client interface, parsing of args, without needing to contact server
 	assert(!clientEnv_.host().empty()); // make sure host is NOT empty.
@@ -286,7 +286,7 @@ int ClientInvoker::do_invoke_cmd(Cmd_ptr cts_cmd) const
  			int no_of_tries = connection_attempts_;
 			while ( no_of_tries > 0 ) {
 				try {
-					if (clientEnv_.debug()) { cout << "ClientInvoker: >>> About to invoke "; cts_cmd->print(cout); cout << " on " << client_env_host_port() << " : retry_connection_period(" << retry_connection_period << ") no_of_tries(" << no_of_tries << ") cmd_connect_timeout(" << cts_cmd->timeout() << ") ECF_CONNECT_TIMEOUT(" << clientEnv_.connect_timeout() << ") <<<\n";}
+					if (clientEnv_.debug()) { cout << "ClientInvoker: >>> About to invoke "; cts_cmd->print(cout); cout << " on " << client_env_host_port() << " : retry_connection_period(" << retry_connection_period << ") no_of_tries(" << no_of_tries << ") cmd_connect_timeout(" << cts_cmd->timeout() << ") ECF_CONNECT_TIMEOUT(" << clientEnv_.connect_timeout() << ")<<<" << endl;}
 
 					/// *** Each call to io_service.run(); is a *REQUEST* to the server ***
 					/// *** Hence we *MUST* clear the server_reply before each call *******
@@ -300,7 +300,7 @@ int ClientInvoker::do_invoke_cmd(Cmd_ptr cts_cmd) const
 					Client theClient( io_service, cts_cmd , clientEnv_.host(), clientEnv_.port(), clientEnv_.connect_timeout() );
 					if (clientEnv_.allow_new_client_old_server() != 0) theClient.allow_new_client_old_server(clientEnv_.allow_new_client_old_server());
 					io_service.run();
-					if (clientEnv_.debug()) cout << "ClientInvoker: >>> After: io_service.run() <<<\n";
+					if (clientEnv_.debug()) cout << "ClientInvoker: >>> After: io_service.run() <<<" << endl;;
 
 					/// Let see how the server responded if at all.
 					try {
@@ -346,7 +346,7 @@ int ClientInvoker::do_invoke_cmd(Cmd_ptr cts_cmd) const
 						return 1;
 					}
 					else {
-						std::cout << "ecflow:ClientInvoker:: missed response? for request "; cts_cmd->print(cout); std::cout << " oops\n";
+						std::cout << "ecflow:ClientInvoker:: missed response? for request "; cts_cmd->print(cout); std::cout << " oops" << endl;
 					}
  				}
 				catch (std::exception& e) {
@@ -405,7 +405,7 @@ int ClientInvoker::do_invoke_cmd(Cmd_ptr cts_cmd) const
 		}
 	}
 	catch ( std::exception& e ) {
-		stringstream ss; ss << "ecflow:ClientInvoker: caught exception:\n" << e.what() << "\n";
+		stringstream ss; ss << "ecflow:ClientInvoker: caught exception:\n" << e.what() << endl;
  		server_reply_.set_error_msg(ss.str());
 	}
 	catch ( ... ) {

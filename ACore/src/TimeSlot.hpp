@@ -50,6 +50,8 @@ public:
 
    bool operator<(const TimeSlot& rhs) const;
    bool operator>(const TimeSlot& rhs) const;
+   bool operator<=(const TimeSlot& rhs) const;
+   bool operator>=(const TimeSlot& rhs) const;
 
 	int hour() const { return hour_;}
 	int minute() const { return minute_;}
@@ -63,17 +65,17 @@ public:
  	std::string toString() const;
 
 private:
-	unsigned short hour_;
-	unsigned short minute_;
-	bool           isNull_;
+ 	unsigned short hour_;
+ 	unsigned short minute_;
+ 	bool           isNull_;
 
-    friend class boost::serialization::access;
-    template<class Archive>
-    void serialize(Archive & ar, const unsigned int /*version*/) {
-    	ar & hour_;
-        ar & minute_;
-        ar & isNull_;
-    }
+ 	friend class boost::serialization::access;
+ 	template<class Archive>
+ 	void serialize(Archive & ar, const unsigned int /*version*/) {
+ 	   ar & hour_;
+ 	   ar & minute_;
+ 	   ar & isNull_;
+ 	}
 };
 
 std::ostream& operator<<(std::ostream& os, const TimeSlot*);

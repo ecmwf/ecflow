@@ -34,7 +34,7 @@ else
       # rm unused file, to stop test_migration from processing it.
       rm -rf /var/tmp/ma0/ECFLOW_TEST/migration/$host.$port.def
       
-   done < /usr/local/apps/ecflow/current/lib/servers
+   done < /usr/local/apps/ecflow/current/share/ecflow/servers
    
    # list directory contents
    ls -la /var/tmp/ma0/ECFLOW_TEST/migration/

@@ -83,7 +83,7 @@ BOOST_AUTO_TEST_CASE( test_triggers_and_meters )
  	}
 
  	// The test harness will create corresponding directory structure & default ecf file
-   ServerTestHarness serverTestHarness(false/*do log file verification*/,false/* dont do standard verification */);
+   ServerTestHarness serverTestHarness;
 	serverTestHarness.run(theDefs,ServerTestHarness::testDataDefsLocation( "test_triggers_and_meters.def"));
 
 	cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount() << ")\n";

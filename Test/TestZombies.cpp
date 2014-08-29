@@ -32,9 +32,7 @@
 #include "Task.hpp"
 #include "DurationTimer.hpp"
 #include "PrintStyle.hpp"
-#include "ClientToServerCmd.hpp"
 #include "AssertTimer.hpp"
-#include "TestVerification.hpp"
 #include "Child.hpp"
 #include "ZombieUtil.hpp"
 
@@ -402,7 +400,7 @@ static void create_and_start_test(Defs& theDefs, const std::string& suite_name, 
    std::cout << "   creating server test harness\n";
 #endif
    // The test harness will create corresponding directory structure & default ecf file
-   ServerTestHarness serverTestHarness( false, /* doVerification */ false /* standardVerification*/ );
+   ServerTestHarness serverTestHarness;
    serverTestHarness.run(theDefs,
                          ServerTestHarness::testDataDefsLocation(suite_name + ".def"),
                          1 /*timeout*/,

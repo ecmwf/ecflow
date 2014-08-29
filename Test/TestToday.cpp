@@ -86,7 +86,7 @@ BOOST_AUTO_TEST_CASE( test_today_single_slot )
 
    // The test harness will create corresponding directory structure
    // and populate with standard sms files.
-   ServerTestHarness serverTestHarness(false/*do verification*/,false/* dont do standard verification */);
+   ServerTestHarness serverTestHarness;
    serverTestHarness.run(theDefs,ServerTestHarness::testDataDefsLocation("test_today_single_slot.def"));
 
    cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount() << ")\n";
@@ -137,7 +137,7 @@ BOOST_AUTO_TEST_CASE( test_today_relative_time_series )
 
    // The test harness will create corresponding directory structure
    // and populate with standard ecf files.
-   ServerTestHarness serverTestHarness(false/*do verification*/,false/* dont do standard verification */);
+   ServerTestHarness serverTestHarness;
    serverTestHarness.run(theDefs,ServerTestHarness::testDataDefsLocation("test_today_relative_time_series.def"));
 
    cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount() << ")\n";
@@ -192,7 +192,7 @@ BOOST_AUTO_TEST_CASE( test_today_real_time_series )
 
    // The test harness will create corresponding directory structure
    // and populate with standard ecf files.
-   ServerTestHarness serverTestHarness(false/*do verification*/,false/* dont do standard verification */);
+   ServerTestHarness serverTestHarness;
    serverTestHarness.run(theDefs,ServerTestHarness::testDataDefsLocation("test_today_real_time_series.def"));
 
    cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount() << ")\n";

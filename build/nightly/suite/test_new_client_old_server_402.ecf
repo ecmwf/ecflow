@@ -1,0 +1,41 @@
+%include <head.h>
+
+# ======================================================================
+# Run LOCALLY
+# ======================================================================
+export WK=%WK%
+
+if [[ %SET_TO_TEST_SCRIPT% = true ]] ; then
+   echo "Test only"
+else
+   cd $WK;
+   
+   # print version of LATEST client
+   Client/bin/%COMPILER_VERSION%/release/ecflow_client --version
+   
+   # Allow test to be rerun, by killing the OLD server, This can fail
+   /usr/local/apps/ecflow/4.0.2/bin/ecflow_client --terminate yes || true
+   
+   # Clear up
+   rm -rf `hostname`.*
+   
+   # START the server with OLD version
+   /usr/local/apps/ecflow/4.0.2/bin/ecflow_server --ecfinterval=3 &
+   sleep 10
+
+   
+   # RUN test with new client and OLD server
+   export ECF_NODE=localhost
+   Client/bin/%COMPILER_VERSION%/release/s_client
+   
+   # RUN more test with new client and OLD server
+   Test/bin/%COMPILER_VERSION%/release/s_test
+   
+   # Allow test to be rerun. by killing the OLD server, This can fail
+   /usr/local/apps/ecflow/4.0.2/bin/ecflow_client --terminate yes || true
+   
+   # Clear up
+   rm -rf `hostname`.*
+fi
+
+%include <tail.h>

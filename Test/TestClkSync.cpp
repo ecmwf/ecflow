@@ -76,7 +76,7 @@ BOOST_AUTO_TEST_CASE( test_clk_sync )
    }
 
    // The test harness will create corresponding directory structure & default ecf file
-   ServerTestHarness serverTestHarness(false);
+   ServerTestHarness serverTestHarness;
    serverTestHarness.run(theDefs,ServerTestHarness::testDataDefsLocation("test_clk_sync.def"));
 
    cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount() << ")\n";
