@@ -24,7 +24,7 @@ Process
 
 0/ git flow start release 4.0.5
 
-   Push to branch onto stash, otherwise the we can not pull, from the remote machines
+   Push branch onto stash, otherwise the we can not pull, from the remote machines
    - In eclipse, you *may* have to push this branch first
      Team->Push Branch
      *otherwise* the option Team->Push Upstream  may well be greyed out.
@@ -89,7 +89,7 @@ can end up renaming.
    appear in the top half of the latest news
 
 0/ Update release:
-   ** Go to "Tools->Attachments", then load the gzip file. *****
+   ** Go to "Tools->Attachments", then load the gzip file:  Go to the bottom of the page *****
    0 release: This uploads the release zip file: making it accessible to member states
    http://software.ecmwf.int/wiki/display/ECFLOW/Releases
    
