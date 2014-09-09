@@ -1129,7 +1129,7 @@ void Defs::order(Node* immediateChild, NOrder::Order ord)
 		}
 		case NOrder::ALPHA:  {
  			std::sort(suiteVec_.begin(),suiteVec_.end(),
-			            boost::bind(std::less<std::string>(),
+			            boost::bind(Str::caseInsLess,
 			                          boost::bind(&Node::name,_1),
 			                          boost::bind(&Node::name,_2)));
          order_state_change_no_ = Ecf::incr_state_change_no();
@@ -1138,7 +1138,7 @@ void Defs::order(Node* immediateChild, NOrder::Order ord)
 		}
 		case NOrder::ORDER:  {
 			std::sort(suiteVec_.begin(),suiteVec_.end(),
-			            boost::bind(std::greater<std::string>(),
+			            boost::bind(Str::caseInsGreater,
 			                          boost::bind(&Node::name,_1),
 			                          boost::bind(&Node::name,_2)));
          order_state_change_no_ = Ecf::incr_state_change_no();
