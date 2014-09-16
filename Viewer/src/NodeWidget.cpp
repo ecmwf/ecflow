@@ -30,7 +30,7 @@ NodeWidget::NodeWidget(QString rootNode,QWidget *parent) :
 	config_=new VConfig;
 
 	//Servers
-	ServerFilter* serverFilter=config_->serverFilter();
+	/*ServerFilter* serverFilter=config_->serverFilter();
 	for(unsigned int i=0; i < ServerHandler::servers().size(); i++)
 	{
 		if(ServerHandler *server=ServerHandler::servers().at(i))
@@ -38,7 +38,7 @@ NodeWidget::NodeWidget(QString rootNode,QWidget *parent) :
 			ServerItem item(server->longName(),server->name(),server->port());
 			serverFilter->addServer(&item);
 		}
-	}
+	}*/
 
 	// Layout
 	QVBoxLayout *mainLayout = new QVBoxLayout(this);

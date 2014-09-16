@@ -50,6 +50,8 @@ public:
 	//From AbstractObserver
 	void update(const Node*, const std::vector<ecf::Aspect::Type>&);
 	void update(const Defs*, const std::vector<ecf::Aspect::Type>&)  {};
+	void update_delete(const Node*);
+	void update_delete(const Defs*);
 
 signals:
 	void nodeChanged(const Node*, QList<ecf::Aspect::Type>);
@@ -77,10 +79,8 @@ class ServerHandler : public QObject
 	friend class ServerDefsAccess;
 
 public:
-		ServerHandler(const std::string& name,const std::string&  port);
-		~ServerHandler();
-
 		const std::string name() const {return name_;}
+		const std::string& host() const {return host_;}
 		const std::string longName() const {return longName_;}
 		const std::string& port() const {return port_;}
 		int numSuites();
@@ -112,15 +112,19 @@ public:
 		bool readManual(Node *n,std::string& fileName,std::string& txt,std::string& errTxt);
 
 		static const std::vector<ServerHandler*>& servers() {return servers_;}
-		static ServerHandler* addServer(const std::string &server, const std::string &port);
+		static ServerHandler* addServer(const std::string &name,const std::string &host, const std::string &port);
+		static void removeServer(ServerHandler*);
+
 		static int numOfImmediateChildren(Node*);
 		static Node* immediateChildAt(Node *parent,int pos);
 		static int indexOfImmediateChild(Node *node);
 		static void command(std::vector<ViewNodeInfo_ptr>,std::string, bool resolve);
+
 		static ServerHandler* find(const std::string& longName);
 		static ServerHandler* find(const std::pair<std::string,std::string>& hostPort);
 		static ServerHandler* find(const std::string& name, const std::string& port);
 		static ServerHandler* find(Node *node);
+
 		static void addServerCommand(const std::string &name, const std::string command);
 		static std::string resolveServerCommand(const std::string &name);
 		static void updateAll();
@@ -133,10 +137,13 @@ public:
 		void removeNodeObserver(QObject* obs);
 
 protected:
+		ServerHandler(const std::string& name,const std::string& host,const std::string&  port);
+		~ServerHandler();
 
 		void setCommunicatingStatus(bool c) {communicating_ = c;}
 
 		std::string name_;
+		std::string host_;
 		std::string port_;
 		ClientInvoker* client_;
 		std::string longName_;

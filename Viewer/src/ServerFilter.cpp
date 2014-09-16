@@ -8,17 +8,24 @@
 //============================================================================
 
 #include "ServerFilter.hpp"
+
 #include "ServerHandler.hpp"
+#include "ServerItem.hpp"
+#include "ServerList.hpp"
 
-
-ServerFilterItem::ServerFilterItem(const std::string& name,const std::string& host,const std::string& port) :
-		ServerItem(name,host,port),
-		server_(0)
+/*
+ServerFilterItem::ServerFilterItem(const std::string& name) //,const std::string& host,const std::string& port)
 {
-	server_=ServerHandler::find(host,port);
-	if(!server_)
-		server_=ServerHandler::addServer(host,port);
+	server_=ServerItem::find(name); //,host,port);
+	server_->addObserver(this);
 
+	ServerHandler* h=ServerHandler::find(server_->host(),server_->port());
+	if(!h)
+		ServerHandler::addServer(server_->host(),server_->port());
+}
+
+ServerFilterItem::~ServerFilterItem()
+{
 }
 
 bool ServerFilterItem::hasSuiteFilter()
@@ -26,24 +33,28 @@ bool ServerFilterItem::hasSuiteFilter()
 	return (suiteFilter_.size()>0);
 }
 
-void ServerFilterItem::addToSuiteFilter(node_ptr suite)
+void ServerFilterItem::addToSuiteFilter(const std::string& suite)
 {
-	suiteFilter_.push_back(suite);
+	suiteFilter_.insert(suite);
 }
 
-void ServerFilterItem::removeFromSuiteFilter(node_ptr suite)
+void ServerFilterItem::removeFromSuiteFilter(const std::string& suite)
 {
-	for(std::vector<node_ptr>::iterator it=suiteFilter_.begin(); it != suiteFilter_.end(); it++)
+	std::set<std::string>::iterator it=suiteFilter_.find(suite);
+	if(it != suiteFilter_.end())
+		suiteFilter_.erase(it);
+}
+
+ServerHandler* ServerFilterItem::serverHandler() const
+{
+	if(server_)
 	{
-		if((*it) == suite)
-		{
-				suiteFilter_.erase(it);
-				return;
-		}
-
+		return ServerHandler::find(server_->host(),server_->port());
 	}
-}
 
+	return 0;
+}
+*/
 
 //==============================================
 //
@@ -55,96 +66,82 @@ ServerFilter::ServerFilter(VConfig *owner) : VConfigItem(owner)
 {
 }
 
-ServerFilterItem* ServerFilter::addServer(ServerItem *item,bool broadcast)
+ServerFilter::~ServerFilter()
 {
-	if(item)
+	for(std::vector<ServerItem*>::const_iterator it=items_.begin(); it != items_.end(); it++)
 	{
-			ServerFilterItem* s=new ServerFilterItem(item->name(),item->host(),item->port());
-			if(s->server_)
-			{
-					servers_.push_back(s);
-					if(broadcast)
-						notifyOwner();
-					return s;
-			}
-			else
-				delete s;
+		(*it)->removeObserver(this);
 	}
-
-	return 0;
 }
 
-void ServerFilter::removeServer(ServerItem *item)
-{
 
+void ServerFilter::addServer(ServerItem *item,bool broadcast)
+{
+	if(item && ServerList::instance()->find(item->name()) == item)
+	{
+			//ServerFilterItem* s=new ServerFilterItem(item->name(),item->host(),item->port());
+			//ServerItem* s=new ServerFilterItem(item->name());
+
+			items_.push_back(item);
+
+			item->addObserver(this);
+
+			if(broadcast)
+				notifyOwner();
+	}
+}
+
+void ServerFilter::removeServer(ServerItem *server)
+{
+	if(!server) return;
+
+	std::vector<ServerItem*>::iterator it=std::find(items_.begin(),items_.end(),server);
+	if(it != items_.end())
+	{
+			items_.erase(it);
+
+			//Notifies the view about the changes
+			notifyOwner();
+
+			//Remove the filter from the observers
+			server->removeObserver(this);
+	}
 }
 
 void ServerFilter::notifyOwner()
 {
-	owner_->changed(this);
+	if(owner_)
+			owner_->changed(this);
 }
 
-bool ServerFilter::match(ServerItem* item)
+void ServerFilter::notifyServerItemChanged(ServerItem *server)
 {
-	if(!item)
-		return false;
+	if(isFiltered(server))
+		notifyOwner();
+}
 
-	for(std::vector<ServerFilterItem*>::iterator it=servers_.begin(); it != servers_.end(); it++)
+//Do not remove the observer in this method!!
+void ServerFilter::notifyServerItemDeletion(ServerItem *server)
+{
+	if(!server) return;
+
+	std::vector<ServerItem*>::iterator it=std::find(items_.begin(),items_.end(),server);
+	if(it != items_.end())
 	{
-			if((*it)->host() == item->host() && (*it)->port() == item->port())
-			{
-					return true;
-			}
+		items_.erase(it);
+
+		//Notifies the view about the changes
+		notifyOwner();
+	}
+}
+
+bool ServerFilter::isFiltered(ServerItem* item) const
+{
+	for(std::vector<ServerItem*>::const_iterator it=items_.begin(); it != items_.end(); it++)
+	{
+		if((*it) == item)
+			return true;
 	}
 	return false;
 }
-
-void  ServerFilter::update(const std::vector<ServerItem*>& items)
-{
-	bool changed=false;
-
-	//Remove
-	for(std::vector<ServerFilterItem*>::iterator it=servers_.begin(); it != servers_.end(); it++)
-	{
-		bool found=false;
-		for(std::vector<ServerItem*>::const_iterator itA=items.begin(); itA != items.end(); itA++)
-		{
-			if(!(*itA)->match(*it))
-			{
-				found=true;
-				break;
-			}
-		}
-		if(!found)
-		{
-			changed=true;
-		}
-	}
-	//Add
-	for(std::vector<ServerItem*>::const_iterator itA=items.begin(); itA != items.end(); itA++)
-	{
-		bool found=false;
-		for(std::vector<ServerFilterItem*>::iterator it=servers_.begin(); it != servers_.end(); it++)
-		{
-			if((*itA)->match(*it))
-			{
-					found=true;
-					break;
-			}
-		}
-		if(!found)
-		{
-			if(ServerFilterItem *sf=addServer(*itA,false))
-			{
-				changed=true;
-			}
-		}
-	}
-
-	if(changed)
-		notifyOwner();
-
-}
-
-
 

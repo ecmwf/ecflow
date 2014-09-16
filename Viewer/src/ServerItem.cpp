@@ -8,62 +8,106 @@
 //============================================================================
 
 #include "ServerItem.hpp"
+#include "ServerHandler.hpp"
+
+#include <algorithm>
+#include <fstream>
+#include <iostream>
+#include <sstream>
+#include <stdlib.h>
+
 
 ServerItem::ServerItem(const std::string& name) :
-  name_(name)
+  name_(name),
+  useCnt_(0),
+  handler_(0)
 {
 }
 
 ServerItem::ServerItem(const std::string& name,const std::string& host,const std::string& port) :
-  name_(name), host_(host), port_(port)
+  name_(name), host_(host), port_(port),
+  useCnt_(0),
+  handler_(0)
 {
 }
 
-ServerItem* ServerItem::clone() const
+ServerItem::~ServerItem()
 {
-	return new ServerItem(name_,host_,port_);
+	if(handler_)
+		ServerHandler::removeServer(handler_);
 }
 
-bool ServerItem::match(ServerItem* item)
+bool ServerItem::isUsed() const
 {
-	if(!item)
-		return false;
+	return (handler_ != NULL);
+}
 
-	if(host_ == item->host() && port_ == item->port())
+
+void ServerItem::reset(const std::string& name,const std::string& host,const std::string& port)
+{
+	name_=name;
+	host_=host;
+	port_=port;
+
+	broadcastChanged();
+}
+
+//===========================================================
+// Register the usage of the server. Create and destroys the
+// the ServerHandler.
+//===========================================================
+
+void ServerItem::registerUsageBegin()
+{
+	useCnt_++;
+	if(!handler_)
 	{
-		return true;
-	}
-	return false;
-}
-
-
-/*
-ServerViewItem::ServerViewItem(const std::string& name,const std::string& host,const std::string& port) :
-		ServerItem(name,host,port)
-{
-
-}
-
-bool ServerViewItem::hasSuiteFilter()
-{
-	return (suiteFilter_.size()>0);
-}
-
-void ServerViewItem::addToSuiteFilter(node_ptr suite)
-{
-	suiteFilter_.push_back(suite);
-}
-
-void ServerViewItem::removeFromSuiteFilter(node_ptr suite)
-{
-	for(std::vector<node_ptr>::iterator it=suiteFilter_.begin(); it != suiteFilter_.end(); it++)
-	{
-		if((*it) == suite)
-		{
-				suiteFilter_.erase(it);
-				return;
-		}
-
+		handler_=ServerHandler::addServer(name_,host_,port_);
 	}
 }
-*/
+
+void ServerItem::registerUsageEnd()
+{
+	useCnt_--;
+	if(useCnt_ == 0 && handler_)
+	{
+		ServerHandler::removeServer(handler_);
+		handler_=0;
+	}
+}
+
+//===========================================================
+// Observers
+//===========================================================
+
+void ServerItem::addObserver(ServerItemObserver* o)
+{
+	std::vector<ServerItemObserver*>::iterator it=std::find(observers_.begin(),observers_.end(),o);
+	if(it == observers_.end())
+	{
+		observers_.push_back(o);
+		registerUsageBegin();
+	}
+}
+
+void ServerItem::removeObserver(ServerItemObserver* o)
+{
+	std::vector<ServerItemObserver*>::iterator it=std::find(observers_.begin(),observers_.end(),o);
+	if(it != observers_.end())
+	{
+		observers_.erase(it);
+		registerUsageEnd();
+	}
+}
+
+void ServerItem::broadcastChanged()
+{
+	for(std::vector<ServerItemObserver*>::const_iterator it=observers_.begin(); it != observers_.end(); it++)
+		(*it)->notifyServerItemChanged(this);
+}
+
+void ServerItem::broadcastDeletion()
+{
+	for(std::vector<ServerItemObserver*>::const_iterator it=observers_.begin(); it != observers_.end(); it++)
+		(*it)->notifyServerItemDeletion(this);
+}

@@ -16,10 +16,12 @@
 #include <QWidget>
 
 #include "DState.hpp"
+#include "ServerList.hpp"
 
 class QToolButton;
 class VParam;
 class VFilter;
+class ServerFilter;
 
 
 class AbstractFilterMenu : public QObject
@@ -57,6 +59,34 @@ class IconFilterMenu : public AbstractFilterMenu
 public:
 	IconFilterMenu(QMenu* parent);
 };
+
+
+class ServerFilterMenu : public QObject, public ServerListObserver
+{
+Q_OBJECT
+
+public:
+	ServerFilterMenu(QMenu* parent);
+	~ServerFilterMenu();
+
+	void reloadFilter(ServerFilter*);
+
+	//From ServerListObserver
+	void notifyServerListChanged();
+
+protected slots:
+	void slotChanged(bool);
+
+protected:
+	void init();
+	void clear();
+	void addAction(QString name,int id);
+
+	QMenu*  menu_;
+	QList<QAction*> acLst_;
+	ServerFilter* filter_;
+};
+
 
 
 

@@ -18,6 +18,9 @@
 #include "VIcon.hpp"
 #include "VFilter.hpp"
 
+#include "ServerItem.hpp"
+#include "ServerFilter.hpp"
+
 //===========================================
 //
 // AbstractFilterMenu
@@ -112,6 +115,108 @@ IconFilterMenu::IconFilterMenu(QMenu * parent) :
 		AbstractFilterMenu(parent,VIcon::filterItems())
 {
 }
+
+
+
+//===========================================
+//
+// ServerFilterMenu
+//
+//===========================================
+
+ServerFilterMenu::ServerFilterMenu(QMenu * parent) :
+ 	menu_(parent),
+	filter_(NULL)
+{
+	init();
+
+	ServerList::instance()->addObserver(this);
+}
+
+ServerFilterMenu::~ServerFilterMenu()
+{
+	ServerList::instance()->removeObserver(this);
+}
+
+void ServerFilterMenu::clear()
+{
+	foreach(QAction* ac,acLst_)
+	{
+		delete ac;
+	}
+	acLst_.clear();
+}
+
+void ServerFilterMenu::init()
+{
+	for(int i=0; i < ServerList::instance()->count(); i++)
+	{
+		ServerItem* item=ServerList::instance()->itemAt(i);
+		QString name=QString::fromStdString(item->name() + " (" + item->host() + ":" + item->port() + ")");
+		addAction(name,i);
+	}
+}
+
+void ServerFilterMenu::addAction(QString name,int id)
+{
+	QAction *ac = new QAction(this);
+	ac->setText(name);
+	ac->setData(id);
+	ac->setCheckable(true);
+	ac->setChecked(false);
+
+	menu_->addAction(ac);
+
+	//It will not be emitted when setChecked is called!!
+    connect(ac,SIGNAL(triggered(bool)),
+					this,SLOT(slotChanged(bool)));
+
+    acLst_ << ac;
+
+}
+
+void ServerFilterMenu::slotChanged(bool)
+{
+	if(QAction *ac=static_cast<QAction*>(sender()))
+	{
+		if(ac->isSeparator()) return;
+
+		if(ServerItem *item=ServerList::instance()->itemAt(ac->data().toInt()))
+		{
+			if(ac->isChecked())
+				filter_->addServer(item);
+			else
+				filter_->removeServer(item);
+		}
+	}
+}
+
+//Reset actions state when a new filter is loaded
+void ServerFilterMenu::reloadFilter(ServerFilter* filter)
+{
+	filter_=filter;
+	foreach(QAction* ac,acLst_)
+	{
+		if(!ac->isSeparator())
+		{
+				if(ServerItem *item=ServerList::instance()->itemAt(ac->data().toInt()))
+				{
+					//std::cout << ac->text().toStdString() << " " << item->name() << " " <<  filter_->isFiltered(item) << std::endl;
+
+					//Triggered will not be called!!
+					ac->setChecked(filter_->isFiltered(item));
+				}
+		}
+	}
+}
+
+void ServerFilterMenu::notifyServerListChanged()
+{
+	clear();
+	init();
+	reloadFilter(filter_);
+}
+
 
 FilterWidget::FilterWidget(QWidget *parent) :
    QWidget(parent),

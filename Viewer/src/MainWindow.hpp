@@ -24,7 +24,7 @@ class QActionGroup;
 class AbstractFilterMenu;
 class FilterWidget;
 class NodePanel;
-class ServerDialog;
+class ServerFilterMenu;
 
 class MainWindow : public QMainWindow, private Ui::MainWindow  
 {
@@ -50,8 +50,8 @@ protected slots:
 	void on_actionQuit_triggered();
 	void on_actionRefresh_triggered();
 	void on_actionReset_triggered();
-	void on_actionServers_triggered();
 	void on_actionConfigureNodeMenu_triggered();
+	void on_actionManageServers_triggered();
 
 	void slotViewMode(QAction*);
 	void slotCurrentChangedInPanel();
@@ -79,9 +79,10 @@ private:
     AbstractFilterMenu* stateFilterMenu_;
     AbstractFilterMenu* attrFilterMenu_;
     AbstractFilterMenu* iconFilterMenu_;
+    ServerFilterMenu* serverFilterMenu_;
     FilterWidget* filterWidget_;
     NodePanel* nodePanel_;
-    ServerDialog* serverDialog_;
+
 
     static bool quitStarted_;
     static QList<MainWindow*> windows_;

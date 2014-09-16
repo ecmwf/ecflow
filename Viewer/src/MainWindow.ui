@@ -95,10 +95,18 @@
      <string>&amp;Help</string>
     </property>
    </widget>
+   <widget class="QMenu" name="menuServer">
+    <property name="title">
+     <string>&amp;Servers</string>
+    </property>
+    <addaction name="actionManageServers"/>
+    <addaction name="separator"/>
+   </widget>
    <addaction name="menuLl"/>
    <addaction name="menuEdit"/>
    <addaction name="menuView"/>
    <addaction name="menu_Help"/>
+   <addaction name="menuServer"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <widget class="QToolBar" name="viewToolBar">
@@ -115,7 +123,6 @@
    <addaction name="actionTableView"/>
    <addaction name="actionRefresh"/>
    <addaction name="actionReset"/>
-   <addaction name="actionServers"/>
   </widget>
   <widget class="QToolBar" name="toolBar">
    <property name="windowTitle">
@@ -239,6 +246,19 @@
   <action name="actionConfigureNodeMenu">
    <property name="text">
     <string>Configure Node &amp;Menu</string>
+   </property>
+  </action>
+  <action name="actionContents">
+   <property name="text">
+    <string>Contents</string>
+   </property>
+   <property name="toolTip">
+    <string>View contents</string>
+   </property>
+  </action>
+  <action name="actionManageServers">
+   <property name="text">
+    <string>&amp;Manage servers</string>
    </property>
   </action>
  </widget>

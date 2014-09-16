@@ -25,7 +25,7 @@
 #include "InfoPanel.hpp"
 #include "NodePanel.hpp"
 #include "ServerHandler.hpp"
-#include "ServerDialog.hpp"
+#include "ServerListDialog.hpp"
 #include "MenuConfigDialog.hpp"
 #include "VConfig.hpp"
 
@@ -69,6 +69,9 @@ MainWindow::MainWindow(QStringList idLst,QWidget *parent) : QMainWindow(parent)
     stateFilterMenu_=new StateFilterMenu(menuState);
     attrFilterMenu_=new AttributeFilterMenu(menuType);
     iconFilterMenu_=new IconFilterMenu(menuIcon);
+
+    //Servers menu menu
+    serverFilterMenu_=new ServerFilterMenu(menuServer);
 
     //Create a node panel
     nodePanel_=new NodePanel(this);
@@ -156,25 +159,6 @@ void MainWindow::on_actionReset_triggered()
 	MainWindow::reload();
 }
 
-void MainWindow::on_actionServers_triggered()
-{
-	ServerDialog dialog(nodePanel_->config()->serverFilter(),this);
-
-	if(dialog.exec() == QDialog::Accepted)
-	{
-		  		//const IconClass &kind=dialog.selected();
-				//kind.createOne(folder,pos.x(),pos.y());
-				////showLastCreated();
-    }
-
-
-	/*QDialog *d=new QDialog(this);
-	QVBoxLayout *vb=new QVBoxLayout;
-	d->setLayout(vb);
-	vb->addWidget(new ServerWidget(d));
-	d->exec();*/
-
-}
 
 void MainWindow::on_actionConfigureNodeMenu_triggered()
 {
@@ -185,15 +169,25 @@ void MainWindow::on_actionConfigureNodeMenu_triggered()
     }
 }
 
+void MainWindow::on_actionManageServers_triggered()
+{
+	ServerFilter *filter=0;
+	if(VConfig *config=	nodePanel_->config())
+	{
+		filter=config->serverFilter();
+	}
 
+	ServerListDialog dialog(ServerListDialog::SelectionMode,filter,this);
+	dialog.exec();
+}
 
 void MainWindow::slotViewMode(QAction* action)
 {
 	if(action->isChecked())
 	{
-			int index=viewModeAg_->actions().indexOf(action);
-			if(index >=0)
-				nodePanel_->setViewMode(static_cast<Viewer::ViewMode>(index));
+		int index=viewModeAg_->actions().indexOf(action);
+		if(index >=0)
+			nodePanel_->setViewMode(static_cast<Viewer::ViewMode>(index));
 	}
 }
 
@@ -207,6 +201,7 @@ void MainWindow::slotCurrentChangedInPanel()
 		stateFilterMenu_->reload(config->stateFilter());
 		attrFilterMenu_->reload(config->attributeFilter());
 		iconFilterMenu_->reload(config->iconFilter());
+		serverFilterMenu_->reloadFilter(config->serverFilter());
 	}
 	//breadcrumbs_->setPath(folderPanel_->currentFolder());
   	 //slotUpdateNavigationActions(folderPanel_->folderNavigation());

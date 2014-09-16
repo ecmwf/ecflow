@@ -61,9 +61,9 @@ public:
 	void removeObserver(VConfigObserver*);
 
 	void changed(ServerFilter*);
-		void changed(StateFilter*);
-		void changed(AttributeFilter*);
-		void changed(IconFilter*);
+	void changed(StateFilter*);
+	void changed(AttributeFilter*);
+	void changed(IconFilter*);
 
 protected:
 

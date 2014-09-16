@@ -10,52 +10,58 @@
 #ifndef SERVERFILTER_HPP_
 #define SERVERFILTER_HPP_
 
+#include <set>
 #include <vector>
 
 #include "Node.hpp"
-#include "ServerItem.hpp"
 #include "VConfig.hpp"
+#include "ServerItem.hpp"
 
-class ServerHandler;
-
-class ServerFilterItem: public ServerItem
+/*class ServerFilterItem : public ServerItemObserver
 {
 	friend class ServerFilter;
 
 public:
 	bool hasSuiteFilter();
-	const std::vector<node_ptr>&  suiteFilter() const {return suiteFilter_;}
-	void addToSuiteFilter(node_ptr);
-	void removeFromSuiteFilter(node_ptr);
+	const std::set<std::string>&  suiteFilter() const {return suiteFilter_;}
+	void addToSuiteFilter(const std::string&);
+	void removeFromSuiteFilter(const std::string&);
+	ServerHandler* serverHandler() const;
+
+	//From ServerItemObserver
+	void notifyServerItemChanged();
 
 protected:
-	ServerFilterItem(const std::string&,const std::string&,const std::string&);
+	ServerFilterItem(const std::string&); //,const std::string&,const std::string&);
+	~ServerFilterItem();
 
-	ServerHandler* server_;
-	std::vector<node_ptr> suiteFilter_;
-
+	ServerItem* server_;
+	std::set<std::string> suiteFilter_;
 };
+*/
 
-
-class ServerFilter : public VConfigItem
+class ServerFilter : public VConfigItem, public ServerItemObserver
 {
 friend class VConfig;
 
 public:
 	ServerFilter(VConfig*);
+	~ServerFilter();
 
-	const std::vector<ServerFilterItem*> servers() const {return servers_;}
-	ServerFilterItem* addServer(ServerItem*,bool broadcast=true);
+	const std::vector<ServerItem*> items() const {return items_;}
+	void addServer(ServerItem*,bool broadcast=true);
 	void removeServer(ServerItem*);
-	bool match(ServerItem*);
-	void update(const std::vector<ServerItem*>&);
+    bool isFiltered(ServerItem*) const;
+
+    //From ServerItemObserver
+    void notifyServerItemChanged(ServerItem*);
+    void notifyServerItemDeletion(ServerItem*);
 
 protected:
 	void notifyOwner();
 
-
 private:
-	std::vector<ServerFilterItem*> servers_;
+	std::vector<ServerItem*> items_;
 };
 
 #endif

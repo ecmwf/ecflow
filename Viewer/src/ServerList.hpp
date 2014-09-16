@@ -14,38 +14,56 @@
 #include <vector>
 
 class ServerItem;
+class ServerList;
 
+class ServerListObserver
+{
+public:
+	ServerListObserver() {};
+	virtual ~ServerListObserver() {};
+	virtual void notifyServerListChanged()=0;
+};
 
 class ServerList
 {
 public:
-	static ServerList* Instance();
+	int count() {return static_cast<int>(items_.size());}
+	ServerItem* itemAt(int);
+	ServerItem* find(const std::string& name);
 
-	int count() const {return static_cast<int>(items_.size());}
-	ServerItem* item(int);
-
-	void rescan();
-	void update(const std::vector<ServerItem*>&);
-	void save();
-
-private:
-	ServerList();
-	~ServerList();
-
+	//Can be added or changed only via these static methods
 	ServerItem* add(const std::string&,const std::string&,const std::string&);
-	ServerItem* add(const std::string&);
-	void add(ServerItem*);
+	void remove(ServerItem*);
+	void reset(ServerItem*,const std::string& name,const std::string& host,const std::string& port);
+
+	std::string uniqueName(const std::string&);
+
+	void init();
+	void save();
+	void rescan();
+
+	void addObserver(ServerListObserver*);
+	void removeObserver(ServerListObserver*);
+
+	static ServerList* instance();
+
+protected:
+	ServerList() {};
+	~ServerList() {};
+
+	static ServerList* instance_;
 
 	bool load();
 	bool readRcFile();
 	bool readSystemFile();
 
-	static ServerList* instance_;
+	void broadcastChanged();
 
 	std::vector<ServerItem*> items_;
 	std::string serversPath_;
-
+	std::vector<ServerListObserver*> observers_;
 };
+
 
 
 #endif

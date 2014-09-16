@@ -10,50 +10,67 @@
 #ifndef SERVERITEM_HPP_
 #define SERVERITEM_HPP_
 
+#include <set>
 #include <string>
 #include <vector>
 
 #include <cstddef>
 #include <boost/shared_ptr.hpp>
 
-class ServerItem
+class ServerHandler;
+class ServerItem;
+
+class ServerItemObserver
 {
 public:
-	ServerItem(const std::string&);
-	ServerItem(const std::string&,const std::string&,const std::string&);
-	virtual ~ServerItem() {};
+	ServerItemObserver() {};
+	virtual ~ServerItemObserver() {};
+	virtual void notifyServerItemChanged(ServerItem*)=0;
+	virtual void notifyServerItemDeletion(ServerItem*)=0;
+};
 
-	ServerItem* clone() const;
-	void  name(const std::string& name) {name_=name;}
-	void  host(const std::string& name) {host_=name;}
-	void  port(const std::string& name) {port_=name;}
 
+class ServerItem
+{
+
+friend class ServerList;
+
+public:
 	const std::string& name() const {return name_;}
 	const std::string& host() const {return host_;}
 	const std::string& port() const {return port_;}
+    bool isUsed() const;
+    ServerHandler* serverHandler() const {return handler_;}
 
-	virtual bool match(ServerItem*);
+	void addObserver(ServerItemObserver*);
+	void removeObserver(ServerItemObserver*);
 
 protected:
+	ServerItem(const std::string&);
+	ServerItem(const std::string&,const std::string&,const std::string&);
+	 ~ServerItem();
+
+	void  name(const std::string& name) {name_=name;}
+	void  host(const std::string& host) {host_=host;}
+	void  port(const std::string& port) {port_=port;}
+	void  reset(const std::string& name,const std::string& host,const std::string& port);
+
+	void registerUsageBegin();
+	void registerUsageEnd();
+
+	void broadcastChanged();
+	void broadcastDeletion();
+
 	std::string name_;
 	std::string host_;
 	std::string port_;
+	int useCnt_;
+	ServerHandler* handler_;
+
+	std::set<std::string> suiteFilter_;
+	std::vector<ServerItemObserver*> observers_;
 };
 
 typedef boost::shared_ptr<ServerItem>   ServerItem_ptr;
-
-/*class ServerViewItem: public ServerItem
-{
-public:
-	ServerViewItem(const std::string&,const std::string&,const std::string&);
-	bool hasSuiteFilter();
-	const std::vector<node_ptr>&  suiteFilter() const {return suiteFilter_;}
-	void addToSuiteFilter(node_ptr);
-	void removeFromSuiteFilter(node_ptr);
-
-protected:
-	std::vector<node_ptr> suiteFilter_;
-
-};*/
 
 #endif

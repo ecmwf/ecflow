@@ -19,26 +19,26 @@
 #include "ServerHandler.hpp"
 #include "MenuHandler.hpp"
 #include "DirectoryHandler.hpp"
+#include "ServerList.hpp"
 #include "VAttribute.hpp"
 #include "VIcon.hpp"
 #include "VState.hpp"
 
 int main(int argc, char **argv)
 {
-
 	std::cout << ecf::Version::description()  << "\n";  // print the version information
 
 
-    if (argc != 3)
-    {
-        std::cout << "Usage:" << std::endl;
-        std::cout << argv[0] << " <host> <port>" << std::endl;
-        return 1;
-    }
+    //if (argc != 3)
+    //{
+    //  std::cout << "Usage:" << std::endl;
+     //   std::cout << argv[0] << " <host> <port>" << std::endl;
+    //    return 1;
+    //}
 
     QApplication app(argc, argv);
 
-    ServerHandler::addServer(argv[1],argv[2]);
+    //ServerHandler::addServer(argv[1],argv[2]);
 
     //Initialise the config and other paths
     DirectoryHandler::init(std::string(argv[0]));  // we need to tell the Directory class where we started from
@@ -48,7 +48,10 @@ int main(int argc, char **argv)
     std::string menuPath = DirectoryHandler::concatenate(DirectoryHandler::etcDir(), menuFilename);
     MenuHandler::readMenuConfigFile(menuPath);
 
-    //Initialise the node/serverstate description
+    //Initialise the server list
+    ServerList::instance()->init();
+
+    //Initialise the node/server state description
     VState::init();
 
     //Initialise the node attributes description

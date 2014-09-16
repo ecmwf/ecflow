@@ -31,7 +31,7 @@ set(viewer_srcs
     ServerFilter.cpp
     ServerItem.cpp
     ServerList.cpp
-    ServerDialog.cpp
+    ServerListDialog.cpp
     TabWidget.cpp 
     TableNodeModel.cpp
     TableNodeView.cpp
@@ -70,7 +70,7 @@ QT4_WRAP_CPP(VIEWER_MOC AbstractNodeModel.hpp
                         NodeWidget.hpp
                         PlainTextSearchLine.hpp
                         ServerHandler.hpp
-                        ServerDialog.hpp
+                        ServerListDialog.hpp
                         TabWidget.hpp
                         TableNodeView.hpp                      
                         TreeNodeView.hpp
@@ -79,7 +79,14 @@ QT4_WRAP_CPP(VIEWER_MOC AbstractNodeModel.hpp
                         VariableItemWidget.hpp)
 
 QT4_ADD_RESOURCES (VIEWER_RES viewer.qrc)
-QT4_WRAP_UI       (VIEWER_FORMS_HEADERS CommandDesignerWidget.ui CustomCommandDialog.ui MainWindow.ui MenuConfigDialog.ui SearchLineWidget.ui ServerDialog.ui ServerItemDialog.ui TextItemWidget.ui)
+QT4_WRAP_UI       (VIEWER_FORMS_HEADERS CommandDesignerWidget.ui CustomCommandDialog.ui MainWindow.ui 
+                        MenuConfigDialog.ui 
+                        SearchLineWidget.ui 
+                        ServerAddDialog.ui
+                        ServerEditDialog.ui 
+                        ServerListDialog.ui
+                        ServerWidget.ui 
+                        TextItemWidget.ui)
 
 
 ecbuild_add_executable( TARGET   ecflowviewer

@@ -15,6 +15,7 @@
 
 #include "ServerFilter.hpp"
 #include "ServerHandler.hpp"
+#include "ServerItem.hpp"
 #include "VFilter.hpp"
 
 bool NodeModelServerItem::isFiltered(Node* node) const
@@ -107,11 +108,14 @@ void AbstractNodeModel::notifyConfigChanged(ServerFilter*)
 void AbstractNodeModel::init()
 {
 	ServerFilter *filter=config_->serverFilter();
-	for(unsigned int i=0; i < filter->servers().size(); i++)
+	for(unsigned int i=0; i < filter->items().size(); i++)
 	{
-			ServerHandler *server=ServerHandler::find(filter->servers().at(i)->host(),filter->servers().at(i)->port());
-			server->addNodeObserver(this);
-			servers_.add(server);
+			//ServerHandler *server=ServerHandler::find(filter->items().at(i)->host(),filter->at().at(i)->port());
+		    if(ServerHandler *server=filter->items().at(i)->serverHandler())
+			{
+		    		server->addNodeObserver(this);
+		    		servers_.add(server);
+			}
 	}
 }
 

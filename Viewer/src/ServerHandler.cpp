@@ -28,8 +28,9 @@ std::vector<ServerHandler*> ServerHandler::servers_;
 std::map<std::string, std::string> ServerHandler::commands_;
 
 
-ServerHandler::ServerHandler(const std::string& name, const std::string& port) :
+ServerHandler::ServerHandler(const std::string& name,const std::string& host, const std::string& port) :
    name_(name),
+   host_(host),
    port_(port),
    client_(0),
    updating_(false),
@@ -37,9 +38,9 @@ ServerHandler::ServerHandler(const std::string& name, const std::string& port) :
    comThread_(0),
    refreshIntervalInSeconds_(10)
 {
-	longName_=name_ + "@" + port_;
+	longName_=host_ + "@" + port_;
 
-	client_=new ClientInvoker(name,port);
+	client_=new ClientInvoker(host,port);
 	//client_->allow_new_client_old_server(1);
 	//client_->allow_new_client_old_server(9);
 
@@ -50,14 +51,14 @@ ServerHandler::ServerHandler(const std::string& name, const std::string& port) :
 
 	client_->sync_local();
 
-	//Set server name and port in defs
+	//Set server host and port in defs
 	{
 		ServerDefsAccess defsAccess(this);  // will reliquish its resources on destruction
 		defs_ptr defs = defsAccess.defs();
 		if(defs != NULL)
 		{
 			ServerState& st=defs->set_server();
-			st.hostPort(std::make_pair(name_,port_));
+			st.hostPort(std::make_pair(host_,port_));
 		}
 	}
 
@@ -122,10 +123,20 @@ void ServerHandler::resetRefreshTimer()
 }
 
 
-ServerHandler* ServerHandler::addServer(const std::string& name, const std::string& port)
+ServerHandler* ServerHandler::addServer(const std::string& name,const std::string& host, const std::string& port)
 {
-		ServerHandler* sh=new ServerHandler(name,port);
+		ServerHandler* sh=new ServerHandler(name,host,port);
 		return sh;
+}
+
+void ServerHandler::removeServer(ServerHandler* server)
+{
+		std::vector<ServerHandler*>::iterator it=std::find(servers_.begin(), servers_.end(),server);
+		if(it != servers_.end())
+		{
+			servers_.erase(it);
+			delete (*it);
+		}
 }
 
 int ServerHandler::numSuites()
@@ -465,7 +476,7 @@ bool ServerHandler::readFile(Node *n,const std::string& id,
   	}
   	else
   	{
-  		//gui::message("%s: fetching %s", this->name(), name.c_str());
+  		//gui::message("%s: fetching %s", this->host(), name.c_str());
   	    try
   	    {
   	    	if (id == "ECF_SCRIPT")
@@ -855,15 +866,15 @@ ServerHandler* ServerHandler::find(const std::string& longName)
 ServerHandler* ServerHandler::find(const std::pair<std::string,std::string>& hostPort)
 {
 	for(std::vector<ServerHandler*>::const_iterator it=servers_.begin(); it != servers_.end();it++)
-			if((*it)->name_ == hostPort.first && (*it)->port_ == hostPort.second)
+			if((*it)->host_ == hostPort.first && (*it)->port_ == hostPort.second)
 					return *it;
 	return NULL;
 }
 
-ServerHandler* ServerHandler::find(const std::string& name,const std::string& port)
+ServerHandler* ServerHandler::find(const std::string& host,const std::string& port)
 {
 	for(std::vector<ServerHandler*>::const_iterator it=servers_.begin(); it != servers_.end();it++)
-			if((*it)->name_ == name && (*it)->port_ == port)
+			if((*it)->host_ == host && (*it)->port_ == port)
 					return *it;
 	return NULL;
 }
@@ -1220,6 +1231,18 @@ void ServerComThread::update(const Node* node, const std::vector<ecf::Aspect::Ty
 	//UserMessage::message(UserMessage::DBG, false, std::string("Thread update: ") + node->name());
 
 	emit nodeChanged(node,v);
+}
+
+void ServerComThread::update_delete(const Node* nc)
+{
+	Node *n=const_cast<Node*>(nc);
+	ChangeMgrSingleton::instance()->detach(n,this);
+}
+
+void ServerComThread::update_delete(const Defs* dc)
+{
+	Defs *d=const_cast<Defs*>(dc);
+	ChangeMgrSingleton::instance()->detach(static_cast<Defs*>(d),this);
 }
 
 // ------------------------------------------------------------
