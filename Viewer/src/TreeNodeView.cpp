@@ -140,7 +140,7 @@ void TreeNodeView::slotViewCommand(std::vector<ViewNodeInfo_ptr> nodeLst,QString
 void TreeNodeView::reload()
 {
 	model_->reload();
-	expandAll();
+	//expandAll();
 }
 
 

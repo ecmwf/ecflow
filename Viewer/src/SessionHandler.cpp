@@ -11,9 +11,9 @@
 
 #include <algorithm>
 
-SessionItem::SessionItem(const std::string& name) : name_(name)
+SessionItem::SessionItem(const std::string& name) :
+  name_(name)
 {
-
 }
 
 

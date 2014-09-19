@@ -32,6 +32,8 @@ public:
 
 	static std::vector<VParam*> filterItems();
 	static QVariantList pixmapList(Node *node,VFilter *filter);
+	static VIcon* find(VParam::Type t);
+	static VIcon* find(const std::string& name);
 	static void init();
 
 	static bool  testWait(Node *n);

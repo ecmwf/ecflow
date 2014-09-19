@@ -21,10 +21,9 @@ public:
 
 	void  name(const std::string& name);
 	const std::string& name() const {return name_;}
-
-
 protected:
 	std::string name_;
+
 };
 
 

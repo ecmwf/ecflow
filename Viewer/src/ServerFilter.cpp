@@ -145,3 +145,24 @@ bool ServerFilter::isFiltered(ServerItem* item) const
 	return false;
 }
 
+void ServerFilter::save(boost::property_tree::ptree& array) const
+{
+	for(std::vector<ServerItem*>::const_iterator it=items_.begin(); it != items_.end(); it++)
+	{
+		array.push_back(std::make_pair("",(*it)->name()));
+	}
+}
+
+void ServerFilter::load(const boost::property_tree::ptree& array)
+{
+	items_.clear();
+
+	for(boost::property_tree::ptree::const_iterator it = array.begin(); it != array.end(); ++it)
+	{
+			std::string name=it->second.get_value<std::string>();
+			if(ServerItem* s=ServerList::instance()->find(name))
+			{
+				addServer(s,false);
+			}
+	}
+}

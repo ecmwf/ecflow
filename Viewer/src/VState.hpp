@@ -33,12 +33,12 @@ public:
 	static VParam::Type toType(Node *n);
 
 	static std::vector<VParam*> filterItems();
-
+	static VState* find(VParam::Type);
+	static VState* find(const std::string& name);
 	static void init();
 
 private:
 	static VState* find(Node *n);
-	static VState* find(VParam::Type);
 
 	static std::vector<VState*> items_;
 };

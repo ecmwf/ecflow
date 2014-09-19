@@ -33,6 +33,8 @@ protected:
 
 	QVariant serverData(const QModelIndex& index,int role) const;
 	QVariant nodeData(const QModelIndex& index,int role) const;
+
+	void resetStateFilter(bool broadcast) {};
 };
 
 

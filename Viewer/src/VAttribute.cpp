@@ -58,6 +58,28 @@ std::vector<VParam*> VAttribute::filterItems()
 	return v;
 }
 
+VAttribute* VAttribute::find(VParam::Type t)
+{
+	for(std::vector<VAttribute*>::const_iterator it=items_.begin(); it != items_.end(); it++)
+	{
+		if((*it)->type() == t)
+				return *it;
+	}
+
+	return NULL;
+}
+
+VAttribute* VAttribute::find(const std::string& name)
+{
+	for(std::vector<VAttribute*>::const_iterator it=items_.begin(); it != items_.end(); it++)
+	{
+		if((*it)->stdName() == name)
+				return *it;
+	}
+
+	return NULL;
+}
+
 int VAttribute::num(Node *node,Type type)
 {
 	if(!node || type == NoAttribute)

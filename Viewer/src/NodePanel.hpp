@@ -10,11 +10,11 @@
 #ifndef NODEPANEL_HPP_
 #define NODEPANEL_HPP_
 
-#include <QSettings>
-
 #include "Viewer.hpp"
 #include "TabWidget.hpp"
 #include "ViewNodeInfo.hpp"
+
+#include <boost/property_tree/ptree.hpp>
 
 class NodeWidget;
 class VConfig;
@@ -36,8 +36,9 @@ public:
 	void addWidget();
 	void resetWidgets(QStringList);
 	void reload();
-	void writeSettings(QSettings &);
-	void readSettings(QSettings &);
+
+	void save(boost::property_tree::ptree &pt);
+	void load(const boost::property_tree::ptree &pt);
 
 public slots:
 	void slotCurrentWidgetChanged(int);

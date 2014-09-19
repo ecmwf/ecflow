@@ -145,4 +145,3 @@ VParam::Type VParam::toType(int v)
 {
 	return static_cast<VParam::Type>(v);
 }
-

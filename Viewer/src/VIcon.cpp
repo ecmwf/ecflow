@@ -90,6 +90,28 @@ std::vector<VParam*> VIcon::filterItems()
 	return v;
 }
 
+VIcon* VIcon::find(VParam::Type t)
+{
+	for(std::vector<VIcon*>::const_iterator it=items_.begin(); it != items_.end(); it++)
+	{
+		if((*it)->type() == t)
+				return *it;
+	}
+
+	return NULL;
+}
+
+VIcon* VIcon::find(const std::string& name)
+{
+	for(std::vector<VIcon*>::const_iterator it=items_.begin(); it != items_.end(); it++)
+	{
+		if((*it)->stdName() == name)
+				return *it;
+	}
+
+	return NULL;
+}
+
 /*VParam* VIcon::item(VParam::Type type)
 {
 	for(std::vector<VIcon*>::const_iterator it=items_.begin(); it != items_.end(); it++)

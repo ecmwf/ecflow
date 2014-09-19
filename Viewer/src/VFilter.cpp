@@ -43,6 +43,29 @@ void VFilter::current(const std::set<VParam::Type>& at)
 	notifyOwner();
 }
 
+void VFilter::save(boost::property_tree::ptree& array)
+{
+	for(std::set<VParam::Type>::const_iterator it=current_.begin(); it != current_.end(); it++)
+	{
+		array.push_back(std::make_pair("",toName(*it)));
+	}
+}
+
+void VFilter::load(const boost::property_tree::ptree& array)
+{
+	current_.clear();
+
+	for(boost::property_tree::ptree::const_iterator it = array.begin(); it != array.end(); ++it)
+	{
+			std::string name=it->second.get_value<std::string>();
+			VParam::Type t=toType(name);
+			if(all_.find(t) != all_.end())
+			{
+				current_.insert(t);
+			}
+	}
+}
+
 //==============================================
 //
 // StateFilter
@@ -59,6 +82,22 @@ StateFilter::StateFilter(VConfig * owner) : VFilter(owner)
 void StateFilter::notifyOwner()
 {
 	owner_->changed(this);
+}
+
+std::string StateFilter::toName(VParam::Type t)
+{
+	if(VParam* p=VState::find(t))
+		return p->stdName();
+
+	return std::string("");
+}
+
+VParam::Type StateFilter::toType(const std::string& name)
+{
+	if(VParam* p=VState::find(name))
+		return p->type();
+
+	return VParam::NoType;
 }
 
 //==============================================
@@ -78,6 +117,22 @@ void AttributeFilter::notifyOwner()
 	owner_->changed(this);
 }
 
+std::string AttributeFilter::toName(VParam::Type t)
+{
+	if(VParam* p=VAttribute::find(t))
+		return p->stdName();
+
+	return std::string("");
+}
+
+VParam::Type AttributeFilter::toType(const std::string& name)
+{
+	if(VParam* p=VAttribute::find(name))
+		return p->type();
+
+	return VParam::NoType;
+}
+
 //==============================================
 //
 // IconFilter
@@ -94,4 +149,20 @@ IconFilter::IconFilter(VConfig * owner) : VFilter(owner)
 void IconFilter::notifyOwner()
 {
 	owner_->changed(this);
+}
+
+std::string IconFilter::toName(VParam::Type t)
+{
+	if(VParam* p=VIcon::find(t))
+		return p->stdName();
+
+	return std::string("");
+}
+
+VParam::Type IconFilter::toType(const std::string& name)
+{
+	if(VParam* p=VIcon::find(name))
+		return p->type();
+
+	return VParam::NoType;
 }

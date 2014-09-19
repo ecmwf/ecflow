@@ -112,7 +112,7 @@ std::string ServerList::uniqueName(const std::string& name)
 		return name;
 	}
 
-	for(int i=0; i < 100; i++)
+	for(int i=1; i < 100; i++)
 	{
 		std::ostringstream c;
 		c << i;

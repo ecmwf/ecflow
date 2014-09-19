@@ -87,6 +87,8 @@ protected:
 	void clean();
 	bool hasData() const;
 
+	virtual void resetStateFilter(bool broadcast)=0;
+
 	virtual bool isServer(const QModelIndex & index) const=0;
 	virtual ServerHandler* indexToServer(const QModelIndex & index) const=0;
 	virtual QModelIndex serverToIndex(ServerHandler*) const=0;

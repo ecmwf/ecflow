@@ -15,6 +15,8 @@
 #include "VConfig.hpp"
 #include "VParam.hpp"
 
+#include <boost/property_tree/ptree.hpp>
+
 class VFilter : public VConfigItem
 {
 public:
@@ -29,8 +31,14 @@ public:
 	bool isComplete() const { return all_.size() == current_.size();}
 	bool isSet(VParam::Type) const;
 
+	void save(boost::property_tree::ptree& array);
+	void load(const boost::property_tree::ptree& array);
+	//void load(const std::set<VParam::Type>&);
+
 protected:
 	void init(const std::vector<VParam*>& items);
+	virtual std::string toName(VParam::Type)=0;
+	virtual VParam::Type toType(const std::string& name)=0;
 
 	std::set<VParam::Type> all_;
 	std::set<VParam::Type> current_;
@@ -41,6 +49,9 @@ class StateFilter : public VFilter
 public:
 	StateFilter(VConfig* owner);
 	void notifyOwner();
+protected:
+	virtual std::string toName(VParam::Type);
+	virtual VParam::Type toType(const std::string& name);
 };
 
 class AttributeFilter : public VFilter
@@ -48,6 +59,9 @@ class AttributeFilter : public VFilter
 public:
 	AttributeFilter(VConfig* owner);
 	void notifyOwner();
+protected:
+	virtual std::string toName(VParam::Type);
+	virtual VParam::Type toType(const std::string& name);
 };
 
 class IconFilter : public VFilter
@@ -55,6 +69,9 @@ class IconFilter : public VFilter
 public:
 	IconFilter(VConfig* owner);
 	void notifyOwner();
+protected:
+	virtual std::string toName(VParam::Type);
+	virtual VParam::Type toType(const std::string& name);
 };
 
 #endif

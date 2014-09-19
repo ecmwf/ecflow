@@ -134,6 +134,7 @@ void AbstractNodeModel::reload()
 	beginResetModel();
 	clean();
 	init();
+	resetStateFilter(false); //do not emit change signal
 	endResetModel();
 }
 
