@@ -30,8 +30,9 @@ void VariableModel::setData(ViewNodeInfo_ptr data)
 	beginResetModel();
 
 	nodes_.clear();
+	server_=0;
 
-	if(data->isNode())
+	if(data.get() != 0 && data->isNode())
 	{
 		Node* n=data->node();
 		while(n)
@@ -40,9 +41,10 @@ void VariableModel::setData(ViewNodeInfo_ptr data)
 			nodes_ << n;
 			n=n->parent();
 		}
-	}
 
-	server_=data->server();
+		server_=data->server();
+
+	}
 
 	//Reset the model (views will be notified)
 	endResetModel();

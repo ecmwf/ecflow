@@ -17,5 +17,6 @@
     <file>../images/exit.svg</file>
     <file>../images/reload.svg</file>
     <file alias="add_tab.svg">../images/add_tab.svg</file>
+    <file alias="directory_arrow.svg">../images/directory_arrow.svg</file>
   </qresource>
 </RCC>

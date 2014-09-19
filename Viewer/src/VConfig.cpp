@@ -35,7 +35,6 @@ VConfig::~VConfig()
 	delete icon_;
 }
 
-
 void VConfig::changed(ServerFilter* f)
 {
 	for(std::vector<VConfigObserver*>::iterator it=observers_.begin(); it != observers_.end(); it++)
@@ -67,7 +66,6 @@ void VConfig::changed(AttributeFilter* f)
 		(*it)->notifyConfigChanged(f);
 	}
 }
-
 
 void VConfig::addObserver(VConfigObserver* obs)
 {

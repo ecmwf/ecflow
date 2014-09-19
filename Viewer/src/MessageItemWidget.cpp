@@ -30,7 +30,7 @@ QWidget* MessageItemWidget::realWidget()
 void MessageItemWidget::reload(ViewNodeInfo_ptr nodeInfo)
 {
 	loaded_=true;
-	if(nodeInfo->isNode())
+	if(nodeInfo.get() != 0 && nodeInfo->isNode())
 	{
 		Node* n=nodeInfo->node();
 		if(ServerHandler* s=nodeInfo->server())

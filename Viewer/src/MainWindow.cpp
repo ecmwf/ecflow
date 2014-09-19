@@ -13,6 +13,7 @@
 #include <QCloseEvent>
 #include <QComboBox>
 #include <QDialog>
+#include <QDockWidget>
 #include <QMessageBox>
 #include <QSplitter>
 #include <QVBoxLayout>
@@ -27,7 +28,11 @@
 #include "ServerHandler.hpp"
 #include "ServerListDialog.hpp"
 #include "MenuConfigDialog.hpp"
+#include "UserMessage.hpp"
 #include "VConfig.hpp"
+
+#include <boost/lexical_cast.hpp>
+#include <boost/property_tree/json_parser.hpp>
 
 //Initialise static variables
 bool MainWindow::quitStarted_=false;
@@ -62,8 +67,8 @@ MainWindow::MainWindow(QStringList idLst,QWidget *parent) : QMainWindow(parent)
     w->setLayout(layout);
     setCentralWidget(w);
 
-    QSplitter *sp=new QSplitter(Qt::Vertical,this);
-    layout->addWidget(sp);
+    //QSplitter *sp=new QSplitter(Qt::Vertical,this);
+    //layout->addWidget(sp);
 
     //View menu
     stateFilterMenu_=new StateFilterMenu(menuState);
@@ -75,40 +80,11 @@ MainWindow::MainWindow(QStringList idLst,QWidget *parent) : QMainWindow(parent)
 
     //Create a node panel
     nodePanel_=new NodePanel(this);
-    sp->addWidget(nodePanel_);
+    layout->addWidget(nodePanel_);//sp->addWidget(nodePanel_);
     
     connect(nodePanel_,SIGNAL(currentWidgetChanged()),
     		this,SLOT(slotCurrentChangedInPanel()));
 
-    //connect(filterWidget_,SIGNAL(filterChanged(QSet<DState::State>)),
-    //    	nodePanel_,SLOT(slotFilterChanged(QSet<DState::State>)));
-
-
-    //connect(attFilter_,SIGNAL(currentIndexChanged(int)),
-    //       nodePanel_,SLOT(slotAttFilterChanged(int)));
-
-
-
-    //Info panel
-    InfoPanel* infoPanel=new InfoPanel(this);
-    sp->addWidget(infoPanel);
-
-    connect(nodePanel_,SIGNAL(selectionChanged(ViewNodeInfo_ptr)),
-    		infoPanel,SLOT(slotReload(ViewNodeInfo_ptr)));
-
-    //File menu
-
-    /*connect(actionNewTab,SIGNAL(triggered()),
-    		nodePanel_,SLOT(slotNewTab()));
-
-    connect(actionNewWindow,SIGNAL(triggered()),
-    		nodePanel_,SLOT(slotNewWindow()));
-
-    connect(actionClose,SIGNAL(triggered()),
-    		this,SLOT(close()));
-
-    connect(actionQuit,SIGNAL(triggered()),
-        		this,SLOT(slotQuit()));*/
 }
 
 
@@ -120,6 +96,23 @@ void MainWindow::init(MainWindow *win)
 	//actionIconSidebar_->setChecked(browser->actionIconSidebar_->isChecked());
 	//actionDrawers_->setChecked(browser->actionDrawers_->isChecked());
 	//actionStatusbar_->setChecked(browser->actionStatusbar_->isChecked());
+}
+
+InfoPanel* MainWindow::addInfoPanel()
+{
+	//Dock widget at the bottom
+    InfoPanelDock *dw = new InfoPanelDock(tr("Info panel"), this);
+
+    //Find a unique objectName
+    QString dname="dock_" + QString::number(findChildren<QDockWidget*>().count()-1);
+    dw->setObjectName(dname);
+
+    addDockWidget(Qt::BottomDockWidgetArea, dw);
+
+    connect(nodePanel_,SIGNAL(selectionChanged(ViewNodeInfo_ptr)),
+    		dw->infoPanel(),SLOT(slotReload(ViewNodeInfo_ptr)));
+
+    return dw->infoPanel();
 }
 
 //==============================================================
@@ -179,6 +172,49 @@ void MainWindow::on_actionManageServers_triggered()
 
 	ServerListDialog dialog(ServerListDialog::SelectionMode,filter,this);
 	dialog.exec();
+}
+
+//void MainWindow::on_actionAddInfoPanel_triggered()
+//{
+//	addInfoPanel();
+//}
+
+void MainWindow::on_actionShowInInfoPanel_triggered()
+{
+	QList<QDockWidget*> dockLst=findChildren<QDockWidget*>();
+
+	//If there is a visible non-detached panel it already shows the needed info
+	foreach(QDockWidget* dw,dockLst)
+	{
+		if(dw->isVisible())
+			if(InfoPanel* ip=static_cast<InfoPanel*>(dw->widget()))
+				if(!ip->detached())
+				{
+					ip->slotReload(nodePanel_->currentSelection());
+					return;
+				}
+	}
+
+
+	foreach(QDockWidget* dw,dockLst)
+	{
+		if(!dw->isVisible())
+		{
+			if(InfoPanel* ip=static_cast<InfoPanel*>(dw->widget()))
+			{
+				ip->reset(nodePanel_->currentSelection());
+				ip->detached(true);
+				dw->show();
+				return;
+			}
+		}
+	}
+
+	//Add a detached panel otherwise
+	InfoPanel* ip=addInfoPanel();
+	ip->reset(nodePanel_->currentSelection());
+	ip->detached(true);
+
 }
 
 void MainWindow::slotViewMode(QAction* action)
@@ -258,84 +294,36 @@ void MainWindow::closeEvent(QCloseEvent* event)
 //
 //====================================================
 
-void MainWindow::writeSettings(QSettings &settings)
+void MainWindow::save(boost::property_tree::ptree &pt,QSettings &qs)
 {
-	settings.setValue("geometry",saveGeometry());
-	settings.setValue("state",saveState());
-	//settings.setValue("drawerSplitter",drawerSplitter_->saveState());
-	//settings.setValue("mainSplitter",mainSplitter_->saveState());
-	settings.setValue("minimized",(windowState() & Qt::WindowMinimized)?1:0);
+	qs.setValue("geometry",saveGeometry());
+	qs.setValue("state",saveState());
+	qs.setValue("minimized",(windowState() & Qt::WindowMinimized)?1:0);
 
-	//settings.setValue("bookmarksPanel",actionSidebar_->isChecked());
-	//settings.setValue("iconsPanel",actionIconSidebar_->isChecked());
-	//settings.setValue("drawersStatus",actionDrawers_->isChecked());
-	//settings.setValue("statusbar",actionStatusbar_->isChecked());
+	pt.put("infoPanelCount",findChildren<QDockWidget*>().count());
 
-	nodePanel_->writeSettings(settings);
+	nodePanel_->save(pt);
 }
 
-void MainWindow::readSettings(QSettings &settings)
+void MainWindow::load(const boost::property_tree::ptree& winPt,QSettings &qs)
 {
-	restoreGeometry(settings.value("geometry").toByteArray());
-	restoreState(settings.value("state").toByteArray());
-	//mainSplitter_->restoreState(settings.value("mainSplitter").toByteArray());
-	//drawerSplitter_->restoreState(settings.value("drawerSplitter").toByteArray());
+	int cnt=winPt.get<int>("infoPanelCount",0);
+	for(int i=0; i < cnt ; i++)
+	{
+		addInfoPanel();
+	}
 
-	if(settings.value("minimized").toInt()== 1)
+	nodePanel_->load(winPt);
+
+	if(qs.value("minimized").toInt()== 1)
 	{
 	  	setWindowState(windowState() | Qt::WindowMinimized);
 	}
 
-	/*QString viewMode=settings.value("viewMode").toString();
-	if(viewMode == MvQFileBrowserWidget::DetailedViewMode)
-	 	actionIconView_->trigger();
-	else if(viewMode == MvQFileBrowserWidget::DetailedViewMode)
-	  	actionDetailedView_->trigger();*/
-
-	/*QVariant var=settings.value("iconSize");
-	if(!var.isNull())
-	{
-	  	slotSetIconSizeByIndex(iconSizes_.indexOf(var.toInt()));
-	}
-
-	if(settings.value("bookmarksPanel").isNull())
-	{
-		actionSidebar_->setChecked(false);
-	}
-	else
-	{
-		actionSidebar_->setChecked(settings.value("bookmarksPanel").toBool());
-	}
-
-	if(settings.value("iconsPanel").isNull())
-	{
-		actionIconSidebar_->setChecked(false);
-	}
-	else
-	{
-		actionIconSidebar_->setChecked(settings.value("iconsPanel").toBool());
-	}
-
-	if(settings.value("drawersStatus").isNull())
-	{
-		actionDrawers_->setChecked(true);
-	}
-	else
-	{
-		actionDrawers_->setChecked(settings.value("drawersStatus").toBool());
-	}
-
-	if(settings.value("statusbar").isNull())
-	{
-		actionStatusbar_->setChecked(true);
-	}
-	else
-	{
-	  	actionStatusbar_->setChecked(settings.value("statusbar").toBool());
-	}*/
-
-	nodePanel_->readSettings(settings);
+	restoreGeometry(qs.value("geometry").toByteArray());
+	restoreState(qs.value("state").toByteArray());
 }
+
 
 //====================================================
 //
@@ -343,10 +331,10 @@ void MainWindow::readSettings(QSettings &settings)
 //
 //====================================================
 
-MainWindow* MainWindow::makeWindow(QSettings &settings)
+MainWindow* MainWindow::makeWindow(const boost::property_tree::ptree& winPt,QSettings& qs)
 {
    	MainWindow* win=MainWindow::makeWindow();
-	win->readSettings(settings);
+	win->load(winPt,qs);
 	return win;
 }
 
@@ -442,41 +430,111 @@ bool MainWindow::aboutToQuit(MainWindow* topWin)
 
 void MainWindow::init()
 {
-	//Read the settings
-  	QSettings settings("ECMWF","ecFlowView");
+	QSettings qs("ECMWF","ecFlowView");
 
-	settings.beginGroup("main");
-  	int cnt=settings.value("windowCount").toInt();
-	int topWinId=settings.value("topWindowId").toInt();
-	settings.endGroup();
+	int cnt=0;
+	int topWinId=-1;
 
-	//MvQDesktopSettings::readSettings(settings);
+	std::string fs = DirectoryHandler::concatenate(DirectoryHandler::configDir(), "session.json");
 
-	if(cnt <0 || cnt > 100)
-		return;
+	//Parse param file using the boost JSON property tree parser
+	using boost::property_tree::ptree;
 
+	ptree pt;
+	ptree pt_empty;
+
+	try
+	{
+		boost::property_tree::json_parser::read_json(fs,pt);
+	}
+	catch (const boost::property_tree::json_parser::json_parser_error& e)
+	{
+		 std::string errorMessage = e.what();
+		 UserMessage::message(UserMessage::ERROR, true, std::string("Error, unable to parse JSON session file : " + errorMessage));
+
+		 MainWindow::makeWindow(pt_empty,qs);
+		 return;
+	}
+
+	cnt=pt.get<int>("windowCount",0);
+	topWinId=pt.get<int>("topWindowId",-1);
+
+	if(cnt > 25)
+	{
+		cnt=25;
+	}
+
+	std::string winPattern("window_");
 	for(int i=0; i < cnt; i++)
 	{
 		if(i != topWinId)
 		{
-	  		settings.beginGroup("window_" + QString::number(i));
-			MainWindow::makeWindow(settings);
-			settings.endGroup();
+			std::string id=winPattern + boost::lexical_cast<std::string>(i);
+			ptree::const_assoc_iterator it=pt.find(id.c_str());
+			if(it != pt.not_found())
+			{
+				const ptree &winPt = it->second;
+				qs.beginGroup(QString::fromStdString(id));
+				MainWindow::makeWindow(winPt,qs);
+				qs.endGroup();
+			}
 		}
 	}
 
 	if(topWinId != -1)
 	{
-	 	settings.beginGroup("window_" + QString::number(topWinId));
-		MainWindow::makeWindow(settings);
-		settings.endGroup();
+		std::string id=winPattern + boost::lexical_cast<std::string>(topWinId);
+		ptree::const_assoc_iterator it=pt.find(id.c_str());
+		if(it != pt.not_found())
+		{
+			const ptree &winPt = it->second;
+			qs.beginGroup(QString::fromStdString(id));
+			MainWindow::makeWindow(winPt,qs);
+			qs.endGroup();
+		}
 	}
 
 	if(windows_.count() == 0)
 	{
-		MainWindow::makeWindow();
+		MainWindow::makeWindow(pt_empty,qs);
+	}
+}
+
+void MainWindow::save(MainWindow *topWin)
+{
+
+	//Define qt settings
+	QSettings qs("ECMWF","ecFlowView");
+
+	//We have to clear it so that not to remember all the previous windows
+	qs.clear();
+
+	//Define json file
+	std::string fs = DirectoryHandler::concatenate(DirectoryHandler::configDir(), "session.json");
+
+	//Generate property tree
+	boost::property_tree::ptree pt;
+
+	//Add total window number and id of active window
+	pt.put("windowCount",windows_.count());
+	pt.put("topWindowId",windows_.indexOf(topWin));
+
+	//Save info for all the windows
+	for(int i=0; i < windows_.count(); i++)
+	{
+		std::string id="window_"+boost::lexical_cast<std::string>(i);
+
+		boost::property_tree::ptree ptWin;
+
+		qs.beginGroup(QString::fromStdString(id));
+		windows_.at(i)->save(ptWin,qs);
+		qs.endGroup();
+
+		pt.add_child(id,ptWin);
 	}
 
+	//Write to json
+	write_json(fs,pt);
 }
 
 void MainWindow::reload()
@@ -493,29 +551,6 @@ void MainWindow::saveSession(SessionItem* s)
 
 
 }
-
-
-
-void MainWindow::save(MainWindow *topWin)
-{
-	QSettings settings("ECMWF","ecFlowView");
-
-	//We have to clear it so that not to remember all the previous windows
-	settings.clear();
-
-	settings.beginGroup("main");
-	settings.setValue("windowCount",windows_.count());
-	settings.setValue("topWindowId",windows_.indexOf(topWin));
-	settings.endGroup();
-
-	for(int i=0; i < windows_.count(); i++)
-	{
-		settings.beginGroup("window_" + QString::number(i));
-		windows_.at(i)->writeSettings(settings);
-		settings.endGroup();
-	}
-}
-
 
 MainWindow* MainWindow::findWindow(QWidget *childW)
 {

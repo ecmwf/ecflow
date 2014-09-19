@@ -10,6 +10,7 @@
 #include "InfoPanel.hpp"
 
 #include <QDebug>
+#include <QToolButton>
 #include <QVBoxLayout>
 
 #include "JobItemWidget.hpp"
@@ -17,6 +18,55 @@
 #include "MessageItemWidget.hpp"
 #include "ScriptItemWidget.hpp"
 #include "VariableItemWidget.hpp"
+
+
+InfoPanelDock::InfoPanelDock(QString label,QWidget * parent) :
+   QDockWidget(label,parent),
+   infoPanel_(0),
+   closed_(true)
+{
+	setAllowedAreas(Qt::BottomDockWidgetArea |
+				Qt::RightDockWidgetArea);
+
+	setFeatures(QDockWidget::DockWidgetClosable | QDockWidget::DockWidgetMovable |
+				QDockWidget::DockWidgetFloatable);
+
+	infoPanel_=new InfoPanel(parent);
+
+	//Just to be sure that init is correct
+	if(isVisible())
+	{
+		closed_=false;
+		infoPanel_->setEnabled(true);
+	}
+	else
+	{
+		infoPanel_->setEnabled(false);
+	}
+
+
+	setWidget(infoPanel_);
+}
+
+void InfoPanelDock::showEvent(QShowEvent* event)
+{
+	if(closed_==true)
+	{
+		closed_=false;
+		infoPanel_->setEnabled(true);
+	}
+
+	QWidget::showEvent(event);
+}
+
+void InfoPanelDock::closeEvent (QCloseEvent *event)
+{
+	QWidget::closeEvent(event);
+
+	closed_=true;
+	infoPanel_->clear();
+	infoPanel_->setEnabled(false);
+}
 
 //==============================================
 //
@@ -50,14 +100,14 @@ InfoPanel::InfoPanel(QWidget* parent) :
   QWidget(parent)
 
 {
-	QVBoxLayout *layout=new QVBoxLayout(this);
-	setLayout(layout);
+	setupUi(this);
 
-	tab_=new QTabWidget(this);
-	layout->addWidget(tab_);
+	frozenTb->setChecked(false);
+	detachedTb->setChecked(false);
+
 
 	connect(tab_,SIGNAL(currentChanged(int)),
-			    this,SLOT(slotCurrentWidgetChanged(int)));
+				    this,SLOT(slotCurrentWidgetChanged(int)));
 
 	//Check which roles are allowed
 	QStringList ids;
@@ -65,6 +115,15 @@ InfoPanel::InfoPanel(QWidget* parent) :
 
 	//Set tabs according to the current set of roles
 	adjust(ids);
+
+	//Build dockWidget
+	/*dock_ = new QDockWidget(tr("Info panel"),parent);
+	dock_->setAllowedAreas(Qt::BottomDockWidgetArea |
+	                                           Qt::RightDockWidgetArea);
+	dock_->setFeatures(QDockWidget::DockWidgetClosable | QDockWidget::DockWidgetMovable |
+	       		QDockWidget::DockWidgetFloatable);
+
+	main->addDockWidget(Qt::BottomDockWidgetArea, dock_);*/
 
 }
 
@@ -74,35 +133,57 @@ InfoPanel::~InfoPanel()
 			delete d;
 }
 
+void InfoPanel::clear()
+{
+	currentNode_.reset();
+	tab_->clear();
+	bcWidget_->setPath(0);
+}
+
+void InfoPanel::reset(ViewNodeInfo_ptr node)
+{
+		currentNode_=node;
+
+		//Check which roles are allowed
+		QStringList ids;
+		ids << "info" << "variable" << "message" << "script" << "job" << "output" << "why" << "manual" << "trigger";
+
+		//Set tabs according to the current set of roles
+		adjust(ids);
+
+		qDebug() << "current" << tab_->currentIndex();
+
+		//Reload the current widget in the tab and clears the others
+		for(int i=0; i < tab_->count(); i++)
+		{
+				if(InfoPanelItem* item=findItem(tab_->widget(i)))
+				{
+					if(i== tab_->currentIndex())
+					{
+						qDebug() << "reload" << i;
+						item->reload(node);
+					}
+					else
+						item->clearContents();
+				}
+			}
+
+		if(node)
+			bcWidget_->setPath(node->node());
+		else
+			bcWidget_->setPath(0);
+}
 
 void InfoPanel::slotReload(ViewNodeInfo_ptr node)
 {
-	currentNode_=node;
+	//When the panel is disabled (i.e. the dock parent is hidden) or the mode is detached it ccanoot receive
+	//the reload request
+	if(!isEnabled() || detached())
+		return;
 
-	//Check which roles are allowed
-	QStringList ids;
-	ids << "info" << "variable" << "message" << "script" << "job" << "output" << "why" << "manual" << "trigger";
-
-	//Set tabs according to the current set of roles
-	adjust(ids);
-
-	qDebug() << "current" << tab_->currentIndex();
-
-	//Reload the current widget in the tab and clears the others
-	for(int i=0; i < tab_->count(); i++)
-	{
-			if(InfoPanelItem* item=findItem(tab_->widget(i)))
-			{
-				if(i== tab_->currentIndex())
-				{
-					qDebug() << "reload" << i;
-					item->reload(node);
-				}
-				else
-					item->clearContents();
-			}
-		}
+	reset(node);
 }
+
 
 void InfoPanel::adjust(QStringList ids)
 {
@@ -213,3 +294,28 @@ void InfoPanel::slotCurrentWidgetChanged(int idx)
 			item->reload(currentNode_);
 	}
 }
+
+void InfoPanel::on_addTb_clicked()
+{
+	//InfoPanel* p=new InfoPanel(parent);
+	//emit newPanelAdded(p);
+}
+
+bool InfoPanel::frozen() const
+{
+	return frozenTb->isChecked();
+}
+
+bool InfoPanel::detached() const
+{
+	return detachedTb->isChecked();
+}
+
+void InfoPanel::detached(bool b)
+{
+	detachedTb->setChecked(b);
+}
+
+
+
+

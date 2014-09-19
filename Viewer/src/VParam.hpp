@@ -31,6 +31,7 @@ public:
 		VParam(QString name,const std::map<QString,QString>& attr);
 
 		QString name() const {return name_;}
+		std::string stdName() const {return name_.toStdString();}
 		VParam::Type type() const {return type_;}
 
 		int number(QString) const;

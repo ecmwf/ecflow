@@ -11,6 +11,7 @@
 #define NODEVIEWBASE_HPP_
 
 #include "Viewer.hpp"
+#include "ViewNodeInfo.hpp"
 
 class QWidget;
 
@@ -22,6 +23,7 @@ public:
 
 		virtual void reload()=0;
 		virtual QWidget* realWidget()=0;
+		virtual ViewNodeInfo_ptr currentSelection()=0;
 
 protected:
 		Viewer::ViewMode id_;

@@ -177,6 +177,9 @@ void ServerFilterMenu::addAction(QString name,int id)
 
 void ServerFilterMenu::slotChanged(bool)
 {
+	if(!filter_)
+		return;
+
 	if(QAction *ac=static_cast<QAction*>(sender()))
 	{
 		if(ac->isSeparator()) return;

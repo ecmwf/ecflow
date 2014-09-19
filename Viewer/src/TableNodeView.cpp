@@ -91,6 +91,16 @@ void TableNodeView::slotSelectItem(const QModelIndex&)
 	}
 }
 
+ViewNodeInfo_ptr TableNodeView::currentSelection()
+{
+	QModelIndexList lst=selectedIndexes();
+	if(lst.count() > 0)
+	{
+		return model_->nodeInfo(filterModel_->mapToSource(lst.front()));
+	}
+	return ViewNodeInfo_ptr();
+}
+
 void TableNodeView::slotDoubleClickItem(const QModelIndex&)
 {
 }

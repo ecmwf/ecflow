@@ -96,14 +96,22 @@ VState* VState::find(Node *n)
 	return NULL;
 }
 
-
 VState* VState::find(VParam::Type type)
 {
 	std::map<VParam::Type,VState*>::const_iterator it=typeMap_.find(type);
 	return (it != typeMap_.end())?(it->second):NULL;
 }
 
+VState* VState::find(const std::string& name)
+{
+	for(std::vector<VState*>::const_iterator it=items_.begin(); it != items_.end(); it++)
+	{
+		if((*it)->stdName() == name)
+			return *it;
+	}
 
+	return NULL;
+}
 
 //
 //Has to be very quick!!

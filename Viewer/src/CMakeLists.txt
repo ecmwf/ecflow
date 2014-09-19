@@ -79,7 +79,9 @@ QT4_WRAP_CPP(VIEWER_MOC AbstractNodeModel.hpp
                         VariableItemWidget.hpp)
 
 QT4_ADD_RESOURCES (VIEWER_RES viewer.qrc)
-QT4_WRAP_UI       (VIEWER_FORMS_HEADERS CommandDesignerWidget.ui CustomCommandDialog.ui MainWindow.ui 
+QT4_WRAP_UI       (VIEWER_FORMS_HEADERS CommandDesignerWidget.ui CustomCommandDialog.ui 
+						InfoPanel.ui
+						MainWindow.ui 
                         MenuConfigDialog.ui 
                         SearchLineWidget.ui 
                         ServerAddDialog.ui

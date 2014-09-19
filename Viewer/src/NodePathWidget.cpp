@@ -18,11 +18,22 @@
 #include <QSignalMapper>
 #include <QStyleOption>
 #include <QPainter>
+#include <QToolButton>
+
 
 #include "Node.hpp"
+#include "ServerHandler.hpp"
 
 //QList<MvQContextItem*> NodePathWidget::cmTbItems_;
 //QList<MvQContextItem*> NodePathWidget::cmMenuItems_;
+
+
+NodePathWidgetItem::~NodePathWidgetItem()
+{
+	    if(menuTb_) menuTb_->deleteLater();
+	    if(nameTb_) nameTb_->deleteLater();
+	    if(menu_) menu_->deleteLater();
+}
 
 //=============================================================
 //
@@ -33,7 +44,8 @@
 NodePathWidget::NodePathWidget(QWidget *parent) :
   QWidget(parent),
   actionReload_(0),
-  reloadTb_(0)
+  reloadTb_(0),
+  displayOnly_(true)
 {
 	layout_=new QHBoxLayout(this);
 	layout_->setSpacing(0);
@@ -230,14 +242,17 @@ void NodePathWidget::setPath(Node *node)
 		tb=new QToolButton(this);
 		item->menuTb_=tb;
 
-		tb->setArrowType(Qt::RightArrow);
+		//tb->setArrowType(Qt::RightArrow);
 		tb->setAutoRaise(true);
-		tb->setIconSize(QSize(10,10));
+		//tb->setIconSize(QSize(10,10));
 		tb->setPopupMode(QToolButton::InstantPopup);
 		tb->setObjectName("pathMenuTb");
+		tb->setProperty("index",i);
 
-		QMenu *mn=createNodeChildrenMenu(i,f,tb);
-		tb->setMenu(mn);
+		connect(tb,SIGNAL(clicked()),
+				 this,SLOT(slotShowNodeChildrenMenu()));
+
+		item->menu_=createNodeChildrenMenu(i,f,tb);
 	}
 
 	//Add items to layout
@@ -291,17 +306,18 @@ QMenu* NodePathWidget::createNodeChildrenMenu(int index,Node* node,QWidget *pare
 	{
 	  	QMenu *childrenMenu=new QMenu(parent);
 
-		/*for(map<string,IconObjectH>::const_iterator it=folder->kids().begin(); it!= folder->kids().end(); it++)
-		{
-		  	if(it->second->visible() &&  it->second->iconClass().type() == "Folder")
-			{
-				QAction *ac=dirMenu->addAction(QString::fromStdString(it->first));
-				ac->setData(index);
-			}
-		}*/
+	  	int num=ServerHandler::numOfImmediateChildren(node);
+	  	for(int i=0; i < num; i++)
+	  	{
+	  		if(Node *n=ServerHandler::immediateChildAt(node,i))
+	  		{
+	  			QAction *ac=childrenMenu->addAction(QString::fromStdString(n->name()));
+	  			ac->setData(index);
+	  		}
+	  	}
 
-		connect(childrenMenu,SIGNAL(triggered(QAction*)),
-			this,SLOT(slotChangeNode(QAction*)));
+		//connect(childrenMenu,SIGNAL(triggered(QAction*)),
+		//	this,SLOT(slotChangeNode(QAction*)));
 
 		childrenMenu->setContextMenuPolicy(Qt::CustomContextMenu);
 
@@ -314,9 +330,29 @@ QMenu* NodePathWidget::createNodeChildrenMenu(int index,Node* node,QWidget *pare
 	return 0;
 }
 
+void NodePathWidget::slotShowNodeChildrenMenu()
+{
+	if(displayOnly_)
+		return;
+
+	if(QToolButton *tb=static_cast<QToolButton*>(sender()))
+	{
+			int index=tb->property("index").toInt();
+			if(index>= 0 && index < items_.count())
+				items_.at(index)->menu_->popup(mapToGlobal(tb->pos()));
+	}
+}
+
+
+
+
+
 //Slot for handling the node button click
 void NodePathWidget::slotChangeNode(int index)
 {
+	if(displayOnly_)
+			return;
+
 	if(index >=0 && index < items_.count()-1)
 	{
 	  	QString path=items_.at(index)->path_;
@@ -338,6 +374,9 @@ void NodePathWidget::slotChangeNode(int index)
 //Slot for handling the node children menu selection
 void NodePathWidget::slotChangeNode(QAction *ac)
 {
+	if(displayOnly_)
+			return;
+
 	QString path=getPath(ac);
 
 	if(!path.isEmpty())

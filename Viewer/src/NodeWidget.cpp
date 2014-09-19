@@ -29,17 +29,6 @@ NodeWidget::NodeWidget(QString rootNode,QWidget *parent) :
 	//Filters
 	config_=new VConfig;
 
-	//Servers
-	/*ServerFilter* serverFilter=config_->serverFilter();
-	for(unsigned int i=0; i < ServerHandler::servers().size(); i++)
-	{
-		if(ServerHandler *server=ServerHandler::servers().at(i))
-		{
-			ServerItem item(server->longName(),server->name(),server->port());
-			serverFilter->addServer(&item);
-		}
-	}*/
-
 	// Layout
 	QVBoxLayout *mainLayout = new QVBoxLayout(this);
 	mainLayout->setSpacing(0);
@@ -127,6 +116,12 @@ QString NodeWidget::currentFolderName()
 	slotFolderReplacedInView(folder);
 }*/
 
+ViewNodeInfo_ptr NodeWidget::currentSelection()
+{
+	return views_->currentBase()->currentSelection();
+}
+
+
 //------------------------
 // Rescan
 //------------------------
@@ -152,23 +147,64 @@ void NodeWidget::setViewMode(Viewer::ViewMode mode)
 	views_->setCurrentMode(mode);
 }
 
-//------------------------
-// Save/restore settings
-//------------------------
-
-void NodeWidget::writeSettings(QSettings &settings)
+void NodeWidget::save(boost::property_tree::ptree &pt)
 {
-	settings.setValue("node","");
-	settings.setValue("viewMode",views_->currentMode());
+	//Server
+	ServerFilter *serverFilter=config_->serverFilter();
+	boost::property_tree::ptree serverArray;
+	serverFilter->save(serverArray);
+	pt.push_back(std::make_pair("server", serverArray));
 
-	//Folder *folder=currentFolder();
-	//settings.setValue("path",(folder)?QString::fromStdString(folder->fullName()):"");
-	//settings.setValue("viewMode",views_->currentModeId());
-	//settings.setValue("iconSize",folderModel_->iconSize());
+	//State
+	VFilter *filter=config_->stateFilter();
+	boost::property_tree::ptree stateArray;
+	filter->save(stateArray);
+	pt.push_back(std::make_pair("state", stateArray));
+
+	//Attribute
+	filter=config_->attributeFilter();
+	boost::property_tree::ptree attrArray;
+	filter->save(attrArray);
+	pt.push_back(std::make_pair("attribute", attrArray));
+
+	//Icons
+	filter=config_->iconFilter();
+	boost::property_tree::ptree iconArray;
+	filter->save(iconArray);
+	pt.push_back(std::make_pair("icon", iconArray));
 }
 
-void NodeWidget::readSettings(QSettings &settings)
+void NodeWidget::load(const boost::property_tree::ptree &pt)
 {
-	//Viewer::ViewMode viewMode=settings.value("viewMode").toInt();
-	//views_->setCurrentMode(viewMode);
+	using boost::property_tree::ptree;
+
+	ptree::const_assoc_iterator it=pt.find("server");
+	if(it != pt.not_found())
+	{
+		ServerFilter *serverFilter=config_->serverFilter();
+		serverFilter->load(it->second);
+	}
+
+	it=pt.find("state");
+	if(it != pt.not_found())
+	{
+		VFilter *filter=config_->stateFilter();
+		filter->load(it->second);
+	}
+
+	it=pt.find("attribute");
+	if(it != pt.not_found())
+	{
+		VFilter *filter=config_->attributeFilter();
+		filter->load(it->second);
+	}
+
+	it=pt.find("icon");
+	if(it != pt.not_found())
+	{
+		VFilter *filter=config_->iconFilter();
+		filter->load(it->second);
+	}
+
+	reload();
 }

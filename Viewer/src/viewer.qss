@@ -1,0 +1,67 @@
+/*----------------------------
+  Mainwindow
+------------------------------*/
+
+QMainWindow { 
+ 	icon-size:  20px; 
+}  
+
+/*QToolBar {
+  	top-padding: 1px;
+	bottom-padding: 1px;
+  	icon-size:  20px;
+}*/	
+
+QToolBar > QToolButton {
+  	padding:  1px;
+}	
+
+/* ----------------------------
+  Breadcrumbs 
+-------------------------------*/
+
+QWidget [path="1"]{
+	background: rgb(245,245,245);
+	border-radius: 4px; 
+        border-color: rgb(140,140,140);
+        /*border-top-width: 4px;*/ 
+}
+
+QToolButton#pathNameTb {
+     	border-radius: 0px;
+     	padding: 0px; 
+	color: black;	
+ }
+
+QToolButton#pathNameTb:hover{
+	background:  qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #deebf6, stop: 1 #bed8ee);
+        border: 1px solid rgb(160, 160, 160);
+     	border-radius: 0px;
+        padding: 0px; 		
+ }
+
+QToolButton#pathIconTb{
+        border: none;
+        padding: 0px; 		
+ }
+
+QToolButton#pathIconTb:hover{
+        background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 rgb(253,253,253), stop: 1 rgb(227,227,227));
+	border: 1px solid rgb(180, 180, 180);
+     	border-radius: 0px;
+        padding: 0px; 		
+ }
+
+QToolButton#pathMenuTb{
+        image: url(":/viewer/directory_arrow.svg");
+	border: none;
+        padding: 0px; 		
+}
+
+QToolButton#pathMenuTb:hover{
+	background:  qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #deebf6, stop: 1 #bed8ee);
+        border: 1px solid rgb(160, 160, 160);
+     	border-radius: 0px;
+        padding: 0px; 	
+}
+

@@ -175,6 +175,15 @@ void  NodePanel::slotNewTab()
 	}*/
 }
 
+ViewNodeInfo_ptr NodePanel::currentSelection()
+{
+	if(NodeWidget *w=currentNodeWidget())
+		return w->currentSelection();
+
+	return ViewNodeInfo_ptr();
+}
+
+
 
 void NodePanel::setViewMode(Viewer::ViewMode mode)
 {
@@ -245,70 +254,68 @@ void NodePanel::reload()
 //
 //==========================================================
 
-void NodePanel::writeSettings(QSettings &settings)
+void NodePanel::save(boost::property_tree::ptree &pt)
 {
-	settings.setValue("tabCount",count());
+	int currentIdx=(currentIndex()>=0)?currentIndex():0;
 
-	settings.setValue("current",(currentIndex()>=0)?currentIndex():0);
+	pt.put("tabCount",count());
+	pt.put("currentTabId",currentIdx);
 
 	for(int i=0; i < count(); i++)
 	{
-		NodeWidget* cw=nodeWidget(i);
-
-		settings.beginGroup("tab_" + QString::number(i));
-		cw->writeSettings(settings);
-		settings.endGroup();
+		boost::property_tree::ptree ptTab;
+		if(NodeWidget* nw=nodeWidget(i))
+		{
+			nw->save(ptTab);
+			pt.add_child("tab_"+ boost::lexical_cast<std::string>(i),ptTab);
+		}
 	}
 }
 
-void NodePanel::readSettings(QSettings &settings)
+void NodePanel::load(const boost::property_tree::ptree &pt)
 {
-	//Create folder tabs
-	int cnt=settings.value("tabCount").toInt();
-	int currentIndex=settings.value("current").toInt();
+	using boost::property_tree::ptree;
 
-	if(cnt >0)
+	int cnt=pt.get<int>("tabCount",0);
+	int currentIndex=pt.get<int>("currentTabId",-1);
+
+	std::string tabPattern("tab_");
+
+	for(ptree::const_iterator it = pt.begin(); it != pt.end(); ++it)
 	{
-		for(int i=0; i < cnt; i++)
+		std::string name=it->first;
+
+		if(name.length() > tabPattern.length() &&
+		   name.find(tabPattern) == 0 &&
+		   boost::lexical_cast<int>(name.substr(tabPattern.length())) >=0 &&
+		   boost::lexical_cast<int>(name.substr(tabPattern.length())) < cnt )
 		{
-			settings.beginGroup("tab_" + QString::number(i));
-			QString relPath=settings.value("path").toString();
-			//Path mvPath(path.toStdString());
-			//if(mvPath.exists())
-			//{
-		  		NodeWidget* nw=addWidget(relPath);
+				const ptree &tabPt = it->second;
+				NodeWidget* nw=addWidget("");
 				if(nw)
-					nw->readSettings(settings);
-
-			//}
-			settings.endGroup();
-		}
-
-		//Set current tab
-		if(currentIndex >=0 && currentIndex < cnt)
-		{
-			setCurrentIndex(currentIndex);
+				{
+					nw->load(tabPt);
+				}
 		}
 	}
-	else
+
+	//Set current tab
+	if(currentIndex >=0 && currentIndex < count())
 	{
-			addWidget("");
-			setCurrentIndex(0);
+		setCurrentIndex(currentIndex);
 	}
 
-
-	/*else if(!mvHomePath_.isEmpty())
+	//If no tabs have been created
+	if(count()==0)
 	{
-		Path mvPath(mvHomePath_.toStdString());
-		if(mvPath.exists())
-			addWidget(mvHomePath_);
-	}*/
-
-	//setDefaults(this);
+		addWidget("");
+		setCurrentIndex(0);
+	}
 
 	if(QWidget *w=currentNodeWidget())
 	  	w->setFocus();
+
+	//We emit it to trigger the whole window ui update!
+	emit currentWidgetChanged();
 }
-
-
 

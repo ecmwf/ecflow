@@ -137,3 +137,13 @@ QList<QWidget*> NodeViewHandler::uniqueWidgets()
 	}
 	return lst;
 }
+
+ViewNodeInfo_ptr NodeViewHandler::currentSelection()
+{
+	if(NodeViewBase* b=currentBase())
+	{
+		return b->currentSelection();
+	}
+
+	return ViewNodeInfo_ptr();
+}

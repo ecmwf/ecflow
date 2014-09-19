@@ -10,14 +10,33 @@
 #ifndef INFOPANEL_HPP_
 #define INFOPANEL_HPP_
 
+#include <QDockWidget>
 #include <QWidget>
 
 #include "Viewer.hpp"
 #include "ViewNodeInfo.hpp"
 
+#include "ui_InfoPanel.h"
+
+class QDockWidget;
 class QTabWidget;
 class InfoPanel;
 class InfoPanelItem;
+
+class InfoPanelDock : public QDockWidget
+{
+public:
+	InfoPanelDock(QString label,QWidget * parent=0);
+	InfoPanel* infoPanel() const {return infoPanel_;}
+
+protected:
+	void showEvent(QShowEvent* event);
+	void closeEvent (QCloseEvent *event);
+
+	InfoPanel* infoPanel_;
+	bool closed_;
+};
+
 
 class InfoPanelItemHandler
 {
@@ -42,17 +61,23 @@ private:
 };
 
 
-class InfoPanel : public QWidget
+class InfoPanel : public QWidget, private Ui::InfoPanel
 {
     Q_OBJECT
 
 public:
-   InfoPanel(QWidget* parent=0);
+    InfoPanel(QWidget* parent=0);
 	virtual ~InfoPanel();
+	bool frozen() const;
+	bool detached() const;
+	void detached(bool);
+	void clear();
+	void reset(ViewNodeInfo_ptr node);
 
 public slots:
 	void slotReload(ViewNodeInfo_ptr node);
 	void slotCurrentWidgetChanged(int);
+	void on_addTb_clicked();
 
 protected:
 	void adjust(QStringList);
@@ -61,7 +86,7 @@ protected:
 	InfoPanelItem* findItem(QWidget* w);
 	InfoPanelItemHandler* createHandler(QString id);
 
-	QTabWidget *tab_;
+	//QTabWidget *tab_;
 	QList<InfoPanelItemHandler*> items_;
 	ViewNodeInfo_ptr currentNode_;
 };

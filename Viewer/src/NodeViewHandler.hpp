@@ -4,6 +4,7 @@
 #include <map>
 #include <QString>
 #include "Viewer.hpp"
+#include "ViewNodeInfo.hpp"
 
 class QStackedLayout;
 class QWidget;
@@ -22,6 +23,7 @@ public:
 	bool setCurrentMode(int);
 	NodeViewBase* currentBase() const {return base(currentMode_);}
 	QList<QWidget*> uniqueWidgets();
+	ViewNodeInfo_ptr currentSelection();
 
 private:
 	NodeViewBase* base(Viewer::ViewMode) const;

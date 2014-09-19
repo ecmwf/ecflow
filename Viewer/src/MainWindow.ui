@@ -123,6 +123,8 @@
    <addaction name="actionTableView"/>
    <addaction name="actionRefresh"/>
    <addaction name="actionReset"/>
+   <addaction name="actionAddInfoPanel"/>
+   <addaction name="actionShowInInfoPanel"/>
   </widget>
   <widget class="QToolBar" name="toolBar">
    <property name="windowTitle">
@@ -259,6 +261,16 @@
   <action name="actionManageServers">
    <property name="text">
     <string>&amp;Manage servers</string>
+   </property>
+  </action>
+  <action name="actionAddInfoPanel">
+   <property name="text">
+    <string>Add info panel</string>
+   </property>
+  </action>
+  <action name="actionShowInInfoPanel">
+   <property name="text">
+    <string>Show info panel</string>
    </property>
   </action>
  </widget>

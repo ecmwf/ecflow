@@ -83,6 +83,15 @@ void TreeNodeView::slotSelectItem(const QModelIndex&)
 		}
 	}
 }
+ViewNodeInfo_ptr TreeNodeView::currentSelection()
+{
+	QModelIndexList lst=selectedIndexes();
+	if(lst.count() > 0)
+	{
+		return model_->nodeInfo(filterModel_->mapToSource(lst.front()));
+	}
+	return ViewNodeInfo_ptr();
+}
 
 void TreeNodeView::slotDoubleClickItem(const QModelIndex&)
 {
@@ -140,7 +149,7 @@ void TreeNodeView::slotViewCommand(std::vector<ViewNodeInfo_ptr> nodeLst,QString
 void TreeNodeView::reload()
 {
 	model_->reload();
-	expandAll();
+	//expandAll();
 }
 
 

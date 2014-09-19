@@ -64,6 +64,7 @@ public:
 	void changed(StateFilter*);
 	void changed(AttributeFilter*);
 	void changed(IconFilter*);
+	void reloaded();
 
 protected:
 

@@ -12,10 +12,11 @@
 
 #include "Viewer.hpp"
 
-#include <QSettings>
 #include <QWidget>
 
 #include "ViewNodeInfo.hpp"
+
+#include <boost/property_tree/ptree.hpp>
 
 class NodeViewHandler;
 class VConfig;
@@ -33,9 +34,10 @@ public:
 	Viewer::ViewMode viewMode();
 	void setViewMode(Viewer::ViewMode);
 	VConfig* config() const {return config_;}
+	ViewNodeInfo_ptr currentSelection();
 
-	void writeSettings(QSettings &);
-	void readSettings(QSettings &);
+	void save(boost::property_tree::ptree &pt);
+	void load(const boost::property_tree::ptree &pt);
 
 public slots:
 	//void slotFolderReplacedInView(Folder*);

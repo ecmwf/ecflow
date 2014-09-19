@@ -435,6 +435,11 @@ void TreeNodeModel::notifyConfigChanged(IconFilter*)
 
 void TreeNodeModel::notifyConfigChanged(StateFilter*)
 {
+	resetStateFilter(true);
+}
+
+void TreeNodeModel::resetStateFilter(bool broadcast)
+{
 	servers_.clearFilter();
 
 	//If all states are visible
@@ -455,7 +460,8 @@ void TreeNodeModel::notifyConfigChanged(StateFilter*)
 	}
 
 	//Notify the filter model
-	emit filterChanged();
+	if(broadcast)
+		emit filterChanged();
 }
 
 bool TreeNodeModel::filterState(node_ptr node,QSet<Node*>& filterSet)

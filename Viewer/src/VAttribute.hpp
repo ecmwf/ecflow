@@ -28,6 +28,8 @@ public:
 	static bool getData(Node *node,int row,VParam::Type &type,QStringList& data);
 	static int totalNum(Node *node);
 	static void init();
+	static VAttribute* find(VParam::Type t);
+	static VAttribute* find(const std::string& name);
 
 private:
 	static bool getData(Node *node,int row,int& totalRow,VParam::Type type,QStringList& data);

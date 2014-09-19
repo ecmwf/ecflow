@@ -30,6 +30,7 @@ public:
 	TreeNodeView(QString,VConfig*,QWidget *parent=0);
 	void reload();
 	QWidget* realWidget();
+	ViewNodeInfo_ptr currentSelection();
 
 public slots:
 	void slotSelectItem(const QModelIndex&);

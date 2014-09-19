@@ -17,12 +17,16 @@
 #include "ui_MainWindow.h"
 
 #include "Defs.hpp"
+#include "DirectoryHandler.hpp"
 #include "SessionHandler.hpp"
 #include "Viewer.hpp"
+
+#include <boost/property_tree/ptree.hpp>
 
 class QActionGroup;
 class AbstractFilterMenu;
 class FilterWidget;
+class InfoPanel;
 class NodePanel;
 class ServerFilterMenu;
 
@@ -33,9 +37,6 @@ class MainWindow : public QMainWindow, private Ui::MainWindow
 public:
     MainWindow(QStringList,QWidget *parent=0);
     
-    //void printDefTree(const std::string &server, int port);
-    //void printNode(node_ptr node, int indent, QTreeWidgetItem *parent);
-
     static void init();
     static void showWindows();
     static void openWindow(QString id,QWidget *fromW=0);
@@ -52,6 +53,7 @@ protected slots:
 	void on_actionReset_triggered();
 	void on_actionConfigureNodeMenu_triggered();
 	void on_actionManageServers_triggered();
+	void on_actionShowInInfoPanel_triggered();
 
 	void slotViewMode(QAction*);
 	void slotCurrentChangedInPanel();
@@ -59,14 +61,15 @@ protected slots:
 private:
     void init(MainWindow*);
     void closeEvent(QCloseEvent*);
+    InfoPanel* addInfoPanel();
 
     void syncViewModeAg(Viewer::ViewMode);
     void reloadContents();
 
-    void writeSettings(QSettings &settings);
-    void readSettings(QSettings &settings);
+    void save(boost::property_tree::ptree &pt,QSettings& qs);
+    void load(const boost::property_tree::ptree& winPt,QSettings& qs);
 
-    static MainWindow *makeWindow(QSettings&);
+    static MainWindow* makeWindow(const boost::property_tree::ptree& winPt,QSettings& qs);
     static MainWindow *makeWindow();
     static MainWindow *makeWindow(QString id);
     static MainWindow *makeWindow(QStringList idLst);
@@ -82,7 +85,6 @@ private:
     ServerFilterMenu* serverFilterMenu_;
     FilterWidget* filterWidget_;
     NodePanel* nodePanel_;
-
 
     static bool quitStarted_;
     static QList<MainWindow*> windows_;
