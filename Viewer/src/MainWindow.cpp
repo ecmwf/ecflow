@@ -237,7 +237,8 @@ void MainWindow::slotCurrentChangedInPanel()
 		stateFilterMenu_->reload(config->stateFilter());
 		attrFilterMenu_->reload(config->attributeFilter());
 		iconFilterMenu_->reload(config->iconFilter());
-		serverFilterMenu_->reloadFilter(config->serverFilter());
+
+		serverFilterMenu_->reload(config);
 	}
 	//breadcrumbs_->setPath(folderPanel_->currentFolder());
   	 //slotUpdateNavigationActions(folderPanel_->folderNavigation());

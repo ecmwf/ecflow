@@ -126,7 +126,7 @@ IconFilterMenu::IconFilterMenu(QMenu * parent) :
 
 ServerFilterMenu::ServerFilterMenu(QMenu * parent) :
  	menu_(parent),
-	filter_(NULL)
+	config_(NULL)
 {
 	init();
 
@@ -136,6 +136,8 @@ ServerFilterMenu::ServerFilterMenu(QMenu * parent) :
 ServerFilterMenu::~ServerFilterMenu()
 {
 	ServerList::instance()->removeObserver(this);
+	if(config_)
+		config_->removeObserver(this);
 }
 
 void ServerFilterMenu::clear()
@@ -177,8 +179,10 @@ void ServerFilterMenu::addAction(QString name,int id)
 
 void ServerFilterMenu::slotChanged(bool)
 {
-	if(!filter_)
+	if(!config_)
 		return;
+
+	ServerFilter* filter=config_->serverFilter();
 
 	if(QAction *ac=static_cast<QAction*>(sender()))
 	{
@@ -187,38 +191,65 @@ void ServerFilterMenu::slotChanged(bool)
 		if(ServerItem *item=ServerList::instance()->itemAt(ac->data().toInt()))
 		{
 			if(ac->isChecked())
-				filter_->addServer(item);
+				filter->addServer(item);
 			else
-				filter_->removeServer(item);
+				filter->removeServer(item);
 		}
 	}
 }
 
 //Reset actions state when a new filter is loaded
-void ServerFilterMenu::reloadFilter(ServerFilter* filter)
+void ServerFilterMenu::reload(VConfig *config)
 {
-	filter_=filter;
+	if(config_)
+		config_->removeObserver(this);
+
+	config_=config;
+
+	if(config_)
+	{
+			config_->addObserver(this);
+			reload(config_->serverFilter());
+	}
+}
+
+//Reset actions state when a new filter is loaded
+void ServerFilterMenu::reload(ServerFilter* filter)
+{
+	if(!filter)
+		return;
+
 	foreach(QAction* ac,acLst_)
 	{
 		if(!ac->isSeparator())
 		{
 				if(ServerItem *item=ServerList::instance()->itemAt(ac->data().toInt()))
 				{
-					//std::cout << ac->text().toStdString() << " " << item->name() << " " <<  filter_->isFiltered(item) << std::endl;
-
-					//Triggered will not be called!!
-					ac->setChecked(filter_->isFiltered(item));
+					//Triggered() will not be called!!
+					ac->setChecked(filter->isFiltered(item));
 				}
 		}
 	}
+}
+
+void ServerFilterMenu::notifyConfigChanged(ServerFilter*)
+{
+	if(config_)
+		reload(config_->serverFilter());
 }
 
 void ServerFilterMenu::notifyServerListChanged()
 {
 	clear();
 	init();
-	reloadFilter(filter_);
+	if(config_)
+		reload(config_->serverFilter());
 }
+
+
+
+
+
 
 
 FilterWidget::FilterWidget(QWidget *parent) :

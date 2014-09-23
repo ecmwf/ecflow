@@ -17,6 +17,7 @@
 
 #include "DState.hpp"
 #include "ServerList.hpp"
+#include "VConfig.hpp"
 
 class QToolButton;
 class VParam;
@@ -61,7 +62,7 @@ public:
 };
 
 
-class ServerFilterMenu : public QObject, public ServerListObserver
+class ServerFilterMenu : public QObject, public ServerListObserver, public VConfigObserver
 {
 Q_OBJECT
 
@@ -69,10 +70,16 @@ public:
 	ServerFilterMenu(QMenu* parent);
 	~ServerFilterMenu();
 
-	void reloadFilter(ServerFilter*);
+	void reload(VConfig*);
 
 	//From ServerListObserver
 	void notifyServerListChanged();
+
+	//From ConfigObserver
+	void notifyConfigChanged(ServerFilter*);
+	void notifyConfigChanged(StateFilter*) {};
+	void notifyConfigChanged(AttributeFilter*) {};
+	void notifyConfigChanged(IconFilter*) {};
 
 protected slots:
 	void slotChanged(bool);
@@ -81,10 +88,11 @@ protected:
 	void init();
 	void clear();
 	void addAction(QString name,int id);
+	void reload(ServerFilter*);
 
 	QMenu*  menu_;
 	QList<QAction*> acLst_;
-	ServerFilter* filter_;
+	VConfig* config_;
 };
 
 
