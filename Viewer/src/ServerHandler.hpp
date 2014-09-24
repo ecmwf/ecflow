@@ -120,9 +120,7 @@ public:
 		static int indexOfImmediateChild(Node *node);
 		static void command(std::vector<ViewNodeInfo_ptr>,std::string, bool resolve);
 
-		static ServerHandler* find(const std::string& longName);
-		static ServerHandler* find(const std::pair<std::string,std::string>& hostPort);
-		static ServerHandler* find(const std::string& name, const std::string& port);
+		static ServerHandler* find(const std::string& name);
 		static ServerHandler* find(Node *node);
 
 		static void addServerCommand(const std::string &name, const std::string command);

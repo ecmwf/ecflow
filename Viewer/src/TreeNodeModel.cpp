@@ -72,8 +72,8 @@ int TreeNodeModel::rowCount( const QModelIndex& parent) const
 	//The parent is a node
 	else if(Node* parentNode=indexToNode(parent))
 	{
-		//qDebug() << "  -->node" << parentNode->name().c_str() << ServerHandler::numOfImmediateChildren(parentNode);
 		int num=VAttribute::totalNum(parentNode);
+		//qDebug() << "  -->node" << parentNode->name().c_str() << num << ServerHandler::numOfImmediateChildren(parentNode);
 		return num+ServerHandler::numOfImmediateChildren(parentNode);
 	}
 
@@ -152,7 +152,7 @@ QVariant TreeNodeModel::nodeData(const QModelIndex& index, int role) const
 		{
 		case 0:	 return QString::fromStdString(node->name());
 		case 1: return VState::toName(node);
-		case 2: return QString::fromStdString(node->absNodePath());
+		case 2: return QString::fromStdString(node->absNodePath()); //QString().sprintf("%08p", node); //QString::fromStdString(node->absNodePath());
 		default: return QVariant();
 		}
 	}
@@ -257,6 +257,7 @@ QModelIndex TreeNodeModel::index( int row, int column, const QModelIndex & paren
 		if(row < servers_.count())
 		{
 			void* p=NULL;
+			//qDebug() << "SERVER" << parent;
 			return createIndex(row,column,(void*)NULL);
 		}
 	}
@@ -268,15 +269,20 @@ QModelIndex TreeNodeModel::index( int row, int column, const QModelIndex & paren
 		//server as an internal pointer
 		if(ServerHandler* server=indexToServer(parent))
 		{
+			//qDebug() << "NODE1" << parent << server->name().c_str();
 			return createIndex(row,column,server);
 		}
 		//Parent is not the server: the parent must be another node
 		else if(Node* parentNode=indexToNode(parent))
 		{
+			//qDebug() << "NODE2" << parent << parentNode->name().c_str() << VAttribute::totalNum(parentNode);
 			return createIndex(row,column,parentNode);
 		}
+
+		//qDebug() << "BAD" << parent;
 	}
 
+	//qDebug() << "EMPTY" << parent;
 	return QModelIndex();
 
 }

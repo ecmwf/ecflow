@@ -59,6 +59,7 @@ ServerHandler::ServerHandler(const std::string& name,const std::string& host, co
 		{
 			ServerState& st=defs->set_server();
 			st.hostPort(std::make_pair(host_,port_));
+			st.add_or_update_user_variables("nameInViewer",name_);
 		}
 	}
 
@@ -854,31 +855,13 @@ void ServerHandler::command(std::vector<ViewNodeInfo_ptr> info, std::string cmd,
 	}
 }
 
-
-ServerHandler* ServerHandler::find(const std::string& longName)
+ServerHandler* ServerHandler::find(const std::string& name)
 {
 	for(std::vector<ServerHandler*>::const_iterator it=servers_.begin(); it != servers_.end();it++)
-			if((*it)->longName() == longName)
+			if((*it)->name() == name)
 					return *it;
 	return NULL;
 }
-
-ServerHandler* ServerHandler::find(const std::pair<std::string,std::string>& hostPort)
-{
-	for(std::vector<ServerHandler*>::const_iterator it=servers_.begin(); it != servers_.end();it++)
-			if((*it)->host_ == hostPort.first && (*it)->port_ == hostPort.second)
-					return *it;
-	return NULL;
-}
-
-ServerHandler* ServerHandler::find(const std::string& host,const std::string& port)
-{
-	for(std::vector<ServerHandler*>::const_iterator it=servers_.begin(); it != servers_.end();it++)
-			if((*it)->host_ == host && (*it)->port_ == port)
-					return *it;
-	return NULL;
-}
-
 
 ServerHandler* ServerHandler::find(Node *node)
 {
@@ -890,7 +873,12 @@ ServerHandler* ServerHandler::find(Node *node)
 		if(Defs* defs = node->defs())
 		{
 			const ServerState& st=defs->server();
-			return ServerHandler::find(st.hostPort());
+
+			//It is a question if this solution is fast enough. We may need to store
+			//directly the server name in ServerState
+			st.find_variable("nameInViewer");
+
+			return ServerHandler::find(st.find_variable("nameInViewer"));
 		}
 	}
 	return NULL;
