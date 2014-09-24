@@ -116,6 +116,7 @@ QString NodeWidget::currentFolderName()
 	slotFolderReplacedInView(folder);
 }*/
 
+
 ViewNodeInfo_ptr NodeWidget::currentSelection()
 {
 	return views_->currentBase()->currentSelection();
