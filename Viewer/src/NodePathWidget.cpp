@@ -18,11 +18,13 @@
 #include <QSignalMapper>
 #include <QStyleOption>
 #include <QPainter>
+#include <QPalette>
 #include <QToolButton>
 
 
 #include "Node.hpp"
 #include "ServerHandler.hpp"
+#include "VState.hpp"
 
 //QList<MvQContextItem*> NodePathWidget::cmTbItems_;
 //QList<MvQContextItem*> NodePathWidget::cmMenuItems_;
@@ -209,6 +211,8 @@ void NodePathWidget::setPath(Node *node)
 		  		tb->setToolButtonStyle(Qt::ToolButtonTextOnly);
 			}*/
 
+
+
 			tb->setToolButtonStyle(Qt::ToolButtonTextOnly);
 
 			tb->setText(item->name_);
@@ -217,6 +221,22 @@ void NodePathWidget::setPath(Node *node)
 			//if(f->isLink())
 			//  	tb->setStyleSheet("QToolButton {font-style: italic;}");
 		}
+
+
+		QPalette pal=tb->palette();
+		pal.setColor(QPalette::Background,VState::toColour(node));
+		tb->setPalette(pal);
+
+		qDebug() << tb->styleSheet();
+
+		/*QString st=tb->styleSheet();
+
+				 	st+="QToolButton {background: }";
+				else
+				  	st+="QToolButton {font-weight: normal;}";
+
+				items_.at(i)->nameTb_->setStyleSheet(st);*/
+
 
 		//tb->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
 		tb->setAutoRaise(true);
