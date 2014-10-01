@@ -1281,7 +1281,8 @@ void ehost::login()
       }
       else {
          tree_->connected(False);
-         if (!top_) top_ = make_xnode<Defs>(0x0, 0, *this);
+         if (!top_) 
+	   top_ = make_xnode<Defs>(0x0, 0, *this);
       }
    }
 
@@ -1361,12 +1362,11 @@ tmp_file ehost::file( node& n, std::string name )
 tmp_file ehost::edit( node& n, std::list<Variable>& l, Boolean preproc )
 {
    gui::message("%s: fetching source", name());
-   int rc = 0;
    try {
       if (preproc)
-         rc = client_.edit_script_preprocess(n.full_name());
+         client_.edit_script_preprocess(n.full_name());
       else
-         rc = client_.edit_script_edit(n.full_name());
+         client_.edit_script_edit(n.full_name());
       return tmp_file(client_.server_reply().get_string());
    } catch ( std::exception &e ) {
        gui::error("host::edit-error: %s", e.what());
@@ -1723,26 +1723,22 @@ bool ehost::connect_mngt( bool connect )
 {
    if (!connect) return true;
    if (!connect_) return true;
-   Boolean btree = False;
    bool rc = true;
    try {
       gui::message("%s: ping", name());
       client_.pingServer();
 
       if (connect) {
-         btree = True;
          rc = true;
          connected_ = true;
       }
       else {
          connected_ = false;
-         btree = False;
          rc = false;
       }
    }
    catch ( std::exception &e ) {
       connected_ = false;
-      btree = False;
       rc = false;
       gui::message("# Exception caught in ehost::connect_mngt");
       gui::message(e.what());

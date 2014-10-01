@@ -49,6 +49,7 @@ exe ecflowview
      /site-config//boost_datetime
      pthread
    : <variant>debug:<define>DEBUG
+     <variant>release:<cxxflags>-O1
      <toolset>gcc:<include>$(MOTIF_INCLUDE)
      <include>../view/src
      <include>../view/src/libicon
@@ -97,4 +98,5 @@ exe test-view : [ glob test/*.cpp  ]
          : <include>../Base/test 
            <include>../Test/src 
            <variant>debug:<define>DEBUG
+  	   <variant>release:<cxxflags>-O1
         ;
