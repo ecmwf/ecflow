@@ -517,12 +517,15 @@ ecf_node* make_node( T* n, ecf_node* parent, char c = 'd' )
    ecf_node* ec = new ecf_concrete_node<T>(n, parent, c);
    if (ec && n) {
       int type = ec->type();
+      XECFDEBUG { if (!ec) std::cerr << "# make node " << type << "\n"; }
       if (!parent || type == NODE_SUPER || type == NODE_SUITE)
          ec->make_subtree();
       else if (type == NODE_FAMILY || type == NODE_TASK || type == NODE_ALIAS) {
          /* temp on demand:: */ec->make_subtree();
       }
    }
+   XECFDEBUG { if (!ec) std::cerr << "# no ecf\n"; 
+     if (!n) std::cerr << "# no node\n"; }
    return ec;
 }
 
@@ -541,6 +544,7 @@ node* make_xnode( T* n, ecf_node* parent, host& h, char c = 'd' )
       ec->adopt(xnode); /* twice ? create is adoption */
       return xnode;
    }
+   XECFDEBUG { if (!ec) std::cerr << "# no ecf2\n"; }
    return NULL;
 }
 

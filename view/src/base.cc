@@ -201,13 +201,3 @@ void base::run()
 }
 
 IMP(base)
-
-/*
--schumacher-clean-medium-i-normal--8-80-75-75-c-80-iso646.1991-irv
--misc-fixed-medium-r-normal--8-60-100-100-c-50-iso8859-1
-
--*-helvetica-medium-r-normal--8-*-*-*-*-*-*-*
--*-helvetica-bold-r-normal--8-*-*-*-*-*-*-*
--*-helvetica-medium-r-normal-*-8-*-*-*-*-*-*-*
--*-helvetica-bold-r-normal-*-8-*-*-*-*-*-*-*
- */

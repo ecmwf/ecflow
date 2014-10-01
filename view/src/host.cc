@@ -717,7 +717,10 @@ bool ehost::create_tree( int hh, int min, int sec )
       gui::message("%s: built %02d:%02d:%02d", name(), next->tm_hour, next->tm_min, next->tm_sec);
    }
 
-   if (!top) return false;
+   if (!top) { 
+     XECFDEBUG { std::cout << "# no top\n"; }
+     return false;
+   }
    if (top_) {
       top->scan(top_);
       destroy_top(top_);
@@ -731,7 +734,12 @@ bool ehost::create_tree( int hh, int min, int sec )
    XECFDEBUG {
       double vmu, res;
       mem_use(vmu, res);
-      std::cout << "# usage: " << vmu << res << "\n";
+      if (top) { 
+	int num = 0; node *n = top->kids(); 
+	while (n) { num += 1; n = n->next(); } 
+	std::cout << "# num " << num << "\n";
+      }
+      std::cout << "# usage: " << vmu << " " << res << "\n";
    }
    return true;
 }
@@ -748,6 +756,7 @@ void ehost::reset( bool full, bool sync )
       if (!tree_) tree_ = tree::new_tree(this);
 
       if (full) {
+ 	 XECFDEBUG std::cerr << "# reset full\n";
          const std::vector<std::string>& s = suites_;
          destroy_top(top_);
          top_ = 0x0;
@@ -792,9 +801,11 @@ void ehost::reset( bool full, bool sync )
       if (sync) client_.sync_local(); // this returns full defs
       searchable::active(False);
       create_tree(hour, min, sec);
+      XECFDEBUG std::cerr << "# reset create tree\n";
    }
    catch ( std::exception &e ) {
-      XECFDEBUG std::cerr << "# sync exception " << e.what() << "\n";
+     // XECFDEBUG 
+      std::cerr << "# sync exception " << e.what() << "\n";
       gui::error("host::reset-sync-error: %s", e.what());
       const std::vector<std::string>& s = suites_;
       /* load one set

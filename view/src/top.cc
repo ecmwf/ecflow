@@ -458,7 +458,7 @@ void top::releaseCB(Widget w,XtPointer)
   snprintf(cmd, 1024, "${ECFLOWVIEW_HELP:=firefox --new-tab %s}\n", urlRef);
   // snprintf(cmd, 1024, "%s %s\n", browserName, urlRef);
   std::cerr << "#INF: " << cmd;
-  system(cmd);
+  if (system(cmd)) { std::cerr << "#ERR release\n"; }
   // execlp(browserName, urlRef, NULL);
   sleep (1);
 }
@@ -474,9 +474,9 @@ void top::helpCB(Widget w,XtPointer)
    snprintf(cmd, 1024, "${ECFLOWVIEW_HELP:=firefox --new-tab %s}\n", link);
    std::cerr << "#INF: " << cmd;
 
-   if (1)
-      system(cmd);
-   else {
+   if (1) { 
+     if (system(cmd)) { std::cerr << "#ERR system\n"; }
+   } else {
       FILE* f = popen(cmd,"r");
       if(!f) {
          gui::error("Cannot access : %s", link);

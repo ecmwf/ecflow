@@ -80,7 +80,7 @@ obj host : src/host.cc
      /theParser//libparser
      /theBase//base
      /theClient//libclient
-  : <variant>release:<optimization>off 
+  : # <variant>release:<optimization>off 
      <include>../view/src
      <include>../view/src/libicon
      <include>../view/src/libxec
