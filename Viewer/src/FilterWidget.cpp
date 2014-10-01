@@ -13,7 +13,7 @@
 #include <QHBoxLayout>
 #include <QToolButton>
 
-#include "VState.hpp"
+#include "VNState.hpp"
 #include "VAttribute.hpp"
 #include "VIcon.hpp"
 #include "VFilter.hpp"
@@ -31,13 +31,15 @@ AbstractFilterMenu::AbstractFilterMenu(QMenu * parent,const std::vector<VParam*>
  	menu_(parent),
 	filter_(NULL)
 {
+	//Param name must be unique
 	for(std::vector<VParam*>::const_iterator it=pars.begin(); it != pars.end(); it++)
 	{
-		addAction((*it)->text("label"),VParam::toInt((*it)->type()));
+		addAction(QString::fromStdString((*it)->text("label")),
+				  QString::fromStdString((*it)->name()));
 	}
 }
 
-void AbstractFilterMenu::addAction(QString name,int id)
+void AbstractFilterMenu::addAction(QString name,QString id)
 {
 	QAction *ac = new QAction(this);
 	ac->setText(name);
@@ -54,13 +56,13 @@ void AbstractFilterMenu::addAction(QString name,int id)
 
 void AbstractFilterMenu::slotChanged(bool)
 {
-	std::set<VParam::Type> items;
+	std::set<std::string> items;
 	foreach(QAction* ac,menu_->actions())
 	{
 		if(!ac->isSeparator())
 		{
 			if(ac->isChecked())
-					items.insert(VParam::toType(ac->data().toInt()));
+					items.insert(ac->data().toString().toStdString());
 		}
 	}
 
@@ -75,8 +77,7 @@ void AbstractFilterMenu::reload(VFilter* filter)
 	{
 		if(!ac->isSeparator())
 		{
-			VParam::Type type=VParam::toType(ac->data().toInt());
-			ac->setChecked(filter_->isSet(type));
+			ac->setChecked(filter_->isSet(ac->data().toString().toStdString()));
 		}
 	}
 }
@@ -90,7 +91,7 @@ void AbstractFilterMenu::reload(VFilter* filter)
 //===========================================
 
 StateFilterMenu::StateFilterMenu(QMenu * parent) :
-		AbstractFilterMenu(parent,VState::filterItems())
+		AbstractFilterMenu(parent,VNState::filterItems())
 {
 }
 

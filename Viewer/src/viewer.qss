@@ -27,7 +27,7 @@ QWidget [path="1"]{
         /*border-top-width: 4px;*/ 
 }
 
-QToolButton#pathNameTb {
+/*QToolButton#pathNameTb {
      	border-radius: 0px;
      	padding: 0px; 
 	color: black;	
@@ -38,7 +38,7 @@ QToolButton#pathNameTb:hover{
         border: 1px solid rgb(160, 160, 160);
      	border-radius: 0px;
         padding: 0px; 		
- }
+ }*/
 
 QToolButton#pathIconTb{
         border: none;

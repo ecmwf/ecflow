@@ -13,32 +13,24 @@
 #include <QDebug>
 #include <QRegExp>
 
-#include <stdlib.h>
-#include <sys/stat.h>
-#include <sys/types.h>
-#include <unistd.h>
+#include "UserMessage.hpp"
 
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/json_parser.hpp>
 
-VParam::VParam(QString name,VParam::Type type) :
+VParam::VParam(const std::string& name) :
    name_(name),
-   type_(type)
+	qName_(QString::fromStdString(name))
 {
+
 }
 
-VParam::VParam(QString name,const std::map<QString,QString>& attr) :
-		name_(name),
-		type_(NoType)
+void VParam::addAttributes(const std::map<std::string,std::string>& attr)
 {
-	addAttributes(attr);
-}
-
-
-void VParam::addAttributes(const std::map<QString,QString>& attr)
-{
-	for(std::map<QString,QString>::const_iterator it=attr.begin(); it != attr.end(); it++)
+	for(std::map<std::string,std::string>::const_iterator it=attr.begin(); it != attr.end(); it++)
 	{
-		QString key=(*it).first;
-		QString val=(*it).second;
+		std::string key=it->first;
+		std::string val=it->second;
 		if(isColour(val))
 		{
 			colourMap_[key]=toColour(val);
@@ -56,64 +48,65 @@ void VParam::addAttributes(const std::map<QString,QString>& attr)
 	}
 }
 
-QString VParam::text(QString key) const
+std::string VParam::text(const std::string& key) const
 {
-	std::map<QString,QString>::const_iterator it=textMap_.find(key);
+	std::map<std::string,std::string>::const_iterator it=textMap_.find(key);
 	if(it != textMap_.end())
 			return it->second;
 
-	return QString();
+	return std::string();
 }
 
-QColor VParam::colour(QString key) const
+QColor VParam::colour(const std::string& key) const
 {
-	std::map<QString,QColor>::const_iterator it=colourMap_.find(key);
+	std::map<std::string,QColor>::const_iterator it=colourMap_.find(key);
 	if(it != colourMap_.end())
 			return it->second;
 
 	return QColor();
 }
 
-int VParam::number(QString key) const
+int VParam::number(const std::string& key) const
 {
-	std::map<QString,int>::const_iterator it=numberMap_.find(key);
+	std::map<std::string,int>::const_iterator it=numberMap_.find(key);
 	if(it != numberMap_.end())
 			return it->second;
 
 	return -1;
 }
 
-QFont VParam::font(QString key) const
+QFont VParam::font(const std::string& key) const
 {
-	std::map<QString,QFont>::const_iterator it=fontMap_.find(key);
+	std::map<std::string,QFont>::const_iterator it=fontMap_.find(key);
 	if(it != fontMap_.end())
 			return it->second;
 
 	return QFont();
 }
 
-bool VParam::isColour(QString val) const
+bool VParam::isColour(const std::string& val) const
 {
-	return val.simplified().startsWith("rgb");
+	return QString::fromStdString(val).simplified().startsWith("rgb");
 }
 
-bool VParam::isFont(QString val) const
+bool VParam::isFont(const std::string& val) const
 {
-	return val.simplified().startsWith("font");
+	return QString::fromStdString(val).simplified().startsWith("font");
 }
 
-bool VParam::isNumber(QString val) const
+bool VParam::isNumber(const std::string& val) const
 {
 	return false;
 }
 
-QColor VParam::toColour(QString name) const
+QColor VParam::toColour(const std::string& name) const
 {
-	qDebug() << name;
+	QString qn=QString::fromStdString(name);
+	qDebug() << qn;
 	QColor col;
 	QRegExp rx("rgb\\((\\d+),(\\d+),(\\d+)");
 
-	if(rx.indexIn(name) > -1 && rx.captureCount() == 3)
+	if(rx.indexIn(qn) > -1 && rx.captureCount() == 3)
 	{
 	  	col=QColor(rx.cap(1).toInt(),
 			      rx.cap(2).toInt(),
@@ -126,22 +119,53 @@ QColor VParam::toColour(QString name) const
 	return col;
 }
 
-QFont VParam::toFont(QString name) const
+QFont VParam::toFont(const std::string& name) const
 {
 	return QFont();
 }
 
-int VParam::toNumber(QString name) const
+int VParam::toNumber(const std::string& name) const
 {
 	return 0;
 }
 
-int  VParam::toInt(VParam::Type t)
+
+void VParam::init(const std::string& parFile,const std::string id,std::map<std::string,std::map<std::string,std::string> >& vals)
 {
-	return static_cast<int>(t);
+	//Parse param file using the boost JSON property tree parser
+	using boost::property_tree::ptree;
+	ptree pt;
+
+	try
+	{
+		read_json(parFile,pt);
+	}
+	catch (const boost::property_tree::json_parser::json_parser_error& e)
+	{
+		 std::string errorMessage = e.what();
+		 UserMessage::message(UserMessage::ERROR, true, std::string("Error, unable to parse JSON attributes file : " + errorMessage));
+		 return;
+	}
+
+	ptree::const_iterator itTop = pt.begin();
+	if(itTop == pt.end() || itTop->first != id)
+	{
+		return;
+	}
+
+	//For each parameter
+	for(ptree::const_iterator itPar = itTop->second.begin(); itPar != itTop->second.end(); ++itPar)
+	{
+		std::string name=itPar->first;
+		ptree const &parPt = itPar->second;
+
+		//std::map<QString,QString> vals;
+		for(ptree::const_iterator itV = parPt.begin(); itV != parPt.end(); ++itV)
+		{
+			vals[name].insert(make_pair(itV->first,itV->second.get_value<std::string>()));
+		}
+	}
 }
 
-VParam::Type VParam::toType(int v)
-{
-	return static_cast<VParam::Type>(v);
-}
+
+

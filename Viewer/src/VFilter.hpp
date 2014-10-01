@@ -23,25 +23,23 @@ public:
 	VFilter(VConfig* owner);
 	virtual ~VFilter() {};
 
-	const std::set<VParam::Type>& all() const {return all_;}
-	const std::set<VParam::Type>& current() const {return current_;}
-	void current(const std::set<VParam::Type>&);
+	const std::set<VParam*>& current() const {return current_;}
+	void current(const std::set<std::string>&);
 
 	bool isEmpty() const {return current_.size() ==0 ;}
 	bool isComplete() const { return all_.size() == current_.size();}
-	bool isSet(VParam::Type) const;
+	bool isSet(const std::string&) const;
+	bool isSet(VParam*) const;
 
 	void save(boost::property_tree::ptree& array);
 	void load(const boost::property_tree::ptree& array);
-	//void load(const std::set<VParam::Type>&);
 
 protected:
 	void init(const std::vector<VParam*>& items);
-	virtual std::string toName(VParam::Type)=0;
-	virtual VParam::Type toType(const std::string& name)=0;
 
-	std::set<VParam::Type> all_;
-	std::set<VParam::Type> current_;
+	std::set<VParam*> all_;
+	std::set<VParam*> current_;
+
 };
 
 class StateFilter : public VFilter
@@ -49,9 +47,6 @@ class StateFilter : public VFilter
 public:
 	StateFilter(VConfig* owner);
 	void notifyOwner();
-protected:
-	virtual std::string toName(VParam::Type);
-	virtual VParam::Type toType(const std::string& name);
 };
 
 class AttributeFilter : public VFilter
@@ -59,9 +54,6 @@ class AttributeFilter : public VFilter
 public:
 	AttributeFilter(VConfig* owner);
 	void notifyOwner();
-protected:
-	virtual std::string toName(VParam::Type);
-	virtual VParam::Type toType(const std::string& name);
 };
 
 class IconFilter : public VFilter
@@ -69,9 +61,6 @@ class IconFilter : public VFilter
 public:
 	IconFilter(VConfig* owner);
 	void notifyOwner();
-protected:
-	virtual std::string toName(VParam::Type);
-	virtual VParam::Type toType(const std::string& name);
 };
 
 #endif

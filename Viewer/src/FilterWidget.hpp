@@ -37,7 +37,7 @@ protected slots:
 	void slotChanged(bool);
 
 protected:
-	void addAction(QString name,int id);
+	void addAction(QString name,QString id);
 
 	QMenu*  menu_;
 	VFilter* filter_;

@@ -8,39 +8,33 @@
 //
 //============================================================================
 
-#ifndef VSTATE_HPP_
-#define VSTATE_HPP_
+#ifndef VSSTATE_HPP_
+#define VSSTATE_HPP_
 
-#include <set>
+#include <map>
 #include <vector>
 #include <string>
 
-#include "NState.hpp"
+#include "SState.hpp"
 #include "VParam.hpp"
 
-class Node;
+class ServerHandler;
 
-class VState : public VParam
+class VSState : public VParam
 {
 public:
-	VState(QString name,VParam::Type,NState::State);
-	VState(QString name,VParam::Type);
+	VSState(const std::string& name,SState::State);
 
-	QColor  colour() const;
+	QColor colour() const;
 
-	static QString toName(Node*);
-	static QColor  toColour(Node* n);
-	static VParam::Type toType(Node *n);
-
-	static std::vector<VParam*> filterItems();
-	static VState* find(VParam::Type);
-	static VState* find(const std::string& name);
-	static void init();
+	static QString toName(ServerHandler*);
+	static QColor  toColour(ServerHandler* n);
+	static VSState* toState(ServerHandler* n);
+	static VSState* find(const std::string& name);
+	static void init(const std::string& parFile);
 
 private:
-	static VState* find(Node *n);
-
-	static std::vector<VState*> items_;
+	static std::map<std::string,VSState*> items_;
 };
 
 #endif

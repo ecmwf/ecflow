@@ -16,7 +16,8 @@
 #include "ServerFilter.hpp"
 #include "ServerHandler.hpp"
 #include "VFilter.hpp"
-#include "VState.hpp"
+#include "VNState.hpp"
+#include "VSState.hpp"
 #include "VAttribute.hpp"
 #include "VIcon.hpp"
 
@@ -25,7 +26,6 @@
 // TreeNodeModel
 //
 //=======================================
-
 
 TreeNodeModel::TreeNodeModel(VConfig* config,QObject *parent) :
    AbstractNodeModel(config,parent)
@@ -121,19 +121,25 @@ QVariant TreeNodeModel::serverData(const QModelIndex& index,int role) const
 
 	if(role == FilterRole)
 		return true;
+
 	else if(index.column() == 0 && role == Qt::BackgroundRole)
 	{
-			//return ViewConfig::Instance()->stateColour(DState::UNKNOWN);
+		if(ServerHandler *server=indexToServer(index))
+				return VSState::toColour(server);
+		else
 		    return Qt::gray;
 	}
 
-	else if(index.column() == 0)
+	else if(index.column() == 0 || index.column() == 1)
 	{
-		if(ServerHandler *server=indexToServer(index))
+		if(role == Qt::DisplayRole)
 		{
-			if(role == Qt::DisplayRole)
+			if(ServerHandler *server=indexToServer(index))
 			{
+				if(index.column() == 0)
 					return QString::fromStdString(server->longName());
+				else if(index.column() == 1)
+					return VSState::toName(server);
 			}
 		}
 	}
@@ -151,7 +157,7 @@ QVariant TreeNodeModel::nodeData(const QModelIndex& index, int role) const
 		switch(index.column())
 		{
 		case 0:	 return QString::fromStdString(node->name());
-		case 1: return VState::toName(node);
+		case 1: return VNState::toName(node);
 		case 2: return QString::fromStdString(node->absNodePath()); //QString().sprintf("%08p", node); //QString::fromStdString(node->absNodePath());
 		default: return QVariant();
 		}
@@ -162,7 +168,7 @@ QVariant TreeNodeModel::nodeData(const QModelIndex& index, int role) const
 	}
 	else if(index.column() == 0 && role == Qt::BackgroundRole)
 	{
-		return VState::toColour(node);
+		return VNState::toColour(node);
 	}
 	else if(index.column() == 0 && role == IconRole)
 	{
@@ -208,8 +214,9 @@ QVariant TreeNodeModel::attributesData(const QModelIndex& index, int role) const
 		return QVariant();
 
 	QStringList attrData;
-	VParam::Type type;
-	VAttribute::getData(node,index.row(),type,attrData);
+	//VParam::Type type;
+	VAttribute* type;
+	VAttribute::getData(node,index.row(),&type,attrData);
 
 	if(role == FilterRole)
 	{
@@ -473,7 +480,7 @@ void TreeNodeModel::resetStateFilter(bool broadcast)
 bool TreeNodeModel::filterState(node_ptr node,QSet<Node*>& filterSet)
 {
 	bool ok=false;
-	if(config_->stateFilter()->isSet(VState::toType(node.get())))
+	if(config_->stateFilter()->isSet(VNState::toState(node.get())))
 	{
 			ok=true;
 	}

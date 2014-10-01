@@ -97,6 +97,8 @@ public:
 		void setUpdatingStatus(bool newStatus) {updating_ = newStatus;}
 		void releaseDefs();
 
+		SState::State state();
+
 		void resetRefreshTimer();
 		void query(NodeInfoQuery_ptr);
 		void messages(NodeInfoQuery_ptr req);

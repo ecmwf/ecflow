@@ -168,10 +168,7 @@ void InfoPanel::reset(ViewNodeInfo_ptr node)
 				}
 			}
 
-		if(node)
-			bcWidget_->setPath(node->node());
-		else
-			bcWidget_->setPath(0);
+		bcWidget_->setPath(node);
 }
 
 void InfoPanel::slotReload(ViewNodeInfo_ptr node)

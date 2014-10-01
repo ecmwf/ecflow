@@ -13,7 +13,7 @@
 
 #include "ChangeMgrSingleton.hpp"
 #include "ServerHandler.hpp"
-#include "VState.hpp"
+#include "VNState.hpp"
 
 //=======================================================
 //
@@ -129,13 +129,13 @@ QVariant TableNodeModel::nodeData(const QModelIndex& index, int role) const
 		switch(index.column())
 		{
 		case 0: return QString::fromStdString(node->absNodePath());
-		case 1: return VState::toName(node);
+		case 1: return VNState::toName(node);
 		default: return QVariant();
 		}
 	}
 	else if(role == Qt::BackgroundRole)
 	{
-		return VState::toColour(node);
+		return VNState::toColour(node);
 	}
 	else if(role == FilterRole)
 		return static_cast<int>(node->dstate());

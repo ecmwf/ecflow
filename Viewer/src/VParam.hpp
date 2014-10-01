@@ -16,51 +16,40 @@
 #include <QColor>
 #include <QFont>
 #include <QMap>
-#include <QVariant>
 
 class VParam
 {
 public:
-		enum Type {NoType,
-			       UnknownState,CompleteState,QueuedState,AbortedState,SubmittedState,ActiveState,SuspendedState,
-			       NoAttribute,LabelAttribute,MeterAttribute,EventAttribute,RepeatAttribute,TimeAttribute,DateAttribute,
-				   TriggerAttribute,VarAttribute,GenVarAttribute,LateAttribute,LimitAttribute,LimiterAttribute,
-			       NoIcon,WaitIcon,RerunIcon,MessageIcon,CompleteIcon,TimeIcon,DateIcon,ZombieIcon,LateIcon};
 
-		VParam(QString name,VParam::Type);
-		VParam(QString name,const std::map<QString,QString>& attr);
+		VParam(const std::string& name);
 
-		QString name() const {return name_;}
-		std::string stdName() const {return name_.toStdString();}
-		VParam::Type type() const {return type_;}
+		QString qName() const {return qName_;}
+		std::string name() const {return name_;}
 
-		int number(QString) const;
-		QColor colour(QString) const;
-		QString text(QString) const;
-		QFont font(QString) const;
-
-		void addAttributes(const std::map<QString,QString>& attr);
-
-		static int  toInt(VParam::Type);
-		static VParam::Type  toType(int);
+		int number(const std::string&) const;
+		QColor colour(const std::string&) const;
+		std::string text(const std::string&) const;
+		QFont font(const std::string&) const;
 
 protected:
-		QString name_;
-		Type type_;
+		void addAttributes(const std::map<std::string,std::string>& attr);
+		static void init(const std::string& parFile,const std::string id,std::map<std::string,std::map<std::string,std::string> >& vals);
+
+		std::string name_;
+		QString qName_;
 
 private:
-		QColor toColour(QString) const;
-		QFont  toFont(QString) const;
-		int    toNumber(QString) const;
-		bool isColour(QString) const;
-		bool isFont(QString) const;
-		bool isNumber(QString) const;
+		QColor toColour(const std::string&) const;
+		QFont  toFont(const std::string&) const;
+		int    toNumber(const std::string&) const;
+		bool isColour(const std::string&) const;
+		bool isFont(const std::string&) const;
+		bool isNumber(const std::string&) const;
 
-		std::map<QString,int> numberMap_;
-		std::map<QString,QString> textMap_;
- 		std::map<QString,QColor> colourMap_;
-		std::map<QString,QFont> fontMap_;
+		std::map<std::string,int> numberMap_;
+		std::map<std::string,std::string> textMap_;
+ 		std::map<std::string,QColor> colourMap_;
+		std::map<std::string,QFont> fontMap_;
 };
-
 
 #endif

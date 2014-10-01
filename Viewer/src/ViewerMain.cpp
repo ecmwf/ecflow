@@ -22,7 +22,8 @@
 #include "ServerList.hpp"
 #include "VAttribute.hpp"
 #include "VIcon.hpp"
-#include "VState.hpp"
+#include "VNState.hpp"
+#include "VSState.hpp"
 
 int main(int argc, char **argv)
 {
@@ -52,13 +53,20 @@ int main(int argc, char **argv)
     ServerList::instance()->init();
 
     //Initialise the node/server state description
-    VState::init();
+    VNState::init(DirectoryHandler::concatenate(DirectoryHandler::etcDir(),
+    											"ecflowview_nstate.json"));
+
+    //Initialise the node/server state description
+    VSState::init(DirectoryHandler::concatenate(DirectoryHandler::etcDir(),
+			      "ecflowview_sstate.json"));
 
     //Initialise the node attributes description
-    VAttribute::init();
+    VAttribute::init(DirectoryHandler::concatenate(DirectoryHandler::etcDir(),
+		      "ecflowview_attribute.json"));
 
     //Initialise the node icon description
-    VIcon::init();
+    VIcon::init(DirectoryHandler::concatenate(DirectoryHandler::etcDir(),
+		      "ecflowview_icon.json"));
 
     //Build the GUI
     MainWindow::init();

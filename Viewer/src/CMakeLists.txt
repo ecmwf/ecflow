@@ -46,7 +46,8 @@ set(viewer_srcs
     VIcon.cpp
     VFilter.cpp
     VParam.cpp
-    VState.cpp
+    VNState.cpp
+    VSState.cpp
     VariableModel.cpp
     VariableItemWidget.cpp
     ViewNodeInfo.cpp

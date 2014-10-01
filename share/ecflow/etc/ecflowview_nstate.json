@@ -1,0 +1,56 @@
+{
+        "nstate":  {
+
+                "unknown": {
+                        "shortname": "Un",
+                        "label": "Unknown",
+                        "tooltip": "unknown",
+                        "colour": "rgb(220,220,220)"
+                },
+
+                "complete": {
+                        "shortname": "C",
+                        "label": "Complete",
+                        "tooltip": "complete",
+                        "colour": "rgb(255,255,0)"
+                },
+
+                "queued": {
+                        "shortname": "Q",
+                        "label": "Queued",
+                        "tooltip": "queued",
+                        "colour": "rgb(224,240,255)"
+                },
+
+                "aborted": {
+                        "shortname": "Ab",
+                        "label": "Aborted",
+                        "tooltip": "aborted",
+                        "colour": "rgb(255,0,0)"
+                },
+
+                "submitted": {
+                        "type" : "colour",
+                        "shortname": "Sb",
+                        "label": "Submitted",
+                        "tooltip": "submitted",
+                        "colour": "rgb(64,224,208)"
+                },
+
+                "active": {
+                        "type" : "colour",
+                        "shortname": "Ac",
+                        "label": "Active",
+                        "tooltip": "active",
+                        "colour": "rgb(0,255,0)"
+                },
+
+                "suspended": {
+                        "type" : "colour",
+                        "shortname": "Sp",
+                        "label": "Suspended",
+                        "tooltip": "suspended",
+                        "colour": "rgb(255,166,0)"
+                }
+        }
+}

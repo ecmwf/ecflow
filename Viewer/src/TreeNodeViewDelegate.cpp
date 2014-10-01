@@ -31,6 +31,19 @@ TreeNodeViewDelegate::TreeNodeViewDelegate(QWidget *parent) : QStyledItemDelegat
 	selectPen_=QPen(MvQTheme::colour(group,"select_pen"));
 	selectBrush_=MvQTheme::brush(group,"select_brush");*/
 
+	attrRenderers_["meter"]=&TreeNodeViewDelegate::renderMeter;
+	attrRenderers_["label"]=&TreeNodeViewDelegate::renderLabel;
+	attrRenderers_["event"]=&TreeNodeViewDelegate::renderEvent;
+	attrRenderers_["var"]=&TreeNodeViewDelegate::renderVar;
+	attrRenderers_["genvar"]=&TreeNodeViewDelegate::renderGenvar;
+	attrRenderers_["limit"]=&TreeNodeViewDelegate::renderLimit;
+	attrRenderers_["limiter"]=&TreeNodeViewDelegate::renderLimiter;
+	attrRenderers_["trigger"]=&TreeNodeViewDelegate::renderTrigger;
+	attrRenderers_["time"]=&TreeNodeViewDelegate::renderTime;
+	attrRenderers_["date"]=&TreeNodeViewDelegate::renderDate;
+	attrRenderers_["repeat"]=&TreeNodeViewDelegate::renderRepeat;
+	attrRenderers_["late"]=&TreeNodeViewDelegate::renderLate;
+
 }
 
 void TreeNodeViewDelegate::paint(QPainter *painter,const QStyleOptionViewItem &option,
@@ -85,6 +98,12 @@ void TreeNodeViewDelegate::paint(QPainter *painter,const QStyleOptionViewItem &o
 			QStringList lst=tVar.toStringList();
 			if(lst.count() > 0)
 			{
+				QMap<QString,AttributeRendererProc>::const_iterator it=attrRenderers_.find(lst.at(0));
+				if(it != attrRenderers_.end())
+				{	AttributeRendererProc a=it.value();
+					(this->*a)(painter,lst,textRect,option.rect);
+				}
+				/*
 				switch(lst.at(0).toInt())
 				{
 				case VParam::MeterAttribute:
@@ -100,7 +119,7 @@ void TreeNodeViewDelegate::paint(QPainter *painter,const QStyleOptionViewItem &o
 					renderVar(painter,lst,textRect,option.rect);
 					break;
 				case VParam::GenVarAttribute:
-					renderGenVar(painter,lst,textRect,option.rect);
+					renderGenvar(painter,lst,textRect,option.rect);
 					break;
 				case VParam::LimitAttribute:
 					renderLimit(painter,lst,textRect,option.rect);
@@ -125,7 +144,7 @@ void TreeNodeViewDelegate::paint(QPainter *painter,const QStyleOptionViewItem &o
 					break;
 				default:
 					break;
-				}
+				}*/
 			}
 
 		}
@@ -385,7 +404,7 @@ void TreeNodeViewDelegate::renderVar(QPainter *painter,QStringList data,QRect te
 	}
 }
 
-void TreeNodeViewDelegate::renderGenVar(QPainter *painter,QStringList data,QRect textRect,QRect optRect) const
+void TreeNodeViewDelegate::renderGenvar(QPainter *painter,QStringList data,QRect textRect,QRect optRect) const
 {
 	QString text;
 

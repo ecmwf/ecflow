@@ -12,8 +12,11 @@
 #define TreeNodeViewDelegate_HPP_
 
 #include <QBrush>
+#include <QMap>
 #include <QPen>
 #include <QStyledItemDelegate>
+
+#include <string>
 
 class TreeNodeViewDelegate : public QStyledItemDelegate
 {
@@ -27,11 +30,13 @@ protected:
 	void renderNode(QPainter *painter,const QModelIndex& index,
 			          QString text,QRect textRect,QRect optRect) const;
 
+	typedef void (TreeNodeViewDelegate::*AttributeRendererProc)(QPainter *painter,QStringList data,QRect textRect,QRect optRect) const;
+
 	void renderMeter(QPainter *painter,QStringList data,QRect textRect,QRect optRect) const;
 	void renderLabel(QPainter *painter,QStringList data,QRect textRect,QRect optRect) const;
 	void renderEvent(QPainter *painter,QStringList data,QRect textRect,QRect optRect) const;
 	void renderVar(QPainter *painter,QStringList data,QRect textRect,QRect optRect) const;
-	void renderGenVar(QPainter *painter,QStringList data,QRect textRect,QRect optRect) const;
+	void renderGenvar(QPainter *painter,QStringList data,QRect textRect,QRect optRect) const;
 	void renderLimit(QPainter *painter,QStringList data,QRect textRect,QRect optRect) const;
 	void renderLimiter(QPainter *painter,QStringList data,QRect textRect,QRect optRect) const;
 	void renderTrigger(QPainter *painter,QStringList data,QRect textRect,QRect optRect) const;
@@ -44,6 +49,8 @@ protected:
 	QBrush hoverBrush_;
 	QPen selectPen_;
 	QBrush selectBrush_;
+
+	QMap<QString,AttributeRendererProc> attrRenderers_;
 };
 
 

@@ -140,6 +140,19 @@ void ServerHandler::removeServer(ServerHandler* server)
 		}
 }
 
+SState::State ServerHandler::state()
+{
+	ServerDefsAccess defsAccess(this);  // will reliquish its resources on destruction
+	defs_ptr defs = defsAccess.defs();
+	if(defs != NULL)
+	{
+			ServerState& st=defs->set_server();
+			return st.get_state();
+	}
+	return SState::RUNNING;
+}
+
+
 int ServerHandler::numSuites()
 {
 	if(client_)

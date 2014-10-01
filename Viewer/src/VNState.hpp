@@ -8,42 +8,35 @@
 //
 //============================================================================
 
-#ifndef VICON_HPP_
-#define VICON_HPP_
+#ifndef VNSTATE_HPP_
+#define VNSTATE_HPP_
 
 #include <map>
-#include <set>
 #include <vector>
 #include <string>
 
+#include "NState.hpp"
 #include "VParam.hpp"
 
-#include <QPixmap>
-#include <QVariant>
-
 class Node;
-class VFilter;
 
-class VIcon : public VParam
+class VNState : public VParam
 {
 public:
-	VIcon(const std::string& name);
-	virtual ~VIcon();
+	VNState(const std::string& name,NState::State);
+	VNState(const std::string& name);
 
+	QColor colour() const;
+
+	static QString toName(Node*);
+	static QColor  toColour(Node* n);
+	static VNState* toState(Node* n);
 	static std::vector<VParam*> filterItems();
-	static QVariantList pixmapList(Node *node,VFilter *filter);
-	static VIcon* find(const std::string& name);
+	static VNState* find(const std::string& name);
 	static void init(const std::string& parFile);
 
-protected:
-	QPixmap* pixmap(int size);
-	virtual bool show(Node*)=0;
-
-	//QApplication makes some initializations of Qt itself, before which no "complex" Qt objects can be created.
-	//Since QPixmap is a complex object it cannot be used in static initialiaztion unless we make it a pointer.
-	QPixmap* pix_;
-
-	static std::map<std::string,VIcon*> items_;
+private:
+	static std::map<std::string,VNState*> items_;
 };
 
 #endif

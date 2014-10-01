@@ -9,7 +9,7 @@
 
 #include "VFilter.hpp"
 
-#include "VState.hpp"
+#include "VNState.hpp"
 #include "VAttribute.hpp"
 #include "VIcon.hpp"
 #include "VParam.hpp"
@@ -28,26 +28,41 @@ void VFilter::init(const std::vector<VParam*>& items)
 {
 	for(std::vector<VParam*>::const_iterator it=items.begin(); it != items.end(); it++)
 	{
-		all_.insert((*it)->type());
+		all_.insert((*it));
 	}
 }
 
-bool VFilter::isSet(VParam::Type type) const
+bool VFilter::isSet(VParam* p) const
 {
-	return (current_.find(type) != current_.end());
+	return (current_.find(p) != current_.end());
 }
 
-void VFilter::current(const std::set<VParam::Type>& at)
+bool VFilter::isSet(const std::string &name) const
 {
-	current_=at;
+	for(std::set<VParam*>::const_iterator it=current_.begin(); it != current_.end(); it++)
+	{
+		if((*it)->name() == name)
+				return true;
+	}
+	return false;
+}
+
+void VFilter::current(const std::set<std::string>& names)
+{
+	current_.clear();
+	for(std::set<VParam*>::const_iterator it=all_.begin(); it != all_.end(); it++)
+	{
+			if(names.find((*it)->name()) != names.end())
+				current_.insert(*it);
+	}
 	notifyOwner();
 }
 
 void VFilter::save(boost::property_tree::ptree& array)
 {
-	for(std::set<VParam::Type>::const_iterator it=current_.begin(); it != current_.end(); it++)
+	for(std::set<VParam*>::const_iterator it=current_.begin(); it != current_.end(); it++)
 	{
-		array.push_back(std::make_pair("",toName(*it)));
+		array.push_back(std::make_pair("",(*it)->name()));
 	}
 }
 
@@ -58,10 +73,10 @@ void VFilter::load(const boost::property_tree::ptree& array)
 	for(boost::property_tree::ptree::const_iterator it = array.begin(); it != array.end(); ++it)
 	{
 			std::string name=it->second.get_value<std::string>();
-			VParam::Type t=toType(name);
-			if(all_.find(t) != all_.end())
+			for(std::set<VParam*>::const_iterator it=all_.begin(); it != all_.end(); it++)
 			{
-				current_.insert(t);
+					if((*it)->name() == name)
+						current_.insert(*it);
 			}
 	}
 }
@@ -74,7 +89,7 @@ void VFilter::load(const boost::property_tree::ptree& array)
 
 StateFilter::StateFilter(VConfig * owner) : VFilter(owner)
 {
-	std::vector<VParam*> v=VState::filterItems();
+	std::vector<VParam*> v=VNState::filterItems();
 	init(v);
 	current_=all_;
 }
@@ -82,22 +97,6 @@ StateFilter::StateFilter(VConfig * owner) : VFilter(owner)
 void StateFilter::notifyOwner()
 {
 	owner_->changed(this);
-}
-
-std::string StateFilter::toName(VParam::Type t)
-{
-	if(VParam* p=VState::find(t))
-		return p->stdName();
-
-	return std::string("");
-}
-
-VParam::Type StateFilter::toType(const std::string& name)
-{
-	if(VParam* p=VState::find(name))
-		return p->type();
-
-	return VParam::NoType;
 }
 
 //==============================================
@@ -117,22 +116,6 @@ void AttributeFilter::notifyOwner()
 	owner_->changed(this);
 }
 
-std::string AttributeFilter::toName(VParam::Type t)
-{
-	if(VParam* p=VAttribute::find(t))
-		return p->stdName();
-
-	return std::string("");
-}
-
-VParam::Type AttributeFilter::toType(const std::string& name)
-{
-	if(VParam* p=VAttribute::find(name))
-		return p->type();
-
-	return VParam::NoType;
-}
-
 //==============================================
 //
 // IconFilter
@@ -149,20 +132,4 @@ IconFilter::IconFilter(VConfig * owner) : VFilter(owner)
 void IconFilter::notifyOwner()
 {
 	owner_->changed(this);
-}
-
-std::string IconFilter::toName(VParam::Type t)
-{
-	if(VParam* p=VIcon::find(t))
-		return p->stdName();
-
-	return std::string("");
-}
-
-VParam::Type IconFilter::toType(const std::string& name)
-{
-	if(VParam* p=VIcon::find(name))
-		return p->type();
-
-	return VParam::NoType;
 }

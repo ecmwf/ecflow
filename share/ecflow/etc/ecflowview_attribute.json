@@ -1,0 +1,43 @@
+{
+        "attribute"  : {
+
+                        "label" : {
+                                "label" : "Labels"
+                        },
+                        "meter" : {
+                                 "label" : "Meters",
+                                 "unset_colour" : "rgb(200,200,200)",
+                                 "set_colour" : "rgb(200,200,200)"
+                        },
+                        "event" : {
+                                 "label" : "Events"
+                        },
+                        "repeat" : {
+                                 "label" : "Repeats"
+                        },
+                        "time" : {
+                                 "label" : "Times"
+                        },
+                        "date" : {
+                                 "label" : "Dates"
+                        },
+                        "trigger" : {
+                                 "label" : "Triggers"
+                        },
+                        "var" : {
+                                 "label" : "Variables"
+                        },
+                        "genvar" : {
+                                 "label" : "Generated variables"
+                        },
+                        "late" : {
+                                 "label" : "Late"
+                        },
+                        "limit" : {
+                                 "label" : "Limits"
+                        },
+                        "limiter" : {
+                                 "label" : "Limiters"
+                        }
+        }
+}

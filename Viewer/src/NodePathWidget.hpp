@@ -12,6 +12,8 @@
 
 #include <QWidget>
 
+#include "ViewNodeInfo.hpp"
+
 #include <string>
 
 class QAction;
@@ -33,6 +35,8 @@ public:
   	QToolButton* menuTb_;
   	QToolButton* nameTb_;
   	QMenu* menu_;
+  	QRect rect_;
+  	QColor colour_;
 };
 
 class NodePathWidget : public QWidget
@@ -44,7 +48,7 @@ public:
 	~NodePathWidget() {}
 
 	void setPath(QString);
-	void setPath(Node*);
+	void setPath(ViewNodeInfo_ptr);
 	void setReloadAction(QAction*);
 
 protected slots:
@@ -52,10 +56,11 @@ protected slots:
 	void slotChangeNode(QAction *);
 	void slotContextMenu(const QPoint&);
 	void slotShowNodeChildrenMenu();
+	void slotEditable(bool);
 
 signals:
   	void nodeClicked(int);
-	void nodeSelected(QString);
+	void nodeSelected(ViewNodeInfo_ptr);
 	void commandRequested(QString,QString);
 
 protected:
@@ -63,7 +68,14 @@ protected:
 	QMenu* createNodeChildrenMenu(int,Node*,QWidget *);
 	QString getPath(QToolButton*);
 	QString getPath(QAction*);
+	void resizeEvent(QResizeEvent *);
 	void paintEvent(QPaintEvent *);
+	void mousePressEvent(QMouseEvent *event);
+	void mouseMoveEvent(QMouseEvent *event);
+	void updateGr();
+
+	ViewNodeInfo_ptr nodeAt(int);
+	int nodeIndex(QPoint pos);
 
 	QHBoxLayout *layout_;
 	QSignalMapper* smp_;
@@ -71,7 +83,15 @@ protected:
 	QAction* actionReload_;
 	QToolButton* reloadTb_;
 	QString path_;
-	bool displayOnly_;
+	bool editable_;
+	ViewNodeInfo_ptr info_;
+	int height_;
+	int paddingX_;
+	int paddingY_;
+	int textPaddingX_;
+	int textPaddingY_;
+	int gapX_;
+
 
 	//static QList<MvQContextItem*> cmTbItems_;
 	//static QList<MvQContextItem*> cmMenuItems_;

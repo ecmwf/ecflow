@@ -1,6 +1,10 @@
 
 # the list of files we want to install
-set (files ecflowview_menus.json)
+set (files ecflowview_menus.json 
+           ecflowview_attribute.json
+           ecflowview_icon.json
+           ecflowview_nstate.json
+           ecflowview_sstate.json)
 
 
 # for each file, copy it into the build directory at build time
