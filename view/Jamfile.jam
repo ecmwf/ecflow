@@ -35,7 +35,8 @@ exe ecflowview
        src/libicon/*.cc src/libxec/*.c src/libui/*.cc :
        src/menul.c src/lister.cc src/tmpnam.c src/line.c src/x.c src/extent.cc
        src/node_alert.cc src/array.cc src/option.cc 
-       src/dialog.cc ] 
+       src/dialog.cc src/host.cc ] 
+     host
      /theCore//core
      /theNodeAttr//nodeattr
      /theNode//node
@@ -49,7 +50,7 @@ exe ecflowview
      /site-config//boost_datetime
      pthread
    : <variant>debug:<define>DEBUG
-     <variant>release:<cxxflags>-O1
+#     <variant>release:<cxxflags>-O1
      <toolset>gcc:<include>$(MOTIF_INCLUDE)
      <include>../view/src
      <include>../view/src/libicon
@@ -62,20 +63,34 @@ exe ecflowview
      <define>unix
      <linkflags>-lm 
      <linkflags>-g
-#     <linkflags>-lcrypt
      <toolset>gcc:<linkflags>-L$(MOTIF_LIBRARY)
      <dll-path>$(MOTIF_LIBRARY)
      <linkflags>-L/usr/X11R6/lib
      <linkflags>-lXpm
      <linkflags>-lXm
-#     <linkflags>-lXp
      <linkflags>-lXext
      <linkflags>-lXt
      <linkflags>-lX11
-#     <linkflags>-lfl
    ;
 
-   
+obj host : src/host.cc 
+     /theCore//core
+     /theNodeAttr//nodeattr
+     /theNode//node
+     /theParser//libparser
+     /theBase//base
+     /theClient//libclient
+  : <variant>release:<optimization>off 
+     <include>../view/src
+     <include>../view/src/libicon
+     <include>../view/src/libxec
+     <include>../view/src/libui	
+     <define>_GNU_SOURCE
+     <define>linux
+     <define>ECFLOW_SHARED_DIR='\"$(ECFLOW_SHARED_DIR)\"'
+     <define>UNIX
+     <define>unix
+   ; 
 #
 # Test the view
 # This uses /theTest//libharness to setup a server
@@ -98,5 +113,5 @@ exe test-view : [ glob test/*.cpp  ]
          : <include>../Base/test 
            <include>../Test/src 
            <variant>debug:<define>DEBUG
-  	   <variant>release:<cxxflags>-O1
+#  	   <variant>release:<cxxflags>-O1
         ;

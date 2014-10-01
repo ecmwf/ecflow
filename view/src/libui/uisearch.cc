@@ -37,6 +37,7 @@ void search_shell_c::create (Widget parent, char *widget_name)
 	Widget drawingArea1 = (Widget)NULL;
 	Widget drawingArea2 = (Widget)NULL;
 	Widget form1 = (Widget)NULL;
+	Widget frame7 = (Widget)NULL;
 	Widget frame6 = (Widget)NULL;
 	Widget frame5 = (Widget)NULL;
 	Widget frame4 = (Widget)NULL;
@@ -71,7 +72,9 @@ void search_shell_c::create (Widget parent, char *widget_name)
 	Widget toggle44 = (Widget)NULL;
 	Widget toggle45 = (Widget)NULL;
 	Widget toggle66 = (Widget)NULL;
-
+	regex_ = (Widget)NULL;
+	exact_ = (Widget)NULL;
+	casesensitive_ = (Widget)NULL;
 	if ( !widget_name )
 	  widget_name = (char*) "search_shell";
 
@@ -219,15 +222,31 @@ void search_shell_c::create (Widget parent, char *widget_name)
 
 	ac = 0;
 	frame6 = XmCreateFrame ( form1, "frame6", al, ac );
-	// XtSetArg(al[ac], XmNnumRows, 2); ac++;
 	XtSetArg(al[ac], XmNorientation, XmHORIZONTAL); ac++;
 	XtSetArg(al[ac], XmNpacking, XmPACK_COLUMN); ac++;
-	timed_rowcol1_ = XmCreateRowColumn ( frame6, "timed_rowcol1_", al, ac );
+	timed_rowcol_ = XmCreateRowColumn ( frame6, "timed_rowcol_", al, ac );
 	ac = 0;
-	timed_text_since_ = XmCreateTextField ( timed_rowcol1_, "timed_text_since_", al, ac );
-	timed_text_from_  = XmCreateTextField ( timed_rowcol1_, "timed_text_from_", al, ac );
+	timed_text_since_ = XmCreateTextField(timed_rowcol_,"timed_text_since_",al,ac);
+	timed_text_from_ = XmCreateTextField(timed_rowcol_,"timed_text_from_",al,ac);
 	XtSetArg(al[ac], XmNchildType, XmFRAME_TITLE_CHILD); ac++;
 	timed_ = XmCreateToggleButton ( frame6, "Status time:", al, ac );
+
+	ac = 0;
+	frame7 = XmCreateFrame ( form1, "frame7", al, ac );
+	XtSetArg(al[ac], XmNnumColumns, 2); ac++;
+	XtSetArg(al[ac], XmNorientation, XmHORIZONTAL); ac++;
+	XtSetArg(al[ac], XmNpacking, XmPACK_COLUMN); ac++;
+	misc_rowcol_ = XmCreateRowColumn ( frame7, "misc_rowcol_", al, ac );
+	ac = 0;
+	XtSetArg(al[ac], XmNset, TRUE); ac++;
+	casesensitive_ = XmCreateToggleButton(misc_rowcol_, "case sensitive",al,ac);
+	ac = 0;
+	regex_ = XmCreateToggleButton( misc_rowcol_, "regular expression", al, ac );
+	ac = 0;
+	exact_ = XmCreateToggleButton( misc_rowcol_, "exact", al, ac );
+	ac = 0;
+	XtSetArg(al[ac], XmNchildType, XmFRAME_TITLE_CHILD); ac++;
+	misc_ = XmCreateToggleButton ( frame7, "Misc.:", al, ac );
 
 	ac = 0;
 	XtSetArg(al[ac], XmNcancelButton, button_close); ac++;
@@ -346,6 +365,17 @@ void search_shell_c::create (Widget parent, char *widget_name)
 	XtSetValues ( frame6,al, ac );
 	ac = 0;
 
+	XtSetArg(al[ac], XmNtopAttachment, XmATTACH_WIDGET); ac++;
+	XtSetArg(al[ac], XmNtopOffset, 3); ac++;
+	XtSetArg(al[ac], XmNtopWidget, frame6); ac++;
+	XtSetArg(al[ac], XmNbottomAttachment, XmATTACH_NONE); ac++;
+	XtSetArg(al[ac], XmNleftAttachment, XmATTACH_FORM); ac++;
+	XtSetArg(al[ac], XmNleftOffset, 3); ac++;
+	XtSetArg(al[ac], XmNrightAttachment, XmATTACH_FORM); ac++;
+	XtSetArg(al[ac], XmNrightOffset, 3); ac++;
+	XtSetValues ( frame7,al, ac );
+	ac = 0;
+
 	XtAddCallback (what_, XmNvalueChangedCallback,&search_shell_c:: whatCB, (XtPointer) this);
 	children[ac++] = what_text_;
 	children[ac++] = what_;
@@ -397,7 +427,8 @@ void search_shell_c::create (Widget parent, char *widget_name)
 	children[ac++] = toggle45;
 	XtManageChildren(children, ac);
 	ac = 0;
-	XtAddCallback (special_, XmNvalueChangedCallback,&search_shell_c:: specialCB, (XtPointer) this);
+	XtAddCallback (special_, XmNvalueChangedCallback,
+		       &search_shell_c::specialCB, (XtPointer) this);
 	children[ac++] = special_;
 	XtManageChildren(children, ac);
 	ac = 0;
@@ -405,8 +436,20 @@ void search_shell_c::create (Widget parent, char *widget_name)
 	children[ac++] = timed_text_since_;
 	XtManageChildren(children, ac);
 	ac = 0;
-	XtAddCallback (timed_, XmNvalueChangedCallback,&search_shell_c:: timedCB, (XtPointer) this);
+	XtAddCallback (timed_, XmNvalueChangedCallback,
+		       &search_shell_c::timedCB, (XtPointer) this);
 	children[ac++] = timed_;
+	XtManageChildren(children, ac);
+
+	ac = 0;
+	children[ac++] = regex_;
+	children[ac++] = casesensitive_;
+	children[ac++] = exact_;
+	XtManageChildren(children, ac);
+	ac = 0;
+	XtAddCallback (misc_, XmNvalueChangedCallback,
+		       &search_shell_c::miscCB, (XtPointer) this);
+	children[ac++] = misc_;
 	XtManageChildren(children, ac);
 
 	ac = 0;
@@ -415,6 +458,7 @@ void search_shell_c::create (Widget parent, char *widget_name)
 	children[ac++] = frame1;
 	children[ac++] = frame2;
 	children[ac++] = frame3;
+	children[ac++] = frame7;
 	children[ac++] = frame6;
 	XtManageChildren(children, ac);
 	ac = 0;
@@ -479,4 +523,10 @@ void search_shell_c::timedCB( Widget widget, XtPointer client_data, XtPointer ca
 {
 	search_shell_p instance = (search_shell_p) client_data;
 	instance->timedCB ( widget, call_data );
+}
+
+void search_shell_c::miscCB( Widget widget, XtPointer client_data, XtPointer call_data )
+{
+	search_shell_p instance = (search_shell_p) client_data;
+	instance->miscCB ( widget, call_data );
 }

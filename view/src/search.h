@@ -44,7 +44,7 @@ private:
 	array<flags*> status_flags_;
 	array<flags*> special_flags_;
 	array<flags*> type_flags_;
-	int  timed_since_, timed_from_;
+	int  timed_since_, timed_from_, exa_, reg_, cas_;
 
 // -- Methods
 
@@ -73,6 +73,7 @@ private:
 	void typeCB(Widget,XtPointer);
 	void specialCB(Widget,XtPointer);
 	void timedCB(Widget,XtPointer);
+	void miscCB(Widget,XtPointer);
 };
 
 inline void destroy(search**) {}
