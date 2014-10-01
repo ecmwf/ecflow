@@ -40,8 +40,12 @@ void DirectoryHandler::init(std::string exePath)
 	if(char *h=getenv("HOME"))
 	{
 		boost::filesystem::path homeDir(h);
-		boost::filesystem::path configDir = homeDir  /= ".ecflowview";
-		boost::filesystem::path rcDir = homeDir  /= ".ecflowrc";
+
+		boost::filesystem::path configDir = homeDir;
+		configDir /= ".ecflowview";
+
+		boost::filesystem::path rcDir = homeDir;
+		rcDir /= ".ecflowrc";
 
 		configDir_=configDir.string();
 		rcDir_=rcDir.string();
@@ -66,9 +70,13 @@ void DirectoryHandler::init(std::string exePath)
     boost::filesystem::path path(exePath);
     boost::filesystem::path binDir   = path.parent_path();
     boost::filesystem::path rootDir  = binDir.parent_path();
-    boost::filesystem::path shareDir = rootDir  /= "share";
+    rootDir  /= "share";
+
+    boost::filesystem::path shareDir = rootDir;
     shareDir /= "ecflow";
-    boost::filesystem::path etcDir   = shareDir /= "etc";
+
+    boost::filesystem::path etcDir   = shareDir;
+    etcDir /= "etc";
 
     shareDir_ = shareDir.string();
     etcDir_   = etcDir.string();
