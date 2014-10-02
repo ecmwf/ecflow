@@ -32,7 +32,7 @@ protected:
 	Widget timed_text_since_, timed_text_from_;
 public:
 	static void radioCB( Widget, XtPointer, XtPointer );
-	virtual void radioCB( Widget, XtPointer ) = 0;
+	virtual void radioCB1( Widget, XtPointer ) = 0;
 
 	static void miscCB( Widget, XtPointer, XtPointer );
 	virtual void miscCB( Widget, XtPointer ) = 0;

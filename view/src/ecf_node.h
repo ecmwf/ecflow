@@ -517,8 +517,8 @@ ecf_node* make_node( T* n, ecf_node* parent, char c = 'd' )
    ecf_node* ec = new ecf_concrete_node<T>(n, parent, c);
    if (ec && n) {
       int type = ec->type();
-      // XECFDEBUG { if (!ec) std::cerr << "# make node " << type << "\n"; }
-      assert ( type > 0); // gcc 4.7 optimisation issue
+      // gcc 4.7 optimisation issue, keep next line
+      XECFDEBUG { if (!ec) std::cerr << "# make node " << type << "\n"; }
       if (!parent || type == NODE_SUPER || type == NODE_SUITE)
          ec->make_subtree();
       else if (type == NODE_FAMILY || type == NODE_TASK || type == NODE_ALIAS) {

@@ -93,16 +93,7 @@ void search::searchCB(Widget,XtPointer)
 
   if(XmToggleButtonGetState(misc_)) {
     icas_ = XmToggleButtonGetState(icase_);
-    if((exac_ = XmToggleButtonGetState(exact_))) { 
-      XmToggleButtonSetState(regex_, False, True); rege_ = glob_ = false;
-      XmToggleButtonSetState(fname_, False, True);  
-    } else if((rege_ = XmToggleButtonGetState(regex_))) {
-      XmToggleButtonSetState(fname_, False, True); glob_ = exac_ = false;
-      XmToggleButtonSetState(exact_, False, True); 
-    } else if((glob_ = XmToggleButtonGetState(fname_))) {
-      XmToggleButtonSetState(regex_, False, True); rege_ = exac_ = false;
-      XmToggleButtonSetState(exact_, False, True); 
-    }
+    glob_ = XmToggleButtonGetState(fname_);
   } else { icas_ = true; exac_ = rege_ = glob_ = false; }
 
   result::clear();
@@ -145,9 +136,9 @@ void search::next(node& n)
   if (ok && name_) {
     if (exac_) {
       if (icas_) 
-	ok &= 0==strncasecmp(name_, n.name().c_str(), sizeof(name_));      
+	ok &= 0==strncasecmp(name_, n.name().c_str(), strlen(name_));      
       else 
-	ok &= 0==strncmp(name_, n.name().c_str(), sizeof(name_));
+	ok &= 0==strncmp(name_, n.name().c_str(), strlen(name_));
     } else {
       
       if (glob_) {
@@ -253,8 +244,8 @@ void search::timedCB(Widget,XtPointer)
   }
 }
 
-void search::radioCB(Widget w, XtPointer data) {
-  printf("radio %d\n", data);
+void search::radioCB1(Widget w, XtPointer data) {
+  printf("radio %d\n", (int)data);
 }
 
 void search::miscCB(Widget,XtPointer)
@@ -262,15 +253,11 @@ void search::miscCB(Widget,XtPointer)
   if(XmToggleButtonGetState(misc_)) {
     XtManageChild(misc_rowcol_); 
     XtManageChild(fname_); 
-    // XtManageChild(regex_); 
     XtManageChild(icase_);
-    // XtManageChild(exact_);
   } else {
     XtUnmanageChild(misc_rowcol_); 
-    // XtUnmanageChild(regex_);
     XtUnmanageChild(icase_);
     XtUnmanageChild(fname_); 
-    // XtUnmanageChild(exact_);
   }
 }
 

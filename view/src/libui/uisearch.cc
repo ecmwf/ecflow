@@ -250,7 +250,7 @@ void search_shell_c::create (Widget parent, char *widget_name)
 
 	XtSetArg(al[ac], XmNbuttons, buttons); ac++;   
 	XtSetArg(al[ac], XmNbuttonCount, 3); ac++;   
-	// XtSetArg(al[ac], XmNsimpleCallback, &search_shell_c::radioCB); ac++;  
+	// XtSetArg(al[ac], XmNsimpleCallback, &search_shell_c::radioCB1); ac++;  
 	XtSetArg(al[ac], XmNbuttonSet, 1); ac++;   
 	fname_ = XmCreateSimpleRadioBox(misc_rowcol_, "radiobox", al, ac);
 	icase_ = XmCreateToggleButton(misc_rowcol_, "ignore case",al,ac);
@@ -325,7 +325,6 @@ void search_shell_c::create (Widget parent, char *widget_name)
 
 	XtAddCallback (fname_, XmNsimpleCallback,&search_shell_c::radioCB,(XtPointer)this);
 	/* http://www.cs.cf.ac.uk/Dave/X_lecture/node8.html */
-
 
 	XtSetArg(al[ac], XmNtopAttachment, XmATTACH_FORM); ac++;
 	XtSetArg(al[ac], XmNtopOffset, 3); ac++;
@@ -558,5 +557,5 @@ void search_shell_c::miscCB( Widget widget, XtPointer client_data, XtPointer cal
 void search_shell_c::radioCB( Widget widget, XtPointer client_data, XtPointer call_data )
 {
 	search_shell_p instance = (search_shell_p) client_data;
-	instance->radioCB ( widget, call_data );
+	instance->radioCB1 ( widget, call_data );
 }

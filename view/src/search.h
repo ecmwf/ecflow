@@ -74,7 +74,7 @@ private:
 	void specialCB(Widget,XtPointer);
 	void timedCB(Widget,XtPointer);
 	void miscCB(Widget,XtPointer);
-	void radioCB(Widget,XtPointer);
+	void radioCB1(Widget,XtPointer);
 };
 
 inline void destroy(search**) {}
