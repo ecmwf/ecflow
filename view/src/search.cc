@@ -90,17 +90,20 @@ void search::searchCB(Widget,XtPointer)
     timed_from_ = 86400*3;
     timed_since_ = 0;
   }
+
   if(XmToggleButtonGetState(misc_)) {
-    if ((exa_= XmToggleButtonGetState(exact_))) {
-      XmToggleButtonSetState(casesensitive_, True, False);
-      XmToggleButtonSetState(regex_, False, False);
-      cas_ = True;
-      reg_ = False;
-    } else {
-      reg_ = XmToggleButtonGetState(regex_);
-      cas_ = XmToggleButtonGetState(casesensitive_);
+    icas_ = XmToggleButtonGetState(icase_);
+    if((exac_ = XmToggleButtonGetState(exact_))) { 
+      XmToggleButtonSetState(regex_, False, True); rege_ = glob_ = false;
+      XmToggleButtonSetState(fname_, False, True);  
+    } else if((rege_ = XmToggleButtonGetState(regex_))) {
+      XmToggleButtonSetState(fname_, False, True); glob_ = exac_ = false;
+      XmToggleButtonSetState(exact_, False, True); 
+    } else if((glob_ = XmToggleButtonGetState(fname_))) {
+      XmToggleButtonSetState(regex_, False, True); rege_ = exac_ = false;
+      XmToggleButtonSetState(exact_, False, True); 
     }
-  } else { exa_ = 0; reg_ = 0; cas_ = 1; }
+  } else { icas_ = true; exac_ = rege_ = glob_ = false; }
 
   result::clear();
   searchable::look_for(*this, !XmToggleButtonGetState(where_));
@@ -131,6 +134,7 @@ void search::show()
 #include <sys/types.h>
 #include <regex.h>
 #include <boost/algorithm/string.hpp>    
+#include <fnmatch.h>
 
 void search::next(node& n)
 {
@@ -139,52 +143,42 @@ void search::next(node& n)
   if (ok) ok &= check(n,status_flags_);
   if (ok) ok &= check(n,special_flags_);	
   if (ok && name_) {
-    if (exa_) {
-      /* 
-      std::string st1 (n.name());
-      std::string st2 (name_);    
-      if (not cas_) {
-	boost::algorithm::to_lower(st1);
-	boost::algorithm::to_lower(st2);
-      }
-      
-      ok &= st1 == st2; */
-      if (cas_) 
+    if (exac_) {
+      if (icas_) 
+	ok &= 0==strncasecmp(name_, n.name().c_str(), sizeof(name_));      
+      else 
 	ok &= 0==strncmp(name_, n.name().c_str(), sizeof(name_));
-      else
-	ok &= 0==strncasecmp(name_, n.name().c_str(), 
-			     sizeof(name_));      
     } else {
       
-      if (reg_) {
-	std::string st1 (n.name());
-	std::string st2 (name_);    
-
-	if (st2.size() > 0)
-	  if (st2[0] == '/') 
-	    st1 = n.full_name();
-	if (not cas_) {
-	  boost::algorithm::to_lower(st1);
-	  boost::algorithm::to_lower(st2);
+      if (glob_) {
+	std::string path (n.name());
+	std::string pattern (name_);    
+	if (name_[0] == '/') 
+	  path = n.full_name();
+	if (icas_) {
+	  boost::algorithm::to_lower(path);
+	  boost::algorithm::to_lower(pattern);
 	}
-
-	regex_t exp;
-	/* regmatch_t matches[1];*/
-	int rv = regcomp(&exp, st2.c_str(), 0);
+	ok &= !fnmatch(pattern.c_str(), path.c_str(), 0);
+      } else if (rege_) {
+	regex_t exp; int flags = REG_EXTENDED;
+	std::string path (n.name());
+	std::string pattern (name_);    
+	if (name_[0] == '/') 
+	  path = n.full_name();
+	if (icas_) 
+	  flags &= REG_ICASE;
+	int rv = regcomp(&exp, pattern.c_str(), flags);
 	if (rv!=0) 
 	  std::cerr << "regcomp failed %d" << rv << "\n";
-	else {
-	  rv = !regexec(&exp, st1.c_str(), 0, NULL, 0);
-	  if (rv) std::cout << "matches " << st1 << " " << st2 << "\n";
-	  ok &= rv;
-	}
+	else
+	  ok &= 0==regexec(&exp, path.c_str(), 0, NULL, 0);
 	regfree(&exp);
-      } else if (cas_) {
-	ok &= n.match(name_);
-      } else {
-	// ignore case
+      } else if (icas_) { // ignore case
 	ok &= strcasestr(n.name().c_str(),name_) != 0; 
-      }
+      } else { // case sensitive, accept longest names
+	ok &= n.match(name_);
+      } 
     }
   }
   if (ok && XmToggleButtonGetState(timed_))
@@ -259,16 +253,24 @@ void search::timedCB(Widget,XtPointer)
   }
 }
 
+void search::radioCB(Widget w, XtPointer data) {
+  printf("radio %d\n", data);
+}
+
 void search::miscCB(Widget,XtPointer)
 {
   if(XmToggleButtonGetState(misc_)) {
     XtManageChild(misc_rowcol_); 
-    XtManageChild(regex_); 
-    XtManageChild(casesensitive_);
+    XtManageChild(fname_); 
+    // XtManageChild(regex_); 
+    XtManageChild(icase_);
+    // XtManageChild(exact_);
   } else {
     XtUnmanageChild(misc_rowcol_); 
-    XtUnmanageChild(regex_);
-    XtUnmanageChild(casesensitive_);
+    // XtUnmanageChild(regex_);
+    XtUnmanageChild(icase_);
+    XtUnmanageChild(fname_); 
+    // XtUnmanageChild(exact_);
   }
 }
 
@@ -286,3 +288,7 @@ void search::scan(Widget w,array<flags*>& f)
     }
   }
 }
+/*
+^[^#]\s*\w+\s*:(?<data>.*?)$
+
+*/

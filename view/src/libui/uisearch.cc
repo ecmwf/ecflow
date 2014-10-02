@@ -72,9 +72,10 @@ void search_shell_c::create (Widget parent, char *widget_name)
 	Widget toggle44 = (Widget)NULL;
 	Widget toggle45 = (Widget)NULL;
 	Widget toggle66 = (Widget)NULL;
-	regex_ = (Widget)NULL;
-	exact_ = (Widget)NULL;
-	casesensitive_ = (Widget)NULL;
+	fname_ = (Widget)NULL;
+	// regex_ = (Widget)NULL;
+	// exact_ = (Widget)NULL;
+	icase_ = (Widget)NULL;
 	if ( !widget_name )
 	  widget_name = (char*) "search_shell";
 
@@ -233,18 +234,36 @@ void search_shell_c::create (Widget parent, char *widget_name)
 
 	ac = 0;
 	frame7 = XmCreateFrame ( form1, "frame7", al, ac );
-	XtSetArg(al[ac], XmNnumColumns, 2); ac++;
+	// XtSetArg(al[ac], XmNnumColumns, 4); ac++;
 	XtSetArg(al[ac], XmNorientation, XmHORIZONTAL); ac++;
 	XtSetArg(al[ac], XmNpacking, XmPACK_COLUMN); ac++;
+	// XtSetArg(al[ac], XmNradioBehavior, True); ac++;
+	// XtSetArg(al[ac], XmNindicatorType, XmN_OF_MANY); ac++; // Checkbox behaviour
+
 	misc_rowcol_ = XmCreateRowColumn ( frame7, "misc_rowcol_", al, ac );
 	ac = 0;
-	XtSetArg(al[ac], XmNset, TRUE); ac++;
-	casesensitive_ = XmCreateToggleButton(misc_rowcol_, "case sensitive",al,ac);
+	// XtSetArg(al[ac], XmNset, TRUE); ac++;
+	XmString buttons[3];
+	buttons[0] = XmStringCreateSimple("reg. exp.");
+	buttons[1] = XmStringCreateSimple("glob");
+	buttons[2] = XmStringCreateSimple("exact");
+
+	XtSetArg(al[ac], XmNbuttons, buttons); ac++;   
+	XtSetArg(al[ac], XmNbuttonCount, 3); ac++;   
+	// XtSetArg(al[ac], XmNsimpleCallback, &search_shell_c::radioCB); ac++;  
+	XtSetArg(al[ac], XmNbuttonSet, 1); ac++;   
+	fname_ = XmCreateSimpleRadioBox(misc_rowcol_, "radiobox", al, ac);
+	icase_ = XmCreateToggleButton(misc_rowcol_, "ignore case",al,ac);
+
+	/* XmStringFree(buttons[0]); FIXME */
+	/*
 	ac = 0;
-	regex_ = XmCreateToggleButton( misc_rowcol_, "regular expression", al, ac );
+	regex_ = XmCreateToggleButton( misc_rowcol_, "reg. exp.", al, ac );
+	ac = 0;
+	fname_ = XmCreateToggleButton( misc_rowcol_, "glob", al, ac );
 	ac = 0;
 	exact_ = XmCreateToggleButton( misc_rowcol_, "exact", al, ac );
-	ac = 0;
+	ac = 0; */
 	XtSetArg(al[ac], XmNchildType, XmFRAME_TITLE_CHILD); ac++;
 	misc_ = XmCreateToggleButton ( frame7, "Misc.:", al, ac );
 
@@ -303,6 +322,10 @@ void search_shell_c::create (Widget parent, char *widget_name)
 	XtAddCallback (form_, XmNmapCallback,&search_shell_c:: mapCB, (XtPointer) this);
 	XtAddCallback (button_search, XmNactivateCallback,&search_shell_c:: searchCB, (XtPointer) this);
 	XtAddCallback (button_close, XmNactivateCallback,&search_shell_c:: closeCB, (XtPointer) this);
+
+	XtAddCallback (fname_, XmNsimpleCallback,&search_shell_c::radioCB,(XtPointer)this);
+	/* http://www.cs.cf.ac.uk/Dave/X_lecture/node8.html */
+
 
 	XtSetArg(al[ac], XmNtopAttachment, XmATTACH_FORM); ac++;
 	XtSetArg(al[ac], XmNtopOffset, 3); ac++;
@@ -442,9 +465,10 @@ void search_shell_c::create (Widget parent, char *widget_name)
 	XtManageChildren(children, ac);
 
 	ac = 0;
-	children[ac++] = regex_;
-	children[ac++] = casesensitive_;
-	children[ac++] = exact_;
+	children[ac++] = fname_;
+	// children[ac++] = regex_;
+	children[ac++] = icase_;
+	// children[ac++] = exact_;
 	XtManageChildren(children, ac);
 	ac = 0;
 	XtAddCallback (misc_, XmNvalueChangedCallback,
@@ -529,4 +553,10 @@ void search_shell_c::miscCB( Widget widget, XtPointer client_data, XtPointer cal
 {
 	search_shell_p instance = (search_shell_p) client_data;
 	instance->miscCB ( widget, call_data );
+}
+
+void search_shell_c::radioCB( Widget widget, XtPointer client_data, XtPointer call_data )
+{
+	search_shell_p instance = (search_shell_p) client_data;
+	instance->radioCB ( widget, call_data );
 }

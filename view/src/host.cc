@@ -718,7 +718,7 @@ bool ehost::create_tree( int hh, int min, int sec )
    }
 
    if (!top) { 
-     XECFDEBUG { std::cout << "# no top\n"; }
+     // XECFDEBUG { std::cout << "# no top\n"; }
      return false;
    }
    if (top_) {
@@ -737,7 +737,7 @@ bool ehost::create_tree( int hh, int min, int sec )
       if (top) { 
 	int num = 0; node *n = top->kids(); 
 	while (n) { num += 1; n = n->next(); } 
-	std::cout << "# num " << num << "\n";
+	// std::cout << "# num " << num << "\n";
       }
       std::cout << "# usage: " << vmu << " " << res << "\n";
    }
