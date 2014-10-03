@@ -93,8 +93,10 @@ void search::searchCB(Widget,XtPointer)
 
   if(XmToggleButtonGetState(misc_)) {
     icas_ = XmToggleButtonGetState(icase_);
-    glob_ = XmToggleButtonGetState(fname_);
-  } else { icas_ = true; exac_ = rege_ = glob_ = false; }
+    rege_ = XmToggleButtonGetState(toggle11_);
+    glob_ = XmToggleButtonGetState(toggle12_);
+    subs_ = XmToggleButtonGetState(toggle13_);
+  } else { icas_ = true; subs_ = rege_ = glob_ = false; }
 
   result::clear();
   searchable::look_for(*this, !XmToggleButtonGetState(where_));
@@ -134,14 +136,17 @@ void search::next(node& n)
   if (ok) ok &= check(n,status_flags_);
   if (ok) ok &= check(n,special_flags_);	
   if (ok && name_) {
-    if (exac_) {
+    if (subs_) {
       if (icas_) 
-	ok &= 0==strncasecmp(name_, n.name().c_str(), strlen(name_));      
+    	ok &= 0==strncasecmp(name_, n.name().c_str(), strlen(name_));      
       else 
-	ok &= 0==strncmp(name_, n.name().c_str(), strlen(name_));
-    } else {
-      
-      if (glob_) {
+    	ok &= 0==strncmp(name_, n.name().c_str(), strlen(name_));
+      // if (icas_) { // ignore case
+      // 	ok &= strcasestr(n.name().c_str(),name_) != 0; 
+      // } else { // case sensitive, accept longest names
+      // 	ok &= n.match(name_);
+      // } 
+    } else if (glob_) {
 	std::string path (n.name());
 	std::string pattern (name_);    
 	if (name_[0] == '/') 
@@ -150,7 +155,7 @@ void search::next(node& n)
 	  boost::algorithm::to_lower(path);
 	  boost::algorithm::to_lower(pattern);
 	}
-	ok &= !fnmatch(pattern.c_str(), path.c_str(), 0);
+	ok &= 0==fnmatch(pattern.c_str(), path.c_str(), 0);
       } else if (rege_) {
 	regex_t exp; int flags = REG_EXTENDED;
 	std::string path (n.name());
@@ -165,12 +170,12 @@ void search::next(node& n)
 	else
 	  ok &= 0==regexec(&exp, path.c_str(), 0, NULL, 0);
 	regfree(&exp);
-      } else if (icas_) { // ignore case
-	ok &= strcasestr(n.name().c_str(),name_) != 0; 
-      } else { // case sensitive, accept longest names
-	ok &= n.match(name_);
-      } 
-    }
+    } else if (icas_) { // ignore case
+      ok &= strcasestr(n.name().c_str(),name_) != 0; 
+    } else { // case sensitive, accept longest names
+       	ok &= n.match(name_);
+    } 
+      //    }
   }
   if (ok && XmToggleButtonGetState(timed_))
   if (n.type() == NODE_TASK || n.type() == NODE_FAMILY || n.type() == NODE_SUITE) {
@@ -244,13 +249,17 @@ void search::timedCB(Widget,XtPointer)
   }
 }
 
-void search::radioCB1(Widget w, XtPointer data) {
-  printf("radio %d\n", (int)data);
+void search::radioCB(Widget w, XtPointer data) {
+  rege_ = XmToggleButtonGetState(toggle11_);
+  glob_ = XmToggleButtonGetState(toggle12_);
+  subs_ = XmToggleButtonGetState(toggle13_);
 }
 
 void search::miscCB(Widget,XtPointer)
 {
   if(XmToggleButtonGetState(misc_)) {
+    XmToggleButtonSetState(icase_, True, False);
+    XmToggleButtonSetState(toggle12_, True, False);
     XtManageChild(misc_rowcol_); 
     XtManageChild(fname_); 
     XtManageChild(icase_);

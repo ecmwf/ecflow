@@ -20,7 +20,7 @@
 #include <Xm/RowColumn.h>
 #include <Xm/TextF.h>
 #include <Xm/ToggleB.h>
-
+#include <Xm/ToggleBG.h>
 #include <Xm/Protocols.h>  
 #include "flags.h"
 #include "uisearch.h"
@@ -72,9 +72,10 @@ void search_shell_c::create (Widget parent, char *widget_name)
 	Widget toggle44 = (Widget)NULL;
 	Widget toggle45 = (Widget)NULL;
 	Widget toggle66 = (Widget)NULL;
+	toggle11_ = (Widget)NULL;
+	toggle12_ = (Widget)NULL;
+	toggle13_ = (Widget)NULL;
 	fname_ = (Widget)NULL;
-	// regex_ = (Widget)NULL;
-	// exact_ = (Widget)NULL;
 	icase_ = (Widget)NULL;
 	if ( !widget_name )
 	  widget_name = (char*) "search_shell";
@@ -234,36 +235,23 @@ void search_shell_c::create (Widget parent, char *widget_name)
 
 	ac = 0;
 	frame7 = XmCreateFrame ( form1, "frame7", al, ac );
-	// XtSetArg(al[ac], XmNnumColumns, 4); ac++;
 	XtSetArg(al[ac], XmNorientation, XmHORIZONTAL); ac++;
 	XtSetArg(al[ac], XmNpacking, XmPACK_COLUMN); ac++;
-	// XtSetArg(al[ac], XmNradioBehavior, True); ac++;
-	// XtSetArg(al[ac], XmNindicatorType, XmN_OF_MANY); ac++; // Checkbox behaviour
-
 	misc_rowcol_ = XmCreateRowColumn ( frame7, "misc_rowcol_", al, ac );
 	ac = 0;
-	// XtSetArg(al[ac], XmNset, TRUE); ac++;
-	XmString buttons[3];
-	buttons[0] = XmStringCreateSimple("reg. exp.");
-	buttons[1] = XmStringCreateSimple("glob");
-	buttons[2] = XmStringCreateSimple("exact");
-
-	XtSetArg(al[ac], XmNbuttons, buttons); ac++;   
-	XtSetArg(al[ac], XmNbuttonCount, 3); ac++;   
-	// XtSetArg(al[ac], XmNsimpleCallback, &search_shell_c::radioCB1); ac++;  
-	XtSetArg(al[ac], XmNbuttonSet, 1); ac++;   
-	fname_ = XmCreateSimpleRadioBox(misc_rowcol_, "radiobox", al, ac);
 	icase_ = XmCreateToggleButton(misc_rowcol_, "ignore case",al,ac);
 
-	/* XmStringFree(buttons[0]); FIXME */
-	/*
 	ac = 0;
-	regex_ = XmCreateToggleButton( misc_rowcol_, "reg. exp.", al, ac );
-	ac = 0;
-	fname_ = XmCreateToggleButton( misc_rowcol_, "glob", al, ac );
-	ac = 0;
-	exact_ = XmCreateToggleButton( misc_rowcol_, "exact", al, ac );
-	ac = 0; */
+	fname_ = XmCreateRadioBox ( misc_rowcol_, "search_kind", al, ac );
+	toggle11_ = XmCreateToggleButtonGadget ( fname_, "reg. exp.", al, ac );
+	toggle12_ = XmCreateToggleButtonGadget ( fname_, "glob", al, ac );
+	toggle13_ = XmCreateToggleButtonGadget ( fname_, "substring", al, ac );
+
+	XtSetArg(al[ac], XmNtopAttachment, XmATTACH_FORM); ac++;
+	XtSetArg(al[ac], XmNbottomAttachment, XmATTACH_FORM); ac++;
+	XtSetArg(al[ac], XmNleftAttachment, XmATTACH_FORM); ac++;
+	XtSetArg(al[ac], XmNrightAttachment, XmATTACH_FORM); ac++;
+	XtSetValues ( form_,al, ac );
 	XtSetArg(al[ac], XmNchildType, XmFRAME_TITLE_CHILD); ac++;
 	misc_ = XmCreateToggleButton ( frame7, "Misc.:", al, ac );
 
@@ -323,6 +311,9 @@ void search_shell_c::create (Widget parent, char *widget_name)
 	XtAddCallback (button_search, XmNactivateCallback,&search_shell_c:: searchCB, (XtPointer) this);
 	XtAddCallback (button_close, XmNactivateCallback,&search_shell_c:: closeCB, (XtPointer) this);
 
+	XtAddCallback (toggle13_, XmNvalueChangedCallback, &search_shell_c::radioCB, (XtPointer) this);
+	XtAddCallback (toggle11_, XmNvalueChangedCallback, &search_shell_c::radioCB, (XtPointer) this);
+	XtAddCallback (toggle12_, XmNvalueChangedCallback, &search_shell_c::radioCB, (XtPointer) this);
 	XtAddCallback (fname_, XmNsimpleCallback,&search_shell_c::radioCB,(XtPointer)this);
 	/* http://www.cs.cf.ac.uk/Dave/X_lecture/node8.html */
 
@@ -465,10 +456,17 @@ void search_shell_c::create (Widget parent, char *widget_name)
 
 	ac = 0;
 	children[ac++] = fname_;
-	// children[ac++] = regex_;
 	children[ac++] = icase_;
-	// children[ac++] = exact_;
+	// children[ac++] = radio_;
 	XtManageChildren(children, ac);
+
+
+	ac = 0;
+	children[ac++] = toggle11_;
+	children[ac++] = toggle12_;
+	children[ac++] = toggle13_;
+	XtManageChildren(children, ac);
+
 	ac = 0;
 	XtAddCallback (misc_, XmNvalueChangedCallback,
 		       &search_shell_c::miscCB, (XtPointer) this);
@@ -557,5 +555,5 @@ void search_shell_c::miscCB( Widget widget, XtPointer client_data, XtPointer cal
 void search_shell_c::radioCB( Widget widget, XtPointer client_data, XtPointer call_data )
 {
 	search_shell_p instance = (search_shell_p) client_data;
-	instance->radioCB1 ( widget, call_data );
+	instance->radioCB ( widget, call_data );
 }

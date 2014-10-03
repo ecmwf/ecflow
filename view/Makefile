@@ -92,3 +92,8 @@ ping:
 
 relbin:
 	$(BJAM) -j4 variant=release define=PORTABLE_BINARY_ARCHIVE ecflowview 
+
+t2:
+	gcc t2.c -lXm -lX11 
+t1: 
+	gcc t1.c
