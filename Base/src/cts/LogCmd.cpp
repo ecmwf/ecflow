@@ -31,11 +31,8 @@ namespace fs = boost::filesystem;
 
 LogCmd::LogCmd(const std::string& path) : api_(NEW),get_last_n_lines_(0),new_path_(path)
 {
-   // path can be empty, i.e we take new path from the server variables
-   // However if specified Check its valid
-   if (!new_path_.empty()) {
-      Log::check_new_path(path); // will throw for errors
-   }
+   // ECFLOW-154, If path to new log file is specified, it should only be checked by the server,
+   //             as that could be on a different machine.
 }
 
 std::ostream& LogCmd::print(std::ostream& os) const
@@ -219,7 +216,6 @@ void LogCmd::create( 	Cmd_ptr& cmd,
       cmd = Cmd_ptr( new LogCmd( path ) );
       return;
    }
-
 
  	std::stringstream ss;
  	ss << "LogCmd: The arguments have not been specified correctly\n" << LogCmd::desc();

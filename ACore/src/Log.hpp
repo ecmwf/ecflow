@@ -83,15 +83,17 @@ public:
    /// Close the existing log file, and new start writing to the new location
    void new_path(const std::string& the_path);
 
-   /// make sure path is not a directory & path has a parent directory.
-   /// Will throw std::runtime_error for errors
-   static void check_new_path(const std::string& the_new_path);
-
    /// Returns the current log file path name
    std::string path() const;
 
    // returns vec = MSG, LOG, ERR, WAR, DBG, OTH
    static void get_log_types(std::vector<std::string>&);
+
+private:
+
+   /// make sure path is not a directory & path has a parent directory.
+   /// Will throw std::runtime_error for errors
+   static void check_new_path(const std::string& the_new_path);
 
 private:
    ~Log();
