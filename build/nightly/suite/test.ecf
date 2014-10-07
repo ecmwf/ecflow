@@ -44,22 +44,11 @@ set -x # echo script lines as they are executed
    # we use TOOLSET since its possible to get different compilers on the same platform
    # If ever use different versions of the same compiler may need COMPILER_VERSION
    #
-   if [[ ^ARCH^ = ibm_power* ]] ; then
-   
-      exe_time=`/opt/freeware/bin/date +%s -r $1/bin/^COMPILER_TEST_PATH^/$2`
-      passed_file_time=0
-      if test -r $1/bin/$2_^TOOLSET^_^MODE^_passed
-      then
-         passed_file_time=`/opt/freeware/bin/date +%s -r $1/bin/$2_^TOOLSET^_^MODE^_passed`
-      fi
-   else
-   
-      exe_time=`date +%s -r $1/bin/^COMPILER_TEST_PATH^/$2`
-      passed_file_time=0
-      if test -r $1/bin/$2_^TOOLSET^_^MODE^_passed
-      then
-         passed_file_time=`date +%s -r $1/bin/$2_^TOOLSET^_^MODE^_passed`
-      fi
+   exe_time=`date +%s -r $1/bin/^COMPILER_TEST_PATH^/$2`
+   passed_file_time=0
+   if test -r $1/bin/$2_^TOOLSET^_^MODE^_passed
+   then
+      passed_file_time=`date +%s -r $1/bin/$2_^TOOLSET^_^MODE^_passed`
    fi
 
 ^ecfmicro %
@@ -101,22 +90,11 @@ set -x # echo script lines as they are executed
    # we use TOOLSET since its possible to get different compilers on the same platform
    # If ever use different versions of the same compiler may need COMPILER_VERSION
    #
-   if [[ ^ARCH^ = ibm_power* ]] ; then
-   
-      exe_time=`/opt/freeware/bin/date +%s -r ecbuild/^MODE^/$1/$2`
-      passed_file_time=0
-      if test -r ecbuild/^MODE^/$1/$2_^TOOLSET^_^MODE^_passed
-      then
-         passed_file_time=`/opt/freeware/bin/date +%s -r ecbuild/^MODE^/$1/$2_^TOOLSET^_^MODE^_passed`
-      fi
-   else
-   
-      exe_time=`date +%s -r ecbuild/^MODE^/$1/$2`
-      passed_file_time=0
-      if test -r ecbuild/^MODE^/$1/$2_^TOOLSET^_^MODE^_passed
-      then
-         passed_file_time=`date +%s -r ecbuild/^MODE^/$1/$2_^TOOLSET^_^MODE^_passed`
-      fi
+   exe_time=`date +%s -r ecbuild/^MODE^/$1/$2`
+   passed_file_time=0
+   if test -r ecbuild/^MODE^/$1/$2_^TOOLSET^_^MODE^_passed
+   then
+      passed_file_time=`date +%s -r ecbuild/^MODE^/$1/$2_^TOOLSET^_^MODE^_passed`
    fi
 
 ^ecfmicro %
@@ -279,12 +257,6 @@ else
       #============================ Client ========================================
       ecflow_client --meter=progress 45             --host=%ECF_NODE% --port=%ECF_PORT%  
       ecflow_client --label=progress Client         --host=%ECF_NODE% --port=%ECF_PORT% 
-      
-      # HACK for IBM which sets ECF_RID, unset before running client server tests
-      # Not defined for other platforms
-      if [[ %ARCH% = ibm_power* ]] ; then
-         unset ECF_RID
-      fi
       
       run_test Client s_client
       

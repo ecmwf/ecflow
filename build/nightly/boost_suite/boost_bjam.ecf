@@ -16,16 +16,8 @@ else
    fi
    
    # use  [[ ]] for string comparisons
-   if [[ %ARCH% = hpux ]] ; then
-      # on HPUX -e does not work
-      if [ ! -r bjam ] ; then
-         # On HPUX using acc to build bjam fails, use gcc instead
-         sh -x ./bootstrap.sh --with-toolset=%BOOTSTRAP_TOOLSET%
-      fi
-   else
-      if [ ! -e bjam ] ; then
-         sh -x ./bootstrap.sh --with-toolset=%BOOTSTRAP_TOOLSET%
-      fi
+   if [ ! -e bjam ] ; then
+      sh -x ./bootstrap.sh --with-toolset=%BOOTSTRAP_TOOLSET%
    fi
 fi
 
