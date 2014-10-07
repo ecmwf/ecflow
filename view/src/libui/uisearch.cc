@@ -19,6 +19,8 @@
 #include <Xm/PushB.h>
 #include <Xm/RowColumn.h>
 #include <Xm/TextF.h>
+#include <Xm/Label.h>
+#include <Xm/LabelG.h>
 #include <Xm/ToggleB.h>
 #include <Xm/ToggleBG.h>
 #include <Xm/Protocols.h>  
@@ -228,8 +230,9 @@ void search_shell_c::create (Widget parent, char *widget_name)
 	XtSetArg(al[ac], XmNpacking, XmPACK_COLUMN); ac++;
 	timed_rowcol_ = XmCreateRowColumn ( frame6, "timed_rowcol_", al, ac );
 	ac = 0;
-	timed_text_since_ = XmCreateTextField(timed_rowcol_,"timed_text_since_",al,ac);
-	timed_text_from_ = XmCreateTextField(timed_rowcol_,"timed_text_from_",al,ac);
+	timed_text_since_ = XmCreateTextField(timed_rowcol_,"timed_text_since",al,ac);
+	timed_text_from_ = XmCreateTextField(timed_rowcol_,"timed_text_from",al,ac);
+	Widget label44 = XmCreateLabel ( timed_rowcol_, "from-to (sec, 0-86400)", al, ac );
 	XtSetArg(al[ac], XmNchildType, XmFRAME_TITLE_CHILD); ac++;
 	timed_ = XmCreateToggleButton ( frame6, "Status time:", al, ac );
 
@@ -447,6 +450,7 @@ void search_shell_c::create (Widget parent, char *widget_name)
 	ac = 0;
 	children[ac++] = timed_text_from_;
 	children[ac++] = timed_text_since_;
+	children[ac++] = label44;
 	XtManageChildren(children, ac);
 	ac = 0;
 	XtAddCallback (timed_, XmNvalueChangedCallback,

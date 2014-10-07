@@ -87,7 +87,7 @@ void search::searchCB(Widget,XtPointer)
     XtFree(since);
     XtFree(from);
   } else {
-    timed_from_ = 86400*3;
+    timed_from_  = 86400;
     timed_since_ = 0;
   }
 
