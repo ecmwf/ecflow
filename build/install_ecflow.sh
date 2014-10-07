@@ -161,15 +161,6 @@ elif [[ "$ARCH" = cray ]] ; then
    export WK=/perm/ma/ma0/workspace/$PE_ENV/ecflow
    export BOOST_ROOT=/perm/ma/ma0/boost/$BOOST_VERSION
 
-elif [[ "$ARCH" = ibm_power7 ]] ; then 
-
-   # ======================================================================
-   # AIX:   We don't install ecflowview on AIX, no x-windows
-   # ======================================================================
-   export BOOST_ROOT=/s2o1/emos_data/ecflow/boost/$BOOST_VERSION;  
-   export WK=/s2o1/emos_data/ecflow/ecflow 
-   
-   install_arg=install     
 fi
 
 # =======================================================================================
