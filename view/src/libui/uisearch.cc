@@ -232,7 +232,9 @@ void search_shell_c::create (Widget parent, char *widget_name)
 	ac = 0;
 	timed_text_since_ = XmCreateTextField(timed_rowcol_,"timed_text_since",al,ac);
 	timed_text_from_ = XmCreateTextField(timed_rowcol_,"timed_text_from",al,ac);
-	Widget label44 = XmCreateLabel ( timed_rowcol_, "from-to (sec, 0-86400)", al, ac );
+	XmTextFieldSetString(timed_text_since_, "0");
+	XmTextFieldSetString(timed_text_from_, "86400");
+	Widget label44 = XmCreateLabel ( timed_rowcol_, "from-to (seconds)", al, ac );
 	XtSetArg(al[ac], XmNchildType, XmFRAME_TITLE_CHILD); ac++;
 	timed_ = XmCreateToggleButton ( frame6, "Status time:", al, ac );
 
