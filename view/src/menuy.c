@@ -79,7 +79,7 @@ extern int yylineno;
  void yylex(void);
 #endif
 
-#if defined(_AIX)
+#if defined(_AIX) 
  extern char yytext[];
  int yydebug;
 #elif defined(hpux) 
@@ -2122,14 +2122,14 @@ yyreduce:
 
 /* Line 1455 of yacc.c  */
 #line 277 "menuy.y"
-    { log_event_status_event(&(yyvsp[(1) - (3)].dti),(yyvsp[(3) - (3)].nod),STATUS_ABORTED); }
+    { log_event_status_event(&(yyvsp[(1) - (3)].dti),(yyvsp[(3) - (3)].nod),STATUS_ABORTED);}
     break;
 
   case 83:
 
 /* Line 1455 of yacc.c  */
 #line 278 "menuy.y"
-    { log_event_status_event(&(yyvsp[(1) - (3)].dti),(yyvsp[(3) - (3)].nod),STATUS_UNKNOWN); }
+    { log_event_status_event(&(yyvsp[(1) - (3)].dti),(yyvsp[(3) - (3)].nod),STATUS_UNKNOWN);}
     break;
 
   case 84:
@@ -2403,6 +2403,11 @@ void yyerror(char * msg)
   else if (!strncmp("DBG:", yytext, 4)) {}
   else if (!strncmp("ERR:", yytext, 4)) {}
   else if (!strncmp("WAR:", yytext, 4)) {}
+  else if (!strncmp("try-no:", yytext, 6)) {}
+  else if (!strncmp("File", yytext, 4)) {}
+  else if (!strncmp("Variable", yytext, 8)) {}
+  else if (!strncmp("Directory", yytext, 9)) {}
+  else if (!strncmp("Search", yytext, 6)) {}
   else if (*yytext == '[') {} 
   else if (*yytext == ':') {} 
   else if (*yytext == '/') {} 

@@ -177,57 +177,57 @@ menu_items : menu_item menu_items { $$ = menus_chain_items($1,$2); }
 		   | menu_item
 		   ;
 
-menu_item : '('  flags ',' flags ','  title ',' action ',' question ',' answer ')' 
+menu_item : '(' flags ',' flags ',' title ',' action ',' question ',' answer ')'
 			{ $$ = menus_create_6($2,$4,$6,$8,$10,$12); }
 		| '('  flags ',' flags ','  title ',' action ')'
 			{ $$ = menus_create_6($2,$4,$6,$8,"",1); }
           ;
 
 flag         : '~' flag        { $$ = new_flagNot($2);        }
-			 | NONE            { $$ = new_flagNone();       }
-			 | ALL             { $$ = new_flagAll();        }
-			 | UNKNOWN         { $$ = new_statusFlag(STATUS_UNKNOWN);    }
-			 | SUSPENDED       { $$ = new_statusFlag(STATUS_SUSPENDED);  }
-			 | COMPLETE        { $$ = new_statusFlag(STATUS_COMPLETE);   }
-			 | QUEUED          { $$ = new_statusFlag(STATUS_QUEUED);     }
-			 | SUBMITTED       { $$ = new_statusFlag(STATUS_SUBMITTED);  }
-			 | ACTIVE          { $$ = new_statusFlag(STATUS_ACTIVE);     }
-			 | ABORTED         { $$ = new_statusFlag(STATUS_ABORTED);    }
-			 | CLEAR           { $$ = new_eventFlag(0);      }
-			 | SET             { $$ = new_eventFlag(1);        }
-			 | SHUTDOWN        { $$ = new_statusFlag(STATUS_SHUTDOWN);   }
-			 | HALTED          { $$ = new_statusFlag(STATUS_HALTED);     }
-			 | SERVER         { $$ = new_typeFlag(NODE_SUPER) ; }
-			 | SMS            { $$ = new_typeFlag(NODE_SUPER) ; }
-			 | SUITE          { $$ = new_typeFlag(NODE_SUITE) ; }
-			 | FAMILY         { $$ = new_typeFlag(NODE_FAMILY) ; }
-			 | TASK           { $$ = new_typeFlag(NODE_TASK) ; }
-			 | NODE           { $$ = new_flagOr(new_flagOr(new_typeFlag(NODE_SUITE),new_typeFlag(NODE_FAMILY)),new_typeFlag(NODE_TASK)); }
-			 | EVENT          { $$ = new_typeFlag(NODE_EVENT) ; }
-			 | LABEL          { $$ = new_typeFlag(NODE_LABEL) ; }
-			 | METER          { $$ = new_typeFlag(NODE_METER) ; }
-			 | REPEAT         { $$ = new_typeFlag(NODE_REPEAT) ; }
-			 | VARIABLE       { $$ = new_typeFlag(NODE_VARIABLE) ; }
-			 | TRIGGER        { $$ = new_typeFlag(NODE_TRIGGER) ; }
-			 | ALIAS          { $$ = new_typeFlag(NODE_ALIAS) ; }
-			 | LIMIT          { $$ = new_typeFlag(NODE_LIMIT) ; }
-			 | HAS_TRIGGERS   { $$ = new_procFlag_node_hasTriggers(); }
-			 | HAS_DATE       { $$ = new_procFlag_node_hasDate(); }
-			 | HAS_TIME       { $$ = new_procFlag_node_hasTime(); }
-			 | HAS_TEXT       { $$ = new_procFlag_node_hasText(); }
-			 | IS_ZOMBIE      { $$ = new_procFlag_node_isZombie(); }
-			 | MIGRATED       { $$ = new_procFlag_node_isMigrated(); }
-			 | LOCKED       { $$ = new_procFlag_node_isLocked(); }
-			 | USER           { $$ = new_userFlag(0); }
-			 | OPER           { $$ = new_userFlag(1); }
-			 | ADMIN          { $$ = new_userFlag(2); }
-			 | SELECTION       { $$ = new_selectionFlag(); }
-			 | '(' flags ')'   { $$ = $2;                     }
-			 ;
+  | NONE            { $$ = new_flagNone();       }
+  | ALL             { $$ = new_flagAll();        }
+  | UNKNOWN         { $$ = new_statusFlag(STATUS_UNKNOWN);    }
+  | SUSPENDED       { $$ = new_statusFlag(STATUS_SUSPENDED);  }
+  | COMPLETE        { $$ = new_statusFlag(STATUS_COMPLETE);   }
+  | QUEUED          { $$ = new_statusFlag(STATUS_QUEUED);     }
+  | SUBMITTED       { $$ = new_statusFlag(STATUS_SUBMITTED);  }
+  | ACTIVE          { $$ = new_statusFlag(STATUS_ACTIVE);     }
+  | ABORTED         { $$ = new_statusFlag(STATUS_ABORTED);    }
+  | CLEAR           { $$ = new_eventFlag(0);      }
+  | SET             { $$ = new_eventFlag(1);        }
+  | SHUTDOWN        { $$ = new_statusFlag(STATUS_SHUTDOWN);   }
+  | HALTED          { $$ = new_statusFlag(STATUS_HALTED);     }
+  | SERVER         { $$ = new_typeFlag(NODE_SUPER) ; }
+  | SMS            { $$ = new_typeFlag(NODE_SUPER) ; }
+  | SUITE          { $$ = new_typeFlag(NODE_SUITE) ; }
+  | FAMILY         { $$ = new_typeFlag(NODE_FAMILY) ; }
+  | TASK           { $$ = new_typeFlag(NODE_TASK) ; }
+  | NODE           { $$ = new_flagOr(new_flagOr(new_typeFlag(NODE_SUITE),new_typeFlag(NODE_FAMILY)),new_typeFlag(NODE_TASK)); }
+  | EVENT          { $$ = new_typeFlag(NODE_EVENT) ; }
+  | LABEL          { $$ = new_typeFlag(NODE_LABEL) ; }
+  | METER          { $$ = new_typeFlag(NODE_METER) ; }
+  | REPEAT         { $$ = new_typeFlag(NODE_REPEAT) ; }
+  | VARIABLE       { $$ = new_typeFlag(NODE_VARIABLE) ; }
+  | TRIGGER        { $$ = new_typeFlag(NODE_TRIGGER) ; }
+  | ALIAS          { $$ = new_typeFlag(NODE_ALIAS) ; }
+  | LIMIT          { $$ = new_typeFlag(NODE_LIMIT) ; }
+  | HAS_TRIGGERS   { $$ = new_procFlag_node_hasTriggers(); }
+  | HAS_DATE       { $$ = new_procFlag_node_hasDate(); }
+  | HAS_TIME       { $$ = new_procFlag_node_hasTime(); }
+  | HAS_TEXT       { $$ = new_procFlag_node_hasText(); }
+  | IS_ZOMBIE      { $$ = new_procFlag_node_isZombie(); }
+  | MIGRATED       { $$ = new_procFlag_node_isMigrated(); }
+  | LOCKED       { $$ = new_procFlag_node_isLocked(); }
+  | USER           { $$ = new_userFlag(0); }
+  | OPER           { $$ = new_userFlag(1); }
+  | ADMIN          { $$ = new_userFlag(2); }
+  | SELECTION       { $$ = new_selectionFlag(); }
+  | '(' flags ')'   { $$ = $2;                     }
+;
 
 flags        : flag '|' flags { $$ = new_flagOr($1,$3); }
-             | flag '&' flags { $$ = new_flagAnd($1,$3); }
-		 | flag
+  | flag '&' flags { $$ = new_flagAnd($1,$3); }
+  | flag
 			 ;
 
 title : STRING { $$ = strdup(yytext); }
@@ -271,15 +271,15 @@ date   : '[' number ':' number ':' number  number '.' number '.' number ']'
           ;
 
 event : date COMPLETE   node_name  { log_event_status_event(&$1,$3,STATUS_COMPLETE); }
-      | date QUEUED     node_name  { log_event_status_event(&$1,$3,STATUS_QUEUED); }
-      | date ACTIVE     node_name  { log_event_status_event(&$1,$3,STATUS_ACTIVE); }
-      | date SUBMITTED  node_name  { log_event_status_event(&$1,$3,STATUS_SUBMITTED); }
-      | date ABORTED    node_name  { log_event_status_event(&$1,$3,STATUS_ABORTED); }
-      | date UNKNOWN    node_name  { log_event_status_event(&$1,$3,STATUS_UNKNOWN); }
-      | date SET        node_name  { log_event_event_event(&$1,$3,1); }
-      | date CLEAR      node_name  { log_event_event_event(&$1,$3,0); }
-      | date METER '[' node_name number node_name ']'  { log_event_meter_event(&$1,$6,$5); }
-	  ;
+  | date QUEUED     node_name  { log_event_status_event(&$1,$3,STATUS_QUEUED); }
+  | date ACTIVE     node_name  { log_event_status_event(&$1,$3,STATUS_ACTIVE); }
+  | date SUBMITTED  node_name  { log_event_status_event(&$1,$3,STATUS_SUBMITTED); }
+  | date ABORTED    node_name  { log_event_status_event(&$1,$3,STATUS_ABORTED);}
+  | date UNKNOWN    node_name  { log_event_status_event(&$1,$3,STATUS_UNKNOWN);}
+  | date SET        node_name  { log_event_event_event(&$1,$3,1); }
+  | date CLEAR      node_name  { log_event_event_event(&$1,$3,0); }
+  | date METER '[' node_name number node_name ']'  { log_event_meter_event(&$1,$6,$5); }
+;
 
 junk  : date JUNK
       | JUNK
@@ -311,6 +311,11 @@ void yyerror(char * msg)
   else if (!strncmp("DBG:", yytext, 4)) {}
   else if (!strncmp("ERR:", yytext, 4)) {}
   else if (!strncmp("WAR:", yytext, 4)) {}
+  else if (!strncmp("try-no:", yytext, 6)) {}
+  else if (!strncmp("File", yytext, 4)) {}
+  else if (!strncmp("Variable", yytext, 8)) {}
+  else if (!strncmp("Directory", yytext, 9)) {}
+  else if (!strncmp("Search", yytext, 6)) {}
   else if (*yytext == '[') {} 
   else if (*yytext == ':') {} 
   else if (*yytext == '/') {} 
