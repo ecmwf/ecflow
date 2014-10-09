@@ -64,7 +64,7 @@ public:
 	virtual void changed(node&);
 	virtual Boolean enabled(node&);
 	virtual void clear();
-	virtual const char* name() const { return "Timeline"; }
+	virtual const char* name() const { return "Time line"; }
 	virtual Widget widget() { return timetable_form_c::xd_rootwidget(); }
 	virtual Widget tools() { return tools_; }
 
