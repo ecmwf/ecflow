@@ -56,7 +56,7 @@ BOOST_AUTO_TEST_CASE( test_client_lifecyle )
    std::string host = ClientEnvironment::hostSpecified();
    if (!host.empty()) {
       // Server allready started, since we cant disable job generation ignore this test
-      std::cout << "Client:: ...test_client_lifecycle, ignoring test when ECF_NODE specified...\n";
+      std::cout << "Client:: ...test_client_lifecycle, ignoring test when ECF_NODE specified..." << endl;
       return;
    }
 

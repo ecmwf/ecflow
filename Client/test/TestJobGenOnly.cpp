@@ -43,7 +43,7 @@ BOOST_AUTO_TEST_SUITE( ClientTestSuite )
 //  Tests the Job generation against the OLD sms
 BOOST_AUTO_TEST_CASE( test_jobgenonly )
 {
-	cout << "Client:: ...test_jobgenonly\n";
+	cout << "Client:: ...test_jobgenonly" << endl;
 
 	// Define paths to ECF_HOME and location of the defs file
 

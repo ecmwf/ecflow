@@ -36,7 +36,7 @@ BOOST_AUTO_TEST_SUITE( ClientTestSuite )
 // **************************************************************************************
 BOOST_AUTO_TEST_CASE( test_client_environment_host_file_parsing )
 {
-	std::cout << "Client:: ...test_client_environment_host_file_parsing\n";
+	std::cout << "Client:: ...test_client_environment_host_file_parsing" << endl;
 
    std::string good_host_file = File::test_data("Client/test/data/good_hostfile","Client");
 
@@ -79,7 +79,7 @@ BOOST_AUTO_TEST_CASE( test_client_environment_host_file_parsing )
 
 BOOST_AUTO_TEST_CASE( test_client_environment_host_file_defaults )
 {
-   std::cout << "Client:: ...test_client_environment_host_file_defaults\n";
+   std::cout << "Client:: ...test_client_environment_host_file_defaults" << endl;
 
    // When the HOST file does *NOT* indicate the port, it should be taken
    // from the config/environment.
@@ -135,7 +135,7 @@ BOOST_AUTO_TEST_CASE( test_client_environment_host_file_defaults )
 
 BOOST_AUTO_TEST_CASE( test_client_environment_empty_host_file )
 {
-   std::cout << "Client:: ...test_client_environment_empty_host_file\n";
+   std::cout << "Client:: ...test_client_environment_empty_host_file" << endl;
 
    std::string empty_host_file = File::test_data("Client/test/data/empty_hostfile","Client");
 
