@@ -43,7 +43,7 @@ BOOST_AUTO_TEST_SUITE( ClientTestSuite )
 // **************************************************************************************
 BOOST_AUTO_TEST_CASE( test_client_interface )
 {
-   std::cout << "Client:: ...test_client_interface\n";
+   std::cout << "Client:: ...test_client_interface" << endl;
 
    ClientInvoker theClient ;
    theClient.testInterface(); // stops submission to server
@@ -368,7 +368,7 @@ BOOST_AUTO_TEST_CASE( test_client_interface )
 
 BOOST_AUTO_TEST_CASE( test_client_interface_for_fail )
 {
-   std::cout << "Client:: ...test_client_interface_for_fail\n";
+   std::cout << "Client:: ...test_client_interface_for_fail" << endl;
 
    ClientInvoker theClient ;
    theClient.testInterface(); // stops submission to server
@@ -491,7 +491,7 @@ BOOST_AUTO_TEST_CASE( test_client_interface_for_fail )
 
 BOOST_AUTO_TEST_CASE( test_client_task_interface )
 {
-   std::cout << "Client:: ...test_client_task_interface\n";
+   std::cout << "Client:: ...test_client_task_interface" << endl;
 
    ClientInvoker theClient ;
    theClient.testInterface(); // stops submission to server

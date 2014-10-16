@@ -16,6 +16,7 @@
 #include <iostream>
 #include <boost/test/unit_test.hpp>
 #include "Version.hpp"
+#include "boost_archive.hpp"
 #include "File.hpp"
 #include "Str.hpp"
 
@@ -31,6 +32,12 @@ BOOST_AUTO_TEST_CASE( test_version )
    BOOST_CHECK_MESSAGE(!desc.empty(),"Expected version");
    cout << "ACore:: ...test_version:" << desc  << endl;
 }
+
+BOOST_AUTO_TEST_CASE( boost_serialisation_version )
+{
+   cout << "ACore:: ...boost_serialisation_version:  " << ecf::boost_archive::version()  << endl;
+}
+
 
 BOOST_AUTO_TEST_CASE( test_version_against_VERSION_cmake )
 {

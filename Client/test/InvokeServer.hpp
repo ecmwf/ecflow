@@ -39,7 +39,7 @@ public:
 	                 remove_checkpt_file_after_server_exit_(remove_checkpt_file_after_server_exit)
    {
 		if (host_.empty()) {
-			if(!msg.empty()) std::cout << msg << "   port(" << port_ << ")\n";
+			if(!msg.empty()) std::cout << msg << "   port(" << port_ << ")" << std::endl;
 
 			host_ = ecf::Str::LOCALHOST();
 
@@ -55,7 +55,7 @@ public:
          test_name += ecf::Str::COLON();
          test_name += port_;
 
-			std::cout <<test_name << "\n";
+			std::cout << test_name << std::endl;
 
 			ClientInvoker theClient(host_,port_);
 		   theClient.logMsg( test_name );

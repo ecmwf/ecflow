@@ -14,18 +14,19 @@ else
    Client/bin/%COMPILER_VERSION%/release/ecflow_client --version
    
    # Allow test to be rerun, by killing the OLD server, This can fail
-   /usr/local/apps/ecflow/4.0.3/bin/ecflow_client --terminate yes || true
+   /usr/local/apps/ecflow/4.0.4/bin/ecflow_client --terminate yes || true
    
    # Clear up
    rm -rf `hostname`.*
    
    # START the server with OLD version
-   /usr/local/apps/ecflow/4.0.3/bin/ecflow_server --ecfinterval=3 &
+   /usr/local/apps/ecflow/4.0.4/bin/ecflow_server --ecfinterval=3 &
    sleep 10
 
    # ecflow 4.0.3 , was built with boost 1.53 which had serialisation library version 10
+   # Note: boost 1.56 has serialisation library version 11, but lib has not changed ?
    #export ECF_ALLOW_NEW_CLIENT_OLD_SERVER=10
-
+ 
    # RUN test with new client and OLD server
    export ECF_NODE=localhost
    Client/bin/%COMPILER_VERSION%/release/s_client
@@ -34,7 +35,7 @@ else
    Test/bin/%COMPILER_VERSION%/release/s_test
    
    # Allow test to be rerun. by killing the OLD server, This can fail
-   /usr/local/apps/ecflow/4.0.3/bin/ecflow_client --terminate yes || true
+   /usr/local/apps/ecflow/4.0.4/bin/ecflow_client --terminate yes || true
    
    # Clear up
    rm -rf `hostname`.*

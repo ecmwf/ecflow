@@ -41,7 +41,7 @@ BOOST_AUTO_TEST_SUITE( ClientTestSuite)
 
 BOOST_AUTO_TEST_CASE( test_plug_cmd )
 {
-	cout << "Client:: ...test_plug_cmd \n";
+	cout << "Client:: ...test_plug_cmd" << endl;
 
    std::string path = File::test_data("Client/test/data/lifecycle.txt","Client");
 
@@ -120,7 +120,7 @@ BOOST_AUTO_TEST_CASE( test_plug_cmd )
 
 BOOST_AUTO_TEST_CASE( test_plug_cmd_with_handles )
 {
-   cout << "Client:: ...test_plug_cmd_with_handles\n";
+   cout << "Client:: ...test_plug_cmd_with_handles" << endl;
 
    std::string path = File::test_data("Client/test/data/lifecycle.txt","Client");
 

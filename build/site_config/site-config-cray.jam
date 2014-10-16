@@ -30,6 +30,7 @@ GCC_TAG = gcc46 ;
 VERSION_TAG = 1_53 ;
 switch $(BOOST_ROOT) {
    case *boost_1_55_0 : VERSION_TAG = 1_55 ;
+   case *boost_1_56_0 : VERSION_TAG = 1_56 ;
 }
 
 switch $(MACHINE_NAME) {
