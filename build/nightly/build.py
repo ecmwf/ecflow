@@ -401,6 +401,7 @@ def build_localhost( parent ) :
     localhost.add_task("test_new_client_old_server_401").add_trigger("test_new_client_old_server_400 == complete or test_new_client_old_server_400 == aborted")
     localhost.add_task("test_new_client_old_server_402").add_trigger("test_new_client_old_server_401 == complete or test_new_client_old_server_401 == aborted")
     localhost.add_task("test_new_client_old_server_403").add_trigger("test_new_client_old_server_402 == complete or test_new_client_old_server_402 == aborted")
+    localhost.add_task("test_new_client_old_server_404").add_trigger("test_new_client_old_server_403 == complete or test_new_client_old_server_403 == aborted")
  
 def build_localhost_cmake( parent ) :
     # Hence left out test_client_performance and test_server_performance
@@ -694,11 +695,12 @@ with defs.add_suite("experiment") as experiment:
 
 print "build boost"
 with defs.add_suite("boost_suite") as boost_suite:
-    boost_suite.add_variable("BOOST_VERSION","boost_1_53_0")
+    boost_suite.add_variable("BOOST_VERSION","boost_1_56_0")
     boost_suite.add_variable("REMOTE_COPY","rcp")
     boost_suite.add_variable("ECF_FILES",os.getenv("SCRATCH") + "/nightly/boost_suite")
     add_suite_variables(boost_suite)
     build_boost(boost_suite)
+
 
 print "incremental and full builds on all platforms"
 with defs.add_suite("suite") as suite:
