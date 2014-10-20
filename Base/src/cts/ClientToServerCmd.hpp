@@ -134,7 +134,7 @@ protected:
 
    /// Some commands which cause a change in state, should force an immediate job submission.
    /// Providing the server is *NOT* shutdown
-   STC_Cmd_ptr doJobSubmission(AbstractServer* as) const;
+   static STC_Cmd_ptr doJobSubmission(AbstractServer* as);
 
    static void dumpVecArgs(const char* argOption, const std::vector<std::string>& args);
 
@@ -850,9 +850,6 @@ public:
             AbstractClientEnv* clientEnv ) const;
 private:
    virtual STC_Cmd_ptr doHandleRequest(AbstractServer*) const;
-
-   /// Can throw std::runtime_error
-   void check_for_active_or_submitted_tasks(AbstractServer* as, node_ptr) const;
 
 private:
    Api api_;
@@ -1735,7 +1732,7 @@ public:
    virtual bool equals(ClientToServerCmd*) const;
 
    void addChild(Cmd_ptr childCmd);
-   const std::vector<Cmd_ptr>& cmdVec() { return cmdVec_;}
+   const std::vector<Cmd_ptr>& cmdVec() const { return cmdVec_;}
 
    virtual const char* theArg() const { return arg();}
    virtual void addOption(boost::program_options::options_description& desc) const;

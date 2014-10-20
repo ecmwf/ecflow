@@ -40,6 +40,10 @@ ostream& operator<<(ostream& os, const vector<T>& v) {
     return os;
 }
 
+
+
+// ===============================================================================
+
 Parser::Parser( DefsStructureParser* p )
 : parent_(NULL),
   rootParser_( p )
@@ -129,12 +133,22 @@ void Parser::addParser(Parser* p)
 void Parser::popNode() const { nodeStack().pop();}
 
 
-void Parser::popToContainerNode()
+void Parser::popToContainerNode() const
 {
 	while ( !nodeStack().empty() &&  !nodeStack_top()->isNodeContainer() ) {
  	     nodeStack().pop(); // keep poping till we get to family or suite
  	}
 }
+
+void Parser::dump(const std::vector<std::string>& lineTokens)
+{
+   cout << "tokens:";
+   for(unsigned i=0; i < lineTokens.size(); i++) {
+      cout << " '" << lineTokens[i] << "' ";
+   }
+   cout << "\n";
+}
+
 
 #ifdef SHOW_PARSER_STATS
 void Parser::printStats()
@@ -153,11 +167,3 @@ void Parser::printStats()
 }
 #endif
 
-void Parser::dump(const std::vector<std::string>& lineTokens) const
-{
-	cout << "tokens:";
-	for(unsigned i=0; i < lineTokens.size(); i++) {
-		cout << " '" << lineTokens[i] << "' ";
-	}
-	cout << "\n";
-}

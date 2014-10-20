@@ -27,7 +27,6 @@ protected:
 	                   bool& andExr,
 	                   bool& orExpr,
 	                   bool& isFree) const;
-	bool hasExtension(const std::string& line,const std::vector<std::string>& lineTokens) const;
 };
 
 class TriggerParser : public TriggerCompleteParser {

@@ -24,6 +24,29 @@
 using namespace ecf;
 using namespace std;
 
+static void extractTheGain(const std::string& theGainToken, ClockAttr& clockAttr)
+{
+   if ( theGainToken.find(Str::COLON()) != std::string::npos ) {
+      // clock real +01:00
+      // clock real  01:36
+      int hour,min ;
+      bool positiveGain = TimeSeries::getTime(theGainToken,hour,min);
+      clockAttr.set_gain(hour,min,positiveGain);
+      return;
+   }
+
+   long theGain = 0;
+   std::string theGainStr = theGainToken;
+   bool positiveGain = false;
+   if ( theGainStr[0] == '+') {
+      positiveGain = true;
+      theGainStr.erase(theGainStr.begin());
+   }
+   theGain =  Extract::theInt(theGainStr,"Invalid clock gain:" + theGainToken);
+   clockAttr.set_gain_in_seconds(theGain,positiveGain);
+}
+
+
 bool ClockParser::doParse( const std::string& line,
                            std::vector<std::string >& lineTokens )
 {
@@ -118,24 +141,3 @@ bool ClockParser::doParse( const std::string& line,
 	return true;
 }
 
-void ClockParser::extractTheGain(const std::string& theGainToken, ClockAttr& clockAttr)
-{
- 	if ( theGainToken.find(Str::COLON()) != std::string::npos ) {
-		// clock real +01:00
-		// clock real  01:36
- 		int hour,min ;
-		bool positiveGain = TimeSeries::getTime(theGainToken,hour,min);
-		clockAttr.set_gain(hour,min,positiveGain);
-		return;
-	}
-
-	long theGain = 0;
-	std::string theGainStr = theGainToken;
-	bool positiveGain = false;
-	if ( theGainStr[0] == '+') {
-		positiveGain = true;
-		theGainStr.erase(theGainStr.begin());
-	}
-	theGain =  Extract::theInt(theGainStr,"Invalid clock gain:" + theGainToken);
-	clockAttr.set_gain_in_seconds(theGain,positiveGain);
-}

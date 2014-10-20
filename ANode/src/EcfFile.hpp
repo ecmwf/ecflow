@@ -72,8 +72,9 @@ public:
 
 private:
 	enum Type { SCRIPT, INCLUDE, MANUAL, COMMENT };
+	static std::string fileType(Type);
+
 	bool open_script_file(const std::string& file, Type, std::vector<std::string>& lines, std::string& errormsg) const;
-	const std::string fileType(Type) const;
 	bool preProcess(std::vector<std::string>& script_lines, std::string& errormsg);
 	bool replaceSmsChildCmdsWithEcf(const std::string& clientPath, std::string& errormsg);
 	std::string getIncludedFilePath( const std::string& include, const std::string& line, std::string& errormsg);
@@ -85,7 +86,7 @@ private:
  	void remove_nopp_end_tokens();
 
  	static int countEcfMicro(const std::string& line, const std::string& ecfMicro);
- 	void dump_expanded_script_file(size_t i, const std::vector<std::string>& lines) const; // for DEBUG
+ 	static void dump_expanded_script_file(size_t i, const std::vector<std::string>& lines); // for DEBUG
 
  	/// returns the extension, i.e for task->.ecf for alias->.usr, will throw if node_ is not task or alias
  	const std::string& get_extn() const;

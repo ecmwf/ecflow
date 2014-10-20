@@ -98,7 +98,7 @@ void ClientToServerCmd::do_log() const
    log(Log::MSG,ss.str());    // will automatically add end of line
 }
 
-STC_Cmd_ptr ClientToServerCmd::doJobSubmission(AbstractServer* as) const
+STC_Cmd_ptr ClientToServerCmd::doJobSubmission(AbstractServer* as)
 {
    // This function could be called at the end of any command that can change state.
    //

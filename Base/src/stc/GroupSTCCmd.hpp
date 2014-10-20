@@ -25,8 +25,8 @@ public:
   	virtual bool equals(ServerToClientCmd*) const;
   	virtual bool handle_server_response( ServerReply& server_reply, Cmd_ptr cts_cmd, bool debug ) const;
 
-   	void addChild(STC_Cmd_ptr childCmd);
- 	const std::vector<STC_Cmd_ptr>& cmdVec() { return cmdVec_;}
+   void addChild(STC_Cmd_ptr childCmd);
+ 	const std::vector<STC_Cmd_ptr>& cmdVec() const { return cmdVec_;}
 
 private:
  	std::vector<STC_Cmd_ptr> cmdVec_;
@@ -36,7 +36,7 @@ private:
 	void serialize( Archive & ar, const unsigned int /*version*/ ) {
  		ar & boost::serialization::base_object< ServerToClientCmd >( *this );
  		ar & cmdVec_;
-   	}
+   }
 };
 
 std::ostream& operator<<(std::ostream& os, const GroupSTCCmd&);

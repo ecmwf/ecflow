@@ -173,21 +173,23 @@ BOOST_AUTO_TEST_CASE( test_server_config_file )
    BOOST_FOREACH(const std::string& expected_var, expected_variables) {
 
       bool found_var = false;
-      typedef std::pair<std::string, std::string> mpair;
-      BOOST_FOREACH(const mpair& p, server_vars ) {
+      typedef std::pair<std::string, std::string> s_pair;
+      BOOST_FOREACH(const s_pair& p, server_vars ) {
          if (expected_var == p.first) { found_var = true; break; }
       }
       BOOST_CHECK_MESSAGE(found_var,"Failed to find server var " << expected_var);
    }
 
-   // check other way, so that this test gets updated
-   typedef std::pair<std::string, std::string> mpair;
-   BOOST_FOREACH(const mpair& p, server_vars ) {
-      bool found_var = false;
-      BOOST_FOREACH(const std::string& expected_var, expected_variables) {
-         if (expected_var == p.first) { found_var = true; break; }
+   {
+      // check other way, so that this test gets updated
+      typedef std::pair<std::string, std::string> mpair;
+      BOOST_FOREACH(const mpair& p, server_vars ) {
+         bool found_var = false;
+         BOOST_FOREACH(const std::string& expected_var, expected_variables) {
+            if (expected_var == p.first) { found_var = true; break; }
+         }
+         BOOST_CHECK_MESSAGE(found_var,"Failed to update test for server var " << p.first);
       }
-      BOOST_CHECK_MESSAGE(found_var,"Failed to update test for server var " << p.first);
    }
 
    // Check the values in the server config file, are the *SAME* as the defaults, when config is *NOT* present

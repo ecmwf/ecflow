@@ -57,8 +57,8 @@ protected:
 	void dumpStackTop(const std::string& msg, const std::string& msg2 = "") const;
 	void addParser(Parser* p);
 	void popNode() const;
-	void popToContainerNode();
-	void dump(const std::vector<std::string>& lineTokens) const;
+	void popToContainerNode() const;
+	static void dump(const std::vector<std::string>& lineTokens);
 	void reserve_vec(int res) { expectedParsers_.reserve(res); }
 
 private:

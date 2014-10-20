@@ -578,7 +578,7 @@ bool EcfFile::open_script_file(
    return true;
 }
 
-const std::string EcfFile::fileType(EcfFile::Type t) const
+std::string EcfFile::fileType(EcfFile::Type t)
 {
    switch (t) {
       case EcfFile::SCRIPT:  return "script";  break;
@@ -1308,7 +1308,7 @@ int EcfFile::countEcfMicro(const std::string& line, const std::string& ecfMicro)
    return count;
 }
 
-void EcfFile::dump_expanded_script_file(size_t i, const std::vector<std::string>& lines) const
+void EcfFile::dump_expanded_script_file(size_t i, const std::vector<std::string>& lines)
 {
 #ifdef DEBUG_PRE_PROCESS
    if (i != 0) std::cout << "\nSee file tmp.ecf around line number " << i-1 << "\n";
