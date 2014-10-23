@@ -78,6 +78,7 @@ private:
 
    void handle_terminate();
    void start_accept();
+   bool shutdown_socket(connection_ptr conn, const std::string& msg) const;
 
 private:
 
