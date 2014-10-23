@@ -33,9 +33,10 @@ BOOST_AUTO_TEST_CASE( test_version )
    cout << "ACore:: ...test_version:" << desc  << endl;
 }
 
-BOOST_AUTO_TEST_CASE( boost_serialisation_version )
+BOOST_AUTO_TEST_CASE( boost_serialisation_archive_version )
 {
-   cout << "ACore:: ...boost_serialisation_version:  " << ecf::boost_archive::version()  << endl;
+   cout << "ACore:: ...boost_serialisation_archive_version:  " << ecf::boost_archive::version()  << endl;
+   BOOST_REQUIRE_MESSAGE(ecf::boost_archive::version() != 0,"keep boost from complaining");
 }
 
 
