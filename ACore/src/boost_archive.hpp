@@ -57,7 +57,16 @@ namespace ecf {
 /// Hence if new client archive version is newer we need to set to archive version used by server.
 /// *providing* there are compatible.
 ///
-/// To enable this, user can export variable:
+/// To enable this, user can export variable ECF_ALLOW_NEW_CLIENT_OLD_SERVER:
+///
+/// We expect following syntax:
+///    option 1/ export ECF_ALLOW_NEW_CLIENT_OLD_SERVER=<int>
+///              This for use ecflow_client command line
+///
+///    option 2/ export ECF_ALLOW_NEW_CLIENT_OLD_SERVER=<host>:<port>:<int>,<host>:<port>:<int>,<host>:<port>:<int>
+///              This for use with ui/viewer where we can have multiple clients, each could
+///              connect to different server version and hence archive.
+///
 /// export ECF_ALLOW_NEW_CLIENT_OLD_SERVER=10, the number used, must be the archive version
 /// that the boost server was built with.
 ///
