@@ -1200,38 +1200,21 @@ bool check_version( const char* v1, const char* v2 )
 
 void get_server_version( ClientInvoker& client, std::string& server_version )
 {
-   int archive_version_of_old_server = client.allow_new_client_old_server();
-   try {
-      // ECF_ALLOW_NEW_CLIENT_OLD_SERVER is really for ecflow_client command line
-      // It will have been read in as a part of the ClientInvoker constructor.
-      // So lets assume the client/server are compatible *first*
-      client.allow_new_client_old_server(0); // assume client <-> server are compatible
+   // ECF_ALLOW_NEW_CLIENT_OLD_SERVER allows each client ('client.allow_new_client_old_server')
+   // to have its own archive version, hence FIRST:  go with what ever was set
+   // See notes: ACore/src/boost_archive.hpp
 
-      client.server_version();
-      server_version = client.server_reply().get_string();
+   for(int av = ecf::boost_archive::version()-1; av >= ecf::boost_archive::version_1_47(); --av) {
 
-      if (server_version.empty()) {
-         // Could not get server version, maybe client/server boost archive version are incompatible
-         if (archive_version_of_old_server == 0) {
-            // assume new client --> old server (old server assumed to be built with boost 1.47)
-            // environment ECF_ALLOW_NEW_CLIENT_OLD_SERVER was not specified, hence assume boost 1.47 archive used in old server
-            archive_version_of_old_server = ecf::boost_archive::version_1_47();
-         }
-         client.allow_new_client_old_server(archive_version_of_old_server);
-
-         // try again
+      // First time in loop, go with what ever was set, including if client.allow_new_client_old_server() !=0
+      try {
          client.server_version();
          server_version = client.server_reply().get_string();
+         if (!server_version.empty()) return;
       }
-   }
-   catch ( ... ) {
-      // assume new client old server. See notes above
-      if (archive_version_of_old_server == 0) archive_version_of_old_server = ecf::boost_archive::version_1_47();
-      client.allow_new_client_old_server(archive_version_of_old_server);
+      catch ( ... ) {}
 
-      // try again
-      client.server_version();
-      server_version = client.server_reply().get_string();
+      client.allow_new_client_old_server(av);
    }
 }
 
