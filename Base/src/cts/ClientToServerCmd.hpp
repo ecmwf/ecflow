@@ -180,7 +180,7 @@ protected:
 public:
 
    virtual bool isWrite() const { return true; }
-   virtual int timeout() const { return 80; }
+   virtual int timeout() const { return 120; }  // ECFLOW-157 80 -> 120
 
    const std::string& path_to_node() const { return path_to_submittable_;}
    const std::string& jobs_password() const { return jobs_password_;}

@@ -150,43 +150,6 @@ BOOST_AUTO_TEST_CASE( test_client_environment_empty_host_file )
    fs::remove(empty_host_file);
 }
 
-BOOST_AUTO_TEST_CASE( test_client_environment )
-{
-   std::cout << "Client:: ...test_client_environment-ECF_ALLOW_NEW_CLIENT_OLD_SERVER" << endl;
-   {
-      char* put = const_cast<char*>("ECF_ALLOW_NEW_CLIENT_OLD_SERVER=10");
-      BOOST_CHECK_MESSAGE(putenv(put) == 0,"putenv failed for " << put);
-      ClientEnvironment client_env;
-      BOOST_CHECK_MESSAGE(client_env.allow_new_client_old_server()==10,"expcted 10 but found " << client_env.allow_new_client_old_server());
-   }
-   {
-      std::string env = "ECF_ALLOW_NEW_CLIENT_OLD_SERVER=";
-      env += Str::LOCALHOST(); env += ":"; env += Str::DEFAULT_PORT_NUMBER(); env += ":11";
-      BOOST_CHECK_MESSAGE(putenv(const_cast<char*>(env.c_str())) == 0,"putenv failed for " << env);
-      ClientEnvironment client_env;
-      BOOST_CHECK_MESSAGE(client_env.allow_new_client_old_server()==11,"Expected 11 but found " << client_env.allow_new_client_old_server() << " for env " << env);
-   }
-
-   {
-      std::stringstream ss;
-      ss << "ECF_ALLOW_NEW_CLIENT_OLD_SERVER=fred:2222:0,bill:333:2222," << Str::LOCALHOST() << ":" << Str::DEFAULT_PORT_NUMBER() << ":" << 33;
-      std::string env = ss.str();
-      BOOST_CHECK_MESSAGE(putenv(const_cast<char*>(env.c_str())) == 0,"putenv failed for " << env);
-      ClientEnvironment client_env;
-      BOOST_CHECK_MESSAGE(client_env.allow_new_client_old_server()==33,"Expected 33 but found " << client_env.allow_new_client_old_server() << " for env " << env);
-   }
-
-   {
-      // Create a valid ECF_ALLOW_NEW_CLIENT_OLD_SERVER list where there is no match with our host/port.
-      // hence allow_new_client_old_server should remain zero
-      std::stringstream ss;
-      ss << "ECF_ALLOW_NEW_CLIENT_OLD_SERVER=fred:2222:0,bill:333:2222,bill:333:2222,bill:333:2222,bill:333:2222,bill:333:2222";
-      std::string env = ss.str();
-      BOOST_CHECK_MESSAGE(putenv(const_cast<char*>(env.c_str())) == 0,"putenv failed for " << env);
-      ClientEnvironment client_env;
-      BOOST_CHECK_MESSAGE(client_env.allow_new_client_old_server()==0,"Should remain unchanged but found " << client_env.allow_new_client_old_server());
-   }
-}
 
 BOOST_AUTO_TEST_CASE( test_client_environment_errors )
 {
@@ -222,6 +185,45 @@ BOOST_AUTO_TEST_CASE( test_client_environment_errors )
       BOOST_CHECK_MESSAGE(putenv(const_cast<char*>(env.c_str())) == 0,"putenv failed for " << env);
       BOOST_CHECK_THROW(ClientEnvironment client_env, std::runtime_error );
    }
+}
+
+BOOST_AUTO_TEST_CASE( test_client_environment )
+{
+   std::cout << "Client:: ...test_client_environment-ECF_ALLOW_NEW_CLIENT_OLD_SERVER" << endl;
+   {
+      std::string env = "ECF_ALLOW_NEW_CLIENT_OLD_SERVER=";
+      env += Str::LOCALHOST(); env += ":"; env += Str::DEFAULT_PORT_NUMBER(); env += ":11";
+      BOOST_CHECK_MESSAGE(putenv(const_cast<char*>(env.c_str())) == 0,"putenv failed for " << env);
+      ClientEnvironment client_env;
+      BOOST_CHECK_MESSAGE(client_env.allow_new_client_old_server()==11,"Expected 11 but found " << client_env.allow_new_client_old_server() << " for env " << env);
+   }
+   {
+      std::stringstream ss;
+      ss << "ECF_ALLOW_NEW_CLIENT_OLD_SERVER=fred:2222:0,bill:333:2222," << Str::LOCALHOST() << ":" << Str::DEFAULT_PORT_NUMBER() << ":" << 33;
+      std::string env = ss.str();
+      BOOST_CHECK_MESSAGE(putenv(const_cast<char*>(env.c_str())) == 0,"putenv failed for " << env);
+      ClientEnvironment client_env;
+      BOOST_CHECK_MESSAGE(client_env.allow_new_client_old_server()==33,"Expected 33 but found " << client_env.allow_new_client_old_server() << " for env " << env);
+   }
+   {
+      // Create a valid ECF_ALLOW_NEW_CLIENT_OLD_SERVER list where there is no match with our host/port.
+      // hence allow_new_client_old_server should remain zero
+      std::stringstream ss;
+      ss << "ECF_ALLOW_NEW_CLIENT_OLD_SERVER=fred:2222:0,bill:333:2222,bill:333:2222,bill:333:2222,bill:333:2222,bill:333:2222";
+      std::string env = ss.str();
+      BOOST_CHECK_MESSAGE(putenv(const_cast<char*>(env.c_str())) == 0,"putenv failed for " << env);
+      ClientEnvironment client_env;
+      BOOST_CHECK_MESSAGE(client_env.allow_new_client_old_server()==0,"Should remain unchanged but found " << client_env.allow_new_client_old_server());
+   }
+   {
+      char* put = const_cast<char*>("ECF_ALLOW_NEW_CLIENT_OLD_SERVER=10");
+      BOOST_CHECK_MESSAGE(putenv(put) == 0,"putenv failed for " << put);
+      ClientEnvironment client_env;
+      BOOST_CHECK_MESSAGE(client_env.allow_new_client_old_server()==10,"expcted 10 but found " << client_env.allow_new_client_old_server());
+   }
+
+   // Unset, otherwise it wull effect other tests
+   BOOST_CHECK_MESSAGE(unsetenv("ECF_ALLOW_NEW_CLIENT_OLD_SERVER") == 0,"unsetenv failed for ECF_ALLOW_NEW_CLIENT_OLD_SERVER");
 }
 
 
