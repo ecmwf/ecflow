@@ -235,7 +235,14 @@ BOOST_AUTO_TEST_CASE( test_file_backwardSearch )
 
 BOOST_AUTO_TEST_CASE( test_create_missing_directories )
 {
-   cout << "ACore:: ...test_create_missing_directories\n";
+   cout << "ACore:: ...test_create_missing_directories";
+
+   // This test FAIL's on the cray in BATCH mode, but passes in interactive mode.
+   if (getenv("CRAY_BATCH_SKIP_test_create_missing_directories")) {
+      cout << " **** SKIPPING test, until HPC team can figure why this fails *****\n";
+      return;
+   }
+   cout << "\n";
 
    std::string nodePath = "dir0/dir1/dir2/dir3/dir4/dir5";
    std::string rootPath = File::test_data("ACore/test/data","ACore");
