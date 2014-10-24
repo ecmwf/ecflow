@@ -51,6 +51,9 @@ BOOST_AUTO_TEST_CASE( test_client_invoker )
       invoker.set_host_port("bill4","6666");
       BOOST_CHECK_MESSAGE(invoker.allow_new_client_old_server()==1313,"Expected 1313 but found " << invoker.allow_new_client_old_server() << " for env " << env);
    }
+
+   // Unset, otherwise it will effect other tests
+   BOOST_CHECK_MESSAGE(unsetenv("ECF_ALLOW_NEW_CLIENT_OLD_SERVER") == 0,"unsetenv failed for ECF_ALLOW_NEW_CLIENT_OLD_SERVER");
 }
 
 BOOST_AUTO_TEST_SUITE_END()
