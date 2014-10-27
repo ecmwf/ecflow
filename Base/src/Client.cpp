@@ -266,32 +266,29 @@ void Client::handle_read( const boost::system::error_code& e )
 		// Successfully handled request
 	}
 	else {
-#ifdef DONT_REPLY_IF_OK
-      // This code will successfully handle  a no reply from the server & hence reduce network traffic
 	   //
 		// A connection error occurred.
 		// In cases where ( to cut down network traffic), the server does a shutdown/closes
 	   // the socket without replying we will get End of File error.
 	   //
 		// i.e. client requests a response from the server, and it does not reply(or replies with shutdown/close)
-		if (e.value() != boost::asio::error::eof) {
- 			std::stringstream ss;
- 			ss << "Client::handle_read: connection error( " << e.message() << " ) for request( " << outbound_request_ << " ) on " << host_ << ":" << port_;
- 			throw std::runtime_error(ss.str());
-		}
-		else {
+	   //
+#ifdef DONT_REPLY_IF_OK
+      // This code will successfully handle  a no reply from the server & hence reduce network traffic
+	   // Server has shutdown and closed the socket
+		if (e.value() == boost::asio::error::eof) {
+			// Treat a  *no* reply as OK, so that handle_server_response() returns OK
 #ifdef DEBUG_CLIENT
 			std::cout << "   Client::handle_read: No reply from server: Treat as OK" << std::endl;
 #endif
-			// Treat a  *no* reply as OK, so that handle_server_response() returns OK
 			inbound_response_.set_cmd( STC_Cmd_ptr(new StcCmd(StcCmd::OK)) );
 			return;
-		}
-#else
+ 		}
+#endif
+
 		std::stringstream ss;
 		ss << "Client::handle_read: connection error( " << e.message() << " ) for request( " << outbound_request_ << " ) on " << host_ << ":" << port_;
 		throw std::runtime_error(ss.str());
-#endif
 	}
 
 	// Since we are not starting a new operation the io_service will run out of
