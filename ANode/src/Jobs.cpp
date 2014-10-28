@@ -83,21 +83,21 @@ bool Jobs::generate( JobsParam& jobsParam) const
     }
 
 	// Process children that have terminated
-	System::instance()->processTerminatedChildren();
+   System::instance()->processTerminatedChildren();
 
 #ifdef DEBUG_JOB_SUBMISSION
-    LOG(Log::DBG,"-->Job submission finish interval = "
-                 << jobsParam.submitJobsInterval()
-                 <<  " time taken = " << durationTimer.duration()
-                 << " Tasks/Aliases submitted " << jobsParam.submitted().size()
-                 << " " << jobsParam.getErrorMsg()
-       );
+   LOG(Log::DBG,"-->Job submission finish interval = "
+       << jobsParam.submitJobsInterval()
+       <<  " time taken = " << durationTimer.duration()
+       << " Tasks/Aliases submitted " << jobsParam.submitted().size()
+       << " " << jobsParam.getErrorMsg()
+   );
 #endif
-    if (durationTimer.duration() > jobsParam.submitJobsInterval()) {
-       LogToCout toCoutAsWell;
-       LOG(Log::ERR,"Jobs::generate: job generation time(" << durationTimer.duration() << " seconds) is is greater than job submission interval of " << jobsParam.submitJobsInterval() << " seconds!!");
-    }
- 	return jobsParam.getErrorMsg().empty();
+   if (durationTimer.duration() > jobsParam.submitJobsInterval()) {
+      LogToCout toCoutAsWell;
+      LOG(Log::ERR,"Jobs::generate: job generation time(" << durationTimer.duration() << " seconds) is greater than job submission interval of " << jobsParam.submitJobsInterval() << " seconds!!");
+   }
+   return jobsParam.getErrorMsg().empty();
 }
 
 bool Jobs::generate() const
