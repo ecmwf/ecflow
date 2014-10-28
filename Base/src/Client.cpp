@@ -22,7 +22,6 @@
 #include "Client.hpp"
 #include "StcCmd.hpp"
 
-#define DONT_REPLY_IF_OK 1
 //#define DEBUG_CLIENT 1;
 
 #ifdef DEBUG_CLIENT
@@ -273,9 +272,10 @@ void Client::handle_read( const boost::system::error_code& e )
 	   //
 		// i.e. client requests a response from the server, and it does not reply(or replies with shutdown/close)
 	   //
-#ifdef DONT_REPLY_IF_OK
-      // This code will successfully handle  a no reply from the server & hence reduce network traffic
-	   // Server has shutdown and closed the socket
+
+	   // This code will handle  a no reply from the server & hence reduce network traffic
+	   // Server has shutdown and closed the socket.
+	   // See void Server::handle_read(...)
 		if (e.value() == boost::asio::error::eof) {
 			// Treat a  *no* reply as OK, so that handle_server_response() returns OK
 #ifdef DEBUG_CLIENT
@@ -284,7 +284,6 @@ void Client::handle_read( const boost::system::error_code& e )
 			inbound_response_.set_cmd( STC_Cmd_ptr(new StcCmd(StcCmd::OK)) );
 			return;
  		}
-#endif
 
 		std::stringstream ss;
 		ss << "Client::handle_read: connection error( " << e.message() << " ) for request( " << outbound_request_ << " ) on " << host_ << ":" << port_;

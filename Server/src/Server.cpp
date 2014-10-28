@@ -42,10 +42,6 @@ namespace fs = boost::filesystem;
 using namespace std;
 using namespace ecf;
 
-/// Allow the server to *not* reply back to the client, if request was OK
-/// This improves performance.
-/// However client CANT distinguish between servers, when we don't reply!!!!!
-#define DONT_REPLY_IF_OK 1
 
 /// Constructor opens the acceptor and starts waiting for the first incoming connection.
 Server::Server( ServerEnvironment& serverEnv ) :
@@ -254,7 +250,8 @@ void Server::handle_read(  const boost::system::error_code& e,connection_ptr con
       // To improve performance, when the reply, is OK, don't bother replying back to the client
       // The client will receive a EOF, and perceive this as OK.
       // Need to specifically *ignore* for terminate, otherwise server will not shutdown cleanly
-#ifdef DONT_REPLY_IF_OK
+      // See: void Client::handle_read() See: ECFLOW-157
+      //
       if (!serverEnv_.reply_back_if_ok()) {
 
          if (!inbound_request_.terminateRequest() && outbound_response_.get_cmd()->isOkCmd()) {
@@ -266,7 +263,6 @@ void Server::handle_read(  const boost::system::error_code& e,connection_ptr con
             return;
          }
       }
-#endif
 
       // *Reply* back to the client:
       conn->async_write( outbound_response_,
