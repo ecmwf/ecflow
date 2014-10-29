@@ -23,6 +23,7 @@
 #include "File.hpp"
 #include "Str.hpp"
 #include "Indentor.hpp"
+#include "TimeStamp.hpp"
 
 //#define DEBUG_BLOCKING_DISK_IO 1
 //#if DEBUG_BLOCKING_DISK_IO
@@ -360,13 +361,7 @@ void LogImpl::check_file_write(const std::string& message) const
 
 void LogImpl::create_time_stamp()
 {
-	char t_fmt[255];
-	time_t stamp = time( NULL );
-	struct tm *tod = localtime( &stamp );
-	sprintf( t_fmt, "[%02d:%02d:%02d %d.%d.%d] ", tod->tm_hour, tod->tm_min,
-				tod->tm_sec, tod->tm_mday, tod->tm_mon + 1, tod->tm_year + 1900 );
-
-	time_stamp_ = t_fmt;
+   TimeStamp::now(time_stamp_);
 }
 
 }
