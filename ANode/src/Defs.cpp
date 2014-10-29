@@ -103,7 +103,9 @@ void Defs::set_state(NState::State the_new_state)
 
 void Defs::set_most_significant_state()
 {
-   set_state( ecf::theComputedNodeState(suiteVec_, true /* immediate children only */ ) );
+   NState::State computedStateOfImmediateChildren = ecf::theComputedNodeState(suiteVec_, true /* immediate children only */ );
+   if (computedStateOfImmediateChildren != state_.state() )
+      set_state(  computedStateOfImmediateChildren );
 }
 
 /// Others ======================================================================
