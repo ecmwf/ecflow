@@ -15,6 +15,7 @@
 
 #include "JobsParam.hpp"
 #include "Str.hpp"
+#include "Log.hpp"
 
 using namespace ecf;
 
@@ -22,6 +23,11 @@ size_t JobsParam::start_profile()
 {
    profiles_.push_back(std::make_pair(std::string(), 0));
    return (profiles_.size() - 1);
+}
+
+size_t JobsParam::last_profile_index() const {
+   if (profiles_.empty()) return 0;
+   return profiles_.size()-1;
 }
 
 void JobsParam::add_to_profile( size_t index, const std::string& s )
@@ -45,4 +51,31 @@ const std::string& JobsParam::get_text_at_profile(size_t index) const
       return profiles_[index].first;
    }
    return Str::EMPTY();
+}
+
+// To debug the output enable this, and then run the Node test
+//#define DEBUG_ME 1
+
+void JobsParam::profile_to_log() const
+{
+   for(size_t i = 0; i < profiles_.size(); i++)  {
+#ifdef DEBUG_ME
+      if ( !profiles_[i].first.empty() )
+#else
+      if ( profiles_[i].second > 0 && !profiles_[i].first.empty() )
+#endif
+          log(Log::MSG, profiles_[i].first);
+   }
+}
+
+void JobsParam::profile_to_cout() const
+{
+   for(size_t i = 0; i < profiles_.size(); i++) {
+#ifdef DEBUG_ME
+      if ( !profiles_[i].first.empty() )
+#else
+      if ( profiles_[i].second > 0 && !profiles_[i].first.empty() )
+#endif
+         std::cout << profiles_[i].first << "\n";
+   }
 }

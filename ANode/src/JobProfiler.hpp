@@ -17,7 +17,7 @@
 //  This will be used to identify those suite/familiy/tasks that take the most
 //  amount of time, *when* we exceed the jobs generation interval.
 //  In particular if we have output that is many megabtyes, it can affect
-//  the performance of the server, esepecially when the server is running
+//  the performance of the server, especially when the server is running
 //  on virtual machines
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 #include <boost/noncopyable.hpp>
@@ -33,16 +33,11 @@ public:
    JobProfiler(Node*,JobsParam&);
    ~JobProfiler();
 
-   static void print_to_log(const JobsParam&);
-   static void print_to_cout(const JobsParam&);
-   static bool enabled() { return enabled_; }
-
 private:
    Node* node_;
    JobsParam& jobsParam_;
    size_t index_;
    boost::posix_time::ptime start_time_;
-   static bool enabled_;
    static int counter_;
 
 private:

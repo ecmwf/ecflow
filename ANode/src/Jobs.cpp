@@ -97,13 +97,13 @@ bool Jobs::generate( JobsParam& jobsParam) const
 #endif
 
 #ifdef DEBUG_JOB_PROFILING
-   JobProfiler::print_to_cout(jobsParam);
-   JobProfiler::print_to_log(jobsParam);
+   jobsParam.profile_to_cout();
+   jobsParam.profile_to_log();
 #endif
 
    if (durationTimer.duration() > jobsParam.submitJobsInterval()) {
       LOG(Log::ERR,"Jobs::generate: job generation time(" << durationTimer.duration() << " seconds) is greater than job submission interval of " << jobsParam.submitJobsInterval() << " seconds!!");
-      JobProfiler::print_to_log(jobsParam);
+      jobsParam.profile_to_log();
    }
    return jobsParam.getErrorMsg().empty();
 }

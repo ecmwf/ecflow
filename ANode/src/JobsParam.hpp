@@ -57,11 +57,13 @@ public:
 
 	// Functions to aid timing of job generation
    size_t start_profile();
-   int last_profile_index() const {  return profiles_.size()-1; } // return -1 if no profile
+   size_t last_profile_index() const;
    void add_to_profile(size_t index, const std::string& s);
    void set_to_profile(size_t index, const std::string& s,int time_taken);
    const std::string& get_text_at_profile(size_t index) const;
    const std::vector< std::pair<std::string,int> >& profiles() const { return profiles_; }
+   void profile_to_log() const;
+   void profile_to_cout() const;
 
 private:
 	bool createJobs_;
