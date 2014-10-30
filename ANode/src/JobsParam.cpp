@@ -13,6 +13,7 @@
 // Description :
 //============================================================================
 
+#include <iostream>
 #include "JobsParam.hpp"
 #include "Str.hpp"
 #include "Log.hpp"
