@@ -58,7 +58,8 @@ const std::string& JobsParam::get_text_at_profile(size_t index) const
 
 void JobsParam::profile_to_log() const
 {
-   for(size_t i = 0; i < profiles_.size(); i++)  {
+   size_t profiles_size = profiles_.size();
+   for(size_t i = 0; i < profiles_size; ++i)  {
 #ifdef DEBUG_ME
       if ( !profiles_[i].first.empty() )
 #else
@@ -70,7 +71,8 @@ void JobsParam::profile_to_log() const
 
 void JobsParam::profile_to_cout() const
 {
-   for(size_t i = 0; i < profiles_.size(); i++) {
+   size_t profiles_size = profiles_.size();
+   for(size_t i = 0; i < profiles_size; ++i) {
 #ifdef DEBUG_ME
       if ( !profiles_[i].first.empty() )
 #else

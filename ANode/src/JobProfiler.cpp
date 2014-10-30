@@ -24,7 +24,6 @@ using namespace std;
 
 // To debug the output enable this, and then run the Node test
 //#define DEBUG_ME 1
-//#define DEBUG_OUTPUT 1
 
 // Connection and client timeout issues can be replicated  by adding
 //   - sleep(1) in EcfFile , i.e when creating the job output
@@ -61,18 +60,13 @@ JobProfiler::JobProfiler(Node* node,JobsParam& jobsParam)
 JobProfiler::~JobProfiler()
 {
    boost::posix_time::time_duration duration = boost::posix_time::microsec_clock::universal_time() - start_time_;
-
-#ifdef DEBUG_OUTPUT
-   int time_taken = duration.total_milliseconds();
-#else
    int time_taken = duration.total_seconds();
-#endif
 
 #ifdef DEBUG_ME
    update(time_taken);
 #else
    if ( time_taken > 0)  update(time_taken);
-   else                 jobsParam_.set_to_profile(index_,Str::EMPTY(),0); // clear any additions, caused by task, ie. job size
+   else                 jobsParam_.set_to_profile(index_,Str::EMPTY(),0); // clear any additions, caused by task, i.e. job size
 #endif
 
    counter_ -= 1;
