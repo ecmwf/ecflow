@@ -27,6 +27,22 @@ using namespace std;
 //#define DEBUG_ME 1
 //#define DEBUG_OUTPUT 1
 
+// Connection and client timeout issues can be replicated  by adding
+//   - sleep(1) in EcfFile , i.e when creating the job output
+//
+// Interpreting the output:
+//   - Please note we are measuring the total time taken by node and *ALL* of its children
+//     hence just adding the times, will not always add up to the total, shown on the suite/family
+//   - Hence in the log file below, we can see the main contribution time comes from tasks.
+//
+//MSG:[15:08:18 30.10.2014] SUITE:/verify - 2s
+//MSG:[15:08:18 30.10.2014]  FAMILY:/verify/06 - 1s
+//MSG:[15:08:18 30.10.2014]   FAMILY:/verify/06/bc - 1s
+//MSG:[15:08:18 30.10.2014]    TASK:/verify/06/bc/bc_upperair - job size:2514 - 1s
+//MSG:[15:08:18 30.10.2014]  FAMILY:/verify/18 - 1s
+//MSG:[15:08:18 30.10.2014]   FAMILY:/verify/18/bc - 1s
+//MSG:[15:08:18 30.10.2014]    TASK:/verify/18/bc/bc_upperair - job size:2514 - 1s
+
 namespace ecf {
 
 // initialise globals
