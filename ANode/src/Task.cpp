@@ -41,6 +41,7 @@
 #include "TaskScriptGenerator.hpp"
 #include "ChangeMgrSingleton.hpp"
 #include "Extract.hpp"
+#include "JobProfiler.hpp"
 
 namespace fs = boost::filesystem;
 using namespace ecf;
@@ -400,6 +401,8 @@ void Task::get_all_aliases(std::vector<alias_ptr>& destinationVec) const
 
 bool Task::resolveDependencies(JobsParam& jobsParam)
 {
+   JobProfiler profile_me(this,jobsParam);
+
    // Calling Submittable::resolveDependencies(jobsParam) up front can be expensive.
    // Due to trigger and complete evaluations. Hence low cost state checks first
 

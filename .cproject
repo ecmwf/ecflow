@@ -45,6 +45,7 @@
 							</tool>
 						</toolChain>
 					</folderInfo>
+					<fileInfo id="cdt.managedbuild.config.gnu.exe.debug.1397459527.2059282616" name="liefcycle.def.glog" rcbsApplicability="disable" resourcePath="CSim/test/data/good_defs/misc/liefcycle.def.glog" toolsToInvoke=""/>
 					<sourceEntries>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 					</sourceEntries>

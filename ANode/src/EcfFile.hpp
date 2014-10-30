@@ -79,7 +79,7 @@ private:
 	bool replaceSmsChildCmdsWithEcf(const std::string& clientPath, std::string& errormsg);
 	std::string getIncludedFilePath( const std::string& include, const std::string& line, std::string& errormsg);
  	void variableSubstituition(JobsParam&);
- 	void doCreateJobFile() const;
+ 	void doCreateJobFile(JobsParam&) const;
  	bool doCreateManFile(std::string& errormsg);
  	bool extractManual(const std::vector< std::string >& lines, std::vector< std::string >& theManualLines, std::string& errormsg) const;
  	void removeCommentAndManual();

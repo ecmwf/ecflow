@@ -37,6 +37,7 @@
 #include "DefsDelta.hpp"
 #include "ChangeMgrSingleton.hpp"
 #include "Str.hpp"
+#include "JobProfiler.hpp"
 
 using namespace ecf;
 using namespace std;
@@ -327,6 +328,8 @@ bool NodeContainer::hasAutoCancel() const
 
 bool NodeContainer::resolveDependencies(JobsParam& jobsParam)
 {
+   JobProfiler profile_me(this,jobsParam);
+
 	// Don't evaluate children unless parent is free. BOMB out early for this case.
 	// Note:: Task::resolveDependencies() will check inLimit up front. *** THIS CHECKS UP THE HIERARCHY ***
 	// Note:: Node::resolveDependencies() may have forced family node to complete, should have have

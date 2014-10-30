@@ -15,12 +15,13 @@
 // Description :
 //============================================================================
 
+#include <boost/noncopyable.hpp>
 #include "NodeFwd.hpp"
 
 // Used as a utility class for controlling job creation.
 // Collates data during the node tree traversal
 // Note: For testing purposes we do not always want to create jobs or spawn jobs
-class JobsParam  {
+class JobsParam : private boost::noncopyable {
 public:
    // This constructor is used in test
 	JobsParam(bool createJobs = false)
@@ -54,6 +55,14 @@ public:
 	void set_user_edit_file(const std::vector<std::string>& file) { user_edit_file_ = file;}
 	const std::vector<std::string>& user_edit_file() const { return user_edit_file_; }
 
+	// Functions to aid timing of job generation
+   size_t start_profile();
+   int last_profile_index() const {  return profiles_.size()-1; } // return -1 if no profile
+   void add_to_profile(size_t index, const std::string& s);
+   void set_to_profile(size_t index, const std::string& s,int time_taken);
+   const std::string& get_text_at_profile(size_t index) const;
+   const std::vector< std::pair<std::string,int> >& profiles() const { return profiles_; }
+
 private:
 	bool createJobs_;
 	bool spawnJobs_;
@@ -62,6 +71,7 @@ private:
 	std::string debugMsg_;
 	std::vector<Submittable*> submitted_;
 	std::vector<std::string> user_edit_file_;
+   std::vector< std::pair<std::string,int> > profiles_;  // text,time
 	NameValueMap user_edit_variables_; /// Used for User edit
 };
 #endif

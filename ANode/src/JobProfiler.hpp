@@ -1,0 +1,55 @@
+#ifndef JOB_PROFILER_HPP_
+#define JOB_PROFILER_HPP_
+/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
+// Name        :
+// Author      : Avi
+// Revision    : $Revision: #7 $
+//
+// Copyright 2009-2012 ECMWF.
+// This software is licensed under the terms of the Apache Licence version 2.0
+// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+// In applying this licence, ECMWF does not waive the privileges and immunities
+// granted to it by virtue of its status as an intergovernmental organisation
+// nor does it submit to any jurisdiction.
+//
+// Description :
+//  This class is used to aid profiling of the job generation step.
+//  This will be used to identify those suite/familiy/tasks that take the most
+//  amount of time, *when* we exceed the jobs generation interval.
+//  In particular if we have output that is many megabtyes, it can affect
+//  the performance of the server, esepecially when the server is running
+//  on virtual machines
+/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
+#include <boost/noncopyable.hpp>
+#include <boost/date_time/posix_time/posix_time_types.hpp>
+
+#include "NodeFwd.hpp"
+class JobsParam;
+
+namespace ecf {
+
+class JobProfiler  : private boost::noncopyable  {
+public:
+   JobProfiler(Node*,JobsParam&);
+   ~JobProfiler();
+
+   static void print_to_log(const JobsParam&);
+   static void print_to_cout(const JobsParam&);
+   static bool enabled() { return enabled_; }
+
+private:
+   Node* node_;
+   JobsParam& jobsParam_;
+   size_t index_;
+   boost::posix_time::ptime start_time_;
+   static bool enabled_;
+   static int counter_;
+
+private:
+   void update(int time_taken);
+};
+
+}
+
+
+#endif

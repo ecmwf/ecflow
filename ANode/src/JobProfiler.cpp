@@ -1,0 +1,118 @@
+//============================================================================
+// Name        :
+// Author      : Avi
+// Revision    : $Revision: #18 $
+//
+// Copyright 2009-2012 ECMWF.
+// This software is licensed under the terms of the Apache Licence version 2.0
+// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+// In applying this licence, ECMWF does not waive the privileges and immunities
+// granted to it by virtue of its status as an intergovernmental organisation
+// nor does it submit to any jurisdiction.
+//
+// Description :
+//============================================================================
+
+#include <boost/lexical_cast.hpp>
+#include "JobProfiler.hpp"
+#include "JobsParam.hpp"
+#include "Node.hpp"
+#include "Log.hpp"
+#include "Str.hpp"
+
+using namespace ecf;
+using namespace std;
+
+// To debug the output enable this, and then run the Node test
+//#define DEBUG_ME 1
+//#define DEBUG_OUTPUT 1
+
+namespace ecf {
+
+// initialise globals
+int JobProfiler::counter_ = -1;
+bool JobProfiler::enabled_ = true;   // Profiling could be controlled by a command
+
+// =================================================================================
+JobProfiler::JobProfiler(Node* node,JobsParam& jobsParam)
+: node_(node),jobsParam_(jobsParam)
+{
+   if (enabled_) {
+      index_ = jobsParam.start_profile();
+      counter_ += 1;
+      start_time_ = boost::posix_time::microsec_clock::universal_time();
+   }
+}
+
+JobProfiler::~JobProfiler()
+{
+   if (enabled_) {
+
+      boost::posix_time::time_duration duration = boost::posix_time::microsec_clock::universal_time() - start_time_;
+
+#ifdef DEBUG_OUTPUT
+      int time_taken = duration.total_milliseconds();
+#else
+      int time_taken = duration.total_seconds();
+#endif
+
+#ifdef DEBUG_ME
+      update(time_taken);
+#else
+      if ( time_taken > 0)  update(time_taken);
+      else                 jobsParam_.set_to_profile(index_,Str::EMPTY(),0); // clear any additions, caused by task, ie. job size
+#endif
+
+      counter_ -= 1;
+   }
+}
+
+void JobProfiler::update(int time_taken)
+{
+   // This class can be called hierarchically, so produce nicely indented output
+   std::string text;
+   for(int i = 0; i < counter_; i++) text += ' ';
+   text += node_->debugNodePath();
+   text += " - ";
+
+   // check if any addition were made, typically for tasks we will add job size.
+   const std::string& additions = jobsParam_.get_text_at_profile(index_);
+   if (!additions.empty()) {
+      text += additions;
+      text += " - ";
+   }
+
+   text += boost::lexical_cast<std::string>( time_taken );
+   text += "s";
+   jobsParam_.set_to_profile(index_,text,time_taken);
+}
+
+
+void JobProfiler::print_to_log(const JobsParam& jobsParam)
+{
+   const std::vector< std::pair<std::string,int> >& job_gen_profiles = jobsParam.profiles();
+   for(size_t i = 0; i < job_gen_profiles.size(); i++)  {
+#ifdef DEBUG_ME
+      if ( !job_gen_profiles[i].first.empty() )
+#else
+      if ( job_gen_profiles[i].second > 0 && !job_gen_profiles[i].first.empty() )
+#endif
+         log(Log::MSG, job_gen_profiles[i].first);
+   }
+}
+
+void JobProfiler::print_to_cout(const JobsParam& jobsParam)
+{
+   const std::vector< std::pair<std::string,int> >& job_gen_profiles = jobsParam.profiles();
+   for(size_t i = 0; i < job_gen_profiles.size(); i++) {
+#ifdef DEBUG_ME
+      if ( !job_gen_profiles[i].first.empty() )
+#else
+      if ( job_gen_profiles[i].second > 0 && !job_gen_profiles[i].first.empty() )
+#endif
+         std::cout << job_gen_profiles[i].first << "\n";
+   }
+}
+
+
+}

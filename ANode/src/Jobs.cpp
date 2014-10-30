@@ -25,11 +25,13 @@
 #include "Signal.hpp"
 #include "System.hpp"
 #include "SuiteChanged.hpp"
+#include "JobProfiler.hpp"
 
 using namespace ecf;
 using namespace std;
 
 //#define DEBUG_JOB_SUBMISSION 1
+//#define DEBUG_JOB_PROFILING 1
 
 bool Jobs::generate( JobsParam& jobsParam) const
 {
@@ -93,9 +95,15 @@ bool Jobs::generate( JobsParam& jobsParam) const
        << " " << jobsParam.getErrorMsg()
    );
 #endif
+
+#ifdef DEBUG_JOB_PROFILING
+   JobProfiler::print_to_cout(jobsParam);
+   JobProfiler::print_to_log(jobsParam);
+#endif
+
    if (durationTimer.duration() > jobsParam.submitJobsInterval()) {
-      LogToCout toCoutAsWell;
       LOG(Log::ERR,"Jobs::generate: job generation time(" << durationTimer.duration() << " seconds) is greater than job submission interval of " << jobsParam.submitJobsInterval() << " seconds!!");
+      JobProfiler::print_to_log(jobsParam);
    }
    return jobsParam.getErrorMsg().empty();
 }

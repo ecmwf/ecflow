@@ -28,6 +28,7 @@
 #include "File.hpp"
 #include "Task.hpp"
 #include "JobsParam.hpp"
+#include "JobProfiler.hpp"
 
 namespace fs = boost::filesystem;
 using namespace std;
@@ -284,7 +285,7 @@ void EcfFile::create_job( JobsParam& jobsParam)
    removeCommentAndManual();
    remove_nopp_end_tokens();
 
-   doCreateJobFile(); // create job on disk
+   doCreateJobFile(jobsParam/* this is only past in for profiling */); // create job on disk
 }
 
 void EcfFile::extract_used_variables(NameValueMap& used_variables_as_map,const std::vector<std::string> &script_lines)
@@ -854,7 +855,7 @@ bool EcfFile::get_used_variables(NameValueMap& used_variables, std::string& erro
 }
 
 
-void EcfFile::doCreateJobFile() const
+void EcfFile::doCreateJobFile(JobsParam& jobsParam) const
 {
    if ( jobLines_.size() > 1 ) {
       // Guard against ecf file that exist's but is empty,
@@ -900,6 +901,18 @@ void EcfFile::doCreateJobFile() const
             std::stringstream ss;
             ss << "EcfFile::doCreateJobFile: Could not make job file " << ecf_job << "  executable by using chmod";
             throw std::runtime_error(ss.str());
+         }
+
+         if (JobProfiler::enabled()) {
+            int index = jobsParam.last_profile_index();
+            if (index != -1) {
+               size_t job_output_size = 0;
+               size_t jobLines_size = jobLines_.size();
+               for(size_t i = 0; i < jobLines_size; ++i)  job_output_size += jobLines_[i].size() + 1; // +1 for newline
+               std::string text = "job size:";
+               text += boost::lexical_cast<std::string>(job_output_size);
+               jobsParam.add_to_profile(index, text);
+            }
          }
 
          return;
