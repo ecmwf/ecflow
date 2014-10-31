@@ -32,8 +32,12 @@ BOOST_AUTO_TEST_SUITE( ClientTestSuite )
 
 BOOST_AUTO_TEST_CASE( test_client_invoker )
 {
-   std::cout << "Client:: ...test_client_invoker" << endl;
+   if (getenv("ECF_ALLOW_NEW_CLIENT_OLD_SERVER")) {
+      cout << "Client:: ...test_client_invoker: ignoring test when ECF_ALLOW_NEW_CLIENT_OLD_SERVER specified\n";
+      return;
+   }
 
+   std::cout << "Client:: ...test_client_invoker" << endl;
    {
       char* put = const_cast<char*>("ECF_ALLOW_NEW_CLIENT_OLD_SERVER=10");
       BOOST_CHECK_MESSAGE(putenv(put) == 0,"putenv failed for " << put);

@@ -153,6 +153,11 @@ BOOST_AUTO_TEST_CASE( test_client_environment_empty_host_file )
 
 BOOST_AUTO_TEST_CASE( test_client_environment_errors )
 {
+   if (getenv("ECF_ALLOW_NEW_CLIENT_OLD_SERVER")) {
+      cout << "Client:: ...test_client_environment_errors-ECF_ALLOW_NEW_CLIENT_OLD_SERVER: ignoring test when ECF_ALLOW_NEW_CLIENT_OLD_SERVER specified\n";
+      return;
+   }
+
    std::cout << "Client:: ...test_client_environment_errors-ECF_ALLOW_NEW_CLIENT_OLD_SERVER" << endl;
    {
       char* put = const_cast<char*>("ECF_ALLOW_NEW_CLIENT_OLD_SERVER=xx");
@@ -194,6 +199,11 @@ BOOST_AUTO_TEST_CASE( test_client_environment_errors )
 
 BOOST_AUTO_TEST_CASE( test_client_environment )
 {
+   if (getenv("ECF_ALLOW_NEW_CLIENT_OLD_SERVER")) {
+      cout << "Client:: ...test_client_environment-ECF_ALLOW_NEW_CLIENT_OLD_SERVER: ignoring test when ECF_ALLOW_NEW_CLIENT_OLD_SERVER specified\n";
+      return;
+   }
+
    std::cout << "Client:: ...test_client_environment-ECF_ALLOW_NEW_CLIENT_OLD_SERVER" << endl;
    {
       std::string env = "ECF_ALLOW_NEW_CLIENT_OLD_SERVER=";
