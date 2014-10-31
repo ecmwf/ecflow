@@ -494,12 +494,12 @@ protected:
    virtual bool authenticate(AbstractServer*, STC_Cmd_ptr&) const;
 
    /// Prompt the user for confirmation: If user responds with no, will exit client
-   void prompt_for_confirmation(const std::string& prompt) const;
+   static void prompt_for_confirmation(const std::string& prompt) const;
 
    /// All user commands will be pre_fixed with "--" and post_fixed with :user.
    std::ostream& user_cmd(std::ostream& os, const std::string& the_cmd) const;
 
-   int time_out_for_load_sync_and_get() const;
+   static int time_out_for_load_sync_and_get() const;
 
    // The order is preserved during the split. Paths assumed to start with '/' char
    static void split_args_to_options_and_paths(

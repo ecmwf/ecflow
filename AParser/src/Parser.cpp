@@ -116,12 +116,10 @@ std::map<Node*,bool>& Parser::defStatusMap() const { return rootParser_->defStat
 
 void Parser::dumpStackTop(const std::string& msg, const std::string& msg2) const
 {
-#ifdef DEBUG_NODE_STACK
-    	std::cout << msg << "  '" << msg2 << "' ++++++++++++++++++++++++++++++++++++++++++++++++++\n";
-    	if (rootParser_->nodeStack_.empty()) std::cout << "nodeStack_ is EMPTY\n";
-    	else  std::cout << "TOP = " <<  rootParser_->nodeStack_.top()->debugType()
-    	                << " '" << rootParser_->nodeStack_.top()->name() << "'\n";
-#endif
+   std::cout << msg << "  '" << msg2 << "' ++++++++++++++++++++++++++++++++++++++++++++++++++\n";
+   if (rootParser_->nodeStack_.empty()) std::cout << "nodeStack_ is EMPTY\n";
+   else  std::cout << "TOP = " <<  rootParser_->nodeStack_.top().first->debugType()
+    	                         << " '" << rootParser_->nodeStack_.top().first->name() << "'\n";
 }
 
 void Parser::addParser(Parser* p)
