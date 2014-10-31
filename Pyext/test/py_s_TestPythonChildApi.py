@@ -59,19 +59,20 @@ def test_client_run(ci):
     ecf_home = Test.ecf_home(ci.get_port())
     dir = ecf_home + "/test_client_run/f1"
     
-    # on cray creating recursive directories can fail, try again.
+    # on cray creating recursive directories can fail, try again. yuk
     try:
         if not os.path.exists(dir): os.makedirs(dir)
-    except OSError:
+    except:
         try:
             if not os.path.exists(dir): os.makedirs(dir)
-        except OSError:
+        except:
             # try breaking down
             if not os.path.exists(ecf_home): os.makedirs(ecf_home)
             new_dir = ecf_home + "/test_client_run"
             if not os.path.exists(new_dir): os.makedirs(new_dir)
             new_dir = ecf_home + "/test_client_run/f1"
             if not os.path.exists(new_dir): os.makedirs(new_dir)
+    if not os.path.exists(dir): os.makedirs(dir)
 
     file = dir + "/t1.ecf"
     contents = "%include <head.py>\n\n"
