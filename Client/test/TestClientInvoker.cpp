@@ -39,6 +39,7 @@ BOOST_AUTO_TEST_CASE( test_client_invoker )
       BOOST_CHECK_MESSAGE(putenv(put) == 0,"putenv failed for " << put);
       ClientInvoker invoker;
       BOOST_CHECK_MESSAGE(invoker.allow_new_client_old_server()==10,"Expected 10 but found " << invoker.allow_new_client_old_server() << " for env " << put);
+      putenv(const_cast<char*>("ECF_ALLOW_NEW_CLIENT_OLD_SERVER")); // remove from env, otherwise valgrind complains
    }
    {
       std::stringstream ss;
@@ -50,10 +51,8 @@ BOOST_AUTO_TEST_CASE( test_client_invoker )
 
       invoker.set_host_port("bill4","6666");
       BOOST_CHECK_MESSAGE(invoker.allow_new_client_old_server()==1313,"Expected 1313 but found " << invoker.allow_new_client_old_server() << " for env " << env);
+      putenv(const_cast<char*>("ECF_ALLOW_NEW_CLIENT_OLD_SERVER")); // remove from env, otherwise valgrind complains, + *COULD* affect other tests
    }
-
-   // Unset, otherwise it will effect other tests
-   BOOST_CHECK_MESSAGE(unsetenv("ECF_ALLOW_NEW_CLIENT_OLD_SERVER") == 0,"unsetenv failed for ECF_ALLOW_NEW_CLIENT_OLD_SERVER");
 }
 
 BOOST_AUTO_TEST_SUITE_END()
