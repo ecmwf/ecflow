@@ -1236,19 +1236,27 @@ void ehost::login()
          return;
       }
 
-      // if we can not get the server version, attempt forward compatibility
+      // if we can not get the server version, attempt backward compatibility
       std::string server_version;
       get_server_version(client_, server_version);
-
-      if (!check_version(server_version.c_str(), ecf::Version::raw().c_str())) {
-         if (!confirm::ask(
-                  false,
-                  "%s (%s@%d): version mismatch, server is %s, client is %s\ntry to connect anyway?",
-                  name(), machine(), number(), server_version.c_str(),
-                  ecf::Version::raw().c_str())) {
-            connect_ = false;
-            connected_ = false;
-            return;
+      if (server_version.empty()) {
+         if (!confirm::ask( false, "%s (%s@%d): Could not connect\nTry again ?", name(), machine(), number())) {
+             connect_ = false;
+             connected_ = false;
+             return;
+          }
+      }
+      else {
+         if (!check_version(server_version.c_str(), ecf::Version::raw().c_str())) {
+            if (!confirm::ask(
+                     false,
+                     "%s (%s@%d): version mismatch, server is %s, client is %s\ntry to connect anyway?",
+                     name(), machine(), number(), server_version.c_str(),
+                     ecf::Version::raw().c_str())) {
+               connect_ = false;
+               connected_ = false;
+               return;
+            }
          }
       }
       connect_ = true;
