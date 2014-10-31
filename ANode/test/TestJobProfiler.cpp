@@ -77,7 +77,7 @@ BOOST_AUTO_TEST_CASE( test_job_profiler )
    // are use in client scripts and used to locate the ecf files
    theDefs.beginAll();
 
-   // By setting submitJobsInterval to -1, we enable the jobs profiling
+   // By setting submitJobsInterval to -1, we enable the jobs profiling testing
    JobsParam jobParam(-1 /*submitJobsInterval*/, false /*createJobs*/);
    Jobs job(&theDefs);
    bool ok = job.generate( jobParam );
@@ -91,15 +91,15 @@ BOOST_AUTO_TEST_CASE( test_job_profiler )
    //   MSG:[11:05:42 31.10.2014]   TASK:/suite/family/t2 - 0s
    //   MSG:[11:05:42 31.10.2014]   TASK:/suite/family/t3 - 0s
    //
-   // Note:: since this is a test JobParam we do not create the jobs.
+   // Note:: since this is a test, we do not create the jobs.
    std::string log_file_contents;
    BOOST_CHECK_MESSAGE(File::open(log_path,log_file_contents), "Could not open log file at " << log_path);
    BOOST_CHECK_MESSAGE(!log_file_contents.empty(),"log file is is empty ?");
-   BOOST_CHECK_MESSAGE(log_file_contents.find("SUITE:/suite") != std::string::npos,"Suite  not in profile");
-   BOOST_CHECK_MESSAGE(log_file_contents.find("FAMILY:/suite/family") != std::string::npos,"FAMILY  not in profile");
-   BOOST_CHECK_MESSAGE(log_file_contents.find("TASK:/suite/family/t1") != std::string::npos,"TASK  not in profile");
-   BOOST_CHECK_MESSAGE(log_file_contents.find("TASK:/suite/family/t2") != std::string::npos,"TASK  not in profile");
-   BOOST_CHECK_MESSAGE(log_file_contents.find("TASK:/suite/family/t3") != std::string::npos,"TASK  not in profile");
+   BOOST_CHECK_MESSAGE(log_file_contents.find("SUITE:/suite") != std::string::npos,        "SUITE:/suite  not in profile");
+   BOOST_CHECK_MESSAGE(log_file_contents.find("FAMILY:/suite/family") != std::string::npos,"FAMILY:/suite/family  not in profile");
+   BOOST_CHECK_MESSAGE(log_file_contents.find("TASK:/suite/family/t1") != std::string::npos,"TASK:/suite/family/t1  not in profile");
+   BOOST_CHECK_MESSAGE(log_file_contents.find("TASK:/suite/family/t2") != std::string::npos,"TASK:/suite/family/t2  not in profile");
+   BOOST_CHECK_MESSAGE(log_file_contents.find("TASK:/suite/family/t3") != std::string::npos,"TASK:/suite/family/t3  not in profile");
 
    // Remove the log file. Comment out for debugging
    fs::remove(log_path);

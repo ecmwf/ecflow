@@ -99,7 +99,7 @@ ServerOptions::ServerOptions( int argc, char* argv[],ServerEnvironment* env )
                                       "This will also maintain compatibility with old client, which expected a reply." )
 ( "dis_job_gen",                      "Disable job generation. For DEBUG/Test only." )
 ( "debug,d",                          "Enable debug output." )
-( "version,v",                        "Show ecflow version number, and version of the boost library used" )
+( "version,v",                        "Show ecflow version number,boost library version, compiler used and compilation date, then exit" )
  	;
 
 	po::store( po::parse_command_line( argc, argv, desc ), vm_ );
