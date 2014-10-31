@@ -39,9 +39,6 @@ private:
    size_t index_;
    boost::posix_time::ptime start_time_;
    static int counter_;
-
-private:
-   void update(int time_taken);
 };
 
 }

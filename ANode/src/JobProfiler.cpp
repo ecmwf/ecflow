@@ -62,34 +62,33 @@ JobProfiler::~JobProfiler()
    boost::posix_time::time_duration duration = boost::posix_time::microsec_clock::universal_time() - start_time_;
    int time_taken = duration.total_seconds();
 
-#ifdef DEBUG_ME
-   update(time_taken);
-#else
-   if ( time_taken > 0)  update(time_taken);
-   else                 jobsParam_.set_to_profile(index_,Str::EMPTY(),0); // clear any additions, caused by task, i.e. job size
-#endif
-
-   counter_ -= 1;
-}
-
-void JobProfiler::update(int time_taken)
-{
-   // This class can be called hierarchically, so produce nicely indented output
-   std::string text;
-   for(int i = 0; i < counter_; i++) text += ' ';
-   text += node_->debugNodePath();
-   text += " - ";
-
-   // check if any addition were made, typically for tasks we will add job size.
-   const std::string& additions = jobsParam_.get_text_at_profile(index_);
-   if (!additions.empty()) {
-      text += additions;
-      text += " - ";
+   // When testing we set submitJobsInterval to < 0
+   if (jobsParam_.submitJobsInterval() < 0 ) {
+      time_taken = 1;
    }
 
-   text += boost::lexical_cast<std::string>( time_taken );
-   text += "s";
+   std::string text;
+   if ( time_taken > 0)  {
+
+      // This class can be called hierarchically, so produce nicely indented output
+      for(int i = 0; i < counter_; i++) text += ' ';
+      text += node_->debugNodePath();
+      text += " - ";
+
+      // check if any addition were made, typically for tasks we will add job size.
+      const std::string& additions = jobsParam_.get_text_at_profile(index_);
+      if (!additions.empty()) {
+         text += additions;
+         text += " - ";
+      }
+
+      text += boost::lexical_cast<std::string>( time_taken );
+      text += "s";
+   }
+
    jobsParam_.set_to_profile(index_,text,time_taken);
+
+   counter_ -= 1;
 }
 
 }
