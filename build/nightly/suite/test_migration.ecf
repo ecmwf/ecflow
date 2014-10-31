@@ -5,7 +5,7 @@
 # ======================================================================
 export WK=%WK%
 
-default_old_version=3.1.9
+default_old_version=4.0.0
       
 if [[ %SET_TO_TEST_SCRIPT% = true ]] ; then
    echo "Test only"
