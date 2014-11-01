@@ -48,11 +48,12 @@ int JobProfiler::counter_ = -1;
 // Profiling could be controlled by a command ?
 
 // =================================================================================
-JobProfiler::JobProfiler(Node* node,JobsParam& jobsParam)
+JobProfiler::JobProfiler(Node* node,JobsParam& jobsParam, size_t threshold)
 : node_(node),
   jobsParam_(jobsParam),
   index_(jobsParam.start_profile()),
-  start_time_(boost::posix_time::microsec_clock::universal_time())
+  start_time_(boost::posix_time::microsec_clock::universal_time()),
+  threshold_(threshold)
 {
    counter_ += 1;
 }
@@ -60,30 +61,30 @@ JobProfiler::JobProfiler(Node* node,JobsParam& jobsParam)
 JobProfiler::~JobProfiler()
 {
    boost::posix_time::time_duration duration = boost::posix_time::microsec_clock::universal_time() - start_time_;
-   int time_taken = duration.total_seconds();
+   size_t time_taken  = duration.total_milliseconds();
 
    // When testing we set submitJobsInterval to < 0
    if (jobsParam_.submitJobsInterval() < 0 ) {
-      time_taken = 1;
+      time_taken = threshold_ + 1;
    }
 
    std::string text;
-   if ( time_taken > 0)  {
+   if ( time_taken > threshold_)  {
 
       // This class can be called hierarchically, so produce nicely indented output
       for(int i = 0; i < counter_; i++) text += ' ';
       text += node_->debugNodePath();
-      text += " - ";
+      text += " : ";
 
       // check if any addition were made, typically for tasks we will add job size.
       const std::string& additions = jobsParam_.get_text_at_profile(index_);
       if (!additions.empty()) {
          text += additions;
-         text += " - ";
+         text += " : ";
       }
 
       text += boost::lexical_cast<std::string>( time_taken );
-      text += "s";
+      text += "ms";
    }
 
    jobsParam_.set_to_profile(index_,text,time_taken);

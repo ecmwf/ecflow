@@ -329,7 +329,7 @@ bool EcfFile::preProcess(std::vector<std::string>& script_lines, std::string& er
 {
    /// Clear existing jobLines
    jobLines_.clear();
-   jobLines_.reserve(script_lines.size() + script_lines.size()); // estimate for includes
+   jobLines_.reserve(512); // estimate for includes
 
    // get the cached ECF_MICRO variable, typically its one char.
    string ecfMicro = ecfMicroCache_;
@@ -346,6 +346,12 @@ bool EcfFile::preProcess(std::vector<std::string>& script_lines, std::string& er
    int recursive_count = 0;
    std::vector<std::string> tokens;       // re-use to save memory
    std::vector<std::string> includeLines; // re-use to save memory
+
+   // constant until ecfmicro changes, then reset
+   string pp_nopp = ecfMicro;    pp_nopp    += T_NOOP;
+   string pp_comment = ecfMicro; pp_comment += T_COMMENT;
+   string pp_manual = ecfMicro;  pp_manual  += T_MANUAL;
+   string pp_end = ecfMicro;     pp_end     += T_END;
 
    while (1) {
 
@@ -381,7 +387,24 @@ bool EcfFile::preProcess(std::vector<std::string>& script_lines, std::string& er
 #ifdef DEBUG_PRE_PROCESS
          std::cout << i << ": " << script_lines[i] << "\n";
 #endif
-         string pp_nopp = ecfMicro;    pp_nopp    += T_NOOP;
+         if (script_lines[i].find(pp_manual) == 0) {
+            if (comment || manual) {
+               std::stringstream ss; ss << "Embedded comments/manuals not supported '" << script_lines[i] << "' at " << path();
+               errormsg += ss.str();
+               dump_expanded_script_file(i,script_lines);
+               return false;
+            }
+            manual = true ; continue;
+         }
+         if (script_lines[i].find(pp_comment) == 0) {
+            if (comment || manual) {
+               std::stringstream ss; ss << "Embedded comments/manuals not supported '" << script_lines[i] << "' at " << path();
+               errormsg += ss.str();
+               dump_expanded_script_file(i,script_lines);
+               return false;
+            }
+            comment = true ; continue;
+         }
          if (script_lines[i].find(pp_nopp) == 0) {
             if (nopp) {
                std::stringstream ss; ss << "Embedded nopp not supported '" << script_lines[i] << "' in " << path();
@@ -391,29 +414,6 @@ bool EcfFile::preProcess(std::vector<std::string>& script_lines, std::string& er
             }
             nopp = true ; continue;
          }
-         string pp_comment = ecfMicro; pp_comment += T_COMMENT;
-         if (script_lines[i].find(pp_comment) == 0) {
-            if (comment || manual) {
-               std::stringstream ss;
-               ss << "Embedded comments/manuals not supported '" << script_lines[i] << "' at " << path();
-               errormsg += ss.str();
-               dump_expanded_script_file(i,script_lines);
-               return false;
-            }
-            comment = true ; continue;
-         }
-         string pp_manual = ecfMicro;  pp_manual  += T_MANUAL;
-         if (script_lines[i].find(pp_manual) == 0) {
-            if (comment || manual) {
-               std::stringstream ss;
-               ss << "Embedded comments/manuals not supported '" << script_lines[i] << "' at " << path();
-               errormsg += ss.str();
-               dump_expanded_script_file(i,script_lines);
-               return false;
-            }
-            manual = true ; continue;
-         }
-         string pp_end = ecfMicro;     pp_end     += T_END;
          if (script_lines[i].find(pp_end) == 0) {
             if (comment) { comment = false; continue;}
             if (manual)  { manual = false; continue;}
@@ -448,6 +448,12 @@ bool EcfFile::preProcess(std::vector<std::string>& script_lines, std::string& er
                errormsg += ss.str();
                return false;
             }
+
+            pp_nopp = ecfMicro;    pp_nopp    += T_NOOP;
+            pp_comment = ecfMicro; pp_comment += T_COMMENT;
+            pp_manual = ecfMicro;  pp_manual  += T_MANUAL;
+            pp_end = ecfMicro;     pp_end     += T_END;
+
             continue;
          }
 
@@ -622,7 +628,8 @@ bool EcfFile::replaceSmsChildCmdsWithEcf(const std::string& clientPath, std::str
    //   smslabel value           ---> ECF_CLIENT(value) --label value
    //   smswait expr             ---> ECF_CLIENT(value) --wait expr
    //   smsabort                 ---> ECF_CLIENT(value) --abort
-   for(size_t i=0; i < jobLines_.size(); ++i) {
+   size_t jobLines_size = jobLines_.size();
+   for(size_t i=0; i < jobLines_size; ++i) {
 
       // ONLY do the replacement if there is no leading comment
       string::size_type commentPos = jobLines_[i].find("#");
@@ -659,7 +666,8 @@ void EcfFile::variableSubstituition(JobsParam& jobsParam)
    std::vector<std::string> tokens;
 
    bool nopp =  false;
-   for(size_t i=0; i < jobLines_.size(); ++i) {
+   size_t jobLines_size = jobLines_.size();
+   for(size_t i=0; i < jobLines_size; ++i) {
 
       if (jobLines_[i].empty()) continue;
 
@@ -668,9 +676,9 @@ void EcfFile::variableSubstituition(JobsParam& jobsParam)
       if (ecfmicro_pos == 0) {
 
          // We can not do variable substitution between %nopp/%end
-         if (jobLines_[i].find(T_NOOP)    == 1) { pp_stack.push_back(NOPP); nopp = true; continue; }
-         if (jobLines_[i].find(T_COMMENT) == 1) { pp_stack.push_back(COMMENT); continue; }
          if (jobLines_[i].find(T_MANUAL)  == 1) { pp_stack.push_back(MANUAL); continue;  }
+         if (jobLines_[i].find(T_COMMENT) == 1) { pp_stack.push_back(COMMENT); continue; }
+         if (jobLines_[i].find(T_NOOP)    == 1) { pp_stack.push_back(NOPP); nopp = true; continue; }
          if (jobLines_[i].find(T_END) == 1) {
             if (pp_stack.empty()) throw std::runtime_error("EcfFile::variableSubstituition: failed unpaired %end");
             int last_directive = pp_stack.back(); pp_stack.pop_back();
@@ -804,9 +812,9 @@ bool EcfFile::get_used_variables(NameValueMap& used_variables, std::string& erro
       if (ecfmicro_pos == 0) {
 
          // We can not do variable substitution between %nopp/%end
-         if (jobLines_[i].find(T_NOOP)    == 1) { pp_stack.push_back(NOPP); nopp = true; continue; }
-         if (jobLines_[i].find(T_COMMENT) == 1) { pp_stack.push_back(COMMENT); continue; }
          if (jobLines_[i].find(T_MANUAL)  == 1) { pp_stack.push_back(MANUAL); continue;  }
+         if (jobLines_[i].find(T_COMMENT) == 1) { pp_stack.push_back(COMMENT); continue; }
+         if (jobLines_[i].find(T_NOOP)    == 1) { pp_stack.push_back(NOPP); nopp = true; continue; }
          if (jobLines_[i].find(T_END) == 1) {
             if (pp_stack.empty()) throw std::runtime_error("EcfFile::get_used_variables: failed  unpaired %end");
             int last_directive = pp_stack.back(); pp_stack.pop_back();
@@ -1160,20 +1168,6 @@ void EcfFile::removeCommentAndManual()
        if (ecfmicro_pos == 0) {
 
           // We can not remove comments/manuals between %nopp/%end
-          if ((*i).find(T_NOOP)    == 1) { pp_stack.push_back(NOPP); nopp = true; continue; }
-          if ((*i).find(T_COMMENT) == 1) {
-             pp_stack.push_back(COMMENT);
-             if (nopp) continue;
-
-             // cerr << "EcfFile::removeCommentAndManual erase = " << erase << " " << *i << "\n";
-             jobLines_.erase( i-- ); // remove %comment
-             if (erase) {
-                std::stringstream ss; ss << "EcfFile::removeCommentAndManual: Embedded comments are not allowed in " << script_path_or_cmd_;
-                throw std::runtime_error( ss.str() );
-             }
-             erase = true;
-             continue;
-          }
           if ((*i).find(T_MANUAL)  == 1) {
              pp_stack.push_back(MANUAL);
              if (nopp) continue;
@@ -1187,6 +1181,23 @@ void EcfFile::removeCommentAndManual()
              erase = true;
              continue;
           }
+
+          if ((*i).find(T_COMMENT) == 1) {
+             pp_stack.push_back(COMMENT);
+             if (nopp) continue;
+
+             // cerr << "EcfFile::removeCommentAndManual erase = " << erase << " " << *i << "\n";
+             jobLines_.erase( i-- ); // remove %comment
+             if (erase) {
+                std::stringstream ss; ss << "EcfFile::removeCommentAndManual: Embedded comments are not allowed in " << script_path_or_cmd_;
+                throw std::runtime_error( ss.str() );
+             }
+             erase = true;
+             continue;
+          }
+
+          if ((*i).find(T_NOOP) == 1) { pp_stack.push_back(NOPP); nopp = true; continue; }
+
           if ((*i).find(T_END) == 1) {
              if (pp_stack.empty()) throw std::runtime_error("EcfFile::removeCommentAndManual: failed  unpaired %end");
              int last_directive = pp_stack.back(); pp_stack.pop_back();
@@ -1251,18 +1262,8 @@ void EcfFile::remove_nopp_end_tokens()
       string::size_type ecfmicro_pos = (*i).find(ecfMicro);
       if ( ecfmicro_pos == 0) {
 
-          if ((*i).find(T_NOOP) == 1) {
-             pp_stack.push_back(NOPP); nopp = true;
-             jobLines_.erase( i-- );      // remove %nopp
-              if (erase) {
-                 std::stringstream ss; ss << "Embedded nopp are not allowed " << script_path_or_cmd_;
-                 throw std::runtime_error("EcfFile::remove_nopp_end_tokens: failed " + ss.str());
-              }
-              erase = true;
-              continue;
-          }
-          if ((*i).find(T_COMMENT) == 1) { pp_stack.push_back(COMMENT); continue; }
           if ((*i).find(T_MANUAL)  == 1) { pp_stack.push_back(MANUAL); continue;  }
+          if ((*i).find(T_COMMENT) == 1) { pp_stack.push_back(COMMENT); continue; }
           if ((*i).find(T_END) == 1) {
              if (pp_stack.empty()) throw std::runtime_error("EcfFile::remove_nopp_end_tokens: failed  unpaired %end");
              int last_directive = pp_stack.back(); pp_stack.pop_back();
@@ -1272,6 +1273,16 @@ void EcfFile::remove_nopp_end_tokens()
                 erase = false;
              }
              continue;
+          }
+          if ((*i).find(T_NOOP) == 1) {
+             pp_stack.push_back(NOPP); nopp = true;
+             jobLines_.erase( i-- );      // remove %nopp
+              if (erase) {
+                 std::stringstream ss; ss << "Embedded nopp are not allowed " << script_path_or_cmd_;
+                 throw std::runtime_error("EcfFile::remove_nopp_end_tokens: failed " + ss.str());
+              }
+              erase = true;
+              continue;
           }
           if (!nopp && (*i).find(T_ECFMICRO) == 1) {  // %ecfmicro #
 

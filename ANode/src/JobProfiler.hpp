@@ -30,7 +30,8 @@ namespace ecf {
 
 class JobProfiler  : private boost::noncopyable  {
 public:
-   JobProfiler(Node*,JobsParam&);
+   // Note: 1000 milliseconds = 1 second
+   JobProfiler(Node*,JobsParam&,size_t threshold = 1000 /* 1 second */);
    ~JobProfiler();
 
 private:
@@ -38,6 +39,7 @@ private:
    JobsParam& jobsParam_;
    size_t index_;
    boost::posix_time::ptime start_time_;
+   size_t threshold_;
    static int counter_;
 };
 

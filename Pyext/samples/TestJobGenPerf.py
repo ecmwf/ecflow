@@ -17,10 +17,8 @@
 #   Since any ad hoc definition will reference local directories in the
 #   ECF_ variables, we need to remove them and inject our own.
 #
-#   This script is re-runnable, and hence will delete suites in the server
-#   matching those in the input definition. Hence it is best to use this 
-#   script with a *test* server to avoid accidentally deleting existing suites 
-#   of the same name.
+#   This test was created aid the performance testing of job generation
+#   It is tied to AParser/test/TestJobGenPerf.cpp
 # =============================================================================
 import ecflow
 import os       # for getenv
@@ -75,16 +73,12 @@ if __name__ == "__main__":
             o Will clear out existing data both on disk and on the server to allow 
               multiple re-runs of this script. ** If this is an issue please use
               a test server **
-            o All suites are put into a suspended state. This allows the GUI to resume them
-            o The server is restarted and suites are begun
             This programs assumes that ecflow module is accessible.
             """    
     PARSER = argparse.ArgumentParser(description=DESC,  
                                      formatter_class=argparse.RawDescriptionHelpFormatter)
     PARSER.add_argument('defs_file', 
                         help="The definition file")
-    PARSER.add_argument('--path', default="/",   
-                        help="replace only the node path in the suite")
     PARSER.add_argument('--ecf_home', default="/var/tmp/ma0/ECFLOW_TEST/TestJobGenPerf/ECF_HOME",
                         help="Directory to be used for generated scripts(ECF_HOME), defaults to /var/tmp/ma0/ECFLOW_TEST/TestJobGenPerf/ECF_HOME")
     PARSER.add_argument('--verbose', nargs='?', default=False, const=True, type=bool,
@@ -156,6 +150,6 @@ if __name__ == "__main__":
     
     
     newDefs = ARGS.ecf_home + "/../" + os.path.basename(ARGS.defs_file)
-    print "saving modified defs as " + newDefs 
+    print "Saving modified defs as " + newDefs 
     DEFS.save_as_defs(newDefs)
 

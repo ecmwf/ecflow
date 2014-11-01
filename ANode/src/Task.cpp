@@ -486,7 +486,8 @@ bool Task::resolveDependencies(JobsParam& jobsParam)
 	//    o Checking limits                  (i.e check_in_limit_up_node_tree() above)
 	// However Suite/Family will however include this, hence a reasonable compromise,
 	// since the major cost will be job generation
-   JobProfiler profile_me(this,jobsParam);
+	// Note: 1000 milliseconds = 1 second
+   JobProfiler profile_me(this,jobsParam,300/*threshold milli-seconds*/);
 
    // call just before job submission, reset data members, update try_no, and generate variable
 	// *PLACED* outside of submitJob() so that we can configure job generation file ECF_JOB for test/python

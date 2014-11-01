@@ -28,8 +28,9 @@ using namespace ecf;
 namespace fs = boost::filesystem;
 
 
-// This relies on Pyext/samples/TestJobGenPerf.py to make any defs ameanable
+// This relies on Pyext/samples/TestJobGenPerf.py to make any defs amenable
 // for this test program.
+//
 // The defs is in /var/tmp/ma0/ECFLOW_TEST/TestJobGenPerf
 //
 int main(int argc, char* argv[])
@@ -38,6 +39,11 @@ int main(int argc, char* argv[])
       cout << "Expect single argument which is path to a defs file\n";
       return 1;
    }
+
+   // delete the log file if it exists.
+   std::string log_path = File::test_data("AParser/test/TestJobGenPerf.log","AParser");
+   fs::remove(log_path);
+
 
    std::string path = argv[1];
 
@@ -58,10 +64,17 @@ int main(int argc, char* argv[])
 
    defs.beginAll();
 
-   JobsParam jobParam(60 /*submitJobsInterval*/, true /*createJobs*/, false/* spawn jobs */);
+
+   // Create a new log, file, place after begin to avoid queued state
+   Log::create(log_path);
+
+   JobsParam jobParam(20 /*submitJobsInterval*/, true /*createJobs*/, false/* spawn jobs */);
    Jobs job(&defs);
    bool ok = job.generate( jobParam );
    if (!ok) cout << " generate failed: " << jobParam.getErrorMsg();
    cout << "submitted " << jobParam.submitted().size() << "\n";
+
+   // fs::remove(log_path);
+
    return 0;
 }
