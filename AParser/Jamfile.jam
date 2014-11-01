@@ -101,4 +101,21 @@ exe perf_aparser_only : test/ParseOnly.cpp
          : <include>../ANode/test 
            <variant>debug:<define>DEBUG
         ;
+        
+#
+# Tests job generation performance, relies on python to setup data
+#
+exe perf_job_gen : test/TestJobGenPerf.cpp   
+           pthread
+           /theCore//core
+           /theNodeAttr//nodeattr
+           /theNode//node
+           libparser
+           /site-config//boost_system
+           /site-config//boost_serialization
+           /site-config//boost_filesystem
+           /site-config//boost_datetime
+         : <include>../ANode/test 
+           <variant>debug:<define>DEBUG
+        ;
 	     
