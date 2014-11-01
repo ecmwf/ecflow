@@ -27,8 +27,8 @@ public:
 	JobsParam(bool createJobs = false)
       : createJobs_(createJobs), spawnJobs_(false), submitJobsInterval_(60){}
 
-	JobsParam(int submitJobsInterval, bool createJobs)
-	   : createJobs_(createJobs),spawnJobs_(true), submitJobsInterval_(submitJobsInterval)
+	JobsParam(int submitJobsInterval, bool createJobs, bool spawn_jobs = true)
+	   : createJobs_(createJobs),spawnJobs_(spawn_jobs), submitJobsInterval_(submitJobsInterval)
 	   { if (!createJobs_) spawnJobs_ = false;}
 
 	std::string& errorMsg() { return errorMsg_;}
