@@ -33,9 +33,14 @@ lib libparser : [ glob src/*.cpp ]
 lib pthread ;
               
 #
-# Tests for parser.  Exclude file test/TestSingleDefsFile.cpp
+# Tests for parser.  Exclude file test/TestSingleDefsFile.cpp, test/ParseOnly.cpp test/ParseTimer.cpp
+#                                 test/TestJobGenPerf.cpp    
 #
-exe u_aparser : [ glob test/*.cpp : test/TestSingleDefsFile.cpp test/ParseOnly.cpp test/ParseTimer.cpp ] 
+exe u_aparser : [ glob test/*.cpp : 
+                  test/TestSingleDefsFile.cpp 
+                  test/ParseOnly.cpp test/ParseTimer.cpp  
+                  test/TestJobGenPerf.cpp
+                ] 
            pthread 
            /theCore//core
            /theNodeAttr//nodeattr
@@ -103,7 +108,7 @@ exe perf_aparser_only : test/ParseOnly.cpp
         ;
         
 #
-# Tests job generation performance, relies on python to setup data
+# Tests job generation performance, relies on python (Pyext/samples/TestJobGenPerf.py) to setup data
 #
 exe perf_job_gen : test/TestJobGenPerf.cpp   
            pthread
