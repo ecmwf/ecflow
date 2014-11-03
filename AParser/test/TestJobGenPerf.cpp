@@ -22,6 +22,7 @@
 #include "Jobs.hpp"
 #include "JobsParam.hpp"
 #include "DefsStructureParser.hpp"
+#include "JobProfiler.hpp"
 
 using namespace std;
 using namespace ecf;
@@ -67,6 +68,11 @@ int main(int argc, char* argv[])
 
    // Create a new log, file, place after begin to avoid queued state
    Log::create(log_path);
+
+   // This controls the log output when job generation > submitJobsInterval
+   JobProfiler::set_suite_threshold(1500);
+   JobProfiler::set_family_threshold(1000);
+   JobProfiler::set_task_threshold(0);
 
    JobsParam jobParam(20 /*submitJobsInterval*/, true /*createJobs*/, false/* spawn jobs */);
    Jobs job(&defs);

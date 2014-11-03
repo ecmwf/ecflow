@@ -33,6 +33,7 @@
 #include "CalendarUpdateParams.hpp"
 #include "SuiteChanged.hpp"
 #include "ChangeMgrSingleton.hpp"
+#include "JobProfiler.hpp"
 
 using namespace ecf;
 using namespace std;
@@ -175,6 +176,7 @@ bool Suite::resolveDependencies(JobsParam& jobsParam)
 {
  	if (begun_) {
  	   SuiteChanged1 changed(this);
+ 	   JobProfiler profile_me(this,jobsParam,JobProfiler::suite_threshold());
   		return NodeContainer::resolveDependencies(jobsParam);
  	}
  	return true;

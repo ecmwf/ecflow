@@ -44,8 +44,13 @@ using namespace std;
 namespace ecf {
 
 // initialise globals
-int JobProfiler::counter_ = -1;
-// Profiling could be controlled by a command ?
+static int counter_ = -1;
+static size_t suite_threshold_ = 2000;
+static size_t family_threshold_ = 1000;
+static size_t task_threshold_ = 300;
+
+std::string JobProfiler::threshold_defaults() { return "suite:2000,family:1000,task:300";}
+
 
 // =================================================================================
 JobProfiler::JobProfiler(Node* node,JobsParam& jobsParam, size_t threshold)
@@ -91,5 +96,12 @@ JobProfiler::~JobProfiler()
 
    counter_ -= 1;
 }
+
+void JobProfiler::set_suite_threshold(size_t threshold) {suite_threshold_ = threshold;}
+void JobProfiler::set_family_threshold(size_t threshold){family_threshold_ = threshold;}
+void JobProfiler::set_task_threshold(size_t threshold){task_threshold_ = threshold;}
+size_t JobProfiler::suite_threshold() { return suite_threshold_; }
+size_t JobProfiler::family_threshold() { return family_threshold_; }
+size_t JobProfiler::task_threshold() { return task_threshold_; }
 
 }

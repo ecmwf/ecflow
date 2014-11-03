@@ -401,6 +401,8 @@ void Task::get_all_aliases(std::vector<alias_ptr>& destinationVec) const
 
 bool Task::resolveDependencies(JobsParam& jobsParam)
 {
+   JobProfiler profile_me(this,jobsParam,JobProfiler::task_threshold());
+
    // Calling Submittable::resolveDependencies(jobsParam) up front can be expensive.
    // Due to trigger and complete evaluations. Hence low cost state checks first
 
@@ -479,15 +481,6 @@ bool Task::resolveDependencies(JobsParam& jobsParam)
 #endif
 		return false;
 	}
-
-	// Minimise the cost of profiling: each profile costs two time stamps at the minimum
-	// Hence for tasks we are ignoring cost of:
-	//    o Trigger and Complete evaluation. (i.e in Node::resolveDependencies() above)
-	//    o Checking limits                  (i.e check_in_limit_up_node_tree() above)
-	// However Suite/Family will however include this, hence a reasonable compromise,
-	// since the major cost will be job generation
-	// Note: 1000 milliseconds = 1 second
-   JobProfiler profile_me(this,jobsParam,300/*threshold milli-seconds*/);
 
    // call just before job submission, reset data members, update try_no, and generate variable
 	// *PLACED* outside of submitJob() so that we can configure job generation file ECF_JOB for test/python

@@ -187,6 +187,8 @@ private:
 	/// dump out current settings
 	std::string dump_valid_users() const;
 
+	void process_profile_thresholds(const std::string& thresholds) const;
+
 private:
 	ecf::Host host_name_;
 	std::string serverHost_; // must be after host_name_, since used in init
@@ -215,7 +217,7 @@ private:
 	std::string url_;
 	std::string ecf_cmd_;
 	std::string ecf_micro_;
-	std::string ecf_white_list_file_;
+   std::string ecf_white_list_file_;
 	std::map<std::string,bool> validUsers_;  // first user name, second true is write access, false read access
 	boost::asio::ip::tcp tcp_protocol_;      // defaults to IPv4 TCP protocol
 	friend class ServerOptions;

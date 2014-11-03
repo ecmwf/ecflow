@@ -33,6 +33,7 @@ public:
    virtual NodeContainer* isNodeContainer() const { return const_cast<Family*>(this); }
 
    virtual void begin();
+   virtual bool resolveDependencies(JobsParam& ); // overriden to speicy family for job profiler
    virtual void requeue(bool resetRepeats, int clear_suspended_in_child_nodes, bool reset_next_time_slot);
 	virtual void accept(ecf::NodeTreeVisitor&);
 	virtual void acceptVisitTraversor(ecf::NodeTreeVisitor& v);

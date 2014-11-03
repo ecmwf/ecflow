@@ -29,6 +29,7 @@
 #include "Ecf.hpp"
 #include "File.hpp"
 #include "CheckPt.hpp"
+#include "JobProfiler.hpp"
 
 using namespace std;
 using namespace ecf;
@@ -316,6 +317,74 @@ BOOST_AUTO_TEST_CASE( test_server_environment_variables )
    // tear down remove the log file created by ServerEnvironment
    Host h;
    fs::remove(h.ecf_log_file("3144"));
+
+   /// Destroy Log singleton to avoid valgrind from complaining
+   Log::destroy();
+}
+
+BOOST_AUTO_TEST_CASE( test_server_profile_threshold_environment_variable )
+{
+   cout << "Server:: ...test_server_profile_threshold_environment_variable\n";
+   int argc = 1;char* argv[] = { const_cast<char*>("ServerEnvironment") };
+   {
+      char* put = const_cast<char*>("ECF_PROFILE_THRESHOLDS=suite:9");
+      BOOST_CHECK_MESSAGE(putenv(put) == 0,"putenv failed for " << put);
+
+      ServerEnvironment serverEnv(argc,argv);
+      BOOST_CHECK_MESSAGE(JobProfiler::suite_threshold() == 9,"Expected suite threshold of 9 but found " <<  JobProfiler::suite_threshold());
+   }
+   {
+      char* put = const_cast<char*>("ECF_PROFILE_THRESHOLDS=family:99");
+      BOOST_CHECK_MESSAGE(putenv(put) == 0,"putenv failed for " << put);
+
+      ServerEnvironment serverEnv(argc,argv);
+      BOOST_CHECK_MESSAGE(JobProfiler::family_threshold() == 99,"Expected suite threshold of 99 but found " <<  JobProfiler::family_threshold());
+   }
+   {
+      char* put = const_cast<char*>("ECF_PROFILE_THRESHOLDS=task:999");
+      BOOST_CHECK_MESSAGE(putenv(put) == 0,"putenv failed for " << put);
+
+      ServerEnvironment serverEnv(argc,argv);
+      BOOST_CHECK_MESSAGE(JobProfiler::task_threshold() == 999,"Expected suite threshold of 999 but found " <<  JobProfiler::task_threshold());
+   }
+   {
+      char* put = const_cast<char*>("ECF_PROFILE_THRESHOLDS=suite:10,family:9,task:8");
+      BOOST_CHECK_MESSAGE(putenv(put) == 0,"putenv failed for " << put);
+
+      ServerEnvironment serverEnv(argc,argv);
+      BOOST_CHECK_MESSAGE(JobProfiler::suite_threshold() == 10,"Expected suite threshold of 10 but found " <<  JobProfiler::suite_threshold());
+      BOOST_CHECK_MESSAGE(JobProfiler::family_threshold() == 9,"Expected family threshold of 9 but found " <<  JobProfiler::family_threshold());
+      BOOST_CHECK_MESSAGE(JobProfiler::task_threshold() == 8,"Expected task threshold of 8 but found " <<  JobProfiler::task_threshold());
+   }
+
+   // ==================================================================================
+   // Note test for errors
+   vector<string> dodgy_thresholds;
+   dodgy_thresholds.push_back("ECF_PROFILE_THRESHOLDS=x");
+   dodgy_thresholds.push_back("ECF_PROFILE_THRESHOLDS=1");
+   dodgy_thresholds.push_back("ECF_PROFILE_THRESHOLDS=,");
+   dodgy_thresholds.push_back("ECF_PROFILE_THRESHOLDS=:");
+   dodgy_thresholds.push_back("ECF_PROFILE_THRESHOLDS=,,");
+   dodgy_thresholds.push_back("ECF_PROFILE_THRESHOLDS=,,,");
+   dodgy_thresholds.push_back("ECF_PROFILE_THRESHOLDS=suite:10,family:9,fred:8");
+   dodgy_thresholds.push_back("ECF_PROFILE_THRESHOLDS=suitee:10,family:9,task:8");
+   dodgy_thresholds.push_back("ECF_PROFILE_THRESHOLDS=suite:10,family:9,task:8,task:8");
+   dodgy_thresholds.push_back("ECF_PROFILE_THRESHOLDS=suite,10,family:9,task:8,task:8");
+   dodgy_thresholds.push_back("ECF_PROFILE_THRESHOLDS=suite:x");
+   dodgy_thresholds.push_back("ECF_PROFILE_THRESHOLDS=family:x");
+   dodgy_thresholds.push_back("ECF_PROFILE_THRESHOLDS=family:-99");
+   dodgy_thresholds.push_back("ECF_PROFILE_THRESHOLDS=suite:10,family:9,task:8,task:a");
+
+   for(size_t i =0; i < dodgy_thresholds.size(); i++) {
+      //cout << "check -------> " << dodgy_thresholds[i] << endl;
+      BOOST_CHECK_MESSAGE(putenv(const_cast<char*>(dodgy_thresholds[i].c_str())) == 0,"putenv failed for " << dodgy_thresholds[i]);
+      BOOST_CHECK_THROW(ServerEnvironment serverEnv(argc,argv), std::runtime_error );
+   }
+
+   putenv(const_cast<char*>("ECF_PROFILE_THRESHOLDS")); // remove from env, otherwise valgrind complains
+
+   Host h;
+   fs::remove(h.ecf_log_file(Str::DEFAULT_PORT_NUMBER()));
 
    /// Destroy Log singleton to avoid valgrind from complaining
    Log::destroy();
