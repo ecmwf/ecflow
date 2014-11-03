@@ -85,6 +85,7 @@ bool EditScriptCmd::isWrite() const
    return false;
 }
 
+
 STC_Cmd_ptr EditScriptCmd::doHandleRequest(AbstractServer* as) const
 {
 	as->update_stats().edit_script_++;
@@ -145,6 +146,7 @@ STC_Cmd_ptr EditScriptCmd::doHandleRequest(AbstractServer* as) const
 			/// This function can throw std::runtime error if pre_processing fails
   			std::string ret_file_contents ;
  			ecf_file.pre_process(user_file_contents_,ret_file_contents);
+ 		   vector<string>().swap(user_file_contents_); // clear user_file_contents_ and minimise its capacity
 			return PreAllocatedReply::string_cmd(ret_file_contents);
   		}
 
@@ -201,6 +203,7 @@ STC_Cmd_ptr EditScriptCmd::doHandleRequest(AbstractServer* as) const
 		      jobsParam.set_user_edit_file( user_file_contents_);
 
 		      if (!submittable->submitJob(jobsParam)) {
+               vector<string>().swap(user_file_contents_); // clear user_file_contents_ and minimise its capacity
 		         throw std::runtime_error("EditScriptCmd::SUBMIT_USER_FILE: failed : " + jobsParam.getErrorMsg());
 		      }
 		      submittable->flag().set(ecf::Flag::USER_EDIT);
@@ -209,6 +212,7 @@ STC_Cmd_ptr EditScriptCmd::doHandleRequest(AbstractServer* as) const
 		      // CREATE a Child Alias. The create alias and parent it to the Task., and choose to run or not.
 		      Task* task = submittable->isTask();
 		      if (!task) {
+		         vector<string>().swap(user_file_contents_); // clear user_file_contents_ and minimise its capacity
 		         throw std::runtime_error("EditScriptCmd::SUBMIT_USER_FILE: Aliases can only be created for a task. Selected path is a Alias. Please select a Task path");
 		      }
 		      alias_ptr alias = task->add_alias(user_file_contents_,user_variables_);
@@ -216,6 +220,7 @@ STC_Cmd_ptr EditScriptCmd::doHandleRequest(AbstractServer* as) const
 		      if (run_) {
 		         JobsParam jobsParam(as->poll_interval(),true /* create jobs */); // spawn jobs = true
 		         if (!alias->submitJob(jobsParam)) {
+		            vector<string>().swap(user_file_contents_); // clear user_file_contents_ and minimise its capacity
 		            throw std::runtime_error("EditScriptCmd::SUBMIT_USER_FILE: failed for Alias : " + jobsParam.getErrorMsg());
 		         }
 		         alias->flag().set(ecf::Flag::USER_EDIT);
@@ -225,6 +230,11 @@ STC_Cmd_ptr EditScriptCmd::doHandleRequest(AbstractServer* as) const
 
 		default : assert(false); break;
 	}
+
+
+   // Clear up memory allocated *ASAP*
+   // When dealing with several thousands strings, this makes a *HUGE* difference
+   vector<string>().swap(user_file_contents_); // clear user_file_contents_ and minimise its capacity
 
 	return PreAllocatedReply::ok_cmd();
 }

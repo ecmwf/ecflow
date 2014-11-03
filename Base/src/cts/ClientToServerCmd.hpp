@@ -854,7 +854,7 @@ private:
 private:
    Api api_;
    bool force_;
-   mutable std::vector<std::string> paths_; // mutable to allow swap to clear & reclaim memory
+   mutable std::vector<std::string> paths_; // mutable to allow swap to clear & reclaim memory, as soon as possible
 
    friend class boost::serialization::access;
    template<class Archive>
@@ -1047,7 +1047,7 @@ private:
    virtual STC_Cmd_ptr doHandleRequest(AbstractServer*) const;
 
 private:
-   std::vector<std::string>  paths_;
+   mutable std::vector<std::string>  paths_;  // mutable to allow swap to clear & reclaim memory, as soon as possible
    Option                    option_;
 
    friend class boost::serialization::access;
@@ -1125,7 +1125,8 @@ private:
 
    virtual STC_Cmd_ptr doHandleRequest(AbstractServer*) const;
 
-   std::vector<std::string> paths_;
+private:
+   mutable std::vector<std::string> paths_; // mutable to allow swap to clear & reclaim memory, as soon as possible
    bool        force_;
    bool        test_;   // only for test, hence we don't serialise this
 
@@ -1312,7 +1313,8 @@ private:
 
    virtual STC_Cmd_ptr doHandleRequest(AbstractServer*) const;
 
-   std::vector<std::string> paths_;
+private:
+   mutable std::vector<std::string> paths_; // mutable to allow swap to clear & reclaim memory, as soon as possible
    std::string              stateOrEvent_;
    bool                     recursive_;
    bool                     setRepeatToLastValue_;
@@ -1372,7 +1374,7 @@ private:
    virtual STC_Cmd_ptr doHandleRequest(AbstractServer*) const;
 
 private:
-   std::vector<std::string> paths_;
+   mutable std::vector<std::string> paths_; // mutable to allow swap to clear & reclaim memory, as soon as possible
    bool          trigger_;
    bool          all_;
    bool          date_;
@@ -1465,7 +1467,8 @@ private:
    void createChange( Cmd_ptr& cmd,       std::vector<std::string>& options,       std::vector<std::string>& paths) const;
    void create_flag(  Cmd_ptr& cmd, const std::vector<std::string>& options, const std::vector<std::string>& paths, bool flag) const;
 
-   std::vector<std::string> paths_;
+private:
+   mutable std::vector<std::string> paths_; // mutable to allow swap to clear & reclaim memory, as soon as possible
    std::string              name_;
    std::string              value_;
    Add_attr_type            add_attr_type_;
