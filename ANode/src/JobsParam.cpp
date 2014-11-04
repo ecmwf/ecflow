@@ -58,7 +58,7 @@ void JobsParam::profile_to_log() const
 {
    size_t profiles_size = profiles_.size();
    for(size_t i = 0; i < profiles_size; ++i)  {
-      if ( profiles_[i].second > 0 && !profiles_[i].first.empty() )
+      if ( profiles_[i].second > 0  )
          log(Log::MSG, profiles_[i].first);
    }
 }
@@ -67,7 +67,7 @@ void JobsParam::profile_to_cout() const
 {
    size_t profiles_size = profiles_.size();
    for(size_t i = 0; i < profiles_size; ++i) {
-      if ( profiles_[i].second > 0 && !profiles_[i].first.empty() )
+      if ( profiles_[i].second > 0  )
          std::cout << profiles_[i].first << "\n";
    }
 }

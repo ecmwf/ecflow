@@ -73,10 +73,10 @@ JobProfiler::~JobProfiler()
       time_taken = threshold_ + 1;
    }
 
-   std::string text;
    if ( time_taken > threshold_)  {
 
       // This class can be called hierarchically, so produce nicely indented output
+      std::string text;
       for(int i = 0; i < counter_; i++) text += ' ';
       text += node_->debugNodePath();
       text += " : ";
@@ -90,9 +90,9 @@ JobProfiler::~JobProfiler()
 
       text += boost::lexical_cast<std::string>( time_taken );
       text += "ms";
-   }
 
-   jobsParam_.set_to_profile(index_,text,time_taken);
+      jobsParam_.set_to_profile(index_,text,time_taken);
+   }
 
    counter_ -= 1;
 }
