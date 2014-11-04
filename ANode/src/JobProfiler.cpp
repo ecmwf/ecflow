@@ -101,7 +101,7 @@ JobProfiler::~JobProfiler()
 
 void JobProfiler::profile_to_log(const JobsParam& jobsParam)
 {
-   LOG(Log::MSG,"Thresholds: suite: " << JobProfiler::suite_threshold() << " family: " << JobProfiler::family_threshold() << " task: " << JobProfiler::task_threshold());
+   LOG(Log::MSG,"Thresholds: suite: " << JobProfiler::suite_threshold() << "ms  family: " << JobProfiler::family_threshold() << "  task: " << JobProfiler::task_threshold() << "ms");
    const std::vector< std::pair<std::string,int> >& profiles = jobsParam.profiles();
    size_t profiles_size = profiles.size();
    for(size_t i = 0; i < profiles_size; ++i)  {
@@ -111,7 +111,7 @@ void JobProfiler::profile_to_log(const JobsParam& jobsParam)
 }
 void JobProfiler::profile_to_cout(const JobsParam& jobsParam)
 {
-   cout << "Thresholds: suite: " << JobProfiler::suite_threshold() << " family: " << JobProfiler::family_threshold() << " task: " << JobProfiler::task_threshold() << "\n";
+   cout << "Thresholds: suite: " << JobProfiler::suite_threshold() << "ms family: " << JobProfiler::family_threshold() << "ms task: " << JobProfiler::task_threshold() << "ms\n";
    const std::vector< std::pair<std::string,int> >& profiles = jobsParam.profiles();
    size_t profiles_size = profiles.size();
    for(size_t i = 0; i < profiles_size; ++i) {
