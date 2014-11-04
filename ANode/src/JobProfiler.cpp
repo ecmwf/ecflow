@@ -18,6 +18,7 @@
 #include "JobsParam.hpp"
 #include "Node.hpp"
 #include "Str.hpp"
+#include "Log.hpp"
 
 using namespace ecf;
 using namespace std;
@@ -95,6 +96,28 @@ JobProfiler::~JobProfiler()
    }
 
    counter_ -= 1;
+}
+
+
+void JobProfiler::profile_to_log(const JobsParam& jobsParam)
+{
+   LOG(Log::MSG,"Thresholds: suite: " << JobProfiler::suite_threshold() << " family: " << JobProfiler::family_threshold() << " task: " << JobProfiler::task_threshold());
+   const std::vector< std::pair<std::string,int> >& profiles = jobsParam.profiles();
+   size_t profiles_size = profiles.size();
+   for(size_t i = 0; i < profiles_size; ++i)  {
+      if ( profiles[i].second > 0  )
+         log(Log::MSG, profiles[i].first);
+   }
+}
+void JobProfiler::profile_to_cout(const JobsParam& jobsParam)
+{
+   cout << "Thresholds: suite: " << JobProfiler::suite_threshold() << " family: " << JobProfiler::family_threshold() << " task: " << JobProfiler::task_threshold() << "\n";
+   const std::vector< std::pair<std::string,int> >& profiles = jobsParam.profiles();
+   size_t profiles_size = profiles.size();
+   for(size_t i = 0; i < profiles_size; ++i) {
+      if ( profiles[i].second > 0  )
+         std::cout << profiles[i].first << "\n";
+   }
 }
 
 void JobProfiler::set_suite_threshold(size_t threshold) {suite_threshold_ = threshold;}

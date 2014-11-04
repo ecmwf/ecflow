@@ -34,6 +34,9 @@ public:
    JobProfiler(Node*,JobsParam&,size_t threshold /* expected to be milli seconds */);
    ~JobProfiler();
 
+   static void profile_to_log(const JobsParam& jobsParam);
+   static void profile_to_cout(const JobsParam& jobsParam_);
+
    static std::string threshold_defaults();
    static void set_suite_threshold(size_t threshold);
    static void set_family_threshold(size_t threshold);
