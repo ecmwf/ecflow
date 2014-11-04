@@ -22,11 +22,11 @@ extern "C" {
 #include "xec.h"
 }
 
-const int kMaxLines = 100;
+const int kMaxLines = 400;
 
 history::history(panel_window& w):
 	panel(w),
-	timeout(5),
+	timeout(30),
 	last_("")
 {
   panel::detach();
