@@ -797,7 +797,7 @@ STC_Cmd_ptr LabelCmd::doHandleRequest(AbstractServer* as) const
 
 	assert(isWrite()); // isWrite used in handleRequest() to control check pointing
 
-	{   // update suite change numbers before job submission
+	{  // update suite change numbers before job submission
 	   // submittable_ setup during authentication
 		SuiteChanged1 changed(submittable_->suite());
 
@@ -809,6 +809,8 @@ STC_Cmd_ptr LabelCmd::doHandleRequest(AbstractServer* as) const
 		}
 		submittable_->changeLabel(name_,label_);
 	}
+
+	// Note: reclaiming memory for label_ earlier make *no* difference to performance of server
 
 	return PreAllocatedReply::ok_cmd();
 }
