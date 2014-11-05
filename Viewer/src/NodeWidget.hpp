@@ -35,6 +35,7 @@ public:
 	void setViewMode(Viewer::ViewMode);
 	VConfig* config() const {return config_;}
 	ViewNodeInfo_ptr currentSelection();
+	void currentSelection(ViewNodeInfo_ptr n);
 
 	void save(boost::property_tree::ptree &pt);
 	void load(const boost::property_tree::ptree &pt);

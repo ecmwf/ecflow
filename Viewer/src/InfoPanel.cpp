@@ -109,6 +109,11 @@ InfoPanel::InfoPanel(QWidget* parent) :
 	connect(tab_,SIGNAL(currentChanged(int)),
 				    this,SLOT(slotCurrentWidgetChanged(int)));
 
+
+	connect(bcWidget_,SIGNAL(selected(ViewNodeInfo_ptr)),
+			this,SIGNAL(selectionChanged(ViewNodeInfo_ptr)));
+
+
 	//Check which roles are allowed
 	QStringList ids;
 	ids << "info" << "variable" << "message" << "script" << "job" << "output" << "why" << "manual" << "trigger";
@@ -137,7 +142,7 @@ void InfoPanel::clear()
 {
 	currentNode_.reset();
 	tab_->clear();
-	bcWidget_->setPath(0);
+	bcWidget_->setPath(ViewNodeInfo_ptr());
 }
 
 void InfoPanel::reset(ViewNodeInfo_ptr node)

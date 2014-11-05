@@ -4,7 +4,8 @@ set (files ecflowview_menus.json
            ecflowview_attribute.json
            ecflowview_icon.json
            ecflowview_nstate.json
-           ecflowview_sstate.json)
+           ecflowview_sstate.json
+           viewer.qss)
 
 
 # for each file, copy it into the build directory at build time

@@ -1,6 +1,6 @@
 /***************************** LICENSE START ***********************************
 
- Copyright 2013 ECMWF and INPE. This software is distributed under the terms
+ Copyright 2014 ECMWF and INPE. This software is distributed under the terms
  of the Apache License version 2.0. In applying this license, ECMWF does not
  waive the privileges and immunities granted to it by virtue of its status as
  an Intergovernmental Organization or submit itself to any jurisdiction.
@@ -9,34 +9,116 @@
 
 #include "NodePathWidget.hpp"
 
-#include <QApplication>
 #include <QDebug>
-#include <QDir>
-#include <QDragEnterEvent>
-#include <QDragMoveEvent>
 #include <QHBoxLayout>
 #include <QMenu>
-#include <QSignalMapper>
 #include <QStyleOption>
 #include <QPainter>
-#include <QPalette>
-#include <QToolButton>
-
 
 #include "Node.hpp"
 #include "ServerHandler.hpp"
 #include "VNState.hpp"
 
-//QList<MvQContextItem*> NodePathWidget::cmTbItems_;
-//QList<MvQContextItem*> NodePathWidget::cmMenuItems_;
 
-
-NodePathWidgetItem::~NodePathWidgetItem()
+NodePathNodeItem::NodePathNodeItem(int index,QString name,QColor col,bool selected,QWidget * parent) :
+  NodePathItem(NodeType,index,parent),
+  col_(col),
+  current_(selected)
 {
-	    if(menuTb_) menuTb_->deleteLater();
-	    if(nameTb_) nameTb_->deleteLater();
-	    if(menu_) menu_->deleteLater();
+	//Stylesheet
+	qss_="QToolButton {\
+		        border: BORDER;\
+			    border-radius: 0px; \
+		     	padding: 0px; \
+				background: BASE-COLOR;\
+			    font-weight: FONT;\
+				color: TEXT-COLOR; \
+		 }\
+		     QToolButton:hover{\
+		    	 border: BORDER;\
+		    	 border-radius: 0px; \
+		    	 padding: 0px; \
+		    	 background: HOVER-COLOR;\
+			     font-weight: FONT;\
+		 }";
+
+	setText(name);
+	resetStyle();
+};
+
+void NodePathNodeItem::reset(QString name,QColor col,bool current)
+{
+	if(text() != name)
+		setText(name);
+
+	if(col_ != col || current_!=current)
+	{
+		col_=col;
+		current_=current;
+		resetStyle();
+	}
 }
+
+void NodePathNodeItem::resetStyle()
+{
+	QString st=qss_;
+	//Colour
+	st.replace("BASE-COLOR",col_.name()).replace("HOVER-COLOR",col_.darker(125).name());
+
+	//Font
+	st.replace("FONT",current_?"bold":"normal");
+
+	//Text color
+	st.replace("TEXT-COLOR",isDark(col_)?"white":"black");
+
+	//Border
+	st.replace("BORDER",current_?"2px solid rgb(40, 40, 40)":"1px solid rgb(160, 160, 160)");
+
+	setStyleSheet(st);
+}
+
+bool NodePathNodeItem::isDark(QColor col) const
+{
+	int h=col.hue();
+	int lg=col.lightness();
+	bool darkBg=false;
+	if(h < 10 || h > 220)
+	{
+		if(lg <180)
+				darkBg=true;
+	}
+	else if(lg < 110)
+	{
+		darkBg=true;
+	}
+	return darkBg;
+}
+
+void NodePathNodeItem::colour(QColor col)
+{
+	if(col_!= col)
+	{
+		col_=col;
+		resetStyle();
+	}
+}
+
+void NodePathNodeItem::current(bool current)
+{
+	if(current_!=current)
+	{
+		current_=current;
+		resetStyle();
+	}
+}
+
+
+NodePathMenuItem::NodePathMenuItem(int index,QWidget * parent) :
+  NodePathItem(MenuType, index,parent)
+{
+	setObjectName("pathMenuTb");
+};
+
 
 //=============================================================
 //
@@ -46,115 +128,156 @@ NodePathWidgetItem::~NodePathWidgetItem()
 
 NodePathWidget::NodePathWidget(QWidget *parent) :
   QWidget(parent),
-  actionReload_(0),
-  reloadTb_(0),
-  editable_(true),
-  paddingX_(2),
-  paddingY_(2),
-  textPaddingX_(2),
-  textPaddingY_(2),
-  gapX_(8)
+  stayInParent_(true),
+  infoIndex_(-1)
 {
+	setProperty("breadcrumbs","1");
+
 	layout_=new QHBoxLayout(this);
 	layout_->setSpacing(0);
 	layout_->setContentsMargins(6,0,6,0);
 	setLayout(layout_);
 
-	setProperty("path","1");
-
-	smp_=new QSignalMapper(this);
-
-	connect(smp_,SIGNAL(mapped(int)),
-		this,SIGNAL(nodeClicked(int)));
-
-	connect(this,SIGNAL(nodeClicked(int)),
-		this,SLOT(slotChangeNode(int)));
-
-	QFont f(QApplication::font());
-	QFontMetrics fm(f);
-
-	height_=fm.height()+2*paddingY_+2*textPaddingY_;
+	//QFont f(QApplication::font());
+	//QFontMetrics fm(f);
 }
+
+NodePathWidget::~NodePathWidget()
+{
+	clearLayout();
+}
+
+
+void  NodePathWidget::clearContents()
+{
+	clearLayout();
+
+	int cnt=nodeItems_.count();
+	for(int i=0; i < cnt; i++)
+	{
+			delete nodeItems_.takeLast();
+
+	}
+	cnt=menuItems_.count();
+	for(int i=0; i < cnt; i++)
+	{
+		delete menuItems_.takeLast();
+
+	}
+}
+
 
 void NodePathWidget::slotContextMenu(const QPoint& pos)
 {
-	/*static MvQContextItemSet cmItems("Breadcrumbs");
 
-	QString path;
-	QMenu *menu=0;
-
-	QToolButton *tb=static_cast<QToolButton*>(QObject::sender());
-	if(tb)
-	{
-	  	path=getPath(tb);
-	}
-	else
-	{	menu=static_cast<QMenu*>(QObject::sender());
-		if(menu)
-		{
-		  	QAction *ac=menu->actionAt(pos);
-			path=getPath(ac);
-		}
-	}
-
-	if((tb || menu) && !path.isEmpty())
-	{
-		QString selection;
-		if(tb)
-			selection=MvQContextMenu::instance()->exec(cmItems.icon(),tb->mapToGlobal(pos),tb);
-		//else
-		//  	selection=MvQContextMenu::instance()->exec(cmMenuItems_,menu->mapToGlobal(pos),menu);
-
-		if(!selection.isEmpty())
-		{
-		  	emit commandRequested(selection,path);
-		}
-	}*/
 }
 
+//We delete the layout items but not the widget they contain
 void NodePathWidget::clearLayout()
 {
   	QLayoutItem *item;
  	while( (item = layout_->takeAt(0)) != 0)
 	{
-     		QWidget *w=item->widget();
-		if(w)
-		{
-		  	layout_->removeWidget(w);
-		  	//delete w;
-		}
-		delete item;
+     		if(QWidget *w=item->widget())
+     		{
+     			layout_->removeWidget(w);
+     			//delete w;
+     		}
+     		delete item;
  	}
 }
 
-void NodePathWidget::setReloadAction(QAction* ac)
+void NodePathWidget::infoIndex(int idx)
 {
-  	actionReload_=ac;
+	if(infoIndex_ >=0 && infoIndex_  < nodeItems_.count())
+	{
+		nodeItems_.at(infoIndex_)->current(false);
+	}
+
+	infoIndex_=idx;
+
+	if(infoIndex_ >=0 && infoIndex_  < nodeItems_.count())
+	{
+			nodeItems_.at(infoIndex_)->current(true);
+	}
 }
 
-void NodePathWidget::setPath(QString path)
+QList<Node*> NodePathWidget::toNodeList(ViewNodeInfo_ptr info)
 {
-	//Need to find out the node from the path
-	//setPath();
+	QList<Node*> lst;
+	if(info->isServer() || !info->node())
+		return lst;
+
+	Node *node=info->node();
+	lst << node;
+	Node *f=node;
+	while(f->parent())
+	{
+		f=f->parent();
+		lst.prepend(f);
+	}
+
+	return lst;
+}
+
+//Find p1 in p2
+int NodePathWidget::findInPath(ViewNodeInfo_ptr p1,ViewNodeInfo_ptr p2,bool sameServer)
+{
+	//The servers are the same
+	if(sameServer)
+	{
+		if(p1->isServer())
+			return 0;
+	}
+	else
+	{
+		return -1;
+	}
+
+	int idx=-1;
+	QList<Node*> lst1=toNodeList(p1);
+	QList<Node*> lst2=toNodeList(p2);
+
+	if(lst1.count() > lst2.count())
+		return -1;
+
+	for(int i=0; i < lst1.count(); i++)
+	{
+			qDebug() << lst1.at(i) << lst2.at(i);
+
+			if(lst1.at(i) != lst2.at(i))
+			{
+				idx=-1;
+				break;
+			}
+			else
+				idx=i+1;
+	}
+
+	return idx;
+}
+
+
+
+void NodePathWidget::setPath(QString)
+{
+
 }
 
 
 void NodePathWidget::setPath(ViewNodeInfo_ptr info)
 {
-	//Clear the layout (widgets are not deleted in this step!)
-	clearLayout();
-  	path_.clear();
-  	items_.clear();
-
   	ServerHandler *server=0;
   	bool sameServer=false;
 
-  	if(info)
+  	//Check if there is data in info
+  	if(info.get())
   	{
   		server=info->server();
 
-  		sameServer=(info_)?(info_->server() != server):false;
+  		sameServer=(info_)?(info_->server() == server):false;
 
+  		//Handle observers
   		if(!sameServer)
   		{
   			if(info_ && info_->server())
@@ -163,490 +286,150 @@ void NodePathWidget::setPath(ViewNodeInfo_ptr info)
   			info->server()->addNodeObserver(this);
   		}
   	}
+  	//If the there is no data we clean everything and return
+  	else
+  	{
+  	  		if(info_ && info_->server())
+  	  				info_->server()->removeNodeObserver(this);
 
-  	//Now it is safe to do
+  	  		info_=info;
+  	  		infoIndex_=-1;
+  	  		clearContents();
+  	  		return;
+  	}
+
+  	//Check "stay in parent" mode
+  	if(stayInParent_)
+  	{
+  		//If the new path is part of the current path we just set the
+  		//current node index and return.
+  		int idx=findInPath(info,info_,sameServer);
+  		if(idx != -1)
+  		{
+  			infoIndex(idx);
+  			return;
+  		}
+  	}
+
+  	//We do not stay in parent mode or the new path is not part of the current one.
+
+  	//Now it is safe to do this assignment
   	info_=info;
 
-	//Get the node list
-  	QList<Node*> lst;
-  	if(info_->isNode())
-	{
-		Node *node=info->node();
-		lst << node;
-		Node *f=node;
-		while(f->parent())
-		{
-			f=f->parent();
-			lst.prepend(f);
+	//Get the node list + prepend the server
+  	QList<Node*> lst=toNodeList(info_);
+  	lst.prepend(0);//indicates the server
 
-			//qDebug() << "node" << f->absNodePath().c_str();
-		}
+  	//--------------------------------------------
+  	// Cleaning (as much as needed)
+  	//--------------------------------------------
+
+  	//Clear the layout (widgets are not deleted in this step!)
+  	clearLayout();
+
+	//Delete
+	int cnt=nodeItems_.count();
+	for(int i=lst.count(); i < cnt; i++)
+	{
+			delete nodeItems_.takeLast();
+
+	}
+	cnt=menuItems_.count();
+	for(int i=lst.count(); i < cnt; i++)
+	{
+		delete menuItems_.takeLast();
+
 	}
 
-	lst.prepend(0);//indicates the server
+	//--------------------------------------------
+	// Reset/rebuild the contents
+	//--------------------------------------------
 
 	for(int i=0; i < lst.count(); i++)
 	{
-			QString stateCol;
+			//---------------------------
+			// Create node/server item
+			//---------------------------
 
-			NodePathWidgetItem* item=0;
-
-			//----------------------
-			// Create item
-			//----------------------
+			QColor col;
+			QString name;
+			NodePathNodeItem* nodeItem=0;
 
 			//Server
 			if(i==0)
 			{
-				item = new NodePathWidgetItem(QString::fromStdString(server->name()),
-														QString::fromStdString("/"));
-
-				item->colour_=QColor(255,255,255);
+				col=QColor(255,255,255);
+				name=QString::fromStdString(server->name());
 			}
 			//Node
 			else
 			{
 				Node *n=lst.at(i);
-				item = new NodePathWidgetItem(QString::fromStdString(n->name()),
-							QString::fromStdString(n->absNodePath()));
-
-				item->colour_=VNState::toColour(n).name();
+				col=VNState::toColour(n).name();
+				name=QString::fromStdString(n->name());
 			}
 
-
-
-			items_ << item;
-
-	}
-
-	updateGr();
-
-}
-
-
-void NodePathWidget::updateGr()
-{
-    QFont f(QApplication::font());
-	QFontMetrics fm(f);
-
-	int w;
-	int h=height_-2*paddingY_;
-
-	int xp=paddingX_;
-	int yp=0;
-
-	for(int i=0; i < items_.count(); i++)
-	{
-		NodePathWidgetItem *item=items_.at(i);
-		w=fm.width(item->name_)+2*textPaddingX_;
-		item->rect_=QRect(xp,yp,w,h);
-		xp+=w+gapX_;
-	}
-
-	if(items_.count()>0)
-	{
-		xp-=gapX_;
-	}
-
-	xp+=paddingX_;
-
-	resize(xp,height_);
-
-	update();
-
-}
-
-
-
-
-void NodePathWidget::resizeEvent(QResizeEvent */*event*/)
-{
-		qDebug() << "resize";
-}
-
-
-/*
-void NodePathWidget::setPath(ViewNodeInfo_ptr info)
-{
-	//Clear the layout (widgets are not deleted in this step!)
-	clearLayout();
-  	path_.clear();
-
-  	ServerHandler *server=0;
-  	bool sameServer=false;
-
-  	if(info)
-  	{
-  		server=info->server();
-
-  		sameServer=(info_)?(info_->server() != server):false;
-
-  		if(!sameServer)
-  		{
-  			if(info_ && info_->server())
-  				info_->server()->removeNodeObserver(this);
-
-  			info->server()->addNodeObserver(this);
-  		}
-  	}
-
-  	//Now it is safe to do
-  	info_=info;
-
-	//Get the node list
-  	QList<Node*> lst;
-  	if(info_->isNode())
-	{
-		Node *node=info->node();
-		lst << node;
-		Node *f=node;
-		while(f->parent())
-		{
-			f=f->parent();
-			lst.prepend(f);
-
-			//qDebug() << "node" << f->absNodePath().c_str();
-		}
-	}
-
-	lst.prepend(0);//indicates the server
-
-	//If same server we try to keep some of the existing widgets/items
-	int lastIndex=0;
-	if(sameServer)
-	{
-		//-----------------------------------------------------------
-		//Try to reuse the current items and delete the unneeded ones
-		//-----------------------------------------------------------
-
-		//qDebug() << "count" << lst.count() << items_.count();
-
-		//Find out how many items can be reused.
-		//firstIndex: the first original item that differs from the current one.
-		for(int i=1; i <  lst.count() && i < items_.count(); i++)
-		{
-			//qDebug() << i << lst.at(i)->absNodePath().c_str() << items_[i]->path_;
-
-			if(QString::fromStdString(lst.at(i)->absNodePath()) == items_[i]->path_)
+			if(i < nodeItems_.count())
 			{
-				lastIndex=i;
+				nodeItem=nodeItems_.at(i);
+				nodeItem->reset(name,col,false);
 			}
 			else
-				break;
-		}
+			{
+				nodeItem=new NodePathNodeItem(i,name,col,false,this);
+				nodeItems_ << nodeItem;
+				connect(nodeItem,SIGNAL(clicked()),
+			  		     this,SLOT(nodeItemSelected()));
+			}
+
+			layout_->addWidget(nodeItem);
+
+			//-----------------------------------------
+			// Create sub item (connector or menu)
+			//-----------------------------------------
+
+			NodePathMenuItem* menuItem=0;
+
+			if(i >= menuItems_.count())
+			{
+				menuItem= new NodePathMenuItem(i,this);
+				menuItems_ << menuItem;
+				connect(menuItem,SIGNAL(clicked()),
+					   this,SLOT(menuItemSelected()));
+			}
+			else
+			{
+				menuItem=menuItems_.at(i);
+			}
+			layout_->addWidget(menuItem);
+
 	}
 
-
-	//Delete unused items (if there are any)
-	int num=items_.count();
-	for(int i=lastIndex; i <  num; i++)
-	{
-		NodePathWidgetItem *item=items_.back();
-	  	items_.removeLast();
-		delete item;
-	}
-
-	for(int i=lastIndex; i < lst.count(); i++)
-	{
-		NodePathWidgetItem *item;
-		QString stateCol;
-		QToolButton *tb;
-
-		//----------------------
-		// Create item
-		//----------------------
-
-		//Server
-		if(i==0)
-	  	{
-			item = new NodePathWidgetItem(QString::fromStdString(server->name()),
-											QString::fromStdString("/"));
-	  	}
-		//Node
-		else
-		{
-			Node *n=lst.at(i);
-			item = new NodePathWidgetItem(QString::fromStdString(n->name()),
-								QString::fromStdString(n->absNodePath()));
-
-			stateCol=VState::toColour(f).name();
-		}
-
-		items_ << item;
-
-		//---------------------------------------
-		// Name
-		//---------------------------------------
-
-		tb=new QToolButton(this);
-		item->nameTb_=tb;
-
-		tb->setText(item->name_);
-		tb->setObjectName("pathNameTb");
-
-		//Server
-		if(i==0)
-		{
-		  	tb->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
-		  	tb->setIconSize(QSize(16,16));
-			tb->setIcon(QPixmap(":/viewer/server.svg"));
-		}
-		//Node
-		else
-		{
-			tb->setToolButtonStyle(Qt::ToolButtonTextOnly);
-		}
-
-		//qDebug() << tb->styleSheet();
-
-		QString st=" QToolButton#pathNameTb { \
-		     	border-radius: 0px;\
-		     	padding: 0px; \
-				color: black; \
-			    background: " + stateCol + ";	\
-		 	 }\
-		QToolButton#pathNameTb:hover{\
-			background:  qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #deebf6, stop: 1 #bed8ee);\
-		        border: 1px solid rgb(160, 160, 160);\
-		     	border-radius: 0px;\
-		        padding: 0px; \
-		 }";
-
-		tb->setStyleSheet(st);
-
-		//tb->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
-		tb->setAutoRaise(true);
-
-		connect(tb,SIGNAL(clicked(bool)),
-			    smp_,SLOT(map()));
-
-		//Context menu
-    	tb->setContextMenuPolicy(Qt::CustomContextMenu);
-
-		connect(tb,SIGNAL(customContextMenuRequested(const QPoint &)),
-                	this, SLOT(slotContextMenu(const QPoint &)));
-
-		smp_->setMapping(tb,i);
-
-		//connect(tb,SIGNAL(iconDropped(QDropEvent*)),
-		//	this,SLOT(slotIconDropped(QDropEvent*)));
-
-	  	//---------------------------------------
-		//Menu with the folders in the given dir
-		//---------------------------------------
-
-		tb=new QToolButton(this);
-		item->menuTb_=tb;
-
-		//tb->setArrowType(Qt::RightArrow);
-		tb->setAutoRaise(true);
-		//tb->setIconSize(QSize(10,10));
-		tb->setPopupMode(QToolButton::InstantPopup);
-		tb->setObjectName("pathMenuTb");
-		tb->setProperty("index",i);
-
-		connect(tb,SIGNAL(clicked()),
-				 this,SLOT(slotShowNodeChildrenMenu()));
-
-		//Server
-		if(i==0)
-		{
-			//item->menu_=createNodeChildrenMenu(i,f,tb);
-		}
-		else
-		{
-			Node *node=lst.at(i);
-			item->menu_=createNodeChildrenMenu(i,node,tb);
-		}
-	}
-
-	//Add items to layout
-	for(int i=0; i <  items_.count(); i++)
-	{
-		layout_->addWidget(items_.at(i)->nameTb_);
-		layout_->addWidget(items_.at(i)->menuTb_);
-	}
-
-	//Set the text in the last item bold
-	for(int i=0; i <  items_.count(); i++)
-	{
-		QString st=items_.at(i)->nameTb_->styleSheet();
-		if(i== items_.count()-1)
-		 	st+="QToolButton {font-weight: bold;}";
-		else
-		  	st+="QToolButton {font-weight: normal;}";
-
-		items_.at(i)->nameTb_->setStyleSheet(st);
-	}
-
-	layout_->addStretch(1);
-
-	//Reload
-	if(actionReload_)
-	{
-	  	if(!reloadTb_)
-		{
-		  	reloadTb_=new QToolButton(this);
-			reloadTb_->setDefaultAction(actionReload_);
-			reloadTb_->setAutoRaise(true);
-			//reloadTb_->setIconSize(QSize(20,20));
-			reloadTb_->setObjectName("pathIconTb");
-		}
-		layout_->addWidget(reloadTb_);
-	}
+	//Set the current node index (used only in "stay in parent" mode). If we are here it must be the last node!
+	infoIndex(lst.count()-1);
 
 
 }
 
-*/
-
-QMenu* NodePathWidget::createNodeChildrenMenu(int index,Node* node,QWidget *parent)
+void  NodePathWidget::nodeItemSelected()
 {
-	if(index >=0 && index < items_.count())
+	NodePathNodeItem* item=static_cast<NodePathNodeItem*>(sender());
+	int idx=nodeItems_.indexOf(item);
+	if(idx != -1 && idx != infoIndex_)
 	{
-	  	QMenu *childrenMenu=new QMenu(parent);
-
-	  	int num=ServerHandler::numOfImmediateChildren(node);
-	  	for(int i=0; i < num; i++)
-	  	{
-	  		if(Node *n=ServerHandler::immediateChildAt(node,i))
-	  		{
-	  			QAction *ac=childrenMenu->addAction(QString::fromStdString(n->name()));
-	  			ac->setData(index);
-	  		}
-	  	}
-
-		//connect(childrenMenu,SIGNAL(triggered(QAction*)),
-		//	this,SLOT(slotChangeNode(QAction*)));
-
-		childrenMenu->setContextMenuPolicy(Qt::CustomContextMenu);
-
-		connect(childrenMenu,SIGNAL(customContextMenuRequested(const QPoint &)),
-                        this, SLOT(slotContextMenu(const QPoint &)));
-
-		return childrenMenu;
+		emit selected(nodeAt(idx));
 	}
-
-	return 0;
 }
 
-void NodePathWidget::slotShowNodeChildrenMenu()
+void  NodePathWidget::menuItemSelected()
 {
-	if(editable_)
-		return;
-
-	if(QToolButton *tb=static_cast<QToolButton*>(sender()))
+	NodePathMenuItem* item=static_cast<NodePathMenuItem*>(sender());
+	int idx=menuItems_.indexOf(item);
+	if(idx != -1)
 	{
-			int index=tb->property("index").toInt();
-			if(index>= 0 && index < items_.count())
-				items_.at(index)->menu_->popup(mapToGlobal(tb->pos()));
+		loadMenu(mapToGlobal(item->pos()+QPoint(0,item->size().height()/2)),nodeAt(idx));
 	}
 }
-
-//Slot for handling the node button click
-void NodePathWidget::slotChangeNode(int index)
-{
-	if(editable_)
-			return;
-
-	if(index >=0 && index < items_.count()-1)
-	{
-	  	QString path=items_.at(index)->path_;
-
-	  	//QString path;
-		//for(int i=0; i <= index; i++)
-		//	path+="/"+items_[i].name_;
-
-		qDebug() << path;
-
-		//setPath(path);
-
-		//emit nodeSelected(path);
-
-		setPath(path);
-	}
-}
-
-//Slot for handling the node children menu selection
-void NodePathWidget::slotChangeNode(QAction *ac)
-{
-	if(editable_)
-			return;
-
-	QString path=getPath(ac);
-
-	if(!path.isEmpty())
-	{
-	  	//emit nodeSelected(path);
-		setPath(path);
-	}
-
-	/*
-	if (!ac) return;
-
-	QVariant var=ac->data();
-	if(var.isNull())  return;
-
-	int index=var.toInt();
-
-  	if(index >=0 && index < items_.count())
-	{
-		QString path=items_.at(index)->fullName_;
-
-	  	//QString path;
-		//for(int i=0; i < index; i++)
-		//	path+="/"+items_[i].name_;
-
-		path+="/" + ac->text();
-
-		qDebug() << path;
-
-		emit dirChanged(path);
-
-		setPath(path);
-	}*/
-}
-
-void NodePathWidget::slotEditable(bool e)
-{
-	if(e != editable_)
-	{
-		editable_=e;
-
-		setPath(info_);
-	}
-}
-
-QString NodePathWidget::getPath(QToolButton *tb)
-{
-	foreach(NodePathWidgetItem *item,items_)
-	{
-	  	if(item->nameTb_ == tb)
-		{
-	  		return item->path_;
-		}
-	}
-
-	return QString();
-}
-
-QString NodePathWidget::getPath(QAction *ac)
-{
-	if (!ac) return QString();
-
-	QVariant var=ac->data();
-	if(var.isNull())  return QString();
-
-	int index=var.toInt();
-
-  	if(index >=0 && index < items_.count())
-	{
-		return items_.at(index)->path_ + "/" + ac->text();;
-	}
-
-	return QString();
-}
-
 
 ViewNodeInfo_ptr NodePathWidget::nodeAt(int idx)
 {
@@ -655,7 +438,7 @@ ViewNodeInfo_ptr NodePathWidget::nodeAt(int idx)
 		ServerHandler* server=info_->server();
 		if(Node *node=info_->node())
 		{
-			for(int i=items_.count()-1; i > idx && i >=1; i--)
+			for(int i=nodeItems_.count()-1; i > idx && i >=1; i--)
 			{
 				node=node->parent();
 			}
@@ -676,76 +459,70 @@ ViewNodeInfo_ptr NodePathWidget::nodeAt(int idx)
 	return ViewNodeInfo_ptr();
 }
 
-
-void NodePathWidget::mousePressEvent(QMouseEvent *event)
+void NodePathWidget::loadMenu(const QPoint& pos,ViewNodeInfo_ptr p)
 {
-	if(editable_)
+	QList<QAction*> acLst;
+
+	if(p->isServer())
 	{
-		int idx=nodeIndex(event->pos());
-		if(idx != -1)
+		ServerHandler* server=p->server();
+
+		int n=server->numSuites();
+		for(unsigned int i=0; i < n; i++)
 		{
-			emit nodeSelected(nodeAt(idx));
+			node_ptr node=server->suiteAt(i);
+			if(node)
+			{
+				QAction *ac=new QAction(QString::fromStdString(node->name()),this);
+				ac->setData(i);
+				acLst << ac;
+			}
+		}
+		if(acLst.count() > 0)
+		{
+			if(QAction *ac=QMenu::exec(acLst,pos,acLst.front(),this))
+			{
+				int idx=ac->data().toInt();
+				ViewNodeInfo_ptr res(new ViewNodeInfo(server->suiteAt(idx).get(),server));
+				emit selected(res);
+			}
+		}
+
+	}
+	else if(Node *node=p->node())
+	{
+		std::vector<node_ptr> nodes;
+		node->immediateChildren(nodes);
+		for(unsigned int i=0; i < nodes.size(); i++)
+		{
+			QAction *ac=new QAction(QString::fromStdString(nodes.at(i)->name()),this);
+			ac->setData(i);
+			acLst << ac;
+		}
+
+		if(acLst.count() > 0)
+		{
+			if(QAction *ac=QMenu::exec(acLst,pos,acLst.front(),this))
+			{
+				int idx=ac->data().toInt();
+				//ServerHandler* server=p->server();
+				ServerHandler* server=info_->server();
+				ViewNodeInfo_ptr res(new ViewNodeInfo(nodes.at(idx).get(),server));
+				emit selected(res);
+			}
 		}
 	}
-}
 
-void NodePathWidget::mouseMoveEvent(QMouseEvent *event)
-{
-	/*if(event->buttons() != Qt::NoButton)
-		return;
-
-	int idx=index(event->pos());
-	if(idx >= 0 && idx < cols_.count())
+	foreach(QAction* ac,acLst)
 	{
-		setToolTip(QString::fromStdString(names_[idx]));
-
-	}*/
-}
-
-int NodePathWidget::nodeIndex(QPoint pos)
-{
-  	for(int i=0; i < items_.count(); i++)
-  		if(items_.at(i)->rect_.contains(pos))
-  			return i;
-
-  	return -1;
-
+		delete ac;
+	}
 }
 
 void NodePathWidget::paintEvent(QPaintEvent *)
  {
-     /*QStyleOption opt;
+     QStyleOption opt;
      opt.init(this);
      QPainter p(this);
-     style()->drawPrimitive(QStyle::PE_Widget, &opt, &p, this);*/
-
-	QPainter p(this);
-
-	QFont f(QApplication::font());
-    QFontMetrics fm(f);
-
-    int w;
-    int h=fm.height();
-
-    p.setPen(QPen(Qt::black));
-
-    for(int i=0; i < items_.count(); i++)
-    {
-     	NodePathWidgetItem *item=items_.at(i);
-     	//w=fm.width(item->name_)+2*paddingX_;
-
-     	p.fillRect(item->rect_,item->colour_);
-     	p.setPen(QPen(QColor(150,150,150)));
-     	p.drawRect(item->rect_);
-
-     	if(i>0)
-     	{
-     	     NodePathWidgetItem *prevItem=items_.at(i-1);
-     	     p.drawLine(item->rect_.x(),item->rect_.center().y(),
-     	     			 prevItem->rect_.right(),prevItem->rect_.center().y());
-     	}
-
-     	p.setPen(QPen(Qt::black));
-     	p.drawText(item->rect_.adjusted(textPaddingX_,textPaddingY_,0,0),Qt::AlignCenter,item->name_);
-     }
+     style()->drawPrimitive(QStyle::PE_Widget, &opt, &p, this);
  }

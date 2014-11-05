@@ -93,6 +93,17 @@ ViewNodeInfo_ptr TreeNodeView::currentSelection()
 	return ViewNodeInfo_ptr();
 }
 
+void TreeNodeView::currentSelection(ViewNodeInfo_ptr info)
+{
+	QModelIndex idx=filterModel_->mapFromSource(model_->infoToIndex(info));
+	if(idx.isValid())
+	{
+			setCurrentIndex(idx);
+			emit selectionChanged(info);
+	}
+}
+
+
 void TreeNodeView::slotDoubleClickItem(const QModelIndex&)
 {
 }

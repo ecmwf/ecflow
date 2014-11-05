@@ -79,6 +79,9 @@ public slots:
 	void slotCurrentWidgetChanged(int);
 	void on_addTb_clicked();
 
+signals:
+	void selectionChanged(ViewNodeInfo_ptr);
+
 protected:
 	void adjust(QStringList);
 	InfoPanelItemHandler* findHandler(QWidget* w);

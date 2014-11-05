@@ -20,17 +20,17 @@ QToolBar > QToolButton {
   Breadcrumbs 
 -------------------------------*/
 
-QWidget [path="1"]{
+QWidget [breadcrumbs="1"]{
 	background: rgb(245,245,245);
 	border-radius: 4px; 
-        border-color: rgb(140,140,140);
+    border-color: rgb(140,140,140);
         /*border-top-width: 4px;*/ 
 }
 
-/*QToolButton#pathNameTb {
+QToolButton#pathNameTb {
      	border-radius: 0px;
      	padding: 0px; 
-	color: black;	
+		color: black;	
  }
 
 QToolButton#pathNameTb:hover{
@@ -38,7 +38,7 @@ QToolButton#pathNameTb:hover{
         border: 1px solid rgb(160, 160, 160);
      	border-radius: 0px;
         padding: 0px; 		
- }*/
+ }
 
 QToolButton#pathIconTb{
         border: none;
@@ -65,3 +65,14 @@ QToolButton#pathMenuTb:hover{
         padding: 0px; 	
 }
 
+
+/*----------------------------
+  Icon folder view
+------------------------------*/
+
+/* QGraphicsview cannot be set from qss only its 
+baseclass QFrame. So we need to set QFrame here! */
+QFrame[breadcrumbs="1"] {
+	background: rgb(252, 252, 252);
+	border: 0; 
+}

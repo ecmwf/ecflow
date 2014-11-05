@@ -122,6 +122,11 @@ ViewNodeInfo_ptr NodeWidget::currentSelection()
 	return views_->currentBase()->currentSelection();
 }
 
+void NodeWidget::currentSelection(ViewNodeInfo_ptr n)
+{
+	return views_->currentBase()->currentSelection(n);
+}
+
 
 //------------------------
 // Rescan

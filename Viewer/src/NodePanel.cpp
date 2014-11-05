@@ -183,7 +183,11 @@ ViewNodeInfo_ptr NodePanel::currentSelection()
 	return ViewNodeInfo_ptr();
 }
 
-
+void NodePanel::slotSelection(ViewNodeInfo_ptr n)
+{
+	if(NodeWidget *w=currentNodeWidget())
+			w->currentSelection(n);
+}
 
 void NodePanel::setViewMode(Viewer::ViewMode mode)
 {
@@ -203,6 +207,8 @@ VConfig* NodePanel::config()
   	NodeWidget *w=currentNodeWidget();
 	return (w)?w->config():NULL;
 }
+
+
 
 
 /*void NodePanel::slotNewWindow(bool)

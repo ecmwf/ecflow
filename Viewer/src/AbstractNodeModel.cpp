@@ -186,6 +186,26 @@ void AbstractNodeModel::setRootNode(Node *node)
 //
 //----------------------------------------------
 
+QModelIndex AbstractNodeModel::infoToIndex(ViewNodeInfo_ptr info,int column) const
+{
+	if(info)
+	{
+		if(info->isServer())
+		{
+			if(ServerHandler *s=info->server())
+			{
+				return serverToIndex(s);
+			}
+		}
+		else if(Node* n=info->node())
+		{
+			return nodeToIndex(n);
+		}
+	}
+
+	return QModelIndex();
+}
+
 ViewNodeInfo_ptr AbstractNodeModel::nodeInfo(const QModelIndex& index) const
 {
 	if(!index.isValid())

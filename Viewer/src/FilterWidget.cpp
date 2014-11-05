@@ -155,7 +155,8 @@ void ServerFilterMenu::init()
 	for(int i=0; i < ServerList::instance()->count(); i++)
 	{
 		ServerItem* item=ServerList::instance()->itemAt(i);
-		QString name=QString::fromStdString(item->name() + " (" + item->host() + ":" + item->port() + ")");
+		//QString name=QString::fromStdString(item->name() + " (" + item->host() + ":" + item->port() + ")");
+		QString name=QString::fromStdString(item->name());
 		addAction(name,i);
 	}
 }

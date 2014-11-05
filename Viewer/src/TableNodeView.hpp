@@ -31,6 +31,7 @@ public:
 	void reload() {};
 	QWidget* realWidget();
 	ViewNodeInfo_ptr currentSelection();
+	void currentSelection(ViewNodeInfo_ptr n) {};
 
 public slots:
 	void slotSelectItem(const QModelIndex&);

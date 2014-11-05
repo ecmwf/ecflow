@@ -69,6 +69,8 @@ public:
 	ViewNodeInfo_ptr nodeInfo(const QModelIndex& index) const;
 	void reload();
 
+	virtual QModelIndex infoToIndex(ViewNodeInfo_ptr,int column=0) const;
+
 	//From ConfigObserver
 	void notifyConfigChanged(ServerFilter*);
 	void notifyConfigChanged(StateFilter*) {};

@@ -16,6 +16,7 @@
 #include <QDockWidget>
 #include <QMessageBox>
 #include <QSplitter>
+#include <QToolBar>
 #include <QVBoxLayout>
 
 #include "Defs.hpp"
@@ -24,6 +25,7 @@
 #include "MainWindow.hpp"
 #include "FilterWidget.hpp"
 #include "InfoPanel.hpp"
+#include "NodePathWidget.hpp"
 #include "NodePanel.hpp"
 #include "ServerHandler.hpp"
 #include "ServerListDialog.hpp"
@@ -60,6 +62,9 @@ MainWindow::MainWindow(QStringList idLst,QWidget *parent) : QMainWindow(parent)
     //filterWidget_=new FilterWidget(this);
     //viewToolBar->addWidget(filterWidget_);
 
+    NodePathWidget* pathWidget=new NodePathWidget(this);
+    toolBar->addWidget(pathWidget);
+
 
     //Create the main layout
     QVBoxLayout* layout=new QVBoxLayout();
@@ -84,6 +89,12 @@ MainWindow::MainWindow(QStringList idLst,QWidget *parent) : QMainWindow(parent)
     
     connect(nodePanel_,SIGNAL(currentWidgetChanged()),
     		this,SLOT(slotCurrentChangedInPanel()));
+
+    connect(nodePanel_,SIGNAL(selectionChanged(ViewNodeInfo_ptr)),
+       		pathWidget,SLOT(setPath(ViewNodeInfo_ptr)));
+
+    connect(pathWidget,SIGNAL(selected(ViewNodeInfo_ptr)),
+       		nodePanel_,SLOT(slotSelection(ViewNodeInfo_ptr)));
 
 }
 
@@ -111,6 +122,9 @@ InfoPanel* MainWindow::addInfoPanel()
 
     connect(nodePanel_,SIGNAL(selectionChanged(ViewNodeInfo_ptr)),
     		dw->infoPanel(),SLOT(slotReload(ViewNodeInfo_ptr)));
+
+    connect(dw->infoPanel(),SIGNAL(selectionChanged(ViewNodeInfo_ptr)),
+    		nodePanel_,SLOT(slotSelection(ViewNodeInfo_ptr)));
 
     return dw->infoPanel();
 }
@@ -240,6 +254,7 @@ void MainWindow::slotCurrentChangedInPanel()
 
 		serverFilterMenu_->reload(config);
 	}
+
 	//breadcrumbs_->setPath(folderPanel_->currentFolder());
   	 //slotUpdateNavigationActions(folderPanel_->folderNavigation());
 

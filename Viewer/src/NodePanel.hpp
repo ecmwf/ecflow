@@ -43,6 +43,7 @@ public:
 
 public slots:
 	void slotCurrentWidgetChanged(int);
+	void slotSelection(ViewNodeInfo_ptr);
 
 	//void slotIconCommand(QString,IconObjectH);
 	//void slotDesktopCommand(QString,QPoint);

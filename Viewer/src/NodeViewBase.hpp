@@ -24,6 +24,7 @@ public:
 		virtual void reload()=0;
 		virtual QWidget* realWidget()=0;
 		virtual ViewNodeInfo_ptr currentSelection()=0;
+		virtual void currentSelection(ViewNodeInfo_ptr n)=0;
 
 protected:
 		Viewer::ViewMode id_;

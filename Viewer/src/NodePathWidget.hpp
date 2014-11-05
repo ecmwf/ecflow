@@ -10,7 +10,10 @@
 #ifndef NODEPATHWIDGET_H
 #define NODEPATHWIDGET_H
 
-#include <QWidget>
+#include <QGraphicsView>
+#include <QGraphicsObject>
+#include <QGraphicsScene>
+#include <QToolButton>
 
 #include "ViewNodeInfo.hpp"
 
@@ -23,21 +26,43 @@ class QSignalMapper;
 class QToolButton;
 
 class Node;
+class NodePathWidget;
 
-class NodePathWidgetItem
+class NodePathItem : public QToolButton
 {
 public:
-    NodePathWidgetItem(QString n,QString fn) : name_(n), path_(fn), menuTb_(0), nameTb_(0), menu_(0) {}
-	~NodePathWidgetItem();
+	enum Type {NodeType,MenuType,ElideType};
+	NodePathItem(Type type,int index,QWidget* parent=0) : QToolButton(parent), type_(type), index_(index) {};
+	int index() const {return index_;}
 
-  	QString name_;
-	QString path_;
-  	QToolButton* menuTb_;
-  	QToolButton* nameTb_;
-  	QMenu* menu_;
-  	QRect rect_;
-  	QColor colour_;
+protected:
+	Type type_;
+	int index_;
 };
+
+class NodePathNodeItem : public NodePathItem
+{
+public:
+	NodePathNodeItem(int index,QString name,QColor col,bool current,QWidget* parent=0);
+	void reset(QString name,QColor col,bool selected);
+    void colour(QColor col);
+    void current(bool);
+
+protected:
+    void resetStyle();
+    bool isDark(QColor col) const;
+
+    QString qss_;
+	QColor col_;
+	bool current_;
+};
+
+class NodePathMenuItem : public NodePathItem
+{
+public:
+	NodePathMenuItem(int index,QWidget* parent=0);
+};
+
 
 class NodePathWidget : public QWidget
 {
@@ -45,57 +70,41 @@ Q_OBJECT
 
 public:
 	NodePathWidget(QWidget* parent=0);
-	~NodePathWidget() {}
+	~NodePathWidget();
 
+public slots:
 	void setPath(QString);
 	void setPath(ViewNodeInfo_ptr);
-	void setReloadAction(QAction*);
 
 protected slots:
-    void slotChangeNode(int);
-	void slotChangeNode(QAction *);
 	void slotContextMenu(const QPoint&);
-	void slotShowNodeChildrenMenu();
-	void slotEditable(bool);
+	void nodeItemSelected();
+	void menuItemSelected();
 
 signals:
-  	void nodeClicked(int);
-	void nodeSelected(ViewNodeInfo_ptr);
-	void commandRequested(QString,QString);
+	void selected(ViewNodeInfo_ptr);
 
 protected:
 	void clearLayout();
-	QMenu* createNodeChildrenMenu(int,Node*,QWidget *);
-	QString getPath(QToolButton*);
-	QString getPath(QAction*);
-	void resizeEvent(QResizeEvent *);
-	void paintEvent(QPaintEvent *);
-	void mousePressEvent(QMouseEvent *event);
-	void mouseMoveEvent(QMouseEvent *event);
-	void updateGr();
-
+	void clearContents();
+	void loadMenu(const QPoint& pos,ViewNodeInfo_ptr p);
 	ViewNodeInfo_ptr nodeAt(int);
-	int nodeIndex(QPoint pos);
+	QList<Node*> toNodeList(ViewNodeInfo_ptr info);
+	int findInPath(ViewNodeInfo_ptr p1,ViewNodeInfo_ptr p2,bool sameServer);
+	void infoIndex(int idx);
+	void paintEvent(QPaintEvent *);
 
-	QHBoxLayout *layout_;
-	QSignalMapper* smp_;
-	QList<NodePathWidgetItem*> items_;
-	QAction* actionReload_;
-	QToolButton* reloadTb_;
-	QString path_;
-	bool editable_;
+	QList<NodePathNodeItem*> nodeItems_;
+	QList<NodePathMenuItem*> menuItems_;
+
+	QHBoxLayout* layout_;
 	ViewNodeInfo_ptr info_;
-	int height_;
-	int paddingX_;
-	int paddingY_;
-	int textPaddingX_;
-	int textPaddingY_;
-	int gapX_;
+	ViewNodeInfo_ptr infoFull_;
+	int infoIndex_;
 
-
-	//static QList<MvQContextItem*> cmTbItems_;
-	//static QList<MvQContextItem*> cmMenuItems_;
-
+	//When it is set to "true": if a node item (i.e. not a menu) is selected the breadcrumbs
+	//will stay the same and only will change the current node/selection!
+	bool stayInParent_;
 };
 
 #endif
