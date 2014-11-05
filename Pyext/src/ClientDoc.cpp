@@ -667,6 +667,19 @@ const char* ClientDoc::stats(){
             ;
 }
 
+const char* ClientDoc::stats_reset(){
+   return
+            "Resets the statistical data in the server::\n\n"
+            "   void stats_reset()\n"
+            "\nUsage::\n\n"
+            "   try:\n"
+            "       ci = Client()  # use default host(ECF_NODE) & port(ECF_PORT)\n"
+            "       ci.stats_reset()\n"
+            "   except RuntimeError, e:\n"
+            "       print str(e)\n"
+            ;
+}
+
 const char* ClientDoc::suites(){
    return
             "Returns a list strings representing the :term:`suite` names.\n\n"

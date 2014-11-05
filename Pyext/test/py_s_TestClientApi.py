@@ -489,6 +489,11 @@ def test_client_free_dep(ci):
 def test_client_stats(ci):
     print "test_client_stats"
     ci.stats()  # writes to standard out
+    
+def test_client_stats_reset(ci):
+    print "test_client_stats_reset"
+    ci.stats_reset()   
+    ci.stats()  # should produce no ouput, where we measure requests
             
 def test_client_debug_server_on_off(ci):
     print "test_client_debug_server_on_off"
@@ -1424,6 +1429,7 @@ if __name__ == "__main__":
         test_client_check_defstatus(ci)  
  
         test_client_stats(ci)             
+        test_client_stats_reset(ci)             
         test_client_debug_server_on_off(ci)             
 
         print "All Tests pass ======================================================================"    

@@ -55,7 +55,8 @@ public:
    static const char* free_time_dep();
    static const char* free_all_dep();
 	static const char* ping();
-	static const char* stats();
+   static const char* stats();
+   static const char* stats_reset();
 	static const char* suites();
    static const char* ch_register();
    static const char* ch_suites();

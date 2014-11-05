@@ -43,6 +43,7 @@ CtsCmdRegistry::CtsCmdRegistry(bool addGroupCmd)
 	vec_.push_back( boost::make_shared<CtsCmd>(CtsCmd::RELOAD_WHITE_LIST_FILE));
 	vec_.push_back( boost::make_shared<CtsCmd>(CtsCmd::FORCE_DEP_EVAL));
    vec_.push_back( boost::make_shared<CtsCmd>(CtsCmd::STATS));
+   vec_.push_back( boost::make_shared<CtsCmd>(CtsCmd::STATS_RESET));
    vec_.push_back( boost::make_shared<CtsCmd>(CtsCmd::DEBUG_SERVER_ON));
    vec_.push_back( boost::make_shared<CtsCmd>(CtsCmd::DEBUG_SERVER_OFF));
    vec_.push_back( boost::make_shared<CtsCmd>(CtsCmd::SERVER_LOAD));

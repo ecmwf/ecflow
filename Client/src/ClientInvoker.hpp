@@ -190,6 +190,7 @@ public:
    int debug_server_on() const;
    int debug_server_off() const;
    int stats() const;
+   int stats_reset() const;
    int server_version() const;
 
 	int suites() const;
