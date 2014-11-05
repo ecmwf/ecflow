@@ -87,7 +87,7 @@ BOOST_AUTO_TEST_CASE( test_job_profiler )
    BOOST_CHECK_MESSAGE(log_file_contents.find("TASK:/suite/family/t1") != std::string::npos,"TASK:/suite/family/t1  not in profile");
    BOOST_CHECK_MESSAGE(log_file_contents.find("TASK:/suite/family/t2") != std::string::npos,"TASK:/suite/family/t2  not in profile");
    BOOST_CHECK_MESSAGE(log_file_contents.find("TASK:/suite/family/t3") != std::string::npos,"TASK:/suite/family/t3  not in profile");
-   BOOST_CHECK_MESSAGE(log_file_contents.find("job size") != std::string::npos,             "job size  not in profile");
+   BOOST_CHECK_MESSAGE(log_file_contents.find("job_size") != std::string::npos,             "job size  not in profile");
 
    // Remove the log file. Comment out for debugging
    fs::remove(log_path);
