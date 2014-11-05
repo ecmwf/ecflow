@@ -35,7 +35,6 @@ public:
    ~JobProfiler();
 
    static void profile_to_log(const JobsParam& jobsParam);
-   static void profile_to_cout(const JobsParam& jobsParam_);
 
    static std::string threshold_defaults();
    static void set_suite_threshold(size_t threshold);

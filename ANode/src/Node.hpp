@@ -241,11 +241,11 @@ public:
    /// 	** This by default works out the most significant state of the children
    /// 	** ie. the computed state. Hence setting the state on Suite/Family is really
    /// 	** meaningless, since it will always be the computed state.
-   void set_state(NState::State s, bool force = false);
+   void set_state(NState::State s, bool force = false, const std::string& additional_info_to_log = "");
    virtual void set_state_hierarchically(NState::State s, bool force) { set_state(s,force); }
 
    /// Set state only, has no side effects
-   void setStateOnly(NState::State s, bool force = false);
+   void setStateOnly(NState::State s, bool force = false, const std::string& additional_info_to_log = "");
    virtual void setStateOnlyHierarchically(NState::State s, bool force = false) { setStateOnly(s,force); }
 
    /// This returns the time of state change: (relative to real time when the suite calendar was begun)

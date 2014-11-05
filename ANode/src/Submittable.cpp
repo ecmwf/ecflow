@@ -436,13 +436,13 @@ bool Submittable::submit_job_only( JobsParam& jobsParam)
       // variable substitution. This will then form the '.job' files.
       // If the job file already exist it is overridden
       try {
-         ecf_file.create_job( jobsParam );
+         const std::string& job_size = ecf_file.create_job( jobsParam );
 
          //... make sure ECF_PASS is set on the task, This is substituted in <head.h> file
          //... and hence must be done before variable substitution in ECF_/JOB file
          //... This is used by client->server authentication
          if (createChildProcess(jobsParam)) {
-            set_state(NState::SUBMITTED);
+            set_state(NState::SUBMITTED, false, job_size );
             return true;
          }
 

@@ -97,8 +97,8 @@ bool Jobs::generate( JobsParam& jobsParam) const
 #endif
 
 #ifdef DEBUG_JOB_PROFILING
+   LogToCout logToCout;
    JobProfiler::profile_to_log(jobsParam);
-   JobProfiler::profile_to_cout(jobsParam);
 #endif
 
    if (durationTimer.duration() > jobsParam.submitJobsInterval()) {

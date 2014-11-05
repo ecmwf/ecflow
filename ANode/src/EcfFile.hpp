@@ -53,7 +53,7 @@ public:
 	/// This is then used to replace smsinit,smscomplete, smsevent,smsmeter.smslabel,smsabort
 	/// This function will start the pre processing
 	/// Will throw std::runtime_error for errors
-	void create_job( JobsParam&);
+	const std::string& create_job( JobsParam&);
 
 	/// Process the script file, to add all the used variables, add the start of the file
 	/// between %comment %end, The augmented script is returned in file_with_used_variables
@@ -79,7 +79,7 @@ private:
 	bool replaceSmsChildCmdsWithEcf(const std::string& clientPath, std::string& errormsg);
 	std::string getIncludedFilePath( const std::string& include, const std::string& line, std::string& errormsg);
  	void variableSubstituition(JobsParam&);
- 	void doCreateJobFile(JobsParam&) const;
+ 	const std::string&  doCreateJobFile(JobsParam&) const;
  	bool doCreateManFile(std::string& errormsg);
  	bool extractManual(const std::vector< std::string >& lines, std::vector< std::string >& theManualLines, std::string& errormsg) const;
  	void removeCommentAndManual();
@@ -98,7 +98,8 @@ private:
 
 	Node* node_;                         // Task or Alias or Container when pre-processing the man files
 	std::string  ecfMicroCache_;         // cache value of ECF_MICRO
-	std::string  script_path_or_cmd_;    // path to .ecf,.usr file or command
+	std::string  script_path_or_cmd_;    // path to .ecf, .usr file or command
+	mutable std::string  job_size_;     // to be placed in log file during job submission
 	//bool         fetchCommand_;        // script is to be extracted form version management repository. Not used !!!
 	std::vector<std::string> jobLines_;  // Lines that will form the job file.
 };

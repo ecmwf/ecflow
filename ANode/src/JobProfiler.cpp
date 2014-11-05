@@ -101,22 +101,16 @@ JobProfiler::~JobProfiler()
 
 void JobProfiler::profile_to_log(const JobsParam& jobsParam)
 {
-   LOG(Log::MSG,"Thresholds: suite: " << JobProfiler::suite_threshold() << "ms  family: " << JobProfiler::family_threshold() << "  task: " << JobProfiler::task_threshold() << "ms");
+   std::stringstream ss;
+   ss << "Thresholds: suite:" << JobProfiler::suite_threshold()
+      << "ms family:" << JobProfiler::family_threshold()
+      << "ms task:" << JobProfiler::task_threshold() << "ms.  Time for *each* node includes all of its children";
+   log(Log::MSG,ss.str());
    const std::vector< std::pair<std::string,int> >& profiles = jobsParam.profiles();
    size_t profiles_size = profiles.size();
    for(size_t i = 0; i < profiles_size; ++i)  {
       if ( profiles[i].second > 0  )
          log(Log::MSG, profiles[i].first);
-   }
-}
-void JobProfiler::profile_to_cout(const JobsParam& jobsParam)
-{
-   cout << "Thresholds: suite: " << JobProfiler::suite_threshold() << "ms family: " << JobProfiler::family_threshold() << "ms task: " << JobProfiler::task_threshold() << "ms\n";
-   const std::vector< std::pair<std::string,int> >& profiles = jobsParam.profiles();
-   size_t profiles_size = profiles.size();
-   for(size_t i = 0; i < profiles_size; ++i) {
-      if ( profiles[i].second > 0  )
-         std::cout << profiles[i].first << "\n";
    }
 }
 
