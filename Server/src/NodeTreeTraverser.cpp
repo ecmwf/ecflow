@@ -134,11 +134,14 @@ void NodeTreeTraverser::terminate()
 
 void NodeTreeTraverser::do_traverse()
 {
-   // since we poll every second, if less than next poll continue.
+   // since we poll every second, if less than next poll(every 60 seconds) continue.
    ptime time_now = Calendar::second_clock_time();
    if (time_now < next_poll_time_) {
 
-      // minimise the number of node tree traversal, to one every second, but only *IF* required
+      // minimise the number of node tree traversal, to once every second, but only *IF* required
+      // Note: if we are a few seconds to the poll time, but job generation takes a while
+      //       we can get warning about the interval took to long. See below:
+
       // LOG(Log::DBG,"get_job_generation_count() = " << server_->get_job_generation_count());
       if (server_->get_job_generation_count() > 0) {
          traverse_node_tree_and_job_generate();
@@ -232,7 +235,7 @@ void NodeTreeTraverser::do_traverse()
       next_poll_time_ += interval_;
    }
 
-   // At begin time for very large suites and in test, during job generation we can miss the next poll time(i.e a,b)
+   // At begin time for very large suites, slow disk, and in test, during job generation we can miss the next poll time(i.e a,b)
    // This means that on the next poll time because last_time was not updated, to be immediately
    // behind the next poll time by 'interval_' seconds an erroneous report is logged about missing the poll time
    //
