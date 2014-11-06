@@ -187,8 +187,6 @@ private:
 	/// dump out current settings
 	std::string dump_valid_users() const;
 
-	void process_profile_thresholds(const std::string& thresholds) const;
-
 private:
 	ecf::Host host_name_;
 	std::string serverHost_; // must be after host_name_, since used in init

@@ -953,6 +953,8 @@ public:
    const std::string& suiteName() const { return suiteName_;}
    bool force() const { return force_;}
 
+   virtual int timeout() const { return 180; }
+
    virtual bool isWrite() const { return true; }
    virtual std::ostream& print(std::ostream& os) const;
    virtual bool equals(ClientToServerCmd*) const;

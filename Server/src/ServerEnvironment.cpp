@@ -440,7 +440,8 @@ void ServerEnvironment::read_config_file(std::string& log_file_name,const std::s
    if (debug())  cout << "ServerEnvironment::read_config_file() current_path = " << fs::current_path() << "\n";
 
    try {
-      std::string theCheckMode, the_profile_thresholds;
+      std::string theCheckMode;
+      int the_task_threshold = 0;
 
       // read the environment from the config file.
       // **** Port *must* be read before log file, and check pt files
@@ -462,7 +463,7 @@ void ServerEnvironment::read_config_file(std::string& log_file_name,const std::s
          ("ECF_URL",       po::value<std::string>(&url_)->default_value(Ecf::URL()), "The default url.")
          ("ECF_MICRODEF",  po::value<std::string>(&ecf_micro_)->default_value(Ecf::MICRO()), "Preprocessor character for variable substitution and including files")
          ("ECF_LISTS",     po::value<std::string>(&ecf_white_list_file_)->default_value(Str::WHITE_LIST_FILE()), "Path name to file the list valid users and thier access rights")
-         ("ECF_PROFILE_THRESHOLDS",po::value<std::string>(&the_profile_thresholds)->default_value(JobProfiler::threshold_defaults()),"The defaults thresholfs when profiling job generation")
+         ("ECF_TASK_THRESHOLD",po::value<int>(&the_task_threshold)->default_value(JobProfiler::task_threshold_default()),"The defaults thresholfs when profiling job generation")
          ;
 
       ifstream ifs(path_to_config_file.c_str());
@@ -480,7 +481,9 @@ void ServerEnvironment::read_config_file(std::string& log_file_name,const std::s
       else if (theCheckMode == "CHECK_NEVER")  checkMode_ = ecf::CheckPt::NEVER;
       else if (theCheckMode == "CHECK_ALWAYS") checkMode_ = ecf::CheckPt::ALWAYS;
 
-      process_profile_thresholds(the_profile_thresholds);
+      if (the_task_threshold != 0 ) {
+         JobProfiler::set_task_threshold(the_task_threshold);
+      }
    }
    catch(std::exception& e)
    {
@@ -541,9 +544,17 @@ void ServerEnvironment::read_environment_variables(std::string& log_file_name)
 	   allow_old_client_new_server_ = ecf::boost_archive::version_1_47();
 	}
 
-   char* thresholds = getenv("ECF_PROFILE_THRESHOLDS");
-   if ( thresholds ) {
-      process_profile_thresholds(std::string( thresholds));
+   char* threshold = getenv("ECF_TASK_THRESHOLD");
+   if ( threshold ) {
+      std::string task_threshold = threshold;
+      try {
+         JobProfiler::set_task_threshold(boost::lexical_cast<int>(task_threshold));
+      }
+      catch ( ... ) {
+         std::stringstream ss;
+         ss << "ServerEnvironment::read_environment_variables(): ECF_TASK_THRESHOLD is defined(" << threshold << ") but value is *not* convertible to an integer\n";
+         throw ServerEnvironmentException(ss.str());
+      }
    }
 }
 
@@ -619,43 +630,3 @@ std::string ServerEnvironment::dump_valid_users() const
    return ss.str();
 }
 
-static void throw_profile_threshold_error(const std::string& profile_thresholds)
-{
-   std::stringstream ss;
-   ss << "ECF_PROFILE_THRESHOLDS is defined(" << profile_thresholds << ")\n";
-   ss << "expected format is one of:  \"suite:2000,family:1000,task:300\" || \"suite:2000\" || \"family:1000,task:300\" || \"task:300\"\n";
-   ss << "The integer which must >= 0, are specified in milliseconds. Note: 1000 milli-seconds equals 1 second.";
-   throw ServerEnvironmentException(ss.str());
-}
-
-void ServerEnvironment::process_profile_thresholds(const std::string& thresholds) const
-{
-   if (thresholds.empty()) return;
-
-   // Expected format is:  "suite:2000,family:1000,task:300"
-   //                      "suite:2000", "family:1000,task:300", "task:300"
-   std::string profile_thresholds = thresholds;
-   vector<string> tokens;
-   Str::split(profile_thresholds,tokens,",");
-   if (tokens.empty()) { throw_profile_threshold_error(profile_thresholds); return;}
-   if (tokens.size() > 3) { throw_profile_threshold_error(profile_thresholds); return;}
-
-   for(size_t i =0; i < tokens.size(); i++) {
-      vector<string> node_threshold;
-      Str::split(tokens[i],node_threshold,":");
-      if (node_threshold.size() != 2) { throw_profile_threshold_error(profile_thresholds); return;}
-
-      int threshold = 0;
-      try { threshold = boost::lexical_cast<int>(node_threshold[1]);}
-      catch ( ... ){
-         throw_profile_threshold_error(profile_thresholds);
-         return;
-      }
-      if (threshold < 0) { throw_profile_threshold_error(profile_thresholds); return;}
-
-      if ( node_threshold[0] == "suite") JobProfiler::set_suite_threshold(threshold);
-      else if ( node_threshold[0] == "family") JobProfiler::set_family_threshold(threshold);
-      else if ( node_threshold[0] == "task") JobProfiler::set_task_threshold(threshold);
-      else  { throw_profile_threshold_error(profile_thresholds); return;}
-   }
-}

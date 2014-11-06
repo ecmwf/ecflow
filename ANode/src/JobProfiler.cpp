@@ -16,86 +16,57 @@
 #include <boost/lexical_cast.hpp>
 #include "JobProfiler.hpp"
 #include "JobsParam.hpp"
-#include "Node.hpp"
+#include "Task.hpp"
 #include "Str.hpp"
 #include "Log.hpp"
 
 using namespace ecf;
 using namespace std;
 
-// To debug the output enable this, and then run the Node test
-//#define DEBUG_ME 1
-
 // Connection and client timeout issues can be replicated  by adding
 //   - sleep(1) in EcfFile , i.e when creating the job output
 //
-// Interpreting the output:
-//   - Please note we are measuring the total time taken by node and *ALL* of its children
-//     hence just adding the times, will not always add up to the total, shown on the suite/family
-//   - Hence in the log file below, we can see the main contribution time comes from tasks.
-//
-//MSG:[15:08:18 30.10.2014] SUITE:/verify - 2s
-//MSG:[15:08:18 30.10.2014]  FAMILY:/verify/06 - 1s
-//MSG:[15:08:18 30.10.2014]   FAMILY:/verify/06/bc - 1s
-//MSG:[15:08:18 30.10.2014]    TASK:/verify/06/bc/bc_upperair - job size:2514 - 1s
-//MSG:[15:08:18 30.10.2014]  FAMILY:/verify/18 - 1s
-//MSG:[15:08:18 30.10.2014]   FAMILY:/verify/18/bc - 1s
-//MSG:[15:08:18 30.10.2014]    TASK:/verify/18/bc/bc_upperair - job size:2514 - 1s
+
+static size_t task_threshold_ = 2000;
 
 namespace ecf {
 
-// initialise globals
-static int counter_ = -1;
-static size_t suite_threshold_ = 2000;
-static size_t family_threshold_ = 1000;
-static size_t task_threshold_ = 300;
-
-std::string JobProfiler::threshold_defaults() { return "suite:2000,family:1000,task:300";}
-
+int JobProfiler::task_threshold_default() { return 2000;}
 
 // =================================================================================
-JobProfiler::JobProfiler(Node* node,JobsParam& jobsParam, size_t threshold)
+JobProfiler::JobProfiler(Task* node,JobsParam& jobsParam, size_t threshold)
 : node_(node),
   jobsParam_(jobsParam),
-  index_(jobsParam.start_profile()),
   start_time_(boost::posix_time::microsec_clock::universal_time()),
   threshold_(threshold)
 {
-   counter_ += 1;
+}
+
+JobProfiler::JobProfiler( JobsParam& jobsParam)
+: node_(0),
+  jobsParam_(jobsParam),
+  start_time_(boost::posix_time::microsec_clock::universal_time()),
+  threshold_(0)
+{
 }
 
 JobProfiler::~JobProfiler()
 {
-   boost::posix_time::time_duration duration = boost::posix_time::microsec_clock::universal_time() - start_time_;
-   size_t time_taken  = duration.total_milliseconds();
+   if (node_) {
+      boost::posix_time::time_duration duration = boost::posix_time::microsec_clock::universal_time() - start_time_;
+      size_t time_taken = duration.total_milliseconds();
 
-   // When testing we set submitJobsInterval to < 0
-   if (jobsParam_.submitJobsInterval() < 0 ) {
-      time_taken = threshold_ + 1;
-   }
-
-   if ( time_taken > threshold_)  {
-
-      // This class can be called hierarchically, so produce nicely indented output
-      std::string text;
-      for(int i = 0; i < counter_; i++) text += ' ';
-      text += node_->debugNodePath();
-      text += " : ";
-
-      // check if any addition were made, typically for tasks we will add job size.
-      const std::string& additions = jobsParam_.get_text_at_profile(index_);
-      if (!additions.empty()) {
-         text += additions;
-         text += " : ";
+      // When testing we set submitJobsInterval to < 0
+      if (jobsParam_.submitJobsInterval() < 0 ) {
+         time_taken = threshold_ + 1;
       }
 
-      text += boost::lexical_cast<std::string>( time_taken );
-      text += "ms";
-
-      jobsParam_.set_to_profile(index_,text,time_taken);
+      if ( time_taken > threshold_)  {
+         std::stringstream ss;
+         ss << "Job generation for task " << node_->absNodePath() << " took " << time_taken << "ms, Exceeds ECF_TASK_THRESHOLD(" << threshold_ << "ms)";
+         log(Log::WAR,ss.str());
+      }
    }
-
-   counter_ -= 1;
 }
 
 bool JobProfiler::time_taken_for_job_generation_to_long() const
@@ -109,26 +80,7 @@ bool JobProfiler::time_taken_for_job_generation_to_long() const
 }
 
 
-void JobProfiler::profile_to_log(const JobsParam& jobsParam)
-{
-   std::stringstream ss;
-   ss << "Thresholds: suite:" << JobProfiler::suite_threshold()
-      << "ms family:" << JobProfiler::family_threshold()
-      << "ms task:" << JobProfiler::task_threshold() << "ms.  Time for *each* node includes all of its children";
-   log(Log::MSG,ss.str());
-   const std::vector< std::pair<std::string,int> >& profiles = jobsParam.profiles();
-   size_t profiles_size = profiles.size();
-   for(size_t i = 0; i < profiles_size; ++i)  {
-      if ( profiles[i].second > 0  )
-         log(Log::MSG, profiles[i].first);
-   }
-}
-
-void JobProfiler::set_suite_threshold(size_t threshold) {suite_threshold_ = threshold;}
-void JobProfiler::set_family_threshold(size_t threshold){family_threshold_ = threshold;}
 void JobProfiler::set_task_threshold(size_t threshold){task_threshold_ = threshold;}
-size_t JobProfiler::suite_threshold() { return suite_threshold_; }
-size_t JobProfiler::family_threshold() { return family_threshold_; }
 size_t JobProfiler::task_threshold() { return task_threshold_; }
 
 }

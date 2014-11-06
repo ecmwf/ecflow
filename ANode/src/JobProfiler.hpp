@@ -31,26 +31,20 @@ namespace ecf {
 class JobProfiler  : private boost::noncopyable  {
 public:
    // Note: 1000 milliseconds = 1 second
-   JobProfiler(Node*,JobsParam&,size_t threshold /* expected to be milli seconds */);
+   JobProfiler(Task*,JobsParam&,size_t threshold /* expected to be milli seconds */);
+   JobProfiler( JobsParam&);
    ~JobProfiler();
 
    bool time_taken_for_job_generation_to_long() const;
 
-   static void profile_to_log(const JobsParam& jobsParam);
-
-   static std::string threshold_defaults();
-   static void set_suite_threshold(size_t threshold);
-   static void set_family_threshold(size_t threshold);
    static void set_task_threshold(size_t threshold);
-
-   static size_t suite_threshold();
-   static size_t family_threshold();
    static size_t task_threshold();
 
+   static int task_threshold_default();
+
 private:
-   Node* node_;
+   Task* node_;
    JobsParam& jobsParam_;
-   size_t index_;
    boost::posix_time::ptime start_time_;
    size_t threshold_;
 };

@@ -59,13 +59,6 @@ public:
 	const std::vector<std::string>& user_edit_file() const { return user_edit_file_; }
 
 	// Functions to aid timing of job generation
-   size_t start_profile();
-   size_t last_profile_index() const;
-   void add_to_profile(size_t index, const std::string& s);
-   void set_to_profile(size_t index, const std::string& s,int time_taken);
-   const std::string& get_text_at_profile(size_t index) const;
-   const std::vector< std::pair<std::string,int> >& profiles() const { return profiles_; }
-
    void set_poll_time(const boost::posix_time::ptime& next_poll_time) { next_poll_time_ = next_poll_time;}
    const boost::posix_time::ptime&  poll_time() const { return next_poll_time_;}
    void set_timed_out_of_job_generation() { timed_out_of_job_generation_ = true;}
@@ -80,8 +73,7 @@ private:
 	std::string debugMsg_;
 	std::vector<Submittable*> submitted_;
 	std::vector<std::string> user_edit_file_;
-   std::vector< std::pair<std::string,int> > profiles_;  // text,time
 	NameValueMap user_edit_variables_; /// Used for User edit
-	boost::posix_time::ptime next_poll_time_;
+	boost::posix_time::ptime next_poll_time_;  //  Functions to aid timing of job generation
 };
 #endif

@@ -31,7 +31,6 @@ using namespace ecf;
 using namespace std;
 
 //#define DEBUG_JOB_SUBMISSION 1
-//#define DEBUG_JOB_PROFILING 1
 
 bool Jobs::generate( JobsParam& jobsParam) const
 {
@@ -96,14 +95,8 @@ bool Jobs::generate( JobsParam& jobsParam) const
    );
 #endif
 
-#ifdef DEBUG_JOB_PROFILING
-   LogToCout logToCout;
-   JobProfiler::profile_to_log(jobsParam);
-#endif
-
    if (durationTimer.duration() > jobsParam.submitJobsInterval()) {
       LOG(Log::ERR,"Jobs::generate: job generation time(" << durationTimer.duration() << " seconds) is greater than job submission interval of " << jobsParam.submitJobsInterval() << " seconds!!");
-      JobProfiler::profile_to_log(jobsParam);
    }
    return jobsParam.getErrorMsg().empty();
 }

@@ -71,7 +71,7 @@ void Family::begin()
 
 bool Family::resolveDependencies(JobsParam& jobsParam)
 {
-   JobProfiler profile_me(this,jobsParam,JobProfiler::family_threshold());
+   JobProfiler profile_me(jobsParam);
    if (profile_me.time_taken_for_job_generation_to_long()) return false;
    return NodeContainer::resolveDependencies(jobsParam);
 }

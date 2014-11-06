@@ -144,7 +144,7 @@ void NodeTreeTraverser::do_traverse()
 
       // LOG(Log::DBG,"get_job_generation_count() = " << server_->get_job_generation_count());
       if (server_->get_job_generation_count() > 0) {
-         traverse_node_tree_and_job_generate();
+         traverse_node_tree_and_job_generate( time_now );
       }
 
       start_timer(); // timer fires *EVERY* second
@@ -175,9 +175,9 @@ void NodeTreeTraverser::do_traverse()
 	   /// This will happen from time to time, hence only report, for real wayward times
 	   int diff = diff_from_last_time - submitJobsIntervalInSeconds;
 	   if (diff > (submitJobsIntervalInSeconds * 0.25)) {
-#ifdef DEBUG
+//#ifdef DEBUG
 	      LogToCout toCoutAsWell;
-#endif
+//#endif
 	      LOG(Log::WAR, ": interval is (" << submitJobsIntervalInSeconds << " seconds)  but took (" << diff_from_last_time  <<  " seconds)" );
 	   }
 	}
@@ -256,7 +256,9 @@ void NodeTreeTraverser::do_traverse()
 
 
    // Start node tree traversal. 
-   // **This relies on next_poll_time_ being set first, to ensure job generation does not take longer
+	// ************************************************************************************************
+   // ** This relies on next_poll_time_ being set first, to ensure job generation does not take longer
+	// ************************************************************************************************
    update_suite_calendar_and_traverse_node_tree(time_now);
 
 	start_timer();  // timer fires *EVERY* second
@@ -292,7 +294,7 @@ void NodeTreeTraverser::traverse(const boost::system::error_code& error )
 }
 
 
-void NodeTreeTraverser::update_suite_calendar_and_traverse_node_tree(boost::posix_time::ptime& time_now)
+void NodeTreeTraverser::update_suite_calendar_and_traverse_node_tree(const boost::posix_time::ptime& time_now)
 {
    // *****************************************************************************
    // JOB SUBMISSION SEEMS TO WORK BEST IF THE CALENDAR INCREMENT HAPPENS FIRST
@@ -321,11 +323,11 @@ void NodeTreeTraverser::update_suite_calendar_and_traverse_node_tree(boost::posi
       CalendarUpdateParams calParams(time_now, interval_/* calendar increment */, running_ );
       server_->defs_->updateCalendar( calParams );
 
-      traverse_node_tree_and_job_generate();
+      traverse_node_tree_and_job_generate(time_now);
    }
 }
 
-void NodeTreeTraverser::traverse_node_tree_and_job_generate()
+void NodeTreeTraverser::traverse_node_tree_and_job_generate(const boost::posix_time::ptime& start_time)
 {
    if ( running_ && server_->defs_) {
        server_->reset_job_generation_count();
@@ -337,6 +339,8 @@ void NodeTreeTraverser::traverse_node_tree_and_job_generate()
        // If job generation takes longer than the time to *reach* next_poll_time_, then time out.
        // Hence we start out with 60 seconds, and time for job generation should decrease. Until reset back to 60
        // Should allow greater child communication.
+       // By setting set_poll_time, we enable timeout of job generation.
+       // Note: There are other place where we may not want to timeout job generation.
        jobsParam.set_poll_time(next_poll_time_);
 
 #ifdef DEBUG_JOB_SUBMISSION
@@ -344,7 +348,24 @@ void NodeTreeTraverser::traverse_node_tree_and_job_generate()
 #endif
        Jobs jobs(server_->defs_);
        if (!jobs.generate(jobsParam)) { ecf::log(Log::ERR, jobsParam.getErrorMsg()); }
-       if (jobsParam.timed_out_of_job_generation()) { ecf::log(Log::WAR, "Timed out job generation"); }
+       if (jobsParam.timed_out_of_job_generation()) {
+
+          // Implies time now >= next_poll_time_,
+          // It could be that we started job generation a few seconds before the poll time,
+          // Hence to avoid excessive warnings, Only warn if time_now > next_poll_time_ and  forgive about 10  seconds
+          ptime time_now = Calendar::second_clock_time();
+          if (time_now > next_poll_time_ ) {
+//             time_duration duration = time_now - next_poll_time_;
+//             if ( duration.total_seconds() > 10) {
+//#ifdef DEBUG
+          LogToCout toCoutAsWell;
+//#endif
+                std::stringstream ss;
+                ss << "Job generation *timed* out: start time:" << start_time << "  time_now:" << time_now << "  poll_time:" << next_poll_time_;
+                ecf::log(Log::WAR,ss.str());
+//             }
+          }
+       }
     }
 }
 

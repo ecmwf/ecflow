@@ -910,19 +910,13 @@ const std::string& EcfFile::doCreateJobFile(JobsParam& jobsParam) const
             throw std::runtime_error(ss.str());
          }
 
-         // record job size, for placement into log files and for profiling
+         // record job size, for placement into log files
          size_t job_output_size = 0;
          size_t jobLines_size = jobLines_.size();
          for(size_t i = 0; i < jobLines_size; ++i)  job_output_size += jobLines_[i].size();
          job_output_size += jobLines_size; // take into account new lines for each line of output
          job_size_ = "job_size:";
          job_size_ += boost::lexical_cast<std::string>(job_output_size);
-
-         if (!jobsParam.profiles().empty()) {
-            size_t index = jobsParam.last_profile_index();
-            jobsParam.add_to_profile(index, job_size_);
-         }
-
          return job_size_;
       }
       else {

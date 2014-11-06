@@ -176,7 +176,7 @@ bool Suite::resolveDependencies(JobsParam& jobsParam)
 {
  	if (begun_) {
  	   SuiteChanged1 changed(this);
- 	   JobProfiler profile_me(this,jobsParam,JobProfiler::suite_threshold());
+ 	   JobProfiler profile_me(jobsParam);
  	   if (profile_me.time_taken_for_job_generation_to_long()) return false;
   		return NodeContainer::resolveDependencies(jobsParam);
  	}

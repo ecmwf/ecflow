@@ -54,8 +54,6 @@ BOOST_AUTO_TEST_CASE( test_job_profiler )
       suite->addVariable( Variable( "SLEEPTIME", "10" ) );
       family_ptr fam = suite->add_family( "family" );
       fam->add_task( "t1" );
-      fam->add_task( "t2" );
-      fam->add_task( "t3" );
    }
    // cerr << theDefs << "\n";
 
@@ -72,22 +70,10 @@ BOOST_AUTO_TEST_CASE( test_job_profiler )
    BOOST_CHECK_MESSAGE(ok,"generate failed: " << jobParam.getErrorMsg());
 
    // Check the log file, has the profiling
-   //   ERR:[08:53:43 1.11.2014] Jobs::generate: job generation time(0 seconds) is greater than job submission interval of -1 seconds!!
-   //   MSG:[08:53:43 1.11.2014] SUITE:/suite - 1s
-   //   MSG:[08:53:43 1.11.2014]  FAMILY:/suite/family - 1s
-   //   MSG:[08:53:43 1.11.2014]   TASK:/suite/family/t1 - job size:3186 - 1s
-   //   MSG:[08:53:43 1.11.2014]   TASK:/suite/family/t2 - job size:2404 - 1s
-   //   MSG:[08:53:43 1.11.2014]   TASK:/suite/family/t3 - job size:2539 - 1s
-
    std::string log_file_contents;
    BOOST_CHECK_MESSAGE(File::open(log_path,log_file_contents), "Could not open log file at " << log_path);
    BOOST_CHECK_MESSAGE(!log_file_contents.empty(),"log file is is empty ?");
-   BOOST_CHECK_MESSAGE(log_file_contents.find("SUITE:/suite") != std::string::npos,        "SUITE:/suite  not in profile");
-   BOOST_CHECK_MESSAGE(log_file_contents.find("FAMILY:/suite/family") != std::string::npos,"FAMILY:/suite/family  not in profile");
-   BOOST_CHECK_MESSAGE(log_file_contents.find("TASK:/suite/family/t1") != std::string::npos,"TASK:/suite/family/t1  not in profile");
-   BOOST_CHECK_MESSAGE(log_file_contents.find("TASK:/suite/family/t2") != std::string::npos,"TASK:/suite/family/t2  not in profile");
-   BOOST_CHECK_MESSAGE(log_file_contents.find("TASK:/suite/family/t3") != std::string::npos,"TASK:/suite/family/t3  not in profile");
-   BOOST_CHECK_MESSAGE(log_file_contents.find("job_size") != std::string::npos,             "job size  not in profile");
+   BOOST_CHECK_MESSAGE(log_file_contents.find("Exceeds ECF_TASK_THRESHOLD") != std::string::npos, "Exceeds ECF_TASK_THRESHOLD  not in profile");
 
    // Remove the log file. Comment out for debugging
    fs::remove(log_path);
