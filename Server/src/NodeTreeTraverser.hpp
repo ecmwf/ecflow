@@ -62,12 +62,13 @@ public:
 	/// async handlers or the server, will not stop.
    void terminate();
 
+	void traverse_node_tree_and_job_generate(const boost::posix_time::ptime& time_now) const;
+
 private:
 	void traverse(const boost::system::error_code& error );
 	void do_traverse();
 	void start_timer();
 	void update_suite_calendar_and_traverse_node_tree(const boost::posix_time::ptime& time_now);
-	void traverse_node_tree_and_job_generate(const boost::posix_time::ptime& time_now);
 
 	Server* server_;
 	const ServerEnvironment& serverEnv_;

@@ -167,6 +167,7 @@ STC_Cmd_ptr EditScriptCmd::doHandleRequest(AbstractServer* as) const
 			}
 
 			/// Do job submission, but creating .usr file first
+			/// This will *NOT* timeout, unlike server Job generation
 			JobsParam jobsParam(as->poll_interval(),true /* create jobs */); // spawn_jobs = true
 			jobsParam.set_user_edit_variables( user_variables_map );
 
@@ -198,6 +199,7 @@ STC_Cmd_ptr EditScriptCmd::doHandleRequest(AbstractServer* as) const
 		      }
 
 		      /// Do job submission, *USING* the user supplied file , will create .usr file
+	         /// This will *NOT* timeout, unlike server Job generation
 		      JobsParam jobsParam(as->poll_interval(),true /* create jobs */);  //  spawn_jobs = true
 		      jobsParam.set_user_edit_variables( user_variables_map );
 		      jobsParam.set_user_edit_file( user_file_contents_);
@@ -218,6 +220,7 @@ STC_Cmd_ptr EditScriptCmd::doHandleRequest(AbstractServer* as) const
 		      alias_ptr alias = task->add_alias(user_file_contents_,user_variables_);
 
 		      if (run_) {
+		         /// This will *NOT* timeout, unlike server Job generation
 		         JobsParam jobsParam(as->poll_interval(),true /* create jobs */); // spawn jobs = true
 		         if (!alias->submitJob(jobsParam)) {
 		            vector<string>().swap(user_file_contents_); // clear user_file_contents_ and minimise its capacity

@@ -94,11 +94,16 @@ void NodeTreeTraverser::start()
 #ifdef DEBUG_TRAVERSER
                std::cout << "  NodeTreeTraverser::start: Do an immediate job generation. Since we don't want to wait for minute boundary, when starting.\n";
 #endif
- 	            update_suite_calendar_and_traverse_node_tree(last_time_);
 
  	            // Make sure subsequent polls are *ALIGNED* to minute boundary
  			      next_poll_time_ = last_time_ + seconds(seconds_to_minute_boundary);
- 			      timer_.expires_from_now(  boost::posix_time::seconds( 1 ) );
+
+ 			      // ************************************************************************************************
+ 			      // ** This relies on next_poll_time_ being set first, to ensure job generation does not take longer
+ 			      // ************************************************************************************************
+ 			      update_suite_calendar_and_traverse_node_tree(last_time_);
+
+               timer_.expires_from_now(  boost::posix_time::seconds( 1 ) );
 
 #ifdef DEBUG_TRAVERSER
  	            std::cout << "  NodeTreeTraverser::start: next_poll_time_(" << to_simple_string(next_poll_time_) << ")\n";
@@ -327,7 +332,7 @@ void NodeTreeTraverser::update_suite_calendar_and_traverse_node_tree(const boost
    }
 }
 
-void NodeTreeTraverser::traverse_node_tree_and_job_generate(const boost::posix_time::ptime& start_time)
+void NodeTreeTraverser::traverse_node_tree_and_job_generate(const boost::posix_time::ptime& start_time) const
 {
    if ( running_ && server_->defs_) {
        server_->reset_job_generation_count();

@@ -73,6 +73,8 @@ STC_Cmd_ptr RunNodeCmd::doHandleRequest(AbstractServer* as) const
 	   // presented to the user, who can elect to kill them if required.
 	   bool createJobs = true;
 	   if (test_) createJobs = false;
+
+      /// This will *NOT* timeout, unlike server Job generation
 	   JobsParam jobsParam(as->poll_interval(), createJobs );  // default here is to spawn jobs , spawn jobs = true
 	                                                           // At the task level, if create jobs is false, we will not spawn jobs
 #ifdef DEBUG_JOB_SUBMISSION

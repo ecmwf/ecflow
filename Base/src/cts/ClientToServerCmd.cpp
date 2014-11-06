@@ -108,18 +108,8 @@ STC_Cmd_ptr ClientToServerCmd::doJobSubmission(AbstractServer* as)
    // However *** errors in job submission ***, should *NOT* typically abort the command.
    // Since we will typically just set task to aborted state
 
-   // *However* we need to check that Server allows job scheduling.
-   if (as->state() == SState::RUNNING && as->defs()) {
-
-      JobsParam jobsParam(as->poll_interval(), as->allow_job_creation_during_tree_walk() );
-#ifdef DEBUG_JOB_SUBMISSION
-      jobsParam.logDebugMessage(" from ClientToServerCmd::doJobSubmission");
-#endif
-      Jobs jobs(as->defs());
-      if (!jobs.generate(jobsParam)) {
-         log(Log::ERR,jobsParam.getErrorMsg());    // will automatically add end of line
-      }
-   }
+   // This job generation will timeout if job generation takes longer than next poll time.
+   as->traverse_node_tree_and_job_generate(Calendar::second_clock_time());
 
    return PreAllocatedReply::ok_cmd();
 }

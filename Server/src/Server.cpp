@@ -648,6 +648,11 @@ void Server::restart()
    checkPtSaver_.start();
 }
 
+void Server::traverse_node_tree_and_job_generate(const boost::posix_time::ptime& time_now) const
+{
+   traverser_.traverse_node_tree_and_job_generate(time_now);
+}
+
 bool Server::reloadWhiteListFile(std::string& errorMsg)
 {
    if (serverEnv_.debug()) cout << "   Server::reloadWhiteListFile" << endl;
@@ -694,10 +699,6 @@ const std::string& Server::lockedUser() const
    return userWhoHasLock_;
 }
 
-bool Server::allow_job_creation_during_tree_walk() const
-{
-   return serverEnv_.jobGeneration();
-}
 
 int Server::poll_interval() const
 {
