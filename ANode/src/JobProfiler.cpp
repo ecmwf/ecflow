@@ -98,6 +98,16 @@ JobProfiler::~JobProfiler()
    counter_ -= 1;
 }
 
+bool JobProfiler::time_taken_for_job_generation_to_long() const
+{
+   if (jobsParam_.timed_out_of_job_generation() ||
+       (!jobsParam_.poll_time().is_special() && start_time_ >= jobsParam_.poll_time())) {
+      jobsParam_.set_timed_out_of_job_generation();
+      return true;
+   }
+   return false;
+}
+
 
 void JobProfiler::profile_to_log(const JobsParam& jobsParam)
 {

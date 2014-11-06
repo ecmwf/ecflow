@@ -15,6 +15,7 @@
 // Description :
 //============================================================================
 
+#include <boost/date_time/posix_time/posix_time_types.hpp>
 #include <boost/noncopyable.hpp>
 #include "NodeFwd.hpp"
 
@@ -25,10 +26,12 @@ class JobsParam : private boost::noncopyable {
 public:
    // This constructor is used in test
 	JobsParam(bool createJobs = false)
-      : createJobs_(createJobs), spawnJobs_(false), submitJobsInterval_(60){}
+      : timed_out_of_job_generation_(false),
+        createJobs_(createJobs), spawnJobs_(false), submitJobsInterval_(60){}
 
 	JobsParam(int submitJobsInterval, bool createJobs, bool spawn_jobs = true)
-	   : createJobs_(createJobs),spawnJobs_(spawn_jobs), submitJobsInterval_(submitJobsInterval)
+	   : timed_out_of_job_generation_(false),
+	     createJobs_(createJobs),spawnJobs_(spawn_jobs), submitJobsInterval_(submitJobsInterval)
 	   { if (!createJobs_) spawnJobs_ = false;}
 
 	std::string& errorMsg() { return errorMsg_;}
@@ -63,7 +66,13 @@ public:
    const std::string& get_text_at_profile(size_t index) const;
    const std::vector< std::pair<std::string,int> >& profiles() const { return profiles_; }
 
+   void set_poll_time(const boost::posix_time::ptime& next_poll_time) { next_poll_time_ = next_poll_time;}
+   const boost::posix_time::ptime&  poll_time() const { return next_poll_time_;}
+   void set_timed_out_of_job_generation() { timed_out_of_job_generation_ = true;}
+   bool timed_out_of_job_generation() const { return timed_out_of_job_generation_; }
+
 private:
+   bool timed_out_of_job_generation_;
 	bool createJobs_;
 	bool spawnJobs_;
 	int  submitJobsInterval_;
@@ -73,5 +82,6 @@ private:
 	std::vector<std::string> user_edit_file_;
    std::vector< std::pair<std::string,int> > profiles_;  // text,time
 	NameValueMap user_edit_variables_; /// Used for User edit
+	boost::posix_time::ptime next_poll_time_;
 };
 #endif

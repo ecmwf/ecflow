@@ -402,6 +402,8 @@ void Task::get_all_aliases(std::vector<alias_ptr>& destinationVec) const
 bool Task::resolveDependencies(JobsParam& jobsParam)
 {
    JobProfiler profile_me(this,jobsParam,JobProfiler::task_threshold());
+   if (profile_me.time_taken_for_job_generation_to_long()) return false;
+
 
    // Calling Submittable::resolveDependencies(jobsParam) up front can be expensive.
    // Due to trigger and complete evaluations. Hence low cost state checks first

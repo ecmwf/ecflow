@@ -182,8 +182,6 @@ void NodeTreeTraverser::do_traverse()
 	   }
 	}
 
- 	// Start node tree traversal
- 	update_suite_calendar_and_traverse_node_tree(time_now);
 
 
 	/// Remove any stale zombies
@@ -255,6 +253,11 @@ void NodeTreeTraverser::do_traverse()
 #ifdef DEBUG_TRAVERSER
 	{ ss << " Next Poll at:" << to_simple_string(next_poll_time_);LogToCout toCoutAsWell; LOG(Log::DBG,ss.str()); }
 #endif
+
+
+   // Start node tree traversal. 
+   // **This relies on next_poll_time_ being set first, to ensure job generation does not take longer
+   update_suite_calendar_and_traverse_node_tree(time_now);
 
 	start_timer();  // timer fires *EVERY* second
 }
@@ -330,11 +333,18 @@ void NodeTreeTraverser::traverse_node_tree_and_job_generate()
        // Pass submit jobs interval, so that we can check jobs submission occurs within the allocated time.
        // By default job generation is enabled, however for testing, allow job generation to be disabled.
        JobsParam jobsParam(serverEnv_.submitJobsInterval(), serverEnv_.jobGeneration());
+
+       // If job generation takes longer than the time to *reach* next_poll_time_, then time out.
+       // Hence we start out with 60 seconds, and time for job generation should decrease. Until reset back to 60
+       // Should allow greater child communication.
+       jobsParam.set_poll_time(next_poll_time_);
+
 #ifdef DEBUG_JOB_SUBMISSION
        jobsParam.logDebugMessage(" from NodeTreeTraverser::traverse_node_tree_and_job_generate()");
 #endif
        Jobs jobs(server_->defs_);
        if (!jobs.generate(jobsParam)) { ecf::log(Log::ERR, jobsParam.getErrorMsg()); }
+       if (jobsParam.timed_out_of_job_generation()) { ecf::log(Log::WAR, "Timed out job generation"); }
     }
 }
 

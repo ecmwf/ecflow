@@ -34,6 +34,8 @@ public:
    JobProfiler(Node*,JobsParam&,size_t threshold /* expected to be milli seconds */);
    ~JobProfiler();
 
+   bool time_taken_for_job_generation_to_long() const;
+
    static void profile_to_log(const JobsParam& jobsParam);
 
    static std::string threshold_defaults();
