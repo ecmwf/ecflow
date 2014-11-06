@@ -28,7 +28,6 @@
 #include "File.hpp"
 #include "Task.hpp"
 #include "JobsParam.hpp"
-#include "JobProfiler.hpp"
 
 namespace fs = boost::filesystem;
 using namespace std;
