@@ -279,7 +279,7 @@ static bool wait_for_zombie_termination(int max_time_to_wait)
 
       if ( assertTimer.duration() >=  assertTimer.timeConstraint() ) {
          if (ecf_debug_enabled)  {
-            "wait_for_zombie_termination: taking longer than time constraint of " << assertTimer.timeConstraint() << " returning\n";
+            std::cout << "wait_for_zombie_termination: taking longer than time constraint of " << assertTimer.timeConstraint() << " returning\n";
             std::cout <<  Zombie::pretty_print( zombies , 3);
          }
          return false;
