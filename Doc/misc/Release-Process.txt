@@ -29,6 +29,8 @@ Process
      Team->Push Branch
      *otherwise* the option Team->Push Upstream  may well be greyed out.
 
+0/ Update ECFLOW_GIT_BRANCH to  "release/4.0.5" 
+
 0/ **** Check we are not in a high risk period ???
 
 0/ **** DO ***NOT*** switch current link ****************
