@@ -111,15 +111,12 @@ static bool waitForTaskStates(WaitType num_of_tasks,NState::State state1,NState:
       BOOST_REQUIRE_MESSAGE(TestFixture::client().sync_local() == 0, "waitForTaskStates: sync_local failed should return 0\n" << TestFixture::client().errorMsg());
       defs_ptr defs = TestFixture::client().defs();
       vector<Task*> tasks; defs->getAllTasks(tasks);
-//if (ecf_debug_enabled)
-//      dump_tasks(tasks);
-//#endif
       if (num_of_tasks == SINGLE) {
          BOOST_FOREACH(Task* task, tasks) {
             if (task->state() == state1 || task->state() == state2 ) {
                if (ecf_debug_enabled) {
                   if (task->state() == state1) std::cout << "    Found at least one Task with state " << NState::toString(state1) << " returning\n";
-                  if (task->state() == state2) std::cout << "    Found at least one Task with state " << NState::toString(state2) << " returning\n";
+                  if (state1 != state2 && task->state() == state2) std::cout << "    Found at least one Task with state " << NState::toString(state2) << " returning\n";
                   dump_zombies();
                }
                return true;
@@ -688,13 +685,12 @@ BOOST_AUTO_TEST_CASE( test_user_zombies_for_adopt )
    /// We have two *sets* of jobs, Wait for ALL the tasks(non zombies) to complete
    BOOST_REQUIRE_MESSAGE(waitForTaskState(ALL,NState::COMPLETE,timeout),"Expected non-zombie tasks to complete");
 
-   // expect 5 zombies, ie because we have NUM_OF_TASKS tasks. These should all be blocking
-   check_expected_no_of_zombies(NUM_OF_TASKS);
+   check_at_least_one_zombie();
 
-   // Adopt all the zombies. This will UNBLOCK the child commands allowing them to finish
-   /// This test below fail on AIX, its too fast , task's may already be adopted and hence zombie delete, hence don't fail
-   (void)/*int no_of_adopted_zombied =*/ ZombieUtil::do_zombie_user_action(User::ADOPT,  NUM_OF_TASKS, timeout);
-   /// BOOST_CHECK_MESSAGE(no_of_adopted_zombied == NUM_OF_TASKS,"Expected " << NUM_OF_TASKS << "  adopted zombies but found " << no_of_adopted_zombied);
+   /// Adopt all the zombies. This will UNBLOCK the child commands allowing them to finish
+   /// This test below fail on AIX, its too fast , task's may already be adopted and hence don't fail
+   int no_of_adopted_zombied = ZombieUtil::do_zombie_user_action(User::ADOPT,  NUM_OF_TASKS, timeout);
+   if (ecf_debug_enabled) cout << "   found " << no_of_adopted_zombied << " zombies for adoption\n";
 
    /// The blocked zombies are free, start with blocked init command
    /// This may fail on AIX, its too fast , task's may already be complete, hence don't fail
