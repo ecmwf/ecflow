@@ -136,6 +136,14 @@ int ZombieUtil::do_zombie_user_action(User::Action uc, int expected_action_cnt, 
 
       // make sure test does not take too long.
       if ( assertTimer.duration() >=  assertTimer.timeConstraint() ) {
+
+         if (expected_action_cnt > 0 && action_set > 0) {
+#ifdef DEBUG_ZOMBIE
+            cout << "   timeing out after action_set = " << action_set << " expected_action_cnt = " << expected_action_cnt << "\n";
+#endif
+            break;
+         }
+
          std::stringstream ss;
          ss << "do_zombie_user_action:\nExpected " << expected_action_cnt
             << " zombies with user action " << User::to_string(uc) << " but found " << action_set << "\naction set zombies\n"
