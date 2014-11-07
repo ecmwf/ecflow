@@ -659,8 +659,7 @@ BOOST_AUTO_TEST_CASE( test_zombies_attr_for_begin )
    /// We have two *sets* of jobs, Wait for ALL the tasks(non zombies) to complete
    BOOST_REQUIRE_MESSAGE(waitForTaskState(ALL,NState::COMPLETE,timeout),"Expected non-zombie tasks to complete");
 
-   // expect 5 zombies, ie because we have NUM_OF_TASKS tasks
-   check_expected_no_of_zombies(NUM_OF_TASKS);
+   check_at_least_one_zombie();
 
    /// *** Fobbing will not change state of the node tree ****
 #ifdef DEBUG_ZOMBIE
