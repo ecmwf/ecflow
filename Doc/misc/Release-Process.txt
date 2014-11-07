@@ -1,26 +1,7 @@
-************************************************************
- VERY VERY VERY IMPORTANT:
- Pre-announce release, because:
-   a/ User support need to set up the modules on AIX
-   b/ Daniel needs to pre-test it works on all other linux flavours
-   c/ For those people who use current LINK, will be hosed
-      They need warning and chance to prepare
-   d/ For those people using a *FIXED* release, make sure
-      you announce any old version that are to be deleted
-   e/ Announce how they will migrate from 1 version to another
-   f/ CHECK https://software.ecmwf.int/wiki/display/ECFLOW/Home
-      Make sure fixed bugs are recorded/closed.
- ************************************************************
-
-Intra- net
-=================================================================
-OLD Intranet site no longer active::
-
-   http://intra.ecmwf.int/metapps/manuals/ecflow
-
-
 Process
 ==================================================================
+
+0/ Inform Daniel. Place tar file on $SCRATCH, allow daniel to test all RPM
 
 0/ git flow start release 4.0.5
 
@@ -117,22 +98,4 @@ can end up renaming.
      This file is included in $WK/ACore/src/Version.cpp
      
      Then check this file in for, for the other platforms.
-   
-ecflow users group   ecflow_int@lists.ecmwf.int  
-=====================================================================
-Bahra Avi
-Bonet, Axel
-Hodkinson, John
-Hofstadler, Alfred
-
-Radnoti, Gabor
-Haseler, Jan
-
-Modigliani, Umberto
-Weihrauch, Christian
-Santoalla, Daniel Varel
-Burton Paul
-Dando Paul
-Lucas, Dominique
-
-====================================================
+  
