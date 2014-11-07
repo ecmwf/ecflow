@@ -181,7 +181,6 @@ static bool waitForZombieCreation(size_t no_of_zombies, int max_time_to_wait)
             std::cout <<  Zombie::pretty_print( zombies , 3);
             std::cout << "    Found " << no_of_zombies << " zombies. returning.\n";
 #endif
-
             return true;
          }
 
@@ -263,6 +262,13 @@ static void check_expected_no_of_zombies(size_t expected)
       std::cout <<  Zombie::pretty_print( zombies , 3);
       return;
    }
+}
+
+static void check_at_least_one_zombie()
+{
+   TestFixture::client().zombieGet();
+   std::vector<Zombie> zombies = TestFixture::client().server_reply().zombies();
+   BOOST_CHECK_MESSAGE(zombies.size() >= 1 ,"Expected at least one zombies but got nothing\n");
 }
 
 static bool wait_for_zombie_termination(int max_time_to_wait)
@@ -421,7 +427,7 @@ static void create_and_start_test(Defs& theDefs, const std::string& suite_name, 
    waitForTaskStates(SINGLE,NState::SUBMITTED,NState::ACTIVE, timeout);
 
    // ******************************************************************************
-   // IMPORTANT: Since 4.0.5, if Job generation taks to long i.e >= next poll
+   // IMPORTANT: Since 4.0.5, if Job generation takes to long i.e >= next poll
    //            then it will TIMEOUT. Hence we may no get the number of zombies
    //            that we expected
    // *******************************************************************************
@@ -586,15 +592,13 @@ BOOST_AUTO_TEST_CASE( test_user_zombies_for_delete_fail )
    // User zombies will be converted to path zombies by the server
    create_and_start_test("test_user_zombies_for_delete_fail","delete");
 
-   // expect 5 zombies, ie because we have NUM_OF_TASKS tasks
-   check_expected_no_of_zombies(NUM_OF_TASKS);
+   check_at_least_one_zombie();
 
    // Fail all the zombies. This will UNBLOCK and terminate the child commands allowing them to finish
    int no_of_failed_zombies = ZombieUtil::do_zombie_user_action(User::FAIL, NUM_OF_TASKS, timeout);
    BOOST_CHECK_MESSAGE(no_of_failed_zombies == NUM_OF_TASKS,"Expected " << NUM_OF_TASKS << " Failed zombies but found " << no_of_failed_zombies);
 
-   // expect 5 zombies, ie because we have NUM_OF_TASKS tasks
-   check_expected_no_of_zombies(NUM_OF_TASKS);
+   check_at_least_one_zombie();
 
    // Wait for zombies to abort, then remove all the zombies
    wait_for_zombies_child_cmd(ALL,ecf::Child::ABORT,timeout, true /* delete */);
