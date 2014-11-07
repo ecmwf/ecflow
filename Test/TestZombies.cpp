@@ -174,6 +174,17 @@ static bool waitForZombieCreation(size_t no_of_zombies, int max_time_to_wait)
          return true;
       }
       if ( assertTimer.duration() >=  assertTimer.timeConstraint() ) {
+
+         if (zombies.size() > 0) {
+#ifdef DEBUG_ZOMBIE
+            std::cout << "   Timeout out found only " << zombies.size()  << " zombies." << "\n";
+            std::cout <<  Zombie::pretty_print( zombies , 3);
+            std::cout << "    Found " << no_of_zombies << " zombies. returning.\n";
+#endif
+
+            return true;
+         }
+
          BOOST_REQUIRE_MESSAGE(assertTimer.duration() <  assertTimer.timeConstraint(),
                   "waitForZombieCreation expected " << no_of_zombies
                   << " zombies but found " << TestFixture::client().server_reply().zombies().size()
@@ -408,6 +419,12 @@ static void create_and_start_test(Defs& theDefs, const std::string& suite_name, 
 
    // Wait for a single task to reach state submitted or active, before creating zombies
    waitForTaskStates(SINGLE,NState::SUBMITTED,NState::ACTIVE, timeout);
+
+   // ******************************************************************************
+   // IMPORTANT: Since 4.0.5, if Job generation taks to long i.e >= next poll
+   //            then it will TIMEOUT. Hence we may no get the number of zombies
+   //            that we expected
+   // *******************************************************************************
 
    if (create_zombies_with == "delete") {
 #ifdef DEBUG_ZOMBIE
