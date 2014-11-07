@@ -357,18 +357,19 @@ void NodeTreeTraverser::traverse_node_tree_and_job_generate(const boost::posix_t
 
           // Implies time now >= next_poll_time_,
           // It could be that we started job generation a few seconds before the poll time,
-          // Hence to avoid excessive warnings, Only warn if time_now > next_poll_time_ and  forgive about 10  seconds
+          // Hence to avoid excessive warnings, Only warn if time_now > next_poll_time_ and  forgive about 4  seconds
           ptime time_now = Calendar::second_clock_time();
           if (time_now > next_poll_time_ ) {
-//             time_duration duration = time_now - next_poll_time_;
-//             if ( duration.total_seconds() > 10) {
-//#ifdef DEBUG
-          LogToCout toCoutAsWell;
-//#endif
+             int leeway = ( serverEnv_.submitJobsInterval() == 60) ? 4 : 1;
+             time_duration duration = time_now - next_poll_time_;
+             if ( duration.total_seconds() >= leeway) {
+#ifdef DEBUG
+                LogToCout toCoutAsWell;
+#endif
                 std::stringstream ss;
                 ss << "Job generation *timed* out: start time:" << start_time << "  time_now:" << time_now << "  poll_time:" << next_poll_time_;
                 ecf::log(Log::WAR,ss.str());
-//             }
+             }
           }
        }
     }

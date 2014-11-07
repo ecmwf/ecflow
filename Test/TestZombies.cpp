@@ -596,7 +596,7 @@ BOOST_AUTO_TEST_CASE( test_user_zombies_for_delete_fail )
 
    // Fail all the zombies. This will UNBLOCK and terminate the child commands allowing them to finish
    int no_of_failed_zombies = ZombieUtil::do_zombie_user_action(User::FAIL, NUM_OF_TASKS, timeout);
-   BOOST_CHECK_MESSAGE(no_of_failed_zombies == NUM_OF_TASKS,"Expected " << NUM_OF_TASKS << " Failed zombies but found " << no_of_failed_zombies);
+   BOOST_CHECK_MESSAGE(no_of_failed_zombies >0,"Expected > 0 Failed zombies but found none");
 
    check_at_least_one_zombie();
 
