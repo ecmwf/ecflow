@@ -401,6 +401,7 @@ void Task::get_all_aliases(std::vector<alias_ptr>& destinationVec) const
 
 bool Task::resolveDependencies(JobsParam& jobsParam)
 {
+   if (jobsParam.timed_out_of_job_generation()) return false;
    JobProfiler profile_me(this,jobsParam,JobProfiler::task_threshold());
    if (profile_me.time_taken_for_job_generation_to_long()) return false;
 
