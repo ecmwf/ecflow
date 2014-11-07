@@ -278,6 +278,9 @@ else
       ecflow_client --meter=progress 80        --host=%ECF_NODE% --port=%ECF_PORT%  
       ecflow_client --label=progress Zombies   --host=%ECF_NODE% --port=%ECF_PORT% 
       
+      if [ %ECF_TRYNO% -gt 1 ] ; then
+         export ECF_DEBUG_ZOMBIES=1
+      fi
       run_test Test s_test_zombies
       
       

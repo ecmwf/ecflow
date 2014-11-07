@@ -68,6 +68,9 @@ namespace fs = boost::filesystem;
 //#define DO_TEST10 1 Need to make reliable
 #define DO_TEST11 1
 
+static bool ecf_debug_enabled = false; // allow environment to enable debug
+
+
 BOOST_GLOBAL_FIXTURE( TestFixture );
 
 BOOST_AUTO_TEST_SUITE( TestSuite  )
@@ -76,7 +79,6 @@ enum WaitType { SINGLE, ALL };
 static int timeout = 30;
 static int NUM_OF_TASKS = 5;
 
-#ifdef DEBUG_ZOMBIE
 static void dump_zombies()
 {
    TestFixture::client().zombieGet();
@@ -90,37 +92,36 @@ static void dump_tasks(const vector<Task*>& tasks) {
    }
    std::cout << "\n";
 }
-#endif
 
 static bool waitForTaskStates(WaitType num_of_tasks,NState::State state1,NState::State state2, int max_time_to_wait)
 {
-#ifdef DEBUG_ZOMBIE
    std::string wait_type_str = (num_of_tasks == SINGLE ) ? "SINGLE" : "ALL";
-   if ( num_of_tasks == SINGLE) {
-      if (state1 == state2) std::cout << "\n   Waiting for SINGLE task to reach state " << NState::toString(state1) << "\n";
-      else                  std::cout << "\n   Waiting for SINGLE task to reach state " << NState::toString(state1) << " || " << NState::toString(state2)  << "\n";
+   if (ecf_debug_enabled) {
+      if ( num_of_tasks == SINGLE) {
+         if (state1 == state2) std::cout << "\n   Waiting for SINGLE task to reach state " << NState::toString(state1) << "\n";
+         else                  std::cout << "\n   Waiting for SINGLE task to reach state " << NState::toString(state1) << " || " << NState::toString(state2)  << "\n";
+      }
+      else {
+         if (state1 == state2)  std::cout << "\n   Waiting for ALL tasks to reach state " << NState::toString(state1) << "\n";
+         else                   std::cout << "\n   Waiting for ALL tasks to reach state " << NState::toString(state1) << " || " << NState::toString(state2)  << "\n";
+      }
    }
-   else {
-      if (state1 == state2)  std::cout << "\n   Waiting for ALL tasks to reach state " << NState::toString(state1) << "\n";
-      else                   std::cout << "\n   Waiting for ALL tasks to reach state " << NState::toString(state1) << " || " << NState::toString(state2)  << "\n";
-   }
-#endif
    AssertTimer assertTimer(max_time_to_wait,false); // Bomb out after n seconds, fall back if test fail
    while (1) {
       BOOST_REQUIRE_MESSAGE(TestFixture::client().sync_local() == 0, "waitForTaskStates: sync_local failed should return 0\n" << TestFixture::client().errorMsg());
       defs_ptr defs = TestFixture::client().defs();
       vector<Task*> tasks; defs->getAllTasks(tasks);
-//#ifdef DEBUG_ZOMBIE
+//if (ecf_debug_enabled)
 //      dump_tasks(tasks);
 //#endif
       if (num_of_tasks == SINGLE) {
          BOOST_FOREACH(Task* task, tasks) {
             if (task->state() == state1 || task->state() == state2 ) {
-#ifdef DEBUG_ZOMBIE
-               if (task->state() == state1) std::cout << "    Found at least one Task with state " << NState::toString(state1) << " returning\n";
-               if (task->state() == state2) std::cout << "    Found at least one Task with state " << NState::toString(state2) << " returning\n";
-               dump_zombies();
-#endif
+               if (ecf_debug_enabled) {
+                  if (task->state() == state1) std::cout << "    Found at least one Task with state " << NState::toString(state1) << " returning\n";
+                  if (task->state() == state2) std::cout << "    Found at least one Task with state " << NState::toString(state2) << " returning\n";
+                  dump_zombies();
+               }
                return true;
             }
          }
@@ -129,22 +130,22 @@ static bool waitForTaskStates(WaitType num_of_tasks,NState::State state1,NState:
          size_t count = 0;
          BOOST_FOREACH(Task* task, tasks) { if (task->state() == state1 || task->state() == state2)  count++; }
          if (count == tasks.size()) {
-#ifdef DEBUG_ZOMBIE
-            if (state2 == state1) std::cout << "    All tasks(" << tasks.size() << ") have reached state " << NState::toString(state1) << " returning\n";
-            else                  std::cout << "    All tasks(" << tasks.size() << ") have reached state " << NState::toString(state1) << " || " <<  NState::toString(state2) <<  " returning\n";
-            dump_tasks(tasks);
-#endif
+            if (ecf_debug_enabled) {
+               if (state2 == state1) std::cout << "    All tasks(" << tasks.size() << ") have reached state " << NState::toString(state1) << " returning\n";
+               else                  std::cout << "    All tasks(" << tasks.size() << ") have reached state " << NState::toString(state1) << " || " <<  NState::toString(state2) <<  " returning\n";
+               dump_tasks(tasks);
+            }
             return true;
          }
       }
 
       if ( assertTimer.duration() >=  assertTimer.timeConstraint() ) {
-#ifdef DEBUG_ZOMBIE
-         dump_zombies();
-         dump_tasks(tasks);
-         std::cout << "waitForTaskState " << wait_type_str << " reach state " << NState::toString(state1) << " || " << NState::toString(state2)
+         if (ecf_debug_enabled) {
+            dump_zombies();
+            dump_tasks(tasks);
+            std::cout << "waitForTaskState " << wait_type_str << " reach state " << NState::toString(state1) << " || " << NState::toString(state2)
                   << " Test taking longer than time constraint of " << assertTimer.timeConstraint() <<  " returning false\n";
-#endif
+         }
          break;
       }
       sleep(1);
@@ -159,28 +160,27 @@ static bool waitForTaskState(WaitType wait_type,NState::State state1, int max_ti
 
 static bool waitForZombieCreation(size_t no_of_zombies, int max_time_to_wait)
 {
-#ifdef DEBUG_ZOMBIE
-   std::cout << "\n   Waiting for " << no_of_zombies << " zombies to be created\n";
-#endif
+   if (ecf_debug_enabled) std::cout << "\n   Waiting for " << no_of_zombies << " zombies to be created\n";
+
    AssertTimer assertTimer(max_time_to_wait,false); // Bomb out after n seconds, fall back if test fail
    while (1) {
       BOOST_REQUIRE_MESSAGE(TestFixture::client().zombieGet() == 0, "zombieGet failed should return 0\n" << TestFixture::client().errorMsg());
       std::vector<Zombie> zombies = TestFixture::client().server_reply().zombies();
       if (zombies.size() == no_of_zombies) {
-#ifdef DEBUG_ZOMBIE
-         std::cout <<  Zombie::pretty_print( zombies , 3);
-         std::cout << "    Found " << no_of_zombies << " zombies. returning.\n";
-#endif
+         if (ecf_debug_enabled) {
+            std::cout <<  Zombie::pretty_print( zombies , 3);
+            std::cout << "    Found " << no_of_zombies << " zombies. returning.\n";
+         }
          return true;
       }
       if ( assertTimer.duration() >=  assertTimer.timeConstraint() ) {
 
          if (zombies.size() > 0) {
-#ifdef DEBUG_ZOMBIE
-            std::cout << "   Timeout out found only " << zombies.size()  << " zombies." << "\n";
-            std::cout <<  Zombie::pretty_print( zombies , 3);
-            std::cout << "    Found " << no_of_zombies << " zombies. returning.\n";
-#endif
+            if (ecf_debug_enabled) {
+               std::cout << "   Timeout out found only " << zombies.size()  << " zombies." << "\n";
+               std::cout <<  Zombie::pretty_print( zombies , 3);
+               std::cout << "    Found " << no_of_zombies << " zombies. returning.\n";
+            }
             return true;
          }
 
@@ -201,9 +201,8 @@ static void remove_stale_zombies()
 {
    // Remove those zombies that have only *ONE* call
    // There is no associated process/child command that has updated the zombie
-#ifdef DEBUG_ZOMBIE
-   cout << "\n   remove_stale_zombies \n";
-#endif
+   if (ecf_debug_enabled) cout << "\n   remove_stale_zombies \n";
+
    BOOST_REQUIRE_MESSAGE(TestFixture::client().zombieGet() == 0, "zombieGet failed should return 0\n" << TestFixture::client().errorMsg());
    std::vector<Zombie> zombies = TestFixture::client().server_reply().zombies();
    BOOST_FOREACH(const Zombie& z, zombies) {
@@ -218,9 +217,8 @@ static void remove_stale_zombies()
 
 static void wait_for_path_zombies(int no_of_tasks, int max_time_to_wait)
 {
-#ifdef DEBUG_ZOMBIE
-   cout << "\n   wait_for_path_zombies\n";
-#endif
+   if (ecf_debug_enabled) cout << "\n   wait_for_path_zombies\n";
+
    int no_of_path_zombies = 0;
    std::vector<Zombie> zombies;
    AssertTimer assertTimer(max_time_to_wait,false); // Bomb out after n seconds, fall back if test fail
@@ -246,9 +244,7 @@ static void wait_for_path_zombies(int no_of_tasks, int max_time_to_wait)
       sleep(1);
    }
 
-#ifdef DEBUG_ZOMBIE
-   cout << Zombie::pretty_print( zombies , 6) << "\n";
-#endif
+   if (ecf_debug_enabled) cout << Zombie::pretty_print( zombies , 6) << "\n";
 }
 
 
@@ -273,9 +269,8 @@ static void check_at_least_one_zombie()
 
 static bool wait_for_zombie_termination(int max_time_to_wait)
 {
-#ifdef DEBUG_ZOMBIE
-   std::cout << "\n   wait_for_zombie_termination\n";
-#endif
+   if (ecf_debug_enabled) std::cout << "\n   wait_for_zombie_termination\n";
+
    AssertTimer assertTimer(max_time_to_wait,false); // Bomb out after n seconds, fall back if test fail
    while (1) {
       TestFixture::client().zombieGet();
@@ -283,8 +278,10 @@ static bool wait_for_zombie_termination(int max_time_to_wait)
       if (zombies.empty() ) break;
 
       if ( assertTimer.duration() >=  assertTimer.timeConstraint() ) {
-//         std::cout <<  Zombie::pretty_print( zombies , 3);
-//         BOOST_REQUIRE_MESSAGE(false,"wait_for_zombie_termination: taking longer than time constraint of " << assertTimer.timeConstraint() << " aborting\n");
+         if (ecf_debug_enabled)  {
+            "wait_for_zombie_termination: taking longer than time constraint of " << assertTimer.timeConstraint() << " returning\n";
+            std::cout <<  Zombie::pretty_print( zombies , 3);
+         }
          return false;
       }
       sleep(1);
@@ -294,58 +291,51 @@ static bool wait_for_zombie_termination(int max_time_to_wait)
 
 static void wait_for_zombies_child_cmd(WaitType wait_type,ecf::Child::CmdType child_cmd,int max_time_to_wait, bool do_delete = false)
 {
-#ifdef DEBUG_ZOMBIE
-   std::cout << "\n   Waiting for ";
-   if (wait_type == SINGLE) std::cout << "SINGLE";
-   else                     std::cout << "ALL";
-   std::cout << "  child (" << Child::to_string(child_cmd) << ") cmd; ";
-   if (do_delete) std::cout << " then DELETE zombies ";
-   std::cout << "=============================================================================================\n";
-#endif
+   if (ecf_debug_enabled) {
+      std::cout << "\n   Waiting for ";
+      if (wait_type == SINGLE) std::cout << "SINGLE";
+      else                     std::cout << "ALL";
+      std::cout << "  child (" << Child::to_string(child_cmd) << ") cmd; ";
+      if (do_delete) std::cout << " then DELETE zombies ";
+      std::cout << "=============================================================================================\n";
+   }
 
    bool child_type_found = false;
    AssertTimer assertTimer(max_time_to_wait,false); // Bomb out after n seconds, fall back if test fail
    while (1) {
       TestFixture::client().zombieGet();
       std::vector<Zombie> zombies = TestFixture::client().server_reply().zombies();
-#ifdef DEBUG_ZOMBIE
-      std::cout << "    Get zombies returned " << zombies.size() << "\n";
-#endif
+      if (ecf_debug_enabled) std::cout << "    Get zombies returned " << zombies.size() << "\n";
+
       if (zombies.empty() && child_type_found && do_delete) {
-#ifdef DEBUG_ZOMBIE
-         std::cout << "   No zombies. (do_delete) was set returning\n";
-#endif
+         if (ecf_debug_enabled) std::cout << "   No zombies. (do_delete) was set returning\n";
          return;
       }
 
       size_t completed_zombies = 0;
       BOOST_FOREACH(const Zombie& z, zombies) {
-#ifdef DEBUG_ZOMBIE
-         std::cout << "   " << z << "\n";
-#endif
+         if (ecf_debug_enabled) std::cout << "   " << z << "\n";
          if (z.last_child_cmd() == child_cmd) {
             child_type_found = true;
             completed_zombies++;
             if (wait_type == SINGLE) {
-#ifdef DEBUG_ZOMBIE
-               std::cout << "   " << z << "\n";
-               std::cout << "   Found SINGLE zombie of correct child type returning\n";
-#endif
+               if (ecf_debug_enabled) {
+                  std::cout << "   " << z << "\n";
+                  std::cout << "   Found SINGLE zombie of correct child type returning\n";
+               }
                return;
             }
          }
       }
 
       if ( completed_zombies == zombies.size() && child_type_found) {
-#ifdef DEBUG_ZOMBIE
-         std::cout << "   Found ALL(" << completed_zombies << ") zombies of child type " << Child::to_string(child_cmd) << "\n";
-         std::cout << Zombie::pretty_print( zombies , 3);
-#endif
+         if (ecf_debug_enabled) {
+            std::cout << "   Found ALL(" << completed_zombies << ") zombies of child type " << Child::to_string(child_cmd) << "\n";
+            std::cout << Zombie::pretty_print( zombies , 3);
+         }
          if (do_delete) {
             BOOST_FOREACH(const Zombie& z, zombies) {
-#ifdef DEBUG_ZOMBIE
-               std::cout << "   deleteing " << z << "\n";
-#endif
+               if (ecf_debug_enabled) std::cout << "   deleteing " << z << "\n";
                TestFixture::client().zombieRemove(z);
             }
          }
@@ -366,17 +356,16 @@ static void wait_for_zombies_child_cmd(WaitType wait_type,ecf::Child::CmdType ch
 
 static void wait_for_no_zombies(int max_time_to_wait)
 {
-#ifdef DEBUG_ZOMBIE
-   std::cout << "\n   wait_for_no_zombies\n";
-#endif
+   if (ecf_debug_enabled) std::cout << "\n   wait_for_no_zombies\n";
+
    AssertTimer assertTimer(max_time_to_wait,false); // Bomb out after n seconds, fall back if test fail
    while (1) {
       TestFixture::client().zombieGet();
       std::vector<Zombie> zombies = TestFixture::client().server_reply().zombies();
-#ifdef DEBUG_ZOMBIE
-      std::cout << "      Get zombies returned " << zombies.size() << "\n";
-      std::cout << Zombie::pretty_print( zombies , 6) << "\n";
-#endif
+      if (ecf_debug_enabled) {
+         std::cout << "      Get zombies returned " << zombies.size() << "\n";
+         std::cout << Zombie::pretty_print( zombies , 6) << "\n";
+      }
       if (zombies.empty()) return;
 
       // make sure test does not take too long.
@@ -387,7 +376,7 @@ static void wait_for_no_zombies(int max_time_to_wait)
                   " taking longer than time constraint of " << assertTimer.timeConstraint() <<
                   " aborting\n");
       }
-      sleep(1);
+      sleep(2);
    }
 }
 
@@ -403,19 +392,19 @@ static void populate_defs(Defs& theDefs,const std::string& suite_name) {
 
 
 static void create_and_start_test(Defs& theDefs, const std::string& suite_name, const std::string& create_zombies_with) {
-#ifdef DEBUG_ZOMBIE
-   std::cout << "\n\n=============================================================================\n";
-   std::cout << "create_and_start_test  " << suite_name << "  using  " << create_zombies_with << "\n";
-#endif
+   if (ecf_debug_enabled) {
+      std::cout << "\n\n=============================================================================\n";
+      std::cout << "create_and_start_test  " << suite_name << "  using  " << create_zombies_with << "\n";
+   }
+
    /// Avoid side effects from previous test, by removing all zombies
    TestFixture::client().zombieGet();
    if (!TestFixture::client().server_reply().zombies().empty()) {
       (void)ZombieUtil::do_zombie_user_action(User::REMOVE,TestFixture::client().server_reply().zombies().size(), timeout);
    }
 
-#ifdef DEBUG_ZOMBIE
-   std::cout << "   creating server test harness\n";
-#endif
+   if (ecf_debug_enabled) std::cout << "   creating server test harness\n";
+
    // The test harness will create corresponding directory structure & default ecf file
    ServerTestHarness serverTestHarness;
    serverTestHarness.run(theDefs,
@@ -433,9 +422,7 @@ static void create_and_start_test(Defs& theDefs, const std::string& suite_name, 
    // *******************************************************************************
 
    if (create_zombies_with == "delete") {
-#ifdef DEBUG_ZOMBIE
-      std::cout << "   create USER zombies by deleting all the nodes in the server\n";
-#endif
+      if (ecf_debug_enabled) std::cout << "   create USER zombies by deleting all the nodes in the server\n";
       TestFixture::client().delete_all( true /* force */);
    }
    else if (create_zombies_with == "begin") {
@@ -446,9 +433,7 @@ static void create_and_start_test(Defs& theDefs, const std::string& suite_name, 
       ///       with same password, BUT different process id ??????
       ///       i.e The begin has regenerate the job file, so we get job started twice.
       ///       This should be trapped by the server, as Task should be active
-#ifdef DEBUG_ZOMBIE
-      std::cout << "   Calling begin_all_suites, now have 2 sets of jobs, The first/original set are now zombies\n";
-#endif
+      if (ecf_debug_enabled) std::cout << "   Calling begin_all_suites, now have 2 sets of jobs, The first/original set are now zombies\n";
       TestFixture::client().set_throw_on_error(false);
       if (TestFixture::client().begin_all_suites( true /* force */) == 1) {
          std::cout << "   Begin raised exception: because " << TestFixture::client().errorMsg() << " ***\n";
@@ -457,11 +442,13 @@ static void create_and_start_test(Defs& theDefs, const std::string& suite_name, 
    }
    else if (create_zombies_with == "complete") {
 
+      if (ecf_debug_enabled) std::cout << "   create USER zombies by calling complete\n";
       std::string path = "/" + suite_name;
       TestFixture::client().force(path,"complete",true/*recursive*/);
    }
    else if (create_zombies_with == "aborted") {
 
+      if (ecf_debug_enabled) std::cout << "   create USER zombies by calling abort\n";
       std::string path = "/" + suite_name;
       TestFixture::client().force(path,"aborted",true/*recursive*/);
    }
@@ -495,15 +482,23 @@ static void create_and_start_test(Defs& theDefs, const std::string& suite_name, 
 
 static void create_and_start_test(const std::string& suite_name, const std::string& create_zombies_with) {
 
-#ifdef DEBUG_ZOMBIE
-   std::cout << "   Creating defs\n";
-#endif
+   if (ecf_debug_enabled) std::cout << "   Creating defs\n";
    Defs theDefs;
    populate_defs(theDefs,suite_name);
    create_and_start_test(theDefs,suite_name,create_zombies_with );
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+BOOST_AUTO_TEST_CASE( enable_debug_for_ECF_TRY_NO_Greater_than_one)
+{
+   BOOST_CHECK_MESSAGE(!ecf_debug_enabled ,"dummy test");
+
+   if (getenv("ECF_DEBUG_ZOMBIES")) {
+      ecf_debug_enabled = true;
+      cout << "Test:: ... debug_enabled" << endl;
+   }
+}
 
 #ifdef DO_TEST1
 BOOST_AUTO_TEST_CASE(test_path_zombie_creation)
@@ -662,9 +657,7 @@ BOOST_AUTO_TEST_CASE( test_zombies_attr_for_begin )
    check_at_least_one_zombie();
 
    /// *** Fobbing will not change state of the node tree ****
-#ifdef DEBUG_ZOMBIE
-   std::cout << "   Add a zombie attribute 'user:fob::' to the suite, which fobs all child commands\n";
-#endif
+   if (ecf_debug_enabled) std::cout << "   Add a zombie attribute 'user:fob::' to the suite, which fobs all child commands\n";
    TestFixture::client().alter("/" + suite_name,"add","zombie","user:fob::");
 
    // Fobbing causes auto deletion of zombies, when the Child complete is reached
@@ -738,14 +731,10 @@ BOOST_AUTO_TEST_CASE( test_zombies_attr_for_adopt )
    // expect 5 zombies, ie because we have NUM_OF_TASKS tasks. These should all be blocking
    check_expected_no_of_zombies(NUM_OF_TASKS);
 
-#ifdef DEBUG_ZOMBIE
-   std::cout << "   Add a zombie attribute 'user:adopt::' to the suite, which *ADOPTS* all zombies allowing them to complete\n";
-#endif
+   if (ecf_debug_enabled) std::cout << "   Add a zombie attribute 'user:adopt::' to the suite, which *ADOPTS* all zombies allowing them to complete\n";
    TestFixture::client().alter("/" + suite_name,"add","zombie","user:adopt::");
 
-#ifdef DEBUG_ZOMBIE
-   dump_zombies();
-#endif
+   if (ecf_debug_enabled) dump_zombies();
 
    /// The blocked zombies are free, start with blocked init command
    /// This may fail on AIX, its too fast , task's may already be complete, dont fail
@@ -857,9 +846,7 @@ BOOST_AUTO_TEST_CASE( test_zombie_inheritance )
 #ifdef DO_TEST11
 static int wait_for_killed_zombies(int no_of_tasks, int max_time_to_wait)
 {
-#ifdef DEBUG_ZOMBIE
-   std::cout << "\n   wait_for_killed_zombies\n";
-#endif
+   if (ecf_debug_enabled) std::cout << "\n   wait_for_killed_zombies\n";
    AssertTimer assertTimer(max_time_to_wait,false); // Bomb out after n seconds, fall back if test fail
    while (1) {
       int killed = 0;
@@ -868,7 +855,9 @@ static int wait_for_killed_zombies(int no_of_tasks, int max_time_to_wait)
       BOOST_FOREACH(const Zombie& z, zombies) {
          if (z.kill()) killed++;
       }
-      if (killed == no_of_tasks) return killed;
+      if (ecf_debug_enabled) std::cout << "   found " << killed << " killed zombies\n";
+
+      if (killed == no_of_tasks)  return killed;
 
       if ( assertTimer.duration() >=  assertTimer.timeConstraint() ) {
          cout <<  "wait_for_killed_zombies Test wait " << assertTimer.duration() <<
@@ -876,7 +865,7 @@ static int wait_for_killed_zombies(int no_of_tasks, int max_time_to_wait)
                   " breaking out\n" << Zombie::pretty_print( zombies , 3) << "\n";
          return killed;
       }
-      sleep(1);
+      sleep(2);
    }
    return 0;
 }
