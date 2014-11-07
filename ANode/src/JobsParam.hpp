@@ -59,8 +59,8 @@ public:
 	const std::vector<std::string>& user_edit_file() const { return user_edit_file_; }
 
 	// Functions to aid timing of job generation
-   void set_poll_time(const boost::posix_time::ptime& next_poll_time) { next_poll_time_ = next_poll_time;}
-   const boost::posix_time::ptime&  poll_time() const { return next_poll_time_;}
+   void set_next_poll_time(const boost::posix_time::ptime& next_poll_time) { next_poll_time_ = next_poll_time;}
+   const boost::posix_time::ptime&  next_poll_time() const { return next_poll_time_;}
    void set_timed_out_of_job_generation() { timed_out_of_job_generation_ = true;}
    bool timed_out_of_job_generation() const { return timed_out_of_job_generation_; }
 

@@ -71,8 +71,7 @@ JobProfiler::~JobProfiler()
 
 bool JobProfiler::time_taken_for_job_generation_to_long() const
 {
-   if (jobsParam_.timed_out_of_job_generation() ||
-       (!jobsParam_.poll_time().is_special() && start_time_ >= jobsParam_.poll_time())) {
+   if (!jobsParam_.next_poll_time().is_special() && start_time_ >= jobsParam_.next_poll_time()) {
       jobsParam_.set_timed_out_of_job_generation();
       return true;
    }

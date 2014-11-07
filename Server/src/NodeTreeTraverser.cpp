@@ -344,9 +344,9 @@ void NodeTreeTraverser::traverse_node_tree_and_job_generate(const boost::posix_t
        // If job generation takes longer than the time to *reach* next_poll_time_, then time out.
        // Hence we start out with 60 seconds, and time for job generation should decrease. Until reset back to 60
        // Should allow greater child communication.
-       // By setting set_poll_time, we enable timeout of job generation.
+       // By setting set_next_poll_time, we enable timeout of job generation. => next_poll_time_ must be set first
        // Note: There are other place where we may not want to timeout job generation.
-       jobsParam.set_poll_time(next_poll_time_);
+       jobsParam.set_next_poll_time(next_poll_time_);
 
 #ifdef DEBUG_JOB_SUBMISSION
        jobsParam.logDebugMessage(" from NodeTreeTraverser::traverse_node_tree_and_job_generate()");
