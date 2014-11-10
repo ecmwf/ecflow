@@ -176,7 +176,7 @@ $BOOST_ROOT/bjam $TOOLSET $CXXFLAGS -d2 variant=$mode_arg $test_arg $install_arg
    
    
 # ============================================================================ 
-# Copy over release from cct -> cca
+# Copy over release from ccb -> cca
 # *Make* sure destination has a trailing '/.' otherwise you can end up renaming.
 # ============================================================================
 #if [[ "$ARCH" = cray ]] ; then 
