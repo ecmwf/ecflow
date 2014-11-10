@@ -724,8 +724,8 @@ BOOST_AUTO_TEST_CASE( test_zombies_attr_for_adopt )
    /// We have two *sets* of jobs, Wait for ALL the tasks(non zombies) to complete
    BOOST_REQUIRE_MESSAGE(waitForTaskState(ALL,NState::COMPLETE,timeout),"Wait for all non-zombie tasks to complete failed");
 
-   // expect 5 zombies, ie because we have NUM_OF_TASKS tasks. These should all be blocking
-   check_expected_no_of_zombies(NUM_OF_TASKS);
+   // expected 5 zombies, ie because we have NUM_OF_TASKS tasks. These should all be blocking
+   check_at_least_one_zombie();
 
    if (ecf_debug_enabled) std::cout << "   Add a zombie attribute 'user:adopt::' to the suite, which *ADOPTS* all zombies allowing them to complete\n";
    TestFixture::client().alter("/" + suite_name,"add","zombie","user:adopt::");

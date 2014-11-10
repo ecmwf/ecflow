@@ -1,13 +1,13 @@
  ======================================================================================
 Subject: New release of ecFlow now available  
 
-A new version of the ecFlow(4.0.4) has been released:
+A new version of the ecFlow(4.0.5) has been released:
 
 #Please be aware that A new ecflow release candidate is planned.
 #If you are using the test version then the link will
 #be changed.
 
-This release is accessible from: /usr/local/apps/ecflow/4.0.4
+This release is accessible from: /usr/local/apps/ecflow/4.0.5
 on the following platforms:
 
    o linux 10.3                (garm)
@@ -16,12 +16,24 @@ on the following platforms:
    o redhat/RHEL 6.4           (ecgb,sappa,sappb)
    o linux cluster             (lxa/lxb)
    o Operational linux cluster (lxop)
-   o AIX/ibm_power7            (c2a)
-   o cca/ccb                   (cray XC30) 
+   o cca/ccb/cct               (cray XC30) 
  
 The release includes the following changes:
  
-
+    server           :  ECFLOW- 141 Order tasks alphabetically in ecflowview, case insensitive
+    server           :  ECFLOW-162 Removal of regular "aborted: /" messages in log file
+    server           :  ECFLOW-158 instrument job creation time + tree walk and trigger evaluation time
+    server           :  ECFLOW-159 allow --stats to be reset
+    server           :  ECFLOW-172 improve server to cope with high disk latencies.
+    ecflowview       :  ECFLOW 131 Search for suspended nodes not functioning in ecflowview 4.0.3
+    ecflowview       :  search insensitive to case (add regexp too)
+    ecflowview       :  Activate time line  from tool bar icon
+    ecflowview       :  ECFLOW-143 Suites don't appear to show in ecflowview on OpenSUSE 13.1,  gcc 4.8 release mode optimisation concern fixed.
+    ecflowview       :  ECFLOW-164 ecflowview, the history tab is possibly over loading the server, + not accurate
+    client           :  ECFLOW-154 --log=new should only check paths on server side
+    client           :  ECFLOW-161 ecflow_client error/cout output should produce a timestamp
+    misc             :  ECFLOW-155 Remove IBM from ecflow build platforms
+    misc             :  ECFLOW-148 Build ecflow with new boost 1.56 release, test on all platforms
  
 To use a specific version use the module functionality.
 This will setup the PATHS for client server and python extension
@@ -32,11 +44,11 @@ i.e.
 
    module avail ecflow
    module unload ecflow 
-   module load ecflow/4.0.4
+   module load ecflow/4.0.5
       
 Alternatively use:
 
-   export ECFLOW_VERSION=4.0.4
+   export ECFLOW_VERSION=4.0.5
    use ecflow
    
             
@@ -46,7 +58,7 @@ The client/Server from one release should not be mixed with another.
 To avoid this problem it is *highly* recommended that you use a 
 specific version:
 
-   module load ecflow/4.0.4
+   module load ecflow/4.0.5
 
 Additionally references to ecflow_client in the scripts(.ecf) should use
 the server variable %ECF_VERSION% to locate the executable, this ensures
@@ -68,7 +80,7 @@ Documentation
 =======================================================================
 The user manual(word and pdf formats) are available from:
 
-   /usr/local/apps/ecflow/4.0.4/doc
+   /usr/local/apps/ecflow/4.0.5/doc
 
 The online documentation and tutorial are accessible from:
 

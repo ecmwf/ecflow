@@ -25,6 +25,7 @@
 #include "Log.hpp"
 #include "Jobs.hpp"
 #include "JobsParam.hpp"
+#include "System.hpp"
 
 using namespace std;
 using namespace ecf;
@@ -80,6 +81,9 @@ BOOST_AUTO_TEST_CASE( test_job_profiler )
 
    // Explicitly destroy log. To keep valgrind happy
    Log::destroy();
+
+   /// Destroy System singleton to avoid valgrind from complaining
+   System::destroy();
 }
 
 BOOST_AUTO_TEST_SUITE_END()
