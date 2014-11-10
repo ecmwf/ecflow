@@ -193,10 +193,10 @@ $BOOST_ROOT/bjam $TOOLSET $CXXFLAGS -d2 variant=$mode_arg $test_arg $install_arg
 # ============================================================================
 if [[ "$ARCH" = "Linux" ]] || [[ "$ARCH" = "linux" ]] 
 then  
-   if [ "$OS_VERSION" = opensuse131 ] ; then
+   if [ "$OS_VERSION" = rhel6 ] ; then
    
       if [[ "$test_arg" = "" ]] ; then
-         # sappa/sappb are same as ecgb/redhat
+         # sappa/sappb(rhel63) are same as ecgb/redhat(rhel6)
          cd /usr/local/apps/ecflow
          scp -r $ECFLOW_VERSION emos@sappa:/usr/local/apps/ecflow/.
          scp -r $ECFLOW_VERSION emos@sappb:/usr/local/apps/ecflow/.
