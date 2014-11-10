@@ -20,7 +20,9 @@ Process
 
 0/ Update ECFLOW_GIT_BRANCH to  "release/4.0.5" 
 
+
 0/ **** Check we are not in a high risk period ???
+
 
 0/ **** DO ***NOT*** switch current link ****************
    **** User support will do this, during an arranged system session
