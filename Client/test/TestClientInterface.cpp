@@ -43,7 +43,7 @@ BOOST_AUTO_TEST_SUITE( ClientTestSuite )
 // **************************************************************************************
 BOOST_AUTO_TEST_CASE( test_client_interface )
 {
-   std::cout << "Client:: ...test_client_interface\n";
+   std::cout << "Client:: ...test_client_interface" << endl;
 
    ClientInvoker theClient ;
    theClient.testInterface(); // stops submission to server
@@ -69,6 +69,7 @@ BOOST_AUTO_TEST_CASE( test_client_interface )
    BOOST_REQUIRE_MESSAGE( theClient.debug_server_on() == 0,CtsApi::debug_server_on() << " should return 0\n" << theClient.errorMsg());
    BOOST_REQUIRE_MESSAGE( theClient.debug_server_off() == 0,CtsApi::debug_server_off() << " should return 0\n" << theClient.errorMsg());
    BOOST_REQUIRE_MESSAGE( theClient.stats() == 0,CtsApi::stats() << " should return 0\n" << theClient.errorMsg());
+   BOOST_REQUIRE_MESSAGE( theClient.stats_reset() == 0,CtsApi::stats_reset() << " should return 0\n" << theClient.errorMsg());
    BOOST_REQUIRE_MESSAGE( theClient.suites() == 0,CtsApi::suites() << " should return 0\n" << theClient.errorMsg());
    BOOST_REQUIRE_MESSAGE( theClient.getDefs() == 0,CtsApi::get() << " should return 0\n" << theClient.errorMsg());
    BOOST_REQUIRE_MESSAGE( theClient.begin("/suite") == 0,CtsApi::begin("/suite") << " should return 0\n" << theClient.errorMsg());
@@ -368,7 +369,7 @@ BOOST_AUTO_TEST_CASE( test_client_interface )
 
 BOOST_AUTO_TEST_CASE( test_client_interface_for_fail )
 {
-   std::cout << "Client:: ...test_client_interface_for_fail\n";
+   std::cout << "Client:: ...test_client_interface_for_fail" << endl;
 
    ClientInvoker theClient ;
    theClient.testInterface(); // stops submission to server
@@ -491,7 +492,7 @@ BOOST_AUTO_TEST_CASE( test_client_interface_for_fail )
 
 BOOST_AUTO_TEST_CASE( test_client_task_interface )
 {
-   std::cout << "Client:: ...test_client_task_interface\n";
+   std::cout << "Client:: ...test_client_task_interface" << endl;
 
    ClientInvoker theClient ;
    theClient.testInterface(); // stops submission to server

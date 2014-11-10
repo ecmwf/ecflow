@@ -23,7 +23,7 @@ else
    /usr/local/apps/ecflow/3.1.9/bin/ecflow_server --ecfinterval=3 &
    sleep 10
 
-   # Boost version changed
+   # Boost version changed, hence 3.1.9, was built with boost 1.47 which had serialisation library version 9
    export ECF_ALLOW_NEW_CLIENT_OLD_SERVER=9
    
    

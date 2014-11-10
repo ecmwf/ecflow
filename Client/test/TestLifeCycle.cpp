@@ -38,7 +38,7 @@ BOOST_AUTO_TEST_SUITE( ClientTestSuite)
 
 BOOST_AUTO_TEST_CASE( test_node_tree_lifecycle )
 {
-	cout << "Client:: ...test_node_tree_lifecycle \n";
+	cout << "Client:: ...test_node_tree_lifecycle" << endl;
 
    std::string path = File::test_data("Client/test/data/lifecycle.txt","Client");
 

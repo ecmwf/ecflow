@@ -192,7 +192,11 @@ void top_shell_c::create (Display *display, char *app_name, int app_argc, char *
                 app_class_name = appName;
 
 	std::string title = appName;
-	title += " (" + ecf::Version::raw() + ")";
+	title += " (" + ecf::Version::raw();
+#ifdef DEBUG 
+	title += "-debug";
+#endif
+	title += ")";
 
         XtSetArg(al[ac], XmNallowShellResize, FALSE); ac++;
         XtSetArg(al[ac], XmNtitle, title.c_str()); ac++;

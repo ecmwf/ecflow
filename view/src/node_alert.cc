@@ -106,7 +106,7 @@ void node_alert<T>::notify_system(node* n) {
 	     n ? name(n) : "",
 	     bg_ == STATUS_ABORTED ? sound : ""
 	     );
-    system(buff);
+    if (system(buff)) { std::cerr << "#node_alert!\n"; }
   }
 #endif
   }

@@ -25,6 +25,25 @@ using namespace ecf;
 using namespace std;
 using namespace boost;
 
+
+static bool hasExtension( const std::string& line, const std::vector< std::string >& lineTokens )
+{
+   //    cout << "hasExtension = ";
+   if ( line[line.size() - 1] == '\\' ) {
+      //       cout << "true\n";
+      return true;
+   }
+   const std::string& lastToken = lineTokens.back();
+   if ( lastToken == "\\" || lastToken[lastToken.size() - 1] == '\\' ) {
+      //       cout << "true\n";
+      return true;
+   }
+   //    cout << "false\n";
+   return false;
+}
+
+// ===============================================================================
+
 void TriggerCompleteParser::getExpression(
          const std::string& line,
          std::vector< std::string >& theLineTokens,
@@ -120,21 +139,6 @@ void TriggerCompleteParser::getExpression(
 	if ( expression.empty() ) throw std::runtime_error( "Invalid trigger " + line );
 }
 
-bool TriggerCompleteParser::hasExtension(	const std::string& line, const std::vector< std::string >& lineTokens ) const
-{
-	//		cout << "hasExtension = ";
-	if ( line[line.size() - 1] == '\\' ) {
-		//			cout << "true\n";
-		return true;
-	}
-	const std::string& lastToken = lineTokens.back();
-	if ( lastToken == "\\" || lastToken[lastToken.size() - 1] == '\\' ) {
-		//			cout << "true\n";
-		return true;
-	}
-	//		cout << "false\n";
-	return false;
-}
 
 bool TriggerParser::doParse( const std::string& line, std::vector<std::string >& lineTokens )
 {

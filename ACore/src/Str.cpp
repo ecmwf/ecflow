@@ -207,6 +207,41 @@ bool Str::caseInsCompare( const std::string& s1, const std::string& s2)
 	return ( (s1.size() == s2.size()) && equal(s1.begin(),s1.end(), s2.begin(), caseInsCharCompare));
 }
 
+
+struct case_insensitive_less : public std::binary_function< char,char,bool >
+{
+    bool operator () (char x, char y) const {
+        if (toupper(x) == toupper(y)) {
+           return x > y;
+        }
+        return toupper( static_cast< unsigned char >(x)) <
+               toupper( static_cast< unsigned char >(y));
+    }
+};
+bool Str::caseInsLess( const std::string& a, const std::string& b)
+{
+   return std::lexicographical_compare( a.begin(),a.end(),
+           b.begin(),b.end(), case_insensitive_less() );
+}
+
+
+struct case_insensitive_greater : public std::binary_function< char,char,bool >
+{
+    bool operator () (char x, char y) const {
+        if (toupper(x) == toupper(y)) {
+           return x < y;
+        }
+        return toupper( static_cast< unsigned char >(x)) >
+               toupper( static_cast< unsigned char >(y));
+    }
+};
+bool Str::caseInsGreater( const std::string& a, const std::string& b)
+{
+   return std::lexicographical_compare( a.begin(),a.end(),
+           b.begin(),b.end(), case_insensitive_greater() );
+}
+
+
 bool Str::valid_name(const std::string& name, std::string &msg)
 {
    // valid names are alphabetic (alphanumeric | underscore | .)

@@ -19,6 +19,9 @@
 #include "Defs.hpp"
 #include "SuiteChanged.hpp"
 #include "AbstractServer.hpp"
+#include "JobsParam.hpp"
+#include "Jobs.hpp"
+#include "Log.hpp"
 #include "Ecf.hpp"  // In server we increment modify and state change numbers,
 
 /// Act as stand in for a server since Request require at least a AbstractServer
@@ -62,7 +65,13 @@ public:
  	}
  	virtual void unlock() { userWhoHasLock_.clear(); restart(); }
  	virtual const std::string& lockedUser() const { return userWhoHasLock_;}
-   virtual bool allow_job_creation_during_tree_walk() const { return false; }
+   virtual void traverse_node_tree_and_job_generate(const boost::posix_time::ptime& time_now) const {
+      if (state() == SState::RUNNING && defs_.get()) {
+          JobsParam jobsParam(poll_interval(), false /* as->allow_job_creation_during_tree_walk() */ );
+          Jobs jobs(defs_);
+          if (!jobs.generate(jobsParam))  ecf::log(ecf::Log::ERR,jobsParam.getErrorMsg());    // will automatically add end of line
+       }
+   }
    virtual int poll_interval() const { return 60; }
  	virtual void debug_server_on(){}
  	virtual void debug_server_off(){}

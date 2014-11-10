@@ -67,6 +67,7 @@ private:
    ClientInvoker* _self;
 };
 void stats(ClientInvoker* self) { CliSetter setter(self); self->stats(); }
+void stats_reset(ClientInvoker* self) { self->stats_reset(); }
 boost::python::list suites(ClientInvoker* self) {
    self->suites();
    const std::vector<std::string> the_suites = self->server_reply().get_string_vec();
@@ -209,7 +210,8 @@ void export_Client()
    .def("free_all_dep",     &free_all_dep,                   ClientDoc::free_all_dep())
    .def("free_all_dep",     &free_all_dep1)
 	.def("ping" ,            &ClientInvoker::pingServer,      ClientDoc::ping())
-	.def("stats" ,           &stats,                          ClientDoc::stats())
+   .def("stats" ,           &stats,                          ClientDoc::stats())
+   .def("stats_reset" ,     &stats_reset,                    ClientDoc::stats_reset())
    .def("get_file" ,        &get_file,                       return_value_policy<copy_const_reference>(), ClientDoc::get_file())
    .def("get_file" ,        &get_file_1,                     return_value_policy<copy_const_reference>())
 	.def("plug" ,            &ClientInvoker::plug,            ClientDoc::plug())

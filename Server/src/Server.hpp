@@ -78,6 +78,7 @@ private:
 
    void handle_terminate();
    void start_accept();
+   bool shutdown_socket(connection_ptr conn, const std::string& msg) const;
 
 private:
 
@@ -112,7 +113,7 @@ private:
    virtual bool lock(const std::string& user);
    virtual void unlock();
    virtual const std::string& lockedUser() const;
-   virtual bool allow_job_creation_during_tree_walk() const;
+   virtual void traverse_node_tree_and_job_generate(const boost::posix_time::ptime& time_now) const;
    virtual int poll_interval() const;
    virtual void debug_server_on();
    virtual void debug_server_off();

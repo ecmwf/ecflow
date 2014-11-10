@@ -25,6 +25,12 @@ else
       #         '$BOOST_ROOT/tools/build/src/tools' '$BOOST_ROOT/tools/build/src/contrib' '$BOOST_ROOT/tools/build/src/.' 
       # for site-config configuration file 'site-config.jam'.
       cp %SITE_CONFIG% $BOOST_ROOT/tools/build/src/site-config.jam
+   fi
+   
+   if [[  %BOOST_VERSION% = boost_1_57_0_b1 ]]  ; then
+   
+      cp %SITE_CONFIG% $BOOST_ROOT/tools/build/src/site-config.jam
+   
    else
       cp %SITE_CONFIG% $BOOST_ROOT/tools/build/v2/site-config.jam
    fi

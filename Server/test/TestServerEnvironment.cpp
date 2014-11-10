@@ -29,6 +29,7 @@
 #include "Ecf.hpp"
 #include "File.hpp"
 #include "CheckPt.hpp"
+#include "JobProfiler.hpp"
 
 using namespace std;
 using namespace ecf;
@@ -173,21 +174,23 @@ BOOST_AUTO_TEST_CASE( test_server_config_file )
    BOOST_FOREACH(const std::string& expected_var, expected_variables) {
 
       bool found_var = false;
-      typedef std::pair<std::string, std::string> mpair;
-      BOOST_FOREACH(const mpair& p, server_vars ) {
+      typedef std::pair<std::string, std::string> s_pair;
+      BOOST_FOREACH(const s_pair& p, server_vars ) {
          if (expected_var == p.first) { found_var = true; break; }
       }
       BOOST_CHECK_MESSAGE(found_var,"Failed to find server var " << expected_var);
    }
 
-   // check other way, so that this test gets updated
-   typedef std::pair<std::string, std::string> mpair;
-   BOOST_FOREACH(const mpair& p, server_vars ) {
-      bool found_var = false;
-      BOOST_FOREACH(const std::string& expected_var, expected_variables) {
-         if (expected_var == p.first) { found_var = true; break; }
+   {
+      // check other way, so that this test gets updated
+      typedef std::pair<std::string, std::string> mpair;
+      BOOST_FOREACH(const mpair& p, server_vars ) {
+         bool found_var = false;
+         BOOST_FOREACH(const std::string& expected_var, expected_variables) {
+            if (expected_var == p.first) { found_var = true; break; }
+         }
+         BOOST_CHECK_MESSAGE(found_var,"Failed to update test for server var " << p.first);
       }
-      BOOST_CHECK_MESSAGE(found_var,"Failed to update test for server var " << p.first);
    }
 
    // Check the values in the server config file, are the *SAME* as the defaults, when config is *NOT* present
@@ -314,6 +317,41 @@ BOOST_AUTO_TEST_CASE( test_server_environment_variables )
    // tear down remove the log file created by ServerEnvironment
    Host h;
    fs::remove(h.ecf_log_file("3144"));
+
+   /// Destroy Log singleton to avoid valgrind from complaining
+   Log::destroy();
+}
+
+BOOST_AUTO_TEST_CASE( test_server_profile_threshold_environment_variable )
+{
+   cout << "Server:: ...test_server_profile_threshold_environment_variable\n";
+   int argc = 1;char* argv[] = { const_cast<char*>("ServerEnvironment") };
+   {
+      char* put = const_cast<char*>("ECF_TASK_THRESHOLD=9");
+      BOOST_CHECK_MESSAGE(putenv(put) == 0,"putenv failed for " << put);
+
+      ServerEnvironment serverEnv(argc,argv);
+      BOOST_CHECK_MESSAGE(JobProfiler::task_threshold() == 9,"Expected task threshold of 9 but found " <<  JobProfiler::task_threshold());
+   }
+
+   // ==================================================================================
+   // Note test for errors
+   vector<string> dodgy_thresholds;
+   dodgy_thresholds.push_back("ECF_TASK_THRESHOLD=x");
+   dodgy_thresholds.push_back("ECF_TASK_THRESHOLD=,");
+   dodgy_thresholds.push_back("ECF_TASK_THRESHOLD=:");
+   dodgy_thresholds.push_back("ECF_TASK_THRESHOLD=,,");
+
+   for(size_t i =0; i < dodgy_thresholds.size(); i++) {
+      //cout << "check -------> " << dodgy_thresholds[i] << endl;
+      BOOST_CHECK_MESSAGE(putenv(const_cast<char*>(dodgy_thresholds[i].c_str())) == 0,"putenv failed for " << dodgy_thresholds[i]);
+      BOOST_CHECK_THROW(ServerEnvironment serverEnv(argc,argv), std::runtime_error );
+   }
+
+   putenv(const_cast<char*>("ECF_TASK_THRESHOLD")); // remove from env, otherwise valgrind complains
+
+   Host h;
+   fs::remove(h.ecf_log_file(Str::DEFAULT_PORT_NUMBER()));
 
    /// Destroy Log singleton to avoid valgrind from complaining
    Log::destroy();

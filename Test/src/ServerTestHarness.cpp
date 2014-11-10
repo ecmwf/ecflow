@@ -102,7 +102,7 @@ ServerTestHarness::doRun(Defs& theClientDefs, const std::map<std::string,std::st
    // If set this can be used to choose which suite to begin.
    std::string suiteName;
 
-   // Create the client early, since we need to determine if enviroment variable
+   // Create the client early, since we need to determine if environment variable
    // ECF_ALLOW_NEW_CLIENT_OLD_SERVER was set, if it was, we need to update the generated .ecf scripts
    // to embed this variable, this will allow  *new child commands* to talk to old servers
    int allow_new_client_old_server = 0;

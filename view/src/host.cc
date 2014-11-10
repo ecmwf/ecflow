@@ -717,7 +717,10 @@ bool ehost::create_tree( int hh, int min, int sec )
       gui::message("%s: built %02d:%02d:%02d", name(), next->tm_hour, next->tm_min, next->tm_sec);
    }
 
-   if (!top) return false;
+   if (!top) { 
+     // XECFDEBUG { std::cout << "# no top\n"; }
+     return false;
+   }
    if (top_) {
       top->scan(top_);
       destroy_top(top_);
@@ -731,7 +734,12 @@ bool ehost::create_tree( int hh, int min, int sec )
    XECFDEBUG {
       double vmu, res;
       mem_use(vmu, res);
-      std::cout << "# usage: " << vmu << res << "\n";
+      if (top) { 
+	int num = 0; node *n = top->kids(); 
+	while (n) { num += 1; n = n->next(); } 
+	// std::cout << "# num " << num << "\n";
+      }
+      std::cout << "# usage: " << vmu << " " << res << "\n";
    }
    return true;
 }
@@ -748,6 +756,7 @@ void ehost::reset( bool full, bool sync )
       if (!tree_) tree_ = tree::new_tree(this);
 
       if (full) {
+ 	 XECFDEBUG std::cerr << "# reset full\n";
          const std::vector<std::string>& s = suites_;
          destroy_top(top_);
          top_ = 0x0;
@@ -792,9 +801,11 @@ void ehost::reset( bool full, bool sync )
       if (sync) client_.sync_local(); // this returns full defs
       searchable::active(False);
       create_tree(hour, min, sec);
+      XECFDEBUG std::cerr << "# reset create tree\n";
    }
    catch ( std::exception &e ) {
-      XECFDEBUG std::cerr << "# sync exception " << e.what() << "\n";
+     // XECFDEBUG 
+      std::cerr << "# sync exception " << e.what() << "\n";
       gui::error("host::reset-sync-error: %s", e.what());
       const std::vector<std::string>& s = suites_;
       /* load one set
@@ -1189,38 +1200,21 @@ bool check_version( const char* v1, const char* v2 )
 
 void get_server_version( ClientInvoker& client, std::string& server_version )
 {
-   int archive_version_of_old_server = client.allow_new_client_old_server();
-   try {
-      // ECF_ALLOW_NEW_CLIENT_OLD_SERVER is really for ecflow_client command line
-      // It will have been read in as a part of the ClientInvoker constructor.
-      // So lets assume the client/server are compatible *first*
-      client.allow_new_client_old_server(0); // assume client <-> server are compatible
+   // ECF_ALLOW_NEW_CLIENT_OLD_SERVER allows each client ('client.allow_new_client_old_server')
+   // to have its own archive version, hence FIRST:  go with what ever was set
+   // See notes: ACore/src/boost_archive.hpp
 
-      client.server_version();
-      server_version = client.server_reply().get_string();
+   for(int av = ecf::boost_archive::version()-1; av >= ecf::boost_archive::version_1_47(); --av) {
 
-      if (server_version.empty()) {
-         // Could not get server version, maybe client/server boost archive version are incompatible
-         if (archive_version_of_old_server == 0) {
-            // assume new client --> old server (old server assumed to be built with boost 1.47)
-            // environment ECF_ALLOW_NEW_CLIENT_OLD_SERVER was not specified, hence assume boost 1.47 archive used in old server
-            archive_version_of_old_server = ecf::boost_archive::version_1_47();
-         }
-         client.allow_new_client_old_server(archive_version_of_old_server);
-
-         // try again
+      // First time in loop, go with what ever was set, including if client.allow_new_client_old_server() !=0
+      try {
          client.server_version();
          server_version = client.server_reply().get_string();
+         if (!server_version.empty()) return;
       }
-   }
-   catch ( ... ) {
-      // assume new client old server. See notes above
-      if (archive_version_of_old_server == 0) archive_version_of_old_server = ecf::boost_archive::version_1_47();
-      client.allow_new_client_old_server(archive_version_of_old_server);
+      catch ( ... ) {}
 
-      // try again
-      client.server_version();
-      server_version = client.server_reply().get_string();
+      client.allow_new_client_old_server(av);
    }
 }
 
@@ -1242,19 +1236,27 @@ void ehost::login()
          return;
       }
 
-      // if we can not get the server version, attempt forward compatibility
+      // if we can not get the server version, attempt backward compatibility
       std::string server_version;
       get_server_version(client_, server_version);
-
-      if (!check_version(server_version.c_str(), ecf::Version::raw().c_str())) {
-         if (!confirm::ask(
-                  false,
-                  "%s (%s@%d): version mismatch, server is %s, client is %s\ntry to connect anyway?",
-                  name(), machine(), number(), server_version.c_str(),
-                  ecf::Version::raw().c_str())) {
-            connect_ = false;
-            connected_ = false;
-            return;
+      if (server_version.empty()) {
+         if (!confirm::ask( false, "%s (%s@%d): Could not connect\nTry again ?", name(), machine(), number())) {
+             connect_ = false;
+             connected_ = false;
+             return;
+          }
+      }
+      else {
+         if (!check_version(server_version.c_str(), ecf::Version::raw().c_str())) {
+            if (!confirm::ask(
+                     false,
+                     "%s (%s@%d): version mismatch, server is %s, client is %s\ntry to connect anyway?",
+                     name(), machine(), number(), server_version.c_str(),
+                     ecf::Version::raw().c_str())) {
+               connect_ = false;
+               connected_ = false;
+               return;
+            }
          }
       }
       connect_ = true;
@@ -1281,7 +1283,8 @@ void ehost::login()
       }
       else {
          tree_->connected(False);
-         if (!top_) top_ = make_xnode<Defs>(0x0, 0, *this);
+         if (!top_) 
+	   top_ = make_xnode<Defs>(0x0, 0, *this);
       }
    }
 
@@ -1361,12 +1364,11 @@ tmp_file ehost::file( node& n, std::string name )
 tmp_file ehost::edit( node& n, std::list<Variable>& l, Boolean preproc )
 {
    gui::message("%s: fetching source", name());
-   int rc = 0;
    try {
       if (preproc)
-         rc = client_.edit_script_preprocess(n.full_name());
+         client_.edit_script_preprocess(n.full_name());
       else
-         rc = client_.edit_script_edit(n.full_name());
+         client_.edit_script_edit(n.full_name());
       return tmp_file(client_.server_reply().get_string());
    } catch ( std::exception &e ) {
        gui::error("host::edit-error: %s", e.what());
@@ -1723,26 +1725,22 @@ bool ehost::connect_mngt( bool connect )
 {
    if (!connect) return true;
    if (!connect_) return true;
-   Boolean btree = False;
    bool rc = true;
    try {
       gui::message("%s: ping", name());
       client_.pingServer();
 
       if (connect) {
-         btree = True;
          rc = true;
          connected_ = true;
       }
       else {
          connected_ = false;
-         btree = False;
          rc = false;
       }
    }
    catch ( std::exception &e ) {
       connected_ = false;
-      btree = False;
       rc = false;
       gui::message("# Exception caught in ehost::connect_mngt");
       gui::message(e.what());

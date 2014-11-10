@@ -7,7 +7,7 @@
 
 # ================================== start of tail.h ================================
 #smscomplete  # Notify ECF of a normal end
-%ECF_CLIENT_EXE_PATH% --complete
+%ECF_CLIENT_EXE_PATH:ecflow_client% --complete
 trap 0       # Remove all traps
 exit 0       # End the shell
 %manual

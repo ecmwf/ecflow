@@ -31,6 +31,7 @@ struct Stats {
    void update() { request_count_++; }
    void update_stats(int poll_interval);
    void update_for_serialisation();
+   void reset();
 
 	int status_;    // 0 HALTED, 1 SHUTDOWN, 2 RUNNING
 	std::string locked_by_user_;

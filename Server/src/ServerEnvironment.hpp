@@ -215,7 +215,7 @@ private:
 	std::string url_;
 	std::string ecf_cmd_;
 	std::string ecf_micro_;
-	std::string ecf_white_list_file_;
+   std::string ecf_white_list_file_;
 	std::map<std::string,bool> validUsers_;  // first user name, second true is write access, false read access
 	boost::asio::ip::tcp tcp_protocol_;      // defaults to IPv4 TCP protocol
 	friend class ServerOptions;

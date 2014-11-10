@@ -313,53 +313,14 @@ def add_opensuse103_variables( opensuse103 ):
     opensuse103.add_variable("ARCH","opensuse103")
     opensuse103.add_variable("SITE_CONFIG","$WK/build/site_config/site-config-Linux.jam")
      
-def add_remote_aix_power7_variables( aix_power7 ) :
-    # for c2a we need to use logsrvr in order to see the job output
-    aix_power7.add_variable("ECF_LOGHOST","c2a")
-    aix_power7.add_variable("ECF_LOGPORT","9316")
-    
-    # Set the remote location for output, LOGDIR needed by queing system
-    # See function ECF_RCP, where the remote file system, is copied to local file system, at the end of the job
-    aix_power7.add_variable("LOGDIR", "/s2o1/emos_data/ecflow/log")
-    aix_power7.add_variable("ECF_OUT","/s2o1/emos_data/ecflow/log")
-
-    aix_power7.add_variable("ECF_INCLUDE",  WK + "/build/nightly/suite/aix_power7/includes")
-    aix_power7.add_variable("ECF_JOB_CMD",    "/home/ma/emos/bin/smssubmit.c2a %USER% %SCHOST% %ECF_JOB% %ECF_JOBOUT%")
-    aix_power7.add_variable("ECF_KILL_CMD",   "/home/ma/emos/bin/smskill   %USER% %SCHOST% %ECF_RID% %ECF_JOB% > %ECF_JOB%.kill 2>&1")
-    aix_power7.add_variable("ECF_STATUS_CMD", "/home/ma/emos/bin/smsstatus %USER% %SCHOST% %ECF_RID% %ECF_JOB% > %ECF_JOB%.stat 2>&1")
-
-    aix_power7.add_variable("QUEUE","ns")
-    aix_power7.add_variable("ACCOUNT","ecodmdma")
-    aix_power7.add_variable("STHOST","/s2o1")  # Needed by qsub.h
-    aix_power7.add_variable("SCHOST","c2a")    # Super Computer HOST
-    aix_power7.add_variable("WSHOST",os.uname()[1])  # Work Space HOST
-
-    aix_power7.add_variable("COMPILER_VERSION","c++/vacpp/12.1.0.0")  # c++/vacpp/11.1.0.1 c++/vacpp/12.1.0.0
-    aix_power7.add_variable("COMPILER_TEST_PATH","vacpp/$mode/threading-multi")
-    aix_power7.add_variable("TOOLSET","vacpp")
-    aix_power7.add_variable("BOOTSTRAP_TOOLSET","vacpp")
-
-def add_aix_power7_variables( aix_power7 ) :
-    aix_power7.add_variable("REMOTE_HOST","c2a")
-    aix_power7.add_variable("ROOT_WK","/s2o1/emos_data/ecflow")
-    aix_power7.add_variable("BOOST_DIR","/s2o1/emos_data/ecflow/boost")
-    aix_power7.add_variable("ARCH","ibm_power7")
-    aix_power7.add_variable("SITE_CONFIG","$WK/build/site_config/site-config-AIX.jam")
-    aix_power7.add_variable("BUILD_ECFLOWVIEW","false")  # dont build on this platform
-
-
 def add_build_debug( parent ): 
     f = parent.add_family("build_debug")
     f.add_trigger("cp_site_config == complete and git_clone_ecflow == complete and git_clone_ecbuild == complete")
     f.add_variable("MODE","debug")
     f.add_task("build")
     task_test = f.add_task("test")
-    # on IBM we do the debug build first
-    if parent.name() == "aix_power7" :
-        task_test.add_trigger("build == complete")
-    else:
-        task_test.add_trigger("build == complete")
-        #task_test.add_trigger("build == complete and (../build_release/test == complete or ../build_release/test == aborted)")
+    task_test.add_trigger("build == complete")
+    #task_test.add_trigger("build == complete and (../build_release/test == complete or ../build_release/test == aborted)")
     task_test.add_label("progress","")
     task_test.add_meter("progress",0,100,100)
      
@@ -371,11 +332,7 @@ def add_build_release( parent ):
     task_build = f.add_task("build")
     
     task_test = f.add_task("test")
-    # on IBM we do the debug build first, it's a *lot* faster
-    if parent.name() == "aix_power7" :
-        task_test.add_trigger("build == complete")
-        #task_test.add_trigger("build == complete and (../build_debug/test == complete or ../build_debug/test == aborted)")
-    elif parent.name() == "linux64intel":
+    if parent.name() == "linux64intel":
         # Both linux64 and linux64intel are same machine, to avoid starting server on same port add a dependency
         task_test.add_trigger("build == complete")
         #task_test.add_trigger("build == complete and ( /suite/build/linux64/build_debug/test == complete or /suite/build/linux64/build_debug/test == aborted)")
@@ -418,13 +375,8 @@ def add_build_and_test_tasks( parent ) :
     cp_site_config = parent.add_task("cp_site_config")
     add_local_job_variables(cp_site_config) # run locally
             
-    # On aix do the debug build first, its a lot faster, than build release
-    if parent.name() == "aix_power7" :
-        add_build_debug( parent )
-        add_build_release( parent )
-    else:
-        add_build_release( parent )
-        add_build_debug( parent )
+    add_build_release( parent )
+    add_build_debug( parent )
 
 def build_localhost( parent ) :
     localhost = parent.add_family("localhost")
@@ -449,6 +401,7 @@ def build_localhost( parent ) :
     localhost.add_task("test_new_client_old_server_401").add_trigger("test_new_client_old_server_400 == complete or test_new_client_old_server_400 == aborted")
     localhost.add_task("test_new_client_old_server_402").add_trigger("test_new_client_old_server_401 == complete or test_new_client_old_server_401 == aborted")
     localhost.add_task("test_new_client_old_server_403").add_trigger("test_new_client_old_server_402 == complete or test_new_client_old_server_402 == aborted")
+    localhost.add_task("test_new_client_old_server_404").add_trigger("test_new_client_old_server_403 == complete or test_new_client_old_server_403 == aborted")
  
 def build_localhost_cmake( parent ) :
     # Hence left out test_client_performance and test_server_performance
@@ -580,13 +533,6 @@ def build_opensuse103( parent ) :
     add_git_tasks( opensuse103 )
     add_build_and_test_tasks( opensuse103 )
 
-def build_aix_power7( parent ) :
-    aix_power7 = parent.add_family("aix_power7")
-    add_aix_power7_variables( aix_power7 )
-    add_remote_aix_power7_variables( aix_power7 )
-    add_git_tasks( aix_power7 )
-    add_build_and_test_tasks( aix_power7 )
-    
 
 def add_boost_tasks( family ):
     boost_remove = family.add_task("boost_remove")  
@@ -689,15 +635,9 @@ def build_boost( boost ):
     add_cray_gnu_compiler_variables(family)
     add_cray_boost_tasks(family)
 
- 
     family = boost.add_family("opensuse103")
     add_opensuse103_variables(family)
     add_remote_opensuse103_variables(family)
-    add_boost_tasks( family )
-    
-    family = boost.add_family("aix_power7")
-    add_aix_power7_variables(family)
-    add_remote_aix_power7_variables(family)
     add_boost_tasks( family )
     
     
@@ -715,7 +655,7 @@ def add_suite_variables( suite ):
     suite.add_variable("GIT","/usr/local/apps/git/current/bin/git")
     suite.add_variable("SET_TO_TEST_SCRIPT","false") 
     suite.add_variable("BUILD_ECFLOWVIEW","true")
-    suite.add_variable("ECFLOW_GIT_BRANCH","release/4.0.4")  # when makeing a relase switch to release/<release version>, otherwise develop
+    suite.add_variable("ECFLOW_GIT_BRANCH","release/4.0.5")  # when makeing a relase switch to release/<release version>, otherwise develop
     suite.add_variable("ECBUILD_GIT_BRANCH","develop")   
 
     # automatically fob all zombies when compiling ecflow 
@@ -755,11 +695,12 @@ with defs.add_suite("experiment") as experiment:
 
 print "build boost"
 with defs.add_suite("boost_suite") as boost_suite:
-    boost_suite.add_variable("BOOST_VERSION","boost_1_53_0")
+    boost_suite.add_variable("BOOST_VERSION","boost_1_56_0")
     boost_suite.add_variable("REMOTE_COPY","rcp")
     boost_suite.add_variable("ECF_FILES",os.getenv("SCRATCH") + "/nightly/boost_suite")
     add_suite_variables(boost_suite)
     build_boost(boost_suite)
+
 
 print "incremental and full builds on all platforms"
 with defs.add_suite("suite") as suite:
@@ -801,7 +742,6 @@ with defs.add_suite("suite") as suite:
             build_redhat( remote )
             build_cray( remote )
             build_opensuse103( remote )
-            build_aix_power7(remote)
         
 #ecflow.PrintStyle.set_style(ecflow.Style.STATE)
 #print defs

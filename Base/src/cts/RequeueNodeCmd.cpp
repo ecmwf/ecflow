@@ -131,6 +131,10 @@ STC_Cmd_ptr RequeueNodeCmd::doHandleRequest(AbstractServer* as) const
 	   }
 	}
 
+   // Clear up memory allocated to path *ASAP*
+   // When dealing with several thousands paths, this makes a *HUGE* difference
+   vector<string>().swap(paths_); // clear paths_ and minimise its capacity
+
    std::string error_msg = ss.str();
    if (!error_msg.empty()) {
       throw std::runtime_error( error_msg ) ;

@@ -31,6 +31,10 @@ using namespace std;
 using namespace boost;
 namespace po = boost::program_options;
 
+// forward declare static functions
+static void check_for_active_or_submitted_tasks(AbstractServer* as,node_ptr theNodeToDelete);
+
+
 PathsCmd::PathsCmd(Api api,const std::string& absNodePath, bool force)
 : api_(api),force_(force)
 {
@@ -280,7 +284,7 @@ STC_Cmd_ptr PathsCmd::doHandleRequest(AbstractServer* as) const
    return PreAllocatedReply::ok_cmd();
 }
 
-void PathsCmd::check_for_active_or_submitted_tasks(AbstractServer* as,node_ptr theNodeToDelete) const
+static void check_for_active_or_submitted_tasks(AbstractServer* as,node_ptr theNodeToDelete)
 {
    vector<Task*> taskVec;
    if ( theNodeToDelete.get() ) {

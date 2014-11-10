@@ -15,7 +15,9 @@
 // Description :
 //============================================================================
 
+#include <boost/date_time/posix_time/posix_time_types.hpp>
 #include <boost/shared_ptr.hpp>
+
 #include "Stats.hpp"
 #include "ZombieCtrl.hpp"
 #include "SState.hpp"
@@ -155,9 +157,6 @@ public:
 	/// Update for number of requests per second
 	void update_stats(int poll_interval) { stats_.update_stats(poll_interval); }
 
-	/// Allow test to disable job creation during tree walk
-	virtual bool allow_job_creation_during_tree_walk() const = 0;
-
 	// Instead of immediate node tree traversal at the end of child command
 	// we use 'increment_job_generation_count' to defer job generation to server
 	// The server will will check job generation count at poll time.
@@ -166,6 +165,9 @@ public:
 	void increment_job_generation_count() { job_gen_count_++;}
 	void reset_job_generation_count() { job_gen_count_ = 0; }
 	int get_job_generation_count() const { return job_gen_count_; }
+
+	/// This job generation is special, in that it will time out, job generation time >= next poll.
+	virtual void traverse_node_tree_and_job_generate(const boost::posix_time::ptime& time_now) const = 0;
 
    /// returns the number of seconds at which we should check time dependencies
    /// this includes evaluating trigger dependencies and submit the corresponding jobs.

@@ -33,6 +33,7 @@ list( APPEND test_srcs
  test/TestDefStatus.cpp
  test/TestExprRepeatDateArithmetic.cpp
  test/TestJobCreator.cpp
+ test/TestJobProfiler.cpp
  test/TestSmsLocator.cpp
  test/TestFindAbsNodePath.cpp
  test/TestTaskScriptGenerator.cpp

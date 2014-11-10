@@ -94,11 +94,16 @@ void NodeTreeTraverser::start()
 #ifdef DEBUG_TRAVERSER
                std::cout << "  NodeTreeTraverser::start: Do an immediate job generation. Since we don't want to wait for minute boundary, when starting.\n";
 #endif
- 	            update_suite_calendar_and_traverse_node_tree(last_time_);
 
  	            // Make sure subsequent polls are *ALIGNED* to minute boundary
  			      next_poll_time_ = last_time_ + seconds(seconds_to_minute_boundary);
- 			      timer_.expires_from_now(  boost::posix_time::seconds( 1 ) );
+
+ 			      // ************************************************************************************************
+ 			      // ** This relies on next_poll_time_ being set first, to ensure job generation does not take longer
+ 			      // ************************************************************************************************
+ 			      update_suite_calendar_and_traverse_node_tree(last_time_);
+
+               timer_.expires_from_now(  boost::posix_time::seconds( 1 ) );
 
 #ifdef DEBUG_TRAVERSER
  	            std::cout << "  NodeTreeTraverser::start: next_poll_time_(" << to_simple_string(next_poll_time_) << ")\n";
@@ -134,14 +139,17 @@ void NodeTreeTraverser::terminate()
 
 void NodeTreeTraverser::do_traverse()
 {
-   // since we poll every second, if less than next poll continue.
+   // since we poll every second, if less than next poll(every 60 seconds) continue.
    ptime time_now = Calendar::second_clock_time();
    if (time_now < next_poll_time_) {
 
-      // minimise the number of node tree traversal, to one every second, but only *IF* required
+      // minimise the number of node tree traversal, to once every second, but only *IF* required
+      // Note: if we are a few seconds to the poll time, but job generation takes a while
+      //       we can get warning about the interval took to long. See below:
+
       // LOG(Log::DBG,"get_job_generation_count() = " << server_->get_job_generation_count());
       if (server_->get_job_generation_count() > 0) {
-         traverse_node_tree_and_job_generate();
+         traverse_node_tree_and_job_generate( time_now );
       }
 
       start_timer(); // timer fires *EVERY* second
@@ -172,15 +180,13 @@ void NodeTreeTraverser::do_traverse()
 	   /// This will happen from time to time, hence only report, for real wayward times
 	   int diff = diff_from_last_time - submitJobsIntervalInSeconds;
 	   if (diff > (submitJobsIntervalInSeconds * 0.25)) {
-#ifdef DEBUG
+//#ifdef DEBUG
 	      LogToCout toCoutAsWell;
-#endif
+//#endif
 	      LOG(Log::WAR, ": interval is (" << submitJobsIntervalInSeconds << " seconds)  but took (" << diff_from_last_time  <<  " seconds)" );
 	   }
 	}
 
- 	// Start node tree traversal
- 	update_suite_calendar_and_traverse_node_tree(time_now);
 
 
 	/// Remove any stale zombies
@@ -232,7 +238,7 @@ void NodeTreeTraverser::do_traverse()
       next_poll_time_ += interval_;
    }
 
-   // At begin time for very large suites and in test, during job generation we can miss the next poll time(i.e a,b)
+   // At begin time for very large suites, slow disk, and in test, during job generation we can miss the next poll time(i.e a,b)
    // This means that on the next poll time because last_time was not updated, to be immediately
    // behind the next poll time by 'interval_' seconds an erroneous report is logged about missing the poll time
    //
@@ -252,6 +258,13 @@ void NodeTreeTraverser::do_traverse()
 #ifdef DEBUG_TRAVERSER
 	{ ss << " Next Poll at:" << to_simple_string(next_poll_time_);LogToCout toCoutAsWell; LOG(Log::DBG,ss.str()); }
 #endif
+
+
+   // Start node tree traversal. 
+	// ************************************************************************************************
+   // ** This relies on next_poll_time_ being set first, to ensure job generation does not take longer
+	// ************************************************************************************************
+   update_suite_calendar_and_traverse_node_tree(time_now);
 
 	start_timer();  // timer fires *EVERY* second
 }
@@ -286,7 +299,7 @@ void NodeTreeTraverser::traverse(const boost::system::error_code& error )
 }
 
 
-void NodeTreeTraverser::update_suite_calendar_and_traverse_node_tree(boost::posix_time::ptime& time_now)
+void NodeTreeTraverser::update_suite_calendar_and_traverse_node_tree(const boost::posix_time::ptime& time_now)
 {
    // *****************************************************************************
    // JOB SUBMISSION SEEMS TO WORK BEST IF THE CALENDAR INCREMENT HAPPENS FIRST
@@ -315,11 +328,11 @@ void NodeTreeTraverser::update_suite_calendar_and_traverse_node_tree(boost::posi
       CalendarUpdateParams calParams(time_now, interval_/* calendar increment */, running_ );
       server_->defs_->updateCalendar( calParams );
 
-      traverse_node_tree_and_job_generate();
+      traverse_node_tree_and_job_generate(time_now);
    }
 }
 
-void NodeTreeTraverser::traverse_node_tree_and_job_generate()
+void NodeTreeTraverser::traverse_node_tree_and_job_generate(const boost::posix_time::ptime& start_time) const
 {
    if ( running_ && server_->defs_) {
        server_->reset_job_generation_count();
@@ -327,11 +340,38 @@ void NodeTreeTraverser::traverse_node_tree_and_job_generate()
        // Pass submit jobs interval, so that we can check jobs submission occurs within the allocated time.
        // By default job generation is enabled, however for testing, allow job generation to be disabled.
        JobsParam jobsParam(serverEnv_.submitJobsInterval(), serverEnv_.jobGeneration());
+
+       // If job generation takes longer than the time to *reach* next_poll_time_, then time out.
+       // Hence we start out with 60 seconds, and time for job generation should decrease. Until reset back to 60
+       // Should allow greater child communication.
+       // By setting set_next_poll_time, we enable timeout of job generation. => next_poll_time_ must be set first
+       // Note: There are other place where we may not want to timeout job generation.
+       jobsParam.set_next_poll_time(next_poll_time_);
+
 #ifdef DEBUG_JOB_SUBMISSION
        jobsParam.logDebugMessage(" from NodeTreeTraverser::traverse_node_tree_and_job_generate()");
 #endif
        Jobs jobs(server_->defs_);
        if (!jobs.generate(jobsParam)) { ecf::log(Log::ERR, jobsParam.getErrorMsg()); }
+       if (jobsParam.timed_out_of_job_generation()) {
+
+          // Implies time now >= next_poll_time_,
+          // It could be that we started job generation a few seconds before the poll time,
+          // Hence to avoid excessive warnings, Only warn if time_now > next_poll_time_ and  forgive about 4  seconds
+          ptime time_now = Calendar::second_clock_time();
+          if (time_now > next_poll_time_ ) {
+             int leeway = ( serverEnv_.submitJobsInterval() == 60) ? 4 : 1;
+             time_duration duration = time_now - next_poll_time_;
+             if ( duration.total_seconds() >= leeway) {
+#ifdef DEBUG
+                LogToCout toCoutAsWell;
+#endif
+                std::stringstream ss;
+                ss << "Job generation *timed* out: start time:" << start_time << "  time_now:" << time_now << "  poll_time:" << next_poll_time_;
+                ecf::log(Log::WAR,ss.str());
+             }
+          }
+       }
     }
 }
 

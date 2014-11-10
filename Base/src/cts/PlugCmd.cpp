@@ -53,7 +53,7 @@ class Lock {
 public:
    Lock(const std::string& user, AbstractServer* as) : as_(as) { ok_ = as->lock(user); }
    ~Lock() { if (ok_) as_->unlock(); }
-   bool ok() { return ok_;}
+   bool ok() const { return ok_;}
 private:
    bool ok_;
    AbstractServer* as_;

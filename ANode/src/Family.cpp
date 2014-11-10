@@ -28,6 +28,8 @@
 #include "Str.hpp"
 #include "Indentor.hpp"
 #include "DefsDelta.hpp"
+#include "JobProfiler.hpp"
+#include "JobsParam.hpp"
 
 using namespace ecf;
 using namespace std;
@@ -66,6 +68,14 @@ void Family::begin()
 {
    NodeContainer::begin();
    update_generated_variables();
+}
+
+bool Family::resolveDependencies(JobsParam& jobsParam)
+{
+   if (jobsParam.timed_out_of_job_generation()) return false;
+   JobProfiler profile_me(jobsParam);
+   if (profile_me.time_taken_for_job_generation_to_long()) return false;
+   return NodeContainer::resolveDependencies(jobsParam);
 }
 
 void Family::requeue(bool resetRepeats, int clear_suspended_in_child_nodes, bool reset_next_time_slot)

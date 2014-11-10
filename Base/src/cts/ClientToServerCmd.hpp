@@ -134,7 +134,7 @@ protected:
 
    /// Some commands which cause a change in state, should force an immediate job submission.
    /// Providing the server is *NOT* shutdown
-   STC_Cmd_ptr doJobSubmission(AbstractServer* as) const;
+   static STC_Cmd_ptr doJobSubmission(AbstractServer* as);
 
    static void dumpVecArgs(const char* argOption, const std::vector<std::string>& args);
 
@@ -180,7 +180,7 @@ protected:
 public:
 
    virtual bool isWrite() const { return true; }
-   virtual int timeout() const { return 80; }
+   virtual int timeout() const { return 180; }  // ECFLOW-157 80 -> 180
 
    const std::string& path_to_node() const { return path_to_submittable_;}
    const std::string& jobs_password() const { return jobs_password_;}
@@ -494,12 +494,12 @@ protected:
    virtual bool authenticate(AbstractServer*, STC_Cmd_ptr&) const;
 
    /// Prompt the user for confirmation: If user responds with no, will exit client
-   void prompt_for_confirmation(const std::string& prompt) const;
+   static void prompt_for_confirmation(const std::string& prompt);
 
    /// All user commands will be pre_fixed with "--" and post_fixed with :user.
    std::ostream& user_cmd(std::ostream& os, const std::string& the_cmd) const;
 
-   int time_out_for_load_sync_and_get() const;
+   static int time_out_for_load_sync_and_get();
 
    // The order is preserved during the split. Paths assumed to start with '/' char
    static void split_args_to_options_and_paths(
@@ -551,9 +551,11 @@ private:
 // number of global symbols used by boost serialisation.
 // =========================================================================
 // *** IMPORTANT ***: If any of these commands in the future need arguments,
-// then ensure to place a DUMMY enum in its place.
-// This will allow a *newer* development client to still send message to a older server.
-// i.e like terminating the server
+// *** then ensure to place a DUMMY enum in its place.
+// *** This will allow a *newer* development client to still send message to a older server.
+// *** i.e like terminating the server
+// *** IMPORTANT: For any new commands, must be added to the end.
+// *** - STATS_RESET was introduced in release 4.0.5
 // =========================================================================
 class CtsCmd : public UserCmd {
 public:
@@ -563,7 +565,7 @@ public:
       FORCE_DEP_EVAL,
       PING, GET_ZOMBIES, STATS, SUITES,
       DEBUG_SERVER_ON, DEBUG_SERVER_OFF,
-      SERVER_LOAD
+      SERVER_LOAD, STATS_RESET
      };
 
    CtsCmd(Api a) : api_(a) {}
@@ -851,13 +853,10 @@ public:
 private:
    virtual STC_Cmd_ptr doHandleRequest(AbstractServer*) const;
 
-   /// Can throw std::runtime_error
-   void check_for_active_or_submitted_tasks(AbstractServer* as, node_ptr) const;
-
 private:
    Api api_;
    bool force_;
-   mutable std::vector<std::string> paths_; // mutable to allow swap to clear & reclaim memory
+   mutable std::vector<std::string> paths_; // mutable to allow swap to clear & reclaim memory, as soon as possible
 
    friend class boost::serialization::access;
    template<class Archive>
@@ -953,6 +952,8 @@ public:
 
    const std::string& suiteName() const { return suiteName_;}
    bool force() const { return force_;}
+
+   virtual int timeout() const { return 80; }
 
    virtual bool isWrite() const { return true; }
    virtual std::ostream& print(std::ostream& os) const;
@@ -1050,7 +1051,7 @@ private:
    virtual STC_Cmd_ptr doHandleRequest(AbstractServer*) const;
 
 private:
-   std::vector<std::string>  paths_;
+   mutable std::vector<std::string>  paths_;  // mutable to allow swap to clear & reclaim memory, as soon as possible
    Option                    option_;
 
    friend class boost::serialization::access;
@@ -1128,7 +1129,8 @@ private:
 
    virtual STC_Cmd_ptr doHandleRequest(AbstractServer*) const;
 
-   std::vector<std::string> paths_;
+private:
+   mutable std::vector<std::string> paths_; // mutable to allow swap to clear & reclaim memory, as soon as possible
    bool        force_;
    bool        test_;   // only for test, hence we don't serialise this
 
@@ -1315,7 +1317,8 @@ private:
 
    virtual STC_Cmd_ptr doHandleRequest(AbstractServer*) const;
 
-   std::vector<std::string> paths_;
+private:
+   mutable std::vector<std::string> paths_; // mutable to allow swap to clear & reclaim memory, as soon as possible
    std::string              stateOrEvent_;
    bool                     recursive_;
    bool                     setRepeatToLastValue_;
@@ -1375,7 +1378,7 @@ private:
    virtual STC_Cmd_ptr doHandleRequest(AbstractServer*) const;
 
 private:
-   std::vector<std::string> paths_;
+   mutable std::vector<std::string> paths_; // mutable to allow swap to clear & reclaim memory, as soon as possible
    bool          trigger_;
    bool          all_;
    bool          date_;
@@ -1468,7 +1471,8 @@ private:
    void createChange( Cmd_ptr& cmd,       std::vector<std::string>& options,       std::vector<std::string>& paths) const;
    void create_flag(  Cmd_ptr& cmd, const std::vector<std::string>& options, const std::vector<std::string>& paths, bool flag) const;
 
-   std::vector<std::string> paths_;
+private:
+   mutable std::vector<std::string> paths_; // mutable to allow swap to clear & reclaim memory, as soon as possible
    std::string              name_;
    std::string              value_;
    Add_attr_type            add_attr_type_;
@@ -1735,7 +1739,7 @@ public:
    virtual bool equals(ClientToServerCmd*) const;
 
    void addChild(Cmd_ptr childCmd);
-   const std::vector<Cmd_ptr>& cmdVec() { return cmdVec_;}
+   const std::vector<Cmd_ptr>& cmdVec() const { return cmdVec_;}
 
    virtual const char* theArg() const { return arg();}
    virtual void addOption(boost::program_options::options_description& desc) const;

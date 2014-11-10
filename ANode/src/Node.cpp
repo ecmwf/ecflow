@@ -652,16 +652,16 @@ bool Node::evaluateTrigger() const
 
 const std::string& Node::abortedReason() const { return Str::EMPTY(); }
 
-void Node::set_state(NState::State s, bool force)
+void Node::set_state(NState::State s, bool force, const std::string& additional_info_to_log)
 {
-   setStateOnly(s,force);
+   setStateOnly(s,false,additional_info_to_log);
 
    // Handle any state change specific functionality. This will update any repeats
    // This is a virtual function, since we want different behaviour during state change
    handleStateChange();
 }
 
-void Node::setStateOnly(NState::State newState, bool force)
+void Node::setStateOnly(NState::State newState, bool force, const std::string& additional_info_to_log)
 {
    Suite* theSuite =  suite();
    const Calendar& calendar = theSuite->calendar();
@@ -712,11 +712,15 @@ void Node::setStateOnly(NState::State newState, bool force)
    // Please change/update LogVerification::extractNodePathAndState() all verification relies on this one function
    //           " " +  submitted(max) + ": " + path(estimate)  + " try-no: " + try_no(estimate)  + " reason: " + reason(estimate)
    // reserve : 1   +  9              + 2    + 100             + 9           + 3                 + 9           + 12   = 145
-   std::string log_state_change; log_state_change.reserve(145);
+   std::string log_state_change; log_state_change.reserve(145 + additional_info_to_log.size());
    log_state_change += " ";
    log_state_change += NState::toString(newState);
    log_state_change += ": ";
    log_state_change += absNodePath();
+   if (!additional_info_to_log.empty()) {
+      log_state_change += " ";
+      log_state_change += additional_info_to_log;
+   }
 
    if ( newState == NState::ABORTED) {
       if (force) flag().set(ecf::Flag::FORCE_ABORT);

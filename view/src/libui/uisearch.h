@@ -11,6 +11,7 @@
 class search_shell_c: public xd_XmDialog_c {
 public:
 	virtual void create (Widget parent, char *widget_name = NULL);
+	Widget regex_, icase_, subst_, fname_, toggle11_, toggle12_, toggle13_;
 protected:
 	Widget search_shell;
 	Widget form_;
@@ -26,12 +27,15 @@ protected:
 	Widget type_;
 	Widget special_rowcol_;
 	Widget special_;
-	Widget timed_;
-	Widget timed_rowcol1_;
-	Widget timed_rowcol2_;
-	Widget timed_text_since_;
-	Widget timed_text_from_;
+	Widget timed_, misc_;
+	Widget timed_rowcol_, timed_rowcol2_, misc_rowcol_;
+	Widget timed_text_since_, timed_text_from_;
 public:
+	static void radioCB( Widget, XtPointer, XtPointer );
+	virtual void radioCB( Widget, XtPointer ) = 0;
+
+	static void miscCB( Widget, XtPointer, XtPointer );
+	virtual void miscCB( Widget, XtPointer ) = 0;
 	static void timedCB( Widget, XtPointer, XtPointer );
 	virtual void timedCB( Widget, XtPointer ) = 0;
 	static void specialCB( Widget, XtPointer, XtPointer );

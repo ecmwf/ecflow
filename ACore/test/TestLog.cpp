@@ -31,7 +31,7 @@ namespace fs = boost::filesystem;
 
 BOOST_AUTO_TEST_SUITE( CoreTestSuite )
 
-std::string getLogPath() {
+static std::string getLogPath() {
 
    return File::test_data("ACore/test/logfile.txt","ACore");
 }

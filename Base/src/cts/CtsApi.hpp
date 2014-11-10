@@ -141,7 +141,8 @@ public:
 	static std::string flushLog();
 	static std::string forceDependencyEval();
 
-	static std::string stats();
+   static std::string stats();
+   static std::string stats_reset();
  	static std::vector<std::string> edit_script(const std::string& path_to_task,
  	                                            const std::string& edit_type,
  	                                            const std::string& path_to_script = "",
@@ -150,7 +151,8 @@ public:
 
  	// Only to be used in Cmd
    static const char* server_version_arg();
-	static const char* statsArg();
+   static const char* statsArg();
+   static const char* stats_reset_arg();
 	static const char* suitesArg();
 	static const char* ch_register_arg();
    static const char* ch_drop_arg();

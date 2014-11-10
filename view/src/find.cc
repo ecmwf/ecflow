@@ -162,12 +162,12 @@ void find::regexCB(Widget,XtPointer data)
 
 void find::entryCB(Widget,XtPointer data)
 {
-	XmRowColumnCallbackStruct *cb = (XmRowColumnCallbackStruct *) data;
-	quick_find *w = (quick_find*) xec_GetUserData (cb->widget);
-	XmTextSetString(find_text_,(char*)w->text_.c_str());
-	XmToggleButtonSetState(regexp_,w->regexp_,True);
-	if(w->regexp_)
-		XmToggleButtonSetState(case_  ,w->case_  ,True);
+  XmRowColumnCallbackStruct *cb = (XmRowColumnCallbackStruct *) data;
+  quick_find *w = (quick_find*) xec_GetUserData (cb->widget);
+  XmTextSetString(find_text_,(char*)w->text_.c_str());
+  XmToggleButtonSetState(regexp_, w->regexp_,True);
+  if(w->regexp_)
+    XmToggleButtonSetState(case_, w->case_  ,True);
 
 }
 IMP(quick_find)

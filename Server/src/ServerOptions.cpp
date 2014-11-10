@@ -77,6 +77,18 @@ ServerOptions::ServerOptions( int argc, char* argv[],ServerEnvironment* env )
          "  Each server can potentially have a different list.\n"
          "  The default is <host>.<port>.ecf.lists\n"
          "  Note: Any settings will be prepended with <host>.<port>.\n"
+         "ECF_TASK_THRESHOLD:\n"
+         "  The Job generation process is expected to take less than 60 seconds\n"
+         "  This is used to aid debugging of task tasking excessive times for job generation\n"
+         "  The causes can be:\n"
+         "    a/ Slow disk I/0, or when server is run an a virtual machine\n"
+         "    b/ Insufficient memory, when compared to the size of the scripts/definition\n"
+         "    c/ Large number of jobs submitted at the same time, and/or very large scripts\n"
+         "  Any task taking longer than the specified time in milliseconds will be logged.\n"
+         "  WAR:[..] Job generation for task /suite/family/dodgy_task took 4000ms, Exceeds ECF_TASK_THRESHOLD(2000ms)\n"
+         "  The default threshold is 2000 milliseconds\n"
+         "  Note: 1000 milliseconds = 1 second\n"
+         "    export ECF_TASK_THRESHOLD=1500\n"
          "\n"
          "These defaults along with several other can be specified in the file\n"
          "server_environment.cfg. The file should be placed in the current working\n"
@@ -93,10 +105,13 @@ ServerOptions::ServerOptions( int argc, char* argv[],ServerEnvironment* env )
 ( "threads",  po::value< int >(),      "<int> No of threads used by the server. Default is no of cores on machine" )
 #endif
 ( "v6",                               "Use IPv6 TCP protocol. Default is IPv4" )
-( "reply_back_if_ok",                 "For test only, maintain compatibility with old client. Always reply back when request is ok." )
+( "reply_back_if_ok",                 "Always reply back when client request is ok. This may improve reliability over a poor network.\n"
+                                      "By default, if the client request is ok(i.e no errors), we shutdown/close the socket in the server.\n"
+                                      "The client will receive a EOF, and treat this as a valid reply.\n"
+                                      "This will also maintain compatibility with old client, which expected a reply." )
 ( "dis_job_gen",                      "Disable job generation. For DEBUG/Test only." )
 ( "debug,d",                          "Enable debug output." )
-( "version,v",                        "Show ecflow version number, and version of the boost library used" )
+( "version,v",                        "Show ecflow version number,boost library version, compiler used and compilation date, then exit" )
  	;
 
 	po::store( po::parse_command_line( argc, argv, desc ), vm_ );

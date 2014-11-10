@@ -75,7 +75,7 @@ void UserCmd::setup_user_authentification()
    user_ = the_user_name;
 }
 
-void UserCmd::prompt_for_confirmation(const std::string& prompt) const
+void UserCmd::prompt_for_confirmation(const std::string& prompt)
 {
    cout << prompt;
    char reply[256];
@@ -122,5 +122,5 @@ void UserCmd::split_args_to_options_and_paths(
 #endif
 }
 
-int UserCmd::time_out_for_load_sync_and_get() const { return 600; }
+int UserCmd::time_out_for_load_sync_and_get() { return 600; }
 

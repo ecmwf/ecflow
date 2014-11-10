@@ -42,10 +42,6 @@ namespace fs = boost::filesystem;
 using namespace std;
 using namespace ecf;
 
-/// Allow the server to *not* reply back to the client, if request was OK
-/// This improves performance.
-/// However client CANT distinguish between servers, when we don't reply!!!!!
-#define DONT_REPLY_IF_OK 1
 
 /// Constructor opens the acceptor and starts waiting for the first incoming connection.
 Server::Server( ServerEnvironment& serverEnv ) :
@@ -254,17 +250,20 @@ void Server::handle_read(  const boost::system::error_code& e,connection_ptr con
       // To improve performance, when the reply, is OK, don't bother replying back to the client
       // The client will receive a EOF, and perceive this as OK.
       // Need to specifically *ignore* for terminate, otherwise server will not shutdown cleanly
-#ifdef DONT_REPLY_IF_OK
+      // See: void Client::handle_read() See: ECFLOW-157
+      //
       if (!serverEnv_.reply_back_if_ok()) {
+
          if (!inbound_request_.terminateRequest() && outbound_response_.get_cmd()->isOkCmd()) {
+
             // cleanly close down the connection
             if (serverEnv_.debug()) cout << "   Server::handle_read: NOT replying, since request is OK" << endl;
-            conn->socket().shutdown(boost::asio::ip::tcp::socket::shutdown_both);
-            conn->socket().close();
+
+            if (shutdown_socket(conn,"Server::handle_read:"))  conn->socket().close();
             return;
          }
       }
-#endif
+
       // *Reply* back to the client:
       conn->async_write( outbound_response_,
                           boost::bind(&Server::handle_write,
@@ -301,6 +300,21 @@ void Server::handle_write( const boost::system::error_code& e, connection_ptr co
       return;
    }
 
+   (void)shutdown_socket(conn,"Server::handle_write:");
+
+   // If asked to terminate we do it here rather than in handle_read.
+   // So that we have responded to the client.
+   // *HOWEVER* only do this if the request was successful.
+   //           we do this by checking that the out bound response was ok
+   //           i.e a read only user should not be allowed to terminate server.
+   if (inbound_request_.terminateRequest() && outbound_response_.get_cmd()->isOkCmd()) {
+      if (serverEnv_.debug()) cout << "   <--Server::handle_write exiting server via terminate() port " << serverEnv_.port() << endl;
+      terminate();
+   }
+}
+
+bool Server::shutdown_socket(connection_ptr conn, const std::string& msg) const
+{
    // For portable behaviour with respect to graceful closure of a connected socket,
    // call shutdown() before closing the socket.
    //
@@ -313,21 +327,13 @@ void Server::handle_write( const boost::system::error_code& e, connection_ptr co
    conn->socket().shutdown(boost::asio::ip::tcp::socket::shutdown_both,ec);
    if (ec) {
       ecf::LogToCout logToCout;
-      std::stringstream ss; ss << "Server::handle_write: socket shutdown both failed: " << ec.message() << " : for request " << inbound_request_;
+      std::stringstream ss; ss << msg << " socket shutdown both failed: " << ec.message() << " : for request " << inbound_request_;
       log(Log::ERR,ss.str());
-      return;
+      return false;
    }
-
-   // If asked to terminate we do it here rather than in handle_read.
-   // So that we have responded to the client.
-   // *HOWEVER* only do this if the request was successful.
-   //           we do this by checking that the out bound response was ok
-   //           i.e a read only user should not be allowed to terminate server.
-   if (inbound_request_.terminateRequest() && outbound_response_.get_cmd()->isOkCmd()) {
-      if (serverEnv_.debug()) cout << "   <--Server::handle_write exiting server via terminate() port " << serverEnv_.port() << endl;
-      terminate();
-   }
+   return true;
 }
+
 #endif
 
 
@@ -642,6 +648,11 @@ void Server::restart()
    checkPtSaver_.start();
 }
 
+void Server::traverse_node_tree_and_job_generate(const boost::posix_time::ptime& time_now) const
+{
+   traverser_.traverse_node_tree_and_job_generate(time_now);
+}
+
 bool Server::reloadWhiteListFile(std::string& errorMsg)
 {
    if (serverEnv_.debug()) cout << "   Server::reloadWhiteListFile" << endl;
@@ -688,10 +699,6 @@ const std::string& Server::lockedUser() const
    return userWhoHasLock_;
 }
 
-bool Server::allow_job_creation_during_tree_walk() const
-{
-   return serverEnv_.jobGeneration();
-}
 
 int Server::poll_interval() const
 {

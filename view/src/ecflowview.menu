@@ -88,10 +88,9 @@ menu 'MAIN'
   (ALL,ALL,'-',SEPARATOR)
 
   (SUITE|TASK|FAMILY,(QUEUED|SUSPENDED) & (HAS_TRIGGERS|HAS_TIME|HAS_DATE),'Delete',MENU)
-  (NODE|ALIAS,ALL,'Special', MENU)
-  (NODE& ADMIN, ALL,'Force', MENU)
-  (NODE& ADMIN, ALL,'Forcex', MENU)
-  (NODE& ADMIN, ALL,'Defstatus', MENU)
+  (NODE | ALIAS, ALL, 'Special', MENU)
+  (NODE | ALIAS, ALL, 'Defstatus', MENU)
+  (NODE & ADMIN, ALL, 'Force',   MENU)
   ((NODE|ALIAS)& ADMIN, ALL,'Order', MENU)
 
   (ALL,ALL,'-',SEPARATOR ,'',YES)
@@ -231,11 +230,6 @@ menu "Order"
   (ALL,ALL,'Alphabetically','ecflow_client --order <full_name> alpha')
 }
 
-menu "Forcex"
-{
-  (TASK, ALL,  'AbortedFree',  'ecflow_client --force aborted <full_name>; ecflow_client --alter add variable ECF_PASS FREE <full_name>')
-}
-
 menu "Force"
 {
   (NODE, ~UNKNOWN, 'Unknown',   'ecflow_client --force unknown recursive <full_name>')
@@ -252,40 +246,29 @@ menu "Force"
 }
 
 menu "Defstatus"
-{
-  (NODE, ALL, 'Complete', 'ecflow_client --alter change defstatus complete <full_name>')
-  (NODE, ALL< 'Queued', 'ecflow_client --alter change defstatus queued <full_name>')
+{ 
+(NODE, ALL, 'Complete', 'ecflow_client --alter change defstatus complete <full_name>')
+(NODE, ALL, 'Queued', 'ecflow_client --alter change defstatus queued <full_name>')
 }
 
 menu "Special"
 {
-!!  ((SUITE|FAMILY) & (COMPLETE|QUEUED|SUSPENDED) & ~MIGRATED,ALL,'Migrate',
-!!   'ecflow_client --migrate <full_name>','',NO)
-!!  ((SUITE|FAMILY) & MIGRATED,ALL,'Restore',
-!!   'ecflow_client --restore_from_checkpt <full_name>','',YES)
-  (SUITE|FAMILY,(ACTIVE|SUBMITTED|ABORTED),'Kill',
-   'ecflow_client --kill <full_name>','',YES)
+  (SUITE|FAMILY,(ACTIVE|SUBMITTED|ABORTED),'Kill', 'ecflow_client --kill <full_name>','',YES)
   (TASK|ALIAS,(ACTIVE|SUBMITTED),'Kill','ecflow_client --kill <full_name>','',YES)
-
   (ALL,ALL,'Check',WINDOW(Check),'',YES)
   (TASK|ALIAS,ALL,'Free password','ecflow_client --alter add variable ECF_PASS FREE <full_name>')
   (TASK|ALIAS,ALL,'ClearZ','ecflow_client --alter clear_flag zombie <full_name>')
   (TASK|ALIAS,ALL,'ClearLate','ecflow_client --alter clear_flag late <full_name>')
 
   (FAMILY, ~ACTIVE & ~SUBMITTED, 'Execute', 'ecflow_client --run <full_name>')
-
-!  (ALL,ALL,'-',SEPARATOR)
-!  ((SUITE|FAMILY) & ADMIN, SELECTION, 'Plug into selected node', PLUG)
   ((SUITE|FAMILY|TASK), SELECTION, 'Plug into selected node', PLUG)
   (TASK|ALIAS, SELECTION, 'Compare Edit (vs selected)', COMP( 'compare' , 'edit' ))
   (TASK|ALIAS, SELECTION, 'Compare EditPP (vs selected)', COMP( 'compare' , 'editpp'))
   (TASK|ALIAS, SELECTION, 'Compare output (vs selected)', COMP('compare' , 'output'))
   (FAMILY|TASK,ALL,'get','ecflow_client --get <full_name>')
   (TASK,ALL,'status','ecflow_client --status <full_name>')
-
   (SUITE|SERVER, ALL, 'Collect...',  WINDOW(Collector))
   (SUITE|FAMILY, ALL, 'Walk', 'ecflow_client --force-dep-eval <full_name>')
-  !  (SERVER|SUITE, ALL ,  'Extra',  MENU  )
 }
 
 menu "Extra"

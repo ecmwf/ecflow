@@ -103,11 +103,14 @@ else
       fi
    fi
    
-   if [[ %BOOST_VERSION% = boost_1_56_0 ]] ; then
-
-      # Crickey! boost shared_ptr_helper forgot two extra includes, for all platforms !
-      cp $WK/build/fix/boost_1_56_0/shared_ptr_helper.hpp  $BOOST_ROOT/boost/serialization/.
-   fi
+   # From boost 1.56 ownwards we use a different approach
+   # We will fix up the tar file, once, then re-use
+   # 
+   #if [[ %BOOST_VERSION% = boost_1_56_0 ]] ; then
+   #
+   #   # Crickey! boost shared_ptr_helper forgot two extra includes, for all platforms !
+   #   cp $WK/build/fix/boost_1_56_0/shared_ptr_helper.hpp  $BOOST_ROOT/boost/serialization/.
+   #fi
 fi
 
 %include <tail.h>

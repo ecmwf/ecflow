@@ -44,6 +44,22 @@ BOOST_AUTO_TEST_SUITE( ClientTestSuite )
 // Note: If you make edits to node tree, they will have no effect until the server is rebuilt
 // ************************************************************************************
 
+static void sync_and_news_local(ClientInvoker& theClient)
+{
+   {
+      cout << "   news_local() : ";
+      DurationTimer duration_timer;
+      theClient.news_local();
+      cout << (double)duration_timer.elapsed().total_milliseconds()/(double)1000;
+   }
+   {
+      cout << "   sync_local() : ";
+      DurationTimer duration_timer;
+      theClient.sync_local();
+      cout << (double)duration_timer.elapsed().total_milliseconds()/(double)1000 << endl;
+   }
+}
+
 void time_load_and_downloads(
          ClientInvoker& theClient,
          const std::string& host,
@@ -56,6 +72,8 @@ void time_load_and_downloads(
 
    BOOST_CHECK(fs::exists( full_path ));
    BOOST_CHECK(fs::is_directory( full_path ));
+
+   int count = 10;
 
    //std::cout << "\nIn directory: " << full_path.directory_string() << "\n\n";
    fs::directory_iterator end_iter;
@@ -71,67 +89,54 @@ void time_load_and_downloads(
             continue;
          }
 
-         cout << relPath.string() << "  : file size " << fs::file_size(relPath) << "\n";
+         cout << "\n" << relPath.string() << "  : file size " << fs::file_size(relPath) << endl;
          {
             DurationTimer duration_timer;
             BOOST_REQUIRE_MESSAGE(theClient.loadDefs(relPath.string()) == 0,"load defs failed \n" << theClient.errorMsg());
-            cout << " Load:                " << duration_timer.elapsed().seconds() << "\n";
+            cout << " Load:                " << duration_timer.elapsed().total_milliseconds() << "ms" << endl;
          }
          {
             DurationTimer duration_timer;
             BOOST_REQUIRE_MESSAGE(theClient.begin_all_suites() == 0,"begin failed \n" << theClient.errorMsg());
-            cout << " Begin:               " << duration_timer.elapsed().seconds() << "\n";
+            cout << " Begin:               " << duration_timer.elapsed().total_milliseconds() << "ms" << endl;
          }
          {
             cout << " Download(Sync):      ";
-            for(int i = 0; i < 5; i++) {
+            for(int i = 0; i < count; i++) {
                DurationTimer duration_timer;
                theClient.sync_local();
-               int seconds = duration_timer.elapsed().seconds();
-               cout << seconds;
-               if (i != 4) cout << ", ";
+               int seconds = duration_timer.elapsed().total_milliseconds();
+               cout << seconds << " ";
             }
-            cout << "        : sync_local() with the same Client. First call updates cache.\n";
+            cout << ":(milli-seconds) sync_local() with the same Client. First call updates cache." << endl;
          }
          {
             // On construction of Defs, hence should be slightly faster
             cout << " Download(Sync-FULL): ";
-            double time1 = 0.0, time2 = 0.0, time3 = 0.0, time4 = 0.0, time5 = 0.0;
-            for(int i = 0; i < 5; i++) {
+            double total = 0;
+            for(int i = 0; i < count; i++) {
                ClientInvoker client(host,port);
                DurationTimer duration_timer;
                client.sync_local();
-               int seconds = duration_timer.elapsed().seconds();
-               cout << seconds;
-               if (i != 4) cout << ", ";
-               if (i == 0) time1 = seconds;
-               if (i == 1) time2 = seconds;
-               if (i == 2) time3 = seconds;
-               if (i == 3) time4 = seconds;
-               if (i == 4) time5 = seconds;
+               int seconds = duration_timer.elapsed().total_milliseconds();
+               cout << seconds << " ";
+               total += seconds;
             }
-            cout << " Avg:" << (double)( time1 + time2 + time3 +time4 +time5)/5
-                 << "  : sync_local() with *different* clients. Uses Cache\n";
+            cout << ": Avg:" << (double)(total)/((double)count*1000) << "(sec)  : sync_local() with *different* clients. Uses Cache" << endl;
          }
          {
             // This should more expensive on second call, due to destruction of
             // defs(on theClient) from previous calls
             cout << " Download(FULL):      ";
-            double time1 = 0.0, time2 = 0.0, time3 = 0.0, time4 = 0.0, time5 = 0.0;
-            for(int i = 0; i < 5; i++) {
+            double total = 0;
+            for(int i = 0; i < count; i++) {
                DurationTimer duration_timer;
                theClient.getDefs();
-               int seconds = duration_timer.elapsed().seconds();
-               cout << seconds;
-               if (i != 4) cout << ", ";
-               if (i == 0) time1 = seconds;
-               if (i == 1) time2 = seconds;
-               if (i == 2) time3 = seconds;
-               if (i == 3) time4 = seconds;
-               if (i == 4) time5 = seconds;
+               int seconds = duration_timer.elapsed().total_milliseconds();
+               cout << seconds << " ";
+               total += seconds;
             }
-            cout << " Avg:" << (double)( time1 + time2 + time3 + time4 + time5 )/5
-                 << "  : get_defs() from same client.\n";
+            cout << ": Avg:" << (double)(total)/((double)count*1000) << "(sec)  : get_defs() from same client" << endl;
          }
          {
             std::vector<task_ptr> all_tasks;
@@ -139,56 +144,48 @@ void time_load_and_downloads(
             std::vector<std::string> paths;paths.reserve(all_tasks.size());
             for(size_t i = 0; i < all_tasks.size(); i++) {
                paths.push_back(all_tasks[i]->absNodePath());
-               if (i == 6000) break;  //  > 10000 really slows down, could be logging ??
+               if (i == 6000) break;  //  > 9000 really slows down, could be logging ??
             }
             {
                cout << " Suspend " << paths.size() << " tasks : ";
                DurationTimer duration_timer;
                theClient.suspend(paths);
-               cout << duration_timer.elapsed().seconds();
+               cout << (double)duration_timer.elapsed().total_milliseconds()/(double)1000;
             }
-            {
-               cout << "   sync_local() : ";
-               DurationTimer duration_timer;
-               theClient.sync_local();
-               cout << duration_timer.elapsed().seconds() << "\n";
-            }
+            sync_and_news_local(theClient);
             {
                cout << " Resume " << paths.size() << " tasks  : ";
                DurationTimer duration_timer;
                theClient.resume(paths);
-               cout << duration_timer.elapsed().seconds();
+               cout << (double)duration_timer.elapsed().total_milliseconds()/(double)1000;
             }
+            sync_and_news_local(theClient);
             {
-               cout << "   sync_local() : ";
+               cout << " force  " << paths.size() << " tasks  : ";
                DurationTimer duration_timer;
-               theClient.sync_local();
-               cout << duration_timer.elapsed().seconds() << "\n";
+               theClient.force(paths,"complete");
+               cout << (double)duration_timer.elapsed().total_milliseconds()/(double)1000;
             }
+            sync_and_news_local(theClient);
          }
          {
             // This should more expensive on second call, due to destruction of
             // defs(on theClient) from previous calls
             cout << " Check pt:            ";
-            double time1 = 0.0, time2 = 0.0, time3 = 0.0, time4 = 0.0, time5 = 0.0;
-            for(int i = 0; i < 5; i++) {
+            double total = 0;
+            for(int i = 0; i < count; i++) {
                DurationTimer duration_timer;
                theClient.checkPtDefs();
-               int seconds = duration_timer.elapsed().seconds();
-               cout << seconds;
-               if (i != 4) cout << ", ";
-               if (i == 0) time1 = seconds;
-               if (i == 1) time2 = seconds;
-               if (i == 2) time3 = seconds;
-               if (i == 3) time4 = seconds;
-               if (i == 4) time5 = seconds;
+               int seconds = duration_timer.elapsed().total_milliseconds();
+               cout << seconds << " ";
+               total += seconds;
             }
-            cout << " Avg:" << (double)( time1 + time2 + time3 + time4 + time5 )/5 << "\n";
+            cout << ": Avg:" << (double)(total)/((double)count*1000) << "ms" << endl;
          }
          {
             DurationTimer duration_timer;
             BOOST_REQUIRE_MESSAGE(theClient.delete_all(true)  == 0,"delete all defs failed \n" << theClient.errorMsg());
-            cout << " Delete:              " << duration_timer.elapsed().seconds() << "\n";
+            cout << " Delete:              " << duration_timer.elapsed().total_milliseconds() << "ms" << endl;
          }
       }
       catch ( const std::exception & ex ) {

@@ -45,7 +45,7 @@ ERROR() {
 	echo "ERROR called"
 	set +e        # Clear -e flag, so we don't fail
     #smsabort      # Notify ECF_ that something went wrong
-	%ECF_CLIENT_EXE_PATH% --abort
+	%ECF_CLIENT_EXE_PATH:ecflow_client% --abort
 	trap 0        # Remove the trap
 	exit 0        # End the script
 }
@@ -60,6 +60,6 @@ trap '{ echo "Killed by a signal"; ERROR ; }' 1 2 3 4 5 6 7 8 10 12 13 15
 
 
 #smsinit $$
-%ECF_CLIENT_EXE_PATH% --init=$$
+%ECF_CLIENT_EXE_PATH:ecflow_client% --init=$$
 echo $?
 # ================================== end of head.h ================================

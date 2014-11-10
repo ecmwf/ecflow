@@ -1,17 +1,19 @@
+BJAM=$(BOOST_ROOT)/bjam c++-template-depth=512
+
 all:  ecf view
 
 ecf:
 	echo . ./view/tool/env.sh 
-	$(BOOST_ROOT)/bjam -j4
+	$(BJAM) -j4
 rel:
-	$(BOOST_ROOT)/bjam -j4 variant=release
+	$(BJAM) -j4 variant=release
 
 view:
-	(cd view; $(BOOST_ROOT)/bjam -j4)
+	(cd view; $(BJAM) -j4)
 
 clean:
-	$(BOOST_ROOT)/bjam clean;
-	(cd view; $(BOOST_ROOT)/bjam clean)
+	$(BJAM) clean;
+	(cd view; $(BJAM) clean)
 
 realclean:
 	rm -rf */bin Pyext/ecflow/ecflow.so

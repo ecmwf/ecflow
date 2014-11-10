@@ -61,6 +61,10 @@ const char* CtsApi::migrate_arg() { return "migrate"; }
 std::string CtsApi::stats()     { return "--stats"; }
 const char* CtsApi::statsArg()  { return "stats"; }
 
+std::string CtsApi::stats_reset()     { return "--stats_reset"; }
+const char* CtsApi::stats_reset_arg()  { return "stats_reset"; }
+
+
 std::string CtsApi::suites()    { return "--suites"; }
 const char* CtsApi::suitesArg() { return "suites"; }
 

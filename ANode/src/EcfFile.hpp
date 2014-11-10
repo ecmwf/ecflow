@@ -53,7 +53,7 @@ public:
 	/// This is then used to replace smsinit,smscomplete, smsevent,smsmeter.smslabel,smsabort
 	/// This function will start the pre processing
 	/// Will throw std::runtime_error for errors
-	void create_job( JobsParam&);
+	const std::string& create_job( JobsParam&);
 
 	/// Process the script file, to add all the used variables, add the start of the file
 	/// between %comment %end, The augmented script is returned in file_with_used_variables
@@ -72,20 +72,21 @@ public:
 
 private:
 	enum Type { SCRIPT, INCLUDE, MANUAL, COMMENT };
+	static std::string fileType(Type);
+
 	bool open_script_file(const std::string& file, Type, std::vector<std::string>& lines, std::string& errormsg) const;
-	const std::string fileType(Type) const;
 	bool preProcess(std::vector<std::string>& script_lines, std::string& errormsg);
 	bool replaceSmsChildCmdsWithEcf(const std::string& clientPath, std::string& errormsg);
 	std::string getIncludedFilePath( const std::string& include, const std::string& line, std::string& errormsg);
  	void variableSubstituition(JobsParam&);
- 	void doCreateJobFile() const;
+ 	const std::string&  doCreateJobFile(JobsParam&) const;
  	bool doCreateManFile(std::string& errormsg);
  	bool extractManual(const std::vector< std::string >& lines, std::vector< std::string >& theManualLines, std::string& errormsg) const;
  	void removeCommentAndManual();
  	void remove_nopp_end_tokens();
 
  	static int countEcfMicro(const std::string& line, const std::string& ecfMicro);
- 	void dump_expanded_script_file(size_t i, const std::vector<std::string>& lines) const; // for DEBUG
+ 	static void dump_expanded_script_file(size_t i, const std::vector<std::string>& lines); // for DEBUG
 
  	/// returns the extension, i.e for task->.ecf for alias->.usr, will throw if node_ is not task or alias
  	const std::string& get_extn() const;
@@ -97,7 +98,8 @@ private:
 
 	Node* node_;                         // Task or Alias or Container when pre-processing the man files
 	std::string  ecfMicroCache_;         // cache value of ECF_MICRO
-	std::string  script_path_or_cmd_;    // path to .ecf,.usr file or command
+	std::string  script_path_or_cmd_;    // path to .ecf, .usr file or command
+	mutable std::string  job_size_;     // to be placed in log file during job submission
 	//bool         fetchCommand_;        // script is to be extracted form version management repository. Not used !!!
 	std::vector<std::string> jobLines_;  // Lines that will form the job file.
 };

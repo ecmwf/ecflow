@@ -99,11 +99,8 @@ public:
 	virtual bool debug() const { return debug_;} //enabled if ECF_DEBUG_CLIENT set
    virtual void set_test() { under_test_ = true; }
    virtual bool under_test() const { return under_test_; }
-private:
-	void init();
 
-	/// Get the standard environment variables
-	void read_environment_variables();
+private:
 
  	std::string task_path_;             // ECF_NAME = /aSuit/aFam/aTask
 	std::string jobs_password_;         // ECF_PASS jobs password
@@ -123,21 +120,30 @@ private:
 	std::vector<std::pair<std::string, std::string> > host_vec_; // The list of host:port pairs
 	int  host_vec_index_;               // index into host_vec;
 	int allow_new_client_old_server_;   // the boost archive version of old server, allow new client--> old server communication
+	std::string env_ecf_new_client_old_server_;
 
 	/// The option read from the command line.
  	friend class ClientOptions;
 
 	// Allow testing to override the task path set in the environment. In this constructor
 	friend class ClientInvoker;
+
+private:
+
+   void init();
+
+   void read_environment_variables();  /// Get the standard environment variables
+
+   void update_allow_new_client_old_server(const std::string& host, const std::string& port);
+
    void taskPath(const std::string& s) { task_path_ = s;}
    void set_jobs_password(const std::string& s) { jobs_password_ = s;}
    void set_connect_timeout(int t) { connect_timeout_ = t;}
 
    // Allow testing to add or update the environment in the Defs file
-	// Each pair is ( variable name, variable value )
- 	void setEnv( const std::vector<std::pair<std::string,std::string> >& e) { env_= e;}
+   // Each pair is ( variable name, variable value )
+   void setEnv( const std::vector<std::pair<std::string,std::string> >& e) { env_= e;}
 
-private:
 	bool parseHostsFile(std::string& errorMsg);
 };
 

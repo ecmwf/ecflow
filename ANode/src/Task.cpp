@@ -41,6 +41,7 @@
 #include "TaskScriptGenerator.hpp"
 #include "ChangeMgrSingleton.hpp"
 #include "Extract.hpp"
+#include "JobProfiler.hpp"
 
 namespace fs = boost::filesystem;
 using namespace ecf;
@@ -400,6 +401,11 @@ void Task::get_all_aliases(std::vector<alias_ptr>& destinationVec) const
 
 bool Task::resolveDependencies(JobsParam& jobsParam)
 {
+   if (jobsParam.timed_out_of_job_generation()) return false;
+   JobProfiler profile_me(this,jobsParam,JobProfiler::task_threshold());
+   if (profile_me.time_taken_for_job_generation_to_long()) return false;
+
+
    // Calling Submittable::resolveDependencies(jobsParam) up front can be expensive.
    // Due to trigger and complete evaluations. Hence low cost state checks first
 
@@ -609,7 +615,7 @@ void Task::order(Node* immediateChild, NOrder::Order ord)
       }
       case NOrder::ALPHA:  {
          std::sort(aliases_.begin(),aliases_.end(),
-                     boost::bind(std::less<std::string>(),
+                     boost::bind(Str::caseInsLess,
                                    boost::bind(&Node::name,_1),
                                    boost::bind(&Node::name,_2)));
          order_state_change_no_ = Ecf::incr_state_change_no();
@@ -617,7 +623,7 @@ void Task::order(Node* immediateChild, NOrder::Order ord)
       }
       case NOrder::ORDER:  {
          std::sort(aliases_.begin(),aliases_.end(),
-                     boost::bind(std::greater<std::string>(),
+                     boost::bind(Str::caseInsGreater,
                                    boost::bind(&Node::name,_1),
                                    boost::bind(&Node::name,_2)));
          order_state_change_no_ = Ecf::incr_state_change_no();

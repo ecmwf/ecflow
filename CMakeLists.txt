@@ -56,7 +56,7 @@ ecbuild_declare_project()
 # =========================================================================================
 # VERSION  
 # Get the ecflow version specified in 'VERSION.cmake'. This is only accessible after ecbuild_declare_project()
-# The ecflow version cofig is done in ACore directory
+# The ecflow version config is done in ACore directory
 # =========================================================================================
 
 message( STATUS "CMAKE_INSTALL_PREFIX : ${CMAKE_INSTALL_PREFIX}" )
@@ -152,7 +152,7 @@ add_subdirectory( view )
 # Directories not need in the distribution tar ball!
 ecbuild_add_resources( TARGET build_nightly DONT_PACK_DIRS build/nightly)
 ecbuild_add_resources( TARGET SCRATCH DONT_PACK_DIRS SCRATCH)
-ecbuild_add_resources( TARGET Doc DONT_PACK_DIRS Doc/func_spec Doc/misc Doc/newsletter Doc/online Doc/presentations Doc/tac)
+ecbuild_add_resources( TARGET Doc DONT_PACK_DIRS Doc/func_spec Doc/misc Doc/New_viewer Doc/newsletter Doc/online Doc/presentations Doc/tac)
 
 # =========================================================================================
 # install 
