@@ -797,18 +797,18 @@ STC_Cmd_ptr LabelCmd::doHandleRequest(AbstractServer* as) const
 
 	assert(isWrite()); // isWrite used in handleRequest() to control check pointing
 
-	{  // update suite change numbers before job submission
-	   // submittable_ setup during authentication
-		SuiteChanged1 changed(submittable_->suite());
+	// submittable_ setup during authentication
+	if (submittable_->findLabel(name_)) {
 
-		if (!submittable_->findLabel(name_)) {
-		   std::string ss;
-		   ss = "Label request failed as label '"; ss += name_; ss += "' does not exist on task "; ss += path_to_node();
-			ecf::log(Log::ERR,ss);
-			return PreAllocatedReply::ok_cmd();
-		}
-		submittable_->changeLabel(name_,label_);
+	   SuiteChanged1 changed(submittable_->suite());
+	   submittable_->changeLabel(name_,label_);
 	}
+	// else {
+	//   // ECFLOW-175, avoid filling up log file. Can get thousands of these messages, especially form MARS
+	//   std::string ss;
+	//   ss = "Label request failed as label '"; ss += name_; ss += "' does not exist on task "; ss += path_to_node();
+	//	  ecf::log(Log::ERR,ss);
+	//}
 
 	// Note: reclaiming memory for label_ earlier make *no* difference to performance of server
 
