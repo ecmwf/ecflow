@@ -124,6 +124,67 @@ bool File::splitFileIntoLines(const std::string& filename, std::vector<std::stri
  	return true;
 }
 
+
+std::string File::get_last_n_lines(const std::string& filename,int last_n_lines, std::string& error_msg)
+{
+   if ( last_n_lines <= 0  ) return string();
+
+   std::ifstream source( filename.c_str(), std::ios_base::in );
+   if (!source) {
+      error_msg = "File::get_last_n_lines: Could not open file " + filename;
+      return string();
+   }
+
+   size_t const granularity = 100 * last_n_lines;
+   source.seekg( 0, std::ios_base::end );
+   size_t size = static_cast<size_t>( source.tellg() );
+   std::vector<char> buffer;
+   int newlineCount = 0;
+   while ( source
+           && buffer.size() != size
+           && newlineCount < last_n_lines ) {
+       buffer.resize( std::min( buffer.size() + granularity, size ) );
+       source.seekg( -static_cast<std::streamoff>( buffer.size() ),
+                     std::ios_base::end );
+       source.read( buffer.data(), buffer.size() );
+       newlineCount = std::count( buffer.begin(), buffer.end(), '\n');
+   }
+
+   std::vector<char>::iterator start = buffer.begin();
+   while ( newlineCount > last_n_lines ) {
+       start = std::find( start, buffer.end(), '\n' ) + 1;
+       -- newlineCount;
+   }
+
+   //std::vector<char>::iterator end = remove( start, buffer.end(), '\r' ); // for windows
+   return std::string( start, buffer.end() );
+}
+
+
+std::string File::get_first_n_lines(const std::string& filename,int n_lines, std::string& error_msg)
+{
+   if ( n_lines <= 0  ) return string();
+
+   std::ifstream source( filename.c_str(), std::ios_base::in );
+   if (!source) {
+      error_msg = "File::get_first_n_lines: Could not open file " + filename;
+      return string();
+   }
+
+   std::string ret; ret.reserve(1024);
+   std::string line;
+
+   int count = 0;
+   while ( std::getline(source,line) && count < n_lines) {
+
+      ret += line;
+      ret += "\n";
+      count++;
+   }
+
+   return ret;
+}
+
 /// Opens the file and returns the contents
 bool File::open(const std::string& filePath, std::string& contents)
 {
