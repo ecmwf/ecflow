@@ -332,6 +332,10 @@ void NodeTreeTraverser::update_suite_calendar_and_traverse_node_tree(const boost
 void NodeTreeTraverser::traverse_node_tree_and_job_generate(const boost::posix_time::ptime& start_time) const
 {
    if ( running_ && server_->defs_) {
+#ifdef DEBUG_JOB_SUBMISSION
+       jobsParam.logDebugMessage(" from NodeTreeTraverser::traverse_node_tree_and_job_generate()");
+#endif
+
        server_->reset_job_generation_count();
 
        // Pass submit jobs interval, so that we can check jobs submission occurs within the allocated time.
@@ -341,27 +345,23 @@ void NodeTreeTraverser::traverse_node_tree_and_job_generate(const boost::posix_t
        // If job generation takes longer than the time to *reach* next_poll_time_, then time out.
        // Hence we start out with 60 seconds, and time for job generation should decrease. Until reset back to 60
        // Should allow greater child communication.
-       // By setting set_next_poll_time, we enable timeout of job generation. => next_poll_time_ must be set first
+       // By setting set_next_poll_time, we enable timeout of job generation.
+       // ** IMPLIES => next_poll_time_ must be set first, before *THIS* function is called **
        // Note: There are other place where we may not want to timeout job generation.
        jobsParam.set_next_poll_time(next_poll_time_);
 
-#ifdef DEBUG_JOB_SUBMISSION
-       jobsParam.logDebugMessage(" from NodeTreeTraverser::traverse_node_tree_and_job_generate()");
-#endif
        Jobs jobs(server_->defs_);
        if (!jobs.generate(jobsParam)) { ecf::log(Log::ERR, jobsParam.getErrorMsg()); }
        if (jobsParam.timed_out_of_job_generation()) {
 
           // Implies time now >= next_poll_time_,
           ptime time_now = Calendar::second_clock_time();
-//#ifdef DEBUG
-//          std::cout << "Job generation *timed* out: start time:" << start_time << "  time_now:" << time_now << "  poll_time:" << next_poll_time_ << "\n";
-//#endif
+//        std::cout << "Job generation *timed* out: start time:" << start_time << "  time_now:" << time_now << "  poll_time:" << next_poll_time_ << "\n";
 
           // It could be that we started job generation a few seconds before the poll time,
-          // Hence to avoid excessive warnings, Only warn if time_now > next_poll_time_ and  forgive about 4  seconds
+          // Hence to avoid excessive warnings, Only warn if time_now > next_poll_time_ and  forgive about 3  seconds
           if (time_now > next_poll_time_ ) {
-             int leeway = ( serverEnv_.submitJobsInterval() == 60) ? 4 : 1;
+             int leeway = ( serverEnv_.submitJobsInterval() == 60) ? 3 : 1;
              time_duration duration = time_now - next_poll_time_;
              if ( duration.total_seconds() >= leeway) {
 
