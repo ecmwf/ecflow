@@ -1,28 +1,7 @@
 Process
 ==================================================================
 
-0/ *Before* each release, make sure the ecflow tar file is
-   copied to $SCRATCH and inform Daniel. This will allow
-   him to make rpm packages, build on other linux flavours.
-
-   This is important, so that release, used internally is in
-   sync with release given to users. 
-   
-   - ** Check the size of tar file **, ensure that have not included redundant files.
-   <Inform Daniel>
-   
-0/ git flow start release 4.0.6
-
-   Push branch onto stash, otherwise the we can not pull, from the remote machines
-   - In eclipse, you *may* have to push this branch first
-     Team->Push Branch
-     *otherwise* the option Team->Push Upstream  may well be greyed out.
-
-0/ Update ECFLOW_GIT_BRANCH to  "release/4.0.6" 
-
-
 0/ **** Check we are not in a high risk period ???
-
 
 0/ **** DO ***NOT*** switch current link ****************
    **** User support will do this, during an arranged system session
@@ -34,6 +13,27 @@ Process
    **** This is **very** important      
    **** IDEALLY we need to educate member states *NOT* to use 
    ****     /usr/local/apps/ecflow/current  
+
+----------------------------------------------------------------------
+
+0/ *Before* each release, make sure the ecflow tar file is
+   copied to $SCRATCH and inform Daniel. This will allow
+   him to make rpm packages, build on other linux flavours.
+
+   This is important, so that release, used internally is in
+   sync with release given to users. 
+   
+   - ** Check the size of tar file **, ensure that have not included redundant files.
+   <Inform Daniel>
+   
+0/ git flow release start 4.0.6
+
+   *Push* branch onto stash, otherwise the we can not pull, from the remote machines
+   - In eclipse, you *may* have to push this branch first
+     Team->Push Branch
+     *otherwise* the option Team->Push Upstream  may well be greyed out.
+
+0/ Update ECFLOW_GIT_BRANCH to "release/4.0.6" in the nightly build.py
 
 0/ Update Documentation
    
@@ -60,7 +60,7 @@ Process
    VIRTUAL Machines: These should treated like regular machines. 
          - These are based on opensuse113, hence we need top copy over exe for this
          
-         - ssh opensus113, su emos;
+         - ssh opensuse113/lxab, su emos;
          - scp -r 4.0.6 emos@<virtual machine>:/usr/local/apps/ecflow/.
          
          
@@ -68,6 +68,7 @@ Process
   can end up renaming.
 
 0/ Inform user support so that they can update the module functionality.
+   Module functionality is done automatically
 
 0/ Update WIKI:
    This announces the changes in the release
@@ -93,8 +94,8 @@ Process
    Use: Release-Anouncement.txt
   
 0/ Tag the release, This should now be automatic when using git flow:
-       git flow finish release 4.0.6
- 
+       git flow release finish 4.0.6
+  
 0/ AFTER the release increment the version number in $WK/VERSION.cmake
    THEN, run:
      sh -x $WK/cmake.sh debug
