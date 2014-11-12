@@ -73,7 +73,7 @@ private:
 	std::string debugMsg_;
 	std::vector<Submittable*> submitted_;
 	std::vector<std::string> user_edit_file_;
-	NameValueMap user_edit_variables_; /// Used for User edit
-	boost::posix_time::ptime next_poll_time_;  //  Functions to aid timing of job generation
+	NameValueMap user_edit_variables_;          // Used for User edit
+	boost::posix_time::ptime next_poll_time_;   // Aid early exit from job generation, if it takes to long
 };
 #endif
