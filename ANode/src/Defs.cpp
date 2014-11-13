@@ -539,17 +539,25 @@ std::string Defs::write_state() const
    // integers used in the time.
    // -  Used in commands
    if (PrintStyle::getStyle() == PrintStyle::MIGRATE || save_edit_history_) {
-      Indentor in;
-      std::map<std::string, std::deque<std::string> >::const_iterator i;
-      for(i=edit_history_.begin(); i != edit_history_.end(); ++i) {
-         Indentor::indent( os ) << "history " << (*i).first << " ";// node path
-         const std::deque<std::string>& vec = (*i).second;   // list of requests
-         for(std::deque<std::string>::const_iterator c = vec.begin(); c != vec.end(); ++c) {
-            os << "\b" << *c;
-         }
-         os << "\n";
-      }
-      save_edit_history_ = false;
+	   Indentor in;
+	   std::map<std::string, std::deque<std::string> >::const_iterator i;
+	   for(i=edit_history_.begin(); i != edit_history_.end(); ++i) {
+		   Indentor::indent( os ) << "history " << (*i).first << " ";// node path
+		   const std::deque<std::string>& vec = (*i).second;   // list of requests
+		   for(std::deque<std::string>::const_iterator c = vec.begin(); c != vec.end(); ++c) {
+
+		      // We expect to output a single newline, hence if there are additional new lines
+		      // It can mess  up, re-parse. i.e during alter change label/value, user could have added newlines
+	         if ((*c).find("\n") == std::string::npos)  os << "\b" << *c;
+	         else {
+	            std::string h = *c;
+	            Str::replaceall(h,"\n","\\n");
+	            os << "\b" << h;
+	         }
+		   }
+		   os << "\n";
+	   }
+	   save_edit_history_ = false;
    }
    return os.str();
 }
