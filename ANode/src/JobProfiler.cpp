@@ -40,6 +40,9 @@ JobProfiler::JobProfiler(Task* node,JobsParam& jobsParam, size_t threshold)
   start_time_(boost::posix_time::microsec_clock::universal_time()),
   threshold_(threshold)
 {
+	if (!jobsParam_.next_poll_time().is_special() && start_time_ >= jobsParam_.next_poll_time()) {
+		jobsParam_.set_timed_out_of_job_generation(start_time_);
+	}
 }
 
 JobProfiler::JobProfiler( JobsParam& jobsParam)
@@ -48,6 +51,9 @@ JobProfiler::JobProfiler( JobsParam& jobsParam)
   start_time_(boost::posix_time::microsec_clock::universal_time()),
   threshold_(0)
 {
+	if (!jobsParam_.next_poll_time().is_special() && start_time_ >= jobsParam_.next_poll_time()) {
+		jobsParam_.set_timed_out_of_job_generation(start_time_);
+	}
 }
 
 JobProfiler::~JobProfiler()
@@ -68,16 +74,6 @@ JobProfiler::~JobProfiler()
       }
    }
 }
-
-bool JobProfiler::time_taken_for_job_generation_to_long() const
-{
-   if (!jobsParam_.next_poll_time().is_special() && start_time_ >= jobsParam_.next_poll_time()) {
-      jobsParam_.set_timed_out_of_job_generation();
-      return true;
-   }
-   return false;
-}
-
 
 void JobProfiler::set_task_threshold(size_t threshold){task_threshold_ = threshold;}
 size_t JobProfiler::task_threshold() { return task_threshold_; }

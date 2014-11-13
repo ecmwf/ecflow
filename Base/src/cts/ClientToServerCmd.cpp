@@ -109,7 +109,7 @@ STC_Cmd_ptr ClientToServerCmd::doJobSubmission(AbstractServer* as)
    // Since we will typically just set task to aborted state
 
    // This job generation will timeout if job generation takes longer than next poll time.
-   as->traverse_node_tree_and_job_generate(Calendar::second_clock_time());
+   as->traverse_node_tree_and_job_generate(Calendar::second_clock_time(), true /* cmd context */);
 
    return PreAllocatedReply::ok_cmd();
 }

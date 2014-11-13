@@ -26,6 +26,7 @@
 #include "CalendarUpdateParams.hpp"
 #include "Calendar.hpp"
 
+using namespace std;
 using namespace ecf;
 using namespace boost::posix_time;
 
@@ -149,7 +150,7 @@ void NodeTreeTraverser::do_traverse()
 
 		// LOG(Log::DBG,"get_job_generation_count() = " << server_->get_job_generation_count());
 		if (server_->get_job_generation_count() > 0) {
-			traverse_node_tree_and_job_generate( time_now );
+			traverse_node_tree_and_job_generate( time_now , false /* not in command context */);
 		}
 
 		start_timer(); // timer fires *EVERY* second
@@ -325,16 +326,32 @@ void NodeTreeTraverser::update_suite_calendar_and_traverse_node_tree(const boost
 		CalendarUpdateParams calParams(time_now, interval_/* calendar increment */, running_ );
 		server_->defs_->updateCalendar( calParams );
 
-		traverse_node_tree_and_job_generate(time_now);
+		traverse_node_tree_and_job_generate(time_now, false /* not in command context */);
 	}
 }
 
-void NodeTreeTraverser::traverse_node_tree_and_job_generate(const boost::posix_time::ptime& start_time) const
+void NodeTreeTraverser::traverse_node_tree_and_job_generate(
+		const boost::posix_time::ptime& start_time,
+		bool cmd_context) const
 {
+	// **************************************************************************************
+	// This can be called at the end of a child command, hence start_time may be >= poll_time
+	// **************************************************************************************
+
 	if ( running_ && server_->defs_) {
 #ifdef DEBUG_JOB_SUBMISSION
 		jobsParam.logDebugMessage(" from NodeTreeTraverser::traverse_node_tree_and_job_generate()");
 #endif
+		// ** In the *NON* command context, we should always have start_time < next_poll_time_
+ 		if (cmd_context && start_time >= next_poll_time_) {
+ 			// This function could be called at the end of child command. When this happens we defer job generation
+ 			cout << "*****************************************************************************************************\n";
+ 			cout << "Command context " << cmd_context << " start_time: " << start_time << " >= " << " next_poll_time_: " << next_poll_time_ << "\n";
+ 			cout << "*****************************************************************************************************\n";
+
+ 			if (cmd_context) server_->increment_job_generation_count();
+ 			return;
+		}
 
 		server_->reset_job_generation_count();
 
@@ -354,19 +371,19 @@ void NodeTreeTraverser::traverse_node_tree_and_job_generate(const boost::posix_t
 		if (!jobs.generate(jobsParam)) { ecf::log(Log::ERR, jobsParam.getErrorMsg()); }
 		if (jobsParam.timed_out_of_job_generation()) {
 
-			// Implies time now >= next_poll_time_,
-			ptime time_now = Calendar::second_clock_time();
-			//        std::cout << "Job generation *timed* out: start time:" << start_time << "  time_now:" << time_now << "  poll_time:" << next_poll_time_ << "\n";
+			// Implies we timed out, hence time_out_time >= next_poll_time_
+			const ptime& time_out_time = jobsParam.time_out_time();
+			// std::cout << "Job generation *timed* out: start time:" << start_time << "  time_out_time:" << time_out_time << "  poll_time:" << next_poll_time_ << "\n";
 
 			// It could be that we started job generation a few seconds before the poll time,
-			// Hence to avoid excessive warnings, Only warn if time_now > next_poll_time_ and  forgive about 3  seconds
-			if (time_now > next_poll_time_ ) {
+			// Hence to avoid excessive warnings, Only warn if time_out_time > next_poll_time_ and  forgive about 3  seconds
+			if (!time_out_time.is_special() && time_out_time > next_poll_time_ ) {
 				int leeway = ( serverEnv_.submitJobsInterval() == 60) ? 3 : 1;
-				time_duration duration = time_now - next_poll_time_;
+				time_duration duration = time_out_time - next_poll_time_;
 				if ( duration.total_seconds() >= leeway) {
 
 					std::stringstream ss;
-					ss << "Job generation *timed* out: start time:" << start_time << "  time_now:" << time_now << "  poll_time:" << next_poll_time_;
+					ss << "Job generation *timed* out: start time:" << start_time << "  time_out_time:" << time_out_time << "  poll_time:" << next_poll_time_;
 					ecf::log(Log::WAR,ss.str());
 				}
 			}

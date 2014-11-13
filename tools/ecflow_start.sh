@@ -263,7 +263,7 @@ echo "";
 echo "OK starting ecFlow server..."
 echo "";
 
-nohup ecflow_server > $ECF_OUT 2>&1 < /dev/null &
+nohup ecflow_server --reply_back_if_ok > $ECF_OUT 2>&1 < /dev/null &
 
 # the sleep allows time for server to start
 if [ "$force" = "true" ]; then

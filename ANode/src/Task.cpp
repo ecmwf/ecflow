@@ -403,7 +403,7 @@ bool Task::resolveDependencies(JobsParam& jobsParam)
 {
    if (jobsParam.timed_out_of_job_generation()) return false;
    JobProfiler profile_me(this,jobsParam,JobProfiler::task_threshold());
-   if (profile_me.time_taken_for_job_generation_to_long()) return false;
+   if (jobsParam.timed_out_of_job_generation()) return false;
 
 
    // Calling Submittable::resolveDependencies(jobsParam) up front can be expensive.

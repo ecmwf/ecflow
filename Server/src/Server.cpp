@@ -648,9 +648,9 @@ void Server::restart()
    checkPtSaver_.start();
 }
 
-void Server::traverse_node_tree_and_job_generate(const boost::posix_time::ptime& time_now) const
+void Server::traverse_node_tree_and_job_generate(const boost::posix_time::ptime& time_now,bool cmd_context ) const
 {
-   traverser_.traverse_node_tree_and_job_generate(time_now);
+   traverser_.traverse_node_tree_and_job_generate(time_now, cmd_context);
 }
 
 bool Server::reloadWhiteListFile(std::string& errorMsg)
