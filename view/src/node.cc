@@ -695,7 +695,13 @@ node* node::find(const std::string name)
     if (0x0 != (top = serv().top())) {
     ecfn = dynamic_cast<ecf_concrete_node<Defs>*>(top->__node__());
     if (0x0 != ecfn) // ok with a node, NOK with attribute
-      ptr = const_cast<Defs*>(ecfn->get())->findAbsNode(name);    
+      try {
+	if (const_cast<Defs*>(ecfn->get()))
+	  ptr = const_cast<Defs*>(ecfn->get())->findAbsNode(name);    
+      } catch (...) { 
+	fprintf(stderr, "exception with node.cc:find\n", 
+		name.c_str());
+      }
     }
   } else {
     const char* fname = full_name().c_str();
