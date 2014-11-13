@@ -176,42 +176,18 @@ std::string Log::path() const
 
 std::string Log::contents(int get_last_n_lines)
 {
-	// Close the file.
-	flush();
+   if ( get_last_n_lines == 0 ) {
+      return string();
+   }
 
- 	if ( get_last_n_lines ==0 ) {
+   // Close the file. Log file may be buffered, hence flush first
+   flush();
 
-		// reopen file and return its content in a string
-		std::ifstream infile( fileName_.c_str() );
-		if ( ! infile) throw std::runtime_error( "Log::contents: Could not open log file " + fileName_ );
-
-		std::ostringstream temp;
-		temp << infile.rdbuf();
-		return temp.str();
- 	}
-
- 	std::vector<std::string> lines;
- 	if (!File::splitFileIntoLines(fileName_, lines)) {
- 		throw std::runtime_error( "Log::contents: Could not open log file (via split) " + fileName_ );
- 	}
-
- 	int start = 0;
- 	int end = static_cast<int>(lines.size());
- 	if ( get_last_n_lines > 0) {
- 		start = end - get_last_n_lines;
- 		if (start < 0 ) start = 0;
- 	}
- 	else {
- 		// if negative get the first lines
- 		end = std::min(std::abs(get_last_n_lines), end);
- 	}
-
- 	std::string ret;
- 	for(int i = start; i < end; i++) {
- 		ret += lines[i];
- 		ret += "\n";
- 	}
- 	return ret;
+   std::string error_msg;
+   if (get_last_n_lines > 0 ) {
+      return File::get_last_n_lines(fileName_,get_last_n_lines,error_msg);
+   }
+   return File::get_first_n_lines(fileName_,std::abs(get_last_n_lines),error_msg);
 }
 
 void log(Log::LogType lt,const std::string& message)

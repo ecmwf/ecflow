@@ -121,9 +121,12 @@ ServerTestHarness::doRun(Defs& theClientDefs, const std::map<std::string,std::st
          std::string value = "export ECF_ALLOW_NEW_CLIENT_OLD_SERVER=" + boost::lexical_cast<std::string>(allow_new_client_old_server);
          s->addVariable( Variable( "ECF_ALLOW_NEW_CLIENT_OLD_SERVER",  value ) );
       }
-      if (s->findVariable(Str::ECF_HOME()).empty())         s->addVariable( Variable( Str::ECF_HOME(),  ecf_home ) );
-      if (s->findVariable("ECF_CLIENT_EXE_PATH").empty()) s->addVariable( Variable( "ECF_CLIENT_EXE_PATH",  theClientExePath ) );
-      if (s->findVariable(Str::ECF_INCLUDE()).empty())      s->addVariable( Variable( Str::ECF_INCLUDE(), TestFixture::includes()  ) );
+
+      // Always override these to correctly locate files.
+      s->addVariable( Variable( Str::ECF_HOME(),  ecf_home ) );
+      s->addVariable( Variable( "ECF_CLIENT_EXE_PATH",  theClientExePath ) );
+      s->addVariable( Variable( Str::ECF_INCLUDE(), TestFixture::includes()  ) );
+
       if (s->findVariable("SLEEPTIME").empty())           s->addVariable( Variable( "SLEEPTIME", "1" ) );
 
       if (check_task_duration_less_than_server_poll_) {
