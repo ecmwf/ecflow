@@ -247,22 +247,21 @@ void Server::handle_read(  const boost::system::error_code& e,connection_ptr con
          outbound_response_.set_cmd( PreAllocatedReply::error_cmd( e.what()  ));
       }
 
-      // To improve performance, when the reply, is OK, don't bother replying back to the client
-      // The client will receive a EOF, and perceive this as OK.
-      // Need to specifically *ignore* for terminate, otherwise server will not shutdown cleanly
-      // See: void Client::handle_read() See: ECFLOW-157
+      // Release >= 4.0.6  More reliable to always respond back. Get more accurate logs
+      // However allow old/new client to deal with shutdown of socket:
+      // See: void Client::handle_read() See: ECFLOW-157, ECFLOW-169
       //
-      if (!serverEnv_.reply_back_if_ok()) {
-
-         if (!inbound_request_.terminateRequest() && outbound_response_.get_cmd()->isOkCmd()) {
-
-            // cleanly close down the connection
-            if (serverEnv_.debug()) cout << "   Server::handle_read: NOT replying, since request is OK" << endl;
-
-            if (shutdown_socket(conn,"Server::handle_read:"))  conn->socket().close();
-            return;
-         }
-      }
+      //      if (!serverEnv_.reply_back_if_ok()) {
+      //
+      //         if (!inbound_request_.terminateRequest() && outbound_response_.get_cmd()->isOkCmd()) {
+      //
+      //            // cleanly close down the connection
+      //            if (serverEnv_.debug()) cout << "   Server::handle_read: NOT replying, since request is OK" << endl;
+      //
+      //            if (shutdown_socket(conn,"Server::handle_read:"))  conn->socket().close();
+      //            return;
+      //         }
+      //      }
 
       // *Reply* back to the client:
       conn->async_write( outbound_response_,

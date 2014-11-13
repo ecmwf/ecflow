@@ -344,10 +344,11 @@ void NodeTreeTraverser::traverse_node_tree_and_job_generate(
 #endif
 		// ** In the *NON* command context, we should always have start_time < next_poll_time_
  		if (cmd_context && start_time >= next_poll_time_) {
+
  			// This function could be called at the end of child command. When this happens we defer job generation
- 			cout << "*****************************************************************************************************\n";
- 			cout << "Command context " << cmd_context << " start_time: " << start_time << " >= " << " next_poll_time_: " << next_poll_time_ << "\n";
- 			cout << "*****************************************************************************************************\n";
+ 			//cout << "*****************************************************************************************************\n";
+ 			//cout << "Command context " << cmd_context << " start_time: " << start_time << " >= " << " next_poll_time_: " << next_poll_time_ << "\n";
+ 			//cout << "*****************************************************************************************************\n";
 
  			if (cmd_context) server_->increment_job_generation_count();
  			return;
