@@ -332,25 +332,27 @@ void NodeTreeTraverser::update_suite_calendar_and_traverse_node_tree(const boost
 
 void NodeTreeTraverser::traverse_node_tree_and_job_generate(
 		const boost::posix_time::ptime& start_time,
-		bool cmd_context) const
+		bool user_cmd_context) const
 {
 	// **************************************************************************************
-	// This can be called at the end of a child command, hence start_time may be >= poll_time
+	// This can be called at the end of a user command(force,alter,requeue,etc),
+	// hence start_time may be >= poll_time, Note: for child command we just call
+	// increment_job_generation_count()
 	// **************************************************************************************
 
 	if ( running_ && server_->defs_) {
 #ifdef DEBUG_JOB_SUBMISSION
 		jobsParam.logDebugMessage(" from NodeTreeTraverser::traverse_node_tree_and_job_generate()");
 #endif
+
 		// ** In the *NON* command context, we should always have start_time < next_poll_time_
- 		if (cmd_context && start_time >= next_poll_time_) {
+ 		if (user_cmd_context && start_time >= next_poll_time_) {
 
- 			// This function could be called at the end of child command. When this happens we defer job generation
  			//cout << "*****************************************************************************************************\n";
- 			//cout << "Command context " << cmd_context << " start_time: " << start_time << " >= " << " next_poll_time_: " << next_poll_time_ << "\n";
+ 			//cout << "user Command context " << cmd_context << " start_time: " << start_time << " >= " << " next_poll_time_: " << next_poll_time_ << "\n";
  			//cout << "*****************************************************************************************************\n";
 
- 			if (cmd_context) server_->increment_job_generation_count();
+ 			server_->increment_job_generation_count();
  			return;
 		}
 

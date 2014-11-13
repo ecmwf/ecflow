@@ -65,7 +65,7 @@ public:
  	}
  	virtual void unlock() { userWhoHasLock_.clear(); restart(); }
  	virtual const std::string& lockedUser() const { return userWhoHasLock_;}
-   virtual void traverse_node_tree_and_job_generate(const boost::posix_time::ptime& time_now,bool cmd_context) const {
+   virtual void traverse_node_tree_and_job_generate(const boost::posix_time::ptime& time_now,bool user_cmd_context) const {
       if (state() == SState::RUNNING && defs_.get()) {
           JobsParam jobsParam(poll_interval(), false /* as->allow_job_creation_during_tree_walk() */ );
           Jobs jobs(defs_);

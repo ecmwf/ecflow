@@ -100,7 +100,7 @@ void ClientToServerCmd::do_log() const
 
 STC_Cmd_ptr ClientToServerCmd::doJobSubmission(AbstractServer* as)
 {
-   // This function could be called at the end of any command that can change state.
+   // This function could be called at the end of *USER* command that can change state.
    //
    // We could have other tasks/jobs dependent on the state change. i.e end of time series
    // This will traverse the node tree and resolve dependencies and may force
@@ -109,7 +109,7 @@ STC_Cmd_ptr ClientToServerCmd::doJobSubmission(AbstractServer* as)
    // Since we will typically just set task to aborted state
 
    // This job generation will timeout if job generation takes longer than next poll time.
-   as->traverse_node_tree_and_job_generate(Calendar::second_clock_time(), true /* cmd context */);
+   as->traverse_node_tree_and_job_generate(Calendar::second_clock_time(), true /* user cmd context */);
 
    return PreAllocatedReply::ok_cmd();
 }
