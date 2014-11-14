@@ -295,7 +295,7 @@ ServerTestHarness::testWaiter( const Defs& theClientDefs, int timeout, bool veri
          test_invariants(full_defs,"First time for getting full defs");
       }
       else {
-         BOOST_REQUIRE_MESSAGE(TestFixture::client().news(full_defs) == 0, "news failed should return 0 " << TestFixture::client().errorMsg());
+         BOOST_CHECK_MESSAGE(TestFixture::client().news(full_defs) == 0, "news failed should return 0 " << TestFixture::client().errorMsg());
          server_changed = TestFixture::client().get_news();
          //			std::cout << "server_changed = " << server_changed << "\n";
          if ( server_changed ) {

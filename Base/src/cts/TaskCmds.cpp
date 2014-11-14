@@ -147,7 +147,8 @@ bool TaskCmd::authenticate(AbstractServer* as, STC_Cmd_ptr& theReply) const
       // If ECF_NONSTRICT_ZOMBIES be more forgiving
       if (!password_missmatch && !pid_missmatch ) {
          if (submittable_->user_variable_exists("ECF_NONSTRICT_ZOMBIES")) {
-            log(Log::WAR," zombie(ECF_NONSTRICT_ZOMBIES) : already active : action taken( fob )");
+            std::stringstream ss; ss <<  " zombie(ECF_NONSTRICT_ZOMBIES) : " << path_to_submittable_ << " : already active : action taken( fob )";
+            log(Log::WAR, ss.str() );
             theReply = PreAllocatedReply::ok_cmd();
             return false;
          }
@@ -164,7 +165,8 @@ bool TaskCmd::authenticate(AbstractServer* as, STC_Cmd_ptr& theReply) const
       // If ECF_NONSTRICT_ZOMBIES be more forgiving
       if (child_type() == Child::COMPLETE) {
          if (submittable_->user_variable_exists("ECF_NONSTRICT_ZOMBIES")) {
-            log(Log::WAR," zombie(ECF_NONSTRICT_ZOMBIES) : already complete : action taken( fob )");
+            std::stringstream ss; ss <<  " zombie(ECF_NONSTRICT_ZOMBIES) : " << path_to_submittable_ << " : already complete : action taken( fob )";
+            log(Log::WAR, ss.str() );
             theReply = PreAllocatedReply::ok_cmd();
             return false;
          }
@@ -182,7 +184,8 @@ bool TaskCmd::authenticate(AbstractServer* as, STC_Cmd_ptr& theReply) const
       // If ECF_NONSTRICT_ZOMBIES be more forgiving
       if (child_type() == Child::ABORT) {
          if (submittable_->user_variable_exists("ECF_NONSTRICT_ZOMBIES")) {
-            log(Log::WAR, " zombie(ECF_NONSTRICT_ZOMBIES) : already aborted : action taken( fob )");
+            std::stringstream ss; ss <<  " zombie(ECF_NONSTRICT_ZOMBIES) : " << path_to_submittable_ << " : already aborted : action taken( fob )";
+            log(Log::WAR, ss.str() );
             theReply = PreAllocatedReply::ok_cmd();
             return false;
          }
