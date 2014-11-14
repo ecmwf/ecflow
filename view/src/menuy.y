@@ -108,9 +108,10 @@ extern int yylineno;
 
 %token NUMBER
 %token JUNK
+%token EOL
 %token NODE_NAME
 %token CANCEL
-%token EOL
+%token ANY
 
 %type<flg> flags;
 %type<flg> flag;
@@ -273,7 +274,10 @@ date   : '[' number ':' number ':' number  number '.' number '.' number ']'
 event : date COMPLETE   node_name  { log_event_status_event(&$1,$3,STATUS_COMPLETE); }
   | date QUEUED     node_name  { log_event_status_event(&$1,$3,STATUS_QUEUED); }
   | date ACTIVE     node_name  { log_event_status_event(&$1,$3,STATUS_ACTIVE); }
-  | date SUBMITTED  node_name  { log_event_status_event(&$1,$3,STATUS_SUBMITTED); }
+  | date SUBMITTED  node_name ANY
+    { log_event_status_event(&$1,$3,STATUS_SUBMITTED); }
+  | date SUBMITTED  node_name 
+    { log_event_status_event(&$1,$3,STATUS_SUBMITTED); }
   | date ABORTED    node_name  { log_event_status_event(&$1,$3,STATUS_ABORTED);}
   | date UNKNOWN    node_name  { log_event_status_event(&$1,$3,STATUS_UNKNOWN);}
   | date SET        node_name  { log_event_event_event(&$1,$3,1); }

@@ -87,7 +87,7 @@
 (char*) "  ",
 (char*) " (ALL,ALL,'-',SEPARATOR) ",
 (char*) "  ",
-(char*) " (SUITE|TASK|FAMILY,(QUEUED|SUSPENDED) & (HAS_TRIGGERS|HAS_TIME|HAS_DATE),'Delete',MENU) ",
+(char*) " (SUITE|TASK|FAMILY,(QUEUED|SUSPENDED|ACTIVE) & (HAS_TRIGGERS|HAS_TIME|HAS_DATE),'Delete',MENU) ",
 (char*) " (NODE | ALIAS, ALL, 'Special', MENU) ",
 (char*) " (NODE | ALIAS, ALL, 'Defstatus', MENU) ",
 (char*) " (NODE & ADMIN, ALL, 'Force', MENU) ",
