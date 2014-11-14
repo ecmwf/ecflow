@@ -171,12 +171,12 @@ void LogCmd::create( 	Cmd_ptr& cmd,
 		}
 
 		if (args.size() == 1 ) {
-			// retrieve the full log from the server. Could be a mega file. be warned
-			cmd = Cmd_ptr( new LogCmd( LogCmd::GET ) );
+			// This will retrieve Log::get_last_n_lines_default() lines from the log file.
+			cmd = Cmd_ptr( new LogCmd( LogCmd::GET , Log::get_last_n_lines_default() ) );
 			return;
 		}
 
- 		int value = 0;
+ 		int value = Log::get_last_n_lines_default();
  		if (args.size() == 2) {
  			try { value = boost::lexical_cast<int>(args[1]); }
  			catch (boost::bad_lexical_cast& e) {
@@ -236,7 +236,7 @@ void LogCmd::create( 	Cmd_ptr& cmd,
 
  	std::stringstream ss;
  	ss << "LogCmd: The arguments have not been specified correctly\n" << LogCmd::desc();
-   	throw std::runtime_error( ss.str() );
+   throw std::runtime_error( ss.str() );
 }
 
 std::ostream& operator<<(std::ostream& os, const LogCmd& c) { return c.print(os); }
