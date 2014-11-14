@@ -72,6 +72,7 @@ public:
    // Search user variables, and then server variables
    const std::string& find_variable(const std::string& name) const;
    const Variable& findVariable(const std::string& name) const;
+   bool variable_exists(const std::string& name) const;
 
   	// These functions/data are used to during job generation
 	void jobSubmissionInterval(int s) { jobSubmissionInterval_ =  s;}

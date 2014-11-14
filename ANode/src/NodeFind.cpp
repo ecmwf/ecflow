@@ -112,6 +112,21 @@ const std::string& Node::find_parent_user_variable_value(const std::string& name
    return defs()->server().find_variable(name);
 }
 
+bool Node::user_variable_exists(const std::string& name) const
+{
+   const Variable& var = findVariable(name);
+   if (!var.empty()) return true;
+
+   Node* theParent = parent();
+   while (theParent) {
+      const Variable& pvar = theParent->findVariable(name);
+      if (!pvar.empty()) return true;
+      theParent = theParent->parent();
+   }
+
+   // If all else fails search defs environment, returns empty string if match not found
+   return defs()->server().variable_exists(name);
+}
 
 const Variable& Node::findVariable(const std::string& name) const
 {

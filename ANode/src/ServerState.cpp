@@ -268,6 +268,24 @@ const Variable& ServerState::findVariable(const std::string& name) const
    return Variable::EMPTY();
 }
 
+bool ServerState::variable_exists(const std::string& name) const
+{
+   // SEARCH USER variables FIRST
+   std::vector<Variable>::const_iterator var_end = user_variables_.end();
+   for(std::vector<Variable>::const_iterator i = user_variables_.begin(); i!=var_end; ++i) {
+      if ((*i).name() == name) return true;
+   }
+
+   // NOW search server variables
+   std::vector<Variable>::const_iterator ser_var_end = server_variables_.end();
+   for(std::vector<Variable>::const_iterator i = server_variables_.begin(); i!=ser_var_end; ++i) {
+      if ((*i).name() == name) return true;
+   }
+
+   return false;
+}
+
+
 void ServerState::set_user_variables(const std::vector<Variable>& e)
 {
    user_variables_ = e;

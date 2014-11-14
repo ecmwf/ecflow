@@ -478,6 +478,9 @@ public:
    /// Useful when we want to return by reference
    const std::string& find_parent_user_variable_value(const std::string& name) const;
 
+   /// Search up the hierarchy, simply checks for existence independent of variable vlaue
+   bool user_variable_exists(const std::string& name) const;
+
    virtual node_ptr findImmediateChild(const std::string& /*name*/, size_t& /*child_pos*/) const { return node_ptr();}
    const Variable& findVariable(const std::string& name) const;
    virtual const Variable& findGenVariable(const std::string& name) const;
