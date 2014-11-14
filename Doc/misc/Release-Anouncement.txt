@@ -19,7 +19,10 @@ on the following platforms:
    o cca/ccb/cct               (cray XC30) 
  
 The release includes the following changes:
- 
+
+    server:         ECFLOW-175  label filtering from log file( don't log missing labels)
+    server:         ECFLOW-174 get log history, causes server memory to grow
+    server:         ECFLOW-169 investigate the slow response on RD virtual machines
  
 To use a specific version use the module functionality.
 This will setup the PATHS for client server and python extension

@@ -82,7 +82,6 @@ ServerEnvironment::ServerEnvironment( int argc, char* argv[])
   debug_(false),
   help_option_(false),
   version_option_(false),
-  reply_back_if_ok_(false),
   allow_old_client_new_server_(0),
   checkMode_(ecf::CheckPt::ON_TIME),
   tcp_protocol_(boost::asio::ip::tcp::v4())
@@ -104,7 +103,6 @@ ServerEnvironment::ServerEnvironment(int argc, char* argv[], const std::string& 
   debug_(false),
   help_option_(false),
   version_option_(false),
-  reply_back_if_ok_(false),
   allow_old_client_new_server_(0),
   checkMode_(ecf::CheckPt::ON_TIME),
   tcp_protocol_(boost::asio::ip::tcp::v4())

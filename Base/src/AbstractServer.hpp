@@ -167,7 +167,9 @@ public:
 	int get_job_generation_count() const { return job_gen_count_; }
 
 	/// This job generation is special, in that it will time out, job generation time >= next poll.
-	virtual void traverse_node_tree_and_job_generate(const boost::posix_time::ptime& time_now) const = 0;
+	/// This can be called at the end of a *USER* command(force,alter,requeue,etc), hence time_now may be >= next_poll_time
+	/// If this is the case, we will defer job generation
+	virtual void traverse_node_tree_and_job_generate(const boost::posix_time::ptime& time_now,bool user_cmd_context) const = 0;
 
    /// returns the number of seconds at which we should check time dependencies
    /// this includes evaluating trigger dependencies and submit the corresponding jobs.
