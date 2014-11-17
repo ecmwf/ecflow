@@ -1354,6 +1354,7 @@ tmp_file ehost::file( node& n, std::string name )
          // in the case of job output the string could be several megabytes.
          return tmp_file(client_.server_reply().get_string());
       } catch ( std::exception &e ) {
+ 	std::cerr << "host::file-error:" << e.what() << "\n";
          gui::message("host::file-error: %s", e.what());
       }
    }
