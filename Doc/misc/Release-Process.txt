@@ -15,7 +15,11 @@ Process
    ****     /usr/local/apps/ecflow/current  
 
 ----------------------------------------------------------------------
-
+0/ Inform user support, allows user support to test rpm
+    
+0/ Inform RD, aske them to update the list of virtual machines
+   That need the new release.
+   
 0/ *Before* each release, make sure the ecflow tar file is
    copied to $SCRATCH and inform Daniel. This will allow
    him to make rpm packages, build on other linux flavours.
@@ -26,14 +30,14 @@ Process
    - ** Check the size of tar file **, ensure that have not included redundant files.
    <Inform Daniel>
    
-0/ git flow release start 4.0.6
+0/ git flow release start 4.0.7
 
    *Push* branch onto stash, otherwise the we can not pull, from the remote machines
    - In eclipse, you *may* have to push this branch first
      Team->Push Branch
      *otherwise* the option Team->Push Upstream  may well be greyed out.
 
-0/ Update ECFLOW_GIT_BRANCH to "release/4.0.6" in the nightly build.py
+0/ Update ECFLOW_GIT_BRANCH to "release/4.0.7" in the nightly build.py
 
 0/ Update Documentation
    
@@ -50,25 +54,23 @@ Process
 0/ CRAY: If you build on cct-login, then copy build to cca/ccb
 
          cd /usr/local/apps/ecflow
-         scp -r 4.0.6 emos@cca:/usr/local/apps/ecflow/.
+         scp -r 4.0.7 emos@cca:/usr/local/apps/ecflow/.
       
    READHAT: If we built on ecgb/redhat we can copy release to sappa/sappab 
   
-         scp -r 4.0.6 emos@sappa:/usr/local/apps/ecflow/.
-         scp -r 4.0.6 emos@sappb:/usr/local/apps/ecflow/.
+         scp -r 4.0.7 emos@sappa:/usr/local/apps/ecflow/.
+         scp -r 4.0.7 emos@sappb:/usr/local/apps/ecflow/.
       
    VIRTUAL Machines: These should treated like regular machines. 
          - These are based on opensuse113, hence we need top copy over exe for this
          
          - ssh opensuse113/lxab, su emos;
-         - scp -r 4.0.6 emos@<virtual machine>:/usr/local/apps/ecflow/.
+         - scp -r 4.0.7 emos@<virtual machine>:/usr/local/apps/ecflow/.
          
          
   *Make* sure destination has a trailing '/.' otherwise you
   can end up renaming.
 
-0/ Inform user support so that they can update the module functionality.
-   Module functionality is done automatically
 
 0/ Update WIKI:
    This announces the changes in the release
@@ -94,7 +96,7 @@ Process
    Use: Release-Anouncement.txt
   
 0/ Tag the release, This should now be automatic when using git flow:
-       git flow release finish 4.0.6
+       git flow release finish 4.0.7
   
 0/ AFTER the release increment the version number in $WK/VERSION.cmake
    THEN, run:
