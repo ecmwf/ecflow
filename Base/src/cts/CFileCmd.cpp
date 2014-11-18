@@ -147,12 +147,42 @@ STC_Cmd_ptr CFileCmd::doHandleRequest(AbstractServer* as) const
 				break;}
 
 			case CFileCmd::JOBOUT: {
+
+			   // ECF_JOBOUT is either constructed from ECF_OUT *OR* ECF_HOME/ECF_NAME.ECF_TRYNO
+			   // See: Submittable.cpp: SubGenVariables::update_generated_variables()
+			   //
+			   // Typically if ECF_OUT is specified, we should only look at that location
+			   // however SMS also looked at the alternate location (and RD relied on this ECFLOW-177 )
+
 				const Variable& ecf_jobout_gen_var = submittable->findGenVariable(Str::ECF_JOBOUT());
 				if (!File::open(ecf_jobout_gen_var.theValue(),fileContents)) {
-					std::stringstream ss;
-					ss << "CFileCmd::doHandleRequest: Failed to open the job-out file('" << ecf_jobout_gen_var.theValue() << "') for task " << pathToNode_;
-					throw std::runtime_error( ss.str() ) ;
- 				}
+
+				   // If that fails as a backup, look under ECF_HOME/ECF_NAME.ECF_TRYNO,   ECFLOW-177 preserve old SMS behaviour
+				   std::string backup_jobout;
+				   submittable->findParentUserVariableValue(Str::ECF_HOME(), backup_jobout);
+				   backup_jobout += submittable->absNodePath();
+				   backup_jobout += ".";
+				   backup_jobout += submittable->tryNo();
+
+				   if ( backup_jobout != ecf_jobout_gen_var.theValue()) {
+				      // Implies ECF_OUT was specified, hence *ALSO* look in ECF_HOME/ECF_NAME.ECF_TRYNO
+				      if (!File::open(backup_jobout,fileContents)) {
+				         std::stringstream ss;
+				         ss << "CFileCmd::doHandleRequest: Failed to open the job-out(ECF_JOBOUT=ECF_OUT/ECF_NAME.ECF_TRYNO) file('"
+				               << ecf_jobout_gen_var.theValue() << "') *AND* at location (ECF_JOBOUT=ECF_HOME/ECF_NAME.ECF_TRYNO)('"
+				               << backup_jobout << "') for task " << pathToNode_;
+				         throw std::runtime_error( ss.str() ) ;
+				      }
+				   }
+				   else {
+				      // ECF_OUT *not* specified implies ECF_JOBOUT = ECF_HOME/ECF_NAME.ECF_TRYNO
+                  std::stringstream ss;
+                  ss << "CFileCmd::doHandleRequest: Failed to open the job-out(ECF_JOBOUT=ECF_HOME/ECF_NAME.ECF_TRYNO) file('"
+                        << ecf_jobout_gen_var.theValue() << "') for task " << pathToNode_;
+                  throw std::runtime_error( ss.str() ) ;
+				   }
+				}
+
 				break; }
 
          case CFileCmd::KILL: {

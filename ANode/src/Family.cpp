@@ -74,7 +74,8 @@ bool Family::resolveDependencies(JobsParam& jobsParam)
 {
    if (jobsParam.timed_out_of_job_generation()) return false;
    JobProfiler profile_me(jobsParam);
-   if (profile_me.time_taken_for_job_generation_to_long()) return false;
+   if (jobsParam.timed_out_of_job_generation()) return false;
+
    return NodeContainer::resolveDependencies(jobsParam);
 }
 

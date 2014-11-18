@@ -30,16 +30,11 @@ ecflow_client --terminate=yes --port=4141
 
 # =======================================================================
 # Start server. 
-# This *MUST* be a compatible version with the clients on different hosts
-# If the client request is ok, and does not need any data sent back, we
-# just close the socket, however older clients will treat this as an error
-# since they want a response back. We use --reply_back_if_ok to keep
-# compatibility with old clients
 # =======================================================================
 rm -rf `hostname`.4141.*
 
 export ECF_ALLOW_OLD_CLIENT_NEW_SERVER=9
-ecflow_server --port=4141 --reply_back_if_ok &
+ecflow_server --port=4141 &
 sleep 4
 
 # =======================================================================

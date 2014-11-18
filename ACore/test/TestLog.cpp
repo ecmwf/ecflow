@@ -23,6 +23,7 @@
 
 #include "Log.hpp"
 #include "File.hpp"
+#include "DurationTimer.hpp"
 
 using namespace ecf;
 using namespace std;
@@ -191,6 +192,174 @@ BOOST_AUTO_TEST_CASE( test_log_new_path )
 
    // Explicitly destroy log. To keep valgrind happy
    Log::destroy();
+}
+
+BOOST_AUTO_TEST_CASE( test_get_last_n_lines_from_log )
+{
+   cout << "ACore:: ...test_get_last_n_lines_from_log\n";
+
+   // delete the log file if it exists.
+   std::string path = getLogPath();
+   fs::remove(path);
+   BOOST_CHECK_MESSAGE(!fs::exists( path ), "log file not deleted " << path << " not created \n");
+
+   // Create the log file;
+   Log::create(path);
+   BOOST_CHECK_MESSAGE(fs::exists( path ), "log file " << path << " not created \n");
+
+   // Log file should be empty
+   const int NO_OF_LINES_IN_LOG_FILE = 200;
+   {
+      for(int i =0; i < NO_OF_LINES_IN_LOG_FILE; i++) {
+         std::string line = Log::instance()->contents(i);
+         BOOST_CHECK_MESSAGE(line.empty(), "Expected empty string but found\n" << line);
+      }
+   }
+
+   // Populate the log file
+   std::string msg = "This is message ";
+   for(int i = 0; i < NO_OF_LINES_IN_LOG_FILE; ++i)  LOG(Log::MSG,msg << i);
+
+   // Now check, getting the lines
+   {
+      std::string line = Log::instance()->contents(0);
+      BOOST_CHECK_MESSAGE(line.empty(), "Expected empty string but found\n" << line);
+   }
+   {
+      // Check we get back the number of line requested
+      for(int i = 0; i< NO_OF_LINES_IN_LOG_FILE; i++) {
+         std::string lines = Log::instance()->contents(i);
+         int newlineCount = std::count( lines.begin(), lines.end(), '\n');
+         BOOST_CHECK_MESSAGE(i == newlineCount, "expected to  " << i << " newlines but found "  <<  newlineCount);
+      }
+   }
+   {
+      // Check we get back *ALL* lines requested
+      std::string lines = Log::instance()->contents(NO_OF_LINES_IN_LOG_FILE);
+      for(int i = 0; i< NO_OF_LINES_IN_LOG_FILE; i++) {
+         std::stringstream ss; ss << msg << i;
+         std::string str_to_find = ss.str();
+         BOOST_CHECK_MESSAGE(lines.find(str_to_find) != std::string::npos, "expected to find " << str_to_find << " in the log file");
+      }
+   }
+
+   {
+      // Request more than is available, should only get back whats there
+      std::string lines = Log::instance()->contents(NO_OF_LINES_IN_LOG_FILE*2);
+      int newlineCount = std::count( lines.begin(), lines.end(), '\n');
+      BOOST_CHECK_MESSAGE(NO_OF_LINES_IN_LOG_FILE == newlineCount, "expected " << NO_OF_LINES_IN_LOG_FILE << " newlines but found "  <<  newlineCount);
+   }
+
+   fs::remove(Log::instance()->path());
+
+   // Explicitly destroy log. To keep valgrind happy
+   Log::destroy();
+}
+
+BOOST_AUTO_TEST_CASE( test_get_first_n_lines_from_log )
+{
+   cout << "ACore:: ...test_get_first_n_lines_from_log\n";
+
+   // delete the log file if it exists.
+   std::string path = getLogPath();
+   fs::remove(path);
+   BOOST_CHECK_MESSAGE(!fs::exists( path ), "log file not deleted " << path << " not created \n");
+
+   // Create the log file;
+   Log::create(path);
+   BOOST_CHECK_MESSAGE(fs::exists( path ), "log file " << path << " not created \n");
+
+   // Populate the log file
+   const int NO_OF_LINES_IN_LOG_FILE = 200;
+   std::string msg = "This is message ";
+   for(int i = 0; i < NO_OF_LINES_IN_LOG_FILE; ++i)  LOG(Log::MSG,msg << i);
+
+   // Now check, getting the lines
+   {
+      // Get the first line
+      std::string line = Log::instance()->contents(-1);
+      std::string expected = msg + "0";
+      BOOST_CHECK_MESSAGE(line.find(expected) != std::string::npos, "Expected '" << expected << "' but found\n" << line);
+   }
+   {
+      // Get the first & second line
+      std::string line = Log::instance()->contents(-2);
+      std::string expected0 = msg + "0";
+      std::string expected1 = msg + "1";
+      BOOST_CHECK_MESSAGE(line.find(expected0) != std::string::npos, "Expected '" << expected0 << "' but found\n" << line);
+      BOOST_CHECK_MESSAGE(line.find(expected1) != std::string::npos, "Expected '" << expected1 << "' but found\n" << line);
+   }
+   {
+      // Check we get back the number of line requested
+      for(int i = 0; i< NO_OF_LINES_IN_LOG_FILE; i++) {
+         std::string lines = Log::instance()->contents(-i);
+         int newlineCount = std::count( lines.begin(), lines.end(), '\n');
+         BOOST_CHECK_MESSAGE(i == newlineCount, "expected to  " << i << " newlines but found "  <<  newlineCount);
+      }
+   }
+   {
+      std::string lines = Log::instance()->contents(-NO_OF_LINES_IN_LOG_FILE);
+      for(int i = 0; i < NO_OF_LINES_IN_LOG_FILE; i++){
+         std::stringstream ss; ss << msg << i;
+         std::string expected = ss.str();
+         BOOST_CHECK_MESSAGE(lines.find(expected) != std::string::npos, "Expected '" << expected << "' but found for i " << i);
+      }
+   }
+
+   {
+      // Request more than is available, should only get back whats there
+      std::string lines = Log::instance()->contents(-NO_OF_LINES_IN_LOG_FILE*2);
+      int newlineCount = std::count( lines.begin(), lines.end(), '\n');
+      BOOST_CHECK_MESSAGE(NO_OF_LINES_IN_LOG_FILE == newlineCount, "expected " << NO_OF_LINES_IN_LOG_FILE << " newlines but found "  <<  newlineCount);
+   }
+
+   fs::remove(Log::instance()->path());
+
+   // Explicitly destroy log. To keep valgrind happy
+   Log::destroy();
+}
+
+
+BOOST_AUTO_TEST_CASE( test_get_log_timing )
+{
+   cout << "ACore:: ...test_get_log_timing: " << flush;
+
+   // *************************************************************************************
+   // This test was used with *DIFFERENT* implementations for Log::instance()->contents(1)
+   // What is shows, is that for optimal performance we should *NOT* load the entire log file
+   // This can be several giga bytes.
+   // **************************************************************************************
+
+   // delete the log file if it exists.
+   std::string path = getLogPath();
+   fs::remove(getLogPath());
+   BOOST_CHECK_MESSAGE(!fs::exists( path ), "log file not deleted " << path << " not created \n");
+
+   // Create the log file;
+   Log::create(path);
+   BOOST_CHECK_MESSAGE(fs::exists( path ), "log file " << path << " not created \n");
+
+   // Populate the log file
+   const int NO_OF_LINES_IN_LOG_FILE = 20000;
+   std::string msg = "This is message ";
+   for(int i = 0; i < NO_OF_LINES_IN_LOG_FILE; ++i)  LOG(Log::MSG,msg << i);
+
+   DurationTimer timer;
+
+   {
+      const int LOOP = 100;
+      for(int i = 0; i< LOOP; i++) {
+         std::string lines = Log::instance()->contents(1);
+         BOOST_CHECK_MESSAGE(!lines.empty(), "expected entry");
+      }
+   }
+
+   fs::remove(Log::instance()->path());
+
+   // Explicitly destroy log. To keep valgrind happy
+   Log::destroy();
+
+   cout << timer.duration() << "s\n" << flush;
 }
 
 BOOST_AUTO_TEST_SUITE_END()

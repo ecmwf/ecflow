@@ -35,8 +35,6 @@ public:
    JobProfiler( JobsParam&);
    ~JobProfiler();
 
-   bool time_taken_for_job_generation_to_long() const;
-
    static void set_task_threshold(size_t threshold);
    static size_t task_threshold();
 

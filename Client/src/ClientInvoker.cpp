@@ -29,6 +29,7 @@
 #include "DurationTimer.hpp"
 #include "ChangeMgrSingleton.hpp"
 #include "TimeStamp.hpp"
+#include "Log.hpp"
 
 #ifdef DEBUG
 
@@ -995,6 +996,7 @@ int ClientInvoker::new_log( const std::string& new_path) const
 }
 int ClientInvoker::getLog( int lastLines) const
 {
+   if (lastLines == 0) lastLines = Log::get_last_n_lines_default();
    if (testInterface_) return invoke(CtsApi::getLog(lastLines));
    return invoke(Cmd_ptr(new LogCmd( LogCmd::GET, lastLines )));
 }

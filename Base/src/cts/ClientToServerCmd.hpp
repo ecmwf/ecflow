@@ -180,7 +180,7 @@ protected:
 public:
 
    virtual bool isWrite() const { return true; }
-   virtual int timeout() const { return 180; }  // ECFLOW-157 80 -> 180
+   virtual int timeout() const { return 190; }  // ECFLOW-157 80 -> 190
 
    const std::string& path_to_node() const { return path_to_submittable_;}
    const std::string& jobs_password() const { return jobs_password_;}
@@ -876,9 +876,9 @@ private:
 class LogCmd : public UserCmd {
 public:
    enum LogApi { GET, CLEAR, FLUSH, NEW , PATH};
-   LogCmd(LogApi a, int get_last_n_lines = 0) : api_(a),get_last_n_lines_(get_last_n_lines) {}
+   LogCmd(LogApi a, int get_last_n_lines = 0); // for zero we take default from log. Avoid adding dependency on log.hpp
    LogCmd(const std::string& path); // NEW
-   LogCmd() : api_(LogCmd::GET),get_last_n_lines_(0) {}
+   LogCmd();
 
    LogApi api() const { return api_;}
    int get_last_n_lines() const { return get_last_n_lines_;}
@@ -899,7 +899,7 @@ private:
    virtual STC_Cmd_ptr doHandleRequest(AbstractServer*) const;
 
    LogApi api_;
-   int get_last_n_lines_;
+   int get_last_n_lines_; // default to 100 -> ECFLOW-174
    std::string new_path_;
 
    friend class boost::serialization::access;

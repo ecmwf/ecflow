@@ -72,7 +72,8 @@ public:
    /// returns the contents of the log file, or the last n lines
    /// Will throw an std::runtime_error if the log file can not be opened
    /// Will close the file.
-   std::string contents(int get_last_n_lines = 0);
+   static int get_last_n_lines_default() { return 100;}
+   std::string contents(int get_last_n_lines);
 
    /// Will call flush and close the file. See notes above
    void flush();

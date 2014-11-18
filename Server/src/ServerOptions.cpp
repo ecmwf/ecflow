@@ -105,10 +105,6 @@ ServerOptions::ServerOptions( int argc, char* argv[],ServerEnvironment* env )
 ( "threads",  po::value< int >(),      "<int> No of threads used by the server. Default is no of cores on machine" )
 #endif
 ( "v6",                               "Use IPv6 TCP protocol. Default is IPv4" )
-( "reply_back_if_ok",                 "Always reply back when client request is ok. This may improve reliability over a poor network.\n"
-                                      "By default, if the client request is ok(i.e no errors), we shutdown/close the socket in the server.\n"
-                                      "The client will receive a EOF, and treat this as a valid reply.\n"
-                                      "This will also maintain compatibility with old client, which expected a reply." )
 ( "dis_job_gen",                      "Disable job generation. For DEBUG/Test only." )
 ( "debug,d",                          "Enable debug output." )
 ( "version,v",                        "Show ecflow version number,boost library version, compiler used and compilation date, then exit" )
@@ -142,11 +138,6 @@ ServerOptions::ServerOptions( int argc, char* argv[],ServerEnvironment* env )
 		if (env->debug_) cout << "ServerOptions: The dis_job_gen is set\n";
 		env->jobGeneration_ = false;
  	}
-
-   if ( vm_.count( "reply_back_if_ok" ) )  {
-     if (env->debug_) cout << "ServerOptions: The reply_back_if_ok is set\n";
-     env->reply_back_if_ok_ = true;
-   }
 
 #ifdef ECFLOW_MT
    if ( vm_.count( "threads" ) ) {

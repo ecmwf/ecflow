@@ -61,7 +61,8 @@ public:
 	// Functions to aid timing of job generation
    void set_next_poll_time(const boost::posix_time::ptime& next_poll_time) { next_poll_time_ = next_poll_time;}
    const boost::posix_time::ptime&  next_poll_time() const { return next_poll_time_;}
-   void set_timed_out_of_job_generation() { timed_out_of_job_generation_ = true;}
+   const boost::posix_time::ptime&  time_out_time() const { return time_out_time_;}
+   void set_timed_out_of_job_generation(const boost::posix_time::ptime& t) { time_out_time_ = t; timed_out_of_job_generation_ = true;}
    bool timed_out_of_job_generation() const { return timed_out_of_job_generation_; }
 
 private:
@@ -73,7 +74,8 @@ private:
 	std::string debugMsg_;
 	std::vector<Submittable*> submitted_;
 	std::vector<std::string> user_edit_file_;
-	NameValueMap user_edit_variables_; /// Used for User edit
-	boost::posix_time::ptime next_poll_time_;  //  Functions to aid timing of job generation
+	NameValueMap user_edit_variables_;          // Used for User edit
+	boost::posix_time::ptime next_poll_time_;   // Aid early exit from job generation, if it takes to long
+	boost::posix_time::ptime time_out_time_;    // When we actually timed out must >= next_poll_time_
 };
 #endif
