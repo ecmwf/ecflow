@@ -301,13 +301,12 @@ BOOST_AUTO_TEST_CASE( test_server_plug_cmd )
  	      BOOST_REQUIRE_MESSAGE( theClient.delete_all() == 0,CtsApi::to_string(CtsApi::delete_node()) << " failed should return 0. Should Delete ALL existing defs in the server\n" << theClient.errorMsg());
  	   }
 
+ 	   // Start local server, special constructor. need false first flag, to avoid ambiguity, with the other constructor.
  		std::string port2 = SCPort::next();
- 		InvokeServer::doStart(port2);
+      InvokeServer invokeServer2(port2,false);
 
 		test_plug_on_multiple_server(ClientEnvironment::hostSpecified(), Str::DEFAULT_PORT_NUMBER(),
 		                             Str::LOCALHOST(), port2);
-
-		TerminateServer::doEnd(Str::LOCALHOST(),port2);
  	}
 }
 
