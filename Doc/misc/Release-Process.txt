@@ -17,8 +17,9 @@ Process
 ----------------------------------------------------------------------
 0/ Inform user support, allows user support to test rpm
     
-0/ Inform RD, aske them to update the list of virtual machines
-   That need the new release.
+0/ Inform RD, ask them to provide the list of virtual machines
+   where they want the new release installed to:
+   
    
 0/ *Before* each release, make sure the ecflow tar file is
    copied to $SCRATCH and inform Daniel. This will allow
