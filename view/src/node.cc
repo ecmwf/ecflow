@@ -699,8 +699,7 @@ node* node::find(const std::string name)
 	if (const_cast<Defs*>(ecfn->get()))
 	  ptr = const_cast<Defs*>(ecfn->get())->findAbsNode(name);    
       } catch (...) { 
-	fprintf(stderr, "exception with node.cc:find\n", 
-		name.c_str());
+         fprintf(stderr, "exception with node.cc:find %s\n", name.c_str());
       }
     }
   } else {
