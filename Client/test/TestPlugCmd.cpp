@@ -181,31 +181,30 @@ static void test_plug_on_multiple_server(
          const std::string& host2, const std::string& port2
 )
 {
-   std::cout << " on host1("<< host1 << ":" << port1 << ") host2(" << host2 << ":" << port2 << ")\n";
+   std::cout << " on host1("<< host1 << ":" << port1 << ") host2(" << host2 << ":" << port2 << ")" << endl;
    ClientInvoker server1Client(host1,port1); server1Client.set_throw_on_error(false);
    ClientInvoker server2Client(host2,port2); server2Client.set_throw_on_error(false);
 
-   // Start the FIRST and SECOND servers
+   //std::cout << " restartServer the FIRST and SECOND servers" << endl;
    BOOST_REQUIRE_MESSAGE( server1Client.restartServer() == 0,CtsApi::restartServer() << " should return 0 server not started, or connection refused\n" << server1Client.errorMsg());
    BOOST_REQUIRE_MESSAGE( server2Client.restartServer() == 0,CtsApi::restartServer() << " should return 0 server not started, or connection refused\n" << server2Client.errorMsg());
 
+   //std::cout << " LOAD the defs into FIRST server(" << host1 << ":" << port1 << ") There is NO DEFS in the second server." << endl;
    std::string path = File::test_data("Client/test/data/lifecycle.txt","Client");
-
-   //  LOAD the defs into FIRST server, There is NO DEFS in the second server.
    BOOST_REQUIRE_MESSAGE( server1Client.loadDefs(path) == 0,"load defs failed \n" << server1Client.errorMsg());
 
-   // ==========================================================================================================
-   // Test the ERROR conditions in MoveCmd
-   // ==========================================================================================================
+
+   //cout << " Test the ERROR conditions in MoveCmd" << endl;
    std::string sourcePath = "/suite1";
    std::string secondServerHostPort = "//localhost:" + port2; // The destination path must encode the host:port path to the second server
 
    std::string destPath = secondServerHostPort + "/A/made/up/dest/path/that/does/not/exist/on/server2";
+   //cout << " Plug/Move from server1(" << host1 << ":" << port1 << ") to destination server " << destPath << endl;
    int theResult =  server1Client.plug(sourcePath,destPath);
    BOOST_REQUIRE_MESSAGE( theResult == 1,CtsApi::plugArg() << "Expected to fail since no defs in server 2\n");
    // 	std::cout << "Error message = " << server1Client.errorMsg() << "\n";
 
-   // *** Load Defs into SECOND server ***, ie both servers have the same definitions
+   //cout << " *** Load Defs into SECOND server ***, ie both servers have the same definitions" << endl;
    BOOST_REQUIRE_MESSAGE( server2Client.loadDefs(path) == 0,"load defs failed \n" << server2Client.errorMsg());
 
 
@@ -280,9 +279,9 @@ static void test_plug_on_multiple_server(
 
 BOOST_AUTO_TEST_CASE( test_server_plug_cmd )
 {
-	cout << "Client:: ...test_server_plug_cmd";
-
  	if (ClientEnvironment::hostSpecified().empty()) {
+
+ 	   cout << "Client:: ...test_server_plug_cmd";
 
  		// Invoke two servers. *which* will both terminate at the end of this scope
  		// This will remove check pt and backup file before server start, to avoid the server from loading previous test data
@@ -293,20 +292,28 @@ BOOST_AUTO_TEST_CASE( test_server_plug_cmd )
 		                             invokeServer2.host(), invokeServer2.port());
 	}
  	else {
- 		// Remote server all ready running, start one more additional server
- 		// *cant* use constructor as that check's for remote server.
+
+ 	   // Plug is broken for new->old servers, where boost serialsation version number changes.
+ 	   if (getenv("ECF_ALLOW_NEW_CLIENT_OLD_SERVER")) {
+ 	      cout << "Client:: ...test_server_plug_cmd:  ignoring test when ECF_ALLOW_NEW_CLIENT_OLD_SERVER specified" << endl;
+ 	      return;
+ 	   }
+
+      cout << "Client:: ...test_server_plug_cmd";
+
+ 	   // Remote server all ready running, start one more additional server
  	   {
  	      // remove any suites on the remote server. Since this test requires it.
  	      ClientInvoker theClient(ClientEnvironment::hostSpecified(),ClientEnvironment::portSpecified());
  	      BOOST_REQUIRE_MESSAGE( theClient.delete_all() == 0,CtsApi::to_string(CtsApi::delete_node()) << " failed should return 0. Should Delete ALL existing defs in the server\n" << theClient.errorMsg());
  	   }
 
- 	   // Start local server, special constructor. need false first flag, to avoid ambiguity, with the other constructor.
- 		std::string port2 = SCPort::next();
-      InvokeServer invokeServer2(port2,false);
+ 	   // Start additional local server, special constructor. need false flag, to avoid ambiguity, with the other constructor.
+ 	   std::string port2 = SCPort::next();
+ 	   InvokeServer invokeServer2(port2,false);
 
-		test_plug_on_multiple_server(ClientEnvironment::hostSpecified(), Str::DEFAULT_PORT_NUMBER(),
-		                             Str::LOCALHOST(), port2);
+ 	   test_plug_on_multiple_server(ClientEnvironment::hostSpecified(), Str::DEFAULT_PORT_NUMBER(),
+ 	                                Str::LOCALHOST(), port2);
  	}
 }
 
