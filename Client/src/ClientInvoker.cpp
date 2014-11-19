@@ -267,7 +267,7 @@ int ClientInvoker::do_invoke_cmd(Cmd_ptr cts_cmd) const
 
 	/// retry_connection_period_ specifies the time to wait, before retrying to connect to server.
 	/// Added to get round glitches in the network.
-	/// However for ping() always default to 1 second. This avoids 20 second wait in release mode.
+	/// However for ping() always default to 1 second. This avoids 10 second wait in release mode.
 	/// We do this both for the CLI(command level interface) and python api
 	unsigned int retry_connection_period = retry_connection_period_;
 	if (cts_cmd->ping_cmd()) retry_connection_period = 1;
