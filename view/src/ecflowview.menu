@@ -128,7 +128,7 @@ menu 'MAIN'
     'ecflow_client --shutdown yes','Shutdown the server in <node_name>?',NO)
   (SERVER,~HALTED,         'Halt',     
     'ecflow_client --halt yes','Halt the server in <node_name>?',NO)
-  (SERVER,HALTED,          'Terminate',
+  (SERVER,HALTED|UNKNOWN,          'Terminate',
     'ecflow_client --terminate yes','Terminate the server in <node_name>?',NO)
   (ALL,ALL,'-',SEPARATOR,'',YES)
   (SERVER,ALL,             'Checkpoint','ecflow_client --check_pt','',YES)
