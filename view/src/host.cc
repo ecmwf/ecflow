@@ -213,6 +213,7 @@ ehost::ehost( const std::string& name, const std::string& h, int number )
    try {
       std::string port = boost::lexical_cast<std::string>(number);
       client_.set_host_port(host_.c_str(), port);
+      client_.set_retry_connection_period(1);
    }
    catch ( std::exception& e ) {
       gui::message("# Exception caught in host::host ");
