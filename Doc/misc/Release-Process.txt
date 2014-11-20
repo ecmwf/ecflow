@@ -17,9 +17,6 @@ Process
 ----------------------------------------------------------------------
 0/ Inform user support, allows user support to test rpm
     
-0/ Inform RD, ask them to provide the list of virtual machines
-   where they want the new release installed to:
-   
    
 0/ *Before* each release, make sure the ecflow tar file is
    copied to $SCRATCH and inform Daniel. This will allow
@@ -72,6 +69,21 @@ Process
   *Make* sure destination has a trailing '/.' otherwise you
   can end up renaming.
 
+0/ Inform RD, ask them to provide the list of virtual machines. 
+   where they want the new release installed to:
+   virtual machines are opensuse112, hence we use lxab(opensuse113) to copy from:
+   
+   ssh rdx@<hostname>
+   
+   i.e  ssh rdx@vecfrdda1
+   
+   The list of all virtual machines, versions and port numbers is:
+   
+        ~rdx/ecflow/servers.config
+        
+   - ssh opensuse113/lxab, su emos;
+   - scp -r 4.0.7 emos@vecfrdda1:/usr/local/apps/ecflow/.
+        
 
 0/ Update WIKI:
    This announces the changes in the release
