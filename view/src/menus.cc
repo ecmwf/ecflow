@@ -334,6 +334,7 @@ void menu::fill(Widget list,int depth)
 void menus::show(Widget parent, XEvent * event_node, node * n)
 {
 
+  if (parent==NULL) fprintf(stderr, "menus::show null widget\n");
 	if(n == 0 || !n->menus())
 	{
 		selection::menu_node(0);
