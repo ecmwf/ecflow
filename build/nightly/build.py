@@ -617,6 +617,11 @@ def build_boost( boost ):
     add_opensuse131_variables(family)
     add_remote_opensuse131_variables(family)
     add_boost_tasks( family )
+    
+    family = boost.add_family("opensuse103")
+    add_opensuse103_variables(family)
+    add_remote_opensuse103_variables(family)
+    add_boost_tasks( family )
 
     family = boost.add_family("redhat")
     add_redhat_variables(family)
@@ -634,11 +639,13 @@ def build_boost( boost ):
     add_remote_cray_variables(family)
     add_cray_gnu_compiler_variables(family)
     add_cray_boost_tasks(family)
-
-    family = boost.add_family("opensuse103")
-    add_opensuse103_variables(family)
-    add_remote_opensuse103_variables(family)
-    add_boost_tasks( family )
+    family.add_defstatus( ecflow.DState.suspended )
+     
+    family = boost.add_family("cray_ccb")
+    add_cray_variables(family)
+    add_remote_cray_variables(family)
+    add_cray_gnu_compiler_variables(family)
+    add_cray_boost_tasks(family)
     
     
 def add_suite_variables( suite ):
@@ -695,7 +702,7 @@ with defs.add_suite("experiment") as experiment:
 
 print "build boost"
 with defs.add_suite("boost_suite") as boost_suite:
-    boost_suite.add_variable("BOOST_VERSION","boost_1_56_0")
+    boost_suite.add_variable("BOOST_VERSION","boost_1_57_0")
     boost_suite.add_variable("REMOTE_COPY","rcp")
     boost_suite.add_variable("ECF_FILES",os.getenv("SCRATCH") + "/nightly/boost_suite")
     add_suite_variables(boost_suite)
@@ -739,9 +746,9 @@ with defs.add_suite("suite") as suite:
             build_linux_64_intel( remote )
             build_opensuse113( remote )
             build_opensuse131( remote )
+            build_opensuse103( remote )
             build_redhat( remote )
             build_cray( remote )
-            build_opensuse103( remote )
         
 #ecflow.PrintStyle.set_style(ecflow.Style.STATE)
 #print defs

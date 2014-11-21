@@ -27,7 +27,7 @@ else
       cp %SITE_CONFIG% $BOOST_ROOT/tools/build/src/site-config.jam
    fi
    
-   if [[  %BOOST_VERSION% = boost_1_57_0_b1 ]]  ; then
+   if [[  %BOOST_VERSION% = boost_1_57_0 ]]  ; then
    
       cp %SITE_CONFIG% $BOOST_ROOT/tools/build/src/site-config.jam
    
