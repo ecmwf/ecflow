@@ -151,8 +151,6 @@ STC_Cmd_ptr CtsCmd::doHandleRequest(AbstractServer* as) const
          break;
       }
       case CtsCmd::FORCE_DEP_EVAL: {
-         if (!as->defs()) throw std::runtime_error( "No definition in server") ;
-
          // The Default JobsParam does *not* allow Job creation, & hence => does not submit jobs
          // The default does *not* allow job spawning
          Jobs jobs(as->defs());

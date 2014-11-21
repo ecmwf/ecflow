@@ -116,7 +116,6 @@ STC_Cmd_ptr PathsCmd::doHandleRequest(AbstractServer* as) const
 
       case PathsCmd::CHECK:  {
          as->update_stats().check_++;
-         if (!as->defs()) throw std::runtime_error( "No definition in server") ;
 
          if (  paths_.empty() ) {
             // check all the defs,
@@ -164,7 +163,6 @@ STC_Cmd_ptr PathsCmd::doHandleRequest(AbstractServer* as) const
             as->clear_defs();
          }
          else {
-            if (!as->defs()) throw std::runtime_error("No definition in server:");
 
             size_t vec_size = paths_.size();
             for(size_t i = 0; i < vec_size; i++) {
@@ -259,7 +257,6 @@ STC_Cmd_ptr PathsCmd::doHandleRequest(AbstractServer* as) const
 
       case PathsCmd::EDIT_HISTORY: {
          as->update_stats().node_edit_history_++;
-         if (!as->defs()) throw std::runtime_error( "No definition in server") ;
          if (paths_.empty()) throw std::runtime_error( "No paths specified for edit history") ;
          // Only first path used
          const std::deque<std::string>& edit_history = as->defs()->get_edit_history(paths_[0]);
@@ -291,8 +288,7 @@ static void check_for_active_or_submitted_tasks(AbstractServer* as,node_ptr theN
       theNodeToDelete->getAllTasks(taskVec);
    }
    else {
-      defs_ptr defs = as->defs();
-      if (defs.get()) defs->getAllTasks(taskVec);
+      as->defs()->getAllTasks(taskVec);
    }
 
    vector<Task*> activeVec,submittedVec;

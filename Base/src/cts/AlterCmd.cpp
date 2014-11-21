@@ -248,8 +248,6 @@ std::ostream& AlterCmd::print(std::ostream& os) const
 
 STC_Cmd_ptr AlterCmd::alter_server_state(AbstractServer* as) const
 {
-	if (!as->defs()) throw std::runtime_error("No definition in server:");
-
 	if ( del_attr_type_ == AlterCmd::DEL_VARIABLE) {
 		as->defs()->set_server().delete_user_variable(name_);
 	}

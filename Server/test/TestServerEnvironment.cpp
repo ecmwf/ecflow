@@ -168,6 +168,7 @@ BOOST_AUTO_TEST_CASE( test_server_config_file )
    expected_variables.push_back( "ECF_VERSION" );
    expected_variables.push_back(  Str::ECF_PORT() );
    expected_variables.push_back( "ECF_NODE");
+   expected_variables.push_back( "ECF_INTERVAL");
 
    std::vector<std::pair<std::string,std::string> > server_vars;
    serverEnv.variables(server_vars);
@@ -291,6 +292,7 @@ BOOST_AUTO_TEST_CASE( test_server_environment_variables )
    expected_variables.push_back( "ECF_VERSION" );
    expected_variables.push_back(  Str::ECF_PORT() );
    expected_variables.push_back( "ECF_NODE");
+   expected_variables.push_back( "ECF_INTERVAL");
 
    std::vector<std::pair<std::string,std::string> > server_vars;
    serverEnv.variables(server_vars);

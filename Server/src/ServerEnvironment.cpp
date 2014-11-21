@@ -346,6 +346,7 @@ void ServerEnvironment::variables(std::vector<std::pair<std::string,std::string>
 	else                 theRetVec.push_back( std::make_pair(std::string("ECF_LOG"), std::string() ));
 	theRetVec.push_back( std::make_pair(std::string("ECF_CHECK"), ecf_checkpt_file_) );
 	theRetVec.push_back( std::make_pair(std::string("ECF_CHECKOLD"), ecf_backup_checkpt_file_) );
+   theRetVec.push_back( std::make_pair(std::string("ECF_INTERVAL"), boost::lexical_cast<std::string>(submitJobsInterval_)) );
 
 	// These variable are read in from the environment, but are not exposed
 	// since they only affect the server

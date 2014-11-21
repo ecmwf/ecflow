@@ -64,16 +64,15 @@ bool ZombieCtrl::handle_path_zombie(
 	const std::string& jobs_password = task_cmd->jobs_password();
 	const std::string& process_or_remote_id = task_cmd->process_or_remote_id();
 
+
 	/// *** The ZombieAttr may have added/ deleted via AlterCmd. This allows for dynamic changes
 	/// *no* task, find the closest Zombie attribute up the Node tree, ie attribute could be on family/suite even though task has been deleted
 	/// If none found we resort to default behaviour
-	node_ptr closest_matching_node;
-	if (as->defs()) {
-		closest_matching_node = as->defs()->find_closest_matching_node(path_to_task);
+	node_ptr closest_matching_node = as->defs()->find_closest_matching_node(path_to_task);
 #ifdef DEBUG_ZOMBIE
-		if (closest_matching_node.get()) std::cout << " closest node found: ";
+	if (closest_matching_node.get()) std::cout << " closest node found: ";
 #endif
-	}
+
 
 #ifdef DEBUG_ZOMBIE
    std::cout << " Searching for match over " << zombies_.size() << " zombies :";

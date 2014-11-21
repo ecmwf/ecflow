@@ -63,8 +63,6 @@ STC_Cmd_ptr PlugCmd::doHandleRequest(AbstractServer* as) const
 {
    as->update_stats().plug_++;
 
-   if (!as->defs()) throw std::runtime_error( "No definition in server") ;
-
    Lock lock(user(),as);
    if (!lock.ok()) {
       std::string errorMsg = "Plug command failed. User "; errorMsg += as->lockedUser();
@@ -149,7 +147,7 @@ STC_Cmd_ptr PlugCmd::doHandleRequest(AbstractServer* as) const
          sourceNode->remove();
 
          // Updated defs state
-         if (as->defs()) as->defs()->set_most_significant_state();
+         as->defs()->set_most_significant_state();
 
          return PreAllocatedReply::ok_cmd();
       }
@@ -180,7 +178,7 @@ STC_Cmd_ptr PlugCmd::doHandleRequest(AbstractServer* as) const
    add_node_for_edit_history(destNode);
 
    // Updated defs state
-   if (as->defs()) as->defs()->set_most_significant_state();
+   as->defs()->set_most_significant_state();
 
    return PreAllocatedReply::ok_cmd();
 }

@@ -226,13 +226,7 @@ bool TaskCmd::authenticate(AbstractServer* as, STC_Cmd_ptr& theReply) const
 
 Submittable* TaskCmd::get_submittable(AbstractServer* as) const
 {
-	defs_ptr defs = as->defs();
-
-	if (defs.get() == NULL) {
-		return NULL;
- 	}
-
-	node_ptr node = defs->findAbsNode(path_to_submittable_);
+	node_ptr node = as->defs()->findAbsNode(path_to_submittable_);
 	if (!node.get()) {
 		return NULL;
  	}

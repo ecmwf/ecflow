@@ -185,14 +185,16 @@ void SSyncCmd::init(
    // Reset all data members since this command can be re-used
    reset_data_members(client_state_change_no);
 
-   // If no definition in server, inform user
-   if ( ! as->defs().get() ) {
-#ifdef DEBUG_SERVER_SYNC
-      cout << ": *NO* defs\n";
-#endif
-      no_defs_ = true;
-      return;
-   }
+   // After ECFLOW-182 server will always have a defs, hence we should never return ServerReply::NO_DEFS
+   // We have kept no_defs_ to allow compatibility. To allow new client(ecflowview) deal with reply from old server
+   // Hence from release >= 4.0.7 no_defs_ will always be false
+   //   if ( ! as->defs().get() ) {
+   //#ifdef DEBUG_SERVER_SYNC
+   //      cout << ": *NO* defs\n";
+   //#endif
+   //      no_defs_ = true;
+   //      return;
+   //   }
 
    // explicit request
    if (do_full_sync) {

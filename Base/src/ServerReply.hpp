@@ -28,6 +28,8 @@
 
 class ServerReply : private boost::noncopyable {
 public:
+   // After ECFLOW-182, NO_DEFS no longer used, however kept, to ensure client/server compatibility
+   // ie. for new client(viewer) must process this from old server, which could return NO_DEFS
    enum News_t { NO_NEWS, NEWS, DO_FULL_SYNC, NO_DEFS };
  	ServerReply()
  	: cli_(false), in_sync_(false), full_sync_(false), news_(NO_NEWS),

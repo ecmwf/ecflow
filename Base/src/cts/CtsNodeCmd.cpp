@@ -138,8 +138,6 @@ STC_Cmd_ptr CtsNodeCmd::doHandleRequest(AbstractServer* as) const
 
       case CtsNodeCmd::CHECK_JOB_GEN_ONLY:  {
          as->update_stats().node_check_job_gen_only_++;
-         if (!as->defs()) throw std::runtime_error( "No definition in server") ;
-
          job_creation_ctrl_ptr jobCtrl = boost::make_shared<JobCreationCtrl>();
          jobCtrl->set_node_path(absNodePath_);
          as->defs()->check_job_creation(jobCtrl);
@@ -151,7 +149,6 @@ STC_Cmd_ptr CtsNodeCmd::doHandleRequest(AbstractServer* as) const
 
       case CtsNodeCmd::JOB_GEN:  {
          as->update_stats().node_job_gen_++;
-         if (!as->defs()) throw std::runtime_error( "No definition in server") ;
 
          if (as->state() == SState::RUNNING) {
 
@@ -169,7 +166,6 @@ STC_Cmd_ptr CtsNodeCmd::doHandleRequest(AbstractServer* as) const
       }
 
       case CtsNodeCmd::WHY: {
-         if (!as->defs()) throw std::runtime_error( "No definition in server");
          /// Why is actually invoked on client side.
          /// Added as a command because:
          ///    o documentation

@@ -54,8 +54,6 @@ STC_Cmd_ptr BeginCmd::doHandleRequest(AbstractServer* as) const
 {
 	as->update_stats().begin_cmd_++;
 	defs_ptr defs = as->defs();
-	if (!defs.get()) throw std::runtime_error( "No definition in server") ;
-
 
 	// If no suite name begin all suites, else begin the the specific suite
 	if ( suiteName_.empty()) {

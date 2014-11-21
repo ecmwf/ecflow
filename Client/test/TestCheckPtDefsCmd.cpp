@@ -201,19 +201,21 @@ BOOST_AUTO_TEST_CASE( test_check_pt_edit_history )
    InvokeServer invokeServer("Client:: ...test_check_pt_edit_history",SCPort::next());
 
    ClientInvoker theClient(invokeServer.host(),invokeServer.port());
-   BOOST_REQUIRE_MESSAGE( theClient.restartServer() == 0,CtsApi::restartServer() << " should return 0 server not started, or connection refused\n" << theClient.errorMsg());
+   BOOST_REQUIRE_MESSAGE(theClient.edit_history(Str::ROOT_PATH()) == 0,CtsApi::to_string(CtsApi::edit_history(Str::ROOT_PATH())) << " should return 0\n" << theClient.errorMsg());
+   BOOST_REQUIRE_MESSAGE(theClient.server_reply().get_string_vec().size() == 0,"Expected edit history of size 0 after server start, but found " << theClient.server_reply().get_string_vec().size());
 
-   // make 4 edits
+
+   // make 5 edits
+   BOOST_REQUIRE_MESSAGE( theClient.restartServer() == 0,CtsApi::restartServer() << " should return 0 server not started, or connection refused\n" << theClient.errorMsg());
    std::string path = File::test_data("Client/test/data/lifecycle.txt","Client");
    BOOST_REQUIRE_MESSAGE(theClient.loadDefs(path) == 0,"load defs failed \n" << theClient.errorMsg());
-
    BOOST_REQUIRE_MESSAGE(theClient.shutdownServer() == 0,CtsApi::shutdownServer() << " should return 0\n" << theClient.errorMsg());
    BOOST_REQUIRE_MESSAGE(theClient.haltServer() == 0,CtsApi::haltServer() << " should return 0\n" << theClient.errorMsg());
    BOOST_REQUIRE_MESSAGE(theClient.restartServer() == 0,CtsApi::restartServer() << " should return 0\n" << theClient.errorMsg());
 
    // make sure edit history updated
    BOOST_REQUIRE_MESSAGE(theClient.edit_history(Str::ROOT_PATH()) == 0,CtsApi::to_string(CtsApi::edit_history(Str::ROOT_PATH())) << " should return 0\n" << theClient.errorMsg());
-   BOOST_REQUIRE_MESSAGE(theClient.server_reply().get_string_vec().size() == 4,"Expected edit history of size 4, but found " << theClient.server_reply().get_string_vec().size());
+   BOOST_REQUIRE_MESSAGE(theClient.server_reply().get_string_vec().size() == 5,"Expected edit history of size 5, but found " << theClient.server_reply().get_string_vec().size());
 
    // make sure edit history was *NOT* serialized, It is only serialized when check pointing
    BOOST_REQUIRE_MESSAGE(theClient.getDefs() == 0,CtsApi::get() << " failed should return 0\n" << theClient.errorMsg());
@@ -224,10 +226,11 @@ BOOST_AUTO_TEST_CASE( test_check_pt_edit_history )
    BOOST_REQUIRE_MESSAGE(fs::exists(invokeServer.ecf_checkpt_file()),CtsApi::checkPtDefs() << " failed No check pt file(" << invokeServer.ecf_checkpt_file() << ") saved");
    BOOST_REQUIRE_MESSAGE(fs::file_size(invokeServer.ecf_checkpt_file()) !=0,"Expected check point file(" << invokeServer.ecf_checkpt_file() << ") to have file size > 0  ");
 
+
    // Create a defs file from the check pt file & check edit history
    Defs defs;
    defs.restore_from_checkpt(invokeServer.ecf_checkpt_file()); // make a data model change
-   BOOST_REQUIRE_MESSAGE(defs.get_edit_history(Str::ROOT_PATH()).size() == 4,"Expected edit history of size 4, but found " <<  defs.get_edit_history(Str::ROOT_PATH()).size());
+   BOOST_REQUIRE_MESSAGE(defs.get_edit_history(Str::ROOT_PATH()).size() == 5,"Expected edit history of size 5, but found " <<  defs.get_edit_history(Str::ROOT_PATH()).size());
 }
 
 BOOST_AUTO_TEST_SUITE_END()
