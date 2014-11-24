@@ -132,13 +132,13 @@ void variables::show( node& n )
    }
 
    if (!varsize) return;
-   sprintf(fmt1, "(%%-%ds = %%-%ds)", varsize, valsize);
-   sprintf(fmt2, " %%-%ds = %%-%ds ", varsize, valsize);
+   snprintf(fmt1, 256, "(%%-%ds = %%-%ds)", varsize, valsize);
+   snprintf(fmt2, 256, " %%-%ds = %%-%ds ", varsize, valsize);
    {
       char buffer[1024];
       node *m = &n;
       while ( m != 0 ) {
-         sprintf(buffer, "Variables defined for %s %s", m->type_name(), m->name().c_str());
+	snprintf(buffer, 1024, "Variables defined for %s %s", m->type_name(), m->name().c_str());
          xec_AddFontListItem(list_, buffer, 1);
          {
             prox = m->__node__();
@@ -167,8 +167,11 @@ void variables::show( node& n )
                gvar.clear();
                ecf->gen_variables(gvar);
                for(it = gvar.begin(); it != gvar.end(); ++it) {
-                  if ((*it).name() == "" || *it == Variable::EMPTY() || (*it).name() == "ECF_PASS") continue;
-                  sprintf(buffer, fmt1, (*it).name().c_str(), (*it).theValue().c_str());
+                  if ((*it).name() == "" || 
+		      *it == Variable::EMPTY() || 
+		      (*it).name() == "ECF_PASS") 
+		    continue;
+                  snprintf(buffer, 1024, fmt1, (*it).name().c_str(), (*it).theValue().c_str());
                   xec_AddFontListItem(list_, buffer, 0);
                }
 
@@ -176,22 +179,22 @@ void variables::show( node& n )
                std::sort(gvar.begin(), gvar.end(), cless_than());
                gvar_end = gvar.end();
                for(it = gvar.begin(); it != gvar_end; ++it) {
-                  sprintf(buffer, fmt2, (*it).name().c_str(), (*it).theValue().c_str());
+		 snprintf(buffer, 1024, fmt2, (*it).name().c_str(), (*it).theValue().c_str());
                   xec_AddFontListItem(list_, buffer, 0);
                }
             }
             if (defs) {
                gvar = defs->server().server_variables();
                for(it = gvar.begin(); it !=  gvar.end(); ++it) {
-                  sprintf(buffer, fmt1, (*it).name().c_str(), (*it).theValue().c_str());
+		 snprintf(buffer, 1024, fmt1, (*it).name().c_str(), (*it).theValue().c_str());
                   xec_AddFontListItem(list_, buffer, 0);
                }
 
                gvar = defs->server().user_variables();
                std::sort(gvar.begin(), gvar.end(), cless_than());
                for(it = gvar.begin(); it !=  gvar.end(); ++it) {
-                  sprintf(buffer, fmt2, (*it).name().c_str(), (*it).theValue().c_str());
-                  xec_AddFontListItem(list_, buffer, 0);
+		 snprintf(buffer, 1024, fmt2, (*it).name().c_str(), (*it).theValue().c_str());
+		 xec_AddFontListItem(list_, buffer, 0);
                }
             }
          }
