@@ -18,7 +18,7 @@
 #include "Node.hpp"
 #include "ServerHandler.hpp"
 #include "VNState.hpp"
-
+#include "VSState.hpp"
 
 NodePathNodeItem::NodePathNodeItem(int index,QString name,QColor col,bool selected,QWidget * parent) :
   NodePathItem(NodeType,index,parent),
@@ -113,11 +113,22 @@ void NodePathNodeItem::current(bool current)
 }
 
 
+NodePathServerItem::NodePathServerItem(int index,QString name,QColor col,bool selected,QWidget * parent) :
+  NodePathNodeItem(index,name,col,selected,parent)
+{
+	setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
+	setIcon(QPixmap(":/viewer/server.svg"));
+}
+
+
+
 NodePathMenuItem::NodePathMenuItem(int index,QWidget * parent) :
   NodePathItem(MenuType, index,parent)
 {
 	setObjectName("pathMenuTb");
 };
+
+
 
 
 //=============================================================
@@ -359,6 +370,7 @@ void NodePathWidget::setPath(ViewNodeInfo_ptr info)
 			if(i==0)
 			{
 				col=QColor(255,255,255);
+				col=VSState::toColour(server).name();
 				name=QString::fromStdString(server->name());
 			}
 			//Node
@@ -376,7 +388,16 @@ void NodePathWidget::setPath(ViewNodeInfo_ptr info)
 			}
 			else
 			{
-				nodeItem=new NodePathNodeItem(i,name,col,false,this);
+				//Server
+				if(i==0)
+				{
+					nodeItem=new NodePathServerItem(i,name,col,false,this);
+				}
+				//Node
+				else
+				{
+					nodeItem=new NodePathNodeItem(i,name,col,false,this);
+				}
 				nodeItems_ << nodeItem;
 				connect(nodeItem,SIGNAL(clicked()),
 			  		     this,SLOT(nodeItemSelected()));

@@ -57,6 +57,12 @@ protected:
 	bool current_;
 };
 
+class NodePathServerItem : public NodePathNodeItem
+{
+public:
+	NodePathServerItem(int index,QString name,QColor col,bool current,QWidget* parent=0);
+};
+
 class NodePathMenuItem : public NodePathItem
 {
 public:

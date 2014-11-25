@@ -27,28 +27,35 @@ public:
 	QSize sizeHint(const QStyleOptionViewItem & option, const QModelIndex & index ) const;
 
 protected:
+
+	void renderServer(QPainter *painter,const QModelIndex& index,
+			            const QStyleOptionViewItemV4& option,QString text) const;
+
 	void renderNode(QPainter *painter,const QModelIndex& index,
-			          QString text,QRect textRect,QRect optRect) const;
+            		const QStyleOptionViewItemV4& option,QString text) const;
 
-	typedef void (TreeNodeViewDelegate::*AttributeRendererProc)(QPainter *painter,QStringList data,QRect textRect,QRect optRect) const;
+	typedef void (TreeNodeViewDelegate::*AttributeRendererProc)(QPainter *painter,QStringList data,const QStyleOptionViewItemV4& option) const;
 
-	void renderMeter(QPainter *painter,QStringList data,QRect textRect,QRect optRect) const;
-	void renderLabel(QPainter *painter,QStringList data,QRect textRect,QRect optRect) const;
-	void renderEvent(QPainter *painter,QStringList data,QRect textRect,QRect optRect) const;
-	void renderVar(QPainter *painter,QStringList data,QRect textRect,QRect optRect) const;
-	void renderGenvar(QPainter *painter,QStringList data,QRect textRect,QRect optRect) const;
-	void renderLimit(QPainter *painter,QStringList data,QRect textRect,QRect optRect) const;
-	void renderLimiter(QPainter *painter,QStringList data,QRect textRect,QRect optRect) const;
-	void renderTrigger(QPainter *painter,QStringList data,QRect textRect,QRect optRect) const;
-	void renderTime(QPainter *painter,QStringList data,QRect textRect,QRect optRect) const;
-	void renderDate(QPainter *painter,QStringList data,QRect textRect,QRect optRect) const;
-	void renderRepeat(QPainter *painter,QStringList data,QRect textRect,QRect optRect) const;
-	void renderLate(QPainter *painter,QStringList data,QRect textRect,QRect optRect) const;
+	void renderMeter(QPainter *painter,QStringList data,const QStyleOptionViewItemV4& option) const;
+	void renderLabel(QPainter *painter,QStringList data,const QStyleOptionViewItemV4& option) const;
+	void renderEvent(QPainter *painter,QStringList data,const QStyleOptionViewItemV4& option) const;
+	void renderVar(QPainter *painter,QStringList data,const QStyleOptionViewItemV4& option) const;
+	void renderGenvar(QPainter *painter,QStringList data,const QStyleOptionViewItemV4& option) const;
+	void renderLimit(QPainter *painter,QStringList data,const QStyleOptionViewItemV4& option) const;
+	void renderLimiter(QPainter *painter,QStringList data,const QStyleOptionViewItemV4& option) const;
+	void renderTrigger(QPainter *painter,QStringList data,const QStyleOptionViewItemV4& option) const;
+	void renderTime(QPainter *painter,QStringList data,const QStyleOptionViewItemV4& option) const;
+	void renderDate(QPainter *painter,QStringList data,const QStyleOptionViewItemV4& option) const;
+	void renderRepeat(QPainter *painter,QStringList data,const QStyleOptionViewItemV4& option) const;
+	void renderLate(QPainter *painter,QStringList data,const QStyleOptionViewItemV4& option) const;
 
 	QPen hoverPen_;
 	QBrush hoverBrush_;
 	QPen selectPen_;
 	QBrush selectBrush_;
+	QPen nodePen_;
+	QPen nodeSelectPen_;
+	QPixmap serverPix_;
 
 	QMap<QString,AttributeRendererProc> attrRenderers_;
 };

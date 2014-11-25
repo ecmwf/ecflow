@@ -76,3 +76,4 @@ QFrame[breadcrumbs="1"] {
 	background: rgb(252, 252, 252);
 	border: 0; 
 }
+

@@ -36,7 +36,7 @@ TreeNodeModel::TreeNodeModel(VConfig* config,QObject *parent) :
 
 int TreeNodeModel::columnCount( const QModelIndex& /*parent */ ) const
 {
-   	 return 3;
+   	 return 1;
 }
 
 int TreeNodeModel::rowCount( const QModelIndex& parent) const
@@ -95,10 +95,20 @@ QVariant TreeNodeModel::data( const QModelIndex& index, int role ) const
 	//the cases where the default should be used.
 	if( !index.isValid() ||
 	   (role != Qt::DisplayRole && role != Qt::ToolTipRole && role != Qt::BackgroundRole &&
-	    role != FilterRole && role != IconRole))
+	    role != FilterRole && role != IconRole && role != ServerRole))
     {
 		return QVariant();
 	}
+
+	//Identifies server
+	if(role == ServerRole)
+	{
+		if(isServer(index))
+			return 0;
+		else
+			return -1;
+	}
+
 
 	//Server
 	int id;
@@ -236,6 +246,8 @@ QVariant TreeNodeModel::attributesData(const QModelIndex& index, int role) const
 
 QVariant TreeNodeModel::headerData( const int section, const Qt::Orientation orient , const int role ) const
 {
+	return QVariant();
+
 	if ( orient != Qt::Horizontal || role != Qt::DisplayRole )
       		  return QAbstractItemModel::headerData( section, orient, role );
 
