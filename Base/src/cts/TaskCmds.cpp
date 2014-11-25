@@ -91,9 +91,6 @@ bool TaskCmd::authenticate(AbstractServer* as, STC_Cmd_ptr& theReply) const
 		return false;
 	}
 
-	SuiteChanged1 changed(submittable_->suite());
-
-
 	// If the CMD *WAS* created with Submittable::DUMMY_JOBS_PASSWORD then we were testing
 	// This will be copied from client to server, hence we want to avoid same check in the
 	// server. when handleRequest is called()
@@ -101,6 +98,8 @@ bool TaskCmd::authenticate(AbstractServer* as, STC_Cmd_ptr& theReply) const
 	if ( jobs_password_ == Submittable::DUMMY_JOBS_PASSWORD()) {
 		return true;
 	}
+
+   SuiteChanged1 changed(submittable_->suite());
 
 	/// Check if User wants to explicitly bypass password checking
 	/// This can be done via AlterCmd by adding a variable on the task,  ECF_PASS with value Submittable::FREE_JOBS_PASSWORD
@@ -116,7 +115,7 @@ bool TaskCmd::authenticate(AbstractServer* as, STC_Cmd_ptr& theReply) const
 
   	/// Handle corner case ,where we have two jobs with different process id, but same password
   	/// Can happen if jobs is started externally,
-	/// or via test(i.e submit 1,sumbit 2(force)) before job1 active its password is overridden
+	/// or via test(i.e submit 1,submit 2(force)) before job1 active its password is overridden
    bool submittable_allready_aborted = false;
    bool submittable_allready_active = false;
    bool submittable_allready_complete = false;
@@ -132,6 +131,7 @@ bool TaskCmd::authenticate(AbstractServer* as, STC_Cmd_ptr& theReply) const
 
    /// *** See Note above: Not all child commands pass a process_id. ***
    /// *** Hence this test for zombies is ONLY valid if process sets the process_or_remote_id_ ****
+   /// *** User should really set ECF_RID in the scripts
    if (!submittable_->process_or_remote_id().empty() && !process_or_remote_id_.empty() && submittable_->process_or_remote_id() != process_or_remote_id_) {
 #ifdef DEBUG_ZOMBIE
       std::cout << ":task pid(" << submittable_->process_or_remote_id() << ") != process pid(" << process_or_remote_id_ << ")";
@@ -165,7 +165,10 @@ bool TaskCmd::authenticate(AbstractServer* as, STC_Cmd_ptr& theReply) const
       // If ECF_NONSTRICT_ZOMBIES be more forgiving
       if (child_type() == Child::COMPLETE) {
          if (submittable_->user_variable_exists("ECF_NONSTRICT_ZOMBIES")) {
-            std::stringstream ss; ss <<  " zombie(ECF_NONSTRICT_ZOMBIES) : " << path_to_submittable_ << " : already complete : action taken( fob )";
+            std::stringstream ss; ss <<  " zombie(ECF_NONSTRICT_ZOMBIES) : " << path_to_submittable_ ;
+            if (password_missmatch) ss << " : password miss-match[ task:"<< submittable_->jobsPassword()<<" child:" << jobs_password_ << " ]";
+            if (pid_missmatch)      ss << " : pid miss-match[ task:"<< submittable_->process_or_remote_id()<<" child:" << process_or_remote_id_ << " ]";
+            ss << " : already complete : action taken( fob )";
             log(Log::WAR, ss.str() );
             theReply = PreAllocatedReply::ok_cmd();
             return false;
@@ -184,7 +187,10 @@ bool TaskCmd::authenticate(AbstractServer* as, STC_Cmd_ptr& theReply) const
       // If ECF_NONSTRICT_ZOMBIES be more forgiving
       if (child_type() == Child::ABORT) {
          if (submittable_->user_variable_exists("ECF_NONSTRICT_ZOMBIES")) {
-            std::stringstream ss; ss <<  " zombie(ECF_NONSTRICT_ZOMBIES) : " << path_to_submittable_ << " : already aborted : action taken( fob )";
+            std::stringstream ss; ss <<  " zombie(ECF_NONSTRICT_ZOMBIES) : " << path_to_submittable_ ;
+            if (password_missmatch) ss << " : password miss-match[ task:"<< submittable_->jobsPassword() << " child:" << jobs_password_ << " ]";
+            if (pid_missmatch)      ss << " : pid miss-match[ task:"<< submittable_->process_or_remote_id() << " child:" << process_or_remote_id_ << " ]";
+            ss << " : already aborted : action taken( fob )";
             log(Log::WAR, ss.str() );
             theReply = PreAllocatedReply::ok_cmd();
             return false;
