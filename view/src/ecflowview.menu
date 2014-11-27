@@ -262,9 +262,6 @@ menu "Special"
 
   (FAMILY, ~ACTIVE & ~SUBMITTED, 'Execute', 'ecflow_client --run <full_name>')
   ((SUITE|FAMILY|TASK), SELECTION, 'Plug into selected node', PLUG)
-  (TASK|ALIAS, SELECTION, 'Compare Edit (vs selected)', COMP( 'compare' , 'edit' ))
-  (TASK|ALIAS, SELECTION, 'Compare EditPP (vs selected)', COMP( 'compare' , 'editpp'))
-  (TASK|ALIAS, SELECTION, 'Compare output (vs selected)', COMP('compare' , 'output'))
   (FAMILY|TASK,ALL,'get','ecflow_client --get <full_name>')
   (TASK,ALL,'status','ecflow_client --status <full_name>')
   (SUITE|SERVER, ALL, 'Collect...',  WINDOW(Collector))
