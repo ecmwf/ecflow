@@ -203,6 +203,8 @@ STC_Cmd_ptr PathsCmd::doHandleRequest(AbstractServer* as) const
       }
 
       case PathsCmd::RESUME: {
+
+         // At the end of resume, we need to traverse node tree, and do job submission
          as->update_stats().node_resume_++;
          size_t vec_size = paths_.size();
          for(size_t i = 0; i < vec_size; i++) {
@@ -214,6 +216,7 @@ STC_Cmd_ptr PathsCmd::doHandleRequest(AbstractServer* as) const
             }
             SuiteChanged0 changed(theNode);
             theNode->resume();
+            as->increment_job_generation_count(); // in case we throw below
          }
          break;
       }
@@ -266,6 +269,7 @@ STC_Cmd_ptr PathsCmd::doHandleRequest(AbstractServer* as) const
       }
 
       case PathsCmd::NO_CMD: assert(false); break;
+
       default: assert(false); break;
    }
 
@@ -276,6 +280,11 @@ STC_Cmd_ptr PathsCmd::doHandleRequest(AbstractServer* as) const
    std::string error_msg = ss.str();
    if (!error_msg.empty()) {
       throw std::runtime_error( error_msg ) ;
+   }
+
+   if ( PathsCmd::RESUME  == api_) {
+      // After resume we need to do job submission.
+      return doJobSubmission(as);
    }
 
    return PreAllocatedReply::ok_cmd();

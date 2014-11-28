@@ -31,7 +31,6 @@
 #include "Log.hpp"
 #include "PrintStyle.hpp"
 #include "JobsParam.hpp"
-#include "Jobs.hpp"
 #include "ExprAstVisitor.hpp"
 #include "Ecf.hpp"
 #include "SuiteChanged.hpp"
@@ -108,11 +107,6 @@ void Node::resume()
 {
    if ( suspended_) {
       clearSuspended();
-
-      // do immediate job generation for any jobs, that were freed of their time
-      // dependencies during the suspend.
-      Jobs jobs(this);
-      jobs.generate();
    }
 }
 
