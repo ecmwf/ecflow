@@ -13,6 +13,7 @@
 
 #include <map>
 
+#include <QStringList>
 #include <QColor>
 #include <QFont>
 #include <QMap>
@@ -20,7 +21,6 @@
 class VParam
 {
 public:
-
 		VParam(const std::string& name);
 
 		QString qName() const {return qName_;}
@@ -31,6 +31,13 @@ public:
 		std::string text(const std::string&) const;
 		QFont font(const std::string&) const;
 
+		static QColor toColour(const std::string&) ;
+		static QFont  toFont(const std::string&);
+		static int    toNumber(const std::string&);
+		static bool isColour(const std::string&);
+		static bool isFont(const std::string&);
+		static bool isNumber(const std::string&);
+
 protected:
 		void addAttributes(const std::map<std::string,std::string>& attr);
 		static void init(const std::string& parFile,const std::string id,std::map<std::string,std::map<std::string,std::string> >& vals);
@@ -39,13 +46,6 @@ protected:
 		QString qName_;
 
 private:
-		QColor toColour(const std::string&) const;
-		QFont  toFont(const std::string&) const;
-		int    toNumber(const std::string&) const;
-		bool isColour(const std::string&) const;
-		bool isFont(const std::string&) const;
-		bool isNumber(const std::string&) const;
-
 		std::map<std::string,int> numberMap_;
 		std::map<std::string,std::string> textMap_;
  		std::map<std::string,QColor> colourMap_;

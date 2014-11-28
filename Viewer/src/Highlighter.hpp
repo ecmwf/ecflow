@@ -8,22 +8,33 @@
 //
 //============================================================================
 
-#ifndef INFOITEMWIDGET_HPP_
-#define INFOITEMWIDGET_HPP_
+#ifndef HIGHLIGHTER_HPP_
+#define HIGHLIGHTER_HPP_
 
-#include "InfoPanelItem.hpp"
-#include "TextItemWidget.hpp"
-#include "ViewNodeInfo.hpp"
+#include <string>
+#include <QSyntaxHighlighter>
 
-class InfoItemWidget : public TextItemWidget, public InfoPanelItem
+class Highlighter : public QSyntaxHighlighter
 {
 public:
-	InfoItemWidget(QWidget *parent=0);
+	Highlighter(QTextDocument *parent,QString id);
+	static void init(const std::string& parFile);
 
-	void reload(ViewNodeInfo_ptr);
-	QWidget* realWidget();
-	void clearContents();
+protected:
+	void highlightBlock(const QString &text);
+	void addRule(QString,QTextCharFormat);
+
+private:
+	void load(QString);
+
+	struct HighlightingRule
+    {
+		QRegExp pattern;
+        QTextCharFormat format;
+    };
+
+	QList<HighlightingRule> rules_;
+	static std::string parFile_;
 };
 
 #endif
-

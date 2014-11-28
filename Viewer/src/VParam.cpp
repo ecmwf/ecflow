@@ -10,13 +10,12 @@
 
 #include "VParam.hpp"
 
+#include <boost/property_tree/json_parser.hpp>
+
 #include <QDebug>
 #include <QRegExp>
 
 #include "UserMessage.hpp"
-
-#include <boost/property_tree/ptree.hpp>
-#include <boost/property_tree/json_parser.hpp>
 
 VParam::VParam(const std::string& name) :
    name_(name),
@@ -84,22 +83,22 @@ QFont VParam::font(const std::string& key) const
 	return QFont();
 }
 
-bool VParam::isColour(const std::string& val) const
+bool VParam::isColour(const std::string& val)
 {
 	return QString::fromStdString(val).simplified().startsWith("rgb");
 }
 
-bool VParam::isFont(const std::string& val) const
+bool VParam::isFont(const std::string& val)
 {
 	return QString::fromStdString(val).simplified().startsWith("font");
 }
 
-bool VParam::isNumber(const std::string& val) const
+bool VParam::isNumber(const std::string& val)
 {
 	return false;
 }
 
-QColor VParam::toColour(const std::string& name) const
+QColor VParam::toColour(const std::string& name)
 {
 	QString qn=QString::fromStdString(name);
 	qDebug() << qn;
@@ -119,12 +118,12 @@ QColor VParam::toColour(const std::string& name) const
 	return col;
 }
 
-QFont VParam::toFont(const std::string& name) const
+QFont VParam::toFont(const std::string& name)
 {
 	return QFont();
 }
 
-int VParam::toNumber(const std::string& name) const
+int VParam::toNumber(const std::string& name)
 {
 	return 0;
 }
@@ -167,5 +166,17 @@ void VParam::init(const std::string& parFile,const std::string id,std::map<std::
 	}
 }
 
+/*QStringList VParam::toList(const boost::property_tree::ptree& array)
+{
+	QStringList lst;
+	for(boost::property_tree::ptree::const_iterator it = array.begin(); it != array.end(); ++it)
+	{
+			std::string name=it->second.get_value<std::string>();
+			lst << QString::fromStdString(name);
+	}
+
+	return lst;
+}
+*/
 
 

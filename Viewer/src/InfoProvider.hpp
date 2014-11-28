@@ -5,25 +5,20 @@
 // In applying this licence, ECMWF does not waive the privileges and immunities
 // granted to it by virtue of its status as an intergovernmental organisation
 // nor does it submit to any jurisdiction.
-//
 //============================================================================
 
-#ifndef INFOITEMWIDGET_HPP_
-#define INFOITEMWIDGET_HPP_
+#ifndef INFOPROVIDER_HPP_
+#define INFOPROVIDER_HPP_
 
-#include "InfoPanelItem.hpp"
-#include "TextItemWidget.hpp"
-#include "ViewNodeInfo.hpp"
+#include <string>
 
-class InfoItemWidget : public TextItemWidget, public InfoPanelItem
+class Node;
+
+class InfoProvider
 {
 public:
-	InfoItemWidget(QWidget *parent=0);
-
-	void reload(ViewNodeInfo_ptr);
-	QWidget* realWidget();
-	void clearContents();
+	static const std::string& nodeType(Node* node);
+	static void info(Node* node,std::stringstream& );
 };
 
 #endif
-

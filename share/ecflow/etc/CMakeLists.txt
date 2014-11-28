@@ -2,6 +2,7 @@
 # the list of files we want to install
 set (files ecflowview_menus.json 
            ecflowview_attribute.json
+           ecflowview_highlighter.json
            ecflowview_icon.json
            ecflowview_nstate.json
            ecflowview_sstate.json

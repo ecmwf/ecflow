@@ -8,9 +8,11 @@ set(viewer_srcs
     CustomCommandDialog.cpp
     DirectoryHandler.cpp
     FilterWidget.cpp
+    Highlighter.cpp
     InfoItemWidget.cpp
     InfoPanel.cpp 
     InfoPanelItem.cpp
+    InfoProvider.cpp
     JobItemWidget.cpp
     MainWindow.cpp
     ManualItemWidget.cpp 

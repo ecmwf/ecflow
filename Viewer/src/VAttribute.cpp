@@ -10,6 +10,9 @@
 
 #include "VAttribute.hpp"
 
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/json_parser.hpp>
+
 #include <QDebug>
 
 #include <stdlib.h>
@@ -21,9 +24,6 @@
 
 #include "Node.hpp"
 #include "UserMessage.hpp"
-
-#include <boost/property_tree/ptree.hpp>
-#include <boost/property_tree/json_parser.hpp>
 
 std::map<std::string,VAttribute*> VAttribute::items_;
 
@@ -509,7 +509,8 @@ bool VRepeatAttribute::getData(Node *node,int row,int& size,QStringList& data)
 	const Repeat& r=node->repeat();
 	if(row >=0 && !r.empty())
 	{
-			data << qName_ << QString::fromStdString(r.name());
+			data << qName_ << QString::fromStdString(r.name()) <<
+			QString::fromStdString(r.valueAsString());
 			return true;
 	}
 	size=(r.empty())?0:1;

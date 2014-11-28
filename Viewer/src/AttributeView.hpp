@@ -7,23 +7,3 @@
 // nor does it submit to any jurisdiction.
 //
 //============================================================================
-
-#ifndef INFOITEMWIDGET_HPP_
-#define INFOITEMWIDGET_HPP_
-
-#include "InfoPanelItem.hpp"
-#include "TextItemWidget.hpp"
-#include "ViewNodeInfo.hpp"
-
-class InfoItemWidget : public TextItemWidget, public InfoPanelItem
-{
-public:
-	InfoItemWidget(QWidget *parent=0);
-
-	void reload(ViewNodeInfo_ptr);
-	QWidget* realWidget();
-	void clearContents();
-};
-
-#endif
-

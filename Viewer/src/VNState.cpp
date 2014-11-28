@@ -10,6 +10,9 @@
 
 #include "VNState.hpp"
 
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/json_parser.hpp>
+
 #include <QDebug>
 #include <QImage>
 #include <QImageReader>
@@ -23,9 +26,6 @@
 #include "Node.hpp"
 #include "Submittable.hpp"
 #include "UserMessage.hpp"
-
-#include <boost/property_tree/ptree.hpp>
-#include <boost/property_tree/json_parser.hpp>
 
 std::map<std::string,VNState*> VNState::items_;
 static std::map<NState::State,VNState*> stateMap_;

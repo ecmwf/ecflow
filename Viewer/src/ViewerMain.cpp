@@ -19,6 +19,7 @@
 #include "ServerHandler.hpp"
 #include "MenuHandler.hpp"
 #include "DirectoryHandler.hpp"
+#include "Highlighter.hpp"
 #include "ServerList.hpp"
 #include "VAttribute.hpp"
 #include "VIcon.hpp"
@@ -67,6 +68,10 @@ int main(int argc, char **argv)
     //Initialise the node icon description
     VIcon::init(DirectoryHandler::concatenate(DirectoryHandler::etcDir(),
 		      "ecflowview_icon.json"));
+
+    //Initialise yexy highlighter
+    Highlighter::init(DirectoryHandler::concatenate(DirectoryHandler::etcDir(),
+    		      "ecflowview_highlighter.json"));
 
     //Build the GUI
     MainWindow::init();

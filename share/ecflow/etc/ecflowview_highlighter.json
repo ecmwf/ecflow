@@ -1,0 +1,16 @@
+{
+        "info"  : {
+
+                        "main" : {
+                        		"pattern" : "^\\s*(name|type|status|at)\\s+:",                      
+                                "colour"  : "rgb(0,0,128)",
+                        		"bold"    : "true"
+                                
+                        },
+                        "genvar" : {
+                        		"pattern" : "^\\s*(# edit)",                       
+                                "colour"  : "rgb(128,128,128)",
+                        		"italic"  : "true"
+                        }                     
+        }
+}
