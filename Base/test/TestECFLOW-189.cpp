@@ -75,7 +75,7 @@ BOOST_AUTO_TEST_CASE( test_ECFLOW_189 )
    TestHelper::invokeRequest(the_defs.get(),Cmd_ptr( new PathsCmd(PathsCmd::RESUME, t1->absNodePath())));
 
    // We expect state to be queued since the trigger on /s1/f1 should prevent jobs from running
-   // If we find submitted or aborted(i.e it though it was free to run, but could not generate the jobs), then its an error
+   // If we find submitted or aborted(i.e it was free to run, but could not generate the jobs), then its an error
    TestHelper::test_state(t1,NState::QUEUED);
    TestHelper::test_state(t2,NState::QUEUED);
 
