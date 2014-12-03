@@ -37,6 +37,10 @@ Process
 
 0/ Update ECFLOW_GIT_BRANCH to "release/4.0.7" in the nightly build.py
 
+0/ For a PREPIFS release change file:
+     /usr/local/apps/ecflow/.modulerc
+   This file defines the mapping to symbol, i.e like default,new,old, prepifs
+   
 0/ Update Documentation
    
   - https://software.ecmwf.int/wiki/display/ECFLOW/Change+History
