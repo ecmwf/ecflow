@@ -25,7 +25,7 @@ rdpa1	vecfrdpa1	11041
 rdpa2	vecfrdpa2	11042
 rdst1	vecfrdst1	11051
 rdst2	vecfrdst2	11052
-rdtest1	vecfrdtest1	12090
+rdtest1	vecfrdxadmin	12090
 rdx_admin	vecfrdxadmin	10091
 xat1	vecfmspifs	21001
 xbe1	vecfmspifs	21011

@@ -6,8 +6,9 @@ cat servers.od > $serv
 cat $rdservers | grep vecf | grep -v -E "^#.*" | awk '{ print $1"\t"$2"\t"$3;}' | sort >> $serv
 
 loc=/usr/local/apps/ecflow/*/share/ecflow 
+# loc=/usr/local/apps/ecflow/4.0.6/share/ecflow 
 files=$serv
-# files=ecflowview.menu
+files=ecflowview.menu
 dests="ibis ablamor opensuse113 opensuse103"
 set +x
 list="$(rsh $dest ls -d $loc | grep -v current)"
