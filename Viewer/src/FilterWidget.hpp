@@ -33,7 +33,7 @@ public:
 	AbstractFilterMenu(QMenu* parent,const std::vector<VParam*>&);
 	void reload(VFilter*);
 
-protected slots:
+protected Q_SLOTS:
 	void slotChanged(bool);
 
 protected:
@@ -81,7 +81,7 @@ public:
 	void notifyConfigChanged(AttributeFilter*) {};
 	void notifyConfigChanged(IconFilter*) {};
 
-protected slots:
+protected Q_SLOTS:
 	void slotChanged(bool);
 
 protected:
@@ -106,10 +106,10 @@ public:
 	FilterWidget(QWidget* parent=0);
 	void reload(VFilter*);
 
-protected slots:
+protected Q_SLOTS:
 	void slotChanged(bool);
 
-signals:
+Q_SIGNALS:
 	void filterChanged(QSet<DState::State>);
 
 private:

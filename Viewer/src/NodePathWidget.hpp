@@ -15,7 +15,8 @@
 #include <QGraphicsScene>
 #include <QToolButton>
 
-#include "ViewNodeInfo.hpp"
+#include "NodeObserver.hpp"
+#include "VInfo.hpp"
 
 #include <string>
 
@@ -70,7 +71,7 @@ public:
 };
 
 
-class NodePathWidget : public QWidget
+class NodePathWidget : public QWidget, public NodeObserver
 {
 Q_OBJECT
 
@@ -78,25 +79,28 @@ public:
 	NodePathWidget(QWidget* parent=0);
 	~NodePathWidget();
 
-public slots:
-	void setPath(QString);
-	void setPath(ViewNodeInfo_ptr);
+	//From NodeObserver
+	void notifyNodeChanged(const Node*, const std::vector<ecf::Aspect::Type>&) {};
 
-protected slots:
+public Q_SLOTS:
+	void setPath(QString);
+	void setPath(VInfo_ptr);
+
+protected Q_SLOTS:
 	void slotContextMenu(const QPoint&);
 	void nodeItemSelected();
 	void menuItemSelected();
 
-signals:
-	void selected(ViewNodeInfo_ptr);
+Q_SIGNALS:
+	void selected(VInfo_ptr);
 
 protected:
 	void clearLayout();
 	void clearContents();
-	void loadMenu(const QPoint& pos,ViewNodeInfo_ptr p);
-	ViewNodeInfo_ptr nodeAt(int);
-	QList<Node*> toNodeList(ViewNodeInfo_ptr info);
-	int findInPath(ViewNodeInfo_ptr p1,ViewNodeInfo_ptr p2,bool sameServer);
+	void loadMenu(const QPoint& pos,VInfo_ptr p);
+	VInfo_ptr nodeAt(int);
+	QList<Node*> toNodeList(VInfo_ptr info);
+	int findInPath(VInfo_ptr p1,VInfo_ptr p2,bool sameServer);
 	void infoIndex(int idx);
 	void paintEvent(QPaintEvent *);
 
@@ -104,8 +108,8 @@ protected:
 	QList<NodePathMenuItem*> menuItems_;
 
 	QHBoxLayout* layout_;
-	ViewNodeInfo_ptr info_;
-	ViewNodeInfo_ptr infoFull_;
+	VInfo_ptr info_;
+	VInfo_ptr infoFull_;
 	int infoIndex_;
 
 	//When it is set to "true": if a node item (i.e. not a menu) is selected the breadcrumbs

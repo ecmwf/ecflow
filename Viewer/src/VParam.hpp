@@ -24,7 +24,7 @@ public:
 		VParam(const std::string& name);
 
 		QString qName() const {return qName_;}
-		std::string name() const {return name_;}
+		const std::string& name() const {return name_;}
 
 		int number(const std::string&) const;
 		QColor colour(const std::string&) const;

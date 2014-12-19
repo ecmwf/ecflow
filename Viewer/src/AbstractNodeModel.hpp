@@ -8,8 +8,9 @@
 #include <vector>
 
 #include "Aspect.hpp"
+#include "NodeObserver.hpp"
 #include "VConfig.hpp"
-#include "ViewNodeInfo.hpp"
+#include "VInfo.hpp"
 
 class Node;
 
@@ -53,7 +54,7 @@ protected:
 };
 
 
-class AbstractNodeModel : public QAbstractItemModel, public VConfigObserver
+class AbstractNodeModel : public QAbstractItemModel, public VConfigObserver, public NodeObserver
 {
 	Q_OBJECT
 
@@ -67,10 +68,10 @@ public:
 	void addServer(ServerHandler *);
 	void setRootNode(Node *node);
 	void dataIsAboutToChange();
-	ViewNodeInfo_ptr nodeInfo(const QModelIndex& index) const;
+	virtual VInfo_ptr nodeInfo(const QModelIndex& index);
 	void reload();
 
-	virtual QModelIndex infoToIndex(ViewNodeInfo_ptr,int column=0) const;
+	virtual QModelIndex infoToIndex(VInfo_ptr,int column=0) const;
 
 	//From ConfigObserver
 	void notifyConfigChanged(ServerFilter*);
@@ -78,10 +79,10 @@ public:
 	void notifyConfigChanged(AttributeFilter*) {};
 	void notifyConfigChanged(IconFilter*) {};
 
-public slots:
-	void slotNodeChanged(const Node*, QList<ecf::Aspect::Type>);
+	//From NodeObserver
+	void notifyNodeChanged(const Node*, const std::vector<ecf::Aspect::Type>&);
 
-signals:
+Q_SIGNALS:
 	void changed();
 	void filterChanged();
 

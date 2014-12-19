@@ -14,7 +14,7 @@
 #include <QWidget>
 
 #include "Viewer.hpp"
-#include "ViewNodeInfo.hpp"
+#include "VInfo.hpp"
 
 #include "ui_InfoPanel.h"
 
@@ -72,15 +72,15 @@ public:
 	bool detached() const;
 	void detached(bool);
 	void clear();
-	void reset(ViewNodeInfo_ptr node);
+	void reset(VInfo_ptr node);
 
-public slots:
-	void slotReload(ViewNodeInfo_ptr node);
+public Q_SLOTS:
+	void slotReload(VInfo_ptr node);
 	void slotCurrentWidgetChanged(int);
 	void on_addTb_clicked();
 
-signals:
-	void selectionChanged(ViewNodeInfo_ptr);
+Q_SIGNALS:
+	void selectionChanged(VInfo_ptr);
 
 protected:
 	void adjust(QStringList);
@@ -91,7 +91,7 @@ protected:
 
 	//QTabWidget *tab_;
 	QList<InfoPanelItemHandler*> items_;
-	ViewNodeInfo_ptr currentNode_;
+	VInfo_ptr currentNode_;
 };
 
 #endif

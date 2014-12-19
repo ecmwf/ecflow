@@ -213,7 +213,7 @@ void NodePathWidget::infoIndex(int idx)
 	}
 }
 
-QList<Node*> NodePathWidget::toNodeList(ViewNodeInfo_ptr info)
+QList<Node*> NodePathWidget::toNodeList(VInfo_ptr info)
 {
 	QList<Node*> lst;
 	if(info->isServer() || !info->node())
@@ -232,7 +232,7 @@ QList<Node*> NodePathWidget::toNodeList(ViewNodeInfo_ptr info)
 }
 
 //Find p1 in p2
-int NodePathWidget::findInPath(ViewNodeInfo_ptr p1,ViewNodeInfo_ptr p2,bool sameServer)
+int NodePathWidget::findInPath(VInfo_ptr p1,VInfo_ptr p2,bool sameServer)
 {
 	//The servers are the same
 	if(sameServer)
@@ -276,7 +276,7 @@ void NodePathWidget::setPath(QString)
 }
 
 
-void NodePathWidget::setPath(ViewNodeInfo_ptr info)
+void NodePathWidget::setPath(VInfo_ptr info)
 {
   	ServerHandler *server=0;
   	bool sameServer=false;
@@ -438,7 +438,7 @@ void  NodePathWidget::nodeItemSelected()
 	int idx=nodeItems_.indexOf(item);
 	if(idx != -1 && idx != infoIndex_)
 	{
-		emit selected(nodeAt(idx));
+		Q_EMIT selected(nodeAt(idx));
 	}
 }
 
@@ -452,7 +452,7 @@ void  NodePathWidget::menuItemSelected()
 	}
 }
 
-ViewNodeInfo_ptr NodePathWidget::nodeAt(int idx)
+VInfo_ptr NodePathWidget::nodeAt(int idx)
 {
 	if(info_ && info_->server())
 	{
@@ -466,21 +466,21 @@ ViewNodeInfo_ptr NodePathWidget::nodeAt(int idx)
 
 			if(node)
 			{
-				ViewNodeInfo_ptr res(new ViewNodeInfo(node,server));
+				VInfo_ptr res(VInfo::make(node,server));
 				qDebug() << "selected" << node->absNodePath().c_str();
 				return res;
 			}
 		}
 
-		ViewNodeInfo_ptr res(new ViewNodeInfo(server));
+		VInfo_ptr res(VInfo::make(server));
 		qDebug() << "selected" << server->name().c_str();
 		return res;
 	}
 
-	return ViewNodeInfo_ptr();
+	return VInfo_ptr();
 }
 
-void NodePathWidget::loadMenu(const QPoint& pos,ViewNodeInfo_ptr p)
+void NodePathWidget::loadMenu(const QPoint& pos,VInfo_ptr p)
 {
 	QList<QAction*> acLst;
 
@@ -504,8 +504,8 @@ void NodePathWidget::loadMenu(const QPoint& pos,ViewNodeInfo_ptr p)
 			if(QAction *ac=QMenu::exec(acLst,pos,acLst.front(),this))
 			{
 				int idx=ac->data().toInt();
-				ViewNodeInfo_ptr res(new ViewNodeInfo(server->suiteAt(idx).get(),server));
-				emit selected(res);
+				VInfo_ptr res(VInfo::make(server->suiteAt(idx).get(),server));
+				Q_EMIT selected(res);
 			}
 		}
 
@@ -528,13 +528,13 @@ void NodePathWidget::loadMenu(const QPoint& pos,ViewNodeInfo_ptr p)
 				int idx=ac->data().toInt();
 				//ServerHandler* server=p->server();
 				ServerHandler* server=info_->server();
-				ViewNodeInfo_ptr res(new ViewNodeInfo(nodes.at(idx).get(),server));
-				emit selected(res);
+				VInfo_ptr res(VInfo::make(nodes.at(idx).get(),server));
+				Q_EMIT selected(res);
 			}
 		}
 	}
 
-	foreach(QAction* ac,acLst)
+	Q_FOREACH(QAction* ac,acLst)
 	{
 		delete ac;
 	}

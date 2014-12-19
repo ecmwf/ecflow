@@ -54,7 +54,7 @@ void NodeModelServers::add(ServerHandler *server)
 
 void NodeModelServers::clearFilter()
 {
-	foreach(NodeModelServerItem item,items_)
+	Q_FOREACH(NodeModelServerItem item,items_)
 	{
 		item.nodeFilter_.clear();
 	}
@@ -186,7 +186,7 @@ void AbstractNodeModel::setRootNode(Node *node)
 //
 //----------------------------------------------
 
-QModelIndex AbstractNodeModel::infoToIndex(ViewNodeInfo_ptr info,int column) const
+QModelIndex AbstractNodeModel::infoToIndex(VInfo_ptr info,int column) const
 {
 	if(info)
 	{
@@ -206,30 +206,30 @@ QModelIndex AbstractNodeModel::infoToIndex(ViewNodeInfo_ptr info,int column) con
 	return QModelIndex();
 }
 
-ViewNodeInfo_ptr AbstractNodeModel::nodeInfo(const QModelIndex& index) const
+VInfo_ptr AbstractNodeModel::nodeInfo(const QModelIndex& index)
 {
 	if(!index.isValid())
 	{
-		ViewNodeInfo_ptr res(new ViewNodeInfo());
+		VInfo_ptr res;
 		return res;
 	}
 
 	ServerHandler *server=indexToServer(index);
 	if(server)
 	{
-		ViewNodeInfo_ptr res(new ViewNodeInfo(server));
+		VInfo_ptr res(VInfo::make(server));
 		return res;
 	}
 	else
 	{
 		Node* node=indexToNode(index);
-		ViewNodeInfo_ptr res(new ViewNodeInfo(node));
+		VInfo_ptr res(VInfo::make(node));
 		return res;
 	}
 }
 
 
-void AbstractNodeModel::slotNodeChanged(const Node* node, QList<ecf::Aspect::Type> types)
+void AbstractNodeModel::notifyNodeChanged(const Node* node, const std::vector<ecf::Aspect::Type>& types)
 {
 	if(node==NULL)
 		return;
@@ -256,7 +256,7 @@ void AbstractNodeModel::slotNodeChanged(const Node* node, QList<ecf::Aspect::Typ
 	//qDebug() << "index pointers " << index1.internalPointer() << index2.internalPointer();
 	qDebug() << "    --->" << QString::fromStdString(nd1->name()) << QString::fromStdString(nd2->name());
 
-	emit dataChanged(index1,index2);
+	Q_EMIT dataChanged(index1,index2);
 }
 
 

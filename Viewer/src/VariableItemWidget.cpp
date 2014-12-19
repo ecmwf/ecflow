@@ -51,7 +51,7 @@ void VariableView::slotSelectItem(const QModelIndex&)
 
 }
 
-void VariableView::reload(ViewNodeInfo_ptr info)
+void VariableView::reload(VInfo_ptr info)
 {
 	model_->setData(info);
 	expandAll();
@@ -76,7 +76,7 @@ QWidget* VariableItemWidget::realWidget()
 	return this;
 }
 
-void VariableItemWidget::reload(ViewNodeInfo_ptr info)
+void VariableItemWidget::reload(VInfo_ptr info)
 {
 	view_->reload(info);
 }

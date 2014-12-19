@@ -15,14 +15,14 @@
 
 #include "InfoPanelItem.hpp"
 #include "TextItemWidget.hpp"
-#include "ViewNodeInfo.hpp"
+#include "VInfo.hpp"
 
 class WhyItemWidget : public TextItemWidget, public InfoPanelItem
 {
 public:
 	WhyItemWidget(QWidget *parent=0);
 
-	void reload(ViewNodeInfo_ptr);
+	void reload(VInfo_ptr);
 	QWidget* realWidget();
 	void clearContents();
 

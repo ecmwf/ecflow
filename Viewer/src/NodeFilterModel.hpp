@@ -25,7 +25,7 @@ public:
 	//From QSortFilterProxyModel
 	void setSourceModel(QAbstractItemModel*);
 
-public slots:
+public Q_SLOTS:
 	void slotFilterChanged();
 
 };

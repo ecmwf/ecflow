@@ -4,7 +4,7 @@
 #include <QAbstractItemModel>
 
 #include "AbstractNodeModel.hpp"
-#include "ViewNodeInfo.hpp"
+#include "VInfo.hpp"
 
 class Node;
 class ServerFilter;

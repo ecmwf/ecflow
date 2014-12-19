@@ -8,7 +8,7 @@
                                 
                         },
                         "genvar" : {
-                        		"pattern" : "^\\s*(# edit)",                       
+                        		"pattern" : "^\\s*(# time-date-dependencies|# edit|edit)",                       
                                 "colour"  : "rgb(128,128,128)",
                         		"italic"  : "true"
                         }                     

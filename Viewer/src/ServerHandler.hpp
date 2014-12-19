@@ -10,73 +10,36 @@
 #ifndef SERVERHANDLER_HPP_
 #define SERVERHANDLER_HPP_
 
+#include <deque>
 #include <utility>
 #include <string>
 #include <vector>
+
+#include "Defs.hpp"
+#include "AbstractObserver.hpp"
+
+#include "VReply.hpp"
+#include "VTask.hpp"
+#include "VInfo.hpp"
 
 #include <QThread>
 #include <QMutex>
 #include <QTimer>
 
-#include "Defs.hpp"
-#include "AbstractObserver.hpp"
-
-#include "NodeInfoQuery.hpp"
-#include "ViewNodeInfo.hpp"
-
 class ClientInvoker;
+class ServerReply;
+
+class NodeObserver;
 class ServerHandler;
-
-// -------------------------------------------------------
-// ServerComThread - a class to handler communication with
-// an ecflow server.
-// -------------------------------------------------------
-
-class ServerComThread : public QThread, public AbstractObserver
-{
-	Q_OBJECT
-
-public:
-	enum ComType {COMMAND, NEWS, SYNC, FILE, HISTORY};
-
-	ServerComThread();
-
-	void sendCommand(ServerHandler *server, ClientInvoker *ci, ServerComThread::ComType comType);
-	void sendCommand(ServerHandler *server, ClientInvoker *ci, ServerComThread::ComType comType,NodeInfoQuery_ptr);
-	void setCommandString(const std::vector<std::string> command);
-	ComType commandType();
-	void stop();
-
-	//From AbstractObserver
-	void update(const Node*, const std::vector<ecf::Aspect::Type>&);
-	void update(const Defs*, const std::vector<ecf::Aspect::Type>&)  {};
-	void update_delete(const Node*);
-	void update_delete(const Defs*);
-
-signals:
-	void nodeChanged(const Node*, QList<ecf::Aspect::Type>);
-	void errorMessage(std::string message);
-	void queryFinished(NodeInfoQuery_ptr);
-
-protected:
-	void run();
-	void initObserver(ServerHandler* server);
-
-private:
-	ServerHandler *server_;
-	ClientInvoker *ci_;
-	std::vector<std::string> command_;
-	ComType comType_;
-	NodeInfoQuery_ptr query_;
-};
-
-
+class ServerComQueue;
+class ServerComThread;
 
 class ServerHandler : public QObject
 {
-	Q_OBJECT   // ingerits from QObject in order to gain signal/slots
+	Q_OBJECT   // inherits from QObject in order to gain signal/slots
 
 	friend class ServerDefsAccess;
+	friend class ServerComQueue;
 
 public:
 		const std::string name() const {return name_;}
@@ -100,18 +63,17 @@ public:
 		SState::State state();
 
 		void resetRefreshTimer();
-		void query(NodeInfoQuery_ptr);
-		void messages(NodeInfoQuery_ptr req);
-		void script(NodeInfoQuery_ptr req);
-		void job(NodeInfoQuery_ptr req);
-		void jobout(NodeInfoQuery_ptr req);
-	    void manual(NodeInfoQuery_ptr req);
-	    void file(NodeInfoQuery_ptr req,const std::string& errText);
 
-		const std::vector<std::string>& messages(Node* node);
-		bool readFile(Node *n,const std::string& id,
-				     std::string& fileName,std::string& txt,std::string& errTxt);
-		bool readManual(Node *n,std::string& fileName,std::string& txt,std::string& errTxt);
+		void runCommand(const std::vector<std::string>& cmd);
+		void run(VTask_ptr);
+		//void run(VTask_ptr task,VReply_ptr reply);
+		void messages(VTask_ptr req);
+		void script(VTask_ptr req);
+		void job(VTask_ptr req);
+		void jobout(VTask_ptr req);
+	    void manual(VTask_ptr req);
+	    void file(VTask_ptr req,const std::string& errText);
+	    void stats(VTask_ptr req);
 
 		static const std::vector<ServerHandler*>& servers() {return servers_;}
 		static ServerHandler* addServer(const std::string &name,const std::string &host, const std::string &port);
@@ -120,7 +82,7 @@ public:
 		static int numOfImmediateChildren(Node*);
 		static Node* immediateChildAt(Node *parent,int pos);
 		static int indexOfImmediateChild(Node *node);
-		static void command(std::vector<ViewNodeInfo_ptr>,std::string, bool resolve);
+		static void command(std::vector<VInfo_ptr>,std::string, bool resolve);
 
 		static ServerHandler* find(const std::string& name);
 		static ServerHandler* find(Node *node);
@@ -129,18 +91,15 @@ public:
 		static std::string resolveServerCommand(const std::string &name);
 		static void updateAll();
 
-		//From AbstractObserver
-		//void update(const Node*, const std::vector<ecf::Aspect::Type>&) {};
-		//void update(const Defs*, const std::vector<ecf::Aspect::Type>&);
-
-		void addNodeObserver(QObject* obs);
-		void removeNodeObserver(QObject* obs);
+		void addNodeObserver(NodeObserver* obs);
+		void removeNodeObserver(NodeObserver* obs);
 
 protected:
 		ServerHandler(const std::string& name,const std::string& host,const std::string&  port);
 		~ServerHandler();
 
 		void setCommunicatingStatus(bool c) {communicating_ = c;}
+		void clientTaskFinished(VTask_ptr task,const ServerReply& serverReply);
 
 		std::string name_;
 		std::string host_;
@@ -149,26 +108,28 @@ protected:
 		std::string longName_;
 		bool updating_;
 		bool communicating_;
+		std::vector<NodeObserver*> nodeObservers_;
 
 		static std::vector<ServerHandler*> servers_;
 		static std::map<std::string, std::string> commands_;
 
-private slots:
 
-		void commandSent();  // invoked when a command has finished being sent to the server
+private Q_SLOTS:
+
+		//void commandSent();  // invoked when a command has finished being sent to the server
 		void errorMessage(std::string message); // invoked when an error message is received
-		void queryFinished(NodeInfoQuery_ptr);  // invoked when a reply is received from from the server/thread
+		//void queryFinished(VReply_ptr);  // invoked when a reply is received from from the server/thread
 		void refreshServerInfo();
+		void slotNodeChanged(const Node* n, const std::vector<ecf::Aspect::Type>& a);
 
 
 private:
 
 		defs_ptr defs();
-		ServerComThread *comThread();
 
-		ServerComThread *comThread_;
 		QMutex           defsMutex_;
 
+		ServerComQueue* comQueue_;
 
 		std::string targetNodeNames_;      // used when building up a command in ServerHandler::command
 		std::string targetNodeFullNames_;  // used when building up a command in ServerHandler::command
@@ -178,6 +139,79 @@ private:
 
 };
 
+// --------------------------------------------------------------
+// ServerComQueue - a class provides a queueing system for
+// sending tasks to the ClientIvoker via the ServerComThread.
+// --------------------------------------------------------------
+
+class ServerComQueue : public QObject
+{
+Q_OBJECT
+
+public:
+	ServerComQueue(ServerHandler *server,ClientInvoker* client,ServerComThread* comThread);
+	~ServerComQueue();
+
+	void addTask(VTask_ptr);
+	void addNewsTask();
+	void addSyncTask();
+
+protected Q_SLOTS:
+	void slotRun();
+
+protected Q_SLOTS:
+	void slotTaskFinished();
+	void slotTaskFailed(std::string);
+
+protected:
+	ServerHandler *server_;
+	ClientInvoker* client_;
+	ServerComThread *comThread_;
+	QTimer* timer_;
+	std::deque<VTask_ptr> tasks_;
+	VTask_ptr current_;
+	bool wait_;
+};
+
+// -------------------------------------------------------
+// ServerComThread - a class to handler communication with
+// an ecflow server.
+// -------------------------------------------------------
+
+class ServerComThread : public QThread, public AbstractObserver
+{
+	Q_OBJECT
+
+public:
+	//enum ComType {NONE, COMMAND, NEWS, SYNC, FILE, HISTORY, STATS};
+
+	ServerComThread(ServerHandler *server, ClientInvoker *ci);
+
+	void task(VTask_ptr);
+	void stop();
+
+	//From AbstractObserver
+	void update(const Node*, const std::vector<ecf::Aspect::Type>&);
+	void update(const Defs*, const std::vector<ecf::Aspect::Type>&)  {};
+	void update_delete(const Node*);
+	void update_delete(const Defs*);
+
+Q_SIGNALS:
+	void nodeChanged(const Node*, const std::vector<ecf::Aspect::Type>&);
+	void failed(std::string message);
+
+protected:
+	void run();
+	void initObserver(ServerHandler* server);
+
+private:
+	ServerHandler *server_;
+	ClientInvoker *ci_;
+	VTask::Type taskType_;
+	std::vector<std::string> command_;
+	std::map<std::string,std::string> params_;
+	std::string nodePath_;
+};
 
 // -------------------------------------------------------------------------
 // ServerDefsAccess - a class to manage access to the server definition tree

@@ -29,8 +29,10 @@ public:
 	QColor colour() const;
 
 	static QString toName(Node*);
+	static QString toDefaultStateName(Node*);
 	static QColor  toColour(Node* n);
 	static VNState* toState(Node* n);
+	static VNState* toDefaultState(Node* n);
 	static std::vector<VParam*> filterItems();
 	static VNState* find(const std::string& name);
 	static void init(const std::string& parFile);

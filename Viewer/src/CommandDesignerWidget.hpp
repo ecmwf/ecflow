@@ -26,7 +26,7 @@ public:
 	QString command() {return commandLineEdit_->text();};
 
 
-public slots:
+public Q_SLOTS:
 	void insertCurrentText();
 };
 

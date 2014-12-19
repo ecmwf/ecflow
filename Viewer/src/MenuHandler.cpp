@@ -224,7 +224,7 @@ bool MenuHandler::addItemToMenu(MenuItem *item, const std::string &menuName)
 }
 
 
-QAction *MenuHandler::invokeMenu(const std::string &menuName, std::vector<ViewNodeInfo_ptr> nodes, QPoint pos, QWidget *parent)
+QAction *MenuHandler::invokeMenu(const std::string &menuName, std::vector<VInfo_ptr> nodes, QPoint pos, QWidget *parent)
 {
     QAction *selectedAction = NULL;
     Menu *menu = findMenu(menuName);
@@ -262,7 +262,7 @@ Menu::~Menu()
 }
 
 
-QMenu *Menu::generateMenu(std::vector<ViewNodeInfo_ptr> nodes, QWidget *parent)
+QMenu *Menu::generateMenu(std::vector<VInfo_ptr> nodes, QWidget *parent)
 {
     bool showIcompatibleItems = true;
     QMenu *qmenu=new QMenu(parent);	
@@ -305,7 +305,7 @@ QMenu *Menu::generateMenu(std::vector<ViewNodeInfo_ptr> nodes, QWidget *parent)
 
         bool compatible = true;
 
-        for (std::vector<ViewNodeInfo_ptr>::iterator itNodes = nodes.begin(); itNodes != nodes.end(); ++itNodes)
+        for (std::vector<VInfo_ptr>::iterator itNodes = nodes.begin(); itNodes != nodes.end(); ++itNodes)
         {
             compatible = compatible && (*itItems)->compatibleWithNode(*itNodes);
         }
@@ -425,7 +425,7 @@ void MenuItem::addValidState(std::string state)
 }
 
 
-bool MenuItem::compatibleWithNode(ViewNodeInfo_ptr nodeInfo)
+bool MenuItem::compatibleWithNode(VInfo_ptr nodeInfo)
 {
     // check each node type and return false if we don't match
 

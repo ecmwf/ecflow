@@ -45,7 +45,7 @@ public:
 	QString host() const;
 	QString port() const;
 
-public slots:
+public Q_SLOTS:
 	void accept();
 
 };
@@ -62,7 +62,7 @@ public:
 	QString port() const;
 	bool addToView() const;
 
-public slots:
+public Q_SLOTS:
 	void accept();
 };
 
@@ -77,10 +77,10 @@ public:
 	ServerListDialog(Mode,ServerFilter*,QWidget *parent=0);
 	~ServerListDialog();
 
-public slots:
+public Q_SLOTS:
 	   void accept();
 
-protected slots:
+protected Q_SLOTS:
 	 void on_actionEdit_triggered();
 	 void on_actionAdd_triggered();
 	 void on_actionDuplicate_triggered();

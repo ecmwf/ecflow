@@ -32,7 +32,7 @@ void Highlighter::addRule(QString pattern,QTextCharFormat format)
 
 void Highlighter::highlightBlock(const QString &text)
 {
-	foreach(HighlightingRule rule, rules_)
+	Q_FOREACH(HighlightingRule rule, rules_)
 	{
 		QRegExp expression(rule.pattern);
         int index = text.indexOf(expression);

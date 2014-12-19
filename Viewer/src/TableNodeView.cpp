@@ -72,7 +72,7 @@ QWidget* TableNodeView::realWidget()
 QModelIndexList TableNodeView::selectedList()
 {
   	QModelIndexList lst;
-  	foreach(QModelIndex idx,selectedIndexes())
+  	Q_FOREACH(QModelIndex idx,selectedIndexes())
 	  	if(idx.column() == 0)
 		  	lst << idx;
 	return lst;
@@ -83,22 +83,22 @@ void TableNodeView::slotSelectItem(const QModelIndex&)
 	QModelIndexList lst=selectedIndexes();
 	if(lst.count() > 0)
 	{
-		ViewNodeInfo_ptr info=model_->nodeInfo(filterModel_->mapToSource(lst.front()));
+		VInfo_ptr info=model_->nodeInfo(filterModel_->mapToSource(lst.front()));
 		if(!info->isEmpty())
 		{
-			emit selectionChanged(info);
+			Q_EMIT selectionChanged(info);
 		}
 	}
 }
 
-ViewNodeInfo_ptr TableNodeView::currentSelection()
+VInfo_ptr TableNodeView::currentSelection()
 {
 	QModelIndexList lst=selectedIndexes();
 	if(lst.count() > 0)
 	{
 		return model_->nodeInfo(filterModel_->mapToSource(lst.front()));
 	}
-	return ViewNodeInfo_ptr();
+	return VInfo_ptr();
 }
 
 void TableNodeView::slotDoubleClickItem(const QModelIndex&)
@@ -122,10 +122,10 @@ void TableNodeView::handleContextMenu(QModelIndex indexClicked,QModelIndexList i
 		{
 		  	qDebug() << "context menu" << indexClicked;
 
-	  		std::vector<ViewNodeInfo_ptr> nodeLst;
+	  		std::vector<VInfo_ptr> nodeLst;
 			for(int i=0; i < indexLst.count(); i++)
 			{
-				ViewNodeInfo_ptr info=model_->nodeInfo(filterModel_->mapToSource(indexLst[i]));
+				VInfo_ptr info=model_->nodeInfo(filterModel_->mapToSource(indexLst[i]));
 				if(!info->isEmpty())
 					nodeLst.push_back(info);
 			}
@@ -139,7 +139,7 @@ void TableNodeView::handleContextMenu(QModelIndex indexClicked,QModelIndexList i
 		}
 }
 
-void TableNodeView::slotViewCommand(std::vector<ViewNodeInfo_ptr> nodeLst,QString cmd)
+void TableNodeView::slotViewCommand(std::vector<VInfo_ptr> nodeLst,QString cmd)
 {
 
 	if(nodeLst.size() == 0)

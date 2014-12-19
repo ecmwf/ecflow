@@ -108,8 +108,6 @@ QVariant TreeNodeModel::data( const QModelIndex& index, int role ) const
 		else
 			return -1;
 	}
-
-
 	//Server
 	int id;
 	if(isServer(index))
@@ -442,6 +440,59 @@ QModelIndex TreeNodeModel::nodeToIndex(Node* node, int column) const
 	return QModelIndex();
 }
 
+//------------------------------------------------------------------
+// Create info object to index. It is used to identify nodes in
+// the tree all over in the programme outside the view.
+//------------------------------------------------------------------
+
+VInfo_ptr TreeNodeModel::nodeInfo(const QModelIndex& index)
+{
+	//For invalid index no info is created.
+	if(!index.isValid())
+	{
+		VInfo_ptr res;
+		return res;
+	}
+
+	//Check if the node is a server
+	if(ServerHandler *s=indexToServer(index))
+	{
+		VInfo_ptr res(VInfo::make(s));
+		return res;
+	}
+
+    //Check if the node is a suite (the internal pointer points to a server id pointer)
+    if(ServerHandler *s=servers_.server(index.internalPointer()))
+	{
+		Node* node=s->suiteAt(index.row()).get();
+		VInfo_ptr res(VInfo::make(node));
+		return res;
+	}
+	//Other nodes
+	else if(Node *parentNode=static_cast<Node*>(index.internalPointer()))
+	{
+		int attNum=VAttribute::totalNum(parentNode);
+		if(index.row() >= attNum)
+		{
+			Node *node=ServerHandler::immediateChildAt(parentNode,index.row()-attNum);
+			VInfo_ptr res(VInfo::make(node));
+			return res;
+		}
+		//It is an attribute
+		else
+		{
+			//VParam::Type type;
+			/*VAttribute* type;
+			VAttribute::getData(parentNode,index.row(),&type,&row);
+			VInfo_ptr res(new VInfo::make(node,type,row));
+			return res;*/
+		}
+	}
+
+    VInfo_ptr res;
+	return res;
+}
+
 //----------------------------------------
 // Filter
 //----------------------------------------
@@ -449,13 +500,13 @@ QModelIndex TreeNodeModel::nodeToIndex(Node* node, int column) const
 void TreeNodeModel::notifyConfigChanged(AttributeFilter*)
 {
 	//Notify the filter model
-	emit filterChanged();
+	Q_EMIT filterChanged();
 }
 
 void TreeNodeModel::notifyConfigChanged(IconFilter*)
 {
 	//Notify the filter model
-	emit filterChanged();
+	Q_EMIT filterChanged();
 }
 
 void TreeNodeModel::notifyConfigChanged(StateFilter*)
@@ -486,7 +537,7 @@ void TreeNodeModel::resetStateFilter(bool broadcast)
 
 	//Notify the filter model
 	if(broadcast)
-		emit filterChanged();
+		Q_EMIT filterChanged();
 }
 
 bool TreeNodeModel::filterState(node_ptr node,QSet<Node*>& filterSet)

@@ -9,9 +9,8 @@ set(viewer_srcs
     DirectoryHandler.cpp
     FilterWidget.cpp
     Highlighter.cpp
-    InfoItemWidget.cpp
     InfoPanel.cpp 
-    InfoPanelItem.cpp
+    InfoPanelItem.cpp   
     InfoProvider.cpp
     JobItemWidget.cpp
     MainWindow.cpp
@@ -20,13 +19,14 @@ set(viewer_srcs
     MenuHandler.cpp
     MessageItemWidget.cpp
     NodeFilterModel.cpp
-    NodeInfoQuery.cpp
     NodePanel.cpp
     NodePathWidget.cpp
     NodeViewBase.cpp
     NodeViewHandler.cpp
     NodeWidget.cpp
     OutputItemWidget.cpp
+    OverviewItemWidget.cpp
+    OverviewProvider.cpp
     PlainTextSearchLine.cpp
     ScriptItemWidget.cpp
     ServerHandler.cpp
@@ -45,14 +45,16 @@ set(viewer_srcs
     UserMessage.cpp
     VAttribute.cpp   
     VConfig.cpp
-    VIcon.cpp
     VFilter.cpp
-    VParam.cpp
+    VIcon.cpp
+    VInfo.cpp
     VNState.cpp
+    VParam.cpp   
+    VReply.cpp
     VSState.cpp
+    VTask.cpp
     VariableModel.cpp
     VariableItemWidget.cpp
-    ViewNodeInfo.cpp
     WhyItemWidget.cpp)
 
 

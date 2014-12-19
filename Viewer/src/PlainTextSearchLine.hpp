@@ -23,7 +23,7 @@ public:
 	~PlainTextSearchLine();
 	void setEditor(QPlainTextEdit*);
 
-public slots:
+public Q_SLOTS:
 	void slotFind(QString);
 	void slotFindNext();
 	void slotFindPrev();

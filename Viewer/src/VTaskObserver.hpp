@@ -5,25 +5,18 @@
 // In applying this licence, ECMWF does not waive the privileges and immunities
 // granted to it by virtue of its status as an intergovernmental organisation
 // nor does it submit to any jurisdiction.
-//
 //============================================================================
 
-#ifndef INFOITEMWIDGET_HPP_
-#define INFOITEMWIDGET_HPP_
+#ifndef VTaskObserver_HPP_
+#define VTaskObserver_HPP_
 
-#include "InfoPanelItem.hpp"
-#include "TextItemWidget.hpp"
-#include "ViewNodeInfo.hpp"
+#include "VTask.hpp"
 
-class InfoItemWidget : public TextItemWidget, public InfoPanelItem
+class VTaskObserver
 {
 public:
-	InfoItemWidget(QWidget *parent=0);
-
-	void reload(ViewNodeInfo_ptr);
-	QWidget* realWidget();
-	void clearContents();
+	virtual ~VTaskObserver() {};
+	virtual void taskChanged(VTask_ptr)=0;
 };
 
 #endif
-

@@ -45,8 +45,8 @@ NodeWidget::NodeWidget(QString rootNode,QWidget *parent) :
 	TreeNodeView *treeView= new TreeNodeView("",config_,this);
 	views_->add(Viewer::TreeViewMode,treeView);
 
-	connect(treeView,SIGNAL(selectionChanged(ViewNodeInfo_ptr)),
-			this,SIGNAL(selectionChanged(ViewNodeInfo_ptr)));
+	connect(treeView,SIGNAL(selectionChanged(VInfo_ptr)),
+			this,SIGNAL(selectionChanged(VInfo_ptr)));
 
 	/*connect(iconView_,SIGNAL(currentFolderChanged(Folder*)),
 		this,SLOT(slotFolderReplacedInView(Folder*)));
@@ -65,8 +65,8 @@ NodeWidget::NodeWidget(QString rootNode,QWidget *parent) :
 	TableNodeView *tableView=new TableNodeView("",config_,this);
 	views_->add(Viewer::TableViewMode,tableView);
 
-	connect(tableView,SIGNAL(selectionChanged(ViewNodeInfo_ptr)),
-			this,SIGNAL(selectionChanged(ViewNodeInfo_ptr)));
+	connect(tableView,SIGNAL(selectionChanged(VInfo_ptr)),
+			this,SIGNAL(selectionChanged(VInfo_ptr)));
 
 
 	/*connect(detailedView_,SIGNAL(currentFolderChanged(Folder*)),
@@ -117,12 +117,12 @@ QString NodeWidget::currentFolderName()
 }*/
 
 
-ViewNodeInfo_ptr NodeWidget::currentSelection()
+VInfo_ptr NodeWidget::currentSelection()
 {
 	return views_->currentBase()->currentSelection();
 }
 
-void NodeWidget::currentSelection(ViewNodeInfo_ptr n)
+void NodeWidget::currentSelection(VInfo_ptr n)
 {
 	return views_->currentBase()->currentSelection(n);
 }

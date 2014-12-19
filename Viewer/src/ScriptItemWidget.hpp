@@ -12,21 +12,19 @@
 #define SCRIPTITEMWIDGET_HPP_
 
 #include "InfoPanelItem.hpp"
-#include "NodeInfoQuery.hpp"
 #include "TextItemWidget.hpp"
-#include "ViewNodeInfo.hpp"
 
-class ScriptItemWidget : public TextItemWidget, public InfoPanelItem, public NodeInfoAccessor
+class ScriptItemWidget : public TextItemWidget, public InfoPanelItem
 {
 public:
 	ScriptItemWidget(QWidget *parent=0);
 
-	void reload(ViewNodeInfo_ptr);
+	void reload(VInfo_ptr);
 	QWidget* realWidget();
 	void clearContents();
 
-	//From NodeInfoAccessor
-	void queryFinished(NodeInfoQuery_ptr);
+	//From VInfoReplyReceiver
+	void infoReady(VReply*);
 
 private:
 	void info(Node* node,std::stringstream& f);

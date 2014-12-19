@@ -5,7 +5,7 @@
 
 #include <vector>
 
-#include "ViewNodeInfo.hpp"
+#include "VInfo.hpp"
 
 class Node;
 class ServerHandler;
@@ -26,7 +26,7 @@ public:
    	QModelIndex index (int, int, const QModelIndex& parent = QModelIndex() ) const;
    	QModelIndex parent (const QModelIndex & ) const;
 
-	void setData(ViewNodeInfo_ptr);
+	void setData(VInfo_ptr);
 
 protected:
 

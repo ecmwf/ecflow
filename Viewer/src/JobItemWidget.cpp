@@ -9,10 +9,6 @@
 
 #include "JobItemWidget.hpp"
 
-#include "Node.hpp"
-#include "ServerHandler.hpp"
-
-
 //========================================================
 //
 // JobItemWidget
@@ -28,11 +24,20 @@ QWidget* JobItemWidget::realWidget()
 	return this;
 }
 
-void JobItemWidget::reload(ViewNodeInfo_ptr nodeInfo)
+void JobItemWidget::reload(VInfo_ptr nodeInfo)
 {
 	loaded_=true;
 
-	if(nodeInfo.get() != 0 && nodeInfo->isNode())
+	if(!nodeInfo)
+	{
+		textEdit_->clear();
+	}
+	else
+	{
+		//nodeInfo->job(this);
+	}
+
+	/*if(nodeInfo.get() != 0 && nodeInfo->isNode())
 	{
 		Node* n=nodeInfo->node();
 		if(ServerHandler* s=nodeInfo->server())
@@ -44,7 +49,7 @@ void JobItemWidget::reload(ViewNodeInfo_ptr nodeInfo)
 	else
 	{
 		textEdit_->clear();
-	}
+	}*/
 }
 
 void JobItemWidget::clearContents()
@@ -54,11 +59,11 @@ void JobItemWidget::clearContents()
 }
 
 
-void JobItemWidget::queryFinished(NodeInfoQuery_ptr reply)
+void JobItemWidget::infoReady(VReply* reply)
 {
 	std::cout << "reply for job" << std::endl;
 
-	if(reply && reply->sender() == this)
+	/*if(reply && reply->sender() == this)
 	{
 		if(reply->done())
 		{
@@ -68,7 +73,7 @@ void JobItemWidget::queryFinished(NodeInfoQuery_ptr reply)
 		{
 			textEdit_->setPlainText(QString::fromStdString(reply->errorText()));
 		}
-	}
+	}*/
 }
 
 static InfoPanelItemMaker<JobItemWidget> maker1("job");

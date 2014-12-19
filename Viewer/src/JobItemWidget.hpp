@@ -12,23 +12,22 @@
 #define JOBITEMWIDGET_HPP_
 
 #include "InfoPanelItem.hpp"
-#include "NodeInfoQuery.hpp"
 #include "TextItemWidget.hpp"
-#include "ViewNodeInfo.hpp"
+#include "VInfo.hpp"
 
 #include "ServerHandler.hpp"
 
-class JobItemWidget : public TextItemWidget, public InfoPanelItem, public NodeInfoAccessor
+class JobItemWidget : public TextItemWidget, public InfoPanelItem
 {
 public:
 	JobItemWidget(QWidget *parent=0);
 
-	void reload(ViewNodeInfo_ptr);
+	void reload(VInfo_ptr);
 	QWidget* realWidget();
 	void clearContents();
 
-	//From NodeInfoAccessor
-	void queryFinished(NodeInfoQuery_ptr);
+	//From VInfoPresenter
+	void infoReady(VReply*);
 
 private:
 	void info(Node* node,std::stringstream& f);

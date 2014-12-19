@@ -75,7 +75,7 @@ public:
 	void reject();
 
 
-//public slots:
+//public Q_SLOTS:
 //	void insertCurrentText();
 
 

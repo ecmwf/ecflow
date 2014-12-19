@@ -14,7 +14,7 @@
 
 #include <QWidget>
 
-#include "ViewNodeInfo.hpp"
+#include "VInfo.hpp"
 
 #include <boost/property_tree/ptree.hpp>
 
@@ -34,22 +34,22 @@ public:
 	Viewer::ViewMode viewMode();
 	void setViewMode(Viewer::ViewMode);
 	VConfig* config() const {return config_;}
-	ViewNodeInfo_ptr currentSelection();
-	void currentSelection(ViewNodeInfo_ptr n);
+	VInfo_ptr currentSelection();
+	void currentSelection(VInfo_ptr n);
 
 	void save(boost::property_tree::ptree &pt);
 	void load(const boost::property_tree::ptree &pt);
 
-public slots:
+public Q_SLOTS:
 	//void slotFolderReplacedInView(Folder*);
 	//void slotFolderChanged(Folder*);
 
-signals:
+Q_SIGNALS:
 	//void iconCommandRequested(QString,IconObjectH);
 	//void desktopCommandRequested(QString,QPoint);
 	//void itemInfoChanged(QString);
 	//void pathChanged();
-    void selectionChanged(ViewNodeInfo_ptr);
+    void selectionChanged(VInfo_ptr);
 
 private:
 	//QModelIndex changeFolder(const QModelIndex&);

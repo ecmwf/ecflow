@@ -9,9 +9,6 @@
 
 #include "ScriptItemWidget.hpp"
 
-#include "Node.hpp"
-#include "ServerHandler.hpp"
-
 //========================================================
 //
 // ScriptItemWidget
@@ -27,11 +24,11 @@ QWidget* ScriptItemWidget::realWidget()
 	return this;
 }
 
-void ScriptItemWidget::reload(ViewNodeInfo_ptr nodeInfo)
+void ScriptItemWidget::reload(VInfo_ptr nodeInfo)
 {
 	loaded_=true;
 	
-	if(nodeInfo.get() != 0 && nodeInfo->isNode())
+	/*if(nodeInfo.get() != 0 && nodeInfo->isNode())
 	{
 		Node* n=nodeInfo->node();
 
@@ -48,7 +45,7 @@ void ScriptItemWidget::reload(ViewNodeInfo_ptr nodeInfo)
 	else
 	{
 		textEdit_->clear();
-	}
+	}*/
 }
 
 void ScriptItemWidget::clearContents()
@@ -57,9 +54,9 @@ void ScriptItemWidget::clearContents()
 	textEdit_->clear();
 }
 
-void ScriptItemWidget::queryFinished(NodeInfoQuery_ptr reply)
+void ScriptItemWidget::infoReady(VReply* reply)
 {
-	if(reply && reply->sender() == this)
+	/*if(reply && reply->sender() == this)
 	{
 		if(reply->done())
 		{
@@ -69,7 +66,7 @@ void ScriptItemWidget::queryFinished(NodeInfoQuery_ptr reply)
 		{
 			textEdit_->setPlainText(QString::fromStdString(reply->errorText()));
 		}
-	}
+	}*/
 }
 
 

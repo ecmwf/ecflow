@@ -44,7 +44,7 @@ public:
     static void reload();
     static void saveSession(SessionItem*);
 
-protected slots:
+protected Q_SLOTS:
 	void on_actionNewTab_triggered();
 	void on_actionNewWindow_triggered();
 	void on_actionClose_triggered();

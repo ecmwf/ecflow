@@ -9,8 +9,7 @@
 
 #include "MessageItemWidget.hpp"
 
-#include "Node.hpp"
-#include "ServerHandler.hpp"
+
 
 //========================================================
 //
@@ -27,10 +26,10 @@ QWidget* MessageItemWidget::realWidget()
 	return this;
 }
 
-void MessageItemWidget::reload(ViewNodeInfo_ptr nodeInfo)
+void MessageItemWidget::reload(VInfo_ptr nodeInfo)
 {
 	loaded_=true;
-	if(nodeInfo.get() != 0 && nodeInfo->isNode())
+	/*if(nodeInfo.get() != 0 && nodeInfo->isNode())
 	{
 		Node* n=nodeInfo->node();
 		if(ServerHandler* s=nodeInfo->server())
@@ -42,7 +41,7 @@ void MessageItemWidget::reload(ViewNodeInfo_ptr nodeInfo)
 	else
 	{
 		textEdit_->clear();
-	}
+	}*/
 
 }
 
@@ -52,9 +51,9 @@ void MessageItemWidget::clearContents()
 	textEdit_->clear();
 }
 
-void MessageItemWidget::queryFinished(NodeInfoQuery_ptr reply)
+void MessageItemWidget::infoReady(VReply* reply)
 {
-	if(reply && reply->sender() == this)
+	/*if(reply && reply->sender() == this)
 	{
 		if(reply->done())
 		{
@@ -64,7 +63,7 @@ void MessageItemWidget::queryFinished(NodeInfoQuery_ptr reply)
 		{
 			textEdit_->setPlainText(QString::fromStdString(reply->errorText()));
 		}
-	}
+	}*/
 }
 
 static InfoPanelItemMaker<MessageItemWidget> maker1("message");

@@ -122,6 +122,8 @@ message( STATUS "Boost_LIBRARIES     : ${Boost_LIBRARIES}" )
 
 if(ENABLE_VIEWER)
     find_package(Qt4 REQUIRED QtCore QtGui )
+    #We need this because there is a problem in using Qt and boost together.
+    ADD_DEFINITIONS(-DQT_NO_KEYWORDS)
 endif()
 
 

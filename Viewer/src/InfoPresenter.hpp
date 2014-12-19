@@ -7,28 +7,27 @@
 // nor does it submit to any jurisdiction.
 //============================================================================
 
+#ifndef INFOPRESENTER_HPP_
+#define INFOPRESENTER_HPP_
 
-#ifndef CUSTOMCOMMANDDIALOG_HPP_
-#define CUSTOMCOMMANDDIALOG_HPP_
+#include "VInfo.hpp"
 
-#include <QDialog>
+class InfoProvider;
+class VReply;
 
-#include "ui_CustomCommandDialog.h"
-
-class CustomCommandDialog : public QDialog, private Ui::CustomCommandDialog
+class InfoPresenter
 {
-	Q_OBJECT
-
 public:
-	CustomCommandDialog(QWidget *parent = 0);
-	~CustomCommandDialog() {};
+	InfoPresenter() : infoProvider_(0) {};
+	virtual ~InfoPresenter() {};
+	virtual void infoReady(VReply*) {};
+	virtual void infoFailed(VReply*) {};
+	virtual void infoProgress(VReply*) {};
+	VInfo_ptr info() const {return info_;}
 
-    QString command() {return commandDesigner_->command();};
-
-
-
-//public Q_SLOTS:
-//	void insertCurrentText();
+protected:
+	VInfo_ptr info_;
+	InfoProvider* infoProvider_;
 };
 
 #endif

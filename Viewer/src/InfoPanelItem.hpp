@@ -10,25 +10,43 @@
 #ifndef INFOPANELITEM_HPP_
 #define INFOPANELITEM_HPP_
 
-#include "ViewNodeInfo.hpp"
+#include "NodeObserver.hpp"
+#include "VInfo.hpp"
+#include "InfoPresenter.hpp"
+#include "VTask.hpp"
+#include "VTaskObserver.hpp"
+
 #include <string>
 
 class QWidget;
+class InfoProvider;
 
-class InfoPanelItem
+class InfoPanelItem : public VTaskObserver, public InfoPresenter, public NodeObserver
 {
 public:
 	InfoPanelItem() : loaded_(false) {};
 	virtual ~InfoPanelItem(){};
 
 	bool loaded() const {return loaded_;}
-	virtual void reload(ViewNodeInfo_ptr node)=0;
+	virtual void reload(VInfo_ptr info)=0;
 	virtual QWidget* realWidget()=0;
 	virtual void clearContents()=0;
 
-protected:
-	bool loaded_;
+	//From VTaskObserver
+	void taskChanged(VTask_ptr) {};
 
+	//From VInfoPresenter
+	void infoReady(VReply*) {};
+	void infoFailed(VReply*) {};
+	void infoProgress(VReply*) {};
+
+	//From NodeObserver
+	void notifyNodeChanged(const Node*, const std::vector<ecf::Aspect::Type>&) {};
+
+protected:
+	void adjust(VInfo_ptr);
+
+	bool loaded_;
 };
 
 

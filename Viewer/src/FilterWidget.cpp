@@ -57,7 +57,7 @@ void AbstractFilterMenu::addAction(QString name,QString id)
 void AbstractFilterMenu::slotChanged(bool)
 {
 	std::set<std::string> items;
-	foreach(QAction* ac,menu_->actions())
+	Q_FOREACH(QAction* ac,menu_->actions())
 	{
 		if(!ac->isSeparator())
 		{
@@ -73,7 +73,7 @@ void AbstractFilterMenu::slotChanged(bool)
 void AbstractFilterMenu::reload(VFilter* filter)
 {
 	filter_=filter;
-	foreach(QAction* ac,menu_->actions())
+	Q_FOREACH(QAction* ac,menu_->actions())
 	{
 		if(!ac->isSeparator())
 		{
@@ -143,7 +143,7 @@ ServerFilterMenu::~ServerFilterMenu()
 
 void ServerFilterMenu::clear()
 {
-	foreach(QAction* ac,acLst_)
+	Q_FOREACH(QAction* ac,acLst_)
 	{
 		delete ac;
 	}
@@ -221,7 +221,7 @@ void ServerFilterMenu::reload(ServerFilter* filter)
 	if(!filter)
 		return;
 
-	foreach(QAction* ac,acLst_)
+	Q_FOREACH(QAction* ac,acLst_)
 	{
 		if(!ac->isSeparator())
 		{
@@ -267,7 +267,7 @@ FilterWidget::FilterWidget(QWidget *parent) :
 	QList<DState::State> lst;
 	lst << DState::UNKNOWN << DState::SUSPENDED << DState::COMPLETE << DState::QUEUED << DState::SUBMITTED << DState::ACTIVE << DState::ABORTED;
 
-	foreach(DState::State st,lst)
+	Q_FOREACH(DState::State st,lst)
 	{
 		QToolButton* tb=createButton(ViewConfig::Instance()->stateShortName(st),ViewConfig::Instance()->stateName(st),ViewConfig::Instance()->stateColour(st));
 

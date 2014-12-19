@@ -7,28 +7,29 @@
 // nor does it submit to any jurisdiction.
 //============================================================================
 
+#ifndef OVERVIEWPROVIDER_HPP_
+#define OVERVIEWPROVIDER_HPP_
 
-#ifndef CUSTOMCOMMANDDIALOG_HPP_
-#define CUSTOMCOMMANDDIALOG_HPP_
+#include "InfoProvider.hpp"
 
-#include <QDialog>
+class InfoPanelItem;
 
-#include "ui_CustomCommandDialog.h"
-
-class CustomCommandDialog : public QDialog, private Ui::CustomCommandDialog
+class OverviewProvider : public InfoProvider
 {
-	Q_OBJECT
-
 public:
-	CustomCommandDialog(QWidget *parent = 0);
-	~CustomCommandDialog() {};
+	OverviewProvider(InfoPresenter* owner);
 
-    QString command() {return commandDesigner_->command();};
+	//From VInfoVisitor
+	void visit(VInfoServer*);
+	void visit(VInfoNode*);
+	void visit(VInfoAttribute*);
 
+	//From VTaskObserver
+	void taskChanged(VTask_ptr);
 
+protected:
+	void serverInfo(VInfoServer*,std::stringstream& f);
 
-//public Q_SLOTS:
-//	void insertCurrentText();
 };
 
 #endif

@@ -90,11 +90,11 @@ MainWindow::MainWindow(QStringList idLst,QWidget *parent) : QMainWindow(parent)
     connect(nodePanel_,SIGNAL(currentWidgetChanged()),
     		this,SLOT(slotCurrentChangedInPanel()));
 
-    connect(nodePanel_,SIGNAL(selectionChanged(ViewNodeInfo_ptr)),
-       		pathWidget,SLOT(setPath(ViewNodeInfo_ptr)));
+    connect(nodePanel_,SIGNAL(selectionChanged(VInfo_ptr)),
+       		pathWidget,SLOT(setPath(VInfo_ptr)));
 
-    connect(pathWidget,SIGNAL(selected(ViewNodeInfo_ptr)),
-       		nodePanel_,SLOT(slotSelection(ViewNodeInfo_ptr)));
+    connect(pathWidget,SIGNAL(selected(VInfo_ptr)),
+       		nodePanel_,SLOT(slotSelection(VInfo_ptr)));
 
 }
 
@@ -120,11 +120,11 @@ InfoPanel* MainWindow::addInfoPanel()
 
     addDockWidget(Qt::BottomDockWidgetArea, dw);
 
-    connect(nodePanel_,SIGNAL(selectionChanged(ViewNodeInfo_ptr)),
-    		dw->infoPanel(),SLOT(slotReload(ViewNodeInfo_ptr)));
+    connect(nodePanel_,SIGNAL(selectionChanged(VInfo_ptr)),
+    		dw->infoPanel(),SLOT(slotReload(VInfo_ptr)));
 
-    connect(dw->infoPanel(),SIGNAL(selectionChanged(ViewNodeInfo_ptr)),
-    		nodePanel_,SLOT(slotSelection(ViewNodeInfo_ptr)));
+    connect(dw->infoPanel(),SIGNAL(selectionChanged(VInfo_ptr)),
+    		nodePanel_,SLOT(slotSelection(VInfo_ptr)));
 
     return dw->infoPanel();
 }
@@ -198,7 +198,7 @@ void MainWindow::on_actionShowInInfoPanel_triggered()
 	QList<QDockWidget*> dockLst=findChildren<QDockWidget*>();
 
 	//If there is a visible non-detached panel it already shows the needed info
-	foreach(QDockWidget* dw,dockLst)
+	Q_FOREACH(QDockWidget* dw,dockLst)
 	{
 		if(dw->isVisible())
 			if(InfoPanel* ip=static_cast<InfoPanel*>(dw->widget()))
@@ -210,7 +210,7 @@ void MainWindow::on_actionShowInInfoPanel_triggered()
 	}
 
 
-	foreach(QDockWidget* dw,dockLst)
+	Q_FOREACH(QDockWidget* dw,dockLst)
 	{
 		if(!dw->isVisible())
 		{
@@ -390,7 +390,7 @@ void MainWindow::openWindow(QStringList idLst,QWidget *fromW)
 
 void MainWindow::showWindows()
 {
-  	foreach(MainWindow *win,windows_)
+  	Q_FOREACH(MainWindow *win,windows_)
 		win->show();
 }
 
@@ -555,7 +555,7 @@ void MainWindow::save(MainWindow *topWin)
 
 void MainWindow::reload()
 {
-	foreach(MainWindow *w,windows_)
+	Q_FOREACH(MainWindow *w,windows_)
 	{
 		w->reloadContents();
 	}
@@ -570,7 +570,7 @@ void MainWindow::saveSession(SessionItem* s)
 
 MainWindow* MainWindow::findWindow(QWidget *childW)
 {
-  	foreach(MainWindow *w,windows_)
+  	Q_FOREACH(MainWindow *w,windows_)
 	{
 	  	if(static_cast<QWidget*>(w) == childW->window())
 			return w;

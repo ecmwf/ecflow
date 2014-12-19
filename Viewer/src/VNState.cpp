@@ -76,6 +76,9 @@ std::vector<VParam*> VNState::filterItems()
 
 VNState* VNState::toState(Node *n)
 {
+	if(!n)
+		return NULL;
+
 	//VParam::Type type;
 	if(n->isSuspended())
 			return items_["suspended"];
@@ -85,6 +88,18 @@ VNState* VNState::toState(Node *n)
 		if(it != stateMap_.end())
 			return it->second;
 	}
+
+	return NULL;
+}
+
+VNState* VNState::toDefaultState(Node *n)
+{
+	if(!n)
+		return NULL;
+
+	std::map<NState::State,VNState*>::const_iterator it=stateMap_.find(DState::convert(n->defStatus()));
+	if(it != stateMap_.end())
+				return it->second;
 
 	return NULL;
 }
@@ -113,6 +128,13 @@ QString VNState::toName(Node *n)
 	VNState *obj=VNState::toState(n);
 	return (obj)?(obj->qName()):QString();
 }
+
+QString VNState::toDefaultStateName(Node *n)
+{
+	VNState *obj=VNState::toDefaultState(n);
+	return (obj)?(obj->qName()):QString();
+}
+
 
 void VNState::init(const std::string& parFile)
 {

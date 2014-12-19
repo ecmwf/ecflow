@@ -16,7 +16,7 @@
 
 #include <vector>
 
-#include "ViewNodeInfo.hpp"
+#include "VInfo.hpp"
 
 class QWidget;
 class Node;
@@ -28,9 +28,9 @@ Q_OBJECT
 public:
 		ActionHandler(QWidget*);
 
-		void contextMenu(std::vector<ViewNodeInfo_ptr>,QPoint);
-signals:
-	    void viewCommand(std::vector<ViewNodeInfo_ptr>,QString);
+		void contextMenu(std::vector<VInfo_ptr>,QPoint);
+Q_SIGNALS:
+	    void viewCommand(std::vector<VInfo_ptr>,QString);
 
 protected:
 		QWidget *parent_;

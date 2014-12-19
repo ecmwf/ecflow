@@ -184,7 +184,7 @@ void TabWidget::currentTabChanged(int index)
 {
 	if (stacked_->count() == bar_->count()) {
 		stacked_->setCurrentIndex(index);
-		emit currentIndexChanged(index);
+		Q_EMIT currentIndexChanged(index);
 
 		checkTabStatus();
 	}

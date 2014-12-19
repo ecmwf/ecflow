@@ -14,7 +14,6 @@
 #include <QVBoxLayout>
 
 #include "JobItemWidget.hpp"
-#include "InfoItemWidget.hpp"
 #include "MessageItemWidget.hpp"
 #include "ScriptItemWidget.hpp"
 #include "VariableItemWidget.hpp"
@@ -110,13 +109,13 @@ InfoPanel::InfoPanel(QWidget* parent) :
 				    this,SLOT(slotCurrentWidgetChanged(int)));
 
 
-	connect(bcWidget_,SIGNAL(selected(ViewNodeInfo_ptr)),
-			this,SIGNAL(selectionChanged(ViewNodeInfo_ptr)));
+	connect(bcWidget_,SIGNAL(selected(VInfo_ptr)),
+			this,SIGNAL(selectionChanged(VInfo_ptr)));
 
 
 	//Check which roles are allowed
 	QStringList ids;
-	ids << "info" << "variable" << "message" << "script" << "job" << "output" << "why" << "manual" << "trigger";
+	ids << "overview" << "variable" << "message" << "script" << "job" << "output" << "why" << "manual" << "trigger";
 
 	//Set tabs according to the current set of roles
 	adjust(ids);
@@ -134,7 +133,7 @@ InfoPanel::InfoPanel(QWidget* parent) :
 
 InfoPanel::~InfoPanel()
 {
-	foreach(InfoPanelItemHandler *d,items_)
+	Q_FOREACH(InfoPanelItemHandler *d,items_)
 			delete d;
 }
 
@@ -142,16 +141,16 @@ void InfoPanel::clear()
 {
 	currentNode_.reset();
 	tab_->clear();
-	bcWidget_->setPath(ViewNodeInfo_ptr());
+	bcWidget_->setPath(VInfo_ptr());
 }
 
-void InfoPanel::reset(ViewNodeInfo_ptr node)
+void InfoPanel::reset(VInfo_ptr node)
 {
 		currentNode_=node;
 
 		//Check which roles are allowed
 		QStringList ids;
-		ids << "info" << "variable" << "message" << "script" << "job" << "output" << "why" << "manual" << "trigger";
+		ids << "overview" << "variable" << "message" << "script" << "job" << "output" << "why" << "manual" << "trigger";
 
 		//Set tabs according to the current set of roles
 		adjust(ids);
@@ -176,7 +175,7 @@ void InfoPanel::reset(ViewNodeInfo_ptr node)
 		bcWidget_->setPath(node);
 }
 
-void InfoPanel::slotReload(ViewNodeInfo_ptr node)
+void InfoPanel::slotReload(VInfo_ptr node)
 {
 	//When the panel is disabled (i.e. the dock parent is hidden) or the mode is detached it ccanoot receive
 	//the reload request
@@ -205,7 +204,7 @@ void InfoPanel::adjust(QStringList ids)
 		QWidget *current=tab_->currentWidget();
 
 		tab_->clear();
-		foreach(QString id, ids)
+		Q_FOREACH(QString id, ids)
 		{
 			if(InfoPanelItemHandler* d=findHandler(id))
 			{
@@ -235,7 +234,7 @@ InfoPanelItem* InfoPanel::findItem(QWidget* w)
 	if(!w)
 		return 0;
 
-	foreach(InfoPanelItemHandler *d,items_)
+	Q_FOREACH(InfoPanelItemHandler *d,items_)
 	{
 			if(d->widget() == w)
 					return d->item();
@@ -249,7 +248,7 @@ InfoPanelItemHandler* InfoPanel::findHandler(QWidget* w)
 	if(!w)
 		return 0;
 
-	foreach(InfoPanelItemHandler *d,items_)
+	Q_FOREACH(InfoPanelItemHandler *d,items_)
 	{
 			if(d->widget() == w)
 					return d;
@@ -260,7 +259,7 @@ InfoPanelItemHandler* InfoPanel::findHandler(QWidget* w)
 
 InfoPanelItemHandler* InfoPanel::findHandler(QString id)
 {
-	foreach(InfoPanelItemHandler *d,items_)
+	Q_FOREACH(InfoPanelItemHandler *d,items_)
 	{
 			if(d->id() == id)
 					return d;

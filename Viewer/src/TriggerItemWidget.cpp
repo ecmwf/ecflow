@@ -26,7 +26,7 @@ QWidget* TriggerItemWidget::realWidget()
 	return this;
 }
 
-void TriggerItemWidget::reload(ViewNodeInfo_ptr nodeInfo)
+void TriggerItemWidget::reload(VInfo_ptr nodeInfo)
 {
 	loaded_=true;
 

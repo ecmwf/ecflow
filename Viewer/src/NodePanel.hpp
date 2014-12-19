@@ -12,7 +12,7 @@
 
 #include "Viewer.hpp"
 #include "TabWidget.hpp"
-#include "ViewNodeInfo.hpp"
+#include "VInfo.hpp"
 
 #include <boost/property_tree/ptree.hpp>
 
@@ -36,24 +36,24 @@ public:
 	void addWidget();
 	void resetWidgets(QStringList);
 	void reload();
-	ViewNodeInfo_ptr currentSelection();
+	VInfo_ptr currentSelection();
 
 	void save(boost::property_tree::ptree &pt);
 	void load(const boost::property_tree::ptree &pt);
 
-public slots:
+public Q_SLOTS:
 	void slotCurrentWidgetChanged(int);
-	void slotSelection(ViewNodeInfo_ptr);
+	void slotSelection(VInfo_ptr);
 
 	//void slotIconCommand(QString,IconObjectH);
 	//void slotDesktopCommand(QString,QPoint);
 	void slotNewTab();
 	//void slotNewWindow(bool);
 
-signals:
+Q_SIGNALS:
 	void itemInfoChanged(QString);
 	void currentWidgetChanged();
-	void selectionChanged(ViewNodeInfo_ptr);
+	void selectionChanged(VInfo_ptr);
 
 protected:
 	NodeWidget* addWidget(QString);

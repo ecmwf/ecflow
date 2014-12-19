@@ -14,7 +14,7 @@
 #include <QTreeView>
 
 #include "InfoPanelItem.hpp"
-#include "ViewNodeInfo.hpp"
+#include "VInfo.hpp"
 
 class VariableModel;
 
@@ -25,9 +25,9 @@ Q_OBJECT
 public:
 		VariableView(QWidget *parent=0);
 		//void reload();
-		void reload(ViewNodeInfo_ptr);
+		void reload(VInfo_ptr);
 
-public slots:
+public Q_SLOTS:
 	void slotSelectItem(const QModelIndex&);
 
 protected:
@@ -40,7 +40,7 @@ class VariableItemWidget : public QWidget, public InfoPanelItem
 public:
 	VariableItemWidget(QWidget *parent=0);
 
-	void reload(ViewNodeInfo_ptr);
+	void reload(VInfo_ptr);
 	QWidget* realWidget();
 	void clearContents();
 

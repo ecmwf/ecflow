@@ -7,7 +7,7 @@
 #include "Node.hpp"
 #include "VAttribute.hpp"
 #include "Viewer.hpp"
-#include "ViewNodeInfo.hpp"
+#include "VInfo.hpp"
 
 class ServerFilter;
 class ServerHandler;
@@ -29,12 +29,14 @@ public:
    	QModelIndex index (int, int, const QModelIndex& parent = QModelIndex() ) const;
    	QModelIndex parent (const QModelIndex & ) const;
 
+   	VInfo_ptr nodeInfo(const QModelIndex& index);
+
    	//VFilterGroup Observer
     void notifyConfigChanged(StateFilter*);
     void notifyConfigChanged(AttributeFilter*);
     void notifyConfigChanged(IconFilter*);
 
-signals:
+Q_SIGNALS:
 	void filterChanged();
 
 private:

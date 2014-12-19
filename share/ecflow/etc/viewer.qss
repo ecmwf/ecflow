@@ -24,7 +24,7 @@ QWidget [breadcrumbs="1"]{
 	background: rgb(245,245,245);
 	border-radius: 4px; 
     border-color: rgb(140,140,140);
-        /*border-top-width: 4px;*/ 
+    /*border-top-width: 4px;*/ 
 }
 
 QToolButton#pathNameTb {
@@ -34,7 +34,7 @@ QToolButton#pathNameTb {
  }
 
 QToolButton#pathNameTb:hover{
-	background:  qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #deebf6, stop: 1 #bed8ee);
+	    background:  qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #deebf6, stop: 1 #bed8ee);
         border: 1px solid rgb(160, 160, 160);
      	border-radius: 0px;
         padding: 0px; 		
@@ -47,14 +47,14 @@ QToolButton#pathIconTb{
 
 QToolButton#pathIconTb:hover{
         background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 rgb(253,253,253), stop: 1 rgb(227,227,227));
-	border: 1px solid rgb(180, 180, 180);
+	    border: 1px solid rgb(180, 180, 180);
      	border-radius: 0px;
         padding: 0px; 		
  }
 
 QToolButton#pathMenuTb{
         image: url(":/viewer/directory_arrow.svg");
-	border: none;
+	    border: none;
         padding: 0px; 		
 }
 
@@ -77,3 +77,10 @@ QFrame[breadcrumbs="1"] {
 	border: 0; 
 }
 
+/*----------------------------
+  Info panel text
+------------------------------*/
+
+QPlainTextEdit {
+    background: rgb(232,232,232);
+}

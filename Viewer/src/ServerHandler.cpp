@@ -7,8 +7,6 @@
 // nor does it submit to any jurisdiction.
 //============================================================================
 
-#include <QMessageBox>
-
 #include "ServerHandler.hpp"
 
 #include "Defs.hpp"
@@ -18,15 +16,25 @@
 #include "ArgvCreator.hpp"
 #include "Str.hpp"
 #include "MainWindow.hpp"
+#include "NodeObserver.hpp"
 #include "UserMessage.hpp"
+#include "VTaskObserver.hpp"
+
+#include <QMessageBox>
 
 #include <iostream>
+#include <algorithm>
 
 #include <boost/algorithm/string/predicate.hpp>
 
 std::vector<ServerHandler*> ServerHandler::servers_;
 std::map<std::string, std::string> ServerHandler::commands_;
 
+//================================================
+//
+// ServerHandler
+//
+//================================================
 
 ServerHandler::ServerHandler(const std::string& name,const std::string& host, const std::string& port) :
    name_(name),
@@ -35,7 +43,7 @@ ServerHandler::ServerHandler(const std::string& name,const std::string& host, co
    client_(0),
    updating_(false),
    communicating_(false),
-   comThread_(0),
+   comQueue_(0),
    refreshIntervalInSeconds_(10)
 {
 	longName_=host_ + "@" + port_;
@@ -68,7 +76,6 @@ ServerHandler::ServerHandler(const std::string& name,const std::string& host, co
 	if (servers_.empty())
 	{
 		qRegisterMetaType<std::string>("std::string");
-		qRegisterMetaType<NodeInfoQuery_ptr>("NodeInfoQuery_ptr");
 		qRegisterMetaType<QList<ecf::Aspect::Type> >("QList<ecf::Aspect::Type>");
 	}
 
@@ -86,11 +93,22 @@ ServerHandler::ServerHandler(const std::string& name,const std::string& host, co
 	// XXX we may not always want to create a thread here because of resource
 	// issues; another strategy would be to create threads on demand, only
 	// when server communication is about to start
-	comThread_ = new ServerComThread();
-	connect(comThread(), SIGNAL(finished()), this, SLOT(commandSent()));
-	connect(comThread(), SIGNAL(errorMessage(std::string)), this, SLOT(errorMessage(std::string)));
-	connect(comThread(), SIGNAL(queryFinished(NodeInfoQuery_ptr)), this, SLOT(queryFinished(NodeInfoQuery_ptr)));
 
+	//We create a ServerComThread here. It is not a member, because we will
+	//pass on its ownership to ServerComQueue.
+	ServerComThread* comThread=new ServerComThread(this,client_);
+
+	//The ServerComThread is observing the actual server and its nodes. When there is a change it
+	//emits a signal a notifies the ServerHandler about it.
+	connect(comThread,SIGNAL(nodeChanged(const Node*, const std::vector<ecf::Aspect::Type>&)),
+				 this,SLOT(slotNodeChanged(const Node*, const std::vector<ecf::Aspect::Type>&)));
+
+	//connect(comThread(), SIGNAL(errorMessage(std::string)),
+	//		this, SLOT(errorMessage(std::string)));
+
+	//Create queue for the tasks to be sent to the client (via the ServerComThread)! It will
+	//take ownership of the ServerComThread.
+	comQueue_=new ServerComQueue (this,client_,comThread);
 
 	// set the timer for refreshing the server info
    	connect(&refreshTimer_, SIGNAL(timeout()), this, SLOT(refreshServerInfo()));
@@ -102,8 +120,8 @@ ServerHandler::~ServerHandler()
 	if(client_)
 		delete client_;
 
-	if (comThread_)
-		delete comThread_;
+	if (comQueue_)
+			delete comQueue_;
 }
 
 
@@ -135,8 +153,10 @@ void ServerHandler::removeServer(ServerHandler* server)
 		std::vector<ServerHandler*>::iterator it=std::find(servers_.begin(), servers_.end(),server);
 		if(it != servers_.end())
 		{
+			ServerHandler *s=*it;
 			servers_.erase(it);
-			delete (*it);
+			delete s;
+
 		}
 }
 
@@ -322,24 +342,10 @@ int ServerHandler::indexOfImmediateChild(Node *node)
 	return -1;
 }
 
-const std::vector<std::string>& ServerHandler::messages(Node* node)
-{
-	try
-	{
-	      client_->edit_history(node->absNodePath());
-	}
-	catch ( std::exception &e )
-	{
-	      //gui::message("host::messages: %s", e.what());
-	}
-	return client_->server_reply().get_string_vec();
-}
-
 void ServerHandler::errorMessage(std::string message)
 {
 	UserMessage::message(UserMessage::ERROR, true, message);
 }
-
 
 //-------------------------------------------------------------
 //
@@ -348,298 +354,130 @@ void ServerHandler::errorMessage(std::string message)
 //
 //--------------------------------------------------------------
 
+//The preferred way to run client commands is to add a command task to the queue. The
+//queue will manage the task and send it to the ClientInvoker. When the task
+//finishes the ServerHandler::clientTaskFinished method is called where the
+//result/reply can be processed.
 
-void ServerHandler::queryFinished(NodeInfoQuery_ptr reply)
+void ServerHandler::runCommand(const std::vector<std::string>& cmd)
 {
-	reply->sender()->queryFinished(reply);
+	VTask_ptr task=VTask::create(VTask::CommandTask);
+	task->command(cmd);
+	comQueue_->addTask(task);
 }
 
-void ServerHandler::query(NodeInfoQuery_ptr req)
+//The preferred way to run client tasks is to define and add a task to the queue. The
+//queue will manage the task and will send it to the ClientInvoker. When the task
+//finishes the ServerHandler::clientTaskFinished method is called where the
+//result/reply can be processed.
+
+void ServerHandler::run(VTask_ptr task)
 {
-	switch(req->type())
+	switch(task->type())
 	{
-	case NodeInfoQuery::SCRIPT:
-		return script(req);
+	case VTask::ScriptTask:
+		return script(task);
 		break;
-	case NodeInfoQuery::JOB:
-		return job(req);
+	case VTask::JobTask:
+		return job(task);
 		break;
-	case NodeInfoQuery::JOBOUT:
-		return jobout(req);
+	case VTask::OutputTask:
+		return jobout(task);
 		break;
-	case NodeInfoQuery::MANUAL:
-		return manual(req);
+	case VTask::ManualTask:
+		return manual(task);
 		break;
-	case NodeInfoQuery::MESSAGE:
-		return messages(req);
+	case VTask::MessageTask:
+		return messages(task);
+		break;
+	case VTask::StatsTask:
+		return stats(task);
+		break;
+	default:
 		break;
 	}
+
+	//If we are here we have an unhandled task type.
+	//task->cancel("ServerHandler cannot handle this type of task!");
+	task->status(VTask::REJECTED);
 }
 
-void ServerHandler::messages(NodeInfoQuery_ptr req)
+void ServerHandler::messages(VTask_ptr task)
 {
-	comThread()->sendCommand(this,client_,ServerComThread::HISTORY,req);
+	comQueue_->addTask(task);
 }
 
-void ServerHandler::script(NodeInfoQuery_ptr req)
-{
-	static std::string errText="no script!\n"
-		      		"check ECF_FILES or ECF_HOME directories, for read access\n"
-		      		"check for file presence and read access below files directory\n"
-		      		"or this may be a 'dummy' task.\n";
-
-	req->ecfVar("ECF_SCRIPT");
-	req->ciPar("script");
-
-	file(req,errText);
-}
-
-void ServerHandler::job(NodeInfoQuery_ptr req)
+void ServerHandler::script(VTask_ptr req)
 {
 	static std::string errText="no script!\n"
 		      		"check ECF_FILES or ECF_HOME directories, for read access\n"
 		      		"check for file presence and read access below files directory\n"
 		      		"or this may be a 'dummy' task.\n";
 
-	req->ecfVar("ECF_JOB");
-	req->ciPar("job");
+	req->param("ecfVar","ECF_SCRIPT");
+	req->param("clientPar","script");
 
 	file(req,errText);
 }
 
-void ServerHandler::jobout(NodeInfoQuery_ptr req)
+void ServerHandler::job(VTask_ptr req)
+{
+	static std::string errText="no script!\n"
+		      		"check ECF_FILES or ECF_HOME directories, for read access\n"
+		      		"check for file presence and read access below files directory\n"
+		      		"or this may be a 'dummy' task.\n";
+
+	req->param("ecfVar","ECF_JOB");
+	req->param("clientPar","job");
+
+	file(req,errText);
+}
+
+void ServerHandler::jobout(VTask_ptr req)
 {
 	static std::string errText="no job output...";
 
-	req->ecfVar("ECF_JOBOUT");
-	req->ciPar("jobout");
+	req->param("ecfVar","ECF_JOBOUT");
+	req->param("clientPar","jobout");
 
 	file(req,errText);
 }
 
-void ServerHandler::manual(NodeInfoQuery_ptr req)
+void ServerHandler::manual(VTask_ptr req)
 {
 	std::string errText="no manual ...";
-	req->ciPar("manual");
+	req->param("clientPar","manual");
 
 	file(req,errText);
 }
 
-void ServerHandler::file(NodeInfoQuery_ptr req,const std::string& errText)
+void ServerHandler::file(VTask_ptr task,const std::string& errText)
 {
 	std::string fileName;
-	if(!req->ecfVar().empty())
+	if(!task->param("ecfVar").empty())
 	{
-		req->node()->findGenVariableValue(req->ecfVar(),fileName);
-		req->fileName(fileName);
+		task->node()->findGenVariableValue(task->param("ecfVar"),fileName);
 	}
 
 	//We try to read the file from the local disk
-	if(req->readFile())
+	if(task->reply()->textFromFile(fileName))
 	{
-	  		req->done(true);
-			emit queryFinished(req);
+			task->status(VTask::FINISHED);
 			return;
 	}
 	//If not on local disc we try the client invoker
 	else
 	{
 		// set up and run the thread for server communication
-		comThread()->sendCommand(this,client_,ServerComThread::FILE,req);
+		comQueue_->addTask(task);
 	}
 }
 
-bool ServerHandler::readFile(Node *n,const std::string& id,
-		     std::string& fileName,std::string& txt,std::string& errTxt)
+void ServerHandler::stats(VTask_ptr task)
 {
-  	if(id == "ECF_SCRIPT")
-  	{
-    	errTxt = "no script!\n"
-      		"check ECF_FILES or ECF_HOME directories, for read access\n"
-      		"check for file presence and read access below files directory\n"
-      		"or this may be a 'dummy' task.\n";
-
-    	n->findGenVariableValue(id,fileName);
-  	}
-  	else if(id == "ECF_JOB")
-  	{
-  		n->findGenVariableValue(id,fileName);
-
-  		if(std::string::npos != fileName.find(".job0"))
-  	    {
-  				errTxt = "job0: no job to be generated yet!";
-  				return false;
-  	    }
-
-  		errTxt = "no script!\n"
-  		      		"check ECF_FILES or ECF_HOME directories, for read access\n"
-  		      		"check for file presence and read access below files directory\n"
-  		      		"or this may be a 'dummy' task.\n";
-
-  	}
-  	else if(boost::algorithm::ends_with(id, ".0"))
-  	{
-    	errTxt = "no output to be expected when TRYNO is 0!\n";
-    	return false;
-  	}
-
-  	//Try to read file
-  	if(ecf::File::open(fileName,txt))
-  	{
-  		return true;
-  	}
-  	else
-  	{
-  		//gui::message("%s: fetching %s", this->host(), name.c_str());
-  	    try
-  	    {
-  	    	if (id == "ECF_SCRIPT")
-  	      			client_->file(n->absNodePath(), "script");
-  	    	else if (id == "ECF_JOB")
-  	      	{
-  	      		client_->file(n->absNodePath(), "job");
-  	      		//boost::lexical_cast<std::string>(jobfile_length_));
-  	      	}
-  	      	else if (id == "ECF_JOBOUT")
-  	      	{
-  	      		std::cout << "jobout " << n->absNodePath() << std::endl;
-  	      		client_->file(n->absNodePath(), "jobout");
-  	      	}
-  	      	else
-  	      	{
-  	      		client_->file(n->absNodePath(), "jobout");
-  	      	}
-
-  	      	// Do *not* assign 'client_.server_reply().get_string()' to a separate string, since
-  	      	// in the case of job output the string could be several megabytes.
-  	      	txt=client_->server_reply().get_string();
-
-  	      	std::cout << "txt " << txt << std::endl;
-
-  	      	//return tmp_file(client_->server_reply().get_string());
-  	   }
-  	   catch(std::exception &e )
-  	   {
-  	         //gui::message("host::file-error: %s", e.what());
-  		   	return false;
-  	   }
-  	}
-
-  	return true;
-
-  	/*
-  	else if(id == "ECF_JOB")
-  	{
-    	n->findGenVariableValue(name,fileName);
-
-    	if (read && (access(fileName.c_str(), R_OK) == 0))
-    		//return tmp_file(fileName.c_str(), false);
-    		return true;
-
-    	if(std::string::npos != fileName.find(".job0"))
-    	{
-			error = "job0: no job to be generated yet!";
-			return false;
-      	}
-      	else
-	  	{
-	  			error = "no script!\n"
-      			"check ECF_HOME,directory for read/write access\n"
-      			"check for file presence and read access below\n"
-      			"The file may have been deleted\n"
-      			"or this may be a 'dummy' task.\n";
-      	}
-  	}
-  	else if(boost::algorithm::ends_with(name, ".0"))
-  	{
-    	error = "no output to be expected when TRYNO is 0!\n";
-    	return false;
-  	}
-  	else //if (name != ecf_node::none())
-  	{
-  		// Try logserver
-      	loghost_ = n.variable("ECF_LOGHOST", true);
-      	logport_ = n.variable("ECF_LOGPORT");
-      	if (loghost_ == ecf_node::none())
-      	{
-         	loghost_ = n.variable("LOGHOST", true);
-         	logport_ = n.variable("LOGPORT");
-    	}
-
-   		std::string::size_type pos = loghost_.find(n.variable("ECF_MICRO"));
-      	if (std::string::npos == pos && loghost_ != ecf_node::none())
-      	{
-         	logsvr the_log_server(loghost_, logport_);
-         	if (the_log_server.ok())
-         	{
-            	tmp_file tmp = the_log_server.getfile(name); // allow more than latest output
-            	if (access(tmp.c_str(), R_OK) == 0) return tmp;
-         	}
-      	}
-
-
-  /* if (read && (access(name.c_str(), R_OK) == 0))
-   {
-		return tmp_file(name.c_str(), false);
-   }
-   else
-   {
-      	//gui::message("%s: fetching %s", this->name(), name.c_str());
-      	try
-      	{
-      		if (name == "ECF_SCRIPT")
-      			client_->file(n->absNodePath(), "script");
-      		else if (name == "ECF_JOB")
-      		{
-      			client_->file(n->absNodePath(), "job");
-      			//boost::lexical_cast<std::string>(jobfile_length_));
-      		}
-      		else if (name == "ECF_JOBOUT")
-      		{
-      			client_->file(n->absNodePath(), "jobout");
-      		}
-      		else
-      		{
-      			client_->file(n->absNodePath(), "jobout");
-      		}
-
-      		// Do *not* assign 'client_.server_reply().get_string()' to a separate string, since
-      		// in the case of job output the string could be several megabytes.
-      		return tmp_file(client_->server_reply().get_string());
-      	}
-      	catch ( std::exception &e )
-      	{
-         //gui::message("host::file-error: %s", e.what());
-      	}
-   }
-
-   //return tmp_file(error);*/
+	//comThread()->sendCommand(this,client_,ServerComThread::STATS,req,reply);
+	comQueue_->addTask(task);
 }
-
-bool ServerHandler::readManual(Node *n,std::string& fileName,std::string& txt,std::string& errTxt)
-{
-   //gui::message("%s: fetching manual", name());
-	try
-	{
-		client_->file(n->absNodePath(), "manual");
-		txt=client_->server_reply().get_string();
-		if(txt.empty())
-		{
-			errTxt = "no manual...";
-			return false;
-		}
-		return true;
-	}
-	catch ( std::exception &e )
-	{
-		//gui::message("host::manual-error: %s", e.what());
-	}
-
-	errTxt = "no manual...";
-	return false;
-}
-
-
 
 void ServerHandler::updateAll()
 {
@@ -650,11 +488,15 @@ void ServerHandler::updateAll()
 	}
 }
 
-
 // see view/host.cc / ehost::update() for full code
 int ServerHandler::update()
 {
+	int err = 0; // do we need this?
 
+	//We add and update task to the queue.
+	comQueue_->addNewsTask();
+
+	/*
 	// do not try to update if already updating
 
 	if (updating_)
@@ -669,7 +511,7 @@ int ServerHandler::update()
 	comThread()->sendCommand(this, client_, ServerComThread::NEWS);
 
 	int err = 0; // do we need this?
-
+*/
 
 /*
 	// do not try to update if already updating
@@ -768,23 +610,18 @@ int ServerHandler::update()
       XECFDEBUG std::cerr << "# host::news-error: " << e.what() << "\n";
    }*/
 
-   setUpdatingStatus(false);
+   /*setUpdatingStatus(false);*/
    return err;
 }
 
+//This slot is called by the timer regularly to get news from the server.
 void ServerHandler::refreshServerInfo()
 {
 	UserMessage::message(UserMessage::DBG, false, std::string("auto refreshing server info for ") + name());
 	update();
 }
 
-
-ServerComThread *ServerHandler::comThread()
-{
-	return comThread_;
-}
-
-void ServerHandler::command(std::vector<ViewNodeInfo_ptr> info, std::string cmd, bool resolve)
+void ServerHandler::command(std::vector<VInfo_ptr> info, std::string cmd, bool resolve)
 {
 	std::string realCommand;
 
@@ -853,9 +690,7 @@ void ServerHandler::command(std::vector<ViewNodeInfo_ptr> info, std::string cmd,
 			ecf::Str::split(realCommand, strs, delimiters);
 
 			// set up and run the thread for server communication
-			serverHandler->comThread()->setCommandString(strs);
-			serverHandler->comThread()->sendCommand(serverHandler, serverHandler->client_, ServerComThread::COMMAND);
-
+			serverHandler->runCommand(strs);
 
 			serverHandler->targetNodeNames_.clear();      // reset the target node names for next time
 			serverHandler->targetNodeFullNames_.clear();  // reset the target node names for next time
@@ -868,6 +703,30 @@ void ServerHandler::command(std::vector<ViewNodeInfo_ptr> info, std::string cmd,
 	}
 }
 
+void ServerHandler::addServerCommand(const std::string &name, const std::string command)
+{
+	commands_[name] = command;
+}
+
+std::string ServerHandler::resolveServerCommand(const std::string &name)
+{
+	std::string realCommand;
+
+	// is this command registered?
+	std::map<std::string,std::string>::iterator it = commands_.find(name);
+
+	if (it != commands_.end())
+	{
+		realCommand = it->second;
+	}
+	else
+	{
+		realCommand = "";
+		UserMessage::message(UserMessage::WARN, true, std::string("Command: ") + name + " is not registered" );
+	}
+
+	return realCommand;
+}
 ServerHandler* ServerHandler::find(const std::string& name)
 {
 	for(std::vector<ServerHandler*>::const_iterator it=servers_.begin(); it != servers_.end();it++)
@@ -897,96 +756,118 @@ ServerHandler* ServerHandler::find(Node *node)
 	return NULL;
 }
 
+//---------------------------------------------------------------------------
+// Manages node changes and node observers. Node observers are notified when
+// any of the nodes changes.
+//---------------------------------------------------------------------------
 
-void ServerHandler::addNodeObserver(QObject* obs)
+//This slot is called when a node changes.
+void ServerHandler::slotNodeChanged(const Node* n, const std::vector<ecf::Aspect::Type>& a)
 {
-		connect(comThread_,SIGNAL(nodeChanged(const Node*, QList<ecf::Aspect::Type>)),
-				obs,SLOT(slotNodeChanged(const Node*, QList<ecf::Aspect::Type>)));
-
+	for(std::vector<NodeObserver*>::const_iterator it=nodeObservers_.begin(); it != nodeObservers_.end(); it++)
+		(*it)->notifyNodeChanged(n,a);
 }
 
-void ServerHandler::removeNodeObserver(QObject* obs)
+void ServerHandler::addNodeObserver(NodeObserver *obs)
 {
-		disconnect(comThread_,SIGNAL(nodeChanged(const Node*, QList<ecf::Aspect::Type>)),
-				obs,SLOT(slotNodeChanged(const Node*, QList<ecf::Aspect::Type>)));
-}
-
-
-// called by ChangeMgrSingleton when the definition is about to be updated
-/*void ServerHandler::update(const Defs*, const std::vector<ecf::Aspect::Type>&)
-{
-}*/
-
-
-
-void ServerHandler::addServerCommand(const std::string &name, const std::string command)
-{
-	commands_[name] = command;
-}
-
-
-std::string ServerHandler::resolveServerCommand(const std::string &name)
-{
-	std::string realCommand;
-
-	// is this command registered?
-	std::map<std::string,std::string>::iterator it = commands_.find(name);
-
-	if (it != commands_.end())
+	std::vector<NodeObserver*>::iterator it=std::find(nodeObservers_.begin(),nodeObservers_.end(),obs);
+	if(it != nodeObservers_.end())
 	{
-		realCommand = it->second;
+		nodeObservers_.push_back(obs);
 	}
-	else
-	{
-		realCommand = "";
-		UserMessage::message(UserMessage::WARN, true, std::string("Command: ") + name + " is not registered" );
-	}
-
-	return realCommand;
 }
 
+void ServerHandler::removeNodeObserver(NodeObserver *obs)
+{
+	std::vector<NodeObserver*>::iterator it=std::find(nodeObservers_.begin(),nodeObservers_.end(),obs);
+	if(it != nodeObservers_.end())
+	{
+		nodeObservers_.erase(it);
+	}
+}
 
+//-------------------------------------------------------------------
+// This slot is called when the comThread finished the given task!!
+//-------------------------------------------------------------------
 
+void ServerHandler::clientTaskFinished(VTask_ptr task,const ServerReply& serverReply)
+{
+	UserMessage::message(UserMessage::DBG, false, std::string("ServerHandler::commandSent"));
 
-	/*client_=new ClientInvoker(server, port);
-    client_->allow_new_client_old_server(1);
+	//See which type of task finished. What we do now will depend on that.
+	switch(task->type())
+	{
+		case VTask::CommandTask:
+		{
+			// a command was sent - we should now check whether there have been
+			// any updates on the server (there should have been, because we
+			// just did something!)
 
-    std::string server_version;
-    client_->server_version();
-    server_version = client_->server_reply().get_string();
-    std::cout << "ecflow server version: " << server_version << "\n";
+			UserMessage::message(UserMessage::DBG, false, std::string("Send command to server"));
+			comQueue_->addNewsTask();
+			break;
+		}
+		case VTask::NewsTask:
+		{
+			// we've just asked the server if anything has changed - has it?
 
-    client_->sync_local();*/
-    //defs_ptr defs = client_.defs();
+			switch (serverReply.get_news())
+			{
+				case ServerReply::NO_NEWS:
+				{
+					// no news, nothing to do
+					UserMessage::message(UserMessage::DBG, false, std::string("No news from server"));
+					break;
+				}
 
-    //const std::vector<suite_ptr> &suites = defs->suiteVec();
+				case ServerReply::NEWS:
+				{
+					// yes, something's changed - synchronise with the server
 
+					UserMessage::message(UserMessage::DBG, false, std::string("News from server - send sync command"));
+					comQueue_->addSyncTask(); //comThread()->sendCommand(this, client_, ServerComThread::SYNC);
+					break;
+				}
 
-//const std::vector<suite_ptr> suites
+				default:
+				{
+					break;
+				}
+			}
+			break;
+		}
+
+		case VTask::ScriptTask:
+		{
+			task->reply()->text(serverReply.get_string());
+			task->status(VTask::FINISHED);
+			break;
+		}
+		case VTask::MessageTask:
+		{
+			task->reply()->text(serverReply.get_string());
+			task->status(VTask::FINISHED);
+			break;
+		}
+		case VTask::StatsTask:
+		{
+			std::stringstream ss;
+			serverReply.stats().show(ss);
+			task->reply()->text(ss.str());
+			task->status(VTask::FINISHED);
+			break;
+		}
+
+		default:
+			break;
+
+	}
+
+}
+
 
 /*
-	size_t numSuites = suites.size();
-    std::cout << "Num suites: " << numSuites << std::endl;
-	for (size_t s = 0; s < numSuites; s++)
-    {
-        QString suiteName(suites[s]->name().c_str());
-        QTreeWidgetItem *suiteItem = new QTreeWidgetItem;
-        suiteItem->setText(s, suiteName);
-        treeWidget_->insertTopLevelItem(s, suiteItem);
-        suiteItem->setExpanded(true);
-
-        const std::vector<node_ptr> &nodes = suites[s]->nodeVec();
-        for (size_t n = 0; n < nodes.size(); n++)
-        {
-            printNode(nodes[n], 2, suiteItem);
-        }
-    }
- */
-
-
-
-void ServerHandler::commandSent()
-{
+void ServerHandler::commandSent(){
 	UserMessage::message(UserMessage::DBG, false, std::string("ServerHandler::commandSent"));
 
 	// which type of command was sent? What we do now will depend on that.
@@ -1053,25 +934,166 @@ void ServerHandler::commandSent()
 	}
 
 }
+*/
 
 
-// ------------------------------------------------------------
-//                         ServerComThread
-// ------------------------------------------------------------
+//===============================================================================
+//
+//                         ServerComQueue
+//
+//===============================================================================
+
+// This class manages the tasks to be sent to the ServerComThread, which controls
+// the communication with the ClientInvoker. The ClientInvoker is hidden from the
+// ServerHandler. The ServerHandler needs to define a task and send it to
+// ServerComQueue then it will pass it on to the ClientInvoker. When the task is finished
+// ServerComQueue notifies the ServerHandler about it.
+
+ServerComQueue::ServerComQueue(ServerHandler *server,ClientInvoker *client, ServerComThread *comThread) :
+		QObject(server),
+		server_(server),
+		client_(client),
+		comThread_(comThread),
+		wait_(false)
+{
+	timer_=new QTimer(this);
+	timer_->setInterval(2000);
+
+	connect(timer_,SIGNAL(timeout()),
+			this,SLOT(slotRun()));
+
+	//When the ServerComThread finishes its task it emits a signal that
+	//is connected to the queue.
+	connect(comThread_, SIGNAL(finished()),
+			this, SLOT(slotTaskFinished()));
+
+	//When there is an error in the ServerComThread task emits the
+	//failed() signal that is connected to the queue.
+	connect(comThread_, SIGNAL(failed(std::string)),
+			this, SLOT(slotTaskFailed(std::string)));
+
+}
+
+ServerComQueue::~ServerComQueue()
+{
+	if(comThread_)
+		delete comThread_;
+}
+
+void ServerComQueue::addTask(VTask_ptr task)
+{
+	tasks_.push_back(task);
+	if(!timer_->isActive())
+	{
+		timer_->start(0);
+	}
+}
+
+void ServerComQueue::addNewsTask()
+{
+	VTask_ptr task=VTask::create(VTask::NewsTask);
+	tasks_.push_back(task);
+	if(!timer_->isActive())
+	{
+		timer_->start(0);
+	}
+}
+
+void ServerComQueue::addSyncTask()
+{
+	VTask_ptr task=VTask::create(VTask::SyncTask);
+	tasks_.push_back(task);
+	if(!timer_->isActive())
+	{
+		timer_->start(0);
+	}
+}
+
+void ServerComQueue::slotRun()
+{
+	UserMessage::message(UserMessage::DBG, false, std::string("  ServerComQueue::run"));
+	UserMessage::message(UserMessage::DBG, false, std::string("     --> number of tasks: " + boost::lexical_cast<std::string>(tasks_.size()) ));
+	for(std::deque<VTask_ptr>::const_iterator it=tasks_.begin(); it != tasks_.end(); it++)
+	{
+		UserMessage::message(UserMessage::DBG, false,"        -task: " + (*it)->typeString());
+	}
+
+	if(tasks_.empty())
+	{
+		UserMessage::message(UserMessage::DBG, false, std::string("     --> stop timer"));
+		timer_->stop();
+		return;
+	}
+
+	if(current_)
+	{
+		UserMessage::message(UserMessage::DBG, false, std::string("     --> processing reply from previous task"));
+		return;
+	}
+
+	if(comThread_->isRunning())
+	{
+		UserMessage::message(UserMessage::DBG, false, std::string("     --> thread is active"));
+		return;
+	}
+
+	current_=tasks_.front();
+	tasks_.pop_front();
+
+	UserMessage::message(UserMessage::DBG, false,"     --> run task: " +  current_->typeString());
+
+	//Send it to the thread
+	comThread_->task(current_);
+}
+
+//This slot is called when ComThread finishes its task. At this point the
+//thread is not running so it is safe to access the ClientInvoker!
+void ServerComQueue::slotTaskFinished()
+{
+	//If the current task is empty there must have been an error that was
+	//handled by the sloTaskFailed slot.
+	if(!current_)
+		return;
+
+	//We notify the server that the task has finished and the results can be accessed.
+	server_->clientTaskFinished(current_,client_->server_reply());
+
+	//We do not need the current task any longer.
+	current_.reset();
+}
+
+//This slot is called the task failed in the ComThread. Right after this signal is emitted
+//the thread will finish and and emits the finished() signal that is connected
+//to the slotTaskFinished slot.
+void ServerComQueue::slotTaskFailed(std::string msg)
+{
+	current_->reply()->errorText(msg);
+	current_->status(VTask::ABORTED);
+
+	//We do not need the current task any longer.
+	current_.reset();
+}
 
 
-ServerComThread::ServerComThread() :
-		server_(0),
-		ci_(0)
+//==============================================================
+//
+//   ServerComThread
+//
+//==============================================================
+
+ServerComThread::ServerComThread(ServerHandler *server, ClientInvoker *ci) :
+		server_(server),
+		ci_(ci),
+		taskType_(VTask::NoTask)
 {
 }
 
-void ServerComThread::setCommandString(const std::vector<std::string> command)
+/*void ServerComThread::setCommandString(const std::vector<std::string> command)
 {
 	command_ = command;
-}
+}*/
 
-void ServerComThread::sendCommand(ServerHandler *server, ClientInvoker *ci, ServerComThread::ComType comType)
+/*void ServerComThread::sendCommand(ServerHandler *server, ClientInvoker *ci, ServerComThread::ComType comType)
 {
 	// do not execute thread if already running
 
@@ -1092,8 +1114,7 @@ void ServerComThread::sendCommand(ServerHandler *server, ClientInvoker *ci, Serv
 	}
 }
 
-void ServerComThread::sendCommand(ServerHandler *server, ClientInvoker *ci, ServerComThread::ComType comType,
-									NodeInfoQuery_ptr query)
+void ServerComThread::sendCommand(ServerComThread::ComType comType,VTask_ptr query,VReply_ptr reply)
 {
 	// do not execute thread if already running
 
@@ -1111,21 +1132,123 @@ void ServerComThread::sendCommand(ServerHandler *server, ClientInvoker *ci, Serv
 		ci_      = ci;
 		comType_ = comType;
 		query_=query;
+		reply_=reply;
 
 		start();  // start the thread execution
 	}
 }
+*/
 
-
-
-ServerComThread::ComType ServerComThread::commandType()
+void ServerComThread::task(VTask_ptr task)
 {
-	return comType_;
+	// do not execute thread if already running
+
+	if (isRunning())
+	{
+		UserMessage::message(UserMessage::ERROR, true, std::string("ServerComThread::sendCommand - thread already running, will not execute command"));
+	}
+	else
+	{
+		//if(!server_ && server)
+		//	initObserver(server);
+
+		//We set the parameters needed to run the task. These members are not protected by
+		//a mutex, because apart from this task() function only run() can access them!!
+		command_=task->command();
+		params_=task->params();
+		nodePath_.clear();
+		if(task->node())
+		{
+			nodePath_=task->node()->absNodePath();
+		}
+
+		//Start the thread execution
+		start();
+	}
 }
 
 void ServerComThread::run()
 {
+	//Can we use it? We are in the thread!!!
+	UserMessage::message(UserMessage::DBG, false, std::string("  ServerComThread::run start"));
 
+	try
+ 	{
+		switch (taskType_)
+		{
+			case VTask::CommandTask:
+			{
+				// call the client invoker with the saved command
+				UserMessage::message(UserMessage::DBG, false, std::string("    COMMAND"));
+				ArgvCreator argvCreator(command_);
+				ci_->invoke(argvCreator.argc(), argvCreator.argv());
+				break;
+			}
+
+			case VTask::NewsTask:
+			{
+				UserMessage::message(UserMessage::DBG, false, std::string("    NEWS"));
+				ci_->news_local(); // call the server
+				break;
+			}
+
+			case VTask::SyncTask:
+			{
+				ServerDefsAccess defsAccess(server_);
+				UserMessage::message(UserMessage::DBG, false, std::string("    SYNC"));
+				ci_->sync_local();
+				break;
+			}
+
+			case VTask::JobTask:
+			case VTask::ManualTask:
+			case VTask::ScriptTask:
+			{
+				UserMessage::message(UserMessage::DBG, false, std::string("    FILE"));
+				ci_->file(nodePath_,params_["clientPar"]);
+				break;
+			}
+
+			case VTask::MessageTask:
+			{
+				UserMessage::message(UserMessage::DBG, false, std::string("    HISTORY"));
+				ci_->edit_history(nodePath_);
+				break;
+			}
+
+			case VTask::StatsTask:
+			{
+				UserMessage::message(UserMessage::DBG, false, std::string("    STATS"));
+				ci_->stats();
+				break;
+			}
+
+			default:
+			{
+
+			}
+		}
+	}
+
+	catch(std::exception& e)
+	{
+		// note that we need to emit a signal rather than directly call a message function
+		// because we can't call Qt widgets from a worker thread
+
+		std::string errorString = e.what();
+		Q_EMIT failed(errorString);
+
+		//This will stop the thread.
+		return;
+	}
+
+	//Can we use it? We are in the thread!!!
+	UserMessage::message(UserMessage::DBG, false, std::string("  ServerComThread::run finished"));
+}
+
+/*
+void ServerComThread::run()
+{
 	UserMessage::message(UserMessage::DBG, false, std::string("  ServerComThread::run start"));
 
 	try
@@ -1146,6 +1269,7 @@ void ServerComThread::run()
 			{
 				UserMessage::message(UserMessage::DBG, false, std::string("    NEWS"));
 				ci_->news_local(); // call the server
+				//reply_->text(ci_->server_reply().get_news());
 				break;
 			}
 
@@ -1160,9 +1284,9 @@ void ServerComThread::run()
 			case FILE:
 			{
 				UserMessage::message(UserMessage::DBG, false, std::string("    FILE"));
-				ci_->file(query_->node()->absNodePath(),query_->ciPar());
-				query_->text(ci_->server_reply().get_string());
-				query_->done(true);
+				ci_->file(query_->node()->absNodePath(),query_->param("clientPar"));
+				reply_->text(ci_->server_reply().get_string());
+				//reply_->done(true);
 				break;
 			}
 
@@ -1170,8 +1294,20 @@ void ServerComThread::run()
 			{
 				UserMessage::message(UserMessage::DBG, false, std::string("    HISTORY"));
 				ci_->edit_history(query_->node()->absNodePath());
-				query_->text(ci_->server_reply().get_string_vec());
-				query_->done(true);
+				reply_->text(ci_->server_reply().get_string_vec());
+				//reply_->done(true);
+				break;
+			}
+
+			case STATS:
+			{
+				UserMessage::message(UserMessage::DBG, false, std::string("    STATS"));
+
+				std::stringstream ss;
+				ci_->stats();
+				ci_->server_reply().stats().show(ss);
+				reply_->text(ss.str());
+				reply_->status(VReply::TaskDone);
 				break;
 			}
 
@@ -1190,15 +1326,18 @@ void ServerComThread::run()
 		emit errorMessage(message);
 	}
 
-	if(comType_ == FILE || comType_ == HISTORY)
-	{
-		emit queryFinished(query_);
-		query_.reset();
-	}
 
+	UserMessage::message(UserMessage::DBG, false, std::string("  ServerComThread::run inished"));
+	emit taskFinished(reply_);
 
-	UserMessage::message(UserMessage::DBG, false, std::string("  ServerComThread::run finished"));
+	//We do not need to held these
+	task_.reset();
+	reply_.reset();
 }
+*/
+
+//This is a headache!!!!!!!!!!
+
 
 void ServerComThread::initObserver(ServerHandler* server)
 {
@@ -1225,13 +1364,15 @@ void ServerComThread::update(const Node* node, const std::vector<ecf::Aspect::Ty
 	if(node==NULL)
 		return;
 
-	QList<ecf::Aspect::Type> v;
-	for(std::vector<ecf::Aspect::Type>::const_iterator it=types.begin(); it != types.end(); it++)
-			v << *it;
+	//QList<ecf::Aspect::Type> v;
+	//for(std::vector<ecf::Aspect::Type>::const_iterator it=types.begin(); it != types.end(); it++)
+	//		v << *it;
+
+
 
 	//UserMessage::message(UserMessage::DBG, false, std::string("Thread update: ") + node->name());
 
-	emit nodeChanged(node,v);
+	Q_EMIT nodeChanged(node,types);
 }
 
 void ServerComThread::update_delete(const Node* nc)

@@ -8,249 +8,31 @@
 //============================================================================
 
 #include "InfoProvider.hpp"
+#include "VReply.hpp"
 
-#include "Node.hpp"
-#include "Suite.hpp"
-#include "VNState.hpp"
-
-#include "boost/date_time/posix_time/posix_time.hpp"
-
-static std::string suiteStr("suite");
-static std::string familyStr("family");
-static std::string taskStr("task");
-static std::string defaultStr("node");
-
-const std::string&  InfoProvider::nodeType(Node* node)
+InfoProvider::InfoProvider(InfoPresenter* owner) : owner_(owner)
 {
-	if(node->isSuite())
-		return suiteStr;
-	else if(node->isFamily())
-		return familyStr;
-	else if(node->isTask())
-			return taskStr;
-
-	return defaultStr;
+	reply_=new VReply();
 }
 
-void InfoProvider::info(Node* node,std::stringstream& f)
+InfoProvider::~InfoProvider()
 {
-	if(!node) return;
+	delete reply_;
+	if(task_)
+		task_->status(VTask::CANCELLED);
+}
 
-	static const std::string inc = "  ";
+void InfoProvider::info(VInfo_ptr info)
+{
+	//We keep it alive
+	info_=info;
 
-	using namespace boost::posix_time;
-	using namespace boost::gregorian;
-
-	std::string typeName=nodeType(node);
-	std::string nodeName=node->name();
-	std::string statusName(VNState::toName(node).toStdString());
-
-	//Header
-	f << "name    : " << nodeName << "\n";
-	f << "type    : " << typeName << "\n";
-	f << "status   : " << statusName << "\n";
-
-	boost::posix_time::ptime state_change_time = node->state_change_time();
-    if(!state_change_time.is_special())
-    {
-    	f << "at      : " << boost::posix_time::to_simple_string(state_change_time) << "\n";
+	if(task_)
+	{
+		task_->status(VTask::CANCELLED);
+		task_.reset();
 	}
 
-    f << "----------\n";
-
-    //Type, name
-	f << typeName << " " << node->name() << "\n";
-
-	//Clock information for suites
-    if(node->isSuite())
-    {
-    	Suite* suite = dynamic_cast<Suite*>(node);
-    	// f << "clock    : ";
-    	if (suite->clockAttr()) {
-    		suite->clockAttr().get()->print(f); // f << "\n";
-    	}
-     }
-
-    //Default status
-    //if(st  != DState::QUEUED && st != DState::UNKNOWN)
-    //	f << inc << "defstatus " << DState::toString(st) << "\n";
-
-    //Zombies attribute
-    const std::vector<ZombieAttr> & vect = node->zombies();
-    for (std::vector<ZombieAttr>::const_iterator it = vect.begin(); it != vect.end(); ++it)
-    		f << inc << it->toString() << "\n";
-
-    //Autocancel
-    if(node->hasAutoCancel() && node->get_autocancel())
-          f << inc << node->get_autocancel()->toString() << "\n";
-
-   // if(statusName)
-  //  {
-    	f << inc << "# " << typeName << " " << nodeName << " is " << statusName << "\n";
-   // }
-
-    if(node->hasTimeDependencies())
-    {
-	      f << inc << "# time-date-dependencies: ";
-	      if (node->isTimeFree()) f << "free\n";
-	      else f << "holding\n";
-    }
-
-    //Generated variables
-    std::vector<Variable> gvar;
-    std::vector<Variable>::const_iterator gvar_end;
-    node->gen_variables(gvar);
-    for(std::vector<Variable>::const_iterator it = gvar.begin(); it != gvar.end(); ++it)
-    {
-    	f << inc << "# edit " << (*it).name() << " '" << (*it).theValue() << "'\n";
-    }
-
-    //Variables
-    gvar = node->variables();
-    for(std::vector<Variable>::const_iterator it = gvar.begin(); it != gvar.end(); ++it)
-    {
-	      f << inc << "edit " << (*it).name() << " '" << (*it).theValue() << "'\n";
-    }
-
-    f << "end" << typeName << " # " << nodeName << "\n";
+	if(owner_ && info_)
+		info_->accept(this);
 }
-
-
-/*
-    ServerDefsAccess defsAc(server);
-    defs_ptr defs = defsAc.defs();
-
-    if(defs)
-    {
-    	const std::vector<Variable>& gvar = defs->server().user_variables();
-        for(std::vector<Variable>::const_iterator it = gvar.begin(); it != gvar.end(); ++it)
-        {
-            f << inc << "# edit " << (*it).name() << " '" << (*it).theValue() << "'\n";
-        }
-
-        const std::vector<Variable>& var = defs->server().server_variables();
-        for(std::vector<Variable>::const_iterator it = var.begin(); it != var.end(); ++it)
-        {
-        	f << inc << "edit " << (*it).name() << " '" << (*it).theValue() << "'\n";
-        }
-	}*/
-
-
-
-
-
-/*
-
-void simple_node::info(std::ostream& f)
-{
-  static const std::string inc = "  ";
-  node::info(f);
-  f << type_name() << " " << name() << "\n";
-  {
-    if (owner_) {
-
-      if (owner_->type() == NODE_SUITE) {
-	Suite* suite = dynamic_cast<Suite*>(owner_->get_node());
-	// f << "clock    : ";
-	if (suite->clockAttr()) {
-	  suite->clockAttr().get()->print(f); // f << "\n";
-	}
-      }
-
-      int defs = owner_->defstatus();
-      if (defs != STATUS_QUEUED && defs != STATUS_UNKNOWN)
-        f << inc << "defstatus " << ecf::status_name[defs] << "\n";
-
-      Node* node = owner_->get_node();
-      if (node) {
-        // if (node->repeat().toString() != "") // repeat // duplicated on suite node
-        //  f << inc << node->repeat().toString() << "\n";
-
-        // zombies attribute
-        const std::vector<ZombieAttr> & vect = node->zombies();
-        std::vector<ZombieAttr>::const_iterator it;
-        for (it = vect.begin(); it != vect.end(); ++it)
-          f << inc << it->toString() << "\n";
-
-        //autocancel
-        if (node->hasAutoCancel() && node->get_autocancel())
-          f << inc << node->get_autocancel()->toString() << "\n";
-      }
-    }
-    if(status() == STATUS_SUSPENDED)
-      f << inc << "# " << type_name() << " " << this->name() << " is " << status_name()
-        << "\n";
-    }
-  {
-    std::vector<Variable> gvar;
-    std::vector<Variable>::const_iterator it, gvar_end;
-    ecf_node* prox = __node__();
-    if (!prox) return;
-
-         Defs* defs = 0;
-         Node* ecf = 0;
-         if (dynamic_cast<ecf_concrete_node<Node>*>(prox)) {
-            ecf = dynamic_cast<ecf_concrete_node<Node>*>(prox)->get();
-         }
-         else if (dynamic_cast<ecf_concrete_node<Task>*>(prox)) {
-            ecf = dynamic_cast<ecf_concrete_node<Task>*>(prox)->get();
-         }
-         else if (dynamic_cast<ecf_concrete_node<Family>*>(prox)) {
-            ecf = dynamic_cast<ecf_concrete_node<Family>*>(prox)->get();
-         }
-         else if (dynamic_cast<ecf_concrete_node<Suite>*>(prox)) {
-            ecf = dynamic_cast<ecf_concrete_node<Suite>*>(prox)->get();
-         }
-         else if (dynamic_cast<ecf_concrete_node<Defs>*>(prox)) {
-            defs = dynamic_cast<ecf_concrete_node<Defs>*>(prox)->get();
-         }
-         if (!ecf && !defs) {
-	   return;
-         }
-
-         if (ecf ) {
-            gvar.clear();
-
-	    if (ecf->hasTimeDependencies()) {
-	      f << inc << "# time-date-dependencies: ";
-	      if (ecf->isTimeFree()) f << "free\n";
-	      else f << "holding\n";
-	    }
-            ecf->gen_variables(gvar);
-            for(it = gvar.begin(); it != gvar.end(); ++it) {
-	      f << inc << "# edit " << (*it).name() << " '" << (*it).theValue() << "'\n";
-            }
-
-            gvar = ecf->variables();
-            for(it = gvar.begin(); it != gvar.end(); ++it) {
-	      f << inc << "edit " << (*it).name() << " '" << (*it).theValue() << "'\n";
-            }
-         }
-         if (defs) {
-            const std::vector<Variable>& gvar = defs->server().user_variables();
-            for(it = gvar.begin(); it != gvar.end(); ++it) {
-	      f << inc << "# edit " << (*it).name() << " '" << (*it).theValue() << "'\n";
-            }
-            const std::vector<Variable>& var = defs->server().server_variables();
-            for(it = var.begin(); it != var.end(); ++it) {
-	      f << inc << "edit " << (*it).name() << " '" << (*it).theValue() << "'\n";
-            }
-         }}
-
-  for (node *run=kids(); run; run=run->next())
-    if (run->type() == NODE_VARIABLE) {
-
-    } else {
-      f << inc;
-      int i = run->type();
-      if (!owner_ || (i == NODE_SUITE || i == NODE_FAMILY ||
-                      i == NODE_TASK  || i == NODE_ALIAS))
-        f << run->type_name() << " ";
-      f << run->toString() << "\n";
-      // f << run->dump() << "\n";
-    }
-  f << "end" << type_name() << " # " << name() << "\n";
-}
-
-
-*/

@@ -7,14 +7,14 @@
 // nor does it submit to any jurisdiction.
 //============================================================================
 
-#include "NodeInfoQuery.hpp"
+#include "VReply.hpp"
 
 #include "File.hpp"
 
-bool NodeInfoQuery::readFile()
+bool VReply::textFromFile(const std::string& fileName)
 {
-	if(!fileName_.empty() &&
-	   ecf::File::open(fileName_,text_))
+	if(!fileName.empty() &&
+	   ecf::File::open(fileName,text_))
 	{
 		return true;
 	}
@@ -22,11 +22,27 @@ bool NodeInfoQuery::readFile()
 	return false;
 }
 
-void NodeInfoQuery::text(const std::vector<std::string>& msg)
+void VReply::text(const std::vector<std::string>& msg)
 {
 	text_.clear();
 	for(std::vector<std::string>::const_iterator it=msg.begin(); it != msg.end(); it++)
 	{
 			text_+=*it + "\n";
 	}
+}
+
+void VReply::prependText(const std::string& txt)
+{
+	text_.insert(0,txt);
+}
+
+void VReply::appendText(const std::string& txt)
+{
+	text_.append(txt);
+}
+
+void VReply::reset()
+{
+	text_.clear();
+	errorText_.clear();
 }

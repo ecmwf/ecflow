@@ -9,9 +9,6 @@
 
 #include "OutputItemWidget.hpp"
 
-#include "Node.hpp"
-#include "ServerHandler.hpp"
-
 //========================================================
 //
 // OutputItemWidget
@@ -27,10 +24,10 @@ QWidget* OutputItemWidget::realWidget()
 	return this;
 }
 
-void OutputItemWidget::reload(ViewNodeInfo_ptr nodeInfo)
+void OutputItemWidget::reload(VInfo_ptr nodeInfo)
 {
 	loaded_=true;
-	if(nodeInfo.get() != 0 && nodeInfo->isNode())
+	/*if(nodeInfo.get() != 0 && nodeInfo->isNode())
 	{
 		Node* n=nodeInfo->node();
 
@@ -43,7 +40,7 @@ void OutputItemWidget::reload(ViewNodeInfo_ptr nodeInfo)
 	else
 	{
 		textEdit_->clear();
-	}
+	}*/
 }
 
 void OutputItemWidget::clearContents()
@@ -52,9 +49,9 @@ void OutputItemWidget::clearContents()
 	textEdit_->clear();
 }
 
-void OutputItemWidget::queryFinished(NodeInfoQuery_ptr reply)
+void OutputItemWidget::infoReady(VReply* reply)
 {
-	if(reply && reply->sender() == this)
+	/*if(reply && reply->sender() == this)
 	{
 		if(reply->done())
 		{
@@ -64,7 +61,7 @@ void OutputItemWidget::queryFinished(NodeInfoQuery_ptr reply)
 		{
 			textEdit_->setPlainText(QString::fromStdString(reply->errorText()));
 		}
-	}
+	}*/
 }
 
 static InfoPanelItemMaker<OutputItemWidget> maker1("output");

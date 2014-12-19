@@ -13,15 +13,12 @@
 #include <QString>
 #include <QAction>
 
-
 #include "DState.hpp"
 
-#include "ViewNodeInfo.hpp"
-
+#include "VInfo.hpp"
 
 class QMenu;
 class Node;
-
 
 // -------------------------
 // MenuItem
@@ -39,7 +36,7 @@ public:
 
 
     void setCommand(const std::string &command);
-    bool compatibleWithNode(ViewNodeInfo_ptr nodeInfo);
+    bool compatibleWithNode(VInfo_ptr nodeInfo);
     void addValidType(std::string type);
     void addValidState(std::string type);
     void setAsSubMenu() {isSubMenu_ = true;};
@@ -83,7 +80,7 @@ public:
     QString exec(std::vector<Node *> nodes);
     std::string &name()       {return name_;};
     void addItem(MenuItem *item) {items_.push_back(item);};
-    QMenu *generateMenu(std::vector<ViewNodeInfo_ptr> nodes, QWidget *parent);
+    QMenu *generateMenu(std::vector<VInfo_ptr> nodes, QWidget *parent);
     std::vector<MenuItem *>& items() {return items_;};
 
 
@@ -108,7 +105,7 @@ public:
 
     //Menu *createMenu(QString &name);
     static bool readMenuConfigFile(const std::string &configFile);
-    static QAction *invokeMenu(const std::string &menuName, std::vector<ViewNodeInfo_ptr> nodes, QPoint pos, QWidget *parent);
+    static QAction *invokeMenu(const std::string &menuName, std::vector<VInfo_ptr> nodes, QPoint pos, QWidget *parent);
     static bool addItemToMenu(MenuItem *item, const std::string &menuName);
     static Menu *findMenu(const std::string &name);
     static MenuItem* newItem(const std::string &name);

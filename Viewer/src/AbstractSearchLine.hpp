@@ -23,7 +23,7 @@ public:
 	~AbstractSearchLine();
 	virtual void clear();
 
-public slots:
+public Q_SLOTS:
 	virtual void slotFind(QString)=0;
 	virtual void slotFindNext()=0;
 	virtual void slotFindPrev()=0;

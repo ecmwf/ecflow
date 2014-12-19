@@ -10,15 +10,30 @@
 #ifndef INFOPROVIDER_HPP_
 #define INFOPROVIDER_HPP_
 
-#include <string>
+#include "VInfo.hpp"
+#include "InfoPresenter.hpp"
+#include "VTask.hpp"
+#include "VTaskObserver.hpp"
 
-class Node;
+class InfoPanelItem;
 
-class InfoProvider
+class InfoProvider : public VTaskObserver, public VInfoVisitor
 {
 public:
-	static const std::string& nodeType(Node* node);
-	static void info(Node* node,std::stringstream& );
+	InfoProvider(InfoPresenter* owner);
+	virtual ~InfoProvider();
+
+	void info(VInfo_ptr);
+
+	//From VTaskObserver
+	void taskChanged(VTask_ptr) {};
+
+protected:
+	InfoPresenter* owner_;
+	VInfo_ptr info_;
+	VTask_ptr task_;
+	VReply* reply_;
 };
+
 
 #endif

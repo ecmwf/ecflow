@@ -74,7 +74,7 @@ QWidget* TreeNodeView::realWidget()
 QModelIndexList TreeNodeView::selectedList()
 {
   	QModelIndexList lst;
-  	foreach(QModelIndex idx,selectedIndexes())
+  	Q_FOREACH(QModelIndex idx,selectedIndexes())
 	  	if(idx.column() == 0)
 		  	lst << idx;
 	return lst;
@@ -85,30 +85,30 @@ void TreeNodeView::slotSelectItem(const QModelIndex&)
 	QModelIndexList lst=selectedIndexes();
 	if(lst.count() > 0)
 	{
-		ViewNodeInfo_ptr info=model_->nodeInfo(filterModel_->mapToSource(lst.front()));
+		VInfo_ptr info=model_->nodeInfo(filterModel_->mapToSource(lst.front()));
 		if(!info->isEmpty())
 		{
-			emit selectionChanged(info);
+			Q_EMIT selectionChanged(info);
 		}
 	}
 }
-ViewNodeInfo_ptr TreeNodeView::currentSelection()
+VInfo_ptr TreeNodeView::currentSelection()
 {
 	QModelIndexList lst=selectedIndexes();
 	if(lst.count() > 0)
 	{
 		return model_->nodeInfo(filterModel_->mapToSource(lst.front()));
 	}
-	return ViewNodeInfo_ptr();
+	return VInfo_ptr();
 }
 
-void TreeNodeView::currentSelection(ViewNodeInfo_ptr info)
+void TreeNodeView::currentSelection(VInfo_ptr info)
 {
 	QModelIndex idx=filterModel_->mapFromSource(model_->infoToIndex(info));
 	if(idx.isValid())
 	{
 			setCurrentIndex(idx);
-			emit selectionChanged(info);
+			Q_EMIT selectionChanged(info);
 	}
 }
 
@@ -134,10 +134,10 @@ void TreeNodeView::handleContextMenu(QModelIndex indexClicked,QModelIndexList in
 	{
 	  	qDebug() << "context menu" << indexClicked;
 
-  		std::vector<ViewNodeInfo_ptr> nodeLst;
+  		std::vector<VInfo_ptr> nodeLst;
 		for(int i=0; i < indexLst.count(); i++)
 		{
-			ViewNodeInfo_ptr info=model_->nodeInfo(filterModel_->mapToSource(indexLst[i]));
+			VInfo_ptr info=model_->nodeInfo(filterModel_->mapToSource(indexLst[i]));
 			if(!info->isEmpty())
 				nodeLst.push_back(info);
 		}
@@ -151,7 +151,7 @@ void TreeNodeView::handleContextMenu(QModelIndex indexClicked,QModelIndexList in
 	}
 }
 
-void TreeNodeView::slotViewCommand(std::vector<ViewNodeInfo_ptr> nodeLst,QString cmd)
+void TreeNodeView::slotViewCommand(std::vector<VInfo_ptr> nodeLst,QString cmd)
 {
 
 	if(nodeLst.size() == 0)

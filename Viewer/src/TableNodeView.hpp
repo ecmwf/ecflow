@@ -15,7 +15,7 @@
 
 #include "NodeViewBase.hpp"
 
-#include "ViewNodeInfo.hpp"
+#include "VInfo.hpp"
 
 class ActionHandler;
 class TableNodeModel;
@@ -30,17 +30,17 @@ public:
 	TableNodeView(QString,VConfig*,QWidget *parent=0);
 	void reload() {};
 	QWidget* realWidget();
-	ViewNodeInfo_ptr currentSelection();
-	void currentSelection(ViewNodeInfo_ptr n) {};
+	VInfo_ptr currentSelection();
+	void currentSelection(VInfo_ptr n) {};
 
-public slots:
+public Q_SLOTS:
 	void slotSelectItem(const QModelIndex&);
 	void slotDoubleClickItem(const QModelIndex&);
 	void slotContextMenu(const QPoint &position);
-	void slotViewCommand(std::vector<ViewNodeInfo_ptr>,QString);
+	void slotViewCommand(std::vector<VInfo_ptr>,QString);
 
-signals:
-	void selectionChanged(ViewNodeInfo_ptr);
+Q_SIGNALS:
+	void selectionChanged(VInfo_ptr);
 
 protected:
 	QModelIndexList selectedList();

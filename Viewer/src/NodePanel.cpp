@@ -80,8 +80,8 @@ NodeWidget *NodePanel::addWidget(QString id)
 	addTab(nw,pix,name);
 
 
-	connect(nw,SIGNAL(selectionChanged(ViewNodeInfo_ptr)),
-			this,SIGNAL(selectionChanged(ViewNodeInfo_ptr)));
+	connect(nw,SIGNAL(selectionChanged(VInfo_ptr)),
+			this,SIGNAL(selectionChanged(VInfo_ptr)));
 
 	/*connect(fw,SIGNAL(pathChanged()),
 		this,SLOT(slotPathChanged()));
@@ -108,7 +108,7 @@ void NodePanel::resetWidgets(QStringList idLst)
 
 	clear();
 
-	foreach(QString id,idLst)
+	Q_FOREACH(QString id,idLst)
 	{
 	  	addWidget(id);
 	}
@@ -160,7 +160,7 @@ NodeWidget *NodePanel::currentNodeWidget()
 
 void NodePanel::slotCurrentWidgetChanged(int /*index*/)
 {
-  	emit currentWidgetChanged();
+  	Q_EMIT currentWidgetChanged();
   	//setDefaults(this);
 }
 
@@ -175,15 +175,15 @@ void  NodePanel::slotNewTab()
 	}*/
 }
 
-ViewNodeInfo_ptr NodePanel::currentSelection()
+VInfo_ptr NodePanel::currentSelection()
 {
 	if(NodeWidget *w=currentNodeWidget())
 		return w->currentSelection();
 
-	return ViewNodeInfo_ptr();
+	return VInfo_ptr();
 }
 
-void NodePanel::slotSelection(ViewNodeInfo_ptr n)
+void NodePanel::slotSelection(VInfo_ptr n)
 {
 	if(NodeWidget *w=currentNodeWidget())
 			w->currentSelection(n);
@@ -322,6 +322,6 @@ void NodePanel::load(const boost::property_tree::ptree &pt)
 	  	w->setFocus();
 
 	//We emit it to trigger the whole window ui update!
-	emit currentWidgetChanged();
+	Q_EMIT currentWidgetChanged();
 }
 

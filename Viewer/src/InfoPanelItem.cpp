@@ -9,6 +9,8 @@
 
 #include "InfoPanelItem.hpp"
 
+#include "ServerHandler.hpp"
+
 #include <map>
 
 static std::map<std::string,InfoPanelItemFactory*>* makers = 0;
@@ -38,3 +40,34 @@ InfoPanelItem* InfoPanelItemFactory::create(const std::string& name)
 	//return new MvQLineEditItem(e,p) ;
 	return 0;
 }
+
+
+void InfoPanelItem::adjust(VInfo_ptr info)
+{
+	ServerHandler *server=0;
+  	bool sameServer=false;
+
+  	//Check if there is data in info
+  	if(info.get())
+  	{
+  		server=info->server();
+
+  		sameServer=(info_)?(info_->server() == server):false;
+
+  		//Handle observers
+  		if(!sameServer)
+  		{
+  			if(info_ && info_->server())
+  				info_->server()->removeNodeObserver(this);
+
+  			info->server()->addNodeObserver(this);
+  		}
+  	}
+  	//If the there is no data we clean everything and return
+  	else
+  	{
+  	  	if(info_ && info_->server())
+  	  		info_->server()->removeNodeObserver(this);
+  	}
+}
+

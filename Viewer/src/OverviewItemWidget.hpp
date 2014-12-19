@@ -5,30 +5,29 @@
 // In applying this licence, ECMWF does not waive the privileges and immunities
 // granted to it by virtue of its status as an intergovernmental organisation
 // nor does it submit to any jurisdiction.
+//
 //============================================================================
 
+#ifndef OVERVIEWITEMWIDGET_HPP_
+#define OVERVIEWITEMWIDGET_HPP_
 
-#ifndef CUSTOMCOMMANDDIALOG_HPP_
-#define CUSTOMCOMMANDDIALOG_HPP_
+#include "InfoPanelItem.hpp"
+#include "TextItemWidget.hpp"
 
-#include <QDialog>
-
-#include "ui_CustomCommandDialog.h"
-
-class CustomCommandDialog : public QDialog, private Ui::CustomCommandDialog
+class OverviewItemWidget : public TextItemWidget, public InfoPanelItem
 {
-	Q_OBJECT
-
 public:
-	CustomCommandDialog(QWidget *parent = 0);
-	~CustomCommandDialog() {};
+	OverviewItemWidget(QWidget *parent=0);
 
-    QString command() {return commandDesigner_->command();};
+	void reload(VInfo_ptr);
+	QWidget* realWidget();
+	void clearContents();
 
-
-
-//public Q_SLOTS:
-//	void insertCurrentText();
+	//From VInfoPresenter
+	void infoReady(VReply*);
+	void infoFailed(VReply*);
+	void infoProgress(VReply*);
 };
 
 #endif
+

@@ -12,21 +12,19 @@
 #define MESSAGEITEMWIDGET_HPP_
 
 #include "InfoPanelItem.hpp"
-#include "NodeInfoQuery.hpp"
 #include "TextItemWidget.hpp"
-#include "ViewNodeInfo.hpp"
 
-class MessageItemWidget : public TextItemWidget, public InfoPanelItem, public NodeInfoAccessor
+class MessageItemWidget : public TextItemWidget, public InfoPanelItem
 {
 public:
 	MessageItemWidget(QWidget *parent=0);
 
-	void reload(ViewNodeInfo_ptr);
+	void reload(VInfo_ptr);
 	QWidget* realWidget();
 	void clearContents();
 
-	//From NodeInfoAccessor
-	void queryFinished(NodeInfoQuery_ptr reply);
+	//From VNodeReplyReceiver
+	void infoReady(VReply* reply);
 };
 
 #endif

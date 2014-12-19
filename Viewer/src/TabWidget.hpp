@@ -36,17 +36,17 @@ public:
 	int count() const;
 	void clear();
 
-public slots:
+public Q_SLOTS:
 	void removeTab(int);
 	void removeOtherTabs(int);
 	void setCurrentIndex(int);
 
-private slots:
+private Q_SLOTS:
 	void slotContextMenu(const QPoint&);
 	void currentTabChanged(int index);
 	void tabMoved(int from,int to);
 
-signals:
+Q_SIGNALS:
     void currentIndexChanged(int);
 	void newTabRequested();
 

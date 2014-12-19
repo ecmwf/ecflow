@@ -25,7 +25,7 @@ bool VariableModel::hasData() const
 	return (nodes_.size()  >0 || server_ != NULL);
 }
 
-void VariableModel::setData(ViewNodeInfo_ptr data)
+void VariableModel::setData(VInfo_ptr data)
 {
 	beginResetModel();
 

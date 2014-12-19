@@ -8,13 +8,13 @@
 
 ActionHandler::ActionHandler(QWidget *view) : QObject(view), parent_(view)
 {
-	connect(this,SIGNAL(viewCommand(std::vector<ViewNodeInfo_ptr>,QString)),
-			parent_,SLOT(slotViewCommand(std::vector<ViewNodeInfo_ptr>,QString)));
+	connect(this,SIGNAL(viewCommand(std::vector<VInfo_ptr>,QString)),
+			parent_,SLOT(slotViewCommand(std::vector<VInfo_ptr>,QString)));
 
 	//makeShortcut();
 }
 
-void ActionHandler::contextMenu(std::vector<ViewNodeInfo_ptr> nodesLst,QPoint pos)
+void ActionHandler::contextMenu(std::vector<VInfo_ptr> nodesLst,QPoint pos)
 {
     QAction *action = MenuHandler::invokeMenu("Node", nodesLst,pos,  parent_);
 
@@ -22,7 +22,7 @@ void ActionHandler::contextMenu(std::vector<ViewNodeInfo_ptr> nodesLst,QPoint po
     {
         if(action->iconText() == "Set as root")
         {
-            emit viewCommand(nodesLst,"set_as_root");
+            Q_EMIT viewCommand(nodesLst,"set_as_root");
         }
         else if(action->iconText() == "Custom")  // would expect this to be 'Custom...' but it's just 'Custom'
         {

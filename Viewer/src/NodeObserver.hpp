@@ -5,40 +5,21 @@
 // In applying this licence, ECMWF does not waive the privileges and immunities
 // granted to it by virtue of its status as an intergovernmental organisation
 // nor does it submit to any jurisdiction.
-//
 //============================================================================
 
-#ifndef VIEWNODEINFO_HPP_
-#define VIEWNODEINFO_HPP_
+#ifndef NODEOBSERVER_HPP_
+#define NODEOBSERVER_HPP_
 
-#include <cstddef>
-#include <boost/shared_ptr.hpp>
+#include "Aspect.hpp"
+#include "Node.hpp"
 
-class Node;
-
-class ServerHandler;
-
-typedef bool (*HasProc)(Node*);
-
-class ViewNodeInfo
+class NodeObserver
 {
 public:
-		ViewNodeInfo();
-		ViewNodeInfo(Node*,ServerHandler* server=NULL);
-		ViewNodeInfo(ServerHandler*);
-
-		bool isNode() const;
-		bool isServer() const;
-		bool isEmpty() const;
-		Node* node() const;
-		ServerHandler* server() const;
-
-private:
-		Node* node_;
-		mutable ServerHandler* server_;
+	NodeObserver() {};
+	virtual ~NodeObserver() {};
+	virtual void notifyNodeChanged(const Node* n, const std::vector<ecf::Aspect::Type>& a)=0;
 };
 
-typedef boost::shared_ptr<ViewNodeInfo>   ViewNodeInfo_ptr;
 
 #endif
-

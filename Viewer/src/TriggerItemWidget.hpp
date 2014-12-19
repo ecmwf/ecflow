@@ -14,14 +14,14 @@
 #include <QWidget>
 
 #include "InfoPanelItem.hpp"
-#include "ViewNodeInfo.hpp"
+#include "VInfo.hpp"
 
 class TriggerItemWidget : public QWidget, public InfoPanelItem
 {
 public:
 	TriggerItemWidget(QWidget *parent=0);
 
-	void reload(ViewNodeInfo_ptr);
+	void reload(VInfo_ptr);
 	QWidget* realWidget();
 	void clearContents();
 

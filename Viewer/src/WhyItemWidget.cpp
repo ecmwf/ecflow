@@ -26,10 +26,10 @@ QWidget* WhyItemWidget::realWidget()
 	return this;
 }
 
-void WhyItemWidget::reload(ViewNodeInfo_ptr nodeInfo)
+void WhyItemWidget::reload(VInfo_ptr nodeInfo)
 {
 	loaded_=true;
-	if(nodeInfo.get() != 0 && nodeInfo->isNode())
+	/*if(nodeInfo.get() != 0 && nodeInfo->isNode())
 	{
 		Node* n=nodeInfo->node();
 
@@ -39,7 +39,7 @@ void WhyItemWidget::reload(ViewNodeInfo_ptr nodeInfo)
 	else
 	{
 		textEdit_->clear();
-	}
+	}*/
 }
 
 void WhyItemWidget::clearContents()
