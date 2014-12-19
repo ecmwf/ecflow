@@ -97,9 +97,10 @@ public:
 
 	ServerHandler* server();
 	void accept(VInfoVisitor*);
+	const std::string&  nodeType();
+	static const std::string&  nodeType(Node*);
 
 protected:
-	const std::string&  nodeType(Node* node);
 };
 
 // Implements the info  base class for attribute selections

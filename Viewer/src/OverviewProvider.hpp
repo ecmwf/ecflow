@@ -29,6 +29,7 @@ public:
 
 protected:
 	void serverInfo(VInfoServer*,std::stringstream& f);
+	void nodeInfo(VInfoNode*,std::stringstream& f);
 
 };
 

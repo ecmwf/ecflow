@@ -224,12 +224,20 @@ ServerHandler* VInfoNode::server()
 	return server_;
 }
 
+const std::string&  VInfoNode::nodeType()
+{
+	return nodeType(node_);
+}
+
 const std::string&  VInfoNode::nodeType(Node* node)
 {
 	static std::string suiteStr("suite");
 	static std::string familyStr("family");
 	static std::string taskStr("task");
 	static std::string defaultStr("node");
+
+	if(!node)
+		return defaultStr;
 
 	if(node->isSuite())
 		return suiteStr;
@@ -240,7 +248,6 @@ const std::string&  VInfoNode::nodeType(Node* node)
 
 	return defaultStr;
 }
-
 
 /*
 void VInfoNode::info(VInfoReplyReceiver* invoker)
