@@ -1397,7 +1397,7 @@ def test_ECFLOW_189(ci):
     ci.resume("/test_ECFLOW_189/f1/t2")
      
     time.sleep(3)
-    ci.sync_local() # get the changes, synced with local defs on ci.
+    ci.sync_local() # get the changes, synced with local defs
     #print ci.get_defs();
     task_t1 = ci.get_defs().find_abs_node("/test_ECFLOW_189/f1/t1")
     task_t2 = ci.get_defs().find_abs_node("/test_ECFLOW_189/f1/t2")
