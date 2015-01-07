@@ -1359,7 +1359,57 @@ def test_client_check_defstatus(ci):
     dir_to_remove = Test.ecf_home(the_port) + "/" + "test_client_check_defstatus"
     shutil.rmtree(dir_to_remove)      
     
+def test_ECFLOW_189(ci):
+    # Bug, when a node is resumed it ignored holding dependencies higher up the tree.
+    # i.e Previously when we resumed a node, it ignored trigger/time/node state, dependencies higher up the tree
+    print "test_ECFLOW_189"
+    ci.delete_all()     
+    defs = create_defs("test_ECFLOW_189")  
+    defs.generate_scripts();
     
+    job_ctrl = JobCreationCtrl()
+    defs.check_job_creation(job_ctrl)       
+    assert len(job_ctrl.get_error_msg()) == 0, job_ctrl.get_error_msg()
+    
+    ci.restart_server()
+    ci.load(defs)   
+    
+    ci.suspend("/test_ECFLOW_189")
+    ci.suspend("/test_ECFLOW_189/f1/t1")
+    ci.suspend("/test_ECFLOW_189/f1/t2")
+        
+    ci.begin_all_suites()
+    
+    ci.sync_local() # get the changes, synced with local defs
+    #print ci.get_defs();
+    task_t1 = ci.get_defs().find_abs_node("/test_ECFLOW_189/f1/t1")
+    task_t2 = ci.get_defs().find_abs_node("/test_ECFLOW_189/f1/t2")
+    assert task_t1 != None,"Could not find /test_ECFLOW_189/f1/t1"
+    assert task_t2 != None,"Could not find /test_ECFLOW_189/f1/t2"
+  
+    assert task_t1.get_state() == State.queued, "Expected state queued but found " + str(task_t1.get_state())
+    assert task_t2.get_state() == State.queued, "Expected state queued but found " + str(task_t2.get_state())
+    assert task_t1.get_dstate() == DState.suspended, "Expected state suspended but found " + str(task_t1.get_dstate())
+    assert task_t2.get_dstate() == DState.suspended, "Expected state suspended but found " + str(task_t2.get_dstate())
+
+    # ok now resume t1/t2, they should remain queued, since the Suite is still suspended
+    ci.resume("/test_ECFLOW_189/f1/t1")
+    ci.resume("/test_ECFLOW_189/f1/t2")
+     
+    time.sleep(3)
+    ci.sync_local() # get the changes, synced with local defs
+    #print ci.get_defs();
+    task_t1 = ci.get_defs().find_abs_node("/test_ECFLOW_189/f1/t1")
+    task_t2 = ci.get_defs().find_abs_node("/test_ECFLOW_189/f1/t2")
+    assert task_t1.get_state() == State.queued, "Expected state queued but found " + str(task_t1.get_state())
+    assert task_t2.get_state() == State.queued, "Expected state queued but found " + str(task_t2.get_state())
+    assert task_t1.get_dstate() == DState.queued, "Expected state queued but found " + str(task_t1.get_dstate())
+    assert task_t2.get_dstate() == DState.queued, "Expected state queued but found " + str(task_t2.get_dstate())
+
+    dir_to_remove = Test.ecf_home(the_port) + "/" + "test_ECFLOW_189"
+    shutil.rmtree(dir_to_remove)      
+
+
 if __name__ == "__main__":
     print "####################################################################"
     print "Running ecflow version " + Client().version() + " debug build(" + str(debug_build()) +")"
@@ -1377,24 +1427,24 @@ if __name__ == "__main__":
         test_client_new_log(ci, the_port)             
         test_client_clear_log(ci, the_port)             
         test_client_log_msg(ci, the_port)             
-        
+         
         test_client_restart_server(ci)             
         test_client_halt_server(ci)             
         test_client_shutdown_server(ci)   
-    
+     
         test_client_load_in_memory_defs(ci)             
         test_client_load_from_disk(ci)             
         test_client_checkpt(ci, the_port)             
         test_client_restore_from_checkpt(ci, the_port)             
-         
+          
         test_client_reload_wl_file(ci, the_port)             
- 
+  
         test_client_run(ci)  
         test_client_run_with_multiple_paths(ci)     
         test_client_requeue(ci)             
         test_client_requeue_with_multiple_paths(ci)             
         test_client_free_dep(ci)              
-
+ 
         test_client_suites(ci)
         test_client_ch_suites(ci)  
         test_client_ch_register(ci)             
@@ -1403,17 +1453,17 @@ if __name__ == "__main__":
         test_client_ch_add(ci)             
         test_client_ch_auto_add(ci)             
         test_client_ch_remove(ci)             
-           
+            
         test_client_get_file(ci)             
         #test_client_plug(ci)             
         test_client_alter_add(ci) 
         test_client_alter_delete(ci) 
         test_client_alter_change(ci) 
-                
+                 
         test_client_force(ci)             
         test_client_replace(ci,False)             
         test_client_replace(ci,True)             
-
+ 
         #test_client_kill(ci)             
         #test_client_status(ci)             
         #test_client_order(ci)             
@@ -1424,12 +1474,14 @@ if __name__ == "__main__":
         test_client_resume_multiple_paths(ci)             
         test_client_delete_node(ci)             
         test_client_delete_node_multiple_paths(ci)             
-
+ 
         test_client_check(ci)  
         test_client_check_defstatus(ci)  
- 
+  
         test_client_stats(ci)             
         test_client_stats_reset(ci)             
-        test_client_debug_server_on_off(ci)             
+        test_client_debug_server_on_off(ci)    
+        
+        test_ECFLOW_189(ci)         
 
         print "All Tests pass ======================================================================"    
