@@ -15,54 +15,48 @@
 
 #include "ActionHandler.hpp"
 #include "NodeFilterModel.hpp"
-#include "TreeNodeModel.hpp"
 #include "TreeNodeViewDelegate.hpp"
 
-TreeNodeView::TreeNodeView(QString ,VConfig* config,QWidget* parent) : QTreeView(parent)
+TreeNodeView::TreeNodeView(NodeFilterModel *model,QWidget* parent) : QTreeView(parent), NodeViewBase(model)
 {
-		model_=new TreeNodeModel(config,this);
+	//Set the model.
+	setModel(model_);
 
-		filterModel_=new NodeFilterModel(this);
-		filterModel_->setSourceModel(model_);
-		filterModel_->setDynamicSortFilter(true);
+	//Create delegate to the view
+	TreeNodeViewDelegate *delegate=new TreeNodeViewDelegate(this);
+	setItemDelegate(delegate);
 
-		setModel(filterModel_);
+	//setRootIsDecorated(false);
+	setAllColumnsShowFocus(true);
+	setUniformRowHeights(true);
+	setMouseTracking(true);
+	setSelectionMode(QAbstractItemView::ExtendedSelection);
 
-		TreeNodeViewDelegate *delegate=new TreeNodeViewDelegate(this);
-		setItemDelegate(delegate);
+	//!!!!We need to do it because:
+	//The background colour between the views left border and the nodes cannot be
+	//controlled by delegates or stylesheets. It always takes the QPalette::Highlight
+	//colour from the palette. Here we set this to transparent so that Qt could leave
+	//this are empty and we will fill it appropriately in our delegate.
+	QPalette pal=palette();
+	pal.setColor(QPalette::Highlight,Qt::transparent);
+	setPalette(pal);
 
-		//setRootIsDecorated(false);
-		setAllColumnsShowFocus(true);
-	    setUniformRowHeights(true);
-	    setMouseTracking(true);
-		setSelectionMode(QAbstractItemView::ExtendedSelection);
+	//Context menu
+	setContextMenuPolicy(Qt::CustomContextMenu);
 
-		//!!!!We need to do it because:
-		//The background colour between the views left border and the nodes cannot be
-		//controlled by delegates or stylesheets. It always takes the QPalette::Highlight
-		//colour from the palette. Here we set this to transparent so that Qt could leave
-		//this are empty and we will fill it appropriately in our delegate.
-		QPalette pal=palette();
-		pal.setColor(QPalette::Highlight,Qt::transparent);
-		setPalette(pal);
-
-		//Context menu
-		setContextMenuPolicy(Qt::CustomContextMenu);
-
-		connect(this, SIGNAL(customContextMenuRequested(const QPoint &)),
+	connect(this, SIGNAL(customContextMenuRequested(const QPoint &)),
 		                this, SLOT(slotContextMenu(const QPoint &)));
 
-		//Selection
-		connect(this,SIGNAL(clicked(const QModelIndex&)),
-				this,SLOT(slotSelectItem(const QModelIndex)));
+	//Selection
+	connect(this,SIGNAL(clicked(const QModelIndex&)),
+			this,SLOT(slotSelectItem(const QModelIndex)));
 
-		connect(this,SIGNAL(doubleClicked(const QModelIndex&)),
-				this,SLOT(slotDoubleClickItem(const QModelIndex)));
+	connect(this,SIGNAL(doubleClicked(const QModelIndex&)),
+			this,SLOT(slotDoubleClickItem(const QModelIndex)));
 
-		actionHandler_=new ActionHandler(this);
+	actionHandler_=new ActionHandler(this);
 
-		expandAll();
-
+	expandAll();
 }
 
 QWidget* TreeNodeView::realWidget()
@@ -85,7 +79,7 @@ void TreeNodeView::slotSelectItem(const QModelIndex&)
 	QModelIndexList lst=selectedIndexes();
 	if(lst.count() > 0)
 	{
-		VInfo_ptr info=model_->nodeInfo(filterModel_->mapToSource(lst.front()));
+		VInfo_ptr info=model_->nodeInfo(lst.front());
 		if(!info->isEmpty())
 		{
 			Q_EMIT selectionChanged(info);
@@ -97,14 +91,14 @@ VInfo_ptr TreeNodeView::currentSelection()
 	QModelIndexList lst=selectedIndexes();
 	if(lst.count() > 0)
 	{
-		return model_->nodeInfo(filterModel_->mapToSource(lst.front()));
+		return model_->nodeInfo(lst.front());
 	}
 	return VInfo_ptr();
 }
 
 void TreeNodeView::currentSelection(VInfo_ptr info)
 {
-	QModelIndex idx=filterModel_->mapFromSource(model_->infoToIndex(info));
+	QModelIndex idx=model_->infoToIndex(info);
 	if(idx.isValid())
 	{
 			setCurrentIndex(idx);
@@ -137,7 +131,7 @@ void TreeNodeView::handleContextMenu(QModelIndex indexClicked,QModelIndexList in
   		std::vector<VInfo_ptr> nodeLst;
 		for(int i=0; i < indexLst.count(); i++)
 		{
-			VInfo_ptr info=model_->nodeInfo(filterModel_->mapToSource(indexLst[i]));
+			VInfo_ptr info=model_->nodeInfo(indexLst[i]);
 			if(!info->isEmpty())
 				nodeLst.push_back(info);
 		}
@@ -157,18 +151,18 @@ void TreeNodeView::slotViewCommand(std::vector<VInfo_ptr> nodeLst,QString cmd)
 	if(nodeLst.size() == 0)
 		return;
 
-	if(cmd == "set_as_root")
+	/*if(cmd == "set_as_root")
 	{
 		qDebug() << "set as root";
 		model_->setRootNode(nodeLst.at(0)->node());
 		expandAll();
-	}
+	}*/
 }
 
 
 void TreeNodeView::reload()
 {
-	model_->reload();
+	//model_->reload();
 	//expandAll();
 }
 

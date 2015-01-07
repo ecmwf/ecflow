@@ -21,9 +21,9 @@
 #include "TableNodeModel.hpp"
 
 
-TableNodeView::TableNodeView(QString ,VConfig* config, QWidget* parent) : QTreeView(parent)
+TableNodeView::TableNodeView(NodeFilterModel *model,QWidget* parent) : QTreeView(parent), NodeViewBase(model)
 {
-		model_=new TableNodeModel(config,this);
+		/*model_=new TableNodeModel(config,this);
 
 		filterModel_=new NodeFilterModel(this);
 		filterModel_->setSourceModel(model_);
@@ -58,7 +58,7 @@ TableNodeView::TableNodeView(QString ,VConfig* config, QWidget* parent) : QTreeV
 		setDropIndicatorShown(true);
 	    setDragDropMode(QAbstractItemView::DragDrop);
 
-		expandAll();
+		expandAll();*/
 
 
 }
@@ -83,7 +83,7 @@ void TableNodeView::slotSelectItem(const QModelIndex&)
 	QModelIndexList lst=selectedIndexes();
 	if(lst.count() > 0)
 	{
-		VInfo_ptr info=model_->nodeInfo(filterModel_->mapToSource(lst.front()));
+		VInfo_ptr info=model_->nodeInfo(lst.front());
 		if(!info->isEmpty())
 		{
 			Q_EMIT selectionChanged(info);
@@ -96,7 +96,7 @@ VInfo_ptr TableNodeView::currentSelection()
 	QModelIndexList lst=selectedIndexes();
 	if(lst.count() > 0)
 	{
-		return model_->nodeInfo(filterModel_->mapToSource(lst.front()));
+		return model_->nodeInfo(lst.front());
 	}
 	return VInfo_ptr();
 }
@@ -125,7 +125,7 @@ void TableNodeView::handleContextMenu(QModelIndex indexClicked,QModelIndexList i
 	  		std::vector<VInfo_ptr> nodeLst;
 			for(int i=0; i < indexLst.count(); i++)
 			{
-				VInfo_ptr info=model_->nodeInfo(filterModel_->mapToSource(indexLst[i]));
+				VInfo_ptr info=model_->nodeInfo(indexLst[i]);
 				if(!info->isEmpty())
 					nodeLst.push_back(info);
 			}

@@ -14,8 +14,6 @@
 #include "NodeViewHandler.hpp"
 #include "ServerHandler.hpp"
 #include "ServerFilter.hpp"
-#include "TableNodeView.hpp"
-#include "TreeNodeView.hpp"
 #include "VFilter.hpp"
 
 #include <QStackedLayout>
@@ -24,7 +22,6 @@
 NodeWidget::NodeWidget(QString rootNode,QWidget *parent) :
         QWidget(parent),
         config_(0)
-
 {
 	//Filters
 	config_=new VConfig;
@@ -38,55 +35,34 @@ NodeWidget::NodeWidget(QString rootNode,QWidget *parent) :
 	QStackedLayout* centralLayout=new QStackedLayout;
 	mainLayout->addLayout(centralLayout,1);
 
-	//View handler
-	views_=new NodeViewHandler(centralLayout);
+	//View handler: handles how views are activated and appear on the
+	//central layout
+	handler_=new NodeViewHandler(centralLayout);
 
-	//Tree view
-	TreeNodeView *treeView= new TreeNodeView("",config_,this);
-	views_->add(Viewer::TreeViewMode,treeView);
+	NodeViewControl *ctl=0;
 
-	connect(treeView,SIGNAL(selectionChanged(VInfo_ptr)),
+	//--------------------------------
+	// Tree view
+	//--------------------------------
+
+	ctl=new TreeNodeViewControl(config_,this);
+	handler_->add(Viewer::TreeViewMode,ctl);
+
+	connect(ctl->widget(),SIGNAL(selectionChanged(VInfo_ptr)),
 			this,SIGNAL(selectionChanged(VInfo_ptr)));
 
-	/*connect(iconView_,SIGNAL(currentFolderChanged(Folder*)),
-		this,SLOT(slotFolderReplacedInView(Folder*)));
+	//---------------------------------
+	// Table view
+	//---------------------------------
 
-	connect(iconView_,SIGNAL(iconCommandRequested(QString,IconObjectH)),
-		this,SIGNAL(iconCommandRequested(QString,IconObjectH)));
+	ctl=new TableNodeViewControl(config_,this);
+	handler_->add(Viewer::TableViewMode,ctl);
 
-	connect(iconView_,SIGNAL(desktopCommandRequested(QString,QPoint)),
-		this,SIGNAL(desktopCommandRequested(QString,QPoint)));
-
-	connect(iconView_,SIGNAL(itemEntered(QString)),
-		this, SIGNAL(itemInfoChanged(QString)));*/
-
-	// Detailed view
-
-	TableNodeView *tableView=new TableNodeView("",config_,this);
-	views_->add(Viewer::TableViewMode,tableView);
-
-	connect(tableView,SIGNAL(selectionChanged(VInfo_ptr)),
-			this,SIGNAL(selectionChanged(VInfo_ptr)));
-
-
-	/*connect(detailedView_,SIGNAL(currentFolderChanged(Folder*)),
-		this,SLOT(slotFolderReplacedInView(Folder*)));
-
-	connect(detailedView_,SIGNAL(iconCommandRequested(QString,IconObjectH)),
-		this,SIGNAL(iconCommandRequested(QString,IconObjectH)));
-
-	connect(detailedView_,SIGNAL(desktopCommandRequested(QString,QPoint)),
-		this,SIGNAL(desktopCommandRequested(QString,QPoint)));
-
-	connect(detailedView_,SIGNAL(itemEntered(QString)),
-		this,SIGNAL(itemInfoChanged(QString)));*/
-
+	connect(ctl->widget(),SIGNAL(selectionChanged(VInfo_ptr)),
+				this,SIGNAL(selectionChanged(VInfo_ptr)));
 
 	//Init view mode
-	views_->setCurrentMode(Viewer::TreeViewMode);
-
-
-	//MvQFolderWatcher::add(this);
+	handler_->setCurrentMode(Viewer::TreeViewMode);
 }
 
 NodeWidget::~NodeWidget()
@@ -95,38 +71,19 @@ NodeWidget::~NodeWidget()
 	delete config_;
 }
 
-/*Folder* NodeWidget::currentFolder()
-{
-	return folderModel_->folder();
-}
-
-QString NodeWidget::currentFolderName()
-{
-	if(folderModel_->folder())
-	  	return QString::fromStdString(folderModel_->folder()->name());
-
-	return QString();
-}*/
-
-
-
-//When the  object itself is changed (e.g. renamed)
-/*void NodeWidget::slotFolderChanged(Folder* folder)
-{
-	slotFolderReplacedInView(folder);
-}*/
-
-
 VInfo_ptr NodeWidget::currentSelection()
 {
-	return views_->currentBase()->currentSelection();
+	if(NodeViewControl *ctl=handler_->currentControl())
+		return  ctl->currentSelection();
+
+	return VInfo_ptr();
 }
 
 void NodeWidget::currentSelection(VInfo_ptr n)
 {
-	return views_->currentBase()->currentSelection(n);
+	if(NodeViewControl *ctl=handler_->currentControl())
+		ctl->currentSelection(n);
 }
-
 
 //------------------------
 // Rescan
@@ -134,9 +91,8 @@ void NodeWidget::currentSelection(VInfo_ptr n)
 
 void NodeWidget::reload()
 {
-	//MvQFolderWatcher::reload(this);
-	views_->currentBase()->reload();
-
+	if(NodeViewControl *ctl=handler_->currentControl())
+		ctl->reload();
 }
 
 //------------------------
@@ -145,13 +101,17 @@ void NodeWidget::reload()
 
 Viewer::ViewMode NodeWidget::viewMode()
 {
- 	return views_->currentMode();
+ 	return handler_->currentMode();
 }
 
 void NodeWidget::setViewMode(Viewer::ViewMode mode)
 {
-	views_->setCurrentMode(mode);
+	handler_->setCurrentMode(mode);
 }
+
+//----------------------------------
+// Save and load settings!!
+//----------------------------------
 
 void NodeWidget::save(boost::property_tree::ptree &pt)
 {

@@ -27,8 +27,12 @@ public:
     NodeModelServerItem(ServerHandler *server) : server_(server), rootNode_(NULL) {}
     bool isFiltered(Node*) const;
 
+    void resetFilter(VFilter* stateFilter);
+
 protected:
-	ServerHandler *server_;
+    bool filterState(node_ptr node,VFilter* stateFilter);
+
+    ServerHandler *server_;
 	QSet<Node*> nodeFilter_;
 	Node* rootNode_;
 
@@ -48,6 +52,7 @@ public:
 	void clearFilter();
 	void nodeFilter(int i,QSet<Node*>);
 	bool isFiltered(Node *node) const;
+	void resetFilter(VFilter* stateFilter);
 
 protected:
 	QList<NodeModelServerItem> items_;
@@ -70,6 +75,8 @@ public:
 	void dataIsAboutToChange();
 	virtual VInfo_ptr nodeInfo(const QModelIndex& index);
 	void reload();
+	void active(bool);
+	bool active() const {return active_;}
 
 	virtual QModelIndex infoToIndex(VInfo_ptr,int column=0) const;
 
@@ -91,7 +98,7 @@ protected:
 	void clean();
 	bool hasData() const;
 
-	virtual void resetStateFilter(bool broadcast)=0;
+	virtual void resetStateFilter(bool broadcast);
 
 	virtual bool isServer(const QModelIndex & index) const=0;
 	virtual ServerHandler* indexToServer(const QModelIndex & index) const=0;
@@ -108,6 +115,7 @@ protected:
 
 	NodeModelServers servers_;
 	VConfig* config_;
+	bool active_;
 };
 
 #endif

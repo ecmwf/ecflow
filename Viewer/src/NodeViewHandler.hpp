@@ -8,30 +8,59 @@
 
 class QStackedLayout;
 class QWidget;
-class NodeViewBase;
 
-using namespace std;
+class AbstractNodeModel;
+class NodeFilterModel;
+class NodeViewBase;
+class VConfig;
+
+class NodeViewControl
+{
+public:
+	void active(bool);
+	bool active() const;
+	NodeViewBase* view() const {return view_;}
+	QWidget* widget();
+	VInfo_ptr currentSelection();
+	void currentSelection(VInfo_ptr info);
+	void reload();
+
+protected:
+	NodeViewControl(): model_(0), filterModel_(0), view_(0) {};
+
+	AbstractNodeModel* model_;
+	NodeFilterModel* filterModel_;
+	NodeViewBase* view_;
+};
+
+class TreeNodeViewControl : public NodeViewControl
+{
+public:
+	TreeNodeViewControl(VConfig*,QWidget* parent=0);
+};
+
+class TableNodeViewControl : public NodeViewControl
+{
+public:
+	TableNodeViewControl(VConfig*,QWidget* parent=0);
+};
 
 class NodeViewHandler
 {
 public:
     NodeViewHandler(QStackedLayout*);
 
-	void add(Viewer::ViewMode,NodeViewBase*);
+	void add(Viewer::ViewMode,NodeViewControl*);
 	Viewer::ViewMode currentMode() const {return currentMode_;}
 	bool setCurrentMode(Viewer::ViewMode);
 	bool setCurrentMode(int);
-	NodeViewBase* currentBase() const {return base(currentMode_);}
-	QList<QWidget*> uniqueWidgets();
-	VInfo_ptr currentSelection();
+	NodeViewControl* currentControl() const {return control(currentMode_);}
 
 private:
-	NodeViewBase* base(Viewer::ViewMode) const;
-	QWidget* widget(Viewer::ViewMode);
+	NodeViewControl* control(Viewer::ViewMode) const;
 
 	Viewer::ViewMode  currentMode_;
-  	std::map<Viewer::ViewMode,NodeViewBase*> bases_;
-	std::map<Viewer::ViewMode,QWidget*> widgets_;
+  	std::map<Viewer::ViewMode,NodeViewControl*> controls_;
 	std::map<Viewer::ViewMode,int> indexes_;
 	QStackedLayout* stacked_;
 };

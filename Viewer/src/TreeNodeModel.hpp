@@ -53,8 +53,8 @@ private:
 	QVariant nodeData(const QModelIndex& index,int role) const;
 	QVariant attributesData(const QModelIndex& index,int role) const;
 
-	void resetStateFilter(bool broadcast);
-	bool filterState(node_ptr node,QSet<Node*>& filterSet);
+	//void resetStateFilter(bool broadcast);
+	//bool filterState(node_ptr node,QSet<Node*>& filterSet);
 };
 
 

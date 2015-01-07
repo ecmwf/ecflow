@@ -11,23 +11,21 @@
 
 #include "AbstractNodeModel.hpp"
 
-NodeFilterModel::NodeFilterModel(QObject *parent) :
-		QSortFilterProxyModel(parent)
+NodeFilterModel::NodeFilterModel(AbstractNodeModel* nodeModel,QObject *parent) :
+		QSortFilterProxyModel(parent),
+		nodeModel_(nodeModel)
 {
+	connect(nodeModel_,SIGNAL(filterChanged()),
+			this,SLOT(slotFilterChanged()));
+
+	QSortFilterProxyModel::setSourceModel(nodeModel_);
+
+	setDynamicSortFilter(true);
 }
 
 NodeFilterModel::~NodeFilterModel()
 {
 }
-
-void NodeFilterModel::setSourceModel(QAbstractItemModel* m)
-{
-	connect(m,SIGNAL(filterChanged()),
-		this,SLOT(slotFilterChanged()));
-
-	QSortFilterProxyModel::setSourceModel(m);
-}
-
 
 bool NodeFilterModel::filterAcceptsRow(int sourceRow,const QModelIndex& sourceParent) const
 {
@@ -40,4 +38,12 @@ void NodeFilterModel::slotFilterChanged()
 	invalidateFilter();
 }
 
+VInfo_ptr NodeFilterModel::nodeInfo(const QModelIndex& index)
+{
+	return nodeModel_->nodeInfo(mapToSource(index));
+}
 
+QModelIndex NodeFilterModel::infoToIndex(VInfo_ptr info)
+{
+	return mapFromSource(nodeModel_->infoToIndex(info));
+}

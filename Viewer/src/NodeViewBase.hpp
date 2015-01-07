@@ -14,11 +14,12 @@
 #include "VInfo.hpp"
 
 class QWidget;
+class NodeFilterModel;
 
 class NodeViewBase
 {
 public:
-		NodeViewBase();
+		NodeViewBase(NodeFilterModel*);
 		virtual ~NodeViewBase(){};
 
 		virtual void reload()=0;
@@ -27,8 +28,7 @@ public:
 		virtual void currentSelection(VInfo_ptr n)=0;
 
 protected:
-		Viewer::ViewMode id_;
-
+		NodeFilterModel* model_;
 };
 
 #endif

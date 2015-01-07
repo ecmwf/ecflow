@@ -27,7 +27,7 @@ class TableNodeView : public QTreeView, public NodeViewBase
 Q_OBJECT
 
 public:
-	TableNodeView(QString,VConfig*,QWidget *parent=0);
+	TableNodeView(NodeFilterModel *model,QWidget *parent=0);
 	void reload() {};
 	QWidget* realWidget();
 	VInfo_ptr currentSelection();
@@ -46,8 +46,6 @@ protected:
 	QModelIndexList selectedList();
 	void handleContextMenu(QModelIndex indexClicked,QModelIndexList indexLst,QPoint globalPos,QPoint widgetPos,QWidget *widget);
 
-	TableNodeModel *model_;
-	NodeFilterModel* filterModel_;
 	ActionHandler* actionHandler_;
 };
 

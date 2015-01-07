@@ -26,6 +26,7 @@
 #include <algorithm>
 
 #include <boost/algorithm/string/predicate.hpp>
+#include <boost/lexical_cast.hpp>
 
 std::vector<ServerHandler*> ServerHandler::servers_;
 std::map<std::string, std::string> ServerHandler::commands_;
@@ -77,6 +78,7 @@ ServerHandler::ServerHandler(const std::string& name,const std::string& host, co
 	{
 		qRegisterMetaType<std::string>("std::string");
 		qRegisterMetaType<QList<ecf::Aspect::Type> >("QList<ecf::Aspect::Type>");
+		qRegisterMetaType<std::vector<ecf::Aspect::Type> >("std::vector<ecf::Aspect::Type>");
 	}
 
 	servers_.push_back(this);
@@ -1011,36 +1013,36 @@ void ServerComQueue::addSyncTask()
 
 void ServerComQueue::slotRun()
 {
-	UserMessage::message(UserMessage::DBG, false, std::string("  ServerComQueue::run"));
-	UserMessage::message(UserMessage::DBG, false, std::string("     --> number of tasks: " + boost::lexical_cast<std::string>(tasks_.size()) ));
-	for(std::deque<VTask_ptr>::const_iterator it=tasks_.begin(); it != tasks_.end(); it++)
-	{
-		UserMessage::message(UserMessage::DBG, false,"        -task: " + (*it)->typeString());
-	}
+	//UserMessage::message(UserMessage::DBG, false, std::string("  ServerComQueue::run"));
+	//UserMessage::message(UserMessage::DBG, false, std::string("     --> number of tasks: " + boost::lexical_cast<std::string>(tasks_.size()) ));
+	//for(std::deque<VTask_ptr>::const_iterator it=tasks_.begin(); it != tasks_.end(); it++)
+	//{
+	//	UserMessage::message(UserMessage::DBG, false,"        -task: " + (*it)->typeString());
+	//}
 
 	if(tasks_.empty())
 	{
-		UserMessage::message(UserMessage::DBG, false, std::string("     --> stop timer"));
+		//UserMessage::message(UserMessage::DBG, false, std::string("     --> stop timer"));
 		timer_->stop();
 		return;
 	}
 
 	if(current_)
 	{
-		UserMessage::message(UserMessage::DBG, false, std::string("     --> processing reply from previous task"));
+		//UserMessage::message(UserMessage::DBG, false, std::string("     --> processing reply from previous task"));
 		return;
 	}
 
 	if(comThread_->isRunning())
 	{
-		UserMessage::message(UserMessage::DBG, false, std::string("     --> thread is active"));
+		//UserMessage::message(UserMessage::DBG, false, std::string("     --> thread is active"));
 		return;
 	}
 
 	current_=tasks_.front();
 	tasks_.pop_front();
 
-	UserMessage::message(UserMessage::DBG, false,"     --> run task: " +  current_->typeString());
+	//UserMessage::message(UserMessage::DBG, false,"     --> run task: " +  current_->typeString());
 
 	//Send it to the thread
 	comThread_->task(current_);
@@ -1086,6 +1088,7 @@ ServerComThread::ServerComThread(ServerHandler *server, ClientInvoker *ci) :
 		ci_(ci),
 		taskType_(VTask::NoTask)
 {
+	initObserver(server_);
 }
 
 /*void ServerComThread::setCommandString(const std::vector<std::string> command)
@@ -1157,6 +1160,7 @@ void ServerComThread::task(VTask_ptr task)
 		command_=task->command();
 		params_=task->params();
 		nodePath_.clear();
+		taskType_=task->type();
 		if(task->node())
 		{
 			nodePath_=task->node()->absNodePath();
@@ -1170,7 +1174,7 @@ void ServerComThread::task(VTask_ptr task)
 void ServerComThread::run()
 {
 	//Can we use it? We are in the thread!!!
-	UserMessage::message(UserMessage::DBG, false, std::string("  ServerComThread::run start"));
+	//UserMessage::message(UserMessage::DBG, false, std::string("  ServerComThread::run start"));
 
 	try
  	{
@@ -1238,12 +1242,14 @@ void ServerComThread::run()
 		std::string errorString = e.what();
 		Q_EMIT failed(errorString);
 
+		UserMessage::message(UserMessage::DBG, false, std::string("  ServerComThread::run failed: ") + errorString);
+
 		//This will stop the thread.
 		return;
 	}
 
 	//Can we use it? We are in the thread!!!
-	UserMessage::message(UserMessage::DBG, false, std::string("  ServerComThread::run finished"));
+	//UserMessage::message(UserMessage::DBG, false, std::string("  ServerComThread::run finished"));
 }
 
 /*
@@ -1346,6 +1352,8 @@ void ServerComThread::initObserver(ServerHandler* server)
 	if(d == NULL)
 		return;
 
+	int cnt=0;
+
 	const std::vector<suite_ptr> &suites = d->suiteVec();
 	for(unsigned int i=0; i < suites.size();i++)
 	{
@@ -1356,7 +1364,11 @@ void ServerComThread::initObserver(ServerHandler* server)
 		for(std::set<Node*>::iterator it=nodes.begin(); it != nodes.end(); it++)
 			ChangeMgrSingleton::instance()->attach((*it),this);
 
+		cnt+=nodes.size();
 	}
+
+	UserMessage::message(UserMessage::DBG, false,std::string("Total number of nodes observed: ") +
+			   boost::lexical_cast<std::string>(cnt));
 }
 
 void ServerComThread::update(const Node* node, const std::vector<ecf::Aspect::Type>& types)
@@ -1370,7 +1382,7 @@ void ServerComThread::update(const Node* node, const std::vector<ecf::Aspect::Ty
 
 
 
-	//UserMessage::message(UserMessage::DBG, false, std::string("Thread update: ") + node->name());
+	UserMessage::message(UserMessage::DBG, false, std::string("Thread update: ") + node->name());
 
 	Q_EMIT nodeChanged(node,types);
 }

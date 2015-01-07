@@ -514,9 +514,10 @@ void TreeNodeModel::notifyConfigChanged(StateFilter*)
 	resetStateFilter(true);
 }
 
-void TreeNodeModel::resetStateFilter(bool broadcast)
+/*void TreeNodeModel::resetStateFilter(bool broadcast)
 {
-	servers_.clearFilter();
+
+	/*servers_.clearFilter();
 
 	//If all states are visible
 	if(config_->stateFilter()->isComplete())
@@ -564,5 +565,5 @@ bool TreeNodeModel::filterState(node_ptr node,QSet<Node*>& filterSet)
 
 	return ok;
 }
-
+*/
 

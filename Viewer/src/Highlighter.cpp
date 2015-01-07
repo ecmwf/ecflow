@@ -102,7 +102,6 @@ void Highlighter::load(QString id)
 			if(itPar->second.get_value<std::string>() == "true")
 				format.setFontItalic(true);
 		}
-
 		addRule(pattern,format);
 	}
 }

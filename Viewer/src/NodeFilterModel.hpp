@@ -12,22 +12,32 @@
 
 #include <QSortFilterProxyModel>
 
+#include "VInfo.hpp"
+
+class AbstractNodeModel;
+
 class NodeFilterModel : public QSortFilterProxyModel
 {
 Q_OBJECT
 
 public:
-	NodeFilterModel(QObject *parent=0);
+	NodeFilterModel(AbstractNodeModel*,QObject *parent=0);
 	~NodeFilterModel();
 
 	bool filterAcceptsRow(int,const QModelIndex &) const;
 
-	//From QSortFilterProxyModel
-	void setSourceModel(QAbstractItemModel*);
+	//From QSortFilterProxyModel:
+	//we set the source model in the constructor. So this function should not do anything.
+	void setSourceModel(QAbstractItemModel*) {};
+
+	VInfo_ptr nodeInfo(const QModelIndex&);
+	QModelIndex infoToIndex(VInfo_ptr);
 
 public Q_SLOTS:
 	void slotFilterChanged();
 
+protected:
+	AbstractNodeModel* nodeModel_;
 };
 
 #endif

@@ -49,7 +49,7 @@ public:
 	virtual bool isAtrribute() {return false;}
 	virtual bool isEmpty() {return true;}
 
-	virtual ServerHandler* server() {return server_;};
+	virtual ServerHandler* server();
 	virtual Node* node() {return node_;}
 	virtual VAttribute* attribute() {return att_;}
 

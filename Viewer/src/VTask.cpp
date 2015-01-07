@@ -17,7 +17,8 @@ VTask::VTask(Type t,VTaskObserver* obs) :
 	node_(0),
 	reply_(0)
 {
-	observers_.push_back(obs);
+	if(obs)
+		observers_.push_back(obs);
 	reply_=new VReply();
 }
 
@@ -27,7 +28,8 @@ VTask::VTask(Type t,Node *node,VTaskObserver* obs) :
 	node_(node),
 	reply_(0)
 {
-	observers_.push_back(obs);
+	if(obs)
+		observers_.push_back(obs);
 	reply_=new VReply();
 }
 

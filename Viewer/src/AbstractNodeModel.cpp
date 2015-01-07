@@ -17,11 +17,57 @@
 #include "ServerHandler.hpp"
 #include "ServerItem.hpp"
 #include "VFilter.hpp"
+#include "VNState.hpp"
 
 bool NodeModelServerItem::isFiltered(Node* node) const
 {
 	return !nodeFilter_.contains(node);
 }
+
+void NodeModelServerItem::resetFilter(VFilter* stateFilter)
+{
+	nodeFilter_.clear();
+
+	//If all states are visible
+	if(stateFilter->isComplete())
+		return;
+
+	for(unsigned int j=0; j < server_->numSuites();j++)
+	{
+		filterState(server_->suiteAt(j),stateFilter);
+	}
+}
+
+bool NodeModelServerItem::filterState(node_ptr node,VFilter* stateFilter)
+{
+	bool ok=false;
+	if(stateFilter->isSet(VNState::toState(node.get())))
+	{
+		ok=true;
+	}
+
+	std::vector<node_ptr> nodes;
+	node->immediateChildren(nodes);
+
+	for(std::vector<node_ptr>::iterator it=nodes.begin(); it != nodes.end(); it++)
+	{
+		if(filterState(*it,stateFilter) == true && ok == false)
+		{
+			ok=true;
+		}
+	}
+
+	if(!ok)
+		nodeFilter_ << node.get();
+
+	return ok;
+}
+
+//==========================================
+//
+// NodeModelServers
+//
+//==========================================
 
 ServerHandler* NodeModelServers::server(int n) const
 {
@@ -50,6 +96,14 @@ int NodeModelServers::index(ServerHandler* s) const
 void NodeModelServers::add(ServerHandler *server)
 {
 	items_ << NodeModelServerItem(server);
+}
+
+void NodeModelServers::resetFilter(VFilter *stateFilter)
+{
+	Q_FOREACH(NodeModelServerItem item,items_)
+	{
+		item.resetFilter(stateFilter);
+	}
 }
 
 void NodeModelServers::clearFilter()
@@ -88,10 +142,14 @@ bool NodeModelServers::isFiltered(Node *node) const
 
 AbstractNodeModel::AbstractNodeModel(VConfig * config,QObject *parent) :
    QAbstractItemModel(parent),
-   config_(config)
+   config_(config),
+   active_(false)
 {
+	//Register as VConfig observer. The has to know about any
+	//changes in VConfig!
 	config_->addObserver(this);
-	init();
+
+	//At this point the model is empty!!
 }
 
 AbstractNodeModel::~AbstractNodeModel()
@@ -100,9 +158,42 @@ AbstractNodeModel::~AbstractNodeModel()
 	clean();
 }
 
+void AbstractNodeModel::active(bool active)
+{
+	if(active_ != active)
+	{
+		active_=active;
+
+		beginResetModel();
+
+		//When the model becomes active we reload everything
+		if(active_)
+		{
+			init();
+
+			//Initialises the filter
+			resetStateFilter(false);
+		}
+
+		//When the model becomes inactive we clean it and
+		//release all the resources
+		else
+		{
+			clean();
+		}
+
+		endResetModel();
+
+		//After finishing reset the view will automatically be notified about
+		//the changes. Also the filter model will be notified!
+	}
+}
+
+//Called when the list of servers to be displayed has changed.
 void AbstractNodeModel::notifyConfigChanged(ServerFilter*)
 {
-	reload();
+	if(active_)
+		reload();
 }
 
 void AbstractNodeModel::init()
@@ -110,12 +201,14 @@ void AbstractNodeModel::init()
 	ServerFilter *filter=config_->serverFilter();
 	for(unsigned int i=0; i < filter->items().size(); i++)
 	{
-			//ServerHandler *server=ServerHandler::find(filter->items().at(i)->host(),filter->at().at(i)->port());
-		    if(ServerHandler *server=filter->items().at(i)->serverHandler())
-			{
-		    		server->addNodeObserver(this);
-		    		servers_.add(server);
-			}
+		if(ServerHandler *server=filter->items().at(i)->serverHandler())
+		{
+		    //The model has to observe the nodes o the server.
+		    server->addNodeObserver(this);
+
+		    //The model stores the servers it has to deal with in a local object.
+		    servers_.add(server);
+		}
 	}
 }
 
@@ -131,11 +224,14 @@ void AbstractNodeModel::clean()
 
 void AbstractNodeModel::reload()
 {
-	beginResetModel();
-	clean();
-	init();
-	resetStateFilter(false); //do not emit change signal
-	endResetModel();
+	if(active_)
+	{
+		beginResetModel();
+		clean();
+		init();
+		resetStateFilter(false); //do not emit change signal
+		endResetModel();
+	}
 }
 
 
@@ -147,6 +243,16 @@ bool AbstractNodeModel::hasData() const
 void AbstractNodeModel::dataIsAboutToChange()
 {
 	beginResetModel();
+}
+
+//Reset the state filter
+void AbstractNodeModel::resetStateFilter(bool broadcast)
+{
+	servers_.resetFilter(config_->stateFilter());
+
+	//Notify the filter model
+	if(broadcast)
+		Q_EMIT filterChanged();
 }
 
 void AbstractNodeModel::addServer(ServerHandler *server)

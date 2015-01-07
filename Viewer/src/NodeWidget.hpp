@@ -54,7 +54,7 @@ Q_SIGNALS:
 private:
 	//QModelIndex changeFolder(const QModelIndex&);
 
-	NodeViewHandler* views_;
+	NodeViewHandler* handler_;
 	VConfig* config_;
 };
 

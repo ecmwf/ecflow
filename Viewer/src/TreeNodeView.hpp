@@ -27,7 +27,7 @@ class TreeNodeView : public QTreeView, public NodeViewBase
 Q_OBJECT
 
 public:
-	TreeNodeView(QString,VConfig*,QWidget *parent=0);
+	TreeNodeView(NodeFilterModel* model,QWidget *parent=0);
 	void reload();
 	QWidget* realWidget();
 	VInfo_ptr currentSelection();
@@ -45,12 +45,8 @@ Q_SIGNALS:
 protected:
 	QModelIndexList selectedList();
 	void handleContextMenu(QModelIndex indexClicked,QModelIndexList indexLst,QPoint globalPos,QPoint widgetPos,QWidget *widget);
-
-	TreeNodeModel *model_;
-	NodeFilterModel *filterModel_;
 	ActionHandler* actionHandler_;
 };
-
 
 #endif
 
