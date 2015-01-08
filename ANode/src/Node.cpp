@@ -225,6 +225,10 @@ void Node::requeue_time_attrs()
    if (time_dep_attrs_) time_dep_attrs_->requeue(true);
 }
 
+void Node::requeue_labels()
+{
+   if (child_attrs_) child_attrs_->requeue_labels();
+}
 
 void Node::miss_next_time_slot()
 {

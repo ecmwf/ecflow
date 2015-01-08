@@ -35,6 +35,7 @@ public:
 
    void begin();
    void requeue();
+   void requeue_labels();
 
    // standard functions: ==============================================
    std::ostream& print(std::ostream&) const;

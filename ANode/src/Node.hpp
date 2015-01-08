@@ -143,6 +143,11 @@ public:
    /// Since alter clock, should not change node state. This is left for user to re-queue the suite
    virtual void requeue_time_attrs();
 
+   /// Previously < 4.0.6 requeue always reset the labels on requeue.
+   /// However ECFLOW-195 suggest some user prefer to see the last label value.
+   /// hence we will only reset the labels on the tasks when task is being run.
+   void requeue_labels();
+
    /// This functionality is only required during interactive force or run
    /// Avoid running the task on the same time slot, by missing the next time slot.
    /// Requires we set a flag, to avoid the requeue resetting the time slots

@@ -427,6 +427,7 @@ bool Submittable::submit_job_only( JobsParam& jobsParam)
    flag().clear(ecf::Flag::NO_SCRIPT);
    flag().clear(ecf::Flag::EDIT_FAILED);
    flag().clear(ecf::Flag::JOBCMD_FAILED);
+   requeue_labels(); // ECFLOW-195, requeue no longer resets labels on tasks, hence we do it at task run time.
 
    try {
       // Locate the ecf files corresponding to the jobs.
