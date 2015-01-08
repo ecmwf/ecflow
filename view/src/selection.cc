@@ -19,12 +19,12 @@
 #include "host.h"
 
 class selection_observer :public observer {
-	node* n_;
+  node* n_;
+  void gone(observable*);
+  void adoption(observable*,observable*);
+  void notification(observable*);
 
-  std::string location;
-	void gone(observable*);
-	void adoption(observable*,observable*);
-	void notification(observable*);
+  std::string location, top;
 
 public:
 
@@ -32,6 +32,7 @@ public:
   void  set(node*);
   node* get() { return n_; }
   const std::string path() { return location; }
+  const std::string server() { return top; }
 };
 
 static selection_observer current;
@@ -51,6 +52,7 @@ void selection_observer::set(node* n)
 
 	if(n_) {
 	  observe((&n_->serv()));
+	  top = n_->serv().name();
 	  location = n_->full_name();
 	}
 }
@@ -142,5 +144,10 @@ node *selection::current_node()
 const std::string selection::current_path()
 {
   return current.path();
+}
+
+const std::string selection::server()
+{
+  return current.server();
 }
 IMP(selection)

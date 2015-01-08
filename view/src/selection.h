@@ -42,6 +42,7 @@ public:
 	static void  menu_node(node*);
 	static node* current_node();
 	static const std::string current_path();
+	static const std::string server();
 
 private:
 
