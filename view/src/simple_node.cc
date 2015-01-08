@@ -1045,6 +1045,7 @@ void simple_node::variables(std::vector<Variable>& var)
 Boolean simple_node::hasMessages() const
 { 
   if (ecfFlag(FLAG_MESSAGE)) return True;
+  if (type() == NODE_SUPER) return serv().messages(*this).size() > 0;
   return False; // serv().messages(*this).size() > 0;
 }
 

@@ -835,7 +835,7 @@ void node::info(std::ostream& f)
   f << "status   : " << status_name() << "\n";
 
   if (owner_) {
-    // if (owner_->type() == NODE_TASK ) 
+    // if (owner_->type() == NODE_TASKtas ) 
     {
        boost::posix_time::ptime state_change_time = owner_->status_time();
        if (!state_change_time.is_special()) {
