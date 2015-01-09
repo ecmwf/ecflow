@@ -148,12 +148,17 @@ const char* RequeueNodeCmd::arg()  { return CtsApi::requeueArg();}
 const char* RequeueNodeCmd::desc() {
    return
             "Re queues the specified node(s)\n"
+            "  If any child of the specified node(s) is in a suspended state, this state is cleared\n"
             "  arg1 = (optional) [ abort | force ]\n"
-            "         abort = re-queue only aborted tasks below node\n"
-            "         force = Force the re-queueing even if there are nodes that are active or submitted\n"
-            "  arg2 = list of node paths. The node paths must begin with a leading '/' character\n"
+            "         abort  = re-queue only aborted tasks below node\n"
+            "         force  = Force the re-queueing even if there are nodes that are active or submitted\n"
+            "         <null> = Checks if any tasks are in submitted or active states below the node\n"
+            "                  if so does nothing. Otherwise re-queues the node.\n"
+            "  arg2 = list of node paths. The node paths must begin with a leading '/' character\n\n"
             "Usage:\n"
-            "  --requeue=abort /suite/f1  # re-queue all aborted children of /suite/f1"
+            "  --requeue=abort /suite/f1  # re-queue all aborted children of /suite/f1\n"
+            "  --requeue=force /suite/f1  # forcibly re-queue /suite/f1 and all its children.May cause zombies.\n"
+            "  --requeue=/s1/f1/t1 /s1/t2 # Re-queue node '/suite/f1/t1' and '/s1/t2'"
             ;
 }
 
