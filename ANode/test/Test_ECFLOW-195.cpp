@@ -26,7 +26,7 @@ BOOST_AUTO_TEST_SUITE( NodeTestSuite )
 
 BOOST_AUTO_TEST_CASE( test_ECFLOW_195 )
 {
-   cout << "ANode:: ...test_ECFLOW_195 re-queue on task should retail label value\n";
+   cout << "ANode:: ...test_ECFLOW_195 re-queue on task should retain label value\n";
 
    defs_ptr defs = Defs::create();
    suite_ptr s1 = defs->add_suite("s1");
