@@ -1082,9 +1082,9 @@ tmp_file host::sfile( node& n, std::string name )
 
    std::string::size_type pos = loghost_.find(n.variable("ECF_MICRO"));
    if (std::string::npos == pos && loghost_ != ecf_node::none()) {
-      logsvr the_log_server(loghost_, logport_);
-      if (the_log_server.ok()) {
-         tmp_file tmp = the_log_server.getfile(name);
+      logsvr log_server(loghost_, logport_);
+      if (log_server.ok()) {
+         tmp_file tmp = log_server.getfile(name);
          if (access(tmp.c_str(), R_OK) == 0) return tmp;
       }
    }
@@ -1095,39 +1095,13 @@ tmp_file host::sfile( node& n, std::string name )
 
    try {
       n.serv().command(clientName, "--file", "-n", cname, host::maxLines, 0x0);
-   }
-   catch ( std::exception &e ) {
+   } catch ( std::exception &e ) {
       gui::error("cannot get file from server: %s", e.what());
    }
 
-   return tmp_file((const char*) NULL);
+   return tmp_file(cname, false);
+   // return tmp_file((const char*) NULL); // FIXME
 }
-
-//bool ecf_guess_name( node& n, char* fn )
-//{
-//   int tn = atoi(n.variable("ECF_TRYNO").c_str());
-//   std::string home = n.variable("ECF_HOME");
-//   const char *suite = n.variable("SUITE").c_str();
-//   const char *family = n.variable("FAMILY").c_str();
-//   const char *task = n.variable("TASK").c_str();
-//   std::string jout = n.variable("ECF_JOBOUT", true);
-//
-//   if (home == ecf_node::none()) home = n.variable("SMSHOME", true);
-//   if (jout == ecf_node::none()) jout = n.variable("SMSJOBOUT", true);
-//
-//   sprintf(fn, "%s", jout.c_str());
-//   if (access(fn, R_OK) == 0) {
-//      return true;
-//   }
-//   sprintf(fn, "/%s/%s/%s/%s.%d", home.c_str(), suite, family, task, tn > 0 ? tn : 1);
-//
-//   if (access(fn, R_OK) == 0) {
-//      return true;
-//   }
-//   sprintf(fn, "/%s/%s.old/%s/%s.%d", home.c_str(), suite, family, task, tn > 0 ? tn : 1);
-//
-//   return access(fn, R_OK) == 0;
-//}
 
 const str& host::timefile()
 {
@@ -1353,7 +1327,8 @@ tmp_file ehost::file( node& n, std::string name )
 
          // Do *not* assign 'client_.server_reply().get_string()' to a separate string, since
          // in the case of job output the string could be several megabytes.
-         return tmp_file(client_.server_reply().get_string());
+         return tmp_file("# file is server by ecflow-server\n" +
+			 client_.server_reply().get_string());
       } catch ( std::exception &e ) {
  	std::cerr << "host::file-error:" << e.what() << "\n";
          gui::message("host::file-error: %s", e.what());
@@ -1802,11 +1777,9 @@ void host::login( const std::string& name, int num )
 void ehost::stats( std::ostream& buf )
 {
    gui::message("%s: fetching stats", name());
-   // std::stringstream buf;
    try {
       client_.stats();
       client_.server_reply().stats().show(buf);
-      // f.push(buf.str());
    }
    catch ( std::exception& e ) {
    }
