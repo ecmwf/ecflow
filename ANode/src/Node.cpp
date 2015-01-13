@@ -216,6 +216,7 @@ void Node::requeue(
    for(size_t i = 0; i < limitVec_.size(); i++) { limitVec_[i]->reset(); }
 
    // ECFLOW-196, ensure the re-queue release tokens held by Limits higher up the tree.
+   // Note: Its safe to call decrementInLimit, even when no limit consumed
    std::set<Limit*> limitSet;     // ensure local limit have preference over parent
    decrementInLimit(limitSet);    // will recurse up, expensive but needed
 }
