@@ -133,7 +133,7 @@ BOOST_AUTO_TEST_CASE( test_limit_decrement )
 
 
 // Globals used throughout the test
-static std::string fileName = "test.txt";
+static std::string fileName = "testLimit.txt";
 BOOST_AUTO_TEST_CASE( test_LimitDefaultConstructor_serialisation )
 {
    cout << "ANode:: ...test_LimitDefaultConstructor_serialisation \n";
