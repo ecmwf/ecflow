@@ -509,8 +509,9 @@ BOOST_AUTO_TEST_CASE( test_limits_after_requeue_ECFLOW_196 )
    }
 
    {
-      // The Mock server, will call resolve dependencies after reque command , and place nodes back into active
-      // state, to *STOP* this we will add a trigger, so that the dependencies will not resolve
+      // We now want to re-queue node f2, and check to see that limit tokens are released after the re-queue
+      // However, the Mock server, will call resolve dependencies after re-queue command , and place nodes *back* into active
+      // state, to *STOP* this, we will add a trigger, so that the dependencies will not resolve, and hence nodes stay queued
       f2->add_trigger("1 == 0");
       TestHelper::invokeRequest(&defs,Cmd_ptr( new RequeueNodeCmd(f2->absNodePath(),RequeueNodeCmd::FORCE)));
 
