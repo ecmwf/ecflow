@@ -572,35 +572,44 @@ BOOST_AUTO_TEST_CASE( test_limits_after_requeue_task_ECFLOW_196 )
 
    // This test is used to ensure that, requeue causes node to release tokens held by the Limits
 
-   // Create the following defs
+   // Create the following def, i.e using internal and external limits
+   // suite s0
+   //   limit X 5
    // suite s1
    //   limit A 10
    //   limit B 5
    //   family f1
    //     inlimit A
    //     inlimit B
+   //     inlimit X /s0/
    //     task t1
    //     task t2
    //   family f2
    //     inlimit A
    //     inlimit B
+   //     inlimit X /s0/
    //     task t1
    //     task t2
 
    // When all the tasks are running/submitted state, limit A should have consumed 4 tokens
    // However if we how force task to reque, then the token should be released
    Defs defs;
+   suite_ptr s0 =  defs.add_suite("s0");
+   s0->addLimit(Limit("X",10));
+
    suite_ptr s1 =  defs.add_suite("s1");
    s1->addLimit(Limit("A",10));
    s1->addLimit(Limit("B",5));
    family_ptr f1 = s1->add_family("f1");
    f1->addInLimit( InLimit("A","/s1"));
    f1->addInLimit( InLimit("B","/s1"));
+   f1->addInLimit( InLimit("X","/s0"));
    task_ptr f1_t1 = f1->add_task("t1");
    task_ptr f1_t2 = f1->add_task("t2");
    family_ptr f2 = s1->add_family("f2");
    f2->addInLimit( InLimit("A","/s1"));
    f2->addInLimit( InLimit("B","/s1"));
+   f2->addInLimit( InLimit("X","/s0"));
    task_ptr f2_t1 = f2->add_task("t1");
    task_ptr f2_t2 = f2->add_task("t2");
 
@@ -611,7 +620,8 @@ BOOST_AUTO_TEST_CASE( test_limits_after_requeue_task_ECFLOW_196 )
 
    limit_ptr the_A_limit = s1->find_limit("A");
    limit_ptr the_B_limit = s1->find_limit("B");
-   BOOST_CHECK_MESSAGE( the_A_limit && the_B_limit, "Could not find limits");
+   limit_ptr the_X_limit = s0->find_limit("X");
+   BOOST_CHECK_MESSAGE( the_A_limit && the_B_limit && the_X_limit, "Could not find limits");
 
    // Create a request to begin suite
    // make sure chosen suite can begin to resolve dependencies.
@@ -633,6 +643,7 @@ BOOST_AUTO_TEST_CASE( test_limits_after_requeue_task_ECFLOW_196 )
 
       BOOST_CHECK_MESSAGE( the_A_limit->value() == expected_limit_value,"Expected limit value to be " << expected_limit_value << " but found " << the_A_limit->value());
       BOOST_CHECK_MESSAGE( the_B_limit->value() == expected_limit_value,"Expected limit value to be " << expected_limit_value << " but found " << the_B_limit->value());
+      BOOST_CHECK_MESSAGE( the_X_limit->value() == expected_limit_value,"Expected limit value to be " << expected_limit_value << " but found " << the_X_limit->value());
    }
 
    {
@@ -647,6 +658,7 @@ BOOST_AUTO_TEST_CASE( test_limits_after_requeue_task_ECFLOW_196 )
          expected_limit_value--;
          BOOST_CHECK_MESSAGE( the_A_limit->value() == expected_limit_value,"Expected limit value " << expected_limit_value << " but found " << the_A_limit->value());
          BOOST_CHECK_MESSAGE( the_B_limit->value() == expected_limit_value,"Expected limit value " << expected_limit_value << " but found " << the_B_limit->value());
+         BOOST_CHECK_MESSAGE( the_X_limit->value() == expected_limit_value,"Expected limit value " << expected_limit_value << " but found " << the_X_limit->value());
       }
    }
 
