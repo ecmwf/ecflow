@@ -111,19 +111,23 @@ public:
 	void set_client_handle(int handle) { client_handle_ = handle;}
 	int client_handle() const { return client_handle_;}
 
+	// During incremental sync, record list of changed nodes, used by python api
+	std::vector<std::string>& changed_nodes() { return changed_nodes_; }
+
 private:
 	friend class SSyncCmd;
 	bool cli_;
- 	bool in_sync_;                       // clear at the start of invoke
- 	bool full_sync_;                     // clear at the start of invoke
-	News_t news_;                        // clear at the start of invoke
-	bool block_client_on_home_server_;   // clear at the start of invoke
-	bool block_client_server_halted_;    // clear at the start of invoke
-	bool block_client_zombie_detected_;  // clear at the start of invoke
-	std::string str_;                    // clear at the start of invoke
-	std::string error_msg_;              // clear at the start of invoke
-   std::vector<Zombie> zombies_;        // clear at the start of invoke
-   std::vector<std::string> str_vec_;   // clear at the start of invoke
+ 	bool in_sync_;                         // clear at the start of invoke
+ 	bool full_sync_;                       // clear at the start of invoke
+	News_t news_;                           // clear at the start of invoke
+	bool block_client_on_home_server_;     // clear at the start of invoke
+	bool block_client_server_halted_;      // clear at the start of invoke
+	bool block_client_zombie_detected_;    // clear at the start of invoke
+	std::string str_;                       // clear at the start of invoke
+	std::string error_msg_;                 // clear at the start of invoke
+   std::vector<Zombie> zombies_;           // clear at the start of invoke
+   std::vector<std::string> str_vec_;      // clear at the start of invoke
+   std::vector<std::string> changed_nodes_;// clear at the start of invoke
    std::vector<std::pair<unsigned int, std::vector<std::string> > > client_handle_suites_; // clear at the start of invoke
    Stats stats_;                        // Used for test only, ideally need to clear
 

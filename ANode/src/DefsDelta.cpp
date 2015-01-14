@@ -17,6 +17,8 @@
 #include "ChangeMgrSingleton.hpp"
 using namespace std;
 
+//#define DEBUG_MEMENTO 1
+
 //===============================================================
 // DefsDelta
 
@@ -31,7 +33,7 @@ void DefsDelta::init(unsigned int client_state_change_no)
 }
 
 
-bool DefsDelta::incremental_sync(defs_ptr client_def) const
+bool DefsDelta::incremental_sync(defs_ptr client_def, std::vector<std::string>& changed_nodes) const
 {
 	if (!client_def.get()) return false;
 
@@ -48,12 +50,16 @@ bool DefsDelta::incremental_sync(defs_ptr client_def) const
 #ifdef DEBUG_MEMENTO
 		std::cout << "DefsDelta::incremental_sync compound_mementos_.size() = " << compound_mementos_.size() << "\n";
 #endif
-		std::for_each(compound_mementos_.begin(),compound_mementos_.end(), boost::bind(&CompoundMemento::incremental_sync,_1,client_def));
+		std::for_each(compound_mementos_.begin(),compound_mementos_.end(),
+		              boost::bind(&CompoundMemento::incremental_sync,_1,client_def,boost::ref(changed_nodes)));
 	}
 	catch ( std::exception& e) {
 		throw std::runtime_error("Could not apply incremental server changes to client defs, because: " + string(e.what()));
 	}
 
+	// For each compound memento, we should have change node.
+	assert( compound_mementos_.size() == changed_nodes.size());
+ 
 	// return true if there were any changes made
 	return !compound_mementos_.empty();
 }

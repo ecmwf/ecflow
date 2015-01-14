@@ -142,7 +142,6 @@ void test_sync_scaffold( defs_change_cmd the_defs_change_command, const std::str
    SNewsCmd news_cmd(client_handle, client_state_change_no,  client_modify_change_no, &mock_server );
    SSyncCmd cmd(client_handle, client_state_change_no,  client_modify_change_no, &mock_server );
 
-
    if ( expected_change ) {
       BOOST_CHECK_MESSAGE( news_cmd.get_news(),         test_name << ": Expected server to change");
       BOOST_CHECK_MESSAGE( cmd.do_sync( server_reply ), test_name << ": Expected server to change");
@@ -164,6 +163,7 @@ void test_sync_scaffold( defs_change_cmd the_defs_change_command, const std::str
       // * with handles, we only return a sub set of the suites, in our handle
 
       // DO a sync again. hence we should expect no changes
+      server_reply.clear_for_invoke(false);
       Ecf::set_server(true);
       /* server side */ SNewsCmd news_cmd1(client_handle, server_reply.client_defs()->state_change_no(),  server_reply.client_defs()->modify_change_no(), &mock_server );
       /* server side */ SSyncCmd cmd1(client_handle, server_reply.client_defs()->state_change_no(),  server_reply.client_defs()->modify_change_no(), &mock_server );

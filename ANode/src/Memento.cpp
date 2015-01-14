@@ -20,23 +20,28 @@
 using namespace std;
 using namespace ecf;
 
+//#define DEBUG_MEMENTO 1
+
 // ===============================================================
 Memento::~Memento() {}
 
 // ===============================================================
-void CompoundMemento::incremental_sync(defs_ptr client_def) const
+void CompoundMemento::incremental_sync(defs_ptr client_def,std::vector<std::string>& changed_nodes) const
 {
    /// Clear out aspects, for this Memento.
    ///   Aspects are added to ChangeMgrSingleton, via do_incremental_* functions
    ///   AND in *this* function when node attributes have been added or deleted.
    ChangeMgrSingleton::instance()->clear_aspects();
 
+   // Record changes nodes for the python interface
+   changed_nodes.push_back(absNodePath_);
+
 	node_ptr node = client_def->findAbsNode(absNodePath_);
  	if (!node.get()) {
  		if ( absNodePath_ != Str::ROOT_PATH()) throw std::runtime_error("CompoundMemento::incremental_sync: could not find path " + absNodePath_ );
 
 #ifdef DEBUG_MEMENTO
- 		cout << "CompoundMemento::incremental_sync(defs_ptr client_def)  ROOT_PATH \n";
+ 		cout << "CompoundMemento::incremental_sync: ROOT_PATH   changed_nodes.size()=" << changed_nodes.size() << "\n";
 #endif
  		BOOST_FOREACH(memento_ptr m, vec_) {
   			m->do_incremental_defs_sync( client_def.get() );
@@ -48,7 +53,7 @@ void CompoundMemento::incremental_sync(defs_ptr client_def) const
  	else {
 
 #ifdef DEBUG_MEMENTO
- 		cout << "CompoundMemento::incremental_sync(defs_ptr client_def) " << node->debugNodePath() << "\n";
+ 		cout << "CompoundMemento::incremental_sync: " << node->debugNodePath() << "  changed_nodes.size()=" << changed_nodes.size() << "\n";
 #endif
 
  		if (clear_attributes_) {

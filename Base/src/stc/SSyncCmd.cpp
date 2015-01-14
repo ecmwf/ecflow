@@ -443,7 +443,7 @@ bool SSyncCmd::do_sync( ServerReply& server_reply, bool debug) const
       // If *no* server loaded, then no changes applied
       // Returns true if are any memento's, i.e. server changed.
       server_reply.set_full_sync( false );
-      bool changes_made_to_client = incremental_changes_.incremental_sync(server_reply.client_defs_);
+      bool changes_made_to_client = incremental_changes_.incremental_sync(server_reply.client_defs_,server_reply.changed_nodes());
       server_reply.set_sync( changes_made_to_client );
 
       if (debug) cout << "SSyncCmd::do_sync::*INCREMENTAL sync*, client side state/modify numbers("
@@ -455,7 +455,8 @@ bool SSyncCmd::do_sync( ServerReply& server_reply, bool debug) const
       cout << "SSyncCmd::do_sync::*INCREMENTAL sync*, client side state/modify numbers("
                             << incremental_changes_.get_server_state_change_no() << ","
                             << incremental_changes_.get_server_modify_change_no() << ") changes_made_to_client("
-                            << changes_made_to_client << ")\n";
+                            << changes_made_to_client << "), changed_node_paths("
+                            << server_reply.changed_nodes().size() << ")\n";
 #endif
       return changes_made_to_client;
    }
