@@ -11,6 +11,7 @@
 
 #include <QApplication>
 #include <QDebug>
+#include <QHeaderView>
 #include <QScrollBar>
 
 #include "ActionHandler.hpp"
@@ -36,10 +37,13 @@ TreeNodeView::TreeNodeView(NodeFilterModel *model,QWidget* parent) : QTreeView(p
 	//The background colour between the views left border and the nodes cannot be
 	//controlled by delegates or stylesheets. It always takes the QPalette::Highlight
 	//colour from the palette. Here we set this to transparent so that Qt could leave
-	//this are empty and we will fill it appropriately in our delegate.
+	//this area empty and we will fill it appropriately in our delegate.
 	QPalette pal=palette();
 	pal.setColor(QPalette::Highlight,Qt::transparent);
 	setPalette(pal);
+
+	//Hide header
+	header()->hide();
 
 	//Context menu
 	setContextMenuPolicy(Qt::CustomContextMenu);

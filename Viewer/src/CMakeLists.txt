@@ -23,7 +23,7 @@ set(viewer_srcs
     NodePathWidget.cpp
     NodeViewBase.cpp
     NodeViewHandler.cpp
-    NodeWidget.cpp
+    NodeWidgetHandler.cpp
     OutputItemWidget.cpp
     OverviewItemWidget.cpp
     OverviewProvider.cpp
@@ -51,6 +51,7 @@ set(viewer_srcs
     VNState.cpp
     VParam.cpp   
     VReply.cpp
+    VSettings.cpp
     VSState.cpp
     VTask.cpp
     VariableModel.cpp
@@ -72,7 +73,7 @@ QT4_WRAP_CPP(VIEWER_MOC AbstractNodeModel.hpp
                         NodeFilterModel.hpp
                         NodePanel.hpp
                         NodePathWidget.hpp
-                        NodeWidget.hpp
+                        NodeWidgetHandler.hpp
                         PlainTextSearchLine.hpp
                         ServerHandler.hpp
                         ServerListDialog.hpp

@@ -24,10 +24,11 @@ class NodeModelServerItem
 friend class NodeModelServers;
 
 public:
-    NodeModelServerItem(ServerHandler *server) : server_(server), rootNode_(NULL) {}
+    NodeModelServerItem(ServerHandler *server) : server_(server), rootNode_(NULL), nodeNum_(-1) {}
     bool isFiltered(Node*) const;
 
     void resetFilter(VFilter* stateFilter);
+    int nodeNum() const;
 
 protected:
     bool filterState(node_ptr node,VFilter* stateFilter);
@@ -35,6 +36,7 @@ protected:
     ServerHandler *server_;
 	QSet<Node*> nodeFilter_;
 	Node* rootNode_;
+	mutable int nodeNum_;
 
 	QList<NodeModelServerItem*> children_;
 };
@@ -54,7 +56,6 @@ public:
 	bool isFiltered(Node *node) const;
 	void resetFilter(VFilter* stateFilter);
 
-protected:
 	QList<NodeModelServerItem> items_;
 };
 

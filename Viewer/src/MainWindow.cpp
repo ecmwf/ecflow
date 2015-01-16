@@ -32,6 +32,7 @@
 #include "MenuConfigDialog.hpp"
 #include "UserMessage.hpp"
 #include "VConfig.hpp"
+#include "VSettings.hpp"
 
 #include <boost/lexical_cast.hpp>
 #include <boost/property_tree/json_parser.hpp>
@@ -39,6 +40,7 @@
 //Initialise static variables
 bool MainWindow::quitStarted_=false;
 QList<MainWindow*> MainWindow::windows_;
+int MainWindow::maxWindowNum_=25;
 
 MainWindow::MainWindow(QStringList idLst,QWidget *parent) : QMainWindow(parent)
 {
@@ -310,36 +312,41 @@ void MainWindow::closeEvent(QCloseEvent* event)
 //
 //====================================================
 
-void MainWindow::save(boost::property_tree::ptree &pt,QSettings &qs)
+void MainWindow::writeSettings(VSettings *vs)
 {
-	qs.setValue("geometry",saveGeometry());
-	qs.setValue("state",saveState());
-	qs.setValue("minimized",(windowState() & Qt::WindowMinimized)?1:0);
+	//Qt settings
+	vs->putQs("geometry",saveGeometry());
+	vs->putQs("state",saveState());
+	vs->putQs("minimized",(windowState() & Qt::WindowMinimized)?1:0);
 
-	pt.put("infoPanelCount",findChildren<QDockWidget*>().count());
+	//Other setting
+	vs->put("infoPanelCount",findChildren<QDockWidget*>().count());
 
-	nodePanel_->save(pt);
+	//Saves nodePanel
+	nodePanel_->writeSettings(vs);
 }
 
-void MainWindow::load(const boost::property_tree::ptree& winPt,QSettings &qs)
+void MainWindow::readSettings(VSettings *vs)
 {
-	int cnt=winPt.get<int>("infoPanelCount",0);
+	int cnt=vs->get<int>("infoPanelCount",0);
 	for(int i=0; i < cnt ; i++)
 	{
-		addInfoPanel();
+		//addInfoPanel();
 	}
 
-	nodePanel_->load(winPt);
+	nodePanel_->readSettings(vs);
 
-	if(qs.value("minimized").toInt()== 1)
+	if(vs->getQs("minimized").toInt()== 1)
 	{
 	  	setWindowState(windowState() | Qt::WindowMinimized);
 	}
 
-	restoreGeometry(qs.value("geometry").toByteArray());
-	restoreState(qs.value("state").toByteArray());
-}
+	if(vs->containsQs("geometry"))
+		restoreGeometry(vs->getQs("geometry").toByteArray());
 
+	if(vs->containsQs("state"))
+		restoreState(vs->getQs("state").toByteArray());
+}
 
 //====================================================
 //
@@ -347,10 +354,10 @@ void MainWindow::load(const boost::property_tree::ptree& winPt,QSettings &qs)
 //
 //====================================================
 
-MainWindow* MainWindow::makeWindow(const boost::property_tree::ptree& winPt,QSettings& qs)
+MainWindow* MainWindow::makeWindow(VSettings* vs)
 {
-   	MainWindow* win=MainWindow::makeWindow();
-	win->load(winPt,qs);
+	MainWindow* win=MainWindow::makeWindow();
+	win->readSettings(vs);
 	return win;
 }
 
@@ -446,111 +453,87 @@ bool MainWindow::aboutToQuit(MainWindow* topWin)
 
 void MainWindow::init()
 {
-	QSettings qs("ECMWF","ecFlowView");
+	VSettings vs("ecFlow_ui");
 
-	int cnt=0;
-	int topWinId=-1;
+	//We have to clear it so that not to remember all the previous windows
+	vs.clear();
 
 	std::string fs = DirectoryHandler::concatenate(DirectoryHandler::configDir(), "session.json");
 
-	//Parse param file using the boost JSON property tree parser
-	using boost::property_tree::ptree;
-
-	ptree pt;
-	ptree pt_empty;
-
-	try
+	//Read configuration. If it fails we create an empty window!!
+	if(!vs.read(fs))
 	{
-		boost::property_tree::json_parser::read_json(fs,pt);
-	}
-	catch (const boost::property_tree::json_parser::json_parser_error& e)
-	{
-		 std::string errorMessage = e.what();
-		 UserMessage::message(UserMessage::ERROR, true, std::string("Error, unable to parse JSON session file : " + errorMessage));
-
-		 MainWindow::makeWindow(pt_empty,qs);
+		 MainWindow::makeWindow(&vs);
 		 return;
 	}
 
-	cnt=pt.get<int>("windowCount",0);
-	topWinId=pt.get<int>("topWindowId",-1);
+	//Get number of windows and topWindow index.
+	int cnt=vs.get<int>("windowCount",0);
+	int topWinId=vs.get<int>("topWindowId",-1);
 
-	if(cnt > 25)
+	if(cnt > maxWindowNum_)
 	{
-		cnt=25;
+		cnt=maxWindowNum_;
 	}
 
+	//Create all windows (except the topWindow) in a loop. The
+	//topWindow should be created last so that it should always appear on top.
 	std::string winPattern("window_");
 	for(int i=0; i < cnt; i++)
 	{
 		if(i != topWinId)
 		{
 			std::string id=winPattern + boost::lexical_cast<std::string>(i);
-			ptree::const_assoc_iterator it=pt.find(id.c_str());
-			if(it != pt.not_found())
+			if(vs.contains(id))
 			{
-				const ptree &winPt = it->second;
-				qs.beginGroup(QString::fromStdString(id));
-				MainWindow::makeWindow(winPt,qs);
-				qs.endGroup();
+				vs.beginGroup(id);
+				MainWindow::makeWindow(&vs);
+				vs.endGroup();
 			}
 		}
 	}
 
+	//Create the topwindow
 	if(topWinId != -1)
 	{
 		std::string id=winPattern + boost::lexical_cast<std::string>(topWinId);
-		ptree::const_assoc_iterator it=pt.find(id.c_str());
-		if(it != pt.not_found())
+		if(vs.contains(id))
 		{
-			const ptree &winPt = it->second;
-			qs.beginGroup(QString::fromStdString(id));
-			MainWindow::makeWindow(winPt,qs);
-			qs.endGroup();
+			vs.beginGroup(id);
+			MainWindow::makeWindow(&vs);
+			vs.endGroup();
 		}
 	}
 
+	//If now windows were created we need to create an empty one
 	if(windows_.count() == 0)
 	{
-		MainWindow::makeWindow(pt_empty,qs);
+		MainWindow::makeWindow(&vs);
 	}
 }
 
 void MainWindow::save(MainWindow *topWin)
 {
-
-	//Define qt settings
-	QSettings qs("ECMWF","ecFlowView");
-
-	//We have to clear it so that not to remember all the previous windows
-	qs.clear();
-
-	//Define json file
-	std::string fs = DirectoryHandler::concatenate(DirectoryHandler::configDir(), "session.json");
-
-	//Generate property tree
-	boost::property_tree::ptree pt;
+	VSettings vs("ecFlow_ui");
 
 	//Add total window number and id of active window
-	pt.put("windowCount",windows_.count());
-	pt.put("topWindowId",windows_.indexOf(topWin));
+	vs.put("windowCount",windows_.count());
+	vs.put("topWindowId",windows_.indexOf(topWin));
 
 	//Save info for all the windows
 	for(int i=0; i < windows_.count(); i++)
 	{
 		std::string id="window_"+boost::lexical_cast<std::string>(i);
-
-		boost::property_tree::ptree ptWin;
-
-		qs.beginGroup(QString::fromStdString(id));
-		windows_.at(i)->save(ptWin,qs);
-		qs.endGroup();
-
-		pt.add_child(id,ptWin);
+		vs.beginGroup(id);
+		windows_.at(i)->writeSettings(&vs);
+		vs.endGroup();
 	}
 
+	//Define json file
+	std::string fs = DirectoryHandler::concatenate(DirectoryHandler::configDir(), "session.json");
+
 	//Write to json
-	write_json(fs,pt);
+	vs.write(fs);
 }
 
 void MainWindow::reload()
@@ -563,8 +546,6 @@ void MainWindow::reload()
 
 void MainWindow::saveSession(SessionItem* s)
 {
-
-
 
 }
 

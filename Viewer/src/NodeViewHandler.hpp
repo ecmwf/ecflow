@@ -3,6 +3,8 @@
 
 #include <map>
 #include <QString>
+#include <QWidget>
+
 #include "Viewer.hpp"
 #include "VInfo.hpp"
 
@@ -14,7 +16,7 @@ class NodeFilterModel;
 class NodeViewBase;
 class VConfig;
 
-class NodeViewControl
+class NodeWidget : public QWidget
 {
 public:
 	void active(bool);
@@ -26,23 +28,23 @@ public:
 	void reload();
 
 protected:
-	NodeViewControl(): model_(0), filterModel_(0), view_(0) {};
+	NodeWidget(): model_(0), filterModel_(0), view_(0) {};
 
 	AbstractNodeModel* model_;
 	NodeFilterModel* filterModel_;
 	NodeViewBase* view_;
 };
 
-class TreeNodeViewControl : public NodeViewControl
+class TreeNodeWidget : public NodeWidget
 {
 public:
-	TreeNodeViewControl(VConfig*,QWidget* parent=0);
+	TreeNodeWidget(VConfig*,QWidget* parent=0);
 };
 
-class TableNodeViewControl : public NodeViewControl
+class TableNodeWidget : public NodeWidget
 {
 public:
-	TableNodeViewControl(VConfig*,QWidget* parent=0);
+	TableNodeWidget(VConfig*,QWidget* parent=0);
 };
 
 class NodeViewHandler
@@ -50,17 +52,17 @@ class NodeViewHandler
 public:
     NodeViewHandler(QStackedLayout*);
 
-	void add(Viewer::ViewMode,NodeViewControl*);
+	void add(Viewer::ViewMode,NodeWidget*);
 	Viewer::ViewMode currentMode() const {return currentMode_;}
 	bool setCurrentMode(Viewer::ViewMode);
 	bool setCurrentMode(int);
-	NodeViewControl* currentControl() const {return control(currentMode_);}
+	NodeWidget* currentControl() const {return control(currentMode_);}
 
 private:
-	NodeViewControl* control(Viewer::ViewMode) const;
+	NodeWidget* control(Viewer::ViewMode) const;
 
 	Viewer::ViewMode  currentMode_;
-  	std::map<Viewer::ViewMode,NodeViewControl*> controls_;
+  	std::map<Viewer::ViewMode,NodeWidget*> controls_;
 	std::map<Viewer::ViewMode,int> indexes_;
 	QStackedLayout* stacked_;
 };

@@ -17,6 +17,8 @@
 #include "VConfig.hpp"
 #include "ServerItem.hpp"
 
+class VSettings;
+
 #include <boost/property_tree/ptree.hpp>
 
 /*class ServerFilterItem : public ServerItemObserver
@@ -54,8 +56,9 @@ public:
 	void addServer(ServerItem*,bool broadcast=true);
 	void removeServer(ServerItem*);
     bool isFiltered(ServerItem*) const;
-    void save(boost::property_tree::ptree& array) const;
-    void load(const boost::property_tree::ptree& array);
+
+    void writeSettings(VSettings*) const;
+    void readSettings(VSettings*);
 
     //From ServerItemObserver
     void notifyServerItemChanged(ServerItem*);

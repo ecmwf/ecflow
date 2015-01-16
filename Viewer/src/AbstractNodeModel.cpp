@@ -19,6 +19,14 @@
 #include "VFilter.hpp"
 #include "VNState.hpp"
 
+int NodeModelServerItem::nodeNum() const
+{
+	if(nodeNum_==-1)
+		nodeNum_=server_->numberOfNodes();
+
+	return nodeNum_;
+}
+
 bool NodeModelServerItem::isFiltered(Node* node) const
 {
 	return !nodeFilter_.contains(node);

@@ -16,8 +16,9 @@
 
 #include <boost/property_tree/ptree.hpp>
 
-class NodeWidget;
+class NodeWidgetHandler;
 class VConfig;
+class VSettings;
 
 class NodePanel : public TabWidget
 {
@@ -32,14 +33,14 @@ public:
 
 	VConfig* config();
 
-	NodeWidget* currentNodeWidget();
+	NodeWidgetHandler* currentNodeWidget();
 	void addWidget();
 	void resetWidgets(QStringList);
 	void reload();
 	VInfo_ptr currentSelection();
 
-	void save(boost::property_tree::ptree &pt);
-	void load(const boost::property_tree::ptree &pt);
+	void writeSettings(VSettings*);
+	void readSettings(VSettings*);
 
 public Q_SLOTS:
 	void slotCurrentWidgetChanged(int);
@@ -56,9 +57,10 @@ Q_SIGNALS:
 	void selectionChanged(VInfo_ptr);
 
 protected:
-	NodeWidget* addWidget(QString);
+	NodeWidgetHandler* addWidget(QString);
 	void tabBarCommand(QString, int);
-	NodeWidget* nodeWidget(int index);
+	NodeWidgetHandler* nodeWidget(int index);
+	static std::string tabSettingsId(int i);
 };
 
 #endif

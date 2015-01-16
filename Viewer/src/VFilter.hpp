@@ -15,6 +15,8 @@
 #include "VConfig.hpp"
 #include "VParam.hpp"
 
+class VSettings;
+
 #include <boost/property_tree/ptree.hpp>
 
 class VFilter : public VConfigItem
@@ -31,14 +33,16 @@ public:
 	bool isSet(const std::string&) const;
 	bool isSet(VParam*) const;
 
-	void save(boost::property_tree::ptree& array);
-	void load(const boost::property_tree::ptree& array);
+	void writeSettings(VSettings* vs);
+	void readSettings(VSettings* vs);
+
 
 protected:
 	void init(const std::vector<VParam*>& items);
 
 	std::set<VParam*> all_;
 	std::set<VParam*> current_;
+	std::string settingsId_;
 
 };
 

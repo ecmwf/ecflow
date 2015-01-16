@@ -28,12 +28,11 @@ TableNodeModel::TableNodeModel(VConfig* config,QObject *parent) :
 
 int TableNodeModel::columnCount( const QModelIndex& /*parent */ ) const
 {
-   	 return 2;
+   	 return 3;
 }
 
 int TableNodeModel::rowCount( const QModelIndex& parent) const
 {
-
 	//There are no servers
 	if(!hasData())
 	{
@@ -44,35 +43,16 @@ int TableNodeModel::rowCount( const QModelIndex& parent) const
 	{
 		return 0;
 	}
-	//Parent is the root: the item must be a server!
+	//
 	else if(!parent.isValid())
 	{
-			//qDebug() << "rowCount" << parent << servers_.count();
-			return servers_.count();
-	}
-	//The parent is a server	VFilter *f=config->stateFilter();
-
-	else if(isServer(parent))
-	{
-		if(ServerHandler *server=indexToServer(parent))
+		int cnt=0;
+		for(int i=0; i < servers_.count(); i++)
 		{
-			//There is a rootNode for the server
-			if(Node *rn=rootNode(server))
-			{
-				return 1;
-			}
-			//We show the whole tree for the server
-			else
-			{
-				return server->numberOfNodes();
-			}
+			cnt+=servers_.items_.at(i).nodeNum();
 		}
-	}
 
-	//The parent is a node
-	else
-	{
-		return 0;
+		return cnt;
 	}
 
 	return 0;
@@ -92,10 +72,10 @@ QVariant TableNodeModel::data( const QModelIndex& index, int role ) const
 	//qDebug() << "data" << index << role;
 
 	//Server
-	if(isServer(index))
+	/*if(isServer(index))
 	{
 		return serverData(index,role);
-	}
+	}*/
 
 	return nodeData(index,role);
 }
@@ -103,7 +83,7 @@ QVariant TableNodeModel::data( const QModelIndex& index, int role ) const
 QVariant TableNodeModel::serverData(const QModelIndex& index,int role) const
 {
 	if(role == FilterRole)
-			return -1;
+			return true;
 
 	else if(index.column() == 0)
 	{
@@ -120,6 +100,9 @@ QVariant TableNodeModel::serverData(const QModelIndex& index,int role) const
 
 QVariant TableNodeModel::nodeData(const QModelIndex& index, int role) const
 {
+	if(role == Qt::BackgroundRole && index.column() != 1)
+		return QVariant();
+
 	Node* node=indexToNode(index);
 	if(!node)
 		return QVariant();
@@ -130,6 +113,11 @@ QVariant TableNodeModel::nodeData(const QModelIndex& index, int role) const
 		{
 		case 0: return QString::fromStdString(node->absNodePath());
 		case 1: return VNState::toName(node);
+		case 2:
+		{
+				ServerHandler* s=ServerHandler::find(node);
+				return (s)?QString::fromStdString(s->name()):QString();
+		}
 		default: return QVariant();
 		}
 	}
@@ -138,7 +126,8 @@ QVariant TableNodeModel::nodeData(const QModelIndex& index, int role) const
 		return VNState::toColour(node);
 	}
 	else if(role == FilterRole)
-		return static_cast<int>(node->dstate());
+		//return static_cast<int>(node->dstate());
+		return true;
 
 	return QVariant();
 }
@@ -152,6 +141,8 @@ QVariant TableNodeModel::headerData( const int section, const Qt::Orientation or
 	{
    	case 0: return tr("Node");
    	case 1: return tr("Status");
+   	case 2: return tr("Server");
+
    	default: return QVariant();
    	}
 
@@ -168,7 +159,27 @@ QModelIndex TableNodeModel::index( int row, int column, const QModelIndex & pare
 
 	//qDebug() << "index" << row << column << parent;
 
-	//When parent is the root this index refers to a server
+	int cnt=0;
+	ServerHandler *server=0;
+	for(int i=0; i < servers_.count(); i++)
+	{
+		if(row-cnt < servers_.items_.at(i).nodeNum())
+		{
+			server=servers_.server(i);
+			break;
+		}
+		cnt+=servers_.items_.at(i).nodeNum();
+	}
+
+	if(server)
+	{
+		if(Node *node=server->findNode(row))
+				return createIndex(row,column,node);
+	}
+
+	return QModelIndex();
+
+	/*//When parent is the root this index refers to a server
 	if(!parent.isValid())
 	{
 		//For the server the internalId is its row index + 1
@@ -209,12 +220,16 @@ QModelIndex TableNodeModel::index( int row, int column, const QModelIndex & pare
 		}
 	}
 
-	return QModelIndex();
+	return QModelIndex();*/
 
 }
 
 QModelIndex TableNodeModel::parent(const QModelIndex &child) const
 {
+	//Parent is always the root!!!
+	return QModelIndex();
+
+
 	//If the child is a server the parent is the root
 	if(isServer(child))
 		return QModelIndex();
@@ -299,14 +314,14 @@ QModelIndex TableNodeModel::serverToIndex(ServerHandler* server) const
 
 Node* TableNodeModel::indexToNode( const QModelIndex & index) const
 {
-	return NULL;
+	//return NULL;
 
 	if(index.isValid())
 	{
-		if(!isServer(index))
-		{
+		//if(!isServer(index))
+		//{
 			return static_cast<Node*>(index.internalPointer());
-		}
+		//}
 
 	}
 	return NULL;

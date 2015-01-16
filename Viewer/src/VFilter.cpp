@@ -13,6 +13,7 @@
 #include "VAttribute.hpp"
 #include "VIcon.hpp"
 #include "VParam.hpp"
+#include "VSettings.hpp"
 
 //==============================================
 //
@@ -58,17 +59,36 @@ void VFilter::current(const std::set<std::string>& names)
 	notifyOwner();
 }
 
-void VFilter::save(boost::property_tree::ptree& array)
+void VFilter::writeSettings(VSettings *vs)
 {
+	std::vector<std::string> array;
+
 	for(std::set<VParam*>::const_iterator it=current_.begin(); it != current_.end(); it++)
 	{
-		array.push_back(std::make_pair("",(*it)->name()));
+		array.push_back((*it)->name());
 	}
+
+	vs->put(settingsId_,array);
 }
 
-void VFilter::load(const boost::property_tree::ptree& array)
+void VFilter::readSettings(VSettings* vs)
 {
 	current_.clear();
+
+	std::vector<std::string> array;
+	vs->get(settingsId_,array);
+
+	for(std::vector<std::string>::const_iterator it = array.begin(); it != array.end(); ++it)
+	{
+		std::string name=*it;
+		for(std::set<VParam*>::const_iterator itA=all_.begin(); itA != all_.end(); itA++)
+		{
+			if((*itA)->name() == name)
+					current_.insert(*itA);
+		}
+	}
+
+/*	current_.clear();
 
 	for(boost::property_tree::ptree::const_iterator it = array.begin(); it != array.end(); ++it)
 	{
@@ -78,7 +98,7 @@ void VFilter::load(const boost::property_tree::ptree& array)
 					if((*it)->name() == name)
 						current_.insert(*it);
 			}
-	}
+	}*/
 }
 
 //==============================================
@@ -89,6 +109,7 @@ void VFilter::load(const boost::property_tree::ptree& array)
 
 StateFilter::StateFilter(VConfig * owner) : VFilter(owner)
 {
+	settingsId_="state";
 	std::vector<VParam*> v=VNState::filterItems();
 	init(v);
 	current_=all_;
@@ -107,6 +128,7 @@ void StateFilter::notifyOwner()
 
 AttributeFilter::AttributeFilter(VConfig * owner) : VFilter(owner)
 {
+	settingsId_="attribute";
 	std::vector<VParam*> v=VAttribute::filterItems();
 	init(v);
 }
@@ -124,6 +146,7 @@ void AttributeFilter::notifyOwner()
 
 IconFilter::IconFilter(VConfig * owner) : VFilter(owner)
 {
+	settingsId_="icon";
 	std::vector<VParam*> v=VIcon::filterItems();
 	init(v);
 	current_=all_;

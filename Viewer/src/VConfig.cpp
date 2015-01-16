@@ -78,3 +78,20 @@ void  VConfig::removeObserver(VConfigObserver* obs)
 	if(it != observers_.end())
 		observers_.erase(it);
 }
+
+void VConfig::writeSettings(VSettings* vs)
+{
+	server_->writeSettings(vs);
+	state_->writeSettings(vs);
+	attr_->writeSettings(vs);
+	icon_->writeSettings(vs);
+}
+
+void VConfig::readSettings(VSettings* vs)
+{
+	server_->readSettings(vs);
+	state_->readSettings(vs);
+	attr_->readSettings(vs);
+	icon_->readSettings(vs);
+}
+

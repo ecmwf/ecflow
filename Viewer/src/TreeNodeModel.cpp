@@ -244,6 +244,7 @@ QVariant TreeNodeModel::attributesData(const QModelIndex& index, int role) const
 
 QVariant TreeNodeModel::headerData( const int section, const Qt::Orientation orient , const int role ) const
 {
+	//No header!!!
 	return QVariant();
 
 	if ( orient != Qt::Horizontal || role != Qt::DisplayRole )

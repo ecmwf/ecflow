@@ -23,7 +23,47 @@
 
 TableNodeView::TableNodeView(NodeFilterModel *model,QWidget* parent) : QTreeView(parent), NodeViewBase(model)
 {
-		/*model_=new TableNodeModel(config,this);
+	//Set the model.
+	setModel(model_);
+
+	//Create delegate to the view
+	//TreeNodeViewDelegate *delegate=new TreeNodeViewDelegate(this);
+	//setItemDelegate(delegate);
+
+	setRootIsDecorated(false);
+	setAllColumnsShowFocus(true);
+	setUniformRowHeights(true);
+	setMouseTracking(true);
+	setSelectionMode(QAbstractItemView::ExtendedSelection);
+
+	//!!!!We need to do it because:
+	//The background colour between the views left border and the nodes cannot be
+	//controlled by delegates or stylesheets. It always takes the QPalette::Highlight
+	//colour from the palette. Here we set this to transparent so that Qt could leave
+	//this are empty and we will fill it appropriately in our delegate.
+	QPalette pal=palette();
+	pal.setColor(QPalette::Highlight,Qt::transparent);
+	setPalette(pal);
+
+	//Context menu
+	setContextMenuPolicy(Qt::CustomContextMenu);
+
+	connect(this, SIGNAL(customContextMenuRequested(const QPoint &)),
+		                this, SLOT(slotContextMenu(const QPoint &)));
+
+	//Selection
+	connect(this,SIGNAL(clicked(const QModelIndex&)),
+			this,SLOT(slotSelectItem(const QModelIndex)));
+
+	connect(this,SIGNAL(doubleClicked(const QModelIndex&)),
+			this,SLOT(slotDoubleClickItem(const QModelIndex)));
+
+	actionHandler_=new ActionHandler(this);
+
+	expandAll();
+
+
+	/*model_=new TableNodeModel(config,this);
 
 		filterModel_=new NodeFilterModel(this);
 		filterModel_->setSourceModel(model_);

@@ -18,51 +18,64 @@
 #include "TreeNodeView.hpp"
 
 #include <QStackedLayout>
+#include <QVBoxLayout>
 #include <QWidget>
 
-QWidget* NodeViewControl::widget()
+QWidget* NodeWidget::widget()
 {
 	return view_->realWidget();
 }
 
-VInfo_ptr NodeViewControl::currentSelection()
+VInfo_ptr NodeWidget::currentSelection()
 {
 	return view_->currentSelection();
 }
 
-void NodeViewControl::currentSelection(VInfo_ptr info)
+void NodeWidget::currentSelection(VInfo_ptr info)
 {
 	view_->currentSelection(info);
 }
 
-void NodeViewControl::reload()
+void NodeWidget::reload()
 {
 	model_->reload();
 }
 
-void NodeViewControl::active(bool b)
+void NodeWidget::active(bool b)
 {
 	model_->active(b);
 	view_->realWidget()->setEnabled(b);
 }
 
-bool NodeViewControl::active() const
+bool NodeWidget::active() const
 {
 	return model_->active();
 }
 
-TreeNodeViewControl::TreeNodeViewControl(VConfig* config,QWidget* parent)
+TreeNodeWidget::TreeNodeWidget(VConfig* config,QWidget* parent)
 {
+	QVBoxLayout* layout=new QVBoxLayout(this);
+	layout->setSpacing(0);
+	layout->setContentsMargins(1,1,1,1);
+
 	model_=new TreeNodeModel(config,parent);
 	filterModel_=new NodeFilterModel(model_,parent);
 	view_= new TreeNodeView(filterModel_,parent);
+
+	layout->addWidget(view_->realWidget());
 }
 
-TableNodeViewControl::TableNodeViewControl(VConfig* config,QWidget * parent)
+TableNodeWidget::TableNodeWidget(VConfig* config,QWidget * parent)
 {
+	QVBoxLayout* layout=new QVBoxLayout(this);
+	layout->setSpacing(0);
+	layout->setContentsMargins(1,1,1,1);
+
 	model_=new TableNodeModel(config,parent);
 	filterModel_=new NodeFilterModel(model_,parent);
 	view_= new TableNodeView(filterModel_,parent);
+
+	layout->addWidget(view_->realWidget());
 }
 
 //===========================================================
@@ -76,7 +89,7 @@ NodeViewHandler::NodeViewHandler(QStackedLayout* p) : stacked_(p)
 	currentMode_=Viewer::NoViewMode;
 }
 
-void NodeViewHandler::add(Viewer::ViewMode mode,NodeViewControl* c)
+void NodeViewHandler::add(Viewer::ViewMode mode,NodeWidget* c)
 {
 	QWidget *w=c->view()->realWidget();
 
@@ -86,9 +99,9 @@ void NodeViewHandler::add(Viewer::ViewMode mode,NodeViewControl* c)
 	controls_[mode]=c;
 }
 
-NodeViewControl* NodeViewHandler::control(Viewer::ViewMode mode) const
+NodeWidget* NodeViewHandler::control(Viewer::ViewMode mode) const
 {
-   	std::map<Viewer::ViewMode,NodeViewControl*>::const_iterator it=controls_.find(mode);
+   	std::map<Viewer::ViewMode,NodeWidget*>::const_iterator it=controls_.find(mode);
 	return (it != controls_.end())?it->second:0;
 }
 
@@ -118,13 +131,13 @@ bool NodeViewHandler::setCurrentMode(Viewer::ViewMode mode)
 	currentMode_=mode;
 
 	//Disable the other views
-	NodeViewControl *cnt=control(currentMode_);
+	NodeWidget *cnt=control(currentMode_);
 
 	//Set the layout
 	stacked_->setCurrentIndex(indexes_[currentMode_]);
 
 	//Deactivate the other views
-	for(std::map<Viewer::ViewMode,NodeViewControl*>::iterator it=controls_.begin(); it != controls_.end(); it++)
+	for(std::map<Viewer::ViewMode,NodeWidget*>::iterator it=controls_.begin(); it != controls_.end(); it++)
 		if(it->first != currentMode_)
 			it->second->active(false);
 

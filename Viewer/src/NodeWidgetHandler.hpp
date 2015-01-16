@@ -7,27 +7,32 @@
 // nor does it submit to any jurisdiction.
 //============================================================================
 
-#ifndef NODEWIDGET_HPP_
-#define NODEWIDGET_HPP_
+#ifndef NODEWIDGETHANDLER_HPP_
+#define NODEWIDGETHANDLER_HPP_
 
 #include "Viewer.hpp"
 
-#include <QWidget>
+#include <QSplitter>
+#include <QMainWindow>
 
 #include "VInfo.hpp"
+#include "VSettings.hpp"
 
 #include <boost/property_tree/ptree.hpp>
 
 class NodeViewHandler;
+class NodeWidget;
 class VConfig;
+class LayoutManager;
+class VSettings;
 
-class NodeWidget : public QWidget
+class NodeWidgetHandler : public QMainWindow
 {
     Q_OBJECT
 
 public:
-  	NodeWidget(QString,QWidget* parent=0);
-	~NodeWidget();
+  	NodeWidgetHandler(QString,QWidget* parent=0);
+	~NodeWidgetHandler();
 
 	void reload();
 
@@ -37,25 +42,43 @@ public:
 	VInfo_ptr currentSelection();
 	void currentSelection(VInfo_ptr n);
 
-	void save(boost::property_tree::ptree &pt);
-	void load(const boost::property_tree::ptree &pt);
+	void writeSettings(VSettings*);
+	void readSettings(VSettings*);
 
 public Q_SLOTS:
 	//void slotFolderReplacedInView(Folder*);
 	//void slotFolderChanged(Folder*);
 
 Q_SIGNALS:
-	//void iconCommandRequested(QString,IconObjectH);
-	//void desktopCommandRequested(QString,QPoint);
-	//void itemInfoChanged(QString);
-	//void pathChanged();
+
     void selectionChanged(VInfo_ptr);
 
 private:
-	//QModelIndex changeFolder(const QModelIndex&);
 
-	NodeViewHandler* handler_;
+//NodeViewHandler* handler_;
 	VConfig* config_;
+
+	LayoutManager* lm_;
+
+	QList<NodeWidget*> widgets_;
 };
+
+class LayoutManager
+{
+public:
+	LayoutManager(QWidget *parent);
+	void add(QWidget*);
+
+protected:
+	QWidget* parent_;
+	QList<QWidget*> widgets_;
+	QSplitter* splitter_;
+	QSplitter* splitterRight_;
+};
+
+
+
+
+
 
 #endif

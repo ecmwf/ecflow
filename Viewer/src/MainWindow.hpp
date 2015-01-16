@@ -29,8 +29,9 @@ class FilterWidget;
 class InfoPanel;
 class NodePanel;
 class ServerFilterMenu;
+class VSettings;
 
-class MainWindow : public QMainWindow, private Ui::MainWindow  
+class MainWindow : public QMainWindow, private Ui::MainWindow
 {
     Q_OBJECT
 
@@ -66,10 +67,13 @@ private:
     void syncViewModeAg(Viewer::ViewMode);
     void reloadContents();
 
-    void save(boost::property_tree::ptree &pt,QSettings& qs);
-    void load(const boost::property_tree::ptree& winPt,QSettings& qs);
+    void writeSettings(VSettings*);
+    void readSettings(VSettings*);
 
-    static MainWindow* makeWindow(const boost::property_tree::ptree& winPt,QSettings& qs);
+    //void save(boost::property_tree::ptree &pt,QSettings& qs);
+    //void load(const boost::property_tree::ptree& winPt,QSettings& qs);
+
+    static MainWindow* makeWindow(VSettings* vs);
     static MainWindow *makeWindow();
     static MainWindow *makeWindow(QString id);
     static MainWindow *makeWindow(QStringList idLst);
@@ -88,6 +92,7 @@ private:
 
     static bool quitStarted_;
     static QList<MainWindow*> windows_;
+    static int maxWindowNum_;
 };
 
 #endif 

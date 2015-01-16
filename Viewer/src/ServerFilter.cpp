@@ -12,6 +12,7 @@
 #include "ServerHandler.hpp"
 #include "ServerItem.hpp"
 #include "ServerList.hpp"
+#include "VSettings.hpp"
 
 /*
 ServerFilterItem::ServerFilterItem(const std::string& name) //,const std::string& host,const std::string& port)
@@ -145,21 +146,27 @@ bool ServerFilter::isFiltered(ServerItem* item) const
 	return false;
 }
 
-void ServerFilter::save(boost::property_tree::ptree& array) const
+void ServerFilter::writeSettings(VSettings* vs) const
 {
+	std::vector<std::string> array;
 	for(std::vector<ServerItem*>::const_iterator it=items_.begin(); it != items_.end(); it++)
 	{
-		array.push_back(std::make_pair("",(*it)->name()));
+		array.push_back((*it)->name());
 	}
+
+	vs->put("server",array);
 }
 
-void ServerFilter::load(const boost::property_tree::ptree& array)
+void ServerFilter::readSettings(VSettings* vs)
 {
 	items_.clear();
 
-	for(boost::property_tree::ptree::const_iterator it = array.begin(); it != array.end(); ++it)
+	std::vector<std::string> array;
+	vs->get("server",array);
+
+	for(std::vector<std::string>::const_iterator it = array.begin(); it != array.end(); ++it)
 	{
-			std::string name=it->second.get_value<std::string>();
+			std::string name=*it;
 			if(ServerItem* s=ServerList::instance()->find(name))
 			{
 				addServer(s,false);

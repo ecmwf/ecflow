@@ -19,6 +19,7 @@ class StateFilter;
 class AttributeFilter;
 class IconFilter;
 class VFilter;
+class VSettings;
 
 class VConfigItem
 {
@@ -65,6 +66,9 @@ public:
 	void changed(AttributeFilter*);
 	void changed(IconFilter*);
 	void reloaded();
+
+	void writeSettings(VSettings*);
+	void readSettings(VSettings*);
 
 protected:
 
