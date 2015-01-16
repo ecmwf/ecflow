@@ -455,9 +455,6 @@ void MainWindow::init()
 {
 	VSettings vs("ecFlow_ui");
 
-	//We have to clear it so that not to remember all the previous windows
-	vs.clear();
-
 	std::string fs = DirectoryHandler::concatenate(DirectoryHandler::configDir(), "session.json");
 
 	//Read configuration. If it fails we create an empty window!!
@@ -515,6 +512,9 @@ void MainWindow::init()
 void MainWindow::save(MainWindow *topWin)
 {
 	VSettings vs("ecFlow_ui");
+
+	//We have to clear it so that not to remember all the previous windows
+	vs.clear();
 
 	//Add total window number and id of active window
 	vs.put("windowCount",windows_.count());

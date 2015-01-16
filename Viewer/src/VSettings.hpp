@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2014 ECMWF.
+// Copyright 2015 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -22,16 +22,13 @@ public:
 	void add(const std::string& key);
 	void pop();
 
-	std::string ptPath() const;
-	std::string qPath() const;
-	std::string ptPath(const std::string& key) const;
-	std::string qPath(const std::string& key) const;
+	std::string path() const;
+	std::string path(const std::string& key) const;
 
 protected:
 	std::string join(const std::string sep) const;
 
 	std::vector<std::string> path_;
-
 };
 
 class VSettings
@@ -56,14 +53,13 @@ public:
 	template <typename T>
 	T get(const std::string& key,const T& defaultVal)
 	{
-		return pt_.get<T>(path_.ptPath(key),defaultVal);
+		return pt_.get<T>(path_.path(key),defaultVal);
 	}
 	void get(const std::string& key,std::vector<std::string>& val);
 	QVariant getQs(const std::string& key);
 
 protected:
 	boost::property_tree::ptree pt_;
-	boost::property_tree::ptree *ptCurrent_;
 	QSettings qs_;
 	VSettingsPath path_;
 };

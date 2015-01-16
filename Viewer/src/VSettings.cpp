@@ -33,31 +33,20 @@ void VSettingsPath::pop()
 		path_.pop_back();
 }
 
-std::string VSettingsPath::ptPath() const
+std::string VSettingsPath::path() const
 {
 	return join(".");
 }
 
-std::string VSettingsPath::qPath() const
+std::string VSettingsPath::path(const std::string& key) const
 {
-	return join("/");
+	std::string s=path();
+	return (s.empty())?key:(s+"."+key);
 }
 
 std::string VSettingsPath::join(const std::string sep) const
 {
 	return boost::algorithm::join(path_,sep);
-}
-
-std::string VSettingsPath::ptPath(const std::string& key) const
-{
-	std::string s=ptPath();
-	return (s.empty())?key:(s+"."+key);
-}
-
-std::string VSettingsPath::qPath(const std::string& key) const
-{
-	std::string s=qPath();
-	return  (s.empty())?key:(s+"/"+key);
 }
 
 //======================================================
@@ -80,12 +69,7 @@ void VSettings::clear()
 
 bool VSettings::contains(const std::string& key)
 {
-	qDebug() << "contains" << path_.ptPath(key).c_str() << key.c_str();
-
-	//return (pt_.find(path_.ptPath(key).c_str()) != pt_.not_found());
-
-
-	return (pt_.get_child_optional(path_.ptPath(key)) != boost::none);
+	return (pt_.get_child_optional(path_.path(key)) != boost::none);
 }
 
 bool VSettings::containsQs(const std::string& key)
@@ -106,9 +90,6 @@ bool VSettings::read(const std::string &fs)
 		 return false;
 	}
 
-	qDebug() << contains("window_0.tabCount");
-
-
 	return true;
 }
 
@@ -123,7 +104,7 @@ void VSettings::write(const std::string &fs)
 
 void VSettings::put(const std::string& key,int val)
 {
-	pt_.put(path_.ptPath(key),val);
+	pt_.put(path_.path(key),val);
 }
 
 void VSettings::put(const std::string& key,const std::vector<std::string>& val)
@@ -133,24 +114,17 @@ void VSettings::put(const std::string& key,const std::vector<std::string>& val)
 	{
 		array.push_back(std::make_pair("",(*it)));
 	}
-	pt_.put_child(path_.ptPath(key),array);
+	pt_.put_child(path_.path(key),array);
 }
 
 void VSettings::putQs(const std::string& key,QVariant val)
 {
-	qs_.setValue(QString::fromStdString(path_.qPath(key)),val);
+	qs_.setValue(QString::fromStdString(key),val);
 }
 
 void VSettings::get(const std::string& key,std::vector<std::string>& val)
 {
-	/*using boost::property_tree::ptree;
-
-	ptree::const_assoc_iterator it=pt_.find(key);
-	if(it == pt_.not_found())
-	{
-		return;
-	}*/
-	boost::optional<boost::property_tree::ptree& > ptArray=pt_.get_child_optional(path_.ptPath(key));
+	boost::optional<boost::property_tree::ptree& > ptArray=pt_.get_child_optional(path_.path(key));
 	if(!ptArray)
 	{
 		return;
@@ -166,7 +140,6 @@ void VSettings::get(const std::string& key,std::vector<std::string>& val)
 	}
 }
 
-
 QVariant  VSettings::getQs(const std::string& key)
 {
 	return qs_.value(QString::fromStdString(key));
@@ -175,9 +148,11 @@ QVariant  VSettings::getQs(const std::string& key)
 void VSettings::beginGroup(const std::string &id)
 {
 	path_.add(id);
+	qs_.beginGroup(QString::fromStdString(id));
 }
 
 void VSettings::endGroup()
 {
 	path_.pop();
+	qs_.endGroup();
 }
