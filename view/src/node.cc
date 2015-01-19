@@ -904,7 +904,12 @@ void node::command(const char* cmd)
 
 std::string node::substitute(const char* cmd)
 {
-  return substitute::scan(cmd,this);
+  try {
+    return substitute::scan(cmd,this);
+  } catch ( std::exception& e ) {
+    return cmd;
+  }
+
 }
 
 void node::edit(node_editor&)
