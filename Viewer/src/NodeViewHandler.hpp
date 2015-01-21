@@ -1,3 +1,12 @@
+/***************************** LICENSE START ***********************************
+
+ Copyright 2015 ECMWF and INPE. This software is distributed under the terms
+ of the Apache License version 2.0. In applying this license, ECMWF does not
+ waive the privileges and immunities granted to it by virtue of its status as
+ an Intergovernmental Organization or submit itself to any jurisdiction.
+
+ ***************************** LICENSE END *************************************/
+
 #ifndef NODEVIEWHANDLER_HPP_
 #define NODEVIEWHANDLER_HPP_
 
@@ -15,8 +24,25 @@ class AbstractNodeModel;
 class NodeFilterModel;
 class NodeViewBase;
 class VConfig;
+class VSettings;
 
-class NodeWidget : public QWidget
+class DashboardWidget : public QWidget
+{
+public:
+	DashboardWidget(QWidget* parent=0) : QWidget(parent) {};
+	virtual ~DashboardWidget() {};
+	virtual void reload()=0;
+	virtual void writeSettings(VSettings*)=0;
+	virtual void readSettings(VSettings*)=0;
+
+	void id(const std::string& id) {id_=id;}
+
+protected:
+	std::string id_;
+};
+
+
+class NodeWidget : public DashboardWidget
 {
 public:
 	void active(bool);
@@ -28,7 +54,7 @@ public:
 	void reload();
 
 protected:
-	NodeWidget(): model_(0), filterModel_(0), view_(0) {};
+	NodeWidget(QWidget* parent=0): DashboardWidget(parent), model_(0), filterModel_(0), view_(0) {};
 
 	AbstractNodeModel* model_;
 	NodeFilterModel* filterModel_;
@@ -39,12 +65,16 @@ class TreeNodeWidget : public NodeWidget
 {
 public:
 	TreeNodeWidget(VConfig*,QWidget* parent=0);
+	void writeSettings(VSettings*);
+	void readSettings(VSettings*);
 };
 
 class TableNodeWidget : public NodeWidget
 {
 public:
 	TableNodeWidget(VConfig*,QWidget* parent=0);
+	void writeSettings(VSettings*);
+	void readSettings(VSettings*);
 };
 
 class NodeViewHandler

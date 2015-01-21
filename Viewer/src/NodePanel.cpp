@@ -9,7 +9,7 @@
 
 #include "NodePanel.hpp"
 
-#include "NodeWidgetHandler.hpp"
+#include "Dashboard.hpp"
 #include "MainWindow.hpp"
 #include "VSettings.hpp"
 
@@ -66,12 +66,12 @@ QString  NodePanel::folderPath(int index)
 //
 //=============================================
 
-NodeWidgetHandler *NodePanel::addWidget(QString id)
+Dashboard *NodePanel::addWidget(QString id)
 {
 	//if(path.isEmpty())
 	//  	return 0;
 
-  	NodeWidgetHandler  *nw=new NodeWidgetHandler("",this);
+  	Dashboard  *nw=new Dashboard("",this);
 
 	//QString name=fw->currentFolderName();
   	QString name("node");
@@ -134,7 +134,7 @@ void NodePanel::tabBarCommand(QString name,int index)
 {
   	if(name == "reloadTab")
 	{
-	  	NodeWidgetHandler *w=nodeWidget(index);
+	  	Dashboard *w=nodeWidget(index);
 		if(w) w->reload();
 	}
 	else if(name == "closeOtherTabs")
@@ -147,16 +147,16 @@ void NodePanel::tabBarCommand(QString name,int index)
 	}
 }
 
-NodeWidgetHandler *NodePanel::nodeWidget(int index)
+Dashboard *NodePanel::nodeWidget(int index)
 {
   	QWidget *w=widget(index);
-  	return (w)?static_cast<NodeWidgetHandler*>(w):0;
+  	return (w)?static_cast<Dashboard*>(w):0;
 }
 
-NodeWidgetHandler *NodePanel::currentNodeWidget()
+Dashboard *NodePanel::currentNodeWidget()
 {
   	QWidget *w=currentWidget();
-  	return static_cast<NodeWidgetHandler*>(w);
+  	return static_cast<Dashboard*>(w);
 }
 
 void NodePanel::slotCurrentWidgetChanged(int /*index*/)
@@ -178,7 +178,7 @@ void  NodePanel::slotNewTab()
 
 VInfo_ptr NodePanel::currentSelection()
 {
-	if(NodeWidgetHandler *w=currentNodeWidget())
+	if(Dashboard *w=currentNodeWidget())
 		return w->currentSelection();
 
 	return VInfo_ptr();
@@ -186,30 +186,34 @@ VInfo_ptr NodePanel::currentSelection()
 
 void NodePanel::slotSelection(VInfo_ptr n)
 {
-	if(NodeWidgetHandler *w=currentNodeWidget())
+	if(Dashboard *w=currentNodeWidget())
 			w->currentSelection(n);
 }
 
 void NodePanel::setViewMode(Viewer::ViewMode mode)
 {
-	NodeWidgetHandler *w=currentNodeWidget();
+	Dashboard *w=currentNodeWidget();
 	if(w) w->setViewMode(mode);
 	//setDefaults(this);
 }
 
 Viewer::ViewMode NodePanel::viewMode()
 {
-  	NodeWidgetHandler *w=currentNodeWidget();
+  	Dashboard *w=currentNodeWidget();
 	return (w)?w->viewMode():Viewer::NoViewMode;
 }
 
 VConfig* NodePanel::config()
 {
-  	NodeWidgetHandler *w=currentNodeWidget();
+  	Dashboard *w=currentNodeWidget();
 	return (w)?w->config():NULL;
 }
 
-
+void NodePanel::addToDashboard(const std::string& type)
+{
+	if(Dashboard *w=currentNodeWidget())
+		w->addWidget(type);
+}
 
 
 /*void NodePanel::slotNewWindow(bool)
@@ -248,14 +252,11 @@ void NodePanel::reload()
 	{
 		if(QWidget *w=widget(i))
 		{
-			if(NodeWidgetHandler* nw=static_cast<NodeWidgetHandler*>(w))
+			if(Dashboard* nw=static_cast<Dashboard*>(w))
 				nw->reload();
 		}
 	}
 }
-
-
-
 
 //==========================================================
 //
@@ -273,7 +274,7 @@ void NodePanel::writeSettings(VSettings *vs)
 	for(int i=0; i < count(); i++)
 	{
 		//boost::property_tree::ptree ptTab;
-		if(NodeWidgetHandler* nw=nodeWidget(i))
+		if(Dashboard* nw=nodeWidget(i))
 		{
 			std::string id=NodePanel::tabSettingsId(i);
 			vs->beginGroup(id);
@@ -296,7 +297,7 @@ void NodePanel::readSettings(VSettings *vs)
 		std::string id=NodePanel::tabSettingsId(i);
 		if(vs->contains(id))
 		{
-			NodeWidgetHandler* nw=addWidget("");
+			Dashboard* nw=addWidget("");
 			if(nw)
 			{
 				vs->beginGroup(id);

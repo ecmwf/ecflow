@@ -2,7 +2,7 @@
 #define MAINWINDOW_HPP_
 
 //============================================================================
-// Copyright 2014 ECMWF. 
+// Copyright 2015 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -55,6 +55,8 @@ protected Q_SLOTS:
 	void on_actionConfigureNodeMenu_triggered();
 	void on_actionManageServers_triggered();
 	void on_actionShowInInfoPanel_triggered();
+	void on_actionAddTreeWidget_triggered();
+	void on_actionAddTableWidget_triggered();
 
 	void slotViewMode(QAction*);
 	void slotCurrentChangedInPanel();

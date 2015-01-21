@@ -1,6 +1,6 @@
 /***************************** LICENSE START ***********************************
 
- Copyright 2013 ECMWF and INPE. This software is distributed under the terms
+ Copyright 2015 ECMWF and INPE. This software is distributed under the terms
  of the Apache License version 2.0. In applying this license, ECMWF does not
  waive the privileges and immunities granted to it by virtue of its status as
  an Intergovernmental Organization or submit itself to any jurisdiction.
@@ -16,10 +16,12 @@
 #include "TableNodeView.hpp"
 #include "TreeNodeModel.hpp"
 #include "TreeNodeView.hpp"
+#include "VSettings.hpp"
 
 #include <QStackedLayout>
 #include <QVBoxLayout>
 #include <QWidget>
+
 
 QWidget* NodeWidget::widget()
 {
@@ -52,6 +54,7 @@ bool NodeWidget::active() const
 	return model_->active();
 }
 
+
 TreeNodeWidget::TreeNodeWidget(VConfig* config,QWidget* parent)
 {
 	QVBoxLayout* layout=new QVBoxLayout(this);
@@ -63,6 +66,21 @@ TreeNodeWidget::TreeNodeWidget(VConfig* config,QWidget* parent)
 	view_= new TreeNodeView(filterModel_,parent);
 
 	layout->addWidget(view_->realWidget());
+}
+
+void TreeNodeWidget::writeSettings(VSettings* vs)
+{
+	vs->put("type","tree");
+	vs->put("dockId",id_);
+}
+
+void TreeNodeWidget::readSettings(VSettings* vs)
+{
+	std::string type=vs->get<std::string>("type","");
+	if(type != "tree")
+	{
+		return;
+	}
 }
 
 TableNodeWidget::TableNodeWidget(VConfig* config,QWidget * parent)
@@ -77,6 +95,24 @@ TableNodeWidget::TableNodeWidget(VConfig* config,QWidget * parent)
 
 	layout->addWidget(view_->realWidget());
 }
+
+void TableNodeWidget::writeSettings(VSettings* vs)
+{
+	vs->put("type","table");
+	vs->put("dockId",id_);
+}
+
+void TableNodeWidget::readSettings(VSettings* vs)
+{
+	std::string type=vs->get<std::string>("type","");
+	if(type != "table")
+	{
+		return;
+	}
+}
+
+
+
 
 //===========================================================
 //

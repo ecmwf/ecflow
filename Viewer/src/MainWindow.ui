@@ -136,6 +136,8 @@
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
+   <addaction name="actionAddTreeWidget"/>
+   <addaction name="actionAddTableWidget"/>
   </widget>
   <action name="actionClose">
    <property name="icon">
@@ -271,6 +273,22 @@
   <action name="actionShowInInfoPanel">
    <property name="text">
     <string>Show info panel</string>
+   </property>
+  </action>
+  <action name="actionAddTreeWidget">
+   <property name="text">
+    <string>Add tree</string>
+   </property>
+   <property name="toolTip">
+    <string>Add tree widget</string>
+   </property>
+  </action>
+  <action name="actionAddTableWidget">
+   <property name="text">
+    <string>Add table</string>
+   </property>
+   <property name="toolTip">
+    <string>Add table widget</string>
    </property>
   </action>
  </widget>

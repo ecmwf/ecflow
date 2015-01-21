@@ -47,6 +47,7 @@ public:
 	void endGroup();
 
 	void put(const std::string& key,int val);
+	void put(const std::string& key,const std::string& val);
 	void put(const std::string& key,const std::vector<std::string>& val);
 	void putQs(const std::string& key,QVariant val);
 

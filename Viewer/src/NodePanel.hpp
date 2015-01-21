@@ -16,7 +16,7 @@
 
 #include <boost/property_tree/ptree.hpp>
 
-class NodeWidgetHandler;
+class Dashboard;
 class VConfig;
 class VSettings;
 
@@ -33,11 +33,12 @@ public:
 
 	VConfig* config();
 
-	NodeWidgetHandler* currentNodeWidget();
+	Dashboard* currentNodeWidget();
 	void addWidget();
 	void resetWidgets(QStringList);
 	void reload();
 	VInfo_ptr currentSelection();
+	void addToDashboard(const std::string& type);
 
 	void writeSettings(VSettings*);
 	void readSettings(VSettings*);
@@ -57,9 +58,9 @@ Q_SIGNALS:
 	void selectionChanged(VInfo_ptr);
 
 protected:
-	NodeWidgetHandler* addWidget(QString);
+	Dashboard* addWidget(QString);
 	void tabBarCommand(QString, int);
-	NodeWidgetHandler* nodeWidget(int index);
+	Dashboard* nodeWidget(int index);
 	static std::string tabSettingsId(int i);
 };
 

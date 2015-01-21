@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2014 ECMWF. 
+// Copyright 2015 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -18,9 +18,6 @@
 #include <QSplitter>
 #include <QToolBar>
 #include <QVBoxLayout>
-
-#include "Defs.hpp"
-#include "ClientInvoker.hpp"
 
 #include "MainWindow.hpp"
 #include "FilterWidget.hpp"
@@ -195,8 +192,19 @@ void MainWindow::on_actionManageServers_triggered()
 //	addInfoPanel();
 //}
 
+void MainWindow::on_actionAddTreeWidget_triggered()
+{
+	nodePanel_->addToDashboard("tree");
+}
+
+void MainWindow::on_actionAddTableWidget_triggered()
+{
+	nodePanel_->addToDashboard("table");
+}
+
 void MainWindow::on_actionShowInInfoPanel_triggered()
 {
+
 	QList<QDockWidget*> dockLst=findChildren<QDockWidget*>();
 
 	//If there is a visible non-detached panel it already shows the needed info

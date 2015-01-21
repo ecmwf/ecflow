@@ -107,6 +107,11 @@ void VSettings::put(const std::string& key,int val)
 	pt_.put(path_.path(key),val);
 }
 
+void VSettings::put(const std::string& key,const std::string& val)
+{
+	pt_.put(path_.path(key),val);
+}
+
 void VSettings::put(const std::string& key,const std::vector<std::string>& val)
 {
 	boost::property_tree::ptree array;

@@ -6,6 +6,7 @@ set(viewer_srcs
     ActionHandler.cpp
     CommandDesignerWidget.cpp
     CustomCommandDialog.cpp
+    Dashboard.cpp
     DirectoryHandler.cpp
     FilterWidget.cpp
     Highlighter.cpp
@@ -23,7 +24,6 @@ set(viewer_srcs
     NodePathWidget.cpp
     NodeViewBase.cpp
     NodeViewHandler.cpp
-    NodeWidgetHandler.cpp
     OutputItemWidget.cpp
     OverviewItemWidget.cpp
     OverviewProvider.cpp
@@ -66,14 +66,14 @@ QT4_WRAP_CPP(VIEWER_MOC AbstractNodeModel.hpp
 					    ActionHandler.hpp
                         CommandDesignerWidget.hpp
                         CustomCommandDialog.hpp
-                        FilterWidget.hpp
+                        Dashboard.hpp
+                        FilterWidget.hpp                      
                         InfoPanel.hpp
                         MainWindow.hpp
                         MenuConfigDialog.hpp
                         NodeFilterModel.hpp
                         NodePanel.hpp
-                        NodePathWidget.hpp
-                        NodeWidgetHandler.hpp
+                        NodePathWidget.hpp                    
                         PlainTextSearchLine.hpp
                         ServerHandler.hpp
                         ServerListDialog.hpp
