@@ -51,11 +51,14 @@ const char* substitute::scan(const char* cmd,node* n)
   if (debug) std::cout << "# substituted1:" << cmd << "\n";
   std::string replace (cmd);
   if (replace.find("%") != std::string::npos) {
-    n->__node__()-> get_node()-> variableSubsitution(replace);
-    strcat(buf, replace.c_str());
-    if (debug) std::cout << "# substituted2:" << replace << "\n";
-    if (debug) std::cout << "# substituted2:" << buf << "\n";
-    return buf;
+    if (n->__node__()-> get_node()) {
+      n->__node__()-> get_node()-> variableSubsitution(replace);
+      strcat(buf, replace.c_str());
+      if (debug) std::cout << "# substituted2:" << replace << "\n";
+      if (debug) std::cout << "# substituted2:" << buf << "\n";
+      return buf;
+    }
+    return cmd;
   }
 
   while(*cmd && cont) {
