@@ -1,4 +1,8 @@
 set( ECFLOW_RELEASE  "4" )
 set( ECFLOW_MAJOR    "0" )
 set( ECFLOW_MINOR    "7" )
-set( ${PROJECT_NAME}_VERSION_STR  "${ECFLOW_RELEASE}.${ECFLOW_MAJOR}.${ECFLOW_MINOR}" )
+
+# use this form to be consistent with other packages, + allow standard extraction of version from scripts
+set( ${PROJECT_NAME}_VERSION_STR  "4.0.7" )
+
+#set( ${PROJECT_NAME}_VERSION_STR  "${ECFLOW_RELEASE}.${ECFLOW_MAJOR}.${ECFLOW_MINOR}" )
