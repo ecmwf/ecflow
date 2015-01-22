@@ -74,6 +74,7 @@ QT4_WRAP_CPP(VIEWER_MOC AbstractNodeModel.hpp
                         NodeFilterModel.hpp
                         NodePanel.hpp
                         NodePathWidget.hpp                    
+                        NodeViewHandler.hpp
                         PlainTextSearchLine.hpp
                         ServerHandler.hpp
                         ServerListDialog.hpp

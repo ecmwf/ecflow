@@ -14,6 +14,7 @@
 #include <QString>
 #include <QWidget>
 
+#include "DashboardWidget.hpp"
 #include "Viewer.hpp"
 #include "VInfo.hpp"
 
@@ -22,28 +23,15 @@ class QWidget;
 
 class AbstractNodeModel;
 class NodeFilterModel;
+class NodePathWidget;
 class NodeViewBase;
 class VConfig;
 class VSettings;
 
-class DashboardWidget : public QWidget
-{
-public:
-	DashboardWidget(QWidget* parent=0) : QWidget(parent) {};
-	virtual ~DashboardWidget() {};
-	virtual void reload()=0;
-	virtual void writeSettings(VSettings*)=0;
-	virtual void readSettings(VSettings*)=0;
-
-	void id(const std::string& id) {id_=id;}
-
-protected:
-	std::string id_;
-};
-
-
 class NodeWidget : public DashboardWidget
 {
+Q_OBJECT
+
 public:
 	void active(bool);
 	bool active() const;
@@ -53,12 +41,16 @@ public:
 	void currentSelection(VInfo_ptr info);
 	void reload();
 
+Q_SIGNALS:
+	void selectionChanged(VInfo_ptr);
+
 protected:
-	NodeWidget(QWidget* parent=0): DashboardWidget(parent), model_(0), filterModel_(0), view_(0) {};
+	NodeWidget(QWidget* parent=0): DashboardWidget(parent), model_(0), filterModel_(0), view_(0), bc_(0) {};
 
 	AbstractNodeModel* model_;
 	NodeFilterModel* filterModel_;
 	NodeViewBase* view_;
+	NodePathWidget* bc_;
 };
 
 class TreeNodeWidget : public NodeWidget
@@ -75,26 +67,6 @@ public:
 	TableNodeWidget(VConfig*,QWidget* parent=0);
 	void writeSettings(VSettings*);
 	void readSettings(VSettings*);
-};
-
-class NodeViewHandler
-{
-public:
-    NodeViewHandler(QStackedLayout*);
-
-	void add(Viewer::ViewMode,NodeWidget*);
-	Viewer::ViewMode currentMode() const {return currentMode_;}
-	bool setCurrentMode(Viewer::ViewMode);
-	bool setCurrentMode(int);
-	NodeWidget* currentControl() const {return control(currentMode_);}
-
-private:
-	NodeWidget* control(Viewer::ViewMode) const;
-
-	Viewer::ViewMode  currentMode_;
-  	std::map<Viewer::ViewMode,NodeWidget*> controls_;
-	std::map<Viewer::ViewMode,int> indexes_;
-	QStackedLayout* stacked_;
 };
 
 #endif

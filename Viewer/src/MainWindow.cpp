@@ -61,8 +61,8 @@ MainWindow::MainWindow(QStringList idLst,QWidget *parent) : QMainWindow(parent)
     //filterWidget_=new FilterWidget(this);
     //viewToolBar->addWidget(filterWidget_);
 
-    NodePathWidget* pathWidget=new NodePathWidget(this);
-    toolBar->addWidget(pathWidget);
+   // NodePathWidget* pathWidget=new NodePathWidget(this);
+   // toolBar->addWidget(pathWidget);
 
 
     //Create the main layout
@@ -89,11 +89,11 @@ MainWindow::MainWindow(QStringList idLst,QWidget *parent) : QMainWindow(parent)
     connect(nodePanel_,SIGNAL(currentWidgetChanged()),
     		this,SLOT(slotCurrentChangedInPanel()));
 
-    connect(nodePanel_,SIGNAL(selectionChanged(VInfo_ptr)),
-       		pathWidget,SLOT(setPath(VInfo_ptr)));
+    //connect(nodePanel_,SIGNAL(selectionChanged(VInfo_ptr)),
+    //   		pathWidget,SLOT(setPath(VInfo_ptr)));
 
-    connect(pathWidget,SIGNAL(selected(VInfo_ptr)),
-       		nodePanel_,SLOT(slotSelection(VInfo_ptr)));
+   //connect(pathWidget,SIGNAL(selected(VInfo_ptr)),
+   //    		nodePanel_,SLOT(slotSelection(VInfo_ptr)));
 
 }
 
@@ -204,6 +204,8 @@ void MainWindow::on_actionAddTableWidget_triggered()
 
 void MainWindow::on_actionShowInInfoPanel_triggered()
 {
+	nodePanel_->addToDashboard("info");
+	return;
 
 	QList<QDockWidget*> dockLst=findChildren<QDockWidget*>();
 

@@ -13,6 +13,7 @@
 #include <QDockWidget>
 #include <QWidget>
 
+#include "DashboardWidget.hpp"
 #include "Viewer.hpp"
 #include "VInfo.hpp"
 
@@ -61,7 +62,7 @@ private:
 };
 
 
-class InfoPanel : public QWidget, private Ui::InfoPanel
+class InfoPanel : public DashboardWidget, private Ui::InfoPanel
 {
     Q_OBJECT
 
@@ -73,6 +74,11 @@ public:
 	void detached(bool);
 	void clear();
 	void reset(VInfo_ptr node);
+
+	//From DashboardWidget
+	void reload() {};
+	void writeSettings(VSettings*);
+	void readSettings(VSettings*);
 
 public Q_SLOTS:
 	void slotReload(VInfo_ptr node);

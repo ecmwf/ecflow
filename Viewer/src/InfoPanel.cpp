@@ -17,6 +17,7 @@
 #include "MessageItemWidget.hpp"
 #include "ScriptItemWidget.hpp"
 #include "VariableItemWidget.hpp"
+#include "VSettings.hpp"
 
 
 InfoPanelDock::InfoPanelDock(QString label,QWidget * parent) :
@@ -96,7 +97,7 @@ void  InfoPanelItemHandler::addToTab(QTabWidget *tab)
 
 
 InfoPanel::InfoPanel(QWidget* parent) :
-  QWidget(parent)
+  DashboardWidget(parent)
 
 {
 	setupUi(this);
@@ -316,6 +317,22 @@ void InfoPanel::detached(bool b)
 {
 	detachedTb->setChecked(b);
 }
+
+void InfoPanel::writeSettings(VSettings* vs)
+{
+	vs->put("type","info");
+	vs->put("dockId",id_);
+}
+
+void InfoPanel::readSettings(VSettings* vs)
+{
+	std::string type=vs->get<std::string>("type","");
+	if(type != "info")
+	{
+		return;
+	}
+}
+
 
 
 

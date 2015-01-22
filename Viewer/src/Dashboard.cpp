@@ -11,6 +11,7 @@
 
 #include "Dashboard.hpp"
 
+#include "InfoPanel.hpp"
 #include "NodeViewHandler.hpp"
 #include "ServerHandler.hpp"
 #include "ServerFilter.hpp"
@@ -104,12 +105,23 @@ DashboardWidget* Dashboard::addWidget(const std::string& type,const std::string&
 	{
 		NodeWidget* ctl=new TreeNodeWidget(config_,this);
 		ctl->active(true);
+		connect(ctl,SIGNAL(selectionChanged(VInfo_ptr)),
+					this,SIGNAL(selectionChanged(VInfo_ptr)));
+
 		w=ctl;//widgets_ << ctl;
 	}
 	else if(type == "table")
 	{
 		NodeWidget* ctl=new TableNodeWidget(config_,this);
 		ctl->active(true);
+		w=ctl;//widgets_ << ctl;
+	}
+	else if(type == "info")
+	{
+		InfoPanel* ctl=new InfoPanel(this);
+		connect(this,SIGNAL(selectionChanged(VInfo_ptr)),
+					ctl,SLOT(slotReload(VInfo_ptr)));
+
 		w=ctl;//widgets_ << ctl;
 	}
 

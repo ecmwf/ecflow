@@ -12,13 +12,14 @@
 
 #include "AbstractNodeModel.hpp"
 #include "NodeFilterModel.hpp"
+#include "NodePathWidget.hpp"
 #include "TableNodeModel.hpp"
 #include "TableNodeView.hpp"
 #include "TreeNodeModel.hpp"
 #include "TreeNodeView.hpp"
 #include "VSettings.hpp"
 
-#include <QStackedLayout>
+#include <QHBoxLayout>
 #include <QVBoxLayout>
 #include <QWidget>
 
@@ -54,7 +55,6 @@ bool NodeWidget::active() const
 	return model_->active();
 }
 
-
 TreeNodeWidget::TreeNodeWidget(VConfig* config,QWidget* parent)
 {
 	QVBoxLayout* layout=new QVBoxLayout(this);
@@ -64,8 +64,24 @@ TreeNodeWidget::TreeNodeWidget(VConfig* config,QWidget* parent)
 	model_=new TreeNodeModel(config,parent);
 	filterModel_=new NodeFilterModel(model_,parent);
 	view_= new TreeNodeView(filterModel_,parent);
+	bc_ = new NodePathWidget(this);
 
+	connect(view_->realWidget(),SIGNAL(selectionChanged(VInfo_ptr)),
+	    		bc_,SLOT(setPath(VInfo_ptr)));
+
+	connect(bc_,SIGNAL(selected(VInfo_ptr)),
+			view_->realWidget(),SLOT(slotSetCurrent(VInfo_ptr)));
+
+	connect(view_->realWidget(),SIGNAL(selectionChanged(VInfo_ptr)),
+			this,SIGNAL(selectionChanged(VInfo_ptr)));
+
+	QHBoxLayout* hb=new QHBoxLayout();
+	hb->addWidget(bc_);
+	hb->addStretch(1);
+
+	layout->addLayout(hb);
 	layout->addWidget(view_->realWidget());
+
 }
 
 void TreeNodeWidget::writeSettings(VSettings* vs)
@@ -109,82 +125,4 @@ void TableNodeWidget::readSettings(VSettings* vs)
 	{
 		return;
 	}
-}
-
-
-
-
-//===========================================================
-//
-// NodeViewhandler
-//
-//===========================================================
-
-NodeViewHandler::NodeViewHandler(QStackedLayout* p) : stacked_(p)
-{
-	currentMode_=Viewer::NoViewMode;
-}
-
-void NodeViewHandler::add(Viewer::ViewMode mode,NodeWidget* c)
-{
-	QWidget *w=c->view()->realWidget();
-
-	int cnt=stacked_->count();
-	stacked_->addWidget(w);
-	indexes_[mode]=cnt;
-	controls_[mode]=c;
-}
-
-NodeWidget* NodeViewHandler::control(Viewer::ViewMode mode) const
-{
-   	std::map<Viewer::ViewMode,NodeWidget*>::const_iterator it=controls_.find(mode);
-	return (it != controls_.end())?it->second:0;
-}
-
-bool NodeViewHandler::setCurrentMode(Viewer::ViewMode mode)
-{
-	bool retVal=false;
-
-	//Check if currentMode is valid
-	if(currentMode_!= Viewer::NoViewMode && controls_.find(currentMode_) == controls_.end())
-	{
-		//If the currentMode is invalid we set it to Tree View Mode
-		currentMode_=Viewer::TreeViewMode;
-
-		//Check if there is tree view view
-		if(controls_.find(currentMode_) == controls_.end())
-		{
-			//If there are any views defined we set current to the first
-			if(controls_.size() > 0)
-				currentMode_=controls_.begin()->first;
-			//Otherwise something really bad happened!
-			else
-				return false;
-		}
-	}
-
-	//Set the mode
-	currentMode_=mode;
-
-	//Disable the other views
-	NodeWidget *cnt=control(currentMode_);
-
-	//Set the layout
-	stacked_->setCurrentIndex(indexes_[currentMode_]);
-
-	//Deactivate the other views
-	for(std::map<Viewer::ViewMode,NodeWidget*>::iterator it=controls_.begin(); it != controls_.end(); it++)
-		if(it->first != currentMode_)
-			it->second->active(false);
-
-	//Activate the current view
-	cnt->active(true);
-
-	return retVal;
-}
-
-bool NodeViewHandler::setCurrentMode(int id)
-{
-	Viewer::ViewMode m=static_cast<Viewer::ViewMode>(id); //need a proper way to do it
-	return setCurrentMode(m);
 }

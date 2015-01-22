@@ -110,6 +110,15 @@ void TreeNodeView::currentSelection(VInfo_ptr info)
 	}
 }
 
+void TreeNodeView::slotSetCurrent(VInfo_ptr info)
+{
+	QModelIndex idx=model_->infoToIndex(info);
+	if(idx.isValid())
+	{
+			setCurrentIndex(idx);
+			Q_EMIT selectionChanged(info);
+	}
+}
 
 void TreeNodeView::slotDoubleClickItem(const QModelIndex&)
 {
