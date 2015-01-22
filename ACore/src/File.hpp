@@ -80,9 +80,6 @@ public:
 	                  std::vector<boost::filesystem::path>& paths_found   // placing path here if found
 				    );
 
-   // returns the workspace directory by looking for the string ecflow up the hierarchy
- 	// Will throw a exception std::runtime_error is directory not found
-   static std::string workspace_dir();
 
 	/// recursively look for a file, given a starting directory and path token
 	/// Returns the first match found
@@ -143,6 +140,11 @@ public:
 
 	// Locate test data
 	static std::string test_data(const std::string& rel_path, const std::string& dir);
+
+   // return root source
+   static bool cmake_build();
+   static std::string root_source_dir();
+   static std::string root_build_dir();
 };
 
 }

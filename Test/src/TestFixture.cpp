@@ -345,8 +345,8 @@ std::string TestFixture::local_ecf_home()
 
 std::string TestFixture::includes()
 {
-   // Get to the workspace directory, Then set the path to the includes directory
-   std::string includes_path = File::workspace_dir();
+   // Get to the root source directory
+   std::string includes_path = File::root_source_dir();
    includes_path += "/";
    includes_path += project_test_dir_;
    includes_path += "/data/includes";
