@@ -7,6 +7,7 @@
 #include "VInfo.hpp"
 
 class Node;
+class NodeFilter;
 class ServerFilter;
 class ServerHandler;
 
@@ -25,7 +26,9 @@ public:
    	QModelIndex parent (const QModelIndex & ) const;
 
 protected:
-	bool isServer(const QModelIndex & index) const;
+	NodeFilter* makeFilter();
+
+   	bool isServer(const QModelIndex & index) const;
 	ServerHandler* indexToServer(const QModelIndex & index) const;
 	QModelIndex serverToIndex(ServerHandler*) const;
 	QModelIndex nodeToIndex(Node*,int column=0) const;
@@ -34,7 +37,7 @@ protected:
 	QVariant serverData(const QModelIndex& index,int role) const;
 	QVariant nodeData(const QModelIndex& index,int role) const;
 
-	void resetStateFilter(bool broadcast) {};
+	void resetStateFilter(bool broadcast);
 };
 
 

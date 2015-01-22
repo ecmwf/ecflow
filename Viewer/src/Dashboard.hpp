@@ -51,7 +51,6 @@ public Q_SLOTS:
 	//void slotFolderChanged(Folder*);
 
 Q_SIGNALS:
-
     void selectionChanged(VInfo_ptr);
 
 private:

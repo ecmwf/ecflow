@@ -1,11 +1,16 @@
+//============================================================================
+// Copyright 2015 ECMWF.
+// This software is licensed under the terms of the Apache Licence version 2.0
+// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+// In applying this licence, ECMWF does not waive the privileges and immunities
+// granted to it by virtue of its status as an intergovernmental organisation
+// nor does it submit to any jurisdiction.
+//============================================================================
+
 #ifndef ABSTRACTNODEMODEL_H
 #define ABSTRACTNODEMODEL_H
 
 #include <QAbstractItemModel>
-#include <QSet>
-
-#include <set>
-#include <vector>
 
 #include "Aspect.hpp"
 #include "NodeObserver.hpp"
@@ -14,51 +19,12 @@
 
 class Node;
 
+class NodeFilter;
+class NodeModelDataHandler;
 class ServerHandler;
 class VFilter;
 
 class AbstractNodeModel;
-
-class NodeModelServerItem
-{
-friend class NodeModelServers;
-
-public:
-    NodeModelServerItem(ServerHandler *server) : server_(server), rootNode_(NULL), nodeNum_(-1) {}
-    bool isFiltered(Node*) const;
-
-    void resetFilter(VFilter* stateFilter);
-    int nodeNum() const;
-
-protected:
-    bool filterState(node_ptr node,VFilter* stateFilter);
-
-    ServerHandler *server_;
-	QSet<Node*> nodeFilter_;
-	Node* rootNode_;
-	mutable int nodeNum_;
-
-	QList<NodeModelServerItem*> children_;
-};
-
-
-class NodeModelServers
-{
-public:
-	ServerHandler* server(int) const;
-	ServerHandler* server(void*) const;
-	void add(ServerHandler *);
-	int index(ServerHandler* s) const;
-	int count() const {return items_.count();}
-	void clear() {items_.clear();}
-	void clearFilter();
-	void nodeFilter(int i,QSet<Node*>);
-	bool isFiltered(Node *node) const;
-	void resetFilter(VFilter* stateFilter);
-
-	QList<NodeModelServerItem> items_;
-};
-
 
 class AbstractNodeModel : public QAbstractItemModel, public VConfigObserver, public NodeObserver
 {
@@ -99,7 +65,10 @@ protected:
 	void clean();
 	bool hasData() const;
 
-	virtual void resetStateFilter(bool broadcast);
+	//Creates a filter object specific for the concrete model type
+	virtual NodeFilter* makeFilter()=0;
+
+	virtual void resetStateFilter(bool broadcast)=0;
 
 	virtual bool isServer(const QModelIndex & index) const=0;
 	virtual ServerHandler* indexToServer(const QModelIndex & index) const=0;
@@ -112,9 +81,7 @@ protected:
 
 	Node *rootNode(ServerHandler*) const;
 
-	//virtual bool filter(node_ptr node,const std::set<DState::State>& ns,QSet<Node*> filterSet) {return true;}
-
-	NodeModelServers servers_;
+	NodeModelDataHandler* servers_;
 	VConfig* config_;
 	bool active_;
 };

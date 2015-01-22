@@ -15,6 +15,9 @@
 #include "VConfig.hpp"
 #include "VParam.hpp"
 
+#include "Node.hpp"
+
+class ServerHandler;
 class VSettings;
 
 #include <boost/property_tree/ptree.hpp>
@@ -65,6 +68,53 @@ class IconFilter : public VFilter
 public:
 	IconFilter(VConfig* owner);
 	void notifyOwner();
+};
+
+
+class NodeFilter
+{
+public:
+	NodeFilter();
+	virtual ~NodeFilter() {};
+
+	virtual void reset(ServerHandler* server,VFilter* sf)=0;
+    virtual bool isFiltered(Node* node)=0;
+    virtual int  matchCount()=0;
+    virtual int  nonMatchCount()=0;
+    virtual Node* match(int i)=0;
+
+protected:
+	std::set<std::string> type_;
+	std::set<std::string> state_;
+};
+
+class TreeNodeFilter : public NodeFilter
+{
+public:
+	TreeNodeFilter();
+	void reset(ServerHandler* server,VFilter* sf);
+	bool isFiltered(Node* node);
+	int  matchCount() {return -1;};
+	int  nonMatchCount() {return static_cast<int>(nonMatch_.size());};
+	Node* match(int i) {return NULL;}
+
+private:
+	bool filterState(node_ptr node,VFilter* stateFilter);
+	std::set<Node*> nonMatch_;
+};
+
+class TableNodeFilter : public NodeFilter
+{
+public:
+	TableNodeFilter();
+	void reset(ServerHandler* server,VFilter* sf);
+	bool isFiltered(Node* node);
+	int  matchCount() {return static_cast<int>(match_.size());};
+	int  nonMatchCount() {return -1;}
+	Node* match(int i);
+
+private:
+	std::vector<Node*> match_;
 };
 
 #endif

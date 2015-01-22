@@ -9,6 +9,7 @@
 #include "Viewer.hpp"
 #include "VInfo.hpp"
 
+class NodeFilter;
 class ServerFilter;
 class ServerHandler;
 
@@ -39,6 +40,9 @@ public:
 Q_SIGNALS:
 	void filterChanged();
 
+protected:
+	NodeFilter* makeFilter();
+
 private:
 	bool isServer(const QModelIndex & index) const;
 	bool isNode(const QModelIndex & index) const;
@@ -53,7 +57,7 @@ private:
 	QVariant nodeData(const QModelIndex& index,int role) const;
 	QVariant attributesData(const QModelIndex& index,int role) const;
 
-	//void resetStateFilter(bool broadcast);
+	void resetStateFilter(bool broadcast);
 	//bool filterState(node_ptr node,QSet<Node*>& filterSet);
 };
 

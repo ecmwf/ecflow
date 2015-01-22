@@ -13,6 +13,7 @@
 
 #include "ChangeMgrSingleton.hpp"
 
+#include "NodeModelData.hpp"
 #include "ServerFilter.hpp"
 #include "ServerHandler.hpp"
 #include "VFilter.hpp"
@@ -57,7 +58,7 @@ int TreeNodeModel::rowCount( const QModelIndex& parent) const
 	else if(!parent.isValid())
 	{
 		//qDebug() << "rowCount" << parent << servers_.count();
-		return servers_.count();
+		return servers_->count();
 	}
 	//The parent is a server
 	else if(isServer(parent))
@@ -172,7 +173,7 @@ QVariant TreeNodeModel::nodeData(const QModelIndex& index, int role) const
 	}
 	else if(role == FilterRole)
 	{
-		return QVariant(servers_.isFiltered(node));
+		return QVariant(servers_->isFiltered(node));
 	}
 	else if(index.column() == 0 && role == Qt::BackgroundRole)
 	{
@@ -272,7 +273,7 @@ QModelIndex TreeNodeModel::index( int row, int column, const QModelIndex & paren
 	if(!parent.isValid())
 	{
 		//For the server the internal pointer is NULL
-		if(row < servers_.count())
+		if(row < servers_->count())
 		{
 			void* p=NULL;
 			//qDebug() << "SERVER" << parent;
@@ -313,10 +314,10 @@ QModelIndex TreeNodeModel::parent(const QModelIndex &child) const
 
 
 	//Child is a suite. Its internal pointer points to a server.
-	if(ServerHandler *s=servers_.server(child.internalPointer()))
+	if(ServerHandler *s=servers_->server(child.internalPointer()))
 	{
 		//The parent is a server
-		int serverIdx=servers_.index(s);
+		int serverIdx=servers_->indexOf(s);
 		return createIndex(serverIdx,0,(void*)NULL);
 	}
 
@@ -371,7 +372,7 @@ ServerHandler* TreeNodeModel::indexToServer(const QModelIndex & index) const
 	if(index.isValid())
 	{
 		if(index.internalPointer() == NULL)
-			return servers_.server(index.row());
+			return servers_->server(index.row());
 	}
 
 	return NULL;
@@ -381,7 +382,7 @@ QModelIndex TreeNodeModel::serverToIndex(ServerHandler* server) const
 {
 	//For servers the internal id is set to their position in servers_ + 1
 	int i;
-	if((i=servers_.index(server))!= -1)
+	if((i=servers_->indexOf(server))!= -1)
 			return createIndex(i,0,(void*)NULL);
 
 	return QModelIndex();
@@ -392,7 +393,7 @@ Node* TreeNodeModel::indexToNode( const QModelIndex & index) const
 	if(index.isValid() && !isServer(index))
 	{
 		//If suite (the internal pointer points to a server id pointer
-		if(ServerHandler *s=servers_.server(index.internalPointer()))
+		if(ServerHandler *s=servers_->server(index.internalPointer()))
 		{
 			return s->suiteAt(index.row()).get();
 		}
@@ -463,7 +464,7 @@ VInfo_ptr TreeNodeModel::nodeInfo(const QModelIndex& index)
 	}
 
     //Check if the node is a suite (the internal pointer points to a server id pointer)
-    if(ServerHandler *s=servers_.server(index.internalPointer()))
+    if(ServerHandler *s=servers_->server(index.internalPointer()))
 	{
 		Node* node=s->suiteAt(index.row()).get();
 		VInfo_ptr res(VInfo::make(node));
@@ -498,6 +499,12 @@ VInfo_ptr TreeNodeModel::nodeInfo(const QModelIndex& index)
 // Filter
 //----------------------------------------
 
+NodeFilter* TreeNodeModel::makeFilter()
+{
+	return new TreeNodeFilter();
+}
+
+
 void TreeNodeModel::notifyConfigChanged(AttributeFilter*)
 {
 	//Notify the filter model
@@ -514,6 +521,17 @@ void TreeNodeModel::notifyConfigChanged(StateFilter*)
 {
 	resetStateFilter(true);
 }
+
+//Reset the state filter
+void TreeNodeModel::resetStateFilter(bool broadcast)
+{
+	servers_->filter(config_->stateFilter());
+
+	//Notify the filter model
+	if(broadcast)
+		Q_EMIT filterChanged();
+}
+
 
 /*void TreeNodeModel::resetStateFilter(bool broadcast)
 {

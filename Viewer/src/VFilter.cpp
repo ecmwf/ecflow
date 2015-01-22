@@ -15,6 +15,8 @@
 #include "VParam.hpp"
 #include "VSettings.hpp"
 
+#include "ServerHandler.hpp"
+
 //==============================================
 //
 // VFilter
@@ -156,3 +158,92 @@ void IconFilter::notifyOwner()
 {
 	owner_->changed(this);
 }
+
+
+
+NodeFilter::NodeFilter()
+{
+
+}
+
+TreeNodeFilter::TreeNodeFilter()
+{
+
+}
+
+bool TreeNodeFilter::isFiltered(Node* node)
+{
+	return (std::find(nonMatch_.begin(), nonMatch_.end(), node) == nonMatch_.end());
+}
+
+void TreeNodeFilter::reset(ServerHandler* server,VFilter* sf)
+{
+	nonMatch_.clear();
+
+	//If all states are visible
+	if(sf->isComplete())
+		return;
+
+	for(unsigned int j=0; j < server->numSuites();j++)
+	{
+		filterState(server->suiteAt(j),sf);
+	}
+}
+
+bool TreeNodeFilter::filterState(node_ptr node,VFilter* stateFilter)
+{
+	bool ok=false;
+	if(stateFilter->isSet(VNState::toState(node.get())))
+	{
+		ok=true;
+	}
+
+	std::vector<node_ptr> nodes;
+	node->immediateChildren(nodes);
+
+	for(std::vector<node_ptr>::iterator it=nodes.begin(); it != nodes.end(); it++)
+	{
+		if(filterState(*it,stateFilter) == true && ok == false)
+		{
+			ok=true;
+		}
+	}
+
+	if(!ok)
+		nonMatch_.insert(node.get());
+
+	return ok;
+}
+
+
+TableNodeFilter::TableNodeFilter()
+{
+	type_.insert("suite");
+}
+
+bool TableNodeFilter::isFiltered(Node* node)
+{
+	return (std::find(match_.begin(), match_.end(), node) != match_.end());
+}
+
+void TableNodeFilter::reset(ServerHandler* server,VFilter* sf)
+{
+	match_.clear();
+
+	//If all states are visible
+	//if(sf->isComplete())
+	//	return;
+
+	for(unsigned int j=0; j < server->numSuites();j++)
+	{
+		match_.push_back(server->suiteAt(j).get());
+	}
+}
+
+Node* TableNodeFilter::match(int i)
+{
+		assert(i>=0 && i < match_.size());
+		return match_.at(i);
+}
+
+

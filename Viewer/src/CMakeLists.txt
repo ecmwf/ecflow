@@ -20,6 +20,7 @@ set(viewer_srcs
     MenuHandler.cpp
     MessageItemWidget.cpp
     NodeFilterModel.cpp
+    NodeModelData.cpp
     NodePanel.cpp
     NodePathWidget.cpp
     NodeViewBase.cpp

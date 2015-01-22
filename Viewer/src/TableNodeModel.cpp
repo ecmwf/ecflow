@@ -12,7 +12,10 @@
 #include <QDebug>
 
 #include "ChangeMgrSingleton.hpp"
+
+#include "NodeModelData.hpp"
 #include "ServerHandler.hpp"
+#include "VFilter.hpp"
 #include "VNState.hpp"
 
 //=======================================================
@@ -47,9 +50,9 @@ int TableNodeModel::rowCount( const QModelIndex& parent) const
 	else if(!parent.isValid())
 	{
 		int cnt=0;
-		for(int i=0; i < servers_.count(); i++)
+		for(int i=0; i < servers_->count(); i++)
 		{
-			cnt+=servers_.items_.at(i).nodeNum();
+			cnt+=servers_->numOfFiltered(i);
 		}
 
 		return cnt;
@@ -159,23 +162,29 @@ QModelIndex TableNodeModel::index( int row, int column, const QModelIndex & pare
 
 	//qDebug() << "index" << row << column << parent;
 
-	int cnt=0;
-	ServerHandler *server=0;
-	for(int i=0; i < servers_.count(); i++)
+	if(Node *node=servers_->getNodeFromFilter(row))
 	{
-		if(row-cnt < servers_.items_.at(i).nodeNum())
+		return createIndex(row,column,node);
+	}
+
+	/*int cnt=0;
+	ServerHandler *server=0;
+	for(int i=0; i < servers_->count(); i++)
+	{
+		NodeFilter *filterservers_->filter(i));
+		if(row-cnt < filter->resultCount())
 		{
-			server=servers_.server(i);
+			server=servers_->server(i);
 			break;
 		}
-		cnt+=servers_.items_.at(i).nodeNum();
+		cnt+=filter->resultCount());
 	}
 
 	if(server)
 	{
 		if(Node *node=server->findNode(row))
 				return createIndex(row,column,node);
-	}
+	}*/
 
 	return QModelIndex();
 
@@ -285,7 +294,7 @@ bool TableNodeModel::isServer(const QModelIndex & index) const
 	if(index.isValid())
 	{
 		int id=index.internalId()-1;
-		return (id >=0 && id < servers_.count());
+		return (id >=0 && id < servers_->count());
 	}
 	return false;
 }
@@ -297,7 +306,7 @@ ServerHandler* TableNodeModel::indexToServer(const QModelIndex & index) const
 	if(index.isValid())
 	{
 		int id=index.internalId()-1;
-		return servers_.server(id);
+		return servers_->server(id);
 	}
 	return NULL;
 }
@@ -306,7 +315,7 @@ QModelIndex TableNodeModel::serverToIndex(ServerHandler* server) const
 {
 	//For servers the internal id is set to their position in servers_ + 1
 	int i;
-	if((i=servers_.index(server))!= -1)
+	if((i=servers_->indexOf(server))!= -1)
 			return createIndex(i,0,i+1);
 
 	return QModelIndex();
@@ -346,6 +355,16 @@ QModelIndex TableNodeModel::nodeToIndex(Node* node, int column) const
 	return QModelIndex();
 }
 
+NodeFilter* TableNodeModel::makeFilter()
+{
+	return new TableNodeFilter();
+}
 
+void TableNodeModel::resetStateFilter(bool broadcast)
+{
+	beginResetModel();
+	servers_->filter(config_->stateFilter());
+	endResetModel();
 
+}
 

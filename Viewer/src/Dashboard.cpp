@@ -244,6 +244,7 @@ void Dashboard::readSettings(VSettings* vs)
 			if(DashboardWidget *dw=addWidget(type,dockId))
 			{
 				dw->readSettings(vs);
+				dw->reload();
 			}
 			vs->endGroup();
 		}
