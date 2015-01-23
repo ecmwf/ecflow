@@ -108,7 +108,19 @@ TableNodeWidget::TableNodeWidget(VConfig* config,QWidget * parent)
 	model_=new TableNodeModel(config,parent);
 	filterModel_=new NodeFilterModel(model_,parent);
 	view_= new TableNodeView(filterModel_,parent);
+	bc_ = new NodePathWidget(this);
 
+	connect(view_->realWidget(),SIGNAL(selectionChanged(VInfo_ptr)),
+		    	bc_,SLOT(setPath(VInfo_ptr)));
+
+	connect(bc_,SIGNAL(selected(VInfo_ptr)),
+				view_->realWidget(),SLOT(slotSetCurrent(VInfo_ptr)));
+
+	QHBoxLayout* hb=new QHBoxLayout();
+	hb->addWidget(bc_);
+	hb->addStretch(1);
+
+	layout->addLayout(hb);
 	layout->addWidget(view_->realWidget());
 }
 

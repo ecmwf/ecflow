@@ -31,6 +31,10 @@ TableNodeView::TableNodeView(NodeFilterModel *model,QWidget* parent) : QTreeView
 	//setItemDelegate(delegate);
 
 	setRootIsDecorated(false);
+
+	setSortingEnabled(true);
+	sortByColumn(0,Qt::AscendingOrder);
+
 	setAllColumnsShowFocus(true);
 	setUniformRowHeights(true);
 	setMouseTracking(true);

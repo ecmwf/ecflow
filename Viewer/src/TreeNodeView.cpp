@@ -84,7 +84,7 @@ void TreeNodeView::slotSelectItem(const QModelIndex&)
 	if(lst.count() > 0)
 	{
 		VInfo_ptr info=model_->nodeInfo(lst.front());
-		if(!info->isEmpty())
+		if(info)
 		{
 			Q_EMIT selectionChanged(info);
 		}
