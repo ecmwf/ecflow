@@ -33,16 +33,38 @@ def ecf_home(port):
 def get_parent_dir(file_path):
     return os.path.dirname(file_path)
 
-def get_workspace_dir():
+def get_root_source_dir():
     cwd = os.getcwd()
-    #print "get_workspace_dir from: " + cwd
+    #print "get_root_source_dir from: " + cwd
     while (1):
+        # Get to directory that has ecflow
         head, tail = os.path.split(cwd)
-        #print "tail:" + tail
+        #print "   tail:" + tail
         if tail.find("ecflow") != -1 :
-            return cwd
+            
+            # bjam, already at the source directory
+            if os.path.exists(cwd + "/VERSION.cmake"): 
+                #print "   Found VERSION.cmake in " + cwd
+                return cwd
+        
+            # in cmake, we may be in the build directory, hence we need to determine source directory
+            file = cwd + "/CTestTestfile.cmake"
+            print "   searching for " + file
+            if os.path.exists(file):
+                # determine path by looking into this file:
+                for line in open(file):
+                    ## Source directory: /tmp/ma0/clientRoot/workspace/working-directory/ecflow/Acore
+                    if line.find("Source directory"):
+                        tokens = line.split()
+                        if len(tokens) == 4:
+                            return tokens[3]
+                raise RuntimeError("ERROR could not find Source directory in CTestTestfile.cmake")
+            else:
+                raise RuntimeError("ERROR could not find file CTestTestfile.cmake in " + cwd)
+                
         cwd = head
     return cwd
+
 
 def log_file_path(port): return "./" + gethostname() + "." + port + ".ecf.log"
 def checkpt_file_path(port): return "./" + gethostname() + "." + port + ".ecf.check"

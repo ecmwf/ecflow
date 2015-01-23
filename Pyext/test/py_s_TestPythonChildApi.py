@@ -21,7 +21,7 @@ from ecflow import Defs, Clock, DState,  Style, State, PrintStyle, File, Client,
 import ecflow_test_util as Test
 
 
-def ecf_includes() : return Test.get_workspace_dir() + "/Pyext" + "/test/data/python_includes"
+def ecf_includes() : return Test.get_root_source_dir() + "/Pyext" + "/test/data/python_includes"
 
 def create_defs(name,the_port):
     defs = Defs()
