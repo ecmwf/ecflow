@@ -197,6 +197,8 @@ else
       #
       if [[ %ECF_TRYNO% -eq 1 ]] ; then
          ctest -R u_ -V
+         ctest -R py_u -V
+         ctest -R py_s -V
          ctest -R c_ -V
          ctest -R s_ -V
          ctest -R perf_ -V
