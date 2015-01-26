@@ -705,6 +705,7 @@ int simple_node::flags()  const {
 #ifdef BRIDGE
   if (tree_) return tree_->flags;
 #endif
+  // FIXME defs
   return owner_ ? owner_->flags() : 0;
 }
 
@@ -1045,7 +1046,10 @@ void simple_node::variables(std::vector<Variable>& var)
 Boolean simple_node::hasMessages() const
 { 
   if (ecfFlag(FLAG_MESSAGE)) return True;
-  if (type() == NODE_SUPER) return serv().messages(*this).size() > 0;
+  // FIXME // cannot call this below while it is called during node redraw
+  if (type() == NODE_SUPER) 
+    return True;
+    // return serv().messages(*this).size() > 0;
   return False; // serv().messages(*this).size() > 0;
 }
 
