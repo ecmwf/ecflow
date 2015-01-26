@@ -1108,6 +1108,8 @@ template<>
 Node* ecf_concrete_node<Alias>::get_node() const { return owner_; }
 template<>
 Node* ecf_concrete_node<Suite>::get_node() const { return owner_; }
+template<>
+Node* ecf_concrete_node<Defs>::get_node() const { return 0x0; }
 
 const char* ecf_node_name(int ii) {
 

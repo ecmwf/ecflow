@@ -1582,6 +1582,7 @@ int ehost::update()
             // there were some kind of changes in the server
             // request the changes from the server & sync with
             // defs on client_
+	   client_.set_throw_on_error(true);
             client_.sync_local();
             // full_sync==true:  no notification on the GUI side
 

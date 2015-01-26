@@ -51,6 +51,7 @@ const char* substitute::scan(const char* cmd,node* n)
   if (debug) std::cout << "# substituted1:" << cmd << "\n";
   std::string replace (cmd);
   if (replace.find("%") != std::string::npos) {
+    if (n->__node__()) if (n->__node__()->type() != NODE_SUPER)
     if (n->__node__()-> get_node()) {
       n->__node__()-> get_node()-> variableSubsitution(replace);
       strcat(buf, replace.c_str());
