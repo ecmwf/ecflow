@@ -37,6 +37,12 @@ bool DefsDelta::incremental_sync(defs_ptr client_def, std::vector<std::string>& 
 {
 	if (!client_def.get()) return false;
 
+   if (ChangeMgrSingleton::exists() && ChangeMgrSingleton::instance()->in_notification()) {
+      // For debug: place a break point here: It appear as Change manager observers, has called another client to server command
+      std::cout << "ecflow:ClientInvoker::incremental_sync() called in the middle of ChangeMgrSingleton::notification.\n";
+      std::cout << "It appears that change observer have called *ANOTHER* client->server command in the middle syncronising client definition\n";
+   }
+
    /// - Sets notification flag, so that observers can also query if they are in
    ///   the middle of notification.
    ChangeMgrStartNotification start_notification;
