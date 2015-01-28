@@ -7,7 +7,8 @@ else
    # ============================================================
    # Now build bjam/b2
    # ============================================================
-   cd $BOOST_ROOT
+   
+   cd %BOOST_DIR%/%BOOST_VERSION%
    
    if [[ %ARCH% = linux64intel ]] ; then
       # provide access to intel c++ compiler on lxab
