@@ -1,4 +1,5 @@
 #!/bin/ksh
+# cray head.h
 set -e # stop the shell on first error
 set -u # fail when using an undefined variable
 set -x # echo script lines as they are executed
