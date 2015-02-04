@@ -28,8 +28,8 @@ extern "C" {
 }
 
 template<class T>
-node_alert<T>::node_alert(const char* title,int bg) :
-  alert_(getenv("ecflow_view_alert"))
+node_alert<T>::node_alert(const char* title,int bg)
+  : alert_(getenv("ecflow_view_alert"))
   , title_(title)
   , bg_ (bg)
 {
