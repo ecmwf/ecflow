@@ -1,4 +1,5 @@
 #!/bin/ksh
+# cray head.h
 set -e # stop the shell on first error
 set -u # fail when using an undefined variable
 set -x # echo script lines as they are executed
@@ -29,7 +30,7 @@ export ECF_NAME=%ECF_NAME%    # The name of this current task
 export ECF_PASS=%ECF_PASS%    # A unique password
 export ECF_TRYNO=%ECF_TRYNO%  # Current try number of the task
 export PID_RID=$$
-
+module load ecflow
 
 # =============================================================================
 # Shorten normal timeout for child commands to one hour

@@ -9,15 +9,15 @@ ecbuild_add_library( TARGET   ecflow
                      LIBS     libclient libsimu base libparser node nodeattr core
                               ${Boost_PYTHON_LIBRARY} 
                               ${PYTHON_LIBRARIES}
-                     INCLUDES ../ACore/src 
-                            ../ANattr/src
-                            ../ANode/src
-                            ../AParser/src
-                            ../Base/src
-                            ../Base/src/cts
-                            ../Base/src/stc
-                            ../Client/src
-                            ../CSim/src
+                     INCLUDES ${CMAKE_SOURCE_DIR}/ACore/src 
+                              ${CMAKE_SOURCE_DIR}/ANattr/src
+                            ${CMAKE_SOURCE_DIR}/ANode/src
+                            ${CMAKE_SOURCE_DIR}/AParser/src
+                            ${CMAKE_SOURCE_DIR}/Base/src
+                            ${CMAKE_SOURCE_DIR}/Base/src/cts
+                            ${CMAKE_SOURCE_DIR}/Base/src/stc
+                            ${CMAKE_SOURCE_DIR}/Client/src
+                            ${CMAKE_SOURCE_DIR}/CSim/src
                             ${Boost_INCLUDE_DIRS}
                             ${PYTHON_INCLUDE_DIRS} 
                     )

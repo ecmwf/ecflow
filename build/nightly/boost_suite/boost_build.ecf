@@ -24,7 +24,7 @@ else
    # Build the boost libs used by ecflow
    # ========================================================================
    
-   cd $BOOST_ROOT
+   cd %BOOST_DIR%/%BOOST_VERSION%
    
    # uncomment for clean build
    #rm -rf stage

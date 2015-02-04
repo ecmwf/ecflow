@@ -20,6 +20,9 @@ echo "*****************************************"
 
 ecflow_client --label=progress core/nodeattr/nodeAParser   --host=%ECF_NODE% --port=%ECF_PORT%  
 
+#  export BOOST_ROOT, this is need by some the .jam file to locate boost build
+export BOOST_ROOT=%BOOST_DIR%/%BOOST_VERSION%
+
 # ================================================================================
 # Test built with Boost build
 # ================================================================================
@@ -298,6 +301,7 @@ else
       echo $PATH
       
       #rm -rf bin/*.test   
+      
       
       # On cray we need CUSTOM_BJAM_ARGS i.e for toolset=intel cxxflags=-fPIC otherwise, 
       # it will rebuild Pyext directory with default compiler
