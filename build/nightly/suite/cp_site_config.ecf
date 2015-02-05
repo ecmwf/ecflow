@@ -19,7 +19,7 @@ else
    # ============================================================================================
    # Update site config.jam. Note  %SITE_CONFIG% needs WK to be defined/exported
    # ============================================================================================
-   if [[ %ARCH% = opensuse113 ||  %ARCH% = opensuse131 || %ARCH% = redhat || %ARCH% = cray || %ARCH = linux64 ]] ; then
+   if [[ %ARCH% = opensuse113 ||  %ARCH% = opensuse131 || %ARCH% = redhat || %ARCH% = cray || %ARCH% = linux64 ]] ; then
    
       if [[ "$remote_host" = "" ]] 
       then

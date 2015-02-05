@@ -58,6 +58,7 @@ def add_local_job_variables( node ):
     node.add_variable("ECF_JOB_CMD","rsh %LOCAL_HOST% -l %USER%  '%ECF_JOB% > %ECF_JOBOUT%  2>&1'")
     node.add_variable("LOCAL_HOST",os.uname()[1])
     node.add_variable("ECF_OUT","") # unset so we use ECF_HOME
+    node.add_variable("MODULE_LOAD_GIT",'echo "module load git does not work on this platform"')  
  
 def add_localhost_variables( localhost ):
     localhost.add_variable("COMPILER_TEST_PATH","gcc-4.5/$mode")
@@ -142,7 +143,8 @@ def add_linux_64_lxc_variables( linux_64 ):
     linux_64.add_variable("ARCH","linux64")
     linux_64.add_variable("SITE_CONFIG","$WK/build/site_config/site-config-Linux64.jam")
     linux_64.add_variable("GIT","git")   # rely on module load git
-    
+    linux_64.add_variable("CUSTOM_BJAM_ARGS","c++-template-depth=512")   # needed for gcc 4.8.1
+
 def add_linux_64_intel_variables( linux_64_intel ): 
     linux_64_intel.add_variable("REMOTE_HOST","lxb")
     linux_64_intel.add_variable("ROOT_WK","/vol/ecf/cluster/intel")
@@ -570,6 +572,7 @@ def add_boost_tasks( family ):
     boost_fix = family.add_task("boost_fix")
     boost_fix.add_trigger("boost_bjam == complete")
     boost_site_config = family.add_task("boost_site_config")
+    add_local_job_variables( boost_site_config ) # this is run locally
     boost_site_config.add_trigger("boost_fix == complete")
     boost_build = family.add_task("boost_build")
     boost_build.add_trigger("boost_site_config == complete")
@@ -731,7 +734,7 @@ with defs.add_suite("experiment") as experiment:
 
 print "build boost"
 with defs.add_suite("boost_suite") as boost_suite:
-    boost_suite.add_variable("BOOST_VERSION","boost_1_57_0")
+    boost_suite.add_variable("BOOST_VERSION","boost_1_53_0")
     boost_suite.add_variable("REMOTE_COPY","rcp")
     boost_suite.add_variable("ECF_FILES",os.getenv("SCRATCH") + "/nightly/boost_suite")
     add_suite_variables(boost_suite)
