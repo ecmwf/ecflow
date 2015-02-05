@@ -84,6 +84,8 @@ if [[ "$PE_ENV" = CRAY ]] ; then
    module unload cray-libsci/12.1.3
 fi
 
+%MODULE_LOAD_GIT:module load git%
+
 #
 set -e;
 trap ERROR 0

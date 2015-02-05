@@ -122,4 +122,8 @@ trap ERROR 0
 
 # Trap any signal that may cause the script to fail
 trap '{ echo "Killed by a signal"; ERROR ; }' 1 2 3 4 5 6 7 8 10 12 13 15
+
+
+%MODULE_LOAD_GIT:module load git%
+
 # last line of head.h

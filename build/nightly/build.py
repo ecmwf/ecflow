@@ -100,7 +100,16 @@ def add_remote_linux_64_lxop_variables( linux_64 ):
     linux_64.add_variable("QUEUE","test")    # for PBS
     linux_64.add_variable("ECF_OUT","/gpfs/lxop/build/ecflow")
     linux_64.add_variable("ECF_LOGHOST","lxop")   
-    linux_64.add_variable("ECF_LOGPORT","9316")   
+    linux_64.add_variable("ECF_LOGPORT","9316")
+    
+def add_remote_linux_64_lxc_variables( linux_64 ): 
+    linux_64.add_variable("ECF_KILL_CMD","ssh  %USER%@%REMOTE_HOST% \"kill -15 %ECF_RID%\"") 
+    linux_64.add_variable("ECF_JOB_CMD","ssh  %USER%@%REMOTE_HOST% 'source ~/.profile; %ECF_JOB% > %ECF_JOBOUT%  2>&1'")
+    linux_64.add_variable("COMPILER_TEST_PATH","gcc-4.9.1/$mode")
+    linux_64.add_variable("COMPILER_VERSION","gcc-4.9.1")
+    linux_64.add_variable("TOOLSET","gcc")
+    linux_64.add_variable("BOOTSTRAP_TOOLSET","gcc")
+    linux_64.add_variable("NO_OF_CORES","8")
 
 def add_remote_linux_64_intel_variables( linux_64 ): 
     linux_64.add_variable("ECF_KILL_CMD","rsh %REMOTE_HOST% \"kill -15 %ECF_RID%\"") 
@@ -126,6 +135,14 @@ def add_linux_64_lxop_variables( linux_64 ):
     linux_64.add_variable("SITE_CONFIG","$WK/build/site_config/site-config-Linux64.jam")
     linux_64.add_variable("GIT","/usr/local/bin/git")   # /usr/local/apps/git/current/bin/git not installed yet
 
+def add_linux_64_lxc_variables( linux_64 ): 
+    linux_64.add_variable("REMOTE_HOST","lxc")
+    linux_64.add_variable("ROOT_WK","/vol/ecf/lxc")
+    linux_64.add_variable("BOOST_DIR","/vol/ecf/lxc/boost")
+    linux_64.add_variable("ARCH","linux64")
+    linux_64.add_variable("SITE_CONFIG","$WK/build/site_config/site-config-Linux64.jam")
+    linux_64.add_variable("GIT","git")   # rely on module load git
+    
 def add_linux_64_intel_variables( linux_64_intel ): 
     linux_64_intel.add_variable("REMOTE_HOST","lxb")
     linux_64_intel.add_variable("ROOT_WK","/vol/ecf/cluster/intel")
@@ -135,7 +152,7 @@ def add_linux_64_intel_variables( linux_64_intel ):
 
 def add_remote_opensuse113_variables( opensuse113 ):
     opensuse113.add_variable("ECF_KILL_CMD","ssh  %USER%@%REMOTE_HOST% \"kill -15 %ECF_RID%\"") 
-    opensuse113.add_variable("ECF_JOB_CMD","ssh  %USER%@%REMOTE_HOST% '%ECF_JOB% > %ECF_JOBOUT%  2>&1'")
+    opensuse113.add_variable("ECF_JOB_CMD","ssh  %USER%@%REMOTE_HOST% 'source ~/.profile; %ECF_JOB% > %ECF_JOBOUT%  2>&1'")
     opensuse113.add_variable("COMPILER_TEST_PATH","gcc-4.5/$mode")
     opensuse113.add_variable("COMPILER_VERSION","gcc-4.5")
     opensuse113.add_variable("TOOLSET","gcc")
@@ -151,7 +168,7 @@ def add_opensuse113_variables( opensuse113 ):
 
 def add_remote_opensuse131_variables( opensuse131 ):
     opensuse131.add_variable("ECF_KILL_CMD","ssh  %USER%@%REMOTE_HOST% \"kill -15 %ECF_RID%\"") 
-    opensuse131.add_variable("ECF_JOB_CMD","ssh  %USER%@%REMOTE_HOST% '%ECF_JOB% > %ECF_JOBOUT%  2>&1'")
+    opensuse131.add_variable("ECF_JOB_CMD","ssh  %USER%@%REMOTE_HOST% 'source ~/.profile; %ECF_JOB% > %ECF_JOBOUT%  2>&1'")
     opensuse131.add_variable("COMPILER_TEST_PATH","gcc-4.8/$mode")
     opensuse131.add_variable("COMPILER_VERSION","gcc-4.8")
     opensuse131.add_variable("TOOLSET","gcc")
@@ -283,7 +300,7 @@ def add_cray_variables( cray ):
     
 def add_remote_redhat_variables( redhat ):
     redhat.add_variable("ECF_KILL_CMD","ssh  %USER%@%REMOTE_HOST% \"kill -15 %ECF_RID%\"") 
-    redhat.add_variable("ECF_JOB_CMD","ssh  %USER%@%REMOTE_HOST% '%ECF_JOB% > %ECF_JOBOUT%  2>&1'")
+    redhat.add_variable("ECF_JOB_CMD","ssh  %USER%@%REMOTE_HOST% 'source ~/.profile; %ECF_JOB% > %ECF_JOBOUT%  2>&1'")
     redhat.add_variable("COMPILER_TEST_PATH","gcc-4.4.7/$mode")
     redhat.add_variable("COMPILER_VERSION","gcc-4.4.7")
     redhat.add_variable("TOOLSET","gcc")
@@ -448,6 +465,13 @@ def build_linux_64_lxop( parent ) :
     add_remote_linux_64_lxop_variables(linux_64)
     add_git_tasks( linux_64 )
     add_build_and_test_tasks( linux_64 )
+
+def build_linux_64_lxc( parent ) :
+    linux_64 = parent.add_family("linux64_lxc")
+    add_linux_64_lxc_variables(linux_64)
+    add_remote_linux_64_lxc_variables(linux_64)
+    add_git_tasks( linux_64 )
+    add_build_and_test_tasks( linux_64 )
     
 def build_linux_64_intel( parent ) :
     linux_64 = parent.add_family("linux64intel")
@@ -601,6 +625,11 @@ def build_boost( boost ):
     add_linux_64_lxop_variables(family)
     add_remote_linux_64_lxop_variables(family)
     add_boost_tasks( family )
+    
+    family = boost.add_family("linux64_lxc")
+    add_linux_64_lxc_variables(family)
+    add_remote_linux_64_lxc_variables(family)
+    add_boost_tasks( family )
 
     family = boost.add_family("linux64intel")
     add_linux_64_intel_variables(family)
@@ -743,6 +772,7 @@ with defs.add_suite("suite") as suite:
             remote.add_variable("BUILD_TYPE","boost")  # choose between [  cmake | boost ]
             build_linux_64( remote )
             build_linux_64_lxop( remote )
+            build_linux_64_lxc( remote )
             build_linux_64_intel( remote )
             build_opensuse113( remote )
             build_opensuse131( remote )
