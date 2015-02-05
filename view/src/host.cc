@@ -1327,8 +1327,8 @@ tmp_file ehost::file( node& n, std::string name )
 
          // Do *not* assign 'client_.server_reply().get_string()' to a separate string, since
          // in the case of job output the string could be several megabytes.
-         return tmp_file("# file is server by ecflow-server\n" +
-			 client_.server_reply().get_string());
+         return tmp_file( client_.server_reply().get_string()
+			  + "\n# file is served by ecflow-server\n" );
       } catch ( std::exception &e ) {
  	std::cerr << "host::file-error:" << e.what() << "\n";
          gui::message("host::file-error: %s", e.what());
@@ -1582,7 +1582,7 @@ int ehost::update()
             // there were some kind of changes in the server
             // request the changes from the server & sync with
             // defs on client_
-	   client_.set_throw_on_error(true);
+
             client_.sync_local();
             // full_sync==true:  no notification on the GUI side
 

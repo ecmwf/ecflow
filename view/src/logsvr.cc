@@ -181,7 +181,7 @@ tmp_file logsvr::getfile(std::string name)
 	  total += len;
 	}
 
-	sprintf(buf, "# served by %s@%s # telnet %s %s # get %s",
+	sprintf(buf, "\n# served by %s@%s # telnet %s %s # get %s",
 		host_.c_str(), port_.c_str(), 
 		host_.c_str(), port_.c_str(), 
 		name.c_str());
