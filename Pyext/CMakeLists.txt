@@ -15,7 +15,7 @@ include_directories(
                      ../CSim/src
                     )
       
-#    INCLUDES here is for extrenal includes           
+# INCLUDES here is for external includes           
 ecbuild_add_library( TARGET   ecflow
                      TYPE     MODULE
                      SOURCES  ${srcs}
