@@ -2,6 +2,20 @@
 
 file( GLOB srcs RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "src/*.cpp" "src/*.hpp" )
 
+# local includes
+include_directories(  
+                     ../ACore/src 
+                     ../ANattr/src
+                     ../ANode/src
+                     ../AParser/src
+                     ../Base/src
+                     ../Base/src/cts
+                     ../Base/src/stc
+                     ../Client/src
+                     ../CSim/src
+                    )
+      
+#    INCLUDES here is for extrenal includes           
 ecbuild_add_library( TARGET   ecflow
                      TYPE     MODULE
                      SOURCES  ${srcs}
@@ -9,15 +23,7 @@ ecbuild_add_library( TARGET   ecflow
                      LIBS     libclient libsimu base libparser node nodeattr core
                               ${Boost_PYTHON_LIBRARY} 
                               ${PYTHON_LIBRARIES}
-                     INCLUDES ${CMAKE_SOURCE_DIR}/ACore/src 
-                              ${CMAKE_SOURCE_DIR}/ANattr/src
-                            ${CMAKE_SOURCE_DIR}/ANode/src
-                            ${CMAKE_SOURCE_DIR}/AParser/src
-                            ${CMAKE_SOURCE_DIR}/Base/src
-                            ${CMAKE_SOURCE_DIR}/Base/src/cts
-                            ${CMAKE_SOURCE_DIR}/Base/src/stc
-                            ${CMAKE_SOURCE_DIR}/Client/src
-                            ${CMAKE_SOURCE_DIR}/CSim/src
+                     INCLUDES 
                             ${Boost_INCLUDE_DIRS}
                             ${PYTHON_INCLUDE_DIRS} 
                     )
