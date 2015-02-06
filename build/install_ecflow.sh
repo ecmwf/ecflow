@@ -69,6 +69,20 @@ fi
 install_arg=install-all
 
 # ==============================================================================
+# Expect $WK and $BOOST_ROOT to be specified
+# ==============================================================================
+if [ "${WK:-unset}" = "unset" ] ; then
+   echo "Install expects environment variable WK  work space to be defined"
+   exit 1
+fi  
+if [ "${BOOST_ROOT:-unset}" = "unset" ] ; then
+   echo "Install expects environment variable BOOST_ROOT to be defined"
+   exit 1
+fi  
+echo "WK         = $WK"
+echo "BOOST_ROOT = $BOOST_ROOT"
+
+# ==============================================================================
 # In order to embedd boost_python path in the ecflow extension, we need
 # ECFLOW_INSTALL_DIR to be set correctly, when building the extension
 # Hacky work around since, <dll-path> does not work for a relink at install time.
@@ -137,7 +151,13 @@ then
       # lxab this is still opensuse113
       export BOOST_ROOT=/vol/ecf/cluster/boost/$BOOST_VERSION;  
       export WK=/vol/ecf/cluster/ecflow
-      
+      case "$HOST" in
+         lxc*)
+	           export BOOST_ROOT=/vol/lxc/boost/$BOOST_VERSION;  
+	           export WK=/vol/ecf/lxc/ecflow
+         ;;
+	  esac
+	  
    elif [[ "$OS_VERSION" = "" ]] ; then 
    
       # lxop does not define OS_VERSION ?????
