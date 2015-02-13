@@ -14,7 +14,7 @@ class ServerHandler;
 class TableNodeModel : public AbstractNodeModel
 {
 public:
-   	TableNodeModel(VConfig* config,QObject *parent=0);
+   	TableNodeModel(NodeModelDataHandler *data,IconFilter* icons,QObject *parent=0);
 
 	int columnCount (const QModelIndex& parent = QModelIndex() ) const;
    	int rowCount (const QModelIndex& parent = QModelIndex() ) const;
@@ -26,8 +26,6 @@ public:
    	QModelIndex parent (const QModelIndex & ) const;
 
 protected:
-	NodeFilter* makeFilter();
-
    	bool isServer(const QModelIndex & index) const;
 	ServerHandler* indexToServer(const QModelIndex & index) const;
 	QModelIndex serverToIndex(ServerHandler*) const;

@@ -18,7 +18,7 @@
 #include "NodeFilterModel.hpp"
 #include "TreeNodeViewDelegate.hpp"
 
-TreeNodeView::TreeNodeView(NodeFilterModel *model,QWidget* parent) : QTreeView(parent), NodeViewBase(model)
+TreeNodeView::TreeNodeView(QWidget* parent) : QTreeView(parent)
 {
 	//Set the model.
 	setModel(model_);
@@ -62,6 +62,15 @@ TreeNodeView::TreeNodeView(NodeFilterModel *model,QWidget* parent) : QTreeView(p
 
 	expandAll();
 }
+
+void TreeNodeView::setModel(NodeFilterModel *model)
+{
+	model_= model;
+
+	//Set the model.
+	QTreeView::setModel(model_);
+}
+
 
 QWidget* TreeNodeView::realWidget()
 {

@@ -12,9 +12,11 @@
 #include "Dashboard.hpp"
 
 #include "InfoPanel.hpp"
-#include "NodeViewHandler.hpp"
+#include "NodeWidget.hpp"
 #include "ServerHandler.hpp"
 #include "ServerFilter.hpp"
+#include "TableNodeWidget.hpp"
+#include "TreeNodeWidget.hpp"
 #include "VFilter.hpp"
 #include "VSettings.hpp"
 
@@ -26,16 +28,14 @@
 int Dashboard::maxWidgetNum_=20;
 
 Dashboard::Dashboard(QString rootNode,QWidget *parent) :
-        QMainWindow(parent),
-        config_(0)
-
+        QMainWindow(parent)
 {
 	//We use the mainwindow as a widget. Its task is
 	//to dock all the component widgets!
 	setWindowFlags(Qt::Widget);
 
-	//Filters
-	config_=new VConfig;
+	//The serverfilter. It holds the list of servers displayed by this dashboard.
+	serverFilter_=new ServerFilter();
 
 	//Central widget - we need to create it but we do not
 	//use it. So we can hide it!
@@ -83,8 +83,7 @@ Dashboard::Dashboard(QString rootNode,QWidget *parent) :
 
 Dashboard::~Dashboard()
 {
-	//MvQFolderWatcher::remove(this);
-	delete config_;
+	delete serverFilter_;
 }
 
 
@@ -93,7 +92,11 @@ DashboardWidget* Dashboard::addWidget(const std::string& type)
 	//Get a unique dockId stored as objectName
 	QString dockId=uniqueDockId();
 
-	 return addWidget(type,dockId.toStdString());
+	DashboardWidget*w=addWidget(type,dockId.toStdString());
+
+	//At this point the widgets can be inactive. Reload will make them active!!!
+	w->reload();
+	return w;
 }
 
 DashboardWidget* Dashboard::addWidget(const std::string& type,const std::string& dockId)
@@ -103,8 +106,8 @@ DashboardWidget* Dashboard::addWidget(const std::string& type,const std::string&
 	//Create a dashboard widget
 	if(type == "tree")
 	{
-		NodeWidget* ctl=new TreeNodeWidget(config_,this);
-		ctl->active(true);
+		NodeWidget* ctl=new TreeNodeWidget(serverFilter_,this);
+		//ctl->active(true);
 		connect(ctl,SIGNAL(selectionChanged(VInfo_ptr)),
 					this,SIGNAL(selectionChanged(VInfo_ptr)));
 
@@ -112,8 +115,8 @@ DashboardWidget* Dashboard::addWidget(const std::string& type,const std::string&
 	}
 	else if(type == "table")
 	{
-		NodeWidget* ctl=new TableNodeWidget(config_,this);
-		ctl->active(true);
+		NodeWidget* ctl=new TableNodeWidget(serverFilter_,this);
+		//ctl->active(true);
 		w=ctl;//widgets_ << ctl;
 	}
 	else if(type == "info")
@@ -135,7 +138,7 @@ DashboardWidget* Dashboard::addWidget(const std::string& type,const std::string&
 	widgets_ << w;
 
 	//Create a dockwidget at the right
-    QDockWidget *dw = new QDockWidget(tr("a"), this);
+    QDockWidget *dw = new QDockWidget(tr(type.c_str()), this);
     dw->setAllowedAreas(Qt::RightDockWidgetArea);
 
     //Store the dockId  in the dockwidget (as objectName)
@@ -203,7 +206,7 @@ void Dashboard::setViewMode(Viewer::ViewMode mode)
 
 void Dashboard::writeSettings(VSettings* vs)
 {
-	config_->writeSettings(vs);
+	serverFilter_->writeSettings(vs);
 
 	//Qt settings
 	vs->putQs("state",saveState());
@@ -222,7 +225,7 @@ void Dashboard::writeSettings(VSettings* vs)
 
 void Dashboard::readSettings(VSettings* vs)
 {
-	config_->readSettings(vs);
+	serverFilter_->readSettings(vs);
 
 	Q_FOREACH(QWidget* w,findChildren<QDockWidget*>())
 	{
@@ -243,8 +246,8 @@ void Dashboard::readSettings(VSettings* vs)
 			//Create a dashboard widget
 			if(DashboardWidget *dw=addWidget(type,dockId))
 			{
+				//This will make the widgets active!!!
 				dw->readSettings(vs);
-				dw->reload();
 			}
 			vs->endGroup();
 		}

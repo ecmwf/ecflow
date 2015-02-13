@@ -55,41 +55,6 @@
     <addaction name="actionPreferences"/>
     <addaction name="actionConfigureNodeMenu"/>
    </widget>
-   <widget class="QMenu" name="menuView">
-    <property name="title">
-     <string>&amp;View</string>
-    </property>
-    <widget class="QMenu" name="menuView_mode">
-     <property name="title">
-      <string>View mode</string>
-     </property>
-     <addaction name="actionTreeView"/>
-     <addaction name="actionTableView"/>
-    </widget>
-    <widget class="QMenu" name="menuType">
-     <property name="tearOffEnabled">
-      <bool>true</bool>
-     </property>
-     <property name="title">
-      <string>Type</string>
-     </property>
-    </widget>
-    <widget class="QMenu" name="menuIcon">
-     <property name="title">
-      <string>Icon</string>
-     </property>
-    </widget>
-    <widget class="QMenu" name="menuState">
-     <property name="title">
-      <string>State</string>
-     </property>
-    </widget>
-    <addaction name="menuView_mode"/>
-    <addaction name="separator"/>
-    <addaction name="menuState"/>
-    <addaction name="menuType"/>
-    <addaction name="menuIcon"/>
-   </widget>
    <widget class="QMenu" name="menu_Help">
     <property name="title">
      <string>&amp;Help</string>
@@ -104,7 +69,6 @@
    </widget>
    <addaction name="menuLl"/>
    <addaction name="menuEdit"/>
-   <addaction name="menuView"/>
    <addaction name="menu_Help"/>
    <addaction name="menuServer"/>
   </widget>
@@ -119,8 +83,6 @@
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
-   <addaction name="actionTreeView"/>
-   <addaction name="actionTableView"/>
    <addaction name="actionRefresh"/>
    <addaction name="actionReset"/>
    <addaction name="actionAddInfoPanel"/>
@@ -186,34 +148,6 @@
   <action name="actionNewWindow">
    <property name="text">
     <string>New &amp;window</string>
-   </property>
-  </action>
-  <action name="actionTreeView">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Tree view</string>
-   </property>
-   <property name="toolTip">
-    <string>Tree view mode</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+1</string>
-   </property>
-  </action>
-  <action name="actionTableView">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Table view</string>
-   </property>
-   <property name="toolTip">
-    <string>Table view mode</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+2</string>
    </property>
   </action>
   <action name="actionRefresh">

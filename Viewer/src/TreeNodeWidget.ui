@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>TreeNodeWidget</class>
+ <widget class="QWidget" name="TreeNodeWidget">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>683</width>
+    <height>491</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <property name="margin">
+    <number>0</number>
+   </property>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_2">
+     <item>
+      <widget class="NodePathWidget" name="bcWidget_" native="true"/>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer_2">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QToolButton" name="viewTb">
+       <property name="toolTip">
+        <string>View options</string>
+       </property>
+       <property name="text">
+        <string>Detached</string>
+       </property>
+       <property name="icon">
+        <iconset resource="viewer.qrc">
+         <normaloff>:/viewer/images/configure.svg</normaloff>:/viewer/images/configure.svg</iconset>
+       </property>
+       <property name="checkable">
+        <bool>true</bool>
+       </property>
+       <property name="popupMode">
+        <enum>QToolButton::InstantPopup</enum>
+       </property>
+       <property name="autoRaise">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <widget class="TreeNodeView" name="viewWidget_" native="true">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+    </widget>
+   </item>
+  </layout>
+  <action name="actionBreadcrumbs">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Breadcrumbs</string>
+   </property>
+   <property name="toolTip">
+    <string>Sho/hide breadcrumbs</string>
+   </property>
+  </action>
+  <action name="actionFrozen">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Frozen</string>
+   </property>
+   <property name="toolTip">
+    <string>Do not update panel when node changes</string>
+   </property>
+  </action>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>NodePathWidget</class>
+   <extends>QWidget</extends>
+   <header>NodePathWidget.hpp</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>TreeNodeView</class>
+   <extends>QWidget</extends>
+   <header location="global">TreeNodeView.hpp</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
+ <resources>
+  <include location="viewer.qrc"/>
+ </resources>
+ <connections/>
+</ui>

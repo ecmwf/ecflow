@@ -12,7 +12,8 @@
 
 #include <set>
 
-#include "VConfig.hpp"
+#include <QObject>
+
 #include "VParam.hpp"
 
 #include "Node.hpp"
@@ -22,14 +23,17 @@ class VSettings;
 
 #include <boost/property_tree/ptree.hpp>
 
-class VFilter : public VConfigItem
+class VParamSet : public QObject
 {
+Q_OBJECT
+
 public:
-	VFilter(VConfig* owner);
-	virtual ~VFilter() {};
+	VParamSet();
+	virtual ~VParamSet() {};
 
 	const std::set<VParam*>& current() const {return current_;}
 	void current(const std::set<std::string>&);
+	const std::set<VParam*>& all() const {return all_;}
 
 	bool isEmpty() const {return current_.size() ==0 ;}
 	bool isComplete() const { return all_.size() == current_.size();}
@@ -39,6 +43,8 @@ public:
 	void writeSettings(VSettings* vs);
 	void readSettings(VSettings* vs);
 
+Q_SIGNALS:
+	void changed();
 
 protected:
 	void init(const std::vector<VParam*>& items);
@@ -46,68 +52,93 @@ protected:
 	std::set<VParam*> all_;
 	std::set<VParam*> current_;
 	std::string settingsId_;
-
 };
 
-class StateFilter : public VFilter
+class NodeStateFilter : public VParamSet
 {
 public:
-	StateFilter(VConfig* owner);
-	void notifyOwner();
+	NodeStateFilter();
 };
 
-class AttributeFilter : public VFilter
+class AttributeFilter : public VParamSet
 {
 public:
-	AttributeFilter(VConfig* owner);
-	void notifyOwner();
+	AttributeFilter();
 };
 
-class IconFilter : public VFilter
+class IconFilter : public VParamSet
 {
 public:
-	IconFilter(VConfig* owner);
-	void notifyOwner();
+	IconFilter();
+};
+
+class TreeNodeFilter;
+class  TableNodeFilter;
+
+class NodeFilterDef : public QObject
+{
+Q_OBJECT
+
+friend class  TreeNodeFilter;
+friend class  TableNodeFilter;
+
+public:
+	enum Scope {NodeState};
+	NodeFilterDef(Scope);
+	NodeStateFilter* nodeState() const {return nodeState_;}
+
+Q_SIGNALS:
+	void changed();
+
+protected:
+	//NodeStateFilter *serverState_;
+	NodeStateFilter *nodeState_;
+	//AttributeFilter *attribute_;
+	//std::string nodeType_;
+	//std::string nodeName_;
 };
 
 
 class NodeFilter
 {
 public:
-	NodeFilter();
+	NodeFilter(NodeFilterDef* def);
 	virtual ~NodeFilter() {};
 
-	virtual void reset(ServerHandler* server,VFilter* sf)=0;
+	enum ChangeAspect {AllChanged,StateChanged,AttributeChanged};
+
+	virtual void reset(ServerHandler* server)=0;
     virtual bool isFiltered(Node* node)=0;
     virtual int  matchCount()=0;
     virtual int  nonMatchCount()=0;
     virtual Node* match(int i)=0;
 
 protected:
-	std::set<std::string> type_;
-	std::set<std::string> state_;
+    NodeFilterDef* def_;
+    std::set<std::string> type_;
+
 };
 
 class TreeNodeFilter : public NodeFilter
 {
 public:
-	TreeNodeFilter();
-	void reset(ServerHandler* server,VFilter* sf);
+	TreeNodeFilter(NodeFilterDef* def);
+	void reset(ServerHandler* server);
 	bool isFiltered(Node* node);
 	int  matchCount() {return -1;};
 	int  nonMatchCount() {return static_cast<int>(nonMatch_.size());};
 	Node* match(int i) {return NULL;}
 
 private:
-	bool filterState(node_ptr node,VFilter* stateFilter);
+	bool filterState(node_ptr node,VParamSet* stateFilter);
 	std::set<Node*> nonMatch_;
 };
 
 class TableNodeFilter : public NodeFilter
 {
 public:
-	TableNodeFilter();
-	void reset(ServerHandler* server,VFilter* sf);
+	TableNodeFilter(NodeFilterDef* def);
+	void reset(ServerHandler* server);
 	bool isFiltered(Node* node);
 	int  matchCount() {return static_cast<int>(match_.size());};
 	int  nonMatchCount() {return -1;}

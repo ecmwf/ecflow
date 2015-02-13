@@ -17,7 +17,7 @@
 #include <boost/property_tree/ptree.hpp>
 
 class Dashboard;
-class VConfig;
+class ServerFilter;
 class VSettings;
 
 class NodePanel : public TabWidget
@@ -31,7 +31,7 @@ public:
 	void setViewMode(Viewer::ViewMode);
 	Viewer::ViewMode viewMode();
 
-	VConfig* config();
+	ServerFilter* serverFilter();
 
 	Dashboard* currentNodeWidget();
 	void addWidget();

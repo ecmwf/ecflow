@@ -20,17 +20,23 @@
 #include "VNState.hpp"
 #include "VSState.hpp"
 
+
+
+
 NodePathNodeItem::NodePathNodeItem(int index,QString name,QColor col,bool selected,QWidget * parent) :
   NodePathItem(NodeType,index,parent),
   col_(col),
   current_(selected)
 {
+	//background:  qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 white,  stop: 0.8 white, stop:0.81 red, stop: 1 red);
+	//background: BASE-COLOR;\
+	//background:  qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 white,  stop: 0.75 white,  stop: 1 BASE-COLOR);\
 	//Stylesheet
+
 	qss_="QToolButton {\
-		        border: BORDER;\
 			    border-radius: 0px; \
 		     	padding: 0px; \
-				background: BASE-COLOR;\
+				border: BORDER;\
 			    font-weight: FONT;\
 				color: TEXT-COLOR; \
 		 }\
@@ -39,11 +45,29 @@ NodePathNodeItem::NodePathNodeItem(int index,QString name,QColor col,bool select
 		    	 border-radius: 0px; \
 		    	 padding: 0px; \
 		    	 background: HOVER-COLOR;\
-			     font-weight: FONT;\
+			     font-weight: FONT; \
 		 }";
 
-	setText(name);
+	qssSelected_="QToolButton {\
+			    border: BORDER;\
+				border-radius: 0px; \
+		     	padding: 0px; \
+			    font-weight: FONT;\
+				color: TEXT-COLOR; \
+		 }\
+		     QToolButton:hover{\
+		    	 border: BORDER;\
+		    	 border-radius: 0px; \
+		    	 padding: 0px; \
+		    	 background: HOVER-COLOR;\
+		 }";
+
+	setText(name+" ");
 	resetStyle();
+
+	/*QFont f;
+	f.setPointSize(8);
+	setFont(f);*/
 };
 
 void NodePathNodeItem::reset(QString name,QColor col,bool current)
@@ -61,18 +85,58 @@ void NodePathNodeItem::reset(QString name,QColor col,bool current)
 
 void NodePathNodeItem::resetStyle()
 {
-	QString st=qss_;
+	QString st;
+	if(current_)
+	{
+		st=qssSelected_;
+		//st.replace("BASE-COLOR",col_.name())
+
+		//Font
+		st.replace("FONT","bold");
+
+		//Text color
+		st.replace("TEXT-COLOR","black");
+
+		//Border
+		st.replace("BORDER","2px solid "+ col_.name());
+	}
+	else
+	{
+		st=qss_;
+		st.replace("BASE-COLOR",col_.name());
+
+		//Font
+		st.replace("FONT","normal");
+
+		//Text color
+		st.replace("TEXT-COLOR","black");
+
+		//Border
+		st.replace("BORDER","1px solid "+ col_.name());
+
+	}
+
+	st.replace("HOVER-COLOR","rgb(230,230,230)");
+
+
 	//Colour
-	st.replace("BASE-COLOR",col_.name()).replace("HOVER-COLOR",col_.darker(125).name());
+	//st.replace("BASE-COLOR",col_.name()).replace("HOVER-COLOR",col_.darker(125).name());
+
+	/*st.replace("BASE-COLOR",col_.name());
+	st.replace("HOVER-COLOR","rgb(230,230,230)");
 
 	//Font
 	st.replace("FONT",current_?"bold":"normal");
 
 	//Text color
-	st.replace("TEXT-COLOR",isDark(col_)?"white":"black");
+	//st.replace("TEXT-COLOR",isDark(col_)?"white":"black");
+	st.replace("TEXT-COLOR","black");
 
 	//Border
-	st.replace("BORDER",current_?"2px solid rgb(40, 40, 40)":"1px solid rgb(160, 160, 160)");
+	//st.replace("BORDER",current_?"2px solid rgb(40, 40, 40)":"1px solid rgb(160, 160, 160)");
+
+	st.replace("BORDER",current_?"2px solid "+ col_.name():"2px solid " +  col_.name());*/
+
 
 	setStyleSheet(st);
 }
@@ -116,8 +180,8 @@ void NodePathNodeItem::current(bool current)
 NodePathServerItem::NodePathServerItem(int index,QString name,QColor col,bool selected,QWidget * parent) :
   NodePathNodeItem(index,name,col,selected,parent)
 {
-	setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
-	setIcon(QPixmap(":/viewer/server.svg"));
+	//setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
+	//setIcon(QPixmap(":/viewer/server.svg"));
 }
 
 
@@ -125,6 +189,11 @@ NodePathServerItem::NodePathServerItem(int index,QString name,QColor col,bool se
 NodePathMenuItem::NodePathMenuItem(int index,QWidget * parent) :
   NodePathItem(MenuType, index,parent)
 {
+	if(index_==0)
+		setText("/");
+	else
+		setText("/");
+
 	setObjectName("pathMenuTb");
 };
 
@@ -146,7 +215,7 @@ NodePathWidget::NodePathWidget(QWidget *parent) :
 
 	layout_=new QHBoxLayout(this);
 	layout_->setSpacing(0);
-	layout_->setContentsMargins(6,0,6,0);
+	layout_->setContentsMargins(6,1,6,1);
 	setLayout(layout_);
 
 	//QFont f(QApplication::font());
@@ -365,6 +434,7 @@ void NodePathWidget::setPath(VInfo_ptr info)
 			QColor col;
 			QString name;
 			NodePathNodeItem* nodeItem=0;
+			bool hasChildren=false;
 
 			//Server
 			if(i==0)
@@ -372,6 +442,7 @@ void NodePathWidget::setPath(VInfo_ptr info)
 				col=QColor(255,255,255);
 				col=VSState::toColour(server).name();
 				name=QString::fromStdString(server->name());
+				hasChildren=true;
 			}
 			//Node
 			else
@@ -379,6 +450,7 @@ void NodePathWidget::setPath(VInfo_ptr info)
 				Node *n=lst.at(i);
 				col=VNState::toColour(n).name();
 				name=QString::fromStdString(n->name());
+				hasChildren=(ServerHandler::numOfImmediateChildren(n) >0);
 			}
 
 			if(i < nodeItems_.count())
@@ -411,20 +483,27 @@ void NodePathWidget::setPath(VInfo_ptr info)
 
 			NodePathMenuItem* menuItem=0;
 
-			if(i >= menuItems_.count())
+			if(hasChildren)
 			{
-				menuItem= new NodePathMenuItem(i,this);
-				menuItems_ << menuItem;
-				connect(menuItem,SIGNAL(clicked()),
+				if(i >= menuItems_.count())
+				{
+					menuItem= new NodePathMenuItem(i,this);
+
+					menuItems_ << menuItem;
+					connect(menuItem,SIGNAL(clicked()),
 					   this,SLOT(menuItemSelected()));
+				}
+				else
+				{
+					menuItem=menuItems_.at(i);
+				}
+
+				layout_->addWidget(menuItem);
 			}
-			else
-			{
-				menuItem=menuItems_.at(i);
-			}
-			layout_->addWidget(menuItem);
 
 	}
+
+	layout_->addStretch(1);
 
 	//Set the current node index (used only in "stay in parent" mode). If we are here it must be the last node!
 	infoIndex(lst.count()-1);

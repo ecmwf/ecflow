@@ -21,24 +21,18 @@
 #include "VNState.hpp"
 
 
-AbstractNodeModel::AbstractNodeModel(VConfig * config,QObject *parent) :
+AbstractNodeModel::AbstractNodeModel(NodeModelDataHandler *data,IconFilter* icons,QObject *parent) :
    QAbstractItemModel(parent),
-   config_(config),
-   active_(true)
+   data_(data),
+   icons_(icons),
+   active_(false)
 {
-	servers_=new NodeModelDataHandler();
-	//Register as VConfig observer. The has to know about any
-	//changes in VConfig!
-	config_->addObserver(this);
-
-	//At this point the model is empty!!
+	//At this point the model is not active o it cannot see its data!
 }
 
 AbstractNodeModel::~AbstractNodeModel()
 {
-	config_->removeObserver(this);
 	clean();
-	delete servers_;
 }
 
 void AbstractNodeModel::active(bool active)
@@ -52,17 +46,18 @@ void AbstractNodeModel::active(bool active)
 		//When the model becomes active we reload everything
 		if(active_)
 		{
-			init();
+			data_->runFilter(false);
+			//init();
 
 			//Initialises the filter
-			resetStateFilter(false);
+			//resetStateFilter(false);
 		}
 
 		//When the model becomes inactive we clean it and
 		//release all the resources
 		else
 		{
-			clean();
+			data_->clear(); //clean();
 		}
 
 		endResetModel();
@@ -73,15 +68,15 @@ void AbstractNodeModel::active(bool active)
 }
 
 //Called when the list of servers to be displayed has changed.
-void AbstractNodeModel::notifyConfigChanged(ServerFilter*)
-{
-	if(active_)
-		reload();
-}
+//void AbstractNodeModel::notifyConfigChanged(ServerFilter*)
+//{
+//	if(active_)
+//		reload();
+//}
 
 void AbstractNodeModel::init()
 {
-	ServerFilter *filter=config_->serverFilter();
+	/*ServerFilter *filter=config_->serverFilter();
 	for(unsigned int i=0; i < filter->items().size(); i++)
 	{
 		if(ServerHandler *server=filter->items().at(i)->serverHandler())
@@ -92,12 +87,12 @@ void AbstractNodeModel::init()
 		    //The model stores the servers it has to deal with in a local object.
 		    servers_->add(server,makeFilter());
 		}
-	}
+	}*/
 }
 
 void AbstractNodeModel::clean()
 {
-	for(int i=0; i < servers_->count(); i++)
+	/*for(int i=0; i < servers_->count(); i++)
 	{
 		if(ServerHandler *s=servers_->server(i))
 		{
@@ -105,7 +100,7 @@ void AbstractNodeModel::clean()
 		}
 	}
 
-	servers_->clear();
+	servers_->clear();*/
 }
 
 void AbstractNodeModel::reload()
@@ -113,9 +108,10 @@ void AbstractNodeModel::reload()
 	if(active_)
 	{
 		beginResetModel();
-		clean();
-		init();
-		resetStateFilter(false); //do not emit change signal
+		data_->reload();
+		//clean();
+		//init();
+		//resetStateFilter(false); //do not emit change signal
 		endResetModel();
 	}
 }
@@ -123,7 +119,7 @@ void AbstractNodeModel::reload()
 
 bool AbstractNodeModel::hasData() const
 {
-	return servers_->count() >0;
+	return (active_&& data_->count() > 0);
 }
 
 void AbstractNodeModel::dataIsAboutToChange()
@@ -131,25 +127,25 @@ void AbstractNodeModel::dataIsAboutToChange()
 	beginResetModel();
 }
 
-void AbstractNodeModel::addServer(ServerHandler *server)
+/*void AbstractNodeModel::addServer(ServerHandler *server)
 {
 	//servers_ << server;
 	//rootNodes_[servers_.back()] = NULL;
-}
+}*/
 
 
-Node * AbstractNodeModel::rootNode(ServerHandler* server) const
+/*Node * AbstractNodeModel::rootNode(ServerHandler* server) const
 {
-	/*QMap<ServerHandler*,Node*>::const_iterator it=rootNodes_.find(server);
+	QMap<ServerHandler*,Node*>::const_iterator it=rootNodes_.find(server);
 	if(it != rootNodes_.end())
-		return it.value();*/
+		return it.value();
 	return NULL;
-}
+}*/
 
 
-void AbstractNodeModel::setRootNode(Node *node)
+/*void AbstractNodeModel::setRootNode(Node *node)
 {
-	/*if(ServerHandler *server=ServerHandler::find(node))
+	if(ServerHandler *server=ServerHandler::find(node))
 	{
 		beginResetModel();
 
@@ -159,8 +155,8 @@ void AbstractNodeModel::setRootNode(Node *node)
 		endResetModel();
 
 		qDebug() << "setRootNode finished";
-	}*/
-}
+	}
+}*/
 
 //----------------------------------------------
 //
@@ -211,14 +207,14 @@ VInfo_ptr AbstractNodeModel::nodeInfo(const QModelIndex& index)
 }
 
 
-void AbstractNodeModel::notifyNodeChanged(const Node* node, const std::vector<ecf::Aspect::Type>& types)
+/*void AbstractNodeModel::notifyNodeChanged(const Node* node, const std::vector<ecf::Aspect::Type>& types)
 {
 	if(node==NULL)
 		return;
 
 	qDebug() << "observer is called" << QString::fromStdString(node->name());
-	/*for(unsigned int i=0; i < types.size(); i++)
-		qDebug() << "  type:" << types.at(i);*/
+	//for(unsigned int i=0; i < types.size(); i++)
+	//	qDebug() << "  type:" << types.at(i);
 
 	Node* nc=const_cast<Node*>(node);
 
@@ -239,7 +235,7 @@ void AbstractNodeModel::notifyNodeChanged(const Node* node, const std::vector<ec
 	qDebug() << "    --->" << QString::fromStdString(nd1->name()) << QString::fromStdString(nd2->name());
 
 	Q_EMIT dataChanged(index1,index2);
-}
+}*/
 
 
 

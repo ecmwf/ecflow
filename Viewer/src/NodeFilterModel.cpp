@@ -35,7 +35,9 @@ bool NodeFilterModel::filterAcceptsRow(int sourceRow,const QModelIndex& sourcePa
 
 void NodeFilterModel::slotFilterChanged()
 {
-	invalidateFilter();
+	//invalidateFilter();
+	invalidate();
+
 }
 
 VInfo_ptr NodeFilterModel::nodeInfo(const QModelIndex& index)

@@ -28,7 +28,6 @@
 #include "ServerListDialog.hpp"
 #include "MenuConfigDialog.hpp"
 #include "UserMessage.hpp"
-#include "VConfig.hpp"
 #include "VSettings.hpp"
 
 #include <boost/lexical_cast.hpp>
@@ -45,39 +44,11 @@ MainWindow::MainWindow(QStringList idLst,QWidget *parent) : QMainWindow(parent)
     
     setAttribute(Qt::WA_DeleteOnClose);
 
-    //Create action group for view mode
-    //The order of the actions in the group must reflect the order in
-    //the Viewer::NodeViewMode enum!!!!
-    viewModeAg_=new QActionGroup(this);
-    viewModeAg_->setExclusive(true);
-    viewModeAg_->addAction(actionTreeView);
-    viewModeAg_->addAction(actionTableView);
-
-    connect(viewModeAg_,SIGNAL(triggered(QAction*)),
-    		this,SLOT(slotViewMode(QAction*)));
-
-
-    //Filter widget in toolbar
-    //filterWidget_=new FilterWidget(this);
-    //viewToolBar->addWidget(filterWidget_);
-
-   // NodePathWidget* pathWidget=new NodePathWidget(this);
-   // toolBar->addWidget(pathWidget);
-
-
     //Create the main layout
     QVBoxLayout* layout=new QVBoxLayout();
     QWidget *w=new QWidget(this);
     w->setLayout(layout);
     setCentralWidget(w);
-
-    //QSplitter *sp=new QSplitter(Qt::Vertical,this);
-    //layout->addWidget(sp);
-
-    //View menu
-    stateFilterMenu_=new StateFilterMenu(menuState);
-    attrFilterMenu_=new AttributeFilterMenu(menuType);
-    iconFilterMenu_=new IconFilterMenu(menuIcon);
 
     //Servers menu menu
     serverFilterMenu_=new ServerFilterMenu(menuServer);
@@ -177,13 +148,7 @@ void MainWindow::on_actionConfigureNodeMenu_triggered()
 
 void MainWindow::on_actionManageServers_triggered()
 {
-	ServerFilter *filter=0;
-	if(VConfig *config=	nodePanel_->config())
-	{
-		filter=config->serverFilter();
-	}
-
-	ServerListDialog dialog(ServerListDialog::SelectionMode,filter,this);
+	ServerListDialog dialog(ServerListDialog::SelectionMode,nodePanel_->serverFilter(),this);
 	dialog.exec();
 }
 
@@ -243,46 +208,18 @@ void MainWindow::on_actionShowInInfoPanel_triggered()
 
 }
 
-void MainWindow::slotViewMode(QAction* action)
-{
-	if(action->isChecked())
-	{
-		int index=viewModeAg_->actions().indexOf(action);
-		if(index >=0)
-			nodePanel_->setViewMode(static_cast<Viewer::ViewMode>(index));
-	}
-}
 
 void MainWindow::slotCurrentChangedInPanel()
 {
-	syncViewModeAg(nodePanel_->viewMode());
 	//filterWidget_->reload(nodePanel_->viewFilter());
 
-	if(VConfig *config=	nodePanel_->config())
-	{
-		stateFilterMenu_->reload(config->stateFilter());
-		attrFilterMenu_->reload(config->attributeFilter());
-		iconFilterMenu_->reload(config->iconFilter());
-
-		serverFilterMenu_->reload(config);
-	}
+	serverFilterMenu_->reload(nodePanel_->serverFilter());
 
 	//breadcrumbs_->setPath(folderPanel_->currentFolder());
   	 //slotUpdateNavigationActions(folderPanel_->folderNavigation());
 
 	 //updateIconSizeActionState();
 	 //updateSearchPanel();
-}
-
-//This functions syncs the toggle state of the action group
-void MainWindow::syncViewModeAg(Viewer::ViewMode mode)
-{
-	//It is safe to call setChecked() because the QActionGroup in this case
-	//does not emit the triggered() signal
-
-	int index=static_cast<int>(mode);
-	if(index >=0 && index < viewModeAg_->actions().count())
-		viewModeAg_->actions().at(index)->setChecked(true);
 }
 
 void MainWindow::reloadContents()

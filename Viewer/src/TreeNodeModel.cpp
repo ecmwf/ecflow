@@ -28,10 +28,40 @@
 //
 //=======================================
 
-TreeNodeModel::TreeNodeModel(VConfig* config,QObject *parent) :
-   AbstractNodeModel(config,parent)
+TreeNodeModel::TreeNodeModel(NodeModelDataHandler *data,AttributeFilter *atts,IconFilter* icons,QObject *parent) :
+   AbstractNodeModel(data,icons,parent),
+   atts_(atts)
 
 {
+	//Attribute filter changes
+	connect(atts_,SIGNAL(changed()),
+				this,SIGNAL(filterChanged()));
+
+	//Icon filter changes
+	connect(icons_,SIGNAL(changed()),
+			this,SLOT(slotIconFilterChanged()));
+
+
+	//When the underlying data changes
+
+	//Filter changed
+	connect(data_,SIGNAL(filterChanged()),
+				this,SIGNAL(filterChanged()));
+
+	//Server added
+	connect(data_,SIGNAL(serverAddBegin(int)),
+				this,SLOT(slotServerAddBegin(int)));
+
+	connect(data_,SIGNAL(serverAddEnd()),
+								this,SLOT(slotAddEnd()));
+
+	//Server removed
+	connect(data_,SIGNAL(serverRemoveBegin(int)),
+						this,SLOT(slotServerRemoveBegin(int)));
+
+	connect(data_,SIGNAL(serverRemoveEnd()),
+							this,SLOT(slotServerRemoveEnd()));
+
 
 }
 
@@ -58,7 +88,7 @@ int TreeNodeModel::rowCount( const QModelIndex& parent) const
 	else if(!parent.isValid())
 	{
 		//qDebug() << "rowCount" << parent << servers_.count();
-		return servers_->count();
+		return data_->count();
 	}
 	//The parent is a server
 	else if(isServer(parent))
@@ -173,7 +203,7 @@ QVariant TreeNodeModel::nodeData(const QModelIndex& index, int role) const
 	}
 	else if(role == FilterRole)
 	{
-		return QVariant(servers_->isFiltered(node));
+		return QVariant(data_->isFiltered(node));
 	}
 	else if(index.column() == 0 && role == Qt::BackgroundRole)
 	{
@@ -181,10 +211,10 @@ QVariant TreeNodeModel::nodeData(const QModelIndex& index, int role) const
 	}
 	else if(index.column() == 0 && role == IconRole)
 	{
-		if(config_->iconFilter()->isEmpty())
+		if(icons_->isEmpty())
 			return QVariant();
 		else
-			return VIcon::pixmapList(node,config_->iconFilter());
+			return VIcon::pixmapList(node,icons_);
 	}
 
 	return QVariant();
@@ -213,7 +243,7 @@ QVariant TreeNodeModel::attributesData(const QModelIndex& index, int role) const
 
 	if(role == FilterRole)
 	{
-		if(config_->attributeFilter()->isEmpty())
+		if(atts_->isEmpty())
 			return QVariant(false);
 	}
 
@@ -229,7 +259,7 @@ QVariant TreeNodeModel::attributesData(const QModelIndex& index, int role) const
 
 	if(role == FilterRole)
 	{
-		if(config_->attributeFilter()->isSet(type))
+		if(atts_->isSet(type))
 		{
 			return QVariant(true);
 		}
@@ -273,7 +303,7 @@ QModelIndex TreeNodeModel::index( int row, int column, const QModelIndex & paren
 	if(!parent.isValid())
 	{
 		//For the server the internal pointer is NULL
-		if(row < servers_->count())
+		if(row < data_->count())
 		{
 			void* p=NULL;
 			//qDebug() << "SERVER" << parent;
@@ -314,10 +344,10 @@ QModelIndex TreeNodeModel::parent(const QModelIndex &child) const
 
 
 	//Child is a suite. Its internal pointer points to a server.
-	if(ServerHandler *s=servers_->server(child.internalPointer()))
+	if(ServerHandler *s=data_->server(child.internalPointer()))
 	{
 		//The parent is a server
-		int serverIdx=servers_->indexOf(s);
+		int serverIdx=data_->indexOf(s);
 		return createIndex(serverIdx,0,(void*)NULL);
 	}
 
@@ -372,7 +402,7 @@ ServerHandler* TreeNodeModel::indexToServer(const QModelIndex & index) const
 	if(index.isValid())
 	{
 		if(index.internalPointer() == NULL)
-			return servers_->server(index.row());
+			return data_->server(index.row());
 	}
 
 	return NULL;
@@ -382,7 +412,7 @@ QModelIndex TreeNodeModel::serverToIndex(ServerHandler* server) const
 {
 	//For servers the internal id is set to their position in servers_ + 1
 	int i;
-	if((i=servers_->indexOf(server))!= -1)
+	if((i=data_->indexOf(server))!= -1)
 			return createIndex(i,0,(void*)NULL);
 
 	return QModelIndex();
@@ -393,7 +423,7 @@ Node* TreeNodeModel::indexToNode( const QModelIndex & index) const
 	if(index.isValid() && !isServer(index))
 	{
 		//If suite (the internal pointer points to a server id pointer
-		if(ServerHandler *s=servers_->server(index.internalPointer()))
+		if(ServerHandler *s=data_->server(index.internalPointer()))
 		{
 			return s->suiteAt(index.row()).get();
 		}
@@ -464,7 +494,7 @@ VInfo_ptr TreeNodeModel::nodeInfo(const QModelIndex& index)
 	}
 
     //Check if the node is a suite (the internal pointer points to a server id pointer)
-    if(ServerHandler *s=servers_->server(index.internalPointer()))
+    if(ServerHandler *s=data_->server(index.internalPointer()))
 	{
 		Node* node=s->suiteAt(index.row()).get();
 		VInfo_ptr res(VInfo::make(node));
@@ -499,90 +529,37 @@ VInfo_ptr TreeNodeModel::nodeInfo(const QModelIndex& index)
 // Filter
 //----------------------------------------
 
-NodeFilter* TreeNodeModel::makeFilter()
+//This slot is called when the icon filter changes
+void TreeNodeModel::slotIconFilterChanged()
 {
-	return new TreeNodeFilter();
-}
+	//This should trigger the re-rendering of the whole view according to
+	//some blogs. However, this does not work!!!!!
+	//Q_EMIT dataChanged(QModelIndex(), QModelIndex());
 
-
-void TreeNodeModel::notifyConfigChanged(AttributeFilter*)
-{
-	//Notify the filter model
+	//This is very expensive!! There should be a better way!!!
 	Q_EMIT filterChanged();
 }
 
-void TreeNodeModel::notifyConfigChanged(IconFilter*)
+//Server is about to be added
+void TreeNodeModel::slotServerAddBegin(int row)
 {
-	//Notify the filter model
-	Q_EMIT filterChanged();
+	beginInsertRows(QModelIndex(),row,row);
 }
 
-void TreeNodeModel::notifyConfigChanged(StateFilter*)
+//Addition of the new server has finished
+void TreeNodeModel::slotServerAddEnd()
 {
-	resetStateFilter(true);
+	endInsertRows();
 }
 
-//Reset the state filter
-void TreeNodeModel::resetStateFilter(bool broadcast)
+//Server is about to be removed
+void TreeNodeModel::slotServerRemoveBegin(int row)
 {
-	servers_->filter(config_->stateFilter());
-
-	//Notify the filter model
-	if(broadcast)
-		Q_EMIT filterChanged();
+	beginRemoveRows(QModelIndex(),row,row);
 }
 
-
-/*void TreeNodeModel::resetStateFilter(bool broadcast)
+//Removal of the server has finished
+void TreeNodeModel::slotServerRemoveEnd()
 {
-
-	/*servers_.clearFilter();
-
-	//If all states are visible
-	if(config_->stateFilter()->isComplete())
-		return;
-
-	for(int i=0; i < servers_.count(); i++)
-	{
-		ServerHandler *server=servers_.server(i);
-		QSet<Node*> filterSet;
-
-		for(unsigned int j=0; j < server->numSuites();j++)
-		{
-			filterState(server->suiteAt(j),filterSet);
-		}
-
-		servers_.nodeFilter(i,filterSet);
-	}
-
-	//Notify the filter model
-	if(broadcast)
-		Q_EMIT filterChanged();
+	endRemoveRows();
 }
-
-bool TreeNodeModel::filterState(node_ptr node,QSet<Node*>& filterSet)
-{
-	bool ok=false;
-	if(config_->stateFilter()->isSet(VNState::toState(node.get())))
-	{
-			ok=true;
-	}
-
-	std::vector<node_ptr> nodes;
-	node->immediateChildren(nodes);
-
-	for(std::vector<node_ptr>::iterator it=nodes.begin(); it != nodes.end(); it++)
-	{
-		if(filterState(*it,filterSet) == true && ok == false)
-		{
-			ok=true;
-		}
-	}
-
-	if(!ok)
-		filterSet << node.get();
-
-	return ok;
-}
-*/
-

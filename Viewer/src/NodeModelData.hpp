@@ -12,11 +12,17 @@
 
 #include <vector>
 
+#include <QObject>
+
+#include "NodeObserver.hpp"
+#include "ServerFilter.hpp"
+
 class Node;
 
 class NodeFilter;
+class NodeFilterDef;
 class ServerHandler;
-class VFilter;
+class VParamSet;
 
 class NodeModelData
 {
@@ -27,34 +33,26 @@ public:
     ~NodeModelData();
 
     int nodeNum() const;
-    void filter(VFilter* stateFilter);
-
-    /*bool isFiltered(Node*) const;
-
-    void resetFilter(VFilter* stateFilter);
-    int nodeNum() const;*/
+    void runFilter();
 
 protected:
-    //bool filterState(node_ptr node,VFilter* stateFilter);
-
-    /*ServerHandler *server_;
-	QSet<Node*> nodeFilter_;
-	Node* rootNode_;
-	mutable int nodeNum_;*/
-
 	ServerHandler *server_;
 	NodeFilter* filter_;
 	mutable int nodeNum_;
 };
 
 
-class NodeModelDataHandler
+class NodeModelDataHandler : public QObject, public ServerFilterObserver, public NodeObserver
 {
-public:
-	NodeModelDataHandler() {}
+Q_OBJECT
 
-	void add(ServerHandler*,NodeFilter*);
+public:
+	NodeModelDataHandler(NodeFilterDef* filterDef);
+
 	void clear();
+	void reset(ServerFilter* servers);
+	void reload();
+	void runFilter(bool broadcast);
 
 	ServerHandler* server(int) const;
 	ServerHandler* server(void*) const;
@@ -64,24 +62,56 @@ public:
 	int numOfNodes(int) const;
 	int numOfFiltered(int index) const;
 	bool isFiltered(Node *node) const;
-	void filter(VFilter* stateFilter);
+	void filter(VParamSet* stateFilter);
 	Node* getNodeFromFilter(int totalRow);
 
-	/*ServerHandler* server(int) const;
-	ServerHandler* server(void*) const;
-	void add(ServerHandler *);
-	int indexOf(ServerHandler* s) const;
-	int count() const {return data_.count();}
-	void clear();
-	void clearFilter();
-	void nodeFilter(int i,QSet<Node*>);
-	bool isFiltered(Node *node) const;
-	void resetFilter(VFilter* stateFilter);*/
+	//From ServerFilterObserver
+	void notifyServerFilterAdded(ServerItem*);
+	void notifyServerFilterRemoved(ServerItem*);
+	void notifyServerFilterChanged(ServerItem*);
+
+	//From NodeObserver
+	void notifyNodeChanged(const Node*, const std::vector<ecf::Aspect::Type>&);
+
+public Q_SLOTS:
+	void slotFilterDefChanged();
+
+Q_SIGNALS:
+	void filterChanged();
+	void serverAddBegin(int);
+	void serverAddEnd();
+	void serverRemoveBegin(int);
+	void serverRemoveEnd();
 
 protected:
+	void init();
+	virtual NodeModelData* makeData(ServerHandler* s)=0;
+	void add(ServerHandler*);
 	NodeModelData* data(int) const;
 
 	std::vector<NodeModelData*> data_;
+	ServerFilter *servers_;
+	NodeFilterDef* filterDef_;
 };
+
+class TreeNodeModelDataHandler : public  NodeModelDataHandler
+{
+public:
+	TreeNodeModelDataHandler(NodeFilterDef* filterDef) : NodeModelDataHandler(filterDef) {};
+protected:
+	void init();
+	NodeModelData* makeData(ServerHandler* s);
+};
+
+class TableNodeModelDataHandler : public  NodeModelDataHandler
+{
+public:
+	TableNodeModelDataHandler(NodeFilterDef* filterDef) : NodeModelDataHandler(filterDef) {};
+protected:
+	NodeModelData* makeData(ServerHandler* s);
+};
+
+
+
 
 #endif

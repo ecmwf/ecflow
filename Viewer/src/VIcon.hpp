@@ -22,7 +22,7 @@
 #include <QVariant>
 
 class Node;
-class VFilter;
+class VParamSet;
 
 class VIcon : public VParam
 {
@@ -31,7 +31,7 @@ public:
 	virtual ~VIcon();
 
 	static std::vector<VParam*> filterItems();
-	static QVariantList pixmapList(Node *node,VFilter *filter);
+	static QVariantList pixmapList(Node *node,VParamSet *filter);
 	static VIcon* find(const std::string& name);
 	static void init(const std::string& parFile);
 

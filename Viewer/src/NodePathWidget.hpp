@@ -29,6 +29,59 @@ class QToolButton;
 class Node;
 class NodePathWidget;
 
+/*
+class NodePathItem : public QGraphicsItem
+{
+public:
+	enum Type {NodeType,MenuType,ElideType};
+	NodePathItem(Type type,int index,QGraphicsItem* parent=0) : QGraphicsItem(parent), type_(type), index_(index) {};
+	int index() const {return index_;}
+
+	QRectF	boundingRect() const;
+    void	paint (QPainter* painter,const QStyleOptionGraphicsItem* option, QWidget* widget = 0);
+
+protected:
+	Type type_;
+	int index_;
+	QRectF brect_;
+};
+
+class NodePathNodeItem : public NodePathItem
+{
+public:
+	NodePathNodeItem(int index,QString name,QColor col,bool current,QWidget* parent=0);
+	void reset(QString name,QColor col,bool selected);
+    void colour(QColor col);
+    void current(bool);
+
+protected:
+    void resetStyle();
+    bool isDark(QColor col) const;
+
+    QString qss_;
+	QColor col_;
+	bool current_;
+};
+
+class NodePathMenuItem : public NodePathNodeItem
+{
+public:
+	NodePathServerItem(int index,QString name,QColor col,bool current,QWidget* parent=0);
+};
+
+class NodePathMenuItem : public NodePathItem
+{
+public:
+	NodePathMenuItem(int index,QWidget* parent=0);
+};
+
+class NodePathMenuItem : public NodePathItem
+{
+public:
+	NodePathMenuItem(int index,QWidget* parent=0);
+};
+*/
+
 class NodePathItem : public QToolButton
 {
 public:
@@ -54,6 +107,7 @@ protected:
     bool isDark(QColor col) const;
 
     QString qss_;
+    QString qssSelected_;
 	QColor col_;
 	bool current_;
 };

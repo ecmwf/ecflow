@@ -23,11 +23,11 @@
 //
 //==============================================
 
-VFilter::VFilter(VConfig * owner) : VConfigItem(owner)
+VParamSet::VParamSet()
 {
 }
 
-void VFilter::init(const std::vector<VParam*>& items)
+void VParamSet::init(const std::vector<VParam*>& items)
 {
 	for(std::vector<VParam*>::const_iterator it=items.begin(); it != items.end(); it++)
 	{
@@ -35,12 +35,12 @@ void VFilter::init(const std::vector<VParam*>& items)
 	}
 }
 
-bool VFilter::isSet(VParam* p) const
+bool VParamSet::isSet(VParam* p) const
 {
 	return (current_.find(p) != current_.end());
 }
 
-bool VFilter::isSet(const std::string &name) const
+bool VParamSet::isSet(const std::string &name) const
 {
 	for(std::set<VParam*>::const_iterator it=current_.begin(); it != current_.end(); it++)
 	{
@@ -50,7 +50,7 @@ bool VFilter::isSet(const std::string &name) const
 	return false;
 }
 
-void VFilter::current(const std::set<std::string>& names)
+void VParamSet::current(const std::set<std::string>& names)
 {
 	current_.clear();
 	for(std::set<VParam*>::const_iterator it=all_.begin(); it != all_.end(); it++)
@@ -58,10 +58,11 @@ void VFilter::current(const std::set<std::string>& names)
 			if(names.find((*it)->name()) != names.end())
 				current_.insert(*it);
 	}
-	notifyOwner();
+
+	Q_EMIT changed();
 }
 
-void VFilter::writeSettings(VSettings *vs)
+void VParamSet::writeSettings(VSettings *vs)
 {
 	std::vector<std::string> array;
 
@@ -73,7 +74,7 @@ void VFilter::writeSettings(VSettings *vs)
 	vs->put(settingsId_,array);
 }
 
-void VFilter::readSettings(VSettings* vs)
+void VParamSet::readSettings(VSettings* vs)
 {
 	current_.clear();
 
@@ -89,18 +90,6 @@ void VFilter::readSettings(VSettings* vs)
 					current_.insert(*itA);
 		}
 	}
-
-/*	current_.clear();
-
-	for(boost::property_tree::ptree::const_iterator it = array.begin(); it != array.end(); ++it)
-	{
-			std::string name=it->second.get_value<std::string>();
-			for(std::set<VParam*>::const_iterator it=all_.begin(); it != all_.end(); it++)
-			{
-					if((*it)->name() == name)
-						current_.insert(*it);
-			}
-	}*/
 }
 
 //==============================================
@@ -109,7 +98,7 @@ void VFilter::readSettings(VSettings* vs)
 //
 //==============================================
 
-StateFilter::StateFilter(VConfig * owner) : VFilter(owner)
+NodeStateFilter::NodeStateFilter() : VParamSet()
 {
 	settingsId_="state";
 	std::vector<VParam*> v=VNState::filterItems();
@@ -117,10 +106,6 @@ StateFilter::StateFilter(VConfig * owner) : VFilter(owner)
 	current_=all_;
 }
 
-void StateFilter::notifyOwner()
-{
-	owner_->changed(this);
-}
 
 //==============================================
 //
@@ -128,16 +113,11 @@ void StateFilter::notifyOwner()
 //
 //==============================================
 
-AttributeFilter::AttributeFilter(VConfig * owner) : VFilter(owner)
+AttributeFilter::AttributeFilter() : VParamSet()
 {
 	settingsId_="attribute";
 	std::vector<VParam*> v=VAttribute::filterItems();
 	init(v);
-}
-
-void AttributeFilter::notifyOwner()
-{
-	owner_->changed(this);
 }
 
 //==============================================
@@ -146,7 +126,7 @@ void AttributeFilter::notifyOwner()
 //
 //==============================================
 
-IconFilter::IconFilter(VConfig * owner) : VFilter(owner)
+IconFilter::IconFilter() : VParamSet()
 {
 	settingsId_="icon";
 	std::vector<VParam*> v=VIcon::filterItems();
@@ -154,19 +134,26 @@ IconFilter::IconFilter(VConfig * owner) : VFilter(owner)
 	current_=all_;
 }
 
-void IconFilter::notifyOwner()
+
+NodeFilterDef::NodeFilterDef(Scope scope) : nodeState_(0)
 {
-	owner_->changed(this);
+	if(scope == NodeState)
+		nodeState_=new NodeStateFilter;
+
+	if(nodeState_)
+	{
+		connect(nodeState_,SIGNAL(changed()),
+					this,SIGNAL(changed()));
+	}
+}
+
+NodeFilter::NodeFilter(NodeFilterDef* def) : def_(def)
+{
+
 }
 
 
-
-NodeFilter::NodeFilter()
-{
-
-}
-
-TreeNodeFilter::TreeNodeFilter()
+TreeNodeFilter::TreeNodeFilter(NodeFilterDef* def) : NodeFilter(def)
 {
 
 }
@@ -176,21 +163,21 @@ bool TreeNodeFilter::isFiltered(Node* node)
 	return (std::find(nonMatch_.begin(), nonMatch_.end(), node) == nonMatch_.end());
 }
 
-void TreeNodeFilter::reset(ServerHandler* server,VFilter* sf)
+void TreeNodeFilter::reset(ServerHandler* server)
 {
 	nonMatch_.clear();
 
 	//If all states are visible
-	if(sf->isComplete())
+	if(def_->nodeState_->isComplete())
 		return;
 
 	for(unsigned int j=0; j < server->numSuites();j++)
 	{
-		filterState(server->suiteAt(j),sf);
+		filterState(server->suiteAt(j),def_->nodeState_);
 	}
 }
 
-bool TreeNodeFilter::filterState(node_ptr node,VFilter* stateFilter)
+bool TreeNodeFilter::filterState(node_ptr node,VParamSet* stateFilter)
 {
 	bool ok=false;
 	if(stateFilter->isSet(VNState::toState(node.get())))
@@ -216,7 +203,7 @@ bool TreeNodeFilter::filterState(node_ptr node,VFilter* stateFilter)
 }
 
 
-TableNodeFilter::TableNodeFilter()
+TableNodeFilter::TableNodeFilter(NodeFilterDef* def) : NodeFilter(def)
 {
 	type_.insert("suite");
 }
@@ -226,7 +213,7 @@ bool TableNodeFilter::isFiltered(Node* node)
 	return (std::find(match_.begin(), match_.end(), node) != match_.end());
 }
 
-void TableNodeFilter::reset(ServerHandler* server,VFilter* sf)
+void TableNodeFilter::reset(ServerHandler* server)
 {
 	match_.clear();
 

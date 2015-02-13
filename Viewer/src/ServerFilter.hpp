@@ -10,47 +10,31 @@
 #ifndef SERVERFILTER_HPP_
 #define SERVERFILTER_HPP_
 
-#include <set>
 #include <vector>
 
 #include "Node.hpp"
-#include "VConfig.hpp"
 #include "ServerItem.hpp"
 
 class VSettings;
 
 #include <boost/property_tree/ptree.hpp>
 
-/*class ServerFilterItem : public ServerItemObserver
+class ServerFilterObserver
 {
-	friend class ServerFilter;
-
 public:
-	bool hasSuiteFilter();
-	const std::set<std::string>&  suiteFilter() const {return suiteFilter_;}
-	void addToSuiteFilter(const std::string&);
-	void removeFromSuiteFilter(const std::string&);
-	ServerHandler* serverHandler() const;
-
-	//From ServerItemObserver
-	void notifyServerItemChanged();
-
-protected:
-	ServerFilterItem(const std::string&); //,const std::string&,const std::string&);
-	~ServerFilterItem();
-
-	ServerItem* server_;
-	std::set<std::string> suiteFilter_;
+	virtual ~ServerFilterObserver() {};
+	virtual void notifyServerFilterAdded(ServerItem*)=0;
+	virtual void notifyServerFilterRemoved(ServerItem*)=0;
+	virtual void notifyServerFilterChanged(ServerItem*)=0;
 };
-*/
 
-class ServerFilter : public VConfigItem, public ServerItemObserver
+class ServerFilter : public ServerItemObserver
 {
-friend class VConfig;
-
 public:
-	ServerFilter(VConfig*);
+	ServerFilter();
 	~ServerFilter();
+
+	enum ChangeAspect {Reset,Added,Removed};
 
 	const std::vector<ServerItem*> items() const {return items_;}
 	void addServer(ServerItem*,bool broadcast=true);
@@ -60,15 +44,22 @@ public:
     void writeSettings(VSettings*) const;
     void readSettings(VSettings*);
 
+    void addObserver(ServerFilterObserver*);
+    void removeObserver(ServerFilterObserver*);
+
     //From ServerItemObserver
     void notifyServerItemChanged(ServerItem*);
     void notifyServerItemDeletion(ServerItem*);
 
 protected:
-	void notifyOwner();
+    void broadcastAdd(ServerItem*);
+    void broadcastRemove(ServerItem*);
+    void broadcastChange(ServerItem*);
 
 private:
 	std::vector<ServerItem*> items_;
+	std::vector<ServerFilterObserver*> observers_;
 };
+
 
 #endif

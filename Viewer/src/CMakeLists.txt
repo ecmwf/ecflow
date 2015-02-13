@@ -24,7 +24,7 @@ set(viewer_srcs
     NodePanel.cpp
     NodePathWidget.cpp
     NodeViewBase.cpp
-    NodeViewHandler.cpp
+    NodeWidget.cpp
     OutputItemWidget.cpp
     OverviewItemWidget.cpp
     OverviewProvider.cpp
@@ -38,14 +38,15 @@ set(viewer_srcs
     TabWidget.cpp 
     TableNodeModel.cpp
     TableNodeView.cpp
+    TableNodeWidget.cpp
     TextItemWidget.cpp
     TriggerItemWidget.cpp
     TreeNodeModel.cpp
     TreeNodeView.cpp
     TreeNodeViewDelegate.cpp
+    TreeNodeWidget.cpp
     UserMessage.cpp
     VAttribute.cpp   
-    VConfig.cpp
     VFilter.cpp
     VIcon.cpp
     VInfo.cpp
@@ -73,18 +74,23 @@ QT4_WRAP_CPP(VIEWER_MOC AbstractNodeModel.hpp
                         MainWindow.hpp
                         MenuConfigDialog.hpp
                         NodeFilterModel.hpp
+                        NodeModelData.hpp
                         NodePanel.hpp
                         NodePathWidget.hpp                    
-                        NodeViewHandler.hpp
+                        NodeWidget.hpp
                         PlainTextSearchLine.hpp
                         ServerHandler.hpp
                         ServerListDialog.hpp
                         TabWidget.hpp
-                        TableNodeView.hpp                      
-                        TreeNodeView.hpp
+                        TableNodeModel.hpp 
+                        TableNodeView.hpp 
+                        TableNodeWidget.hpp                     
                         TreeNodeModel.hpp
+                        TreeNodeView.hpp                   
+                        TreeNodeWidget.hpp
                         UserMessage.hpp
-                        VariableItemWidget.hpp)
+                        VariableItemWidget.hpp
+                        VFilter.hpp)
 
 QT4_ADD_RESOURCES (VIEWER_RES viewer.qrc)
 QT4_WRAP_UI       (VIEWER_FORMS_HEADERS CommandDesignerWidget.ui CustomCommandDialog.ui 
@@ -96,7 +102,9 @@ QT4_WRAP_UI       (VIEWER_FORMS_HEADERS CommandDesignerWidget.ui CustomCommandDi
                         ServerEditDialog.ui 
                         ServerListDialog.ui
                         ServerWidget.ui 
-                        TextItemWidget.ui)
+                        TableNodeWidget.ui
+                        TextItemWidget.ui
+                        TreeNodeWidget.ui)
 
 
 ecbuild_add_executable( TARGET   ecflowviewer

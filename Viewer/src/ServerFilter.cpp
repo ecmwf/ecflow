@@ -63,7 +63,7 @@ ServerHandler* ServerFilterItem::serverHandler() const
 //
 //==============================================
 
-ServerFilter::ServerFilter(VConfig *owner) : VConfigItem(owner)
+ServerFilter::ServerFilter()
 {
 }
 
@@ -88,7 +88,7 @@ void ServerFilter::addServer(ServerItem *item,bool broadcast)
 			item->addObserver(this);
 
 			if(broadcast)
-				notifyOwner();
+				broadcastAdd(item);
 	}
 }
 
@@ -102,23 +102,17 @@ void ServerFilter::removeServer(ServerItem *server)
 			items_.erase(it);
 
 			//Notifies the view about the changes
-			notifyOwner();
+			broadcastRemove(*it);
 
 			//Remove the filter from the observers
 			server->removeObserver(this);
 	}
 }
 
-void ServerFilter::notifyOwner()
-{
-	if(owner_)
-			owner_->changed(this);
-}
-
 void ServerFilter::notifyServerItemChanged(ServerItem *server)
 {
 	if(isFiltered(server))
-		notifyOwner();
+		broadcastChange(server);
 }
 
 //Do not remove the observer in this method!!
@@ -132,7 +126,7 @@ void ServerFilter::notifyServerItemDeletion(ServerItem *server)
 		items_.erase(it);
 
 		//Notifies the view about the changes
-		notifyOwner();
+		broadcastRemove(*it);
 	}
 }
 
@@ -173,3 +167,51 @@ void ServerFilter::readSettings(VSettings* vs)
 			}
 	}
 }
+
+//===========================================================
+// Observers
+//===========================================================
+
+void ServerFilter::broadcastAdd(ServerItem *server)
+{
+	for(std::vector<ServerFilterObserver*>::const_iterator it=observers_.begin(); it != observers_.end(); it++)
+	{
+			(*it)->notifyServerFilterAdded(server);
+	}
+}
+
+void ServerFilter::broadcastRemove(ServerItem *server)
+{
+	for(std::vector<ServerFilterObserver*>::const_iterator it=observers_.begin(); it != observers_.end(); it++)
+	{
+			(*it)->notifyServerFilterRemoved(server);
+	}
+}
+
+void ServerFilter::broadcastChange(ServerItem *server)
+{
+	for(std::vector<ServerFilterObserver*>::const_iterator it=observers_.begin(); it != observers_.end(); it++)
+	{
+			(*it)->notifyServerFilterChanged(server);
+	}
+}
+
+void ServerFilter::addObserver(ServerFilterObserver* o)
+{
+	std::vector<ServerFilterObserver*>::iterator it=std::find(observers_.begin(),observers_.end(),o);
+	if(it == observers_.end())
+	{
+		observers_.push_back(o);
+	}
+}
+
+void ServerFilter::removeObserver(ServerFilterObserver* o)
+{
+	std::vector<ServerFilterObserver*>::iterator it=std::find(observers_.begin(),observers_.end(),o);
+	if(it != observers_.end())
+	{
+		observers_.erase(it);
+	}
+}
+
+

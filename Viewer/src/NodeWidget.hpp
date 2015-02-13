@@ -7,10 +7,9 @@
 
  ***************************** LICENSE END *************************************/
 
-#ifndef NODEVIEWHANDLER_HPP_
-#define NODEVIEWHANDLER_HPP_
+#ifndef NODEWIDGET_HPP_
+#define NODEWIDGET_HPP_
 
-#include <map>
 #include <QString>
 #include <QWidget>
 
@@ -22,11 +21,13 @@ class QStackedLayout;
 class QWidget;
 
 class AbstractNodeModel;
+class IconFilter;
+class NodeFilter;
 class NodeFilterModel;
+class NodeModelDataHandler;
 class NodePathWidget;
 class NodeViewBase;
-class VConfig;
-class VSettings;
+class ServerFilter;
 
 class NodeWidget : public DashboardWidget
 {
@@ -45,28 +46,16 @@ Q_SIGNALS:
 	void selectionChanged(VInfo_ptr);
 
 protected:
-	NodeWidget(QWidget* parent=0): DashboardWidget(parent), model_(0), filterModel_(0), view_(0), bc_(0) {};
+	NodeWidget(QWidget* parent=0);
+	virtual ~NodeWidget();
 
 	AbstractNodeModel* model_;
 	NodeFilterModel* filterModel_;
 	NodeViewBase* view_;
-	NodePathWidget* bc_;
-};
+	IconFilter* icons_;
+	NodeFilter* filter_;
+	NodeModelDataHandler* data_;
 
-class TreeNodeWidget : public NodeWidget
-{
-public:
-	TreeNodeWidget(VConfig*,QWidget* parent=0);
-	void writeSettings(VSettings*);
-	void readSettings(VSettings*);
-};
-
-class TableNodeWidget : public NodeWidget
-{
-public:
-	TableNodeWidget(VConfig*,QWidget* parent=0);
-	void writeSettings(VSettings*);
-	void readSettings(VSettings*);
 };
 
 #endif

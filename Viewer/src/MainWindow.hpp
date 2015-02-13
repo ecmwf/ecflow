@@ -24,8 +24,6 @@
 #include <boost/property_tree/ptree.hpp>
 
 class QActionGroup;
-class AbstractFilterMenu;
-class FilterWidget;
 class InfoPanel;
 class NodePanel;
 class ServerFilterMenu;
@@ -58,7 +56,6 @@ protected Q_SLOTS:
 	void on_actionAddTreeWidget_triggered();
 	void on_actionAddTableWidget_triggered();
 
-	void slotViewMode(QAction*);
 	void slotCurrentChangedInPanel();
 
 private:
@@ -66,14 +63,11 @@ private:
     void closeEvent(QCloseEvent*);
     InfoPanel* addInfoPanel();
 
-    void syncViewModeAg(Viewer::ViewMode);
     void reloadContents();
 
     void writeSettings(VSettings*);
     void readSettings(VSettings*);
 
-    //void save(boost::property_tree::ptree &pt,QSettings& qs);
-    //void load(const boost::property_tree::ptree& winPt,QSettings& qs);
 
     static MainWindow* makeWindow(VSettings* vs);
     static MainWindow *makeWindow();
@@ -84,12 +78,7 @@ private:
     static void save(MainWindow *);
     static MainWindow* findWindow(QWidget *childW);
 
-    QActionGroup *viewModeAg_;
-    AbstractFilterMenu* stateFilterMenu_;
-    AbstractFilterMenu* attrFilterMenu_;
-    AbstractFilterMenu* iconFilterMenu_;
     ServerFilterMenu* serverFilterMenu_;
-    FilterWidget* filterWidget_;
     NodePanel* nodePanel_;
 
     static bool quitStarted_;

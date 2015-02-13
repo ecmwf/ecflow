@@ -176,7 +176,7 @@ VIcon* VIcon::find(const std::string& name)
 
 
 //Create the pixmap containing all the relevant icons for the given node according to the filter.
-QVariantList VIcon::pixmapList(Node *node,VFilter *filter)
+QVariantList VIcon::pixmapList(Node *node,VParamSet *filter)
 {
 	QVariantList lst;
 	if(!node)

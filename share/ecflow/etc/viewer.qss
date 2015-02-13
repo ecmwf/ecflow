@@ -3,7 +3,7 @@
 ------------------------------*/
 
 QMainWindow { 
- 	icon-size:  20px; 
+ 	icon-size:  16px; 
 }  
 
 /*QToolBar {
@@ -53,13 +53,13 @@ QToolButton#pathIconTb:hover{
  }
 
 QToolButton#pathMenuTb{
-        image: url(":/viewer/directory_arrow.svg");
+        /*image: url(":/viewer/directory_arrow.svg");*/
 	    border: none;
         padding: 0px; 		
 }
 
 QToolButton#pathMenuTb:hover{
-	background:  qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #deebf6, stop: 1 #bed8ee);
+	background:  qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 blue, stop 0.5 red, stop: 1 white);
         border: 1px solid rgb(160, 160, 160);
      	border-radius: 0px;
         padding: 0px; 	

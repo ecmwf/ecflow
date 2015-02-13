@@ -21,9 +21,7 @@
 #include <boost/property_tree/ptree.hpp>
 
 class DashboardWidget;
-class NodeWidget;
-class VConfig;
-class LayoutManager;
+class ServerFilter;
 class VSettings;
 
 class Dashboard : public QMainWindow
@@ -39,7 +37,7 @@ public:
 	DashboardWidget* addWidget(const std::string& type);
 	Viewer::ViewMode viewMode();
 	void setViewMode(Viewer::ViewMode);
-	VConfig* config() const {return config_;}
+	ServerFilter* serverFilter() const {return serverFilter_;}
 	VInfo_ptr currentSelection();
 	void currentSelection(VInfo_ptr n);
 
@@ -58,7 +56,7 @@ private:
 	QString uniqueDockId();
 	static std::string widgetSettingsId(int i);
 
-	VConfig* config_;
+	ServerFilter* serverFilter_;
 	QList<DashboardWidget*> widgets_;
 	static int maxWidgetNum_;
 };

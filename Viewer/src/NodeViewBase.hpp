@@ -19,7 +19,7 @@ class NodeFilterModel;
 class NodeViewBase
 {
 public:
-		NodeViewBase(NodeFilterModel*);
+		NodeViewBase(NodeFilterModel* model=0);
 		virtual ~NodeViewBase(){};
 
 		virtual void reload()=0;

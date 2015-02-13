@@ -20,18 +20,18 @@
 class ActionHandler;
 class TableNodeModel;
 class NodeFilterModel;
-class VConfig;
 
 class TableNodeView : public QTreeView, public NodeViewBase
 {
 Q_OBJECT
 
 public:
-	TableNodeView(NodeFilterModel *model,QWidget *parent=0);
+	TableNodeView(QWidget *parent=0);
 	void reload() {};
 	QWidget* realWidget();
 	VInfo_ptr currentSelection();
 	void currentSelection(VInfo_ptr n) {};
+	void setModel(NodeFilterModel *model);
 
 public Q_SLOTS:
 	void slotSelectItem(const QModelIndex&);

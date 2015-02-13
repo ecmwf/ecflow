@@ -9,6 +9,7 @@
 #include "Viewer.hpp"
 #include "VInfo.hpp"
 
+class AttributeFilter;
 class NodeFilter;
 class ServerFilter;
 class ServerHandler;
@@ -18,7 +19,7 @@ class TreeNodeModel : public AbstractNodeModel
 Q_OBJECT
 
 public:
-   	TreeNodeModel(VConfig*,QObject *parent=0);
+   	TreeNodeModel(NodeModelDataHandler *data,AttributeFilter *atts,IconFilter* icons,QObject *parent=0);
 
    	int columnCount (const QModelIndex& parent = QModelIndex() ) const;
    	int rowCount (const QModelIndex& parent = QModelIndex() ) const;
@@ -32,16 +33,15 @@ public:
 
    	VInfo_ptr nodeInfo(const QModelIndex& index);
 
-   	//VFilterGroup Observer
-    void notifyConfigChanged(StateFilter*);
-    void notifyConfigChanged(AttributeFilter*);
-    void notifyConfigChanged(IconFilter*);
+public Q_SLOTS:
+	void slotIconFilterChanged();
+	void slotServerAddBegin(int row);
+	void slotServerAddEnd();
+	void slotServerRemoveBegin(int row);
+	void slotServerRemoveEnd();
 
 Q_SIGNALS:
 	void filterChanged();
-
-protected:
-	NodeFilter* makeFilter();
 
 private:
 	bool isServer(const QModelIndex & index) const;
@@ -57,8 +57,8 @@ private:
 	QVariant nodeData(const QModelIndex& index,int role) const;
 	QVariant attributesData(const QModelIndex& index,int role) const;
 
-	void resetStateFilter(bool broadcast);
-	//bool filterState(node_ptr node,QSet<Node*>& filterSet);
+	//Attribute filter
+	AttributeFilter* atts_;
 };
 
 

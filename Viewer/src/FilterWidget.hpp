@@ -16,22 +16,24 @@
 #include <QWidget>
 
 #include "DState.hpp"
+#include "ServerFilter.hpp"
 #include "ServerList.hpp"
-#include "VConfig.hpp"
 
 class QToolButton;
 class VParam;
-class VFilter;
+class VParamSet;
 class ServerFilter;
 
 
-class AbstractFilterMenu : public QObject
+class VParamFilterMenu : public QObject
 {
 Q_OBJECT
 
 public:
-	AbstractFilterMenu(QMenu* parent,const std::vector<VParam*>&);
-	void reload(VFilter*);
+	enum DecorMode {NoDecor,ColourDecor,PixmapDecor};
+
+	VParamFilterMenu(QMenu* parent,VParamSet* filter,DecorMode decorMode=NoDecor);
+	void reload();
 
 protected Q_SLOTS:
 	void slotChanged(bool);
@@ -40,9 +42,11 @@ protected:
 	void addAction(QString name,QString id);
 
 	QMenu*  menu_;
-	VFilter* filter_;
+	VParamSet* filter_;
+	DecorMode decorMode_;
 };
 
+/*
 class StateFilterMenu : public AbstractFilterMenu
 {
 public:
@@ -60,9 +64,9 @@ class IconFilterMenu : public AbstractFilterMenu
 public:
 	IconFilterMenu(QMenu* parent);
 };
+*/
 
-
-class ServerFilterMenu : public QObject, public ServerListObserver, public VConfigObserver
+class ServerFilterMenu : public QObject, public ServerListObserver, public ServerFilterObserver
 {
 Q_OBJECT
 
@@ -70,16 +74,15 @@ public:
 	ServerFilterMenu(QMenu* parent);
 	~ServerFilterMenu();
 
-	void reload(VConfig*);
+	void reload(ServerFilter*);
 
 	//From ServerListObserver
 	void notifyServerListChanged();
 
 	//From ConfigObserver
-	void notifyConfigChanged(ServerFilter*);
-	void notifyConfigChanged(StateFilter*) {};
-	void notifyConfigChanged(AttributeFilter*) {};
-	void notifyConfigChanged(IconFilter*) {};
+	void notifyServerFilterAdded(ServerItem*);
+	void notifyServerFilterRemoved(ServerItem*);
+	void notifyServerFilterChanged(ServerItem*);
 
 protected Q_SLOTS:
 	void slotChanged(bool);
@@ -88,11 +91,11 @@ protected:
 	void init();
 	void clear();
 	void addAction(QString name,int id);
-	void reload(ServerFilter*);
+	void reload();
 
 	QMenu*  menu_;
 	QList<QAction*> acLst_;
-	VConfig* config_;
+	ServerFilter* filter_;
 };
 
 
@@ -104,7 +107,7 @@ Q_OBJECT
 
 public:
 	FilterWidget(QWidget* parent=0);
-	void reload(VFilter*);
+	void reload(VParamSet*);
 
 protected Q_SLOTS:
 	void slotChanged(bool);
@@ -116,7 +119,7 @@ private:
 	QToolButton* createButton(QString,QString,QColor);
 
 	QMap<DState::State,QToolButton*> items_;
-	VFilter* data_;
+	VParamSet* data_;
 };
 
 #endif

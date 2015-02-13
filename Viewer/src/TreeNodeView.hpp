@@ -18,7 +18,6 @@
 #include "VInfo.hpp"
 
 class ActionHandler;
-class VConfig;
 class NodeFilterModel;
 class TreeNodeModel;
 
@@ -27,11 +26,12 @@ class TreeNodeView : public QTreeView, public NodeViewBase
 Q_OBJECT
 
 public:
-	TreeNodeView(NodeFilterModel* model,QWidget *parent=0);
+	TreeNodeView(QWidget *parent=0);
 	void reload();
 	QWidget* realWidget();
 	VInfo_ptr currentSelection();
 	void currentSelection(VInfo_ptr n);
+	void setModel(NodeFilterModel* model);
 
 public Q_SLOTS:
 	void slotSelectItem(const QModelIndex&);

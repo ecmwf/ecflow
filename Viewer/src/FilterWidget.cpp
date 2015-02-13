@@ -11,6 +11,8 @@
 
 #include <QDebug>
 #include <QHBoxLayout>
+#include <QPainter>
+#include <QPixmap>
 #include <QToolButton>
 
 #include "VNState.hpp"
@@ -23,23 +25,45 @@
 
 //===========================================
 //
-// AbstractFilterMenu
+// VParamFilterMenu
 //
 //===========================================
 
-AbstractFilterMenu::AbstractFilterMenu(QMenu * parent,const std::vector<VParam*>& pars) :
+VParamFilterMenu::VParamFilterMenu(QMenu * parent,VParamSet* filter,DecorMode decorMode) :
  	menu_(parent),
-	filter_(NULL)
+	filter_(filter),
+	decorMode_(decorMode)
 {
 	//Param name must be unique
-	for(std::vector<VParam*>::const_iterator it=pars.begin(); it != pars.end(); it++)
+	for(std::set<VParam*>::const_iterator it=filter_->all().begin(); it != filter_->all().end(); it++)
 	{
 		addAction(QString::fromStdString((*it)->text("label")),
 				  QString::fromStdString((*it)->name()));
 	}
+
+	if(decorMode_ == ColourDecor)
+	{
+		Q_FOREACH(QAction* ac,menu_->actions())
+		{
+			if(!ac->isSeparator())
+			{
+				if(VNState* vs=VNState::find(ac->data().toString().toStdString()))
+				{
+					QPixmap pix(10,10);
+					QPainter painter(&pix);
+					pix.fill(vs->colour());
+					painter.setPen(Qt::black);
+					painter.drawRect(0,0,9,9);
+					ac->setIcon(pix);
+				}
+			}
+		}
+	}
+
+	reload();
 }
 
-void AbstractFilterMenu::addAction(QString name,QString id)
+void VParamFilterMenu::addAction(QString name,QString id)
 {
 	QAction *ac = new QAction(this);
 	ac->setText(name);
@@ -54,7 +78,7 @@ void AbstractFilterMenu::addAction(QString name,QString id)
 					this,SLOT(slotChanged(bool)));
 }
 
-void AbstractFilterMenu::slotChanged(bool)
+void VParamFilterMenu::slotChanged(bool)
 {
 	std::set<std::string> items;
 	Q_FOREACH(QAction* ac,menu_->actions())
@@ -70,9 +94,8 @@ void AbstractFilterMenu::slotChanged(bool)
 		filter_->current(items);
 }
 
-void AbstractFilterMenu::reload(VFilter* filter)
+void VParamFilterMenu::reload()
 {
-	filter_=filter;
 	Q_FOREACH(QAction* ac,menu_->actions())
 	{
 		if(!ac->isSeparator())
@@ -83,7 +106,7 @@ void AbstractFilterMenu::reload(VFilter* filter)
 }
 
 
-
+/*
 //===========================================
 //
 // StateFilterMenu
@@ -91,8 +114,23 @@ void AbstractFilterMenu::reload(VFilter* filter)
 //===========================================
 
 StateFilterMenu::StateFilterMenu(QMenu * parent) :
-		AbstractFilterMenu(parent,VNState::filterItems())
+		VParamFilterMenu(parent,VNState::filterItems())
 {
+	Q_FOREACH(QAction* ac,menu_->actions())
+	{
+		if(!ac->isSeparator())
+		{
+			if(VNState* vs=VNState::find(ac->data().toString().toStdString()))
+			{
+				QPixmap pix(10,10);
+				QPainter painter(&pix);
+				pix.fill(vs->colour());
+				painter.setPen(Qt::black);
+				painter.drawRect(0,0,9,9);
+				ac->setIcon(pix);
+			}
+		}
+	}
 }
 
 //===========================================
@@ -102,7 +140,7 @@ StateFilterMenu::StateFilterMenu(QMenu * parent) :
 //===========================================
 
 AttributeFilterMenu::AttributeFilterMenu(QMenu * parent) :
-		AbstractFilterMenu(parent,VAttribute::filterItems())
+		VParamFilterMenu(parent,VAttribute::filterItems())
 {
 }
 
@@ -113,10 +151,10 @@ AttributeFilterMenu::AttributeFilterMenu(QMenu * parent) :
 //===========================================
 
 IconFilterMenu::IconFilterMenu(QMenu * parent) :
-		AbstractFilterMenu(parent,VIcon::filterItems())
+		VParamFilterMenu(parent,VIcon::filterItems())
 {
 }
-
+*/
 
 
 //===========================================
@@ -127,7 +165,7 @@ IconFilterMenu::IconFilterMenu(QMenu * parent) :
 
 ServerFilterMenu::ServerFilterMenu(QMenu * parent) :
  	menu_(parent),
-	config_(NULL)
+	filter_(NULL)
 {
 	init();
 
@@ -137,8 +175,8 @@ ServerFilterMenu::ServerFilterMenu(QMenu * parent) :
 ServerFilterMenu::~ServerFilterMenu()
 {
 	ServerList::instance()->removeObserver(this);
-	if(config_)
-		config_->removeObserver(this);
+	if(filter_)
+		filter_->removeObserver(this);
 }
 
 void ServerFilterMenu::clear()
@@ -181,10 +219,8 @@ void ServerFilterMenu::addAction(QString name,int id)
 
 void ServerFilterMenu::slotChanged(bool)
 {
-	if(!config_)
+	if(!filter_)
 		return;
-
-	ServerFilter* filter=config_->serverFilter();
 
 	if(QAction *ac=static_cast<QAction*>(sender()))
 	{
@@ -193,32 +229,36 @@ void ServerFilterMenu::slotChanged(bool)
 		if(ServerItem *item=ServerList::instance()->itemAt(ac->data().toInt()))
 		{
 			if(ac->isChecked())
-				filter->addServer(item);
+				filter_->addServer(item);
 			else
-				filter->removeServer(item);
+				filter_->removeServer(item);
 		}
 	}
 }
 
 //Reset actions state when a new filter is loaded
-void ServerFilterMenu::reload(VConfig *config)
+void ServerFilterMenu::reload(ServerFilter *filter)
 {
-	if(config_)
-		config_->removeObserver(this);
+	if(filter_)
+		filter_->removeObserver(this);
 
-	config_=config;
+	filter_=filter;
 
-	if(config_)
+	if(!filter_)
+		return;
+
+	if(filter_)
 	{
-			config_->addObserver(this);
-			reload(config_->serverFilter());
+			filter_->addObserver(this);
+			reload();
 	}
+
 }
 
 //Reset actions state when a new filter is loaded
-void ServerFilterMenu::reload(ServerFilter* filter)
+void ServerFilterMenu::reload()
 {
-	if(!filter)
+	if(!filter_)
 		return;
 
 	Q_FOREACH(QAction* ac,acLst_)
@@ -228,27 +268,35 @@ void ServerFilterMenu::reload(ServerFilter* filter)
 				if(ServerItem *item=ServerList::instance()->itemAt(ac->data().toInt()))
 				{
 					//Triggered() will not be called!!
-					ac->setChecked(filter->isFiltered(item));
+					ac->setChecked(filter_->isFiltered(item));
 				}
 		}
 	}
 }
 
-void ServerFilterMenu::notifyConfigChanged(ServerFilter*)
-{
-	if(config_)
-		reload(config_->serverFilter());
-}
 
 void ServerFilterMenu::notifyServerListChanged()
 {
 	clear();
 	init();
-	if(config_)
-		reload(config_->serverFilter());
+	reload();
 }
 
 
+void ServerFilterMenu::notifyServerFilterAdded(ServerItem*)
+{
+	reload();
+}
+
+void ServerFilterMenu::notifyServerFilterRemoved(ServerItem*)
+{
+	reload();
+}
+
+void ServerFilterMenu::notifyServerFilterChanged(ServerItem*)
+{
+	reload();
+}
 
 
 
@@ -301,7 +349,7 @@ QToolButton* FilterWidget::createButton(QString label,QString tooltip,QColor col
 	return tb;
 }
 
-void FilterWidget::reload(VFilter* filterData)
+void FilterWidget::reload(VParamSet* filterData)
 {
 	data_=filterData;
 

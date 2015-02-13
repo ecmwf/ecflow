@@ -24,9 +24,11 @@
 //
 //=======================================================
 
-TableNodeModel::TableNodeModel(VConfig* config,QObject *parent) :
-	AbstractNodeModel(config,parent)
+TableNodeModel::TableNodeModel(NodeModelDataHandler *data,IconFilter* icons,QObject *parent) :
+	AbstractNodeModel(data,icons,parent)
 {
+	//connect(data_,SIGNAL(dataChanged()),
+	//		this, SIGNAL
 }
 
 int TableNodeModel::columnCount( const QModelIndex& /*parent */ ) const
@@ -50,9 +52,9 @@ int TableNodeModel::rowCount( const QModelIndex& parent) const
 	else if(!parent.isValid())
 	{
 		int cnt=0;
-		for(int i=0; i < servers_->count(); i++)
+		for(int i=0; i < data_->count(); i++)
 		{
-			cnt+=servers_->numOfFiltered(i);
+			cnt+=data_->numOfFiltered(i);
 		}
 
 		return cnt;
@@ -162,7 +164,7 @@ QModelIndex TableNodeModel::index( int row, int column, const QModelIndex & pare
 
 	//qDebug() << "index" << row << column << parent;
 
-	if(Node *node=servers_->getNodeFromFilter(row))
+	if(Node *node=data_->getNodeFromFilter(row))
 	{
 		return createIndex(row,column,node);
 	}
@@ -294,7 +296,7 @@ bool TableNodeModel::isServer(const QModelIndex & index) const
 	if(index.isValid())
 	{
 		int id=index.internalId()-1;
-		return (id >=0 && id < servers_->count());
+		return (id >=0 && id < data_->count());
 	}
 	return false;
 }
@@ -306,7 +308,7 @@ ServerHandler* TableNodeModel::indexToServer(const QModelIndex & index) const
 	if(index.isValid())
 	{
 		int id=index.internalId()-1;
-		return servers_->server(id);
+		return data_->server(id);
 	}
 	return NULL;
 }
@@ -315,7 +317,7 @@ QModelIndex TableNodeModel::serverToIndex(ServerHandler* server) const
 {
 	//For servers the internal id is set to their position in servers_ + 1
 	int i;
-	if((i=servers_->indexOf(server))!= -1)
+	if((i=data_->indexOf(server))!= -1)
 			return createIndex(i,0,i+1);
 
 	return QModelIndex();
@@ -355,16 +357,12 @@ QModelIndex TableNodeModel::nodeToIndex(Node* node, int column) const
 	return QModelIndex();
 }
 
-NodeFilter* TableNodeModel::makeFilter()
-{
-	return new TableNodeFilter();
-}
 
 void TableNodeModel::resetStateFilter(bool broadcast)
 {
-	beginResetModel();
+	/*beginResetModel();
 	servers_->filter(config_->stateFilter());
-	endResetModel();
+	endResetModel();*/
 
 }
 

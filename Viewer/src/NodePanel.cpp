@@ -203,10 +203,10 @@ Viewer::ViewMode NodePanel::viewMode()
 	return (w)?w->viewMode():Viewer::NoViewMode;
 }
 
-VConfig* NodePanel::config()
+ServerFilter* NodePanel::serverFilter()
 {
   	Dashboard *w=currentNodeWidget();
-	return (w)?w->config():NULL;
+	return (w)?w->serverFilter():NULL;
 }
 
 void NodePanel::addToDashboard(const std::string& type)

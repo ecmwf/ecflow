@@ -20,16 +20,8 @@
 #include "NodeFilterModel.hpp"
 #include "TableNodeModel.hpp"
 
-
-TableNodeView::TableNodeView(NodeFilterModel *model,QWidget* parent) : QTreeView(parent), NodeViewBase(model)
+TableNodeView::TableNodeView(QWidget* parent) : QTreeView(parent), NodeViewBase(0)
 {
-	//Set the model.
-	setModel(model_);
-
-	//Create delegate to the view
-	//TreeNodeViewDelegate *delegate=new TreeNodeViewDelegate(this);
-	//setItemDelegate(delegate);
-
 	setRootIsDecorated(false);
 
 	setSortingEnabled(true);
@@ -65,46 +57,14 @@ TableNodeView::TableNodeView(NodeFilterModel *model,QWidget* parent) : QTreeView
 	actionHandler_=new ActionHandler(this);
 
 	expandAll();
+}
 
+void TableNodeView::setModel(NodeFilterModel *model)
+{
+	model_= model;
 
-	/*model_=new TableNodeModel(config,this);
-
-		filterModel_=new NodeFilterModel(this);
-		filterModel_->setSourceModel(model_);
-		filterModel_->setDynamicSortFilter(true);
-
-		setModel(filterModel_);
-
-		//Context menu
-		setContextMenuPolicy(Qt::CustomContextMenu);
-
-		connect(this, SIGNAL(customContextMenuRequested(const QPoint &)),
-		                this, SLOT(slotContextMenu(const QPoint &)));
-
-		//Selection
-		connect(this,SIGNAL(clicked(const QModelIndex&)),
-				this,SLOT(slotSelectItem(const QModelIndex)));
-
-		connect(this,SIGNAL(doubleClicked(const QModelIndex&)),
-				this,SLOT(slotDoubleClickItem(const QModelIndex)));
-
-		actionHandler_=new ActionHandler(this);
-
-
-		setRootIsDecorated(false);
-		setAllColumnsShowFocus(true);
-		setUniformRowHeights(true);
-		setMouseTracking(true);
-		setSelectionMode(QAbstractItemView::ExtendedSelection);
-
-		setDragEnabled(true);
-		setAcceptDrops(true);
-		setDropIndicatorShown(true);
-	    setDragDropMode(QAbstractItemView::DragDrop);
-
-		expandAll();*/
-
-
+	//Set the model.
+	QTreeView::setModel(model_);
 }
 
 QWidget* TableNodeView::realWidget()

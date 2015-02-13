@@ -14,31 +14,27 @@
 
 #include "Aspect.hpp"
 #include "NodeObserver.hpp"
-#include "VConfig.hpp"
 #include "VInfo.hpp"
 
 class Node;
 
-class NodeFilter;
+class IconFilter;
 class NodeModelDataHandler;
-class ServerHandler;
-class VFilter;
+class VParamSet;
 
 class AbstractNodeModel;
 
-class AbstractNodeModel : public QAbstractItemModel, public VConfigObserver, public NodeObserver
+class AbstractNodeModel : public QAbstractItemModel
 {
 	Q_OBJECT
 
 public:
-	AbstractNodeModel(VConfig*,QObject *parent=0);
+	AbstractNodeModel(NodeModelDataHandler *data,IconFilter* icons,QObject *parent=0);
    	virtual ~AbstractNodeModel();
 
    	enum CustomItemRole {FilterRole = Qt::UserRole+1, IconRole = Qt::UserRole+2,
    		                 ServerRole = Qt::UserRole+3};
 
-	void addServer(ServerHandler *);
-	void setRootNode(Node *node);
 	void dataIsAboutToChange();
 	virtual VInfo_ptr nodeInfo(const QModelIndex& index);
 	void reload();
@@ -46,15 +42,6 @@ public:
 	bool active() const {return active_;}
 
 	virtual QModelIndex infoToIndex(VInfo_ptr,int column=0) const;
-
-	//From ConfigObserver
-	void notifyConfigChanged(ServerFilter*);
-	void notifyConfigChanged(StateFilter*) {};
-	void notifyConfigChanged(AttributeFilter*) {};
-	void notifyConfigChanged(IconFilter*) {};
-
-	//From NodeObserver
-	void notifyNodeChanged(const Node*, const std::vector<ecf::Aspect::Type>&);
 
 Q_SIGNALS:
 	void changed();
@@ -65,10 +52,7 @@ protected:
 	void clean();
 	bool hasData() const;
 
-	//Creates a filter object specific for the concrete model type
-	virtual NodeFilter* makeFilter()=0;
-
-	virtual void resetStateFilter(bool broadcast)=0;
+	virtual void resetStateFilter(bool broadcast) {};
 
 	virtual bool isServer(const QModelIndex & index) const=0;
 	virtual ServerHandler* indexToServer(const QModelIndex & index) const=0;
@@ -79,10 +63,8 @@ protected:
 	virtual QVariant serverData(const QModelIndex& index,int role) const=0;
 	virtual QVariant nodeData(const QModelIndex& index,int role) const=0;
 
-	Node *rootNode(ServerHandler*) const;
-
-	NodeModelDataHandler* servers_;
-	VConfig* config_;
+	NodeModelDataHandler* data_;
+	IconFilter *icons_;
 	bool active_;
 };
 
