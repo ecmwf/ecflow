@@ -24,16 +24,25 @@ class NodeFilterDef;
 class ServerHandler;
 class VParamSet;
 
-class NodeModelData
+class NodeModelData : public QObject, public NodeObserver
 {
+Q_OBJECT
+
 friend class NodeModelDataHandler;
 
 public:
-    NodeModelData(ServerHandler *server,NodeFilter*);
+    NodeModelData(ServerHandler *server,NodeFilter* filter);
     ~NodeModelData();
 
     int nodeNum() const;
     void runFilter();
+
+    //From NodeObserver
+	void notifyNodeChanged(const Node*, const std::vector<ecf::Aspect::Type>&);
+
+Q_SIGNALS:
+	void dataChanged(ServerHandler *);
+	void dataChanged(ServerHandler *,Node*);
 
 protected:
 	ServerHandler *server_;
@@ -42,7 +51,7 @@ protected:
 };
 
 
-class NodeModelDataHandler : public QObject, public ServerFilterObserver, public NodeObserver
+class NodeModelDataHandler : public QObject, public ServerFilterObserver
 {
 Q_OBJECT
 
@@ -70,9 +79,6 @@ public:
 	void notifyServerFilterRemoved(ServerItem*);
 	void notifyServerFilterChanged(ServerItem*);
 
-	//From NodeObserver
-	void notifyNodeChanged(const Node*, const std::vector<ecf::Aspect::Type>&);
-
 public Q_SLOTS:
 	void slotFilterDefChanged();
 
@@ -82,6 +88,8 @@ Q_SIGNALS:
 	void serverAddEnd();
 	void serverRemoveBegin(int);
 	void serverRemoveEnd();
+	void dataChanged(ServerHandler *);
+	void dataChanged(ServerHandler *,Node*);
 
 protected:
 	void init();

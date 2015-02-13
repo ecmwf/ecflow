@@ -18,18 +18,23 @@
 //
 //==========================================
 
+//It takes ownership of the filter
 
 NodeModelData::NodeModelData(ServerHandler *server,NodeFilter* filter) :
    server_(server),
    filter_(filter),
    nodeNum_(-1)
 {
+	//We has to observe the nodes of the server.
+	server_->addNodeObserver(this);
 }
 
 NodeModelData::~NodeModelData()
 {
-//	if(filter_)
-//		delete filter_;
+	server_->addNodeObserver(this);
+
+	if(filter_)
+		delete filter_;
 }
 
 int NodeModelData::nodeNum() const
@@ -40,13 +45,6 @@ int NodeModelData::nodeNum() const
 	return nodeNum_;
 }
 
-/*void NodeModelData::filter(VParamSet* stateFilter)
-{
-	if(filter_)
-		filter_->reset(server_,stateFilter);
-
-}*/
-
 void NodeModelData::runFilter()
 {
 	if(filter_)
@@ -54,6 +52,29 @@ void NodeModelData::runFilter()
 
 }
 
+void NodeModelData::notifyNodeChanged(const Node* node, const std::vector<ecf::Aspect::Type>& types)
+{
+	if(node==NULL)
+		return;
+
+	//qDebug() << "observer is called" << QString::fromStdString(node->name());
+	//for(unsigned int i=0; i < types.size(); i++)
+	//	qDebug() << "  type:" << types.at(i);
+
+	Node* nc=const_cast<Node*>(node);
+
+	//We need to check if it changes the filter state
+	if(filter_)
+	{
+		/*if(filter_->update(nc))
+		{
+			Q_EMIT dataChanged(server_);
+			return;
+		}*/
+	}
+
+	Q_EMIT dataChanged(server_,nc);
+}
 
 //==========================================
 //
@@ -99,9 +120,16 @@ ServerHandler* NodeModelDataHandler::server(void* idPointer) const
 void NodeModelDataHandler::add(ServerHandler *server)
 {
 	//We has to observe the nodes of the server.
-	server->addNodeObserver(this);
+	//server->addNodeObserver(this);
+	NodeModelData* d=makeData(server);
 
-	data_.push_back(makeData(server));
+	connect(d,SIGNAL(dataChanged(ServerHandler*)),
+			this,SIGNAL(dataChanged(ServerHandler*)));
+
+	connect(d,SIGNAL(dataChanged(ServerHandler*,Node*)),
+			  this,SIGNAL(dataChanged(ServerHandler*,Node*)));
+
+	data_.push_back(d);
 }
 
 int NodeModelDataHandler::indexOf(ServerHandler* s) const
@@ -133,14 +161,6 @@ int NodeModelDataHandler::numOfNodes(int index) const
 	}
 	return 0;
 }
-
-/*void NodeModelDataHandler::filter(VParamSet *stateFilter)
-{
-	for(unsigned int i=0; i < data_.size(); i++)
-	{
-		data_.at(i)->filter(stateFilter);
-	}
-}*/
 
 Node* NodeModelDataHandler::getNodeFromFilter(int totalRow)
 {
@@ -191,11 +211,6 @@ void NodeModelDataHandler::clear()
 
 	for(int i=0; i < data_.size(); i++)
 	{
-		if(ServerHandler *s=server(i))
-		{
-			s->removeNodeObserver(this);
-		}
-
 		delete data_.at(i);
 	}
 
@@ -276,12 +291,15 @@ void NodeModelDataHandler::slotFilterDefChanged()
 	runFilter(true);
 }
 
+
+//Node observer
+/*
 void NodeModelDataHandler::notifyNodeChanged(const Node* node, const std::vector<ecf::Aspect::Type>& types)
 {
 	if(node==NULL)
 		return;
 
-	/*qDebug() << "observer is called" << QString::fromStdString(node->name());
+	qDebug() << "observer is called" << QString::fromStdString(node->name());
 	//for(unsigned int i=0; i < types.size(); i++)
 	//	qDebug() << "  type:" << types.at(i);
 
@@ -303,8 +321,12 @@ void NodeModelDataHandler::notifyNodeChanged(const Node* node, const std::vector
 	//qDebug() << "index pointers " << index1.internalPointer() << index2.internalPointer();
 	qDebug() << "    --->" << QString::fromStdString(nd1->name()) << QString::fromStdString(nd2->name());
 
-	Q_EMIT dataChanged(index1,index2);*/
+	Q_EMIT dataChanged(index1,index2);
 }
+*/
+
+
+
 
 
 NodeModelData* TreeNodeModelDataHandler::makeData(ServerHandler* s)

@@ -773,7 +773,7 @@ void ServerHandler::slotNodeChanged(const Node* n, const std::vector<ecf::Aspect
 void ServerHandler::addNodeObserver(NodeObserver *obs)
 {
 	std::vector<NodeObserver*>::iterator it=std::find(nodeObservers_.begin(),nodeObservers_.end(),obs);
-	if(it != nodeObservers_.end())
+	if(it == nodeObservers_.end())
 	{
 		nodeObservers_.push_back(obs);
 	}

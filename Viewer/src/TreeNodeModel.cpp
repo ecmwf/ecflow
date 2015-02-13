@@ -62,6 +62,12 @@ TreeNodeModel::TreeNodeModel(NodeModelDataHandler *data,AttributeFilter *atts,Ic
 	connect(data_,SIGNAL(serverRemoveEnd()),
 							this,SLOT(slotServerRemoveEnd()));
 
+	//Node changes
+	connect(data_,SIGNAL(dataChanged(ServerHandler*)),
+			this,SLOT(slotDataChanged(ServerHandler*)));
+
+	connect(data_,SIGNAL(dataChanged(ServerHandler*,Node*)),
+				this,SLOT(slotDataChanged(ServerHandler*,Node*)));
 
 }
 
@@ -441,6 +447,7 @@ Node* TreeNodeModel::indexToNode( const QModelIndex & index) const
 	return NULL;
 }
 
+//Find the index for the node!
 QModelIndex TreeNodeModel::nodeToIndex(Node* node, int column) const
 {
 	if(!node)
@@ -450,6 +457,38 @@ QModelIndex TreeNodeModel::nodeToIndex(Node* node, int column) const
 	if(node->isSuite())
 	{
 		if(ServerHandler* server=ServerHandler::find(node))
+		{
+				int row=server->indexOfSuite(node);
+				if(row != -1)
+						return createIndex(row,column,server);
+		}
+	}
+
+	//Other nodes
+	else if(Node *parentNode=node->parent())
+	{
+		int row=ServerHandler::indexOfImmediateChild(node);
+		if(row != -1)
+		{
+			int attNum=VAttribute::totalNum(parentNode);
+			row+=attNum;
+			return createIndex(row,column,parentNode);
+		}
+	}
+
+	return QModelIndex();
+}
+
+//Find the index for the node when we know what the server is!
+QModelIndex TreeNodeModel::nodeToIndex(ServerHandler* server,Node* node, int column) const
+{
+	if(!node)
+		return QModelIndex();
+
+	//If the node is a suite
+	if(node->isSuite())
+	{
+		if(server)
 		{
 				int row=server->indexOfSuite(node);
 				if(row != -1)
@@ -563,3 +602,44 @@ void TreeNodeModel::slotServerRemoveEnd()
 {
 	endRemoveRows();
 }
+
+void TreeNodeModel::slotDataChanged(ServerHandler* server)
+{
+
+}
+
+
+void TreeNodeModel::slotDataChanged(ServerHandler* server,Node* node)
+{
+	if(!node)
+		return;
+
+	qDebug() << "observer is called" << QString::fromStdString(node->name());
+	//for(unsigned int i=0; i < types.size(); i++)
+	//	qDebug() << "  type:" << types.at(i);
+
+	QModelIndex index=nodeToIndex(node,0);
+
+	if(!index.isValid())
+		return;
+
+	/*Node *nd1=indexToNode(index1);
+	Node *nd2=indexToNode(index2);
+
+	if(!nd1 || !nd2)
+		return;
+
+	//qDebug() << "indexes" << index1 << index2;
+	//qDebug() << "index pointers " << index1.internalPointer() << index2.internalPointer();
+	qDebug() << "    --->" << QString::fromStdString(nd1->name()) << QString::fromStdString(nd2->name());*/
+
+	Q_EMIT dataChanged(index,index);
+
+
+}
+
+
+
+
+
+

@@ -39,6 +39,8 @@ public Q_SLOTS:
 	void slotServerAddEnd();
 	void slotServerRemoveBegin(int row);
 	void slotServerRemoveEnd();
+	void slotDataChanged(ServerHandler*);
+	void slotDataChanged(ServerHandler*,Node*);
 
 Q_SIGNALS:
 	void filterChanged();
@@ -51,6 +53,7 @@ private:
 	ServerHandler* indexToServer(const QModelIndex & index) const;
 	QModelIndex serverToIndex(ServerHandler*) const;
 	QModelIndex nodeToIndex(Node*,int column=0) const;
+	QModelIndex nodeToIndex(ServerHandler*,Node*,int column=0) const;
 	Node* indexToNode( const QModelIndex & index) const;
 
 	QVariant serverData(const QModelIndex& index,int role) const;
