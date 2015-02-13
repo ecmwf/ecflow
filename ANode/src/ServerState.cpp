@@ -320,6 +320,7 @@ void ServerState::setup_default_server_variables(std::vector<Variable>&  server_
    server_variables.push_back( Variable(string("ECF_URL"), Ecf::URL() ));
    server_variables.push_back( Variable(string("ECF_LOG"), host.ecf_log_file(port) ));
    server_variables.push_back( Variable(string("ECF_INTERVAL"), string("60") ));            // Check time dependencies and submit any jobs
+   server_variables.push_back( Variable(string("ECF_LISTS"), host.ecf_lists_file(port) ));
    server_variables.push_back( Variable(string("ECF_CHECK"), host.ecf_checkpt_file(port) ));
    server_variables.push_back( Variable(string("ECF_CHECKOLD"), host.ecf_backup_checkpt_file(port)));
    server_variables.push_back( Variable(string("ECF_CHECKINTERVAL"), string("120") ));      //The interval in seconds to save check point file

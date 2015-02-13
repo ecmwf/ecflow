@@ -351,7 +351,8 @@ void ServerEnvironment::variables(std::vector<std::pair<std::string,std::string>
 	// These variable are read in from the environment, but are not exposed
 	// since they only affect the server
 	// ECF_CHECKINTERVAL
-	// ECF_LISTS
+
+   theRetVec.push_back( std::make_pair(std::string("ECF_LISTS"), ecf_white_list_file_) ); // read only variable, changing it has no effect
 
 	// variables that can be overridden, in the suite definition
 	theRetVec.push_back( std::make_pair(std::string("ECF_JOB_CMD"), ecf_cmd_) );
