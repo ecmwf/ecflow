@@ -53,7 +53,7 @@ TreeNodeModel::TreeNodeModel(NodeModelDataHandler *data,AttributeFilter *atts,Ic
 				this,SLOT(slotServerAddBegin(int)));
 
 	connect(data_,SIGNAL(serverAddEnd()),
-								this,SLOT(slotAddEnd()));
+								this,SLOT(slotServerAddEnd()));
 
 	//Server removed
 	connect(data_,SIGNAL(serverRemoveBegin(int)),
@@ -222,6 +222,11 @@ QVariant TreeNodeModel::nodeData(const QModelIndex& index, int role) const
 		else
 			return VIcon::pixmapList(node,icons_);
 	}
+	else if(index.column() == 0 && role == Qt::ToolTipRole)
+	{
+		return VNState::toName(node);
+	}
+
 
 	return QVariant();
 }

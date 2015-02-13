@@ -28,6 +28,7 @@ class QToolButton;
 
 class Node;
 class NodePathWidget;
+class VSettings;
 
 /*
 class NodePathItem : public QGraphicsItem
@@ -133,8 +134,14 @@ public:
 	NodePathWidget(QWidget* parent=0);
 	~NodePathWidget();
 
+	bool active() const {return active_;}
+	void active(bool);
+
 	//From NodeObserver
 	void notifyNodeChanged(const Node*, const std::vector<ecf::Aspect::Type>&) {};
+
+	void writeSettings(VSettings *vs);
+	void readSettings(VSettings *vs);
 
 public Q_SLOTS:
 	void setPath(QString);
@@ -150,7 +157,7 @@ Q_SIGNALS:
 
 protected:
 	void clearLayout();
-	void clearContents();
+	void clear();
 	void loadMenu(const QPoint& pos,VInfo_ptr p);
 	VInfo_ptr nodeAt(int);
 	QList<Node*> toNodeList(VInfo_ptr info);
@@ -169,6 +176,10 @@ protected:
 	//When it is set to "true": if a node item (i.e. not a menu) is selected the breadcrumbs
 	//will stay the same and only will change the current node/selection!
 	bool stayInParent_;
+
+	//When active_ is "true" the widget is visible and can receive and display data. When it
+	//is "false" the widget is hidden and cannot hold any data.
+	bool active_;
 };
 
 #endif

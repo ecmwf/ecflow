@@ -86,9 +86,18 @@ TreeNodeWidget::TreeNodeWidget(ServerFilter* servers,QWidget* parent) : NodeWidg
 	viewTb->setMenu(menu);
 }
 
-void TreeNodeWidget::on_actionBreadcrumbs_toggled(bool b)
+void TreeNodeWidget::on_actionBreadcrumbs_triggered(bool b)
 {
-	bcWidget_->setVisible(b);
+	if(b)
+	{
+		bcWidget_->active(true);
+		bcWidget_->setPath(view_->currentSelection());
+	}
+	else
+	{
+		bcWidget_->active(false);
+	}
+
 	//bcWidget_->clear();
 }
 
@@ -96,6 +105,8 @@ void TreeNodeWidget::writeSettings(VSettings* vs)
 {
 	vs->put("type","tree");
 	vs->put("dockId",id_);
+
+	bcWidget_->writeSettings(vs);
 
 	states_->writeSettings(vs);
 	atts_->writeSettings(vs);
@@ -119,6 +130,16 @@ void TreeNodeWidget::readSettings(VSettings* vs)
 	//   to the current settings
 	//	-it will load and display the data
 	model_->active(true);
+
+	//--------------------------
+	//Breadcrumbs
+	//--------------------------
+
+	bcWidget_->readSettings(vs);
+
+	//Synchronise the action and the breadcrumbs state
+	//This will not emit the trigered signal of the action!!
+	actionBreadcrumbs->setChecked(bcWidget_->active());
 
 	attrFilterMenu_->reload();
 	iconFilterMenu_->reload();

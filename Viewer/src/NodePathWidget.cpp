@@ -19,6 +19,7 @@
 #include "ServerHandler.hpp"
 #include "VNState.hpp"
 #include "VSState.hpp"
+#include "VSettings.hpp"
 
 
 
@@ -38,7 +39,8 @@ NodePathNodeItem::NodePathNodeItem(int index,QString name,QColor col,bool select
 		     	padding: 0px; \
 				border: BORDER;\
 			    font-weight: FONT;\
-				color: TEXT-COLOR; \
+				background: BASE-COLOR;\
+			    color: TEXT-COLOR; \
 		 }\
 		     QToolButton:hover{\
 		    	 border: BORDER;\
@@ -53,7 +55,8 @@ NodePathNodeItem::NodePathNodeItem(int index,QString name,QColor col,bool select
 				border-radius: 0px; \
 		     	padding: 0px; \
 			    font-weight: FONT;\
-				color: TEXT-COLOR; \
+				background: BASE-COLOR;\
+			    color: TEXT-COLOR; \
 		 }\
 		     QToolButton:hover{\
 		    	 border: BORDER;\
@@ -65,9 +68,9 @@ NodePathNodeItem::NodePathNodeItem(int index,QString name,QColor col,bool select
 	setText(name+" ");
 	resetStyle();
 
-	/*QFont f;
+	QFont f;
 	f.setPointSize(8);
-	setFont(f);*/
+	setFont(f);
 };
 
 void NodePathNodeItem::reset(QString name,QColor col,bool current)
@@ -86,10 +89,13 @@ void NodePathNodeItem::reset(QString name,QColor col,bool current)
 void NodePathNodeItem::resetStyle()
 {
 	QString st;
+
+	//Selected
 	if(current_)
 	{
 		st=qssSelected_;
-		//st.replace("BASE-COLOR",col_.name())
+
+		st.replace("BASE-COLOR",col_.name());
 
 		//Font
 		st.replace("FONT","bold");
@@ -98,8 +104,9 @@ void NodePathNodeItem::resetStyle()
 		st.replace("TEXT-COLOR","black");
 
 		//Border
-		st.replace("BORDER","2px solid "+ col_.name());
+		st.replace("BORDER","2px solid black");
 	}
+	//Non selected
 	else
 	{
 		st=qss_;
@@ -209,7 +216,8 @@ NodePathMenuItem::NodePathMenuItem(int index,QWidget * parent) :
 NodePathWidget::NodePathWidget(QWidget *parent) :
   QWidget(parent),
   stayInParent_(true),
-  infoIndex_(-1)
+  infoIndex_(-1),
+  active_(true)
 {
 	setProperty("breadcrumbs","1");
 
@@ -227,9 +235,14 @@ NodePathWidget::~NodePathWidget()
 	clearLayout();
 }
 
-
-void  NodePathWidget::clearContents()
+void NodePathWidget::clear()
 {
+	if(info_ && info_->server())
+	  	  	info_->server()->removeNodeObserver(this);
+
+	info_.reset();
+	infoIndex_=-1;
+
 	clearLayout();
 
 	int cnt=nodeItems_.count();
@@ -246,12 +259,6 @@ void  NodePathWidget::clearContents()
 	}
 }
 
-
-void NodePathWidget::slotContextMenu(const QPoint& pos)
-{
-
-}
-
 //We delete the layout items but not the widget they contain
 void NodePathWidget::clearLayout()
 {
@@ -265,6 +272,28 @@ void NodePathWidget::clearLayout()
      		}
      		delete item;
  	}
+}
+
+void NodePathWidget::active(bool active)
+{
+	if(active_ != active)
+		active_=active;
+
+	if(active_)
+	{
+		setVisible(true);
+	}
+	else
+	{
+		setVisible(false);
+		clear();
+	}
+}
+
+
+void NodePathWidget::slotContextMenu(const QPoint& pos)
+{
+
 }
 
 void NodePathWidget::infoIndex(int idx)
@@ -337,17 +366,19 @@ int NodePathWidget::findInPath(VInfo_ptr p1,VInfo_ptr p2,bool sameServer)
 	return idx;
 }
 
-
-
 void NodePathWidget::setPath(QString)
 {
-
+	if(!active_)
+	  		return;
 }
 
 
 void NodePathWidget::setPath(VInfo_ptr info)
 {
-  	ServerHandler *server=0;
+  	if(!active_)
+  		return;
+
+	ServerHandler *server=0;
   	bool sameServer=false;
 
   	//Check if there is data in info
@@ -369,12 +400,13 @@ void NodePathWidget::setPath(VInfo_ptr info)
   	//If the there is no data we clean everything and return
   	else
   	{
-  	  		if(info_ && info_->server())
+  	  		clear();
+  			/*if(info_ && info_->server())
   	  				info_->server()->removeNodeObserver(this);
 
   	  		info_=info;
   	  		infoIndex_=-1;
-  	  		clearContents();
+  	  		clearContents();*/
   	  		return;
   	}
 
@@ -626,3 +658,32 @@ void NodePathWidget::paintEvent(QPaintEvent *)
      QPainter p(this);
      style()->drawPrimitive(QStyle::PE_Widget, &opt, &p, this);
  }
+
+
+void NodePathWidget::writeSettings(VSettings *vs)
+{
+	vs->beginGroup("breadcrumbs");
+	vs->put("active",active_);
+	vs->put("stayInParent",stayInParent_);
+	vs->endGroup();
+}
+
+void NodePathWidget::readSettings(VSettings* vs)
+{
+	vs->beginGroup("breadcrumbs");
+	int ival;
+
+	ival=vs->get<int>("active",1);
+	active((ival==1)?true:false);
+
+	ival=vs->get<int>("stayInParent",1);
+	stayInParent_=(ival==1)?true:false;
+
+	vs->endGroup();
+}
+
+
+
+
+
+

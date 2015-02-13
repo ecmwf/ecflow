@@ -31,7 +31,7 @@ public:
 	void readSettings(VSettings*);
 
 protected Q_SLOTS:
-	void on_actionBreadcrumbs_toggled(bool b);
+	void on_actionBreadcrumbs_triggered(bool b);
 
 protected:
 	NodeStateFilter *states_;
