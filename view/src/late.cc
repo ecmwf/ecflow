@@ -18,7 +18,7 @@
 
 
 late::late():
-	node_alert<late>("Late Node")
+	node_alert<late>("Late Nodes")
 {
 }
 
