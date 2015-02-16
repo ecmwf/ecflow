@@ -147,8 +147,10 @@ static char* xresources = (char*) "\n"
 
 "ecFlowview*@zombied.labelString: Use default settings\n"
 "ecFlowview*@aliases.labelString: Use default settings\n"
+"ecFlowview*@late_family.labelString: Use default settings\n"
 "ecFlowview*zombied.labelString: Zombies\n"
 "ecFlowview*aliases.labelString: Aborted or restarted aliases\n"
+"ecFlowview*late_family.labelString: Late family\n"
 
 "ecFlowview*File.labelString: File\n"
 "ecFlowview*.XmText.background: OldLace\n"
@@ -452,8 +454,10 @@ static char* xresources = (char*) "\n"
 
 "XCdp*@zombied.labelString: Use default settings\n"
 "XCdp*@aliases.labelString: Use default settings\n"
+"XCdp*@late_family.labelString: Use default settings\n"
 "XCdp*zombied.labelString: Zombies\n"
 "XCdp*aliases.labelString: Aborted or restarted aliases\n"
+"XCdp*late_family.labelString: Late family\n"
 
 "XCdp*File.labelString: File\n"
 "XCdp*.XmText.background: OldLace\n"

@@ -96,7 +96,7 @@ void node_alert<T>::notify_system(node* n) {
   notify-send -i 'dialog-information' 'Summary' \
     '<b><font color=red>Message body.'
  */
-  if(0 && alert_) {
+  if(1 && alert_) {
     char buff[1024];
     const char *cmd = "kdialog --title ecFlowview::%s --passivepopup '<b><font color=%s> %s' 5; %s";
     const char *sound = "play -q /usr/share/xemacs/xemacs-packages/etc/sounds/boing.wav";

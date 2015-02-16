@@ -177,6 +177,7 @@ host::host( const std::string& name, const std::string& host, int number )
 	 , new_suites_(this, "new_suites", true)
 	 , zombie_(this, "zombie", false)
 	 , aliases_(this, "aliases", false)
+	 , late_family_(this, "late_family", false)
 	 , to_check_(this, "to_check", false)
 	 , chkmail_(true)
 	 , top_(0)
@@ -844,7 +845,9 @@ void host::restarted( node& n )
 
 void host::late( node& n )
 {
-   if (late_) late::show(n);
+  if (late_family_ && n.type() == NODE_FAMILY)
+    late::show(n);
+  else if (late_) late::show(n);
 }
 
 void host::zombie( node& n )

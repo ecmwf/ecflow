@@ -244,6 +244,7 @@ class host : public extent<host>
 
 	option<bool>      zombie_;
 	option<bool>      aliases_;
+	option<bool>      late_family_;
 	option<bool>      to_check_;
 
 	bool  chkmail_;
