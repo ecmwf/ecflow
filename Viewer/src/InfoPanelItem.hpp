@@ -41,10 +41,11 @@ public:
 	void infoProgress(VReply*) {};
 
 	//From NodeObserver
-	void notifyNodeChanged(const Node*, const std::vector<ecf::Aspect::Type>&) {};
+	void notifyNodeChanged(const Node*, const std::vector<ecf::Aspect::Type>&);
 
 protected:
 	void adjust(VInfo_ptr);
+	virtual void nodeChanged(const Node*, const std::vector<ecf::Aspect::Type>&)=0;
 
 	bool loaded_;
 };

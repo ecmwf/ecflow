@@ -29,6 +29,7 @@ public:
 private:
 	void info(Node* node,std::stringstream& f);
 
+	void nodeChanged(const Node*, const std::vector<ecf::Aspect::Type>&) {};
 };
 
 #endif

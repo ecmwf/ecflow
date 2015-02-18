@@ -11,43 +11,118 @@
 #ifndef VARIABLEITEMWIDGET_HPP_
 #define VARIABLEITEMWIDGET_HPP_
 
+#include <QSortFilterProxyModel>
 #include <QTreeView>
+
+#include "ui_VariableEditDialog.h"
+#include "ui_VariableItemWidget.h"
 
 #include "InfoPanelItem.hpp"
 #include "VInfo.hpp"
 
 class VariableModel;
+class VariableModelDataHandler;
+class VariableSortModel;
+
 
 class VariableView : public QTreeView
 {
 Q_OBJECT
 
 public:
-		VariableView(QWidget *parent=0);
-		//void reload();
-		void reload(VInfo_ptr);
+	VariableView(QWidget *parent=0);
+	//void reload();
+	void reload(VInfo_ptr);
 
 public Q_SLOTS:
 	void slotSelectItem(const QModelIndex&);
 
 protected:
-	VariableModel *model_;
+	//VariableModel *model_;
 };
 
 
-class VariableItemWidget : public QWidget, public InfoPanelItem
+
+class VariableDialogChecker
 {
+protected:
+	VariableDialogChecker(QString txt) : errorText_(txt) {};
+
+	bool checkName(QString name);
+	bool checkValue(QString value);
+	void error(QString msg);
+
+	QString errorText_;
+};
+
+
+class VariableEditDialog : public QDialog, private Ui::VariableEditDialog, public VariableDialogChecker
+{
+Q_OBJECT
+
+public:
+	VariableEditDialog(QString name,QString value,QWidget* parent=0);
+
+	QString name() const;
+	QString value() const;
+
+
+public Q_SLOTS:
+	void accept();
+
+};
+
+/*
+class ServerAddDialog : public QDialog, private Ui::ServerAddDialog, public VariableDialogChecker
+{
+Q_OBJECT
+
+public:
+	ServerAddDialog(QWidget* parent=0);
+
+	QString name() const;
+	QString host() const;
+	QString port() const;
+	bool addToView() const;
+
+public Q_SLOTS:
+	void accept();
+};
+*/
+
+
+
+
+class VariableItemWidget : public QWidget, public InfoPanelItem, protected Ui::VariableItemWidget
+{
+Q_OBJECT
+
 public:
 	VariableItemWidget(QWidget *parent=0);
+	~VariableItemWidget();
 
 	void reload(VInfo_ptr);
 	QWidget* realWidget();
 	void clearContents();
 
+public Q_SLOTS:
+	void on_actionEdit_triggered();
+	void on_actionAdd_triggered();
+	void on_actionDuplicate_triggered();
+	void on_actionDelete_triggered();
+	void on_varView_doubleClicked(const QModelIndex& index);
 
 protected:
-	VariableView *view_;
+	void editItem(const QModelIndex& index);
+	void duplicateItem(const QModelIndex& index);
+	void addItem();
+	void removeItem(const QModelIndex& index);
 
+	void nodeChanged(const Node*, const std::vector<ecf::Aspect::Type>&);
+
+	VariableModelDataHandler* data_;
+	VariableModel* model_;
+	VariableSortModel* sortModel_;
 };
 
 #endif

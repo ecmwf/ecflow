@@ -84,3 +84,70 @@ QFrame[breadcrumbs="1"] {
 QPlainTextEdit {
     background: rgb(232,232,232);
 }
+    
+/*----------------------------
+  Variable tree view
+------------------------------*/
+
+QTreeView[var="1"]::branch:!has-children {  
+   background: white;
+   border: 1px solid #BBBBBB;
+   border-top-color: transparent;
+   border-left-color: transparent; 
+   border-right-color: transparent;
+}
+ 
+
+QTreeView[var="1"]::branch:!has-children {
+      image: none;
+} 
+ 
+QTreeView[var="1"]::branch:!has-children:alternate {
+      background: rgb(248,247,246);
+} 
+ 
+/* 
+QTreeView[var="1"]::branch:alternate {
+      background: rgb(248,247,246);
+} 
+*/
+QTreeView[var="1"]::item:has-children {
+      background: rgb(122,122,122);
+      color: white;
+} 
+/*
+QTreeView[var="1"]::branch:has-children {
+      background: rgb(122,122,122);
+} 
+*/
+/*
+QTreeView[var="1"]::branch:has-children:closed {
+         border-image: none;
+         image: url(":/viewer/drawer_close.svg");
+}
+
+QTreeView[var="1"]::branch:has-children:open {
+         border-image: none;
+         image: url(":/viewer/drawer_open.svg");
+}
+*/
+
+/*QAbstractItemView {
+    alternate-background-color: #FFE6BF;
+        background: #FFF2DE;
+    selection-background-color: rgb(194, 221, 255);
+}*/
+
+QTreeView[var="1"]::item  {
+    border: 1px solid #BBBBBB;
+    border-top-color: transparent;
+    border-left-color: transparent; 
+    border-right-color: transparent;
+ }
+
+QTreeView::item:selected[var="1"] {
+   background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #6ea1f1, stop: 1 #567dbc);
+}
+
+
+}

@@ -42,9 +42,9 @@ class ServerHandler : public QObject
 	friend class ServerComQueue;
 
 public:
-		const std::string name() const {return name_;}
+		const std::string& name() const {return name_;}
 		const std::string& host() const {return host_;}
-		const std::string longName() const {return longName_;}
+		const std::string& longName() const {return longName_;}
 		const std::string& port() const {return port_;}
 		int numSuites();
 		node_ptr suiteAt(int);

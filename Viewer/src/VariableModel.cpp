@@ -13,42 +13,29 @@
 #include <QDebug>
 
 #include "ServerHandler.hpp"
+#include "VariableModelData.hpp"
 
-VariableModel::VariableModel(QObject *parent) :
+//=======================================================================
+//
+// VariabletModel
+//
+//=======================================================================
+
+VariableModel::VariableModel(VariableModelDataHandler* data,QObject *parent) :
           QAbstractItemModel(parent),
-          server_(0)
+          data_(data)
 {
+	connect(data_,SIGNAL(reloadBegin()),
+			this,SLOT(slotReloadBegin()));
+
+	connect(data_,SIGNAL(reloadEnd()),
+					this,SLOT(slotReloadEnd()));
+
 }
 
 bool VariableModel::hasData() const
 {
-	return (nodes_.size()  >0 || server_ != NULL);
-}
-
-void VariableModel::setData(VInfo_ptr data)
-{
-	beginResetModel();
-
-	nodes_.clear();
-	server_=0;
-
-	if(data.get() != 0 && data->isNode())
-	{
-		Node* n=data->node();
-		while(n)
-		{
-			qDebug() << "name" << QString::fromStdString(n->name());
-			nodes_ << n;
-			n=n->parent();
-		}
-
-		server_=data->server();
-
-	}
-
-	//Reset the model (views will be notified)
-	endResetModel();
-
+	return (data_->count()  > 0);
 }
 
 int VariableModel::columnCount( const QModelIndex& /*parent */ ) const
@@ -58,43 +45,20 @@ int VariableModel::columnCount( const QModelIndex& /*parent */ ) const
 
 int VariableModel::rowCount( const QModelIndex& parent) const
 {
-	//There is no data
-	if(!hasData())
-	{
-		return 0;
-	}
-	//We use only column 0
-	//else if(parent.column() > 0)
-	//{
-	//	return 0;
-	//}
+
 	//Parent is the root: the item must be a node or a server
-	else if(!parent.isValid())
+	if(!parent.isValid())
 	{
-		return nodes_.count()+((server_)?1:0);
+		return data_->count();
 	}
-	//The parent is a server
-	else if(isServer(parent))
+	//The parent is a server or a node
+	else if(!isVariable(parent))
 	{
-		if(server_)
-		{
-			ServerDefsAccess defsAccess(server_);  // will reliquish its resources on destruction
-			return static_cast<int>(defsAccess.defs()->server().server_variables().size());
-		}
-	}
-	//The parent is a node
-	else if(isNode(parent))
-	{
-		if(Node* parentNode=indexToNode(parent))
-		{
-				int num=static_cast<int>(parentNode->variables().size());
-				std::vector<Variable> v;
-				parentNode->gen_variables(v);
-				num+=static_cast<int>(v.size());
-				return num;
-		}
+		int row=parent.row();
+		return data_->varNum(row);
 	}
 
+	//parent is a variable
 	return 0;
 }
 
@@ -109,150 +73,85 @@ Qt::ItemFlags VariableModel::flags ( const QModelIndex & index) const
 
 QVariant VariableModel::data( const QModelIndex& index, int role ) const
 {
-	//Data lookup can be costly so we immediately return a default value for all
-	//the cases where the default should be used.
 	if( !index.isValid())
     {
 		return QVariant();
 	}
 
+	//Data lookup can be costly so we immediately return a default value for all
+	//the cases where the default should be used.
+	if(role != Qt::DisplayRole && role != Qt::ToolTipRole && role != Qt::DecorationRole && role != Qt::BackgroundRole && role != Qt::ForegroundRole)
+	{
+		return QVariant();
+	}
 	//qDebug() << "data" << index << role;
 
+	int row=index.row();
 	int level=indexToLevel(index);
 
-	//Server  or node
+	//Server or node
 	if(level == 1)
 	{
-		if(role != Qt::DisplayRole && role != Qt::ToolTipRole)
+		VariableModelData *d=data_->data(row);
+		if(!d)
 		{
 			return QVariant();
 		}
 
 		if(index.column() == 0)
 		{
-			if(isServer(index))
+			if(role == Qt::DisplayRole)
 			{
-				return serverData(index,role);
-			}
-			else if(isNode(index))
-			{
-				return nodeData(index,role);
+				return QString::fromStdString(d->name());
 			}
 		}
+
 		return QVariant();
 	}
 
 	//Variables
 	else if (level == 2)
 	{
-		if(role != Qt::DisplayRole && role != Qt::ToolTipRole && role != Qt::ForegroundRole)
+		VariableModelData *d=data_->data(index.parent().row());
+		if(!d)
 		{
-				return QVariant();
-		}
-
-		QModelIndex p=parent(index);
-		if(isServer(p))
-		{
-			return variableData(server_,index,role);
-		}
-		else if(Node *node=indexToNode(p))
-		{
-			return variableData(node,index,role);
-		}
-	}
-
-	return QVariant();
-}
-
-QVariant VariableModel::serverData(const QModelIndex& index,int role) const
-{
-	if(index.column() == 0 && role == Qt::DisplayRole)
-	{
-		if(server_)
-		{
-			return QString::fromStdString(server_->longName());
-		}
-	}
-	return QVariant();
-}
-
-QVariant VariableModel::nodeData(const QModelIndex& index, int role) const
-{
-	if(index.column() == 0 && role == Qt::DisplayRole)
-	{
-		if(Node* node=indexToNode(index))
-		{
-			return QString::fromStdString(node->name());
-		}
-	}
-	return QVariant();
-}
-
-QVariant VariableModel::variableData(Node* node,const QModelIndex& index, int role) const
-{
-	if(!node || (role != Qt::DisplayRole && role != Qt::ForegroundRole))
 			return QVariant();
+		}
 
-	const std::vector<Variable> v=node->variables();
-
-	if(index.row() >=0 && index.row() < v.size())
-	{
-			if(role == Qt::ForegroundRole)
-					return QVariant();
-
-			if(index.column() == 0)
-			{
-				return QString::fromStdString(v.at(index.row()).name());
-			}
-			else if(index.column() == 1)
-			{
-				return QString::fromStdString(v.at(index.row()).theValue());
-			}
-	}
-	else
-	{
+		//Generated variable
+		if(d->isGenVar(row))
+		{
 			if(role == Qt::ForegroundRole)
 					return QColor(70,70,70);
+		}
 
-			int row=index.row()-v.size();
-			std::vector<Variable> genV;
-			node->gen_variables(genV);
-			if(row >=0 && row < genV.size())
-			{
-				if(index.column() == 0)
-				{
-					return QString::fromStdString(genV.at(row).name());
-				}
-				else if(index.column() == 1)
-				{
-					return QString::fromStdString(genV.at(row).theValue());
-				}
-			}
-	}
-
-	return QVariant();
-}
-
-QVariant VariableModel::variableData(ServerHandler *server,const QModelIndex& index, int role) const
-{
-	if(!server || role != Qt::DisplayRole)
-			return QVariant();
-
-	ServerDefsAccess defsAccess(server);  // will reliquish its resources on destruction
-	const std::vector<Variable>& v=defsAccess.defs()->server().server_variables();
-	if(index.row() >=0 && index.row() < v.size())
-	{
 		if(index.column() == 0)
 		{
-			return QString::fromStdString(v.at(index.row()).name());
+			return QString::fromStdString(d->name(row));
 		}
 		else if(index.column() == 1)
 		{
-			return QString::fromStdString(v.at(index.row()).theValue());
+			return QString::fromStdString(d->value(row));
 		}
+		return QVariant();
 	}
 
 	return QVariant();
+}
+
+bool VariableModel::data(const QModelIndex& idx, QString& name,QString& value) const
+{
+	QModelIndex idx0=index(idx.row(),0,idx.parent());
+	QModelIndex idx1=index(idx.row(),1,idx.parent());
+
+	name=data(idx0,Qt::DisplayRole).toString();
+	value=data(idx1,Qt::DisplayRole).toString();
+	return true;
+}
+
+bool VariableModel::setData(const QModelIndex& index, QString name,QString value)
+{
+	return false;
 }
 
 QVariant VariableModel::headerData( const int section, const Qt::Orientation orient , const int role ) const
@@ -336,11 +235,17 @@ int VariableModel::indexToLevel(const QModelIndex& index) const
 //
 //----------------------------------------------
 
+bool VariableModel::isVariable(const QModelIndex & index) const
+{
+	return (indexToLevel(index) == 2);
+}
+
+/*
 bool VariableModel::isServer(const QModelIndex & index) const
 {
 	if(index.isValid())
 	{
-		if(indexToLevel(index) == 1 && index.row() == nodes_.count())
+		if(indexToLevel(index) == 1 && index.row() == nodes_.size())
 			return true;
 	}
 	return false;
@@ -351,11 +256,12 @@ ServerHandler* VariableModel::indexToServer(const QModelIndex & index) const
 	return (isServer(index))?server_:NULL;
 }
 
+
 bool VariableModel::isNode(const QModelIndex & index) const
 {
 	if(index.isValid())
 	{
-		if(indexToLevel(index) == 1 && index.row() < nodes_.count())
+		if(indexToLevel(index) == 1 && index.row() < nodes_.size())
 			return true;
 	}
 	return false;
@@ -366,6 +272,19 @@ Node* VariableModel::indexToNode( const QModelIndex & index) const
 	return (isNode(index))?nodes_.at(index.row()):NULL;
 }
 
+QModelIndex VariableModel::nodeToIndex(Node *node) const
+{
+	for(unsigned int i=0; i < nodes_.size(); i++)
+	{
+		if(nodes_.at(i) == node)
+		{
+			return index(i,0);
+		}
+	}
+
+	return QModelIndex();
+}
+*/
 
 /*
 QModelIndex VariableModel::serverToIndex(ServerHandler* server) const
@@ -392,4 +311,61 @@ Node* VariableModel::indexToNode( const QModelIndex & index) const
 }
 */
 
+void VariableModel::nodeChanged(const Node* node, const std::vector<ecf::Aspect::Type>&)
+{
+	/*Node* n=const_cast<Node*>(node);
+	QModelIndex idx=nodeToIndex(n);
 
+	Q_EMIT dataChanged(idx,idx);*/
+}
+
+void VariableModel::slotReloadBegin()
+{
+	beginResetModel();
+}
+
+void VariableModel::slotReloadEnd()
+{
+	endResetModel();
+}
+
+//=======================================================================
+//
+// VariableSortModel
+//
+//=======================================================================
+
+VariableSortModel::VariableSortModel(VariableModel *varModel,QObject* parent) :
+	QSortFilterProxyModel(parent),
+	varModel_(varModel)
+{
+	QSortFilterProxyModel::setSourceModel(varModel_);
+	setDynamicSortFilter(true);
+}
+
+
+bool VariableSortModel::lessThan(const QModelIndex &sourceLeft, const QModelIndex &sourceRight) const
+{
+	//Node or server. Here we want the nodes and server to stay unsorted. That is the order should stay as
+	//it is defined in the data handler: the selected node stays on top and its ancestors and the server
+	//follow each other downwards. This order is reflected in the row index of these items in
+	//the varModel: the selected node's row is 0, its parent's row is 1, etc.
+	if(!varModel_->isVariable(sourceLeft))
+	{
+		if(sortOrder() == Qt::AscendingOrder)
+			return (sourceLeft.row() < sourceRight.row());
+		else
+			return (sourceLeft.row() > sourceRight.row());
+	}
+	//For variables we simply sort according to the string
+	else
+	{
+			return varModel_->data(sourceLeft,Qt::DisplayRole).toString() < varModel_->data(sourceRight,Qt::DisplayRole).toString();
+	}
+	return true;
+}
+
+bool VariableSortModel::filterAcceptsRow(int,const QModelIndex &) const
+{
+	return true;
+}

@@ -29,9 +29,6 @@ NodePathNodeItem::NodePathNodeItem(int index,QString name,QColor col,bool select
   col_(col),
   current_(selected)
 {
-	//background:  qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 white,  stop: 0.8 white, stop:0.81 red, stop: 1 red);
-	//background: BASE-COLOR;\
-	//background:  qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 white,  stop: 0.75 white,  stop: 1 BASE-COLOR);\
 	//Stylesheet
 
 	qss_="QToolButton {\

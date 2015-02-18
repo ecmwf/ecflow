@@ -98,6 +98,22 @@ VInfo::VInfo(VAttribute* att,int attIndex,Node* node,ServerHandler* server) :
 
 }
 
+void VInfo::ancestors(ServerHandler **sv,std::vector<Node*>& nodes)
+{
+	*sv=server();
+
+	if(isNode())
+	{
+		Node* n=node();
+		while(n)
+		{
+
+			nodes.push_back(n);
+			n=n->parent();
+		}
+	}
+}
+
 //--------------------------------------------------
 // Factory methods
 //--------------------------------------------------

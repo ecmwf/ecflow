@@ -25,6 +25,8 @@ public:
 
 	//From VInfoPresenter
 	void infoReady(VReply*);
+
+	void nodeChanged(const Node*, const std::vector<ecf::Aspect::Type>&) {};
 };
 
 #endif

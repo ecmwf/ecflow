@@ -71,3 +71,27 @@ void InfoPanelItem::adjust(VInfo_ptr info)
   	}
 }
 
+//From NodeObserver
+void InfoPanelItem::notifyNodeChanged(const Node* node, const std::vector<ecf::Aspect::Type>& aspect)
+{
+	//Check if there is data in info
+	if(info_.get())
+	{
+		if(info_->isNode())
+		{
+			Node* n=info_->node();
+			while(n)
+			{
+				if(n == node)
+				{
+					nodeChanged(node,aspect);
+					return;
+				}
+				n=n->parent();
+			}
+
+		}
+	}
+}
+
+

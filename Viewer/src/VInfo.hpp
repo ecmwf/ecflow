@@ -15,6 +15,7 @@
 #include <boost/shared_ptr.hpp>
 
 #include <string>
+#include <vector>
 
 class Node;
 
@@ -35,6 +36,43 @@ class VInfoVisitor;
 
 
 //This is the base class for the info objects
+/*
+class VInfo
+{
+	virtual const std::string& name()=0;
+	virtual QColor colour()=0;
+
+	virtual bool isServer() {return false;}
+	virtual bool isNode() {return false;}
+	virtual bool isAtrribute() {return false;}
+	virtual bool isEmpty() {return true;}
+
+	VInfo* selection() {return selection_;}
+
+protected:
+	VInfo* selection_;
+	std::vector<VInfo*> children_;
+
+
+	std::vectorvars
+
+};
+
+
+class VServer : public VInfo
+{
+
+}
+
+class VNode : public VInfo
+{
+
+}
+
+
+*/
+
+
 
 class VInfo
 {
@@ -52,6 +90,8 @@ public:
 	virtual ServerHandler* server() {return server_;};
 	virtual Node* node() {return node_;}
 	virtual VAttribute* attribute() {return att_;}
+
+	void ancestors(ServerHandler **server,std::vector<Node*>& nodes);
 
 	virtual void accept(VInfoVisitor*)=0;
 

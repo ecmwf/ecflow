@@ -26,6 +26,8 @@ public:
 	QWidget* realWidget();
 	void clearContents();
 
+	void nodeChanged(const Node*, const std::vector<ecf::Aspect::Type>&) {};
+
 private:
 	QString why(Node* n) const;
 

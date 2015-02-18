@@ -57,6 +57,7 @@ set(viewer_srcs
     VSState.cpp
     VTask.cpp
     VariableModel.cpp
+    VariableModelData.cpp
     VariableItemWidget.cpp
     WhyItemWidget.cpp)
 
@@ -90,6 +91,8 @@ QT4_WRAP_CPP(VIEWER_MOC AbstractNodeModel.hpp
                         TreeNodeWidget.hpp
                         UserMessage.hpp
                         VariableItemWidget.hpp
+                        VariableModel.hpp
+                        VariableModelData.hpp
                         VFilter.hpp)
 
 QT4_ADD_RESOURCES (VIEWER_RES viewer.qrc)
@@ -104,7 +107,9 @@ QT4_WRAP_UI       (VIEWER_FORMS_HEADERS CommandDesignerWidget.ui CustomCommandDi
                         ServerWidget.ui 
                         TableNodeWidget.ui
                         TextItemWidget.ui
-                        TreeNodeWidget.ui)
+                        TreeNodeWidget.ui
+                        VariableEditDialog.ui
+                        VariableItemWidget.ui)
 
 
 ecbuild_add_executable( TARGET   ecflowviewer
