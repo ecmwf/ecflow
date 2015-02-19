@@ -181,9 +181,6 @@ BOOST_AUTO_TEST_CASE( test_single_defs )
       cout << " Persist and reload(DEFS) and compare, time taken           = "
                << timer.elapsed() <<  " < limit(" << expectedTimeForDefsPersistAndReload << ")"
                << " file_size(" << helper.file_size() << ")" << endl;
-      BOOST_CHECK_MESSAGE( helper.file_size() < mega_file_size,
-                           "Regression: expected ecf defs file size(" << helper.file_size()
-                           << ") to be less that original file size(" << mega_file_size << ") since we ignore comments");
    }
    {
       timer.restart();
@@ -201,9 +198,9 @@ BOOST_AUTO_TEST_CASE( test_single_defs )
                << timer.elapsed() <<  " < limit(" << expectedTimeForDefsPersistAndReload << ")"
                << " file_size(" << helper.file_size() << ")" << endl;
 
-      // each platform will have a slightlty different size, since the server environment variables
+      // each platform will have a slightly different size, since the server environment variables
       // will be different, i.e host, pid, i.e check point etc, encompasses the host name, which will be different
-      BOOST_CHECK_MESSAGE(helper.file_size() <= 6669222 ,"File size regression expected <= 6669222 but found " << helper.file_size());
+      BOOST_CHECK_MESSAGE(helper.file_size() <= 6679000 ,"File size regression expected <= 6679000 but found " << helper.file_size());
    }
 
 #if defined(BINARY_ARCHIVE)

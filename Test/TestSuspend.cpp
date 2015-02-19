@@ -119,7 +119,7 @@ BOOST_AUTO_TEST_CASE( test_shutdown )
    }
 
    // The test harness will create corresponding directory structure and populate with standard sms files.
-   ServerTestHarness serverTestHarness(false/*do verification*/);
+   ServerTestHarness serverTestHarness;
    serverTestHarness.run(theDefs,
                          ServerTestHarness::testDataDefsLocation("test_shutdown.def"),
                          1,
@@ -198,7 +198,7 @@ BOOST_AUTO_TEST_CASE( test_suspend_node )
    }
 
    // The test harness will create corresponding directory structure and populate with standard sms files.
-   ServerTestHarness serverTestHarness(false/*do verification*/);
+   ServerTestHarness serverTestHarness;
    serverTestHarness.run(theDefs,
                          ServerTestHarness::testDataDefsLocation("test_suspend_node.def"),
                          1,

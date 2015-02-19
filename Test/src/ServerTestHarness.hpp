@@ -35,7 +35,7 @@ public:
 	// if standardVerification is true, we test task goes through normal life cycle
 	// changes. else we compare the log file states with golden log file
 	// Comparing log files across platforms is not reliable, and ignored
-  	ServerTestHarness(bool doLogFileVerification = true, bool standardVerification = true);
+  	ServerTestHarness();
 
   	/// generate man files for Suite and family nodes
   	void generateManFileForNodeContainers() { generateManFileForNodeContainers_ = true; }
@@ -77,9 +77,6 @@ public:
 	/// The test data location
 	static std::string testDataLocation( const std::string& defsFile);
 
-	/// Given a file name, returns the golden data location
-	static std::string goldenTestDataLocation( const std::string& file);
-
 
 	/// This function is used for waiting for test to finish
 	/// returns the defs from the server at test completeion
@@ -103,8 +100,6 @@ private:
   	std::string getDefaultTemplateEcfFile(Task* t) const;
 
 private:
-	bool doLogFileVerification_;
-	bool standardVerification_;
 	bool generateManFileForNodeContainers_;
 	bool check_task_duration_less_than_server_poll_;
 	bool add_default_sleep_time_;

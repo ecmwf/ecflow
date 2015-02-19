@@ -22,9 +22,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include "ServerTestHarness.hpp"
-#include "TestVerification.hpp"
 #include "TestFixture.hpp"
-#include "LogVerification.hpp"
 #include "DurationTimer.hpp"
 
 #include "Defs.hpp"
@@ -48,10 +46,8 @@ namespace fs = boost::filesystem;
 //#define DEBUG_TEST_HARNESS 1
 //#define DEBUG_DIFF 1
 
-ServerTestHarness::ServerTestHarness( bool doLogFileVerification, bool standardVerification   )
-: doLogFileVerification_(doLogFileVerification),
-  standardVerification_(standardVerification),
-  generateManFileForNodeContainers_(false),
+ServerTestHarness::ServerTestHarness()
+: generateManFileForNodeContainers_(false),
   check_task_duration_less_than_server_poll_(true),
   add_default_sleep_time_(true),
   serverUpdateCalendarCount_(0)
@@ -69,25 +65,6 @@ void ServerTestHarness::run(
 
    /// RUN the TEST
    defs_ptr serverDefs = doRun(theClientDefs,customTaskSmsMap,timeout,waitForTestCompletion);
-
-   /// CHECK the test
-   if ( doLogFileVerification_ ) {
-
-      // Locate log file for analysis and comparison
-      string newLog = TestVerification::locate_log_file(defs_filename);
-
-      if ( standardVerification_ ) {
-         /// The standard test verification will check in the log file that each task goes through the
-         /// normal life cycle changes, and then compares the state changes to a golden reference log file
-         TestVerification::standardVerification(newLog,theClientDefs);
-      }
-      else {
-         // Does not follow the normal life cycle changes
-         // hence we will only compare with golden reference log file.
-         std::string errorMsg;
-         BOOST_CHECK_MESSAGE(LogVerification::compareNodeStates(newLog,ServerTestHarness::goldenTestDataLocation(newLog),errorMsg),errorMsg);
-      }
-   }
 }
 
 void  ServerTestHarness::run(Defs& defs,const std::string& defs_filename, int timeout, bool waitForTestCompletion)
@@ -125,7 +102,7 @@ ServerTestHarness::doRun(Defs& theClientDefs, const std::map<std::string,std::st
    // If set this can be used to choose which suite to begin.
    std::string suiteName;
 
-   // Create the client early, since we need to determine if enviroment variable
+   // Create the client early, since we need to determine if environment variable
    // ECF_ALLOW_NEW_CLIENT_OLD_SERVER was set, if it was, we need to update the generated .ecf scripts
    // to embed this variable, this will allow  *new child commands* to talk to old servers
    int allow_new_client_old_server = 0;
@@ -144,9 +121,12 @@ ServerTestHarness::doRun(Defs& theClientDefs, const std::map<std::string,std::st
          std::string value = "export ECF_ALLOW_NEW_CLIENT_OLD_SERVER=" + boost::lexical_cast<std::string>(allow_new_client_old_server);
          s->addVariable( Variable( "ECF_ALLOW_NEW_CLIENT_OLD_SERVER",  value ) );
       }
-      if (s->findVariable(Str::ECF_HOME()).empty())         s->addVariable( Variable( Str::ECF_HOME(),  ecf_home ) );
-      if (s->findVariable("ECF_CLIENT_EXE_PATH").empty()) s->addVariable( Variable( "ECF_CLIENT_EXE_PATH",  theClientExePath ) );
-      if (s->findVariable(Str::ECF_INCLUDE()).empty())      s->addVariable( Variable( Str::ECF_INCLUDE(), TestFixture::includes()  ) );
+
+      // Always override these to correctly locate files.
+      s->addVariable( Variable( Str::ECF_HOME(),  ecf_home ) );
+      s->addVariable( Variable( "ECF_CLIENT_EXE_PATH",  theClientExePath ) );
+      s->addVariable( Variable( Str::ECF_INCLUDE(), TestFixture::includes()  ) );
+
       if (s->findVariable("SLEEPTIME").empty())           s->addVariable( Variable( "SLEEPTIME", "1" ) );
 
       if (check_task_duration_less_than_server_poll_) {
@@ -315,7 +295,7 @@ ServerTestHarness::testWaiter( const Defs& theClientDefs, int timeout, bool veri
          test_invariants(full_defs,"First time for getting full defs");
       }
       else {
-         BOOST_REQUIRE_MESSAGE(TestFixture::client().news(full_defs) == 0, "news failed should return 0 " << TestFixture::client().errorMsg());
+         BOOST_CHECK_MESSAGE(TestFixture::client().news(full_defs) == 0, "news failed should return 0 " << TestFixture::client().errorMsg());
          server_changed = TestFixture::client().get_news();
          //			std::cout << "server_changed = " << server_changed << "\n";
          if ( server_changed ) {
@@ -574,21 +554,5 @@ std::string ServerTestHarness::testDataLocation( const std::string& defsFile)
 
 
    std::string testData = TestFixture::smshome() + "/" + base_name;
-   return testData;
-}
-
-std::string ServerTestHarness::goldenTestDataLocation( const std::string& logFile )
-{
-   // file is of the form Test/data/my.def_log
-   //                    OR data/my.def_log
-   // convert to my.def_log
-   std::string leafLogFile = logFile;
-   size_t lastSlash = logFile.find_last_of("/");
-   if ( lastSlash != std::string::npos) {
-      leafLogFile = logFile.substr( lastSlash+1 );
-   }
-
-   std::string testData = File::test_data("Test/goldenData/","Test");
-   testData += leafLogFile;
    return testData;
 }

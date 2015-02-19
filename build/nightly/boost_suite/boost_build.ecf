@@ -24,7 +24,7 @@ else
    # Build the boost libs used by ecflow
    # ========================================================================
    
-   cd $BOOST_ROOT
+   cd %BOOST_DIR%/%BOOST_VERSION%
    
    # uncomment for clean build
    #rm -rf stage
@@ -34,28 +34,29 @@ else
    # ========================================================================
    # Note: boost thread *ONLY* needed to *test* multi-threaded server
    # ========================================================================
+   TOOLSET=%TOOLSET%
+   LAYOUT=%LAYOUT%
+   ./bjam -j2 --build-dir=./tmpBuildDir toolset=$TOOLSET $CXXFLAGS stage link=static --layout=$LAYOUT --with-system variant=debug     
+   ./bjam -j2 --build-dir=./tmpBuildDir toolset=$TOOLSET $CXXFLAGS stage link=static --layout=$LAYOUT --with-date_time variant=debug    
+   ./bjam -j2 --build-dir=./tmpBuildDir toolset=$TOOLSET $CXXFLAGS stage link=static --layout=$LAYOUT --with-filesystem variant=debug   
+   ./bjam -j2 --build-dir=./tmpBuildDir toolset=$TOOLSET $CXXFLAGS stage link=static --layout=$LAYOUT --with-program_options variant=debug 
+   ./bjam -j2 --build-dir=./tmpBuildDir toolset=$TOOLSET $CXXFLAGS stage link=static --layout=$LAYOUT --with-serialization  variant=debug 
+   ./bjam -j2 --build-dir=./tmpBuildDir toolset=$TOOLSET $CXXFLAGS stage link=static --layout=$LAYOUT --with-thread variant=debug  
+   ./bjam -j2 --build-dir=./tmpBuildDir toolset=$TOOLSET $CXXFLAGS stage link=static --layout=$LAYOUT --with-test variant=debug  
    
-   ./bjam -j2 --build-dir=./tmpBuildDir toolset=%TOOLSET% $CXXFLAGS stage link=static --layout=%LAYOUT% --with-system variant=debug     
-   ./bjam -j2 --build-dir=./tmpBuildDir toolset=%TOOLSET% $CXXFLAGS stage link=static --layout=%LAYOUT% --with-date_time variant=debug    
-   ./bjam -j2 --build-dir=./tmpBuildDir toolset=%TOOLSET% $CXXFLAGS stage link=static --layout=%LAYOUT% --with-filesystem variant=debug   
-   ./bjam -j2 --build-dir=./tmpBuildDir toolset=%TOOLSET% $CXXFLAGS stage link=static --layout=%LAYOUT% --with-program_options variant=debug 
-   ./bjam -j2 --build-dir=./tmpBuildDir toolset=%TOOLSET% $CXXFLAGS stage link=static --layout=%LAYOUT% --with-serialization  variant=debug 
-   ./bjam -j2 --build-dir=./tmpBuildDir toolset=%TOOLSET% $CXXFLAGS stage link=static --layout=%LAYOUT% --with-thread variant=debug  
-   ./bjam -j2 --build-dir=./tmpBuildDir toolset=%TOOLSET% $CXXFLAGS stage link=static --layout=%LAYOUT% --with-test variant=debug  
-   
-   ./bjam -j2 --build-dir=./tmpBuildDir toolset=%TOOLSET% $CXXFLAGS stage link=static --layout=%LAYOUT% --with-system variant=release 
-   ./bjam -j2 --build-dir=./tmpBuildDir toolset=%TOOLSET% $CXXFLAGS stage link=static --layout=%LAYOUT% --with-date_time variant=release  
-   ./bjam -j2 --build-dir=./tmpBuildDir toolset=%TOOLSET% $CXXFLAGS stage link=static --layout=%LAYOUT% --with-filesystem variant=release   
-   ./bjam -j2 --build-dir=./tmpBuildDir toolset=%TOOLSET% $CXXFLAGS stage link=static --layout=%LAYOUT% --with-program_options variant=release 
-   ./bjam -j2 --build-dir=./tmpBuildDir toolset=%TOOLSET% $CXXFLAGS stage link=static --layout=%LAYOUT% --with-serialization  variant=release 
-   ./bjam -j2 --build-dir=./tmpBuildDir toolset=%TOOLSET% $CXXFLAGS stage link=static --layout=%LAYOUT% --with-thread variant=release  
-   ./bjam -j2 --build-dir=./tmpBuildDir toolset=%TOOLSET% $CXXFLAGS stage link=static --layout=%LAYOUT% --with-test variant=release  
+   ./bjam -j2 --build-dir=./tmpBuildDir toolset=$TOOLSET $CXXFLAGS stage link=static --layout=$LAYOUT --with-system variant=release 
+   ./bjam -j2 --build-dir=./tmpBuildDir toolset=$TOOLSET $CXXFLAGS stage link=static --layout=$LAYOUT --with-date_time variant=release  
+   ./bjam -j2 --build-dir=./tmpBuildDir toolset=$TOOLSET $CXXFLAGS stage link=static --layout=$LAYOUT --with-filesystem variant=release   
+   ./bjam -j2 --build-dir=./tmpBuildDir toolset=$TOOLSET $CXXFLAGS stage link=static --layout=$LAYOUT --with-program_options variant=release 
+   ./bjam -j2 --build-dir=./tmpBuildDir toolset=$TOOLSET $CXXFLAGS stage link=static --layout=$LAYOUT --with-serialization  variant=release 
+   ./bjam -j2 --build-dir=./tmpBuildDir toolset=$TOOLSET $CXXFLAGS stage link=static --layout=$LAYOUT --with-thread variant=release  
+   ./bjam -j2 --build-dir=./tmpBuildDir toolset=$TOOLSET $CXXFLAGS stage link=static --layout=$LAYOUT --with-test variant=release  
    
    # Build boost python in the same, as building $WK/Pyext
-   ./bjam -j2 toolset=%TOOLSET% link=shared variant=debug   $CXXFLAGS stage --layout=%LAYOUT% threading=multi --with-python
-   ./bjam -j2 toolset=%TOOLSET% link=shared variant=release $CXXFLAGS stage --layout=%LAYOUT% threading=multi --with-python
-   ./bjam -j2 toolset=%TOOLSET% link=static variant=debug   $CXXFLAGS stage --layout=%LAYOUT% threading=multi --with-python
-   ./bjam -j2 toolset=%TOOLSET% link=static variant=release $CXXFLAGS stage --layout=%LAYOUT% threading=multi --with-python
+   ./bjam -j2 toolset=$TOOLSET link=shared variant=debug   $CXXFLAGS stage --layout=$LAYOUT threading=multi --with-python
+   ./bjam -j2 toolset=$TOOLSET link=shared variant=release $CXXFLAGS stage --layout=$LAYOUT threading=multi --with-python
+   ./bjam -j2 toolset=$TOOLSET link=static variant=debug   $CXXFLAGS stage --layout=$LAYOUT threading=multi --with-python
+   ./bjam -j2 toolset=$TOOLSET link=static variant=release $CXXFLAGS stage --layout=$LAYOUT threading=multi --with-python
 
 fi
 

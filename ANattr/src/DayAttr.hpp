@@ -69,19 +69,17 @@ private:
    bool is_free(const ecf::Calendar&) const; // ignores makeFree_
 
 private:
-	std::string theDay(Day_t) const;
+   DayAttr::Day_t day_;
+   bool           makeFree_;         // persisted for use by why() on client side
+   unsigned int  state_change_no_;  // *not* persisted, only used on server side
 
-	DayAttr::Day_t day_;
-	bool           makeFree_;         // persisted for use by why() on client side
-	unsigned int   state_change_no_;  // *not* persisted, only used on server side
-
-    friend class boost::serialization::access;
-    template<class Archive>
-    void serialize(Archive & ar, const unsigned int /*version*/)
-    {
-    	ar & day_;
-    	ar & makeFree_;
-    }
+   friend class boost::serialization::access;
+   template<class Archive>
+   void serialize(Archive & ar, const unsigned int /*version*/)
+   {
+      ar & day_;
+      ar & makeFree_;
+   }
 };
 
 // This should ONLY be added to objects that are *NOT* serialised through a pointer

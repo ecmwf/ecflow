@@ -1,0 +1,53 @@
+%include <head.h>
+
+# ======================================================================
+# Run LOCALLY
+# ======================================================================
+export WK=%WK%
+
+if [[ %SET_TO_TEST_SCRIPT% = true ]] ; then
+   echo "Test only"
+else
+   cd $WK;
+   
+   # print version of LATEST client
+   Client/bin/%COMPILER_VERSION%/release/ecflow_client --version
+   
+   # Allow test to be rerun, by killing the OLD server, This can fail
+   /usr/local/apps/ecflow/4.0.0/bin/ecflow_client --terminate yes || true
+   
+   # Clear up
+   rm -rf `hostname`.*
+   
+   # START the server with OLD version
+   /usr/local/apps/ecflow/4.0.0/bin/ecflow_server --ecfinterval=3 &
+   sleep 10
+
+   # ecflow 4.0.0 , was built with boost 1.53 which had serialisation library version 10
+   #export ECF_ALLOW_NEW_CLIENT_OLD_SERVER=10
+
+   # RUN test with new client and OLD server
+   export ECF_NODE=localhost
+   Client/bin/%COMPILER_VERSION%/release/s_client
+   
+   # RUN more test with new client and OLD server
+   #
+   # 4.0.1: Not all tests pass, since we now set families to complete, when used in repeat loop
+   #        See: ECFLOW-96 Families with loops(cron/repeat) should log complete
+   #        and hence tests fail verification, which counts number of times that a node should complete
+   #        Need to have a mechanism that disables 'complete' state verification
+   #        Currently this done by setting an environment variable
+   # When/If we release ecflow version 5.0, we can remove environment variable, and associated logic.
+   export DISABLE_VERIFY_ATTRIBUTE_VERIFICATION=1
+  
+   
+   Test/bin/%COMPILER_VERSION%/release/s_test
+   
+   # Allow test to be rerun. by killing the OLD server, This can fail
+   /usr/local/apps/ecflow/4.0.0/bin/ecflow_client --terminate yes || true
+   
+   # Clear up
+   rm -rf `hostname`.*
+fi
+
+%include <tail.h>

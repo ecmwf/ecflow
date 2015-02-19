@@ -91,9 +91,6 @@ bool TaskCmd::authenticate(AbstractServer* as, STC_Cmd_ptr& theReply) const
 		return false;
 	}
 
-	SuiteChanged1 changed(submittable_->suite());
-
-
 	// If the CMD *WAS* created with Submittable::DUMMY_JOBS_PASSWORD then we were testing
 	// This will be copied from client to server, hence we want to avoid same check in the
 	// server. when handleRequest is called()
@@ -101,6 +98,8 @@ bool TaskCmd::authenticate(AbstractServer* as, STC_Cmd_ptr& theReply) const
 	if ( jobs_password_ == Submittable::DUMMY_JOBS_PASSWORD()) {
 		return true;
 	}
+
+   SuiteChanged1 changed(submittable_->suite());
 
 	/// Check if User wants to explicitly bypass password checking
 	/// This can be done via AlterCmd by adding a variable on the task,  ECF_PASS with value Submittable::FREE_JOBS_PASSWORD
@@ -116,47 +115,91 @@ bool TaskCmd::authenticate(AbstractServer* as, STC_Cmd_ptr& theReply) const
 
   	/// Handle corner case ,where we have two jobs with different process id, but same password
   	/// Can happen if jobs is started externally,
-	/// or via test(i.e submit 1,sumbit 2(force)) before job1 active its password is overridden
+	/// or via test(i.e submit 1,submit 2(force)) before job1 active its password is overridden
    bool submittable_allready_aborted = false;
    bool submittable_allready_active = false;
    bool submittable_allready_complete = false;
    bool password_missmatch = false;
    bool pid_missmatch = false;
+
+   if ( submittable_->jobsPassword() != jobs_password_) {
+#ifdef DEBUG_ZOMBIE
+      std::cout << ": submittable pass(" << submittable_->jobsPassword() << ") != jobs_password_(" << jobs_password_ << ")";
+#endif
+      password_missmatch = true;
+   }
+
+   /// *** See Note above: Not all child commands pass a process_id. ***
+   /// *** Hence this test for zombies is ONLY valid if process sets the process_or_remote_id_ ****
+   /// *** User should really set ECF_RID in the scripts
+   if (!submittable_->process_or_remote_id().empty() && !process_or_remote_id_.empty() && submittable_->process_or_remote_id() != process_or_remote_id_) {
+#ifdef DEBUG_ZOMBIE
+      std::cout << ":task pid(" << submittable_->process_or_remote_id() << ") != process pid(" << process_or_remote_id_ << ")";
+#endif
+      pid_missmatch = true;
+   }
+
+   if ((child_type() == Child::INIT) && (submittable_->state() == NState::ACTIVE)) {
+#ifdef DEBUG_ZOMBIE
+      std::cout << ":(child_type() == Child::INIT) && submittable_->state() == NState::ACTIVE)";
+#endif
+
+      // If ECF_NONSTRICT_ZOMBIES be more forgiving
+      if (!password_missmatch && !pid_missmatch ) {
+         if (submittable_->user_variable_exists("ECF_NONSTRICT_ZOMBIES")) {
+            std::stringstream ss; ss <<  " zombie(ECF_NONSTRICT_ZOMBIES) : " << path_to_submittable_ << " : already active : action taken( fob )";
+            log(Log::WAR, ss.str() );
+            theReply = PreAllocatedReply::ok_cmd();
+            return false;
+         }
+      }
+
+      submittable_allready_active = true;
+   }
+
    if ( submittable_->state() == NState::COMPLETE) {
 #ifdef DEBUG_ZOMBIE
       std::cout << ": submittable_->state() == NState::COMPLETE)";
 #endif
+
+      // If ECF_NONSTRICT_ZOMBIES be more forgiving
+      if (child_type() == Child::COMPLETE) {
+         if (submittable_->user_variable_exists("ECF_NONSTRICT_ZOMBIES")) {
+            std::stringstream ss; ss <<  " zombie(ECF_NONSTRICT_ZOMBIES) : " << path_to_submittable_ ;
+            if (password_missmatch) ss << " : password miss-match[ task:"<< submittable_->jobsPassword()<<" child:" << jobs_password_ << " ]";
+            if (pid_missmatch)      ss << " : pid miss-match[ task:"<< submittable_->process_or_remote_id()<<" child:" << process_or_remote_id_ << " ]";
+            ss << " : already complete : action taken( fob )";
+            log(Log::WAR, ss.str() );
+            theReply = PreAllocatedReply::ok_cmd();
+            return false;
+         }
+      }
+
       // If Task state is complete, and we receive **any** child command then it is a zombie
       submittable_allready_complete = true;
    }
+
    if ( submittable_->state() == NState::ABORTED) {
 #ifdef DEBUG_ZOMBIE
       std::cout << ": submittable_->state() == NState::ABORTED)";
 #endif
+
+      // If ECF_NONSTRICT_ZOMBIES be more forgiving
+      if (child_type() == Child::ABORT) {
+         if (submittable_->user_variable_exists("ECF_NONSTRICT_ZOMBIES")) {
+            std::stringstream ss; ss <<  " zombie(ECF_NONSTRICT_ZOMBIES) : " << path_to_submittable_ ;
+            if (password_missmatch) ss << " : password miss-match[ task:"<< submittable_->jobsPassword() << " child:" << jobs_password_ << " ]";
+            if (pid_missmatch)      ss << " : pid miss-match[ task:"<< submittable_->process_or_remote_id() << " child:" << process_or_remote_id_ << " ]";
+            ss << " : already aborted : action taken( fob )";
+            log(Log::WAR, ss.str() );
+            theReply = PreAllocatedReply::ok_cmd();
+            return false;
+         }
+      }
+
       // If Task state is aborted, and we receive **any** child command then it is a zombie
       submittable_allready_aborted = true;
    }
-  	if ((child_type() == Child::INIT) && (submittable_->state() == NState::ACTIVE)) {
-#ifdef DEBUG_ZOMBIE
-  		std::cout << ":(child_type() == Child::INIT) && submittable_->state() == NState::ACTIVE)";
-#endif
-  		submittable_allready_active = true;
-  	}
-   if ( submittable_->jobsPassword() != jobs_password_) {
-#ifdef DEBUG_ZOMBIE
-  		std::cout << ": subittable pass(" << submittable_->jobsPassword() << ") != jobs_password_(" << jobs_password_ << ")";
-#endif
-  		password_missmatch = true;
- 	}
-
-   /// *** See Note above: Not all child commands pass a process_id. ***
-   /// *** Hence this test for zombies is ONLY valid if process sets the process_or_remote_id_ ****
-  	if (!submittable_->process_or_remote_id().empty() && !process_or_remote_id_.empty() && submittable_->process_or_remote_id() != process_or_remote_id_) {
-#ifdef DEBUG_ZOMBIE
-  		std::cout << ":task pid(" << submittable_->process_or_remote_id() << ") != process pid(" << process_or_remote_id_ << ")";
-#endif
-  		pid_missmatch = true;
-  	}
 
 #ifdef DEBUG_ZOMBIE
     std::cout << "\n";
@@ -189,13 +232,7 @@ bool TaskCmd::authenticate(AbstractServer* as, STC_Cmd_ptr& theReply) const
 
 Submittable* TaskCmd::get_submittable(AbstractServer* as) const
 {
-	defs_ptr defs = as->defs();
-
-	if (defs.get() == NULL) {
-		return NULL;
- 	}
-
-	node_ptr node = defs->findAbsNode(path_to_submittable_);
+	node_ptr node = as->defs()->findAbsNode(path_to_submittable_);
 	if (!node.get()) {
 		return NULL;
  	}
@@ -237,10 +274,12 @@ const char* InitCmd::desc() {
             "Mark task as started(active). For use in the '.ecf' script file *only*\n"
             "Hence the context is supplied via environment variables.\n"
             "  arg = process_or_remote_id. The process id of the job or remote_id\n"
-            "                              Using remote id allows the jobs to be killed\n"
+            "                              Using remote id allows the jobs to be killed\n\n"
+            "If this child command is a zombie, then the default action will be to *block*.\n"
+            "The default can be overridden by using zombie attributes.\n"
+            "Otherwise the blocking period is defined by ECF_TIMEOUT.\n\n"
             "Usage:\n"
             "  ecflow_client --init=$$"
-
  	;
 }
 
@@ -260,7 +299,8 @@ void InitCmd::create( 	Cmd_ptr& cmd,
 		<< ") clientEnv->jobs_password(" << clientEnv->jobs_password()
 		<< ") clientEnv->process_or_remote_id(" << clientEnv->process_or_remote_id()
 		<< ") clientEnv->task_try_no(" << clientEnv->task_try_no()
-		<< ") process_or_remote_id(" << process_or_remote_id
+      << ") process_or_remote_id(" << process_or_remote_id
+      << ") clientEnv->under_test(" << clientEnv->under_test()
 		<< ")\n";
 
 	std::string errorMsg;
@@ -269,7 +309,8 @@ void InitCmd::create( 	Cmd_ptr& cmd,
 	}
 
 	/// if ECF_RID is specified then it *MUST* be the same as input argument
- 	if (!clientEnv->process_or_remote_id().empty() && clientEnv->process_or_remote_id() != process_or_remote_id) {
+	/// On cca we ECF_RID can be specified under test, and therefore fail this check, hence we use clientEnv->under_test()
+ 	if (!clientEnv->under_test() && !clientEnv->process_or_remote_id().empty() && clientEnv->process_or_remote_id() != process_or_remote_id) {
  		std::stringstream ss;
  		ss << "remote id(" << process_or_remote_id << ") passed as an argument, not the same the client environment ECF_RID(" << clientEnv->process_or_remote_id() << ")";
 		throw std::runtime_error(ss.str());
@@ -321,9 +362,12 @@ const char* CompleteCmd::desc()
 {
 	return
 	         "Mark task as complete. For use in the '.ecf' script file *only*\n"
-	         "Hence the context is supplied via environment variables\n"
-            "Usage:\n"
-            "  ecflow_client --complete"
+	         "Hence the context is supplied via environment variables\n\n"
+	         "If this child command is a zombie, then the default action will be to *block*.\n"
+	         "The default can be overridden by using zombie attributes.\n"
+	         "Otherwise the blocking period is defined by ECF_TIMEOUT.\n\n"
+	         "Usage:\n"
+	         "  ecflow_client --complete"
 	         ;
 }
 
@@ -536,7 +580,10 @@ const char* AbortCmd::desc() {
             "Mark task as aborted. For use in the '.ecf' script file *only*\n"
             "Hence the context is supplied via environment variables\n"
             "  arg1 = (optional) string(reason)\n"
-            "         Optionally provide a reason why the abort was raised\n"
+            "         Optionally provide a reason why the abort was raised\n\n"
+            "If this child command is a zombie, then the default action will be to *block*.\n"
+            "The default can be overridden by using zombie attributes.\n"
+            "Otherwise the blocking period is defined by ECF_TIMEOUT.\n\n"
             "Usage:\n"
             "  ecflow_client --abort=reasonX"
             ;
@@ -611,7 +658,10 @@ const char* EventCmd::desc() {
    return
             "Change event. For use in the '.ecf' script file *only*\n"
             "Hence the context is supplied via environment variables\n"
-            "  arg1(string | int) = event-name\n"
+            "  arg1(string | int) = event-name\n\n"
+            "If this child command is a zombie, then the default action will be to *fob*,\n"
+            "i.e allow the ecflow client command to complete without an error\n"
+            "The default can be overridden by using zombie attributes.\n\n"
             "Usage:\n"
             "  ecflow_client --event=ev"
             ;
@@ -681,7 +731,7 @@ STC_Cmd_ptr MeterCmd::doHandleRequest(AbstractServer* as) const
 
 	      Meter& the_meter = submittable_->find_meter(name_);
 	      if (the_meter.empty()) {
-	         LOG(Log::WAR,"MeterCmd::doHandleRequest: failed as meter '"  << name_ << "' does not exist on task " << path_to_node());
+	         LOG(Log::ERR,"MeterCmd::doHandleRequest: failed as meter '"  << name_ << "' does not exist on task " << path_to_node());
 	         return PreAllocatedReply::ok_cmd();
 	      }
 
@@ -690,7 +740,7 @@ STC_Cmd_ptr MeterCmd::doHandleRequest(AbstractServer* as) const
 		   the_meter.set_value(value_);
 		}
 		catch (std::exception& e) {
-         LOG(Log::WAR,"MeterCmd::doHandleRequest: failed for task " << path_to_node() << ". " << e.what());
+         LOG(Log::ERR,"MeterCmd::doHandleRequest: failed for task " << path_to_node() << ". " << e.what());
          return PreAllocatedReply::ok_cmd();
 		}
 	}
@@ -706,7 +756,10 @@ const char* MeterCmd::desc() {
             "Change meter. For use in the '.ecf' script file *only*\n"
             "Hence the context is supplied via environment variables\n"
             "  arg1(string) = meter-name\n"
-            "  arg2(int)    = the new meter value\n"
+            "  arg2(int)    = the new meter value\n\n"
+            "If this child command is a zombie, then the default action will be to *fob*,\n"
+            "i.e allow the ecflow client command to complete without an error\n"
+            "The default can be overridden by using zombie attributes.\n\n"
             "Usage:\n"
             "  ecflow_client --meter=my_meter 20"
             ;
@@ -781,18 +834,20 @@ STC_Cmd_ptr LabelCmd::doHandleRequest(AbstractServer* as) const
 
 	assert(isWrite()); // isWrite used in handleRequest() to control check pointing
 
-	{   // update suite change numbers before job submission
-	   // submittable_ setup during authentication
-		SuiteChanged1 changed(submittable_->suite());
+	// submittable_ setup during authentication
+	if (submittable_->findLabel(name_)) {
 
-		if (!submittable_->findLabel(name_)) {
-		   std::string ss;
-		   ss = "Label request failed as label '"; ss += name_; ss += "' does not exist on task "; ss += path_to_node();
-			ecf::log(Log::ERR,ss);
-			return PreAllocatedReply::ok_cmd();
-		}
-		submittable_->changeLabel(name_,label_);
+	   SuiteChanged1 changed(submittable_->suite());
+	   submittable_->changeLabel(name_,label_);
 	}
+	// else {
+	//   // ECFLOW-175, avoid filling up log file. Can get thousands of these messages, especially form MARS
+	//   std::string ss;
+	//   ss = "Label request failed as label '"; ss += name_; ss += "' does not exist on task "; ss += path_to_node();
+	//	  ecf::log(Log::ERR,ss);
+	//}
+
+	// Note: reclaiming memory for label_ earlier make *no* difference to performance of server
 
 	return PreAllocatedReply::ok_cmd();
 }
@@ -804,9 +859,12 @@ const char* LabelCmd::desc() {
             "Hence the context is supplied via environment variables\n"
             "  arg1 = label-name\n"
             "  arg2 = The new label value\n"
-            "         The labels values can be single or multi-line(space separated quoted strings)\n"
+            "         The labels values can be single or multi-line(space separated quoted strings)\n\n"
+            "If this child command is a zombie, then the default action will be to *fob*,\n"
+            "i.e allow the ecflow client command to complete without an error\n"
+            "The default can be overridden by using zombie attributes.\n\n"
             "Usage:\n"
-            "  ecflow_client --label=progressed to task merlin"
+            "  ecflow_client --label=progressed merlin"
             ;
 }
 

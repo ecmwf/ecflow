@@ -31,7 +31,6 @@
 #include "PrintStyle.hpp"
 #include "ClientToServerCmd.hpp"
 #include "AssertTimer.hpp"
-#include "TestVerification.hpp"
 #include "File.hpp"
 
 using namespace std;
@@ -103,7 +102,7 @@ static bool kill_cmd(bool kill_task)
 
    // cout << "test_kill_cmd Start test\n";
    // The test harness will create corresponding directory structure & default ecf file
-   ServerTestHarness serverTestHarness(false /* don't bother with any log file verification*/) ;
+   ServerTestHarness serverTestHarness;
    serverTestHarness.run(theDefs,defs_location,1 /*timeout*/,  false/* don't wait for test to finish */);
 
 

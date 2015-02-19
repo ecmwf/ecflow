@@ -89,18 +89,22 @@ std::auto_ptr<AstTop> PartExpression::parseExpressions(std::string& errorMsg) co
 //===========================================================================
 
 Expression::Expression(const std::string& expression)
-:  makeFree_(false), state_change_no_(0)
+:  makeFree_(false), state_change_no_(0), theCombinedAst_(0)
 {
    add(PartExpression(expression));
 }
 
-Expression::Expression(const PartExpression& exp) : makeFree_(false), state_change_no_(0)
+Expression::Expression(const PartExpression& exp)
+: makeFree_(false), state_change_no_(0),theCombinedAst_(0)
 {
    add(exp);
 }
 
-Expression::Expression() : makeFree_(false), state_change_no_(0) {}
-Expression::Expression(const Expression& rhs) : vec_(rhs.vec_), makeFree_(rhs.makeFree_), state_change_no_(0){}
+Expression::Expression()
+: makeFree_(false), state_change_no_(0), theCombinedAst_(0) {}
+
+Expression::Expression(const Expression& rhs)
+: vec_(rhs.vec_), makeFree_(rhs.makeFree_), state_change_no_(0),theCombinedAst_(0) {}
 
 std::ostream& Expression::print(std::ostream& os, const std::string& exprType) const
 {

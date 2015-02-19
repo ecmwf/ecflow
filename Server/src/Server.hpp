@@ -78,22 +78,22 @@ private:
 
    void handle_terminate();
    void start_accept();
+   bool shutdown_socket(connection_ptr conn, const std::string& msg) const;
 
 private:
 
    // abort server if check pt files exist, but can't be loaded
-   void load_check_pt_file_on_startup();
+   bool load_check_pt_file_on_startup();
    void loadCheckPtFile();
    bool restore_from_checkpt(const std::string& filename, bool& failed);
    void update_defs_server_state();
    void set_server_state(SState::State);
 
-private:
+protected: // Allow test to override
 
    /// AbstractServer functions
    virtual SState::State state() const { return serverState_; }
    virtual std::pair<std::string,std::string> hostPort() const;
-   virtual void create_defs();
    virtual defs_ptr defs() const { return defs_;}
    virtual void updateDefs(defs_ptr,bool force);
    virtual void clear_defs();
@@ -112,7 +112,7 @@ private:
    virtual bool lock(const std::string& user);
    virtual void unlock();
    virtual const std::string& lockedUser() const;
-   virtual bool allow_job_creation_during_tree_walk() const;
+   virtual void traverse_node_tree_and_job_generate(const boost::posix_time::ptime& time_now, bool user_cmd_context) const;
    virtual int poll_interval() const;
    virtual void debug_server_on();
    virtual void debug_server_off();

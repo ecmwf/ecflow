@@ -381,10 +381,289 @@ BOOST_AUTO_TEST_CASE( test_limit_references_after_delete )
 	BOOST_REQUIRE_MESSAGE( !f->findLimitViaInLimit(in_limit1), "In-limit still references limit that has been deleted?");
 	BOOST_REQUIRE_MESSAGE( !f1->findLimitViaInLimit(in_limit2), "In-limit still references limit that has been deleted?");
 	BOOST_REQUIRE_MESSAGE( !f2->findLimitViaInLimit(in_limit3), "In-limit still references limit that has been deleted?");
+}
+
+BOOST_AUTO_TEST_CASE( test_limits_after_force_cmd )
+{
+   cout << "Base:: ...test_limits_after_force_cmd\n";
+
+   // Create the following defs
+   // suite s1
+   //   limit A 10
+   //   family f1
+   //     inlimit A
+   //     task t1
+   //     task t2
+   //   family f2
+   //     inlimit A
+   //     task t1
+   //     task t2
+
+   // When all the tasks are running/submitted state, limit A should have consumed 4 tokens
+   // However if we how force family f2 to be complete, then the limit should be reset back to 2 tokens.
+   // Repeating for family f1, should result with a Limit with no tokens
+   Defs defs;
+   suite_ptr s1 =  defs.add_suite("s1");
+   s1->addLimit(Limit("A",10));
+   family_ptr f1 = s1->add_family("f1");
+   f1->addInLimit( InLimit("A","/s1"));
+   task_ptr f1_t1 = f1->add_task("t1");
+   task_ptr f1_t2 = f1->add_task("t2");
+   family_ptr f2 = s1->add_family("f2");
+   f2->addInLimit( InLimit("A","/s1"));
+   task_ptr f2_t1 = f2->add_task("t1");
+   task_ptr f2_t2 = f2->add_task("t2");
+   //cout << defs;
+
+   // Create a request to begin suite
+   // make sure chosen suite can begin to resolve dependencies.
+   // beginning the suite will:
+   //     1/ set all children to the QUEUED state
+   //     2/ Begin job submission, and hence changes state to ACTIVE for submitted jobs
+   //
+   //  Resolve dependencies. All tasks are within the limit and hence should start
+   {
+      TestHelper::invokeRequest(&defs,Cmd_ptr( new BeginCmd("/s1")));
+      BOOST_CHECK_MESSAGE( s1->state() == NState::ACTIVE, "expected state NState::ACTIVE, but found to be " << NState::toString(s1->state()));
+      BOOST_CHECK_MESSAGE( f1->state() == NState::ACTIVE, "expected state NState::ACTIVE, but found to be " << NState::toString(f1->state()));
+      BOOST_CHECK_MESSAGE( f1_t1->state() == NState::ACTIVE, "expected state NState::ACTIVE, but found to be " << NState::toString(f1_t1->state()));
+      BOOST_CHECK_MESSAGE( f1_t2->state() == NState::ACTIVE, "expected state NState::ACTIVE, but found to be " << NState::toString(f1_t2->state()));
+      BOOST_CHECK_MESSAGE( f2->state() == NState::ACTIVE, "expected state NState::ACTIVE, but found to be " << NState::toString(f2->state()));
+      BOOST_CHECK_MESSAGE( f2_t1->state() == NState::ACTIVE, "expected state NState::ACTIVE, but found to be " << NState::toString(f2_t1->state()));
+      BOOST_CHECK_MESSAGE( f2_t2->state() == NState::ACTIVE, "expected state NState::ACTIVE, but found to be " << NState::toString(f2_t2->state()));
+
+      limit_ptr the_limit = s1->find_limit("A");
+      BOOST_CHECK_MESSAGE( the_limit, "Could not find limit");
+      BOOST_CHECK_MESSAGE( the_limit->value() == 4,"Expected limit value to be 4 but found " << the_limit->value());
+   }
+
+   {
+      TestHelper::invokeRequest(&defs,Cmd_ptr( new ForceCmd(f2->absNodePath(),"complete",true /*recursive */, false /* set Repeat to last value */)));
+
+      BOOST_CHECK_MESSAGE( s1->state() == NState::ACTIVE, "expected state NState::ACTIVE, but found to be " << NState::toString(s1->state()));
+      BOOST_CHECK_MESSAGE( f1->state() == NState::ACTIVE, "expected state NState::ACTIVE, but found to be " << NState::toString(f1->state()));
+      BOOST_CHECK_MESSAGE( f1_t1->state() == NState::ACTIVE, "expected state NState::ACTIVE, but found to be " << NState::toString(f1_t1->state()));
+      BOOST_CHECK_MESSAGE( f1_t2->state() == NState::ACTIVE, "expected state NState::ACTIVE, but found to be " << NState::toString(f1_t2->state()));
+      BOOST_CHECK_MESSAGE( f2->state() == NState::COMPLETE, "expected state NState::COMPLETE, but found to be " << NState::toString(f2->state()));
+      BOOST_CHECK_MESSAGE( f2_t1->state() == NState::COMPLETE, "expected state NState::COMPLETE, but found to be " << NState::toString(f2_t1->state()));
+      BOOST_CHECK_MESSAGE( f2_t2->state() == NState::COMPLETE, "expected state NState::COMPLETE, but found to be " << NState::toString(f2_t2->state()));
+
+      limit_ptr the_limit = s1->find_limit("A");
+      BOOST_CHECK_MESSAGE( the_limit, "Could not find limit");
+      BOOST_CHECK_MESSAGE( the_limit->value() == 2,"Expected limit value to be 2 but found " << the_limit->value());
+   }
+
+   {
+      TestHelper::invokeRequest(&defs,Cmd_ptr( new ForceCmd(f1->absNodePath(),"complete",true /*recursive */, false /* set Repeat to last value */)));
+
+      BOOST_CHECK_MESSAGE( s1->state() == NState::COMPLETE, "expected state NState::ACTIVE, but found to be " << NState::toString(s1->state()));
+      BOOST_CHECK_MESSAGE( f1->state() == NState::COMPLETE, "expected state NState::ACTIVE, but found to be " << NState::toString(f1->state()));
+      BOOST_CHECK_MESSAGE( f1_t1->state() == NState::COMPLETE, "expected state NState::ACTIVE, but found to be " << NState::toString(f1_t1->state()));
+      BOOST_CHECK_MESSAGE( f1_t2->state() == NState::COMPLETE, "expected state NState::ACTIVE, but found to be " << NState::toString(f1_t2->state()));
+      BOOST_CHECK_MESSAGE( f2->state() == NState::COMPLETE, "expected state NState::COMPLETE, but found to be " << NState::toString(f2->state()));
+      BOOST_CHECK_MESSAGE( f2_t1->state() == NState::COMPLETE, "expected state NState::COMPLETE, but found to be " << NState::toString(f2_t1->state()));
+      BOOST_CHECK_MESSAGE( f2_t2->state() == NState::COMPLETE, "expected state NState::COMPLETE, but found to be " << NState::toString(f2_t2->state()));
+
+      limit_ptr the_limit = s1->find_limit("A");
+      BOOST_CHECK_MESSAGE( the_limit, "Could not find limit");
+      BOOST_CHECK_MESSAGE( the_limit->value() == 0,"Expected limit value to be 0 but found " << the_limit->value());
+   }
+}
+
+BOOST_AUTO_TEST_CASE( test_limits_after_requeue_family_ECFLOW_196 )
+{
+   cout << "Base:: ...test_limits_after_requeue_family_ECFLOW_196\n";
+
+   // This test is used to ensure that, requeue causes node to release tokens held by the Limits
+
+   // Create the following defs
+   // suite s1
+   //   limit A 10
+   //   family f1
+   //     inlimit A
+   //     task t1
+   //     task t2
+   //   family f2
+   //     inlimit A
+   //     task t1
+   //     task t2
+
+   // When all the tasks are running/submitted state, limit A should have consumed 4 tokens
+   // However if we how force family f2 to be requeud, then the limit should be reset back to 2 tokens.
+   Defs defs;
+   suite_ptr s1 =  defs.add_suite("s1");
+   s1->addLimit(Limit("A",10));
+   family_ptr f1 = s1->add_family("f1");
+   f1->addInLimit( InLimit("A","/s1"));
+   task_ptr f1_t1 = f1->add_task("t1");
+   task_ptr f1_t2 = f1->add_task("t2");
+   family_ptr f2 = s1->add_family("f2");
+   f2->addInLimit( InLimit("A","/s1"));
+   task_ptr f2_t1 = f2->add_task("t1");
+   task_ptr f2_t2 = f2->add_task("t2");
+   //cout << defs;
 
 
-	/// Destroy System singleton to avoid valgrind from complaining
-	System::destroy();
+   // Create a request to begin suite
+   // make sure chosen suite can begin to resolve dependencies.
+   // beginning the suite will:
+   //     1/ set all children to the QUEUED state
+   //     2/ Begin job submission, and hence changes state to ACTIVE for submitted jobs
+   //
+   //  Resolve dependencies. All tasks are within the limit and hence should start
+   int expected_limit_value = 4;
+   limit_ptr the_limit = s1->find_limit("A");
+   BOOST_CHECK_MESSAGE( the_limit, "Could not find limit");
+   {
+      TestHelper::invokeRequest(&defs,Cmd_ptr( new BeginCmd("/s1")));
+      BOOST_CHECK_MESSAGE( s1->state() == NState::ACTIVE, "expected state NState::ACTIVE, but found to be " << NState::toString(s1->state()));
+      BOOST_CHECK_MESSAGE( f1->state() == NState::ACTIVE, "expected state NState::ACTIVE, but found to be " << NState::toString(f1->state()));
+      BOOST_CHECK_MESSAGE( f1_t1->state() == NState::ACTIVE, "expected state NState::ACTIVE, but found to be " << NState::toString(f1_t1->state()));
+      BOOST_CHECK_MESSAGE( f1_t2->state() == NState::ACTIVE, "expected state NState::ACTIVE, but found to be " << NState::toString(f1_t2->state()));
+      BOOST_CHECK_MESSAGE( f2->state() == NState::ACTIVE, "expected state NState::ACTIVE, but found to be " << NState::toString(f2->state()));
+      BOOST_CHECK_MESSAGE( f2_t1->state() == NState::ACTIVE, "expected state NState::ACTIVE, but found to be " << NState::toString(f2_t1->state()));
+      BOOST_CHECK_MESSAGE( f2_t2->state() == NState::ACTIVE, "expected state NState::ACTIVE, but found to be " << NState::toString(f2_t2->state()));
+
+      BOOST_CHECK_MESSAGE( the_limit->value() == expected_limit_value,"Expected limit value to be 4 but found " << the_limit->value());
+   }
+
+   {
+      expected_limit_value = 2;
+      // We now want to re-queue node f2, and check to see that limit tokens are released after the re-queue
+      // However, the Mock server, will call resolve dependencies after re-queue command , and place nodes *back* into active
+      // state, to *STOP* this, we will add a trigger, so that the dependencies will not resolve, and hence nodes stay queued
+      f2->add_trigger("1 == 0");
+      TestHelper::invokeRequest(&defs,Cmd_ptr( new RequeueNodeCmd(f2->absNodePath(),RequeueNodeCmd::FORCE)));
+
+      BOOST_CHECK_MESSAGE( s1->state() == NState::ACTIVE, "expected state NState::ACTIVE, but found to be " << NState::toString(s1->state()));
+      BOOST_CHECK_MESSAGE( f1->state() == NState::ACTIVE, "expected state NState::ACTIVE, but found to be " << NState::toString(f1->state()));
+      BOOST_CHECK_MESSAGE( f1_t1->state() == NState::ACTIVE, "expected state NState::ACTIVE, but found to be " << NState::toString(f1_t1->state()));
+      BOOST_CHECK_MESSAGE( f1_t2->state() == NState::ACTIVE, "expected state NState::ACTIVE, but found to be " << NState::toString(f1_t2->state()));
+      BOOST_CHECK_MESSAGE( f2->state() == NState::QUEUED, "expected state NState::QUEUED, but found to be " << NState::toString(f2->state()));
+      BOOST_CHECK_MESSAGE( f2_t1->state() == NState::QUEUED, "expected state NState::QUEUED, but found to be " << NState::toString(f2_t1->state()));
+      BOOST_CHECK_MESSAGE( f2_t2->state() == NState::QUEUED, "expected state NState::QUEUED, but found to be " << NState::toString(f2_t2->state()));
+
+      BOOST_CHECK_MESSAGE( the_limit->value() == expected_limit_value,"Expected limit value to be 2 but found " << the_limit->value());
+   }
+
+   {
+      expected_limit_value = 0;
+      // We now want to re-queue node f1, and check to see that limit tokens are released after the re-queue
+      // However, the Mock server, will call resolve dependencies after re-queue command , and place nodes *back* into active
+      // state, to *STOP* this, we will add a trigger, so that the dependencies will not resolve, and hence nodes stay queued
+      f1->add_trigger("1 == 0");
+      TestHelper::invokeRequest(&defs,Cmd_ptr( new RequeueNodeCmd(f1->absNodePath(),RequeueNodeCmd::FORCE)));
+
+      BOOST_CHECK_MESSAGE( s1->state() == NState::QUEUED, "expected state NState::ACTIVE, but found to be " << NState::toString(s1->state()));
+      BOOST_CHECK_MESSAGE( f1->state() == NState::QUEUED, "expected state NState::ACTIVE, but found to be " << NState::toString(f1->state()));
+      BOOST_CHECK_MESSAGE( f1_t1->state() == NState::QUEUED, "expected state NState::ACTIVE, but found to be " << NState::toString(f1_t1->state()));
+      BOOST_CHECK_MESSAGE( f1_t2->state() == NState::QUEUED, "expected state NState::ACTIVE, but found to be " << NState::toString(f1_t2->state()));
+      BOOST_CHECK_MESSAGE( f2->state() == NState::QUEUED, "expected state NState::QUEUED, but found to be " << NState::toString(f2->state()));
+      BOOST_CHECK_MESSAGE( f2_t1->state() == NState::QUEUED, "expected state NState::QUEUED, but found to be " << NState::toString(f2_t1->state()));
+      BOOST_CHECK_MESSAGE( f2_t2->state() == NState::QUEUED, "expected state NState::QUEUED, but found to be " << NState::toString(f2_t2->state()));
+
+      BOOST_CHECK_MESSAGE( the_limit->value() == expected_limit_value,"Expected limit value to be 0 but found " << the_limit->value());
+   }
+}
+
+BOOST_AUTO_TEST_CASE( test_limits_after_requeue_task_ECFLOW_196 )
+{
+   cout << "Base:: ...test_limits_after_requeue_task_ECFLOW_196\n";
+
+   // This test is used to ensure that, requeue causes node to release tokens held by the Limits
+
+   // Create the following def, i.e using internal and external limits
+   // suite s0
+   //   limit X 5
+   // suite s1
+   //   limit A 10
+   //   limit B 5
+   //   family f1
+   //     inlimit A
+   //     inlimit B
+   //     inlimit X /s0/
+   //     task t1
+   //     task t2
+   //   family f2
+   //     inlimit A
+   //     inlimit B
+   //     inlimit X /s0/
+   //     task t1
+   //     task t2
+
+   // When all the tasks are running/submitted state, limit A should have consumed 4 tokens
+   // However if we how force task to reque, then the token should be released
+   Defs defs;
+   suite_ptr s0 =  defs.add_suite("s0");
+   s0->addLimit(Limit("X",10));
+
+   suite_ptr s1 =  defs.add_suite("s1");
+   s1->addLimit(Limit("A",10));
+   s1->addLimit(Limit("B",5));
+   family_ptr f1 = s1->add_family("f1");
+   f1->addInLimit( InLimit("A","/s1"));
+   f1->addInLimit( InLimit("B","/s1"));
+   f1->addInLimit( InLimit("X","/s0"));
+   task_ptr f1_t1 = f1->add_task("t1");
+   task_ptr f1_t2 = f1->add_task("t2");
+   family_ptr f2 = s1->add_family("f2");
+   f2->addInLimit( InLimit("A","/s1"));
+   f2->addInLimit( InLimit("B","/s1"));
+   f2->addInLimit( InLimit("X","/s0"));
+   task_ptr f2_t1 = f2->add_task("t1");
+   task_ptr f2_t2 = f2->add_task("t2");
+
+   std::vector<task_ptr> tasks;
+   tasks.push_back(f1_t1); tasks.push_back(f1_t2);
+   tasks.push_back(f2_t1); tasks.push_back(f2_t2);
+   //cout << defs;
+
+   limit_ptr the_A_limit = s1->find_limit("A");
+   limit_ptr the_B_limit = s1->find_limit("B");
+   limit_ptr the_X_limit = s0->find_limit("X");
+   BOOST_CHECK_MESSAGE( the_A_limit && the_B_limit && the_X_limit, "Could not find limits");
+
+   // Create a request to begin suite
+   // make sure chosen suite can begin to resolve dependencies.
+   // beginning the suite will:
+   //     1/ set all children to the QUEUED state
+   //     2/ Begin job submission, and hence changes state to ACTIVE for submitted jobs
+   //
+   //  Resolve dependencies. All tasks are within the limit and hence should start
+   int expected_limit_value = 4;
+   {
+      TestHelper::invokeRequest(&defs,Cmd_ptr( new BeginCmd("/s1")));
+      BOOST_CHECK_MESSAGE( s1->state() == NState::ACTIVE, "expected state NState::ACTIVE, but found to be " << NState::toString(s1->state()));
+      BOOST_CHECK_MESSAGE( f1->state() == NState::ACTIVE, "expected state NState::ACTIVE, but found to be " << NState::toString(f1->state()));
+      BOOST_CHECK_MESSAGE( f1_t1->state() == NState::ACTIVE, "expected state NState::ACTIVE, but found to be " << NState::toString(f1_t1->state()));
+      BOOST_CHECK_MESSAGE( f1_t2->state() == NState::ACTIVE, "expected state NState::ACTIVE, but found to be " << NState::toString(f1_t2->state()));
+      BOOST_CHECK_MESSAGE( f2->state() == NState::ACTIVE, "expected state NState::ACTIVE, but found to be " << NState::toString(f2->state()));
+      BOOST_CHECK_MESSAGE( f2_t1->state() == NState::ACTIVE, "expected state NState::ACTIVE, but found to be " << NState::toString(f2_t1->state()));
+      BOOST_CHECK_MESSAGE( f2_t2->state() == NState::ACTIVE, "expected state NState::ACTIVE, but found to be " << NState::toString(f2_t2->state()));
+
+      BOOST_CHECK_MESSAGE( the_A_limit->value() == expected_limit_value,"Expected limit value to be " << expected_limit_value << " but found " << the_A_limit->value());
+      BOOST_CHECK_MESSAGE( the_B_limit->value() == expected_limit_value,"Expected limit value to be " << expected_limit_value << " but found " << the_B_limit->value());
+      BOOST_CHECK_MESSAGE( the_X_limit->value() == expected_limit_value,"Expected limit value to be " << expected_limit_value << " but found " << the_X_limit->value());
+   }
+
+   {
+      // We now want to re-queue node tasks, and check to see that limit tokens are released after the re-queue
+      // However, the Mock server, will call resolve dependencies after re-queue command , and place nodes *back* into active
+      // state, to *STOP* this, we will add a trigger, so that the dependencies will not resolve, and hence nodes stay queued
+      f1->add_trigger("1 == 0");
+      f2->add_trigger("1 == 0");
+
+      for(size_t i =0; i < tasks.size(); i++) {
+         TestHelper::invokeRequest(&defs,Cmd_ptr( new RequeueNodeCmd(tasks[i]->absNodePath(),RequeueNodeCmd::FORCE)));
+         expected_limit_value--;
+         BOOST_CHECK_MESSAGE( the_A_limit->value() == expected_limit_value,"Expected limit value " << expected_limit_value << " but found " << the_A_limit->value());
+         BOOST_CHECK_MESSAGE( the_B_limit->value() == expected_limit_value,"Expected limit value " << expected_limit_value << " but found " << the_B_limit->value());
+         BOOST_CHECK_MESSAGE( the_X_limit->value() == expected_limit_value,"Expected limit value " << expected_limit_value << " but found " << the_X_limit->value());
+      }
+   }
+
+   /// Destroy System singleton to avoid valgrind from complaining
+   System::destroy();
 }
 
 BOOST_AUTO_TEST_SUITE_END()

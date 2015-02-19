@@ -100,6 +100,7 @@ public:
 	void set_jobs_password(const std::string&);
  	void setEnv( const std::vector<std::pair<std::string,std::string> >& e);
  	void testInterface(); // allow cmd construction to be aware thats it under test
+   const std::string& process_or_remote_id() const;
 
  	/// record each request its arguments and the round trip time to and from server
  	/// If the file can not opened for create/append then an runtime error exception is thrown
@@ -189,6 +190,7 @@ public:
    int debug_server_on() const;
    int debug_server_off() const;
    int stats() const;
+   int stats_reset() const;
    int server_version() const;
 
 	int suites() const;
@@ -334,6 +336,11 @@ private:
 	mutable ClientEnvironment clientEnv_;         // Will read the environment *once* on construction. Must be before Client options
 	mutable ClientOptions     args_;              // Used for argument parsing & creating client request
 	mutable ServerReply server_reply_;            // stores the local defs, client_handle, & all server replies
+
+   /// For use by python interface,
+   std::vector<std::string>::const_iterator changed_node_paths_begin() const { return server_reply_.changed_nodes().begin();}
+   std::vector<std::string>::const_iterator changed_node_paths_end() const { return server_reply_.changed_nodes().end();}
+   friend void export_Client();
 };
 
 // Allow logging and debug output of request round trip times

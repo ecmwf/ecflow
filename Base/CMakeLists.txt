@@ -84,6 +84,7 @@ list( APPEND test_srcs
    test/TestClientHandleCmd.cpp
    test/TestCmd.cpp
    test/TestDeleteNodeCmd.cpp
+   test/TestECFLOW-189.cpp
    test/TestForceCmd.cpp
    test/TestFreeDepCmd.cpp
    test/TestLimit.cpp

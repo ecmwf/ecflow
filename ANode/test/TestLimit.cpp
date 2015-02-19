@@ -21,6 +21,7 @@
 #include "SerializationTest.hpp"
 
 #include "Limit.hpp"
+#include "Ecf.hpp"
 
 using namespace std;
 using namespace ecf;
@@ -99,28 +100,40 @@ BOOST_AUTO_TEST_CASE( test_limit_decrement )
 {
    cout << "ANode:: ...test_limit_decrement\n";
 
-   Limit limit("name",10);     // Limit of 10
+   Ecf::set_server(true); // needed to test state_change_numbers
 
-   limit.increment(1,"path");  // consume 1 token
+   Limit limit("name",10);     // Limit of 10
+   unsigned int expected_state_change_no = limit.state_change_no();
+
+   limit.increment(1,"path"); expected_state_change_no++; // consume 1 token, should increment state change no
    BOOST_CHECK_MESSAGE(limit.value() == 1,"Expected limit of value 1  but found " << limit.value());
    BOOST_CHECK_MESSAGE(limit.paths().size() == 1,"Expected 1 task path but found " << limit.paths().size());
+   BOOST_CHECK_MESSAGE( limit.state_change_no() == expected_state_change_no,"Expected increment to increase state change no, expected " << expected_state_change_no << " but found " <<  limit.state_change_no());
 
+   // Since 'path_x' is NOT in the list of paths stored by the limit, there should be NO change to state_change_no
    limit.decrement(1,"path_x");
    BOOST_CHECK_MESSAGE(limit.value() == 1," decrement of path that does not exist, should not affect the Limit: Expected limit of value 1  but found " << limit.value());
    BOOST_CHECK_MESSAGE(limit.paths().size() == 1," decrement of path that does not exist, should not affect the Limit : Expected 1 task path but found " << limit.paths().size());
+   BOOST_CHECK_MESSAGE( limit.state_change_no() == expected_state_change_no,"Expected no change in state change no, expected " << expected_state_change_no << " but found " <<  limit.state_change_no());
 
    // Multiple decrements should leave Limit of value = 0, and not a negative number
-   limit.decrement(1,"path");
+   limit.decrement(1,"path"); expected_state_change_no++;
+   BOOST_CHECK_MESSAGE( limit.state_change_no() == expected_state_change_no,"Expected decrement to increase state change no, expected " << expected_state_change_no << " but found " <<  limit.state_change_no());
+
+   // Since we have removed 'path' from the limit expect no further state changes
    limit.decrement(1,"path");
    limit.decrement(1,"path");
    limit.decrement(1,"path");
    BOOST_CHECK_MESSAGE(limit.value() == 0,"Expected limit of value 0  but found " << limit.value());
    BOOST_CHECK_MESSAGE(limit.paths().size() == 0,"Expected no task paths but found " << limit.paths().size());
+   BOOST_CHECK_MESSAGE( limit.state_change_no() == expected_state_change_no,"Expected no change to state change no, expected " << expected_state_change_no << " but found " <<  limit.state_change_no());
+
+   Ecf::set_server(false); // needed to test state_change_numbers
 }
 
 
 // Globals used throughout the test
-static std::string fileName = "test.txt";
+static std::string fileName = "testLimit.txt";
 BOOST_AUTO_TEST_CASE( test_LimitDefaultConstructor_serialisation )
 {
    cout << "ANode:: ...test_LimitDefaultConstructor_serialisation \n";

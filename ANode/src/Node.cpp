@@ -31,7 +31,6 @@
 #include "Log.hpp"
 #include "PrintStyle.hpp"
 #include "JobsParam.hpp"
-#include "Jobs.hpp"
 #include "ExprAstVisitor.hpp"
 #include "Ecf.hpp"
 #include "SuiteChanged.hpp"
@@ -94,15 +93,6 @@ Node::~Node() {
    delete misc_attrs_;
 }
 
-bool Node::doDelete( Node* nodeToBeDeleted )
-{
-   Node* theParent = nodeToBeDeleted->parent();
-   if ( theParent ) return theParent->doDeleteChild( nodeToBeDeleted );
-
-   Defs* theDefs = nodeToBeDeleted->defs();
-   return theDefs->doDeleteChild( nodeToBeDeleted );
-}
-
 bool Node::isParentSuspended() const
 {
    Node* theParent = parent();
@@ -117,11 +107,6 @@ void Node::resume()
 {
    if ( suspended_) {
       clearSuspended();
-
-      // do immediate job generation for any jobs, that were freed of their time
-      // dependencies during the suspend.
-      Jobs jobs(this);
-      jobs.generate();
    }
 }
 
@@ -229,6 +214,11 @@ void Node::requeue(
    if (child_attrs_) child_attrs_->requeue();
 
    for(size_t i = 0; i < limitVec_.size(); i++) { limitVec_[i]->reset(); }
+
+   // ECFLOW-196, ensure the re-queue release tokens held by Limits higher up the tree.
+   // Note: Its safe to call decrementInLimit, even when no limit consumed
+   std::set<Limit*> limitSet;     // ensure local limit have preference over parent
+   decrementInLimit(limitSet);    // will recurse up, expensive but needed
 }
 
 
@@ -240,6 +230,10 @@ void Node::requeue_time_attrs()
    if (time_dep_attrs_) time_dep_attrs_->requeue(true);
 }
 
+void Node::requeue_labels()
+{
+   if (child_attrs_) child_attrs_->requeue_labels();
+}
 
 void Node::miss_next_time_slot()
 {
@@ -661,16 +655,16 @@ bool Node::evaluateTrigger() const
 
 const std::string& Node::abortedReason() const { return Str::EMPTY(); }
 
-void Node::set_state(NState::State s, bool force)
+void Node::set_state(NState::State s, bool force, const std::string& additional_info_to_log)
 {
-   setStateOnly(s,force);
+   setStateOnly(s,false,additional_info_to_log);
 
    // Handle any state change specific functionality. This will update any repeats
    // This is a virtual function, since we want different behaviour during state change
    handleStateChange();
 }
 
-void Node::setStateOnly(NState::State newState, bool force)
+void Node::setStateOnly(NState::State newState, bool force, const std::string& additional_info_to_log)
 {
    Suite* theSuite =  suite();
    const Calendar& calendar = theSuite->calendar();
@@ -721,11 +715,15 @@ void Node::setStateOnly(NState::State newState, bool force)
    // Please change/update LogVerification::extractNodePathAndState() all verification relies on this one function
    //           " " +  submitted(max) + ": " + path(estimate)  + " try-no: " + try_no(estimate)  + " reason: " + reason(estimate)
    // reserve : 1   +  9              + 2    + 100             + 9           + 3                 + 9           + 12   = 145
-   std::string log_state_change; log_state_change.reserve(145);
+   std::string log_state_change; log_state_change.reserve(145 + additional_info_to_log.size());
    log_state_change += " ";
    log_state_change += NState::toString(newState);
    log_state_change += ": ";
    log_state_change += absNodePath();
+   if (!additional_info_to_log.empty()) {
+      log_state_change += " ";
+      log_state_change += additional_info_to_log;
+   }
 
    if ( newState == NState::ABORTED) {
       if (force) flag().set(ecf::Flag::FORCE_ABORT);
@@ -779,6 +777,9 @@ boost::posix_time::ptime Node::state_change_time() const
 
 DState::State Node::dstate() const {
 
+   // ECFLOW-139, check for suspended must be done first
+   if (isSuspended()) return DState::SUSPENDED;
+
    switch ( state() ) {
       case NState::COMPLETE:  return DState::COMPLETE; break;
       case NState::ABORTED:   return DState::ABORTED; break;
@@ -787,7 +788,6 @@ DState::State Node::dstate() const {
       case NState::QUEUED:    return DState::QUEUED; break;
       case NState::UNKNOWN:   return DState::UNKNOWN; break;
    }
-   if (isSuspended()) return DState::SUSPENDED;
    return DState::UNKNOWN;
 }
 
@@ -1642,12 +1642,19 @@ void Node::why(std::vector<std::string>& vec) const
    // The complete expression is used to set node to complete, when it evaluates and hence
    // should not prevent further tree walking. evaluate each leaf branch
    // **************************************************************************************
-   if (triggerAst())  {
+   AstTop* theTriggerAst = triggerAst();
+   if (theTriggerAst) {
+      // Note 1: A trigger can be freed by the ForceCmd
+      // Note 2: if we have a non NULL trigger ast, we must have trigger expression
+      // Note 3: The freed state is stored on the expression ( i.e *NOT* on the ast (abstract syntax tree) )
+      if (!triggerExpr_->isFree() ) {
+
 #ifdef DEBUG_WHY
-      std::cout << "   Node::why " << debugNodePath() << " checking trigger dependencies\n";
+         std::cout << "   Node::why " << debugNodePath() << " checking trigger dependencies\n";
 #endif
-      std::string postFix;
-      if (triggerAst()->why(postFix)) { vec.push_back(prefix + postFix); }
+         std::string postFix;
+         if (theTriggerAst->why(postFix)) { vec.push_back(prefix + postFix); }
+      }
    }
 }
 

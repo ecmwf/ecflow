@@ -55,7 +55,6 @@ void meter_node::drawNode(Widget w,XRectangle* r,bool tree)
 	drawBackground(w,r,tree);
 
 	XmString s = tree?labelTree():labelTrigger();
-
 	XRectangle x = *r;
 	int width,mark;
 
@@ -71,12 +70,7 @@ void meter_node::drawNode(Widget w,XRectangle* r,bool tree)
 
 	XFillRectangles(XtDisplay(w),XtWindow(w),colorGC(0),&x,1);
 
-        if (0) {
-        if (value() >= threshold())
-          XFillRectangle(XtDisplay(w),XtWindow(w),redGC(),x.x,x.y,width,x.height);
-        else
-          XFillRectangle(XtDisplay(w),XtWindow(w),blueGC(),x.x,x.y,width,x.height);
-          } else if (value() > threshold())
+	if (value() > threshold())
           XFillRectangle(XtDisplay(w),XtWindow(w),gui::colorGC(STATUS_MAX+1),x.x,x.y,width,x.height);
         else
           XFillRectangle(XtDisplay(w),XtWindow(w),gui::colorGC(STATUS_MAX),x.x,x.y,width,x.height);

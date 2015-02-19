@@ -59,9 +59,6 @@ public:
    bool timeDependenciesFree() const;
    bool time_today_cron_is_free() const; /* used by viewer */
 
-   // returns true if this node has time dependencies. NOTE: Does not look at children
-   bool hasDayDateDependencies() const;
-
    // Access functions: ======================================================
    const std::vector<ecf::TimeAttr>&   timeVec()  const { return timeVec_; }
    const std::vector<ecf::TodayAttr>&  todayVec() const { return todayVec_; }

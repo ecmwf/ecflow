@@ -35,7 +35,6 @@
 #include "ClientToServerCmd.hpp"
 #include "DefsStructureParser.hpp"
 #include "AssertTimer.hpp"
-#include "TestVerification.hpp"
 #include "File.hpp"
 
 using namespace std;
@@ -71,12 +70,62 @@ BOOST_AUTO_TEST_CASE( test_mega_def )
    std::string errorMsg,warningMsg;
    BOOST_REQUIRE_MESSAGE(checkPtParser.doParse(errorMsg,warningMsg),errorMsg);
 
-   ServerTestHarness serverTestHarness( false /*doVerification*/, false /* standardVerification*/);
+   ServerTestHarness serverTestHarness;
    serverTestHarness.check_task_duration_less_than_server_poll(false); // Add variable CHECK_TASK_DURATION_LESS_THAN_SERVER_POLL
    serverTestHarness.run(theDefs,path,std::numeric_limits<int>::max()/*timeout*/  );
 
    cout << timer.duration() << "\n";
 }
+
+// DO NOT delete
+// This is used to test with thousands of labels
+//BOOST_AUTO_TEST_CASE( test_large_client_labels_calls )
+//{
+//   DurationTimer timer;
+//   cout << "Test:: ...test_large_client_labels_calls "<< flush;
+//   TestClean clean_at_start_and_end;
+//
+//   //# Note: we have to use relative paths, since these tests are relocatable
+//   // suite test_large_client_labels_calls
+//   //   family family
+//   //       task t1
+//   //          label name "value"
+//   //    endfamily
+//   // endsuite
+//   Defs theDefs;
+//   {
+//      suite_ptr suite = theDefs.add_suite("test_large_client_labels_calls");
+//      family_ptr fam = suite->add_family("family");
+//      task_ptr t1 = fam->add_task("t1");
+//      t1->addLabel( Label("name","value"));
+//   }
+//
+//   // Create a custom ecf file for test_large_client_labels_calls/family/t1 to invoke label commands
+//   std::string templateEcfFile;
+//   templateEcfFile += "%include <head.h>\n";
+//   templateEcfFile += "\n";
+//   templateEcfFile += "echo do some work\n";
+//   templateEcfFile += "i=1\n";
+//   templateEcfFile += "while [ \"$i\" -le 10000 ] \n";
+//   templateEcfFile += "do\n";
+//   templateEcfFile += "  %ECF_CLIENT_EXE_PATH% --label=name \"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890\"\n";
+//   templateEcfFile += "  i=$((i+1))\n";
+//   templateEcfFile += "done\n";
+//   templateEcfFile += "\n";
+//   templateEcfFile += "%include <tail.h>\n";
+//
+//   // The test harness will create corresponding directory structure
+//   // Override the default ECF file, with our custom ECF_ file
+//   std::map<std::string,std::string> taskEcfFileMap;
+//   taskEcfFileMap.insert(std::make_pair(TestFixture::taskAbsNodePath(theDefs,"t1"),templateEcfFile));
+//
+//    // Avoid standard verification since we expect to abort many times
+//   ServerTestHarness serverTestHarness;
+//   serverTestHarness.run(theDefs,ServerTestHarness::testDataDefsLocation("test_large_client_labels_calls.def"), taskEcfFileMap,1000000);
+//
+//   cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount() << ")\n" << endl;
+//}
+//
 
 //// DO NOT delete
 /// The following  test verifies that the job generation is largely linear.
@@ -109,7 +158,7 @@ BOOST_AUTO_TEST_CASE( test_mega_def )
 //      //      suite->addRepeat( RepeatDate("YMD",19000101,99991201,1) );
 //   }
 //
-//   ServerTestHarness serverTestHarness( false /*doVerification*/, false /* standardVerification*/);
+//   ServerTestHarness serverTestHarness;
 //   serverTestHarness.check_task_duration_less_than_server_poll(false); // Add variable CHECK_TASK_DURATION_LESS_THAN_SERVER_POLL
 //   DurationTimer timer;
 //   serverTestHarness.run(theDefs,ServerTestHarness::testDataDefsLocation(test_name + ".def"), std::numeric_limits<int>::max()/*timeout*/  );

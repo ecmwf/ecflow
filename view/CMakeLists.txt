@@ -202,6 +202,23 @@ find_package( Threads )
 #
 add_definitions( -D_GNU_SOURCE -DUNIX -Dunix -Dlinux -DECFLOW_SHARED_DIR="${CMAKE_INSTALL_PREFIX}/share/ecflow" )
 
+
+# local includes
+include_directories( src
+                     src/libicon
+                     src/libxec
+                     src/libui
+                     ../ACore/src 
+                     ../ANattr/src
+                     ../ANode/src
+                     ../AParser/src
+                     ../Base/src
+                     ../Base/src/cts
+                     ../Base/src/stc
+                     ../Client/src
+                    )
+
+# in ecbuild_add_library INCLUDES is only for external includes
 ecbuild_add_library(TARGET    libecflowview
 				        CONDITION MOTIF_FOUND AND X11_FOUND AND CMAKE_THREAD_LIBS_INIT
                     SOURCES  
@@ -209,18 +226,6 @@ ecbuild_add_library(TARGET    libecflowview
                     TEMPLATES
                               src/array.cc
                     INCLUDES 
-                              src
-                              src/libicon
-                              src/libxec
-                              src/libui
-                              ../ACore/src 
-                              ../ANattr/src
-                              ../ANode/src
-                              ../AParser/src
-                              ../Base/src
-                              ../Base/src/cts
-                              ../Base/src/stc
-                              ../Client/src
                               ${X11_INCLUDE_DIR}
                               ${MOTIF_INCLUDE_DIR}
                    )

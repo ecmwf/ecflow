@@ -48,6 +48,7 @@ public:
 	~SuiteChanged0();
 private:
 	weak_node_ptr node_;
+   Suite* suite_; // if node is removed suite pointer is not accessible, hence store first
 	unsigned int state_change_no_;
 	unsigned int modify_change_no_;
 };

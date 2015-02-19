@@ -108,8 +108,8 @@ BOOST_AUTO_TEST_CASE( test_limit )
 
 
  	// The test harness will create corresponding directory structure
- 	// and populate with standard sms files.
- 	ServerTestHarness serverTestHarness(false/*do log file verification*/);
+ 	// and populate with standard ecf files.
+ 	ServerTestHarness serverTestHarness;
  	serverTestHarness.run(theDefs,  ServerTestHarness::testDataDefsLocation( "test_limit.def" ));
 
 	cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount() << ")\n";

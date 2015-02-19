@@ -150,7 +150,7 @@ BOOST_AUTO_TEST_CASE( test_change_order )
    }
 
    // The test harness will create corresponding directory structure & default ecf file
-   ServerTestHarness serverTestHarness( false,/*do log file verification*/ false /* standardVerification*/ );
+   ServerTestHarness serverTestHarness;
    serverTestHarness.run(theDefs,
             ServerTestHarness::testDataDefsLocation("test_change_order.def"),
             1 /*timeout*/,
@@ -186,7 +186,7 @@ BOOST_AUTO_TEST_CASE( test_handle_change_order )
    }
 
    // The test harness will create corresponding directory structure & default ecf file
-   ServerTestHarness serverTestHarness( false,/*do log file verification*/ false /* standardVerification*/ );
+   ServerTestHarness serverTestHarness;
    serverTestHarness.run(theDefs,
             ServerTestHarness::testDataDefsLocation("test_change_order.def"),
             1 /*timeout*/,

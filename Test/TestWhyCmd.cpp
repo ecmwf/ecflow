@@ -97,7 +97,7 @@ BOOST_AUTO_TEST_CASE( test_why_day )
       theDefs.addSuite( suite );
    }
 
-   ServerTestHarness serverTestHarness( false /*doVerification*/, false /* standardVerification*/);
+   ServerTestHarness serverTestHarness;
    serverTestHarness.run(theDefs,
                          ServerTestHarness::testDataDefsLocation("test_why_day.def"),
                          1/*timeout*/,
@@ -133,7 +133,7 @@ BOOST_AUTO_TEST_CASE( test_why_date )
       theDefs.addSuite( suite );
    }
 
-   ServerTestHarness serverTestHarness( false /*doVerification*/, false /* standardVerification*/);
+   ServerTestHarness serverTestHarness;
    serverTestHarness.run(theDefs,
                          ServerTestHarness::testDataDefsLocation("test_why_date.def"),
                          1/*timeout*/,
@@ -170,7 +170,7 @@ BOOST_AUTO_TEST_CASE( test_why_time )
    }
 
 
-   ServerTestHarness serverTestHarness( false /*doVerification*/, false /* standardVerification*/);
+   ServerTestHarness serverTestHarness;
    serverTestHarness.run(theDefs,
                          ServerTestHarness::testDataDefsLocation("test_why_time.def"),
                          1/*timeout*/,
@@ -215,7 +215,7 @@ BOOST_AUTO_TEST_CASE( test_why_today )
       task->addToday( ecf::TodayAttr(  ecf::TimeSlot(time1.time_of_day()) ) );
    }
 
-   ServerTestHarness serverTestHarness( false /*doVerification*/, false /* standardVerification*/);
+   ServerTestHarness serverTestHarness;
    serverTestHarness.run(theDefs,
                          ServerTestHarness::testDataDefsLocation("test_why_today.def"),
                          1/*timeout*/,
@@ -271,7 +271,7 @@ BOOST_AUTO_TEST_CASE( test_why_cron )
       theDefs.addSuite( suite );
    }
 
-   ServerTestHarness serverTestHarness( false /*doVerification*/, false /* standardVerification*/);
+   ServerTestHarness serverTestHarness;
    serverTestHarness.run(theDefs,
                          ServerTestHarness::testDataDefsLocation("test_why_cron.def"),
                          1/*timeout*/,
@@ -321,7 +321,7 @@ BOOST_AUTO_TEST_CASE( test_why_limit )
       }
    }
 
-   ServerTestHarness serverTestHarness( false /*doVerification*/, false /* standardVerification*/);
+   ServerTestHarness serverTestHarness;
    serverTestHarness.run(theDefs,
                          ServerTestHarness::testDataDefsLocation( "test_why_limit.def" ),
                          1/*timeout*/,
@@ -374,7 +374,7 @@ BOOST_AUTO_TEST_CASE( test_why_trigger )
       theDefs.addSuite( suite );
    }
 
-   ServerTestHarness serverTestHarness( false /*doVerification*/, false /* standardVerification*/);
+   ServerTestHarness serverTestHarness;
    serverTestHarness.run(theDefs,
                          ServerTestHarness::testDataDefsLocation("test_why_trigger.def"),
                          1/*timeout*/,
@@ -403,7 +403,7 @@ BOOST_AUTO_TEST_CASE( test_why_meter )
       theDefs.addSuite( suite );
    }
 
-   ServerTestHarness serverTestHarness( false /*doVerification*/, false /* standardVerification*/);
+   ServerTestHarness serverTestHarness;
    serverTestHarness.run(theDefs,
                          ServerTestHarness::testDataDefsLocation("test_why_meter.def"),
                          1/*timeout*/,
@@ -435,7 +435,7 @@ BOOST_AUTO_TEST_CASE( test_why_event )
       theDefs.addSuite( suite );
    }
 
-   ServerTestHarness serverTestHarness( false /*doVerification*/, false /* standardVerification*/);
+   ServerTestHarness serverTestHarness;
    serverTestHarness.run(theDefs,
                          ServerTestHarness::testDataDefsLocation("test_why_event.def"),
                          1/*timeout*/,
@@ -464,7 +464,7 @@ BOOST_AUTO_TEST_CASE( test_why_user_var )
       theDefs.addSuite( suite );
    }
 
-   ServerTestHarness serverTestHarness( false /*doVerification*/, false /* standardVerification*/);
+   ServerTestHarness serverTestHarness;
    serverTestHarness.run(theDefs,
                          ServerTestHarness::testDataDefsLocation("test_why_user_var.def"),
                          1/*timeout*/,
@@ -492,7 +492,7 @@ BOOST_AUTO_TEST_CASE( test_why_gen_var )
       theDefs.addSuite( suite );
    }
 
-   ServerTestHarness serverTestHarness( false /*doVerification*/, false /* standardVerification*/);
+   ServerTestHarness serverTestHarness;
    serverTestHarness.run(theDefs,
                          ServerTestHarness::testDataDefsLocation("test_why_gen_var.def"),
                          1/*timeout*/,
@@ -522,7 +522,7 @@ BOOST_AUTO_TEST_CASE( test_why_repeat )
       theDefs.addSuite( suite );
    }
 
-   ServerTestHarness serverTestHarness( false /*doVerification*/, false /* standardVerification*/);
+   ServerTestHarness serverTestHarness;
    serverTestHarness.run(theDefs,
                          ServerTestHarness::testDataDefsLocation("test_why_repeat.def"),
                          1/*timeout*/,

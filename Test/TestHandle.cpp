@@ -80,7 +80,7 @@ BOOST_AUTO_TEST_CASE( test_handle )
    }
 
    // The test harness will create corresponding directory structure & default ecf file
-   ServerTestHarness serverTestHarness( false,/*do log file verification*/ false /* standardVerification*/ );
+   ServerTestHarness serverTestHarness;
    serverTestHarness.run(theDefs,
                         ServerTestHarness::testDataDefsLocation("test_handle.def"),
                         1 /*timeout*/,
@@ -206,7 +206,7 @@ BOOST_AUTO_TEST_CASE( test_handle_sync )
    }
 
    // The test harness will create corresponding directory structure & default ecf file
-   ServerTestHarness serverTestHarness( false, /*do log file verification*/ false /* standardVerification*/ );
+   ServerTestHarness serverTestHarness;
    serverTestHarness.run(theDefs,
                          ServerTestHarness::testDataDefsLocation("test_handle_sync.def"),
                          1 /*timeout*/,
@@ -233,7 +233,7 @@ BOOST_AUTO_TEST_CASE( test_handle_sync )
       BOOST_CHECK_MESSAGE(!TestFixture::client().get_news(),"Expected no change since suite s3 is not in our handle");
 
       // make a change to a suite *not* in our handle, that *does* cause state propagation.
-      TestFixture::client().force("/s3","complete");
+      TestFixture::client().force("/s3/t0","aborted");
       TestFixture::client().news_local();
       BOOST_CHECK_MESSAGE(TestFixture::client().get_news(),"Expected change via state propagation to defs, even though s3 not in our handle");
 
@@ -333,7 +333,7 @@ BOOST_AUTO_TEST_CASE( test_handle_add_remove_add )
 
    // The test harness will create corresponding directory structure & default ecf file
    // ADD
-   ServerTestHarness serverTestHarness( false, /*do log file verification*/ false /* standardVerification*/ );
+   ServerTestHarness serverTestHarness;
    serverTestHarness.run(*theDefs,
                          ServerTestHarness::testDataDefsLocation("test_handle_sync.def"),
                          1 /*timeout*/,

@@ -31,28 +31,45 @@ BOOST_AUTO_TEST_CASE( test_client_handle_cmd_empty_server )
 {
    cout << "Base:: ...test_client_handle_cmd_empty_server\n";
 
-   std::vector<std::string> suite_names; suite_names.reserve(6);
+   std::vector<std::string> suite_names; suite_names.reserve(5);
    for(int i=0; i < 5; i++)  suite_names.push_back( "s" + boost::lexical_cast<std::string>(i) );
 
-   Defs* defs = NULL;
+   defs_ptr new_defs = Defs::create();
 
-   // Register new handle on an EMPTY server. This create a empty defs and register the suite
+   // Register new handle on an EMPTY server. register the suite
    for(size_t j = 0; j < suite_names.size(); j++)  {
       std::vector<std::string> names; names.push_back(suite_names[j]);
-      TestHelper::invokeRequest(defs,Cmd_ptr( new ClientHandleCmd(names,false)),bypass_state_modify_change_check);
+      TestHelper::invokeRequest(new_defs.get(),Cmd_ptr( new ClientHandleCmd(names,false)),bypass_state_modify_change_check);
    }
 
-   // expect failure when dropping(DROP_USER) a handle
-   TestHelper::invokeFailureRequest(defs,Cmd_ptr( new ClientHandleCmd(1)));
+   // We should have 5 handle, 1,2,3,4,5
 
-   // expect failure for auto add
-   TestHelper::invokeFailureRequest(defs,Cmd_ptr( new ClientHandleCmd(1,true /* auto add */)));
+   //std::cout << "   expect failure when dropping(DROP_USER) on handle that does not exist, handle 6" << endl;
+   TestHelper::invokeFailureRequest(new_defs.get(),Cmd_ptr( new ClientHandleCmd(6)));
 
-   // expect failure for ADD, an an empty server
-   TestHelper::invokeFailureRequest(defs,Cmd_ptr( new ClientHandleCmd(1,suite_names,ClientHandleCmd::ADD)));
+   //std::cout << "   expect failure for auto add,on handle that does not exist, handle 6" << endl;
+   TestHelper::invokeFailureRequest(new_defs.get(),Cmd_ptr( new ClientHandleCmd(6,true /* auto add */)));
 
-   // expect failure for REMOVE, an an empty server
-   TestHelper::invokeFailureRequest(defs,Cmd_ptr( new ClientHandleCmd(1,suite_names,ClientHandleCmd::REMOVE)));
+   //std::cout << "   expect failure for ADD,on handle that does not exist, handle 6" << endl;
+   TestHelper::invokeFailureRequest(new_defs.get(),Cmd_ptr( new ClientHandleCmd(6,suite_names,ClientHandleCmd::ADD)));
+
+   //std::cout << "   expect failure for REMOVE, on handle that does not exist, handle 6" << endl;
+   TestHelper::invokeFailureRequest(new_defs.get(),Cmd_ptr( new ClientHandleCmd(6,suite_names,ClientHandleCmd::REMOVE)));
+
+   for(int handle=1; handle < 6; handle++) {
+
+      //std::cout << "   expect success for dropping handle " << handle << endl;
+      TestHelper::invokeRequest(new_defs.get(),Cmd_ptr( new ClientHandleCmd(handle)),bypass_state_modify_change_check);
+
+      //std::cout << "   expect failure for auto add,on handle that does not exist, handle " << handle << endl;
+      TestHelper::invokeFailureRequest(new_defs.get(),Cmd_ptr( new ClientHandleCmd(6,true /* auto add */)));
+
+      //std::cout << "   expect failure for ADD,on handle that does not exist, handle " << handle <<endl;
+      TestHelper::invokeFailureRequest(new_defs.get(),Cmd_ptr( new ClientHandleCmd(6,suite_names,ClientHandleCmd::ADD)));
+
+      //std::cout << "   expect failure for REMOVE, on handle that does not exist, handle " << handle << "\n" << endl;
+      TestHelper::invokeFailureRequest(new_defs.get(),Cmd_ptr( new ClientHandleCmd(6,suite_names,ClientHandleCmd::REMOVE)));
+   }
 }
 
 

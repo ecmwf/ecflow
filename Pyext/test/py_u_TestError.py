@@ -233,7 +233,7 @@ if __name__ == "__main__":
  
 
     # ========================================================================
-    # Check node names
+    print "Check node names"
     for i in range(25):
         assert check_node_name(str(i)),             "Integer names should be allowed"
      
@@ -247,7 +247,7 @@ if __name__ == "__main__":
     assert check_defs("a_made_up_path_that_doesnt_not_exit.def") == False, "Expected exception, Defs file does not exist"
 
     # =================================================================================
-    # test save_as_defs
+    print "test save_as_defs"
     defs = Defs()                      # create a empty definition
     s1 = defs.add_suite("s1")          # create a suite "s1" and add to defs
     defs.save_as_defs("testerror.def") # create a defs on disk
@@ -255,7 +255,7 @@ if __name__ == "__main__":
     os.remove("testerror.def")
 
     # =================================================================================
-    # duplicate suites not allowed
+    print "Check duplicate suites not allowed"
     test_passed = False
     try :
         defs = Defs()               # create a empty definition
@@ -267,7 +267,7 @@ if __name__ == "__main__":
     assert test_passed,"duplicate suite test failed"   
 
     # =================================================================================
-    # duplicate family not allowed
+    print "check duplicate family not allowed"
     test_passed = False
     try:
         suite = Suite("1")
@@ -281,7 +281,7 @@ if __name__ == "__main__":
     assert test_passed,"duplicate Family test failed"   
   
     # =================================================================================
-    # duplicate task not allowed
+    print "duplicate task not allowed"
     test_passed = False
     try:
         suite = Suite("1")
@@ -295,7 +295,7 @@ if __name__ == "__main__":
     assert test_passed,"duplicate Task test failed"   
 
     # =================================================================================
-    # duplicate meter not allowed
+    print "check duplicate meter not allowed"
     test_passed = False
     try:
         defs = Defs()
@@ -321,7 +321,7 @@ if __name__ == "__main__":
     assert test_passed,"duplicate meter test failed"   
     
     # =================================================================================
-    # duplicate event not allowed
+    print "check duplicate event not allowed"
     test_passed = False
     try:
         defs = Defs()
@@ -360,16 +360,39 @@ if __name__ == "__main__":
     
     
     # =================================================================================
-    # Add same task to suite and family
-    # This should fail but doesnt, because task is reference counted it still works !!!
-    # Only way to trap this is record ptrs used on the C++ side. Hence left out
-    #
-    new_defs = Defs();
-    suite = new_defs.add_suite("ns1")
+    print "check cannot add same node to different containers"
+    defs1 = Defs();
+    suite = defs1.add_suite("s1")
     family =  suite.add_family("f1")
-    task =  Task("t1")
-    suite.add_task(task)
-    family.add_task(task)
-    print new_defs
- 
+    task  = family.add_task("t1")
+    
+    test_passed = False
+    try :
+        defs2 = Defs();
+        defs2.add_suite(suite)
+    except RuntimeError, e : 
+        test_passed = True
+        pass    
+    assert test_passed,"Can't add same suite to two different defs"   
+
+    test_passed = False
+    try :
+        defs3 = Defs();
+        suite = defs3.add_suite(suite)
+        suite.add_family(family)
+    except RuntimeError, e : 
+        test_passed = True
+        pass    
+    assert test_passed,"Can't add same family to two different suites"   
+
+    test_passed = False
+    try :
+        defs4 = Defs();
+        suite = defs4.add_suite("s1")
+        suite.add_task(task)
+    except RuntimeError, e : 
+        test_passed = True
+        pass    
+    assert test_passed,"Can't add same task to two different containers"   
+
     print "All Tests pass"

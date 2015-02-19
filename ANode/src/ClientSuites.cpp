@@ -220,6 +220,7 @@ defs_ptr ClientSuites::create_defs(defs_ptr server_defs) const
 
          // This will end up setting the suite's defs pointer to 'newly_created_defs'.
          // This is wrong, since we only have a single suite
+         suite->set_defs(NULL); // otherwise addSuite, will complain
          newly_created_defs->addSuite(suite); // will update modify_change_no, see comment at top
 
          suite->set_defs(old_defs);                            // reset the defs, since addSuite() changed defs ptr

@@ -52,21 +52,20 @@ STC_Cmd_ptr ClientToServerCmd::handleRequest(AbstractServer* as) const
    // Allow override in the rare cases, where we want to output additional debug
    do_log();
 
+#ifdef DEBUG_INVARIANTS
+   LOG_ASSERT( as->defs() , "ClientToServerCmd::handleRequest: Start:  No defs? ");
+   std::string errmsg;
+   if (!as->defs()->checkInvariants(errmsg)) {
+      LOG(Log::ERR,"ClientToServerCmd::handleRequest: PreCondition: Failed invariant checking:" << errmsg);
+   }
+#endif
+
 
    STC_Cmd_ptr halted;
    if (! authenticate(as,halted)) {
       assert (halted.get());
       return halted;
    }
-
-#ifdef DEBUG_INVARIANTS
-   if (as->defs()) {
-      std::string errmsg;
-      if (!as->defs()->checkInvariants(errmsg)) {
-         LOG(Log::ERR,"ClientToServerCmd::handleRequest: PreCondition: Failed invariant checking:" << errmsg);
-      }
-   }
-#endif
 
    // mark edited nodes, with edit history
    EditHistoryMgr edit_history_mgr(this,as);
@@ -80,11 +79,10 @@ STC_Cmd_ptr ClientToServerCmd::handleRequest(AbstractServer* as) const
    }
 
 #ifdef DEBUG_INVARIANTS
-   if (as->defs()) {
-      std::string errmsg;
-      if (!as->defs()->checkInvariants(errmsg)) {
-         LOG(Log::ERR,"ClientToServerCmd::handleRequest: PostCondition: Failed invariant checking:" << errmsg);
-      }
+   LOG_ASSERT( as->defs() , "ClientToServerCmd::handleRequest: End:  No defs? ");
+   std::string errmsg;
+   if (!as->defs()->checkInvariants(errmsg)) {
+      LOG(Log::ERR,"ClientToServerCmd::handleRequest: PostCondition: Failed invariant checking:" << errmsg);
    }
 #endif
 
@@ -98,9 +96,9 @@ void ClientToServerCmd::do_log() const
    log(Log::MSG,ss.str());    // will automatically add end of line
 }
 
-STC_Cmd_ptr ClientToServerCmd::doJobSubmission(AbstractServer* as) const
+STC_Cmd_ptr ClientToServerCmd::doJobSubmission(AbstractServer* as)
 {
-   // This function could be called at the end of any command that can change state.
+   // This function could be called at the end of *USER* command that can change state.
    //
    // We could have other tasks/jobs dependent on the state change. i.e end of time series
    // This will traverse the node tree and resolve dependencies and may force
@@ -108,26 +106,14 @@ STC_Cmd_ptr ClientToServerCmd::doJobSubmission(AbstractServer* as) const
    // However *** errors in job submission ***, should *NOT* typically abort the command.
    // Since we will typically just set task to aborted state
 
-   // *However* we need to check that Server allows job scheduling.
-   if (as->state() == SState::RUNNING && as->defs()) {
-
-      JobsParam jobsParam(as->poll_interval(), as->allow_job_creation_during_tree_walk() );
-#ifdef DEBUG_JOB_SUBMISSION
-      jobsParam.logDebugMessage(" from ClientToServerCmd::doJobSubmission");
-#endif
-      Jobs jobs(as->defs());
-      if (!jobs.generate(jobsParam)) {
-         log(Log::ERR,jobsParam.getErrorMsg());    // will automatically add end of line
-      }
-   }
+   // This job generation will timeout if job generation takes longer than next poll time.
+   as->traverse_node_tree_and_job_generate(Calendar::second_clock_time(), true /* user cmd context */);
 
    return PreAllocatedReply::ok_cmd();
 }
 
 node_ptr ClientToServerCmd::find_node(AbstractServer* as, const std::string& absNodepath) const
 {
-   if (!as->defs()) throw std::runtime_error("No definition in server:");
-
    node_ptr theNode =  as->defs()->findAbsNode(absNodepath);
    if ( !theNode.get() ) {
 
@@ -159,7 +145,6 @@ node_ptr ClientToServerCmd::find_node_for_edit(AbstractServer* as, const std::st
 
 node_ptr ClientToServerCmd::find_node_for_edit_no_throw(AbstractServer* as, const std::string& absNodepath) const
 {
-   if (!as->defs()) throw std::runtime_error("No definition in server:");
    node_ptr theNode = as->defs()->findAbsNode(absNodepath);
    add_node_for_edit_history(theNode);
    return theNode;
@@ -167,9 +152,7 @@ node_ptr ClientToServerCmd::find_node_for_edit_no_throw(AbstractServer* as, cons
 
 void ClientToServerCmd::add_node_for_edit_history(AbstractServer* as,const std::string& absNodepath) const
 {
-   if (as->defs()) {
-      add_node_for_edit_history(as->defs()->findAbsNode(absNodepath));
-   }
+    add_node_for_edit_history(as->defs()->findAbsNode(absNodepath));
 }
 
 void ClientToServerCmd::add_node_for_edit_history(node_ptr the_node) const

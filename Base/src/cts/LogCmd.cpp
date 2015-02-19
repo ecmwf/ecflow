@@ -29,13 +29,25 @@ using namespace boost;
 namespace po = boost::program_options;
 namespace fs = boost::filesystem;
 
-LogCmd::LogCmd(const std::string& path) : api_(NEW),get_last_n_lines_(0),new_path_(path)
+
+LogCmd::LogCmd(LogApi a, int get_last_n_lines)
+: api_(a), get_last_n_lines_(get_last_n_lines)
 {
-   // path can be empty, i.e we take new path from the server variables
-   // However if specified Check its valid
-   if (!new_path_.empty()) {
-      Log::check_new_path(path); // will throw for errors
-   }
+   if (get_last_n_lines_ == 0) get_last_n_lines_ = Log::get_last_n_lines_default();
+}
+
+
+LogCmd::LogCmd()
+: api_(LogCmd::GET),get_last_n_lines_(Log::get_last_n_lines_default()) {}
+
+
+LogCmd::LogCmd(const std::string& path)
+: api_(NEW),get_last_n_lines_(Log::get_last_n_lines_default()),new_path_(path)
+{
+   // ECFLOW-154, If path to new log file is specified, it should only be checked by the server,
+   //             as that could be on a different machine.
+   // ECFLOW-174, Never get the full log, as this can make server consume to much memory
+   //             default taken from get_last_n_lines_default
 }
 
 std::ostream& LogCmd::print(std::ostream& os) const
@@ -75,22 +87,14 @@ STC_Cmd_ptr LogCmd::doHandleRequest(AbstractServer* as) const
                Log::instance()->new_path(new_path_); // will throw for errors
 
                // Update the corresponding server variable
-               if (as->defs()) {
-                  NameValueVec vec;
-                  vec.push_back(std::make_pair(Str::ECF_LOG(),Log::instance()->path()));
-                  as->defs()->set_server().add_or_update_server_variables(vec);
-               }
+               NameValueVec vec;
+               vec.push_back(std::make_pair(Str::ECF_LOG(),Log::instance()->path()));
+               as->defs()->set_server().add_or_update_server_variables(vec);
             }
             else {
-               if (as->defs()) {
-                  // User could have overridden ECF_LOG variable
-                  const std::string& log_file_name = as->defs()->server().find_variable(Str::ECF_LOG());
-                  Log::instance()->new_path(log_file_name);  // will throw for errors
-               }
-               else {
-                  // Re-use reload the existing file, flushing will close file, next log command will re-open it
-                  Log::instance()->flush();
-               }
+               // User could have overridden ECF_LOG variable
+               const std::string& log_file_name = as->defs()->server().find_variable(Str::ECF_LOG());
+               Log::instance()->new_path(log_file_name);  // will throw for errors
             }
 
             as->stats().ECF_LOG_ = Log::instance()->path();  // do NOT update number of requests
@@ -107,11 +111,12 @@ const char* LogCmd::arg() { return "log";}
 const char* LogCmd::desc() {
    return  "Get,clear,flush or create a new log file.\n"
             "The user must ensure that a valid path is specified.\n"
-            "However for *test* we also provide functionality to get the\n"
-            "log file.This could be a very large file, and should not generally be used,\n"
-            "optionally the number of lines can be specified.\n"
+            "Specifying '--log=get' with a large number of lines from the server,\n"
+            "can consume a lot of **memory**. The log file can be a very large file,\n"
+            "hence we use a default of 100 lines, optionally the number of lines can be specified.\n"
             "  arg1 = [ get | clear | flush | new | path ]\n"
-            "         get   -  Outputs the log file to standard out. Not for general usage\n"
+            "         get   -  Outputs the log file to standard out.\n"
+            "                  defaults to return the last 100 lines\n"
             "                  The second argument can specify how many lines to return\n"
             "         clear -  Clear the log file of its contents.\n"
             "         flush -  Flush and close the log file. (only temporary) next time\n"
@@ -127,6 +132,7 @@ const char* LogCmd::desc() {
             "         if get specified can specify lines to get. Value must be convertible to an integer\n"
             "         Otherwise if arg1 is 'new' then the second argument must be a path\n"
             "Usage:\n"
+            "  --log=get                        # Write the last 100 lines of the log file to standard out\n"
             "  --log=get 200                    # Write the last 200 lines of the log file to standard out\n"
             "  --log=clear                      # Clear the log file. The log is now empty\n"
             "  --log=flush                      # Flush and close log file, next request will re-open log file\n"
@@ -157,12 +163,12 @@ void LogCmd::create( 	Cmd_ptr& cmd,
 		}
 
 		if (args.size() == 1 ) {
-			// retrieve the full log from the server. Could be a mega file. be warned
-			cmd = Cmd_ptr( new LogCmd( LogCmd::GET ) );
+			// This will retrieve Log::get_last_n_lines_default() lines from the log file.
+			cmd = Cmd_ptr( new LogCmd( LogCmd::GET , Log::get_last_n_lines_default() ) );
 			return;
 		}
 
- 		int value = 0;
+ 		int value = Log::get_last_n_lines_default();
  		if (args.size() == 2) {
  			try { value = boost::lexical_cast<int>(args[1]); }
  			catch (boost::bad_lexical_cast& e) {
@@ -220,10 +226,9 @@ void LogCmd::create( 	Cmd_ptr& cmd,
       return;
    }
 
-
  	std::stringstream ss;
  	ss << "LogCmd: The arguments have not been specified correctly\n" << LogCmd::desc();
-   	throw std::runtime_error( ss.str() );
+   throw std::runtime_error( ss.str() );
 }
 
 std::ostream& operator<<(std::ostream& os, const LogCmd& c) { return c.print(os); }

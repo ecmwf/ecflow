@@ -44,7 +44,8 @@ public:
 	static const char* get_server_defs();
    static const char* sync();
    static const char* in_sync();
-	static const char* news();
+   static const char* news();
+   static const char* changed_node_paths();
 	static const char* checkpt();
 	static const char* restore_from_checkpt();
 	static const char* reload_wl_file();
@@ -55,7 +56,8 @@ public:
    static const char* free_time_dep();
    static const char* free_all_dep();
 	static const char* ping();
-	static const char* stats();
+   static const char* stats();
+   static const char* stats_reset();
 	static const char* suites();
    static const char* ch_register();
    static const char* ch_suites();

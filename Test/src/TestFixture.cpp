@@ -146,14 +146,14 @@ void TestFixture::init(const std::string& project_test_dir)
       std::cout << "   EXTERNAL SERVER running on _SAME_ PLATFORM. Assuming " << host_ << ":" << port_ << "\n";
 
       // log file may have been deleted, by previous tests. Create a new log file
-      if ( !fs::exists( TestFixture::pathToLogFile() )) {
-         std::string log_path = fs::current_path().parent_path().c_str();
-         log_path += "/MyProject/";
-         log_path += TestFixture::pathToLogFile();
-         std::cout << "No log file: Creating new log(via remote server) file " << log_path  << "\n";
-         client().new_log( log_path );
+      std::string the_log_file = TestFixture::pathToLogFile();
+      if ( !fs::exists( the_log_file )) {
+         std::cout << "   Log file " << the_log_file << " does NOT exist, attempting to recreate\n";
+         std::cout << "   Creating new log(via remote server) file " << the_log_file  << "\n";
+         client().new_log( the_log_file );
          client().logMsg("Created new log file. msg sent to force new log file to be written to disk");
       }
+      else std::cout << "   Log file " << the_log_file << " already exist\n";
    }
    else {
       // For local host start by removing log file. Server invocation should create a new log file
@@ -322,12 +322,6 @@ std::string TestFixture::pathToLogFile()
 
 	char* pathToRemoteLog_p = getenv("ECF_LOG");
 	if ( pathToRemoteLog_p == NULL) {
-
-		// This will do. This assumes we are sticking with default ECF_ file name
-		std::string pathToRemoteLog = "/scratch/ma/emos/ma0/hpia64/ecflow/MyProject/";
-		pathToRemoteLog += "itanium." + port_ + ".ecf.log";
-		if ( fs::exists(pathToRemoteLog) ) return pathToRemoteLog;
-
 		cout << "TestFixture::pathToLogFile(): assert failed\n";
 		cout << "Please set ECF_LOG. This needs to be set to path to the log file\n";
 		cout << "that can be see by the client and server\n";
@@ -351,8 +345,8 @@ std::string TestFixture::local_ecf_home()
 
 std::string TestFixture::includes()
 {
-   // Get to the workspace directory, Then set the path to the includes directory
-   std::string includes_path = File::workspace_dir();
+   // Get to the root source directory
+   std::string includes_path = File::root_source_dir();
    includes_path += "/";
    includes_path += project_test_dir_;
    includes_path += "/data/includes";

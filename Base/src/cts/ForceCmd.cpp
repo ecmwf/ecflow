@@ -61,7 +61,7 @@ STC_Cmd_ptr ForceCmd::doHandleRequest(AbstractServer* as) const
  		throw std::runtime_error( ss.str() ) ;
  	}
 
-   std::stringstream ss;
+   std::stringstream error_ss;
  	size_t vec_size = paths_.size();
  	for(size_t i = 0; i < vec_size; i++) {
 
@@ -71,17 +71,21 @@ STC_Cmd_ptr ForceCmd::doHandleRequest(AbstractServer* as) const
  	      Extract::pathAndName(paths_[i],the_path, the_event);
  	      if ( the_path.empty() || the_event.empty() ) {
  	         std::stringstream ss;
- 	         ss << "ForceCmd: When 'set' or 'clear' is specified the path needs to include name of the event i.e\n";
- 	         ss << " --force=/path/to_task:event_name set\n";
- 	         ecf::log(Log::ERR,ss.str());
+ 	         ss << "ForceCmd: When 'set' or 'clear' is specified the path needs to include name of the event i.e --force=/path/to_task:event_name set";
+ 	         std::string error_msg = ss.str();
+ 	         ecf::log(Log::ERR, error_msg);
+ 	         error_ss << error_msg << "\n";
  	         continue;
  	      }
  	   }
 
  	   node_ptr node = find_node_for_edit_no_throw(as,the_path);
  	   if (!node.get()) {
-         ss << "ForceCmd: Could not find node at path " << the_path << "\n";
- 	      LOG(Log::ERR,"ForceCmd: Could not find node at path " << the_path);
+ 	      std::stringstream ss;
+         ss << "ForceCmd: Could not find node at path " << the_path;
+         std::string error_msg = ss.str();
+         ecf::log(Log::ERR, error_msg);
+         error_ss << error_msg << "\n";
  	      continue;
  	   }
  	   SuiteChanged0 changed(node); // Cater for suites in handles
@@ -104,15 +108,19 @@ STC_Cmd_ptr ForceCmd::doHandleRequest(AbstractServer* as) const
  	         if (!node->set_event(the_event)) {
  	            std::stringstream ss;
  	            ss << "ForceCmd: force set: failed for node(" << node->absNodePath() << ") can not find event(" << the_event << ")";
- 	            ecf::log(Log::ERR,ss.str());
- 	            continue;
+ 	            std::string error_msg = ss.str();
+ 	            ecf::log(Log::ERR, error_msg);
+ 	            error_ss << error_msg << "\n";
+	            continue;
  	         }
  	      }
  	      else if ( stateOrEvent_ == Event::CLEAR() ) {
  	         if (!node->clear_event(the_event)) {
  	            std::stringstream ss;
  	            ss << "ForceCmd: force clear: failed for node(" << node->absNodePath() << ") can not find event(" << the_event << ")";
- 	            ecf::log(Log::ERR,ss.str());
+               std::string error_msg = ss.str();
+               ecf::log(Log::ERR, error_msg);
+               error_ss << error_msg << "\n";
  	            continue;
  	         }
  	      }
@@ -124,7 +132,14 @@ STC_Cmd_ptr ForceCmd::doHandleRequest(AbstractServer* as) const
  	   }
  	}
 
-   std::string error_msg = ss.str();
+   // Clear up memory allocated to path. *ASAP*
+ 	// When paths is very large, freeing memory has big impact on performance
+ 	// i.e comment this out and run Client/test/TestSinglePerf.cpp  -> ecflow test_performance to see the effect
+ 	// Commands run after this are considerably slower.Looks like it still retained in memory dues to shared ptr, slightly longer
+   // When dealing with several thousands paths, this makes a *HUGE* difference
+   vector<string>().swap(paths_); // clear paths_ and minimise its capacity *ASAP*
+
+   std::string error_msg = error_ss.str();
    if (!error_msg.empty()) {
       throw std::runtime_error( error_msg ) ;
    }

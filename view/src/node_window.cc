@@ -32,7 +32,6 @@ node_window::~node_window()
 {
 }
 
-
 void node_window::linkCB(Widget w,XtPointer from,XtPointer cb_data)
 {
 	LinkCallbackStruct* cb = (LinkCallbackStruct*)cb_data;
@@ -80,15 +79,8 @@ void node_window::raw_click1(XEvent* event,xnode* x)
 	node*  n = x ? x->get_node() : 0;
 	selection::menu_node(n);
 	unsigned int modifiers = event->xbutton.state;
-
-	/* printf("raw_click1 %x\n",event->xbutton.state); */
-
 	Boolean shift   = (modifiers & ShiftMask) != 0;
 	Boolean control = (modifiers & ControlMask) != 0;
-
-	// printf("raw_click1 %p %d %d\n",n,shift,control);
-
-	// if (shift && n) this->raw_click2(event, x); else
 	click1(n,shift,control);
 }
 
@@ -97,14 +89,8 @@ void node_window::raw_click2(XEvent* event,xnode* x)
 	node*  n = x ? x->get_node() : 0;
 	selection::menu_node(n);
 	unsigned int modifiers = event->xbutton.state;
-
-	/* printf("raw_click2 %x\n",event->xbutton.state); */
-
 	Boolean shift   = (modifiers & ShiftMask) != 0;
 	Boolean control = (modifiers & ControlMask) != 0;
-
-	/* printf("raw_click2 %p %d %d\n",n,shift,control); */
-
 	if(n) this->click2(n,shift,control);
 }
 
@@ -113,26 +99,22 @@ void node_window::raw_click3(XEvent* event,xnode* x)
 	node*  n = x ? x->get_node() : 0;
 	selection::menu_node(n);
 	unsigned int modifiers = event->xbutton.state;
-
-	/* printf("raw_click3 %x\n",event->xbutton.state); */
-
 	Boolean shift   = (modifiers & ShiftMask) != 0;
 	Boolean control = (modifiers & ControlMask) != 0;
 
 	if(n) click3(n,shift,control);
 	if( shift && n)
 	{
-	  // build_why_menu(why_menu,n);
 	  XmMenuPosition(menu2(),(XButtonPressedEvent*)event);
 	  XtManageChild(menu2());
 	}
 	else if(n)
 	{
-	  menus::show(node_widget(),event,n);
+	  // menus::show(node_widget(),event,n); // 20141119
+	  menus::show(menu1(),event,n);
 	  //XmMenuPosition(g_cmd_menu,(XButtonPressedEvent*)event);
 	  //XtManageChild(g_cmd_menu);
 	} else {
-	  /* printf("node_window::raw_click3 %p\n",menu1()); */
 	  XmMenuPosition(menu1(),(XButtonPressedEvent*)event);
 	  XtManageChild(menu1());
 	}
@@ -225,39 +207,19 @@ void node_window::keypress(XEvent* event)
     n = next_node(n);
     if (n) click1(n,0,0);	  
     }
-    /* } else {
-       char buffer[] = "  ";
-       int nchars = XLookupString(
-       &(event->xkey),
-       buffer,
-       2,  // buffer size
-       &keysym,
-       NULL );
-       if (nchars == 1) printf("# Key '%c' pressed\n", buffer[0]); */
 }
 
 void node_window::click(XEvent* event)
 {
-	int button   = event->xbutton.button;
-	xnode* x     = (xnode*)NodeFind(node_widget(),event);
-
-	switch(button)
-	{
-
-	case 1:
-		raw_click1(event,x);
-		break;
-
-	case 2:
-		raw_click2(event,x);
-		break;
-
-	case 3:
-		raw_click3(event,x);
-		break;
-	default:
-	  keypress(event);
-	}
+  int button   = event->xbutton.button;
+  xnode* x     = (xnode*)NodeFind(node_widget(),event);
+  
+  switch(button) {
+  case 1: raw_click1(event,x); break;
+  case 2:	raw_click2(event,x); break;
+  case 3:	raw_click3(event,x); break;
+  default: keypress(event);
+  }
 }
 
 void node_window::show_node(node&)
@@ -266,24 +228,24 @@ void node_window::show_node(node&)
 
 void node_window::new_selection(node& n)
 {
-	xnode* x = xnode_of(n);
-	if(x && x->widget() == node_widget() ) { 
-		show_node(n);
-		x->select();
-	}
-	else 
-	  selection_cleared();
+  xnode* x = xnode_of(n);
+  if(x && x->widget() == node_widget() ) { 
+    show_node(n);
+    x->select();
+  }
+  else 
+    selection_cleared();
 }
 
 void node_window::selection_cleared()
 {
-	XtVaSetValues(node_widget(),XtNselected,-1,NULL);
+  XtVaSetValues(node_widget(),XtNselected,-1,NULL);
 }
 
 void node_window::add_input_CB()
 {
-	XtAddCallback( node_widget(), XmNinputCallback, inputCB, this);
-	XtAddCallback( node_widget(), XtNlinkCallback,  linkCB, this);
+  XtAddCallback( node_widget(), XmNinputCallback, inputCB, this);
+  XtAddCallback( node_widget(), XtNlinkCallback,  linkCB, this);
 }
 
 void node_window::link(XEvent*,node*,node*)

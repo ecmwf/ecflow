@@ -24,9 +24,6 @@ public:
 	ClockParser(DefsStructureParser* p) : Parser(p) {}
 	virtual const char* keyword() const { return "clock"; }
 	virtual bool doParse(const std::string& line, std::vector<std::string>& lineTokens);
-
-private:
-	void extractTheGain(const std::string& theGainToken, ClockAttr& clockAttr);
 };
 
 #endif

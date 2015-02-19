@@ -63,6 +63,12 @@ public:
 	/// case in sensitive string comparison
 	static bool caseInsCompare( const std::string& str1, const std::string& str2);
 
+	/// case insenstive less
+   static bool caseInsLess( const std::string& str1, const std::string& str2);
+
+   /// case insenstive Greater
+   static bool caseInsGreater( const std::string& str1, const std::string& str2);
+
 	/// Used for checking node names
    static bool valid_name(const std::string& name, std::string &msg);
    static bool valid_name(const std::string& name);

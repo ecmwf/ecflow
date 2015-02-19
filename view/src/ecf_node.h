@@ -107,7 +107,7 @@ public:
    static node* make_xnode( host& h, ecf_node* n, std::string type );
 };
 
-template<class T, class W>
+template<typename T, class W>
 class ecf_node_builder : public ecf_node_maker {
    virtual node* make( host& h, ecf_node* e )
    {
@@ -311,7 +311,7 @@ public:
    void delvars();
 };
 
-template<class T>
+template<typename T>
 class ecf_concrete_node : public ecf_node, public AbstractObserver {
 private:
    T* owner_;
@@ -511,28 +511,31 @@ private:
    }
 };
 
-template<class T>
+template<typename T>
 ecf_node* make_node( T* n, ecf_node* parent, char c = 'd' )
 {
    ecf_node* ec = new ecf_concrete_node<T>(n, parent, c);
    if (ec && n) {
       int type = ec->type();
+      // gcc 4.7 optimisation issue, keep next line
+      XECFDEBUG { if (!ec) std::cerr << "# make node " << type << "\n"; }
       if (!parent || type == NODE_SUPER || type == NODE_SUITE)
          ec->make_subtree();
       else if (type == NODE_FAMILY || type == NODE_TASK || type == NODE_ALIAS) {
          /* temp on demand:: */ec->make_subtree();
       }
    }
+   // XECFDEBUG { if (!ec) std::cerr << "# no ecf\n"; if (!n) std::cerr << "# no node\n"; }
    return ec;
 }
 
-template<class T>
+template<typename T>
 ecf_node* make_node( T& n, ecf_node* parent, const char c = 'd' )
 {
    return make_node<T>(&n, parent, c);
 }
 
-template<class T>
+template<typename T>
 node* make_xnode( T* n, ecf_node* parent, host& h, char c = 'd' )
 {
    ecf_node* ec = make_node<T>(n, parent, c);
@@ -541,16 +544,17 @@ node* make_xnode( T* n, ecf_node* parent, host& h, char c = 'd' )
       ec->adopt(xnode); /* twice ? create is adoption */
       return xnode;
    }
+   XECFDEBUG { if (!ec) std::cerr << "# no ecf2\n"; }
    return NULL;
 }
 
-template<class T>
+template<typename T>
 node* make_xnode( T& n, ecf_node* parent, host& h, const char c = 'd' )
 {
    return make_xnode<T>(&n, parent, h, c);
 }
 
-template<class T>
+template<typename T>
 void make_kids_list( ecf_node* parent, const std::vector<boost::shared_ptr<T> >& v )
 {
    for(typename std::vector<boost::shared_ptr<T> >::const_reverse_iterator j = v.rbegin();
@@ -559,7 +563,7 @@ void make_kids_list( ecf_node* parent, const std::vector<boost::shared_ptr<T> >&
    }
 }
 
-template<class T>
+template<typename T>
 void make_kids_list( ecf_node* parent, const std::vector<T>& v )
 {
    for(typename std::vector<T>::const_reverse_iterator j = v.rbegin(); j != v.rend();
@@ -568,7 +572,7 @@ void make_kids_list( ecf_node* parent, const std::vector<T>& v )
    }
 }
 
-template<class T>
+template<typename T>
 const std::string ecf_concrete_node<T>::toString() const
 {
    if (owner_) return owner_->toString();

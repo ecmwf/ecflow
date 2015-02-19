@@ -36,7 +36,7 @@ BOOST_AUTO_TEST_SUITE( ClientTestSuite )
 // **************************************************************************************
 BOOST_AUTO_TEST_CASE( test_client_environment_host_file_parsing )
 {
-	std::cout << "Client:: ...test_client_environment_host_file_parsing\n";
+	std::cout << "Client:: ...test_client_environment_host_file_parsing" << endl;
 
    std::string good_host_file = File::test_data("Client/test/data/good_hostfile","Client");
 
@@ -79,7 +79,7 @@ BOOST_AUTO_TEST_CASE( test_client_environment_host_file_parsing )
 
 BOOST_AUTO_TEST_CASE( test_client_environment_host_file_defaults )
 {
-   std::cout << "Client:: ...test_client_environment_host_file_defaults\n";
+   std::cout << "Client:: ...test_client_environment_host_file_defaults" << endl;
 
    // When the HOST file does *NOT* indicate the port, it should be taken
    // from the config/environment.
@@ -135,7 +135,7 @@ BOOST_AUTO_TEST_CASE( test_client_environment_host_file_defaults )
 
 BOOST_AUTO_TEST_CASE( test_client_environment_empty_host_file )
 {
-   std::cout << "Client:: ...test_client_environment_empty_host_file\n";
+   std::cout << "Client:: ...test_client_environment_empty_host_file" << endl;
 
    std::string empty_host_file = File::test_data("Client/test/data/empty_hostfile","Client");
 
@@ -149,6 +149,99 @@ BOOST_AUTO_TEST_CASE( test_client_environment_empty_host_file )
 
    fs::remove(empty_host_file);
 }
+
+
+BOOST_AUTO_TEST_CASE( test_client_environment_errors )
+{
+   if (getenv("ECF_ALLOW_NEW_CLIENT_OLD_SERVER")) {
+      cout << "Client:: ...test_client_environment_errors-ECF_ALLOW_NEW_CLIENT_OLD_SERVER: ignoring test when ECF_ALLOW_NEW_CLIENT_OLD_SERVER specified\n";
+      return;
+   }
+
+   std::cout << "Client:: ...test_client_environment_errors-ECF_ALLOW_NEW_CLIENT_OLD_SERVER" << endl;
+   {
+      char* put = const_cast<char*>("ECF_ALLOW_NEW_CLIENT_OLD_SERVER=xx");
+      BOOST_CHECK_MESSAGE(putenv(put) == 0,"putenv failed for " << put);
+      BOOST_CHECK_THROW(ClientEnvironment client_env, std::runtime_error );
+      putenv(const_cast<char*>("ECF_ALLOW_NEW_CLIENT_OLD_SERVER")); // remove from env, otherwise valgrind complains
+   }
+
+   {
+      std::string env = "ECF_ALLOW_NEW_CLIENT_OLD_SERVER=";
+      env += Str::LOCALHOST(); env += ":"; env += Str::DEFAULT_PORT_NUMBER(); env += ":xx";
+      BOOST_CHECK_MESSAGE(putenv(const_cast<char*>(env.c_str())) == 0,"putenv failed for " << env);
+      BOOST_CHECK_THROW(ClientEnvironment client_env, std::runtime_error );
+      putenv(const_cast<char*>("ECF_ALLOW_NEW_CLIENT_OLD_SERVER")); // remove from env, otherwise valgrind complains
+   }
+   {
+      std::string env = "ECF_ALLOW_NEW_CLIENT_OLD_SERVER=";
+      env += Str::LOCALHOST(); env += ":"; env += Str::DEFAULT_PORT_NUMBER(); env += "xx";
+      BOOST_CHECK_MESSAGE(putenv(const_cast<char*>(env.c_str())) == 0,"putenv failed for " << env);
+      BOOST_CHECK_THROW(ClientEnvironment client_env, std::runtime_error );
+      putenv(const_cast<char*>("ECF_ALLOW_NEW_CLIENT_OLD_SERVER")); // remove from env, otherwise valgrind complains
+   }
+   {
+      std::string env = "ECF_ALLOW_NEW_CLIENT_OLD_SERVER=";
+      env += Str::LOCALHOST(); env += Str::DEFAULT_PORT_NUMBER(); env += "12";
+      BOOST_CHECK_MESSAGE(putenv(const_cast<char*>(env.c_str())) == 0,"putenv failed for " << env);
+      BOOST_CHECK_THROW(ClientEnvironment client_env, std::runtime_error );
+      putenv(const_cast<char*>("ECF_ALLOW_NEW_CLIENT_OLD_SERVER")); // remove from env, otherwise valgrind complains
+   }
+   {
+      std::stringstream ss;
+      ss << "ECF_ALLOW_NEW_CLIENT_OLD_SERVER=fred:2222:0,bill:333:2222," << Str::LOCALHOST() << ":" << Str::DEFAULT_PORT_NUMBER() << ":xx";
+      std::string env = ss.str();
+      BOOST_CHECK_MESSAGE(putenv(const_cast<char*>(env.c_str())) == 0,"putenv failed for " << env);
+      BOOST_CHECK_THROW(ClientEnvironment client_env, std::runtime_error );
+      putenv(const_cast<char*>("ECF_ALLOW_NEW_CLIENT_OLD_SERVER")); // remove from env, otherwise valgrind complains
+   }
+}
+
+BOOST_AUTO_TEST_CASE( test_client_environment )
+{
+   if (getenv("ECF_ALLOW_NEW_CLIENT_OLD_SERVER")) {
+      cout << "Client:: ...test_client_environment-ECF_ALLOW_NEW_CLIENT_OLD_SERVER: ignoring test when ECF_ALLOW_NEW_CLIENT_OLD_SERVER specified\n";
+      return;
+   }
+
+   std::cout << "Client:: ...test_client_environment-ECF_ALLOW_NEW_CLIENT_OLD_SERVER" << endl;
+   {
+      std::string env = "ECF_ALLOW_NEW_CLIENT_OLD_SERVER=";
+      env += Str::LOCALHOST(); env += ":"; env += Str::DEFAULT_PORT_NUMBER(); env += ":11";
+      BOOST_CHECK_MESSAGE(putenv(const_cast<char*>(env.c_str())) == 0,"putenv failed for " << env);
+      ClientEnvironment client_env;
+      BOOST_CHECK_MESSAGE(client_env.allow_new_client_old_server()==11,"Expected 11 but found " << client_env.allow_new_client_old_server() << " for env " << env);
+      putenv(const_cast<char*>("ECF_ALLOW_NEW_CLIENT_OLD_SERVER")); // remove from env, otherwise valgrind complains
+   }
+   {
+      std::stringstream ss;
+      ss << "ECF_ALLOW_NEW_CLIENT_OLD_SERVER=fred:2222:0,bill:333:2222," << Str::LOCALHOST() << ":" << Str::DEFAULT_PORT_NUMBER() << ":" << 33;
+      std::string env = ss.str();
+      BOOST_CHECK_MESSAGE(putenv(const_cast<char*>(env.c_str())) == 0,"putenv failed for " << env);
+      ClientEnvironment client_env;
+      BOOST_CHECK_MESSAGE(client_env.allow_new_client_old_server()==33,"Expected 33 but found " << client_env.allow_new_client_old_server() << " for env " << env);
+      putenv(const_cast<char*>("ECF_ALLOW_NEW_CLIENT_OLD_SERVER")); // remove from env, otherwise valgrind complains
+   }
+   {
+      // Create a valid ECF_ALLOW_NEW_CLIENT_OLD_SERVER list where there is no match with our host/port.
+      // hence allow_new_client_old_server should remain zero
+      std::stringstream ss;
+      ss << "ECF_ALLOW_NEW_CLIENT_OLD_SERVER=fred:2222:0,bill:333:2222,bill:333:2222,bill:333:2222,bill:333:2222,bill:333:2222";
+      std::string env = ss.str();
+      BOOST_CHECK_MESSAGE(putenv(const_cast<char*>(env.c_str())) == 0,"putenv failed for " << env);
+      ClientEnvironment client_env;
+      BOOST_CHECK_MESSAGE(client_env.allow_new_client_old_server()==0,"Should remain unchanged but found " << client_env.allow_new_client_old_server());
+      putenv(const_cast<char*>("ECF_ALLOW_NEW_CLIENT_OLD_SERVER")); // remove from env, otherwise valgrind complains
+   }
+   {
+      char* put = const_cast<char*>("ECF_ALLOW_NEW_CLIENT_OLD_SERVER=10");
+      BOOST_CHECK_MESSAGE(putenv(put) == 0,"putenv failed for " << put);
+      ClientEnvironment client_env;
+      BOOST_CHECK_MESSAGE(client_env.allow_new_client_old_server()==10,"expcted 10 but found " << client_env.allow_new_client_old_server());
+      putenv(const_cast<char*>("ECF_ALLOW_NEW_CLIENT_OLD_SERVER")); // remove from env, otherwise valgrind complains
+   }
+}
+
 
 BOOST_AUTO_TEST_SUITE_END()
 

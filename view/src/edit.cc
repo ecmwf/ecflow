@@ -142,7 +142,7 @@ void edit::submitCB(Widget,XtPointer)
 {
   bool alias = XmToggleButtonGetState(alias_);
   bool run   = true;
-  char line[1024];
+  char line[4096];
   node *nd = get_node();
   
   if(nd) {

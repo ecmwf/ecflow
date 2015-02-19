@@ -50,10 +50,10 @@ static resource* gui_resources[] = {
 	new option<str>(globals::instance(),"color_event",      "blue"),
 
 	new option<str>(globals::instance(),"normal_font_plain", 
-			"-*-helvetica-medium-r-normal--12-*-*-*-*-*-*-*"),
+			"-*-helvetica-medium-r-normal-*-12-*-*-*-*-*-*-*"),
 
 	new option<str>(globals::instance(),"normal_font_bold",  
-			"-*-helvetica-bold-r-normal--12-*-*-*-*-*-*-*"),
+			"-*-helvetica-bold-r-normal-*-12-*-*-*-*-*-*-*"),
 
 	new option<str>(globals::instance(),"small_font_plain",  
 			"-*-helvetica-medium-r-normal-*-11-*-*-*-*-*-*-*"),

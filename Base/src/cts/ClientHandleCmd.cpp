@@ -87,18 +87,9 @@ STC_Cmd_ptr ClientHandleCmd::doHandleRequest(AbstractServer* as) const
 {
    as->update_stats().ch_cmd_++;
 
-   defs_ptr defs = as->defs();
-
 	switch (api_) {
 		case ClientHandleCmd::REGISTER:  {
 
-		   /// Allow registration even when no defs loaded, By creating a new definition
-		   /// Any subsequent load will, update the client handle, suite ptrs
-		   if (!defs.get()) {
-		      as->create_defs();
-		      as->updateDefs(as->defs(),false);
-		      // *IMPORTANT* defs will still be null, hence use as->defs()
-		   }
  			unsigned int client_handle = as->defs()->client_suite_mgr().create_client_suite(auto_add_new_suites_,suites_,user());
 //#ifdef DEBUG
 // 	      LOG(Log::DBG,as->defs()->client_suite_mgr().dump_max_change_no());
@@ -107,51 +98,47 @@ STC_Cmd_ptr ClientHandleCmd::doHandleRequest(AbstractServer* as) const
 		 	return PreAllocatedReply::client_handle_cmd(client_handle) ;
 		}
 
- 		case ClientHandleCmd::DROP: {
- 		   if (!defs.get()) throw std::runtime_error( "No definition in server") ;
- 			defs->client_suite_mgr().remove_client_suite(client_handle_); // will throw if handle not found
+		case ClientHandleCmd::DROP: {
+		   as->defs()->client_suite_mgr().remove_client_suite(client_handle_); // will throw if handle not found
 
-         // return the 0 handle to the client. The client stores the handle locally. Reset to zero.
-         return PreAllocatedReply::client_handle_cmd(0) ;
- 		}
+		   // return the 0 handle to the client. The client stores the handle locally. Reset to zero.
+		   return PreAllocatedReply::client_handle_cmd(0) ;
+		}
 
-      case ClientHandleCmd::DROP_USER: {
-         // will throw if no users handles dropped
-         if (!defs.get()) throw std::runtime_error( "No definition in server") ;
-         if (drop_user_.empty()) defs->client_suite_mgr().remove_client_suites(user());
-         else                    defs->client_suite_mgr().remove_client_suites(drop_user_);
+		case ClientHandleCmd::DROP_USER: {
+		   // will throw if no users handles dropped
+		   if (drop_user_.empty()) as->defs()->client_suite_mgr().remove_client_suites(user());
+		   else                    as->defs()->client_suite_mgr().remove_client_suites(drop_user_);
 
-         if (drop_user_.empty() || drop_user_ == user()) {
-            // return the 0 handle to the client. The client stores the handle locally. Reset to zero.
-            return PreAllocatedReply::client_handle_cmd(0) ;
-         }
-         break;
-      }
+		   if (drop_user_.empty() || drop_user_ == user()) {
+		      // return the 0 handle to the client. The client stores the handle locally. Reset to zero.
+		      return PreAllocatedReply::client_handle_cmd(0) ;
+		   }
+		   break;
+		}
 
 		case ClientHandleCmd::ADD:  {
-		   if (!defs.get()) throw std::runtime_error( "No definition in server") ;
- 			defs->client_suite_mgr().add_suites(client_handle_,suites_);  // will throw if handle not found
+		   as->defs()->client_suite_mgr().add_suites(client_handle_,suites_);  // will throw if handle not found
  			break;
 		}
 
 		case ClientHandleCmd::REMOVE:  {
-		   if (!defs.get()) throw std::runtime_error( "No definition in server") ;
-			defs->client_suite_mgr().remove_suites(client_handle_,suites_);  // will throw if handle not found
+		   as->defs()->client_suite_mgr().remove_suites(client_handle_,suites_);  // will throw if handle not found
   			break;
 		}
 
 		case ClientHandleCmd::AUTO_ADD: {
-		   if (!defs.get()) throw std::runtime_error( "No definition in server") ;
-			defs->client_suite_mgr().auto_add_new_suites(client_handle_,auto_add_new_suites_);  // will throw if handle not found
+		   as->defs()->client_suite_mgr().auto_add_new_suites(client_handle_,auto_add_new_suites_);  // will throw if handle not found
 			break;
 		}
 
       case ClientHandleCmd::SUITES: {
-         if (!defs.get()) throw std::runtime_error( "No definition in server") ;
          return PreAllocatedReply::client_handle_suites_cmd(as) ;
          break;
       }
+
 		default: assert(false); break;
+
  	}
 	return PreAllocatedReply::ok_cmd();
 }

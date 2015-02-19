@@ -138,13 +138,6 @@ public:
 	/// If errors arise the exist user still stay in affect
   	bool reloadWhiteListFile(std::string& errorMsg);
 
-  	/// For Test/Compatibility only
-  	/// For those client request that succeeded and do need to send data back
-  	/// we can control whether a OK command is sent, or connection is closed
-  	/// Older client treat socket close as an error, hence by replay back, they are kept happy
-  	/// Default is not to reply, i.e socket is closed.
-  	bool reply_back_if_ok() const { return reply_back_if_ok_ ;}
-
 #ifdef ECFLOW_MT
   	// returns the numbers threads to be used by the server.
    size_t threads() const { return threads_; };
@@ -201,7 +194,6 @@ private:
 	bool debug_;
    bool help_option_;
    bool version_option_;
-	bool reply_back_if_ok_;
 	int allow_old_client_new_server_;
  	ecf::CheckPt::Mode checkMode_;
 	std::string ecfHome_;
@@ -215,7 +207,7 @@ private:
 	std::string url_;
 	std::string ecf_cmd_;
 	std::string ecf_micro_;
-	std::string ecf_white_list_file_;
+   std::string ecf_white_list_file_;
 	std::map<std::string,bool> validUsers_;  // first user name, second true is write access, false read access
 	boost::asio::ip::tcp tcp_protocol_;      // defaults to IPv4 TCP protocol
 	friend class ServerOptions;

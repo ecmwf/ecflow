@@ -62,12 +62,15 @@ public:
 	/// async handlers or the server, will not stop.
    void terminate();
 
+   /// This can be called at the end of a *USER* command(force,alter,requeue,etc), hence time_now may be >= poll_time
+   /// If this is the case, we will defer job generation
+   void traverse_node_tree_and_job_generate(const boost::posix_time::ptime& time_now, bool user_cmd_context) const;
+
 private:
 	void traverse(const boost::system::error_code& error );
 	void do_traverse();
 	void start_timer();
-	void update_suite_calendar_and_traverse_node_tree(boost::posix_time::ptime& time_now);
-	void traverse_node_tree_and_job_generate();
+	void update_suite_calendar_and_traverse_node_tree(const boost::posix_time::ptime& time_now);
 
 	Server* server_;
 	const ServerEnvironment& serverEnv_;

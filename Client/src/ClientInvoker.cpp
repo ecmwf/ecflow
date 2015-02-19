@@ -28,6 +28,8 @@
 #include "Ecf.hpp"
 #include "DurationTimer.hpp"
 #include "ChangeMgrSingleton.hpp"
+#include "TimeStamp.hpp"
+#include "Log.hpp"
 
 #ifdef DEBUG
 
@@ -133,6 +135,11 @@ void ClientInvoker::setEnv( const std::vector<std::pair<std::string,std::string>
 void ClientInvoker::testInterface() {
    testInterface_ = true;
    clientEnv_.set_test();
+}
+
+const std::string& ClientInvoker::process_or_remote_id() const
+{
+   return clientEnv_.process_or_remote_id();
 }
 
 void ClientInvoker::enable_logging(const std::string& log_file_name)
@@ -253,14 +260,14 @@ int ClientInvoker::invoke(Cmd_ptr cts_cmd) const
 
 int ClientInvoker::do_invoke_cmd(Cmd_ptr cts_cmd) const
 {
-	if (clientEnv_.debug()) cout << "\necflow:ClientInvoker::do_invoke_cmd on_error_throw_exception_(" << on_error_throw_exception_ << ")================================\n";
+	if (clientEnv_.debug()) cout << "\necflow:ClientInvoker::do_invoke_cmd on_error_throw_exception_(" << on_error_throw_exception_ << ")================================" << std::endl;
 	if (clientEnv_.no_ecf())  return 0; // success If NO_ECF set then abort immediately. returning success. Useful in testing  jobs stand-alone.
 	if (testInterface_) return 0;       // The testInterface_ flag allows testing of client interface, parsing of args, without needing to contact server
 	assert(!clientEnv_.host().empty()); // make sure host is NOT empty.
 
 	/// retry_connection_period_ specifies the time to wait, before retrying to connect to server.
 	/// Added to get round glitches in the network.
-	/// However for ping() always default to 1 second. This avoids 20 second wait in release mode.
+	/// However for ping() always default to 1 second. This avoids 10 second wait in release mode.
 	/// We do this both for the CLI(command level interface) and python api
 	unsigned int retry_connection_period = retry_connection_period_;
 	if (cts_cmd->ping_cmd()) retry_connection_period = 1;
@@ -281,7 +288,7 @@ int ClientInvoker::do_invoke_cmd(Cmd_ptr cts_cmd) const
  			int no_of_tries = connection_attempts_;
 			while ( no_of_tries > 0 ) {
 				try {
-					if (clientEnv_.debug()) { cout << "ClientInvoker: >>> About to invoke "; cts_cmd->print(cout); cout << " on " << client_env_host_port() << " : retry_connection_period(" << retry_connection_period << ") no_of_tries(" << no_of_tries << ") cmd_connect_timeout(" << cts_cmd->timeout() << ") ECF_CONNECT_TIMEOUT(" << clientEnv_.connect_timeout() << ") <<<\n";}
+					if (clientEnv_.debug()) { cout << "ClientInvoker: >>> About to invoke "; cts_cmd->print(cout); cout << " on " << client_env_host_port() << " : retry_connection_period(" << retry_connection_period << ") no_of_tries(" << no_of_tries << ") cmd_connect_timeout(" << cts_cmd->timeout() << ") ECF_CONNECT_TIMEOUT(" << clientEnv_.connect_timeout() << ")<<<" << endl;}
 
 					/// *** Each call to io_service.run(); is a *REQUEST* to the server ***
 					/// *** Hence we *MUST* clear the server_reply before each call *******
@@ -295,7 +302,7 @@ int ClientInvoker::do_invoke_cmd(Cmd_ptr cts_cmd) const
 					Client theClient( io_service, cts_cmd , clientEnv_.host(), clientEnv_.port(), clientEnv_.connect_timeout() );
 					if (clientEnv_.allow_new_client_old_server() != 0) theClient.allow_new_client_old_server(clientEnv_.allow_new_client_old_server());
 					io_service.run();
-					if (clientEnv_.debug()) cout << "ClientInvoker: >>> After: io_service.run() <<<\n";
+					if (clientEnv_.debug()) cout << "ClientInvoker: >>> After: io_service.run() <<<" << endl;;
 
 					/// Let see how the server responded if at all.
 					try {
@@ -319,36 +326,36 @@ int ClientInvoker::do_invoke_cmd(Cmd_ptr cts_cmd) const
 					if ( server_reply_.block_client_on_home_server()) {
 						// Valid reply from server. Typically waiting on a expression
 						// Ok _Block_ on _current_ server, and continue waiting, until server reply is ok
-						if (!report_block_client_on_home_server || clientEnv_.debug()) {cout << "ecflow:ClientInvoker: "; cts_cmd->print(cout); cout << " : " << client_env_host_port() << " : WAITING on home server, continue waiting\n";report_block_client_on_home_server = true;}
+						if (!report_block_client_on_home_server || clientEnv_.debug()) { cout << TimeStamp::now() << "ecflow:ClientInvoker: "; cts_cmd->print(cout); cout << " : " << client_env_host_port() << " : WAITING on home server, continue waiting\n";report_block_client_on_home_server = true;}
 						no_of_tries++;
  					}
 					else if (server_reply_.block_client_server_halted()) {
 						// Valid reply from server.
 					   // fall through try again, then try other hosts
-						if (!report_block_client_server_halted || clientEnv_.debug()){ cout << "ecflow:ClientInvoker: "; cts_cmd->print(cout); cout << " : " << client_env_host_port() << " : blocking : server is HALTED, continue waiting\n";report_block_client_server_halted = true;}
+						if (!report_block_client_server_halted || clientEnv_.debug()){ cout << TimeStamp::now() << "ecflow:ClientInvoker: "; cts_cmd->print(cout); cout << " : " << client_env_host_port() << " : blocking : server is HALTED, continue waiting\n";report_block_client_server_halted = true;}
   					}
 					else if (server_reply_.block_client_zombie_detected()) {
 						// Valid reply from server.
 					   // fall through try again, then try other hosts
-						if (!report_block_client_zombie_detected || clientEnv_.debug()){ cout << "ecflow:ClientInvoker: "; cts_cmd->print(cout); cout << " : " << client_env_host_port() << " : blocking : zombie detected, continue waiting\n";report_block_client_zombie_detected = true;}
+						if (!report_block_client_zombie_detected || clientEnv_.debug()){ cout << TimeStamp::now() << "ecflow:ClientInvoker: "; cts_cmd->print(cout); cout << " : " << client_env_host_port() << " : blocking : zombie detected, continue waiting\n";report_block_client_zombie_detected = true;}
   					}
 					else  if (server_reply_.client_request_failed()) {
 						// Valid reply from server
 						// This error is ONLY valid if we got a real reply from the server
 						// as opposed to some kind of connection errors. For connections errors
 						// we fall through and try again.
-						if (clientEnv_.debug()) {cout << "ClientInvoker:"; cts_cmd->print(cout); cout << " failed : " << client_env_host_port() << " : " << server_reply_.error_msg() << "\n";}
+						if (clientEnv_.debug()) {cout << "ecflow:ClientInvoker:"; cts_cmd->print(cout); cout << " failed : " << client_env_host_port() << " : " << server_reply_.error_msg() << "\n";}
 						return 1;
 					}
 					else {
-						std::cout << "ecflow:ClientInvoker:: missed response? for request "; cts_cmd->print(cout); std::cout << " oops\n";
+						std::cout << TimeStamp::now() << "ecflow:ClientInvoker: missed response? for request "; cts_cmd->print(cout); std::cout << " oops" << endl;
 					}
  				}
 				catch (std::exception& e) {
 					// *Some kind of connection error*: fall through and try again. Avoid this message when pinging, i.e to see if server is alive.
-				   if (clientEnv_.debug()) { cerr << "ecflow:ClientInvoker:: Connection error: (" << e.what() <<  ")" << endl; }
+				   if (clientEnv_.debug()) { cerr << "ecflow:ClientInvoker: Connection error: (" << e.what() <<  ")" << endl; }
 				   if (!cts_cmd->ping_cmd()) {
-				      cerr << "ecflow:ClientInvoker:: Connection error: (" << e.what() <<  ")" << endl;
+				      cerr << TimeStamp::now() << "ecflow:ClientInvoker: Connection error: (" << e.what() <<  ")" << endl;
 				   }
  				}
 
@@ -364,7 +371,7 @@ int ClientInvoker::do_invoke_cmd(Cmd_ptr cts_cmd) const
 			//  4/ Dealing with non tasks based request
 			if (!cts_cmd->connect_to_different_servers() || test_ || cts_cmd->ping_cmd() || clientEnv_.denied() ) {
 				std::stringstream ss;
- 				ss <<  "Request( "; cts_cmd->print(ss) << " )";
+ 				ss << TimeStamp::now() << "Request( "; cts_cmd->print(ss) << " )";
  				if (clientEnv_.denied()) ss << " ECF_DENIED ";
  				ss << ", Failed to connect to "  << client_env_host_port()
  				   << ". After " << connection_attempts_ << " attempts. Is the server running ?\n";
@@ -378,7 +385,7 @@ int ClientInvoker::do_invoke_cmd(Cmd_ptr cts_cmd) const
 			if (clientEnv_.debug()) { cout << "ClientInvoker: Time duration = " << duration.total_seconds() << " clientEnv_.max_child_cmd_timeout() = " << clientEnv_.max_child_cmd_timeout() << endl;}
 
 			if ( duration.total_seconds() >= clientEnv_.max_child_cmd_timeout() ) {
-				std::stringstream ss; ss << "ecflow:ClientInvoker: Timed out after " << clientEnv_.max_child_cmd_timeout() << " seconds : for " << client_env_host_port() << "\n";
+				std::stringstream ss; ss << TimeStamp::now() << "ecflow:ClientInvoker: Timed out after " << clientEnv_.max_child_cmd_timeout() << " seconds : for " << client_env_host_port() << "\n";
  				std::string msg = ss.str();
  				cout << msg;
 				server_reply_.set_error_msg(msg);
@@ -387,24 +394,27 @@ int ClientInvoker::do_invoke_cmd(Cmd_ptr cts_cmd) const
 
 			// The host is not playing ball, try the next host, will *restart* with home server, if end reached
 			// *get_next_host* *only* returns false if host exists, and parsing it fails
-			cout << "ecflow:ClientInvoker: "; cts_cmd->print(cout); cout << " current host(" << client_env_host_port() << ") trying next host " << endl;
+			std::string current_host_port = client_env_host_port();
 
 			std::string local_error_msg;
 			if (!clientEnv_.get_next_host(local_error_msg)) {
 			   /// Instead of exiting, Just spit out a warning
-			   cout << "ecflow:ClientInvoker: "; cts_cmd->print(cout); cout << " get next host failed because: " << local_error_msg  << endl;
+			   cout << TimeStamp::now() << "ecflow:ClientInvoker: "; cts_cmd->print(cout); cout << " get next host failed because: " << local_error_msg  << endl;
 			}
+
+			cout << TimeStamp::now() << "ecflow:ClientInvoker: "; cts_cmd->print(cout); cout << " current host(" << current_host_port << ") trying next host(" << client_env_host_port() << ")" << endl;
 
 			if( never_polled ) never_polled = false; // To avoid the first wait
 			else               sleep(NEXT_HOST_POLL_PERIOD);
 		}
 	}
 	catch ( std::exception& e ) {
-		stringstream ss; ss << "ecflow:ClientInvoker: caught exception:\n" << e.what() << "\n";
+		stringstream ss; ss << TimeStamp::now() << "ecflow:ClientInvoker: caught exception: " << e.what() << "\n";
  		server_reply_.set_error_msg(ss.str());
 	}
 	catch ( ... ) {
-		server_reply_.set_error_msg("ecflow:ClientInvoker: Caught Exception of unknown type!\n");
+      stringstream ss; ss << TimeStamp::now() << "ecflow:ClientInvoker: Caught Exception of unknown type!\n";
+		server_reply_.set_error_msg(ss.str());
 	}
 	return 1;
 }
@@ -529,6 +539,11 @@ int ClientInvoker::stats() const
 {
    if (testInterface_) return invoke(CtsApi::stats());
    return invoke(Cmd_ptr(new CtsCmd(CtsCmd::STATS)));
+}
+int ClientInvoker::stats_reset() const
+{
+   if (testInterface_) return invoke(CtsApi::stats_reset());
+   return invoke(Cmd_ptr(new CtsCmd(CtsCmd::STATS_RESET)));
 }
 int ClientInvoker::suites() const
 {
@@ -981,6 +996,7 @@ int ClientInvoker::new_log( const std::string& new_path) const
 }
 int ClientInvoker::getLog( int lastLines) const
 {
+   if (lastLines == 0) lastLines = Log::get_last_n_lines_default();
    if (testInterface_) return invoke(CtsApi::getLog(lastLines));
    return invoke(Cmd_ptr(new LogCmd( LogCmd::GET, lastLines )));
 }

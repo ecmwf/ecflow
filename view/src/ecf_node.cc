@@ -575,6 +575,38 @@ void ecf_node::nokids(bool own) {
   kids_.clear();
 }
 
+int redraw_kids(node* node_, 
+		const std::vector<ecf::Aspect::Type>& aspect) {
+   int tot = 0;
+   for(std::vector<ecf::Aspect::Type>::const_iterator it = aspect.begin(); it != aspect.end(); ++it) {
+     int  kind = 0;
+      switch ( *it ) {
+         case ecf::Aspect::METER:
+	   kind = NODE_METER;
+            break;
+         case ecf::Aspect::LABEL: 	   
+	   kind = NODE_LABEL;
+            break;
+         case ecf::Aspect::EVENT:
+	   kind = NODE_EVENT;
+            break;
+         case ecf::Aspect::LIMIT:
+	   kind = NODE_LIMIT;
+	   break;
+      default: 
+	   continue;
+      }
+      ++tot;
+      if (kind)
+	   for(node *xn = node_->kids(); xn; xn = xn->next())
+	     if (xn) if (xn->type() == kind) {
+		 xn->update(-1, -1, -1);
+		 xn->redraw();
+	       }
+   }
+   return tot;
+}
+
 template<> 
 void ecf_concrete_node<Node>::update(const Node* n, 
                                      const std::vector<ecf::Aspect::Type>& aspect)
@@ -621,34 +653,7 @@ void ecf_concrete_node<Node>::update(const Node* n,
       }
 
    const_cast<Node*>(n)->set_graphic_ptr(xnode());
-   int tot = 0;
-   for(std::vector<ecf::Aspect::Type>::const_iterator it = aspect.begin(); it != aspect.end(); ++it) {
-     int  kind = 0;
-      switch ( *it ) {
-         case ecf::Aspect::METER:
-	   kind = NODE_METER;
-            break;
-         case ecf::Aspect::LABEL: 	   
-	   kind = NODE_LABEL;
-            break;
-         case ecf::Aspect::EVENT:
-	   kind = NODE_EVENT;
-            break;
-         case ecf::Aspect::LIMIT:
-	   kind = NODE_LIMIT;
-	   break;
-      default: 
-	   continue;
-      }
-      ++tot;
-      if (kind)
-	   for(node *xn = node_->kids(); xn; xn = xn->next())
-	     if (xn) if (xn->type() == kind) {
-		 xn->update(-1, -1, -1);
-		 xn->redraw();
-	       }
-   }
-   if (tot==1) return;
+   if (redraw_kids(node_, aspect) == 1) return;
 
    node_->update(-1, -1, -1); // call pop up window with check
    node_->notify_observers();
@@ -671,6 +676,8 @@ void ecf_concrete_node<Suite>::update(const Node* n,
 
   if (owner_->begun())
      owner_->update_generated_variables();
+
+  if (redraw_kids(node_, aspect) == 1) return;
 
   node_->update(-1, -1, -1);
   node_->notify_observers();
@@ -1108,6 +1115,8 @@ template<>
 Node* ecf_concrete_node<Alias>::get_node() const { return owner_; }
 template<>
 Node* ecf_concrete_node<Suite>::get_node() const { return owner_; }
+template<>
+Node* ecf_concrete_node<Defs>::get_node() const { return 0x0; }
 
 const char* ecf_node_name(int ii) {
 

@@ -73,6 +73,8 @@ STC_Cmd_ptr RunNodeCmd::doHandleRequest(AbstractServer* as) const
 	   // presented to the user, who can elect to kill them if required.
 	   bool createJobs = true;
 	   if (test_) createJobs = false;
+
+      /// This will *NOT* timeout, unlike server Job generation
 	   JobsParam jobsParam(as->poll_interval(), createJobs );  // default here is to spawn jobs , spawn jobs = true
 	                                                           // At the task level, if create jobs is false, we will not spawn jobs
 #ifdef DEBUG_JOB_SUBMISSION
@@ -88,6 +90,10 @@ STC_Cmd_ptr RunNodeCmd::doHandleRequest(AbstractServer* as) const
          LOG(Log::ERR,"RunNodeCmd: Failed for " << paths_[i] << " : " << jobsParam.getErrorMsg());
  	   }
 	}
+
+   // Clear up memory allocated to path *ASAP*
+   // When dealing with several thousands paths, this makes a *HUGE* difference
+   vector<string>().swap(paths_); // clear paths_ and minimise its capacity
 
    std::string error_msg = ss.str();
    if (!error_msg.empty()) {

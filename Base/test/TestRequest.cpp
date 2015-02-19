@@ -74,7 +74,8 @@ static void populateCmdVec(std::vector<Cmd_ptr>& cmd_vec, std::vector<STC_Cmd_pt
 	cmd_vec.push_back( Cmd_ptr( new CtsCmd(CtsCmd::TERMINATE_SERVER)));
 	cmd_vec.push_back( Cmd_ptr( new CtsCmd(CtsCmd::RELOAD_WHITE_LIST_FILE)));
 	cmd_vec.push_back( Cmd_ptr( new CtsCmd(CtsCmd::FORCE_DEP_EVAL)));
-	cmd_vec.push_back( Cmd_ptr( new CtsCmd(CtsCmd::STATS)));
+   cmd_vec.push_back( Cmd_ptr( new CtsCmd(CtsCmd::STATS)));
+   cmd_vec.push_back( Cmd_ptr( new CtsCmd(CtsCmd::STATS_RESET)));
 	cmd_vec.push_back( Cmd_ptr( new CtsCmd(CtsCmd::SUITES)));
 	cmd_vec.push_back( Cmd_ptr( new CSyncCmd(CSyncCmd::NEWS,0,0,0)));
    cmd_vec.push_back( Cmd_ptr( new CSyncCmd(CSyncCmd::SYNC,0,0,0)));

@@ -42,10 +42,6 @@ namespace fs = boost::filesystem;
 using namespace std;
 using namespace ecf;
 
-/// Allow the server to *not* reply back to the client, if request was OK
-/// This improves performance.
-/// However client CANT distinguish between servers, when we don't reply!!!!!
-#define DONT_REPLY_IF_OK 1
 
 /// Constructor opens the acceptor and starts waiting for the first incoming connection.
 Server::Server( ServerEnvironment& serverEnv ) :
@@ -57,6 +53,7 @@ Server::Server( ServerEnvironment& serverEnv ) :
    thread_pool_size_(serverEnv.threads()),
    new_connection_(),
 #endif
+   defs_(Defs::create()),      // ECFLOW-182
    traverser_   (this,  io_service_, serverEnv ),
    checkPtSaver_(this,  io_service_, &serverEnv ),
    serverState_(SState::HALTED),
@@ -104,7 +101,13 @@ Server::Server( ServerEnvironment& serverEnv ) :
    // Update log file:
    ecf::log(Log::MSG, "Server initial state is HALTED");
 
-   load_check_pt_file_on_startup();
+   // The defs_ *MUST* be updated with the server state
+   // When we load from the check pt file we call update_defs_server_state();
+   if (!load_check_pt_file_on_startup()) {
+
+      // No check pt files loaded, update defs, with server state
+      update_defs_server_state();           // works on def_
+   }
 
    /// Setup globals used to detect incremental changes to the definition
    Ecf::set_server(true);
@@ -198,13 +201,13 @@ void Server::handle_accept( const boost::system::error_code& e, connection_ptr c
    // Check whether the server was stopped by a signal before this completion
    // handler had a chance to run.
    if (!acceptor_.is_open()) {
-      if (serverEnv_.debug()) cout << "   Server::handle_accept:  acceptor is closed, returning\n";
+      if (serverEnv_.debug()) cout << "   Server::handle_accept:  acceptor is closed, returning" << endl;
       return;
    }
 
    if ( !e ) {
       // Read and interpret message from the client
-      if (serverEnv_.debug()) cout << "   Server::handle_accept\n";
+      if (serverEnv_.debug()) cout << "   Server::handle_accept" << endl;
 
       // Successfully accepted a new connection. Determine what the
       // client sent to us. The connection::async_read() function will
@@ -214,7 +217,7 @@ void Server::handle_accept( const boost::system::error_code& e, connection_ptr c
                                 boost::asio::placeholders::error,conn ) );
    }
    else {
-      if (serverEnv_.debug()) cout << "   Server::handle_accept " << e.message() << "\n";
+      if (serverEnv_.debug()) cout << "   Server::handle_accept " << e.message() << endl;
       if (e != boost::asio::error::operation_aborted) {
          // An error occurred. Log it
          LogToCout toCoutAsWell;
@@ -240,7 +243,7 @@ void Server::handle_read(  const boost::system::error_code& e,connection_ptr con
    if ( !e ) {
 
       // See what kind of message we got from the client
-      if (serverEnv_.debug()) std::cout << "   Server::handle_read : client request " << inbound_request_ << "\n";
+      if (serverEnv_.debug()) std::cout << "   Server::handle_read : client request " << inbound_request_ << endl;
 
       try {
          // Service the in bound request, handling the request will populate the outbound_response_
@@ -251,20 +254,22 @@ void Server::handle_read(  const boost::system::error_code& e,connection_ptr con
          outbound_response_.set_cmd( PreAllocatedReply::error_cmd( e.what()  ));
       }
 
-      // To improve performance, when the reply, is OK, don't bother replying back to the client
-      // The client will receive a EOF, and perceive this as OK.
-      // Need to specifically *ignore* for terminate, otherwise server will not shutdown cleanly
-#ifdef DONT_REPLY_IF_OK
-      if (!serverEnv_.reply_back_if_ok()) {
-         if (!inbound_request_.terminateRequest() && outbound_response_.get_cmd()->isOkCmd()) {
-            // cleanly close down the connection
-            if (serverEnv_.debug()) cout << "   Server::handle_read: NOT replying, since request is OK\n";
-            conn->socket().shutdown(boost::asio::ip::tcp::socket::shutdown_both);
-            conn->socket().close();
-            return;
-         }
-      }
-#endif
+      // Release >= 4.0.6  More reliable to always respond back. Get more accurate logs
+      // However allow old/new client to deal with shutdown of socket:
+      // See: void Client::handle_read() See: ECFLOW-157, ECFLOW-169
+      //
+      //      if (!serverEnv_.reply_back_if_ok()) {
+      //
+      //         if (!inbound_request_.terminateRequest() && outbound_response_.get_cmd()->isOkCmd()) {
+      //
+      //            // cleanly close down the connection
+      //            if (serverEnv_.debug()) cout << "   Server::handle_read: NOT replying, since request is OK" << endl;
+      //
+      //            if (shutdown_socket(conn,"Server::handle_read:"))  conn->socket().close();
+      //            return;
+      //         }
+      //      }
+
       // *Reply* back to the client:
       conn->async_write( outbound_response_,
                           boost::bind(&Server::handle_write,
@@ -292,7 +297,7 @@ void Server::handle_write( const boost::system::error_code& e, connection_ptr co
    // Nothing to do. The socket will be closed automatically when the last
    // reference to the connection object goes away.
    if (serverEnv_.debug())
-      cout << "   Server::handle_write: client request " << inbound_request_ << " replying with  " << outbound_response_ << "\n";
+      cout << "   Server::handle_write: client request " << inbound_request_ << " replying with  " << outbound_response_ << endl;
 
    if (e) {
       ecf::LogToCout logToCout;
@@ -301,6 +306,21 @@ void Server::handle_write( const boost::system::error_code& e, connection_ptr co
       return;
    }
 
+   (void)shutdown_socket(conn,"Server::handle_write:");
+
+   // If asked to terminate we do it here rather than in handle_read.
+   // So that we have responded to the client.
+   // *HOWEVER* only do this if the request was successful.
+   //           we do this by checking that the out bound response was ok
+   //           i.e a read only user should not be allowed to terminate server.
+   if (inbound_request_.terminateRequest() && outbound_response_.get_cmd()->isOkCmd()) {
+      if (serverEnv_.debug()) cout << "   <--Server::handle_write exiting server via terminate() port " << serverEnv_.port() << endl;
+      terminate();
+   }
+}
+
+bool Server::shutdown_socket(connection_ptr conn, const std::string& msg) const
+{
    // For portable behaviour with respect to graceful closure of a connected socket,
    // call shutdown() before closing the socket.
    //
@@ -313,21 +333,13 @@ void Server::handle_write( const boost::system::error_code& e, connection_ptr co
    conn->socket().shutdown(boost::asio::ip::tcp::socket::shutdown_both,ec);
    if (ec) {
       ecf::LogToCout logToCout;
-      std::stringstream ss; ss << "Server::handle_write: socket shutdown both failed: " << ec.message() << " : for request " << inbound_request_;
+      std::stringstream ss; ss << msg << " socket shutdown both failed: " << ec.message() << " : for request " << inbound_request_;
       log(Log::ERR,ss.str());
-      return;
+      return false;
    }
-
-   // If asked to terminate we do it here rather than in handle_read.
-   // So that we have responded to the client.
-   // *HOWEVER* only do this if the request was successful.
-   //           we do this by checking that the out bound response was ok
-   //           i.e a read only user should not be allowed to terminate server.
-   if (inbound_request_.terminateRequest() && outbound_response_.get_cmd()->isOkCmd()) {
-      if (serverEnv_.debug()) cout << "   <--Server::handle_write exiting server via terminate() port " << serverEnv_.port() << endl;
-      terminate();
-   }
+   return true;
 }
+
 #endif
 
 
@@ -335,7 +347,7 @@ void Server::terminate()
 {
    // The server is terminated by cancelling all outstanding asynchronous
    // operations. Once all operations have finished the io_service::run() call  will exit.
-   if (serverEnv_.debug()) cout << "   Server::terminate(): posting call to Server::handle_terminate \n";
+   if (serverEnv_.debug()) cout << "   Server::terminate(): posting call to Server::handle_terminate" << endl;
 
    // Post a call to the stop function so that Server::stop() is safe to call from any thread.
    io_service_.post(boost::bind(&Server::handle_terminate, this));
@@ -343,7 +355,7 @@ void Server::terminate()
 
 void Server::handle_terminate()
 {
-   if (serverEnv_.debug()) cout << boost::this_thread::get_id() << "   Server::handle_terminate() : cancelling checkpt and traverser timers, and signals\n";
+   if (serverEnv_.debug()) cout << boost::this_thread::get_id() << "   Server::handle_terminate() : cancelling checkpt and traverser timers, and signals" << endl;
 
    // Cancel signal
    signals_.clear();
@@ -361,7 +373,7 @@ void Server::handle_terminate()
 
 // ============================== other privates ===========================================
 
-void Server::load_check_pt_file_on_startup()
+bool Server::load_check_pt_file_on_startup()
 {
    // On start up we want different behaviour.
    // If check pt file exists and we can't load then we want to exit
@@ -370,11 +382,11 @@ void Server::load_check_pt_file_on_startup()
    LogToCout logToCout;
    bool checkpt_failed = false;
    if (restore_from_checkpt(serverEnv_.checkPtFilename(),checkpt_failed)) {
-      return;
+      return true;
    }
    bool backup_checkpt_failed = false;
    if (restore_from_checkpt(serverEnv_.oldCheckPtFilename(),backup_checkpt_failed)) {
-      return;
+      return true;
    }
 
    if (backup_checkpt_failed && !fs::exists(serverEnv_.checkPtFilename())) {
@@ -384,6 +396,7 @@ void Server::load_check_pt_file_on_startup()
    if (checkpt_failed && !fs::exists(serverEnv_.oldCheckPtFilename())) {
       throw std::runtime_error("Can not start server, please handle the checkpoint file first");
    }
+   return false;
 }
 
 void Server::loadCheckPtFile()
@@ -410,17 +423,6 @@ bool Server::restore_from_checkpt(const std::string& filename,bool& failed)
       LOG(Log::MSG, "Loading check point file " << filename << " port = " << serverEnv_.port());
 
       try {
-         if (!defs_.get()) {
-            // Do the things that can throw
-            defs_ptr defs = Defs::create();
-            defs->restore_from_checkpt(filename); // this can throw
-
-            // change state
-            defs_ = defs;
-            update_defs_server_state();           // works on def_
-            //cout << "Server::restore_from_checkpt SUCCEDED found " << defs_->suiteVec().size() << " suites\n";
-            return true;
-         }
          defs_->restore_from_checkpt(filename);   // this can throw
          update_defs_server_state();              // works on def_
          //cout << "Server::restore_from_checkpt SUCCEDED found " << defs_->suiteVec().size() << " suites\n";
@@ -441,50 +443,41 @@ void Server::update_defs_server_state()
 {
    /// The Job submission interval, and host port are not persisted, on the DEFS
    /// Hence when restoring from a checkpoint file, Be sure to update server state
-   if (defs_.get())  {
-      // Do any *one* time setup on the defs
 
-      // Set the server environment *ON* the defs, so that generate variables can be created.
-      // gets the environment as read in by the server, and make available for defs
-      // ECF_HOME .
-      // ECF_CHECK ecf.check
-      // ECF_CHECKOLD ecf.check.b
-      std::vector<std::pair<std::string,std::string> > envVec;
-      serverEnv_.variables(envVec);
-      defs_->set_server().add_or_update_server_variables(envVec);
+   // Do any *one* time setup on the defs
 
-      defs_->set_server().hostPort(  hostPort() );
-      defs_->set_server().set_state( serverState_ );
+   // Set the server environment *ON* the defs, so that generate variables can be created.
+   // gets the environment as read in by the server, and make available for defs
+   // ECF_HOME .
+   // ECF_CHECK ecf.check
+   // ECF_CHECKOLD ecf.check.b
+   std::vector<std::pair<std::string,std::string> > envVec;
+   serverEnv_.variables(envVec);
+   defs_->set_server().add_or_update_server_variables(envVec);
 
-      // let the defs store the job submission interval, & whether we want job generation.testing can disable this
-      defs_->set_server().jobSubmissionInterval(  serverEnv_.submitJobsInterval() );
-      defs_->set_server().jobGeneration( serverEnv_.jobGeneration() );
-      LOG_ASSERT( defs_->server().jobSubmissionInterval() != 0 ,"");
+   defs_->set_server().hostPort(  hostPort() );
+   defs_->set_server().set_state( serverState_ );
 
-      /// System needs defs to handle process that have died, and need to flagged as aborted
-      ecf::System::instance()->setDefs(defs_);
-   }
+   // let the defs store the job submission interval, & whether we want job generation.testing can disable this
+   defs_->set_server().jobSubmissionInterval(  serverEnv_.submitJobsInterval() );
+   defs_->set_server().jobGeneration( serverEnv_.jobGeneration() );
+   LOG_ASSERT( defs_->server().jobSubmissionInterval() != 0 ,"");
+
+   /// System needs defs to handle process that have died, and need to flagged as aborted
+   ecf::System::instance()->setDefs(defs_);
 }
 
 void Server::set_server_state(SState::State ss)
 {
    serverState_ = ss;
    stats().status_ = static_cast<int>(serverState_);
-   if (defs_.get()) defs_->set_server().set_state( serverState_ );
+   defs_->set_server().set_state( serverState_ );
 }
 
 
 /// ======================================================================================
 /// AbstractServer function.
 /// ======================================================================================
-
-void Server::create_defs()
-{
-   if (!defs_.get()) {
-      defs_ = Defs::create();
-      update_defs_server_state(); // Do any *one* time setup on the defs
-   }
-}
 
 std::pair<std::string,std::string> Server::hostPort() const
 {
@@ -493,39 +486,26 @@ std::pair<std::string,std::string> Server::hostPort() const
 
 void Server::updateDefs( defs_ptr defs, bool force)
 {
-   if (defs_.get() == NULL) {
-      if (serverEnv_.debug()) cout << "   Server::updateDefs: First time load of Node tree. Updating defs with server environment\n";
+   if (serverEnv_.debug()) std::cout << "   Server::updateDefs: Loading new suites" << endl;
 
-      defs_ = defs;
+   // After the absorb, input defs will be left with NO suites.
+   defs_->absorb(defs.get(),force);
 
-      update_defs_server_state(); // Do any *one* time setup on the defs
-   }
-   else {
-      if (serverEnv_.debug()) std::cout << "   Server::updateDefs: Loading new suites\n";
-
-      // After the absorb, input defs will be left with NO suites.
-      defs_->absorb(defs.get(),force);
-   }
-
-   if (defs_) {
-      defs_->set_most_significant_state();
-      LOG_ASSERT( defs_->server().jobSubmissionInterval() != 0 ,"");
-   }
+   defs_->set_most_significant_state();
+   LOG_ASSERT( defs_->server().jobSubmissionInterval() != 0 ,"");
 }
 
 void Server::clear_defs()
 {
-   if (serverEnv_.debug()) cout << "   Server::clear_defs()\n";
+   if (serverEnv_.debug()) cout << "   Server::clear_defs()" << endl;
 
-   if (defs_.get()) {
-      defs_->clear();
-   }
+   defs_->clear();
 }
 
 void Server::checkPtDefs(ecf::CheckPt::Mode m, int check_pt_interval, int check_pt_save_time_alarm)
 {
    if (serverEnv_.debug())
-      cout << "   Server::checkPtDefs() mode(" << m << ") check_pt_interval(" << check_pt_interval << ") check_pt_save_time_alarm(" << check_pt_save_time_alarm << ")\n";
+      cout << "   Server::checkPtDefs() mode(" << m << ") check_pt_interval(" << check_pt_interval << ") check_pt_save_time_alarm(" << check_pt_save_time_alarm << ")" << endl;
 
    if (m == ecf::CheckPt::UNDEFINED && check_pt_interval == 0 && check_pt_save_time_alarm == 0) {
       checkPtSaver_.explicitSave();  // will always save
@@ -548,13 +528,13 @@ void Server::checkPtDefs(ecf::CheckPt::Mode m, int check_pt_interval, int check_
 
 void Server::restore_defs_from_checkpt()
 {
-   if (serverEnv_.debug()) cout << "   Server::restore_defs_from_checkpt()\n";
+   if (serverEnv_.debug()) cout << "   Server::restore_defs_from_checkpt()" << endl;
 
    if (serverState_ != SState::HALTED ) {
       throw std::runtime_error( "Can not restore from checkpt the server must be halted first");
    }
 
-   if (defs_.get() && !defs_->suiteVec().empty()) {
+   if (!defs_->suiteVec().empty()) {
       // suites must be deleted manually first
       throw std::runtime_error( "Can not restore from checkpt the server suites must be deleted first");
    }
@@ -564,7 +544,7 @@ void Server::restore_defs_from_checkpt()
 
 void Server::nodeTreeStateChanged()
 {
-   if (serverEnv_.debug()) cout << "   Server::nodeTreeStateChanged()\n";
+   if (serverEnv_.debug()) cout << "   Server::nodeTreeStateChanged()" << endl;
 
    // will only actually save if configuration allows it
    checkPtSaver_.saveIfAllowed();
@@ -582,7 +562,7 @@ void Server::shutdown()
    /// RUNNING      yes               yes              yes            yes
    /// SHUTDOWN     yes               yes              no             yes
    /// HALTED       yes               no               no             no
-   if (serverEnv_.debug()) cout << "   Server::shutdown. Stop Scheduling new jobs only\n";
+   if (serverEnv_.debug()) cout << "   Server::shutdown. Stop Scheduling new jobs only" << endl;
 
    // Stop server from creating new jobs. Don't stop the checkPtSaver_ since
    // the jobs communication with server can still change state. Which we want
@@ -604,7 +584,7 @@ void Server::halted()
    /// RUNNING      yes               yes              yes            yes
    /// SHUTDOWN     yes               yes              no             yes
    /// HALTED       yes               no               no             no
-   if (serverEnv_.debug()) cout << "   Server::halted. Stop Scheduling new jobs *and* block task communication. Stop check pointing. Only accept user request\n";
+   if (serverEnv_.debug()) cout << "   Server::halted. Stop Scheduling new jobs *and* block task communication. Stop check pointing. Only accept user request" << endl;
 
    // Stop server from creating new jobs. i.e Job scheduling.
    traverser_.stop();
@@ -629,7 +609,7 @@ void Server::restart()
    /// RUNNING      yes               yes              yes            yes
    /// SHUTDOWN     yes               yes              no             yes
    /// HALTED       yes               no               no             no
-   if (serverEnv_.debug()) std::cout << "   Server::restart\n";
+   if (serverEnv_.debug()) std::cout << "   Server::restart" << endl;
 
    // The server state *MUST* be set, *before* traverser_.start(), since that can kick off job traversal.
    // Job Scheduling can only be done under RUNNING state, hence must be before traverser_.start();
@@ -642,9 +622,14 @@ void Server::restart()
    checkPtSaver_.start();
 }
 
+void Server::traverse_node_tree_and_job_generate(const boost::posix_time::ptime& time_now,bool user_cmd_context ) const
+{
+   traverser_.traverse_node_tree_and_job_generate(time_now, user_cmd_context);
+}
+
 bool Server::reloadWhiteListFile(std::string& errorMsg)
 {
-   if (serverEnv_.debug()) cout << "   Server::reloadWhiteListFile\n";
+   if (serverEnv_.debug()) cout << "   Server::reloadWhiteListFile" << endl;
 
    return serverEnv_.reloadWhiteListFile(errorMsg);
 }
@@ -661,7 +646,7 @@ bool Server::authenticateWriteAccess(const std::string& user,  bool client_reque
 
 bool Server::lock(const std::string& user)
 {
-   if (serverEnv_.debug()) std::cout << "   Server::lock " << user << "\n";
+   if (serverEnv_.debug()) std::cout << "   Server::lock " << user << endl;
 
    if (userWhoHasLock_.empty()) {
       userWhoHasLock_ = user;
@@ -677,7 +662,7 @@ bool Server::lock(const std::string& user)
 }
 void Server::unlock()
 {
-   if (serverEnv_.debug()) std::cout << "   Server::unlock " << userWhoHasLock_ << "\n";
+   if (serverEnv_.debug()) std::cout << "   Server::unlock " << userWhoHasLock_ << endl;
 
    userWhoHasLock_.clear();
    stats().locked_by_user_.clear();
@@ -688,10 +673,6 @@ const std::string& Server::lockedUser() const
    return userWhoHasLock_;
 }
 
-bool Server::allow_job_creation_during_tree_walk() const
-{
-   return serverEnv_.jobGeneration();
-}
 
 int Server::poll_interval() const
 {
@@ -702,7 +683,7 @@ void Server::debug_server_on()
 {
    serverEnv_.set_debug(true);
    std::cout << "\nEnable DEBUG, start with DUMP of server environment:\n\n";
-   std::cout << serverEnv_.dump() << "\n";
+   std::cout << serverEnv_.dump() << endl;
 }
 
 void Server::debug_server_off()

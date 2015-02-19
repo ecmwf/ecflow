@@ -67,10 +67,8 @@ BOOST_AUTO_TEST_CASE( test_server_job_submission )
  		}
  	}
 
-
- 	// The test harness will create corresponding directory structure
- 	// and populate with standard sms files.
- 	ServerTestHarness serverTestHarness;
+ 	// The test harness will create corresponding directory structure and populate with standard ecf files.
+   ServerTestHarness serverTestHarness;
 	serverTestHarness.run(theDefs,ServerTestHarness::testDataDefsLocation("test_server_job_submission.def"));
 
 	cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount() << ")\n";
@@ -91,7 +89,7 @@ BOOST_AUTO_TEST_CASE( test_restore_defs_from_check_pt )
       suite->addTask( Task::create( "t1" ) );
       theDefs.addSuite( suite );
    }
-   ServerTestHarness serverTestHarness(false /* dont bother with log file verification */);
+   ServerTestHarness serverTestHarness;
    serverTestHarness.run(theDefs,ServerTestHarness::testDataDefsLocation("test_restore_defs_from_check_pt.def"));
 
    TestFixture::client().set_throw_on_error(false);

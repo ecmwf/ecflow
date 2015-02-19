@@ -1,11 +1,14 @@
 
-Question to ask user
-====================
+Question to ask user & general support
+=======================================
 
 o Platform and compiler and boost version ?
   It may be compiler/boost version that we have not tested ?
    
 o Version 
+
+o Are they running on a virtual machine ?
+  - Check size of VM for ecflow_server, see below about log file  ECFLOW-174
 
 o Need the definition file.
   - Gives a que to the size of data transmitted for client/server communication.
@@ -15,6 +18,12 @@ o Need the definition file.
 o Log file
   - Will verify the server version
   - show server load, kind of requests, performance issues i.e news/sync
+  - ** Look out for --log=get  in ecflow version < 4.0.6  **and** where the log file is huge.
+    ** This is because the server read in the whole of the log file, and therefore consumed to much memory
+    ** On virtual machines this may cause server to hang. 
+    ** Ask user the VM taken up by the server
+    ** ECFLOW-174
+  - Watch out for --log=get <large number> this will have a same effect if <large number> > 1000000
   
 o Ask user to supply info returned from:
   ecflow_client --port< > --host<> --stats
@@ -41,18 +50,22 @@ o Ask user to supply info returned from:
      and might indicate why its slow.
      
   
-o If there is a performance problem.
+o If there is a performance problem::
+
   * First establish if its *consistent* and reproducible*
-  - Establish if they are using the right version of ecflowview.
-    Post 3.1.0, we now put version in the ecflowview window title.
-  - Check ecflowview Poll rate, if this is excessive it can intefere with interactive use.
-    i.e Edit->Preference, select "Server Options" tab
-        Check "Call server every" <> seconds. If this is <15 seconds, it could explain
-        slow interactive use.
+  	- Establish if they are using the right version of ecflowview.
+      Post 3.1.0, we now put version in the ecflowview window title.
+  	- Check ecflowview Poll rate, if this is excessive it can interfere with interactive use.
+      i.e Edit->Preference, select "Server Options" tab
+      Check "Call server every" <> seconds. If this is <15 seconds, it could explain
+      slow interactive use.
   
   The following should be done *before* trying to reproduce the problem
 
-  - In ecflowView, select the server, RMB->Extra->Client Logging on
+  * If the using version < 4.0.6 and have large log files, check for '--log=get' in log file.
+    This would have had an effect on the server, especially if running on VM.
+  
+  * In ecflowView, select the server, RMB->Extra->Client Logging on
     This will produce a file called:
        >> ecflow_client.log
     This will log the round trip time from the client ->server ->client
@@ -61,7 +74,7 @@ o If there is a performance problem.
     
     make sure they disable it afterwards, ie RMB->Extra->Client Logging off
      
-  - Run strace;
+  * Run strace;
     - ps -ef | grep ecflow_server   # not the pid
     - strace -p <pid> strace.txt 2>& 1
       *OR* strace -p <pid> -o tmp.txt

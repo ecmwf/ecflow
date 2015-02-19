@@ -70,6 +70,11 @@ BOOST_AUTO_TEST_CASE( test_today_attr)
    BOOST_CHECK_MESSAGE(timeSeries_free_slots.size() == 11,"Expected 11 free slots for " << timeSeries.toString() << " but found "  << timeSeries_free_slots.size());
    BOOST_CHECK_MESSAGE(timeSeries2_free_slots.size() == 5,"Expected 5 free slots for " << timeSeries2.toString() << " but found "  << timeSeries_free_slots.size());
 
+   // follow normal process
+   timeSeries.reset( calendar );
+   timeSeries2.reset( calendar );
+   timeSeries3.reset( calendar );
+
    bool day_changed = false; // after midnight make sure we keep day_changed
    for(int m=1; m < 96; m++) {
       calendar.update( time_duration( minutes(30) ) );

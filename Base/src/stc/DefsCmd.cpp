@@ -26,7 +26,6 @@ using namespace boost;
 
 //=====================================================================================
 // The defs command returns the full definition back to the client
-// Note: In the case where defs has not been loaded, it can be NULL
 
 DefsCmd::DefsCmd(AbstractServer* as,bool save_edit_history)
 {
@@ -35,14 +34,12 @@ DefsCmd::DefsCmd(AbstractServer* as,bool save_edit_history)
 
 void DefsCmd::init(AbstractServer* as,bool save_edit_history)
 {
-	defs_ = as->defs();
-	if (defs_.get()) {
-		/// Return the current value of the state change no. So the that
-		/// the next call to get the SSYncCmd , we need only return what's changed
-		defs_->set_state_change_no( Ecf::state_change_no() );
-		defs_->set_modify_change_no( Ecf::modify_change_no() );
-		defs_->save_edit_history(save_edit_history);
-	}
+   defs_ = as->defs();
+   /// Return the current value of the state change no. So the that
+   /// the next call to get the SSYncCmd , we need only return what's changed
+   defs_->set_state_change_no( Ecf::state_change_no() );
+   defs_->set_modify_change_no( Ecf::modify_change_no() );
+   defs_->save_edit_history(save_edit_history);
 }
 
 bool DefsCmd::equals(ServerToClientCmd* rhs) const
@@ -59,10 +56,7 @@ bool DefsCmd::equals(ServerToClientCmd* rhs) const
 
 std::ostream& DefsCmd::print(std::ostream& os) const
 {
-	os << "cmd:DefsCmd [ ";
-	if (defs_) os << "defs";
-	else       os << "defs == NULL";
-	os << " ]";
+	os << "cmd:DefsCmd [ defs ]";
 	return os;
 }
 

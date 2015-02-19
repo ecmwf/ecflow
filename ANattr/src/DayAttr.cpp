@@ -26,6 +26,23 @@ using namespace ecf;
 
 //===============================================================================
 
+static std::string theDay(DayAttr::Day_t day)
+{
+   switch (day) {
+      case DayAttr::SUNDAY:    return "sunday"; break;
+      case DayAttr::MONDAY:    return "monday"; break;
+      case DayAttr::TUESDAY:   return "tuesday"; break;
+      case DayAttr::WEDNESDAY: return "wednesday"; break;
+      case DayAttr::THURSDAY:  return "thursday"; break;
+      case DayAttr::FRIDAY:    return "friday"; break;
+      case DayAttr::SATURDAY:  return "saturday"; break;
+      default: assert(false);break;
+   }
+   return std::string();
+}
+
+//===============================================================================
+
 void DayAttr::calendarChanged( const ecf::Calendar& c )
 {
    if (makeFree_) {
@@ -137,20 +154,6 @@ bool DayAttr::structureEquals(const DayAttr& rhs) const
 	return (day_ == rhs.day_);
 }
 
-std::string DayAttr::theDay(DayAttr::Day_t day) const
-{
-	switch (day) {
-		case DayAttr::SUNDAY:    return "sunday"; break;
-		case DayAttr::MONDAY:    return "monday"; break;
-		case DayAttr::TUESDAY:   return "tuesday"; break;
-		case DayAttr::WEDNESDAY: return "wednesday"; break;
-		case DayAttr::THURSDAY:  return "thursday"; break;
-		case DayAttr::FRIDAY:    return "friday"; break;
-		case DayAttr::SATURDAY:  return "saturday"; break;
-		default: assert(false);break;
-	}
-	return std::string();
-}
 
 DayAttr DayAttr::create(const std::string& dayStr)
 {

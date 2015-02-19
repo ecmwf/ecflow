@@ -1,14 +1,14 @@
 //============================================================================
 // Name        :
 // Author      : Avi
-// Revision    : $Revision: #35 $ 
+// Revision    : $Revision: #35 $
 //
-// Copyright 2009-2012 ECMWF. 
-// This software is licensed under the terms of the Apache Licence version 2.0 
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
-// In applying this licence, ECMWF does not waive the privileges and immunities 
-// granted to it by virtue of its status as an intergovernmental organisation 
-// nor does it submit to any jurisdiction. 
+// Copyright 2009-2012 ECMWF.
+// This software is licensed under the terms of the Apache Licence version 2.0
+// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+// In applying this licence, ECMWF does not waive the privileges and immunities
+// granted to it by virtue of its status as an intergovernmental organisation
+// nor does it submit to any jurisdiction.
 //
 // Description :
 //============================================================================
@@ -29,6 +29,7 @@
 #include "Family.hpp"
 #include "Task.hpp"
 #include "DurationTimer.hpp"
+#include "PrintStyle.hpp"
 
 using namespace std;
 using namespace ecf;
@@ -40,7 +41,7 @@ BOOST_AUTO_TEST_SUITE( TestSuite )
 BOOST_AUTO_TEST_CASE( test_single_real_time )
 {
    DurationTimer timer;
-   cout << "Test:: ...test_time_single_slot " << flush;
+   cout << "Test:: ...test_single_real_time " << flush;
    TestClean clean_at_start_and_end;
 
    // Create the defs file corresponding to the text below
@@ -53,13 +54,13 @@ BOOST_AUTO_TEST_CASE( test_single_real_time )
 
    //# Note: we have to use relative paths, since these tests are relocatable
    //suite suite
-   //	edit SLEEPTIME 1
-   //	edit ECF_INCLUDE $ECF_HOME/includes
+   // edit SLEEPTIME 1
+   // edit ECF_INCLUDE $ECF_HOME/includes
    //  clock real <todays date>
-   //	family family
-   //   	task t1
+   // family family
+   //    task t1
    //         time 10:00
-   //  	endfamily
+   //    endfamily
    //endsuite
    Defs theDefs;
    {
@@ -67,7 +68,7 @@ BOOST_AUTO_TEST_CASE( test_single_real_time )
       // with todays time + minute
       // Avoid adding directly to TimeSlot
       // i.e if local time is 9:59 and we create a TimeSlot like
-      // 		task->addTime( ecf::TimeAttr( ecf::TimeSlot(theTm.tm_hour,theTm.tm_min+3) )  );
+      //       task->addTime( ecf::TimeAttr( ecf::TimeSlot(theTm.tm_hour,theTm.tm_min+3) )  );
       // The the minute will be 62, which is illegal and will not parse
       boost::posix_time::ptime theLocalTime = boost::posix_time::ptime(date(2010,6,21),time_duration(10,0,0));
       boost::posix_time::ptime time1 =  theLocalTime +  minutes(1);
@@ -77,7 +78,7 @@ BOOST_AUTO_TEST_CASE( test_single_real_time )
       //       we will find that state change happens at job submission interval,
       //       and hence skews time series.  Which can leave state in a queued state,
       //       and hence test never completes
-      suite_ptr suite = theDefs.add_suite("test_time_single_slot");
+      suite_ptr suite = theDefs.add_suite("test_single_real_time");
       ClockAttr clockAttr(theLocalTime,false);
       suite->addClock( clockAttr );
 
@@ -89,8 +90,8 @@ BOOST_AUTO_TEST_CASE( test_single_real_time )
 
    // The test harness will create corresponding directory structure
    // and populate with standard ecf files.
-   ServerTestHarness serverTestHarness(false/*do log file verification*/,false/* dont do standard verification */);
-   serverTestHarness.run(theDefs,ServerTestHarness::testDataDefsLocation("test_time_single_slot.def"));
+   ServerTestHarness serverTestHarness;
+   serverTestHarness.run(theDefs,ServerTestHarness::testDataDefsLocation("test_single_real_time.def"));
 
    cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount() << ")\n";
 }
@@ -110,14 +111,14 @@ BOOST_AUTO_TEST_CASE( test_time_multiple_single_slot )
 
    //# Note: we have to use relative paths, since these tests are relocatable
    //suite test_time_multiple_single_slot
-   //	edit ECF_INCLUDE $ECF_HOME/includes
+   // edit ECF_INCLUDE $ECF_HOME/includes
    //  clock real <todays date>
-   //	family family
-   //   	task t1
+   // family family
+   //    task t1
    //         time 10:01
    //         time 10:04
    //         time 10:07
-   //  	endfamily
+   //    endfamily
    //endsuite
    Defs theDefs;
    {
@@ -143,7 +144,7 @@ BOOST_AUTO_TEST_CASE( test_time_multiple_single_slot )
 
    // The test harness will create corresponding directory structure
    // and populate with standard ecf files.
-   ServerTestHarness serverTestHarness(false/*do log file verification*/,false/* dont do standard verification */);
+   ServerTestHarness serverTestHarness;
    serverTestHarness.run(theDefs,ServerTestHarness::testDataDefsLocation("test_time_multiple_single_slot.def"));
 
    cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount() << ")\n";
@@ -164,13 +165,13 @@ BOOST_AUTO_TEST_CASE( test_time_relative_time_series )
 
    //# Note: we have to use relative paths, since these tests are relocatable
    //suite test_time_relative_time_series
-   //	edit SLEEPTIME 1
-   //	edit ECF_INCLUDE $ECF_HOME/includes
+   // edit SLEEPTIME 1
+   // edit ECF_INCLUDE $ECF_HOME/includes
    //  clock real <todays date>
-   //	family family
-   //   	task t1
+   // family family
+   //    task t1
    //       time +<start> <finish> incr
-   //  	endfamily
+   //    endfamily
    //endsuite
    Defs theDefs;
    {
@@ -195,7 +196,7 @@ BOOST_AUTO_TEST_CASE( test_time_relative_time_series )
 
    // The test harness will create corresponding directory structure
    // and populate with standard ecf files.
-   ServerTestHarness serverTestHarness(false/*do log file verification*/,false/* dont do standard verification */);
+   ServerTestHarness serverTestHarness;
    serverTestHarness.run(theDefs, ServerTestHarness::testDataDefsLocation("test_time_relative_time_series.def"));
 
    cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount() << ")\n";
@@ -215,13 +216,13 @@ BOOST_AUTO_TEST_CASE( test_time_real_series )
 
    //# Note: we have to use relative paths, since these tests are relocatable
    //suite test_time_real_series
-   //	edit SLEEPTIME 1
-   //	edit ECF_INCLUDE $ECF_HOME/includes
+   // edit SLEEPTIME 1
+   // edit ECF_INCLUDE $ECF_HOME/includes
    //  clock real <date>
-   //	family family
-   //   	task t1
+   // family family
+   //    task t1
    //       time <start> <finish> <incr>
-   //  	endfamily
+   //    endfamily
    //endsuite
    Defs theDefs;
    {
@@ -253,12 +254,134 @@ BOOST_AUTO_TEST_CASE( test_time_real_series )
 
    // The test harness will create corresponding directory structure
    // and populate with standard sms files.
-   ServerTestHarness serverTestHarness(false/*do log file verification*/,false/* dont do standard verification */);
+   ServerTestHarness serverTestHarness;
    //serverTestHarness.add_default_sleep_time(false); // avoid missing time steps due to submit->active->complete > job submission interval
    serverTestHarness.run(theDefs, ServerTestHarness::testDataDefsLocation("test_time_real_series.def"));
 
    cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount() << ")\n";
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+BOOST_AUTO_TEST_CASE( test_single_real_time_near_midnight )
+{
+   DurationTimer timer;
+   cout << "Test:: ...test_single_real_time_near_midnight " << flush;
+   int the_server_version = TestFixture::server_version() ;
+   if (the_server_version == 403 ) {
+      cout << " SKIPPING, This test does not work with 403, current server version is " << the_server_version << "\n";
+      return;
+   }
 
+   TestClean clean_at_start_and_end;
+
+   //# Note: we have to use relative paths, since these tests are relocatable
+   //suite suite
+   // edit SLEEPTIME 4
+   // edit ECF_INCLUDE $ECF_HOME/includes
+   //  clock real <todays date>
+   // family family
+   //    task t1
+   //         time 23:59
+   //    endfamily
+   //endsuite
+   Defs theDefs;
+   {
+      // ECFLOW-130
+      // Make sure job completes after midnight.
+      // The task SHOULD stay complete and *NOT* requeue
+      // Since TestHarness requires suite completion, we dont need to do anything.
+      boost::posix_time::ptime time_start = boost::posix_time::ptime(date(2010,6,21),time_duration(23,59,0));
+      boost::posix_time::ptime clock_start = time_start -  minutes(1);
+
+      suite_ptr suite = theDefs.add_suite("test_single_real_time_near_midnight");
+      ClockAttr clockAttr(clock_start,false);
+      suite->addClock( clockAttr );
+      suite->add_variable("SLEEPTIME",boost::lexical_cast<string>(TestFixture::job_submission_interval()*2));
+
+      family_ptr fam = suite->add_family("family");
+      task_ptr task = fam->add_task("t");
+      task->addTime( ecf::TimeAttr(ecf::TimeSlot(time_start.time_of_day())));
+      task->addVerify( VerifyAttr(NState::COMPLETE,1) );      // task should complete 1 times
+   }
+
+   // The test harness will create corresponding directory structure and populate with standard ecf files.
+   ServerTestHarness serverTestHarness;
+   serverTestHarness.run(theDefs,ServerTestHarness::testDataDefsLocation("test_single_real_time_near_midnight.def"));
+
+#ifdef DEBUG_ME
+   BOOST_REQUIRE_MESSAGE(TestFixture::client().sync_local() == 0, "Could not get the defs from server\n" << TestFixture::client().errorMsg());
+   defs_ptr defs = TestFixture::client().defs();
+   PrintStyle::setStyle(PrintStyle::STATE);
+   std::cout << *defs;
+#endif
+
+   cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount() << ")\n";
+}
+
+BOOST_AUTO_TEST_CASE( test_time_real_series_near_midnight )
+{
+   DurationTimer timer;
+   cout << "Test:: ...test_time_real_series_near_midnight " << flush;
+   int the_server_version = TestFixture::server_version() ;
+   if (the_server_version == 403 ) {
+      cout << " SKIPPING, This test does not work with 403, current server version is " << the_server_version << "\n";
+      return;
+   }
+
+   TestClean clean_at_start_and_end;
+
+   // SLOW SYSTEMS
+   // for each time attribute leave GAP of 3 * job submission interval
+   // on slow systems submitted->active->complete > TestFixture::job_submission_interval()
+   // Also the task duration must be greater than job_submission_interval,  otherwise
+   // we will get multiple invocation for the same time step
+
+   //# Note: we have to use relative paths, since these tests are relocatable
+   //suite test_time_real_series
+   // edit SLEEPTIME 1
+   // edit ECF_INCLUDE $ECF_HOME/includes
+   //  clock real <date>
+   // family family
+   //    task t1
+   //       time <start> <finish> <incr>
+   //    endfamily
+   //endsuite
+   Defs theDefs;
+   {
+      // ECFLOW-130
+      // make sure that last job, *runs* and completes after midnight.
+      // It should stay complete and not requeue.
+      // Test harness, will check suite task->family->suite completes, hence no need to do anything
+      boost::posix_time::ptime last_time = boost::posix_time::ptime(date(2010,6,21),time_duration(23,59,0));
+      boost::posix_time::ptime first_time = last_time - minutes(TestFixture::job_submission_interval()*2);
+      boost::posix_time::ptime clock_start = first_time - minutes(1);
+
+      suite_ptr suite = theDefs.add_suite("test_time_real_series_near_midnight");
+      suite->add_variable("SLEEPTIME",boost::lexical_cast<string>(TestFixture::job_submission_interval()*2));
+
+      ClockAttr clockAttr(clock_start,false);
+      suite->addClock( clockAttr );
+
+      family_ptr  fam = suite->add_family("family");
+      task_ptr task = fam->add_task("t");
+      task->addTime( ecf::TimeAttr(
+               ecf::TimeSlot(first_time.time_of_day()),
+               ecf::TimeSlot(last_time.time_of_day()),
+               ecf::TimeSlot(0,TestFixture::job_submission_interval()*2)
+      ));
+      task->addVerify( VerifyAttr(NState::COMPLETE,2) );      // task should complete 2 times
+   }
+
+   // The test harness will create corresponding directory structure and populate with standard ecf files.
+   ServerTestHarness serverTestHarness;
+   serverTestHarness.run(theDefs, ServerTestHarness::testDataDefsLocation("test_time_real_series_near_midnight.def"));
+
+#ifdef DEBUG_ME
+   BOOST_REQUIRE_MESSAGE(TestFixture::client().sync_local() == 0, "Could not get the defs from server\n" << TestFixture::client().errorMsg());
+   defs_ptr defs = TestFixture::client().defs();
+   PrintStyle::setStyle(PrintStyle::STATE);
+   std::cout << *defs;
+#endif
+
+   cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount() << ")\n";
+}
+BOOST_AUTO_TEST_SUITE_END()

@@ -135,6 +135,9 @@ else
          
       # BOOST Build =====================================================
    
+      #  export BOOST_ROOT, this is need by some the .jam file to locate boost build
+      export BOOST_ROOT=%BOOST_DIR%/%BOOST_VERSION%
+      
       # TEST should be set to -n if defined
       $BOOST_ROOT/bjam %CUSTOM_BJAM_ARGS:% variant=%MODE% -j%NO_OF_CORES% %TEST:% -d2
    fi

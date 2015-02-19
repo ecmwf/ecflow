@@ -46,6 +46,9 @@
 /// TEXT,BINARY, PORTABLE_BINARY there was _no_ discernible difference in the
 /// run times? I would have expected client->server communication via binary
 /// to be faster. However the definition file we are using are relatively small!
+///
+/// See: ACore/src/boost_archive.hpp for details about serialisation migration issues
+///
 /**
  * Each message sent using this class consists of:
  * @li An 8-byte header containing the length of the serialized data in
@@ -79,6 +82,7 @@ public:
 	}
 
 	// support for forward compatibility, by changing boost archive version, used in client context
+	// See: ACore/src/boost_archive.hpp for details about serialisation migration issues
    void allow_new_client_old_server(int f)  { allow_new_client_old_server_ = f;}
 
    // support for forward compatibility, by changing boost archive version, used in server context
@@ -97,7 +101,7 @@ public:
 		   ecf::save_as_string(outbound_data_,t);
 
          if (allow_new_client_old_server_ != 0 && !Ecf::server()) {
-            // Client context, forward compatibility, new client -> old server(* assumes old server is boost lib version 9 *)
+            // Client context, forward compatibility, new client -> old server
             ecf::boost_archive::replace_version(outbound_data_,allow_new_client_old_server_);
          }
 
@@ -110,8 +114,7 @@ public:
 
 		} catch (const boost::archive::archive_exception& ae ) {
 		   // Unable to decode data. Something went wrong, inform the caller.
-		   ecf::LogToCout logToCout;
-		   LOG(ecf::Log::ERR,"Connection::async_write boost::archive::archive_exception " << ae.what());
+		   log_archive_error("Connection::async_write, boost::archive::archive_exception ",ae);
 		   boost::system::error_code error(boost::asio::error::invalid_argument);
 		   socket_.get_io_service().post(boost::bind(handler, error));
 		   return;
@@ -125,8 +128,7 @@ public:
 		header_stream << std::setw(header_length) << std::hex << outbound_data_.size();
 		if (!header_stream || header_stream.str().size() != header_length) {
 			// Something went wrong, inform the caller.
-			ecf::LogToCout logToCout;
-			LOG(ecf::Log::ERR,"Connection::async_write could not format header");
+		   log_error("Connection::async_write, could not format header");
 			boost::system::error_code error(boost::asio::error::invalid_argument);
 			socket_.get_io_service().post(boost::bind(handler, error));
 			return;
@@ -242,8 +244,7 @@ private:
 			catch (const boost::archive::archive_exception& ae ) {
 
 			   // Log anyway so we know client <--> server incompatible
-				ecf::LogToCout logToCout;
-				LOG(ecf::Log::ERR,"Connection::handle_read_data boost::archive::archive_exception " << ae.what());
+			   log_archive_error("Connection::handle_read_data, boost::archive::archive_exception ",ae);
 
 			   // two context, client code or server, before giving up, try
 			   // - Client context, new server  -> old client (* assumes old client updated, with this code *)
@@ -271,9 +272,7 @@ private:
 				return;
 			}
 			catch (std::exception& ) {
-				// Unable to decode data.
-				ecf::LogToCout logToCout;
-				LOG(ecf::Log::ERR,"Connection::handle_read_data Unable to decode data");
+			   log_error("Connection::handle_read_data, Unable to decode data");
  				boost::system::error_code error( boost::asio::error::invalid_argument);
 				boost::get<0>(handler)(error);
 				return;
@@ -283,6 +282,22 @@ private:
 			boost::get<0>(handler)(e);
 		}
 	}
+
+private:
+
+	void log_error(const char* msg) {
+      const char* in_context = ", in client";
+      if (Ecf::server()) in_context = ", in server";
+      ecf::LogToCout logToCout;
+      LOG(ecf::Log::ERR, msg << in_context);
+	}
+
+   void log_archive_error(const char* msg,const boost::archive::archive_exception& ae) {
+      const char* in_context = ", in client";
+      if (Ecf::server()) in_context = ", in server";
+      ecf::LogToCout logToCout;
+      LOG(ecf::Log::ERR, msg << ae.what() << in_context);
+   }
 
 private:
    int allow_new_client_old_server_;

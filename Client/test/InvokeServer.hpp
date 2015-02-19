@@ -19,7 +19,6 @@
 #include "boost/filesystem/operations.hpp"
 #include <boost/noncopyable.hpp>
 
-#include "TerminateServer.hpp"
 #include "TestHelper.hpp"
 #include "ClientInvoker.hpp"
 #include "Str.hpp"
@@ -39,9 +38,7 @@ public:
 	                 remove_checkpt_file_after_server_exit_(remove_checkpt_file_after_server_exit)
    {
 		if (host_.empty()) {
-			if(!msg.empty()) std::cout << msg << "   port(" << port_ << ")\n";
-
-			host_ = ecf::Str::LOCALHOST();
+			if(!msg.empty()) std::cout << msg << "   port(" << port_ << ")" << std::endl;
 
 			doStart(port_,disable_job_generation,remove_checkpt_file_before_server_start);
 		}
@@ -55,7 +52,7 @@ public:
          test_name += ecf::Str::COLON();
          test_name += port_;
 
-			std::cout <<test_name << "\n";
+			std::cout << test_name << std::endl;
 
 			ClientInvoker theClient(host_,port_);
 		   theClient.logMsg( test_name );
@@ -63,19 +60,36 @@ public:
 		}
 	}
 
-	// This will also remove the generated files. Please see TerminateServer
-	~InvokeServer() { TerminateServer terminateServer(port_,remove_checkpt_file_after_server_exit_); }
+   InvokeServer(const std::string& port,
+                  bool stop_ambiguaty,
+                  bool disable_job_generation = false,
+                  bool remove_checkpt_file_before_server_start = true,
+                  bool remove_checkpt_file_after_server_exit = true
+                ) : port_(port),
+                    remove_checkpt_file_after_server_exit_(remove_checkpt_file_after_server_exit)
+   {
+      // host_ is empty.
+      doStart(port_,disable_job_generation,remove_checkpt_file_before_server_start);
+   }
+
+	~InvokeServer() {
+	   // This will also remove the generated files.
+	   // Will only terminate local server, host_ is *EMPTY* for local server, using two constructors above
+	   if (host_.empty()) {
+	      doEnd(ecf::Str::LOCALHOST(), port_, remove_checkpt_file_after_server_exit_);
+	   }
+	}
 
 	const std::string& port() const { return port_; }
-	const std::string& host() const { return host_; }
+	const std::string& host() const { if (host_.empty()) return ecf::Str::LOCALHOST(); return host_; }
 
 	std::string ecf_log_file() const            { return host_name_.ecf_log_file(port_);}
  	std::string ecf_checkpt_file() const        { return host_name_.ecf_checkpt_file(port_); }
 	std::string ecf_backup_checkpt_file() const { return host_name_.ecf_backup_checkpt_file(port_); }
 
+
 	static void doStart(const std::string& port,bool disable_job_generation = false, bool remove_checkpt_file_before_server_start = true)
 	{
-
 		/// Remove check pt and backup check pt file, else server will load it & remove log file
 		ecf::Host h;
 		if (remove_checkpt_file_before_server_start) {
@@ -106,6 +120,32 @@ public:
       ClientInvoker theClient(ecf::Str::LOCALHOST(),port);
       BOOST_REQUIRE_MESSAGE(theClient.wait_for_server_reply(),"InvokeServer::doStart: Server failed to start after 60 second on " << ecf::Str::LOCALHOST() << ":" << port);
 	}
+
+
+   static void doEnd( const std::string& host, const std::string& port, bool remove_checkpt_file_after_server_exit )
+   {
+      //    std::cout << "*****InvokeServer::doEnd    Closing server on  " << host << ecf::Str::COLON() << port << "\n";
+      {
+         ClientInvoker theClient(host,port);
+         BOOST_REQUIRE_NO_THROW( theClient.terminateServer() );
+         BOOST_REQUIRE_MESSAGE( theClient.wait_for_server_death(),"Failed to terminate server after 60 seconds\n");
+      }
+
+      // remove port file. This prevented multiple different process from opening servers with same port number
+      ecf::EcfPortLock::remove( port );
+
+      // Remove generated file comment for debug
+      ecf::Host h;
+      boost::filesystem::remove(h.ecf_log_file(port));
+      BOOST_CHECK_MESSAGE(!boost::filesystem::exists(h.ecf_log_file(port)), "log file " << h.ecf_log_file(port) << " not deleted\n");
+
+      if (remove_checkpt_file_after_server_exit) {
+         boost::filesystem::remove(h.ecf_checkpt_file(port));
+         boost::filesystem::remove(h.ecf_backup_checkpt_file(port));
+         BOOST_CHECK_MESSAGE(!boost::filesystem::exists(h.ecf_checkpt_file(port)), "file " << h.ecf_checkpt_file(port) << " not deleted\n");
+         BOOST_CHECK_MESSAGE(!boost::filesystem::exists(h.ecf_backup_checkpt_file(port)), "file " << h.ecf_backup_checkpt_file(port) << " not deleted\n");
+      }
+   }
 
 private:
 	InvokeServer(const InvokeServer&);

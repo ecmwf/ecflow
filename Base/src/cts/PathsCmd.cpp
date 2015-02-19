@@ -31,6 +31,10 @@ using namespace std;
 using namespace boost;
 namespace po = boost::program_options;
 
+// forward declare static functions
+static void check_for_active_or_submitted_tasks(AbstractServer* as,node_ptr theNodeToDelete);
+
+
 PathsCmd::PathsCmd(Api api,const std::string& absNodePath, bool force)
 : api_(api),force_(force)
 {
@@ -112,7 +116,6 @@ STC_Cmd_ptr PathsCmd::doHandleRequest(AbstractServer* as) const
 
       case PathsCmd::CHECK:  {
          as->update_stats().check_++;
-         if (!as->defs()) throw std::runtime_error( "No definition in server") ;
 
          if (  paths_.empty() ) {
             // check all the defs,
@@ -160,7 +163,6 @@ STC_Cmd_ptr PathsCmd::doHandleRequest(AbstractServer* as) const
             as->clear_defs();
          }
          else {
-            if (!as->defs()) throw std::runtime_error("No definition in server:");
 
             size_t vec_size = paths_.size();
             for(size_t i = 0; i < vec_size; i++) {
@@ -201,6 +203,8 @@ STC_Cmd_ptr PathsCmd::doHandleRequest(AbstractServer* as) const
       }
 
       case PathsCmd::RESUME: {
+
+         // At the end of resume, we need to traverse node tree, and do job submission
          as->update_stats().node_resume_++;
          size_t vec_size = paths_.size();
          for(size_t i = 0; i < vec_size; i++) {
@@ -212,6 +216,7 @@ STC_Cmd_ptr PathsCmd::doHandleRequest(AbstractServer* as) const
             }
             SuiteChanged0 changed(theNode);
             theNode->resume();
+            as->increment_job_generation_count(); // in case we throw below
          }
          break;
       }
@@ -255,7 +260,6 @@ STC_Cmd_ptr PathsCmd::doHandleRequest(AbstractServer* as) const
 
       case PathsCmd::EDIT_HISTORY: {
          as->update_stats().node_edit_history_++;
-         if (!as->defs()) throw std::runtime_error( "No definition in server") ;
          if (paths_.empty()) throw std::runtime_error( "No paths specified for edit history") ;
          // Only first path used
          const std::deque<std::string>& edit_history = as->defs()->get_edit_history(paths_[0]);
@@ -265,6 +269,7 @@ STC_Cmd_ptr PathsCmd::doHandleRequest(AbstractServer* as) const
       }
 
       case PathsCmd::NO_CMD: assert(false); break;
+
       default: assert(false); break;
    }
 
@@ -277,18 +282,22 @@ STC_Cmd_ptr PathsCmd::doHandleRequest(AbstractServer* as) const
       throw std::runtime_error( error_msg ) ;
    }
 
+   if ( PathsCmd::RESUME  == api_) {
+      // After resume we need to do job submission.
+      return doJobSubmission(as);
+   }
+
    return PreAllocatedReply::ok_cmd();
 }
 
-void PathsCmd::check_for_active_or_submitted_tasks(AbstractServer* as,node_ptr theNodeToDelete) const
+static void check_for_active_or_submitted_tasks(AbstractServer* as,node_ptr theNodeToDelete)
 {
    vector<Task*> taskVec;
    if ( theNodeToDelete.get() ) {
       theNodeToDelete->getAllTasks(taskVec);
    }
    else {
-      defs_ptr defs = as->defs();
-      if (defs.get()) defs->getAllTasks(taskVec);
+      as->defs()->getAllTasks(taskVec);
    }
 
    vector<Task*> activeVec,submittedVec;

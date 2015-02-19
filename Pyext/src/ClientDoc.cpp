@@ -426,6 +426,38 @@ const char* ClientDoc::news() {
             ;
 }
 
+const char* ClientDoc::changed_node_paths() {
+   return
+            "After a call to sync_local() we can access the list of nodes that changed\n\n"
+            "The returned list consists of node paths. *IF* the list is empty assume that\n"
+            "whole definition changed. This should be expected after the first call to sync_local()\n"
+            "since that always retrieves the full definition from the server::\n\n"
+            "   void changed_node_paths()\n"
+            "\n"
+            "\nUsage::\n\n"
+            "try:\n"
+            "   ci = Client()                          # use default host(ECF_NODE) & port(ECF_PORT)\n"
+            "   if ci.news_local():                    # has the server changed\n"
+            "      print 'Server Changed'              # server changed bring client in sync with server\n"
+            "      ci.sync_local()                     # get the full definition from the server if first time\n"
+            "                                          # otherwise apply incremental changes to Client definition,\n"
+            "                                          # bringing it in sync with the server definition\n"
+            "      defs = ci.get_defs()                # get the updated/synchronised definition\n"
+            "      for path in ci.changed_node_paths():\n"
+            "         print path;\n"
+            "         if path == '/':                 # path '/' represent change to server node/defs\n"
+            "            print 'defs changed'         # defs state change or user variables changed\n"
+            "         else:\n"
+            "            node = defs.find_abs_node_path()\n"
+            "\n"
+            "      # if changed_node_paths is empty, then assume entire definition changed\n"
+            "      print defs                         # print the synchronised definition. Should be same as server\n"
+            "except RuntimeError, e:\n"
+            "  print str(e)\n"
+            ;
+}
+
+
 const char* ClientDoc::checkpt(){
    return
             "Request the :term:`ecflow_server` :term:`check point` s the definition held in the server immediately\n\n"
@@ -662,6 +694,19 @@ const char* ClientDoc::stats(){
             "   try:\n"
             "       ci = Client()  # use default host(ECF_NODE) & port(ECF_PORT)\n"
             "       ci.stats()\n"
+            "   except RuntimeError, e:\n"
+            "       print str(e)\n"
+            ;
+}
+
+const char* ClientDoc::stats_reset(){
+   return
+            "Resets the statistical data in the server::\n\n"
+            "   void stats_reset()\n"
+            "\nUsage::\n\n"
+            "   try:\n"
+            "       ci = Client()  # use default host(ECF_NODE) & port(ECF_PORT)\n"
+            "       ci.stats_reset()\n"
             "   except RuntimeError, e:\n"
             "       print str(e)\n"
             ;

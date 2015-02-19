@@ -44,9 +44,13 @@
 
 #define FAIL(a) do { perror(a); exit(1); } while(0)
 
-logsvr::logsvr(std::string host,std::string cport):
-	soc_(-1)
+logsvr::logsvr(std::string host,std::string cport)
+  : soc_(-1)
+  , host_ (host)
+  , port_ (cport)
 {
+  struct hostent *ht = gethostbyname( host.c_str() );
+  if (ht == NULL) { soc_ = -1; return; }
   connect(host,!cport.empty() ? atoi(cport.c_str()) : 19999);
 }
 
@@ -141,9 +145,8 @@ logsvr::~logsvr()
 tmp_file logsvr::getfile(std::string name)
 {
   tmp_file empty((char*)"",false);
-	if(soc_ < 0)
-		return empty;
-
+  if(soc_ < 0)
+    return empty;
 
 	write(soc_,"get ",4);	
 	write(soc_,name.c_str(),name.size());
@@ -159,31 +162,37 @@ tmp_file logsvr::getfile(std::string name)
 
 	if(!f)
 	{
-		char buf[2048];
-		sprintf(buf,"Cannot create %s",out.c_str());
-		gui::syserr(buf);
-		return empty;
+	  char buf[2048];
+	  sprintf(buf,"Cannot create %s",out.c_str());
+	  gui::syserr(buf);
+	  return empty;
 	}
-
+	
 	while( (len = read(soc_,buf,size)) > 0)
 	{
-		if(fwrite(buf,1,len,f) != len)
-		{
-			char buf[2048];
-			sprintf(buf,"Write error on %s",out.c_str());
-			gui::syserr(buf);
-			fclose(f);
-			return empty;
-		}
-		total += len;
+	  if(fwrite(buf,1,len,f) != len)
+	    {
+	      char buf[2048];
+	      sprintf(buf,"Write error on %s",out.c_str());
+	      gui::syserr(buf);
+	      fclose(f);
+	      return empty;
+	    }
+	  total += len;
 	}
+
+	sprintf(buf, "\n# served by %s@%s # telnet %s %s # get %s",
+		host_.c_str(), port_.c_str(), 
+		host_.c_str(), port_.c_str(), 
+		name.c_str());
+	fwrite(buf,1,size,f);
 
 	if(fclose(f))
 	{
-		char buf[2048];
-		sprintf(buf,"Write error on %s",out.c_str());
-		gui::syserr(buf); 
-		return empty;
+	  char buf[2048];
+	  sprintf(buf,"Write error on %s",out.c_str());
+	  gui::syserr(buf); 
+	  return empty;
 	}
 
 	if(total)

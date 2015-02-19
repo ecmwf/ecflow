@@ -695,7 +695,12 @@ node* node::find(const std::string name)
     if (0x0 != (top = serv().top())) {
     ecfn = dynamic_cast<ecf_concrete_node<Defs>*>(top->__node__());
     if (0x0 != ecfn) // ok with a node, NOK with attribute
-      ptr = const_cast<Defs*>(ecfn->get())->findAbsNode(name);    
+      try {
+	if (const_cast<Defs*>(ecfn->get()))
+	  ptr = const_cast<Defs*>(ecfn->get())->findAbsNode(name);    
+      } catch (...) { 
+         fprintf(stderr, "exception with node.cc:find %s\n", name.c_str());
+      }
     }
   } else {
     const char* fname = full_name().c_str();
@@ -830,7 +835,7 @@ void node::info(std::ostream& f)
   f << "status   : " << status_name() << "\n";
 
   if (owner_) {
-    // if (owner_->type() == NODE_TASK ) 
+    // if (owner_->type() == NODE_TASKtas ) 
     {
        boost::posix_time::ptime state_change_time = owner_->status_time();
        if (!state_change_time.is_special()) {
@@ -899,7 +904,12 @@ void node::command(const char* cmd)
 
 std::string node::substitute(const char* cmd)
 {
-  return substitute::scan(cmd,this);
+  try {
+    return substitute::scan(cmd,this);
+  } catch ( std::exception& e ) {
+    return cmd;
+  }
+
 }
 
 void node::edit(node_editor&)

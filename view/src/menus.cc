@@ -147,46 +147,46 @@ menu *menu::chain(menu * n)
 }
 
 void menu::root(menu *m) {
-    if (root_[num_] == NULL) root_[num_] = m;
-    else if (m) { 
-      menu *men = menu::find(m->name_.c_str(), m->page_);
-      XECFDEBUG { 
-	if (!men) printf("# menu chained %s\n", m->name_.c_str());
-	else	  printf("# menu already there %s\n", m->name_.c_str()); }
-    }
+  if (root_[num_] == NULL) root_[num_] = m;
+  else if (m) { 
+    menu *men = menu::find(m->name_.c_str(), m->page_);
+    XECFDEBUG { 
+      if (!men) printf("# menu chained %s\n", m->name_.c_str());
+      else	  printf("# menu already there %s\n", m->name_.c_str()); }
   }
+}
 
 class action {
 protected:
-	Widget widget_;
-	item*  item_;
-
+  Widget widget_;
+  item*  item_;
+  
   action() : widget_(0),item_(0) {}
 public:
-   virtual ~action() {}
-	void owner(item* i) { item_ = i; }
-
-	virtual void create(Widget, item *) = 0;
-	virtual void fill(Widget, int) {}
-
-	Widget widget() { return widget_; }
-	virtual void run(node *) { }
+  virtual ~action() {}
+  void owner(item* i) { item_ = i; }
+  
+  virtual void create(Widget, item *) = 0;
+  virtual void fill(Widget, int) {}
+  
+  Widget widget() { return widget_; }
+  virtual void run(node *) { }
 };
 
 class command : public action {
-	char *name_;
+  char *name_;
   virtual void create(Widget, item *);
 public:
-	command(char *name): name_(name) { }
-	virtual void run(node *);
+  command(char *name): name_(name) { }
+  virtual void run(node *);
 };
 
 class window_cmd : public action {
-	char *name_;
+  char *name_;
   virtual void create(Widget, item *);
 public:
-	window_cmd(char *name): name_(name) { }
-	virtual void run(node *);
+  window_cmd(char *name): name_(name) { }
+  virtual void run(node *);
 };
 
 typedef void (*nodeproc)(node*);
@@ -232,13 +232,13 @@ public:
   item    *next_;
 private:
   friend int script_menus(node*, const char *cmd);
-	flags   *visible_;
-	flags   *enabled_;
-	char    *title_;
-	action  *action_;
-	char    *question_;
-	Boolean answer_;
-        int     page_;
+  flags   *visible_;
+  flags   *enabled_;
+  char    *title_;
+  action  *action_;
+  char    *question_;
+  Boolean answer_;
+  int     page_;
 
 public:
 
@@ -251,44 +251,44 @@ public:
     , answer_(answer), page_(menu::num_)
   { if(action_) action_->owner(this); }
 
-	void update(node *);
-
-	void create(Widget parent)
-	{
-	  action_->create(parent, this);
-	  if(next_) 
-	      next_->create(parent);
-	}
-
-	item *chain(item * n)
-	{
-	  if (n->page_ == page_)
-		next_ = n;
-		return this;
-	}
-
-	char *title() { return title_; }
-
+  void update(node *);
+  
+  void create(Widget parent)
+  {
+    action_->create(parent, this);
+    if(next_) 
+      next_->create(parent);
+  }
+  
+  item *chain(item * n)
+  {
+    if (n->page_ == page_)
+      next_ = n;
+    return this;
+  }
+  
+  char *title() { return title_; }
+  
   item *find(const char* name);
-
-	void run(node * n)
-	{
-	  str question = n->substitute(question_);
-	  if(question_[0] == 0 || confirm::ask(answer_,question))
-	    action_->run(n);
-	}
-
-	void fill(Widget list,int depth)
-	{
-  XECFDEBUG printf("# item::fill %p %d\n",list,depth);
-		char buf[1024];
-		memset(buf,' ',depth);
-		sprintf(buf+depth,"%s",title_);
-		xec_AddListItem(list,buf);
-		action_->fill(list,depth);
-		if(next_) 	   
-		    next_->fill(list,depth);
-	}
+  
+  void run(node * n)
+  {
+    str question = n->substitute(question_);
+    if(question_[0] == 0 || confirm::ask(answer_,question))
+      action_->run(n);
+  }
+  
+  void fill(Widget list,int depth)
+  {
+    XECFDEBUG printf("# item::fill %p %d\n",list,depth);
+    char buf[1024];
+    memset(buf,' ',depth);
+    sprintf(buf+depth,"%s",title_);
+    xec_AddListItem(list,buf);
+    action_->fill(list,depth);
+    if(next_) 	   
+      next_->fill(list,depth);
+  }
 };
 
 item* item::find(const char* title)
@@ -328,12 +328,13 @@ void menus::fillList(Widget list)
 
 void menu::fill(Widget list,int depth)
 {
-	item_->fill(list,depth);
+  item_->fill(list,depth);
 }
 
 void menus::show(Widget parent, XEvent * event_node, node * n)
 {
 
+  if (parent==NULL) fprintf(stderr, "menus::show null widget\n");
 	if(n == 0 || !n->menus())
 	{
 		selection::menu_node(0);

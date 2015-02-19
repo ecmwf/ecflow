@@ -55,9 +55,11 @@ void ZombieUtil::test_clean_up(int timeout) {
 int ZombieUtil::do_zombie_user_action(User::Action uc, int expected_action_cnt, int max_time_to_wait, bool fail_if_to_long)
 {
    /// return the number of zombies set to user action;
-#ifdef DEBUG_ZOMBIE
-   cout << "\n   do_zombie_user_action " << User::to_string(uc) << " expected_action_cnt " << expected_action_cnt << "\n";
-#endif
+   bool ecf_debug_zombies = false;
+   if (getenv("ECF_DEBUG_ZOMBIES")) {
+      ecf_debug_zombies = true;
+      cout << "\n   do_zombie_user_action " << User::to_string(uc) << " expected_action_cnt " << expected_action_cnt << "\n";
+   }
 
    int action_set =  0;
    std::vector<Zombie> action_set_zombies;
@@ -136,6 +138,12 @@ int ZombieUtil::do_zombie_user_action(User::Action uc, int expected_action_cnt, 
 
       // make sure test does not take too long.
       if ( assertTimer.duration() >=  assertTimer.timeConstraint() ) {
+
+         if (expected_action_cnt > 0 && action_set > 0) {
+            if (ecf_debug_zombies) cout << "   timeing out after action_set = " << action_set << " expected_action_cnt = " << expected_action_cnt << "\n";
+            break;
+         }
+
          std::stringstream ss;
          ss << "do_zombie_user_action:\nExpected " << expected_action_cnt
             << " zombies with user action " << User::to_string(uc) << " but found " << action_set << "\naction set zombies\n"
@@ -168,9 +176,9 @@ int ZombieUtil::do_zombie_user_action(User::Action uc, int expected_action_cnt, 
          case User::KILL:   { if (z.kill())   action_set++; break; }
       }
    }
-#ifdef DEBUG_ZOMBIE
-   cout << "   " << action_set << " zombies set to user action " << User::to_string(uc) << " returning\n";
-   cout << Zombie::pretty_print( zombies , 6);
-#endif
+   if (ecf_debug_zombies) {
+      cout << "   " << action_set << " zombies set to user action " << User::to_string(uc) << " returning\n";
+      cout << Zombie::pretty_print( zombies , 6);
+   }
    return action_set;
 }

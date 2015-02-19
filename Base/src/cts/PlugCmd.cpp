@@ -53,7 +53,7 @@ class Lock {
 public:
    Lock(const std::string& user, AbstractServer* as) : as_(as) { ok_ = as->lock(user); }
    ~Lock() { if (ok_) as_->unlock(); }
-   bool ok() { return ok_;}
+   bool ok() const { return ok_;}
 private:
    bool ok_;
    AbstractServer* as_;
@@ -62,8 +62,6 @@ private:
 STC_Cmd_ptr PlugCmd::doHandleRequest(AbstractServer* as) const
 {
    as->update_stats().plug_++;
-
-   if (!as->defs()) throw std::runtime_error( "No definition in server") ;
 
    Lock lock(user(),as);
    if (!lock.ok()) {
@@ -149,7 +147,7 @@ STC_Cmd_ptr PlugCmd::doHandleRequest(AbstractServer* as) const
          sourceNode->remove();
 
          // Updated defs state
-         if (as->defs()) as->defs()->set_most_significant_state();
+         as->defs()->set_most_significant_state();
 
          return PreAllocatedReply::ok_cmd();
       }
@@ -180,7 +178,7 @@ STC_Cmd_ptr PlugCmd::doHandleRequest(AbstractServer* as) const
    add_node_for_edit_history(destNode);
 
    // Updated defs state
-   if (as->defs()) as->defs()->set_most_significant_state();
+   as->defs()->set_most_significant_state();
 
    return PreAllocatedReply::ok_cmd();
 }

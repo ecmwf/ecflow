@@ -20,6 +20,7 @@ protected:
 
 	Widget zombied;
 	Widget aliases;
+	Widget late_family;
 
 	Widget new_suites;
 	Widget direct_read;

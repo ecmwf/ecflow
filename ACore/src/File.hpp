@@ -46,7 +46,14 @@ public:
 	/// returns the input files, split into a vector of string, where each string
 	/// represent a line in the file. returns true if file open ok , false otherwise
 	/// The additional parameter ignoreEmptyLine  can be used to ignore empty lines
+	/// **Always reads _WHOLE_ file. Not suitable for very large files **
  	static bool splitFileIntoLines(const std::string& filename, std::vector<std::string>& lines, bool ignoreEmptyLine = false);
+
+ 	/// This is suitable for large files. > several gigabytes, since it does load the entire file
+ 	static std::string get_last_n_lines(const std::string& filename,int last_n_lines, std::string& error_msg);
+
+ 	/// returns the first n line of a file, does not read all the file, hence suitable for very large files
+   static std::string get_first_n_lines(const std::string& filename,int n_lines, std::string& error_msg);
 
  	/// Opens the file and returns the contents
  	static bool open(const std::string& filePath, std::string& contents);
@@ -73,9 +80,6 @@ public:
 	                  std::vector<boost::filesystem::path>& paths_found   // placing path here if found
 				    );
 
-   // returns the workspace directory by looking for the string ecflow up the hierarchy
- 	// Will throw a exception std::runtime_error is directory not found
-   static std::string workspace_dir();
 
 	/// recursively look for a file, given a starting directory and path token
 	/// Returns the first match found
@@ -136,6 +140,11 @@ public:
 
 	// Locate test data
 	static std::string test_data(const std::string& rel_path, const std::string& dir);
+
+   // return root source
+   static bool cmake_build();
+   static std::string root_source_dir();
+   static std::string root_build_dir();
 };
 
 }

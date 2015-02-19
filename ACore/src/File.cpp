@@ -25,6 +25,7 @@
 #include <boost/foreach.hpp>
 #include <boost/tokenizer.hpp>
 
+
 #include "File.hpp"
 #include "File_r.hpp"
 #include "Log.hpp"
@@ -38,6 +39,23 @@ namespace fs = boost::filesystem;
 
 //#define DEBUG_SERVER_PATH 1
 //#define DEBUG_CLIENT_PATH 1
+
+static std::string workspace_dir()
+{
+   // We need the *SAME* location so that different process find the same file. Get to the workspace directory
+   boost::filesystem::path current_path = boost::filesystem::current_path();
+   std::string stem = current_path.stem().string();
+   int count = 0;
+   while( stem.find("ecflow") == std::string::npos) {
+      current_path = current_path.parent_path();
+      stem = current_path.stem().string();
+      count++;
+      if (count == 10000) throw std::runtime_error("File::workspace_dir() failed to find ecflow in a directory name, up the directory tree");
+   }
+   std::string the_workspace_dir = current_path.string();  // cos string is returned by reference
+   return the_workspace_dir;
+}
+
 
 namespace ecf {
 
@@ -122,6 +140,67 @@ bool File::splitFileIntoLines(const std::string& filename, std::vector<std::stri
 
 	// The current implementation is 2.5 times faster then method 1, and ~4 times faster than method 2
  	return true;
+}
+
+
+std::string File::get_last_n_lines(const std::string& filename,int last_n_lines, std::string& error_msg)
+{
+   if ( last_n_lines <= 0  ) return string();
+
+   std::ifstream source( filename.c_str(), std::ios_base::in );
+   if (!source) {
+      error_msg = "File::get_last_n_lines: Could not open file " + filename;
+      return string();
+   }
+
+   size_t const granularity = 100 * last_n_lines;
+   source.seekg( 0, std::ios_base::end );
+   size_t size = static_cast<size_t>( source.tellg() );
+   std::vector<char> buffer;
+   int newlineCount = 0;
+   while ( source
+           && buffer.size() != size
+           && newlineCount < last_n_lines ) {
+       buffer.resize( std::min( buffer.size() + granularity, size ) );
+       source.seekg( -static_cast<std::streamoff>( buffer.size() ),
+                     std::ios_base::end );
+       source.read( buffer.data(), buffer.size() );
+       newlineCount = std::count( buffer.begin(), buffer.end(), '\n');
+   }
+
+   std::vector<char>::iterator start = buffer.begin();
+   while ( newlineCount > last_n_lines ) {
+       start = std::find( start, buffer.end(), '\n' ) + 1;
+       -- newlineCount;
+   }
+
+   //std::vector<char>::iterator end = remove( start, buffer.end(), '\r' ); // for windows
+   return std::string( start, buffer.end() );
+}
+
+
+std::string File::get_first_n_lines(const std::string& filename,int n_lines, std::string& error_msg)
+{
+   if ( n_lines <= 0  ) return string();
+
+   std::ifstream source( filename.c_str(), std::ios_base::in );
+   if (!source) {
+      error_msg = "File::get_first_n_lines: Could not open file " + filename;
+      return string();
+   }
+
+   std::string ret; ret.reserve(1024);
+   std::string line;
+
+   int count = 0;
+   while ( std::getline(source,line) && count < n_lines) {
+
+      ret += line;
+      ret += "\n";
+      count++;
+   }
+
+   return ret;
 }
 
 /// Opens the file and returns the contents
@@ -287,24 +366,6 @@ void File::findAll(
 	}
 }
 
-
-std::string File::workspace_dir()
-{
-   // We need the *SAME* location so that different process find the same file. Get to the workspace directory
-   boost::filesystem::path current_path = boost::filesystem::current_path();
-   std::string stem = current_path.stem().string();
-   int count = 0;
-   while( stem.find("ecflow") == std::string::npos) {
-      current_path = current_path.parent_path();
-      stem = current_path.stem().string();
-      count++;
-      if (count == 10000) throw std::runtime_error("File::workspace_dir() failed to find ecflow in a directory name, up the directory tree");
-   }
-   std::string the_workspace_dir = current_path.string();  // cos string is returned by reference
-   return the_workspace_dir;
-}
-
-
 std::string File::findPath(
                   const boost::filesystem::path& dir_path,    // from this directory downwards
                   const std::string&             file_name,   // search for this name,
@@ -348,22 +409,42 @@ std::string File::findPath(
    return std::string();
 }
 
-
+//#define INTEL_DEBUG_ME 1
 bool File::createMissingDirectories(const std::string& pathToFileOrDir)
 {
+#ifdef INTEL_DEBUG_ME
+   std::cout << "File::createMissingDirectories  " << pathToFileOrDir << std::endl;
+#endif
 	if (pathToFileOrDir.empty()) return false;
 
 	// Avoid making unnecessary system calls, by checking to see if directory exists first
    fs::path fs_path(pathToFileOrDir);
    if (fs_path.extension().empty()) {
+
+#ifdef INTEL_DEBUG_ME
+      std::cout << "   pure directory no extension" << std::endl;
+#endif
       // pure directory
       if (fs::exists(pathToFileOrDir)) {
+
+#ifdef INTEL_DEBUG_ME
+         std::cout << "   " << pathToFileOrDir << " already exists " << std::endl;
+#endif
+
          return true;
       }
    }
    else {
+
+#ifdef INTEL_DEBUG_ME
+      std::cout << "   pure directory *has* extension" << std::endl;
+#endif
       // could be /tmp/fred/sms.job, see if /tmp/fred exists
       if (fs::exists(fs_path.parent_path())) {
+
+#ifdef INTEL_DEBUG_ME
+         std::cout << "   " << pathToFileOrDir << " already exists " << std::endl;
+#endif
          return true;
       }
    }
@@ -373,10 +454,17 @@ bool File::createMissingDirectories(const std::string& pathToFileOrDir)
 	try {
 		if ( !thePath.empty() ) {
 
+#ifdef INTEL_DEBUG_ME
+         std::cout << "   last file " << thePath.back() << std::endl;
+#endif
+
 			// pathToFileOrDir is of form: /tmp/fred/sms.job
 			//   we should only create directories for /tmp/fred
 			if ( thePath.back().find( "." ) != std::string::npos ) {
 				// assume the last token represents a file, hence dont create a directory
+#ifdef INTEL_DEBUG_ME
+	         std::cout << "   last file " << thePath.back() << " has a *dot* ignoring "<< std::endl;
+#endif
 				thePath.pop_back();
 			}
 
@@ -388,22 +476,39 @@ bool File::createMissingDirectories(const std::string& pathToFileOrDir)
 			for (size_t i = 0; i < thePath.size(); i++) {
 				pathToCreate += thePath[i];
 				if ( !fs::exists( pathToCreate ) ) {
+#ifdef INTEL_DEBUG_ME
+	            std::cout << "   " << pathToCreate << " does not exist, creating directory " << std::endl;
+#endif
 					fs::create_directory( pathToCreate );
 				}
 				pathToCreate += Str::PATH_SEPERATOR();
 			}
 		}
 		else {
+#ifdef INTEL_DEBUG_ME
+         std::cout << "   NO path component in " << pathToFileOrDir <<  std::endl;
+#endif
+
 			if ( pathToFileOrDir.find( "." ) != std::string::npos ) {
 				// assume represents a file, hence don't create a directory fred.job1
+#ifdef INTEL_DEBUG_ME
+	         std::cout << "   assuming " << pathToFileOrDir << " is a file, found a dot, returning without creating dir " <<  std::endl;
+#endif
 				return true;
 			}
 
 			// assume is a dir
+#ifdef INTEL_DEBUG_ME
+         std::cout << "   about to create dir " <<  pathToFileOrDir << std::endl;
+#endif
+
 			fs::create_directory( pathToFileOrDir );
 		}
 	}
-	catch ( const std::exception & ) {
+	catch ( const std::exception & ex ) {
+#ifdef INTEL_DEBUG_ME
+	   std::cout << "   Exception " << ex.what() << " could not create dir " << pathToFileOrDir << std::endl;
+#endif
 		return false;
 	}
 	return true;
@@ -586,7 +691,7 @@ static std::string find_bjam_ecf_server_path()
 #endif
 
    // bjam uses in source tree, for build, which is in the workspace dir
-   std::string bin_dir = File::workspace_dir() + "/Server/bin/";
+   std::string bin_dir = workspace_dir() + "/Server/bin/";
 
 #ifdef DEBUG_SERVER_PATH
    cout << "  Searching under: " << bin_dir << "\n";
@@ -631,40 +736,16 @@ static std::string find_bjam_ecf_server_path()
 
 std::string File::find_ecf_server_path()
 {
-   char* server_path = getenv("ECFLOW_SERVER_PATH"); // for ecbuild
-   if (server_path != NULL) return std::string(server_path);
+   if (File::cmake_build()) {
 
-   fs::path current_path = fs::current_path();
-   std::string the_current_path = current_path.string();
-
-#ifdef DEBUG_SERVER_PATH
-   cout << " File::find_ecf_server_path() the_current_path = " << the_current_path << "\n";
-#endif
-
-   if ( the_current_path.find("ecbuild") != std::string::npos) {
-
-      char* workspace = getenv("WK"); // for ecbuild
-      if (workspace != NULL) {
-
-         std::string path = workspace;
-         if ( the_current_path.find("debug") != std::string::npos) {
-            path += "/ecbuild/debug/bin/";
-         }
-         else {
-            path += "/ecbuild/release/bin/";
-         }
-         path += Ecf::SERVER_NAME();
+      std::string path = File::root_build_dir();
+      path += "/bin/";
+      path += Ecf::SERVER_NAME();
 
 #ifdef DEBUG_SERVER_PATH
-         cout << " File::find_ecf_server_path() path = " << path << "\n";
+      cout << " File::find_ecf_server_path() path = " << path << "\n";
 #endif
-         return path;
-      }
-#ifdef DEBUG_SERVER_PATH
-      else {
-         cout << " File::find_ecf_server_path() WK environement variable UNDEFINED \n";
-      }
-#endif
+      return path;
    }
 
    return find_bjam_ecf_server_path();
@@ -678,7 +759,7 @@ static std::string find_bjam_ecf_client_path()
 #endif
 
    // Bjam uses, in source build
-   std::string binDir = File::workspace_dir() + "/Client/bin/";
+   std::string binDir = workspace_dir() + "/Client/bin/";
 
    // We need to take into account that on linux, we may have the GNU and CLANG executables
    // Hence we need to distinguish between them.
@@ -718,40 +799,16 @@ static std::string find_bjam_ecf_client_path()
 
 std::string File::find_ecf_client_path()
 {
-   char* the_path = getenv("ECFLOW_CLIENT_PATH"); // for ecbuild
-   if (the_path != NULL) return std::string(the_path);
+   if (File::cmake_build()) {
 
-   fs::path current_path = fs::current_path();
-   std::string the_current_path = current_path.string();
-
-#ifdef DEBUG_CLIENT_PATH
-   cout << " File::find_ecf_client_path() the_current_path = " << the_current_path << "\n";
-#endif
-
-   if ( the_current_path.find("ecbuild") != std::string::npos) {
-
-      char* workspace = getenv("WK"); // for ecbuild
-      if (workspace != NULL) {
-
-         std::string path = workspace;
-         if ( the_current_path.find("debug") != std::string::npos) {
-            path += "/ecbuild/debug/bin/";
-         }
-         else {
-            path += "/ecbuild/release/bin/";
-         }
-         path += Ecf::CLIENT_NAME();
+      std::string path = File::root_build_dir();
+      path += "/bin/";
+      path += Ecf::CLIENT_NAME();
 
 #ifdef DEBUG_CLIENT_PATH
-         cout << " File::find_ecf_client_path() returning path " << path << "\n";
+      cout << " File::find_ecf_client_path() returning path " << path << "\n";
 #endif
-         return path;
-      }
-#ifdef DEBUG_CLIENT_PATH
-      else {
-         cout << " File::find_ecf_client_path() WK environment variable UNDEFINED \n";
-      }
-#endif
+      return path;
    }
 
 #ifdef DEBUG_CLIENT_PATH
@@ -789,5 +846,131 @@ std::string File::test_data(const std::string& rel_path, const std::string& dir)
    }
    return test_file;
 }
+
+
+bool File::cmake_build()
+{
+   fs::path current_path = fs::current_path();
+   std::string the_current_path = current_path.string();
+   std::string cmakecache_txt = the_current_path + "/CTestTestfile.cmake";
+   if (fs::exists(cmakecache_txt)) {
+      return true;
+   }
+   return false;
+}
+
+std::string File::root_source_dir()
+{
+   // bjam
+   fs::path current_path = fs::current_path();
+   std::string the_current_path = current_path.string();
+   std::string version_cmake = the_current_path + "/VERSION.cmake";
+   if (fs::exists(version_cmake)) {
+      return the_current_path;
+   }
+
+   std::string stem = current_path.stem().string();
+   int count = 0;
+   while( stem.find("ecflow") == std::string::npos) {
+      current_path = current_path.parent_path();
+
+      // bjam
+      std::string version_cmake = std::string(current_path.string()) + "/VERSION.cmake";
+      if (fs::exists(version_cmake)) {
+         std::string the_root_source_dir = current_path.string();  // cos current_path.string() is returned by reference
+         return the_root_source_dir;
+      }
+
+      stem = current_path.stem().string();
+      count++;
+      if (count == 10000) break;
+   }
+
+
+
+   // cmake,  CTestTestfile.cmake exists in the sub-directories and root directories
+   // File CTestTestfile.cmake, lists the source directory.
+   std::string cmake_test_file = the_current_path + "/CTestTestfile.cmake";
+   if (!fs::exists(cmake_test_file))
+      throw std::runtime_error("File::root_source_dir(): could not find file CTestTestfile.cmake at path " + cmake_test_file);
+
+   std::vector<std::string> lines;
+   if (splitFileIntoLines(cmake_test_file,lines, true)) {
+      for(size_t i = 0; i < lines.size(); i++) {
+         if (lines[i].find("Source directory") != std::string::npos) {
+
+            std::vector< std::string > lineTokens;
+            Str::split( lines[i],lineTokens,":");
+            if (lineTokens.size() != 2) throw std::runtime_error("File::root_source_dir(): could not parse CTestTestfile.cmake for source directory");
+
+            // This may be of the form: # Source directory: /tmp/ma0/clientRoot/workspace/working-directory/ecflow/ACore
+            std::string source_directory = lineTokens[1];
+            boost::algorithm::trim(source_directory);
+
+            std::vector< std::string > pathTokens;
+            Str::split( source_directory,pathTokens,"/");
+            if (pathTokens.empty()) throw std::runtime_error("File::root_source_dir(): could not extract source directory from " + source_directory);
+
+            for(size_t i = pathTokens.size()-1; i > 0 ; i-- ) {
+               if (pathTokens[i] != "ecflow")  pathTokens.erase( pathTokens.begin() + i);
+               else break;
+            }
+
+            std::string path;
+            for(size_t i =0; i < pathTokens.size(); i++) {
+               path += "/";
+               path += pathTokens[i];
+            }
+            return path;
+         }
+      }
+      throw std::runtime_error("File::root_source_dir(): could not find text 'Source directory' in " + cmake_test_file );
+   }
+   else {
+      throw std::runtime_error("File::root_source_dir(): could not open file " + cmake_test_file );
+   }
+
+   return std::string();
+}
+
+std::string File::root_build_dir()
+{
+   fs::path current_path = fs::current_path();
+   std::string the_current_path = current_path.string();
+
+   // bjam
+   std::string version_cmake = the_current_path + "/VERSION.cmake";
+   if (fs::exists(version_cmake))  return the_current_path;
+
+   // cmake
+   std::string cmake_cache = the_current_path + "/CMakeCache.txt";
+   if (fs::exists(cmake_cache))  return the_current_path;
+
+
+   // bjam or cmake
+   std::string stem = current_path.stem().string();
+   int count = 0;
+   while( stem.find("ecflow") == std::string::npos) {
+      current_path = current_path.parent_path();
+
+      the_current_path = current_path.string(); // cos current_path.string() is returned by reference
+
+      // bjam
+      std::string version_cmake = the_current_path + "/VERSION.cmake";
+      if (fs::exists(version_cmake))  return the_current_path;
+
+      // cmake
+      std::string cmake_cache = the_current_path + "/CMakeCache.txt";
+      if (fs::exists(cmake_cache))  return the_current_path;
+
+      stem = current_path.stem().string();
+      count++;
+      if (count == 1000) throw std::runtime_error("File::root_build_dir() failed to find ecflow in a directory name, up the directory tree");
+   }
+
+   throw std::runtime_error("File::root_build_dir() failed to find root build directory");
+   return std::string();
+}
+
 
 }

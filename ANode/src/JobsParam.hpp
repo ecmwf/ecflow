@@ -15,19 +15,23 @@
 // Description :
 //============================================================================
 
+#include <boost/date_time/posix_time/posix_time_types.hpp>
+#include <boost/noncopyable.hpp>
 #include "NodeFwd.hpp"
 
 // Used as a utility class for controlling job creation.
 // Collates data during the node tree traversal
 // Note: For testing purposes we do not always want to create jobs or spawn jobs
-class JobsParam  {
+class JobsParam : private boost::noncopyable {
 public:
    // This constructor is used in test
 	JobsParam(bool createJobs = false)
-      : createJobs_(createJobs), spawnJobs_(false), submitJobsInterval_(60){}
+      : timed_out_of_job_generation_(false),
+        createJobs_(createJobs), spawnJobs_(false), submitJobsInterval_(60){}
 
-	JobsParam(int submitJobsInterval, bool createJobs)
-	   : createJobs_(createJobs),spawnJobs_(true), submitJobsInterval_(submitJobsInterval)
+	JobsParam(int submitJobsInterval, bool createJobs, bool spawn_jobs = true)
+	   : timed_out_of_job_generation_(false),
+	     createJobs_(createJobs),spawnJobs_(spawn_jobs), submitJobsInterval_(submitJobsInterval)
 	   { if (!createJobs_) spawnJobs_ = false;}
 
 	std::string& errorMsg() { return errorMsg_;}
@@ -54,7 +58,15 @@ public:
 	void set_user_edit_file(const std::vector<std::string>& file) { user_edit_file_ = file;}
 	const std::vector<std::string>& user_edit_file() const { return user_edit_file_; }
 
+	// Functions to aid timing of job generation
+   void set_next_poll_time(const boost::posix_time::ptime& next_poll_time) { next_poll_time_ = next_poll_time;}
+   const boost::posix_time::ptime&  next_poll_time() const { return next_poll_time_;}
+   const boost::posix_time::ptime&  time_out_time() const { return time_out_time_;}
+   void set_timed_out_of_job_generation(const boost::posix_time::ptime& t) { time_out_time_ = t; timed_out_of_job_generation_ = true;}
+   bool timed_out_of_job_generation() const { return timed_out_of_job_generation_; }
+
 private:
+   bool timed_out_of_job_generation_;
 	bool createJobs_;
 	bool spawnJobs_;
 	int  submitJobsInterval_;
@@ -62,6 +74,8 @@ private:
 	std::string debugMsg_;
 	std::vector<Submittable*> submitted_;
 	std::vector<std::string> user_edit_file_;
-	NameValueMap user_edit_variables_; /// Used for User edit
+	NameValueMap user_edit_variables_;          // Used for User edit
+	boost::posix_time::ptime next_poll_time_;   // Aid early exit from job generation, if it takes to long
+	boost::posix_time::ptime time_out_time_;    // When we actually timed out must >= next_poll_time_
 };
 #endif

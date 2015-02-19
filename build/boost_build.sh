@@ -12,6 +12,15 @@
 echo "WK=$WK"
 echo "BOOST_ROOT=$BOOST_ROOT"
 
+#
+# From boost 1.56 > the location of site-config.jam location has changed
+#
+SITE_CONFIG_LOCATION=$BOOST_ROOT/tools/build/v2/site-config.jam
+BOOST_VERSION="$(basename $BOOST_ROOT)"
+if [[ "$BOOST_VERSION" = boost_1_56_0 || "$BOOST_VERSION" = boost_1_57_0 ]] ; then
+   SITE_CONFIG_LOCATION=$BOOST_ROOT/tools/build/src/site-config.jam
+fi
+
 tool=
 
 # Check that a command is in the PATH.
@@ -54,7 +63,7 @@ if test_uname Linux ; then
        CXXFLAGS=cxxflags=-fPIC
        layout=versioned  
        
-       cp $WK/build/site_config/site-config-cray.jam $BOOST_ROOT/tools/build/v2/site-config.jam
+       cp $WK/build/site_config/site-config-cray.jam $SITE_CONFIG_LOCATION
        if [ "$PE_ENV" = INTEL ] ; then
           tool=intel
        fi
@@ -62,23 +71,23 @@ if test_uname Linux ; then
           tool=cray
        fi
     else
-       cp $WK/build/site_config/site-config-Linux64.jam $BOOST_ROOT/tools/build/v2/site-config.jam  
+       cp $WK/build/site_config/site-config-Linux64.jam $SITE_CONFIG_LOCATION  
     fi
      
   else 
-    cp $WK/build/site_config/site-config-Linux.jam $BOOST_ROOT/tools/build/v2/site-config.jam
+    cp $WK/build/site_config/site-config-Linux.jam $SITE_CONFIG_LOCATION
   fi
   
 elif test_uname HP-UX ; then
 
   tool=acc
-  cp $WK/build/site_config/site-config-HPUX.jam $BOOST_ROOT/tools/build/v2/site-config.jam
+  cp $WK/build/site_config/site-config-HPUX.jam $SITE_CONFIG_LOCATION
    
 elif test_uname AIX ; then
 
    # on c1a
    tool=vacpp
-   cp $WK/build/site_config/site-config-AIX.jam $BOOST_ROOT/tools/build/v2/site-config.jam
+   cp $WK/build/site_config/site-config-AIX.jam $SITE_CONFIG_LOCATION
 fi
 
 # Only uncomment for debugging this script

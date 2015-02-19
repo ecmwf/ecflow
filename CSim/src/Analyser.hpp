@@ -24,7 +24,7 @@ class Analyser  {
 public:
 	Analyser();
 
-	void run(Defs& theDefs);
+	static void run(Defs& theDefs);
 };
 
 }

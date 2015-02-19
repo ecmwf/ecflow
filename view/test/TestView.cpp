@@ -87,7 +87,7 @@ BOOST_AUTO_TEST_CASE( test_view )
 
    // Start server if not already started, load the defs, and start playing
    // The test harness will create corresponding directory structure & default ecf file
-   ServerTestHarness serverTestHarness( false /* doLogFileVerification*/, false /* standardVerification*/);
+   ServerTestHarness serverTestHarness;
    serverTestHarness.run(theDefs,
 			 ServerTestHarness::testDataDefsLocation("test_view.def"),
 			 30, // timeout

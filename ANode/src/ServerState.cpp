@@ -13,6 +13,7 @@
 // Description :
 //============================================================================
 #include <assert.h>
+#include <iostream>
 #include "ServerState.hpp"
 #include "Str.hpp"
 #include "Log.hpp"
@@ -267,6 +268,24 @@ const Variable& ServerState::findVariable(const std::string& name) const
    return Variable::EMPTY();
 }
 
+bool ServerState::variable_exists(const std::string& name) const
+{
+   // SEARCH USER variables FIRST
+   std::vector<Variable>::const_iterator var_end = user_variables_.end();
+   for(std::vector<Variable>::const_iterator i = user_variables_.begin(); i!=var_end; ++i) {
+      if ((*i).name() == name) return true;
+   }
+
+   // NOW search server variables
+   std::vector<Variable>::const_iterator ser_var_end = server_variables_.end();
+   for(std::vector<Variable>::const_iterator i = server_variables_.begin(); i!=ser_var_end; ++i) {
+      if ((*i).name() == name) return true;
+   }
+
+   return false;
+}
+
+
 void ServerState::set_user_variables(const std::vector<Variable>& e)
 {
    user_variables_ = e;
@@ -301,6 +320,7 @@ void ServerState::setup_default_server_variables(std::vector<Variable>&  server_
    server_variables.push_back( Variable(string("ECF_URL"), Ecf::URL() ));
    server_variables.push_back( Variable(string("ECF_LOG"), host.ecf_log_file(port) ));
    server_variables.push_back( Variable(string("ECF_INTERVAL"), string("60") ));            // Check time dependencies and submit any jobs
+   server_variables.push_back( Variable(string("ECF_LISTS"), host.ecf_lists_file(port) ));
    server_variables.push_back( Variable(string("ECF_CHECK"), host.ecf_checkpt_file(port) ));
    server_variables.push_back( Variable(string("ECF_CHECKOLD"), host.ecf_backup_checkpt_file(port)));
    server_variables.push_back( Variable(string("ECF_CHECKINTERVAL"), string("120") ));      //The interval in seconds to save check point file

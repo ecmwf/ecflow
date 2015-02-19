@@ -41,6 +41,7 @@
 #include "TaskScriptGenerator.hpp"
 #include "ChangeMgrSingleton.hpp"
 #include "Extract.hpp"
+#include "JobProfiler.hpp"
 
 namespace fs = boost::filesystem;
 using namespace ecf;
@@ -400,6 +401,11 @@ void Task::get_all_aliases(std::vector<alias_ptr>& destinationVec) const
 
 bool Task::resolveDependencies(JobsParam& jobsParam)
 {
+   if (jobsParam.timed_out_of_job_generation()) return false;
+   JobProfiler profile_me(this,jobsParam,JobProfiler::task_threshold());
+   if (jobsParam.timed_out_of_job_generation()) return false;
+
+
    // Calling Submittable::resolveDependencies(jobsParam) up front can be expensive.
    // Due to trigger and complete evaluations. Hence low cost state checks first
 
@@ -527,6 +533,7 @@ node_ptr Task::removeChild(Node* child)
    size_t node_vec_size = aliases_.size();
    for(size_t t = 0; t < node_vec_size; t++)     {
       if (aliases_[t].get() == child) {
+         child->set_parent(NULL);
          node_ptr node = boost::dynamic_pointer_cast<Alias>(aliases_[t]);
          aliases_.erase( aliases_.begin() + t);
          add_remove_state_change_no_ = Ecf::incr_state_change_no();
@@ -544,6 +551,7 @@ bool Task::doDeleteChild(Node* child)
    std::vector<alias_ptr>::iterator the_end = aliases_.end();
    for(std::vector<alias_ptr>::iterator t = aliases_.begin(); t!=the_end; ++t) {
       if ( (*t).get() == child) {
+         if (child && child->parent()) child->set_parent(NULL);
          aliases_.erase(t);
          add_remove_state_change_no_ = Ecf::incr_state_change_no();
          return true;
@@ -607,7 +615,7 @@ void Task::order(Node* immediateChild, NOrder::Order ord)
       }
       case NOrder::ALPHA:  {
          std::sort(aliases_.begin(),aliases_.end(),
-                     boost::bind(std::less<std::string>(),
+                     boost::bind(Str::caseInsLess,
                                    boost::bind(&Node::name,_1),
                                    boost::bind(&Node::name,_2)));
          order_state_change_no_ = Ecf::incr_state_change_no();
@@ -615,7 +623,7 @@ void Task::order(Node* immediateChild, NOrder::Order ord)
       }
       case NOrder::ORDER:  {
          std::sort(aliases_.begin(),aliases_.end(),
-                     boost::bind(std::greater<std::string>(),
+                     boost::bind(Str::caseInsGreater,
                                    boost::bind(&Node::name,_1),
                                    boost::bind(&Node::name,_2)));
          order_state_change_no_ = Ecf::incr_state_change_no();

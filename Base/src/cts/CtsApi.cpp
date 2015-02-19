@@ -61,6 +61,10 @@ const char* CtsApi::migrate_arg() { return "migrate"; }
 std::string CtsApi::stats()     { return "--stats"; }
 const char* CtsApi::statsArg()  { return "stats"; }
 
+std::string CtsApi::stats_reset()     { return "--stats_reset"; }
+const char* CtsApi::stats_reset_arg()  { return "stats_reset"; }
+
+
 std::string CtsApi::suites()    { return "--suites"; }
 const char* CtsApi::suitesArg() { return "suites"; }
 
@@ -678,7 +682,6 @@ std::vector<std::string> CtsApi::new_log(const std::string& new_path) {
 std::string CtsApi::clearLog()     { return "--log=clear"; }
 std::string CtsApi::flushLog()     { return "--log=flush"; }
 std::string CtsApi::get_log_path() { return "--log=path"; }
-const char* CtsApi::logArg() { return "log";}
 
 
 std::string CtsApi::forceDependencyEval() { return "--force-dep-eval";}

@@ -131,7 +131,7 @@ BOOST_AUTO_TEST_CASE( test_cron_time_series )
 
    // The test harness will create corresponding directory structure
    // and populate with standard ecf files.
-   ServerTestHarness serverTestHarness(false/*do log file verification*/,false/* dont do standard verification */);
+   ServerTestHarness serverTestHarness;
    serverTestHarness.add_default_sleep_time(false); // avoid missing time steps due to submit->active->complete > job submission interval
    serverTestHarness.run(theDefs, ServerTestHarness::testDataDefsLocation("test_cron_time_series.def"),1 /* timeout ignored*/, false /*waitForTestCompletion*/);
 
