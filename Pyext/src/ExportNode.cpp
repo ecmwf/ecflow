@@ -89,6 +89,12 @@ node_ptr add_zombie(node_ptr self, const ZombieAttr& attr){ self->addZombie(attr
 
 node_ptr add_cron(node_ptr self,const ecf::CronAttr& attr)      { self->addCron(attr); return self; }
 node_ptr add_late(node_ptr self,const ecf::LateAttr& attr)      { self->addLate(attr); return self; }
+std::string get_state_change_time(node_ptr self,const std::string& format)
+{
+   if (format == "iso_extended") return to_iso_extended_string(self->state_change_time());
+   else if (format == "iso") return to_iso_string(self->state_change_time());
+   return to_simple_string(self->state_change_time());
+}
 
 node_ptr add_defstatus(node_ptr self,DState::State s)      { self->addDefStatus(s); return self; }
 
@@ -246,6 +252,7 @@ void export_Node()
    .def("find_limit",       &Node::find_limit  ,           "Find the :term:`limit` on the node only. returns a limit ptr" )
    .def("find_node_up_the_tree",&Node::find_node_up_the_tree  , "Search immediate node, then up the node hierarchy" )
    .def("get_state",        &Node::state , "Returns the state of the node. This excludes the suspended state")
+   .def("get_state_change_time",&get_state_change_time, (bp::arg("format")="iso_extended"), "Returns the time of the last state change as a string. Default format is iso_extended, (iso_extended, iso, simple)")
    .def("get_dstate",       &Node::dstate, "Returns the state of node. This will include suspended state")
    .def("get_defstatus",    &Node::defStatus )
    .def("get_repeat",       &Node::repeat, return_value_policy<copy_const_reference>() )
