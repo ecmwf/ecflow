@@ -265,6 +265,13 @@ int ClientInvoker::do_invoke_cmd(Cmd_ptr cts_cmd) const
 	if (testInterface_) return 0;       // The testInterface_ flag allows testing of client interface, parsing of args, without needing to contact server
 	assert(!clientEnv_.host().empty()); // make sure host is NOT empty.
 
+   if (ChangeMgrSingleton::exists() && ChangeMgrSingleton::instance()->in_notification()) {
+      // place break point here, Change mgr observers, calling *ANOTHER* client->server command, in a middle of update to observers
+      std::cout << "***********************************************************\n";
+      std::cout << "ecflow:ClientInvoker::do_invoke_cmd() "; cts_cmd->print(cout); std::cout << " called in the middle of ChangeMgrSingleton::notification. !!!!!!!!\n";
+      std::cout << "***********************************************************\n";
+   }
+
 	/// retry_connection_period_ specifies the time to wait, before retrying to connect to server.
 	/// Added to get round glitches in the network.
 	/// However for ping() always default to 1 second. This avoids 10 second wait in release mode.
