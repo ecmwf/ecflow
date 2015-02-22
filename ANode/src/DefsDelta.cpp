@@ -64,6 +64,9 @@ bool DefsDelta::incremental_sync(defs_ptr client_def, std::vector<std::string>& 
 	}
 
 	// For each compound memento, we should have change node.
+	//if ( compound_mementos_.size() != changed_nodes.size()) {
+	//   std::cout << "**** compound_mementos_.size() " << compound_mementos_.size() << "  changed_nodes.size(): " << changed_nodes.size() << "\n";
+	//}
 	// assert( compound_mementos_.size() == changed_nodes.size()); // FIXME restore for long term GUI test
  
 	// return true if there were any changes made
