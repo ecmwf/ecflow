@@ -249,9 +249,17 @@ def add_cray_cray_compiler_variables( cray_cray ):
 def add_remote_cray_variables( cray ):
     # re use axel scripts for trap.h. rcp.eh etc,  
     # However this re-use requires definitions for SMSNAME and SMSPASS
-    cray.add_variable("SMSNAME", "0")
-    cray.add_variable("SMSPASS", "0")
-    cray.add_variable("ECF_INCLUDE", "/home/ma/emos/def/cray/include")
+    cray.add_variable("ECF_INCLUDE", "/home/ma/emos/def/o/include")
+    cray.add_variable("SMSNAME", "%ECF_NAME%")
+    cray.add_variable("SMSPASS", "1")
+    cray.add_variable("SMSFILES", "ECF_FILES")
+    cray.add_variable("SMSHOME", "")
+    cray.add_variable("SMSINCLUDE", "")
+    cray.add_variable("SMSJOBOUT", "%ECF_JOBOUT%")
+    cray.add_variable("SMSNODE", "0")
+    cray.add_variable("SMSOUT", "%ECF_OUT%")
+    cray.add_variable("SMSTRYNO", "%ECF_TRYNO%")
+    cray.add_variable("SMS_PROG", "0")
     
     cray.add_variable("REMOTE_COPY","scp")
 
