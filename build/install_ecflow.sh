@@ -240,6 +240,9 @@ if [[ "$test_arg" = "" ]] ; then
    cd $ECFLOW_INSTALL_DIR/bin
    chmod 755 *
    
+   cd $ECFLOW_PYTHON_INSTALL_DIR
+   chmod 755 *
+   
    #==========================================================================
    echo "...sanity test, make sure exe's exist in the bin directory"
    # ============================================================================
