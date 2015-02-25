@@ -180,7 +180,6 @@ elif [[ "$ARCH" = cray ]] ; then
    
    export WK=/perm/ma/ma0/workspace/$PE_ENV/ecflow
    export BOOST_ROOT=/perm/ma/ma0/boost/$BOOST_VERSION
-
 fi
 
 # =======================================================================================
@@ -194,7 +193,31 @@ export ECFLOW_PYTHON_INSTALL_DIR=$ECFLOW_INSTALL_DIR/lib/python2.7/site-packages
 # ============================================================================
 $BOOST_ROOT/bjam $TOOLSET $CXXFLAGS -d2 variant=$mode_arg $test_arg $install_arg
    
+
+#==========================================================================
+echo "...make sure executables have execute permissions for group and others"
+# ============================================================================
+if [[ "$test_arg" = "" ]] ; then
+   cd $ECFLOW_INSTALL_DIR/bin
+   chmod 755 *
    
+   cd $ECFLOW_PYTHON_INSTALL_DIR
+   chmod 755 *
+   
+   #==========================================================================
+   echo "...sanity test, make sure exe's exist in the bin directory"
+   # ============================================================================
+   if [[ ! -r ecflow_client ]] ; then
+      echo "ecflow_client not installed !!!!!"
+   fi
+   if [[ ! -r ecflow_server ]] ; then
+      echo "ecflow_server not installed !!!!!"
+   fi
+   if [[ ! -r ecflowview ]] ; then
+      echo "ecflowview not installed !!!!!"
+   fi
+fi
+
 # ============================================================================ 
 # Copy over release from ccb -> cca, or cca ->ccb, depending on the machine 
 # *Make* sure destination has a trailing '/.' otherwise you can end up renaming.
@@ -216,6 +239,7 @@ if [[ "$ARCH" = cray ]] ; then
    fi
 fi  
 
+
 # ============================================================================ 
 # Copy over release from ecgb(redhat) -> sappa and sappb
 # *Make* sure destination has a trailing '/.' otherwise you can end up renaming.
@@ -230,29 +254,5 @@ then
          scp -r $ECFLOW_VERSION emos@sappa:/usr/local/apps/ecflow/.
          scp -r $ECFLOW_VERSION emos@sappb:/usr/local/apps/ecflow/.
       fi
-   fi
-fi
-
-if [[ "$test_arg" = "" ]] ; then
-   #==========================================================================
-   echo "...make sure executables have execute permissions for group and others"
-   # ============================================================================
-   cd $ECFLOW_INSTALL_DIR/bin
-   chmod 755 *
-   
-   cd $ECFLOW_PYTHON_INSTALL_DIR
-   chmod 755 *
-   
-   #==========================================================================
-   echo "...sanity test, make sure exe's exist in the bin directory"
-   # ============================================================================
-   if [[ ! -r ecflow_client ]] ; then
-      echo "ecflow_client not installed !!!!!"
-   fi
-   if [[ ! -r ecflow_server ]] ; then
-      echo "ecflow_server not installed !!!!!"
-   fi
-   if [[ ! -r ecflowview ]] ; then
-      echo "ecflowview not installed !!!!!"
    fi
 fi
