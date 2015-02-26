@@ -40,9 +40,11 @@ BOOST_AUTO_TEST_SUITE( CoreTestSuite )
 BOOST_AUTO_TEST_CASE( test_splitFileIntoLines )
 {
    // This is sanity test for splitFileIntoLines used extensively
-   cout << "ACore:: ...test_splitFileIntoLines\n";
+   cout << "ACore:: ...test_splitFileIntoLines, current path = " << fs::current_path() << "\n";
 
    std::string path = File::test_data("ACore/test/data/test_splitFileIntoLines.txt","ACore");
+
+   cout << "path = " << path << "\n";
 
    std::string theText = "This is a test string";
    {
