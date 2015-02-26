@@ -834,7 +834,7 @@ std::string File::test_data(const std::string& rel_path, const std::string& dir)
          // remove first path, expecting "dir/path/path1" remove dir
          std::string::size_type pos = rel_path.find("/",1); // skip over any leading /
          if (pos != std::string::npos) {
-            test_file += rel_path.substr(pos);
+            test_file += rel_path.substr(pos+1); // skip over '/' to be left with path/path1, making it relative
          }
          else {
             test_file += rel_path;
