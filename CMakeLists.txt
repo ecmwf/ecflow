@@ -74,6 +74,8 @@ option( ENABLE_PYTHON         "enable python interface"   ON  )
 
 if(ENABLE_PYTHON)
    ecbuild_find_python( VERSION 2.7 REQUIRED )
+   debug_var(PYTHON_LIBRARIES)
+   debug_var(PYTHON_INCLUDE_DIR)
 else() 
    ecbuild_find_python( VERSION 2.7 )
 endif()
