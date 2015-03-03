@@ -50,6 +50,7 @@ list( APPEND test_srcs
  test/TestVariableGeneration.cpp
  test/TestVariableInheritance.cpp
  test/TestVariableSubstitution.cpp
+ test/TestVariableSubstitutionDefs.cpp
  test/TestZombies.cpp
 )
 
