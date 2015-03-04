@@ -380,8 +380,9 @@ tmp_file ehost::jobcheck( node& n, const std::string &cmd )
    //std::string user = n.variable("USER");
    std::string job = n.variable("ECF_JOB");
    std::string stat = job + ".stat";
-   if (n.__node__()) if (n.__node__()->get_node()) n.__node__()->get_node()->variableSubsitution(
-            subcmd);
+   if (n.__node__()) 
+     if (n.__node__()->get_node()) 
+       n.__node__()->get_node()->variableSubsitution(subcmd);
    std::string check = "sh " + subcmd;
    command(check);
    return tmp_file(stat.c_str(), false);

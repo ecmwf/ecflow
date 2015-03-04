@@ -771,14 +771,6 @@ ecf_concrete_node(const Event* owner,ecf_node* parent, const char c)
    , owner_(owner)
 {}
 
-// template<> 
-// const std::string ecf_concrete_node<Node>::substitute(const std::string& cmd) const 
-// { 
-//   std::string out (cmd);
-//   if (owner_) owner_->variableSubsitution(out); 
-//   return out;
-// }
-
 template<> 
 const std::string ecf_concrete_node<ExpressionWrapper>::toString() const 
   { if (owner_) return owner_->expression(); return ecf_node::none(); }
@@ -1075,7 +1067,17 @@ template<>
 std::string ecf_concrete_node<Defs>::get_var(const std::string& name, 
                                              bool is_gen,
                                              bool substitute) 
-{ return owner_->server().findVariable(name).theValue(); }
+{ if (!is_gen) { // user variable have priority
+      const Variable& var = owner_->server().findVariable(name);
+      if (!var.empty()) {
+         std::string value = var.theValue();
+         if (substitute)
+            owner_->server().variableSubsitution(value);
+         return value;
+      }
+   }
+  return owner_->server().findVariable(name).theValue(); 
+}
 
 template<>
 Limit* ecf_concrete_node<Limit>::get_limit(const std::string& name)
