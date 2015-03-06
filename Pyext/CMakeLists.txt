@@ -68,8 +68,10 @@ foreach( test ${tests} )
 
     ecbuild_add_test( TARGET ${test} 
                       TYPE PYTHON 
-                      ARGS ${CMAKE_CURRENT_SOURCE_DIR}/test/${test}.py
-                      ENVIRONMENT "PYTHONPATH=${CMAKE_BINARY_DIR}/lib" )
+                      ARGS        ${CMAKE_CURRENT_SOURCE_DIR}/test/${test}.py
+                      ENVIRONMENT "PYTHONPATH=${CMAKE_BINARY_DIR}/lib" 
+                      TEST_DEPENDS u_base
+                     )
 endforeach()
 
 set_property(TEST py_s_TestClientApi      APPEND PROPERTY DEPENDS s_test)
