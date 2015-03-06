@@ -45,3 +45,7 @@ ecbuild_add_test( TARGET    c_csim_single
                             pthread 
                   INCLUDES  ../ANode/test
                    )
+
+set_property(TEST c_csim APPEND PROPERTY DEPENDS u_base)
+set_property(TEST c_csim_single APPEND PROPERTY DEPENDS u_base)
+                   

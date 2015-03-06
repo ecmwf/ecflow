@@ -103,3 +103,6 @@ ecbuild_add_test( TARGET    u_base
                             pthread 
                   INCLUDES ../ANode/test
                   )
+
+set_property(TEST u_base APPEND PROPERTY DEPENDS u_aparser)
+                  

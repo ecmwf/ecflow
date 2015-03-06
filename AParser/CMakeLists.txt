@@ -33,6 +33,8 @@ ecbuild_add_test( TARGET   u_aparser
                   LIBS     libparser 
                  )
 
+set_property(TEST u_aparser APPEND PROPERTY DEPENDS u_anode)
+
 #
 # Tests parser for a single defs file but with a range of tests
 #

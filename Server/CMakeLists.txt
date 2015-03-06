@@ -71,6 +71,8 @@ ecbuild_add_test( TARGET   u_server
                   LIBS     libserver  
               )
 
+set_property(TEST u_server APPEND PROPERTY DEPENDS u_base)
+
 # ===================================================================
 # install
 # ===================================================================

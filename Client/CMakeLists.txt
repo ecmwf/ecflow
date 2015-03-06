@@ -94,6 +94,8 @@ ecbuild_add_test( TARGET    s_client
                             ../Base/test 
                  )
 
+set_property(TEST s_client APPEND PROPERTY DEPENDS u_base)
+
 # 
 # Simple stand alone test
 #
