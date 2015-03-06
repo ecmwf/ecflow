@@ -821,27 +821,35 @@ std::string File::find_ecf_client_path()
 std::string File::test_data(const std::string& rel_path, const std::string& dir)
 {
    std::string test_file;
-   char* workspace = getenv("WK"); // for ecbuild
-   if (workspace != NULL ) {
-      test_file = std::string(workspace);
+   char* work_space = getenv("WK"); // for ecbuild
+   if (work_space != NULL ) {
+      test_file = std::string(work_space);
       if (!rel_path.empty() && rel_path[0] != '/' ) test_file += "/";
       test_file += rel_path;
    }
    else {
-      fs::path current_path = fs::current_path();
-      if (current_path.stem() == dir ) {
+      std::string work_space = root_source_dir();
+      if (!work_space.empty()) {
+         test_file = work_space;
+         if (!rel_path.empty() && rel_path[0] != '/' ) test_file += "/";
+         test_file += rel_path;
+      }
+      else {
+         fs::path current_path = fs::current_path();
+         if (current_path.stem() == dir ) {
 
-         // remove first path, expecting "dir/path/path1" remove dir
-         std::string::size_type pos = rel_path.find("/",1); // skip over any leading /
-         if (pos != std::string::npos) {
-            test_file += rel_path.substr(pos+1); // skip over '/' to be left with path/path1, making it relative
+            // remove first path, expecting "dir/path/path1" remove dir
+            std::string::size_type pos = rel_path.find("/",1); // skip over any leading /
+            if (pos != std::string::npos) {
+               test_file += rel_path.substr(pos+1); // skip over '/' to be left with path/path1, making it relative
+            }
+            else {
+               test_file += rel_path;
+            }
          }
          else {
             test_file += rel_path;
          }
-      }
-      else {
-         test_file += rel_path;
       }
    }
    return test_file;
