@@ -67,3 +67,7 @@ ecbuild_add_test( TARGET  u_anode_stest
                   SOURCES   ${stest_srcs}
                   LIBS      node 
                  )
+
+set_property(TEST u_anode APPEND PROPERTY DEPENDS u_anattr)
+set_property(TEST u_anode_stest APPEND PROPERTY DEPENDS u_anattr)
+

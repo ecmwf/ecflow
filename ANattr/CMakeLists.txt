@@ -19,3 +19,5 @@ ecbuild_add_test( TARGET   u_anattr
                   SOURCES  ${test_srcs}
                   LIBS     nodeattr
                  )
+
+set_property(TEST u_anattr APPEND PROPERTY DEPENDS u_acore)
