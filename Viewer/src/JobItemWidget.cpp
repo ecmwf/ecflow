@@ -9,71 +9,69 @@
 
 #include "JobItemWidget.hpp"
 
-//========================================================
-//
-// JobItemWidget
-//
-//========================================================
+#include "Highlighter.hpp"
+#include "JobProvider.hpp"
+#include "VReply.hpp"
+
 
 JobItemWidget::JobItemWidget(QWidget *parent) : TextItemWidget(parent)
 {
+    QFont f;
+    f.setFamily("Monospace");
+    //f.setFamily("Courier");
+    f.setStyleHint(QFont::TypeWriter);
+    f.setFixedPitch(true);
+    textEdit_->setFont(f);
+
+    Highlighter* ih=new Highlighter(textEdit_->document(),"script");
+
+    infoProvider_=new JobProvider(this);
+  
 }
 
 QWidget* JobItemWidget::realWidget()
 {
-	return this;
+    return this;
 }
 
 void JobItemWidget::reload(VInfo_ptr nodeInfo)
 {
-	loaded_=true;
+    loaded_=true;
+    info_=nodeInfo;
 
-	if(!nodeInfo)
-	{
-		textEdit_->clear();
-	}
-	else
-	{
-		//nodeInfo->job(this);
-	}
-
-	/*if(nodeInfo.get() != 0 && nodeInfo->isNode())
-	{
-		Node* n=nodeInfo->node();
-		if(ServerHandler* s=nodeInfo->server())
-		{
-			NodeInfoQuery_ptr query(new NodeInfoQuery(n,NodeInfoQuery::JOB,this));
-			s->query(query);
-		}
-	}
-	else
-	{
-		textEdit_->clear();
-	}*/
+    if(!nodeInfo.get())
+    {
+        textEdit_->clear();
+    }
+    else
+    {
+        clearContents();
+        infoProvider_->info(info_);
+    }   
 }
 
 void JobItemWidget::clearContents()
 {
-	loaded_=false;
-	textEdit_->clear();
+    loaded_=false;
+    textEdit_->clear();
 }
-
 
 void JobItemWidget::infoReady(VReply* reply)
 {
-	std::cout << "reply for job" << std::endl;
+    QString s=QString::fromStdString(reply->text());
+    textEdit_->setPlainText(s);
+}
 
-	/*if(reply && reply->sender() == this)
-	{
-		if(reply->done())
-		{
-			textEdit_->setPlainText(QString::fromStdString(reply->text()));
-		}
-		else
-		{
-			textEdit_->setPlainText(QString::fromStdString(reply->errorText()));
-		}
-	}*/
+void JobItemWidget::infoProgress(VReply* reply)
+{
+    QString s=QString::fromStdString(reply->text());
+    textEdit_->setPlainText(s);
+}
+
+void JobItemWidget::infoFailed(VReply* reply)
+{
+    QString s=QString::fromStdString(reply->errorText());
+    textEdit_->setPlainText(s);
 }
 
 static InfoPanelItemMaker<JobItemWidget> maker1("job");

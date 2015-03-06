@@ -14,8 +14,11 @@ set(viewer_srcs
     InfoPanelItem.cpp   
     InfoProvider.cpp
     JobItemWidget.cpp
+    JobProvider.cpp
+    LineEdit.cpp
     MainWindow.cpp
     ManualItemWidget.cpp 
+    ManualProvider.cpp
     MenuConfigDialog.cpp
     MenuHandler.cpp
     MessageItemWidget.cpp
@@ -30,6 +33,7 @@ set(viewer_srcs
     OverviewProvider.cpp
     PlainTextSearchLine.cpp
     ScriptItemWidget.cpp
+    ScriptProvider.cpp
     ServerHandler.cpp
     ServerFilter.cpp
     ServerItem.cpp
@@ -39,6 +43,7 @@ set(viewer_srcs
     TableNodeModel.cpp
     TableNodeView.cpp
     TableNodeWidget.cpp
+    TextEdit.cpp
     TextItemWidget.cpp
     TriggerItemWidget.cpp
     TreeNodeModel.cpp
@@ -59,6 +64,8 @@ set(viewer_srcs
     VariableModel.cpp
     VariableModelData.cpp
     VariableItemWidget.cpp
+    VariableSearchLine.cpp
+    VariableView.cpp
     WhyItemWidget.cpp)
 
 
@@ -72,6 +79,7 @@ QT4_WRAP_CPP(VIEWER_MOC AbstractNodeModel.hpp
                         Dashboard.hpp
                         FilterWidget.hpp                      
                         InfoPanel.hpp
+                        LineEdit.hpp
                         MainWindow.hpp
                         MenuConfigDialog.hpp
                         NodeFilterModel.hpp
@@ -86,6 +94,7 @@ QT4_WRAP_CPP(VIEWER_MOC AbstractNodeModel.hpp
                         TableNodeModel.hpp 
                         TableNodeView.hpp 
                         TableNodeWidget.hpp                     
+                        TextEdit.hpp
                         TreeNodeModel.hpp
                         TreeNodeView.hpp                   
                         TreeNodeWidget.hpp
@@ -93,6 +102,7 @@ QT4_WRAP_CPP(VIEWER_MOC AbstractNodeModel.hpp
                         VariableItemWidget.hpp
                         VariableModel.hpp
                         VariableModelData.hpp
+                        VariableSearchLine.hpp
                         VFilter.hpp)
 
 QT4_ADD_RESOURCES (VIEWER_RES viewer.qrc)
@@ -108,6 +118,7 @@ QT4_WRAP_UI       (VIEWER_FORMS_HEADERS CommandDesignerWidget.ui CustomCommandDi
                         TableNodeWidget.ui
                         TextItemWidget.ui
                         TreeNodeWidget.ui
+                        VariableAddDialog.ui
                         VariableEditDialog.ui
                         VariableItemWidget.ui)
 

@@ -5,36 +5,27 @@
 // In applying this licence, ECMWF does not waive the privileges and immunities
 // granted to it by virtue of its status as an intergovernmental organisation
 // nor does it submit to any jurisdiction.
-//
 //============================================================================
 
-#ifndef JOBITEMWIDGET_HPP_
-#define JOBITEMWIDGET_HPP_
+#ifndef MANUALPROVIDER_HPP_
+#define MANUALPROVIDER_HPP_
 
-#include "InfoPanelItem.hpp"
-#include "TextItemWidget.hpp"
-#include "VInfo.hpp"
+#include "InfoProvider.hpp"
 
-#include "ServerHandler.hpp"
+class InfoPanelItem;
 
-class JobItemWidget : public TextItemWidget, public InfoPanelItem
+class ManualProvider : public InfoProvider
 {
 public:
-	JobItemWidget(QWidget *parent=0);
+    ManualProvider(InfoPresenter* owner);
 
-	void reload(VInfo_ptr);
-	QWidget* realWidget();
-	void clearContents();
+    //From VInfoVisitor
+    void visit(VInfoServer*) {};
+    void visit(VInfoNode*);
+    void visit(VInfoAttribute*) {};
 
-	//From VInfoPresenter
-	 //From VInfoPresenter
-    void infoReady(VReply*);
-    void infoFailed(VReply*);
-    void infoProgress(VReply*);
-
-	void nodeChanged(const Node*, const std::vector<ecf::Aspect::Type>&) {};
-
+    //From VTaskObserver
+    void taskChanged(VTask_ptr);
 };
 
 #endif
-

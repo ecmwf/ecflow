@@ -21,12 +21,18 @@
        <property name="text">
         <string>...</string>
        </property>
+       <property name="autoRaise">
+        <bool>true</bool>
+       </property>
       </widget>
      </item>
      <item>
       <widget class="QToolButton" name="deleteTb">
        <property name="text">
         <string>...</string>
+       </property>
+       <property name="autoRaise">
+        <bool>true</bool>
        </property>
       </widget>
      </item>
@@ -35,7 +41,27 @@
        <property name="text">
         <string>...</string>
        </property>
+       <property name="autoRaise">
+        <bool>true</bool>
+       </property>
       </widget>
+     </item>
+     <item>
+      <widget class="QToolButton" name="filterTb">
+       <property name="text">
+        <string>...</string>
+       </property>
+       <property name="icon">
+        <iconset resource="viewer.qrc">
+         <normaloff>:/viewer/filter_decor.svg</normaloff>:/viewer/filter_decor.svg</iconset>
+       </property>
+       <property name="checkable">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="LineEdit" name="filterLine"/>
      </item>
      <item>
       <spacer name="horizontalSpacer">
@@ -53,29 +79,10 @@
     </layout>
    </item>
    <item>
-    <widget class="QTreeView" name="varView">
-     <property name="contextMenuPolicy">
-      <enum>Qt::ActionsContextMenu</enum>
-     </property>
-     <property name="alternatingRowColors">
-      <bool>true</bool>
-     </property>
-     <property name="rootIsDecorated">
-      <bool>true</bool>
-     </property>
-     <property name="uniformRowHeights">
-      <bool>true</bool>
-     </property>
-     <property name="sortingEnabled">
-      <bool>true</bool>
-     </property>
-     <property name="allColumnsShowFocus">
-      <bool>true</bool>
-     </property>
-    </widget>
+    <widget class="VariableView" name="varView"/>
    </item>
    <item>
-    <widget class="PlainTextSearchLine" name="searchLine_" native="true"/>
+    <widget class="VariableSearchLine" name="searchLine_" native="true"/>
    </item>
   </layout>
   <action name="actionAdd">
@@ -96,7 +103,7 @@
   <action name="actionEdit">
    <property name="icon">
     <iconset resource="viewer.qrc">
-     <normaloff>:/viewer/images/configure.svg</normaloff>:/viewer/images/configure.svg</iconset>
+     <normaloff>:/viewer/edit.svg</normaloff>:/viewer/edit.svg</iconset>
    </property>
    <property name="text">
     <string>Edit</string>
@@ -114,7 +121,7 @@
      <normaloff>:/viewer/images/close.svg</normaloff>:/viewer/images/close.svg</iconset>
    </property>
    <property name="text">
-    <string>Delete variable</string>
+    <string>Delete</string>
    </property>
    <property name="toolTip">
     <string>Delete variable</string>
@@ -137,10 +144,20 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>PlainTextSearchLine</class>
+   <class>VariableSearchLine</class>
    <extends>QWidget</extends>
-   <header>PlainTextSearchLine.hpp</header>
+   <header location="global">VariableSearchLine.hpp</header>
    <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>VariableView</class>
+   <extends>QTreeView</extends>
+   <header location="global">VariableView.hpp</header>
+  </customwidget>
+  <customwidget>
+   <class>LineEdit</class>
+   <extends>QLineEdit</extends>
+   <header location="global">LineEdit.hpp</header>
   </customwidget>
  </customwidgets>
  <resources>

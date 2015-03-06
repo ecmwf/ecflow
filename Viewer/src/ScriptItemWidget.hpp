@@ -22,14 +22,13 @@ public:
 	void reload(VInfo_ptr);
 	QWidget* realWidget();
 	void clearContents();
+    
+    //From VInfoPresenter
+    void infoReady(VReply*);
+    void infoFailed(VReply*);
+    void infoProgress(VReply*);
 
-	//From VInfoReplyReceiver
-	void infoReady(VReply*);
-
-private:
-	void info(Node* node,std::stringstream& f);
-
-	void nodeChanged(const Node*, const std::vector<ecf::Aspect::Type>&) {};
+    void nodeChanged(const Node*, const std::vector<ecf::Aspect::Type>&) {}
 };
 
 #endif

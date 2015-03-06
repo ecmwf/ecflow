@@ -12,6 +12,9 @@
 #include "ServerHandler.hpp"
 #include "VNState.hpp"
 
+#include <QDebug>
+#include <QString>
+
 static std::string defaultStr("");
 
 //==========================================
@@ -19,6 +22,12 @@ static std::string defaultStr("");
 // VariableModelData
 //
 //==========================================
+
+void VariableModelData::clear()
+{
+	vars_.clear();
+	genVars_.clear();
+}
 
 const std::string& VariableModelData::name(int index) const
 {
@@ -51,6 +60,72 @@ const std::string& VariableModelData::value(int index) const
 }
 
 
+/*    void variables::deleteCB( Widget, XtPointer )
+{
+   if (get_node()) {
+      char *name = XmTextGetString(name_);
+      const char* fullname = get_node()->full_name().c_str();
+      if (confirm::ask(False, "Delete variable %s for node %s", name, fullname)) {
+         // repeat get_node while suite may have been cancelled by another
+         // while answering this question
+         if (get_node()) {
+            if (get_node()->__node__())
+               get_node()->serv().command(clientName, "--alter", "delete", "variable", name,
+                                          fullname, NULL);
+            else
+               get_node()->serv().command("alter", "-vr", fullname, name, NULL);
+         }
+      }
+      XtFree(name);
+      update();
+   }
+   else
+      clear();
+}
+
+void variables::setCB( Widget, XtPointer )
+{
+   if (get_node()) {
+
+      char *name = XmTextGetString(name_);
+      char *value = XmTextGetString(value_);
+      Boolean ok = True;
+      node* n = get_node()->variableOwner(name);
+
+      if (n != 0 && n != get_node()) {
+         ok = confirm::ask(True, "This variable is already defined in the %s %s\n"
+                           "A new variable will be created for the selected node\n"
+                           "and hide the previous one\n"
+                           "Do you want to proceed?",
+                           n->type_name(), n->full_name().c_str());
+      }
+
+      if (n != 0 && n->isGenVariable(name) && ok) {
+         ok = confirm::ask(True, "This variable is a generated variable\n"
+                           "Do you want to proceed?");
+      }
+
+      if (ok) {
+         bool add = true;
+         if (get_node()->__node__()) add = get_node()->__node__()->variable(name)
+                  == ecf_node::none();
+         if (get_node()->__node__())
+            get_node()->serv().command(clientName, "--alter", add ? "add" : "change", "variable",
+                                       name, value, get_node()->full_name().c_str(), NULL);
+         else
+            get_node()->serv().command("alter", "-v", get_node()->full_name().c_str(), name, value,
+                                       NULL);
+         if (add) update();
+      }
+      XtFree(name);
+      XtFree(value);
+   }
+   else
+      clear();
+}
+    
+}    
+*/
 bool VariableModelData::isGenVar(int index) const
 {
 	return (index >= vars_.size());
@@ -61,6 +136,25 @@ int VariableModelData::varNum() const
 	return vars_.size() + genVars_.size();
 }
 
+void VariableModelData::match(const std::string& txt,std::vector<int>& result) const
+{
+    QString str=QString::fromStdString(txt);
+    
+    qDebug() << "match" << QString::fromStdString(txt);
+
+    for(int i=0; i < varNum(); i++)
+    {
+    	qDebug() << "  " << QString::fromStdString(name(i)) << QString::fromStdString(value(i)) ;
+
+    	if(QString::fromStdString(name(i)).contains(str,Qt::CaseInsensitive) ||
+            QString::fromStdString(value(i)).contains(str,Qt::CaseInsensitive))
+        {
+            qDebug() << "    -->YES";
+    		result.push_back(i);
+        }
+    }
+}   
+
 VariableServerData::VariableServerData(ServerHandler *server)
 {
 	server_=server;
@@ -68,7 +162,7 @@ VariableServerData::VariableServerData(ServerHandler *server)
 
 }
 
-const std::string& VariableServerData::name()
+const std::string& VariableServerData::dataName()
 {
 	return server_->longName();
 }
@@ -80,6 +174,8 @@ QColor VariableServerData::colour()
 
 void VariableServerData::reload()
 {
+	clear();
+
 	ServerDefsAccess defsAccess(server_);  // will reliquish its resources on destruction
 	const std::vector<Variable>& v=defsAccess.defs()->server().server_variables();
 
@@ -89,6 +185,11 @@ void VariableServerData::reload()
 	}
 }
 
+
+void VariableServerData::setValue(int index,const std::string& val)
+{
+}
+
 VariableNodeData::VariableNodeData(Node *node)
 {
 	node_=node;
@@ -96,7 +197,7 @@ VariableNodeData::VariableNodeData(Node *node)
 
 }
 
-const std::string& VariableNodeData::name()
+const std::string& VariableNodeData::dataName()
 {
 	return node_->name();
 }
@@ -109,6 +210,8 @@ QColor VariableNodeData::colour()
 
 void VariableNodeData::reload()
 {
+	clear();
+
 	std::vector<Variable> v=node_->variables();
 	for(std::vector<Variable>::const_iterator it=v.begin(); it != v.end(); it++)
 	{
@@ -123,6 +226,18 @@ void VariableNodeData::reload()
 	}
 }
 
+void VariableNodeData::setValue(int index,const std::string& val)
+{
+	VInfo_ptr info(VInfo::make(node_));
+
+	std::string cmd="ecflow_client --alter change variable " + name(index) + " " + val + " <full_name>"  ;
+
+	ServerHandler::command(info,cmd,false);
+
+	/*get_node()->serv().command(clientName, "--alter", add ? "add" : "change", "variable",
+	                                       name, value, get_node()->full_name().c_str(), NULL);*/
+
+}
 
 //==========================================
 //
@@ -130,7 +245,7 @@ void VariableNodeData::reload()
 //
 //==========================================
 
-VariableModelDataHandler::VariableModelDataHandler()
+VariableModelDataHandler::VariableModelDataHandler() : server_(0)
 {
 }
 
@@ -196,10 +311,30 @@ VariableModelData* VariableModelDataHandler::data(int index) const
 }
 
 
-void VariableModelDataHandler::nodeChanged(const Node* node, const std::vector<ecf::Aspect::Type>&)
+void VariableModelDataHandler::nodeChanged(const Node* node, const std::vector<ecf::Aspect::Type>& aspect)
 {
-	//find in data
-	//update
-	//emit change signal
+	bool changed=false;
+	for(std::vector<ecf::Aspect::Type>::const_iterator it=aspect.begin(); it != aspect.end(); it++)
+	{
+		if(*it == ecf::Aspect::NODE_VARIABLE)
+		{
+			changed=true;
+			break;
+		}
+	}
+
+	if(changed)
+	{
+		for(unsigned int i=0; i < data_.size(); i++)
+		{
+			if(data_.at(i)->dataName() == node->name())
+			{
+				//Notifies the model that a change will happen
+			    Q_EMIT reloadBegin();
+			    data_.at(i)->reload();
+			    Q_EMIT reloadEnd();
+			}
+		}
+	}
 }
 

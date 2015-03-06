@@ -145,9 +145,9 @@ void InfoPanel::clear()
 	bcWidget_->setPath(VInfo_ptr());
 }
 
-void InfoPanel::reset(VInfo_ptr node)
+void InfoPanel::reset(VInfo_ptr info)
 {
-		currentNode_=node;
+		currentNode_=info;
 
 		//Check which roles are allowed
 		QStringList ids;
@@ -166,14 +166,14 @@ void InfoPanel::reset(VInfo_ptr node)
 					if(i== tab_->currentIndex())
 					{
 						qDebug() << "reload" << i;
-						item->reload(node);
+						item->reload(info);
 					}
 					else
 						item->clearContents();
 				}
 			}
 
-		bcWidget_->setPath(node);
+		bcWidget_->setPath(info);
 }
 
 void InfoPanel::slotReload(VInfo_ptr node)

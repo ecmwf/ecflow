@@ -69,6 +69,8 @@ void InfoPanelItem::adjust(VInfo_ptr info)
   	  	if(info_ && info_->server())
   	  		info_->server()->removeNodeObserver(this);
   	}
+
+  	info_=info;
 }
 
 //From NodeObserver

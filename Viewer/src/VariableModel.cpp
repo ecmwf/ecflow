@@ -92,7 +92,13 @@ QVariant VariableModel::data( const QModelIndex& index, int role ) const
 	//Server or node
 	if(level == 1)
 	{
-		VariableModelData *d=data_->data(row);
+		if(role == Qt:: BackgroundRole)
+            return QColor(122,122,122);
+        
+        if(role == Qt::ForegroundRole)
+            return QColor(255,255,255);
+        
+        VariableModelData *d=data_->data(row);
 		if(!d)
 		{
 			return QVariant();
@@ -102,7 +108,7 @@ QVariant VariableModel::data( const QModelIndex& index, int role ) const
 		{
 			if(role == Qt::DisplayRole)
 			{
-				return QString::fromStdString(d->name());
+				return QString::fromStdString(d->dataName());
 			}
 		}
 
@@ -139,19 +145,54 @@ QVariant VariableModel::data( const QModelIndex& index, int role ) const
 	return QVariant();
 }
 
-bool VariableModel::data(const QModelIndex& idx, QString& name,QString& value) const
+bool VariableModel::data(const QModelIndex& idx, QString& name,QString& value,bool& genVar) const
 {
-	QModelIndex idx0=index(idx.row(),0,idx.parent());
-	QModelIndex idx1=index(idx.row(),1,idx.parent());
+	int block=-1;
+	int row=-1;
 
-	name=data(idx0,Qt::DisplayRole).toString();
-	value=data(idx1,Qt::DisplayRole).toString();
-	return true;
+	identify(idx,block,row);
+
+	if(row < 0)
+		return false;
+
+	if(block >=0 && block < data_->count())
+	{
+		name=QString::fromStdString(data_->data(block)->name(row));
+		value=QString::fromStdString(data_->data(block)->value(row));
+		genVar=data_->data(block)->isGenVar(row);
+		return true;
+	}
+
+	return false;
 }
 
 bool VariableModel::setData(const QModelIndex& index, QString name,QString value)
 {
-	return false;
+    int block;
+    int row;
+    
+    identify(index,block,row);
+    
+    if(block == -1 || row == -1)
+        return false;
+    
+    if(block >=0 && block < data_->count())
+    {
+        //double check
+        if(data_->data(block)->name(row) != name.toStdString())
+        {
+            assert(0);
+            return false;
+        }    
+                
+        //This will call the ServerComThread  so we 
+        //do not know if it was succesful. The model will be
+        //updated through the observer when the value will actually
+        //change.
+        data_->data(block)->setValue(row,value.toStdString());
+    }
+    
+    return false;
 }
 
 QVariant VariableModel::headerData( const int section, const Qt::Orientation orient , const int role ) const
@@ -239,6 +280,30 @@ bool VariableModel::isVariable(const QModelIndex & index) const
 {
 	return (indexToLevel(index) == 2);
 }
+
+void VariableModel::identify(const QModelIndex& index,int& block,int& row) const
+{
+    block=-1;
+    row=-1;
+    
+    if(!index.isValid())
+    {
+       return;
+    }
+    
+    int level=indexToLevel(index);
+    
+    if(level == 1)
+    {
+        block=index.row();
+        row=-1;
+    }
+    else if(level == 2)
+    {
+        block=parent(index).row();
+        row=index.row();       
+    }        
+}    
 
 /*
 bool VariableModel::isServer(const QModelIndex & index) const
@@ -329,6 +394,23 @@ void VariableModel::slotReloadEnd()
 	endResetModel();
 }
 
+/*QModelIndexList VariableModel::match(const QModelIndex& start,int role,const QVariant& value,int hits,Qt::MatchFlags flags) const
+{
+    QModelIndexList  lst;
+    for(unsigned int i=0; i < data_->count(); i++)
+    {
+        QModelIndex parent=index(i,0);
+        std::vector<int> res;
+        data_->data(i)->match(value.toString().toStdString(),res);
+        for(std::vector<int>::const_iterator it =res.begin(); it != res.end(); it++)
+        {
+            lst << index(*it,0,parent);
+        }
+    }   
+    
+    return lst;
+}*/
+
 //=======================================================================
 //
 // VariableSortModel
@@ -337,10 +419,34 @@ void VariableModel::slotReloadEnd()
 
 VariableSortModel::VariableSortModel(VariableModel *varModel,QObject* parent) :
 	QSortFilterProxyModel(parent),
-	varModel_(varModel)
+	varModel_(varModel),
+	filter_(false)
 {
 	QSortFilterProxyModel::setSourceModel(varModel_);
 	setDynamicSortFilter(true);
+}
+
+void VariableSortModel::enableFilter(bool filter)
+{
+	if(filter_ != filter)
+	{
+		filter_=filter;
+		filterText_.clear();
+
+		//reload the filter model
+		invalidate();
+	}
+}
+
+void VariableSortModel::setFilterText(QString txt)
+{
+	if(filter_)
+	{
+		filterText_=txt;
+
+		//reload the filter model
+		invalidate();
+	}
 }
 
 
@@ -360,12 +466,87 @@ bool VariableSortModel::lessThan(const QModelIndex &sourceLeft, const QModelInde
 	//For variables we simply sort according to the string
 	else
 	{
-			return varModel_->data(sourceLeft,Qt::DisplayRole).toString() < varModel_->data(sourceRight,Qt::DisplayRole).toString();
+		return varModel_->data(sourceLeft,Qt::DisplayRole).toString() < varModel_->data(sourceRight,Qt::DisplayRole).toString();
 	}
 	return true;
 }
 
-bool VariableSortModel::filterAcceptsRow(int,const QModelIndex &) const
+bool VariableSortModel::filterAcceptsRow(int sourceRow,const QModelIndex& sourceParent) const
 {
-	return true;
+	if(!filter_ || filterText_.simplified().isEmpty())
+		return true;
+
+	if(!sourceParent.isValid())
+		return true;
+
+	QModelIndex idx=varModel_->index(sourceRow,0,sourceParent);
+	QModelIndex idx2=varModel_->index(sourceRow,1,sourceParent);
+
+	QString s=varModel_->data(idx,Qt::DisplayRole).toString();
+	QString s2=varModel_->data(idx2,Qt::DisplayRole).toString();
+
+	if(s.contains(filterText_,Qt::CaseInsensitive) || s2.contains(filterText_,Qt::CaseInsensitive))
+	{
+		return true;
+	}
+
+	return false;
 }
+
+QVariant VariableSortModel::data(const QModelIndex& idx,int role) const
+{
+    if(role != Qt::UserRole)
+    {
+        return QSortFilterProxyModel::data(idx,role);
+    }    
+    
+    //We highlight the matching items (the entire row).
+    if(matchLst_.count() >0)
+    {
+        int col2=(idx.column()==0)?1:0;
+        QModelIndex idx2=index(idx.row(),col2,idx.parent());
+            
+        qDebug() << idx << idx2;
+        
+        if(matchLst_.contains(idx) || matchLst_.contains(idx2))
+            return QColor(83,187,109);
+    }
+    
+    return QSortFilterProxyModel::data(idx,role);
+}    
+    
+QModelIndexList VariableSortModel::match(const QModelIndex& start,int role,const QVariant& value,int hits,Qt::MatchFlags flags) const
+{
+	QModelIndex root;
+	QString txt=value.toString();
+
+	matchLst_.clear();
+
+	for(int i=0; i < rowCount(); i++)
+	{
+		QModelIndex idx=index(i,0);
+		for(int row=0; row < rowCount(idx);row++)
+		{
+			//Name column
+			QModelIndex colIdx=index(row,0,idx);
+			QString s=data(colIdx,Qt::DisplayRole).toString();
+
+			if(s.contains(txt,Qt::CaseInsensitive))
+			{
+				matchLst_ << colIdx;
+				continue;
+			}
+
+			//Value columns
+			QModelIndex colIdx1=index(row,1,idx);
+			s=data(colIdx1,Qt::DisplayRole).toString();
+			if(s.contains(txt,Qt::CaseInsensitive))
+			{
+				matchLst_ << colIdx;
+			}
+		}
+	}
+
+    return matchLst_;
+}
+

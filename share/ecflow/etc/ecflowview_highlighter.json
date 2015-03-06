@@ -12,5 +12,19 @@
                                 "colour"  : "rgb(128,128,128)",
                         		"italic"  : "true"
                         }                     
+        },
+
+        "script"  : {
+
+                        "preproc" : {
+                                "pattern" : "^\\s*(%include\\s*<\\S*>|%manual|%comment|%nopp|%end|%ecfmicro \\S+)",                      
+                                "colour"  : "rgb(0,140,0)"                           
+                                
+                        },
+                        "var" : {
+                                "pattern" : "(DAY))",                       
+                                "colour"  : "rgb(0,0,255)",
+                                "bold"  : "true"
+                        }                     
         }
 }

@@ -33,10 +33,12 @@ public:
    	QModelIndex index (int, int, const QModelIndex& parent = QModelIndex() ) const;
    	QModelIndex parent (const QModelIndex & ) const;
 
-	bool data(const QModelIndex& index, QString& name,QString& value) const;
+	bool data(const QModelIndex& index, QString& name,QString& value,bool& genVar) const;
 	bool setData(const QModelIndex& index,QString name,QString value);
 
 	void nodeChanged(const Node*, const std::vector<ecf::Aspect::Type>&);
+    
+    //QModelIndexList match(const QModelIndex& start,int role,const QVariant& value,int hits,Qt::MatchFlags flags) const;
 
 public Q_SLOTS:
 	void slotReloadBegin();
@@ -47,6 +49,7 @@ protected:
 
 	int indexToLevel(const QModelIndex&) const;
 	bool isVariable(const QModelIndex & index) const;
+    void identify(const QModelIndex& index,int& parent,int& row) const;
 	/*
 	bool isServer(const QModelIndex & index) const;
 	bool isNode(const QModelIndex & index) const;
@@ -68,15 +71,27 @@ public:
 	VariableSortModel(VariableModel*,QObject *parent=0);
 	~VariableSortModel() {};
 
+	void enableFilter(bool filter);
+	void setFilterText(QString text);
+
 	bool lessThan(const QModelIndex &left, const QModelIndex &right) const;
 	bool filterAcceptsRow(int,const QModelIndex &) const;
 
 	//From QSortFilterProxyModel:
 	//we set the source model in the constructor. So this function should not do anything.
 	void setSourceModel(QAbstractItemModel*) {};
+    QVariant data (const QModelIndex& , int role = Qt::DisplayRole ) const;
+	
+    QModelIndexList match(const QModelIndex& start,int role,const QVariant& value,int hits = 1, Qt::MatchFlags flags = Qt::MatchFlags( Qt::MatchStartsWith | Qt::MatchWrap )) const;
 
 protected:
+    void match(QString text);
+
 	VariableModel* varModel_;
+	QString matchText_;
+    mutable QModelIndexList matchLst_;
+    bool filter_;
+    QString filterText_;
 };
 
 

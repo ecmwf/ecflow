@@ -11,9 +11,6 @@
 #ifndef VARIABLEITEMWIDGET_HPP_
 #define VARIABLEITEMWIDGET_HPP_
 
-#include <QSortFilterProxyModel>
-#include <QTreeView>
-
 #include "ui_VariableEditDialog.h"
 #include "ui_VariableItemWidget.h"
 
@@ -23,24 +20,6 @@
 class VariableModel;
 class VariableModelDataHandler;
 class VariableSortModel;
-
-
-class VariableView : public QTreeView
-{
-Q_OBJECT
-
-public:
-	VariableView(QWidget *parent=0);
-	//void reload();
-	void reload(VInfo_ptr);
-
-public Q_SLOTS:
-	void slotSelectItem(const QModelIndex&);
-
-protected:
-	//VariableModel *model_;
-};
-
 
 
 class VariableDialogChecker
@@ -56,12 +35,12 @@ protected:
 };
 
 
-class VariableEditDialog : public QDialog, private Ui::VariableEditDialog, public VariableDialogChecker
+class VariableEditDialog : public QDialog, private Ui::VariableEditDialog //, public VariableDialogChecker
 {
 Q_OBJECT
 
 public:
-	VariableEditDialog(QString name,QString value,QWidget* parent=0);
+	VariableEditDialog(QString name,QString value,bool genVar,QWidget* parent=0);
 
 	QString name() const;
 	QString value() const;
@@ -69,6 +48,9 @@ public:
 
 public Q_SLOTS:
 	void accept();
+
+protected:
+	bool genVar_;
 
 };
 
@@ -111,6 +93,8 @@ public Q_SLOTS:
 	void on_actionDuplicate_triggered();
 	void on_actionDelete_triggered();
 	void on_varView_doubleClicked(const QModelIndex& index);
+	void on_filterTb_toggled(bool);
+	void on_filterLine_textChanged(QString text);
 
 protected:
 	void editItem(const QModelIndex& index);

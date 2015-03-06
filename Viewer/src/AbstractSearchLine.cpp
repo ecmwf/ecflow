@@ -13,6 +13,8 @@ AbstractSearchLine::AbstractSearchLine(QWidget* parent) : QWidget(parent)
 {
 	setupUi(this);
 
+	//searchLine_->setDecoration(QPixmap(":/viewer/filter_decor.svg"));
+
 	connect(searchLine_, SIGNAL(textChanged(QString)),
 		this, SLOT(slotFind(QString)));
 

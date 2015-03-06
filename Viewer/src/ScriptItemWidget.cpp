@@ -9,6 +9,10 @@
 
 #include "ScriptItemWidget.hpp"
 
+#include "Highlighter.hpp"
+#include "ScriptProvider.hpp"
+#include "VReply.hpp"
+
 //========================================================
 //
 // ScriptItemWidget
@@ -17,6 +21,17 @@
 
 ScriptItemWidget::ScriptItemWidget(QWidget *parent) : TextItemWidget(parent)
 {
+    QFont f;
+	f.setFamily("Monospace");
+	//f.setFamily("Courier");
+	f.setStyleHint(QFont::TypeWriter);
+	f.setFixedPitch(true);
+	textEdit_->setFont(f);
+
+    Highlighter* ih=new Highlighter(textEdit_->document(),"script");
+
+	infoProvider_=new ScriptProvider(this);
+  
 }
 
 QWidget* ScriptItemWidget::realWidget()
@@ -26,47 +41,42 @@ QWidget* ScriptItemWidget::realWidget()
 
 void ScriptItemWidget::reload(VInfo_ptr nodeInfo)
 {
-	loaded_=true;
-	
-	/*if(nodeInfo.get() != 0 && nodeInfo->isNode())
-	{
-		Node* n=nodeInfo->node();
+    loaded_=true;
+    info_=nodeInfo;
 
-		if(nodeInfo->isNode())
-		{
-			Node* n=nodeInfo->node();
-			if(ServerHandler* s=nodeInfo->server())
-			{
-				NodeInfoQuery_ptr query(new NodeInfoQuery(n,NodeInfoQuery::SCRIPT,this));
-				s->query(query);
-			}
-		}	
-	}
-	else
-	{
-		textEdit_->clear();
-	}*/
+    if(!nodeInfo.get())
+    {
+        textEdit_->clear();
+    }
+    else
+    {
+        clearContents();
+        infoProvider_->info(info_);
+    }	
 }
 
 void ScriptItemWidget::clearContents()
 {
-	loaded_=false;
-	textEdit_->clear();
+    loaded_=false;
+    textEdit_->clear();
 }
 
 void ScriptItemWidget::infoReady(VReply* reply)
 {
-	/*if(reply && reply->sender() == this)
-	{
-		if(reply->done())
-		{
-			textEdit_->setPlainText(QString::fromStdString(reply->text()));
-		}
-		else
-		{
-			textEdit_->setPlainText(QString::fromStdString(reply->errorText()));
-		}
-	}*/
+    QString s=QString::fromStdString(reply->text());
+    textEdit_->setPlainText(s);
+}
+
+void ScriptItemWidget::infoProgress(VReply* reply)
+{
+    QString s=QString::fromStdString(reply->text());
+    textEdit_->setPlainText(s);
+}
+
+void ScriptItemWidget::infoFailed(VReply* reply)
+{
+    QString s=QString::fromStdString(reply->errorText());
+    textEdit_->setPlainText(s);
 }
 
 

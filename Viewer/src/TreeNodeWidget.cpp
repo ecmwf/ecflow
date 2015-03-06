@@ -84,6 +84,12 @@ TreeNodeWidget::TreeNodeWidget(ServerFilter* servers,QWidget* parent) : NodeWidg
 
 	//Sets the menu on the toolbutton
 	viewTb->setMenu(menu);
+
+
+	//This will not emit the trigered signal of the action!!
+	//Synchronise the action and the breadcrumbs state
+	actionBreadcrumbs->setChecked(bcWidget_->active());
+
 }
 
 void TreeNodeWidget::on_actionBreadcrumbs_triggered(bool b)

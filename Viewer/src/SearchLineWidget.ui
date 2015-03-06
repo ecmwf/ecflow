@@ -34,7 +34,7 @@
     </widget>
    </item>
    <item>
-    <widget class="QLineEdit" name="searchLine_"/>
+    <widget class="LineEdit" name="searchLine_"/>
    </item>
    <item>
     <widget class="QPushButton" name="nextPb_">
@@ -66,6 +66,13 @@
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>LineEdit</class>
+   <extends>QLineEdit</extends>
+   <header location="global">LineEdit.hpp</header>
+  </customwidget>
+ </customwidgets>
  <resources>
   <include location="viewer.qrc"/>
  </resources>

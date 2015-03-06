@@ -82,6 +82,7 @@ public:
 		static int numOfImmediateChildren(Node*);
 		static Node* immediateChildAt(Node *parent,int pos);
 		static int indexOfImmediateChild(Node *node);
+		static void command(VInfo_ptr,std::string, bool resolve);
 		static void command(std::vector<VInfo_ptr>,std::string, bool resolve);
 
 		static ServerHandler* find(const std::string& name);
@@ -131,8 +132,8 @@ private:
 
 		ServerComQueue* comQueue_;
 
-		std::string targetNodeNames_;      // used when building up a command in ServerHandler::command
-		std::string targetNodeFullNames_;  // used when building up a command in ServerHandler::command
+		//std::string targetNodeNames_;      // used when building up a command in ServerHandler::command
+		//std::string targetNodeFullNames_;  // used when building up a command in ServerHandler::command
 
 		int refreshIntervalInSeconds_;
 		QTimer refreshTimer_;

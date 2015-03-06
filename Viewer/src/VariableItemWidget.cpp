@@ -13,52 +13,8 @@
 #include <QMessageBox>
 #include <QVBoxLayout>
 
-//#include "Defs.hpp"
-//#include "ClientInvoker.hpp"
-//#include "Node.hpp"
-
 #include "VariableModel.hpp"
 #include "VariableModelData.hpp"
-
-
-//========================================================
-//
-// VariableView
-//
-//========================================================
-
-VariableView::VariableView(QWidget* parent) : QTreeView(parent)
-{
-	//model_=new VariableModel(this);
-
-	//setModel(model_);
-
-	//setRootIsDecorated(false);
-	setAllColumnsShowFocus(true);
-	setUniformRowHeights(true);
-	setMouseTracking(true);
-	setSelectionMode(QAbstractItemView::ExtendedSelection);
-
-	//Context menu
-	setContextMenuPolicy(Qt::CustomContextMenu);
-
-	//Selection
-	connect(this,SIGNAL(clicked(const QModelIndex&)),
-			this,SLOT(slotSelectItem(const QModelIndex)));
-
-}
-
-
-void VariableView::slotSelectItem(const QModelIndex&)
-{
-
-}
-
-void VariableView::reload(VInfo_ptr info)
-{
-	//model_->setData(info);
-	expandAll();
-}
 
 //======================================
 //
@@ -116,41 +72,45 @@ void VariableDialogChecker::error(QString msg)
 //
 //======================================
 
-VariableEditDialog::VariableEditDialog(QString name, QString value,QWidget *parent) :
+VariableEditDialog::VariableEditDialog(QString name, QString value,bool genVar,QWidget *parent) :
    QDialog(parent),
-   VariableDialogChecker(tr("Cannot modify server!"))
+   genVar_(genVar)
 {
 	setupUi(this);
 
-	nameEdit->setText(name);
-	valueEdit->setText(value);
-
-	//Validators
-	//nameEdit->setValidator(new QRegExpValidator(""));
-	//hostEdit->setValidator(new QRegExpValidator(""));
-	//portEdit->setValidator(new QIntValidator(1025,65535,this));
+	nameLabel_->setText(name);
+	valueEdit_->setText(value);
 }
 
 void VariableEditDialog::accept()
 {
-	QString name=nameEdit->text();
-	QString value=valueEdit->text();
+	QString value=valueEdit_->text();
 
-	//if(!checkName(name) || !checkHost(host) || !checkPort(port))
+	if(genVar_)
+	{
+		if(QMessageBox::Ok!=
+				QMessageBox::question(0,QObject::tr("Confirm: change variable"),
+						"You are about to modify a <b>generated variable</b>.<br>Do you want to proceed?"),
+						QMessageBox::Ok|QMessageBox::Cancel,QMessageBox::Cancel)
+		{
+			QDialog::reject();
+		}
+	}
+
+	//if(!checkValue(name))
 	//	return;
 
 	QDialog::accept();
 }
 
-
 QString VariableEditDialog::name() const
 {
-	return nameEdit->text();
+	return nameLabel_->text();
 }
 
 QString VariableEditDialog::value() const
 {
-	return valueEdit->text();
+	return valueEdit_->text();
 }
 
 
@@ -168,11 +128,28 @@ VariableItemWidget::VariableItemWidget(QWidget *parent)
 
 	model_=new VariableModel(data_,this);
 	sortModel_= new VariableSortModel(model_,this);
-
-	varView->setProperty("var","1");
-	varView->setIndentation(16);
+    
+    //!!!!We need to do it because:
+    //The background colour between the tree view's left border and the items in the first column be
+    //controlled by delegates or stylesheets. It always takes the QPalette::Highlight
+    //colour from the palette. Here we set this to transparent so that Qt could leave
+    //this area empty and we will fill it appropriately in our delegate.
+    QPalette pal=varView->palette();
+    pal.setColor(QPalette::Highlight,Qt::transparent);
+    varView->setPalette(pal);
+	
+    //varView->setProperty("var","1");
+	//varView->setIndentation(16);
 	varView->setModel(sortModel_);
 
+	filterLine->setDecoration(QPixmap(":/viewer/filter_decor.svg"));
+
+
+	searchLine_->hide();
+
+    //Initialise the search widget
+    //searchLine_->setView(varView);
+    
 	/*varView->setRootIsDecorated(false);
 	varView->setAllColumnsShowFocus(true);
 	varView->setUniformRowHeights(true);
@@ -227,20 +204,21 @@ void VariableItemWidget::editItem(const QModelIndex& index)
 {
 	QString name;
 	QString value;
+	bool genVar;
 
 	QModelIndex vIndex=sortModel_->mapToSource(index);
 
 	//Get the data from the model
-	model_->data(vIndex,name,value);
-
-	//Start edit dialog
-	VariableEditDialog d(name,value,this);
-
-	//The dialog checks the name and valueS
-	if(d.exec()== QDialog::Accepted)
+	if(model_->data(vIndex,name,value,genVar))
 	{
-		model_->setData(index,name,value);
-		//ServerList::instance()->reset(item,d.name().toStdString(),d.host().toStdString(),d.port().toStdString());
+		//Start edit dialog
+		VariableEditDialog d(name,value,genVar,this);
+
+		//The dialog checks the name and valueS
+		if(d.exec()== QDialog::Accepted)
+		{
+			model_->setData(vIndex,name,d.value());
+		}
 	}
 }
 
@@ -356,10 +334,22 @@ void VariableItemWidget::on_actionDuplicate_triggered()
 	duplicateItem(index);
 }
 
+void VariableItemWidget::on_filterTb_toggled(bool b)
+{
+	sortModel_->enableFilter(b);
+	//searchLine_->setFilter(b);
+}
+
+void VariableItemWidget::on_filterLine_textChanged(QString text)
+{
+	sortModel_->setFilterText(text);
+	//searchLine_->setFilter(b);
+}
+
 
 void VariableItemWidget::nodeChanged(const Node* node, const std::vector<ecf::Aspect::Type>& aspect)
 {
-	model_->nodeChanged(node,aspect);
+	data_->nodeChanged(node,aspect);
 }
 
 static InfoPanelItemMaker<VariableItemWidget> maker1("variable");

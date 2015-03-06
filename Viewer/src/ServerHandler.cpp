@@ -623,6 +623,63 @@ void ServerHandler::refreshServerInfo()
 	update();
 }
 
+void ServerHandler::command(VInfo_ptr info, std::string cmd, bool resolve)
+{
+	std::string realCommand;
+
+	// is this a shortcut name for a command, or the actual command itself?
+	if (resolve)
+		realCommand = resolveServerCommand(cmd);
+	else
+		realCommand = cmd;
+
+	if (!realCommand.empty())
+	{
+		UserMessage::message(UserMessage::DBG, false, std::string("command: ") + cmd + " (real: " + realCommand + ")");
+
+		std::string nodeFullName;
+		std::string nodeName;
+		ServerHandler* serverHandler = info->server();
+
+		if(info->isNode())
+		{
+			nodeFullName = info->node()->absNodePath();
+			nodeName = info->node()->name();
+			//UserMessage::message(UserMessage::DBG, false, std::string("  --> for node: ") + nodeFullName + " (server: " + info[i]->server()->longName() + ")");
+		}
+		else if(info->isServer())
+		{
+			nodeFullName = info->server()->longName();
+			//UserMessage::message(UserMessage::DBG, false, std::string("  --> for server: ") + nodeFullName);
+		}
+
+		// replace placeholders with real node names
+
+		std::string placeholder("<full_name>");
+		ecf::Str::replace_all(realCommand, placeholder, nodeFullName);
+
+		placeholder = "<node_name>";
+		ecf::Str::replace_all(realCommand, placeholder, nodeName);
+
+		UserMessage::message(UserMessage::DBG, false, std::string("final command: ") + realCommand);
+
+		// get the command into the right format by first splitting into tokens
+		// and then converting to argc, argv format
+
+		std::vector<std::string> strs;
+		std::string delimiters(" ");
+		ecf::Str::split(realCommand, strs, delimiters);
+
+		// set up and run the thread for server communication
+		serverHandler->runCommand(strs);
+	}
+	else
+	{
+		UserMessage::message(UserMessage::ERROR, true, std::string("command ") + cmd + " is not recognised. Check the menu definition.");
+	}
+}
+
+
 void ServerHandler::command(std::vector<VInfo_ptr> info, std::string cmd, bool resolve)
 {
 	std::string realCommand;
@@ -638,6 +695,9 @@ void ServerHandler::command(std::vector<VInfo_ptr> info, std::string cmd, bool r
 	if (!realCommand.empty())
 	{
 		UserMessage::message(UserMessage::DBG, false, std::string("command: ") + cmd + " (real: " + realCommand + ")");
+
+		std::map<ServerHandler*,std::string> targetNodeNames;
+		std::map<ServerHandler*,std::string> targetNodeFullNames;
 
 		for(int i=0; i < info.size(); i++)
 		{
@@ -655,8 +715,11 @@ void ServerHandler::command(std::vector<VInfo_ptr> info, std::string cmd, bool r
 				//UserMessage::message(UserMessage::DBG, false, std::string("  --> for server: ") + nodeFullName);
 			}
 
-			info[i]->server()->targetNodeNames_     += " " + nodeName;      // build up the list of nodes for each server
-			info[i]->server()->targetNodeFullNames_ += " " + nodeFullName;  // build up the list of nodes for each server
+			targetNodeNames[info[i]->server()] += " " + nodeName;
+			targetNodeFullNames[info[i]->server()] += " " + nodeFullName;
+
+			//info[i]->server()->targetNodeNames_     += " " + nodeName;      // build up the list of nodes for each server
+			//info[i]->server()->targetNodeFullNames_ += " " + nodeFullName;  // build up the list of nodes for each server
 
 
 			// add this to our list of target servers?
@@ -676,10 +739,12 @@ void ServerHandler::command(std::vector<VInfo_ptr> info, std::string cmd, bool r
 			// replace placeholders with real node names
 
 			std::string placeholder("<full_name>");
-			ecf::Str::replace_all(realCommand, placeholder, serverHandler->targetNodeFullNames_);
+			//ecf::Str::replace_all(realCommand, placeholder, serverHandler->targetNodeFullNames_);
+			ecf::Str::replace_all(realCommand, placeholder, targetNodeFullNames[serverHandler]);
 
 			placeholder = "<node_name>";
-			ecf::Str::replace_all(realCommand, placeholder, serverHandler->targetNodeNames_);
+			//ecf::Str::replace_all(realCommand, placeholder, serverHandler->targetNodeNames_);
+			ecf::Str::replace_all(realCommand, placeholder, targetNodeNames[serverHandler]);
 
 			UserMessage::message(UserMessage::DBG, false, std::string("final command: ") + realCommand);
 
@@ -694,8 +759,8 @@ void ServerHandler::command(std::vector<VInfo_ptr> info, std::string cmd, bool r
 			// set up and run the thread for server communication
 			serverHandler->runCommand(strs);
 
-			serverHandler->targetNodeNames_.clear();      // reset the target node names for next time
-			serverHandler->targetNodeFullNames_.clear();  // reset the target node names for next time
+			//serverHandler->targetNodeNames_.clear();      // reset the target node names for next time
+			//serverHandler->targetNodeFullNames_.clear();  // reset the target node names for next time
 			//serverHandler->update();
 		}
 	}
@@ -1064,7 +1129,7 @@ void ServerComQueue::slotTaskFinished()
 	current_.reset();
 }
 
-//This slot is called the task failed in the ComThread. Right after this signal is emitted
+//This slot is called when the task failed in the ComThread. Right after this signal is emitted
 //the thread will finish and and emits the finished() signal that is connected
 //to the slotTaskFinished slot.
 void ServerComQueue::slotTaskFailed(std::string msg)

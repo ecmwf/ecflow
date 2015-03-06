@@ -8,33 +8,35 @@
 //
 //============================================================================
 
-#ifndef JOBITEMWIDGET_HPP_
-#define JOBITEMWIDGET_HPP_
+#ifndef LINEEDIT_INC_
+#define LINEEDIT_INC_
 
-#include "InfoPanelItem.hpp"
-#include "TextItemWidget.hpp"
-#include "VInfo.hpp"
+#include <QLineEdit>
 
-#include "ServerHandler.hpp"
+class QLabel;
+class QToolButton;
 
-class JobItemWidget : public TextItemWidget, public InfoPanelItem
+class LineEdit : public QLineEdit
 {
+Q_OBJECT
+
 public:
-	JobItemWidget(QWidget *parent=0);
+	LineEdit (QWidget *parent=0);
+	void setDecoration(QPixmap);
 
-	void reload(VInfo_ptr);
-	QWidget* realWidget();
-	void clearContents();
+public Q_SLOTS:
+    void slotClear();
 
-	//From VInfoPresenter
-	 //From VInfoPresenter
-    void infoReady(VReply*);
-    void infoFailed(VReply*);
-    void infoProgress(VReply*);
+Q_SIGNALS:
+    void textCleared();
 
-	void nodeChanged(const Node*, const std::vector<ecf::Aspect::Type>&) {};
+protected:
+	void adjustSize();
+	void resizeEvent(QResizeEvent*);
 
+	QToolButton *clearTb_;
+	QLabel*	iconLabel_;
 };
 
-#endif
 
+#endif

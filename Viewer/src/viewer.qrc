@@ -21,5 +21,8 @@
     <file alias="server.svg">../images/server.svg</file> 
     <file alias="drawer_open.svg">../images/drawer_open.svg</file>
     <file alias="drawer_close.svg">../images/drawer_close.svg</file>
+    <file alias="clear_left.svg">../images/clear_left.svg</file>
+    <file alias="filter_decor.svg">../images/filter_decor.svg</file>
+    <file alias="edit.svg">../images/edit.svg</file>
   </qresource>
 </RCC>

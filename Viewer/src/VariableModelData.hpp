@@ -27,14 +27,17 @@ class VariableModelData
 public:
 	virtual ~VariableModelData() {};
 
-	virtual const std::string& name()=0;
+	virtual const std::string& dataName()=0;
 	virtual QColor colour()=0;
 	const std::string& name(int index) const;
 	const std::string& value(int index) const;
 	bool isGenVar(int index) const;
 	int varNum() const;
+    void match(const std::string&,std::vector<int>& result) const; 
 
+    void clear();
 	virtual void reload()=0;
+	virtual void setValue(int index,const std::string& val)=0;
 
 	std::vector<std::pair<std::string,std::string> > vars_;
 	std::vector<std::pair<std::string,std::string> > genVars_;
@@ -44,8 +47,9 @@ class VariableServerData : public VariableModelData
 {
 public:
 	VariableServerData(ServerHandler*);
-	const std::string& name();
+	const std::string& dataName();
 	QColor colour();
+	void setValue(int index,const std::string& val);
 
 protected:
 	void reload();
@@ -57,8 +61,9 @@ class VariableNodeData : public VariableModelData
 {
 public:
 	VariableNodeData(Node*);
-	const std::string& name();
+	const std::string& dataName();
 	QColor colour();
+	void setValue(int index,const std::string& val);
 
 protected:
 	void reload();
@@ -79,6 +84,7 @@ public:
 	int count() const {return static_cast<int>(data_.size());}
 	int varNum(int index) const;
 	VariableModelData* data(int index) const;
+	void nodeChanged(const Node* node, const std::vector<ecf::Aspect::Type>&);
 
 Q_SIGNALS:
 	void reloadBegin();
@@ -86,7 +92,6 @@ Q_SIGNALS:
 
 protected:
 	std::vector<VariableModelData*> data_;
-	void nodeChanged(const Node* node, const std::vector<ecf::Aspect::Type>&);
 
 	ServerHandler* server_;
 
