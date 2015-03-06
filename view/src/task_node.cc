@@ -93,7 +93,7 @@ void task_node::create()
 #undef FLAG_ISSET
 #endif
 #define FLAG_ISSET(flag) (1<<(flag))
-inline bool is_late(int f) { return (f & FLAG_ISSET(FLAG_LATE)); }
+inline bool is_late(int f) { return (f & FLAG_ISSET(FLAG_LATE)); } 
 inline bool is_zombie(int f) { return (f & FLAG_ISSET(FLAG_ZOMBIE)); }
 inline bool is_to_check(int f) { return (f& FLAG_ISSET(FLAG_TO_CHECK));}
 

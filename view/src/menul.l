@@ -225,5 +225,6 @@ NODE    \/[_0-9A-Za-z:\/]*
 <INITIAL>[ \t]         ;
 <INITIAL>.            return *yytext;
 \n                    { BEGIN INITIAL; NEWLINE; }
+<LOGFILE>job_size:.*$          { return ANY; }
 
 %

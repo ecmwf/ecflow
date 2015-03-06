@@ -109,33 +109,18 @@ STC_Cmd_ptr ReplaceNodeCmd::doHandleRequest(AbstractServer* as) const
 	assert(isWrite()); // isWrite used in handleRequest() to control check pointing
 	if (clientDefs_) {
 
-	   if (as->defs()) {
-
-	      if (as->defs().get() == clientDefs_.get()) {
-	         /// Typically will only happen with test environment
-	         throw std::runtime_error("ReplaceNodeCmd::doHandleRequest: The definition in the server is the same as the client provided definition??");
-	      }
-
-	      if (force_) {
-	         as->zombie_ctrl().add_user_zombies( as->defs()->findAbsNode( pathToNode_ ) );
-	      }
-
-	      std::string errorMsg;
-	      if (!as->defs()->replaceChild(pathToNode_, clientDefs_, createNodesAsNeeded_, force_, errorMsg)) {
-	         throw std::runtime_error(errorMsg);
-	      }
+	   if (as->defs().get() == clientDefs_.get()) {
+	      /// Typically will only happen with test environment
+	      throw std::runtime_error("ReplaceNodeCmd::doHandleRequest: The definition in the server is the same as the client provided definition??");
 	   }
-	   else {
-	      // The server has *NO* defs. Hence create one
-	      as->create_defs();
 
-	      // Hence replace should act as a *ADD* *IF*
-	      // a/ pathToNode_ exists in clientDefs_
-	      // b/ createNodesAsNeeded_ is TRUE, i.e parent option used
-         std::string errorMsg;
-         if (!as->defs()->replaceChild(pathToNode_, clientDefs_, createNodesAsNeeded_, force_, errorMsg)) {
-            throw std::runtime_error(errorMsg);
-         }
+	   if (force_) {
+	      as->zombie_ctrl().add_user_zombies( as->defs()->findAbsNode( pathToNode_ ) );
+	   }
+
+	   std::string errorMsg;
+	   if (!as->defs()->replaceChild(pathToNode_, clientDefs_, createNodesAsNeeded_, force_, errorMsg)) {
+	      throw std::runtime_error(errorMsg);
 	   }
 
 	   add_node_for_edit_history(as,pathToNode_);

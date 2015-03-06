@@ -1,4 +1,8 @@
 
+if [[ $HOST = lxop* ]]; then
+  ln -sf $(echo ${PBS_NODEFILE:=} | sed -e 's:aux:spool:').OU %ECF_JOBOUT%
+fi
+
 # Notify ecFlow of a normal end
 #
 # we call wait to let all background process stop

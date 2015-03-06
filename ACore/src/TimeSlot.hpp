@@ -25,9 +25,6 @@ namespace ecf {
 
 // Use compiler , generated destructor, assignment,  copy constructor
 // *relative* times can extend to a maximum of 99 hours and 59 seconds
-// Note: We used to use (hour(-1), minute(-1)) to represent a NULL TimeSlot
-// but AIX portable binary format, can't cope with -1. hence we need to devise
-// an alternative
 //
 // TimeSlot is used in many other attributes, i.e. like AutoCancelAttr
 // in this case user can specify days, which we convert to hours, hence it
@@ -50,6 +47,8 @@ public:
 
    bool operator<(const TimeSlot& rhs) const;
    bool operator>(const TimeSlot& rhs) const;
+   bool operator<=(const TimeSlot& rhs) const;
+   bool operator>=(const TimeSlot& rhs) const;
 
 	int hour() const { return hour_;}
 	int minute() const { return minute_;}
@@ -63,17 +62,17 @@ public:
  	std::string toString() const;
 
 private:
-	unsigned short hour_;
-	unsigned short minute_;
-	bool           isNull_;
+ 	unsigned short hour_;
+ 	unsigned short minute_;
+ 	bool           isNull_;
 
-    friend class boost::serialization::access;
-    template<class Archive>
-    void serialize(Archive & ar, const unsigned int /*version*/) {
-    	ar & hour_;
-        ar & minute_;
-        ar & isNull_;
-    }
+ 	friend class boost::serialization::access;
+ 	template<class Archive>
+ 	void serialize(Archive & ar, const unsigned int /*version*/) {
+ 	   ar & hour_;
+ 	   ar & minute_;
+ 	   ar & isNull_;
+ 	}
 };
 
 std::ostream& operator<<(std::ostream& os, const TimeSlot*);

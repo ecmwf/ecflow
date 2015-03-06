@@ -43,65 +43,64 @@ namespace fs = boost::filesystem;
 
 BOOST_AUTO_TEST_SUITE( SimulatorTestSuite )
 
-BOOST_AUTO_TEST_CASE( test_repeat_with_cron  )
+BOOST_AUTO_TEST_CASE( test_repeat_date_for_loop2  )
 {
-   cout << "Simulator:: ...test_repeat_with_cron\n";
-//    suite s
-//    clock real <today date>
-//      family f
-//      repeat date YMD 20091001  20091004 1  # yyyymmdd
-//       family plot
-//          complete plot/finish == complete
-//
-//          task finish
-//             trigger 1 == 0    # stops task from running
-//             complete checkdata::done or checkdata == complete
-//
-//          task checkdata
-//             event done
-//             cron <today date> + 2 minutes     # cron that run forever
-//      endfamily
-//   endfamily
-// endsuite
+   cout << "Simulator:: ...test_repeat_date_for_loop2\n";
 
+   //suite suite
+   // clock real <todays date>
+   // repeat date YMD 20091001  20091005 1  # yyyymmdd
+   // family family
+   //     repeat date YMD 20091001  20091005 1  # yyyymmdd
+   //    task t
+   //       time 10:00
+   //       time 11:00
+   //    endfamily
+   //endsuite
+
+   // Each task should be run 5 * 5 * 2 = 50 times, ie every day from from 1st Oct -> 5 Oct 5*5 times * 2 time slots
    Defs theDefs;
    {
-      boost::posix_time::ptime   theLocalTime =  Calendar::second_clock_time();
-      boost::posix_time::ptime   time_plus_2_minute =  theLocalTime +  minutes(2);
-      ClockAttr clockAttr(theLocalTime, false/* real clock*/);
+      // start at specific time other wise time dependent checks will not verify
+      suite_ptr suite = theDefs.add_suite("test_repeat_date_for_loop2");
+      suite->addRepeat( RepeatDate("YMD",20091001,20091005,1));  // repeat contents 5 times
+      suite->addVerify( VerifyAttr(NState::COMPLETE,5) );
 
-      suite_ptr suite = theDefs.add_suite("test_repeat_with_cron");
+      ClockAttr clockAttr;
+      clockAttr.date(1,10,2009);
       suite->addClock( clockAttr );
 
-      family_ptr f = suite->add_family( "f" );
-      f->addRepeat( RepeatDate("YMD",20091001,20091004,1));  // repeat contents 4 times
-      f->addVerify( VerifyAttr(NState::COMPLETE,4) );
+      family_ptr fam = suite->add_family( "family" );
+      fam->addRepeat( RepeatDate("YMD",20091001,20091005,1));  // repeat contents 5 times
+      fam->addVerify( VerifyAttr(NState::COMPLETE,25) );
 
-      family_ptr family_plot = f->add_family( "plot" );
-      family_plot->add_complete(  "plot/finish ==  complete");
-      family_plot->addVerify( VerifyAttr(NState::COMPLETE,4) );
+      task_ptr task = fam->add_task("t");
+      task->addTime( ecf::TimeAttr( TimeSlot(10,0) ) );
+      task->addTime( ecf::TimeAttr( TimeSlot(11,0) ) );
+      task->addVerify( VerifyAttr(NState::COMPLETE,50) );     // task should complete 50 times
 
-
-      task_ptr task_finish = family_plot->add_task("finish");
-      task_finish->add_trigger(  "1 == 0");
-      task_finish->add_complete( "checkdata:done or checkdata == complete" );
-      task_finish->addVerify( VerifyAttr(NState::COMPLETE,8) );
-
-      task_ptr task_checkdata = family_plot->add_task("checkdata");
-      task_checkdata->addEvent( Event(1,"done"));
-
-      CronAttr cronAttr;
-      cronAttr.addTimeSeries( ecf::TimeSlot(time_plus_2_minute.time_of_day()) );
-      task_checkdata->addCron( cronAttr  );
-      task_checkdata->addVerify( VerifyAttr(NState::COMPLETE,8) );
-
-//    cout << theDefs << "\n";
+      // cout << theDefs << "\n";
    }
 
    Simulator simulator;
    std::string errorMsg;
-   BOOST_REQUIRE_MESSAGE(simulator.run(theDefs, TestUtil::testDataLocation("test_repeat_with_cron.def"), errorMsg),errorMsg);
+   BOOST_CHECK_MESSAGE(simulator.run(theDefs, TestUtil::testDataLocation("test_repeat_date_for_loop2.def"), errorMsg),errorMsg);
 }
+
+
+//BOOST_AUTO_TEST_CASE( test_single_from_file  )
+//{
+//   cout << "Simulator:: ...test_single_from_file\n";
+//
+////std::string path = File::test_data("CSim/test/data/good_defs/operations/loop.def","CSim");
+//   std::string path = File::test_data("CSim/test/data/good_defs/ECFLOW-130/radarlvl2.def","CSim");
+//
+//   Simulator simulator;
+//   std::string errorMsg;
+//   bool passed = simulator.run(path, errorMsg);
+//
+//   BOOST_REQUIRE_MESSAGE(passed, path << " failed simulation \n" << errorMsg);
+//}
 
 
 BOOST_AUTO_TEST_SUITE_END()

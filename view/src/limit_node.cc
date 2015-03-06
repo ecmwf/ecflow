@@ -35,15 +35,21 @@ Limit* limit_node::get() const {
 #endif
   if (!owner_) return 0x0;
   return dynamic_cast<ecf_concrete_node<Limit>*>(owner_)->get();
+  /*  ecf_concrete_node<const Limit>* base = 
+    dynamic_cast<ecf_concrete_node<const Limit>*> (owner_);
+  if (base) return *(base->get());
+  if (parent() && parent()->__node__())
+      return parent()->__node__()->get_limit(name_);
+      return 0x0; */
 }
 
 xmstring limit_node::make_label_tree()
 {
   if (get()) {
-    xmstring s(owner_->name().c_str(),"bold"); 
-    s += xmstring(": ","bold");
     char buf[30];
-    sprintf(buf,"%d/%d",get()->value(), get()->theLimit());
+    xmstring s(owner_->name().c_str(),"bold"); 
+    sprintf(buf,"%d/%d", get()->value(), get()->theLimit());
+    s += xmstring(": ","bold");
     s += xmstring(buf);
     return s; 
   } 
@@ -81,13 +87,13 @@ inline int max(int a,int b) { return a>b?a:b; }
 
 void limit_node::drawNode(Widget w,XRectangle* r,bool tree)
 {
-  int m = 0, v = 0; m = maximum(); v = value();
-  // { Limit *lim = owner_ ? owner_->get_limit("") : 0x0; 
-  //   if (lim)  { m = lim->theLimit(); v = lim->value(); }
-  // }
+  int m = 0, v = 0; 
+  if (get()) { 
+    m = get()->theLimit();
+    v = get()->value();
+  }
 
   XmString s = labelTree();
-  
   XRectangle x = *r;
   x.width      = XmStringWidth(smallfont(),s)  + 2*kHMargins;
 

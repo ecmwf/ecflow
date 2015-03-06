@@ -191,7 +191,12 @@ bool Simulator::run(Defs& theDefs, const std::string& defs_filename,  std::strin
 
   			Analyser analyser;
   			analyser.run(theDefs);
-  			errorMsg += "Please see files .flat and .depth for analysis";
+  			errorMsg += "Please see files .flat and .depth for analysis\n";
+
+  			PrintStyle::setStyle(PrintStyle::MIGRATE);
+  			std::stringstream ss;
+  			ss << theDefs;
+  			errorMsg += ss.str();
 			return false;
 		}
 

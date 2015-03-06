@@ -41,6 +41,7 @@
 #include "Calendar.hpp"
 #include "File.hpp"
 #include "boost_archive.hpp"
+#include "JobProfiler.hpp"
 
 using namespace ecf;
 using namespace std;
@@ -81,7 +82,6 @@ ServerEnvironment::ServerEnvironment( int argc, char* argv[])
   debug_(false),
   help_option_(false),
   version_option_(false),
-  reply_back_if_ok_(false),
   allow_old_client_new_server_(0),
   checkMode_(ecf::CheckPt::ON_TIME),
   tcp_protocol_(boost::asio::ip::tcp::v4())
@@ -103,7 +103,6 @@ ServerEnvironment::ServerEnvironment(int argc, char* argv[], const std::string& 
   debug_(false),
   help_option_(false),
   version_option_(false),
-  reply_back_if_ok_(false),
   allow_old_client_new_server_(0),
   checkMode_(ecf::CheckPt::ON_TIME),
   tcp_protocol_(boost::asio::ip::tcp::v4())
@@ -347,11 +346,13 @@ void ServerEnvironment::variables(std::vector<std::pair<std::string,std::string>
 	else                 theRetVec.push_back( std::make_pair(std::string("ECF_LOG"), std::string() ));
 	theRetVec.push_back( std::make_pair(std::string("ECF_CHECK"), ecf_checkpt_file_) );
 	theRetVec.push_back( std::make_pair(std::string("ECF_CHECKOLD"), ecf_backup_checkpt_file_) );
+   theRetVec.push_back( std::make_pair(std::string("ECF_INTERVAL"), boost::lexical_cast<std::string>(submitJobsInterval_)) );
 
 	// These variable are read in from the environment, but are not exposed
 	// since they only affect the server
 	// ECF_CHECKINTERVAL
-	// ECF_LISTS
+
+   theRetVec.push_back( std::make_pair(std::string("ECF_LISTS"), ecf_white_list_file_) ); // read only variable, changing it has no effect
 
 	// variables that can be overridden, in the suite definition
 	theRetVec.push_back( std::make_pair(std::string("ECF_JOB_CMD"), ecf_cmd_) );
@@ -440,6 +441,7 @@ void ServerEnvironment::read_config_file(std::string& log_file_name,const std::s
 
    try {
       std::string theCheckMode;
+      int the_task_threshold = 0;
 
       // read the environment from the config file.
       // **** Port *must* be read before log file, and check pt files
@@ -461,6 +463,7 @@ void ServerEnvironment::read_config_file(std::string& log_file_name,const std::s
          ("ECF_URL",       po::value<std::string>(&url_)->default_value(Ecf::URL()), "The default url.")
          ("ECF_MICRODEF",  po::value<std::string>(&ecf_micro_)->default_value(Ecf::MICRO()), "Preprocessor character for variable substitution and including files")
          ("ECF_LISTS",     po::value<std::string>(&ecf_white_list_file_)->default_value(Str::WHITE_LIST_FILE()), "Path name to file the list valid users and thier access rights")
+         ("ECF_TASK_THRESHOLD",po::value<int>(&the_task_threshold)->default_value(JobProfiler::task_threshold_default()),"The defaults thresholfs when profiling job generation")
          ;
 
       ifstream ifs(path_to_config_file.c_str());
@@ -477,6 +480,10 @@ void ServerEnvironment::read_config_file(std::string& log_file_name,const std::s
       if (theCheckMode == "CHECK_ON_TIME")     checkMode_ = ecf::CheckPt::ON_TIME;
       else if (theCheckMode == "CHECK_NEVER")  checkMode_ = ecf::CheckPt::NEVER;
       else if (theCheckMode == "CHECK_ALWAYS") checkMode_ = ecf::CheckPt::ALWAYS;
+
+      if (the_task_threshold != 0 ) {
+         JobProfiler::set_task_threshold(the_task_threshold);
+      }
    }
    catch(std::exception& e)
    {
@@ -536,6 +543,19 @@ void ServerEnvironment::read_environment_variables(std::string& log_file_name)
 	   // this from the message sent to the server from the *old* client
 	   allow_old_client_new_server_ = ecf::boost_archive::version_1_47();
 	}
+
+   char* threshold = getenv("ECF_TASK_THRESHOLD");
+   if ( threshold ) {
+      std::string task_threshold = threshold;
+      try {
+         JobProfiler::set_task_threshold(boost::lexical_cast<int>(task_threshold));
+      }
+      catch ( ... ) {
+         std::stringstream ss;
+         ss << "ServerEnvironment::read_environment_variables(): ECF_TASK_THRESHOLD is defined(" << threshold << ") but value is *not* convertible to an integer\n";
+         throw ServerEnvironmentException(ss.str());
+      }
+   }
 }
 
 std::string ServerEnvironment::serverPort() const
@@ -609,3 +629,4 @@ std::string ServerEnvironment::dump_valid_users() const
    }
    return ss.str();
 }
+

@@ -30,10 +30,8 @@ void SStatsCmd::init(AbstractServer* as)
 {
    as->stats().update_for_serialisation();
 	stats_ = as->stats();
-	stats_.no_of_suites_ = 0;
- 	if (as->defs())  stats_.no_of_suites_ = as->defs()->suiteVec().size();
+ 	stats_.no_of_suites_ = as->defs()->suiteVec().size();
 }
-
 
 bool SStatsCmd::equals(ServerToClientCmd* rhs) const
 {

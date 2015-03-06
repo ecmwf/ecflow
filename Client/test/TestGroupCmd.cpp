@@ -104,7 +104,14 @@ BOOST_AUTO_TEST_CASE( test_client_group_lifecyle )
    {
       theClient.taskPath(suite1_family1_a);
       theClient.set_jobs_password(Submittable::DUMMY_JOBS_PASSWORD());
-      std::string groupRequest ="begin=suite1;  init=process_or_remote_id; event=myEvent; force-dep-eval; get";
+
+      // make sure to use same ECF_RID if its specified
+      std::string remote_id= "process_or_remote_id";
+      if (!theClient.process_or_remote_id().empty())  remote_id = theClient.process_or_remote_id();
+      std::string groupRequest ="begin=suite1;  init=";
+      groupRequest += remote_id;
+      groupRequest += "; event=myEvent; force-dep-eval; get";
+
       BOOST_REQUIRE_MESSAGE(theClient.group(groupRequest) == 0,"Group request " << groupRequest << " failed should return 0\n" << theClient.errorMsg());
 
       defs_ptr serverDefs =  theClient.defs();

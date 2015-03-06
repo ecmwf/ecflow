@@ -35,7 +35,7 @@ BOOST_AUTO_TEST_SUITE( ClientTestSuite )
 // This will test the UrlCmd.
 BOOST_AUTO_TEST_CASE( test_url_cmd )
 {
-	cout << "Client:: ...test_url_cmd\n";
+	cout << "Client:: ...test_url_cmd" << endl;
 
    std::string path = File::test_data("Client/test/data/lifecycle.txt","Client");
 

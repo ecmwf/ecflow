@@ -323,13 +323,6 @@ void TimeDepAttrs::freeHoldingTimeDependencies()
    }
 }
 
-bool TimeDepAttrs::hasDayDateDependencies() const
-{
-   if ( !dates_.empty() || !days_.empty() ) {
-      return true;
-   }
-   return false;
-}
 
 bool TimeDepAttrs::timeDependenciesFree() const
 {

@@ -363,6 +363,111 @@ BOOST_AUTO_TEST_CASE( test_extract_data_member_value )
    BOOST_CHECK_MESSAGE(expected == actual,"expected '" << expected << "' but found '" << actual << "'");
 }
 
+
+std::string toString(const std::vector<std::string>& c)
+{
+   std::stringstream ss;
+   std::copy (c.begin(), c.end(), std::ostream_iterator <std::string> (ss, ", "));
+   return ss.str();
+}
+
+BOOST_AUTO_TEST_CASE( test_str_less_greater)
+{
+   cout << "ACore:: ...test_str_less_greater\n";
+
+   std::vector<std::string> expected;
+   expected.push_back("a1");
+   expected.push_back("A2");
+   expected.push_back("b1");
+   expected.push_back("B2");
+   expected.push_back("c");
+
+   std::vector<std::string> expectedGreater;
+   expectedGreater.push_back("c");
+   expectedGreater.push_back("B2");
+   expectedGreater.push_back("b1");
+   expectedGreater.push_back("A2");
+   expectedGreater.push_back("a1");
+
+   std::vector<std::string> vec;
+   vec.push_back("c");
+   vec.push_back("A2");
+   vec.push_back("a1");
+   vec.push_back("b1");
+   vec.push_back("B2");
+
+   std::sort(vec.begin(),vec.end(),Str::caseInsLess);
+   BOOST_REQUIRE_MESSAGE( vec == expected,"expected " << toString(expected) << " but found " << toString(vec) );
+
+   std::sort(vec.begin(),vec.end(),Str::caseInsGreater);
+   BOOST_REQUIRE_MESSAGE( vec == expectedGreater,"expected " << toString(expectedGreater) << " but found " << toString(vec) );
+
+   // --------------------------------------------------------------------
+
+   expected.clear();
+   expected.push_back("a");
+   expected.push_back("A");
+   expected.push_back("b");
+   expected.push_back("B");
+   expected.push_back("c");
+
+   expectedGreater.clear();
+   expectedGreater.push_back("c");
+   expectedGreater.push_back("B");
+   expectedGreater.push_back("b");
+   expectedGreater.push_back("A");
+   expectedGreater.push_back("a");
+
+   vec.clear();
+   vec.push_back("c");
+   vec.push_back("B");
+   vec.push_back("A");
+   vec.push_back("b");
+   vec.push_back("a");
+
+   std::sort(vec.begin(),vec.end(),Str::caseInsLess);
+   BOOST_REQUIRE_MESSAGE( vec == expected,"expected " << toString(expected) << " but found " << toString(vec) );
+
+   std::sort(vec.begin(),vec.end(),Str::caseInsGreater);
+   BOOST_REQUIRE_MESSAGE( vec == expectedGreater,"expected " << toString(expectedGreater) << " but found " << toString(vec) );
+
+   // --------------------------------------------------------------------
+
+   expected.clear();
+   expected.push_back("1234");
+   expected.push_back("baSE");
+   expected.push_back("Base");
+   expected.push_back("case");
+   expected.push_back("CaSe");
+   expected.push_back("suite");
+   expected.push_back("SUITE");
+
+   expectedGreater.clear();
+   expectedGreater.push_back("SUITE");
+   expectedGreater.push_back("suite");
+   expectedGreater.push_back("CaSe");
+   expectedGreater.push_back("case");
+   expectedGreater.push_back("Base");
+   expectedGreater.push_back("baSE");
+   expectedGreater.push_back("1234");
+
+   vec.clear();
+   vec.push_back("suite");
+   vec.push_back("SUITE");
+   vec.push_back("baSE");
+   vec.push_back("Base");
+   vec.push_back("case");
+   vec.push_back("CaSe");
+   vec.push_back("1234");
+
+   std::sort(vec.begin(),vec.end(),Str::caseInsLess);
+   BOOST_REQUIRE_MESSAGE( vec == expected,"expected " << toString(expected) << " but found " << toString(vec) );
+
+   std::sort(vec.begin(),vec.end(),Str::caseInsGreater);
+   BOOST_REQUIRE_MESSAGE( vec == expectedGreater,"expected " << toString(expectedGreater) << " but found " << toString(vec) );
+}
+
+
 //// ==============================================================
 //// Timing to find the fastest looping
 //// ==============================================================

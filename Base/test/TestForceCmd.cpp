@@ -231,6 +231,73 @@ BOOST_AUTO_TEST_CASE( test_force_events )
    }
 }
 
+BOOST_AUTO_TEST_CASE( test_force_events_errors )
+{
+   cout << "Base:: ...test_force_events_errors\n";
+
+   MyDefsFixture fixtureDef;
+   MockServer mockServer(&fixtureDef.defsfile_);
+
+   node_ptr suite = fixtureDef.fixtureDefsFile().findAbsNode("/suiteName");
+   BOOST_REQUIRE_MESSAGE( suite.get(), "Could not find suite");
+   std::vector<Node*> nodes;
+   suite->getAllNodes(nodes);
+
+   /// Make a path that does not exist
+   BOOST_FOREACH(Node* node, nodes) {
+      BOOST_FOREACH(const Event& e, node->events()) {
+         std::string path = node->absNodePath() + "/path/doesnot/exist" + ":" + e.name_or_number();
+         ForceCmd cmd(path, Event::SET(), false /*recursive */, false /* set Repeat to last value */);
+         cmd.setup_user_authentification();
+         BOOST_REQUIRE_THROW(cmd.handleRequest( &mockServer ) , std::runtime_error);
+      }
+   }
+   BOOST_FOREACH(Node* node, nodes) {
+      BOOST_FOREACH(const Event& e, node->events()) {
+         std::string path = node->absNodePath() + "/path/doesnot/exist" + ":" + e.name_or_number();
+         ForceCmd cmd(path, Event::CLEAR(), false /*recursive */, false /* set Repeat to last value */);
+         cmd.setup_user_authentification();
+         BOOST_REQUIRE_THROW(cmd.handleRequest( &mockServer ) , std::runtime_error);
+      }
+   }
+
+   /// Make path that does not contain a event
+   BOOST_FOREACH(Node* node, nodes) {
+      if (node->events().empty()) {
+         std::string path = node->absNodePath() ;
+         ForceCmd cmd(path, Event::SET(), false /*recursive */, false /* set Repeat to last value */);
+         cmd.setup_user_authentification();
+         BOOST_REQUIRE_THROW(cmd.handleRequest( &mockServer ) , std::runtime_error);
+      }
+   }
+   BOOST_FOREACH(Node* node, nodes) {
+      if (node->events().empty()) {
+         std::string path = node->absNodePath();
+         ForceCmd cmd(path, Event::CLEAR(), false /*recursive */, false /* set Repeat to last value */);
+         cmd.setup_user_authentification();
+         BOOST_REQUIRE_THROW(cmd.handleRequest( &mockServer ) , std::runtime_error);
+      }
+   }
+
+   /// Make a event that does not exist
+   BOOST_FOREACH(Node* node, nodes) {
+      BOOST_FOREACH(const Event& e, node->events()) {
+         std::string path = node->absNodePath() +  ":" + e.name_or_number() + "made_up";
+         ForceCmd cmd(path, Event::SET(), false /*recursive */, false /* set Repeat to last value */);
+         cmd.setup_user_authentification();
+         BOOST_REQUIRE_THROW(cmd.handleRequest( &mockServer ) , std::runtime_error);
+      }
+   }
+   BOOST_FOREACH(Node* node, nodes) {
+      BOOST_FOREACH(const Event& e, node->events()) {
+         std::string path = node->absNodePath() + ":" + e.name_or_number() + "made_up";
+         ForceCmd cmd(path, Event::CLEAR(), false /*recursive */, false /* set Repeat to last value */);
+         cmd.setup_user_authentification();
+         BOOST_REQUIRE_THROW(cmd.handleRequest( &mockServer ) , std::runtime_error);
+      }
+   }
+}
+
 
 BOOST_AUTO_TEST_CASE( test_force_interactive )
 {

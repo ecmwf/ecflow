@@ -209,6 +209,7 @@ BOOST_AUTO_TEST_CASE( test_multiple_times_and_dates )
    //suite suite
    //  clock real <todays date>
    //	family family
+   //    repeat integer 0 1 1  # repeat twice
    //   	task t1
    //       date  <today date>
    //       date  <tomrrows date>
@@ -233,7 +234,9 @@ BOOST_AUTO_TEST_CASE( test_multiple_times_and_dates )
       suite_ptr suite = theDefs.add_suite("test_multiple_times_and_dates");
       suite->addClock( clockAttr );
 
+
       family_ptr fam = suite->add_family( "family" );
+      //fam->addRepeat( RepeatInteger("rep",0,1,1) );
       task_ptr task = fam->add_task("t");
       task->addDate( DateAttr(todaysDate.day(),todaysDate.month(),todaysDate.year()) );
       task->addDate( DateAttr(tomarrows_date.day(),tomarrows_date.month(),tomarrows_date.year()) );
@@ -299,6 +302,7 @@ BOOST_AUTO_TEST_CASE( test_multiple_times_and_days )
    //suite suite
    //  clock real <sunday>
    //	family family
+   //    rep integer 0 1 1 # repeat twice
    //   	task t1
    //       day  monday
    //       day  tuesday
@@ -316,6 +320,7 @@ BOOST_AUTO_TEST_CASE( test_multiple_times_and_days )
       suite->addClock( clockAttr );
 
       family_ptr fam = suite->add_family("family");
+      //fam->addRepeat( RepeatInteger("rep",0,1,1) );
       task_ptr task = fam->add_task("t");
       task->addDay( DayAttr(DayAttr::MONDAY) );
       task->addDay( DayAttr(DayAttr::TUESDAY) );

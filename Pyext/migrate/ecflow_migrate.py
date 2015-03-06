@@ -31,7 +31,7 @@ class Migrator(object):
         return self.list_of_output_lines
     
     def migrate(self, default_version_number):
-        """Template/skeleton function, whicj will call the hooks
+        """Template/skeleton function, which will call the hooks
         """
         version = self.version_number_as_integer(default_version_number) 
         if version >= default_version_number:
@@ -220,6 +220,53 @@ class MigrateForVariable(Migrator):
            
         return migrated
      
+     
+class MigrateForHistory(Migrator):
+    """Fix bug where history spans multiple lines.  
+       See File: history_bug.def
+    """
+    def __init__(self, list_of_input_lines):
+        Migrator.__init__(self, list_of_input_lines)
+ 
+    def _migration_hook(self,default_version_number):
+        """
+        The history should all be on one line
+            defs_state MIGRATE state>:queued flag:message state_change:1500811 modify_change:48
+            edit ECF_LOG '/vol/emos_nc/output/ecflow/vali.21801.ecf.log'
+            edit SMSNAME '0'
+            history /s2s_devel/ecmf/back MSG:[15:53:06 21.10.2014] --replace=/s2s_devel/ecmf/back s2s_devel.def parent  :emos
+            history /s2s_devel/ecmf/enfh MSG:[13:45:53 12.11.2014] -alter change label last_run 20140929
+            20141002
+            20141016
+            20141023 /s2s_devel/ecmf/enfh/  :emos    MSG:[14:05:53 14.11.2014] --requeue force /s2s_devel/ecmf/enfh  :emos
+            history /s2s_devel/ecmf/enfh/back MSG:[13:38:30 11.11.2014] --alter change event doIt set /s2s_devel/ecmf/enfh/back  :emos
+            suite limits #  begun:1 state:complete flag:message suspended:1
+            endsuite
+        """
+        migrated = False
+        history_started = False
+        for line in self.list_of_input_lines:
+            # process line
+            tokens = line.split()
+            if len(tokens) >= 2 and tokens[0] == "suite":
+                history_started = False
+
+            if not history_started and len(tokens) >= 2 and tokens[0] == "history":
+                history_started = True
+ 
+            if history_started:
+                # append to previous line
+                if len(tokens) >= 1 and tokens[0] != "history":
+                    # get last line of output lines, string the new line and append
+                    self.list_of_output_lines[-1] = self.list_of_output_lines[-1].rstrip()
+                    self.list_of_output_lines[-1] = self.list_of_output_lines[-1] + line
+                    migrated = True
+                    continue;
+                  
+            self.list_of_output_lines.append(line)
+           
+        return migrated  
+    
     
 def do_migrate(defs_file):
     
@@ -251,6 +298,14 @@ def do_migrate(defs_file):
 
         variable_migrator = MigrateForVariable(list_of_input_lines)
         if variable_migrator.migrate(401):
+            migration_count += 1
+            # did migration, update input lines for next migration
+            list_of_input_lines = variable_migrator.output_lines()
+        list_of_output_lines = variable_migrator.output_lines()
+        
+        
+        variable_migrator = MigrateForHistory(list_of_input_lines)
+        if variable_migrator.migrate(406):
             migration_count += 1
             # did migration, update input lines for next migration
             list_of_input_lines = variable_migrator.output_lines()

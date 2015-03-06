@@ -1,51 +1,47 @@
  ======================================================================================
 Subject: New release of ecFlow now available  
 
-A new version of the ecFlow(4.0.2) has been released:
+A new version of the ecFlow(4.0.6) has been released:
 
 #Please be aware that A new ecflow release candidate is planned.
 #If you are using the test version then the link will
 #be changed.
 
-This release is accessible from: /usr/local/apps/ecflow/4.0.2
+This release is accessible from: /usr/local/apps/ecflow/4.0.6
 on the following platforms:
 
-   o linux 10.3      (garm)
-   o linux 11.3      (anubis/opensuse113)
-   o linux 13.1      (opensuse131)
-   o redhat/RHEL 6.4 (ecgb,sappa,sappb)
-   o linux cluster   (lxa/lxb)
-   o HPUX            (itanium)
-   o AIX/ibm_power7  (c2a/c2b)
-   o cct/cca         (cray XC30) 
+   o linux 10.3                (garm)
+   o linux 11.3                (anubis/opensuse113)
+   o linux 13.1                (opensuse131)
+   o redhat/RHEL 6.4           (ecgb,sappa,sappb)
+   o linux cluster             (lxa/lxb)
+   o Operational linux cluster (lxop)
+   o cca/ccb/cct               (cray XC30) 
  
 The release includes the following changes:
- 
 
- 
- 
-To use a specific version (this is the *recommended* way):
+    server:         ECFLOW-175  label filtering from log file( don't log missing labels)
+    server:         ECFLOW-174 get log history, causes server memory to grow
+    server:         ECFLOW-169 investigate the slow response on RD virtual machines
+    server:         ECFLOW-177 Viewing output from RD cancel tasks in ecflowview
+    server:         ECFLOW-178 Add support for non strict zombies, ECF_NONSTRICT_ZOMBIES
+  
+To use a specific version use the module functionality.
+This will setup the PATHS for client server and python extension
+Note: The GUI(ecflowview) is only available on linux  
+Please note that the latest version of ecflow can change at any
+time, so it is advisable to specify the version for long term usage.
+i.e.
 
-   export ECFLOW_VERSION=4.0.2
+   module avail ecflow
+   module unload ecflow 
+   module load ecflow/4.0.6
+      
+Alternatively use:
+
+   export ECFLOW_VERSION=4.0.6
    use ecflow
    
-   This will setup the PATHS for client server and python extension
-   Note: The GUI(ecflowview) is only available on linux  
-   Please note that the latest version of ecflow can change at any
-   time, so it is advisable to specify the version for long term usage.
-
-To use the latest test version:
-
-   export ECFLOW_VERSION=test
-   use ecflow
-   
-To use the latest ecFlow CRAY(cct/cca),AIX(c2a/c2b) and redhat/RHEL(ecgb):
-
-   Please use the module functionality  i.e
-      module avail ecflow
-      module unload ecflow 
-      module load ecflow/4.0.2
-                  
             
 Compatibility
 ========================================================================
@@ -53,8 +49,7 @@ The client/Server from one release should not be mixed with another.
 To avoid this problem it is *highly* recommended that you use a 
 specific version:
 
-   export ECFLOW_VERSION=4.0.2
-   use ecflow
+   module load ecflow/4.0.6
 
 Additionally references to ecflow_client in the scripts(.ecf) should use
 the server variable %ECF_VERSION% to locate the executable, this ensures
@@ -65,6 +60,7 @@ that client version is in sync with the server i.e
 or:
 
   module load ecflow/%ECF_VERSION%
+  ecflow_client --complete
 
 Please see:
    https://software.ecmwf.int/wiki/display/ECFLOW/Release+process
@@ -75,7 +71,7 @@ Documentation
 =======================================================================
 The user manual(word and pdf formats) are available from:
 
-   /usr/local/apps/ecflow/4.0.2/doc
+   /usr/local/apps/ecflow/4.0.6/doc
 
 The online documentation and tutorial are accessible from:
 

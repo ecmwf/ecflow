@@ -1,0 +1,24 @@
+# 4.0.3
+suite radarlvl2
+  clock real 1.1.2014  # need to define a date otherwise log file/verify content varies according to the time 
+  # repeat day 1
+  family prod
+    task jradar_level2_cleanup
+      time 00:10 21:10 03:00
+      verify complete:8
+    task jradar_reflectivity_mosaic
+      event release_mosaic
+      time 00:20 23:20 01:00
+      verify complete:24
+    task jradar_reflectivity_ref2grb
+      trigger /radarlvl2/prod/jradar_reflectivity_mosaic:release_mosaic
+      verify complete:24
+      time 00:20 23:20 01:00
+    task jradar_canrad
+      time 00:05 23:55 00:10
+      verify complete:144
+    task jradar_level2
+      time 00:10 23:55 00:15
+      verify complete:96
+  endfamily
+endsuite

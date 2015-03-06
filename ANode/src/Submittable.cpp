@@ -427,6 +427,7 @@ bool Submittable::submit_job_only( JobsParam& jobsParam)
    flag().clear(ecf::Flag::NO_SCRIPT);
    flag().clear(ecf::Flag::EDIT_FAILED);
    flag().clear(ecf::Flag::JOBCMD_FAILED);
+   requeue_labels(); // ECFLOW-195, requeue no longer resets labels on tasks, hence we do it at task run time.
 
    try {
       // Locate the ecf files corresponding to the jobs.
@@ -435,7 +436,19 @@ bool Submittable::submit_job_only( JobsParam& jobsParam)
       // Pre-process sms file (i.e expand includes, remove comments,manual) and perform
       // variable substitution. This will then form the '.job' files.
       // If the job file already exist it is overridden
-      try { ecf_file.create_job( jobsParam ); }
+      try {
+         const std::string& job_size = ecf_file.create_job( jobsParam );
+
+         //... make sure ECF_PASS is set on the task, This is substituted in <head.h> file
+         //... and hence must be done before variable substitution in ECF_/JOB file
+         //... This is used by client->server authentication
+         if (createChildProcess(jobsParam)) {
+            set_state(NState::SUBMITTED, false, job_size );
+            return true;
+         }
+
+         // Fall through job submission failed.
+      }
       catch ( std::exception& e) {
          flag().set(ecf::Flag::EDIT_FAILED);
          std::string reason = "Submittable::submit_job_only: Job creation failed for task ";
@@ -455,14 +468,6 @@ bool Submittable::submit_job_only( JobsParam& jobsParam)
       jobsParam.errorMsg() += ss.str();
       set_aborted_only( e.what() ); // remember jobsParam.errorMsg() is accumulated
       return false;
-   }
-
-   //... make sure ECF_PASS is set on the task, This is substituted in <head.h> file
-   //... and hence must be done before variable substitution in ECF_/JOB file
-   //... This is used by client->server authentication
-   if (createChildProcess(jobsParam)) {
-      set_state(NState::SUBMITTED);
-      return true;
    }
 
    flag().set(ecf::Flag::JOBCMD_FAILED);

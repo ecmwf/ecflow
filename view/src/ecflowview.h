@@ -45,7 +45,7 @@
 #define urlRef "http://software.ecmwf.int/issues/browse/ECFLOW"
 #define tmpName   "ecFlowvw" /* 8 char */
 
-#if DEBUG
+#if 1 // DEBUG
 #define XECFDEBUG if(getenv("XECFLOW_DEBUG"))
 #else
 #define XECFDEBUG if (0)

@@ -25,7 +25,6 @@
 #include "Log.hpp"
 #include "PrintStyle.hpp"
 #include "NodeTreeVisitor.hpp"
-#include "Jobs.hpp"
 #include "Str.hpp"
 #include "Extract.hpp"
 #include "NodePath.hpp"
@@ -103,7 +102,9 @@ void Defs::set_state(NState::State the_new_state)
 
 void Defs::set_most_significant_state()
 {
-   set_state( ecf::theComputedNodeState(suiteVec_, true /* immediate children only */ ) );
+   NState::State computedStateOfImmediateChildren = ecf::theComputedNodeState(suiteVec_, true /* immediate children only */ );
+   if (computedStateOfImmediateChildren != state_.state() )
+      set_state(  computedStateOfImmediateChildren );
 }
 
 /// Others ======================================================================
@@ -289,6 +290,12 @@ void Defs::addSuite(suite_ptr s, size_t position)
 
 void Defs::add_suite_only(suite_ptr s, size_t position)
 {
+   if (s->defs()) {
+      std::stringstream ss;
+      ss << "Add Suite failed: The suite of name '" << s->name() << "' already owned by another Defs ";
+      throw std::runtime_error( ss.str() );
+   }
+
    s->set_defs(this);
    if (position >= suiteVec_.size()) {
       suiteVec_.push_back(s);
@@ -304,6 +311,7 @@ suite_ptr Defs::removeSuite(suite_ptr s)
 {
 	std::vector<suite_ptr>::iterator i = std::find(suiteVec_.begin(), suiteVec_.end(),s);
  	if ( i != suiteVec_.end()) {
+ 	   s->set_defs(NULL);              // allows suite to added to different defs
 		suiteVec_.erase(i);             // iterator invalidated
 	 	Ecf::incr_modify_change_no();
 	 	client_suite_mgr_.suite_deleted_in_defs(s); // must be after Ecf::incr_modify_change_no();
@@ -334,6 +342,7 @@ node_ptr Defs::removeChild(Node* child)
  	for(size_t t = 0; t < vecSize; t++)     {
  		if (suiteVec_[t].get() == child) {
  		 	Ecf::incr_modify_change_no();
+ 		   suiteVec_[t]->set_defs(NULL); // Must be set to NULL, allows suite to be added to different defs
  		 	client_suite_mgr_.suite_deleted_in_defs(suiteVec_[t]); // must be after Ecf::incr_modify_change_no();
  			node_ptr node = boost::dynamic_pointer_cast<Node>(suiteVec_[t]);
  			suiteVec_.erase( suiteVec_.begin() + t);
@@ -529,17 +538,25 @@ std::string Defs::write_state() const
    // integers used in the time.
    // -  Used in commands
    if (PrintStyle::getStyle() == PrintStyle::MIGRATE || save_edit_history_) {
-      Indentor in;
-      std::map<std::string, std::deque<std::string> >::const_iterator i;
-      for(i=edit_history_.begin(); i != edit_history_.end(); ++i) {
-         Indentor::indent( os ) << "history " << (*i).first << " ";// node path
-         const std::deque<std::string>& vec = (*i).second;   // list of requests
-         for(std::deque<std::string>::const_iterator c = vec.begin(); c != vec.end(); ++c) {
-            os << "\b" << *c;
-         }
-         os << "\n";
-      }
-      save_edit_history_ = false;
+	   Indentor in;
+	   std::map<std::string, std::deque<std::string> >::const_iterator i;
+	   for(i=edit_history_.begin(); i != edit_history_.end(); ++i) {
+		   Indentor::indent( os ) << "history " << (*i).first << " ";// node path
+		   const std::deque<std::string>& vec = (*i).second;   // list of requests
+		   for(std::deque<std::string>::const_iterator c = vec.begin(); c != vec.end(); ++c) {
+
+		      // We expect to output a single newline, hence if there are additional new lines
+		      // It can mess  up, re-parse. i.e during alter change label/value, user could have added newlines
+	         if ((*c).find("\n") == std::string::npos)  os << "\b" << *c;
+	         else {
+	            std::string h = *c;
+	            Str::replaceall(h,"\n","\\n");
+	            os << "\b" << h;
+	         }
+		   }
+		   os << "\n";
+	   }
+	   save_edit_history_ = false;
    }
    return os.str();
 }
@@ -833,6 +850,7 @@ bool Defs::doDeleteChild(Node* nodeToBeDeleted)
  		if ( (*s).get() == nodeToBeDeleted) {
   		 	Ecf::incr_modify_change_no();
   		 	client_suite_mgr_.suite_deleted_in_defs(*s); // must be after Ecf::incr_modify_change_no();
+  		 	(*s)->set_defs(NULL); // Must be set to NULL, allows re-added to a different defs
   			suiteVec_.erase(s);
   			set_most_significant_state(); // must be after suiteVec_.erase(s);
   			return true;
@@ -1120,7 +1138,7 @@ void Defs::order(Node* immediateChild, NOrder::Order ord)
 		}
 		case NOrder::ALPHA:  {
  			std::sort(suiteVec_.begin(),suiteVec_.end(),
-			            boost::bind(std::less<std::string>(),
+			            boost::bind(Str::caseInsLess,
 			                          boost::bind(&Node::name,_1),
 			                          boost::bind(&Node::name,_2)));
          order_state_change_no_ = Ecf::incr_state_change_no();
@@ -1129,7 +1147,7 @@ void Defs::order(Node* immediateChild, NOrder::Order ord)
 		}
 		case NOrder::ORDER:  {
 			std::sort(suiteVec_.begin(),suiteVec_.end(),
-			            boost::bind(std::greater<std::string>(),
+			            boost::bind(Str::caseInsGreater,
 			                          boost::bind(&Node::name,_1),
 			                          boost::bind(&Node::name,_2)));
          order_state_change_no_ = Ecf::incr_state_change_no();

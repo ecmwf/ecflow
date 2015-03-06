@@ -1,4 +1,5 @@
 #!/bin/ksh
+# cray head.h
 set -e # stop the shell on first error
 set -u # fail when using an undefined variable
 set -x # echo script lines as they are executed
@@ -29,7 +30,7 @@ export ECF_NAME=%ECF_NAME%    # The name of this current task
 export ECF_PASS=%ECF_PASS%    # A unique password
 export ECF_TRYNO=%ECF_TRYNO%  # Current try number of the task
 export PID_RID=$$
-
+module load ecflow
 
 # =============================================================================
 # Shorten normal timeout for child commands to one hour
@@ -53,6 +54,13 @@ ulimit
 # Export Python to pick up python 2.7
 export PATH=/usr/local/apps/python/current/bin:$PATH
 
+
+# ==================================================================================
+# Hack for CRAY, for some reason in batch mode in can do the equivalent of mkdir -p
+# The test fails for both gnu and intel compilers
+# See file: ACore/test/TestFile.cpp
+export CRAY_BATCH_SKIP_test_create_missing_directories=1
+
 # ===================================================================================
 # Load the right environment, default is always cray
 #
@@ -75,6 +83,8 @@ if [[ "$PE_ENV" = CRAY ]] ; then
    #/opt/cray/libsci/12.1.3/CRAY/81/sandybridge/lib/libsci_cray_mp.so: undefined reference to `__MAXLOC_F08'
    module unload cray-libsci/12.1.3
 fi
+
+%MODULE_LOAD_GIT:module load git%
 
 #
 set -e;

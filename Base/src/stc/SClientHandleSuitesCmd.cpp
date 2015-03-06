@@ -34,9 +34,6 @@ void SClientHandleSuitesCmd::init(AbstractServer* as)
    users_.clear();
    client_handles_.clear();
 
-   // Created in the server
-   if (!as->defs().get()) return;
-
    ClientSuiteMgr& client_suite_mgr = as->defs()->client_suite_mgr();
    const std::vector<ecf::ClientSuites>& clientSuites = client_suite_mgr.clientSuites();
 

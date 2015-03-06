@@ -87,11 +87,11 @@ menu 'MAIN'
 
   (ALL,ALL,'-',SEPARATOR)
 
-  (SUITE|TASK|FAMILY,(QUEUED) & (HAS_TRIGGERS|HAS_TIME|HAS_DATE),'Delete',MENU)
-  (NODE|ALIAS,ALL,'Special', MENU)
-  (NODE& ADMIN, ALL,'Force', MENU)
- !! (NODE& ADMIN, ALL,'Forcex', MENU)
-    ((NODE|ALIAS)& ADMIN, ALL,'Order', MENU)
+  (SUITE|TASK|FAMILY,(QUEUED|SUSPENDED|ACTIVE) & (HAS_TRIGGERS|HAS_TIME|HAS_DATE),'Delete',MENU)
+  (NODE | ALIAS, ALL, 'Special', MENU)
+  (NODE | ALIAS, ALL, 'Defstatus', MENU)
+  (NODE & ADMIN, ALL, 'Force',   MENU)
+  ((NODE|ALIAS)& ADMIN, ALL,'Order', MENU)
 
   (ALL,ALL,'-',SEPARATOR ,'',YES)
   (SUITE|FAMILY|TASK, ALL, 'Web...', 'ecflow_client --url <full_name> ', '', YES)
@@ -128,7 +128,7 @@ menu 'MAIN'
     'ecflow_client --shutdown yes','Shutdown the server in <node_name>?',NO)
   (SERVER,~HALTED,         'Halt',     
     'ecflow_client --halt yes','Halt the server in <node_name>?',NO)
-  (SERVER,HALTED,          'Terminate',
+  (SERVER,HALTED|UNKNOWN,          'Terminate',
     'ecflow_client --terminate yes','Terminate the server in <node_name>?',NO)
   (ALL,ALL,'-',SEPARATOR,'',YES)
   (SERVER,ALL,             'Checkpoint','ecflow_client --check_pt','',YES)
@@ -196,25 +196,6 @@ menu 'Status'
 }
 
 !==============================================================================
-! Force submenu
-!==============================================================================
-
-menu 'Forcex'
-{
-  (TASK, ~UNKNOWN, 'Unknown',  'ecflow_client --force <full_name> unknown',  '',YES)
-
-  (TASK, ~COMPLETE, 'Complete', 'ecflow_client --force complete <full_name>', 
-	'Have you tried the new menu <Set complete>',YES)
-
-  (TASK, ~QUEUED,   'Queued',   'ecflow_client --force queued <full_name>',   
-	'Have you tried the new menu <Rerun>',YES)
-
-  (TASK, ~SUBMITTED,'Submitted','ecflow_client --force submitted <full_name>','',YES)
-  (TASK, ~ACTIVE,   'Active',   'ecflow_client --force active <full_name>',   '',YES)
-  (TASK, ~ABORTED,  'Aborted',  'ecflow_client --force aborted <full_name>',  '',YES)
-}
-
-!==============================================================================
 ! Suite submenu
 !==============================================================================
 
@@ -264,35 +245,27 @@ menu "Force"
    'Check running/queued jobs and Confirm force submitted of <full_name>', YES)
 }
 
+menu "Defstatus"
+{ 
+(NODE, ALL, 'Complete', 'ecflow_client --alter change defstatus complete <full_name>')
+(NODE, ALL, 'Queued', 'ecflow_client --alter change defstatus queued <full_name>')
+}
+
 menu "Special"
 {
-!!  ((SUITE|FAMILY) & (COMPLETE|QUEUED|SUSPENDED) & ~MIGRATED,ALL,'Migrate',
-!!   'ecflow_client --migrate <full_name>','',NO)
-!!  ((SUITE|FAMILY) & MIGRATED,ALL,'Restore',
-!!   'ecflow_client --restore_from_checkpt <full_name>','',YES)
-  (SUITE|FAMILY,(ACTIVE|SUBMITTED|ABORTED),'Kill',
-   'ecflow_client --kill <full_name>','',YES)
+  (SUITE|FAMILY,(ACTIVE|SUBMITTED|ABORTED),'Kill', 'ecflow_client --kill <full_name>','',YES)
   (TASK|ALIAS,(ACTIVE|SUBMITTED),'Kill','ecflow_client --kill <full_name>','',YES)
-
   (ALL,ALL,'Check',WINDOW(Check),'',YES)
   (TASK|ALIAS,ALL,'Free password','ecflow_client --alter add variable ECF_PASS FREE <full_name>')
   (TASK|ALIAS,ALL,'ClearZ','ecflow_client --alter clear_flag zombie <full_name>')
   (TASK|ALIAS,ALL,'ClearLate','ecflow_client --alter clear_flag late <full_name>')
 
   (FAMILY, ~ACTIVE & ~SUBMITTED, 'Execute', 'ecflow_client --run <full_name>')
-
-!  (ALL,ALL,'-',SEPARATOR)
-!  ((SUITE|FAMILY) & ADMIN, SELECTION, 'Plug into selected node', PLUG)
-  ((SUITE|FAMILY), SELECTION, 'Plug into selected node', PLUG)
-  (TASK|ALIAS, SELECTION, 'Compare Edit (vs selected)', COMP( 'compare' , 'edit' ))
-  (TASK|ALIAS, SELECTION, 'Compare EditPP (vs selected)', COMP( 'compare' , 'editpp'))
-  (TASK|ALIAS, SELECTION, 'Compare output (vs selected)', COMP('compare' , 'output'))
+  ((SUITE|FAMILY|TASK), SELECTION, 'Plug into selected node', PLUG)
   (FAMILY|TASK,ALL,'get','ecflow_client --get <full_name>')
   (TASK,ALL,'status','ecflow_client --status <full_name>')
-
   (SUITE|SERVER, ALL, 'Collect...',  WINDOW(Collector))
   (SUITE|FAMILY, ALL, 'Walk', 'ecflow_client --force-dep-eval <full_name>')
-  !  (SERVER|SUITE, ALL ,  'Extra',  MENU  )
 }
 
 menu "Extra"

@@ -295,6 +295,11 @@ if __name__ == "__main__":
     # add and delete crons
     #===========================================================================
     cron = ecflow.Cron()
+    start = ecflow.TimeSlot(23 , 0)
+    ts = ecflow.TimeSeries(start,True)  # True means relative to suite start
+    cron.set_time_series(ts)
+    
+    cron = ecflow.Cron()
     cron.set_week_days([0, 1, 2, 3, 4, 5, 6])
     cron.set_days_of_month([1, 2, 3, 4, 5, 6 ])
     cron.set_months([1, 2, 3, 4, 5, 6])

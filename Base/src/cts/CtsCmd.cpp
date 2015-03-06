@@ -30,6 +30,8 @@ using namespace std;
 using namespace boost;
 namespace po = boost::program_options;
 
+// *IMPORTANT*: STATS_RESET was introduced in release 4.0.5
+
 std::ostream& CtsCmd::print(std::ostream& os) const
 {
    switch (api_) {
@@ -43,6 +45,7 @@ std::ostream& CtsCmd::print(std::ostream& os) const
       case CtsCmd::FORCE_DEP_EVAL:             return user_cmd(os,CtsApi::forceDependencyEval()); break;
       case CtsCmd::PING:                       return user_cmd(os,CtsApi::pingServer()); break;
       case CtsCmd::STATS:                      return user_cmd(os,CtsApi::stats()); break;
+      case CtsCmd::STATS_RESET:                return user_cmd(os,CtsApi::stats_reset()); break;
       case CtsCmd::SUITES:                     return user_cmd(os,CtsApi::suites()); break;
       case CtsCmd::DEBUG_SERVER_ON:            return user_cmd(os,CtsApi::debug_server_on()); break;
       case CtsCmd::DEBUG_SERVER_OFF:           return user_cmd(os,CtsApi::debug_server_off()); break;
@@ -74,6 +77,7 @@ bool CtsCmd::isWrite() const
       case CtsCmd::FORCE_DEP_EVAL:   return true; break;       // requires write privilege
       case CtsCmd::PING:             return false; break;      // read only
       case CtsCmd::STATS:            return false; break;      // read only
+      case CtsCmd::STATS_RESET:      return true; break;       // requires write privilege
       case CtsCmd::SUITES:           return false; break;      // read only
       case CtsCmd::DEBUG_SERVER_ON:  return false; break;      // read only
       case CtsCmd::DEBUG_SERVER_OFF: return false; break;      // read only
@@ -104,6 +108,7 @@ const char* CtsCmd::theArg() const
       case CtsCmd::FORCE_DEP_EVAL:   return CtsApi::forceDependencyEvalArg(); break;
       case CtsCmd::PING:             return CtsApi::pingServerArg(); break;
       case CtsCmd::STATS:            return CtsApi::statsArg(); break;
+      case CtsCmd::STATS_RESET:      return CtsApi::stats_reset_arg(); break;
       case CtsCmd::SUITES:           return CtsApi::suitesArg(); break;
       case CtsCmd::DEBUG_SERVER_ON:  return CtsApi::debug_server_on_arg(); break;
       case CtsCmd::DEBUG_SERVER_OFF: return CtsApi::debug_server_off_arg(); break;
@@ -146,8 +151,6 @@ STC_Cmd_ptr CtsCmd::doHandleRequest(AbstractServer* as) const
          break;
       }
       case CtsCmd::FORCE_DEP_EVAL: {
-         if (!as->defs()) throw std::runtime_error( "No definition in server") ;
-
          // The Default JobsParam does *not* allow Job creation, & hence => does not submit jobs
          // The default does *not* allow job spawning
          Jobs jobs(as->defs());
@@ -155,8 +158,9 @@ STC_Cmd_ptr CtsCmd::doHandleRequest(AbstractServer* as) const
          if (!jobs.generate(jobsParam)) throw std::runtime_error( jobsParam.getErrorMsg() ) ;
          break;
       }
-      case CtsCmd::PING:   as->update_stats().ping_++; break;
-      case CtsCmd::STATS:  as->update_stats().stats_++;  return PreAllocatedReply::stats_cmd( as ); break;
+      case CtsCmd::PING:         as->update_stats().ping_++; break;
+      case CtsCmd::STATS:        as->update_stats().stats_++;  return PreAllocatedReply::stats_cmd( as ); break;
+      case CtsCmd::STATS_RESET:  as->update_stats().reset(); break; // we could have done as->update_stats().stats_++, to honor reset, we dont
       case CtsCmd::SUITES: as->update_stats().suites_++; return PreAllocatedReply::suites_cmd( as ); break;
       case CtsCmd::DEBUG_SERVER_ON:  as->update_stats().debug_server_on_++;  as->debug_server_on(); break;
       case CtsCmd::DEBUG_SERVER_OFF: as->update_stats().debug_server_off_++; as->debug_server_off(); break;
@@ -304,6 +308,12 @@ void CtsCmd::addOption(boost::program_options::options_description& desc) const
       case CtsCmd::STATS:{
          desc.add_options()( CtsApi::statsArg(),
                   "Returns the server statistics."
+         );
+         break;
+      }
+      case CtsCmd::STATS_RESET:{
+         desc.add_options()( CtsApi::stats_reset_arg(),
+                  "Resets the server statistics."
          );
          break;
       }

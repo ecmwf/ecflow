@@ -66,7 +66,8 @@ SET_TARGET_PROPERTIES(ecflow_server PROPERTIES
 # TEST
 ecbuild_add_test( TARGET   u_server
                   BOOST  
-                  SOURCES  test/TestServerEnvironment.cpp
+                  SOURCES  test/TestServerEnvironment.cpp 
+                           test/TestServer1.cpp
                   LIBS     libserver  
               )
 

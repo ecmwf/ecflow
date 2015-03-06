@@ -153,6 +153,78 @@ void Stats::update_for_serialisation()
    request_stats_ = ss.str();
 }
 
+void Stats::reset()
+{
+   checkpt_ = 0;
+   restore_defs_from_checkpt_ = 0;
+
+   server_version_ = 0;
+   restart_server_ = 0;
+   shutdown_server_ = 0;
+   halt_server_ = 0;
+   reload_white_list_file_ = 0;
+   ping_ = 0;
+   debug_server_on_ = 0;
+   debug_server_off_ = 0;
+   get_defs_ = 0;
+   sync_ = 0;
+   news_ = 0;
+
+   node_job_gen_ = 0;
+   node_check_job_gen_only_ = 0;
+   node_delete_ = 0;
+   node_suspend_ = 0;
+   node_resume_ = 0;
+   node_kill_ = 0;
+   node_status_ = 0;
+   node_edit_history_ = 0;
+
+   log_cmd_ = 0;
+   log_msg_cmd_ = 0;
+   begin_cmd_ = 0;
+
+   task_init_ = 0;
+   task_complete_ = 0;
+   task_wait_ = 0;
+   task_abort_ = 0;
+   task_event_ = 0;
+   task_meter_ = 0;
+   task_label_ = 0;
+
+   zombie_fob_ = 0;
+   zombie_fail_ = 0;
+   zombie_adopt_ = 0;
+   zombie_remove_ = 0;
+   zombie_get_ = 0;
+   zombie_block_ = 0;
+   zombie_kill_ = 0;
+
+   requeue_node_ = 0;
+   order_node_ = 0;
+   run_node_ = 0;
+   load_defs_ = 0;
+   replace_ = 0;
+   force_ = 0;
+   free_dep_ = 0;
+   suites_ = 0;
+   edit_script_ = 0;
+
+   alter_cmd_ = 0;
+   ch_cmd_ = 0;
+   file_ecf_ = 0;
+   file_job_ = 0;
+   file_jobout_ = 0;
+   file_cmdout_ = 0;
+   file_manual_ = 0;
+
+   plug_ = 0;
+   move_ = 0;
+   group_cmd_ = 0;
+   server_load_cmd_ = 0;
+   stats_ = 0;
+   check_ = 0;
+}
+
 static string show_checkpt_mode(ecf::CheckPt::Mode m){
    switch (m) {
       case ecf::CheckPt::NEVER: return "CHECK_NEVER"; break;
@@ -257,4 +329,5 @@ void Stats::show(std::ostream& os) const
    if (file_jobout_ != 0) os << left << setw(width) << "   File Job out " << file_jobout_ << "\n";
    if (file_cmdout_ != 0) os << left << setw(width) << "   File Cmd out " << file_cmdout_ << "\n";
    if (file_manual_ != 0) os << left << setw(width) << "   File manual " << file_manual_ << "\n";
+   os << flush;
 }

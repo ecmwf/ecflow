@@ -7,7 +7,8 @@ else
    # ============================================================
    # Now build bjam/b2
    # ============================================================
-   cd $BOOST_ROOT
+   
+   cd %BOOST_DIR%/%BOOST_VERSION%
    
    if [[ %ARCH% = linux64intel ]] ; then
       # provide access to intel c++ compiler on lxab
@@ -16,16 +17,8 @@ else
    fi
    
    # use  [[ ]] for string comparisons
-   if [[ %ARCH% = hpux ]] ; then
-      # on HPUX -e does not work
-      if [ ! -r bjam ] ; then
-         # On HPUX using acc to build bjam fails, use gcc instead
-         sh -x ./bootstrap.sh --with-toolset=%BOOTSTRAP_TOOLSET%
-      fi
-   else
-      if [ ! -e bjam ] ; then
-         sh -x ./bootstrap.sh --with-toolset=%BOOTSTRAP_TOOLSET%
-      fi
+   if [ ! -e bjam ] ; then
+      sh -x ./bootstrap.sh --with-toolset=%BOOTSTRAP_TOOLSET%
    fi
 fi
 

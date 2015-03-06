@@ -13,29 +13,32 @@ DEFS=
 DEFS=
 # DEFS=define=PORTABLE_BINARY_ARCHIVE
 DIRRC=~/.ecflowrc
+BJAM=bjam
+BJAM=$(BOOST_ROOT)/bjam c++-template-depth=512
+VALG=/tmp/map/work/valgrind-3.7.0/coregrind/valgrind
 
 all:
-	$(BOOST_ROOT)/bjam -j4 variant=debug $(DEFS) ecflowview
+	$(BJAM) -j4 variant=debug $(DEFS) ecflowview
 
 fast:
-	$(BOOST_ROOT)/bjam variant=debug $(DEFS) ecflowview
+	$(BJAM) variant=debug $(DEFS) ecflowview
 
 rel:
-	$(BOOST_ROOT)/bjam -j4 variant=release $(DEFS) ecflowview 
+	$(BJAM) -j4 variant=release $(DEFS) ecflowview 
 
 val:
-	/tmp/map/work/valgrind-3.7.0/coregrind/valgrind bin/gcc-4.5/release/ecflowview 
+	$(VALG) bin/gcc-4.5/release/ecflowview 
 
 vald:
-	/tmp/map/work/valgrind-3.7.0/coregrind/valgrind bin/gcc-4.5/debug/ecflowview 
+	$(VALG) bin/gcc-4.5/debug/ecflowview 
 
 profile:
-	$(BOOST_ROOT)/bjam -j4 variant=profile $(DEFS) ecflowview 
+	$(BJAM) -j4 variant=profile $(DEFS) ecflowview 
 
 prof:   profile $(KIND)/profile/ecflowview 
 	date
 	- time $(KIND)/profile/ecflowview 
-	gprof $(KIND)/profile/ecflowview  gmon.out  > gprof.out
+	gprof $(KIND)/profile/ecflowview gmon.out >gprof.out
 	@cp gprof.out $(SCRATCH)/.	# - kprof # 
 
 # useful when updating the menu from the sources
@@ -68,7 +71,7 @@ ddd:
 
 clean:
 	-\rm *~ gmon.out
-	$(BOOST_ROOT)/bjam clean
+	$(BJAM) clean
 
 calib:
 	date; time $(CLNT) --get > /dev/null
@@ -88,4 +91,9 @@ ping:
 	 - $(CLNT) --ping
 
 relbin:
-	$(BOOST_ROOT)/bjam -j4 variant=release define=PORTABLE_BINARY_ARCHIVE ecflowview 
+	$(BJAM) -j4 variant=release define=PORTABLE_BINARY_ARCHIVE ecflowview 
+
+t2:
+	gcc t2.c -lXm -lX11 
+t1: 
+	gcc t1.c

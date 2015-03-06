@@ -47,7 +47,32 @@
 
 namespace ecf {
 
-// Utility class for boost archive version
+/// Utility class for boost archive version
+///
+/// Boost archive version is specified in: $BOOST_ROOT/libs/serialization/src/basic_archive.cpp
+///
+/// boost 1.47 serialisation library archive version = 9
+/// boost 1.53 serialisation library archive version = 10
+/// boost 1.56 serialisation library archive version = 11 // however no change in library ?
+/// boost 1.57 serialisation library archive version = 11
+///
+/// boost supports old -> new only. In our case typically new_client needs to talk to old server
+/// Hence if new client archive version is newer we need to set to archive version used by server.
+/// *providing* there are compatible.
+///
+/// To enable this, user can export variable ECF_ALLOW_NEW_CLIENT_OLD_SERVER:
+///
+/// We expect following syntax:
+///    option 1/ export ECF_ALLOW_NEW_CLIENT_OLD_SERVER=<int>
+///              This for use ecflow_client command line
+///
+///    option 2/ export ECF_ALLOW_NEW_CLIENT_OLD_SERVER=<host>:<port>:<int>,<host>:<port>:<int>,<host>:<port>:<int>
+///              This for use with ui/viewer where we can have multiple clients, each could
+///              connect to different server version and hence archive.
+///
+/// export ECF_ALLOW_NEW_CLIENT_OLD_SERVER=10, the number used, must be the archive version
+/// that the boost server was built with.
+///
 class boost_archive : private boost::noncopyable {
 public:
 

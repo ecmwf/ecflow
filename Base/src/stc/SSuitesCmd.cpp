@@ -34,9 +34,6 @@ void SSuitesCmd::init(AbstractServer* as)
 	// This command can be re-used hence clear existing data members
 	suites_.clear();
 
-	// Created in the server
-	if (!as->defs().get()) return;
-
 	const std::vector<suite_ptr>& suiteVec = as->defs()->suiteVec();
 	size_t suite_vec_size = suiteVec.size();
  	suites_.reserve(suite_vec_size);

@@ -106,4 +106,49 @@ BOOST_AUTO_TEST_CASE( test_defstatus )
    BOOST_FOREACH(Node* n,nodes) { BOOST_CHECK_MESSAGE(n->state() == NState::QUEUED,"Expected queued but found " << NState::toString(n->state())); }
 }
 
+BOOST_AUTO_TEST_CASE( test_ECFLOW_139 )
+{
+   cout << "ANode:: ...test_ECFLOW_139\n";
+
+   // Create a defs file corresponding to:
+   //suite suite1
+   // family f1
+   //    task t1; defstatus suspended
+   //    task t2; defstatus suspended
+   // family f2
+   //    task t1; defstatus suspended
+   //    task t2; defstatus suspended
+   Defs theDefs;
+   suite_ptr suite =  theDefs.add_suite(  "suite1"  );
+   family_ptr f1 =  suite->add_family( "f1" );
+   task_ptr t1 =  f1->add_task( "t1" );
+   task_ptr t2 =  f1->add_task( "t2" );
+   t1->addDefStatus(DState::SUSPENDED);
+   t2->addDefStatus(DState::SUSPENDED);
+
+   family_ptr f2 =  suite->add_family( "f2" );
+   task_ptr f2_t1 =  f2->add_task( "t1" );
+   task_ptr f2_t2 =  f2->add_task( "t2" );
+   f2_t1->addDefStatus(DState::SUSPENDED);
+   f2_t2->addDefStatus(DState::SUSPENDED);
+
+   // Get all nodes and tasks for ease of test
+   vector<Task*> tasks;
+   theDefs.getAllTasks(tasks);
+
+   /// It should be noted that once a suite has begun, it stays begun, however for test purposes we had
+   /// added ability to reset the begin state.
+
+   /// Test 1: Check NODE state All nodes should be set to NState::QUEUED
+   theDefs.beginAll();
+   BOOST_FOREACH(Task* n,tasks) { BOOST_CHECK_MESSAGE(n->state() == NState::QUEUED,"Expected queued but found " << NState::toString(n->state())); }
+
+   /// Check: DSTATE
+   BOOST_FOREACH(Task* n,tasks) { BOOST_CHECK_MESSAGE(n->dstate() == DState::SUSPENDED,"Expected suspended but found " << DState::toString(n->dstate())); }
+
+   theDefs.requeue();
+   BOOST_FOREACH(Task* n,tasks) { BOOST_CHECK_MESSAGE(n->state() == NState::QUEUED,"Expected queued but found " << NState::toString(n->state())); }
+   BOOST_FOREACH(Task* n,tasks) { BOOST_CHECK_MESSAGE(n->dstate() == DState::SUSPENDED,"Expected suspended but found " << DState::toString(n->dstate())); }
+}
+
 BOOST_AUTO_TEST_SUITE_END()

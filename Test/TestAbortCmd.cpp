@@ -90,7 +90,7 @@ BOOST_AUTO_TEST_CASE( test_ )
  	taskEcfFileMap.insert(std::make_pair(TestFixture::taskAbsNodePath(theDefs,"abort"),templateEcfFile));
 
     // Avoid standard verification since we expect to abort many times
- 	ServerTestHarness serverTestHarness(false/*do log file verification*/, false/* standardVerification */);
+   ServerTestHarness serverTestHarness;
 	serverTestHarness.run(theDefs,ServerTestHarness::testDataDefsLocation("test_abort_cmd.def"), taskEcfFileMap);
 
 	cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount() << ")\n";

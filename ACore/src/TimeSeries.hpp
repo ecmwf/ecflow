@@ -27,24 +27,26 @@ namespace ecf { class Calendar;} // forward declare class
 namespace ecf {
 /// TimeSeries can have a single time slot or a series of time slots
 ///
-/// ********************************************************************************************
-/// **** A TimeSeries should always complete, unless it has a loop construct. (i.e like repeat)
-/// **** or date/day attribute. For attribute like date,day then TimeSeries is held for last date/day
-/// ********************************************************************************************
 ///
-/// We need value() data member to record the next valid time slot, otherwise when
+/// We need nextTimeSlot_ data member to record the next valid time slot, otherwise when
 /// we have a time series, all times within the time series would be valid for
 /// Job submission. We do not know how long a job will run, hence when incrementing
-/// the value, we need the *NEXT* available time slot *after* the current calendar time.
+/// the nextTimeSlot_, we need the *NEXT* available time slot *after* the current calendar time.
 ///
 /// Usage pattern is :
+///           TimeSeries.calendarChanged()   // Called every minute. Calls isFree(). Once free we stay free, until requeue.
+///                                          // At midnight clear time expiration and reset next time slot
 ///           TimeSeries.isFree(..)          // called when node is QUEUED:
-////                                         // during dependency evaluation, checks next time slot, against calendar time
+///                                          // during dependency evaluation, checks next time slot, against calendar time
+///                                          // Once free a node stays free, until requeue()
 ///           TimeSeries.checkForRequeue();  // called when node is COMPLETE: Checks if next available time slot is valid
 ///                                          // *Must* return false for last time slot
+///                                          // ECFLOW-130 jobs that start before midnight and finish after midnight should not requeue
 ///           TimeSeries.requeue();          // called when node is re-queued.
 ///                                          // Sets value to next valid time slot after calendar time.
-///
+///                                          // Can *expire* the time, relies on TimeSeries.calendarChanged() to clear time expiration
+///                                          // after midnight
+/// ECFLOW-130 jobs that start before midnight and finish after midnight should not requeue
 
 // Use compiler, destructor, copy constructor and assignment operator
 class TimeSeries  {
@@ -57,14 +59,16 @@ public:
    bool operator<(const TimeSeries& rhs) const;
 
 	// returns true if a state change is made
-	bool calendarChanged( const ecf::Calendar& c );
+   // Will clear time expiration flag at midnight
+   bool calendarChanged( const ecf::Calendar& c);
 
 	// relative duration stored locally since it can be reset, when used with repeats
 	// returns true if relative duration is reset/ i.e state change has been made
 	bool resetRelativeDuration();
 	void reset(const ecf::Calendar& c);
 
-	/// Increment time series. Will find the next time slot after current calendar
+	// Increment time series. Will find the next time slot after current calendar
+	// record the current suite time, to check of jobs finish after midnight
 	void requeue(const ecf::Calendar& c,bool reset_next_time_slot = true);
 
 	// Since we can miss next time slot , allow its computation for the
@@ -80,8 +84,7 @@ public:
  	boost::posix_time::time_duration duration(const ecf::Calendar& calendar ) const;
 
  	/// If time has expired, returns false
-	/// Note: relative means relative to suite start, or relative to the beginning
-	///       of repeated node.
+	/// Note: relative means relative to suite start, or relative to the beginning of repeated node.
  	/// Is of the form hh:mm.   This means relative has a range 00:00->99.59
 	/// For a single slot time series, should not be re queued again, and hence
 	/// should fail checkForRequeue. Likewise when the the current value is
@@ -89,8 +92,10 @@ public:
 	/// node will be stuck in queued state.
 	bool isFree(const ecf::Calendar& calendar) const;
 
-	/// For single slot time based attributes we need additional context.(i.e the_min,the_max parameter)
-	/// In order to determine whether we should requeue
+	/// For single slot time based attributes we need additional context (i.e the_min,the_max parameter)
+	/// in order to determine whether we should re-queue.
+	/// Additionally when we have a time range, what if the last jobs runs over midnight. In this case
+	/// we need to return false. i.e do not re-queue ECFLOW-130
    bool checkForRequeue( const ecf::Calendar& calendar, const TimeSlot& the_min, const TimeSlot& the_max) const;
 
    void min_max_time_slots(TimeSlot& the_min, TimeSlot& the_max) const;
@@ -164,17 +169,18 @@ private:
 	bool match_duration_with_time_series(const boost::posix_time::time_duration& relative_or_real_td) const;
 	boost::posix_time::time_duration relativeDuration() const;
 
-
+private:
 	bool relativeToSuiteStart_;
 	bool isValid_;                                     // Needed for single slot to avoid multiple jobs submissions
 	TimeSlot start_;
 	TimeSlot finish_;
 	TimeSlot incr_;
 	TimeSlot nextTimeSlot_;                             // nextTimeSlot_ >= start && is incremented by incr
+	mutable TimeSlot suiteTimeAtReque_; // NOT persisted, check of day change, between requeue -> checkForRequeue, when we have series
 	boost::posix_time::time_duration relativeDuration_;
 	boost::posix_time::time_duration lastTimeSlot_;    // Only used when we have a series, can be generated
 
-
+private:
 	// Note: isValid_      is persisted for use by why() command on the client side.
 	// Note: nextTimeSlot_ is persisted for use by why() command on the client side.
 	// Note: relativeDuration_ is persisted for use by why() command on the client side.

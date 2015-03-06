@@ -126,7 +126,7 @@ BOOST_AUTO_TEST_CASE( test_wait_cmd )
    std::map<std::string,std::string> taskEcfFileMap;
    taskEcfFileMap.insert(std::make_pair(TestFixture::taskAbsNodePath(theDefs,"wait"),templateEcfFileForWait));
 
-   ServerTestHarness serverTestHarness(false/* doLogFileVerification */, false/* standardVerification */);
+   ServerTestHarness serverTestHarness;
    serverTestHarness.run(theDefs,ServerTestHarness::testDataDefsLocation("test_wait_cmd.def"), taskEcfFileMap);
 
    cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount() << ")\n";
@@ -156,7 +156,7 @@ BOOST_AUTO_TEST_CASE( test_wait_cmd_parse_fail )
    std::map<std::string,std::string> taskEcfFileMap;
    taskEcfFileMap.insert(std::make_pair(TestFixture::taskAbsNodePath(theDefs,"wait"),templateEcfFileForWait));
 
-   ServerTestHarness serverTestHarness(false /* doLogFileVerification */, false /* standardVerification */);
+   ServerTestHarness serverTestHarness;
    serverTestHarness.run(theDefs,ServerTestHarness::testDataDefsLocation("test_wait_cmd_parse_fail.def"), taskEcfFileMap,1 /*timeout*/,  false/* don't wait for test to finish */);
 
    // wait for family1 and family2 to complete
@@ -196,7 +196,7 @@ BOOST_AUTO_TEST_CASE( test_wait_cmd_non_existant_paths )
    std::map<std::string,std::string> taskEcfFileMap;
    taskEcfFileMap.insert(std::make_pair(TestFixture::taskAbsNodePath(theDefs,"wait"),templateEcfFileForWait));
 
-   ServerTestHarness serverTestHarness(false /* doLogFileVerification */, false /* standardVerification */);
+   ServerTestHarness serverTestHarness;
    serverTestHarness.run(theDefs,ServerTestHarness::testDataDefsLocation("test_wait_cmd_non_existant_paths.def"), taskEcfFileMap,1 /*timeout*/,  false/* don't wait for test to finish */);
 
    // wait for family1 and family2 to complete

@@ -59,6 +59,8 @@ suite time
          time 16:00
          time 17:00
          time 18:00
+         time 19:00
+         trigger 1 == 0
     task t12
          time 17:00
     task t13
@@ -75,6 +77,7 @@ suite time
          time 23:00
     task t19
          time 23:00
+         trigger 1 == 0
     task t20
          time 00:00
    endfamily

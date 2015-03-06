@@ -117,7 +117,7 @@ if sys.platform.startswith("aix"):
 #   lib/python2.7/site-packages/ecflow/ecflow.so
 #                                     __init__.py               
 setup( name='ecflow', 
-       version='4.0.2', 
+       version='4.0.5', 
        author      = 'ECMWF',
        description = """ecflow Python interface""",
        packages = [ 'ecflow' ],

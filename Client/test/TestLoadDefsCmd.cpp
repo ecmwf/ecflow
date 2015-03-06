@@ -49,7 +49,7 @@ BOOST_AUTO_TEST_SUITE( ClientTestSuite )
 // *******************************************************************
 BOOST_AUTO_TEST_CASE( test_load_defs_cmd_handleRequest )
 {
-	cout << "Client:: ...test_load_defs_cmd_handleRequest\n";
+	cout << "Client:: ...test_load_defs_cmd_handleRequest"<< endl;
 
    std::string firstDef = File::test_data("Client/test/data/first.def","Client");
 

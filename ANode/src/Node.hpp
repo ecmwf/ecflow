@@ -70,8 +70,6 @@ public:
    /// The Parent Must set the parent pointer. For a Suite however this will be NULL
    void set_parent(Node* p) { parent_ = p; }
 
-   static bool doDelete(Node*);
-
    // Server called functions:
    /// Required when we have time attributes, when time related attribute are free they stay free
    virtual void calendarChanged(const ecf::Calendar&, std::vector<node_ptr>& auto_cancelled_nodes);
@@ -144,6 +142,11 @@ public:
    /// Note: Under the hybrid clock this will not mark node as complete, (if we have day,date,cron attributes)
    /// Since alter clock, should not change node state. This is left for user to re-queue the suite
    virtual void requeue_time_attrs();
+
+   /// Previously < 4.0.6 requeue always reset the labels on requeue.
+   /// However ECFLOW-195 suggest some user prefer to see the last label value.
+   /// hence we will only reset the labels on the tasks when task is being run.
+   void requeue_labels();
 
    /// This functionality is only required during interactive force or run
    /// Avoid running the task on the same time slot, by missing the next time slot.
@@ -243,11 +246,11 @@ public:
    /// 	** This by default works out the most significant state of the children
    /// 	** ie. the computed state. Hence setting the state on Suite/Family is really
    /// 	** meaningless, since it will always be the computed state.
-   void set_state(NState::State s, bool force = false);
+   void set_state(NState::State s, bool force = false, const std::string& additional_info_to_log = "");
    virtual void set_state_hierarchically(NState::State s, bool force) { set_state(s,force); }
 
    /// Set state only, has no side effects
-   void setStateOnly(NState::State s, bool force = false);
+   void setStateOnly(NState::State s, bool force = false, const std::string& additional_info_to_log = "");
    virtual void setStateOnlyHierarchically(NState::State s, bool force = false) { setStateOnly(s,force); }
 
    /// This returns the time of state change: (relative to real time when the suite calendar was begun)
@@ -479,6 +482,9 @@ public:
    /// a variable that exist but has a empty value, and variable not found.(still return empty string)
    /// Useful when we want to return by reference
    const std::string& find_parent_user_variable_value(const std::string& name) const;
+
+   /// Search up the hierarchy, simply checks for existence independent of variable vlaue
+   bool user_variable_exists(const std::string& name) const;
 
    virtual node_ptr findImmediateChild(const std::string& /*name*/, size_t& /*child_pos*/) const { return node_ptr();}
    const Variable& findVariable(const std::string& name) const;

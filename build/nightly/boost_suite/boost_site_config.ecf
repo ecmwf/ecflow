@@ -1,24 +1,43 @@
 %include <head.h>
 
-# ==========================================================
-# Run as REMOTE_HOST. i.e %REMOTE_HOST:%
-# !!! This relies on ecflow to have been untarred on the remote.
-# ==========================================================
+# ======================================================================
+# Run LOCALLY  %SUITE%_%FAMILY%_%TASK%
+# ======================================================================
+export WK=%WK%
 
-#===============================================================
-# defines variable WK ***this is NEEDED by SITE_CONFIG below ****
-#===============================================================
-%include <export_WK.h>
- 
 if [[ %SET_TO_TEST_SCRIPT% = true ]] ; then
    echo "Test only"
 else
-   # ========================================================================
-   # FIRST setup site-config.jam, by copying from ecflow workspace directory
-   # SITE_CONFIG relies on $WK being setup
-   # ========================================================================
-   echo "BOOST_ROOT=$BOOST_ROOT"
-   cp %SITE_CONFIG% $BOOST_ROOT/tools/build/v2/site-config.jam
+   remote_host=%REMOTE_HOST:%
+   root_wk=%ROOT_WK:/var/tmp/ma0%
+   
+   BOOST_SITE_CONFIG_LOC=tools/build/v2/site-config.jam
+   if [[ %BOOST_VERSION% = boost_1_56_0 || %BOOST_VERSION% = boost_1_57_0 ]] ; then
+      # notice: Searching '/etc' '/home/ma/ma0' '$BOOST_ROOT/tools/build/src' '/usr/share/boost-build' 
+      #         '$BOOST_ROOT/tools/build/src/kernel' '$BOOST_ROOT/tools/build/src/util' '$BOOST_ROOT/tools/build/src/build' 
+      #         '$BOOST_ROOT/tools/build/src/tools' '$BOOST_ROOT/tools/build/src/contrib' '$BOOST_ROOT/tools/build/src/.' 
+      # for site-config configuration file 'site-config.jam'.
+   
+      BOOST_SITE_CONFIG_LOC=tools/build/src/site-config.jam
+   fi
+   
+   # ============================================================================================
+   # Update site config.jam. Note  %SITE_CONFIG% needs WK to be defined/exported
+   # ============================================================================================
+   if [[ %ARCH% = opensuse113 ||  %ARCH% = opensuse131 || %ARCH% = redhat || %ARCH% = cray || %ARCH% = linux64 ]] ; then
+   
+      if [[ "$remote_host" = "" ]] 
+      then
+          cp %SITE_CONFIG%   %BOOST_DIR%/%BOOST_VERSION%/$BOOST_SITE_CONFIG_LOC
+      else      
+         # NOTE: uses SSH
+         scp %SITE_CONFIG%   $remote_host:%BOOST_DIR%/%BOOST_VERSION%/$BOOST_SITE_CONFIG_LOC
+      fi
+   elif [[ %ARCH% = hpux ]] ; then
+      scp %SITE_CONFIG%   %BOOST_DIR%/%BOOST_VERSION%/$BOOST_SITE_CONFIG_LOC
+   else
+      rcp %SITE_CONFIG%   $remote_host:$root_wk/boost/%BOOST_VERSION%/$BOOST_SITE_CONFIG_LOC
+   fi
 fi
 
 %include <tail.h>

@@ -83,7 +83,7 @@ public:
   virtual ~host_maker() {}
 };
 
-template<class T> 
+template<typename T>
 class host_builder : public host_maker {
   virtual host* make(const std::string& name, const std::string& machine, int port) 
   { return new T(name, machine, port); }
@@ -244,6 +244,7 @@ class host : public extent<host>
 
 	option<bool>      zombie_;
 	option<bool>      aliases_;
+	option<bool>      late_family_;
 	option<bool>      to_check_;
 
 	bool  chkmail_;

@@ -23,7 +23,6 @@ namespace ecf {
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 
-
 bool TimeSlot::operator<(const TimeSlot& rhs) const
 {
    if (hour_ <  rhs.hour()) return true;
@@ -41,6 +40,20 @@ bool TimeSlot::operator>(const TimeSlot& rhs) const
    }
    return false;
 }
+
+bool TimeSlot::operator<=( const TimeSlot& rhs ) const
+{
+   if (operator<(rhs)) return true;
+   return operator==(rhs);
+}
+
+
+bool TimeSlot::operator>=( const TimeSlot& rhs ) const
+{
+   if (operator>(rhs)) return true;
+   return operator==(rhs);
+}
+
 
 std::ostream& TimeSlot::print(std::ostream& os) const
 {

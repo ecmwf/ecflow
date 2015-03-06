@@ -28,8 +28,8 @@ extern "C" {
 }
 
 template<class T>
-node_alert<T>::node_alert(const char* title,int bg) :
-  alert_(getenv("ecflow_view_alert"))
+node_alert<T>::node_alert(const char* title,int bg)
+  : alert_(getenv("ecflow_view_alert"))
   , title_(title)
   , bg_ (bg)
 {
@@ -96,7 +96,7 @@ void node_alert<T>::notify_system(node* n) {
   notify-send -i 'dialog-information' 'Summary' \
     '<b><font color=red>Message body.'
  */
-  if(0 && alert_) {
+  if(1 && alert_) {
     char buff[1024];
     const char *cmd = "kdialog --title ecFlowview::%s --passivepopup '<b><font color=%s> %s' 5; %s";
     const char *sound = "play -q /usr/share/xemacs/xemacs-packages/etc/sounds/boing.wav";
@@ -106,7 +106,7 @@ void node_alert<T>::notify_system(node* n) {
 	     n ? name(n) : "",
 	     bg_ == STATUS_ABORTED ? sound : ""
 	     );
-    system(buff);
+    if (system(buff)) { std::cerr << "#node_alert!\n"; }
   }
 #endif
   }

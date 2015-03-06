@@ -25,7 +25,8 @@ namespace ecf {
 //   see ACore/doc/extracting_version_number.ddoc
 //
 //   See ACore/src/ecflow_version.h"
-//   This file is generated cmake from $WK/VERSION.cmake
+//   This file is generated from $WK/VERSION.cmake when cmake is run, i.e
+//   sh -x $WK/cmake.sh debug
 //
 // It is also extracted by python, from VERSION.CMAKE check build/nightly/build.py
 // This minimises the places where we have hard code the version number.

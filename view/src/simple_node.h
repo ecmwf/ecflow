@@ -129,6 +129,8 @@ class suite_node : public simple_node {
 
   // virtual void info(std::ostream&);
 };
+#define FLAG_ISSET(flag) (1<<(flag))
+#include "late.h"
 
 class family_node : public simple_node {
   virtual bool trigger_kids()   const { return false; }
@@ -138,6 +140,19 @@ public:
 #ifdef BRIDGE
   family_node(host& h,sms_node* n,char b) : simple_node(h,n,b) {}
 #endif
+  void update(int oldstatus,int oldtryno,int oldflags) {
+    bool is_late  = flags()    & FLAG_ISSET(FLAG_LATE);
+    bool was_late = old_flags_ & FLAG_ISSET(FLAG_LATE);
+    simple_node::update(oldstatus,oldtryno,oldflags);    
+    if(is_late != was_late) {
+      if(is_late)
+	serv().late(*this);
+      else
+	late::hide(*this);
+    }
+    old_flags_ = flags();
+}
+
 };
 
 #endif

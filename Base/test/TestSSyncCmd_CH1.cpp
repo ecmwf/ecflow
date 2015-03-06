@@ -48,6 +48,20 @@ static bool bypass_state_modify_change_check = false;
 
 BOOST_AUTO_TEST_SUITE( BaseTestSuite )
 
+static defs_ptr create_client_defs(defs_ptr defs)
+{
+   for(size_t j = 0; j < 5; j++)  {
+      suite_ptr suite = defs->add_suite( "s" + boost::lexical_cast<std::string>(j) );
+      family_ptr f = suite->add_family("f");
+      f->add_task("t");
+      if (j == 0) {
+         suite->addLimit( Limit("suiteLimit",10) );
+         suite->addRepeat( RepeatDate("YMD",20090916,20090916,1) );
+      }
+   }
+   return defs;
+}
+
 static defs_ptr create_server_defs()
 {
    defs_ptr defs = Defs::create();
@@ -58,25 +72,9 @@ static defs_ptr create_server_defs()
    ServerState::setup_default_server_variables(server_variables,"4000");
    defs->set_server().set_server_variables(server_variables);
 
-   for(size_t j = 0; j < 5; j++)  {
-      suite_ptr suite = defs->add_suite( "s" + boost::lexical_cast<std::string>(j) );
-      family_ptr f = suite->add_family("f");
-      f->add_task("t");
-   }
-   return defs;
+   // ensure client/server start out the same
+   return create_client_defs(defs);
 }
-
-static defs_ptr create_client_defs()
-{
-   defs_ptr defs = Defs::create();
-   for(size_t j = 0; j < 5; j++)  {
-      suite_ptr suite = defs->add_suite( "s" + boost::lexical_cast<std::string>(j) );
-      family_ptr f = suite->add_family("f");
-      f->add_task("t");
-   }
-   return defs;
-}
-
 
 /// define a function which returns nothing, and takes a defs_ptr parameter
 typedef boost::function<bool (defs_ptr)> defs_change_cmd;
@@ -88,10 +86,13 @@ void test_sync_scaffold( defs_change_cmd the_defs_change_command, const std::str
    // Create the defs
    defs_ptr server_defs = create_server_defs();
    ServerReply server_reply;
-   server_reply.set_client_defs( create_client_defs() );
+   server_reply.set_client_defs( create_client_defs(Defs::create()) );
 
    Ecf::set_debug_equality(true); // only has affect in DEBUG build
-   BOOST_CHECK_MESSAGE( *server_defs == *server_reply.client_defs(), test_name << ": Starting point client and server defs should be the same");
+   BOOST_CHECK_MESSAGE( *server_defs == *server_reply.client_defs(),
+                        test_name << ": Starting point client and server defs should be the same : "
+                        << "SERVER\n" << server_defs
+                        << "CLIENT\n" << server_reply.client_defs());
    Ecf::set_debug_equality(false);
 
    // set handle and change numbers, before any changes
@@ -142,11 +143,10 @@ void test_sync_scaffold( defs_change_cmd the_defs_change_command, const std::str
    SNewsCmd news_cmd(client_handle, client_state_change_no,  client_modify_change_no, &mock_server );
    SSyncCmd cmd(client_handle, client_state_change_no,  client_modify_change_no, &mock_server );
 
-
    if ( expected_change ) {
-      BOOST_CHECK_MESSAGE( news_cmd.get_news(),         test_name << ": Expected server to change");
-      BOOST_CHECK_MESSAGE( cmd.do_sync( server_reply ), test_name << ": Expected server to change");
-      BOOST_CHECK_MESSAGE( server_reply.in_sync(),      test_name << ": Expected server to change");
+      BOOST_CHECK_MESSAGE( news_cmd.get_news(),         test_name << " : get_news : Expected server to change");
+      BOOST_CHECK_MESSAGE( cmd.do_sync( server_reply ), test_name << " : do_sync : Expected server to change");
+      BOOST_CHECK_MESSAGE( server_reply.in_sync(),      test_name << " : in_sync : Expected client server to be in sync");
       BOOST_CHECK_MESSAGE( server_reply.full_sync() == full_sync,test_name << ": Expected sync not as expected. client: " << server_reply.full_sync() << " full_sync: " << full_sync);
       BOOST_CHECK_MESSAGE( server_defs->state() == server_reply.client_defs()->state(),test_name << ": Expected server State(" << NState::toString(server_defs->state()) << ") to be same as client state(" << NState::toString(server_reply.client_defs()->state()) << ")");
       if (full_sync) {
@@ -164,6 +164,7 @@ void test_sync_scaffold( defs_change_cmd the_defs_change_command, const std::str
       // * with handles, we only return a sub set of the suites, in our handle
 
       // DO a sync again. hence we should expect no changes
+      server_reply.clear_for_invoke(false);
       Ecf::set_server(true);
       /* server side */ SNewsCmd news_cmd1(client_handle, server_reply.client_defs()->state_change_no(),  server_reply.client_defs()->modify_change_no(), &mock_server );
       /* server side */ SSyncCmd cmd1(client_handle, server_reply.client_defs()->state_change_no(),  server_reply.client_defs()->modify_change_no(), &mock_server );
@@ -333,10 +334,192 @@ static bool change_server_variable(defs_ptr defs) {
    return true;
 }
 
+// ===============================================================================
+// The modifiers, do this for suite s0 which is in a handle
+// ===============================================================================
+static bool s0_delete_some_attributes(defs_ptr defs) {
+
+   /// Ok now make state change to s4, which **is** in the handle
+   /// We need MockSuiteChangedServer, so that change is propagated to the suite.
+   suite_ptr suite = defs->findSuite("s0");
+   BOOST_REQUIRE_MESSAGE( suite,"Could not find suite");
+   MockSuiteChangedServer mockServer(suite); // Increment suite state/modify change number
+
+   std::vector<Task*> tasks;
+   suite->getAllTasks(tasks);
+   BOOST_REQUIRE_MESSAGE( !tasks.empty(), "Expected at least one task");
+
+   BOOST_FOREACH(Task* task, tasks) {
+      SuiteChanged1 changed(task->suite());
+      task->addMeter(Meter("meter",0,100));
+   }
+   return true;
+}
+
+static bool s0_add_some_attributes(defs_ptr defs) {
+   suite_ptr suite = defs->findSuite("s0");
+   BOOST_REQUIRE_MESSAGE( suite,"Could not find suite");
+   MockSuiteChangedServer mockServer(suite); // Increment suite state/modify change number
+
+   std::vector<task_ptr> tasks;
+   suite->get_all_tasks(tasks);
+   BOOST_REQUIRE_MESSAGE( !tasks.empty(), "Expected at least one task");
+
+   BOOST_FOREACH(task_ptr task, tasks) { SuiteChanged1 changed(suite.get()); task->addDay( DayAttr(DayAttr::TUESDAY) );}
+   return true;
+}
+
+static bool s0_begin(defs_ptr defs) {
+   suite_ptr suite = defs->findSuite("s0");
+   BOOST_REQUIRE_MESSAGE( suite,"Could not find suite");
+   MockSuiteChangedServer mockServer(suite); // Increment suite state/modify change number
+
+   suite->begin();
+   return true;
+}
+
+static bool s0_add_alias(defs_ptr defs) {
+   suite_ptr suite = defs->findSuite("s0");
+   BOOST_REQUIRE_MESSAGE( suite,"Could not find suite");
+   MockSuiteChangedServer mockServer(suite); // Increment suite state/modify change number
+
+   std::vector<task_ptr> tasks;
+   suite->get_all_tasks(tasks);
+   BOOST_REQUIRE_MESSAGE( !tasks.empty(), "Expected at least one task");
+
+   SuiteChanged1 changed(tasks[0]->suite());
+   tasks[0]->add_alias_only();
+   return true;
+}
+
+static bool s0_remove_all_tasks(defs_ptr defs) {
+   suite_ptr suite = defs->findSuite("s0");
+   BOOST_REQUIRE_MESSAGE( suite,"Could not find suite");
+   MockSuiteChangedServer mockServer(suite); // Increment suite state/modify change number
+
+
+   // Remove tasks should force a incremental sync
+   std::vector<task_ptr> tasks;
+   suite->get_all_tasks(tasks);
+   BOOST_REQUIRE_MESSAGE( !tasks.empty(), "Expected at least one task");
+   BOOST_FOREACH(task_ptr task, tasks) { SuiteChanged1 changed(task->suite()); task->remove() ;}
+
+   tasks.clear();
+   suite->get_all_tasks(tasks);
+   BOOST_REQUIRE_MESSAGE( tasks.empty(), "Failed to delete tasks");
+   return true;
+}
+
+static bool s0_remove_a_family(defs_ptr defs) {
+   suite_ptr suite = defs->findSuite("s0");
+   BOOST_REQUIRE_MESSAGE( suite,"Could not find suite");
+   MockSuiteChangedServer mockServer(suite); // Increment suite state/modify change number
+
+   std::vector<Family*> vec;
+   suite->getAllFamilies(vec);
+   size_t family_size = vec.size();
+   BOOST_REQUIRE_MESSAGE( !vec.empty(), "Expected at least one family");
+   if (!vec.empty()) {
+      SuiteChanged1 changed(vec[0]->suite());
+      vec[0]->remove();
+   }
+
+   vec.clear();
+   suite->getAllFamilies(vec);
+   BOOST_REQUIRE_MESSAGE( vec.size() < family_size, "Failed to delete family");
+   return true;
+}
+
+
+static bool s0_change_clock_gain(defs_ptr defs) {
+   suite_ptr suite = defs->findSuite("s0");
+   BOOST_REQUIRE_MESSAGE( suite,"Could not find suite");
+   MockSuiteChangedServer mockServer(suite); // Increment suite state/modify change number
+
+   suite->changeClockGain("100001");
+   return true;
+}
+
+static bool s0_change_clock_type_to_real(defs_ptr defs) {
+   suite_ptr suite = defs->findSuite("s0");
+   BOOST_REQUIRE_MESSAGE( suite,"Could not find suite");
+   MockSuiteChangedServer mockServer(suite); // Increment suite state/modify change number
+
+   suite->changeClockType("hybrid");
+   return true;
+}
+
+static bool s0_change_clock_date(defs_ptr defs) {
+   suite_ptr suite = defs->findSuite("s0");
+   BOOST_REQUIRE_MESSAGE( suite,"Could not find suite");
+
+   suite->changeClockDate("1.1.2001");
+   return true;
+}
+
+static bool s0_change_clock_sync(defs_ptr defs) {
+   suite_ptr suite = defs->findSuite("s0");
+   BOOST_REQUIRE_MESSAGE( suite,"Could not find suite");
+   MockSuiteChangedServer mockServer(suite); // Increment suite state/modify change number
+
+   suite->changeClockSync();
+   return true;
+}
+
+/// This has been split into two functions, as changing both together could mask an error
+/// i.e found bug where we forgot to update state_change number when changing the limit
+/// max value, however because we had, changed value as well it got masked.
+static bool s0_change_limit_max(defs_ptr defs) {
+   suite_ptr suite = defs->findSuite("s0");
+   BOOST_REQUIRE_MESSAGE( suite,"Could not find suite");
+   // Note: we ONLY* need MockSuiteChangedServer, when we make changes via functions and not commands
+
+   std::vector<limit_ptr> theLimits =  suite->limits();
+   BOOST_REQUIRE_MESSAGE( !theLimits.empty(),"The limit are empty on suite s0 " << defs);
+   BOOST_FOREACH(limit_ptr l, theLimits) {
+      //std::cout << "found " << l->toString() << "\n";
+      TestHelper::invokeRequest(defs.get(),Cmd_ptr( new AlterCmd(suite->absNodePath(),AlterCmd::LIMIT_MAX,l->name(),"90")));
+      limit_ptr v = suite->find_limit(l->name());
+      BOOST_CHECK_MESSAGE( v.get() && v->theLimit() == 90, "expected to find limit with max value of 90");
+   }
+   return true;
+}
+
+static bool s0_change_limit_value(defs_ptr defs) {
+   suite_ptr suite = defs->findSuite("s0");
+   BOOST_REQUIRE_MESSAGE( suite,"Could not find suite");
+   // Note: we ONLY* need MockSuiteChangedServer, when we make changes via functions and not commands
+
+   std::vector<limit_ptr> theLimits =  suite->limits();
+   BOOST_FOREACH(limit_ptr l, theLimits) {
+      TestHelper::invokeRequest(defs.get(),Cmd_ptr( new AlterCmd(suite->absNodePath(),AlterCmd::LIMIT_VAL,l->name(),"33")));
+      limit_ptr v = suite->find_limit(l->name());
+      BOOST_CHECK_MESSAGE( v.get() && v->value() == 33, "expected to find limit with value of 33");
+   }
+   return true;
+}
+
+static bool s0_update_repeat(defs_ptr defs) {
+
+   suite_ptr suite = defs->findSuite("s0");
+   BOOST_REQUIRE_MESSAGE( suite,"Could not find suite");
+   MockSuiteChangedServer mockServer(suite); // Increment suite state/modify change number
+
+
+   SuiteChanged1 changed(suite.get());
+   suite->increment_repeat();
+   return true;
+}
+
+// ===============================================
 
 BOOST_AUTO_TEST_CASE( test_ssync_using_handle  )
 {
    cout << "Base:: ...test_ssync_using_handle\n";
+
+   // =======================================================================================
+   // Note: where we update Suite::modify_change_no()  we should *EXPECT* a full sync
+   // =======================================================================================
 
    // test_sync_scaffold will created 5 suites  s0,s1,s2,s3,s4,s5 and add suites s0 & s4 to a handle
    // The following test will perform changes in/out of handles
@@ -370,20 +553,36 @@ BOOST_AUTO_TEST_CASE( test_ssync_using_handle  )
    test_sync_scaffold(delete_family_on_suite_s4,"delete_family_on_suite_s4");
    test_sync_scaffold(delete_suite_s4,"delete_suite_s4", true /* expect a full sync */);
 
+
+   test_sync_scaffold(s0_delete_some_attributes,"s0_delete_some_attributes");
+   test_sync_scaffold(s0_add_some_attributes,"s0_add_some_attributes");
+   test_sync_scaffold(s0_add_alias,"s0_add_alias");
+   test_sync_scaffold(s0_update_repeat,"s0_update_repeat");
+   test_sync_scaffold(s0_change_limit_max,"s0_change_limit_max");
+   test_sync_scaffold(s0_change_limit_value,"s0_change_limit_value");
+   test_sync_scaffold(s0_begin,"s0_begin", true/* expect a full sync */);
+
+   test_sync_scaffold(s0_remove_all_tasks,"s0_remove_all_tasks" );
+   test_sync_scaffold(s0_remove_a_family,"s0_remove_a_family");
+
+   test_sync_scaffold(s0_change_clock_gain,"s0_change_clock_gain", true/* expect a full sync */);
+   test_sync_scaffold(s0_change_clock_type_to_real,"s0_change_clock_type_to_real", true/* expect a full sync */);
+   test_sync_scaffold(s0_change_clock_date,"s0_change_clock_date", true/* expect a full sync */);
+   test_sync_scaffold(s0_change_clock_sync,"s0_change_clock_sync", true/* expect a full sync */);
+
    /// Keep valgrind happy
    ChangeMgrSingleton::destroy();
 }
 
 
+
 static defs_ptr create_the_server_defs()
 {
-   defs_ptr defs = Defs::create();
-   for(size_t j = 0; j < 5; j++)  {
-      suite_ptr suite = defs->add_suite( "s" + boost::lexical_cast<std::string>(j) );
-      family_ptr f = suite->add_family("f");
-      f->add_task("t");
-      suite->set_state_change_no(j);
-      suite->set_modify_change_no(j);
+   defs_ptr defs = create_server_defs();
+   std::vector<suite_ptr> suite_vec =  defs->suiteVec();
+   for(size_t j = 0; j < suite_vec.size(); j++)  {
+      suite_vec[j]->set_state_change_no(j);
+      suite_vec[j]->set_modify_change_no(j);
    }
    return defs;
 }
@@ -403,11 +602,13 @@ BOOST_AUTO_TEST_CASE( test_ssync_full_sync_using_handle  )
 
    // Create Client defs, without any changes
    ServerReply server_reply;
-   server_reply.set_client_defs( create_client_defs() );
+   server_reply.set_client_defs( create_client_defs(Defs::create()) );
 
    // Server & client should be the same, since we ignore change numbers in the comparison
    Ecf::set_debug_equality(true); // only has affect in DEBUG build
-   BOOST_CHECK_MESSAGE( *server_defs == *server_reply.client_defs(), "Starting point client and server defs should be the same");
+   BOOST_CHECK_MESSAGE( *server_defs == *server_reply.client_defs(), "Starting point client and server defs should be the same"
+                        << "SERVER\n" << server_defs
+                        << "CLIENT\n" << server_reply.client_defs());
    Ecf::set_debug_equality(false);
 
    /// register interest in **ALL** the suites

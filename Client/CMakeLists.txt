@@ -72,6 +72,7 @@ list( APPEND test_srcs
  test/TestCheckPtDefsCmd.cpp
  test/TestClientEnvironment.cpp
  test/TestClientInterface.cpp
+ test/TestClientInvoker.cpp
  test/TestClientTimeout.cpp
  test/TestGroupCmd.cpp
  test/TestJobGenOnly.cpp

@@ -69,6 +69,20 @@ fi
 install_arg=install-all
 
 # ==============================================================================
+# Expect $WK and $BOOST_ROOT to be specified
+# ==============================================================================
+if [ "${WK:-unset}" = "unset" ] ; then
+   echo "Install expects environment variable WK  work space to be defined"
+   exit 1
+fi  
+if [ "${BOOST_ROOT:-unset}" = "unset" ] ; then
+   echo "Install expects environment variable BOOST_ROOT to be defined"
+   exit 1
+fi  
+echo "WK         = $WK"
+echo "BOOST_ROOT = $BOOST_ROOT"
+
+# ==============================================================================
 # In order to embedd boost_python path in the ecflow extension, we need
 # ECFLOW_INSTALL_DIR to be set correctly, when building the extension
 # Hacky work around since, <dll-path> does not work for a relink at install time.
@@ -108,31 +122,47 @@ then
    # =====================================================================
    # LINUX
    # =====================================================================
-   if [ "$OS_VERSION" = opensuse113 ] ; then
+   
+   # lxop does not define OS_VERSION ?????, hence default to empty string
+   : ${OS_VERSION:=""}
+   
+   if [[ "$OS_VERSION" = opensuse113 ]] ; then
    
       export BOOST_ROOT=/vol/ecf/opensuse113/boost/$BOOST_VERSION; 
       export WK=/vol/ecf/opensuse113/ecflow
 
-   elif [ "$OS_VERSION" = opensuse131 ] ; then
+   elif [[ "$OS_VERSION" = opensuse131 ]] ; then
    
       export BOOST_ROOT=/vol/ecf/opensuse131/boost/$BOOST_VERSION; 
       export WK=/vol/ecf/opensuse131/ecflow
       
-   elif [ "$OS_VERSION" = opensuse103 ] ; then 
+   elif [[ "$OS_VERSION" = opensuse103 ]] ; then 
    
       export BOOST_ROOT=/vol/ecf/opensuse103/boost/$BOOST_VERSION;  
       export WK=/vol/ecf/opensuse103/ecflow
       
-   elif [ "$OS_VERSION" = rhel6 ] ; then 
+   elif [[ "$OS_VERSION" = rhel6 ]] ; then 
 
       export BOOST_ROOT=/vol/ecf/redhat/boost/$BOOST_VERSION;  
       export WK=/vol/ecf/redhat/ecflow
    
-   elif [ "$OS_VERSION" = sles11 ] ; then 
+   elif [[ "$OS_VERSION" = sles11 ]] ; then 
    
       # lxab this is still opensuse113
       export BOOST_ROOT=/vol/ecf/cluster/boost/$BOOST_VERSION;  
       export WK=/vol/ecf/cluster/ecflow
+      case "$HOST" in
+         lxc*)
+	           export BOOST_ROOT=/vol/lxc/boost/$BOOST_VERSION;  
+	           export WK=/vol/ecf/lxc/ecflow
+         ;;
+	  esac
+	  
+   elif [[ "$OS_VERSION" = "" ]] ; then 
+   
+      # lxop does not define OS_VERSION ?????
+      export BOOST_ROOT=/gpfs/lxop/build/builds/boost/$BOOST_VERSION;  
+      export WK=/gpfs/lxop/build/builds/ecflow
    fi
   
 elif [[ "$ARCH" = cray ]] ; then 
@@ -151,26 +181,6 @@ elif [[ "$ARCH" = cray ]] ; then
    export WK=/perm/ma/ma0/workspace/$PE_ENV/ecflow
    export BOOST_ROOT=/perm/ma/ma0/boost/$BOOST_VERSION
 
-elif [[ "$ARCH" = hpia64 ]] ; then 
-
-   # ======================================================================
-   # HPUX:   We don't install ecflowview on HPUX, no x-windows
-   # ======================================================================
-   NEW_SCRATCH=/scratch/ma/emos/ma0
-   export BOOST_ROOT=$NEW_SCRATCH/$ARCH/boost/$BOOST_VERSION;  
-   export WK=$NEW_SCRATCH/$ARCH/ecflow   
-      
-   install_arg=install 
-
-elif [[ "$ARCH" = ibm_power7 ]] ; then 
-
-   # ======================================================================
-   # AIX:   We don't install ecflowview on AIX, no x-windows
-   # ======================================================================
-   export BOOST_ROOT=/s2o1/emos_data/ecflow/boost/$BOOST_VERSION;  
-   export WK=/s2o1/emos_data/ecflow/ecflow 
-   
-   install_arg=install     
 fi
 
 # =======================================================================================
@@ -186,17 +196,42 @@ $BOOST_ROOT/bjam $TOOLSET $CXXFLAGS -d2 variant=$mode_arg $test_arg $install_arg
    
    
 # ============================================================================ 
-# Copy over release from c2a -> c2b
-#
+# Copy over release from ccb -> cca, or cca ->ccb, depending on the machine 
 # *Make* sure destination has a trailing '/.' otherwise you can end up renaming.
-# =============================================================================
-if [[ "$ARCH" = ibm_power7 ]] ; then 
+# ============================================================================
+if [[ "$ARCH" = cray ]] ; then 
 
    if [[ "$test_arg" = "" ]] ; then
       cd /usr/local/apps/ecflow
-      ecrcp -avr $ECFLOW_VERSION emos@c2b:/usr/local/apps/ecflow/.
+      
+      if [[ "$EC_CLUSTER" = ccb ]] ; then
+      
+      	 scp -r $ECFLOW_VERSION emos@cca:/usr/local/apps/ecflow/.
+      	 
+      elif [[ "$EC_CLUSTER" = cca ]] ; then
+      
+        scp -r $ECFLOW_VERSION emos@ccb:/usr/local/apps/ecflow/.
+        
+      fi
    fi
 fi  
+
+# ============================================================================ 
+# Copy over release from ecgb(redhat) -> sappa and sappb
+# *Make* sure destination has a trailing '/.' otherwise you can end up renaming.
+# ============================================================================
+if [[ "$ARCH" = "Linux" ]] || [[ "$ARCH" = "linux" ]] 
+then  
+   if [ "$OS_VERSION" = rhel6 ] ; then
+   
+      if [[ "$test_arg" = "" ]] ; then
+         # sappa/sappb(rhel63) are same as ecgb/redhat(rhel6)
+         cd /usr/local/apps/ecflow
+         scp -r $ECFLOW_VERSION emos@sappa:/usr/local/apps/ecflow/.
+         scp -r $ECFLOW_VERSION emos@sappb:/usr/local/apps/ecflow/.
+      fi
+   fi
+fi
 
 if [[ "$test_arg" = "" ]] ; then
    #==========================================================================

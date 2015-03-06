@@ -5,7 +5,7 @@
 # ======================================================================
 export WK=%WK%
 
-default_old_version=3.1.9
+default_old_version=4.0.0
       
 if [[ %SET_TO_TEST_SCRIPT% = true ]] ; then
    echo "Test only"
@@ -26,15 +26,21 @@ else
       fi
       
       echo $nick $host $port $version
-      /usr/local/apps/ecflow/$version/bin/ecflow_client $LOG --migrate > /var/tmp/ma0/ECFLOW_TEST/migration/$host.$port.def
+      set +e
       
-      # This will generate a file, with .mig extention
-      python Pyext/migrate/ecflow_migrate.py --d /var/tmp/ma0/ECFLOW_TEST/migration/$host.$port.def
+      /usr/local/apps/ecflow/$version/bin/ecflow_client $LOG --migrate > /var/tmp/ma0/ECFLOW_TEST/migration/$host.$port.def  
+      if [ "$?" -eq 0 ]; then  
+         # This will generate a file, with .mig extention
+         python Pyext/migrate/ecflow_migrate.py --d /var/tmp/ma0/ECFLOW_TEST/migration/$host.$port.def
+      fi
+      
+      set -e
+      
       
       # rm unused file, to stop test_migration from processing it.
       rm -rf /var/tmp/ma0/ECFLOW_TEST/migration/$host.$port.def
       
-   done < /usr/local/apps/ecflow/current/lib/servers
+   done < /usr/local/apps/ecflow/current/share/ecflow/servers
    
    # list directory contents
    ls -la /var/tmp/ma0/ECFLOW_TEST/migration/

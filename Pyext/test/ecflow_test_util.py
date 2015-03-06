@@ -33,23 +33,45 @@ def ecf_home(port):
 def get_parent_dir(file_path):
     return os.path.dirname(file_path)
 
-def get_workspace_dir():
+def get_root_source_dir():
     cwd = os.getcwd()
-    #print "get_workspace_dir from: " + cwd
+    #print "get_root_source_dir from: " + cwd
     while (1):
+        # Get to directory that has ecflow
         head, tail = os.path.split(cwd)
-        #print "tail:" + tail
+        #print "   tail:" + tail
         if tail.find("ecflow") != -1 :
-            return cwd
+            
+            # bjam, already at the source directory
+            if os.path.exists(cwd + "/VERSION.cmake"): 
+                #print "   Found VERSION.cmake in " + cwd
+                return cwd
+        
+            # in cmake, we may be in the build directory, hence we need to determine source directory
+            file = cwd + "/CTestTestfile.cmake"
+            print "   searching for " + file
+            if os.path.exists(file):
+                # determine path by looking into this file:
+                for line in open(file):
+                    ## Source directory: /tmp/ma0/clientRoot/workspace/working-directory/ecflow/Acore
+                    if line.find("Source directory"):
+                        tokens = line.split()
+                        if len(tokens) == 4:
+                            return tokens[3]
+                raise RuntimeError("ERROR could not find Source directory in CTestTestfile.cmake")
+            else:
+                raise RuntimeError("ERROR could not find file CTestTestfile.cmake in " + cwd)
+                
         cwd = head
     return cwd
+
 
 def log_file_path(port): return "./" + gethostname() + "." + port + ".ecf.log"
 def checkpt_file_path(port): return "./" + gethostname() + "." + port + ".ecf.check"
 def backup_checkpt_file_path(port): return "./" + gethostname() + "." + port + ".ecf.check.b"
 def white_list_file_path(port): return "./" + gethostname() + "." + port + ".ecf.lists"
 
-def clean_up(port):
+def clean_up_server(port):
     print "   clean_up " + port
     try: os.remove(log_file_path(port))
     except: pass
@@ -59,15 +81,15 @@ def clean_up(port):
     except: pass
     try: os.remove(white_list_file_path(port))  
     except: pass
-    if not debugging():
-        print "   Attempting to Removing ECF_HOME " + ecf_home(port)
-        try: 
-            shutil.rmtree(ecf_home(port),True)   # True means ignore errors 
-            print "   Remove OK" 
-        except: 
-            print "   Remove Failed" 
-            pass
-               
+    
+def clean_up_data(port):
+    print "   Attempting to Removing ECF_HOME " + ecf_home(port)
+    try: 
+        shutil.rmtree(ecf_home(port),True)   # True means ignore errors 
+        print "   Remove OK" 
+    except: 
+        print "   Remove Failed" 
+        pass
         
 # =======================================================================================
 class EcfPortLock(object):
@@ -140,7 +162,7 @@ class Server(object):
             self.the_port = "3152"
      
         # Only worth doing this test, if the server is running
-        # ON HPUX, have only one connection attempt, sometimes fails
+        # ON HPUX, having only one connection attempt, sometimes fails
         #ci.set_connection_attempts(1)     # improve responsiveness only make 1 attempt to connect to server
         #ci.set_retry_connection_period(0) # Only applicable when make more than one attempt. Added to check api.
         self.ci = Client("localhost", self.the_port)
@@ -149,40 +171,50 @@ class Server(object):
         try:
             print "Server:__enter__: About to ping localhost:" + self.the_port       
             self.ci.ping() 
-            print "------- Server all ready running *UNEXPECTED* ------"
+            print "   ------- Server all ready running *UNEXPECTED* ------"
         except RuntimeError, e:
-            print "------- Server *NOT* running as *EXPECTED* ------ " 
-            print "------- Start the server on port " + self.the_port + " ---------"  
-            clean_up(str(self.the_port))
+            print "   ------- Server not running as *EXPECTED* ------ " 
+            print "   ------- Start the server on port " + self.the_port + " ---------"  
+            clean_up_server(str(self.the_port))
+            clean_up_data(str(self.the_port))
     
             server_exe = File.find_server();
             assert len(server_exe) != 0, "Could not locate the server executable"
         
             server_exe += " --port=" + self.the_port + " --ecfinterval=4 &"
-            print "TestClient.py: Starting server ", server_exe
+            print "   TestClient.py: Starting server ", server_exe
             os.system(server_exe) 
         
-            print "allow time for server to start"
+            print "   Allow time for server to start"
             if self.ci.wait_for_server_reply() :
-                print "Server has started"
+                print "   Server has started"
             else:
-                print "Server failed to start after 60 second !!!!!!"
+                print "   Server failed to start after 60 second !!!!!!"
                 assert False , "Server failed to start after 60 second !!!!!!"
             
-        print "run the tests" 
+        print "   Run the tests, leaving Server:__enter__:" 
 
         # return the Client, that can call to the server
         return self.ci
     
     def __exit__(self,exctype,value,tb):
-        print "Server:__exit__: Kill the server, clean up log file, check pt files and lock files, ECF_HOME"
-        if not debugging():
-            print "   Terminate server"
-            self.ci.terminate_server()  
-            print "   Terminate server OK"
-            clean_up(str(self.the_port))
-            print "   Remove lock file"
-            self.lock_file.remove(self.the_port)
+        print "   Server:__exit__: Kill the server, clean up log file, check pt files and lock files, ECF_HOME"
+        print "   exctype:==================================================="
+        print exctype
+        print "   value:=====================================================" 
+        print value
+        print "   tb:========================================================"; 
+        print tb
+        print "   Terminate server ===================================================="
+        self.ci.terminate_server()  
+        print "   Terminate server OK ================================================="
+        print "   Remove lock file"
+        self.lock_file.remove(self.the_port)
+        clean_up_server(str(self.the_port))
+        
+        # Do not clean up data, if an assert was raised. This allow debug
+        if exctype == None:
+            clean_up_data(str(self.the_port))
         return False
         
   

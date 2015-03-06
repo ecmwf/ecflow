@@ -1,26 +1,6 @@
-************************************************************
- VERY VERY VERY IMPORTANT:
- Pre-announce release, because:
-   a/ User support need to set up the modules on AIX
-   b/ Daniel needs to pre-test it works on all other linux flavours
-   c/ For those people who use current LINK, will be hosed
-      They need warning and chance to prepare
-   d/ For those people using a *FIXED* release, make sure
-      you announce any old version that are to be deleted
-   e/ Announce how they will migrate from 1 version to another
-   f/ CHECK https://software.ecmwf.int/wiki/display/ECFLOW/Home
-      Make sure fixed bugs are recorded/closed.
- ************************************************************
-
-Intra- net
-=================================================================
-OLD Intranet site no longer active::
-
-   http://intra.ecmwf.int/metapps/manuals/ecflow
-
-
 Process
 ==================================================================
+
 0/ **** Check we are not in a high risk period ???
 
 0/ **** DO ***NOT*** switch current link ****************
@@ -34,32 +14,10 @@ Process
    **** IDEALLY we need to educate member states *NOT* to use 
    ****     /usr/local/apps/ecflow/current  
 
-0/ Update Documentation
-   
-  - https://software.ecmwf.int/wiki/display/ECFLOW/Change+History
-
-  - Need automated way:
-    - Just need to update python API.
-    - cd $WK/Doc/online; make clean; make html
+----------------------------------------------------------------------
+0/ Inform user support, allows user support to test rpm
     
-0/ CRAY: If you build on cct-login, then copy build to cca.
-
-         scp -r 4.0.2 emos@cca:/usr/local/apps/ecflow 
-      
-   READHAT: If we built on ecgb/readhat we can cop release to sappa/sappab 
-  
-         scp -r 4.0.2 emos@sappa:/usr/local/apps/ecflow/.
-         scp -r 4.0.2 emos@sappb:/usr/local/apps/ecflow/.
-      
-    IBM:  copy ecflow onto c2b please do the following
- 
-        cd /usr/local/apps/ecflow
-        ecrcp -avr 4.0.2 emos@c2b:/usr/local/apps/ecflow/.
- 
-
-*Make* sure destination has a trailing '/.' otherwise you
-can end up renaming.
-
+   
 0/ *Before* each release, make sure the ecflow tar file is
    copied to $SCRATCH and inform Daniel. This will allow
    him to make rpm packages, build on other linux flavours.
@@ -70,7 +28,66 @@ can end up renaming.
    - ** Check the size of tar file **, ensure that have not included redundant files.
    <Inform Daniel>
    
-0/ Inform user support so that they can update the module functionality
+0/ git flow release start 4.0.7
+
+   *Push* branch onto stash, otherwise the we can not pull, from the remote machines
+   - In eclipse, you *may* have to push this branch first
+     Team->Push Branch
+     *otherwise* the option Team->Push Upstream  may well be greyed out.
+
+0/ Update ECFLOW_GIT_BRANCH to "release/4.0.7" in the nightly build.py
+
+0/ For a PREPIFS release change file:
+     /usr/local/apps/ecflow/.modulerc
+   This file defines the mapping to symbol, i.e like default,new,old, prepifs
+   
+0/ Update Documentation
+   
+  - https://software.ecmwf.int/wiki/display/ECFLOW/Change+History
+
+  - Need automated way:
+    - Just need to update python API.
+    - cd $WK/Doc/online; make clean; make html
+    
+    Sometimes this crashes, Just re-build Pyext, and try again.
+       rm -rf Pyext/bin
+       bjam -j8
+    
+0/ CRAY: If you build on cct-login, then copy build to cca/ccb
+
+         cd /usr/local/apps/ecflow
+         scp -r 4.0.7 emos@cca:/usr/local/apps/ecflow/.
+      
+   READHAT: If we built on ecgb/redhat we can copy release to sappa/sappab 
+  
+         scp -r 4.0.7 emos@sappa:/usr/local/apps/ecflow/.
+         scp -r 4.0.7 emos@sappb:/usr/local/apps/ecflow/.
+      
+   VIRTUAL Machines: These should treated like regular machines. 
+         - These are based on opensuse113, hence we need top copy over exe for this
+         
+         - ssh opensuse113/lxab, su emos;
+         - scp -r 4.0.7 emos@<virtual machine>:/usr/local/apps/ecflow/.
+         
+         
+  *Make* sure destination has a trailing '/.' otherwise you
+  can end up renaming.
+
+0/ Inform RD, ask them to provide the list of virtual machines. 
+   where they want the new release installed to:
+   virtual machines are opensuse112, hence we use lxab(opensuse113) to copy from:
+   
+   ssh rdx@<hostname>
+   
+   i.e  ssh rdx@vecfrdda1
+   
+   The list of all virtual machines, versions and port numbers is:
+   
+        ~rdx/ecflow/servers.config
+        
+   - ssh opensuse113/lxab, su emos;
+   - scp -r 4.0.7 emos@vecfrdda1:/usr/local/apps/ecflow/.
+        
 
 0/ Update WIKI:
    This announces the changes in the release
@@ -80,7 +97,7 @@ can end up renaming.
    appear in the top half of the latest news
 
 0/ Update release:
-   ** Go to "Tools->Attachments", then load the gzip file. *****
+   ** Go to "Tools->Attachments", then load the gzip file:  Go to the bottom of the page *****
    0 release: This uploads the release zip file: making it accessible to member states
    http://software.ecmwf.int/wiki/display/ECFLOW/Releases
    
@@ -95,32 +112,15 @@ can end up renaming.
    mail group:  ecflow_int@lists.ecmwf.int 
    Use: Release-Anouncement.txt
   
-0/ Tag the release
-   This should now be automatic when using git flow:
-   i.e 
-       git flow start release 4.0.1
-       git flow finish release 4.0.1
-   Alternatively use:
-      git tag -a <release-number> -m "ecflow release-number"
-      git tag
-      git show <release number>
-   
-
-   
-ecflow users group   ecflow_int@lists.ecmwf.int  
-=====================================================================
-Bahra Avi
-Bonet, Axel
-Hodkinson, John
-Hofstadler, Alfred
-
-Radnoti, Gabor
-Haseler, Jan
-
-Modigliani, Umberto
-Weihrauch, Christian
-Santoalla, Daniel Varel
-Burton Paul
-Dando Paul
-Lucas, Dominique
-
+0/ Tag the release, This should now be automatic when using git flow:
+       git flow release finish 4.0.7
+  
+0/ AFTER the release increment the version number in $WK/VERSION.cmake
+   THEN, run:
+     sh -x $WK/cmake.sh debug
+     
+     This will update the version number for $WK/ACore/src/ecflow_version.h
+     This file is included in $WK/ACore/src/Version.cpp
+     
+     Then check this file in for, for the other platforms.
+  
