@@ -210,7 +210,7 @@ BOOST_AUTO_TEST_CASE( test_server_config_file )
          BOOST_CHECK_MESSAGE(p.second == fs::current_path().string(),"for ECF_HOME expected " << fs::current_path().string() << " but found " << p.second);
          continue;
       }
-      if (string("ECF_PORT") == p.first) {
+      if (string("ECF_PORT") == p.first && !getenv("ECF_PORT")) {
          BOOST_CHECK_MESSAGE(p.second == Str::DEFAULT_PORT_NUMBER(),"for ECF_PORT expected " <<  Str::DEFAULT_PORT_NUMBER() << " but found " << p.second);
          continue;
       }
