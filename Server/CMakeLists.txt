@@ -64,14 +64,13 @@ SET_TARGET_PROPERTIES(ecflow_server PROPERTIES
                           
 # ================================================================================                         
 # TEST
-ecbuild_add_test( TARGET   u_server
+ecbuild_add_test( TARGET       u_server
                   BOOST  
-                  SOURCES  test/TestServerEnvironment.cpp 
-                           test/TestServer1.cpp
-                  LIBS     libserver  
+                  SOURCES      test/TestServerEnvironment.cpp 
+                               test/TestServer1.cpp
+                  LIBS         libserver  
+                  TEST_DEPENDS u_base
               )
-
-set_property(TEST u_server APPEND PROPERTY DEPENDS u_base)
 
 # ===================================================================
 # install

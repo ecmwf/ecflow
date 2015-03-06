@@ -263,6 +263,7 @@ ecbuild_add_test( TARGET  test-view
                   SOURCES   test/TestRunner.cpp test/TestView.cpp
                   LIBS      libharness    
                   INCLUDES  ../Test/src
+                  TEST_DEPENDS s_test_zombies
                 )
                           
 # ===================================================================

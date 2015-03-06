@@ -92,9 +92,8 @@ ecbuild_add_test( TARGET    s_client
                   LIBS      libclient 
                   INCLUDES  ../ANode/test
                             ../Base/test 
+                  TEST_DEPENDS u_base
                  )
-
-set_property(TEST s_client APPEND PROPERTY DEPENDS u_base)
 
 # 
 # Simple stand alone test
@@ -105,6 +104,7 @@ ecbuild_add_test( TARGET   perf_test_large_defs
                   LIBS     libclient 
                   INCLUDES ../ANode/test
                            ../Base/test 
+                  TEST_DEPENDS u_base
                 )
                
 # 
@@ -116,6 +116,7 @@ ecbuild_add_test( TARGET test_migration
                   LIBS     libclient 
                   INCLUDES ../ANode/test
                            ../Base/test 
+                  TEST_DEPENDS u_base
                 )
 
 # ===================================================================

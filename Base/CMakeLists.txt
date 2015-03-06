@@ -96,13 +96,12 @@ list( APPEND test_srcs
    test/TestSSyncCmd.cpp
    test/TestSSyncCmdOrder.cpp
 )
-ecbuild_add_test( TARGET    u_base
+ecbuild_add_test( TARGET       u_base
                   BOOST
-                  SOURCES   ${test_srcs}
-                  LIBS      base       
-                            pthread 
-                  INCLUDES ../ANode/test
+                  SOURCES      ${test_srcs}
+                  LIBS         base       
+                               pthread 
+                  INCLUDES     ../ANode/test
+                  TEST_DEPENDS u_aparser
                   )
-
-set_property(TEST u_base APPEND PROPERTY DEPENDS u_aparser)
                   

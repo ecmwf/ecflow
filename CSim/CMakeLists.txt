@@ -36,6 +36,7 @@ ecbuild_add_test( TARGET   c_csim
                   LIBS     libsimu        
                            pthread 
                   INCLUDES ../ANode/test
+                  TEST_DEPENDS u_base
                  )
 
 ecbuild_add_test( TARGET    c_csim_single
@@ -44,8 +45,6 @@ ecbuild_add_test( TARGET    c_csim_single
                   LIBS      libsimu   
                             pthread 
                   INCLUDES  ../ANode/test
-                   )
-
-set_property(TEST c_csim APPEND PROPERTY DEPENDS u_base)
-set_property(TEST c_csim_single APPEND PROPERTY DEPENDS u_base)
+                  TEST_DEPENDS u_base
+                 )
                    

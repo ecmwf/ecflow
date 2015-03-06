@@ -54,21 +54,22 @@ list( APPEND test_srcs
 ecbuild_add_test( TARGET s_test
                   BOOST
                   SOURCES  ${test_srcs}
-                  LIBS     libharness 
+                  LIBS     libharness
+                  TEST_DEPENDS s_client
                 )
-set_property(TEST s_test APPEND PROPERTY DEPENDS s_client)
 
 
 ecbuild_add_test( TARGET  s_test_zombies
                   BOOST
                   SOURCES   ./TestZombies.cpp
                   LIBS      libharness 
+                  TEST_DEPENDS s_test
                 )
-set_property(TEST s_test_zombies APPEND PROPERTY DEPENDS s_test)
 
 # This test runs forever, hence not suitable for unit test.                          
 #ecbuild_add_test( TARGET  singletest
 #                  BOOST
 #                  SOURCES   ./TestSingle.cpp
 #                  LIBS      libharness 
+#                  TEST_DEPENDS s_client
 #               )

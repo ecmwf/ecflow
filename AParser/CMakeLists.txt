@@ -27,13 +27,13 @@ list( APPEND test_srcs
    test/TestParser.cpp
    test/TestVariableParsing.cpp
 )
-ecbuild_add_test( TARGET   u_aparser
+ecbuild_add_test( TARGET       u_aparser
                   BOOST
-                  SOURCES  ${test_srcs}
-                  LIBS     libparser 
+                  SOURCES      ${test_srcs}
+                  LIBS         libparser 
+                  TEST_DEPENDS u_anode
                  )
 
-set_property(TEST u_aparser APPEND PROPERTY DEPENDS u_anode)
 
 #
 # Tests parser for a single defs file but with a range of tests
@@ -69,5 +69,3 @@ ecbuild_add_test( TARGET   perf_aparser_only
                   INCLUDES ../ANode/test
                            ${Boost_INCLUDE_DIRS} 
                  )
-
- 

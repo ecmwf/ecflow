@@ -56,18 +56,17 @@ list( APPEND test_srcs
 
 ecbuild_add_test(TARGET  u_anode
                  BOOST
-                 SOURCES  ${test_srcs}
-                 LIBS     node  
+                 SOURCES      ${test_srcs}
+                 LIBS         node  
+                 TEST_DEPENDS u_anattr
                  )
 
 
 list( APPEND stest_srcs   test/TestSingleExprParse.cpp )                    
-ecbuild_add_test( TARGET  u_anode_stest
+ecbuild_add_test( TARGET       u_anode_stest
                   BOOST
-                  SOURCES   ${stest_srcs}
-                  LIBS      node 
+                  SOURCES      ${stest_srcs}
+                  LIBS         node 
+                  TEST_DEPENDS u_anattr
                  )
-
-set_property(TEST u_anode APPEND PROPERTY DEPENDS u_anattr)
-set_property(TEST u_anode_stest APPEND PROPERTY DEPENDS u_anattr)
 
