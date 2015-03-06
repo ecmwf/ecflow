@@ -72,7 +72,7 @@ foreach( test ${tests} )
                       ENVIRONMENT "PYTHONPATH=${CMAKE_BINARY_DIR}/lib" )
 endforeach()
 
-set_property(TEST py_s_TestClientApi      APPEND PROPERTY DEPENDS s_client)
+set_property(TEST py_s_TestClientApi      APPEND PROPERTY DEPENDS s_test)
 set_property(TEST py_s_TestPythonChildApi APPEND PROPERTY DEPENDS py_s_TestClientApi)
 
 ecbuild_add_test( TARGET py_u_TestMigrate
