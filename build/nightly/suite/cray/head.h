@@ -59,7 +59,7 @@ export PATH=/usr/local/apps/python/current/bin:$PATH
 # Hack for CRAY, for some reason in batch mode in can do the equivalent of mkdir -p
 # The test fails for both gnu and intel compilers
 # See file: ACore/test/TestFile.cpp
-export CRAY_BATCH_SKIP_test_create_missing_directories=1
+export ECFLOW_CRAY_BATCH=1
 
 # ===================================================================================
 # Load the right environment, default is always cray
