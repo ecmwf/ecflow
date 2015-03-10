@@ -370,6 +370,7 @@ void ServerEnvironment::variables(std::vector<std::pair<std::string,std::string>
 
 bool ServerEnvironment::reloadWhiteListFile(std::string& errorMsg)
 {
+   if (debug()) cout << "ServerEnvironment::reloadWhiteListFile:(" << ecf_white_list_file_ << ") CWD(" << fs::current_path().string() << ")\n";
 	if (ecf_white_list_file_.empty()) {
 		errorMsg += "The ECF_LISTS file ";
 		errorMsg += ecf_white_list_file_;
@@ -379,7 +380,7 @@ bool ServerEnvironment::reloadWhiteListFile(std::string& errorMsg)
 	if (!fs::exists(ecf_white_list_file_)) {
 		errorMsg += "The ECF_LISTS file ";
 		errorMsg += ecf_white_list_file_;
-		errorMsg += " does not exist.";
+      errorMsg += " does not exist. Server CWD : " + fs::current_path().string();
 		return false;
 	}
 
@@ -390,6 +391,8 @@ bool ServerEnvironment::reloadWhiteListFile(std::string& errorMsg)
 
  		validUsers_.clear();
  		validUsers_ = validUsers;
+
+ 	   if (debug())  std::cout << dump_valid_users() << "\n";
  		return true;
  	}
  	return false;
