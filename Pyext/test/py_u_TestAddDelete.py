@@ -309,6 +309,10 @@ if __name__ == "__main__":
     ts = ecflow.TimeSeries(start, finish, incr, True)  # True means relative to suite start
     cron.set_time_series(ts)
 
+    cron0 = ecflow.Cron()
+    cron0.set_week_days([0, 1, 2, 3, 4, 5 ])
+    cron0.set_time_series(1, 30) # default relative = false, added in release 4.0.7
+
     cron1 = ecflow.Cron()
     cron1.set_week_days([0, 1, 2, 3, 4, 5, 6 ])
     cron1.set_time_series(1, 30, True)
