@@ -237,7 +237,7 @@ BOOST_AUTO_TEST_CASE( test_create_missing_directories )
 {
    cout << "ACore:: ...test_create_missing_directories";
 
-   // This test FAIL's on the cray in BATCH mode, but passes in interactive mode.
+   // This test FAIL's randomly on the cray in BATCH mode, but passes in interactive mode.
    if (getenv("ECFLOW_CRAY_BATCH")) {
       cout << " **** SKIPPING test, until HPC team can  fix File::createMissingDirectories.(like mkdir -p)  *****\n";
       return;
