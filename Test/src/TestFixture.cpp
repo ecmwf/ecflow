@@ -324,7 +324,7 @@ std::string TestFixture::pathToLogFile()
 	if ( pathToRemoteLog_p == NULL) {
 		cout << "TestFixture::pathToLogFile(): assert failed\n";
 		cout << "Please set ECF_LOG. This needs to be set to path to the log file\n";
-		cout << "that can be see by the client and server\n";
+		cout << "that can be seen by the client and server\n";
 		assert(false);
   	}
 	return std::string(pathToRemoteLog_p);
