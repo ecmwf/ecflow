@@ -1,3 +1,3 @@
-suite suiteName
-   date 10.10.2009   # date should not be allowed on a suite, ECFLOW-106 Times/Dates attributes attached to suite node 
+suite a
+   date 10.10.2009   # date should not be allowed on a suite, see SUP-1198, ECFLOW-106 Times/Dates attributes attached to suite node 
 endsuite

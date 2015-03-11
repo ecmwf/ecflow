@@ -337,6 +337,7 @@ private:
 
 //================================================================================
 
+// See ECFLOW-106, and SUP-1198, why we don't allow time,today,date,day ate the suite level.
 class SuiteParser : public Parser {
 public:
 	SuiteParser(DefsStructureParser* p) : Parser(p), started_(false)
@@ -351,9 +352,7 @@ public:
 	   addParser( new InlimitParser(p) );
 	   addParser( new RepeatParser(p) );
 	   addParser( new LateParser(p) );
-	   addParser( new DateParser(p) );
 	   addParser( new CronParser(p) );
-	   addParser( new DayParser(p) );
 	   addParser( new AutoCancelParser(p) );
 	   addParser( new VerifyParser(p) );
 	   addParser( new ZombieAttrParser(p) );
