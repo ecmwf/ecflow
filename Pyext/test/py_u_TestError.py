@@ -267,6 +267,51 @@ if __name__ == "__main__":
     assert test_passed,"duplicate suite test failed"   
 
     # =================================================================================
+    test_passed = False
+    try:
+        defs = Defs()
+        defs.add_suite("1").add_today("00:30")
+    except RuntimeError, e : 
+        test_passed = True
+        pass
+    assert test_passed,"Adding today at the suite level should fail"   
+    print "check adding today at the suite level: RuntimeError: ",e
+
+    # =================================================================================
+    test_passed = False
+    try:
+        defs = Defs()
+        defs.add_suite("1").add_time("00:30")
+    except RuntimeError, e : 
+        test_passed = True
+        pass
+    assert test_passed,"Adding time at the suite level should fail"    
+    print "check adding time at the suite level: RuntimeError: ",e
+
+    # =================================================================================
+    test_passed = False
+    try:
+        defs = Defs()
+        defs.add_suite("1").add_date(1,1,2016)
+    except RuntimeError, e : 
+        test_passed = True
+        pass
+    assert test_passed,"Adding date at the suite level should fail"    
+    print "check adding date at the suite level: RuntimeError: ",e
+
+    # =================================================================================
+    test_passed = False
+    try:
+        defs = Defs()
+        defs.add_suite("1").add_day("monday")
+    except RuntimeError, e : 
+        test_passed = True
+        pass
+    assert test_passed,"Adding day at the suite level should fail"    
+    print "check adding day at the suite level: RuntimeError: ",e
+
+
+    # =================================================================================
     print "check duplicate family not allowed"
     test_passed = False
     try:
