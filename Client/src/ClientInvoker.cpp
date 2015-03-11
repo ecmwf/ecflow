@@ -1092,7 +1092,7 @@ std::string ClientInvoker::find_free_port(int seed_port_number, bool debug)
          the_port++;
       }
       catch ( std::runtime_error& e) {
-         if (debug) cout << "   Found free port " << free_port << "\n";
+         if (debug) cout << "   Found free port " << free_port << "\n" << e.what() << "\n";
          break;
       }
    }
