@@ -41,6 +41,9 @@ fi
 # -DCMAKE_PYTHON_INSTALL_PREFIX should *only* used when using python setup.py (CMAKE_PYTHON_INSTALL_TYPE=setup)
 #   *AND* for testing python install to local directory
 #
+# Use:DCMAKE_CXX_FLAGS to set compiler flags 
+#            -DCMAKE_CXX_FLAGS="-ftemplate-depth-128  -finline-functions -Wno-inline -Wall -fPIC  -DNDEBUG" \
+
 
 cmake ../.. -DCMAKE_MODULE_PATH=$WK/../ecbuild/cmake \
             -DCMAKE_BUILD_TYPE=$cmake_build_type \

@@ -16,17 +16,18 @@ include_directories(
                     )
       
 # INCLUDES here is for external includes           
-ecbuild_add_library( TARGET   ecflow
-                     TYPE     MODULE
-                     SOURCES  ${srcs}
+ecbuild_add_library( TARGET    ecflow
+                     TYPE      MODULE
+                     SOURCES   ${srcs}
 					 CONDITION PYTHONLIBS_FOUND
-                     LIBS     libclient libsimu base libparser node nodeattr core
-                              ${Boost_PYTHON_LIBRARY} 
-                              ${PYTHON_LIBRARIES}
+                     LIBS      libclient libsimu base libparser node nodeattr core
+                               ${PYTHON_LIBRARIES}
                      INCLUDES 
-                            ${Boost_INCLUDE_DIRS}
-                            ${PYTHON_INCLUDE_DIRS} 
+                               ${Boost_INCLUDE_DIRS}
+                               ${PYTHON_INCLUDE_DIRS} 
                     )
+                    
+target_link_libraries(ecflow debug ${Boost_PYTHON_LIBRARY_DEBUG}  ${Boost_PYTHON_LIBRARY_RELEASE})
 
 #
 # Override default behaviour that add RPATHS during install

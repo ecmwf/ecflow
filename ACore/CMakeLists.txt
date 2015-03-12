@@ -15,12 +15,13 @@ ecbuild_add_library( TARGET core
                      SOURCES  ${srcs}
                      INCLUDES src
                               ${Boost_INCLUDE_DIRS} 
-                     LIBS     ${Boost_SERIALIZATION_LIBRARY}
-                              ${Boost_SYSTEM_LIBRARY}
-                              ${Boost_FILESYSTEM_LIBRARY}
-                              ${Boost_DATE_TIME_LIBRARY}  
                     )
 
+target_link_libraries(core debug ${Boost_SERIALIZATION_LIBRARY_DEBUG}   ${Boost_SERIALIZATION_LIBRARY_RELEASE}
+                           debug ${Boost_SYSTEM_LIBRARY_DEBUG}          ${Boost_SYSTEM_LIBRARY_RELEASE}  
+                           debug ${Boost_FILESYSTEM_LIBRARY_DEBUG}      ${Boost_FILESYSTEM_LIBRARY_RELEASE}
+                           debug ${Boost_DATE_TIME_LIBRARY_DEBUG}       ${Boost_DATE_TIME_LIBRARY_RELEASE})                
+                   
 #
 # By use'ing BOOST tag we indicate this test should link with boost test libs
 #

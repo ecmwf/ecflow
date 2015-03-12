@@ -17,7 +17,6 @@ ecbuild_add_library( TARGET libserver
                      TYPE     STATIC
                      SOURCES  ${srcs}
                      LIBS     base libparser node nodeattr core
-                              ${Boost_THREAD_LIBRARY}
                               pthread
                      INCLUDES src
                               ../ACore/src 
@@ -28,6 +27,8 @@ ecbuild_add_library( TARGET libserver
                               ../Base/src/cts
                               ../Base/src/stc
                      )
+
+target_link_libraries(libserver debug ${Boost_THREAD_LIBRARY_DEBUG} ${Boost_THREAD_LIBRARY_RELEASE})
 
 # =======================================================
 # EXE ecflow_server

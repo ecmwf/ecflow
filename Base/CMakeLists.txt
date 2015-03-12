@@ -67,7 +67,6 @@ ecbuild_add_library( TARGET   base
                      TYPE     STATIC
                      SOURCES  ${srcs}
                      LIBS     libparser node nodeattr core 
-                              ${Boost_PROGRAM_OPTIONS_LIBRARY}    
                      INCLUDES src
                               ../ACore/src 
                               ../ANattr/src
@@ -78,6 +77,7 @@ ecbuild_add_library( TARGET   base
                               ../Base/src/stc
                      )
 
+target_link_libraries(base debug ${Boost_PROGRAM_OPTIONS_LIBRARY_DEBUG}   ${Boost_PROGRAM_OPTIONS_LIBRARY_RELEASE})
  
 list( APPEND test_srcs
    test/TestAlterCmd.cpp
