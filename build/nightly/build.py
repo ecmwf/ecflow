@@ -81,8 +81,6 @@ def add_localhost_clang_variables( localhost_clang ):
     add_local_job_variables( localhost_clang )
 
 def add_remote_linux_64_variables( linux_64 ): 
-    linux_64.add_variable("ECF_KILL_CMD","rsh %REMOTE_HOST% \"kill -15 %ECF_RID%\"") 
-    linux_64.add_variable("ECF_JOB_CMD","rsh %REMOTE_HOST% -l %USER%  '%ECF_JOB% > %ECF_JOBOUT%  2>&1'")
     linux_64.add_variable("COMPILER_TEST_PATH","gcc-4.3/$mode")
     linux_64.add_variable("COMPILER_VERSION","gcc-4.3")
     linux_64.add_variable("TOOLSET","gcc")
@@ -104,8 +102,6 @@ def add_remote_linux_64_lxop_variables( linux_64 ):
     linux_64.add_variable("ECF_LOGPORT","9316")
     
 def add_remote_linux_64_lxc_variables( linux_64 ): 
-    linux_64.add_variable("ECF_KILL_CMD","ssh  %USER%@%REMOTE_HOST% \"kill -15 %ECF_RID%\"") 
-    linux_64.add_variable("ECF_JOB_CMD","ssh  %USER%@%REMOTE_HOST% 'source ~/.profile; %ECF_JOB% > %ECF_JOBOUT%  2>&1'")
     linux_64.add_variable("COMPILER_TEST_PATH","gcc-4.9.1/$mode")
     linux_64.add_variable("COMPILER_VERSION","gcc-4.9.1")
     linux_64.add_variable("TOOLSET","gcc")
@@ -113,8 +109,6 @@ def add_remote_linux_64_lxc_variables( linux_64 ):
     linux_64.add_variable("NO_OF_CORES","8")
 
 def add_remote_linux_64_intel_variables( linux_64 ): 
-    linux_64.add_variable("ECF_KILL_CMD","rsh %REMOTE_HOST% \"kill -15 %ECF_RID%\"") 
-    linux_64.add_variable("ECF_JOB_CMD","rsh %REMOTE_HOST% -l %USER%  '%ECF_JOB% > %ECF_JOBOUT%  2>&1'")
     linux_64.add_variable("COMPILER_TEST_PATH","intel-linux/$mode")
     linux_64.add_variable("COMPILER_VERSION","intel-linux")
     linux_64.add_variable("TOOLSET","intel")  # intel-linux
@@ -153,8 +147,6 @@ def add_linux_64_intel_variables( linux_64_intel ):
     linux_64_intel.add_variable("SITE_CONFIG","$WK/build/site_config/site-config-Linux64-intel.jam")
 
 def add_remote_opensuse113_variables( opensuse113 ):
-    opensuse113.add_variable("ECF_KILL_CMD","ssh  %USER%@%REMOTE_HOST% \"kill -15 %ECF_RID%\"") 
-    opensuse113.add_variable("ECF_JOB_CMD","ssh  %USER%@%REMOTE_HOST% 'source ~/.profile; %ECF_JOB% > %ECF_JOBOUT%  2>&1'")
     opensuse113.add_variable("COMPILER_TEST_PATH","gcc-4.5/$mode")
     opensuse113.add_variable("COMPILER_VERSION","gcc-4.5")
     opensuse113.add_variable("TOOLSET","gcc")
@@ -169,8 +161,6 @@ def add_opensuse113_variables( opensuse113 ):
     opensuse113.add_variable("SITE_CONFIG","$WK/build/site_config/site-config-Linux64.jam")
 
 def add_remote_opensuse131_variables( opensuse131 ):
-    opensuse131.add_variable("ECF_KILL_CMD","ssh  %USER%@%REMOTE_HOST% \"kill -15 %ECF_RID%\"") 
-    opensuse131.add_variable("ECF_JOB_CMD","ssh  %USER%@%REMOTE_HOST% 'source ~/.profile; %ECF_JOB% > %ECF_JOBOUT%  2>&1'")
     opensuse131.add_variable("COMPILER_TEST_PATH","gcc-4.8/$mode")
     opensuse131.add_variable("COMPILER_VERSION","gcc-4.8")
     opensuse131.add_variable("TOOLSET","gcc")
@@ -309,16 +299,14 @@ def add_cray_variables( cray ):
 
     
 def add_remote_redhat_variables( redhat ):
-    redhat.add_variable("ECF_KILL_CMD","ssh  %USER%@%REMOTE_HOST% \"kill -15 %ECF_RID%\"") 
-    redhat.add_variable("ECF_JOB_CMD","ssh  %USER%@%REMOTE_HOST% 'source ~/.profile; %ECF_JOB% > %ECF_JOBOUT%  2>&1'")
     redhat.add_variable("COMPILER_TEST_PATH","gcc-4.4.7/$mode")
     redhat.add_variable("COMPILER_VERSION","gcc-4.4.7")
     redhat.add_variable("TOOLSET","gcc")
     redhat.add_variable("BOOTSTRAP_TOOLSET","gcc")
     redhat.add_variable("REMOTE_COPY","scp")
+    redhat.add_variable("REMOTE_HOST","ecgb")
 
 def add_redhat_variables( redhat ):
-    redhat.add_variable("REMOTE_HOST","ecgb")
     redhat.add_variable("ROOT_WK","/vol/ecf/redhat")
     redhat.add_variable("BOOST_DIR","/vol/ecf/redhat/boost")
     redhat.add_variable("ARCH","redhat")
@@ -326,15 +314,15 @@ def add_redhat_variables( redhat ):
     redhat.add_variable("CUSTOM_BJAM_ARGS","c++-template-depth=512")
  
 def add_remote_opensuse103_variables( opensuse103 ):
-    opensuse103.add_variable("ECF_KILL_CMD","rsh %REMOTE_HOST% \"kill -15 %ECF_RID%\"") 
-    opensuse103.add_variable("ECF_JOB_CMD","rsh %REMOTE_HOST% -l %USER%  '%ECF_JOB% > %ECF_JOBOUT%  2>&1'")
+    opensuse103.add_variable("REMOTE_HOST","opensuse103")
+    #opensuse103.add_variable("ECF_KILL_CMD","rsh %REMOTE_HOST% \"kill -15 %ECF_RID%\"") 
+    #opensuse103.add_variable("ECF_JOB_CMD","rsh %REMOTE_HOST% -l %USER%  '%ECF_JOB% > %ECF_JOBOUT%  2>&1'")
     opensuse103.add_variable("COMPILER_TEST_PATH","gcc-4.2.1/$mode")
     opensuse103.add_variable("COMPILER_VERSION","gcc-4.2.1")
     opensuse103.add_variable("TOOLSET","gcc")
     opensuse103.add_variable("BOOTSTRAP_TOOLSET","gcc")
 
 def add_opensuse103_variables( opensuse103 ):
-    opensuse103.add_variable("REMOTE_HOST","opensuse103")
     opensuse103.add_variable("ROOT_WK","/vol/ecf/opensuse103")
     opensuse103.add_variable("BOOST_DIR","/vol/ecf/opensuse103/boost")
     opensuse103.add_variable("ARCH","opensuse103")
@@ -704,6 +692,9 @@ def add_suite_variables( suite ):
     suite.add_variable("BUILD_ECFLOWVIEW","true")
     suite.add_variable("ECFLOW_GIT_BRANCH","develop")  # when makeing a relase switch to release/<release version>, otherwise develop
     suite.add_variable("ECBUILD_GIT_BRANCH","develop")   
+    suite.add_variable("ECF_KILL_CMD","ssh  %USER%@%REMOTE_HOST% \"kill -15 %ECF_RID%\"") 
+    suite.add_variable("ECF_JOB_CMD","ssh  %USER%@%REMOTE_HOST% 'source ~/.profile; %ECF_JOB% > %ECF_JOBOUT%  2>&1'")
+
 
     # automatically fob all zombies when compiling ecflow 
     child_list = []
@@ -763,17 +754,19 @@ with defs.add_suite("suite") as suite:
     
         git_pull_ecflow = build.add_task("git_pull_ecflow")
         git_pull_ecflow.add_variable("ARCH","opensuse113")
-        git_pull_ecflow.add_variable("LOCAL_HOST",os.uname()[1]) # run this locally
+        add_local_job_variables(git_pull_ecflow)  # run this locally
+        
         git_pull_ecbuild = build.add_task("git_pull_ecbuild")
         git_pull_ecbuild.add_variable("ARCH","opensuse113")
-        git_pull_ecbuild.add_variable("LOCAL_HOST",os.uname()[1]) # run this locally
+        add_local_job_variables(git_pull_ecbuild)  # run this locally
 
         tar_fam = build.add_family("tar")
         tar_fam.add_trigger("git_pull_ecflow == complete and git_pull_ecbuild == complete")
     
         create_tar = tar_fam.add_task("create_tar")
         create_tar.add_variable("ARCH","opensuse113")
-    
+        add_local_job_variables(create_tar)  # run this locally
+
         with build.add_family("local") as local:
             build_localhost( local )
             build_localhost_cmake( local )
