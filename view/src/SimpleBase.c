@@ -368,7 +368,7 @@ static void Destroy(SimpleBaseWidget w)
 {
 	Widget clip,scroll,ww;
 
-	printf("Destroy(SimpleBaseWidget w)\n");
+	//printf("Destroy(SimpleBaseWidget w)\n");
 
 	NodeReset((Widget)w);
 
