@@ -110,6 +110,9 @@ simple_node::simple_node(host& h,ecf_node* n) : node(h,n)
 					      , old_tryno_(-1)
 					      , old_flags_(-1)
 {
+   old_flags_ = flags();
+   old_status_ = status();
+   old_tryno_ = tryno();
 }
 
 const int kPixSize = 16;
