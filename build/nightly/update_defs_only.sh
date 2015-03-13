@@ -4,10 +4,12 @@
 # a/ use the system installed version, everywhere, avoid miss-match between different releases
 # b/ Test the latest release, requires compatible client/server versions
 
+set -e # if non zero , exit
 set -u # fail when using an undefined variable
 set -x # echo script lines as they are executed
 
 cd $SCRATCH
+rm -rf build.def
 
 # Generate the defs
 python $WK/build/nightly/build.py
