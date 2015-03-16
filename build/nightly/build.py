@@ -413,10 +413,8 @@ def build_localhost( parent ) :
     localhost.add_task("test_migration").add_trigger("test_performance == complete or test_server_performance == aborted")
     localhost.add_task("test_new_client_old_server_319").add_trigger("test_migration == complete or test_migration == aborted")
     localhost.add_task("test_new_client_old_server_400").add_trigger("test_new_client_old_server_319 == complete or test_new_client_old_server_319 == aborted")
-    localhost.add_task("test_new_client_old_server_401").add_trigger("test_new_client_old_server_400 == complete or test_new_client_old_server_400 == aborted")
-    localhost.add_task("test_new_client_old_server_402").add_trigger("test_new_client_old_server_401 == complete or test_new_client_old_server_401 == aborted")
-    localhost.add_task("test_new_client_old_server_403").add_trigger("test_new_client_old_server_402 == complete or test_new_client_old_server_402 == aborted")
-    localhost.add_task("test_new_client_old_server_404").add_trigger("test_new_client_old_server_403 == complete or test_new_client_old_server_403 == aborted")
+    localhost.add_task("test_new_client_old_server_404").add_trigger("test_new_client_old_server_400 == complete or test_new_client_old_server_400 == aborted")
+    localhost.add_task("test_new_client_old_server_406").add_trigger("test_new_client_old_server_404 == complete or test_new_client_old_server_404 == aborted")
  
 def build_localhost_cmake( parent ) :
     # Hence left out test_client_performance and test_server_performance

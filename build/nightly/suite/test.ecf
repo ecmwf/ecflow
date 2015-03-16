@@ -199,12 +199,14 @@ else
       # --output-on-failure only show output on failure
       #
       if [[ %ECF_TRYNO% -eq 1 ]] ; then
-         ctest -R u_ -V
+         ctest -R ^u_ -V
          ctest -R py_u -V
          ctest -R py_s -V
          ctest -R c_ -V
          ctest -R s_ -V
-         ctest -R perf_ -V
+         if [[ %MODE% != debug ]] ; then
+         	ctest -R perf_ -V
+         fi
       else
          # this does not work
          # ctest --rerun-failed --output-on-failure
