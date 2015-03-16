@@ -65,6 +65,9 @@ Process
       
    VIRTUAL Machines: These should treated like regular machines. 
          - These are based on opensuse113, hence we need top copy over exe for this
+         - For a list of machines see view/server.od( vsms1,vmsm2,vsms3,vali)
+         - to show kernel version: uname -a
+         - to show os version:     lsb_release -a
          
          - ssh opensuse113/lxab, su emos;
          - scp -r 4.0.7 emos@<virtual machine>:/usr/local/apps/ecflow/.
