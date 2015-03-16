@@ -16,7 +16,6 @@ Process
 
 ----------------------------------------------------------------------
 0/ Inform user support, allows user support to test rpm
-    
    
 0/ *Before* each release, make sure the ecflow tar file is
    copied to $SCRATCH and inform Daniel. This will allow
@@ -30,12 +29,12 @@ Process
    
 0/ git flow release start 4.0.7
 
-   *Push* branch onto stash, otherwise the we can not pull, from the remote machines
+   *Push* branch onto stash, otherwise we can not pull, from the remote machines
    - In eclipse, you *may* have to push this branch first
      Team->Push Branch
      *otherwise* the option Team->Push Upstream  may well be greyed out.
 
-0/ Update ECFLOW_GIT_BRANCH to "release/4.0.7" in the nightly build.py
+0/ Update ECFLOW_GIT_BRANCH to "release/4.0.7" in the nightly build.py or meta-builder(settings/ecflow/ecflow.py# git_tag=release/4.0.7
 
 0/ For a PREPIFS release change file:
      /usr/local/apps/ecflow/.modulerc
@@ -118,12 +117,13 @@ Process
 0/ Tag the release, This should now be automatic when using git flow:
        git flow release finish 4.0.7
   
-0/ AFTER the release increment the version number in $WK/VERSION.cmake
-   THEN, run:
+0/ AFTER the release 
+   o increment the version number in $WK/VERSION.cmake THEN, run:
      sh -x $WK/cmake.sh debug
      
      This will update the version number for $WK/ACore/src/ecflow_version.h
      This file is included in $WK/ACore/src/Version.cpp
      
      Then check this file in for, for the other platforms.
-  
+     
+   o Reset metabuilder ecflow git_tag, back to develop
