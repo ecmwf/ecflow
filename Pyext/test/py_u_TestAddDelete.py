@@ -179,11 +179,17 @@ if __name__ == "__main__":
     assert(event.name() == "Eventname"), "Expected name to be empty"
     assert(event.value() == 0),"Expected to not to find event"
 
-    for e in task.events:     print str(e)," # value: ",str(e.value())
     event = task.find_event("fred"); 
     assert(not event.empty()),"Expected to find event"
     assert(event.name() == "fred"), "Expected name to be empty, when name defind an not number, number is max_int"
     assert(event.value() == 0),"Expected to not to find event"
+
+    for e in task.events:     print str(e)," # value: ",str(e.value())
+    a_dict = {}
+    for e in task.events:
+        if e.name() != "": a_dict[e.name()] = e.value()
+        else:              a_dict[e.number()] = e.value()
+    print a_dict
 
     assert len(list(task.events)) == 5, "Expected 5 Events"
     task.delete_event("1");         assert len(list(task.events)) == 4, "Expected 4 Events"
