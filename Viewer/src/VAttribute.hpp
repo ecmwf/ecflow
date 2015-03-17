@@ -18,30 +18,34 @@
 #include "VParam.hpp"
 
 class Node;
+class VProperty;
 
 class VAttribute : public VParam
 {
 public:
-	//VAttribute(QString name,VParam::Type type);
 	VAttribute(const std::string& name);
 	virtual ~VAttribute() {};
 
+    void setProperty(VProperty*);
+    
 	static std::vector<VParam*> filterItems();
-	//static bool getData(Node *node,int row,VParam::Type &type,QStringList& data);
+	
 	static bool getData(Node *node,int row,VAttribute** type,QStringList& data);
 	static int totalNum(Node *node);
 	static void init(const std::string& parFile);
-	//static VAttribute* find(VParam::Type t);
+	
 	static VAttribute* find(const std::string& name);
+    
+    //Called from VConfigLoader
+    static void load(VProperty*);
 
 protected:
 	virtual bool getData(Node *node,int row,int& totalRow,QStringList& data)=0;
 	virtual int num(Node* nod)=0;
+    
+    VProperty* prop_;
 
 private:
-	//static bool getData(Node *node,int row,int& totalRow,VParam::Type type,QStringList& data);
-	//static int num(Node* node,VParam::Type type);
-
 	static std::map<std::string,VAttribute*> items_;
 };
 

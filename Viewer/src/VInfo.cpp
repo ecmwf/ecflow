@@ -43,7 +43,7 @@ VInfoAttributeFactory::~VInfoAttributeFactory()
 
 VInfoAttribute* VInfoAttributeFactory::create(VAttribute* att,int attIndex,Node* node,ServerHandler* server)
 {
-	const std::string& name=att->name();
+	std::string name=att->name().toStdString();
 
 	std::map<std::string,VInfoAttributeFactory*>::iterator j = makers->find(name);
 	if(j != makers->end())

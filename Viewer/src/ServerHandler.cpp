@@ -368,6 +368,7 @@ void ServerHandler::runCommand(const std::vector<std::string>& cmd)
 	comQueue_->addTask(task);
 }
 
+
 //The preferred way to run client tasks is to define and add a task to the queue. The
 //queue will manage the task and will send it to the ClientInvoker. When the task
 //finishes the ServerHandler::clientTaskFinished method is called where the
@@ -623,19 +624,13 @@ void ServerHandler::refreshServerInfo()
 	update();
 }
 
-void ServerHandler::command(VInfo_ptr info, std::string cmd, bool resolve)
+void ServerHandler::command(VInfo_ptr info,const std::vector<std::string>& cmd, bool resolve)
 {
-	std::string realCommand;
-
-	// is this a shortcut name for a command, or the actual command itself?
-	if (resolve)
-		realCommand = resolveServerCommand(cmd);
-	else
-		realCommand = cmd;
+	std::vector<std::string> realCommand=cmd;
 
 	if (!realCommand.empty())
 	{
-		UserMessage::message(UserMessage::DBG, false, std::string("command: ") + cmd + " (real: " + realCommand + ")");
+		//UserMessage::message(UserMessage::DBG, false, std::string("command: ") + cmd + " (real: " + realCommand + ")");
 
 		std::string nodeFullName;
 		std::string nodeName;
@@ -654,28 +649,29 @@ void ServerHandler::command(VInfo_ptr info, std::string cmd, bool resolve)
 		}
 
 		// replace placeholders with real node names
+		for(unsigned int i=0; i < cmd.size(); i++)
+		{
+			if(realCommand[i]=="<full_name>")
+				realCommand[i]=nodeFullName;
+			else if(realCommand[i]=="<node_name>")
+				realCommand[i]=nodeName;
+		}
 
-		std::string placeholder("<full_name>");
-		ecf::Str::replace_all(realCommand, placeholder, nodeFullName);
-
-		placeholder = "<node_name>";
-		ecf::Str::replace_all(realCommand, placeholder, nodeName);
-
-		UserMessage::message(UserMessage::DBG, false, std::string("final command: ") + realCommand);
+		//UserMessage::message(UserMessage::DBG, false, std::string("final command: ") + realCommand);
 
 		// get the command into the right format by first splitting into tokens
 		// and then converting to argc, argv format
 
-		std::vector<std::string> strs;
-		std::string delimiters(" ");
-		ecf::Str::split(realCommand, strs, delimiters);
+		//std::vector<std::string> strs;
+		//std::string delimiters(" ");
+		//ecf::Str::split(realCommand, strs, delimiters);
 
 		// set up and run the thread for server communication
-		serverHandler->runCommand(strs);
+		serverHandler->runCommand(realCommand);
 	}
 	else
 	{
-		UserMessage::message(UserMessage::ERROR, true, std::string("command ") + cmd + " is not recognised. Check the menu definition.");
+		UserMessage::message(UserMessage::ERROR, true, std::string("command is not recognised."));
 	}
 }
 
@@ -1250,6 +1246,7 @@ void ServerComThread::run()
 				// call the client invoker with the saved command
 				UserMessage::message(UserMessage::DBG, false, std::string("    COMMAND"));
 				ArgvCreator argvCreator(command_);
+				//UserMessage::message(UserMessage::DBG, false, argvCreator.toString());
 				ci_->invoke(argvCreator.argc(), argvCreator.argv());
 				break;
 			}

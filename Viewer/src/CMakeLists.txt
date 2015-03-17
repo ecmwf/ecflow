@@ -32,6 +32,8 @@ set(viewer_srcs
     OverviewItemWidget.cpp
     OverviewProvider.cpp
     PlainTextSearchLine.cpp
+    PropertyDialog.cpp
+    PropertyEditor.cpp
     ScriptItemWidget.cpp
     ScriptProvider.cpp
     ServerHandler.cpp
@@ -51,12 +53,14 @@ set(viewer_srcs
     TreeNodeViewDelegate.cpp
     TreeNodeWidget.cpp
     UserMessage.cpp
-    VAttribute.cpp   
+    VAttribute.cpp
+    VConfig.cpp   
     VFilter.cpp
     VIcon.cpp
     VInfo.cpp
     VNState.cpp
-    VParam.cpp   
+    VParam.cpp
+    VProperty.cpp   
     VReply.cpp
     VSettings.cpp
     VSState.cpp
@@ -66,6 +70,7 @@ set(viewer_srcs
     VariableItemWidget.cpp
     VariableSearchLine.cpp
     VariableView.cpp
+    VConfigLoader.cpp
     WhyItemWidget.cpp)
 
 
@@ -87,6 +92,7 @@ QT4_WRAP_CPP(VIEWER_MOC AbstractNodeModel.hpp
                         NodePanel.hpp
                         NodePathWidget.hpp                    
                         NodeWidget.hpp
+                        PropertyDialog.hpp
                         PlainTextSearchLine.hpp
                         ServerHandler.hpp
                         ServerListDialog.hpp
@@ -110,6 +116,7 @@ QT4_WRAP_UI       (VIEWER_FORMS_HEADERS CommandDesignerWidget.ui CustomCommandDi
 						InfoPanel.ui
 						MainWindow.ui 
                         MenuConfigDialog.ui 
+                        PropertyDialog.ui
                         SearchLineWidget.ui 
                         ServerAddDialog.ui
                         ServerEditDialog.ui 
@@ -134,10 +141,11 @@ ecbuild_add_executable( TARGET   ecflowviewer
                                  ../../Base/src/cts
                                  ../../Base/src/stc
                                  ../../Client/src
+                                 ../qtpropertybrowser
                                  ${Boost_INCLUDE_DIRS} 
 				 ${CMAKE_CURRENT_BINARY_DIR}
                         LIBS     core nodeattr node libparser base libclient 
                                  pthread ${Ecflow_Boost_LIBS}
                                  m crypt dl fl
-                                 ${QT_LIBRARIES}
+                                 qtpropertybrowser ${QT_LIBRARIES}
                      )

@@ -1,0 +1,47 @@
+{
+    "sstate":  {
+
+            "label" : "Server state",
+
+            "halted": {
+                "label": "Halted",
+                "tooltip": "halted",
+                "fill_colour" : {
+                    "label" : "Colour",
+                    "default": "rgb(220,220,220)"
+                },
+                "font_colour" : {
+                    "label" : "Font colour",
+                    "default": "rgb(0,0,0)"
+                }
+            },
+
+           "shutdown": {
+                "label": "Shutdown",
+                "tooltip": "shutdown",
+                "fill_colour" : {
+                    "label" : "Colour",
+                    "default": "rgb(220,220,220)"
+                },
+                "font_colour" : {
+                    "label" : "Font colour",
+                    "default": "rgb(0,0,0)"
+                }
+            },
+          
+            "running": {
+                "label": "Running",
+                "tooltip": "running",
+                "fill_colour" : {
+                    "label" : "Colour",
+                    "default": "rgb(0,220,0)"
+                },
+                "font_colour" : {
+                    "label" : "Font colour",
+                    "default": "rgb(0,0,0)"
+                }
+            }
+       
+       }
+
+}

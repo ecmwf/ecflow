@@ -5,6 +5,7 @@
 // In applying this licence, ECMWF does not waive the privileges and immunities
 // granted to it by virtue of its status as an intergovernmental organisation
 // nor does it submit to any jurisdiction.
+//
 //============================================================================
 
 #ifndef VCONFIG_HPP_
@@ -12,92 +13,31 @@
 
 #include <vector>
 
-class VConfig;
+#include <boost/property_tree/ptree.hpp>
 
-class ServerFilter;
-class VNStateSet;
-class AttributeFilter;
-class IconFilter;
-class VParamSet;
-class VSettings;
+class VProperty;
 
-class NodeFilter;
-
-
-class VConfigItem
-{
-friend class VConfig;
-
-public:
-	VConfigItem(VConfig* owner) : owner_(owner) {};
-	virtual ~VConfigItem() {};
-
-	virtual void notifyOwner()=0;
-	VConfig* owner_;
-};
-
-class VConfigObserver
-{
-public:
-	VConfigObserver(){};
-	virtual ~VConfigObserver(){};
-	virtual void notifyConfigChanged(ServerFilter*)=0;
-	virtual void notifyConfigChanged(VNStateSet*)=0;
-	virtual void notifyConfigChanged(AttributeFilter*)=0;
-	virtual void notifyConfigChanged(IconFilter*)=0;
-
-	virtual void notifyServerSetChanged()=0;
-	virtual void notifyIconSetChanged()=0;
-	virtual void notifyNodeFilterChanged()=0;
-};
+//This singleton class strores the configuration of the viewer.
 
 class VConfig
 {
 public:
-
-	VConfig();
-	~VConfig();
-
-	enum Type {Server,State,Attribute,Icon};
-
-	void addServerSet(ServerFilter* server=0);
-
-	ServerFilter* serverSet() const {return server_;}
-	//NodeFilter* filter() const { return filter_;}
-	VParamSet*  iconSet() const {return icon_;}
-
-	/*VParamSet* stateFilter() const {return state_;}
-	VParamSet* attributeFilter() const {return attr_;}
-	VParamSet* iconFilter() const {return icon_;}*/
-
-	void addObserver(VConfigObserver*);
-	void removeObserver(VConfigObserver*);
-
-	void changed(ServerFilter*) {};
-	void changed(IconFilter*) {};
-	void changed(NodeFilter*) {};
-
-	/*void changed(StateFilter*);
-	void changed(AttributeFilter*);
-	void changed(IconFilter*);*/
-
-
-	void reloaded();
-
-	void writeSettings(VSettings*);
-	void readSettings(VSettings*);
+    ~VConfig();
+    
+    static VConfig* instance();
+    
+    void init(const std::string& parDir);
+    const std::vector<VProperty*>& groups() {return groups_;}
 
 protected:
+    VConfig();
+    
+    void loadFile(const std::string& parFile);
+    void loadProperty(const boost::property_tree::ptree& pt,VProperty *prop);
 
-
-	std::vector<VConfigObserver*> observers_;
-
-private:
-	ServerFilter* server_;
-	//VParamSet* state_;
-	//VParamSet* attr_;
-	VParamSet* icon_;
-	//NodeFilter* filter_;
+    static VConfig* instance_;
+    
+    std::vector<VProperty*> groups_;
 };
 
 #endif

@@ -23,9 +23,12 @@ class VParam
 public:
 		VParam(const std::string& name);
 
-		QString qName() const {return qName_;}
-		const std::string& name() const {return name_;}
+		QString name() const {return qName_;}
+		const std::string& strName() const {return name_;}
 
+		QString label() const {return label_;}
+		QColor colour() const {return colour_;}
+		
 		int number(const std::string&) const;
 		QColor colour(const std::string&) const;
 		std::string text(const std::string&) const;
@@ -45,8 +48,10 @@ protected:
 		std::string name_;
 		QString qName_;
 
-private:
-		std::map<std::string,int> numberMap_;
+		QColor colour_;
+        QString label_;
+        
+        std::map<std::string,int> numberMap_;
 		std::map<std::string,std::string> textMap_;
  		std::map<std::string,QColor> colourMap_;
 		std::map<std::string,QFont> fontMap_;

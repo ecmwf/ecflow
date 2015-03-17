@@ -22,6 +22,7 @@
 #include "Highlighter.hpp"
 #include "ServerList.hpp"
 #include "VAttribute.hpp"
+#include "VConfig.hpp"
 #include "VIcon.hpp"
 #include "VNState.hpp"
 #include "VSState.hpp"
@@ -53,8 +54,11 @@ int main(int argc, char **argv)
     //Initialise the server list
     ServerList::instance()->init();
 
+    VConfig::instance()->init(DirectoryHandler::etcDir());
+    
+    
     //Initialise the node/server state description
-    VNState::init(DirectoryHandler::concatenate(DirectoryHandler::etcDir(),
+    /*VNState::init(DirectoryHandler::concatenate(DirectoryHandler::etcDir(),
     											"ecflowview_nstate.json"));
 
     //Initialise the node/server state description
@@ -67,7 +71,7 @@ int main(int argc, char **argv)
 
     //Initialise the node icon description
     VIcon::init(DirectoryHandler::concatenate(DirectoryHandler::etcDir(),
-		      "ecflowview_icon.json"));
+		      "ecflowview_icon.json"));*/
 
     //Initialise yexy highlighter
     Highlighter::init(DirectoryHandler::concatenate(DirectoryHandler::etcDir(),

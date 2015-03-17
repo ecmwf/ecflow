@@ -10,9 +10,6 @@
 
 #include "VNState.hpp"
 
-#include <boost/property_tree/ptree.hpp>
-#include <boost/property_tree/json_parser.hpp>
-
 #include <QDebug>
 #include <QImage>
 #include <QImageReader>
@@ -26,6 +23,8 @@
 #include "Node.hpp"
 #include "Submittable.hpp"
 #include "UserMessage.hpp"
+#include "VConfigLoader.hpp"
+#include "VProperty.hpp"
 
 std::map<std::string,VNState*> VNState::items_;
 static std::map<NState::State,VNState*> stateMap_;
@@ -39,7 +38,8 @@ static VNState activeSt("active",NState::ACTIVE);
 static VNState suspendedSt("suspended");
 
 VNState::VNState(const std::string& name,NState::State nstate) :
-		VParam(name)
+		VParam(name),
+		prop_(0)
 
 {
 	items_[name]=this;
@@ -47,14 +47,26 @@ VNState::VNState(const std::string& name,NState::State nstate) :
 }
 
 VNState::VNState(const std::string& name) :
-		VParam(name)
+		VParam(name),
+        prop_(0)
 {
 	items_[name]=this;
 }
 
-QColor VNState::colour() const
+void VNState::setProperty(VProperty* prop)
 {
-	return VParam::colour("colour");
+    prop_=prop; 
+    
+    //Label
+    label_=prop_->labelText();
+    
+    //get colour
+    if(VProperty *p=prop_->findChild("fill_colour"))
+    {
+        colour_=p->value().value<QColor>();
+        
+        qDebug() << qName_ << colour_;
+    }    
 }
 
 //===============================================================
@@ -126,35 +138,24 @@ QColor VNState::toColour(Node *n)
 QString VNState::toName(Node *n)
 {
 	VNState *obj=VNState::toState(n);
-	return (obj)?(obj->qName()):QString();
+	return (obj)?(obj->name()):QString();
 }
 
 QString VNState::toDefaultStateName(Node *n)
 {
 	VNState *obj=VNState::toDefaultState(n);
-	return (obj)?(obj->qName()):QString();
+	return (obj)?(obj->name()):QString();
 }
 
-
-void VNState::init(const std::string& parFile)
+void VNState::load(VProperty* group)
 {
-	//std::string parFile("/home/graphics/cgr/ecflowview_state.json");
-	std::map<std::string,std::map<std::string,std::string> > vals;
-
-	VParam::init(parFile,"nstate",vals);
-
-	for(std::map<std::string,std::map<std::string,std::string> >::const_iterator it=vals.begin(); it != vals.end(); it++)
-	{
-		std::string name=it->first;
-		//Assign the information we read to an existing VAttribute object
-		if(VNState* obj=VNState::find(name))
-				obj->addAttributes(it->second);
-
-		//We are in trouble: the icon defined in the JSON file does not correspond to any of the VIcon objects!!!
-		else
-		{
-			UserMessage::message(UserMessage::ERROR, true,
-					std::string("Error, state defined in JSON file does not belong to any attribute objects : " + name));
-		}
-	}
+    Q_FOREACH(VProperty* p,group->children())
+    {
+         if(VNState* obj=VNState::find(p->strName())) 
+         {
+            obj->setProperty(p);
+         }   
+    }    
 }
+        
+static SimpleLoader<VNState> loader("nstate");

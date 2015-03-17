@@ -94,6 +94,7 @@ void VariableEditDialog::accept()
 						QMessageBox::Ok|QMessageBox::Cancel,QMessageBox::Cancel)
 		{
 			QDialog::reject();
+			return;
 		}
 	}
 
@@ -113,6 +114,53 @@ QString VariableEditDialog::value() const
 	return valueEdit_->text();
 }
 
+//======================================
+//
+// VariableAddDialog
+//
+//======================================
+
+VariableAddDialog::VariableAddDialog(VariableModelData *data,QWidget *parent) :
+   QDialog(parent),
+   data_(data)
+{
+	setupUi(this);
+
+	label_->setText(tr("Add new variable for ") +
+			"<b>" + QString::fromStdString(data->type()) + "</b>: " +
+			QString::fromStdString(data->dataName()));
+}
+
+void VariableAddDialog::accept()
+{
+	QString name=nameEdit_->text();
+	QString value=valueEdit_->text();
+
+	if(data_->hasName(name.toStdString()))
+	{
+		if(QMessageBox::Ok!=
+		   QMessageBox::question(0,QObject::tr("Confirm: overwrite variable"),
+								"This variable is <b>already defined<b>. A new variable will be created \
+								for the selected node and hide the previous one.<br>Do you want to proceed?"),
+					    QMessageBox::Ok|QMessageBox::Cancel,QMessageBox::Cancel);
+		{
+			QDialog::reject();
+			return;
+		}
+	}
+
+	QDialog::accept();
+}
+
+QString VariableAddDialog::name() const
+{
+	return nameEdit_->text();
+}
+
+QString VariableAddDialog::value() const
+{
+	return valueEdit_->text();
+}
 
 //========================================================
 //
@@ -144,7 +192,6 @@ VariableItemWidget::VariableItemWidget(QWidget *parent)
 
 	filterLine->setDecoration(QPixmap(":/viewer/filter_decor.svg"));
 
-
 	searchLine_->hide();
 
     //Initialise the search widget
@@ -155,6 +202,10 @@ VariableItemWidget::VariableItemWidget(QWidget *parent)
 	varView->setUniformRowHeights(true);
 	varView->setSortingEnabled(true);*/
 	//varView->setSelectionMode(QAbstractItemView::ExtendedSelection);
+
+	connect(varView,SIGNAL(activated(QModelIndex)),
+			this,SLOT(slotItemSelected(QModelIndex)));
+
 
 	//Add context menu actions to the view
 	QAction* sep1=new QAction(this);
@@ -173,6 +224,9 @@ VariableItemWidget::VariableItemWidget(QWidget *parent)
 	addTb->setDefaultAction(actionAdd);
 	deleteTb->setDefaultAction(actionDelete);
 	editTb->setDefaultAction(actionEdit);
+
+	//Initialise action state (it depends on the selection)
+	checkActionState();
 }
 
 VariableItemWidget::~VariableItemWidget()
@@ -200,6 +254,45 @@ void VariableItemWidget::clearContents()
 }
 
 
+void VariableItemWidget::slotItemSelected(const QModelIndex& idx)
+{
+	checkActionState();
+}
+
+void VariableItemWidget::checkActionState()
+{
+	QModelIndex vIndex=varView->currentIndex();
+	QModelIndex index=sortModel_->mapToSource(vIndex);
+
+	//The index is invalid (no selection)
+	if(!index.isValid())
+	{
+		actionAdd->setEnabled(false);
+		actionEdit->setEnabled(false);
+		actionDuplicate->setEnabled(false);
+		actionDelete->setEnabled(false);
+	}
+	else
+	{
+		//Variables
+		if(model_->isVariable(index))
+		{
+			actionAdd->setEnabled(true);
+			actionEdit->setEnabled(true);
+			actionDuplicate->setEnabled(true);
+			actionDelete->setEnabled(true);
+		}
+		//Server or nodes
+		else
+		{
+			actionAdd->setEnabled(true);
+			actionEdit->setEnabled(false);
+			actionDuplicate->setEnabled(false);
+			actionDelete->setEnabled(false);
+		}
+	}
+}
+
 void VariableItemWidget::editItem(const QModelIndex& index)
 {
 	QString name;
@@ -209,7 +302,7 @@ void VariableItemWidget::editItem(const QModelIndex& index)
 	QModelIndex vIndex=sortModel_->mapToSource(index);
 
 	//Get the data from the model
-	if(model_->data(vIndex,name,value,genVar))
+	if(model_->variable(vIndex,name,value,genVar))
 	{
 		//Start edit dialog
 		VariableEditDialog d(name,value,genVar,this);
@@ -217,7 +310,7 @@ void VariableItemWidget::editItem(const QModelIndex& index)
 		//The dialog checks the name and valueS
 		if(d.exec()== QDialog::Accepted)
 		{
-			model_->setData(vIndex,name,d.value());
+			model_->setVariable(vIndex,name,d.value());
 		}
 	}
 }
@@ -249,60 +342,41 @@ void VariableItemWidget::duplicateItem(const QModelIndex& index)
 	}*/
 }
 
-void VariableItemWidget::addItem()
+void VariableItemWidget::addItem(const QModelIndex& index)
 {
-	QString name,value;
-	VariableEditDialog d(name,value,this);
+	QModelIndex vIndex=sortModel_->mapToSource(index);
 
-	//The dialog checks the name, host and port!
-	if(d.exec() == QDialog::Accepted)
+	if(VariableModelData* data=model_->indexToData(vIndex))
 	{
-		/*model_->setData();
-		model_->dataIsAboutToChange();
-		//ServerItem* item=ServerList::instance()->add(d.name().toStdString(),d.host().toStdString(),d.port().toStdString());
-		model_->dataChangeFinished();
-		if(d.addToView() && filter_)
+		VariableAddDialog d(data,this);
+
+		//The dialog checks the name, host and port!
+		if(d.exec() == QDialog::Accepted)
 		{
-			filter_->addServer(item);
-		}*/
+			data->add(d.name().toStdString(),d.value().toStdString());
+		}
 	}
 }
 
 void VariableItemWidget::removeItem(const QModelIndex& index)
 {
-	/*ServerItem* item=model_->indexToServer(sortModel_->mapToSource(index));
+	QString name;
+	QString value;
+	bool genVar;
 
-	if(!item)
-		return;
+	QModelIndex vIndex=sortModel_->mapToSource(index);
 
-	QString str=tr("Are you sure that you want to delete server: <b>");
-	str+=QString::fromStdString(item->name()) ;
-	str+="</b>?";
-	str+=tr("<br>It will be removed from all the existing views!");
-
-	QMessageBox msgBox;
-	msgBox.setWindowTitle(tr("Delete server"));
-	msgBox.setText(str);
-	msgBox.setIcon(QMessageBox::Warning);
-	msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::Cancel);
-	msgBox.setDefaultButton(QMessageBox::Cancel);
-	int ret=msgBox.exec();
-
-	switch (ret)
+	//Get the data from the model
+	if(model_->variable(vIndex,name,value,genVar))
 	{
-   	case QMessageBox::Yes:
-   		model_->dataIsAboutToChange();
-   		//It will delete item as well!
-   		ServerList::instance()->remove(item);
-   		model_->dataChangeFinished();
-      	break;
-   	case QMessageBox::Cancel:
-       	// Cancel was clicked
-       	break;
-   	default:
-       	// should never be reached
-      	 break;
-	}*/
+		if(QMessageBox::Ok ==
+				QMessageBox::question(0,QObject::tr("Confirm: delete variable"),
+									"Are you sure that you want to delete variable <b>"+ name + "</b>?"),
+							    QMessageBox::Ok|QMessageBox::Cancel,QMessageBox::Cancel);
+		{
+			model_->removeVariable(vIndex,name,value);
+		}
+	}
 }
 
 
@@ -319,7 +393,8 @@ void VariableItemWidget::on_actionEdit_triggered()
 
 void VariableItemWidget::on_actionAdd_triggered()
 {
-	addItem();
+	QModelIndex index=varView->currentIndex();
+	addItem(index);
 }
 
 void VariableItemWidget::on_actionDelete_triggered()

@@ -33,31 +33,24 @@ public:
    	QModelIndex index (int, int, const QModelIndex& parent = QModelIndex() ) const;
    	QModelIndex parent (const QModelIndex & ) const;
 
-	bool data(const QModelIndex& index, QString& name,QString& value,bool& genVar) const;
-	bool setData(const QModelIndex& index,QString name,QString value);
+	bool variable(const QModelIndex& index, QString& name,QString& value,bool& genVar) const;
+	bool setVariable(const QModelIndex& index,QString name,QString value);
+	bool removeVariable(const QModelIndex& index,QString name,QString value);
 
-	void nodeChanged(const Node*, const std::vector<ecf::Aspect::Type>&);
-    
-    //QModelIndexList match(const QModelIndex& start,int role,const QVariant& value,int hits,Qt::MatchFlags flags) const;
+	VariableModelData* indexToData(const QModelIndex& index) const;
+
+	bool isVariable(const QModelIndex & index) const;
 
 public Q_SLOTS:
 	void slotReloadBegin();
 	void slotReloadEnd();
+	void slotDataChanged(int);
 
 protected:
 	bool hasData() const;
 
 	int indexToLevel(const QModelIndex&) const;
-	bool isVariable(const QModelIndex & index) const;
     void identify(const QModelIndex& index,int& parent,int& row) const;
-	/*
-	bool isServer(const QModelIndex & index) const;
-	bool isNode(const QModelIndex & index) const;
-	bool isVariable(const QModelIndex & index) const;
-	ServerHandler* indexToServer(const QModelIndex & index) const;
-	Node* indexToNode( const QModelIndex & index) const;
-
-	QModelIndex nodeToIndex(Node *node) const;*/
 
 	VariableModelDataHandler* data_;
 };

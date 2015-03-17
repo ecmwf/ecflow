@@ -31,6 +31,9 @@ VariableModel::VariableModel(VariableModelDataHandler* data,QObject *parent) :
 	connect(data_,SIGNAL(reloadEnd()),
 					this,SLOT(slotReloadEnd()));
 
+	connect(data_,SIGNAL(dataChanged(int)),
+						this,SLOT(slotDataChanged(int)));
+
 }
 
 bool VariableModel::hasData() const
@@ -145,7 +148,7 @@ QVariant VariableModel::data( const QModelIndex& index, int role ) const
 	return QVariant();
 }
 
-bool VariableModel::data(const QModelIndex& idx, QString& name,QString& value,bool& genVar) const
+bool VariableModel::variable(const QModelIndex& idx, QString& name,QString& value,bool& genVar) const
 {
 	int block=-1;
 	int row=-1;
@@ -166,7 +169,7 @@ bool VariableModel::data(const QModelIndex& idx, QString& name,QString& value,bo
 	return false;
 }
 
-bool VariableModel::setData(const QModelIndex& index, QString name,QString value)
+bool VariableModel::setVariable(const QModelIndex& index, QString name,QString value)
 {
     int block;
     int row;
@@ -192,6 +195,35 @@ bool VariableModel::setData(const QModelIndex& index, QString name,QString value
         data_->data(block)->setValue(row,value.toStdString());
     }
     
+    return false;
+}
+
+bool VariableModel::removeVariable(const QModelIndex& index, QString name,QString value)
+{
+    int block;
+    int row;
+
+    identify(index,block,row);
+
+    if(block == -1 || row == -1)
+        return false;
+
+    if(block >=0 && block < data_->count())
+    {
+        //double check
+        if(data_->data(block)->name(row) != name.toStdString())
+        {
+            assert(0);
+            return false;
+        }
+
+        //This will call the ServerComThread  so we
+        //do not know if it was succesful. The model will be
+        //updated through the observer when the value will actually
+        //change.
+        data_->data(block)->remove(row,name.toStdString());
+    }
+
     return false;
 }
 
@@ -270,6 +302,20 @@ int VariableModel::indexToLevel(const QModelIndex& index) const
 	return 2;
 }
 
+VariableModelData* VariableModel::indexToData(const QModelIndex& index) const
+{
+	int block;
+	int row;
+
+	identify(index,block,row);
+
+	if(block != -1)
+		return data_->data(block);
+
+	return NULL;
+}
+
+
 //----------------------------------------------
 //
 // Server to index mapping and lookup
@@ -305,87 +351,9 @@ void VariableModel::identify(const QModelIndex& index,int& block,int& row) const
     }        
 }    
 
-/*
-bool VariableModel::isServer(const QModelIndex & index) const
-{
-	if(index.isValid())
-	{
-		if(indexToLevel(index) == 1 && index.row() == nodes_.size())
-			return true;
-	}
-	return false;
-}
-
-ServerHandler* VariableModel::indexToServer(const QModelIndex & index) const
-{
-	return (isServer(index))?server_:NULL;
-}
-
-
-bool VariableModel::isNode(const QModelIndex & index) const
-{
-	if(index.isValid())
-	{
-		if(indexToLevel(index) == 1 && index.row() < nodes_.size())
-			return true;
-	}
-	return false;
-}
-
-Node* VariableModel::indexToNode( const QModelIndex & index) const
-{
-	return (isNode(index))?nodes_.at(index.row()):NULL;
-}
-
-QModelIndex VariableModel::nodeToIndex(Node *node) const
-{
-	for(unsigned int i=0; i < nodes_.size(); i++)
-	{
-		if(nodes_.at(i) == node)
-		{
-			return index(i,0);
-		}
-	}
-
-	return QModelIndex();
-}
-*/
-
-/*
-QModelIndex VariableModel::serverToIndex(ServerHandler* server) const
-{
-	//For servers the internal id is set to their position in servers_ + 1
-	int i;
-	if((i=servers_.indexOf(server))!= -1)
-			return createIndex(i,0,i+1);
-
-	return QModelIndex();
-}
-
-Node* VariableModel::indexToNode( const QModelIndex & index) const
-{
-	if(index.isValid())
-	{
-		if(!isServer(index))
-		{
-			return static_cast<Node*>(index.internalPointer());
-		}
-
-	}
-	return NULL;
-}
-*/
-
-void VariableModel::nodeChanged(const Node* node, const std::vector<ecf::Aspect::Type>&)
-{
-	/*Node* n=const_cast<Node*>(node);
-	QModelIndex idx=nodeToIndex(n);
-
-	Q_EMIT dataChanged(idx,idx);*/
-}
-
 void VariableModel::slotReloadBegin()
 {
+	//Reset the whole model
 	beginResetModel();
 }
 
@@ -394,22 +362,12 @@ void VariableModel::slotReloadEnd()
 	endResetModel();
 }
 
-/*QModelIndexList VariableModel::match(const QModelIndex& start,int role,const QVariant& value,int hits,Qt::MatchFlags flags) const
+void VariableModel::slotDataChanged(int row)
 {
-    QModelIndexList  lst;
-    for(unsigned int i=0; i < data_->count(); i++)
-    {
-        QModelIndex parent=index(i,0);
-        std::vector<int> res;
-        data_->data(i)->match(value.toString().toStdString(),res);
-        for(std::vector<int>::const_iterator it =res.begin(); it != res.end(); it++)
-        {
-            lst << index(*it,0,parent);
-        }
-    }   
-    
-    return lst;
-}*/
+	QModelIndex blockIndex0=index(row,0);
+	QModelIndex blockIndex1=index(row,1);
+	Q_EMIT dataChanged(blockIndex0,blockIndex1);
+}
 
 //=======================================================================
 //

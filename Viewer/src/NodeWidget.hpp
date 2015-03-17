@@ -29,6 +29,7 @@ class NodePathWidget;
 class NodeViewBase;
 class ServerFilter;
 
+
 class NodeWidget : public DashboardWidget
 {
 Q_OBJECT

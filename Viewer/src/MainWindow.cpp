@@ -24,6 +24,7 @@
 #include "InfoPanel.hpp"
 #include "NodePathWidget.hpp"
 #include "NodePanel.hpp"
+#include "PropertyDialog.hpp"
 #include "ServerHandler.hpp"
 #include "ServerListDialog.hpp"
 #include "MenuConfigDialog.hpp"
@@ -134,6 +135,15 @@ void MainWindow::on_actionReset_triggered()
 {
 	ServerHandler::updateAll();
 	MainWindow::reload();
+}
+
+void MainWindow::on_actionPreferences_triggered()
+{
+    PropertyDialog d;
+
+	if(d.exec() == QDialog::Accepted)
+	{
+    }
 }
 
 

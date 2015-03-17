@@ -59,6 +59,47 @@ const std::string& VariableModelData::value(int index) const
 	}
 }
 
+bool VariableModelData::hasName(const std::string& n) const
+{
+	for(std::vector<std::pair<std::string,std::string> >::const_iterator it=vars_.begin(); it != vars_.end(); it++)
+	{
+		if((*it).first == n)
+		{
+			return true;
+		}
+	}
+
+	for(std::vector<std::pair<std::string,std::string> >::const_iterator it=genVars_.begin(); it != genVars_.end(); it++)
+	{
+		if((*it).first == n)
+		{
+			return true;
+		}
+	}
+
+	return false;
+
+}
+
+void VariableModelData::buildAlterCommand(std::vector<std::string>& cmd,
+		                            const std::string& action, const std::string& type,
+		                            const std::string& name,const std::string& value)
+{
+	cmd.push_back("ecflow_client");
+	cmd.push_back("--alter");
+	cmd.push_back(action);
+	cmd.push_back(type);
+
+	if(!name.empty())
+	{
+		cmd.push_back(name);
+		cmd.push_back(value);
+	}
+
+	cmd.push_back("<full_name>");
+
+}
+
 
 /*    void variables::deleteCB( Widget, XtPointer )
 {
@@ -136,25 +177,6 @@ int VariableModelData::varNum() const
 	return vars_.size() + genVars_.size();
 }
 
-void VariableModelData::match(const std::string& txt,std::vector<int>& result) const
-{
-    QString str=QString::fromStdString(txt);
-    
-    qDebug() << "match" << QString::fromStdString(txt);
-
-    for(int i=0; i < varNum(); i++)
-    {
-    	qDebug() << "  " << QString::fromStdString(name(i)) << QString::fromStdString(value(i)) ;
-
-    	if(QString::fromStdString(name(i)).contains(str,Qt::CaseInsensitive) ||
-            QString::fromStdString(value(i)).contains(str,Qt::CaseInsensitive))
-        {
-            qDebug() << "    -->YES";
-    		result.push_back(i);
-        }
-    }
-}   
-
 VariableServerData::VariableServerData(ServerHandler *server)
 {
 	server_=server;
@@ -165,6 +187,11 @@ VariableServerData::VariableServerData(ServerHandler *server)
 const std::string& VariableServerData::dataName()
 {
 	return server_->longName();
+}
+
+std::string VariableServerData::type()
+{
+	return "server";
 }
 
 QColor VariableServerData::colour()
@@ -190,6 +217,17 @@ void VariableServerData::setValue(int index,const std::string& val)
 {
 }
 
+void VariableServerData::add(const std::string& name,const std::string& val)
+{
+
+}
+
+//==========================================
+//
+// VariableNodeData
+//
+//==========================================
+
 VariableNodeData::VariableNodeData(Node *node)
 {
 	node_=node;
@@ -200,6 +238,11 @@ VariableNodeData::VariableNodeData(Node *node)
 const std::string& VariableNodeData::dataName()
 {
 	return node_->name();
+}
+
+std::string VariableNodeData::type()
+{
+	return "node";
 }
 
 QColor VariableNodeData::colour()
@@ -226,18 +269,50 @@ void VariableNodeData::reload()
 	}
 }
 
+//Check if the total number of variables has changed.
+bool VariableNodeData::sizeChanged()
+{
+	std::vector<Variable> v=node_->variables();
+	std::vector<Variable> vg;
+	node_->gen_variables(vg);
+
+	return (v.size() != vars_.size() || vg.size() != genVars_.size());
+}
+
 void VariableNodeData::setValue(int index,const std::string& val)
 {
 	VInfo_ptr info(VInfo::make(node_));
 
-	std::string cmd="ecflow_client --alter change variable " + name(index) + " " + val + " <full_name>"  ;
+	std::vector<std::string> cmd;
+	buildAlterCommand(cmd,"change","variable",name(index),val);
 
 	ServerHandler::command(info,cmd,false);
-
-	/*get_node()->serv().command(clientName, "--alter", add ? "add" : "change", "variable",
-	                                       name, value, get_node()->full_name().c_str(), NULL);*/
-
 }
+
+void VariableNodeData::add(const std::string& name,const std::string& val)
+{
+	VInfo_ptr info(VInfo::make(node_));
+
+	std::vector<std::string> cmd;
+	buildAlterCommand(cmd,"change","variable",name,val);
+
+
+	ServerHandler::command(info,cmd,false);
+}
+
+void VariableNodeData::remove(int index,const std::string& varName)
+{
+	if(varName == name(index))
+	{
+		VInfo_ptr info(VInfo::make(node_));
+
+		std::vector<std::string> cmd;
+		buildAlterCommand(cmd,"delete","variable",varName,"");
+
+		ServerHandler::command(info,cmd,false);
+	}
+}
+
 
 //==========================================
 //
@@ -327,12 +402,20 @@ void VariableModelDataHandler::nodeChanged(const Node* node, const std::vector<e
 	{
 		for(unsigned int i=0; i < data_.size(); i++)
 		{
-			if(data_.at(i)->dataName() == node->name())
+			if(data_.at(i)->isNode(node))
 			{
-				//Notifies the model that a change will happen
-			    Q_EMIT reloadBegin();
-			    data_.at(i)->reload();
-			    Q_EMIT reloadEnd();
+				if(data_.at(i)->sizeChanged())
+				{
+					//Notifies the model that a change will happen
+					Q_EMIT reloadBegin();
+					data_.at(i)->reload();
+					Q_EMIT reloadEnd();
+				}
+				else
+				{
+					data_.at(i)->reload();
+					Q_EMIT dataChanged(i);
+				}
 			}
 		}
 	}

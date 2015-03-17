@@ -22,7 +22,7 @@
     </widget>
    </item>
    <item>
-    <widget class="QPlainTextEdit" name="textEdit_">
+    <widget class="TextEdit" name="textEdit_">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
        <horstretch>0</horstretch>
@@ -48,6 +48,11 @@
    <extends>QWidget</extends>
    <header>PlainTextSearchLine.hpp</header>
    <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>TextEdit</class>
+   <extends>QPlainTextEdit</extends>
+   <header location="global">TextEdit.hpp</header>
   </customwidget>
  </customwidgets>
  <resources/>

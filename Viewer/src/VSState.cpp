@@ -23,9 +23,8 @@
 #include "ServerHandler.hpp"
 #include "Submittable.hpp"
 #include "UserMessage.hpp"
-
-#include <boost/property_tree/ptree.hpp>
-#include <boost/property_tree/json_parser.hpp>
+#include "VConfigLoader.hpp"
+#include "VProperty.hpp"
 
 std::map<std::string,VSState*> VSState::items_;
 static std::map<SState::State,VSState*> stateMap_;
@@ -37,17 +36,26 @@ static VSState shutSt("shutdown",SState::SHUTDOWN);
 
 
 VSState::VSState(const std::string& name,SState::State Sstate) :
-		VParam(name)
+		VParam(name),
+		prop_(0)
 {
 	items_[name]=this;
 	stateMap_[Sstate]=this;
 }
 
-
-QColor VSState::colour() const
+void VSState::setProperty(VProperty* prop)
 {
-	return VParam::colour("colour");
+    prop_=prop; 
+    
+    //get colour
+    if(VProperty *p=prop_->findChild("fill_colour"))
+    {
+        colour_=p->value().value<QColor>();
+        
+        qDebug() << qName_ << colour_;
+    }    
 }
+
 
 //===============================================================
 //
@@ -89,28 +97,19 @@ QColor VSState::toColour(ServerHandler* s)
 QString VSState::toName(ServerHandler* s)
 {
 	VSState *obj=VSState::toState(s);
-	return (obj)?(obj->qName()):QString();
+	return (obj)?(obj->name()):QString();
 }
 
-void VSState::init(const std::string& parFile)
+void VSState::load(VProperty* group)
 {
-	//std::string parFile("/home/graphics/cgr/ecflowview_sstate.json");
-	std::map<std::string,std::map<std::string,std::string> > vals;
-
-	VParam::init(parFile,"sstate",vals);
-
-	for(std::map<std::string,std::map<std::string,std::string> >::const_iterator it=vals.begin(); it != vals.end(); it++)
-	{
-		std::string name=it->first;
-		//Assign the information we read to an existing VAttribute object
-		if(VSState* obj=VSState::find(name))
-				obj->addAttributes(it->second);
-
-		//We are in trouble: the icon defined in the JSON file does not correspond to any of the VIcon objects!!!
-		else
-		{
-			UserMessage::message(UserMessage::ERROR, true,
-					std::string("Error, state defined in JSON file does not belong to any attribute objects : " + name));
-		}
-	}
+    Q_FOREACH(VProperty* p,group->children())
+    {
+         if(VSState* obj=VSState::find(p->strName())) 
+         {
+            obj->setProperty(p);
+         }   
+    }    
 }
+        
+static SimpleLoader<VSState> loader("sstate");
+

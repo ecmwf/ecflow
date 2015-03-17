@@ -1,0 +1,97 @@
+{
+    "nstate":  {
+    	
+    		"label" : "Node state",
+
+            "unknown": {
+            	"label": "Unknown",
+                "tooltip": "unknown",
+                "fill_colour" : {
+                	"label" : "Colour",
+                	"default": "rgb(220,220,220)"
+                },
+                "font_colour" : {
+					"label" : "Font colour",
+					"default": "rgb(0,0,0)"
+				}
+            },
+
+            "complete": {
+            		"label": "Complete",
+            		"tooltip": "complete",
+            		"fill_colour" : {
+            			"label" : "Colour",
+            			"default": "rgb(255,255,0)"
+            		},
+            		"font_colour" : {
+						"label" : "Font colour",
+						"default": "rgb(0,0,0)"
+					}
+			},	
+            	
+            "queued": {
+        			"label": "Queued",
+        			"tooltip": "queued",
+        			"fill_colour" : {
+        				"label" : "Colour",
+        				"default": "rgb(224,240,255)"
+        			},
+        			"font_colour" : {
+						"label" : "Font colour",
+						"default": "rgb(0,0,0)"
+					}                 
+            },
+
+            "aborted": {
+    			"label": "Aborted",
+    			"tooltip": "aborted",
+    			"fill_colour" : {
+    				"label" : "Colour",
+    				"default": "rgb(255,0,0)"
+    			},
+    			"font_colour" : {
+					"label" : "Font colour",
+					"default": "rgb(0,0,0)"
+				}                    
+            },
+
+            "submitted": {
+    			"label": "Submitted",
+    			"tooltip": "submitted",
+    			"fill_colour" : {
+    				"label" : "Colour",
+    				"default": "rgb(64,224,208)"
+    			},    			
+    			"font_colour" : {
+					"label" : "Font colour",
+					"default": "rgb(0,0,0)"
+				}                               	           	
+            },
+
+            "active": {
+    			"label": "Active",
+    			"tooltip": "active",
+    			"fill_colour" : {
+    				"label" : "Colour",
+    				"default": "rgb(0,255,0)"
+    			},    			
+    			"font_colour" : {
+					"label" : "Font colour",
+					"default": "rgb(0,0,0)"
+				}                                	        
+            },
+
+            "suspended": {
+    			"label": "Suspended",
+    			"tooltip": "suspended",
+    			"fill_colour" : {
+    				"label" : "Colour",
+    				"default": "rgb(255,166,0)"
+    			},    			
+    			"font_colour" : {
+					"label" : "Font colour",
+					"default": "rgb(0,0,0)"
+				}                      
+            }
+    }
+}

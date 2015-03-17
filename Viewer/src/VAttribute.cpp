@@ -10,9 +10,6 @@
 
 #include "VAttribute.hpp"
 
-#include <boost/property_tree/ptree.hpp>
-#include <boost/property_tree/json_parser.hpp>
-
 #include <QDebug>
 
 #include <stdlib.h>
@@ -24,6 +21,8 @@
 
 #include "Node.hpp"
 #include "UserMessage.hpp"
+#include "VConfigLoader.hpp"
+#include "VProperty.hpp"
 
 std::map<std::string,VAttribute*> VAttribute::items_;
 
@@ -140,11 +139,21 @@ static VGenvarAttribute genvarAttr("genvar");
 
 
 VAttribute::VAttribute(const std::string& name) :
-		VParam(name)
+		VParam(name),
+		prop_(0)
 {
 	//items_.push_back(this);
 	items_[name]=this;
 }
+
+
+void VAttribute::setProperty(VProperty* prop)
+{
+    prop_=prop; 
+    
+    //Cache label in VParam;
+    label_=prop_->labelText();
+   }
 
 std::vector<VParam*> VAttribute::filterItems()
 {
@@ -156,6 +165,7 @@ std::vector<VParam*> VAttribute::filterItems()
 
 	return v;
 }
+
 
 VAttribute* VAttribute::find(const std::string& name)
 {
@@ -212,29 +222,18 @@ bool VAttribute::getData(Node *node,int row,VAttribute **type,QStringList& data)
 	return false;
 }
 
-
-void VAttribute::init(const std::string& parFile)
+void VAttribute::load(VProperty* group)
 {
-	//std::string parFile("/home/graphics/cgr/ecflowview_attribute.json");
-	std::map<std::string,std::map<std::string,std::string> > vals;
-
-	VParam::init(parFile,"attribute",vals);
-
-	for(std::map<std::string,std::map<std::string,std::string> >::const_iterator it=vals.begin(); it != vals.end(); it++)
-	{
-		std::string name=it->first;
-		//Assign the information we read to an existing VAttribute object
-		if(VAttribute* obj=VAttribute::find(name))
-				obj->addAttributes(it->second);
-
-		//We are in trouble: the icon defined in the JSON file does not correspond to any of the VIcon objects!!!
-		else
-		{
-			UserMessage::message(UserMessage::ERROR, true,
-					std::string("Error, attribute defined in JSON file does not belong to any attribute objects : " + name));
-		}
-	}
+    Q_FOREACH(VProperty* p,group->children())
+    {
+         if(VAttribute* obj=VAttribute::find(p->strName())) 
+         {
+            obj->setProperty(p);
+         }   
+    }    
 }
+
+
 
 //================================
 // Meters
@@ -538,4 +537,5 @@ bool VLateAttribute::getData(Node *node,int row,int& size,QStringList& data)
 	return false;
 }
 
+static SimpleLoader<VAttribute> loader("attribute");
 

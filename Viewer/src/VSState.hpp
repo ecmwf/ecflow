@@ -19,22 +19,27 @@
 #include "VParam.hpp"
 
 class ServerHandler;
+class VProperty;
 
 class VSState : public VParam
 {
 public:
 	VSState(const std::string& name,SState::State);
 
-	QColor colour() const;
-
+    void setProperty(VProperty*);
+    
 	static QString toName(ServerHandler*);
 	static QColor  toColour(ServerHandler* n);
 	static VSState* toState(ServerHandler* n);
 	static VSState* find(const std::string& name);
-	static void init(const std::string& parFile);
+    
+    //Called from VConfigLoader
+    static void load(VProperty* group);
 
 private:
 	static std::map<std::string,VSState*> items_;
+    
+    VProperty* prop_;
 };
 
 #endif

@@ -12,12 +12,14 @@
 #define VARIABLEITEMWIDGET_HPP_
 
 #include "ui_VariableEditDialog.h"
+#include "ui_VariableAddDialog.h"
 #include "ui_VariableItemWidget.h"
 
 #include "InfoPanelItem.hpp"
 #include "VInfo.hpp"
 
 class VariableModel;
+class VariableModelData;
 class VariableModelDataHandler;
 class VariableSortModel;
 
@@ -45,7 +47,6 @@ public:
 	QString name() const;
 	QString value() const;
 
-
 public Q_SLOTS:
 	void accept();
 
@@ -54,23 +55,22 @@ protected:
 
 };
 
-/*
-class ServerAddDialog : public QDialog, private Ui::ServerAddDialog, public VariableDialogChecker
+class VariableAddDialog : public QDialog, private Ui::VariableAddDialog //, public VariableDialogChecker
 {
 Q_OBJECT
 
 public:
-	ServerAddDialog(QWidget* parent=0);
+	VariableAddDialog(VariableModelData* data,QWidget* parent=0);
 
 	QString name() const;
-	QString host() const;
-	QString port() const;
-	bool addToView() const;
+	QString value() const;
 
 public Q_SLOTS:
 	void accept();
+
+protected:
+	VariableModelData* data_;
 };
-*/
 
 
 
@@ -95,11 +95,13 @@ public Q_SLOTS:
 	void on_varView_doubleClicked(const QModelIndex& index);
 	void on_filterTb_toggled(bool);
 	void on_filterLine_textChanged(QString text);
+	void slotItemSelected(const QModelIndex& idx);
 
 protected:
+	void checkActionState();
 	void editItem(const QModelIndex& index);
 	void duplicateItem(const QModelIndex& index);
-	void addItem();
+	void addItem(const QModelIndex& index);
 	void removeItem(const QModelIndex& index);
 
 	void nodeChanged(const Node*, const std::vector<ecf::Aspect::Type>&);

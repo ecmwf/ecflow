@@ -1,0 +1,65 @@
+{
+	"icon"  : {
+			
+			"label" : "Node state",
+			"editable" : "false",
+ 			
+        	"wait" : {
+        		"label" : "Waiting", 
+        		"tooltip" : "A running task is waiting for a trigger.",
+                "icon" : {      
+                	"file" : "icon_waiting.png"
+                }
+        	},      
+            "rerun" : {
+                 "label" : "Rerun",
+                 "tooltip" : "",
+                 "icon" : {      
+                     "file" : "icon_rerun.png"
+                 }
+                
+            },
+            "message" : {
+                 "label" : "Message",
+                 "tooltip" : "Has user messages. User has issued a command since the last begin.",
+                 "icon"  : {
+                	 "file": "icon_message.png"
+                  }
+            },
+            "complete" : {
+            	 "label" : "Complete",
+            	 "tooltip" : "",
+                 "icon"  : {	 
+                	 "file" : "icon_complete.png"
+                 }		 
+            },
+            "time" : {
+                 "label" : "Time",
+                 "tooltip" : "Node has a time dependency.",
+                 "icon"  : {
+                	 "file" : "icon_clock.png"
+                 }
+            },                      
+            "date" : {
+                 "label" : "Date",
+                 "tooltip" : "Node has date or day dependency.",
+                 "icon"  : { 
+                	 "file" : "icon_calendar.png"
+                 }
+            },
+            "zombie" : {
+                "label" : "Zombie",
+                "tooltip" : "",
+                "icon"  : {
+                	"file" :"icon_Z.png"
+                }
+            },
+            "late" : {
+                "label" : "Late",
+                "tooltip" : "Node is late.",               
+                "icon"  : {
+                	"file" : "icon_late.png"
+                }
+            }
+     }
+}

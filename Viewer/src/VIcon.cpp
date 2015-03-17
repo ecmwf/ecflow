@@ -23,10 +23,9 @@
 #include "Node.hpp"
 #include "Submittable.hpp"
 #include "UserMessage.hpp"
+#include "VConfigLoader.hpp"
 #include "VFilter.hpp"
-
-#include <boost/property_tree/ptree.hpp>
-#include <boost/property_tree/json_parser.hpp>
+#include "VProperty.hpp"
 
 std::map<std::string,VIcon*> VIcon::items_;
 
@@ -117,9 +116,15 @@ static VLateIcon lateIcon("late");
 
 VIcon::VIcon(const std::string& name) :
 		VParam(name),
-		pix_(0)
+		pix_(0),
+		prop_(0)
 {
 	items_[name]=this;
+}
+
+VIcon::~VIcon()
+{
+	delete pix_;
 }
 
 
@@ -143,10 +148,14 @@ QPixmap* VIcon::pixmap(int size)
 	return pix_;
 }
 
-VIcon::~VIcon()
+void VIcon::setProperty(VProperty* prop)
 {
-	delete pix_;
+    prop_=prop;
+
+    //Cache label in VParam;
+    label_=prop_->labelText();
 }
+
 
 //===============================================================
 //
@@ -197,7 +206,7 @@ QVariantList VIcon::pixmapList(Node *node,VParamSet *filter)
 	return lst;
 }
 
-void VIcon::init(const std::string& parFile)
+/*void VIcon::init(const std::string& parFile)
 {
 	//std::string parFile("/home/graphics/cgr/ecflowview_icon.json");
 	std::map<std::string,std::map<std::string,std::string> > vals;
@@ -218,7 +227,23 @@ void VIcon::init(const std::string& parFile)
 					std::string("Error, icon defined in JSON file does not belong to any attribute objects : " + name));
 		}
 	}
+}*/
+
+void VIcon::load(VProperty* group)
+{
+    Q_FOREACH(VProperty* p,group->children())
+    {
+         if(VIcon* obj=VIcon::find(p->strName()))
+         {
+            obj->setProperty(p);
+         }
+    }
 }
+
+static SimpleLoader<VIcon> loader("icon");
+
+
+
 
 //==========================================================
 // Wait

@@ -82,7 +82,7 @@ public:
 		static int numOfImmediateChildren(Node*);
 		static Node* immediateChildAt(Node *parent,int pos);
 		static int indexOfImmediateChild(Node *node);
-		static void command(VInfo_ptr,std::string, bool resolve);
+		static void command(VInfo_ptr,const std::vector<std::string>&, bool resolve);
 		static void command(std::vector<VInfo_ptr>,std::string, bool resolve);
 
 		static ServerHandler* find(const std::string& name);

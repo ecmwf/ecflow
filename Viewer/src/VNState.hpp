@@ -19,6 +19,7 @@
 #include "VParam.hpp"
 
 class Node;
+class VProperty;
 
 class VNState : public VParam
 {
@@ -26,8 +27,8 @@ public:
 	VNState(const std::string& name,NState::State);
 	VNState(const std::string& name);
 
-	QColor colour() const;
-
+    void setProperty(VProperty* prop);
+      
 	static QString toName(Node*);
 	static QString toDefaultStateName(Node*);
 	static QColor  toColour(Node* n);
@@ -35,10 +36,14 @@ public:
 	static VNState* toDefaultState(Node* n);
 	static std::vector<VParam*> filterItems();
 	static VNState* find(const std::string& name);
-	static void init(const std::string& parFile);
+	
+    //Called from VConfigLoader
+    static void load(VProperty*);
 
 private:
 	static std::map<std::string,VNState*> items_;
+    VProperty* prop_;
+
 };
 
 #endif
