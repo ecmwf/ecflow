@@ -26,7 +26,8 @@ ecbuild_add_library( TARGET    ecflow
                                ${Boost_INCLUDE_DIRS}
                                ${PYTHON_INCLUDE_DIRS} 
                     )
-                    
+
+# This ensures that for debug config, we only link with debug boost libs, for other configs, we link with optimised boost libs                 
 target_link_libraries(ecflow debug ${Boost_PYTHON_LIBRARY_DEBUG}  ${Boost_PYTHON_LIBRARY_RELEASE})
 
 #
