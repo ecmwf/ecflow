@@ -136,6 +136,9 @@ tar --exclude=*.check --exclude=*.check.b \
 # Remove the link
 rm $ECFLOW_WS_DIR  
 
+# add ecbuild/ into tar file, exclude any .git files
+tar -rvf  $ECFLOWTAR --exclude=.git ecbuild/
+
 ls -lh $ECFLOWTAR
 gzip $ECFLOWTAR
 
