@@ -25,6 +25,7 @@
 #include <iostream>
 #include <algorithm>
 
+#include <boost/algorithm/string/join.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/lexical_cast.hpp>
 
@@ -624,14 +625,22 @@ void ServerHandler::refreshServerInfo()
 	update();
 }
 
+std::string ServerHandler::commandToString(const std::vector<std::string>& cmd)
+{
+	return boost::algorithm::join(cmd," ");
+}
+
+//Send a command to a server. The command is specified as a string vector, while the node or server for that
+//the command will be applied is specified in a VInfo object.
 void ServerHandler::command(VInfo_ptr info,const std::vector<std::string>& cmd, bool resolve)
 {
 	std::vector<std::string> realCommand=cmd;
 
 	if (!realCommand.empty())
 	{
-		//UserMessage::message(UserMessage::DBG, false, std::string("command: ") + cmd + " (real: " + realCommand + ")");
+		UserMessage::message(UserMessage::DBG, false, std::string("command: ") + commandToString(realCommand));
 
+		//Get the name of the object for that the command will be applied
 		std::string nodeFullName;
 		std::string nodeName;
 		ServerHandler* serverHandler = info->server();
@@ -648,7 +657,7 @@ void ServerHandler::command(VInfo_ptr info,const std::vector<std::string>& cmd, 
 			//UserMessage::message(UserMessage::DBG, false, std::string("  --> for server: ") + nodeFullName);
 		}
 
-		// replace placeholders with real node names
+		//Replace placeholders with real node names
 		for(unsigned int i=0; i < cmd.size(); i++)
 		{
 			if(realCommand[i]=="<full_name>")
@@ -657,7 +666,7 @@ void ServerHandler::command(VInfo_ptr info,const std::vector<std::string>& cmd, 
 				realCommand[i]=nodeName;
 		}
 
-		//UserMessage::message(UserMessage::DBG, false, std::string("final command: ") + realCommand);
+		UserMessage::message(UserMessage::DBG, false, std::string("final command: ") + commandToString(realCommand));
 
 		// get the command into the right format by first splitting into tokens
 		// and then converting to argc, argv format
@@ -674,7 +683,8 @@ void ServerHandler::command(VInfo_ptr info,const std::vector<std::string>& cmd, 
 		UserMessage::message(UserMessage::ERROR, true, std::string("command is not recognised."));
 	}
 }
-
+//Send the same command for a list of objects (nodes/servers) specified in a VInfo vector.
+//The command is specified as a string.
 
 void ServerHandler::command(std::vector<VInfo_ptr> info, std::string cmd, bool resolve)
 {
@@ -695,11 +705,13 @@ void ServerHandler::command(std::vector<VInfo_ptr> info, std::string cmd, bool r
 		std::map<ServerHandler*,std::string> targetNodeNames;
 		std::map<ServerHandler*,std::string> targetNodeFullNames;
 
+		//Figure out what objects (node/server) the command should be applied to
 		for(int i=0; i < info.size(); i++)
 		{
 			std::string nodeFullName;
 			std::string nodeName = info[i]->node()->name();
 
+			//Get the name
 			if(info[i]->isNode())
 			{
 				nodeFullName = info[i]->node()->absNodePath();
@@ -711,6 +723,7 @@ void ServerHandler::command(std::vector<VInfo_ptr> info, std::string cmd, bool r
 				//UserMessage::message(UserMessage::DBG, false, std::string("  --> for server: ") + nodeFullName);
 			}
 
+			//Storre the names per target servers
 			targetNodeNames[info[i]->server()] += " " + nodeName;
 			targetNodeFullNames[info[i]->server()] += " " + nodeFullName;
 

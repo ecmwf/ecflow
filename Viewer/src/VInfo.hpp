@@ -17,6 +17,8 @@
 #include <string>
 #include <vector>
 
+#include "Variable.hpp"
+
 class Node;
 
 class ServerHandler;
@@ -91,6 +93,10 @@ public:
 	virtual Node* node() {return node_;}
 	virtual VAttribute* attribute() {return att_;}
 
+	virtual void variables(std::vector<Variable>& vars) {};
+	virtual void genVariables(std::vector<Variable>& vars) {};
+	virtual std::string name() {return std::string();}
+
 	void ancestors(ServerHandler **server,std::vector<Node*>& nodes);
 
 	virtual void accept(VInfoVisitor*)=0;
@@ -124,6 +130,9 @@ public:
 	bool isServer() {return true;}
     bool isEmpty() {return false;}
     void accept(VInfoVisitor*);
+
+    void variables(std::vector<Variable>& vars);
+    std::string name();
 };
 
 // Implements the info object for node selections
@@ -139,6 +148,11 @@ public:
 	void accept(VInfoVisitor*);
 	const std::string&  nodeType();
 	static const std::string&  nodeType(Node*);
+
+	void variables(std::vector<Variable>& vars);
+	void genVariables(std::vector<Variable>& vars);
+	std::string name();
+
 
 protected:
 };

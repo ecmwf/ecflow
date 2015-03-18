@@ -150,6 +150,22 @@ void VInfoServer::accept(VInfoVisitor* v)
 	v->visit(this);
 }
 
+void VInfoServer::variables(std::vector<Variable>& vars)
+{
+	ServerDefsAccess defsAccess(server_);  // will reliquish its resources on destruction
+	const std::vector<Variable>& v=defsAccess.defs()->server().server_variables();
+
+	vars=v;
+}
+
+std::string VInfoServer::name()
+{
+	if(server_)
+		return server_->longName();
+
+	return std::string();
+}
+
 /*
 VInfoReply_ptr VInfoServer::info(VInfoQuery_ptr q)
 {
@@ -263,6 +279,26 @@ const std::string&  VInfoNode::nodeType(Node* node)
 			return taskStr;
 
 	return defaultStr;
+}
+
+
+void VInfoNode::variables(std::vector<Variable>& vars)
+{
+	vars=node_->variables();
+}
+
+void VInfoNode::genVariables(std::vector<Variable>& genVars)
+{
+	genVars.clear();
+	node_->gen_variables(genVars);
+}
+
+std::string VInfoNode::name()
+{
+	if(node_)
+		return node_->name();
+
+	return std::string();
 }
 
 /*

@@ -23,10 +23,33 @@ static std::string defaultStr("");
 //
 //==========================================
 
+VariableModelData::VariableModelData(VInfo_ptr info) : info_(info)
+{
+	reload();
+}
+
 void VariableModelData::clear()
 {
 	vars_.clear();
 	genVars_.clear();
+}
+
+void VariableModelData::reload()
+{
+	clear();
+
+	info_->variables(vars_);
+	info_->genVariables(genVars_);
+}
+
+std::string VariableModelData::name()
+{
+	return info_->name();
+}
+
+std::string VariableModelData::type()
+{
+	return (info_->isNode())?"node":"server";
 }
 
 const std::string& VariableModelData::name(int index) const
@@ -36,12 +59,14 @@ const std::string& VariableModelData::name(int index) const
 
 	if(!isGenVar(index))
 	{
-		return vars_.at(index).first;
+		return vars_.at(index).name();
 	}
 	else
 	{
-		return genVars_.at(index-vars_.size()).first;
+		return genVars_.at(index-vars_.size()).name();
 	}
+
+	return defaultStr;
 }
 
 const std::string& VariableModelData::value(int index) const
@@ -51,27 +76,29 @@ const std::string& VariableModelData::value(int index) const
 
 	if(!isGenVar(index))
 	{
-		return vars_.at(index).second;
+		return vars_.at(index).theValue();
 	}
 	else
 	{
-		return genVars_.at(index-vars_.size()).second;
+		return genVars_.at(index-vars_.size()).theValue();
 	}
+
+	return defaultStr;
 }
 
 bool VariableModelData::hasName(const std::string& n) const
 {
-	for(std::vector<std::pair<std::string,std::string> >::const_iterator it=vars_.begin(); it != vars_.end(); it++)
+	for(std::vector<Variable>::const_iterator it=vars_.begin(); it != vars_.end(); it++)
 	{
-		if((*it).first == n)
+		if((*it).name() == n)
 		{
 			return true;
 		}
 	}
 
-	for(std::vector<std::pair<std::string,std::string> >::const_iterator it=genVars_.begin(); it != genVars_.end(); it++)
+	for(std::vector<Variable>::const_iterator it=genVars_.begin(); it != genVars_.end(); it++)
 	{
-		if((*it).first == n)
+		if((*it).name() == n)
 		{
 			return true;
 		}
@@ -100,73 +127,33 @@ void VariableModelData::buildAlterCommand(std::vector<std::string>& cmd,
 
 }
 
-
-/*    void variables::deleteCB( Widget, XtPointer )
+void VariableModelData::setValue(int index,const std::string& val)
 {
-   if (get_node()) {
-      char *name = XmTextGetString(name_);
-      const char* fullname = get_node()->full_name().c_str();
-      if (confirm::ask(False, "Delete variable %s for node %s", name, fullname)) {
-         // repeat get_node while suite may have been cancelled by another
-         // while answering this question
-         if (get_node()) {
-            if (get_node()->__node__())
-               get_node()->serv().command(clientName, "--alter", "delete", "variable", name,
-                                          fullname, NULL);
-            else
-               get_node()->serv().command("alter", "-vr", fullname, name, NULL);
-         }
-      }
-      XtFree(name);
-      update();
-   }
-   else
-      clear();
+	std::vector<std::string> cmd;
+	buildAlterCommand(cmd,"change","variable",name(index),val);
+
+	ServerHandler::command(info_,cmd,false);
 }
 
-void variables::setCB( Widget, XtPointer )
+void VariableModelData::add(const std::string& name,const std::string& val)
 {
-   if (get_node()) {
+	std::vector<std::string> cmd;
+	buildAlterCommand(cmd,(hasName(name))?"change":"add","variable",name,val);
 
-      char *name = XmTextGetString(name_);
-      char *value = XmTextGetString(value_);
-      Boolean ok = True;
-      node* n = get_node()->variableOwner(name);
-
-      if (n != 0 && n != get_node()) {
-         ok = confirm::ask(True, "This variable is already defined in the %s %s\n"
-                           "A new variable will be created for the selected node\n"
-                           "and hide the previous one\n"
-                           "Do you want to proceed?",
-                           n->type_name(), n->full_name().c_str());
-      }
-
-      if (n != 0 && n->isGenVariable(name) && ok) {
-         ok = confirm::ask(True, "This variable is a generated variable\n"
-                           "Do you want to proceed?");
-      }
-
-      if (ok) {
-         bool add = true;
-         if (get_node()->__node__()) add = get_node()->__node__()->variable(name)
-                  == ecf_node::none();
-         if (get_node()->__node__())
-            get_node()->serv().command(clientName, "--alter", add ? "add" : "change", "variable",
-                                       name, value, get_node()->full_name().c_str(), NULL);
-         else
-            get_node()->serv().command("alter", "-v", get_node()->full_name().c_str(), name, value,
-                                       NULL);
-         if (add) update();
-      }
-      XtFree(name);
-      XtFree(value);
-   }
-   else
-      clear();
+	ServerHandler::command(info_,cmd,false);
 }
-    
-}    
-*/
+
+void VariableModelData::remove(int index,const std::string& varName)
+{
+	if(varName == name(index))
+	{
+		std::vector<std::string> cmd;
+		buildAlterCommand(cmd,"delete","variable",varName,"");
+
+		ServerHandler::command(info_,cmd,false);
+	}
+}
+
 bool VariableModelData::isGenVar(int index) const
 {
 	return (index >= vars_.size());
@@ -177,142 +164,62 @@ int VariableModelData::varNum() const
 	return vars_.size() + genVars_.size();
 }
 
-VariableServerData::VariableServerData(ServerHandler *server)
-{
-	server_=server;
-	reload();
-
-}
-
-const std::string& VariableServerData::dataName()
-{
-	return server_->longName();
-}
-
-std::string VariableServerData::type()
-{
-	return "server";
-}
-
-QColor VariableServerData::colour()
-{
-	return Qt::gray;
-}
-
-void VariableServerData::reload()
-{
-	clear();
-
-	ServerDefsAccess defsAccess(server_);  // will reliquish its resources on destruction
-	const std::vector<Variable>& v=defsAccess.defs()->server().server_variables();
-
-	for(std::vector<Variable>::const_iterator it=v.begin(); it != v.end(); it++)
-	{
-		vars_.push_back(std::make_pair((*it).name(),(*it).theValue()));
-	}
-}
-
-
-void VariableServerData::setValue(int index,const std::string& val)
-{
-}
-
-void VariableServerData::add(const std::string& name,const std::string& val)
-{
-
-}
-
-//==========================================
-//
-// VariableNodeData
-//
-//==========================================
-
-VariableNodeData::VariableNodeData(Node *node)
-{
-	node_=node;
-	reload();
-
-}
-
-const std::string& VariableNodeData::dataName()
-{
-	return node_->name();
-}
-
-std::string VariableNodeData::type()
-{
-	return "node";
-}
-
-QColor VariableNodeData::colour()
-{
-	return VNState::toColour(node_);
-}
-
-
-void VariableNodeData::reload()
-{
-	clear();
-
-	std::vector<Variable> v=node_->variables();
-	for(std::vector<Variable>::const_iterator it=v.begin(); it != v.end(); it++)
-	{
-		vars_.push_back(std::make_pair((*it).name(),(*it).theValue()));
-	}
-
-	v.clear();
-	node_->gen_variables(v);
-	for(std::vector<Variable>::const_iterator it=v.begin(); it != v.end(); it++)
-	{
-		genVars_.push_back(std::make_pair((*it).name(),(*it).theValue()));
-	}
-}
 
 //Check if the total number of variables has changed.
-bool VariableNodeData::sizeChanged()
+bool VariableModelData::sizeChanged()
 {
-	std::vector<Variable> v=node_->variables();
+	std::vector<Variable> v;
 	std::vector<Variable> vg;
-	node_->gen_variables(vg);
+
+	info_->variables(v);
+	info_->genVariables(vg);
 
 	return (v.size() != vars_.size() || vg.size() != genVars_.size());
 }
 
-void VariableNodeData::setValue(int index,const std::string& val)
+//Check if any of the values has changed
+bool VariableModelData::updateValues()
 {
-	VInfo_ptr info(VInfo::make(node_));
+	std::vector<Variable> v;
+	std::vector<Variable> vg;
 
-	std::vector<std::string> cmd;
-	buildAlterCommand(cmd,"change","variable",name(index),val);
+	info_->variables(v);
+	info_->genVariables(vg);
 
-	ServerHandler::command(info,cmd,false);
-}
+	assert(v.size() == vars_.size() && vg.size() == genVars_.size());
 
-void VariableNodeData::add(const std::string& name,const std::string& val)
-{
-	VInfo_ptr info(VInfo::make(node_));
+	bool changed=false;
 
-	std::vector<std::string> cmd;
-	buildAlterCommand(cmd,"change","variable",name,val);
-
-
-	ServerHandler::command(info,cmd,false);
-}
-
-void VariableNodeData::remove(int index,const std::string& varName)
-{
-	if(varName == name(index))
+	for(unsigned int i=0; i < vars_.size(); i++)
 	{
-		VInfo_ptr info(VInfo::make(node_));
-
-		std::vector<std::string> cmd;
-		buildAlterCommand(cmd,"delete","variable",varName,"");
-
-		ServerHandler::command(info,cmd,false);
+		if(vars_[i].name() != v[i].name() || vars_[i].theValue() != v[i].theValue())
+		{
+			changed=true;
+			break;
+		}
 	}
-}
 
+	if(changed == false)
+	{
+		for(unsigned int i=0; i < genVars_.size(); i++)
+		{
+			if(genVars_[i].name() != vg[i].name() || genVars_[i].theValue() != vg[i].theValue())
+			{
+				changed=true;
+				break;
+			}
+		}
+	}
+
+	if(changed)
+	{
+		vars_=v;
+		genVars_=vg;
+	}
+
+	return changed;
+
+}
 
 //==========================================
 //
@@ -344,12 +251,14 @@ void VariableModelDataHandler::reload(VInfo_ptr info)
 
 		for(std::vector<Node*>::iterator it=nodes.begin(); it != nodes.end(); it++)
 		{
-			data_.push_back(new VariableNodeData(*it));
+			VInfo_ptr info(VInfo::make(*it));
+			data_.push_back(new VariableModelData(info));
 		}
 
 		if(server_)
 		{
-			data_.push_back(new VariableServerData(server_));
+			VInfo_ptr info(VInfo::make(server_));
+			data_.push_back(new VariableModelData(info));
 		}
 
 	}
@@ -358,6 +267,20 @@ void VariableModelDataHandler::reload(VInfo_ptr info)
 
 	//Reset the model (views will be n
 }
+
+void VariableModelDataHandler::reload()
+{
+	//Notifies the model that a change will happen
+	Q_EMIT reloadBegin();
+
+	for(std::vector<VariableModelData*>::iterator it=data_.begin(); it != data_.end(); it++)
+	{
+		(*it)->reload();
+	}
+
+	Q_EMIT reloadEnd();
+}
+
 
 void VariableModelDataHandler::clear()
 {
@@ -389,31 +312,50 @@ VariableModelData* VariableModelDataHandler::data(int index) const
 void VariableModelDataHandler::nodeChanged(const Node* node, const std::vector<ecf::Aspect::Type>& aspect)
 {
 	bool changed=false;
+
+	//Check if some variables were added or removed
+
 	for(std::vector<ecf::Aspect::Type>::const_iterator it=aspect.begin(); it != aspect.end(); it++)
 	{
-		if(*it == ecf::Aspect::NODE_VARIABLE)
+		if(*it == ecf::Aspect::ADD_REMOVE_ATTR)
 		{
-			changed=true;
-			break;
+			bool changed=false;
+			for(unsigned int i=0; i < data_.size(); i++)
+			{
+				//If the number of the variables not the same we reset the whole model
+				if(data_.at(i)->sizeChanged())
+				{
+					changed=true;
+				}
+			}
+
+			//If the number of the variables not the same we reset the whole model
+			if(changed)
+			{
+				//Notifies the model that a change will happen
+				Q_EMIT reloadBegin();
+				reload();
+				Q_EMIT reloadEnd();
+
+				//reset the model so no other changes should be checked
+				return;
+			}
 		}
 	}
 
-	if(changed)
+
+	//Check if some variables' value changed
+
+	for(std::vector<ecf::Aspect::Type>::const_iterator it=aspect.begin(); it != aspect.end(); it++)
 	{
-		for(unsigned int i=0; i < data_.size(); i++)
+		//A variable's value changed
+		if(*it == ecf::Aspect::NODE_VARIABLE)
 		{
-			if(data_.at(i)->isNode(node))
+			for(unsigned int i=0; i < data_.size(); i++)
 			{
-				if(data_.at(i)->sizeChanged())
+				if(data_.at(i)->updateValues())
 				{
-					//Notifies the model that a change will happen
-					Q_EMIT reloadBegin();
-					data_.at(i)->reload();
-					Q_EMIT reloadEnd();
-				}
-				else
-				{
-					data_.at(i)->reload();
+					//Update the data item in the model
 					Q_EMIT dataChanged(i);
 				}
 			}

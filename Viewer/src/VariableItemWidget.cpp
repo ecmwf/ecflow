@@ -128,7 +128,7 @@ VariableAddDialog::VariableAddDialog(VariableModelData *data,QWidget *parent) :
 
 	label_->setText(tr("Add new variable for ") +
 			"<b>" + QString::fromStdString(data->type()) + "</b>: " +
-			QString::fromStdString(data->dataName()));
+			QString::fromStdString(data->name()));
 }
 
 void VariableAddDialog::accept()
@@ -192,10 +192,10 @@ VariableItemWidget::VariableItemWidget(QWidget *parent)
 
 	filterLine->setDecoration(QPixmap(":/viewer/filter_decor.svg"));
 
-	searchLine_->hide();
+	//searchLine_->hide();
 
     //Initialise the search widget
-    //searchLine_->setView(varView);
+    searchLine_->setView(varView);
     
 	/*varView->setRootIsDecorated(false);
 	varView->setAllColumnsShowFocus(true);
@@ -319,27 +319,6 @@ void VariableItemWidget::duplicateItem(const QModelIndex& index)
 {
 	std::string name;
 	std::string value;
-	/*
-	sortModel_->data(index,name,value);
-
-
-
-	if(ServerItem* item=model_->indexToServer(sortModel_->mapToSource(index)))
-	{
-		std::string dname=ServerList::instance()->uniqueName(item->name());
-
-		VariableEditDialog d(QString::fromStdString(dname),
-						   QString::fromStdString(item->host()),
-						   QString::fromStdString(item->port()),this);
-
-		//The dialog checks the name, host and port!
-		if(d.exec() == QDialog::Accepted)
-		{
-			model_->dataIsAboutToChange();
-			ServerList::instance()->add(d.name().toStdString(),d.host().toStdString(),d.port().toStdString());
-			model_->dataChangeFinished();
-		}
-	}*/
 }
 
 void VariableItemWidget::addItem(const QModelIndex& index)
@@ -372,7 +351,7 @@ void VariableItemWidget::removeItem(const QModelIndex& index)
 		if(QMessageBox::Ok ==
 				QMessageBox::question(0,QObject::tr("Confirm: delete variable"),
 									"Are you sure that you want to delete variable <b>"+ name + "</b>?"),
-							    QMessageBox::Ok|QMessageBox::Cancel,QMessageBox::Cancel);
+							    QMessageBox::Ok | QMessageBox::Cancel,QMessageBox::Cancel);
 		{
 			model_->removeVariable(vIndex,name,value);
 		}
