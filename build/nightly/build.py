@@ -273,9 +273,9 @@ def add_remote_cray_variables( cray ):
     cray.add_variable("LOGDIR", "/scratch/ma/ma0/nightly")
     cray.add_variable("ECF_OUT","/scratch/ma/ma0/nightly")
 
-    cray.add_variable("ECF_KILL_CMD",   "/home/ma/emos/bin/smssubmit.cray %USER% %SCHOST% %ECF_RID% %ECF_JOB% %ECF_JOBOUT% kill")
-    cray.add_variable("ECF_STATUS_CMD", "/home/ma/emos/bin/smssubmit.cray %USER% %SCHOST% %ECF_RID% %ECF_JOB% %ECF_JOBOUT% stat")
-    cray.add_variable("ECF_JOB_CMD",    "/home/ma/emos/bin/smssubmit.cray %USER% %SCHOST% %ECF_JOB% %ECF_JOBOUT%")
+    cray.add_variable("ECF_KILL_CMD",   "/home/ma/emos/bin/trimurti %USER%  %SCHOST% %ECF_RID% %ECF_JOB% %ECF_JOBOUT% kill") 
+    cray.add_variable("ECF_JOB_CMD",    "/home/ma/emos/bin/trimurti %USER%  %SCHOST% %ECF_JOB% %ECF_JOBOUT%")
+    cray.add_variable("ECF_STATUS_CMD", "/home/ma/emos/bin/trimurti %USER%  %SCHOST% %ECF_RID% %ECF_JOB% %ECF_JOBOUT% stat")
 
     cray.add_variable("QUEUE","ns")
     cray.add_variable("ACCOUNT","ecodmdma")
