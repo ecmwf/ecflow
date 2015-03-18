@@ -153,7 +153,7 @@ then
       export WK=/vol/ecf/cluster/ecflow
       case "$HOST" in
          lxc*)
-	           export BOOST_ROOT=/vol/lxc/boost/$BOOST_VERSION;  
+	           export BOOST_ROOT=/vol/ecf/lxc/boost/$BOOST_VERSION;  
 	           export WK=/vol/ecf/lxc/ecflow
          ;;
 	  esac
