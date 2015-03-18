@@ -88,15 +88,16 @@ def add_remote_linux_64_variables( linux_64 ):
     linux_64.add_variable("NO_OF_CORES","8")
 
 def add_remote_linux_64_lxop_variables( linux_64 ): 
-    linux_64.add_variable("ECF_KILL_CMD","/home/ma/emos/bin/smssubmit.cray %USER% %ECF_RID% %SCHOST% %ECF_JOB% %ECF_JOBOUT%") 
-    linux_64.add_variable("ECF_JOB_CMD", "/home/ma/emos/bin/smssubmit.cray %USER% %SCHOST% %ECF_JOB% %ECF_JOBOUT%")
+    linux_64.add_variable("ECF_KILL_CMD",   "/home/ma/emos/bin/trimurti %USER%  %SCHOST% %ECF_RID% %ECF_JOB% %ECF_JOBOUT% kill") 
+    linux_64.add_variable("ECF_JOB_CMD",    "/home/ma/emos/bin/trimurti %USER%  %SCHOST% %ECF_JOB% %ECF_JOBOUT%")
+    linux_64.add_variable("ECF_STATUS_CMD", "/home/ma/emos/bin/trimurti %USER%  %SCHOST% %ECF_RID% %ECF_JOB% %ECF_JOBOUT% stat")
     linux_64.add_variable("COMPILER_TEST_PATH","gcc-4.3/$mode")
     linux_64.add_variable("COMPILER_VERSION","gcc-4.3")
     linux_64.add_variable("TOOLSET","gcc")
     linux_64.add_variable("BOOTSTRAP_TOOLSET","gcc")
     linux_64.add_variable("NO_OF_CORES","8")
     linux_64.add_variable("SCHOST","lxop")    # Super Computer HOST
-    linux_64.add_variable("QUEUE","test")    # for PBS
+    linux_64.add_variable("QUEUE","build")    # for PBS
     linux_64.add_variable("ECF_OUT","/gpfs/lxop/build/ecflow")
     linux_64.add_variable("ECF_LOGHOST","lxop")   
     linux_64.add_variable("ECF_LOGPORT","9316")
