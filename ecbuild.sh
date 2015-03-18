@@ -2,19 +2,29 @@
 
 # ======================================================================
 # Use for install of ecflow using cmake and ecbuild(bundled with ecflow)
+# External requirements: cmake, boost
+#                        export WK=<source root of ecflow> i.e 
+#                        /var/tmp/fred/ecflow_4_0_7
+
+# assumes ecbuild is parallel to the source
+# Will by default create a build directory parallel to source directory, i.e.
+#                        /var/tmp/fred/cmake_build_dir
+#
+
+# Requires: users to set INSTALL_PREFIX,  
+# This needs to be set to path where you want to install
+INSTALL_PREFIX=/var/tmp/ma0/cmake/ecflow
+
 
 # =====================================================================
-# Maximum of 1 arguments expected:
-if [ "$#" -gt 1 ] ; then
-   echo "cmake expects 1 argument i.e"
-   echo "  ecbuild.sh debug"
-   echo "  ecbuild.sh release"
+# At least one argument expected:
+if [ "$#" -ne 1 ] ; then
+   echo "ecbuild.sh expects 1 argument i.e"
+   echo "  ecbuild.sh  <prefix-dir>"
+   echo "  ecbuild.sh  /usr/local/apps/ecflow"
    exit 1
 fi
-if [[ "$1" != debug && "$1" != release  ]] ; then
-  echo "ecbuild.sh expected [ debug | release   ] but found $1"
-  exit 1
-fi
+INSTALL_PREFIX=$1
 
 # ==================================================================
 # Error handling
@@ -32,26 +42,16 @@ minor=$(cat VERSION.cmake   | grep 'set( ECFLOW_MINOR'   | awk '{print $3}'| sed
 # ===================================================================
 # Build directory
 cd ..
-mkdir -p build_dir/$1
-cd build_dir/$1
+mkdir -p cmake_build_dir/ecflow/release
+cd cmake_build_dir/ecflow/release
       
-cmake_build_type=
-if [[ $1 = debug ]] ; then
-    cmake_build_type=Debug
-else
-    cmake_build_type=Release
-fi
 
 # ===================================================================
-# ecbuild/cmake
+# Configuration
 
 # BOOST_ROOT:  
 #  By default it looks for environment variable BOOST_ROOT, if not it can specified on the command line. i.e
 #  -DBOOST_ROOT=/var/tmp/ma0/boost/boost_1_53_0
-
-# PREFIX: 
-#   This needs to be set to path where you want to install
-INSTALL_PREFIX=/var/tmp/ma0/cmake/ecflow
 
 # Python:
 # -DCMAKE_PYTHON_INSTALL_TYPE = [ local | setup ]
@@ -63,13 +63,18 @@ INSTALL_PREFIX=/var/tmp/ma0/cmake/ecflow
 
 cmake $WK \
       -DCMAKE_MODULE_PATH=$WK/../ecbuild/cmake \
-      -DCMAKE_BUILD_TYPE=$cmake_build_type \
+      -DCMAKE_BUILD_TYPE=Release \
       -DCMAKE_INSTALL_PREFIX=$INSTALL_PREFIX/$release.$major.$minor \
       -DCMAKE_PYTHON_INSTALL_TYPE=local 
       #-DCMAKE_PYTHON_INSTALL_PREFIX=$INSTALL_PREFIX/$release.$major.$minor/lib/python2.7/site-packages/ecflow
      
+
 # ===================================================================   
-# next steps:
-# make -j2
-# umask 0022
-# make install
+# Build
+
+# determine number of cpu
+CPUS=$(lscpu -p | grep -v '#' | wc -l)
+
+make -j${CPUS}
+umask 0022
+make install
