@@ -52,11 +52,11 @@
 cmake/ecbuild
 =====================================================================
 
-* run $WK/ecbuild.sh , just specify the install prefix
+* run $WK/configure.sh , just specify the install prefix
 
-  # sh -x ecbuild.sh /usr/local/apps/ecflow
-
-  This will configure, build and install to the given prefix
+  # ./configure.sh /usr/local/apps/ecflow
+  # make
+  # make install
   
 
 boost/bjam

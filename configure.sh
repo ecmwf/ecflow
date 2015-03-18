@@ -19,9 +19,9 @@ INSTALL_PREFIX=/var/tmp/ma0/cmake/ecflow
 # =====================================================================
 # At least one argument expected:
 if [ "$#" -ne 1 ] ; then
-   echo "ecbuild.sh expects 1 argument i.e"
-   echo "  ecbuild.sh  <prefix-dir>"
-   echo "  ecbuild.sh  /usr/local/apps/ecflow"
+   echo "configure.sh expects 1 argument i.e"
+   echo "  configure.sh  <prefix-dir>"
+   echo "  configure.sh  /usr/local/apps/ecflow"
    exit 1
 fi
 INSTALL_PREFIX=$1
@@ -67,14 +67,3 @@ cmake $WK \
       -DCMAKE_INSTALL_PREFIX=$INSTALL_PREFIX/$release.$major.$minor \
       -DCMAKE_PYTHON_INSTALL_TYPE=local 
       #-DCMAKE_PYTHON_INSTALL_PREFIX=$INSTALL_PREFIX/$release.$major.$minor/lib/python2.7/site-packages/ecflow
-     
-
-# ===================================================================   
-# Build
-
-# determine number of cpu
-CPUS=$(lscpu -p | grep -v '#' | wc -l)
-
-make -j${CPUS}
-umask 0022
-make install
