@@ -26,7 +26,8 @@ ecbuild_add_library( TARGET    ecflow
                                ${Boost_INCLUDE_DIRS}
                                ${PYTHON_INCLUDE_DIRS} 
                     )
-                    
+
+# This ensures that for debug config, we only link with debug boost libs, for other configs, we link with optimised boost libs                 
 target_link_libraries(ecflow debug ${Boost_PYTHON_LIBRARY_DEBUG}  ${Boost_PYTHON_LIBRARY_RELEASE})
 
 #
@@ -118,7 +119,7 @@ if( ENABLE_PYTHON )
       set(SETUP_PY_IN "${CMAKE_CURRENT_SOURCE_DIR}/setup.py.in")
       set(SETUP_PY    "${CMAKE_CURRENT_SOURCE_DIR}/setup.py")
       set(DEPS        "${CMAKE_CURRENT_SOURCE_DIR}/ecflow/__init__.py")
-      set(OUTPUT      "${CMAKE_CURRENT_SOURCE_DIR}/build/timestamp")
+      set(OUTPUT      "${CMAKE_CURRENT_SOURCE_DIR}/timestamp")
 
       configure_file(${SETUP_PY_IN} ${SETUP_PY} )
 

@@ -16,7 +16,6 @@ Process
 
 ----------------------------------------------------------------------
 0/ Inform user support, allows user support to test rpm
-    
    
 0/ *Before* each release, make sure the ecflow tar file is
    copied to $SCRATCH and inform Daniel. This will allow
@@ -30,12 +29,12 @@ Process
    
 0/ git flow release start 4.0.7
 
-   *Push* branch onto stash, otherwise the we can not pull, from the remote machines
+   *Push* branch onto stash, otherwise we can not pull, from the remote machines
    - In eclipse, you *may* have to push this branch first
      Team->Push Branch
      *otherwise* the option Team->Push Upstream  may well be greyed out.
 
-0/ Update ECFLOW_GIT_BRANCH to "release/4.0.7" in the nightly build.py
+0/ Update ECFLOW_GIT_BRANCH to "release/4.0.7" in the nightly build.py or meta-builder(settings/ecflow/ecflow.py# git_tag=release/4.0.7
 
 0/ For a PREPIFS release change file:
      /usr/local/apps/ecflow/.modulerc
@@ -76,19 +75,21 @@ Process
   *Make* sure destination has a trailing '/.' otherwise you
   can end up renaming.
 
-0/ Inform RD, ask them to provide the list of virtual machines. 
-   where they want the new release installed to:
-   virtual machines are opensuse112, hence we use lxab(opensuse113) to copy from:
+0/ The RD virtual machines are tied to vsms1, via a link to /usr/local
+ 
+   	  ssh rdx@<hostname>
    
-   ssh rdx@<hostname>
-   
-   i.e  ssh rdx@vecfrdda1
-   
-   The list of all virtual machines, versions and port numbers is:
+      i.e  ssh rdx@vecfrdda1
+      
+      df 
+         this will show the links
+      
+   The list of all virtual machines, versions and port numbers is in:
    
         ~rdx/ecflow/servers.config
         
-   - ssh opensuse113/lxab, su emos;
+   # as an emergency we can copy from lxab
+   - ssh lxab, su emos;
    - scp -r 4.0.7 emos@vecfrdda1:/usr/local/apps/ecflow/.
         
 
@@ -118,12 +119,13 @@ Process
 0/ Tag the release, This should now be automatic when using git flow:
        git flow release finish 4.0.7
   
-0/ AFTER the release increment the version number in $WK/VERSION.cmake
-   THEN, run:
+0/ AFTER the release 
+   o increment the version number in $WK/VERSION.cmake THEN, run:
      sh -x $WK/cmake.sh debug
      
      This will update the version number for $WK/ACore/src/ecflow_version.h
      This file is included in $WK/ACore/src/Version.cpp
      
      Then check this file in for, for the other platforms.
-  
+     
+0/ Reset metabuilder ecflow git_tag, back to develop

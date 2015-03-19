@@ -13,6 +13,8 @@
    * Xlib, X11, XMotif for :term:`ecflowview`. Do *not* use Lesstif library
      to compile ecflowview as a replacement for Motif. OpenMotif can be 
      downloaded from http://www.ist.co.uk/downloads/motif_download.html
+     
+   * optionally cmake
 
 * ecfFlow consists of two tar files i.e. :
    
@@ -32,10 +34,11 @@
    # tar -xf boost_1_53_0.tar
    # tar -xf ecflow_4_0_7.tar
    
-* You should have two directories created::
+* You should have three directories created::
 
    boost_1_53_0
    ecflow_4_0_7
+   ecbuild
    
 * Create two environment variables. These are used by some of scripts::
 
@@ -43,6 +46,21 @@
    > export BOOST_ROOT=/tmp/ecflow_build/boost_1_53_0
    
    
+* There are two ways of building ecflow, boost-build/bjam or cmake/ecbuild
+
+
+cmake/ecbuild
+=====================================================================
+
+* run $WK/configure.sh , just specify the install prefix
+
+  # ./configure.sh /usr/local/apps/ecflow
+  # make
+  # make install
+  
+
+boost/bjam
+=====================================================================
 * | For installation the following environment variables are required.
   
   ::

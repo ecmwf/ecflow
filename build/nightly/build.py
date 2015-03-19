@@ -88,15 +88,16 @@ def add_remote_linux_64_variables( linux_64 ):
     linux_64.add_variable("NO_OF_CORES","8")
 
 def add_remote_linux_64_lxop_variables( linux_64 ): 
-    linux_64.add_variable("ECF_KILL_CMD","/home/ma/emos/bin/smssubmit.cray %USER% %ECF_RID% %SCHOST% %ECF_JOB% %ECF_JOBOUT%") 
-    linux_64.add_variable("ECF_JOB_CMD", "/home/ma/emos/bin/smssubmit.cray %USER% %SCHOST% %ECF_JOB% %ECF_JOBOUT%")
+    linux_64.add_variable("ECF_KILL_CMD",   "/home/ma/emos/bin/trimurti %USER%  %SCHOST% %ECF_RID% %ECF_JOB% %ECF_JOBOUT% kill") 
+    linux_64.add_variable("ECF_JOB_CMD",    "/home/ma/emos/bin/trimurti %USER%  %SCHOST% %ECF_JOB% %ECF_JOBOUT%")
+    linux_64.add_variable("ECF_STATUS_CMD", "/home/ma/emos/bin/trimurti %USER%  %SCHOST% %ECF_RID% %ECF_JOB% %ECF_JOBOUT% stat")
     linux_64.add_variable("COMPILER_TEST_PATH","gcc-4.3/$mode")
     linux_64.add_variable("COMPILER_VERSION","gcc-4.3")
     linux_64.add_variable("TOOLSET","gcc")
     linux_64.add_variable("BOOTSTRAP_TOOLSET","gcc")
     linux_64.add_variable("NO_OF_CORES","8")
     linux_64.add_variable("SCHOST","lxop")    # Super Computer HOST
-    linux_64.add_variable("QUEUE","test")    # for PBS
+    linux_64.add_variable("QUEUE","build")    # for PBS
     linux_64.add_variable("ECF_OUT","/gpfs/lxop/build/ecflow")
     linux_64.add_variable("ECF_LOGHOST","lxop")   
     linux_64.add_variable("ECF_LOGPORT","9316")
@@ -272,9 +273,9 @@ def add_remote_cray_variables( cray ):
     cray.add_variable("LOGDIR", "/scratch/ma/ma0/nightly")
     cray.add_variable("ECF_OUT","/scratch/ma/ma0/nightly")
 
-    cray.add_variable("ECF_KILL_CMD",   "/home/ma/emos/bin/smssubmit.cray %USER% %SCHOST% %ECF_RID% %ECF_JOB% %ECF_JOBOUT% kill")
-    cray.add_variable("ECF_STATUS_CMD", "/home/ma/emos/bin/smssubmit.cray %USER% %SCHOST% %ECF_RID% %ECF_JOB% %ECF_JOBOUT% stat")
-    cray.add_variable("ECF_JOB_CMD",    "/home/ma/emos/bin/smssubmit.cray %USER% %SCHOST% %ECF_JOB% %ECF_JOBOUT%")
+    cray.add_variable("ECF_KILL_CMD",   "/home/ma/emos/bin/trimurti %USER%  %SCHOST% %ECF_RID% %ECF_JOB% %ECF_JOBOUT% kill") 
+    cray.add_variable("ECF_JOB_CMD",    "/home/ma/emos/bin/trimurti %USER%  %SCHOST% %ECF_JOB% %ECF_JOBOUT%")
+    cray.add_variable("ECF_STATUS_CMD", "/home/ma/emos/bin/trimurti %USER%  %SCHOST% %ECF_RID% %ECF_JOB% %ECF_JOBOUT% stat")
 
     cray.add_variable("QUEUE","ns")
     cray.add_variable("ACCOUNT","ecodmdma")
@@ -413,10 +414,8 @@ def build_localhost( parent ) :
     localhost.add_task("test_migration").add_trigger("test_performance == complete or test_server_performance == aborted")
     localhost.add_task("test_new_client_old_server_319").add_trigger("test_migration == complete or test_migration == aborted")
     localhost.add_task("test_new_client_old_server_400").add_trigger("test_new_client_old_server_319 == complete or test_new_client_old_server_319 == aborted")
-    localhost.add_task("test_new_client_old_server_401").add_trigger("test_new_client_old_server_400 == complete or test_new_client_old_server_400 == aborted")
-    localhost.add_task("test_new_client_old_server_402").add_trigger("test_new_client_old_server_401 == complete or test_new_client_old_server_401 == aborted")
-    localhost.add_task("test_new_client_old_server_403").add_trigger("test_new_client_old_server_402 == complete or test_new_client_old_server_402 == aborted")
-    localhost.add_task("test_new_client_old_server_404").add_trigger("test_new_client_old_server_403 == complete or test_new_client_old_server_403 == aborted")
+    localhost.add_task("test_new_client_old_server_404").add_trigger("test_new_client_old_server_400 == complete or test_new_client_old_server_400 == aborted")
+    localhost.add_task("test_new_client_old_server_406").add_trigger("test_new_client_old_server_404 == complete or test_new_client_old_server_404 == aborted")
  
 def build_localhost_cmake( parent ) :
     # Hence left out test_client_performance and test_server_performance

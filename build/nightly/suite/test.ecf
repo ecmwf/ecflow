@@ -199,12 +199,19 @@ else
       # --output-on-failure only show output on failure
       #
       if [[ %ECF_TRYNO% -eq 1 ]] ; then
-         ctest -R u_ -V
-         ctest -R py_u -V
-         ctest -R py_s -V
-         ctest -R c_ -V
-         ctest -R s_ -V
-         ctest -R perf_ -V
+      
+         if [[ %ARCH% = cray ]] ; then
+         	ctest -E "(s_test|perf_|test_migration)" -V
+         else
+         	ctest -R ^u_ -V
+         	ctest -R py_u -V
+         	ctest -R py_s -V
+         	ctest -R c_ -V
+         	ctest -R s_ -V
+         	if [[ %MODE% != debug ]] ; then
+         		ctest -R perf_ -V
+         	fi
+         fi
       else
          # this does not work
          # ctest --rerun-failed --output-on-failure
@@ -276,7 +283,9 @@ else
          export ECF_PORT=3142
       fi
       
-      run_test Test s_test
+      if [[ %ARCH% != cray ]] ; then
+      	  run_test Test s_test
+      fi
       
       
       #============================ Test zombies ========================================
@@ -286,7 +295,10 @@ else
       if [ %ECF_TRYNO% -gt 1 ] ; then
          export ECF_DEBUG_ZOMBIES=1
       fi
-      run_test Test s_test_zombies
+      
+      if [[ %ARCH% != cray ]] ; then
+         run_test Test s_test_zombies
+      fi
       
       
       #============================ Python ========================================
