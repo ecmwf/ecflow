@@ -75,19 +75,21 @@ Process
   *Make* sure destination has a trailing '/.' otherwise you
   can end up renaming.
 
-0/ Inform RD, ask them to provide the list of virtual machines. 
-   where they want the new release installed to:
-   virtual machines are opensuse112, hence we use lxab(opensuse113) to copy from:
+0/ The RD virtual machines are tied to vsms1, via a link to /usr/local
+ 
+   	  ssh rdx@<hostname>
    
-   ssh rdx@<hostname>
-   
-   i.e  ssh rdx@vecfrdda1
-   
-   The list of all virtual machines, versions and port numbers is:
+      i.e  ssh rdx@vecfrdda1
+      
+      df 
+         this will show the links
+      
+   The list of all virtual machines, versions and port numbers is in:
    
         ~rdx/ecflow/servers.config
         
-   - ssh opensuse113/lxab, su emos;
+   # as an emergency we can copy from lxab
+   - ssh lxab, su emos;
    - scp -r 4.0.7 emos@vecfrdda1:/usr/local/apps/ecflow/.
         
 
