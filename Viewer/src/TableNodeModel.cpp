@@ -57,6 +57,9 @@ int TableNodeModel::rowCount( const QModelIndex& parent) const
 			cnt+=data_->numOfFiltered(i);
 		}
 
+
+		qDebug() << "table count" << cnt;
+
 		return cnt;
 	}
 

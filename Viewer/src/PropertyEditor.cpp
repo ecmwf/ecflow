@@ -110,6 +110,10 @@ void PropertyEditor::addItem(VProperty* vProp,QtProperty* parentProp)
 
         QVariant::Type vType=vProp->defaultValue().type();
 
+        //We cannot handle these values.
+        if(vType == QVariant::Invalid)
+        	return;
+
         QtVariantProperty *prop =
             variantManager->addProperty(vType,vProp->labelText());
 

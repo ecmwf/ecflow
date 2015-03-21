@@ -140,45 +140,51 @@ InfoPanel::~InfoPanel()
 
 void InfoPanel::clear()
 {
-	currentNode_.reset();
+	info_.reset();
 	tab_->clear();
 	bcWidget_->setPath(VInfo_ptr());
 }
 
+//TODO: It should be the slot
 void InfoPanel::reset(VInfo_ptr info)
 {
-		currentNode_=info;
+        //Set info
+    info_=info;
 
-		//Check which roles are allowed
-		QStringList ids;
-		ids << "overview" << "variable" << "message" << "script" << "job" << "output" << "why" << "manual" << "trigger";
+	//Check which roles are allowed
+    QStringList ids;
+	ids << "overview" << "variable" << "message" << "script" << "job" << "output" << "why" << "manual" << "trigger";
 
-		//Set tabs according to the current set of roles
-		adjust(ids);
+	//Set tabs according to the current set of roles
+	adjust(ids);
 
 		qDebug() << "current" << tab_->currentIndex();
 
-		//Reload the current widget in the tab and clears the others
-		for(int i=0; i < tab_->count(); i++)
+	//Reload the current widget in the tab and clears the others
+	for(int i=0; i < tab_->count(); i++)
+	{
+		if(InfoPanelItem* item=findItem(tab_->widget(i)))
 		{
-				if(InfoPanelItem* item=findItem(tab_->widget(i)))
-				{
-					if(i== tab_->currentIndex())
-					{
-						qDebug() << "reload" << i;
-						item->reload(info);
-					}
-					else
-						item->clearContents();
-				}
+			if(i== tab_->currentIndex())
+		    {
+				qDebug() << "reload" << i;
+				item->reload(info);
 			}
-
-		bcWidget_->setPath(info);
+			else
+            {    
+				item->clearContents();
+			}
+		}
+    }
+		
+	//update the breadcrumbs	
+	bcWidget_->setPath(info);
 }
 
+//This slot is called when the info objec is selected
 void InfoPanel::slotReload(VInfo_ptr node)
 {
-	//When the panel is disabled (i.e. the dock parent is hidden) or the mode is detached it ccanoot receive
+	//When the panel is disabled (i.e. the dock parent is hidden) or the mode is detached it cannot receive
 	//the reload request
 	if(!isEnabled() || detached())
 		return;
@@ -199,13 +205,17 @@ void InfoPanel::adjust(QStringList ids)
 		}
 	}
 
+	//A new set of tabs is needed!
 	if(match != ids.count())
 	{
 		//Remember the current widget
 		QWidget *current=tab_->currentWidget();
 
-		tab_->clear();
-		Q_FOREACH(QString id, ids)
+		//Remove the pages but does not delete them
+        tab_->clear();
+		
+        
+        Q_FOREACH(QString id, ids)
 		{
 			if(InfoPanelItemHandler* d=findHandler(id))
 			{
@@ -286,14 +296,14 @@ InfoPanelItemHandler* InfoPanel::createHandler(QString id)
 
 void InfoPanel::slotCurrentWidgetChanged(int idx)
 {
-	if(!currentNode_.get())
+	if(!info_.get())
 		return;
 
 	if(InfoPanelItem* item=findItem(tab_->widget(idx)))
 	{
 		qDebug() << "tab changed" << item->loaded();
 		if(!item->loaded())
-			item->reload(currentNode_);
+			item->reload(info_);
 	}
 }
 

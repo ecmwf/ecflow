@@ -21,7 +21,6 @@
 class Node;
 class ServerHandler;
 
-
 class VariableModelData
 {
 public:

@@ -18,8 +18,7 @@
 VariableSearchLine::VariableSearchLine(QWidget *parent) :
     AbstractSearchLine(parent), 
     view_(0),
-    currentResultItem_(-1),
-    filter_(false)
+    currentResultItem_(-1)
 {
 }
 
@@ -50,32 +49,23 @@ void VariableSearchLine::setView(QTreeView* view)
        		this,SLOT(slotUpdate(QModelIndex,QModelIndex)));
 }    
 
-void VariableSearchLine::setFilter(bool f)
-{
-	filter_=f;
-
-	//We need to call the sortmodel
-}
-
-
 void VariableSearchLine::slotFind(QString txt)
 {
     if(!view_)
         return;
     
-    if(txt.simplified().isEmpty())
+    if(txt.simplified().isEmpty() && resultItems_.isEmpty())
     {
-        currentResultItem_=0;
-        resultItems_.clear();
-        updateButtons(false);
         return;
     }   
-  
+
     QModelIndex current=view_->currentIndex();
 
+    //The (sort) model redoes the match.
     resultItems_=view_->model()->match(current,Qt::DisplayRole,txt,-1,
     		            Qt::MatchStartsWith | Qt::MatchRecursive | Qt::MatchWrap);
 
+    //The view needs to be rerendered!
     view_->dataChanged(QModelIndex(),QModelIndex());
     
     if(resultItems_.count() > 0)

@@ -24,6 +24,10 @@ public:
 	TableNodeWidget(ServerFilter* servers,QWidget* parent=0);
 	void writeSettings(VSettings*);
 	void readSettings(VSettings*);
+
+public Q_SLOTS:
+	void on_actionBreadcrumbs_triggered(bool b);
+
 };
 
 #endif

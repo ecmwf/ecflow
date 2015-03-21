@@ -73,7 +73,6 @@ public:
 	bool detached() const;
 	void detached(bool);
 	void clear();
-	void reset(VInfo_ptr node);
 
 	//From DashboardWidget
 	void reload() {};
@@ -89,7 +88,8 @@ Q_SIGNALS:
 	void selectionChanged(VInfo_ptr);
 
 protected:
-	void adjust(QStringList);
+	void reset(VInfo_ptr node);
+    void adjust(QStringList);
 	InfoPanelItemHandler* findHandler(QWidget* w);
 	InfoPanelItemHandler* findHandler(QString id);
 	InfoPanelItem* findItem(QWidget* w);
@@ -97,7 +97,7 @@ protected:
 
 	//QTabWidget *tab_;
 	QList<InfoPanelItemHandler*> items_;
-	VInfo_ptr currentNode_;
+	VInfo_ptr info_;
 };
 
 #endif

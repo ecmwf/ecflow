@@ -83,7 +83,7 @@ QVariant VariableModel::data( const QModelIndex& index, int role ) const
 
 	//Data lookup can be costly so we immediately return a default value for all
 	//the cases where the default should be used.
-	if(role != Qt::DisplayRole && role != Qt::ToolTipRole && role != Qt::DecorationRole && role != Qt::BackgroundRole && role != Qt::ForegroundRole)
+	if(role != Qt::DisplayRole && role != Qt::BackgroundRole && role != Qt::ForegroundRole)
 	{
 		return QVariant();
 	}
@@ -121,7 +121,7 @@ QVariant VariableModel::data( const QModelIndex& index, int role ) const
 	//Variables
 	else if (level == 2)
 	{
-		VariableModelData *d=data_->data(index.parent().row());
+        VariableModelData *d=data_->data(index.parent().row());
 		if(!d)
 		{
 			return QVariant();
@@ -133,15 +133,18 @@ QVariant VariableModel::data( const QModelIndex& index, int role ) const
 			if(role == Qt::ForegroundRole)
 					return QColor(70,70,70);
 		}
-
-		if(index.column() == 0)
-		{
-			return QString::fromStdString(d->name(row));
-		}
-		else if(index.column() == 1)
-		{
-			return QString::fromStdString(d->value(row));
-		}
+        if(role == Qt::DisplayRole)
+        {    
+		    if(index.column() == 0)
+		    {
+			    return QString::fromStdString(d->name(row));
+		    }
+		    else if(index.column() == 1)
+		    {
+			    return QString::fromStdString(d->value(row));
+		    }
+        }
+        
 		return QVariant();
 	}
 
@@ -464,7 +467,7 @@ QVariant VariableSortModel::data(const QModelIndex& idx,int role) const
         int col2=(idx.column()==0)?1:0;
         QModelIndex idx2=index(idx.row(),col2,idx.parent());
             
-        qDebug() << idx << idx2;
+        //qDebug() << idx << idx2;
         
         if(matchLst_.contains(idx) || matchLst_.contains(idx2))
             return QColor(83,187,109);
@@ -479,6 +482,9 @@ QModelIndexList VariableSortModel::match(const QModelIndex& start,int role,const
 	QString txt=value.toString();
 
 	matchLst_.clear();
+
+	if(txt.simplified().isEmpty())
+		return matchLst_;
 
 	for(int i=0; i < rowCount(); i++)
 	{

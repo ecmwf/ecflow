@@ -61,6 +61,7 @@ Q_OBJECT
 
 public:
 	VariableAddDialog(VariableModelData* data,QWidget* parent=0);
+	VariableAddDialog(VariableModelData* data,QString name,QString value,QWidget* parent=0);
 
 	QString name() const;
 	QString value() const;

@@ -103,6 +103,9 @@ void AbstractNodeModel::clean()
 	servers_->clear();*/
 }
 
+//TODO!!!!!
+
+//Should be reviewed what it is actually doing!!!!!!!!!!!!!!!!!
 void AbstractNodeModel::reload()
 {
 	if(active_)

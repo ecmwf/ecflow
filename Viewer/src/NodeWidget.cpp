@@ -48,7 +48,7 @@ void NodeWidget::currentSelection(VInfo_ptr info)
 void NodeWidget::reload()
 {
 	active(true);
-	model_->reload();
+	//model_->reload();
 }
 
 void NodeWidget::active(bool b)

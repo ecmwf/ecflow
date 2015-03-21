@@ -37,8 +37,8 @@ void VariableDelegate::paint(QPainter *painter,const QStyleOptionViewItem &optio
     const QStyle *style = vopt.widget ? vopt.widget->style() : QApplication::style();
     const QWidget* widget = vopt.widget;
 
-    //This indicates that the item is not a parent item (node or server),
-    //but a variable, hence it does not have branch controls.
+    //This indicates that the item is a parent item (node or server),
+    // hence it has branch controls.
     bool hasChild=!index.parent().isValid();
 
     //Save painter state
@@ -54,7 +54,7 @@ void VariableDelegate::paint(QPainter *painter,const QStyleOptionViewItem &optio
     	bgRect.setX(0);
     }
 
-    //Paint item highlight!!
+    //Paint item highlight!! It is taken from the UserRole
     QColor highCol=index.data(Qt::UserRole).value<QColor>();
     if(highCol.isValid())
     {
@@ -109,9 +109,14 @@ void VariableDelegate::paint(QPainter *painter,const QStyleOptionViewItem &optio
     //For variables in the first column we move the text to the left.
     if(index.column() == 0 && !hasChild)
     {
-    	textRect.moveLeft(option.rect.x()-17);
+    	textRect.setLeft(option.rect.x()-17);
     }
-
+    
+    if(index.column() == 1)
+    {
+        textRect.adjust(2,0,2,0);
+    }    
+    
     QColor fg=index.data(Qt::ForegroundRole).value<QColor>();
     if(!fg.isValid())
     	   fg=Qt::black;
@@ -128,7 +133,7 @@ QSize VariableDelegate::sizeHint(const QStyleOptionViewItem & option, const QMod
 {
 	QSize size=QStyledItemDelegate::sizeHint(option,index);
 
-	size+=QSize(0,4);
+	size+=QSize(0,2);
 
     return size;
 }
@@ -157,13 +162,13 @@ VariableView::VariableView(QWidget* parent) : QTreeView(parent)
 }
 
 //We do not want to render the branches for the variable items. We only
-//render the branch for the node items (nodes or server).
+//render the branch for the group items (nodes or server).
 void VariableView::drawBranches(QPainter* painter,const QRect& rect,const QModelIndex& index ) const
-{
-	if(!index.parent().isValid())
-	{
+{   
+    if(!index.parent().isValid() && index.column()==0)
+	{ 
 		//We need to fill the branch area here. We cannot do it in the delegate
-		//because when the delegate is called the the branch control is already
+		//because when the delegate is called the branch control is already
 		//rendered, so the delegate would just overpaint it!!!
 		painter->fillRect(rect,index.data(Qt::BackgroundRole).value<QColor>());
 

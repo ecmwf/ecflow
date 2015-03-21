@@ -21,6 +21,9 @@
 class QWidget;
 class InfoProvider;
 
+//Thisis the base class to represent one tab in the info panel.
+
+
 class InfoPanelItem : public VTaskObserver, public InfoPresenter, public NodeObserver
 {
 public:

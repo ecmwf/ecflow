@@ -24,7 +24,6 @@ public:
      VariableSearchLine(QWidget *parent);
     ~VariableSearchLine();
     void setView(QTreeView* view);
-    void setFilter(bool);
 
 public Q_SLOTS:
     void slotFind(QString);
@@ -42,8 +41,6 @@ protected:
     QTreeView* view_;
     QModelIndexList resultItems_;
     int currentResultItem_;
-    bool filter_;
-
 };
 
 #endif

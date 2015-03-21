@@ -130,7 +130,7 @@ QT4_WRAP_UI       (VIEWER_FORMS_HEADERS CommandDesignerWidget.ui CustomCommandDi
                         VariableItemWidget.ui)
 
 
-ecbuild_add_executable( TARGET   ecflowviewer
+ecbuild_add_executable( TARGET   ecflow_ui
                         SOURCES  ${viewer_srcs} ${VIEWER_MOC} ${VIEWER_RES} ${VIEWER_FORMS_HEADERS}
                         INCLUDES .
                                  ../../ACore/src 

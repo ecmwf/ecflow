@@ -15,6 +15,10 @@
 class InfoProvider;
 class VReply;
 
+//This is a base class for presenting a VInfo object. The InfoPanelItems 
+//are derived from this class. It can contain an InfoProvider member that
+//is able to generate the information we want to display about the VInfo.
+
 class InfoPresenter
 {
 public:

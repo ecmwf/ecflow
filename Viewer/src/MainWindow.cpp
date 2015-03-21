@@ -181,7 +181,7 @@ void MainWindow::on_actionShowInInfoPanel_triggered()
 {
 	nodePanel_->addToDashboard("info");
 	return;
-
+/*
 	QList<QDockWidget*> dockLst=findChildren<QDockWidget*>();
 
 	//If there is a visible non-detached panel it already shows the needed info
@@ -215,7 +215,7 @@ void MainWindow::on_actionShowInInfoPanel_triggered()
 	InfoPanel* ip=addInfoPanel();
 	ip->reset(nodePanel_->currentSelection());
 	ip->detached(true);
-
+*/
 }
 
 

@@ -71,17 +71,64 @@ TableNodeWidget::TableNodeWidget(ServerFilter* servers,QWidget * parent) : NodeW
 	viewTb->setMenu(menu);
 }
 
+
+void TableNodeWidget::on_actionBreadcrumbs_triggered(bool b)
+{
+	if(b)
+	{
+		bcWidget_->active(true);
+		bcWidget_->setPath(view_->currentSelection());
+	}
+	else
+	{
+		bcWidget_->active(false);
+	}
+
+	//bcWidget_->clear();
+}
+
 void TableNodeWidget::writeSettings(VSettings* vs)
 {
 	vs->put("type","table");
 	vs->put("dockId",id_);
+
+	bcWidget_->writeSettings(vs);
+
+	//states_->writeSettings(vs);
+	//atts_->writeSettings(vs);
+	//icons_->writeSettings(vs);
 }
 
 void TableNodeWidget::readSettings(VSettings* vs)
 {
 	std::string type=vs->get<std::string>("type","");
 	if(type != "table")
-	{
 		return;
-	}
+
+	//This will not emit the changed signal. So the "observers" will
+	//not notice the change.
+	//states_->readSettings(vs);
+	//atts_->readSettings(vs);
+	//icons_->readSettings(vs);
+
+	//The model at this point is inactive (not using its data). We make it active:
+	//	-it will instruct its data provider to filter the data according
+	//   to the current settings
+	//	-it will load and display the data
+	model_->active(true);
+
+	//--------------------------
+	//Breadcrumbs
+	//--------------------------
+
+	bcWidget_->readSettings(vs);
+
+	//Synchronise the action and the breadcrumbs state
+	//This will not emit the trigered signal of the action!!
+	actionBreadcrumbs->setChecked(bcWidget_->active());
+
+	//attrFilterMenu_->reload();
+	//iconFilterMenu_->reload();
+	//stateFilterMenu_->reload();
+
 }
