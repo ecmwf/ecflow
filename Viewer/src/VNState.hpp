@@ -17,11 +17,12 @@
 
 #include "NState.hpp"
 #include "VParam.hpp"
+#include "VProperty.hpp"
 
 class Node;
 class VProperty;
 
-class VNState : public VParam
+class VNState : public VParam, public VPropertyObserver
 {
 public:
 	VNState(const std::string& name,NState::State);
@@ -29,6 +30,9 @@ public:
 
     void setProperty(VProperty* prop);
       
+    //From VPropertyObserver
+    void notifyChange(VProperty*);
+
 	static QString toName(Node*);
 	static QString toDefaultStateName(Node*);
 	static QColor  toColour(Node* n);

@@ -33,6 +33,7 @@ class NodeObserver;
 class ServerHandler;
 class ServerComQueue;
 class ServerComThread;
+class VNode;
 
 class ServerHandler : public QObject
 {
@@ -114,6 +115,8 @@ protected:
 		bool communicating_;
 		std::vector<NodeObserver*> nodeObservers_;
 
+        VNode* vRoot_;
+        
 		static std::vector<ServerHandler*> servers_;
 		static std::map<std::string, std::string> commands_;
 
@@ -239,5 +242,17 @@ private:
 };
 
 
-
+class VNode
+{
+public:
+    VNode(Node*);
+    void addChild(VNode*);
+    Node *node() {return node_;}
+    
+protected:
+    Node* node_;
+    std::vector<VNode*> children_;
+    std::vector<int> attrCount_;   
+};
+    
 #endif

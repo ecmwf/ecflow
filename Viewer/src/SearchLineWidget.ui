@@ -37,7 +37,13 @@
     <widget class="LineEdit" name="searchLine_"/>
    </item>
    <item>
-    <widget class="QPushButton" name="nextPb_">
+    <widget class="QToolButton" name="nextPb_">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
      <property name="text">
       <string>&amp;Next</string>
      </property>
@@ -48,10 +54,13 @@
      <property name="shortcut">
       <string>F3</string>
      </property>
+     <property name="toolButtonStyle">
+      <enum>Qt::ToolButtonTextBesideIcon</enum>
+     </property>
     </widget>
    </item>
    <item>
-    <widget class="QPushButton" name="prevPb_">
+    <widget class="QToolButton" name="prevPb_">
      <property name="text">
       <string>&amp;Prev</string>
      </property>
@@ -61,6 +70,9 @@
      </property>
      <property name="shortcut">
       <string>Shift+F3</string>
+     </property>
+     <property name="toolButtonStyle">
+      <enum>Qt::ToolButtonTextBesideIcon</enum>
      </property>
     </widget>
    </item>

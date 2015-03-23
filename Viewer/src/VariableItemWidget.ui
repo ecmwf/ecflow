@@ -14,6 +14,12 @@
    <string>Form</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
+   <property name="spacing">
+    <number>2</number>
+   </property>
+   <property name="margin">
+    <number>0</number>
+   </property>
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
@@ -76,13 +82,13 @@
        </property>
       </spacer>
      </item>
+     <item>
+      <widget class="VariableSearchLine" name="searchLine_" native="true"/>
+     </item>
     </layout>
    </item>
    <item>
     <widget class="VariableView" name="varView"/>
-   </item>
-   <item>
-    <widget class="VariableSearchLine" name="searchLine_" native="true"/>
    </item>
   </layout>
   <action name="actionAdd">

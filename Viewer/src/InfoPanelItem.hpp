@@ -27,7 +27,7 @@ class InfoProvider;
 class InfoPanelItem : public VTaskObserver, public InfoPresenter, public NodeObserver
 {
 public:
-	InfoPanelItem() : loaded_(false) {};
+	InfoPanelItem() : loaded_(false), useAncestors_(false) {};
 	virtual ~InfoPanelItem(){};
 
 	bool loaded() const {return loaded_;}
@@ -51,6 +51,7 @@ protected:
 	virtual void nodeChanged(const Node*, const std::vector<ecf::Aspect::Type>&)=0;
 
 	bool loaded_;
+    bool useAncestors_;
 };
 
 

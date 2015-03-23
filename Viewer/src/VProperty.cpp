@@ -69,6 +69,8 @@ void VProperty::setValue(const std::string& val)
         value_=defaultValue_;
         //An error messages should be shown!
     }
+
+    dispatchChange();
 }
 
 void VProperty::setValue(QVariant val)
@@ -80,11 +82,31 @@ void VProperty::setValue(QVariant val)
     }
 
     value_=val;
+
+    dispatchChange();
 }
 
 void VProperty::addChild(VProperty *prop)
 {
     children_ << prop;
+}
+
+void VProperty::addObserver(VPropertyObserver* obs)
+{
+	observers_ << obs;
+}
+
+void VProperty::removeObserver(VPropertyObserver* obs)
+{
+	observers_.removeAll(obs);
+}
+
+void VProperty::dispatchChange()
+{
+	Q_FOREACH(VPropertyObserver* obs,observers_)
+	{
+		obs->notifyChange(this);
+	}
 }
 
 //=============================

@@ -16,11 +16,22 @@
 #include <QList>
 #include <QVariant>
 
+class VProperty;
+
+class VPropertyObserver
+{
+public:
+	VPropertyObserver() {}
+	virtual ~VPropertyObserver() {}
+
+	virtual void notifyChange(VProperty*)=0;
+};
+
+
 //This class defines a property storing its value as a QVariant.
 //Properties are used to store the viewer's configuration. Editable properties
 //store all the information needed to display them in an property editor.
 //Properties can have children so trees can be built up from them.
-
 
 class VProperty
 {
@@ -46,9 +57,11 @@ public:
     bool hasChildren() const {return children_.count() >0;}
     QList<VProperty*> children() const {return children_;}
     void addChild(VProperty*);
-
     VProperty* findChild(QString name);
     
+    void addObserver(VPropertyObserver*);
+    void removeObserver(VPropertyObserver*);
+
 protected:
     std::string strName_; //The name of the property as as std::string
     QString name_; //The name of the property. Used as an id.
@@ -59,6 +72,8 @@ protected:
     bool editable_;
 
 private:
+    void dispatchChange();
+
     static bool isColour(const std::string&);
     static bool isFont(const std::string&);
     static bool isNumber(const std::string&);
@@ -68,6 +83,7 @@ private:
     static int    toNumber(const std::string&);
 
     QList<VProperty*> children_;
+    QList<VPropertyObserver*> observers_;
 };
 
 #endif

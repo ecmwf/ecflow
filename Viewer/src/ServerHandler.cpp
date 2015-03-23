@@ -1497,3 +1497,13 @@ defs_ptr ServerDefsAccess::defs()
 	return server_->defs();		// the resource will always be locked when we use it
 }
 
+
+VNode::VNode(Node* node) : node_(node)
+{
+}
+
+void VNode::addChild(VNode* n)
+{
+    children_.push_back(n);
+} 
+    

@@ -114,6 +114,29 @@ void VInfo::ancestors(ServerHandler **sv,std::vector<Node*>& nodes)
 	}
 }
 
+bool VInfo::sameAs(Node* n,bool checkAncestors)
+{
+    if(isNode())
+    {
+        if(n == node())
+            return true;
+        
+        if(checkAncestors)
+        {
+            Node* nd=node();
+            while(nd)
+            {
+                if(n == nd)
+                    return true;
+           
+                nd=nd->parent();
+            }    
+        }
+    }
+    
+    return false;
+}
+
 //--------------------------------------------------
 // Factory methods
 //--------------------------------------------------

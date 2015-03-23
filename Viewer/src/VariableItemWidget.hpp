@@ -96,7 +96,7 @@ public Q_SLOTS:
 	void on_varView_doubleClicked(const QModelIndex& index);
 	void on_filterTb_toggled(bool);
 	void on_filterLine_textChanged(QString text);
-	void slotItemSelected(const QModelIndex& idx);
+	void slotItemSelected(const QModelIndex& idx,const QModelIndex& prevIdx);
 
 protected:
 	void checkActionState();

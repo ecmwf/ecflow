@@ -19,12 +19,16 @@ LineEdit::LineEdit(QWidget *parent):
       iconLabel_(0)
 {
 	clearTb_=new QToolButton(this);
-	clearTb_->setIcon(QPixmap(":/viewer/clear_left.svg"));
+	QPixmap pix(":/viewer/clear_left.svg");
+    clearTb_->setIcon(pix);
+    clearTb_->setIconSize(QSize(12,12));
   	clearTb_->setAutoRaise(true);
 	clearTb_->setCursor(Qt::ArrowCursor);
 	clearTb_->setToolTip(tr("Clear text"));
 	clearTb_->setObjectName("clearTextTb");
 
+    clearTb_->setStyleSheet("QToolButton{ border: node; padding: 0px;}");
+    
 	connect(clearTb_,SIGNAL(clicked()),
 		this,SLOT(slotClear()));
 

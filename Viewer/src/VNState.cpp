@@ -56,7 +56,7 @@ VNState::VNState(const std::string& name) :
 void VNState::setProperty(VProperty* prop)
 {
     prop_=prop; 
-    
+
     //Label
     label_=prop_->labelText();
     
@@ -64,10 +64,22 @@ void VNState::setProperty(VProperty* prop)
     if(VProperty *p=prop_->findChild("fill_colour"))
     {
         colour_=p->value().value<QColor>();
+        p->addObserver(this);
         
         qDebug() << qName_ << colour_;
     }    
 }
+void VNState::notifyChange(VProperty *p)
+{
+	if(!prop_)
+		return;
+
+	if(p->name() == "fill_colour")
+	{
+		colour_=p->value().value<QColor>();
+	}
+}
+
 
 //===============================================================
 //

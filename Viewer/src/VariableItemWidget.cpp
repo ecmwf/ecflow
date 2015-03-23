@@ -10,6 +10,7 @@
 #include "VariableItemWidget.hpp"
 
 #include <QDebug>
+#include <QItemSelectionModel>
 #include <QMessageBox>
 #include <QVBoxLayout>
 
@@ -183,7 +184,10 @@ QString VariableAddDialog::value() const
 
 VariableItemWidget::VariableItemWidget(QWidget *parent)
 {
-	setupUi(this);
+	//This item displays all the ancestors of the info object
+    useAncestors_=true;
+    
+    setupUi(this);
 
 	data_=new VariableModelDataHandler();
 
@@ -191,7 +195,7 @@ VariableItemWidget::VariableItemWidget(QWidget *parent)
 	sortModel_= new VariableSortModel(model_,this);
     
     //!!!!We need to do it because:
-    //The background colour between the tree view's left border and the items in the first column be
+    //The background colour between the tree view's left border and the items in the first column cannot be
     //controlled by delegates or stylesheets. It always takes the QPalette::Highlight
     //colour from the palette. Here we set this to transparent so that Qt could leave
     //this area empty and we will fill it appropriately in our delegate.
@@ -218,8 +222,8 @@ VariableItemWidget::VariableItemWidget(QWidget *parent)
 	varView->setSortingEnabled(true);*/
 	//varView->setSelectionMode(QAbstractItemView::ExtendedSelection);
 
-	connect(varView,SIGNAL(activated(QModelIndex)),
-			this,SLOT(slotItemSelected(QModelIndex)));
+	connect(varView->selectionModel(),SIGNAL(currentChanged(QModelIndex,QModelIndex)),
+			this,SLOT(slotItemSelected(QModelIndex,QModelIndex)));
 
 
 	//Add context menu actions to the view
@@ -254,6 +258,7 @@ QWidget* VariableItemWidget::realWidget()
 	return this;
 }
 
+//A new info object is set
 void VariableItemWidget::reload(VInfo_ptr info)
 {
 	adjust(info);
@@ -261,6 +266,7 @@ void VariableItemWidget::reload(VInfo_ptr info)
 	varView->expandAll();
 	varView->resizeColumnToContents(0);
 	//varView->reload(info);
+	loaded_=true;
 }
 
 void VariableItemWidget::clearContents()
@@ -269,7 +275,7 @@ void VariableItemWidget::clearContents()
 }
 
 
-void VariableItemWidget::slotItemSelected(const QModelIndex& idx)
+void VariableItemWidget::slotItemSelected(const QModelIndex& idx,const QModelIndex& /*prevIdx*/)
 {
 	checkActionState();
 }

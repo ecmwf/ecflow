@@ -98,8 +98,9 @@ public:
 	virtual std::string name() {return std::string();}
 
 	void ancestors(ServerHandler **server,std::vector<Node*>& nodes);
-
-	virtual void accept(VInfoVisitor*)=0;
+    bool sameAs(Node* n,bool checkAncestors=false);
+	
+    virtual void accept(VInfoVisitor*)=0;
 
 	static VInfo* make(ServerHandler*);
 	static VInfo* make(Node*,ServerHandler* server=0);
