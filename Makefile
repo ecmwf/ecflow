@@ -4,6 +4,9 @@ default: release
 
 release:
 	(cd ../cmake_build_dir/ecflow/release; make -j4)
-	
+
 install:
 	(cd ../cmake_build_dir/ecflow/release; make install)
+
+simple:
+	bjam -j8
