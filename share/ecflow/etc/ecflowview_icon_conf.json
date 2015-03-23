@@ -8,14 +8,14 @@
         		"label" : "Waiting", 
         		"tooltip" : "A running task is waiting for a trigger.",
                 "icon" : {      
-                	"file" : "icon_waiting.png"
+                	"default" : "icon_waiting.png"
                 }
         	},      
             "rerun" : {
                  "label" : "Rerun",
                  "tooltip" : "",
                  "icon" : {      
-                     "file" : "icon_rerun.png"
+                     "default" : "icon_rerun.png"
                  }
                 
             },
@@ -23,42 +23,42 @@
                  "label" : "Message",
                  "tooltip" : "Has user messages. User has issued a command since the last begin.",
                  "icon"  : {
-                	 "file": "icon_message.png"
+                	 "default": "icon_message.png"
                   }
             },
             "complete" : {
             	 "label" : "Complete",
             	 "tooltip" : "",
                  "icon"  : {	 
-                	 "file" : "icon_complete.png"
+                	 "default" : "icon_complete.png"
                  }		 
             },
             "time" : {
                  "label" : "Time",
                  "tooltip" : "Node has a time dependency.",
                  "icon"  : {
-                	 "file" : "icon_clock.png"
+                	 "default" : "icon_clock.png"
                  }
             },                      
             "date" : {
                  "label" : "Date",
                  "tooltip" : "Node has date or day dependency.",
                  "icon"  : { 
-                	 "file" : "icon_calendar.png"
+                	 "default" : "icon_calendar.png"
                  }
             },
             "zombie" : {
                 "label" : "Zombie",
                 "tooltip" : "",
                 "icon"  : {
-                	"file" :"icon_Z.png"
+                	"default" :"icon_Z.png"
                 }
             },
             "late" : {
                 "label" : "Late",
                 "tooltip" : "Node is late.",               
                 "icon"  : {
-                	"file" : "icon_late.png"
+                	"default" : "icon_late.png"
                 }
             }
      }

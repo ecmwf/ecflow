@@ -39,7 +39,8 @@ TreeNodeModel::TreeNodeModel(NodeModelDataHandler *data,AttributeFilter *atts,Ic
 
 	//Icon filter changes
 	connect(icons_,SIGNAL(changed()),
-			this,SLOT(slotIconFilterChanged()));
+			this,SIGNAL(filterChanged()));
+	//this,SLOT(slotIconFilterChanged()));
 
 
 	//When the underlying data changes

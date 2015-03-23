@@ -132,17 +132,28 @@ QPixmap* VIcon::pixmap(int size)
 {
 	if(!pix_)
 	{
-		QString path=QString::fromStdString(text("icon"));
-		QImageReader imgR(":/viewer/" + path);
-		if(imgR.canRead())
+		if(prop_)
 		{
-			imgR.setScaledSize(QSize(size,size));
-			QImage img=imgR.read();
-			pix_=new QPixmap(QPixmap::fromImage(img));
-		}
-		else
-			pix_=new QPixmap();
+			if(VProperty* p=prop_->findChild("icon"))
+			{
+				qDebug() << p->value().toString();
 
+				QImageReader imgR(":/viewer/" + p->value().toString());
+				if(imgR.canRead())
+				{
+					imgR.setScaledSize(QSize(size,size));
+					QImage img=imgR.read();
+					pix_=new QPixmap(QPixmap::fromImage(img));
+				}
+				else
+					pix_=new QPixmap();
+			}
+			else
+			{
+				pix_=new QPixmap();
+			}
+
+		}
 	}
 
 	return pix_;

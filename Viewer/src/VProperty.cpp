@@ -49,11 +49,16 @@ void VProperty::setDefaultValue(const std::string& val)
     {
         defaultValue_=toColour(val);
     }
+    //text
+    else
+    {
+    	defaultValue_=QString::fromStdString(val);
+    }
     
     if(value_.isNull())
         value_=defaultValue_;
     
-    qDebug() << "Prop:" << name_ << value_.value<QColor>();
+    qDebug() << "Prop:" << name_ << defaultValue_ << value_.value<QColor>();
 }
 
 void VProperty::setValue(const std::string& val)
