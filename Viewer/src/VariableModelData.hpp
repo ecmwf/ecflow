@@ -27,6 +27,7 @@ public:
 	VariableModelData(VInfo_ptr info);
 	virtual ~VariableModelData() {};
 
+	std::string fullPath();
 	std::string name();
 	std::string type();
 	const std::string& name(int index) const;
@@ -53,7 +54,6 @@ public:
 
 	VInfo_ptr info_;
 };
-
 
 class VariableModelDataHandler : public QObject
 {

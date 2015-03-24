@@ -14,8 +14,10 @@
 #include <QMessageBox>
 #include <QVBoxLayout>
 
+#include "LineEdit.hpp"
 #include "VariableModel.hpp"
 #include "VariableModelData.hpp"
+#include "VariableSearchLine.hpp"
 
 //======================================
 //
@@ -69,23 +71,40 @@ void VariableDialogChecker::error(QString msg)
 
 //======================================
 //
-// VariableEditDialog
+// VariablePropDialog
 //
 //======================================
 
-VariableEditDialog::VariableEditDialog(QString name, QString value,bool genVar,QWidget *parent) :
+VariablePropDialog::VariablePropDialog(VariableModelData *data,QString name, QString value,bool genVar,QWidget *parent) :
    QDialog(parent),
-   genVar_(genVar)
+   genVar_(genVar),
+   data_(data)
 {
 	setupUi(this);
 
-	nameLabel_->setText(name);
-	valueEdit_->setText(value);
+	parentLabel_->setText(QString::fromStdString(data_->fullPath()) + " (" +
+			    QString::fromStdString(data_->type()) +")");
+	typeLabel_->setText(genVar?tr("variable"):tr("generated variable"));
+	nameEdit_->setText(name);
+	valueEdit_->setPlainText(value);
 }
 
-void VariableEditDialog::accept()
+void VariablePropDialog::accept()
 {
-	QString value=valueEdit_->text();
+	QString name=nameEdit_->text();
+	QString value=valueEdit_->toPlainText();
+
+	if(data_->hasName(name.toStdString()))
+	{
+		if(QMessageBox::question(0,tr("Confirm: overwrite variable"),
+									tr("This variable is <b>already defined</b>. A new variable will be created \
+									for the selected node and hide the previous one.<br>Do you want to proceed?"),
+						    QMessageBox::Ok|QMessageBox::Cancel,QMessageBox::Cancel) == QMessageBox::Cancel)
+			{
+				QDialog::reject();
+				return;
+			}
+	}
 
 	if(genVar_)
 	{
@@ -99,20 +118,17 @@ void VariableEditDialog::accept()
 		}
 	}
 
-	//if(!checkValue(name))
-	//	return;
-
 	QDialog::accept();
 }
 
-QString VariableEditDialog::name() const
+QString VariablePropDialog::name() const
 {
-	return nameLabel_->text();
+	return nameEdit_->text();
 }
 
-QString VariableEditDialog::value() const
+QString VariablePropDialog::value() const
 {
-	return valueEdit_->text();
+	return valueEdit_->toPlainText();
 }
 
 //======================================
@@ -154,7 +170,7 @@ void VariableAddDialog::accept()
 	if(data_->hasName(name.toStdString()))
 	{
 		if(QMessageBox::question(0,tr("Confirm: overwrite variable"),
-								tr("This variable is <b>already defined<b>. A new variable will be created \
+								tr("This variable is <b>already defined</b>. A new variable will be created \
 								for the selected node and hide the previous one.<br>Do you want to proceed?"),
 					    QMessageBox::Ok|QMessageBox::Cancel,QMessageBox::Cancel) == QMessageBox::Cancel)
 		{
@@ -191,6 +207,7 @@ VariableItemWidget::VariableItemWidget(QWidget *parent)
 
 	data_=new VariableModelDataHandler();
 
+	//The model and the sort-filter model
 	model_=new VariableModel(data_,this);
 	sortModel_= new VariableSortModel(model_,this);
     
@@ -202,47 +219,67 @@ VariableItemWidget::VariableItemWidget(QWidget *parent)
     QPalette pal=varView->palette();
     pal.setColor(QPalette::Highlight,Qt::transparent);
     varView->setPalette(pal);
-	
-    //varView->setProperty("var","1");
-	//varView->setIndentation(16);
-	varView->setModel(sortModel_);
 
-	//filterLine->setDecoration(QPixmap(":/viewer/filter_decor.svg"));
-	filterLine->hide();
-	filterTb->hide();
+    //Set the model on the view
+    varView->setModel(sortModel_);
 
-	//searchLine_->hide();
+    //Search and filter interface: we have a menu attached to a toolbutton and a
+    //stackedwidget connected up.
 
-    //Initialise the search widget
+    //Populate the toolbuttons menu
+    findModeTb->addAction(actionFilter);
+	findModeTb->addAction(actionSearch);
+
+    //The filter line editor
+    filterLine_=new LineEdit;
+    stackedWidget->addWidget(filterLine_);
+
+    //The search line editor. Its a custom widget handling its own signals and slots.
+    searchLine_=new VariableSearchLine(this);
+    stackedWidget->addWidget(searchLine_);
     searchLine_->setView(varView);
     
-	/*varView->setRootIsDecorated(false);
-	varView->setAllColumnsShowFocus(true);
-	varView->setUniformRowHeights(true);
-	varView->setSortingEnabled(true);*/
-	//varView->setSelectionMode(QAbstractItemView::ExtendedSelection);
+    //The filter editor changes
+    connect(filterLine_,SIGNAL(textChanged(QString)),
+        		this,SLOT(slotFilterTextChanged(QString)));
 
+    //The selection changes in the view
 	connect(varView->selectionModel(),SIGNAL(currentChanged(QModelIndex,QModelIndex)),
 			this,SLOT(slotItemSelected(QModelIndex,QModelIndex)));
 
+	//Init the find mode selection
+	if(sortModel_->matchMode() == VariableSortModel::FilterMode)
+	{
+		actionFilter->trigger();
+	}
+	else
+	{
+		actionSearch->trigger();
+	}
 
 	//Add context menu actions to the view
 	QAction* sep1=new QAction(this);
 	sep1->setSeparator(true);
 	QAction* sep2=new QAction(this);
 	sep2->setSeparator(true);
+	QAction* sep3=new QAction(this);
+	sep3->setSeparator(true);
 
+	//Build context menu
 	varView->addAction(actionAdd);
 	varView->addAction(sep1);
-	varView->addAction(actionDuplicate);
-	varView->addAction(actionEdit);
+	varView->addAction(actionCopy);
+	varView->addAction(actionPaste);
 	varView->addAction(sep2);
 	varView->addAction(actionDelete);
+	varView->addAction(sep3);
+	varView->addAction(actionProp);
 
 	//Add actions for the toolbuttons
 	addTb->setDefaultAction(actionAdd);
 	deleteTb->setDefaultAction(actionDelete);
-	editTb->setDefaultAction(actionEdit);
+	propTb->setDefaultAction(actionProp);
+	exportTb->setDefaultAction(actionExport);
 
 	//Initialise action state (it depends on the selection)
 	checkActionState();
@@ -289,8 +326,7 @@ void VariableItemWidget::checkActionState()
 	if(!index.isValid())
 	{
 		actionAdd->setEnabled(false);
-		actionEdit->setEnabled(false);
-		actionDuplicate->setEnabled(false);
+		actionProp->setEnabled(false);
 		actionDelete->setEnabled(false);
 	}
 	else
@@ -299,16 +335,14 @@ void VariableItemWidget::checkActionState()
 		if(model_->isVariable(index))
 		{
 			actionAdd->setEnabled(true);
-			actionEdit->setEnabled(true);
-			actionDuplicate->setEnabled(true);
+			actionProp->setEnabled(true);
 			actionDelete->setEnabled(true);
 		}
 		//Server or nodes
 		else
 		{
 			actionAdd->setEnabled(true);
-			actionEdit->setEnabled(false);
-			actionDuplicate->setEnabled(false);
+			actionProp->setEnabled(false);
 			actionDelete->setEnabled(false);
 		}
 	}
@@ -322,11 +356,13 @@ void VariableItemWidget::editItem(const QModelIndex& index)
 
 	QModelIndex vIndex=sortModel_->mapToSource(index);
 
+	VariableModelData* data=model_->indexToData(vIndex);
+
 	//Get the data from the model
-	if(model_->variable(vIndex,name,value,genVar))
+	if(data && model_->variable(vIndex,name,value,genVar))
 	{
 		//Start edit dialog
-		VariableEditDialog d(name,value,genVar,this);
+		VariablePropDialog d(data,name,value,genVar,this);
 
 		if(d.exec()== QDialog::Accepted)
 		{
@@ -400,7 +436,7 @@ void VariableItemWidget::on_varView_doubleClicked(const QModelIndex& index)
 	editItem(index);
 }
 
-void VariableItemWidget::on_actionEdit_triggered()
+void VariableItemWidget::on_actionProp_triggered()
 {
 	QModelIndex index=varView->currentIndex();
 	editItem(index);
@@ -418,22 +454,32 @@ void VariableItemWidget::on_actionDelete_triggered()
 	removeItem(index);
 }
 
-void VariableItemWidget::on_actionDuplicate_triggered()
+void VariableItemWidget::on_actionFilter_triggered()
 {
-	QModelIndex index=varView->currentIndex();
-	duplicateItem(index);
+	findModeTb->setIcon(actionFilter->icon());
+	sortModel_->setMatchMode(VariableSortModel::FilterMode);
+	filterLine_->clear();
+	searchLine_->clear();
+
+	//Notify stackedwidget
+	stackedWidget->setCurrentIndex(0);
 }
 
-void VariableItemWidget::on_filterTb_toggled(bool b)
+void VariableItemWidget::on_actionSearch_triggered()
 {
-	sortModel_->enableFilter(b);
-	//searchLine_->setFilter(b);
+	findModeTb->setIcon(actionSearch->icon());
+	sortModel_->setMatchMode(VariableSortModel::SearchMode);
+	filterLine_->clear();
+	searchLine_->clear();
+
+	//Notify stackedwidget
+	stackedWidget->setCurrentIndex(1);
+
 }
 
-void VariableItemWidget::on_filterLine_textChanged(QString text)
+void VariableItemWidget::slotFilterTextChanged(QString text)
 {
-	sortModel_->setFilterText(text);
-	//searchLine_->setFilter(b);
+	sortModel_->setMatchText(text);
 }
 
 
@@ -442,7 +488,5 @@ void VariableItemWidget::nodeChanged(const Node* node, const std::vector<ecf::As
 	data_->nodeChanged(node,aspect);
 }
 
+//Register at the factory
 static InfoPanelItemMaker<VariableItemWidget> maker1("variable");
-
-
-

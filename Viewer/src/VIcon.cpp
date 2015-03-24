@@ -132,27 +132,28 @@ QPixmap* VIcon::pixmap(int size)
 {
 	if(!pix_)
 	{
+		bool created=false;
 		if(prop_)
 		{
 			if(VProperty* p=prop_->findChild("icon"))
 			{
-				qDebug() << p->value().toString();
-
 				QImageReader imgR(":/viewer/" + p->value().toString());
 				if(imgR.canRead())
 				{
+					created=true;
 					imgR.setScaledSize(QSize(size,size));
 					QImage img=imgR.read();
 					pix_=new QPixmap(QPixmap::fromImage(img));
 				}
-				else
-					pix_=new QPixmap();
 			}
-			else
-			{
-				pix_=new QPixmap();
-			}
+		}
 
+		if(!created)
+		{
+			pix_=new QPixmap();
+
+			UserMessage::message(UserMessage::WARN, true,
+					std::string("Warning! VConfig::pixmap() unable to create icon image for: " + strName()));
 		}
 	}
 

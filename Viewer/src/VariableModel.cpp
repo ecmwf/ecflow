@@ -381,30 +381,34 @@ void VariableModel::slotDataChanged(int row)
 VariableSortModel::VariableSortModel(VariableModel *varModel,QObject* parent) :
 	QSortFilterProxyModel(parent),
 	varModel_(varModel),
-	filter_(false)
+	matchMode_(FilterMode),
+	ignoreDuplicateNames_(false)
 {
 	QSortFilterProxyModel::setSourceModel(varModel_);
 	setDynamicSortFilter(true);
 }
 
-void VariableSortModel::enableFilter(bool filter)
-{
-	if(filter_ != filter)
-	{
-		filter_=filter;
-		filterText_.clear();
 
-		//reload the filter model
-		invalidate();
-	}
+void VariableSortModel::setMatchMode(MatchMode mode)
+{
+	if(matchMode_ == mode)
+		return;
+
+	matchMode_=mode;
+
+	matchLst_.clear();
+	matchText_.clear();
+
+	//reload the filter model
+	invalidate();
 }
 
-void VariableSortModel::setFilterText(QString txt)
+void VariableSortModel::setMatchText(QString txt)
 {
-	if(filter_)
-	{
-		filterText_=txt;
+	matchText_=txt;
 
+	if(matchMode_ == FilterMode)
+	{
 		//reload the filter model
 		invalidate();
 	}
@@ -434,7 +438,7 @@ bool VariableSortModel::lessThan(const QModelIndex &sourceLeft, const QModelInde
 
 bool VariableSortModel::filterAcceptsRow(int sourceRow,const QModelIndex& sourceParent) const
 {
-	if(!filter_ || filterText_.simplified().isEmpty())
+	if(matchMode_ != FilterMode || matchText_.simplified().isEmpty())
 		return true;
 
 	if(!sourceParent.isValid())
@@ -446,7 +450,7 @@ bool VariableSortModel::filterAcceptsRow(int sourceRow,const QModelIndex& source
 	QString s=varModel_->data(idx,Qt::DisplayRole).toString();
 	QString s2=varModel_->data(idx2,Qt::DisplayRole).toString();
 
-	if(s.contains(filterText_,Qt::CaseInsensitive) || s2.contains(filterText_,Qt::CaseInsensitive))
+	if(s.contains(matchText_,Qt::CaseInsensitive) || s2.contains(matchText_,Qt::CaseInsensitive))
 	{
 		return true;
 	}
@@ -462,7 +466,7 @@ QVariant VariableSortModel::data(const QModelIndex& idx,int role) const
     }    
     
     //We highlight the matching items (the entire row).
-    if(matchLst_.count() >0)
+    if(matchMode_ == SearchMode && matchLst_.count() >0)
     {
         int col2=(idx.column()==0)?1:0;
         QModelIndex idx2=index(idx.row(),col2,idx.parent());
@@ -475,15 +479,19 @@ QVariant VariableSortModel::data(const QModelIndex& idx,int role) const
     
     return QSortFilterProxyModel::data(idx,role);
 }    
-    
+
+
 QModelIndexList VariableSortModel::match(const QModelIndex& start,int role,const QVariant& value,int hits,Qt::MatchFlags flags) const
 {
+	if(matchMode_ != SearchMode)
+		return QModelIndexList();
+
 	QModelIndex root;
-	QString txt=value.toString();
+	matchText_=value.toString();
 
 	matchLst_.clear();
 
-	if(txt.simplified().isEmpty())
+	if(matchText_.simplified().isEmpty())
 		return matchLst_;
 
 	for(int i=0; i < rowCount(); i++)
@@ -495,7 +503,7 @@ QModelIndexList VariableSortModel::match(const QModelIndex& start,int role,const
 			QModelIndex colIdx=index(row,0,idx);
 			QString s=data(colIdx,Qt::DisplayRole).toString();
 
-			if(s.contains(txt,Qt::CaseInsensitive))
+			if(s.contains(matchText_,Qt::CaseInsensitive))
 			{
 				matchLst_ << colIdx;
 				continue;
@@ -504,13 +512,14 @@ QModelIndexList VariableSortModel::match(const QModelIndex& start,int role,const
 			//Value columns
 			QModelIndex colIdx1=index(row,1,idx);
 			s=data(colIdx1,Qt::DisplayRole).toString();
-			if(s.contains(txt,Qt::CaseInsensitive))
+			if(s.contains(matchText_,Qt::CaseInsensitive))
 			{
 				matchLst_ << colIdx;
 			}
 		}
 	}
 
-    return matchLst_;
+	return matchLst_;
 }
+
 

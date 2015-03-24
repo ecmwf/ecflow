@@ -23,7 +23,8 @@ static std::string defaultStr("");
 //
 //==========================================
 
-VariableModelData::VariableModelData(VInfo_ptr info) : info_(info)
+VariableModelData::VariableModelData(VInfo_ptr info) :
+		info_(info)
 {
 	reload();
 }
@@ -40,6 +41,11 @@ void VariableModelData::reload()
 
 	info_->variables(vars_);
 	info_->genVariables(genVars_);
+}
+
+std::string VariableModelData::fullPath()
+{
+	return info_->fullPath();
 }
 
 std::string VariableModelData::name()

@@ -11,18 +11,19 @@
 #ifndef VARIABLEITEMWIDGET_HPP_
 #define VARIABLEITEMWIDGET_HPP_
 
-#include "ui_VariableEditDialog.h"
+#include "ui_VariablePropDialog.h"
 #include "ui_VariableAddDialog.h"
 #include "ui_VariableItemWidget.h"
 
 #include "InfoPanelItem.hpp"
 #include "VInfo.hpp"
 
+class LineEdit;
 class VariableModel;
 class VariableModelData;
 class VariableModelDataHandler;
 class VariableSortModel;
-
+class VariableSearchLine;
 
 class VariableDialogChecker
 {
@@ -37,12 +38,12 @@ protected:
 };
 
 
-class VariableEditDialog : public QDialog, private Ui::VariableEditDialog //, public VariableDialogChecker
+class VariablePropDialog : public QDialog, private Ui::VariablePropDialog //, public VariableDialogChecker
 {
 Q_OBJECT
 
 public:
-	VariableEditDialog(QString name,QString value,bool genVar,QWidget* parent=0);
+	VariablePropDialog(VariableModelData* data,QString name,QString value,bool genVar,QWidget* parent=0);
 
 	QString name() const;
 	QString value() const;
@@ -52,6 +53,7 @@ public Q_SLOTS:
 
 protected:
 	bool genVar_;
+	VariableModelData* data_;
 
 };
 
@@ -74,8 +76,6 @@ protected:
 };
 
 
-
-
 class VariableItemWidget : public QWidget, public InfoPanelItem, protected Ui::VariableItemWidget
 {
 Q_OBJECT
@@ -89,13 +89,13 @@ public:
 	void clearContents();
 
 public Q_SLOTS:
-	void on_actionEdit_triggered();
+	void on_actionProp_triggered();
 	void on_actionAdd_triggered();
-	void on_actionDuplicate_triggered();
 	void on_actionDelete_triggered();
 	void on_varView_doubleClicked(const QModelIndex& index);
-	void on_filterTb_toggled(bool);
-	void on_filterLine_textChanged(QString text);
+	void on_actionFilter_triggered();
+	void on_actionSearch_triggered();
+	void slotFilterTextChanged(QString text);
 	void slotItemSelected(const QModelIndex& idx,const QModelIndex& prevIdx);
 
 protected:
@@ -110,6 +110,9 @@ protected:
 	VariableModelDataHandler* data_;
 	VariableModel* model_;
 	VariableSortModel* sortModel_;
+
+	LineEdit* filterLine_;
+	VariableSearchLine *searchLine_;
 };
 
 #endif

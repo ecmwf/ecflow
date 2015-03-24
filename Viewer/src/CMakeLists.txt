@@ -126,7 +126,7 @@ QT4_WRAP_UI       (VIEWER_FORMS_HEADERS CommandDesignerWidget.ui CustomCommandDi
                         TextItemWidget.ui
                         TreeNodeWidget.ui
                         VariableAddDialog.ui
-                        VariableEditDialog.ui
+                        VariablePropDialog.ui
                         VariableItemWidget.ui)
 
 

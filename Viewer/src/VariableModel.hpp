@@ -61,11 +61,14 @@ protected:
 class VariableSortModel : public QSortFilterProxyModel
 {
 public:
+	enum MatchMode {FilterMode,SearchMode};
+
 	VariableSortModel(VariableModel*,QObject *parent=0);
 	~VariableSortModel() {};
 
-	void enableFilter(bool filter);
-	void setFilterText(QString text);
+	MatchMode matchMode() const {return matchMode_;}
+	void setMatchMode(MatchMode mode);
+	void setMatchText(QString text);
 
 	bool lessThan(const QModelIndex &left, const QModelIndex &right) const;
 	bool filterAcceptsRow(int,const QModelIndex &) const;
@@ -81,10 +84,13 @@ protected:
     void match(QString text);
 
 	VariableModel* varModel_;
-	QString matchText_;
+
+	MatchMode matchMode_;
+	mutable QString matchText_;
     mutable QModelIndexList matchLst_;
-    bool filter_;
-    QString filterText_;
+
+    QMap<QString,int> nameCnt_;
+    bool ignoreDuplicateNames_; //Ignore duplicate names across ancestors
 };
 
 

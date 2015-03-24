@@ -324,6 +324,21 @@ std::string VInfoNode::name()
 	return std::string();
 }
 
+std::string VInfoNode::fullPath()
+{
+	std::string s;
+
+	if(node_)
+	{
+		s=node_->absNodePath();
+		if(server())
+			s=server()->name() + ":" +s;
+	}
+
+	return s;
+}
+
+
 /*
 void VInfoNode::info(VInfoReplyReceiver* invoker)
 {

@@ -96,6 +96,7 @@ public:
 	virtual void variables(std::vector<Variable>& vars) {};
 	virtual void genVariables(std::vector<Variable>& vars) {};
 	virtual std::string name() {return std::string();}
+	virtual std::string fullPath() {return std::string();}
 
 	void ancestors(ServerHandler **server,std::vector<Node*>& nodes);
     bool sameAs(Node* n,bool checkAncestors=false);
@@ -134,6 +135,7 @@ public:
 
     void variables(std::vector<Variable>& vars);
     std::string name();
+    std::string fullPath() {return name();}
 };
 
 // Implements the info object for node selections
@@ -153,6 +155,7 @@ public:
 	void variables(std::vector<Variable>& vars);
 	void genVariables(std::vector<Variable>& vars);
 	std::string name();
+	std::string fullPath();
 
 
 protected:

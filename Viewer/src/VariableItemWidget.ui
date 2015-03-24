@@ -6,14 +6,14 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>510</width>
-    <height>465</height>
+    <width>615</width>
+    <height>482</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout">
+  <layout class="QVBoxLayout" name="verticalLayout" stretch="0,1">
    <property name="spacing">
     <number>2</number>
    </property>
@@ -22,6 +22,38 @@
    </property>
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout">
+     <item>
+      <widget class="QToolButton" name="findModeTb">
+       <property name="text">
+        <string>...</string>
+       </property>
+       <property name="popupMode">
+        <enum>QToolButton::InstantPopup</enum>
+       </property>
+       <property name="toolButtonStyle">
+        <enum>Qt::ToolButtonIconOnly</enum>
+       </property>
+       <property name="autoRaise">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QStackedWidget" name="stackedWidget"/>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer_2">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
      <item>
       <widget class="QToolButton" name="addTb">
        <property name="text">
@@ -43,7 +75,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QToolButton" name="editTb">
+      <widget class="QToolButton" name="propTb">
        <property name="text">
         <string>...</string>
        </property>
@@ -53,37 +85,14 @@
       </widget>
      </item>
      <item>
-      <widget class="QToolButton" name="filterTb">
+      <widget class="QToolButton" name="exportTb">
        <property name="text">
         <string>...</string>
        </property>
-       <property name="icon">
-        <iconset resource="viewer.qrc">
-         <normaloff>:/viewer/filter_decor.svg</normaloff>:/viewer/filter_decor.svg</iconset>
-       </property>
-       <property name="checkable">
+       <property name="autoRaise">
         <bool>true</bool>
        </property>
       </widget>
-     </item>
-     <item>
-      <widget class="LineEdit" name="filterLine"/>
-     </item>
-     <item>
-      <spacer name="horizontalSpacer">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>40</width>
-         <height>20</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
-     <item>
-      <widget class="VariableSearchLine" name="searchLine_" native="true"/>
      </item>
     </layout>
    </item>
@@ -97,7 +106,7 @@
      <normaloff>:/viewer/images/add.svg</normaloff>:/viewer/images/add.svg</iconset>
    </property>
    <property name="text">
-    <string>Add variable</string>
+    <string>&amp;New variable</string>
    </property>
    <property name="toolTip">
     <string>Add new variable</string>
@@ -106,16 +115,16 @@
     <string>Ctrl+N</string>
    </property>
   </action>
-  <action name="actionEdit">
+  <action name="actionProp">
    <property name="icon">
     <iconset resource="viewer.qrc">
      <normaloff>:/viewer/edit.svg</normaloff>:/viewer/edit.svg</iconset>
    </property>
    <property name="text">
-    <string>Edit</string>
+    <string>&amp;Properties</string>
    </property>
    <property name="toolTip">
-    <string>Edit variable</string>
+    <string>See/edit variable's properties</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+E</string>
@@ -136,34 +145,81 @@
     <string>Del</string>
    </property>
   </action>
-  <action name="actionDuplicate">
+  <action name="actionExport">
+   <property name="icon">
+    <iconset resource="viewer.qrc">
+     <normaloff>:/viewer/filesave.svg</normaloff>:/viewer/filesave.svg</iconset>
+   </property>
    <property name="text">
-    <string>Duplicate</string>
+    <string>E&amp;xport</string>
    </property>
    <property name="toolTip">
-    <string>Duplicate variable</string>
+    <string>Export variables</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+D</string>
+    <string>Ctrl+S</string>
+   </property>
+  </action>
+  <action name="actionCopy">
+   <property name="icon">
+    <iconset resource="viewer.qrc">
+     <normaloff>:/viewer/editcopy.svg</normaloff>:/viewer/editcopy.svg</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Copy variable</string>
+   </property>
+   <property name="toolTip">
+    <string>Copy variable</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+C</string>
+   </property>
+  </action>
+  <action name="actionPaste">
+   <property name="icon">
+    <iconset resource="viewer.qrc">
+     <normaloff>:/viewer/editpaste.svg</normaloff>:/viewer/editpaste.svg</iconset>
+   </property>
+   <property name="text">
+    <string>Pa&amp;ste as new</string>
+   </property>
+   <property name="toolTip">
+    <string>Paste as new variable</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+V</string>
+   </property>
+  </action>
+  <action name="actionFilter">
+   <property name="icon">
+    <iconset resource="viewer.qrc">
+     <normaloff>:/viewer/filter_decor.svg</normaloff>:/viewer/filter_decor.svg</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Filter mode</string>
+   </property>
+   <property name="toolTip">
+    <string>Filter mode</string>
+   </property>
+  </action>
+  <action name="actionSearch">
+   <property name="icon">
+    <iconset resource="viewer.qrc">
+     <normaloff>:/viewer/search_decor.svg</normaloff>:/viewer/search_decor.svg</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Search mode</string>
+   </property>
+   <property name="toolTip">
+    <string>Search mode</string>
    </property>
   </action>
  </widget>
  <customwidgets>
   <customwidget>
-   <class>VariableSearchLine</class>
-   <extends>QWidget</extends>
-   <header location="global">VariableSearchLine.hpp</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
    <class>VariableView</class>
    <extends>QTreeView</extends>
    <header location="global">VariableView.hpp</header>
-  </customwidget>
-  <customwidget>
-   <class>LineEdit</class>
-   <extends>QLineEdit</extends>
-   <header location="global">LineEdit.hpp</header>
   </customwidget>
  </customwidgets>
  <resources>

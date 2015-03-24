@@ -81,7 +81,7 @@ QFrame[breadcrumbs="1"] {
   Info panel text
 ------------------------------*/
 
-QPlainTextEdit {
+TextItemWidget {
     background: rgb(232,232,232);
 }
     
