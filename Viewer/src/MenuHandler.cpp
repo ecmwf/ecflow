@@ -288,7 +288,7 @@ QMenu *Menu::generateMenu(std::vector<VInfo_ptr> nodes, QWidget *parent)
         */
 
         QAction *action = new QAction(0);
-        action->setText(QString::fromStdString((*nodes[0]).node()->name()));
+        action->setText(QString::fromStdString((*nodes[0]).name()));
         qmenu->addAction(action);
         action->setParent(parent);
         action->setEnabled(false);
