@@ -31,6 +31,12 @@ VariableModel::VariableModel(VariableModelDataHandler* data,QObject *parent) :
 	connect(data_,SIGNAL(reloadEnd()),
 					this,SLOT(slotReloadEnd()));
 
+	connect(data_,SIGNAL(addRemoveBegin(int,int)),
+				this,SLOT(slotAddRemoveBegin(int,int)));
+
+	connect(data_,SIGNAL(addRemoveEnd(int)),
+						this,SLOT(slotAddRemoveEnd(int)));
+
 	connect(data_,SIGNAL(dataChanged(int)),
 						this,SLOT(slotDataChanged(int)));
 
@@ -365,10 +371,47 @@ void VariableModel::slotReloadEnd()
 	endResetModel();
 }
 
-void VariableModel::slotDataChanged(int row)
+void VariableModel::slotAddRemoveBegin(int block,int diff)
 {
-	QModelIndex blockIndex0=index(row,0);
-	QModelIndex blockIndex1=index(row,1);
+	QModelIndex parent=index(block,0);
+	if(!parent.isValid())
+		return;
+
+	int num=rowCount(parent);
+
+	//Insertion
+	if(diff > 0)
+	{
+		//We add extra rows to the end
+		beginInsertRows(parent,num,num+diff-1);
+	}
+	//Deletion
+	else if(diff <0)
+	{
+		//We remove rows from the end
+		beginRemoveRows(parent,num-1+diff,num-1);
+	}
+}
+
+void VariableModel::slotAddRemoveEnd(int diff)
+{
+	//Insertion
+	if(diff > 0)
+	{
+		endInsertRows();
+	}
+	//Deletion
+	else if(diff <0)
+	{
+		endRemoveRows();
+	}
+}
+
+
+void VariableModel::slotDataChanged(int block)
+{
+	QModelIndex blockIndex0=index(block,0);
+	QModelIndex blockIndex1=index(block,1);
 	Q_EMIT dataChanged(blockIndex0,blockIndex1);
 }
 

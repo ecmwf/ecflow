@@ -46,8 +46,8 @@ public:
 	void add(const std::string& name,const std::string& val);
 	void remove(int index,const std::string& val);
 
-	bool sizeChanged();
-	bool updateValues();
+	int checkUpdateDiff();
+	bool update();
 
 	std::vector<Variable> vars_;
 	std::vector<Variable> genVars_;
@@ -73,6 +73,8 @@ public:
 Q_SIGNALS:
 	void reloadBegin();
 	void reloadEnd();
+	void addRemoveBegin(int,int);
+	void addRemoveEnd(int);
 	void dataChanged(int);
 
 protected:

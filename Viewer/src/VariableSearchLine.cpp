@@ -20,6 +20,8 @@ VariableSearchLine::VariableSearchLine(QWidget *parent) :
     view_(0),
     currentResultItem_(-1)
 {
+	label_->hide();
+
 }
 
 VariableSearchLine::~VariableSearchLine()

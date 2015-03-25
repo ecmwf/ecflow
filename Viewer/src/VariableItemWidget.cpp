@@ -84,7 +84,7 @@ VariablePropDialog::VariablePropDialog(VariableModelData *data,QString name, QSt
 
 	parentLabel_->setText(QString::fromStdString(data_->fullPath()) + " (" +
 			    QString::fromStdString(data_->type()) +")");
-	typeLabel_->setText(genVar?tr("variable"):tr("generated variable"));
+	typeLabel_->setText(genVar?tr("generated variable"):tr("variable"));
 	nameEdit_->setText(name);
 	valueEdit_->setPlainText(value);
 }

@@ -171,8 +171,8 @@ int VariableModelData::varNum() const
 }
 
 
-//Check if the total number of variables has changed.
-bool VariableModelData::sizeChanged()
+//Check if the total number of variables will change. It does not update the local data!
+int VariableModelData::checkUpdateDiff()
 {
 	std::vector<Variable> v;
 	std::vector<Variable> vg;
@@ -180,11 +180,14 @@ bool VariableModelData::sizeChanged()
 	info_->variables(v);
 	info_->genVariables(vg);
 
-	return (v.size() != vars_.size() || vg.size() != genVars_.size());
+	//Return the change in the total size of variables
+	return v.size()+vg.size() -(vars_.size() + genVars_.size());
 }
 
-//Check if any of the values has changed
-bool VariableModelData::updateValues()
+
+//Check if any of the values has changed. We suppose that the number of current and new
+//variables are the same but some of their names or values have been changed.
+bool VariableModelData::update()
 {
 	std::vector<Variable> v;
 	std::vector<Variable> vg;
@@ -192,6 +195,7 @@ bool VariableModelData::updateValues()
 	info_->variables(v);
 	info_->genVariables(vg);
 
+	//We must have the same numbe rof variables
 	assert(v.size() == vars_.size() && vg.size() == genVars_.size());
 
 	bool changed=false;
@@ -314,6 +318,7 @@ VariableModelData* VariableModelDataHandler::data(int index) const
 	return 0;
 }
 
+//It is called when a node was changed.
 
 void VariableModelDataHandler::nodeChanged(const Node* node, const std::vector<ecf::Aspect::Type>& aspect)
 {
@@ -329,23 +334,20 @@ void VariableModelDataHandler::nodeChanged(const Node* node, const std::vector<e
 			for(unsigned int i=0; i < data_.size(); i++)
 			{
 				//If the number of the variables not the same we reset the whole model
-				if(data_.at(i)->sizeChanged())
+				int cntDiff=data_.at(i)->checkUpdateDiff();
+				if(cntDiff != 0)
 				{
-					changed=true;
+					//Notifies the model that rows will be added or removed for this data item
+					Q_EMIT addRemoveBegin(i,cntDiff);
+					data_.at(i)->reload();
+					Q_EMIT addRemoveEnd(cntDiff);
+
+					//Update the data item in the model
+					Q_EMIT dataChanged(i);
 				}
 			}
 
-			//If the number of the variables not the same we reset the whole model
-			if(changed)
-			{
-				//Notifies the model that a change will happen
-				Q_EMIT reloadBegin();
-				reload();
-				Q_EMIT reloadEnd();
-
-				//reset the model so no other changes should be checked
-				return;
-			}
+			break;
 		}
 	}
 
@@ -359,12 +361,14 @@ void VariableModelDataHandler::nodeChanged(const Node* node, const std::vector<e
 		{
 			for(unsigned int i=0; i < data_.size(); i++)
 			{
-				if(data_.at(i)->updateValues())
+				if(data_.at(i)->update())
 				{
 					//Update the data item in the model
 					Q_EMIT dataChanged(i);
 				}
 			}
+
+			break;
 		}
 	}
 }

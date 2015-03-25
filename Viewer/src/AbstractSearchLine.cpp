@@ -28,7 +28,7 @@ AbstractSearchLine::AbstractSearchLine(QWidget* parent) : QWidget(parent)
 		this, SLOT(slotFindPrev()));
 
 	oriColour_=QColor(searchLine_->palette().color(QPalette::Base));
-	redColour_=QColor(255,102,102);
+	redColour_=QColor(247,230,230);
 	greenColour_=QColor(186,249,206);
 
 	status_=true;

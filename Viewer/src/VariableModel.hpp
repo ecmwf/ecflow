@@ -44,6 +44,8 @@ public:
 public Q_SLOTS:
 	void slotReloadBegin();
 	void slotReloadEnd();
+	void slotAddRemoveBegin(int block,int diff);
+	void slotAddRemoveEnd(int diff);
 	void slotDataChanged(int);
 
 protected:
