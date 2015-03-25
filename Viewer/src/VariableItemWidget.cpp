@@ -94,12 +94,11 @@ void VariablePropDialog::accept()
 	QString name=nameEdit_->text();
 	QString value=valueEdit_->toPlainText();
 
-	if(data_->hasName(name.toStdString()))
+	if(!data_->hasName(name.toStdString()))
 	{
-		if(QMessageBox::question(0,tr("Confirm: overwrite variable"),
-									tr("This variable is <b>already defined</b>. A new variable will be created \
-									for the selected node and hide the previous one.<br>Do you want to proceed?"),
-						    QMessageBox::Ok|QMessageBox::Cancel,QMessageBox::Cancel) == QMessageBox::Cancel)
+		if(QMessageBox::question(0,tr("Confirm: create new variable"),
+									tr("You are about to cretae a <b>new</b> variable<br>Do you want to proceed?"),
+						    QMessageBox::Save|QMessageBox::Cancel,QMessageBox::Cancel) == QMessageBox::Cancel)
 			{
 				QDialog::reject();
 				return;
@@ -111,7 +110,7 @@ void VariablePropDialog::accept()
 		if(QMessageBox::Ok!=
 				QMessageBox::question(0,QObject::tr("Confirm: change variable"),
 						"You are about to modify a <b>generated variable</b>.<br>Do you want to proceed?"),
-						QMessageBox::Ok|QMessageBox::Cancel,QMessageBox::Cancel)
+						QMessageBox::Save|QMessageBox::Cancel,QMessageBox::Cancel)
 		{
 			QDialog::reject();
 			return;
@@ -486,6 +485,11 @@ void VariableItemWidget::slotFilterTextChanged(QString text)
 void VariableItemWidget::nodeChanged(const Node* node, const std::vector<ecf::Aspect::Type>& aspect)
 {
 	data_->nodeChanged(node,aspect);
+}
+
+void VariableItemWidget::defsChanged(const std::vector<ecf::Aspect::Type>& aspect)
+{
+	data_->defsChanged(aspect);
 }
 
 //Register at the factory

@@ -69,6 +69,7 @@ public:
 	int varNum(int index) const;
 	VariableModelData* data(int index) const;
 	void nodeChanged(const Node* node, const std::vector<ecf::Aspect::Type>&);
+	void defsChanged(const std::vector<ecf::Aspect::Type>&);
 
 Q_SIGNALS:
 	void reloadBegin();

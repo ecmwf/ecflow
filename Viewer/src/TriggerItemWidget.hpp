@@ -26,6 +26,7 @@ public:
 	void clearContents();
 
 	void nodeChanged(const Node*, const std::vector<ecf::Aspect::Type>&) {};
+	void defsChanged(const std::vector<ecf::Aspect::Type>&) {};
 
 };
 

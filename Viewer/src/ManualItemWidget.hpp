@@ -29,6 +29,7 @@ public:
     void infoProgress(VReply*);
 
 	void nodeChanged(const Node*, const std::vector<ecf::Aspect::Type>&) {};
+	void defsChanged(const std::vector<ecf::Aspect::Type>&) {};
 };
 
 #endif

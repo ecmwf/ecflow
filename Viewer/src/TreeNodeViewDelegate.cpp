@@ -29,9 +29,9 @@ TreeNodeViewDelegate::TreeNodeViewDelegate(QWidget *parent) : QStyledItemDelegat
 	QImageReader imgR(":/viewer/server.svg");
 	if(imgR.canRead())
 	{
-			imgR.setScaledSize(QSize(12,12));
-			QImage img=imgR.read();
-			serverPix_=QPixmap(QPixmap::fromImage(img));
+		imgR.setScaledSize(QSize(12,12));
+		QImage img=imgR.read();
+		serverPix_=QPixmap(QPixmap::fromImage(img));
 	}
 
 	/*QString group("itemview_main");

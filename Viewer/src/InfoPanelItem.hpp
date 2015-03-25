@@ -11,6 +11,7 @@
 #define INFOPANELITEM_HPP_
 
 #include "NodeObserver.hpp"
+#include "ServerObserver.hpp"
 #include "VInfo.hpp"
 #include "InfoPresenter.hpp"
 #include "VTask.hpp"
@@ -24,7 +25,7 @@ class InfoProvider;
 //Thisis the base class to represent one tab in the info panel.
 
 
-class InfoPanelItem : public VTaskObserver, public InfoPresenter, public NodeObserver
+class InfoPanelItem : public VTaskObserver, public InfoPresenter, public NodeObserver, public ServerObserver
 {
 public:
 	InfoPanelItem() : loaded_(false), useAncestors_(false) {};
@@ -46,9 +47,13 @@ public:
 	//From NodeObserver
 	void notifyNodeChanged(const Node*, const std::vector<ecf::Aspect::Type>&);
 
+	//From ServerObserver
+	void notifyDefsChanged(ServerHandler* server,const std::vector<ecf::Aspect::Type>&);
+
 protected:
 	void adjust(VInfo_ptr);
 	virtual void nodeChanged(const Node*, const std::vector<ecf::Aspect::Type>&)=0;
+	virtual void defsChanged(const std::vector<ecf::Aspect::Type>&)=0;
 
 	bool loaded_;
     bool useAncestors_;

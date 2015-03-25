@@ -176,9 +176,13 @@ void VInfoServer::accept(VInfoVisitor* v)
 void VInfoServer::variables(std::vector<Variable>& vars)
 {
 	ServerDefsAccess defsAccess(server_);  // will reliquish its resources on destruction
-	const std::vector<Variable>& v=defsAccess.defs()->server().server_variables();
+	vars=defsAccess.defs()->server().server_variables();
 
-	vars=v;
+	const std::vector<Variable>& uv=defsAccess.defs()->server().user_variables();
+	for(std::vector<Variable>::const_iterator it=uv.begin(); it != uv.end(); it++)
+	{
+		vars.push_back(*it);
+	}
 }
 
 std::string VInfoServer::name()

@@ -145,7 +145,7 @@ void PropertyEditor::syncToConfig(QtProperty *prop)
 {
     qDebug() << " prop:" << prop->propertyName() << prop->propertyName() <<  prop->isModified();
 
-    //If the roperty value has been changed.
+    //If the property value has been changed.
     if(prop->hasValue()/*prop->isModified()*/)
     {
         //We lookup the corresponding VProperty in in VConfig

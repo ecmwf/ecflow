@@ -319,13 +319,11 @@ VariableModelData* VariableModelDataHandler::data(int index) const
 }
 
 //It is called when a node was changed.
-
 void VariableModelDataHandler::nodeChanged(const Node* node, const std::vector<ecf::Aspect::Type>& aspect)
 {
 	bool changed=false;
 
 	//Check if some variables were added or removed
-
 	for(std::vector<ecf::Aspect::Type>::const_iterator it=aspect.begin(); it != aspect.end(); it++)
 	{
 		if(*it == ecf::Aspect::ADD_REMOVE_ATTR)
@@ -333,6 +331,10 @@ void VariableModelDataHandler::nodeChanged(const Node* node, const std::vector<e
 			bool changed=false;
 			for(unsigned int i=0; i < data_.size(); i++)
 			{
+				//Do not check the server
+				if(data_.at(i)->type() == "server")
+					continue;
+
 				//If the number of the variables not the same we reset the whole model
 				int cntDiff=data_.at(i)->checkUpdateDiff();
 				if(cntDiff != 0)
@@ -353,14 +355,19 @@ void VariableModelDataHandler::nodeChanged(const Node* node, const std::vector<e
 
 
 	//Check if some variables' value changed
-
 	for(std::vector<ecf::Aspect::Type>::const_iterator it=aspect.begin(); it != aspect.end(); it++)
 	{
 		//A variable's value changed
 		if(*it == ecf::Aspect::NODE_VARIABLE)
 		{
+			//Do not check the server
 			for(unsigned int i=0; i < data_.size(); i++)
 			{
+				//Do not check the server
+				if(data_.at(i)->type() == "server")
+					continue;
+
+				//Update the names/values
 				if(data_.at(i)->update())
 				{
 					//Update the data item in the model
@@ -373,3 +380,46 @@ void VariableModelDataHandler::nodeChanged(const Node* node, const std::vector<e
 	}
 }
 
+//ADD_REMOVE_ATTR?????
+
+//It is called when the server defs was changed
+void VariableModelDataHandler::defsChanged(const std::vector<ecf::Aspect::Type>& aspect)
+{
+	if(data_.size() == 0)
+		return;
+
+	VariableModelData* d=data_.at(data_.size()-1);
+	if(d->type() != "server")
+	{
+		return;
+	}
+
+	int dIndex=data_.size()-1;
+
+	for(std::vector<ecf::Aspect::Type>::const_iterator it=aspect.begin(); it != aspect.end(); it++)
+	{
+		if(*it == ecf::Aspect::SERVER_VARIABLE)
+		{
+			//Check if some variables were added or removed
+			int cntDiff=d->checkUpdateDiff();
+			if(cntDiff != 0)
+			{
+				//Notifies the model that rows will be added or removed for this data item
+				Q_EMIT addRemoveBegin(dIndex,cntDiff);
+				d->reload();
+				Q_EMIT addRemoveEnd(cntDiff);
+
+				//Update the data item in the model
+				Q_EMIT dataChanged(dIndex);
+			}
+			//Otherwise Update the names/values
+			else if(d->update())
+			{
+				//Update the data item in the model
+				Q_EMIT dataChanged(dIndex);
+			}
+
+			break;
+		}
+	}
+}

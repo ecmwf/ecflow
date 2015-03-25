@@ -38,5 +38,4 @@ protected:
 	void resetStateFilter(bool broadcast);
 };
 
-
 #endif

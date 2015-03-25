@@ -33,6 +33,7 @@ class NodeObserver;
 class ServerHandler;
 class ServerComQueue;
 class ServerComThread;
+class ServerObserver;
 class VNode;
 
 class ServerHandler : public QObject
@@ -97,6 +98,9 @@ public:
 		void addNodeObserver(NodeObserver* obs);
 		void removeNodeObserver(NodeObserver* obs);
 
+		void addServerObserver(ServerObserver* obs);
+		void removeServerObserver(ServerObserver* obs);
+
 protected:
 		ServerHandler(const std::string& name,const std::string& host,const std::string&  port);
 		~ServerHandler();
@@ -114,6 +118,7 @@ protected:
 		bool updating_;
 		bool communicating_;
 		std::vector<NodeObserver*> nodeObservers_;
+		std::vector<ServerObserver*> serverObservers_;
 
         VNode* vRoot_;
         
@@ -128,7 +133,7 @@ private Q_SLOTS:
 		//void queryFinished(VReply_ptr);  // invoked when a reply is received from from the server/thread
 		void refreshServerInfo();
 		void slotNodeChanged(const Node* n, const std::vector<ecf::Aspect::Type>& a);
-
+		void slotDefsChanged(const std::vector<ecf::Aspect::Type>& a);
 
 private:
 
@@ -199,12 +204,13 @@ public:
 
 	//From AbstractObserver
 	void update(const Node*, const std::vector<ecf::Aspect::Type>&);
-	void update(const Defs*, const std::vector<ecf::Aspect::Type>&)  {};
+	void update(const Defs*, const std::vector<ecf::Aspect::Type>&);
 	void update_delete(const Node*);
 	void update_delete(const Defs*);
 
 Q_SIGNALS:
 	void nodeChanged(const Node*, const std::vector<ecf::Aspect::Type>&);
+	void defsChanged(const std::vector<ecf::Aspect::Type>&);
 	void failed(std::string message);
 
 protected:

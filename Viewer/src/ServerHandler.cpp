@@ -17,6 +17,7 @@
 #include "Str.hpp"
 #include "MainWindow.hpp"
 #include "NodeObserver.hpp"
+#include "ServerObserver.hpp"
 #include "UserMessage.hpp"
 #include "VTaskObserver.hpp"
 
@@ -105,6 +106,9 @@ ServerHandler::ServerHandler(const std::string& name,const std::string& host, co
 	//emits a signal a notifies the ServerHandler about it.
 	connect(comThread,SIGNAL(nodeChanged(const Node*, const std::vector<ecf::Aspect::Type>&)),
 				 this,SLOT(slotNodeChanged(const Node*, const std::vector<ecf::Aspect::Type>&)));
+
+	connect(comThread,SIGNAL(defsChanged(const std::vector<ecf::Aspect::Type>&)),
+					 this,SLOT(slotDefsChanged(const std::vector<ecf::Aspect::Type>&)));
 
 	//connect(comThread(), SIGNAL(errorMessage(std::string)),
 	//		this, SLOT(errorMessage(std::string)));
@@ -653,7 +657,8 @@ void ServerHandler::command(VInfo_ptr info,const std::vector<std::string>& cmd, 
 		}
 		else if(info->isServer())
 		{
-			nodeFullName = info->server()->longName();
+			nodeFullName = "/";
+			nodeName = "/";
 			//UserMessage::message(UserMessage::DBG, false, std::string("  --> for server: ") + nodeFullName);
 		}
 
@@ -861,6 +866,37 @@ void ServerHandler::removeNodeObserver(NodeObserver *obs)
 		nodeObservers_.erase(it);
 	}
 }
+
+//---------------------------------------------------------------------------
+// Manages Defs changes and desf observers. Defs observers are notified when
+// there is a change.
+//---------------------------------------------------------------------------
+
+//This slot is called when the Defs change.
+void ServerHandler::slotDefsChanged(const std::vector<ecf::Aspect::Type>& a)
+{
+	for(std::vector<ServerObserver*>::const_iterator it=serverObservers_.begin(); it != serverObservers_.end(); it++)
+		(*it)->notifyDefsChanged(this,a);
+}
+
+void ServerHandler::addServerObserver(ServerObserver *obs)
+{
+	std::vector<ServerObserver*>::iterator it=std::find(serverObservers_.begin(),serverObservers_.end(),obs);
+	if(it == serverObservers_.end())
+	{
+		serverObservers_.push_back(obs);
+	}
+}
+
+void ServerHandler::removeServerObserver(ServerObserver *obs)
+{
+	std::vector<ServerObserver*>::iterator it=std::find(serverObservers_.begin(),serverObservers_.end(),obs);
+	if(it != serverObservers_.end())
+	{
+		serverObservers_.erase(it);
+	}
+}
+
 
 //-------------------------------------------------------------------
 // This slot is called when the comThread finished the given task!!
@@ -1429,6 +1465,8 @@ void ServerComThread::initObserver(ServerHandler* server)
 
 	int cnt=0;
 
+	ChangeMgrSingleton::instance()->attach(d.get(),this);
+
 	const std::vector<suite_ptr> &suites = d->suiteVec();
 	for(unsigned int i=0; i < suites.size();i++)
 	{
@@ -1451,15 +1489,21 @@ void ServerComThread::update(const Node* node, const std::vector<ecf::Aspect::Ty
 	if(node==NULL)
 		return;
 
-	//QList<ecf::Aspect::Type> v;
-	//for(std::vector<ecf::Aspect::Type>::const_iterator it=types.begin(); it != types.end(); it++)
-	//		v << *it;
-
-
-
-	UserMessage::message(UserMessage::DBG, false, std::string("Thread update: ") + node->name());
+	UserMessage::message(UserMessage::DBG, false, std::string("Thread update - node: ") + node->name());
+	for(std::vector<ecf::Aspect::Type>::const_iterator it=types.begin(); it != types.end(); it++)
+		UserMessage::message(UserMessage::DBG, false, std::string(" aspect: ") + boost::lexical_cast<std::string>(*it));
 
 	Q_EMIT nodeChanged(node,types);
+}
+
+
+void ServerComThread::update(const Defs* dc, const std::vector<ecf::Aspect::Type>& types)
+{
+	UserMessage::message(UserMessage::DBG, false, std::string("Thread update - defs: "));
+	for(std::vector<ecf::Aspect::Type>::const_iterator it=types.begin(); it != types.end(); it++)
+			UserMessage::message(UserMessage::DBG, false, std::string(" aspect: ") + boost::lexical_cast<std::string>(*it));
+
+	Q_EMIT defsChanged(types);
 }
 
 void ServerComThread::update_delete(const Node* nc)
