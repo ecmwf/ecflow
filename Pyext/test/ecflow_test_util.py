@@ -48,7 +48,7 @@ def get_root_source_dir():
                 print "   Found VERSION.cmake in " + cwd
                 return cwd
         
-        if tail != "Pyext":
+        if tail != "Pyext" and tail != "migrate":
             # in cmake, we may be in the build directory, hence we need to determine source directory
             file = cwd + "/CTestTestfile.cmake"
             #print "   searching for " + file

@@ -13,8 +13,8 @@ def get_root_source_dir():
     while (1):
         # Get to directory that has ecflow
         head, tail = os.path.split(cwd)
-        #print "   head:" + head
-        #print "   tail:" + tail
+        print "   head:" + head
+        print "   tail:" + tail
         if tail.find("ecflow") != -1 :
             
             # bjam, already at the source directory
@@ -22,7 +22,7 @@ def get_root_source_dir():
                 print "   Found VERSION.cmake in " + cwd
                 return cwd
         
-        if tail != "Pyext":
+        if tail != "Pyext" and tail != "migrate":
             # in cmake, we may be in the build directory, hence we need to determine source directory
             file = cwd + "/CTestTestfile.cmake"
             #print "   searching for " + file
