@@ -18,7 +18,7 @@
 #       src/tmpnam.c 
 #       src/line.c 
 #       src/x.c 
-       
+
 list( APPEND srcs_cc
    src/aborted.cc
    src/alerts.cc
@@ -172,7 +172,7 @@ file( GLOB srcs_cpp     RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "src/*.cpp"        
 file( GLOB libicon_srcs RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "src/libicon/*.cc" )
 file( GLOB libxec_srcs  RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "src/libxec/*.c"   )
 file( GLOB libui_srcs   RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "src/libui/*.cc"   )
-
+       
 # ======================================================================================
 
 find_package( X11 )
@@ -236,6 +236,8 @@ ecbuild_add_library(TARGET    libecflowview
 #    o Xp       libxprint does not appear to be used ?
 #    o fl       fast lexical analyser generator, not used ?
 # ========================================================================
+# ECFLOW-143 SUP-1212
+SET_SOURCE_FILES_PROPERTIES(src/host.cc PROPERTIES COMPILE_FLAGS "-O0")
 
 ecbuild_add_executable( TARGET    ecflowview
                         SOURCES   
@@ -274,5 +276,4 @@ install ( FILES       ${CMAKE_SOURCE_DIR}/view/src/ecflowview.menu
                       ${CMAKE_SOURCE_DIR}/view/servers
           DESTINATION share/ecflow
           PERMISSIONS OWNER_READ GROUP_READ WORLD_READ OWNER_EXECUTE GROUP_EXECUTE WORLD_EXECUTE
-        )
-        
+        )        
