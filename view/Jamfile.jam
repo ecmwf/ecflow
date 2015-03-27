@@ -80,7 +80,7 @@ obj host : src/host.cc
      /theParser//libparser
      /theBase//base
      /theClient//libclient
-  : # <variant>release:<optimization>off 
+  :  <variant>release:<optimization>off 
      <include>../view/src
      <include>../view/src/libicon
      <include>../view/src/libxec
@@ -115,3 +115,4 @@ exe test-view : [ glob test/*.cpp  ]
            <variant>debug:<define>DEBUG
 #  	   <variant>release:<cxxflags>-O1
         ;
+# bjam -j8 release c++-template-depth=512
