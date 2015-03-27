@@ -13,8 +13,8 @@ def get_root_source_dir():
     while (1):
         # Get to directory that has ecflow
         head, tail = os.path.split(cwd)
-        print "   head:" + head
-        print "   tail:" + tail
+        #print "   head:" + head
+        #print "   tail:" + tail
         if tail.find("ecflow") != -1 :
             
             # bjam, already at the source directory
