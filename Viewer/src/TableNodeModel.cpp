@@ -13,9 +13,10 @@
 
 #include "ChangeMgrSingleton.hpp"
 
-#include "NodeModelData.hpp"
 #include "ServerHandler.hpp"
 #include "VFilter.hpp"
+#include "VModelData.hpp"
+#include "VNode.hpp"
 #include "VNState.hpp"
 
 //=======================================================
@@ -24,7 +25,7 @@
 //
 //=======================================================
 
-TableNodeModel::TableNodeModel(NodeModelDataHandler *data,IconFilter* icons,QObject *parent) :
+TableNodeModel::TableNodeModel(VModelData *data,IconFilter* icons,QObject *parent) :
 	AbstractNodeModel(data,icons,parent)
 {
 	//connect(data_,SIGNAL(dataChanged()),
@@ -95,7 +96,7 @@ QVariant TableNodeModel::serverData(const QModelIndex& index,int role) const
 
 	else if(index.column() == 0)
 	{
-		if(ServerHandler *server=indexToServer(index))
+		if(ServerHandler *server=indexToRealServer(index))
 		{
 			if(role == Qt::DisplayRole)
 			{
@@ -111,9 +112,11 @@ QVariant TableNodeModel::nodeData(const QModelIndex& index, int role) const
 	if(role == Qt::BackgroundRole && index.column() != 1)
 		return QVariant();
 
-	Node* node=indexToNode(index);
-	if(!node)
+	VNode* vnode=indexToNode(index);
+	if(!vnode || !vnode->node())
 		return QVariant();
+
+	Node *node=vnode->node();
 
 	if(role == Qt::DisplayRole)
 	{
@@ -167,7 +170,7 @@ QModelIndex TableNodeModel::index( int row, int column, const QModelIndex & pare
 
 	//qDebug() << "index" << row << column << parent;
 
-	if(Node *node=data_->getNodeFromFilter(row))
+	if(VNode *node=data_->getNodeFromFilter(row))
 	{
 		return createIndex(row,column,node);
 	}
@@ -249,7 +252,7 @@ QModelIndex TableNodeModel::parent(const QModelIndex &child) const
 		return QModelIndex();
 
 	//Get the node
-	Node* node=indexToNode(child);
+	VNode* node=indexToNode(child);
 	if(!node)
 		return QModelIndex();
 
@@ -269,9 +272,9 @@ QModelIndex TableNodeModel::parent(const QModelIndex &child) const
 	//The node is not a rootnode
 
 	//Get the parent node
-	return serverToIndex(ServerHandler::find(node));
+	return serverToIndex(ServerHandler::find(node->node()));
 
-	Node *parentNode=node->parent();
+	//Node *parentNode=node->parent();
 
 	/*//If there is no parent node it is a suite so its parent is a server
 	if(!parentNode)
@@ -305,7 +308,18 @@ bool TableNodeModel::isServer(const QModelIndex & index) const
 }
 
 
-ServerHandler* TableNodeModel::indexToServer(const QModelIndex & index) const
+ServerHandler* TableNodeModel::indexToRealServer(const QModelIndex & index) const
+{
+	//For servers the internal id is set to their position in servers_ + 1
+	if(index.isValid())
+	{
+		int id=index.internalId()-1;
+		return data_->realServer(id);
+	}
+	return NULL;
+}
+
+VModelServer* TableNodeModel::indexToServer(const QModelIndex & index) const
 {
 	//For servers the internal id is set to their position in servers_ + 1
 	if(index.isValid())
@@ -316,17 +330,29 @@ ServerHandler* TableNodeModel::indexToServer(const QModelIndex & index) const
 	return NULL;
 }
 
+
 QModelIndex TableNodeModel::serverToIndex(ServerHandler* server) const
 {
 	//For servers the internal id is set to their position in servers_ + 1
 	int i;
-	if((i=data_->indexOf(server))!= -1)
+	if((i=data_->indexOfServer(server))!= -1)
 			return createIndex(i,0,i+1);
 
 	return QModelIndex();
 }
 
-Node* TableNodeModel::indexToNode( const QModelIndex & index) const
+QModelIndex TableNodeModel::serverToIndex(VModelServer* server) const
+{
+	//For servers the internal id is set to their position in servers_ + 1
+	int i;
+	if((i=data_->indexOfServer(server))!= -1)
+			return createIndex(i,0,i+1);
+
+	return QModelIndex();
+}
+
+
+VNode* TableNodeModel::indexToNode( const QModelIndex & index) const
 {
 	//return NULL;
 
@@ -334,18 +360,18 @@ Node* TableNodeModel::indexToNode( const QModelIndex & index) const
 	{
 		//if(!isServer(index))
 		//{
-			return static_cast<Node*>(index.internalPointer());
+			return static_cast<VNode*>(index.internalPointer());
 		//}
 
 	}
 	return NULL;
 }
 
-QModelIndex TableNodeModel::nodeToIndex(Node* node, int column) const
+QModelIndex TableNodeModel::nodeToIndex(VNode* node, int column) const
 {
 	return QModelIndex();
 
-	if(!node)
+	/*if(!node)
 			return QModelIndex();
 
 	if(node->parent() != 0)
@@ -357,7 +383,13 @@ QModelIndex TableNodeModel::nodeToIndex(Node* node, int column) const
 		}
 	}
 
-	return QModelIndex();
+	return QModelIndex();*/
+}
+
+VInfo_ptr TableNodeModel::nodeInfo(const QModelIndex&)
+{
+	VInfo_ptr info;
+	return info;
 }
 
 

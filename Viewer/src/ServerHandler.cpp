@@ -19,6 +19,7 @@
 #include "NodeObserver.hpp"
 #include "ServerObserver.hpp"
 #include "UserMessage.hpp"
+#include "VNode.hpp"
 #include "VTaskObserver.hpp"
 
 #include <QMessageBox>
@@ -117,9 +118,13 @@ ServerHandler::ServerHandler(const std::string& name,const std::string& host, co
 	//take ownership of the ServerComThread.
 	comQueue_=new ServerComQueue (this,client_,comThread);
 
+
 	// set the timer for refreshing the server info
    	connect(&refreshTimer_, SIGNAL(timeout()), this, SLOT(refreshServerInfo()));
 	resetRefreshTimer();
+
+	//Create vnode tree
+	vRoot_=new VNodeRoot(this);
 }
 
 ServerHandler::~ServerHandler()
@@ -130,7 +135,6 @@ ServerHandler::~ServerHandler()
 	if (comQueue_)
 			delete comQueue_;
 }
-
 
 void ServerHandler::resetRefreshTimer()
 {
@@ -843,10 +847,26 @@ ServerHandler* ServerHandler::find(Node *node)
 //---------------------------------------------------------------------------
 
 //This slot is called when a node changes.
-void ServerHandler::slotNodeChanged(const Node* n, const std::vector<ecf::Aspect::Type>& a)
+void ServerHandler::slotNodeChanged(const Node* nc, const std::vector<ecf::Aspect::Type>& aspect)
 {
+	VNode* vn=vRoot_->find(nc);
+
+	//We must have this VNode
+	assert(vn != NULL);
+
+	//Begin update for the VNode
+	vRoot_->beginUpdate(vn,aspect);
+
+	//Notify the observers
 	for(std::vector<NodeObserver*>::const_iterator it=nodeObservers_.begin(); it != nodeObservers_.end(); it++)
-		(*it)->notifyNodeChanged(n,a);
+		(*it)->notifyNodeChanged(vn,aspect);
+
+	//End update for the VNode
+	vRoot_->endUpdate(vn,aspect);
+
+	//for(std::vector<NodeObserver*>::const_iterator it=nodeObservers_.begin(); it != nodeObservers_.end(); it++)
+	//	(*it)->notifyNodeChanged(n,a);
+
 }
 
 void ServerHandler::addNodeObserver(NodeObserver *obs)
@@ -1540,14 +1560,3 @@ defs_ptr ServerDefsAccess::defs()
 {
 	return server_->defs();		// the resource will always be locked when we use it
 }
-
-
-VNode::VNode(Node* node) : node_(node)
-{
-}
-
-void VNode::addChild(VNode* n)
-{
-    children_.push_back(n);
-} 
-    

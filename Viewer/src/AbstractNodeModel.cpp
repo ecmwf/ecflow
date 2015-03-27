@@ -13,21 +13,21 @@
 
 #include "ChangeMgrSingleton.hpp"
 
-#include "NodeModelData.hpp"
 #include "ServerFilter.hpp"
 #include "ServerHandler.hpp"
 #include "ServerItem.hpp"
 #include "VFilter.hpp"
+#include "VModelData.hpp"
 #include "VNState.hpp"
 
 
-AbstractNodeModel::AbstractNodeModel(NodeModelDataHandler *data,IconFilter* icons,QObject *parent) :
+AbstractNodeModel::AbstractNodeModel(VModelData *data,IconFilter* icons,QObject *parent) :
    QAbstractItemModel(parent),
    data_(data),
    icons_(icons),
    active_(false)
 {
-	//At this point the model is not active o it cannot see its data!
+	//At this point the model is not active and it cannot see its data!
 }
 
 AbstractNodeModel::~AbstractNodeModel()
@@ -111,7 +111,7 @@ void AbstractNodeModel::reload()
 	if(active_)
 	{
 		beginResetModel();
-		data_->reload();
+		//data_->reload();
 		//clean();
 		//init();
 		//resetStateFilter(false); //do not emit change signal
@@ -180,14 +180,14 @@ QModelIndex AbstractNodeModel::infoToIndex(VInfo_ptr info,int column) const
 		}
 		else if(Node* n=info->node())
 		{
-			return nodeToIndex(n);
+			//return nodeToIndex(n);
 		}
 	}
 
 	return QModelIndex();
 }
 
-VInfo_ptr AbstractNodeModel::nodeInfo(const QModelIndex& index)
+/*VInfo_ptr AbstractNodeModel::nodeInfo(const QModelIndex& index)
 {
 	if(!index.isValid())
 	{
@@ -207,7 +207,7 @@ VInfo_ptr AbstractNodeModel::nodeInfo(const QModelIndex& index)
 		VInfo_ptr res(VInfo::make(node));
 		return res;
 	}
-}
+}*/
 
 
 /*void AbstractNodeModel::notifyNodeChanged(const Node* node, const std::vector<ecf::Aspect::Type>& types)

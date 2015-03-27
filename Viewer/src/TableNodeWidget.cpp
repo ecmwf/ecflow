@@ -12,11 +12,11 @@
 
 #include "AbstractNodeModel.hpp"
 #include "NodeFilterModel.hpp"
-#include "NodeModelData.hpp"
 #include "NodePathWidget.hpp"
 #include "TableNodeModel.hpp"
 #include "TableNodeView.hpp"
 #include "VFilter.hpp"
+#include "VModelData.hpp"
 #include "VSettings.hpp"
 
 #include <QMenu>
@@ -35,8 +35,7 @@ TableNodeWidget::TableNodeWidget(ServerFilter* servers,QWidget * parent) : NodeW
 	NodeFilterDef *filterDef_=new NodeFilterDef(NodeFilterDef::NodeState);
 
 	//Create the data handler for the tree model.
-	data_=new TableNodeModelDataHandler(filterDef_);
-	data_->reset(servers);
+	data_=new VModelData(servers,filterDef_,VModelData::TableModel);
 
 	//Create the table model. It uses the datahandler to access the data.
 	model_=new TableNodeModel(data_,icons_,parent);

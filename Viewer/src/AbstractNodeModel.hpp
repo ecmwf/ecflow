@@ -19,7 +19,8 @@
 class Node;
 
 class IconFilter;
-class NodeModelDataHandler;
+class VModelData;
+class VModelServer;
 class VParamSet;
 
 class AbstractNodeModel;
@@ -29,14 +30,14 @@ class AbstractNodeModel : public QAbstractItemModel
 	Q_OBJECT
 
 public:
-	AbstractNodeModel(NodeModelDataHandler *data,IconFilter* icons,QObject *parent=0);
+	AbstractNodeModel(VModelData *data,IconFilter* icons,QObject *parent=0);
    	virtual ~AbstractNodeModel();
 
    	enum CustomItemRole {FilterRole = Qt::UserRole+1, IconRole = Qt::UserRole+2,
-   		                 ServerRole = Qt::UserRole+3};
+   		                 ServerRole = Qt::UserRole+3, NodeNumRole = Qt::UserRole+4};
 
 	void dataIsAboutToChange();
-	virtual VInfo_ptr nodeInfo(const QModelIndex& index);
+	virtual VInfo_ptr nodeInfo(const QModelIndex& index)=0;
 	void reload();
 	void active(bool);
 	bool active() const {return active_;}
@@ -55,15 +56,17 @@ protected:
 	virtual void resetStateFilter(bool broadcast) {};
 
 	virtual bool isServer(const QModelIndex & index) const=0;
-	virtual ServerHandler* indexToServer(const QModelIndex & index) const=0;
+	virtual ServerHandler* indexToRealServer(const QModelIndex & index) const=0;
+	virtual VModelServer* indexToServer(const QModelIndex & index) const=0;
 	virtual QModelIndex serverToIndex(ServerHandler*) const=0;
-	virtual QModelIndex nodeToIndex(Node*,int column=0) const=0;
-	virtual Node* indexToNode( const QModelIndex & index) const=0;
+
+	virtual QModelIndex nodeToIndex(VNode*,int column=0) const=0;
+	virtual VNode* indexToNode( const QModelIndex & index) const=0;
 
 	virtual QVariant serverData(const QModelIndex& index,int role) const=0;
 	virtual QVariant nodeData(const QModelIndex& index,int role) const=0;
 
-	NodeModelDataHandler* data_;
+	VModelData* data_;
 	IconFilter *icons_;
 	bool active_;
 };

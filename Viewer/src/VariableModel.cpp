@@ -389,7 +389,7 @@ void VariableModel::slotAddRemoveBegin(int block,int diff)
 	else if(diff <0)
 	{
 		//We remove rows from the end
-		beginRemoveRows(parent,num-1+diff,num-1);
+		beginRemoveRows(parent,num+diff,num-1);
 	}
 }
 

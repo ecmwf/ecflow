@@ -23,7 +23,6 @@ set(viewer_srcs
     MenuHandler.cpp
     MessageItemWidget.cpp
     NodeFilterModel.cpp
-    NodeModelData.cpp
     NodePanel.cpp
     NodePathWidget.cpp
     NodeViewBase.cpp
@@ -58,6 +57,8 @@ set(viewer_srcs
     VFilter.cpp
     VIcon.cpp
     VInfo.cpp
+    VModelData.cpp
+    VNode.cpp
     VNState.cpp
     VParam.cpp
     VProperty.cpp   
@@ -87,8 +88,7 @@ QT4_WRAP_CPP(VIEWER_MOC AbstractNodeModel.hpp
                         LineEdit.hpp
                         MainWindow.hpp
                         MenuConfigDialog.hpp
-                        NodeFilterModel.hpp
-                        NodeModelData.hpp
+                        NodeFilterModel.hpp                    
                         NodePanel.hpp
                         NodePathWidget.hpp                    
                         NodeWidget.hpp
@@ -109,7 +109,8 @@ QT4_WRAP_CPP(VIEWER_MOC AbstractNodeModel.hpp
                         VariableModel.hpp
                         VariableModelData.hpp
                         VariableSearchLine.hpp
-                        VFilter.hpp)
+                        VFilter.hpp
+                        VModelData.hpp)
 
 QT4_ADD_RESOURCES (VIEWER_RES viewer.qrc)
 QT4_WRAP_UI       (VIEWER_FORMS_HEADERS CommandDesignerWidget.ui CustomCommandDialog.ui 

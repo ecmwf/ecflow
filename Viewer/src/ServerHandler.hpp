@@ -34,7 +34,7 @@ class ServerHandler;
 class ServerComQueue;
 class ServerComThread;
 class ServerObserver;
-class VNode;
+class VNodeRoot;
 
 class ServerHandler : public QObject
 {
@@ -52,6 +52,7 @@ public:
 		node_ptr suiteAt(int);
 		int indexOfSuite(Node* node);
 
+
 		int numberOfNodes();
 		Node* findNode(int globalIndex);
 		Node* findNode(int globalIndex,int& total,Node *parent);
@@ -62,6 +63,7 @@ public:
 		void setUpdatingStatus(bool newStatus) {updating_ = newStatus;}
 		void releaseDefs();
 
+		VNodeRoot* vRoot() const {return vRoot_;}
 		SState::State state();
 
 		void resetRefreshTimer();
@@ -120,7 +122,7 @@ protected:
 		std::vector<NodeObserver*> nodeObservers_;
 		std::vector<ServerObserver*> serverObservers_;
 
-        VNode* vRoot_;
+        VNodeRoot* vRoot_;
         
 		static std::vector<ServerHandler*> servers_;
 		static std::map<std::string, std::string> commands_;
@@ -247,18 +249,5 @@ private:
 	ServerHandler *server_;
 };
 
-
-class VNode
-{
-public:
-    VNode(Node*);
-    void addChild(VNode*);
-    Node *node() {return node_;}
-    
-protected:
-    Node* node_;
-    std::vector<VNode*> children_;
-    std::vector<int> attrCount_;   
-};
     
 #endif

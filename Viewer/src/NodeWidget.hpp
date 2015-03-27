@@ -24,7 +24,7 @@ class AbstractNodeModel;
 class IconFilter;
 class NodeFilter;
 class NodeFilterModel;
-class NodeModelDataHandler;
+class VModelData;
 class NodePathWidget;
 class NodeViewBase;
 class ServerFilter;
@@ -55,7 +55,7 @@ protected:
 	NodeViewBase* view_;
 	IconFilter* icons_;
 	NodeFilter* filter_;
-	NodeModelDataHandler* data_;
+	VModelData* data_;
 
 };
 

@@ -14,11 +14,11 @@
 
 #include "AbstractNodeModel.hpp"
 #include "NodeFilterModel.hpp"
-#include "NodeModelData.hpp"
 #include "NodePathWidget.hpp"
 #include "TreeNodeModel.hpp"
 #include "TreeNodeView.hpp"
 #include "VFilter.hpp"
+#include "VModelData.hpp"
 #include "VSettings.hpp"
 
 #include "FilterWidget.hpp"
@@ -43,8 +43,7 @@ TreeNodeWidget::TreeNodeWidget(ServerFilter* servers,QWidget* parent) : NodeWidg
 	states_=filterDef_->nodeState();
 
 	//Create the data handler for the tree model.
-	data_=new TreeNodeModelDataHandler(filterDef_);
-	data_->reset(servers);
+	data_=new VModelData(servers,filterDef_,VModelData::TreeModel);
 
 	//Create the tree model. It uses the datahandler to access the data.
 	model_=new TreeNodeModel(data_,atts_,icons_,parent);
