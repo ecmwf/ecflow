@@ -54,18 +54,18 @@ latest_version = ecflow_version_list[0] + "." + ecflow_version_list[1] + "." + e
 # Or we could start a log server on ecgate, (this is what is done for c1a/b)
 def add_local_job_variables( node ):
     node.add_variable("ECF_KILL_CMD","kill -15 %ECF_RID%")
+    node.add_variable("ECF_JOB_CMD","%ECF_JOB% 1> %ECF_JOBOUT% 2>&1")
     node.add_variable("ECF_INCLUDE",os.getenv("SCRATCH") + "/nightly")   
-    node.add_variable("ECF_JOB_CMD","rsh %LOCAL_HOST% -l %USER%  '%ECF_JOB% > %ECF_JOBOUT%  2>&1'")
     node.add_variable("LOCAL_HOST",os.uname()[1])
     node.add_variable("ECF_OUT","") # unset so we use ECF_HOME
-    node.add_variable("MODULE_LOAD_GIT",'echo "module load git does not work on this platform"')  
  
 def add_localhost_variables( localhost ):
-    localhost.add_variable("COMPILER_TEST_PATH","gcc-4.5/$mode")
-    localhost.add_variable("COMPILER_VERSION","gcc-4.5")
+    localhost.add_variable("COMPILER_TEST_PATH","gcc-4.8/$mode")
+    localhost.add_variable("COMPILER_VERSION","gcc-4.8")
     localhost.add_variable("TOOLSET","gcc")
     localhost.add_variable("BOOTSTRAP_TOOLSET","gcc")
-    localhost.add_variable("ARCH","opensuse113")
+    localhost.add_variable("CUSTOM_BJAM_ARGS","c++-template-depth=512")   # needed for gcc 4.8.1
+    localhost.add_variable("ARCH","opensuse131")
     localhost.add_variable("SITE_CONFIG","$WK/build/site_config/site-config-Linux64.jam")
     add_local_job_variables( localhost )
     
