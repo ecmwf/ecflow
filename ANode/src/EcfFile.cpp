@@ -1037,32 +1037,52 @@ std::string EcfFile::getIncludedFilePath( const std::string& includedFile,
    //   %include "../file.name"   -> script_file_path/../file.name
    //   %include "file.name"      -> %ECF_HOME%/%SUITE%/%FAMILY%/filename
    //   %include <file.name>      -> %ECF_INCLUDE%/filename
+   //   When ECF_INCLUDE          -> path1:path2:path3
+   //   %include <file.name>      -> path1/filename || path2/filename || path3/filename
+   //
    //   %include <file.name>      -> ECF_HOME/filename
 
-
+   std::string the_include_file = includedFile.substr( 1, includedFile.size() - 2 );
    if ( includedFile.size() >=2 && includedFile[1] == '/') {
-      // filename starts with /, no interpretation return as in
-      // %include </home/sms/fred.ecf>
-      // %include "/home/sms/fred.ecf"
-      return includedFile.substr( 1, includedFile.size() - 2 );
+      // filename starts with '/' no interpretation return as in
+      // %include </home/ecf/fred.ecf>
+      // %include "/home/ecf/fred.ecf"
+      return the_include_file;
    }
 
    std::stringstream ss;
    if ( includedFile[0] == '<' ) {
-      // include <filename>
-      //    include contents of %ECF_INCLUDE%/filename
-      //    include contents of ECF_HOME/filename
+      // %include <filename> can be one of:
+      //    o When ECF_INCLUDE is a single path -> path1/filename
+      //    o When ECF_INCLUDE is a multi  path -> path1:path2:path3
+      //                                        -> path1/filename || path2/filename || path3/filename
+      //    o ECF_HOME/filename
       std::string ecf_include;
       if (node_->findParentUserVariableValue( Str::ECF_INCLUDE() , ecf_include ) && !ecf_include.empty() ) {
 
-         ecf_include += '/';
-         ecf_include += includedFile.substr( 1, includedFile.size() - 2 );
+         // if ECF_INCLUDE is a set a paths, search in order. i.e like $PATH
+         if (ecf_include.find(':') != std::string::npos) {
+            std::vector<std::string> include_paths;
+            Str::split(ecf_include,include_paths,":");
+            for(size_t i =0; i < include_paths.size();i++) {
+               ecf_include.clear();
+               ecf_include = include_paths[i];
+               ecf_include += '/';
+               ecf_include += the_include_file;
 
-         // Don't rely on hard coded paths. Added for testing, but could be generally useful
-         // since in test scenario ECF_INCLUDE is defined relative to $ECF_HOME
-         node_->enviromentSubsitution(ecf_include);
+               // Don't rely on hard coded paths. Added for testing, but could be generally useful
+               // since in test scenario ECF_INCLUDE is defined relative to $ECF_HOME
+               node_->enviromentSubsitution(ecf_include);
 
-         if (fs::exists(ecf_include)) return ecf_include;
+               if (fs::exists(ecf_include)) return ecf_include;
+            }
+         }
+         else {
+            ecf_include += '/';
+            ecf_include += the_include_file;
+            node_->enviromentSubsitution(ecf_include);
+            if (fs::exists(ecf_include)) return ecf_include;
+         }
 
          // ECF_INCLUDE is specified *BUT* the file does *NOT* exist, Look in ECF_HOME
       }
@@ -1077,7 +1097,7 @@ std::string EcfFile::getIncludedFilePath( const std::string& includedFile,
       }
 
       ecf_include += '/';
-      ecf_include += includedFile.substr( 1, includedFile.size() - 2 );
+      ecf_include += the_include_file;
 
       return ecf_include;
    }
@@ -1106,7 +1126,7 @@ std::string EcfFile::getIncludedFilePath( const std::string& includedFile,
       // include contents of %ECF_HOME%/%SUITE%/%FAMILY%/filename
       node_->findParentUserVariableValue( Str::ECF_HOME() , path);
       if ( path.empty() ) {
-         ss << "ECF_HOME not specified, for include " << line;
+         ss << "ECF_HOME not specified, for task " << node_->absNodePath() << " at " << line;
          errormsg += ss.str();
          return string();
       }
@@ -1114,7 +1134,7 @@ std::string EcfFile::getIncludedFilePath( const std::string& includedFile,
       std::string suite;
       node_->findParentVariableValue( "SUITE" , suite);   // SUITE is a generated variable
       if ( suite.empty() ) {
-         ss << "SUITE not specified, for include " << line;
+         ss << "SUITE not specified, for task " << node_->absNodePath() << " at " << line;
          errormsg += ss.str();
          return string();
       }
@@ -1123,13 +1143,13 @@ std::string EcfFile::getIncludedFilePath( const std::string& includedFile,
       std::string family;
       node_->findParentVariableValue( "FAMILY" , family); // FAMILY is a generated variable
       if ( family.empty() ) {
-         ss << "FAMILY not specified, for include " << line;
+         ss << "FAMILY not specified, for task " << node_->absNodePath() << " at " << line;
          errormsg += ss.str();
          return string();
       }
       path += family;
       path += '/';
-      path += includedFile.substr( 1, includedFile.size() - 2 ); // "filename"
+      path += the_include_file ; // "filename"
       return path;
    }
 
