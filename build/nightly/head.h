@@ -110,7 +110,7 @@ ERROR() {
    wait
    ecflow_client --abort=trap  --host=%ECF_NODE% --port=%ECF_PORT%
 
-   echo "environment was:" printenv | sort
+   echo "environment was:"; printenv | sort
    trap 0                      # Remove the trap
    exit 0                      # End the script
 }
