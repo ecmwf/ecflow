@@ -1034,7 +1034,7 @@ std::string EcfFile::getIncludedFilePath( const std::string& includedFile,
    // Include can have following format:
    //   %include /tmp/file.name   -> /tmp/filename
    //   %include file.name        -> filename
-   //   %include "../file.name"   -> script_file_path/../file.name
+   //   %include "../file.name"   -> script_directory_location/file.name
    //   %include "file.name"      -> %ECF_HOME%/%SUITE%/%FAMILY%/filename
    //   %include <file.name>      -> %ECF_INCLUDE%/filename
    //   When ECF_INCLUDE          -> path1:path2:path3
