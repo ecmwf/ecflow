@@ -1112,6 +1112,9 @@ std::string EcfFile::getIncludedFilePath( const std::string& includedFile,
          std::string the_included_file = includedFile;
          Str::removeQuotes(the_included_file);
 
+         // remove leading ../  ECFLOW-274
+         Str::replace(the_included_file,"../","");
+
          // Get the root path, i.e. script_path_or_cmd_ is of the form "/user/home/ma/mao/course/t1.ecf"
          // we need "/user/home/ma/mao/course/"
          std::string::size_type last_slash = script_path_or_cmd_.rfind("/");
