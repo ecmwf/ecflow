@@ -1034,7 +1034,8 @@ std::string EcfFile::getIncludedFilePath( const std::string& includedFile,
    // Include can have following format:
    //   %include /tmp/file.name   -> /tmp/filename
    //   %include file.name        -> filename
-   //   %include "../file.name"   -> script_directory_location/file.name
+   //   %include "../file.name"   -> script_file_location/../file.name
+   //   %include "./file.name"    -> script_file_location/./file.name
    //   %include "file.name"      -> %ECF_HOME%/%SUITE%/%FAMILY%/filename
    //   %include <file.name>      -> %ECF_INCLUDE%/filename
    //   When ECF_INCLUDE          -> path1:path2:path3
@@ -1105,15 +1106,14 @@ std::string EcfFile::getIncludedFilePath( const std::string& includedFile,
 
       // we have two forms: "head.h" & "../head.h"
 
+      //  ECFLOW-274 need to allow:
+      //     - %include "../fred.h"     # this one directory up
+      //     - %include "./fred.h"      # this is at the same level as script
       std::string path;
-      if ( includedFile.find("../") == 1) {
-         // Find the include file relative to the ecf file.  "../head.h"
+      if ( includedFile.find("./") == 1 || includedFile.find("../") == 1) {
          // remove the leading and trailing '"'
          std::string the_included_file = includedFile;
          Str::removeQuotes(the_included_file);
-
-         // remove leading ../  ECFLOW-274
-         Str::replace(the_included_file,"../","");
 
          // Get the root path, i.e. script_path_or_cmd_ is of the form "/user/home/ma/mao/course/t1.ecf"
          // we need "/user/home/ma/mao/course/"

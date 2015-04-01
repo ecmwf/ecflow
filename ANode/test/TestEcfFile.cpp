@@ -299,11 +299,11 @@ BOOST_AUTO_TEST_CASE( test_ecf_include_multi_paths )
 }
 
 
-BOOST_AUTO_TEST_CASE( test_ecf_include_relative_headers )
+BOOST_AUTO_TEST_CASE( test_ecf_include_ECFLOW_274 )
 {
    // Test .ecf scripts with includes like %include "../bill.h"
    // In this case we expect to find bill.h in the same directory as the script
-   cout << "ANode:: ...test_ecf_include_relative_headers";
+   cout << "ANode:: ...test_ecf_include_ECFLOW_274";
 
    // This test FAIL's randomly on the cray in BATCH mode, but passes in interactive mode.
    if (getenv("ECFLOW_CRAY_BATCH")) {
@@ -340,7 +340,7 @@ BOOST_AUTO_TEST_CASE( test_ecf_include_relative_headers )
 
    // generate the ecf file;
    string header = "%include <head.h>\n\n";
-   string body = "%include \"../t1.h\"\n\n";
+   string body = "%include \"./t1.h\"\n\n";
    string tail = "%include <tail.h>\n# ===================================";
    string ecf_file = header;
    ecf_file += body;
