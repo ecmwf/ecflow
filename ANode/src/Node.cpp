@@ -1013,7 +1013,7 @@ bool Node::variable_substitution(std::string& cmd, const NameValueMap& user_edit
       }
 
       // Simple Check for infinite recursion
-      if (count > 100)  return false;
+      if (count > 1000)  return false;
       count++;
    }
 
