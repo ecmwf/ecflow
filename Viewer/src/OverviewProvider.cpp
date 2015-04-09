@@ -82,7 +82,6 @@ void  OverviewProvider::taskChanged(VTask_ptr task)
 	}
 }
 
-
 void OverviewProvider::serverInfo(VInfoServer* info,std::stringstream& f)
 {
 	ServerHandler *server=info->server();
@@ -106,6 +105,30 @@ void OverviewProvider::serverInfo(VInfoServer* info,std::stringstream& f)
     f << "----------\n";
     //Start block: Type, name
     f << typeName << " " << server->name() << "\n";
+
+    //Generated variables
+    std::vector<Variable> gvar;
+    info->genVariables(gvar);
+    for(std::vector<Variable>::const_iterator it = gvar.begin(); it != gvar.end(); ++it)
+    {
+    	f << inc << "# edit " << (*it).name() << " '" << (*it).theValue() << "'\n";
+    }
+
+    //Variables
+    std::vector<Variable> var;
+    info->variables(var);
+    for(std::vector<Variable>::const_iterator it = var.begin(); it != var.end(); ++it)
+    {
+       	f << inc << "edit " << (*it).name() << " '" << (*it).theValue() << "'\n";
+    }
+
+    //Print children
+    VNode *vr=server->vRoot();
+    for(unsigned int i=0; i < vr->numOfChildren(); i++)
+    {
+    	f << inc << VInfo::nodeType(vr->childAt(i)) << " " <<
+    			vr->childAt(i)->name().toStdString() << "\n";
+    }
 
     //End block
     f << "end" << typeName << " # " << nodeName << "\n";
@@ -170,7 +193,11 @@ void OverviewProvider::nodeInfo(VInfoNode* info,std::stringstream& f)
 	if(nn->hasAutoCancel() && nn->get_autocancel())
 		f << inc << nn->get_autocancel()->toString() << "\n";
 
-	f << inc << "# " << typeName << " " << nodeName << " is " << statusName << "\n";
+	//For suspended nodes
+	if(nn->isSuspended())
+	{
+		f << inc << "# " << typeName << " " << nodeName << " is " << statusName << "\n";
+	}
 
 	if(nn->hasTimeDependencies())
 	{
@@ -181,35 +208,31 @@ void OverviewProvider::nodeInfo(VInfoNode* info,std::stringstream& f)
 
 	//Generated variables
 	std::vector<Variable> gvar;
-	std::vector<Variable>::const_iterator gvar_end;
-	nn->gen_variables(gvar);
+	info->genVariables(gvar);
 	for(std::vector<Variable>::const_iterator it = gvar.begin(); it != gvar.end(); ++it)
 	{
-		f << inc << "# edit " << (*it).name() << " '" << (*it).theValue() << "'\n";
+	    	f << inc << "# edit " << (*it).name() << " '" << (*it).theValue() << "'\n";
 	}
 
 	//Variables
-	gvar = nn->variables();
-	for(std::vector<Variable>::const_iterator it = gvar.begin(); it != gvar.end(); ++it)
+	std::vector<Variable> var;
+	info->variables(var);
+	for(std::vector<Variable>::const_iterator it = var.begin(); it != var.end(); ++it)
 	{
 		f << inc << "edit " << (*it).name() << " '" << (*it).theValue() << "'\n";
 	}
 
 	//Print children
+	VNode *vr=server->vRoot();
 	for(unsigned int i=0; i < node->numOfChildren(); i++)
 	{
-		f << inc << info->nodeType(node->childAt(i)) << " " << node->childAt(i)->name().toStdString() << "\n";
-	}
+		f << inc << VInfo::nodeType(node->childAt(i)) << " " <<
+	    			node->childAt(i)->name().toStdString() << "\n";
+    }
+
 
 	//Here we should print some additional information from the attributes as well. It is not clear exactly what!
 
 	//End block
 	f << "end" << typeName << " # " << nodeName << "\n";
 }
-
-
-
-
-
-
-

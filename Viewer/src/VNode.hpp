@@ -63,6 +63,7 @@ public:
     QString name() const;
     QString stateName();
     QString defaultStateName();
+    bool isSuspended() const;
     QColor  stateColour() const;
 
 protected:

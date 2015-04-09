@@ -12,13 +12,18 @@
 #include "OverviewProvider.hpp"
 #include "VReply.hpp"
 
+#include <QScrollBar>
+
+
 //========================================================
 //
 // InfoItemWidget
 //
 //========================================================
 
-OverviewItemWidget::OverviewItemWidget(QWidget *parent) : TextItemWidget(parent)
+OverviewItemWidget::OverviewItemWidget(QWidget *parent) :
+  TextItemWidget(parent),
+  lastScrollPos_(0)
 {
 	QFont f;
 	f.setFamily("Monospace");
@@ -38,12 +43,12 @@ QWidget* OverviewItemWidget::realWidget()
 	return this;
 }
 
-void OverviewItemWidget::reload(VInfo_ptr nodeInfo)
+void OverviewItemWidget::reload(VInfo_ptr info)
 {
-	loaded_=true;
-	info_=nodeInfo;
+	//set the info
+	adjust(info);
 
-	if(!nodeInfo.get())
+	if(!info_.get())
 	{
 		textEdit_->clear();
 	}
@@ -52,6 +57,17 @@ void OverviewItemWidget::reload(VInfo_ptr nodeInfo)
 		clearContents();
 		infoProvider_->info(info_);
 	}
+
+	loaded_=true;
+}
+
+void OverviewItemWidget::reload()
+{
+	//Save the vertical scrollbar pos
+	lastScrollPos_=textEdit_->verticalScrollBar()->value();
+
+	textEdit_->clear();
+	infoProvider_->info(info_);
 }
 
 void OverviewItemWidget::clearContents()
@@ -64,6 +80,9 @@ void OverviewItemWidget::infoReady(VReply* reply)
 {
 	QString s=QString::fromStdString(reply->text());
 	textEdit_->setPlainText(s);
+
+	//Restore the vertical scrollbar pos
+	textEdit_->verticalScrollBar()->setValue(lastScrollPos_);
 }
 
 void OverviewItemWidget::infoProgress(VReply* reply)
@@ -76,6 +95,32 @@ void OverviewItemWidget::infoFailed(VReply* reply)
 {
 	QString s=QString::fromStdString(reply->errorText());
 	textEdit_->setPlainText(s);
+}
+
+//At this point we can be sure that the node is handled by this item.
+void OverviewItemWidget::nodeChanged(const VNode* node, const std::vector<ecf::Aspect::Type>& aspect)
+{
+	for(std::vector<ecf::Aspect::Type>::const_iterator it=aspect.begin(); it != aspect.end(); it++)
+	{
+		if(*it == ecf::Aspect::STATE || *it == ecf::Aspect::ADD_REMOVE_NODE || *it == ecf::Aspect::ADD_REMOVE_ATTR ||
+		   *it == ecf::Aspect::DEFSTATUS || *it == ecf::Aspect::SUSPENDED || *it == ecf::Aspect::NODE_VARIABLE)
+		{
+			reload();
+			return;
+		}
+	}
+}
+
+void OverviewItemWidget::defsChanged(const std::vector<ecf::Aspect::Type>& aspect)
+{
+	for(std::vector<ecf::Aspect::Type>::const_iterator it=aspect.begin(); it != aspect.end(); it++)
+	{
+		if(*it == ecf::Aspect::SERVER_STATE || *it == ecf::Aspect::SERVER_VARIABLE || *it == ecf::Aspect::ADD_REMOVE_ATTR)
+		{
+			reload();
+			return;
+		}
+	}
 }
 
 

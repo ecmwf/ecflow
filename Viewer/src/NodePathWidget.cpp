@@ -340,8 +340,8 @@ int NodePathWidget::findInPath(VInfo_ptr p1,VInfo_ptr p2,bool sameServer)
 	}
 
 	int idx=-1;
-	std::vector<VNode*> lst1=p1->ancestors(VInfo::ParentToChild);
-	std::vector<VNode*> lst2=p2->ancestors(VInfo::ParentToChild);
+	std::vector<VNode*> lst1=p1->ancestors(VInfo::ParentToChildOrder);
+	std::vector<VNode*> lst2=p2->ancestors(VInfo::ParentToChildOrder);
 
 	if(lst1.size() > lst2.size())
 		return -1;
@@ -479,7 +479,7 @@ void NodePathWidget::setPath(VInfo_ptr info)
   	info_=info;
 
 	//Get the node list + prepend the server
-  	std::vector<VNode*> lst=info_->ancestors(VInfo::ParentToChild);
+  	std::vector<VNode*> lst=info_->ancestors(VInfo::ParentToChildOrder);
   	lst.insert(lst.begin(),0);//indicates the server
 
   	//--------------------------------------------
@@ -640,7 +640,7 @@ VInfo_ptr NodePathWidget::nodeAt(int idx)
 		}
 		else
 		{
-			std::vector<VNode*> nodes=info_->ancestors(VInfo::ParentToChild);
+			std::vector<VNode*> nodes=info_->ancestors(VInfo::ParentToChildOrder);
 			if(idx-1 < nodes.size())
 			{
 				VInfo_ptr res(VInfo::make(nodes.at(idx-1),server));
@@ -722,7 +722,7 @@ void NodePathWidget::notifyNodeChanged(const VNode* node, const std::vector<ecf:
 		if(std::find(aspect.begin(),aspect.end(),ecf::Aspect::STATE) != aspect.end() ||
 		   std::find(aspect.begin(),aspect.end(),ecf::Aspect::SUSPENDED) != aspect.end())
 		{
-			std::vector<VNode*> nodes=info_->ancestors(VInfo::ParentToChild);
+			std::vector<VNode*> nodes=info_->ancestors(VInfo::ParentToChildOrder);
 			for(unsigned int i=0; i < nodes.size(); i++)
 			{
 				if(nodes.at(i) == node)
@@ -741,7 +741,7 @@ void NodePathWidget::notifyNodeChanged(const VNode* node, const std::vector<ecf:
 		//A child was removed or added
 		else if(std::find(aspect.begin(),aspect.end(),ecf::Aspect::ADD_REMOVE_NODE) != aspect.end())
 		{
-			std::vector<VNode*> nodes=info_->ancestors(VInfo::ParentToChild);
+			std::vector<VNode*> nodes=info_->ancestors(VInfo::ParentToChildOrder);
 			for(unsigned int i=0; i < nodes.size(); i++)
 			{
 				if(node == nodes.at(i))

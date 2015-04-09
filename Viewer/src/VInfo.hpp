@@ -38,7 +38,7 @@ class VInfoVisitor;
 class VInfo
 {
 public:
-	enum NodeOrder {ChildToParent,ParentToChild};
+	enum NodeOrder {ChildToParentOrder,ParentToChildOrder};
 
 	VInfo();
 	virtual ~VInfo() {};
@@ -62,6 +62,8 @@ public:
     bool sameAs(const VNode* n,bool checkAncestors=false);
 	
     virtual void accept(VInfoVisitor*)=0;
+
+    static const std::string&  nodeType(VNode*);
 
 	static VInfo* make(ServerHandler*);
 	static VInfo* make(VNode*,ServerHandler* server=0);
@@ -94,6 +96,7 @@ public:
     void accept(VInfoVisitor*);
 
     void variables(std::vector<Variable>& vars);
+    void genVariables(std::vector<Variable>& vars);
     std::string name();
     std::string fullPath() {return name();}
 };
@@ -110,7 +113,6 @@ public:
 	ServerHandler* server();
 	void accept(VInfoVisitor*);
 	const std::string&  nodeType();
-	static const std::string&  nodeType(VNode*);
 
 	void variables(std::vector<Variable>& vars);
 	void genVariables(std::vector<Variable>& vars);

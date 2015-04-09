@@ -103,7 +103,7 @@ std::vector<VNode*> VInfo::ancestors(NodeOrder order)
 	std::vector<VNode*> nodes;
 	if(isNode())
 	{
-		if(order == ChildToParent)
+		if(order == ChildToParentOrder)
 		{
 			VNode* n=node();
 			while(n && n->parent())
@@ -165,6 +165,26 @@ bool VInfo::sameAs(const VNode* n,bool checkAncestors)
     return false;
 }
 
+const std::string&  VInfo::nodeType(VNode* node)
+{
+	static std::string suiteStr("suite");
+	static std::string familyStr("family");
+	static std::string taskStr("task");
+	static std::string defaultStr("node");
+
+	if(!node || !node->node())
+		return defaultStr;
+
+	if(node->node()->isSuite())
+		return suiteStr;
+	else if(node->node()->isFamily())
+		return familyStr;
+	else if(node->node()->isTask())
+			return taskStr;
+
+	return defaultStr;
+}
+
 //--------------------------------------------------
 // Factory methods
 //--------------------------------------------------
@@ -203,15 +223,19 @@ void VInfoServer::accept(VInfoVisitor* v)
 
 void VInfoServer::variables(std::vector<Variable>& vars)
 {
+	vars.clear();
+	ServerDefsAccess defsAccess(server_);  // will reliquish its resources on destruction
+	vars=defsAccess.defs()->server().user_variables();
+}
+
+void VInfoServer::genVariables(std::vector<Variable>& vars)
+{
+	vars.clear();
 	ServerDefsAccess defsAccess(server_);  // will reliquish its resources on destruction
 	vars=defsAccess.defs()->server().server_variables();
-
-	const std::vector<Variable>& uv=defsAccess.defs()->server().user_variables();
-	for(std::vector<Variable>::const_iterator it=uv.begin(); it != uv.end(); it++)
-	{
-		vars.push_back(*it);
-	}
 }
+
+
 
 std::string VInfoServer::name()
 {
@@ -313,29 +337,8 @@ ServerHandler* VInfoNode::server()
 
 const std::string&  VInfoNode::nodeType()
 {
-	return nodeType(node_);
+	return VInfo::nodeType(node_);
 }
-
-const std::string&  VInfoNode::nodeType(VNode* node)
-{
-	static std::string suiteStr("suite");
-	static std::string familyStr("family");
-	static std::string taskStr("task");
-	static std::string defaultStr("node");
-
-	if(!node || !node->node())
-		return defaultStr;
-
-	if(node->node()->isSuite())
-		return suiteStr;
-	else if(node->node()->isFamily())
-		return familyStr;
-	else if(node->node()->isTask())
-			return taskStr;
-
-	return defaultStr;
-}
-
 
 void VInfoNode::variables(std::vector<Variable>& vars)
 {

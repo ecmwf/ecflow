@@ -127,6 +127,12 @@ QString VNode::defaultStateName()
 	return VNState::toDefaultStateName(node_);
 }
 
+bool VNode::isSuspended() const
+{
+	return (node_ && node_->isSuspended());
+}
+
+
 QColor  VNode::stateColour() const
 {
 	return VNState::toColour(node_);
