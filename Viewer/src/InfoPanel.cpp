@@ -140,15 +140,28 @@ InfoPanel::~InfoPanel()
 
 void InfoPanel::clear()
 {
+	//release info
 	info_.reset();
+
+	//Clear the tab contents
+	for(int i=0; i < tab_->count(); i++)
+	{
+		if(InfoPanelItem* item=findItem(tab_->widget(i)))
+		{
+			item->clearContents();
+		}
+	}
+	//Clear the tabs
 	tab_->clear();
-	bcWidget_->setPath(VInfo_ptr());
+
+	//Clear the breadcrumbs
+	bcWidget_->clear();
 }
 
 //TODO: It should be the slot
 void InfoPanel::reset(VInfo_ptr info)
 {
-        //Set info
+    //Set info
     info_=info;
 
 	//Check which roles are allowed
@@ -158,7 +171,7 @@ void InfoPanel::reset(VInfo_ptr info)
 	//Set tabs according to the current set of roles
 	adjust(ids);
 
-		qDebug() << "current" << tab_->currentIndex();
+	qDebug() << "current" << tab_->currentIndex();
 
 	//Reload the current widget in the tab and clears the others
 	for(int i=0; i < tab_->count(); i++)
@@ -170,10 +183,10 @@ void InfoPanel::reset(VInfo_ptr info)
 				qDebug() << "reload" << i;
 				item->reload(info);
 			}
-			else
+			/*else
             {    
 				item->clearContents();
-			}
+			}*/
 		}
     }
 		
@@ -200,6 +213,9 @@ void InfoPanel::adjust(QStringList ids)
 	{
 		if(InfoPanelItemHandler* d=findHandler(tab_->widget(i)))
 		{
+			//Clear the contents
+			d->item()->clearContents();
+
 			if(d->match(ids))
 					match++;
 		}
@@ -213,8 +229,7 @@ void InfoPanel::adjust(QStringList ids)
 
 		//Remove the pages but does not delete them
         tab_->clear();
-		
-        
+
         Q_FOREACH(QString id, ids)
 		{
 			if(InfoPanelItemHandler* d=findHandler(id))
@@ -326,6 +341,14 @@ bool InfoPanel::detached() const
 void InfoPanel::detached(bool b)
 {
 	detachedTb->setChecked(b);
+}
+
+void InfoPanel::notifyServerDelete(ServerHandler* server)
+{
+	if(info_ && info_->server() == server)
+	{
+		clear();
+	}
 }
 
 void InfoPanel::writeSettings(VSettings* vs)

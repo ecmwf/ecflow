@@ -253,13 +253,13 @@ void VariableModelDataHandler::reload(VInfo_ptr info)
 	clear();
 
 	server_=0;
-	std::vector<Node*> nodes;
+	std::vector<VNode*> nodes;
 
 	if(info.get() != 0)
 	{
 		info->ancestors(&server_,nodes);
 
-		for(std::vector<Node*>::iterator it=nodes.begin(); it != nodes.end(); it++)
+		for(std::vector<VNode*>::iterator it=nodes.begin(); it != nodes.end(); it++)
 		{
 			VInfo_ptr info(VInfo::make(*it));
 			data_.push_back(new VariableModelData(info));
@@ -294,12 +294,17 @@ void VariableModelDataHandler::reload()
 
 void VariableModelDataHandler::clear()
 {
+	//Notifies the model that a change will happen
+	Q_EMIT reloadBegin();
+
 	for(std::vector<VariableModelData*>::iterator it=data_.begin(); it != data_.end(); it++)
 	{
 		delete *it;
 	}
 
 	data_.clear();
+
+	Q_EMIT reloadEnd();
 }
 
 int VariableModelDataHandler::varNum(int index) const
@@ -319,11 +324,11 @@ VariableModelData* VariableModelDataHandler::data(int index) const
 }
 
 //It is called when a node was changed.
-void VariableModelDataHandler::nodeChanged(const Node* node, const std::vector<ecf::Aspect::Type>& aspect)
+void VariableModelDataHandler::nodeChanged(const VNode* node, const std::vector<ecf::Aspect::Type>& aspect)
 {
 	bool changed=false;
 
-	//Check if some variables were added or removed
+	//Check if some variables were added or removed.
 	for(std::vector<ecf::Aspect::Type>::const_iterator it=aspect.begin(); it != aspect.end(); it++)
 	{
 		if(*it == ecf::Aspect::ADD_REMOVE_ATTR)

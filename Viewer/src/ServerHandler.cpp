@@ -129,6 +129,10 @@ ServerHandler::ServerHandler(const std::string& name,const std::string& host, co
 
 ServerHandler::~ServerHandler()
 {
+	//Notify the observers
+	for(std::vector<ServerObserver*>::const_iterator it=serverObservers_.begin(); it != serverObservers_.end(); it++)
+			(*it)->notifyServerDelete(this);
+
 	if(client_)
 		delete client_;
 
@@ -468,7 +472,7 @@ void ServerHandler::file(VTask_ptr task,const std::string& errText)
 	std::string fileName;
 	if(!task->param("ecfVar").empty())
 	{
-		task->node()->findGenVariableValue(task->param("ecfVar"),fileName);
+		task->node()->node()->findGenVariableValue(task->param("ecfVar"),fileName);
 	}
 
 	//We try to read the file from the local disk
@@ -655,8 +659,8 @@ void ServerHandler::command(VInfo_ptr info,const std::vector<std::string>& cmd, 
 
 		if(info->isNode())
 		{
-			nodeFullName = info->node()->absNodePath();
-			nodeName = info->node()->name();
+			nodeFullName = info->node()->node()->absNodePath();
+			nodeName = info->node()->node()->name();
 			//UserMessage::message(UserMessage::DBG, false, std::string("  --> for node: ") + nodeFullName + " (server: " + info[i]->server()->longName() + ")");
 		}
 		else if(info->isServer())
@@ -718,12 +722,12 @@ void ServerHandler::command(std::vector<VInfo_ptr> info, std::string cmd, bool r
 		for(int i=0; i < info.size(); i++)
 		{
 			std::string nodeFullName;
-			std::string nodeName = info[i]->node()->name();
+			std::string nodeName = info[i]->node()->node()->name();
 
 			//Get the name
 			if(info[i]->isNode())
 			{
-				nodeFullName = info[i]->node()->absNodePath();
+				nodeFullName = info[i]->node()->node()->absNodePath();
 				//UserMessage::message(UserMessage::DBG, false, std::string("  --> for node: ") + nodeFullName + " (server: " + info[i]->server()->longName() + ")");
 			}
 			else if(info[i]->isServer())
@@ -854,12 +858,15 @@ void ServerHandler::slotNodeChanged(const Node* nc, const std::vector<ecf::Aspec
 	//We must have this VNode
 	assert(vn != NULL);
 
+	//Create an object adding some more details about the change
+	VNodeChange change;
+
 	//Begin update for the VNode
-	vRoot_->beginUpdate(vn,aspect);
+	vRoot_->beginUpdate(vn,aspect,change);
 
 	//Notify the observers
 	for(std::vector<NodeObserver*>::const_iterator it=nodeObservers_.begin(); it != nodeObservers_.end(); it++)
-		(*it)->notifyNodeChanged(vn,aspect);
+		(*it)->notifyNodeChanged(vn,aspect,change);
 
 	//End update for the VNode
 	vRoot_->endUpdate(vn,aspect);
@@ -898,6 +905,9 @@ void ServerHandler::slotDefsChanged(const std::vector<ecf::Aspect::Type>& a)
 	for(std::vector<ServerObserver*>::const_iterator it=serverObservers_.begin(); it != serverObservers_.end(); it++)
 		(*it)->notifyDefsChanged(this,a);
 }
+
+
+
 
 void ServerHandler::addServerObserver(ServerObserver *obs)
 {
@@ -1293,7 +1303,7 @@ void ServerComThread::task(VTask_ptr task)
 		taskType_=task->type();
 		if(task->node())
 		{
-			nodePath_=task->node()->absNodePath();
+			nodePath_=task->node()->node()->absNodePath();
 		}
 
 		//Start the thread execution

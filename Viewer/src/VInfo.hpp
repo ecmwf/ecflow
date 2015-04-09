@@ -19,10 +19,9 @@
 
 #include "Variable.hpp"
 
-class Node;
-
 class ServerHandler;
 class VAttribute;
+class VNode;
 
 class VInfoVisitor;
 
@@ -36,61 +35,21 @@ class VInfoVisitor;
 // is used in breadcrumbs, info panels or other widgets outside the main views.
 //==============================================================================
 
-
-//This is the base class for the info objects
-/*
-class VInfo
-{
-	virtual const std::string& name()=0;
-	virtual QColor colour()=0;
-
-	virtual bool isServer() {return false;}
-	virtual bool isNode() {return false;}
-	virtual bool isAtrribute() {return false;}
-	virtual bool isEmpty() {return true;}
-
-	VInfo* selection() {return selection_;}
-
-protected:
-	VInfo* selection_;
-	std::vector<VInfo*> children_;
-
-
-	std::vectorvars
-
-};
-
-
-class VServer : public VInfo
-{
-
-}
-
-class VNode : public VInfo
-{
-
-}
-
-
-*/
-
-
-
 class VInfo
 {
 public:
-	//enum Type {NONE,INFO,WHY,MANUAL,SCRIPT,JOB,MESSAGES,OUTPUT}
+	enum NodeOrder {ChildToParent,ParentToChild};
 
 	VInfo();
 	virtual ~VInfo() {};
 
 	virtual bool isServer() {return false;}
-	virtual bool isNode() {return false;}
-	virtual bool isAtrribute() {return false;}
-	virtual bool isEmpty() {return true;}
+	virtual bool isNode()  {return false;}
+	virtual bool isAtrribute()  {return false;}
+	virtual bool isEmpty()  {return true;}
 
 	virtual ServerHandler* server() {return server_;};
-	virtual Node* node() {return node_;}
+	virtual VNode* node()  {return node_;}
 	virtual VAttribute* attribute() {return att_;}
 
 	virtual void variables(std::vector<Variable>& vars) {};
@@ -98,22 +57,23 @@ public:
 	virtual std::string name() {return std::string();}
 	virtual std::string fullPath() {return std::string();}
 
-	void ancestors(ServerHandler **server,std::vector<Node*>& nodes);
-    bool sameAs(Node* n,bool checkAncestors=false);
+	void ancestors(ServerHandler **server,std::vector<VNode*>& nodes);
+	std::vector<VNode*> ancestors(NodeOrder);
+    bool sameAs(const VNode* n,bool checkAncestors=false);
 	
     virtual void accept(VInfoVisitor*)=0;
 
 	static VInfo* make(ServerHandler*);
-	static VInfo* make(Node*,ServerHandler* server=0);
-	static VInfo* make(VAttribute*,int,Node*);
+	static VInfo* make(VNode*,ServerHandler* server=0);
+	static VInfo* make(VAttribute*,int,VNode*);
 
 protected:
 	VInfo(ServerHandler*);
-	VInfo(Node*,ServerHandler* server);
-	VInfo(VAttribute*,int attIndex,Node*,ServerHandler* server);
+	VInfo(VNode*,ServerHandler* server);
+	VInfo(VAttribute*,int attIndex,VNode*,ServerHandler* server);
 
 	mutable ServerHandler* server_;
-	mutable Node* node_;
+	mutable VNode* node_;
 	mutable VAttribute* att_;
 	mutable int attIndex_;
 };
@@ -142,7 +102,7 @@ public:
 class VInfoNode: public VInfo
 {
 public:
-	VInfoNode(Node*,ServerHandler* server=0);
+	VInfoNode(VNode*,ServerHandler* server=0);
 
 	bool isNode() {return true;}
 	bool isEmpty() {return false;}
@@ -150,7 +110,7 @@ public:
 	ServerHandler* server();
 	void accept(VInfoVisitor*);
 	const std::string&  nodeType();
-	static const std::string&  nodeType(Node*);
+	static const std::string&  nodeType(VNode*);
 
 	void variables(std::vector<Variable>& vars);
 	void genVariables(std::vector<Variable>& vars);
@@ -165,7 +125,7 @@ protected:
 class VInfoAttribute: public VInfo
 {
 public:
-	VInfoAttribute(VAttribute*,int,Node*,ServerHandler*);
+	VInfoAttribute(VAttribute*,int,VNode*,ServerHandler*);
 
 	bool isAttribute() {return true;}
 	bool isEmpty() {return false;}
@@ -176,7 +136,7 @@ public:
 class VInfoLimit: public VInfoAttribute
 {
 public:
-	VInfoLimit(VAttribute*,int,Node*,ServerHandler* server=0);
+	VInfoLimit(VAttribute*,int,VNode*,ServerHandler* server=0);
 };
 
 //=================================================
@@ -189,8 +149,8 @@ public:
 	VInfoAttributeFactory(const std::string&);
 	virtual ~VInfoAttributeFactory();
 
-	virtual VInfoAttribute* make(VAttribute*,int,Node*,ServerHandler* server=0) = 0;
-	static VInfoAttribute* create(VAttribute* att,int attIndex,Node* node,ServerHandler* server=0);
+	virtual VInfoAttribute* make(VAttribute*,int,VNode*,ServerHandler* server=0) = 0;
+	static VInfoAttribute* create(VAttribute* att,int attIndex,VNode* node,ServerHandler* server=0);
 
 private:
 	VInfoAttributeFactory(const VInfoAttributeFactory&);
@@ -201,7 +161,7 @@ private:
 template<class T>
 class  VInfoAttributeMaker : public VInfoAttributeFactory
 {
-	VInfoAttribute* make(VAttribute* att,int attIndex,Node* node,ServerHandler* server=0)
+	VInfoAttribute* make(VAttribute* att,int attIndex,VNode* node,ServerHandler* server=0)
 	       { return new T(att,attIndex,node,server); }
 public:
 	 VInfoAttributeMaker(const std::string& name) : VInfoAttributeFactory(name) {}

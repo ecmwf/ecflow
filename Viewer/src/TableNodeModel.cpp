@@ -367,7 +367,7 @@ VNode* TableNodeModel::indexToNode( const QModelIndex & index) const
 	return NULL;
 }
 
-QModelIndex TableNodeModel::nodeToIndex(VNode* node, int column) const
+QModelIndex TableNodeModel::nodeToIndex(const VNode* node, int column) const
 {
 	return QModelIndex();
 

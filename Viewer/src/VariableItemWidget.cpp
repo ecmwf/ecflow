@@ -307,7 +307,8 @@ void VariableItemWidget::reload(VInfo_ptr info)
 
 void VariableItemWidget::clearContents()
 {
-	loaded_=false;
+	InfoPanelItem::clear();
+	data_->clear();
 }
 
 
@@ -482,7 +483,7 @@ void VariableItemWidget::slotFilterTextChanged(QString text)
 }
 
 
-void VariableItemWidget::nodeChanged(const Node* node, const std::vector<ecf::Aspect::Type>& aspect)
+void VariableItemWidget::nodeChanged(const VNode* node, const std::vector<ecf::Aspect::Type>& aspect)
 {
 	data_->nodeChanged(node,aspect);
 }

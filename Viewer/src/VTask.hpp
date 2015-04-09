@@ -21,6 +21,7 @@
 class VReply;
 
 class Node;
+class VNode;
 class VTaskObserver;
 
 //This class defines a task that can be sent to the server to be executed.
@@ -42,7 +43,7 @@ public:
 
 	Type type() const {return type_;}
 	const std::string& typeString() const;
-	Node* node() const {return node_;}
+	VNode* node() const {return node_;}
 	Status status() {return status_;}
 	const std::string& param(const std::string& key) const;
 	const std::map<std::string,std::string>& params() const {return params_;}
@@ -59,17 +60,17 @@ public:
 	void broadcast();
 
 	static VTask_ptr create(Type t,VTaskObserver* obs=0);
-	static VTask_ptr create(Type t,Node *node,VTaskObserver* obs=0);
+	static VTask_ptr create(Type t,VNode *node,VTaskObserver* obs=0);
 
 protected:
 	VTask(Type t,VTaskObserver* obs=0);
-	VTask(Type t,Node *node,VTaskObserver* obs=0);
+	VTask(Type t,VNode *node,VTaskObserver* obs=0);
 
 	Type type_;
 	Status status_;
 	std::map<std::string,std::string> params_;
 	std::vector<std::string> command_;
-	Node *node_;
+	VNode *node_;
 	std::vector<VTaskObserver*> observers_;
 	VReply*  reply_;
 };

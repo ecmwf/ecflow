@@ -26,6 +26,7 @@ OverviewItemWidget::OverviewItemWidget(QWidget *parent) : TextItemWidget(parent)
 	f.setStyleHint(QFont::TypeWriter);
 	f.setFixedPitch(true);
 	textEdit_->setFont(f);
+	textEdit_->setShowLineNumbers(false);
 
 	Highlighter* ih=new Highlighter(textEdit_->document(),"info");
 

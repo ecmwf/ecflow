@@ -41,6 +41,12 @@ InfoPanelItem* InfoPanelItemFactory::create(const std::string& name)
 	return 0;
 }
 
+//=======================================================
+//
+// InfoPanelItem
+//
+//=======================================================
+
 //Set the new VInfo object.
 //We also we need to manage the node observers. The InfoItem 
 //will be the observer of the server of the object stored in
@@ -84,8 +90,19 @@ void InfoPanelItem::adjust(VInfo_ptr info)
   	info_=info;
 }
 
+void InfoPanelItem::clear()
+{
+	if(info_ && info_->server())
+  	{
+  	  	info_->server()->removeServerObserver(this);
+  	  	info_->server()->removeNodeObserver(this);
+  	}
+
+	loaded_=false;
+}
+
 //From NodeObserver
-void InfoPanelItem::notifyNodeChanged(const Node* node, const std::vector<ecf::Aspect::Type>& aspect)
+void InfoPanelItem::notifyNodeChanged(const VNode* node, const std::vector<ecf::Aspect::Type>& aspect,const VNodeChange&)
 {
 	if(!loaded_)
         return;
@@ -96,7 +113,7 @@ void InfoPanelItem::notifyNodeChanged(const Node* node, const std::vector<ecf::A
 		if(info_->isNode())
 		{
 			//Check if the updated node is handled by the item
-            if(info_->sameAs(info_->node(),useAncestors_))
+            if(info_->sameAs(node,useAncestors_))
             {
 			    //We call the method implemented in the concrete class 
                 //to handle the changes
@@ -124,4 +141,3 @@ void InfoPanelItem::notifyDefsChanged(ServerHandler *server, const std::vector<e
 		}
 	}
 }
-

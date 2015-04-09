@@ -22,8 +22,7 @@
 class QWidget;
 class InfoProvider;
 
-//Thisis the base class to represent one tab in the info panel.
-
+//This is the (abstract) base class to represent one tab in the info panel.
 
 class InfoPanelItem : public VTaskObserver, public InfoPresenter, public NodeObserver, public ServerObserver
 {
@@ -45,20 +44,21 @@ public:
 	void infoProgress(VReply*) {};
 
 	//From NodeObserver
-	void notifyNodeChanged(const Node*, const std::vector<ecf::Aspect::Type>&);
+	void notifyNodeChanged(const VNode*, const std::vector<ecf::Aspect::Type>&,const VNodeChange&);
 
 	//From ServerObserver
 	void notifyDefsChanged(ServerHandler* server,const std::vector<ecf::Aspect::Type>&);
+	void notifyServerDelete(ServerHandler* server) {}; //InfoPanel handles this
 
 protected:
 	void adjust(VInfo_ptr);
-	virtual void nodeChanged(const Node*, const std::vector<ecf::Aspect::Type>&)=0;
+	void clear();
+	virtual void nodeChanged(const VNode*, const std::vector<ecf::Aspect::Type>&)=0;
 	virtual void defsChanged(const std::vector<ecf::Aspect::Type>&)=0;
 
 	bool loaded_;
     bool useAncestors_;
 };
-
 
 class InfoPanelItemFactory
 {

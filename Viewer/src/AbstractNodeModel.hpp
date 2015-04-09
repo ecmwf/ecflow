@@ -60,7 +60,7 @@ protected:
 	virtual VModelServer* indexToServer(const QModelIndex & index) const=0;
 	virtual QModelIndex serverToIndex(ServerHandler*) const=0;
 
-	virtual QModelIndex nodeToIndex(VNode*,int column=0) const=0;
+	virtual QModelIndex nodeToIndex(const VNode*,int column=0) const=0;
 	virtual VNode* indexToNode( const QModelIndex & index) const=0;
 
 	virtual QVariant serverData(const QModelIndex& index,int role) const=0;

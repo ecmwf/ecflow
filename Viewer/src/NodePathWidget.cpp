@@ -14,15 +14,13 @@
 #include <QMenu>
 #include <QStyleOption>
 #include <QPainter>
+#include <QVector>
 
-#include "Node.hpp"
+#include "VNode.hpp"
 #include "ServerHandler.hpp"
 #include "VNState.hpp"
 #include "VSState.hpp"
 #include "VSettings.hpp"
-
-
-
 
 NodePathNodeItem::NodePathNodeItem(int index,QString name,QColor col,bool selected,QWidget * parent) :
   NodePathItem(NodeType,index,parent),
@@ -82,6 +80,19 @@ void NodePathNodeItem::reset(QString name,QColor col,bool current)
 		resetStyle();
 	}
 }
+
+void NodePathNodeItem::reset(QString name,QColor col)
+{
+	if(text() != name)
+		setText(name);
+
+	if(col_ != col)
+	{
+		col_=col;
+		resetStyle();
+	}
+}
+
 
 void NodePathNodeItem::resetStyle()
 {
@@ -235,7 +246,10 @@ NodePathWidget::~NodePathWidget()
 void NodePathWidget::clear()
 {
 	if(info_ && info_->server())
-	  	  	info_->server()->removeNodeObserver(this);
+	{
+		info_->server()->removeNodeObserver(this);
+		info_->server()->removeServerObserver(this);
+	}
 
 	info_.reset();
 	infoIndex_=-1;
@@ -308,27 +322,12 @@ void NodePathWidget::infoIndex(int idx)
 	}
 }
 
-QList<Node*> NodePathWidget::toNodeList(VInfo_ptr info)
-{
-	QList<Node*> lst;
-	if(info->isServer() || !info->node())
-		return lst;
-
-	Node *node=info->node();
-	lst << node;
-	Node *f=node;
-	while(f->parent())
-	{
-		f=f->parent();
-		lst.prepend(f);
-	}
-
-	return lst;
-}
-
 //Find p1 in p2
 int NodePathWidget::findInPath(VInfo_ptr p1,VInfo_ptr p2,bool sameServer)
 {
+	if(!p1 || !p1.get())
+		return -1;
+
 	//The servers are the same
 	if(sameServer)
 	{
@@ -341,13 +340,13 @@ int NodePathWidget::findInPath(VInfo_ptr p1,VInfo_ptr p2,bool sameServer)
 	}
 
 	int idx=-1;
-	QList<Node*> lst1=toNodeList(p1);
-	QList<Node*> lst2=toNodeList(p2);
+	std::vector<VNode*> lst1=p1->ancestors(VInfo::ParentToChild);
+	std::vector<VNode*> lst2=p2->ancestors(VInfo::ParentToChild);
 
-	if(lst1.count() > lst2.count())
+	if(lst1.size() > lst2.size())
 		return -1;
 
-	for(int i=0; i < lst1.count(); i++)
+	for(unsigned int i=0; i < lst1.size(); i++)
 	{
 			qDebug() << lst1.at(i) << lst2.at(i);
 
@@ -363,6 +362,47 @@ int NodePathWidget::findInPath(VInfo_ptr p1,VInfo_ptr p2,bool sameServer)
 	return idx;
 }
 
+void NodePathWidget::adjust(VInfo_ptr info,ServerHandler** serverOut,bool &sameServer)
+{
+	ServerHandler* server=0;
+
+  	//Check if there is data in info
+  	if(info.get())
+  	{
+  		server=info->server();
+
+  		sameServer=(info_)?(info_->server() == server):false;
+
+  		//Handle observers
+  		if(!sameServer)
+  		{
+  			if(info_ && info_->server())
+  			{
+  				info_->server()->removeServerObserver(this);
+  				info_->server()->removeNodeObserver(this);
+  			}
+
+  			info->server()->addServerObserver(this);
+  			info->server()->addNodeObserver(this);
+  		}
+  	}
+  	//If the there is no data we clean everything and return
+  	else
+  	{
+  	  	if(info_ && info_->server())
+  	  	{
+  	  		info_->server()->removeServerObserver(this);
+  	  		info_->server()->removeNodeObserver(this);
+  	  	}
+  	}
+
+  	//Set the info
+  	info_=info;
+
+  	*serverOut=server;
+}
+
+
 void NodePathWidget::setPath(QString)
 {
 	if(!active_)
@@ -375,7 +415,20 @@ void NodePathWidget::setPath(VInfo_ptr info)
   	if(!active_)
   		return;
 
-	ServerHandler *server=0;
+  	ServerHandler *server=0;
+  	bool sameServer=false;
+
+  	VInfo_ptr info_ori=info_;
+
+  	adjust(info,&server,sameServer);
+
+  	if(!info_ || !info_.get())
+  	{
+  		clear();
+  		return;
+  	}
+
+	/*ServerHandler *server=0;
   	bool sameServer=false;
 
   	//Check if there is data in info
@@ -398,21 +451,21 @@ void NodePathWidget::setPath(VInfo_ptr info)
   	else
   	{
   	  		clear();
-  			/*if(info_ && info_->server())
-  	  				info_->server()->removeNodeObserver(this);
+  			//if(info_ && info_->server())
+  	  		//		info_->server()->removeNodeObserver(this);
 
-  	  		info_=info;
-  	  		infoIndex_=-1;
-  	  		clearContents();*/
+  	  		//info_=info;
+  	  		//infoIndex_=-1;
+  	  		//clearContents();
   	  		return;
-  	}
+  	}*/
 
   	//Check "stay in parent" mode
   	if(stayInParent_)
   	{
   		//If the new path is part of the current path we just set the
   		//current node index and return.
-  		int idx=findInPath(info,info_,sameServer);
+  		int idx=findInPath(info_,info_ori,sameServer);
   		if(idx != -1)
   		{
   			infoIndex(idx);
@@ -426,8 +479,8 @@ void NodePathWidget::setPath(VInfo_ptr info)
   	info_=info;
 
 	//Get the node list + prepend the server
-  	QList<Node*> lst=toNodeList(info_);
-  	lst.prepend(0);//indicates the server
+  	std::vector<VNode*> lst=info_->ancestors(VInfo::ParentToChild);
+  	lst.insert(lst.begin(),0);//indicates the server
 
   	//--------------------------------------------
   	// Cleaning (as much as needed)
@@ -438,13 +491,13 @@ void NodePathWidget::setPath(VInfo_ptr info)
 
 	//Delete
 	int cnt=nodeItems_.count();
-	for(int i=lst.count(); i < cnt; i++)
+	for(unsigned int i=lst.size(); i < cnt; i++)
 	{
 			delete nodeItems_.takeLast();
 
 	}
 	cnt=menuItems_.count();
-	for(int i=lst.count(); i < cnt; i++)
+	for(unsigned int i=lst.size(); i < cnt; i++)
 	{
 		delete menuItems_.takeLast();
 
@@ -454,7 +507,7 @@ void NodePathWidget::setPath(VInfo_ptr info)
 	// Reset/rebuild the contents
 	//--------------------------------------------
 
-	for(int i=0; i < lst.count(); i++)
+	for(unsigned int i=0; i < lst.size(); i++)
 	{
 			//---------------------------
 			// Create node/server item
@@ -469,17 +522,17 @@ void NodePathWidget::setPath(VInfo_ptr info)
 			if(i==0)
 			{
 				col=QColor(255,255,255);
-				col=VSState::toColour(server).name();
+				col=VSState::toColour(server);
 				name=QString::fromStdString(server->name());
 				hasChildren=true;
 			}
 			//Node
 			else
 			{
-				Node *n=lst.at(i);
-				col=VNState::toColour(n).name();
-				name=QString::fromStdString(n->name());
-				hasChildren=(ServerHandler::numOfImmediateChildren(n) >0);
+				VNode *n=lst.at(i);
+				col=n->stateColour();
+				name=n->name();
+				hasChildren=(n->numOfChildren() >0);
 			}
 
 			if(i < nodeItems_.count())
@@ -535,7 +588,7 @@ void NodePathWidget::setPath(VInfo_ptr info)
 	layout_->addStretch(1);
 
 	//Set the current node index (used only in "stay in parent" mode). If we are here it must be the last node!
-	infoIndex(lst.count()-1);
+	infoIndex(lst.size()-1);
 
 
 }
@@ -560,29 +613,41 @@ void  NodePathWidget::menuItemSelected()
 	}
 }
 
+//-------------------------------------------------------------------------------------------
+// Get the object from nodeItems_ at position idx.
+// This is the order/position of the items:
+//
+//   0         1     2     ....    nodeItems_.count()-2          nodeItems_.count()-1
+// server                              node's aprent 		           node (=info_)
+//--------------------------------------------------------------------------------------------
+
 VInfo_ptr NodePathWidget::nodeAt(int idx)
 {
+	qDebug() << "nodeAt()" << idx;
+
 	if(info_ && info_->server())
 	{
-		ServerHandler* server=info_->server();
-		if(Node *node=info_->node())
-		{
-			for(int i=nodeItems_.count()-1; i > idx && i >=1; i--)
-			{
-				node=node->parent();
-			}
+		//The last i
+		if(idx == nodeItems_.count()-1)
+			return info_;
 
-			if(node)
+		ServerHandler* server=info_->server();
+		if(idx == 0)
+		{
+			VInfo_ptr res(VInfo::make(server));
+			qDebug() << "selected" << server->name().c_str();
+			return res;
+		}
+		else
+		{
+			std::vector<VNode*> nodes=info_->ancestors(VInfo::ParentToChild);
+			if(idx-1 < nodes.size())
 			{
-				VInfo_ptr res(VInfo::make(node,server));
-				qDebug() << "selected" << node->absNodePath().c_str();
+				VInfo_ptr res(VInfo::make(nodes.at(idx-1),server));
+				qDebug() << "selected" << nodes.at(idx-1)->node()->absNodePath().c_str();
 				return res;
 			}
 		}
-
-		VInfo_ptr res(VInfo::make(server));
-		qDebug() << "selected" << server->name().c_str();
-		return res;
 	}
 
 	return VInfo_ptr();
@@ -597,10 +662,9 @@ void NodePathWidget::loadMenu(const QPoint& pos,VInfo_ptr p)
 		ServerHandler* server=p->server();
 
 		int n=server->numSuites();
-		for(unsigned int i=0; i < n; i++)
+		for(unsigned int i=0; i < server->vRoot()->numOfChildren(); i++)
 		{
-			node_ptr node=server->suiteAt(i);
-			if(node)
+			if(Node* node=server->vRoot()->childAt(i)->node())
 			{
 				QAction *ac=new QAction(QString::fromStdString(node->name()),this);
 				ac->setData(i);
@@ -612,19 +676,17 @@ void NodePathWidget::loadMenu(const QPoint& pos,VInfo_ptr p)
 			if(QAction *ac=QMenu::exec(acLst,pos,acLst.front(),this))
 			{
 				int idx=ac->data().toInt();
-				VInfo_ptr res(VInfo::make(server->suiteAt(idx).get(),server));
+				VInfo_ptr res(VInfo::make(server->vRoot()->childAt(idx),server));
 				Q_EMIT selected(res);
 			}
 		}
 
 	}
-	else if(Node *node=p->node())
+	else if(VNode *node=p->node())
 	{
-		std::vector<node_ptr> nodes;
-		node->immediateChildren(nodes);
-		for(unsigned int i=0; i < nodes.size(); i++)
+		for(unsigned int i=0; i < node->numOfChildren(); i++)
 		{
-			QAction *ac=new QAction(QString::fromStdString(nodes.at(i)->name()),this);
+			QAction *ac=new QAction(QString::fromStdString(node->childAt(i)->node()->name()),this);
 			ac->setData(i);
 			acLst << ac;
 		}
@@ -636,7 +698,7 @@ void NodePathWidget::loadMenu(const QPoint& pos,VInfo_ptr p)
 				int idx=ac->data().toInt();
 				//ServerHandler* server=p->server();
 				ServerHandler* server=info_->server();
-				VInfo_ptr res(VInfo::make(nodes.at(idx).get(),server));
+				VInfo_ptr res(VInfo::make(node->childAt(idx),server));
 				Q_EMIT selected(res);
 			}
 		}
@@ -646,6 +708,62 @@ void NodePathWidget::loadMenu(const QPoint& pos,VInfo_ptr p)
 	{
 		delete ac;
 	}
+}
+
+void NodePathWidget::notifyNodeChanged(const VNode* node, const std::vector<ecf::Aspect::Type>& aspect,const VNodeChange&)
+{
+	if(!active_)
+		return;
+
+	//Check if there is data in inf0
+	if(info_.get() && info_->isNode())
+	{
+		//State changed
+		if(std::find(aspect.begin(),aspect.end(),ecf::Aspect::STATE) != aspect.end() ||
+		   std::find(aspect.begin(),aspect.end(),ecf::Aspect::SUSPENDED) != aspect.end())
+		{
+			std::vector<VNode*> nodes=info_->ancestors(VInfo::ParentToChild);
+			for(unsigned int i=0; i < nodes.size(); i++)
+			{
+				if(nodes.at(i) == node)
+				{
+					//The server is at position 0, so we need to add 1 to get the index right
+					int idx=i+1;
+					if(idx < nodeItems_.count())
+					{
+						nodeItems_.at(idx)->reset(node->name(),node->stateColour());
+					}
+					return;
+				}
+			}
+		}
+
+		//A child was removed or added
+		else if(std::find(aspect.begin(),aspect.end(),ecf::Aspect::ADD_REMOVE_NODE) != aspect.end())
+		{
+			std::vector<VNode*> nodes=info_->ancestors(VInfo::ParentToChild);
+			for(unsigned int i=0; i < nodes.size(); i++)
+			{
+				if(node == nodes.at(i))
+				{
+					//Reload everything
+					setPath(info_);
+				}
+			}
+		}
+
+	}
+}
+
+
+void NodePathWidget::notifyDefsChanged(ServerHandler* server,const std::vector<ecf::Aspect::Type>&)
+{
+}
+
+
+void NodePathWidget::notifyServerDelete(ServerHandler* server)
+{
+
 }
 
 void NodePathWidget::paintEvent(QPaintEvent *)

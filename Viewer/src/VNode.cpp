@@ -13,6 +13,7 @@
 #include "Node.hpp"
 #include "ServerHandler.hpp"
 #include "VAttribute.hpp"
+#include "VNState.hpp"
 
 //=================================================
 // VNode
@@ -31,7 +32,7 @@ VNode::VNode(VNode* parent,Node* node) :
 		node_->set_graphic_ptr(this);
 }
 
-bool VNode::isTopLevel()
+bool VNode::isTopLevel() const
 {
 	return (node_)?(node_->isSuite() != NULL):false;
 }
@@ -83,7 +84,7 @@ VNode* VNode::childAt(int index) const
 	return (index>=0 && index < children_.size())?children_.at(index):0;
 }
 
-int VNode::indexOfChild(VNode* vn) const
+int VNode::indexOfChild(const VNode* vn) const
 {
 	for(unsigned int i=0; i < children_.size(); i++)
 	{
@@ -94,9 +95,41 @@ int VNode::indexOfChild(VNode* vn) const
 	return -1;
 }
 
+int VNode::indexOfChild(Node* n) const
+{
+	for(unsigned int i=0; i < children_.size(); i++)
+	{
+		if(children_.at(i)->node() == n)
+			return i;
+	}
+
+	return -1;
+}
+
+
 void VNode::replaceChildren(const std::vector<VNode*>& newCh)
 {
 	children_=newCh;
+}
+
+QString VNode::name() const
+{
+	return (node_)?QString::fromStdString(node_->name()):QString();
+}
+
+QString VNode::stateName()
+{
+	return VNState::toName(node_);
+}
+
+QString VNode::defaultStateName()
+{
+	return VNState::toDefaultStateName(node_);
+}
+
+QColor  VNode::stateColour() const
+{
+	return VNState::toColour(node_);
 }
 
 //=================================================
@@ -159,45 +192,96 @@ void VNodeRoot::deleteNode(VNode* node)
 	totalNum_--;
 }
 
-void VNodeRoot::beginUpdate(VNode* node,const std::vector<ecf::Aspect::Type>& aspect) //,VNodeChange* change)
+void VNodeRoot::beginUpdate(VNode* node,const std::vector<ecf::Aspect::Type>& aspect,VNodeChange& change)
 {
 	bool attrNumCh=(std::find(aspect.begin(),aspect.end(),ecf::Aspect::ADD_REMOVE_ATTR) != aspect.end());
 	bool nodeNumCh=(std::find(aspect.begin(),aspect.end(),ecf::Aspect::ADD_REMOVE_NODE) != aspect.end());
 
 	//------------------------------------------------------------
-	// Number of attributes changed but number of nodes did not
+	// Number of attributes changed
 	//-----------------------------------------------------------
-	if(attrNumCh && !nodeNumCh)
+	if(attrNumCh)
 	{
 		node->beginUpdateAttrNum();
+		change.attrNum_=node->attrNum();
+		change.cachedAttrNum_=node->cachedAttrNum();
 	}
 
 	//-------------------------------------------------------------
-	// Number of nodes changed but number of attributes did not
+	// Number of nodes changed
 	//-------------------------------------------------------------
-	else if(!attrNumCh && nodeNumCh)
+	if(nodeNumCh)
 	{
 		std::vector<node_ptr> nodes;
 		node->node()->immediateChildren(nodes);
 
-		//Go through the current list of children and see what existing and has to be created.
-		//All these VNodes are collected into upChildren.
+		change.cachedNodeNum_=node->numOfChildren();
+		change.nodeNum_=static_cast<int>(nodes.size());
+
+		//----------------------------------------------------------------
+		// We handle the situation when only one node was added and the
+		// order of the nodes did not changed. It is only interesting
+		// the number of attributes did not changed!!!!
+		//----------------------------------------------------------------
+
+		if(!attrNumCh && nodes.size() == node->numOfChildren()+1)
+		{
+			int added=0;
+			int same=0;
+			int addedAt=-1;
+
+			//We need to be sure that all the nodes were really kept
+			for(unsigned int i=0; i < nodes.size(); i++)
+			{
+				if(node->childAt(i-added)->node() == nodes.at(i).get())
+				{
+					same++;
+				}
+				else
+				{
+					//it is really a new node
+					if(node->indexOfChild(nodes.at(i).get()) == -1)
+					{
+						added++;
+						addedAt=i;
+					}
+				}
+			}
+
+			//If there was only one node added and the order of the node was kept
+			//we register it in the change object
+			if(same == node->numOfChildren() && added == 1 && addedAt != -1)
+			{
+				change.nodeAddedAt_=addedAt;
+			}
+		}
+
+		//---------------------------------------------------------------------
+		// Now we update the nodes. We need to take into account the order
+		// as well.
+		//---------------------------------------------------------------------
+
+		//Go through the current list of children and see what exists and what has to be created.
+		//All these are collected into upChildren.
 		std::vector<VNode*> upChildren;
 		for(std::vector<node_ptr>::const_iterator it=nodes.begin(); it != nodes.end(); it++)
 		{
-			bool has=false;
-			for(unsigned int i=0; i < node->numOfChildren(); i++)
+			//If the node is already present as a VNode
+			int idx=-1;
+			if((idx=node->indexOfChild((*it).get())) != -1)
 			{
-				if(node->childAt(i)->node() == (*it).get())
-				{
-					upChildren.push_back(node->childAt(i));
-					break;
-				}
+				upChildren.push_back(node->childAt(idx));
 			}
-			if(!has)
+			//It is new node
+			else
 			{
+				//Create a Vnode and add it to its parent
 				VNode* vn=new VNode(node,(*it).get());
+
+				//Scan the newly added vnode
 				scan(vn);
+
+				upChildren.push_back(vn);
 			}
 		}
 
@@ -221,15 +305,6 @@ void VNodeRoot::beginUpdate(VNode* node,const std::vector<ecf::Aspect::Type>& as
 			deleteNode(rmChildren[i]);
 		}
 	}
-
-	//-------------------------------------------------------------
-	// But the number of nodes and number of attributes changed
-	//-------------------------------------------------------------
-	else if(attrNumCh && nodeNumCh)
-	{
-
-	}
-
 }
 
 void VNodeRoot::endUpdate(VNode* node,const std::vector<ecf::Aspect::Type>& aspect)

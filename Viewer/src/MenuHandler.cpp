@@ -24,6 +24,7 @@
 #include "MenuHandler.hpp"
 #include "ServerHandler.hpp"
 #include "UserMessage.hpp"
+#include "VNode.hpp"
 
 
 std::vector<Menu *> MenuHandler::menus_;
@@ -435,7 +436,7 @@ bool MenuItem::compatibleWithNode(VInfo_ptr nodeInfo)
 
     if(nodeInfo->isNode())
     {
-        Node *node = nodeInfo->node();
+        Node *node = nodeInfo->node()->node();
 
         if(node->isSuite())
             if(std::find(validNodeTypes_.begin(), validNodeTypes_.end(), SUITE) == validNodeTypes_.end())

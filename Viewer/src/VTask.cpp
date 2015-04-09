@@ -22,7 +22,7 @@ VTask::VTask(Type t,VTaskObserver* obs) :
 	reply_=new VReply();
 }
 
-VTask::VTask(Type t,Node *node,VTaskObserver* obs) :
+VTask::VTask(Type t,VNode *node,VTaskObserver* obs) :
 	type_(t),
 	status_(NOSTATUS),
 	node_(node),
@@ -43,7 +43,7 @@ VTask_ptr VTask::create(Type t,VTaskObserver* obs)
 	return VTask_ptr(new VTask(t,obs));
 }
 
-VTask_ptr VTask::create(Type t,Node *node,VTaskObserver* obs)
+VTask_ptr VTask::create(Type t,VNode *node,VTaskObserver* obs)
 {
 	return VTask_ptr(new VTask(t,node,obs));
 }

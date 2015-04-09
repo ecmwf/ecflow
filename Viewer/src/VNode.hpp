@@ -13,6 +13,7 @@
 
 #include <vector>
 
+#include <QColor>
 #include <QStringList>
 
 #include "Aspect.hpp"
@@ -22,12 +23,17 @@ class ServerHandler;
 class VAttribute;
 class VNodeRoot;
 
-//Describes the cardinal changes during an update
+//Describes the major changes during an update
 class VNodeChange
 {
 public:
-	int attrDelta_;
-	std::vector<int> nodeDelta_;
+	VNodeChange() : cachedAttrNum_(-1), attrNum_(-1), cachedNodeNum_(-1),
+					nodeNum_(-1), nodeAddedAt_(-1) {}
+	int cachedAttrNum_;
+	int attrNum_;
+	int cachedNodeNum_;
+	int nodeNum_;
+	int nodeAddedAt_;
 };
 
 
@@ -39,7 +45,7 @@ public:
 	VNode(VNode* parent,Node*);
 
     Node *node() {return node_;}
-    bool isTopLevel();
+    bool isTopLevel() const;
 
     void beginUpdateAttrNum();
     void endUpdateAttrNum();
@@ -51,7 +57,13 @@ public:
     VNode* parent() const {return parent_;}
     int numOfChildren() const {return static_cast<int>(children_.size());}
     VNode* childAt(int index) const;
-    int indexOfChild(VNode* vn) const;
+    int indexOfChild(const VNode* vn) const;
+    int indexOfChild(Node* n) const;
+
+    QString name() const;
+    QString stateName();
+    QString defaultStateName();
+    QColor  stateColour() const;
 
 protected:
     void replaceChildren(const std::vector<VNode*>& newCh);
@@ -72,7 +84,7 @@ public:
 
 	int totalNum() const {return totalNum_;}
 	VNode* find(const Node* nc) const;
-	void beginUpdate(VNode* node,const std::vector<ecf::Aspect::Type>& aspect);
+	void beginUpdate(VNode* node,const std::vector<ecf::Aspect::Type>& aspect,VNodeChange&);
 	void endUpdate(VNode* node,const std::vector<ecf::Aspect::Type>& aspect);
 
 protected:

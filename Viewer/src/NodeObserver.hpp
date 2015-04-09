@@ -14,14 +14,14 @@
 #include "Node.hpp"
 
 class VNode;
+class VNodeChange;
 
 class NodeObserver
 {
 public:
 	NodeObserver() {};
 	virtual ~NodeObserver() {};
-	virtual void notifyNodeChanged(const Node* n, const std::vector<ecf::Aspect::Type>& a)=0;
-	virtual void notifyNodeChanged(VNode* vn, const std::vector<ecf::Aspect::Type>& a) {};
+	virtual void notifyNodeChanged(const VNode* vn, const std::vector<ecf::Aspect::Type>& a,const VNodeChange&)=0;
 };
 
 

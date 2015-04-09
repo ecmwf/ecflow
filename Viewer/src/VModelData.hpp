@@ -37,18 +37,22 @@ public:
 
     ServerHandler* realServer() const {return server_;}
     int topLevelNodeNum() const;
-    int indexOfTopLevelNode(VNode* node) const;
+    int indexOfTopLevelNode(const VNode* node) const;
     VNode* topLevelNode(int row) const;
     int totalNodeNum() const;
     void runFilter();
 
     //From NodeObserver
-	void notifyNodeChanged(const Node*, const std::vector<ecf::Aspect::Type>&) {};
+	//void notifyNodeChanged(const VNode*, const std::vector<ecf::Aspect::Type>&) {};
 
 Q_SIGNALS:
-	void addRemoveAttributes(VModelServer*,VNode*,int,int);
+	void addRemoveAttributes(VModelServer*,const VNode*,int,int);
+	void addRemoveNodes(VModelServer*,const VNode*,int,int);
+	void addNode(VModelServer*,const VNode*,int pos);
+	void resetBranch(VModelServer*,const VNode*);
 	void dataChanged(VModelServer*);
-	void dataChanged(VModelServer*,VNode*);
+	void nodeChanged(VModelServer*,const VNode*);
+	void attributesChanged(VModelServer*,const VNode*);
 
 protected:
 	ServerHandler *server_;
@@ -64,7 +68,7 @@ public:
 	 int checkAttributeUpdateDiff(VNode *node);
 
 	 //From NodeObserver
-	 void notifyNodeChanged(VNode*, const std::vector<ecf::Aspect::Type>&);
+	 void notifyNodeChanged(const VNode*, const std::vector<ecf::Aspect::Type>&,const VNodeChange&);
 };
 
 class VTableServer : public VModelServer
@@ -74,7 +78,7 @@ public:
 	 ~VTableServer();
 
 	 //From NodeObserver
-	 void notifyNodeChanged(VNode*, const std::vector<ecf::Aspect::Type>&);
+	 void notifyNodeChanged(const VNode*, const std::vector<ecf::Aspect::Type>&,const VNodeChange&);
 };
 
 //This class defines the data a given Node Model (Tree or Table) displays. The
@@ -96,7 +100,7 @@ public:
 	void runFilter(bool broadcast);
 
 	int  indexOfServer(void*) const;
-	bool identifyTopLevelNode(VNode* node,VModelServer**,int& index);
+	bool identifyTopLevelNode(const VNode* node,VModelServer**,int& index);
 	VNode* topLevelNode(void*,int);
 
 	ServerHandler* realServer(int) const;
@@ -123,9 +127,13 @@ Q_SIGNALS:
 	void serverAddEnd();
 	void serverRemoveBegin(int);
 	void serverRemoveEnd();
-	void addRemoveAttributes(VModelServer*,VNode*,int,int);
+	void addRemoveAttributes(VModelServer*,const VNode*,int,int);
+	void addRemoveNodes(VModelServer*,const VNode*,int,int);
+	void addNode(VModelServer*,const VNode*,int pos);
+	void resetBranch(VModelServer*,const VNode*);
 	void dataChanged(VModelServer*);
-	void dataChanged(VModelServer*,VNode*);
+	void nodeChanged(VModelServer*,const VNode*);
+	void attributesChanged(VModelServer*,const VNode*);
 
 protected:
 	void init();

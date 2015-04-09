@@ -43,7 +43,7 @@ VNode* VModelServer::topLevelNode(int row) const
 	return server_->vRoot()->childAt(row);
 }
 
-int VModelServer::indexOfTopLevelNode(VNode* node) const
+int VModelServer::indexOfTopLevelNode(const VNode* node) const
 {
 	return server_->vRoot()->indexOfChild(node);
 }
@@ -93,66 +93,92 @@ int VTreeServer::checkAttributeUpdateDiff(VNode *node)
 }
 
 
-void VTreeServer::notifyNodeChanged(VNode* node, const std::vector<ecf::Aspect::Type>& aspect) //,VNodeChange *change)
+void VTreeServer::notifyNodeChanged(const VNode* node, const std::vector<ecf::Aspect::Type>& aspect, const VNodeChange& change)
 {
 	if(node==NULL)
 		return;
 
-	//qDebug() << "observer is called" << QString::fromStdString(node->name());
-	//for(unsigned int i=0; i < types.size(); i++)
-	//	qDebug() << "  type:" << types.at(i);
-
-	//Node* nc=const_cast<Node*>(node);
-
-	//We need to check if it changes the filter state
-	if(filter_)
-	{
-		/*if(filter_->update(nc))
-		{
-			Q_EMIT dataChanged(server_);
-			return;
-		}*/
-	}
-
-	Q_EMIT dataChanged(this,node);
-
-
-	//Works for tree only
-
+	bool runFilter=false;
 	bool attrNumCh=(std::find(aspect.begin(),aspect.end(),ecf::Aspect::ADD_REMOVE_ATTR) != aspect.end());
 	bool nodeNumCh=(std::find(aspect.begin(),aspect.end(),ecf::Aspect::ADD_REMOVE_NODE) != aspect.end());
 
-	//The number of attributes changed but the number of nodes is the same!
+	//-----------------------------------------------------------------------
+	// The number of attributes changed but the number of nodes is the same!
+	//-----------------------------------------------------------------------
 	if(attrNumCh && !nodeNumCh)
 	{
-		int cached=node->cachedAttrNum();
-		int current=node->attrNum();
-		if(cached != current)
+		if(change.cachedAttrNum_ != change.attrNum_)
 		{
-			Q_EMIT addRemoveAttributes(this,node,current,cached);
+			Q_EMIT addRemoveAttributes(this,node,
+					change.attrNum_,change.cachedAttrNum_);
 		}
-
 	}
 
-
-	/*//Check
-	for(std::vector<ecf::Aspect::Type>::const_iterator it=aspect.begin(); it != aspect.end(); it++)
+	//----------------------------------------------------------------------
+	// The number of nodes changed but number of attributes is the same!
+	//----------------------------------------------------------------------
+	else if(!attrNumCh && nodeNumCh)
 	{
-		//The number of attributes changed for the node
-		if(*it == ecf::Aspect::ADD_REMOVE_ATTR)
+		//Only one node was added and the order of the nodes is the same
+		if(change.nodeAddedAt_ != -1)
 		{
-			//We need to figure out the difference between the
-			//current and the future number of attributes
-			int cntDiff=checkAttributeUpdateDiff(node);
-			if(cntDiff != 0)
+			Q_EMIT addNode(this,node,change.nodeAddedAt_);
+		}
+		else
+		{
+			Q_EMIT resetBranch(this,node);
+		}
+
+		runFilter=true;
+	}
+
+	//---------------------------------------------------------------------
+	// Both the number of nodes and the number of attributes changed!
+	//---------------------------------------------------------------------
+	else if(!attrNumCh && nodeNumCh)
+	{
+		Q_EMIT resetBranch(this,node);
+
+		runFilter=true;
+	}
+
+	//---------------------------------------------------------------------
+	// The number of attributes and nodes did not change
+	//---------------------------------------------------------------------
+	else
+	{
+		//Check the aspects
+		for(std::vector<ecf::Aspect::Type>::const_iterator it=aspect.begin(); it != aspect.end(); it++)
+		{
+			//Changes in the nodes
+			if(*it == ecf::Aspect::STATE || *it == ecf::Aspect::DEFSTATUS ||
+			   *it == ecf::Aspect::SUSPENDED)
 			{
-				Q_EMIT beginAddRemoveAttributes(this,node,cntDiff);
-				//node->update();
-				Q_EMIT endAddRemoveAttributes(this,node,cntDiff);
+				Q_EMIT nodeChanged(this,node);
+				runFilter=true;
+			}
+
+			//Changes in the attributes
+			else if(*it == ecf::Aspect::METER ||  *it == ecf::Aspect::EVENT ||
+			   *it == ecf::Aspect::LABEL || *it == ecf::Aspect::LIMIT ||
+			   *it == ecf::Aspect::EXPR_TRIGGER || *it == ecf::Aspect::EXPR_COMPLETE ||
+			   *it == ecf::Aspect::REPEAT || *it == ecf::Aspect::NODE_VARIABLE ||
+			   *it == ecf::Aspect::LATE || *it == ecf::Aspect::TODAY || *it == ecf::Aspect::TIME ||
+			   *it == ecf::Aspect::DAY || *it == ecf::Aspect::CRON || *it == ecf::Aspect::DATE )
+			{
+				Q_EMIT attributesChanged(this,node);
 			}
 		}
-	}*/
+	}
 
+	//We need to check if it changes the filter state
+	if(runFilter && filter_)
+	{
+		/*if(filter_->update(node->node()))
+		{
+			Q_EMIT dataChanged(this);
+		}*/
+	}
 }
 
 //==========================================
@@ -177,7 +203,7 @@ VTableServer::~VTableServer()
 {
 }
 
-void VTableServer::notifyNodeChanged(VNode* node, const std::vector<ecf::Aspect::Type>& types)
+void VTableServer::notifyNodeChanged(const VNode* node, const std::vector<ecf::Aspect::Type>& types,const VNodeChange&)
 {
 }
 
@@ -260,14 +286,23 @@ void VModelData::add(ServerHandler *server)
 	connect(d,SIGNAL(dataChanged(VModelServer*)),
 			this,SIGNAL(dataChanged(VModelServer*)));
 
-	connect(d,SIGNAL(dataChanged(VModelServer*,VNode*)),
-			  this,SIGNAL(dataChanged(VModelServer*,VNode*)));
+	connect(d,SIGNAL(nodeChanged(VModelServer*,const VNode*)),
+			  this,SIGNAL(nodeChanged(VModelServer*,const VNode*)));
 
-	connect(d,SIGNAL(addRemoveAttributes(VModelServer*,VNode*,int,int)),
-			this,SIGNAL(addRemoveAttributes(VModelServer*,VNode*,int,int)));
+	connect(d,SIGNAL(attributesChanged(VModelServer*,const VNode*)),
+				  this,SIGNAL(attributesChanged(VModelServer*,const VNode*)));
 
-	connect(d,SIGNAL(endAddRemoveAttributes(VModelServer*,VNode*,int)),
-				this,SIGNAL(endAddRemoveAttributes(VModelServer*,VNode*,int,int)));
+	connect(d,SIGNAL(addRemoveAttributes(VModelServer*,const VNode*,int,int)),
+			this,SIGNAL(addRemoveAttributes(VModelServer*,const VNode*,int,int)));
+
+	connect(d,SIGNAL(addRemoveNodes(VModelServer*,const VNode*,int,int)),
+				this,SIGNAL(addRemoveNodes(VModelServer*,const VNode*,int,int)));
+
+	connect(d,SIGNAL(addNode(VModelServer*,const VNode*,int)),
+					this,SIGNAL(addNode(VModelServer*,const VNode*,int)));
+
+	connect(d,SIGNAL(resetBranch(VModelServer*,const VNode*)),
+						this,SIGNAL(resetBranch(VModelServer*,const VNode*)));
 
 	servers_.push_back(d);
 }
@@ -383,7 +418,7 @@ VNode* VModelData::topLevelNode(void* ptrToServer,int row)
 	return NULL;
 }
 
-bool VModelData::identifyTopLevelNode(VNode* node,VModelServer** server,int& row)
+bool VModelData::identifyTopLevelNode(const VNode* node,VModelServer** server,int& row)
 {
 	for(unsigned int i=0; i < servers_.size(); i++)
 	{

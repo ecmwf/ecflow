@@ -32,7 +32,7 @@ void TriggerItemWidget::reload(VInfo_ptr nodeInfo)
 
 	if(nodeInfo.get() != 0 && nodeInfo->isNode())
 	{
-		Node* n=nodeInfo->node();
+		//Node* n=nodeInfo->node();
 	}
 	else
 	{

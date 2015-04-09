@@ -10,7 +10,7 @@
 
 #include "VInfo.hpp"
 
-#include "Node.hpp"
+#include "VNode.hpp"
 #include "Suite.hpp"
 
 #include "ServerHandler.hpp"
@@ -41,7 +41,7 @@ VInfoAttributeFactory::~VInfoAttributeFactory()
 	// Not called
 }
 
-VInfoAttribute* VInfoAttributeFactory::create(VAttribute* att,int attIndex,Node* node,ServerHandler* server)
+VInfoAttribute* VInfoAttributeFactory::create(VAttribute* att,int attIndex,VNode* node,ServerHandler* server)
 {
 	std::string name=att->name().toStdString();
 
@@ -80,7 +80,7 @@ VInfo::VInfo(ServerHandler* server) :
 
 }
 
-VInfo::VInfo(Node* node,ServerHandler* server) :
+VInfo::VInfo(VNode* node,ServerHandler* server) :
 	server_(server),
 	node_(node),
 	att_(0),
@@ -89,7 +89,7 @@ VInfo::VInfo(Node* node,ServerHandler* server) :
 
 }
 
-VInfo::VInfo(VAttribute* att,int attIndex,Node* node,ServerHandler* server) :
+VInfo::VInfo(VAttribute* att,int attIndex,VNode* node,ServerHandler* server) :
 	server_(server),
 	node_(node),
 	att_(att),
@@ -98,23 +98,51 @@ VInfo::VInfo(VAttribute* att,int attIndex,Node* node,ServerHandler* server) :
 
 }
 
-void VInfo::ancestors(ServerHandler **sv,std::vector<Node*>& nodes)
+std::vector<VNode*> VInfo::ancestors(NodeOrder order)
+{
+	std::vector<VNode*> nodes;
+	if(isNode())
+	{
+		if(order == ChildToParent)
+		{
+			VNode* n=node();
+			while(n && n->parent())
+			{
+				nodes.push_back(n);
+				n=n->parent();
+			}
+		}
+
+		else
+		{
+			VNode* n=node();
+			while(n && n->parent())
+			{
+				nodes.insert(nodes.begin(),n);
+				n=n->parent();
+			}
+		}
+	}
+
+	return nodes;
+}
+
+void VInfo::ancestors(ServerHandler **sv,std::vector<VNode*>& nodes)
 {
 	*sv=server();
 
 	if(isNode())
 	{
-		Node* n=node();
-		while(n)
+		VNode* n=node();
+		while(n && n->parent())
 		{
-
 			nodes.push_back(n);
 			n=n->parent();
 		}
 	}
 }
 
-bool VInfo::sameAs(Node* n,bool checkAncestors)
+bool VInfo::sameAs(const VNode* n,bool checkAncestors)
 {
     if(isNode())
     {
@@ -123,8 +151,8 @@ bool VInfo::sameAs(Node* n,bool checkAncestors)
         
         if(checkAncestors)
         {
-            Node* nd=node();
-            while(nd)
+            VNode* nd=node();
+            while(nd && nd->parent())
             {
                 if(n == nd)
                     return true;
@@ -147,12 +175,12 @@ VInfo* VInfo::make(ServerHandler* s)
 }
 
 
-VInfo* VInfo::make(Node* n,ServerHandler* s)
+VInfo* VInfo::make(VNode* n,ServerHandler* s)
 {
 	return new VInfoNode(n,s);
 }
 
-VInfo* VInfo::make(VAttribute* att,int attIndex,Node* node)
+VInfo* VInfo::make(VAttribute* att,int attIndex,VNode* node)
 {
 	return VInfoAttributeFactory::create(att,attIndex,node);
 }
@@ -264,7 +292,7 @@ void VInfoServer::info(std::stringstream& f)
 //=========================================
 
 
-VInfoNode::VInfoNode(Node *node,ServerHandler *server) : VInfo(node,server)
+VInfoNode::VInfoNode(VNode *node,ServerHandler *server) : VInfo(node,server)
 {
 
 }
@@ -278,7 +306,7 @@ ServerHandler* VInfoNode::server()
 {
 	if(server_ == NULL && node_)
 	{
-		server_=ServerHandler::find(node_);
+		server_=ServerHandler::find(node_->node());
 	}
 	return server_;
 }
@@ -288,21 +316,21 @@ const std::string&  VInfoNode::nodeType()
 	return nodeType(node_);
 }
 
-const std::string&  VInfoNode::nodeType(Node* node)
+const std::string&  VInfoNode::nodeType(VNode* node)
 {
 	static std::string suiteStr("suite");
 	static std::string familyStr("family");
 	static std::string taskStr("task");
 	static std::string defaultStr("node");
 
-	if(!node)
+	if(!node || !node->node())
 		return defaultStr;
 
-	if(node->isSuite())
+	if(node->node()->isSuite())
 		return suiteStr;
-	else if(node->isFamily())
+	else if(node->node()->isFamily())
 		return familyStr;
-	else if(node->isTask())
+	else if(node->node()->isTask())
 			return taskStr;
 
 	return defaultStr;
@@ -311,19 +339,22 @@ const std::string&  VInfoNode::nodeType(Node* node)
 
 void VInfoNode::variables(std::vector<Variable>& vars)
 {
-	vars=node_->variables();
+	vars.clear();
+	if(node_->node())
+		vars=node_->node()->variables();
 }
 
 void VInfoNode::genVariables(std::vector<Variable>& genVars)
 {
 	genVars.clear();
-	node_->gen_variables(genVars);
+	if(node_->node())
+		node_->node()->gen_variables(genVars);
 }
 
 std::string VInfoNode::name()
 {
-	if(node_)
-		return node_->name();
+	if(node_ && node_->node())
+		return node_->node()->name();
 
 	return std::string();
 }
@@ -332,9 +363,9 @@ std::string VInfoNode::fullPath()
 {
 	std::string s;
 
-	if(node_)
+	if(node_ && node_->node())
 	{
-		s=node_->absNodePath();
+		s=node_->node()->absNodePath();
 		if(server())
 			s=server()->name() + ":" +s;
 	}
@@ -460,7 +491,7 @@ void VInfoNode::info(std::stringstream& f)
 //=========================================
 
 
-VInfoAttribute::VInfoAttribute(VAttribute* att,int attIndex,Node* node,ServerHandler *server) :
+VInfoAttribute::VInfoAttribute(VAttribute* att,int attIndex,VNode* node,ServerHandler *server) :
 		VInfo(att,attIndex,node,server)
 {
 
@@ -472,7 +503,7 @@ void VInfoAttribute::accept(VInfoVisitor* v)
 }
 
 
-VInfoLimit::VInfoLimit(VAttribute* att,int attIndex,Node* node,ServerHandler *server) :
+VInfoLimit::VInfoLimit(VAttribute* att,int attIndex,VNode* node,ServerHandler *server) :
 		VInfoAttribute(att,attIndex,node,server)
 {
 

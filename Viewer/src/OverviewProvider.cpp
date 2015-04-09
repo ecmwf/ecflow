@@ -10,6 +10,7 @@
 #include "OverviewProvider.hpp"
 
 #include "ServerHandler.hpp"
+#include "VNode.hpp"
 #include "VNState.hpp"
 #include "VSState.hpp"
 
@@ -115,7 +116,7 @@ void OverviewProvider::nodeInfo(VInfoNode* info,std::stringstream& f)
 	ServerHandler *server=info->server();
 	if(!server) return;
 
-	Node* node=info->node();
+	VNode* node=info->node();
 	if(!node) return;
 
 	static const std::string inc = "  ";
@@ -124,15 +125,17 @@ void OverviewProvider::nodeInfo(VInfoNode* info,std::stringstream& f)
 	using namespace boost::gregorian;
 
 	std::string typeName=info->nodeType();
-	std::string nodeName=node->name();
-	std::string statusName(VNState::toName(node).toStdString());
+	std::string nodeName(node->name().toStdString());
+	std::string statusName(node->stateName().toStdString());
 
 	//Header
 	f << "name    : " << nodeName << "\n";
 	f << "type    : " << typeName << "\n";
 	f << "status   : " << statusName << "\n";
 
-	boost::posix_time::ptime state_change_time = node->state_change_time();
+	Node *nn=node->node();
+
+	boost::posix_time::ptime state_change_time = nn->state_change_time();
 	if(!state_change_time.is_special())
 	{
 		f << "at      : " << boost::posix_time::to_simple_string(state_change_time) << "\n";
@@ -141,12 +144,12 @@ void OverviewProvider::nodeInfo(VInfoNode* info,std::stringstream& f)
 	f << "----------\n";
 
 	//Start block: Type, name
-	f << typeName << " " << node->name() << "\n";
+	f << typeName << " " << nodeName << "\n";
 
 	//Clock information for suites
-	if(node->isSuite())
+	if(Suite *suite=nn->isSuite())
 	{
-		Suite* suite = dynamic_cast<Suite*>(node);
+		//Suite* suite = dynamic_cast<Suite*>(nn);
 		// f << "clock    : ";
 		if (suite->clockAttr())
 		{
@@ -156,51 +159,49 @@ void OverviewProvider::nodeInfo(VInfoNode* info,std::stringstream& f)
 
 	//Default status: the status the node should have when the begin/re-queue is called
 	//if(st  != DState::QUEUED && st != DState::UNKNOWN)
-	f << inc << "defstatus " <<  VNState::toDefaultStateName(node).toStdString() << "\n";
+	f << inc << "defstatus " <<  node->defaultStateName().toStdString() << "\n";
 
 	//Zombies attribute
-	const std::vector<ZombieAttr> & vect = node->zombies();
+	const std::vector<ZombieAttr> & vect = nn->zombies();
 	for (std::vector<ZombieAttr>::const_iterator it = vect.begin(); it != vect.end(); ++it)
 		f << inc << it->toString() << "\n";
 
 	//Autocancel
-	if(node->hasAutoCancel() && node->get_autocancel())
-		f << inc << node->get_autocancel()->toString() << "\n";
+	if(nn->hasAutoCancel() && nn->get_autocancel())
+		f << inc << nn->get_autocancel()->toString() << "\n";
 
 	f << inc << "# " << typeName << " " << nodeName << " is " << statusName << "\n";
 
-	if(node->hasTimeDependencies())
+	if(nn->hasTimeDependencies())
 	{
 		f << inc << "# time-date-dependencies: ";
-		if (node->isTimeFree()) f << "free\n";
+		if (nn->isTimeFree()) f << "free\n";
 			else f << "holding\n";
 	}
 
 	//Generated variables
 	std::vector<Variable> gvar;
 	std::vector<Variable>::const_iterator gvar_end;
-	node->gen_variables(gvar);
+	nn->gen_variables(gvar);
 	for(std::vector<Variable>::const_iterator it = gvar.begin(); it != gvar.end(); ++it)
 	{
 		f << inc << "# edit " << (*it).name() << " '" << (*it).theValue() << "'\n";
 	}
 
 	//Variables
-	gvar = node->variables();
+	gvar = nn->variables();
 	for(std::vector<Variable>::const_iterator it = gvar.begin(); it != gvar.end(); ++it)
 	{
 		f << inc << "edit " << (*it).name() << " '" << (*it).theValue() << "'\n";
 	}
 
 	//Print children
-	std::vector<node_ptr> nodes;
-	node->immediateChildren(nodes);
-	for(unsigned int i=0; i < nodes.size(); i++)
+	for(unsigned int i=0; i < node->numOfChildren(); i++)
 	{
-		f << inc << info->nodeType(nodes.at(i).get()) << " " << nodes.at(i)->name() << "\n";
+		f << inc << info->nodeType(node->childAt(i)) << " " << node->childAt(i)->name().toStdString() << "\n";
 	}
 
-	//Here we should print some additional information from the attributes well. It i not clear exactly what!
+	//Here we should print some additional information from the attributes as well. It is not clear exactly what!
 
 	//End block
 	f << "end" << typeName << " # " << nodeName << "\n";

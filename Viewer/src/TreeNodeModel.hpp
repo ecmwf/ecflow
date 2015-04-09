@@ -51,8 +51,12 @@ public Q_SLOTS:
 	void slotServerRemoveBegin(int row);
 	void slotServerRemoveEnd();
 	void slotDataChanged(VModelServer*);
-	void slotDataChanged(VModelServer*,VNode*);
-	void slotAddRemoveAttributes(VModelServer*,VNode*,int,int);
+	void slotNodeChanged(VModelServer*,const VNode*);
+	void slotAttributesChanged(VModelServer*,const VNode*);
+	void slotAddRemoveAttributes(VModelServer*,const VNode*,int,int);
+	void slotAddRemoveNodes(VModelServer*,const VNode*,int,int);
+	void slotAddNode(VModelServer*,const VNode*,int);
+	void slotResetBranch(VModelServer*,const VNode*);
 
 Q_SIGNALS:
 	void filterChanged();
@@ -66,8 +70,8 @@ private:
 	VModelServer* indexToServer(const QModelIndex & index) const;
 	QModelIndex serverToIndex(ServerHandler*) const;
 
-	QModelIndex nodeToIndex(VNode*,int column=0) const;
-	QModelIndex nodeToIndex(VModelServer*,VNode*,int column=0) const;
+	QModelIndex nodeToIndex(const VNode*,int column=0) const;
+	QModelIndex nodeToIndex(VModelServer*,const VNode*,int column=0) const;
 	VNode* indexToNode( const QModelIndex & index) const;
 
 	QVariant serverData(const QModelIndex& index,int role) const;

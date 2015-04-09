@@ -14,6 +14,7 @@
 #include <QWidget>
 
 #include "DashboardWidget.hpp"
+#include "ServerObserver.hpp"
 #include "Viewer.hpp"
 #include "VInfo.hpp"
 
@@ -62,7 +63,7 @@ private:
 };
 
 
-class InfoPanel : public DashboardWidget, private Ui::InfoPanel
+class InfoPanel : public DashboardWidget, public ServerObserver, private Ui::InfoPanel
 {
     Q_OBJECT
 
@@ -78,6 +79,10 @@ public:
 	void reload() {};
 	void writeSettings(VSettings*);
 	void readSettings(VSettings*);
+
+	//From ServerObserver
+	void notifyDefsChanged(ServerHandler* server,const std::vector<ecf::Aspect::Type>&) {};
+	void notifyServerDelete(ServerHandler* server);
 
 public Q_SLOTS:
 	void slotReload(VInfo_ptr node);

@@ -178,9 +178,9 @@ QModelIndex AbstractNodeModel::infoToIndex(VInfo_ptr info,int column) const
 				return serverToIndex(s);
 			}
 		}
-		else if(Node* n=info->node())
+		else if(VNode* n=info->node())
 		{
-			//return nodeToIndex(n);
+			return nodeToIndex(n);
 		}
 	}
 

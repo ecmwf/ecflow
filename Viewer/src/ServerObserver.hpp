@@ -20,6 +20,7 @@ public:
 	ServerObserver() {};
 	virtual ~ServerObserver() {};
 	virtual void notifyDefsChanged(ServerHandler* server, const std::vector<ecf::Aspect::Type>& a)=0;
+	virtual void notifyServerDelete(ServerHandler* server)=0;
 };
 
 

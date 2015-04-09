@@ -105,7 +105,7 @@ protected:
 	void addItem(const QModelIndex& index);
 	void removeItem(const QModelIndex& index);
 
-	void nodeChanged(const Node*, const std::vector<ecf::Aspect::Type>&);
+	void nodeChanged(const VNode*, const std::vector<ecf::Aspect::Type>&);
 	void defsChanged(const std::vector<ecf::Aspect::Type>&);
 
 	VariableModelDataHandler* data_;
