@@ -14,7 +14,7 @@
 #include "VNState.hpp"
 #include "VSState.hpp"
 
-OverviewProvider::OverviewProvider(InfoPresenter* owner) : InfoProvider(owner)
+OverviewProvider::OverviewProvider(InfoPresenter* owner) : InfoProvider(owner,VTask::NoTask)
 {
 
 }

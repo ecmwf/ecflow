@@ -5,27 +5,30 @@
 // In applying this licence, ECMWF does not waive the privileges and immunities
 // granted to it by virtue of its status as an intergovernmental organisation
 // nor does it submit to any jurisdiction.
+//
 //============================================================================
 
-#ifndef SCRIPTPROVIDER_HPP_
-#define SCRIPTPROVIDER_HPP_
+#ifndef TIMEITEMWIDGET_HPP_
+#define TIMEITEMWIDGET_HPP_
 
-#include "InfoProvider.hpp"
+#include <QWidget>
 
-class InfoPanelItem;
+#include "InfoPanelItem.hpp"
+#include "VInfo.hpp"
 
-class ScriptProvider : public InfoProvider
+class TimeItemWidget : public QWidget, public InfoPanelItem
 {
 public:
-	ScriptProvider(InfoPresenter* owner);
+	TimeItemWidget(QWidget *parent=0);
 
-	//From VInfoVisitor
-	void visit(VInfoServer*) {};
-	void visit(VInfoNode*);
-	void visit(VInfoAttribute*) {};
+	void reload(VInfo_ptr);
+	QWidget* realWidget();
+	void clearContents();
 
-	//From VTaskObserver
-	void taskChanged(VTask_ptr);
+	void nodeChanged(const VNode*, const std::vector<ecf::Aspect::Type>&) {};
+	void defsChanged(const std::vector<ecf::Aspect::Type>&) {};
+
 };
 
 #endif
+

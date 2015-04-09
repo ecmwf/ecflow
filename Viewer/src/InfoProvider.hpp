@@ -20,19 +20,54 @@ class InfoPanelItem;
 class InfoProvider : public VTaskObserver, public VInfoVisitor
 {
 public:
-	InfoProvider(InfoPresenter* owner);
+	InfoProvider(InfoPresenter* owner,VTask::Type);
 	virtual ~InfoProvider();
 
 	void info(VInfo_ptr);
 
+	//From VInfoVisitor
+	void visit(VInfoServer*) {};
+	void visit(VInfoNode*);
+	void visit(VInfoAttribute*) {};
+
 	//From VTaskObserver
-	void taskChanged(VTask_ptr) {};
+	void taskChanged(VTask_ptr);
 
 protected:
 	InfoPresenter* owner_;
 	VInfo_ptr info_;
 	VTask_ptr task_;
 	VReply* reply_;
+	VTask::Type taskType_;
+};
+
+class JobProvider : public InfoProvider
+{
+public:
+	 JobProvider(InfoPresenter* owner) :
+		 InfoProvider(owner,VTask::JobTask) {}
+};
+
+
+class ManualProvider : public InfoProvider
+{
+public:
+	 ManualProvider(InfoPresenter* owner) :
+		 InfoProvider(owner,VTask::ManualTask) {}
+};
+
+class MessagesProvider : public InfoProvider
+{
+public:
+	 MessagesProvider(InfoPresenter* owner) :
+		 InfoProvider(owner,VTask::MessageTask) {}
+};
+
+class ScriptProvider : public InfoProvider
+{
+public:
+	 ScriptProvider(InfoPresenter* owner) :
+		 InfoProvider(owner,VTask::ScriptTask) {}
 };
 
 

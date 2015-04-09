@@ -11,7 +11,7 @@
 #include "ManualItemWidget.hpp"
 
 #include "Highlighter.hpp"
-#include "ManualProvider.hpp"
+#include "InfoProvider.hpp"
 #include "VReply.hpp"
 
 

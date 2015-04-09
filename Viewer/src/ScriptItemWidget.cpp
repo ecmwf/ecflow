@@ -10,7 +10,7 @@
 #include "ScriptItemWidget.hpp"
 
 #include "Highlighter.hpp"
-#include "ScriptProvider.hpp"
+#include "InfoProvider.hpp"
 #include "VReply.hpp"
 
 //========================================================

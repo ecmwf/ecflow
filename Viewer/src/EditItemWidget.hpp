@@ -5,27 +5,30 @@
 // In applying this licence, ECMWF does not waive the privileges and immunities
 // granted to it by virtue of its status as an intergovernmental organisation
 // nor does it submit to any jurisdiction.
+//
 //============================================================================
 
-#ifndef MANUALPROVIDER_HPP_
-#define MANUALPROVIDER_HPP_
+#ifndef EDITITEMWIDGET_HPP_
+#define EDITITEMWIDGET_HPP_
 
-#include "InfoProvider.hpp"
+#include <QWidget>
 
-class InfoPanelItem;
+#include "InfoPanelItem.hpp"
+#include "VInfo.hpp"
 
-class ManualProvider : public InfoProvider
+class EditItemWidget : public QWidget, public InfoPanelItem
 {
 public:
-    ManualProvider(InfoPresenter* owner);
+	EditItemWidget(QWidget *parent=0);
 
-    //From VInfoVisitor
-    void visit(VInfoServer*) {};
-    void visit(VInfoNode*);
-    void visit(VInfoAttribute*) {};
+	void reload(VInfo_ptr);
+	QWidget* realWidget();
+	void clearContents();
 
-    //From VTaskObserver
-    void taskChanged(VTask_ptr);
+	void nodeChanged(const VNode*, const std::vector<ecf::Aspect::Type>&) {};
+	void defsChanged(const std::vector<ecf::Aspect::Type>&) {};
+
 };
 
 #endif
+

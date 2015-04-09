@@ -7,36 +7,36 @@
 // nor does it submit to any jurisdiction.
 //============================================================================
 
-#include "ManualProvider.hpp"
+#include "SimpleInfoProvider.hpp"
 
 #include "ServerHandler.hpp"
 
-
-ManualProvider::ManualProvider(InfoPresenter* owner) : InfoProvider(owner)
+SimpleInfoProvider::SimpleInfoProvider(InfoPresenter* owner,VTask::Type taskType) :
+     InfoProvider(owner),
+     taskType_(taskType)
 {
 
 }
 
 //Node
-void ManualProvider::visit(VInfoNode* info)
+void SimpleInfoProvider::visit(VInfoNode* info)
 {
     reply_->reset();
-    
+
     if(!info->node())
     {
-        owner_->infoFailed(reply_);   
+        owner_->infoFailed(reply_);
     }
-    
-    //Define a task for getting the stats from the server.
-    //We need ClientInvoker for this
-    task_=VTask::create(VTask::ManualTask,info->node(),this);
-    
+
+    //Define a task for getting the info from the server.
+    task_=VTask::create(taskType_,info->node(),this);
+
     //Run the task in the server. When it finish taskFinished() is called. The text returned
     //in the reply will be prepended to the string we generated above.
     info->server()->run(task_);
 }
 
-void  ManualProvider::taskChanged(VTask_ptr task)
+void  SimpleInfoProvider::taskChanged(VTask_ptr task)
 {
     if(task_ != task)
         return;

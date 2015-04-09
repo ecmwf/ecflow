@@ -8,17 +8,16 @@ set(viewer_srcs
     CustomCommandDialog.cpp
     Dashboard.cpp
     DirectoryHandler.cpp
+    EditItemWidget.cpp
     FilterWidget.cpp
     Highlighter.cpp
     InfoPanel.cpp 
     InfoPanelItem.cpp   
     InfoProvider.cpp
     JobItemWidget.cpp
-    JobProvider.cpp
     LineEdit.cpp
     MainWindow.cpp
     ManualItemWidget.cpp 
-    ManualProvider.cpp
     MenuConfigDialog.cpp
     MenuHandler.cpp
     MessageItemWidget.cpp
@@ -34,7 +33,6 @@ set(viewer_srcs
     PropertyDialog.cpp
     PropertyEditor.cpp
     ScriptItemWidget.cpp
-    ScriptProvider.cpp
     ServerHandler.cpp
     ServerFilter.cpp
     ServerItem.cpp
@@ -46,6 +44,7 @@ set(viewer_srcs
     TableNodeWidget.cpp
     TextEdit.cpp
     TextItemWidget.cpp
+    TimeItemWidget.cpp
     TriggerItemWidget.cpp
     TreeNodeModel.cpp
     TreeNodeView.cpp

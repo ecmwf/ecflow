@@ -10,7 +10,7 @@
 #include "JobItemWidget.hpp"
 
 #include "Highlighter.hpp"
-#include "JobProvider.hpp"
+#include "InfoProvider.hpp"
 #include "VReply.hpp"
 
 
@@ -26,7 +26,6 @@ JobItemWidget::JobItemWidget(QWidget *parent) : TextItemWidget(parent)
     Highlighter* ih=new Highlighter(textEdit_->document(),"script");
 
     infoProvider_=new JobProvider(this);
-  
 }
 
 QWidget* JobItemWidget::realWidget()

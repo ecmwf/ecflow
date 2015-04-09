@@ -7,17 +7,17 @@
 // nor does it submit to any jurisdiction.
 //============================================================================
 
-#ifndef JOBPROVIDER_HPP_
-#define JOBPROVIDER_HPP_
+#ifndef SIMPLEINFOPROVIDER_HPP_
+#define SIMPLEINFOPROVIDER_HPP_
 
 #include "InfoProvider.hpp"
 
 class InfoPanelItem;
 
-class JobProvider : public InfoProvider
+class SimpleInfoProvider : public InfoProvider
 {
 public:
-    JobProvider(InfoPresenter* owner);
+    SimpleInfoProvider(InfoPresenter* owner,VTask::Type);
 
     //From VInfoVisitor
     void visit(VInfoServer*) {};
@@ -26,6 +26,9 @@ public:
 
     //From VTaskObserver
     void taskChanged(VTask_ptr);
+
+private:
+    VTask::Type taskType_;
 };
 
 #endif
