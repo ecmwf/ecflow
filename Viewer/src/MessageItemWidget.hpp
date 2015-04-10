@@ -23,8 +23,10 @@ public:
 	QWidget* realWidget();
 	void clearContents();
 
-	//From VNodeReplyReceiver
-	void infoReady(VReply* reply);
+	//From VInfoPresenter
+	void infoReady(VReply*);
+	void infoFailed(VReply*);
+	void infoProgress(VReply*);
 
 	void nodeChanged(const VNode*, const std::vector<ecf::Aspect::Type>&) {};
 	void defsChanged(const std::vector<ecf::Aspect::Type>&) {};

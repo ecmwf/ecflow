@@ -112,6 +112,11 @@ void VNode::replaceChildren(const std::vector<VNode*>& newCh)
 	children_=newCh;
 }
 
+std::string VNode::absNodePath() const
+{
+	return (node_)?node_->absNodePath():"";
+}
+
 QString VNode::name() const
 {
 	return (node_)?QString::fromStdString(node_->name()):QString();
@@ -165,6 +170,11 @@ VNodeRoot::~VNodeRoot()
 
 	//A sanity check
 	assert(totalNum_ == 0);
+}
+
+std::string VNodeRoot::absNodePath() const
+{
+	return "/";
 }
 
 VNode* VNodeRoot::find(const Node* nc) const

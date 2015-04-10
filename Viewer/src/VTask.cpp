@@ -8,12 +8,14 @@
 //============================================================================
 
 #include "VTask.hpp"
+#include "VNode.hpp"
 #include "VReply.hpp"
 #include "VTaskObserver.hpp"
 
 VTask::VTask(Type t,VTaskObserver* obs) :
 	type_(t),
 	status_(NOSTATUS),
+	targetPath_("/"),
 	node_(0),
 	reply_(0)
 {
@@ -28,8 +30,12 @@ VTask::VTask(Type t,VNode *node,VTaskObserver* obs) :
 	node_(node),
 	reply_(0)
 {
+	if(node_)
+		targetPath_=node_->absNodePath();
+
 	if(obs)
 		observers_.push_back(obs);
+
 	reply_=new VReply();
 }
 
@@ -38,15 +44,18 @@ VTask::~VTask()
 	delete reply_;
 }
 
+//Task for a server
 VTask_ptr VTask::create(Type t,VTaskObserver* obs)
 {
 	return VTask_ptr(new VTask(t,obs));
 }
 
+//Task for a node
 VTask_ptr VTask::create(Type t,VNode *node,VTaskObserver* obs)
 {
 	return VTask_ptr(new VTask(t,node,obs));
 }
+
 
 const std::string& VTask::typeString() const
 {

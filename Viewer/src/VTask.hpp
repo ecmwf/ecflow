@@ -45,6 +45,8 @@ public:
 	const std::string& typeString() const;
 	VNode* node() const {return node_;}
 	Status status() {return status_;}
+	const std::string& targetPath() const {return targetPath_;}
+
 	const std::string& param(const std::string& key) const;
 	const std::map<std::string,std::string>& params() const {return params_;}
 	const std::vector<std::string>& command() const {return command_;}
@@ -70,6 +72,7 @@ protected:
 	Status status_;
 	std::map<std::string,std::string> params_;
 	std::vector<std::string> command_;
+	std::string targetPath_;
 	VNode *node_;
 	std::vector<VTaskObserver*> observers_;
 	VReply*  reply_;

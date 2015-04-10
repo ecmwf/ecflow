@@ -43,6 +43,7 @@ friend class VNodeRoot;
 
 public:
 	VNode(VNode* parent,Node*);
+	virtual ~VNode() {};
 
     Node *node() {return node_;}
     bool isTopLevel() const;
@@ -60,6 +61,7 @@ public:
     int indexOfChild(const VNode* vn) const;
     int indexOfChild(Node* n) const;
 
+    virtual std::string absNodePath() const;
     QString name() const;
     QString stateName();
     QString defaultStateName();
@@ -83,6 +85,7 @@ public:
 	VNodeRoot(ServerHandler*);
 	~VNodeRoot();
 
+	std::string absNodePath() const;
 	int totalNum() const {return totalNum_;}
 	VNode* find(const Node* nc) const;
 	void beginUpdate(VNode* node,const std::vector<ecf::Aspect::Type>& aspect,VNodeChange&);

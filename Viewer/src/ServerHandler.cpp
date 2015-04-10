@@ -469,6 +469,12 @@ void ServerHandler::manual(VTask_ptr req)
 
 void ServerHandler::file(VTask_ptr task,const std::string& errText)
 {
+	if(!task->node() || !task->node()->node())
+	{
+		task->status(VTask::FINISHED);
+		return;
+	}
+
 	std::string fileName;
 	if(!task->param("ecfVar").empty())
 	{
@@ -987,7 +993,7 @@ void ServerHandler::clientTaskFinished(VTask_ptr task,const ServerReply& serverR
 		}
 		case VTask::MessageTask:
 		{
-			task->reply()->text(serverReply.get_string());
+			task->reply()->text(serverReply.get_string_vec());
 			task->status(VTask::FINISHED);
 			break;
 		}
@@ -1301,10 +1307,7 @@ void ServerComThread::task(VTask_ptr task)
 		params_=task->params();
 		nodePath_.clear();
 		taskType_=task->type();
-		if(task->node())
-		{
-			nodePath_=task->node()->node()->absNodePath();
-		}
+		nodePath_=task->targetPath();
 
 		//Start the thread execution
 		start();
@@ -1315,6 +1318,8 @@ void ServerComThread::run()
 {
 	//Can we use it? We are in the thread!!!
 	//UserMessage::message(UserMessage::DBG, false, std::string("  ServerComThread::run start"));
+
+	UserMessage::message(UserMessage::DBG, false, std::string("  ServerComThread::run start path: ") + nodePath_);
 
 	try
  	{

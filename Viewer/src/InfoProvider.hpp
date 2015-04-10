@@ -26,7 +26,7 @@ public:
 	void info(VInfo_ptr);
 
 	//From VInfoVisitor
-	void visit(VInfoServer*) {};
+	void visit(VInfoServer*);
 	void visit(VInfoNode*);
 	void visit(VInfoAttribute*) {};
 
@@ -56,10 +56,10 @@ public:
 		 InfoProvider(owner,VTask::ManualTask) {}
 };
 
-class MessagesProvider : public InfoProvider
+class MessageProvider : public InfoProvider
 {
 public:
-	 MessagesProvider(InfoPresenter* owner) :
+	 MessageProvider(InfoPresenter* owner) :
 		 InfoProvider(owner,VTask::MessageTask) {}
 };
 

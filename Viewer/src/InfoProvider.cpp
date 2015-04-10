@@ -8,6 +8,7 @@
 //============================================================================
 
 #include "InfoProvider.hpp"
+#include "VNode.hpp"
 #include "VReply.hpp"
 #include "ServerHandler.hpp"
 
@@ -38,6 +39,24 @@ void InfoProvider::info(VInfo_ptr info)
 
 	if(owner_ && info_)
 		info_->accept(this);
+}
+
+//Server
+void InfoProvider::visit(VInfoServer* info)
+{
+    reply_->reset();
+
+    if(!info->server())
+    {
+        owner_->infoFailed(reply_);
+    }
+
+    //Define a task for getting the info from the server.
+    task_=VTask::create(taskType_,this);
+
+    //Run the task in the server. When it finish taskFinished() is called. The text returned
+    //in the reply will be prepended to the string we generated above.
+    info->server()->run(task_);
 }
 
 //Node
