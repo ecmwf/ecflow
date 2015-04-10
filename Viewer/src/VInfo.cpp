@@ -354,6 +354,16 @@ void VInfoNode::genVariables(std::vector<Variable>& genVars)
 		node_->node()->gen_variables(genVars);
 }
 
+std::string VInfoNode::genVariable(const std::string& key)
+{
+	std::string val;
+	if(node_ && node_->node())
+		node_->node()->findGenVariableValue(key,val);
+
+	return val;
+}
+
+
 std::string VInfoNode::name()
 {
 	if(node_ && node_->node())

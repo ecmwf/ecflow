@@ -13,8 +13,7 @@
 #include "InfoProvider.hpp"
 #include "VReply.hpp"
 
-
-JobItemWidget::JobItemWidget(QWidget *parent) : TextItemWidget(parent)
+JobItemWidget::JobItemWidget(QWidget *parent) : CodeItemWidget(parent)
 {
     QFont f;
     f.setFamily("Monospace");
@@ -33,18 +32,19 @@ QWidget* JobItemWidget::realWidget()
     return this;
 }
 
-void JobItemWidget::reload(VInfo_ptr nodeInfo)
+void JobItemWidget::reload(VInfo_ptr info)
 {
     loaded_=true;
-    info_=nodeInfo;
+    info_=info;
 
-    if(!nodeInfo.get())
+    if(!info.get())
     {
         textEdit_->clear();
     }
     else
     {
         clearContents();
+        fileLabel_->setText(tr("File: ") + QString::fromStdString(info_->genVariable("ECF_JOB")));
         infoProvider_->info(info_);
     }   
 }

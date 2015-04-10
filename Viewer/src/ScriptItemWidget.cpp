@@ -19,7 +19,7 @@
 //
 //========================================================
 
-ScriptItemWidget::ScriptItemWidget(QWidget *parent) : TextItemWidget(parent)
+ScriptItemWidget::ScriptItemWidget(QWidget *parent) : CodeItemWidget(parent)
 {
     QFont f;
 	f.setFamily("Monospace");
@@ -39,18 +39,20 @@ QWidget* ScriptItemWidget::realWidget()
 	return this;
 }
 
-void ScriptItemWidget::reload(VInfo_ptr nodeInfo)
+void ScriptItemWidget::reload(VInfo_ptr info)
 {
     loaded_=true;
-    info_=nodeInfo;
+    info_=info;
 
-    if(!nodeInfo.get())
+    if(!info.get())
     {
+        fileLabel_->clear();
         textEdit_->clear();
     }
     else
     {
         clearContents();
+        fileLabel_->setText(tr("File: ") + QString::fromStdString(info_->genVariable("ECF_SCRIPT")));
         infoProvider_->info(info_);
     }	
 }
@@ -58,6 +60,7 @@ void ScriptItemWidget::reload(VInfo_ptr nodeInfo)
 void ScriptItemWidget::clearContents()
 {
     loaded_=false;
+    fileLabel_->clear();
     textEdit_->clear();
 }
 

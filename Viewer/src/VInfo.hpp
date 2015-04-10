@@ -52,6 +52,7 @@ public:
 	virtual VNode* node()  {return node_;}
 	virtual VAttribute* attribute() {return att_;}
 
+	virtual std::string genVariable(const std::string& key) {return "";}
 	virtual void variables(std::vector<Variable>& vars) {};
 	virtual void genVariables(std::vector<Variable>& vars) {};
 	virtual std::string name() {return std::string();}
@@ -114,6 +115,7 @@ public:
 	void accept(VInfoVisitor*);
 	const std::string&  nodeType();
 
+	virtual std::string genVariable(const std::string& key);
 	void variables(std::vector<Variable>& vars);
 	void genVariables(std::vector<Variable>& vars);
 	std::string name();

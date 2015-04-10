@@ -8,28 +8,17 @@
 //
 //============================================================================
 
-#ifndef MANUALITEMWIDGET_HPP_
-#define MANUALITEMWIDGET_HPP_
+#ifndef CODEITEMWIDGET_HPP_
+#define CODEITEMWIDGET_HPP_
 
-#include "InfoPanelItem.hpp"
-#include "CodeItemWidget.hpp"
+#include <QWidget>
 
-class ManualItemWidget : public CodeItemWidget, public InfoPanelItem
+#include "ui_CodeItemWidget.h"
+
+class CodeItemWidget : public QWidget, protected Ui::CodeItemWidget
 {
 public:
-	ManualItemWidget(QWidget *parent=0);
-
-	void reload(VInfo_ptr);
-	QWidget* realWidget();
-	void clearContents();
-
-    //From VInfoPresenter
-    void infoReady(VReply*);
-    void infoFailed(VReply*);
-    void infoProgress(VReply*);
-
-	void nodeChanged(const VNode*, const std::vector<ecf::Aspect::Type>&) {};
-	void defsChanged(const std::vector<ecf::Aspect::Type>&) {};
+	CodeItemWidget(QWidget *parent=0);
 };
 
 #endif

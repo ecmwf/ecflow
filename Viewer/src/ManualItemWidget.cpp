@@ -15,7 +15,7 @@
 #include "VReply.hpp"
 
 
-ManualItemWidget::ManualItemWidget(QWidget *parent) : TextItemWidget(parent)
+ManualItemWidget::ManualItemWidget(QWidget *parent) : CodeItemWidget(parent)
 {
     QFont f;
     f.setFamily("Monospace");

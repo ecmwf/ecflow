@@ -12,9 +12,9 @@
 #define SCRIPTITEMWIDGET_HPP_
 
 #include "InfoPanelItem.hpp"
-#include "TextItemWidget.hpp"
+#include "CodeItemWidget.hpp"
 
-class ScriptItemWidget : public TextItemWidget, public InfoPanelItem
+class ScriptItemWidget : public CodeItemWidget, public InfoPanelItem
 {
 public:
 	ScriptItemWidget(QWidget *parent=0);

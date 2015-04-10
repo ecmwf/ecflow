@@ -8,29 +8,11 @@
 //
 //============================================================================
 
-#ifndef MANUALITEMWIDGET_HPP_
-#define MANUALITEMWIDGET_HPP_
-
-#include "InfoPanelItem.hpp"
 #include "CodeItemWidget.hpp"
 
-class ManualItemWidget : public CodeItemWidget, public InfoPanelItem
+CodeItemWidget::CodeItemWidget(QWidget *parent) : QWidget(parent)
 {
-public:
-	ManualItemWidget(QWidget *parent=0);
+	setupUi(this);
 
-	void reload(VInfo_ptr);
-	QWidget* realWidget();
-	void clearContents();
-
-    //From VInfoPresenter
-    void infoReady(VReply*);
-    void infoFailed(VReply*);
-    void infoProgress(VReply*);
-
-	void nodeChanged(const VNode*, const std::vector<ecf::Aspect::Type>&) {};
-	void defsChanged(const std::vector<ecf::Aspect::Type>&) {};
-};
-
-#endif
-
+	searchLine_->setEditor(textEdit_);
+}

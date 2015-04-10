@@ -4,6 +4,7 @@ set(viewer_srcs
     AbstractNodeModel.cpp
     AbstractSearchLine.cpp
     ActionHandler.cpp
+    CodeItemWidget.cpp
     CommandDesignerWidget.cpp
     CustomCommandDialog.cpp
     Dashboard.cpp
@@ -113,6 +114,7 @@ QT4_WRAP_CPP(VIEWER_MOC AbstractNodeModel.hpp
 
 QT4_ADD_RESOURCES (VIEWER_RES viewer.qrc)
 QT4_WRAP_UI       (VIEWER_FORMS_HEADERS CommandDesignerWidget.ui CustomCommandDialog.ui 
+						CodeItemWidget.ui
 						InfoPanel.ui
 						MainWindow.ui 
                         MenuConfigDialog.ui 

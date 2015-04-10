@@ -12,12 +12,12 @@
 #define JOBITEMWIDGET_HPP_
 
 #include "InfoPanelItem.hpp"
-#include "TextItemWidget.hpp"
+#include "CodeItemWidget.hpp"
 #include "VInfo.hpp"
 
 #include "ServerHandler.hpp"
 
-class JobItemWidget : public TextItemWidget, public InfoPanelItem
+class JobItemWidget : public CodeItemWidget, public InfoPanelItem
 {
 public:
 	JobItemWidget(QWidget *parent=0);
