@@ -1,4 +1,3 @@
-suite suiteName
-  
-    repeat year 3 20090331 20121212 1 # status 0
+suite s
+ repeat year 3 20090331 20121212 1 # status 0
 endsuite
