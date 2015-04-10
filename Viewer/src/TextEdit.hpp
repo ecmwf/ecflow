@@ -49,6 +49,7 @@ protected:
 private:
     bool showLineNum_;
     QWidget *lineNumArea_;
+    int rightMargin_;
 };
 
 

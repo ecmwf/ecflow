@@ -16,7 +16,8 @@
 
 TextEdit::TextEdit(QWidget * parent) :
     QPlainTextEdit(parent),
-    showLineNum_(true)
+    showLineNum_(true),
+    rightMargin_(2)
 {
     lineNumArea_ = new LineNumberArea(this);
 
@@ -122,7 +123,7 @@ int TextEdit::lineNumberAreaWidth()
             ++digits;
         }
 
-        int space = 3 + fontMetrics().width(QLatin1Char('9')) * digits;
+        int space = 3 + fontMetrics().width(QLatin1Char('9')) * digits + rightMargin_;
 
         return space;
     }
@@ -216,6 +217,8 @@ void TextEdit::lineNumberAreaPaintEvent(QPaintEvent *event)
     QPainter painter(lineNumArea_);
     painter.fillRect(event->rect(), QColor(240, 240, 240));  // light grey background
 
+    painter.setPen(QPen(QColor(220,220,220)));
+    painter.drawLine(event->rect().topRight(),event->rect().bottomRight());
 
     QTextBlock block = firstVisibleBlock();
     int blockNumber = block.blockNumber();
@@ -237,11 +240,11 @@ void TextEdit::lineNumberAreaPaintEvent(QPaintEvent *event)
             if (blockNumber == currentRow-1)  // is this the current line?
             {
                 painter.setFont(fontBold);
-                painter.fillRect(0, top, lineNumArea_->width(), fontMetrics().height(), QColor(212, 212, 255));  // highlight the background
+                painter.fillRect(0, top, lineNumArea_->width()-rightMargin_, fontMetrics().height(), QColor(212, 212, 255));  // highlight the background
             }
 
 
-            painter.drawText(0, top, lineNumArea_->width(), fontMetrics().height(),  // draw the line number
+            painter.drawText(0, top, lineNumArea_->width()-rightMargin_, fontMetrics().height(),  // draw the line number
                              Qt::AlignRight, number);
 
 

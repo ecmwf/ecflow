@@ -484,8 +484,8 @@ void ServerHandler::file(VTask_ptr task,const std::string& errText)
 	//We try to read the file from the local disk
 	if(task->reply()->textFromFile(fileName))
 	{
-			task->status(VTask::FINISHED);
-			return;
+		task->status(VTask::FINISHED);
+		return;
 	}
 	//If not on local disc we try the client invoker
 	else
@@ -986,17 +986,14 @@ void ServerHandler::clientTaskFinished(VTask_ptr task,const ServerReply& serverR
 		}
 
 		case VTask::ScriptTask:
+		case VTask::MessageTask:
+		case VTask::ManualTask:
 		{
 			task->reply()->text(serverReply.get_string());
 			task->status(VTask::FINISHED);
 			break;
 		}
-		case VTask::MessageTask:
-		{
-			task->reply()->text(serverReply.get_string_vec());
-			task->status(VTask::FINISHED);
-			break;
-		}
+
 		case VTask::StatsTask:
 		{
 			std::stringstream ss;

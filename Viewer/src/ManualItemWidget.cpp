@@ -23,6 +23,7 @@ ManualItemWidget::ManualItemWidget(QWidget *parent) : CodeItemWidget(parent)
     f.setStyleHint(QFont::TypeWriter);
     f.setFixedPitch(true);
     textEdit_->setFont(f);
+    fileLabel_->hide();
 
     Highlighter* ih=new Highlighter(textEdit_->document(),"manual");
 
@@ -42,11 +43,14 @@ void ManualItemWidget::reload(VInfo_ptr nodeInfo)
 
     if(!nodeInfo.get())
     {
-        textEdit_->clear();
+        //fileLabel_->clear();
+    	textEdit_->clear();
     }
     else
     {
         clearContents();
+        //TODO: figure it if we can get the filename for the manual
+        //fileLabel_->setText(tr("File: ") + QString::fromStdString(info_->genVariable("ECF_SCRIPT")));
         infoProvider_->info(info_);
     }   
 }
@@ -54,6 +58,7 @@ void ManualItemWidget::reload(VInfo_ptr nodeInfo)
 void ManualItemWidget::clearContents()
 {
     loaded_=false;
+   // fileLabel_->clear();
     textEdit_->clear();
 }
 
