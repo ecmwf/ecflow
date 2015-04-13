@@ -1,6 +1,3 @@
-#ifndef DIRECTORY_HANDLER_HPP_
-#define DIRECTORY_HANDLER_HPP_
-
 //============================================================================
 // Copyright 2014 ECMWF. 
 // This software is licensed under the terms of the Apache Licence version 2.0 
@@ -10,9 +7,11 @@
 // nor does it submit to any jurisdiction. 
 //============================================================================
 
+#ifndef DIRECTORY_HANDLER_HPP_
+#define DIRECTORY_HANDLER_HPP_
 
 #include <string>
-
+#include <vector>
 
 class DirectoryHandler
 {
@@ -25,7 +24,9 @@ public:
     static std::string configDir()  {return configDir_;};
     static std::string rcDir()    {return rcDir_;};
     static std::string concatenate(const std::string &path1, const std::string &path2);
-    static void findFiles(const std::string &dirPath,const std::string &startsWith);
+
+    static void findFiles(const std::string &dirPath,const std::string &startsWith,
+    		    std::vector<std::string>& res);
 
 private:
     static std::string shareDir_;

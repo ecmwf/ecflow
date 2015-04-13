@@ -8,7 +8,6 @@
 //
 //============================================================================
 
-
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/path.hpp>
 #include <boost/foreach.hpp>
@@ -92,7 +91,7 @@ std::string DirectoryHandler::concatenate(const std::string &path1, const std::s
 }
 
 
-void DirectoryHandler::findFiles(const std::string &dirPath,const std::string &startsWith)
+void DirectoryHandler::findFiles(const std::string &dirPath,const std::string &startsWith,std::vector<std::string>& res)
 {
 	boost::filesystem::path path(dirPath);
 
@@ -103,8 +102,77 @@ void DirectoryHandler::findFiles(const std::string &dirPath,const std::string &s
         if(is_regular_file(p) && boost::algorithm::starts_with(p.filename().string(),startsWith))
         {
             std::string filename = p.filename().string();
+            res.push_back(filename);
         }
     }
-
-
 }
+
+/*
+ecf_dir *ecf_file_dir(char *path, char *pattern, int fullname)
+{
+  struct dirent *de;
+  DIR           *dp;
+  struct stat    st;
+
+  ecf_dir       *cur = NULL;
+  ecf_dir       *dir = NULL;
+
+  bool            ok = true;
+
+  if( (dp=opendir(path)) )
+  {
+    char name[MAXLEN];
+    char *s;
+
+    strcpy(name,path);
+    s = name + strlen(path);
+    *s++ = '/';
+
+    while( ok && (de=readdir(dp)) != NULL )
+    {
+      if( de->d_ino != 0 )
+      {
+        strcpy(s,de->d_name);
+
+        if( !pattern || strncmp(de->d_name,pattern,strlen(pattern))==0 )
+          if( lstat(name,&st) == 0 )
+          {
+            if( (cur = new ecf_dir())) // (ecf_dir*) calloc(1,sizeof(ecf_dir))) )
+            {
+              if(fullname)
+              {
+                char buff[MAXLEN];
+                sprintf(buff,"%s/%s",const_ecf_string(path),const_ecf_string(de->d_name));
+                cur->name_ = strdup(buff);
+              }
+              else
+                cur->name_  = strdup(de->d_name);
+
+              cur->mode  = st.st_mode;
+              cur->uid   = st.st_uid;
+              cur->gid   = st.st_gid;
+              cur->size  = st.st_size;
+              cur->atime = st.st_atime;
+              cur->mtime = st.st_mtime;
+              cur->ctime = st.st_ctime;
+
+              ecf_list_add<ecf_dir>(&dir,cur);
+            }
+            else
+              ok = false;
+          }
+	  else {}
+        else {}
+      }
+    }
+    closedir(dp);
+  } else {};
+
+  return dir;
+}
+
+*/
+
+
+
+

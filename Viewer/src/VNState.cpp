@@ -21,6 +21,7 @@
 #include <map>
 
 #include "Node.hpp"
+#include "ServerHandler.hpp"
 #include "Submittable.hpp"
 #include "UserMessage.hpp"
 #include "VConfigLoader.hpp"
@@ -157,6 +158,43 @@ QString VNState::toDefaultStateName(Node *n)
 {
 	VNState *obj=VNState::toDefaultState(n);
 	return (obj)?(obj->name()):QString();
+}
+
+
+//==================================================
+// Server state
+//==================================================
+
+VNState* VNState::toState(ServerHandler *s)
+{
+	if(!s)
+		return NULL;
+
+	bool susp=false;
+	NState::State ns=s->state(susp);
+
+	if(susp)
+			return items_["suspended"];
+	else
+	{
+		std::map<NState::State,VNState*>::const_iterator it=stateMap_.find(ns);
+		if(it != stateMap_.end())
+			return it->second;
+	}
+
+	return NULL;
+}
+
+QString VNState::toName(ServerHandler *s)
+{
+	VNState *obj=VNState::toState(s);
+	return (obj)?(obj->name()):QString();
+}
+
+QColor VNState::toColour(ServerHandler *s)
+{
+	VNState *obj=VNState::toState(s);
+	return (obj)?(obj->colour()):QColor();
 }
 
 void VNState::load(VProperty* group)

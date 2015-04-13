@@ -68,7 +68,7 @@ VSState* VSState::toState(ServerHandler* s)
 	if(!s)
 		return NULL;
 
-	std::map<SState::State,VSState*>::const_iterator it=stateMap_.find(s->state());
+	std::map<SState::State,VSState*>::const_iterator it=stateMap_.find(s->serverState());
 	if(it != stateMap_.end())
 		return it->second;
 

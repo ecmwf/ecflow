@@ -14,6 +14,8 @@
 #include "TabWidget.hpp"
 #include "VInfo.hpp"
 
+#include <QIcon>
+
 #include <boost/property_tree/ptree.hpp>
 
 class Dashboard;
@@ -51,6 +53,7 @@ public Q_SLOTS:
 	//void slotDesktopCommand(QString,QPoint);
 	void slotNewTab();
 	//void slotNewWindow(bool);
+	void slotTabTitle(QWidget* w,QString text,QPixmap pix);
 
 Q_SIGNALS:
 	void itemInfoChanged(QString);

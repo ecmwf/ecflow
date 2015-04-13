@@ -12,9 +12,12 @@
 #define OUTPUTITEMWIDGET_HPP_
 
 #include "InfoPanelItem.hpp"
-#include "TextItemWidget.hpp"
 
-class OutputItemWidget : public TextItemWidget, public InfoPanelItem
+#include "ui_OutputItemWidget.h"
+
+class OutputModel;
+
+class OutputItemWidget : public QWidget, public InfoPanelItem, protected Ui::OutputItemWidget
 {
 public:
 	OutputItemWidget(QWidget *parent=0);
@@ -24,10 +27,15 @@ public:
 	void clearContents();
 
 	//From VInfoPresenter
-	void infoReady(VReply* reply);
+	void infoReady(VReply*);
+	void infoFailed(VReply*);
+	void infoProgress(VReply*);
 
 	void nodeChanged(const VNode*, const std::vector<ecf::Aspect::Type>&) {};
 	void defsChanged(const std::vector<ecf::Aspect::Type>&) {};
+
+protected:
+	OutputModel* model_;
 };
 
 #endif

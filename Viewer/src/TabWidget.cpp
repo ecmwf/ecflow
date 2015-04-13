@@ -209,10 +209,41 @@ void TabWidget::setTabText(int index, QString txt)
 
 void TabWidget::setTabIcon(int index, QPixmap pix)
 {
-	if (index >= 0 && index < bar_->count()) {
-		bar_->setTabIcon(index, pix);
+	if (index >= 0 && index < bar_->count())
+	{
+		QSize maxSize=maxIconSize();
+
+		if(maxSize.width() < pix.width())
+			maxSize.setWidth(pix.width());
+
+		if(maxSize.height() < pix.height())
+			maxSize.setHeight(pix.height());
+
+		if(maxSize != bar_->iconSize())
+			bar_->setIconSize(maxSize);
+
+		bar_->setTabIcon(index, QIcon(pix));
 	}
 }
+
+QSize TabWidget::maxIconSize() const
+{
+	QSize maxSize(0,0);
+	for(int i=0; i < bar_->count(); i++)
+	{
+		if(bar_->tabIcon(i).availableSizes().count() > 0)
+		{
+			QSize avs=bar_->tabIcon(i).availableSizes().front();
+			if(maxSize.width() < avs.width())
+				maxSize.setWidth(avs.width());
+
+			if(maxSize.height() < avs.height())
+				maxSize.setHeight(avs.height());
+		}
+	}
+	return maxSize;
+}
+
 
 void TabWidget::checkTabStatus()
 {

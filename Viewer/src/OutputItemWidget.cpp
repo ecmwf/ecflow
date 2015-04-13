@@ -9,14 +9,37 @@
 
 #include "OutputItemWidget.hpp"
 
-//========================================================
-//
-// OutputItemWidget
-//
-//========================================================
+#include "Highlighter.hpp"
+#include "InfoProvider.hpp"
+#include "OutputModel.hpp"
+#include "VReply.hpp"
 
-OutputItemWidget::OutputItemWidget(QWidget *parent) :TextItemWidget(parent)
+OutputItemWidget::OutputItemWidget(QWidget *parent) :
+	QWidget(parent)
 {
+	setupUi(this);
+
+	QFont f;
+	f.setFamily("Monospace");
+	//f.setFamily("Courier");
+	f.setStyleHint(QFont::TypeWriter);
+	f.setFixedPitch(true);
+	textEdit_->setFont(f);
+
+	Highlighter* ih=new Highlighter(textEdit_->document(),"output");
+
+	infoProvider_=new OutputProvider(this);
+
+	outputView_->setRootIsDecorated(true);
+	outputView_->setAllColumnsShowFocus(true);
+	outputView_->setUniformRowHeights(true);
+	outputView_->setAlternatingRowColors(true);
+	outputView_->setSortingEnabled(true);
+
+	OutputData* data=new OutputData;
+	model_=new OutputModel(data,this);
+
+	outputView_->setModel(model_);
 }
 
 QWidget* OutputItemWidget::realWidget()
@@ -24,44 +47,339 @@ QWidget* OutputItemWidget::realWidget()
 	return this;
 }
 
-void OutputItemWidget::reload(VInfo_ptr nodeInfo)
+void OutputItemWidget::reload(VInfo_ptr info)
 {
 	loaded_=true;
-	/*if(nodeInfo.get() != 0 && nodeInfo->isNode())
-	{
-		Node* n=nodeInfo->node();
+	info_=info;
 
-		if(ServerHandler* s=nodeInfo->server())
-		{
-			NodeInfoQuery_ptr query(new NodeInfoQuery(n,NodeInfoQuery::JOBOUT,this));
-			s->query(query);
-		}
-	}
-	else
+	if(!info.get())
 	{
+		fileLabel_->clear();
 		textEdit_->clear();
-	}*/
+	}
+    else
+	{
+	    clearContents();
+	    fileLabel_->setText(tr("File: ") + QString::fromStdString(info_->genVariable("ECF_JOBOUT")));
+	    infoProvider_->info(info_);
+
+
+    }
 }
 
 void OutputItemWidget::clearContents()
 {
 	loaded_=false;
+	fileLabel_->clear();
 	textEdit_->clear();
 }
 
 void OutputItemWidget::infoReady(VReply* reply)
 {
-	/*if(reply && reply->sender() == this)
-	{
-		if(reply->done())
-		{
-			textEdit_->setPlainText(QString::fromStdString(reply->text()));
-		}
-		else
-		{
-			textEdit_->setPlainText(QString::fromStdString(reply->errorText()));
-		}
-	}*/
+    QString s=QString::fromStdString(reply->text());
+    textEdit_->setPlainText(s);
 }
 
+void OutputItemWidget::infoProgress(VReply* reply)
+{
+    QString s=QString::fromStdString(reply->text());
+    textEdit_->setPlainText(s);
+}
+
+void OutputItemWidget::infoFailed(VReply* reply)
+{
+    QString s=QString::fromStdString(reply->errorText());
+    textEdit_->setPlainText(s);
+}
+
+
+
 static InfoPanelItemMaker<OutputItemWidget> maker1("output");
+
+
+
+
+
+/*
+
+
+
+
+class output_lister : public lister<ecf_dir> {
+	Widget list_;
+	bool sort() { return true; }
+	bool compare(ecf_dir&,ecf_dir&);
+	void next(ecf_dir&);
+public:
+	output_lister(Widget l) : list_(l) {}
+};
+
+void output_lister::next(ecf_dir& d)
+{
+  if(S_ISREG(d.mode))
+    {
+      time_t t   = d.mtime;
+      time_t now = time(0);
+
+      int delta  = now - t;
+      if(delta<0) delta = 0;
+
+      char buf[80];
+      strcpy(buf,"Right now");
+
+      if(delta >=1  && delta < 60)
+	{
+	  sprintf(buf,"%d second%s ago",delta,delta>1?"s":"");
+	}
+
+      if(delta >= 60 && delta < 60*60)
+	{
+	  sprintf(buf,"%d minute%s ago",delta/60,delta/60>1?"s":"");
+	}
+
+      if(delta >= 60*60 && delta < 60*60*24)
+	{
+	  sprintf(buf,"%d hour%s ago",delta/60/60,delta/60/60>1?"s":"");
+	}
+
+      if(delta >= 60*60*24)
+	{
+	  sprintf(buf,"%d day%s ago",delta/60/60/24,delta/60/60/24>1?"s":"");
+	}
+
+      xec_VaAddListItem(list_,(char*) "%-60s (%s)",d.name_,buf);
+    }
+}
+
+bool output_lister::compare(ecf_dir& a,ecf_dir& b)
+{
+  return a.mtime > b.mtime;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// Name        :
+
+#include "output.h"
+#include "node.h"
+#include "host.h"
+#include <Xm/Text.h>
+#include <Xm/TextStrSoP.h>
+#include <Xm/List.h>
+#include "ecf_node.h"
+extern "C" {
+#include "xec.h"
+}
+
+#include <sys/types.h>
+#include <sys/stat.h>
+
+output::output(panel_window& w):
+	text_window(true),
+	panel(w),
+	file_(0x0)
+{
+}
+
+output::~output()
+{
+	if(file_)
+		free(file_);
+}
+
+void output::create (Widget parent, char *widget_name )
+{
+	output_form_c::create(parent,widget_name);
+}
+
+void output::clear()
+{
+	if(file_) free(file_);
+	file_ = 0x0;
+	XmTextSetString(name_,(char*) "");
+	XmListDeleteAllItems(list_);
+	//active(False);
+	text_window::clear();
+}
+
+class output_lister : public lister<ecf_dir> {
+	Widget list_;
+	bool sort() { return true; }
+	bool compare(ecf_dir&,ecf_dir&);
+	void next(ecf_dir&);
+public:
+	output_lister(Widget l) : list_(l) {}
+};
+
+void output_lister::next(ecf_dir& d)
+{
+  if(S_ISREG(d.mode))
+    {
+      time_t t   = d.mtime;
+      time_t now = time(0);
+
+      int delta  = now - t;
+      if(delta<0) delta = 0;
+
+      char buf[80];
+      strcpy(buf,"Right now");
+
+      if(delta >=1  && delta < 60)
+	{
+	  sprintf(buf,"%d second%s ago",delta,delta>1?"s":"");
+	}
+
+      if(delta >= 60 && delta < 60*60)
+	{
+	  sprintf(buf,"%d minute%s ago",delta/60,delta/60>1?"s":"");
+	}
+
+      if(delta >= 60*60 && delta < 60*60*24)
+	{
+	  sprintf(buf,"%d hour%s ago",delta/60/60,delta/60/60>1?"s":"");
+	}
+
+      if(delta >= 60*60*24)
+	{
+	  sprintf(buf,"%d day%s ago",delta/60/60/24,delta/60/60/24>1?"s":"");
+	}
+
+      xec_VaAddListItem(list_,(char*) "%-60s (%s)",d.name_,buf);
+    }
+}
+
+bool output_lister::compare(ecf_dir& a,ecf_dir& b)
+{
+  return a.mtime > b.mtime;
+}
+
+class search_me : public runnable {
+	find& find_;
+
+	void run() {
+	  // text case regexp back wrap
+	  find_.search("System Billing Units",true,false,false,true);
+	  find_.search("smscomplete",true,false,false,true);
+	  find_.search("smsabort",true,false,false,true);
+	  // display init but not appreciated when updating for tail:
+	  // find_.search("ecflow_client",true,false,false,true);
+	  find_.search("xcomplete",true,false,false,true);
+	  find_.search("xabort",true,false,false,true);
+	  find_.search(" --complete",true,false,false,true);
+	  find_.search(" --abort",true,false,false,true);
+	  find_.no_message();
+	  find_.pending(0);
+	  delete this;
+	}
+
+public:
+	search_me(find& f)  : find_(f) { find_.pending(this); enable();}
+};
+
+void output::show(node& n)
+{
+  std::string jobout = n.variable("ECF_JOBOUT");
+  if (!n.__node__())
+    jobout = n.variable("SMSJOBOUT");
+  else if (!n.__node__()) return;
+  else if (!n.__node__()->get_node()) return;
+  else n.__node__()->get_node()->variableSubsitution(jobout);
+
+  if(jobout == ecf_node::none()) {
+    clear();
+    return;
+  }
+
+  // output variable may contain micro
+
+  if(file_) free(file_);
+  file_ = strdup(jobout.c_str());
+  load(n);
+  XmListDeleteAllItems(list_);
+
+  output_lister ol(list_);
+  n.serv().dir(n,file_,ol);
+
+  std::string remote = n.variable("ECF_OUT");
+  std::string job    = n.variable("ECF_JOB");
+  if (!n.__node__()) {
+    remote = n.variable("SMSOUT");
+    job    = n.variable("SMSJOB");
+  }
+  if (!remote.empty() && !job.empty()) {
+    // display both remote and local dir
+    if (remote == job) {
+      output_lister rem(list_);
+      n.serv().dir(n,job.c_str(),rem);
+    }
+  }
+  new search_me(*this);
+}
+
+void output::load(node& n)
+{
+	if(file_)
+		XmTextSetString(name_,(char*)file_);
+	else
+		clear();
+
+	if(file_) {
+	  tmp_file f = n.serv().file(n,file_);
+	  text_window::load(f);
+	} else {
+	  tmp_file f = n.serv().output(n);
+	  text_window::load(f);
+	}
+}
+
+void output::updateCB(Widget,XtPointer data)
+{
+	if(get_node())
+		show(*get_node());
+	else
+		clear();
+	XmTextShowPosition(text_,XmTextGetLastPosition(text_));
+}
+
+void output::browseCB(Widget,XtPointer data)
+{
+	XmListCallbackStruct *cb = (XmListCallbackStruct *) data;
+	if(file_) free(file_);
+
+	char *p = xec_GetString(cb->item);
+	char buf[1024];
+	sscanf(p,"%s",buf);
+	XtFree(p);
+
+	file_ = strdup(buf);
+
+	if(get_node())
+		load(*get_node());
+	else
+		clear();
+}
+
+Boolean output::enabled(node& n)
+{
+  if (n.type() != NODE_TASK && n.type() != NODE_ALIAS) return False;
+  if (!n.__node__())
+    return n.variable("SMSJOBOUT") != ecf_node::none();
+  return n.variable("ECF_JOBOUT") != ecf_node::none();
+}
+
+*/

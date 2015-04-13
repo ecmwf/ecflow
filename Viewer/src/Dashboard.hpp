@@ -50,9 +50,11 @@ public Q_SLOTS:
 
 Q_SIGNALS:
     void selectionChanged(VInfo_ptr);
+	void titleChanged(QWidget*,QString,QPixmap);
 
 private:
 	DashboardWidget* addWidget(const std::string& type,const std::string& dockId);
+	void updateTitle();
 	QString uniqueDockId();
 	static std::string widgetSettingsId(int i);
 

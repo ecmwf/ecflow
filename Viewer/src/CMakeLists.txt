@@ -27,6 +27,7 @@ set(viewer_srcs
     NodePathWidget.cpp
     NodeViewBase.cpp
     NodeWidget.cpp
+    OutputModel.cpp
     OutputItemWidget.cpp
     OverviewItemWidget.cpp
     OverviewProvider.cpp
@@ -117,7 +118,8 @@ QT4_WRAP_UI       (VIEWER_FORMS_HEADERS CommandDesignerWidget.ui CustomCommandDi
 						CodeItemWidget.ui
 						InfoPanel.ui
 						MainWindow.ui 
-                        MenuConfigDialog.ui 
+                        MenuConfigDialog.ui
+                        OutputItemWidget.ui 
                         PropertyDialog.ui
                         SearchLineWidget.ui 
                         ServerAddDialog.ui

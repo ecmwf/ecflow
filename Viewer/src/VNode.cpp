@@ -137,14 +137,13 @@ bool VNode::isSuspended() const
 	return (node_ && node_->isSuspended());
 }
 
-
 QColor  VNode::stateColour() const
 {
 	return VNState::toColour(node_);
 }
 
 //=================================================
-// VNodeRoot
+// VNodeRoot - this represents the server
 //=================================================
 
 VNodeRoot::VNodeRoot(ServerHandler* server) : VNode(0,0), totalNum_(0)
