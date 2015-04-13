@@ -37,6 +37,7 @@ Dashboard::Dashboard(QString rootNode,QWidget *parent) :
 
 	//The serverfilter. It holds the list of servers displayed by this dashboard.
 	serverFilter_=new ServerFilter();
+	serverFilter_->addObserver(this);
 
 	//Central widget - we need to create it but we do not
 	//use it. So we can hide it!
@@ -257,6 +258,28 @@ void Dashboard::setViewMode(Viewer::ViewMode mode)
 {
 	//handler_->setCurrentMode(mode);
 }
+
+//------------------------------------------
+// React to changes in ServerFilter
+//------------------------------------------
+
+void Dashboard::notifyServerFilterAdded(ServerItem*)
+{
+	updateTitle();
+}
+void Dashboard::notifyServerFilterRemoved(ServerItem*)
+{
+	updateTitle();
+}
+
+void Dashboard::notifyServerFilterChanged(ServerItem*)
+{
+	updateTitle();
+}
+
+
+
+
 
 //----------------------------------
 // Save and load settings!!
