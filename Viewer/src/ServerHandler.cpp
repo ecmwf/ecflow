@@ -59,21 +59,25 @@ ServerHandler::ServerHandler(const std::string& name,const std::string& host, co
 	client_->set_retry_connection_period(1);
 	client_->set_throw_on_error(true);
 
-	try {
-	  std::string server_version;
-	  client_->server_version();
-	  server_version = client_->server_reply().get_string();
-	  UserMessage::message(UserMessage::DBG, false, 
+	try
+	{
+		std::string server_version;
+		client_->server_version();
+		server_version = client_->server_reply().get_string();
+
+		UserMessage::message(UserMessage::DBG, false,
 			       std::string("ecflow server version: ") 
 			       + server_version);
-         if (!server_version.empty()) return;
 
-	UserMessage::message(UserMessage::DBG, false, std::string("sync_local begin"));
+		//if (!server_version.empty()) return;
 
-	client_->sync_local();
-	} catch ( ... ) { } /* 20150410 server may be down */
+        UserMessage::message(UserMessage::DBG, false, std::string("sync_local begin"));
+        client_->sync_local();
+        UserMessage::message(UserMessage::DBG, false, std::string("sync_local end"));
 
-	UserMessage::message(UserMessage::DBG, false, std::string("sync_local end"));
+	}
+	catch ( ... )
+	{ } /* 20150410 server may be down */
 
 	//Set server host and port in defs
 	{
@@ -86,7 +90,6 @@ ServerHandler::ServerHandler(const std::string& name,const std::string& host, co
 			st.add_or_update_user_variables("nameInViewer",name_);
 		}
 	}
-
 
 	// we'll need to pass std::strings via signals and slots for error messages
 	if (servers_.empty())
