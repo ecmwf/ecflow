@@ -1,7 +1,5 @@
-suite suiteName
-   
-    repeat integer VARIABLE 0 10 2 # comment
-    repeat integer VARIABLE 0 10 # duplicate variable name
-    repeat integer VARIABLE 0 10 # duplicate variable name
- 
+suite s
+ repeat integer VARIABLE 0 10 2 # comment
+ repeat integer VARIABLE 0 10 # duplicate variable name
+ repeat integer VARIABLE 0 10 # duplicate variable name
 endsuite

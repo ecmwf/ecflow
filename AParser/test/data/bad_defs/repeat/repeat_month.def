@@ -1,4 +1,4 @@
-suite suiteName
-     repeat month 2                         #111
+suite s
+ repeat month 2   #111
 endsuite
  

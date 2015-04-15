@@ -197,20 +197,38 @@ RepeatDate::RepeatDate( const std::string& variable,
    if ( !Str::valid_name( variable ) ) {
       throw std::runtime_error("RepeatDate::RepeatDate: Invalid name: " + variable);
    }
-	if (start > end) {
-	   std::stringstream ss; ss << "repeat " << variable << " " << start << " " << end << " " << delta;
-		throw std::runtime_error("Invalid Repeat date: The end must be greater than the start date" + ss.str());
-	}
-	std::string theStart = boost::lexical_cast< std::string >(start);
-	if (theStart.size() != 8) {
-	   std::stringstream ss; ss << "repeat " << variable << " " << start << " " << end << " " << delta;
-		throw std::runtime_error("Invalid Repeat date: The start is not a valid date. Please use yyyymmdd format." + ss.str());
- 	}
-	std::string theEnd = boost::lexical_cast< std::string >(end);
-	if (theEnd.size() != 8) {
+
+   if (delta == 0) {
       std::stringstream ss; ss << "repeat " << variable << " " << start << " " << end << " " << delta;
-		throw std::runtime_error("Invalid Repeat date: The end is not a valid date. Please use yyyymmdd format." + ss.str());
- 	}
+      throw std::runtime_error("Invalid Repeat date: the delta can not be zero" + ss.str());
+   }
+
+   std::string theStart = boost::lexical_cast< std::string >(start);
+   if (theStart.size() != 8) {
+      std::stringstream ss; ss << "repeat " << variable << " " << start << " " << end << " " << delta;
+      throw std::runtime_error("Invalid Repeat date: The start is not a valid date. Please use yyyymmdd format." + ss.str());
+   }
+   std::string theEnd = boost::lexical_cast< std::string >(end);
+   if (theEnd.size() != 8) {
+      std::stringstream ss; ss << "repeat " << variable << " " << start << " " << end << " " << delta;
+      throw std::runtime_error("Invalid Repeat date: The end is not a valid date. Please use yyyymmdd format." + ss.str());
+   }
+
+
+   if (delta_ > 0) {
+      // assert end => start
+      if (!(end >= start)) {
+         std::stringstream ss; ss << "repeat " << variable << " " << start << " " << end << " " << delta;
+         throw std::runtime_error("Invalid Repeat date: The end must be greater than the start date, when delta is positive " + ss.str());
+      }
+   }
+   else {
+      // assert start >= end
+      if (!(start >= end)) {
+         std::stringstream ss; ss << "repeat " << variable << " " << start << " " << end << " " << delta;
+         throw std::runtime_error("Invalid Repeat date: The start must be greater than the end date, when delta is negative " + ss.str());
+      }
+   }
 
 	// Use date lib to check YMD
 	try {
