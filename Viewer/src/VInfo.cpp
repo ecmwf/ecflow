@@ -225,14 +225,16 @@ void VInfoServer::variables(std::vector<Variable>& vars)
 {
 	vars.clear();
 	ServerDefsAccess defsAccess(server_);  // will reliquish its resources on destruction
-	vars=defsAccess.defs()->server().user_variables();
+	if (defsAccess.defs())
+	  vars=defsAccess.defs()->server().user_variables();
 }
 
 void VInfoServer::genVariables(std::vector<Variable>& vars)
 {
 	vars.clear();
 	ServerDefsAccess defsAccess(server_);  // will reliquish its resources on destruction
-	vars=defsAccess.defs()->server().server_variables();
+	if (defsAccess.defs())
+	  vars=defsAccess.defs()->server().server_variables();
 }
 
 

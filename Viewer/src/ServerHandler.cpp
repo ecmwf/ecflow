@@ -55,13 +55,20 @@ ServerHandler::ServerHandler(const std::string& name,const std::string& host, co
 	client_=new ClientInvoker(host,port);
 	//client_->allow_new_client_old_server(1);
 	//client_->allow_new_client_old_server(9);
+	client_->set_retry_connection_period(1);
+	client_->set_throw_on_error(true);
 
-	std::string server_version;
-	client_->server_version();
-	server_version = client_->server_reply().get_string();
-	UserMessage::message(UserMessage::DBG, false, std::string("ecflow server version: ") + server_version);
+	try {
+	  std::string server_version;
+	  client_->server_version();
+	  server_version = client_->server_reply().get_string();
+	  UserMessage::message(UserMessage::DBG, false, 
+			       std::string("ecflow server version: ") 
+			       + server_version);
+         if (!server_version.empty()) return;
 
 	client_->sync_local();
+	} catch ( ... ) { } /* 20150410 server may be down */
 
 	//Set server host and port in defs
 	{
@@ -124,7 +131,9 @@ ServerHandler::ServerHandler(const std::string& name,const std::string& host, co
 	resetRefreshTimer();
 
 	//Create vnode tree
+	// try { if (client_->pingServer()) // ???
 	vRoot_=new VNodeRoot(this);
+	// } catch ( ... ) {}
 }
 
 ServerHandler::~ServerHandler()

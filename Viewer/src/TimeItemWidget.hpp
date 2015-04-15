@@ -10,13 +10,20 @@
 
 #ifndef TIMEITEMWIDGET_HPP_
 #define TIMEITEMWIDGET_HPP_
+#include "ui_TimeItemWidget.h"
 
 #include <QWidget>
 
 #include "InfoPanelItem.hpp"
 #include "VInfo.hpp"
 
-class TimeItemWidget : public QWidget, public InfoPanelItem
+class LineEdit;
+
+class TimeItemWidget 
+  : public QWidget
+  , public InfoPanelItem
+  , protected Ui::TimeItemWidget
+		       
 {
 public:
 	TimeItemWidget(QWidget *parent=0);
@@ -28,6 +35,7 @@ public:
 	void nodeChanged(const VNode*, const std::vector<ecf::Aspect::Type>&) {};
 	void defsChanged(const std::vector<ecf::Aspect::Type>&) {};
 
+  QGraphicsView* view() { return graphicsView; }
 };
 
 #endif

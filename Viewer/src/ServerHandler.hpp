@@ -42,7 +42,7 @@ class ServerHandler : public QObject
 
 	friend class ServerDefsAccess;
 	friend class ServerComQueue;
-
+  
 public:
 		const std::string& name() const {return name_;}
 		const std::string& host() const {return host_;}

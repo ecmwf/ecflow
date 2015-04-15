@@ -85,8 +85,8 @@ void  OverviewProvider::taskChanged(VTask_ptr task)
 void OverviewProvider::serverInfo(VInfoServer* info,std::stringstream& f)
 {
 	ServerHandler *server=info->server();
-
 	if(!server) return;
+	if(!ServerDefsAccess(server).defs()) return;
 
 	static const std::string inc = "  ";
 
@@ -138,6 +138,7 @@ void OverviewProvider::nodeInfo(VInfoNode* info,std::stringstream& f)
 {
 	ServerHandler *server=info->server();
 	if(!server) return;
+	if(!ServerDefsAccess(server).defs()) return;
 
 	VNode* node=info->node();
 	if(!node) return;

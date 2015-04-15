@@ -39,7 +39,10 @@ void DirectoryHandler::init(std::string exePath)
 	//Sets paths in the home directory
 	if(char *h=getenv("HOME"))
 	{
-		boost::filesystem::path homeDir(h);
+                // Gtk-WARNING: Locale not supported by C library.  Using the fallback locale
+	        // boost::filesystem::path::imbue(std::locale("C")); 
+                // boost::filesystem::path::imbue(std::locale("C.UTF-8")); 
+  	        boost::filesystem::path homeDir(h);
 
 		boost::filesystem::path configDir = homeDir;
 		configDir /= ".ecflowview";

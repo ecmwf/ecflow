@@ -151,6 +151,7 @@ VNodeRoot::VNodeRoot(ServerHandler* server) : VNode(0,0), totalNum_(0)
 {
 	ServerDefsAccess defsAccess(server);  // will reliquish its resources on destruction
 	defs_ptr defs = defsAccess.defs();
+	if (!defs) return;
 
 	const std::vector<suite_ptr> &suites = defs->suiteVec();
 	for(unsigned int i=0; i < suites.size();i++)

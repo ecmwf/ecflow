@@ -46,6 +46,8 @@ set(viewer_srcs
     TextEdit.cpp
     TextItemWidget.cpp
     TimeItemWidget.cpp
+    LogEvent.cpp
+
     TriggerItemWidget.cpp
     TreeNodeModel.cpp
     TreeNodeView.cpp
@@ -113,10 +115,12 @@ QT4_WRAP_CPP(VIEWER_MOC AbstractNodeModel.hpp
                         VModelData.hpp)
 
 QT4_ADD_RESOURCES (VIEWER_RES viewer.qrc)
-QT4_WRAP_UI       (VIEWER_FORMS_HEADERS CommandDesignerWidget.ui CustomCommandDialog.ui 
+QT4_WRAP_UI       (VIEWER_FORMS_HEADERS CommandDesignerWidget.ui 
+                                                CustomCommandDialog.ui 
 						CodeItemWidget.ui
 						InfoPanel.ui
 						MainWindow.ui 
+						TimeItemWidget.ui
                         MenuConfigDialog.ui 
                         PropertyDialog.ui
                         SearchLineWidget.ui 
@@ -151,3 +155,27 @@ ecbuild_add_executable( TARGET   ecflow_ui
                                  m crypt dl fl
                                  qtpropertybrowser ${QT_LIBRARIES}
                      )
+
+list(REMOVE_ITEM viewer_srcs ViewerMain.cpp)
+ecbuild_add_executable( TARGET   ecflow_ui_log
+                        SOURCES  LogEvent.cpp
+			         ${viewer_srcs} ${VIEWER_MOC} ${VIEWER_RES} ${VIEWER_FORMS_HEADERS}
+                        INCLUDES .
+                                 ../../ACore/src 
+                                 ../../ANattr/src
+                                 ../../ANode/src
+                                 ../../ANode/test
+                                 ../../Base/src
+                                 ../../Base/src/cts
+                                 ../../Base/src/stc
+                                 ../../Client/src
+                                 ../qtpropertybrowser
+                                 ${Boost_INCLUDE_DIRS} 
+				 ${CMAKE_CURRENT_BINARY_DIR}
+                        LIBS     core nodeattr node libparser base libclient 
+                                 pthread ${Ecflow_Boost_LIBS}
+                                 m 
+				 qtpropertybrowser ${QT_LIBRARIES}
+			DEFINITIONS MAIN_LOG
+                     )
+

@@ -7,6 +7,8 @@
 // nor does it submit to any jurisdiction.
 //============================================================================
 
+#include "LineEdit.hpp"
+
 #include "TimeItemWidget.hpp"
 
 #include "Node.hpp"
@@ -19,6 +21,8 @@
 
 TimeItemWidget::TimeItemWidget(QWidget *parent) : QWidget(parent)
 {
+  setupUi(this);
+  
 }
 
 QWidget* TimeItemWidget::realWidget()

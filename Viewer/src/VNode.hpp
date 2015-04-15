@@ -56,7 +56,7 @@ public:
     QStringList getAttributeData(int,VAttribute**);
 
     VNode* parent() const {return parent_;}
-    int numOfChildren() const {return static_cast<int>(children_.size());}
+    int numOfChildren() const { return static_cast<int>(children_.size());}
     VNode* childAt(int index) const;
     int indexOfChild(const VNode* vn) const;
     int indexOfChild(Node* n) const;

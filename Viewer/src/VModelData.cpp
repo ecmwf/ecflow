@@ -40,22 +40,23 @@ VModelServer::~VModelServer()
 
 VNode* VModelServer::topLevelNode(int row) const
 {
-	return server_->vRoot()->childAt(row);
+  /* server alive but empty 20150410 */
+  return server_->vRoot() ? server_->vRoot()->childAt(row) : NULL;
 }
 
 int VModelServer::indexOfTopLevelNode(const VNode* node) const
 {
-	return server_->vRoot()->indexOfChild(node);
+  return server_->vRoot() ? server_->vRoot()->indexOfChild(node) : 0;
 }
 
 int VModelServer::topLevelNodeNum() const
 {
-	return server_->vRoot()->numOfChildren();
+  return server_->vRoot() ? server_->vRoot()->numOfChildren() : 0;
 }
 
 int VModelServer::totalNodeNum() const
 {
-	return server_->vRoot()->totalNum();
+  return server_->vRoot() ? server_->vRoot()->totalNum() : 0;
 }
 
 void VModelServer::runFilter()

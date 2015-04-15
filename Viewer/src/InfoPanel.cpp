@@ -116,7 +116,8 @@ InfoPanel::InfoPanel(QWidget* parent) :
 
 	//Check which roles are allowed
 	QStringList ids;
-	ids << "overview" << "variable" << "message" << "script" << "job" << "output" << "why" << "manual" << "trigger" << "edit" << "time";
+	ids << "overview" << "variable" << "message" << "script" 
+	    << "job" << "output" << "why" << "manual" << "trigger" << "edit" << "time";
 
 	//Set tabs according to the current set of roles
 	adjust(ids);
