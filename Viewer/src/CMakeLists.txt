@@ -17,6 +17,7 @@ set(viewer_srcs
     InfoProvider.cpp
     JobItemWidget.cpp
     LineEdit.cpp
+    LogServer.cpp
     MainWindow.cpp
     ManualItemWidget.cpp 
     MenuConfigDialog.cpp
@@ -29,6 +30,7 @@ set(viewer_srcs
     NodeWidget.cpp
     OutputModel.cpp
     OutputItemWidget.cpp
+    OutputProvider.cpp
     OverviewItemWidget.cpp
     OverviewProvider.cpp
     PlainTextSearchLine.cpp
@@ -57,9 +59,11 @@ set(viewer_srcs
     UserMessage.cpp
     VAttribute.cpp
     VConfig.cpp   
+    VDir.cpp
     VFilter.cpp
     VIcon.cpp
     VInfo.cpp
+    VFile.cpp
     VModelData.cpp
     VNode.cpp
     VNState.cpp

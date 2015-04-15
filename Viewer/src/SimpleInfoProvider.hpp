@@ -31,4 +31,13 @@ private:
     VTask::Type taskType_;
 };
 
+class ManualProvider : public SimpleInfoProvider
+{
+public:
+	 ManualProvider(InfoPresenter* owner,VTask::Type taskType) :
+		 SimpleInfoProvider(owner,VTask::ManualTask) {}
+};
+
+
+
 #endif

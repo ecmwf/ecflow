@@ -20,7 +20,7 @@ class InfoPanelItem;
 class InfoProvider : public VTaskObserver, public VInfoVisitor
 {
 public:
-	InfoProvider(InfoPresenter* owner,VTask::Type);
+	InfoProvider(InfoPresenter* owner,VTask::Type,const std::string& fileVarName="");
 	virtual ~InfoProvider();
 
 	void info(VInfo_ptr);
@@ -39,13 +39,14 @@ protected:
 	VTask_ptr task_;
 	VReply* reply_;
 	VTask::Type taskType_;
+	std::string fileVarName_;
 };
 
 class JobProvider : public InfoProvider
 {
 public:
 	 JobProvider(InfoPresenter* owner) :
-		 InfoProvider(owner,VTask::JobTask) {}
+		 InfoProvider(owner,VTask::JobTask,"ECF_JOB") {}
 };
 
 
@@ -53,7 +54,7 @@ class ManualProvider : public InfoProvider
 {
 public:
 	 ManualProvider(InfoPresenter* owner) :
-		 InfoProvider(owner,VTask::ManualTask) {}
+		 InfoProvider(owner,VTask::ManualTask,"ECF_MANUAL") {}
 };
 
 class MessageProvider : public InfoProvider
@@ -67,14 +68,8 @@ class ScriptProvider : public InfoProvider
 {
 public:
 	 ScriptProvider(InfoPresenter* owner) :
-		 InfoProvider(owner,VTask::ScriptTask) {}
+		 InfoProvider(owner,VTask::ScriptTask,"ECF_SCRIPT") {}
 };
 
-class OutputProvider : public InfoProvider
-{
-public:
-	 OutputProvider(InfoPresenter* owner) :
-		 InfoProvider(owner,VTask::OutputTask) {}
-};
 
 #endif

@@ -72,13 +72,13 @@ public:
 		void runCommand(const std::vector<std::string>& cmd);
 		void run(VTask_ptr);
 		//void run(VTask_ptr task,VReply_ptr reply);
-		void messages(VTask_ptr req);
+		//void messages(VTask_ptr req);
 		void script(VTask_ptr req);
 		void job(VTask_ptr req);
 		void jobout(VTask_ptr req);
 	    void manual(VTask_ptr req);
-	    void file(VTask_ptr req,const std::string& errText);
-	    void stats(VTask_ptr req);
+	    //void file(VTask_ptr req,const std::string& errText);
+	    //void stats(VTask_ptr req);
 
 		static const std::vector<ServerHandler*>& servers() {return servers_;}
 		static ServerHandler* addServer(const std::string &name,const std::string &host, const std::string &port);
@@ -104,6 +104,8 @@ public:
 		void addServerObserver(ServerObserver* obs);
 		void removeServerObserver(ServerObserver* obs);
 
+		bool readFromDisk() const {return readFromDisk_;}
+
 protected:
 		ServerHandler(const std::string& name,const std::string& host,const std::string&  port);
 		~ServerHandler();
@@ -122,6 +124,8 @@ protected:
 		bool communicating_;
 		std::vector<NodeObserver*> nodeObservers_;
 		std::vector<ServerObserver*> serverObservers_;
+
+		bool readFromDisk_;
 
         VNodeRoot* vRoot_;
         

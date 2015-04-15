@@ -4,31 +4,21 @@
 #include <QAbstractItemModel>
 #include <QSortFilterProxyModel>
 
-#include <vector>
-
 #include "NodeObserver.hpp"
+#include "VDir.hpp"
 #include "VInfo.hpp"
-
-
-class OutputData
-{
-public:
-	std::string path_;
-	std::vector<std::string> names_;
-};
-
 
 class OutputModel : public QAbstractItemModel
 {
-//friend class VariableSortModel;
-
 public:
-   	OutputModel(OutputData* data,QObject *parent=0);
+   	OutputModel(QObject *parent=0);
+
+   	void setData(VDir_ptr dir);
 
    	int columnCount (const QModelIndex& parent = QModelIndex() ) const;
    	int rowCount (const QModelIndex& parent = QModelIndex() ) const;
 
-   	Qt::ItemFlags flags ( const QModelIndex & index) const;
+   	//Qt::ItemFlags flags ( const QModelIndex & index) const;
    	QVariant data (const QModelIndex& , int role = Qt::DisplayRole ) const;
 	QVariant headerData(int,Qt::Orientation,int role = Qt::DisplayRole ) const;
 
@@ -36,9 +26,11 @@ public:
    	QModelIndex parent (const QModelIndex & ) const;
 
 protected:
-	bool hasData() const;
+   	bool hasData() const;
+   	QString formatSize(unsigned int size) const;
+   	QString formatDate(const std::time_t&) const;
 
-	OutputData* data_;
+   	VDir_ptr dir_;
 };
 
 

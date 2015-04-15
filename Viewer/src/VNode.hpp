@@ -61,6 +61,8 @@ public:
     int indexOfChild(const VNode* vn) const;
     int indexOfChild(Node* n) const;
 
+    std::string genVariable(const std::string& key) const;
+
     virtual std::string absNodePath() const;
     QString name() const;
     QString stateName();

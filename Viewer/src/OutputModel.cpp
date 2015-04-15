@@ -10,138 +10,67 @@
 #include "OutputModel.hpp"
 
 #include <QColor>
+#include <QDateTime>
 #include <QDebug>
 
-#include "ServerHandler.hpp"
-
 //=======================================================================
 //
-// VariabletModel
+// OutputModel
 //
 //=======================================================================
 
-OutputModel::OutputModel(OutputData* data,QObject *parent) :
-          QAbstractItemModel(parent),
-          data_(data)
-{
+OutputModel::OutputModel(QObject *parent) :
+          QAbstractItemModel(parent)
 
+{
+	//setIconProvider(0);
 }
 
-bool OutputModel::hasData() const
+void OutputModel::setData(VDir_ptr dir)
 {
-	return true; //(data_->count()  > 0);
+	beginResetModel();
+	dir_=dir;
+	endResetModel();
 }
 
-int OutputModel::columnCount( const QModelIndex& /*parent */ ) const
+int OutputModel::columnCount( const QModelIndex& parent  ) const
 {
-   	 return 2;
+	return 3;
 }
 
 int OutputModel::rowCount( const QModelIndex& parent) const
 {
+	if(!hasData())
+		return 0;
 
-	/*//Parent is the root: the item must be a node or a server
 	if(!parent.isValid())
-	{
-		return data_->count();
-	}
-	//The parent is a server or a node
-	else if(!isVariable(parent))
-	{
-		int row=parent.row();
-		return data_->varNum(row);
-	}*/
+		return dir_->count();
 
-	//parent is a variable
 	return 0;
 }
 
-Qt::ItemFlags OutputModel::flags ( const QModelIndex & index) const
+QVariant  OutputModel::data(const QModelIndex& index, int role) const
 {
-	Qt::ItemFlags defaultFlags;
-
-	defaultFlags=Qt::ItemIsEnabled | Qt::ItemIsSelectable;
-
-	return defaultFlags;
-}
-
-QVariant OutputModel::data( const QModelIndex& index, int role ) const
-{
-	if( !index.isValid())
-    {
+	if(!hasData() || role != Qt::DisplayRole)
 		return QVariant();
-	}
-
-	/*//Data lookup can be costly so we immediately return a default value for all
-	//the cases where the default should be used.
-	if(role != Qt::DisplayRole && role != Qt::BackgroundRole && role != Qt::ForegroundRole)
-	{
-		return QVariant();
-	}
-	//qDebug() << "data" << index << role;
 
 	int row=index.row();
-	int level=indexToLevel(index);
+	VDirItem *item=dir_->items().at(row);
 
-	//Server or node
-	if(level == 1)
+	switch(index.column())
 	{
-		if(role == Qt:: BackgroundRole)
-            return QColor(122,122,122);
-
-        if(role == Qt::ForegroundRole)
-            return QColor(255,255,255);
-
-        OutputModelData *d=data_->data(row);
-		if(!d)
-		{
-			return QVariant();
-		}
-
-		if(index.column() == 0)
-		{
-			if(role == Qt::DisplayRole)
-			{
-				return QString::fromStdString(d->name());
-			}
-		}
-
-		return QVariant();
+	case 0:
+		return QString::fromStdString(item->name_);
+	case 1:
+		return formatSize(item->size_);
+	case 2:
+		return formatDate(item->mtime_);
+	default:
+		break;
 	}
-
-	//Variables
-	else if (level == 2)
-	{
-        OutputModelData *d=data_->data(index.parent().row());
-		if(!d)
-		{
-			return QVariant();
-		}
-
-		//Generated variable
-		if(d->isGenVar(row))
-		{
-			if(role == Qt::ForegroundRole)
-					return QColor(70,70,70);
-		}
-        if(role == Qt::DisplayRole)
-        {
-		    if(index.column() == 0)
-		    {
-			    return QString::fromStdString(d->name(row));
-		    }
-		    else if(index.column() == 1)
-		    {
-			    return QString::fromStdString(d->value(row));
-		    }
-        }
-
-		return QVariant();
-	}*/
 
 	return QVariant();
 }
-
 
 QVariant OutputModel::headerData( const int section, const Qt::Orientation orient , const int role ) const
 {
@@ -151,7 +80,8 @@ QVariant OutputModel::headerData( const int section, const Qt::Orientation orien
    	switch ( section )
 	{
    	case 0: return tr("Name");
-   	case 1: return tr("Modified");
+   	case 1: return tr("Size");
+   	case 2: return tr("Modified");
    	default: return QVariant();
    	}
 
@@ -165,10 +95,43 @@ QModelIndex OutputModel::index( int row, int column, const QModelIndex & parent 
 		return QModelIndex();
 	}
 
-	return createIndex(row,column);
+	//When parent is the root this index refers to a node or server
+	if(!parent.isValid())
+	{
+		return createIndex(row,column,0);
+	}
+
+	return QModelIndex();
+
 }
 
 QModelIndex OutputModel::parent(const QModelIndex &child) const
 {
 	return QModelIndex();
+
+}
+
+bool OutputModel::hasData() const
+{
+	return dir_ && dir_.get();
+}
+
+QString OutputModel::formatSize(unsigned int size) const
+{
+  	if(size < 1024)
+	  	return QString::number(size) + " B";
+	else if(size < 1024*1024)
+	  	return QString::number(size/1024) + " KB";
+	else if(size < 1024*1024*1024)
+	  	return QString::number(size/(1024*1024)) + " MB";
+	else
+	  	return QString::number(size/(1024*1024*1024)) + " GB";
+
+ 	return QString();
+}
+
+QString OutputModel::formatDate(const std::time_t& t) const
+{
+  	QDateTime dt=QDateTime::fromTime_t(t);
+	return dt.toString("yyyy-MM-dd hh:mm");
 }

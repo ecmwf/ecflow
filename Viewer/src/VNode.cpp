@@ -112,6 +112,15 @@ void VNode::replaceChildren(const std::vector<VNode*>& newCh)
 	children_=newCh;
 }
 
+std::string VNode::genVariable(const std::string& key) const
+{
+    std::string val;
+    if(node_ )
+    	node_->findGenVariableValue(key,val);
+    return val;
+}
+
+
 std::string VNode::absNodePath() const
 {
 	return (node_)?node_->absNodePath():"";

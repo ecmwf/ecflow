@@ -5,36 +5,31 @@
 // In applying this licence, ECMWF does not waive the privileges and immunities
 // granted to it by virtue of its status as an intergovernmental organisation
 // nor does it submit to any jurisdiction.
-//
 //============================================================================
 
-#ifndef JOBITEMWIDGET_HPP_
-#define JOBITEMWIDGET_HPP_
+#ifndef OUTPUTPROVIDER_HPP_
+#define OUTPUTPROVIDER_HPP_
 
-#include "InfoPanelItem.hpp"
-#include "CodeItemWidget.hpp"
+#include "VDir.hpp"
 #include "VInfo.hpp"
+#include "InfoProvider.hpp"
+#include "VTask.hpp"
+#include "VTaskObserver.hpp"
 
-#include "ServerHandler.hpp"
-
-class JobItemWidget : public CodeItemWidget, public InfoPanelItem
+class OutputProvider : public InfoProvider
 {
 public:
-	JobItemWidget(QWidget *parent=0);
+	 OutputProvider(InfoPresenter* owner) :
+		 InfoProvider(owner,VTask::OutputTask) {}
 
-	void reload(VInfo_ptr);
-	QWidget* realWidget();
-	void clearContents();
+	 void visit(VInfoNode*);
+	 VDir_ptr directory();
 
-	//From VInfoPresenter
-    void infoReady(VReply*);
-    void infoFailed(VReply*);
-    void infoProgress(VReply*);
-
-	void nodeChanged(const VNode*, const std::vector<ecf::Aspect::Type>&) {};
-	void defsChanged(const std::vector<ecf::Aspect::Type>&) {};
+private:
+	 bool fetchFileViaLogServer(VNode *n,const std::string& fileName);
+	 VDir_ptr fetchDirViaLogServer(VNode *n,const std::string& fileName);
+	 VDir_ptr fetchLocalDir(const std::string& path);
 
 };
 
 #endif
-

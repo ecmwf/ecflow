@@ -12,9 +12,12 @@
 #include "VReply.hpp"
 #include "ServerHandler.hpp"
 
-InfoProvider::InfoProvider(InfoPresenter* owner,VTask::Type taskType) :
+#include <boost/algorithm/string/predicate.hpp>
+
+InfoProvider::InfoProvider(InfoPresenter* owner,VTask::Type taskType,const std::string& fileVarName) :
 	owner_(owner),
-	taskType_(taskType)
+	taskType_(taskType),
+	fileVarName_(fileVarName)
 {
 	reply_=new VReply();
 }
@@ -64,17 +67,42 @@ void InfoProvider::visit(VInfoNode* info)
 {
     reply_->reset();
 
-    if(!info->node())
+    if(!info->node() || !info->node()->node())
     {
         owner_->infoFailed(reply_);
     }
 
-    //Define a task for getting the info from the server.
-    task_=VTask::create(taskType_,info->node(),this);
+    //Check if we have a server
+    if(!info->server())
+    {
+    	owner_->infoFailed(reply_);
+    }
 
-    //Run the task in the server. When it finish taskFinished() is called. The text returned
-    //in the reply will be prepended to the string we generated above.
-    info->server()->run(task_);
+    VNode *n=info->node();
+
+    //We try to read the file directly from the disk
+    if(!fileVarName_.empty() && info->server()->readFromDisk())
+    {
+    	//Get the fileName
+    	std::string fileName=n->genVariable(fileVarName_);
+
+    	if(reply_->textFromFile(fileName))
+    	{
+    		owner_->infoReady(reply_);
+    		return;
+    	}
+    }
+    //Otherwise we try to get the file contents from the server
+    //(this will go through the threaded communication)
+    else
+    {
+    	//Define a task for getting the info from the server.
+    	task_=VTask::create(taskType_,n,this);
+
+    	//Run the task in the server. When it finish taskFinished() is called. The text returned
+    	//in the reply will be prepended to the string we generated above.
+    	info->server()->run(task_);
+    }
 }
 
 void  InfoProvider::taskChanged(VTask_ptr task)
@@ -102,3 +130,4 @@ void  InfoProvider::taskChanged(VTask_ptr task)
             break;
     }
 }
+

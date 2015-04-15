@@ -10,9 +10,11 @@
 #include "OutputItemWidget.hpp"
 
 #include "Highlighter.hpp"
-#include "InfoProvider.hpp"
+#include "OutputProvider.hpp"
 #include "OutputModel.hpp"
 #include "VReply.hpp"
+
+#include <QDebug>
 
 OutputItemWidget::OutputItemWidget(QWidget *parent) :
 	QWidget(parent)
@@ -30,14 +32,14 @@ OutputItemWidget::OutputItemWidget(QWidget *parent) :
 
 	infoProvider_=new OutputProvider(this);
 
-	outputView_->setRootIsDecorated(true);
+	outputView_->setRootIsDecorated(false);
 	outputView_->setAllColumnsShowFocus(true);
 	outputView_->setUniformRowHeights(true);
 	outputView_->setAlternatingRowColors(true);
 	outputView_->setSortingEnabled(true);
 
-	OutputData* data=new OutputData;
-	model_=new OutputModel(data,this);
+	//OutputData* data=new OutputData;
+	model_=new OutputModel(this);
 
 	outputView_->setModel(model_);
 }
@@ -60,11 +62,51 @@ void OutputItemWidget::reload(VInfo_ptr info)
     else
 	{
 	    clearContents();
-	    fileLabel_->setText(tr("File: ") + QString::fromStdString(info_->genVariable("ECF_JOBOUT")));
+
+	    QString name=QString::fromStdString(info_->genVariable("ECF_JOBOUT"));
+
+	    fileLabel_->setText(tr("File: ") + name);
 	    infoProvider_->info(info_);
 
+	    OutputProvider* op=static_cast<OutputProvider*>(infoProvider_);
 
-    }
+	    VDir_ptr dir=op->directory();
+
+	    if(dir)
+	    {
+	    	model_->setData(dir);
+	    	outputView_->show();
+	    }
+	    else
+	    {
+	    	outputView_->hide();
+	    }
+
+
+
+	    /*QString name=QString::fromStdString(info_->genVariable("ECF_JOBOUT"));
+
+	    qDebug() << "NAME" << name;
+
+	    fileLabel_->setText(tr("File: ") + name);
+	    infoProvider_->info(info_);
+
+	    int lindex=name.lastIndexOf("/");
+	    if(lindex != -1)
+	    {
+	    	name=name.left(lindex+1);
+
+	    	QFileInfo fileInfo(name);
+	    	QDir dir=fileInfo.absoluteDir();
+
+	    	qDebug() << "DIR" << dir.absolutePath();
+	    	if(dir.exists())
+	    	{
+	    		model_->setRootPath(dir.absolutePath());
+	    		outputView_->setRootIndex(model_->index(dir.absolutePath()));
+	    	}
+	    }*/
+	}
 }
 
 void OutputItemWidget::clearContents()
@@ -72,6 +114,7 @@ void OutputItemWidget::clearContents()
 	loaded_=false;
 	fileLabel_->clear();
 	textEdit_->clear();
+	//model_->clear();
 }
 
 void OutputItemWidget::infoReady(VReply* reply)
@@ -92,9 +135,101 @@ void OutputItemWidget::infoFailed(VReply* reply)
     textEdit_->setPlainText(s);
 }
 
-
-
 static InfoPanelItemMaker<OutputItemWidget> maker1("output");
+
+/*
+std::string error;
+ bool read = direct_read_;
+
+    if (name == "ECF_SCRIPT")
+    {
+    	error = "no script!\n"
+    			"check ECF_FILES or ECF_HOME directories, for read access\n"
+    			"check for file presence and read access below files directory\n"
+    			"or this may be a 'dummy' task.\n";
+ 	 }
+    else if (name == "ECF_JOB")
+    {
+    	std::string filename = n.variable(name);
+    	if (read && (access(filename.c_str(), R_OK) == 0))
+    		return tmp_file(filename.c_str(), false);
+
+    	if (std::string::npos != filename.find(".job0")) {
+    		error = "job0: no job to be generated yet!";
+    		return tmp_file(error);
+    	} else
+    		error = "no script!\n"
+    				"check ECF_HOME,directory for read/write access\n"
+    				"check for file presence and read access below\n"
+    				"The file may have been deleted\n"
+    				"or this may be a 'dummy' task.\n";
+
+    }
+    else if (boost::algorithm::ends_with(name, ".0"))
+    {
+    	error = "no output to be expected when TRYNO is 0!\n";
+    	return tmp_file(error);
+    }
+    else if (name != ecf_node::none())
+    { // Try logserver
+    	loghost_ = n.variable("ECF_LOGHOST", true);
+    	logport_ = n.variable("ECF_LOGPORT");
+    	if (loghost_ == ecf_node::none()) {
+    		loghost_ = n.variable("LOGHOST", true);
+    		logport_ = n.variable("LOGPORT");
+    	}
+    	std::string::size_type pos = loghost_.find(n.variable("ECF_MICRO"));
+    	if (std::string::npos == pos && loghost_ != ecf_node::none())
+    	{
+    		logsvr the_log_server(loghost_, logport_);
+    		if (the_log_server.ok()) {
+    			tmp_file tmp = the_log_server.getfile(name); // allow more than latest output
+    			if (access(tmp.c_str(), R_OK) == 0) return tmp;
+    		}
+    	}
+    }
+
+    if (read && (access(name.c_str(), R_OK) == 0))
+    {
+    	return tmp_file(name.c_str(), false);
+    }
+    else
+    {
+    	gui::message("%s: fetching %s", this->name(), name.c_str());
+    	try
+    	{
+    		if (name == "ECF_SCRIPT")
+    			client_.file(n.full_name(), "script");
+    		else if (name == "ECF_JOB")
+    		{
+    			client_.file(n.full_name(), "job", boost::lexical_cast<std::string>(jobfile_length_));
+    		}
+    		else if (name == "ECF_JOBOUT")
+    			client_.file(n.full_name(), "jobout");
+    		else
+    		{
+    			client_.file(n.full_name(), "jobout");
+    		}
+
+    		// Do *not* assign 'client_.server_reply().get_string()' to a separate string, since
+    		// in the case of job output the string could be several megabytes.
+    		return tmp_file( client_.server_reply().get_string()
+    				+ "\n# file is served by ecflow-server\n" );
+    	}
+    	catch ( std::exception &e )
+    	{
+    		std::cerr << "host::file-error:" << e.what() << "\n";
+    		gui::message("host::file-error: %s", e.what());
+    	}
+    }
+
+ return tmp_file(error);
+
+*/
+
+
+
+
 
 
 

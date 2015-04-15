@@ -48,7 +48,8 @@ ServerHandler::ServerHandler(const std::string& name,const std::string& host, co
    updating_(false),
    communicating_(false),
    comQueue_(0),
-   refreshIntervalInSeconds_(10)
+   refreshIntervalInSeconds_(60),
+   readFromDisk_(true)
 {
 	longName_=host_ + "@" + port_;
 
@@ -67,8 +68,12 @@ ServerHandler::ServerHandler(const std::string& name,const std::string& host, co
 			       + server_version);
          if (!server_version.empty()) return;
 
+	UserMessage::message(UserMessage::DBG, false, std::string("sync_local begin"));
+
 	client_->sync_local();
 	} catch ( ... ) { } /* 20150410 server may be down */
+
+	UserMessage::message(UserMessage::DBG, false, std::string("sync_local end"));
 
 	//Set server host and port in defs
 	{
@@ -108,7 +113,10 @@ ServerHandler::ServerHandler(const std::string& name,const std::string& host, co
 
 	//We create a ServerComThread here. It is not a member, because we will
 	//pass on its ownership to ServerComQueue.
+
+	UserMessage::message(UserMessage::DBG, false, std::string("create ComThread begin"));
 	ServerComThread* comThread=new ServerComThread(this,client_);
+	UserMessage::message(UserMessage::DBG, false, std::string("create ComThread end"));
 
 	//The ServerComThread is observing the actual server and its nodes. When there is a change it
 	//emits a signal a notifies the ServerHandler about it.
@@ -425,69 +433,54 @@ void ServerHandler::run(VTask_ptr task)
 		return manual(task);
 		break;
 	case VTask::MessageTask:
-		return messages(task);
-		break;
 	case VTask::StatsTask:
-		return stats(task);
+		comQueue_->addTask(task);
 		break;
 	default:
+		//If we are here we have an unhandled task type.
+		task->status(VTask::REJECTED);
 		break;
 	}
-
-	//If we are here we have an unhandled task type.
-	//task->cancel("ServerHandler cannot handle this type of task!");
-	task->status(VTask::REJECTED);
 }
 
-void ServerHandler::messages(VTask_ptr task)
+void ServerHandler::script(VTask_ptr task)
 {
+	static std::string errText="no script!\n"
+		      		"check ECF_FILES or ECF_HOME directories, for read access\n"
+		      		"check for file presence and read access below files directory\n"
+		      		"or this may be a 'dummy' task.\n";
+
+	task->param("clientPar","script");
 	comQueue_->addTask(task);
 }
 
-void ServerHandler::script(VTask_ptr req)
+void ServerHandler::job(VTask_ptr task)
 {
 	static std::string errText="no script!\n"
 		      		"check ECF_FILES or ECF_HOME directories, for read access\n"
 		      		"check for file presence and read access below files directory\n"
 		      		"or this may be a 'dummy' task.\n";
 
-	req->param("ecfVar","ECF_SCRIPT");
-	req->param("clientPar","script");
-
-	file(req,errText);
+	task->param("clientPar","job");
+	comQueue_->addTask(task);
 }
 
-void ServerHandler::job(VTask_ptr req)
-{
-	static std::string errText="no script!\n"
-		      		"check ECF_FILES or ECF_HOME directories, for read access\n"
-		      		"check for file presence and read access below files directory\n"
-		      		"or this may be a 'dummy' task.\n";
-
-	req->param("ecfVar","ECF_JOB");
-	req->param("clientPar","job");
-
-	file(req,errText);
-}
-
-void ServerHandler::jobout(VTask_ptr req)
+void ServerHandler::jobout(VTask_ptr task)
 {
 	static std::string errText="no job output...";
 
-	req->param("ecfVar","ECF_JOBOUT");
-	req->param("clientPar","jobout");
-
-	file(req,errText);
+	task->param("clientPar","jobout");
+	comQueue_->addTask(task);
 }
 
-void ServerHandler::manual(VTask_ptr req)
+void ServerHandler::manual(VTask_ptr task)
 {
 	std::string errText="no manual ...";
-	req->param("clientPar","manual");
-
-	file(req,errText);
+	task->param("clientPar","manual");
+	comQueue_->addTask(task);
 }
 
+/*
 void ServerHandler::file(VTask_ptr task,const std::string& errText)
 {
 	if(!task->node() || !task->node()->node())
@@ -496,17 +489,25 @@ void ServerHandler::file(VTask_ptr task,const std::string& errText)
 		return;
 	}
 
-	std::string fileName;
-	if(!task->param("ecfVar").empty())
-	{
-		task->node()->node()->findGenVariableValue(task->param("ecfVar"),fileName);
-	}
+	//We try the client invoker.
+	//Set up and run the thread for server communication
+	comQueue_->addTask(task);
 
-	//We try to read the file from the local disk
-	if(task->reply()->textFromFile(fileName))
+	//We try to read the file directly from the disk
+	if(readFromDisk_)
 	{
-		task->status(VTask::FINISHED);
-		return;
+		//Get the fileName
+		std::string fileName;
+		if(!task->param("ecfVar").empty())
+		{
+			task->node()->node()->findGenVariableValue(task->param("ecfVar"),fileName);
+		}
+
+		if(task->reply()->textFromFile(fileName))
+		{
+			task->status(VTask::FINISHED);
+			return;
+		}
 	}
 	//If not on local disc we try the client invoker
 	else
@@ -515,13 +516,13 @@ void ServerHandler::file(VTask_ptr task,const std::string& errText)
 		comQueue_->addTask(task);
 	}
 }
+*/
 
-void ServerHandler::stats(VTask_ptr task)
+/*void ServerHandler::stats(VTask_ptr task)
 {
-	//comThread()->sendCommand(this,client_,ServerComThread::STATS,req,reply);
 	comQueue_->addTask(task);
 }
-
+*/
 /*void ServerHandler::fetchDir(const std::string& path)
 {
 	if(path.empty())
@@ -1385,6 +1386,7 @@ void ServerComThread::run()
 				ServerDefsAccess defsAccess(server_);
 				UserMessage::message(UserMessage::DBG, false, std::string("    SYNC"));
 				ci_->sync_local();
+				UserMessage::message(UserMessage::DBG, false, std::string("    SYNC FINISHED"));
 				break;
 			}
 
