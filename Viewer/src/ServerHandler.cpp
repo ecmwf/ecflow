@@ -184,18 +184,30 @@ void ServerHandler::removeServer(ServerHandler* server)
 		}
 }
 
-SState::State ServerHandler::state()
+SState::State ServerHandler::serverState()
 {
 	ServerDefsAccess defsAccess(this);  // will reliquish its resources on destruction
 	defs_ptr defs = defsAccess.defs();
 	if(defs != NULL)
 	{
-			ServerState& st=defs->set_server();
-			return st.get_state();
+		ServerState& st=defs->set_server();
+		return st.get_state();
 	}
 	return SState::RUNNING;
 }
 
+NState::State ServerHandler::state(bool& suspended)
+{
+	suspended=false;
+	ServerDefsAccess defsAccess(this);  // will reliquish its resources on destruction
+	defs_ptr defs = defsAccess.defs();
+	if(defs != NULL)
+	{
+		suspended=defs->isSuspended();
+		return defs->state();
+	}
+	return NState::UNKNOWN;
+}
 
 int ServerHandler::numSuites()
 {
@@ -509,6 +521,20 @@ void ServerHandler::stats(VTask_ptr task)
 	//comThread()->sendCommand(this,client_,ServerComThread::STATS,req,reply);
 	comQueue_->addTask(task);
 }
+
+/*void ServerHandler::fetchDir(const std::string& path)
+{
+	if(path.empty())
+		return;
+
+
+}*/
+
+
+
+
+
+
 
 void ServerHandler::updateAll()
 {
@@ -995,10 +1021,16 @@ void ServerHandler::clientTaskFinished(VTask_ptr task,const ServerReply& serverR
 		}
 
 		case VTask::ScriptTask:
-		case VTask::MessageTask:
 		case VTask::ManualTask:
 		{
 			task->reply()->text(serverReply.get_string());
+			task->status(VTask::FINISHED);
+			break;
+		}
+
+		case VTask::MessageTask:
+		{
+			task->reply()->text(serverReply.get_string_vec());
 			task->status(VTask::FINISHED);
 			break;
 		}

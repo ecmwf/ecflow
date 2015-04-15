@@ -20,6 +20,7 @@
 #include "VProperty.hpp"
 
 class Node;
+class ServerHandler;
 class VProperty;
 
 class VNState : public VParam, public VPropertyObserver
@@ -33,11 +34,18 @@ public:
     //From VPropertyObserver
     void notifyChange(VProperty*);
 
+    //Nodes
 	static QString toName(Node*);
 	static QString toDefaultStateName(Node*);
 	static QColor  toColour(Node* n);
 	static VNState* toState(Node* n);
 	static VNState* toDefaultState(Node* n);
+
+	//Server
+	static QString toName(ServerHandler*);
+	static QColor  toColour(ServerHandler*);
+	static VNState* toState(ServerHandler*);
+
 	static std::vector<VParam*> filterItems();
 	static VNState* find(const std::string& name);
 	

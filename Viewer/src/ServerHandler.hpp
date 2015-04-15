@@ -64,7 +64,8 @@ public:
 		void releaseDefs();
 
 		VNodeRoot* vRoot() const {return vRoot_;}
-		SState::State state();
+		SState::State serverState();
+		NState::State state(bool& isSuspended);
 
 		void resetRefreshTimer();
 

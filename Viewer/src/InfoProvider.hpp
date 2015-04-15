@@ -70,5 +70,11 @@ public:
 		 InfoProvider(owner,VTask::ScriptTask) {}
 };
 
+class OutputProvider : public InfoProvider
+{
+public:
+	 OutputProvider(InfoPresenter* owner) :
+		 InfoProvider(owner,VTask::OutputTask) {}
+};
 
 #endif

@@ -84,6 +84,9 @@ Dashboard *NodePanel::addWidget(QString id)
 	connect(nw,SIGNAL(selectionChanged(VInfo_ptr)),
 			this,SIGNAL(selectionChanged(VInfo_ptr)));
 
+	connect(nw,SIGNAL(titleChanged(QWidget*,QString,QPixmap)),
+				this,SLOT(slotTabTitle(QWidget*,QString,QPixmap)));
+
 	/*connect(fw,SIGNAL(pathChanged()),
 		this,SLOT(slotPathChanged()));
 
@@ -213,6 +216,16 @@ void NodePanel::addToDashboard(const std::string& type)
 {
 	if(Dashboard *w=currentNodeWidget())
 		w->addWidget(type);
+}
+
+void NodePanel::slotTabTitle(QWidget* w,QString text,QPixmap pix)
+{
+	int index=indexOfWidget(w);
+	if(index != -1)
+	{
+		setTabText(index,text);
+		setTabIcon(index,pix);
+	}
 }
 
 

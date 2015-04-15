@@ -19,6 +19,7 @@
 #include "TreeNodeWidget.hpp"
 #include "VFilter.hpp"
 #include "VSettings.hpp"
+#include "VNState.hpp"
 
 #include <QDebug>
 #include <QVBoxLayout>
@@ -36,6 +37,7 @@ Dashboard::Dashboard(QString rootNode,QWidget *parent) :
 
 	//The serverfilter. It holds the list of servers displayed by this dashboard.
 	serverFilter_=new ServerFilter();
+	serverFilter_->addObserver(this);
 
 	//Central widget - we need to create it but we do not
 	//use it. So we can hide it!
@@ -168,6 +170,64 @@ void Dashboard::currentSelection(VInfo_ptr n)
 	//	ctl->currentSelection(n);
 }
 
+//-----------------------
+// Title
+//-----------------------
+
+void Dashboard::updateTitle()
+{
+	const int marginX=0;
+	const int marginY=0;
+	const int textMarginX=2;
+	const int textMarginY=1;
+	const int gap=8;
+	QFont f;
+	QFontMetrics fm(f);
+
+	//Compute the pixmap size
+	int w=0;
+	int h=fm.height()+2*marginY+2*textMarginY;
+
+	QStringList texts;
+	QList<QRect> textRects;
+	QList<QRect> fillRects;
+	QList<QColor> colors;
+
+	int xp=marginX;
+	int yp=marginY;
+	const std::vector<ServerItem*> items=serverFilter_->items();
+	for(std::vector<ServerItem*>::const_iterator it=items.begin(); it != items.end(); it++)
+	{
+		//Get text
+		QString str=QString::fromStdString((*it)->name());
+		textRects << QRect(xp+textMarginX,yp+textMarginY,fm.width(str),fm.height());
+		texts << str;
+
+		//Get server status
+		ServerHandler* server=(*it)->serverHandler();
+		colors << VNState::toColour(server);
+		fillRects << QRect(xp,yp,fm.width(str)+2*textMarginX,fm.height()+2*textMarginY);
+
+		xp=fillRects.back().right()+gap;
+	}
+	w=xp-gap+marginX;
+
+	//Render the pixmap
+	QPixmap pix(w,h);
+	pix.fill(Qt::transparent);
+	QPainter painter(&pix);
+
+	for(int i=0; i < texts.count(); i++)
+	{
+		painter.setPen(Qt::NoPen);
+		painter.fillRect(fillRects[i],colors[i]);
+		painter.setPen(QPen());
+		painter.drawText(textRects[i],texts[i]);
+	}
+
+	Q_EMIT titleChanged(this,"",pix);
+}
+
 //------------------------
 // Rescan
 //------------------------
@@ -178,11 +238,10 @@ void Dashboard::reload()
 	//	ctl->reload();
 
 
-
-
 	for(int i=0; i < widgets_.count(); i++)
 		widgets_.at(i)->reload();
 
+	updateTitle();
 }
 
 //------------------------
@@ -199,6 +258,28 @@ void Dashboard::setViewMode(Viewer::ViewMode mode)
 {
 	//handler_->setCurrentMode(mode);
 }
+
+//------------------------------------------
+// React to changes in ServerFilter
+//------------------------------------------
+
+void Dashboard::notifyServerFilterAdded(ServerItem*)
+{
+	updateTitle();
+}
+void Dashboard::notifyServerFilterRemoved(ServerItem*)
+{
+	updateTitle();
+}
+
+void Dashboard::notifyServerFilterChanged(ServerItem*)
+{
+	updateTitle();
+}
+
+
+
+
 
 //----------------------------------
 // Save and load settings!!
@@ -259,6 +340,10 @@ void Dashboard::readSettings(VSettings* vs)
 	//it when the dockwidgets have already been created.
 	if(vs->containsQs("state"))
 		restoreState(vs->getQs("state").toByteArray());
+
+	//Update the dashboard title
+	updateTitle();
+
 
 }
 //Find an unique id for a new dockwidget

@@ -15,6 +15,7 @@
 #include <QSplitter>
 #include <QMainWindow>
 
+#include "ServerFilter.hpp"
 #include "VInfo.hpp"
 #include "VSettings.hpp"
 
@@ -22,9 +23,10 @@
 
 class DashboardWidget;
 class ServerFilter;
+class ServerItem;
 class VSettings;
 
-class Dashboard : public QMainWindow
+class Dashboard : public QMainWindow, public ServerFilterObserver
 {
     Q_OBJECT
 
@@ -41,6 +43,11 @@ public:
 	VInfo_ptr currentSelection();
 	void currentSelection(VInfo_ptr n);
 
+	//From  ServerFilterObserver
+	void notifyServerFilterAdded(ServerItem*);
+	void notifyServerFilterRemoved(ServerItem*);
+	void notifyServerFilterChanged(ServerItem*);
+
 	void writeSettings(VSettings*);
 	void readSettings(VSettings*);
 
@@ -50,9 +57,11 @@ public Q_SLOTS:
 
 Q_SIGNALS:
     void selectionChanged(VInfo_ptr);
+	void titleChanged(QWidget*,QString,QPixmap);
 
 private:
 	DashboardWidget* addWidget(const std::string& type,const std::string& dockId);
+	void updateTitle();
 	QString uniqueDockId();
 	static std::string widgetSettingsId(int i);
 

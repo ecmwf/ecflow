@@ -27,6 +27,7 @@ set(viewer_srcs
     NodePathWidget.cpp
     NodeViewBase.cpp
     NodeWidget.cpp
+    OutputModel.cpp
     OutputItemWidget.cpp
     OverviewItemWidget.cpp
     OverviewProvider.cpp
@@ -116,12 +117,13 @@ QT4_WRAP_CPP(VIEWER_MOC AbstractNodeModel.hpp
 
 QT4_ADD_RESOURCES (VIEWER_RES viewer.qrc)
 QT4_WRAP_UI       (VIEWER_FORMS_HEADERS CommandDesignerWidget.ui 
-                                                CustomCommandDialog.ui 
-						CodeItemWidget.ui
-						InfoPanel.ui
-						MainWindow.ui 
-						TimeItemWidget.ui
-                        MenuConfigDialog.ui 
+                        CustomCommandDialog.ui 
+			CodeItemWidget.ui
+			InfoPanel.ui
+			MainWindow.ui 
+			TimeItemWidget.ui
+                        MenuConfigDialog.ui
+                        OutputItemWidget.ui 
                         PropertyDialog.ui
                         SearchLineWidget.ui 
                         ServerAddDialog.ui
