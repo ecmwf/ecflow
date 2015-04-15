@@ -14,6 +14,37 @@
 /*=============================================================================================*/
 
 #ifndef BRIDGE
+/*
+"ecFlowview.*DrawingAreaInput.baseTranslations: #augment    \
+      <Key>osfUp:      scroll-one-line-up()\\n\
+      <Key>osfDown:    scroll-one-line-down()\\n\
+      <KeyUp>Prior:    previous-page()\\n\
+      <KeyUp>Next:     next-page()\\n\
+      <Key>Up:         scroll-one-line-up()   \\n\
+      <Key>Down:       scroll-one-line-down() \\n\
+      <KeyUp>KP_Prior: previous-page()\\n\
+      <KeyUp>KP_Next:  next-page()\\n\
+      <KeyUp>KP_Up:    scroll-one-line-up()   \\n\
+      <KeyUp>KP_Down:  scroll-one-line-down() \n\
+ Shift<Btn5Down>: previous-page()   \\n\
+ Shift<Btn4Down>: next-page() \\n\
+      <Btn5Down>: scroll-one-line-up()   \\n\
+      <Btn4Down>: scroll-one-line-down() \n"
+"*XmSpinBox.accelerators: #augment \
+      <Btn5Down>: SpinBPrior()\\n\
+      <Btn5Up>:SpinBDisarm()\\n\
+      <Btn4Down>: SpinBNext()\\n\
+      <Btn4Up>: SpinBDisarm()\\n\
+      <Key>osfUp:SpinBNext()\\n\
+      <Key>osfDown: SpinBPrior()\\n\
+      <KeyUp>osfUp: SpinBDisarm()\\n\
+      <KeyUp>osfDown: SpinBDisarm()\\n\
+      <Key>osfLeft:  SpinBLeft()\\n\
+      <Key>osfRight: SpinBRight()\\n\
+      <KeyUp>osfLeft:  SpinBDisarm()\\n\
+      <KeyUp>osfRight: SpinBDisarm()\\n\
+      <Key>osfBeginLine: SpinBFirst()\\n\
+      <Key>osfEndLine: SpinBLast()\n" */
 
 static char* xresources = (char*) "\n"
 "ecFlowview*File.accelerator: Ctrl<Key>f\n"
@@ -127,8 +158,8 @@ static char* xresources = (char*) "\n"
       <KeyUp>KP_Down:  scroll-one-line-down() \n\
  Shift<Btn5Down>: previous-page()   \\n\
  Shift<Btn4Down>: next-page() \\n\
-      <Btn5Down>: scroll-one-line-up()   \\n\
-      <Btn4Down>: scroll-one-line-down() \n"
+      <Btn5Down>: increment(-10)   \\n\
+      <Btn4Down>: increment(10) \n"
 "*XmSpinBox.accelerators: #augment \
       <Btn5Down>: SpinBPrior()\\n\
       <Btn5Up>:SpinBDisarm()\\n\

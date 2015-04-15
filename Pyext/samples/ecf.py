@@ -19,11 +19,11 @@ import ecflow
 ecflow.Ecf.set_debug_level(3)
 
 DEBUG = 0
-DECORATE = "ALL"
 # DECORATE = "ONLY_TRIGGER"
 # DECORATE = "NO_TRIGGER"
 # DECORATE = "ONLY_EVENT"
 # DECORATE = "NO_ATTRIBUTE"
+DECORATE = "ALL"
 
 USE_TIME = True
 USE_LATE = False
@@ -34,18 +34,18 @@ if DECORATE == "NO_TRIGGER":
     USE_TRIGGER = False
     USE_LIMIT = True
     USE_EVENT = True
-# elif DECORATE == "ONLY_TRIGGER":
-#     USE_TRIGGER = True 
-#     USE_LIMIT = False 
-#     USE_EVENT = False
-# elif DECORATE == "NO_ATTRIBUTE":
-#     USE_TRIGGER = False
-#     USE_LIMIT = False
-#     USE_EVENT = False
-# elif DECORATE == "ONLY_EVENT":
-#     USE_TRIGGER = False
-#     USE_LIMIT = False
-#     USE_EVENT = True
+elif DECORATE == "ONLY_TRIGGER":
+    USE_TRIGGER = True 
+    USE_LIMIT = False 
+    USE_EVENT = False
+elif DECORATE == "NO_ATTRIBUTE":
+    USE_TRIGGER = False
+    USE_LIMIT = False
+    USE_EVENT = False
+elif DECORATE == "ONLY_EVENT":
+    USE_TRIGGER = False
+    USE_LIMIT = False
+    USE_EVENT = True
 elif DECORATE == "ALL":
     USE_TRIGGER = True
     USE_LIMIT = True
@@ -236,16 +236,16 @@ class Trigger(Attribute):
 
                 if item is None: self.expr = None
                 elif index == 0 or self.expr is None:
-                    # 20131125 # self.expr = ecflow.Expression(item)
                     self.expr = item
                 elif item is None: return
-                else: # self.expr.add(ecflow.PartExpression(item,anded))
-                    self.expr += " and %s" % item
+                else: self.expr += " and %s" % item
 
         elif type(expr) in (ecflow.Expression, 
                             ecflow.PartExpression):
             self.expr = ecflow.Expression(str(item))
-        else: print type(expr); raise Exception("what? trigger?")
+        else: 
+          print type(expr)
+          raise Exception("what? trigger?")
 
     def add_to(self, node):
         if not USE_TRIGGER:
@@ -396,8 +396,18 @@ class Day(Date):
     """ wrapper to add day """
     def add_to(self, node):
         if USE_TIME and self.data is not None:
+          if isinstance(self.data, str):
+            days = { "monday": ecflow.Days.monday,
+                     "sunday": ecflow.Days.sunday,
+                     "tuesday": ecflow.Days.tuesday,
+                     "wednesday": ecflow.Days.wednesday,
+                     "thursday": ecflow.Days.thursday,
+                     "saturday": ecflow.Days.saturday,
+                     "friday": ecflow.Days.friday, }
             # node.add_date(self.data) ### FIX
             node.add_variable("WEEKDAY", self.data)
+            node.add_day(ecflow.Days(days[self.data]))
+          else: node.add_day(ecflow.Days(self.data))
 
 class Defcomplete(Attribute):
     """ wrapper to add defstatus complete """
@@ -461,7 +471,7 @@ class Late(Attribute):
     def __init__(self, arg):
         self.data = None
         if not USE_LATE: 
-            # print "#MSG: late is disabled"
+            if DEBUG: print "#MSG: late is disabled"
             return
         sub = False
         act = False
@@ -548,7 +558,25 @@ class Variables(Attribute):
 
     def add_to(self, node):
         if self.data is not None:
-            node.add_variable(self.data)
+          node.add_variable(self.data)
+          edit =  "%s" % self.data
+          try: # FIXME Christian's request
+            if "ECF_JOB_CMD" in edit:
+              if "%WSHOST%" in edit:
+                node.add_label("infopcmd", "WSHOST")
+              elif "%SCHOST%" in edit:
+                node.add_label("infopcmd", "SCHOST")
+              elif "%HOST%" in edit:
+                node.add_label("infopcmd", "HOST")
+              else:
+                node.add_label("infopcmd", edit)
+            elif "edit WSHOST " in edit:
+              node.add_label("infopws", edit.replace("edit WSHOST ", ""))
+            elif "edit SCHOST " in edit:
+              node.add_label("infopsc", edit.replace("edit SCHOST ", ""))
+            elif "edit HOST " in edit:
+              node.add_label("infophs", edit.replace("edit HOST ", ""))
+          except: pass
         if self.next is not None:
             self.next.add_to(node)
 
@@ -707,8 +735,12 @@ class Root(object): # from where Suite and Node derive
                 for val in item:
                     self.add(val)
             else:
+                if DEBUG:
+                  if type(item) in (Task, Family): 
+                    print item.fullname()
                 try: item.add_to(self)
                 except Exception, exc: 
+                  print item
                   raise BaseException("not yet", self, type(item), exc)
 
         if len(args) > 0:
@@ -922,6 +954,7 @@ class Task(ecflow.Task, Node, Attribute):
         self.add_variable(key, val)
 
     def add_to(self, node):
+            # self.add_label("infop", "def") 
             node.add_task(self)
 
     def add_family(self, node): raise BaseException()
