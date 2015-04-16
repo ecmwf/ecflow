@@ -63,6 +63,8 @@ public:
 
     std::string genVariable(const std::string& key) const;
 
+    virtual std::string findVariable(const std::string& key,bool substitute=false) const;
+
     //Find a variable in the given node or in its ancestors. Both the variables and the
     //generated variables are searched.
     virtual std::string findInheritedVariable(const std::string& key,bool substitute=false) const;
@@ -101,6 +103,7 @@ public:
 	void beginUpdate(VNode* node,const std::vector<ecf::Aspect::Type>& aspect,VNodeChange&);
 	void endUpdate(VNode* node,const std::vector<ecf::Aspect::Type>& aspect);
 
+	std::string findVariable(const std::string& key,bool substitute=false) const;
 	//Find a variable in the Defs. Both the user_variables and the
 	//server variables are searched.
 	std::string findInheritedVariable(const std::string& key,bool substitute=false) const;

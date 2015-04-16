@@ -58,9 +58,16 @@ void OutputProvider::visit(VInfoNode* info)
     VNode *n=info->node();
 
     //Get the filename
-    std::string fileName=n->genVariable("ECF_JOBOUT");
+    std::string fileName=n->findVariable("ECF_JOBOUT",true);
 
     reply_->fileName(fileName);
+
+    //Joubout variable is not defined
+    if(fileName.empty())
+    {
+    	reply_->errorText("Variable ECF_JOBOUT is not defined!");
+    	owner_->infoFailed(reply_);
+    }
 
     //Check if it is tryno 0
     if(boost::algorithm::ends_with(fileName,".0"))
@@ -119,6 +126,7 @@ bool OutputProvider::fetchFileViaLogServer(VNode *n,const std::string& fileName)
 	if(logServer && logServer->ok())
 	{
 		VFile_ptr tmp = logServer->getFile(fileName);
+
 		if(tmp && tmp.get() && tmp->exists())
 		{
 			reply_->fileReadMode(VReply::LogServerReadMode);

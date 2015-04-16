@@ -122,6 +122,36 @@ std::string VNode::genVariable(const std::string& key) const
     return val;
 }
 
+std::string VNode::findVariable(const std::string& key,bool substitute) const
+{
+	std::string val;
+	if(!node_ )
+	    return val;
+
+	const Variable& var=node_->findVariable(key);
+	if(!var.empty())
+	{
+		val=var.theValue();
+		if(substitute)
+		{
+		    node_->variableSubsitution(val);
+		}
+		return val;
+	}
+	const Variable& gvar=node_->findGenVariable(key);
+	if(!gvar.empty())
+	{
+	   val=gvar.theValue();
+	   if(substitute)
+	   {
+		   node_->variableSubsitution(val);
+	   }
+	   return val;
+	}
+
+	return val;
+}
+
 std::string VNode::findInheritedVariable(const std::string& key,bool substitute) const
 {
     std::string val;
@@ -138,7 +168,7 @@ std::string VNode::findInheritedVariable(const std::string& key,bool substitute)
     	}
     	return val;
     }
-    /*const Variable& gvar=node_->findGenVariable(key);
+    const Variable& gvar=node_->findGenVariable(key);
     if(!gvar.empty())
     {
     	val=gvar.theValue();
@@ -147,7 +177,7 @@ std::string VNode::findInheritedVariable(const std::string& key,bool substitute)
        		node_->variableSubsitution(val);
        	}
        	return val;
-    }*/
+    }
 
     //Try to find it in the parent
     if(parent())
@@ -253,7 +283,8 @@ VNode* VNodeRoot::find(const Node* nc) const
 	return static_cast<VNode*>(nc->graphic_ptr());
 }
 
-std::string VNodeRoot::findInheritedVariable(const std::string& key,bool substitute) const
+
+std::string VNodeRoot::findVariable(const std::string& key,bool substitute) const
 {
 	std::string val;
 
@@ -272,6 +303,12 @@ std::string VNodeRoot::findInheritedVariable(const std::string& key,bool substit
     	}
     }
     return val;
+}
+
+
+std::string VNodeRoot::findInheritedVariable(const std::string& key,bool substitute) const
+{
+	return findVariable(key,substitute);
 }
 
 void VNodeRoot::scan(VNode *parent)

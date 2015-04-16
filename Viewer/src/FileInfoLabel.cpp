@@ -42,13 +42,21 @@ void FileInfoLabel::update(VReply* reply)
 	if(!reply)
 		clear();
 
-	QString fileName=QString::fromStdString(reply->fileName());
-
+	QString s;
 	QColor col(Qt::black);
 	QColor colText("#000010");
 	QColor colSize(0,0,255);
+	QColor colErr(255,0,0);
 
-	QString s;
+	QString fileName=QString::fromStdString(reply->fileName());
+
+	if(fileName.isEmpty())
+	{
+		s="<b><font color=" + col.name() + ">File: </font></b>";
+		s+="<font color=" + colErr.name() + "> ??? </font>";
+		setText(s);
+		return;
+	}
 
 	//Name
 	s="<b><font color=" + col.name() + ">File: </font></b>";
