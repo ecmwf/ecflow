@@ -21,10 +21,11 @@
 #include <QWidgetAction>
 #include <QDebug>
 
+#include "Str.hpp"
 #include "MenuHandler.hpp"
 #include "ServerHandler.hpp"
 #include "UserMessage.hpp"
-#include "VNode.hpp"
+#include "NodeExpression.hpp"
 
 
 std::vector<Menu *> MenuHandler::menus_;
@@ -116,14 +117,26 @@ bool MenuHandler::readMenuConfigFile(const std::string &configFile)
             {
                 ptree const &ItemDef = itItems->second;
 
-                std::string name     = ItemDef.get("name",    "NoName");
-                std::string menuName = ItemDef.get("menu",    "NoMenu");
-                std::string command  = ItemDef.get("command", "NoCommand");
-                std::string type     = ItemDef.get("type",    "Command");
+                std::string name     = ItemDef.get("name",        "NoName");
+                std::string menuName = ItemDef.get("menu",        "NoMenu");
+                std::string command  = ItemDef.get("command",     "NoCommand");
+                std::string type     = ItemDef.get("type",        "Command");
+                std::string enabled  = ItemDef.get("enabled_for", "");
                 //std::cout << "  " << name << " :" << menuName << std::endl;
 
                 MenuItem *item = new MenuItem(name);
                 item->setCommand(command);
+
+
+                BaseNodeCondition *nodeCond = NodeExpressionParser::parseWholeExpression(enabled);
+                if (nodeCond == NULL)
+                {
+                    UserMessage::message(UserMessage::ERROR, true, std::string("Error, unable to parse condition: " + enabled));
+                    nodeCond = new FalseNodeCondition();
+                }
+                item->setNodeCondition(nodeCond);
+
+
 
                 if (type == "Submenu")
                     item->setAsSubMenu();
@@ -137,19 +150,19 @@ bool MenuHandler::readMenuConfigFile(const std::string &configFile)
 
                 // parse the valid node types/states for this menu item
 
-                if( ItemDef.count("valid_types") > 0 )  // does this node exist on the tree?
-                {
-                    ptree ptValidTypes = ItemDef.get_child("valid_types");
-		            for (ptree::const_iterator itTypes = ptValidTypes.begin(); itTypes != ptValidTypes.end(); ++itTypes)
-                    {
-                        std::string type(itTypes->second.data());
-                        item->addValidType(type);
-                    }
-                }
-                else
-                {
-                    item->addValidType("all");
-                }
+                //if( ItemDef.count("valid_types") > 0 )  // does this node exist on the tree?
+                //{
+                //    ptree ptValidTypes = ItemDef.get_child("valid_types");
+		        //    for (ptree::const_iterator itTypes = ptValidTypes.begin(); itTypes != ptValidTypes.end(); ++itTypes)
+                //    {
+                //        std::string type(itTypes->second.data());
+                //        //item->addValidType(type);
+                //    }
+                //}
+                //else
+                //{
+                //    //item->addValidType("all");
+                //}
 
 
                 if( ItemDef.count("valid_states") > 0 )  // does this node exist on the tree?
@@ -158,12 +171,12 @@ bool MenuHandler::readMenuConfigFile(const std::string &configFile)
 		            for (ptree::const_iterator itStates = ptValidStates.begin(); itStates != ptValidStates.end(); ++itStates)
                     {
                         std::string state(itStates->second.data());
-                        item->addValidState(state);
+                        //item->addValidState(state);
                     }
                 }
                 else
                 {
-                    item->addValidState("all");
+                    //item->addValidState("all");
                 }
             }
         }
@@ -244,9 +257,16 @@ QAction *MenuHandler::invokeMenu(const std::string &menuName, std::vector<VInfo_
 
 
 
+// -----------------------------------------------------------------
+
+
+///////////////////////////////////////////////////////////
+
 // --------------------
 // Menu class functions
 // --------------------
+
+
 
 Menu::Menu(const std::string &name) : name_(name)
 {
@@ -299,6 +319,21 @@ QMenu *Menu::generateMenu(std::vector<VInfo_ptr> nodes, QWidget *parent)
         action->setFont(menuTitleFont);
     }
 
+    //TypeNodeCondition  typeCondFamily   (MenuItem::FAMILY);
+    //TypeNodeCondition  typeCondTask     (MenuItem::TASK);
+    //StateNodeCondition stateCondUnknown ("unknown");
+    //OrNodeCondition    orCond           (&typeCondFamily, &typeCondTask);
+    //AndNodeCondition   andCond          (&orCond, &stateCondUnknown);
+
+    //std::string condString("not task");
+    //BaseNodeCondition *nodeCond = NodeExpressionParser::parseWholeExpression(condString);
+
+    //if (nodeCond == NULL)
+    //{
+    //    UserMessage::message(UserMessage::ERROR, true, std::string("Error, unable to parse condition: " + condString));
+    //}
+
+
 
     for (std::vector<MenuItem*>::iterator itItems = items_.begin(); itItems != items_.end(); ++itItems)
     {
@@ -308,7 +343,9 @@ QMenu *Menu::generateMenu(std::vector<VInfo_ptr> nodes, QWidget *parent)
 
         for (std::vector<VInfo_ptr>::iterator itNodes = nodes.begin(); itNodes != nodes.end(); ++itNodes)
         {
-            compatible = compatible && (*itItems)->compatibleWithNode(*itNodes);
+            //compatible = compatible && (*itItems)->compatibleWithNode(*itNodes);
+            //compatible = compatible && (nodeCond != NULL && nodeCond->execute(*itNodes));
+            compatible = compatible && (*itItems)->condition()->execute(*itNodes);
         }
 
         if (showIcompatibleItems)
@@ -383,77 +420,86 @@ void MenuItem::setCommand(const std::string &command)
         action_->setStatusTip(QString(command.c_str()));  // so we see the command in the status bar
 };
 
-// adds an entry to the list of valid node types for this menu item
-void MenuItem::addValidType(std::string type)
-{
-    static NodeType all[] = {TASK, FAMILY, SUITE, SERVER, ALIAS};
+// // adds an entry to the list of valid node types for this menu item
+// void MenuItem::addValidType(std::string type)
+// {
+//     static NodeType all[] = {TASK, FAMILY, SUITE, SERVER, ALIAS};
+// 
+//     if     (type == "server")
+//         validNodeTypes_.push_back(SERVER);
+//     else if(type == "suite")
+//         validNodeTypes_.push_back(SUITE);
+//     else if(type == "task")
+//         validNodeTypes_.push_back(TASK);
+//     else if(type == "family")
+//         validNodeTypes_.push_back(FAMILY);
+//     else if(type == "alias")
+//         validNodeTypes_.push_back(ALIAS);
+//     else if(type == "all")
+//         validNodeTypes_.insert(validNodeTypes_.begin(), all, all+5);
+// }
+// 
+// 
+// // adds an entry to the list of valid node types for this menu item
+// void MenuItem::addValidState(std::string state)
+// {
+//     DState::State dstate;
+// 
+//     if (DState::isValid(state))
+//     {
+//         dstate = DState::toState(state);
+//         validNodeStates_.push_back(dstate);
+//     }
+//     else if (state == "all")
+//     {
+//         // add the list of all states
+//         std::vector<DState::State> allDstates = DState::states();
+//         validNodeStates_.insert(validNodeStates_.end(), allDstates.begin(), allDstates.end());
+//     }
+//     else
+//     {
+//         UserMessage::message(UserMessage::ERROR, false, std::string("Bad node state in menu file: " + state));
+//     }
+// }
 
-    if     (type == "server")
-        validNodeTypes_.push_back(SERVER);
-    else if(type == "suite")
-        validNodeTypes_.push_back(SUITE);
-    else if(type == "task")
-        validNodeTypes_.push_back(TASK);
-    else if(type == "family")
-        validNodeTypes_.push_back(FAMILY);
-    else if(type == "alias")
-        validNodeTypes_.push_back(ALIAS);
-    else if(type == "all")
-        validNodeTypes_.insert(validNodeTypes_.begin(), all, all+5);
-}
 
-
-// adds an entry to the list of valid node types for this menu item
-void MenuItem::addValidState(std::string state)
-{
-    DState::State dstate;
-
-    if (DState::isValid(state))
-    {
-        dstate = DState::toState(state);
-        validNodeStates_.push_back(dstate);
-    }
-    else if (state == "all")
-    {
-        // add the list of all states
-        std::vector<DState::State> allDstates = DState::states();
-        validNodeStates_.insert(validNodeStates_.end(), allDstates.begin(), allDstates.end());
-    }
-    else
-    {
-        UserMessage::message(UserMessage::ERROR, false, std::string("Bad node state in menu file: " + state));
-    }
-}
-
-
-bool MenuItem::compatibleWithNode(VInfo_ptr nodeInfo)
-{
-    // check each node type and return false if we don't match
-
-    if(nodeInfo->isServer())
-        if(std::find(validNodeTypes_.begin(), validNodeTypes_.end(), SERVER) == validNodeTypes_.end())
-            return false;
-
-    if(nodeInfo->isNode())
-    {
-        Node *node = nodeInfo->node()->node();
-
-        if(node->isSuite())
-            if(std::find(validNodeTypes_.begin(), validNodeTypes_.end(), SUITE) == validNodeTypes_.end())
-                return false;
-
-        if(node->isTask())
-            if(std::find(validNodeTypes_.begin(), validNodeTypes_.end(), TASK) == validNodeTypes_.end())
-                return false;
-
-        if(node->isAlias())
-            if(std::find(validNodeTypes_.begin(), validNodeTypes_.end(), ALIAS) == validNodeTypes_.end())
-                return false;
-
-        if(node->isFamily())
-            if(std::find(validNodeTypes_.begin(), validNodeTypes_.end(), FAMILY) == validNodeTypes_.end())
-                return false;
-    }
-
-    return true;
-}
+// bool MenuItem::isNodeTypeValidForMenuItem(NodeType type)
+// {
+//     if(std::find(validNodeTypes_.begin(), validNodeTypes_.end(), type) == validNodeTypes_.end())
+//         return false;
+//     else
+//         return true;
+// }
+// 
+// 
+// bool MenuItem::compatibleWithNode(VInfo_ptr nodeInfo)
+// {
+//     // check each node type and return false if we don't match
+// 
+//     if(nodeInfo->isServer())
+//         if(std::find(validNodeTypes_.begin(), validNodeTypes_.end(), SERVER) == validNodeTypes_.end())
+//             return false;
+// 
+//     if(nodeInfo->isNode())
+//     {
+//         Node *node = nodeInfo->node()->node();
+// 
+//         if(node->isSuite())
+//             if (!isNodeTypeValidForMenuItem(SUITE))
+//                 return false;
+// 
+//         if(node->isTask())
+//             if (!isNodeTypeValidForMenuItem(TASK))
+//                 return false;
+// 
+//         if(node->isAlias())
+//             if (!isNodeTypeValidForMenuItem(ALIAS))
+//                 return false;
+// 
+//         if(node->isFamily())
+//             if (!isNodeTypeValidForMenuItem(FAMILY))
+//                 return false;
+//     }
+// 
+//     return true;
+// }

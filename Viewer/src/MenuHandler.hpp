@@ -1,8 +1,5 @@
-#ifndef MENUHANDLER_HPP_
-#define MENUHANDLER_HPP_
-
 //============================================================================
-// Copyright 2014 ECMWF. 
+// Copyright 2015 ECMWF. 
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -10,15 +7,22 @@
 // nor does it submit to any jurisdiction. 
 //============================================================================
 
-#include <QString>
-#include <QAction>
+#ifndef MENUHANDLER_HPP_
+#define MENUHANDLER_HPP_
 
-#include "DState.hpp"
+#include <vector>
+#include <QString>
+#include <QPoint>
 
 #include "VInfo.hpp"
 
 class QMenu;
+class QAction;
+class QWidget;
 class Node;
+class BaseNodeCondition;
+
+
 
 // -------------------------
 // MenuItem
@@ -30,33 +34,35 @@ class MenuItem
 public:
     MenuItem(const std::string &name);
     ~MenuItem();
-    
-
-    enum NodeType {SERVER, SUITE, FAMILY, TASK, ALIAS};
-
 
     void setCommand(const std::string &command);
-    bool compatibleWithNode(VInfo_ptr nodeInfo);
-    void addValidType(std::string type);
-    void addValidState(std::string type);
+    //bool compatibleWithNode(VInfo_ptr nodeInfo);
+    //void addValidType(std::string type);
+    //void addValidState(std::string type);
     void setAsSubMenu() {isSubMenu_ = true;};
+    void setNodeCondition(BaseNodeCondition *cond) {nodeCondition_ = cond;};
+    BaseNodeCondition *condition() {return nodeCondition_;};
     bool isSubMenu()    {return isSubMenu_;};
     bool isDivider()    {return isDivider_;};
     std::string &name()   {return name_;};
     QAction     *action() {return action_;};
 
-
-
 private:
+
+    //bool isNodeTypeValidForMenuItem(NodeType type);
+
     std::string name_;
     std::string tooltip_;
     std::string command_;
     std::string question_;
     std::string defaultAnswer_;
 
-    std::vector<NodeType>      validNodeTypes_;
-    std::vector<DState::State> validNodeStates_;
-    
+    //std::vector<NodeType>      validNodeTypes_;
+    //std::vector<DState::State> validNodeStates_;
+
+
+    BaseNodeCondition *nodeCondition_;
+
     bool isSubMenu_;
     bool isDivider_;
 

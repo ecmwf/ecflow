@@ -23,27 +23,55 @@
     "menu_items" :
     [
 
+
+        {
+            "name"           : "Suspend",
+            "menu"           : "Node",
+            "enabled_for"    : "not suspended",
+            "command"        : "ecflow_client --suspend <full_name>"
+        },
+
+        {
+            "name"           : "Resume",
+            "menu"           : "Node",
+            "enabled_for"    : "suspended",
+            "command"        : "ecflow_client --resume <full_name>"
+        },
+
+        {
+            "name"        : "Rerun",
+            "menu"        : "Node",
+            "visible_for" : "task",
+            "enabled_for" : "(not active) and (not submitted)",
+            "command"     : "ecflow_client --force queued <full_name>"
+        },
+
+
+
+
+
+
         {
             "name"           : "Execute",
             "menu"           : "Node",
-            "valid_types"    : ["task", "alias", "family"],
-            "valid_states"   : ["complete", "unknown", "queued", "aborted", "suspended"],
+            "xxxxvalid_types"    : ["task", "alias", "family"],
+            "enabled_for"    : "task or alias or family and complete or unknown or queued or aborted or suspended",
             "command"        : "ecflow_client --run <full_name>"
         },
 
         {
             "name"           : "Requeue",
             "menu"           : "Node",
-            "valid_types"    : ["task", "suite", "family"],
-            "valid_states"   : ["complete", "unknown", "queued", "aborted", "suspended"],
+            "xxxxvalid_types"    : ["task", "suite", "family"],
+            "enabled_for"   : "task or suite or family and complete or unknown or queued or aborted or suspended",
             "command"        : "ecflow_client --requeue force <full_name>"
         },
 
         {
             "name"           : "Set complete",
             "menu"           : "Node",
-            "valid_types"    : ["task", "alias"],
-            "valid_states"   : ["submitted", "active"],
+            "visible_for"    : "task or alias",
+            "enabled_for"    : "submitted or active",
             "command"        : "ecflow_client --force complete <full_name>",
             "question"       : "Have you checked that the job is not active anymore (jobstatus)?",
             "default_answer" : "Yes"
@@ -52,25 +80,17 @@
         {
             "name"           : "Begin",
             "menu"           : "Node",
-            "valid_types"    : ["suite"],
-            "valid_states"   : ["unknown", "complete"],
+            "visible_for"    : "suite",
+            "enabled_for"    : "unknown or complete",
             "command"        : "ecflow_client --begin <node_name>"
-        },
-
-        {
-            "name"           : "Suspend",
-            "menu"           : "Node",
-            "valid_types"    : ["all"],
-            "valid_states"   : ["not suspended"],
-            "command"        : "ecflow_client --suspend <full_name>"
         },
 
         {
             "name"           : "Delete",
             "type"           : "Submenu",
             "menu"           : "Node",
-            "valid_types"    : ["suite", "task", "family"],
-            "valid_states"   : ["queued"],
+            "visible_for"    : "suite or task or family",
+            "enabled_for"    : "queued or suspended or active",
             "valid_attrs"    : ["has_triggers", "has_time", "has_date"],
             "command"        : "None"
         },
@@ -83,14 +103,13 @@
         {
             "name"           : "Set as root",
             "menu"           : "Node",
-            "valid_types"    : ["suite", "task", "family"]
+            "enabled_for"    : "suite or task or family"
         },
 
         {
             "name"           : "All dependencies",
             "menu"           : "Delete",
             "valid_types"    : ["all"],
-            "valid_states"   : ["all"],
             "valid_attrs"    : ["has_triggers", "has_time", "has_date"],
             "command"        : "ecflow_client --free-dep all <full_name>"
         },
@@ -104,7 +123,6 @@
             "name"           : "Custom...",
             "menu"           : "Node",
             "valid_types"    : ["all"],
-            "valid_states"   : ["all"],
             "command"        : "CUSTOM_COMMAND"
         }
     ]

@@ -25,6 +25,7 @@ set(viewer_srcs
     MenuConfigDialog.cpp
     MenuHandler.cpp
     MessageItemWidget.cpp
+    NodeExpression.cpp
     NodeFilterModel.cpp
     NodePanel.cpp
     NodePathWidget.cpp
