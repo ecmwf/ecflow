@@ -11,6 +11,8 @@
 #include "VNode.hpp"
 
 #include "Node.hpp"
+#include "Variable.hpp"
+
 #include "ServerHandler.hpp"
 #include "VAttribute.hpp"
 #include "VNState.hpp"
@@ -120,6 +122,42 @@ std::string VNode::genVariable(const std::string& key) const
     return val;
 }
 
+std::string VNode::findInheritedVariable(const std::string& key,bool substitute) const
+{
+    std::string val;
+    if(!node_ )
+    	return val;
+
+    const Variable& var=node_->findVariable(key);
+    if(!var.empty())
+    {
+    	val=var.theValue();
+    	if(substitute)
+    	{
+    		node_->variableSubsitution(val);
+    	}
+    	return val;
+    }
+    /*const Variable& gvar=node_->findGenVariable(key);
+    if(!gvar.empty())
+    {
+    	val=gvar.theValue();
+       	if(substitute)
+       	{
+       		node_->variableSubsitution(val);
+       	}
+       	return val;
+    }*/
+
+    //Try to find it in the parent
+    if(parent())
+    {
+    	return parent()->findInheritedVariable(key,substitute);
+    }
+
+    return val;
+}
+
 
 std::string VNode::absNodePath() const
 {
@@ -151,15 +189,39 @@ QColor  VNode::stateColour() const
 	return VNState::toColour(node_);
 }
 
+LogServer_ptr VNode::logServer()
+{
+	LogServer_ptr lsv;
+
+	std::string logHost=findInheritedVariable("ECF_LOGHOST",true);
+	std::string logPort=findInheritedVariable("ECF_LOGPORT");
+	if(logHost.empty())
+	{
+		logHost=findInheritedVariable("LOGHOST",true);
+		logPort=findInheritedVariable("LOGPORT");
+	}
+
+	std::string micro=findInheritedVariable("ECF_MICRO");
+	if(!logHost.empty() && !logPort.empty() &&
+	  (micro.empty() || logHost.find(micro) ==  std::string::npos))
+	{
+		lsv=LogServer_ptr(new LogServer(logHost,logPort));
+		return lsv;
+	}
+
+	return lsv;
+}
+
 //=================================================
 // VNodeRoot - this represents the server
 //=================================================
 
-VNodeRoot::VNodeRoot(ServerHandler* server) : VNode(0,0), totalNum_(0)
+VNodeRoot::VNodeRoot(ServerHandler* server) : VNode(0,0), server_(server), totalNum_(0)
 {
-	ServerDefsAccess defsAccess(server);  // will reliquish its resources on destruction
+	ServerDefsAccess defsAccess(server_);  // will reliquish its resources on destruction
 	defs_ptr defs = defsAccess.defs();
-	if (!defs) return;
+	if (!defs)
+		return;
 
 	const std::vector<suite_ptr> &suites = defs->suiteVec();
 	for(unsigned int i=0; i < suites.size();i++)
@@ -191,6 +253,26 @@ VNode* VNodeRoot::find(const Node* nc) const
 	return static_cast<VNode*>(nc->graphic_ptr());
 }
 
+std::string VNodeRoot::findInheritedVariable(const std::string& key,bool substitute) const
+{
+	std::string val;
+
+	ServerDefsAccess defsAccess(server_);  // will reliquish its resources on destruction
+	defs_ptr defs = defsAccess.defs();
+	if (!defs)
+		return val;
+
+	const Variable& var=defs->server().findVariable(key);
+    if(!var.empty())
+    {
+    	val=var.theValue();
+    	if(substitute)
+    	{
+    		//defs->server().variableSubsitution(val);
+    	}
+    }
+    return val;
+}
 
 void VNodeRoot::scan(VNode *parent)
 {
@@ -339,6 +421,10 @@ void VNodeRoot::endUpdate(VNode* node,const std::vector<ecf::Aspect::Type>& aspe
 		node->endUpdateAttrNum();
 }
 
-
+LogServer_ptr VNodeRoot::logServer()
+{
+	LogServer_ptr lsv;
+	return lsv;
+}
 
 //void* graphic_ptr() const { return  graphic_ptr_;}

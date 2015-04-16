@@ -17,6 +17,7 @@
 #include <QStringList>
 
 #include "Aspect.hpp"
+#include "LogServer.hpp"
 
 class Node;
 class ServerHandler;
@@ -35,7 +36,6 @@ public:
 	int nodeNum_;
 	int nodeAddedAt_;
 };
-
 
 class VNode
 {
@@ -63,12 +63,18 @@ public:
 
     std::string genVariable(const std::string& key) const;
 
+    //Find a variable in the given node or in its ancestors. Both the variables and the
+    //generated variables are searched.
+    virtual std::string findInheritedVariable(const std::string& key,bool substitute=false) const;
+
     virtual std::string absNodePath() const;
     QString name() const;
     QString stateName();
     QString defaultStateName();
     bool isSuspended() const;
     QColor  stateColour() const;
+
+    virtual LogServer_ptr logServer();
 
 protected:
     void replaceChildren(const std::vector<VNode*>& newCh);
@@ -80,6 +86,8 @@ protected:
     mutable short attrNum_;
     mutable short cachedAttrNum_;
 };
+
+//This is the root node representing the Server.
 
 class VNodeRoot : public VNode
 {
@@ -93,10 +101,17 @@ public:
 	void beginUpdate(VNode* node,const std::vector<ecf::Aspect::Type>& aspect,VNodeChange&);
 	void endUpdate(VNode* node,const std::vector<ecf::Aspect::Type>& aspect);
 
+	//Find a variable in the Defs. Both the user_variables and the
+	//server variables are searched.
+	std::string findInheritedVariable(const std::string& key,bool substitute=false) const;
+
+	 LogServer_ptr logServer();
+
 protected:
     void scan(VNode*);
     void deleteNode(VNode* node);
 
+    ServerHandler* server_;
     int totalNum_;
 };
 

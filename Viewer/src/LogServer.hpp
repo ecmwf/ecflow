@@ -13,11 +13,17 @@
 #include "VFile.hpp"
 #include "VDir.hpp"
 
+class LogServer;
+typedef boost::shared_ptr<LogServer> LogServer_ptr;
+
 class LogServer
 {
 public:
     LogServer(std::string host,std::string port);
     ~LogServer();
+
+    const std::string host() const {return host_;}
+    const std::string port() const {return port_;}
 
     VFile_ptr getFile(std::string name);
     VDir_ptr  getDir(const char* name);

@@ -15,6 +15,7 @@
 #include "VReply.hpp"
 
 #include <QDebug>
+#include <QFile>
 
 OutputItemWidget::OutputItemWidget(QWidget *parent) :
 	QWidget(parent)
@@ -111,8 +112,21 @@ void OutputItemWidget::clearContents()
 
 void OutputItemWidget::infoReady(VReply* reply)
 {
-    QString s=QString::fromStdString(reply->text());
-    textEdit_->setPlainText(s);
+    VFile_ptr f=reply->tmpFile();
+
+    //If the info is stored in a tmp file
+    if(f && f.get())
+    {
+    	QFile file(QString::fromStdString(f->path()));
+    	file.open(QIODevice::ReadOnly);
+    	textEdit_->setPlainText(file.readAll());
+    }
+    //The info is stores as a string in the reply object
+    else
+    {
+    	QString s=QString::fromStdString(reply->text());
+    	textEdit_->setPlainText(s);
+    }
 
     fileLabel_->update(reply);
 }

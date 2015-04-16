@@ -73,7 +73,6 @@ void OutputProvider::visit(VInfoNode* info)
     //Try to use the logserver to fetch the file
     else if(fetchFileViaLogServer(n,fileName))
     {
-    	reply_->fileReadMode(VReply::LogServerReadMode);
     	owner_->infoReady(reply_);
     	return;
     }
@@ -114,31 +113,27 @@ void OutputProvider::visit(VInfoNode* info)
 
 bool OutputProvider::fetchFileViaLogServer(VNode *n,const std::string& fileName)
 {
-	std::string logHost=n->genVariable("ECF_LOGHOST");
-	std::string logPort=n->genVariable("ECF_LOGPORT");
-	if(logHost.empty())
-	{
-		logHost=n->genVariable("LOGHOST");
-		logPort=n->genVariable("LOGPORT");
-	}
+	//Create a logserver
+	LogServer_ptr logServer=n->logServer();
 
-	std::string::size_type pos = logHost.find(n->genVariable("ECF_MICRO"));
-	if(std::string::npos == pos && !logHost.empty())
+	if(logServer && logServer->ok())
 	{
-		//Create a logserver
-		LogServer logServer(logHost,logPort);
-		if(logServer.ok())
+		VFile_ptr tmp = logServer->getFile(fileName);
+		if(tmp && tmp.get() && tmp->exists())
 		{
-			VFile_ptr tmp = logServer.getFile(fileName);
-			if(tmp->exists())
-			{
-				//reply_->tmpFile(tmp);
-				//reply_->directory(logServer.getDir(fileName));
-				return true;
-			}
+			reply_->fileReadMode(VReply::LogServerReadMode);
+
+			std::string method="served by " + logServer->host() + "@" + logServer->port();
+			reply_->fileReadMethod(method);
+
+			reply_->tmpFile(tmp);
+
+			return true;
 		}
 	}
+
 	return false;
+
 }
 
 VDir_ptr OutputProvider::directory()
@@ -170,29 +165,12 @@ VDir_ptr OutputProvider::fetchDirViaLogServer(VNode *n,const std::string& fileNa
 {
 	VDir_ptr res;
 
-	std::string logHost=n->genVariable("ECF_LOGHOST");
-	std::string logPort=n->genVariable("ECF_LOGPORT");
-	if(logHost.empty())
-	{
-		logHost=n->genVariable("LOGHOST");
-		logPort=n->genVariable("LOGPORT");
-	}
+	//Create a logserver
+	LogServer_ptr logServer=n->logServer();
 
-	std::string::size_type pos = logHost.find(n->genVariable("ECF_MICRO"));
-	if(std::string::npos == pos && !logHost.empty())
+	if(logServer && logServer->ok())
 	{
-		//Create a logserver
-		LogServer logServer(logHost,logPort);
-		if(logServer.ok())
-		{
-			VFile_ptr tmp = logServer.getFile(fileName);
-			if(tmp->exists())
-			{
-				res=logServer.getDir(fileName.c_str());
-				return res;
-
-			}
-		}
+		res=logServer->getDir(fileName.c_str());
 	}
 
 	return res;

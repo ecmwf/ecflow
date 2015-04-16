@@ -30,8 +30,6 @@
 #include <memory.h>
 #endif
 
-//#include "AutoAlarm.hpp"
-
 #define FAIL(a) do { perror(a); exit(1); } while(0)
 
 LogServer::LogServer(std::string host,std::string cport) :
@@ -177,10 +175,6 @@ VFile_ptr LogServer::getFile(std::string name)
 	  total += len;
 	}
 
-	sprintf(buf, "\n# served by %s@%s # telnet %s %s # get %s",
-		host_.c_str(), port_.c_str(),
-		host_.c_str(), port_.c_str(),
-		name.c_str());
 	fwrite(buf,1,size,f);
 
 	if(fclose(f))
@@ -233,3 +227,6 @@ VDir_ptr LogServer::getDir(const char* name)
 
 	return dir;
 }
+
+
+

@@ -56,45 +56,58 @@ void FileInfoLabel::update(VReply* reply)
 
 	VFileInfo f(fileName);
 
-	if(reply->fileReadMode() == VReply::LocalReadMode && f.exists())
-	{
-		s+="<br>";
-
-		s+="<b><font color=" + col.name() + "> Size: </font></b>";
-		s+="<font color=" + colSize.name() + ">" + f.formatSize() + "</font>";
-
-		s+="<b><font color=" + col.name() + "> Permissions: </font></b>";
-		s+="<font color=" + colText.name() + ">" + f.formatPermissions() + "</font>";
-
-		s+="<b><font color=" + col.name() + "> Owner: </font></b>";
-		s+="<font color=" + colText.name() + ">" + f.owner() + "</font>";
-
-		s+="<b><font color=" + col.name() + "> Group: </font></b>";
-		s+="<font color=" + colText.name() + ">" + f.group() + "</font>";
-
-		s+="<b><font color=" + col.name() + "> Modified: </font></b>";
-		s+="<font color=" + colText.name() + ">" + f.formatModDate() + "</font>";
-	}
-
-	if(reply->fileReadMode() != VReply::NoReadMode)
-	{
-		s+="<br>";
-		s+="<b><font color=" + col.name() + "> Access method: </font></b>";
-	}
-
+	//Local read
 	if(reply->fileReadMode() == VReply::LocalReadMode)
 	{
-		s+="<font color=" + colText.name() + "> read from disk</font>";
+		VFileInfo f(fileName);
+		if(f.exists())
+		{
+			s+="<br>";
 
+			s+="<b><font color=" + col.name() + "> Size: </font></b>";
+			s+="<font color=" + colSize.name() + ">" + f.formatSize() + "</font>";
+
+			s+="<b><font color=" + col.name() + "> Permissions: </font></b>";
+			s+="<font color=" + colText.name() + ">" + f.formatPermissions() + "</font>";
+
+			s+="<b><font color=" + col.name() + "> Owner: </font></b>";
+			s+="<font color=" + colText.name() + ">" + f.owner() + "</font>";
+
+			s+="<b><font color=" + col.name() + "> Group: </font></b>";
+			s+="<font color=" + colText.name() + ">" + f.group() + "</font>";
+
+			s+="<b><font color=" + col.name() + "> Modified: </font></b>";
+			s+="<font color=" + colText.name() + ">" + f.formatModDate() + "</font>";
+
+			s+="<br>";
+			s+="<b><font color=" + col.name() + "> Access method: </font></b>";
+			s+="<font color=" + colText.name() + "> read from disk</font>";
+		}
 	}
 	else if(reply->fileReadMode() == VReply::ServerReadMode)
 	{
+		s+="<br>";
+		s+="<b><font color=" + col.name() + "> Access method: </font></b>";
 		int rowLimit=10000;
 		s+="<font color=" + colText.name() + "> through server (first " + QString::number(rowLimit) + "lines)</font>";
 	}
+
 	else if(reply->fileReadMode() == VReply::LogServerReadMode)
 	{
-		s+="<font color=" + colText.name() + "> through log server</font>";
+		VFile_ptr tmp=reply->tmpFile();
+		if(tmp && tmp.get())
+		{
+			VFileInfo f(QString::fromStdString(tmp->path()));
+			if(f.exists())
+			{
+				s+="<br>";
+				s+="<b><font color=" + col.name() + "> Size: </font></b>";
+				s+="<font color=" + colSize.name() + ">" + f.formatSize() + "</font>";
+			}
+		}
+		s+="<br>";
+		s+="<b><font color=" + col.name() + "> Access method: </font></b>";
+		s+="<font color=" + colText.name() + "> " + QString::fromStdString(reply->fileReadMethod()) + "</font>";
 	}
 
 	setText(s);
