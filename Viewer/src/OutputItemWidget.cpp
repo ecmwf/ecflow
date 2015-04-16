@@ -32,16 +32,20 @@ OutputItemWidget::OutputItemWidget(QWidget *parent) :
 
 	infoProvider_=new OutputProvider(this);
 
+	//The view
 	outputView_->setRootIsDecorated(false);
 	outputView_->setAllColumnsShowFocus(true);
 	outputView_->setUniformRowHeights(true);
 	outputView_->setAlternatingRowColors(true);
 	outputView_->setSortingEnabled(true);
 
-	//OutputData* data=new OutputData;
+	//The models
 	model_=new OutputModel(this);
+	sortModel_=new OutputSortModel(this);
+	sortModel_->setSourceModel(model_);
+	sortModel_->setDynamicSortFilter(true);
 
-	outputView_->setModel(model_);
+	outputView_->setModel(sortModel_);
 }
 
 QWidget* OutputItemWidget::realWidget()
@@ -58,69 +62,59 @@ void OutputItemWidget::reload(VInfo_ptr info)
 	{
 		fileLabel_->clear();
 		textEdit_->clear();
+
+		dirLabel_->clear();
+		model_->clearData();
+
+		dirLabel_->hide();
+		outputView_->hide();
 	}
     else
 	{
 	    clearContents();
 
-	    QString name=QString::fromStdString(info_->genVariable("ECF_JOBOUT"));
-
-	    fileLabel_->setText(tr("File: ") + name);
+	    //Get file contents
 	    infoProvider_->info(info_);
-
 	    OutputProvider* op=static_cast<OutputProvider*>(infoProvider_);
 
+	    //Get directory contents
 	    VDir_ptr dir=op->directory();
 
 	    if(dir)
 	    {
 	    	model_->setData(dir);
+	    	dirLabel_->show();
 	    	outputView_->show();
 	    }
 	    else
 	    {
+	    	model_->clearData();
+	    	dirLabel_->hide();
 	    	outputView_->hide();
 	    }
-
-
-
-	    /*QString name=QString::fromStdString(info_->genVariable("ECF_JOBOUT"));
-
-	    qDebug() << "NAME" << name;
-
-	    fileLabel_->setText(tr("File: ") + name);
-	    infoProvider_->info(info_);
-
-	    int lindex=name.lastIndexOf("/");
-	    if(lindex != -1)
-	    {
-	    	name=name.left(lindex+1);
-
-	    	QFileInfo fileInfo(name);
-	    	QDir dir=fileInfo.absoluteDir();
-
-	    	qDebug() << "DIR" << dir.absolutePath();
-	    	if(dir.exists())
-	    	{
-	    		model_->setRootPath(dir.absolutePath());
-	    		outputView_->setRootIndex(model_->index(dir.absolutePath()));
-	    	}
-	    }*/
 	}
 }
 
 void OutputItemWidget::clearContents()
 {
 	loaded_=false;
+
 	fileLabel_->clear();
 	textEdit_->clear();
-	//model_->clear();
+
+	dirLabel_->clear();
+	model_->clearData();
+
+	dirLabel_->hide();
+	outputView_->hide();
 }
 
 void OutputItemWidget::infoReady(VReply* reply)
 {
     QString s=QString::fromStdString(reply->text());
     textEdit_->setPlainText(s);
+
+    fileLabel_->update(reply);
 }
 
 void OutputItemWidget::infoProgress(VReply* reply)
@@ -133,7 +127,14 @@ void OutputItemWidget::infoFailed(VReply* reply)
 {
     QString s=QString::fromStdString(reply->errorText());
     textEdit_->setPlainText(s);
+
+    fileLabel_->update(reply);
 }
+
+//void OutputItemWidget::updateFilelabel(VReply *reply)
+//{
+//}
+
 
 static InfoPanelItemMaker<OutputItemWidget> maker1("output");
 

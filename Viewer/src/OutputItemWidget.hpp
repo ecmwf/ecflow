@@ -16,6 +16,7 @@
 #include "ui_OutputItemWidget.h"
 
 class OutputModel;
+class OutputSortModel;
 
 class OutputItemWidget : public QWidget, public InfoPanelItem, protected Ui::OutputItemWidget
 {
@@ -36,6 +37,7 @@ public:
 
 protected:
 	OutputModel* model_;
+	OutputSortModel* sortModel_;
 };
 
 #endif

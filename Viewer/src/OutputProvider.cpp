@@ -60,6 +60,8 @@ void OutputProvider::visit(VInfoNode* info)
     //Get the filename
     std::string fileName=n->genVariable("ECF_JOBOUT");
 
+    reply_->fileName(fileName);
+
     //Check if it is tryno 0
     if(boost::algorithm::ends_with(fileName,".0"))
     {
@@ -71,6 +73,7 @@ void OutputProvider::visit(VInfoNode* info)
     //Try to use the logserver to fetch the file
     else if(fetchFileViaLogServer(n,fileName))
     {
+    	reply_->fileReadMode(VReply::LogServerReadMode);
     	owner_->infoReady(reply_);
     	return;
     }
@@ -84,12 +87,15 @@ void OutputProvider::visit(VInfoNode* info)
     		//Get the fileName
     		if(reply_->textFromFile(fileName))
     		{
+    			reply_->fileReadMode(VReply::LocalReadMode);
     			owner_->infoReady(reply_);
     			return;
     		}
     	}
     	else
     	{
+    		reply_->fileReadMode(VReply::ServerReadMode);
+
     		//Define a task for getting the info from the server.
     		task_=VTask::create(taskType_,info->node(),this);
 

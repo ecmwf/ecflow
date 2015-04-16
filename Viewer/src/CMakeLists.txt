@@ -10,6 +10,7 @@ set(viewer_srcs
     Dashboard.cpp
     DirectoryHandler.cpp
     EditItemWidget.cpp
+    FileInfoLabel.cpp
     FilterWidget.cpp
     Highlighter.cpp
     InfoPanel.cpp 
@@ -17,6 +18,7 @@ set(viewer_srcs
     InfoProvider.cpp
     JobItemWidget.cpp
     LineEdit.cpp
+    LogEvent.cpp
     LogServer.cpp
     MainWindow.cpp
     ManualItemWidget.cpp 
@@ -49,8 +51,6 @@ set(viewer_srcs
     TextEdit.cpp
     TextItemWidget.cpp
     TimeItemWidget.cpp
-    LogEvent.cpp
-
     TriggerItemWidget.cpp
     TreeNodeModel.cpp
     TreeNodeView.cpp
@@ -64,6 +64,7 @@ set(viewer_srcs
     VIcon.cpp
     VInfo.cpp
     VFile.cpp
+    VFileInfo.cpp
     VModelData.cpp
     VNode.cpp
     VNState.cpp

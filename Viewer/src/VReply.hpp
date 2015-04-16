@@ -17,7 +17,8 @@ class VReply
 {
 public:
 	enum Status {NoStatus,TaskDone,TaskFailed,TaskCancelled};
-	VReply() : status_(NoStatus){};
+	enum FileReadMode {NoReadMode,LocalReadMode,ServerReadMode,LogServerReadMode};
+	VReply() : status_(NoStatus), readMode_(NoReadMode) {};
 	~VReply() {}
 
 	void reset();
@@ -25,11 +26,15 @@ public:
 	const std::string& errorText() const {return errorText_;}
 	const std::string& text() const {return text_;}
 	Status status() const {return status_;}
+	const std::string fileName() const {return fileName_;}
+	FileReadMode fileReadMode() const {return readMode_;}
 
 	bool textFromFile(const std::string&);
 	void text(const std::vector<std::string>& msg);
 	void text(const std::string s) {text_=s;}
 	void errorText(const std::string s) {errorText_=s;}
+	void fileName(const std::string s) {fileName_=s;}
+	void fileReadMode(FileReadMode m) {readMode_=m;}
 
 	void prependText(const std::string&);
 	void appendText(const std::string&);
@@ -40,6 +45,8 @@ protected:
 	Status status_;
 	std::string errorText_;
 	std::string text_;
+	std::string fileName_;
+	FileReadMode readMode_;
 };
 
 #endif
