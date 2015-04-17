@@ -17,6 +17,8 @@
 #include "TextItemWidget.hpp"
 #include "VInfo.hpp"
 
+class VNode;
+
 class WhyItemWidget : public TextItemWidget, public InfoPanelItem
 {
 public:
@@ -30,7 +32,7 @@ public:
 	void defsChanged(const std::vector<ecf::Aspect::Type>&) {};
 
 private:
-	QString why(Node* n) const;
+	QString why(VNode* n) const;
 
 
 };

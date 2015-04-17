@@ -10,6 +10,7 @@
 #include "WhyItemWidget.hpp"
 
 #include "Node.hpp"
+#include "VNode.hpp"
 
 //========================================================
 //
@@ -26,20 +27,19 @@ QWidget* WhyItemWidget::realWidget()
 	return this;
 }
 
-void WhyItemWidget::reload(VInfo_ptr nodeInfo)
+void WhyItemWidget::reload(VInfo_ptr info)
 {
 	loaded_=true;
-	/*if(nodeInfo.get() != 0 && nodeInfo->isNode())
-	{
-		Node* n=nodeInfo->node();
+	info_=info;
 
-		QString txt;
-		textEdit_->setPlainText(why(n));
+	if(info_ && info_.get() && info_->isNode())
+	{
+		textEdit_->setPlainText(why(info_->node()));
 	}
 	else
 	{
 		textEdit_->clear();
-	}*/
+	}
 }
 
 void WhyItemWidget::clearContents()
@@ -48,12 +48,13 @@ void WhyItemWidget::clearContents()
 	textEdit_->clear();
 }
 
-QString WhyItemWidget::why(Node* n) const
+QString WhyItemWidget::why(VNode* node) const
 {
 	QString s;
 
-	if(n)
+	if(node && node->node())
 	{
+		Node *n=node->node();
 		std::vector<std::string> theReasonWhy;
 		n->bottom_up_why(theReasonWhy);
 		for (std::vector<std::string>::const_iterator it=theReasonWhy.begin(); it != theReasonWhy.end(); ++it)
