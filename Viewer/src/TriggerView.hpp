@@ -8,29 +8,23 @@
 //
 //============================================================================
 
-#ifndef TRIGGERITEMWIDGET_HPP_
-#define TRIGGERITEMWIDGET_HPP_
+#ifndef TRIGGERVIEW_HPP_
+#define TRIGGERVIEW_HPP_
 
-#include <QWidget>
+#include <QGraphicsScene>
+#include <QGraphicsView>
 
-#include "InfoPanelItem.hpp"
-#include "VInfo.hpp"
 
-#include "ui_TriggerItemWidget.h"
-
-class TriggerItemWidget : public QWidget, public InfoPanelItem, protected Ui::TriggerItemWidget
+class TriggerScene : public QGraphicsScene
 {
 public:
-	TriggerItemWidget(QWidget *parent=0);
+	TriggerScene(QWidget *parent=0);
+};
 
-	void reload(VInfo_ptr);
-	QWidget* realWidget();
-	void clearContents();
-
-	void nodeChanged(const VNode*, const std::vector<ecf::Aspect::Type>&) {};
-	void defsChanged(const std::vector<ecf::Aspect::Type>&) {};
-
+class TriggerView : public QGraphicsView
+{
+public:
+	TriggerView(QWidget *parent=0);
 };
 
 #endif
-

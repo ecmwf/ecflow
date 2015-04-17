@@ -10,6 +10,7 @@
 #include "TriggerItemWidget.hpp"
 
 #include "Node.hpp"
+#include "TriggerView.hpp"
 
 //========================================================
 //
@@ -19,6 +20,7 @@
 
 TriggerItemWidget::TriggerItemWidget(QWidget *parent) : QWidget(parent)
 {
+    setupUi(this);
 }
 
 QWidget* TriggerItemWidget::realWidget()

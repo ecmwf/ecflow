@@ -57,6 +57,7 @@ set(viewer_srcs
     TreeNodeView.cpp
     TreeNodeViewDelegate.cpp
     TreeNodeWidget.cpp
+    TriggerView.cpp
     UserMessage.cpp
     VAttribute.cpp
     VConfig.cpp   
@@ -140,6 +141,7 @@ QT4_WRAP_UI       (VIEWER_FORMS_HEADERS CommandDesignerWidget.ui
                         TableNodeWidget.ui
                         TextItemWidget.ui
                         TreeNodeWidget.ui
+                        TriggerItemWidget.ui
                         VariableAddDialog.ui
                         VariablePropDialog.ui
                         VariableItemWidget.ui)
