@@ -88,15 +88,15 @@ def add_remote_linux_64_variables( linux_64 ):
     linux_64.add_variable("NO_OF_CORES","8")
 
 def add_remote_linux_64_lxop_variables( linux_64 ): 
-    linux_64.add_variable("ECF_KILL_CMD",   "/home/ma/emos/bin/trimurti %USER%  %SCHOST% %ECF_RID% %ECF_JOB% %ECF_JOBOUT% kill") 
-    linux_64.add_variable("ECF_JOB_CMD",    "/home/ma/emos/bin/trimurti %USER%  %SCHOST% %ECF_JOB% %ECF_JOBOUT%")
-    linux_64.add_variable("ECF_STATUS_CMD", "/home/ma/emos/bin/trimurti %USER%  %SCHOST% %ECF_RID% %ECF_JOB% %ECF_JOBOUT% stat")
+    linux_64.add_variable("ECF_KILL_CMD",   "/home/ma/emos/bin/trimurti %USER%  %REMOTE_HOST% %ECF_RID% %ECF_JOB% %ECF_JOBOUT% kill") 
+    linux_64.add_variable("ECF_JOB_CMD",    "/home/ma/emos/bin/trimurti %USER%  %REMOTE_HOST% %ECF_JOB% %ECF_JOBOUT%")
+    linux_64.add_variable("ECF_STATUS_CMD", "/home/ma/emos/bin/trimurti %USER%  %REMOTE_HOST% %ECF_RID% %ECF_JOB% %ECF_JOBOUT% stat")
     linux_64.add_variable("COMPILER_TEST_PATH","gcc-4.3/$mode")
     linux_64.add_variable("COMPILER_VERSION","gcc-4.3")
     linux_64.add_variable("TOOLSET","gcc")
     linux_64.add_variable("BOOTSTRAP_TOOLSET","gcc")
     linux_64.add_variable("NO_OF_CORES","8")
-    linux_64.add_variable("SCHOST","lxop")    # Super Computer HOST
+    linux_64.add_variable("REMOTE_HOST","lxop")    # Super Computer HOST
     linux_64.add_variable("QUEUE","build")    # for PBS
     linux_64.add_variable("ECF_OUT","/gpfs/lxop/build/ecflow")
     linux_64.add_variable("ECF_LOGHOST","lxop")   
@@ -257,14 +257,14 @@ def add_remote_cray_variables( cray ):
     # for cray we need to use logsrvr in order to see the job output
     if is_cray_cct(cray):
         cray.add_variable("ECF_LOGHOST","cct")   
-        cray.add_variable("SCHOST","cct")    # Super Computer HOST
+        cray.add_variable("REMOTE_HOST","cct")    # Super Computer HOST
     else:
         if is_cray_cca(cray):
-            cray.add_variable("SCHOST","cca")    # Super Computer HOST
+            cray.add_variable("REMOTE_HOST","cca")    # Super Computer HOST
             cray.add_variable("ECF_LOGHOST","cca-il2")  
         else:
             cray.add_variable("ECF_LOGHOST","ccb-il2")   # or use ccb-log1
-            cray.add_variable("SCHOST","ccb")    # Super Computer HOST
+            cray.add_variable("REMOTE_HOST","ccb")    # Super Computer HOST
 
     cray.add_variable("ECF_LOGPORT","9316")   
     
@@ -273,9 +273,9 @@ def add_remote_cray_variables( cray ):
     cray.add_variable("LOGDIR", "/scratch/ma/ma0/nightly")
     cray.add_variable("ECF_OUT","/scratch/ma/ma0/nightly")
 
-    cray.add_variable("ECF_KILL_CMD",   "/home/ma/emos/bin/trimurti %USER%  %SCHOST% %ECF_RID% %ECF_JOB% %ECF_JOBOUT% kill") 
-    cray.add_variable("ECF_JOB_CMD",    "/home/ma/emos/bin/trimurti %USER%  %SCHOST% %ECF_JOB% %ECF_JOBOUT%")
-    cray.add_variable("ECF_STATUS_CMD", "/home/ma/emos/bin/trimurti %USER%  %SCHOST% %ECF_RID% %ECF_JOB% %ECF_JOBOUT% stat")
+    cray.add_variable("ECF_KILL_CMD",   "/home/ma/emos/bin/trimurti %USER%  %REMOTE_HOST% %ECF_RID% %ECF_JOB% %ECF_JOBOUT% kill") 
+    cray.add_variable("ECF_JOB_CMD",    "/home/ma/emos/bin/trimurti %USER%  %REMOTE_HOST% %ECF_JOB% %ECF_JOBOUT%")
+    cray.add_variable("ECF_STATUS_CMD", "/home/ma/emos/bin/trimurti %USER%  %REMOTE_HOST% %ECF_RID% %ECF_JOB% %ECF_JOBOUT% stat")
 
     cray.add_variable("QUEUE","ns")
     cray.add_variable("ACCOUNT","ecodmdma")
