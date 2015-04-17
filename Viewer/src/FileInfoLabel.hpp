@@ -13,6 +13,8 @@
 
 #include <QLabel>
 
+#include "VDir.hpp"
+
 class VReply;
 
 class FileInfoLabel : public QLabel
@@ -21,6 +23,15 @@ public:
 	FileInfoLabel(QWidget* parent=0);
 
 	void update(VReply*);
+
+};
+
+class DirInfoLabel : public FileInfoLabel
+{
+public:
+	DirInfoLabel(QWidget* parent=0) : FileInfoLabel(parent) {}
+
+	void update(VDir_ptr);
 
 };
 

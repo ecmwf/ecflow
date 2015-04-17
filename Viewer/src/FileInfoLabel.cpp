@@ -10,12 +10,15 @@
 
 #include "FileInfoLabel.hpp"
 
+#include <QVariant>
+
 #include "VFileInfo.hpp"
 #include "VReply.hpp"
 
 FileInfoLabel::FileInfoLabel(QWidget* parent) : QLabel(parent)
 {
-	setObjectName(QString::fromUtf8("fileInfoLabel"));
+	//Define id for the css
+	setProperty("fileInfo","1");
 
     //Set size policy
 	QSizePolicy sizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
@@ -121,4 +124,39 @@ void FileInfoLabel::update(VReply* reply)
 	setText(s);
 }
 
+void DirInfoLabel::update(VDir_ptr dir)
+{
+	if(!dir)
+		clear();
 
+	QString s;
+	QColor col(Qt::black);
+	QColor colText("#000010");
+	QColor colSize(0,0,255);
+	QColor colErr(255,0,0);
+
+	QString dirName=QString::fromStdString(dir->path());
+
+	if(dirName.isEmpty())
+	{
+		s="<b><font color=" + col.name() + ">Directory: </font></b>";
+		s+="<font color=" + colErr.name() + "> ??? </font>";
+		setText(s);
+		return;
+	}
+
+	//Name
+	s="<b><font color=" + col.name() + ">Directory: </font></b>";
+	s+="<font color=" +colText.name() + ">" + dirName + "</font>";
+
+	//Where
+	QString where=QString::fromStdString(dir->where());
+	if(where.isEmpty())
+		where="???";
+
+	s+="<br>";
+	s+="<b><font color=" + col.name() + ">Host: </font></b>";
+	s+="<font color=" +colText.name() + ">" + where + "</font>";
+
+	setText(s);
+}

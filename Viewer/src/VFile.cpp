@@ -41,8 +41,12 @@ VFile::VFile(bool deleteFile) :
 
 VFile::~VFile()
 {
-	//if(deleteFile_)
-	//	 unlink(path_.c_str());
+	if(deleteFile_)
+	{
+		//TODO: add further checks
+		if(!path_.empty() && path_ != "/" && path_.size() > 4)
+			unlink(path_.c_str());
+	}
 }
 
 bool VFile::exists() const

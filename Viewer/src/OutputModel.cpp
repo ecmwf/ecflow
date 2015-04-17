@@ -12,6 +12,7 @@
 #include <QColor>
 #include <QDateTime>
 #include <QDebug>
+#include <QDir>
 
 //=======================================================================
 //
@@ -23,7 +24,6 @@ OutputModel::OutputModel(QObject *parent) :
           QAbstractItemModel(parent)
 
 {
-	//setIconProvider(0);
 }
 
 void OutputModel::setData(VDir_ptr dir)
@@ -91,7 +91,6 @@ QVariant  OutputModel::data(const QModelIndex& index, int role) const
 		default:
 			break;
 		}
-
 	}
 
 	return QVariant();
@@ -140,6 +139,14 @@ QModelIndex OutputModel::parent(const QModelIndex &child) const
 bool OutputModel::hasData() const
 {
 	return dir_ && dir_.get();
+}
+
+std::string OutputModel::fullName(const QModelIndex& index)
+{
+	if(!hasData())
+		return std::string();
+
+	return dir_->fullName(index.row());
 }
 
 QString OutputModel::formatSize(unsigned int size) const

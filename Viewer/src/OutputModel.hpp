@@ -11,7 +11,7 @@
 class OutputModel : public QAbstractItemModel
 {
 public:
-   	OutputModel(QObject *parent=0);
+	OutputModel(QObject *parent=0);
 
    	void setData(VDir_ptr dir);
    	void clearData();
@@ -26,6 +26,8 @@ public:
    	QModelIndex index (int, int, const QModelIndex& parent = QModelIndex() ) const;
    	QModelIndex parent (const QModelIndex & ) const;
 
+   	std::string fullName(const QModelIndex& index);
+
 protected:
    	bool hasData() const;
    	QString formatSize(unsigned int size) const;
@@ -35,9 +37,7 @@ protected:
    	VDir_ptr dir_;
 };
 
-
-//Filter and sorts the output
-
+//Filters and sorts the output
 class OutputSortModel : public QSortFilterProxyModel
 {
 public:

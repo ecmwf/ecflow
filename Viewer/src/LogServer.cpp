@@ -30,6 +30,9 @@
 #include <memory.h>
 #endif
 
+#include <boost/filesystem/operations.hpp>
+#include <boost/filesystem/path.hpp>
+
 #define FAIL(a) do { perror(a); exit(1); } while(0)
 
 LogServer::LogServer(std::string host,std::string cport) :
@@ -205,9 +208,16 @@ VDir_ptr LogServer::getDir(const char* name)
 	FILE* f = fdopen(soc_,"r");
 
 	char buf[2048];
-	std::string strName(name);
 
-	VDir_ptr dir(new VDir(strName));
+	//We suppose name is a file name!
+	//Create the resulting directory object. We might need to
+	//adjust its path later.
+	boost::filesystem::path fp(name);
+	std::string dirName=fp.parent_path().string();
+	VDir_ptr dir(new VDir(dirName));
+
+	//indicates the source of the files
+	dir->where(host_ + "@" + port_);
 
 	while(fgets(buf,sizeof(buf),f))
 	{
@@ -222,11 +232,18 @@ VDir_ptr LogServer::getDir(const char* name)
 				&atime,&mtime,&ctime,
 				name);
 
-		dir->addItem(name,size,mtime);
+		boost::filesystem::path p(name);
+		std::string fileDirName=fp.parent_path().string();
+		std::string fileName=p.leaf().string();
+
+		//Adjust the path in the dir
+		if(fileDirName != dirName)
+		{
+			dir->path(fileDirName,false);
+		}
+
+		dir->addItem(fileName,size,mtime);
 	}
 
 	return dir;
 }
-
-
-

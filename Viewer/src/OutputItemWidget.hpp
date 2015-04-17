@@ -13,6 +13,8 @@
 
 #include "InfoPanelItem.hpp"
 
+#include "VDir.hpp"
+
 #include "ui_OutputItemWidget.h"
 
 class OutputModel;
@@ -20,6 +22,8 @@ class OutputSortModel;
 
 class OutputItemWidget : public QWidget, public InfoPanelItem, protected Ui::OutputItemWidget
 {
+Q_OBJECT
+
 public:
 	OutputItemWidget(QWidget *parent=0);
 
@@ -35,9 +39,15 @@ public:
 	void nodeChanged(const VNode*, const std::vector<ecf::Aspect::Type>&) {};
 	void defsChanged(const std::vector<ecf::Aspect::Type>&) {};
 
+protected Q_SLOTS:
+	void slotOutputSelected(QModelIndex,QModelIndex);
+
 protected:
-	OutputModel* model_;
-	OutputSortModel* sortModel_;
+	void updateDir(VDir_ptr dir);
+	void enableDir(bool);
+
+	OutputModel* dirModel_;
+	OutputSortModel* dirSortModel_;
 };
 
 #endif

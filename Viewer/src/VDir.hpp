@@ -38,15 +38,24 @@ public:
 
 	~VDir();
 
+	const std::string& path() const {return path_;}
+    void path(const std::string path,bool reload=true);
+
+    const std::string& where() const {return where_;}
+    void where(const std::string w) {where_=w;}
+
+    std::string fullName(int row);
+
 	int count() const {return static_cast<int>(items_.size());}
 	void clear();
 	void reload();
-	void addItem(const char*, unsigned int, unsigned int);
+	void addItem(const std::string&, unsigned int, unsigned int);
 	const std::vector<VDirItem*>& items() const {return items_;}
 
 protected:
 	std::string path_;
 	std::string pattern_;
+	std::string where_;
 	std::vector<VDirItem*> items_;
 };
 

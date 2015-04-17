@@ -8,6 +8,7 @@
 //============================================================================
 
 #include "VDir.hpp"
+#include "DirectoryHandler.hpp"
 
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/path.hpp>
@@ -32,17 +33,28 @@ VDir::~VDir()
 	clear();
 }
 
+void VDir::path(const std::string path,bool doReload)
+{
+	path_=path;
+	if(doReload)
+		reload();
+}
+
 void VDir::clear()
 {
 	for(std::vector<VDirItem*>::iterator it=items_.begin(); it != items_.end(); it++)
-			delete (*it);
+		delete (*it);
 }
 
-void VDir::addItem(const char* name, unsigned int size,unsigned int mtime)
+void VDir::addItem(const std::string& name, unsigned int size,unsigned int mtime)
 {
 	VDirItem* item=new VDirItem;
 
-	item->name_=std::string(name);
+	boost::filesystem::path p(name);
+	std::string dirName=p.parent_path().string();
+	std::string fileName=p.leaf().string();
+
+	item->name_=fileName;
 	item->size_=size;
 	item->mtime_ = mtime;
 
@@ -53,6 +65,8 @@ void VDir::addItem(const char* name, unsigned int size,unsigned int mtime)
 void VDir::reload()
 {
 	clear();
+
+	where_="localhost";
 
 	boost::filesystem::path path(path_);
 
@@ -73,4 +87,14 @@ void VDir::reload()
 
         }
     }
+}
+
+std::string VDir::fullName(int row)
+{
+	std::string res;
+	if(row >=0 && row < items_.size())
+	{
+		res=DirectoryHandler::concatenate(path_,items_.at(row)->name_);
+	}
+	return res;
 }

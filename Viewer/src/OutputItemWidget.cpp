@@ -16,6 +16,7 @@
 
 #include <QDebug>
 #include <QFile>
+#include <QItemSelectionModel>
 
 OutputItemWidget::OutputItemWidget(QWidget *parent) :
 	QWidget(parent)
@@ -41,12 +42,16 @@ OutputItemWidget::OutputItemWidget(QWidget *parent) :
 	outputView_->setSortingEnabled(true);
 
 	//The models
-	model_=new OutputModel(this);
-	sortModel_=new OutputSortModel(this);
-	sortModel_->setSourceModel(model_);
-	sortModel_->setDynamicSortFilter(true);
+	dirModel_=new OutputModel(this);
+	dirSortModel_=new OutputSortModel(this);
+	dirSortModel_->setSourceModel(dirModel_);
+	dirSortModel_->setDynamicSortFilter(true);
 
-	outputView_->setModel(sortModel_);
+	outputView_->setModel(dirSortModel_);
+
+	//When the selection changes in the view
+	connect(outputView_->selectionModel(),SIGNAL(currentChanged(QModelIndex,QModelIndex)),
+			this,SLOT(slotOutputSelected(QModelIndex,QModelIndex)));
 }
 
 QWidget* OutputItemWidget::realWidget()
@@ -61,53 +66,62 @@ void OutputItemWidget::reload(VInfo_ptr info)
 
 	if(!info.get())
 	{
-		fileLabel_->clear();
-		textEdit_->clear();
-
-		dirLabel_->clear();
-		model_->clearData();
-
-		dirLabel_->hide();
-		outputView_->hide();
+		clearContents();
 	}
     else
 	{
-	    clearContents();
+	    //Clear the contents
+    	clearContents();
 
 	    //Get file contents
 	    infoProvider_->info(info_);
-	    OutputProvider* op=static_cast<OutputProvider*>(infoProvider_);
 
 	    //Get directory contents
-	    VDir_ptr dir=op->directory();
+	    OutputProvider* op=static_cast<OutputProvider*>(infoProvider_);
+	    updateDir(op->directory());
 
-	    if(dir)
-	    {
-	    	model_->setData(dir);
-	    	dirLabel_->show();
-	    	outputView_->show();
-	    }
-	    else
-	    {
-	    	model_->clearData();
-	    	dirLabel_->hide();
-	    	outputView_->hide();
-	    }
+	}
+}
+void OutputItemWidget::updateDir(VDir_ptr dir)
+{
+	bool status=(dir && dir.get());
+
+	if(status)
+	{
+		dirModel_->setData(dir);
+		dirLabel_->update(dir);
+		dirWidget_->show();
+	}
+	else
+	{
+		dirWidget_->hide();
+		dirLabel_->clear();
+		dirModel_->clearData();
+	}
+}
+
+void OutputItemWidget::enableDir(bool status)
+{
+	if(status)
+	{
+		dirWidget_->show();
+	}
+	else
+	{
+		dirWidget_->hide();
+		dirLabel_->clear();
+		dirModel_->clearData();
 	}
 }
 
 void OutputItemWidget::clearContents()
 {
-	loaded_=false;
+	//loaded_=false;
 
 	fileLabel_->clear();
 	textEdit_->clear();
 
-	dirLabel_->clear();
-	model_->clearData();
-
-	dirLabel_->hide();
-	outputView_->hide();
+	enableDir(false);
 }
 
 void OutputItemWidget::infoReady(VReply* reply)
@@ -121,13 +135,14 @@ void OutputItemWidget::infoReady(VReply* reply)
     	file.open(QIODevice::ReadOnly);
     	textEdit_->setPlainText(file.readAll());
     }
-    //The info is stores as a string in the reply object
+    //If the info is stored as a string in the reply object
     else
     {
     	QString s=QString::fromStdString(reply->text());
     	textEdit_->setPlainText(s);
     }
 
+    //Update the file label
     fileLabel_->update(reply);
 }
 
@@ -142,16 +157,20 @@ void OutputItemWidget::infoFailed(VReply* reply)
     QString s=QString::fromStdString(reply->errorText());
     textEdit_->setPlainText(s);
 
+    //Update the file label
     fileLabel_->update(reply);
 
-    if(reply->fileName().empty())
-    {
-    	dirLabel_->clear();
-    	model_->clearData();
+}
 
-    	dirLabel_->hide();
-    	outputView_->hide();
-    }
+//This slot is called when a file item is selected in the output view.
+void OutputItemWidget::slotOutputSelected(QModelIndex,QModelIndex)
+{
+	QModelIndex current=dirSortModel_->mapToSource(outputView_->currentIndex());
+	std::string fullName=dirModel_->fullName(current);
+
+	//Get the file via the provider. This will call infoReady() etc. in the end.
+	OutputProvider* op=static_cast<OutputProvider*>(infoProvider_);
+	op->file(fullName);
 }
 
 static InfoPanelItemMaker<OutputItemWidget> maker1("output");

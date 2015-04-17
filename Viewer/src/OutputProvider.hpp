@@ -23,9 +23,15 @@ public:
 		 InfoProvider(owner,VTask::OutputTask) {}
 
 	 void visit(VInfoNode*);
+
+	 //Get the contents of the jobout directory
 	 VDir_ptr directory();
 
+	 //Get a particular jobout file
+	 void file(const std::string& fileName);
+
 private:
+	 void fetchFile(ServerHandler *server,VNode *n,const std::string fileName,bool isJobout);
 	 bool fetchFileViaLogServer(VNode *n,const std::string& fileName);
 	 VDir_ptr fetchDirViaLogServer(VNode *n,const std::string& fileName);
 	 VDir_ptr fetchLocalDir(const std::string& path);

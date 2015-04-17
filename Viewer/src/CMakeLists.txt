@@ -101,6 +101,7 @@ QT4_WRAP_CPP(VIEWER_MOC AbstractNodeModel.hpp
                         NodePanel.hpp
                         NodePathWidget.hpp                    
                         NodeWidget.hpp
+                        OutputItemWidget.hpp
                         PropertyDialog.hpp
                         PlainTextSearchLine.hpp
                         ServerHandler.hpp

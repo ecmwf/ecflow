@@ -89,11 +89,10 @@ TextItemWidget {
   File info label
 ------------------------------*/
   
-QLabel#fileInfoLabel {
-     /*border: 1px solid rgb(60,60,60);*/
+QLabel[fileInfo="1"] {
+     border: 1px solid rgb(60,60,60);
      background: rgb(246, 246, 246);  
 }
-  
   
 /*----------------------------
   Variable tree view
