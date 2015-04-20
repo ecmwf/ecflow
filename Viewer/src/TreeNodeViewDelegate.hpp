@@ -55,7 +55,7 @@ protected:
 	QBrush selectBrush_;
 	QPen nodePen_;
 	QPen nodeSelectPen_;
-	QPixmap serverPix_;
+	QPixmap errPix_;
 
 	QMap<QString,AttributeRendererProc> attrRenderers_;
 };

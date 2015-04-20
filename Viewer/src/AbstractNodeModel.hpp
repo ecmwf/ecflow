@@ -34,7 +34,8 @@ public:
    	virtual ~AbstractNodeModel();
 
    	enum CustomItemRole {FilterRole = Qt::UserRole+1, IconRole = Qt::UserRole+2,
-   		                 ServerRole = Qt::UserRole+3, NodeNumRole = Qt::UserRole+4};
+   		                 ServerRole = Qt::UserRole+3, NodeNumRole = Qt::UserRole+4,
+   						 ConnectedRole = Qt::UserRole+5};
 
 	void dataIsAboutToChange();
 	virtual VInfo_ptr nodeInfo(const QModelIndex& index)=0;

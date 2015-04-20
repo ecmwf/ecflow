@@ -26,21 +26,16 @@ TreeNodeViewDelegate::TreeNodeViewDelegate(QWidget *parent) : QStyledItemDelegat
 	nodePen_=QPen(QColor(180,180,180));
 	nodeSelectPen_=QPen(QColor(0,0,0),2);
 
-	QImageReader imgR(":/viewer/server.svg");
+	QImageReader imgR(":/viewer/warning.svg");
 	if(imgR.canRead())
 	{
-		imgR.setScaledSize(QSize(12,12));
+		QFont font;
+		QFontMetrics fm(font);
+		int size=fm.height()+2;
+		imgR.setScaledSize(QSize(size,size));
 		QImage img=imgR.read();
-		serverPix_=QPixmap(QPixmap::fromImage(img));
+		errPix_=QPixmap(QPixmap::fromImage(img));
 	}
-
-	/*QString group("itemview_main");
-	editPen_=QPen(MvQTheme::colour(group,"edit_pen"));
-	editBrush_=MvQTheme::brush(group,"edit_brush");
-	hoverPen_=QPen(MvQTheme::colour(group,"hover_pen"));
-	hoverBrush_=MvQTheme::brush(group,"hover_brush");
-	selectPen_=QPen(MvQTheme::colour(group,"select_pen"));
-	selectBrush_=MvQTheme::brush(group,"select_brush");*/
 
 	attrRenderers_["meter"]=&TreeNodeViewDelegate::renderMeter;
 	attrRenderers_["label"]=&TreeNodeViewDelegate::renderLabel;
@@ -165,14 +160,14 @@ void TreeNodeViewDelegate::renderServer(QPainter *painter,const QModelIndex& ind
 		fillRect.adjust(0,1,0,-1);
 
 	//Pixmap rect
-	QRect pixRect = QRect(fillRect.left()+offset,
-			fillRect.top()+(fillRect.height()-serverPix_.height())/2,
-			serverPix_.width(),
-			serverPix_.height());
+	//QRect pixRect = QRect(fillRect.left()+offset,
+	//		fillRect.top()+(fillRect.height()-serverPix_.height())/2,
+	//		serverPix_.width(),
+	//		serverPix_.height());
 
 	//The text rectangle
 	QRect textRect = fillRect;
-	textRect.setLeft(pixRect.right()+offset);
+	textRect.setLeft(fillRect.left()+offset);
 	QFont font;
 
 	QFontMetrics fm(font);
@@ -181,6 +176,17 @@ void TreeNodeViewDelegate::renderServer(QPainter *painter,const QModelIndex& ind
 
 	//Adjust the filled rect width
 	fillRect.setRight(textRect.right()+offset);
+
+	//The pixmap
+	QRect pixRect;
+	bool connected=index.data(AbstractNodeModel::ConnectedRole).toBool();
+	if(!connected)
+	{
+		pixRect = QRect(fillRect.right()+fm.width('A'),
+				fillRect.top()+(fillRect.height()-errPix_.height())/2,
+				errPix_.width(),
+				errPix_.height());
+	}
 
 	//The number rectangle
 	int num=index.data(AbstractNodeModel::NodeNumRole).toInt();
@@ -191,9 +197,15 @@ void TreeNodeViewDelegate::renderServer(QPainter *painter,const QModelIndex& ind
 	fm=QFontMetrics(numFont);
 	int numWidth=fm.width(numTxt);
 	QRect numRect = textRect;
-	numRect.setLeft(fillRect.right()+fm.width('A'));
+	if(!connected)
+	{
+		numRect.setLeft(pixRect.right()+fm.width('A'));
+	}
+	else
+	{
+		numRect.setLeft(fillRect.right()+fm.width('A'));
+	}
 	numRect.setWidth(numWidth);
-
 
 	//Define clipping
 	int rightPos=numRect.right()+1;
@@ -210,9 +222,6 @@ void TreeNodeViewDelegate::renderServer(QPainter *painter,const QModelIndex& ind
 	painter->setPen((option.state & QStyle::State_Selected)?nodeSelectPen_:nodePen_);
 	painter->drawRect(fillRect);
 
-	//Draw pixmap
-	painter->drawPixmap(pixRect,serverPix_);
-
 	//Draw text
 	if(bg == QColor(Qt::red))
 			painter->setPen(Qt::white);
@@ -221,10 +230,19 @@ void TreeNodeViewDelegate::renderServer(QPainter *painter,const QModelIndex& ind
 
 	painter->drawText(textRect,Qt::AlignLeft | Qt::AlignVCenter,text);
 
+	//Draw pixmap if needed
+	if(!connected)
+	{
+		painter->drawPixmap(pixRect,errPix_);
+	}
+
 	//Draw number
-	painter->setPen(Qt::black);
-	painter->setFont(numFont);
-	painter->drawText(numRect,Qt::AlignLeft | Qt::AlignVCenter,numTxt);
+	if(connected)
+	{
+		painter->setPen(Qt::black);
+		painter->setFont(numFont);
+		painter->drawText(numRect,Qt::AlignLeft | Qt::AlignVCenter,numTxt);
+	}
 
 	if(setClipRect)
 	{
@@ -569,34 +587,49 @@ void TreeNodeViewDelegate::renderVar(QPainter *painter,QStringList data,const QS
 
 void TreeNodeViewDelegate::renderGenvar(QPainter *painter,QStringList data,const QStyleOptionViewItemV4& option) const
 {
-	/*QString text;
+	QString text;
 
 	if(data.count() >1)
 		text+=data.at(1) + "=";
 	if(data.count() > 2)
 		text+=data.at(2);
 
-	QFont font;
-	QFontMetrics fm(font);
-	int textWidth=fm.width(text);
 	int offset=2;
 
+	//The border rect (we will adjust its  width)
+	QRect fillRect=option.rect.adjusted(offset,1,0,-1);
+	if(option.state & QStyle::State_Selected)
+				fillRect.adjust(0,1,0,-1);
+
+	//The text rectangle
+	QFont font;
+	//nameFont.setBold(true);
+	QFontMetrics fm(font);
+	int textWidth=fm.width(text);
+	QRect textRect = fillRect.adjusted(offset,0,0,0);
 	textRect.setWidth(textWidth);
-	QRect fillRect=textRect.adjusted(-offset,1,2*offset,-2);
-	textRect.moveLeft(textRect.x()+offset);
 
-	if(fillRect.left() < optRect.right())
+	//Adjust the filled rect width
+	fillRect.setRight(textRect.right()+offset);
+
+	//Define clipping
+	int rightPos=fillRect.right()+1;
+	const bool setClipRect = rightPos > option.rect.right();
+	if(setClipRect)
 	{
-		if(textRect.left() < optRect.right())
-		{
-			if(textRect.right()>=optRect.right())
-				textRect.setRight(optRect.right());
+		painter->save();
+		painter->setClipRect(option.rect);
+	}
 
-			painter->setPen(Qt::blue);
+	//Draw text
+	painter->setPen(Qt::blue);
+	painter->setFont(font);
+	painter->drawText(textRect,Qt::AlignLeft | Qt::AlignVCenter,text);
 
-			painter->drawText(textRect,Qt::AlignLeft | Qt::AlignVCenter,text);
-		}
-	}*/
+	if(setClipRect)
+	{
+		painter->restore();
+	}
 }
 
 void TreeNodeViewDelegate::renderLimit(QPainter *painter,QStringList data,const QStyleOptionViewItemV4& option) const

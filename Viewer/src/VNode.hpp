@@ -71,10 +71,10 @@ public:
 
     virtual std::string absNodePath() const;
     QString name() const;
-    QString stateName();
-    QString defaultStateName();
-    bool isSuspended() const;
-    QColor  stateColour() const;
+    virtual  QString stateName();
+    virtual QString defaultStateName();
+    virtual bool isSuspended() const;
+    virtual QColor  stateColour() const;
 
     virtual LogServer_ptr logServer();
 
@@ -93,6 +93,8 @@ protected:
 
 class VNodeRoot : public VNode
 {
+	friend class ServerHandler;
+
 public:
 	VNodeRoot(ServerHandler*);
 	~VNodeRoot();
@@ -103,14 +105,24 @@ public:
 	void beginUpdate(VNode* node,const std::vector<ecf::Aspect::Type>& aspect,VNodeChange&);
 	void endUpdate(VNode* node,const std::vector<ecf::Aspect::Type>& aspect);
 
+	QString stateName();
+	QString defaultStateName();
+	bool isSuspended() const;
+	QColor  stateColour() const;
+
 	std::string findVariable(const std::string& key,bool substitute=false) const;
 	//Find a variable in the Defs. Both the user_variables and the
 	//server variables are searched.
 	std::string findInheritedVariable(const std::string& key,bool substitute=false) const;
 
-	 LogServer_ptr logServer();
+	LogServer_ptr logServer();
 
 protected:
+	//Clear contents and rebuild the whole tree.
+	void scan();
+
+private:
+	void clear();
     void scan(VNode*);
     void deleteNode(VNode* node);
 

@@ -43,7 +43,7 @@ VFile::~VFile()
 {
 	if(deleteFile_)
 	{
-		//TODO: add further checks
+		//TODO: add further/better checks
 		if(!path_.empty() && path_ != "/" && path_.size() > 4)
 			unlink(path_.c_str());
 	}

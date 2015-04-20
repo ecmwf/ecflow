@@ -25,6 +25,7 @@ public:
 
 	static QString formatSize(unsigned int size);
 	static QString formatDate(const std::time_t& t);
+	static QString formatDateAgo(const std::time_t& t);
 };
 
 #endif

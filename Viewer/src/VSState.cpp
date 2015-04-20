@@ -29,11 +29,10 @@
 std::map<std::string,VSState*> VSState::items_;
 static std::map<SState::State,VSState*> stateMap_;
 
-
-static VSState halterSt("halted",SState::HALTED);
+static VSState haltedSt("halted",SState::HALTED);
 static VSState runningSt("running",SState::RUNNING);
 static VSState shutSt("shutdown",SState::SHUTDOWN);
-
+static VSState disconnectedSt("disconnected");
 
 VSState::VSState(const std::string& name,SState::State Sstate) :
 		VParam(name),
@@ -41,6 +40,13 @@ VSState::VSState(const std::string& name,SState::State Sstate) :
 {
 	items_[name]=this;
 	stateMap_[Sstate]=this;
+}
+
+VSState::VSState(const std::string& name) :
+		VParam(name),
+		prop_(0)
+{
+	items_[name]=this;
 }
 
 void VSState::setProperty(VProperty* prop)
@@ -56,17 +62,25 @@ void VSState::setProperty(VProperty* prop)
     }    
 }
 
-
 //===============================================================
 //
 // Static methods
 //
 //===============================================================
 
+bool VSState::isRunningState(ServerHandler* s)
+{
+	return toState(s)==items_["running"];
+}
+
+
 VSState* VSState::toState(ServerHandler* s)
 {
 	if(!s)
 		return NULL;
+
+	if(!s->connected())
+		return items_["disconnected"];
 
 	std::map<SState::State,VSState*>::const_iterator it=stateMap_.find(s->serverState());
 	if(it != stateMap_.end())

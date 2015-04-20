@@ -16,6 +16,7 @@
 #include "ServerHandler.hpp"
 #include "VAttribute.hpp"
 #include "VNState.hpp"
+#include "VSState.hpp"
 
 //=================================================
 // VNode
@@ -290,35 +291,33 @@ void VNode::triggers(TriggerList& tlr)
 
 
 //=================================================
+//
 // VNodeRoot - this represents the server
+//
 //=================================================
 
-VNodeRoot::VNodeRoot(ServerHandler* server) : VNode(0,0), server_(server), totalNum_(0)
+VNodeRoot::VNodeRoot(ServerHandler* server) :
+	VNode(0,0),
+	server_(server),
+	totalNum_(0)
 {
-	ServerDefsAccess defsAccess(server_);  // will reliquish its resources on destruction
-	defs_ptr defs = defsAccess.defs();
-	if (!defs)
-		return;
-
-	const std::vector<suite_ptr> &suites = defs->suiteVec();
-	for(unsigned int i=0; i < suites.size();i++)
-	{
-		VNode* vn=new VNode(this,suites.at(i).get());
-		totalNum_++;
-		scan(vn);
-	}
 }
 
 VNodeRoot::~VNodeRoot()
+{
+	clear();
+}
+
+void VNodeRoot::clear()
 {
 	for(std::vector<VNode*>::const_iterator it=children_.begin(); it != children_.end(); it++)
 	{
 		deleteNode(*it);
 	}
-
 	//A sanity check
 	assert(totalNum_ == 0);
 }
+
 
 std::string VNodeRoot::absNodePath() const
 {
@@ -356,6 +355,31 @@ std::string VNodeRoot::findVariable(const std::string& key,bool substitute) cons
 std::string VNodeRoot::findInheritedVariable(const std::string& key,bool substitute) const
 {
 	return findVariable(key,substitute);
+}
+
+//Clear the contents and rebuild the whole tree.
+void VNodeRoot::scan()
+{
+	//Clear the contents
+	clear();
+
+	if(server_->connected())
+	{
+		//Get the Defs
+		ServerDefsAccess defsAccess(server_);  // will reliquish its resources on destruction
+		defs_ptr defs = defsAccess.defs();
+		if (!defs)
+			return;
+
+		//Scan the suits.This will recursively scan all nodes in the tree.
+		const std::vector<suite_ptr> &suites = defs->suiteVec();
+		for(unsigned int i=0; i < suites.size();i++)
+		{
+			VNode* vn=new VNode(this,suites.at(i).get());
+			totalNum_++;
+			scan(vn);
+		}
+	}
 }
 
 void VNodeRoot::scan(VNode *parent)
@@ -511,4 +535,33 @@ LogServer_ptr VNodeRoot::logServer()
 	return lsv;
 }
 
-//void* graphic_ptr() const { return  graphic_ptr_;}
+QString VNodeRoot::stateName()
+{
+	if(VSState::isRunningState(server_))
+	{
+		return VNState::toName(server_);
+	}
+
+	return VNState::toName(server_);
+}
+
+QString VNodeRoot::defaultStateName()
+{
+	return stateName();
+}
+
+bool VNodeRoot::isSuspended() const
+{
+	return false;
+}
+
+QColor  VNodeRoot::stateColour() const
+{
+	if(VSState::isRunningState(server_))
+	{
+		return VNState::toColour(server_);
+	}
+
+	return VSState::toColour(server_);
+}
+

@@ -22,6 +22,7 @@
 #include "VAttribute.hpp"
 #include "VNode.hpp"
 #include "VIcon.hpp"
+#include "VFileInfo.hpp"
 #include "VModelData.hpp"
 
 //=======================================
@@ -148,7 +149,8 @@ QVariant TreeNodeModel::data( const QModelIndex& index, int role ) const
 	//the cases where the default should be used.
 	if( !index.isValid() ||
 	   (role != Qt::DisplayRole && role != Qt::ToolTipRole && role != Qt::BackgroundRole &&
-	    role != FilterRole && role != IconRole && role != ServerRole && role != NodeNumRole))
+	    role != FilterRole && role != IconRole && role != ServerRole && role != NodeNumRole &&
+	    role != ConnectedRole))
     {
 		return QVariant();
 	}
@@ -169,7 +171,7 @@ QVariant TreeNodeModel::data( const QModelIndex& index, int role ) const
 	}
 
 	//We only continue for the relevant roles for nodes and attributes
-	if(role == NodeNumRole)
+	if(role == NodeNumRole || role == ConnectedRole)
 	{
 		return QVariant();
 	}
@@ -204,7 +206,7 @@ QVariant TreeNodeModel::serverData(const QModelIndex& index,int role) const
 	else if(index.column() == 0 && role == Qt::BackgroundRole)
 	{
 		if(ServerHandler *server=indexToRealServer(index))
-				return VSState::toColour(server);
+				return server->vRoot()->stateColour();
 		else
 		    return Qt::gray;
 	}
@@ -214,9 +216,9 @@ QVariant TreeNodeModel::serverData(const QModelIndex& index,int role) const
 		if(ServerHandler *server=indexToRealServer(index))
 		{
 				if(index.column() == 0)
-					return QString::fromStdString(server->longName());
+					return QString::fromStdString(server->name());
 				else if(index.column() == 1)
-					return VSState::toName(server);
+					return server->vRoot()->stateName();
 		}
 	}
 	else if(role == NodeNumRole)
@@ -226,6 +228,37 @@ QVariant TreeNodeModel::serverData(const QModelIndex& index,int role) const
 			return server->totalNodeNum();
 		}
 	}
+	else if(role == ConnectedRole)
+	{
+		if(ServerHandler *server=indexToRealServer(index))
+		{
+			return server->connected();
+		}
+	}
+	else if(role == Qt::ToolTipRole)
+	{
+		if(ServerHandler *server=indexToRealServer(index))
+		{
+			QString txt="<b>Server</b>: " + QString::fromStdString(server->name()) + "<br>";
+			txt+="<b>Host</b>: " + QString::fromStdString(server->host());
+			txt+=" <b>Port</b>: " + QString::fromStdString(server->port()) + "<br>";
+
+			if(server->connected())
+			{
+				txt+="<b>Server status</b>: " + VSState::toName(server) + "<br>";
+				txt+="<b>Status</b>: " + VNState::toName(server) + "<br>";
+				txt+="<b>Total number of nodes</b>: " +  QString::number(server->vRoot()->totalNum());
+			}
+			else
+			{
+				txt+="<b>Server is disconnected!</b><br>";
+				txt+="<b>Last connection attempt</b>: " + VFileInfo::formatDateAgo(server->lastConnectAttempt()) + "<br>";
+				txt+="<b>Error message</b>:<br>" +  QString::fromStdString(server->connectError());
+			}
+			return txt;
+		}
+	}
+
 	return QVariant();
 }
 

@@ -14,6 +14,7 @@
 #include <utility>
 #include <string>
 #include <vector>
+#include <ctime>
 
 #include "Defs.hpp"
 #include "AbstractObserver.hpp"
@@ -57,7 +58,11 @@ public:
 		Node* findNode(int globalIndex);
 		Node* findNode(int globalIndex,int& total,Node *parent);
 
+		bool connected() {return connected_;}
 		bool communicating() {return communicating_;}
+		std::time_t lastConnectAttempt() const {return lastConnectAttempt_;}
+		std::time_t lastContactTime() const {return lastContactTime_;}
+		const std::string& connectError() const {return connectError_;}
 
 		int update();
 		void setUpdatingStatus(bool newStatus) {updating_ = newStatus;}
@@ -66,8 +71,6 @@ public:
 		VNodeRoot* vRoot() const {return vRoot_;}
 		SState::State serverState();
 		NState::State state(bool& isSuspended);
-
-		void resetRefreshTimer();
 
 		void runCommand(const std::vector<std::string>& cmd);
 		void run(VTask_ptr);
@@ -110,6 +113,7 @@ protected:
 		ServerHandler(const std::string& name,const std::string& host,const std::string&  port);
 		~ServerHandler();
 
+		void connectToServer();
 		void setCommunicatingStatus(bool c) {communicating_ = c;}
 		void clientTaskFinished(VTask_ptr task,const ServerReply& serverReply);
 
@@ -120,6 +124,7 @@ protected:
 		std::string port_;
 		ClientInvoker* client_;
 		std::string longName_;
+		bool connected_;
 		bool updating_;
 		bool communicating_;
 		std::vector<NodeObserver*> nodeObservers_;
@@ -143,6 +148,8 @@ private Q_SLOTS:
 		void slotDefsChanged(const std::vector<ecf::Aspect::Type>& a);
 
 private:
+		void stopRefreshTimer();
+		void resetRefreshTimer();
 
 		defs_ptr defs();
 
@@ -156,6 +163,9 @@ private:
 		int refreshIntervalInSeconds_;
 		QTimer refreshTimer_;
 
+		std::time_t lastConnectAttempt_;
+		std::time_t lastContactTime_;
+		std::string connectError_;
 };
 
 // --------------------------------------------------------------

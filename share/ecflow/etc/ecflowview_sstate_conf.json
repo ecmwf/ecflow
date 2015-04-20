@@ -8,7 +8,7 @@
                 "tooltip": "halted",
                 "fill_colour" : {
                     "label" : "Colour",
-                    "default": "rgb(220,220,220)"
+                    "default": "rgb(238,130,238)"
                 },
                 "font_colour" : {
                     "label" : "Font colour",
@@ -21,7 +21,7 @@
                 "tooltip": "shutdown",
                 "fill_colour" : {
                     "label" : "Colour",
-                    "default": "rgb(220,220,220)"
+                    "default": "rgb(255,102,102)"
                 },
                 "font_colour" : {
                     "label" : "Font colour",
@@ -34,7 +34,19 @@
                 "tooltip": "running",
                 "fill_colour" : {
                     "label" : "Colour",
-                    "default": "rgb(0,220,0)"
+                    "default": "rgb(0,255,0)"
+                },
+                "font_colour" : {
+                    "label" : "Font colour",
+                    "default": "rgb(0,0,0)"
+                }
+            },
+            "disconnected": {
+                "label": "Disconnected",
+                "tooltip": "disconnected",
+                "fill_colour" : {
+                    "label" : "Colour",
+                    "default": "rgb(200,200,200)"
                 },
                 "font_colour" : {
                     "label" : "Font colour",

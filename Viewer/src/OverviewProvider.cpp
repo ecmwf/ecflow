@@ -13,6 +13,7 @@
 #include "VNode.hpp"
 #include "VNState.hpp"
 #include "VSState.hpp"
+#include "VFileInfo.hpp"
 
 OverviewProvider::OverviewProvider(InfoPresenter* owner) : InfoProvider(owner,VTask::NoTask)
 {
@@ -32,6 +33,12 @@ void OverviewProvider::visit(VInfoServer* info)
 	std::stringstream ss;
 	serverInfo(info,ss);
 	reply_->text(ss.str());
+
+	//If not connected we reply immediately!
+	if(!info->server()->connected())
+	{
+		owner_->infoReady(reply_);
+	}
 
 	//Define a task for getting the stats from the server.
 	//We need ClientInvoker for this
@@ -84,11 +91,26 @@ void  OverviewProvider::taskChanged(VTask_ptr task)
 
 void OverviewProvider::serverInfo(VInfoServer* info,std::stringstream& f)
 {
+	static const std::string inc = "  ";
+
 	ServerHandler *server=info->server();
 	if(!server) return;
-	if(!ServerDefsAccess(server).defs()) return;
 
-	static const std::string inc = "  ";
+	//If the server is not connected!!
+	if(!server->connected())
+	{
+		f << "Server is disconnected!" << "\n";
+		f << inc << "Name    : " << server->name() << "\n";
+		f << inc << "Host    : " << server->host() << "\n";
+		f << inc << "Port    : " << server->port() << "\n";
+		f << inc << "Last connection attempt  : " << VFileInfo::formatDateAgo(server->lastConnectAttempt()).toStdString() << "\n";
+		f << "\n";
+		f << "Error message:\n";
+		f << server->connectError();
+		return;
+	}
+
+	if(!ServerDefsAccess(server).defs()) return;
 
 	using namespace boost::posix_time;
 	using namespace boost::gregorian;

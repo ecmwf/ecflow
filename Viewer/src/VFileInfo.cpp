@@ -10,6 +10,7 @@
 #include "VFileInfo.hpp"
 
 #include <QDateTime>
+#include <QObject>
 
 QString  VFileInfo::formatSize() const
 {
@@ -56,3 +57,46 @@ QString VFileInfo::formatDate(const std::time_t& t)
   	QDateTime dt=QDateTime::fromTime_t(t);
 	return dt.toString("yyyy-MM-dd hh:mm");
 }
+
+QString VFileInfo::formatDateAgo(const std::time_t& t)
+{
+	QString str=QObject::tr("Right now");
+
+	time_t now = time(0);
+
+	int delta  = now - t;
+	if(delta<0) delta = 0;
+
+	if(delta ==1)
+		str=QObject::tr("1 second ago");
+
+	else if(delta >=1  && delta < 60)
+	{
+		str=QString::number(delta) + QObject::tr(" second") +  ((delta==1)?"":"s") +  QObject::tr(" ago");
+	}
+
+	else if(delta >= 60 && delta < 60*60)
+	{
+		int val=delta/60;
+		str=QString::number(val) + QObject::tr(" minute") +  ((val==1)?"":"s") +  QObject::tr(" ago");
+	}
+
+	else if(delta >= 60*60 && delta < 60*60*24)
+	{
+		int val=delta/(60*60);
+		str=QString::number(val) + QObject::tr(" hour") +  ((val==1)?"":"s") +  QObject::tr(" ago");
+	}
+
+	else if(delta >= 60*60*24)
+	{
+		int val=delta/(60*60*24);
+		str=QString::number(val) + QObject::tr(" day") +  ((val==1)?"":"s") +  QObject::tr(" ago");
+	}
+
+	return str;
+}
+
+
+
+
+

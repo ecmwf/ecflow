@@ -45,74 +45,52 @@ ServerHandler::ServerHandler(const std::string& name,const std::string& host, co
    host_(host),
    port_(port),
    client_(0),
+   connected_(false),
    updating_(false),
    communicating_(false),
    comQueue_(0),
    refreshIntervalInSeconds_(60),
    readFromDisk_(true)
 {
+	//Create longname
 	longName_=host_ + "@" + port_;
 
+	//Create the client invoker
 	client_=new ClientInvoker(host,port);
 	//client_->allow_new_client_old_server(1);
 	//client_->allow_new_client_old_server(9);
 	client_->set_retry_connection_period(1);
 	client_->set_throw_on_error(true);
 
-	try
-	{
-		std::string server_version;
-		client_->server_version();
-		server_version = client_->server_reply().get_string();
+	//Create the vnode root. This will represent the node tree in the viewer, but
+	//at this point it is empty.
+	vRoot_=new VNodeRoot(this);
 
-		UserMessage::message(UserMessage::DBG, false,
-			       std::string("ecflow server version: ") 
-			       + server_version);
+	//Connect up the timer for refreshing the server info. The timer has not
+	//started yet.
+	connect(&refreshTimer_, SIGNAL(timeout()),
+			this, SLOT(refreshServerInfo()));
 
-		//if (!server_version.empty()) return;
+	//Try to connect to the server
+	connectToServer();
 
-        UserMessage::message(UserMessage::DBG, false, std::string("sync_local begin"));
-        client_->sync_local();
-        UserMessage::message(UserMessage::DBG, false, std::string("sync_local end"));
+	//We might have not been able to connect to the server. This is indicated by
+	//the value of connected_. However, we create all all the objects handled by the
+	//ServerHandler, but we need to be sure that they are all aware of the value
+	//of connected_ and do their tasks accordingly.
 
-	}
-	catch ( ... )
-	{ } /* 20150410 server may be down */
-
-	//Set server host and port in defs
-	{
-		ServerDefsAccess defsAccess(this);  // will reliquish its resources on destruction
-		defs_ptr defs = defsAccess.defs();
-		if(defs != NULL)
-		{
-			ServerState& st=defs->set_server();
-			st.hostPort(std::make_pair(host_,port_));
-			st.add_or_update_user_variables("nameInViewer",name_);
-		}
-	}
-
-	// we'll need to pass std::strings via signals and slots for error messages
-	if (servers_.empty())
+	//We will need to pass various non-Qt types via signals and slots for error messages.
+	//So we need to register these types.
+	if(servers_.empty())
 	{
 		qRegisterMetaType<std::string>("std::string");
 		qRegisterMetaType<QList<ecf::Aspect::Type> >("QList<ecf::Aspect::Type>");
 		qRegisterMetaType<std::vector<ecf::Aspect::Type> >("std::vector<ecf::Aspect::Type>");
 	}
 
-	servers_.push_back(this);
-
-	// populate the map of server commands - in the future this will be done when
-	// the configuration file is parsed
-	//if (commands_.empty())
-	//{
-	//	addServerCommand("Requeue", "ecflow_client --requeue force <full_name>");
-	//	addServerCommand("Execute", "ecflow_client --run <full_name>");
-	//}
-
-
-	// XXX we may not always want to create a thread here because of resource
+	//NOTE: we may not always want to create a thread here because of resource
 	// issues; another strategy would be to create threads on demand, only
-	// when server communication is about to start
+	// when server communication is about to start.
 
 	//We create a ServerComThread here. It is not a member, because we will
 	//pass on its ownership to ServerComQueue.
@@ -124,27 +102,18 @@ ServerHandler::ServerHandler(const std::string& name,const std::string& host, co
 	//The ServerComThread is observing the actual server and its nodes. When there is a change it
 	//emits a signal a notifies the ServerHandler about it.
 	connect(comThread,SIGNAL(nodeChanged(const Node*, const std::vector<ecf::Aspect::Type>&)),
-				 this,SLOT(slotNodeChanged(const Node*, const std::vector<ecf::Aspect::Type>&)));
+					 this,SLOT(slotNodeChanged(const Node*, const std::vector<ecf::Aspect::Type>&)));
 
 	connect(comThread,SIGNAL(defsChanged(const std::vector<ecf::Aspect::Type>&)),
-					 this,SLOT(slotDefsChanged(const std::vector<ecf::Aspect::Type>&)));
+						 this,SLOT(slotDefsChanged(const std::vector<ecf::Aspect::Type>&)));
 
-	//connect(comThread(), SIGNAL(errorMessage(std::string)),
-	//		this, SLOT(errorMessage(std::string)));
-
-	//Create queue for the tasks to be sent to the client (via the ServerComThread)! It will
+	//Create the queue for the tasks to be sent to the client (via the ServerComThread)! It will
 	//take ownership of the ServerComThread.
 	comQueue_=new ServerComQueue (this,client_,comThread);
 
 
-	// set the timer for refreshing the server info
-   	connect(&refreshTimer_, SIGNAL(timeout()), this, SLOT(refreshServerInfo()));
-	resetRefreshTimer();
-
-	//Create vnode tree
-	// try { if (client_->pingServer()) // ???
-	vRoot_=new VNodeRoot(this);
-	// } catch ( ... ) {}
+	//Add this instance to the servers_ list.
+	servers_.push_back(this);
 }
 
 ServerHandler::~ServerHandler()
@@ -158,12 +127,90 @@ ServerHandler::~ServerHandler()
 
 	if (comQueue_)
 			delete comQueue_;
+
+	//Remove itself from the server vector
+	std::vector<ServerHandler*>::iterator it=std::find(servers_.begin(),servers_.end(),this);
+	if(it != servers_.end())
+			servers_.erase(it);
+}
+
+void ServerHandler::connectToServer()
+{
+	if(connected_)
+		return;
+
+	//Clear tyhe connect error text message
+	connectError_.clear();
+
+	//Register time
+	lastConnectAttempt_=time(0);
+
+	//Sync the client. This might fail e.g. because the the server may be down, or
+	//there is a network error.
+	try
+	{
+		//Get the server version
+		std::string server_version;
+		client_->server_version();
+		server_version = client_->server_reply().get_string();
+
+		UserMessage::message(UserMessage::DBG, false,
+			       std::string("ecflow server version: ") + server_version);
+
+		//if (!server_version.empty()) return;
+
+        UserMessage::message(UserMessage::DBG, false, std::string("sync_local begin"));
+        client_->sync_local();
+        UserMessage::message(UserMessage::DBG, false, std::string("sync_local end"));
+
+    	//Here we can be sure that we can connect to the server.
+        connected_=true;
+	}
+	catch(std::exception& e)
+	{
+		connectError_= e.what();
+		UserMessage::message(UserMessage::DBG, false, std::string("failed to sync: ") + e.what());
+	}
+
+	//If we could connect to the server.
+	if(connected_)
+	{
+		//Set server host and port in defs. It is used to find the server of
+		//a given node in the viewer.
+		ServerDefsAccess defsAccess(this);  // will reliquish its resources on destruction
+		defs_ptr defs = defsAccess.defs();
+		if(defs != NULL)
+		{
+			ServerState& st=defs->set_server();
+			st.hostPort(std::make_pair(host_,port_));
+			st.add_or_update_user_variables("nameInViewer",name_);
+		}
+	}
+
+	//If we could connect to the server.
+	if(connected_)
+	{
+		//(Re-)populate the vnode tree.
+		vRoot_->scan();
+
+		//Resurrect the timer
+		resetRefreshTimer();
+	}
+}
+
+void ServerHandler::stopRefreshTimer()
+{
+	refreshTimer_.stop();
 }
 
 void ServerHandler::resetRefreshTimer()
 {
-	// interval of -1 means don't use a timer
+	//If we are not connected to the server the
+	//timer should not run.
+	if(!connected_)
+		refreshTimer_.stop();
 
+	// interval of -1 means don't use a timer
 	if (refreshIntervalInSeconds_ != -1)
 	{
 		refreshTimer_.stop();
@@ -554,8 +601,13 @@ int ServerHandler::update()
 {
 	int err = 0; // do we need this?
 
-	//We add and update task to the queue.
-	comQueue_->addNewsTask();
+	//We add and update task to the queue. On startup this function can be called
+	//before the comQueue_ was creteted so we need to check if it exists.
+
+	if(comQueue_)
+	{
+		comQueue_->addNewsTask();
+	}
 
 	/*
 	// do not try to update if already updating

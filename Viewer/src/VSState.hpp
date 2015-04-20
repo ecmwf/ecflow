@@ -25,9 +25,11 @@ class VSState : public VParam
 {
 public:
 	VSState(const std::string& name,SState::State);
+	VSState(const std::string& name);
 
     void setProperty(VProperty*);
     
+    static bool isRunningState(ServerHandler*);
 	static QString toName(ServerHandler*);
 	static QColor  toColour(ServerHandler* n);
 	static VSState* toState(ServerHandler* n);
