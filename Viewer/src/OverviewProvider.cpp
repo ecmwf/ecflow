@@ -38,6 +38,7 @@ void OverviewProvider::visit(VInfoServer* info)
 	if(!info->server()->connected())
 	{
 		owner_->infoReady(reply_);
+		return;
 	}
 
 	//Define a task for getting the stats from the server.

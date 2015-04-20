@@ -1224,6 +1224,9 @@ ServerComQueue::~ServerComQueue()
 
 void ServerComQueue::addTask(VTask_ptr task)
 {
+	if(!server_->connected())
+		return;
+
 	tasks_.push_back(task);
 	if(!timer_->isActive())
 	{
@@ -1233,6 +1236,9 @@ void ServerComQueue::addTask(VTask_ptr task)
 
 void ServerComQueue::addNewsTask()
 {
+	if(!server_->connected())
+		return;
+
 	VTask_ptr task=VTask::create(VTask::NewsTask);
 	tasks_.push_back(task);
 	if(!timer_->isActive())
@@ -1243,6 +1249,9 @@ void ServerComQueue::addNewsTask()
 
 void ServerComQueue::addSyncTask()
 {
+	if(!server_->connected())
+		return;
+
 	VTask_ptr task=VTask::create(VTask::SyncTask);
 	tasks_.push_back(task);
 	if(!timer_->isActive())
