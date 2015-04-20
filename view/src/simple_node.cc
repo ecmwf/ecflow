@@ -431,6 +431,10 @@ void simple_node::info(std::ostream& f)
          if (ecf ) {
             gvar.clear();
 
+	    DState::State defstatus = ecf->defStatus();
+	    if (defstatus != DState::QUEUED && defstatus != DState::UNKNOWN)
+	      f << inc << "# defstatus " << DState::toString(defstatus) << "\n";
+
 	    if (ecf->hasTimeDependencies()) {	      
 	      f << inc << "# time-date-dependencies: ";
 	      if (ecf->isTimeFree()) f << "free\n"; 
