@@ -11,14 +11,28 @@
 #ifndef TRIGGERVIEW_HPP_
 #define TRIGGERVIEW_HPP_
 
+#include <QGraphicsItem>
 #include <QGraphicsScene>
 #include <QGraphicsView>
+
+#include "VInfo.hpp"
+
+class NodeItem : public QGraphicsItem
+{
+public:
+	NodeItem();
+
+	QRectF boundingRect() const;
+	void paint(QPainter*, const QStyleOptionGraphicsItem *,QWidget*) {};
+};
 
 
 class TriggerScene : public QGraphicsScene
 {
 public:
 	TriggerScene(QWidget *parent=0);
+
+	void reset(VInfo_ptr info);
 };
 
 class TriggerView : public QGraphicsView

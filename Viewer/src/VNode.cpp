@@ -242,6 +242,53 @@ LogServer_ptr VNode::logServer()
 	return lsv;
 }
 
+
+/*
+//Get the triggers list for the Triggers view
+void VNode::triggers(TriggerList& tlr)
+{
+	//Check the node itself
+	if(tlr.self())
+	{
+		if(node_ && !node_->isSuite())
+		{
+			std::set<VNode*> theSet;
+			std::set<VNode*>::iterator sit;
+			AstCollateXNodesVisitor astVisitor(theSet);
+
+			if(node_->completeAst())
+				node_->completeAst()->accept(astVisitor);
+
+			if(node_->triggerAst())
+				node_->triggerAst()->accept(astVisitor);
+
+			for (sit = theSet.begin(); sit != theSet.end(); ++sit)
+				tlr.next_node( *(*sit), 0, trigger_lister::normal, *sit);
+     }
+
+	 //Go through the attributes
+     for(std::vector<VNode*>::iterator it=children_.begin(); it!= children_.end(); it++)
+     {
+        int type = node_->type();
+        {
+           ecf_concrete_node<InLimit const> *c =
+                    dynamic_cast<ecf_concrete_node<InLimit const>*> (n->__node__());
+           InLimit const * i = c ? c->get() : 0;
+           if (i) {
+              node *xn = 0;
+              if ((xn = find_limit(i->pathToNode(), i->name())))
+                 tlr.next_node(*xn,0,trigger_lister::normal,xn);
+           }
+        }
+        if (type == NODE_DATE || type == NODE_TIME)
+           tlr.next_node(*n,0,trigger_lister::normal,n);
+     }
+    }
+  }
+
+*/
+
+
 //=================================================
 // VNodeRoot - this represents the server
 //=================================================
