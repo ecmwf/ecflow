@@ -35,6 +35,11 @@ VNode::VNode(VNode* parent,Node* node) :
 		node_->set_graphic_ptr(this);
 }
 
+ServerHandler* VNode::server() const
+{
+	return (parent_)?(parent_->server()):NULL;
+}
+
 bool VNode::isTopLevel() const
 {
 	return (node_)?(node_->isSuite() != NULL):false;
@@ -224,6 +229,9 @@ LogServer_ptr VNode::logServer()
 {
 	LogServer_ptr lsv;
 
+	if(!node_)
+		return lsv;
+
 	std::string logHost=findInheritedVariable("ECF_LOGHOST",true);
 	std::string logPort=findInheritedVariable("ECF_LOGPORT");
 	if(logHost.empty())
@@ -296,19 +304,19 @@ void VNode::triggers(TriggerList& tlr)
 //
 //=================================================
 
-VNodeRoot::VNodeRoot(ServerHandler* server) :
+VServer::VServer(ServerHandler* server) :
 	VNode(0,0),
 	server_(server),
 	totalNum_(0)
 {
 }
 
-VNodeRoot::~VNodeRoot()
+VServer::~VServer()
 {
 	clear();
 }
 
-void VNodeRoot::clear()
+void VServer::clear()
 {
 	for(std::vector<VNode*>::const_iterator it=children_.begin(); it != children_.end(); it++)
 	{
@@ -318,19 +326,13 @@ void VNodeRoot::clear()
 	assert(totalNum_ == 0);
 }
 
-
-std::string VNodeRoot::absNodePath() const
-{
-	return "/";
-}
-
-VNode* VNodeRoot::find(const Node* nc) const
+VNode* VServer::toVNode(const Node* nc) const
 {
 	return static_cast<VNode*>(nc->graphic_ptr());
 }
 
 
-std::string VNodeRoot::findVariable(const std::string& key,bool substitute) const
+std::string VServer::findVariable(const std::string& key,bool substitute) const
 {
 	std::string val;
 
@@ -352,37 +354,48 @@ std::string VNodeRoot::findVariable(const std::string& key,bool substitute) cons
 }
 
 
-std::string VNodeRoot::findInheritedVariable(const std::string& key,bool substitute) const
+std::string VServer::findInheritedVariable(const std::string& key,bool substitute) const
 {
 	return findVariable(key,substitute);
 }
 
 //Clear the contents and rebuild the whole tree.
-void VNodeRoot::scan()
+void VServer::beginScan(VServerChange& change)
 {
 	//Clear the contents
 	clear();
 
-	if(server_->connected())
-	{
-		//Get the Defs
-		ServerDefsAccess defsAccess(server_);  // will reliquish its resources on destruction
-		defs_ptr defs = defsAccess.defs();
-		if (!defs)
-			return;
+	//Get the Defs
+	ServerDefsAccess defsAccess(server_);  // will reliquish its resources on destruction
+	defs_ptr defs = defsAccess.defs();
+	if (!defs)
+		return;
 
-		//Scan the suits.This will recursively scan all nodes in the tree.
-		const std::vector<suite_ptr> &suites = defs->suiteVec();
-		for(unsigned int i=0; i < suites.size();i++)
-		{
-			VNode* vn=new VNode(this,suites.at(i).get());
-			totalNum_++;
-			scan(vn);
-		}
+	const std::vector<suite_ptr> &suites = defs->suiteVec();
+	change.suiteNum_=suites.size();
+}
+
+//Clear the contents and rebuild the whole tree.
+void VServer::endScan()
+{
+	//Get the Defs
+	ServerDefsAccess defsAccess(server_);  // will reliquish its resources on destruction
+	defs_ptr defs = defsAccess.defs();
+	if (!defs)
+		return;
+
+	//Scan the suits.This will recursively scan all nodes in the tree.
+	const std::vector<suite_ptr> &suites = defs->suiteVec();
+
+	for(unsigned int i=0; i < suites.size();i++)
+	{
+		VNode* vn=new VNode(this,suites.at(i).get());
+		totalNum_++;
+		scan(vn);
 	}
 }
 
-void VNodeRoot::scan(VNode *parent)
+void VServer::scan(VNode *parent)
 {
 	std::vector<node_ptr> nodes;
 	parent->node()->immediateChildren(nodes);
@@ -396,7 +409,7 @@ void VNodeRoot::scan(VNode *parent)
 	}
 }
 
-void VNodeRoot::deleteNode(VNode* node)
+void VServer::deleteNode(VNode* node)
 {
 	for(unsigned int i=0; i < node->numOfChildren(); i++)
 	{
@@ -407,7 +420,7 @@ void VNodeRoot::deleteNode(VNode* node)
 	totalNum_--;
 }
 
-void VNodeRoot::beginUpdate(VNode* node,const std::vector<ecf::Aspect::Type>& aspect,VNodeChange& change)
+void VServer::beginUpdate(VNode* node,const std::vector<ecf::Aspect::Type>& aspect,VNodeChange& change)
 {
 	bool attrNumCh=(std::find(aspect.begin(),aspect.end(),ecf::Aspect::ADD_REMOVE_ATTR) != aspect.end());
 	bool nodeNumCh=(std::find(aspect.begin(),aspect.end(),ecf::Aspect::ADD_REMOVE_NODE) != aspect.end());
@@ -522,20 +535,14 @@ void VNodeRoot::beginUpdate(VNode* node,const std::vector<ecf::Aspect::Type>& as
 	}
 }
 
-void VNodeRoot::endUpdate(VNode* node,const std::vector<ecf::Aspect::Type>& aspect)
+void VServer::endUpdate(VNode* node,const std::vector<ecf::Aspect::Type>& aspect)
 {
 	bool attrNumCh=(std::find(aspect.begin(),aspect.end(),ecf::Aspect::ADD_REMOVE_ATTR) != aspect.end());
 	if(attrNumCh)
 		node->endUpdateAttrNum();
 }
 
-LogServer_ptr VNodeRoot::logServer()
-{
-	LogServer_ptr lsv;
-	return lsv;
-}
-
-QString VNodeRoot::stateName()
+QString VServer::stateName()
 {
 	if(VSState::isRunningState(server_))
 	{
@@ -545,17 +552,17 @@ QString VNodeRoot::stateName()
 	return VNState::toName(server_);
 }
 
-QString VNodeRoot::defaultStateName()
+QString VServer::defaultStateName()
 {
 	return stateName();
 }
 
-bool VNodeRoot::isSuspended() const
+bool VServer::isSuspended() const
 {
 	return false;
 }
 
-QColor  VNodeRoot::stateColour() const
+QColor  VServer::stateColour() const
 {
 	if(VSState::isRunningState(server_))
 	{
@@ -564,4 +571,5 @@ QColor  VNodeRoot::stateColour() const
 
 	return VSState::toColour(server_);
 }
+
 

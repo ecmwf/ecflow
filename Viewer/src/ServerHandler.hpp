@@ -35,7 +35,8 @@ class ServerHandler;
 class ServerComQueue;
 class ServerComThread;
 class ServerObserver;
-class VNodeRoot;
+class VServer;
+class VServerChange;
 
 class ServerHandler : public QObject
 {
@@ -45,6 +46,8 @@ class ServerHandler : public QObject
 	friend class ServerComQueue;
   
 public:
+	    enum Activity {NoActivity,InitActivity,ResetActivity};
+
 		const std::string& name() const {return name_;}
 		const std::string& host() const {return host_;}
 		const std::string& longName() const {return longName_;}
@@ -53,35 +56,33 @@ public:
 		node_ptr suiteAt(int);
 		int indexOfSuite(Node* node);
 
-
 		int numberOfNodes();
 		Node* findNode(int globalIndex);
 		Node* findNode(int globalIndex,int& total,Node *parent);
 
+		Activity activity() const {return activity_;}
 		bool connected() {return connected_;}
 		bool communicating() {return communicating_;}
 		std::time_t lastConnectAttempt() const {return lastConnectAttempt_;}
 		std::time_t lastContactTime() const {return lastContactTime_;}
 		const std::string& connectError() const {return connectError_;}
 
+		void reset();
+
 		int update();
 		void setUpdatingStatus(bool newStatus) {updating_ = newStatus;}
 		void releaseDefs();
 
-		VNodeRoot* vRoot() const {return vRoot_;}
+		VServer* vRoot() const {return vRoot_;}
 		SState::State serverState();
 		NState::State state(bool& isSuspended);
 
 		void runCommand(const std::vector<std::string>& cmd);
 		void run(VTask_ptr);
-		//void run(VTask_ptr task,VReply_ptr reply);
-		//void messages(VTask_ptr req);
 		void script(VTask_ptr req);
 		void job(VTask_ptr req);
 		void jobout(VTask_ptr req);
 	    void manual(VTask_ptr req);
-	    //void file(VTask_ptr req,const std::string& errText);
-	    //void stats(VTask_ptr req);
 
 		static const std::vector<ServerHandler*>& servers() {return servers_;}
 		static ServerHandler* addServer(const std::string &name,const std::string &host, const std::string &port);
@@ -109,6 +110,7 @@ public:
 
 		bool readFromDisk() const {return readFromDisk_;}
 
+
 protected:
 		ServerHandler(const std::string& name,const std::string& host,const std::string&  port);
 		~ServerHandler();
@@ -116,6 +118,7 @@ protected:
 		void connectToServer();
 		void setCommunicatingStatus(bool c) {communicating_ = c;}
 		void clientTaskFinished(VTask_ptr task,const ServerReply& serverReply);
+		void clientTaskFailed(VTask_ptr task,const std::string& errMsg);
 
 		static std::string commandToString(const std::vector<std::string>& cmd);
 
@@ -132,7 +135,7 @@ protected:
 
 		bool readFromDisk_;
 
-        VNodeRoot* vRoot_;
+        VServer* vRoot_;
         
 		static std::vector<ServerHandler*> servers_;
 		static std::map<std::string, std::string> commands_;
@@ -147,11 +150,25 @@ private Q_SLOTS:
 		void slotNodeChanged(const Node* n, const std::vector<ecf::Aspect::Type>& a);
 		void slotDefsChanged(const std::vector<ecf::Aspect::Type>& a);
 
+
 private:
+		//Begin and end the initialisation by connecting to the server and syncing.
+		void beginInit();
+		void endInit(bool);
+
+		//Handle the update timer
 		void stopRefreshTimer();
 		void resetRefreshTimer();
 
+
+
 		defs_ptr defs();
+
+		typedef void (ServerObserver::*SoMethod)(ServerHandler*);
+		void notifyServerObservers(SoMethod);
+		typedef void (ServerObserver::*SoMethodV1)(ServerHandler*,const VServerChange&);
+		void notifyServerObservers(SoMethodV1,const VServerChange&);
+
 
 		QMutex           defsMutex_;
 
@@ -163,6 +180,7 @@ private:
 		int refreshIntervalInSeconds_;
 		QTimer refreshTimer_;
 
+		Activity activity_;
 		std::time_t lastConnectAttempt_;
 		std::time_t lastContactTime_;
 		std::string connectError_;
@@ -184,6 +202,9 @@ public:
 	void addTask(VTask_ptr);
 	void addNewsTask();
 	void addSyncTask();
+	void start();
+	void stop();
+	void init();
 
 protected Q_SLOTS:
 	void slotRun();
@@ -200,6 +221,7 @@ protected:
 	std::deque<VTask_ptr> tasks_;
 	VTask_ptr current_;
 	bool wait_;
+	bool active_;
 };
 
 // -------------------------------------------------------
@@ -212,8 +234,6 @@ class ServerComThread : public QThread, public AbstractObserver
 	Q_OBJECT
 
 public:
-	//enum ComType {NONE, COMMAND, NEWS, SYNC, FILE, HISTORY, STATS};
-
 	ServerComThread(ServerHandler *server, ClientInvoker *ci);
 
 	void task(VTask_ptr);
@@ -225,6 +245,9 @@ public:
 	void update_delete(const Node*);
 	void update_delete(const Defs*);
 
+	void attach();
+	void detach();
+
 Q_SIGNALS:
 	void nodeChanged(const Node*, const std::vector<ecf::Aspect::Type>&);
 	void defsChanged(const std::vector<ecf::Aspect::Type>&);
@@ -232,15 +255,18 @@ Q_SIGNALS:
 
 protected:
 	void run();
-	void initObserver(ServerHandler* server);
 
 private:
+	void attach(Node *node);
+	void detach(Node *node);
+
 	ServerHandler *server_;
 	ClientInvoker *ci_;
 	VTask::Type taskType_;
 	std::vector<std::string> command_;
 	std::map<std::string,std::string> params_;
 	std::string nodePath_;
+	bool attached_;
 };
 
 // -------------------------------------------------------------------------

@@ -332,7 +332,10 @@ ServerHandler* VInfoNode::server()
 {
 	if(server_ == NULL && node_)
 	{
-		server_=ServerHandler::find(node_->node());
+		server_=node_->server();
+
+		if(server_ == NULL)
+			server_=ServerHandler::find(node_->node());
 	}
 	return server_;
 }

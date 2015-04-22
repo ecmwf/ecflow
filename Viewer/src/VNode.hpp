@@ -22,7 +22,7 @@
 class Node;
 class ServerHandler;
 class VAttribute;
-class VNodeRoot;
+class VServer;
 
 //Describes the major changes during an update
 class VNodeChange
@@ -37,14 +37,23 @@ public:
 	int nodeAddedAt_;
 };
 
+//Describes the major changes during an update
+class VServerChange
+{
+public:
+	VServerChange() : suiteNum_(-1) {}
+	int suiteNum_;
+};
+
 class VNode
 {
-friend class VNodeRoot;
+friend class VServer;
 
 public:
 	VNode(VNode* parent,Node*);
 	virtual ~VNode() {};
 
+	virtual ServerHandler* server() const;
     Node *node() {return node_;}
     bool isTopLevel() const;
 
@@ -76,7 +85,7 @@ public:
     virtual bool isSuspended() const;
     virtual QColor  stateColour() const;
 
-    virtual LogServer_ptr logServer();
+    LogServer_ptr logServer();
 
 protected:
     void replaceChildren(const std::vector<VNode*>& newCh);
@@ -91,35 +100,37 @@ protected:
 
 //This is the root node representing the Server.
 
-class VNodeRoot : public VNode
+class VServer : public VNode
 {
 	friend class ServerHandler;
 
 public:
-	VNodeRoot(ServerHandler*);
-	~VNodeRoot();
+	VServer(ServerHandler*);
+	~VServer();
 
-	std::string absNodePath() const;
+	ServerHandler* server() const {return server_;}
+
 	int totalNum() const {return totalNum_;}
-	VNode* find(const Node* nc) const;
+	VNode* toVNode(const Node* nc) const;
 	void beginUpdate(VNode* node,const std::vector<ecf::Aspect::Type>& aspect,VNodeChange&);
 	void endUpdate(VNode* node,const std::vector<ecf::Aspect::Type>& aspect);
 
+	//From VNode
+	std::string absNodePath() const {return "/";}
 	QString stateName();
 	QString defaultStateName();
 	bool isSuspended() const;
 	QColor  stateColour() const;
 
-	std::string findVariable(const std::string& key,bool substitute=false) const;
 	//Find a variable in the Defs. Both the user_variables and the
 	//server variables are searched.
+	std::string findVariable(const std::string& key,bool substitute=false) const;
 	std::string findInheritedVariable(const std::string& key,bool substitute=false) const;
-
-	LogServer_ptr logServer();
 
 protected:
 	//Clear contents and rebuild the whole tree.
-	void scan();
+	void beginScan(VServerChange&);
+	void endScan();
 
 private:
 	void clear();
@@ -129,6 +140,8 @@ private:
     ServerHandler* server_;
     int totalNum_;
 };
+
+
 
 
 #endif

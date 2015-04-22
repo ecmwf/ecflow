@@ -57,6 +57,8 @@ public Q_SLOTS:
 	void slotAddRemoveNodes(VModelServer*,const VNode*,int,int);
 	void slotAddNode(VModelServer*,const VNode*,int);
 	void slotResetBranch(VModelServer*,const VNode*);
+	void slotBeginServerInit(VModelServer* server,int);
+	void slotEndServerInit(VModelServer* server);
 
 Q_SIGNALS:
 	void filterChanged();
@@ -68,6 +70,7 @@ private:
 
 	ServerHandler* indexToRealServer(const QModelIndex & index) const;
 	VModelServer* indexToServer(const QModelIndex & index) const;
+	QModelIndex serverToIndex(VModelServer* server) const;
 	QModelIndex serverToIndex(ServerHandler*) const;
 
 	QModelIndex nodeToIndex(const VNode*,int column=0) const;

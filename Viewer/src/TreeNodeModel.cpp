@@ -52,6 +52,15 @@ TreeNodeModel::TreeNodeModel(VModelData *data,AttributeFilter *atts,IconFilter* 
 	connect(data_,SIGNAL(filterChanged()),
 				this,SIGNAL(filterChanged()));
 
+
+	//Server init
+	connect(data_,SIGNAL(beginServerInit(VModelServer*,int)),
+					this,SLOT(slotBeginServerInit(VModelServer*,int)));
+
+	connect(data_,SIGNAL(endServerInit(VModelServer*)),
+				this,SLOT(slotEndServerInit(VModelServer*)));
+
+
 	//Server added
 	connect(data_,SIGNAL(serverAddBegin(int)),
 				this,SLOT(slotServerAddBegin(int)));
@@ -150,7 +159,7 @@ QVariant TreeNodeModel::data( const QModelIndex& index, int role ) const
 	if( !index.isValid() ||
 	   (role != Qt::DisplayRole && role != Qt::ToolTipRole && role != Qt::BackgroundRole &&
 	    role != FilterRole && role != IconRole && role != ServerRole && role != NodeNumRole &&
-	    role != ConnectedRole))
+	    role != InfoRole))
     {
 		return QVariant();
 	}
@@ -171,7 +180,7 @@ QVariant TreeNodeModel::data( const QModelIndex& index, int role ) const
 	}
 
 	//We only continue for the relevant roles for nodes and attributes
-	if(role == NodeNumRole || role == ConnectedRole)
+	if(role == NodeNumRole || role == InfoRole)
 	{
 		return QVariant();
 	}
@@ -197,9 +206,6 @@ QVariant TreeNodeModel::data( const QModelIndex& index, int role ) const
 
 QVariant TreeNodeModel::serverData(const QModelIndex& index,int role) const
 {
-	if(role == IconRole)
-			return QVariant();
-
 	if(role == FilterRole)
 		return true;
 
@@ -223,18 +229,45 @@ QVariant TreeNodeModel::serverData(const QModelIndex& index,int role) const
 	}
 	else if(role == NodeNumRole)
 	{
-		if(VModelServer *server=indexToServer(index))
+		if(ServerHandler *server=indexToRealServer(index))
 		{
-			return server->totalNodeNum();
+			if(server->connected())
+			{
+				return server->vRoot()->totalNum();
+			}
 		}
+		return QVariant();
 	}
-	else if(role == ConnectedRole)
+	else if(role == InfoRole)
 	{
 		if(ServerHandler *server=indexToRealServer(index))
 		{
-			return server->connected();
+			switch(server->activity())
+			{
+			case ServerHandler::InitActivity:
+				return "Loading ...";
+			case ServerHandler::ResetActivity:
+				return "Resetting ...";
+			default:
+				return "";
+			}
 		}
 	}
+
+	else if(role == IconRole)
+	{
+		if(ServerHandler *server=indexToRealServer(index))
+		{
+			//TODO: add a proper iconprovider
+			if(server->activity() == ServerHandler::NoActivity)
+			{
+				if(!server->connected())
+					return "d";
+			}
+			return QVariant();
+		}
+	}
+
 	else if(role == Qt::ToolTipRole)
 	{
 		if(ServerHandler *server=indexToRealServer(index))
@@ -550,6 +583,17 @@ QModelIndex TreeNodeModel::serverToIndex(ServerHandler* server) const
 	return QModelIndex();
 }
 
+QModelIndex TreeNodeModel::serverToIndex(VModelServer* server) const
+{
+	//For servers the internal id is set to their position in servers_ + 1
+	int i;
+	if((i=data_->indexOfServer(server))!= -1)
+			return createIndex(i,0,(void*)NULL);
+
+	return QModelIndex();
+}
+
+
 VNode* TreeNodeModel::indexToNode( const QModelIndex & index) const
 {
 	//If it is not a sever ...
@@ -795,7 +839,8 @@ void TreeNodeModel::slotServerRemoveEnd()
 
 void TreeNodeModel::slotDataChanged(VModelServer* server)
 {
-
+	QModelIndex idx=serverToIndex(server);
+	Q_EMIT dataChanged(idx,idx);
 }
 
 //The node changed (it status etc)
@@ -938,3 +983,39 @@ void TreeNodeModel::slotResetBranch(VModelServer* server,const VNode* node)
 	endInsertRows();
 
 }
+
+/*void TreeNodeModel::initBegin(VModelServer* server)
+{
+	assert(active_ == true);
+
+	QModelIndex parent=serverToIndex(server);
+
+	if(parent.isValid())
+	{
+
+	}
+}*/
+
+void TreeNodeModel::slotBeginServerInit(VModelServer* server,int num)
+{
+	assert(active_ == true);
+
+	QModelIndex idx=serverToIndex(server);
+
+	//At this point the server node does not have any rows in the model!!!
+
+	if(idx.isValid())
+	{
+		if(num >0)
+		{
+			beginInsertRows(idx,0,num-1);
+		}
+	}
+}
+
+void TreeNodeModel::slotEndServerInit(VModelServer* server)
+{
+	assert(active_ == true);
+	endInsertRows();
+}
+

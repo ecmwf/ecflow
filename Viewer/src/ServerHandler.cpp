@@ -50,12 +50,13 @@ ServerHandler::ServerHandler(const std::string& name,const std::string& host, co
    communicating_(false),
    comQueue_(0),
    refreshIntervalInSeconds_(60),
-   readFromDisk_(true)
+   readFromDisk_(true),
+   activity_(NoActivity)
 {
 	//Create longname
 	longName_=host_ + "@" + port_;
 
-	//Create the client invoker
+	//Create the client invoker. At this point it is empty.
 	client_=new ClientInvoker(host,port);
 	//client_->allow_new_client_old_server(1);
 	//client_->allow_new_client_old_server(9);
@@ -64,20 +65,13 @@ ServerHandler::ServerHandler(const std::string& name,const std::string& host, co
 
 	//Create the vnode root. This will represent the node tree in the viewer, but
 	//at this point it is empty.
-	vRoot_=new VNodeRoot(this);
+	vRoot_=new VServer(this);
 
 	//Connect up the timer for refreshing the server info. The timer has not
 	//started yet.
 	connect(&refreshTimer_, SIGNAL(timeout()),
 			this, SLOT(refreshServerInfo()));
 
-	//Try to connect to the server
-	connectToServer();
-
-	//We might have not been able to connect to the server. This is indicated by
-	//the value of connected_. However, we create all all the objects handled by the
-	//ServerHandler, but we need to be sure that they are all aware of the value
-	//of connected_ and do their tasks accordingly.
 
 	//We will need to pass various non-Qt types via signals and slots for error messages.
 	//So we need to register these types.
@@ -88,19 +82,22 @@ ServerHandler::ServerHandler(const std::string& name,const std::string& host, co
 		qRegisterMetaType<std::vector<ecf::Aspect::Type> >("std::vector<ecf::Aspect::Type>");
 	}
 
+	//Add this instance to the servers_ list.
+	servers_.push_back(this);
+
 	//NOTE: we may not always want to create a thread here because of resource
 	// issues; another strategy would be to create threads on demand, only
 	// when server communication is about to start.
 
 	//We create a ServerComThread here. It is not a member, because we will
-	//pass on its ownership to ServerComQueue.
+	//pass on its ownership to ServerComQueue. At this point the thread is not doing anything.
 
-	UserMessage::message(UserMessage::DBG, false, std::string("create ComThread begin"));
+	//UserMessage::message(UserMessage::DBG, false, std::string("create ComThread begin"));
 	ServerComThread* comThread=new ServerComThread(this,client_);
-	UserMessage::message(UserMessage::DBG, false, std::string("create ComThread end"));
+	//UserMessage::message(UserMessage::DBG, false, std::string("create ComThread end"));
 
 	//The ServerComThread is observing the actual server and its nodes. When there is a change it
-	//emits a signal a notifies the ServerHandler about it.
+	//emits a signal to notify the ServerHandler about it.
 	connect(comThread,SIGNAL(nodeChanged(const Node*, const std::vector<ecf::Aspect::Type>&)),
 					 this,SLOT(slotNodeChanged(const Node*, const std::vector<ecf::Aspect::Type>&)));
 
@@ -108,12 +105,20 @@ ServerHandler::ServerHandler(const std::string& name,const std::string& host, co
 						 this,SLOT(slotDefsChanged(const std::vector<ecf::Aspect::Type>&)));
 
 	//Create the queue for the tasks to be sent to the client (via the ServerComThread)! It will
-	//take ownership of the ServerComThread.
+	//take ownership of the ServerComThread. At this point the queue has not started yet.
 	comQueue_=new ServerComQueue (this,client_,comThread);
 
+	//At this point nothing is running or active!!!!
 
-	//Add this instance to the servers_ list.
-	servers_.push_back(this);
+	//Try to connect to the server. This might fail.
+	beginInit();
+
+
+	//connectToServer();
+
+	//We might not have been able to connect to the server. This is indicated by
+	//the value of connected_. Each object needs to be aware of the value
+	//of connected_ and do its tasks accordingly.
 }
 
 ServerHandler::~ServerHandler()
@@ -122,31 +127,40 @@ ServerHandler::~ServerHandler()
 	for(std::vector<ServerObserver*>::const_iterator it=serverObservers_.begin(); it != serverObservers_.end(); it++)
 			(*it)->notifyServerDelete(this);
 
-	if(client_)
-		delete client_;
-
 	if (comQueue_)
 			delete comQueue_;
+
+	if(client_)
+		delete client_;
 
 	//Remove itself from the server vector
 	std::vector<ServerHandler*>::iterator it=std::find(servers_.begin(),servers_.end(),this);
 	if(it != servers_.end())
-			servers_.erase(it);
+		servers_.erase(it);
+
+	delete vRoot_;
 }
 
-void ServerHandler::connectToServer()
+void ServerHandler::beginInit()
 {
 	if(connected_)
 		return;
 
-	//Clear tyhe connect error text message
+	//Indicate that we start an init
+	activity_=InitActivity;
+
+	//There are no observers at this point
+	//Notify the observers that the init has begun
+	//notifyServerObservers(&ServerObserver::notifyServerInitBegin);
+
+	//Clear the connect error text message
 	connectError_.clear();
 
 	//Register time
 	lastConnectAttempt_=time(0);
 
-	//Sync the client. This might fail e.g. because the the server may be down, or
-	//there is a network error.
+	//Try to get the server version via the client. If it is successful
+	//we can be sure that we can connect to the server.
 	try
 	{
 		//Get the server version
@@ -158,43 +172,83 @@ void ServerHandler::connectToServer()
 			       std::string("ecflow server version: ") + server_version);
 
 		//if (!server_version.empty()) return;
-
-        UserMessage::message(UserMessage::DBG, false, std::string("sync_local begin"));
-        client_->sync_local();
-        UserMessage::message(UserMessage::DBG, false, std::string("sync_local end"));
-
-    	//Here we can be sure that we can connect to the server.
-        connected_=true;
 	}
+
+	//The init failed
 	catch(std::exception& e)
 	{
 		connectError_= e.what();
 		UserMessage::message(UserMessage::DBG, false, std::string("failed to sync: ") + e.what());
+
+		//The init has failed
+		endInit(false);
+		return;
 	}
 
-	//If we could connect to the server.
-	if(connected_)
+	//If we are here we can be sure that we can connect to the server and get the defs. Instruct the queue
+	//to run the init task. It will eventually call initEnd() with the right argument!!
+
+	//NOTE: at this point the queue is not running, init is a special call for doing the
+	//setup.
+	comQueue_->init();
+}
+
+void ServerHandler::endInit(bool status)
+{
+	activity_=NoActivity;
+
+	//the init succeeded
+	if(status)
 	{
+		connected_=true;
+
 		//Set server host and port in defs. It is used to find the server of
 		//a given node in the viewer.
-		ServerDefsAccess defsAccess(this);  // will reliquish its resources on destruction
-		defs_ptr defs = defsAccess.defs();
-		if(defs != NULL)
 		{
-			ServerState& st=defs->set_server();
-			st.hostPort(std::make_pair(host_,port_));
-			st.add_or_update_user_variables("nameInViewer",name_);
-		}
-	}
+			ServerDefsAccess defsAccess(this);  // will reliquish its resources on destruction
 
-	//If we could connect to the server.
-	if(connected_)
-	{
-		//(Re-)populate the vnode tree.
-		vRoot_->scan();
+			defs_ptr defs = defsAccess.defs();
+			if(defs != NULL)
+			{
+				ServerState& st=defs->set_server();
+				st.hostPort(std::make_pair(host_,port_));
+				st.add_or_update_user_variables("nameInViewer",name_);
+			}
+		}
+
+		//Create an object to inform the observers about the change
+		VServerChange change;
+
+		//Begin the full scan to get the tree. This call does not actually
+		//run the scan but counts how many suits will be available.
+	    vRoot_->beginScan(change);
+
+		//Notify the observers that init has started
+	    notifyServerObservers(&ServerObserver::notifyBeginServerInit,change);
+
+		//Finish full scan
+		vRoot_->endScan();
+
+		//Notify the observers that init has ended
+		notifyServerObservers(&ServerObserver::notifyEndServerInit);
+
+		//Start the queue
+		comQueue_->start();
 
 		//Resurrect the timer
 		resetRefreshTimer();
+	}
+
+	//The init failed and we could not connect to the server, e.g. because the the server
+	//may be down, or there is a network error, or the authorisation is missing.
+
+	//This status is indicated by the (false) value of connected_. Each object needs to be aware of the value
+	//of connected_ and do its tasks accordingly.
+	else
+	{
+		//TODO: use observers
+		connected_=false;
+		notifyServerObservers(&ServerObserver::notifyServerInitFailed);
 	}
 }
 
@@ -942,15 +996,15 @@ ServerHandler* ServerHandler::find(Node *node)
 	return NULL;
 }
 
-//---------------------------------------------------------------------------
+//======================================================================================
 // Manages node changes and node observers. Node observers are notified when
 // any of the nodes changes.
-//---------------------------------------------------------------------------
+//======================================================================================
 
 //This slot is called when a node changes.
 void ServerHandler::slotNodeChanged(const Node* nc, const std::vector<ecf::Aspect::Type>& aspect)
 {
-	VNode* vn=vRoot_->find(nc);
+	VNode* vn=vRoot_->toVNode(nc);
 
 	//We must have this VNode
 	assert(vn != NULL);
@@ -1003,9 +1057,6 @@ void ServerHandler::slotDefsChanged(const std::vector<ecf::Aspect::Type>& a)
 		(*it)->notifyDefsChanged(this,a);
 }
 
-
-
-
 void ServerHandler::addServerObserver(ServerObserver *obs)
 {
 	std::vector<ServerObserver*>::iterator it=std::find(serverObservers_.begin(),serverObservers_.end(),obs);
@@ -1024,6 +1075,17 @@ void ServerHandler::removeServerObserver(ServerObserver *obs)
 	}
 }
 
+void ServerHandler::notifyServerObservers(SoMethod proc)
+{
+	for(std::vector<ServerObserver*>::const_iterator it=serverObservers_.begin(); it != serverObservers_.end(); it++)
+		((*it)->*proc)(this);
+}
+
+void ServerHandler::notifyServerObservers(SoMethodV1 proc,const VServerChange& ch)
+{
+	for(std::vector<ServerObserver*>::const_iterator it=serverObservers_.begin(); it != serverObservers_.end(); it++)
+		((*it)->*proc)(this,ch);
+}
 
 //-------------------------------------------------------------------
 // This slot is called when the comThread finished the given task!!
@@ -1068,11 +1130,26 @@ void ServerHandler::clientTaskFinished(VTask_ptr task,const ServerReply& serverR
 					break;
 				}
 
+				case ServerReply::DO_FULL_SYNC:
+				{
+					// yes, a lot of things have changed - we need to reset!!!!!!
+
+					UserMessage::message(UserMessage::DBG, false, std::string("Do_FULL_SYNC from server"));
+					reset();
+					break;
+				}
+
 				default:
 				{
 					break;
 				}
 			}
+			break;
+		}
+		case VTask::InitTask:
+		{
+			//If not yet connected but the sync task was successful
+			endInit(true);
 			break;
 		}
 
@@ -1104,7 +1181,77 @@ void ServerHandler::clientTaskFinished(VTask_ptr task,const ServerReply& serverR
 			break;
 
 	}
+}
 
+//-------------------------------------------------------------------
+// This slot is called when the comThread finished the given task!!
+//-------------------------------------------------------------------
+
+void ServerHandler::clientTaskFailed(VTask_ptr task,const std::string& errMsg)
+{
+	//UserMessage::message(UserMessage::DBG, false, std::string("ServerHandler::commandSent"));
+
+	//See which type of task finished. What we do now will depend on that.
+	switch(task->type())
+	{
+		//The initialisation failed
+		case VTask::InitTask:
+		{
+			endInit(false);
+			break;
+		}
+		default:
+			task->reply()->errorText(errMsg);
+			task->status(VTask::ABORTED);
+			break;
+
+	}
+}
+
+void ServerHandler::reset()
+{
+	//Stop the timer
+	stopRefreshTimer();
+
+	//Empty and stop the queue
+	comQueue_->stop();
+
+	//Notify observers that the reset will start
+	notifyServerObservers(&ServerObserver::notifyServerResetBegin);
+
+	//Clear vnode
+	//vRoot_->clear();
+
+	//Reset client handle and defs as well. This does not require
+	//communications with the server.
+	client_->reset();
+
+	//Sync local
+	try
+	{
+		client_->sync_local();
+	}
+	catch(std::exception& e)
+	{
+		connected_=false;
+
+		//Notify observers
+		notifyServerObservers(&ServerObserver::notifyServerResetEnd);
+
+		return;
+	}
+
+	//Populate vnode
+	//vRoot_->scan();
+
+	//Notify observers thet the reset finished
+	notifyServerObservers(&ServerObserver::notifyServerResetEnd);
+
+	//Restart the queue
+	comQueue_->start();
+
+	//Restart timer
+	resetRefreshTimer();
 }
 
 
@@ -1196,7 +1343,8 @@ ServerComQueue::ServerComQueue(ServerHandler *server,ClientInvoker *client, Serv
 		server_(server),
 		client_(client),
 		comThread_(comThread),
-		wait_(false)
+		wait_(false),
+		active_(false)
 {
 	timer_=new QTimer(this);
 	timer_->setInterval(2000);
@@ -1213,18 +1361,78 @@ ServerComQueue::ServerComQueue(ServerHandler *server,ClientInvoker *client, Serv
 	//failed() signal that is connected to the queue.
 	connect(comThread_, SIGNAL(failed(std::string)),
 			this, SLOT(slotTaskFailed(std::string)));
-
 }
 
 ServerComQueue::~ServerComQueue()
 {
+	stop();
+
 	if(comThread_)
 		delete comThread_;
 }
 
+void ServerComQueue::init()
+{
+	//The queue must be stopped to call init
+	stop();
+
+	//The thread cannot be running
+	assert(comThread_->isRunning() == false);
+
+	//We sent the init command straight away to the thread!!
+	VTask_ptr task=VTask::create(VTask::InitTask);
+	current_=task;
+	comThread_->task(current_);
+
+	//The queue is still inactive!!!
+}
+
+void ServerComQueue::start()
+{
+	active_=true;
+
+	//TODO: how to handle this???
+	if(comThread_->isRunning())
+	{
+
+	}
+	else
+	{
+		//comThread_->attach();
+	}
+
+	//Starts the timer
+	timer_->start();
+}
+
+void ServerComQueue::stop()
+{
+	active_=false;
+
+	//Empty the tasks
+	tasks_.clear();
+
+	//Stop the timer
+	timer_->stop();
+
+	//TODO: how to handle this???
+	if(comThread_->isRunning())
+	{
+
+	}
+	else
+	{
+		comThread_->detach();
+	}
+
+	//Clear the current task
+	if(current_)
+		current_.reset();
+}
+
 void ServerComQueue::addTask(VTask_ptr task)
 {
-	if(!server_->connected())
+	if(!active_)
 		return;
 
 	tasks_.push_back(task);
@@ -1236,7 +1444,7 @@ void ServerComQueue::addTask(VTask_ptr task)
 
 void ServerComQueue::addNewsTask()
 {
-	if(!server_->connected())
+	if(!active_)
 		return;
 
 	VTask_ptr task=VTask::create(VTask::NewsTask);
@@ -1249,7 +1457,7 @@ void ServerComQueue::addNewsTask()
 
 void ServerComQueue::addSyncTask()
 {
-	if(!server_->connected())
+	if(!active_)
 		return;
 
 	VTask_ptr task=VTask::create(VTask::SyncTask);
@@ -1262,6 +1470,9 @@ void ServerComQueue::addSyncTask()
 
 void ServerComQueue::slotRun()
 {
+	if(!active_)
+		return;
+
 	//UserMessage::message(UserMessage::DBG, false, std::string("  ServerComQueue::run"));
 	//UserMessage::message(UserMessage::DBG, false, std::string("     --> number of tasks: " + boost::lexical_cast<std::string>(tasks_.size()) ));
 	//for(std::deque<VTask_ptr>::const_iterator it=tasks_.begin(); it != tasks_.end(); it++)
@@ -1301,6 +1512,9 @@ void ServerComQueue::slotRun()
 //thread is not running so it is safe to access the ClientInvoker!
 void ServerComQueue::slotTaskFinished()
 {
+	//if(!active_)
+	//	return;
+
 	//If the current task is empty there must have been an error that was
 	//handled by the sloTaskFailed slot.
 	if(!current_)
@@ -1310,7 +1524,8 @@ void ServerComQueue::slotTaskFinished()
 	server_->clientTaskFinished(current_,client_->server_reply());
 
 	//We do not need the current task any longer.
-	current_.reset();
+	if(current_)
+		current_.reset();
 }
 
 //This slot is called when the task failed in the ComThread. Right after this signal is emitted
@@ -1318,13 +1533,19 @@ void ServerComQueue::slotTaskFinished()
 //to the slotTaskFinished slot.
 void ServerComQueue::slotTaskFailed(std::string msg)
 {
-	current_->reply()->errorText(msg);
-	current_->status(VTask::ABORTED);
+	//if(!active_)
+	//	return;
+
+	//We notify the server that the task has failed
+	server_->clientTaskFailed(current_,msg);
+
+	//current_->reply()->errorText(msg);
+	//current_->status(VTask::ABORTED);
 
 	//We do not need the current task any longer.
-	current_.reset();
+	if(current_)
+		current_.reset();
 }
-
 
 //==============================================================
 //
@@ -1335,9 +1556,10 @@ void ServerComQueue::slotTaskFailed(std::string msg)
 ServerComThread::ServerComThread(ServerHandler *server, ClientInvoker *ci) :
 		server_(server),
 		ci_(ci),
-		taskType_(VTask::NoTask)
+		taskType_(VTask::NoTask),
+		attached_(false)
 {
-	initObserver(server_);
+	//initObserver(server_);
 }
 
 /*void ServerComThread::setCommandString(const std::vector<std::string> command)
@@ -1454,6 +1676,21 @@ void ServerComThread::run()
 				break;
 			}
 
+			case VTask::InitTask:
+			{
+				{
+					sleep(15);
+					ServerDefsAccess defsAccess(server_);
+					UserMessage::message(UserMessage::DBG, false, std::string("    INIT SYNC"));
+					ci_->sync_local();
+					UserMessage::message(UserMessage::DBG, false, std::string("    INIT SYNC FINISHED"));
+				}
+
+				//Attach the observers to the server
+				attach();
+				break;
+			}
+
 			case VTask::JobTask:
 			case VTask::ManualTask:
 			case VTask::ScriptTask:
@@ -1501,6 +1738,8 @@ void ServerComThread::run()
 	//Can we use it? We are in the thread!!!
 	//UserMessage::message(UserMessage::DBG, false, std::string("  ServerComThread::run finished"));
 }
+
+
 
 /*
 void ServerComThread::run()
@@ -1595,7 +1834,7 @@ void ServerComThread::run()
 //This is a headache!!!!!!!!!!
 
 
-void ServerComThread::initObserver(ServerHandler* server)
+/*void ServerComThread::initObserver(ServerHandler* server)
 {
 	ServerDefsAccess defsAccess(server);  // will reliquish its resources on destruction
 	defs_ptr d = defsAccess.defs();
@@ -1621,7 +1860,7 @@ void ServerComThread::initObserver(ServerHandler* server)
 
 	UserMessage::message(UserMessage::DBG, false,std::string("Total number of nodes observed: ") +
 			   boost::lexical_cast<std::string>(cnt));
-}
+}*/
 
 void ServerComThread::update(const Node* node, const std::vector<ecf::Aspect::Type>& types)
 {
@@ -1656,6 +1895,83 @@ void ServerComThread::update_delete(const Defs* dc)
 	Defs *d=const_cast<Defs*>(dc);
 	ChangeMgrSingleton::instance()->detach(static_cast<Defs*>(d),this);
 }
+
+//Register each node to the observer
+void ServerComThread::attach()
+{
+	if(attached_)
+		return;
+
+	ServerDefsAccess defsAccess(server_);  // will reliquish its resources on destruction
+	defs_ptr d = defsAccess.defs();
+	if(d == NULL)
+		return;
+
+	int cnt=0;
+
+	ChangeMgrSingleton::instance()->attach(d.get(),this);
+
+	const std::vector<suite_ptr> &suites = d->suiteVec();
+	for(unsigned int i=0; i < suites.size();i++)
+	{
+		attach(suites.at(i).get());
+	}
+
+	attached_=true;
+}
+
+//Add a node to the observer
+void ServerComThread::attach(Node *node)
+{
+	ChangeMgrSingleton::instance()->attach(node,this);
+
+	std::vector<node_ptr> nodes;
+	node->immediateChildren(nodes);
+
+	for(std::vector<node_ptr>::const_iterator it=nodes.begin(); it != nodes.end(); it++)
+	{
+		attach((*it).get());
+	}
+}
+
+//Remove each node from the observer
+void ServerComThread::detach()
+{
+	if(!attached_)
+		return;
+
+	ServerDefsAccess defsAccess(server_);  // will reliquish its resources on destruction
+	defs_ptr d = defsAccess.defs();
+	if(d == NULL)
+		return;
+
+	int cnt=0;
+
+	ChangeMgrSingleton::instance()->detach(d.get(),this);
+
+	const std::vector<suite_ptr> &suites = d->suiteVec();
+	for(unsigned int i=0; i < suites.size();i++)
+	{
+		detach(suites.at(i).get());
+	}
+
+	attached_=false;
+}
+
+//Remove each node from the observer
+void ServerComThread::detach(Node *node)
+{
+	ChangeMgrSingleton::instance()->detach(node,this);
+
+	std::vector<node_ptr> nodes;
+	node->immediateChildren(nodes);
+
+	for(std::vector<node_ptr>::const_iterator it=nodes.begin(); it != nodes.end(); it++)
+	{
+		detach((*it).get());
+	}
+}
+
 
 // ------------------------------------------------------------
 //                         ServerDefsAccess

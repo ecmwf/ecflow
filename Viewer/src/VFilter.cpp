@@ -171,6 +171,9 @@ void TreeNodeFilter::reset(ServerHandler* server)
 	if(def_->nodeState_->isComplete())
 		return;
 
+	return;
+
+
 	for(unsigned int j=0; j < server->numSuites();j++)
 	{
 		filterState(server->suiteAt(j),def_->nodeState_);
@@ -221,10 +224,10 @@ void TableNodeFilter::reset(ServerHandler* server)
 	//if(sf->isComplete())
 	//	return;
 
-	for(unsigned int j=0; j < server->numSuites();j++)
+	/*for(unsigned int j=0; j < server->numSuites();j++)
 	{
 		match_.push_back(server->suiteAt(j).get());
-	}
+	}*/
 }
 
 Node* TableNodeFilter::match(int i)

@@ -153,6 +153,7 @@ void TreeNodeViewDelegate::renderServer(QPainter *painter,const QModelIndex& ind
 		                                   const QStyleOptionViewItemV4& option,QString text) const
 {
 	int offset=2;
+	int currentRight=0;
 
 	//The initial filled rect (we will adjust its  width)
 	QRect fillRect=option.rect.adjusted(offset,1,0,-2);
@@ -177,38 +178,65 @@ void TreeNodeViewDelegate::renderServer(QPainter *painter,const QModelIndex& ind
 	//Adjust the filled rect width
 	fillRect.setRight(textRect.right()+offset);
 
-	//The pixmap
+	currentRight=fillRect.right();
+
+	//The pixmap (optional)
 	QRect pixRect;
-	bool connected=index.data(AbstractNodeModel::ConnectedRole).toBool();
-	if(!connected)
+	bool hasPix=false;
+	hasPix=(index.data(AbstractNodeModel::IconRole).toString() == "d");
+
+	if(hasPix)
 	{
 		pixRect = QRect(fillRect.right()+fm.width('A'),
 				fillRect.top()+(fillRect.height()-errPix_.height())/2,
 				errPix_.width(),
 				errPix_.height());
+
+		hasPix=true;
+		currentRight=pixRect.right();
 	}
 
-	//The number rectangle
-	int num=index.data(AbstractNodeModel::NodeNumRole).toInt();
-	QString numTxt="(" + QString::number(num) + ")";
+	//The info rectangle (optional)
+	QRect infoRect;
+	QString infoTxt=index.data(AbstractNodeModel::InfoRole).toString();
+	bool hasInfo=(infoTxt.isEmpty() == false);
+	QFont infoFont;
 
+	if(hasInfo)
+	{
+		//infoFont.setBold(true);
+		fm=QFontMetrics(infoFont);
+
+		int infoWidth=fm.width(infoTxt);
+		infoRect = textRect;
+		infoRect.setLeft(currentRight+fm.width('A'));
+		infoRect.setWidth(infoWidth);
+		currentRight=infoRect.right();
+	}
+
+	//The node number (optional)
+	QRect numRect;
+	QString numTxt;
+	QVariant va=index.data(AbstractNodeModel::NodeNumRole);
+	bool hasNum=(va.isNull() == false);
 	QFont numFont;
-	numFont.setBold(true);
-	fm=QFontMetrics(numFont);
-	int numWidth=fm.width(numTxt);
-	QRect numRect = textRect;
-	if(!connected)
+
+	if(hasNum)
 	{
-		numRect.setLeft(pixRect.right()+fm.width('A'));
+		numTxt="(" + QString::number(va.toInt()) + ")";
+
+		numFont.setBold(true);
+		fm=QFontMetrics(numFont);
+
+		int numWidth=fm.width(numTxt);
+		numRect = textRect;
+		numRect.setLeft(currentRight+fm.width('A'));
+		numRect.setWidth(numWidth);
+		currentRight=numRect.right();
 	}
-	else
-	{
-		numRect.setLeft(fillRect.right()+fm.width('A'));
-	}
-	numRect.setWidth(numWidth);
 
 	//Define clipping
-	int rightPos=numRect.right()+1;
+	int rightPos=currentRight+1;
 	const bool setClipRect = rightPos > option.rect.right();
 	if(setClipRect)
 	{
@@ -231,13 +259,21 @@ void TreeNodeViewDelegate::renderServer(QPainter *painter,const QModelIndex& ind
 	painter->drawText(textRect,Qt::AlignLeft | Qt::AlignVCenter,text);
 
 	//Draw pixmap if needed
-	if(!connected)
+	if(hasPix)
 	{
 		painter->drawPixmap(pixRect,errPix_);
 	}
 
+	//Draw info
+	if(hasInfo)
+	{
+		painter->setPen(Qt::black);
+		painter->setFont(infoFont);
+		painter->drawText(infoRect,Qt::AlignLeft | Qt::AlignVCenter,infoTxt);
+	}
+
 	//Draw number
-	if(connected)
+	if(hasNum)
 	{
 		painter->setPen(Qt::black);
 		painter->setFont(numFont);

@@ -14,9 +14,13 @@
 #include "VAttribute.hpp"
 #include "VNode.hpp"
 
+#include <QDebug>
+#include <QMetaMethod>
+
+
 //==========================================
 //
-// NodeModelData
+// VModelServer
 //
 //==========================================
 
@@ -28,6 +32,10 @@ VModelServer::VModelServer(ServerHandler *server) :
 {
 	//We has to observe the nodes of the server.
 	server_->addNodeObserver(this);
+
+	//We has to observe the nodes of the server.
+	server_->addServerObserver(this);
+
 }
 
 VModelServer::~VModelServer()
@@ -40,23 +48,22 @@ VModelServer::~VModelServer()
 
 VNode* VModelServer::topLevelNode(int row) const
 {
-  /* server alive but empty 20150410 */
-  return server_->vRoot() ? server_->vRoot()->childAt(row) : NULL;
+  return server_->vRoot()->childAt(row);
 }
 
 int VModelServer::indexOfTopLevelNode(const VNode* node) const
 {
-  return server_->vRoot() ? server_->vRoot()->indexOfChild(node) : 0;
+  return server_->vRoot()->indexOfChild(node);
 }
 
 int VModelServer::topLevelNodeNum() const
 {
-  return server_->vRoot() ? server_->vRoot()->numOfChildren() : 0;
+  return server_->vRoot()->numOfChildren();
 }
 
 int VModelServer::totalNodeNum() const
 {
-  return server_->vRoot() ? server_->vRoot()->totalNum() : 0;
+  return server_->vRoot()->totalNum();
 }
 
 void VModelServer::runFilter()
@@ -67,7 +74,7 @@ void VModelServer::runFilter()
 }
 //==========================================
 //
-// TreeNodeModelData
+// VTreeServer
 //
 //==========================================
 
@@ -79,7 +86,7 @@ VTreeServer::VTreeServer(ServerHandler *server,NodeFilterDef* filterDef) :
 	filter_=new TableNodeFilter(filterDef);
 
 	//We has to observe the nodes of the server.
-	server_->addNodeObserver(this);
+	//server_->addNodeObserver(this);
 }
 
 VTreeServer::~VTreeServer()
@@ -93,6 +100,21 @@ int VTreeServer::checkAttributeUpdateDiff(VNode *node)
 	return current-last;
 }
 
+
+void VTreeServer::notifyBeginServerInit(ServerHandler* server,const VServerChange& change)
+{
+	Q_EMIT beginServerInit(this,change.suiteNum_);
+}
+
+void VTreeServer::notifyEndServerInit(ServerHandler* server)
+{
+	Q_EMIT endServerInit(this);
+}
+
+void VTreeServer::notifyServerInitFailed(ServerHandler* server)
+{
+	Q_EMIT dataChanged(this);
+}
 
 void VTreeServer::notifyNodeChanged(const VNode* node, const std::vector<ecf::Aspect::Type>& aspect, const VNodeChange& change)
 {
@@ -184,7 +206,7 @@ void VTreeServer::notifyNodeChanged(const VNode* node, const std::vector<ecf::As
 
 //==========================================
 //
-// TableNodeModelData
+// VTableServer
 //
 //==========================================
 
@@ -197,7 +219,7 @@ VTableServer::VTableServer(ServerHandler *server,NodeFilterDef* filterDef) :
 	filter_=new TableNodeFilter(filterDef);
 
 	//We has to observe the nodes of the server.
-	server_->addNodeObserver(this);
+	//server_->addNodeObserver(this);
 }
 
 VTableServer::~VTableServer()
@@ -211,7 +233,7 @@ void VTableServer::notifyNodeChanged(const VNode* node, const std::vector<ecf::A
 
 //==========================================
 //
-// NodeModelDataHandler
+// VModelData
 //
 //==========================================
 
@@ -284,7 +306,33 @@ void VModelData::add(ServerHandler *server)
 		return; //TODO: give an error message!!
 	}
 
-	connect(d,SIGNAL(dataChanged(VModelServer*)),
+	//We need to relay all the possible signals from VModelServer
+
+	//Loop over the methods of the VModelServer
+	for(int i = 0; i < d->staticMetaObject.methodCount(); i++)
+	{
+		//Get the method signature
+		const char* sg=d->staticMetaObject.method(i).signature();
+
+		//Check if it is a signal
+		if(d->staticMetaObject.indexOfSignal(sg) != -1)
+		{
+			//Check if it is a signal in the current class as well
+			int idx=staticMetaObject.indexOfSignal(sg);
+			if(idx != -1)
+			{
+				//We simply relay this signal
+				connect(d,d->staticMetaObject.method(i),
+						this,staticMetaObject.method(idx));
+			}
+		}
+	}
+
+
+	//	qDebug() << d->staticMetaObject.method(n).typeName();
+	//    qDebug() << d->staticMetaObject.method(n).signature();
+
+	/*connect(d,SIGNAL(dataChanged(VModelServer*)),
 			this,SIGNAL(dataChanged(VModelServer*)));
 
 	connect(d,SIGNAL(nodeChanged(VModelServer*,const VNode*)),
@@ -304,6 +352,12 @@ void VModelData::add(ServerHandler *server)
 
 	connect(d,SIGNAL(resetBranch(VModelServer*,const VNode*)),
 						this,SIGNAL(resetBranch(VModelServer*,const VNode*)));
+
+	connect(d,SIGNAL(beginServerInit(VModelServer*,int)),
+			this,SIGNAL(beginServerInit(VModelServer*,int)));
+
+	connect(d,SIGNAL(endServerInit(VModelServer*)),
+			this,SIGNAL(endServerInit(VModelServer*)));*/
 
 	servers_.push_back(d);
 }
@@ -487,54 +541,3 @@ void VModelData::slotFilterDefChanged()
 {
 	runFilter(true);
 }
-
-
-//Node observer
-/*
-void NodeModelDataHandler::notifyNodeChanged(const Node* node, const std::vector<ecf::Aspect::Type>& types)
-{
-	if(node==NULL)
-		return;
-
-	qDebug() << "observer is called" << QString::fromStdString(node->name());
-	//for(unsigned int i=0; i < types.size(); i++)
-	//	qDebug() << "  type:" << types.at(i);
-
-	Node* nc=const_cast<Node*>(node);
-
-	QModelIndex index1=nodeToIndex(nc,0);
-	QModelIndex index2=nodeToIndex(nc,2);
-
-	if(!index1.isValid() || !index2.isValid())
-		return;
-
-	Node *nd1=indexToNode(index1);
-	Node *nd2=indexToNode(index2);
-
-	if(!nd1 || !nd2)
-		return;
-
-	//qDebug() << "indexes" << index1 << index2;
-	//qDebug() << "index pointers " << index1.internalPointer() << index2.internalPointer();
-	qDebug() << "    --->" << QString::fromStdString(nd1->name()) << QString::fromStdString(nd2->name());
-
-	Q_EMIT dataChanged(index1,index2);
-}
-*/
-
-
-
-
-/*
-VModelServer* TreeNodeModelDataHandler::makeData(ServerHandler* s)
-{
-	return new VTreeServer(s,filterDef_);
-}
-
-VModelServer* TableNodeModelDataHandler::makeData(ServerHandler* s)
-{
-	return new VTableServer(s,filterDef_);
-}
-*/
-
-

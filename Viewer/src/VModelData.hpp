@@ -16,6 +16,7 @@
 
 #include "NodeObserver.hpp"
 #include "ServerFilter.hpp"
+#include "ServerObserver.hpp"
 
 class Node;
 class VNode;
@@ -25,7 +26,7 @@ class NodeFilterDef;
 class ServerHandler;
 class VParamSet;
 
-class VModelServer : public QObject, public NodeObserver
+class VModelServer : public QObject, public ServerObserver, public NodeObserver
 {
 Q_OBJECT
 
@@ -53,6 +54,8 @@ Q_SIGNALS:
 	void dataChanged(VModelServer*);
 	void nodeChanged(VModelServer*,const VNode*);
 	void attributesChanged(VModelServer*,const VNode*);
+	void beginServerInit(VModelServer*,int);
+	void endServerInit(VModelServer*);
 
 protected:
 	ServerHandler *server_;
@@ -67,6 +70,15 @@ public:
 
 	 int checkAttributeUpdateDiff(VNode *node);
 
+	 //From ServerObserver
+	 void notifyDefsChanged(ServerHandler* server, const std::vector<ecf::Aspect::Type>& a) {};
+	 void notifyServerDelete(ServerHandler* server) {};
+	 void notifyServerResetBegin(ServerHandler* server) {};
+	 void notifyServerResetEnd(ServerHandler* server) {};
+	 void notifyBeginServerInit(ServerHandler* server,const VServerChange&);
+	 void notifyEndServerInit(ServerHandler* server);
+	 void notifyServerInitFailed(ServerHandler* server);
+
 	 //From NodeObserver
 	 void notifyNodeChanged(const VNode*, const std::vector<ecf::Aspect::Type>&,const VNodeChange&);
 };
@@ -76,6 +88,10 @@ class VTableServer : public VModelServer
 public:
 	 VTableServer(ServerHandler *server,NodeFilterDef* filterDef);
 	 ~VTableServer();
+
+	 //From ServerObserver
+	 void notifyDefsChanged(ServerHandler* server, const std::vector<ecf::Aspect::Type>& a) {};
+	 void notifyServerDelete(ServerHandler* server) {};
 
 	 //From NodeObserver
 	 void notifyNodeChanged(const VNode*, const std::vector<ecf::Aspect::Type>&,const VNodeChange&);
@@ -134,6 +150,8 @@ Q_SIGNALS:
 	void dataChanged(VModelServer*);
 	void nodeChanged(VModelServer*,const VNode*);
 	void attributesChanged(VModelServer*,const VNode*);
+	void beginServerInit(VModelServer*,int);
+	void endServerInit(VModelServer*);
 
 protected:
 	void init();
