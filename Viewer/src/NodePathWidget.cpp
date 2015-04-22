@@ -657,14 +657,14 @@ void NodePathWidget::loadMenu(const QPoint& pos,VInfo_ptr p)
 {
 	QList<QAction*> acLst;
 
-	if(p->isServer())
+	if(p->isServer() && p->server())
 	{
 		ServerHandler* server=p->server();
+		VServer* root=server->vRoot();
 
-		int n=server->numSuites();
-		for(unsigned int i=0; i < server->vRoot()->numOfChildren(); i++)
+		for(unsigned int i=0; i < root->numOfChildren(); i++)
 		{
-			if(Node* node=server->vRoot()->childAt(i)->node())
+			if(Node* node=root->childAt(i)->node())
 			{
 				QAction *ac=new QAction(QString::fromStdString(node->name()),this);
 				ac->setData(i);
@@ -676,7 +676,7 @@ void NodePathWidget::loadMenu(const QPoint& pos,VInfo_ptr p)
 			if(QAction *ac=QMenu::exec(acLst,pos,acLst.front(),this))
 			{
 				int idx=ac->data().toInt();
-				VInfo_ptr res(VInfo::make(server->vRoot()->childAt(idx),server));
+				VInfo_ptr res(VInfo::make(root->childAt(idx),server));
 				Q_EMIT selected(res);
 			}
 		}

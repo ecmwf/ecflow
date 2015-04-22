@@ -19,6 +19,7 @@
 #include "Node.hpp"
 
 class ServerHandler;
+class VNode;
 class VSettings;
 
 #include <boost/property_tree/ptree.hpp>
@@ -108,10 +109,10 @@ public:
 	enum ChangeAspect {AllChanged,StateChanged,AttributeChanged};
 
 	virtual void reset(ServerHandler* server)=0;
-    virtual bool isFiltered(Node* node)=0;
+    virtual bool isFiltered(VNode* node)=0;
     virtual int  matchCount()=0;
     virtual int  nonMatchCount()=0;
-    virtual Node* match(int i)=0;
+    virtual VNode* match(int i)=0;
 
 protected:
     NodeFilterDef* def_;
@@ -124,14 +125,14 @@ class TreeNodeFilter : public NodeFilter
 public:
 	TreeNodeFilter(NodeFilterDef* def);
 	void reset(ServerHandler* server);
-	bool isFiltered(Node* node);
+	bool isFiltered(VNode* node);
 	int  matchCount() {return -1;};
 	int  nonMatchCount() {return static_cast<int>(nonMatch_.size());};
-	Node* match(int i) {return NULL;}
+	VNode* match(int i) {return NULL;}
 
 private:
-	bool filterState(node_ptr node,VParamSet* stateFilter);
-	std::set<Node*> nonMatch_;
+	bool filterState(VNode* node,VParamSet* stateFilter);
+	std::set<VNode*> nonMatch_;
 };
 
 class TableNodeFilter : public NodeFilter
@@ -139,13 +140,13 @@ class TableNodeFilter : public NodeFilter
 public:
 	TableNodeFilter(NodeFilterDef* def);
 	void reset(ServerHandler* server);
-	bool isFiltered(Node* node);
+	bool isFiltered(VNode* node);
 	int  matchCount() {return static_cast<int>(match_.size());};
 	int  nonMatchCount() {return -1;}
-	Node* match(int i);
+	VNode* match(int i);
 
 private:
-	std::vector<Node*> match_;
+	std::vector<VNode*> match_;
 };
 
 #endif

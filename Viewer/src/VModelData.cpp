@@ -14,9 +14,7 @@
 #include "VAttribute.hpp"
 #include "VNode.hpp"
 
-#include <QDebug>
 #include <QMetaMethod>
-
 
 //==========================================
 //
@@ -41,6 +39,7 @@ VModelServer::VModelServer(ServerHandler *server) :
 VModelServer::~VModelServer()
 {
 	server_->removeNodeObserver(this);
+	server_->removeServerObserver(this);
 
 	if(filter_)
 		delete filter_;
@@ -74,7 +73,7 @@ void VModelServer::runFilter()
 }
 //==========================================
 //
-// VTreeServer
+// VTreeServer#include <QDebug>
 //
 //==========================================
 
@@ -100,6 +99,9 @@ int VTreeServer::checkAttributeUpdateDiff(VNode *node)
 	return current-last;
 }
 
+//--------------------------------------------------
+// ServerObserver methods
+//--------------------------------------------------
 
 void VTreeServer::notifyBeginServerInit(ServerHandler* server,const VServerChange& change)
 {
@@ -114,6 +116,16 @@ void VTreeServer::notifyEndServerInit(ServerHandler* server)
 void VTreeServer::notifyServerInitFailed(ServerHandler* server)
 {
 	Q_EMIT dataChanged(this);
+}
+
+void VTreeServer::notifyBeginServerReset(ServerHandler* server)
+{
+	Q_EMIT beginServerReset(this);
+}
+
+void VTreeServer::notifyEndServerReset(ServerHandler* server)
+{
+	Q_EMIT endServerReset(this);
 }
 
 void VTreeServer::notifyNodeChanged(const VNode* node, const std::vector<ecf::Aspect::Type>& aspect, const VNodeChange& change)
@@ -328,37 +340,6 @@ void VModelData::add(ServerHandler *server)
 		}
 	}
 
-
-	//	qDebug() << d->staticMetaObject.method(n).typeName();
-	//    qDebug() << d->staticMetaObject.method(n).signature();
-
-	/*connect(d,SIGNAL(dataChanged(VModelServer*)),
-			this,SIGNAL(dataChanged(VModelServer*)));
-
-	connect(d,SIGNAL(nodeChanged(VModelServer*,const VNode*)),
-			  this,SIGNAL(nodeChanged(VModelServer*,const VNode*)));
-
-	connect(d,SIGNAL(attributesChanged(VModelServer*,const VNode*)),
-				  this,SIGNAL(attributesChanged(VModelServer*,const VNode*)));
-
-	connect(d,SIGNAL(addRemoveAttributes(VModelServer*,const VNode*,int,int)),
-			this,SIGNAL(addRemoveAttributes(VModelServer*,const VNode*,int,int)));
-
-	connect(d,SIGNAL(addRemoveNodes(VModelServer*,const VNode*,int,int)),
-				this,SIGNAL(addRemoveNodes(VModelServer*,const VNode*,int,int)));
-
-	connect(d,SIGNAL(addNode(VModelServer*,const VNode*,int)),
-					this,SIGNAL(addNode(VModelServer*,const VNode*,int)));
-
-	connect(d,SIGNAL(resetBranch(VModelServer*,const VNode*)),
-						this,SIGNAL(resetBranch(VModelServer*,const VNode*)));
-
-	connect(d,SIGNAL(beginServerInit(VModelServer*,int)),
-			this,SIGNAL(beginServerInit(VModelServer*,int)));
-
-	connect(d,SIGNAL(endServerInit(VModelServer*)),
-			this,SIGNAL(endServerInit(VModelServer*)));*/
-
 	servers_.push_back(d);
 }
 
@@ -372,14 +353,6 @@ ServerHandler* VModelData::realServer(int n) const
 	return (n >=0 && n < servers_.size())?servers_.at(n)->server_:0;
 }
 
-/*ServerHandler* VModelData::server(void* idPointer) const
-{
-	for(unsigned int i=0; i < servers_.size(); i++)
-		if(servers_.at(i)->server_ == idPointer)
-			return servers_.at(i)->server_;
-
-	return NULL;
-}*/
 
 int VModelData::indexOfServer(void* idPointer) const
 {
@@ -401,14 +374,18 @@ int VModelData::indexOfServer(ServerHandler* s) const
 //This has to be very fast!!!
 bool VModelData::isFiltered(VNode *node) const
 {
-	/*ServerHandler* server=ServerHandler::find(node);
-	int id=indexOf(server);
+	return true;
+
+	//TODO: make it work again
+
+	/*ServerHandler* server=node->server();
+	int id=indexOfServer(server);
 	if(id != -1 && servers_.at(id)->filter_)
 	{
 		return servers_.at(id)->filter_->isFiltered(node);
-	}*/
+	}
 
-	return true;
+	return true;*/
 }
 
 int VModelData::numOfNodes(int index) const

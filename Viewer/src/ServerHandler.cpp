@@ -36,7 +36,7 @@ std::map<std::string, std::string> ServerHandler::commands_;
 
 //================================================
 //
-// ServerHandler
+//                    ServerHandler
 //
 //================================================
 
@@ -91,10 +91,7 @@ ServerHandler::ServerHandler(const std::string& name,const std::string& host, co
 
 	//We create a ServerComThread here. It is not a member, because we will
 	//pass on its ownership to ServerComQueue. At this point the thread is not doing anything.
-
-	//UserMessage::message(UserMessage::DBG, false, std::string("create ComThread begin"));
 	ServerComThread* comThread=new ServerComThread(this,client_);
-	//UserMessage::message(UserMessage::DBG, false, std::string("create ComThread end"));
 
 	//The ServerComThread is observing the actual server and its nodes. When there is a change it
 	//emits a signal to notify the ServerHandler about it.
@@ -112,9 +109,6 @@ ServerHandler::ServerHandler(const std::string& name,const std::string& host, co
 
 	//Try to connect to the server. This might fail.
 	beginInit();
-
-
-	//connectToServer();
 
 	//We might not have been able to connect to the server. This is indicated by
 	//the value of connected_. Each object needs to be aware of the value
@@ -321,131 +315,6 @@ NState::State ServerHandler::state(bool& suspended)
 	return NState::UNKNOWN;
 }
 
-int ServerHandler::numSuites()
-{
-	if(client_)
-	{
-		ServerDefsAccess defsAccess(this);  // will reliquish its resources on destruction
-		defs_ptr defs = defsAccess.defs();
-		if(defs != NULL)
-		{
-			return static_cast<int>(defs->suiteVec().size());
-		}
-	}
-	return 0;
-}
-
-node_ptr ServerHandler::suiteAt(int pos)
-{
-	ServerDefsAccess defsAccess(this);  // will reliquish its resources on destruction
-	defs_ptr d = defsAccess.defs();
-	if(d != NULL)
-	{
-		const std::vector<suite_ptr> &suites = d->suiteVec();
-		return (pos >=0 && pos < suites.size())?suites.at(pos):node_ptr();
-	}
-
-	return node_ptr();
-}
-
-int ServerHandler::indexOfSuite(Node* node)
-{
-	ServerDefsAccess defsAccess(this);  // will reliquish its resources on destruction
-	defs_ptr d = defsAccess.defs();
-	if(d != NULL)
-	{
-			const std::vector<suite_ptr> &suites = d->suiteVec();
-			for(unsigned int i=0; i < suites.size(); i++)
-					if(suites.at(i).get() == node)
-							return i;
-		}
-
-	return -1;
-
-
-}
-
-int ServerHandler::numberOfNodes()
-{
-	int num=0;
-	ServerDefsAccess defsAccess(this);  // will reliquish its resources on destruction
-	defs_ptr d = defsAccess.defs();
-	if(d != NULL)
-	{
-			const std::vector<suite_ptr> &suites = d->suiteVec();
-			for(unsigned int i=0; i < suites.size(); i++)
-			{
-				num+=1;
-				std::set<Node*> n;
-				suites.at(i)->allChildren(n);
-				num+=static_cast<int>(n.size());
-			}
-		}
-
-	return num;
-}
-
-Node* ServerHandler::findNode(int globalIndex)
-{
-	ServerDefsAccess defsAccess(this);  // will reliquish its resources on destruction
-	defs_ptr d=defsAccess.defs();
-	if(d == NULL)
-			return 0;
-
-	int total=0;
-	const std::vector<suite_ptr> &suites = d->suiteVec();
-	for(unsigned int i=0; i < suites.size();i++)
-	{
-			if(total == globalIndex)
-					return suites.at(i).get();
-
-			total+=1;
-
-			Node *n=findNode(globalIndex,total,suites.at(i).get());
-			if(n)
-				return n;
-	}
-
-	return 0;
-}
-
-Node* ServerHandler::findNode(int globalIndex,int& total,Node *parent)
-{
-	std::vector<node_ptr> nodes;
-	parent->immediateChildren(nodes);
-	if(globalIndex < total+nodes.size())
-	{
-		int pos=globalIndex-total;
-		return nodes.at(pos).get();
-	}
-	else
-	{
-		total+=nodes.size();
-		for(unsigned int i=0; i < nodes.size();i++)
-		{
-			Node *n=findNode(globalIndex,total,nodes.at(i).get());
-			if(n)
-				return n;
-		}
-	}
-
-	return 0;
-}
-
-
-
-Node* ServerHandler::immediateChildAt(Node *parent,int pos)
-{
-	if(!parent || pos <0) return NULL;
-
-	std::vector<node_ptr> nodes;
-	parent->immediateChildren(nodes);
-	if(static_cast<int>(nodes.size()) > pos)
-		return nodes.at(pos).get();
-
-	return NULL;
-}
-
 defs_ptr ServerHandler::defs()
 {
 	if(client_)
@@ -465,30 +334,6 @@ void ServerHandler::releaseDefs()
 }
 
 
-int ServerHandler::numOfImmediateChildren(Node *node)
-{
-	if(!node) return 0;
-
-	std::vector<node_ptr> nodes;
-	node->immediateChildren(nodes);
-	return static_cast<int>(nodes.size());
-}
-
-int ServerHandler::indexOfImmediateChild(Node *node)
-{
-	if(!node) return 0;
-
-	std::vector<node_ptr> nodes;
-	if(node->parent())
-	{
-			node->parent()->immediateChildren(nodes);
-			for(unsigned int i=0; i < nodes.size(); i++)
-				if(nodes.at(i).get() == node)
-						return i;
-	}
-
-	return -1;
-}
 
 void ServerHandler::errorMessage(std::string message)
 {
@@ -583,62 +428,6 @@ void ServerHandler::manual(VTask_ptr task)
 	task->param("clientPar","manual");
 	comQueue_->addTask(task);
 }
-
-/*
-void ServerHandler::file(VTask_ptr task,const std::string& errText)
-{
-	if(!task->node() || !task->node()->node())
-	{
-		task->status(VTask::FINISHED);
-		return;
-	}
-
-	//We try the client invoker.
-	//Set up and run the thread for server communication
-	comQueue_->addTask(task);
-
-	//We try to read the file directly from the disk
-	if(readFromDisk_)
-	{
-		//Get the fileName
-		std::string fileName;
-		if(!task->param("ecfVar").empty())
-		{
-			task->node()->node()->findGenVariableValue(task->param("ecfVar"),fileName);
-		}
-
-		if(task->reply()->textFromFile(fileName))
-		{
-			task->status(VTask::FINISHED);
-			return;
-		}
-	}
-	//If not on local disc we try the client invoker
-	else
-	{
-		// set up and run the thread for server communication
-		comQueue_->addTask(task);
-	}
-}
-*/
-
-/*void ServerHandler::stats(VTask_ptr task)
-{
-	comQueue_->addTask(task);
-}
-*/
-/*void ServerHandler::fetchDir(const std::string& path)
-{
-	if(path.empty())
-		return;
-
-
-}*/
-
-
-
-
-
 
 
 void ServerHandler::updateAll()
@@ -967,34 +756,7 @@ std::string ServerHandler::resolveServerCommand(const std::string &name)
 
 	return realCommand;
 }
-ServerHandler* ServerHandler::find(const std::string& name)
-{
-	for(std::vector<ServerHandler*>::const_iterator it=servers_.begin(); it != servers_.end();it++)
-			if((*it)->name() == name)
-					return *it;
-	return NULL;
-}
 
-ServerHandler* ServerHandler::find(Node *node)
-{
-	// XXXXX here we should protect access to the definitions, but we
-	// don't yet know which defs we are accessing!
-
-	if(node)
-	{
-		if(Defs* defs = node->defs())
-		{
-			const ServerState& st=defs->server();
-
-			//It is a question if this solution is fast enough. We may need to store
-			//directly the server name in ServerState
-			st.find_variable("nameInViewer");
-
-			return ServerHandler::find(st.find_variable("nameInViewer"));
-		}
-	}
-	return NULL;
-}
 
 //======================================================================================
 // Manages node changes and node observers. Node observers are notified when
@@ -1217,14 +979,20 @@ void ServerHandler::reset()
 	comQueue_->stop();
 
 	//Notify observers that the reset will start
-	notifyServerObservers(&ServerObserver::notifyServerResetBegin);
+	notifyServerObservers(&ServerObserver::notifyBeginServerReset);
 
 	//Clear vnode
-	//vRoot_->clear();
+	vRoot_->clear();
+
 
 	//Reset client handle and defs as well. This does not require
 	//communications with the server.
 	client_->reset();
+
+	notifyServerObservers(&ServerObserver::notifyEndServerReset);
+
+	return;
+
 
 	//Sync local
 	try
@@ -1236,7 +1004,7 @@ void ServerHandler::reset()
 		connected_=false;
 
 		//Notify observers
-		notifyServerObservers(&ServerObserver::notifyServerResetEnd);
+		notifyServerObservers(&ServerObserver::notifyEndServerReset);
 
 		return;
 	}
@@ -1245,7 +1013,7 @@ void ServerHandler::reset()
 	//vRoot_->scan();
 
 	//Notify observers thet the reset finished
-	notifyServerObservers(&ServerObserver::notifyServerResetEnd);
+	notifyServerObservers(&ServerObserver::notifyEndServerReset);
 
 	//Restart the queue
 	comQueue_->start();
@@ -1325,6 +1093,42 @@ void ServerHandler::commandSent(){
 }
 */
 
+
+
+//--------------------------------------------------------------
+//
+//   Find the server for a node
+//
+//--------------------------------------------------------------
+
+ServerHandler* ServerHandler::find(const std::string& name)
+{
+	for(std::vector<ServerHandler*>::const_iterator it=servers_.begin(); it != servers_.end();it++)
+			if((*it)->name() == name)
+					return *it;
+	return NULL;
+}
+
+ServerHandler* ServerHandler::find(Node *node)
+{
+	// XXXXX here we should protect access to the definitions, but we
+	// don't yet know which defs we are accessing!
+
+	if(node)
+	{
+		if(Defs* defs = node->defs())
+		{
+			const ServerState& st=defs->server();
+
+			//It is a question if this solution is fast enough. We may need to store
+			//directly the server name in ServerState
+			st.find_variable("nameInViewer");
+
+			return ServerHandler::find(st.find_variable("nameInViewer"));
+		}
+	}
+	return NULL;
+}
 
 //===============================================================================
 //
@@ -1549,7 +1353,7 @@ void ServerComQueue::slotTaskFailed(std::string msg)
 
 //==============================================================
 //
-//   ServerComThread
+//                     ServerComThread
 //
 //==============================================================
 
@@ -1559,59 +1363,7 @@ ServerComThread::ServerComThread(ServerHandler *server, ClientInvoker *ci) :
 		taskType_(VTask::NoTask),
 		attached_(false)
 {
-	//initObserver(server_);
 }
-
-/*void ServerComThread::setCommandString(const std::vector<std::string> command)
-{
-	command_ = command;
-}*/
-
-/*void ServerComThread::sendCommand(ServerHandler *server, ClientInvoker *ci, ServerComThread::ComType comType)
-{
-	// do not execute thread if already running
-
-	if (isRunning())
-	{
-		UserMessage::message(UserMessage::ERROR, true, std::string("ServerComThread::sendCommand - thread already running, will not execute command"));
-	}
-	else
-	{
-
-		if(!server_ && server)
-			initObserver(server);
-
-		server_  = server;
-		ci_      = ci;
-		comType_ = comType;
-		start();  // start the thread execution
-	}
-}
-
-void ServerComThread::sendCommand(ServerComThread::ComType comType,VTask_ptr query,VReply_ptr reply)
-{
-	// do not execute thread if already running
-
-	if (isRunning())
-	{
-		UserMessage::message(UserMessage::ERROR, true, std::string("ServerComThread::sendCommand - thread already running, will not execute command"));
-	}
-	else
-	{
-
-		//if(!server_ && server)
-		//	initObserver(server);
-
-		server_  = server;
-		ci_      = ci;
-		comType_ = comType;
-		query_=query;
-		reply_=reply;
-
-		start();  // start the thread execution
-	}
-}
-*/
 
 void ServerComThread::task(VTask_ptr task)
 {
@@ -1679,7 +1431,7 @@ void ServerComThread::run()
 			case VTask::InitTask:
 			{
 				{
-					sleep(15);
+					//sleep(15);
 					ServerDefsAccess defsAccess(server_);
 					UserMessage::message(UserMessage::DBG, false, std::string("    INIT SYNC"));
 					ci_->sync_local();
@@ -1738,129 +1490,6 @@ void ServerComThread::run()
 	//Can we use it? We are in the thread!!!
 	//UserMessage::message(UserMessage::DBG, false, std::string("  ServerComThread::run finished"));
 }
-
-
-
-/*
-void ServerComThread::run()
-{
-	UserMessage::message(UserMessage::DBG, false, std::string("  ServerComThread::run start"));
-
-	try
- 	{
-		switch (comType_)
-		{
-			case COMMAND:
-			{
-				// call the client invoker with the saved command
-				UserMessage::message(UserMessage::DBG, false, std::string("    COMMAND"));
-				ArgvCreator argvCreator(command_);
-				ci_->invoke(argvCreator.argc(), argvCreator.argv());
-
-				break;
-			}
-
-			case NEWS:
-			{
-				UserMessage::message(UserMessage::DBG, false, std::string("    NEWS"));
-				ci_->news_local(); // call the server
-				//reply_->text(ci_->server_reply().get_news());
-				break;
-			}
-
-			case SYNC:
-			{
-				ServerDefsAccess defsAccess(server_);
-				UserMessage::message(UserMessage::DBG, false, std::string("    SYNC"));
-				ci_->sync_local();
-				break;
-			}
-
-			case FILE:
-			{
-				UserMessage::message(UserMessage::DBG, false, std::string("    FILE"));
-				ci_->file(query_->node()->absNodePath(),query_->param("clientPar"));
-				reply_->text(ci_->server_reply().get_string());
-				//reply_->done(true);
-				break;
-			}
-
-			case HISTORY:
-			{
-				UserMessage::message(UserMessage::DBG, false, std::string("    HISTORY"));
-				ci_->edit_history(query_->node()->absNodePath());
-				reply_->text(ci_->server_reply().get_string_vec());
-				//reply_->done(true);
-				break;
-			}
-
-			case STATS:
-			{
-				UserMessage::message(UserMessage::DBG, false, std::string("    STATS"));
-
-				std::stringstream ss;
-				ci_->stats();
-				ci_->server_reply().stats().show(ss);
-				reply_->text(ss.str());
-				reply_->status(VReply::TaskDone);
-				break;
-			}
-
-			default:
-			{
-			}
-		}
-	}
-
-	catch(std::exception& e)
-	{
-		// note that we need to emit a signal rather than directly call a message function
-		// because we can't call Qt widgets from a worker thread
-
-		std::string message = e.what();
-		emit errorMessage(message);
-	}
-
-
-	UserMessage::message(UserMessage::DBG, false, std::string("  ServerComThread::run inished"));
-	emit taskFinished(reply_);
-
-	//We do not need to held these
-	task_.reset();
-	reply_.reset();
-}
-*/
-
-//This is a headache!!!!!!!!!!
-
-
-/*void ServerComThread::initObserver(ServerHandler* server)
-{
-	ServerDefsAccess defsAccess(server);  // will reliquish its resources on destruction
-	defs_ptr d = defsAccess.defs();
-	if(d == NULL)
-		return;
-
-	int cnt=0;
-
-	ChangeMgrSingleton::instance()->attach(d.get(),this);
-
-	const std::vector<suite_ptr> &suites = d->suiteVec();
-	for(unsigned int i=0; i < suites.size();i++)
-	{
-		ChangeMgrSingleton::instance()->attach(suites.at(i).get(),this);
-
-		std::set<Node*> nodes;
-		suites.at(i)->allChildren(nodes);
-		for(std::set<Node*>::iterator it=nodes.begin(); it != nodes.end(); it++)
-			ChangeMgrSingleton::instance()->attach((*it),this);
-
-		cnt+=nodes.size();
-	}
-
-	UserMessage::message(UserMessage::DBG, false,std::string("Total number of nodes observed: ") +
-			   boost::lexical_cast<std::string>(cnt));
-}*/
 
 void ServerComThread::update(const Node* node, const std::vector<ecf::Aspect::Type>& types)
 {

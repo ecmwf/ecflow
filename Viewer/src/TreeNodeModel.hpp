@@ -59,6 +59,8 @@ public Q_SLOTS:
 	void slotResetBranch(VModelServer*,const VNode*);
 	void slotBeginServerInit(VModelServer* server,int);
 	void slotEndServerInit(VModelServer* server);
+	void slotBeginServerReset(VModelServer* server);
+	void slotEndServerReset(VModelServer* server);
 
 Q_SIGNALS:
 	void filterChanged();

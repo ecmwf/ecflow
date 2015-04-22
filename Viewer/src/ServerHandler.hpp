@@ -52,13 +52,6 @@ public:
 		const std::string& host() const {return host_;}
 		const std::string& longName() const {return longName_;}
 		const std::string& port() const {return port_;}
-		int numSuites();
-		node_ptr suiteAt(int);
-		int indexOfSuite(Node* node);
-
-		int numberOfNodes();
-		Node* findNode(int globalIndex);
-		Node* findNode(int globalIndex,int& total,Node *parent);
 
 		Activity activity() const {return activity_;}
 		bool connected() {return connected_;}
@@ -66,6 +59,7 @@ public:
 		std::time_t lastConnectAttempt() const {return lastConnectAttempt_;}
 		std::time_t lastContactTime() const {return lastContactTime_;}
 		const std::string& connectError() const {return connectError_;}
+		bool readFromDisk() const {return readFromDisk_;}
 
 		void reset();
 
@@ -84,13 +78,15 @@ public:
 		void jobout(VTask_ptr req);
 	    void manual(VTask_ptr req);
 
+		void addNodeObserver(NodeObserver* obs);
+		void removeNodeObserver(NodeObserver* obs);
+
+		void addServerObserver(ServerObserver* obs);
+		void removeServerObserver(ServerObserver* obs);
+
 		static const std::vector<ServerHandler*>& servers() {return servers_;}
 		static ServerHandler* addServer(const std::string &name,const std::string &host, const std::string &port);
 		static void removeServer(ServerHandler*);
-
-		static int numOfImmediateChildren(Node*);
-		static Node* immediateChildAt(Node *parent,int pos);
-		static int indexOfImmediateChild(Node *node);
 
 		static void command(VInfo_ptr,const std::vector<std::string>&, bool resolve);
 		static void command(std::vector<VInfo_ptr>,std::string, bool resolve);
@@ -101,15 +97,6 @@ public:
 		static void addServerCommand(const std::string &name, const std::string command);
 		static std::string resolveServerCommand(const std::string &name);
 		static void updateAll();
-
-		void addNodeObserver(NodeObserver* obs);
-		void removeNodeObserver(NodeObserver* obs);
-
-		void addServerObserver(ServerObserver* obs);
-		void removeServerObserver(ServerObserver* obs);
-
-		bool readFromDisk() const {return readFromDisk_;}
-
 
 protected:
 		ServerHandler(const std::string& name,const std::string& host,const std::string&  port);
@@ -160,8 +147,6 @@ private:
 		void stopRefreshTimer();
 		void resetRefreshTimer();
 
-
-
 		defs_ptr defs();
 
 		typedef void (ServerObserver::*SoMethod)(ServerHandler*);
@@ -187,7 +172,7 @@ private:
 };
 
 // --------------------------------------------------------------
-// ServerComQueue - a class provides a queueing system for
+// ServerComQueue - a class to provide a queueing system for
 // sending tasks to the ClientIvoker via the ServerComThread.
 // --------------------------------------------------------------
 
@@ -278,15 +263,12 @@ class ServerDefsAccess
 {
 
 public:
-
 	ServerDefsAccess(ServerHandler *server);
 	~ServerDefsAccess();
 
 	defs_ptr defs();
 
-
 private:
-
 	ServerHandler *server_;
 };
 

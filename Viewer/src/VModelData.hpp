@@ -56,6 +56,8 @@ Q_SIGNALS:
 	void attributesChanged(VModelServer*,const VNode*);
 	void beginServerInit(VModelServer*,int);
 	void endServerInit(VModelServer*);
+	void beginServerReset(VModelServer*);
+	void endServerReset(VModelServer*);
 
 protected:
 	ServerHandler *server_;
@@ -73,8 +75,8 @@ public:
 	 //From ServerObserver
 	 void notifyDefsChanged(ServerHandler* server, const std::vector<ecf::Aspect::Type>& a) {};
 	 void notifyServerDelete(ServerHandler* server) {};
-	 void notifyServerResetBegin(ServerHandler* server) {};
-	 void notifyServerResetEnd(ServerHandler* server) {};
+	 void notifyBeginServerReset(ServerHandler* server);
+	 void notifyEndServerReset(ServerHandler* server);
 	 void notifyBeginServerInit(ServerHandler* server,const VServerChange&);
 	 void notifyEndServerInit(ServerHandler* server);
 	 void notifyServerInitFailed(ServerHandler* server);
@@ -152,6 +154,8 @@ Q_SIGNALS:
 	void attributesChanged(VModelServer*,const VNode*);
 	void beginServerInit(VModelServer*,int);
 	void endServerInit(VModelServer*);
+	void beginServerReset(VModelServer*);
+	void endServerReset(VModelServer*);
 
 protected:
 	void init();

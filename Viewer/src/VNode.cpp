@@ -322,6 +322,9 @@ void VServer::clear()
 	{
 		deleteNode(*it);
 	}
+
+	children_.clear();
+
 	//A sanity check
 	assert(totalNum_ == 0);
 }

@@ -12,6 +12,7 @@
 #include "VNState.hpp"
 #include "VAttribute.hpp"
 #include "VIcon.hpp"
+#include "VNode.hpp"
 #include "VParam.hpp"
 #include "VSettings.hpp"
 
@@ -158,7 +159,7 @@ TreeNodeFilter::TreeNodeFilter(NodeFilterDef* def) : NodeFilter(def)
 
 }
 
-bool TreeNodeFilter::isFiltered(Node* node)
+bool TreeNodeFilter::isFiltered(VNode* node)
 {
 	return (std::find(nonMatch_.begin(), nonMatch_.end(), node) == nonMatch_.end());
 }
@@ -173,34 +174,35 @@ void TreeNodeFilter::reset(ServerHandler* server)
 
 	return;
 
+	//TODO: make it work again
 
-	for(unsigned int j=0; j < server->numSuites();j++)
+	VServer* root=server->vRoot();
+
+	for(unsigned int j=0; j < root->numOfChildren();j++)
 	{
-		filterState(server->suiteAt(j),def_->nodeState_);
+		filterState(root->childAt(j),def_->nodeState_);
 	}
 }
 
-bool TreeNodeFilter::filterState(node_ptr node,VParamSet* stateFilter)
+bool TreeNodeFilter::filterState(VNode* node,VParamSet* stateFilter)
 {
 	bool ok=false;
-	if(stateFilter->isSet(VNState::toState(node.get())))
+	if(stateFilter->isSet(VNState::toState(node->node())))
 	{
 		ok=true;
 	}
 
-	std::vector<node_ptr> nodes;
-	node->immediateChildren(nodes);
-
-	for(std::vector<node_ptr>::iterator it=nodes.begin(); it != nodes.end(); it++)
+	for(unsigned int i=0; i < node->numOfChildren(); i++)
 	{
-		if(filterState(*it,stateFilter) == true && ok == false)
+		if(filterState(node->childAt(i),stateFilter) == true && ok == false)
 		{
 			ok=true;
 		}
 	}
 
+
 	if(!ok)
-		nonMatch_.insert(node.get());
+		nonMatch_.insert(node);
 
 	return ok;
 }
@@ -211,7 +213,7 @@ TableNodeFilter::TableNodeFilter(NodeFilterDef* def) : NodeFilter(def)
 	type_.insert("suite");
 }
 
-bool TableNodeFilter::isFiltered(Node* node)
+bool TableNodeFilter::isFiltered(VNode* node)
 {
 	return (std::find(match_.begin(), match_.end(), node) != match_.end());
 }
@@ -230,7 +232,7 @@ void TableNodeFilter::reset(ServerHandler* server)
 	}*/
 }
 
-Node* TableNodeFilter::match(int i)
+VNode* TableNodeFilter::match(int i)
 {
 		assert(i>=0 && i < match_.size());
 		return match_.at(i);

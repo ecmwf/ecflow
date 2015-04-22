@@ -10,6 +10,7 @@
 #include "TreeNodeModel.hpp"
 
 #include <QDebug>
+#include <QMetaMethod>
 
 #include "ChangeMgrSingleton.hpp"
 
@@ -46,15 +47,58 @@ TreeNodeModel::TreeNodeModel(VModelData *data,AttributeFilter *atts,IconFilter* 
 	//this,SLOT(slotIconFilterChanged()));
 
 
-	//When the underlying data changes
 
 	//Filter changed
 	connect(data_,SIGNAL(filterChanged()),
-				this,SIGNAL(filterChanged()));
+			this,SIGNAL(filterChanged()));
+
+
+	//We need connect the rest of the VModelData signals to local slots
+
+	//Loop over the methods of the VModelServer
+	for(int i = 0; i < data_->staticMetaObject.methodCount(); i++)
+	{
+		//Get the method signature
+		const char* sg=data_->staticMetaObject.method(i).signature();
+
+		//Check if it is a signal
+		if(data_->staticMetaObject.indexOfSignal(sg) != -1)
+		{
+			QString localSlot(sg);
+			if(!localSlot.isEmpty())
+			{
+				QChar first=localSlot.at(0);
+
+				localSlot="slot" + localSlot.replace(0,1,first.toUpper());
+
+				//Check if it is a slot in the current class as well
+				int idx=staticMetaObject.indexOfSlot(localSlot.toStdString().c_str());
+				if(idx != -1)
+				{
+					//We simply relay this signal
+					connect(data_,data_->staticMetaObject.method(i),
+							this,staticMetaObject.method(idx));
+				}
+			}
+		}
+	}
+
+
+
+
+
+
+
+
+	//When the underlying data changes
+
+	//Filter changed
+	//connect(data_,SIGNAL(filterChanged()),
+	//			this,SIGNAL(filterChanged()));
 
 
 	//Server init
-	connect(data_,SIGNAL(beginServerInit(VModelServer*,int)),
+	/*connect(data_,SIGNAL(beginServerInit(VModelServer*,int)),
 					this,SLOT(slotBeginServerInit(VModelServer*,int)));
 
 	connect(data_,SIGNAL(endServerInit(VModelServer*)),
@@ -98,7 +142,7 @@ TreeNodeModel::TreeNodeModel(VModelData *data,AttributeFilter *atts,IconFilter* 
 			this,SLOT(slotAddNode(VModelServer*,const VNode*,int)));
 
 	connect(data_,SIGNAL(resetBranch(VModelServer*,const VNode*)),
-			this,SLOT(slotResetBranch(VModelServer*,const VNode*)));
+			this,SLOT(slotResetBranch(VModelServer*,const VNode*)));*/
 
 }
 
@@ -276,17 +320,31 @@ QVariant TreeNodeModel::serverData(const QModelIndex& index,int role) const
 			txt+="<b>Host</b>: " + QString::fromStdString(server->host());
 			txt+=" <b>Port</b>: " + QString::fromStdString(server->port()) + "<br>";
 
-			if(server->connected())
+
+			if(server->activity() == ServerHandler::InitActivity)
 			{
-				txt+="<b>Server status</b>: " + VSState::toName(server) + "<br>";
-				txt+="<b>Status</b>: " + VNState::toName(server) + "<br>";
-				txt+="<b>Total number of nodes</b>: " +  QString::number(server->vRoot()->totalNum());
+				txt+="<b>Server is being loaded!</b><br>";
+				txt+="<b>Started</b>: " + VFileInfo::formatDateAgo(server->lastConnectAttempt()) + "<br>";
+			}
+			else if(server->activity() == ServerHandler::ResetActivity)
+			{
+				txt+="<b>Server is being reset!</b><br>";
+				txt+="<b>Started</b>: " + VFileInfo::formatDateAgo(server->lastConnectAttempt()) + "<br>";
 			}
 			else
 			{
-				txt+="<b>Server is disconnected!</b><br>";
-				txt+="<b>Last connection attempt</b>: " + VFileInfo::formatDateAgo(server->lastConnectAttempt()) + "<br>";
-				txt+="<b>Error message</b>:<br>" +  QString::fromStdString(server->connectError());
+				if(server->connected())
+				{
+					txt+="<b>Server status</b>: " + VSState::toName(server) + "<br>";
+					txt+="<b>Status</b>: " + VNState::toName(server) + "<br>";
+					txt+="<b>Total number of nodes</b>: " +  QString::number(server->vRoot()->totalNum());
+				}
+				else
+				{
+					txt+="<b>Server is disconnected!</b><br>";
+					txt+="<b>Last connection attempt</b>: " + VFileInfo::formatDateAgo(server->lastConnectAttempt()) + "<br>";
+					txt+="<b>Error message</b>:<br>" +  QString::fromStdString(server->connectError());
+				}
 			}
 			return txt;
 		}
@@ -984,18 +1042,6 @@ void TreeNodeModel::slotResetBranch(VModelServer* server,const VNode* node)
 
 }
 
-/*void TreeNodeModel::initBegin(VModelServer* server)
-{
-	assert(active_ == true);
-
-	QModelIndex parent=serverToIndex(server);
-
-	if(parent.isValid())
-	{
-
-	}
-}*/
-
 void TreeNodeModel::slotBeginServerInit(VModelServer* server,int num)
 {
 	assert(active_ == true);
@@ -1019,3 +1065,21 @@ void TreeNodeModel::slotEndServerInit(VModelServer* server)
 	endInsertRows();
 }
 
+void TreeNodeModel::slotBeginServerReset(VModelServer* server)
+{
+	assert(active_ == true);
+
+	QModelIndex idx=serverToIndex(server);
+
+	if(idx.isValid())
+	{
+		int num=rowCount(idx);
+		beginRemoveRows(idx,0,num-1);
+	}
+}
+
+void TreeNodeModel::slotEndServerReset(VModelServer* server)
+{
+	assert(active_ == true);
+	endRemoveRows();
+}
