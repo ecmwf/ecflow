@@ -85,7 +85,7 @@ public:
 
 	bool active() const {return active_;}
 	void active(bool);
-	void clear();
+	void clear(bool detachObservers=true);
 
 	//From NodeObserver
 	void notifyNodeChanged(const VNode*, const std::vector<ecf::Aspect::Type>&,const VNodeChange&);

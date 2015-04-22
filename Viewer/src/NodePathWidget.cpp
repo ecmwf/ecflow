@@ -240,12 +240,12 @@ NodePathWidget::NodePathWidget(QWidget *parent) :
 
 NodePathWidget::~NodePathWidget()
 {
-	clearLayout();
+	clear(true);
 }
 
-void NodePathWidget::clear()
+void NodePathWidget::clear(bool detachObservers)
 {
-	if(info_ && info_->server())
+	if(detachObservers && info_ && info_->server())
 	{
 		info_->server()->removeNodeObserver(this);
 		info_->server()->removeServerObserver(this);
@@ -763,7 +763,12 @@ void NodePathWidget::notifyDefsChanged(ServerHandler* server,const std::vector<e
 
 void NodePathWidget::notifyServerDelete(ServerHandler* server)
 {
-
+	if(info_ && info_->server() ==  server)
+	{
+		//We do not want to detach ourselves as an observer the from the server. When this function is
+		//called the server is actually loops through its observers and notify them.
+		clear(false);
+	}
 }
 
 void NodePathWidget::paintEvent(QPaintEvent *)

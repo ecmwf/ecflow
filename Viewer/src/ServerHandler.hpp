@@ -63,6 +63,8 @@ public:
 
 		void reset();
 
+		static void resetFirst();
+
 		int update();
 		void setUpdatingStatus(bool newStatus) {updating_ = newStatus;}
 		void releaseDefs();
@@ -190,6 +192,7 @@ public:
 	void start();
 	void stop();
 	void init();
+	bool active() const {return active_;}
 
 protected Q_SLOTS:
 	void slotRun();
@@ -230,6 +233,7 @@ public:
 	void update_delete(const Node*);
 	void update_delete(const Defs*);
 
+	bool attached() const {return attached_;}
 	void attach();
 	void detach();
 

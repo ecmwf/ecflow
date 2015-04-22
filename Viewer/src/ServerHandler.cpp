@@ -122,7 +122,7 @@ ServerHandler::~ServerHandler()
 			(*it)->notifyServerDelete(this);
 
 	if (comQueue_)
-			delete comQueue_;
+		delete comQueue_;
 
 	if(client_)
 		delete client_;
@@ -137,7 +137,19 @@ ServerHandler::~ServerHandler()
 
 void ServerHandler::beginInit()
 {
-	if(connected_)
+	//This method can only be called when:
+	// -the queue is not running
+	// -the timer is stopped
+	// -the tree is empty.
+	//The caller routine must ensure that these conditions are met
+
+	assert(comQueue_->active() == false);
+	assert(refreshTimer_.isActive() == false);
+	assert(vRoot_->totalNum() == 0);
+	assert(vRoot_->numOfChildren() == 0);
+
+	//The server must be disconnected or we have to be in a reset to continue
+	if(activity_!= ResetActivity && connected_)
 		return;
 
 	//Indicate that we start an init
@@ -970,30 +982,55 @@ void ServerHandler::clientTaskFailed(VTask_ptr task,const std::string& errMsg)
 	}
 }
 
+//It is just for testing
+void ServerHandler::resetFirst()
+{
+	if(servers_.size() > 0)
+		servers_.at(0)->reset();
+}
+
 void ServerHandler::reset()
 {
+	activity_=ResetActivity;
+
+	//---------------------------------
+	// First part of reset: clearing
+	//---------------------------------
+
+	//We indicate that started a reset
+	activity_=ResetActivity;
+
 	//Stop the timer
 	stopRefreshTimer();
 
 	//Empty and stop the queue
 	comQueue_->stop();
 
-	//Notify observers that the reset will start
+	//Notify observers that the reset is about to begin
 	notifyServerObservers(&ServerObserver::notifyBeginServerReset);
 
 	//Clear vnode
 	vRoot_->clear();
 
-
 	//Reset client handle and defs as well. This does not require
 	//communications with the server.
 	client_->reset();
 
+	//Notify observers that the reset ended
 	notifyServerObservers(&ServerObserver::notifyEndServerReset);
 
-	return;
+	//At this point nothing is running and the tree is empty (it only contains
+	//the root node)
+
+	//--------------------------------------
+	// Second part of reset: initialising
+	//--------------------------------------
+
+	//We simply call init again
+	beginInit();
 
 
+/*
 	//Sync local
 	try
 	{
@@ -1020,6 +1057,8 @@ void ServerHandler::reset()
 
 	//Restart timer
 	resetRefreshTimer();
+
+	*/
 }
 
 
@@ -1093,11 +1132,11 @@ void ServerHandler::commandSent(){
 }
 */
 
-
-
 //--------------------------------------------------------------
 //
-//   Find the server for a node
+//   Find the server for a node.
+//   TODO: this is just a backup method. We might not want to use it
+//         at all, since it is not safe.
 //
 //--------------------------------------------------------------
 
@@ -1198,7 +1237,7 @@ void ServerComQueue::start()
 	//TODO: how to handle this???
 	if(comThread_->isRunning())
 	{
-
+		assert(0);
 	}
 	else
 	{
@@ -1222,7 +1261,7 @@ void ServerComQueue::stop()
 	//TODO: how to handle this???
 	if(comThread_->isRunning())
 	{
-
+		assert(0);
 	}
 	else
 	{

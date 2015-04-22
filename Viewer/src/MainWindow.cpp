@@ -133,8 +133,10 @@ void MainWindow::on_actionRefresh_triggered()
 
 void MainWindow::on_actionReset_triggered()
 {
-	ServerHandler::updateAll();
-	MainWindow::reload();
+	ServerHandler::resetFirst();
+
+	//ServerHandler::updateAll();
+	//MainWindow::reload();
 }
 
 void MainWindow::on_actionPreferences_triggered()

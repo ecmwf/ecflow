@@ -99,13 +99,16 @@ void ServerFilter::removeServer(ServerItem *server)
 	std::vector<ServerItem*>::iterator it=std::find(items_.begin(),items_.end(),server);
 	if(it != items_.end())
 	{
-			items_.erase(it);
+		//Remove the item from the filter. This should come
+	    //first because the observers update themselves according to the
+		//contents of items_!!!!
+		items_.erase(it);
 
-			//Notifies the view about the changes
-			broadcastRemove(*it);
+		//Notifies the view about the changes
+		broadcastRemove(server);
 
-			//Remove the filter from the observers
-			server->removeObserver(this);
+		//Remove the filter from the observers
+		server->removeObserver(this);
 	}
 }
 
