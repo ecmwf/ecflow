@@ -20,6 +20,7 @@
 #include <unistd.h>
 #include <map>
 
+#include "ConnectState.hpp"
 #include "ServerHandler.hpp"
 #include "Submittable.hpp"
 #include "UserMessage.hpp"
@@ -79,7 +80,7 @@ VSState* VSState::toState(ServerHandler* s)
 	if(!s)
 		return NULL;
 
-	if(!s->connected())
+	if(s->connectState()->state() != ConnectState::Normal)
 		return items_["disconnected"];
 
 	std::map<SState::State,VSState*>::const_iterator it=stateMap_.find(s->serverState());

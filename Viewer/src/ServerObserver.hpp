@@ -22,11 +22,12 @@ public:
 	virtual ~ServerObserver() {};
 	virtual void notifyDefsChanged(ServerHandler* server, const std::vector<ecf::Aspect::Type>& a)=0;
 	virtual void notifyServerDelete(ServerHandler* server)=0;
-	virtual void notifyBeginServerReset(ServerHandler* server) {};
-	virtual void notifyEndServerReset(ServerHandler* server) {};
-	virtual void notifyBeginServerInit(ServerHandler* server,const VServerChange&) {};
-	virtual void notifyEndServerInit(ServerHandler* server) {};
+	virtual void notifyBeginServerClear(ServerHandler* server) {};
+	virtual void notifyEndServerClear(ServerHandler* server) {};
+	virtual void notifyBeginServerScan(ServerHandler* server,const VServerChange&) {};
+	virtual void notifyEndServerScan(ServerHandler* server) {};
 	virtual void notifyServerInitFailed(ServerHandler* server) {};
+	virtual void notifyServerConnectState(ServerHandler* server) {};
 };
 
 

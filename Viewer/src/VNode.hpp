@@ -115,6 +115,8 @@ public:
 	void beginUpdate(VNode* node,const std::vector<ecf::Aspect::Type>& aspect,VNodeChange&);
 	void endUpdate(VNode* node,const std::vector<ecf::Aspect::Type>& aspect);
 
+	QString toolTip();
+
 	//From VNode
 	std::string absNodePath() const {return "/";}
 	QString stateName();

@@ -83,6 +83,8 @@ public:
 	//From ServerObserver
 	void notifyDefsChanged(ServerHandler* server,const std::vector<ecf::Aspect::Type>&) {};
 	void notifyServerDelete(ServerHandler* server);
+	void notifyBeginServerClear(ServerHandler* server);
+	void notifyEndServerClear(ServerHandler* server);
 
 public Q_SLOTS:
 	void slotReload(VInfo_ptr node);

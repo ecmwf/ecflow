@@ -103,14 +103,14 @@ int VTreeServer::checkAttributeUpdateDiff(VNode *node)
 // ServerObserver methods
 //--------------------------------------------------
 
-void VTreeServer::notifyBeginServerInit(ServerHandler* server,const VServerChange& change)
+void VTreeServer::notifyBeginServerScan(ServerHandler* server,const VServerChange& change)
 {
-	Q_EMIT beginServerInit(this,change.suiteNum_);
+	Q_EMIT beginServerScan(this,change.suiteNum_);
 }
 
-void VTreeServer::notifyEndServerInit(ServerHandler* server)
+void VTreeServer::notifyEndServerScan(ServerHandler* server)
 {
-	Q_EMIT endServerInit(this);
+	Q_EMIT endServerScan(this);
 }
 
 void VTreeServer::notifyServerInitFailed(ServerHandler* server)
@@ -118,14 +118,14 @@ void VTreeServer::notifyServerInitFailed(ServerHandler* server)
 	Q_EMIT dataChanged(this);
 }
 
-void VTreeServer::notifyBeginServerReset(ServerHandler* server)
+void VTreeServer::notifyBeginServerClear(ServerHandler* server)
 {
-	Q_EMIT beginServerReset(this);
+	Q_EMIT beginServerClear(this);
 }
 
-void VTreeServer::notifyEndServerReset(ServerHandler* server)
+void VTreeServer::notifyEndServerClear(ServerHandler* server)
 {
-	Q_EMIT endServerReset(this);
+	Q_EMIT endServerClear(this);
 }
 
 void VTreeServer::notifyNodeChanged(const VNode* node, const std::vector<ecf::Aspect::Type>& aspect, const VNodeChange& change)

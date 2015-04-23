@@ -14,6 +14,7 @@
 
 #include "ChangeMgrSingleton.hpp"
 
+#include "ConnectState.hpp"
 #include "VFilter.hpp"
 #include "ServerFilter.hpp"
 #include "ServerHandler.hpp"
@@ -44,14 +45,10 @@ TreeNodeModel::TreeNodeModel(VModelData *data,AttributeFilter *atts,IconFilter* 
 	//Icon filter changes
 	connect(icons_,SIGNAL(changed()),
 			this,SIGNAL(filterChanged()));
-	//this,SLOT(slotIconFilterChanged()));
-
-
 
 	//Filter changed
 	connect(data_,SIGNAL(filterChanged()),
 			this,SIGNAL(filterChanged()));
-
 
 	//We need connect the rest of the VModelData signals to local slots
 
@@ -82,68 +79,6 @@ TreeNodeModel::TreeNodeModel(VModelData *data,AttributeFilter *atts,IconFilter* 
 			}
 		}
 	}
-
-
-
-
-
-
-
-
-	//When the underlying data changes
-
-	//Filter changed
-	//connect(data_,SIGNAL(filterChanged()),
-	//			this,SIGNAL(filterChanged()));
-
-
-	//Server init
-	/*connect(data_,SIGNAL(beginServerInit(VModelServer*,int)),
-					this,SLOT(slotBeginServerInit(VModelServer*,int)));
-
-	connect(data_,SIGNAL(endServerInit(VModelServer*)),
-				this,SLOT(slotEndServerInit(VModelServer*)));
-
-
-	//Server added
-	connect(data_,SIGNAL(serverAddBegin(int)),
-				this,SLOT(slotServerAddBegin(int)));
-
-	connect(data_,SIGNAL(serverAddEnd()),
-								this,SLOT(slotServerAddEnd()));
-
-	//Server removed
-	connect(data_,SIGNAL(serverRemoveBegin(int)),
-						this,SLOT(slotServerRemoveBegin(int)));
-
-	connect(data_,SIGNAL(serverRemoveEnd()),
-							this,SLOT(slotServerRemoveEnd()));
-
-	//The whole server content changes
-	connect(data_,SIGNAL(dataChanged(VModelServer*)),
-			this,SLOT(slotDataChanged(VModelServer*)));
-
-	//Node changes
-	connect(data_,SIGNAL(nodeChanged(VModelServer*,const VNode*)),
-				this,SLOT(slotNodeChanged(VModelServer*,const VNode*)));
-
-	//Attributes change
-	connect(data_,SIGNAL(attributesChanged(VModelServer*,const VNode*)),
-			 	 this,SLOT(slotAttributesChanged(VModelServer*,const VNode*)));
-
-	//Node or attributes number changed
-	connect(data_,SIGNAL(addRemoveAttributes(VModelServer*,const VNode*,int,int)),
-			this,SLOT(slotAddRemoveAttributes(VModelServer*,const VNode*,int,int)));
-
-	connect(data_,SIGNAL(addRemoveNodes(VModelServer*,const VNode*,int,int)),
-				this,SLOT(slotAddRemoveNodes(VModelServer*,const VNode*,int,int)));
-
-	connect(data_,SIGNAL(addNode(VModelServer*,const VNode*,int)),
-			this,SLOT(slotAddNode(VModelServer*,const VNode*,int)));
-
-	connect(data_,SIGNAL(resetBranch(VModelServer*,const VNode*)),
-			this,SLOT(slotResetBranch(VModelServer*,const VNode*)));*/
-
 }
 
 int TreeNodeModel::columnCount( const QModelIndex& /*parent */ ) const
@@ -253,6 +188,7 @@ QVariant TreeNodeModel::serverData(const QModelIndex& index,int role) const
 	if(role == FilterRole)
 		return true;
 
+	//The colour of the server node
 	else if(index.column() == 0 && role == Qt::BackgroundRole)
 	{
 		if(ServerHandler *server=indexToRealServer(index))
@@ -261,92 +197,110 @@ QVariant TreeNodeModel::serverData(const QModelIndex& index,int role) const
 		    return Qt::gray;
 	}
 
+	//The text
 	else if(role == Qt::DisplayRole)
 	{
 		if(ServerHandler *server=indexToRealServer(index))
 		{
-				if(index.column() == 0)
-					return QString::fromStdString(server->name());
-				else if(index.column() == 1)
-					return server->vRoot()->stateName();
+			if(index.column() == 0)
+				return QString::fromStdString(server->name());
+			else if(index.column() == 1)
+				return server->vRoot()->stateName();
 		}
 	}
+
+	//The number of nodes the server has
 	else if(role == NodeNumRole)
 	{
 		if(ServerHandler *server=indexToRealServer(index))
 		{
-			if(server->connected())
+			ConnectState* st=server->connectState();
+			if(server->activity() != ServerHandler::LoadActivity &&
+			  st->state() != ConnectState::InitFailed)
 			{
 				return server->vRoot()->totalNum();
 			}
 		}
 		return QVariant();
 	}
+
+	//Extra information about the server activity
 	else if(role == InfoRole)
 	{
 		if(ServerHandler *server=indexToRealServer(index))
 		{
 			switch(server->activity())
 			{
-			case ServerHandler::InitActivity:
+			case ServerHandler::LoadActivity:
 				return "Loading ...";
-			case ServerHandler::ResetActivity:
-				return "Resetting ...";
 			default:
 				return "";
 			}
 		}
 	}
 
+	//icon decoration
 	else if(role == IconRole)
 	{
 		if(ServerHandler *server=indexToRealServer(index))
 		{
 			//TODO: add a proper iconprovider
-			if(server->activity() == ServerHandler::NoActivity)
+			ConnectState* st=server->connectState();
+			if(server->activity() != ServerHandler::LoadActivity &&
+			   st->state() != ConnectState::Normal)
 			{
-				if(!server->connected())
-					return "d";
+				return "d";
 			}
 			return QVariant();
 		}
 	}
 
+	//Tooltip
 	else if(role == Qt::ToolTipRole)
 	{
 		if(ServerHandler *server=indexToRealServer(index))
 		{
-			QString txt="<b>Server</b>: " + QString::fromStdString(server->name()) + "<br>";
+			return server->vRoot()->toolTip();
+
+			/*QString txt="<b>Server</b>: " + QString::fromStdString(server->name()) + "<br>";
 			txt+="<b>Host</b>: " + QString::fromStdString(server->host());
 			txt+=" <b>Port</b>: " + QString::fromStdString(server->port()) + "<br>";
 
+			ConnectState* st=server->connectState();
 
-			if(server->activity() == ServerHandler::InitActivity)
+			if(server->activity() == ServerHandler::LoadActivity)
 			{
 				txt+="<b>Server is being loaded!</b><br>";
-				txt+="<b>Started</b>: " + VFileInfo::formatDateAgo(server->lastConnectAttempt()) + "<br>";
-			}
-			else if(server->activity() == ServerHandler::ResetActivity)
-			{
-				txt+="<b>Server is being reset!</b><br>";
-				txt+="<b>Started</b>: " + VFileInfo::formatDateAgo(server->lastConnectAttempt()) + "<br>";
+				txt+="<b>Started</b>: " + VFileInfo::formatDateAgo(st->startTime()) + "<br>";
 			}
 			else
 			{
-				if(server->connected())
+				if(st->state() == ConnectState::Normal)
 				{
 					txt+="<b>Server status</b>: " + VSState::toName(server) + "<br>";
 					txt+="<b>Status</b>: " + VNState::toName(server) + "<br>";
 					txt+="<b>Total number of nodes</b>: " +  QString::number(server->vRoot()->totalNum());
 				}
-				else
+				else if(st->state() == ConnectState::Lost)
+				{
+					txt+="<b>Connection to server lost!</b><br>";
+					txt+="<b>Last connection attempt</b>: " + VFileInfo::formatDateAgo(st->startTime()) + "<br>";
+					txt+="<b>Error message</b>:<br>" +  QString::fromStdString(st->errorMessage());
+				}
+				else if(st->state() == ConnectState::InitFailed)
+				{
+					txt+="<b>Failed to connect to server!</b><br>";
+					txt+="<b>Last connection attempt</b>: " + VFileInfo::formatDateAgo(st->startTime()) + "<br>";
+					txt+="<b>Error message</b>:<br>" +  QString::fromStdString(st->errorMessage());
+				}
+				else if(st->state() == ConnectState::Disconnected)
 				{
 					txt+="<b>Server is disconnected!</b><br>";
-					txt+="<b>Last connection attempt</b>: " + VFileInfo::formatDateAgo(server->lastConnectAttempt()) + "<br>";
-					txt+="<b>Error message</b>:<br>" +  QString::fromStdString(server->connectError());
+					txt+="<b>Last connection attempt</b>: " + VFileInfo::formatDateAgo(st->startTime()) + "<br>";
+					txt+="<b>Error message</b>:<br>" +  QString::fromStdString(st->errorMessage());
 				}
 			}
-			return txt;
+			return txt;*/
 		}
 	}
 
@@ -1042,7 +996,9 @@ void TreeNodeModel::slotResetBranch(VModelServer* server,const VNode* node)
 
 }
 
-void TreeNodeModel::slotBeginServerInit(VModelServer* server,int num)
+//The server scan has started (to populate the tree). At this point the tree is empty only containing the
+//root node. Num tells us the number of children nodes (aka suites) the root node will contain.
+void TreeNodeModel::slotBeginServerScan(VModelServer* server,int num)
 {
 	assert(active_ == true);
 
@@ -1059,13 +1015,16 @@ void TreeNodeModel::slotBeginServerInit(VModelServer* server,int num)
 	}
 }
 
-void TreeNodeModel::slotEndServerInit(VModelServer* server)
+//The server scan has finished. The tree is fully populated.
+void TreeNodeModel::slotEndServerScan(VModelServer* server)
 {
 	assert(active_ == true);
 	endInsertRows();
 }
 
-void TreeNodeModel::slotBeginServerReset(VModelServer* server)
+//The server clear has started. It well remove all the nodes except the root node.
+//So we need to remove all the rows belonging to the rootnode.
+void TreeNodeModel::slotBeginServerClear(VModelServer* server)
 {
 	assert(active_ == true);
 
@@ -1077,8 +1036,8 @@ void TreeNodeModel::slotBeginServerReset(VModelServer* server)
 		beginRemoveRows(idx,0,num-1);
 	}
 }
-
-void TreeNodeModel::slotEndServerReset(VModelServer* server)
+//The server clear has finished. The tree is empty only containing the rootnode
+void TreeNodeModel::slotEndServerClear(VModelServer* server)
 {
 	assert(active_ == true);
 	endRemoveRows();

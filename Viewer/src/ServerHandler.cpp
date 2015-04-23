@@ -15,7 +15,8 @@
 #include "File.hpp"
 #include "ArgvCreator.hpp"
 #include "Str.hpp"
-#include "MainWindow.hpp"
+
+#include "ConnectState.hpp"
 #include "NodeObserver.hpp"
 #include "ServerObserver.hpp"
 #include "UserMessage.hpp"
@@ -23,6 +24,7 @@
 #include "VTaskObserver.hpp"
 
 #include <QMessageBox>
+#include <QMetaType>
 
 #include <iostream>
 #include <algorithm>
@@ -45,13 +47,13 @@ ServerHandler::ServerHandler(const std::string& name,const std::string& host, co
    host_(host),
    port_(port),
    client_(0),
-   connected_(false),
    updating_(false),
    communicating_(false),
    comQueue_(0),
    refreshIntervalInSeconds_(60),
    readFromDisk_(true),
-   activity_(NoActivity)
+   activity_(NoActivity),
+   connectState_(new ConnectState())
 {
 	//Create longname
 	longName_=host_ + "@" + port_;
@@ -105,14 +107,19 @@ ServerHandler::ServerHandler(const std::string& name,const std::string& host, co
 	//take ownership of the ServerComThread. At this point the queue has not started yet.
 	comQueue_=new ServerComQueue (this,client_,comThread);
 
-	//At this point nothing is running or active!!!!
+	//-------------------------------------------------
+	// At this point nothing is running or active!!!!
+	//-------------------------------------------------
 
-	//Try to connect to the server. This might fail.
-	beginInit();
+	//Indicate that we start an init (initial load)
+	activity_=LoadActivity;
+
+	//Try to connect to the server and load the defs etc. This might fail!
+	load();
 
 	//We might not have been able to connect to the server. This is indicated by
-	//the value of connected_. Each object needs to be aware of the value
-	//of connected_ and do its tasks accordingly.
+	//the value of connectedStatus_. Each object needs to be aware of it and
+	//do its tasks accordingly.
 }
 
 ServerHandler::~ServerHandler()
@@ -133,9 +140,12 @@ ServerHandler::~ServerHandler()
 		servers_.erase(it);
 
 	delete vRoot_;
+	delete connectState_;
 }
 
-void ServerHandler::beginInit()
+//Completely update the Client Invoker and the graphical tree
+
+void ServerHandler::load()
 {
 	//This method can only be called when:
 	// -the queue is not running
@@ -149,25 +159,25 @@ void ServerHandler::beginInit()
 	assert(vRoot_->numOfChildren() == 0);
 
 	//The server must be disconnected or we have to be in a reset to continue
-	if(activity_!= ResetActivity && connected_)
-		return;
-
-	//Indicate that we start an init
-	activity_=InitActivity;
+	//if(activity_!= ResetActivity && connectState_ == Normal)
+	//	return;
 
 	//There are no observers at this point
 	//Notify the observers that the init has begun
 	//notifyServerObservers(&ServerObserver::notifyServerInitBegin);
 
 	//Clear the connect error text message
-	connectError_.clear();
+	//connectError_.clear();
+
+	//Indicate that we start an init (initial load)
+	activity_=LoadActivity;
 
 	//Register time
-	lastConnectAttempt_=time(0);
+	connectState_->lapStart();
 
 	//Try to get the server version via the client. If it is successful
 	//we can be sure that we can connect to the server.
-	try
+	/*try
 	{
 		//Get the server version
 		std::string server_version;
@@ -183,13 +193,13 @@ void ServerHandler::beginInit()
 	//The init failed
 	catch(std::exception& e)
 	{
-		connectError_= e.what();
+		connectState_->errorMessage(e.what());
 		UserMessage::message(UserMessage::DBG, false, std::string("failed to sync: ") + e.what());
 
 		//The init has failed
-		endInit(false);
+		loadFailed();
 		return;
-	}
+	}*/
 
 	//If we are here we can be sure that we can connect to the server and get the defs. Instruct the queue
 	//to run the init task. It will eventually call initEnd() with the right argument!!
@@ -199,63 +209,77 @@ void ServerHandler::beginInit()
 	comQueue_->init();
 }
 
-void ServerHandler::endInit(bool status)
+//The load was sussessfull
+void ServerHandler::loadFinished()
 {
 	activity_=NoActivity;
 
-	//the init succeeded
-	if(status)
+	connectState_->lapStop();
+
+	//Set the connection state
+	connectState_->state(ConnectState::Normal);
+
+	//Set server host and port in defs. It is used to find the server of
+	//a given node in the viewer.
 	{
-		connected_=true;
+		ServerDefsAccess defsAccess(this);  // will reliquish its resources on destruction
 
-		//Set server host and port in defs. It is used to find the server of
-		//a given node in the viewer.
+		defs_ptr defs = defsAccess.defs();
+		if(defs != NULL)
 		{
-			ServerDefsAccess defsAccess(this);  // will reliquish its resources on destruction
-
-			defs_ptr defs = defsAccess.defs();
-			if(defs != NULL)
-			{
-				ServerState& st=defs->set_server();
-				st.hostPort(std::make_pair(host_,port_));
-				st.add_or_update_user_variables("nameInViewer",name_);
-			}
+			ServerState& st=defs->set_server();
+			st.hostPort(std::make_pair(host_,port_));
+			st.add_or_update_user_variables("nameInViewer",name_);
 		}
-
-		//Create an object to inform the observers about the change
-		VServerChange change;
-
-		//Begin the full scan to get the tree. This call does not actually
-		//run the scan but counts how many suits will be available.
-	    vRoot_->beginScan(change);
-
-		//Notify the observers that init has started
-	    notifyServerObservers(&ServerObserver::notifyBeginServerInit,change);
-
-		//Finish full scan
-		vRoot_->endScan();
-
-		//Notify the observers that init has ended
-		notifyServerObservers(&ServerObserver::notifyEndServerInit);
-
-		//Start the queue
-		comQueue_->start();
-
-		//Resurrect the timer
-		resetRefreshTimer();
 	}
 
-	//The init failed and we could not connect to the server, e.g. because the the server
-	//may be down, or there is a network error, or the authorisation is missing.
+	//Create an object to inform the observers about the change
+	VServerChange change;
 
-	//This status is indicated by the (false) value of connected_. Each object needs to be aware of the value
-	//of connected_ and do its tasks accordingly.
+	//Begin the full scan to get the tree. This call does not actually
+	//run the scan but counts how many suits will be available.
+	vRoot_->beginScan(change);
+
+	//Notify the observers that the scan has started
+	broadcast(&ServerObserver::notifyBeginServerScan,change);
+
+	//Finish full scan
+	vRoot_->endScan();
+
+	//Notify the observers that scan has ended
+	broadcast(&ServerObserver::notifyEndServerScan);
+
+	//Start the queue
+	comQueue_->start();
+
+	//Resurrect the timer
+	resetRefreshTimer();
+}
+
+//The load failed and we could not connect to the server, e.g. because the the server
+//may be down, or there is a network error, or the authorisation is missing.
+void ServerHandler::loadFailed()
+{
+	connectState_->lapStop();
+
+	//This status is indicated by the connectStat_. Each object needs to be aware of it
+	//and do its tasks accordingly.
+
+	//It was the init process
+	if(connectState_->state() == ConnectState::Undef ||
+	   connectState_->state() == ConnectState::InitFailed)
+	{
+		connectState_->state(ConnectState::InitFailed);
+	}
+	//Otherwise we lost the connection
 	else
 	{
-		//TODO: use observers
-		connected_=false;
-		notifyServerObservers(&ServerObserver::notifyServerInitFailed);
+		connectState_->state(ConnectState::Lost);
 	}
+
+	activity_=NoActivity;
+
+	broadcast(&ServerObserver::notifyServerConnectState);
 }
 
 void ServerHandler::stopRefreshTimer()
@@ -266,9 +290,8 @@ void ServerHandler::stopRefreshTimer()
 void ServerHandler::resetRefreshTimer()
 {
 	//If we are not connected to the server the
-	//timer should not run.
-	if(!connected_)
-		refreshTimer_.stop();
+	//timer should not run. ????
+	refreshTimer_.stop();
 
 	// interval of -1 means don't use a timer
 	if (refreshIntervalInSeconds_ != -1)
@@ -286,24 +309,26 @@ void ServerHandler::resetRefreshTimer()
 
 ServerHandler* ServerHandler::addServer(const std::string& name,const std::string& host, const std::string& port)
 {
-		ServerHandler* sh=new ServerHandler(name,host,port);
-		return sh;
+	ServerHandler* sh=new ServerHandler(name,host,port);
+	return sh;
 }
 
 void ServerHandler::removeServer(ServerHandler* server)
 {
-		std::vector<ServerHandler*>::iterator it=std::find(servers_.begin(), servers_.end(),server);
-		if(it != servers_.end())
-		{
-			ServerHandler *s=*it;
-			servers_.erase(it);
-			delete s;
-
-		}
+	std::vector<ServerHandler*>::iterator it=std::find(servers_.begin(), servers_.end(),server);
+	if(it != servers_.end())
+	{
+		ServerHandler *s=*it;
+		servers_.erase(it);
+		delete s;
+	}
 }
 
 SState::State ServerHandler::serverState()
 {
+	if(connectState_->state() != ConnectState::Normal || activity_== LoadActivity)
+		return SState::RUNNING;
+
 	ServerDefsAccess defsAccess(this);  // will reliquish its resources on destruction
 	defs_ptr defs = defsAccess.defs();
 	if(defs != NULL)
@@ -316,6 +341,9 @@ SState::State ServerHandler::serverState()
 
 NState::State ServerHandler::state(bool& suspended)
 {
+	if(connectState_->state() != ConnectState::Normal || activity_== LoadActivity)
+		return NState::UNKNOWN;
+
 	suspended=false;
 	ServerDefsAccess defsAccess(this);  // will reliquish its resources on destruction
 	defs_ptr defs = defsAccess.defs();
@@ -459,7 +487,7 @@ int ServerHandler::update()
 	//We add and update task to the queue. On startup this function can be called
 	//before the comQueue_ was creteted so we need to check if it exists.
 
-	if(comQueue_)
+	if(comQueue_ && comQueue_->active())
 	{
 		comQueue_->addNewsTask();
 	}
@@ -849,13 +877,13 @@ void ServerHandler::removeServerObserver(ServerObserver *obs)
 	}
 }
 
-void ServerHandler::notifyServerObservers(SoMethod proc)
+void ServerHandler::broadcast(SoMethod proc)
 {
 	for(std::vector<ServerObserver*>::const_iterator it=serverObservers_.begin(); it != serverObservers_.end(); it++)
 		((*it)->*proc)(this);
 }
 
-void ServerHandler::notifyServerObservers(SoMethodV1 proc,const VServerChange& ch)
+void ServerHandler::broadcast(SoMethodV1 proc,const VServerChange& ch)
 {
 	for(std::vector<ServerObserver*>::const_iterator it=serverObservers_.begin(); it != serverObservers_.end(); it++)
 		((*it)->*proc)(this,ch);
@@ -923,7 +951,7 @@ void ServerHandler::clientTaskFinished(VTask_ptr task,const ServerReply& serverR
 		case VTask::InitTask:
 		{
 			//If not yet connected but the sync task was successful
-			endInit(true);
+			loadFinished();
 			break;
 		}
 
@@ -971,7 +999,13 @@ void ServerHandler::clientTaskFailed(VTask_ptr task,const std::string& errMsg)
 		//The initialisation failed
 		case VTask::InitTask:
 		{
-			endInit(false);
+			loadFailed();
+			break;
+		}
+		case VTask::NewsTask:
+		case VTask::StatsTask:
+		{
+			connectionLost();
 			break;
 		}
 		default:
@@ -980,6 +1014,11 @@ void ServerHandler::clientTaskFailed(VTask_ptr task,const std::string& errMsg)
 			break;
 
 	}
+}
+
+void ServerHandler::connectionLost()
+{
+	connectState_->state(ConnectState::Lost);
 }
 
 //It is just for testing
@@ -991,14 +1030,9 @@ void ServerHandler::resetFirst()
 
 void ServerHandler::reset()
 {
-	activity_=ResetActivity;
-
 	//---------------------------------
 	// First part of reset: clearing
 	//---------------------------------
-
-	//We indicate that started a reset
-	activity_=ResetActivity;
 
 	//Stop the timer
 	stopRefreshTimer();
@@ -1006,8 +1040,8 @@ void ServerHandler::reset()
 	//Empty and stop the queue
 	comQueue_->stop();
 
-	//Notify observers that the reset is about to begin
-	notifyServerObservers(&ServerObserver::notifyBeginServerReset);
+	//Notify observers that the clear is about to begin
+	broadcast(&ServerObserver::notifyBeginServerClear);
 
 	//Clear vnode
 	vRoot_->clear();
@@ -1016,49 +1050,18 @@ void ServerHandler::reset()
 	//communications with the server.
 	client_->reset();
 
-	//Notify observers that the reset ended
-	notifyServerObservers(&ServerObserver::notifyEndServerReset);
+	//Notify observers that the clear ended
+	broadcast(&ServerObserver::notifyEndServerClear);
 
 	//At this point nothing is running and the tree is empty (it only contains
 	//the root node)
 
 	//--------------------------------------
-	// Second part of reset: initialising
+	// Second part of reset: loading
 	//--------------------------------------
 
-	//We simply call init again
-	beginInit();
-
-
-/*
-	//Sync local
-	try
-	{
-		client_->sync_local();
-	}
-	catch(std::exception& e)
-	{
-		connected_=false;
-
-		//Notify observers
-		notifyServerObservers(&ServerObserver::notifyEndServerReset);
-
-		return;
-	}
-
-	//Populate vnode
-	//vRoot_->scan();
-
-	//Notify observers thet the reset finished
-	notifyServerObservers(&ServerObserver::notifyEndServerReset);
-
-	//Restart the queue
-	comQueue_->start();
-
-	//Restart timer
-	resetRefreshTimer();
-
-	*/
+	//We simply call load again
+	load();
 }
 
 

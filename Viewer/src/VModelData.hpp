@@ -54,10 +54,10 @@ Q_SIGNALS:
 	void dataChanged(VModelServer*);
 	void nodeChanged(VModelServer*,const VNode*);
 	void attributesChanged(VModelServer*,const VNode*);
-	void beginServerInit(VModelServer*,int);
-	void endServerInit(VModelServer*);
-	void beginServerReset(VModelServer*);
-	void endServerReset(VModelServer*);
+	void beginServerScan(VModelServer*,int);
+	void endServerScan(VModelServer*);
+	void beginServerClear(VModelServer*);
+	void endServerClear(VModelServer*);
 
 protected:
 	ServerHandler *server_;
@@ -75,11 +75,12 @@ public:
 	 //From ServerObserver
 	 void notifyDefsChanged(ServerHandler* server, const std::vector<ecf::Aspect::Type>& a) {};
 	 void notifyServerDelete(ServerHandler* server) {};
-	 void notifyBeginServerReset(ServerHandler* server);
-	 void notifyEndServerReset(ServerHandler* server);
-	 void notifyBeginServerInit(ServerHandler* server,const VServerChange&);
-	 void notifyEndServerInit(ServerHandler* server);
+	 void notifyBeginServerClear(ServerHandler* server);
+	 void notifyEndServerClear(ServerHandler* server);
+	 void notifyBeginServerScan(ServerHandler* server,const VServerChange&);
+	 void notifyEndServerScan(ServerHandler* server);
 	 void notifyServerInitFailed(ServerHandler* server);
+	 void notifyServerConnectState(ServerHandler* server) {}
 
 	 //From NodeObserver
 	 void notifyNodeChanged(const VNode*, const std::vector<ecf::Aspect::Type>&,const VNodeChange&);
@@ -145,6 +146,8 @@ Q_SIGNALS:
 	void serverAddEnd();
 	void serverRemoveBegin(int);
 	void serverRemoveEnd();
+
+	//Signals relayed from VModelServer
 	void addRemoveAttributes(VModelServer*,const VNode*,int,int);
 	void addRemoveNodes(VModelServer*,const VNode*,int,int);
 	void addNode(VModelServer*,const VNode*,int pos);
@@ -152,10 +155,10 @@ Q_SIGNALS:
 	void dataChanged(VModelServer*);
 	void nodeChanged(VModelServer*,const VNode*);
 	void attributesChanged(VModelServer*,const VNode*);
-	void beginServerInit(VModelServer*,int);
-	void endServerInit(VModelServer*);
-	void beginServerReset(VModelServer*);
-	void endServerReset(VModelServer*);
+	void beginServerScan(VModelServer*,int);
+	void endServerScan(VModelServer*);
+	void beginServerClear(VModelServer*);
+	void endServerClear(VModelServer*);
 
 protected:
 	void init();

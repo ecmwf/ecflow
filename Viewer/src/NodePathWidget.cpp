@@ -223,7 +223,7 @@ NodePathMenuItem::NodePathMenuItem(int index,QWidget * parent) :
 
 NodePathWidget::NodePathWidget(QWidget *parent) :
   QWidget(parent),
-  stayInParent_(true),
+  stayInParent_(false),
   infoIndex_(-1),
   active_(true)
 {
@@ -276,12 +276,12 @@ void NodePathWidget::clearLayout()
   	QLayoutItem *item;
  	while( (item = layout_->takeAt(0)) != 0)
 	{
-     		if(QWidget *w=item->widget())
-     		{
-     			layout_->removeWidget(w);
-     			//delete w;
-     		}
-     		delete item;
+     	if(QWidget *w=item->widget())
+     	{
+     		layout_->removeWidget(w);
+     		//delete w;
+     	}
+     	delete item;
  	}
 }
 
@@ -475,8 +475,8 @@ void NodePathWidget::setPath(VInfo_ptr info)
 
   	//We do not stay in parent mode or the new path is not part of the current one.
 
-  	//Now it is safe to do this assignment
-  	info_=info;
+  	//Now it is safe to do this assignment //????
+  	//info_=info;
 
 	//Get the node list + prepend the server
   	std::vector<VNode*> lst=info_->ancestors(VInfo::ParentToChildOrder);
@@ -766,7 +766,7 @@ void NodePathWidget::notifyServerDelete(ServerHandler* server)
 	if(info_ && info_->server() ==  server)
 	{
 		//We do not want to detach ourselves as an observer the from the server. When this function is
-		//called the server is actually loops through its observers and notify them.
+		//called the server actually loops through its observers and notify them.
 		clear(false);
 	}
 }
@@ -797,7 +797,7 @@ void NodePathWidget::readSettings(VSettings* vs)
 	active((ival==1)?true:false);
 
 	ival=vs->get<int>("stayInParent",1);
-	stayInParent_=(ival==1)?true:false;
+	//stayInParent_=(ival==1)?true:false;
 
 	vs->endGroup();
 }

@@ -9,6 +9,7 @@
 
 #include "OverviewProvider.hpp"
 
+#include "ConnectState.hpp"
 #include "ServerHandler.hpp"
 #include "VNode.hpp"
 #include "VNState.hpp"
@@ -35,7 +36,7 @@ void OverviewProvider::visit(VInfoServer* info)
 	reply_->text(ss.str());
 
 	//If not connected we reply immediately!
-	if(!info->server()->connected())
+	if(info->server()->connectState()->state() != ConnectState::Normal)
 	{
 		owner_->infoReady(reply_);
 		return;
@@ -97,10 +98,12 @@ void OverviewProvider::serverInfo(VInfoServer* info,std::stringstream& f)
 	ServerHandler *server=info->server();
 	if(!server) return;
 
+	ConnectState* cst=server->connectState();
+
 	//If the server is not connected!!
-	if(!server->connected())
+	if(cst->state() != ConnectState::Normal)
 	{
-		f << "Server is disconnected!" << "\n";
+		f << cst->describe() << "\n";
 		f << inc << "Name    : " << server->name() << "\n";
 		f << inc << "Host    : " << server->host() << "\n";
 		f << inc << "Port    : " << server->port() << "\n";

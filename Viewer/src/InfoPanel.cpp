@@ -352,6 +352,20 @@ void InfoPanel::notifyServerDelete(ServerHandler* server)
 	}
 }
 
+void InfoPanel::notifyBeginServerClear(ServerHandler* server)
+{
+	if(info_ && info_->server() == server)
+	{
+		clear();
+	}
+}
+
+void InfoPanel::notifyEndServerClear(ServerHandler* server)
+{
+
+}
+
+
 void InfoPanel::writeSettings(VSettings* vs)
 {
 	vs->put("type","info");

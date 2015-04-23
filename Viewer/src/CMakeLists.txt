@@ -5,6 +5,7 @@ set(viewer_srcs
     AbstractSearchLine.cpp
     ActionHandler.cpp
     CodeItemWidget.cpp
+    ConnectState.cpp
     CommandDesignerWidget.cpp
     CustomCommandDialog.cpp
     Dashboard.cpp

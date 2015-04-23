@@ -13,8 +13,10 @@
 #include "Node.hpp"
 #include "Variable.hpp"
 
+#include "ConnectState.hpp"
 #include "ServerHandler.hpp"
 #include "VAttribute.hpp"
+#include "VFileInfo.hpp"
 #include "VNState.hpp"
 #include "VSState.hpp"
 
@@ -575,4 +577,45 @@ QColor  VServer::stateColour() const
 	return VSState::toColour(server_);
 }
 
+QString VServer::toolTip()
+{
+	QString txt="<b>Server</b>: " + QString::fromStdString(server_->name()) + "<br>";
+	txt+="<b>Host</b>: " + QString::fromStdString(server_->host());
+	txt+=" <b>Port</b>: " + QString::fromStdString(server_->port()) + "<br>";
 
+	ConnectState* st=server_->connectState();
+
+	if(server_->activity() == ServerHandler::LoadActivity)
+	{
+		txt+="<b>Server is being loaded!</b><br>";
+		txt+="<b>Started</b>: " + VFileInfo::formatDateAgo(st->startTime()) + "<br>";
+	}
+	else
+	{
+		if(st->state() == ConnectState::Normal)
+		{
+			txt+="<b>Server status</b>: " + VSState::toName(server_) + "<br>";
+			txt+="<b>Status</b>: " + VNState::toName(server_) + "<br>";
+			txt+="<b>Total number of nodes</b>: " +  QString::number(totalNum_);
+		}
+		else if(st->state() == ConnectState::Lost)
+		{
+			txt+="<b>Connection to server lost!</b><br>";
+			txt+="<b>Last connection attempt</b>: " + VFileInfo::formatDateAgo(st->startTime()) + "<br>";
+			txt+="<b>Error message</b>:<br>" +  QString::fromStdString(st->errorMessage());
+		}
+		else if(st->state() == ConnectState::InitFailed)
+		{
+			txt+="<b>Failed to connect to server!</b><br>";
+			txt+="<b>Last connection attempt</b>: " + VFileInfo::formatDateAgo(st->startTime()) + "<br>";
+			txt+="<b>Error message</b>:<br>" +  QString::fromStdString(st->errorMessage());
+		}
+		else if(st->state() == ConnectState::Disconnected)
+		{
+			txt+="<b>Server is disconnected!</b><br>";
+			txt+="<b>Last connection attempt</b>: " + VFileInfo::formatDateAgo(st->startTime()) + "<br>";
+			txt+="<b>Error message</b>:<br>" +  QString::fromStdString(st->errorMessage());
+		}
+	}
+	return txt;
+}

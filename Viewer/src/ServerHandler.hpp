@@ -30,6 +30,7 @@
 class ClientInvoker;
 class ServerReply;
 
+class ConnectState;
 class NodeObserver;
 class ServerHandler;
 class ServerComQueue;
@@ -46,92 +47,85 @@ class ServerHandler : public QObject
 	friend class ServerComQueue;
   
 public:
-	    enum Activity {NoActivity,InitActivity,ResetActivity};
+	enum Activity {NoActivity,LoadActivity};
 
-		const std::string& name() const {return name_;}
-		const std::string& host() const {return host_;}
-		const std::string& longName() const {return longName_;}
-		const std::string& port() const {return port_;}
+	const std::string& name() const {return name_;}
+	const std::string& host() const {return host_;}
+	const std::string& longName() const {return longName_;}
+	const std::string& port() const {return port_;}
 
-		Activity activity() const {return activity_;}
-		bool connected() {return connected_;}
-		bool communicating() {return communicating_;}
-		std::time_t lastConnectAttempt() const {return lastConnectAttempt_;}
-		std::time_t lastContactTime() const {return lastContactTime_;}
-		const std::string& connectError() const {return connectError_;}
-		bool readFromDisk() const {return readFromDisk_;}
+	Activity activity() const {return activity_;}
+	ConnectState* connectState() const {return connectState_;}
+	bool communicating() {return communicating_;}
+	std::time_t lastConnectAttempt() const {return lastConnectAttempt_;}
+	std::time_t lastContactTime() const {return lastContactTime_;}
+	const std::string& connectError() const {return connectError_;}
+	bool readFromDisk() const {return readFromDisk_;}
 
-		void reset();
+	void reset();
 
-		static void resetFirst();
+	static void resetFirst();
 
-		int update();
-		void setUpdatingStatus(bool newStatus) {updating_ = newStatus;}
-		void releaseDefs();
+	int update();
+	void setUpdatingStatus(bool newStatus) {updating_ = newStatus;}
+	void releaseDefs();
 
-		VServer* vRoot() const {return vRoot_;}
-		SState::State serverState();
-		NState::State state(bool& isSuspended);
+	VServer* vRoot() const {return vRoot_;}
+	SState::State serverState();
+	NState::State state(bool& isSuspended);
 
-		void runCommand(const std::vector<std::string>& cmd);
-		void run(VTask_ptr);
-		void script(VTask_ptr req);
-		void job(VTask_ptr req);
-		void jobout(VTask_ptr req);
-	    void manual(VTask_ptr req);
+	void runCommand(const std::vector<std::string>& cmd);
+	void run(VTask_ptr);
 
-		void addNodeObserver(NodeObserver* obs);
-		void removeNodeObserver(NodeObserver* obs);
+	void addNodeObserver(NodeObserver* obs);
+	void removeNodeObserver(NodeObserver* obs);
 
-		void addServerObserver(ServerObserver* obs);
-		void removeServerObserver(ServerObserver* obs);
+	void addServerObserver(ServerObserver* obs);
+	void removeServerObserver(ServerObserver* obs);
 
-		static const std::vector<ServerHandler*>& servers() {return servers_;}
-		static ServerHandler* addServer(const std::string &name,const std::string &host, const std::string &port);
-		static void removeServer(ServerHandler*);
+	static const std::vector<ServerHandler*>& servers() {return servers_;}
+	static ServerHandler* addServer(const std::string &name,const std::string &host, const std::string &port);
+	static void removeServer(ServerHandler*);
 
-		static void command(VInfo_ptr,const std::vector<std::string>&, bool resolve);
-		static void command(std::vector<VInfo_ptr>,std::string, bool resolve);
+	static void command(VInfo_ptr,const std::vector<std::string>&, bool resolve);
+	static void command(std::vector<VInfo_ptr>,std::string, bool resolve);
 
-		static ServerHandler* find(const std::string& name);
-		static ServerHandler* find(Node *node);
+	static ServerHandler* find(const std::string& name);
+	static ServerHandler* find(Node *node);
 
-		static void addServerCommand(const std::string &name, const std::string command);
-		static std::string resolveServerCommand(const std::string &name);
-		static void updateAll();
+	static void addServerCommand(const std::string &name, const std::string command);
+	static std::string resolveServerCommand(const std::string &name);
+	static void updateAll();
 
 protected:
-		ServerHandler(const std::string& name,const std::string& host,const std::string&  port);
-		~ServerHandler();
+	ServerHandler(const std::string& name,const std::string& host,const std::string&  port);
+	~ServerHandler();
 
-		void connectToServer();
-		void setCommunicatingStatus(bool c) {communicating_ = c;}
-		void clientTaskFinished(VTask_ptr task,const ServerReply& serverReply);
-		void clientTaskFailed(VTask_ptr task,const std::string& errMsg);
+	void connectToServer();
+	void setCommunicatingStatus(bool c) {communicating_ = c;}
+	void clientTaskFinished(VTask_ptr task,const ServerReply& serverReply);
+	void clientTaskFailed(VTask_ptr task,const std::string& errMsg);
 
-		static std::string commandToString(const std::vector<std::string>& cmd);
+	static std::string commandToString(const std::vector<std::string>& cmd);
 
-		std::string name_;
-		std::string host_;
-		std::string port_;
-		ClientInvoker* client_;
-		std::string longName_;
-		bool connected_;
-		bool updating_;
-		bool communicating_;
-		std::vector<NodeObserver*> nodeObservers_;
-		std::vector<ServerObserver*> serverObservers_;
+	std::string name_;
+	std::string host_;
+	std::string port_;
+	ClientInvoker* client_;
+	std::string longName_;
+	bool updating_;
+	bool communicating_;
+	std::vector<NodeObserver*> nodeObservers_;
+	std::vector<ServerObserver*> serverObservers_;
 
-		bool readFromDisk_;
+	bool readFromDisk_;
 
-        VServer* vRoot_;
+    VServer* vRoot_;
         
-		static std::vector<ServerHandler*> servers_;
-		static std::map<std::string, std::string> commands_;
-
+	static std::vector<ServerHandler*> servers_;
+	static std::map<std::string, std::string> commands_;
 
 private Q_SLOTS:
-
 		//void commandSent();  // invoked when a command has finished being sent to the server
 		void errorMessage(std::string message); // invoked when an error message is received
 		//void queryFinished(VReply_ptr);  // invoked when a reply is received from from the server/thread
@@ -139,38 +133,45 @@ private Q_SLOTS:
 		void slotNodeChanged(const Node* n, const std::vector<ecf::Aspect::Type>& a);
 		void slotDefsChanged(const std::vector<ecf::Aspect::Type>& a);
 
-
 private:
-		//Begin and end the initialisation by connecting to the server and syncing.
-		void beginInit();
-		void endInit(bool);
+	//Begin and end the initialisation by connecting to the server and syncing.
+	void load();
+	void loadFinished();
+	void loadFailed();
+	void connectionLost();
 
-		//Handle the update timer
-		void stopRefreshTimer();
-		void resetRefreshTimer();
+	//Handle the update timer
+	void stopRefreshTimer();
+	void resetRefreshTimer();
 
-		defs_ptr defs();
+	void script(VTask_ptr req);
+	void job(VTask_ptr req);
+	void jobout(VTask_ptr req);
+	void manual(VTask_ptr req);
 
-		typedef void (ServerObserver::*SoMethod)(ServerHandler*);
-		void notifyServerObservers(SoMethod);
-		typedef void (ServerObserver::*SoMethodV1)(ServerHandler*,const VServerChange&);
-		void notifyServerObservers(SoMethodV1,const VServerChange&);
+	defs_ptr defs();
 
+	typedef void (ServerObserver::*SoMethod)(ServerHandler*);
+	typedef void (ServerObserver::*SoMethodV1)(ServerHandler*,const VServerChange&);
 
-		QMutex           defsMutex_;
+	void broadcast(SoMethod);
+	void broadcast(SoMethodV1,const VServerChange&);
 
-		ServerComQueue* comQueue_;
+	QMutex           defsMutex_;
 
-		//std::string targetNodeNames_;      // used when building up a command in ServerHandler::command
-		//std::string targetNodeFullNames_;  // used when building up a command in ServerHandler::command
+	ServerComQueue* comQueue_;
 
-		int refreshIntervalInSeconds_;
-		QTimer refreshTimer_;
+	//std::string targetNodeNames_;      // used when building up a command in ServerHandler::command
+	//std::string targetNodeFullNames_;  // used when building up a command in ServerHandler::command
 
-		Activity activity_;
-		std::time_t lastConnectAttempt_;
-		std::time_t lastContactTime_;
-		std::string connectError_;
+	int refreshIntervalInSeconds_;
+	QTimer refreshTimer_;
+
+	Activity activity_;
+	ConnectState* connectState_;
+	std::time_t lastConnectAttempt_;
+	std::time_t lastContactTime_;
+	std::string connectError_;
 };
 
 // --------------------------------------------------------------
