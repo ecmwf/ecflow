@@ -81,10 +81,19 @@ public:
 	void readSettings(VSettings*);
 
 	//From ServerObserver
-	void notifyDefsChanged(ServerHandler* server,const std::vector<ecf::Aspect::Type>&) {};
+	//void notifyDefsChanged(ServerHandler* server,const std::vector<ecf::Aspect::Type>&) {};
+	//void notifyServerDelete(ServerHandler* server);
+	//void notifyBeginServerClear(ServerHandler* server);
+	//void notifyEndServerClear(ServerHandler* server);
+
+	void notifyDefsChanged(ServerHandler* server, const std::vector<ecf::Aspect::Type>& a);
 	void notifyServerDelete(ServerHandler* server);
 	void notifyBeginServerClear(ServerHandler* server);
-	void notifyEndServerClear(ServerHandler* server);
+	void notifyEndServerClear(ServerHandler* server) {};
+	void notifyBeginServerScan(ServerHandler* server,const VServerChange&) {};
+	void notifyEndServerScan(ServerHandler* server) {};
+	void notifyServerInitFailed(ServerHandler* server) {};
+	void notifyServerConnectState(ServerHandler* server);
 
 public Q_SLOTS:
 	void slotReload(VInfo_ptr node);
@@ -96,6 +105,7 @@ Q_SIGNALS:
 
 protected:
 	void reset(VInfo_ptr node);
+	void adjust(VInfo_ptr node);
     void adjust(QStringList);
 	InfoPanelItemHandler* findHandler(QWidget* w);
 	InfoPanelItemHandler* findHandler(QString id);

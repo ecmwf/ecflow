@@ -128,6 +128,15 @@ void VTreeServer::notifyEndServerClear(ServerHandler* server)
 	Q_EMIT endServerClear(this);
 }
 
+void VTreeServer::notifyServerConnectState(ServerHandler* server)
+{
+	Q_EMIT dataChanged(this);
+}
+
+//--------------------------------------------------
+// NodeObserver methods
+//--------------------------------------------------
+
 void VTreeServer::notifyNodeChanged(const VNode* node, const std::vector<ecf::Aspect::Type>& aspect, const VNodeChange& change)
 {
 	if(node==NULL)

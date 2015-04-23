@@ -68,11 +68,11 @@ void InfoPanelItem::adjust(VInfo_ptr info)
   		{
   			if(info_ && info_->server())
   			{
-  				info_->server()->removeServerObserver(this);
+  				//info_->server()->removeServerObserver(this);
   				info_->server()->removeNodeObserver(this);
   			}
 
-  			info->server()->addServerObserver(this);
+  			//info->server()->addServerObserver(this);
   			info->server()->addNodeObserver(this);
   		}
   	}
@@ -81,7 +81,7 @@ void InfoPanelItem::adjust(VInfo_ptr info)
   	{
   	  	if(info_ && info_->server())
   	  	{
-  	  		info_->server()->removeServerObserver(this);
+  	  		//info_->server()->removeServerObserver(this);
   	  		info_->server()->removeNodeObserver(this);
   	  	}
   	}
@@ -94,7 +94,7 @@ void InfoPanelItem::clear()
 {
 	if(info_ && info_->server())
   	{
-  	  	info_->server()->removeServerObserver(this);
+  	  	//info_->server()->removeServerObserver(this);
   	  	info_->server()->removeNodeObserver(this);
   	}
 
@@ -120,24 +120,6 @@ void InfoPanelItem::notifyNodeChanged(const VNode* node, const std::vector<ecf::
                 nodeChanged(node,aspect);
 				return;
             }
-		}
-	}
-}
-
-//From ServerObserver
-void InfoPanelItem::notifyDefsChanged(ServerHandler *server, const std::vector<ecf::Aspect::Type>& aspect)
-{
-	if(!loaded_)
-        return;
-
-    //Check if there is data in info
-	if(info_.get())
-	{
-		if(info_->server() && info_->server() == server)
-		{
-			//We call the method implemented in the concrete class
-            //to handle the changes
-            defsChanged(aspect);
 		}
 	}
 }

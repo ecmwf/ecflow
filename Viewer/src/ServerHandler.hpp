@@ -57,9 +57,6 @@ public:
 	Activity activity() const {return activity_;}
 	ConnectState* connectState() const {return connectState_;}
 	bool communicating() {return communicating_;}
-	std::time_t lastConnectAttempt() const {return lastConnectAttempt_;}
-	std::time_t lastContactTime() const {return lastContactTime_;}
-	const std::string& connectError() const {return connectError_;}
 	bool readFromDisk() const {return readFromDisk_;}
 
 	void reset();
@@ -169,9 +166,6 @@ private:
 
 	Activity activity_;
 	ConnectState* connectState_;
-	std::time_t lastConnectAttempt_;
-	std::time_t lastContactTime_;
-	std::string connectError_;
 };
 
 // --------------------------------------------------------------

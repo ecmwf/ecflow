@@ -123,5 +123,9 @@ void OverviewItemWidget::defsChanged(const std::vector<ecf::Aspect::Type>& aspec
 	}
 }
 
+void OverviewItemWidget::connectStateChanged()
+{
+	reload();
+}
 
 static InfoPanelItemMaker<OverviewItemWidget> maker1("overview");

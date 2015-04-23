@@ -107,10 +107,13 @@ void OverviewProvider::serverInfo(VInfoServer* info,std::stringstream& f)
 		f << inc << "Name    : " << server->name() << "\n";
 		f << inc << "Host    : " << server->host() << "\n";
 		f << inc << "Port    : " << server->port() << "\n";
-		f << inc << "Last connection attempt  : " << VFileInfo::formatDateAgo(server->lastConnectAttempt()).toStdString() << "\n";
+		f << inc << "Last connection attempt  : " << VFileInfo::formatDate(cst->startTime()).toStdString() << "\n";
 		f << "\n";
-		f << "Error message:\n";
-		f << server->connectError();
+		if(!cst->errorMessage().empty())
+		{
+			f << "Error message:\n";
+			f << cst->errorMessage();
+		}
 		return;
 	}
 

@@ -162,8 +162,8 @@ void InfoPanel::clear()
 //TODO: It should be the slot
 void InfoPanel::reset(VInfo_ptr info)
 {
-    //Set info
-    info_=info;
+	//Set info
+    adjust(info);
 
 	//Check which roles are allowed
     QStringList ids;
@@ -206,6 +206,48 @@ void InfoPanel::slotReload(VInfo_ptr node)
 	reset(node);
 }
 
+//Set the new VInfo object.
+//We also we need to manage the node observers. The InfoItem
+//will be the observer of the server of the object stored in
+//the new VInfo
+void InfoPanel::adjust(VInfo_ptr info)
+{
+	ServerHandler *server=0;
+  	bool sameServer=false;
+
+  	//Check if there is data in info
+  	if(info.get())
+  	{
+  		server=info->server();
+
+  		sameServer=(info_)?(info_->server() == server):false;
+
+  		//Handle observers
+  		if(!sameServer)
+  		{
+  			if(info_ && info_->server())
+  			{
+  				info_->server()->removeServerObserver(this);
+  				//info_->server()->removeNodeObserver(this);
+  			}
+
+  			info->server()->addServerObserver(this);
+  			//info->server()->addNodeObserver(this);
+  		}
+  	}
+  	//If the there is no data we clean everything and return
+  	else
+  	{
+  	  	if(info_ && info_->server())
+  	  	{
+  	  		info_->server()->removeServerObserver(this);
+  	  		//info_->server()->removeNodeObserver(this);
+  	  	}
+  	}
+
+  	//Set the info
+  	info_=info;
+}
 
 void InfoPanel::adjust(QStringList ids)
 {
@@ -344,6 +386,25 @@ void InfoPanel::detached(bool b)
 	detachedTb->setChecked(b);
 }
 
+//-------------------------------------------------
+// ServerObserver methods
+//-------------------------------------------------
+
+void InfoPanel::notifyDefsChanged(ServerHandler *server, const std::vector<ecf::Aspect::Type>& aspect)
+{
+	if(info_.get())
+	{
+		if(info_->server() && info_->server() == server)
+		{
+			//Dispatch the change
+			Q_FOREACH(InfoPanelItemHandler *item,items_)
+			{
+				item->item()->defsChanged(aspect);
+			}
+		}
+	}
+}
+
 void InfoPanel::notifyServerDelete(ServerHandler* server)
 {
 	if(info_ && info_->server() == server)
@@ -360,9 +421,19 @@ void InfoPanel::notifyBeginServerClear(ServerHandler* server)
 	}
 }
 
-void InfoPanel::notifyEndServerClear(ServerHandler* server)
+void InfoPanel::notifyServerConnectState(ServerHandler* server)
 {
-
+	if(info_.get())
+	{
+		if(info_->server() && info_->server() == server)
+		{
+			//Dispatch the change
+			Q_FOREACH(InfoPanelItemHandler *item,items_)
+			{
+					item->item()->connectStateChanged();
+			}
+		}
+	}
 }
 
 
