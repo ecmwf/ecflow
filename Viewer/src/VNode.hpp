@@ -29,12 +29,13 @@ class VNodeChange
 {
 public:
 	VNodeChange() : cachedAttrNum_(-1), attrNum_(-1), cachedNodeNum_(-1),
-					nodeNum_(-1), nodeAddedAt_(-1) {}
+					nodeNum_(-1), nodeAddedAt_(-1), ignore_(false) {}
 	int cachedAttrNum_;
 	int attrNum_;
 	int cachedNodeNum_;
 	int nodeNum_;
 	int nodeAddedAt_;
+	bool ignore_;
 };
 
 //Describes the major changes during an update
@@ -90,6 +91,8 @@ public:
 protected:
     void replaceChildren(const std::vector<VNode*>& newCh);
     void addChild(VNode*);
+    short currentAttrNum() const;
+    bool isAttrNumInitialised() const {return attrNum_!=-1;}
 
     Node* node_;
     VNode* parent_;

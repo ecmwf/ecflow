@@ -49,13 +49,19 @@ bool VNode::isTopLevel() const
 //At the beginning of the update we get the current number of attributes
 void VNode::beginUpdateAttrNum()
 {
-	attrNum_=VAttribute::totalNum(node_);
+	//if(attrNum_ != -1)
+	//{
+	//	attrNum_=cachedAttrNum_;
+	//}
+
+	//attrNum_=VAttribute::totalNum(node_);
 }
 
 //At the end of the update we set the cached value to the current number of attributes
 void VNode::endUpdateAttrNum()
 {
 	cachedAttrNum_=attrNum_;
+	attrNum_=VAttribute::totalNum(node_);
 }
 
 short VNode::cachedAttrNum() const
@@ -75,6 +81,11 @@ short VNode::attrNum() const
 	}
 
 	return attrNum_;
+}
+
+short VNode::currentAttrNum() const
+{
+	return VAttribute::totalNum(node_);
 }
 
 QStringList VNode::getAttributeData(int row,VAttribute** type)
@@ -427,17 +438,41 @@ void VServer::deleteNode(VNode* node)
 
 void VServer::beginUpdate(VNode* node,const std::vector<ecf::Aspect::Type>& aspect,VNodeChange& change)
 {
+	//NOTE: when this function is called the real node (Node) has already been updated. However the
+	//views does not know about this change. So at this point (this is the begin step of the update)
+	//all VNode functions have to return the values valid before the update happened!!!!!!!
+	//The main goal of this function is to cleverly provide the views with some information about the nature of the update.
+
 	bool attrNumCh=(std::find(aspect.begin(),aspect.end(),ecf::Aspect::ADD_REMOVE_ATTR) != aspect.end());
 	bool nodeNumCh=(std::find(aspect.begin(),aspect.end(),ecf::Aspect::ADD_REMOVE_NODE) != aspect.end());
 
 	//------------------------------------------------------------
-	// Number of attributes changed
+	// Only the number of attributes changed
 	//-----------------------------------------------------------
-	if(attrNumCh)
+
+	if(attrNumCh && !nodeNumCh)
 	{
-		node->beginUpdateAttrNum();
-		change.attrNum_=node->attrNum();
-		change.cachedAttrNum_=node->cachedAttrNum();
+		//The attributes were never used. None of the views have ever
+		//wanted to display/access these attributes so far, so we can
+		//just ignore this update!!
+		if(!node->isAttrNumInitialised())
+		{
+			change.ignore_=1;
+		}
+		//Otherwise we just register the number of attributes before and after the update
+		else
+		{
+			node->beginUpdateAttrNum();
+
+			//This it the current number of attributes stored in the real Node. This call will not change the
+			//the number of attributes (attrNum_ stored in the VNode!!!!)
+			change.attrNum_=node->currentAttrNum();
+
+			//this is the number of attributes before the update.
+			change.cachedAttrNum_=node->cachedAttrNum();
+		}
+
+		return;
 	}
 
 	//-------------------------------------------------------------
@@ -543,8 +578,13 @@ void VServer::beginUpdate(VNode* node,const std::vector<ecf::Aspect::Type>& aspe
 void VServer::endUpdate(VNode* node,const std::vector<ecf::Aspect::Type>& aspect)
 {
 	bool attrNumCh=(std::find(aspect.begin(),aspect.end(),ecf::Aspect::ADD_REMOVE_ATTR) != aspect.end());
-	if(attrNumCh)
+	bool nodeNumCh=(std::find(aspect.begin(),aspect.end(),ecf::Aspect::ADD_REMOVE_NODE) != aspect.end());
+
+	if(attrNumCh && ! nodeNumCh)
+	{
+		//This call update the number of attributes strored in the VNode
 		node->endUpdateAttrNum();
+	}
 }
 
 QString VServer::stateName()

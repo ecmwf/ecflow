@@ -53,7 +53,8 @@ public Q_SLOTS:
 	void slotDataChanged(VModelServer*);
 	void slotNodeChanged(VModelServer*,const VNode*);
 	void slotAttributesChanged(VModelServer*,const VNode*);
-	void slotAddRemoveAttributes(VModelServer*,const VNode*,int,int);
+	void slotBeginAddRemoveAttributes(VModelServer*,const VNode*,int,int);
+	void slotEndAddRemoveAttributes(VModelServer*,const VNode*,int,int);
 	void slotAddRemoveNodes(VModelServer*,const VNode*,int,int);
 	void slotAddNode(VModelServer*,const VNode*,int);
 	void slotResetBranch(VModelServer*,const VNode*);

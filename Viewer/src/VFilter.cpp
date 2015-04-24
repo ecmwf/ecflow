@@ -38,6 +38,9 @@ void VParamSet::init(const std::vector<VParam*>& items)
 
 bool VParamSet::isSet(VParam* p) const
 {
+	if(!p)
+		return false;
+
 	return (current_.find(p) != current_.end());
 }
 

@@ -11,7 +11,6 @@
 #define INFOPANELITEM_HPP_
 
 #include "NodeObserver.hpp"
-//#include "ServerObserver.hpp"
 #include "VInfo.hpp"
 #include "InfoPresenter.hpp"
 #include "VTask.hpp"
@@ -25,7 +24,7 @@ class InfoProvider;
 
 //This is the (abstract) base class to represent one tab in the info panel.
 
-class InfoPanelItem : public VTaskObserver, public InfoPresenter, public NodeObserver //, public ServerObserver
+class InfoPanelItem : public VTaskObserver, public InfoPresenter, public NodeObserver
 {
 friend class InfoPanel;
 
@@ -47,22 +46,20 @@ public:
 	void infoProgress(VReply*) {};
 
 	//From NodeObserver
-	void notifyNodeChanged(const VNode*, const std::vector<ecf::Aspect::Type>&,const VNodeChange&);
-
-	//From ServerObserver
-	//void notifyDefsChanged(ServerHandler* server,const std::vector<ecf::Aspect::Type>&);
-	//void notifyServerDelete(ServerHandler* server) {}; //InfoPanel handles this
-	//void notifyServerConnectState(ServerHandler* server);
+	void notifyBeginNodeChange(const VNode*, const std::vector<ecf::Aspect::Type>&,const VNodeChange&);
+	void notifyEndNodeChange(const VNode*, const std::vector<ecf::Aspect::Type>&,const VNodeChange&) {}
 
 protected:
 	void adjust(VInfo_ptr);
 	void clear();
 
-	//Notifications from the InfoPanel
-	virtual void nodeChanged(const VNode*, const std::vector<ecf::Aspect::Type>&)=0;
+	//Notifications about the server changes
 	virtual void defsChanged(const std::vector<ecf::Aspect::Type>&)=0;
 	virtual void connectStateChanged() {};
-
+	
+	//Notifications about the node changes
+	virtual void nodeChanged(const VNode*, const std::vector<ecf::Aspect::Type>&)=0;
+	
 	bool loaded_;
     bool useAncestors_;
 };

@@ -88,7 +88,8 @@ public:
 	void clear(bool detachObservers=true);
 
 	//From NodeObserver
-	void notifyNodeChanged(const VNode*, const std::vector<ecf::Aspect::Type>&,const VNodeChange&);
+	void notifyBeginNodeChange(const VNode*, const std::vector<ecf::Aspect::Type>&,const VNodeChange&);
+	void notifyEndNodeChange(const VNode*, const std::vector<ecf::Aspect::Type>&,const VNodeChange&) {}
 
 	//From ServerObserver
 	void notifyDefsChanged(ServerHandler* server,const std::vector<ecf::Aspect::Type>&);

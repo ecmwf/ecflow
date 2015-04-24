@@ -47,7 +47,8 @@ public:
 	//void notifyNodeChanged(const VNode*, const std::vector<ecf::Aspect::Type>&) {};
 
 Q_SIGNALS:
-	void addRemoveAttributes(VModelServer*,const VNode*,int,int);
+	void beginAddRemoveAttributes(VModelServer*,const VNode*,int,int);
+	void endAddRemoveAttributes(VModelServer*,const VNode*,int,int);
 	void addRemoveNodes(VModelServer*,const VNode*,int,int);
 	void addNode(VModelServer*,const VNode*,int pos);
 	void resetBranch(VModelServer*,const VNode*);
@@ -83,7 +84,8 @@ public:
 	 void notifyServerConnectState(ServerHandler* server);
 
 	 //From NodeObserver
-	 void notifyNodeChanged(const VNode*, const std::vector<ecf::Aspect::Type>&,const VNodeChange&);
+	 void notifyBeginNodeChange(const VNode*, const std::vector<ecf::Aspect::Type>&,const VNodeChange&);
+	 void notifyEndNodeChange(const VNode*, const std::vector<ecf::Aspect::Type>&,const VNodeChange&);
 };
 
 class VTableServer : public VModelServer
@@ -97,7 +99,8 @@ public:
 	 void notifyServerDelete(ServerHandler* server) {};
 
 	 //From NodeObserver
-	 void notifyNodeChanged(const VNode*, const std::vector<ecf::Aspect::Type>&,const VNodeChange&);
+	 void notifyBeginNodeChange(const VNode*, const std::vector<ecf::Aspect::Type>&,const VNodeChange&);
+	 void notifyEndNodeChange(const VNode*, const std::vector<ecf::Aspect::Type>&,const VNodeChange&);
 };
 
 //This class defines the data a given Node Model (Tree or Table) displays. The
@@ -148,7 +151,8 @@ Q_SIGNALS:
 	void serverRemoveEnd();
 
 	//Signals relayed from VModelServer
-	void addRemoveAttributes(VModelServer*,const VNode*,int,int);
+	void beginAddRemoveAttributes(VModelServer*,const VNode*,int,int);
+	void endAddRemoveAttributes(VModelServer*,const VNode*,int,int);
 	void addRemoveNodes(VModelServer*,const VNode*,int,int);
 	void addNode(VModelServer*,const VNode*,int pos);
 	void resetBranch(VModelServer*,const VNode*);

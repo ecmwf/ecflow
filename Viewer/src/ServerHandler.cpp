@@ -690,16 +690,19 @@ void ServerHandler::slotNodeChanged(const Node* nc, const std::vector<ecf::Aspec
 	//Begin update for the VNode
 	vRoot_->beginUpdate(vn,aspect,change);
 
-	//Notify the observers
-	for(std::vector<NodeObserver*>::const_iterator it=nodeObservers_.begin(); it != nodeObservers_.end(); it++)
-		(*it)->notifyNodeChanged(vn,aspect,change);
+	if(change.ignore_ == false)
+	{
+		//Notify the observers
+		for(std::vector<NodeObserver*>::const_iterator it=nodeObservers_.begin(); it != nodeObservers_.end(); it++)
+			(*it)->notifyBeginNodeChange(vn,aspect,change);
 
-	//End update for the VNode
-	vRoot_->endUpdate(vn,aspect);
+		//End update for the VNode
+		vRoot_->endUpdate(vn,aspect);
 
-	//for(std::vector<NodeObserver*>::const_iterator it=nodeObservers_.begin(); it != nodeObservers_.end(); it++)
-	//	(*it)->notifyNodeChanged(n,a);
-
+		//Notify the observers
+		for(std::vector<NodeObserver*>::const_iterator it=nodeObservers_.begin(); it != nodeObservers_.end(); it++)
+			(*it)->notifyEndNodeChange(vn,aspect,change);
+	}
 }
 
 void ServerHandler::addNodeObserver(NodeObserver *obs)

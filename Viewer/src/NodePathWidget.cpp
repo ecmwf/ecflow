@@ -710,7 +710,7 @@ void NodePathWidget::loadMenu(const QPoint& pos,VInfo_ptr p)
 	}
 }
 
-void NodePathWidget::notifyNodeChanged(const VNode* node, const std::vector<ecf::Aspect::Type>& aspect,const VNodeChange&)
+void NodePathWidget::notifyBeginNodeChange(const VNode* node, const std::vector<ecf::Aspect::Type>& aspect,const VNodeChange&)
 {
 	if(!active_)
 		return;

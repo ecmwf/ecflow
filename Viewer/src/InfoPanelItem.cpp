@@ -98,7 +98,7 @@ void InfoPanelItem::clear()
 }
 
 //From NodeObserver
-void InfoPanelItem::notifyNodeChanged(const VNode* node, const std::vector<ecf::Aspect::Type>& aspect,const VNodeChange&)
+void InfoPanelItem::notifyBeginNodeChange(const VNode* node, const std::vector<ecf::Aspect::Type>& aspect,const VNodeChange&)
 {
 	if(!loaded_)
         return;

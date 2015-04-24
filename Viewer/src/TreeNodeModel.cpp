@@ -379,7 +379,7 @@ QVariant TreeNodeModel::attributesData(const QModelIndex& index, int role) const
 	if(!node)
 		return QVariant();
 
-	VAttribute* type;
+	VAttribute* type=0;
 	QStringList attrData=node->getAttributeData(index.row(),&type);
 
 	//VParam::Type type;
@@ -889,7 +889,7 @@ void TreeNodeModel::slotAttributesChanged(VModelServer* server,const VNode* node
 }
 
 //Attributes were added or removed
-void TreeNodeModel::slotAddRemoveAttributes(VModelServer* server,const VNode* node,int currentNum,int cachedNum)
+void TreeNodeModel::slotBeginAddRemoveAttributes(VModelServer* server,const VNode* node,int currentNum,int cachedNum)
 {
 	int diff=currentNum-cachedNum;
 	if(diff==0)
@@ -902,24 +902,59 @@ void TreeNodeModel::slotAddRemoveAttributes(VModelServer* server,const VNode* no
 		return;
 
 	//At this point the model state is based on cachedNum!!!!
+	//So VNode::attributeNum() must return cachedNum and we need to pretend we have
+	//cachedNum number of attributes
 
 	//Insertion
 	if(diff > 0)
 	{
 		//We add extra rows to the end of the attributes
 		beginInsertRows(parent,cachedNum,cachedNum+diff-1);
-		endInsertRows();
 	}
 	//Deletion
 	else if(diff <0)
 	{
 		//We remove rows from the end
 		beginRemoveRows(parent,cachedNum+diff,cachedNum-1);
-		endRemoveRows();
 	}
 
 	//At this point the model state is based on currentNum!!!!
 }
+
+
+//Attributes were added or removed
+void TreeNodeModel::slotEndAddRemoveAttributes(VModelServer* server,const VNode* node,int currentNum,int cachedNum)
+{
+	int diff=currentNum-cachedNum;
+	if(diff==0)
+		return;
+
+	//Find the index of the node. This call does not use the
+	//number of attributes of the node so it is safe.
+	QModelIndex parent=nodeToIndex(server,node,0);
+	if(!parent.isValid())
+		return;
+
+	//At this point the model state is based on currentNum!!!!
+
+	//Insertion
+	if(diff > 0)
+	{
+		endInsertRows();
+	}
+	//Deletion
+	else if(diff <0)
+	{
+		endRemoveRows();
+	}
+
+	//We need to update all the attributes to reflect the change!
+	//(Since we do not have information about what attribute was actually added
+	//we always add or remove attributes at the end of the attribute list!!! Then the
+	//call below will update all the attributes of the node in the tree).
+	slotAttributesChanged(server,node);
+}
+
 
 //Nodes were added or removed
 void TreeNodeModel::slotAddRemoveNodes(VModelServer* server,const VNode* node,int currentNum,int cachedNum)

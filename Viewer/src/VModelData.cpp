@@ -94,9 +94,10 @@ VTreeServer::~VTreeServer()
 
 int VTreeServer::checkAttributeUpdateDiff(VNode *node)
 {
-	int last=node->cachedAttrNum();
-	int current=node->attrNum();
-	return current-last;
+	//int last=node->cachedAttrNum();
+	//int current=node->attrNum();
+	//return current-last;
+	return 0;
 }
 
 //--------------------------------------------------
@@ -137,7 +138,7 @@ void VTreeServer::notifyServerConnectState(ServerHandler* server)
 // NodeObserver methods
 //--------------------------------------------------
 
-void VTreeServer::notifyNodeChanged(const VNode* node, const std::vector<ecf::Aspect::Type>& aspect, const VNodeChange& change)
+void VTreeServer::notifyBeginNodeChange(const VNode* node, const std::vector<ecf::Aspect::Type>& aspect, const VNodeChange& change)
 {
 	if(node==NULL)
 		return;
@@ -153,7 +154,7 @@ void VTreeServer::notifyNodeChanged(const VNode* node, const std::vector<ecf::As
 	{
 		if(change.cachedAttrNum_ != change.attrNum_)
 		{
-			Q_EMIT addRemoveAttributes(this,node,
+			Q_EMIT beginAddRemoveAttributes(this,node,
 					change.attrNum_,change.cachedAttrNum_);
 		}
 	}
@@ -225,6 +226,28 @@ void VTreeServer::notifyNodeChanged(const VNode* node, const std::vector<ecf::As
 	}
 }
 
+void VTreeServer::notifyEndNodeChange(const VNode* node, const std::vector<ecf::Aspect::Type>& aspect, const VNodeChange& change)
+{
+	if(node==NULL)
+		return;
+
+	bool runFilter=false;
+	bool attrNumCh=(std::find(aspect.begin(),aspect.end(),ecf::Aspect::ADD_REMOVE_ATTR) != aspect.end());
+	bool nodeNumCh=(std::find(aspect.begin(),aspect.end(),ecf::Aspect::ADD_REMOVE_NODE) != aspect.end());
+
+	//-----------------------------------------------------------------------
+	// The number of attributes changed but the number of nodes is the same!
+	//-----------------------------------------------------------------------
+	if(attrNumCh && !nodeNumCh)
+	{
+		if(change.cachedAttrNum_ != change.attrNum_)
+		{
+			Q_EMIT endAddRemoveAttributes(this,node,
+					change.attrNum_,change.cachedAttrNum_);
+		}
+	}
+}
+
 //==========================================
 //
 // VTableServer
@@ -247,10 +270,13 @@ VTableServer::~VTableServer()
 {
 }
 
-void VTableServer::notifyNodeChanged(const VNode* node, const std::vector<ecf::Aspect::Type>& types,const VNodeChange&)
+void VTableServer::notifyBeginNodeChange(const VNode* node, const std::vector<ecf::Aspect::Type>& types,const VNodeChange&)
 {
 }
 
+void VTableServer::notifyEndNodeChange(const VNode* node, const std::vector<ecf::Aspect::Type>& types,const VNodeChange&)
+{
+}
 
 //==========================================
 //
