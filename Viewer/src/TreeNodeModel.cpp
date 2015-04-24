@@ -215,8 +215,7 @@ QVariant TreeNodeModel::serverData(const QModelIndex& index,int role) const
 		if(ServerHandler *server=indexToRealServer(index))
 		{
 			ConnectState* st=server->connectState();
-			if(server->activity() != ServerHandler::LoadActivity &&
-			  st->state() != ConnectState::InitFailed)
+			if(server->activity() != ServerHandler::LoadActivity)
 			{
 				return server->vRoot()->totalNum();
 			}

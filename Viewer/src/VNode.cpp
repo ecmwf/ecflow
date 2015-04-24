@@ -588,7 +588,7 @@ QString VServer::toolTip()
 	if(server_->activity() == ServerHandler::LoadActivity)
 	{
 		txt+="<b>Server is being loaded!</b><br>";
-		txt+="<b>Started</b>: " + VFileInfo::formatDateAgo(st->startTime()) + "<br>";
+		//txt+="<b>Started</b>: " + VFileInfo::formatDateAgo(st->lastConnectTime()) + "<br>";
 	}
 	else
 	{
@@ -600,21 +600,18 @@ QString VServer::toolTip()
 		}
 		else if(st->state() == ConnectState::Lost)
 		{
-			txt+="<b>Connection to server lost!</b><br>";
-			txt+="<b>Last connection attempt</b>: " + VFileInfo::formatDateAgo(st->startTime()) + "<br>";
-			txt+="<b>Error message</b>:<br>" +  QString::fromStdString(st->errorMessage());
-		}
-		else if(st->state() == ConnectState::InitFailed)
-		{
-			txt+="<b>Failed to connect to server!</b><br>";
-			txt+="<b>Last connection attempt</b>: " + VFileInfo::formatDateAgo(st->startTime()) + "<br>";
-			txt+="<b>Error message</b>:<br>" +  QString::fromStdString(st->errorMessage());
+			QColor colErr(255,0,0);
+			txt+="<b><font color=" + colErr.name() +">Failed to connect to server!</b><br>";
+			txt+="<b>Last connection</b>: " + VFileInfo::formatDateAgo(st->lastConnectTime()) + "<br>";
+			txt+="<b>Last failed attempt</b>: " + VFileInfo::formatDateAgo(st->lastLostTime()) + "<br>";
+			if(!st->errorMessage().empty())
+				txt+="<b>Error message</b>:<br>" + QString::fromStdString(st->shortErrorMessage());
 		}
 		else if(st->state() == ConnectState::Disconnected)
 		{
-			txt+="<b>Server is disconnected!</b><br>";
-			txt+="<b>Last connection attempt</b>: " + VFileInfo::formatDateAgo(st->startTime()) + "<br>";
-			txt+="<b>Error message</b>:<br>" +  QString::fromStdString(st->errorMessage());
+			QColor colErr(255,0,0);
+			txt+="<b><font color=" + colErr.name() +">Server is disconnected!</b><br>";
+			txt+="<b>Disconnected</b>: " + VFileInfo::formatDateAgo(st->lastDisconnectTime()) + "<br>";
 		}
 	}
 	return txt;

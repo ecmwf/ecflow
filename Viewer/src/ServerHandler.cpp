@@ -120,6 +120,9 @@ ServerHandler::ServerHandler(const std::string& name,const std::string& host, co
 	//We might not have been able to connect to the server. This is indicated by
 	//the value of connectedStatus_. Each object needs to be aware of it and
 	//do its tasks accordingly.
+
+	//Start the timer
+	resetRefreshTimer();
 }
 
 ServerHandler::~ServerHandler()
@@ -128,11 +131,10 @@ ServerHandler::~ServerHandler()
 	for(std::vector<ServerObserver*>::const_iterator it=serverObservers_.begin(); it != serverObservers_.end(); it++)
 			(*it)->notifyServerDelete(this);
 
+	//The queue must be deleted before the client, since the thread might
+	//be running a job on the client!!
 	if (comQueue_)
 		delete comQueue_;
-
-	if(client_)
-		delete client_;
 
 	//Remove itself from the server vector
 	std::vector<ServerHandler*>::iterator it=std::find(servers_.begin(),servers_.end(),this);
@@ -141,6 +143,10 @@ ServerHandler::~ServerHandler()
 
 	delete vRoot_;
 	delete connectState_;
+
+	//The safest is to delete the client in the end
+	if(client_)
+		delete client_;
 }
 
 //Completely update the Client Invoker and the graphical tree
@@ -172,9 +178,6 @@ void ServerHandler::load()
 	//Indicate that we start an init (initial load)
 	activity_=LoadActivity;
 
-	//Register time
-	connectState_->lapStart();
-
 	//Try to get the server version via the client. If it is successful
 	//we can be sure that we can connect to the server.
 	/*try
@@ -204,9 +207,9 @@ void ServerHandler::load()
 	//If we are here we can be sure that we can connect to the server and get the defs. Instruct the queue
 	//to run the init task. It will eventually call initEnd() with the right argument!!
 
-	//NOTE: at this point the queue is not running, init is a special call for doing the
-	//setup.
-	comQueue_->init();
+	//NOTE: at this point the queue is not running but load will start it.
+	//While the queue is in load mode it does not accept tasks.
+	comQueue_->load();
 }
 
 //The load was sussessfull
@@ -214,10 +217,9 @@ void ServerHandler::loadFinished()
 {
 	activity_=NoActivity;
 
-	connectState_->lapStop();
-
 	//Set the connection state
 	connectState_->state(ConnectState::Normal);
+	broadcast(&ServerObserver::notifyServerConnectState);
 
 	//Set server host and port in defs. It is used to find the server of
 	//a given node in the viewer.
@@ -248,35 +250,17 @@ void ServerHandler::loadFinished()
 
 	//Notify the observers that scan has ended
 	broadcast(&ServerObserver::notifyEndServerScan);
-
-	//Start the queue
-	comQueue_->start();
-
-	//Resurrect the timer
-	resetRefreshTimer();
 }
 
 //The load failed and we could not connect to the server, e.g. because the the server
 //may be down, or there is a network error, or the authorisation is missing.
-void ServerHandler::loadFailed()
+void ServerHandler::loadFailed(const std::string& errMsg)
 {
-	connectState_->lapStop();
-
 	//This status is indicated by the connectStat_. Each object needs to be aware of it
 	//and do its tasks accordingly.
 
-	//It was the init process
-	if(connectState_->state() == ConnectState::Undef ||
-	   connectState_->state() == ConnectState::InitFailed)
-	{
-		connectState_->state(ConnectState::InitFailed);
-	}
-	//Otherwise we lost the connection
-	else
-	{
-		connectState_->state(ConnectState::Lost);
-	}
-
+	connectState_->state(ConnectState::Lost);
+	connectState_->errorMessage(errMsg);
 	activity_=NoActivity;
 
 	broadcast(&ServerObserver::notifyServerConnectState);
@@ -290,8 +274,9 @@ void ServerHandler::stopRefreshTimer()
 void ServerHandler::resetRefreshTimer()
 {
 	//If we are not connected to the server the
-	//timer should not run. ????
-	refreshTimer_.stop();
+	//timer should not run.
+	if(connectState_->state() == ConnectState::Disconnected)
+		return;
 
 	// interval of -1 means don't use a timer
 	if (refreshIntervalInSeconds_ != -1)
@@ -394,6 +379,9 @@ void ServerHandler::errorMessage(std::string message)
 
 void ServerHandler::runCommand(const std::vector<std::string>& cmd)
 {
+	if(connectState_->state() == ConnectState::Disconnected)
+		return;
+
 	VTask_ptr task=VTask::create(VTask::CommandTask);
 	task->command(cmd);
 	comQueue_->addTask(task);
@@ -407,6 +395,9 @@ void ServerHandler::runCommand(const std::vector<std::string>& cmd)
 
 void ServerHandler::run(VTask_ptr task)
 {
+	if(connectState_->state() == ConnectState::Disconnected)
+		return;
+
 	switch(task->type())
 	{
 	case VTask::ScriptTask:
@@ -482,132 +473,14 @@ void ServerHandler::updateAll()
 // see view/host.cc / ehost::update() for full code
 int ServerHandler::update()
 {
-	int err = 0; // do we need this?
-
 	//We add and update task to the queue. On startup this function can be called
-	//before the comQueue_ was creteted so we need to check if it exists.
-
+	//before the comQueue_ was created so we need to check if it exists.
 	if(comQueue_ && comQueue_->active())
 	{
 		comQueue_->addNewsTask();
 	}
 
-	/*
-	// do not try to update if already updating
-
-	if (updating_)
-		return 0;
-
-
-
-	// we trigger a refresh by asking for the news; then 
-	// ServerHandler::commandSent() handles the rest of the communication
-
-	setUpdatingStatus(true);
-	comThread()->sendCommand(this, client_, ServerComThread::NEWS);
-
-	int err = 0; // do we need this?
-*/
-
-/*
-	// do not try to update if already updating
-	if (updating_)
-		return 0;
-
-	setUpdatingStatus(true);;
-	//SelectNode select(this);
-
-	int err = -1;
-
-	//if (!connected_) return err;
-
-	//gui::watch (True);
-	//last_ = ::time(0);
-
-	client_->news_local(); // call the server
-	//if (tree_) tree_->connected(True);
-
-
-	switch ( client_->server_reply().get_news() )
-	{
-		case ServerReply::NO_NEWS:
-			std::cout << "No news from server" << std::endl;
-			setUpdatingStatus(false);
-			//MainWindow::reload();
-			return 0;
-			break;
-
-
-
-		case ServerReply::NEWS:
-			client_->sync_local();
-			setUpdatingStatus(false);
-			//MainWindow::reload();
-			return 0;
-			break;
-
-
-		default:
-			break;
-	}
-
-	//MainWindow::reload();
-*/
-/*
-      switch ( client_.server_reply().get_news() ) {
-         case ServerReply::NO_NEWS:
-            gui::message("::nonews\n");
-            if (top_) top_->up_to_date();
-            return 0;
-            break;
-      case ServerReply::DO_FULL_SYNC: // 4 calls to the server:
-
-	gui::message("::fullsync\n");
-	if (top_) top_->up_to_date();
-	update_reg_suites(true);
-	reset(true);
 	return 0;
-	break;
-      case ServerReply::NO_DEFS:
-	reset(true);
-	return 0;
-	break;
-      case ServerReply::NEWS:
-            // there were some kind of changes in the server
-            // request the changes from the server & sync with
-            // defs on client_
-            client_.sync_local();
-	    // full_sync==true:  no notification on the GUI side
-
-	    // full_sync==false: incremental change, notification
-	    // received through ::update (ecf_node)
-
-	    gui::message("%s: receiving status", name());
-
-	    if (client_.server_reply().full_sync()) {
-	      update_reg_suites(false); // new suite may have been added
-	      reset(false, false); // SUP-398
-	    } else {
-              gui::message("%s: updating status", name());
-              XECFDEBUG std::cout << "# " << name() << ": small update\n";
-              if (tree_)
-                tree_->update_tree(false); // fp:60043 Issue with Ecflow updating on console VM
-              // redraw(false); // too much blinking with this
-            }
-            err = 0;
-            break;
-         default:
-            break;
-      }
-   } catch ( std::exception& e ) {
-      if (tree_ != 0x0) tree_->connected(False);
-      err = -1;
-      gui::message("host::news-error: %s",e.what());
-      XECFDEBUG std::cerr << "# host::news-error: " << e.what() << "\n";
-   }*/
-
-   /*setUpdatingStatus(false);*/
-   return err;
 }
 
 //This slot is called by the timer regularly to get news from the server.
@@ -920,6 +793,7 @@ void ServerHandler::clientTaskFinished(VTask_ptr task,const ServerReply& serverR
 				{
 					// no news, nothing to do
 					UserMessage::message(UserMessage::DBG, false, std::string("No news from server"));
+					connectionGained();
 					break;
 				}
 
@@ -928,6 +802,7 @@ void ServerHandler::clientTaskFinished(VTask_ptr task,const ServerReply& serverR
 					// yes, something's changed - synchronise with the server
 
 					UserMessage::message(UserMessage::DBG, false, std::string("News from server - send sync command"));
+					connectionGained();
 					comQueue_->addSyncTask(); //comThread()->sendCommand(this, client_, ServerComThread::SYNC);
 					break;
 				}
@@ -937,6 +812,7 @@ void ServerHandler::clientTaskFinished(VTask_ptr task,const ServerReply& serverR
 					// yes, a lot of things have changed - we need to reset!!!!!!
 
 					UserMessage::message(UserMessage::DBG, false, std::string("Do_FULL_SYNC from server"));
+					connectionGained();
 					reset();
 					break;
 				}
@@ -948,7 +824,7 @@ void ServerHandler::clientTaskFinished(VTask_ptr task,const ServerReply& serverR
 			}
 			break;
 		}
-		case VTask::InitTask:
+		case VTask::LoadTask:
 		{
 			//If not yet connected but the sync task was successful
 			loadFinished();
@@ -997,15 +873,15 @@ void ServerHandler::clientTaskFailed(VTask_ptr task,const std::string& errMsg)
 	switch(task->type())
 	{
 		//The initialisation failed
-		case VTask::InitTask:
+		case VTask::LoadTask:
 		{
-			loadFailed();
+			loadFailed(errMsg);
 			break;
 		}
 		case VTask::NewsTask:
 		case VTask::StatsTask:
 		{
-			connectionLost();
+			connectionLost(errMsg);
 			break;
 		}
 		default:
@@ -1016,9 +892,50 @@ void ServerHandler::clientTaskFailed(VTask_ptr task,const std::string& errMsg)
 	}
 }
 
-void ServerHandler::connectionLost()
+void ServerHandler::connectionLost(const std::string& errMsg)
 {
 	connectState_->state(ConnectState::Lost);
+	connectState_->errorMessage(errMsg);
+	broadcast(&ServerObserver::notifyServerConnectState);
+}
+
+void ServerHandler::connectionGained()
+{
+	if(connectState_->state() != ConnectState::Normal)
+	{
+		connectState_->state(ConnectState::Normal);
+		broadcast(&ServerObserver::notifyServerConnectState);
+	}
+}
+
+void ServerHandler::disconnectServer()
+{
+	if(connectState_->state() != ConnectState::Disconnected)
+	{
+		connectState_->state(ConnectState::Disconnected);
+		broadcast(&ServerObserver::notifyServerConnectState);
+
+		//Stop the queue
+		comQueue_->stop();
+
+		//Stop the timer
+		stopRefreshTimer();
+	}
+}
+
+void ServerHandler::connectServer()
+{
+	if(connectState_->state() == ConnectState::Disconnected)
+	{
+		//Start the queue
+		comQueue_->start();
+
+		//Start the timer
+		resetRefreshTimer();
+
+		//Try to get the news
+		update();
+	}
 }
 
 //It is just for testing
@@ -1185,12 +1102,13 @@ ServerHandler* ServerHandler::find(Node *node)
 // ServerComQueue notifies the ServerHandler about it.
 
 ServerComQueue::ServerComQueue(ServerHandler *server,ClientInvoker *client, ServerComThread *comThread) :
-		QObject(server),
-		server_(server),
-		client_(client),
-		comThread_(comThread),
-		wait_(false),
-		active_(false)
+	QObject(server),
+	server_(server),
+	client_(client),
+	comThread_(comThread),
+	wait_(false),
+	active_(false),
+	load_(false)
 {
 	timer_=new QTimer(this);
 	timer_->setInterval(2000);
@@ -1211,48 +1129,87 @@ ServerComQueue::ServerComQueue(ServerHandler *server,ClientInvoker *client, Serv
 
 ServerComQueue::~ServerComQueue()
 {
+	//Stop the queue
 	stop();
 
-	if(comThread_)
-		delete comThread_;
+	//Disconnects all the signals from the thread
+	comThread_->disconnect(0,this);
+
+	//If the comthread is running we need to wait
+	//until it finishes its task.
+	comThread_->wait();
+
+	delete comThread_;
 }
 
-void ServerComQueue::init()
+//This is a special mode to reload the whole ClientInvoker
+void ServerComQueue::load()
 {
-	//The queue must be stopped to call init
+	if(load_)
+		return;
+
+	//Set the load status
+	load_=true;
+
+	//The queue must be stopped
 	stop();
 
 	//The thread cannot be running
 	assert(comThread_->isRunning() == false);
 
-	//We sent the init command straight away to the thread!!
-	VTask_ptr task=VTask::create(VTask::InitTask);
+	//We send and init command straight away to the thread!!
+	VTask_ptr task=VTask::create(VTask::LoadTask);
 	current_=task;
 	comThread_->task(current_);
 
-	//The queue is still inactive!!!
+	//The queue is still stopped!!!
 }
 
+void ServerComQueue::endLoad()
+{
+	if(load_)
+	{
+		//Set the load status
+		load_=false;
+
+		//We restart the queue
+		start();
+	}
+}
+
+
+//When the queue is started:
+// -it is ready to accept tasks
+// -its timer is running
 void ServerComQueue::start()
 {
+	if(active_==true)
+		return;
+
+	//Set the status
 	active_=true;
 
-	//TODO: how to handle this???
-	if(comThread_->isRunning())
-	{
-		assert(0);
-	}
-	else
-	{
-		//comThread_->attach();
-	}
+	//If the comthread is running we need to wait
+	//until it finishes its task.
+	comThread_->wait();
+
+	//comThread_->attach();
 
 	//Starts the timer
 	timer_->start();
 }
 
+//When the queue is stopped:
+// -it is empty
+// -it does not accept tasks
+// -its timer is stopped
+// -the thread is detached from ClientInvoker
 void ServerComQueue::stop()
 {
+	if(active_==false)
+		return;
+
+	//Set the status
 	active_=false;
 
 	//Empty the tasks
@@ -1261,15 +1218,12 @@ void ServerComQueue::stop()
 	//Stop the timer
 	timer_->stop();
 
-	//TODO: how to handle this???
-	if(comThread_->isRunning())
-	{
-		assert(0);
-	}
-	else
-	{
-		comThread_->detach();
-	}
+	//If the comthread is running we need to wait
+	//until it finishes its task.
+	comThread_->wait();
+
+	//Detach the thread from the ClientInvoker
+	comThread_->detach();
 
 	//Clear the current task
 	if(current_)
@@ -1278,7 +1232,10 @@ void ServerComQueue::stop()
 
 void ServerComQueue::addTask(VTask_ptr task)
 {
-	if(!active_)
+	if(!task)
+		return;
+
+	if(!active_ || (task && task->type() ==VTask::LoadTask) )
 		return;
 
 	tasks_.push_back(task);
@@ -1358,8 +1315,8 @@ void ServerComQueue::slotRun()
 //thread is not running so it is safe to access the ClientInvoker!
 void ServerComQueue::slotTaskFinished()
 {
-	//if(!active_)
-	//	return;
+	//We need to leave the load mode
+	endLoad();
 
 	//If the current task is empty there must have been an error that was
 	//handled by the sloTaskFailed slot.
@@ -1379,8 +1336,8 @@ void ServerComQueue::slotTaskFinished()
 //to the slotTaskFinished slot.
 void ServerComQueue::slotTaskFailed(std::string msg)
 {
-	//if(!active_)
-	//	return;
+	//We need to leave the load mode
+	endLoad();
 
 	//We notify the server that the task has failed
 	server_->clientTaskFailed(current_,msg);
@@ -1405,6 +1362,11 @@ ServerComThread::ServerComThread(ServerHandler *server, ClientInvoker *ci) :
 		taskType_(VTask::NoTask),
 		attached_(false)
 {
+}
+
+ServerComThread::~ServerComThread()
+{
+	detach();
 }
 
 void ServerComThread::task(VTask_ptr task)
@@ -1470,7 +1432,7 @@ void ServerComThread::run()
 				break;
 			}
 
-			case VTask::InitTask:
+			case VTask::LoadTask:
 			{
 				{
 					//sleep(15);
@@ -1642,7 +1604,6 @@ void ServerComThread::detach(Node *node)
 		detach((*it).get());
 	}
 }
-
 
 // ------------------------------------------------------------
 //                         ServerDefsAccess

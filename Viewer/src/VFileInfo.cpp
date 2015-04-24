@@ -67,6 +67,11 @@ QString VFileInfo::formatDateAgo(const std::time_t& t)
 	int delta  = now - t;
 	if(delta<0) delta = 0;
 
+	if( t== 0)
+	{
+		return QObject::tr("never");
+	}
+
 	if(delta ==1)
 		str=QObject::tr("1 second ago");
 

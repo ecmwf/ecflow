@@ -68,11 +68,8 @@ void InfoPanelItem::adjust(VInfo_ptr info)
   		{
   			if(info_ && info_->server())
   			{
-  				//info_->server()->removeServerObserver(this);
   				info_->server()->removeNodeObserver(this);
   			}
-
-  			//info->server()->addServerObserver(this);
   			info->server()->addNodeObserver(this);
   		}
   	}
@@ -81,7 +78,6 @@ void InfoPanelItem::adjust(VInfo_ptr info)
   	{
   	  	if(info_ && info_->server())
   	  	{
-  	  		//info_->server()->removeServerObserver(this);
   	  		info_->server()->removeNodeObserver(this);
   	  	}
   	}

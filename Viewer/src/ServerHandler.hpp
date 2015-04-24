@@ -59,6 +59,8 @@ public:
 	bool communicating() {return communicating_;}
 	bool readFromDisk() const {return readFromDisk_;}
 
+	void connectServer();
+	void disconnectServer();
 	void reset();
 
 	static void resetFirst();
@@ -123,19 +125,20 @@ protected:
 	static std::map<std::string, std::string> commands_;
 
 private Q_SLOTS:
-		//void commandSent();  // invoked when a command has finished being sent to the server
-		void errorMessage(std::string message); // invoked when an error message is received
-		//void queryFinished(VReply_ptr);  // invoked when a reply is received from from the server/thread
-		void refreshServerInfo();
-		void slotNodeChanged(const Node* n, const std::vector<ecf::Aspect::Type>& a);
-		void slotDefsChanged(const std::vector<ecf::Aspect::Type>& a);
+	//void commandSent();  // invoked when a command has finished being sent to the server
+	void errorMessage(std::string message); // invoked when an error message is received
+	//void queryFinished(VReply_ptr);  // invoked when a reply is received from from the server/thread
+	void refreshServerInfo();
+	void slotNodeChanged(const Node* n, const std::vector<ecf::Aspect::Type>& a);
+	void slotDefsChanged(const std::vector<ecf::Aspect::Type>& a);
 
 private:
 	//Begin and end the initialisation by connecting to the server and syncing.
 	void load();
 	void loadFinished();
-	void loadFailed();
-	void connectionLost();
+	void loadFailed(const std::string& errMsg);
+	void connectionLost(const std::string& errMsg);
+	void connectionGained();
 
 	//Handle the update timer
 	void stopRefreshTimer();
@@ -186,7 +189,7 @@ public:
 	void addSyncTask();
 	void start();
 	void stop();
-	void init();
+	void load();
 	bool active() const {return active_;}
 
 protected Q_SLOTS:
@@ -197,6 +200,8 @@ protected Q_SLOTS:
 	void slotTaskFailed(std::string);
 
 protected:
+	void endLoad();
+
 	ServerHandler *server_;
 	ClientInvoker* client_;
 	ServerComThread *comThread_;
@@ -205,6 +210,7 @@ protected:
 	VTask_ptr current_;
 	bool wait_;
 	bool active_;
+	bool load_;
 };
 
 // -------------------------------------------------------
@@ -218,6 +224,7 @@ class ServerComThread : public QThread, public AbstractObserver
 
 public:
 	ServerComThread(ServerHandler *server, ClientInvoker *ci);
+	~ServerComThread();
 
 	void task(VTask_ptr);
 	void stop();

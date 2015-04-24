@@ -15,8 +15,9 @@ static std::map<ConnectState::State,std::string> descMap;
 
 ConnectState::ConnectState() :
 	state_(Undef),
-	lapStart_(0),
-	lapStop_(0)
+	lastConnect_(0),
+	lastFailed_(0),
+	lastDisconnect_(0)
 {
 	init();
 }
@@ -26,7 +27,6 @@ void ConnectState::init()
 	if(descMap.empty())
 	{
 		descMap[Undef]="";
-		descMap[InitFailed]="Could not connect to server";
 		descMap[Lost]="Connection to server lost";
 		descMap[Disconnected]="Server is disconnected";
 		descMap[Normal]="Server is connected";
@@ -45,21 +45,52 @@ const std::string& ConnectState::describe() const
 	return empty;
 
 }
-
-void ConnectState::lapStart()
+void ConnectState::state(State state)
 {
-	lapStart_=time(0);
-	lapStop_=lapStart_;
+	state_=state;
+
+	switch(state_)
+	{
+	case Normal:
+		logConnect();
+		break;
+	case Lost:
+		logFailed();
+		break;
+	case Disconnected:
+		logDisconnect();
+		break;
+	default:
+		break;
+	}
 }
 
-void ConnectState::lapStop()
+void ConnectState::logConnect()
 {
-	lapStop_=time(0);
+	lastConnect_=time(0);
 }
 
-void ConnectState::errorMessage(const std::string)
+void ConnectState::logFailed()
 {
-
+	lastFailed_=time(0);
 }
 
+void ConnectState::logDisconnect()
+{
+	lastDisconnect_=time(0);
+}
 
+void ConnectState::errorMessage(const std::string str)
+{
+	errMsg_=str;
+
+	std::size_t pos = str.find("Client environment:");
+	if(pos != std::string::npos)
+	{
+		shortErrMsg_=str.substr(0,pos);
+	}
+	else
+	{
+		shortErrMsg_=str;
+	}
+}

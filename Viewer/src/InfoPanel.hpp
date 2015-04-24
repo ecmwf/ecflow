@@ -81,11 +81,6 @@ public:
 	void readSettings(VSettings*);
 
 	//From ServerObserver
-	//void notifyDefsChanged(ServerHandler* server,const std::vector<ecf::Aspect::Type>&) {};
-	//void notifyServerDelete(ServerHandler* server);
-	//void notifyBeginServerClear(ServerHandler* server);
-	//void notifyEndServerClear(ServerHandler* server);
-
 	void notifyDefsChanged(ServerHandler* server, const std::vector<ecf::Aspect::Type>& a);
 	void notifyServerDelete(ServerHandler* server);
 	void notifyBeginServerClear(ServerHandler* server);
@@ -112,7 +107,6 @@ protected:
 	InfoPanelItem* findItem(QWidget* w);
 	InfoPanelItemHandler* createHandler(QString id);
 
-	//QTabWidget *tab_;
 	QList<InfoPanelItemHandler*> items_;
 	VInfo_ptr info_;
 };
