@@ -21,9 +21,9 @@ class NodeObserver
 public:
 	NodeObserver() {};
 	virtual ~NodeObserver() {};
+
 	virtual void notifyBeginNodeChange(const VNode* vn, const std::vector<ecf::Aspect::Type>& a,const VNodeChange&)=0;
 	virtual void notifyEndNodeChange(const VNode* vn, const std::vector<ecf::Aspect::Type>& a,const VNodeChange&)=0;
 };
-
 
 #endif

@@ -29,13 +29,16 @@ class VNodeChange
 {
 public:
 	VNodeChange() : cachedAttrNum_(-1), attrNum_(-1), cachedNodeNum_(-1),
-					nodeNum_(-1), nodeAddedAt_(-1), ignore_(false) {}
+					nodeNum_(-1), nodeAddAt_(-1), nodeRemoveAt_(-1),
+					ignore_(false), reset_(false) {}
 	int cachedAttrNum_;
 	int attrNum_;
 	int cachedNodeNum_;
 	int nodeNum_;
-	int nodeAddedAt_;
+	int nodeAddAt_;
+	int nodeRemoveAt_;
 	bool ignore_;
+	bool reset_;
 };
 
 //Describes the major changes during an update
@@ -89,6 +92,7 @@ public:
     LogServer_ptr logServer();
 
 protected:
+    void clear();
     void replaceChildren(const std::vector<VNode*>& newCh);
     void addChild(VNode*);
     short currentAttrNum() const;
@@ -139,6 +143,7 @@ protected:
 
 private:
 	void clear();
+	void clear(VNode*);
     void scan(VNode*);
     void deleteNode(VNode* node);
 

@@ -902,7 +902,7 @@ void TreeNodeModel::slotBeginAddRemoveAttributes(VModelServer* server,const VNod
 		return;
 
 	//At this point the model state is based on cachedNum!!!!
-	//So VNode::attributeNum() must return cachedNum and we need to pretend we have
+	//So VNode::attr() must return cachedNum and we need to pretend we have
 	//cachedNum number of attributes
 
 	//Insertion
@@ -994,7 +994,7 @@ void TreeNodeModel::slotAddRemoveNodes(VModelServer* server,const VNode* node,in
 
 //A new node was added. posInNodes tells us the position within the nodes before
 //the new node has to be inserted.
-void TreeNodeModel::slotAddNode(VModelServer* server,const VNode* node,int posInNodes)
+void TreeNodeModel::slotBeginAddRemoveNode(VModelServer* server,const VNode* node,int posInNodes,bool add)
 {
 	if(!node)
 		return;
@@ -1004,9 +1004,31 @@ void TreeNodeModel::slotAddNode(VModelServer* server,const VNode* node,int posIn
 	if(!parent.isValid())
 		return;
 
+	//At this point the model state is based the un-updated VNode!!!!
+	//So we need to pretend we have the old number of nodes.
+
 	int attrNum=node->attrNum();
-	beginInsertRows(parent,attrNum+posInNodes,attrNum+posInNodes+1);
-	endInsertRows();
+	int pos=attrNum+posInNodes;
+
+	if(add)
+	{
+		beginInsertRows(parent,pos,pos);
+	}
+	else
+	{
+		beginRemoveRows(parent,pos,pos);
+	}
+}
+
+void TreeNodeModel::slotEndAddRemoveNode(VModelServer* server,const VNode* node,int posInNodes,bool add)
+{
+	if(!node)
+		return;
+
+	if(add)
+		endInsertRows();
+	else
+		endRemoveRows();
 }
 
 //The whole branch belonging to the node has to be reset!!!

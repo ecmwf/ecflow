@@ -36,6 +36,7 @@ class ServerHandler;
 class ServerComQueue;
 class ServerComThread;
 class ServerObserver;
+class VNodeChange;
 class VServer;
 class VServerChange;
 
@@ -153,9 +154,14 @@ private:
 
 	typedef void (ServerObserver::*SoMethod)(ServerHandler*);
 	typedef void (ServerObserver::*SoMethodV1)(ServerHandler*,const VServerChange&);
-
 	void broadcast(SoMethod);
 	void broadcast(SoMethodV1,const VServerChange&);
+
+	typedef void (NodeObserver::*NoMethod)(const VNode*);
+	typedef void (NodeObserver::*NoMethodV1)(const VNode*,const std::vector<ecf::Aspect::Type>&,const VNodeChange&);
+	void broadcast(NoMethod,const VNode*);
+	void broadcast(NoMethodV1,const VNode*,const std::vector<ecf::Aspect::Type>&,const VNodeChange&);
+
 
 	QMutex           defsMutex_;
 

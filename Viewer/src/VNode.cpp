@@ -46,6 +46,15 @@ bool VNode::isTopLevel() const
 {
 	return (node_)?(node_->isSuite() != NULL):false;
 }
+
+void VNode::clear()
+{
+	children_.clear();
+	attrNum_=-1,
+	cachedAttrNum_=-1;
+}
+
+
 //At the beginning of the update we get the current number of attributes
 void VNode::beginUpdateAttrNum()
 {
@@ -329,24 +338,60 @@ VServer::~VServer()
 	clear();
 }
 
+//--------------------------------
+// Clear
+//--------------------------------
+
+//Clear the whole contents
 void VServer::clear()
 {
+	//Delete the children nodes. It will recursively delete all the nodes.
 	for(std::vector<VNode*>::const_iterator it=children_.begin(); it != children_.end(); it++)
 	{
 		deleteNode(*it);
 	}
 
+	//Clear the children vector
 	children_.clear();
 
 	//A sanity check
 	assert(totalNum_ == 0);
 }
 
+//Clear the contents of a particular VNode
+void VServer::clear(VNode* node)
+{
+	//Delete the children of node. It will recursively delete all the nodes
+	//below this node
+	for(unsigned int i=0; i < node->numOfChildren(); i++)
+	{
+		deleteNode(node->childAt(i));
+	}
+
+	//Clear the node contents
+	node->clear();
+}
+
+//Delete a particular node
+void VServer::deleteNode(VNode* node)
+{
+	for(unsigned int i=0; i < node->numOfChildren(); i++)
+	{
+		deleteNode(node->childAt(i));
+	}
+
+	delete node;
+	totalNum_--;
+}
+
+//------------------------------------------
+// Find
+//------------------------------------------
+
 VNode* VServer::toVNode(const Node* nc) const
 {
 	return static_cast<VNode*>(nc->graphic_ptr());
 }
-
 
 std::string VServer::findVariable(const std::string& key,bool substitute) const
 {
@@ -375,7 +420,12 @@ std::string VServer::findInheritedVariable(const std::string& key,bool substitut
 	return findVariable(key,substitute);
 }
 
-//Clear the contents and rebuild the whole tree.
+//----------------------------------------------
+// Scan
+//----------------------------------------------
+
+//Clear the contents and get the number of children (suites)
+//the server contain. At this point we do not build the tree.
 void VServer::beginScan(VServerChange& change)
 {
 	//Clear the contents
@@ -391,7 +441,7 @@ void VServer::beginScan(VServerChange& change)
 	change.suiteNum_=suites.size();
 }
 
-//Clear the contents and rebuild the whole tree.
+//Build the whole tree.
 void VServer::endScan()
 {
 	//Get the Defs
@@ -411,44 +461,37 @@ void VServer::endScan()
 	}
 }
 
-void VServer::scan(VNode *parent)
+void VServer::scan(VNode *node)
 {
 	std::vector<node_ptr> nodes;
-	parent->node()->immediateChildren(nodes);
+	node->node()->immediateChildren(nodes);
 
 	totalNum_+=nodes.size();
 
 	for(std::vector<node_ptr>::const_iterator it=nodes.begin(); it != nodes.end(); it++)
 	{
-		VNode* vn=new VNode(parent,(*it).get());
+		VNode* vn=new VNode(node,(*it).get());
 		scan(vn);
 	}
 }
 
-void VServer::deleteNode(VNode* node)
-{
-	for(unsigned int i=0; i < node->numOfChildren(); i++)
-	{
-		deleteNode(node->childAt(i));
-	}
-
-	delete node;
-	totalNum_--;
-}
+//----------------------------------------------
+// Update
+//----------------------------------------------
 
 void VServer::beginUpdate(VNode* node,const std::vector<ecf::Aspect::Type>& aspect,VNodeChange& change)
 {
 	//NOTE: when this function is called the real node (Node) has already been updated. However the
-	//views does not know about this change. So at this point (this is the begin step of the update)
+	//views do not know about this change. So at this point (this is the begin step of the update)
 	//all VNode functions have to return the values valid before the update happened!!!!!!!
 	//The main goal of this function is to cleverly provide the views with some information about the nature of the update.
 
 	bool attrNumCh=(std::find(aspect.begin(),aspect.end(),ecf::Aspect::ADD_REMOVE_ATTR) != aspect.end());
 	bool nodeNumCh=(std::find(aspect.begin(),aspect.end(),ecf::Aspect::ADD_REMOVE_NODE) != aspect.end());
 
-	//------------------------------------------------------------
-	// Only the number of attributes changed
-	//-----------------------------------------------------------
+	//--------------------------------------------------------------
+	// The number of attributes changed but the number of nodes did not
+	//-------------------------------------------------------------
 
 	if(attrNumCh && !nodeNumCh)
 	{
@@ -475,24 +518,26 @@ void VServer::beginUpdate(VNode* node,const std::vector<ecf::Aspect::Type>& aspe
 		return;
 	}
 
-	//-------------------------------------------------------------
-	// Number of nodes changed
-	//-------------------------------------------------------------
-	if(nodeNumCh)
+	//----------------------------------------------------------------
+	// The number of nodes changed but the number of attributes did not
+	//----------------------------------------------------------------
+	if(nodeNumCh && !attrNumCh)
 	{
+		//The current number of nodes in Node (already updated)
 		std::vector<node_ptr> nodes;
 		node->node()->immediateChildren(nodes);
-
-		change.cachedNodeNum_=node->numOfChildren();
 		change.nodeNum_=static_cast<int>(nodes.size());
 
+		//The number of nodes stored in the VNode
+		change.cachedNodeNum_=node->numOfChildren();
+
 		//----------------------------------------------------------------
-		// We handle the situation when only one node was added and the
-		// order of the nodes did not changed. It is only interesting
-		// the number of attributes did not changed!!!!
+		// We only handle the situation when one node was added/removed and the
+		// order of the nodes did not changed!!!
 		//----------------------------------------------------------------
 
-		if(!attrNumCh && nodes.size() == node->numOfChildren()+1)
+		//A node was added
+		if(nodes.size() == node->numOfChildren()+1)
 		{
 			int added=0;
 			int same=0;
@@ -520,9 +565,80 @@ void VServer::beginUpdate(VNode* node,const std::vector<ecf::Aspect::Type>& aspe
 			//we register it in the change object
 			if(same == node->numOfChildren() && added == 1 && addedAt != -1)
 			{
-				change.nodeAddedAt_=addedAt;
+				change.nodeAddAt_=addedAt;
 			}
 		}
+		//A node was removed
+		else if(nodes.size() == node->numOfChildren()-1)
+		{
+			int removed=0;
+			int same=0;
+			int removedAt=-1;
+
+			//We need to be sure that all the nodes were really kept
+			for(unsigned int i=0; i < nodes.size(); i++)
+			{
+				if(node->childAt(i)->node() == nodes.at(i-removed).get())
+				{
+					same++;
+				}
+				else
+				{
+					removed++;
+					removedAt=i;
+				}
+			}
+
+			//If there was only one node added and the order of the node was kept
+			//we register it in the change object
+			if(same == node->numOfChildren()-1 && removed == 1 && removedAt != -1)
+			{
+				change.nodeRemoveAt_=removedAt;
+			}
+		}
+
+		//Otherwise we need to reset!!!!!!
+		else
+		{
+			change.reset_=true;
+		}
+	}
+
+	//----------------------------------------------------------------
+	// Both the number of nodes and the number of attributes changed
+	//----------------------------------------------------------------
+	if(nodeNumCh && attrNumCh)
+	{
+		change.reset_=true;
+	}
+
+	//In any other cases it is just a simple update (value or status changed)
+}
+
+void VServer::endUpdate(VNode* node,const std::vector<ecf::Aspect::Type>& aspect)
+{
+	bool attrNumCh=(std::find(aspect.begin(),aspect.end(),ecf::Aspect::ADD_REMOVE_ATTR) != aspect.end());
+	bool nodeNumCh=(std::find(aspect.begin(),aspect.end(),ecf::Aspect::ADD_REMOVE_NODE) != aspect.end());
+
+	//--------------------------------------------------------------
+	// The number of attributes changed but the number of nodes did not
+	//-------------------------------------------------------------
+
+	if(attrNumCh && ! nodeNumCh)
+	{
+		//This call updates the number of attributes stored in the VNode
+		node->endUpdateAttrNum();
+	}
+
+	//----------------------------------------------------------------
+	// The number of nodes changed but the number of attributes did not
+	//----------------------------------------------------------------
+
+	if(nodeNumCh && !attrNumCh)
+	{
+		//The current number of nodes in Node (already updated)
+		std::vector<node_ptr> nodes;
+		node->node()->immediateChildren(nodes);
 
 		//---------------------------------------------------------------------
 		// Now we update the nodes. We need to take into account the order
@@ -572,18 +688,6 @@ void VServer::beginUpdate(VNode* node,const std::vector<ecf::Aspect::Type>& aspe
 		{
 			deleteNode(rmChildren[i]);
 		}
-	}
-}
-
-void VServer::endUpdate(VNode* node,const std::vector<ecf::Aspect::Type>& aspect)
-{
-	bool attrNumCh=(std::find(aspect.begin(),aspect.end(),ecf::Aspect::ADD_REMOVE_ATTR) != aspect.end());
-	bool nodeNumCh=(std::find(aspect.begin(),aspect.end(),ecf::Aspect::ADD_REMOVE_NODE) != aspect.end());
-
-	if(attrNumCh && ! nodeNumCh)
-	{
-		//This call update the number of attributes strored in the VNode
-		node->endUpdateAttrNum();
 	}
 }
 

@@ -112,11 +112,14 @@ void VTreeServer::notifyBeginServerScan(ServerHandler* server,const VServerChang
 void VTreeServer::notifyEndServerScan(ServerHandler* server)
 {
 	Q_EMIT endServerScan(this);
-}
 
-void VTreeServer::notifyServerInitFailed(ServerHandler* server)
-{
-	Q_EMIT dataChanged(this);
+	if(filter_)
+	{
+		/*if(filter_->update(node->node()))
+		{
+			Q_EMIT dataChanged(this);
+		}*/
+	}
 }
 
 void VTreeServer::notifyBeginServerClear(ServerHandler* server)
@@ -127,6 +130,14 @@ void VTreeServer::notifyBeginServerClear(ServerHandler* server)
 void VTreeServer::notifyEndServerClear(ServerHandler* server)
 {
 	Q_EMIT endServerClear(this);
+
+	if(filter_)
+	{
+		/*if(filter_->update(node->node()))
+		{
+			Q_EMIT dataChanged(this);
+		}*/
+	}
 }
 
 void VTreeServer::notifyServerConnectState(ServerHandler* server)
@@ -165,9 +176,13 @@ void VTreeServer::notifyBeginNodeChange(const VNode* node, const std::vector<ecf
 	else if(!attrNumCh && nodeNumCh)
 	{
 		//Only one node was added and the order of the nodes is the same
-		if(change.nodeAddedAt_ != -1)
+		if(change.nodeAddAt_ != -1)
 		{
-			Q_EMIT addNode(this,node,change.nodeAddedAt_);
+			Q_EMIT beginAddRemoveNode(this,node,change.nodeAddAt_,true);
+		}
+		else if(change.nodeRemoveAt_ != -1)
+		{
+			Q_EMIT beginAddRemoveNode(this,node,change.nodeRemoveAt_,false);
 		}
 		else
 		{
@@ -182,9 +197,8 @@ void VTreeServer::notifyBeginNodeChange(const VNode* node, const std::vector<ecf
 	//---------------------------------------------------------------------
 	else if(!attrNumCh && nodeNumCh)
 	{
-		Q_EMIT resetBranch(this,node);
-
-		runFilter=true;
+		//This can never happen
+		assert(0);
 	}
 
 	//---------------------------------------------------------------------
@@ -246,6 +260,27 @@ void VTreeServer::notifyEndNodeChange(const VNode* node, const std::vector<ecf::
 					change.attrNum_,change.cachedAttrNum_);
 		}
 	}
+
+	//----------------------------------------------------------------------
+	// The number of nodes changed but number of attributes is the same!
+	//----------------------------------------------------------------------
+	else if(!attrNumCh && nodeNumCh)
+	{
+		//Only one node was added and the order of the nodes is the same
+		if(change.nodeAddAt_ != -1)
+		{
+			Q_EMIT endAddRemoveNode(this,node,change.nodeAddAt_,true);
+		}
+		else if(change.nodeRemoveAt_ != -1)
+		{
+			Q_EMIT endAddRemoveNode(this,node,change.nodeRemoveAt_,false);
+		}
+		else
+		{
+			//Q_EMIT resetBranch(this,node);
+		}
+	}
+
 }
 
 //==========================================

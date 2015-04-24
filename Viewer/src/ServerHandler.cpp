@@ -690,18 +690,47 @@ void ServerHandler::slotNodeChanged(const Node* nc, const std::vector<ecf::Aspec
 	//Begin update for the VNode
 	vRoot_->beginUpdate(vn,aspect,change);
 
-	if(change.ignore_ == false)
+	//If the node has not been used by any of the views so far we ignore the update
+	//TODO: what about the infopanel or breadcrumbs??????
+	if(change.ignore_)
+	{
+		return;
+	}
+	//If too many things changed we simply reset
+	else if(change.reset_)
+	{
+		/*
+		//Notify the observers
+		broadcast(&NodeObserver::notifyBeginNodeClear,vn);
+
+		//End update for the VNode
+		vRoot_->clear(vn);
+
+		//Notify the observers
+		broadcast(&NodeObserver::notifyEndNodeClear,vn);
+
+		//Notify the observers
+		broadcast(&NodeObserver::notifyBeginNodeScan,vn);
+
+		//End update for the VNode
+		vRoot_->beginScan();
+
+		//Notify the observers
+		broadcast(&NodeObserver::notifyEndNodeScan,vn);*/
+
+		reset();
+	}
+	//Otherwise continue with the update
+	else
 	{
 		//Notify the observers
-		for(std::vector<NodeObserver*>::const_iterator it=nodeObservers_.begin(); it != nodeObservers_.end(); it++)
-			(*it)->notifyBeginNodeChange(vn,aspect,change);
+		broadcast(&NodeObserver::notifyBeginNodeChange,vn,aspect,change);
 
 		//End update for the VNode
 		vRoot_->endUpdate(vn,aspect);
 
 		//Notify the observers
-		for(std::vector<NodeObserver*>::const_iterator it=nodeObservers_.begin(); it != nodeObservers_.end(); it++)
-			(*it)->notifyEndNodeChange(vn,aspect,change);
+		broadcast(&NodeObserver::notifyEndNodeChange,vn,aspect,change);
 	}
 }
 
@@ -721,6 +750,18 @@ void ServerHandler::removeNodeObserver(NodeObserver *obs)
 	{
 		nodeObservers_.erase(it);
 	}
+}
+
+void ServerHandler::broadcast(NoMethod proc,const VNode* node)
+{
+	for(std::vector<NodeObserver*>::const_iterator it=nodeObservers_.begin(); it != nodeObservers_.end(); it++)
+		((*it)->*proc)(node);
+}
+
+void ServerHandler::broadcast(NoMethodV1 proc,const VNode* node,const std::vector<ecf::Aspect::Type>& aspect,const VNodeChange& change)
+{
+	for(std::vector<NodeObserver*>::const_iterator it=nodeObservers_.begin(); it != nodeObservers_.end(); it++)
+		((*it)->*proc)(node,aspect,change);
 }
 
 //---------------------------------------------------------------------------

@@ -50,7 +50,8 @@ Q_SIGNALS:
 	void beginAddRemoveAttributes(VModelServer*,const VNode*,int,int);
 	void endAddRemoveAttributes(VModelServer*,const VNode*,int,int);
 	void addRemoveNodes(VModelServer*,const VNode*,int,int);
-	void addNode(VModelServer*,const VNode*,int pos);
+	void beginAddRemoveNode(VModelServer*,const VNode*,int pos,bool add);
+	void endAddRemoveNode(VModelServer*,const VNode*,int pos,bool add);
 	void resetBranch(VModelServer*,const VNode*);
 	void dataChanged(VModelServer*);
 	void nodeChanged(VModelServer*,const VNode*);
@@ -80,7 +81,6 @@ public:
 	 void notifyEndServerClear(ServerHandler* server);
 	 void notifyBeginServerScan(ServerHandler* server,const VServerChange&);
 	 void notifyEndServerScan(ServerHandler* server);
-	 void notifyServerInitFailed(ServerHandler* server);
 	 void notifyServerConnectState(ServerHandler* server);
 
 	 //From NodeObserver
@@ -154,7 +154,8 @@ Q_SIGNALS:
 	void beginAddRemoveAttributes(VModelServer*,const VNode*,int,int);
 	void endAddRemoveAttributes(VModelServer*,const VNode*,int,int);
 	void addRemoveNodes(VModelServer*,const VNode*,int,int);
-	void addNode(VModelServer*,const VNode*,int pos);
+	void beginAddRemoveNode(VModelServer*,const VNode*,int pos,bool add);
+	void endAddRemoveNode(VModelServer*,const VNode*,int pos,bool add);
 	void resetBranch(VModelServer*,const VNode*);
 	void dataChanged(VModelServer*);
 	void nodeChanged(VModelServer*,const VNode*);
