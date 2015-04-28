@@ -19,7 +19,6 @@
 #include "arch.h"
 #include "repeat_node.h"
 #include "show.h"
-// #include "text_lister.h"
 #include "host.h"
 const int  REPEAT_SHOWN = 3;
 #include "ecflowview.h"
@@ -161,8 +160,9 @@ int repeat_node::current() const
     }
   }
 #endif
-  if (get()) 
-    return get()->index_or_value();
+  if (get()) {
+    return get()->index_or_value();    
+  }
   return 0;
 }
 
@@ -188,8 +188,9 @@ void repeat_node::value(char* n,int i) const
     }
   }
 #endif
-  if (get() && n) 
+  if (get() && n) {
     sprintf(n,"%s",get()->value_as_string(i).c_str());
+  }
 }
 
 //===============================================================
@@ -203,7 +204,7 @@ xmstring repeat_node::make_label_tree()
         int first  = curr - REPEAT_SHOWN/2;
         static xmstring space(" ");
         {
-        if(first<0)             first = 0;
+        if(first<0)                    first = 0;
         if(end -first<REPEAT_SHOWN)    first = end  - REPEAT_SHOWN;
         if(end <=REPEAT_SHOWN)         first = 0;
 

@@ -175,6 +175,14 @@ long ecf_repeat_date_to_julian(long ddate)
 	ddate %= 100;
 	day = ddate;
 
+	if (0) {
+	  a = (14 - month) / 12;
+	  y1 = year + 4800 - a;
+	  m1 = month + 12*a - 3;
+	  j1 = day + (153*m1 + 2)/5 + 365*y1 + y1/4 - y1/100 + y1/400 - 32045;
+	  return j1 - 0.5;
+	}
+
 	if (month > 2)
 	{
 		m1 = month - 3;

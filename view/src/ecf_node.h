@@ -575,7 +575,8 @@ void make_kids_list( ecf_node* parent, const std::vector<T>& v )
 template<typename T>
 const std::string ecf_concrete_node<T>::toString() const
 {
-   if (owner_) return owner_->toString();
+   if (owner_) 
+     return owner_->toString();
    return "";
 }
 

@@ -26,6 +26,12 @@
 #ifndef NODE_MAX
 #define NODE_MAX 41
 #endif
+
+static int nb_tasks = 0;
+static int nb_attrs = 0;
+
+static char* info_label = getenv("ECFLOWVIEW_INFO_LABEL");
+
 std::map<std::string, ecf_node_maker*>& ecf_node_maker::map()
 {
    static std::map<std::string, ecf_node_maker*> map_;
@@ -184,8 +190,13 @@ node* ecf_node::create_tree(host& h, node* xnode) {
 }
 
 void ecf_node::add_kid(ecf_node* k) {
-  if (k) 
+  if (k) {
     kids_.push_back(k);
+
+    if (k->type() == NODE_TASK) nb_tasks++;
+    else if (k->type() == NODE_FAMILY) {} 
+    else nb_attrs++;
+  }
 }
 
 template<> const std::string& ecf_concrete_node<Defs>::name() const
@@ -271,7 +282,7 @@ void ecf_concrete_node<Alias>::make_subtree() {
   std::sort(gvar.begin(),gvar.end(),cless_than());
   make_kids_list(this,gvar);
 #else
- make_kids_list(this,n->variables());
+  make_kids_list(this,n->variables());
 #endif
 
   make_kids_list(this,n->labels());
@@ -366,6 +377,10 @@ void ecf_concrete_node<Suite>::make_subtree() {
 
   if (!owner_) return;
   Suite* n = owner_; 
+
+  nb_tasks = 0;
+  nb_attrs = 0;
+
   if (n->begun())
     n->update_generated_variables();
 
@@ -385,13 +400,24 @@ void ecf_concrete_node<Suite>::make_subtree() {
       add_kid(make_node(*it, this, 'g'));
     else std::cerr << "# empty variable\n";
 
+  std::string info = "";
 #ifdef SORT_VAR
   gvar = n->variables(); /* expensive */
   std::sort(gvar.begin(),gvar.end(),cless_than());
   make_kids_list(this,gvar);
+  if (info_label)
+    for (it=gvar.begin(); it!=gvar.end(); ++it) {
+      // if ((*it).name().find("HOST") != std::string::npos) info += ", " + (*it).theValue(); else 
+      if ("ECF_JOB_CMD" == (*it).name() || 
+	  "HOST" == (*it).name() || 
+	  "WSHOST" == (*it).name() || 
+	  "SCHOST" == (*it).name())
+	info += ", " + (*it).theValue();
+    }
 #else
   make_kids_list(this,n->variables());
 #endif
+
   make_kids_list(this,n->labels());
   make_kids_list(this,n->events());
   make_kids_list(this,n->meters());
@@ -436,6 +462,18 @@ void ecf_concrete_node<Suite>::make_subtree() {
     else 
       std::cerr << "# ecflfowview does not recognises this repeat item\n";
     }
+
+  /* INT-67 */
+  if (info_label)
+    try {
+      char msg[400]; 
+      snprintf(msg,400, "nb_tasks %d, nb_attrs %d%s", 
+	       nb_tasks, nb_attrs, info.c_str());
+      const Label * labt = new Label("info", msg);
+      add_kid(make_node(labt, this));
+      XECFDEBUG {
+	std::cout << "#MSG suite " << this->name() << msg << "\n";
+      } } catch(...) {} 
 }
 
 template<>
@@ -576,23 +614,35 @@ void ecf_node::nokids(bool own) {
 }
 
 int redraw_kids(node* node_, 
-		const std::vector<ecf::Aspect::Type>& aspect) {
+		const std::vector<ecf::Aspect::Type>& aspect) 
+{
    int tot = 0;
    for(std::vector<ecf::Aspect::Type>::const_iterator it = aspect.begin(); it != aspect.end(); ++it) {
      int  kind = 0;
-      switch ( *it ) {
+     switch ( *it ) {
          case ecf::Aspect::METER:
 	   kind = NODE_METER;
-            break;
-         case ecf::Aspect::LABEL: 	   
-	   kind = NODE_LABEL;
             break;
          case ecf::Aspect::EVENT:
 	   kind = NODE_EVENT;
             break;
+         case ecf::Aspect::LABEL: 	   
+	   kind = NODE_LABEL;
+            break;
          case ecf::Aspect::LIMIT:
 	   kind = NODE_LIMIT;
 	   break;
+         case ecf::Aspect::REPEAT:
+	   kind = NODE_REPEAT;
+	   // node_->update(-1, -1, -1); node_->redraw(); break;
+         case ecf::Aspect::STATE:
+	   node_->update(-1, -1, -1); node_->redraw();
+	   break;
+         case ecf::Aspect::SERVER_VARIABLE:
+#undef NODE_VARIABLE
+     case ecf::Aspect::NODE_VARIABLE:
+#define NODE_VARIABLE 3
+       kind = NODE_VARIABLE;
       default: 
 	   continue;
       }
@@ -662,7 +712,8 @@ void ecf_concrete_node<Node>::update(const Node* n,
 
 template<> 
 void ecf_concrete_node<Suite>::update(const Node* n, 
-                                      const std::vector<ecf::Aspect::Type>& aspect) {
+                                      const std::vector<ecf::Aspect::Type>& aspect) 
+{
   if (!owner_) return;     
   if (!node_) return;
   assert(xnode());
@@ -810,6 +861,13 @@ const std::string ecf_concrete_node<RepeatDay>::toString() const
       return parent()->get_repeat().toString();
   return none();
 }
+
+/*template<> 
+const std::string ecf_concrete_node<Label>::toString() const
+{ if (parent())
+      return parent()->get_label().toString();
+  return none();
+  }*/
 
 template<> 
 const std::string ecf_concrete_node<RepeatDate>::toString() const
@@ -1047,7 +1105,7 @@ template<>
 std::string ecf_concrete_node<Node>::get_var(const std::string& name, 
                                              bool is_gen,
                                              bool substitute) 
-                                             {
+{
    if (!is_gen) { // user variable have priority
       const Variable& var = owner_->findVariable(name);
       if (!var.empty()) {
@@ -1166,7 +1224,8 @@ void ecf_concrete_node<Defs>::make_subtree() {
 
 template<> 
 void ecf_concrete_node<Defs>::update(const Defs* n, 
-                                     const std::vector<ecf::Aspect::Type>& aspect) {
+                                     const std::vector<ecf::Aspect::Type>& aspect) 
+{
   if (!owner_) return;     
   if (!node_) return;
   if (is_reset(aspect)) {  
