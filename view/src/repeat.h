@@ -30,24 +30,26 @@ class repeat_date_node : public repeat_node {
 		 ecf_repeat_date_to_julian(start())) / step();
       int gui = ecf_repeat_julian_to_date(ecf_repeat_date_to_julian(start()) + cur * step());
       
-      if (get()->index_or_value() != gui)
-	std::cerr << "#WAR repeat value does not match: " 
+      if (get()->index_or_value() != gui) {
+	std::stringstream ss;
+	ss << "# WAR repeat value does not match: " 
 		  << get()->index_or_value()
 		  << ", gui "   << gui
 		  << ", index " << cur
 		  << ", start " << start()
 		  << ", last "   << last()
 		  << ", step "  << step() << "\n";    
+
+	std::string msg (ss.str());
+	serv().command(clientName, "--msg", msg.c_str(), NULL);
+	std::cerr << ss;
+      }
       return cur;
     }
     return repeat_node::current(); }
 
   virtual void value(char* n,int i) const {
     if (n) {
-      /*std::cout << "# MSG repeat current " << (ecf_repeat_julian_to_date 
-                (ecf_repeat_date_to_julian(start()) + i * step()))
-		<< " " << i
-		<< " " << get()->index_or_value() << "\n";*/
        sprintf(n,"%ld",
                (ecf_repeat_julian_to_date 
                 (ecf_repeat_date_to_julian(start()) + i * step())));
