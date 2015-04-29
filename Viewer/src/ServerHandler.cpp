@@ -13,6 +13,7 @@
 #include "ChangeMgrSingleton.hpp"
 #include "ClientInvoker.hpp"
 #include "File.hpp"
+#include "NodeFwd.hpp"
 #include "ArgvCreator.hpp"
 #include "Str.hpp"
 
@@ -414,6 +415,9 @@ void ServerHandler::run(VTask_ptr task)
 		break;
 	case VTask::MessageTask:
 	case VTask::StatsTask:
+	case VTask::ScriptPreprocTask:
+	case VTask::ScriptEditTask:
+	case VTask::ScriptSubmitTask:
 		comQueue_->addTask(task);
 		break;
 	default:
@@ -696,12 +700,13 @@ void ServerHandler::slotNodeChanged(const Node* nc, const std::vector<ecf::Aspec
 	{
 		return;
 	}
-	//If too many things changed we simply reset
+	//If too many things changed we simply reset the node
 	else if(change.reset_)
 	{
-		/*
-		//Notify the observers
-		broadcast(&NodeObserver::notifyBeginNodeClear,vn);
+		reset();
+
+		//Notify the observers. This will save the expand state.
+		/*broadcast(&NodeObserver::notifyBeginNodeClear,vn);
 
 		//End update for the VNode
 		vRoot_->clear(vn);
@@ -712,13 +717,11 @@ void ServerHandler::slotNodeChanged(const Node* nc, const std::vector<ecf::Aspec
 		//Notify the observers
 		broadcast(&NodeObserver::notifyBeginNodeScan,vn);
 
-		//End update for the VNode
-		vRoot_->beginScan();
+		//Perform the scan
+		vRoot_->scan(vn);
 
 		//Notify the observers
 		broadcast(&NodeObserver::notifyEndNodeScan,vn);*/
-
-		reset();
 	}
 	//Otherwise continue with the update
 	else
@@ -727,10 +730,15 @@ void ServerHandler::slotNodeChanged(const Node* nc, const std::vector<ecf::Aspec
 		broadcast(&NodeObserver::notifyBeginNodeChange,vn,aspect,change);
 
 		//End update for the VNode
-		vRoot_->endUpdate(vn,aspect);
-
-		//Notify the observers
-		broadcast(&NodeObserver::notifyEndNodeChange,vn,aspect,change);
+		if(vRoot_->endUpdate(vn,aspect,change))
+		{
+			//Notify the observers
+			broadcast(&NodeObserver::notifyEndNodeChange,vn,aspect,change);
+		}
+		//if finishing the update failed we need to reset
+		{
+			reset();
+		}
 	}
 }
 
@@ -898,6 +906,15 @@ void ServerHandler::clientTaskFinished(VTask_ptr task,const ServerReply& serverR
 			task->status(VTask::FINISHED);
 			break;
 		}
+		case VTask::ScriptPreprocTask:
+		case VTask::ScriptEditTask:
+		case VTask::ScriptSubmitTask:
+		{
+			task->reply()->text(serverReply.get_string());
+			task->status(VTask::FINISHED);
+			break;
+		}
+
 
 		default:
 			break;
@@ -1430,6 +1447,8 @@ void ServerComThread::task(VTask_ptr task)
 		//a mutex, because apart from this task() function only run() can access them!!
 		command_=task->command();
 		params_=task->params();
+		contents_=task->contents();
+		vars_=task->vars();
 		nodePath_.clear();
 		taskType_=task->type();
 		nodePath_=task->targetPath();
@@ -1514,6 +1533,24 @@ void ServerComThread::run()
 				break;
 			}
 
+			case VTask::ScriptPreprocTask:
+				UserMessage::message(UserMessage::DBG, false, std::string("    SCRIP PREPROCESS"));
+				ci_->edit_script_preprocess(nodePath_);
+				break;
+
+			case VTask::ScriptEditTask:
+				UserMessage::message(UserMessage::DBG, false, std::string("    SCRIP EDIT"));
+				ci_->edit_script_edit(nodePath_);
+				break;
+
+			case VTask::ScriptSubmitTask:
+				UserMessage::message(UserMessage::DBG, false, std::string("    SCRIP SUBMIT"));
+				ci_->edit_script_submit(nodePath_, vars_, contents_,
+						(params_["alias"]=="1")?true:false,
+						(params_["run"] == "1")?true:false);
+				break;
+
+
 			default:
 			{
 
@@ -1564,6 +1601,8 @@ void ServerComThread::update(const Defs* dc, const std::vector<ecf::Aspect::Type
 void ServerComThread::update_delete(const Node* nc)
 {
 	Node *n=const_cast<Node*>(nc);
+
+	UserMessage::message(UserMessage::DBG, false, std::string("Update delete: ") + n->name());
 	ChangeMgrSingleton::instance()->detach(n,this);
 }
 

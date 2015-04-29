@@ -49,3 +49,8 @@ QModelIndex NodeFilterModel::infoToIndex(VInfo_ptr info)
 {
 	return mapFromSource(nodeModel_->infoToIndex(info));
 }
+
+QModelIndex NodeFilterModel::nodeToIndex(const VNode *node)
+{
+	return mapFromSource(nodeModel_->nodeToIndex(node));
+}

@@ -59,7 +59,8 @@ public:
 
 	virtual ServerHandler* server() const;
     Node *node() {return node_;}
-    bool isTopLevel() const;
+    virtual bool isTopLevel() const;
+    virtual bool isServer() const {return false;}
 
     void beginUpdateAttrNum();
     void endUpdateAttrNum();
@@ -73,6 +74,7 @@ public:
     VNode* childAt(int index) const;
     int indexOfChild(const VNode* vn) const;
     int indexOfChild(Node* n) const;
+    VNode* findChild(const std::string& name) const;
 
     std::string genVariable(const std::string& key) const;
 
@@ -83,7 +85,9 @@ public:
     virtual std::string findInheritedVariable(const std::string& key,bool substitute=false) const;
 
     virtual std::string absNodePath() const;
-    QString name() const;
+    bool sameName(const std::string& name) const;
+    virtual std::string strName() const;
+    virtual QString name() const;
     virtual  QString stateName();
     virtual QString defaultStateName();
     virtual bool isSuspended() const;
@@ -93,16 +97,19 @@ public:
 
 protected:
     void clear();
-    void replaceChildren(const std::vector<VNode*>& newCh);
+    void detachNode();
     void addChild(VNode*);
+    void removeChild(VNode*);
     short currentAttrNum() const;
     bool isAttrNumInitialised() const {return attrNum_!=-1;}
+
 
     Node* node_;
     VNode* parent_;
     std::vector<VNode*> children_;
     mutable short attrNum_;
     mutable short cachedAttrNum_;
+    mutable std::string name_;
 };
 
 //This is the root node representing the Server.
@@ -117,10 +124,13 @@ public:
 
 	ServerHandler* server() const {return server_;}
 
+	bool isTopLevel() const {return false;}
+	bool isServer() const {return true;}
+
 	int totalNum() const {return totalNum_;}
 	VNode* toVNode(const Node* nc) const;
 	void beginUpdate(VNode* node,const std::vector<ecf::Aspect::Type>& aspect,VNodeChange&);
-	void endUpdate(VNode* node,const std::vector<ecf::Aspect::Type>& aspect);
+	bool endUpdate(VNode* node,const std::vector<ecf::Aspect::Type>& aspect,const VNodeChange&);
 
 	QString toolTip();
 
@@ -130,6 +140,7 @@ public:
 	QString defaultStateName();
 	bool isSuspended() const;
 	QColor  stateColour() const;
+	std::string strName() const;
 
 	//Find a variable in the Defs. Both the user_variables and the
 	//server variables are searched.

@@ -24,6 +24,10 @@ public:
 
 	virtual void notifyBeginNodeChange(const VNode* vn, const std::vector<ecf::Aspect::Type>& a,const VNodeChange&)=0;
 	virtual void notifyEndNodeChange(const VNode* vn, const std::vector<ecf::Aspect::Type>& a,const VNodeChange&)=0;
+	virtual void notifyBeginNodeClear(const VNode* vn) {};
+	virtual void notifyEndNodeClear(const VNode* vn) {};
+	virtual void notifyBeginNodeScan(const VNode* vn,const VNodeChange& change) {};
+	virtual void notifyEndNodeScan(const VNode* vn) {};
 };
 
 #endif

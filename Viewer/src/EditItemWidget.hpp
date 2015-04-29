@@ -16,8 +16,12 @@
 #include "InfoPanelItem.hpp"
 #include "VInfo.hpp"
 
-class EditItemWidget : public QWidget, public InfoPanelItem
+#include "ui_EditItemWidget.h"
+
+class EditItemWidget : public QWidget, public InfoPanelItem, protected Ui::EditItemWidget
 {
+Q_OBJECT
+
 public:
 	EditItemWidget(QWidget *parent=0);
 
@@ -25,8 +29,24 @@ public:
 	QWidget* realWidget();
 	void clearContents();
 
+	//From VInfoPresenter
+	void infoReady(VReply*);
+	void infoFailed(VReply*);
+	void infoProgress(VReply*);
+
 	void nodeChanged(const VNode*, const std::vector<ecf::Aspect::Type>&) {};
 	void defsChanged(const std::vector<ecf::Aspect::Type>&) {};
+
+protected Q_SLOTS:
+	void on_preprocTb__toggled(bool);
+	void on_submitTb__clicked(bool);
+
+protected:
+	bool preproc() const;
+	bool alias() const;
+
+	bool preproc_;
+	bool alias_;
 
 };
 

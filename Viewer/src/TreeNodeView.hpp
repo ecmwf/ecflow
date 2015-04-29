@@ -18,6 +18,8 @@
 #include "VInfo.hpp"
 
 class ActionHandler;
+class ExpandNode;
+class ExpandState;
 class NodeFilterModel;
 class TreeNodeModel;
 
@@ -27,6 +29,8 @@ Q_OBJECT
 
 public:
 	TreeNodeView(QWidget *parent=0);
+	~TreeNodeView();
+
 	void reload();
 	QWidget* realWidget();
 	VInfo_ptr currentSelection();
@@ -39,6 +43,8 @@ public Q_SLOTS:
 	void slotContextMenu(const QPoint &position);
 	void slotViewCommand(std::vector<VInfo_ptr>,QString);
 	void slotSetCurrent(VInfo_ptr);
+	void slotSaveExpand(const VNode* node);
+	void slotRestoreExpand(const VNode* node);
 
 Q_SIGNALS:
 	void selectionChanged(VInfo_ptr);
@@ -46,7 +52,11 @@ Q_SIGNALS:
 protected:
 	QModelIndexList selectedList();
 	void handleContextMenu(QModelIndex indexClicked,QModelIndexList indexLst,QPoint globalPos,QPoint widgetPos,QWidget *widget);
+	void saveExpand(ExpandNode *parentExpand,const QModelIndex& idx);
+	void restoreExpand(ExpandNode *expand,const VNode* node);
+
 	ActionHandler* actionHandler_;
+	ExpandState *expandState_;
 };
 
 #endif

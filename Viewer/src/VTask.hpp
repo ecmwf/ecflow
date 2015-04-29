@@ -14,6 +14,8 @@
 #include <string>
 #include <vector>
 
+#include "NodeFwd.hpp"
+
 #include <boost/shared_ptr.hpp>
 #include <boost/enable_shared_from_this.hpp>
 
@@ -36,7 +38,8 @@ class VTask  : public boost::enable_shared_from_this<VTask>
 {
 public:
 	enum Type {NoTask,CommandTask,OverviewTask,WhyTask,ManualTask,ScriptTask,
-		       JobTask,MessageTask,OutputTask,StatsTask,NewsTask,SyncTask,LoadTask};
+		       JobTask,MessageTask,OutputTask,StatsTask,NewsTask,SyncTask,LoadTask,
+			   ScriptEditTask,ScriptPreprocTask,ScriptSubmitTask};
 	enum Status {NOSTATUS,QUEUED,RUNNING,FINISHED,CANCELLED,ABORTED,REJECTED};
 
 	virtual ~VTask();
@@ -50,10 +53,14 @@ public:
 	const std::string& param(const std::string& key) const;
 	const std::map<std::string,std::string>& params() const {return params_;}
 	const std::vector<std::string>& command() const {return command_;}
+	const std::vector<std::string>& contents() const {return contents_;}
+	const NameValueVec& vars() const {return vars_;}
 	VReply* reply() const {return reply_;}
 
 	void param(const std::string& key,const std::string& val) {params_[key]=val;}
 	void command(const std::vector<std::string>& cmd) {command_=cmd;}
+	void contents(const std::vector<std::string>& c) {contents_=c;}
+	void vars(const NameValueVec& v) {vars_=v;}
 
 	//When it is called the observers are notified about the change in status.
 	void status(Status s,bool broadcast=true);
@@ -72,6 +79,8 @@ protected:
 	Status status_;
 	std::map<std::string,std::string> params_;
 	std::vector<std::string> command_;
+	std::vector<std::string> contents_;
+	NameValueVec vars_;
 	std::string targetPath_;
 	VNode *node_;
 	std::vector<VTaskObserver*> observers_;

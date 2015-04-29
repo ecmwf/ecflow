@@ -11,6 +11,8 @@ set(viewer_srcs
     Dashboard.cpp
     DirectoryHandler.cpp
     EditItemWidget.cpp
+    EditProvider.cpp
+    ExpandState.cpp
     FileInfoLabel.cpp
     FilterWidget.cpp
     Highlighter.cpp
@@ -94,6 +96,7 @@ QT4_WRAP_CPP(VIEWER_MOC AbstractNodeModel.hpp
                         CommandDesignerWidget.hpp
                         CustomCommandDialog.hpp
                         Dashboard.hpp
+                        EditItemWidget.hpp
                         FilterWidget.hpp                      
                         InfoPanel.hpp
                         LineEdit.hpp
@@ -128,24 +131,25 @@ QT4_ADD_RESOURCES (VIEWER_RES viewer.qrc)
 QT4_WRAP_UI       (VIEWER_FORMS_HEADERS CommandDesignerWidget.ui 
                         CustomCommandDialog.ui 
 			CodeItemWidget.ui
-			InfoPanel.ui
+			EditItemWidget.ui
+			InfoPanel.ui			
 			MainWindow.ui 
 			TimeItemWidget.ui
-                        MenuConfigDialog.ui
-                        OutputItemWidget.ui 
-                        PropertyDialog.ui
-                        SearchLineWidget.ui 
-                        ServerAddDialog.ui
-                        ServerEditDialog.ui 
-                        ServerListDialog.ui
-                        ServerWidget.ui 
-                        TableNodeWidget.ui
-                        TextItemWidget.ui
-                        TreeNodeWidget.ui
-                        TriggerItemWidget.ui
-                        VariableAddDialog.ui
-                        VariablePropDialog.ui
-                        VariableItemWidget.ui)
+            MenuConfigDialog.ui
+            OutputItemWidget.ui 
+            PropertyDialog.ui
+            SearchLineWidget.ui 
+            ServerAddDialog.ui
+            ServerEditDialog.ui 
+            ServerListDialog.ui
+            ServerWidget.ui 
+            TableNodeWidget.ui
+            TextItemWidget.ui
+            TreeNodeWidget.ui
+            TriggerItemWidget.ui
+            VariableAddDialog.ui
+            VariablePropDialog.ui
+            VariableItemWidget.ui)
 
 
 ecbuild_add_executable( TARGET   ecflow_ui

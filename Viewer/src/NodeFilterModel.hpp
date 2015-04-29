@@ -32,6 +32,7 @@ public:
 
 	VInfo_ptr nodeInfo(const QModelIndex&);
 	QModelIndex infoToIndex(VInfo_ptr);
+	QModelIndex nodeToIndex(const VNode *node);
 
 public Q_SLOTS:
 	void slotFilterChanged();

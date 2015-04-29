@@ -56,8 +56,12 @@ public Q_SLOTS:
 	void slotBeginAddRemoveAttributes(VModelServer*,const VNode*,int,int);
 	void slotEndAddRemoveAttributes(VModelServer*,const VNode*,int,int);
 	void slotAddRemoveNodes(VModelServer*,const VNode*,int,int);
-	void slotBeginAddRemoveNode(VModelServer*,const VNode*,int,bool);
-	void slotEndAddRemoveNode(VModelServer*,const VNode*,int,bool);
+	void slotBeginAddRemoveNode(VModelServer*,const VNode*,int,int);
+	void slotEndAddRemoveNode(VModelServer*,const VNode*,bool);
+	void slotBeginNodeClear(VModelServer* server,const VNode *node);
+	void slotEndNodeClear();
+	void slotBeginNodeScan(VModelServer* server,const VNode *node,int num);
+	void slotEndNodeScan(VModelServer* server,const VNode *node);
 	void slotResetBranch(VModelServer*,const VNode*);
 	void slotBeginServerScan(VModelServer* server,int);
 	void slotEndServerScan(VModelServer* server);
@@ -66,6 +70,8 @@ public Q_SLOTS:
 
 Q_SIGNALS:
 	void filterChanged();
+	void clearBegun(const VNode*);
+	void scanEnded(const VNode*);
 
 private:
 	bool isServer(const QModelIndex & index) const;

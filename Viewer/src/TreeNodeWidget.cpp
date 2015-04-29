@@ -68,6 +68,12 @@ TreeNodeWidget::TreeNodeWidget(ServerFilter* servers,QWidget* parent) : NodeWidg
 	connect(view_->realWidget(),SIGNAL(selectionChanged(VInfo_ptr)),
 			this,SIGNAL(selectionChanged(VInfo_ptr)));
 
+	connect(model_,SIGNAL(clearBegun(const VNode*)),
+			view_->realWidget(),SLOT(slotSaveExpand(const VNode*)));
+
+	connect(model_,SIGNAL(scanEnded(const VNode*)),
+				view_->realWidget(),SLOT(slotRestoreExpand(const VNode*)));
+
 	//Builds the menu for the settings tool button
 	QMenu *menu=new QMenu(this);
 

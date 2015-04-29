@@ -40,6 +40,7 @@ protected:
 	VReply* reply_;
 	VTask::Type taskType_;
 	std::string fileVarName_;
+	//std::map<std::string,std::string> params_;
 };
 
 class JobProvider : public InfoProvider

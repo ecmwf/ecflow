@@ -632,14 +632,19 @@ VNode* TreeNodeModel::indexToNode( const QModelIndex & index) const
 }
 
 
-//Find the index for the node!
+//Find the index for the node! The VNode can be a server as well!!!
 QModelIndex TreeNodeModel::nodeToIndex(const VNode* node, int column) const
 {
 	if(!node)
 		return QModelIndex();
 
+	//This is a server!!!
+	if(node->isServer())
+	{
+		return serverToIndex(node->server());
+	}
 	//If the node is toplevel node (suite).
-	if(node->isTopLevel())
+	else if(node->isTopLevel())
 	{
 		VModelServer* server=NULL;
 		int row=-1;
@@ -994,7 +999,7 @@ void TreeNodeModel::slotAddRemoveNodes(VModelServer* server,const VNode* node,in
 
 //A new node was added. posInNodes tells us the position within the nodes before
 //the new node has to be inserted.
-void TreeNodeModel::slotBeginAddRemoveNode(VModelServer* server,const VNode* node,int posInNodes,bool add)
+void TreeNodeModel::slotBeginAddRemoveNode(VModelServer* server,const VNode* node,int posInNodes,int cnt)
 {
 	if(!node)
 		return;
@@ -1010,17 +1015,17 @@ void TreeNodeModel::slotBeginAddRemoveNode(VModelServer* server,const VNode* nod
 	int attrNum=node->attrNum();
 	int pos=attrNum+posInNodes;
 
-	if(add)
+	if(cnt >0)
 	{
-		beginInsertRows(parent,pos,pos);
+		beginInsertRows(parent,pos,pos+cnt-1);
 	}
-	else
+	else if(cnt< 0)
 	{
-		beginRemoveRows(parent,pos,pos);
+		beginRemoveRows(parent,pos,pos-cnt+-1);
 	}
 }
 
-void TreeNodeModel::slotEndAddRemoveNode(VModelServer* server,const VNode* node,int posInNodes,bool add)
+void TreeNodeModel::slotEndAddRemoveNode(VModelServer* server,const VNode* node,bool add)
 {
 	if(!node)
 		return;
@@ -1029,6 +1034,53 @@ void TreeNodeModel::slotEndAddRemoveNode(VModelServer* server,const VNode* node,
 		endInsertRows();
 	else
 		endRemoveRows();
+}
+
+//The server clear has started. It well remove all the nodes except the root node.
+//So we need to remove all the rows belonging to the rootnode.
+void TreeNodeModel::slotBeginNodeClear(VModelServer* server,const VNode *node)
+{
+	assert(active_ == true);
+
+	Q_EMIT clearBegun(node);
+
+	QModelIndex idx=nodeToIndex(server,node,0);
+	if(idx.isValid())
+	{
+		int num=rowCount(idx);
+		beginRemoveRows(idx,0,num-1);
+	}
+}
+//The server clear has finished. The tree is empty only containing the rootnode
+void TreeNodeModel::slotEndNodeClear()
+{
+	assert(active_ == true);
+	endRemoveRows();
+}
+
+//The server clear has started. It well remove all the nodes except the root node.
+//So we need to remove all the rows belonging to the rootnode.
+void TreeNodeModel::slotBeginNodeScan(VModelServer* server,const VNode *node,int num)
+{
+	assert(active_ == true);
+
+	QModelIndex idx=nodeToIndex(server,node,0);
+	if(idx.isValid())
+	{
+		if(num > 0)
+		{
+			beginInsertRows(idx,0,num-1);
+		}
+	}
+}
+
+//The server clear has finished. The tree is empty only containing the rootnode
+void TreeNodeModel::slotEndNodeScan(VModelServer* server,const VNode *node)
+{
+	assert(active_ == true);
+	endInsertRows();
+
+	Q_EMIT scanEnded(node);
 }
 
 //The whole branch belonging to the node has to be reset!!!
@@ -1076,6 +1128,8 @@ void TreeNodeModel::slotEndServerScan(VModelServer* server)
 {
 	assert(active_ == true);
 	endInsertRows();
+
+	Q_EMIT scanEnded(server->realServer()->vRoot());
 }
 
 //The server clear has started. It well remove all the nodes except the root node.
@@ -1088,6 +1142,8 @@ void TreeNodeModel::slotBeginServerClear(VModelServer* server)
 
 	if(idx.isValid())
 	{
+		Q_EMIT clearBegun(server->realServer()->vRoot());
+
 		int num=rowCount(idx);
 		beginRemoveRows(idx,0,num-1);
 	}

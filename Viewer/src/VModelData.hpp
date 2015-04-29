@@ -50,8 +50,12 @@ Q_SIGNALS:
 	void beginAddRemoveAttributes(VModelServer*,const VNode*,int,int);
 	void endAddRemoveAttributes(VModelServer*,const VNode*,int,int);
 	void addRemoveNodes(VModelServer*,const VNode*,int,int);
-	void beginAddRemoveNode(VModelServer*,const VNode*,int pos,bool add);
-	void endAddRemoveNode(VModelServer*,const VNode*,int pos,bool add);
+	void beginAddRemoveNode(VModelServer*,const VNode*,int pos,int cnt);
+	void endAddRemoveNode(VModelServer*,const VNode*,bool add);
+	void beginNodeScan(VModelServer*,const VNode*,int);
+	void endNodeScan(VModelServer*,const VNode*);
+	void beginNodeClear(VModelServer*,const VNode*);
+	void endNodeClear();
 	void resetBranch(VModelServer*,const VNode*);
 	void dataChanged(VModelServer*);
 	void nodeChanged(VModelServer*,const VNode*);
@@ -86,6 +90,10 @@ public:
 	 //From NodeObserver
 	 void notifyBeginNodeChange(const VNode*, const std::vector<ecf::Aspect::Type>&,const VNodeChange&);
 	 void notifyEndNodeChange(const VNode*, const std::vector<ecf::Aspect::Type>&,const VNodeChange&);
+	 void notifyBeginNodeClear(const VNode*);
+	 void notifyEndNodeClear(const VNode*);
+	 void notifyBeginNodeScan(const VNode*,const VNodeChange& change);
+	 void notifyEndNodeScan(const VNode*);
 };
 
 class VTableServer : public VModelServer
@@ -101,6 +109,10 @@ public:
 	 //From NodeObserver
 	 void notifyBeginNodeChange(const VNode*, const std::vector<ecf::Aspect::Type>&,const VNodeChange&);
 	 void notifyEndNodeChange(const VNode*, const std::vector<ecf::Aspect::Type>&,const VNodeChange&);
+	 void notifyBeginNodeClear(const VNode*) {};
+	 void notifyEndNodeClear(const VNode*) {};
+	 void notifyBeginNodeScan(const VNode*,const VNodeChange& change) {};
+	 void notifyEndNodeScan(const VNode*) {};
 };
 
 //This class defines the data a given Node Model (Tree or Table) displays. The
@@ -154,8 +166,12 @@ Q_SIGNALS:
 	void beginAddRemoveAttributes(VModelServer*,const VNode*,int,int);
 	void endAddRemoveAttributes(VModelServer*,const VNode*,int,int);
 	void addRemoveNodes(VModelServer*,const VNode*,int,int);
-	void beginAddRemoveNode(VModelServer*,const VNode*,int pos,bool add);
-	void endAddRemoveNode(VModelServer*,const VNode*,int pos,bool add);
+	void beginAddRemoveNode(VModelServer*,const VNode*,int pos,int cnt);
+	void endAddRemoveNode(VModelServer*,const VNode*,bool add);
+	void beginNodeScan(VModelServer*,const VNode*,int);
+	void endNodeScan(VModelServer*,const VNode*);
+	void beginNodeClear(VModelServer*,const VNode*);
+	void endNodeClear();
 	void resetBranch(VModelServer*,const VNode*);
 	void dataChanged(VModelServer*);
 	void nodeChanged(VModelServer*,const VNode*);

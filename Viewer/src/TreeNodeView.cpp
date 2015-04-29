@@ -15,11 +15,18 @@
 #include <QScrollBar>
 
 #include "ActionHandler.hpp"
+#include "ExpandState.hpp"
 #include "NodeFilterModel.hpp"
 #include "TreeNodeViewDelegate.hpp"
+#include "VNode.hpp"
 
-TreeNodeView::TreeNodeView(QWidget* parent) : QTreeView(parent)
+TreeNodeView::TreeNodeView(QWidget* parent) :
+	QTreeView(parent)
 {
+	expandState_=new ExpandState();
+	actionHandler_=new ActionHandler(this);
+
+
 	//Set the model.
 	setModel(model_);
 
@@ -58,9 +65,13 @@ TreeNodeView::TreeNodeView(QWidget* parent) : QTreeView(parent)
 	connect(this,SIGNAL(doubleClicked(const QModelIndex&)),
 			this,SLOT(slotDoubleClickItem(const QModelIndex)));
 
-	actionHandler_=new ActionHandler(this);
-
 	expandAll();
+}
+
+TreeNodeView::~TreeNodeView()
+{
+	delete expandState_;
+	delete actionHandler_;
 }
 
 void TreeNodeView::setModel(NodeFilterModel *model)
@@ -188,5 +199,82 @@ void TreeNodeView::reload()
 	//expandAll();
 }
 
+//====================================================
+// Expand state management
+//====================================================
 
+//Save the expand state for the given node (it can be a server as well)
+void TreeNodeView::slotSaveExpand(const VNode* node)
+{
+	expandState_->clear();
 
+	QModelIndex idx=model_->nodeToIndex(node);
+	if(isExpanded(idx))
+	{
+		expandState_->setRoot(node->strName());
+		saveExpand(expandState_->root(),idx);
+	}
+}
+
+void TreeNodeView::saveExpand(ExpandNode *parentExpand,const QModelIndex& idx)
+{
+	for(int i=0; i < model_->rowCount(idx); i++)
+	{
+		QModelIndex chIdx=model_->index(i, 0, idx);
+
+		if(!isExpanded(chIdx))
+	        continue;
+		else
+		{
+			ExpandNode* expand=parentExpand->add(chIdx.data(Qt::DisplayRole).toString().toStdString());
+			saveExpand(expand,chIdx);
+		}
+	}
+}
+
+//Save the expand state for the given node (it can be a server as well)
+void TreeNodeView::slotRestoreExpand(const VNode* node)
+{
+	if(!expandState_->root())
+		return;
+
+	if(node->strName() != expandState_->root()->name_)
+	{
+		expandState_->clear();
+		return;
+	}
+
+	restoreExpand(expandState_->root(),node);
+
+	expandState_->clear();
+}
+
+void TreeNodeView::restoreExpand(ExpandNode *expand,const VNode* node)
+{
+	//Lookup the mnode in the model
+	QModelIndex nodeIdx=model_->nodeToIndex(node);
+	if(nodeIdx != QModelIndex())
+	{
+		setExpanded(nodeIdx,true);
+	}
+	else
+	{
+		return;
+	}
+
+	for(int i=0; i < expand->children_.size(); i++)
+	{
+		ExpandNode *chExpand=expand->children_.at(i);
+		std::string name=chExpand->name_;
+
+		if(VNode *chNode=node->findChild(name))
+		{
+			QModelIndex chIdx=model_->nodeToIndex(chNode);
+			if(chIdx != QModelIndex())
+			{
+				//setExpanded(chIdx,true);
+				restoreExpand(chExpand,chNode);
+			}
+		}
+	}
+}

@@ -175,14 +175,19 @@ void VTreeServer::notifyBeginNodeChange(const VNode* node, const std::vector<ecf
 	//----------------------------------------------------------------------
 	else if(!attrNumCh && nodeNumCh)
 	{
-		//Only one node was added and the order of the nodes is the same
+		//Only a continuous block of nodes was added and the order of the nodes is the same
 		if(change.nodeAddAt_ != -1)
 		{
-			Q_EMIT beginAddRemoveNode(this,node,change.nodeAddAt_,true);
+			int diff=change.nodeNum_-change.cachedNodeNum_;
+			assert(diff >0);
+			Q_EMIT beginAddRemoveNode(this,node,change.nodeAddAt_,diff);
 		}
+		//Only a continuous block of nodes was removed and the order of the nodes is the same
 		else if(change.nodeRemoveAt_ != -1)
 		{
-			Q_EMIT beginAddRemoveNode(this,node,change.nodeRemoveAt_,false);
+			int diff=change.nodeNum_-change.cachedNodeNum_;
+			assert(diff <0);
+			Q_EMIT beginAddRemoveNode(this,node,change.nodeRemoveAt_,diff);
 		}
 		else
 		{
@@ -269,11 +274,11 @@ void VTreeServer::notifyEndNodeChange(const VNode* node, const std::vector<ecf::
 		//Only one node was added and the order of the nodes is the same
 		if(change.nodeAddAt_ != -1)
 		{
-			Q_EMIT endAddRemoveNode(this,node,change.nodeAddAt_,true);
+			Q_EMIT endAddRemoveNode(this,node,true);
 		}
 		else if(change.nodeRemoveAt_ != -1)
 		{
-			Q_EMIT endAddRemoveNode(this,node,change.nodeRemoveAt_,false);
+			Q_EMIT endAddRemoveNode(this,node,false);
 		}
 		else
 		{
@@ -281,6 +286,26 @@ void VTreeServer::notifyEndNodeChange(const VNode* node, const std::vector<ecf::
 		}
 	}
 
+}
+
+void VTreeServer::notifyBeginNodeClear(const VNode* node)
+{
+	Q_EMIT beginNodeClear(this,node);
+}
+
+void VTreeServer::notifyEndNodeClear(const VNode* node)
+{
+	Q_EMIT endNodeClear();
+}
+
+void VTreeServer::notifyBeginNodeScan(const VNode* node,const VNodeChange& change)
+{
+	Q_EMIT beginNodeScan(this,node,change.nodeNum_);
+}
+
+void VTreeServer::notifyEndNodeScan(const VNode* node)
+{
+	Q_EMIT endNodeScan(this,node);
 }
 
 //==========================================

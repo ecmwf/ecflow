@@ -159,9 +159,10 @@ private:
 
 	typedef void (NodeObserver::*NoMethod)(const VNode*);
 	typedef void (NodeObserver::*NoMethodV1)(const VNode*,const std::vector<ecf::Aspect::Type>&,const VNodeChange&);
+	typedef void (NodeObserver::*NoMethodV2)(const VNode*,const VNodeChange&);
 	void broadcast(NoMethod,const VNode*);
 	void broadcast(NoMethodV1,const VNode*,const std::vector<ecf::Aspect::Type>&,const VNodeChange&);
-
+	void broadcast(NoMethodV2,const VNode*,const VNodeChange&);
 
 	QMutex           defsMutex_;
 
@@ -262,6 +263,8 @@ private:
 	VTask::Type taskType_;
 	std::vector<std::string> command_;
 	std::map<std::string,std::string> params_;
+	std::vector<std::string> contents_;
+	NameValueVec vars_;
 	std::string nodePath_;
 	bool attached_;
 };
