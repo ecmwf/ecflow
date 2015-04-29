@@ -20,6 +20,8 @@
 #include "VNState.hpp"
 #include "VSState.hpp"
 
+#include <boost/algorithm/string.hpp>
+
 //=================================================
 // VNode
 //=================================================
@@ -55,9 +57,9 @@ void VNode::clear()
 	cachedAttrNum_=-1;
 }
 
-void VNode::detachNode()
+bool VNode::hasAccessed() const
 {
-	node_=0;
+	return !name_.empty();
 }
 
 //At the beginning of the update we get the current number of attributes
@@ -158,6 +160,22 @@ VNode *VNode::findChild(const std::string& name) const
 			return children_.at(i);
 	}
 	return 0;
+}
+
+VNode* VNode::find(const std::vector<std::string>& pathVec)
+{
+	if(pathVec.size() == 0)
+		return this;
+
+	if(pathVec.size() == 1)
+	{
+		return findChild(pathVec.at(0));
+	}
+
+	std::vector<std::string> rest(pathVec.begin()+1,pathVec.end());
+	VNode *n = findChild(pathVec.at(0));
+
+	return n?n->find(rest):NULL;
 }
 
 std::string VNode::genVariable(const std::string& key) const
@@ -428,6 +446,20 @@ VNode* VServer::toVNode(const Node* nc) const
 	return static_cast<VNode*>(nc->graphic_ptr());
 }
 
+VNode* VServer::find(const std::string& fullPath)
+{
+	if(fullPath.empty())
+		return NULL;
+
+	if(fullPath == "/")
+		return this;
+
+	std::vector<std::string> pathVec;
+	boost::split(pathVec,fullPath,boost::is_any_of("/"));
+
+	return VNode::find(pathVec);
+}
+
 std::string VServer::findVariable(const std::string& key,bool substitute) const
 {
 	std::string val;
@@ -553,40 +585,13 @@ void VServer::beginUpdate(VNode* node,const std::vector<ecf::Aspect::Type>& aspe
 		return;
 	}
 
-	//----------------------------------------------------------------
-	// The number of nodes changed. We need to reset
-	//----------------------------------------------------------------
+	//---------------------------------------------------------------------------------
+	// The number of nodes changed. If we are here we must have reset the whole server
+	// a few second ago!!!!!!!!!!!!!!!!!!!!!!
+	//---------------------------------------------------------------------------------
 	else if(nodeNumCh)
 	{
-		change.reset_=true;
-
-		/*
-
-		//For all the nodes to be deleted we set internal info_ to 0!!
-		//This indicates that only the cached information is avaialable!!!
-		std::vector<node_ptr> nodeVec;
-		node->node()->immediateChildren(nodeVec);
-
-		//PROBLEM: nothing guarantees that the node_ inside the given VNodes still exists!!!
-
-		for(unsigned int i=0; i < node->numOfChildren(); i++)
-		{
-			bool found=false;
-			for(unsigned int j=0; j < nodeVec.size(); j++)
-			{
-				if(node->childAt(i)->sameName(nodeVec.at(j).get()->name()))
-				{
-					found=true;
-					break;
-				}
-			}
-			if(!found)
-			{
-				node->childAt(i)->detachNode();
-			}
-		}
-
-		*/
+		change.ignore_=1;
 	}
 
 	//In any other cases it is just a simple update (value or status changed)
@@ -597,7 +602,7 @@ void VServer::beginUpdate(VNode* node,const std::vector<ecf::Aspect::Type>& aspe
 // If anything does not match we return false that will call reset!!!
 //-------------------------------------------------------------------------------------------
 
-bool VServer::endUpdate(VNode* node,const std::vector<ecf::Aspect::Type>& aspect,const VNodeChange& change)
+void VServer::endUpdate(VNode* node,const std::vector<ecf::Aspect::Type>& aspect,const VNodeChange& change)
 {
 	bool attrNumCh=(std::find(aspect.begin(),aspect.end(),ecf::Aspect::ADD_REMOVE_ATTR) != aspect.end());
 	bool nodeNumCh=(std::find(aspect.begin(),aspect.end(),ecf::Aspect::ADD_REMOVE_NODE) != aspect.end());
@@ -611,9 +616,6 @@ bool VServer::endUpdate(VNode* node,const std::vector<ecf::Aspect::Type>& aspect
 		//This call updates the number of attributes stored in the VNode
 		node->endUpdateAttrNum();
 	}
-
-
-	return true;
 }
 
 std::string VServer::strName() const

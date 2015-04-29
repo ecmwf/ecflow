@@ -102,7 +102,13 @@ ServerHandler::ServerHandler(const std::string& name,const std::string& host, co
 					 this,SLOT(slotNodeChanged(const Node*, const std::vector<ecf::Aspect::Type>&)));
 
 	connect(comThread,SIGNAL(defsChanged(const std::vector<ecf::Aspect::Type>&)),
-						 this,SLOT(slotDefsChanged(const std::vector<ecf::Aspect::Type>&)));
+				     this,SLOT(slotDefsChanged(const std::vector<ecf::Aspect::Type>&)));
+
+	connect(comThread,SIGNAL(nodeDeleted(const std::string&)),
+					 this,SLOT(slotNodeDeleted(const std::string&)));
+
+	connect(comThread,SIGNAL(defsDeleted()),
+						 this,SLOT(slotDefsDeleted()));
 
 	//Create the queue for the tasks to be sent to the client (via the ServerComThread)! It will
 	//take ownership of the ServerComThread. At this point the queue has not started yet.
@@ -251,6 +257,9 @@ void ServerHandler::loadFinished()
 
 	//Notify the observers that scan has ended
 	broadcast(&ServerObserver::notifyEndServerScan);
+
+	//Restart the timer
+	resetRefreshTimer();
 }
 
 //The load failed and we could not connect to the server, e.g. because the the server
@@ -265,6 +274,9 @@ void ServerHandler::loadFailed(const std::string& errMsg)
 	activity_=NoActivity;
 
 	broadcast(&ServerObserver::notifyServerConnectState);
+
+	//Restart the timer
+	resetRefreshTimer();
 }
 
 void ServerHandler::stopRefreshTimer()
@@ -700,29 +712,6 @@ void ServerHandler::slotNodeChanged(const Node* nc, const std::vector<ecf::Aspec
 	{
 		return;
 	}
-	//If too many things changed we simply reset the node
-	else if(change.reset_)
-	{
-		reset();
-
-		//Notify the observers. This will save the expand state.
-		/*broadcast(&NodeObserver::notifyBeginNodeClear,vn);
-
-		//End update for the VNode
-		vRoot_->clear(vn);
-
-		//Notify the observers
-		broadcast(&NodeObserver::notifyEndNodeClear,vn);
-
-		//Notify the observers
-		broadcast(&NodeObserver::notifyBeginNodeScan,vn);
-
-		//Perform the scan
-		vRoot_->scan(vn);
-
-		//Notify the observers
-		broadcast(&NodeObserver::notifyEndNodeScan,vn);*/
-	}
 	//Otherwise continue with the update
 	else
 	{
@@ -730,15 +719,26 @@ void ServerHandler::slotNodeChanged(const Node* nc, const std::vector<ecf::Aspec
 		broadcast(&NodeObserver::notifyBeginNodeChange,vn,aspect,change);
 
 		//End update for the VNode
-		if(vRoot_->endUpdate(vn,aspect,change))
+		vRoot_->endUpdate(vn,aspect,change);
+
+		//Notify the observers
+		broadcast(&NodeObserver::notifyEndNodeChange,vn,aspect,change);
+	}
+}
+
+//When this slot is called we are probably in the middle of an update.
+void ServerHandler::slotNodeDeleted(const std::string& fullPath)
+{
+	if(VNode* vn=vRoot_->find(fullPath))
+	{
+		if(vn->hasAccessed())
 		{
-			//Notify the observers
-			broadcast(&NodeObserver::notifyEndNodeChange,vn,aspect,change);
+			rescanTree();
 		}
-		//if finishing the update failed we need to reset
-		{
-			reset();
-		}
+	}
+	else
+	{
+		reset();
 	}
 }
 
@@ -782,6 +782,13 @@ void ServerHandler::slotDefsChanged(const std::vector<ecf::Aspect::Type>& a)
 {
 	for(std::vector<ServerObserver*>::const_iterator it=serverObservers_.begin(); it != serverObservers_.end(); it++)
 		(*it)->notifyDefsChanged(this,a);
+}
+
+//When this slot is called we are probably in the middle of an update.
+void ServerHandler::slotDefsDeleted()
+{
+	UserMessage::message(UserMessage::DBG, false, std::string("ServerHandler::slotDefsDeleted"));
+	rescanTree();
 }
 
 void ServerHandler::addServerObserver(ServerObserver *obs)
@@ -1006,6 +1013,7 @@ void ServerHandler::resetFirst()
 		servers_.at(0)->reset();
 }
 
+
 void ServerHandler::reset()
 {
 	//---------------------------------
@@ -1015,14 +1023,15 @@ void ServerHandler::reset()
 	//Stop the timer
 	stopRefreshTimer();
 
-	//Empty and stop the queue
-	comQueue_->stop();
-
 	//Notify observers that the clear is about to begin
 	broadcast(&ServerObserver::notifyBeginServerClear);
 
 	//Clear vnode
 	vRoot_->clear();
+
+	//Empty and stop the queue. We need to call it here because it has to
+	//wait for the thread to finish!!!
+	comQueue_->stop();
 
 	//Reset client handle and defs as well. This does not require
 	//communications with the server.
@@ -1041,6 +1050,59 @@ void ServerHandler::reset()
 	//We simply call load again
 	load();
 }
+
+void ServerHandler::rescanTree()
+{
+	//---------------------------------
+	// First part of reset: clearing
+	//---------------------------------
+
+	//Stop the timer
+	stopRefreshTimer();
+
+	//Notify observers that the clear is about to begin
+	broadcast(&ServerObserver::notifyBeginServerClear);
+
+	//Clear vnode
+	vRoot_->clear();
+
+	//Empty and stop the queue. We need to call it after clearing the vRoot because it has to
+	//wait for the thread to finish!!!
+	comQueue_->stop();
+
+	//Notify observers that the clear ended
+	broadcast(&ServerObserver::notifyEndServerClear);
+
+	//At this point nothing is running and the tree is empty (it only contains
+	//the root node)
+
+	//--------------------------------------
+	// Second part of reset: loading
+	//--------------------------------------
+
+	//Create an object to inform the observers about the change
+	VServerChange change;
+
+	//Begin the full scan to get the tree. This call does not actually
+	//run the scan but counts how many suits will be available.
+	vRoot_->beginScan(change);
+
+	//Notify the observers that the scan has started
+	broadcast(&ServerObserver::notifyBeginServerScan,change);
+
+	//Finish full scan
+	vRoot_->endScan();
+
+	//Notify the observers that scan has ended
+	broadcast(&ServerObserver::notifyEndServerScan);
+
+	//Start the queue
+	comQueue_->start();
+
+	//Start the timer
+	resetRefreshTimer();
+}
+
 
 
 /*
@@ -1421,7 +1483,9 @@ ServerComThread::ServerComThread(ServerHandler *server, ClientInvoker *ci) :
 		server_(server),
 		ci_(ci),
 		taskType_(VTask::NoTask),
-		attached_(false)
+		attached_(false),
+		nodeToDelete_(false),
+		defsToDelete_(false)
 {
 }
 
@@ -1460,6 +1524,11 @@ void ServerComThread::task(VTask_ptr task)
 
 void ServerComThread::run()
 {
+	//This flag indicates if we get a notification through the observers about
+	//the deletion of the defs or a nodes
+	defsToDelete_=false;
+	nodeToDelete_=false;
+
 	//Can we use it? We are in the thread!!!
 	//UserMessage::message(UserMessage::DBG, false, std::string("  ServerComThread::run start"));
 
@@ -1568,9 +1637,17 @@ void ServerComThread::run()
 
 		UserMessage::message(UserMessage::DBG, false, std::string("  ServerComThread::run failed: ") + errorString);
 
+		//Reset update flags
+		defsToDelete_=false;
+		nodeToDelete_=false;
+
 		//This will stop the thread.
 		return;
 	}
+
+	//Reset update flags
+	defsToDelete_=false;
+	nodeToDelete_=false;
 
 	//Can we use it? We are in the thread!!!
 	//UserMessage::message(UserMessage::DBG, false, std::string("  ServerComThread::run finished"));
@@ -1603,11 +1680,42 @@ void ServerComThread::update_delete(const Node* nc)
 	Node *n=const_cast<Node*>(nc);
 
 	UserMessage::message(UserMessage::DBG, false, std::string("Update delete: ") + n->name());
+
+	//If the defs was asked to be deleted in the thread we ignore the node's deletion and
+	//do not emit a signal!! We also ignore it if another node has been already asked to
+	//be deleted in the thread.!!!
+
+	if(!defsToDelete_ && !nodeToDelete_)
+	{
+		nodeToDelete_=true;
+
+		//Once this signal is emitted we reset the whole server!!!!
+		//So we want to emit it only once during the thread.
+		UserMessage::message(UserMessage::DBG, false, std::string("     -->signal emitted"));
+		Q_EMIT nodeDeleted(nc->name());
+	}
+
 	ChangeMgrSingleton::instance()->detach(n,this);
+
 }
 
+//Here we suppose that when nodes are deleted this method is called for the ones on
+//the topmost level!!!
 void ServerComThread::update_delete(const Defs* dc)
 {
+	UserMessage::message(UserMessage::DBG, false, std::string("Update defs delete: "));
+
+	if(!defsToDelete_)
+	{
+		//Indicate that the defs is asked to be deleted in the thread
+		defsToDelete_=true;
+
+		//Once this signal is emitted we reset the whole server!!!!
+		//So we want to emit it only once during the thread.
+		UserMessage::message(UserMessage::DBG, false, std::string("     -->signal emitted"));
+		Q_EMIT defsDeleted();
+	}
+
 	Defs *d=const_cast<Defs*>(dc);
 	ChangeMgrSingleton::instance()->detach(static_cast<Defs*>(d),this);
 }

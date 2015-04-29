@@ -93,16 +93,17 @@ public:
     virtual bool isSuspended() const;
     virtual QColor  stateColour() const;
 
+    bool hasAccessed() const;
+
     LogServer_ptr logServer();
 
 protected:
     void clear();
-    void detachNode();
     void addChild(VNode*);
     void removeChild(VNode*);
     short currentAttrNum() const;
     bool isAttrNumInitialised() const {return attrNum_!=-1;}
-
+    VNode* find(const std::vector<std::string>& pathVec);
 
     Node* node_;
     VNode* parent_;
@@ -130,7 +131,7 @@ public:
 	int totalNum() const {return totalNum_;}
 	VNode* toVNode(const Node* nc) const;
 	void beginUpdate(VNode* node,const std::vector<ecf::Aspect::Type>& aspect,VNodeChange&);
-	bool endUpdate(VNode* node,const std::vector<ecf::Aspect::Type>& aspect,const VNodeChange&);
+	void endUpdate(VNode* node,const std::vector<ecf::Aspect::Type>& aspect,const VNodeChange&);
 
 	QString toolTip();
 
@@ -141,6 +142,8 @@ public:
 	bool isSuspended() const;
 	QColor  stateColour() const;
 	std::string strName() const;
+
+	VNode* find(const std::string& fullPath);
 
 	//Find a variable in the Defs. Both the user_variables and the
 	//server variables are searched.

@@ -132,12 +132,15 @@ private Q_SLOTS:
 	void refreshServerInfo();
 	void slotNodeChanged(const Node* n, const std::vector<ecf::Aspect::Type>& a);
 	void slotDefsChanged(const std::vector<ecf::Aspect::Type>& a);
+	void slotNodeDeleted(const std::string& fullPath);
+	void slotDefsDeleted();
 
 private:
 	//Begin and end the initialisation by connecting to the server and syncing.
 	void load();
 	void loadFinished();
 	void loadFailed(const std::string& errMsg);
+	void rescanTree();
 	void connectionLost(const std::string& errMsg);
 	void connectionGained();
 
@@ -249,6 +252,8 @@ public:
 Q_SIGNALS:
 	void nodeChanged(const Node*, const std::vector<ecf::Aspect::Type>&);
 	void defsChanged(const std::vector<ecf::Aspect::Type>&);
+	void nodeDeleted(const std::string&);
+	void defsDeleted();
 	void failed(std::string message);
 
 protected:
@@ -267,6 +272,9 @@ private:
 	NameValueVec vars_;
 	std::string nodePath_;
 	bool attached_;
+
+	bool defsToDelete_;
+	bool nodeToDelete_;
 };
 
 // -------------------------------------------------------------------------
