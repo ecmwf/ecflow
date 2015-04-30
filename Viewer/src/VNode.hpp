@@ -30,7 +30,7 @@ class VNodeChange
 public:
 	VNodeChange() : cachedAttrNum_(-1), attrNum_(-1), cachedNodeNum_(-1),
 					nodeNum_(-1), nodeAddAt_(-1), nodeRemoveAt_(-1),
-					ignore_(false), reset_(false) {}
+					ignore_(false), rescan_(false) {}
 	int cachedAttrNum_;
 	int attrNum_;
 	int cachedNodeNum_;
@@ -38,7 +38,7 @@ public:
 	int nodeAddAt_;
 	int nodeRemoveAt_;
 	bool ignore_;
-	bool reset_;
+	bool rescan_;
 };
 
 //Describes the major changes during an update

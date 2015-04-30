@@ -260,46 +260,6 @@ QVariant TreeNodeModel::serverData(const QModelIndex& index,int role) const
 		if(ServerHandler *server=indexToRealServer(index))
 		{
 			return server->vRoot()->toolTip();
-
-			/*QString txt="<b>Server</b>: " + QString::fromStdString(server->name()) + "<br>";
-			txt+="<b>Host</b>: " + QString::fromStdString(server->host());
-			txt+=" <b>Port</b>: " + QString::fromStdString(server->port()) + "<br>";
-
-			ConnectState* st=server->connectState();
-
-			if(server->activity() == ServerHandler::LoadActivity)
-			{
-				txt+="<b>Server is being loaded!</b><br>";
-				txt+="<b>Started</b>: " + VFileInfo::formatDateAgo(st->startTime()) + "<br>";
-			}
-			else
-			{
-				if(st->state() == ConnectState::Normal)
-				{
-					txt+="<b>Server status</b>: " + VSState::toName(server) + "<br>";
-					txt+="<b>Status</b>: " + VNState::toName(server) + "<br>";
-					txt+="<b>Total number of nodes</b>: " +  QString::number(server->vRoot()->totalNum());
-				}
-				else if(st->state() == ConnectState::Lost)
-				{
-					txt+="<b>Connection to server lost!</b><br>";
-					txt+="<b>Last connection attempt</b>: " + VFileInfo::formatDateAgo(st->startTime()) + "<br>";
-					txt+="<b>Error message</b>:<br>" +  QString::fromStdString(st->errorMessage());
-				}
-				else if(st->state() == ConnectState::InitFailed)
-				{
-					txt+="<b>Failed to connect to server!</b><br>";
-					txt+="<b>Last connection attempt</b>: " + VFileInfo::formatDateAgo(st->startTime()) + "<br>";
-					txt+="<b>Error message</b>:<br>" +  QString::fromStdString(st->errorMessage());
-				}
-				else if(st->state() == ConnectState::Disconnected)
-				{
-					txt+="<b>Server is disconnected!</b><br>";
-					txt+="<b>Last connection attempt</b>: " + VFileInfo::formatDateAgo(st->startTime()) + "<br>";
-					txt+="<b>Error message</b>:<br>" +  QString::fromStdString(st->errorMessage());
-				}
-			}
-			return txt;*/
 		}
 	}
 
@@ -318,7 +278,7 @@ QVariant TreeNodeModel::nodeData(const QModelIndex& index, int role) const
 	{
 		switch(index.column())
 		{
-		case 0:	 return QString::fromStdString(node->name());
+		case 0:	 return vnode->name();
 		case 1: return VNState::toName(node);
 		case 2: return QString::fromStdString(node->absNodePath()); //QString().sprintf("%08p", node); //QString::fromStdString(node->absNodePath());
 		default: return QVariant();

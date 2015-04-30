@@ -567,7 +567,7 @@ void VServer::beginUpdate(VNode* node,const std::vector<ecf::Aspect::Type>& aspe
 		//just ignore this update!!
 		if(!node->isAttrNumInitialised())
 		{
-			change.ignore_=1;
+			change.ignore_=true;
 		}
 		//Otherwise we just register the number of attributes before and after the update
 		else
@@ -591,7 +591,7 @@ void VServer::beginUpdate(VNode* node,const std::vector<ecf::Aspect::Type>& aspe
 	//---------------------------------------------------------------------------------
 	else if(nodeNumCh)
 	{
-		change.ignore_=1;
+		change.rescan_=true;
 	}
 
 	//In any other cases it is just a simple update (value or status changed)

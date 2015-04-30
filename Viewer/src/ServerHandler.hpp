@@ -130,7 +130,7 @@ private Q_SLOTS:
 	void errorMessage(std::string message); // invoked when an error message is received
 	//void queryFinished(VReply_ptr);  // invoked when a reply is received from from the server/thread
 	void refreshServerInfo();
-	void slotNodeChanged(const Node* n, const std::vector<ecf::Aspect::Type>& a);
+	void slotNodeChanged(const Node* n, const std::vector<ecf::Aspect::Type>& a,bool);
 	void slotDefsChanged(const std::vector<ecf::Aspect::Type>& a);
 	void slotNodeDeleted(const std::string& fullPath);
 	void slotDefsDeleted();
@@ -250,7 +250,7 @@ public:
 	void detach();
 
 Q_SIGNALS:
-	void nodeChanged(const Node*, const std::vector<ecf::Aspect::Type>&);
+	void nodeChanged(const Node*, const std::vector<ecf::Aspect::Type>&,bool);
 	void defsChanged(const std::vector<ecf::Aspect::Type>&);
 	void nodeDeleted(const std::string&);
 	void defsDeleted();

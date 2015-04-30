@@ -98,8 +98,8 @@ ServerHandler::ServerHandler(const std::string& name,const std::string& host, co
 
 	//The ServerComThread is observing the actual server and its nodes. When there is a change it
 	//emits a signal to notify the ServerHandler about it.
-	connect(comThread,SIGNAL(nodeChanged(const Node*, const std::vector<ecf::Aspect::Type>&)),
-					 this,SLOT(slotNodeChanged(const Node*, const std::vector<ecf::Aspect::Type>&)));
+	connect(comThread,SIGNAL(nodeChanged(const Node*, const std::vector<ecf::Aspect::Type>&,bool)),
+					 this,SLOT(slotNodeChanged(const Node*, const std::vector<ecf::Aspect::Type>&,bool)));
 
 	connect(comThread,SIGNAL(defsChanged(const std::vector<ecf::Aspect::Type>&)),
 				     this,SLOT(slotDefsChanged(const std::vector<ecf::Aspect::Type>&)));
@@ -693,7 +693,7 @@ std::string ServerHandler::resolveServerCommand(const std::string &name)
 //======================================================================================
 
 //This slot is called when a node changes.
-void ServerHandler::slotNodeChanged(const Node* nc, const std::vector<ecf::Aspect::Type>& aspect)
+void ServerHandler::slotNodeChanged(const Node* nc, const std::vector<ecf::Aspect::Type>& aspect, bool deleteRequested)
 {
 	VNode* vn=vRoot_->toVNode(nc);
 
@@ -711,6 +711,14 @@ void ServerHandler::slotNodeChanged(const Node* nc, const std::vector<ecf::Aspec
 	if(change.ignore_)
 	{
 		return;
+	}
+	//A rescan is needed
+	else if(change.rescan_)
+	{
+		//If a delete has already been requested during this update the
+		//tree rescan/reset has already been scheduled.
+		if(!deleteRequested)
+			rescanTree();
 	}
 	//Otherwise continue with the update
 	else
@@ -883,6 +891,17 @@ void ServerHandler::clientTaskFinished(VTask_ptr task,const ServerReply& serverR
 			}
 			break;
 		}
+		case VTask::SyncTask:
+		{
+			//full_sync==true : large changes, no notification through the observers
+			//full_sync==false : incremental changes, notification through the observers
+			if(serverReply.full_sync())
+			{
+				rescanTree();
+			}
+			break;
+		}
+
 		case VTask::LoadTask:
 		{
 			//If not yet connected but the sync task was successful
@@ -915,14 +934,21 @@ void ServerHandler::clientTaskFinished(VTask_ptr task,const ServerReply& serverR
 		}
 		case VTask::ScriptPreprocTask:
 		case VTask::ScriptEditTask:
-		case VTask::ScriptSubmitTask:
 		{
 			task->reply()->text(serverReply.get_string());
 			task->status(VTask::FINISHED);
 			break;
 		}
+		case VTask::ScriptSubmitTask:
+		{
+			task->reply()->text(serverReply.get_string());
+			task->status(VTask::FINISHED);
 
-
+			//Submitting the task was successful - we should now get updates from the server
+			UserMessage::message(UserMessage::DBG, false, std::string("Send command to server"));
+			comQueue_->addNewsTask();
+			break;
+		}
 		default:
 			break;
 
@@ -1030,7 +1056,8 @@ void ServerHandler::reset()
 	vRoot_->clear();
 
 	//Empty and stop the queue. We need to call it here because it has to
-	//wait for the thread to finish!!!
+	//wait for the thread to finish!!! So it blocks the program until the thread
+	//is finished!!!!
 	comQueue_->stop();
 
 	//Reset client handle and defs as well. This does not require
@@ -1662,7 +1689,9 @@ void ServerComThread::update(const Node* node, const std::vector<ecf::Aspect::Ty
 	for(std::vector<ecf::Aspect::Type>::const_iterator it=types.begin(); it != types.end(); it++)
 		UserMessage::message(UserMessage::DBG, false, std::string(" aspect: ") + boost::lexical_cast<std::string>(*it));
 
-	Q_EMIT nodeChanged(node,types);
+	bool deleteRequested=(defsToDelete_ || nodeToDelete_);
+
+	Q_EMIT nodeChanged(node,types,deleteRequested);
 }
 
 
