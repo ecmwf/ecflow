@@ -718,6 +718,8 @@ void NodePathWidget::notifyBeginNodeChange(const VNode* node, const std::vector<
 	//Check if there is data in inf0
 	if(info_.get() && info_->isNode())
 	{
+		//TODO: MAKE IT SAFE!!!!
+
 		//State changed
 		if(std::find(aspect.begin(),aspect.end(),ecf::Aspect::STATE) != aspect.end() ||
 		   std::find(aspect.begin(),aspect.end(),ecf::Aspect::SUSPENDED) != aspect.end())
@@ -756,8 +758,27 @@ void NodePathWidget::notifyBeginNodeChange(const VNode* node, const std::vector<
 }
 
 
-void NodePathWidget::notifyDefsChanged(ServerHandler* server,const std::vector<ecf::Aspect::Type>&)
+void NodePathWidget::notifyDefsChanged(ServerHandler* server,const std::vector<ecf::Aspect::Type>& aspect)
 {
+	if(!active_)
+		return;
+
+	//Check if there is data in inf0
+	if(info_.get() && info_->server()  && info_->server() == server)
+	{
+		//State changed
+		if(std::find(aspect.begin(),aspect.end(),ecf::Aspect::SERVER_STATE) != aspect.end())
+		{
+			ServerHandler* server;
+			if(nodeItems_.count() > 0)
+			{
+				nodeItems_.at(0)->reset(server->vRoot()->name(),
+						                server->vRoot()->stateColour());
+			}
+
+		}
+	}
+
 }
 
 

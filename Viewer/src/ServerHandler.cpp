@@ -98,8 +98,8 @@ ServerHandler::ServerHandler(const std::string& name,const std::string& host, co
 
 	//The ServerComThread is observing the actual server and its nodes. When there is a change it
 	//emits a signal to notify the ServerHandler about it.
-	connect(comThread,SIGNAL(nodeChanged(const Node*, const std::vector<ecf::Aspect::Type>&,bool)),
-					 this,SLOT(slotNodeChanged(const Node*, const std::vector<ecf::Aspect::Type>&,bool)));
+	connect(comThread,SIGNAL(nodeChanged(const Node*, const std::vector<ecf::Aspect::Type>&)),
+					 this,SLOT(slotNodeChanged(const Node*, const std::vector<ecf::Aspect::Type>&)));
 
 	connect(comThread,SIGNAL(defsChanged(const std::vector<ecf::Aspect::Type>&)),
 				     this,SLOT(slotDefsChanged(const std::vector<ecf::Aspect::Type>&)));
@@ -693,8 +693,14 @@ std::string ServerHandler::resolveServerCommand(const std::string &name)
 //======================================================================================
 
 //This slot is called when a node changes.
-void ServerHandler::slotNodeChanged(const Node* nc, const std::vector<ecf::Aspect::Type>& aspect, bool deleteRequested)
+void ServerHandler::slotNodeChanged(const Node* nc, const std::vector<ecf::Aspect::Type>& aspect)
 {
+	UserMessage::message(UserMessage::DBG, false, std::string("ServerHandler::slotNodeChanged"));
+
+	UserMessage::message(UserMessage::DBG, false, std::string("Thread update - node: ") + nc->name());
+	for(std::vector<ecf::Aspect::Type>::const_iterator it=aspect.begin(); it != aspect.end(); it++)
+		UserMessage::message(UserMessage::DBG, false, std::string(" aspect: ") + boost::lexical_cast<std::string>(*it));
+
 	VNode* vn=vRoot_->toVNode(nc);
 
 	//We must have this VNode
@@ -715,10 +721,7 @@ void ServerHandler::slotNodeChanged(const Node* nc, const std::vector<ecf::Aspec
 	//A rescan is needed
 	else if(change.rescan_)
 	{
-		//If a delete has already been requested during this update the
-		//tree rescan/reset has already been scheduled.
-		if(!deleteRequested)
-			rescanTree();
+		rescanTree();
 	}
 	//Otherwise continue with the update
 	else
@@ -737,12 +740,14 @@ void ServerHandler::slotNodeChanged(const Node* nc, const std::vector<ecf::Aspec
 //When this slot is called we are probably in the middle of an update.
 void ServerHandler::slotNodeDeleted(const std::string& fullPath)
 {
+	UserMessage::message(UserMessage::DBG, false, std::string("ServerHandler::slotNodeDeleted"));
+
 	if(VNode* vn=vRoot_->find(fullPath))
 	{
-		if(vn->hasAccessed())
-		{
-			rescanTree();
-		}
+		//if(vn->hasAccessed())
+		//{
+		rescanTree();
+		//}
 	}
 	else
 	{
@@ -1682,6 +1687,13 @@ void ServerComThread::run()
 
 void ServerComThread::update(const Node* node, const std::vector<ecf::Aspect::Type>& types)
 {
+	//If anything was requested to be deleted in the thread we ignore this notification,
+	//because the deletion will trigger a full rescan!!!
+	if(defsToDelete_ || nodeToDelete_)
+	{
+		return;
+	}
+
 	if(node==NULL)
 		return;
 
@@ -1689,9 +1701,7 @@ void ServerComThread::update(const Node* node, const std::vector<ecf::Aspect::Ty
 	for(std::vector<ecf::Aspect::Type>::const_iterator it=types.begin(); it != types.end(); it++)
 		UserMessage::message(UserMessage::DBG, false, std::string(" aspect: ") + boost::lexical_cast<std::string>(*it));
 
-	bool deleteRequested=(defsToDelete_ || nodeToDelete_);
-
-	Q_EMIT nodeChanged(node,types,deleteRequested);
+	Q_EMIT nodeChanged(node,types);
 }
 
 
