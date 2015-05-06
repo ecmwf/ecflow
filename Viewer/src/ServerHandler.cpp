@@ -20,6 +20,7 @@
 #include "ConnectState.hpp"
 #include "NodeObserver.hpp"
 #include "ServerObserver.hpp"
+#include "SuiteFilter.hpp"
 #include "UserMessage.hpp"
 #include "VNode.hpp"
 #include "VTaskObserver.hpp"
@@ -54,7 +55,10 @@ ServerHandler::ServerHandler(const std::string& name,const std::string& host, co
    refreshIntervalInSeconds_(60),
    readFromDisk_(true),
    activity_(NoActivity),
-   connectState_(new ConnectState())
+   connectState_(new ConnectState()),
+   suiteFilter_(new SuiteFilter()),
+   addNewSuites_(true),
+   suiteFilterType_(NoSuiteFilter)
 {
 	//Create longname
 	longName_=host_ + "@" + port_;
@@ -119,17 +123,14 @@ ServerHandler::ServerHandler(const std::string& name,const std::string& host, co
 	//-------------------------------------------------
 
 	//Indicate that we start an init (initial load)
-	activity_=LoadActivity;
+	//activity_=LoadActivity;
 
 	//Try to connect to the server and load the defs etc. This might fail!
-	load();
+	reset();
 
 	//We might not have been able to connect to the server. This is indicated by
 	//the value of connectedStatus_. Each object needs to be aware of it and
 	//do its tasks accordingly.
-
-	//Start the timer
-	resetRefreshTimer();
 }
 
 ServerHandler::~ServerHandler()
@@ -150,133 +151,11 @@ ServerHandler::~ServerHandler()
 
 	delete vRoot_;
 	delete connectState_;
+	delete suiteFilter_;
 
 	//The safest is to delete the client in the end
 	if(client_)
 		delete client_;
-}
-
-//Completely update the Client Invoker and the graphical tree
-
-void ServerHandler::load()
-{
-	//This method can only be called when:
-	// -the queue is not running
-	// -the timer is stopped
-	// -the tree is empty.
-	//The caller routine must ensure that these conditions are met
-
-	assert(comQueue_->active() == false);
-	assert(refreshTimer_.isActive() == false);
-	assert(vRoot_->totalNum() == 0);
-	assert(vRoot_->numOfChildren() == 0);
-
-	//The server must be disconnected or we have to be in a reset to continue
-	//if(activity_!= ResetActivity && connectState_ == Normal)
-	//	return;
-
-	//There are no observers at this point
-	//Notify the observers that the init has begun
-	//notifyServerObservers(&ServerObserver::notifyServerInitBegin);
-
-	//Clear the connect error text message
-	//connectError_.clear();
-
-	//Indicate that we start an init (initial load)
-	activity_=LoadActivity;
-
-	//Try to get the server version via the client. If it is successful
-	//we can be sure that we can connect to the server.
-	/*try
-	{
-		//Get the server version
-		std::string server_version;
-		client_->server_version();
-		server_version = client_->server_reply().get_string();
-
-		UserMessage::message(UserMessage::DBG, false,
-			       std::string("ecflow server version: ") + server_version);
-
-		//if (!server_version.empty()) return;
-	}
-
-	//The init failed
-	catch(std::exception& e)
-	{
-		connectState_->errorMessage(e.what());
-		UserMessage::message(UserMessage::DBG, false, std::string("failed to sync: ") + e.what());
-
-		//The init has failed
-		loadFailed();
-		return;
-	}*/
-
-	//If we are here we can be sure that we can connect to the server and get the defs. Instruct the queue
-	//to run the init task. It will eventually call initEnd() with the right argument!!
-
-	//NOTE: at this point the queue is not running but load will start it.
-	//While the queue is in load mode it does not accept tasks.
-	comQueue_->load();
-}
-
-//The load was sussessfull
-void ServerHandler::loadFinished()
-{
-	activity_=NoActivity;
-
-	//Set the connection state
-	connectState_->state(ConnectState::Normal);
-	broadcast(&ServerObserver::notifyServerConnectState);
-
-	//Set server host and port in defs. It is used to find the server of
-	//a given node in the viewer.
-	{
-		ServerDefsAccess defsAccess(this);  // will reliquish its resources on destruction
-
-		defs_ptr defs = defsAccess.defs();
-		if(defs != NULL)
-		{
-			ServerState& st=defs->set_server();
-			st.hostPort(std::make_pair(host_,port_));
-			st.add_or_update_user_variables("nameInViewer",name_);
-		}
-	}
-
-	//Create an object to inform the observers about the change
-	VServerChange change;
-
-	//Begin the full scan to get the tree. This call does not actually
-	//run the scan but counts how many suits will be available.
-	vRoot_->beginScan(change);
-
-	//Notify the observers that the scan has started
-	broadcast(&ServerObserver::notifyBeginServerScan,change);
-
-	//Finish full scan
-	vRoot_->endScan();
-
-	//Notify the observers that scan has ended
-	broadcast(&ServerObserver::notifyEndServerScan);
-
-	//Restart the timer
-	resetRefreshTimer();
-}
-
-//The load failed and we could not connect to the server, e.g. because the the server
-//may be down, or there is a network error, or the authorisation is missing.
-void ServerHandler::loadFailed(const std::string& errMsg)
-{
-	//This status is indicated by the connectStat_. Each object needs to be aware of it
-	//and do its tasks accordingly.
-
-	connectState_->state(ConnectState::Lost);
-	connectState_->errorMessage(errMsg);
-	activity_=NoActivity;
-
-	broadcast(&ServerObserver::notifyServerConnectState);
-
-	//Restart the timer
-	resetRefreshTimer();
 }
 
 void ServerHandler::stopRefreshTimer()
@@ -304,6 +183,11 @@ void ServerHandler::resetRefreshTimer()
 	}
 }
 
+void ServerHandler::setActivity(Activity ac)
+{
+	activity_=ac;
+	broadcast(&ServerObserver::notifyServerActivityChanged);
+}
 
 ServerHandler* ServerHandler::addServer(const std::string& name,const std::string& host, const std::string& port)
 {
@@ -324,7 +208,7 @@ void ServerHandler::removeServer(ServerHandler* server)
 
 SState::State ServerHandler::serverState()
 {
-	if(connectState_->state() != ConnectState::Normal || activity_== LoadActivity)
+	if(connectState_->state() != ConnectState::Normal || activity() == LoadActivity)
 		return SState::RUNNING;
 
 	ServerDefsAccess defsAccess(this);  // will reliquish its resources on destruction
@@ -339,7 +223,7 @@ SState::State ServerHandler::serverState()
 
 NState::State ServerHandler::state(bool& suspended)
 {
-	if(connectState_->state() != ConnectState::Normal || activity_== LoadActivity)
+	if(connectState_->state() != ConnectState::Normal || activity() == LoadActivity)
 		return NState::UNKNOWN;
 
 	suspended=false;
@@ -425,6 +309,7 @@ void ServerHandler::run(VTask_ptr task)
 	case VTask::ManualTask:
 		return manual(task);
 		break;
+	case VTask::HistoryTask:
 	case VTask::MessageTask:
 	case VTask::StatsTask:
 	case VTask::ScriptPreprocTask:
@@ -907,15 +792,16 @@ void ServerHandler::clientTaskFinished(VTask_ptr task,const ServerReply& serverR
 			break;
 		}
 
-		case VTask::LoadTask:
+		case VTask::ResetTask:
 		{
 			//If not yet connected but the sync task was successful
-			loadFinished();
+			resetFinished();
 			break;
 		}
 
 		case VTask::ScriptTask:
 		case VTask::ManualTask:
+		case VTask::HistoryTask:
 		{
 			task->reply()->text(serverReply.get_string());
 			task->status(VTask::FINISHED);
@@ -937,6 +823,7 @@ void ServerHandler::clientTaskFinished(VTask_ptr task,const ServerReply& serverR
 			task->status(VTask::FINISHED);
 			break;
 		}
+
 		case VTask::ScriptPreprocTask:
 		case VTask::ScriptEditTask:
 		{
@@ -972,9 +859,9 @@ void ServerHandler::clientTaskFailed(VTask_ptr task,const std::string& errMsg)
 	switch(task->type())
 	{
 		//The initialisation failed
-		case VTask::LoadTask:
+		case VTask::ResetTask:
 		{
-			loadFailed(errMsg);
+			resetFailed(errMsg);
 			break;
 		}
 		case VTask::NewsTask:
@@ -1067,7 +954,7 @@ void ServerHandler::reset()
 
 	//Reset client handle and defs as well. This does not require
 	//communications with the server.
-	client_->reset();
+	//client_->reset();
 
 	//Notify observers that the clear ended
 	broadcast(&ServerObserver::notifyEndServerClear);
@@ -1079,14 +966,143 @@ void ServerHandler::reset()
 	// Second part of reset: loading
 	//--------------------------------------
 
-	//We simply call load again
-	load();
+	//Indicate that we start an init (initial load)
+	setActivity(LoadActivity);
+
+	//NOTE: at this point the queue is not running but reset() will start it.
+	//While the queue is in reset mode it does not accept tasks.
+	comQueue_->reset();
+}
+/*
+void ServerHandler::load()
+{
+	//This method can only be called when:
+	// -the queue is not running
+	// -the timer is stopped
+	// -the tree is empty.
+	//The caller routine must ensure that these conditions are met
+
+	assert(comQueue_->active() == false);
+	assert(refreshTimer_.isActive() == false);
+	assert(vRoot_->totalNum() == 0);
+	assert(vRoot_->numOfChildren() == 0);
+
+	//The server must be disconnected or we have to be in a reset to continue
+	//if(activity_!= ResetActivity && connectState_ == Normal)
+	//	return;
+
+	//There are no observers at this point
+	//Notify the observers that the init has begun
+	//notifyServerObservers(&ServerObserver::notifyServerInitBegin);
+
+	//Clear the connect error text message
+	//connectError_.clear();
+
+	//Indicate that we start an init (initial load)
+	activity_=LoadActivity;
+
+	//Try to get the server version via the client. If it is successful
+	//we can be sure that we can connect to the server.
+	//try
+	//{
+	//	//Get the server version
+	//	std::string server_version;
+	//	client_->server_version();
+	//	server_version = client_->server_reply().get_string();
+
+	//	UserMessage::message(UserMessage::DBG, false,
+	//		       std::string("ecflow server version: ") + server_version);
+//
+	//	//if (!server_version.empty()) return;
+	//}
+
+	//The init failed
+	//catch(std::exception& e)
+	//{
+	//	connectState_->errorMessage(e.what());
+	//	UserMessage::message(UserMessage::DBG, false, std::string("failed to sync: ") + e.what());
+//
+	//	//The init has failed
+	//	loadFailed();
+	//	return;
+	//}
+
+	//If we are here we can be sure that we can connect to the server and get the defs. Instruct the queue
+	//to run the init task. It will eventually call initEnd() with the right argument!!
+
+	//NOTE: at this point the queue is not running but load will start it.
+	//While the queue is in load mode it does not accept tasks.
+	comQueue_->reset();
+}
+*/
+
+//The reset was successful
+void ServerHandler::resetFinished()
+{
+	setActivity(NoActivity);
+
+	//Set the connection state
+	connectState_->state(ConnectState::Normal);
+	broadcast(&ServerObserver::notifyServerConnectState);
+
+	//Set server host and port in defs. It is used to find the server of
+	//a given node in the viewer.
+	{
+		ServerDefsAccess defsAccess(this);  // will reliquish its resources on destruction
+
+		defs_ptr defs = defsAccess.defs();
+		if(defs != NULL)
+		{
+			ServerState& st=defs->set_server();
+			st.hostPort(std::make_pair(host_,port_));
+			st.add_or_update_user_variables("nameInViewer",name_);
+		}
+	}
+
+
+	updateSuites();
+
+	//Create an object to inform the observers about the change
+	VServerChange change;
+
+	//Begin the full scan to get the tree. This call does not actually
+	//run the scan but counts how many suits will be available.
+	vRoot_->beginScan(change);
+
+	//Notify the observers that the scan has started
+	broadcast(&ServerObserver::notifyBeginServerScan,change);
+
+	//Finish full scan
+	vRoot_->endScan();
+
+	//Notify the observers that scan has ended
+	broadcast(&ServerObserver::notifyEndServerScan);
+
+	//Restart the timer
+	resetRefreshTimer();
+}
+
+//The reset failed and we could not connect to the server, e.g. because the the server
+//may be down, or there is a network error, or the authorisation is missing.
+void ServerHandler::resetFailed(const std::string& errMsg)
+{
+	//This status is indicated by the connectStat_. Each object needs to be aware of it
+	//and do its tasks accordingly.
+
+	connectState_->state(ConnectState::Lost);
+	connectState_->errorMessage(errMsg);
+	setActivity(NoActivity);
+
+	broadcast(&ServerObserver::notifyServerConnectState);
+
+	//Restart the timer
+	resetRefreshTimer();
 }
 
 void ServerHandler::rescanTree()
 {
 	//---------------------------------
-	// First part of reset: clearing
+	// First part of rescan: clearing
 	//---------------------------------
 
 	//Stop the timer
@@ -1109,7 +1125,7 @@ void ServerHandler::rescanTree()
 	//the root node)
 
 	//--------------------------------------
-	// Second part of reset: loading
+	// Second part of rescan: loading
 	//--------------------------------------
 
 	//Create an object to inform the observers about the change
@@ -1135,77 +1151,112 @@ void ServerHandler::rescanTree()
 	resetRefreshTimer();
 }
 
+//====================================================
+// Suite filter
+//====================================================
 
-
-/*
-void ServerHandler::commandSent(){
-	UserMessage::message(UserMessage::DBG, false, std::string("ServerHandler::commandSent"));
-
-	// which type of command was sent? What we do now will depend on that.
-
-	switch (comThread()->commandType())
+void ServerHandler::updateSuiteFilter(SuiteFilter* sf)
+{
+	if(suiteFilter_->update(sf))
 	{
-		case ServerComThread::COMMAND:
-		{
-			// a command was sent - we should now check whether there have been
-			// any updates on the server (there should have been, because we
-			// just did something!)
-
-			UserMessage::message(UserMessage::DBG, false, std::string("Send command to server"));
-			comThread()->sendCommand(this, client_, ServerComThread::NEWS);
-			break;
-		}
-
-		case  ServerComThread::NEWS:
-		{
-			// we've just asked the server if anything has changed - has it?
-
-			switch (client_->server_reply().get_news())
-			{
-				case ServerReply::NO_NEWS:
-				{
-					// no news, nothing to do
-					UserMessage::message(UserMessage::DBG, false, std::string("No news from server"));
-					setUpdatingStatus(false);  // finished updating
-					break;
-				}
-
-				case ServerReply::NEWS:
-				{
-					// yes, something's changed - synchronise with the server
-
-					UserMessage::message(UserMessage::DBG, false, std::string("News from server - send sync command"));
-					comThread()->sendCommand(this, client_, ServerComThread::SYNC);
-					break;
-				}
-
-				default:
-				{
-					break;
-				}
-			}
-
-			break;
-		}
-		
-		case ServerComThread::SYNC:
-		{
-			// yes, something's changed - synchronise with the server
-
-			UserMessage::message(UserMessage::DBG, false, std::string("We've synced"));
-			setUpdatingStatus(false);  // finished updating
-			break;
-		}
-
-		default:
-		{
-			break;
-		}
-
+		reset();
 	}
 
 }
+void ServerHandler::updateSuites()
+{
+   if(addNewSuites_)
+   {
+	   // SUP-398 // temporary add higher load on the server
+	   switch(suiteFilterType_)
+	   {
+	   case NoSuiteFilter:
+	   case LocalSuiteFilter:
+	   	   {
+	   		   ServerDefsAccess defsAccess(this);  // will reliquish its resources on destruction
+	   		   defs_ptr defs = defsAccess.defs();
+	   		   if(defs != NULL)
+	   		   {
+	   			   const std::vector<suite_ptr>& suites_vec = defs->suiteVec();
+	   			   suites_.clear();
+	   			   for(size_t i = 0; i < suites_vec.size(); ++i)
+	   			   {
+	   				   suites_.push_back(suites_vec[i]->name());
+	   			   }
+	   		   }
+	   		   else
+	   		   {
+	   			   suites_.clear();
+	   		   }
+	   	   }
+
+	   	   suiteFilter_->current(suites_);
+
+	   	   break;
+
+	   case HandlerSuiteFilter:
+	   	   {
+	   		   //comQueue_->addSuiteUpdateTask();
+
+
+         }
+	   	   break;
+	   default:
+		   break;
+
+
+      }
+
+   }
+}
+
+/*
+void ehost::suites( int which, std::vector<std::string>& l )
+
+{
+   try {
+      switch ( which ) {
+         case SUITES_LIST:
+            client_.suites();
+            l = client_.server_reply().get_string_vec();
+            break;
+         case SUITES_MINE:
+            l = suites_;
+            break;
+         case SUITES_REG:
+            gui::message("%s: registering to suites", name());
+            suites_ = l;
+            try {
+               if (l.empty()) {
+                  try { client_.ch1_drop(); }
+                  catch ( std::exception &e ) {
+                     std::cout << "# no drop possible: " << e.what() << "\n";
+                  }
+
+                  // reset handle to zero , and clear the defs
+                  client_.reset();
+               }
+               client_.ch_register(new_suites_, suites_);
+               status();
+               redraw();
+            }
+            catch ( std::exception &e ) {
+               gui::error("host::suites-reg-error: %s", e.what());
+            }
+            break;
+         default:
+            gui::message("%s: suites, what?");
+            break;
+      }
+   }
+   catch ( std::exception &e ) {
+      if (client_.defs().get()) {
+         gui::error("host::suites-error: %s", e.what());
+      }
+   }
+}
 */
+
 
 //--------------------------------------------------------------
 //
@@ -1263,7 +1314,7 @@ ServerComQueue::ServerComQueue(ServerHandler *server,ClientInvoker *client, Serv
 	comThread_(comThread),
 	wait_(false),
 	active_(false),
-	load_(false)
+	reset_(false)
 {
 	timer_=new QTimer(this);
 	timer_->setInterval(2000);
@@ -1298,13 +1349,13 @@ ServerComQueue::~ServerComQueue()
 }
 
 //This is a special mode to reload the whole ClientInvoker
-void ServerComQueue::load()
+void ServerComQueue::reset()
 {
-	if(load_)
+	if(reset_)
 		return;
 
 	//Set the load status
-	load_=true;
+	reset_=true;
 
 	//The queue must be stopped
 	stop();
@@ -1313,19 +1364,19 @@ void ServerComQueue::load()
 	assert(comThread_->isRunning() == false);
 
 	//We send and init command straight away to the thread!!
-	VTask_ptr task=VTask::create(VTask::LoadTask);
+	VTask_ptr task=VTask::create(VTask::ResetTask);
 	current_=task;
 	comThread_->task(current_);
 
 	//The queue is still stopped!!!
 }
 
-void ServerComQueue::endLoad()
+void ServerComQueue::endReset()
 {
-	if(load_)
+	if(reset_)
 	{
 		//Set the load status
-		load_=false;
+		reset_=false;
 
 		//We restart the queue
 		start();
@@ -1390,7 +1441,7 @@ void ServerComQueue::addTask(VTask_ptr task)
 	if(!task)
 		return;
 
-	if(!active_ || (task && task->type() ==VTask::LoadTask) )
+	if(!active_ || (task && task->type() ==VTask::ResetTask) )
 		return;
 
 	tasks_.push_back(task);
@@ -1471,7 +1522,7 @@ void ServerComQueue::slotRun()
 void ServerComQueue::slotTaskFinished()
 {
 	//We need to leave the load mode
-	endLoad();
+	endReset();
 
 	//If the current task is empty there must have been an error that was
 	//handled by the sloTaskFailed slot.
@@ -1492,7 +1543,7 @@ void ServerComQueue::slotTaskFinished()
 void ServerComQueue::slotTaskFailed(std::string msg)
 {
 	//We need to leave the load mode
-	endLoad();
+	endReset();
 
 	//We notify the server that the task has failed
 	server_->clientTaskFailed(current_,msg);
@@ -1517,7 +1568,9 @@ ServerComThread::ServerComThread(ServerHandler *server, ClientInvoker *ci) :
 		taskType_(VTask::NoTask),
 		attached_(false),
 		nodeToDelete_(false),
-		defsToDelete_(false)
+		defsToDelete_(false),
+		hasSuiteFilter_(false),
+		autoAddNewSuites_(false)
 {
 }
 
@@ -1548,6 +1601,11 @@ void ServerComThread::task(VTask_ptr task)
 		nodePath_.clear();
 		taskType_=task->type();
 		nodePath_=task->targetPath();
+
+		//Suite filter
+		hasSuiteFilter_=server_->suiteFilter()->isEnabled();
+		autoAddNewSuites_=server_->suiteFilter()->autoAddNewSuites();
+		suites_=server_->suiteFilter()->filter();
 
 		//Start the thread execution
 		start();
@@ -1596,9 +1654,12 @@ void ServerComThread::run()
 				break;
 			}
 
-			case VTask::LoadTask:
+			//This is called during reset
+			case VTask::ResetTask:
 			{
-				{
+				reset();
+
+				/*{
 					//sleep(15);
 					ServerDefsAccess defsAccess(server_);
 					UserMessage::message(UserMessage::DBG, false, std::string("    INIT SYNC"));
@@ -1607,7 +1668,7 @@ void ServerComThread::run()
 				}
 
 				//Attach the observers to the server
-				attach();
+				attach();*/
 				break;
 			}
 
@@ -1622,7 +1683,7 @@ void ServerComThread::run()
 
 			case VTask::MessageTask:
 			{
-				UserMessage::message(UserMessage::DBG, false, std::string("    HISTORY"));
+				UserMessage::message(UserMessage::DBG, false, std::string("    EDIT HISTORY"));
 				ci_->edit_history(nodePath_);
 				break;
 			}
@@ -1631,6 +1692,13 @@ void ServerComThread::run()
 			{
 				UserMessage::message(UserMessage::DBG, false, std::string("    STATS"));
 				ci_->stats();
+				break;
+			}
+
+			case VTask::HistoryTask:
+			{
+				UserMessage::message(UserMessage::DBG, false, std::string("    HISTORY"));
+				ci_->getLog(100);
 				break;
 			}
 
@@ -1652,10 +1720,13 @@ void ServerComThread::run()
 				break;
 
 
-			default:
-			{
+			case VTask::SuiteRegisterTask:
+				updateSuites();
+				break;
 
-			}
+
+			default:
+				break;
 		}
 	}
 
@@ -1684,6 +1755,102 @@ void ServerComThread::run()
 	//Can we use it? We are in the thread!!!
 	//UserMessage::message(UserMessage::DBG, false, std::string("  ServerComThread::run finished"));
 }
+
+
+void ServerComThread::reset()
+{
+	//sleep(15);
+	{
+		ServerDefsAccess defsAccess(server_);
+
+		/// registering with empty set would lead
+		//      to retrieve all server content,
+		//      opposite of expected result
+
+		//If we have already set a handle we
+		//need to drop it.
+		if(ci_->client_handle() > 0)
+		{
+			try
+			{
+				ci_->ch1_drop();
+			}
+			catch (std::exception &e)
+			{
+						std::cout << "# no drop possible: " << e.what() << "\n";
+			}
+		}
+
+		if(hasSuiteFilter_)
+		{
+			//reset client handle + defs
+			ci_->reset();
+
+			if(!suites_.empty())
+			{
+				UserMessage::message(UserMessage::DBG, false, std::string("    REGISTER SUITES"));
+
+				//This will add a new handle to the client
+				ci_->ch_register(autoAddNewSuites_, suites_);
+			}
+		}
+		else
+		{
+			// reset client handle + defs
+			ci_->reset();
+		}
+
+		UserMessage::message(UserMessage::DBG, false, std::string("    INIT SYNC"));
+		ci_->sync_local();
+		UserMessage::message(UserMessage::DBG, false, std::string("    INIT SYNC FINISHED"));
+	}
+
+	//Attach the observers to the server
+	attach();
+}
+
+
+void ServerComThread::updateSuites()
+{
+	if(!hasSuiteFilter_)
+	{
+		try
+		{
+			ci_->ch1_drop();
+		}
+		catch ( std::exception& e )
+		{
+			//gui::message("host::update-reg-suite-error: %s", e.what());
+		}
+
+		//reset client handle + defs
+		ci_->reset();
+
+		ci_->sync_local();
+	}
+
+	else if(hasSuiteFilter_)
+	{
+		try
+		{
+			ci_->ch_suites();
+		}
+	catch ( std::exception& e )
+	{
+		//gui::message("host::update-reg-suite-error: %s", e.what());
+	}
+	const std::vector<std::pair<unsigned int, std::vector<std::string> > >& vct = ci_->server_reply().get_client_handle_suites();
+	for(size_t i = 0; i < vct.size(); ++i)
+	{
+		if(vct[i].first == (unsigned int) ci_->client_handle())
+	    {
+	       suites_ = vct[i].second;
+	       break;
+	    }
+	}
+	}
+}
+
 
 void ServerComThread::update(const Node* node, const std::vector<ecf::Aspect::Type>& types)
 {

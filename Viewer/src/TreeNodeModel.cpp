@@ -138,7 +138,7 @@ QVariant TreeNodeModel::data( const QModelIndex& index, int role ) const
 	if( !index.isValid() ||
 	   (role != Qt::DisplayRole && role != Qt::ToolTipRole && role != Qt::BackgroundRole &&
 	    role != FilterRole && role != IconRole && role != ServerRole && role != NodeNumRole &&
-	    role != InfoRole))
+	    role != InfoRole && role != LoadRole))
     {
 		return QVariant();
 	}
@@ -159,7 +159,7 @@ QVariant TreeNodeModel::data( const QModelIndex& index, int role ) const
 	}
 
 	//We only continue for the relevant roles for nodes and attributes
-	if(role == NodeNumRole || role == InfoRole)
+	if(role == NodeNumRole || role == InfoRole || role == LoadRole)
 	{
 		return QVariant();
 	}
@@ -236,6 +236,16 @@ QVariant TreeNodeModel::serverData(const QModelIndex& index,int role) const
 				return "";
 			}
 		}
+	}
+
+	//The number of nodes the server has
+	else if(role == LoadRole)
+	{
+		if(ServerHandler *server=indexToRealServer(index))
+		{
+			return (server->activity() == ServerHandler::LoadActivity);
+		}
+		return QVariant();
 	}
 
 	//icon decoration

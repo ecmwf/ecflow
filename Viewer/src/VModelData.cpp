@@ -145,6 +145,11 @@ void VTreeServer::notifyServerConnectState(ServerHandler* server)
 	Q_EMIT dataChanged(this);
 }
 
+void VTreeServer::notifyServerActivityChanged(ServerHandler* server)
+{
+	Q_EMIT dataChanged(this);
+}
+
 //--------------------------------------------------
 // NodeObserver methods
 //--------------------------------------------------

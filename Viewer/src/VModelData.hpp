@@ -86,6 +86,7 @@ public:
 	 void notifyBeginServerScan(ServerHandler* server,const VServerChange&);
 	 void notifyEndServerScan(ServerHandler* server);
 	 void notifyServerConnectState(ServerHandler* server);
+	 void notifyServerActivityChanged(ServerHandler* server);
 
 	 //From NodeObserver
 	 void notifyBeginNodeChange(const VNode*, const std::vector<ecf::Aspect::Type>&,const VNodeChange&);

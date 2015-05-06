@@ -72,5 +72,12 @@ public:
 		 InfoProvider(owner,VTask::ScriptTask,"ECF_SCRIPT") {}
 };
 
+class HistoryProvider : public InfoProvider
+{
+public:
+	 HistoryProvider(InfoPresenter* owner) :
+		 InfoProvider(owner,VTask::HistoryTask) {}
+};
+
 
 #endif

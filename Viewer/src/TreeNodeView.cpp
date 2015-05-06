@@ -15,6 +15,7 @@
 #include <QScrollBar>
 
 #include "ActionHandler.hpp"
+#include "Animation.hpp"
 #include "ExpandState.hpp"
 #include "NodeFilterModel.hpp"
 #include "TreeNodeViewDelegate.hpp"
@@ -25,7 +26,6 @@ TreeNodeView::TreeNodeView(QWidget* parent) :
 {
 	expandState_=new ExpandState();
 	actionHandler_=new ActionHandler(this);
-
 
 	//Set the model.
 	setModel(model_);
@@ -198,6 +198,18 @@ void TreeNodeView::reload()
 	//model_->reload();
 	//expandAll();
 }
+
+void TreeNodeView::slotRepaint(Animation* an)
+{
+	if(!an)
+		return;
+
+	Q_FOREACH(QModelIndex idx,an->targets())
+	{
+		update(idx);
+	}
+}
+
 
 //====================================================
 // Expand state management

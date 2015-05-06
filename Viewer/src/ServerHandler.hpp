@@ -36,6 +36,7 @@ class ServerHandler;
 class ServerComQueue;
 class ServerComThread;
 class ServerObserver;
+class SuiteFilter;
 class VNodeChange;
 class VServer;
 class VServerChange;
@@ -49,6 +50,7 @@ class ServerHandler : public QObject
   
 public:
 	enum Activity {NoActivity,LoadActivity};
+	enum SuiteFilterType {NoSuiteFilter,LocalSuiteFilter,HandlerSuiteFilter};
 
 	const std::string& name() const {return name_;}
 	const std::string& host() const {return host_;}
@@ -59,6 +61,10 @@ public:
 	ConnectState* connectState() const {return connectState_;}
 	bool communicating() {return communicating_;}
 	bool readFromDisk() const {return readFromDisk_;}
+	const std::vector<std::string>& suites() {return suites_;}
+	SuiteFilter* suiteFilter() const {return suiteFilter_;}
+	void updateSuiteFilter(SuiteFilter*);
+
 
 	void connectServer();
 	void disconnectServer();
@@ -121,7 +127,13 @@ protected:
 	bool readFromDisk_;
 
     VServer* vRoot_;
-        
+
+    //The list of suites the server makes accessible
+    SuiteFilter* suiteFilter_;
+    std::vector<std::string> suites_;
+    bool addNewSuites_;
+    SuiteFilterType suiteFilterType_;
+
 	static std::vector<ServerHandler*> servers_;
 	static std::map<std::string, std::string> commands_;
 
@@ -137,12 +149,12 @@ private Q_SLOTS:
 
 private:
 	//Begin and end the initialisation by connecting to the server and syncing.
-	void load();
-	void loadFinished();
-	void loadFailed(const std::string& errMsg);
+	void resetFinished();
+	void resetFailed(const std::string& errMsg);
 	void rescanTree();
 	void connectionLost(const std::string& errMsg);
 	void connectionGained();
+	void updateSuites();
 
 	//Handle the update timer
 	void stopRefreshTimer();
@@ -154,6 +166,8 @@ private:
 	void manual(VTask_ptr req);
 
 	defs_ptr defs();
+
+	void setActivity(Activity activity);
 
 	typedef void (ServerObserver::*SoMethod)(ServerHandler*);
 	typedef void (ServerObserver::*SoMethodV1)(ServerHandler*,const VServerChange&);
@@ -199,7 +213,7 @@ public:
 	void addSyncTask();
 	void start();
 	void stop();
-	void load();
+	void reset();
 	bool active() const {return active_;}
 
 protected Q_SLOTS:
@@ -210,7 +224,7 @@ protected Q_SLOTS:
 	void slotTaskFailed(std::string);
 
 protected:
-	void endLoad();
+	void endReset();
 
 	ServerHandler *server_;
 	ClientInvoker* client_;
@@ -220,7 +234,7 @@ protected:
 	VTask_ptr current_;
 	bool wait_;
 	bool active_;
-	bool load_;
+	bool reset_;
 };
 
 // -------------------------------------------------------
@@ -258,6 +272,8 @@ Q_SIGNALS:
 
 protected:
 	void run();
+	void reset();
+	void updateSuites();
 
 private:
 	void attach(Node *node);
@@ -272,9 +288,11 @@ private:
 	NameValueVec vars_;
 	std::string nodePath_;
 	bool attached_;
-
 	bool defsToDelete_;
 	bool nodeToDelete_;
+	bool hasSuiteFilter_;;
+	std::vector<std::string> suites_;
+	bool autoAddNewSuites_;
 };
 
 // -------------------------------------------------------------------------

@@ -27,6 +27,7 @@ public:
 	virtual void notifyBeginServerScan(ServerHandler* server,const VServerChange&) {};
 	virtual void notifyEndServerScan(ServerHandler* server) {};
 	virtual void notifyServerConnectState(ServerHandler* server) {};
+	virtual void notifyServerActivityChanged(ServerHandler* server) {};
 };
 
 

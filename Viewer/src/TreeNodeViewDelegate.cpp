@@ -15,10 +15,15 @@
 #include <QPainter>
 
 #include "AbstractNodeModel.hpp"
+#include "Animation.hpp"
 #include "VParam.hpp"
 
-TreeNodeViewDelegate::TreeNodeViewDelegate(QWidget *parent) : QStyledItemDelegate(parent)
+TreeNodeViewDelegate::TreeNodeViewDelegate(QWidget *parent) :
+    QStyledItemDelegate(parent)
 {
+	//The parent mist be the view!!!
+	animation_=new AnimationHandler(parent);
+
 	hoverPen_=QPen(QColor(201,201,201));
 	hoverBrush_=QBrush(QColor(250,250,250,210));
 	selectPen_=QPen(QColor(125,162,206));
@@ -49,7 +54,11 @@ TreeNodeViewDelegate::TreeNodeViewDelegate(QWidget *parent) : QStyledItemDelegat
 	attrRenderers_["date"]=&TreeNodeViewDelegate::renderDate;
 	attrRenderers_["repeat"]=&TreeNodeViewDelegate::renderRepeat;
 	attrRenderers_["late"]=&TreeNodeViewDelegate::renderLate;
+}
 
+TreeNodeViewDelegate::~TreeNodeViewDelegate()
+{
+	delete animation_;
 }
 
 void TreeNodeViewDelegate::paint(QPainter *painter,const QStyleOptionViewItem &option,
@@ -145,9 +154,6 @@ QSize TreeNodeViewDelegate::sizeHint(const QStyleOptionViewItem & option, const 
 }
 
 
-//QRect TreeNodeViewDelegate::textRect()
-
-
 
 void TreeNodeViewDelegate::renderServer(QPainter *painter,const QModelIndex& index,
 		                                   const QStyleOptionViewItemV4& option,QString text) const
@@ -214,6 +220,33 @@ void TreeNodeViewDelegate::renderServer(QPainter *painter,const QModelIndex& ind
 		currentRight=infoRect.right();
 	}
 
+	//The load icon (optional)
+	QRect loadRect;
+	bool hasLoad=index.data(AbstractNodeModel::LoadRole).toBool();
+	Animation* an=0;
+
+	//Update load animation
+	if(hasLoad)
+	{
+		an=animation_->find(Animation::ServerLoadType,true);
+
+		loadRect = QRect(currentRight+fm.width('A'),
+						fillRect.top()+(fillRect.height()-an->scaledSize().height())/2,
+						an->scaledSize().width(),
+						an->scaledSize().height());
+
+		currentRight=loadRect.right();
+
+		//Add this index to the animations
+		an->addTarget(index);
+	}
+	//Stops load animation
+	else
+	{
+		if((an=animation_->find(Animation::ServerLoadType,false)) != NULL)
+			an->removeTarget(index);
+	}
+
 	//The node number (optional)
 	QRect numRect;
 	QString numTxt;
@@ -278,6 +311,16 @@ void TreeNodeViewDelegate::renderServer(QPainter *painter,const QModelIndex& ind
 		painter->setPen(Qt::black);
 		painter->setFont(numFont);
 		painter->drawText(numRect,Qt::AlignLeft | Qt::AlignVCenter,numTxt);
+	}
+
+	//Draw number
+	if(hasLoad)
+	{
+		Animation* an=animation_->find(Animation::ServerLoadType,false);
+		if(an)
+		{
+			painter->drawPixmap(loadRect,an->currentPixmap());
+		}
 	}
 
 	if(setClipRect)

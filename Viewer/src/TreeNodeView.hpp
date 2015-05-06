@@ -18,6 +18,7 @@
 #include "VInfo.hpp"
 
 class ActionHandler;
+class Animation;
 class ExpandNode;
 class ExpandState;
 class NodeFilterModel;
@@ -45,6 +46,7 @@ public Q_SLOTS:
 	void slotSetCurrent(VInfo_ptr);
 	void slotSaveExpand(const VNode* node);
 	void slotRestoreExpand(const VNode* node);
+	void slotRepaint(Animation*);
 
 Q_SIGNALS:
 	void selectionChanged(VInfo_ptr);

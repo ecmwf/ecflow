@@ -4,6 +4,7 @@ set(viewer_srcs
     AbstractNodeModel.cpp
     AbstractSearchLine.cpp
     ActionHandler.cpp
+    Animation.cpp
     CodeItemWidget.cpp
     ConnectState.cpp
     CommandDesignerWidget.cpp
@@ -16,6 +17,7 @@ set(viewer_srcs
     FileInfoLabel.cpp
     FilterWidget.cpp
     Highlighter.cpp
+    HistoryItemWidget.cpp
     InfoPanel.cpp 
     InfoPanelItem.cpp   
     InfoProvider.cpp
@@ -48,6 +50,9 @@ set(viewer_srcs
     ServerItem.cpp
     ServerList.cpp
     ServerListDialog.cpp
+    SuiteItemWidget.cpp
+    SuiteFilter.cpp
+    SuiteModel.cpp
     TabWidget.cpp 
     TableNodeModel.cpp
     TableNodeView.cpp
@@ -85,7 +90,8 @@ set(viewer_srcs
     VariableSearchLine.cpp
     VariableView.cpp
     VConfigLoader.cpp
-    WhyItemWidget.cpp)
+    WhyItemWidget.cpp
+    ZombieItemWidget.cpp)
 
 
 include(${QT_USE_FILE})
@@ -93,6 +99,7 @@ include(${QT_USE_FILE})
 QT4_WRAP_CPP(VIEWER_MOC AbstractNodeModel.hpp
 					    AbstractSearchLine.hpp
 					    ActionHandler.hpp
+                        Animation.hpp
                         CommandDesignerWidget.hpp
                         CustomCommandDialog.hpp
                         Dashboard.hpp
@@ -111,6 +118,7 @@ QT4_WRAP_CPP(VIEWER_MOC AbstractNodeModel.hpp
                         PlainTextSearchLine.hpp
                         ServerHandler.hpp
                         ServerListDialog.hpp
+                        SuiteItemWidget.hpp
                         TabWidget.hpp
                         TableNodeModel.hpp 
                         TableNodeView.hpp 
@@ -125,7 +133,8 @@ QT4_WRAP_CPP(VIEWER_MOC AbstractNodeModel.hpp
                         VariableModelData.hpp
                         VariableSearchLine.hpp
                         VFilter.hpp
-                        VModelData.hpp)
+                        VModelData.hpp
+                        ZombieItemWidget.hpp)
 
 QT4_ADD_RESOURCES (VIEWER_RES viewer.qrc)
 QT4_WRAP_UI       (VIEWER_FORMS_HEADERS CommandDesignerWidget.ui 
@@ -142,11 +151,11 @@ QT4_WRAP_UI       (VIEWER_FORMS_HEADERS CommandDesignerWidget.ui
             ServerAddDialog.ui
             ServerEditDialog.ui 
             ServerListDialog.ui
-            ServerWidget.ui 
+            SuiteItemWidget.ui
             TableNodeWidget.ui
             TextItemWidget.ui
             TreeNodeWidget.ui
-            TriggerItemWidget.ui
+            TriggerItemWidget.ui          
             VariableAddDialog.ui
             VariablePropDialog.ui
             VariableItemWidget.ui)

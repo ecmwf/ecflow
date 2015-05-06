@@ -29,7 +29,6 @@ class VTaskObserver;
 //This class defines a task that can be sent to the server to be executed.
 //A VTask can only be created through the static create methods that return back
 //a shared pointer of VTask. So VTask can only exist as a shared pointer.
-//VTask contains a
 
 class VTask;
 typedef boost::shared_ptr<VTask> VTask_ptr;
@@ -38,8 +37,8 @@ class VTask  : public boost::enable_shared_from_this<VTask>
 {
 public:
 	enum Type {NoTask,CommandTask,OverviewTask,WhyTask,ManualTask,ScriptTask,
-		       JobTask,MessageTask,OutputTask,StatsTask,NewsTask,SyncTask,LoadTask,
-			   ScriptEditTask,ScriptPreprocTask,ScriptSubmitTask};
+		       JobTask,MessageTask,OutputTask,StatsTask,NewsTask,SyncTask,ResetTask,SuiteRegisterTask,
+			   ScriptEditTask,ScriptPreprocTask,ScriptSubmitTask,HistoryTask};
 	enum Status {NOSTATUS,QUEUED,RUNNING,FINISHED,CANCELLED,ABORTED,REJECTED};
 
 	virtual ~VTask();

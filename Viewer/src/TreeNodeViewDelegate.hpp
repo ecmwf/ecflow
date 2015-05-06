@@ -18,10 +18,14 @@
 
 #include <string>
 
+class AnimationHandler;
+
 class TreeNodeViewDelegate : public QStyledItemDelegate
 {
 public:
 	TreeNodeViewDelegate(QWidget *parent=0);
+	~TreeNodeViewDelegate();
+
 	void paint(QPainter *painter,const QStyleOptionViewItem &option,
 		           const QModelIndex& index) const;
 	QSize sizeHint(const QStyleOptionViewItem & option, const QModelIndex & index ) const;
@@ -58,6 +62,7 @@ protected:
 	QPixmap errPix_;
 
 	QMap<QString,AttributeRendererProc> attrRenderers_;
+	AnimationHandler* animation_;
 };
 
 

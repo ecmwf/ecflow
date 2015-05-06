@@ -28,6 +28,7 @@
     <file alias="filesave.svg">../images/filesave.svg</file>
     <file alias="filter_decor.svg">../images/filter_decor.svg</file>
     <file alias="search_decor.svg">../images/search_decor.svg</file>
+    <file alias="spinning_wheel.gif">../images/spinning_wheel.gif</file>
     <file alias="warning.svg">../images/warning.svg</file>
   </qresource>
 </RCC>
