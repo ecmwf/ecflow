@@ -69,6 +69,6 @@ cmake $WK \
       -DCMAKE_BUILD_TYPE=Release \
       -DCMAKE_INSTALL_PREFIX=$INSTALL_PREFIX/$release.$major.$minor \
       -DCMAKE_PYTHON_INSTALL_TYPE=local 
-      #-DENABLE_GUI=ON
+      #-DENABLE_GUI=OFF
       #-DCMAKE_CXX_COMPILER=xlC_r 
       #-DCMAKE_PYTHON_INSTALL_PREFIX=$INSTALL_PREFIX/$release.$major.$minor/lib/python2.7/site-packages/ecflow
