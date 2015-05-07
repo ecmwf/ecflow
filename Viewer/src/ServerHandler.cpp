@@ -56,9 +56,7 @@ ServerHandler::ServerHandler(const std::string& name,const std::string& host, co
    readFromDisk_(true),
    activity_(NoActivity),
    connectState_(new ConnectState()),
-   suiteFilter_(new SuiteFilter()),
-   addNewSuites_(true),
-   suiteFilterType_(NoSuiteFilter)
+   suiteFilter_(new SuiteFilter())
 {
 	//Create longname
 	longName_=host_ + "@" + port_;
@@ -371,12 +369,11 @@ void ServerHandler::updateAll()
 	}
 }
 
-// see view/host.cc / ehost::update() for full code
 int ServerHandler::update()
 {
 	//We add and update task to the queue. On startup this function can be called
 	//before the comQueue_ was created so we need to check if it exists.
-	if(comQueue_ && comQueue_->active())
+	if(comQueue_)
 	{
 		comQueue_->addNewsTask();
 	}
@@ -606,6 +603,7 @@ void ServerHandler::slotNodeChanged(const Node* nc, const std::vector<ecf::Aspec
 	//A rescan is needed
 	else if(change.rescan_)
 	{
+		UserMessage::message(UserMessage::DBG, false, std::string("ServerHandler::slotNodeChanged  --> rescan"));
 		rescanTree();
 	}
 	//Otherwise continue with the update
@@ -622,13 +620,24 @@ void ServerHandler::slotNodeChanged(const Node* nc, const std::vector<ecf::Aspec
 	}
 }
 
-//When this slot is called we are probably in the middle of an update.
+//When this slot is called we must be in the middle of an update.
 void ServerHandler::slotNodeDeleted(const std::string& fullPath)
 {
 	UserMessage::message(UserMessage::DBG, false, std::string("ServerHandler::slotNodeDeleted"));
 
+	//There are significant changes. We will suspend the queue until the update finishes.
+	comQueue_->suspend();
+
+	//The  safest is to clear the tree. When the update is finished we will
+	//rescan the tree.
+	clearTree();
+
+	/*
 	if(VNode* vn=vRoot_->find(fullPath))
 	{
+		//The  safest is to clear the tree
+		clearTree();
+
 		//if(vn->hasAccessed())
 		//{
 		rescanTree();
@@ -637,7 +646,7 @@ void ServerHandler::slotNodeDeleted(const std::string& fullPath)
 	else
 	{
 		reset();
-	}
+	}*/
 }
 
 void ServerHandler::addNodeObserver(NodeObserver *obs)
@@ -682,11 +691,17 @@ void ServerHandler::slotDefsChanged(const std::vector<ecf::Aspect::Type>& a)
 		(*it)->notifyDefsChanged(this,a);
 }
 
-//When this slot is called we are probably in the middle of an update.
+//When this slot is called we must be in the middle of an update.
 void ServerHandler::slotDefsDeleted()
 {
 	UserMessage::message(UserMessage::DBG, false, std::string("ServerHandler::slotDefsDeleted"));
-	rescanTree();
+
+	//There are significant changes. We will suspend the queue until the update finishes.
+	comQueue_->suspend();
+
+	//The  safest is to clear the tree. When the update is finished we will
+	//rescan the tree.
+	clearTree();
 }
 
 void ServerHandler::addServerObserver(ServerObserver *obs)
@@ -725,7 +740,7 @@ void ServerHandler::broadcast(SoMethodV1 proc,const VServerChange& ch)
 
 void ServerHandler::clientTaskFinished(VTask_ptr task,const ServerReply& serverReply)
 {
-	UserMessage::message(UserMessage::DBG, false, std::string("ServerHandler::commandSent"));
+	UserMessage::message(UserMessage::DBG, false, std::string("ServerHandler::clientTaskFinished"));
 
 	//See which type of task finished. What we do now will depend on that.
 	switch(task->type())
@@ -736,7 +751,7 @@ void ServerHandler::clientTaskFinished(VTask_ptr task,const ServerReply& serverR
 			// any updates on the server (there should have been, because we
 			// just did something!)
 
-			UserMessage::message(UserMessage::DBG, false, std::string("Send command to server"));
+			UserMessage::message(UserMessage::DBG, false, std::string("COMMAND finished"));
 			comQueue_->addNewsTask();
 			break;
 		}
@@ -768,7 +783,7 @@ void ServerHandler::clientTaskFinished(VTask_ptr task,const ServerReply& serverR
 				{
 					// yes, a lot of things have changed - we need to reset!!!!!!
 
-					UserMessage::message(UserMessage::DBG, false, std::string("Do_FULL_SYNC from server"));
+					UserMessage::message(UserMessage::DBG, false, std::string("DO_FULL_SYNC from server"));
 					connectionGained();
 					reset();
 					break;
@@ -783,12 +798,21 @@ void ServerHandler::clientTaskFinished(VTask_ptr task,const ServerReply& serverR
 		}
 		case VTask::SyncTask:
 		{
-			//full_sync==true : large changes, no notification through the observers
-			//full_sync==false : incremental changes, notification through the observers
-			if(serverReply.full_sync())
+			UserMessage::message(UserMessage::DBG, false, std::string("SYNC finished"));
+
+			//This typically happens when a suite is added/removed
+			if(serverReply.full_sync() ||
+			  (comQueue_->isSuspended() && vRoot_->isEmpty()))
 			{
+				UserMessage::message(UserMessage::DBG, false, std::string("  --> Full SYNC requested --> rescanTree"));
+
+				//This will update the suites
 				rescanTree();
 			}
+
+			UserMessage::message(UserMessage::DBG, false, std::string("  --> Update suite filter after SYNC"));
+			comQueue_->addSuiteListTask();
+
 			break;
 		}
 
@@ -796,6 +820,7 @@ void ServerHandler::clientTaskFinished(VTask_ptr task,const ServerReply& serverR
 		{
 			//If not yet connected but the sync task was successful
 			resetFinished();
+			comQueue_->addSuiteListTask();
 			break;
 		}
 
@@ -841,6 +866,13 @@ void ServerHandler::clientTaskFinished(VTask_ptr task,const ServerReply& serverR
 			comQueue_->addNewsTask();
 			break;
 		}
+
+		case VTask::SuiteListTask:
+		{
+			updateSuiteFilter(serverReply.get_string_vec());
+			break;
+		}
+
 		default:
 			break;
 
@@ -855,9 +887,16 @@ void ServerHandler::clientTaskFailed(VTask_ptr task,const std::string& errMsg)
 {
 	//UserMessage::message(UserMessage::DBG, false, std::string("ServerHandler::commandSent"));
 
+	//TODO: suite filter  + ci_ observers
+
+
 	//See which type of task finished. What we do now will depend on that.
 	switch(task->type())
 	{
+		case VTask::SyncTask:
+			connectionLost(errMsg);
+			break;
+
 		//The initialisation failed
 		case VTask::ResetTask:
 		{
@@ -902,7 +941,7 @@ void ServerHandler::disconnectServer()
 		broadcast(&ServerObserver::notifyServerConnectState);
 
 		//Stop the queue
-		comQueue_->stop();
+		comQueue_->disable();
 
 		//Stop the timer
 		stopRefreshTimer();
@@ -914,13 +953,15 @@ void ServerHandler::connectServer()
 	if(connectState_->state() == ConnectState::Disconnected)
 	{
 		//Start the queue
-		comQueue_->start();
+		comQueue_->enable();
 
 		//Start the timer
 		resetRefreshTimer();
 
 		//Try to get the news
 		update();
+
+		//TODO: attach the observers!!!!
 	}
 }
 
@@ -947,10 +988,13 @@ void ServerHandler::reset()
 	//Clear vnode
 	vRoot_->clear();
 
+	//A safety measure
+	comQueue_->suspend();
+
 	//Empty and stop the queue. We need to call it here because it has to
 	//wait for the thread to finish!!! So it blocks the program until the thread
 	//is finished!!!!
-	comQueue_->stop();
+	//comQueue_->stop();
 
 	//Reset client handle and defs as well. This does not require
 	//communications with the server.
@@ -966,7 +1010,7 @@ void ServerHandler::reset()
 	// Second part of reset: loading
 	//--------------------------------------
 
-	//Indicate that we start an init (initial load)
+	//Indicate that we reload the defs
 	setActivity(LoadActivity);
 
 	//NOTE: at this point the queue is not running but reset() will start it.
@@ -1059,9 +1103,6 @@ void ServerHandler::resetFinished()
 		}
 	}
 
-
-	updateSuites();
-
 	//Create an object to inform the observers about the change
 	VServerChange change;
 
@@ -1099,8 +1140,32 @@ void ServerHandler::resetFailed(const std::string& errMsg)
 	resetRefreshTimer();
 }
 
+//This function must be called during a SYNC!!!!!!!!
+
+void ServerHandler::clearTree()
+{
+	UserMessage::message(UserMessage::DBG, false, std::string("ServerHandler::clearTree"));
+
+	if(!vRoot_->isEmpty())
+	{
+		//Notify observers that the clear is about to begin
+		broadcast(&ServerObserver::notifyBeginServerClear);
+
+		//Clear vnode
+		vRoot_->clear();
+
+		//Notify observers that the clear ended
+		broadcast(&ServerObserver::notifyEndServerClear);
+	}
+}
+
+
 void ServerHandler::rescanTree()
 {
+	UserMessage::message(UserMessage::DBG, false, std::string("ServerHandler::rescanTree -- begin"));
+
+	setActivity(RescanActivity);
+
 	//---------------------------------
 	// First part of rescan: clearing
 	//---------------------------------
@@ -1108,18 +1173,11 @@ void ServerHandler::rescanTree()
 	//Stop the timer
 	stopRefreshTimer();
 
-	//Notify observers that the clear is about to begin
-	broadcast(&ServerObserver::notifyBeginServerClear);
+	//Stop the queue as a safety measure: we do not want any chages during the rescan
+	comQueue_->suspend();
 
-	//Clear vnode
-	vRoot_->clear();
-
-	//Empty and stop the queue. We need to call it after clearing the vRoot because it has to
-	//wait for the thread to finish!!!
-	comQueue_->stop();
-
-	//Notify observers that the clear ended
-	broadcast(&ServerObserver::notifyEndServerClear);
+	//clear the tree
+	clearTree();
 
 	//At this point nothing is running and the tree is empty (it only contains
 	//the root node)
@@ -1144,11 +1202,15 @@ void ServerHandler::rescanTree()
 	//Notify the observers that scan has ended
 	broadcast(&ServerObserver::notifyEndServerScan);
 
-	//Start the queue
+	//Restart the queue
 	comQueue_->start();
 
 	//Start the timer
 	resetRefreshTimer();
+
+	setActivity(NoActivity);
+
+	UserMessage::message(UserMessage::DBG, false, std::string("ServerHandler::rescanTree -- end"));
 }
 
 //====================================================
@@ -1159,55 +1221,44 @@ void ServerHandler::updateSuiteFilter(SuiteFilter* sf)
 {
 	if(suiteFilter_->update(sf))
 	{
-		reset();
+		//If only this flag has changed we exec a custom task for it
+		if(suiteFilter_->changeFlags().sameAs(SuiteFilter::AutoAddChanged))
+		{
+			comQueue_->addSuiteAutoRegisterTask();
+		}
+		//Otherwise we need a full reset
+		else
+		{
+			reset();
+		}
 	}
 
 }
-void ServerHandler::updateSuites()
+//This is called internally aftern an update!!!
+void ServerHandler::updateSuiteFilter(const std::vector<std::string>& loadedSuites)
 {
-   if(addNewSuites_)
-   {
-	   // SUP-398 // temporary add higher load on the server
-	   switch(suiteFilterType_)
-	   {
-	   case NoSuiteFilter:
-	   case LocalSuiteFilter:
-	   	   {
-	   		   ServerDefsAccess defsAccess(this);  // will reliquish its resources on destruction
-	   		   defs_ptr defs = defsAccess.defs();
-	   		   if(defs != NULL)
-	   		   {
-	   			   const std::vector<suite_ptr>& suites_vec = defs->suiteVec();
-	   			   suites_.clear();
-	   			   for(size_t i = 0; i < suites_vec.size(); ++i)
-	   			   {
-	   				   suites_.push_back(suites_vec[i]->name());
-	   			   }
-	   		   }
-	   		   else
-	   		   {
-	   			   suites_.clear();
-	   		   }
-	   	   }
+	std::vector<std::string> defSuites;
+	//vRoot_->suites(defSuites);
+	suiteFilter_->setLoaded(loadedSuites);
+	broadcast(&ServerObserver::notifyServerSuiteFilterChanged);
 
-	   	   suiteFilter_->current(suites_);
+	//if(suiteFilter_->isEnabled())
+	//{
+	/*	ServerDefsAccess defsAccess(this);  // will reliquish its resources on destruction
+		defs_ptr defs = defsAccess.defs();
+		if(defs != NULL)
+		{
+			std::vector<std::string> suites;
+			const std::vector<suite_ptr>& suitVec = defs->suiteVec();
+			for(std::vector<suite_ptr>::const_iterator it=suitVec.begin(); it != suitVec.end(); it++)
+			{
+				suites.push_back((*it)->name());
+			}
 
-	   	   break;
+			suiteFilter_->current(suites);
+		}
+	//}*/
 
-	   case HandlerSuiteFilter:
-	   	   {
-	   		   //comQueue_->addSuiteUpdateTask();
-
-
-         }
-	   	   break;
-	   default:
-		   break;
-
-
-      }
-
-   }
 }
 
 /*
@@ -1312,9 +1363,7 @@ ServerComQueue::ServerComQueue(ServerHandler *server,ClientInvoker *client, Serv
 	server_(server),
 	client_(client),
 	comThread_(comThread),
-	wait_(false),
-	active_(false),
-	reset_(false)
+	state_(SuspendedState) //the queue is enabled but not running
 {
 	timer_=new QTimer(this);
 	timer_->setInterval(2000);
@@ -1335,8 +1384,13 @@ ServerComQueue::ServerComQueue(ServerHandler *server,ClientInvoker *client, Serv
 
 ServerComQueue::~ServerComQueue()
 {
-	//Stop the queue
-	stop();
+	state_=DisabledState;
+
+	//Stop the timer
+	timer_->stop();
+
+	//Empty the tasks
+	tasks_.clear();
 
 	//Disconnects all the signals from the thread
 	comThread_->disconnect(0,this);
@@ -1345,40 +1399,88 @@ ServerComQueue::~ServerComQueue()
 	//until it finishes its task.
 	comThread_->wait();
 
+	//Detach the thread from the ClientInvoker
+	comThread_->detach();
+
+	//Send a logout task
+	VTask_ptr task=VTask::create(VTask::LogOutTask);
+	comThread_->task(task);
+
+	//Wait unit the logout finishes
+	comThread_->wait();
+
 	delete comThread_;
 }
+
+void ServerComQueue::enable()
+{
+	state_=SuspendedState;
+	start();
+}
+
+void ServerComQueue::disable()
+{
+	if(state_ == DisabledState)
+		return;
+
+	state_=DisabledState;
+
+	//Remove all tasks
+	tasks_.clear();
+
+	//Stop the timer
+	timer_->stop();
+
+	//If the comthread is running we need to wait
+	//until it finishes its task.
+	comThread_->wait();
+
+	//Clear the current task
+	if(current_)
+		current_.reset();
+}
+
+
 
 //This is a special mode to reload the whole ClientInvoker
 void ServerComQueue::reset()
 {
-	if(reset_)
+	if(state_ == DisabledState || state_ == ResetState)
 		return;
 
-	//Set the load status
-	reset_=true;
+	//This state has the highest priority.
+	state_=ResetState;
 
-	//The queue must be stopped
-	stop();
+	//Remove all tasks
+	tasks_.clear();
+
+	//Stop the timer
+	timer_->stop();
+
+	//If the comthread is running we need to wait
+	//until it finishes its task.
+	comThread_->wait();
+
+	//Detach the thread from the ClientInvoker
+	comThread_->detach();
 
 	//The thread cannot be running
 	assert(comThread_->isRunning() == false);
 
-	//We send and init command straight away to the thread!!
+	//We send an Reset command straight to the thread!!
 	VTask_ptr task=VTask::create(VTask::ResetTask);
 	current_=task;
+
 	comThread_->task(current_);
 
-	//The queue is still stopped!!!
+	//The queue is still stopped and does not accept any tasks until the reset finishes.
 }
 
 void ServerComQueue::endReset()
 {
-	if(reset_)
+	if(state_ == ResetState)
 	{
-		//Set the load status
-		reset_=false;
-
-		//We restart the queue
+		state_=SuspendedState;
 		start();
 	}
 }
@@ -1389,20 +1491,17 @@ void ServerComQueue::endReset()
 // -its timer is running
 void ServerComQueue::start()
 {
-	if(active_==true)
-		return;
+	if(state_ != DisabledState && state_ != ResetState)
+	{
+		//If the comthread is running we need to wait
+		//until it finishes its task.
+		comThread_->wait();
 
-	//Set the status
-	active_=true;
+		state_=RunningState;
 
-	//If the comthread is running we need to wait
-	//until it finishes its task.
-	comThread_->wait();
-
-	//comThread_->attach();
-
-	//Starts the timer
-	timer_->start();
+		//Starts the timer
+		timer_->start();
+	}
 }
 
 //When the queue is stopped:
@@ -1410,7 +1509,7 @@ void ServerComQueue::start()
 // -it does not accept tasks
 // -its timer is stopped
 // -the thread is detached from ClientInvoker
-void ServerComQueue::stop()
+/*void ServerComQueue::stop()
 {
 	if(active_==false)
 		return;
@@ -1432,8 +1531,20 @@ void ServerComQueue::stop()
 	comThread_->detach();
 
 	//Clear the current task
-	if(current_)
-		current_.reset();
+	//if(current_)
+	//	current_.reset();
+}*/
+
+//The queue contents remains the same but the timer is stopped. Until start() is
+//called nothing will be submitted to the queue.
+void ServerComQueue::suspend()
+{
+	if(state_ != DisabledState &&
+	   state_ != ResetState)
+	{
+		state_=SuspendedState;
+		timer_->stop();
+	}
 }
 
 void ServerComQueue::addTask(VTask_ptr task)
@@ -1441,11 +1552,12 @@ void ServerComQueue::addTask(VTask_ptr task)
 	if(!task)
 		return;
 
-	if(!active_ || (task && task->type() ==VTask::ResetTask) )
+	if(state_ == DisabledState || state_ == ResetState ||
+	  (task && task->type() ==VTask::ResetTask) )
 		return;
 
 	tasks_.push_back(task);
-	if(!timer_->isActive())
+	if(!timer_->isActive() && state_ != SuspendedState)
 	{
 		timer_->start(0);
 	}
@@ -1453,33 +1565,43 @@ void ServerComQueue::addTask(VTask_ptr task)
 
 void ServerComQueue::addNewsTask()
 {
-	if(!active_)
+	if(state_ == DisabledState || state_ == ResetState)
 		return;
 
 	VTask_ptr task=VTask::create(VTask::NewsTask);
-	tasks_.push_back(task);
-	if(!timer_->isActive())
-	{
-		timer_->start(0);
-	}
+	addTask(task);
 }
 
 void ServerComQueue::addSyncTask()
 {
-	if(!active_)
+	if(state_ == DisabledState || state_ == ResetState)
 		return;
 
 	VTask_ptr task=VTask::create(VTask::SyncTask);
-	tasks_.push_back(task);
-	if(!timer_->isActive())
-	{
-		timer_->start(0);
-	}
+	addTask(task);
+}
+
+void ServerComQueue::addSuiteListTask()
+{
+	if(state_ == DisabledState || state_ == ResetState)
+		return;
+
+	VTask_ptr task=VTask::create(VTask::SuiteListTask);
+	addTask(task);
+}
+
+void ServerComQueue::addSuiteAutoRegisterTask()
+{
+	if(state_ == DisabledState || state_ == ResetState)
+		return;
+
+	VTask_ptr task=VTask::create(VTask::SuiteAutoRegisterTask);
+	addTask(task);
 }
 
 void ServerComQueue::slotRun()
 {
-	if(!active_)
+	if(state_ == DisabledState || state_ == ResetState ||state_ == SuspendedState )
 		return;
 
 	//UserMessage::message(UserMessage::DBG, false, std::string("  ServerComQueue::run"));
@@ -1521,6 +1643,8 @@ void ServerComQueue::slotRun()
 //thread is not running so it is safe to access the ClientInvoker!
 void ServerComQueue::slotTaskFinished()
 {
+	UserMessage::message(UserMessage::DBG, false,std::string("ServerComQueue::slotTaskFinished"));
+
 	//We need to leave the load mode
 	endReset();
 
@@ -1542,6 +1666,8 @@ void ServerComQueue::slotTaskFinished()
 //to the slotTaskFinished slot.
 void ServerComQueue::slotTaskFailed(std::string msg)
 {
+	UserMessage::message(UserMessage::DBG, false,std::string("ServerComQueue::slotTaskFailed"));
+
 	//We need to leave the load mode
 	endReset();
 
@@ -1605,7 +1731,7 @@ void ServerComThread::task(VTask_ptr task)
 		//Suite filter
 		hasSuiteFilter_=server_->suiteFilter()->isEnabled();
 		autoAddNewSuites_=server_->suiteFilter()->autoAddNewSuites();
-		suites_=server_->suiteFilter()->filter();
+		filteredSuites_=server_->suiteFilter()->filter();
 
 		//Start the thread execution
 		start();
@@ -1651,6 +1777,14 @@ void ServerComThread::run()
 				UserMessage::message(UserMessage::DBG, false, std::string("    SYNC"));
 				ci_->sync_local();
 				UserMessage::message(UserMessage::DBG, false, std::string("    SYNC FINISHED"));
+
+				//If there was a significant change
+				//we need to update the registered suites
+				if(defsToDelete_ || nodeToDelete_)
+				{
+					updateRegSuites();
+				}
+
 				break;
 			}
 
@@ -1719,12 +1853,23 @@ void ServerComThread::run()
 						(params_["run"] == "1")?true:false);
 				break;
 
-
-			case VTask::SuiteRegisterTask:
-				updateSuites();
+			case VTask::SuiteListTask:
+				ci_->suites();
 				break;
 
+			case VTask::SuiteAutoRegisterTask:
+				if(hasSuiteFilter_)
+				{
+					ci_->ch1_auto_add(autoAddNewSuites_);
+				}
+				break;
 
+			case VTask::LogOutTask:
+				if(ci_->client_handle() > 0)
+				{
+					ci_->ch1_drop();
+				}
+				break;
 			default:
 				break;
 		}
@@ -1777,7 +1922,7 @@ void ServerComThread::reset()
 			}
 			catch (std::exception &e)
 			{
-						std::cout << "# no drop possible: " << e.what() << "\n";
+				UserMessage::message(UserMessage::DBG, false, std::string("o drop possible") + e.what());
 			}
 		}
 
@@ -1786,12 +1931,12 @@ void ServerComThread::reset()
 			//reset client handle + defs
 			ci_->reset();
 
-			if(!suites_.empty())
+			if(!filteredSuites_.empty())
 			{
 				UserMessage::message(UserMessage::DBG, false, std::string("    REGISTER SUITES"));
 
 				//This will add a new handle to the client
-				ci_->ch_register(autoAddNewSuites_, suites_);
+				ci_->ch_register(autoAddNewSuites_, filteredSuites_);
 			}
 		}
 		else
@@ -1810,46 +1955,119 @@ void ServerComThread::reset()
 }
 
 
-void ServerComThread::updateSuites()
+void ServerComThread::updateRegSuites()
 {
 	if(!hasSuiteFilter_)
+		return;
+
+	//----------------------------------------
+	// Get the registered list of suites!!
+	//----------------------------------------
+	try
 	{
-		try
-		{
-			ci_->ch1_drop();
-		}
-		catch ( std::exception& e )
-		{
-			//gui::message("host::update-reg-suite-error: %s", e.what());
-		}
-
-		//reset client handle + defs
-		ci_->reset();
-
-		ci_->sync_local();
+		ci_->ch_suites();
 	}
-
-	else if(hasSuiteFilter_)
-	{
-		try
-		{
-			ci_->ch_suites();
-		}
 	catch ( std::exception& e )
 	{
-		//gui::message("host::update-reg-suite-error: %s", e.what());
+		UserMessage::message(UserMessage::DBG, false, std::string("host::update-reg-suite-error:") + e.what());
 	}
-	const std::vector<std::pair<unsigned int, std::vector<std::string> > >& vct = ci_->server_reply().get_client_handle_suites();
+
+	const std::vector<std::pair<unsigned int, std::vector<std::string> > >& vct=ci_->server_reply().get_client_handle_suites();
+
+	std::vector<std::string> regSuites;
 	for(size_t i = 0; i < vct.size(); ++i)
 	{
-		if(vct[i].first == (unsigned int) ci_->client_handle())
-	    {
-	       suites_ = vct[i].second;
-	       break;
-	    }
+		if(vct[i].first == static_cast<unsigned int>(ci_->client_handle()))
+		{
+		    regSuites = vct[i].second;
+		    break;
+		}
+    }
+
+	//-----------------------------------------
+	// Get the list of suites from the defs
+	//-----------------------------------------
+	const std::vector<suite_ptr>& defSuites = ci_->defs()->suiteVec();
+
+	//-----------------------------------------------------------------------
+	// If something is registered but not in the defs we need to remove it
+	//-----------------------------------------------------------------------
+
+	std::vector<std::string> delSuites;
+	for(std::vector<std::string>::iterator it=regSuites.begin(); it != regSuites.end(); it++)
+	{
+		bool found=0;
+		for(size_t i = 0; i < defSuites.size(); ++i)
+		{
+			if(defSuites.at(i)->name() == *it)
+			{
+				found=true;
+				break;
+			}
+		}
+		if(!found)
+		{
+			delSuites.push_back(*it);
+		}
 	}
+
+	if(!delSuites.empty())
+	{
+		ci_->ch_remove(ci_->client_handle(),delSuites);
 	}
+
+	//------------------------------------------------------
+	// If something is loaded and in the filter but
+	// not registered we need to register it!!
+	//------------------------------------------------------
+
+	if(!autoAddNewSuites_)
+	{
+		//get the list of loaded suites
+		ci_->suites();
+		const std::vector<std::string>& loadedSuites=ci_->server_reply().get_string_vec();
+
+		std::vector<std::string> addSuites;
+		for(std::vector<std::string>::const_iterator it=loadedSuites.begin(); it != loadedSuites.end(); it++)
+		{
+			if(std::find(filteredSuites_.begin(),filteredSuites_.end(),*it) != filteredSuites_.end() &&
+			   std::find(regSuites.begin(),regSuites.end(),*it) != regSuites.end())
+			{
+				addSuites.push_back(*it);
+			}
+		}
+
+		if(!addSuites.empty())
+		{
+			ci_->ch_add(ci_->client_handle(),addSuites);
+		}
+	}
+
+	UserMessage::message(UserMessage::DBG, false, std::string("Suite update finished"));
 }
+
+/*void ServerComThread::suites()
+{
+	if(hasSuiteFilter_)
+	{
+		//get the list of loaded suites
+		try
+		{
+			ci_->suites();
+		}
+		catch
+		{
+			const std::vector<std::string>& loadedSuites=ci_->server_reply().get_string_vec();
+		}
+		std::vector<std::string> defSuites;
+	const std::vector<suite_ptr>& sv = ci_->defs()->suiteVec();
+	for(std::vector<suite_ptr>::const_iterator it=sv.begin(); it != sv.end(); it++)
+	{
+		defSuites.push_back((*it)->name());
+	}
+
+	Q_EMIT suiteListChanged(loadedSuites,defSuites);
+}*/
 
 
 void ServerComThread::update(const Node* node, const std::vector<ecf::Aspect::Type>& types)

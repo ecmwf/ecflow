@@ -391,6 +391,31 @@ VServer::~VServer()
 	clear();
 }
 
+
+int VServer::totalNumOfTopLevel(VNode* n) const
+{
+	if(!n->isTopLevel())
+		return -1;
+
+	int idx=indexOfChild(n);
+	if(idx != -1)
+		return totalNumOfTopLevel(idx);
+
+	return -1;
+}
+
+int VServer::totalNumOfTopLevel(int idx) const
+{
+	assert(totalNumInChild_.size() == children_.size());
+
+	if(idx >=0 && idx < totalNumInChild_.size())
+	{
+		return totalNumInChild_.at(idx);
+	}
+
+	return -1;
+}
+
 //--------------------------------
 // Clear
 //--------------------------------
@@ -407,12 +432,14 @@ void VServer::clear()
 	//Clear the children vector
 	children_.clear();
 
+	totalNumInChild_.clear();
+
 	//A sanity check
 	assert(totalNum_ == 0);
 }
 
 //Clear the contents of a particular VNode
-void VServer::clear(VNode* node)
+/*void VServer::clear(VNode* node)
 {
 	//Delete the children of node. It will recursively delete all the nodes
 	//below this node
@@ -423,7 +450,7 @@ void VServer::clear(VNode* node)
 
 	//Clear the node contents
 	node->clear();
-}
+}*/
 
 //Delete a particular node
 void VServer::deleteNode(VNode* node)
@@ -511,6 +538,8 @@ void VServer::beginScan(VServerChange& change)
 //Build the whole tree.
 void VServer::endScan()
 {
+	totalNum_=0;
+
 	//Get the Defs
 	ServerDefsAccess defsAccess(server_);  // will reliquish its resources on destruction
 	defs_ptr defs = defsAccess.defs();
@@ -530,6 +559,8 @@ void VServer::endScan()
 
 void VServer::scan(VNode *node)
 {
+	int prevTotalNum=totalNum_;
+
 	std::vector<node_ptr> nodes;
 	node->node()->immediateChildren(nodes);
 
@@ -539,6 +570,11 @@ void VServer::scan(VNode *node)
 	{
 		VNode* vn=new VNode(node,(*it).get());
 		scan(vn);
+	}
+
+	if(node->parent() == this)
+	{
+		 totalNumInChild_.push_back(totalNum_-prevTotalNum);
 	}
 }
 
@@ -586,8 +622,7 @@ void VServer::beginUpdate(VNode* node,const std::vector<ecf::Aspect::Type>& aspe
 	}
 
 	//---------------------------------------------------------------------------------
-	// The number of nodes changed. If we are here we must have reset the whole server
-	// a few second ago!!!!!!!!!!!!!!!!!!!!!!
+	// The number of nodes changed.
 	//---------------------------------------------------------------------------------
 	else if(nodeNumCh)
 	{
@@ -615,6 +650,14 @@ void VServer::endUpdate(VNode* node,const std::vector<ecf::Aspect::Type>& aspect
 	{
 		//This call updates the number of attributes stored in the VNode
 		node->endUpdateAttrNum();
+	}
+}
+
+void VServer::suites(std::vector<std::string>& sv)
+{
+	for(int i=0; i < numOfChildren(); i++)
+	{
+		sv.push_back(children_.at(i)->strName());
 	}
 }
 

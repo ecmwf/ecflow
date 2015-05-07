@@ -34,6 +34,8 @@ SuiteItemWidget::SuiteItemWidget(QWidget *parent) : QWidget(parent)
 
 	suiteView->setModel(model_);
 
+	updateButtonStatus();
+
 }
 
 QWidget* SuiteItemWidget::realWidget()
@@ -48,7 +50,17 @@ void SuiteItemWidget::reload(VInfo_ptr info)
 
 	if(info_.get() && info_->isServer() && info_->server())
 	{
-		model_->setData(info_->server()->suiteFilter());
+		if(SuiteFilter *sf=info_->server()->suiteFilter())
+		{
+			model_->setData(sf);
+			enableTb->setChecked(sf->isEnabled());
+			autoTb->setChecked(sf->autoAddNewSuites());
+			updateButtonStatus();
+		}
+		else
+		{
+			model_->setData(0);
+		}
 	}
 	else
 	{
@@ -61,16 +73,61 @@ void SuiteItemWidget::clearContents()
 	model_->setData(0);
 }
 
-void SuiteItemWidget::on_autoTb_toggled(bool)
+void SuiteItemWidget::updateButtonStatus()
 {
+	if(enableTb->isChecked())
+	{
+		autoTb->setEnabled(true);
+		selectAllTb->setEnabled(true);
+		unselectAllTb->setEnabled(true);
 
+		if(SuiteFilter* sf=model_->filter())
+		{
+			autoTb->setChecked(sf->autoAddNewSuites());
+		}
+	}
+	else
+	{
+		autoTb->setEnabled(false);
+		selectAllTb->setEnabled(false);
+		unselectAllTb->setEnabled(false);
+	}
 }
 
-void SuiteItemWidget::on_enableTb_toggled(bool val)
+void SuiteItemWidget::on_autoTb_clicked(bool val)
+{
+	if(SuiteFilter* sf=model_->filter())
+	{
+		sf->setAutoAddNewSuites(val);
+	}
+}
+
+void SuiteItemWidget::on_enableTb_clicked(bool val)
 {
 	if(SuiteFilter* sf=model_->filter())
 	{
 		sf->setEnabled(val);
+		model_->reloadData();
+	}
+
+	updateButtonStatus();
+}
+
+void SuiteItemWidget::on_selectAllTb_clicked(bool)
+{
+	if(SuiteFilter* sf=model_->filter())
+	{
+		sf->selectAll();
+		model_->reloadData();
+	}
+}
+
+void SuiteItemWidget::on_unselectAllTb_clicked(bool)
+{
+	if(SuiteFilter* sf=model_->filter())
+	{
+		sf->unselectAll();
+		model_->reloadData();
 	}
 }
 
@@ -80,6 +137,11 @@ void SuiteItemWidget::on_okTb_clicked(bool)
 	{
 		info_->server()->updateSuiteFilter(model_->filter());
 	}
+}
+
+void SuiteItemWidget::suiteFilterChanged()
+{
+	model_->reloadData();
 }
 
 static InfoPanelItemMaker<SuiteItemWidget> maker1("suite");

@@ -49,6 +49,26 @@
       </widget>
      </item>
      <item>
+      <widget class="QToolButton" name="selectAllTb">
+       <property name="toolTip">
+        <string>Select all suites</string>
+       </property>
+       <property name="text">
+        <string>Select all</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QToolButton" name="unselectAllTb">
+       <property name="toolTip">
+        <string>Deselect all suites</string>
+       </property>
+       <property name="text">
+        <string>Unselect all</string>
+       </property>
+      </widget>
+     </item>
+     <item>
       <spacer name="horizontalSpacer">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
@@ -77,6 +97,24 @@
     <widget class="QTreeView" name="suiteView">
      <property name="contextMenuPolicy">
       <enum>Qt::ActionsContextMenu</enum>
+     </property>
+     <property name="alternatingRowColors">
+      <bool>true</bool>
+     </property>
+     <property name="rootIsDecorated">
+      <bool>false</bool>
+     </property>
+     <property name="uniformRowHeights">
+      <bool>true</bool>
+     </property>
+     <property name="itemsExpandable">
+      <bool>false</bool>
+     </property>
+     <property name="allColumnsShowFocus">
+      <bool>true</bool>
+     </property>
+     <property name="expandsOnDoubleClick">
+      <bool>false</bool>
      </property>
     </widget>
    </item>

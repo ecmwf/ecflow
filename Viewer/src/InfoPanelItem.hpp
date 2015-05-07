@@ -56,6 +56,7 @@ protected:
 	//Notifications about the server changes
 	virtual void defsChanged(const std::vector<ecf::Aspect::Type>&)=0;
 	virtual void connectStateChanged() {};
+	virtual void suiteFilterChanged() {};
 	
 	//Notifications about the node changes
 	virtual void nodeChanged(const VNode*, const std::vector<ecf::Aspect::Type>&)=0;

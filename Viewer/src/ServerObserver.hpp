@@ -28,6 +28,7 @@ public:
 	virtual void notifyEndServerScan(ServerHandler* server) {};
 	virtual void notifyServerConnectState(ServerHandler* server) {};
 	virtual void notifyServerActivityChanged(ServerHandler* server) {};
+	virtual void notifyServerSuiteFilterChanged(ServerHandler* server) {};
 };
 
 

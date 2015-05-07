@@ -88,6 +88,7 @@ public:
 	void notifyBeginServerScan(ServerHandler* server,const VServerChange&) {};
 	void notifyEndServerScan(ServerHandler* server) {};
 	void notifyServerConnectState(ServerHandler* server);
+	void notifyServerSuiteFilterChanged(ServerHandler* server);
 
 public Q_SLOTS:
 	void slotReload(VInfo_ptr node);

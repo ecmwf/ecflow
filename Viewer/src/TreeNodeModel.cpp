@@ -159,7 +159,7 @@ QVariant TreeNodeModel::data( const QModelIndex& index, int role ) const
 	}
 
 	//We only continue for the relevant roles for nodes and attributes
-	if(role == NodeNumRole || role == InfoRole || role == LoadRole)
+	if(role == InfoRole || role == LoadRole)
 	{
 		return QVariant();
 	}
@@ -313,7 +313,15 @@ QVariant TreeNodeModel::nodeData(const QModelIndex& index, int role) const
 	{
 		return VNState::toName(node);
 	}
-
+	//The number of nodes a suite has
+	else if(role == NodeNumRole)
+	{
+		if(vnode->isTopLevel())
+		{
+			return vnode->server()->vRoot()->totalNumOfTopLevel(vnode);
+		}
+		return QVariant();
+	}
 
 	return QVariant();
 }

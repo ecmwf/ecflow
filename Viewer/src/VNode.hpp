@@ -125,10 +125,14 @@ public:
 
 	ServerHandler* server() const {return server_;}
 
+	bool isEmpty() const { return numOfChildren() == 0;}
 	bool isTopLevel() const {return false;}
 	bool isServer() const {return true;}
 
 	int totalNum() const {return totalNum_;}
+	int totalNumOfTopLevel(int) const;
+	int totalNumOfTopLevel(VNode*) const;
+
 	VNode* toVNode(const Node* nc) const;
 	void beginUpdate(VNode* node,const std::vector<ecf::Aspect::Type>& aspect,VNodeChange&);
 	void endUpdate(VNode* node,const std::vector<ecf::Aspect::Type>& aspect,const VNodeChange&);
@@ -143,6 +147,7 @@ public:
 	QColor  stateColour() const;
 	std::string strName() const;
 
+	void suites(std::vector<std::string>&);
 	VNode* find(const std::string& fullPath);
 
 	//Find a variable in the Defs. Both the user_variables and the
@@ -157,12 +162,13 @@ protected:
 
 private:
 	void clear();
-	void clear(VNode*);
+	//void clear(VNode*);
     void scan(VNode*);
     void deleteNode(VNode* node);
 
     ServerHandler* server_;
     int totalNum_;
+    std::vector<int> totalNumInChild_;
 };
 
 

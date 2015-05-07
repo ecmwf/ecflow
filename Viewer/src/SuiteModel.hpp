@@ -27,7 +27,8 @@ public:
    	QModelIndex index (int, int, const QModelIndex& parent = QModelIndex() ) const;
    	QModelIndex parent (const QModelIndex & ) const;
 
-   	void setData(SuiteFilter* filter);
+	void reloadData();
+	void setData(SuiteFilter* filter);
    	SuiteFilter* filter() const {return data_;}
 
 protected:

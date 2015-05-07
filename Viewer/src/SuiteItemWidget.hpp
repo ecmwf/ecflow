@@ -36,15 +36,20 @@ public:
 	void infoFailed(VReply*) {};
 	void infoProgress(VReply*) {};
 
+	void suiteFilterChanged();
 	void nodeChanged(const VNode*, const std::vector<ecf::Aspect::Type>&) {};
 	void defsChanged(const std::vector<ecf::Aspect::Type>&) {};
 
 protected Q_SLOTS:
-	void on_autoTb_toggled(bool);
-	void on_enableTb_toggled(bool);
+	void on_autoTb_clicked(bool);
+	void on_enableTb_clicked(bool);
+	void on_selectAllTb_clicked(bool);
+	void on_unselectAllTb_clicked(bool);
 	void on_okTb_clicked(bool);
 
 protected:
+	void updateButtonStatus();
+
 	SuiteModel *model_;
 };
 

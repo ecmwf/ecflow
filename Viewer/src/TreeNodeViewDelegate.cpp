@@ -313,7 +313,7 @@ void TreeNodeViewDelegate::renderServer(QPainter *painter,const QModelIndex& ind
 		painter->drawText(numRect,Qt::AlignLeft | Qt::AlignVCenter,numTxt);
 	}
 
-	//Draw number
+	//Draw load animation
 	if(hasLoad)
 	{
 		Animation* an=animation_->find(Animation::ServerLoadType,false);
@@ -351,6 +351,8 @@ void TreeNodeViewDelegate::renderNode(QPainter *painter,const QModelIndex& index
 	//Adjust the filled rect width
 	fillRect.setRight(textRect.right()+offset);
 
+	int currentRight=fillRect.right();
+
 	//Icons area
 	QList<QPixmap> pixLst;
 	QList<QRect> pixRectLst;
@@ -358,7 +360,7 @@ void TreeNodeViewDelegate::renderNode(QPainter *painter,const QModelIndex& index
 	if(va.type() == QVariant::List)
 	{
 			QVariantList lst=va.toList();
-			int xp=fillRect.topRight().x()+5;
+			int xp=currentRight+5;
 			int yp=fillRect.top();
 			for(int i=0; i < lst.count(); i++)
 			{
@@ -366,10 +368,33 @@ void TreeNodeViewDelegate::renderNode(QPainter *painter,const QModelIndex& index
 				pixRectLst << QRect(xp,yp,pixLst.back().width(),pixLst.back().height());
 				xp+=pixLst.back().width();
 			}
+
+			if(!pixRectLst.isEmpty())
+				currentRight=pixRectLst.back().right();
+	}
+
+	//The node number (optional)
+	QRect numRect;
+	QString numTxt;
+	va=index.data(AbstractNodeModel::NodeNumRole);
+	bool hasNum=(va.isNull() == false);
+	QFont numFont;
+
+	if(hasNum)
+	{
+		numTxt="(" + QString::number(va.toInt()) + ")";
+		numFont.setBold(true);
+		fm=QFontMetrics(numFont);
+
+		int numWidth=fm.width(numTxt);
+		numRect = textRect;
+		numRect.setLeft(currentRight+fm.width('A'));
+		numRect.setWidth(numWidth);
+		currentRight=numRect.right();
 	}
 
 	//Define clipping
-	int rightPos=(pixRectLst.empty())?(fillRect.right()+1):(pixRectLst.back().right()+1);
+	int rightPos=currentRight+1;
 	const bool setClipRect = rightPos > option.rect.right();
 	if(setClipRect)
 	{
@@ -395,6 +420,14 @@ void TreeNodeViewDelegate::renderNode(QPainter *painter,const QModelIndex& index
 	for(int i=0; i < pixLst.count(); i++)
 	{
 		painter->drawPixmap(pixRectLst[i],pixLst[i]);
+	}
+
+	//Draw number
+	if(hasNum)
+	{
+		painter->setPen(QColor(120,120,120));
+		painter->setFont(numFont);
+		painter->drawText(numRect,Qt::AlignLeft | Qt::AlignVCenter,numTxt);
 	}
 
 	if(setClipRect)

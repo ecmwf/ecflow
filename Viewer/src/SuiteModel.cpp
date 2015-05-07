@@ -30,17 +30,24 @@ void SuiteModel::setData(SuiteFilter* filter)
 {
 	beginResetModel();
 
-	if(data_)
+	if(data_ && data_ != filter)
 	{
 		delete data_;
 		data_=0;
 	}
 
-	if(filter)
+	if(filter && data_ != filter)
 		data_=filter->clone();
 
 	endResetModel();
 }
+
+void SuiteModel::reloadData()
+{
+	beginResetModel();
+	endResetModel();
+}
+
 
 bool SuiteModel::hasData() const
 {
@@ -70,7 +77,10 @@ Qt::ItemFlags SuiteModel::flags ( const QModelIndex & index) const
 {
 	Qt::ItemFlags defaultFlags;
 
-	defaultFlags=Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsUserCheckable; // | Qt::ItemIsEditable;
+	if(data_->isEnabled())
+	{
+		defaultFlags=Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsUserCheckable; // | Qt::ItemIsEditable;
+	}
 
 	return defaultFlags;
 }
@@ -102,7 +112,7 @@ QVariant SuiteModel::data( const QModelIndex& index, int role ) const
 			return QString::fromStdString(data_->items().at(row).name_);
 			break;
 		case 1:
-			return (data_->items().at(row).present_)?"present":"-";
+			return (data_->items().at(row).present_)?"loaded":"not loaded";
 			break;
 		default:
 			break;
@@ -113,6 +123,19 @@ QVariant SuiteModel::data( const QModelIndex& index, int role ) const
 		if(index.column()==0)
 			return (data_->items().at(row).filtered_)?QVariant(Qt::Checked):QVariant(Qt::Unchecked);
 	}
+	/*else if(role == Qt::ForegroundRole)
+	{
+		if(data_->isEnabled())
+		{
+			return QVariant();
+		}
+		else
+		{
+			return QColor(200,200,200);
+		}
+	}*/
+
+
 
 	return QVariant();
 }
@@ -137,16 +160,27 @@ bool SuiteModel::setData(const QModelIndex& index, const QVariant & value, int r
 
 QVariant SuiteModel::headerData( const int section, const Qt::Orientation orient , const int role ) const
 {
-	if ( orient != Qt::Horizontal || role != Qt::DisplayRole )
+	if ( orient != Qt::Horizontal || (role != Qt::DisplayRole &&  role != Qt::ToolTipRole))
       		  return QAbstractItemModel::headerData( section, orient, role );
 
-   	switch ( section )
-	{
-   	case 0: return tr("Name");
-   	case 1: return tr("Present");
-   	default: return QVariant();
+   	if(role == Qt::DisplayRole)
+   	{
+   		switch ( section )
+   		{
+   		case 0: return tr("Suite");
+   		case 1: return tr("Load status");
+   		default: return QVariant();
+   		}
    	}
-
+   	else if(role== Qt::ToolTipRole)
+   	{
+   		switch ( section )
+   		{
+   		case 0: return tr("Suite name");
+   		case 1: return tr("Indicates if the suite is <b>loaded</b> to the server or not");
+   		default: return QVariant();
+   		}
+   	}
     return QVariant();
 }
 

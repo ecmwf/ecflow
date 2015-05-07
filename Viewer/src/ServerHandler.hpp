@@ -49,8 +49,7 @@ class ServerHandler : public QObject
 	friend class ServerComQueue;
   
 public:
-	enum Activity {NoActivity,LoadActivity};
-	enum SuiteFilterType {NoSuiteFilter,LocalSuiteFilter,HandlerSuiteFilter};
+	enum Activity {NoActivity,LoadActivity,RescanActivity};
 
 	const std::string& name() const {return name_;}
 	const std::string& host() const {return host_;}
@@ -61,7 +60,6 @@ public:
 	ConnectState* connectState() const {return connectState_;}
 	bool communicating() {return communicating_;}
 	bool readFromDisk() const {return readFromDisk_;}
-	const std::vector<std::string>& suites() {return suites_;}
 	SuiteFilter* suiteFilter() const {return suiteFilter_;}
 	void updateSuiteFilter(SuiteFilter*);
 
@@ -130,9 +128,6 @@ protected:
 
     //The list of suites the server makes accessible
     SuiteFilter* suiteFilter_;
-    std::vector<std::string> suites_;
-    bool addNewSuites_;
-    SuiteFilterType suiteFilterType_;
 
 	static std::vector<ServerHandler*> servers_;
 	static std::map<std::string, std::string> commands_;
@@ -151,10 +146,12 @@ private:
 	//Begin and end the initialisation by connecting to the server and syncing.
 	void resetFinished();
 	void resetFailed(const std::string& errMsg);
+	void clearTree();
 	void rescanTree();
 	void connectionLost(const std::string& errMsg);
 	void connectionGained();
-	void updateSuites();
+
+	void updateSuiteFilter(const std::vector<std::string>&);
 
 	//Handle the update timer
 	void stopRefreshTimer();
@@ -211,10 +208,16 @@ public:
 	void addTask(VTask_ptr);
 	void addNewsTask();
 	void addSyncTask();
+	void addSuiteListTask();
+	void addSuiteAutoRegisterTask();
+
+	void enable();
+	void disable();
 	void start();
-	void stop();
+	void suspend();
 	void reset();
-	bool active() const {return active_;}
+	//bool active() const {return active_;}
+	bool isSuspended() const {return state_==SuspendedState;}
 
 protected Q_SLOTS:
 	void slotRun();
@@ -226,15 +229,18 @@ protected Q_SLOTS:
 protected:
 	void endReset();
 
+	enum State {RunningState,SuspendedState,ResetState,DisabledState};
+
 	ServerHandler *server_;
 	ClientInvoker* client_;
 	ServerComThread *comThread_;
 	QTimer* timer_;
 	std::deque<VTask_ptr> tasks_;
 	VTask_ptr current_;
-	bool wait_;
-	bool active_;
-	bool reset_;
+	//bool wait_;
+	//bool active_;
+	//bool reset_;
+	State state_;
 };
 
 // -------------------------------------------------------
@@ -269,11 +275,12 @@ Q_SIGNALS:
 	void nodeDeleted(const std::string&);
 	void defsDeleted();
 	void failed(std::string message);
+	void suiteListChanged(const std::vector<std::string>&,const std::vector<std::string>&);
 
 protected:
 	void run();
 	void reset();
-	void updateSuites();
+	void updateRegSuites();
 
 private:
 	void attach(Node *node);
@@ -291,7 +298,7 @@ private:
 	bool defsToDelete_;
 	bool nodeToDelete_;
 	bool hasSuiteFilter_;;
-	std::vector<std::string> suites_;
+	std::vector<std::string> filteredSuites_;
 	bool autoAddNewSuites_;
 };
 

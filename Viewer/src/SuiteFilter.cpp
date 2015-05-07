@@ -30,18 +30,18 @@ SuiteFilterItem::SuiteFilterItem(const SuiteFilterItem& other)
 //
 //=================================================================
 
-void SuiteFilter::current(const std::vector<std::string>& suites)
+/*void SuiteFilter::current(const std::vector<std::string>& suites)
 {
 	current_=suites;
 	adjust();
-}
+}*/
 
 void SuiteFilter::adjust()
 {
 	items_.clear();
 
 	//Items present in current_
-	for(std::vector<std::string>::const_iterator it=current_.begin(); it != current_.end(); it++)
+	for(std::vector<std::string>::const_iterator it=loaded_.begin(); it != loaded_.end(); it++)
 	{
 		bool filtered=false;
 		if(std::find(filter_.begin(), filter_.end(),*it) != filter_.end())
@@ -55,7 +55,7 @@ void SuiteFilter::adjust()
 	//Items present in filter_ only
 	for(std::vector<std::string>::const_iterator it=filter_.begin(); it != filter_.end(); it++)
 	{
-		if(std::find(current_.begin(), current_.end(),*it) == current_.end())
+		if(std::find(loaded_.begin(), loaded_.end(),*it) == loaded_.end())
 		{
 			items_.push_back(SuiteFilterItem(*it,false,true));
 		}
@@ -88,12 +88,22 @@ void SuiteFilter::setFiltered(int index,bool val)
 SuiteFilter* SuiteFilter::clone()
 {
 	SuiteFilter* sf=new SuiteFilter();
-	sf->current_=current_;
+	sf->loaded_=loaded_;
 	sf->filter_=filter_;
 	sf->items_=items_;
+	sf->enabled_=enabled_;
+	sf->autoAddNew_=autoAddNew_;
 
 	return sf;
 }
+
+
+void SuiteFilter::setLoaded(const std::vector<std::string>& loaded)
+{
+	loaded_=loaded;
+	adjust();
+}
+
 
 bool SuiteFilter::update(SuiteFilter* sf)
 {
@@ -138,3 +148,19 @@ bool SuiteFilter::update(SuiteFilter* sf)
 
 	return (changeFlags_.isEmpty() == false);
 }
+
+void SuiteFilter::selectAll()
+{
+	for(size_t i=0; i < items_.size(); i++)
+	{
+		setFiltered(static_cast<int>(i),true);
+	}
+}
+
+void SuiteFilter::unselectAll()
+{
+	filter_.clear();
+	adjust();
+}
+
+

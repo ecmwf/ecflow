@@ -24,6 +24,7 @@ public:
     void unset(T flag ) { flags_ &= ~ (1 << flag); }
     bool isSet(T flag) const { return (flags_ >> flag) & 1; }
     bool isEmpty() const {return flags_==0;}
+    bool sameAs(T flag) const {return flags_ == flag;}
 
 private:
     int flags_;
@@ -53,7 +54,6 @@ public:
 
 	SuiteFilter* clone();
 
-	const std::vector<std::string>& current() const {return current_;}
 	const std::vector<std::string>& filter() const {return filter_;}
 	const std::vector<SuiteFilterItem> items() const {return items_;}
 
@@ -66,15 +66,18 @@ public:
 
 	void setAutoAddNewSuites(bool b) {autoAddNew_=b;}
 	void setEnabled(bool b) {enabled_=b;}
+	void selectAll();
+	void unselectAll();
 
 	bool update(SuiteFilter*);
+	void setLoaded(const std::vector<std::string>& loaded);
 	const FlagSet<ChangeFlag>& changeFlags() {return changeFlags_;}
-
 
 private:
 	void adjust();
 
-    std::vector<std::string> current_;
+    std::vector<std::string> loaded_;
+    std::vector<std::string> defs_;
 	std::vector<std::string> filter_;
 	std::vector<SuiteFilterItem> items_;
 	bool autoAddNew_;

@@ -37,8 +37,8 @@ class VTask  : public boost::enable_shared_from_this<VTask>
 {
 public:
 	enum Type {NoTask,CommandTask,OverviewTask,WhyTask,ManualTask,ScriptTask,
-		       JobTask,MessageTask,OutputTask,StatsTask,NewsTask,SyncTask,ResetTask,SuiteRegisterTask,
-			   ScriptEditTask,ScriptPreprocTask,ScriptSubmitTask,HistoryTask};
+		       JobTask,MessageTask,OutputTask,StatsTask,NewsTask,SyncTask,ResetTask,SuiteAutoRegisterTask,
+			   SuiteListTask,ScriptEditTask,ScriptPreprocTask,ScriptSubmitTask,HistoryTask,LogOutTask};
 	enum Status {NOSTATUS,QUEUED,RUNNING,FINISHED,CANCELLED,ABORTED,REJECTED};
 
 	virtual ~VTask();

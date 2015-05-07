@@ -431,12 +431,27 @@ void InfoPanel::notifyServerConnectState(ServerHandler* server)
 			//Dispatch the change
 			Q_FOREACH(InfoPanelItemHandler *item,items_)
 			{
-					item->item()->connectStateChanged();
+				item->item()->connectStateChanged();
 			}
 		}
 	}
 }
 
+void InfoPanel::notifyServerSuiteFilterChanged(ServerHandler* server)
+{
+	if(info_.get())
+	{
+		if(info_->server() && info_->server() == server)
+		{
+			//Dispatch the change
+			Q_FOREACH(InfoPanelItemHandler *item,items_)
+			{
+				item->item()->suiteFilterChanged();
+			}
+		}
+	}
+
+}
 
 void InfoPanel::writeSettings(VSettings* vs)
 {
