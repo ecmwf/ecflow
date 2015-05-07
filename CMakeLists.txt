@@ -65,12 +65,21 @@ message( STATUS "ECFLOW_MAJOR         : ${ECFLOW_MAJOR}" )
 message( STATUS "ECFLOW_MINOR         : ${ECFLOW_MINOR}" )
 message( STATUS "ECFLOW_VERSION       : ${ECFLOW_VERSION_STR}" )
 
+
+# =========================================================================================
+# Options  
+# =========================================================================================
+option( ENABLE_PYTHON         "enable python interface"   ON  )
+
+ecbuild_add_option( FEATURE ENABLE_GUI DESCRIPTION "Build ecflowview"  DEFAULT ON )
+
+
+message( STATUS "ENABLE_PYTHON         : ${ENABLE_PYTHON}" )
+message( STATUS "ENABLE_GUI            : ${ENABLE_GUI}" )
+
 # =========================================================================================
 # Python  
 # =========================================================================================
-# some variables of this project
-
-option( ENABLE_PYTHON         "enable python interface"   ON  )
 
 if(ENABLE_PYTHON)
    ecbuild_find_python( VERSION 2.7 REQUIRED )
@@ -149,7 +158,10 @@ add_subdirectory( CSim )
 add_subdirectory( Server )
 add_subdirectory( Test )
 add_subdirectory( Pyext )
-add_subdirectory( view )
+
+if(ENABLE_GUI)
+	add_subdirectory( view )
+endif()
 
 # Directories not need in the distribution tar ball!
 ecbuild_add_resources( TARGET build_nightly DONT_PACK_DIRS build/nightly)
@@ -169,7 +181,7 @@ install( FILES
             ${CMAKE_SOURCE_DIR}/Pyext/migrate/ecflow_migrate.py
          DESTINATION bin
          PERMISSIONS OWNER_READ GROUP_READ WORLD_READ OWNER_EXECUTE GROUP_EXECUTE WORLD_EXECUTE
-        )
+      )
 
 # install documentation         
 install( FILES
@@ -178,7 +190,7 @@ install( FILES
             ${CMAKE_SOURCE_DIR}/Doc/user-manual/user_manual.pdf    
          DESTINATION doc/ecflow
          PERMISSIONS OWNER_READ GROUP_READ WORLD_READ OWNER_EXECUTE GROUP_EXECUTE WORLD_EXECUTE
-        )
+       )
         
 # =========================================================================================
 # final

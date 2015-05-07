@@ -61,9 +61,14 @@ cd cmake_build_dir/ecflow/release
 #    -DCMAKE_PYTHON_INSTALL_PREFIX should *only* used when using python setup.py (CMAKE_PYTHON_INSTALL_TYPE=setup)
 #    *AND* for testing python install to local directory
 
+# enable: -DCMAKE_CXX_COMPILER=xlC_r, for compiling on IBM *AND*
+#         -DENABLE_GUI=OFF
+
 cmake $WK \
       -DCMAKE_MODULE_PATH=$WK/../ecbuild/cmake \
       -DCMAKE_BUILD_TYPE=Release \
       -DCMAKE_INSTALL_PREFIX=$INSTALL_PREFIX/$release.$major.$minor \
       -DCMAKE_PYTHON_INSTALL_TYPE=local 
+      #-DENABLE_GUI=ON
+      #-DCMAKE_CXX_COMPILER=xlC_r 
       #-DCMAKE_PYTHON_INSTALL_PREFIX=$INSTALL_PREFIX/$release.$major.$minor/lib/python2.7/site-packages/ecflow
