@@ -27,9 +27,13 @@
 #define NODE_MAX 41
 #endif
 
+#include <iostream>
+#include <locale>
+#include <string>
+#include <boost/date_time/posix_time/posix_time.hpp>
+#include <boost/date_time/posix_time/posix_time_io.hpp>
 static int nb_tasks = 0;
 static int nb_attrs = 0;
-
 static char* info_label = getenv("ECFLOWVIEW_INFO_LABEL");
 
 std::map<std::string, ecf_node_maker*>& ecf_node_maker::map()
@@ -193,8 +197,10 @@ void ecf_node::add_kid(ecf_node* k) {
   if (k) {
     kids_.push_back(k);
 
-    if (k->type() == NODE_TASK) nb_tasks++;
-    else if (k->type() == NODE_FAMILY) {} 
+    if (k->type() == NODE_TASK) { 
+      nb_tasks++;
+      kids_.push_back(make_node(new Label("time", to_simple_string(k->status_time())), k));
+    } else if (k->type() == NODE_FAMILY) {} 
     else nb_attrs++;
   }
 }
@@ -657,6 +663,18 @@ int redraw_kids(node* node_,
    return tot;
 }
 
+void update_status_time(node* xnode, const Node* n, ecf_node* ecf) {
+  if (!n) return;  
+  if (!ecf) return;
+  if (!ecf->type() == NODE_TASK) return;
+  if (!xnode) return;
+  /*
+  for (std::vector<ecf_node*>::iterator it = ecf->kids_.begin(); it != ecf->kids_.end(); ++it)
+    if ((*it)->type() == NODE_LABEL && (*it)->name() == "time") {
+      Label* lb = dynamic_cast<Label *>(n->findLabel("time"));
+      if (lb) lb->set_new_value(to_simple_string(ecf->state_time())); */
+}
+
 template<> 
 void ecf_concrete_node<Node>::update(const Node* n, 
                                      const std::vector<ecf::Aspect::Type>& aspect)
@@ -704,6 +722,8 @@ void ecf_concrete_node<Node>::update(const Node* n,
 
    const_cast<Node*>(n)->set_graphic_ptr(xnode());
    if (redraw_kids(node_, aspect) == 1) return;
+
+   if (info_label) update_status_time(node_, n, this);
 
    node_->update(-1, -1, -1); // call pop up window with check
    node_->notify_observers();

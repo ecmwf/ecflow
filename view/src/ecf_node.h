@@ -159,7 +159,7 @@ protected:
    std::vector<ecf_node*> kids_;
    node *node_;
    char kind_; // 'c' for complete trigger
-
+   friend void update_status_time(node*, const Node* , ecf_node*);
    const std::string name_;
 
    ExpressionWrapper *trigger_;
