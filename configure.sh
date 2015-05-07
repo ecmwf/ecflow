@@ -1,5 +1,11 @@
 #!/bin/sh
 
+# ==================================================================
+# Error handling
+set -e # stop the shell on first error
+set -u # fail when using an undefined variable
+set -x # echo script lines as they are executed
+
 # ======================================================================
 # Use for install of ecflow using cmake and ecbuild(bundled with ecflow)
 # External requirements: cmake, boost
@@ -25,12 +31,6 @@ if [ "$#" -ne 1 ] ; then
    exit 1
 fi
 INSTALL_PREFIX=$1
-
-# ==================================================================
-# Error handling
-set -e # stop the shell on first error
-set -u # fail when using an undefined variable
-set -x # echo script lines as they are executed
 
 # ===================================================================
 # Version number
