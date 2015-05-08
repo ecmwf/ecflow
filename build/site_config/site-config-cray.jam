@@ -166,6 +166,7 @@ lib boost_python_static   : : <toolset>cray <variant>release <file>$(BOOST_ROOT)
 project site-config 
     : requirements <include>$(BOOST_ROOT)  
     : requirements <toolset>cray:<define>BOOST_ASIO_DISABLE_FENCED_BLOCK
+      <toolset>gcc:<cxxflags>-Wno-unused-local-typedefs 
     ;
 
 # On linux 64, because most of the static library's, are placed in a shared libs(ecflow.so)
