@@ -69,6 +69,7 @@ lib boost_python_static   : : <variant>release <file>$(BOOST_ROOT)/stage/lib/lib
 #
 project site-config 
     : requirements <include>$(BOOST_ROOT) 
+    #<toolset>gcc:<cxxflags>-Wno-unused-local-typedefs
     ;
 
 # using syntax:
