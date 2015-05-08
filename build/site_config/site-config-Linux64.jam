@@ -64,11 +64,11 @@ lib boost_python_static   : : <variant>release <file>$(BOOST_ROOT)/stage/lib/lib
 #   b/ Can cause links errors
 # Hence left to individual projects/test
 #
-# Boost 1.53 with > gcc 4.8, to many warnings: suppress with: <toolset>gcc:<cxxflags>-W...
+# Boost 1.53 with > gcc 4.8, to many warnings: suppress with: <toolset>gcc:<cxxflags>-Wno-unused-local-typedefs
+#    However Wno-unused-local-typedefs does not work with gcc 4.3, i.e rpm fails, hence keep for local use
 #
 project site-config 
     : requirements <include>$(BOOST_ROOT) 
-      <toolset>gcc:<cxxflags>-Wno-unused-local-typedefs 
     ;
 
 # using syntax:
