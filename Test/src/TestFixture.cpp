@@ -126,7 +126,8 @@ void TestFixture::init(const std::string& project_test_dir)
       theSCRATCHArea += "/ECF_HOME";
       scratchSmsHome_ = theSCRATCHArea;
 
-      bool ok = File::createDirectories(theSCRATCHArea); assert(ok);
+      bool ok = File::createDirectories(theSCRATCHArea);
+      BOOST_REQUIRE_MESSAGE(ok,"File::createDirectories(theSCRATCHArea) failed");
       ok = fs::exists(theSCRATCHArea); assert(ok);
 
       // Ensure that local includes data exists. This needs to be copied to SCRATCH
