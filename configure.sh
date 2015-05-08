@@ -40,11 +40,38 @@ major=$(cat VERSION.cmake   | grep 'set( ECFLOW_MAJOR'   | awk '{print $3}'| sed
 minor=$(cat VERSION.cmake   | grep 'set( ECFLOW_MINOR'   | awk '{print $3}'| sed 's/["]//g')
 
 # ===================================================================
-# Build directory
+# Build directory, always start clean, to avoid cmake cacheing issues
 cd ..
+if [ -e cmake_build_dir ] ; then
+	rm -rf cmake_build_dir
+fi
 mkdir -p cmake_build_dir/ecflow/release
 cd cmake_build_dir/ecflow/release
-      
+
+
+# =======================================================================
+# On IBM we need to customise
+cmake_extra_options=""
+
+test_path ()
+{
+    if `command -v command 1>/dev/null 2>/dev/null`; then
+        command -v $1 1>/dev/null 2>/dev/null
+    else
+        hash $1 1>/dev/null 2>/dev/null
+    fi
+}
+
+test_uname ()
+{
+    if test_path uname; then
+        test `uname` = $*
+    fi
+}
+
+if test_uname AIX ; then
+	cmake_extra_options="-DENABLE_GUI=OFF -DCMAKE_CXX_COMPILER=xlC_r"
+fi
 
 # ===================================================================
 # Configuration
@@ -61,14 +88,9 @@ cd cmake_build_dir/ecflow/release
 #    -DCMAKE_PYTHON_INSTALL_PREFIX should *only* used when using python setup.py (CMAKE_PYTHON_INSTALL_TYPE=setup)
 #    *AND* for testing python install to local directory
 
-# enable: -DCMAKE_CXX_COMPILER=xlC_r, for compiling on IBM *AND*
-#         -DENABLE_GUI=OFF
-
 cmake $WK \
       -DCMAKE_MODULE_PATH=$WK/../ecbuild/cmake \
       -DCMAKE_BUILD_TYPE=Release \
       -DCMAKE_INSTALL_PREFIX=$INSTALL_PREFIX/$release.$major.$minor \
-      -DCMAKE_PYTHON_INSTALL_TYPE=local 
-      #-DENABLE_GUI=OFF
-      #-DCMAKE_CXX_COMPILER=xlC_r 
+      -DCMAKE_PYTHON_INSTALL_TYPE=local  ${cmake_extra_options}
       #-DCMAKE_PYTHON_INSTALL_PREFIX=$INSTALL_PREFIX/$release.$major.$minor/lib/python2.7/site-packages/ecflow

@@ -67,12 +67,11 @@ message( STATUS "ECFLOW_VERSION       : ${ECFLOW_VERSION_STR}" )
 
 
 # =========================================================================================
-# Options  
+# Options , be aware of caching, when modifying on the command line. 
+# Ideally start fresh or remove cache CmakeCache.txt in build dir
 # =========================================================================================
 option( ENABLE_PYTHON         "enable python interface"   ON  )
-
-ecbuild_add_option( FEATURE ENABLE_GUI DESCRIPTION "Build ecflowview"  DEFAULT ON )
-
+option( ENABLE_GUI            "Build ecflowview"          ON  )
 
 message( STATUS "ENABLE_PYTHON         : ${ENABLE_PYTHON}" )
 message( STATUS "ENABLE_GUI            : ${ENABLE_GUI}" )
