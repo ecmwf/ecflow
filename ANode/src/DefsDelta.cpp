@@ -63,7 +63,7 @@ bool DefsDelta::incremental_sync(defs_ptr client_def, std::vector<std::string>& 
 		throw std::runtime_error("Could not apply incremental server changes to client defs, because: " + string(e.what()));
 	}
 
-	// For each compound memento, we should have change node.
+	// For each compound memento, we should have a changed node.
 	//if ( compound_mementos_.size() != changed_nodes.size()) {
 	//   std::cout << "**** compound_mementos_.size() " << compound_mementos_.size() << "  changed_nodes.size(): " << changed_nodes.size() << "\n";
 	//}
