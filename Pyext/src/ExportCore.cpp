@@ -25,8 +25,7 @@
 #include "Ecf.hpp"
 
 // See: http://wiki.python.org/moin/boost.python/HowTo#boost.function_objects
-// TODO:
-	template<class K, class T>
+template<class K, class T>
 	struct pair_to_tuple  {
 		typedef pair_to_tuple<K,T> converter;
 		typedef std::pair<K,T> ctype;
@@ -38,7 +37,7 @@
 		static void register_to_python()  {
 			boost::python::to_python_converter<ctype,converter>();
 		}
-	 };
+};
 
 using namespace boost::python;
 using namespace std;
