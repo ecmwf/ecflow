@@ -43,7 +43,7 @@ minor=$(cat VERSION.cmake   | grep 'set( ECFLOW_MINOR'   | awk '{print $3}'| sed
 # Build directory, always start clean, to avoid cmake cacheing issues
 cd ..
 if [ -e cmake_build_dir ] ; then
-	rm -rf cmake_build_dir
+	rm -rf cmake_build_dir/ecflow
 fi
 mkdir -p cmake_build_dir/ecflow/release
 cd cmake_build_dir/ecflow/release

@@ -44,6 +44,9 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/ecflow/view/src}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${BOOST_ROOT}&quot;"/>
 								</option>
+								<option id="org.eclipse.cdt.build.core.settings.holder.symbols.1633633217" name="Symbols" superClass="org.eclipse.cdt.build.core.settings.holder.symbols" valueType="definedSymbols">
+									<listOptionValue builtIn="false" value="boost::serialization::base_object"/>
+								</option>
 								<inputType id="org.eclipse.cdt.build.core.settings.holder.inType.622201653" languageId="org.eclipse.cdt.core.g++" languageName="GNU C++" sourceContentType="org.eclipse.cdt.core.cxxSource,org.eclipse.cdt.core.cxxHeader" superClass="org.eclipse.cdt.build.core.settings.holder.inType"/>
 							</tool>
 							<tool id="org.eclipse.cdt.build.core.settings.holder.1113367365" name="GNU C" superClass="org.eclipse.cdt.build.core.settings.holder">
@@ -51,6 +54,14 @@
 							</tool>
 						</toolChain>
 					</folderInfo>
+					<fileInfo id="0.2057036449.1748006011" name="Suite.hpp" rcbsApplicability="disable" resourcePath="ANode/src/Suite.hpp" toolsToInvoke="org.eclipse.cdt.build.core.settings.holder.326966186.2144907492">
+						<tool id="org.eclipse.cdt.build.core.settings.holder.326966186.2144907492" name="GNU C++" superClass="org.eclipse.cdt.build.core.settings.holder.1816546809">
+							<option id="org.eclipse.cdt.build.core.settings.holder.symbols.1137182345" name="Symbols" superClass="org.eclipse.cdt.build.core.settings.holder.symbols" valueType="definedSymbols">
+								<listOptionValue builtIn="false" value="base_object"/>
+							</option>
+							<inputType id="org.eclipse.cdt.build.core.settings.holder.inType.1096551142" languageId="org.eclipse.cdt.core.g++" languageName="GNU C++" sourceContentType="org.eclipse.cdt.core.cxxSource,org.eclipse.cdt.core.cxxHeader" superClass="org.eclipse.cdt.build.core.settings.holder.inType"/>
+						</tool>
+					</fileInfo>
 				</configuration>
 			</storageModule>
 			<storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>
