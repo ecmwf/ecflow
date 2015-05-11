@@ -28,8 +28,6 @@ time2_demo contained this comment:
 
 /*
 
-TODO:
-
   * Fully implement error handling, with test cases.
   * Consider issues raised by Michael Marcin:
 
