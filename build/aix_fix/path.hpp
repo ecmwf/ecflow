@@ -92,7 +92,7 @@ namespace filesystem3
     //
     //  See m_pathname comments for further important rationale.
 
-    //  TODO: rules needed for operating systems that use / or .
+    //  rules needed for operating systems that use / or .
     //  differently, or format directory paths differently from file paths.
     //
     //  ************************************************************************
