@@ -40,7 +40,7 @@ bool DefsDelta::incremental_sync(defs_ptr client_def, std::vector<std::string>& 
    if (ChangeMgrSingleton::exists() && ChangeMgrSingleton::instance()->in_notification()) {
       // For debug: place a break point here: It appear as Change manager observers, has called another client to server command
       std::cout << "ecflow:ClientInvoker::incremental_sync() called in the middle of ChangeMgrSingleton::notification.\n";
-      std::cout << "It appears that change observer have called *ANOTHER* client->server command in the middle syncronising client definition\n";
+      std::cout << "It appears that change observer have called *ANOTHER* client->server command in the middle synchronising client definition\n";
    }
 
    /// - Sets notification flag, so that observers can also query if they are in
@@ -63,10 +63,11 @@ bool DefsDelta::incremental_sync(defs_ptr client_def, std::vector<std::string>& 
 		throw std::runtime_error("Could not apply incremental server changes to client defs, because: " + string(e.what()));
 	}
 
-	// For each compound memento, we should have a changed node.
-	//if ( compound_mementos_.size() != changed_nodes.size()) {
-	//   std::cout << "**** compound_mementos_.size() " << compound_mementos_.size() << "  changed_nodes.size(): " << changed_nodes.size() << "\n";
-	//}
+	// For each compound memento, we should have a changed node,
+   // If the assertion fails, then the sync in the observers, would have called another client->server command in the middle synchronising
+	if ( compound_mementos_.size() != changed_nodes.size()) {
+	   std::cout << "DefsDelta::incremental_sync: ERROR **** compound_mementos_.size() " << compound_mementos_.size() << "  changed_nodes.size(): " << changed_nodes.size() << " differ.\n";
+	}
 	// assert( compound_mementos_.size() == changed_nodes.size()); // FIXME restore for long term GUI test
  
 	// return true if there were any changes made
