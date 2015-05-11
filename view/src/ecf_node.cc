@@ -666,7 +666,7 @@ int redraw_kids(node* node_,
 void update_status_time(node* xnode, const Node* n, ecf_node* ecf) {
   if (!n) return;  
   if (!ecf) return;
-  if (!ecf->type() == NODE_TASK) return;
+  if (!(ecf->type() == NODE_TASK)) return;
   if (!xnode) return;
   /*
   for (std::vector<ecf_node*>::iterator it = ecf->kids_.begin(); it != ecf->kids_.end(); ++it)
