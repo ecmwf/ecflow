@@ -53,7 +53,7 @@ if [[ "$clang_arg" = clang ]] ; then
 	cmake_extra_options="-DCMAKE_CXX_FLAGS=-ftemplate-depth=512"
 fi
 if [[ "$clang_sanitiser_arg" = san ]] ; then
-	module uload gnu
+	module unload gnu
 	module load clang
 	cmake_extra_options="$cmake_extra_options -DCMAKE_C_FLAGS=-fsanitize=thread"
 fi
