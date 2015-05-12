@@ -145,15 +145,16 @@ endif()
 # =========================================================================================
 # flags
 # =========================================================================================
+message( STATUS "CMAKE_CXX_COMPILER_ID     : ${CMAKE_CXX_COMPILER_ID}" )
 
 # build type flags
-if(CMAKE_Fortran_COMPILER_ID MATCHES "GNU")
+if(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
     # -Wno-unused-local-typedefs is only required because boost 1.53 and when gcc > 4.7
-	set(CMAKE_CXX_FLAGS_DEBUG   "-Wall -Wno-unused-local-typedefs"       CACHE STRING "" FORCE)
-elseif(CMAKE_Fortran_COMPILER_ID MATCHES "Intel")
-	set(CMAKE_CXX_FLAGS_DEBUG   "-Wall -Wno-unused-local-typedefs"       CACHE STRING "" FORCE)
-#elseif(CMAKE_Fortran_COMPILER_ID MATCHES "PGI")
-#elseif(CMAKE_Fortran_COMPILER_ID MATCHES "Cray")
+	set(CMAKE_CXX_FLAGS   "-Wall -Wno-unused-local-typedefs"       CACHE STRING "" FORCE)
+elseif(CMAKE_CXX_COMPILER_ID MATCHES "Intel")
+	set(CMAKE_CXX_FLAGS   "-Wall -Wno-unused-local-typedefs"       CACHE STRING "" FORCE)
+#elseif(CMAKE_CXX_COMPILER_ID MATCHES "PGI")
+#elseif(CMAKE_CXX_COMPILER_ID MATCHES "Cray")
 #else()
 endif()
 
