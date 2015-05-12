@@ -142,11 +142,24 @@ if( CMAKE_BUILD_TYPE MATCHES "[Dd][Ee][Bb][Uu][Gg]" )
 
 endif()
 
+# =========================================================================================
+# flags
+# =========================================================================================
+
+# build type flags
+if(CMAKE_Fortran_COMPILER_ID MATCHES "GNU")
+    # -Wno-unused-local-typedefs is only required because boost 1.53 and when gcc > 4.7
+	set(CMAKE_CXX_FLAGS_DEBUG   "-Wall -Wno-unused-local-typedefs"       CACHE STRING "" FORCE)
+elseif(CMAKE_Fortran_COMPILER_ID MATCHES "Intel")
+	set(CMAKE_CXX_FLAGS_DEBUG   "-Wall -Wno-unused-local-typedefs"       CACHE STRING "" FORCE)
+#elseif(CMAKE_Fortran_COMPILER_ID MATCHES "PGI")
+#elseif(CMAKE_Fortran_COMPILER_ID MATCHES "Cray")
+#else()
+endif()
 
 # =========================================================================================
 # build source code
 # =========================================================================================
-
 add_subdirectory( ACore )
 add_subdirectory( ANattr )
 add_subdirectory( ANode )
