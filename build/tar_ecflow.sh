@@ -118,7 +118,7 @@ tar --exclude=*.check --exclude=*.check.b \
     --exclude=.metadata --exclude=.cproject --exclude=.project --exclude=.settings --exclude=.csettings \
     --exclude=ecbuild \
     --exclude=bin \
-    --exclude=gcc4.5 \
+    --exclude=gcc4.8 \
     --exclude=Debug \
     --exclude=operations \
     --exclude=ecflow.so \

@@ -7,11 +7,17 @@ set -x # echo script lines as they are executed
 
 # ====================================================================
 show_error_and_exit() {
-   echo "cmake.sh expects at least one argument, note 'san' is short for thread sanitiser i.e"
-   echo "  cmake.sh debug || release [clang] [san] [make] [verbose] [test]"
+   echo "cmake.sh expects at least one argument"
+   echo " cmake.sh debug || release [clang] [san] [make] [verbose] [test] [package_source] "
+   echo "  "
+   echo "   make           - run make after cmake"
+   echo "   test           - run tests"
+   echo "   san            - is short for clang thread sanitiser"
+   echo "   package_source - produces ecFlow-4.0.8-Source.tar.gz file, for users"
    exit 1
 }
 
+package_source_arg=
 make_arg=
 test_arg=
 clang_arg=
@@ -29,6 +35,8 @@ while [[ "$#" != 0 ]] ; do
       make_arg=$1
    elif  [[ "$1" = verbose ]] ; then
       verbose_arg=$1
+   elif  [[ "$1" = package_source ]] ; then
+      package_source_arg=$1
    else
    	 show_error_and_exit
    fi
@@ -59,6 +67,7 @@ if [[ "$clang_sanitiser_arg" = san ]] ; then
 fi
 
 # ====================================================================================
+# Use for local install
 cd $WK
 release=$(cat VERSION.cmake | grep 'set( ECFLOW_RELEASE' | awk '{print $3}'| sed 's/["]//g')
 major=$(cat VERSION.cmake   | grep 'set( ECFLOW_MAJOR'   | awk '{print $3}'| sed 's/["]//g')
@@ -66,9 +75,15 @@ minor=$(cat VERSION.cmake   | grep 'set( ECFLOW_MINOR'   | awk '{print $3}'| sed
 
 # ====================================================================================
 rm -rf ecbuild/$mode_arg
+
+# clean up source before packaging, do this after deleting ecbuild
+if [[ $package_source_arg = package_source ]] ; then
+	source $WK/build/clean.sh
+fi
+
 mkdir -p ecbuild/$mode_arg
 cd ecbuild/$mode_arg
-    
+
 # ====================================================================================  
 cmake_build_type=
 if [[ $mode_arg = debug ]] ; then
@@ -83,13 +98,12 @@ fi
 # -DCMAKE_PYTHON_INSTALL_PREFIX should *only* used when using python setup.py (CMAKE_PYTHON_INSTALL_TYPE=setup)
 #   *AND* for testing python install to local directory
 #
-# Use:DCMAKE_CXX_FLAGS to set compiler flags 
-#            -DCMAKE_CXX_FLAGS="-ftemplate-depth-128  -finline-functions -Wno-inline -Wall -fPIC  -DNDEBUG" \
 
 cmake ../.. -DCMAKE_MODULE_PATH=$WK/../ecbuild/cmake \
             -DCMAKE_BUILD_TYPE=$cmake_build_type \
             -DCMAKE_INSTALL_PREFIX=/var/tmp/ma0/cmake/ecflow/$release.$major.$minor \
             -DCMAKE_PYTHON_INSTALL_TYPE=local \
+            -DCMAKE_CXX_FLAGS="-Wall -Wno-unused-local-typedefs" \
             ${cmake_extra_options}
             #-DCMAKE_PYTHON_INSTALL_PREFIX=/var/tmp/ma0/cmake/ecflow/$release.$major.$minor/lib/python2.7/site-packages/ecflow
         
@@ -110,6 +124,28 @@ if [[ $test_arg = test ]] ; then
 	ctest -R py_s
 	ctest -R s_
 fi
+
+# =============================================================================================
+if [[ $package_source_arg = package_source ]] ; then
+	make package_source
+fi
+
+
+
+# NOTES:
+# =========================================================================================
+# Boost:  
+#  By default it looks for environment variable BOOST_ROOT, if not it can specified on the command line. i.e
+#  -DBOOST_ROOT=/var/tmp/ma0/boost/boost_1_53_0
+
+# ============================================================================================
+# Python:
+# -DCMAKE_PYTHON_INSTALL_TYPE = [ local | setup ]
+#    local : this will install to $INSTALL_PREFIX/$release.$major.$minor/lib/python2.7/site-packages/ecflow/
+#    setup : experimental only,python way of installing
+#
+#    -DCMAKE_PYTHON_INSTALL_PREFIX should *only* used when using python setup.py (CMAKE_PYTHON_INSTALL_TYPE=setup)
+#    *AND* for testing python install to local directory
 
 # ============================================================================================
 # The process for thread checking very simple when using clang thread sanitiser

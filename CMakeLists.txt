@@ -7,7 +7,7 @@
 #       -DCMAKE_MODULE_PATH=/path/to/ecbuild/cmake
 #
 #       -DCMAKE_C_COMPILER=gcc
-#       -DCMAKE_C_COMPILER=g++
+#       -DCMAKE_CXX_COMPILER=g++
 #
 #       -DCMAKE_PREFIX_PATH=/path/to/jasper:/path/to/any/package/out/of/place
 #       -DBUILD_SHARED_LIBS=OFF
@@ -19,23 +19,7 @@
 # major=$(cat VERSION.cmake   | grep 'set( ECFLOW_MAJOR'   | awk '{print $3}'| sed 's/["]//g')
 # minor=$(cat VERSION.cmake   | grep 'set( ECFLOW_MINOR'   | awk '{print $3}'| sed 's/["]//g')
 #
-# mkdir ecbuild
-# cd ecbuild
-# mkdir debug
-# mkdir release
-# cd debug
-#
-#/usr/local/apps/cmake/current/bin/cmake ../../  \
-#         -DCMAKE_BUILD_TYPE=Debug \
-#         -DCMAKE_MODULE_PATH=/usr/local/apps/ecbuild/current/share/ecbuild/cmake \
-#         -DPYTHON_LIBRARY=/usr/local/apps/python/current/lib/libpython2.7.a \
-#         -DPYTHON_INCLUDE_DIR=/usr/local/apps/python/current/include/python2.7 \
-#         -DPYTHON_EXECUTABLE=/usr/local/apps/python/current/bin/python2.7 \
-#         -DCMAKE_INSTALL_PREFIX=/usr/local/apps/ecflow/$release.$major.$minor
-#
-#         -DCMAKE_INSTALL_PREFIX=/var/tmp/ma0/cmake/ecflow/4.0.1
-#
-#############################################################
+########################################################################
 
 cmake_minimum_required( VERSION 2.8.4 FATAL_ERROR )
 
@@ -77,23 +61,7 @@ message( STATUS "ENABLE_PYTHON         : ${ENABLE_PYTHON}" )
 message( STATUS "ENABLE_GUI            : ${ENABLE_GUI}" )
 
 # =========================================================================================
-# Python  
-# =========================================================================================
-
-if(ENABLE_PYTHON)
-   ecbuild_find_python( VERSION 2.7 REQUIRED )
-   debug_var(PYTHON_LIBRARIES)
-   debug_var(PYTHON_INCLUDE_DIR)
-else() 
-   ecbuild_find_python( VERSION 2.7 )
-endif()
-
-# =========================================================================================
 # Boost
-# Jira ISSUE:   ECBUILD-40 ecbuild 1.3.2 ignores -DBOOST_ROOT
-#     setting  -DBOOST_ROOT=/var/tmp/ma0/boost/boost_1_53_0
-#     Does not appear to be honored. ?
-#     It always seem to use boost in /usr/local/apps
 # =========================================================================================
 
 ecbuild_add_extra_search_paths( boost ) # also respects BOOST_ROOT
@@ -123,7 +91,6 @@ find_package( Boost 1.53.0 REQUIRED COMPONENTS python serialization system threa
 
 message( STATUS "Boost_LIBRARIES     : ${Boost_LIBRARIES}" )
 
-
 # =========================================================================================
 # debug
 # =========================================================================================
@@ -143,22 +110,6 @@ if( CMAKE_BUILD_TYPE MATCHES "[Dd][Ee][Bb][Uu][Gg]" )
 endif()
 
 # =========================================================================================
-# flags
-# =========================================================================================
-message( STATUS "CMAKE_CXX_COMPILER_ID     : ${CMAKE_CXX_COMPILER_ID}" )
-
-# build type flags
-if(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
-    # -Wno-unused-local-typedefs is only required because boost 1.53 and when gcc > 4.7
-	set(CMAKE_CXX_FLAGS   "-Wall -Wno-unused-local-typedefs"       CACHE STRING "" FORCE)
-elseif(CMAKE_CXX_COMPILER_ID MATCHES "Intel")
-	set(CMAKE_CXX_FLAGS   "-Wall -Wno-unused-local-typedefs"       CACHE STRING "" FORCE)
-#elseif(CMAKE_CXX_COMPILER_ID MATCHES "PGI")
-#elseif(CMAKE_CXX_COMPILER_ID MATCHES "Cray")
-#else()
-endif()
-
-# =========================================================================================
 # build source code
 # =========================================================================================
 add_subdirectory( ACore )
@@ -170,10 +121,16 @@ add_subdirectory( Client )
 add_subdirectory( CSim )
 add_subdirectory( Server )
 add_subdirectory( Test )
-add_subdirectory( Pyext )
+
+if (ENABLE_PYTHON)
+    ecbuild_find_python( VERSION 2.7 REQUIRED )
+    debug_var(PYTHON_LIBRARIES)
+    debug_var(PYTHON_INCLUDE_DIR)
+	add_subdirectory( Pyext )
+endif()
 
 if(ENABLE_GUI)
-	add_subdirectory( view )
+   add_subdirectory( view )
 endif()
 
 # Directories not need in the distribution tar ball!
