@@ -44,7 +44,7 @@
   > export BOOST_ROOT=/tmp/ecflow_build/boost_1_53_0
    
 * There are two ways of building ecflow, boost-build/bjam or cmake
-  Preference should be given to  using cmake
+  >> Preference should be given to using cmake <<
   However first we need to build boost.
 
 boost libs
@@ -116,7 +116,6 @@ boost/bjam
   On some systems like fedora/redhat you may run into compiler errors
   which complain about the template depth being exceeded.
   In this case compile using:
-  
   
   > cd $WK
   > bjam c++-template-depth=512 variant=release install-all
