@@ -73,6 +73,13 @@ cmake
 * 
   > cd /tmp/ecflow_build/ecFlow-4.0.8-Source
   > mkdir build; cd build
+  > cmake ..  
+  > make 
+  > make install
+  
+* Optionally you can specify install dir:
+  > cd /tmp/ecflow_build/ecFlow-4.0.8-Source
+  > mkdir build; cd build
   > cmake .. -DCMAKE_INSTALL_PREFIX=/var/tmp/ma0/cmake/ecflow \
              -DCMAKE_BUILD_TYPE=Release
   > make 
