@@ -59,9 +59,38 @@ def test_get_all_nodes(defs):
     one_suite_defs = Defs()
     one_suite_defs.add_suite("s1")
     node_vec = one_suite_defs.get_all_nodes()
-    assert len(node_vec) == 1, "Expected one node, but found" + str(len(node_vec))
+    assert len(node_vec) == 1, "Expected one node, but found " + str(len(node_vec))
 
     print "test_get_all_nodes PASSED"
+    
+def test_get_all_nodes_from_nodes():
+    defs = Defs()
+    suite = defs.add_suite("test_get_all")
+    node_vec = suite.get_all_nodes()
+    assert len(node_vec) == 1, "Expected one nodes but found " + str(len(node_vec))
+
+    fam1 = suite.add_family("f1")
+    fam2 = suite.add_family("f2")
+    fam3 = suite.add_family("f3")
+    node_vec = suite.get_all_nodes()
+    assert len(node_vec) == 4, "Expected 4 nodes but found " + str(len(node_vec))
+
+    node_vec = fam1.get_all_nodes()
+    assert len(node_vec) == 1, "Expected 1 nodes but found " + str(len(node_vec))
+
+    f1_t1 = fam1.add_task("t1") 
+    f1_t2 = fam1.add_task("t2") 
+    node_vec = fam1.get_all_nodes()
+    assert len(node_vec) == 3, "Expected 3 nodes but found " + str(len(node_vec))
+
+    node_vec = f1_t1.get_all_nodes()
+    assert len(node_vec) == 1, "Expected 1 nodes but found " + str(len(node_vec))
+
+    node_vec = suite.get_all_nodes()
+    assert len(node_vec) == 6, "Expected 6 nodes but found " + str(len(node_vec))
+
+    print "test_get_all_nodes_from_nodes PASSED"
+   
 
 if __name__ == "__main__":
     print "####################################################################"
@@ -70,4 +99,5 @@ if __name__ == "__main__":
  
     test_get_all_tasks(create_defs())
     test_get_all_nodes(create_defs())
+    test_get_all_nodes_from_nodes()
     print "All Tests pass"    
