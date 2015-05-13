@@ -62,6 +62,7 @@
 							<inputType id="org.eclipse.cdt.build.core.settings.holder.inType.1096551142" languageId="org.eclipse.cdt.core.g++" languageName="GNU C++" sourceContentType="org.eclipse.cdt.core.cxxSource,org.eclipse.cdt.core.cxxHeader" superClass="org.eclipse.cdt.build.core.settings.holder.inType"/>
 						</tool>
 					</fileInfo>
+					<fileInfo id="0.2057036449.5953985" name="install.sh" rcbsApplicability="disable" resourcePath="install.sh" toolsToInvoke=""/>
 				</configuration>
 			</storageModule>
 			<storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>

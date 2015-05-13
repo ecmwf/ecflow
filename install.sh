@@ -17,6 +17,7 @@ prefix_arg=/var/tmp/$USER/cmake/ecflow
 if  [[ "$#" = 1 ]] ; then
    prefix_arg=$1
 fi
+
 set -x # echo script lines as they are executed
 
 #===================================================================
