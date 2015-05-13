@@ -133,6 +133,12 @@ if(ENABLE_GUI)
    add_subdirectory( view )
 endif()
 
+
+# =========================================================================================
+# tar ball, by default ecbuild will tar everything apart form hard wired directory called 'build' 
+#   hence we can tell it what directories not to pack
+# =========================================================================================
+
 # Directories not need in the distribution tar ball!
 #ecbuild_add_resources( TARGET build DONT_PACK_DIRS build/nightly build/test_bench)
 #ecbuild_add_resources( TARGET build PACK )
@@ -141,13 +147,13 @@ endif()
 
 ecbuild_dont_pack( DIRS 
                    SCRATCH 
+                   build/nightly build/test_bench
                    Doc/func_spec Doc/misc Doc/New_viewer Doc/newsletter Doc/online Doc/presentations Doc/tac
 )
 
 # =========================================================================================
-# install 
-# =========================================================================================
 # install scripts
+# =========================================================================================
 install( FILES
             ${CMAKE_SOURCE_DIR}/tools/ecflow_logsvr.pl
             ${CMAKE_SOURCE_DIR}/tools/ecflow_logsvr.sh
