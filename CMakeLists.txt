@@ -94,15 +94,10 @@ message( STATUS "Boost_LIBRARIES     : ${Boost_LIBRARIES}" )
 # =========================================================================================
 # debug
 # =========================================================================================
+
 if( CMAKE_BUILD_TYPE MATCHES "[Dd][Ee][Bb][Uu][Gg]" )
 
 	message( STATUS "INFO: DEBUG BUILD" )
-
-    # for debug type builds, turn on verbose makefiles
-    # set(CMAKE_VERBOSE_MAKEFILE ON)
-
-    # Tell other CMake files that we're doing a debug build
-	# set( DEBUG_BUILD 1 ) -- not used anymore
 
     # Tell C/C++ that we're doing a debug build
     add_definitions( -DDEBUG )
@@ -112,6 +107,7 @@ endif()
 # =========================================================================================
 # build source code
 # =========================================================================================
+
 add_subdirectory( ACore )
 add_subdirectory( ANattr )
 add_subdirectory( ANode )
@@ -133,27 +129,22 @@ if(ENABLE_GUI)
    add_subdirectory( view )
 endif()
 
-
 # =========================================================================================
-# tar ball, by default ecbuild will tar everything apart form hard wired directory called 'build' 
-#   hence we can tell it what directories not to pack
+# tar ball, by default ecbuild will tar everything apart from hard wired directory called 'build' 
+#   hence we can tell it, what directories not to pack
 # =========================================================================================
-
-# Directories not need in the distribution tar ball!
-#ecbuild_add_resources( TARGET build DONT_PACK_DIRS build/nightly build/test_bench)
-#ecbuild_add_resources( TARGET build PACK )
-#ecbuild_add_resources( TARGET SCRATCH DONT_PACK_DIRS SCRATCH)
-#ecbuild_add_resources( TARGET Doc DONT_PACK_DIRS Doc/func_spec Doc/misc Doc/New_viewer Doc/newsletter Doc/online Doc/presentations Doc/tac)
 
 ecbuild_dont_pack( DIRS 
-                   SCRATCH 
-                   build/nightly build/test_bench
-                   Doc/func_spec Doc/misc Doc/New_viewer Doc/newsletter Doc/online Doc/presentations Doc/tac
+                   	ACore/doc ANattr/doc ANode/doc Client/doc Pyext/doc Server/doc
+                    SCRATCH 
+                    build/nightly build/test_bench
+                    Doc/func_spec Doc/misc Doc/New_viewer Doc/newsletter Doc/online Doc/presentations Doc/tac
 )
 
 # =========================================================================================
 # install scripts
 # =========================================================================================
+
 install( FILES
             ${CMAKE_SOURCE_DIR}/tools/ecflow_logsvr.pl
             ${CMAKE_SOURCE_DIR}/tools/ecflow_logsvr.sh
@@ -163,7 +154,7 @@ install( FILES
             ${CMAKE_SOURCE_DIR}/Pyext/migrate/ecflow_migrate.py
          DESTINATION bin
          PERMISSIONS OWNER_READ GROUP_READ WORLD_READ OWNER_EXECUTE GROUP_EXECUTE WORLD_EXECUTE
-      )
+)
 
 # install documentation         
 install( FILES
@@ -172,7 +163,7 @@ install( FILES
             ${CMAKE_SOURCE_DIR}/Doc/user-manual/user_manual.pdf    
          DESTINATION doc/ecflow
          PERMISSIONS OWNER_READ GROUP_READ WORLD_READ OWNER_EXECUTE GROUP_EXECUTE WORLD_EXECUTE
-       )
+)
         
 # =========================================================================================
 # final

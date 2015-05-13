@@ -8,15 +8,18 @@ set -x # echo script lines as they are executed
 # ====================================================================
 show_error_and_exit() {
    echo "cmake.sh expects at least one argument"
-   echo " cmake.sh debug || release [clang] [san] [make] [verbose] [test] [package_source] "
+   echo " cmake.sh debug || release [clang] [san] [make] [verbose] [test] [package_source] [debug]"
    echo "  "
    echo "   make           - run make after cmake"
    echo "   test           - run tests"
    echo "   san            - is short for clang thread sanitiser"
    echo "   package_source - produces ecFlow-4.0.8-Source.tar.gz file, for users"
+   echo "                    copies the tar file to $SCRATCH"
+   echo "   debug          - copies ecFlow-4.0.8-Source.tar.gz to /tmp/$USER/tmp/. and untars file"
    exit 1
 }
 
+debug=
 package_source_arg=
 make_arg=
 test_arg=
@@ -37,6 +40,8 @@ while [[ "$#" != 0 ]] ; do
       verbose_arg=$1
    elif  [[ "$1" = package_source ]] ; then
       package_source_arg=$1
+   elif  [[ "$1" = debug ]] ; then
+      debug=$1
    else
    	 show_error_and_exit
    fi
@@ -128,12 +133,21 @@ fi
 # =============================================================================================
 if [[ $package_source_arg = package_source ]] ; then
 	make package_source
+	
+	if [[ $debug = debug ]] ; then
+		rm -rf /tmp/$USER/tmp
+		mkdir -p /tmp/$USER/tmp
+		cp ecFlow-$release.$major.$minor-Source.tar.gz  /tmp/$USER/tmp/.
+		cd /tmp/$USER/tmp/
+		tar -zxf ecFlow-$release.$major.$minor-Source.tar.gz
+	fi
+	
+	cp ecFlow-$release.$major.$minor-Source.tar.gz $SCRATCH/.
 fi
 
 
-
-# NOTES:
 # =========================================================================================
+# NOTES:
 # Boost:  
 #  By default it looks for environment variable BOOST_ROOT, if not it can specified on the command line. i.e
 #  -DBOOST_ROOT=/var/tmp/ma0/boost/boost_1_53_0
