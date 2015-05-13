@@ -27,7 +27,7 @@ sleep 4
 # load the build defs, in the server then delete generated defs.
 # Make sure server is running
 # =======================================================================
-python $WK/build/nightly/load.py
+python $WK/build_scripts/nightly/load.py
 
 # =======================================================================
 # Start the viewer

@@ -11,4 +11,4 @@
 # Assumes boost version 1.56
 
 # See: https://svn.boost.org/trac/boost/ticket/10348
-cp $WK/build/fix/boost_1_56_0/shared_ptr_helper.hpp  $BOOST_ROOT/boost/serialization/.
+cp $WK/build_scripts/fix/boost_1_56_0/shared_ptr_helper.hpp  $BOOST_ROOT/boost/serialization/.

@@ -9,13 +9,13 @@ set -x # echo script lines as they are executed
 
 # copy associated scripts files
 rm -rf nightly
-cp -r $WK/build/nightly .
+cp -r $WK/build_scripts/nightly .
 
 # Generate the defs
-python $WK/build/nightly/build.py
+python $WK/build_scripts/nightly/build.py
 
 # load the generated defs, *ASSUMES* server is running
-python $WK/build/nightly/load.py
+python $WK/build_scripts/nightly/load.py
 
 # start the viewer
 #/usr/local/apps/ecflow/current/bin/ecflowview &

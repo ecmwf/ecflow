@@ -66,7 +66,7 @@ def add_localhost_variables( localhost ):
     localhost.add_variable("BOOTSTRAP_TOOLSET","gcc")
     localhost.add_variable("CUSTOM_BJAM_ARGS","c++-template-depth=512")   # needed for gcc 4.8.1
     localhost.add_variable("ARCH","opensuse131")
-    localhost.add_variable("SITE_CONFIG","$WK/build/site_config/site-config-Linux64.jam")
+    localhost.add_variable("SITE_CONFIG","$WK/build_scripts/site_config/site-config-Linux64.jam")
     add_local_job_variables( localhost )
     
 def add_localhost_clang_variables( localhost_clang ):
@@ -76,7 +76,7 @@ def add_localhost_clang_variables( localhost_clang ):
     localhost_clang.add_variable("BOOTSTRAP_TOOLSET","gcc")  # can't seem to build jam with clang, using gcc instead
     localhost_clang.add_variable("REMOTE_COPY","cp")
     localhost_clang.add_variable("ARCH","opensuse113")
-    localhost_clang.add_variable("SITE_CONFIG","$WK/build/site_config/site-config-Linux64-clang.jam")
+    localhost_clang.add_variable("SITE_CONFIG","$WK/build_scripts/site_config/site-config-Linux64-clang.jam")
     localhost_clang.add_variable("BOOST_DIR","/var/tmp/ma0/boost/clang")
     add_local_job_variables( localhost_clang )
 
@@ -121,14 +121,14 @@ def add_linux_64_variables( linux_64 ):
     linux_64.add_variable("ROOT_WK","/vol/ecf/cluster")
     linux_64.add_variable("BOOST_DIR","/vol/ecf/cluster/boost")
     linux_64.add_variable("ARCH","linux64")
-    linux_64.add_variable("SITE_CONFIG","$WK/build/site_config/site-config-Linux64.jam")
+    linux_64.add_variable("SITE_CONFIG","$WK/build_scripts/site_config/site-config-Linux64.jam")
     
 def add_linux_64_lxop_variables( linux_64 ): 
     linux_64.add_variable("REMOTE_HOST","lxop")
     linux_64.add_variable("ROOT_WK","/gpfs/lxop/build/builds")
     linux_64.add_variable("BOOST_DIR","/gpfs/lxop/build/builds/boost")
     linux_64.add_variable("ARCH","linux64")
-    linux_64.add_variable("SITE_CONFIG","$WK/build/site_config/site-config-Linux64.jam")
+    linux_64.add_variable("SITE_CONFIG","$WK/build_scripts/site_config/site-config-Linux64.jam")
     linux_64.add_variable("GIT","/usr/local/bin/git")   # /usr/local/apps/git/current/bin/git not installed yet
 
 def add_linux_64_lxc_variables( linux_64 ): 
@@ -136,7 +136,7 @@ def add_linux_64_lxc_variables( linux_64 ):
     linux_64.add_variable("ROOT_WK","/vol/ecf/lxc")
     linux_64.add_variable("BOOST_DIR","/vol/ecf/lxc/boost")
     linux_64.add_variable("ARCH","linux64")
-    linux_64.add_variable("SITE_CONFIG","$WK/build/site_config/site-config-Linux64.jam")
+    linux_64.add_variable("SITE_CONFIG","$WK/build_scripts/site_config/site-config-Linux64.jam")
     linux_64.add_variable("GIT","git")   # rely on module load git
     linux_64.add_variable("CUSTOM_BJAM_ARGS","c++-template-depth=512")   # needed for gcc 4.8.1
 
@@ -145,7 +145,7 @@ def add_linux_64_intel_variables( linux_64_intel ):
     linux_64_intel.add_variable("ROOT_WK","/vol/ecf/cluster/intel")
     linux_64_intel.add_variable("BOOST_DIR","/vol/ecf/cluster/intel/boost")
     linux_64_intel.add_variable("ARCH","linux64intel")
-    linux_64_intel.add_variable("SITE_CONFIG","$WK/build/site_config/site-config-Linux64-intel.jam")
+    linux_64_intel.add_variable("SITE_CONFIG","$WK/build_scripts/site_config/site-config-Linux64-intel.jam")
 
 def add_remote_opensuse113_variables( opensuse113 ):
     opensuse113.add_variable("COMPILER_TEST_PATH","gcc-4.5/$mode")
@@ -159,7 +159,7 @@ def add_opensuse113_variables( opensuse113 ):
     opensuse113.add_variable("ROOT_WK","/vol/ecf/opensuse113")
     opensuse113.add_variable("BOOST_DIR","/vol/ecf/opensuse113/boost")
     opensuse113.add_variable("ARCH","opensuse113")
-    opensuse113.add_variable("SITE_CONFIG","$WK/build/site_config/site-config-Linux64.jam")
+    opensuse113.add_variable("SITE_CONFIG","$WK/build_scripts/site_config/site-config-Linux64.jam")
 
 def add_remote_opensuse131_variables( opensuse131 ):
     opensuse131.add_variable("COMPILER_TEST_PATH","gcc-4.8/$mode")
@@ -173,7 +173,7 @@ def add_opensuse131_variables( opensuse131 ):
     opensuse131.add_variable("ROOT_WK","/vol/ecf/opensuse131")
     opensuse131.add_variable("BOOST_DIR","/vol/ecf/opensuse131/boost")
     opensuse131.add_variable("ARCH","opensuse131")
-    opensuse131.add_variable("SITE_CONFIG","$WK/build/site_config/site-config-Linux64.jam")
+    opensuse131.add_variable("SITE_CONFIG","$WK/build_scripts/site_config/site-config-Linux64.jam")
     opensuse131.add_variable("CUSTOM_BJAM_ARGS","c++-template-depth=512")   # needed for gcc 4.8.1
 
 def is_cray_cct( node ):
@@ -208,7 +208,7 @@ def add_cray_gnu_compiler_variables( cray_gnu ):
     cray_gnu.add_variable("BOOTSTRAP_TOOLSET","gcc")
     cray_gnu.add_variable("LAYOUT","versioned")
     cray_gnu.add_variable("PRGENV","PrgEnv-gnu")
-    cray_gnu.add_variable("SITE_CONFIG","$WK/build/site_config/site-config-cray.jam")
+    cray_gnu.add_variable("SITE_CONFIG","$WK/build_scripts/site_config/site-config-cray.jam")
     cray_gnu.add_variable("ROOT_WK","/perm/ma/ma0/workspace/GNU")
     if is_cray_cct( cray_gnu ):
         cray_gnu.add_variable("CUSTOM_BJAM_ARGS","toolset=gcc cxxflags=-fPIC")  
@@ -222,7 +222,7 @@ def add_cray_intel_compiler_variables( cray_intel ):
     cray_intel.add_variable("BOOTSTRAP_TOOLSET","intel")
     cray_intel.add_variable("LAYOUT","versioned")
     cray_intel.add_variable("PRGENV","PrgEnv-intel")
-    cray_intel.add_variable("SITE_CONFIG","$WK/build/site_config/site-config-cray.jam")
+    cray_intel.add_variable("SITE_CONFIG","$WK/build_scripts/site_config/site-config-cray.jam")
     cray_intel.add_variable("ROOT_WK","/perm/ma/ma0/workspace/INTEL")
     cray_intel.add_variable("CUSTOM_BJAM_ARGS","toolset=intel cxxflags=-fPIC")  
 
@@ -233,7 +233,7 @@ def add_cray_cray_compiler_variables( cray_cray ):
     cray_cray.add_variable("BOOTSTRAP_TOOLSET","cray")
     cray_cray.add_variable("LAYOUT","versioned")
     cray_cray.add_variable("PRGENV","PrgEnv-cray")
-    cray_cray.add_variable("SITE_CONFIG","$WK/build/site_config/site-config-cray.jam")
+    cray_cray.add_variable("SITE_CONFIG","$WK/build_scripts/site_config/site-config-cray.jam")
     cray_cray.add_variable("ROOT_WK","/perm/ma/ma0/workspace/CRAY")
     cray_cray.add_variable("CUSTOM_BJAM_ARGS","toolset=cray cxxflags=-fPIC")  
 
@@ -311,7 +311,7 @@ def add_redhat_variables( redhat ):
     redhat.add_variable("ROOT_WK","/vol/ecf/redhat")
     redhat.add_variable("BOOST_DIR","/vol/ecf/redhat/boost")
     redhat.add_variable("ARCH","redhat")
-    redhat.add_variable("SITE_CONFIG","$WK/build/site_config/site-config-Linux64.jam")
+    redhat.add_variable("SITE_CONFIG","$WK/build_scripts/site_config/site-config-Linux64.jam")
     redhat.add_variable("CUSTOM_BJAM_ARGS","c++-template-depth=512")
  
 def add_remote_opensuse103_variables( opensuse103 ):
@@ -327,7 +327,7 @@ def add_opensuse103_variables( opensuse103 ):
     opensuse103.add_variable("ROOT_WK","/vol/ecf/opensuse103")
     opensuse103.add_variable("BOOST_DIR","/vol/ecf/opensuse103/boost")
     opensuse103.add_variable("ARCH","opensuse103")
-    opensuse103.add_variable("SITE_CONFIG","$WK/build/site_config/site-config-Linux.jam")
+    opensuse103.add_variable("SITE_CONFIG","$WK/build_scripts/site_config/site-config-Linux.jam")
      
 def add_build_debug( parent ): 
     f = parent.add_family("build_debug")

@@ -78,7 +78,7 @@ rm -rf ../cmake_build_dir/ecflow/$mode_arg
 
 # clean up source before packaging, do this after deleting ecbuild
 if [[ $package_source_arg = package_source ]] ; then
-	source $WK/build/clean.sh
+	source $WK/build_scripts/clean.sh
 fi
 
 mkdir -p ../cmake_build_dir/ecflow/$mode_arg

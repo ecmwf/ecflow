@@ -8,15 +8,15 @@ set -u # fail when using an undefined variable
 set -x # echo script lines as they are executed
 
 # =======================================================================
-# Create build scripts files. Must be before python $WK/build/nightly/build.py
+# Create build scripts files. Must be before python $WK/build_scripts/nightly/build.py
 # =======================================================================
 rm -rf nightly
-cp -r $WK/build/nightly .
+cp -r $WK/build_scripts/nightly .
 
 # =======================================================================
 # Generate the defs, the is loaded into the server by load.py
 # =======================================================================
-python $WK/build/nightly/build.py
+python $WK/build_scripts/nightly/build.py
 if [[ $? = 1 ]] ; then
    exit 1
 fi
@@ -41,7 +41,7 @@ sleep 4
 # load the build defs, in the server then delete generated defs.
 # Make sure server is running
 # =======================================================================
-python $WK/build/nightly/load.py
+python $WK/build_scripts/nightly/load.py
 
 # =======================================================================
 # Start the viewer

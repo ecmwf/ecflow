@@ -35,12 +35,12 @@ if test_uname Linux ; then
 elif test_uname HP-UX ; then
 
   # Hack for utf8_codecvt_facet due to compiler build error on ACC
-  cp $WK/build/hpux_fix/utf8_codecvt_facet.cpp  $BOOST_ROOT/libs/detail/
+  cp $WK/build_scripts/hpux_fix/utf8_codecvt_facet.cpp  $BOOST_ROOT/libs/detail/
    
 elif test_uname AIX ; then  
    
    # Fix bug where release version crashes due to bug in Serialization/compiler
-   # See file $WK/build/aix_fix/README
-   cp $WK/build/aix_fix/singleton.hpp $BOOST_ROOT/boost/serialization/
-   cp $WK/build/aix_fix/force_include.hpp $BOOST_ROOT/boost/serialization/
+   # See file $WK/build_scripts/aix_fix/README
+   cp $WK/build_scripts/aix_fix/singleton.hpp $BOOST_ROOT/boost/serialization/
+   cp $WK/build_scripts/aix_fix/force_include.hpp $BOOST_ROOT/boost/serialization/
 fi

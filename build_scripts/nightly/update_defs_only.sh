@@ -12,9 +12,9 @@ cd $SCRATCH
 rm -rf build.def
 
 # Generate the defs
-python $WK/build/nightly/build.py
+python $WK/build_scripts/nightly/build.py
 cat build.def
 
 # load the generated defs, *ASSUMES* server is running
-python $WK/build/nightly/load.py
+python $WK/build_scripts/nightly/load.py
 

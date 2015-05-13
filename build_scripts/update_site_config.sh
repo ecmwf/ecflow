@@ -52,7 +52,7 @@ if test_uname Linux ; then
        CXXFLAGS=cxxflags=-fPIC
        layout=versioned  
        
-       cp $WK/build/site_config/site-config-cray.jam $SITE_CONFIG_LOCATION
+       cp $WK/build_scripts/site_config/site-config-cray.jam $SITE_CONFIG_LOCATION
        if [ "$PE_ENV" = INTEL ] ; then
           tool=intel
        fi
@@ -60,23 +60,23 @@ if test_uname Linux ; then
           tool=cray
        fi
     else
-       cp $WK/build/site_config/site-config-Linux64.jam $SITE_CONFIG_LOCATION  
+       cp $WK/build_scripts/site_config/site-config-Linux64.jam $SITE_CONFIG_LOCATION  
     fi
      
   else 
-    cp $WK/build/site_config/site-config-Linux.jam $SITE_CONFIG_LOCATION
+    cp $WK/build_scripts/site_config/site-config-Linux.jam $SITE_CONFIG_LOCATION
   fi
   
 elif test_uname HP-UX ; then
 
   tool=acc
-  cp $WK/build/site_config/site-config-HPUX.jam $SITE_CONFIG_LOCATION
+  cp $WK/build_scripts/site_config/site-config-HPUX.jam $SITE_CONFIG_LOCATION
    
 elif test_uname AIX ; then
 
    # on c1a
    tool=vacpp
-   cp $WK/build/site_config/site-config-AIX.jam $SITE_CONFIG_LOCATION
+   cp $WK/build_scripts/site_config/site-config-AIX.jam $SITE_CONFIG_LOCATION
  
 fi
 

@@ -25,7 +25,7 @@ echo "STARTING   PE_ENV=$PE_ENV"
    
 # setup boost
 export BOOST_ROOT=/perm/ma/ma0/boost/boost_1_53_0
-cp $WK/build/site_config/site-config-cray.jam $BOOST_ROOT/tools/build/v2/site-config.jam
+cp $WK/build_scripts/site_config/site-config-cray.jam $BOOST_ROOT/tools/build/v2/site-config.jam
    
 if [[ "$1" = cray ]] ; then
    if [[ "$PE_ENV" = INTEL ]] ; then
@@ -40,7 +40,7 @@ if [[ "$1" = cray ]] ; then
    export COMPILER_VERSION=$(echo $CRAY_CC_VERSION | sed 's/\.//' | cut -c1-2)
    export WK=/perm/ma/ma0/workspace/$PE_ENV/ecflow
    export BOOST_ROOT=/perm/ma/ma0/boost/boost_1_55_0
-   cp $WK/build/site_config/site-config-cray.jam $BOOST_ROOT/tools/build/v2/site-config.jam
+   cp $WK/build_scripts/site_config/site-config-cray.jam $BOOST_ROOT/tools/build/v2/site-config.jam
    alias bjam='$BOOST_ROOT/bjam cxxflags=-hPIC toolset=cray'
    
    # module cray-libsci interferes with ecflow linking, hence disable

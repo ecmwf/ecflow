@@ -109,5 +109,3 @@ using acc : : : <compileflags>+W2236,2461,2191,2815,4232,4189
           ;
           
 using testing ;
-
-# - If you change python version ,remember to change: $WK/build/install_ecflow.sh: ECFLOW_PYTHON_INSTALL_DIR

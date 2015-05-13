@@ -74,8 +74,8 @@
   ::
   
    > cd $BOOST_ROOT
-   > $WK/build/boost_1_53_fix.sh    # fix for boost, only for some platforms
-   > $WK/build/boost_build.sh       # compile boost libs used by ecFlow
+   > $WK/build_scripts/boost_1_53_fix.sh    # fix for boost, only for some platforms
+   > $WK/build_scripts/boost_build.sh       # compile boost libs used by ecFlow
   
 * We now need to build ecFlow. Currently ecflowview is only built if 
   environment variable of name ARCH is set to linux::

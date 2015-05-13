@@ -9,4 +9,4 @@ set -x # echo script lines as they are executed
 
 # copy associated scripts files
 cd $SCRATCH
-cp -r $WK/build/nightly .
+cp -r $WK/build_scripts/nightly .

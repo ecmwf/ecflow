@@ -35,19 +35,19 @@ if test_uname Linux ; then
 elif test_uname HP-UX ; then
 
   # Hack for utf8_codecvt_facet due to compiler build error on ACC
-  cp $WK/build/hpux_fix/boost_1_53_0/utf8_codecvt_facet.ipp  $BOOST_ROOT/boost/detail/.
+  cp $WK/build_scripts/hpux_fix/boost_1_53_0/utf8_codecvt_facet.ipp  $BOOST_ROOT/boost/detail/.
 
   # Seems to only affect debug build of ecflow(serialisation) on HP-UX
   # Hack because:
   #   more than one instance of overloaded function "throw_exception" matches the argument list
   #
-  cp $WK/build/hpux_fix/boost_1_53_0/smart_cast.hpp  $BOOST_ROOT/boost/serialization/.
+  cp $WK/build_scripts/hpux_fix/boost_1_53_0/smart_cast.hpp  $BOOST_ROOT/boost/serialization/.
    
 elif test_uname AIX ; then  
    
    # Fix bug with thread.cpp   libs/thread/src/pthread/thread.cpp
-   # See file $WK/build/aix_fix/README 
-   cp $WK/build/aix_fix/boost_1_53_0/thread.cpp  $BOOST_ROOT/libs/thread/src/pthread/ 
+   # See file $WK/build_scripts/aix_fix/README 
+   cp $WK/build_scripts/aix_fix/boost_1_53_0/thread.cpp  $BOOST_ROOT/libs/thread/src/pthread/ 
 fi
 
  

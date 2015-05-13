@@ -31,6 +31,6 @@ test_uname ()
 if test_uname HP-UX ; then
 
   # Hack for utf8_codecvt_facet due to compiler build error on ACC
-  cp $WK/build/hpux_fix/boost_1_51_0/utf8_codecvt_facet.ipp  $BOOST_ROOT/boost/detail/.
+  cp $WK/build_scripts/hpux_fix/boost_1_51_0/utf8_codecvt_facet.ipp  $BOOST_ROOT/boost/detail/.
 
 fi

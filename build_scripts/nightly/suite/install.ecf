@@ -17,27 +17,27 @@ else
 
    if [[ %ARCH% = linux64 ]] ; then
    
-      rsh -l emos lxb "$WK/build/install_ecflow.sh release"
+      rsh -l emos lxb "$WK/build_scripts/install_ecflow.sh release"
     
    elif [[ %ARCH% = cray ]] ; then
    
-      rsh -l emos cct "$WK/build/install_ecflow.sh release"
+      rsh -l emos cct "$WK/build_scripts/install_ecflow.sh release"
    
    elif [[ %ARCH% = linux64 ]] ; then
    
-      rsh -l emos lxb "$WK/build/install_ecflow.sh release"
+      rsh -l emos lxb "$WK/build_scripts/install_ecflow.sh release"
    
    elif [[ %ARCH% = opensuse113  ]] ; then
    
-      rsh -l emos opensuse113 "$WK/build/install_ecflow.sh release"
+      rsh -l emos opensuse113 "$WK/build_scripts/install_ecflow.sh release"
  
    elif [[ %ARCH% = redaht  ]] ; then
    
-      rsh -l emos ecgb "$WK/build/install_ecflow.sh release"     
+      rsh -l emos ecgb "$WK/build_scripts/install_ecflow.sh release"     
       
    elif [[ %ARCH% = opensuse103  ]] ; then
    
-      rsh -l emos opensuse103 "$WK/build/install_ecflow.sh release"
+      rsh -l emos opensuse103 "$WK/build_scripts/install_ecflow.sh release"
    
    fi
 fi

@@ -21,10 +21,10 @@ else
          if [[ "$remote_host" != "" ]] 
          then
             # NOTE: uses SSH
-            scp $WK/build/install_ecflow.sh  $remote_host:$root_wk/ecflow/build/.
+            scp $WK/build_scripts/install_ecflow.sh  $remote_host:$root_wk/ecflow/build/.
          fi
       else
-         rcp $WK/build/install_ecflow.sh  $remote_host:$root_wk/ecflow/build/.
+         rcp $WK/build_scripts/install_ecflow.sh  $remote_host:$root_wk/ecflow/build/.
       fi
    fi
 fi
