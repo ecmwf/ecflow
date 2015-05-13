@@ -124,7 +124,6 @@ def add_linux_64_variables( linux_64 ):
     linux_64.add_variable("SITE_CONFIG","$WK/build_scripts/site_config/site-config-Linux64.jam")
     
 def add_linux_64_lxop_variables( linux_64 ): 
-    linux_64.add_variable("REMOTE_HOST","lxop")
     linux_64.add_variable("ROOT_WK","/gpfs/lxop/build/builds")
     linux_64.add_variable("BOOST_DIR","/gpfs/lxop/build/builds/boost")
     linux_64.add_variable("ARCH","linux64")
@@ -289,15 +288,9 @@ def add_cray_variables( cray ):
     cray.add_variable("ARCH","cray")
     cray.add_variable("MODULE_LOAD_CRAY_COMPILER","module load cce/8.3.1")
     if is_cray_cct( cray ):
-        cray.add_variable("REMOTE_HOST","cct")
         cray.add_variable("MODULE_LOAD_GCC","module load gcc/4.6.3")
     else:
         cray.add_variable("MODULE_LOAD_GCC","module load gcc/4.8.2")
-        if is_cray_cca( cray ):
-            cray.add_variable("REMOTE_HOST","cca")
-        else:
-            cray.add_variable("REMOTE_HOST","ccb")
-
     
 def add_remote_redhat_variables( redhat ):
     redhat.add_variable("COMPILER_TEST_PATH","gcc-4.4.7/$mode")
