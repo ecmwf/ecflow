@@ -34,8 +34,9 @@ cd build
 #  By default it looks for environment variable BOOST_ROOT, if not it can specified on the command line. i.e
 #  -DBOOST_ROOT=/var/tmp/ma0/boost/boost_1_53_0
 
-cmake .. -DCMAKE_INSTALL_PREFIX=$prefix_arg  \
-         -DCMAKE_BUILD_TYPE=Release 
+cmake .. 
+         # -DCMAKE_INSTALL_PREFIX=$prefix_arg  \
+         # -DCMAKE_BUILD_TYPE=Release 
          # -DENABLE_GUI=OFF    \
          # -DENABLE_PYTHON=OFF  \
          # -DCMAKE_PYTHON_INSTALL_TYPE=local \
