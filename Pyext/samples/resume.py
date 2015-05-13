@@ -16,7 +16,7 @@ import argparse # for argument parsing
 
 if __name__ == "__main__":
     
-    DESC = """Will resume any suspended 'node' who name mache's input
+    DESC = """Will resume any suspended 'node' who name matches input
               Usage:
                 Example1: resume all suspended node whose name matches 'fred' for suite grib_api
                    resume.py --host cca --port 4141 --suite grib_api --name fred
@@ -32,8 +32,8 @@ if __name__ == "__main__":
     PARSER.add_argument('--name', default="install",   
                         help="The name of the node")
     ARGS = PARSER.parse_args()
-    #print ARGS    
-    
+    print ARGS    
+     
     # ===========================================================================
     CL = ecflow.Client(ARGS.host, ARGS.port)
     try:
@@ -47,18 +47,33 @@ if __name__ == "__main__":
         if defs == None :
             print "No definition found, exiting..."
             exit(0) 
-            
-        suite = defs.find_suite(ARGS.suite)
-        if suite != None:
-            paths_list = []
-            node_vec = suite.get_all_nodes()
-            for node in node_vec:
-                if node.name() == ARGS.name and node.get_dstate() == DState.SUSPENDED:
-                    paths_list.append(node.get_abs_node_path())
+         
+        paths_list = []
+        node_vec = defs.get_all_nodes()
+        for node in node_vec:
+            if node.name() != ARGS.name: continue
+            if node.get_dstate() != ecflow.DState.suspended: continue
 
-            print paths_list
-            if len(paths_list) > 0:
-                 CL.resume(paths_list)
+            path = node.get_abs_node_path()
+            paths = path.split('/')
+            if paths[1] == ARGS.suite:
+                paths_list.append(path) 
+                
+        if len(paths_list) > 0:
+            CL.resume(paths_list)
+
+#        # requires ecflow >= 4.0.8
+#         suite = defs.find_suite(ARGS.suite)
+#         if suite != None:
+#             paths_list = []
+#             node_vec = suite.get_all_nodes()
+#             for node in node_vec:
+#                 if node.name() == ARGS.name and node.get_dstate() == DState.SUSPENDED:
+#                     paths_list.append(node.get_abs_node_path())
+# 
+#             print paths_list
+#             if len(paths_list) > 0:
+#                  CL.resume(paths_list)
         
     except RuntimeError, ex:
         print "Error: " + str(ex)
