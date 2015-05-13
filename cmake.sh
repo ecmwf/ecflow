@@ -74,15 +74,15 @@ major=$(cat VERSION.cmake   | grep 'set( ECFLOW_MAJOR'   | awk '{print $3}'| sed
 minor=$(cat VERSION.cmake   | grep 'set( ECFLOW_MINOR'   | awk '{print $3}'| sed 's/["]//g')
 
 # ====================================================================================
-rm -rf ecbuild/$mode_arg
+rm -rf ../cmake_build_dir/ecflow/$mode_arg
 
 # clean up source before packaging, do this after deleting ecbuild
 if [[ $package_source_arg = package_source ]] ; then
 	source $WK/build/clean.sh
 fi
 
-mkdir -p ecbuild/$mode_arg
-cd ecbuild/$mode_arg
+mkdir -p ../cmake_build_dir/ecflow/$mode_arg
+cd ../cmake_build_dir/ecflow/$mode_arg
 
 # ====================================================================================  
 cmake_build_type=
@@ -99,7 +99,7 @@ fi
 #   *AND* for testing python install to local directory
 #
 
-cmake ../.. -DCMAKE_MODULE_PATH=$WK/../ecbuild/cmake \
+cmake ../../../ecflow -DCMAKE_MODULE_PATH=$WK/../ecbuild/cmake \
             -DCMAKE_BUILD_TYPE=$cmake_build_type \
             -DCMAKE_INSTALL_PREFIX=/var/tmp/ma0/cmake/ecflow/$release.$major.$minor \
             -DCMAKE_PYTHON_INSTALL_TYPE=local \

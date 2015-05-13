@@ -134,9 +134,15 @@ if(ENABLE_GUI)
 endif()
 
 # Directories not need in the distribution tar ball!
-ecbuild_add_resources( TARGET build_nightly DONT_PACK_DIRS build/nightly)
-ecbuild_add_resources( TARGET SCRATCH DONT_PACK_DIRS SCRATCH)
-ecbuild_add_resources( TARGET Doc DONT_PACK_DIRS Doc/func_spec Doc/misc Doc/New_viewer Doc/newsletter Doc/online Doc/presentations Doc/tac)
+#ecbuild_add_resources( TARGET build DONT_PACK_DIRS build/nightly build/test_bench)
+#ecbuild_add_resources( TARGET build PACK )
+#ecbuild_add_resources( TARGET SCRATCH DONT_PACK_DIRS SCRATCH)
+#ecbuild_add_resources( TARGET Doc DONT_PACK_DIRS Doc/func_spec Doc/misc Doc/New_viewer Doc/newsletter Doc/online Doc/presentations Doc/tac)
+
+ecbuild_dont_pack( DIRS 
+                   SCRATCH 
+                   Doc/func_spec Doc/misc Doc/New_viewer Doc/newsletter Doc/online Doc/presentations Doc/tac
+)
 
 # =========================================================================================
 # install 

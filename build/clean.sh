@@ -39,6 +39,7 @@ rm -rf *.log
 
 find . -name \*~ -exec rm -rf \*~ {} \; -print
 find . -name \*.mk -exec rm -rf \*.mk {} \; -print
+find . -name \*.o -exec rm -rf \*.mk {} \; -print
 find . -name \*.so -exec rm -rf \*.so {} \; -print
 find . -name \*.tmp -exec rm -rf \*.tmp {} \; -print
 find . -name \*.job\* -exec rm -rf \*.job\* {} \; -print
