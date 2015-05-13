@@ -3,7 +3,6 @@
 # Error handling
 set -e # stop the shell on first error
 set -u # fail when using an undefined variable
-set -x # echo script lines as they are executed
 
 # ====================================================================
 show_error_and_exit() {
@@ -11,18 +10,20 @@ show_error_and_exit() {
    echo " cmake.sh debug || release [clang] [san] [make] [verbose] [test] [package_source] [debug]"
    echo "  "
    echo "   make           - run make after cmake"
-   echo "   test           - run tests"
+   echo "   test           - run all the tests"
+   echo "   test_safe      - only run deterministic tests"
    echo "   san            - is short for clang thread sanitiser"
    echo "   package_source - produces ecFlow-4.0.8-Source.tar.gz file, for users"
    echo "                    copies the tar file to $SCRATCH"
-   echo "   debug          - copies ecFlow-4.0.8-Source.tar.gz to /tmp/$USER/tmp/. and untars file"
+   echo "   copy_tarball   - copies ecFlow-4.0.8-Source.tar.gz to /tmp/$USER/tmp/. and untars file"
    exit 1
 }
 
-debug=
+copy_tarball_arg=
 package_source_arg=
 make_arg=
 test_arg=
+test_safe_arg=
 clang_arg=
 clang_sanitiser_arg=
 mode_arg=
@@ -40,8 +41,12 @@ while [[ "$#" != 0 ]] ; do
       verbose_arg=$1
    elif  [[ "$1" = package_source ]] ; then
       package_source_arg=$1
-   elif  [[ "$1" = debug ]] ; then
-      debug=$1
+   elif  [[ "$1" = copy_tarball ]] ; then
+      copy_tarball_arg=$1
+   elif  [[ "$1" = test ]] ; then
+      test_arg=$1
+   elif  [[ "$1" = test_safe ]] ; then
+      test_safe_arg=$1
    else
    	 show_error_and_exit
    fi
@@ -55,6 +60,16 @@ if [ ${#mode_arg} -eq 0 ] ; then
    exit 1
 fi
 
+echo "copy_tarball_arg=$copy_tarball_arg"
+echo "package_source_arg=$package_source_arg"
+echo "make_arg=$make_arg"
+echo "test_arg=$test_arg"
+echo "test_safe_arg=$test_safe_arg"
+echo "clang_arg=$clang_arg"
+echo "clang_sanitiser_arg=$clang_sanitiser_arg"
+echo "mode_arg=$mode_arg"
+echo "verbose_arg=$verbose_arg"
+set -x # echo script lines as they are executed
 
 # ====================================================================
 # To load module automatically requires Korn shell, system start scripts
@@ -122,19 +137,22 @@ if [[ $make_arg = make ]] ; then
 fi
 
 # =============================================================================================
-if [[ $test_arg = test ]] ; then
+if [[ $test_arg = test || $test_safe_arg = test_safe ]] ; then
 	ctest -R ^u_
 	ctest -R c_
 	ctest -R py_u
+	ctest -R s_client
+fi
+if [[ $test_arg = test ]] ; then
+	ctest -R s_test
 	ctest -R py_s
-	ctest -R s_
 fi
 
 # =============================================================================================
 if [[ $package_source_arg = package_source ]] ; then
 	make package_source
 	
-	if [[ $debug = debug ]] ; then
+	if [[ $copy_tarball_arg = copy_tarball ]] ; then
 		rm -rf /tmp/$USER/tmp
 		mkdir -p /tmp/$USER/tmp
 		cp ecFlow-$release.$major.$minor-Source.tar.gz  /tmp/$USER/tmp/.
@@ -160,21 +178,3 @@ fi
 #
 #    -DCMAKE_PYTHON_INSTALL_PREFIX should *only* used when using python setup.py (CMAKE_PYTHON_INSTALL_TYPE=setup)
 #    *AND* for testing python install to local directory
-
-# ============================================================================================
-# The process for thread checking very simple when using clang thread sanitiser
-#*) Load the module for Clang
-#module unload gnu
-#module load clang
-#
-#*) Run cmake with the sanitizer
-#cmake /path/to/source -DCMAKE_C_FLAGS="-fsanitize=thread" ...
-#
-#*) Compile and run tests
-#make -jN
-#ctest -jN
-#
-#If there are failures, the executable will fail with a non-zero exit code and a message on stderr e.g.
-#WARNING: ThreadSanitizer: data race
-#...
-#WARNING: ThreadSanitizer: heap-use-after-free 
