@@ -82,10 +82,3 @@ using testing ;
 local motif_library = [ os.environ MOTIF_LIBRARY ] ;
 motif_library default = "/usr/lib64" ; 
 constant MOTIF_LIBRARY : $(motif_library) ; 
-
-# ================================================================================
-# Link with FDB, (PRODGEN)
-lib libfdb
-    :
-    : <file>/usr/local/lib/metaps/lib/libfdb.a 
-    ;

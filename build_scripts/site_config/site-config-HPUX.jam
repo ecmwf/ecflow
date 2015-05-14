@@ -89,7 +89,7 @@ project site-config
 #     +check=uninit -z
 #using acc :  : : <compileflags>+w
 #                 <compileflags>+W2236,2461,2261,2236,4296,2401,2340,4255,4227,2193,2324,4285
-#		            <compileflags>+check=all
+#		          <compileflags>+check=all
 #                 ;
 
 

@@ -1,6 +1,6 @@
 #!/bin/sh
 
-## Copyright 2009-2012 ECMWF. 
+## Copyright 2009-2015 ECMWF. 
 ## This software is licensed under the terms of the Apache Licence version 2.0 
 ## which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 ## In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -17,7 +17,7 @@ echo "BOOST_ROOT=$BOOST_ROOT"
 #
 SITE_CONFIG_LOCATION=$BOOST_ROOT/tools/build/v2/site-config.jam
 BOOST_VERSION="$(basename $BOOST_ROOT)"
-if [[ "$BOOST_VERSION" = boost_1_56_0 || "$BOOST_VERSION" = boost_1_57_0 ]] ; then
+if [[ "$BOOST_VERSION" = boost_1_56_0 || "$BOOST_VERSION" = boost_1_57_0 || "$BOOST_VERSION" = boost_1_58_0]] ; then
    SITE_CONFIG_LOCATION=$BOOST_ROOT/tools/build/src/site-config.jam
 fi
 
@@ -71,7 +71,9 @@ if test_uname Linux ; then
           tool=cray
        fi
     else
-       cp $WK/build_scripts/site_config/site-config-Linux64.jam $SITE_CONFIG_LOCATION  
+       cp $WK/build_scripts/site_config/site-config-Linux64.jam $SITE_CONFIG_LOCATION 
+       # for boost 1.53 and > gcc 4.8 get a lot warning messages use suppress
+       #CXXFLAGS=-no-unused-local-typedefs 
     fi
      
   else 
@@ -97,7 +99,7 @@ fi
 #
 # Note: if '--build-dir=./tmpBuildDir' is omitted, boost will build the libs in a directory:
 #   bin.v2/
-# On completion , the library is copied to:
+# On completion, the library is copied to:
 #   stage/lib/
 # 
 

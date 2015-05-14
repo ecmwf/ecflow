@@ -84,8 +84,8 @@ lib boost_python_static   : : <variant>release <file>$(BOOST_ROOT)/stage/lib/lib
 #    "/s1a/emos_esuite/emos_data/sms/boost/boost_1_45_0/boost/serialization/singleton.hpp", line 126.17: 1540-2883 (W) Inline function "void use(const iserializer<boost::archive::text_iarchive,PartExpression> &)" given attribute noinline.
 
 project site-config 
-	: requirements <include>$(BOOST_ROOT)  
-	: requirements <threading>multi 
+   : requirements <include>$(BOOST_ROOT)  
+   : requirements <threading>multi 
    : requirements <cxxflags>-qsuppress=1540-0198                          # (W) The omitted keyword "private" is assumed for base class
    : requirements <cxxflags>-qsuppress=1540-2883                          # (W) Inline function "<function>" given attribute noinline.
    : requirements <variant>release:<cxxflags>-qsuppress=1500-029          # supress could not be inlined message
@@ -98,11 +98,3 @@ project site-config
 #
 using vacpp ;
 using testing ;
-
-# ================================================================================
-# Link with FDB  (PRODGEN)
- 
-lib libfdb
-    :
-    : <file>/usr/local/lib/libfdb.a   
-    ;

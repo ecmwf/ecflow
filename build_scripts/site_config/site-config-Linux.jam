@@ -81,10 +81,3 @@ motif_library default = "/usr/lib64" ;
 constant MOTIF_LIBRARY : $(motif_library) ; 
 
 MOTIF_LIBRARY default = /usr/lib ;
-
-# ================================================================================
-# Link with FDB, (PRODGEN)
-lib libfdb
-    :
-    : <file>/usr/local/lib/metaps/lib/libfdb.a 
-    ;
