@@ -4,39 +4,36 @@
  
 * dependencies
 
-   * | python 2.7,  Python 3.0 not tested. 
-     | If you intend to use ecFlow Python api, You will need to install python.
-     | If python installed in non standard installation, you may need to
-     | customise $BOOST_ROOT/tools/build/v2/site-config.jam
-     | The python installation should include the development packages
+   - python 2.7,  Python 3.0 not tested. 
+     If you intend to use ecFlow Python api, You will need to install python.
+     If python installed in non standard installation, you may need to
+     customise $BOOST_ROOT/tools/build/v2/site-config.jam
+     The python installation should include the development packages
      
-   * Xlib, X11, XMotif for :term:`ecflowview`. Do *not* use Lesstif library
+   - Xlib, X11, XMotif for :term:`ecflowview`. Do *not* use Lesstif library
      to compile ecflowview as a replacement for Motif. OpenMotif can be 
      downloaded from http://www.ist.co.uk/downloads/motif_download.html
      
-
 * ecfFlow consists of two tar files i.e. :
    
-   * :file:`boost_1_53_0.tar.gz`
-   * :file:`ecFlow-4.0.8-Source.tar.gz`
+   - boost_1_53_0.tar.gz
+   - ecFlow-4.0.8-Source.tar.gz
    
 * Create a directory for the build::
 
-   > mkdir /tmp/ecflow_build
+  > mkdir /tmp/ecflow_build
    
-* Copy the the two tar file into this directory, then change directory to :file:`/tmp/ecflow_build`
+* Copy the the two tar file into this directory, then change directory to /tmp/ecflow_build
    
 * Un-zip then un-tar the two file files::
 
-   # gunzip boost_1_53_0.tar.gz
-   # gunzip ecFlow-4.0.8-Source.tar.gz
-   # tar -xf boost_1_53_0.tar
-   # tar -xf ecFlow-4.0.8-Source.tar
+  > tar -zxf boost_1_53_0.tar.gz
+  > tar -zxf ecFlow-4.0.8-Source.tar.gz
    
 * You should have two directories created::
 
-   boost_1_53_0
-   ecFlow-4.0.8-Source
+   - boost_1_53_0
+   - ecFlow-4.0.8-Source
     
 * Create two environment variables. These are used by some of scripts::
 
@@ -45,12 +42,12 @@
    
 * There are two ways of building ecflow, boost-build/bjam or cmake
   >> Preference should be given to using cmake <<
-  However first we need to build boost.
+  However first we need to build boost libraries
 
 boost libs
 =====================================================================
 
-* Boost uses bjam for build ing the boost libraries.  
+* Boost uses bjam for building the boost libraries.  
   bjam source is available in boost, hence we first need to build bjam itself
   
   > cd $BOOST_ROOT
@@ -74,43 +71,55 @@ cmake
   > cd /tmp/ecflow_build/ecFlow-4.0.8-Source
   > mkdir build; cd build
   > cmake ..  
-  > make 
+  > make -j2
   > make install
+  > make test 
   
-* Optionally you can specify install dir:
+* Optionally you can specify install prefix directory and to build the most optimised:
   > cd /tmp/ecflow_build/ecFlow-4.0.8-Source
   > mkdir build; cd build
   > cmake .. -DCMAKE_INSTALL_PREFIX=/var/tmp/ma0/cmake/ecflow \
              -DCMAKE_BUILD_TYPE=Release
-  > make 
+  > make -j2
   > make install
 
-* Optionally if you do *NOT* want to build the GUI or use the python api, 
-  replace the cmake step with
-  
+* Optionally if you do *NOT* want to build the GUI or use the python api:
+   
+  > cd /tmp/ecflow_build/ecFlow-4.0.8-Source
+  > mkdir build; cd build
   > cmake .. -DCMAKE_INSTALL_PREFIX=/var/tmp/ma0/cmake/ecflow \
              -DCMAKE_BUILD_TYPE=Release \
              -DENABLE_GUI=OFF    \
              -DENABLE_PYTHON=OFF
+  > make -j2
+  > make install
 
 * Optionally if you did not export BOOST_ROOT you can specify on the command line:
 
+  > cd /tmp/ecflow_build/ecFlow-4.0.8-Source
+  > mkdir build; cd build
   > cmake .. -DCMAKE_INSTALL_PREFIX=/usr/local/apps/ecflow \
              -DCMAKE_BUILD_TYPE=Release \
              -DBOOST_ROOT=/tmp/ecflow_build/boost_1_53_0
+  > make -j2
+  > make install
 
 * On some platforms(AIX) you may need to specify the c++ compiler
 
- > cmake .. -DCMAKE_INSTALL_PREFIX=/usr/local/apps/ecflow \
-            -DCMAKE_BUILD_TYPE=Release \
-            -DCMAKE_CXX_COMPILER=xlC_r"
+  > cd /tmp/ecflow_build/ecFlow-4.0.8-Source
+  > mkdir build; cd build
+  > cmake .. -DCMAKE_INSTALL_PREFIX=/usr/local/apps/ecflow \
+             -DCMAKE_BUILD_TYPE=Release \
+             -DCMAKE_CXX_COMPILER=xlC_r"
+  > make -j2
+  > make install
 
 boost/bjam
 =====================================================================
 * For installation the following environment variables are required.
   
-      ECFLOW_INSTALL_DIR         # Directory Location for client ,server and gui program's
-      ECFLOW_PYTHON_INSTALL_DIR  # Directory Location for ecflow python package
+  ECFLOW_INSTALL_DIR         # Directory Location for client ,server and gui program's
+  ECFLOW_PYTHON_INSTALL_DIR  # Directory Location for ecflow python package
     
   The python installation can be customised, by changing Pyext/jamfile.jam and site-config.jam
   
@@ -138,14 +147,14 @@ boost/bjam
       
   This will create directories::
   
-  <ECFLOW_INSTALL_DIR>/bin
-  <ECFLOW_INSTALL_DIR>/lib
-  <ECFLOW_INSTALL_DIR>/doc
-  <ECFLOW_PYTHON_INSTALL_DIR> 
+     <ECFLOW_INSTALL_DIR>/bin
+     <ECFLOW_INSTALL_DIR>/lib
+     <ECFLOW_INSTALL_DIR>/doc
+     <ECFLOW_PYTHON_INSTALL_DIR> 
       
   Depending on your umask setting you may need to call chmod 755 on the executables  
      
-* To use the :ref:`python_api`, you need to add/change 
+* To use the python_api, you need to add/change 
   PYTHONPATH and LD_LIBRARY_PATH
   
       export PYTHONPATH=$PYTHONPATH:$ECFLOW_PYTHON_INSTALL_DIR
