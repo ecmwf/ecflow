@@ -49,5 +49,3 @@ elif test_uname AIX ; then
    # See file $WK/build_scripts/aix_fix/README 
    cp $WK/build_scripts/aix_fix/boost_1_53_0/thread.cpp  $BOOST_ROOT/libs/thread/src/pthread/ 
 fi
-
- 
