@@ -5,7 +5,7 @@ import ecflow
 # =====================================================================================
 # Load the defs from disk
 # =====================================================================================
-generated_defs_file = os.getenv("WK") + "/build/test_bench/test_force_cmd.def"
+generated_defs_file = os.getenv("WK") + "/build_scripts/test_bench/test_force_cmd.def"
 defs = ecflow.Defs(generated_defs_file)
  
 # =====================================================================================
@@ -13,8 +13,8 @@ defs = ecflow.Defs(generated_defs_file)
 # This assumes the ECF_HOME and ECF_INCLUDE have not been defined
 # =====================================================================================
 for suite in defs.suites:
-    suite.add_variable("ECF_HOME", os.getenv("WK") + "/build/test_bench/test_force_cmd")
-    suite.add_variable("ECF_INCLUDE", os.getenv("WK") + "/build/test_bench/test_force_cmd/includes")
+    suite.add_variable("ECF_HOME", os.getenv("WK") + "/build_scripts/test_bench/test_force_cmd")
+    suite.add_variable("ECF_INCLUDE", os.getenv("WK") + "/build_scripts/test_bench/test_force_cmd/includes")
 
 defs.generate_scripts()
 

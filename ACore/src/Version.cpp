@@ -28,7 +28,7 @@ namespace ecf {
 //   This file is generated from $WK/VERSION.cmake when cmake is run, i.e
 //   sh -x $WK/cmake.sh debug
 //
-// It is also extracted by python, from VERSION.CMAKE check build/nightly/build.py
+// It is also extracted by python, from VERSION.CMAKE check build_scripts/nightly/build.py
 // This minimises the places where we have hard code the version number.
 //
 // When changing the version change remember to:
@@ -36,7 +36,7 @@ namespace ecf {
 //      required for interactive install
 //
 // To Install a new version on all the different platforms:
-//  . build/nightly/quick_install_.sh
+//  . build_scripts/nightly/quick_install_.sh
 // This is because the definition hold's the last version.
 // Hence we must rerun to update the version.
 //

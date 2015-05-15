@@ -12,14 +12,14 @@ else
    # Copy test.sh & rmbin,sh to $HOME/bin/
    # ============================================================================================
    cd $WK
-   cp build/test.sh  $HOME/bin/test.sh
-   cp build/rmbin.sh $HOME/bin/rmbin.sh
+   cp build_scripts/test.sh  $HOME/bin/test.sh
+   cp build_scripts/rmbin.sh $HOME/bin/rmbin.sh
    
    
    # ============================================================================================
    # will move tar to /var/tmp/ma0/clientRoot/workspace
    # ============================================================================================
-   sh -x build/tar_ecflow.sh
+   sh -x build_scripts/tar_ecflow.sh
    
    
    # ============================================================================================
