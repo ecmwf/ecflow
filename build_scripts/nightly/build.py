@@ -58,6 +58,9 @@ def add_local_job_variables( node ):
     node.add_variable("ECF_INCLUDE",os.getenv("SCRATCH") + "/nightly")   
     node.add_variable("LOCAL_HOST",os.uname()[1])
     node.add_variable("ECF_OUT","") # unset so we use ECF_HOME
+    node.add_variable("GIT","git")    
+    node.add_variable("CMAKE","cmake")
+
 
 def add_localhost_variables( localhost ):
     localhost.add_variable("COMPILER_TEST_PATH","gcc-4.8/$mode")
@@ -67,12 +70,13 @@ def add_localhost_variables( localhost ):
     localhost.add_variable("CUSTOM_BJAM_ARGS","c++-template-depth=512 cxxflags=-Wno-unused-local-typedefs")   # needed for gcc 4.8.1
     localhost.add_variable("ARCH","opensuse131")
     localhost.add_variable("SITE_CONFIG","$WK/build_scripts/site_config/site-config-Linux64.jam")
-    localhost.add_variable("GIT","git")    
     add_local_job_variables( localhost )
     
 def add_localhost_clang_variables( localhost_clang ):
-    localhost_clang.add_variable("COMPILER_TEST_PATH","clang-linux-3.2/$mode")
-    localhost_clang.add_variable("COMPILER_VERSION","clang-linux-3.2")
+    localhost_clang.add_variable("COMPILER_TEST_PATH","clang-linux-3.5.0/$mode")
+    localhost_clang.add_variable("COMPILER_VERSION","clang-linux-3.5.0")
+    localhost_clang.add_variable("MODULE_LOAD","module unload gnu; module load clang")
+    localhost_clang.add_variable("CUSTOM_BJAM_ARGS","cxxflags=-ftemplate-depth=512")
     localhost_clang.add_variable("TOOLSET","clang")
     localhost_clang.add_variable("BOOTSTRAP_TOOLSET","gcc")  # can't seem to build jam with clang, using gcc instead
     localhost_clang.add_variable("REMOTE_COPY","cp")
@@ -406,9 +410,8 @@ def build_localhost( parent ) :
     localhost.add_task("test_server_performance").add_trigger("test_client_performance == complete or test_client_performance == aborted")
     localhost.add_task("test_performance").add_trigger("test_server_performance == complete or test_server_performance == aborted")
     localhost.add_task("test_migration").add_trigger("test_performance == complete or test_server_performance == aborted")
-    localhost.add_task("test_new_client_old_server_319").add_trigger("test_migration == complete or test_migration == aborted")
-    localhost.add_task("test_new_client_old_server_400").add_trigger("test_new_client_old_server_319 == complete or test_new_client_old_server_319 == aborted")
-    localhost.add_task("test_new_client_old_server_404").add_trigger("test_new_client_old_server_400 == complete or test_new_client_old_server_400 == aborted")
+    localhost.add_task("test_new_client_old_server_401").add_trigger("test_migration == complete or test_migration == aborted")
+    localhost.add_task("test_new_client_old_server_404").add_trigger("test_new_client_old_server_401 == complete or test_new_client_old_server_401 == aborted")
     localhost.add_task("test_new_client_old_server_406").add_trigger("test_new_client_old_server_404 == complete or test_new_client_old_server_404 == aborted")
  
 def build_localhost_cmake( parent ) :

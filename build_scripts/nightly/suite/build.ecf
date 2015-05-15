@@ -71,6 +71,9 @@ if [[ %ARCH% = linux64intel ]] ; then
 fi
 
 
+%MODULE_LOAD:%
+
+
 echo $PATH
 if [[ %SET_TO_TEST_SCRIPT% = true ]] ; then
    echo "Test only"
@@ -78,6 +81,8 @@ else
    if [[ %BUILD_TYPE:boost% = cmake ]] ; then
    
       # CMAKE ===========================================================
+      module load cmake
+      
       pwd
       mkdir -p ecbuild/%MODE% 
       cd ecbuild/%MODE%

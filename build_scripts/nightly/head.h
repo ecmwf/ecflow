@@ -124,6 +124,10 @@ trap ERROR 0
 trap '{ echo "Killed by a signal"; ERROR ; }' 1 2 3 4 5 6 7 8 10 12 13 15
 
 
+# Enable module capability for korn shell
+# The alternative is to source .profile, in ECF_JOB_CMD, however that affect all jobs
+source /usr/local/apps/module/init/ksh
+
 %MODULE_LOAD_GIT:module load git%
 
 # last line of head.h

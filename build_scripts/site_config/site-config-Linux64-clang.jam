@@ -73,7 +73,7 @@ project site-config
 #
 # On linux 64, because most of the static library's, are placed in a shared libs(ecflow.so)
 # hence we need to compile with -fPIC
-using clang : : /usr/local/apps/clang/current/bin/clang++ : <cxxflags>-fPIC ;
+using clang : : : <cxxflags>-fPIC ;
 
 using testing ;
 
