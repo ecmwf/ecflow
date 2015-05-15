@@ -58,15 +58,16 @@ def add_local_job_variables( node ):
     node.add_variable("ECF_INCLUDE",os.getenv("SCRATCH") + "/nightly")   
     node.add_variable("LOCAL_HOST",os.uname()[1])
     node.add_variable("ECF_OUT","") # unset so we use ECF_HOME
- 
+
 def add_localhost_variables( localhost ):
     localhost.add_variable("COMPILER_TEST_PATH","gcc-4.8/$mode")
     localhost.add_variable("COMPILER_VERSION","gcc-4.8")
     localhost.add_variable("TOOLSET","gcc")
     localhost.add_variable("BOOTSTRAP_TOOLSET","gcc")
-    localhost.add_variable("CUSTOM_BJAM_ARGS","c++-template-depth=512")   # needed for gcc 4.8.1
+    localhost.add_variable("CUSTOM_BJAM_ARGS","c++-template-depth=512 cxxflags=-Wno-unused-local-typedefs")   # needed for gcc 4.8.1
     localhost.add_variable("ARCH","opensuse131")
     localhost.add_variable("SITE_CONFIG","$WK/build_scripts/site_config/site-config-Linux64.jam")
+    localhost.add_variable("GIT","git")    
     add_local_job_variables( localhost )
     
 def add_localhost_clang_variables( localhost_clang ):
@@ -137,7 +138,7 @@ def add_linux_64_lxc_variables( linux_64 ):
     linux_64.add_variable("ARCH","linux64")
     linux_64.add_variable("SITE_CONFIG","$WK/build_scripts/site_config/site-config-Linux64.jam")
     linux_64.add_variable("GIT","git")   # rely on module load git
-    linux_64.add_variable("CUSTOM_BJAM_ARGS","c++-template-depth=512")   # needed for gcc 4.8.1
+    linux_64.add_variable("CUSTOM_BJAM_ARGS","c++-template-depth=512 cxxflags=-Wno-unused-local-typedefs")   # needed for gcc 4.8.1
 
 def add_linux_64_intel_variables( linux_64_intel ): 
     linux_64_intel.add_variable("REMOTE_HOST","lxb")
@@ -173,7 +174,7 @@ def add_opensuse131_variables( opensuse131 ):
     opensuse131.add_variable("BOOST_DIR","/vol/ecf/opensuse131/boost")
     opensuse131.add_variable("ARCH","opensuse131")
     opensuse131.add_variable("SITE_CONFIG","$WK/build_scripts/site_config/site-config-Linux64.jam")
-    opensuse131.add_variable("CUSTOM_BJAM_ARGS","c++-template-depth=512")   # needed for gcc 4.8.1
+    opensuse131.add_variable("CUSTOM_BJAM_ARGS","c++-template-depth=512 cxxflags=-Wno-unused-local-typedefs")   # needed for gcc 4.8.1
 
 def is_cray_cct( node ):
     if (node.name() == "cray_cct"):
@@ -745,11 +746,11 @@ with defs.add_suite("suite") as suite:
         build.add_defstatus( ecflow.DState.suspended );
     
         git_pull_ecflow = build.add_task("git_pull_ecflow")
-        git_pull_ecflow.add_variable("ARCH","opensuse113")
+        git_pull_ecflow.add_variable("ARCH","opensuse131")
         add_local_job_variables(git_pull_ecflow)  # run this locally
         
         git_pull_ecbuild = build.add_task("git_pull_ecbuild")
-        git_pull_ecbuild.add_variable("ARCH","opensuse113")
+        git_pull_ecbuild.add_variable("ARCH","opensuse131")
         add_local_job_variables(git_pull_ecbuild)  # run this locally
 
         tar_fam = build.add_family("tar")

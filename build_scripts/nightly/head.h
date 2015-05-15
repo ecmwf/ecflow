@@ -40,8 +40,8 @@ ECFLOW_INSTALL_PATH=%ECFLOW_LAST_INSTALLED_VERSION%
 
 #==================================================================================================
 
-# Used to locate ecrcp,python and ecflow_client
-export PATH=/usr/local/bin:$ECFLOW_INSTALL_PATH/bin:$PATH
+# Used to locate ecrcp,git,python and ecflow_client
+export PATH=/usr/local/bin:/usr/bin:$ECFLOW_INSTALL_PATH/bin:$PATH
 
 # ==================================================================================================
 # make sure path to the python interpreter is accessible.
