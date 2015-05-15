@@ -31,6 +31,10 @@ else
 
    cp ../../ecflow_"$release"_"$major"_"$minor".tar.gz /scratch/ma/ma0/.
    
+   # ============================================================================================
+   # Create cmake based tar ball, this will copy tar ball to $SCRATCH
+   # ============================================================================================
+   sh -x cmake.sh release package_source
 fi
 
 %include <tail.h>
