@@ -9,7 +9,7 @@ if [[ %SET_TO_TEST_SCRIPT% = true ]] ; then
    echo "Test only"
 else
 
-   module load valgrind/3.9.0
+   module load valgrind/3.10.1
 
 # user options for Memcheck:
 #    --leak-check=no|summary|full     search for memory leaks at exit?  [summary]

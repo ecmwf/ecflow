@@ -17,7 +17,7 @@ else
    rm -rf `hostname`.*
    
    # Load the latest valgrind. 
-   module load valgrind/3.9.0
+   module load valgrind/3.10.1
    
    # test server for memory leaks, & give it time to start
    valgrind --leak-check=full --show-reachable=yes --error-exitcode=1 Server/bin/%COMPILER_VERSION%/release/ecflow_server --ecfinterval=3 &
