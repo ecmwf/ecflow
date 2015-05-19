@@ -92,10 +92,11 @@ void LateAttr::checkForLateness( const std::pair<NState,boost::posix_time::time_
 		   //
 		   //			if ( calendar.duration() >= submitted_.duration()  ) {
 		   //	 			setLate(true);
-		   // 				return;
+		   // 		   return;
 		   //			}
-		   // This is incorrect since calendar.duration() is esentially duration until
-		   // the last call to Calendar::init() i.e suite duration time.
+		   // This is incorrect since calendar.duration() is essentially duration until
+		   // the last call to Calendar::init() i.e suite duration time. Hence late was
+		   // set straight away.
 		   //
          // to check for submitted, we need the duration *after* state went into submitted state
          // state.second is when state went SUBMITTED, relative to suite start
