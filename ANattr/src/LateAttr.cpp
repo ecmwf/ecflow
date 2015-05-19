@@ -100,8 +100,8 @@ void LateAttr::checkForLateness( const std::pair<NState,boost::posix_time::time_
 		   //
          // to check for submitted, we need the duration *after* state went into submitted state
          // state.second is when state went SUBMITTED, relative to suite start
-         boost::posix_time::time_duration runtime = calendar.duration() - state.second ;
-         if ( runtime >= submitted_.duration()) {
+         boost::posix_time::time_duration time_in_submitted_state = calendar.duration() - state.second ;
+         if ( time_in_submitted_state >= submitted_.duration()) {
             setLate(true);
             return;
          }
