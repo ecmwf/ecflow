@@ -82,12 +82,28 @@ void LateAttr::checkForLateness( const std::pair<NState,boost::posix_time::time_
 	}
 
 	if (state.first == NState::SUBMITTED || state.first == NState::QUEUED) {
+
 		// Submitted is always relative, ASSUME this means relative to suite start
 		if (state.first == NState::SUBMITTED && !submitted_.isNULL()) {
-			if ( calendar.duration() >= submitted_.duration()  ) {
-	 			setLate(true);
- 				return;
-			}
+
+		   // ECFLOW-322
+		   // The late attr check for being late in submitted state, is always *RELATIVE*
+		   // Previously we had:
+		   //
+		   //			if ( calendar.duration() >= submitted_.duration()  ) {
+		   //	 			setLate(true);
+		   // 				return;
+		   //			}
+		   // This is incorrect since calendar.duration() is esentially duration until
+		   // the last call to Calendar::init() i.e suite duration time.
+		   //
+         // to check for submitted, we need the duration *after* state went into submitted state
+         // state.second is when state went SUBMITTED, relative to suite start
+         boost::posix_time::time_duration runtime = calendar.duration() - state.second ;
+         if ( runtime >= submitted_.duration()) {
+            setLate(true);
+            return;
+         }
 		}
 
 		// In Submitted or queued state, check for active, in REAL time
