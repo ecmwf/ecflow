@@ -17,7 +17,7 @@ echo "BOOST_ROOT=$BOOST_ROOT"
 #
 SITE_CONFIG_LOCATION=$BOOST_ROOT/tools/build/v2/site-config.jam
 BOOST_VERSION="$(basename $BOOST_ROOT)"
-if [[ "$BOOST_VERSION" = boost_1_56_0 || "$BOOST_VERSION" = boost_1_57_0 || "$BOOST_VERSION" = boost_1_58_0]] ; then
+if [[ "$BOOST_VERSION" = boost_1_56_0 || "$BOOST_VERSION" = boost_1_57_0 || "$BOOST_VERSION" = boost_1_58_0 ]] ; then
    SITE_CONFIG_LOCATION=$BOOST_ROOT/tools/build/src/site-config.jam
 fi
 
