@@ -160,6 +160,8 @@ menu 'MAIN'
   (ALL,ALL,'-',SEPARATOR)
   (SERVER, ALL ,  'Options...',  WINDOW(Options)  )
   (SERVER, ALL ,  'Extra',  MENU  )
+  (SERVER, ALL ,  'Ping',  'sh ecflow_client --port %ECF_PORT% --host %ECF_NODE% --ping' )
+  (SERVER, ALL ,  'Stat',  'sh ecflow_client --port %ECF_PORT% --host %ECF_NODE% --stats' )
 }
 
 menu 'Web' 
@@ -259,6 +261,7 @@ menu "Special"
   (TASK|ALIAS,ALL,'Free password','ecflow_client --alter add variable ECF_PASS FREE <full_name>')
   (TASK|ALIAS,ALL,'ClearZ','ecflow_client --alter clear_flag zombie <full_name>')
   (TASK|ALIAS,ALL,'ClearLate','ecflow_client --alter clear_flag late <full_name>')
+  (TASK|ALIAS,ALL,'ClearKill','ecflow_client --alter clear_flag killed <full_name>')
 
   (FAMILY, ~ACTIVE & ~SUBMITTED, 'Execute', 'ecflow_client --run <full_name>')
   ((SUITE|FAMILY|TASK), SELECTION, 'Plug into selected node', PLUG)

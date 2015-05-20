@@ -199,7 +199,7 @@ void ecf_node::add_kid(ecf_node* k) {
 
     if (k->type() == NODE_TASK) { 
       nb_tasks++;
-      kids_.push_back(make_node(new Label("time", to_simple_string(k->status_time())), k));
+      // kids_.push_back(make_node(new Label("time", to_simple_string(k->status_time())), k));
     } else if (k->type() == NODE_FAMILY) {} 
     else nb_attrs++;
   }
