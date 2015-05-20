@@ -119,6 +119,8 @@ bool evaluate_complete(node_ptr self) { Ast* t = self->completeAst(); if (t) ret
 
 static job_creation_ctrl_ptr makeJobCreationCtrl() { return boost::make_shared<JobCreationCtrl>();}
 
+std::vector<node_ptr> get_all_nodes(node_ptr self){ std::vector<node_ptr> nodes; self->get_all_nodes(nodes); return nodes; }
+
 void export_Node()
 {
    class_<JobCreationCtrl, boost::noncopyable, job_creation_ctrl_ptr >("JobCreationCtrl",  DefsDoc::jobgenctrl_doc())
@@ -262,6 +264,7 @@ void export_Node()
    .def("get_complete",     &Node::get_complete, return_internal_reference<>() )
    .def("get_defs",         get_defs,   return_internal_reference<>() )
    .def("get_parent",       &Node::parent, return_internal_reference<>() )
+   .def("get_all_nodes",    &get_all_nodes,"Returns all the child nodes")
    .add_property("meters",    boost::python::range( &Node::meter_begin,    &Node::meter_end) ,  "Returns a list of :term:`meter` s")
    .add_property("events",    boost::python::range( &Node::event_begin,    &Node::event_end) ,  "Returns a list of :term:`event` s")
    .add_property("variables", boost::python::range( &Node::variable_begin, &Node::variable_end),"Returns a list of user defined :term:`variable` s" )

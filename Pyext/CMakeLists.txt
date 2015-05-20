@@ -87,14 +87,19 @@ ecbuild_add_test( TARGET py_u_TestMigrate
 
 # ==========================================================================
 # install
+#    -DCMAKE_PYTHON_INSTALL_TYPE = [ local | setup ]
+#    local : this will install to $INSTALL_PREFIX/$release.$major.$minor/lib/python2.7/site-packages/ecflow/
+#    setup : experimental only,python way of installing
+#
+#    -DCMAKE_PYTHON_INSTALL_PREFIX should *only* used when using python setup.py (CMAKE_PYTHON_INSTALL_TYPE=setup)
+#    *AND* for testing python install to local directory
 # ==========================================================================
-if( ENABLE_PYTHON )
 
-   message( STATUS "python found,  CMAKE_PYTHON_INSTALL_TYPE=${CMAKE_PYTHON_INSTALL_TYPE}")
+message( STATUS "python found,  CMAKE_PYTHON_INSTALL_TYPE=${CMAKE_PYTHON_INSTALL_TYPE}")
 
-   # CMAKE_PYTHON_INSTALL_TYPE = [ local | setup ]
+# CMAKE_PYTHON_INSTALL_TYPE = [ local | setup ]
    
-   if( CMAKE_PYTHON_INSTALL_TYPE MATCHES  "local"  OR NOT DEFINED CMAKE_PYTHON_INSTALL_TYPE )
+if( CMAKE_PYTHON_INSTALL_TYPE MATCHES  "local"  OR NOT DEFINED CMAKE_PYTHON_INSTALL_TYPE )
    
       message(STATUS "python install *LOCAL* ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
       set(PYTHON_SITE "lib/python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}/site-packages" )
@@ -105,7 +110,7 @@ if( ENABLE_PYTHON )
              )
       install( FILES   ecflow/__init__.py  DESTINATION ${PYTHON_DEST} )
       
-   else()
+else()
 
       # -------------------------------------------------------------------------------------
       # Install using setup.py
@@ -138,6 +143,4 @@ if( ENABLE_PYTHON )
       else()
          install(CODE "execute_process(COMMAND ${PYTHON} ${SETUP_PY} install)")
       endif()
-   endif()
-
 endif()

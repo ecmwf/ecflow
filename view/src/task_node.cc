@@ -240,7 +240,6 @@ void cpp_translator::save(FILE* f,const char *line)
 		node *n = n_->variableOwner(val);
 		if(n == 0) n = n_;
 
-		// TODO fprintf(f,"<b><a href=\"%s:%s\">%%",n->html_url(),val);
 		url_translator::save(f,val);
 		fprintf(f,"%%</a></b>");
 		p = q;

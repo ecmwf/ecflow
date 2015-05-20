@@ -15,6 +15,12 @@ Process
    ****     /usr/local/apps/ecflow/current  
 
 ----------------------------------------------------------------------
+
+0/ Create the tarball using cmake, in the build directory with  
+   This can be done using:
+   
+   $WK/cmake.sh release package_source
+
 0/ Inform user support, allows user support to test rpm
    
 0/ *Before* each release, make sure the ecflow tar file is
@@ -27,14 +33,15 @@ Process
    - ** Check the size of tar file **, ensure that have not included redundant files.
    <Inform Daniel>
    
-0/ git flow release start 4.0.7
+0/ git flow release start 4.0.8
 
    *Push* branch onto stash, otherwise we can not pull, from the remote machines
    - In eclipse, you *may* have to push this branch first
      Team->Push Branch
      *otherwise* the option Team->Push Upstream  may well be greyed out.
 
-0/ Update ECFLOW_GIT_BRANCH to "release/4.0.7" in the nightly build.py or meta-builder(settings/ecflow/ecflow.py# git_tag=release/4.0.7
+0/ Update ECFLOW_GIT_BRANCH to "4.0.8" in the nightly build.py or meta-builder(settings/ecflow/ecflow.py# git_tag=4.0.8)
+   Then use the meta builder to build/install.
 
 0/ For a PREPIFS release change file:
      /usr/local/apps/ecflow/.modulerc
@@ -55,12 +62,12 @@ Process
 0/ CRAY: If you build on cct-login, then copy build to cca/ccb
 
          cd /usr/local/apps/ecflow
-         scp -r 4.0.7 emos@cca:/usr/local/apps/ecflow/.
+         scp -r 4.0.8 emos@cca:/usr/local/apps/ecflow/.
       
    READHAT: If we built on ecgb/redhat we can copy release to sappa/sappab 
   
-         scp -r 4.0.7 emos@sappa:/usr/local/apps/ecflow/.
-         scp -r 4.0.7 emos@sappb:/usr/local/apps/ecflow/.
+         scp -r 4.0.8 emos@sappa:/usr/local/apps/ecflow/.
+         scp -r 4.0.8 emos@sappb:/usr/local/apps/ecflow/.
       
    VIRTUAL Machines: These should treated like regular machines. 
          - These are based on opensuse113, hence we need top copy over exe for this
@@ -69,7 +76,7 @@ Process
          - to show os version:     lsb_release -a
          
          - ssh opensuse113/lxab, su emos;
-         - scp -r 4.0.7 emos@<virtual machine>:/usr/local/apps/ecflow/.
+         - scp -r 4.0.8 emos@<virtual machine>:/usr/local/apps/ecflow/.
          
          
   *Make* sure destination has a trailing '/.' otherwise you
@@ -90,7 +97,7 @@ Process
         
    # as an emergency we can copy from lxab
    - ssh lxab, su emos;
-   - scp -r 4.0.7 emos@vecfrdda1:/usr/local/apps/ecflow/.
+   - scp -r 4.0.8 emos@vecfrdda1:/usr/local/apps/ecflow/.
         
 
 0/ Update WIKI:
@@ -117,7 +124,7 @@ Process
    Use: Release-Anouncement.txt
   
 0/ Tag the release, This should now be automatic when using git flow:
-       git flow release finish 4.0.7
+       git flow release finish 4.0.8
   
 0/ AFTER the release 
    o increment the version number in $WK/VERSION.cmake THEN, run:

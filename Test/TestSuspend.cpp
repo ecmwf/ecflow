@@ -88,7 +88,6 @@ BOOST_AUTO_TEST_CASE( test_shutdown )
    //                     This is substituted in sms includes
    //                     Allows test to run without requiring installation
 
-   int taskSize = 2; // on linux 1024 tasks take ~4 seconds for job submission
    Defs theDefs;
    {
       // Initialise clock with todays date and time, then create a time attribute
@@ -108,6 +107,7 @@ BOOST_AUTO_TEST_CASE( test_shutdown )
       suite->addClock( clockAttr );
 
       family_ptr fam = suite->add_family("family");
+      int taskSize = 2; // on linux 1024 tasks take ~4 seconds for job submission
       for(int i=0; i < taskSize; i++) {
          task_ptr task = fam->add_task("t" + boost::lexical_cast<std::string>(i));
 

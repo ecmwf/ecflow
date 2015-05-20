@@ -251,6 +251,13 @@ void export_Client()
    .def("debug_server_on",  &ClientInvoker::debug_server_on,  "Enable server debug, Will dump to standard out on server host.")
    .def("debug_server_off", &ClientInvoker::debug_server_off, "Disable server debug")
 
+   .def("zombie_fob",       &ClientInvoker::zombieFobCli )
+   .def("zombie_fail",      &ClientInvoker::zombieFailCli )
+   .def("zombie_adopt",     &ClientInvoker::zombieAdoptCli )
+   .def("zombie_block",     &ClientInvoker::zombieBlockCli )
+   .def("zombie_remove",    &ClientInvoker::zombieRemoveCli )
+   .def("zombie_kill",      &ClientInvoker::zombieKillCli )
+
    .def("set_child_path",      &ClientInvoker::set_child_path ,   "Set the path to the task, obtained from server using %ECF_NAME%")
    .def("set_child_password",  &ClientInvoker::set_child_password,"Set the password, needed for authentication, provided by the server using %ECF_PASS%")
    .def("set_child_pid",       &ClientInvoker::set_child_pid,     "Set the process id of this job" )

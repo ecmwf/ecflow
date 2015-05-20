@@ -789,7 +789,6 @@ BOOST_AUTO_TEST_CASE( test_ecf_file_includenoop )
    // Create a defs file, where the task name mirrors the ecf files in the given directory
    task_ptr task_t1 = Task::create( "t1" );
    suite_ptr suite = Suite::create( "suite_test_ecf_file_includenopp"  );
-   std::pair<std::string,std::string> p;
    Defs theDefs; {
       suite->addVariable( Variable( Str::ECF_INCLUDE(), "$ECF_HOME/includes" ) );
       suite->addVariable( Variable( "SLEEPTIME", "1" ) );
@@ -881,7 +880,6 @@ BOOST_AUTO_TEST_CASE( test_ecf_file_override_ECF_JOB )
    task_ptr task_t1 = Task::create( "t1" );
    task_t1->addVariable( Variable( "ECF_JOB",  job_file_location  ) );
    suite_ptr suite = Suite::create( "test_ecf_file_override_ECF_JOB"  );
-   std::pair<std::string,std::string> p;
    Defs theDefs; {
       suite->addVariable( Variable( Str::ECF_INCLUDE(), "$ECF_HOME/includes" ) );
       suite->addVariable( Variable( "SLEEPTIME", "1" ) );

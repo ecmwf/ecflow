@@ -372,7 +372,7 @@ static void Layout(Widget w,long *maxWidth,long *maxHeight)
 	SimpleTreeWidget tw = (SimpleTreeWidget)w;
 	int                 high = (int)tw->simpletree.v_min_space;
 	int                 i,n;
-	int                 h_max = 0,w_max = 0, dh;
+	int                 h_max = 0,w_max = 0;
 
 	*maxWidth = *maxHeight = 5;
 
@@ -385,7 +385,7 @@ static void Layout(Widget w,long *maxWidth,long *maxHeight)
 		w_max = MAX(w_max,w->r.width);
 	}
 
-	dh = h_max / 2;
+	//int dh = h_max / 2;
 
 	h_max += tw->simpletree.v_min_space;
 	w_max += tw->simpletree.h_min_space;
