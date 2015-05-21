@@ -236,14 +236,12 @@ void ecf_node::add_kid( ecf_node* k )
    if (k) {
       kids_.push_back(k);
 
-      if (k->type() == NODE_TASK) {
-         nb_tasks++;
-         kids_.push_back(make_node(new Label("time", to_simple_string(k->status_time())), k));
-      }
-      else if (k->type() == NODE_FAMILY) {
-      }
-      else nb_attrs++;
-   }
+    if (k->type() == NODE_TASK) { 
+      nb_tasks++;
+      // kids_.push_back(make_node(new Label("time", to_simple_string(k->status_time())), k));
+    } else if (k->type() == NODE_FAMILY) {} 
+    else nb_attrs++;
+  }
 }
 
 template<> const std::string& ecf_concrete_node<Defs>::name() const

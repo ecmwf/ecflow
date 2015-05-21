@@ -118,8 +118,8 @@ class search_me : public runnable {
 	  // find_.search("ecflow_client",true,false,false,true); 
 	  find_.search("xcomplete",true,false,false,true);
 	  find_.search("xabort",true,false,false,true);
-	  find_.search(" --complete",true,false,false,true);
-	  find_.search(" --abort",true,false,false,true);
+	  find_.search("--complete",true,false,false,true);
+	  find_.search("--abort",true,false,false,true);
 	  find_.no_message();
 	  find_.pending(0);
 	  delete this;
