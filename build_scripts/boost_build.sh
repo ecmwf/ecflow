@@ -7,12 +7,21 @@
 ## granted to it by virtue of its status as an intergovernmental organisation 
 ## nor does it submit to any jurisdiction. 
 
+# ===============================================================
+# allow tool to overridden
+tool=gcc
+if [[ "$#" = 1 ]] ; then   
+	tool=$1
+fi
+
+# ===============================================================
 # This file is used build the boost libs used by ecflow
 # This script Use $BOOST_ROOT and $WK environment variable
 echo "WK=$WK"
 echo "BOOST_ROOT=$BOOST_ROOT"
 
-#
+
+# ===============================================================
 # From boost 1.56 > the location of site-config.jam location has changed
 #
 SITE_CONFIG_LOCATION=$BOOST_ROOT/tools/build/v2/site-config.jam
@@ -21,7 +30,6 @@ if [[ "$BOOST_VERSION" = boost_1_56_0 || "$BOOST_VERSION" = boost_1_57_0 || "$BO
    SITE_CONFIG_LOCATION=$BOOST_ROOT/tools/build/src/site-config.jam
 fi
 
-tool=
 
 # Check that a command is in the PATH.
 test_path ()
@@ -53,7 +61,6 @@ layout=tagged
 
 CXXFLAGS=
 if test_uname Linux ; then
-  tool=gcc
   X64=$(uname -m)
   if [ "$X64" = x86_64 ]
   then
@@ -62,7 +69,7 @@ if test_uname Linux ; then
     then
        CXXFLAGS=cxxflags=-fPIC
        layout=versioned  
-       
+       tool=gcc
        cp $WK/build_scripts/site_config/site-config-cray.jam $SITE_CONFIG_LOCATION
        if [ "$PE_ENV" = INTEL ] ; then
           tool=intel
@@ -71,14 +78,26 @@ if test_uname Linux ; then
           tool=cray
        fi
     else
-       cp $WK/build_scripts/site_config/site-config-Linux64.jam $SITE_CONFIG_LOCATION 
-       # for boost 1.53 and > gcc 4.8 get a lot warning messages use suppress
-       #CXXFLAGS=-no-unused-local-typedefs 
-    fi
+      if [[ $tool = gcc ]] ; then
+  
+      		cp $WK/build_scripts/site_config/site-config-Linux64.jam $SITE_CONFIG_LOCATION 
+      		# for boost 1.53 and > gcc 4.8 get a lot warning messages use suppress
+      		#CXXFLAGS=-no-unused-local-typedefs 
+  	  elif [[ $tool = intel ]] ; then
+  
+      		cp $WK/build_scripts/site_config/site-config-Linux64-intel.jam $SITE_CONFIG_LOCATION 
+
+  	  elif [[ $tool = clang ]] ; then
+  
+      		cp $WK/build_scripts/site_config/site-config-Linux64-clang.jam $SITE_CONFIG_LOCATION 
+  	  fi
+   fi
      
   else 
     cp $WK/build_scripts/site_config/site-config-Linux.jam $SITE_CONFIG_LOCATION
   fi
+  
+
   
 elif test_uname HP-UX ; then
 
