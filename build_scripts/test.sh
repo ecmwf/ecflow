@@ -71,6 +71,8 @@ test_uname ()
     fi
 }
 
+unset ECF_PORT
+
 if test_uname Linux ; then
 
    TOOLSET=
