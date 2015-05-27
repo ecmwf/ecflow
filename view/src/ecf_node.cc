@@ -685,6 +685,7 @@ int redraw_kids( node* node_, const std::vector<ecf::Aspect::Type>& aspect )
          case ecf::Aspect::STATE:
             node_->update(-1, -1, -1);
             node_->redraw();
+	    kind = NODE_FAMILY;
             break;
          case ecf::Aspect::SERVER_VARIABLE:
 #undef NODE_VARIABLE
@@ -695,11 +696,16 @@ int redraw_kids( node* node_, const std::vector<ecf::Aspect::Type>& aspect )
             continue;
       }
       ++tot;
-      if (kind) for(node *xn = node_->kids(); xn; xn = xn->next())
-         if (xn) if (xn->type() == kind) {
-            xn->update(-1, -1, -1);
-            xn->redraw();
+      if (kind) {
+	node_->update(-1, -1, -1); node_->redraw();
+	for(node *xn = node_->kids(); xn; xn = xn->next())
+	  if (xn) if (xn->type() == kind 
+		      || (xn->type() == NODE_TASK && kind == NODE_FAMILY)
+		      ) {
+	      xn->update(-1, -1, -1);
+	      xn->redraw();
          }
+      }
    }
    return tot;
 }
