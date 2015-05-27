@@ -15,10 +15,15 @@
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 
 #include <boost/test/unit_test.hpp>
+#include <boost/lexical_cast.hpp>
+#include <boost/date_time/posix_time/time_formatters.hpp>  // requires boost date and time lib
+#include <boost/date_time/posix_time/posix_time_types.hpp>
 
 #include "RepeatAttr.hpp"
 
 using namespace std;
+using namespace boost::gregorian;
+using namespace boost::posix_time;
 
 BOOST_AUTO_TEST_SUITE( ANattrTestSuite )
 
@@ -422,7 +427,6 @@ BOOST_AUTO_TEST_CASE( test_repeat_enumerated_as_string_integers )
    }
 }
 
-
 BOOST_AUTO_TEST_CASE( test_repeat_increment )
 {
    cout << "ANattr:: ...test_repeat_increment \n";
@@ -440,6 +444,23 @@ BOOST_AUTO_TEST_CASE( test_repeat_increment )
       BOOST_CHECK_MESSAGE(rep.last_valid_value() == 20090916,"expected 20090916 but found " << rep.last_valid_value());
    }
 
+   {
+      Repeat rep(RepeatDate("YMD",20150514,20150730,7));
+      while( rep.valid()) { rep.increment();
+         //cout << "YMD: " << rep.value() << "\n";
+      }
+      BOOST_CHECK_MESSAGE(rep.value() == 20150806,"expected 20150806 but found " << rep.value());
+      BOOST_CHECK_MESSAGE(rep.last_valid_value() == 20150730,"expected 20150730 but found " << rep.last_valid_value());
+   }
+   {
+      Repeat rep(RepeatDate("YMD",20150730,20150514,-7));
+      while( rep.valid()) {
+          rep.increment();
+          //cout << "YMD: " << rep.value() << "\n";
+      }
+      BOOST_CHECK_MESSAGE(rep.value() == 20150507,"expected 20150507 but found " << rep.value());
+      BOOST_CHECK_MESSAGE(rep.last_valid_value() == 20150514,"expected 20150514 but found " << rep.last_valid_value());
+   }
 
    std::vector<std::string> stringList; stringList.reserve(3);
    stringList.push_back("a");
@@ -465,6 +486,33 @@ BOOST_AUTO_TEST_CASE( test_repeat_increment )
    }
 }
 
+BOOST_AUTO_TEST_CASE( test_repeat_date_change_value )
+{
+   cout << "ANattr:: ...test_repeat_date_change_value \n";
+   {
+      Repeat rep2(RepeatDate("YMD",20150514,20150730,7));
+      Repeat rep(RepeatDate("YMD",20150514,20150730,7));
+      BOOST_CHECK_MESSAGE(rep.valid(),"expected valid at start ");
+
+      while( rep.valid() ) {
+         rep2.change(boost::lexical_cast<std::string>(rep.value()));
+         BOOST_CHECK_MESSAGE(rep.value() == rep2.value(),"expected same value, but found " << rep.value() << "  " << rep2.value());
+         rep.increment();
+      }
+   }
+   {
+      Repeat rep2(RepeatDate("YMD",20150730,20150514,-7));
+      Repeat rep(RepeatDate("YMD",20150730,20150514,-7));
+      BOOST_CHECK_MESSAGE(rep.valid(),"expected valid at start ");
+
+      while( rep.valid() ) {
+         rep2.change(boost::lexical_cast<std::string>(rep.value()));
+         BOOST_CHECK_MESSAGE(rep.value() == rep2.value(),"expected same value, but found " << rep.value() << "  " << rep2.value());
+         rep.increment();
+      }
+   }
+}
+
 
 BOOST_AUTO_TEST_CASE( test_repeat_date_errors )
 {
@@ -481,7 +529,64 @@ BOOST_AUTO_TEST_CASE( test_repeat_date_errors )
 
    BOOST_REQUIRE_THROW( RepeatDate("YMD",20090920,20090916,1),std::runtime_error);  //  start day > end day, and delta > 0
    BOOST_REQUIRE_THROW( RepeatDate("YMD",20090916,20090920,-1),std::runtime_error);  //  start day < end day, and delta < 0
+
+   RepeatDate date("YMD",20150514,20150730,7);
+   BOOST_REQUIRE_THROW( date.changeValue(20150513),std::runtime_error);   // outside of range
+   BOOST_REQUIRE_THROW( date.changeValue(20150731),std::runtime_error);   // outside of range
+   BOOST_REQUIRE_THROW( date.changeValue(20150801),std::runtime_error);   // outside of range
+
+   BOOST_REQUIRE_THROW( date.changeValue(20150515),std::runtime_error);   // not a valid step
+   BOOST_REQUIRE_THROW( date.changeValue(20150516),std::runtime_error);   // not a valid step
+   BOOST_REQUIRE_THROW( date.changeValue(20150517),std::runtime_error);   // not a valid step
+   BOOST_REQUIRE_THROW( date.changeValue(20150518),std::runtime_error);   // not a valid step
+   BOOST_REQUIRE_THROW( date.changeValue(20150519),std::runtime_error);   // not a valid step
+   BOOST_REQUIRE_THROW( date.changeValue(20150520),std::runtime_error);   // not a valid step
+   BOOST_REQUIRE_THROW( date.changeValue(20150522),std::runtime_error);   // not a valid step
+
+   RepeatDate date1("YMD",20150730,20150514,-7);
+   BOOST_REQUIRE_THROW( date1.changeValue(20150731),std::runtime_error);   // outside of range
+   BOOST_REQUIRE_THROW( date1.changeValue(20150813),std::runtime_error);   // outside of range
+   BOOST_REQUIRE_THROW( date1.changeValue(20150513),std::runtime_error);   // outside of range
+   BOOST_REQUIRE_THROW( date1.changeValue(20150413),std::runtime_error);   // outside of range
+
+   BOOST_REQUIRE_THROW( date.changeValue(20150729),std::runtime_error);    // not a valid step
+   BOOST_REQUIRE_THROW( date.changeValue(20150728),std::runtime_error);    // not a valid step
+   BOOST_REQUIRE_THROW( date.changeValue(20150515),std::runtime_error);    // not a valid step
 }
+
+static void check_date(int start, int end, int delta)
+{
+   boost::gregorian::date bdate(from_undelimited_string(boost::lexical_cast<std::string>(start)));
+
+   Repeat rep(RepeatDate("YMD",start,end,delta));
+   Repeat rep2(RepeatDate("YMD",start,end,delta));
+   while (rep.valid()) {
+
+      // xref repeat date with boost date, essentially checking bdate with rep
+      string str_value = boost::lexical_cast<std::string>(rep.value());
+      boost::gregorian::date date2(from_undelimited_string( str_value ));
+      BOOST_CHECK_MESSAGE(bdate == date2 ,"expected same value, but found " << bdate << "  " << date2);
+
+      // check change value
+      rep2.change(str_value);
+      BOOST_CHECK_MESSAGE(rep.value() == rep2.value(),"expected same value, but found " << rep.value() << "  " << rep2.value());
+
+      // increment repeat and boost date
+      rep.increment();
+      bdate += days(delta);
+   }
+}
+
+BOOST_AUTO_TEST_CASE( test_repeat_date_xref_to_boost_date )
+{
+   cout << "ANattr:: ...test_repeat_date_xref_to_boost_date \n";
+
+   check_date(19800101,20621231,1);
+   check_date(19800101,20621231,7);
+   check_date(20621231,19800101,-7);
+   check_date(20150514,20150730,7);
+}
+
 
 BOOST_AUTO_TEST_SUITE_END()
 
