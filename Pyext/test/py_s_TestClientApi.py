@@ -1019,11 +1019,11 @@ def test_client_alter_change(ci):
     label = task_t1.find_label("label")
     assert label.new_value() == "new-value", "Expected alter of label to be 'new-value' but found " + label.new_value()
     
-    ci.alter(repeat_date_path,"change","repeat","20100112")   
+    ci.alter(repeat_date_path,"change","repeat","20100113")   
     ci.sync_local()
     task = ci.get_defs().find_abs_node(repeat_date_path)
     repeat = task.get_repeat()
-    assert repeat.value() == 20100112, "Expected alter of repeat to be 20100112 but found " + str(repeat.value())
+    assert repeat.value() == 20100113, "Expected alter of repeat to be 20100113 but found " + str(repeat.value())
  
 
     # ISSUES:
