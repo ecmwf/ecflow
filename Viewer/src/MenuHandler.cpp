@@ -122,19 +122,30 @@ bool MenuHandler::readMenuConfigFile(const std::string &configFile)
                 std::string command  = ItemDef.get("command",     "NoCommand");
                 std::string type     = ItemDef.get("type",        "Command");
                 std::string enabled  = ItemDef.get("enabled_for", "");
+                std::string visible  = ItemDef.get("visible_for", "");
                 //std::cout << "  " << name << " :" << menuName << std::endl;
 
+                UserMessage::message(UserMessage::DBG, false, std::string("  " + name));
                 MenuItem *item = new MenuItem(name);
                 item->setCommand(command);
 
 
-                BaseNodeCondition *nodeCond = NodeExpressionParser::parseWholeExpression(enabled);
-                if (nodeCond == NULL)
+                BaseNodeCondition *enabledCond = NodeExpressionParser::parseWholeExpression(enabled);
+                if (enabledCond == NULL)
                 {
-                    UserMessage::message(UserMessage::ERROR, true, std::string("Error, unable to parse condition: " + enabled));
-                    nodeCond = new FalseNodeCondition();
+                    UserMessage::message(UserMessage::ERROR, true, std::string("Error, unable to parse enabled condition: " + enabled));
+                    enabledCond = new FalseNodeCondition();
                 }
-                item->setNodeCondition(nodeCond);
+                item->setEnabledCondition(enabledCond);
+
+
+                BaseNodeCondition *visibleCond = NodeExpressionParser::parseWholeExpression(visible);
+                if (visibleCond == NULL)
+                {
+                    UserMessage::message(UserMessage::ERROR, true, std::string("Error, unable to parse visible condition: " + visible));
+                    visibleCond = new FalseNodeCondition();
+                }
+                item->setVisibleCondition(visibleCond);
 
 
 
@@ -339,17 +350,25 @@ QMenu *Menu::generateMenu(std::vector<VInfo_ptr> nodes, QWidget *parent)
     {
         //  is this item valid for the current selection?
 
-        bool compatible = true;
+        bool visible = true;
 
         for (std::vector<VInfo_ptr>::iterator itNodes = nodes.begin(); itNodes != nodes.end(); ++itNodes)
         {
             //compatible = compatible && (*itItems)->compatibleWithNode(*itNodes);
             //compatible = compatible && (nodeCond != NULL && nodeCond->execute(*itNodes));
-            compatible = compatible && (*itItems)->condition()->execute(*itNodes);
+            visible = visible && (*itItems)->visibleCondition()->execute(*itNodes);
         }
 
-        if (showIcompatibleItems)
+        if (visible)
         {
+            bool enabled = true;
+
+            for (std::vector<VInfo_ptr>::iterator itNodes = nodes.begin(); itNodes != nodes.end(); ++itNodes)
+            {
+                enabled = enabled && (*itItems)->enabledCondition()->execute(*itNodes);
+            }
+
+
             if ((*itItems)->isSubMenu())
             {
                 //QMenu *subMenu = qmenu->addMenu(QString::fromStdString((*itItems)->name()));
@@ -358,6 +377,7 @@ QMenu *Menu::generateMenu(std::vector<VInfo_ptr> nodes, QWidget *parent)
                 {
                     QMenu *subMenu = menu->generateMenu(nodes, 0);
                     qmenu->addMenu(subMenu);
+                    subMenu->setEnabled(enabled);
                 }
             }
             else if  ((*itItems)->isDivider())
@@ -369,16 +389,7 @@ QMenu *Menu::generateMenu(std::vector<VInfo_ptr> nodes, QWidget *parent)
                 QAction *action = (*itItems)->action();
                 qmenu->addAction(action);
                 action->setParent(parent);
-                action->setEnabled(compatible);
-            }
-        }
-        else
-        {
-            if (compatible)
-            {
-                QAction *action = (*itItems)->action();
-                action->setParent(parent);
-                qmenu->addAction(action);
+                action->setEnabled(enabled);
             }
         }
     }

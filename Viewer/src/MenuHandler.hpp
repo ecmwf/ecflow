@@ -40,10 +40,12 @@ public:
     //void addValidType(std::string type);
     //void addValidState(std::string type);
     void setAsSubMenu() {isSubMenu_ = true;};
-    void setNodeCondition(BaseNodeCondition *cond) {nodeCondition_ = cond;};
-    BaseNodeCondition *condition() {return nodeCondition_;};
-    bool isSubMenu()    {return isSubMenu_;};
-    bool isDivider()    {return isDivider_;};
+    void setVisibleCondition(BaseNodeCondition *cond) {visibleCondition_ = cond;};
+    void setEnabledCondition(BaseNodeCondition *cond) {enabledCondition_ = cond;};
+    BaseNodeCondition *visibleCondition() {return visibleCondition_;};
+    BaseNodeCondition *enabledCondition() {return enabledCondition_;};
+    bool isSubMenu()      {return isSubMenu_;};
+    bool isDivider()      {return isDivider_;};
     std::string &name()   {return name_;};
     QAction     *action() {return action_;};
 
@@ -61,7 +63,8 @@ private:
     //std::vector<DState::State> validNodeStates_;
 
 
-    BaseNodeCondition *nodeCondition_;
+    BaseNodeCondition *visibleCondition_;
+    BaseNodeCondition *enabledCondition_;
 
     bool isSubMenu_;
     bool isDivider_;

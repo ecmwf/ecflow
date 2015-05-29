@@ -22,6 +22,9 @@
 // Expression parser classes
 // -------------------------
 
+std::vector<std::string>                 NodeExpressionParser::tokens_;
+std::vector<std::string>::const_iterator NodeExpressionParser::i_;
+
 
 NodeExpressionParser::NodeType NodeExpressionParser::nodeType(const std::string &name)
 {
@@ -30,6 +33,7 @@ NodeExpressionParser::NodeType NodeExpressionParser::nodeType(const std::string 
     else if (name == "family") return FAMILY;
     else if (name == "task")   return TASK;
     else if (name == "alias")  return ALIAS;
+    else if (name == "node")   return NODE;
     else return BAD;
 }
 
@@ -40,7 +44,24 @@ std::string NodeExpressionParser::typeName(const NodeType type)
     else if (type == FAMILY) return std::string("family");
     else if (type == TASK)   return std::string("task");
     else if (type == ALIAS)  return std::string("alias");
+    else if (type == NODE)   return std::string("node");
     else return std::string("BAD");
+}
+
+bool NodeExpressionParser::isUserLevel(const std::string &str)
+{
+    if (str == "oper" || str == "admin")
+        return true;
+    else
+        return false;
+}
+
+bool NodeExpressionParser::isNodeAttribute(const std::string &str)
+{
+    if (str == "has_triggers" || str == "has_time" || str == "has_date" || str == "locked")
+        return true;
+    else
+        return false;
 }
 
 
@@ -68,17 +89,21 @@ BaseNodeCondition *NodeExpressionParser::parseWholeExpression(std::string expr)
     std::vector<std::string> tokens;
     std::string delimiters(" ");
 
+    UserMessage::message(UserMessage::DBG, false, std::string("    in: ") + expr);
+
     ecf::Str::replace_all(expr, std::string("("), std::string(" ( "));
     ecf::Str::replace_all(expr, std::string(")"), std::string(" ) "));
 
     boost::algorithm::to_lower(expr); // convert to lowercase
     ecf::Str::split(expr, tokens, delimiters);
 
-    return parseExpression(tokens);
+    setTokens(tokens);
+
+    return parseExpression();
 }
 
 
-BaseNodeCondition *NodeExpressionParser::parseExpression(std::vector<std::string> &tokens)
+BaseNodeCondition *NodeExpressionParser::parseExpression()
 {
     BaseNodeCondition *result = NULL;
 
@@ -88,38 +113,22 @@ BaseNodeCondition *NodeExpressionParser::parseExpression(std::vector<std::string
 
     // short-circuit - if empty, then return a True condition
 
-    if (tokens.size() == 0)
+    if (tokens_.size() == 0)
     {
         result = new TrueNodeCondition();
     }
 
 
-    std::vector<std::string>::const_iterator i = tokens.begin();
-
-    while (i != tokens.end() || funcStack.size() > 0)
+    while (i_ != tokens_.end() || funcStack.size() > 0)
     {
         bool tokenOk = true;
         bool updatedOperands = false;
 
 
-        if (i != tokens.end())
+        if (i_ != tokens_.end())
         {
-
-            if (*i == "(" || *i == ")")
-            {
-                // temporary to avoid errors
-                i++;
-                continue;
-            }
-
-            if (*i == "(")
-            {
-                //BaseNodeCondition subResult = NodeExpressionParser::parseExpression();
-            }
-
-
             // node types
-            NodeExpressionParser::NodeType type = NodeExpressionParser::nodeType(*i);
+            NodeExpressionParser::NodeType type = NodeExpressionParser::nodeType(*i_);
             if (type != BAD)
             {
                 TypeNodeCondition *typeCond = new TypeNodeCondition(type);
@@ -128,37 +137,65 @@ BaseNodeCondition *NodeExpressionParser::parseExpression(std::vector<std::string
                 updatedOperands = true;
             }
 
-            // node states
-            else if (DState::isValid(*i))
+            // node/server states
+            else if (DState::isValid(*i_) || VSState::find(*i_))
             {
-                StateNodeCondition *stateCond = new StateNodeCondition(QString::fromStdString(*i));
+                StateNodeCondition *stateCond = new StateNodeCondition(QString::fromStdString(*i_));
                 operandStack.push_back(stateCond);
                 result = stateCond;
                 updatedOperands = true;
             }
 
+            // user level
+            else if (isUserLevel(*i_))
+            {
+                UserLevelCondition *userCond = new UserLevelCondition(QString::fromStdString(*i_));
+                operandStack.push_back(userCond);
+                result = userCond;
+                updatedOperands = true;
+            }
+
+            // node attribute
+            else if (isNodeAttribute(*i_))
+            {
+                NodeAttributeCondition *attrCond = new NodeAttributeCondition(QString::fromStdString(*i_));
+                operandStack.push_back(attrCond);
+                result = attrCond;
+                updatedOperands = true;
+            }
 
             // logical operators
-            else if (*i == "and")
+            else if (*i_ == "and")
             {
                 AndNodeCondition *andCond = new AndNodeCondition();
                 funcStack.push_back(andCond);
                 result = andCond;
             }
 
-            else if (*i == "or")
+            else if (*i_ == "or")
             {
                 OrNodeCondition *orCond = new OrNodeCondition();
                 funcStack.push_back(orCond);
                 result = orCond;
             }
 
-            else if (*i == "not")
+            else if (*i_ == "not")
             {
                 NotNodeCondition *notCond = new NotNodeCondition();
                 funcStack.push_back(notCond);
                 result = notCond;
             }
+            else if (*i_ == "(")
+            {
+                i_++;
+                result = NodeExpressionParser::parseExpression();
+                operandStack.push_back(result);
+            }
+            else if (*i_ == ")")
+            {
+                return result;
+            }
+
             else
             {
                 tokenOk = false;
@@ -193,15 +230,16 @@ BaseNodeCondition *NodeExpressionParser::parseExpression(std::vector<std::string
         }
         else
         {
-            UserMessage::message(UserMessage::ERROR, true, std::string("Error parsing expression " + *i));
+            UserMessage::message(UserMessage::ERROR, false, std::string("Error parsing expression " + *i_));
             result = new FalseNodeCondition();
+            return result;
         }
 
-        if (i != tokens.end())
-            i++; // move onto the next token
+        if (i_ != tokens_.end())
+            i_++; // move onto the next token
     }
 
-    UserMessage::message(UserMessage::DBG, false, result->print());
+    UserMessage::message(UserMessage::DBG, false, std::string("    ") + result->print());
     return result;
 }
 
@@ -229,6 +267,9 @@ bool TypeNodeCondition::execute(VInfo_ptr nodeInfo)
 
         if (type_ == NodeExpressionParser::FAMILY && node->isFamily())
             return true;
+
+        if (type_ == NodeExpressionParser::NODE)
+            return true;
     }
 
     return false;
@@ -249,6 +290,53 @@ bool StateNodeCondition::execute(VInfo_ptr nodeInfo)
         Node *node = nodeInfo->node()->node();
 
         return (VNState::toName(node) == stateName_);
+    }
+
+    return false;
+};
+
+// -----------------------------------------------------------------
+
+bool UserLevelCondition::execute(VInfo_ptr nodeInfo)
+{
+    // since we don't currently have the concept of user levels, we just 
+    // return true for now
+
+    return true;
+};
+
+// -----------------------------------------------------------------
+
+bool NodeAttributeCondition::execute(VInfo_ptr nodeInfo)
+{
+    if (nodeInfo->isServer())
+    {
+        if (nodeAttrName_ == "locked")  
+        {
+            return false;   //  XXX temporary for now
+        }
+    }
+
+    if(nodeInfo->isNode())
+    {
+        Node *node = nodeInfo->node()->node();
+
+        if (nodeAttrName_ == "has_time")
+        {
+            return (node->timeVec().size()  > 0 ||
+                    node->todayVec().size() > 0 ||
+                    node->crons().size()    > 0);
+        }
+        else if (nodeAttrName_ == "has_date")
+        {
+            return (node->days().size()  > 0 || 
+                    node->dates().size() > 0);
+        }
+        else if (nodeAttrName_ == "has_triggers")
+        {
+            return (node->triggerAst() || 
+                    node->completeAst());
+        }
     }
 
     return false;

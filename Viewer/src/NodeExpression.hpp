@@ -30,17 +30,22 @@ public:
     NodeExpressionParser()  {};
     ~NodeExpressionParser() {};
 
-    enum NodeType {SERVER, SUITE, FAMILY, TASK, ALIAS, BAD};
+    enum NodeType {SERVER, SUITE, FAMILY, TASK, ALIAS, NODE, BAD};
 
 
     static BaseNodeCondition *parseWholeExpression(std::string);
-    static BaseNodeCondition *parseExpression(std::vector<std::string> &tokens);
+    static BaseNodeCondition *parseExpression();
+    static void               setTokens(std::vector<std::string> &tokens) {tokens_ = tokens; i_ = tokens_.begin();};
 
     static NodeType    nodeType(const std::string &name);
     static std::string typeName(const NodeType);
+    static bool        isUserLevel(const std::string &str);
+    static bool        isNodeAttribute(const std::string &str);
 
 private:
     static std::vector<BaseNodeCondition *> popLastNOperands(std::vector<BaseNodeCondition *> &inOperands, int n);
+    static std::vector<std::string> tokens_;
+    static std::vector<std::string>::const_iterator i_;
 };
 
 
@@ -155,5 +160,34 @@ private:
     QString stateName_;
 };
 
+// -----------------------------------------------------------------
+
+class UserLevelCondition : public BaseNodeCondition
+{
+public:
+    UserLevelCondition(QString userLevelName) {userLevelName_ = userLevelName;};
+    ~UserLevelCondition() {};
+
+    bool execute(VInfo_ptr nodeInfo);
+    std::string print() {return userLevelName_.toStdString();};
+
+private:
+    QString userLevelName_;
+};
+
+// -----------------------------------------------------------------
+
+class NodeAttributeCondition : public BaseNodeCondition
+{
+public:
+    NodeAttributeCondition(QString nodeAttrName) {nodeAttrName_ = nodeAttrName;};
+    ~NodeAttributeCondition() {};
+
+    bool execute(VInfo_ptr nodeInfo);
+    std::string print() {return nodeAttrName_.toStdString();};
+
+private:
+    QString nodeAttrName_;
+};
 
 #endif
