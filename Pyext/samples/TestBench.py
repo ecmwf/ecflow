@@ -135,16 +135,12 @@ if __name__ == "__main__":
         print "add variables required for script generation, for all suites\n"
     DEFS.add_variable("ECF_HOME", ARGS.ecf_home)
     if os.getenv("WK") != None: 
-        print "WK defined" 
         debug_path = os.getenv("WK") + "/Client/bin/gcc-4.8/debug/ecflow_client"
         release_path = os.getenv("WK") + "/Client/bin/gcc-4.8/debug/ecflow_client"
         if os.path.exists( debug_path ):
-            print "Debug ecflow_client exists ",debug_path
             DEFS.add_variable("ECF_CLIENT_EXE_PATH", debug_path )
         else:
-            print "debug path '",debug_path,"' does not exist"
             if os.path.exists( release_path ):
-                print "Release ecflow_client exists ",release_path
                 DEFS.add_variable("ECF_CLIENT_EXE_PATH", release_path )
  
     DEFS.add_variable("SLEEP", "10")  # not strictly required since default is 1 second
