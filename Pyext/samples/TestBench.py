@@ -105,7 +105,7 @@ if __name__ == "__main__":
         ARGS.ecf_home = os.getenv("WK") + "/Pyext/test/data/CUSTOMER/ECF_HOME"
         if ARGS.verbose:
             print "Workspace is defined" 
-            print "using /Client/bin/gcc\-4.5/debug/ecflow_client"
+            print "using /Client/bin/gcc\-4.8/debug/ecflow_client"
 
     if ARGS.verbose:
         print "Using ECF_HOME=" + ARGS.ecf_home
@@ -135,10 +135,14 @@ if __name__ == "__main__":
         print "add variables required for script generation, for all suites\n"
     DEFS.add_variable("ECF_HOME", ARGS.ecf_home)
     if os.getenv("WK") != None: 
-        if os.path.exists(os.getenv("WK") + "/Client/bin/gcc\-4.5/debug/ecflow_client"):
-            DEFS.add_variable("ECF_CLIENT_EXE_PATH", os.getenv("WK") + "/Client/bin/gcc\-4.5/debug/ecflow_client")
+        debug_path = os.getenv("WK") + "/Client/bin/gcc-4.8/debug/ecflow_client"
+        release_path = os.getenv("WK") + "/Client/bin/gcc-4.8/debug/ecflow_client"
+        if os.path.exists( debug_path ):
+            DEFS.add_variable("ECF_CLIENT_EXE_PATH", debug_path )
         else:
-            DEFS.add_variable("ECF_CLIENT_EXE_PATH", os.getenv("WK") + "/Client/bin/gcc\-4.5/release/ecflow_client")            
+            if os.path.exists( release_path ):
+                DEFS.add_variable("ECF_CLIENT_EXE_PATH", release_path )
+ 
     DEFS.add_variable("SLEEP", "10")  # not strictly required since default is 1 second
     DEFS.add_variable("ECF_INCLUDE", ARGS.ecf_home + "/includes")
 
