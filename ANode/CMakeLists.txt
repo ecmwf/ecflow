@@ -48,6 +48,7 @@ list( APPEND test_srcs
  test/TestSetState.cpp
  test/TestSmsLocator.cpp
  test/TestTaskScriptGenerator.cpp
+ test/TestTimeDependencies.cpp
  test/TestVariableGeneration.cpp
  test/TestVariableInheritance.cpp
  test/TestVariableSubstitution.cpp
