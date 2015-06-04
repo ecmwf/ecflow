@@ -8,9 +8,9 @@
 ## nor does it submit to any jurisdiction. 
 
 # ===============================================================
-# allow tool to overridden
+# allow tool to be overridden
 tool=gcc
-if [[ "$#" = 1 ]] ; then   
+if [ "$#" = 1 ] ; then   
 	tool=$1
 fi
 
@@ -78,16 +78,17 @@ if test_uname Linux ; then
           tool=cray
        fi
     else
-      if [[ $tool = gcc ]] ; then
+      if [ $tool = gcc ] ; then
   
       		cp $WK/build_scripts/site_config/site-config-Linux64.jam $SITE_CONFIG_LOCATION 
       		# for boost 1.53 and > gcc 4.8 get a lot warning messages use suppress
       		#CXXFLAGS=-no-unused-local-typedefs 
-  	  elif [[ $tool = intel ]] ; then
+      		
+  	  elif [ $tool = intel ] ; then
   
       		cp $WK/build_scripts/site_config/site-config-Linux64-intel.jam $SITE_CONFIG_LOCATION 
 
-  	  elif [[ $tool = clang ]] ; then
+  	  elif [ $tool = clang ] ; then
   
       		cp $WK/build_scripts/site_config/site-config-Linux64-clang.jam $SITE_CONFIG_LOCATION 
   	  fi
@@ -98,7 +99,6 @@ if test_uname Linux ; then
   fi
   
 
-  
 elif test_uname HP-UX ; then
 
   tool=acc
