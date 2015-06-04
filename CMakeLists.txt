@@ -49,7 +49,6 @@ message( STATUS "ECFLOW_MAJOR         : ${ECFLOW_MAJOR}" )
 message( STATUS "ECFLOW_MINOR         : ${ECFLOW_MINOR}" )
 message( STATUS "ECFLOW_VERSION       : ${ECFLOW_VERSION_STR}" )
 
-
 # =========================================================================================
 # Options , be aware of caching, when modifying on the command line. 
 # Ideally start fresh or remove cache CmakeCache.txt in build dir
@@ -60,6 +59,27 @@ option( ENABLE_GUI            "Build ecflowview"          ON  )
 message( STATUS "ENABLE_PYTHON         : ${ENABLE_PYTHON}" )
 message( STATUS "ENABLE_GUI            : ${ENABLE_GUI}" )
 
+# ======================================================================================
+# GUI requires X11 and Motif
+# ======================================================================================
+
+find_package( X11 )
+if ( X11_FOUND )
+	debug_var( X11_INCLUDE_DIR )
+	debug_var( X11_LIBRARIES )  
+	debug_var( X11_Xt_INCLUDE_PATH )
+	debug_var( X11_Xt_LIB )
+	debug_var( X11_Xpm_INCLUDE_PATH )
+	debug_var( X11_Xpm_LIB )
+endif()
+
+find_package( Motif )
+if ( MOTIF_FOUND )
+	debug_var( MOTIF_INCLUDE_DIR )
+	debug_var( MOTIF_LIBRARIES )  
+endif()
+ 
+ 
 # =========================================================================================
 # Boost
 # =========================================================================================
@@ -125,7 +145,7 @@ if (ENABLE_PYTHON)
 	add_subdirectory( Pyext )
 endif()
 
-if(ENABLE_GUI)
+if( ENABLE_GUI AND X11_FOUND AND MOTIF_FOUND )
    add_subdirectory( view )
 endif()
 

@@ -172,21 +172,6 @@ file( GLOB srcs_cpp     RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "src/*.cpp"        
 file( GLOB libicon_srcs RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "src/libicon/*.cc" )
 file( GLOB libxec_srcs  RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "src/libxec/*.c"   )
 file( GLOB libui_srcs   RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "src/libui/*.cc"   )
-       
-# ======================================================================================
-
-find_package( X11 )
-debug_var( X11_INCLUDE_DIR )
-debug_var( X11_LIBRARIES )  
-debug_var( X11_Xt_INCLUDE_PATH )
-debug_var( X11_Xt_LIB )
-debug_var( X11_Xpm_INCLUDE_PATH )
-debug_var( X11_Xpm_LIB )
-
-find_package( Motif )
-debug_var( MOTIF_INCLUDE_DIR )
-debug_var( MOTIF_LIBRARIES )  
- 
  
 # =======================================================================================
 find_package( CMath )
