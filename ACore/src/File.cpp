@@ -50,7 +50,14 @@ static std::string workspace_dir()
       current_path = current_path.parent_path();
       stem = current_path.stem().string();
       count++;
-      if (count == 10000) throw std::runtime_error("File::workspace_dir() failed to find ecflow in a directory name, up the directory tree");
+      if (count == 100) {
+         char* workspace = getenv("WK");
+         if (workspace == NULL) {
+            throw std::runtime_error("File::workspace_dir() failed to find ecflow in a directory name, up the directory tree and WK undefined");
+         }
+         std::string the_workspace_dir = workspace;
+         return the_workspace_dir;
+      }
    }
    std::string the_workspace_dir = current_path.string();  // cos string is returned by reference
    return the_workspace_dir;
