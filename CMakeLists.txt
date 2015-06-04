@@ -156,6 +156,7 @@ endif()
 
 ecbuild_dont_pack( DIRS 
                    	ACore/doc ANattr/doc ANode/doc Client/doc Pyext/doc Server/doc
+                   	ecbuild
                     SCRATCH 
                     build_scripts/nightly build_scripts/test_bench
                     Doc/func_spec Doc/misc Doc/New_viewer Doc/newsletter Doc/online Doc/presentations Doc/tac
