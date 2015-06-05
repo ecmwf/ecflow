@@ -24,7 +24,8 @@ namespace ecf {
 class Host : private boost::noncopyable {
 public:
 	/// can throw std::runtime_error if the gethostname fails
-	Host();
+   Host();
+   Host(const std::string& host);
 
 	/// return the host name
 	std::string name() const;
@@ -46,6 +47,7 @@ public:
 
 private:
 	std::string host_port_prefix(const std::string& port) const;
+	void get_host_name();
 	std::string the_host_name_;
 };
 }

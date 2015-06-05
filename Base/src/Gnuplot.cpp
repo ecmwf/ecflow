@@ -26,25 +26,38 @@
 #include "File_r.hpp"
 #include "Str.hpp"
 #include "NodePath.hpp"
+#include "Host.hpp"
 
 using namespace std;
 namespace fs = boost::filesystem;
 
-
 namespace ecf {
 
-void Gnuplot::show_server_load(const std::string& log_file,size_t no_of_suites_to_plot)
+Gnuplot::Gnuplot( const std::string& log_file,
+         const std::string& host,
+         const std::string& port,
+         size_t no_of_suites_to_plot
+         )
+: log_file_(log_file), host_(host),port_(port), no_of_suites_to_plot_(no_of_suites_to_plot)
 {
    if (!fs::exists(log_file)) {
       std::stringstream ss;
-      ss << "Gnuplot::show_server_load: The log file " << log_file << " does not exist\n";
+      ss << "Gnuplot::Gnuplot: The log file " << log_file << " does not exist\n";
       throw std::runtime_error( ss.str() );
    }
+}
+
+void Gnuplot::show_server_load() const
+{
+   Host the_host(host_);
+   std::string gnuplot_dat_file    = the_host.prefix_host_and_port(port_,"gnuplot.dat");
+   std::string gnuplot_script_file = the_host.prefix_host_and_port(port_,"gnuplot.script");
+
 
    // The vector index is the order in which suites are found, this will be used to place the suite in the correct column
    std::vector<SuiteLoad> suite_vec;
-   std::string gnuplot_file = create_gnuplot_file(log_file,suite_vec);
-   std::string gnuplot_script = create_gnuplot_script(gnuplot_file,suite_vec,no_of_suites_to_plot);
+   std::string gnuplot_file = create_gnuplot_file(suite_vec,gnuplot_dat_file);
+   std::string gnuplot_script = create_gnuplot_script(gnuplot_file,suite_vec,no_of_suites_to_plot_,gnuplot_script_file);
 
 
    // make the gnuplot_script file executable
@@ -60,9 +73,8 @@ void Gnuplot::show_server_load(const std::string& log_file,size_t no_of_suites_t
 
 
 std::string Gnuplot::create_gnuplot_file(
-         const std::string& the_log_file,
          std::vector<SuiteLoad>& suite_vec,
-         const std::string& temp_file )
+         const std::string& temp_file ) const
 {
    /// Will read the log file and create a new file that can be used as input to gnuplot
    /// We will collate each request/cmd to the server made over a second.
@@ -81,8 +93,8 @@ std::string Gnuplot::create_gnuplot_file(
    ///  HH:MM:SS D.M.YYYY request/sec  child_request  users_requests  suite_0 suite_1  suite_2  suite_3  suite_n
 
    /// The log file can be massive > 50Mb
-   File_r log_file( the_log_file);
-   if ( !log_file.ok() ) throw std::runtime_error( "Gnuplot::prepare_for_gnuplot: Could not open log file " + the_log_file );
+   File_r log_file(log_file_);
+   if ( !log_file.ok() ) throw std::runtime_error( "Gnuplot::prepare_for_gnuplot: Could not open log file " + log_file_ );
 
 
    /// Create a new file that can be used with gnuplot. This has to be column based
@@ -201,13 +213,16 @@ std::string Gnuplot::create_gnuplot_script(
          const std::string& path_to_file,
          const std::vector<SuiteLoad>& suite_vec,
          size_t no_of_suites_to_plot,
-         const std::string& script)
+         const std::string& script) const
 {
    /// Create the gnuplot script file for rendering the graph
    std::ofstream gnuplot_script( script.c_str() );
    if ( !gnuplot_script ) {
        throw std::runtime_error( "Gnuplot::create_gnuplot_script: Could not open output file: " + script);
    }
+
+   gnuplot_script << "set term png\n";
+   gnuplot_script << "set output \"" << host_ << "." << port_ << ".png\"\n";
 
 
    gnuplot_script << "set autoscale                          # scale axes automatically\n";
@@ -282,7 +297,7 @@ std::string Gnuplot::create_gnuplot_script(
       else                               gnuplot_script << ",";
    }
 
-   gnuplot_script << "pause -1 \"Hit any key to continue\"\n\n";
+//   gnuplot_script << "pause -1 \"Hit any key to continue\"\n\n";
 
    return script;
 }

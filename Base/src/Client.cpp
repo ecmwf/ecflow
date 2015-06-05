@@ -306,6 +306,7 @@ void Client::stop()
 bool Client::handle_server_response( ServerReply& server_reply, bool debug ) const
 {
 	if (debug) std::cout << "   Client::handle_server_response" << std::endl;
+	server_reply.set_host_port(host_,port_); // client context, needed by some commands, ie. SServerLoadCmd
 	return inbound_response_.handle_server_response(server_reply, outbound_request_.get_cmd(), debug);
 }
 

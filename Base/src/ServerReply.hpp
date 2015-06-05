@@ -51,6 +51,10 @@ public:
 	bool block_client_zombie_detected() const { return block_client_zombie_detected_;}
 	void set_block_client_zombie_detected() { block_client_zombie_detected_ = true;}
 
+	void set_host_port(const std::string& host, const std::string& port) { host_ = host; port_ = port;}
+   const std::string& host() const { return host_;}
+   const std::string& port() const { return port_;}
+
 	bool client_request_failed() const { return !error_msg_.empty(); }
 	void set_error_msg(const std::string& e) { error_msg_ = e;}
 	const std::string& error_msg() const { return error_msg_; }
@@ -117,12 +121,14 @@ public:
 private:
 	friend class SSyncCmd;
 	bool cli_;
- 	bool in_sync_;                         // clear at the start of invoke
- 	bool full_sync_;                       // clear at the start of invoke
+ 	bool in_sync_;                          // clear at the start of invoke
+ 	bool full_sync_;                        // clear at the start of invoke
 	News_t news_;                           // clear at the start of invoke
-	bool block_client_on_home_server_;     // clear at the start of invoke
-	bool block_client_server_halted_;      // clear at the start of invoke
-	bool block_client_zombie_detected_;    // clear at the start of invoke
+	bool block_client_on_home_server_;      // clear at the start of invoke
+	bool block_client_server_halted_;       // clear at the start of invoke
+	bool block_client_zombie_detected_;     // clear at the start of invoke
+   std::string host_;                      // clear at the start of invoke
+   std::string port_;                      // clear at the start of invoke
 	std::string str_;                       // clear at the start of invoke
 	std::string error_msg_;                 // clear at the start of invoke
    std::vector<Zombie> zombies_;           // clear at the start of invoke
