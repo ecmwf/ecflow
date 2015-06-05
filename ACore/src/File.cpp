@@ -171,7 +171,11 @@ std::string File::get_last_n_lines(const std::string& filename,int last_n_lines,
        buffer.resize( std::min( buffer.size() + granularity, size ) );
        source.seekg( -static_cast<std::streamoff>( buffer.size() ),
                      std::ios_base::end );
+#if defined(HPUX) || defined(_AIX)
+       source.read( &(buffer.front()), buffer.size() );
+#else
        source.read( buffer.data(), buffer.size() );
+#endif
        newlineCount = std::count( buffer.begin(), buffer.end(), '\n');
    }
 
