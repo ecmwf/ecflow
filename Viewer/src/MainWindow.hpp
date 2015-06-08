@@ -27,7 +27,7 @@ class QActionGroup;
 class InfoPanel;
 class NodePanel;
 class ServerFilterMenu;
-class VSettings;
+class VComboSettings;
 
 class MainWindow : public QMainWindow, private Ui::MainWindow
 {
@@ -66,11 +66,11 @@ private:
 
     void reloadContents();
 
-    void writeSettings(VSettings*);
-    void readSettings(VSettings*);
+    void writeSettings(VComboSettings*);
+    void readSettings(VComboSettings*);
 
 
-    static MainWindow* makeWindow(VSettings* vs);
+    static MainWindow* makeWindow(VComboSettings* vs);
     static MainWindow *makeWindow();
     static MainWindow *makeWindow(QString id);
     static MainWindow *makeWindow(QStringList idLst);

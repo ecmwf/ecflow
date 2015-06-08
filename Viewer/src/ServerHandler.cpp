@@ -18,11 +18,13 @@
 #include "Str.hpp"
 
 #include "ConnectState.hpp"
+#include "DirectoryHandler.hpp"
 #include "NodeObserver.hpp"
 #include "ServerObserver.hpp"
 #include "SuiteFilter.hpp"
 #include "UserMessage.hpp"
 #include "VNode.hpp"
+#include "VSettings.hpp"
 #include "VTaskObserver.hpp"
 
 #include <QMessageBox>
@@ -133,6 +135,8 @@ ServerHandler::ServerHandler(const std::string& name,const std::string& host, co
 
 ServerHandler::~ServerHandler()
 {
+	writeSettings();
+
 	//Notify the observers
 	for(std::vector<ServerObserver*>::const_iterator it=serverObservers_.begin(); it != serverObservers_.end(); it++)
 			(*it)->notifyServerDelete(this);
@@ -1231,10 +1235,12 @@ void ServerHandler::updateSuiteFilter(SuiteFilter* sf)
 		{
 			reset();
 		}
+
+		writeSettings();
 	}
 
 }
-//This is called internally aftern an update!!!
+//This is called internally after an update!!!
 void ServerHandler::updateSuiteFilter(const std::vector<std::string>& loadedSuites)
 {
 	std::vector<std::string> defSuites;
@@ -1261,52 +1267,111 @@ void ServerHandler::updateSuiteFilter(const std::vector<std::string>& loadedSuit
 
 }
 
-/*
-void ehost::suites( int which, std::vector<std::string>& l )
-
+void ServerHandler::readSettings()
 {
-   try {
-      switch ( which ) {
-         case SUITES_LIST:
-            client_.suites();
-            l = client_.server_reply().get_string_vec();
-            break;
-         case SUITES_MINE:
-            l = suites_;
-            break;
-         case SUITES_REG:
-            gui::message("%s: registering to suites", name());
-            suites_ = l;
-            try {
-               if (l.empty()) {
-                  try { client_.ch1_drop(); }
-                  catch ( std::exception &e ) {
-                     std::cout << "# no drop possible: " << e.what() << "\n";
-                  }
+	VSettings vs;
 
-                  // reset handle to zero , and clear the defs
-                  client_.reset();
-               }
-               client_.ch_register(new_suites_, suites_);
-               status();
-               redraw();
-            }
-            catch ( std::exception &e ) {
-               gui::error("host::suites-reg-error: %s", e.what());
-            }
-            break;
-         default:
-            gui::message("%s: suites, what?");
-            break;
-      }
-   }
-   catch ( std::exception &e ) {
-      if (client_.defs().get()) {
-         gui::error("host::suites-error: %s", e.what());
-      }
-   }
+	std::string fs = DirectoryHandler::concatenate(DirectoryHandler::configDir(), name() + ".conf.json");
+
+	//Read configuration.
+	if(!vs.read(fs))
+	{
+		 return;
+	}
+
+	vs.beginGroup("suiteFilter");
+	suiteFilter_->readSettings(&vs);
+	vs.endGroup();
+
+/*
+	int cnt=vs.get<int>("windowCount",0);
+
+	//Get number of windows and topWindow index.
+	int cnt=vs.get<int>("windowCount",0);
+	int topWinId=vs.get<int>("topWindowId",-1);
+
+	if(cnt > maxWindowNum_)
+	{
+		cnt=maxWindowNum_;
+	}
+
+	//Create all windows (except the topWindow) in a loop. The
+	//topWindow should be created last so that it should always appear on top.
+	std::string winPattern("window_");
+	for(int i=0; i < cnt; i++)
+	{
+		if(i != topWinId)
+		{
+			std::string id=winPattern + boost::lexical_cast<std::string>(i);
+			if(vs.contains(id))
+			{
+				vs.beginGroup(id);
+				MainWindow::makeWindow(&vs);
+				vs.endGroup();
+			}
+		}
+	}
+
+	//Create the topwindow
+	if(topWinId != -1)
+	{
+		std::string id=winPattern + boost::lexical_cast<std::string>(topWinId);
+		if(vs.contains(id))
+		{
+			vs.beginGroup(id);
+			MainWindow::makeWindow(&vs);
+			vs.endGroup();
+		}
+	}
+
+	//If now windows were created we need to create an empty one
+	if(windows_.count() == 0)
+	{
+		MainWindow::makeWindow(&vs);
+	}*/
 }
-*/
+
+void ServerHandler::writeSettings()
+{
+	VSettings vs;
+
+	std::string fs = DirectoryHandler::concatenate(DirectoryHandler::configDir(), name() + ".conf.json");
+
+	vs.beginGroup("suiteFilter");
+	suiteFilter_->writeSettings(&vs);
+	vs.endGroup();
+
+	//Write to json
+	vs.write(fs);
+
+		/*VSettings vs("ecFlow_ui");
+
+	//We have to clear it so that not to remember all the previous windows
+	vs.clear();
+
+	//Add total window number and id of active window
+	vs.put("windowCount",windows_.count());
+	vs.put("topWindowId",windows_.indexOf(topWin));
+
+	//Save info for all the windows
+	for(int i=0; i < windows_.count(); i++)
+	{
+		std::string id="window_"+boost::lexical_cast<std::string>(i);
+		vs.beginGroup(id);
+		windows_.at(i)->writeSettings(&vs);
+		vs.endGroup();
+	}
+
+	//Define json file
+	std::string fs = DirectoryHandler::concatenate(DirectoryHandler::configDir(), "session.json");
+
+	//Write to json
+	vs.write(fs);*/
+}
+
+
+
+
 
 
 //--------------------------------------------------------------

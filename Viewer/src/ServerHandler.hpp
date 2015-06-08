@@ -40,6 +40,21 @@ class SuiteFilter;
 class VNodeChange;
 class VServer;
 class VServerChange;
+class VSettings;
+
+class ServerSettings
+{
+protected:
+
+	int updateRate_;
+	bool adaptiveUpdate_;
+	int maxAdaptiveUpdateRate_;
+	int maxJobFileLines_;
+	bool readFromDisk_;
+
+	bool abortedPopUp_;
+
+};
 
 class ServerHandler : public QObject
 {
@@ -86,6 +101,9 @@ public:
 
 	void addServerObserver(ServerObserver* obs);
 	void removeServerObserver(ServerObserver* obs);
+
+	void readSettings();
+	void writeSettings();
 
 	static const std::vector<ServerHandler*>& servers() {return servers_;}
 	static ServerHandler* addServer(const std::string &name,const std::string &host, const std::string &port);

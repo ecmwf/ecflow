@@ -103,10 +103,11 @@ protected:
 class NodeFilter
 {
 public:
-	NodeFilter(NodeFilterDef* def);
-	virtual ~NodeFilter() {};
-
 	enum ChangeAspect {AllChanged,StateChanged,AttributeChanged};
+	enum ResultMode {StoreMatched,StoreNonMatched};
+
+	NodeFilter(NodeFilterDef* def,ResultMode resultMode);
+	virtual ~NodeFilter() {};
 
 	virtual void reset(ServerHandler* server)=0;
     virtual bool isFiltered(VNode* node)=0;
@@ -117,6 +118,8 @@ public:
 protected:
     NodeFilterDef* def_;
     std::set<std::string> type_;
+    ResultMode resultMode_;
+	std::set<VNode*> result_;
 
 };
 
@@ -126,12 +129,13 @@ public:
 	TreeNodeFilter(NodeFilterDef* def);
 	void reset(ServerHandler* server);
 	bool isFiltered(VNode* node);
-	int  matchCount() {return -1;};
-	int  nonMatchCount() {return static_cast<int>(nonMatch_.size());};
+	int  matchCount();
+	int  nonMatchCount();
 	VNode* match(int i) {return NULL;}
 
 private:
 	bool filterState(VNode* node,VParamSet* stateFilter);
+	std::vector<VNode*> match_;
 	std::set<VNode*> nonMatch_;
 };
 

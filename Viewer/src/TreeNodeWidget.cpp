@@ -114,7 +114,7 @@ void TreeNodeWidget::on_actionBreadcrumbs_triggered(bool b)
 
 void TreeNodeWidget::writeSettings(VSettings* vs)
 {
-	vs->put("type","tree");
+	vs->put("type",std::string("tree"));
 	vs->put("dockId",id_);
 
 	bcWidget_->writeSettings(vs);

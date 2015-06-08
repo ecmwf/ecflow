@@ -285,7 +285,7 @@ void Dashboard::notifyServerFilterChanged(ServerItem*)
 // Save and load settings!!
 //----------------------------------
 
-void Dashboard::writeSettings(VSettings* vs)
+void Dashboard::writeSettings(VComboSettings* vs)
 {
 	serverFilter_->writeSettings(vs);
 
@@ -304,7 +304,7 @@ void Dashboard::writeSettings(VSettings* vs)
 	}
 }
 
-void Dashboard::readSettings(VSettings* vs)
+void Dashboard::readSettings(VComboSettings* vs)
 {
 	serverFilter_->readSettings(vs);
 

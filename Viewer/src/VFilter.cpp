@@ -151,36 +151,55 @@ NodeFilterDef::NodeFilterDef(Scope scope) : nodeState_(0)
 	}
 }
 
-NodeFilter::NodeFilter(NodeFilterDef* def) : def_(def)
+NodeFilter::NodeFilter(NodeFilterDef* def,ResultMode resultMode) : def_(def), resultMode_(resultMode)
 {
 
 }
 
 
-TreeNodeFilter::TreeNodeFilter(NodeFilterDef* def) : NodeFilter(def)
+TreeNodeFilter::TreeNodeFilter(NodeFilterDef* def) : NodeFilter(def,StoreNonMatched)
 {
 
 }
 
 bool TreeNodeFilter::isFiltered(VNode* node)
 {
-	return (std::find(nonMatch_.begin(), nonMatch_.end(), node) == nonMatch_.end());
+	if(resultMode_==StoreNonMatched)
+	{
+		if(result_.empty())
+			return true;
+
+		return (std::find(result_.begin(), result_.end(), node) == result_.end());
+	}
+	else if(resultMode_==StoreMatched)
+	{
+		if(result_.empty())
+			return false;
+
+		return (std::find(result_.begin(), result_.end(), node) == result_.end());
+	}
+
+	return false;
 }
 
 void TreeNodeFilter::reset(ServerHandler* server)
 {
-	nonMatch_.clear();
+	result_.clear();
+	resultMode_=StoreNonMatched;
 
 	//If all states are visible
 	if(def_->nodeState_->isComplete())
+	{
 		return;
+	}
 
-	return;
-
-	//TODO: make it work again
+	else if(def_->nodeState_->isEmpty())
+	{
+		resultMode_=StoreMatched;
+		return;
+	}
 
 	VServer* root=server->vRoot();
-
 	for(unsigned int j=0; j < root->numOfChildren();j++)
 	{
 		filterState(root->childAt(j),def_->nodeState_);
@@ -205,13 +224,31 @@ bool TreeNodeFilter::filterState(VNode* node,VParamSet* stateFilter)
 
 
 	if(!ok)
-		nonMatch_.insert(node);
+		result_.insert(node);
 
 	return ok;
 }
 
+int TreeNodeFilter::matchCount()
+{
+	if(resultMode_==StoreMatched)
+	{
+		return static_cast<int>(result_.size());
+	}
+	return -1;
+};
 
-TableNodeFilter::TableNodeFilter(NodeFilterDef* def) : NodeFilter(def)
+int TreeNodeFilter::nonMatchCount()
+{
+	if(resultMode_==StoreNonMatched)
+	{
+		return static_cast<int>(result_.size());
+	}
+	return -1;
+}
+
+
+TableNodeFilter::TableNodeFilter(NodeFilterDef* def) : NodeFilter(def,StoreMatched)
 {
 	type_.insert("suite");
 }

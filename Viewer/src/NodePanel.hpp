@@ -20,7 +20,7 @@
 
 class Dashboard;
 class ServerFilter;
-class VSettings;
+class VComboSettings;
 
 class NodePanel : public TabWidget
 {
@@ -42,8 +42,8 @@ public:
 	VInfo_ptr currentSelection();
 	void addToDashboard(const std::string& type);
 
-	void writeSettings(VSettings*);
-	void readSettings(VSettings*);
+	void writeSettings(VComboSettings*);
+	void readSettings(VComboSettings*);
 
 public Q_SLOTS:
 	void slotCurrentWidgetChanged(int);

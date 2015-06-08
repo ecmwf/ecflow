@@ -13,6 +13,8 @@
 #include <string>
 #include <vector>
 
+class VSettings;
+
 template <class T>
 class FlagSet
 {
@@ -73,7 +75,11 @@ public:
 	void setLoaded(const std::vector<std::string>& loaded);
 	const FlagSet<ChangeFlag>& changeFlags() {return changeFlags_;}
 
+	void readSettings(VSettings *vs);
+	void writeSettings(VSettings *vs);
+
 private:
+	void clear();
 	void adjust();
 
     std::vector<std::string> loaded_;

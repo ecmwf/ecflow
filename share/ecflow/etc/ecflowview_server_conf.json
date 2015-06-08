@@ -1,0 +1,86 @@
+{
+    "server":  {
+
+            "label" : "Server options",
+
+            "update": {
+            	"label" : "Update",
+            	"tooltip" : "update",      
+            
+            	"updateRate": {
+            		"label": "Update frequency",
+            		"suffix" : "seconds", 
+            		"tooltip": "update frequency",                          
+            		"default": "60"
+                },
+                
+                "apdaptiveUpdate": {
+                	"label": "Adaptive update frequency",
+                	"tooltip": "Adaptive update frequency",                          
+                	"default": "true"
+                },
+			
+                "maxApdaptiveUpdateRate": {
+                	"label": "Maximum adaptive update frequency",
+                	"suffix" : "minutes", 
+                	"tooltip": "Maximum adaptive update frequency",                          
+                	"default": "60"
+                }
+            }, 
+
+			"files": {
+				"label" : "Files",
+				"tooltip" : "files", 
+				
+				"readFilesFromDisk": {
+            		"label": "Read files from disk when possible",
+            		"tooltip": "",                          
+            		"default": "true"
+                	},
+            
+            	"maxJobFile": {
+                	"label": "Maximum size of job files",
+                	"suffix" : "lines", 
+                	"tooltip": "",                          
+                	"default": "15000"
+                    }
+            },
+            
+            "popup": {
+				"label" : "Popup notifications",
+				"tooltip" : "Popup notifications", 
+				
+				"aborted": {
+            		"label": "Aborted tasks",
+            		"tooltip": "aborted tasks",                          
+            		"default": "true"
+                },
+            	
+                "restarted": {
+            		"label": "Restarted tasks",
+            		"tooltip": "restarted tasks",                          
+            		"default": "true"
+            	},
+            	
+            	"late": {
+            		"label": "Late tasks",
+            		"tooltip": "late tasks",                          
+            		"default": "true"
+            	},
+            	
+            	"zombie": {
+            		"label": "Zombies",
+            		"tooltip": "zombies",                          
+            		"default": "true"
+            	}, 
+            	
+            	"alias": {
+            		"label": "Aborted or restarted aliases",
+            		"tooltip": "aborted or restarted aliases",                          
+            		"default": "true"
+            	}
+              	
+            }          
+
+     }
+}

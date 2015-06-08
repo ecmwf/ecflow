@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2014 ECMWF.
+// Copyright 2015 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -7,33 +7,23 @@
 // nor does it submit to any jurisdiction.
 //============================================================================
 
-#ifndef PROPERTYDIALOG_INC_
-#define PROPERTYDIALOG_INC_
 
-#include "ui_PropertyDialog.h"
+#include "VServerSettings.hpp"
 
-#include <QDialog>
+#include "VProperty.hpp"
 
-class VProperty;
+static VProperty* VServerSettings::prop_=0;
 
-class PropertyDialog : public QDialog, private Ui::PropertyDialog
+VProperty* VServerSettings::derive()
 {
 
-Q_OBJECT    
-    
-public:
-    PropertyDialog(QWidget *parent=0);
-    ~PropertyDialog() {};
+}
 
-public Q_SLOTS:
-    void accept();
-    void slotChangePage(QListWidgetItem *current, QListWidgetItem *previous);
 
-protected:
-    void build();
-    void addPage(QWidget *w,QIcon icon,QString txt);
+//Called from VConfigLoader
+void VServerSettings::load(VProperty*)
+{
 
-};
+}
 
-#endif
-
+static SimpleLoader<VServerSettings> loader("server");

@@ -24,7 +24,7 @@
 class DashboardWidget;
 class ServerFilter;
 class ServerItem;
-class VSettings;
+class VComboSettings;
 
 class Dashboard : public QMainWindow, public ServerFilterObserver
 {
@@ -48,8 +48,8 @@ public:
 	void notifyServerFilterRemoved(ServerItem*);
 	void notifyServerFilterChanged(ServerItem*);
 
-	void writeSettings(VSettings*);
-	void readSettings(VSettings*);
+	void writeSettings(VComboSettings*);
+	void readSettings(VComboSettings*);
 
 public Q_SLOTS:
 	//void slotFolderReplacedInView(Folder*);

@@ -55,14 +55,12 @@ std::string VSettingsPath::join(const std::string sep) const
 //
 //======================================================
 
-VSettings::VSettings(const std::string& application) :
-		qs_("ECMWF",QString::fromStdString(application))
+VSettings::VSettings()
 {
 }
 
 void VSettings::clear()
 {
-	qs_.clear();
 	pt_.clear();
 
 }
@@ -70,11 +68,6 @@ void VSettings::clear()
 bool VSettings::contains(const std::string& key)
 {
 	return (pt_.get_child_optional(path_.path(key)) != boost::none);
-}
-
-bool VSettings::containsQs(const std::string& key)
-{
-	return qs_.contains(QString::fromStdString(key));
 }
 
 bool VSettings::read(const std::string &fs)
@@ -93,19 +86,21 @@ bool VSettings::read(const std::string &fs)
 	return true;
 }
 
-
 void VSettings::write(const std::string &fs)
 {
 	//Write to json
 	write_json(fs,pt_);
-
-	qs_.sync();
 }
 
 void VSettings::put(const std::string& key,int val)
 {
 	pt_.put(path_.path(key),val);
 }
+
+/*void VSettings::put(const std::string& key,bool val)
+{
+	pt_.put(path_.path(key),val);
+}*/
 
 void VSettings::put(const std::string& key,const std::string& val)
 {
@@ -122,11 +117,6 @@ void VSettings::put(const std::string& key,const std::vector<std::string>& val)
 	pt_.put_child(path_.path(key),array);
 }
 
-void VSettings::putQs(const std::string& key,QVariant val)
-{
-	qs_.setValue(QString::fromStdString(key),val);
-}
-
 void VSettings::get(const std::string& key,std::vector<std::string>& val)
 {
 	boost::optional<boost::property_tree::ptree& > ptArray=pt_.get_child_optional(path_.path(key));
@@ -135,29 +125,70 @@ void VSettings::get(const std::string& key,std::vector<std::string>& val)
 		return;
 	}
 
-
 	//boost::property_tree::ptree ptArray=it->second;
 	for(boost::property_tree::ptree::const_iterator it = ptArray.get().begin(); it != ptArray.get().end(); ++it)
 	{
-			std::string name=it->second.get_value<std::string>();
-			val.push_back(name);
-
+		std::string name=it->second.get_value<std::string>();
+		val.push_back(name);
 	}
-}
-
-QVariant  VSettings::getQs(const std::string& key)
-{
-	return qs_.value(QString::fromStdString(key));
 }
 
 void VSettings::beginGroup(const std::string &id)
 {
 	path_.add(id);
-	qs_.beginGroup(QString::fromStdString(id));
 }
 
 void VSettings::endGroup()
 {
 	path_.pop();
+}
+
+//======================================================
+//
+// VSettings
+//
+//======================================================
+
+VComboSettings::VComboSettings(const std::string& application) :
+		qs_("ECMWF",QString::fromStdString(application))
+{
+}
+
+void VComboSettings::clear()
+{
+	VSettings::clear();
+	pt_.clear();
+}
+
+bool VComboSettings::containsQs(const std::string& key)
+{
+	return qs_.contains(QString::fromStdString(key));
+}
+
+void VComboSettings::write(const std::string &fs)
+{
+	VSettings::write(fs);
+	qs_.sync();
+}
+
+void VComboSettings::putQs(const std::string& key,QVariant val)
+{
+	qs_.setValue(QString::fromStdString(key),val);
+}
+
+QVariant  VComboSettings::getQs(const std::string& key)
+{
+	return qs_.value(QString::fromStdString(key));
+}
+
+void VComboSettings::beginGroup(const std::string &id)
+{
+	VSettings::beginGroup(id);
+	qs_.beginGroup(QString::fromStdString(id));
+}
+
+void VComboSettings::endGroup()
+{
+	VSettings::endGroup();
 	qs_.endGroup();
 }

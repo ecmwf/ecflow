@@ -9,6 +9,8 @@
 
 #include "SuiteFilter.hpp"
 
+#include "VSettings.hpp"
+
 #include <algorithm>
 
 //=================================================================
@@ -35,6 +37,12 @@ SuiteFilterItem::SuiteFilterItem(const SuiteFilterItem& other)
 	current_=suites;
 	adjust();
 }*/
+
+void SuiteFilter::clear()
+{
+	items_.clear();
+	filter_.clear();
+}
 
 void SuiteFilter::adjust()
 {
@@ -163,4 +171,29 @@ void SuiteFilter::unselectAll()
 	adjust();
 }
 
+void SuiteFilter::readSettings(VSettings *vs)
+{
+	clear();
 
+	enabled_=vs->get<bool>("enabled",enabled_);
+	autoAddNew_=vs->get<bool>("autoAddNew",autoAddNew_);
+
+	adjust();
+
+	changeFlags_.clear();
+	changeFlags_.set(ItemChanged);
+}
+
+void SuiteFilter::writeSettings(VSettings *vs)
+{
+	vs->put("enabled",enabled_);
+	vs->put("autoAddNew",autoAddNew_);
+
+	std::vector<std::string> array;
+	for(std::vector<std::string>::const_iterator it=filter_.begin(); it != filter_.end(); it++)
+	{
+		array.push_back(*it);
+	}
+
+	vs->put("filter",array);
+}

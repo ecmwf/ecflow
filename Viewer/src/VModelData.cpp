@@ -82,7 +82,7 @@ void VModelServer::runFilter()
 VTreeServer::VTreeServer(ServerHandler *server,NodeFilterDef* filterDef) :
    VModelServer(server)
 {
-	filter_=new TableNodeFilter(filterDef);
+	filter_=new TreeNodeFilter(filterDef);
 
 	//We has to observe the nodes of the server.
 	//server_->addNodeObserver(this);

@@ -115,6 +115,7 @@ QT4_WRAP_CPP(VIEWER_MOC AbstractNodeModel.hpp
                         NodeWidget.hpp
                         OutputItemWidget.hpp
                         PropertyDialog.hpp
+                        PropertyEditor.hpp
                         PlainTextSearchLine.hpp
                         ServerHandler.hpp
                         ServerListDialog.hpp
@@ -147,6 +148,7 @@ QT4_WRAP_UI       (VIEWER_FORMS_HEADERS CommandDesignerWidget.ui
             MenuConfigDialog.ui
             OutputItemWidget.ui 
             PropertyDialog.ui
+            PropertyEditor.ui
             SearchLineWidget.ui 
             ServerAddDialog.ui
             ServerEditDialog.ui 

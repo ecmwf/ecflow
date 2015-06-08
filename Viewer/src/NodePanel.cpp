@@ -277,7 +277,7 @@ void NodePanel::reload()
 //
 //==========================================================
 
-void NodePanel::writeSettings(VSettings *vs)
+void NodePanel::writeSettings(VComboSettings *vs)
 {
 	int currentIdx=(currentIndex()>=0)?currentIndex():0;
 
@@ -298,7 +298,7 @@ void NodePanel::writeSettings(VSettings *vs)
 	}
 }
 
-void NodePanel::readSettings(VSettings *vs)
+void NodePanel::readSettings(VComboSettings *vs)
 {
 	using boost::property_tree::ptree;
 

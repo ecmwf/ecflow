@@ -18,7 +18,9 @@
 VProperty::VProperty(const std::string& name) :
    strName_(name),
    name_(QString::fromStdString(name)),
-   editable_(true)
+   editable_(true),
+   master_(0),
+   useMaster_(false)
 {
 }
 
@@ -49,6 +51,16 @@ void VProperty::setDefaultValue(const std::string& val)
     {
         defaultValue_=toColour(val);
     }
+    //int
+    else if(isNumber(val))
+    {
+       	defaultValue_=toNumber(val);
+    }
+    //bool
+    else if(isBool(val))
+    {
+        defaultValue_=toBool(val);
+    }
     //text
     else
     {
@@ -67,7 +79,14 @@ void VProperty::setValue(const std::string& val)
     {
         value_=toColour(val);
     }
-
+    else if(isNumber(val))
+    {
+    	value_=toNumber(val);
+    }
+    else if(isBool(val))
+    {
+       	value_=toBool(val);
+    }
     if(!defaultValue_.isNull() &&
             defaultValue_.type() != value_.type())
     {
@@ -132,7 +151,14 @@ bool VProperty::isFont(const std::string& val)
 
 bool VProperty::isNumber(const std::string& val)
 {
-    return false;
+	QString str=QString::fromStdString(val);
+	QRegExp re("\\d*");
+	return (re.exactMatch(str));
+}
+
+bool VProperty::isBool(const std::string& val)
+{
+	return (val == "true" || val == "false");
 }
 
 QColor VProperty::toColour(const std::string& name)
@@ -162,7 +188,15 @@ QFont VProperty::toFont(const std::string& name)
 
 int VProperty::toNumber(const std::string& name)
 {
-    return 0;
+	QString qn=QString::fromStdString(name);
+
+	qDebug() << "int" << qn << qn.toInt();
+	return qn.toInt();
+}
+
+bool VProperty::toBool(const std::string& name)
+{
+	return (name == "true")?true:false;
 }
 
 VProperty* VProperty::findChild(QString name)
@@ -175,3 +209,33 @@ VProperty* VProperty::findChild(QString name)
     
     return 0;
 }
+
+void VProperty::setMaster(VProperty* m)
+{
+	if(master_)
+		master_->removeObserver(this);
+
+	master_=m;
+	master_->addObserver(this);
+}
+
+VProperty* VProperty::derive()
+{
+	 VProperty *cp=new VProperty(strName_);
+
+	 cp->toolTip_=toolTip_;
+	 cp->labelText_=labelText_;
+	 cp->defaultValue_=defaultValue_;
+	 cp->value_=value_;
+	 cp->editable_=editable_;
+
+	 cp->setMaster(this);
+
+	 Q_FOREACH(VProperty* p,children_)
+	 {
+		 VProperty *ch=p->derive();
+		 cp->addChild(ch);
+	 }
+	 return cp;
+}
+

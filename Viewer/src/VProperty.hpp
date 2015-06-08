@@ -30,10 +30,10 @@ public:
 
 //This class defines a property storing its value as a QVariant.
 //Properties are used to store the viewer's configuration. Editable properties
-//store all the information needed to display them in an property editor.
+//store all the information needed to display them in a property editor.
 //Properties can have children so trees can be built up from them.
 
-class VProperty
+class VProperty : public VPropertyObserver
 {
 public:
     VProperty(const std::string& name);
@@ -59,8 +59,13 @@ public:
     void addChild(VProperty*);
     VProperty* findChild(QString name);
     
+    void setMaster(VProperty*);
+    VProperty *derive();
+
     void addObserver(VPropertyObserver*);
     void removeObserver(VPropertyObserver*);
+
+    void notifyChange(VProperty*) {}
 
 protected:
     std::string strName_; //The name of the property as as std::string
@@ -77,13 +82,17 @@ private:
     static bool isColour(const std::string&);
     static bool isFont(const std::string&);
     static bool isNumber(const std::string&);
+    static bool isBool(const std::string&);
 
     static QColor toColour(const std::string&) ;
     static QFont  toFont(const std::string&);
     static int    toNumber(const std::string&);
+    static bool   toBool(const std::string&);
 
     QList<VProperty*> children_;
     QList<VPropertyObserver*> observers_;
+    VProperty* master_;
+    bool useMaster_;
 };
 
 #endif

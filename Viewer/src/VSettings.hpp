@@ -31,25 +31,25 @@ protected:
 	std::vector<std::string> path_;
 };
 
+//This class stores the settings as a boost property tree and read/write them into/from json.
 class VSettings
 {
 public:
-	VSettings(const std::string& application);
+	VSettings();
+	virtual ~VSettings() {};
 
-	void write(const std::string &fs);
 	bool read(const std::string &fs);
-	void clear();
-
+	virtual void write(const std::string &fs);
+	virtual void clear();
 	bool contains(const std::string& key);
-	bool containsQs(const std::string& key);
 
-	void beginGroup(const std::string&);
-	void endGroup();
+	virtual void beginGroup(const std::string&);
+	virtual void endGroup();
 
 	void put(const std::string& key,int val);
+	//void put(const std::string& key,bool val);
 	void put(const std::string& key,const std::string& val);
 	void put(const std::string& key,const std::vector<std::string>& val);
-	void putQs(const std::string& key,QVariant val);
 
 	template <typename T>
 	T get(const std::string& key,const T& defaultVal)
@@ -57,12 +57,33 @@ public:
 		return pt_.get<T>(path_.path(key),defaultVal);
 	}
 	void get(const std::string& key,std::vector<std::string>& val);
-	QVariant getQs(const std::string& key);
 
 protected:
 	boost::property_tree::ptree pt_;
-	QSettings qs_;
 	VSettingsPath path_;
+};
+
+//This class uses both the boost property tree and QSettings to store and manage the settings. The idea
+//is that Qt based settings like window geometry, window state etc. are handled by QSettings while
+//all the others by the boost property tree.
+class VComboSettings : public VSettings
+{
+public:
+	VComboSettings(const std::string& application);
+
+	void write(const std::string &fs);
+	void clear();
+
+	bool containsQs(const std::string& key);
+
+	void beginGroup(const std::string&);
+	void endGroup();
+
+	void putQs(const std::string& key,QVariant val);
+	QVariant getQs(const std::string& key);
+
+protected:
+	QSettings qs_;
 };
 
 #endif

@@ -271,7 +271,7 @@ void MainWindow::closeEvent(QCloseEvent* event)
 //
 //====================================================
 
-void MainWindow::writeSettings(VSettings *vs)
+void MainWindow::writeSettings(VComboSettings *vs)
 {
 	//Qt settings
 	vs->putQs("geometry",saveGeometry());
@@ -285,7 +285,7 @@ void MainWindow::writeSettings(VSettings *vs)
 	nodePanel_->writeSettings(vs);
 }
 
-void MainWindow::readSettings(VSettings *vs)
+void MainWindow::readSettings(VComboSettings *vs)
 {
 	int cnt=vs->get<int>("infoPanelCount",0);
 	for(int i=0; i < cnt ; i++)
@@ -313,7 +313,7 @@ void MainWindow::readSettings(VSettings *vs)
 //
 //====================================================
 
-MainWindow* MainWindow::makeWindow(VSettings* vs)
+MainWindow* MainWindow::makeWindow(VComboSettings* vs)
 {
 	MainWindow* win=MainWindow::makeWindow();
 	win->readSettings(vs);
@@ -412,7 +412,7 @@ bool MainWindow::aboutToQuit(MainWindow* topWin)
 
 void MainWindow::init()
 {
-	VSettings vs("ecFlow_ui");
+	VComboSettings vs("ecFlow_ui");
 
 	std::string fs = DirectoryHandler::concatenate(DirectoryHandler::configDir(), "session.json");
 
@@ -470,7 +470,7 @@ void MainWindow::init()
 
 void MainWindow::save(MainWindow *topWin)
 {
-	VSettings vs("ecFlow_ui");
+	VComboSettings vs("ecFlow_ui");
 
 	//We have to clear it so that not to remember all the previous windows
 	vs.clear();
