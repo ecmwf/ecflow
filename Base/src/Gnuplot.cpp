@@ -49,9 +49,8 @@ Gnuplot::Gnuplot( const std::string& log_file,
 
 void Gnuplot::show_server_load() const
 {
-   Host the_host(host_);
-   std::string gnuplot_dat_file    = the_host.prefix_host_and_port(port_,"gnuplot.dat");
-   std::string gnuplot_script_file = the_host.prefix_host_and_port(port_,"gnuplot.script");
+   std::string gnuplot_dat_file    = host_.prefix_host_and_port(port_,"gnuplot.dat");
+   std::string gnuplot_script_file = host_.prefix_host_and_port(port_,"gnuplot.script");
 
 
    // The vector index is the order in which suites are found, this will be used to place the suite in the correct column
@@ -222,7 +221,7 @@ std::string Gnuplot::create_gnuplot_script(
    }
 
    gnuplot_script << "set term png\n";
-   gnuplot_script << "set output \"" << host_ << "." << port_ << ".png\"\n";
+   gnuplot_script << "set output \"" << host_.name() << "." << port_ << ".png\"\n";
 
 
    gnuplot_script << "set autoscale                          # scale axes automatically\n";

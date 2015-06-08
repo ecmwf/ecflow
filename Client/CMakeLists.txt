@@ -82,6 +82,7 @@ list( APPEND test_srcs
  test/TestRtt.cpp
  test/TestServer.cpp
  test/TestServerAndLifeCycle.cpp
+ test/TestServerLoad.cpp
  test/TestSignalSIGTERM.cpp
  test/TestUrlCmd.cpp
  test/TestWhiteListFile.cpp

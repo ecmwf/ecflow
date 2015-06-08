@@ -16,6 +16,7 @@
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 #include <string>
 #include <boost/noncopyable.hpp>
+#include "Host.hpp"
 
 namespace ecf {
 
@@ -37,7 +38,7 @@ public:
 
 private:
   std::string log_file_;
-  std::string host_;
+  Host        host_;
   std::string port_;
   size_t no_of_suites_to_plot_;
 
