@@ -182,7 +182,8 @@ static const char* server_load_desc() {
    return
             "Generates gnuplot files that show the server load graphically.\n"
             "This is done by parsing the log file. If no log file is provided,\n"
-            "then the log file path is obtained from the server.\n"
+            "then the log file path is obtained from the server. If the returned\n"
+            "log file path is not accessible an error is returned\n"
             "This command produces a three files in the CWD.\n"
             "    o <host>.<port>.gnuplot.dat\n"
             "    o <host>.<port>.gnuplot.script\n"
