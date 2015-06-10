@@ -429,11 +429,7 @@ bool Task::resolveDependencies(JobsParam& jobsParam)
 	      return false;
 	   }
 
-      // If the task was aborted, and we have not exceeded ECF_TRIES, then resubmit
-      // otherwise ONLY in state QUEUED can we submit jobs
-      // The Node could have been placed into SUSPENDED state
-
-      /// If we have been killed by the user. Do not resubmit jobs, until begin or re-queue FLAG_ISSET
+      /// If we have been killed by the user. Do not resubmit jobs, until *begin* or *re-queue*
       if (flag().is_set(ecf::Flag::KILLED)) {
 #ifdef DEBUG_DEPENDENCIES
          LOG(Log::DBG,"   Task::resolveDependencies() " << absNodePath() << " HOLDING as task state " << NState::toString(state()) << " has been killed." );
@@ -441,6 +437,8 @@ bool Task::resolveDependencies(JobsParam& jobsParam)
          return false;
       }
 
+      // If the task was aborted, and we have not exceeded ECF_TRIES, then resubmit
+      // otherwise ONLY in state QUEUED can we submit jobs
       std::string varValue;
       if (findParentUserVariableValue( Str::ECF_TRIES(), varValue ))  {
          // std::cout << "tryNo_ = " << tryNo_ << " ECF_TRIES = " <<  varValue << "\n";
