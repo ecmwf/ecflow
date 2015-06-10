@@ -10,18 +10,20 @@
 // granted to it by virtue of its status as an intergovernmental organisation
 // nor does it submit to any jurisdiction.
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
+#include <iostream>
+#include <stdlib.h>
+
+#include "boost/filesystem/operations.hpp"
+#include "boost/filesystem/path.hpp"
+#include <boost/test/unit_test.hpp>
+
 #include "Defs.hpp"
 #include "Suite.hpp"
 #include "Family.hpp"
 #include "Task.hpp"
 #include "EcfFile.hpp"
-
-#include "boost/filesystem/operations.hpp"
-#include "boost/filesystem/path.hpp"
-
-#include <boost/test/unit_test.hpp>
-#include <iostream>
-#include <stdlib.h>
+#include "Jobs.hpp"
+#include "JobsParam.hpp"
 
 using namespace std;
 using namespace ecf;
@@ -92,6 +94,44 @@ BOOST_AUTO_TEST_CASE( test_set_state )
  	/// This by default works out the most significant state of the children
  	/// ie. the computed state. Hence setting the state on Suite/Family is really
  	/// meaningless, since it will always be the computed state.
+}
+
+BOOST_AUTO_TEST_CASE( test_set_aborted )
+{
+   // see ECFLOW-344
+   cout << "ANode:: ...test_set_aborted\n";
+
+   Defs  defs;
+   suite_ptr suite = defs.add_suite("s1");
+   task_ptr t1 = suite->add_task("t1");
+   t1->addDefStatus( DState::COMPLETE );
+   defs.beginAll();
+
+   {
+      Jobs jobs(&defs);
+      JobsParam jobsParam;
+      jobs.generate(jobsParam);
+      BOOST_CHECK_MESSAGE( jobsParam.submitted().size() == 0,"No jobs should be submitted when task is complete but found " << jobsParam.submitted().size() << " submitted");
+   }
+
+   t1->setStateOnly(NState::ABORTED,true/*force*/);
+   {
+      Jobs jobs(&defs);
+      JobsParam jobsParam;
+      jobs.generate(jobsParam);
+      BOOST_CHECK_MESSAGE( jobsParam.submitted().size() == 0,"No jobs should be submitted when task is forcibly aborted but found " << jobsParam.submitted().size() << " submitted");
+   }
+
+   t1->requeue(true,0,false);
+
+   t1->set_state(NState::ABORTED); // mimic non forced, i.e like job aborted
+   {
+      Jobs jobs(&defs);
+      JobsParam jobsParam;
+      jobs.generate(jobsParam);
+      BOOST_CHECK_MESSAGE( jobsParam.submitted().size() == 1,"Expected 1 job, when job aborts and ECF_TRIES > 1 but found " << jobsParam.submitted().size() << " submitted");
+      BOOST_CHECK_MESSAGE(  t1->try_no() == 1," expected try_no to be 1 but found " << t1->try_no());
+   }
 }
 
 BOOST_AUTO_TEST_SUITE_END()

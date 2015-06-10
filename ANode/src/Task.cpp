@@ -420,6 +420,15 @@ bool Task::resolveDependencies(JobsParam& jobsParam)
 		return false;
 	}
 	else if (task_state == NState::ABORTED) {
+
+	   /// If we have been forcibly aborted by the user. Do not resubmit jobs, until *begin* or *re-queue*
+	   if (flag().is_set(ecf::Flag::FORCE_ABORT)) {
+#ifdef DEBUG_DEPENDENCIES
+	      LOG(Log::DBG,"   Task::resolveDependencies() " << absNodePath() << " HOLDING as task state " << NState::toString(state()) << " has been forcibly aborted." );
+#endif
+	      return false;
+	   }
+
       // If the task was aborted, and we have not exceeded ECF_TRIES, then resubmit
       // otherwise ONLY in state QUEUED can we submit jobs
       // The Node could have been placed into SUSPENDED state
@@ -458,6 +467,7 @@ bool Task::resolveDependencies(JobsParam& jobsParam)
 #endif
 
    /// If we have been forcibly aborted by the user. Do not resubmit jobs, until *begin* or *re-queue*
+	/// This can be set via ALTER, so independent of state.
    if (flag().is_set(ecf::Flag::FORCE_ABORT)) {
 #ifdef DEBUG_DEPENDENCIES
       LOG(Log::DBG,"   Task::resolveDependencies() " << absNodePath() << " HOLDING as task state " << NState::toString(state()) << " has been forcibly aborted." );
