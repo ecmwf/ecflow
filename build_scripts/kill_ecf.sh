@@ -7,10 +7,6 @@
 ## granted to it by virtue of its status as an intergovernmental organisation 
 ## nor does it submit to any jurisdiction. 
 
-# kill any running test
-ps -ef | grep ma0 | grep gcc | grep log_level=message | cut -c9-14 | xargs kill -9
-ps -ef | grep ma0 | grep test.sh | cut -c9-14 | xargs kill -9
-
 # kill any existing test based server 
 ps -ef | grep ma0 | grep ecfinterval | grep ecflow_server | cut -c9-14 | xargs kill -9
 ps -ef | grep ma0 | grep dis_job_gen | grep ecflow_server | cut -c9-14 | xargs kill -9
@@ -24,3 +20,5 @@ ps -ef | grep ma0 | grep clientRoot | grep ecbuild | grep release | cut -c9-14 |
 # kill any jobs
 ps -ef | grep ma0  | grep job | grep test | cut -c9-14 | xargs kill -9
 
+# kill any running test
+ps -ef | grep ma0 | grep test.sh | cut -c9-14 | xargs kill -9 || true
