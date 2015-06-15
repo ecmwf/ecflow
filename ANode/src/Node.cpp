@@ -594,9 +594,12 @@ bool Node::evaluateComplete() const
          // >>old:if (!completeExpr_->isFree()) freeComplete();
 
          // ECFLOW-247 Family goes complete despite active child
+         //            Typically we have a complete expression on the family i/e f1/t1 == complete
+         //            However if we have another child that is active,submitted forcing family to complete will cause zombies
+         //            Another child could be a family which could be aborted.
          // if computedState state is:
          //    NState::ABORTED   -> don't complete if any of the children are aborted  -> ECFLOW-247
-         //                         This can hide active/submitted nodes, as abort has higher priority
+         //                         This can hide active/submitted nodes, as abort has higher priority, could cause zombies
          //    NState::ACTIVE    -> can cause zombies
          //    NState::SUBMITTED -> can cause zombies
          // hence only allow complete is we are in a NState::QUEUED state
