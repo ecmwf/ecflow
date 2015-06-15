@@ -1055,7 +1055,7 @@ std::string EcfFile::getIncludedFilePath( const std::string& includedFile,
    if ( includedFile[0] == '<' ) {
       // %include <filename> can be one of:
       //    o When ECF_INCLUDE is a single path -> path1/filename
-      //    o When ECF_INCLUDE is a multi  path -> path1:path2:path3
+      //    o When ECF_INCLUDE is a multi  path -> path1:path2:path3  -> ECFLOW-261
       //                                        -> path1/filename || path2/filename || path3/filename
       //    o ECF_HOME/filename
       std::string ecf_include;
