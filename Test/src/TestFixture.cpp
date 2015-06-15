@@ -377,6 +377,10 @@ int TestFixture::server_version()
    std::string the_server_version_str = TestFixture::client().get_string();
    //cout << "\nserver_version_str = " << the_server_version_str << "\n";
    BOOST_REQUIRE_MESSAGE( Str::replace_all(the_server_version_str,".",""),"failed to find '.' in server version string " << TestFixture::client().get_string());
+
+   // Could 4.0.8rc1
+   Str::replace_all(the_server_version_str,"rc1","");
+   Str::replace_all(the_server_version_str,"rc2","");
    int the_server_version = boost::lexical_cast<int>(the_server_version_str);
    return the_server_version;
 }
