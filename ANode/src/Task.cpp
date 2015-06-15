@@ -421,7 +421,7 @@ bool Task::resolveDependencies(JobsParam& jobsParam)
 	}
 	else if (task_state == NState::ABORTED) {
 
-	   /// If we have been forcibly aborted by the user. Do not resubmit jobs, until *begin* or *re-queue*
+	   /// If we have been forcibly aborted by the user. Do not resubmit jobs, until *begin* or *re-queue*. ECFLOW-344
 	   if (flag().is_set(ecf::Flag::FORCE_ABORT)) {
 #ifdef DEBUG_DEPENDENCIES
 	      LOG(Log::DBG,"   Task::resolveDependencies() " << absNodePath() << " HOLDING as task state " << NState::toString(state()) << " has been forcibly aborted." );
