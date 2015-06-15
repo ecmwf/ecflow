@@ -24,6 +24,7 @@
 #include "EcfFile.hpp"
 #include "Jobs.hpp"
 #include "JobsParam.hpp"
+#include "System.hpp"
 
 using namespace std;
 using namespace ecf;
@@ -132,6 +133,9 @@ BOOST_AUTO_TEST_CASE( test_set_aborted )
       BOOST_CHECK_MESSAGE( jobsParam.submitted().size() == 1,"Expected 1 job, when job aborts and ECF_TRIES > 1 but found " << jobsParam.submitted().size() << " submitted");
       BOOST_CHECK_MESSAGE(  t1->try_no() == 1," expected try_no to be 1 but found " << t1->try_no());
    }
+
+   /// Destroy System singleton to avoid valgrind from complaining
+   System::destroy();
 }
 
 BOOST_AUTO_TEST_SUITE_END()
