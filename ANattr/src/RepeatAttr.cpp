@@ -400,7 +400,7 @@ void RepeatDate::changeValue(long the_new_date)
       }
    }
 
-   // Check new value is in step. ECFLOW-323 repeat date 7
+   // Check new value is in step. ECFLOW-325 repeat date 7
    long julian_new_date = sms_repeat_date_to_julian(the_new_date);
    long julian_start = sms_repeat_date_to_julian(start_);
    long diff = julian_new_date - julian_start;
