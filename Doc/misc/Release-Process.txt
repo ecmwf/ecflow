@@ -40,8 +40,12 @@ Process
      Team->Push Branch
      *otherwise* the option Team->Push Upstream  may well be greyed out.
 
-0/ Update ECFLOW_GIT_BRANCH to "4.0.8" in the nightly build.py or meta-builder(settings/ecflow/ecflow.py# git_tag=4.0.8)
+0/ Update ECFLOW_GIT_BRANCH to "4.0.8" in the nightly build.py or meta-builder(settings/ecflow/ecflow.py# git_tag=release/4.0.8)
    Then use the meta builder to build/install.
+   Note: if used 
+     > git flow release start 4.0.8    # -> it will create a branch release/4.0.8
+     > Either set package_version="4.0.8"
+     > Either set package_version=""        # extract version from VERSION.cmake
 
 0/ For a PREPIFS release change file:
      /usr/local/apps/ecflow/.modulerc
