@@ -15,12 +15,16 @@
 
 #include "UserMessage.hpp"
 
+#include <boost/algorithm/string.hpp>
+
+
 VProperty::VProperty(const std::string& name) :
    strName_(name),
    name_(QString::fromStdString(name)),
-   editable_(true),
    master_(0),
-   useMaster_(false)
+   useMaster_(false),
+   type_("string"),
+   link_(0)
 {
 }
 
@@ -35,36 +39,37 @@ VProperty::~VProperty()
 }
 
 
-void VProperty::setLabelText(const std::string& val)
-{
-    labelText_=QString::fromStdString(val);
-}
-
-void VProperty::setToolTip(const std::string& val)
-{
-    toolTip_=QString::fromStdString(val);
-}
-
 void VProperty::setDefaultValue(const std::string& val)
 {
-    if(isColour(val))
+    //Colour
+	if(isColour(val))
     {
         defaultValue_=toColour(val);
+        type_="colour";
     }
+	//Font
+	else if(isFont(val))
+	{
+	   defaultValue_=toFont(val);
+	   type_="font";
+	}
     //int
     else if(isNumber(val))
     {
        	defaultValue_=toNumber(val);
+        type_="int";
     }
     //bool
     else if(isBool(val))
     {
         defaultValue_=toBool(val);
+        type_="bool";
     }
     //text
     else
     {
     	defaultValue_=QString::fromStdString(val);
+    	type_="string";
     }
     
     if(value_.isNull())
@@ -108,6 +113,20 @@ void VProperty::setValue(QVariant val)
     value_=val;
 
     dispatchChange();
+}
+
+void VProperty::setParam(QString name,QString value)
+{
+	params_[name]=value;
+}
+
+QString VProperty::param(QString name)
+{
+	QMap<QString,QString>::const_iterator it=params_.find(name);
+	if(it != params_.end())
+			return it.value();
+
+	return QString();
 }
 
 void VProperty::addChild(VProperty *prop)
@@ -210,6 +229,46 @@ VProperty* VProperty::findChild(QString name)
     return 0;
 }
 
+VProperty* VProperty::find(const std::string& fullPath)
+{
+	if(fullPath.empty())
+		return NULL;
+
+	if(fullPath == strName_)
+		return this;
+
+	std::vector<std::string> pathVec;
+	boost::split(pathVec,fullPath,boost::is_any_of("."));
+
+	if(pathVec.size() > 0)
+	{
+		if(pathVec.at(0) != strName_)
+			return NULL;
+	}
+
+	return VProperty::find(pathVec);
+}
+
+VProperty* VProperty::find(const std::vector<std::string>& pathVec)
+{
+	if(pathVec.size() == 0)
+	{
+		return NULL;
+	}
+
+	if(pathVec.size() == 1)
+	{
+		return this;
+	}
+
+	//The vec size  >=2
+
+	std::vector<std::string> rest(pathVec.begin()+1,pathVec.end());
+	VProperty *n = findChild(QString::fromStdString(pathVec.at(1)));
+
+	return n?n->find(rest):NULL;
+}
+
 void VProperty::setMaster(VProperty* m)
 {
 	if(master_)
@@ -223,11 +282,8 @@ VProperty* VProperty::derive()
 {
 	 VProperty *cp=new VProperty(strName_);
 
-	 cp->toolTip_=toolTip_;
-	 cp->labelText_=labelText_;
 	 cp->defaultValue_=defaultValue_;
 	 cp->value_=value_;
-	 cp->editable_=editable_;
 
 	 cp->setMaster(this);
 
@@ -238,4 +294,5 @@ VProperty* VProperty::derive()
 	 }
 	 return cp;
 }
+
 

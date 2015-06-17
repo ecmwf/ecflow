@@ -59,7 +59,7 @@ void VNState::setProperty(VProperty* prop)
     prop_=prop; 
 
     //Label
-    label_=prop_->labelText();
+    label_=prop_->param("label");
     
     //get colour
     if(VProperty *p=prop_->findChild("fill_colour"))

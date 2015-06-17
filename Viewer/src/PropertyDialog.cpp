@@ -11,7 +11,10 @@
 
 #include "PropertyEditor.hpp"
 #include "VConfig.hpp"
+#include "VConfigLoader.hpp"
 #include "VProperty.hpp"
+
+VProperty* PropertyDialog::prop_=0;
 
 PropertyDialog::PropertyDialog(QWidget* parent) : QDialog(parent)
 {
@@ -41,22 +44,15 @@ PropertyDialog::PropertyDialog(QWidget* parent) : QDialog(parent)
 //Build the property tree from the the definitions
 void PropertyDialog::build()
 {
-	const std::vector<VProperty*>& groups=VConfig::instance()->groups();
-
-	for(std::vector<VProperty*>::const_iterator it=groups.begin();it != groups.end(); it++)
-    {
-        VProperty *vGroup=*it;
-
-        //We only handle editable groups
-        if(!vGroup->editable())
-            continue;
-
-        PropertyEditor* ed=new PropertyEditor(this); //vGroup);
-
-        ed->edit(vGroup);
-
-        addPage(ed,QIcon(),vGroup->labelText());
-    }
+	if(prop_)
+	{
+		Q_FOREACH(VProperty* vPage,prop_->children())
+		{
+			  PropertyEditor* ed=new PropertyEditor(this);
+			  ed->edit(vPage);
+			  addPage(ed,QIcon(),vPage->name());
+		}
+	}
 }
 
 void PropertyDialog::accept()
@@ -84,3 +80,34 @@ void PropertyDialog::slotChangePage(QListWidgetItem *current, QListWidgetItem *p
 
      page_->setCurrentIndex(list_->row(current));
 }
+
+void PropertyDialog::load(VProperty* p)
+{
+    prop_=p;
+
+    /*Q_FOREACH(VProperty* vp,prop_->children())
+    {
+    	PropertyDialog::resolveDef(vp);
+    }*/
+}
+
+void PropertyDialog::resolveDef(VProperty* prop)
+{
+	Q_FOREACH(VProperty* vp,prop->children())
+	{
+		if(vp->name() == "line")
+		{
+			QString val=vp->value().toString();
+			if(VProperty* target=VConfig::instance()->find(val.toStdString()))
+			{
+				vp->setLink(target);
+			}
+		}
+		else if(vp->hasChildren())
+		{
+			PropertyDialog::resolveDef(vp);
+		}
+	}
+}
+
+static SimpleLoader<PropertyDialog> loader("gui");

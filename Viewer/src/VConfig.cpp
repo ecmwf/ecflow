@@ -12,6 +12,7 @@
 #include "VConfigLoader.hpp"
 #include "VProperty.hpp"
 
+#include "DirectoryHandler.hpp"
 #include "UserMessage.hpp"
 
 #include <boost/property_tree/json_parser.hpp>
@@ -65,8 +66,13 @@ void VConfig::init(const std::string& parDirPath)
             }
         }
     } 
-    
+
+   //Read gui definition
+   std::string guiFile=DirectoryHandler::concatenate(parDir.string(),"ecflowview_gui.json");
+
+   loadFile(guiFile);
 }
+
 void VConfig::loadFile(const std::string& parFile)
 {
     //Parse param file using the boost JSON property tree parser
@@ -95,6 +101,8 @@ void VConfig::loadFile(const std::string& parFile)
         VProperty *grProp=new VProperty(groupName);
         groups_.push_back(grProp);
 
+        UserMessage::message(UserMessage::DBG,false,std::string("Read config group: ") + groupName);
+
         //Load the property parameters. It will recursively add all the
         //children properties.
         loadProperty(ptGr,grProp);
@@ -112,7 +120,7 @@ void VConfig::loadProperty(const boost::property_tree::ptree& pt,VProperty *prop
 
     //Check if is editable. If not it will not
     //appear in the editor.
-    if((itProp=pt.find("editable")) != pt.not_found())
+   /* if((itProp=pt.find("editable")) != pt.not_found())
     {
         prop->setEditable((itProp->second.get_value<std::string>() == "false")?false:true);
     }
@@ -133,21 +141,84 @@ void VConfig::loadProperty(const boost::property_tree::ptree& pt,VProperty *prop
     if((itProp=pt.find("default")) != pt.not_found())
     {
         prop->setDefaultValue(itProp->second.get_value<std::string>());
-    }
+    }*/
 
     //Loop over the possible properties
     for(ptree::const_iterator it = pt.begin(); it != pt.end(); ++it)
     {
-        ptree ptProp=it->second;
 
+    	std::string name=it->first;
+    	ptree ptProp=it->second;
+
+    	//Default value
+    	if(name == "default")
+    	{
+    		std::string val=ptProp.get_value<std::string>();
+    		prop->setDefaultValue(val);
+    	}
+    	else if(name == "line")
+    	{
+    		VProperty *chProp=new VProperty(name);
+    		prop->addChild(chProp);
+
+    		std::string val=ptProp.get_value<std::string>();
+
+    		QString prefix=prop->param("prefix");
+    		if(!prefix.isEmpty())
+    			val=prefix.toStdString() + "." + val;
+
+    		if(VProperty* lineEditProp=find(val))
+    		{
+    			chProp->setLink(lineEditProp);
+    		}
+    	}
         //Here we only load the properties with
         //children (i.e. key/value pairs (like "label" etc above)
         //are ignored.
-        if(!ptProp.empty())
+    	else if(!ptProp.empty())
         {
-            VProperty *chProp=new VProperty(it->first);
+            VProperty *chProp=new VProperty(name);
             prop->addChild(chProp);
             loadProperty(ptProp,chProp);
         }
+        else
+        {
+        	QString val=QString::fromStdString(ptProp.get_value<std::string>());
+        	prop->setParam(QString::fromStdString(name),val);
+        }
+
     }
 }
+
+VProperty* VConfig::find(const std::string& path)
+{
+	const std::vector<VProperty*>& groups=VConfig::instance()->groups();
+
+	VProperty* res=0;
+
+	for(std::vector<VProperty*>::const_iterator it=groups.begin();it != groups.end(); it++)
+	{
+	    VProperty *vGroup=*it;
+	    res=vGroup->find(path);
+	    if(res)
+	    {
+	    	return res;
+	    }
+	}
+
+	return res;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+

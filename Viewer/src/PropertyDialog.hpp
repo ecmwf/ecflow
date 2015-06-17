@@ -25,13 +25,21 @@ public:
     PropertyDialog(QWidget *parent=0);
     ~PropertyDialog() {};
 
+    //Called from VConfigLoader
+    static void load(VProperty*);
+
+
 public Q_SLOTS:
     void accept();
     void slotChangePage(QListWidgetItem *current, QListWidgetItem *previous);
 
-protected:
+private:
     void build();
     void addPage(QWidget *w,QIcon icon,QString txt);
+
+    static void resolveDef(VProperty*);
+
+    static VProperty* prop_;
 
 };
 

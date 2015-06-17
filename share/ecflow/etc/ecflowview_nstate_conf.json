@@ -1,7 +1,5 @@
 {
     "nstate":  {
-    	
-    		"label" : "Node state",
 
             "unknown": {
             	"label": "Unknown",
@@ -13,7 +11,12 @@
                 "font_colour" : {
 					"label" : "Font colour",
 					"default": "rgb(0,0,0)"
+				},
+                "font" : {
+					"label" : "Font",
+					"default": "font()"
 				}
+                
             },
 
             "complete": {

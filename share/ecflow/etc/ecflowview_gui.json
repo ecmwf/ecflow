@@ -1,0 +1,74 @@
+{
+	"gui" : {
+							
+ 		"Nodes":  {
+ 			
+ 			"desc" : "Node properties",
+ 					
+ 			"line" : "nstate.aborted.fill_colour",
+ 			
+ 			"group" : {
+ 				"title" : "Node state=unknown",
+ 				"prefix" : "nstate.unknown", 				
+ 				
+ 				"line" :  "fill_colour",
+				"line" :  "font_colour"
+			},					 				
+ 			
+			"group" : {
+ 				"title" : "Aborted",
+ 				"prefix" : "nstate.aborted", 				
+ 				
+ 				"line" :  "fill_colour",
+				"line" :  "font_colour"
+			},			
+			
+			"group" : {
+ 				"title" : "Queued",
+ 				"prefix" : "nstate.queued", 				
+ 				
+ 				"line" :  "fill_colour",
+				"line" :  "font_colour"
+			},	
+			
+			"group" : {
+ 				"title" : "Active",
+ 				"prefix" : "nstate.active", 				
+ 				
+ 				"line" :  "fill_colour",
+				"line" :  "font_colour"
+			},	
+			
+			"group" : {
+ 				"title" : "Complete",
+ 				"prefix" : "nstate.complete", 				
+ 				
+ 				"line" :  "fill_colour",
+				"line" :  "font_colour"
+			},	
+			
+ 			"group" : {
+ 				"title" : "sstate.halted",
+ 				"prefix" : "sstate.halted",				
+ 				
+ 				"line" : "fill_colour", 				
+ 				"line" : "font_colour" 				
+ 			}
+ 		},	
+ 			
+ 		"Server options": {
+ 			
+ 			"desc" : "Server options",
+ 			
+ 			"group" : {
+ 				
+ 				"title" : "server.update",
+ 				"prefix" : "server.update",
+ 				
+ 				"line" : "updateRate",
+ 				"line" : "apdaptiveUpdate",
+ 				"line" : "maxApdaptiveUpdateRate"
+ 			}
+ 		}
+ 	}
+}

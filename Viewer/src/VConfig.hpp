@@ -28,6 +28,7 @@ public:
     
     void init(const std::string& parDir);
     const std::vector<VProperty*>& groups() {return groups_;}
+    VProperty* find(const std::string& path);
 
 protected:
     VConfig();

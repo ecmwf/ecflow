@@ -152,7 +152,7 @@ void VAttribute::setProperty(VProperty* prop)
     prop_=prop; 
     
     //Cache label in VParam;
-    label_=prop_->labelText();
+    label_=prop_->param("label");
    }
 
 std::vector<VParam*> VAttribute::filterItems()

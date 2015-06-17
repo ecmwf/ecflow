@@ -1,8 +1,6 @@
 {
     "sstate":  {
 
-            "label" : "Server state",
-
             "halted": {
                 "label": "Halted",
                 "tooltip": "halted",

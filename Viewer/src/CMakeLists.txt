@@ -44,6 +44,7 @@ set(viewer_srcs
     PlainTextSearchLine.cpp
     PropertyDialog.cpp
     PropertyEditor.cpp
+    PropertyLine.cpp
     ScriptItemWidget.cpp
     ServerHandler.cpp
     ServerFilter.cpp
@@ -116,6 +117,7 @@ QT4_WRAP_CPP(VIEWER_MOC AbstractNodeModel.hpp
                         OutputItemWidget.hpp
                         PropertyDialog.hpp
                         PropertyEditor.hpp
+                        PropertyLine.hpp
                         PlainTextSearchLine.hpp
                         ServerHandler.hpp
                         ServerListDialog.hpp

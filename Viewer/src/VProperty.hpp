@@ -16,6 +16,8 @@
 #include <QList>
 #include <QVariant>
 
+#include <vector>
+
 class VProperty;
 
 class VPropertyObserver
@@ -41,24 +43,25 @@ public:
 
     QString name() const {return name_;}
     const std::string& strName() const {return strName_;}
-    QString labelText() const {return labelText_;}
-    QString toolTip() const {return toolTip_;}
-    bool editable() const {return editable_;}
     QVariant defaultValue() const {return defaultValue_;}
     QVariant value() const {return value_;}
+    std::string type() const {return type_;}
+    QString param(QString name);
 
-    void setEditable(bool e) {editable_=e;}
-    void setLabelText(const std::string&);
-    void setToolTip(const std::string&);
     void setDefaultValue(const std::string&);
     void setValue(const std::string&);
     void setValue(QVariant);
+    void setParam(QString,QString);
 
     bool hasChildren() const {return children_.count() >0;}
     QList<VProperty*> children() const {return children_;}
     void addChild(VProperty*);
     VProperty* findChild(QString name);
-    
+    VProperty* find(const std::string& fullPath);
+
+    void setLink(VProperty* p) {link_=p;}
+    VProperty* link() const {return link_;}
+
     void setMaster(VProperty*);
     VProperty *derive();
 
@@ -70,14 +73,12 @@ public:
 protected:
     std::string strName_; //The name of the property as as std::string
     QString name_; //The name of the property. Used as an id.
-    QString toolTip_;  //The tooltip to display in the editor
-    QString labelText_; //The name/label to display in the editor
     QVariant defaultValue_; //The default value
     QVariant value_; //The current value
-    bool editable_;
 
 private:
     void dispatchChange();
+    VProperty* find(const std::vector<std::string>& pathVec);
 
     static bool isColour(const std::string&);
     static bool isFont(const std::string&);
@@ -93,6 +94,10 @@ private:
     QList<VPropertyObserver*> observers_;
     VProperty* master_;
     bool useMaster_;
+    std::string type_;
+    QMap<QString,QString> params_;
+    VProperty* link_;
 };
+
 
 #endif
