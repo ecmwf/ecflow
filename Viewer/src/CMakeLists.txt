@@ -175,14 +175,13 @@ ecbuild_add_executable( TARGET   ecflow_ui
                                  ../../Base/src
                                  ../../Base/src/cts
                                  ../../Base/src/stc
-                                 ../../Client/src
-                                 ../qtpropertybrowser
+                                 ../../Client/src                                
                                  ${Boost_INCLUDE_DIRS} 
 				 ${CMAKE_CURRENT_BINARY_DIR}
                         LIBS     core nodeattr node libparser base libclient 
                                  pthread ${Ecflow_Boost_LIBS}
                                  m crypt dl fl
-                                 qtpropertybrowser ${QT_LIBRARIES}
+                                 ${QT_LIBRARIES}
                      )
 
 list(REMOVE_ITEM viewer_srcs ViewerMain.cpp)
@@ -197,14 +196,13 @@ ecbuild_add_executable( TARGET   ecflow_ui_log
                                  ../../Base/src
                                  ../../Base/src/cts
                                  ../../Base/src/stc
-                                 ../../Client/src
-                                 ../qtpropertybrowser
+                                 ../../Client/src                                 
                                  ${Boost_INCLUDE_DIRS} 
 				 ${CMAKE_CURRENT_BINARY_DIR}
                         LIBS     core nodeattr node libparser base libclient 
                                  pthread ${Ecflow_Boost_LIBS}
                                  m 
-				 qtpropertybrowser ${QT_LIBRARIES}
+				                 ${QT_LIBRARIES}
 			DEFINITIONS MAIN_LOG
                      )
 

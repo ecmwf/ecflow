@@ -39,7 +39,6 @@ private:
     //QMap<QtProperty*,VProperty*> confMap_;
 
     VProperty* group_;
-
 };
 
 

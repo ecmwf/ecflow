@@ -1,0 +1,29 @@
+{
+    "view":  {
+
+            "treeview": {
+            	
+                "font" : {
+					"label" : "Font",
+					"default": "font()"
+				},
+				"nodeRectRadius" : {
+					"label" : "Node rectangle corner radius",
+					"default": "0"
+				},
+				"displayChildCount" : {
+					"label" : "Display number of child nodes",
+					"default": "true"
+				}
+                
+            },
+
+            "table view": {
+            
+            	"font" : {
+ 					"label" : "Font",
+ 					"default": "font()"
+ 				}
+			}
+    }
+}

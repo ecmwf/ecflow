@@ -8,6 +8,7 @@ set (files ecflowview_menus.json
            ecflowview_nstate_conf.json
            ecflowview_sstate_conf.json
            ecflowview_server_conf.json
+           ecflowview_view_conf.json
            viewer.qss)
 
 

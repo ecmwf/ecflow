@@ -4,9 +4,7 @@
  		"Nodes":  {
  			
  			"desc" : "Node properties",
- 					
- 			"line" : "nstate.aborted.fill_colour",
- 			
+ 					 			
  			"group" : {
  				"title" : "Node state=unknown",
  				"prefix" : "nstate.unknown", 				
@@ -15,13 +13,14 @@
 				"line" :  "font_colour"
 			},					 				
  			
+
 			"group" : {
- 				"title" : "Aborted",
- 				"prefix" : "nstate.aborted", 				
+ 				"title" : "Complete",
+ 				"prefix" : "nstate.complete", 				
  				
  				"line" :  "fill_colour",
 				"line" :  "font_colour"
-			},			
+			},	
 			
 			"group" : {
  				"title" : "Queued",
@@ -31,6 +30,23 @@
 				"line" :  "font_colour"
 			},	
 			
+			
+			"group" : {
+ 				"title" : "Aborted",
+ 				"prefix" : "nstate.aborted", 				
+ 				
+ 				"line" :  "fill_colour",
+				"line" :  "font_colour"
+			},			
+			
+			"group" : {
+ 				"title" : "Submitted",
+ 				"prefix" : "nstate.submitted", 				
+ 				
+ 				"line" :  "fill_colour",
+				"line" :  "font_colour"
+			},	
+	
 			"group" : {
  				"title" : "Active",
  				"prefix" : "nstate.active", 				
@@ -40,20 +56,45 @@
 			},	
 			
 			"group" : {
- 				"title" : "Complete",
- 				"prefix" : "nstate.complete", 				
+ 				"title" : "Suspended",
+ 				"prefix" : "nstate.suspended", 				
  				
  				"line" :  "fill_colour",
 				"line" :  "font_colour"
 			},	
 			
  			"group" : {
- 				"title" : "sstate.halted",
+ 				"title" : "Halted",
  				"prefix" : "sstate.halted",				
  				
  				"line" : "fill_colour", 				
  				"line" : "font_colour" 				
+ 			},
+ 			
+			"group" : {
+ 				"title" : "Shutdown",
+ 				"prefix" : "sstate.shutdown",				
+ 				
+ 				"line" : "fill_colour", 				
+ 				"line" : "font_colour" 				
+ 			},
+ 			
+ 			"group" : {
+ 				"title" : "Running",
+ 				"prefix" : "sstate.running",				
+ 				
+ 				"line" : "fill_colour", 				
+ 				"line" : "font_colour" 				
+ 			},
+ 			
+ 			"group" : {
+ 				"title" : "Disconnected",
+ 				"prefix" : "sstate.running",				
+ 				
+ 				"line" : "fill_colour", 				
+ 				"line" : "font_colour" 				
  			}
+			
  		},	
  			
  		"Server options": {
@@ -62,13 +103,44 @@
  			
  			"group" : {
  				
- 				"title" : "server.update",
+ 				"title" : "Update",
  				"prefix" : "server.update",
  				
  				"line" : "updateRate",
  				"line" : "apdaptiveUpdate",
  				"line" : "maxApdaptiveUpdateRate"
- 			}
- 		}
+ 			},
+ 			
+ 			"group" : {
+				
+				"title" : "Files",
+				"prefix" : "server.files",
+				
+				"line" : "readFilesFromDisk",
+				"line" : "maxJobFile"				
+			},
+
+			"group" : {
+				
+				"title" : "Popup",
+				"prefix" : "server.popup",
+				
+				"line" : "aborted",
+				"line" : "restarted",
+				"line" : "late",
+				"line" : "zombie",
+				"line" : "alias"
+			}
+ 		
+ 		},
+
+ 		"Tree view" : {
+ 			
+ 			"desc" : "Tree view options",
+ 			 			
+ 			"line" : "view.treeview.font",
+ 			"line" : "view.treeview.nodeRectRadius",
+ 			"line" : "view.treeview.displayChildCount" 
+ 		}		
  	}
 }
