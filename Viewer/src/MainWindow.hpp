@@ -65,10 +65,10 @@ private:
     InfoPanel* addInfoPanel();
 
     void reloadContents();
+    void rerenderContents();
 
     void writeSettings(VComboSettings*);
     void readSettings(VComboSettings*);
-
 
     static MainWindow* makeWindow(VComboSettings* vs);
     static MainWindow *makeWindow();
@@ -78,6 +78,8 @@ private:
     static bool aboutToQuit(MainWindow*);
     static void save(MainWindow *);
     static MainWindow* findWindow(QWidget *childW);
+    static void configChanged(MainWindow *);
+
 
     ServerFilterMenu* serverFilterMenu_;
     NodePanel* nodePanel_;

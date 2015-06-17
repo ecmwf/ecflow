@@ -244,6 +244,14 @@ void Dashboard::reload()
 	updateTitle();
 }
 
+void Dashboard::rerender()
+{
+	for(int i=0; i < widgets_.count(); i++)
+		widgets_.at(i)->rerender();
+
+	updateTitle();
+}
+
 //------------------------
 // ViewMode
 //------------------------

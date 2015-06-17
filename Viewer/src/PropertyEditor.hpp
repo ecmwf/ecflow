@@ -27,7 +27,8 @@ public:
     ~PropertyEditor();
 
     void edit(VProperty*);
-    void editAccepted();
+    bool applyChange();
+    VProperty* property() const {return group_;}
 
 private:
     void build();
@@ -39,6 +40,7 @@ private:
     //QMap<QtProperty*,VProperty*> confMap_;
 
     VProperty* group_;
+    QList<PropertyLine*> lineItems_;
 };
 
 

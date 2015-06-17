@@ -78,12 +78,15 @@ void PropertyEditor::addItem(VProperty* vProp,QGridLayout* gridLayout)
     		QWidget *bw=item->button();
     		if(bw)
     			gridLayout->addWidget(bw,row,2);
+
+    		lineItems_ << item;
     	}
 
     }
     else if(vProp->name() == "group")
     {
 		QGroupBox *groupBox = new QGroupBox(vProp->param("title"));
+		groupBox->setObjectName("editorGroupBox");
 		QGridLayout *grid=new QGridLayout();
 		grid->setColumnStretch(1,1);
 		groupBox->setLayout(grid);
@@ -103,14 +106,20 @@ void PropertyEditor::addItem(VProperty* vProp,QGridLayout* gridLayout)
     }
 }
 
-void PropertyEditor::editAccepted()
+bool PropertyEditor::applyChange()
 {
-    //Loop over the top level properties (groups) in the browser
-    /*Q_FOREACH(QtProperty* gp, browser_->properties())
+    bool changed=false;
+	//Loop over the top level properties (groups) in the browser
+    Q_FOREACH(PropertyLine* item, lineItems_)
     {
         //Sync the changes to VConfig
-        syncToConfig(gp);
-    }*/
+    	if(item->applyChange())
+    	{
+    		changed=true;
+    	}
+    }
+
+    return changed;
 }
 
 /*

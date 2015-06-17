@@ -255,7 +255,7 @@ Viewer::FolderViewMode NodePanel::viewMode()
 
 //==========================================================
 //
-// Rescan
+//
 //
 //==========================================================
 
@@ -267,6 +267,18 @@ void NodePanel::reload()
 		{
 			if(Dashboard* nw=static_cast<Dashboard*>(w))
 				nw->reload();
+		}
+	}
+}
+
+void NodePanel::rerender()
+{
+	for(int i=0; i < count(); i++)
+	{
+		if(QWidget *w=widget(i))
+		{
+			if(Dashboard* nw=static_cast<Dashboard*>(w))
+				nw->rerender();
 		}
 	}
 }

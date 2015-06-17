@@ -13,6 +13,7 @@
 
 #include <string>
 
+#include <QFont>
 #include <QObject>
 #include <QVariant>
 
@@ -69,6 +70,7 @@ public:
 	virtual QWidget* button()=0;
 
 	virtual void reset(QVariant)=0;
+	virtual bool applyChange()=0;
 
 protected:
 	VProperty* prop_;
@@ -88,6 +90,7 @@ public:
 	QWidget* item();
 	QWidget* button();
 	void reset(QVariant);
+	bool applyChange();
 
 private:
 	QLineEdit* le_;
@@ -106,6 +109,7 @@ public:
 	QWidget* item();
 	QWidget* button();
 	void reset(QVariant);
+	bool applyChange();
 
 private Q_SLOTS:
 	void slotEdit(bool);
@@ -127,6 +131,7 @@ public:
 	QWidget* item();
 	QWidget* button();
 	void reset(QVariant);
+	bool applyChange();
 
 private Q_SLOTS:
 	void slotEdit(bool);
@@ -134,6 +139,7 @@ private Q_SLOTS:
 private:
 	QLabel* lName_;
 	QToolButton *tbEdit_;
+	QFont font_;
 };
 
 //-------------------------------------
@@ -147,6 +153,7 @@ public:
 	QWidget* item();
 	QWidget* button();
 	void reset(QVariant);
+	bool applyChange();
 
 private:
 	QSpinBox* spin_;
@@ -163,6 +170,7 @@ public:
 	QWidget* item();
 	QWidget* button();
 	void reset(QVariant);
+	bool applyChange();
 
 private:
 	QCheckBox* cb_;

@@ -21,6 +21,7 @@ public:
 	DashboardWidget(QWidget* parent=0) : QWidget(parent) {};
 	virtual ~DashboardWidget() {};
 	virtual void reload()=0;
+	virtual void rerender()=0;
 	virtual void writeSettings(VSettings*)=0;
 	virtual void readSettings(VSettings*)=0;
 

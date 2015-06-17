@@ -75,7 +75,6 @@ PropertyLine::PropertyLine(VProperty* vProp,bool addLabel,QWidget * parent) :
 		label_=new QLabel(vProp->param("label"),parent);
 }
 
-
 //=========================================================================
 //
 // StringPropertyLine
@@ -100,6 +99,17 @@ QWidget* StringPropertyLine::button()
 void StringPropertyLine::reset(QVariant v)
 {
 	le_->setText(v.toString());
+}
+
+bool StringPropertyLine::applyChange()
+{
+	QString v=prop_->value().toString();
+	if(v != le_->text())
+	{
+		prop_->setValue(le_->text());
+		return true;
+	}
+	return false;
 }
 
 //=========================================================================
@@ -152,6 +162,20 @@ void ColourPropertyLine::slotEdit(bool)
 	}
 }
 
+bool ColourPropertyLine::applyChange()
+{
+	QColor v=prop_->value().value<QColor>();
+	QColor c=cb_->palette().color(QPalette::Window);
+
+	if(v != c)
+	{
+		prop_->setValue(c);
+		return true;
+	}
+
+	return false;
+}
+
 //=========================================================================
 //
 // FontPropertyLine
@@ -181,10 +205,7 @@ QWidget* FontPropertyLine::button()
 
 void FontPropertyLine::reset(QVariant v)
 {
-	//cbar_->setText(v.value<QColor>().name());
-
-	QFont f;
-	lName_->setText(f.toString());
+	lName_->setText(font_.toString());
 }
 
 void FontPropertyLine::slotEdit(bool)
@@ -195,7 +216,21 @@ void FontPropertyLine::slotEdit(bool)
 	QFont f = QFontDialog::getFont(&ok,c,lName_->parentWidget());
 
 	if(ok)
+	{
 		lName_->setText(f.toString());
+		font_=f;
+	}
+}
+
+bool FontPropertyLine::applyChange()
+{
+	QFont v=prop_->value().value<QFont>();
+	if(v != font_)
+	{
+		prop_->setValue(font_);
+		return true;
+	}
+	return false;
 }
 
 //=========================================================================
@@ -224,6 +259,18 @@ void IntPropertyLine::reset(QVariant v)
 	spin_->setValue(v.toInt());
 }
 
+bool IntPropertyLine::applyChange()
+{
+	int v=prop_->value().toInt();
+	if(v != spin_->value())
+	{
+		prop_->setValue(spin_->value());
+		return true;
+	}
+	return false;
+}
+
+
 //=========================================================================
 //
 // BoolPropertyLine
@@ -248,6 +295,18 @@ QWidget* BoolPropertyLine::button()
 void BoolPropertyLine::reset(QVariant v)
 {
 	cb_->setChecked(v.toBool());
+}
+
+bool BoolPropertyLine::applyChange()
+{
+	int v=prop_->value().toBool();
+
+	if(v != cb_->isChecked())
+	{
+		prop_->setValue(cb_->isChecked());
+		return true;
+	}
+	return false;
 }
 
 

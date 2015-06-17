@@ -199,6 +199,11 @@ void TreeNodeView::reload()
 	//expandAll();
 }
 
+void TreeNodeView::rerender()
+{
+	viewport()->update();
+}
+
 void TreeNodeView::slotRepaint(Animation* an)
 {
 	if(!an)

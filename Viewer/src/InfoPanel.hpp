@@ -77,6 +77,7 @@ public:
 
 	//From DashboardWidget
 	void reload() {};
+	void rerender() {};
 	void writeSettings(VSettings*);
 	void readSettings(VSettings*);
 

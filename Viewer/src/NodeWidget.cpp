@@ -51,6 +51,11 @@ void NodeWidget::reload()
 	//model_->reload();
 }
 
+void NodeWidget::rerender()
+{
+	view_->rerender();
+}
+
 void NodeWidget::active(bool b)
 {
 	model_->active(b);

@@ -35,6 +35,7 @@ public:
 	~Dashboard();
 
 	void reload();
+	void rerender();
 
 	DashboardWidget* addWidget(const std::string& type);
 	Viewer::ViewMode viewMode();

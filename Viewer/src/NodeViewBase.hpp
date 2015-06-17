@@ -23,6 +23,7 @@ public:
 		virtual ~NodeViewBase(){};
 
 		virtual void reload()=0;
+		virtual void rerender()=0;
 		virtual QWidget* realWidget()=0;
 		virtual VInfo_ptr currentSelection()=0;
 		virtual void currentSelection(VInfo_ptr n)=0;

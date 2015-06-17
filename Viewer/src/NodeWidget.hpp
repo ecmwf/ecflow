@@ -29,7 +29,6 @@ class NodePathWidget;
 class NodeViewBase;
 class ServerFilter;
 
-
 class NodeWidget : public DashboardWidget
 {
 Q_OBJECT
@@ -42,6 +41,7 @@ public:
 	VInfo_ptr currentSelection();
 	void currentSelection(VInfo_ptr info);
 	void reload();
+	void rerender();
 
 Q_SIGNALS:
 	void selectionChanged(VInfo_ptr);

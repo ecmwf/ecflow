@@ -16,7 +16,9 @@
 
 VProperty* PropertyDialog::prop_=0;
 
-PropertyDialog::PropertyDialog(QWidget* parent) : QDialog(parent)
+PropertyDialog::PropertyDialog(QWidget* parent) :
+		QDialog(parent),
+		configChanged_(false)
 {
 	setupUi(this);
 
@@ -37,8 +39,6 @@ PropertyDialog::PropertyDialog(QWidget* parent) : QDialog(parent)
 	list_->setMaximumWidth(fm.width("Server state ATWWWWW"));
 
 	build();
-
-
 }
 
 //Build the property tree from the the definitions
@@ -51,13 +51,14 @@ void PropertyDialog::build()
 			  PropertyEditor* ed=new PropertyEditor(this);
 			  ed->edit(vPage);
 			  addPage(ed,QIcon(),vPage->name());
+			  editors_ << ed;
 		}
 	}
 }
 
 void PropertyDialog::accept()
 {
-    //editor_->editAccepted();
+	manageChange();
 
     QDialog::accept();
 }    
@@ -81,33 +82,24 @@ void PropertyDialog::slotChangePage(QListWidgetItem *current, QListWidgetItem *p
      page_->setCurrentIndex(list_->row(current));
 }
 
+void PropertyDialog::manageChange()
+{
+	Q_FOREACH(PropertyEditor* ed,editors_)
+	{
+		if(ed->applyChange())
+		{
+			VProperty* p=ed->property();
+			if(p && p->name() != "server")
+			{
+				configChanged_=true;
+			}
+		}
+	}
+}
+
 void PropertyDialog::load(VProperty* p)
 {
     prop_=p;
-
-    /*Q_FOREACH(VProperty* vp,prop_->children())
-    {
-    	PropertyDialog::resolveDef(vp);
-    }*/
-}
-
-void PropertyDialog::resolveDef(VProperty* prop)
-{
-	Q_FOREACH(VProperty* vp,prop->children())
-	{
-		if(vp->name() == "line")
-		{
-			QString val=vp->value().toString();
-			if(VProperty* target=VConfig::instance()->find(val.toStdString()))
-			{
-				vp->setLink(target);
-			}
-		}
-		else if(vp->hasChildren())
-		{
-			PropertyDialog::resolveDef(vp);
-		}
-	}
 }
 
 static SimpleLoader<PropertyDialog> loader("gui");

@@ -39,6 +39,7 @@ public:
 	void addWidget();
 	void resetWidgets(QStringList);
 	void reload();
+	void rerender();
 	VInfo_ptr currentSelection();
 	void addToDashboard(const std::string& type);
 

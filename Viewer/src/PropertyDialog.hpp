@@ -14,6 +14,7 @@
 
 #include <QDialog>
 
+class PropertyEditor;
 class VProperty;
 
 class PropertyDialog : public QDialog, private Ui::PropertyDialog
@@ -25,9 +26,10 @@ public:
     PropertyDialog(QWidget *parent=0);
     ~PropertyDialog() {};
 
+    bool configChanged() const {return configChanged_;}
+
     //Called from VConfigLoader
     static void load(VProperty*);
-
 
 public Q_SLOTS:
     void accept();
@@ -36,8 +38,10 @@ public Q_SLOTS:
 private:
     void build();
     void addPage(QWidget *w,QIcon icon,QString txt);
+    void manageChange();
 
-    static void resolveDef(VProperty*);
+    QList<PropertyEditor*> editors_;
+    bool configChanged_;
 
     static VProperty* prop_;
 

@@ -95,7 +95,7 @@ QLabel[fileInfo="1"] {
 }
   
 /*----------------------------
-  Property editor header
+  Property editor
 ------------------------------*/
   
 QLabel#headerLabel_ {
@@ -103,6 +103,11 @@ QLabel#headerLabel_ {
      background: rgb(246, 246, 246);  
 }
    
+QGroupBox#editorGroupBox {
+   
+   font-weight: bold;
+}   
+     
 /*----------------------------
   Variable tree view
 ------------------------------*/
@@ -167,5 +172,3 @@ QTreeView::item:selected[var="1"] {
    background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #f0f7fd, stop: 1 #b9cfec);
 }
 
-
-}

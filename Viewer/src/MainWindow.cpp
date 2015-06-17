@@ -145,9 +145,12 @@ void MainWindow::on_actionPreferences_triggered()
 
 	if(d.exec() == QDialog::Accepted)
 	{
+		if(d.configChanged())
+		{
+			configChanged(this);
+		}
     }
 }
-
 
 void MainWindow::on_actionConfigureNodeMenu_triggered()
 {
@@ -239,6 +242,11 @@ void MainWindow::reloadContents()
 	nodePanel_->reload();
 }
 
+//Rerender all the views and breadcrumbs
+void MainWindow::rerenderContents()
+{
+	nodePanel_->rerender();
+}
 
 //==============================================================
 //
@@ -358,6 +366,12 @@ void MainWindow::showWindows()
 {
   	Q_FOREACH(MainWindow *win,windows_)
 		win->show();
+}
+
+void MainWindow::configChanged(MainWindow* owner)
+{
+	Q_FOREACH(MainWindow *win,windows_)
+			win->rerenderContents();
 }
 
 //Return true if close is allowed, false otherwise

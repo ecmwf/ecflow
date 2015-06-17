@@ -28,6 +28,7 @@ Q_OBJECT
 public:
 	TableNodeView(QWidget *parent=0);
 	void reload() {};
+	void rerender() {};
 	QWidget* realWidget();
 	VInfo_ptr currentSelection();
 	void currentSelection(VInfo_ptr n) {};
