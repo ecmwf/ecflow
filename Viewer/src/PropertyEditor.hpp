@@ -33,11 +33,6 @@ public:
 private:
     void build();
     void addItem(VProperty* vProp,QGridLayout* grid);
-    //void syncToConfig(QtProperty*);
-
-
-    //This is a map between the properties in the editor and in the config
-    //QMap<QtProperty*,VProperty*> confMap_;
 
     VProperty* group_;
     QList<PropertyLine*> lineItems_;

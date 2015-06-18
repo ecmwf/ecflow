@@ -16,6 +16,9 @@
 
 std::string Highlighter::parFile_;
 
+#include "VProperty.hpp"
+
+
 Highlighter::Highlighter(QTextDocument *parent,QString id)
      : QSyntaxHighlighter(parent)
 {
@@ -90,7 +93,7 @@ void Highlighter::load(QString id)
 		}
 		if((itPar=ptPar.find("colour")) !=ptPar.not_found())
 		{
-			format.setForeground(VParam::toColour(itPar->second.get_value<std::string>()));
+			format.setForeground(VProperty::toColour(itPar->second.get_value<std::string>()));
 		}
 		if((itPar=ptPar.find("bold")) !=ptPar.not_found())
 		{

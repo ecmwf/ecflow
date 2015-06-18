@@ -39,48 +39,17 @@ static VNState activeSt("active",NState::ACTIVE);
 static VNState suspendedSt("suspended");
 
 VNState::VNState(const std::string& name,NState::State nstate) :
-		VParam(name),
-		prop_(0)
-
+	VParam(name)
 {
 	items_[name]=this;
 	stateMap_[nstate]=this;
 }
 
 VNState::VNState(const std::string& name) :
-		VParam(name),
-        prop_(0)
+	VParam(name)
 {
 	items_[name]=this;
 }
-
-void VNState::setProperty(VProperty* prop)
-{
-    prop_=prop; 
-
-    //Label
-    label_=prop_->param("label");
-    
-    //get colour
-    if(VProperty *p=prop_->findChild("fill_colour"))
-    {
-        colour_=p->value().value<QColor>();
-        p->addObserver(this);
-        
-        qDebug() << qName_ << colour_;
-    }    
-}
-void VNState::notifyChange(VProperty *p)
-{
-	if(!prop_)
-		return;
-
-	if(p->name() == "fill_colour")
-	{
-		colour_=p->value().value<QColor>();
-	}
-}
-
 
 //===============================================================
 //
@@ -148,6 +117,12 @@ QColor VNState::toColour(Node *n)
 	return (obj)?(obj->colour()):QColor();
 }
 
+QColor VNState::toFontColour(Node *n)
+{
+	VNState *obj=VNState::toState(n);
+	return (obj)?(obj->fontColour()):QColor();
+}
+
 QString VNState::toName(Node *n)
 {
 	VNState *obj=VNState::toState(n);
@@ -159,7 +134,6 @@ QString VNState::toDefaultStateName(Node *n)
 	VNState *obj=VNState::toDefaultState(n);
 	return (obj)?(obj->name()):QString();
 }
-
 
 //==================================================
 // Server state
@@ -195,6 +169,12 @@ QColor VNState::toColour(ServerHandler *s)
 {
 	VNState *obj=VNState::toState(s);
 	return (obj)?(obj->colour()):QColor();
+}
+
+QColor VNState::toFontColour(ServerHandler *s)
+{
+	VNState *obj=VNState::toState(s);
+	return (obj)?(obj->fontColour()):QColor();
 }
 
 void VNState::load(VProperty* group)

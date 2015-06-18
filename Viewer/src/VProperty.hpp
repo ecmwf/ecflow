@@ -70,16 +70,6 @@ public:
 
     void notifyChange(VProperty*) {}
 
-protected:
-    std::string strName_; //The name of the property as as std::string
-    QString name_; //The name of the property. Used as an id.
-    QVariant defaultValue_; //The default value
-    QVariant value_; //The current value
-
-private:
-    void dispatchChange();
-    VProperty* find(const std::vector<std::string>& pathVec);
-
     static bool isColour(const std::string&);
     static bool isFont(const std::string&);
     static bool isNumber(const std::string&);
@@ -89,6 +79,16 @@ private:
     static QFont  toFont(const std::string&);
     static int    toNumber(const std::string&);
     static bool   toBool(const std::string&);
+
+protected:
+    std::string strName_; //The name of the property as as std::string
+    QString name_; //The name of the property. Used as an id.
+    QVariant defaultValue_; //The default value
+    QVariant value_; //The current value
+
+private:
+    void dispatchChange();
+    VProperty* find(const std::vector<std::string>& pathVec);
 
     QList<VProperty*> children_;
     QList<VPropertyObserver*> observers_;

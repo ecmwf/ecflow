@@ -11,14 +11,11 @@
 #ifndef VPARAM_HPP_
 #define VPARAM_HPP_
 
-#include <map>
-
-#include <QStringList>
 #include <QColor>
-#include <QFont>
-#include <QMap>
 
-class VParam
+#include "VProperty.hpp"
+
+class VParam : public VPropertyObserver
 {
 public:
 		VParam(const std::string& name);
@@ -28,7 +25,13 @@ public:
 
 		QString label() const {return label_;}
 		QColor colour() const {return colour_;}
+		QColor fontColour() const {return fontColour_;}
+
+		void setProperty(VProperty*);
 		
+		void notifyChange(VProperty*);
+
+		/*
 		int number(const std::string&) const;
 		QColor colour(const std::string&) const;
 		std::string text(const std::string&) const;
@@ -39,22 +42,28 @@ public:
 		static int    toNumber(const std::string&);
 		static bool isColour(const std::string&);
 		static bool isFont(const std::string&);
-		static bool isNumber(const std::string&);
+		static bool isNumber(const std::string&);*/
 
 protected:
-		void addAttributes(const std::map<std::string,std::string>& attr);
-		static void init(const std::string& parFile,const std::string id,std::map<std::string,std::map<std::string,std::string> >& vals);
+		//void addAttributes(const std::map<std::string,std::string>& attr);
+		//static void init(const std::string& parFile,const std::string id,std::map<std::string,std::map<std::string,std::string> >& vals);
 
 		std::string name_;
 		QString qName_;
+		QString label_;
 
+		//Cached information
 		QColor colour_;
-        QString label_;
-        
-        std::map<std::string,int> numberMap_;
+		QColor fontColour_;
+
+        /*std::map<std::string,int> numberMap_;
 		std::map<std::string,std::string> textMap_;
  		std::map<std::string,QColor> colourMap_;
-		std::map<std::string,QFont> fontMap_;
+		std::map<std::string,QFont> fontMap_;*/
+
+		VProperty* prop_;
+		QString colourPropName_;
+		QString fontColourPropName_;
 };
 
 #endif

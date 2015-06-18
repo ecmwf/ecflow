@@ -300,6 +300,11 @@ QColor  VNode::stateColour() const
 	return VNState::toColour(node_);
 }
 
+QColor  VNode::stateFontColour() const
+{
+	return VNState::toFontColour(node_);
+}
+
 LogServer_ptr VNode::logServer()
 {
 	LogServer_ptr lsv;
@@ -700,6 +705,17 @@ QColor  VServer::stateColour() const
 
 	return VSState::toColour(server_);
 }
+
+QColor  VServer::stateFontColour() const
+{
+	if(VSState::isRunningState(server_))
+	{
+		return VNState::toFontColour(server_);
+	}
+
+	return VSState::toFontColour(server_);
+}
+
 
 QString VServer::toolTip()
 {

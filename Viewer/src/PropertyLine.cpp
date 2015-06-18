@@ -36,7 +36,6 @@ PropertyLineFactory::PropertyLineFactory(const std::string& name)
 	if(makers == 0)
 		makers = new std::map<std::string,PropertyLineFactory*>;
 
-	// Put in reverse order...
 	(*makers)[name] = this;
 }
 
@@ -55,9 +54,6 @@ PropertyLine* PropertyLineFactory::create(VProperty* p,QWidget* w)
 	if(j != makers->end())
 		return (*j).second->make(p,w);
 
-	//Default
-	//return  new MvQTextLine(e,p);
-	//return new MvQLineEditItem(e,p) ;
 	return 0;
 }
 

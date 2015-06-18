@@ -36,31 +36,16 @@ static VSState shutSt("shutdown",SState::SHUTDOWN);
 static VSState disconnectedSt("disconnected");
 
 VSState::VSState(const std::string& name,SState::State Sstate) :
-		VParam(name),
-		prop_(0)
+		VParam(name)
 {
 	items_[name]=this;
 	stateMap_[Sstate]=this;
 }
 
 VSState::VSState(const std::string& name) :
-		VParam(name),
-		prop_(0)
+		VParam(name)
 {
 	items_[name]=this;
-}
-
-void VSState::setProperty(VProperty* prop)
-{
-    prop_=prop; 
-    
-    //get colour
-    if(VProperty *p=prop_->findChild("fill_colour"))
-    {
-        colour_=p->value().value<QColor>();
-        
-        qDebug() << qName_ << colour_;
-    }    
 }
 
 //===============================================================
@@ -107,6 +92,12 @@ QColor VSState::toColour(ServerHandler* s)
 {
 	VSState *obj=VSState::toState(s);
 	return (obj)?(obj->colour()):QColor();
+}
+
+QColor VSState::toFontColour(ServerHandler* s)
+{
+	VSState *obj=VSState::toState(s);
+	return (obj)?(obj->fontColour()):QColor();
 }
 
 QString VSState::toName(ServerHandler* s)

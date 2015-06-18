@@ -1,7 +1,7 @@
 {
     "view":  {
 
-            "treeview": {
+            "tree": {
             	
                 "font" : {
 					"label" : "Font",
@@ -18,7 +18,7 @@
                 
             },
 
-            "table view": {
+            "table": {
             
             	"font" : {
  					"label" : "Font",

@@ -92,6 +92,7 @@ public:
     virtual QString defaultStateName();
     virtual bool isSuspended() const;
     virtual QColor  stateColour() const;
+    virtual QColor  stateFontColour() const;
 
     bool hasAccessed() const;
 
@@ -145,6 +146,7 @@ public:
 	QString defaultStateName();
 	bool isSuspended() const;
 	QColor  stateColour() const;
+	QColor  stateFontColour() const;
 	std::string strName() const;
 
 	void suites(std::vector<std::string>&);

@@ -284,11 +284,8 @@ void TreeNodeViewDelegate::renderServer(QPainter *painter,const QModelIndex& ind
 	painter->drawRect(fillRect);
 
 	//Draw text
-	if(bg == QColor(Qt::red))
-			painter->setPen(Qt::white);
-	else
-			painter->setPen(Qt::black);
-
+	QColor fg=index.data(Qt::ForegroundRole).value<QColor>();
+	painter->setPen(fg);
 	painter->drawText(textRect,Qt::AlignLeft | Qt::AlignVCenter,text);
 
 	//Draw pixmap if needed
@@ -409,11 +406,8 @@ void TreeNodeViewDelegate::renderNode(QPainter *painter,const QModelIndex& index
 	painter->drawRect(fillRect);
 
 	//Draw text
-	if(bg == QColor(Qt::red))
-			painter->setPen(Qt::white);
-	else
-			painter->setPen(Qt::black);
-
+	QColor fg=index.data(Qt::ForegroundRole).value<QColor>();
+	painter->setPen(fg);
 	painter->drawText(textRect,Qt::AlignLeft | Qt::AlignVCenter,text);
 
 	//Draw icons

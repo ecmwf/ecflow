@@ -10,20 +10,55 @@
 
 #include "VParam.hpp"
 
-#include <boost/property_tree/json_parser.hpp>
-
 #include <QDebug>
-#include <QRegExp>
 
-#include "UserMessage.hpp"
+#include "VProperty.hpp"
 
 VParam::VParam(const std::string& name) :
    name_(name),
-	qName_(QString::fromStdString(name))
+   qName_(QString::fromStdString(name)),
+   prop_(0),
+   colourPropName_("fill_colour"),
+   fontColourPropName_("font_colour")
 {
 
 }
 
+void VParam::setProperty(VProperty* prop)
+{
+	prop_=prop;
+
+	label_=prop->param("label");
+
+	if(!colourPropName_.isEmpty())
+	{
+		if(VProperty* p=prop->findChild(colourPropName_))
+		{
+			p->addObserver(this);
+			colour_=p->value().value<QColor>();
+		}
+	}
+
+	if(!fontColourPropName_.isEmpty())
+	{
+		if(VProperty* p=prop->findChild(fontColourPropName_))
+		{
+			p->addObserver(this);
+			fontColour_=p->value().value<QColor>();
+		}
+	}
+}
+
+void VParam::notifyChange(VProperty* prop)
+{
+	if(prop->name() == colourPropName_)
+		colour_=prop->value().value<QColor>();
+
+	else if(prop->name() == fontColourPropName_)
+		fontColour_=prop->value().value<QColor>();
+}
+
+/*
 void VParam::addAttributes(const std::map<std::string,std::string>& attr)
 {
 	for(std::map<std::string,std::string>::const_iterator it=attr.begin(); it != attr.end(); it++)
@@ -165,6 +200,7 @@ void VParam::init(const std::string& parFile,const std::string id,std::map<std::
 		}
 	}
 }
+*/
 
 /*QStringList VParam::toList(const boost::property_tree::ptree& array)
 {

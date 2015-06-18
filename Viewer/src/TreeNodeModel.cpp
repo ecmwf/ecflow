@@ -137,6 +137,7 @@ QVariant TreeNodeModel::data( const QModelIndex& index, int role ) const
 	//the cases where the default should be used.
 	if( !index.isValid() ||
 	   (role != Qt::DisplayRole && role != Qt::ToolTipRole && role != Qt::BackgroundRole &&
+	    role != Qt::ForegroundRole &&
 	    role != FilterRole && role != IconRole && role != ServerRole && role != NodeNumRole &&
 	    role != InfoRole && role != LoadRole))
     {
@@ -188,45 +189,38 @@ QVariant TreeNodeModel::serverData(const QModelIndex& index,int role) const
 	if(role == FilterRole)
 		return true;
 
-	//The colour of the server node
-	else if(index.column() == 0 && role == Qt::BackgroundRole)
-	{
-		if(ServerHandler *server=indexToRealServer(index))
-				return server->vRoot()->stateColour();
-		else
-		    return Qt::gray;
-	}
 
-	//The text
-	else if(role == Qt::DisplayRole)
-	{
-		if(ServerHandler *server=indexToRealServer(index))
-		{
-			if(index.column() == 0)
-				return QString::fromStdString(server->name());
-			else if(index.column() == 1)
-				return server->vRoot()->stateName();
-		}
-	}
+	ServerHandler *server=indexToRealServer(index);
+	if(!server)
+		return QVariant();
 
-	//The number of nodes the server has
-	else if(role == NodeNumRole)
+	if(index.column() == 0)
 	{
-		if(ServerHandler *server=indexToRealServer(index))
+		//The colour of the server node
+		if(role == Qt::BackgroundRole)
+			return server->vRoot()->stateColour();
+
+		//The font colour of the server node
+		else if(role == Qt::ForegroundRole)
+			return server->vRoot()->stateFontColour();
+
+		//The text
+		else if(role == Qt::DisplayRole)
+			return QString::fromStdString(server->name());
+
+		//The number of nodes the server has
+		else if(role == NodeNumRole)
 		{
 			ConnectState* st=server->connectState();
 			if(server->activity() != ServerHandler::LoadActivity)
 			{
 				return server->vRoot()->totalNum();
 			}
+			return QVariant();
 		}
-		return QVariant();
-	}
 
-	//Extra information about the server activity
-	else if(role == InfoRole)
-	{
-		if(ServerHandler *server=indexToRealServer(index))
+		//Extra information about the server activity
+		else if(role == InfoRole)
 		{
 			switch(server->activity())
 			{
@@ -236,22 +230,12 @@ QVariant TreeNodeModel::serverData(const QModelIndex& index,int role) const
 				return "";
 			}
 		}
-	}
 
-	//The number of nodes the server has
-	else if(role == LoadRole)
-	{
-		if(ServerHandler *server=indexToRealServer(index))
-		{
+		else if(role == LoadRole)
 			return (server->activity() == ServerHandler::LoadActivity);
-		}
-		return QVariant();
-	}
 
-	//icon decoration
-	else if(role == IconRole)
-	{
-		if(ServerHandler *server=indexToRealServer(index))
+		//icon decoration
+		else if(role == IconRole)
 		{
 			//TODO: add a proper iconprovider
 			ConnectState* st=server->connectState();
@@ -262,12 +246,9 @@ QVariant TreeNodeModel::serverData(const QModelIndex& index,int role) const
 			}
 			return QVariant();
 		}
-	}
 
-	//Tooltip
-	else if(role == Qt::ToolTipRole)
-	{
-		if(ServerHandler *server=indexToRealServer(index))
+		//Tooltip
+		else if(role == Qt::ToolTipRole)
 		{
 			return server->vRoot()->toolTip();
 		}
@@ -282,45 +263,41 @@ QVariant TreeNodeModel::nodeData(const QModelIndex& index, int role) const
 	if(!vnode || !vnode->node())
 		return QVariant();
 
-	Node *node=vnode->node();
+	if(index.column() == 0)
+	{
+		if(role == Qt::DisplayRole)
+			return vnode->name();
 
-	if(role == Qt::DisplayRole)
-	{
-		switch(index.column())
+		else if(role == FilterRole)
+			return QVariant(data_->isFiltered(vnode));
+
+		else if(role == Qt::BackgroundRole)
+			return vnode->stateColour() ;
+
+		else if(role == Qt::ForegroundRole)
+			return vnode->stateFontColour();
+
+		else if(role == IconRole)
 		{
-		case 0:	 return vnode->name();
-		case 1: return VNState::toName(node);
-		case 2: return QString::fromStdString(node->absNodePath()); //QString().sprintf("%08p", node); //QString::fromStdString(node->absNodePath());
-		default: return QVariant();
+			if(icons_->isEmpty())
+				return QVariant();
+			else
+				return VIcon::pixmapList(vnode->node(),icons_);
 		}
-	}
-	else if(role == FilterRole)
-	{
-		return QVariant(data_->isFiltered(vnode));
-	}
-	else if(index.column() == 0 && role == Qt::BackgroundRole)
-	{
-		return VNState::toColour(node);
-	}
-	else if(index.column() == 0 && role == IconRole)
-	{
-		if(icons_->isEmpty())
+		else if(role == Qt::ToolTipRole)
+		{
+			//return VNState::toName(node);
+		}
+
+		//The number of nodes a suite has
+		else if(role == NodeNumRole)
+		{
+			if(vnode->isTopLevel())
+			{
+				return vnode->server()->vRoot()->totalNumOfTopLevel(vnode);
+			}
 			return QVariant();
-		else
-			return VIcon::pixmapList(node,icons_);
-	}
-	else if(index.column() == 0 && role == Qt::ToolTipRole)
-	{
-		return VNState::toName(node);
-	}
-	//The number of nodes a suite has
-	else if(role == NodeNumRole)
-	{
-		if(vnode->isTopLevel())
-		{
-			return vnode->server()->vRoot()->totalNumOfTopLevel(vnode);
 		}
-		return QVariant();
 	}
 
 	return QVariant();

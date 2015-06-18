@@ -122,32 +122,3 @@ bool PropertyEditor::applyChange()
     return changed;
 }
 
-/*
-void PropertyEditor::syncToConfig(QtProperty *prop)
-{
-    qDebug() << " prop:" << prop->propertyName() << prop->propertyName() <<  prop->isModified();
-
-    //If the property value has been changed.
-    if(prop->hasValue())
-    {
-        //We lookup the corresponding VProperty in in VConfig
-        //and set its current value.
-        QMap<QtProperty*,VProperty*>::iterator it = confMap_.find(prop);
-        if(it != confMap_.end())
-        {
-            if(QtVariantProperty *vp=static_cast<QtVariantProperty*>(prop))
-            {
-                qDebug() << "   value:  " << vp->value();
-                it.value()->setValue(vp->value());
-            }
-        }
-    }
-
-    //Go through all the children.
-    Q_FOREACH(QtProperty* sp,prop->subProperties())
-    {
-        syncToConfig(sp);
-    }
-}*/
-
-

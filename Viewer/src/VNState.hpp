@@ -17,27 +17,22 @@
 
 #include "NState.hpp"
 #include "VParam.hpp"
-#include "VProperty.hpp"
 
 class Node;
 class ServerHandler;
 class VProperty;
 
-class VNState : public VParam, public VPropertyObserver
+class VNState : public VParam
 {
 public:
 	VNState(const std::string& name,NState::State);
 	VNState(const std::string& name);
 
-    void setProperty(VProperty* prop);
-      
-    //From VPropertyObserver
-    void notifyChange(VProperty*);
-
     //Nodes
 	static QString toName(Node*);
 	static QString toDefaultStateName(Node*);
 	static QColor  toColour(Node* n);
+	static QColor  toFontColour(Node* n);
 	static VNState* toState(Node* n);
 	static VNState* toDefaultState(Node* n);
 
@@ -45,6 +40,7 @@ public:
 	static QString toName(ServerHandler*);
 	static QColor  toColour(ServerHandler*);
 	static VNState* toState(ServerHandler*);
+	static QColor  toFontColour(ServerHandler*);
 
 	static std::vector<VParam*> filterItems();
 	static VNState* find(const std::string& name);
@@ -54,8 +50,6 @@ public:
 
 private:
 	static std::map<std::string,VNState*> items_;
-    VProperty* prop_;
-
 };
 
 #endif
