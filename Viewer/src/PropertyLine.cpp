@@ -15,15 +15,14 @@
 #include <QDebug>
 #include <QFontDialog>
 #include <QHBoxLayout>
+#include <QIntValidator>
 #include <QLabel>
 #include <QLineEdit>
 #include <QPalette>
-#include <QSpinBox>
 #include <QToolButton>
 
-#include "VProperty.hpp"
 
-static std::map<std::string,PropertyLineFactory*>* makers = 0;
+static std::map<VProperty::Type,PropertyLineFactory*>* makers = 0;
 
 //=========================================================================
 //
@@ -31,12 +30,12 @@ static std::map<std::string,PropertyLineFactory*>* makers = 0;
 //
 //=========================================================================
 
-PropertyLineFactory::PropertyLineFactory(const std::string& name)
+PropertyLineFactory::PropertyLineFactory(VProperty::Type type)
 {
 	if(makers == 0)
-		makers = new std::map<std::string,PropertyLineFactory*>;
+		makers = new std::map<VProperty::Type,PropertyLineFactory*>;
 
-	(*makers)[name] = this;
+	(*makers)[type] = this;
 }
 
 PropertyLineFactory::~PropertyLineFactory()
@@ -49,8 +48,8 @@ PropertyLine* PropertyLineFactory::create(VProperty* p,QWidget* w)
 	if(!p)
 		return 0;
 
-	std::string t=p->type();
-	std::map<std::string,PropertyLineFactory*>::iterator j = makers->find(t);
+	VProperty::Type t=p->type();
+	std::map<VProperty::Type,PropertyLineFactory*>::iterator j = makers->find(t);
 	if(j != makers->end())
 		return (*j).second->make(p,w);
 
@@ -237,12 +236,27 @@ bool FontPropertyLine::applyChange()
 
 IntPropertyLine::IntPropertyLine(VProperty* vProp,QWidget * parent) : PropertyLine(vProp,true,parent)
 {
-	spin_=new QSpinBox(parent);
+	le_=new QLineEdit(parent);
+	QIntValidator* validator=new QIntValidator(le_);
+
+	QString s=vProp->param("max");
+	if(!s.isEmpty())
+	{
+		validator->setTop(s.toInt());
+	}
+
+	s=vProp->param("min");
+	if(!s.isEmpty())
+	{
+			validator->setBottom(s.toInt());
+	}
+
+	le_->setValidator(validator);
 }
 
 QWidget* IntPropertyLine::item()
 {
-	return spin_;
+	return le_;
 }
 
 QWidget* IntPropertyLine::button()
@@ -252,15 +266,16 @@ QWidget* IntPropertyLine::button()
 
 void IntPropertyLine::reset(QVariant v)
 {
-	spin_->setValue(v.toInt());
+	le_->setText(QString::number(v.toInt()));
 }
 
 bool IntPropertyLine::applyChange()
 {
 	int v=prop_->value().toInt();
-	if(v != spin_->value())
+	int cv=le_->text().toInt();
+	if(v != cv)
 	{
-		prop_->setValue(spin_->value());
+		prop_->setValue(cv);
 		return true;
 	}
 	return false;
@@ -306,9 +321,9 @@ bool BoolPropertyLine::applyChange()
 }
 
 
-static PropertyLineMaker<StringPropertyLine> makerStr("string");
-static PropertyLineMaker<ColourPropertyLine> makerCol("colour");
-static PropertyLineMaker<FontPropertyLine> makerFont("font");
-static PropertyLineMaker<IntPropertyLine> makerInt("int");
-static PropertyLineMaker<BoolPropertyLine> makerBool("bool");
+static PropertyLineMaker<StringPropertyLine> makerStr(VProperty::StringType);
+static PropertyLineMaker<ColourPropertyLine> makerCol(VProperty::ColourType);
+static PropertyLineMaker<FontPropertyLine> makerFont(VProperty::FontType);
+static PropertyLineMaker<IntPropertyLine> makerInt(VProperty::IntType);
+static PropertyLineMaker<BoolPropertyLine> makerBool(VProperty::BoolType);
 

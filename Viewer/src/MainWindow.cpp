@@ -29,6 +29,7 @@
 #include "ServerListDialog.hpp"
 #include "MenuConfigDialog.hpp"
 #include "UserMessage.hpp"
+#include "VConfig.hpp"
 #include "VSettings.hpp"
 
 #include <boost/lexical_cast.hpp>
@@ -426,12 +427,14 @@ bool MainWindow::aboutToQuit(MainWindow* topWin)
 
 void MainWindow::init()
 {
-	VComboSettings vs("ecFlow_ui");
+	SessionItem* cs=SessionHandler::instance()->current();
+	assert(cs);
 
-	std::string fs = DirectoryHandler::concatenate(DirectoryHandler::configDir(), "session.json");
+	VComboSettings vs(cs->sessionFile(),cs->windowFile());
+
 
 	//Read configuration. If it fails we create an empty window!!
-	if(!vs.read(fs))
+	if(!vs.read())
 	{
 		 MainWindow::makeWindow(&vs);
 		 return;
@@ -484,7 +487,10 @@ void MainWindow::init()
 
 void MainWindow::save(MainWindow *topWin)
 {
-	VComboSettings vs("ecFlow_ui");
+	SessionItem* cs=SessionHandler::instance()->current();
+	assert(cs);
+
+	VComboSettings vs(cs->sessionFile(),cs->windowFile());
 
 	//We have to clear it so that not to remember all the previous windows
 	vs.clear();
@@ -502,11 +508,11 @@ void MainWindow::save(MainWindow *topWin)
 		vs.endGroup();
 	}
 
-	//Define json file
-	std::string fs = DirectoryHandler::concatenate(DirectoryHandler::configDir(), "session.json");
-
 	//Write to json
-	vs.write(fs);
+	vs.write();
+
+
+	VConfig::instance()->saveSettings();
 }
 
 void MainWindow::reload()

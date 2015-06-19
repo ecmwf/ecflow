@@ -38,13 +38,10 @@ void DirectoryHandler::init(std::string exePath)
 	//Sets paths in the home directory
 	if(char *h=getenv("HOME"))
 	{
-                // Gtk-WARNING: Locale not supported by C library.  Using the fallback locale
-	        // boost::filesystem::path::imbue(std::locale("C")); 
-                // boost::filesystem::path::imbue(std::locale("C.UTF-8")); 
   	    boost::filesystem::path homeDir(h);
 
 		boost::filesystem::path configDir = homeDir;
-		configDir /= ".ecflowview";
+		configDir /= ".ecflow_ui";
 
 		boost::filesystem::path rcDir = homeDir;
 		rcDir /= ".ecflowrc";
@@ -110,72 +107,19 @@ void DirectoryHandler::findFiles(const std::string &dirPath,const std::string &s
     }
 }
 
-/*
-ecf_dir *ecf_file_dir(char *path, char *pattern, int fullname)
+void DirectoryHandler::createDir(const std::string& path)
 {
-  struct dirent *de;
-  DIR           *dp;
-  struct stat    st;
-
-  ecf_dir       *cur = NULL;
-  ecf_dir       *dir = NULL;
-
-  bool            ok = true;
-
-  if( (dp=opendir(path)) )
-  {
-    char name[MAXLEN];
-    char *s;
-
-    strcpy(name,path);
-    s = name + strlen(path);
-    *s++ = '/';
-
-    while( ok && (de=readdir(dp)) != NULL )
-    {
-      if( de->d_ino != 0 )
-      {
-        strcpy(s,de->d_name);
-
-        if( !pattern || strncmp(de->d_name,pattern,strlen(pattern))==0 )
-          if( lstat(name,&st) == 0 )
-          {
-            if( (cur = new ecf_dir())) // (ecf_dir*) calloc(1,sizeof(ecf_dir))) )
-            {
-              if(fullname)
-              {
-                char buff[MAXLEN];
-                sprintf(buff,"%s/%s",const_ecf_string(path),const_ecf_string(de->d_name));
-                cur->name_ = strdup(buff);
-              }
-              else
-                cur->name_  = strdup(de->d_name);
-
-              cur->mode  = st.st_mode;
-              cur->uid   = st.st_uid;
-              cur->gid   = st.st_gid;
-              cur->size  = st.st_size;
-              cur->atime = st.st_atime;
-              cur->mtime = st.st_mtime;
-              cur->ctime = st.st_ctime;
-
-              ecf_list_add<ecf_dir>(&dir,cur);
-            }
-            else
-              ok = false;
-          }
-	  else {}
-        else {}
-      }
-    }
-    closedir(dp);
-  } else {};
-
-  return dir;
+	//Create configDir if if does not exist
+	if(!boost::filesystem::exists(path))
+	{
+		try
+		{
+			boost::filesystem::create_directory(path);
+		}
+		catch(const boost::filesystem::filesystem_error& err)
+		{
+			UserMessage::message(UserMessage::ERROR, true,
+					std::string("Could not create dir: " + path + " reason: " + err.what()));
+		}
+	}
 }
-
-*/
-
-
-
-

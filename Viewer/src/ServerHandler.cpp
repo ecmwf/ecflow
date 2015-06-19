@@ -21,6 +21,7 @@
 #include "DirectoryHandler.hpp"
 #include "NodeObserver.hpp"
 #include "ServerObserver.hpp"
+#include "SessionHandler.hpp"
 #include "SuiteFilter.hpp"
 #include "UserMessage.hpp"
 #include "VNode.hpp"
@@ -1269,12 +1270,15 @@ void ServerHandler::updateSuiteFilter(const std::vector<std::string>& loadedSuit
 
 void ServerHandler::readSettings()
 {
-	VSettings vs;
+	SessionItem *cs=SessionHandler::instance()->current();
+	assert(cs);
 
-	std::string fs = DirectoryHandler::concatenate(DirectoryHandler::configDir(), name() + ".conf.json");
+	VSettings vs(cs->serverFile(name()));
+
+	//std::string fs = DirectoryHandler::concatenate(DirectoryHandler::configDir(), name() + ".conf.json");
 
 	//Read configuration.
-	if(!vs.read(fs))
+	if(!vs.read())
 	{
 		 return;
 	}
@@ -1333,16 +1337,19 @@ void ServerHandler::readSettings()
 
 void ServerHandler::writeSettings()
 {
-	VSettings vs;
+	SessionItem *cs=SessionHandler::instance()->current();
+	assert(cs);
 
-	std::string fs = DirectoryHandler::concatenate(DirectoryHandler::configDir(), name() + ".conf.json");
+	VSettings vs(cs->serverFile(name()));
+
+	//std::string fs = DirectoryHandler::concatenate(DirectoryHandler::configDir(), name() + ".conf.json");
 
 	vs.beginGroup("suiteFilter");
 	suiteFilter_->writeSettings(&vs);
 	vs.endGroup();
 
 	//Write to json
-	vs.write(fs);
+	vs.write();
 
 		/*VSettings vs("ecFlow_ui");
 

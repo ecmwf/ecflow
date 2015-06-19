@@ -41,11 +41,14 @@ public:
     VProperty(const std::string& name);
     ~VProperty();
 
+    enum Type {StringType,IntType,BoolType,ColourType,FontType};
+
     QString name() const {return name_;}
     const std::string& strName() const {return strName_;}
     QVariant defaultValue() const {return defaultValue_;}
     QVariant value() const {return value_;}
-    std::string type() const {return type_;}
+    std::string valueAsString() const;
+    Type type() const {return type_;}
     QString param(QString name);
 
     void setDefaultValue(const std::string&);
@@ -53,11 +56,16 @@ public:
     void setValue(QVariant);
     void setParam(QString,QString);
 
+    std::string path();
+    void setParent(VProperty* p) {parent_=p;}
     bool hasChildren() const {return children_.count() >0;}
     QList<VProperty*> children() const {return children_;}
     void addChild(VProperty*);
     VProperty* findChild(QString name);
     VProperty* find(const std::string& fullPath);
+
+    bool changed() const;
+    void collectLinks(std::vector<VProperty*>&);
 
     void setLink(VProperty* p) {link_=p;}
     VProperty* link() const {return link_;}
@@ -80,21 +88,23 @@ public:
     static int    toNumber(const std::string&);
     static bool   toBool(const std::string&);
 
-protected:
-    std::string strName_; //The name of the property as as std::string
-    QString name_; //The name of the property. Used as an id.
-    QVariant defaultValue_; //The default value
-    QVariant value_; //The current value
+    static QString toString(QColor col);
 
 private:
     void dispatchChange();
     VProperty* find(const std::vector<std::string>& pathVec);
 
+    std::string strName_; //The name of the property as an std::string
+    QString name_; //The name of the property. Used as an id.
+    QVariant defaultValue_; //The default value
+    QVariant value_; //The current value
+
+    VProperty* parent_;
     QList<VProperty*> children_;
     QList<VPropertyObserver*> observers_;
     VProperty* master_;
     bool useMaster_;
-    std::string type_;
+    Type type_;
     QMap<QString,QString> params_;
     VProperty* link_;
 };

@@ -28,13 +28,17 @@ public:
     
     void init(const std::string& parDir);
     const std::vector<VProperty*>& groups() {return groups_;}
-    VProperty* find(const std::string& path);
+    void saveSettings();
+
 
 protected:
     VConfig();
     
-    void loadFile(const std::string& parFile);
+    void loadInit(const std::string& parFile);
     void loadProperty(const boost::property_tree::ptree& pt,VProperty *prop);
+    void loadSettings();
+    VProperty* find(const std::string& path);
+    VProperty* group(const std::string& name);
 
     static VConfig* instance_;
     

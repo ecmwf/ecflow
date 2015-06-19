@@ -13,6 +13,7 @@
 #include "VProperty.hpp"
 
 #include "DirectoryHandler.hpp"
+#include "SessionHandler.hpp"
 #include "UserMessage.hpp"
 
 #include <boost/property_tree/json_parser.hpp>
@@ -20,7 +21,6 @@
 #include <boost/filesystem/path.hpp>
 
 VConfig* VConfig::instance_=0;
-
 
 VConfig::VConfig()
 {
@@ -61,19 +61,22 @@ void VConfig::init(const std::string& parDirPath)
                 std::string name=it->path().filename().string();
                 if(name.find("_conf.json") != std::string::npos)
                 {    
-                    loadFile(it->path().string()); 
+                    loadInit(it->path().string());
                 }    
             }
         }
     } 
 
-   //Read gui definition
+   //Read gui definition for the editable properties
    std::string guiFile=DirectoryHandler::concatenate(parDir.string(),"ecflowview_gui.json");
+   loadInit(guiFile);
 
-   loadFile(guiFile);
+   //Load existing user settings for the editable properties
+   loadSettings();
+
 }
 
-void VConfig::loadFile(const std::string& parFile)
+void VConfig::loadInit(const std::string& parFile)
 {
     //Parse param file using the boost JSON property tree parser
     using boost::property_tree::ptree;
@@ -118,35 +121,9 @@ void VConfig::loadProperty(const boost::property_tree::ptree& pt,VProperty *prop
 
     ptree::const_assoc_iterator itProp;
 
-    //Check if is editable. If not it will not
-    //appear in the editor.
-   /* if((itProp=pt.find("editable")) != pt.not_found())
-    {
-        prop->setEditable((itProp->second.get_value<std::string>() == "false")?false:true);
-    }
-
-    //Label
-    if((itProp=pt.find("label")) != pt.not_found())
-    {
-        prop->setLabelText(itProp->second.get_value<std::string>());
-    }
-
-    //Tooltip
-    if((itProp=pt.find("tooltip")) != pt.not_found())
-    {
-        prop->setToolTip(itProp->second.get_value<std::string>());
-    }
-
-    //Default
-    if((itProp=pt.find("default")) != pt.not_found())
-    {
-        prop->setDefaultValue(itProp->second.get_value<std::string>());
-    }*/
-
     //Loop over the possible properties
     for(ptree::const_iterator it = pt.begin(); it != pt.end(); ++it)
     {
-
     	std::string name=it->first;
     	ptree ptProp=it->second;
 
@@ -186,17 +163,14 @@ void VConfig::loadProperty(const boost::property_tree::ptree& pt,VProperty *prop
         	QString val=QString::fromStdString(ptProp.get_value<std::string>());
         	prop->setParam(QString::fromStdString(name),val);
         }
-
     }
 }
 
 VProperty* VConfig::find(const std::string& path)
 {
-	const std::vector<VProperty*>& groups=VConfig::instance()->groups();
-
 	VProperty* res=0;
 
-	for(std::vector<VProperty*>::const_iterator it=groups.begin();it != groups.end(); it++)
+	for(std::vector<VProperty*>::const_iterator it=groups_.begin();it != groups_.end(); it++)
 	{
 	    VProperty *vGroup=*it;
 	    res=vGroup->find(path);
@@ -209,16 +183,73 @@ VProperty* VConfig::find(const std::string& path)
 	return res;
 }
 
+VProperty* VConfig::group(const std::string& name)
+{
+	for(std::vector<VProperty*>::const_iterator it=groups_.begin();it != groups_.end(); it++)
+	{
+		if((*it)->strName() == name)
+			return *it;
+	}
+
+	return 0;
+}
 
 
+void VConfig::saveSettings()
+{
+	SessionItem* cs=SessionHandler::instance()->current();
+	std::string fName=cs->settingsFile();
 
+	using boost::property_tree::ptree;
+	ptree pt;
 
+	//Get editable properties
+	VProperty *prop=group("gui");
+	std::vector<VProperty*> linkVec;
+	prop->collectLinks(linkVec);
 
+	for(std::vector<VProperty*>::const_iterator it=linkVec.begin(); it != linkVec.end(); it++)
+	{
+		if((*it)->changed())
+			pt.put((*it)->path(),(*it)->valueAsString());
+	}
 
+	write_json(fName,pt);
+}
 
+void VConfig::loadSettings()
+{
+	SessionItem* cs=SessionHandler::instance()->current();
+	std::string parFile=cs->settingsFile();
 
+	VProperty *prop=group("gui");
+	std::vector<VProperty*> linkVec;
+	prop->collectLinks(linkVec);
 
+	//Parse file using the boost JSON property tree parser
+	using boost::property_tree::ptree;
+	ptree pt;
 
+	try
+	{
+	    read_json(parFile,pt);
+	}
+	catch (const boost::property_tree::json_parser::json_parser_error& e)
+	{
+	    std::string errorMessage = e.what();
+	    UserMessage::message(UserMessage::ERROR, true,
+	                std::string("Error! VConfig::loadSetting() unable to parse settings file: " + parFile + " Message: " +errorMessage));
+	    return;
+    }
 
+	for(std::vector<VProperty*>::const_iterator it=linkVec.begin(); it != linkVec.end(); it++)
+	{
+		if(pt.get_child_optional((*it)->path()) != boost::none)
+		{
+			std::string val=pt.get<std::string>((*it)->path());
+			(*it)->setValue(val);
+		}
+	}
+}
 
 

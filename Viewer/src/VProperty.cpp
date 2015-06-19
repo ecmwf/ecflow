@@ -21,9 +21,10 @@
 VProperty::VProperty(const std::string& name) :
    strName_(name),
    name_(QString::fromStdString(name)),
+   parent_(0),
    master_(0),
    useMaster_(false),
-   type_("string"),
+   type_(StringType),
    link_(0)
 {
 }
@@ -45,31 +46,31 @@ void VProperty::setDefaultValue(const std::string& val)
 	if(isColour(val))
     {
         defaultValue_=toColour(val);
-        type_="colour";
+        type_=ColourType;
     }
 	//Font
 	else if(isFont(val))
 	{
 	   defaultValue_=toFont(val);
-	   type_="font";
+	   type_=FontType;
 	}
     //int
     else if(isNumber(val))
     {
        	defaultValue_=toNumber(val);
-        type_="int";
+        type_=IntType;
     }
     //bool
     else if(isBool(val))
     {
         defaultValue_=toBool(val);
-        type_="bool";
+        type_=BoolType;
     }
     //text
     else
     {
     	defaultValue_=QString::fromStdString(val);
-    	type_="string";
+    	type_=StringType;
     }
     
     if(value_.isNull())
@@ -115,6 +116,35 @@ void VProperty::setValue(QVariant val)
     dispatchChange();
 }
 
+std::string VProperty::valueAsString() const
+{
+	QString s;
+
+	switch(type_)
+	{
+	case StringType:
+		s=value_.toString();
+		break;
+	case IntType:
+		s=QString::number(value_.toInt());
+		break;
+	case BoolType:
+		s=(value_.toBool() == true)?"true":"false";
+		break;
+	case ColourType:
+		s=VProperty::toString(value_.value<QColor>());
+		break;
+	case FontType:
+		s=value_.value<QFont>().toString();
+		break;
+	default:
+		break;
+
+	}
+
+	return s.toStdString();
+}
+
 void VProperty::setParam(QString name,QString value)
 {
 	params_[name]=value;
@@ -132,6 +162,7 @@ QString VProperty::param(QString name)
 void VProperty::addChild(VProperty *prop)
 {
     children_ << prop;
+    prop->setParent(this);
 }
 
 void VProperty::addObserver(VPropertyObserver* obs)
@@ -151,6 +182,109 @@ void VProperty::dispatchChange()
 		obs->notifyChange(this);
 	}
 }
+
+VProperty* VProperty::findChild(QString name)
+{
+    Q_FOREACH(VProperty* p,children_)
+    {
+        if(p->name() == name)
+            return p;
+    }
+    
+    return 0;
+}
+
+VProperty* VProperty::find(const std::string& fullPath)
+{
+	if(fullPath.empty())
+		return NULL;
+
+	if(fullPath == strName_)
+		return this;
+
+	std::vector<std::string> pathVec;
+	boost::split(pathVec,fullPath,boost::is_any_of("."));
+
+	if(pathVec.size() > 0)
+	{
+		if(pathVec.at(0) != strName_)
+			return NULL;
+	}
+
+	return VProperty::find(pathVec);
+}
+
+VProperty* VProperty::find(const std::vector<std::string>& pathVec)
+{
+	if(pathVec.size() == 0)
+	{
+		return NULL;
+	}
+
+	if(pathVec.size() == 1)
+	{
+		return this;
+	}
+
+	//The vec size  >=2
+
+	std::vector<std::string> rest(pathVec.begin()+1,pathVec.end());
+	VProperty *n = findChild(QString::fromStdString(pathVec.at(1)));
+
+	return n?n->find(rest):NULL;
+}
+
+bool VProperty:: changed() const
+{
+	return value_ != defaultValue_;
+}
+
+void VProperty::collectLinks(std::vector<VProperty*>& linkVec)
+{
+	if(link_)
+		linkVec.push_back(link_);
+
+	 Q_FOREACH(VProperty* p,children_)
+	 {
+		 p->collectLinks(linkVec);
+	 }
+}
+
+std::string VProperty::path()
+{
+	if(parent_)
+		return parent_->path() + "." + strName_;
+
+	return strName_;
+}
+
+void VProperty::setMaster(VProperty* m)
+{
+	if(master_)
+		master_->removeObserver(this);
+
+	master_=m;
+	master_->addObserver(this);
+}
+
+VProperty* VProperty::derive()
+{
+	 VProperty *cp=new VProperty(strName_);
+
+	 cp->defaultValue_=defaultValue_;
+	 cp->value_=value_;
+
+	 cp->setMaster(this);
+
+	 Q_FOREACH(VProperty* p,children_)
+	 {
+		 VProperty *ch=p->derive();
+		 cp->addChild(ch);
+	 }
+	 return cp;
+}
+
+
 
 //=============================
 //
@@ -218,81 +352,12 @@ bool VProperty::toBool(const std::string& name)
 	return (name == "true")?true:false;
 }
 
-VProperty* VProperty::findChild(QString name)
+QString VProperty::toString(QColor col)
 {
-    Q_FOREACH(VProperty* p,children_)
-    {
-        if(p->name() == name)
-            return p;
-    }
-    
-    return 0;
+	return "rgb(" + QString::number(col.red()) + "," +
+			QString::number(col.green()) + "," +
+			QString::number(col.blue()) + ")";
 }
 
-VProperty* VProperty::find(const std::string& fullPath)
-{
-	if(fullPath.empty())
-		return NULL;
-
-	if(fullPath == strName_)
-		return this;
-
-	std::vector<std::string> pathVec;
-	boost::split(pathVec,fullPath,boost::is_any_of("."));
-
-	if(pathVec.size() > 0)
-	{
-		if(pathVec.at(0) != strName_)
-			return NULL;
-	}
-
-	return VProperty::find(pathVec);
-}
-
-VProperty* VProperty::find(const std::vector<std::string>& pathVec)
-{
-	if(pathVec.size() == 0)
-	{
-		return NULL;
-	}
-
-	if(pathVec.size() == 1)
-	{
-		return this;
-	}
-
-	//The vec size  >=2
-
-	std::vector<std::string> rest(pathVec.begin()+1,pathVec.end());
-	VProperty *n = findChild(QString::fromStdString(pathVec.at(1)));
-
-	return n?n->find(rest):NULL;
-}
-
-void VProperty::setMaster(VProperty* m)
-{
-	if(master_)
-		master_->removeObserver(this);
-
-	master_=m;
-	master_->addObserver(this);
-}
-
-VProperty* VProperty::derive()
-{
-	 VProperty *cp=new VProperty(strName_);
-
-	 cp->defaultValue_=defaultValue_;
-	 cp->value_=value_;
-
-	 cp->setMaster(this);
-
-	 Q_FOREACH(VProperty* p,children_)
-	 {
-		 VProperty *ch=p->derive();
-		 cp->addChild(ch);
-	 }
-	 return cp;
-}
 
 

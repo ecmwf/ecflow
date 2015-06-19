@@ -35,13 +35,18 @@ protected:
 class VSettings
 {
 public:
-	VSettings();
+	VSettings(const std::string& file);
 	virtual ~VSettings() {};
 
-	bool read(const std::string &fs);
-	virtual void write(const std::string &fs);
+	//bool read(const std::string &fs);
+	//virtual void write(const std::string &fs);
+
+	bool read();
+	virtual void write();
+
 	virtual void clear();
 	bool contains(const std::string& key);
+	bool containsFullPath(const std::string& key);
 
 	virtual void beginGroup(const std::string&);
 	virtual void endGroup();
@@ -61,6 +66,7 @@ public:
 protected:
 	boost::property_tree::ptree pt_;
 	VSettingsPath path_;
+	std::string file_;
 };
 
 //This class uses both the boost property tree and QSettings to store and manage the settings. The idea
@@ -69,10 +75,14 @@ protected:
 class VComboSettings : public VSettings
 {
 public:
-	VComboSettings(const std::string& application);
+	VComboSettings(const std::string& file,const std::string& qsFile);
+	~VComboSettings();
 
-	void write(const std::string &fs);
+	//void write(const std::string &fs);
 	void clear();
+
+	void write();
+
 
 	bool containsQs(const std::string& key);
 

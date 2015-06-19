@@ -138,9 +138,9 @@
  			
  			"desc" : "Tree view options",
  			 			
- 			"line" : "view.treeview.font",
- 			"line" : "view.treeview.nodeRectRadius",
- 			"line" : "view.treeview.displayChildCount" 
+ 			"line" : "view.tree.font",
+ 			"line" : "view.tree.nodeRectRadius",
+ 			"line" : "view.tree.displayChildCount" 
  		}		
  	}
 }

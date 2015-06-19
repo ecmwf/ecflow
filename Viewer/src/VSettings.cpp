@@ -55,7 +55,7 @@ std::string VSettingsPath::join(const std::string sep) const
 //
 //======================================================
 
-VSettings::VSettings()
+VSettings::VSettings(const std::string& file) : file_(file)
 {
 }
 
@@ -70,11 +70,18 @@ bool VSettings::contains(const std::string& key)
 	return (pt_.get_child_optional(path_.path(key)) != boost::none);
 }
 
-bool VSettings::read(const std::string &fs)
+bool VSettings::containsFullPath(const std::string& key)
+{
+	return (pt_.get_child_optional(key) != boost::none);
+}
+
+
+//bool VSettings::read(const std::string &fs)
+bool VSettings::read()
 {
 	try
 	{
-		boost::property_tree::json_parser::read_json(fs,pt_);
+		boost::property_tree::json_parser::read_json(file_,pt_);
 	}
 	catch (const boost::property_tree::json_parser::json_parser_error& e)
 	{
@@ -86,10 +93,11 @@ bool VSettings::read(const std::string &fs)
 	return true;
 }
 
-void VSettings::write(const std::string &fs)
+//void VSettings::write(const std::string &fs)
+void VSettings::write()
 {
 	//Write to json
-	write_json(fs,pt_);
+	write_json(file_,pt_);
 }
 
 void VSettings::put(const std::string& key,int val)
@@ -149,8 +157,23 @@ void VSettings::endGroup()
 //
 //======================================================
 
-VComboSettings::VComboSettings(const std::string& application) :
-		qs_("ECMWF",QString::fromStdString(application))
+VComboSettings::VComboSettings(const std::string& file,const std::string& qsFile) :
+		VSettings(file),
+		qs_(QString::fromStdString(qsFile),QSettings::NativeFormat)
+{
+
+	//qs_(QString::fromStdString(application))
+
+	//QSettings::setPath(QSettings::IniFormat, QSettings::UserScope,"/home/graphics/cgr/.ecflowview");
+
+
+	//QSettings::setPath(QSettings::IniFormat, QSettings::UserScope,"/home/graphics/cgr/.ecflowview");
+
+	qDebug() << qs_.fileName();
+
+}
+
+VComboSettings::~VComboSettings()
 {
 }
 
@@ -165,9 +188,9 @@ bool VComboSettings::containsQs(const std::string& key)
 	return qs_.contains(QString::fromStdString(key));
 }
 
-void VComboSettings::write(const std::string &fs)
+void VComboSettings::write()
 {
-	VSettings::write(fs);
+	VSettings::write();
 	qs_.sync();
 }
 

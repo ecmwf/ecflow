@@ -11,7 +11,8 @@
             		"label": "Update frequency",
             		"suffix" : "seconds", 
             		"tooltip": "update frequency",                          
-            		"default": "60"
+            		"default": "60",
+            		"min" : "0"
                 },
                 
                 "apdaptiveUpdate": {
@@ -24,7 +25,8 @@
                 	"label": "Maximum adaptive update frequency",
                 	"suffix" : "minutes", 
                 	"tooltip": "Maximum adaptive update frequency",                          
-                	"default": "60"
+                	"default": "60",
+                	"min" : "0"
                 }
             }, 
 
@@ -42,7 +44,8 @@
                 	"label": "Maximum size of job files",
                 	"suffix" : "lines", 
                 	"tooltip": "",                          
-                	"default": "15000"
+                	"default": "15000",
+                	"min" : "0"	
                     }
             },
             

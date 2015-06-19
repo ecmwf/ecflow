@@ -24,6 +24,7 @@ public:
     static std::string configDir()  {return configDir_;};
     static std::string rcDir()    {return rcDir_;};
     static std::string concatenate(const std::string &path1, const std::string &path2);
+    static void createDir(const std::string& path);
 
     static void findFiles(const std::string &dirPath,const std::string &startsWith,
     		    std::vector<std::string>& res);

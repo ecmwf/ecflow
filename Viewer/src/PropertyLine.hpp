@@ -24,8 +24,9 @@ class  QSpinBox;
 class  QToolButton;
 class  QWidget;
 
+#include "VProperty.hpp"
+
 class PropertyLine;
-class VProperty;
 
 //-------------------------------------
 // Factory
@@ -34,7 +35,7 @@ class VProperty;
 class PropertyLineFactory
 {
 public:
-	PropertyLineFactory(const std::string&);
+	PropertyLineFactory(VProperty::Type);
 	virtual ~PropertyLineFactory();
 
 	virtual PropertyLine* make(VProperty* p,QWidget* w) = 0;
@@ -51,7 +52,7 @@ class PropertyLineMaker : public PropertyLineFactory
 {
 	PropertyLine* make(VProperty* p,QWidget* w) { return new T(p,w); }
 public:
-	PropertyLineMaker(const std::string& name) : PropertyLineFactory(name) {}
+	PropertyLineMaker(VProperty::Type t) : PropertyLineFactory(t) {}
 };
 
 
@@ -156,7 +157,7 @@ public:
 	bool applyChange();
 
 private:
-	QSpinBox* spin_;
+	QLineEdit* le_;
 };
 
 //-------------------------------------

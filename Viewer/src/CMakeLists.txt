@@ -51,6 +51,7 @@ set(viewer_srcs
     ServerItem.cpp
     ServerList.cpp
     ServerListDialog.cpp
+    SessionHandler.cpp
     SuiteItemWidget.cpp
     SuiteFilter.cpp
     SuiteModel.cpp
