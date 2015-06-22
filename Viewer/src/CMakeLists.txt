@@ -20,6 +20,7 @@ set(viewer_srcs
     HistoryItemWidget.cpp
     InfoPanel.cpp 
     InfoPanelItem.cpp   
+    InfoPanelHandler.cpp
     InfoProvider.cpp
     JobItemWidget.cpp
     LineEdit.cpp

@@ -23,6 +23,7 @@
 class QDockWidget;
 class QTabWidget;
 class InfoPanel;
+class InfoPanelDef;
 class InfoPanelItem;
 
 class InfoPanelDock : public QDockWidget
@@ -45,20 +46,19 @@ class InfoPanelItemHandler
 friend class InfoPanel;
 
 public:
-		InfoPanelItemHandler(QString id,QString name,InfoPanelItem* item) :
-			id_(id), label_(name), item_(item) {}
+	InfoPanelItemHandler(InfoPanelDef* def,InfoPanelItem* item) :
+		def_(def), item_(item) {}
 
-		bool match(QStringList ids) const;
-		QString id() const {return id_;}
-		InfoPanelItem* item() const {return item_;}
-		QWidget* widget();
+	bool match(const std::vector<InfoPanelDef*>& defs) const;
+	InfoPanelItem* item() const {return item_;}
+	QWidget* widget();
+	InfoPanelDef* def() const {return def_;}
 
 protected:
 		void addToTab(QTabWidget *);
 
 private:
-		QString id_;
-		QString label_;
+		InfoPanelDef* def_;
 		InfoPanelItem* item_;
 };
 
@@ -101,14 +101,15 @@ Q_SIGNALS:
 
 protected:
 	void reset(VInfo_ptr node);
-	void adjust(VInfo_ptr node);
-    void adjust(QStringList);
+	void adjustInfo(VInfo_ptr node);
+    void adjustTabs(VInfo_ptr node);
 	InfoPanelItemHandler* findHandler(QWidget* w);
-	InfoPanelItemHandler* findHandler(QString id);
+	InfoPanelItemHandler* findHandler(InfoPanelDef*);
 	InfoPanelItem* findItem(QWidget* w);
-	InfoPanelItemHandler* createHandler(QString id);
+	InfoPanelItemHandler* createHandler(InfoPanelDef*);
 
 	QList<InfoPanelItemHandler*> items_;
+	//std::map<InfoPanelDef*,InfoPanelItem*>
 	VInfo_ptr info_;
 };
 

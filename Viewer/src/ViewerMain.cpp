@@ -18,6 +18,7 @@
 #include "MainWindow.hpp"
 #include "ServerHandler.hpp"
 #include "MenuHandler.hpp"
+#include "InfoPanelHandler.hpp"
 #include "DirectoryHandler.hpp"
 #include "Highlighter.hpp"
 #include "ServerList.hpp"
@@ -50,6 +51,10 @@ int main(int argc, char **argv)
     std::string menuFilename("ecflowview_menus.json");
     std::string menuPath = DirectoryHandler::concatenate(DirectoryHandler::etcDir(), menuFilename);
     MenuHandler::readMenuConfigFile(menuPath);
+
+    //Load the infopanel definition
+    std::string panelFile = DirectoryHandler::concatenate(DirectoryHandler::etcDir(), "ecflowview_panels.json");
+    InfoPanelHandler::instance()->init(panelFile);
 
     //Initialise the server list
     ServerList::instance()->init();

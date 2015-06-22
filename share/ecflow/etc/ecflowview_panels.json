@@ -1,0 +1,104 @@
+{
+    "file_id" : "ecflowview menu configuration",
+
+    "file_version" : "1.0",
+
+    "info_panel" :
+    [
+        {
+            "name"    : "overview",
+            "label"   : "Info",
+            "visible_for" : "server or node"
+        },
+
+        {
+        	"name"    : "manual",
+            "label"   : "Manual",
+            "visible_for" : "node"            
+        },    
+       
+        {
+        	"name"    : "script",
+            "label"   : "Script",
+            "visible_for" : "task"            
+        }, 
+        
+        {
+        	"name"    : "job",
+            "label"   : "Job",
+            "visible_for" : "task"            
+        },    
+        
+        {
+        	"name"    : "jobstatus",
+            "label"   : "Job status",
+            "visible_for" : "task"            
+        },   
+        
+        {
+        	"name"    : "output",
+            "label"   : "Output",
+            "visible_for" : "task"            
+        },    
+        
+        {
+        	"name"    : "why",
+            "label"   : "Why?",
+            "visible_for" : "server or node"            
+        },  
+        
+        {
+        	"name"    : "triggers",
+            "label"   : "Triggers",
+            "visible_for" : "node"            
+        },  
+        
+        {
+        	"name"    : "time",
+            "label"   : "Time line",
+            "visible_for" : "server or node"            
+        },  
+        
+        {
+        	"name"    : "variable",
+             "label"   : "Variables",
+             "visible_for" : "server or node"
+             
+        },  
+        
+        {
+        	"name"    : "history",
+             "label"   : "History",
+             "visible_for" : "server"
+             
+        },  
+        
+        {
+        	"name"    : "edit",
+            "label"   : "Edit",
+            "visible_for" : "task"            
+        } ,   
+       
+        
+        {
+        	"name"    : "message",
+            "label"   : "Messages",
+            "visible_for" : "server or node"
+             
+        },     
+        
+        {
+        	"name"    : "zombie",
+            "label"   : "Zombies",
+            "visible_for" : "server"
+             
+        },     
+        
+        {
+        	"name"    : "suite",
+            "label"   : "Suites",
+            "visible_for" : "server"
+             
+        }      
+    ]
+}

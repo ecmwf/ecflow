@@ -13,6 +13,7 @@
 #include <QToolButton>
 #include <QVBoxLayout>
 
+#include "InfoPanelHandler.hpp"
 #include "JobItemWidget.hpp"
 #include "MessageItemWidget.hpp"
 #include "ScriptItemWidget.hpp"
@@ -79,14 +80,14 @@ QWidget* InfoPanelItemHandler::widget()
 	return item_->realWidget();
 }
 
-bool InfoPanelItemHandler::match(QStringList ids) const
+bool InfoPanelItemHandler::match(const std::vector<InfoPanelDef*>& ids) const
 {
-	return ids.contains(id_);
+	return (std::find(ids.begin(),ids.end(),def_) != ids.end());
 }
 
 void  InfoPanelItemHandler::addToTab(QTabWidget *tab)
 {
-	tab->addTab(item_->realWidget(),label_);
+	tab->addTab(item_->realWidget(),QString::fromStdString(def_->label()));
 }
 
 //==============================================
@@ -94,7 +95,6 @@ void  InfoPanelItemHandler::addToTab(QTabWidget *tab)
 // InfoPanel
 //
 //==============================================
-
 
 InfoPanel::InfoPanel(QWidget* parent) :
   DashboardWidget(parent)
@@ -112,25 +112,6 @@ InfoPanel::InfoPanel(QWidget* parent) :
 
 	connect(bcWidget_,SIGNAL(selected(VInfo_ptr)),
 			this,SIGNAL(selectionChanged(VInfo_ptr)));
-
-
-	//Check which roles are allowed
-	QStringList ids;
-	ids << "overview" << "variable" << "message" << "script" 
-	    << "job" << "output" << "why" << "manual" << "trigger" << "edit" << "time" << "suite" << "history" << "zombie";
-
-	//Set tabs according to the current set of roles
-	adjust(ids);
-
-	//Build dockWidget
-	/*dock_ = new QDockWidget(tr("Info panel"),parent);
-	dock_->setAllowedAreas(Qt::BottomDockWidgetArea |
-	                                           Qt::RightDockWidgetArea);
-	dock_->setFeatures(QDockWidget::DockWidgetClosable | QDockWidget::DockWidgetMovable |
-	       		QDockWidget::DockWidgetFloatable);
-
-	main->addDockWidget(Qt::BottomDockWidgetArea, dock_);*/
-
 }
 
 InfoPanel::~InfoPanel()
@@ -163,36 +144,12 @@ void InfoPanel::clear()
 void InfoPanel::reset(VInfo_ptr info)
 {
 	//Set info
-    adjust(info);
+    adjustInfo(info);
 
-	//Check which roles are allowed
-    QStringList ids;
-	ids << "overview" << "variable" << "message" << "script" << "job" << "output" << "why"
-			<< "manual" << "trigger" << "edit" << "time" << "suite" << "history" << "zombie";
+    //Set tabs
+	adjustTabs(info);
 
-	//Set tabs according to the current set of roles
-	adjust(ids);
-
-	qDebug() << "current" << tab_->currentIndex();
-
-	//Reload the current widget in the tab and clears the others
-	for(int i=0; i < tab_->count(); i++)
-	{
-		if(InfoPanelItem* item=findItem(tab_->widget(i)))
-		{
-			if(i== tab_->currentIndex())
-		    {
-				qDebug() << "reload" << i;
-				item->reload(info);
-			}
-			/*else
-            {    
-				item->clearContents();
-			}*/
-		}
-    }
-		
-	//update the breadcrumbs	
+	//Set breadcrumbs
 	bcWidget_->setPath(info);
 }
 
@@ -211,7 +168,7 @@ void InfoPanel::slotReload(VInfo_ptr node)
 //We also we need to manage the node observers. The InfoItem
 //will be the observer of the server of the object stored in
 //the new VInfo
-void InfoPanel::adjust(VInfo_ptr info)
+void InfoPanel::adjustInfo(VInfo_ptr info)
 {
 	ServerHandler *server=0;
   	bool sameServer=false;
@@ -250,8 +207,17 @@ void InfoPanel::adjust(VInfo_ptr info)
   	info_=info;
 }
 
-void InfoPanel::adjust(QStringList ids)
+void InfoPanel::adjustTabs(VInfo_ptr info)
 {
+	//Set tabs according to the current set of roles
+	std::vector<InfoPanelDef*> ids;
+	InfoPanelHandler::instance()->visible(info,ids);
+
+	for(int i=0; i < ids.size(); i++)
+	{
+		qDebug() << ids[i]->name().c_str();
+	}
+
 	int match=0;
 	for(int i=0; i < tab_->count(); i++)
 	{
@@ -261,24 +227,28 @@ void InfoPanel::adjust(QStringList ids)
 			d->item()->clearContents();
 
 			if(d->match(ids))
-					match++;
+				match++;
 		}
 	}
 
+	//Remember the current widget
+	QWidget *current=tab_->currentWidget();
+	InfoPanelItem* currentItem=findItem(current);
+
 	//A new set of tabs is needed!
-	if(match != ids.count())
+	if(match != ids.size())
 	{
 		//Remember the current widget
-		QWidget *current=tab_->currentWidget();
+		//QWidget *current=tab_->currentWidget();
 
 		//Remove the pages but does not delete them
         tab_->clear();
 
-        Q_FOREACH(QString id, ids)
+        for(std::vector<InfoPanelDef*>::iterator it=ids.begin(); it != ids.end(); it++)
 		{
-			if(InfoPanelItemHandler* d=findHandler(id))
+			if(InfoPanelItemHandler* d=findHandler(*it))
 			{
-					d->addToTab(tab_);
+				d->addToTab(tab_);
 			}
 		}
 
@@ -289,13 +259,22 @@ void InfoPanel::adjust(QStringList ids)
 			if(tab_->widget(i) == current)
 			{
 				tab_->setCurrentIndex(i);
+
 				hasCurrent=true;
 				break;
 			}
 		}
 		//If the current widget is not present select the first
 		if(!hasCurrent && tab_->count() >0)
+		{
 			tab_->setCurrentIndex(0);
+			currentItem=findItem(tab_->widget(0));
+		}
+	}
+
+	if(currentItem)
+	{
+		currentItem->reload(info);
 	}
 }
 
@@ -327,25 +306,22 @@ InfoPanelItemHandler* InfoPanel::findHandler(QWidget* w)
 	return 0;
 }
 
-InfoPanelItemHandler* InfoPanel::findHandler(QString id)
+InfoPanelItemHandler* InfoPanel::findHandler(InfoPanelDef* def)
 {
 	Q_FOREACH(InfoPanelItemHandler *d,items_)
 	{
-			if(d->id() == id)
+			if(d->def() == def)
 					return d;
 	}
 
-	return createHandler(id);
+	return createHandler(def);
 }
 
-InfoPanelItemHandler* InfoPanel::createHandler(QString id)
+InfoPanelItemHandler* InfoPanel::createHandler(InfoPanelDef* def)
 {
-	qDebug() << "create" << id;
-
-	if(InfoPanelItem *iw=InfoPanelItemFactory::create(id.toStdString()))
+	if(InfoPanelItem *iw=InfoPanelItemFactory::create(def->name()))
 	{
-		qDebug() <<"widget ok";
-		InfoPanelItemHandler* h=new InfoPanelItemHandler(id,id,iw);
+		InfoPanelItemHandler* h=new InfoPanelItemHandler(def,iw);
 		items_ << h;
 		return h;
 	}
@@ -467,8 +443,3 @@ void InfoPanel::readSettings(VSettings* vs)
 		return;
 	}
 }
-
-
-
-
-
