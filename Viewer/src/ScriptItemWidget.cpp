@@ -11,6 +11,7 @@
 
 #include "Highlighter.hpp"
 #include "InfoProvider.hpp"
+#include "VNode.hpp"
 #include "VReply.hpp"
 
 //========================================================
@@ -44,7 +45,7 @@ void ScriptItemWidget::reload(VInfo_ptr info)
     loaded_=true;
     info_=info;
 
-    if(!info.get())
+    if(!info.get() || !info->isNode() || !info->node())
     {
         fileLabel_->clear();
         textEdit_->clear();
@@ -52,7 +53,7 @@ void ScriptItemWidget::reload(VInfo_ptr info)
     else
     {
         clearContents();
-        fileLabel_->setText(tr("File: ") + QString::fromStdString(info_->genVariable("ECF_SCRIPT")));
+        fileLabel_->setText(tr("File: ") + QString::fromStdString(info->node()->genVariable("ECF_SCRIPT")));
         infoProvider_->info(info_);
     }	
 }

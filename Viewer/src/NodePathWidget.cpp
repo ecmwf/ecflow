@@ -325,7 +325,11 @@ void NodePathWidget::infoIndex(int idx)
 //Find p1 in p2
 int NodePathWidget::findInPath(VInfo_ptr p1,VInfo_ptr p2,bool sameServer)
 {
-	if(!p1 || !p1.get())
+	return -1;
+
+	//TODO: reimplement if needed
+
+	/*if(!p1 || !p1.get())
 		return -1;
 
 	//The servers are the same
@@ -359,7 +363,7 @@ int NodePathWidget::findInPath(VInfo_ptr p1,VInfo_ptr p2,bool sameServer)
 				idx=i+1;
 	}
 
-	return idx;
+	return idx;*/
 }
 
 void NodePathWidget::adjust(VInfo_ptr info,ServerHandler** serverOut,bool &sameServer)
@@ -422,7 +426,8 @@ void NodePathWidget::setPath(VInfo_ptr info)
 
   	adjust(info,&server,sameServer);
 
-  	if(!info_ || !info_.get())
+  	if(!info_ || !info_.get() ||
+  	  (!info_->isServer() && !info_->isNode()))
   	{
   		clear();
   		return;
@@ -478,9 +483,12 @@ void NodePathWidget::setPath(VInfo_ptr info)
   	//Now it is safe to do this assignment //????
   	//info_=info;
 
-	//Get the node list + prepend the server
-  	std::vector<VNode*> lst=info_->ancestors(VInfo::ParentToChildOrder);
-  	lst.insert(lst.begin(),0);//indicates the server
+	//Get the node list including the server
+  	std::vector<VNode*> lst;
+  	if(info_->node())
+  	{
+  		lst=info_->node()->ancestors(VNode::ParentToChildSort);
+  	}
 
   	//--------------------------------------------
   	// Cleaning (as much as needed)
@@ -502,30 +510,34 @@ void NodePathWidget::setPath(VInfo_ptr info)
 		delete menuItems_.takeLast();
 
 	}
-
 	//--------------------------------------------
 	// Reset/rebuild the contents
 	//--------------------------------------------
 
 	for(unsigned int i=0; i < lst.size(); i++)
 	{
-			//---------------------------
-			// Create node/server item
-			//---------------------------
+		//---------------------------
+		// Create node/server item
+		//---------------------------
 
-			QColor col;
-			QString name;
-			NodePathNodeItem* nodeItem=0;
-			bool hasChildren=false;
+		QColor col;
+		QString name;
+		NodePathNodeItem* nodeItem=0;
+		bool hasChildren=false;
 
-			//Server
-			if(i==0)
-			{
-				col=QColor(255,255,255);
-				col=VSState::toColour(server);
-				name=QString::fromStdString(server->name());
-				hasChildren=true;
-			}
+		VNode *n=lst.at(i);
+		col=n->stateColour();
+		name=n->name();
+		hasChildren=(n->numOfChildren() >0);
+
+		//Server
+		/*if(i==0)
+		{
+			col=QColor(255,255,255);
+			col=VSState::toColour(server);
+			name=QString::fromStdString(server->name());
+			hasChildren=true;
+		}
 			//Node
 			else
 			{
@@ -534,63 +546,60 @@ void NodePathWidget::setPath(VInfo_ptr info)
 				name=n->name();
 				hasChildren=(n->numOfChildren() >0);
 			}
-
-			if(i < nodeItems_.count())
+	*/
+		if(i < nodeItems_.count())
+		{
+			nodeItem=nodeItems_.at(i);
+			nodeItem->reset(name,col,false);
+		}
+		else
+		{
+			//Server
+			if(i==0)
 			{
-				nodeItem=nodeItems_.at(i);
-				nodeItem->reset(name,col,false);
+				nodeItem=new NodePathServerItem(i,name,col,false,this);
+			}
+			//Node
+			else
+			{
+				nodeItem=new NodePathNodeItem(i,name,col,false,this);
+			}
+			nodeItems_ << nodeItem;
+			connect(nodeItem,SIGNAL(clicked()),
+			  		     this,SLOT(nodeItemSelected()));
+		}
+
+		layout_->addWidget(nodeItem);
+
+		//-----------------------------------------
+		// Create sub item (connector or menu)
+		//-----------------------------------------
+
+		NodePathMenuItem* menuItem=0;
+
+		if(hasChildren)
+		{
+			if(i >= menuItems_.count())
+			{
+				menuItem= new NodePathMenuItem(i,this);
+
+				menuItems_ << menuItem;
+				connect(menuItem,SIGNAL(clicked()),
+					   this,SLOT(menuItemSelected()));
 			}
 			else
 			{
-				//Server
-				if(i==0)
-				{
-					nodeItem=new NodePathServerItem(i,name,col,false,this);
-				}
-				//Node
-				else
-				{
-					nodeItem=new NodePathNodeItem(i,name,col,false,this);
-				}
-				nodeItems_ << nodeItem;
-				connect(nodeItem,SIGNAL(clicked()),
-			  		     this,SLOT(nodeItemSelected()));
+				menuItem=menuItems_.at(i);
 			}
 
-			layout_->addWidget(nodeItem);
-
-			//-----------------------------------------
-			// Create sub item (connector or menu)
-			//-----------------------------------------
-
-			NodePathMenuItem* menuItem=0;
-
-			if(hasChildren)
-			{
-				if(i >= menuItems_.count())
-				{
-					menuItem= new NodePathMenuItem(i,this);
-
-					menuItems_ << menuItem;
-					connect(menuItem,SIGNAL(clicked()),
-					   this,SLOT(menuItemSelected()));
-				}
-				else
-				{
-					menuItem=menuItems_.at(i);
-				}
-
-				layout_->addWidget(menuItem);
-			}
-
+			layout_->addWidget(menuItem);
+		}
 	}
 
 	layout_->addStretch(1);
 
 	//Set the current node index (used only in "stay in parent" mode). If we are here it must be the last node!
 	infoIndex(lst.size()-1);
-
-
 }
 
 void  NodePathWidget::nodeItemSelected()
@@ -618,36 +627,50 @@ void  NodePathWidget::menuItemSelected()
 // This is the order/position of the items:
 //
 //   0         1     2     ....    nodeItems_.count()-2          nodeItems_.count()-1
-// server                              node's aprent 		           node (=info_)
+// server                              node's parent 		           node (=info_)
 //--------------------------------------------------------------------------------------------
 
 VInfo_ptr NodePathWidget::nodeAt(int idx)
 {
 	qDebug() << "nodeAt()" << idx;
 
-	if(info_ && info_->server())
+	ServerHandler* server=info_->server();
+
+	if(info_ && server)
 	{
-		//The last i
+		if(VNode *n=info_->node()->ancestorAt(idx,VNode::ParentToChildSort))
+		{
+			if(n == info_->node())
+				return info_;
+			else if(n->isServer())
+				return VInfoServer::create(n->server());
+			else
+				return VInfoNode::create(n);
+		}
+
+		/*
+		//The last item
 		if(idx == nodeItems_.count()-1)
 			return info_;
 
-		ServerHandler* server=info_->server();
+		//Server
 		if(idx == 0)
 		{
-			VInfo_ptr res(VInfo::make(server));
+			VInfo_ptr res=VInfoServer::make(server);
 			qDebug() << "selected" << server->name().c_str();
 			return res;
 		}
-		else
+		//Node
+		else if(info_->node())
 		{
-			std::vector<VNode*> nodes=info_->ancestors(VInfo::ParentToChildOrder);
+			std::vector<VNode*> nodes=info_->node()->ancestors(VNode::ParentToChildSort);
 			if(idx-1 < nodes.size())
 			{
-				VInfo_ptr res(VInfo::make(nodes.at(idx-1),server));
+				VInfo_ptr res=VInfoNode::make(nodes.at(idx-1));
 				qDebug() << "selected" << nodes.at(idx-1)->node()->absNodePath().c_str();
 				return res;
 			}
-		}
+		}*/
 	}
 
 	return VInfo_ptr();
@@ -655,8 +678,35 @@ VInfo_ptr NodePathWidget::nodeAt(int idx)
 
 void NodePathWidget::loadMenu(const QPoint& pos,VInfo_ptr p)
 {
-	QList<QAction*> acLst;
+	if(p && p->node())
+	{
+		QList<QAction*> acLst;
+		VNode* node=p->node();
 
+		for(unsigned int i=0; i < node->numOfChildren(); i++)
+		{
+			QAction *ac=new QAction(node->childAt(i)->name(),this);
+			ac->setData(i);
+			acLst << ac;
+		}
+
+		if(acLst.count() > 0)
+		{
+			if(QAction *ac=QMenu::exec(acLst,pos,acLst.front(),this))
+			{
+				int idx=ac->data().toInt();
+				VInfo_ptr res=VInfoNode::create(node->childAt(idx));
+				Q_EMIT selected(res);
+			}
+	    }
+
+	    Q_FOREACH(QAction* ac,acLst)
+		{
+			delete ac;
+		}
+	}
+
+	/*
 	if(p->isServer() && p->server())
 	{
 		ServerHandler* server=p->server();
@@ -664,9 +714,9 @@ void NodePathWidget::loadMenu(const QPoint& pos,VInfo_ptr p)
 
 		for(unsigned int i=0; i < root->numOfChildren(); i++)
 		{
-			if(Node* node=root->childAt(i)->node())
+			if(VNode* node=root->childAt(i))
 			{
-				QAction *ac=new QAction(QString::fromStdString(node->name()),this);
+				QAction *ac=new QAction(node->name(),this);
 				ac->setData(i);
 				acLst << ac;
 			}
@@ -686,7 +736,7 @@ void NodePathWidget::loadMenu(const QPoint& pos,VInfo_ptr p)
 	{
 		for(unsigned int i=0; i < node->numOfChildren(); i++)
 		{
-			QAction *ac=new QAction(QString::fromStdString(node->childAt(i)->node()->name()),this);
+			QAction *ac=new QAction(node->childAt(i)->name(),this);
 			ac->setData(i);
 			acLst << ac;
 		}
@@ -707,7 +757,7 @@ void NodePathWidget::loadMenu(const QPoint& pos,VInfo_ptr p)
 	Q_FOREACH(QAction* ac,acLst)
 	{
 		delete ac;
-	}
+	}*/
 }
 
 void NodePathWidget::notifyBeginNodeChange(const VNode* node, const std::vector<ecf::Aspect::Type>& aspect,const VNodeChange&)
@@ -715,8 +765,8 @@ void NodePathWidget::notifyBeginNodeChange(const VNode* node, const std::vector<
 	if(!active_)
 		return;
 
-	//Check if there is data in inf0
-	if(info_.get() && info_->isNode())
+	//Check if there is data in info
+	if(info_.get() && info_->isNode() && info_->node())
 	{
 		//TODO: MAKE IT SAFE!!!!
 
@@ -724,16 +774,14 @@ void NodePathWidget::notifyBeginNodeChange(const VNode* node, const std::vector<
 		if(std::find(aspect.begin(),aspect.end(),ecf::Aspect::STATE) != aspect.end() ||
 		   std::find(aspect.begin(),aspect.end(),ecf::Aspect::SUSPENDED) != aspect.end())
 		{
-			std::vector<VNode*> nodes=info_->ancestors(VInfo::ParentToChildOrder);
+			std::vector<VNode*> nodes=info_->node()->ancestors(VNode::ParentToChildSort);
 			for(unsigned int i=0; i < nodes.size(); i++)
 			{
 				if(nodes.at(i) == node)
 				{
-					//The server is at position 0, so we need to add 1 to get the index right
-					int idx=i+1;
-					if(idx < nodeItems_.count())
+					if(i < nodeItems_.count())
 					{
-						nodeItems_.at(idx)->reset(node->name(),node->stateColour());
+						nodeItems_.at(i)->reset(node->name(),node->stateColour());
 					}
 					return;
 				}
@@ -743,7 +791,7 @@ void NodePathWidget::notifyBeginNodeChange(const VNode* node, const std::vector<
 		//A child was removed or added
 		else if(std::find(aspect.begin(),aspect.end(),ecf::Aspect::ADD_REMOVE_NODE) != aspect.end())
 		{
-			std::vector<VNode*> nodes=info_->ancestors(VInfo::ParentToChildOrder);
+			std::vector<VNode*> nodes=info_->node()->ancestors(VNode::ParentToChildSort);
 			for(unsigned int i=0; i < nodes.size(); i++)
 			{
 				if(node == nodes.at(i))

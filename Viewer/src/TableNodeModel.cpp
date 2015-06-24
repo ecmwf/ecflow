@@ -116,17 +116,15 @@ QVariant TableNodeModel::nodeData(const QModelIndex& index, int role) const
 	if(!vnode || !vnode->node())
 		return QVariant();
 
-	Node *node=vnode->node();
-
 	if(role == Qt::DisplayRole)
 	{
 		switch(index.column())
 		{
-		case 0: return QString::fromStdString(node->absNodePath());
-		case 1: return VNState::toName(node);
+		case 0: return QString::fromStdString(vnode->node()->absNodePath());
+		case 1: return VNState::toName(vnode);
 		case 2:
 		{
-				ServerHandler* s=ServerHandler::find(node);
+				ServerHandler* s=ServerHandler::find(vnode);
 				return (s)?QString::fromStdString(s->name()):QString();
 		}
 		default: return QVariant();
@@ -134,7 +132,7 @@ QVariant TableNodeModel::nodeData(const QModelIndex& index, int role) const
 	}
 	else if(role == Qt::BackgroundRole)
 	{
-		return VNState::toColour(node);
+		return VNState::toColour(vnode);
 	}
 	else if(role == FilterRole)
 		//return static_cast<int>(node->dstate());
@@ -272,7 +270,7 @@ QModelIndex TableNodeModel::parent(const QModelIndex &child) const
 	//The node is not a rootnode
 
 	//Get the parent node
-	return serverToIndex(ServerHandler::find(node->node()));
+	return serverToIndex(ServerHandler::find(node));
 
 	//Node *parentNode=node->parent();
 

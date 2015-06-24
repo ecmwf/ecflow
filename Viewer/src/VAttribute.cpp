@@ -19,7 +19,7 @@
 
 #include <map>
 
-#include "Node.hpp"
+#include "VNode.hpp"
 #include "UserMessage.hpp"
 #include "VConfigLoader.hpp"
 #include "VProperty.hpp"
@@ -31,16 +31,16 @@ class VMeterAttribute : public VAttribute
 {
 public:
 	VMeterAttribute(const std::string& n) : VAttribute(n) {};
-	int num(Node *node);
-	bool getData(Node *node,int row,int& size,QStringList& data);
+	int num(const VNode *node);
+	bool getData(VNode *node,int row,int& size,QStringList& data);
 };
 
 class VEventAttribute : public VAttribute
 {
 public:
 	VEventAttribute(const std::string& n) : VAttribute(n) {};
-	int num(Node *node);
-	bool getData(Node *node,int row,int& size,QStringList& data);
+	int num(const VNode *node);
+	bool getData(VNode *node,int row,int& size,QStringList& data);
 };
 
 
@@ -48,80 +48,80 @@ class VRepeatAttribute : public VAttribute
 {
 public:
 	VRepeatAttribute(const std::string& n) : VAttribute(n) {};
-	int num(Node *node);
-	bool getData(Node *node,int row,int& size,QStringList& data);
+	int num(const VNode *node);
+	bool getData(VNode *node,int row,int& size,QStringList& data);
 };
 
 class VTriggerAttribute : public VAttribute
 {
 public:
 	VTriggerAttribute(const std::string& n) : VAttribute(n) {};
-	int num(Node *node);
-	bool getData(Node *node,int row,int& size,QStringList& data);
+	int num(const VNode *node);
+	bool getData(VNode *node,int row,int& size,QStringList& data);
 };
 
 class VLabelAttribute : public VAttribute
 {
 public:
 	VLabelAttribute(const std::string& n) : VAttribute(n) {};
-	int num(Node *node);
-	bool getData(Node *node,int row,int& size,QStringList& data);
+	int num(const VNode *node);
+	bool getData(VNode *node,int row,int& size,QStringList& data);
 };
 
 class VDateAttribute : public VAttribute
 {
 public:
 	VDateAttribute(const std::string& n) : VAttribute(n) {};
-	int num(Node *node);
-	bool getData(Node *node,int row,int& size,QStringList& data);
+	int num(const VNode *node);
+	bool getData(VNode *node,int row,int& size,QStringList& data);
 };
 
 class VTimeAttribute : public VAttribute
 {
 public:
 	VTimeAttribute(const std::string& n) : VAttribute(n) {};
-	int num(Node *node);
-	bool getData(Node *node,int row,int& size,QStringList& data);
+	int num(const VNode *node);
+	bool getData(VNode *node,int row,int& size,QStringList& data);
 };
 
 class VLimitAttribute : public VAttribute
 {
 public:
 	VLimitAttribute(const std::string& n) : VAttribute(n) {};
-	int num(Node *node);
-	bool getData(Node *node,int row,int& size,QStringList& data);
+	int num(const VNode *node);
+	bool getData(VNode *node,int row,int& size,QStringList& data);
 };
 
 class VLimiterAttribute : public VAttribute
 {
 public:
 	VLimiterAttribute(const std::string& n) : VAttribute(n) {};
-	int num(Node *node);
-	bool getData(Node *node,int row,int& size,QStringList& data);
+	int num(const VNode *node);
+	bool getData(VNode *node,int row,int& size,QStringList& data);
 };
 
 class VLateAttribute : public VAttribute
 {
 public:
 	VLateAttribute(const std::string& n) : VAttribute(n) {};
-	int num(Node *node);
-	bool getData(Node *node,int row,int& size,QStringList& data);
+	int num(const VNode *node);
+	bool getData(VNode *node,int row,int& size,QStringList& data);
 };
 
 class VVarAttribute : public VAttribute
 {
 public:
 	VVarAttribute(const std::string& n) : VAttribute(n) {};
-	int num(Node *node);
-	bool getData(Node *node,int row,int& size,QStringList& data);
+	int num(const VNode *node);
+	bool getData(VNode *node,int row,int& size,QStringList& data);
 };
 
 class VGenvarAttribute : public VAttribute
 {
 public:
 	VGenvarAttribute(const std::string& n) : VAttribute(n) {};
-	int num(Node *node);
-	bool getData(Node *node,int row,int& size,QStringList& data);
+	int num(const VNode *node);
+	bool getData(VNode *node,int row,int& size,QStringList& data);
 };
 
 static VMeterAttribute meterAttr("meter");
@@ -184,15 +184,15 @@ VAttribute* VAttribute::find(const std::string& name)
 	return NULL;*/
 }
 
-int VAttribute::totalNum(Node *node)
+int VAttribute::totalNum(const VNode *vnode)
 {
-	if(!node)
+	if(!vnode)
 		return 0;
 
 	int total=0;
 	for(std::map<std::string,VAttribute*>::const_iterator it=items_.begin(); it != items_.end(); it++)
 	{
-		int n=it->second->num(node);
+		int n=it->second->num(vnode);
 		total+=n;
 	}
 
@@ -200,18 +200,18 @@ int VAttribute::totalNum(Node *node)
 }
 
 
-bool VAttribute::getData(Node *node,int row,VAttribute **type,QStringList& data)
+bool VAttribute::getData(VNode *vnode,int row,VAttribute **type,QStringList& data)
 {
 	*type=0;
 
-	if(!node)
+	if(!vnode)
 		return false;
 
 	int totalRow=0;
 	for(std::map<std::string,VAttribute*>::const_iterator it=items_.begin(); it != items_.end(); it++)
 	{
 		int size=0;
-		if(it->second->getData(node,row-totalRow,size,data))
+		if(it->second->getData(vnode,row-totalRow,size,data))
 		{
 			*type=it->second;
 			return true;
@@ -239,13 +239,18 @@ void VAttribute::load(VProperty* group)
 // Meters
 //================================
 
-int VMeterAttribute::num(Node *node)
+int VMeterAttribute::num(const VNode *vnode)
 {
-	return (node)?static_cast<int>(node->meters().size()):0;
+	node_ptr node=vnode->node();
+	return (node.get())?static_cast<int>(node->meters().size()):0;
 }
 
-bool VMeterAttribute::getData(Node *node,int row,int& size,QStringList& data)
+bool VMeterAttribute::getData(VNode *vnode,int row,int& size,QStringList& data)
 {
+	node_ptr node=vnode->node();
+	if(!node.get())
+		return false;
+
 	const std::vector<Meter>&  v=node->meters();
 	if(row >=0 && row < v.size())
 	{
@@ -263,13 +268,18 @@ bool VMeterAttribute::getData(Node *node,int row,int& size,QStringList& data)
 // Labels
 //================================
 
-int VLabelAttribute::num(Node *node)
+int VLabelAttribute::num(const VNode *vnode)
 {
-	return (node)?static_cast<int>(node->labels().size()):0;
+	node_ptr node=vnode->node();
+	return (node.get())?static_cast<int>(node->labels().size()):0;
 }
 
-bool VLabelAttribute::getData(Node *node,int row,int& size,QStringList& data)
+bool VLabelAttribute::getData(VNode *vnode,int row,int& size,QStringList& data)
 {
+	node_ptr node=vnode->node();
+	if(node.get())
+		return false;
+
 	const std::vector<Label>&  v=node->labels();
 	if(row >=0 && row < v.size())
 	{
@@ -286,19 +296,24 @@ bool VLabelAttribute::getData(Node *node,int row,int& size,QStringList& data)
 // Events
 //================================
 
-int VEventAttribute::num(Node *node)
+int VEventAttribute::num(const VNode *vnode)
 {
-	return (node)? static_cast<int>(node->events().size()):0;
+	node_ptr node=vnode->node();
+	return (node.get())? static_cast<int>(node->events().size()):0;
 }
 
-bool VEventAttribute::getData(Node *node,int row,int& size,QStringList& data)
+bool VEventAttribute::getData(VNode *vnode,int row,int& size,QStringList& data)
 {
+	node_ptr node=vnode->node();
+	if(node.get())
+			return false;
+
 	const std::vector<Event>& v=node->events();
 	if(row >=0 && row < v.size())
 	{
 		data << qName_ <<
-						QString::fromStdString(v.at(row).name_or_number()) <<
-						QString::number((v.at(row).value()==true)?1:0);
+				QString::fromStdString(v.at(row).name_or_number()) <<
+				QString::number((v.at(row).value()==true)?1:0);
 		return true;
 	}
 	size=v.size();
@@ -309,9 +324,10 @@ bool VEventAttribute::getData(Node *node,int row,int& size,QStringList& data)
 //Generated Variables
 //================================
 
-int VGenvarAttribute::num(Node *node)
+int VGenvarAttribute::num(const VNode *vnode)
 {
-	if(node)
+	node_ptr node=vnode->node();
+	if(node.get())
 	{
 		std::vector<Variable> genV;
 		node->gen_variables(genV);
@@ -320,8 +336,12 @@ int VGenvarAttribute::num(Node *node)
 	return 0;
 }
 
-bool VGenvarAttribute::getData(Node *node,int row,int& size,QStringList& data)
+bool VGenvarAttribute::getData(VNode *vnode,int row,int& size,QStringList& data)
 {
+	node_ptr node=vnode->node();
+	if(node.get())
+			return false;
+
 	std::vector<Variable> genV;
 	node->gen_variables(genV);
 	if(row >=0 && row < genV.size())
@@ -339,36 +359,46 @@ bool VGenvarAttribute::getData(Node *node,int row,int& size,QStringList& data)
 //Variables
 //================================
 
-int VVarAttribute::num(Node *node)
+int VVarAttribute::num(const VNode *vnode)
 {
-	return (node)?static_cast<int>(node->variables().size()):0;
+	node_ptr node=vnode->node();
+	return (node.get())?static_cast<int>(node->variables().size()):0;
 }
 
-bool VVarAttribute::getData(Node *node,int row,int& size,QStringList& data)
+bool VVarAttribute::getData(VNode *vnode,int row,int& size,QStringList& data)
 {
-		const std::vector<Variable>& v=node->variables();
-		if(row >=0 && row < v.size())
-		{
-			data << qName_ <<
-					QString::fromStdString(v.at(row).name()) <<
-					QString::fromStdString(v.at(row).theValue());
-			return true;
-		}
-		size=v.size();
-		return false;
+	node_ptr node=vnode->node();
+	if(node.get())
+			return false;
+
+	const std::vector<Variable>& v=node->variables();
+	if(row >=0 && row < v.size())
+	{
+		data << qName_ <<
+				QString::fromStdString(v.at(row).name()) <<
+				QString::fromStdString(v.at(row).theValue());
+		return true;
+	}
+	size=v.size();
+	return false;
 }
 
 //================================
 // Limits
 //================================
 
-int VLimitAttribute::num(Node *node)
+int VLimitAttribute::num(const VNode *vnode)
 {
-	return (node)?static_cast<int>(node->limits().size()):0;
+	node_ptr node=vnode->node();
+	return (node.get())?static_cast<int>(node->limits().size()):0;
 }
 
-bool VLimitAttribute::getData(Node *node,int row,int& size,QStringList& data)
+bool VLimitAttribute::getData(VNode *vnode,int row,int& size,QStringList& data)
 {
+	node_ptr node=vnode->node();
+	if(node.get())
+		return false;
+
 	const std::vector<limit_ptr>& v=node->limits();
 	if(row >=0 && row < v.size())
 	{
@@ -386,19 +416,24 @@ bool VLimitAttribute::getData(Node *node,int row,int& size,QStringList& data)
 //Limiters
 //================================
 
-int VLimiterAttribute::num(Node *node)
+int VLimiterAttribute::num(const VNode *vnode)
 {
+	node_ptr node=vnode->node();
 	return (node)?static_cast<int>(node->inlimits().size()):0;
 }
 
-bool VLimiterAttribute::getData(Node *node,int row,int& size,QStringList& data)
+bool VLimiterAttribute::getData(VNode *vnode,int row,int& size,QStringList& data)
 {
+	node_ptr node=vnode->node();
+	if(node.get())
+		return false;
+
 	const std::vector<InLimit>& v=node->inlimits();
 	if(row >=0 && row < v.size())
 	{
 			data << qName_ <<
-						QString::fromStdString(v.at(row).name()) <<
-						QString::fromStdString(v.at(row).pathToNode());
+					QString::fromStdString(v.at(row).name()) <<
+					QString::fromStdString(v.at(row).pathToNode());
 			return true;
 	}
 	size=v.size();
@@ -409,13 +444,21 @@ bool VLimiterAttribute::getData(Node *node,int row,int& size,QStringList& data)
 //Triggers
 //================================
 
-int VTriggerAttribute::num(Node *node)
+int VTriggerAttribute::num(const VNode *vnode)
 {
+	node_ptr node=vnode->node();
+	if(node.get())
+		return false;
+
 	return (node->get_trigger() != NULL || node->get_complete()!= NULL)?1:0;
 }
 
-bool VTriggerAttribute::getData(Node *node,int row,int& size,QStringList& data)
+bool VTriggerAttribute::getData(VNode *vnode,int row,int& size,QStringList& data)
 {
+	node_ptr node=vnode->node();
+	if(node.get())
+		return false;
+
 	Expression* eT=node->get_trigger();
 	Expression* eC=node->get_complete();
 	if(row ==0 && (eT || eC))
@@ -434,13 +477,18 @@ bool VTriggerAttribute::getData(Node *node,int row,int& size,QStringList& data)
 //Times
 //================================
 
-int VTimeAttribute::num(Node *node)
+int VTimeAttribute::num(const VNode *vnode)
 {
-	return (node)?static_cast<int>(node->timeVec().size() + node->todayVec().size()+ node->crons().size()):0;
+	node_ptr node=vnode->node();
+	return (node.get())?static_cast<int>(node->timeVec().size() + node->todayVec().size()+ node->crons().size()):0;
 }
 
-bool VTimeAttribute::getData(Node *node,int row,int& size,QStringList& data)
+bool VTimeAttribute::getData(VNode *vnode,int row,int& size,QStringList& data)
 {
+	node_ptr node=vnode->node();
+	if(node.get())
+		return false;
+
 	const std::vector<ecf::TimeAttr>& tV=node->timeVec();
 	const std::vector<ecf::TodayAttr>& tdV=node->todayVec();
 	const std::vector<ecf::CronAttr>& cV=node->crons();
@@ -467,13 +515,18 @@ bool VTimeAttribute::getData(Node *node,int row,int& size,QStringList& data)
 //Date
 //================================
 
-int VDateAttribute::num(Node *node)
+int VDateAttribute::num(const VNode *vnode)
 {
-	return (node)?static_cast<int>(node->dates().size() + node->days().size()):0;
+	node_ptr node=vnode->node();
+	return (node.get())?static_cast<int>(node->dates().size() + node->days().size()):0;
 }
 
-bool VDateAttribute::getData(Node *node,int row,int& size,QStringList& data)
+bool VDateAttribute::getData(VNode *vnode,int row,int& size,QStringList& data)
 {
+	node_ptr node=vnode->node();
+	if(node.get())
+		return false;
+
 	const std::vector<DateAttr>& dV=node->dates();
 	const std::vector<DayAttr>& dayV=node->days();
 
@@ -498,19 +551,24 @@ bool VDateAttribute::getData(Node *node,int row,int& size,QStringList& data)
 //Repeat
 //================================
 
-int VRepeatAttribute::num(Node *node)
+int VRepeatAttribute::num(const VNode *vnode)
 {
-	return (node)?((node->repeat().empty())?0:1):0;
+	node_ptr node=vnode->node();
+	return (node.get())?((node->repeat().empty())?0:1):0;
 }
 
-bool VRepeatAttribute::getData(Node *node,int row,int& size,QStringList& data)
+bool VRepeatAttribute::getData(VNode *vnode,int row,int& size,QStringList& data)
 {
+	node_ptr node=vnode->node();
+	if(node.get())
+		return false;
+
 	const Repeat& r=node->repeat();
 	if(row >=0 && !r.empty())
 	{
-			data << qName_ << QString::fromStdString(r.name()) <<
-			QString::fromStdString(r.valueAsString());
-			return true;
+		data << qName_ << QString::fromStdString(r.name()) <<
+		QString::fromStdString(r.valueAsString());
+		return true;
 	}
 	size=(r.empty())?0:1;
 	return false;
@@ -520,13 +578,18 @@ bool VRepeatAttribute::getData(Node *node,int row,int& size,QStringList& data)
 //Late
 //================================
 
-int VLateAttribute::num(Node *node)
+int VLateAttribute::num(const VNode *vnode)
 {
-	return (node)?((node->get_late())?1:0):0;
+	node_ptr node=vnode->node();
+	return (node.get())?((node->get_late())?1:0):0;
 }
 
-bool VLateAttribute::getData(Node *node,int row,int& size,QStringList& data)
+bool VLateAttribute::getData(VNode *vnode,int row,int& size,QStringList& data)
 {
+	node_ptr node=vnode->node();
+	if(node.get())
+		return false;
+
 	ecf::LateAttr *late=node->get_late();
 	if(row >=0 && late)
 	{

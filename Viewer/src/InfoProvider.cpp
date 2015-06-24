@@ -57,7 +57,7 @@ void InfoProvider::visit(VInfoServer* info)
     //Define a task for getting the info from the server.
     task_=VTask::create(taskType_,this);
 
-    //Run the task in the server. When it finish taskFinished() is called. The text returned
+    //Run the task in the server. When it completes taskFinished() is called. The text returned
     //in the reply will be prepended to the string we generated above.
     info->server()->run(task_);
 }

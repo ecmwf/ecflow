@@ -47,6 +47,9 @@ set(viewer_srcs
     PropertyEditor.cpp
     PropertyLine.cpp
     ScriptItemWidget.cpp
+    ServerComQueue.cpp
+    ServerComThread.cpp
+    ServerDefsAccess.cpp
     ServerHandler.cpp
     ServerFilter.cpp
     ServerItem.cpp
@@ -120,6 +123,8 @@ QT4_WRAP_CPP(VIEWER_MOC AbstractNodeModel.hpp
                         PropertyDialog.hpp                     
                         PropertyLine.hpp
                         PlainTextSearchLine.hpp
+                        ServerComQueue.hpp
+                        ServerComThread.hpp
                         ServerHandler.hpp
                         ServerListDialog.hpp
                         SuiteItemWidget.hpp

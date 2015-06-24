@@ -12,6 +12,7 @@
 #include "Highlighter.hpp"
 #include "InfoProvider.hpp"
 #include "VReply.hpp"
+#include "VNode.hpp"
 
 JobItemWidget::JobItemWidget(QWidget *parent) : CodeItemWidget(parent)
 {
@@ -37,14 +38,15 @@ void JobItemWidget::reload(VInfo_ptr info)
     loaded_=true;
     info_=info;
 
-    if(!info.get())
+    //Info must be a node
+    if(!info_.get() || !info_->isNode() || !info_->node())
     {
         textEdit_->clear();
     }
     else
     {
         clearContents();
-        fileLabel_->setText(tr("File: ") + QString::fromStdString(info_->genVariable("ECF_JOB")));
+        fileLabel_->setText(tr("File: ") + QString::fromStdString(info_->node()->genVariable("ECF_JOB")));
         infoProvider_->info(info_);
     }   
 }

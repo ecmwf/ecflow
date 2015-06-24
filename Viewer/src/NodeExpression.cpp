@@ -254,7 +254,7 @@ bool TypeNodeCondition::execute(VInfo_ptr nodeInfo)
 
     if(nodeInfo->isNode())
     {
-        Node *node = nodeInfo->node()->node();
+        node_ptr node = nodeInfo->node()->node();
 
         if (type_ == NodeExpressionParser::SUITE && node->isSuite())
             return true;
@@ -287,9 +287,7 @@ bool StateNodeCondition::execute(VInfo_ptr nodeInfo)
 
     if(nodeInfo->isNode())
     {
-        Node *node = nodeInfo->node()->node();
-
-        return (VNState::toName(node) == stateName_);
+        return (VNState::toName(nodeInfo->node()) == stateName_);
     }
 
     return false;
@@ -319,7 +317,7 @@ bool NodeAttributeCondition::execute(VInfo_ptr nodeInfo)
 
     if(nodeInfo->isNode())
     {
-        Node *node = nodeInfo->node()->node();
+        node_ptr node = nodeInfo->node()->node();
 
         if (nodeAttrName_ == "has_time")
         {

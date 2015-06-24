@@ -20,7 +20,7 @@
 #include <unistd.h>
 #include <map>
 
-#include "Node.hpp"
+#include "VNode.hpp"
 #include "ServerHandler.hpp"
 #include "Submittable.hpp"
 #include "UserMessage.hpp"
@@ -68,17 +68,19 @@ std::vector<VParam*> VNState::filterItems()
 	return v;
 }
 
-VNState* VNState::toState(Node *n)
+VNState* VNState::toState(const VNode *n)
 {
-	if(!n)
+	if(!n || !n->node().get())
 		return NULL;
 
+	node_ptr node=n->node();
+
 	//VParam::Type type;
-	if(n->isSuspended())
+	if(node->isSuspended())
 			return items_["suspended"];
 	else
 	{
-		std::map<NState::State,VNState*>::const_iterator it=stateMap_.find(n->state());
+		std::map<NState::State,VNState*>::const_iterator it=stateMap_.find(node->state());
 		if(it != stateMap_.end())
 			return it->second;
 	}
@@ -86,14 +88,16 @@ VNState* VNState::toState(Node *n)
 	return NULL;
 }
 
-VNState* VNState::toDefaultState(Node *n)
+VNState* VNState::toDefaultState(const VNode *n)
 {
-	if(!n)
+	if(!n || !n->node().get())
 		return NULL;
 
-	std::map<NState::State,VNState*>::const_iterator it=stateMap_.find(DState::convert(n->defStatus()));
+	node_ptr node=n->node();
+
+	std::map<NState::State,VNState*>::const_iterator it=stateMap_.find(DState::convert(node->defStatus()));
 	if(it != stateMap_.end())
-				return it->second;
+			return it->second;
 
 	return NULL;
 }
@@ -111,25 +115,25 @@ VNState* VNState::find(const std::string& name)
 //Has to be very quick!!
 //
 
-QColor VNState::toColour(Node *n)
+QColor VNState::toColour(const VNode *n)
 {
 	VNState *obj=VNState::toState(n);
 	return (obj)?(obj->colour()):QColor();
 }
 
-QColor VNState::toFontColour(Node *n)
+QColor VNState::toFontColour(const VNode *n)
 {
 	VNState *obj=VNState::toState(n);
 	return (obj)?(obj->fontColour()):QColor();
 }
 
-QString VNState::toName(Node *n)
+QString VNState::toName(const VNode *n)
 {
 	VNState *obj=VNState::toState(n);
 	return (obj)?(obj->name()):QString();
 }
 
-QString VNState::toDefaultStateName(Node *n)
+QString VNState::toDefaultStateName(const VNode *n)
 {
 	VNState *obj=VNState::toDefaultState(n);
 	return (obj)?(obj->name()):QString();

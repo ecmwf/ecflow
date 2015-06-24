@@ -10,6 +10,7 @@
 #include "VariableModelData.hpp"
 
 #include "ServerHandler.hpp"
+#include "VNode.hpp"
 #include "VNState.hpp"
 
 #include <QDebug>
@@ -39,13 +40,19 @@ void VariableModelData::reload()
 {
 	clear();
 
-	info_->variables(vars_);
-	info_->genVariables(genVars_);
+	if(info_ && info_->node())
+	{
+		info_->node()->variables(vars_);
+		info_->node()->genVariables(genVars_);
+	}
 }
 
 std::string VariableModelData::fullPath()
 {
-	return info_->fullPath();
+	if(info_ && info_->node())
+		return info_->node()->absNodePath();
+
+	return std::string();
 }
 
 std::string VariableModelData::name()
@@ -177,8 +184,11 @@ int VariableModelData::checkUpdateDiff()
 	std::vector<Variable> v;
 	std::vector<Variable> vg;
 
-	info_->variables(v);
-	info_->genVariables(vg);
+	if(info_ && info_->node())
+	{
+		info_->node()->variables(v);
+		info_->node()->genVariables(vg);
+	}
 
 	//Return the change in the total size of variables
 	return v.size()+vg.size() -(vars_.size() + genVars_.size());
@@ -192,8 +202,11 @@ bool VariableModelData::update()
 	std::vector<Variable> v;
 	std::vector<Variable> vg;
 
-	info_->variables(v);
-	info_->genVariables(vg);
+	if(info_ && info_->node())
+	{
+		info_->node()->variables(v);
+		info_->node()->genVariables(vg);
+	}
 
 	//We must have the same numbe rof variables
 	assert(v.size() == vars_.size() && vg.size() == genVars_.size());
@@ -253,24 +266,28 @@ void VariableModelDataHandler::reload(VInfo_ptr info)
 	clear();
 
 	server_=0;
-	std::vector<VNode*> nodes;
 
-	if(info.get() != 0)
+	if(info.get() != 0 && info->node())
 	{
-		info->ancestors(&server_,nodes);
+		server_=info->server();
+
+		std::vector<VNode*> nodes=info->node()->ancestors(VNode::ChildToParentSort);
 
 		for(std::vector<VNode*>::iterator it=nodes.begin(); it != nodes.end(); it++)
 		{
-			VInfo_ptr info(VInfo::make(*it));
-			data_.push_back(new VariableModelData(info));
-		}
+			VNode* n=*it;
 
-		if(server_)
-		{
-			VInfo_ptr info(VInfo::make(server_));
-			data_.push_back(new VariableModelData(info));
+			if(n->isServer())
+			{
+				VInfo_ptr ptr=VInfoServer::create(n->server());
+				data_.push_back(new VariableModelData(ptr));
+			}
+			else
+			{
+				VInfo_ptr ptr=VInfoNode::create(n);
+				data_.push_back(new VariableModelData(ptr));
+			}
 		}
-
 	}
 
 	Q_EMIT reloadEnd();

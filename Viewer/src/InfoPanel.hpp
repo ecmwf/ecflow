@@ -63,7 +63,7 @@ private:
 };
 
 
-class InfoPanel : public DashboardWidget, public ServerObserver, private Ui::InfoPanel
+class InfoPanel : public DashboardWidget, public ServerObserver, public VInfoObserver, private Ui::InfoPanel
 {
     Q_OBJECT
 
@@ -81,13 +81,17 @@ public:
 	void writeSettings(VSettings*);
 	void readSettings(VSettings*);
 
+	//From VInfoObserver
+	void notifyDelete(VInfo*) {};
+	void notifyDataLost(VInfo*);
+
 	//From ServerObserver
 	void notifyDefsChanged(ServerHandler* server, const std::vector<ecf::Aspect::Type>& a);
 	void notifyServerDelete(ServerHandler* server);
 	void notifyBeginServerClear(ServerHandler* server);
 	void notifyEndServerClear(ServerHandler* server) {};
 	void notifyBeginServerScan(ServerHandler* server,const VServerChange&) {};
-	void notifyEndServerScan(ServerHandler* server) {};
+	void notifyEndServerScan(ServerHandler* server);
 	void notifyServerConnectState(ServerHandler* server);
 	void notifyServerSuiteFilterChanged(ServerHandler* server);
 

@@ -282,7 +282,7 @@ QVariant TreeNodeModel::nodeData(const QModelIndex& index, int role) const
 			if(icons_->isEmpty())
 				return QVariant();
 			else
-				return VIcon::pixmapList(vnode->node(),icons_);
+				return VIcon::pixmapList(vnode,icons_);
 		}
 		else if(role == Qt::ToolTipRole)
 		{
@@ -652,73 +652,6 @@ QModelIndex TreeNodeModel::nodeToIndex(VModelServer* server,const VNode* node, i
 
 }
 
-
-
-/*
-//Find the index for the node!
-QModelIndex TreeNodeModel::nodeToIndex(Node* node, int column) const
-{
-	if(!node)
-		return QModelIndex();
-
-	//If the node is a suite
-	if(node->isSuite())
-	{
-		if(ServerHandler* server=ServerHandler::find(node))
-		{
-				int row=server->indexOfSuite(node);
-				if(row != -1)
-						return createIndex(row,column,server);
-		}
-	}
-
-	//Other nodes
-	else if(Node *parentNode=node->parent())
-	{
-		int row=ServerHandler::indexOfImmediateChild(node);
-		if(row != -1)
-		{
-			int attNum=VAttribute::totalNum(parentNode);
-			row+=attNum;
-			return createIndex(row,column,parentNode);
-		}
-	}
-
-	return QModelIndex();
-}
-*/
-//Find the index for the node when we know what the server is!
-/*QModelIndex TreeNodeModel::nodeToIndex(ServerHandler* server,VNode* node, int column) const
-{
-	if(!node)
-		return QModelIndex();
-
-	//If the node is a suite
-	if(node->isSuite())
-	{
-		if(server)
-		{
-				int row=server->indexOfSuite(node);
-				if(row != -1)
-						return createIndex(row,column,server);
-		}
-	}
-
-	//Other nodes
-	else if(Node *parentNode=node->parent())
-	{
-		int row=ServerHandler::indexOfImmediateChild(node);
-		if(row != -1)
-		{
-			int attNum=VAttribute::totalNum(parentNode);
-			row+=attNum;
-			return createIndex(row,column,parentNode);
-		}
-	}
-
-	return QModelIndex();
-}*/
-
 //------------------------------------------------------------------
 // Create info object to index. It is used to identify nodes in
 // the tree all over in the programme outside the view.
@@ -736,16 +669,14 @@ VInfo_ptr TreeNodeModel::nodeInfo(const QModelIndex& index)
 	//Check if the node is a server
 	if(ServerHandler *s=indexToRealServer(index))
 	{
-		VInfo_ptr res(VInfo::make(s));
-		return res;
+		return VInfoServer::create(s);
 	}
 
 	//If it is a top level node (suite) the internal pointer has to point
 	//to a server pointer.
 	if(VNode *n=data_->topLevelNode(index.internalPointer(),index.row()))
 	{
-		VInfo_ptr res(VInfo::make(n));
-		return res;
+		return VInfoNode::create(n);
 	}
 
 	//Otherwise the internal pointer points to the parent node
@@ -755,8 +686,7 @@ VInfo_ptr TreeNodeModel::nodeInfo(const QModelIndex& index)
 		if(index.row() >= attNum)
 		{
 			VNode *n=parentNode->childAt(index.row()-attNum);
-			VInfo_ptr res(VInfo::make(n));
-			return res;
+			return VInfoNode::create(n);
 		}
 		//It is an attribute
 		else

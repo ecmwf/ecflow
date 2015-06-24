@@ -130,37 +130,6 @@ void AbstractNodeModel::dataIsAboutToChange()
 	beginResetModel();
 }
 
-/*void AbstractNodeModel::addServer(ServerHandler *server)
-{
-	//servers_ << server;
-	//rootNodes_[servers_.back()] = NULL;
-}*/
-
-
-/*Node * AbstractNodeModel::rootNode(ServerHandler* server) const
-{
-	QMap<ServerHandler*,Node*>::const_iterator it=rootNodes_.find(server);
-	if(it != rootNodes_.end())
-		return it.value();
-	return NULL;
-}*/
-
-
-/*void AbstractNodeModel::setRootNode(Node *node)
-{
-	if(ServerHandler *server=ServerHandler::find(node))
-	{
-		beginResetModel();
-
-		rootNodes_[server]=node;
-
-		//Reset the model (views will be notified)
-		endResetModel();
-
-		qDebug() << "setRootNode finished";
-	}
-}*/
-
 //----------------------------------------------
 //
 // Server to index mapping and lookup
@@ -187,58 +156,6 @@ QModelIndex AbstractNodeModel::infoToIndex(VInfo_ptr info,int column) const
 	return QModelIndex();
 }
 
-/*VInfo_ptr AbstractNodeModel::nodeInfo(const QModelIndex& index)
-{
-	if(!index.isValid())
-	{
-		VInfo_ptr res;
-		return res;
-	}
-
-	ServerHandler *server=indexToServer(index);
-	if(server)
-	{
-		VInfo_ptr res(VInfo::make(server));
-		return res;
-	}
-	else
-	{
-		Node* node=indexToNode(index);
-		VInfo_ptr res(VInfo::make(node));
-		return res;
-	}
-}*/
-
-
-/*void AbstractNodeModel::notifyNodeChanged(const Node* node, const std::vector<ecf::Aspect::Type>& types)
-{
-	if(node==NULL)
-		return;
-
-	qDebug() << "observer is called" << QString::fromStdString(node->name());
-	//for(unsigned int i=0; i < types.size(); i++)
-	//	qDebug() << "  type:" << types.at(i);
-
-	Node* nc=const_cast<Node*>(node);
-
-	QModelIndex index1=nodeToIndex(nc,0);
-	QModelIndex index2=nodeToIndex(nc,2);
-
-	if(!index1.isValid() || !index2.isValid())
-		return;
-
-	Node *nd1=indexToNode(index1);
-	Node *nd2=indexToNode(index2);
-
-	if(!nd1 || !nd2)
-		return;
-
-	//qDebug() << "indexes" << index1 << index2;
-	//qDebug() << "index pointers " << index1.internalPointer() << index2.internalPointer();
-	qDebug() << "    --->" << QString::fromStdString(nd1->name()) << QString::fromStdString(nd2->name());
-
-	Q_EMIT dataChanged(index1,index2);
-}*/
 
 
 

@@ -209,7 +209,7 @@ void TreeNodeFilter::reset(ServerHandler* server)
 bool TreeNodeFilter::filterState(VNode* node,VParamSet* stateFilter)
 {
 	bool ok=false;
-	if(stateFilter->isSet(VNState::toState(node->node())))
+	if(stateFilter->isSet(VNState::toState(node)))
 	{
 		ok=true;
 	}

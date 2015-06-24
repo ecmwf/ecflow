@@ -18,7 +18,7 @@
 #include "NState.hpp"
 #include "VParam.hpp"
 
-class Node;
+class VNode;
 class ServerHandler;
 class VProperty;
 
@@ -29,12 +29,12 @@ public:
 	VNState(const std::string& name);
 
     //Nodes
-	static QString toName(Node*);
-	static QString toDefaultStateName(Node*);
-	static QColor  toColour(Node* n);
-	static QColor  toFontColour(Node* n);
-	static VNState* toState(Node* n);
-	static VNState* toDefaultState(Node* n);
+	static QString toName(const VNode*);
+	static QString toDefaultStateName(const VNode*);
+	static QColor  toColour(const VNode* n);
+	static QColor  toFontColour(const VNode* n);
+	static VNState* toState(const VNode* n);
+	static VNState* toDefaultState(const VNode* n);
 
 	//Server
 	static QString toName(ServerHandler*);

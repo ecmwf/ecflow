@@ -20,11 +20,11 @@
 #include <unistd.h>
 #include <map>
 
-#include "Node.hpp"
 #include "Submittable.hpp"
 #include "UserMessage.hpp"
 #include "VConfigLoader.hpp"
 #include "VFilter.hpp"
+#include "VNode.hpp"
 #include "VProperty.hpp"
 
 std::map<std::string,VIcon*> VIcon::items_;
@@ -41,56 +41,56 @@ class VWaitIcon : public VIcon
 {
 public:
 	VWaitIcon(const std::string& name) : VIcon(name) {};
-	bool show(Node*);
+	bool show(VNode*);
 };
 
 class VRerunIcon : public VIcon
 {
 public:
 	VRerunIcon(const std::string& name) : VIcon(name) {};
-	bool show(Node*);
+	bool show(VNode*);
 };
 
 class VMessageIcon : public VIcon
 {
 public:
 	VMessageIcon(const std::string& name) : VIcon(name) {};
-	bool show(Node*);
+	bool show(VNode*);
 };
 
 class VCompleteIcon : public VIcon
 {
 public:
 	VCompleteIcon(const std::string& name) : VIcon(name) {};
-	bool show(Node*);
+	bool show(VNode*);
 };
 
 class VTimeIcon : public VIcon
 {
 public:
 	VTimeIcon(const std::string& name) : VIcon(name) {};
-	bool show(Node*);
+	bool show(VNode*);
 };
 
 class VDateIcon : public VIcon
 {
 public:
 	VDateIcon(const std::string& name) : VIcon(name) {};
-	bool show(Node*);
+	bool show(VNode*);
 };
 
 class VZombieIcon : public VIcon
 {
 public:
 	VZombieIcon(const std::string& name) : VIcon(name) {};
-	bool show(Node*);
+	bool show(VNode*);
 };
 
 class VLateIcon : public VIcon
 {
 public:
 	VLateIcon(const std::string& name) : VIcon(name) {};
-	bool show(Node*);
+	bool show(VNode*);
 };
 
 //==========================================================
@@ -197,10 +197,10 @@ VIcon* VIcon::find(const std::string& name)
 
 
 //Create the pixmap containing all the relevant icons for the given node according to the filter.
-QVariantList VIcon::pixmapList(Node *node,VParamSet *filter)
+QVariantList VIcon::pixmapList(VNode *vnode,VParamSet *filter)
 {
 	QVariantList lst;
-	if(!node)
+	if(!vnode)
 		return lst;
 
 	for(std::map<std::string,VIcon*>::const_iterator it=items_.begin(); it != items_.end(); it++)
@@ -208,7 +208,7 @@ QVariantList VIcon::pixmapList(Node *node,VParamSet *filter)
 			if(filter->current().find(it->second) != filter->current().end())
 			{
 				VIcon *v=it->second;
-				if(v->show(node) )
+				if(v->show(vnode) )
 				{
 					lst << *(v->pixmap(16));
 				}
@@ -255,24 +255,28 @@ void VIcon::load(VProperty* group)
 static SimpleLoader<VIcon> loader("icon");
 
 
-
-
 //==========================================================
 // Wait
 //==========================================================
 
-bool  VWaitIcon::show(Node *n)
+bool  VWaitIcon::show(VNode *n)
 {
-	return n->flag().is_set(ecf::Flag::WAIT);
+	node_ptr node=n->node();
+	if(!node.get()) return false;
+
+	return node->flag().is_set(ecf::Flag::WAIT);
 }
 
 //==========================================================
 // Rerun
 //==========================================================
 
-bool  VRerunIcon::show(Node *n)
+bool  VRerunIcon::show(VNode *n)
 {
-	if(Submittable* s = n->isSubmittable())
+	node_ptr node=n->node();
+	if(!node.get()) return false;
+
+	if(Submittable* s = node->isSubmittable())
 	{
 		return (s->try_no() > 1);
 	}
@@ -284,16 +288,19 @@ bool  VRerunIcon::show(Node *n)
 // Message
 //==========================================================
 
-bool  VMessageIcon::show(Node *n)
+bool  VMessageIcon::show(VNode *n)
 {
-	return n->flag().is_set(ecf::Flag::MESSAGE);
+	node_ptr node=n->node();
+	if(!node.get()) return false;
+
+	return node->flag().is_set(ecf::Flag::MESSAGE);
 }
 
 //==========================================================
 // Complete
 //==========================================================
 
-bool  VCompleteIcon::show(Node *n)
+bool  VCompleteIcon::show(VNode *n)
 {
 	 /*if (!owner_) return False;
 	  else if (!owner_)
@@ -316,43 +323,55 @@ bool  VCompleteIcon::show(Node *n)
 // Date
 //==========================================================
 
-bool  VDateIcon::show(Node *n)
+bool  VDateIcon::show(VNode *n)
 {
-	return (n->days().size() > 0 || n->dates().size() > 0);
+	node_ptr node=n->node();
+
+	if(!node.get()) return false;
+
+	return (node->days().size() > 0 || node->dates().size() > 0);
 }
 
 //==========================================================
 // Time
 //==========================================================
 
-bool  VTimeIcon::show(Node *n)
+bool  VTimeIcon::show(VNode *n)
 {
+	node_ptr node=n->node();
+
 	//Check if time is held
-	if(TimeDepAttrs *attr = n->get_time_dep_attrs())
+	if(TimeDepAttrs *attr = node->get_time_dep_attrs())
 	{
 		return !attr->time_today_cron_is_free();
 	}
 
-	return (n->timeVec().size() > 0 ||
-	        n->todayVec().size() > 0 ||
-	        n->crons().size() > 0);
+	return (node->timeVec().size() > 0 ||
+	        node->todayVec().size() > 0 ||
+	        node->crons().size() > 0);
 }
 
 //==========================================================
 // Zombie
 //==========================================================
 
-bool VZombieIcon::show(Node *n)
+bool VZombieIcon::show(VNode *n)
 {
-	return n->flag().is_set(ecf::Flag::ZOMBIE);
+	node_ptr node=n->node();
+	if(!node.get()) return false;
+
+	return node->flag().is_set(ecf::Flag::ZOMBIE);
 }
 
 //==========================================================
 // Late
 //==========================================================
 
-bool VLateIcon::show(Node *n)
+bool VLateIcon::show(VNode *n)
 {
-	return n->flag().is_set(ecf::Flag::LATE);
+	node_ptr node=n->node();
+	if(!node.get()) return false;
+
+	return node->flag().is_set(ecf::Flag::LATE);
 }
 

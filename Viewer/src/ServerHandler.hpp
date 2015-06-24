@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2014 ECMWF.
+// Copyright 2015 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -17,13 +17,11 @@
 #include <ctime>
 
 #include "Defs.hpp"
-#include "AbstractObserver.hpp"
 
 #include "VReply.hpp"
 #include "VTask.hpp"
 #include "VInfo.hpp"
 
-#include <QThread>
 #include <QMutex>
 #include <QTimer>
 
@@ -34,7 +32,6 @@ class ConnectState;
 class NodeObserver;
 class ServerHandler;
 class ServerComQueue;
-class ServerComThread;
 class ServerObserver;
 class SuiteFilter;
 class VNodeChange;
@@ -113,7 +110,7 @@ public:
 	static void command(std::vector<VInfo_ptr>,std::string, bool resolve);
 
 	static ServerHandler* find(const std::string& name);
-	static ServerHandler* find(Node *node);
+	static ServerHandler* find(VNode *node);
 
 	static void addServerCommand(const std::string &name, const std::string command);
 	static std::string resolveServerCommand(const std::string &name);
@@ -159,6 +156,7 @@ private Q_SLOTS:
 	void slotDefsChanged(const std::vector<ecf::Aspect::Type>& a);
 	void slotNodeDeleted(const std::string& fullPath);
 	void slotDefsDeleted();
+	void slotRescanNeed();
 
 private:
 	//Begin and end the initialisation by connecting to the server and syncing.
@@ -209,134 +207,5 @@ private:
 	Activity activity_;
 	ConnectState* connectState_;
 };
-
-// --------------------------------------------------------------
-// ServerComQueue - a class to provide a queueing system for
-// sending tasks to the ClientIvoker via the ServerComThread.
-// --------------------------------------------------------------
-
-class ServerComQueue : public QObject
-{
-Q_OBJECT
-
-public:
-	ServerComQueue(ServerHandler *server,ClientInvoker* client,ServerComThread* comThread);
-	~ServerComQueue();
-
-	void addTask(VTask_ptr);
-	void addNewsTask();
-	void addSyncTask();
-	void addSuiteListTask();
-	void addSuiteAutoRegisterTask();
-
-	void enable();
-	void disable();
-	void start();
-	void suspend();
-	void reset();
-	//bool active() const {return active_;}
-	bool isSuspended() const {return state_==SuspendedState;}
-
-protected Q_SLOTS:
-	void slotRun();
-
-protected Q_SLOTS:
-	void slotTaskFinished();
-	void slotTaskFailed(std::string);
-
-protected:
-	void endReset();
-
-	enum State {RunningState,SuspendedState,ResetState,DisabledState};
-
-	ServerHandler *server_;
-	ClientInvoker* client_;
-	ServerComThread *comThread_;
-	QTimer* timer_;
-	std::deque<VTask_ptr> tasks_;
-	VTask_ptr current_;
-	//bool wait_;
-	//bool active_;
-	//bool reset_;
-	State state_;
-};
-
-// -------------------------------------------------------
-// ServerComThread - a class to handler communication with
-// an ecflow server.
-// -------------------------------------------------------
-
-class ServerComThread : public QThread, public AbstractObserver
-{
-	Q_OBJECT
-
-public:
-	ServerComThread(ServerHandler *server, ClientInvoker *ci);
-	~ServerComThread();
-
-	void task(VTask_ptr);
-	void stop();
-
-	//From AbstractObserver
-	void update(const Node*, const std::vector<ecf::Aspect::Type>&);
-	void update(const Defs*, const std::vector<ecf::Aspect::Type>&);
-	void update_delete(const Node*);
-	void update_delete(const Defs*);
-
-	bool attached() const {return attached_;}
-	void attach();
-	void detach();
-
-Q_SIGNALS:
-	void nodeChanged(const Node*, const std::vector<ecf::Aspect::Type>&);
-	void defsChanged(const std::vector<ecf::Aspect::Type>&);
-	void nodeDeleted(const std::string&);
-	void defsDeleted();
-	void failed(std::string message);
-	void suiteListChanged(const std::vector<std::string>&,const std::vector<std::string>&);
-
-protected:
-	void run();
-	void reset();
-	void updateRegSuites();
-
-private:
-	void attach(Node *node);
-	void detach(Node *node);
-
-	ServerHandler *server_;
-	ClientInvoker *ci_;
-	VTask::Type taskType_;
-	std::vector<std::string> command_;
-	std::map<std::string,std::string> params_;
-	std::vector<std::string> contents_;
-	NameValueVec vars_;
-	std::string nodePath_;
-	bool attached_;
-	bool defsToDelete_;
-	bool nodeToDelete_;
-	bool hasSuiteFilter_;;
-	std::vector<std::string> filteredSuites_;
-	bool autoAddNewSuites_;
-};
-
-// -------------------------------------------------------------------------
-// ServerDefsAccess - a class to manage access to the server definition tree
-// - required for multi-threaded access
-// -------------------------------------------------------------------------
-
-class ServerDefsAccess
-{
-
-public:
-	ServerDefsAccess(ServerHandler *server);
-	~ServerDefsAccess();
-
-	defs_ptr defs();
-
-private:
-	ServerHandler *server_;
-};
-
     
 #endif

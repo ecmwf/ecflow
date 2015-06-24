@@ -21,7 +21,7 @@
 #include <QPixmap>
 #include <QVariant>
 
-class Node;
+class VNode;
 class VParamSet;
 class VProperty;
 
@@ -32,7 +32,7 @@ public:
 	virtual ~VIcon();
 
 	static std::vector<VParam*> filterItems();
-	static QVariantList pixmapList(Node *node,VParamSet *filter);
+	static QVariantList pixmapList(VNode *vnode,VParamSet *filter);
 	static VIcon* find(const std::string& name);
 
 	void setProperty(VProperty* prop);
@@ -42,7 +42,7 @@ public:
 
 protected:
 	QPixmap* pixmap(int size);
-	virtual bool show(Node*)=0;
+	virtual bool show(VNode*)=0;
 
 	//QApplication makes some initializations of Qt itself, before which no "complex" Qt objects can be created.
 	//Since QPixmap is a complex object it cannot be used in static initialiaztion unless we make it a pointer.

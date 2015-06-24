@@ -363,6 +363,16 @@ void InfoPanel::detached(bool b)
 	detachedTb->setChecked(b);
 }
 
+
+void InfoPanel::notifyDataLost(VInfo* info)
+{
+	if(info_ && info_.get() == info)
+	{
+		clear();
+	}
+}
+
+
 //-------------------------------------------------
 // ServerObserver methods
 //-------------------------------------------------
@@ -392,10 +402,11 @@ void InfoPanel::notifyServerDelete(ServerHandler* server)
 
 void InfoPanel::notifyBeginServerClear(ServerHandler* server)
 {
-	if(info_ && info_->server() == server)
-	{
-		clear();
-	}
+}
+
+void InfoPanel::notifyEndServerScan(ServerHandler* server)
+{
+
 }
 
 void InfoPanel::notifyServerConnectState(ServerHandler* server)

@@ -14,6 +14,7 @@
 #include "Variable.hpp"
 
 #include "ConnectState.hpp"
+#include "ServerDefsAccess.hpp"
 #include "ServerHandler.hpp"
 #include "VAttribute.hpp"
 #include "VFileInfo.hpp"
@@ -26,7 +27,7 @@
 // VNode
 //=================================================
 
-VNode::VNode(VNode* parent,Node* node) :
+VNode::VNode(VNode* parent,node_ptr node) :
     node_(node),
     parent_(parent),
     attrNum_(-1),
@@ -59,7 +60,7 @@ void VNode::clear()
 
 bool VNode::hasAccessed() const
 {
-	return !name_.empty();
+	return true; //!name_.empty();
 }
 
 //At the beginning of the update we get the current number of attributes
@@ -77,7 +78,7 @@ void VNode::beginUpdateAttrNum()
 void VNode::endUpdateAttrNum()
 {
 	cachedAttrNum_=attrNum_;
-	attrNum_=VAttribute::totalNum(node_);
+	attrNum_=VAttribute::totalNum(this);
 }
 
 short VNode::cachedAttrNum() const
@@ -90,7 +91,7 @@ short VNode::attrNum() const
 	//If if was not initialised we get its value
 	if(attrNum_==-1)
 	{
-		attrNum_=VAttribute::totalNum(node_);
+		attrNum_=VAttribute::totalNum(this);
 
 		if(cachedAttrNum_ == -1)
 			cachedAttrNum_=attrNum_;
@@ -101,13 +102,13 @@ short VNode::attrNum() const
 
 short VNode::currentAttrNum() const
 {
-	return VAttribute::totalNum(node_);
+	return VAttribute::totalNum(this);
 }
 
 QStringList VNode::getAttributeData(int row,VAttribute** type)
 {
 	QStringList lst;
-	VAttribute::getData(node_,row,type,lst);
+	VAttribute::getData(this,row,type,lst);
 	return lst;
 }
 
@@ -141,7 +142,7 @@ int VNode::indexOfChild(const VNode* vn) const
 	return -1;
 }
 
-int VNode::indexOfChild(Node* n) const
+int VNode::indexOfChild(node_ptr n) const
 {
 	for(unsigned int i=0; i < children_.size(); i++)
 	{
@@ -252,6 +253,20 @@ std::string VNode::findInheritedVariable(const std::string& key,bool substitute)
     return val;
 }
 
+void VNode::variables(std::vector<Variable>& vars)
+{
+	vars.clear();
+	if(node_.get())
+		vars=node_->variables();
+}
+
+void VNode::genVariables(std::vector<Variable>& genVars)
+{
+	genVars.clear();
+	if(node_.get())
+		node_->gen_variables(genVars);
+}
+
 
 std::string VNode::absNodePath() const
 {
@@ -266,12 +281,17 @@ bool VNode::sameName(const std::string& name) const
 
 std::string VNode::strName() const
 {
+	if(node_ && node_.get())
+		return node_->name();
+
+	return std::string();
+	/*
 	if(name_.empty())
 	{
 		if(node_)
 			name_=node_->name();
 	}
-	return name_;
+	return name_;*/
 }
 
 QString VNode::name() const
@@ -282,12 +302,12 @@ QString VNode::name() const
 
 QString VNode::stateName()
 {
-	return VNState::toName(node_);
+	return VNState::toName(this);
 }
 
 QString VNode::defaultStateName()
 {
-	return VNState::toDefaultStateName(node_);
+	return VNState::toDefaultStateName(this);
 }
 
 bool VNode::isSuspended() const
@@ -297,12 +317,12 @@ bool VNode::isSuspended() const
 
 QColor  VNode::stateColour() const
 {
-	return VNState::toColour(node_);
+	return VNState::toColour(this);
 }
 
 QColor  VNode::stateFontColour() const
 {
-	return VNState::toFontColour(node_);
+	return VNState::toFontColour(this);
 }
 
 LogServer_ptr VNode::logServer()
@@ -329,6 +349,93 @@ LogServer_ptr VNode::logServer()
 	}
 
 	return lsv;
+}
+
+bool VNode::isAncestor(const VNode* n)
+{
+	if(n == this)
+		return true;
+
+    VNode* nd=parent();
+    while(nd)
+    {
+    	if(n == nd)
+           return true;
+
+    	nd=nd->parent();
+    }
+    return false;
+}
+
+std::vector<VNode*> VNode::ancestors(SortMode sortMode)
+{
+	std::vector<VNode*> nodes;
+
+	VNode* n=this;
+
+	nodes.push_back(n);
+	n=n->parent();
+
+	if(sortMode == ChildToParentSort)
+	{
+		while(n)
+		{
+			nodes.push_back(n);
+			n=n->parent();
+		}
+	}
+
+	else if (sortMode == ParentToChildSort)
+	{
+		while(n)
+		{
+			nodes.insert(nodes.begin(),n);
+			n=n->parent();
+		}
+	}
+
+	return nodes;
+}
+
+VNode* VNode::ancestorAt(int idx,SortMode sortMode)
+{
+	if(sortMode == ChildToParentSort &&  idx==0)
+		return this;
+
+	std::vector<VNode*> nodes=ancestors(sortMode);
+
+	if(nodes.size() >= 0 && nodes.size() > idx)
+	{
+		return nodes.at(idx);
+	}
+
+	return NULL;
+}
+
+const std::string&  VNode::nodeType()
+{
+	static std::string suiteStr("suite");
+	static std::string familyStr("family");
+	static std::string taskStr("task");
+	static std::string defaultStr("node");
+	static std::string serverStr("server");
+
+	if(isServer())
+		return serverStr;
+
+	node_ptr np=node();
+
+	if(!np || !np.get())
+		return defaultStr;
+
+	if(np->isSuite())
+		return suiteStr;
+	else if(np->isFamily())
+		return familyStr;
+	else if(np->isTask())
+			return taskStr;
+
+	return defaultStr;
 }
 
 
@@ -385,7 +492,7 @@ void VNode::triggers(TriggerList& tlr)
 //=================================================
 
 VServer::VServer(ServerHandler* server) :
-	VNode(0,0),
+	VNode(0,node_ptr()),
 	server_(server),
 	totalNum_(0)
 {
@@ -470,6 +577,26 @@ void VServer::deleteNode(VNode* node)
 }
 
 //------------------------------------------
+// Variables
+//------------------------------------------
+
+void VServer::variables(std::vector<Variable>& vars)
+{
+	vars.clear();
+	ServerDefsAccess defsAccess(server_);
+	if (defsAccess.defs())
+		vars=defsAccess.defs()->server().user_variables();
+}
+
+void VServer::genVariables(std::vector<Variable>& vars)
+{
+	vars.clear();
+	ServerDefsAccess defsAccess(server_);
+	if (defsAccess.defs())
+		vars=defsAccess.defs()->server().server_variables();
+}
+
+//------------------------------------------
 // Find
 //------------------------------------------
 
@@ -488,6 +615,11 @@ VNode* VServer::find(const std::string& fullPath)
 
 	std::vector<std::string> pathVec;
 	boost::split(pathVec,fullPath,boost::is_any_of("/"));
+
+	if(pathVec.size() > 0 && pathVec.at(0).empty())
+	{
+		pathVec.erase(pathVec.begin());
+	}
 
 	return VNode::find(pathVec);
 }
@@ -512,7 +644,6 @@ std::string VServer::findVariable(const std::string& key,bool substitute) const
     }
     return val;
 }
-
 
 std::string VServer::findInheritedVariable(const std::string& key,bool substitute) const
 {
@@ -556,7 +687,7 @@ void VServer::endScan()
 
 	for(unsigned int i=0; i < suites.size();i++)
 	{
-		VNode* vn=new VNode(this,suites.at(i).get());
+		VNode* vn=new VNode(this,suites.at(i));
 		totalNum_++;
 		scan(vn);
 	}
@@ -573,7 +704,7 @@ void VServer::scan(VNode *node)
 
 	for(std::vector<node_ptr>::const_iterator it=nodes.begin(); it != nodes.end(); it++)
 	{
-		VNode* vn=new VNode(node,(*it).get());
+		VNode* vn=new VNode(node,*it);
 		scan(vn);
 	}
 
@@ -668,12 +799,18 @@ void VServer::suites(std::vector<std::string>& sv)
 
 std::string VServer::strName() const
 {
-	if(name_.empty())
+	if(server_)
+		return server_->name();
+
+	return std::string();
+
+
+	/*if(name_.empty())
 	{
 		if(server_)
 			name_=server_->name();
 	}
-	return name_;
+	return name_;*/
 }
 
 QString VServer::stateName()

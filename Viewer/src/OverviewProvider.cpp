@@ -97,6 +97,7 @@ void OverviewProvider::serverInfo(VInfoServer* info,std::stringstream& f)
 
 	ServerHandler *server=info->server();
 	if(!server) return;
+	VServer *snode=server->vRoot();
 
 	ConnectState* cst=server->connectState();
 
@@ -125,7 +126,7 @@ void OverviewProvider::serverInfo(VInfoServer* info,std::stringstream& f)
 		return;
 	}
 
-	if(!ServerDefsAccess(server).defs()) return;
+	//if(!ServerDefsAccess(server).defs()) return;
 
 	using namespace boost::posix_time;
 	using namespace boost::gregorian;
@@ -145,7 +146,7 @@ void OverviewProvider::serverInfo(VInfoServer* info,std::stringstream& f)
 
     //Generated variables
     std::vector<Variable> gvar;
-    info->genVariables(gvar);
+    snode->genVariables(gvar);
     for(std::vector<Variable>::const_iterator it = gvar.begin(); it != gvar.end(); ++it)
     {
     	f << inc << "# edit " << (*it).name() << " '" << (*it).theValue() << "'\n";
@@ -153,7 +154,7 @@ void OverviewProvider::serverInfo(VInfoServer* info,std::stringstream& f)
 
     //Variables
     std::vector<Variable> var;
-    info->variables(var);
+    snode->variables(var);
     for(std::vector<Variable>::const_iterator it = var.begin(); it != var.end(); ++it)
     {
        	f << inc << "edit " << (*it).name() << " '" << (*it).theValue() << "'\n";
@@ -163,8 +164,8 @@ void OverviewProvider::serverInfo(VInfoServer* info,std::stringstream& f)
     VNode *vr=server->vRoot();
     for(unsigned int i=0; i < vr->numOfChildren(); i++)
     {
-    	f << inc << VInfo::nodeType(vr->childAt(i)) << " " <<
-    			vr->childAt(i)->name().toStdString() << "\n";
+    	f << inc << vr->childAt(i)->nodeType() << " " <<
+    			vr->childAt(i)->strName() << "\n";
     }
 
     //End block
@@ -175,7 +176,7 @@ void OverviewProvider::nodeInfo(VInfoNode* info,std::stringstream& f)
 {
 	ServerHandler *server=info->server();
 	if(!server) return;
-	if(!ServerDefsAccess(server).defs()) return;
+	//if(!ServerDefsAccess(server).defs()) return;
 
 	VNode* node=info->node();
 	if(!node) return;
@@ -185,7 +186,7 @@ void OverviewProvider::nodeInfo(VInfoNode* info,std::stringstream& f)
 	using namespace boost::posix_time;
 	using namespace boost::gregorian;
 
-	std::string typeName=info->nodeType();
+	std::string typeName=node->nodeType();
 	std::string nodeName(node->name().toStdString());
 	std::string statusName(node->stateName().toStdString());
 
@@ -194,7 +195,7 @@ void OverviewProvider::nodeInfo(VInfoNode* info,std::stringstream& f)
 	f << "type    : " << typeName << "\n";
 	f << "status   : " << statusName << "\n";
 
-	Node *nn=node->node();
+	node_ptr nn=node->node();
 
 	boost::posix_time::ptime state_change_time = nn->state_change_time();
 	if(!state_change_time.is_special())
@@ -246,7 +247,7 @@ void OverviewProvider::nodeInfo(VInfoNode* info,std::stringstream& f)
 
 	//Generated variables
 	std::vector<Variable> gvar;
-	info->genVariables(gvar);
+	node->genVariables(gvar);
 	for(std::vector<Variable>::const_iterator it = gvar.begin(); it != gvar.end(); ++it)
 	{
 	    	f << inc << "# edit " << (*it).name() << " '" << (*it).theValue() << "'\n";
@@ -254,7 +255,7 @@ void OverviewProvider::nodeInfo(VInfoNode* info,std::stringstream& f)
 
 	//Variables
 	std::vector<Variable> var;
-	info->variables(var);
+	node->variables(var);
 	for(std::vector<Variable>::const_iterator it = var.begin(); it != var.end(); ++it)
 	{
 		f << inc << "edit " << (*it).name() << " '" << (*it).theValue() << "'\n";
@@ -264,8 +265,8 @@ void OverviewProvider::nodeInfo(VInfoNode* info,std::stringstream& f)
 	VNode *vr=server->vRoot();
 	for(unsigned int i=0; i < node->numOfChildren(); i++)
 	{
-		f << inc << VInfo::nodeType(node->childAt(i)) << " " <<
-	    			node->childAt(i)->name().toStdString() << "\n";
+		f << inc << node->childAt(i)->nodeType() << " " <<
+	    			node->childAt(i)->strName() << "\n";
     }
 
 

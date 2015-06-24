@@ -17,7 +17,7 @@
 
 #include "VParam.hpp"
 
-class Node;
+class VNode;
 class VProperty;
 
 class VAttribute : public VParam
@@ -30,8 +30,8 @@ public:
     
 	static std::vector<VParam*> filterItems();
 	
-	static bool getData(Node *node,int row,VAttribute** type,QStringList& data);
-	static int totalNum(Node *node);
+	static bool getData(VNode* vnode,int row,VAttribute** type,QStringList& data);
+	static int totalNum(const VNode *vnode);
 	static void init(const std::string& parFile);
 	
 	static VAttribute* find(const std::string& name);
@@ -40,8 +40,8 @@ public:
     static void load(VProperty*);
 
 protected:
-	virtual bool getData(Node *node,int row,int& totalRow,QStringList& data)=0;
-	virtual int num(Node* nod)=0;
+	virtual bool getData(VNode *vnode,int row,int& totalRow,QStringList& data)=0;
+	virtual int num(const VNode* vnode)=0;
     
     VProperty* prop_;
 

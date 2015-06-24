@@ -62,6 +62,56 @@ VInfoAttribute* VInfoAttributeFactory::create(VAttribute* att,int attIndex,VNode
 //
 //========================================
 
+VInfo::VInfo(ServerHandler* server,VNode* node) :
+	server_(server),
+	node_(node)
+{
+	if(node)
+		nodePath_=node->absNodePath();
+
+	if(server_)
+		server_->addServerObserver(this);
+}
+
+VInfo::~VInfo()
+{
+	if(server_)
+		server_->removeServerObserver(this);
+
+	for(std::vector<VInfoObserver*>::const_iterator it=observers_.begin(); it != observers_.end(); it++)
+		(*it)->notifyDelete(this);
+}
+
+void VInfo::notifyBeginServerClear(ServerHandler* server)
+{
+	node_=NULL;
+}
+
+void VInfo::notifyEndServerScan(ServerHandler* server)
+{
+	node_=server_->vRoot()->find(nodePath_);
+	if(!node_)
+	{
+		for(std::vector<VInfoObserver*>::const_iterator it=observers_.begin(); it != observers_.end(); it++)
+				(*it)->notifyDataLost(this);
+	}
+}
+
+void VInfo::addObserver(VInfoObserver* o)
+{
+	std::vector<VInfoObserver*>::iterator it=std::find(observers_.begin(),observers_.end(),o);
+	if(it == observers_.end())
+		observers_.push_back(o);
+}
+
+void VInfo::removeObserver(VInfoObserver* o)
+{
+	std::vector<VInfoObserver*>::iterator it=std::find(observers_.begin(),observers_.end(),o);
+	if(it != observers_.end())
+		observers_.erase(it);
+}
+
+/*
 VInfo::VInfo() :
 	server_(0),
 	node_(0),
@@ -204,16 +254,25 @@ VInfo* VInfo::make(VAttribute* att,int attIndex,VNode* node)
 {
 	return VInfoAttributeFactory::create(att,attIndex,node);
 }
-
+*/
 //=========================================
 //
 // VInfoServer
 //
 //=========================================
 
-VInfoServer::VInfoServer(ServerHandler *server) : VInfo(server)
+VInfoServer::VInfoServer(ServerHandler *server) : VInfo(server,NULL)
 {
+	if(server_)
+	{
+		node_=server_->vRoot();
+		//server_->addServerObserver(this);
+	}
+}
 
+VInfo_ptr VInfoServer::create(ServerHandler *server)
+{
+	return VInfo_ptr(new VInfoServer(server));
 }
 
 void VInfoServer::accept(VInfoVisitor* v)
@@ -221,6 +280,16 @@ void VInfoServer::accept(VInfoVisitor* v)
 	v->visit(this);
 }
 
+std::string VInfoServer::name()
+{
+	if(server_)
+		return server_->name();
+
+	return std::string();
+}
+
+
+/*
 void VInfoServer::variables(std::vector<Variable>& vars)
 {
 	vars.clear();
@@ -246,7 +315,7 @@ std::string VInfoServer::name()
 
 	return std::string();
 }
-
+*/
 /*
 VInfoReply_ptr VInfoServer::info(VInfoQuery_ptr q)
 {
@@ -318,9 +387,20 @@ void VInfoServer::info(std::stringstream& f)
 //=========================================
 
 
-VInfoNode::VInfoNode(VNode *node,ServerHandler *server) : VInfo(node,server)
+VInfoNode::VInfoNode(ServerHandler* server,VNode* node) : VInfo(server,node)
 {
+	//if(server_)
+	//	server_->addServerObserver(this);
+}
 
+VInfo_ptr VInfoNode::create(VNode *node)
+{
+	ServerHandler* server=NULL;
+	if(node)
+	{
+		server=node->server();
+	}
+	return VInfo_ptr(new VInfoNode(server,node));
 }
 
 void VInfoNode::accept(VInfoVisitor* v)
@@ -328,18 +408,30 @@ void VInfoNode::accept(VInfoVisitor* v)
 	v->visit(this);
 }
 
+std::string VInfoNode::name()
+{
+	if(node_ && node_->node())
+		return node_->strName();
+
+	return std::string();
+}
+
+
+/*
 ServerHandler* VInfoNode::server()
 {
 	if(server_ == NULL && node_)
 	{
 		server_=node_->server();
 
-		if(server_ == NULL)
-			server_=ServerHandler::find(node_->node());
+		//TODO!!!!!!!!!
+		//if(server_ == NULL)
+		//	server_=ServerHandler::find(node_->node());
 	}
 	return server_;
-}
+}*/
 
+/*
 const std::string&  VInfoNode::nodeType()
 {
 	return VInfo::nodeType(node_);
@@ -390,7 +482,7 @@ std::string VInfoNode::fullPath()
 
 	return s;
 }
-
+*/
 
 /*
 void VInfoNode::info(VInfoReplyReceiver* invoker)
@@ -509,8 +601,10 @@ void VInfoNode::info(std::stringstream& f)
 //=========================================
 
 
-VInfoAttribute::VInfoAttribute(VAttribute* att,int attIndex,VNode* node,ServerHandler *server) :
-		VInfo(att,attIndex,node,server)
+VInfoAttribute::VInfoAttribute(ServerHandler* server,VNode* node,VAttribute* att,int attIndex) :
+		VInfo(server,node),
+		att_(att),
+		attIndex_(attIndex)
 {
 
 }
@@ -520,7 +614,14 @@ void VInfoAttribute::accept(VInfoVisitor* v)
 	v->visit(this);
 }
 
+VInfo_ptr VInfoAttribute::create(ServerHandler* server,VNode* node,VAttribute* att,int attIndex)
+{
+	return VInfo_ptr(new VInfoAttribute(server,node,att,attIndex));
+}
 
+
+
+/*
 VInfoLimit::VInfoLimit(VAttribute* att,int attIndex,VNode* node,ServerHandler *server) :
 		VInfoAttribute(att,attIndex,node,server)
 {
@@ -528,7 +629,7 @@ VInfoLimit::VInfoLimit(VAttribute* att,int attIndex,VNode* node,ServerHandler *s
 }
 
 static VInfoAttributeMaker<VInfoLimit> maker1("limit");
-
+*/
 
 
 /*static VMeterAttribute meterAttr("meter");

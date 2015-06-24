@@ -18,8 +18,8 @@
 
 #include "Aspect.hpp"
 #include "LogServer.hpp"
+#include "Node.hpp"
 
-class Node;
 class ServerHandler;
 class VAttribute;
 class VServer;
@@ -54,11 +54,13 @@ class VNode
 friend class VServer;
 
 public:
-	VNode(VNode* parent,Node*);
+	VNode(VNode* parent,node_ptr);
 	virtual ~VNode() {};
 
+	enum SortMode {ParentToChildSort,ChildToParentSort};
+
 	virtual ServerHandler* server() const;
-    Node *node() {return node_;}
+    node_ptr node() const {return node_;}
     virtual bool isTopLevel() const;
     virtual bool isServer() const {return false;}
 
@@ -73,11 +75,14 @@ public:
     int numOfChildren() const { return static_cast<int>(children_.size());}
     VNode* childAt(int index) const;
     int indexOfChild(const VNode* vn) const;
-    int indexOfChild(Node* n) const;
+    int indexOfChild(node_ptr n) const;
     VNode* findChild(const std::string& name) const;
 
-    std::string genVariable(const std::string& key) const;
+    //Get all the variables
+    virtual void variables(std::vector<Variable>& vars);
+    virtual void genVariables(std::vector<Variable>& genVars);
 
+    std::string genVariable(const std::string& key) const;
     virtual std::string findVariable(const std::string& key,bool substitute=false) const;
 
     //Find a variable in the given node or in its ancestors. Both the variables and the
@@ -88,13 +93,18 @@ public:
     bool sameName(const std::string& name) const;
     virtual std::string strName() const;
     virtual QString name() const;
-    virtual  QString stateName();
+    virtual QString stateName();
     virtual QString defaultStateName();
     virtual bool isSuspended() const;
     virtual QColor  stateColour() const;
     virtual QColor  stateFontColour() const;
 
     bool hasAccessed() const;
+    bool isAncestor(const VNode* n);
+    std::vector<VNode*> ancestors(SortMode sortMode);
+    VNode* ancestorAt(int idx,SortMode sortMode);
+
+    const std::string& nodeType();
 
     LogServer_ptr logServer();
 
@@ -106,12 +116,13 @@ protected:
     bool isAttrNumInitialised() const {return attrNum_!=-1;}
     VNode* find(const std::vector<std::string>& pathVec);
 
-    Node* node_;
+    //Node* node_;
+    node_ptr node_;
     VNode* parent_;
     std::vector<VNode*> children_;
     mutable short attrNum_;
     mutable short cachedAttrNum_;
-    mutable std::string name_;
+    //mutable std::string name_;
 };
 
 //This is the root node representing the Server.
@@ -151,6 +162,10 @@ public:
 
 	void suites(std::vector<std::string>&);
 	VNode* find(const std::string& fullPath);
+
+	//Get all the variables
+	void variables(std::vector<Variable>& vars);
+	void genVariables(std::vector<Variable>& genVars);
 
 	//Find a variable in the Defs. Both the user_variables and the
 	//server variables are searched.

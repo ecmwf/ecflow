@@ -54,7 +54,7 @@ QString WhyItemWidget::why(VNode* node) const
 
 	if(node && node->node())
 	{
-		Node *n=node->node();
+		node_ptr n=node->node();
 		std::vector<std::string> theReasonWhy;
 		n->bottom_up_why(theReasonWhy);
 		for (std::vector<std::string>::const_iterator it=theReasonWhy.begin(); it != theReasonWhy.end(); ++it)
