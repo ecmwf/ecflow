@@ -96,8 +96,8 @@ std::string VFile::tmpName()
 
 #else
 
-	char* s=std::string(tmpnam(NULL));
-	res=std::string(s);
+//	char* s=std::string(tmpnam(NULL));
+	res=std::string(tmpnam(NULL));
 
 #endif
 
