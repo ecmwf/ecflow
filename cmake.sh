@@ -11,6 +11,7 @@ show_error_and_exit() {
    echo "  "
    echo "   make           - run make after cmake"
    echo "   test           - run all the tests"
+   echo "   new_viewer     - Build new viewer"
    echo "   test_safe      - only run deterministic tests"
    echo "   san            - is short for clang thread sanitiser"
    echo "   package_source - produces ecFlow-4.0.8-Source.tar.gz file, for users"
@@ -28,6 +29,7 @@ clang_arg=
 clang_sanitiser_arg=
 mode_arg=
 verbose_arg=
+new_viewer_arg=
 while [[ "$#" != 0 ]] ; do   
    if [[ "$1" = debug || "$1" = release ]] ; then
       mode_arg=$1
@@ -47,6 +49,8 @@ while [[ "$#" != 0 ]] ; do
       test_arg=$1
    elif  [[ "$1" = test_safe ]] ; then
       test_safe_arg=$1
+   elif  [[ "$1" = new_viewer ]] ; then
+      new_viewer_arg=$1
    else
    	 show_error_and_exit
    fi
@@ -84,6 +88,9 @@ if [[ "$clang_sanitiser_arg" = san ]] ; then
 	module unload gnu
 	module load clang
 	cmake_extra_options="$cmake_extra_options -DCMAKE_C_FLAGS=-fsanitize=thread"
+fi
+if [[ "$new_viewer_arg" = new_viewer ]] ; then
+	cmake_extra_options="$cmake_extra_options -DENABLE_VIEWER=ON"
 fi
 
 # ====================================================================================
