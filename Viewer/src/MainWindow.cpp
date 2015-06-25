@@ -35,7 +35,6 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/property_tree/json_parser.hpp>
 
-//Initialise static variables
 bool MainWindow::quitStarted_=false;
 QList<MainWindow*> MainWindow::windows_;
 int MainWindow::maxWindowNum_=25;
@@ -61,13 +60,6 @@ MainWindow::MainWindow(QStringList idLst,QWidget *parent) : QMainWindow(parent)
     
     connect(nodePanel_,SIGNAL(currentWidgetChanged()),
     		this,SLOT(slotCurrentChangedInPanel()));
-
-    //connect(nodePanel_,SIGNAL(selectionChanged(VInfo_ptr)),
-    //   		pathWidget,SLOT(setPath(VInfo_ptr)));
-
-   //connect(pathWidget,SIGNAL(selected(VInfo_ptr)),
-   //    		nodePanel_,SLOT(slotSelection(VInfo_ptr)));
-
 }
 
 
@@ -75,30 +67,6 @@ void MainWindow::init(MainWindow *win)
 {
   	if(!win)
 	  	return;
-
-	//actionIconSidebar_->setChecked(browser->actionIconSidebar_->isChecked());
-	//actionDrawers_->setChecked(browser->actionDrawers_->isChecked());
-	//actionStatusbar_->setChecked(browser->actionStatusbar_->isChecked());
-}
-
-InfoPanel* MainWindow::addInfoPanel()
-{
-	//Dock widget at the bottom
-    InfoPanelDock *dw = new InfoPanelDock(tr("Info panel"), this);
-
-    //Find a unique objectName
-    QString dname="dock_" + QString::number(findChildren<QDockWidget*>().count()-1);
-    dw->setObjectName(dname);
-
-    addDockWidget(Qt::BottomDockWidgetArea, dw);
-
-    connect(nodePanel_,SIGNAL(selectionChanged(VInfo_ptr)),
-    		dw->infoPanel(),SLOT(slotReload(VInfo_ptr)));
-
-    connect(dw->infoPanel(),SIGNAL(selectionChanged(VInfo_ptr)),
-    		nodePanel_,SLOT(slotSelection(VInfo_ptr)));
-
-    return dw->infoPanel();
 }
 
 //==============================================================
@@ -168,11 +136,6 @@ void MainWindow::on_actionManageServers_triggered()
 	dialog.exec();
 }
 
-//void MainWindow::on_actionAddInfoPanel_triggered()
-//{
-//	addInfoPanel();
-//}
-
 void MainWindow::on_actionAddTreeWidget_triggered()
 {
 	nodePanel_->addToDashboard("tree");
@@ -183,45 +146,13 @@ void MainWindow::on_actionAddTableWidget_triggered()
 	nodePanel_->addToDashboard("table");
 }
 
-void MainWindow::on_actionShowInInfoPanel_triggered()
+void MainWindow::on_actionAddInfoPanel_triggered()
 {
 	nodePanel_->addToDashboard("info");
-	return;
-/*
-	QList<QDockWidget*> dockLst=findChildren<QDockWidget*>();
+}
 
-	//If there is a visible non-detached panel it already shows the needed info
-	Q_FOREACH(QDockWidget* dw,dockLst)
-	{
-		if(dw->isVisible())
-			if(InfoPanel* ip=static_cast<InfoPanel*>(dw->widget()))
-				if(!ip->detached())
-				{
-					ip->slotReload(nodePanel_->currentSelection());
-					return;
-				}
-	}
-
-
-	Q_FOREACH(QDockWidget* dw,dockLst)
-	{
-		if(!dw->isVisible())
-		{
-			if(InfoPanel* ip=static_cast<InfoPanel*>(dw->widget()))
-			{
-				ip->reset(nodePanel_->currentSelection());
-				ip->detached(true);
-				dw->show();
-				return;
-			}
-		}
-	}
-
-	//Add a detached panel otherwise
-	InfoPanel* ip=addInfoPanel();
-	ip->reset(nodePanel_->currentSelection());
-	ip->detached(true);
-*/
+void MainWindow::on_actionShowInInfoPanel_triggered()
+{
 }
 
 
@@ -261,7 +192,6 @@ void MainWindow::closeEvent(QCloseEvent* event)
 	{
 		windows_.removeOne(this);
 		event->accept();
-		//deleteLater();
 	}
 	else
 	{

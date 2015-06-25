@@ -334,15 +334,9 @@ QVariant TreeNodeModel::attributesData(const QModelIndex& index, int role) const
 	if(!node)
 		return QVariant();
 
-	VAttribute* type=0;
-	QStringList attrData=node->getAttributeData(index.row(),&type);
-
-	//VParam::Type type;
-	//VAttribute* type;
-	//VAttribute::getData(node->node(),index.row(),&type,attrData);
-
 	if(role == FilterRole)
 	{
+		VAttribute* type=node->getAttributeType(index.row());
 		if(atts_->isSet(type))
 		{
 			return QVariant(true);
@@ -351,7 +345,8 @@ QVariant TreeNodeModel::attributesData(const QModelIndex& index, int role) const
 	}
 	else if(role == Qt::DisplayRole)
 	{
-		return attrData;
+		VAttribute* type=0;
+		return node->getAttributeData(index.row(),&type);
 	}
 
 

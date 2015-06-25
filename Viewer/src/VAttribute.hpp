@@ -23,13 +23,14 @@ class VProperty;
 class VAttribute : public VParam
 {
 public:
-	VAttribute(const std::string& name);
+	explicit VAttribute(const std::string& name);
 	virtual ~VAttribute() {};
 
     void setProperty(VProperty*);
     
 	static std::vector<VParam*> filterItems();
 	
+	static bool getType(VNode *vnode,int row,VAttribute **type);
 	static bool getData(VNode* vnode,int row,VAttribute** type,QStringList& data);
 	static int totalNum(const VNode *vnode);
 	static void init(const std::string& parFile);

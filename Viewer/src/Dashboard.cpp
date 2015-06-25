@@ -25,6 +25,7 @@
 #include <QVBoxLayout>
 #include <QLabel>
 #include <QDockWidget>
+#include <QToolButton>
 
 int Dashboard::maxWidgetNum_=20;
 
@@ -46,41 +47,6 @@ Dashboard::Dashboard(QString rootNode,QWidget *parent) :
 	w->hide();
 
 	setDockOptions(QMainWindow::AnimatedDocks|QMainWindow::AllowTabbedDocks|QMainWindow::AllowNestedDocks);
-
-	/*
-
-	//View mode stacked widget
-	QStackedLayout* centralLayout=new QStackedLayout;
-	mainLayout->addLayout(centralLayout,1);
-
-	//View handler: handles how views are activated and appear on the
-	//central layout
-	handler_=new NodeViewHandler(centralLayout);
-
-	NodeWidget *ctl=0;
-
-	//--------------------------------
-	// Tree view
-	//--------------------------------
-
-	ctl=new TreeNodeViewControl(config_,this);
-	handler_->add(Viewer::TreeViewMode,ctl);
-
-	connect(ctl->widget(),SIGNAL(selectionChanged(VInfo_ptr)),
-			this,SIGNAL(selectionChanged(VInfo_ptr)));
-
-	//---------------------------------
-	// Table view
-	//---------------------------------
-
-	ctl=new TableNodeViewControl(config_,this);
-	handler_->add(Viewer::TableViewMode,ctl);
-
-	connect(ctl->widget(),SIGNAL(selectionChanged(VInfo_ptr)),
-				this,SIGNAL(selectionChanged(VInfo_ptr)));
-
-	//Init view mode
-	handler_->setCurrentMode(Viewer::TreeViewMode);*/
 }
 
 Dashboard::~Dashboard()
@@ -140,7 +106,9 @@ DashboardWidget* Dashboard::addWidget(const std::string& type,const std::string&
 	widgets_ << w;
 
 	//Create a dockwidget at the right
-    QDockWidget *dw = new QDockWidget(tr(type.c_str()), this);
+    //QDockWidget *dw = new QDockWidget(tr(type.c_str()), this);
+	DashboardDock *dw = new DashboardDock(tr(type.c_str()), this);
+
     dw->setAllowedAreas(Qt::RightDockWidgetArea);
 
     //Store the dockId  in the dockwidget (as objectName)
@@ -152,9 +120,20 @@ DashboardWidget* Dashboard::addWidget(const std::string& type,const std::string&
     //Add the dockwidget to the dashboard
     addDockWidget(Qt::RightDockWidgetArea, dw);
 
+    connect(dw,SIGNAL(closeRequested()),
+    		this,SLOT(slotDockClose()));
+
     return w;
 }
 
+void Dashboard::slotDockClose()
+{
+	if(DashboardDock *dw=static_cast<DashboardDock*>(sender()))
+	{
+		widgets_.removeOne(static_cast<DashboardWidget*>(dw->widget()));
+		dw->deleteLater();
+	}
+}
 
 VInfo_ptr Dashboard::currentSelection()
 {
@@ -285,10 +264,6 @@ void Dashboard::notifyServerFilterChanged(ServerItem*)
 	updateTitle();
 }
 
-
-
-
-
 //----------------------------------
 // Save and load settings!!
 //----------------------------------
@@ -382,3 +357,21 @@ std::string Dashboard::widgetSettingsId(int i)
 {
 	return "widget_" + boost::lexical_cast<std::string>(i);
 }
+
+
+
+void DashboardDock::showEvent(QShowEvent* event)
+{
+	QWidget::showEvent(event);
+}
+
+void DashboardDock::closeEvent (QCloseEvent *event)
+{
+	QWidget::closeEvent(event);
+	Q_EMIT closeRequested();
+}
+
+
+
+
+

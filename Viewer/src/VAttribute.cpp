@@ -30,7 +30,7 @@ std::map<std::string,VAttribute*> VAttribute::items_;
 class VMeterAttribute : public VAttribute
 {
 public:
-	VMeterAttribute(const std::string& n) : VAttribute(n) {};
+	explicit VMeterAttribute(const std::string& n) : VAttribute(n) {};
 	int num(const VNode *node);
 	bool getData(VNode *node,int row,int& size,QStringList& data);
 };
@@ -38,7 +38,7 @@ public:
 class VEventAttribute : public VAttribute
 {
 public:
-	VEventAttribute(const std::string& n) : VAttribute(n) {};
+	explicit  VEventAttribute(const std::string& n) : VAttribute(n) {};
 	int num(const VNode *node);
 	bool getData(VNode *node,int row,int& size,QStringList& data);
 };
@@ -47,7 +47,7 @@ public:
 class VRepeatAttribute : public VAttribute
 {
 public:
-	VRepeatAttribute(const std::string& n) : VAttribute(n) {};
+	explicit VRepeatAttribute(const std::string& n) : VAttribute(n) {};
 	int num(const VNode *node);
 	bool getData(VNode *node,int row,int& size,QStringList& data);
 };
@@ -55,7 +55,7 @@ public:
 class VTriggerAttribute : public VAttribute
 {
 public:
-	VTriggerAttribute(const std::string& n) : VAttribute(n) {};
+	explicit VTriggerAttribute(const std::string& n) : VAttribute(n) {};
 	int num(const VNode *node);
 	bool getData(VNode *node,int row,int& size,QStringList& data);
 };
@@ -63,7 +63,7 @@ public:
 class VLabelAttribute : public VAttribute
 {
 public:
-	VLabelAttribute(const std::string& n) : VAttribute(n) {};
+	explicit VLabelAttribute(const std::string& n) : VAttribute(n) {};
 	int num(const VNode *node);
 	bool getData(VNode *node,int row,int& size,QStringList& data);
 };
@@ -71,7 +71,7 @@ public:
 class VDateAttribute : public VAttribute
 {
 public:
-	VDateAttribute(const std::string& n) : VAttribute(n) {};
+	explicit VDateAttribute(const std::string& n) : VAttribute(n) {};
 	int num(const VNode *node);
 	bool getData(VNode *node,int row,int& size,QStringList& data);
 };
@@ -79,7 +79,7 @@ public:
 class VTimeAttribute : public VAttribute
 {
 public:
-	VTimeAttribute(const std::string& n) : VAttribute(n) {};
+	explicit VTimeAttribute(const std::string& n) : VAttribute(n) {};
 	int num(const VNode *node);
 	bool getData(VNode *node,int row,int& size,QStringList& data);
 };
@@ -87,7 +87,7 @@ public:
 class VLimitAttribute : public VAttribute
 {
 public:
-	VLimitAttribute(const std::string& n) : VAttribute(n) {};
+	explicit VLimitAttribute(const std::string& n) : VAttribute(n) {};
 	int num(const VNode *node);
 	bool getData(VNode *node,int row,int& size,QStringList& data);
 };
@@ -95,7 +95,7 @@ public:
 class VLimiterAttribute : public VAttribute
 {
 public:
-	VLimiterAttribute(const std::string& n) : VAttribute(n) {};
+	explicit VLimiterAttribute(const std::string& n) : VAttribute(n) {};
 	int num(const VNode *node);
 	bool getData(VNode *node,int row,int& size,QStringList& data);
 };
@@ -103,7 +103,7 @@ public:
 class VLateAttribute : public VAttribute
 {
 public:
-	VLateAttribute(const std::string& n) : VAttribute(n) {};
+	explicit VLateAttribute(const std::string& n) : VAttribute(n) {};
 	int num(const VNode *node);
 	bool getData(VNode *node,int row,int& size,QStringList& data);
 };
@@ -111,7 +111,7 @@ public:
 class VVarAttribute : public VAttribute
 {
 public:
-	VVarAttribute(const std::string& n) : VAttribute(n) {};
+	explicit VVarAttribute(const std::string& n) : VAttribute(n) {};
 	int num(const VNode *node);
 	bool getData(VNode *node,int row,int& size,QStringList& data);
 };
@@ -119,7 +119,7 @@ public:
 class VGenvarAttribute : public VAttribute
 {
 public:
-	VGenvarAttribute(const std::string& n) : VAttribute(n) {};
+	explicit VGenvarAttribute(const std::string& n) : VAttribute(n) {};
 	int num(const VNode *node);
 	bool getData(VNode *node,int row,int& size,QStringList& data);
 };
@@ -197,6 +197,28 @@ int VAttribute::totalNum(const VNode *vnode)
 	}
 
 	return total;
+}
+
+bool VAttribute::getType(VNode *vnode,int row,VAttribute **type)
+{
+	*type=0;
+
+	if(!vnode)
+		return false;
+
+	int totalRow=0;
+	for(std::map<std::string,VAttribute*>::const_iterator it=items_.begin(); it != items_.end(); it++)
+	{
+		int size=it->second->num(vnode);
+		if(row-totalRow >=0 && row-totalRow < size)
+		{
+			*type=it->second;
+			return true;
+		}
+		totalRow+=size;
+	}
+
+	return false;
 }
 
 
@@ -277,7 +299,7 @@ int VLabelAttribute::num(const VNode *vnode)
 bool VLabelAttribute::getData(VNode *vnode,int row,int& size,QStringList& data)
 {
 	node_ptr node=vnode->node();
-	if(node.get())
+	if(!node.get())
 		return false;
 
 	const std::vector<Label>&  v=node->labels();
@@ -305,7 +327,7 @@ int VEventAttribute::num(const VNode *vnode)
 bool VEventAttribute::getData(VNode *vnode,int row,int& size,QStringList& data)
 {
 	node_ptr node=vnode->node();
-	if(node.get())
+	if(!node.get())
 			return false;
 
 	const std::vector<Event>& v=node->events();
@@ -327,7 +349,7 @@ bool VEventAttribute::getData(VNode *vnode,int row,int& size,QStringList& data)
 int VGenvarAttribute::num(const VNode *vnode)
 {
 	node_ptr node=vnode->node();
-	if(node.get())
+	if(!node.get())
 	{
 		std::vector<Variable> genV;
 		node->gen_variables(genV);
@@ -339,7 +361,7 @@ int VGenvarAttribute::num(const VNode *vnode)
 bool VGenvarAttribute::getData(VNode *vnode,int row,int& size,QStringList& data)
 {
 	node_ptr node=vnode->node();
-	if(node.get())
+	if(!node.get())
 			return false;
 
 	std::vector<Variable> genV;
@@ -368,7 +390,7 @@ int VVarAttribute::num(const VNode *vnode)
 bool VVarAttribute::getData(VNode *vnode,int row,int& size,QStringList& data)
 {
 	node_ptr node=vnode->node();
-	if(node.get())
+	if(!node.get())
 			return false;
 
 	const std::vector<Variable>& v=node->variables();
@@ -396,7 +418,7 @@ int VLimitAttribute::num(const VNode *vnode)
 bool VLimitAttribute::getData(VNode *vnode,int row,int& size,QStringList& data)
 {
 	node_ptr node=vnode->node();
-	if(node.get())
+	if(!node.get())
 		return false;
 
 	const std::vector<limit_ptr>& v=node->limits();
@@ -425,7 +447,7 @@ int VLimiterAttribute::num(const VNode *vnode)
 bool VLimiterAttribute::getData(VNode *vnode,int row,int& size,QStringList& data)
 {
 	node_ptr node=vnode->node();
-	if(node.get())
+	if(!node.get())
 		return false;
 
 	const std::vector<InLimit>& v=node->inlimits();
@@ -447,7 +469,7 @@ bool VLimiterAttribute::getData(VNode *vnode,int row,int& size,QStringList& data
 int VTriggerAttribute::num(const VNode *vnode)
 {
 	node_ptr node=vnode->node();
-	if(node.get())
+	if(!node.get())
 		return false;
 
 	return (node->get_trigger() != NULL || node->get_complete()!= NULL)?1:0;
@@ -456,7 +478,7 @@ int VTriggerAttribute::num(const VNode *vnode)
 bool VTriggerAttribute::getData(VNode *vnode,int row,int& size,QStringList& data)
 {
 	node_ptr node=vnode->node();
-	if(node.get())
+	if(!node.get())
 		return false;
 
 	Expression* eT=node->get_trigger();
@@ -486,7 +508,7 @@ int VTimeAttribute::num(const VNode *vnode)
 bool VTimeAttribute::getData(VNode *vnode,int row,int& size,QStringList& data)
 {
 	node_ptr node=vnode->node();
-	if(node.get())
+	if(!node.get())
 		return false;
 
 	const std::vector<ecf::TimeAttr>& tV=node->timeVec();
@@ -524,7 +546,7 @@ int VDateAttribute::num(const VNode *vnode)
 bool VDateAttribute::getData(VNode *vnode,int row,int& size,QStringList& data)
 {
 	node_ptr node=vnode->node();
-	if(node.get())
+	if(!node.get())
 		return false;
 
 	const std::vector<DateAttr>& dV=node->dates();
@@ -560,7 +582,7 @@ int VRepeatAttribute::num(const VNode *vnode)
 bool VRepeatAttribute::getData(VNode *vnode,int row,int& size,QStringList& data)
 {
 	node_ptr node=vnode->node();
-	if(node.get())
+	if(!node.get())
 		return false;
 
 	const Repeat& r=node->repeat();
@@ -587,7 +609,7 @@ int VLateAttribute::num(const VNode *vnode)
 bool VLateAttribute::getData(VNode *vnode,int row,int& size,QStringList& data)
 {
 	node_ptr node=vnode->node();
-	if(node.get())
+	if(!node.get())
 		return false;
 
 	ecf::LateAttr *late=node->get_late();

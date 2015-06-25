@@ -112,6 +112,13 @@ QStringList VNode::getAttributeData(int row,VAttribute** type)
 	return lst;
 }
 
+VAttribute* VNode::getAttributeType(int row)
+{
+	VAttribute** type;
+	VAttribute::getType(this,row,type);
+	return *type;
+}
+
 void VNode::addChild(VNode* vn)
 {
 	children_.push_back(vn);

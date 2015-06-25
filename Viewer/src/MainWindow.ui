@@ -38,6 +38,9 @@
     </rect>
    </property>
    <widget class="QMenu" name="menuLl">
+    <property name="tearOffEnabled">
+     <bool>true</bool>
+    </property>
     <property name="title">
      <string>&amp;File</string>
     </property>
@@ -49,6 +52,9 @@
     <addaction name="actionQuit"/>
    </widget>
    <widget class="QMenu" name="menuEdit">
+    <property name="tearOffEnabled">
+     <bool>true</bool>
+    </property>
     <property name="title">
      <string>&amp;Edit</string>
     </property>
@@ -56,11 +62,17 @@
     <addaction name="actionConfigureNodeMenu"/>
    </widget>
    <widget class="QMenu" name="menu_Help">
+    <property name="tearOffEnabled">
+     <bool>true</bool>
+    </property>
     <property name="title">
      <string>&amp;Help</string>
     </property>
    </widget>
    <widget class="QMenu" name="menuServer">
+    <property name="tearOffEnabled">
+     <bool>true</bool>
+    </property>
     <property name="title">
      <string>&amp;Servers</string>
     </property>
@@ -85,7 +97,6 @@
    </attribute>
    <addaction name="actionRefresh"/>
    <addaction name="actionReset"/>
-   <addaction name="actionAddInfoPanel"/>
    <addaction name="actionShowInInfoPanel"/>
   </widget>
   <widget class="QToolBar" name="toolBar">
@@ -100,6 +111,7 @@
    </attribute>
    <addaction name="actionAddTreeWidget"/>
    <addaction name="actionAddTableWidget"/>
+   <addaction name="actionAddInfoPanel"/>
   </widget>
   <action name="actionClose">
    <property name="icon">
@@ -200,16 +212,28 @@
    </property>
   </action>
   <action name="actionAddInfoPanel">
+   <property name="icon">
+    <iconset resource="viewer.qrc">
+     <normaloff>:/viewer/images/add_info.svg</normaloff>:/viewer/images/add_info.svg</iconset>
+   </property>
    <property name="text">
     <string>Add info panel</string>
    </property>
   </action>
   <action name="actionShowInInfoPanel">
+   <property name="icon">
+    <iconset resource="viewer.qrc">
+     <normaloff>:/viewer/images/info.svg</normaloff>:/viewer/images/info.svg</iconset>
+   </property>
    <property name="text">
     <string>Show info panel</string>
    </property>
   </action>
   <action name="actionAddTreeWidget">
+   <property name="icon">
+    <iconset resource="viewer.qrc">
+     <normaloff>:/viewer/images/add_tree.svg</normaloff>:/viewer/images/add_tree.svg</iconset>
+   </property>
    <property name="text">
     <string>Add tree</string>
    </property>
@@ -218,6 +242,10 @@
    </property>
   </action>
   <action name="actionAddTableWidget">
+   <property name="icon">
+    <iconset resource="viewer.qrc">
+     <normaloff>:/viewer/images/add_table.svg</normaloff>:/viewer/images/add_table.svg</iconset>
+   </property>
    <property name="text">
     <string>Add table</string>
    </property>

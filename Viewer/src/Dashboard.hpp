@@ -14,6 +14,7 @@
 
 #include <QSplitter>
 #include <QMainWindow>
+#include <QDockWidget>
 
 #include "ServerFilter.hpp"
 #include "VInfo.hpp"
@@ -25,6 +26,24 @@ class DashboardWidget;
 class ServerFilter;
 class ServerItem;
 class VComboSettings;
+
+
+class DashboardDock : public QDockWidget
+{
+
+Q_OBJECT
+
+public:
+	DashboardDock(QString title,QWidget * parent=0) : QDockWidget(title,parent) {};
+
+Q_SIGNALS:
+	void closeRequested();
+
+protected:
+	void showEvent(QShowEvent* event);
+	void closeEvent (QCloseEvent *event);
+};
+
 
 class Dashboard : public QMainWindow, public ServerFilterObserver
 {
@@ -53,8 +72,7 @@ public:
 	void readSettings(VComboSettings*);
 
 public Q_SLOTS:
-	//void slotFolderReplacedInView(Folder*);
-	//void slotFolderChanged(Folder*);
+	void slotDockClose();
 
 Q_SIGNALS:
     void selectionChanged(VInfo_ptr);

@@ -70,6 +70,7 @@ public:
     short attrNum() const;
 
     QStringList getAttributeData(int,VAttribute**);
+    VAttribute* getAttributeType(int);
 
     VNode* parent() const {return parent_;}
     int numOfChildren() const { return static_cast<int>(children_.size());}

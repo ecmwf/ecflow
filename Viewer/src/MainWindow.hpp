@@ -55,6 +55,7 @@ protected Q_SLOTS:
 	void on_actionShowInInfoPanel_triggered();
 	void on_actionAddTreeWidget_triggered();
 	void on_actionAddTableWidget_triggered();
+	void on_actionAddInfoPanel_triggered();
 	void on_actionPreferences_triggered();
 
 	void slotCurrentChangedInPanel();
@@ -62,7 +63,6 @@ protected Q_SLOTS:
 private:
     void init(MainWindow*);
     void closeEvent(QCloseEvent*);
-    InfoPanel* addInfoPanel();
 
     void reloadContents();
     void rerenderContents();

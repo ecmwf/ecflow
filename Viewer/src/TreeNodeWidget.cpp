@@ -76,11 +76,16 @@ TreeNodeWidget::TreeNodeWidget(ServerFilter* servers,QWidget* parent) : NodeWidg
 
 	//Builds the menu for the settings tool button
 	QMenu *menu=new QMenu(this);
+	menu->setTearOffEnabled(true);
 
 	menu->addAction(actionBreadcrumbs);
 	QMenu *menuState=menu->addMenu(tr("Status"));
 	QMenu *menuType=menu->addMenu(tr("Attribute"));
 	QMenu *menuIcon=menu->addMenu(tr("Icon"));
+
+	menuState->setTearOffEnabled(true);
+	menuType->setTearOffEnabled(true);
+	menuIcon->setTearOffEnabled(true);
 
 	//stateFilterMenu_=new StateFilterMenu(menuState,filter_->menu());
 	attrFilterMenu_=new VParamFilterMenu(menuType,atts_);
