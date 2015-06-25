@@ -98,7 +98,6 @@ public:
 public Q_SLOTS:
 	void slotReload(VInfo_ptr node);
 	void slotCurrentWidgetChanged(int);
-	void on_addTb_clicked();
 
 Q_SIGNALS:
 	void selectionChanged(VInfo_ptr);

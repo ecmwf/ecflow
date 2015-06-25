@@ -118,10 +118,20 @@ InfoPanel::~InfoPanel()
 {
 	Q_FOREACH(InfoPanelItemHandler *d,items_)
 			delete d;
+
+	if(info_ && info_.get())
+	{
+		info_->removeObserver(this);
+	}
 }
 
 void InfoPanel::clear()
 {
+	if(info_ && info_.get())
+	{
+		info_->removeObserver(this);
+	}
+
 	//release info
 	info_.reset();
 
@@ -170,13 +180,12 @@ void InfoPanel::slotReload(VInfo_ptr node)
 //the new VInfo
 void InfoPanel::adjustInfo(VInfo_ptr info)
 {
-	ServerHandler *server=0;
-  	bool sameServer=false;
-
   	//Check if there is data in info
   	if(info.get())
   	{
-  		server=info->server();
+  		bool sameServer=false;
+
+  		ServerHandler *server=info->server();
 
   		sameServer=(info_)?(info_->server() == server):false;
 
@@ -204,7 +213,18 @@ void InfoPanel::adjustInfo(VInfo_ptr info)
   	}
 
   	//Set the info
+  	if(info_)
+  	{
+  		info_->removeObserver(this);
+  	}
+
   	info_=info;
+
+  	if(info_)
+  	{
+  		info_->addObserver(this);
+  	}
+
 }
 
 void InfoPanel::adjustTabs(VInfo_ptr info)
@@ -342,12 +362,6 @@ void InfoPanel::slotCurrentWidgetChanged(int idx)
 	}
 }
 
-void InfoPanel::on_addTb_clicked()
-{
-	//InfoPanel* p=new InfoPanel(parent);
-	//emit newPanelAdded(p);
-}
-
 bool InfoPanel::frozen() const
 {
 	return frozenTb->isChecked();
@@ -363,7 +377,6 @@ void InfoPanel::detached(bool b)
 	detachedTb->setChecked(b);
 }
 
-
 void InfoPanel::notifyDataLost(VInfo* info)
 {
 	if(info_ && info_.get() == info)
@@ -371,7 +384,6 @@ void InfoPanel::notifyDataLost(VInfo* info)
 		clear();
 	}
 }
-
 
 //-------------------------------------------------
 // ServerObserver methods

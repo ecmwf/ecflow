@@ -22,7 +22,7 @@ class ServerHandler;
 class ServerDefsAccess
 {
 public:
-	ServerDefsAccess(ServerHandler *server);
+	explicit ServerDefsAccess(ServerHandler *server);
 	~ServerDefsAccess();
 
 	defs_ptr defs();

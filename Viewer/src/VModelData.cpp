@@ -73,7 +73,7 @@ void VModelServer::runFilter()
 }
 //==========================================
 //
-// VTreeServer#include <QDebug>
+// VTreeServer
 //
 //==========================================
 
@@ -111,7 +111,7 @@ void VTreeServer::notifyBeginServerScan(ServerHandler* server,const VServerChang
 
 void VTreeServer::notifyEndServerScan(ServerHandler* server)
 {
-	Q_EMIT endServerScan(this);
+	Q_EMIT endServerScan(this,server->vRoot()->numOfChildren());
 
 	if(filter_)
 	{

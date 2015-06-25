@@ -61,7 +61,7 @@ Q_SIGNALS:
 	void nodeChanged(VModelServer*,const VNode*);
 	void attributesChanged(VModelServer*,const VNode*);
 	void beginServerScan(VModelServer*,int);
-	void endServerScan(VModelServer*);
+	void endServerScan(VModelServer*,int);
 	void beginServerClear(VModelServer*);
 	void endServerClear(VModelServer*);
 
@@ -178,7 +178,7 @@ Q_SIGNALS:
 	void nodeChanged(VModelServer*,const VNode*);
 	void attributesChanged(VModelServer*,const VNode*);
 	void beginServerScan(VModelServer*,int);
-	void endServerScan(VModelServer*);
+	void endServerScan(VModelServer*,int);
 	void beginServerClear(VModelServer*);
 	void endServerClear(VModelServer*);
 

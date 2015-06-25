@@ -84,7 +84,6 @@ public:
 
 	int update();
 	void setUpdatingStatus(bool newStatus) {updating_ = newStatus;}
-	void releaseDefs();
 
 	VServer* vRoot() const {return vRoot_;}
 	SState::State serverState();
@@ -112,7 +111,7 @@ public:
 	static ServerHandler* find(const std::string& name);
 	static ServerHandler* find(VNode *node);
 
-	static void addServerCommand(const std::string &name, const std::string command);
+	static void addServerCommand(const std::string &name, const std::string& command);
 	static std::string resolveServerCommand(const std::string &name);
 	static void updateAll();
 

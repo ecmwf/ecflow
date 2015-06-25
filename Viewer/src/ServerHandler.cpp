@@ -132,7 +132,7 @@ ServerHandler::~ServerHandler()
 	writeSettings();
 
 	//Notify the observers
-	for(std::vector<ServerObserver*>::const_iterator it=serverObservers_.begin(); it != serverObservers_.end(); it++)
+	for(std::vector<ServerObserver*>::const_iterator it=serverObservers_.begin(); it != serverObservers_.end(); ++it)
 			(*it)->notifyServerDelete(this);
 
 	//The queue must be deleted before the client, since the thread might
@@ -246,13 +246,6 @@ defs_ptr ServerHandler::defs()
 	}
 }
 
-void ServerHandler::releaseDefs()
-{
-	defsMutex_.unlock();   // unlock addess to the defs for this thread
-}
-
-
-
 void ServerHandler::errorMessage(std::string message)
 {
 	UserMessage::message(UserMessage::ERROR, true, message);
@@ -313,10 +306,10 @@ void ServerHandler::run(VTask_ptr task)
 
 void ServerHandler::script(VTask_ptr task)
 {
-	static std::string errText="no script!\n"
+	/*static std::string errText="no script!\n"
 		      		"check ECF_FILES or ECF_HOME directories, for read access\n"
 		      		"check for file presence and read access below files directory\n"
-		      		"or this may be a 'dummy' task.\n";
+		      		"or this may be a 'dummy' task.\n";*/
 
 	task->param("clientPar","script");
 	comQueue_->addTask(task);
@@ -324,10 +317,10 @@ void ServerHandler::script(VTask_ptr task)
 
 void ServerHandler::job(VTask_ptr task)
 {
-	static std::string errText="no script!\n"
+	/*static std::string errText="no script!\n"
 		      		"check ECF_FILES or ECF_HOME directories, for read access\n"
 		      		"check for file presence and read access below files directory\n"
-		      		"or this may be a 'dummy' task.\n";
+		      		"or this may be a 'dummy' task.\n";*/
 
 	task->param("clientPar","job");
 	comQueue_->addTask(task);
@@ -335,7 +328,7 @@ void ServerHandler::job(VTask_ptr task)
 
 void ServerHandler::jobout(VTask_ptr task)
 {
-	static std::string errText="no job output...";
+	//static std::string errText="no job output...";
 
 	task->param("clientPar","jobout");
 	comQueue_->addTask(task);
@@ -343,7 +336,7 @@ void ServerHandler::jobout(VTask_ptr task)
 
 void ServerHandler::manual(VTask_ptr task)
 {
-	std::string errText="no manual ...";
+	//std::string errText="no manual ...";
 	task->param("clientPar","manual");
 	comQueue_->addTask(task);
 }
@@ -351,7 +344,7 @@ void ServerHandler::manual(VTask_ptr task)
 
 void ServerHandler::updateAll()
 {
-	for(std::vector<ServerHandler*>::const_iterator it=servers_.begin(); it != servers_.end();it++)
+	for(std::vector<ServerHandler*>::const_iterator it=servers_.begin(); it != servers_.end(); ++it)
 	{
 		(*it)->update();
 		(*it)->resetRefreshTimer();  // to avoid too many server requests
@@ -532,7 +525,7 @@ void ServerHandler::command(std::vector<VInfo_ptr> info, std::string cmd, bool r
 	}
 }
 
-void ServerHandler::addServerCommand(const std::string &name, const std::string command)
+void ServerHandler::addServerCommand(const std::string &name, const std::string& command)
 {
 	commands_[name] = command;
 }
@@ -566,7 +559,7 @@ std::string ServerHandler::resolveServerCommand(const std::string &name)
 void ServerHandler::slotNodeChanged(const Node* nc, const std::vector<ecf::Aspect::Type>& aspect)
 {
 	UserMessage::message(UserMessage::DBG, false, std::string("ServerHandler::slotNodeChanged - node: ") + nc->name());
-	for(std::vector<ecf::Aspect::Type>::const_iterator it=aspect.begin(); it != aspect.end(); it++)
+	for(std::vector<ecf::Aspect::Type>::const_iterator it=aspect.begin(); it != aspect.end(); ++it)
 		UserMessage::message(UserMessage::DBG, false, std::string(" aspect: ") + boost::lexical_cast<std::string>(*it));
 
 	//This can happen if we initiated a reset while we sync in the thread
@@ -655,13 +648,13 @@ void ServerHandler::removeNodeObserver(NodeObserver *obs)
 
 void ServerHandler::broadcast(NoMethod proc,const VNode* node)
 {
-	for(std::vector<NodeObserver*>::const_iterator it=nodeObservers_.begin(); it != nodeObservers_.end(); it++)
+	for(std::vector<NodeObserver*>::const_iterator it=nodeObservers_.begin(); it != nodeObservers_.end(); ++it)
 		((*it)->*proc)(node);
 }
 
 void ServerHandler::broadcast(NoMethodV1 proc,const VNode* node,const std::vector<ecf::Aspect::Type>& aspect,const VNodeChange& change)
 {
-	for(std::vector<NodeObserver*>::const_iterator it=nodeObservers_.begin(); it != nodeObservers_.end(); it++)
+	for(std::vector<NodeObserver*>::const_iterator it=nodeObservers_.begin(); it != nodeObservers_.end(); ++it)
 		((*it)->*proc)(node,aspect,change);
 }
 
@@ -673,7 +666,7 @@ void ServerHandler::broadcast(NoMethodV1 proc,const VNode* node,const std::vecto
 //This slot is called when the Defs change.
 void ServerHandler::slotDefsChanged(const std::vector<ecf::Aspect::Type>& a)
 {
-	for(std::vector<ServerObserver*>::const_iterator it=serverObservers_.begin(); it != serverObservers_.end(); it++)
+	for(std::vector<ServerObserver*>::const_iterator it=serverObservers_.begin(); it != serverObservers_.end(); ++it)
 		(*it)->notifyDefsChanged(this,a);
 }
 
@@ -710,13 +703,13 @@ void ServerHandler::removeServerObserver(ServerObserver *obs)
 
 void ServerHandler::broadcast(SoMethod proc)
 {
-	for(std::vector<ServerObserver*>::const_iterator it=serverObservers_.begin(); it != serverObservers_.end(); it++)
+	for(std::vector<ServerObserver*>::const_iterator it=serverObservers_.begin(); it != serverObservers_.end(); ++it)
 		((*it)->*proc)(this);
 }
 
 void ServerHandler::broadcast(SoMethodV1 proc,const VServerChange& ch)
 {
-	for(std::vector<ServerObserver*>::const_iterator it=serverObservers_.begin(); it != serverObservers_.end(); it++)
+	for(std::vector<ServerObserver*>::const_iterator it=serverObservers_.begin(); it != serverObservers_.end(); ++it)
 		((*it)->*proc)(this,ch);
 }
 
@@ -1097,6 +1090,8 @@ void ServerHandler::resetFinished()
 	//Finish full scan
 	vRoot_->endScan();
 
+	assert(change.suiteNum_ == vRoot_->numOfChildren());
+
 	//Notify the observers that scan has ended
 	broadcast(&ServerObserver::notifyEndServerScan);
 
@@ -1229,7 +1224,7 @@ void ServerHandler::updateSuiteFilter(SuiteFilter* sf)
 //This is called internally after an update!!!
 void ServerHandler::updateSuiteFilter(const std::vector<std::string>& loadedSuites)
 {
-	std::vector<std::string> defSuites;
+	//std::vector<std::string> defSuites;
 	//vRoot_->suites(defSuites);
 	suiteFilter_->setLoaded(loadedSuites);
 	broadcast(&ServerObserver::notifyServerSuiteFilterChanged);
@@ -1371,7 +1366,7 @@ void ServerHandler::writeSettings()
 
 ServerHandler* ServerHandler::find(const std::string& name)
 {
-	for(std::vector<ServerHandler*>::const_iterator it=servers_.begin(); it != servers_.end();it++)
+	for(std::vector<ServerHandler*>::const_iterator it=servers_.begin(); it != servers_.end(); ++it)
 			if((*it)->name() == name)
 					return *it;
 	return NULL;

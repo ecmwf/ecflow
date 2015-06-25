@@ -415,7 +415,6 @@ QModelIndex TreeNodeModel::index( int row, int column, const QModelIndex & paren
 		//For the server the internal pointer is NULL
 		if(row < data_->count())
 		{
-			void* p=NULL;
 			//qDebug() << "SERVER" << parent;
 			return createIndex(row,column,(void*)NULL);
 		}
@@ -998,22 +997,22 @@ void TreeNodeModel::slotBeginServerScan(VModelServer* server,int num)
 	QModelIndex idx=serverToIndex(server);
 
 	//At this point the server node does not have any rows in the model!!!
-
-	if(idx.isValid())
+	if(idx.isValid() && num >0)
 	{
-		if(num >0)
-		{
-			beginInsertRows(idx,0,num-1);
-		}
+		beginInsertRows(idx,0,num-1);
 	}
 }
 
 //The server scan has finished. The tree is fully populated.
-void TreeNodeModel::slotEndServerScan(VModelServer* server)
+void TreeNodeModel::slotEndServerScan(VModelServer* server,int num)
 {
 	assert(active_ == true);
-	endInsertRows();
 
+	QModelIndex idx=serverToIndex(server);
+	if(idx.isValid() && num >0)
+	{
+		endInsertRows();
+	}
 	Q_EMIT scanEnded(server->realServer()->vRoot());
 }
 
