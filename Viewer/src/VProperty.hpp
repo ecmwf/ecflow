@@ -29,6 +29,15 @@ public:
 	virtual void notifyChange(VProperty*)=0;
 };
 
+class VPropertyVisitor
+{
+public:
+	VPropertyVisitor() {};
+	virtual ~VPropertyVisitor() {};
+	virtual void visit(VProperty*)=0;
+};
+
+
 
 //This class defines a property storing its value as a QVariant.
 //Properties are used to store the viewer's configuration. Editable properties
@@ -38,7 +47,7 @@ public:
 class VProperty : public VPropertyObserver
 {
 public:
-    VProperty(const std::string& name);
+    explicit VProperty(const std::string& name);
     ~VProperty();
 
     enum Type {StringType,IntType,BoolType,ColourType,FontType};
@@ -63,6 +72,7 @@ public:
     void addChild(VProperty*);
     VProperty* findChild(QString name);
     VProperty* find(const std::string& fullPath);
+    void collectChildren(std::vector<VProperty*>&) const;
 
     bool changed() const;
     void collectLinks(std::vector<VProperty*>&);
@@ -71,7 +81,7 @@ public:
     VProperty* link() const {return link_;}
 
     void setMaster(VProperty*);
-    VProperty *derive();
+    VProperty *clone(bool addLink,bool setMaster);
 
     void addObserver(VPropertyObserver*);
     void removeObserver(VPropertyObserver*);

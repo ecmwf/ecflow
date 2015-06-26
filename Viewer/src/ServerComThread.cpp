@@ -517,8 +517,6 @@ void ServerComThread::attach()
 	if(d == NULL)
 		return;
 
-	int cnt=0;
-
 	ChangeMgrSingleton::instance()->attach(d.get(),this);
 
 	const std::vector<suite_ptr> &suites = d->suiteVec();

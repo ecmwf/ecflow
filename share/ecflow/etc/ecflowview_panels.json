@@ -99,6 +99,14 @@
             "label"   : "Suites",
             "visible_for" : "server"
              
-        }      
+        },
+        
+        {
+        	"name"    : "server_settings",
+            "label"   : "Settings",
+            "visible_for" : "server"
+             
+        }  
+        
     ]
 }

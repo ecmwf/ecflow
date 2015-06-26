@@ -194,6 +194,28 @@ VProperty* VConfig::group(const std::string& name)
 	return 0;
 }
 
+VProperty* VConfig::cloneServerGui(VProperty *linkTarget)
+{
+	VProperty* gr=find("gui.server");
+
+	assert(gr);
+
+	VProperty* cGr=gr->clone(true,false);
+
+	std::vector<VProperty*> chVec;
+	cGr->collectChildren(chVec);
+	for(std::vector<VProperty*>::iterator it=chVec.begin(); it != chVec.end(); it++)
+	{
+		VProperty *p=*it;
+		if(p->link())
+		{
+			p->setLink(linkTarget->find(p->link()->path()));
+		}
+	}
+
+
+	return cGr;
+}
 
 void VConfig::saveSettings()
 {

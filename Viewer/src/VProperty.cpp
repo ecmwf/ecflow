@@ -234,6 +234,15 @@ VProperty* VProperty::find(const std::vector<std::string>& pathVec)
 	return n?n->find(rest):NULL;
 }
 
+void VProperty::collectChildren(std::vector<VProperty*>& chVec) const
+{
+	Q_FOREACH(VProperty* p,children_)
+	{
+		chVec.push_back(p);
+		p->collectChildren(chVec);
+	}
+}
+
 bool VProperty:: changed() const
 {
 	return value_ != defaultValue_;
@@ -267,24 +276,34 @@ void VProperty::setMaster(VProperty* m)
 	master_->addObserver(this);
 }
 
-VProperty* VProperty::derive()
+VProperty* VProperty::clone(bool addLink,bool setMaster)
 {
-	 VProperty *cp=new VProperty(strName_);
+	VProperty *cp=new VProperty(strName_);
 
-	 cp->defaultValue_=defaultValue_;
-	 cp->value_=value_;
+	cp->value_=value_;
+	cp->defaultValue_=defaultValue_;
+	cp->type_=type_;
 
-	 cp->setMaster(this);
+	if(addLink)
+	{
+		cp->link_=link_;
+	}
 
-	 Q_FOREACH(VProperty* p,children_)
-	 {
-		 VProperty *ch=p->derive();
-		 cp->addChild(ch);
-	 }
-	 return cp;
+	cp->params_=params_;
+
+	if(setMaster)
+	{
+		cp->setMaster(this);
+	}
+
+	Q_FOREACH(VProperty* p,children_)
+	{
+		VProperty *ch=p->clone(addLink,setMaster);
+		cp->addChild(ch);
+	}
+
+	return cp;
 }
-
-
 
 //=============================
 //

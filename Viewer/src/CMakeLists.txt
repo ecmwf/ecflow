@@ -55,6 +55,7 @@ set(viewer_srcs
     ServerItem.cpp
     ServerList.cpp
     ServerListDialog.cpp
+    ServerSettingsItemWidget.cpp
     SessionHandler.cpp
     SuiteItemWidget.cpp
     SuiteFilter.cpp
@@ -87,6 +88,7 @@ set(viewer_srcs
     VParam.cpp
     VProperty.cpp   
     VReply.cpp
+    VServerSettings.cpp
     VSettings.cpp
     VSState.cpp
     VTask.cpp
@@ -161,6 +163,7 @@ QT4_WRAP_UI       (VIEWER_FORMS_HEADERS CommandDesignerWidget.ui
             ServerAddDialog.ui
             ServerEditDialog.ui 
             ServerListDialog.ui
+            ServerSettingsItemWidget.ui
             SuiteItemWidget.ui
             TableNodeWidget.ui
             TextItemWidget.ui

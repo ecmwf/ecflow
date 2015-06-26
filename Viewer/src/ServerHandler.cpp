@@ -51,14 +51,16 @@ ServerHandler::ServerHandler(const std::string& name,const std::string& host, co
    updating_(false),
    communicating_(false),
    comQueue_(0),
-   refreshIntervalInSeconds_(60),
    readFromDisk_(true),
    activity_(NoActivity),
    connectState_(new ConnectState()),
-   suiteFilter_(new SuiteFilter())
+   suiteFilter_(new SuiteFilter()),
+   conf_(0)
 {
 	//Create longname
 	longName_=host_ + "@" + port_;
+
+	conf_=new VServerSettings(this);
 
 	//Create the client invoker. At this point it is empty.
 	client_=new ClientInvoker(host,port);
@@ -152,6 +154,8 @@ ServerHandler::~ServerHandler()
 	//The safest is to delete the client in the end
 	if(client_)
 		delete client_;
+
+	delete conf_;
 }
 
 void ServerHandler::stopRefreshTimer()
@@ -166,11 +170,10 @@ void ServerHandler::resetRefreshTimer()
 	if(connectState_->state() == ConnectState::Disconnected)
 		return;
 
-	// interval of -1 means don't use a timer
-	if (refreshIntervalInSeconds_ != -1)
+	if(!refreshTimer_.isActive())
 	{
 		refreshTimer_.stop();
-		refreshTimer_.setInterval(refreshIntervalInSeconds_*1000);
+		refreshTimer_.setInterval(conf_->intValue(VServerSettings::UpdateRate)*1000);
 		refreshTimer_.start();
 	}
 	else
@@ -604,28 +607,6 @@ void ServerHandler::slotNodeDeleted(const std::string& fullPath)
 {
 	UserMessage::message(UserMessage::DBG, false, std::string("ServerHandler::slotNodeDeleted"));
 
-	//There are significant changes. We will suspend the queue until the update finishes.
-	//comQueue_->suspend();
-
-	//The  safest is to clear the tree. When the update is finished we will
-	//rescan the tree.
-	//clearTree();
-
-	/*
-	if(VNode* vn=vRoot_->find(fullPath))
-	{
-		//The  safest is to clear the tree
-		clearTree();
-
-		//if(vn->hasAccessed())
-		//{
-		rescanTree();
-		//}
-	}
-	else
-	{
-		reset();
-	}*/
 }
 
 void ServerHandler::addNodeObserver(NodeObserver *obs)
@@ -995,68 +976,6 @@ void ServerHandler::reset()
 	//While the queue is in reset mode it does not accept tasks.
 	comQueue_->reset();
 }
-/*
-void ServerHandler::load()
-{
-	//This method can only be called when:
-	// -the queue is not running
-	// -the timer is stopped
-	// -the tree is empty.
-	//The caller routine must ensure that these conditions are met
-
-	assert(comQueue_->active() == false);
-	assert(refreshTimer_.isActive() == false);
-	assert(vRoot_->totalNum() == 0);
-	assert(vRoot_->numOfChildren() == 0);
-
-	//The server must be disconnected or we have to be in a reset to continue
-	//if(activity_!= ResetActivity && connectState_ == Normal)
-	//	return;
-
-	//There are no observers at this point
-	//Notify the observers that the init has begun
-	//notifyServerObservers(&ServerObserver::notifyServerInitBegin);
-
-	//Clear the connect error text message
-	//connectError_.clear();
-
-	//Indicate that we start an init (initial load)
-	activity_=LoadActivity;
-
-	//Try to get the server version via the client. If it is successful
-	//we can be sure that we can connect to the server.
-	//try
-	//{
-	//	//Get the server version
-	//	std::string server_version;
-	//	client_->server_version();
-	//	server_version = client_->server_reply().get_string();
-
-	//	UserMessage::message(UserMessage::DBG, false,
-	//		       std::string("ecflow server version: ") + server_version);
-//
-	//	//if (!server_version.empty()) return;
-	//}
-
-	//The init failed
-	//catch(std::exception& e)
-	//{
-	//	connectState_->errorMessage(e.what());
-	//	UserMessage::message(UserMessage::DBG, false, std::string("failed to sync: ") + e.what());
-//
-	//	//The init has failed
-	//	loadFailed();
-	//	return;
-	//}
-
-	//If we are here we can be sure that we can connect to the server and get the defs. Instruct the queue
-	//to run the init task. It will eventually call initEnd() with the right argument!!
-
-	//NOTE: at this point the queue is not running but load will start it.
-	//While the queue is in load mode it does not accept tasks.
-	comQueue_->reset();
-}
-*/
 
 //The reset was successful
 void ServerHandler::resetFinished()
@@ -1247,6 +1166,20 @@ void ServerHandler::updateSuiteFilter(const std::vector<std::string>& loadedSuit
 	//}*/
 
 }
+
+void ServerHandler::confChanged(VServerSettings::Param par,VProperty* prop)
+{
+	switch(par)
+	{
+	case VServerSettings::UpdateRate:
+		break;
+	default:
+		break;
+	}
+
+}
+
+
 
 void ServerHandler::readSettings()
 {

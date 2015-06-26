@@ -11,21 +11,43 @@
 #ifndef VSERVERSETTINGS_HPP_
 #define VSERVERSETTINGS_HPP_
 
-class VProperty;
+#include "VProperty.hpp"
 
-class VServerSettings
+class ServerHandler;
+
+class VServerSettings : public VPropertyObserver
 {
-public:
-	VServerSettings() {};
+	friend class ServerHandler;
 
-    static VProperty* derive();
+public:
+	enum Param {UpdateRate,AdaptiveUpdate,MaxAdaptiveUpdateRate,MaxJobFileLines,ReadFromDisk,
+	           AbortedPopup};
+
+	int intValue(Param par) const;
+	bool boolValue(Param par) const;
+
+	VProperty* guiProp() const {return guiProp_;}
+
+	//From VPropertyObserver
+	void notifyChange(VProperty*);
 
 	//Called from VConfigLoader
 	static void load(VProperty*);
 
 protected:
+	VServerSettings(ServerHandler* server);
+	~VServerSettings();
 
-	static VProperty* prop_;
+	VProperty* property(Param par) const;
+
+	ServerHandler* server_;
+	VProperty* prop_;
+	VProperty* guiProp_;
+	std::map<Param,VProperty*> parToProp_;
+	std::map<VProperty*,Param> propToPar_;
+
+	static std::map<Param,std::string> parNames_;
+	static VProperty* globalProp_;
 };
 
 #endif

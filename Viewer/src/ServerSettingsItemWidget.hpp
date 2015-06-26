@@ -8,49 +8,33 @@
 //
 //============================================================================
 
-#ifndef SUITEITEMWIDGET_HPP_
-#define SUITEITEMWIDGET_HPP_
+#ifndef SERVERSETTINGSITEMWIDGET_HPP_
+#define SERVERSETTINGSITEMWIDGET_HPP_
 
 #include <QWidget>
 
 #include "InfoPanelItem.hpp"
+#include "PropertyEditor.hpp"
 #include "VInfo.hpp"
 
-#include "ui_SuiteItemWidget.h"
+#include "ui_ServerSettingsItemWidget.h"
+
+class VNode;
 
 class SuiteModel;
 
-class SuiteItemWidget : public QWidget, public InfoPanelItem, protected Ui::SuiteItemWidget
+class ServerSettingsItemWidget : public QWidget, public InfoPanelItem, protected Ui::ServerSettingsItemWidget
 {
-Q_OBJECT
-
 public:
-	explicit SuiteItemWidget(QWidget *parent=0);
+	explicit ServerSettingsItemWidget(QWidget *parent=0);
 
 	void reload(VInfo_ptr);
 	QWidget* realWidget();
 	void clearContents();
 
-	//From VInfoPresenter
-	void infoReady(VReply*) {};
-	void infoFailed(VReply*) {};
-	void infoProgress(VReply*) {};
-
-	void suiteFilterChanged();
 	void nodeChanged(const VNode*, const std::vector<ecf::Aspect::Type>&) {};
 	void defsChanged(const std::vector<ecf::Aspect::Type>&) {};
 
-protected Q_SLOTS:
-	void on_autoTb_clicked(bool);
-	void on_enableTb_clicked(bool);
-	void on_selectAllTb_clicked(bool);
-	void on_unselectAllTb_clicked(bool);
-	void on_okTb_clicked(bool);
-
-protected:
-	void updateButtonStatus();
-
-	SuiteModel *model_;
 };
 
 #endif

@@ -28,6 +28,9 @@ public:
     
     void init(const std::string& parDir);
     const std::vector<VProperty*>& groups() {return groups_;}
+
+    VProperty* cloneServerGui(VProperty *linkTarget);
+
     void saveSettings();
 
 

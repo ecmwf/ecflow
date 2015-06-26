@@ -21,6 +21,7 @@
 #include "VReply.hpp"
 #include "VTask.hpp"
 #include "VInfo.hpp"
+#include "VServerSettings.hpp"
 
 #include <QMutex>
 #include <QTimer>
@@ -39,19 +40,6 @@ class VServer;
 class VServerChange;
 class VSettings;
 
-class ServerSettings
-{
-protected:
-
-	int updateRate_;
-	bool adaptiveUpdate_;
-	int maxAdaptiveUpdateRate_;
-	int maxJobFileLines_;
-	bool readFromDisk_;
-
-	bool abortedPopUp_;
-
-};
 
 class ServerHandler : public QObject
 {
@@ -98,6 +86,10 @@ public:
 	void addServerObserver(ServerObserver* obs);
 	void removeServerObserver(ServerObserver* obs);
 
+	void confChanged(VServerSettings::Param,VProperty*);
+	VServerSettings* conf() const {return conf_;}
+
+
 	void readSettings();
 	void writeSettings();
 
@@ -114,6 +106,7 @@ public:
 	static void addServerCommand(const std::string &name, const std::string& command);
 	static std::string resolveServerCommand(const std::string &name);
 	static void updateAll();
+
 
 protected:
 	ServerHandler(const std::string& name,const std::string& host,const std::string&  port);
@@ -200,11 +193,12 @@ private:
 	//std::string targetNodeNames_;      // used when building up a command in ServerHandler::command
 	//std::string targetNodeFullNames_;  // used when building up a command in ServerHandler::command
 
-	int refreshIntervalInSeconds_;
 	QTimer refreshTimer_;
 
 	Activity activity_;
 	ConnectState* connectState_;
+
+	VServerSettings* conf_;
 };
     
 #endif

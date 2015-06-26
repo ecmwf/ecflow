@@ -97,7 +97,7 @@
 			
  		},	
  			
- 		"Server options": {
+ 		"server": {
  			
  			"desc" : "Server options",
  			
@@ -106,9 +106,9 @@
  				"title" : "Update",
  				"prefix" : "server.update",
  				
- 				"line" : "updateRate",
- 				"line" : "apdaptiveUpdate",
- 				"line" : "maxApdaptiveUpdateRate"
+ 				"line" : "updateRateInSec",
+ 				"line" : "adaptiveUpdate",
+ 				"line" : "maxAdaptiveUpdateRateInMin"
  			},
  			
  			"group" : {

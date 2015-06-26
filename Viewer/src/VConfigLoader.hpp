@@ -18,7 +18,7 @@ class VProperty;
 class VConfigLoader 
 {
 public:
-    VConfigLoader(const std::string& name);
+    explicit VConfigLoader(const std::string& name);
     virtual ~VConfigLoader(); 
 
     virtual void load(VProperty* group) = 0;
@@ -26,7 +26,7 @@ public:
     
 private:
     // No copy allowed
-    VConfigLoader(const VConfigLoader&);
+    explicit VConfigLoader(const VConfigLoader&);
     VConfigLoader& operator=(const VConfigLoader&);
 };
 
@@ -34,7 +34,7 @@ template<class T>
 class SimpleLoader : public VConfigLoader {
     void load(VProperty* prop) { T::load(prop); }
 public:
-    SimpleLoader(const std::string& name) : VConfigLoader(name) {}
+    explicit SimpleLoader(const std::string& name) : VConfigLoader(name) {}
 };
 
 #endif
