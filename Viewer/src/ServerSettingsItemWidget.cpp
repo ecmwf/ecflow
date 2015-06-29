@@ -22,6 +22,10 @@
 ServerSettingsItemWidget::ServerSettingsItemWidget(QWidget *parent) : QWidget(parent)
 {
 	setupUi(this);
+
+	connect(buttonBox_,SIGNAL(clicked(QAbstractButton*)),
+			this,SLOT(slotClicked(QAbstractButton *)));
+
 }
 
 QWidget* ServerSettingsItemWidget::realWidget()
@@ -49,5 +53,18 @@ void ServerSettingsItemWidget::clearContents()
 	loaded_=false;
 }
 
+void ServerSettingsItemWidget::slotClicked(QAbstractButton* button)
+{
+	switch(buttonBox_->standardButton(button))
+	{
+	case QDialogButtonBox::Apply:
+		{
+			bool changed=editor_->applyChange();
+		}
+		break;
+	default:
+		break;
+	}
+}
 
 static InfoPanelItemMaker<ServerSettingsItemWidget> maker1("server_settings");

@@ -19,11 +19,11 @@
 //
 //=================================================================
 
-SuiteFilterItem::SuiteFilterItem(const SuiteFilterItem& other)
+SuiteFilterItem::SuiteFilterItem(const SuiteFilterItem& other) :
+	name_(other.name_),
+	present_(other.present_),
+	filtered_(other.filtered_)
 {
-	name_=other.name_;
-	present_=other.present_;
-	filtered_=other.filtered_;
 }
 
 //=================================================================
@@ -49,7 +49,7 @@ void SuiteFilter::adjust()
 	items_.clear();
 
 	//Items present in current_
-	for(std::vector<std::string>::const_iterator it=loaded_.begin(); it != loaded_.end(); it++)
+	for(std::vector<std::string>::const_iterator it=loaded_.begin(); it != loaded_.end(); ++it)
 	{
 		bool filtered=false;
 		if(std::find(filter_.begin(), filter_.end(),*it) != filter_.end())
@@ -61,7 +61,7 @@ void SuiteFilter::adjust()
 	}
 
 	//Items present in filter_ only
-	for(std::vector<std::string>::const_iterator it=filter_.begin(); it != filter_.end(); it++)
+	for(std::vector<std::string>::const_iterator it=filter_.begin(); it != filter_.end(); ++it)
 	{
 		if(std::find(loaded_.begin(), loaded_.end(),*it) == loaded_.end())
 		{
@@ -178,6 +178,11 @@ void SuiteFilter::readSettings(VSettings *vs)
 	enabled_=vs->get<bool>("enabled",enabled_);
 	autoAddNew_=vs->get<bool>("autoAddNew",autoAddNew_);
 
+	if(vs->contains("suites"))
+	{
+		vs->get("filter",filter_);
+	}
+
 	adjust();
 
 	changeFlags_.clear();
@@ -189,11 +194,14 @@ void SuiteFilter::writeSettings(VSettings *vs)
 	vs->put("enabled",enabled_);
 	vs->put("autoAddNew",autoAddNew_);
 
-	std::vector<std::string> array;
-	for(std::vector<std::string>::const_iterator it=filter_.begin(); it != filter_.end(); it++)
+	if(filter_.size() >0)
 	{
-		array.push_back(*it);
-	}
+		std::vector<std::string> array;
+		for(std::vector<std::string>::const_iterator it=filter_.begin(); it != filter_.end(); ++it)
+		{
+			array.push_back(*it);
+		}
 
-	vs->put("filter",array);
+		vs->put("suites",array);
+	}
 }

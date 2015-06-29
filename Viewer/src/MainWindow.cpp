@@ -19,6 +19,8 @@
 #include <QToolBar>
 #include <QVBoxLayout>
 
+#include <QDebug>
+
 #include "MainWindow.hpp"
 #include "FilterWidget.hpp"
 #include "InfoPanel.hpp"
@@ -56,12 +58,17 @@ MainWindow::MainWindow(QStringList idLst,QWidget *parent) : QMainWindow(parent)
 
     //Create a node panel
     nodePanel_=new NodePanel(this);
-    layout->addWidget(nodePanel_);//sp->addWidget(nodePanel_);
+    layout->addWidget(nodePanel_);
     
     connect(nodePanel_,SIGNAL(currentWidgetChanged()),
     		this,SLOT(slotCurrentChangedInPanel()));
 }
 
+
+MainWindow::~MainWindow()
+{
+	qDebug() << "exit";
+}
 
 void MainWindow::init(MainWindow *win)
 {
@@ -441,8 +448,17 @@ void MainWindow::save(MainWindow *topWin)
 	//Write to json
 	vs.write();
 
-
+	//Save global config
 	VConfig::instance()->saveSettings();
+
+	ServerHandler::saveSettings();
+
+
+	//Save non-global config
+	for(int i=0; i < windows_.count(); i++)
+	{
+		//windows_.at(i)->saveSettings();
+	}
 }
 
 void MainWindow::reload()

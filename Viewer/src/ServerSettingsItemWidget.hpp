@@ -19,12 +19,14 @@
 
 #include "ui_ServerSettingsItemWidget.h"
 
-class VNode;
+class QAbstractButton;
 
-class SuiteModel;
+class VNode;
 
 class ServerSettingsItemWidget : public QWidget, public InfoPanelItem, protected Ui::ServerSettingsItemWidget
 {
+Q_OBJECT
+
 public:
 	explicit ServerSettingsItemWidget(QWidget *parent=0);
 
@@ -35,6 +37,8 @@ public:
 	void nodeChanged(const VNode*, const std::vector<ecf::Aspect::Type>&) {};
 	void defsChanged(const std::vector<ecf::Aspect::Type>&) {};
 
+public Q_SLOTS:
+	void slotClicked(QAbstractButton* button);
 };
 
 #endif

@@ -10,12 +10,10 @@
 #ifndef INFOPANEL_HPP_
 #define INFOPANEL_HPP_
 
-#include <QDockWidget>
 #include <QWidget>
 
 #include "DashboardWidget.hpp"
 #include "ServerObserver.hpp"
-#include "Viewer.hpp"
 #include "VInfo.hpp"
 
 #include "ui_InfoPanel.h"
@@ -25,21 +23,6 @@ class QTabWidget;
 class InfoPanel;
 class InfoPanelDef;
 class InfoPanelItem;
-
-class InfoPanelDock : public QDockWidget
-{
-public:
-	InfoPanelDock(QString label,QWidget * parent=0);
-	InfoPanel* infoPanel() const {return infoPanel_;}
-
-protected:
-	void showEvent(QShowEvent* event);
-	void closeEvent (QCloseEvent *event);
-
-	InfoPanel* infoPanel_;
-	bool closed_;
-};
-
 
 class InfoPanelItemHandler
 {
@@ -68,7 +51,7 @@ class InfoPanel : public DashboardWidget, public ServerObserver, public VInfoObs
     Q_OBJECT
 
 public:
-    InfoPanel(QWidget* parent=0);
+    explicit InfoPanel(QWidget* parent=0);
 	virtual ~InfoPanel();
 	bool frozen() const;
 	bool detached() const;

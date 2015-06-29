@@ -129,7 +129,7 @@ void ServerFilter::notifyServerItemDeletion(ServerItem *server)
 		items_.erase(it);
 
 		//Notifies the view about the changes
-		broadcastRemove(*it);
+		broadcastRemove(server);
 	}
 }
 

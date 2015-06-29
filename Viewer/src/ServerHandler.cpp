@@ -119,6 +119,10 @@ ServerHandler::ServerHandler(const std::string& name,const std::string& host, co
 	//take ownership of the ServerComThread. At this point the queue has not started yet.
 	comQueue_=new ServerComQueue (this,client_,comThread);
 
+
+	//Load settings
+	loadConf();
+
 	//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	// At this point nothing is running or active!!!!
 
@@ -131,7 +135,8 @@ ServerHandler::ServerHandler(const std::string& name,const std::string& host, co
 
 ServerHandler::~ServerHandler()
 {
-	writeSettings();
+	//Save setings
+	saveConf();
 
 	//Notify the observers
 	for(std::vector<ServerObserver*>::const_iterator it=serverObservers_.begin(); it != serverObservers_.end(); ++it)
@@ -163,7 +168,7 @@ void ServerHandler::stopRefreshTimer()
 	refreshTimer_.stop();
 }
 
-void ServerHandler::resetRefreshTimer()
+void ServerHandler::startRefreshTimer()
 {
 	//If we are not connected to the server the
 	//timer should not run.
@@ -172,13 +177,23 @@ void ServerHandler::resetRefreshTimer()
 
 	if(!refreshTimer_.isActive())
 	{
-		refreshTimer_.stop();
 		refreshTimer_.setInterval(conf_->intValue(VServerSettings::UpdateRate)*1000);
 		refreshTimer_.start();
 	}
-	else
+}
+
+void ServerHandler::updateRefreshTimer()
+{
+	//If we are not connected to the server the
+	//timer should not run.
+	if(connectState_->state() == ConnectState::Disconnected)
+		return;
+
+	if(refreshTimer_.isActive())
 	{
 		refreshTimer_.stop();
+		refreshTimer_.setInterval(conf_->intValue(VServerSettings::UpdateRate)*1000);
+		refreshTimer_.start();
 	}
 }
 
@@ -350,7 +365,7 @@ void ServerHandler::updateAll()
 	for(std::vector<ServerHandler*>::const_iterator it=servers_.begin(); it != servers_.end(); ++it)
 	{
 		(*it)->update();
-		(*it)->resetRefreshTimer();  // to avoid too many server requests
+		//(*it)->resetRefreshTimer();  // to avoid too many server requests
 	}
 }
 
@@ -924,7 +939,7 @@ void ServerHandler::connectServer()
 		comQueue_->enable();
 
 		//Start the timer
-		resetRefreshTimer();
+		startRefreshTimer();
 
 		//Try to get the news
 		update();
@@ -1015,7 +1030,7 @@ void ServerHandler::resetFinished()
 	broadcast(&ServerObserver::notifyEndServerScan);
 
 	//Restart the timer
-	resetRefreshTimer();
+	startRefreshTimer();
 
 	//Set the connection state
 	if(connectState_->state() != ConnectState::Normal)
@@ -1039,7 +1054,7 @@ void ServerHandler::resetFailed(const std::string& errMsg)
 	broadcast(&ServerObserver::notifyServerConnectState);
 
 	//Restart the timer
-	resetRefreshTimer();
+	startRefreshTimer();
 }
 
 //This function must be called during a SYNC!!!!!!!!
@@ -1110,7 +1125,7 @@ void ServerHandler::rescanTree()
 	comQueue_->start();
 
 	//Start the timer
-	resetRefreshTimer();
+	startRefreshTimer();
 
 	setActivity(NoActivity);
 
@@ -1135,8 +1150,6 @@ void ServerHandler::updateSuiteFilter(SuiteFilter* sf)
 		{
 			reset();
 		}
-
-		writeSettings();
 	}
 
 }
@@ -1172,6 +1185,7 @@ void ServerHandler::confChanged(VServerSettings::Param par,VProperty* prop)
 	switch(par)
 	{
 	case VServerSettings::UpdateRate:
+		updateRefreshTimer();
 		break;
 	default:
 		break;
@@ -1179,114 +1193,20 @@ void ServerHandler::confChanged(VServerSettings::Param par,VProperty* prop)
 
 }
 
-
-
-void ServerHandler::readSettings()
+void ServerHandler::saveSettings()
 {
-	SessionItem *cs=SessionHandler::instance()->current();
-	assert(cs);
-
-	VSettings vs(cs->serverFile(name()));
-
-	//std::string fs = DirectoryHandler::concatenate(DirectoryHandler::configDir(), name() + ".conf.json");
-
-	//Read configuration.
-	if(!vs.read())
-	{
-		 return;
-	}
-
-	vs.beginGroup("suiteFilter");
-	suiteFilter_->readSettings(&vs);
-	vs.endGroup();
-
-/*
-	int cnt=vs.get<int>("windowCount",0);
-
-	//Get number of windows and topWindow index.
-	int cnt=vs.get<int>("windowCount",0);
-	int topWinId=vs.get<int>("topWindowId",-1);
-
-	if(cnt > maxWindowNum_)
-	{
-		cnt=maxWindowNum_;
-	}
-
-	//Create all windows (except the topWindow) in a loop. The
-	//topWindow should be created last so that it should always appear on top.
-	std::string winPattern("window_");
-	for(int i=0; i < cnt; i++)
-	{
-		if(i != topWinId)
-		{
-			std::string id=winPattern + boost::lexical_cast<std::string>(i);
-			if(vs.contains(id))
-			{
-				vs.beginGroup(id);
-				MainWindow::makeWindow(&vs);
-				vs.endGroup();
-			}
-		}
-	}
-
-	//Create the topwindow
-	if(topWinId != -1)
-	{
-		std::string id=winPattern + boost::lexical_cast<std::string>(topWinId);
-		if(vs.contains(id))
-		{
-			vs.beginGroup(id);
-			MainWindow::makeWindow(&vs);
-			vs.endGroup();
-		}
-	}
-
-	//If now windows were created we need to create an empty one
-	if(windows_.count() == 0)
-	{
-		MainWindow::makeWindow(&vs);
-	}*/
+	for(std::vector<ServerHandler*>::const_iterator it=servers_.begin(); it != servers_.end(); ++it)
+		(*it)->saveConf();
 }
 
-void ServerHandler::writeSettings()
+void ServerHandler::saveConf()
 {
-	SessionItem *cs=SessionHandler::instance()->current();
-	assert(cs);
+	conf_->saveSettings();
+}
 
-	VSettings vs(cs->serverFile(name()));
-
-	//std::string fs = DirectoryHandler::concatenate(DirectoryHandler::configDir(), name() + ".conf.json");
-
-	vs.beginGroup("suiteFilter");
-	suiteFilter_->writeSettings(&vs);
-	vs.endGroup();
-
-	//Write to json
-	vs.write();
-
-		/*VSettings vs("ecFlow_ui");
-
-	//We have to clear it so that not to remember all the previous windows
-	vs.clear();
-
-	//Add total window number and id of active window
-	vs.put("windowCount",windows_.count());
-	vs.put("topWindowId",windows_.indexOf(topWin));
-
-	//Save info for all the windows
-	for(int i=0; i < windows_.count(); i++)
-	{
-		std::string id="window_"+boost::lexical_cast<std::string>(i);
-		vs.beginGroup(id);
-		windows_.at(i)->writeSettings(&vs);
-		vs.endGroup();
-	}
-
-	//Define json file
-	std::string fs = DirectoryHandler::concatenate(DirectoryHandler::configDir(), "session.json");
-
-	//Write to json
-	vs.write(fs);*/
+void ServerHandler::loadConf()
+{
+	conf_->loadSettings();
 }
 
 //--------------------------------------------------------------

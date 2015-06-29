@@ -11,6 +11,7 @@
 #include "VConfig.hpp"
 #include "VConfigLoader.hpp"
 #include "VProperty.hpp"
+#include "VSettings.hpp"
 
 #include "DirectoryHandler.hpp"
 #include "SessionHandler.hpp"
@@ -222,13 +223,20 @@ void VConfig::saveSettings()
 	SessionItem* cs=SessionHandler::instance()->current();
 	std::string fName=cs->settingsFile();
 
+	VProperty *guiProp=group("gui");
+
+	saveSettings(fName,guiProp,NULL);
+}
+
+
+void VConfig::saveSettings(const std::string& parFile,VProperty* guiProp,VSettings* vs)
+{
 	using boost::property_tree::ptree;
 	ptree pt;
 
 	//Get editable properties
-	VProperty *prop=group("gui");
 	std::vector<VProperty*> linkVec;
-	prop->collectLinks(linkVec);
+	guiProp->collectLinks(linkVec);
 
 	for(std::vector<VProperty*>::const_iterator it=linkVec.begin(); it != linkVec.end(); it++)
 	{
@@ -236,7 +244,17 @@ void VConfig::saveSettings()
 			pt.put((*it)->path(),(*it)->valueAsString());
 	}
 
-	write_json(fName,pt);
+	//Add settings stored in VSettings
+	if(vs)
+	{
+		//Loop over the possible properties
+		for(ptree::const_iterator it = vs->propertyTree().begin(); it != vs->propertyTree().end(); ++it)
+		{
+			pt.add_child(it->first,it->second);
+		}
+	}
+
+	write_json(parFile,pt);
 }
 
 void VConfig::loadSettings()
@@ -244,9 +262,17 @@ void VConfig::loadSettings()
 	SessionItem* cs=SessionHandler::instance()->current();
 	std::string parFile=cs->settingsFile();
 
-	VProperty *prop=group("gui");
+	VProperty *guiProp=group("gui");
+
+	loadSettings(parFile,guiProp);
+}
+
+
+
+void VConfig::loadSettings(const std::string& parFile,VProperty* guiProp)
+{
 	std::vector<VProperty*> linkVec;
-	prop->collectLinks(linkVec);
+	guiProp->collectLinks(linkVec);
 
 	//Parse file using the boost JSON property tree parser
 	using boost::property_tree::ptree;
@@ -273,5 +299,15 @@ void VConfig::loadSettings()
 		}
 	}
 }
+
+
+
+
+
+
+
+
+
+
 
 

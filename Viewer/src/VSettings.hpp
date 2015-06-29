@@ -35,7 +35,7 @@ protected:
 class VSettings
 {
 public:
-	VSettings(const std::string& file);
+	explicit VSettings(const std::string& file);
 	virtual ~VSettings() {};
 
 	//bool read(const std::string &fs);
@@ -62,6 +62,8 @@ public:
 		return pt_.get<T>(path_.path(key),defaultVal);
 	}
 	void get(const std::string& key,std::vector<std::string>& val);
+
+	const boost::property_tree::ptree & propertyTree() const {return pt_;}
 
 protected:
 	boost::property_tree::ptree pt_;

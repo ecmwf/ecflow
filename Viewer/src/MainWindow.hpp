@@ -35,6 +35,7 @@ class MainWindow : public QMainWindow, private Ui::MainWindow
 
 public:
     MainWindow(QStringList,QWidget *parent=0);
+    ~MainWindow();
     
     static void init();
     static void showWindows();

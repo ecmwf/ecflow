@@ -11,10 +11,16 @@
 
 #include <assert.h>
 
+#include "ServerHandler.hpp"
+#include "SessionHandler.hpp"
+#include "SuiteFilter.hpp"
 #include "UserMessage.hpp"
 #include "VConfig.hpp"
 #include "VConfigLoader.hpp"
 #include "VProperty.hpp"
+#include "VSettings.hpp"
+
+#include <boost/property_tree/json_parser.hpp>
 
 std::map<VServerSettings::Param,std::string> VServerSettings::parNames_;
 VProperty* VServerSettings::globalProp_=0;
@@ -100,7 +106,7 @@ void VServerSettings::notifyChange(VProperty* p)
 	std::map<VProperty*,Param>::iterator it=propToPar_.find(p);
 	if(it != propToPar_.end())
 	{
-		//server_->confChanged(it->first,it->second);
+		server_->confChanged(it->second,it->first);
 
 	}
 	else
@@ -109,33 +115,34 @@ void VServerSettings::notifyChange(VProperty* p)
 	}
 }
 
+void VServerSettings::loadSettings()
+{
+	SessionItem* cs=SessionHandler::instance()->current();
+	std::string fName=cs->serverFile(server_->name());
 
+	//Load settings stored in VProperty
+	VConfig::instance()->loadSettings(fName,guiProp_);
 
+	//Some  settings are read through VSettings
+	VSettings vs(fName);
+	vs.beginGroup("server_filter");
+	server_->suiteFilter()->readSettings(&vs);
+	vs.endGroup();
+}
 
-/*
-	updateRate_=prop_->find("server.updateRate")
+void VServerSettings::saveSettings()
+{
+	SessionItem* cs=SessionHandler::instance()->current();
+	std::string fName=cs->serverFile(server_->name());
 
+	//We save the sitefilter through VSettings
+	VSettings vs("");
+	vs.beginGroup("server_filter");
+	server_->suiteFilter()->writeSettings(&vs);
+	vs.endGroup();
 
-	SessionItem *cs=SessionHandler::instance()->current();
-	assert(cs);
-
-	VSettings vs(cs->serverFile(name()));
-
-	//std::string fs = DirectoryHandler::concatenate(DirectoryHandler::configDir(), name() + ".conf.json");
-
-	//Read configuration.
-	if(!vs.read())
-	{
-		 return;
-	}
-
-	vs.beginGroup("suiteFilter");
-	suiteFilter_->readSettings(&vs);
-	vs.endGroup();*/
-
-
-
-
+	VConfig::instance()->saveSettings(fName,guiProp_,&vs);
+}
 
 //Called from VConfigLoader
 void VServerSettings::load(VProperty* p)

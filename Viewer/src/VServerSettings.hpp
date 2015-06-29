@@ -39,6 +39,8 @@ protected:
 	~VServerSettings();
 
 	VProperty* property(Param par) const;
+	void loadSettings();
+	void saveSettings();
 
 	ServerHandler* server_;
 	VProperty* prop_;

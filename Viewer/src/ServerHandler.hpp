@@ -89,9 +89,7 @@ public:
 	void confChanged(VServerSettings::Param,VProperty*);
 	VServerSettings* conf() const {return conf_;}
 
-
-	void readSettings();
-	void writeSettings();
+	static void saveSettings();
 
 	static const std::vector<ServerHandler*>& servers() {return servers_;}
 	static ServerHandler* addServer(const std::string &name,const std::string &host, const std::string &port);
@@ -140,9 +138,7 @@ protected:
 	static std::map<std::string, std::string> commands_;
 
 private Q_SLOTS:
-	//void commandSent();  // invoked when a command has finished being sent to the server
 	void errorMessage(std::string message); // invoked when an error message is received
-	//void queryFinished(VReply_ptr);  // invoked when a reply is received from from the server/thread
 	void refreshServerInfo();
 	void slotNodeChanged(const Node* n, const std::vector<ecf::Aspect::Type>& a);
 	void slotDefsChanged(const std::vector<ecf::Aspect::Type>& a);
@@ -163,7 +159,8 @@ private:
 
 	//Handle the update timer
 	void stopRefreshTimer();
-	void resetRefreshTimer();
+	void startRefreshTimer();
+	void updateRefreshTimer();
 
 	void script(VTask_ptr req);
 	void job(VTask_ptr req);
@@ -185,6 +182,9 @@ private:
 	void broadcast(NoMethod,const VNode*);
 	void broadcast(NoMethodV1,const VNode*,const std::vector<ecf::Aspect::Type>&,const VNodeChange&);
 	void broadcast(NoMethodV2,const VNode*,const VNodeChange&);
+
+	void saveConf();
+	void loadConf();
 
 	QMutex           defsMutex_;
 

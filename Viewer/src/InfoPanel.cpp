@@ -13,61 +13,11 @@
 #include <QToolButton>
 #include <QVBoxLayout>
 
+#include "InfoPanelItem.hpp"
 #include "InfoPanelHandler.hpp"
-#include "JobItemWidget.hpp"
-#include "MessageItemWidget.hpp"
-#include "ScriptItemWidget.hpp"
-#include "VariableItemWidget.hpp"
+#include "ServerHandler.hpp"
+#include "UserMessage.hpp"
 #include "VSettings.hpp"
-
-
-InfoPanelDock::InfoPanelDock(QString label,QWidget * parent) :
-   QDockWidget(label,parent),
-   infoPanel_(0),
-   closed_(true)
-{
-	setAllowedAreas(Qt::BottomDockWidgetArea |
-				Qt::RightDockWidgetArea);
-
-	setFeatures(QDockWidget::DockWidgetClosable | QDockWidget::DockWidgetMovable |
-				QDockWidget::DockWidgetFloatable);
-
-	infoPanel_=new InfoPanel(parent);
-
-	//Just to be sure that init is correct
-	if(isVisible())
-	{
-		closed_=false;
-		infoPanel_->setEnabled(true);
-	}
-	else
-	{
-		infoPanel_->setEnabled(false);
-	}
-
-
-	setWidget(infoPanel_);
-}
-
-void InfoPanelDock::showEvent(QShowEvent* event)
-{
-	if(closed_==true)
-	{
-		closed_=false;
-		infoPanel_->setEnabled(true);
-	}
-
-	QWidget::showEvent(event);
-}
-
-void InfoPanelDock::closeEvent (QCloseEvent *event)
-{
-	QWidget::closeEvent(event);
-
-	closed_=true;
-	infoPanel_->clear();
-	infoPanel_->setEnabled(false);
-}
 
 //==============================================
 //
@@ -183,11 +133,9 @@ void InfoPanel::adjustInfo(VInfo_ptr info)
   	//Check if there is data in info
   	if(info.get())
   	{
-  		bool sameServer=false;
-
   		ServerHandler *server=info->server();
 
-  		sameServer=(info_)?(info_->server() == server):false;
+  		bool sameServer=(info_)?(info_->server() == server):false;
 
   		//Handle observers
   		if(!sameServer)
@@ -235,7 +183,7 @@ void InfoPanel::adjustTabs(VInfo_ptr info)
 
 	for(int i=0; i < ids.size(); i++)
 	{
-		qDebug() << ids[i]->name().c_str();
+		UserMessage::message(UserMessage::DBG,false,std::string("InfoPanel --> tab: ") + ids[i]->name());
 	}
 
 	int match=0;
@@ -356,7 +304,6 @@ void InfoPanel::slotCurrentWidgetChanged(int idx)
 
 	if(InfoPanelItem* item=findItem(tab_->widget(idx)))
 	{
-		qDebug() << "tab changed" << item->loaded();
 		if(!item->loaded())
 			item->reload(info_);
 	}

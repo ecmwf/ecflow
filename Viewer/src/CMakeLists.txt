@@ -129,6 +129,7 @@ QT4_WRAP_CPP(VIEWER_MOC AbstractNodeModel.hpp
                         ServerComThread.hpp
                         ServerHandler.hpp
                         ServerListDialog.hpp
+                        ServerSettingsItemWidget.hpp
                         SuiteItemWidget.hpp
                         TabWidget.hpp
                         TableNodeModel.hpp 

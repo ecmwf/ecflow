@@ -16,11 +16,15 @@
 #include <boost/property_tree/ptree.hpp>
 
 class VProperty;
+class VServerSettings;
+class VSettings;
 
-//This singleton class strores the configuration of the viewer.
+//This singleton class stores the configuration of the viewer.
 
 class VConfig
 {
+	friend class VServerSettings;
+
 public:
     ~VConfig();
     
@@ -33,13 +37,15 @@ public:
 
     void saveSettings();
 
-
 protected:
     VConfig();
     
     void loadInit(const std::string& parFile);
     void loadProperty(const boost::property_tree::ptree& pt,VProperty *prop);
     void loadSettings();
+    void saveSettings(const std::string& parFile,VProperty* guiProp,VSettings* vs);
+    void loadSettings(const std::string& parFile,VProperty* guiProp);
+
     VProperty* find(const std::string& path);
     VProperty* group(const std::string& name);
 
