@@ -89,11 +89,19 @@ void VInfo::notifyBeginServerClear(ServerHandler* server)
 
 void VInfo::notifyEndServerScan(ServerHandler* server)
 {
-	node_=server_->vRoot()->find(nodePath_);
-	if(!node_)
+	if(isNode())
 	{
-		for(std::vector<VInfoObserver*>::const_iterator it=observers_.begin(); it != observers_.end(); it++)
-				(*it)->notifyDataLost(this);
+		node_=server_->vRoot()->find(nodePath_);
+		if(!node_)
+		{
+			for(std::vector<VInfoObserver*>::iterator it=observers_.begin(); it != observers_.end(); it++)
+			{
+				VInfoObserver* o=*it;
+
+				observers_.erase(it);
+				o->notifyDataLost(this);
+			}
+		}
 	}
 }
 
