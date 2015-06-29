@@ -76,7 +76,7 @@ void VProperty::setDefaultValue(const std::string& val)
     if(value_.isNull())
         value_=defaultValue_;
     
-    qDebug() << "Prop:" << name_ << defaultValue_ << value_.value<QColor>();
+    //qDebug() << "Prop:" << name_ << defaultValue_ << value_.value<QColor>();
 }
 
 void VProperty::setValue(const std::string& val)
@@ -336,7 +336,6 @@ bool VProperty::isBool(const std::string& val)
 QColor VProperty::toColour(const std::string& name)
 {
     QString qn=QString::fromStdString(name);
-    qDebug() << qn;
     QColor col;
     QRegExp rx("rgb\\((\\d+),(\\d+),(\\d+)");
 
@@ -347,8 +346,6 @@ QColor VProperty::toColour(const std::string& name)
                   rx.cap(3).toInt());
 
     }
-
-    qDebug() << col;
 
     return col;
 }
@@ -361,8 +358,6 @@ QFont VProperty::toFont(const std::string& name)
 int VProperty::toNumber(const std::string& name)
 {
 	QString qn=QString::fromStdString(name);
-
-	qDebug() << "int" << qn << qn.toInt();
 	return qn.toInt();
 }
 

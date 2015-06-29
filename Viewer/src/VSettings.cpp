@@ -9,6 +9,8 @@
 //============================================================================
 
 #include "VSettings.hpp"
+
+#include "DirectoryHandler.hpp"
 #include "UserMessage.hpp"
 
 #include <QDebug>
@@ -85,8 +87,11 @@ bool VSettings::read()
 	}
 	catch (const boost::property_tree::json_parser::json_parser_error& e)
 	{
-		 std::string errorMessage = e.what();
-		 UserMessage::message(UserMessage::ERROR, true, std::string("Error, unable to parse JSON session file : " + errorMessage));
+		 if(!DirectoryHandler::isFirstStartUp())
+		 {
+			 std::string errorMessage = e.what();
+			 UserMessage::message(UserMessage::ERROR, true, std::string("Error, unable to parse JSON session file : " + errorMessage));
+		 }
 		 return false;
 	}
 

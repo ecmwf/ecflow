@@ -22,6 +22,8 @@ std::string DirectoryHandler::etcDir_;
 std::string DirectoryHandler::configDir_;
 std::string DirectoryHandler::rcDir_;
 
+static bool firstStartUp=false;
+
 DirectoryHandler::DirectoryHandler()
 {
 }
@@ -52,6 +54,8 @@ void DirectoryHandler::init(std::string exePath)
 		//Create configDir if if does not exist
 		if(!boost::filesystem::exists(configDir))
 		{
+			firstStartUp=true;
+
 			try
 			{
 				boost::filesystem::create_directory(configDir);
@@ -122,4 +126,9 @@ void DirectoryHandler::createDir(const std::string& path)
 					std::string("Could not create dir: " + path + " reason: " + err.what()));
 		}
 	}
+}
+
+bool DirectoryHandler::isFirstStartUp()
+{
+	return firstStartUp;
 }

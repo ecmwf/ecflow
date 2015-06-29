@@ -284,9 +284,12 @@ void VConfig::loadSettings(const std::string& parFile,VProperty* guiProp)
 	}
 	catch (const boost::property_tree::json_parser::json_parser_error& e)
 	{
-	    std::string errorMessage = e.what();
-	    UserMessage::message(UserMessage::ERROR, true,
-	                std::string("Error! VConfig::loadSetting() unable to parse settings file: " + parFile + " Message: " +errorMessage));
+		if(!DirectoryHandler::isFirstStartUp())
+		{
+			std::string errorMessage = e.what();
+			UserMessage::message(UserMessage::ERROR, true,
+	                std::string("Error! VConfig::loadSettings() unable to parse settings file: " + parFile + " Message: " +errorMessage));
+		}
 	    return;
     }
 
@@ -299,15 +302,3 @@ void VConfig::loadSettings(const std::string& parFile,VProperty* guiProp)
 		}
 	}
 }
-
-
-
-
-
-
-
-
-
-
-
-

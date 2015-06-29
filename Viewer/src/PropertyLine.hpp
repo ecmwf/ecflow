@@ -42,7 +42,7 @@ public:
 	static PropertyLine* create(VProperty* p,QWidget* w);
 
 private:
-	PropertyLineFactory(const PropertyLineFactory&);
+	explicit PropertyLineFactory(const PropertyLineFactory&);
 	PropertyLineFactory& operator=(const PropertyLineFactory&);
 
 };
@@ -52,7 +52,7 @@ class PropertyLineMaker : public PropertyLineFactory
 {
 	PropertyLine* make(VProperty* p,QWidget* w) { return new T(p,w); }
 public:
-	PropertyLineMaker(VProperty::Type t) : PropertyLineFactory(t) {}
+	explicit PropertyLineMaker(VProperty::Type t) : PropertyLineFactory(t) {}
 };
 
 
@@ -62,6 +62,8 @@ public:
 
 class PropertyLine: public QObject
 {
+ Q_OBJECT
+
 public:
 	PropertyLine(VProperty*,bool addLabel,QWidget* parent=0);
 	virtual ~PropertyLine() {}
@@ -69,16 +71,22 @@ public:
 	QLabel* label() {return label_;};
 	virtual QWidget* item()=0;
 	virtual QWidget* button()=0;
+	QToolButton* defaultTb() {return defaultTb_;};
 
 	virtual void reset(QVariant)=0;
 	virtual bool applyChange()=0;
+	virtual QVariant currentValue()=0;
+
+protected Q_SLOTS:
+	void slotResetToDefault(bool);
+	void checkState();
 
 protected:
 	VProperty* prop_;
 	QVariant val_;
 	QLabel* label_;
+	QToolButton* defaultTb_;
 };
-
 
 //-------------------------------------
 // String editor
@@ -86,12 +94,18 @@ protected:
 
 class StringPropertyLine : public PropertyLine
 {
+	Q_OBJECT
+
 public:
 	StringPropertyLine(VProperty* vProp,QWidget * parent=0);
 	QWidget* item();
 	QWidget* button();
 	void reset(QVariant);
 	bool applyChange();
+	QVariant currentValue();
+
+public Q_SLOTS:
+	void slotEdited(QString);
 
 private:
 	QLineEdit* le_;
@@ -111,6 +125,7 @@ public:
 	QWidget* button();
 	void reset(QVariant);
 	bool applyChange();
+	QVariant currentValue();
 
 private Q_SLOTS:
 	void slotEdit(bool);
@@ -133,6 +148,7 @@ public:
 	QWidget* button();
 	void reset(QVariant);
 	bool applyChange();
+	QVariant currentValue();
 
 private Q_SLOTS:
 	void slotEdit(bool);
@@ -149,12 +165,18 @@ private:
 
 class IntPropertyLine : public PropertyLine
 {
+	Q_OBJECT
+
 public:
 	IntPropertyLine(VProperty* vProp,QWidget * parent=0);
 	QWidget* item();
 	QWidget* button();
 	void reset(QVariant);
 	bool applyChange();
+	QVariant currentValue();
+
+public Q_SLOTS:
+	void slotEdited(QString);
 
 private:
 	QLineEdit* le_;
@@ -166,12 +188,18 @@ private:
 
 class BoolPropertyLine : public PropertyLine
 {
+	Q_OBJECT
+
 public:
 	BoolPropertyLine(VProperty* vProp,QWidget * parent=0);
 	QWidget* item();
 	QWidget* button();
 	void reset(QVariant);
 	bool applyChange();
+	QVariant currentValue();
+
+public Q_SLOTS:
+	void slotStateChanged(int);
 
 private:
 	QCheckBox* cb_;

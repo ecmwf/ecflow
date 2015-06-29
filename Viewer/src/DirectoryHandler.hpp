@@ -29,6 +29,8 @@ public:
     static void findFiles(const std::string &dirPath,const std::string &startsWith,
     		    std::vector<std::string>& res);
 
+    static bool isFirstStartUp();
+
 private:
     static std::string shareDir_;
     static std::string etcDir_;

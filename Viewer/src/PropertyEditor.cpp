@@ -13,6 +13,7 @@
 #include <QDebug>
 #include <QGroupBox>
 #include <QLabel>
+#include <QToolButton>
 
 #include "PropertyLine.hpp"
 #include "VConfig.hpp"
@@ -78,6 +79,13 @@ void PropertyEditor::addItem(VProperty* vProp,QGridLayout* gridLayout)
     		QWidget *bw=item->button();
     		if(bw)
     			gridLayout->addWidget(bw,row,2);
+
+
+    		QToolButton* defTb=item->defaultTb();
+    		if(defTb)
+    		{
+    			gridLayout->addWidget(defTb,row,3);
+    		}
 
     		lineItems_ << item;
     	}

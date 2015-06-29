@@ -63,11 +63,33 @@ PropertyLine* PropertyLineFactory::create(VProperty* p,QWidget* w)
 //=========================================================================
 
 PropertyLine::PropertyLine(VProperty* vProp,bool addLabel,QWidget * parent) :
+	QObject(parent),
 	prop_(vProp),
 	label_(0)
 {
 	if(addLabel)
 		label_=new QLabel(vProp->param("label"),parent);
+
+	defaultTb_= new QToolButton(parent);
+	defaultTb_->setText("Default");
+	defaultTb_->setToolTip(tr("Reset to default value"));
+
+	connect(defaultTb_,SIGNAL(clicked(bool)),
+			this,SLOT(slotResetToDefault(bool)));
+}
+
+void PropertyLine::slotResetToDefault(bool)
+{
+	reset(prop_->defaultValue());
+	checkState();
+}
+
+void PropertyLine::checkState()
+{
+	if(prop_->defaultValue() != currentValue())
+		defaultTb_->setEnabled(true);
+	else
+		defaultTb_->setEnabled(false);
 }
 
 //=========================================================================
@@ -79,6 +101,9 @@ PropertyLine::PropertyLine(VProperty* vProp,bool addLabel,QWidget * parent) :
 StringPropertyLine::StringPropertyLine(VProperty* vProp,QWidget * parent) : PropertyLine(vProp,parent)
 {
 	le_=new QLineEdit(parent);
+
+	connect(le_,SIGNAL(textEdited(QString)),
+			this,SLOT(slotEdited(QString)));
 }
 
 QWidget* StringPropertyLine::item()
@@ -94,6 +119,7 @@ QWidget* StringPropertyLine::button()
 void StringPropertyLine::reset(QVariant v)
 {
 	le_->setText(v.toString());
+	PropertyLine::checkState();
 }
 
 bool StringPropertyLine::applyChange()
@@ -105,6 +131,16 @@ bool StringPropertyLine::applyChange()
 		return true;
 	}
 	return false;
+}
+
+QVariant StringPropertyLine::currentValue()
+{
+	return le_->text();
+}
+
+void StringPropertyLine::slotEdited(QString)
+{
+	PropertyLine::checkState();
 }
 
 //=========================================================================
@@ -145,11 +181,13 @@ void ColourPropertyLine::reset(QVariant v)
 	QPalette pal = cb_->palette();
 	pal.setColor(QPalette::Window, v.value<QColor>());
 	cb_->setPalette(pal);
+	PropertyLine::checkState();
 }
 
 void ColourPropertyLine::slotEdit(bool)
 {
-	QColor col=QColorDialog::getColor(cb_->palette().color(QPalette::Window),cb_->parentWidget());
+	QColor currentCol=currentValue().value<QColor>();
+	QColor col=QColorDialog::getColor(currentCol,cb_->parentWidget());
 
 	if(col.isValid())
 	{
@@ -160,7 +198,7 @@ void ColourPropertyLine::slotEdit(bool)
 bool ColourPropertyLine::applyChange()
 {
 	QColor v=prop_->value().value<QColor>();
-	QColor c=cb_->palette().color(QPalette::Window);
+	QColor c=currentValue().value<QColor>();
 
 	if(v != c)
 	{
@@ -169,6 +207,11 @@ bool ColourPropertyLine::applyChange()
 	}
 
 	return false;
+}
+
+QVariant ColourPropertyLine::currentValue()
+{
+	return cb_->palette().color(QPalette::Window);
 }
 
 //=========================================================================
@@ -201,6 +244,7 @@ QWidget* FontPropertyLine::button()
 void FontPropertyLine::reset(QVariant v)
 {
 	lName_->setText(font_.toString());
+	PropertyLine::checkState();
 }
 
 void FontPropertyLine::slotEdit(bool)
@@ -228,6 +272,11 @@ bool FontPropertyLine::applyChange()
 	return false;
 }
 
+QVariant FontPropertyLine::currentValue()
+{
+	return font_;
+}
+
 //=========================================================================
 //
 // IntPropertyLine
@@ -252,6 +301,9 @@ IntPropertyLine::IntPropertyLine(VProperty* vProp,QWidget * parent) : PropertyLi
 	}
 
 	le_->setValidator(validator);
+
+	connect(le_,SIGNAL(textEdited(QString)),
+			this,SLOT(slotEdited(QString)));
 }
 
 QWidget* IntPropertyLine::item()
@@ -267,6 +319,7 @@ QWidget* IntPropertyLine::button()
 void IntPropertyLine::reset(QVariant v)
 {
 	le_->setText(QString::number(v.toInt()));
+	PropertyLine::checkState();
 }
 
 bool IntPropertyLine::applyChange()
@@ -281,6 +334,15 @@ bool IntPropertyLine::applyChange()
 	return false;
 }
 
+QVariant IntPropertyLine::currentValue()
+{
+	return le_->text().toInt();
+}
+
+void IntPropertyLine::slotEdited(QString)
+{
+	PropertyLine::checkState();
+}
 
 //=========================================================================
 //
@@ -291,6 +353,9 @@ bool IntPropertyLine::applyChange()
 BoolPropertyLine::BoolPropertyLine(VProperty* vProp,QWidget * parent) : PropertyLine(vProp,false,parent)
 {
 	cb_=new QCheckBox(vProp->param("label"));
+
+	connect(cb_,SIGNAL(stateChanged(int)),
+			   this,SLOT(slotStateChanged(int)));
 }
 
 QWidget* BoolPropertyLine::item()
@@ -306,6 +371,7 @@ QWidget* BoolPropertyLine::button()
 void BoolPropertyLine::reset(QVariant v)
 {
 	cb_->setChecked(v.toBool());
+	PropertyLine::checkState();
 }
 
 bool BoolPropertyLine::applyChange()
@@ -320,10 +386,18 @@ bool BoolPropertyLine::applyChange()
 	return false;
 }
 
+QVariant BoolPropertyLine::currentValue()
+{
+	return cb_->isChecked();
+}
+
+void BoolPropertyLine::slotStateChanged(int)
+{
+	PropertyLine::checkState();
+}
 
 static PropertyLineMaker<StringPropertyLine> makerStr(VProperty::StringType);
 static PropertyLineMaker<ColourPropertyLine> makerCol(VProperty::ColourType);
 static PropertyLineMaker<FontPropertyLine> makerFont(VProperty::FontType);
 static PropertyLineMaker<IntPropertyLine> makerInt(VProperty::IntType);
 static PropertyLineMaker<BoolPropertyLine> makerBool(VProperty::BoolType);
-

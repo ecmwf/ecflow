@@ -32,37 +32,6 @@ NodePanel::~NodePanel()
 	qDebug() << "a";
 }
 
-
-/*Folder* NodePanel::currentFolder()
-{
-	NodeWidget* w=currentFolderWidget();
-  	return (w)?w->currentFolder():0;
-}
-
-QList<Folder*> NodePanel::currentFolders()
-{
-	QList<Folder*>  lst;
-	for(int i=0; i < count(); i++)
-	{
-		NodeWidget* w=folderWidget(i);
-		if(w)
-		{
-		  	lst << w->currentFolder();
-		}
-	}
-	return lst;
-}
-
-QString  NodePanel::folderPath(int index)
-{
-	if(NodeWidget* w=folderWidget(index))
-	{
-	  	if(Folder *f=w->currentFolder())
-			return QString::fromStdString(f->fullName());
-	}
-	return QString();
-}
-*/
 //=============================================
 //
 //  Tab management desktopAction
@@ -120,20 +89,6 @@ void NodePanel::resetWidgets(QStringList idLst)
 	  	addWidget(id);
 	}
 }
-
-
-/*MvQContextItemSet* NodePanel::cmSet()
-{
-	static MvQContextItemSet cmItems("FolderPanel");
-  	return &cmItems;
-}*/
-
-//void NodePanel::slotCurrentWidgetChanged(int index)
-//{
-//	qDebug() << "current" << index;
-//	emit currentWidgetChanged();
-//}
-
 
 //Handle the tab bar context menu actions
 void NodePanel::tabBarCommand(QString name,int index)
@@ -346,6 +301,11 @@ void NodePanel::readSettings(VComboSettings *vs)
 	{
 		addWidget("");
 		setCurrentIndex(0);
+		if(Dashboard* d=currentNodeWidget())
+		{
+			d->addWidget("tree");
+		}
+
 	}
 
 	if(QWidget *w=currentNodeWidget())
