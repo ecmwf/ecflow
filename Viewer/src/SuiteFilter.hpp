@@ -50,7 +50,7 @@ public:
 class SuiteFilter
 {
 public:
-	SuiteFilter() : autoAddNew_(true), enabled_(false) {}
+	SuiteFilter() : autoAddNew_(false), enabled_(false) {}
 
 	enum ChangeFlag {AutoAddChanged=1,EnabledChanged=2,ItemChanged=4};
 

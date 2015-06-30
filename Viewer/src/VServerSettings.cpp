@@ -129,7 +129,8 @@ void VServerSettings::loadSettings()
 
 	//Some  settings are read through VSettings
 	VSettings vs(fName);
-	vs.beginGroup("server_filter");
+	vs.read();
+	vs.beginGroup("suite_filter");
 	server_->suiteFilter()->readSettings(&vs);
 	vs.endGroup();
 }
@@ -139,9 +140,9 @@ void VServerSettings::saveSettings()
 	SessionItem* cs=SessionHandler::instance()->current();
 	std::string fName=cs->serverFile(server_->name());
 
-	//We save the suitefilter through VSettings
+	//We save the suite filter through VSettings
 	VSettings vs("");
-	vs.beginGroup("server_filter");
+	vs.beginGroup("suite_filter");
 	server_->suiteFilter()->writeSettings(&vs);
 	vs.endGroup();
 
@@ -216,9 +217,9 @@ void VServerSettings::importRcFiles()
 						pt.put("server.files.readFilesFromDisk",par[1]);
 						hasValue=true;
 					}
-					else if(par[0] == "jobfile_lenght")
+					else if(par[0] == "jobfile_length")
 					{
-						pt.put("server.file.maxJobFileLines",par[1]);
+						pt.put("server.files.maxJobFileLines",par[1]);
 						hasValue=true;
 					}
 

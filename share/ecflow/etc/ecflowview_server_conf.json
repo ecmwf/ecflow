@@ -79,13 +79,13 @@
             	"zombie": {
             		"label": "Zombies",
             		"tooltip": "zombies",                          
-            		"default": "true"
+            		"default": "false"
             	}, 
             	
             	"alias": {
             		"label": "Aborted or restarted aliases",
             		"tooltip": "aborted or restarted aliases",                          
-            		"default": "true"
+            		"default": "false"
             	}
               	
             }          

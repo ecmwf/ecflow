@@ -10,6 +10,7 @@
 #include "SuiteFilter.hpp"
 
 #include "VSettings.hpp"
+#include "VProperty.hpp"
 
 #include <algorithm>
 
@@ -175,12 +176,12 @@ void SuiteFilter::readSettings(VSettings *vs)
 {
 	clear();
 
-	enabled_=vs->get<bool>("enabled",enabled_);
-	autoAddNew_=vs->get<bool>("autoAddNew",autoAddNew_);
+	enabled_=vs->getAsBool("enabled",enabled_);
+	autoAddNew_=vs->getAsBool("autoAddNew",autoAddNew_);
 
 	if(vs->contains("suites"))
 	{
-		vs->get("filter",filter_);
+		vs->get("suites",filter_);
 	}
 
 	adjust();
@@ -191,8 +192,8 @@ void SuiteFilter::readSettings(VSettings *vs)
 
 void SuiteFilter::writeSettings(VSettings *vs)
 {
-	vs->put("enabled",enabled_);
-	vs->put("autoAddNew",autoAddNew_);
+	vs->putAsBool("enabled",enabled_);
+	vs->putAsBool("autoAddNew",autoAddNew_);
 
 	if(filter_.size() >0)
 	{

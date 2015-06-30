@@ -55,6 +55,7 @@ public:
 	//void put(const std::string& key,bool val);
 	void put(const std::string& key,const std::string& val);
 	void put(const std::string& key,const std::vector<std::string>& val);
+	void putAsBool(const std::string& key,bool val);
 
 	template <typename T>
 	T get(const std::string& key,const T& defaultVal)
@@ -62,8 +63,10 @@ public:
 		return pt_.get<T>(path_.path(key),defaultVal);
 	}
 	void get(const std::string& key,std::vector<std::string>& val);
+	bool getAsBool(const std::string& key,bool defaultVal);
 
 	const boost::property_tree::ptree & propertyTree() const {return pt_;}
+
 
 protected:
 	boost::property_tree::ptree pt_;

@@ -130,6 +130,12 @@ void VSettings::put(const std::string& key,const std::vector<std::string>& val)
 	pt_.put_child(path_.path(key),array);
 }
 
+void VSettings::putAsBool(const std::string& key,bool val)
+{
+	pt_.put(path_.path(key),val?"true":"false");
+}
+
+
 void VSettings::get(const std::string& key,std::vector<std::string>& val)
 {
 	boost::optional<boost::property_tree::ptree& > ptArray=pt_.get_child_optional(path_.path(key));
@@ -144,6 +150,16 @@ void VSettings::get(const std::string& key,std::vector<std::string>& val)
 		std::string name=it->second.get_value<std::string>();
 		val.push_back(name);
 	}
+}
+
+bool VSettings::getAsBool(const std::string& key,bool defaultVal)
+{
+	std::string v=pt_.get<std::string>(path_.path(key),(defaultVal)?"true":"false");
+	if(v == "true" || v == "1")
+		return true;
+
+	return false;
+
 }
 
 void VSettings::beginGroup(const std::string &id)
