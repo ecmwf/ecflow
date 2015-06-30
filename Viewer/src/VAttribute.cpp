@@ -349,7 +349,7 @@ bool VEventAttribute::getData(VNode *vnode,int row,int& size,QStringList& data)
 int VGenvarAttribute::num(const VNode *vnode)
 {
 	node_ptr node=vnode->node();
-	if(!node.get())
+	if(node.get())
 	{
 		std::vector<Variable> genV;
 		node->gen_variables(genV);
