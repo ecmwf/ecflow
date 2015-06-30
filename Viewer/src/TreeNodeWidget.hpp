@@ -27,6 +27,8 @@ Q_OBJECT
 
 public:
 	TreeNodeWidget(ServerFilter*,QWidget* parent=0);
+
+	bool selectFirstServerInView();
 	void writeSettings(VSettings*);
 	void readSettings(VSettings*);
 

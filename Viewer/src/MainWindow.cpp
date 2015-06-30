@@ -21,6 +21,9 @@
 
 #include <QDebug>
 
+#include "Version.hpp"
+
+
 #include "MainWindow.hpp"
 #include "FilterWidget.hpp"
 #include "InfoPanel.hpp"
@@ -46,6 +49,8 @@ MainWindow::MainWindow(QStringList idLst,QWidget *parent) : QMainWindow(parent)
     setupUi(this);
     
     setAttribute(Qt::WA_DeleteOnClose);
+
+    setWindowTitle("ecflow_ui (" + QString::fromStdString(ecf::Version::raw()) + ")");
 
     //Create the main layout
     QVBoxLayout* layout=new QVBoxLayout();

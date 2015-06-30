@@ -32,6 +32,7 @@ public:
 	QWidget* realWidget();
 	VInfo_ptr currentSelection();
 	void currentSelection(VInfo_ptr n) {};
+	void selectFirstServer() {}
 	void setModel(NodeFilterModel *model);
 
 public Q_SLOTS:

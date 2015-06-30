@@ -14,7 +14,6 @@
 #include <QApplication>
 
 #include "File.hpp"
-#include "Version.hpp"
 #include "MainWindow.hpp"
 #include "ServerHandler.hpp"
 #include "MenuHandler.hpp"
@@ -27,9 +26,6 @@
 
 int main(int argc, char **argv)
 {
-	std::cout << ecf::Version::description()  << "\n";  // print the version information
-
-
     //if (argc != 3)
     //{
     //  std::cout << "Usage:" << std::endl;

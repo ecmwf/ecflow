@@ -117,6 +117,13 @@ void TreeNodeWidget::on_actionBreadcrumbs_triggered(bool b)
 	//bcWidget_->clear();
 }
 
+bool TreeNodeWidget::selectFirstServerInView()
+{
+	view_->selectFirstServer();
+	return true;
+}
+
+
 void TreeNodeWidget::writeSettings(VSettings* vs)
 {
 	vs->put("type",std::string("tree"));

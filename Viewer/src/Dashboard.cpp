@@ -66,6 +66,7 @@ DashboardWidget* Dashboard::addWidget(const std::string& type)
 
 	//At this point the widgets can be inactive. Reload will make them active!!!
 	w->reload();
+
 	return w;
 }
 
@@ -94,6 +95,10 @@ DashboardWidget* Dashboard::addWidget(const std::string& type,const std::string&
 		InfoPanel* ctl=new InfoPanel(this);
 		connect(this,SIGNAL(selectionChanged(VInfo_ptr)),
 					ctl,SLOT(slotReload(VInfo_ptr)));
+
+		VInfo_ptr info=currentSelectionInView();
+		if(info && info.get())
+			ctl->slotReload(info);
 
 		w=ctl;//widgets_ << ctl;
 	}
@@ -331,8 +336,35 @@ void Dashboard::readSettings(VComboSettings* vs)
 	//Update the dashboard title
 	updateTitle();
 
+	selectFirstServerInView();
+
 
 }
+
+
+void Dashboard::selectFirstServerInView()
+{
+	Q_FOREACH(DashboardWidget* w,widgets_)
+	{
+		if(w->selectFirstServerInView())
+		{
+			return;
+		}
+	}
+}
+
+VInfo_ptr Dashboard::currentSelectionInView()
+{
+	Q_FOREACH(DashboardWidget* w,widgets_)
+	{
+		VInfo_ptr info=w->currentSelection();
+		if(info && info.get())
+			return info;
+	}
+
+	return VInfo_ptr();
+}
+
 //Find an unique id for a new dockwidget
 QString Dashboard::uniqueDockId()
 {

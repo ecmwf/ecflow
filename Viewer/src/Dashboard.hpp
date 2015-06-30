@@ -62,6 +62,7 @@ public:
 	ServerFilter* serverFilter() const {return serverFilter_;}
 	VInfo_ptr currentSelection();
 	void currentSelection(VInfo_ptr n);
+	void selectFirstServer();
 
 	void updateTitle();
 
@@ -84,6 +85,8 @@ private:
 	DashboardWidget* addWidget(const std::string& type,const std::string& dockId);
 	QString uniqueDockId();
 	static std::string widgetSettingsId(int i);
+	void selectFirstServerInView();
+	VInfo_ptr currentSelectionInView();
 
 	ServerFilter* serverFilter_;
 	QList<DashboardWidget*> widgets_;

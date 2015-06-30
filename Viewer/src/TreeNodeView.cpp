@@ -140,6 +140,18 @@ void TreeNodeView::slotSetCurrent(VInfo_ptr info)
 	}
 }
 
+void TreeNodeView::selectFirstServer()
+{
+	QModelIndex idx=model_->index(0,0);
+	if(idx.isValid())
+	{
+		setCurrentIndex(idx);
+		VInfo_ptr info=model_->nodeInfo(idx);
+		Q_EMIT selectionChanged(info);
+	}
+}
+
+
 void TreeNodeView::slotDoubleClickItem(const QModelIndex&)
 {
 }

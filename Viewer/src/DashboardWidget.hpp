@@ -14,6 +14,8 @@
 #include <QDockWidget>
 #include <QWidget>
 
+#include "VInfo.hpp"
+
 class VSettings;
 
 class DashboardWidget : public QWidget
@@ -24,6 +26,8 @@ public:
 
 	virtual void reload()=0;
 	virtual void rerender()=0;
+	virtual bool selectFirstServerInView() {return false;};
+	virtual VInfo_ptr currentSelection() {return VInfo_ptr(); }
 	virtual void writeSettings(VSettings*)=0;
 	virtual void readSettings(VSettings*)=0;
 
