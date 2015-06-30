@@ -298,7 +298,7 @@ GC gui::colorGC(unsigned int n)
           for(unsigned int i = 0 ; i < XtNumber(::ecf_colors_name); i++)
             status_gc[i] = makegc(colors(i));
 	}
-	if(n < 0 || n>= XtNumber(::ecf_colors_name)) return blackGC();
+	if(n>= XtNumber(::ecf_colors_name)) return blackGC();
 	return status_gc[n];
 }
 

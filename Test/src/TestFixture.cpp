@@ -126,7 +126,8 @@ void TestFixture::init(const std::string& project_test_dir)
       theSCRATCHArea += "/ECF_HOME";
       scratchSmsHome_ = theSCRATCHArea;
 
-      bool ok = File::createDirectories(theSCRATCHArea); assert(ok);
+      bool ok = File::createDirectories(theSCRATCHArea);
+      BOOST_REQUIRE_MESSAGE(ok,"File::createDirectories(theSCRATCHArea) failed");
       ok = fs::exists(theSCRATCHArea); assert(ok);
 
       // Ensure that local includes data exists. This needs to be copied to SCRATCH
@@ -324,7 +325,7 @@ std::string TestFixture::pathToLogFile()
 	if ( pathToRemoteLog_p == NULL) {
 		cout << "TestFixture::pathToLogFile(): assert failed\n";
 		cout << "Please set ECF_LOG. This needs to be set to path to the log file\n";
-		cout << "that can be see by the client and server\n";
+		cout << "that can be seen by the client and server\n";
 		assert(false);
   	}
 	return std::string(pathToRemoteLog_p);
@@ -376,6 +377,10 @@ int TestFixture::server_version()
    std::string the_server_version_str = TestFixture::client().get_string();
    //cout << "\nserver_version_str = " << the_server_version_str << "\n";
    BOOST_REQUIRE_MESSAGE( Str::replace_all(the_server_version_str,".",""),"failed to find '.' in server version string " << TestFixture::client().get_string());
+
+   // Could 4.0.8rc1
+   Str::replace_all(the_server_version_str,"rc1","");
+   Str::replace_all(the_server_version_str,"rc2","");
    int the_server_version = boost::lexical_cast<int>(the_server_version_str);
    return the_server_version;
 }

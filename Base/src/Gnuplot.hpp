@@ -16,16 +16,31 @@
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 #include <string>
 #include <boost/noncopyable.hpp>
+#include "Host.hpp"
 
 namespace ecf {
 
 class Gnuplot : private boost::noncopyable {
 public:
 
+   Gnuplot( const std::string& log_file,
+            const std::string& host,
+            const std::string& port,
+            size_t no_of_suites_to_plot = 5
+            );
+
    /// parse the log file and show gnuplot of server load
    /// Include the suite most contributing to the load
-   /// Assumes that gnuplot is available on $PATH
-   static void show_server_load(const std::string& log_file, size_t no_of_suites_to_plot = 5);
+   /// generates two files
+   ///    o <host>.<port>.gnuplot.dat
+   ///    o <host>.<port>.gnuplot.script
+  void show_server_load() const;
+
+private:
+  std::string log_file_;
+  Host        host_;
+  std::string port_;
+  size_t no_of_suites_to_plot_;
 
 private:
 
@@ -40,17 +55,16 @@ private:
    /// Returns that path to file created by this function.
    /// The create file is to be used by gnuplot to show the server load.
    ///  Can throw exceptions
-   static std::string create_gnuplot_file(
-            const std::string& log_file,
+   std::string create_gnuplot_file(
             std::vector<SuiteLoad>& suite_vec,
-            const std::string& input_data = "gnuplot.dat");
+            const std::string& input_data) const;
 
    /// returns the path to the gnuplot script
-   static std::string create_gnuplot_script(
+   std::string create_gnuplot_script(
             const std::string& path_to_file,
             const std::vector<SuiteLoad>& suite_vec,
             size_t no_of_suites_to_plot,
-            const std::string& script = "gnuplot.script");
+            const std::string& script) const;
 
    static bool extract_suite_path(
             const std::string& line,
@@ -58,11 +72,6 @@ private:
             std::vector<SuiteLoad>& suite_vec,
             size_t& column_index   // 0 based
             );
-
-private:
-
-   ~Gnuplot();
-   Gnuplot();
 };
 }
 

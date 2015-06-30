@@ -163,6 +163,42 @@ BOOST_AUTO_TEST_CASE( test_repeat_date  )
 	BOOST_CHECK_MESSAGE(simulator.run(theDefs, TestUtil::testDataLocation("test_repeat_date.def"), errorMsg),errorMsg);
 }
 
+BOOST_AUTO_TEST_CASE( test_repeat_date_2  )
+{
+   cout << "Simulator:: ...test_repeat_date_2\n";
+   //suite suite
+   // clock real <fixed date + time>
+   // family family
+   //    repeat date YMD 20091015 20091001 -1
+   //    task t
+   //       time 10:00
+   //    endfamily
+   //endsuite
+
+   // Each task should be run 15 times, ie every day at 10.00 am
+   Defs theDefs;
+   {
+      ClockAttr clockAttr;
+      clockAttr.date(1,10,2015);
+      suite_ptr suite = theDefs.add_suite("test_repeat_date");
+      suite->addVerify( VerifyAttr(NState::COMPLETE,1) );
+      suite->addClock( clockAttr );
+
+      family_ptr fam = suite->add_family( "family" );
+      fam->addRepeat( RepeatDate("YMD",20091015,20091001,-1));  // repeat contents 15 times
+      fam->addVerify( VerifyAttr(NState::COMPLETE,15) );
+
+      task_ptr task = fam->add_task("t");
+      task->addTime( ecf::TimeAttr( TimeSlot(10,0) ) );
+      task->addVerify( VerifyAttr(NState::COMPLETE,15) );      // task should complete 15 times
+
+//    cout << theDefs << "\n";
+   }
+
+   Simulator simulator;
+   std::string errorMsg;
+   BOOST_CHECK_MESSAGE(simulator.run(theDefs, TestUtil::testDataLocation("test_repeat_date.def"), errorMsg),errorMsg);
+}
 
 BOOST_AUTO_TEST_CASE( test_repeat_date_for_loop  )
 {

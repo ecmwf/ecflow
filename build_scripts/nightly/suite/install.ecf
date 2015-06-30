@@ -1,0 +1,45 @@
+%include <head.h>
+
+#===============================================================
+# defines variable WK 
+#===============================================================
+%include <export_WK.h>
+cd $WK
+
+
+if [[ %SET_TO_TEST_SCRIPT% = true ]] ; then
+   echo "Test only"
+else
+   # Must be done from local host, due to rhost setup
+   # ********************************************************
+   # <TODO> : This does not work, even on a interactive shell
+   # ********************************************************
+
+   if [[ %ARCH% = linux64 ]] ; then
+   
+      rsh -l emos lxb "$WK/build_scripts/install_ecflow.sh release"
+    
+   elif [[ %ARCH% = cray ]] ; then
+   
+      rsh -l emos cct "$WK/build_scripts/install_ecflow.sh release"
+   
+   elif [[ %ARCH% = linux64 ]] ; then
+   
+      rsh -l emos lxb "$WK/build_scripts/install_ecflow.sh release"
+   
+   elif [[ %ARCH% = opensuse113  ]] ; then
+   
+      rsh -l emos opensuse113 "$WK/build_scripts/install_ecflow.sh release"
+ 
+   elif [[ %ARCH% = redaht  ]] ; then
+   
+      rsh -l emos ecgb "$WK/build_scripts/install_ecflow.sh release"     
+      
+   elif [[ %ARCH% = opensuse103  ]] ; then
+   
+      rsh -l emos opensuse103 "$WK/build_scripts/install_ecflow.sh release"
+   
+   fi
+fi
+
+%include <tail.h>

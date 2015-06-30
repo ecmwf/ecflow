@@ -33,7 +33,7 @@ To migrate from perforce to git, clean up generated files to avoid adding them t
       
     Team -> share project ->git
       
-  o Update $WK/build/tar_ecflow.sh
+  o Update $WK/build_scripts/tar_ecflow.sh
                      tar_incr_ecflow.sh
     - replace MyProject with ecflow
     

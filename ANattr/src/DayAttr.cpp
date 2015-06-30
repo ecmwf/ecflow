@@ -45,6 +45,10 @@ static std::string theDay(DayAttr::Day_t day)
 
 void DayAttr::calendarChanged( const ecf::Calendar& c )
 {
+   // See ECFLOW-337
+   if (c.dayChanged()) {
+      clearFree();
+   }
    if (makeFree_) {
       return;
    }

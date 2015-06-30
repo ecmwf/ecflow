@@ -82,6 +82,7 @@ list( APPEND test_srcs
  test/TestRtt.cpp
  test/TestServer.cpp
  test/TestServerAndLifeCycle.cpp
+ test/TestServerLoad.cpp
  test/TestSignalSIGTERM.cpp
  test/TestUrlCmd.cpp
  test/TestWhiteListFile.cpp
@@ -92,6 +93,7 @@ ecbuild_add_test( TARGET    s_client
                   LIBS      libclient 
                   INCLUDES  ../ANode/test
                             ../Base/test 
+                  TEST_DEPENDS u_base
                  )
 
 # 
@@ -103,6 +105,7 @@ ecbuild_add_test( TARGET   perf_test_large_defs
                   LIBS     libclient 
                   INCLUDES ../ANode/test
                            ../Base/test 
+                  TEST_DEPENDS u_base
                 )
                
 # 
@@ -114,6 +117,7 @@ ecbuild_add_test( TARGET test_migration
                   LIBS     libclient 
                   INCLUDES ../ANode/test
                            ../Base/test 
+                  TEST_DEPENDS u_base
                 )
 
 # ===================================================================

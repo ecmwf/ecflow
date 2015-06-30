@@ -80,7 +80,7 @@ void task_node::update(int oldstatus,int oldtryno,int oldflags)
 void task_node::adopt(node* n)
 {
 	simple_node::adopt(n);
-	check(n->status(),n->tryno(),n->flags());
+	check(0,0,0);
 }
 
 void task_node::create()
@@ -97,40 +97,47 @@ inline bool is_late(int f) { return (f & FLAG_ISSET(FLAG_LATE)); }
 inline bool is_zombie(int f) { return (f & FLAG_ISSET(FLAG_ZOMBIE)); }
 inline bool is_to_check(int f) { return (f& FLAG_ISSET(FLAG_TO_CHECK));}
 
-void task_node::check(int oldstatus,int oldtryno,int oldflags)
+void task_node::check(int,int,int)
 {
-  
-	if(status() != old_status_ && status() == STATUS_ABORTED)
+   int new_status = status();
+   int new_flags =  flags();
+   int new_try_no = tryno();
+
+	if(new_status != old_status_ && new_status == STATUS_ABORTED)
 		serv().aborted(*this);
 
-	if(tryno() > 1 && tryno() != old_tryno_ && (
-		status() == STATUS_SUBMITTED || 
-		status() == STATUS_ACTIVE))
-		serv().restarted(*this);
+	if(new_try_no > 1 && new_try_no != old_tryno_ && (
+	         new_status == STATUS_SUBMITTED ||
+	         new_status == STATUS_ACTIVE))
+		      serv().restarted(*this);
 
-	if(is_late(flags()) != is_late(old_flags_)) {
-		if(is_late(flags()))
+	bool new_is_late = is_late(new_flags);
+	if(new_is_late != is_late(old_flags_)) {
+		if(new_is_late)
                   serv().late(*this);
 		else
                   late::hide(*this);
 	}
 
-	if(is_zombie(flags()) != is_zombie(old_flags_)) {
-		if(is_zombie(flags()))
+	bool new_is_zombie = is_zombie(new_flags);
+	if(new_is_zombie != is_zombie(old_flags_)) {
+		if(new_is_zombie)
                   serv().zombie(*this);
 		else
                   zombie::hide(*this);
 	}
 
-	if(is_to_check(flags()) != is_to_check(old_flags_)) {
-		if(is_to_check(flags()))
-                  serv().to_check(*this);
-		else
-                  to_check::hide(*this);
-	}
-	old_flags_ = flags();
-	old_status_ = status();
-	old_tryno_ = tryno();
+//
+//	if(is_to_check(new_flags) != is_to_check(old_flags_)) {
+//		if(is_to_check(new_flags))
+//                  serv().to_check(*this);
+//		else
+//                  to_check::hide(*this);
+//	}
+
+	old_flags_ = new_flags;
+	old_status_ = new_status;
+	old_tryno_ = new_try_no;
 }
 
 void task_node::aborted(std::ostream& f)
@@ -233,7 +240,6 @@ void cpp_translator::save(FILE* f,const char *line)
 		node *n = n_->variableOwner(val);
 		if(n == 0) n = n_;
 
-		// TODO fprintf(f,"<b><a href=\"%s:%s\">%%",n->html_url(),val);
 		url_translator::save(f,val);
 		fprintf(f,"%%</a></b>");
 		p = q;

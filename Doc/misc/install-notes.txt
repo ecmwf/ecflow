@@ -1,7 +1,7 @@
  Install steps
  =============
  
- 0/ These Steps should be encapsulated by $WK/build/install.sh ***************
+ 0/ These Steps should be encapsulated by $WK/build_scripts/install.sh ***************
  
  1/ Become emos user. Required for write access to installation directory
     Note: 

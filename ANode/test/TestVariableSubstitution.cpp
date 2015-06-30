@@ -400,5 +400,39 @@ BOOST_AUTO_TEST_CASE( test_server_variable_substitution )
    }
 }
 
+BOOST_AUTO_TEST_CASE( test_generated_variable_substitution_of_ECF_OUT )
+{
+   // test that if ECF_OUT is defined using %, then we perform variable substitution
+   std::cout <<  "ANode:: ...test_generated_variable_substitution_of_ECF_OUT\n";
+
+   Defs defs;
+   suite_ptr s = defs.add_suite("suite");
+   s->addVariable(Variable("PATH","/fred/bill/joe"));
+   s->addVariable(Variable("ECF_HOME","/ecf_home"));
+   family_ptr f = s->add_family("f");
+   task_ptr t = f->add_task("t");
+   t->addVariable(Variable("ECF_OUT","%PATH%"));
+   family_ptr f1 = s->add_family("f1");
+   f1->addVariable(Variable("PATH2","/fred/bill/joe2"));
+   task_ptr t1 = f1->add_task("t1");
+   t1->addVariable(Variable("ECF_OUT","%PATH2%"));
+
+   // begin_all
+   defs.beginAll();
+   t->update_generated_variables();
+   t1->update_generated_variables();
+
+   // cout << defs;
+
+   string value;
+   value.clear();
+   t->findParentVariableValue(Str::ECF_JOBOUT(),value);
+   BOOST_CHECK_MESSAGE(value == "/fred/bill/joe/suite/f/t.0","ECF_JOBOUT expected /fred/bill/joe/suite/f/t.0, but found " << value);
+
+   value.clear();
+   t1->findParentVariableValue(Str::ECF_JOBOUT(),value);
+   BOOST_CHECK_MESSAGE(value == "/fred/bill/joe2/suite/f1/t1.0","ECF_JOBOUT expected /fred/bill/joe/suite/f/t.0, but found " << value);
+}
+
 BOOST_AUTO_TEST_SUITE_END()
 

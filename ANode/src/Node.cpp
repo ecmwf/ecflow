@@ -593,10 +593,18 @@ bool Node::evaluateComplete() const
          // >>old: Set the complete as free, until begin()/requeue, // Only update state change no, if state has changed.
          // >>old:if (!completeExpr_->isFree()) freeComplete();
 
-         // If we have **any** children that are in STATE ACTIVE or SUMBMITTED the don't bother
-         // changing state to complete. Otherwise zombies will be created.
+         // ECFLOW-247 Family goes complete despite active child
+         //            Typically we have a complete expression on the family i/e f1/t1 == complete
+         //            However if we have another child that is active,submitted forcing family to complete will cause zombies
+         //            Another child could be a family which could be aborted.
+         // if computedState state is:
+         //    NState::ABORTED   -> don't complete if any of the children are aborted  -> ECFLOW-247
+         //                         This can hide active/submitted nodes, as abort has higher priority, could cause zombies
+         //    NState::ACTIVE    -> can cause zombies
+         //    NState::SUBMITTED -> can cause zombies
+         // hence only allow complete is we are in a NState::QUEUED state
          NState::State theComputedState = computedState(Node::HIERARCHICAL);
-         if ( theComputedState == NState::ACTIVE ||  theComputedState ==  NState::SUBMITTED) {
+         if ( theComputedState != NState::QUEUED ) {
 #ifdef DEBUG_DEPENDENCIES
             LOG(Log::DBG,"   Node::evaluateComplete() " << absNodePath() << " AST evaluation succeeded *BUT* " << debugType() << " has children in ACTIVE or SUBMITTED States" );
 #endif
@@ -1008,7 +1016,7 @@ bool Node::variable_substitution(std::string& cmd, const NameValueMap& user_edit
       }
 
       // Simple Check for infinite recursion
-      if (count > 100)  return false;
+      if (count > 1000)  return false;
       count++;
    }
 

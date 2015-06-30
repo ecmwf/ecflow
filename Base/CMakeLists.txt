@@ -67,7 +67,6 @@ ecbuild_add_library( TARGET   base
                      TYPE     STATIC
                      SOURCES  ${srcs}
                      LIBS     libparser node nodeattr core 
-                              ${Boost_PROGRAM_OPTIONS_LIBRARY}    
                      INCLUDES src
                               ../ACore/src 
                               ../ANattr/src
@@ -78,6 +77,8 @@ ecbuild_add_library( TARGET   base
                               ../Base/src/stc
                      )
 
+# This ensures that for debug config, we only link with debug boost libs, for other configs, we link with optimised boost libs
+target_link_libraries(base debug ${Boost_PROGRAM_OPTIONS_LIBRARY_DEBUG}   ${Boost_PROGRAM_OPTIONS_LIBRARY_RELEASE})
  
 list( APPEND test_srcs
    test/TestAlterCmd.cpp
@@ -96,10 +97,12 @@ list( APPEND test_srcs
    test/TestSSyncCmd.cpp
    test/TestSSyncCmdOrder.cpp
 )
-ecbuild_add_test( TARGET    u_base
+ecbuild_add_test( TARGET       u_base
                   BOOST
-                  SOURCES   ${test_srcs}
-                  LIBS      base       
-                            pthread 
-                  INCLUDES ../ANode/test
+                  SOURCES      ${test_srcs}
+                  LIBS         base       
+                               pthread 
+                  INCLUDES     ../ANode/test
+                  TEST_DEPENDS u_aparser
                   )
+                  

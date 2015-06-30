@@ -34,8 +34,8 @@ namespace ecf {
 ///               longer than the time specified, the late flag is set
 /// -a Active   : The time of day the node must have become active (format hh:mm). If the node
 ///               is still queued or submitted, the late flag is set
-/// -a Complete : The time node must become complete (format {+}hh:mm). If relative, time is
-///               taken form the time the node became actice, otherwise node must be complete by
+/// -c Complete : The time node must become complete (format {+}hh:mm). If relative, time is
+///               taken from the time the node became active, otherwise node must be complete by
 ///               the time given.
 /// ===========================================================================
 class LateAttr  {

@@ -50,7 +50,14 @@ static std::string workspace_dir()
       current_path = current_path.parent_path();
       stem = current_path.stem().string();
       count++;
-      if (count == 10000) throw std::runtime_error("File::workspace_dir() failed to find ecflow in a directory name, up the directory tree");
+      if (count == 100) {
+         char* workspace = getenv("WK");
+         if (workspace == NULL) {
+            throw std::runtime_error("File::workspace_dir() failed to find ecflow in a directory name, up the directory tree and WK undefined");
+         }
+         std::string the_workspace_dir = workspace;
+         return the_workspace_dir;
+      }
    }
    std::string the_workspace_dir = current_path.string();  // cos string is returned by reference
    return the_workspace_dir;
@@ -164,7 +171,11 @@ std::string File::get_last_n_lines(const std::string& filename,int last_n_lines,
        buffer.resize( std::min( buffer.size() + granularity, size ) );
        source.seekg( -static_cast<std::streamoff>( buffer.size() ),
                      std::ios_base::end );
+#if defined(HPUX) || defined(_AIX)
+       source.read( &(buffer.front()), buffer.size() );
+#else
        source.read( buffer.data(), buffer.size() );
+#endif
        newlineCount = std::count( buffer.begin(), buffer.end(), '\n');
    }
 
@@ -821,27 +832,35 @@ std::string File::find_ecf_client_path()
 std::string File::test_data(const std::string& rel_path, const std::string& dir)
 {
    std::string test_file;
-   char* workspace = getenv("WK"); // for ecbuild
-   if (workspace != NULL ) {
-      test_file = std::string(workspace);
+   char* work_space = getenv("WK"); // for ecbuild
+   if (work_space != NULL ) {
+      test_file = std::string(work_space);
       if (!rel_path.empty() && rel_path[0] != '/' ) test_file += "/";
       test_file += rel_path;
    }
    else {
-      fs::path current_path = fs::current_path();
-      if (current_path.stem() == dir ) {
+      std::string work_space = root_source_dir();
+      if (!work_space.empty()) {
+         test_file = work_space;
+         if (!rel_path.empty() && rel_path[0] != '/' ) test_file += "/";
+         test_file += rel_path;
+      }
+      else {
+         fs::path current_path = fs::current_path();
+         if (current_path.stem() == dir ) {
 
-         // remove first path, expecting "dir/path/path1" remove dir
-         std::string::size_type pos = rel_path.find("/",1); // skip over any leading /
-         if (pos != std::string::npos) {
-            test_file += rel_path.substr(pos);
+            // remove first path, expecting "dir/path/path1" remove dir
+            std::string::size_type pos = rel_path.find("/",1); // skip over any leading /
+            if (pos != std::string::npos) {
+               test_file += rel_path.substr(pos+1); // skip over '/' to be left with path/path1, making it relative
+            }
+            else {
+               test_file += rel_path;
+            }
          }
          else {
             test_file += rel_path;
          }
-      }
-      else {
-         test_file += rel_path;
       }
    }
    return test_file;

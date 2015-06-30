@@ -159,6 +159,8 @@ if __name__ == "__main__":
     
     task8 = family.add_task("t8")
     task8.add_repeat( RepeatDay() )
+    print "task8.get_try_no()    :string:",task8.get_try_no()
+    print "task8.get_int_try_no():int   :",task8.get_int_try_no()
     
     the_defs = task8.get_defs()
  

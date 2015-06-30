@@ -17,7 +17,6 @@ ecbuild_add_library( TARGET libserver
                      TYPE     STATIC
                      SOURCES  ${srcs}
                      LIBS     base libparser node nodeattr core
-                              ${Boost_THREAD_LIBRARY}
                               pthread
                      INCLUDES src
                               ../ACore/src 
@@ -28,6 +27,9 @@ ecbuild_add_library( TARGET libserver
                               ../Base/src/cts
                               ../Base/src/stc
                      )
+
+# This ensures that for debug config, we only link with debug boost libs, for other configs, we link with optimised boost libs
+target_link_libraries(libserver debug ${Boost_THREAD_LIBRARY_DEBUG} ${Boost_THREAD_LIBRARY_RELEASE})
 
 # =======================================================
 # EXE ecflow_server
@@ -64,11 +66,12 @@ SET_TARGET_PROPERTIES(ecflow_server PROPERTIES
                           
 # ================================================================================                         
 # TEST
-ecbuild_add_test( TARGET   u_server
+ecbuild_add_test( TARGET       u_server
                   BOOST  
-                  SOURCES  test/TestServerEnvironment.cpp 
-                           test/TestServer1.cpp
-                  LIBS     libserver  
+                  SOURCES      test/TestServerEnvironment.cpp 
+                               test/TestServer1.cpp
+                  LIBS         libserver  
+                  TEST_DEPENDS u_base
               )
 
 # ===================================================================

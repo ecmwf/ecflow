@@ -19,6 +19,7 @@
 #include "Suite.hpp"
 #include "Family.hpp"
 #include "Task.hpp"
+#include "System.hpp"
 
 using namespace std;
 using namespace ecf;
@@ -72,6 +73,9 @@ BOOST_AUTO_TEST_CASE( test_zombies )
       BOOST_REQUIRE_MESSAGE(t->findParentZombie(ecf::Child::ECF,ecf_z) && !ecf_z.empty(), "Expected to find ECF zombies on parent");
       BOOST_REQUIRE_MESSAGE(t->findParentZombie(ecf::Child::USER,user_z) && !user_z.empty(), "Expected to find USER zombies on parent");
    }
+
+   /// Destroy System singleton to avoid valgrind from complaining
+   System::destroy();
 }
 
 BOOST_AUTO_TEST_SUITE_END()

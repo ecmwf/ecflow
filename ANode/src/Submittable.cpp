@@ -855,6 +855,12 @@ void SubGenVariables::update_generated_variables() const
       genvar_ecfjobout_.value_by_ref() = ecf_home;
    }
    else  {
+      // For metabuilder, where we use %ECF_HOME% for ECF_OUT
+      char micro = '%';
+      if (ecf_out.find(micro) != std::string::npos) {
+         NameValueMap user_edit_variables;
+         submittable_->variable_substitution(ecf_out,user_edit_variables,micro);
+      }
       genvar_ecfjobout_.value_by_ref().reserve( ecf_out.size() + theAbsNodePath.size() + 1 + the_try_no.size());
       genvar_ecfjobout_.value_by_ref() = ecf_out;
    }

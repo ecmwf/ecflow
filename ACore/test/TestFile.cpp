@@ -123,7 +123,6 @@ BOOST_AUTO_TEST_CASE( test_file_tokenizer )
    std::string path = File::test_data("ACore/test/data/test_file_tokenizer.txt","ACore");
 
 	size_t linesWithText = 100;
-	size_t totalLines = 151;
 	std::string theText = "This is a test string";
 	{
 		std::ofstream file( path.c_str() );
@@ -140,6 +139,7 @@ BOOST_AUTO_TEST_CASE( test_file_tokenizer )
 		BOOST_CHECK_MESSAGE( lines[linesWithText-1] == theText,"Expected '" << theText << "' but found " <<  lines[linesWithText-1]);
 
 		lines.clear();
+		size_t totalLines = 151;
 		BOOST_CHECK_MESSAGE( File::splitFileIntoLines(path,lines)," Failed to open file " << path);
 		BOOST_CHECK_MESSAGE( lines.size() == totalLines-1,"Expected " << totalLines-1 << " but found " <<  lines.size());
 		BOOST_CHECK_MESSAGE( lines[0] == "","Expected empty string  but found " <<  lines[0]);
@@ -237,9 +237,9 @@ BOOST_AUTO_TEST_CASE( test_create_missing_directories )
 {
    cout << "ACore:: ...test_create_missing_directories";
 
-   // This test FAIL's on the cray in BATCH mode, but passes in interactive mode.
-   if (getenv("CRAY_BATCH_SKIP_test_create_missing_directories")) {
-      cout << " **** SKIPPING test, until HPC team can figure why this fails *****\n";
+   // This test FAIL's randomly on the cray in BATCH mode, but passes in interactive mode.
+   if (getenv("ECFLOW_CRAY_BATCH")) {
+      cout << " **** SKIPPING test, until HPC team can  fix File::createMissingDirectories.(like mkdir -p)  *****\n";
       return;
    }
    cout << "\n";

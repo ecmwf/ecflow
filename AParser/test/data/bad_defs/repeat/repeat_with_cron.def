@@ -1,5 +1,4 @@
-suite suiteName
-    repeat date YMD 20090331 20121212 1 # status 0
-    cron 10:00 23:00 00:10              # cant have repeat  & cron time series at same level
+suite s
+ repeat date YMD 20090331 20121212 1 # status 0
+ cron 10:00 23:00 00:10              # cant have repeat  & cron time series at same level
 endsuite
-

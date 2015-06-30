@@ -359,7 +359,7 @@ void host::run()
    if (drift_) drift(5, maximum_ * 60);
 }
 
-tmp_file host::file( node& n, std::string name )
+tmp_file host::file(node& n, std::string name)
 {
    return tmp_file(NULL);
 }
@@ -377,11 +377,11 @@ tmp_file host::jobcheck( node& n, const std::string &cmd )
 tmp_file ehost::jobcheck( node& n, const std::string &cmd )
 {
    std::string subcmd = n.variable(cmd);
-   //std::string user = n.variable("USER");
    std::string job = n.variable("ECF_JOB");
    std::string stat = job + ".stat";
-   if (n.__node__()) if (n.__node__()->get_node()) n.__node__()->get_node()->variableSubsitution(
-            subcmd);
+   if (n.__node__()) 
+     if (n.__node__()->get_node()) 
+       n.__node__()->get_node()->variableSubsitution(subcmd);
    std::string check = "sh " + subcmd;
    command(check);
    return tmp_file(stat.c_str(), false);
@@ -720,7 +720,6 @@ bool ehost::create_tree( int hh, int min, int sec )
    }
 
    if (!top) { 
-     // XECFDEBUG { std::cout << "# no top\n"; }
      return false;
    }
    if (top_) {
@@ -739,7 +738,6 @@ bool ehost::create_tree( int hh, int min, int sec )
       if (top) { 
 	int num = 0; node *n = top->kids(); 
 	while (n) { num += 1; n = n->next(); } 
-	// std::cout << "# num " << num << "\n";
       }
       std::cout << "# usage: " << vmu << " " << res << "\n";
    }
@@ -1067,6 +1065,12 @@ int host::do_plug( node* into, node* from )
    return 0;
 }
 
+struct dup_slash { // INT-74
+  bool operator() (char x, char y) const {
+    return x=='/' && y=='/';
+  };
+};
+
 tmp_file ehost::sfile( node& n, std::string name )
 {
    loghost_ = n.variable("ECF_LOGHOST", true);
@@ -1081,6 +1085,7 @@ tmp_file ehost::sfile( node& n, std::string name )
 tmp_file host::sfile( node& n, std::string name )
 {
    if (name == ecf_node::none()) return tmp_file((const char*) NULL);
+   name.erase(std::unique(name.begin(), name.end(), dup_slash()), name.end()); // INT-74
    const char *cname = name.c_str();
 
    std::string::size_type pos = loghost_.find(n.variable("ECF_MICRO"));
@@ -1103,7 +1108,6 @@ tmp_file host::sfile( node& n, std::string name )
    }
 
    return tmp_file(cname, false);
-   // return tmp_file((const char*) NULL); // FIXME
 }
 
 const str& host::timefile()
@@ -1209,7 +1213,7 @@ void ehost::login()
       if (!connect_mngt(true)) {
          gui::message("%s: no reply", name());
          logout();
-         connected_ = false; // tree_->connected(false);
+         connected_ = false;
          connect_ = false;
          return;
       }
@@ -1269,10 +1273,12 @@ void ehost::login()
    update();
 }
 
-tmp_file ehost::file( node& n, std::string name )
+tmp_file ehost::file(node& n, std::string name)
 {
   std::string error;
-   bool read = direct_read_;
+  bool read = direct_read_;
+  name.erase(std::unique(name.begin(), name.end(), dup_slash()), name.end()); // INT-74
+
   if (name == "ECF_SCRIPT") {
     error = "no script!\n"
       "check ECF_FILES or ECF_HOME directories, for read access\n"

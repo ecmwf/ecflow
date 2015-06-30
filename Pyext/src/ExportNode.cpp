@@ -89,6 +89,12 @@ node_ptr add_zombie(node_ptr self, const ZombieAttr& attr){ self->addZombie(attr
 
 node_ptr add_cron(node_ptr self,const ecf::CronAttr& attr)      { self->addCron(attr); return self; }
 node_ptr add_late(node_ptr self,const ecf::LateAttr& attr)      { self->addLate(attr); return self; }
+std::string get_state_change_time(node_ptr self,const std::string& format)
+{
+   if (format == "iso_extended") return to_iso_extended_string(self->state_change_time());
+   else if (format == "iso") return to_iso_string(self->state_change_time());
+   return to_simple_string(self->state_change_time());
+}
 
 node_ptr add_defstatus(node_ptr self,DState::State s)      { self->addDefStatus(s); return self; }
 
@@ -112,6 +118,8 @@ bool evaluate_trigger(node_ptr self) { Ast* t = self->triggerAst(); if (t) retur
 bool evaluate_complete(node_ptr self) { Ast* t = self->completeAst(); if (t) return t->evaluate();return false;}
 
 static job_creation_ctrl_ptr makeJobCreationCtrl() { return boost::make_shared<JobCreationCtrl>();}
+
+std::vector<node_ptr> get_all_nodes(node_ptr self){ std::vector<node_ptr> nodes; self->get_all_nodes(nodes); return nodes; }
 
 void export_Node()
 {
@@ -246,6 +254,7 @@ void export_Node()
    .def("find_limit",       &Node::find_limit  ,           "Find the :term:`limit` on the node only. returns a limit ptr" )
    .def("find_node_up_the_tree",&Node::find_node_up_the_tree  , "Search immediate node, then up the node hierarchy" )
    .def("get_state",        &Node::state , "Returns the state of the node. This excludes the suspended state")
+   .def("get_state_change_time",&get_state_change_time, (bp::arg("format")="iso_extended"), "Returns the time of the last state change as a string. Default format is iso_extended, (iso_extended, iso, simple)")
    .def("get_dstate",       &Node::dstate, "Returns the state of node. This will include suspended state")
    .def("get_defstatus",    &Node::defStatus )
    .def("get_repeat",       &Node::repeat, return_value_policy<copy_const_reference>() )
@@ -255,6 +264,7 @@ void export_Node()
    .def("get_complete",     &Node::get_complete, return_internal_reference<>() )
    .def("get_defs",         get_defs,   return_internal_reference<>() )
    .def("get_parent",       &Node::parent, return_internal_reference<>() )
+   .def("get_all_nodes",    &get_all_nodes,"Returns all the child nodes")
    .add_property("meters",    boost::python::range( &Node::meter_begin,    &Node::meter_end) ,  "Returns a list of :term:`meter` s")
    .add_property("events",    boost::python::range( &Node::event_begin,    &Node::event_end) ,  "Returns a list of :term:`event` s")
    .add_property("variables", boost::python::range( &Node::variable_begin, &Node::variable_end),"Returns a list of user defined :term:`variable` s" )

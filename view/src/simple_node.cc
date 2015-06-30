@@ -110,6 +110,9 @@ simple_node::simple_node(host& h,ecf_node* n) : node(h,n)
 					      , old_tryno_(-1)
 					      , old_flags_(-1)
 {
+   old_flags_ = flags();
+   old_status_ = status();
+   old_tryno_ = tryno();
 }
 
 const int kPixSize = 16;
@@ -427,6 +430,10 @@ void simple_node::info(std::ostream& f)
 
          if (ecf ) {
             gvar.clear();
+
+	    DState::State defstatus = ecf->defStatus();
+	    if (defstatus != DState::QUEUED && defstatus != DState::UNKNOWN)
+	      f << inc << "# defstatus " << DState::toString(defstatus) << "\n";
 
 	    if (ecf->hasTimeDependencies()) {	      
 	      f << inc << "# time-date-dependencies: ";

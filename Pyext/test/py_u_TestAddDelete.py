@@ -147,13 +147,50 @@ if __name__ == "__main__":
 
      
     #===========================================================================
-    # add and delete events
+    # add,delete,find events
     #===========================================================================
-    task.add_event(ecflow.Event(1))
-    task.add_event(2)
-    task.add_event(ecflow.Event(10, "Eventname"))
-    task.add_event(10, "Eventname2")
-    task.add_event("fred")
+    task.add_event(ecflow.Event(1)); 
+    task.add_event(2)                              
+    task.add_event(ecflow.Event(10, "Eventname"))  
+    task.add_event(10, "Eventname2")               
+    task.add_event("fred")                         
+    
+    # test find
+    event = task.find_event("EVENT")
+    assert(event.empty()),"Expected to not to find event"
+    assert(event.name() == ""),"Expected to not to find event, number is maximum int"
+    assert(event.value() == 0),"Expected to not to find event"
+
+    event = task.find_event("1"); 
+    assert(not event.empty()),"Expected to find event"
+    assert(event.number() == 1), "Expected to find event 1"
+    assert(event.name() == ""), "Expected name to be empty"
+    assert(event.value() == 0),"Expected to not to find event"
+
+    event = task.find_event("2"); 
+    assert(not event.empty()),"Expected to find event"
+    assert(event.number() == 2), "Expected to find event 1"
+    assert(event.name() == ""), "Expected name to be empty"
+    assert(event.value() == 0),"Expected to not to find event"
+
+    event = task.find_event("10"); 
+    assert(not event.empty()),"Expected to find event"
+    assert(event.number() == 10), "Expected to find event 10"
+    assert(event.name() == "Eventname"), "Expected name to be empty"
+    assert(event.value() == 0),"Expected to not to find event"
+
+    event = task.find_event("fred"); 
+    assert(not event.empty()),"Expected to find event"
+    assert(event.name() == "fred"), "Expected name to be empty, when name defind an not number, number is max_int"
+    assert(event.value() == 0),"Expected to not to find event"
+
+    for e in task.events:     print str(e)," # value: ",str(e.value())
+    a_dict = {}
+    for e in task.events:
+        if e.name() != "": a_dict[e.name()] = e.value()
+        else:              a_dict[e.number()] = e.value()
+    print a_dict
+
     assert len(list(task.events)) == 5, "Expected 5 Events"
     task.delete_event("1");         assert len(list(task.events)) == 4, "Expected 4 Events"
     task.delete_event("Eventname"); assert len(list(task.events)) == 3, "Expected 3 Events"
@@ -308,6 +345,10 @@ if __name__ == "__main__":
     incr = ecflow.TimeSlot(0, 30)
     ts = ecflow.TimeSeries(start, finish, incr, True)  # True means relative to suite start
     cron.set_time_series(ts)
+
+    cron0 = ecflow.Cron()
+    cron0.set_week_days([0, 1, 2, 3, 4, 5 ])
+    cron0.set_time_series(1, 30) # default relative = false, added in release 4.0.7
 
     cron1 = ecflow.Cron()
     cron1.set_week_days([0, 1, 2, 3, 4, 5, 6 ])

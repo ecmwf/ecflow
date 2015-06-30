@@ -42,6 +42,8 @@ public:
   virtual void drawNode(Widget w,XRectangle* r,bool);
   virtual void sizeNode(Widget w,XRectangle* r,bool);
   
+ protected:
+  static const int ink = 1;
 private:
   std::string name_,full_name_;
   

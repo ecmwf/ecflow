@@ -77,6 +77,20 @@ BOOST_AUTO_TEST_CASE( test_limit_basics )
 
 	l1.decrement(1,"/a/b/c");
 	BOOST_CHECK_MESSAGE(l1.paths() == expected_empty_paths,"Expected paths not the same");
+   BOOST_CHECK_MESSAGE(l1.value() == 0,"Expected value to be 0");
+
+
+   l1.increment(1,"/a/b/c");
+   l1.increment(1,"/a/b/d");
+   BOOST_CHECK_MESSAGE(l1.paths().size() == 2,"Expected 2 paths but found " << l1.paths().size());
+   BOOST_CHECK_MESSAGE(l1.value() == 2,"Expected value to be 2 but found " << l1.value());
+   l1.reset();
+   BOOST_CHECK_MESSAGE(l1.value() == 0,"Expected value to be 0 after reset, but found " << l1.value());
+   BOOST_CHECK_MESSAGE(l1.paths().size() == 0,"Expected 0 paths after reset but found " << l1.paths().size());
+
+   l1.setValue(10);
+   BOOST_CHECK_MESSAGE(l1.value() == 10,"Expected value to be 10, but found " << l1.value());
+   BOOST_CHECK_MESSAGE(l1.paths().size() == 0,"Expected 0 paths after reset but found " << l1.paths().size());
 }
 
 
@@ -94,6 +108,19 @@ BOOST_AUTO_TEST_CASE( test_limit_increment )
 
    BOOST_CHECK_MESSAGE(limit.value() == 1,"Expected 1 token but it has consumed " << limit.value());
    BOOST_CHECK_MESSAGE(limit.paths().size() == 1,"Expected 1 task path but found " << limit.paths().size());
+}
+
+BOOST_AUTO_TEST_CASE( test_limit_increment_2 )
+{
+   cout << "ANode:: ...test_limit_increment_2\n";
+
+   Limit limit("name",10);     // Limit of 10
+   for(int i = 0; i < 20; i++) {
+      // increment should keep increasing limit value, *EVEN* if over the limit. See ECFLOW-324
+      std::string path = boost::lexical_cast<std::string>(i);
+      limit.increment(1,path);
+      BOOST_CHECK_MESSAGE(limit.value() == i + 1,"Expected limit value of " << i + 1 << " but found " << limit.value());
+   }
 }
 
 BOOST_AUTO_TEST_CASE( test_limit_decrement )

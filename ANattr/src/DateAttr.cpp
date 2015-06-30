@@ -82,6 +82,11 @@ void DateAttr::checkDate(int day, int month, int year, bool allow_wild_cards)
 
 void DateAttr::calendarChanged( const ecf::Calendar& c )
 {
+   // See ECFLOW-337
+   if (c.dayChanged()) {
+      clearFree();
+   }
+
    if (makeFree_) {
       return;
    }

@@ -304,7 +304,6 @@ BOOST_AUTO_TEST_CASE( test_why_limit )
    //	   		task t5
    //	   endfamily
    //	endsuite
-   int taskSize = 6;
 
    Defs theDefs;
    {
@@ -316,6 +315,7 @@ BOOST_AUTO_TEST_CASE( test_why_limit )
 
       family_ptr fam = suite->add_family( "family");
       fam->addInLimit(InLimit("disk",pathToLimit,50));
+      int taskSize = 6;
       for(int i=0; i < taskSize; i++) {
          fam->addTask( Task::create("t" + boost::lexical_cast<std::string>(i))  );
       }

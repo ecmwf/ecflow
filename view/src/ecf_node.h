@@ -159,7 +159,7 @@ protected:
    std::vector<ecf_node*> kids_;
    node *node_;
    char kind_; // 'c' for complete trigger
-
+   friend void update_status_time(node*, const Node* , ecf_node*);
    const std::string name_;
 
    ExpressionWrapper *trigger_;
@@ -518,7 +518,7 @@ ecf_node* make_node( T* n, ecf_node* parent, char c = 'd' )
    if (ec && n) {
       int type = ec->type();
       // gcc 4.7 optimisation issue, keep next line
-      XECFDEBUG { if (!ec) std::cerr << "# make node " << type << "\n"; }
+      // XECFDEBUG { if (!ec) std::cerr << "# make node " << type << "\n"; }
       if (!parent || type == NODE_SUPER || type == NODE_SUITE)
          ec->make_subtree();
       else if (type == NODE_FAMILY || type == NODE_TASK || type == NODE_ALIAS) {
@@ -575,7 +575,8 @@ void make_kids_list( ecf_node* parent, const std::vector<T>& v )
 template<typename T>
 const std::string ecf_concrete_node<T>::toString() const
 {
-   if (owner_) return owner_->toString();
+   if (owner_) 
+     return owner_->toString();
    return "";
 }
 

@@ -4,9 +4,9 @@ Changing Python version
 Update file(s):
 
 o $HOME/.user_kshrc
-o Change $WK/build/nightly/build.py
-o Change $WK/build/site_config/*
-o Change $WK/build/install_ecflow.sh
+o Change $WK/build_scripts/nightly/build.py
+o Change $WK/build_scripts/site_config/*
+o Change $WK/build_scripts/install_ecflow.sh
 
 Changing Boost version
 ==================================================
@@ -14,8 +14,8 @@ Changing Boost version
 Update file(s):
 
 o $HOME/.user_kshrc
-o Change $WK/build/nightly/build.py
-o Change $WK/build/install_ecflow.sh  
+o Change $WK/build_scripts/nightly/build.py
+o Change $WK/build_scripts/install_ecflow.sh  
 o boost_cp.sh,boost_untar.sh,cp_ecflow,tar_incr_ecflow.sh
 
 
@@ -24,7 +24,7 @@ Updating version number
 
 When changing the version change:
     - Create a new shell, since new shell will parse $WK/Core/src/Version.cpp to extract version
-    - $WK/build/install_ecflow.sh
+    - $WK/build_scripts/install_ecflow.sh
     - $WK/ACore/src/Version.cpp
     - $WK/cmake.version
 

@@ -49,21 +49,21 @@ public:
    /// The BYRULE is used to distinguish between tasks that have RUN and completed
    /// and those that have completed by complete expression.
    enum Type {
-      FORCE_ABORT   =  0,  // Node*
+      FORCE_ABORT   =  0,  // Node* do not run when try_no > ECF_TRIES, and task aborted by user
       USER_EDIT     =  1,  // task
       TASK_ABORTED  =  2,  // task*
       EDIT_FAILED   =  3,  // task*
       JOBCMD_FAILED =  4,  // task*
       NO_SCRIPT     =  5,  // task*
-      KILLED        =  6,  // task*
-      MIGRATED      =  7,  // Node  ( NOT USED currently)
+      KILLED        =  6,  // task* do not run when try_no > ECF_TRIES, and task killed by user
+      MIGRATED      =  7,  // Node                                   ( NOT USED currently )
       LATE          =  8,  // Node attribute, Task is late, or Defs checkpt takes to long
       MESSAGE       =  9,  // Node
       BYRULE        = 10,  // Node*, set if node is set to complete by complete trigger expression
-      QUEUELIMIT    = 11,  // Node attribute, ????   change this to propagate to node
-      WAIT          = 12,  // task*
-      LOCKED        = 13,  // Server
-      ZOMBIE        = 14,  // task*
+      QUEUELIMIT    = 11,  // Node                                   ( NOT USED currently)
+      WAIT          = 12,  // task*  Set/cleared but never queried ? ( NOT USED currently )
+      LOCKED        = 13,  // Server                                 ( NOT USED currently)
+      ZOMBIE        = 14,  // task*  Set/cleared but never queried ? ( NOT USED currently )
       NO_REQUE_IF_SINGLE_TIME_DEP = 15,  //
       NOT_SET       = 16
    };
@@ -80,7 +80,7 @@ public:
    void reset();
    int flag() const { return flag_;}
    void set_flag(int f) { flag_ = f; }
-   void set_flag(const std::string& flags); // these are comma seperated
+   void set_flag(const std::string& flags); // these are comma separated
 
    /// returns a comma separated list of all flags set
    std::string to_string() const;

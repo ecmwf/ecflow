@@ -16,17 +16,19 @@ include_directories(
                     )
       
 # INCLUDES here is for external includes           
-ecbuild_add_library( TARGET   ecflow
-                     TYPE     MODULE
-                     SOURCES  ${srcs}
+ecbuild_add_library( TARGET    ecflow
+                     TYPE      MODULE
+                     SOURCES   ${srcs}
 					 CONDITION PYTHONLIBS_FOUND
-                     LIBS     libclient libsimu base libparser node nodeattr core
-                              ${Boost_PYTHON_LIBRARY} 
-                              ${PYTHON_LIBRARIES}
+                     LIBS      libclient libsimu base libparser node nodeattr core
+                               ${PYTHON_LIBRARIES}
                      INCLUDES 
-                            ${Boost_INCLUDE_DIRS}
-                            ${PYTHON_INCLUDE_DIRS} 
+                               ${Boost_INCLUDE_DIRS}
+                               ${PYTHON_INCLUDE_DIRS} 
                     )
+
+# This ensures that for debug config, we only link with debug boost libs, for other configs, we link with optimised boost libs                 
+target_link_libraries(ecflow debug ${Boost_PYTHON_LIBRARY_DEBUG}  ${Boost_PYTHON_LIBRARY_RELEASE})
 
 #
 # Override default behaviour that add RPATHS during install
@@ -68,10 +70,14 @@ foreach( test ${tests} )
 
     ecbuild_add_test( TARGET ${test} 
                       TYPE PYTHON 
-                      ARGS ${CMAKE_CURRENT_SOURCE_DIR}/test/${test}.py
-                      ENVIRONMENT "PYTHONPATH=${CMAKE_BINARY_DIR}/lib" )
+                      ARGS        ${CMAKE_CURRENT_SOURCE_DIR}/test/${test}.py
+                      ENVIRONMENT "PYTHONPATH=${CMAKE_BINARY_DIR}/lib" 
+                      TEST_DEPENDS u_base
+                     )
 endforeach()
 
+set_property(TEST py_s_TestClientApi      APPEND PROPERTY DEPENDS s_test)
+set_property(TEST py_s_TestPythonChildApi APPEND PROPERTY DEPENDS py_s_TestClientApi)
 
 ecbuild_add_test( TARGET py_u_TestMigrate
                   TYPE PYTHON 
@@ -81,14 +87,19 @@ ecbuild_add_test( TARGET py_u_TestMigrate
 
 # ==========================================================================
 # install
+#    -DCMAKE_PYTHON_INSTALL_TYPE = [ local | setup ]
+#    local : this will install to $INSTALL_PREFIX/$release.$major.$minor/lib/python2.7/site-packages/ecflow/
+#    setup : experimental only,python way of installing
+#
+#    -DCMAKE_PYTHON_INSTALL_PREFIX should *only* used when using python setup.py (CMAKE_PYTHON_INSTALL_TYPE=setup)
+#    *AND* for testing python install to local directory
 # ==========================================================================
-if( ENABLE_PYTHON )
 
-   message( STATUS "python found,  CMAKE_PYTHON_INSTALL_TYPE=${CMAKE_PYTHON_INSTALL_TYPE}")
+message( STATUS "python found,  CMAKE_PYTHON_INSTALL_TYPE=${CMAKE_PYTHON_INSTALL_TYPE}")
 
-   # CMAKE_PYTHON_INSTALL_TYPE = [ local | setup ]
+# CMAKE_PYTHON_INSTALL_TYPE = [ local | setup ]
    
-   if( CMAKE_PYTHON_INSTALL_TYPE MATCHES  "local"  OR NOT DEFINED CMAKE_PYTHON_INSTALL_TYPE )
+if( CMAKE_PYTHON_INSTALL_TYPE MATCHES  "local"  OR NOT DEFINED CMAKE_PYTHON_INSTALL_TYPE )
    
       message(STATUS "python install *LOCAL* ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
       set(PYTHON_SITE "lib/python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}/site-packages" )
@@ -99,7 +110,7 @@ if( ENABLE_PYTHON )
              )
       install( FILES   ecflow/__init__.py  DESTINATION ${PYTHON_DEST} )
       
-   else()
+else()
 
       # -------------------------------------------------------------------------------------
       # Install using setup.py
@@ -113,7 +124,7 @@ if( ENABLE_PYTHON )
       set(SETUP_PY_IN "${CMAKE_CURRENT_SOURCE_DIR}/setup.py.in")
       set(SETUP_PY    "${CMAKE_CURRENT_SOURCE_DIR}/setup.py")
       set(DEPS        "${CMAKE_CURRENT_SOURCE_DIR}/ecflow/__init__.py")
-      set(OUTPUT      "${CMAKE_CURRENT_SOURCE_DIR}/build/timestamp")
+      set(OUTPUT      "${CMAKE_CURRENT_SOURCE_DIR}/timestamp")
 
       configure_file(${SETUP_PY_IN} ${SETUP_PY} )
 
@@ -132,6 +143,4 @@ if( ENABLE_PYTHON )
       else()
          install(CODE "execute_process(COMMAND ${PYTHON} ${SETUP_PY} install)")
       endif()
-   endif()
-
 endif()

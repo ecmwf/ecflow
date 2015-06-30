@@ -129,20 +129,20 @@ void Limit::decrement( int tokens ,  const std::string& abs_node_path) {
 void Limit::increment( int tokens , const std::string& abs_node_path) {
    // cout << "Limit::increment name = " << name_ << " current value_ = " << value_ << " limit = " <<  theLimit_ << " consume tokens = " << tokens << "\n";
 
-   if ( value_ < theLimit_ ) {
+   // increment should keep increasing limit value, *EVEN* if over the limit. See ECFLOW-324
+   // Note: previously we had:
+   //     if ( value_ < theLimit_ ) {
 
-      std::set<std::string>::iterator i = paths_.find(abs_node_path);
-      if (i == paths_.end()) {
+   if (paths_.find(abs_node_path) == paths_.end()) {
 
-         paths_.insert( abs_node_path );
-         value_ += tokens;
-         update_change_no();
-      }
+      paths_.insert( abs_node_path );
+      value_ += tokens;
+      update_change_no();
+   }
 
 #ifdef DEBUG_STATE_CHANGE_NO
       std::cout << "Limit::increment\n";
 #endif
-   }
    // cout << "Limit::increment name = " << name_ << " current value_ = " << value_ << "\n";
 }
 
