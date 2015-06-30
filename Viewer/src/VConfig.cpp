@@ -171,7 +171,7 @@ VProperty* VConfig::find(const std::string& path)
 {
 	VProperty* res=0;
 
-	for(std::vector<VProperty*>::const_iterator it=groups_.begin();it != groups_.end(); it++)
+	for(std::vector<VProperty*>::const_iterator it=groups_.begin();it != groups_.end(); ++it)
 	{
 	    VProperty *vGroup=*it;
 	    res=vGroup->find(path);
@@ -186,7 +186,7 @@ VProperty* VConfig::find(const std::string& path)
 
 VProperty* VConfig::group(const std::string& name)
 {
-	for(std::vector<VProperty*>::const_iterator it=groups_.begin();it != groups_.end(); it++)
+	for(std::vector<VProperty*>::const_iterator it=groups_.begin();it != groups_.end(); ++it)
 	{
 		if((*it)->strName() == name)
 			return *it;
@@ -284,7 +284,7 @@ void VConfig::loadSettings(const std::string& parFile,VProperty* guiProp)
 	}
 	catch (const boost::property_tree::json_parser::json_parser_error& e)
 	{
-		if(!DirectoryHandler::isFirstStartUp())
+		if(boost::filesystem::exists(parFile))
 		{
 			std::string errorMessage = e.what();
 			UserMessage::message(UserMessage::ERROR, true,

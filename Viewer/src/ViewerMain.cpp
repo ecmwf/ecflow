@@ -22,11 +22,8 @@
 #include "DirectoryHandler.hpp"
 #include "Highlighter.hpp"
 #include "ServerList.hpp"
-#include "VAttribute.hpp"
 #include "VConfig.hpp"
-#include "VIcon.hpp"
-#include "VNState.hpp"
-#include "VSState.hpp"
+#include "VServerSettings.hpp"
 
 int main(int argc, char **argv)
 {
@@ -41,8 +38,6 @@ int main(int argc, char **argv)
     //}
 
     QApplication app(argc, argv);
-
-    //ServerHandler::addServer(argv[1],argv[2]);
 
     //Initialise the config and other paths
     DirectoryHandler::init(std::string(argv[0]));  // we need to tell the Directory class where we started from
@@ -59,26 +54,14 @@ int main(int argc, char **argv)
     //Initialise the server list
     ServerList::instance()->init();
 
+    //Load the global configurations
     VConfig::instance()->init(DirectoryHandler::etcDir());
     
+    //Import server settings from the previous viewer
+    if(DirectoryHandler::isFirstStartUp())
+    	VServerSettings::importRcFiles();
     
-    //Initialise the node/server state description
-    /*VNState::init(DirectoryHandler::concatenate(DirectoryHandler::etcDir(),
-    											"ecflowview_nstate.json"));
-
-    //Initialise the node/server state description
-    VSState::init(DirectoryHandler::concatenate(DirectoryHandler::etcDir(),
-			      "ecflowview_sstate.json"));
-
-    //Initialise the node attributes description
-    VAttribute::init(DirectoryHandler::concatenate(DirectoryHandler::etcDir(),
-		      "ecflowview_attribute.json"));
-
-    //Initialise the node icon description
-    VIcon::init(DirectoryHandler::concatenate(DirectoryHandler::etcDir(),
-		      "ecflowview_icon.json"));*/
-
-    //Initialise yexy highlighter
+    //Initialise highlighter
     Highlighter::init(DirectoryHandler::concatenate(DirectoryHandler::etcDir(),
     		      "ecflowview_highlighter.json"));
 
@@ -98,5 +81,3 @@ int main(int argc, char **argv)
 
     return app.exec();
 }
-
-

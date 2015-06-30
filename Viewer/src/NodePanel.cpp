@@ -114,7 +114,7 @@ Dashboard *NodePanel::nodeWidget(int index)
   	return (w)?static_cast<Dashboard*>(w):0;
 }
 
-Dashboard *NodePanel::currentNodeWidget()
+Dashboard *NodePanel::currentDashboard()
 {
   	QWidget *w=currentWidget();
   	return static_cast<Dashboard*>(w);
@@ -139,7 +139,7 @@ void  NodePanel::slotNewTab()
 
 VInfo_ptr NodePanel::currentSelection()
 {
-	if(Dashboard *w=currentNodeWidget())
+	if(Dashboard *w=currentDashboard())
 		return w->currentSelection();
 
 	return VInfo_ptr();
@@ -147,32 +147,32 @@ VInfo_ptr NodePanel::currentSelection()
 
 void NodePanel::slotSelection(VInfo_ptr n)
 {
-	if(Dashboard *w=currentNodeWidget())
+	if(Dashboard *w=currentDashboard())
 			w->currentSelection(n);
 }
 
 void NodePanel::setViewMode(Viewer::ViewMode mode)
 {
-	Dashboard *w=currentNodeWidget();
+	Dashboard *w=currentDashboard();
 	if(w) w->setViewMode(mode);
 	//setDefaults(this);
 }
 
 Viewer::ViewMode NodePanel::viewMode()
 {
-  	Dashboard *w=currentNodeWidget();
+  	Dashboard *w=currentDashboard();
 	return (w)?w->viewMode():Viewer::NoViewMode;
 }
 
 ServerFilter* NodePanel::serverFilter()
 {
-  	Dashboard *w=currentNodeWidget();
+  	Dashboard *w=currentDashboard();
 	return (w)?w->serverFilter():NULL;
 }
 
 void NodePanel::addToDashboard(const std::string& type)
 {
-	if(Dashboard *w=currentNodeWidget())
+	if(Dashboard *w=currentDashboard())
 		w->addWidget(type);
 }
 
@@ -301,14 +301,14 @@ void NodePanel::readSettings(VComboSettings *vs)
 	{
 		addWidget("");
 		setCurrentIndex(0);
-		if(Dashboard* d=currentNodeWidget())
+		if(Dashboard* d=currentDashboard())
 		{
 			d->addWidget("tree");
 		}
 
 	}
 
-	if(QWidget *w=currentNodeWidget())
+	if(QWidget *w=currentDashboard())
 		  w->setFocus();
 
 	//We emit it to trigger the whole window ui update!

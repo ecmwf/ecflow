@@ -19,6 +19,7 @@
 #include "TreeNodeWidget.hpp"
 #include "UserMessage.hpp"
 #include "VFilter.hpp"
+#include "VNode.hpp"
 #include "VSettings.hpp"
 #include "VNState.hpp"
 
@@ -171,12 +172,13 @@ void Dashboard::updateTitle()
 	QStringList texts;
 	QList<QRect> textRects;
 	QList<QRect> fillRects;
-	QList<QColor> colors;
+	QList<QColor> fillColors;
+	QList<QColor> textColors;
 
 	int xp=marginX;
 	int yp=marginY;
 	const std::vector<ServerItem*> items=serverFilter_->items();
-	for(std::vector<ServerItem*>::const_iterator it=items.begin(); it != items.end(); it++)
+	for(std::vector<ServerItem*>::const_iterator it=items.begin(); it != items.end(); ++it)
 	{
 		//Get text
 		QString str=QString::fromStdString((*it)->name());
@@ -185,7 +187,8 @@ void Dashboard::updateTitle()
 
 		//Get server status
 		ServerHandler* server=(*it)->serverHandler();
-		colors << VNState::toColour(server);
+		fillColors << server->vRoot()->stateColour();
+		textColors << server->vRoot()->stateFontColour();
 		fillRects << QRect(xp,yp,fm.width(str)+2*textMarginX,fm.height()+2*textMarginY);
 
 		xp=fillRects.back().right()+gap;
@@ -200,8 +203,8 @@ void Dashboard::updateTitle()
 	for(int i=0; i < texts.count(); i++)
 	{
 		painter.setPen(Qt::NoPen);
-		painter.fillRect(fillRects[i],colors[i]);
-		painter.setPen(QPen());
+		painter.fillRect(fillRects[i],fillColors[i]);
+		painter.setPen(QPen(textColors[i]));
 		painter.drawText(textRects[i],texts[i]);
 	}
 

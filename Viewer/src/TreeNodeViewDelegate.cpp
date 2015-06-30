@@ -75,7 +75,7 @@ void TreeNodeViewDelegate::paint(QPainter *painter,const QStyleOptionViewItem &o
 	painter->save();
 
 	//Selection - we only do it once
-	if(index.column() == 0)
+	/*if(index.column() == 0)
 	{
 		QRect fullRect=QRect(0,option.rect.y(),painter->device()->width(),option.rect.height());
 
@@ -95,7 +95,7 @@ void TreeNodeViewDelegate::paint(QPainter *painter,const QStyleOptionViewItem &o
 			painter->drawLine(fullRect.topLeft(),fullRect.topRight());
 			painter->drawLine(fullRect.bottomLeft(),fullRect.bottomRight());
 		}
-	}
+	}*/
 
 	//First column (nodes)
 	if(index.column() == 0)

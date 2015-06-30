@@ -63,6 +63,8 @@ public:
 	VInfo_ptr currentSelection();
 	void currentSelection(VInfo_ptr n);
 
+	void updateTitle();
+
 	//From  ServerFilterObserver
 	void notifyServerFilterAdded(ServerItem*);
 	void notifyServerFilterRemoved(ServerItem*);
@@ -80,7 +82,6 @@ Q_SIGNALS:
 
 private:
 	DashboardWidget* addWidget(const std::string& type,const std::string& dockId);
-	void updateTitle();
 	QString uniqueDockId();
 	static std::string widgetSettingsId(int i);
 

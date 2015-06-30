@@ -34,6 +34,8 @@ public:
 	//Called from VConfigLoader
 	static void load(VProperty*);
 
+	static void importRcFiles();
+
 protected:
 	VServerSettings(ServerHandler* server);
 	~VServerSettings();

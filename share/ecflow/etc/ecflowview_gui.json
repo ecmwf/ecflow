@@ -106,6 +106,7 @@
  				"title" : "Update",
  				"prefix" : "server.update",
  				
+ 				"line" : "update",
  				"line" : "updateRateInSec",
  				"line" : "adaptiveUpdate",
  				"line" : "maxAdaptiveUpdateRateInMin"
@@ -117,7 +118,7 @@
 				"prefix" : "server.files",
 				
 				"line" : "readFilesFromDisk",
-				"line" : "maxJobFile"				
+				"line" : "maxJobFileLines"				
 			},
 
 			"group" : {

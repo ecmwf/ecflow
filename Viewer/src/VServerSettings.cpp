@@ -11,7 +11,10 @@
 
 #include <assert.h>
 
+#include "DirectoryHandler.hpp"
 #include "ServerHandler.hpp"
+#include "ServerItem.hpp"
+#include "ServerList.hpp"
 #include "SessionHandler.hpp"
 #include "SuiteFilter.hpp"
 #include "UserMessage.hpp"
@@ -21,6 +24,7 @@
 #include "VSettings.hpp"
 
 #include <boost/property_tree/json_parser.hpp>
+#include <boost/algorithm/string.hpp>
 
 std::map<VServerSettings::Param,std::string> VServerSettings::parNames_;
 VProperty* VServerSettings::globalProp_=0;
@@ -46,7 +50,7 @@ VServerSettings::VServerSettings(ServerHandler* server) :
 
 	prop_=globalProp_->clone(false,true);
 
-	for(std::map<Param,std::string>::const_iterator it=parNames_.begin(); it != parNames_.end(); it++)
+	for(std::map<Param,std::string>::const_iterator it=parNames_.begin(); it != parNames_.end(); ++it)
 	{
 		if(VProperty* p=prop_->find(it->second))
 		{
@@ -135,7 +139,7 @@ void VServerSettings::saveSettings()
 	SessionItem* cs=SessionHandler::instance()->current();
 	std::string fName=cs->serverFile(server_->name());
 
-	//We save the sitefilter through VSettings
+	//We save the suitefilter through VSettings
 	VSettings vs("");
 	vs.beginGroup("server_filter");
 	server_->suiteFilter()->writeSettings(&vs);
@@ -143,6 +147,147 @@ void VServerSettings::saveSettings()
 
 	VConfig::instance()->saveSettings(fName,guiProp_,&vs);
 }
+
+void VServerSettings::importRcFiles()
+{
+	SessionItem* cs=SessionHandler::instance()->current();
+
+	for(int i=0; i < ServerList::instance()->count(); i++)
+	{
+		std::string name=ServerList::instance()->itemAt(i)->name();
+
+		std::string rcFile(DirectoryHandler::concatenate(DirectoryHandler::rcDir(),name + ".options"));
+
+		std::ifstream in(rcFile.c_str());
+
+		if(!in.good())
+			continue;
+
+		using boost::property_tree::ptree;
+		ptree pt;
+
+		bool hasValue=false;
+
+		std::string line;
+		while(getline(in,line))
+		{
+			std::string buf;
+			std::stringstream ssdata(line);
+			std::vector<std::string> vec;
+
+			while(ssdata >> buf)
+			{
+				vec.push_back(buf);
+			}
+
+			if(vec.size() >= 1)
+			{
+				std::vector<std::string> par;
+				boost::split(par,vec[0],boost::is_any_of(":"));
+
+				if(par.size()==2)
+				{
+					//Update
+					if(par[0] == "timeout")
+					{
+						pt.put("server.update.updateRateInSec",par[1]);
+						hasValue=true;
+					}
+					else if(par[0] == "poll")
+					{
+						pt.put("server.update.update",par[1]);
+						hasValue=true;
+					}
+
+					else if(par[0] == "drift")
+					{
+						pt.put("server.update.adaptiveUpdate",par[1]);
+						hasValue=true;
+					}
+					else if(par[0] == "maximum")
+					{
+						pt.put("server.update.maxAdaptiveUpdateRateInMin",par[1]);
+						hasValue=true;
+					}
+
+					//Files
+					else if(par[0] == "direct_read")
+					{
+						pt.put("server.files.readFilesFromDisk",par[1]);
+						hasValue=true;
+					}
+					else if(par[0] == "jobfile_lenght")
+					{
+						pt.put("server.file.maxJobFileLines",par[1]);
+						hasValue=true;
+					}
+
+					//Popup
+					else if(par[0] == "aborted")
+					{
+						pt.put("server.popup.aborted",par[1]);
+						hasValue=true;
+					}
+					else if(par[0] == "restarted")
+					{
+						pt.put("server.popup.restarted",par[1]);
+						hasValue=true;
+					}
+					else if(par[0] == "late")
+					{
+						pt.put("server.popup.late",par[1]);
+						hasValue=true;
+					}
+					else if(par[0] == "zombies")
+					{
+						pt.put("server.popup.zombie",par[1]);
+						hasValue=true;
+					}
+					else if(par[0] == "aliases")
+					{
+						pt.put("server.popup.alias",par[1]);
+						hasValue=true;
+					}
+					//Suites
+					else if(par[0] == "new_suites")
+					{
+						pt.put("suite_filter.autoAddNew",par[1]);
+						hasValue=true;
+
+					}
+					else if(par[0] == "suites")
+					{
+						boost::property_tree::ptree suites;
+						suites.push_back(std::make_pair("",par[1]));
+
+						for(unsigned int j=1; j < vec.size(); j++)
+						{
+							suites.push_back(std::make_pair("",vec.at(j)));
+						}
+
+						pt.put_child("suite_filter.suites",suites);
+
+						pt.put("suite_filter.enabled","true");
+
+						hasValue=true;
+
+					}
+				}
+			}
+
+		} //while(getline)
+
+		in.close();
+
+		if(hasValue)
+		{
+			std::string jsonName=cs->serverFile(name);
+			write_json(jsonName,pt);
+		}
+
+	}
+}
+
 
 //Called from VConfigLoader
 void VServerSettings::load(VProperty* p)

@@ -7,6 +7,11 @@
             	"label" : "Update",
             	"tooltip" : "update",      
             
+            	"update": {
+            		"label": "Enable automatic update",                     
+            		"default": "true"
+                },
+            	           	
             	"updateRateInSec": {
             		"label": "Update frequency",
             		"suffix" : "seconds", 

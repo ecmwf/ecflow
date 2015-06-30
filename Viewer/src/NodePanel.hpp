@@ -27,7 +27,7 @@ class NodePanel : public TabWidget
     Q_OBJECT
 
 public:
-	NodePanel(QWidget* parent=0);
+	explicit NodePanel(QWidget* parent=0);
 	virtual ~NodePanel();
 
 	void setViewMode(Viewer::ViewMode);
@@ -35,7 +35,7 @@ public:
 
 	ServerFilter* serverFilter();
 
-	Dashboard* currentNodeWidget();
+	Dashboard* currentDashboard();
 	void addWidget();
 	void resetWidgets(QStringList);
 	void reload();
