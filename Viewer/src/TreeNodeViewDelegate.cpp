@@ -16,11 +16,28 @@
 
 #include "AbstractNodeModel.hpp"
 #include "Animation.hpp"
-#include "VParam.hpp"
+#include "PropertyMapper.hpp"
+
+static std::vector<std::string> propVec;
 
 TreeNodeViewDelegate::TreeNodeViewDelegate(QWidget *parent) :
-    QStyledItemDelegate(parent)
+    QStyledItemDelegate(parent),
+    prop_(0),
+    nodeRectRad_(0),
+    drawChildCount_(true)
 {
+	//Property
+	if(propVec.empty())
+	{
+		propVec.push_back("view.tree.nodeRectRadius");
+		propVec.push_back("view.tree.font");
+		propVec.push_back("view.tree.displayChildCount");
+	}
+
+	prop_=new PropertyMapper(propVec,this);
+
+	updateSettings();
+
 	//The parent mist be the view!!!
 	animation_=new AnimationHandler(parent);
 
@@ -59,6 +76,34 @@ TreeNodeViewDelegate::TreeNodeViewDelegate(QWidget *parent) :
 TreeNodeViewDelegate::~TreeNodeViewDelegate()
 {
 	delete animation_;
+	delete prop_;
+}
+
+void TreeNodeViewDelegate::notifyChange(VProperty* p)
+{
+	updateSettings();
+}
+
+void TreeNodeViewDelegate::updateSettings()
+{
+	if(VProperty* p=prop_->find("view.tree.nodeRectRadius"))
+	{
+		nodeRectRad_=p->value().toInt();
+	}
+	if(VProperty* p=prop_->find("view.tree.font"))
+	{
+		font_=p->value().value<QFont>();
+	}
+	if(VProperty* p=prop_->find("view.tree.displayChildCount"))
+	{
+		drawChildCount_=p->value().toBool();
+	}
+}
+
+QSize TreeNodeViewDelegate::sizeHint(const QStyleOptionViewItem & option, const QModelIndex & index ) const
+{
+	QSize size=QStyledItemDelegate::sizeHint(option,index);
+	return size+QSize(0,4);
 }
 
 void TreeNodeViewDelegate::paint(QPainter *painter,const QStyleOptionViewItem &option,
@@ -146,13 +191,6 @@ void TreeNodeViewDelegate::paint(QPainter *painter,const QStyleOptionViewItem &o
 	//else
 	//	QStyledItemDelegate::paint(painter,option,index);
 }
-
-QSize TreeNodeViewDelegate::sizeHint(const QStyleOptionViewItem & option, const QModelIndex & index ) const
-{
-	QSize size=QStyledItemDelegate::sizeHint(option,index);
-	return size+QSize(0,4);
-}
-
 
 
 void TreeNodeViewDelegate::renderServer(QPainter *painter,const QModelIndex& index,

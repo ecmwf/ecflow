@@ -16,11 +16,14 @@
 #include <QPen>
 #include <QStyledItemDelegate>
 
+#include "VProperty.hpp"
+
 #include <string>
 
 class AnimationHandler;
+class PropertyMapper;
 
-class TreeNodeViewDelegate : public QStyledItemDelegate
+class TreeNodeViewDelegate : public QStyledItemDelegate, public VPropertyObserver
 {
 public:
 	TreeNodeViewDelegate(QWidget *parent=0);
@@ -30,7 +33,10 @@ public:
 		           const QModelIndex& index) const;
 	QSize sizeHint(const QStyleOptionViewItem & option, const QModelIndex & index ) const;
 
+	void notifyChange(VProperty*);
+
 protected:
+	void updateSettings();
 
 	void renderServer(QPainter *painter,const QModelIndex& index,
 			            const QStyleOptionViewItemV4& option,QString text) const;
@@ -63,8 +69,12 @@ protected:
 
 	QMap<QString,AttributeRendererProc> attrRenderers_;
 	AnimationHandler* animation_;
-};
 
+	PropertyMapper* prop_;
+	int nodeRectRad_;
+	QFont font_;
+	bool drawChildCount_;
+};
 
 #endif
 

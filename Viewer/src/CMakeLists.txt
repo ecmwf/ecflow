@@ -46,6 +46,7 @@ set(viewer_srcs
     PropertyDialog.cpp
     PropertyEditor.cpp
     PropertyLine.cpp
+    PropertyMapper.cpp
     ScriptItemWidget.cpp
     ServerComQueue.cpp
     ServerComThread.cpp

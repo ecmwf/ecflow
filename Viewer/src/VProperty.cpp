@@ -373,5 +373,3 @@ QString VProperty::toString(QColor col)
 			QString::number(col.blue()) + ")";
 }
 
-
-

@@ -32,6 +32,7 @@ public:
     
     void init(const std::string& parDir);
     const std::vector<VProperty*>& groups() {return groups_;}
+    VProperty* find(const std::string& path);
 
     VProperty* cloneServerGui(VProperty *linkTarget);
 
@@ -46,7 +47,6 @@ protected:
     void saveSettings(const std::string& parFile,VProperty* guiProp,VSettings* vs);
     void loadSettings(const std::string& parFile,VProperty* guiProp);
 
-    VProperty* find(const std::string& path);
     VProperty* group(const std::string& name);
 
     static VConfig* instance_;

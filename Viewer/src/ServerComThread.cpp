@@ -256,7 +256,7 @@ void ServerComThread::reset()
 			}
 			catch (std::exception &e)
 			{
-				UserMessage::message(UserMessage::DBG, false, std::string("o drop possible") + e.what());
+				UserMessage::message(UserMessage::DBG, false, std::string("no drop possible") + e.what());
 			}
 		}
 
