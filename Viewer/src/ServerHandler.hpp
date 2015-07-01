@@ -153,7 +153,7 @@ private:
 	void clearTree();
 	void rescanTree();
 	void connectionLost(const std::string& errMsg);
-	void connectionGained();
+	bool connectionGained();
 
 	void updateSuiteFilter(const std::vector<std::string>&);
 

@@ -25,7 +25,9 @@ ServerComQueue::ServerComQueue(ServerHandler *server,ClientInvoker *client, Serv
 	server_(server),
 	client_(client),
 	comThread_(comThread),
-	state_(SuspendedState) //the queue is enabled but not running
+	state_(SuspendedState), //the queue is enabled but not running
+	taskIsBeingFinished_(false),
+	taskIsBeingFailed_(false)
 {
 	timer_=new QTimer(this);
 	timer_->setInterval(2000);
@@ -97,6 +99,8 @@ void ServerComQueue::disable()
 	//until it finishes its task.
 	comThread_->wait();
 
+	UserMessage::message(UserMessage::DBG, false, std::string("ServerComQueue::disable"));
+
 	//Clear the current task
 	if(current_)
 		current_.reset();
@@ -154,11 +158,15 @@ void ServerComQueue::start()
 {
 	if(state_ != DisabledState && state_ != ResetState)
 	{
+		UserMessage::message(UserMessage::DBG, false, std::string("comQueue::start"));
+
 		//If the comthread is running we need to wait
 		//until it finishes its task.
 		comThread_->wait();
 
 		state_=RunningState;
+
+		UserMessage::message(UserMessage::DBG, false, std::string("comQueue::start start timer"));
 
 		//Starts the timer
 		timer_->start();
@@ -234,7 +242,10 @@ void ServerComQueue::slotRun()
 	if(state_ == DisabledState || state_ == ResetState ||state_ == SuspendedState )
 		return;
 
-	//UserMessage::message(UserMessage::DBG, false, std::string("  ServerComQueue::run"));
+	if(taskIsBeingFinished_ || taskIsBeingFailed_)
+		return;
+
+	//UserMessage::message(UserMessage::DBG, false, std::string("ServerComQueue::slotRun"));
 	//UserMessage::message(UserMessage::DBG, false, std::string("     --> number of tasks: " + boost::lexical_cast<std::string>(tasks_.size()) ));
 	//for(std::deque<VTask_ptr>::const_iterator it=tasks_.begin(); it != tasks_.end(); it++)
 	//{
@@ -260,6 +271,7 @@ void ServerComQueue::slotRun()
 		return;
 	}
 
+	//UserMessage::message(UserMessage::DBG, false, std::string("ServerComQueue::slotRun"));
 	current_=tasks_.front();
 	tasks_.pop_front();
 
@@ -273,6 +285,8 @@ void ServerComQueue::slotRun()
 //thread is not running so it is safe to access the ClientInvoker!
 void ServerComQueue::slotTaskFinished()
 {
+	taskIsBeingFinished_=true;
+
 	UserMessage::message(UserMessage::DBG, false,std::string("ServerComQueue::slotTaskFinished"));
 
 	//We need to leave the load mode
@@ -280,15 +294,16 @@ void ServerComQueue::slotTaskFinished()
 
 	//If the current task is empty there must have been an error that was
 	//handled by the sloTaskFailed slot.
-	if(!current_)
-		return;
-
-	//We notify the server that the task has finished and the results can be accessed.
-	server_->clientTaskFinished(current_,client_->server_reply());
-
-	//We do not need the current task any longer.
 	if(current_)
+	{
+		VTask_ptr task=current_;
 		current_.reset();
+
+		//We notify the server that the task has finished and the results can be accessed.
+		server_->clientTaskFinished(task,client_->server_reply());
+	}
+
+	taskIsBeingFinished_=false;
 }
 
 //This slot is called when the task failed in the ComThread. Right after this signal is emitted
@@ -296,18 +311,20 @@ void ServerComQueue::slotTaskFinished()
 //to the slotTaskFinished slot.
 void ServerComQueue::slotTaskFailed(std::string msg)
 {
+	taskIsBeingFailed_=true;
+
 	UserMessage::message(UserMessage::DBG, false,std::string("ServerComQueue::slotTaskFailed"));
 
 	//We need to leave the load mode
 	endReset();
 
+	assert(current_);
+
+	VTask_ptr task=current_;
+	current_.reset();
+
 	//We notify the server that the task has failed
-	server_->clientTaskFailed(current_,msg);
+	server_->clientTaskFailed(task,msg);
 
-	//current_->reply()->errorText(msg);
-	//current_->status(VTask::ABORTED);
-
-	//We do not need the current task any longer.
-	if(current_)
-		current_.reset();
+	taskIsBeingFailed_=false;
 }

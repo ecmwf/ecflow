@@ -69,6 +69,8 @@ protected:
 	std::deque<VTask_ptr> tasks_;
 	VTask_ptr current_;
 	State state_;
+	bool taskIsBeingFinished_;
+	bool taskIsBeingFailed_;
 };
 
 #endif

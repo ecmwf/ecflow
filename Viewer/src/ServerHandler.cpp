@@ -749,7 +749,12 @@ void ServerHandler::clientTaskFinished(VTask_ptr task,const ServerReply& serverR
 				{
 					// no news, nothing to do
 					UserMessage::message(UserMessage::DBG, false, std::string(" --> No news from server"));
-					connectionGained();
+
+					//If we just regained the connection we need to reset
+					if(connectionGained())
+					{
+						reset();
+					}
 					break;
 				}
 
@@ -757,9 +762,16 @@ void ServerHandler::clientTaskFinished(VTask_ptr task,const ServerReply& serverR
 				{
 					// yes, something's changed - synchronise with the server
 
+					//If we just regained the connection we need to reset
 					UserMessage::message(UserMessage::DBG, false, std::string(" --> News from server - send SYNC command"));
-					connectionGained();
-					comQueue_->addSyncTask(); //comThread()->sendCommand(this, client_, ServerComThread::SYNC);
+					if(connectionGained())
+					{
+						reset();
+					}
+					else
+					{
+						comQueue_->addSyncTask(); //comThread()->sendCommand(this, client_, ServerComThread::SYNC);
+					}
 					break;
 				}
 
@@ -909,13 +921,16 @@ void ServerHandler::connectionLost(const std::string& errMsg)
 	broadcast(&ServerObserver::notifyServerConnectState);
 }
 
-void ServerHandler::connectionGained()
+bool ServerHandler::connectionGained()
 {
 	if(connectState_->state() != ConnectState::Normal)
 	{
 		connectState_->state(ConnectState::Normal);
 		broadcast(&ServerObserver::notifyServerConnectState);
+		return true;
 	}
+	return false;
+
 }
 
 void ServerHandler::disconnectServer()
