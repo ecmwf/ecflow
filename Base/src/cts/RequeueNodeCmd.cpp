@@ -87,9 +87,13 @@ STC_Cmd_ptr RequeueNodeCmd::doHandleRequest(AbstractServer* as) const
 	            taskVec[i]->requeue( true /* reset repeats */,
 	                                 clear_suspended_in_child_nodes,
 	                                 true /* reset_next_time_slot */);
-	            taskVec[i]->set_most_significant_state_up_node_tree(); // can be waste full
 	         }
 	      }
+         theNodeToRequeue->set_most_significant_state_up_node_tree();
+
+         // Call handleStateChange on parent, to avoid requeue same node again.
+         Node* parent = theNodeToRequeue->parent();
+         if (parent) parent->handleStateChange();  // ECFLOW-359
 	   }
 	   else if ( option_ == RequeueNodeCmd::NO_OPTION) {
 	      // ONLY Re-queue if there no tasks in submitted or active states
@@ -113,7 +117,13 @@ STC_Cmd_ptr RequeueNodeCmd::doHandleRequest(AbstractServer* as) const
 	      theNodeToRequeue->requeue( true /* reset repeats */,
 	                                 clear_suspended_in_child_nodes,
 	                                 true /* reset_next_time_slot */ );
+
+
 	      theNodeToRequeue->set_most_significant_state_up_node_tree();
+
+         // Call handleStateChange on parent, to avoid requeue same node again.
+         Node* parent = theNodeToRequeue->parent();
+         if (parent) parent->handleStateChange();  // ECFLOW-359
 	   }
 	   else if ( option_ == RequeueNodeCmd::FORCE) {
 
@@ -127,7 +137,12 @@ STC_Cmd_ptr RequeueNodeCmd::doHandleRequest(AbstractServer* as) const
 	      theNodeToRequeue->requeue(  true /* reset repeats */,
 	                                  clear_suspended_in_child_nodes,
 	                                  true /* reset_next_time_slot */ );
+
 	      theNodeToRequeue->set_most_significant_state_up_node_tree();
+
+	      // Call handleStateChange on parent, to avoid requeue same node again.
+         Node* parent = theNodeToRequeue->parent();
+         if (parent) parent->handleStateChange();  // ECFLOW-359
 	   }
 	}
 
