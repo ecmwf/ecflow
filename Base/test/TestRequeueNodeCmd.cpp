@@ -146,5 +146,54 @@ BOOST_AUTO_TEST_CASE( test_repeat_based_requeue_clears_children )
    BOOST_CHECK_MESSAGE( !t1->get_flag().is_set(ecf::Flag::NO_REQUE_IF_SINGLE_TIME_DEP),"Expected ecf::Flag::NO_REQUE_IF_SINGLE_TIME_DEP to be clear");
 }
 
+BOOST_AUTO_TEST_CASE( test_ecflow_359 )
+{
+   cout << "Base:: ...test_ECFLOW-359\n";
+
+   //   suite s1
+   //     family f1
+   //       repeat date YMD 20090916 20090928
+   //       family parent
+   //          task dummy
+   //             time 16:00
+   //       endfamily
+   //       task complete
+   //          defstatus complete
+
+   //   set defstatus complete /s1/f1/parent/dummy
+   //   requeue s1/f1/parent
+   //   f1 gets set complete through status inheritance
+   //   YMD is not increment at the moment...
+
+   defs_ptr the_defs = Defs::create();
+   suite_ptr suite = the_defs->add_suite( "s1" ) ;
+   family_ptr f1 = suite->add_family("f1");
+   f1->addRepeat( RepeatDate("YMD",20090916,20090928,1) );
+
+   family_ptr parent  = f1->add_family( "parent" ) ;
+   task_ptr dummy = parent->add_task("dummy");
+   dummy->addTime( TimeAttr(16,0));
+
+   task_ptr complete = f1->add_task("complete");
+   complete->addDefStatus( DState::COMPLETE);
+
+//   PrintStyle::setStyle(PrintStyle::STATE);
+//   cout << the_defs;
+
+   the_defs->beginAll();
+
+   // set defstatus complete /s1/f1/parent/dummy
+   BOOST_CHECK_MESSAGE( dummy->defStatus() == DState::QUEUED, "Expected dstate to be queued but found " << DState::toString( dummy->dstate()));
+   TestHelper::invokeRequest(the_defs.get(),Cmd_ptr( new AlterCmd(dummy->absNodePath(),AlterCmd::DEFSTATUS,"complete")));
+   BOOST_CHECK_MESSAGE( dummy->defStatus() == DState::COMPLETE, "Expected dstate to be complete but found " << DState::toString( dummy->dstate()));
+
+   // requeue f1  since all children are now complete, we expect the repeat on the parent to increment
+   BOOST_CHECK_MESSAGE( f1->repeat().value() ==  20090916, "Expected repeat value of 20090916 but found " << f1->repeat().value());
+   TestHelper::invokeRequest(the_defs.get(),Cmd_ptr( new RequeueNodeCmd(parent->absNodePath())));
+   BOOST_CHECK_MESSAGE( f1->repeat().value() ==  20090917, "Expected repeat value of 20090917 but found " << f1->repeat().value());
+
+   TestHelper::invokeRequest(the_defs.get(),Cmd_ptr( new RequeueNodeCmd(parent->absNodePath())));
+   BOOST_CHECK_MESSAGE( f1->repeat().value() ==  20090918, "Expected repeat value of 20090918 but found " << f1->repeat().value());
+}
 
 BOOST_AUTO_TEST_SUITE_END()
