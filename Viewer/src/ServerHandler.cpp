@@ -473,16 +473,18 @@ void ServerHandler::command(std::vector<VInfo_ptr> info, std::string cmd, bool r
 		for(int i=0; i < info.size(); i++)
 		{
 			std::string nodeFullName;
-			std::string nodeName = info[i]->node()->node()->name();
+			std::string nodeName;
 
 			//Get the name
 			if(info[i]->isNode())
 			{
+				nodeName     = info[i]->node()->node()->name();
 				nodeFullName = info[i]->node()->node()->absNodePath();
 				//UserMessage::message(UserMessage::DBG, false, std::string("  --> for node: ") + nodeFullName + " (server: " + info[i]->server()->longName() + ")");
 			}
 			else if(info[i]->isServer())
 			{
+				nodeName     = info[i]->server()->name();
 				nodeFullName = info[i]->server()->longName();
 				//UserMessage::message(UserMessage::DBG, false, std::string("  --> for server: ") + nodeFullName);
 			}
