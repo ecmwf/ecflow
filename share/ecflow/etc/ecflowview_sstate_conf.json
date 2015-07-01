@@ -19,7 +19,7 @@
                 "tooltip": "shutdown",
                 "fill_colour" : {
                     "label" : "Colour",
-                    "default": "rgb(255,102,102)"
+                    "default": "rgb(255,192,203)"
                 },
                 "font_colour" : {
                     "label" : "Font colour",

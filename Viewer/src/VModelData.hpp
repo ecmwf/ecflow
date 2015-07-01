@@ -79,7 +79,7 @@ public:
 	 int checkAttributeUpdateDiff(VNode *node);
 
 	 //From ServerObserver
-	 void notifyDefsChanged(ServerHandler* server, const std::vector<ecf::Aspect::Type>& a) {};
+	 void notifyDefsChanged(ServerHandler* server, const std::vector<ecf::Aspect::Type>& a);
 	 void notifyServerDelete(ServerHandler* server) {};
 	 void notifyBeginServerClear(ServerHandler* server);
 	 void notifyEndServerClear(ServerHandler* server);

@@ -817,7 +817,6 @@ void NodePathWidget::notifyDefsChanged(ServerHandler* server,const std::vector<e
 		//State changed
 		if(std::find(aspect.begin(),aspect.end(),ecf::Aspect::SERVER_STATE) != aspect.end())
 		{
-			ServerHandler* server;
 			if(nodeItems_.count() > 0)
 			{
 				nodeItems_.at(0)->reset(server->vRoot()->name(),

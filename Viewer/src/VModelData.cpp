@@ -104,6 +104,11 @@ int VTreeServer::checkAttributeUpdateDiff(VNode *node)
 // ServerObserver methods
 //--------------------------------------------------
 
+void VTreeServer::notifyDefsChanged(ServerHandler* server, const std::vector<ecf::Aspect::Type>& a)
+{
+	Q_EMIT dataChanged(this);
+}
+
 void VTreeServer::notifyBeginServerScan(ServerHandler* server,const VServerChange& change)
 {
 	Q_EMIT beginServerScan(this,change.suiteNum_);
