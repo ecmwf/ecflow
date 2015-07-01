@@ -64,6 +64,7 @@ Q_SIGNALS:
 	void endServerScan(VModelServer*,int);
 	void beginServerClear(VModelServer*);
 	void endServerClear(VModelServer*);
+	void rerender();
 
 protected:
 	ServerHandler *server_;
@@ -181,6 +182,7 @@ Q_SIGNALS:
 	void endServerScan(VModelServer*,int);
 	void beginServerClear(VModelServer*);
 	void endServerClear(VModelServer*);
+	void rerender();
 
 protected:
 	void init();

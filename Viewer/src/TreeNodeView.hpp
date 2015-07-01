@@ -49,6 +49,7 @@ public Q_SLOTS:
 	void slotSaveExpand(const VNode* node);
 	void slotRestoreExpand(const VNode* node);
 	void slotRepaint(Animation*);
+	void slotRerender();
 
 Q_SIGNALS:
 	void selectionChanged(VInfo_ptr);

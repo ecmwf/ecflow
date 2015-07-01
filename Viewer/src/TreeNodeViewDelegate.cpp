@@ -48,6 +48,9 @@ TreeNodeViewDelegate::TreeNodeViewDelegate(QWidget *parent) :
 	nodePen_=QPen(QColor(180,180,180));
 	nodeSelectPen_=QPen(QColor(0,0,0),2);
 
+	lostConnectBgBrush_=QBrush(QColor(150,150,150,150),Qt::Dense7Pattern);
+	lostConnectBandBrush_=QBrush(QColor(255,166,0,150));
+
 	QImageReader imgR(":/viewer/warning.svg");
 	if(imgR.canRead())
 	{
@@ -141,6 +144,15 @@ void TreeNodeViewDelegate::paint(QPainter *painter,const QStyleOptionViewItem &o
 			painter->drawLine(fullRect.bottomLeft(),fullRect.bottomRight());
 		}
 	}*/
+
+	if(index.data(AbstractNodeModel::ConnectionRole).toInt() == 0)
+	{
+		QRect fullRect=QRect(0,option.rect.y(),painter->device()->width(),option.rect.height());
+		painter->fillRect(fullRect,lostConnectBgBrush_);
+		QRect bandRect=QRect(0,option.rect.y(),5,option.rect.height());
+		painter->fillRect(bandRect,lostConnectBandBrush_);
+
+	}
 
 	//First column (nodes)
 	if(index.column() == 0)

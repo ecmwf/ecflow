@@ -74,6 +74,9 @@ TreeNodeWidget::TreeNodeWidget(ServerFilter* servers,QWidget* parent) : NodeWidg
 	connect(model_,SIGNAL(scanEnded(const VNode*)),
 				view_->realWidget(),SLOT(slotRestoreExpand(const VNode*)));
 
+	connect(data_,SIGNAL(rerender()),
+				view_->realWidget(),SLOT(slotRerender()));
+
 	//Builds the menu for the settings tool button
 	QMenu *menu=new QMenu(this);
 	menu->setTearOffEnabled(true);

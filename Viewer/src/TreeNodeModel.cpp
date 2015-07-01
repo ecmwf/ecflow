@@ -139,7 +139,7 @@ QVariant TreeNodeModel::data( const QModelIndex& index, int role ) const
 	   (role != Qt::DisplayRole && role != Qt::ToolTipRole && role != Qt::BackgroundRole &&
 	    role != Qt::ForegroundRole &&
 	    role != FilterRole && role != IconRole && role != ServerRole && role != NodeNumRole &&
-	    role != InfoRole && role != LoadRole))
+	    role != InfoRole && role != LoadRole && role != ConnectionRole))
     {
 		return QVariant();
 	}
@@ -189,7 +189,6 @@ QVariant TreeNodeModel::serverData(const QModelIndex& index,int role) const
 	if(role == FilterRole)
 		return true;
 
-
 	ServerHandler *server=indexToRealServer(index);
 	if(!server)
 		return QVariant();
@@ -197,7 +196,11 @@ QVariant TreeNodeModel::serverData(const QModelIndex& index,int role) const
 	if(index.column() == 0)
 	{
 		//The colour of the server node
-		if(role == Qt::BackgroundRole)
+		if(role == ConnectionRole)
+			return (server->connectState()->state() == ConnectState::Lost)?0:1;
+
+		//The colour of the server node
+		else if(role == Qt::BackgroundRole)
 			return server->vRoot()->stateColour();
 
 		//The font colour of the server node
@@ -265,7 +268,13 @@ QVariant TreeNodeModel::nodeData(const QModelIndex& index, int role) const
 
 	if(index.column() == 0)
 	{
-		if(role == Qt::DisplayRole)
+		//The colour of the server node
+		if(role == ConnectionRole)
+		{
+			return (vnode->server()->connectState()->state() == ConnectState::Lost)?0:1;
+		}
+
+		else if(role == Qt::DisplayRole)
 			return vnode->name();
 
 		else if(role == FilterRole)
@@ -298,6 +307,9 @@ QVariant TreeNodeModel::nodeData(const QModelIndex& index, int role) const
 			}
 			return QVariant();
 		}
+
+
+
 	}
 
 	return QVariant();
@@ -317,7 +329,7 @@ QVariant TreeNodeModel::attributesData(const QModelIndex& index, int role) const
 	if(index.column()!=0)
 		return QVariant();
 
-	if(role != Qt::BackgroundRole && role != FilterRole && role != Qt::DisplayRole)
+	if(role != Qt::BackgroundRole && role != FilterRole && role != Qt::DisplayRole && role != ConnectionRole)
 		return QVariant();
 
 	if(role == Qt::BackgroundRole)
@@ -334,6 +346,7 @@ QVariant TreeNodeModel::attributesData(const QModelIndex& index, int role) const
 	if(!node)
 		return QVariant();
 
+
 	if(role == FilterRole)
 	{
 		VAttribute* type=node->getAttributeType(index.row());
@@ -343,6 +356,12 @@ QVariant TreeNodeModel::attributesData(const QModelIndex& index, int role) const
 		}
 		return QVariant(false);
 	}
+
+	else if(role == ConnectionRole)
+	{
+		return (node->server()->connectState()->state() == ConnectState::Lost)?0:1;
+	}
+
 	else if(role == Qt::DisplayRole)
 	{
 		VAttribute* type=0;

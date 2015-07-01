@@ -67,6 +67,9 @@ protected:
 	QPen nodeSelectPen_;
 	QPixmap errPix_;
 
+	QBrush lostConnectBgBrush_;
+	QBrush lostConnectBandBrush_;
+
 	QMap<QString,AttributeRendererProc> attrRenderers_;
 	AnimationHandler* animation_;
 

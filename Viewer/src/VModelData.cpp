@@ -147,7 +147,7 @@ void VTreeServer::notifyEndServerClear(ServerHandler* server)
 
 void VTreeServer::notifyServerConnectState(ServerHandler* server)
 {
-	Q_EMIT dataChanged(this);
+	Q_EMIT rerender();
 }
 
 void VTreeServer::notifyServerActivityChanged(ServerHandler* server)

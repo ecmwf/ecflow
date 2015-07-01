@@ -216,6 +216,11 @@ void TreeNodeView::rerender()
 	viewport()->update();
 }
 
+void TreeNodeView::slotRerender()
+{
+	rerender();
+}
+
 void TreeNodeView::slotRepaint(Animation* an)
 {
 	if(!an)
