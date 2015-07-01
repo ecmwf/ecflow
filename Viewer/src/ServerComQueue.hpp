@@ -66,6 +66,7 @@ protected:
 	ClientInvoker* client_;
 	ServerComThread *comThread_;
 	QTimer* timer_;
+	int timeout_;
 	std::deque<VTask_ptr> tasks_;
 	VTask_ptr current_;
 	State state_;

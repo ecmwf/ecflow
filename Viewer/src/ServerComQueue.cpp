@@ -25,12 +25,13 @@ ServerComQueue::ServerComQueue(ServerHandler *server,ClientInvoker *client, Serv
 	server_(server),
 	client_(client),
 	comThread_(comThread),
+	timeout_(1000),
 	state_(SuspendedState), //the queue is enabled but not running
 	taskIsBeingFinished_(false),
 	taskIsBeingFailed_(false)
 {
 	timer_=new QTimer(this);
-	timer_->setInterval(2000);
+	timer_->setInterval(timeout_);
 
 	connect(timer_,SIGNAL(timeout()),
 			this,SLOT(slotRun()));
@@ -113,14 +114,15 @@ void ServerComQueue::reset()
 	if(state_ == DisabledState || state_ == ResetState)
 		return;
 
-	//This state has the highest priority.
-	state_=ResetState;
-
 	//Remove all tasks
 	tasks_.clear();
 
 	//Stop the timer
 	timer_->stop();
+
+	//This state has the highest priority.
+	state_=ResetState;
+
 
 	//If the comthread is running we need to wait
 	//until it finishes its task.
@@ -132,13 +134,13 @@ void ServerComQueue::reset()
 	//The thread cannot be running
 	assert(comThread_->isRunning() == false);
 
-	//We send a Reset command straight to the thread!!
+	//We send a Reset command to the thread!! This is the only task that is allowed
+	//during the reset!!
 	VTask_ptr task=VTask::create(VTask::ResetTask);
-	current_=task;
+	tasks_.push_back(task);
 
-	comThread_->task(current_);
-
-	//The queue is still stopped and does not accept any tasks until the reset finishes.
+	//We start the timeer with a shorter interval
+	timer_->start(100);
 }
 
 void ServerComQueue::endReset()
@@ -169,7 +171,7 @@ void ServerComQueue::start()
 		UserMessage::message(UserMessage::DBG, false, std::string("comQueue::start start timer"));
 
 		//Starts the timer
-		timer_->start();
+		timer_->start(timeout_);
 	}
 }
 
@@ -197,7 +199,7 @@ void ServerComQueue::addTask(VTask_ptr task)
 	tasks_.push_back(task);
 	if(!timer_->isActive() && state_ != SuspendedState)
 	{
-		timer_->start(0);
+		timer_->start(timeout_);
 	}
 }
 
@@ -239,7 +241,7 @@ void ServerComQueue::addSuiteAutoRegisterTask()
 
 void ServerComQueue::slotRun()
 {
-	if(state_ == DisabledState || state_ == ResetState ||state_ == SuspendedState )
+	if(state_ == DisabledState ||state_ == SuspendedState )
 		return;
 
 	if(taskIsBeingFinished_ || taskIsBeingFailed_)

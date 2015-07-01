@@ -329,9 +329,21 @@ void TreeNodeViewDelegate::renderServer(QPainter *painter,const QModelIndex& ind
 
 	//Draw bg rect
 	QColor bg=index.data(Qt::BackgroundRole).value<QColor>();
-	painter->fillRect(fillRect,bg);
+	painter->setBrush(bg);
 	painter->setPen((option.state & QStyle::State_Selected)?nodeSelectPen_:nodePen_);
-	painter->drawRect(fillRect);
+
+	if(nodeRectRad_ <=0)
+	{
+		painter->drawRect(fillRect);
+	}
+	else
+	{
+		painter->drawRoundedRect(fillRect,nodeRectRad_,nodeRectRad_);
+	}
+
+	//painter->fillRect(fillRect,bg);
+	//painter->setPen((option.state & QStyle::State_Selected)?nodeSelectPen_:nodePen_);
+	//painter->drawRect(fillRect);
 
 	//Draw text
 	QColor fg=index.data(Qt::ForegroundRole).value<QColor>();
