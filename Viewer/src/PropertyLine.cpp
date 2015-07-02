@@ -243,6 +243,7 @@ QWidget* FontPropertyLine::button()
 
 void FontPropertyLine::reset(QVariant v)
 {
+	font_=v.value<QFont>();
 	lName_->setText(font_.toString());
 	PropertyLine::checkState();
 }

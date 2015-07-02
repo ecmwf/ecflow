@@ -99,6 +99,7 @@ public:
     static bool   toBool(const std::string&);
 
     static QString toString(QColor col);
+    static QString toString(QFont f);
 
 private:
     void dispatchChange();

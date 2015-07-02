@@ -77,6 +77,11 @@ protected:
 	int nodeRectRad_;
 	QFont font_;
 	bool drawChildCount_;
+
+	QFont serverNumFont_;
+	QFont suiteNumFont_;
+	QFont serverInfoFont_;
+
 };
 
 #endif

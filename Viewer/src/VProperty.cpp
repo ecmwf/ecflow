@@ -85,6 +85,11 @@ void VProperty::setValue(const std::string& val)
     {
         value_=toColour(val);
     }
+    else if(isFont(val))
+    {
+        value_=toFont(val);
+    }
+
     else if(isNumber(val))
     {
     	value_=toNumber(val);
@@ -135,7 +140,7 @@ std::string VProperty::valueAsString() const
 		s=VProperty::toString(value_.value<QColor>());
 		break;
 	case FontType:
-		s=value_.value<QFont>().toString();
+		s=VProperty::toString(value_.value<QFont>());
 		break;
 	default:
 		break;
@@ -313,12 +318,12 @@ VProperty* VProperty::clone(bool addLink,bool setMaster)
 
 bool VProperty::isColour(const std::string& val)
 {
-    return QString::fromStdString(val).simplified().startsWith("rgb");
+    return QString::fromStdString(val).simplified().startsWith("rgb(");
 }
 
 bool VProperty::isFont(const std::string& val)
 {
-    return QString::fromStdString(val).simplified().startsWith("font");
+    return QString::fromStdString(val).simplified().startsWith("font(");
 }
 
 bool VProperty::isNumber(const std::string& val)
@@ -346,13 +351,20 @@ QColor VProperty::toColour(const std::string& name)
                   rx.cap(3).toInt());
 
     }
-
     return col;
 }
 
 QFont VProperty::toFont(const std::string& name)
 {
-    return QFont();
+	QString qn=QString::fromStdString(name);
+	QFont f;
+	QRegExp rx("font\\((.+)\\)");
+	if(rx.indexIn(qn) > -1 && rx.captureCount() == 1)
+	{
+		f.fromString(rx.cap(1));
+	}
+
+	return f;
 }
 
 int VProperty::toNumber(const std::string& name)
@@ -371,5 +383,10 @@ QString VProperty::toString(QColor col)
 	return "rgb(" + QString::number(col.red()) + "," +
 			QString::number(col.green()) + "," +
 			QString::number(col.blue()) + ")";
+}
+
+QString VProperty::toString(QFont f)
+{
+	return "font(" + f.toString() + ")";
 }
 

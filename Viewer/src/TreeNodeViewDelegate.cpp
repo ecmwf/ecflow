@@ -29,7 +29,6 @@ TreeNodeViewDelegate::TreeNodeViewDelegate(QWidget *parent) :
 	//Property
 	if(propVec.empty())
 	{
-		propVec.push_back("view.tree.nodeRectRadius");
 		propVec.push_back("view.tree.font");
 		propVec.push_back("view.tree.displayChildCount");
 	}
@@ -96,6 +95,13 @@ void TreeNodeViewDelegate::updateSettings()
 	if(VProperty* p=prop_->find("view.tree.font"))
 	{
 		font_=p->value().value<QFont>();
+
+		serverInfoFont_=font_;
+		serverNumFont_=font_;
+		serverNumFont_.setBold(true);
+		suiteNumFont_=font_;
+		suiteNumFont_.setBold(true);
+
 	}
 	if(VProperty* p=prop_->find("view.tree.displayChildCount"))
 	{
@@ -106,7 +112,10 @@ void TreeNodeViewDelegate::updateSettings()
 QSize TreeNodeViewDelegate::sizeHint(const QStyleOptionViewItem & option, const QModelIndex & index ) const
 {
 	QSize size=QStyledItemDelegate::sizeHint(option,index);
-	return size+QSize(0,4);
+
+	QFontMetrics fm(font_);
+	int h=fm.height();
+	return QSize(size.width(),h+10);
 }
 
 void TreeNodeViewDelegate::paint(QPainter *painter,const QStyleOptionViewItem &option,
@@ -160,6 +169,8 @@ void TreeNodeViewDelegate::paint(QPainter *painter,const QStyleOptionViewItem &o
 		QVariant tVar=index.data(Qt::DisplayRole);
 		QRect textRect = style->subElementRect(QStyle::SE_ItemViewItemText, &vopt, widget);
 
+		painter->setFont(font_);
+
 		if(tVar.type() == QVariant::String)
 		{
 			QString text=index.data(Qt::DisplayRole).toString();
@@ -208,13 +219,17 @@ void TreeNodeViewDelegate::paint(QPainter *painter,const QStyleOptionViewItem &o
 void TreeNodeViewDelegate::renderServer(QPainter *painter,const QModelIndex& index,
 		                                   const QStyleOptionViewItemV4& option,QString text) const
 {
-	int offset=2;
+	int offset=4;
 	int currentRight=0;
 
+	QFontMetrics fm(font_);
+	int deltaH=(option.rect.height()-(fm.height()+6))/2;
+
 	//The initial filled rect (we will adjust its  width)
-	QRect fillRect=option.rect.adjusted(offset,1,0,-2);
+	//QRect fillRect=option.rect.adjusted(offset,1,0,-2);
+	QRect fillRect=option.rect.adjusted(offset,deltaH,0,-deltaH-1);
 	if(option.state & QStyle::State_Selected)
-		fillRect.adjust(0,1,0,-1);
+		fillRect.adjust(0,0,0,0);
 
 	//Pixmap rect
 	//QRect pixRect = QRect(fillRect.left()+offset,
@@ -225,9 +240,7 @@ void TreeNodeViewDelegate::renderServer(QPainter *painter,const QModelIndex& ind
 	//The text rectangle
 	QRect textRect = fillRect;
 	textRect.setLeft(fillRect.left()+offset);
-	QFont font;
 
-	QFontMetrics fm(font);
 	int textWidth=fm.width(text);
 	textRect.setWidth(textWidth);
 
@@ -256,12 +269,11 @@ void TreeNodeViewDelegate::renderServer(QPainter *painter,const QModelIndex& ind
 	QRect infoRect;
 	QString infoTxt=index.data(AbstractNodeModel::InfoRole).toString();
 	bool hasInfo=(infoTxt.isEmpty() == false);
-	QFont infoFont;
 
 	if(hasInfo)
 	{
 		//infoFont.setBold(true);
-		fm=QFontMetrics(infoFont);
+		fm=QFontMetrics(serverInfoFont_);
 
 		int infoWidth=fm.width(infoTxt);
 		infoRect = textRect;
@@ -300,22 +312,24 @@ void TreeNodeViewDelegate::renderServer(QPainter *painter,const QModelIndex& ind
 	//The node number (optional)
 	QRect numRect;
 	QString numTxt;
-	QVariant va=index.data(AbstractNodeModel::NodeNumRole);
-	bool hasNum=(va.isNull() == false);
-	QFont numFont;
+	bool hasNum=false;
 
-	if(hasNum)
+	if(drawChildCount_)
 	{
-		numTxt="(" + QString::number(va.toInt()) + ")";
+		QVariant va=index.data(AbstractNodeModel::NodeNumRole);
+		hasNum=(va.isNull() == false);
+		if(hasNum)
+		{
+			numTxt="(" + QString::number(va.toInt()) + ")";
 
-		numFont.setBold(true);
-		fm=QFontMetrics(numFont);
+			fm=QFontMetrics(serverNumFont_);
 
-		int numWidth=fm.width(numTxt);
-		numRect = textRect;
-		numRect.setLeft(currentRight+fm.width('A'));
-		numRect.setWidth(numWidth);
-		currentRight=numRect.right();
+			int numWidth=fm.width(numTxt);
+			numRect = textRect;
+			numRect.setLeft(currentRight+fm.width('A'));
+			numRect.setWidth(numWidth);
+			currentRight=numRect.right();
+		}
 	}
 
 	//Define clipping
@@ -360,7 +374,7 @@ void TreeNodeViewDelegate::renderServer(QPainter *painter,const QModelIndex& ind
 	if(hasInfo)
 	{
 		painter->setPen(Qt::black);
-		painter->setFont(infoFont);
+		painter->setFont(serverInfoFont_);
 		painter->drawText(infoRect,Qt::AlignLeft | Qt::AlignVCenter,infoTxt);
 	}
 
@@ -368,7 +382,7 @@ void TreeNodeViewDelegate::renderServer(QPainter *painter,const QModelIndex& ind
 	if(hasNum)
 	{
 		painter->setPen(Qt::black);
-		painter->setFont(numFont);
+		painter->setFont(serverNumFont_);
 		painter->drawText(numRect,Qt::AlignLeft | Qt::AlignVCenter,numTxt);
 	}
 
@@ -392,18 +406,19 @@ void TreeNodeViewDelegate::renderServer(QPainter *painter,const QModelIndex& ind
 void TreeNodeViewDelegate::renderNode(QPainter *painter,const QModelIndex& index,
         							const QStyleOptionViewItemV4& option,QString text) const
 {
-	int offset=2;
+	int offset=4;
+
+	QFontMetrics fm(font_);
+	int deltaH=(option.rect.height()-(fm.height()+6))/2;
 
 	//The initial filled rect (we will adjust its  width)
-	QRect fillRect=option.rect.adjusted(offset,1,0,-2);
+	QRect fillRect=option.rect.adjusted(offset,deltaH,0,-deltaH-1);
 	if(option.state & QStyle::State_Selected)
-		fillRect.adjust(0,1,0,-1);
+		fillRect.adjust(0,0,0,-0);
 
 	//The text rectangle
 	QRect textRect = fillRect.adjusted(offset,0,0,0);
 
-	QFont font;
-	QFontMetrics fm(font);
 	int textWidth=fm.width(text);
 	textRect.setWidth(textWidth);
 
@@ -435,21 +450,24 @@ void TreeNodeViewDelegate::renderNode(QPainter *painter,const QModelIndex& index
 	//The node number (optional)
 	QRect numRect;
 	QString numTxt;
-	va=index.data(AbstractNodeModel::NodeNumRole);
-	bool hasNum=(va.isNull() == false);
-	QFont numFont;
+	bool hasNum=false;
 
-	if(hasNum)
+	if(drawChildCount_)
 	{
-		numTxt="(" + QString::number(va.toInt()) + ")";
-		numFont.setBold(true);
-		fm=QFontMetrics(numFont);
+		va=index.data(AbstractNodeModel::NodeNumRole);
+		hasNum=(va.isNull() == false);
 
-		int numWidth=fm.width(numTxt);
-		numRect = textRect;
-		numRect.setLeft(currentRight+fm.width('A'));
-		numRect.setWidth(numWidth);
-		currentRight=numRect.right();
+		if(hasNum)
+		{
+			numTxt="(" + QString::number(va.toInt()) + ")";
+			fm=QFontMetrics(suiteNumFont_);
+
+			int numWidth=fm.width(numTxt);
+			numRect = textRect;
+			numRect.setLeft(currentRight+fm.width('A'));
+			numRect.setWidth(numWidth);
+			currentRight=numRect.right();
+		}
 	}
 
 	//Define clipping
@@ -482,7 +500,7 @@ void TreeNodeViewDelegate::renderNode(QPainter *painter,const QModelIndex& index
 	if(hasNum)
 	{
 		painter->setPen(QColor(120,120,120));
-		painter->setFont(numFont);
+		painter->setFont(suiteNumFont_);
 		painter->drawText(numRect,Qt::AlignLeft | Qt::AlignVCenter,numTxt);
 	}
 
@@ -524,7 +542,7 @@ void TreeNodeViewDelegate::renderMeter(QPainter *painter,QStringList data,const 
 	stRect.setWidth(50);
 
 	//The text rectangle
-	QFont nameFont;
+	QFont nameFont=font_;
 	nameFont.setBold(true);
 	QFontMetrics fm(nameFont);
 	int nameWidth=fm.width(name);
@@ -533,7 +551,7 @@ void TreeNodeViewDelegate::renderMeter(QPainter *painter,QStringList data,const 
 	nameRect.setWidth(nameWidth);
 
 	//The value rectangle
-	QFont valFont;
+	QFont valFont=font_;
 	fm=QFontMetrics(valFont);
 	int valWidth=fm.width(valStr);
 	QRect valRect = nameRect;
@@ -596,7 +614,7 @@ void TreeNodeViewDelegate::renderLabel(QPainter *painter,QStringList data,const 
 			fillRect.adjust(0,1,0,-1);
 
 	//The text rectangle
-	QFont nameFont;
+	QFont nameFont=font_;
 	nameFont.setBold(true);
 	QFontMetrics fm(nameFont);
 	int nameWidth=fm.width(name);
@@ -604,7 +622,7 @@ void TreeNodeViewDelegate::renderLabel(QPainter *painter,QStringList data,const 
 	nameRect.setWidth(nameWidth);
 
 	//The value rectangle
-	QFont valFont;
+	QFont valFont=font_;
 	fm=QFontMetrics(valFont);
 	int valWidth=fm.width(val);
 	QRect valRect = nameRect;
@@ -669,7 +687,7 @@ void TreeNodeViewDelegate::renderEvent(QPainter *painter,QStringList data,const 
 	cRect.setWidth(cRect.height());
 
 	//The text rectangle
-	QFont font;
+	QFont font=font_;
 	QFontMetrics fm(font);
 	int nameWidth=fm.width(name);
 	QRect nameRect = fillRect.adjusted(offset,0,0,0);
@@ -723,7 +741,7 @@ void TreeNodeViewDelegate::renderVar(QPainter *painter,QStringList data,const QS
 				fillRect.adjust(0,1,0,-1);
 
 	//The text rectangle
-	QFont font;
+	QFont font=font_;
 	//nameFont.setBold(true);
 	QFontMetrics fm(font);
 	int textWidth=fm.width(text);
@@ -770,7 +788,7 @@ void TreeNodeViewDelegate::renderGenvar(QPainter *painter,QStringList data,const
 				fillRect.adjust(0,1,0,-1);
 
 	//The text rectangle
-	QFont font;
+	QFont font=font_;
 	//nameFont.setBold(true);
 	QFontMetrics fm(font);
 	int textWidth=fm.width(text);
@@ -812,7 +830,7 @@ void TreeNodeViewDelegate::renderLimit(QPainter *painter,QStringList data,const 
 	QString valStr=QString::number(val) + "/" + QString::number(max);
 	bool drawItem=(max < 21);
 
-	QFontMetrics fm(QApplication::font());
+	QFontMetrics fm(font_);
 	int offset=2;
 	int gap=fm.width('A');
 	int itemSize=6;
@@ -825,7 +843,7 @@ void TreeNodeViewDelegate::renderLimit(QPainter *painter,QStringList data,const 
 			fillRect.adjust(0,1,0,-1);
 
 	//The text rectangle
-	QFont nameFont;
+	QFont nameFont=font_;
 	nameFont.setBold(true);
 	fm=QFontMetrics(nameFont);
 	int nameWidth=fm.width(name);
@@ -834,7 +852,7 @@ void TreeNodeViewDelegate::renderLimit(QPainter *painter,QStringList data,const 
 	nameRect.setWidth(nameWidth+offset);
 
 	//The value rectangle
-	QFont valFont;
+	QFont valFont=font_;
 	fm=QFontMetrics(valFont);
 	int valWidth=fm.width(valStr);
 	QRect valRect = nameRect;
@@ -911,7 +929,7 @@ void TreeNodeViewDelegate::renderLimiter(QPainter *painter,QStringList data,cons
 			fillRect.adjust(0,1,0,-1);
 
 	//The text rectangle
-	QFont nameFont;
+	QFont nameFont=font_;
 	//nameFont.setBold(true);
 	QFontMetrics fm(nameFont);
 	int nameWidth=fm.width(name);
@@ -986,7 +1004,7 @@ void TreeNodeViewDelegate::renderTime(QPainter *painter,QStringList data,const Q
 			fillRect.adjust(0,1,0,-1);
 
 	//The text rectangle
-	QFont nameFont;
+	QFont nameFont=font_;
 	//nameFont.setBold(true);
 	QFontMetrics fm(nameFont);
 	int nameWidth=fm.width(name);
@@ -1031,7 +1049,7 @@ void TreeNodeViewDelegate::renderDate(QPainter *painter,QStringList data,const Q
 			fillRect.adjust(0,1,0,-1);
 
 	//The text rectangle
-	QFont nameFont;
+	QFont nameFont=font_;
 	//nameFont.setBold(true);
 	QFontMetrics fm(nameFont);
 	int nameWidth=fm.width(name);
@@ -1082,7 +1100,7 @@ void TreeNodeViewDelegate::renderRepeat(QPainter *painter,QStringList data,const
 			fillRect.adjust(0,1,0,-1);
 
 	//The text rectangle
-	QFont nameFont;
+	QFont nameFont=font_;
 	nameFont.setBold(true);
 	QFontMetrics fm(nameFont);
 	int nameWidth=fm.width(name);
@@ -1090,7 +1108,7 @@ void TreeNodeViewDelegate::renderRepeat(QPainter *painter,QStringList data,const
 	nameRect.setWidth(nameWidth);
 
 	//The value rectangle
-	QFont valFont;
+	QFont valFont=font_;
 	fm=QFontMetrics(valFont);
 	int valWidth=fm.width(val);
 	QRect valRect = nameRect;
