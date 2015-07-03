@@ -212,7 +212,7 @@ void InfoPanel::adjustTabs(VInfo_ptr info)
 		//Remove the pages but does not delete them
         tab_->clear();
 
-        for(std::vector<InfoPanelDef*>::iterator it=ids.begin(); it != ids.end(); it++)
+        for(std::vector<InfoPanelDef*>::iterator it=ids.begin(); it != ids.end(); ++it)
 		{
 			if(InfoPanelItemHandler* d=findHandler(*it))
 			{

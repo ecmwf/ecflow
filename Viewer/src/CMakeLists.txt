@@ -100,7 +100,8 @@ set(viewer_srcs
     VariableView.cpp
     VConfigLoader.cpp
     WhyItemWidget.cpp
-    ZombieItemWidget.cpp)
+    ZombieItemWidget.cpp
+    ZombieModel.cpp)
 
 
 include(${QT_USE_FILE})
@@ -173,7 +174,8 @@ QT4_WRAP_UI       (VIEWER_FORMS_HEADERS CommandDesignerWidget.ui
             TriggerItemWidget.ui          
             VariableAddDialog.ui
             VariablePropDialog.ui
-            VariableItemWidget.ui)
+            VariableItemWidget.ui
+            ZombieItemWidget.ui)
 
 
 ecbuild_add_executable( TARGET   ecflow_ui

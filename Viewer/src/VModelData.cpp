@@ -210,7 +210,7 @@ void VTreeServer::notifyBeginNodeChange(const VNode* node, const std::vector<ecf
 	//---------------------------------------------------------------------
 	// Both the number of nodes and the number of attributes changed!
 	//---------------------------------------------------------------------
-	else if(!attrNumCh && nodeNumCh)
+	else if(attrNumCh && nodeNumCh)
 	{
 		//This can never happen
 		assert(0);
@@ -232,8 +232,16 @@ void VTreeServer::notifyBeginNodeChange(const VNode* node, const std::vector<ecf
 				runFilter=true;
 			}
 
+			//Changes might affect the icons
+			else if (*it == ecf::Aspect::FLAG || *it == ecf::Aspect::SUBMITTABLE ||
+					*it == ecf::Aspect::TODAY || *it == ecf::Aspect::TIME ||
+					*it == ecf::Aspect::DAY || *it == ecf::Aspect::CRON || *it == ecf::Aspect::DATE)
+			{
+				Q_EMIT nodeChanged(this,node);
+			}
+
 			//Changes in the attributes
-			else if(*it == ecf::Aspect::METER ||  *it == ecf::Aspect::EVENT ||
+			if(*it == ecf::Aspect::METER ||  *it == ecf::Aspect::EVENT ||
 			   *it == ecf::Aspect::LABEL || *it == ecf::Aspect::LIMIT ||
 			   *it == ecf::Aspect::EXPR_TRIGGER || *it == ecf::Aspect::EXPR_COMPLETE ||
 			   *it == ecf::Aspect::REPEAT || *it == ecf::Aspect::NODE_VARIABLE ||

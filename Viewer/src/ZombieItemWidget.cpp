@@ -9,11 +9,14 @@
 
 #include "ZombieItemWidget.hpp"
 
+
+#include <QItemSelectionModel>
+
 #include "ServerHandler.hpp"
-//#include "SuiteFilter.hpp"
-//#include "SuiteModel.hpp"
 #include "VNode.hpp"
 #include "VReply.hpp"
+#include "InfoProvider.hpp"
+#include "ZombieModel.hpp"
 
 //========================================================
 //
@@ -25,14 +28,16 @@ ZombieItemWidget::ZombieItemWidget(QWidget *parent) : QWidget(parent)
 {
 	setupUi(this);
 
-	//infoProvider_=new EditProvider(this);
+	infoProvider_=new ZombieProvider(this);
 
-	//connect(submitTb_,SIGNAL(clicked(bool)),
-	//		this,SLOT(on_submitTb__clicked(bool)));
+	model_=new ZombieModel(this);
 
-	//model_=new SuiteModel(this);
+	zombieView->setModel(model_);
 
-	//suiteView->setModel(model_);
+	//The selection changes in the view
+	connect(zombieView->selectionModel(),SIGNAL(currentChanged(QModelIndex,QModelIndex)),
+			this,SLOT(slotItemSelected(QModelIndex,QModelIndex)));
+
 
 }
 
@@ -46,40 +51,84 @@ void ZombieItemWidget::reload(VInfo_ptr info)
 	loaded_=true;
 	info_=info;
 
-	/*if(info_.get() && info_->isServer() && info_->server())
+	if(info_.get() && info_->isServer() && info_->server())
 	{
-		model_->setData(info_->server()->suiteFilter());
+		infoProvider_->info(info_);
 	}
 	else
 	{
 		clearContents();
-	}*/
+	}
 }
 
 void ZombieItemWidget::clearContents()
 {
-	//model_->setData(0);
+	loaded_=false;
+	model_->clearData();
 }
 
-void ZombieItemWidget::on_autoTb_toggled(bool)
+void ZombieItemWidget::infoReady(VReply* reply)
 {
-
+	//We need to know what task it was!
+	model_->setData(reply->zombies());
 }
 
-void ZombieItemWidget::on_enableTb_toggled(bool val)
+
+void ZombieItemWidget::infoFailed(VReply* reply)
 {
-	/*if(SuiteFilter* sf=model_->filter())
+    QString s=QString::fromStdString(reply->errorText());
+}
+
+void ZombieItemWidget::on_terminateTb_toggled(bool)
+{
+	command("zombie_fail");
+}
+
+void ZombieItemWidget::on_rescueTb_toggled(bool val)
+{
+	command("zombie_adopt");
+}
+
+void ZombieItemWidget::on_foboffTb_clicked(bool)
+{
+	command("zombie_fob");
+}
+
+void ZombieItemWidget::on_deleteTb_clicked(bool)
+{
+	command("zombie_remove");
+}
+
+void ZombieItemWidget::on_killTb_clicked(bool)
+{
+	command("zombie_kill");
+}
+
+
+void ZombieItemWidget::command(const std::string& cmdName)
+{
+	if(info_ && info_->server())
 	{
-		sf->setEnabled(val);
-	}*/
-}
+		//Get selection form view
+		QModelIndexList lst=zombieView->selectionModel()->selectedRows(0);
 
-void ZombieItemWidget::on_okTb_clicked(bool)
-{
-	/*if(info_.get() && info_->isServer() && info_->server())
-	{
-		info_->server()->updateSuiteFilter(model_->filter());
-	}*/
+		if(!lst.isEmpty())
+		{
+			std::vector<std::string> paths;
+			Q_FOREACH(QModelIndex idx,lst)
+			{
+				paths.push_back(model_->data(idx,Qt::DisplayRole).toString().toStdString());
+			}
+
+			std::vector<std::string> cmd;
+			cmd.push_back("ecflow_client");
+			cmd.push_back("--" + cmdName);
+			cmd.push_back("<full_path>");
+
+			info_->server()->command(paths,cmd,false);
+		}
+	}
 }
 
 static InfoPanelItemMaker<ZombieItemWidget> maker1("zombie");
+

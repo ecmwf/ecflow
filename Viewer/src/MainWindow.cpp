@@ -54,6 +54,7 @@ MainWindow::MainWindow(QStringList idLst,QWidget *parent) : QMainWindow(parent)
 
     //Create the main layout
     QVBoxLayout* layout=new QVBoxLayout();
+    layout->setContentsMargins(0,0,0,0);
     QWidget *w=new QWidget(this);
     w->setLayout(layout);
     setCentralWidget(w);

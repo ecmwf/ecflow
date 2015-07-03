@@ -35,7 +35,7 @@ VParamFilterMenu::VParamFilterMenu(QMenu * parent,VParamSet* filter,DecorMode de
 	decorMode_(decorMode)
 {
 	//Param name must be unique
-	for(std::set<VParam*>::const_iterator it=filter_->all().begin(); it != filter_->all().end(); it++)
+	for(std::set<VParam*>::const_iterator it=filter_->all().begin(); it != filter_->all().end(); ++it)
 	{
 		addAction((*it)->label(),
 				  (*it)->name());

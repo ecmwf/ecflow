@@ -33,16 +33,16 @@ public:
 class VDir
 {
 public:
-	VDir(const std::string& path);
+	explicit VDir(const std::string& path);
 	VDir(const std::string& path, const std::string& pattern);
 
 	~VDir();
 
 	const std::string& path() const {return path_;}
-    void path(const std::string path,bool reload=true);
+    void path(const std::string& path,bool reload=true);
 
     const std::string& where() const {return where_;}
-    void where(const std::string w) {where_=w;}
+    void where(const std::string& w) {where_=w;}
 
     std::string fullName(int row);
 

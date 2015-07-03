@@ -80,7 +80,7 @@ void ConnectState::logDisconnect()
 	lastDisconnect_=time(0);
 }
 
-void ConnectState::errorMessage(const std::string str)
+void ConnectState::errorMessage(const std::string& str)
 {
 	errMsg_=str;
 

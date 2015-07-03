@@ -24,6 +24,7 @@ public:
 	virtual ~InfoProvider();
 
 	void info(VInfo_ptr);
+	void command(VTask::Type);
 
 	//From VInfoVisitor
 	void visit(VInfoServer*);
@@ -46,7 +47,7 @@ protected:
 class JobProvider : public InfoProvider
 {
 public:
-	 JobProvider(InfoPresenter* owner) :
+	 explicit JobProvider(InfoPresenter* owner) :
 		 InfoProvider(owner,VTask::JobTask,"ECF_JOB") {}
 };
 
@@ -54,29 +55,36 @@ public:
 class ManualProvider : public InfoProvider
 {
 public:
-	 ManualProvider(InfoPresenter* owner) :
+	 explicit ManualProvider(InfoPresenter* owner) :
 		 InfoProvider(owner,VTask::ManualTask,"ECF_MANUAL") {}
 };
 
 class MessageProvider : public InfoProvider
 {
 public:
-	 MessageProvider(InfoPresenter* owner) :
+	 explicit MessageProvider(InfoPresenter* owner) :
 		 InfoProvider(owner,VTask::MessageTask) {}
 };
 
 class ScriptProvider : public InfoProvider
 {
 public:
-	 ScriptProvider(InfoPresenter* owner) :
+	 explicit ScriptProvider(InfoPresenter* owner) :
 		 InfoProvider(owner,VTask::ScriptTask,"ECF_SCRIPT") {}
 };
 
 class HistoryProvider : public InfoProvider
 {
 public:
-	 HistoryProvider(InfoPresenter* owner) :
+	 explicit HistoryProvider(InfoPresenter* owner) :
 		 InfoProvider(owner,VTask::HistoryTask) {}
+};
+
+class ZombieProvider : public InfoProvider
+{
+public:
+	 explicit ZombieProvider(InfoPresenter* owner) :
+		 InfoProvider(owner,VTask::ZombieListTask) {}
 };
 
 

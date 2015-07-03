@@ -95,6 +95,7 @@ public:
 	static ServerHandler* addServer(const std::string &name,const std::string &host, const std::string &port);
 	static void removeServer(ServerHandler*);
 
+	void command(const std::vector<std::string>& fullPaths, const std::vector<std::string>& cmd, bool resolve);
 	static void command(VInfo_ptr,const std::vector<std::string>&, bool resolve);
 	static void command(std::vector<VInfo_ptr>,std::string, bool resolve);
 

@@ -20,7 +20,7 @@ class VReply;
 class FileInfoLabel : public QLabel
 {
 public:
-	FileInfoLabel(QWidget* parent=0);
+	explicit FileInfoLabel(QWidget* parent=0);
 
 	void update(VReply*);
 
@@ -29,7 +29,7 @@ public:
 class DirInfoLabel : public FileInfoLabel
 {
 public:
-	DirInfoLabel(QWidget* parent=0) : FileInfoLabel(parent) {}
+	explicit DirInfoLabel(QWidget* parent=0) : FileInfoLabel(parent) {}
 
 	void update(VDir_ptr);
 

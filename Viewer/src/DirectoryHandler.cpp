@@ -35,7 +35,7 @@ DirectoryHandler::DirectoryHandler()
 // where all the other directories are
 // -----------------------------------------------------------------------------
 
-void DirectoryHandler::init(std::string exePath)
+void DirectoryHandler::init(const std::string& exePath)
 {
 	//Sets paths in the home directory
 	if(char *h=getenv("HOME"))

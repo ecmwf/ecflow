@@ -16,36 +16,40 @@
 #include "InfoPanelItem.hpp"
 #include "VInfo.hpp"
 
-#include "ui_SuiteItemWidget.h"
+#include "ui_ZombieItemWidget.h"
 
-//class ZombieModel;
+class ZombieModel;
 
-class ZombieItemWidget : public QWidget, public InfoPanelItem, protected Ui::SuiteItemWidget
+class ZombieItemWidget : public QWidget, public InfoPanelItem, protected Ui::ZombieItemWidget
 {
 Q_OBJECT
 
 public:
-	ZombieItemWidget(QWidget *parent=0);
+	explicit ZombieItemWidget(QWidget *parent=0);
 
 	void reload(VInfo_ptr);
 	QWidget* realWidget();
 	void clearContents();
 
 	//From VInfoPresenter
-	void infoReady(VReply*) {};
-	void infoFailed(VReply*) {};
+	void infoReady(VReply*);
+	void infoFailed(VReply*);
 	void infoProgress(VReply*) {};
 
 	void nodeChanged(const VNode*, const std::vector<ecf::Aspect::Type>&) {};
 	void defsChanged(const std::vector<ecf::Aspect::Type>&) {};
 
 protected Q_SLOTS:
-	void on_autoTb_toggled(bool);
-	void on_enableTb_toggled(bool);
-	void on_okTb_clicked(bool);
+	void on_terminateTb_toggled(bool);
+	void on_rescueTb_toggled(bool);
+	void on_foboffTb_clicked(bool);
+	void on_deleteTb_clicked(bool);
+	void on_killTb_clicked(bool);
 
-protected:
-	//ZombieModel *model_;
+private:
+	void command(const std::string& cmdName);
+
+	ZombieModel *model_;
 };
 
 #endif

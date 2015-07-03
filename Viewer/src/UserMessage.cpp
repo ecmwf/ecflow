@@ -21,7 +21,7 @@ UserMessage::UserMessage()
 {
 }
 
-void UserMessage::message(MessageType type, bool popup, const std::string message)
+void UserMessage::message(MessageType type, bool popup, const std::string& message)
 {
 
     if (echoToCout_)

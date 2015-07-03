@@ -147,7 +147,7 @@ void EditProvider::submit(const std::vector<std::string>& txt,bool alias)
 	std::string comEnd= micro + comEndText;
 
     bool inVars = false;
-    for(std::vector<std::string>::const_iterator it=txt.begin(); it != txt.end(); it++)
+    for(std::vector<std::string>::const_iterator it=txt.begin(); it != txt.end(); ++it)
     {
     	const std::string& line=*it;
 

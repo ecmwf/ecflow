@@ -36,7 +36,7 @@ public:
 	void current(const std::set<std::string>&);
 	const std::set<VParam*>& all() const {return all_;}
 
-	bool isEmpty() const {return current_.size() ==0 ;}
+	bool isEmpty() const {return current_.empty();}
 	bool isComplete() const { return all_.size() == current_.size();}
 	bool isSet(const std::string&) const;
 	bool isSet(VParam*) const;

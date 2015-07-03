@@ -33,7 +33,7 @@ Q_OBJECT
 friend class VModelData;
 
 public:
-    VModelServer(ServerHandler *server);
+    explicit VModelServer(ServerHandler *server);
     virtual ~VModelServer();
 
     ServerHandler* realServer() const {return server_;}

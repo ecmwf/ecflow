@@ -112,7 +112,7 @@ void InfoPanelHandler::init(const std::string &configFile)
 
 void InfoPanelHandler::visible(VInfo_ptr info,std::vector<InfoPanelDef*>& lst)
 {
-	for(std::vector<InfoPanelDef*>::const_iterator it=panels_.begin(); it != panels_.end(); it++)
+	for(std::vector<InfoPanelDef*>::const_iterator it=panels_.begin(); it != panels_.end(); ++it)
 	{
           if((*it)->visibleCondition()->execute(info))
         	 lst.push_back((*it));

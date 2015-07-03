@@ -68,14 +68,14 @@ protected:
 class InfoPanelItemFactory
 {
 public:
-	InfoPanelItemFactory(const std::string&);
+	explicit InfoPanelItemFactory(const std::string&);
 	virtual ~InfoPanelItemFactory();
 
 	virtual InfoPanelItem* make() = 0;
 	static InfoPanelItem* create(const std::string& name);
 
 private:
-	InfoPanelItemFactory(const InfoPanelItemFactory&);
+	explicit InfoPanelItemFactory(const InfoPanelItemFactory&);
 	InfoPanelItemFactory& operator=(const InfoPanelItemFactory&);
 
 };
@@ -85,7 +85,7 @@ class InfoPanelItemMaker : public InfoPanelItemFactory
 {
 	InfoPanelItem* make() { return new T(); }
 public:
-	InfoPanelItemMaker(const std::string& name) : InfoPanelItemFactory(name) {}
+	explicit InfoPanelItemMaker(const std::string& name) : InfoPanelItemFactory(name) {}
 };
 
 #endif

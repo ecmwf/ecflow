@@ -156,7 +156,7 @@ void OutputProvider::file(const std::string& fileName)
 	fetchFile(server,n,fileName,(fileName==jobout));
 }
 
-void OutputProvider::fetchFile(ServerHandler *server,VNode *n,const std::string fileName,bool isJobout)
+void OutputProvider::fetchFile(ServerHandler *server,VNode *n,const std::string& fileName,bool isJobout)
 {
 	if(!n || !n->node())
     {

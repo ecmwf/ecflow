@@ -195,6 +195,11 @@ void ServerComThread::run()
 				}
 				break;
 
+			case VTask::ZombieListTask:
+				UserMessage::message(UserMessage::DBG, false, std::string(" ZOMBIES"));
+				ci_->zombieGet();
+				break;
+
 			case VTask::LogOutTask:
 				UserMessage::message(UserMessage::DBG, false, std::string(" LOGOUT"));
 				if(ci_->client_handle() > 0)
@@ -552,8 +557,6 @@ void ServerComThread::detach()
 	defs_ptr d = defsAccess.defs();
 	if(d == NULL)
 		return;
-
-	int cnt=0;
 
 	ChangeMgrSingleton::instance()->detach(d.get(),this);
 

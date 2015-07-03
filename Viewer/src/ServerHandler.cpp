@@ -545,6 +545,42 @@ void ServerHandler::command(std::vector<VInfo_ptr> info, std::string cmd, bool r
 	}
 }
 
+//Send the same command for a list of nodes specified by their paths.
+//The command is specified as a string.
+
+void ServerHandler::command(const std::vector<std::string>& fullPaths, const std::vector<std::string>& cmd, bool resolve)
+{
+	std::vector<std::string> realCommand=cmd;
+
+	if (!realCommand.empty())
+	{
+		UserMessage::message(UserMessage::DBG, false, "command: " +  commandToString(realCommand));
+
+		std::string fullNameStr;
+
+		for(unsigned int i=0; i < fullPaths.size(); ++i)
+		{
+			fullNameStr+= " " +  fullPaths[i];
+		}
+
+		//Replace placeholders with real node names
+		for(unsigned int i=0; i < realCommand.size(); i++)
+		{
+			if(realCommand[i]=="<full_name>")
+				realCommand[i]=fullNameStr;
+		}
+
+		UserMessage::message(UserMessage::DBG, false, std::string("final command: ") + commandToString(realCommand));
+
+		// set up and run the thread for server communication
+		runCommand(realCommand);
+	}
+	else
+	{
+		UserMessage::message(UserMessage::ERROR, true, std::string("command ") +   commandToString(cmd) + " is not recognised. Check the menu definition.");
+	}
+}
+
 void ServerHandler::addServerCommand(const std::string &name, const std::string& command)
 {
 	commands_[name] = command;
@@ -867,6 +903,13 @@ void ServerHandler::clientTaskFinished(VTask_ptr task,const ServerReply& serverR
 		case VTask::SuiteListTask:
 		{
 			updateSuiteFilter(serverReply.get_string_vec());
+			break;
+		}
+
+		case VTask::ZombieListTask:
+		{
+			task->reply()->zombies(serverReply.zombies());
+			task->status(VTask::FINISHED);
 			break;
 		}
 

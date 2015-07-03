@@ -81,8 +81,8 @@
    </widget>
    <addaction name="menuLl"/>
    <addaction name="menuEdit"/>
-   <addaction name="menu_Help"/>
    <addaction name="menuServer"/>
+   <addaction name="menu_Help"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <widget class="QToolBar" name="viewToolBar">

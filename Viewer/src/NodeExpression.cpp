@@ -187,7 +187,7 @@ BaseNodeCondition *NodeExpressionParser::parseExpression()
             }
             else if (*i_ == "(")
             {
-                i_++;
+                ++i_;
                 result = NodeExpressionParser::parseExpression();
                 operandStack.push_back(result);
             }
@@ -236,7 +236,7 @@ BaseNodeCondition *NodeExpressionParser::parseExpression()
         }
 
         if (i_ != tokens_.end())
-            i_++; // move onto the next token
+            ++i_; // move onto the next token
     }
 
     UserMessage::message(UserMessage::DBG, false, std::string("    ") + result->print());

@@ -18,7 +18,7 @@ class DirectoryHandler
 public:
     DirectoryHandler();
 
-    static void init(const std::string exePath);
+    static void init(const std::string& exePath);
     static std::string shareDir()  {return shareDir_;};
     static std::string etcDir()    {return etcDir_;};
     static std::string configDir()  {return configDir_;};

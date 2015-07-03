@@ -26,7 +26,7 @@ public:
 	std::string path(const std::string& key) const;
 
 protected:
-	std::string join(const std::string sep) const;
+	std::string join(const std::string& sep) const;
 
 	std::vector<std::string> path_;
 };

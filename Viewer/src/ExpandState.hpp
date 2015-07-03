@@ -21,7 +21,7 @@ class ExpandNode
 	friend class TreeNodeView;
 
 public:
-	ExpandNode(const std::string& name) : name_(name) {}
+	explicit ExpandNode(const std::string& name) : name_(name) {}
 	ExpandNode() : name_("") {}
 	~ExpandNode();
 
@@ -38,7 +38,7 @@ class ExpandState
 	friend class TreeNodeView;
 
 public:
-	ExpandState() : root_(0) {}
+	explicit ExpandState() : root_(0) {}
 	~ExpandState();
 
 	void clear();

@@ -41,7 +41,7 @@ protected:
 class AnimationHandler
 {
 public:
-	AnimationHandler(QWidget* view);
+	explicit AnimationHandler(QWidget* view);
 	~AnimationHandler();
 	Animation* find(Animation::Type,bool makeIt);
 

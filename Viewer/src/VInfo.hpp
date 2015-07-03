@@ -105,7 +105,7 @@ public:
     static VInfo_ptr create(ServerHandler*);
 
 protected:
-    VInfoServer(ServerHandler*);
+    explicit VInfoServer(ServerHandler*);
 };
 
 
@@ -277,14 +277,14 @@ public:
 class VInfoAttributeFactory
 {
 public:
-	VInfoAttributeFactory(const std::string&);
+	explicit VInfoAttributeFactory(const std::string&);
 	virtual ~VInfoAttributeFactory();
 
 	virtual VInfoAttribute* make(VAttribute*,int,VNode*,ServerHandler* server=0) = 0;
 	static VInfoAttribute* create(VAttribute* att,int attIndex,VNode* node,ServerHandler* server=0);
 
 private:
-	VInfoAttributeFactory(const VInfoAttributeFactory&);
+	explicit VInfoAttributeFactory(const VInfoAttributeFactory&);
 	VInfoAttributeFactory& operator=(const VInfoAttributeFactory &);
 
 };
@@ -295,7 +295,7 @@ class  VInfoAttributeMaker : public VInfoAttributeFactory
 	VInfoAttribute* make(VAttribute* att,int attIndex,VNode* node,ServerHandler* server=0)
 	       { return new T(att,attIndex,node,server); }
 public:
-	 VInfoAttributeMaker(const std::string& name) : VInfoAttributeFactory(name) {}
+	 explicit VInfoAttributeMaker(const std::string& name) : VInfoAttributeFactory(name) {}
 };
 
 typedef boost::shared_ptr<VInfoServer>   VInfoServer_ptr;

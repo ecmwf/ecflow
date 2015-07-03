@@ -48,6 +48,8 @@ Dashboard::Dashboard(QString rootNode,QWidget *parent) :
 	setCentralWidget(w);
 	w->hide();
 
+	layout()->setContentsMargins(0,0,0,0);
+
 	setDockOptions(QMainWindow::AnimatedDocks|QMainWindow::AllowTabbedDocks|QMainWindow::AllowNestedDocks);
 }
 

@@ -18,7 +18,7 @@
 class CodeItemWidget : public QWidget, protected Ui::CodeItemWidget
 {
 public:
-	CodeItemWidget(QWidget *parent=0);
+	explicit CodeItemWidget(QWidget *parent=0);
 };
 
 #endif

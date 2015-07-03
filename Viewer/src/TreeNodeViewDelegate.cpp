@@ -251,8 +251,8 @@ void TreeNodeViewDelegate::renderServer(QPainter *painter,const QModelIndex& ind
 
 	//The pixmap (optional)
 	QRect pixRect;
-	bool hasPix=false;
-	hasPix=(index.data(AbstractNodeModel::IconRole).toString() == "d");
+
+	bool hasPix=(index.data(AbstractNodeModel::IconRole).toString() == "d");
 
 	if(hasPix)
 	{

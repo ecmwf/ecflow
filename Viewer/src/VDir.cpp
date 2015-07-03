@@ -33,7 +33,7 @@ VDir::~VDir()
 	clear();
 }
 
-void VDir::path(const std::string path,bool doReload)
+void VDir::path(const std::string& path,bool doReload)
 {
 	path_=path;
 	if(doReload)

@@ -13,6 +13,7 @@
 #include <string>
 #include <vector>
 
+#include "Zombie.hpp"
 #include "VFile.hpp"
 
 class VReply
@@ -32,15 +33,17 @@ public:
 	FileReadMode fileReadMode() const {return readMode_;}
 	const std::string fileReadMethod() {return readMethod_;}
 	VFile_ptr tmpFile() const {return tmpFile_;}
+	const std::vector<Zombie>& zombies() const {return zombies_;}
 
 	bool textFromFile(const std::string&);
 	void text(const std::vector<std::string>& msg);
-	void text(const std::string s) {text_=s;}
-	void errorText(const std::string s) {errorText_=s;}
-	void fileName(const std::string s) {fileName_=s;}
+	void text(const std::string& s) {text_=s;}
+	void errorText(const std::string& s) {errorText_=s;}
+	void fileName(const std::string& s) {fileName_=s;}
 	void fileReadMode(FileReadMode m) {readMode_=m;}
-	void fileReadMethod(const std::string m) {readMethod_=m;}
+	void fileReadMethod(const std::string& m) {readMethod_=m;}
 	void tmpFile(VFile_ptr f) {tmpFile_=f;}
+	void zombies(const std::vector<Zombie>& z) { zombies_=z;}
 
 	void prependText(const std::string&);
 	void appendText(const std::string&);
@@ -55,6 +58,7 @@ protected:
 	FileReadMode readMode_;
 	std::string  readMethod_;
 	VFile_ptr  tmpFile_;
+	std::vector<Zombie> zombies_;
 };
 
 #endif

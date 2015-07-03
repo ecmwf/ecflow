@@ -26,7 +26,7 @@ class TableNodeView : public QTreeView, public NodeViewBase
 Q_OBJECT
 
 public:
-	TableNodeView(QWidget *parent=0);
+	explicit TableNodeView(QWidget *parent=0);
 	void reload() {};
 	void rerender() {};
 	QWidget* realWidget();

@@ -46,7 +46,7 @@ std::string VSettingsPath::path(const std::string& key) const
 	return (s.empty())?key:(s+"."+key);
 }
 
-std::string VSettingsPath::join(const std::string sep) const
+std::string VSettingsPath::join(const std::string& sep) const
 {
 	return boost::algorithm::join(path_,sep);
 }

@@ -54,15 +54,12 @@ InfoPanelItem* InfoPanelItemFactory::create(const std::string& name)
 //the new VInfo
 void InfoPanelItem::adjust(VInfo_ptr info)
 {
-	ServerHandler *server=0;
-  	bool sameServer=false;
-
   	//Check if there is data in info
   	if(info.get())
   	{
-  		server=info->server();
+  		ServerHandler *server=info->server();
 
-  		sameServer=(info_)?(info_->server() == server):false;
+  		bool sameServer=(info_)?(info_->server() == server):false;
 
   		//Handle observers
   		if(!sameServer)

@@ -19,7 +19,7 @@
 class EditProvider : public InfoProvider
 {
 public:
-	 EditProvider(InfoPresenter* owner) :
+	 explicit EditProvider(InfoPresenter* owner) :
 		 InfoProvider(owner,VTask::OutputTask), preproc_(false) {}
 
 	 void visit(VInfoNode*);

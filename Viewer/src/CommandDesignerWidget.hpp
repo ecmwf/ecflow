@@ -20,7 +20,7 @@ class CommandDesignerWidget : public QWidget, private Ui::commandDesignerWidget
 	Q_OBJECT
 
 public:
-	CommandDesignerWidget(QWidget *parent = 0);
+	explicit CommandDesignerWidget(QWidget *parent = 0);
 	~CommandDesignerWidget() {};
 
 	QString command() {return commandLineEdit_->text();};

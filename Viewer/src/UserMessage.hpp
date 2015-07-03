@@ -24,7 +24,7 @@ public:
     enum MessageType {INFO, WARN, ERROR, DBG};  // note: cannot have DEBUG because of possible -DDEBUG in cpp!
 
     static void setEchoToCout(bool toggle) {echoToCout_ = toggle;};
-    static void message(MessageType type, bool popup, const std::string message);
+    static void message(MessageType type, bool popup, const std::string& message);
 
 private:
     static bool echoToCout_;

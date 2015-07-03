@@ -23,7 +23,7 @@ public:
 	void state(State state);
 	State state() const {return state_;}
 	const std::string& describe() const;
-	void errorMessage(const std::string);
+	void errorMessage(const std::string&);
 	std::time_t lastConnectTime() const {return lastConnect_;}
 	std::time_t lastLostTime() const {return lastFailed_;}
 	std::time_t lastDisconnectTime() const {return lastDisconnect_;}

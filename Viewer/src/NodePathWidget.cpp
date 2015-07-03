@@ -523,12 +523,11 @@ void NodePathWidget::setPath(VInfo_ptr info)
 		QColor col;
 		QString name;
 		NodePathNodeItem* nodeItem=0;
-		bool hasChildren=false;
 
 		VNode *n=lst.at(i);
 		col=n->stateColour();
 		name=n->name();
-		hasChildren=(n->numOfChildren() >0);
+		bool hasChildren=hasChildren=(n->numOfChildren() >0);
 
 		//Server
 		/*if(i==0)
@@ -575,10 +574,10 @@ void NodePathWidget::setPath(VInfo_ptr info)
 		// Create sub item (connector or menu)
 		//-----------------------------------------
 
-		NodePathMenuItem* menuItem=0;
-
 		if(hasChildren)
 		{
+			NodePathMenuItem* menuItem=0;
+
 			if(i >= menuItems_.count())
 			{
 				menuItem= new NodePathMenuItem(i,this);

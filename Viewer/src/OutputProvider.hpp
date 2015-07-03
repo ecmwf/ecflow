@@ -31,7 +31,7 @@ public:
 	 void file(const std::string& fileName);
 
 private:
-	 void fetchFile(ServerHandler *server,VNode *n,const std::string fileName,bool isJobout);
+	 void fetchFile(ServerHandler *server,VNode *n,const std::string& fileName,bool isJobout);
 	 bool fetchFileViaLogServer(VNode *n,const std::string& fileName);
 	 VDir_ptr fetchDirViaLogServer(VNode *n,const std::string& fileName);
 	 VDir_ptr fetchLocalDir(const std::string& path);
