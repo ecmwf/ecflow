@@ -32,12 +32,32 @@ PropertyEditor::~PropertyEditor()
 
 void PropertyEditor::edit(VProperty * vGroup)
 {
+	 clear();
+
 	 group_=vGroup;
 
 	 headerLabel_->setText(group_->param("desc"));
 
 	 build();
 }
+
+void PropertyEditor::clear()
+{
+	lineItems_.clear();
+
+	QLayoutItem* item;
+	while((item=grid_->takeAt(0))!= 0)
+	{
+		if(QWidget *w=item->widget())
+		{
+		    grid_->removeWidget(w);
+		    delete w;
+		}
+
+		delete item;
+	}
+}
+
 
 //Build the property tree from the the definitions
 void PropertyEditor::build()

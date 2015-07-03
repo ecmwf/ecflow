@@ -31,6 +31,7 @@ public:
     VProperty* property() const {return group_;}
 
 private:
+    void clear();
     void build();
     void addItem(VProperty* vProp,QGridLayout* grid);
 
