@@ -30,8 +30,8 @@ set( CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH} 
 
 include( ecbuild_system )
 
-ecbuild_requires_macro_version( 1.3 )
-option( ENABLE_VIEWER    "enable the Qt version of ecflowview"  ON )
+ecbuild_requires_macro_version( 1.6 )
+
 
 ###############################################################################
 # local project
@@ -56,30 +56,33 @@ message( STATUS "ECFLOW_VERSION       : ${ECFLOW_VERSION_STR}" )
 # =========================================================================================
 option( ENABLE_PYTHON         "enable python interface"   ON  )
 option( ENABLE_GUI            "Build ecflowview"          ON  )
+option( ENABLE_VIEWER         "enable the Qt version of ecflowview" ON  )
+option( ENABLE_QT5            "enable Qt5"                          OFF )
 
-message( STATUS "ENABLE_PYTHON         : ${ENABLE_PYTHON}" )
-message( STATUS "ENABLE_GUI            : ${ENABLE_GUI}" )
+message( STATUS "ENABLE_PYTHON        : ${ENABLE_PYTHON}" )
+message( STATUS "ENABLE_GUI           : ${ENABLE_GUI}" )
 
 # ======================================================================================
 # GUI requires X11 and Motif
 # ======================================================================================
 
-find_package( X11 )
-if ( X11_FOUND )
+if(ENABLE_GUI)
+  find_package( X11 )
+  if ( X11_FOUND )
 	debug_var( X11_INCLUDE_DIR )
 	debug_var( X11_LIBRARIES )  
 	debug_var( X11_Xt_INCLUDE_PATH )
 	debug_var( X11_Xt_LIB )
 	debug_var( X11_Xpm_INCLUDE_PATH )
 	debug_var( X11_Xpm_LIB )
-endif()
+  endif()
 
-find_package( Motif )
-if ( MOTIF_FOUND )
+  find_package( Motif )
+  if ( MOTIF_FOUND )
 	debug_var( MOTIF_INCLUDE_DIR )
 	debug_var( MOTIF_LIBRARIES )  
+  endif()
 endif()
- 
  
 # =========================================================================================
 # Boost
@@ -118,9 +121,32 @@ message( STATUS "Boost_LIBRARIES     : ${Boost_LIBRARIES}" )
 # =========================================================================================
 
 if(ENABLE_VIEWER)
+ if( ENABLE_QT5 )
+      find_package(Qt5Widgets REQUIRED)
+      find_package(Qt5Gui REQUIRED)
+#      find_package(Qt5Network REQUIRED)
+#      find_package(Qt5Xml REQUIRED)
+#      find_package(Qt5XmlPatterns REQUIRED)
+#      find_package(Qt5PrintSupport REQUIRED)
+
+      if( Qt5Widgets_FOUND )
+          message(STATUS "Qt5 version ${Qt5Widgets_VERSION_STRING} was found")
+          include_directories(${Qt5Widgets_INCLUDE_DIRS} ${Qt5Gui_INCLUDE_DIR} ${Qt5Xml_INCLUDE_DIR} ${Qt5XmlPatterns_INCLUDE_DIR} ${Qt5Network_INCLUDE_DIR} ${Qt5PrintSupport_INCLUDE_DIR})
+          set( METVIEW_QT 1)
+          set( METVIEW_QT5 1)
+          add_definitions( -DECFLOW_UI_QT5 )
+      else()
+          message(FATAL_ERROR "Qt5 was NOT found ...")
+      endif()
+  else( ENABLE_QT5 )
     find_package(Qt4 REQUIRED QtCore QtGui )
-    #We need this because there is a problem in using Qt and boost together.
-    ADD_DEFINITIONS(-DQT_NO_KEYWORDS)
+    if( QT_FOUND )
+        #We need this because there is a problem in using Qt and boost together.
+        ADD_DEFINITIONS(-DQT_NO_KEYWORDS)
+    else()
+        message(FATAL_ERROR "Qt not found - this is required for the new user interface")
+    endif()
+  endif( ENABLE_QT5 )
 endif()
 
 
