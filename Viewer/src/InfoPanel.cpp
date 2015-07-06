@@ -47,8 +47,8 @@ void  InfoPanelItemHandler::addToTab(QTabWidget *tab)
 //==============================================
 
 InfoPanel::InfoPanel(QWidget* parent) :
-  DashboardWidget(parent)
-
+  DashboardWidget(parent),
+  tabBeingCleared_(false)
 {
 	setupUi(this);
 
@@ -94,7 +94,7 @@ void InfoPanel::clear()
 		}
 	}
 	//Clear the tabs
-	tab_->clear();
+	clearTab();
 
 	//Clear the breadcrumbs
 	bcWidget_->clear();
@@ -210,7 +210,7 @@ void InfoPanel::adjustTabs(VInfo_ptr info)
 		//QWidget *current=tab_->currentWidget();
 
 		//Remove the pages but does not delete them
-        tab_->clear();
+		clearTab();
 
         for(std::vector<InfoPanelDef*>::iterator it=ids.begin(); it != ids.end(); ++it)
 		{
@@ -299,6 +299,9 @@ InfoPanelItemHandler* InfoPanel::createHandler(InfoPanelDef* def)
 
 void InfoPanel::slotCurrentWidgetChanged(int idx)
 {
+	if(tabBeingCleared_)
+		return;
+
 	if(!info_.get())
 		return;
 
@@ -307,6 +310,13 @@ void InfoPanel::slotCurrentWidgetChanged(int idx)
 		if(!item->loaded())
 			item->reload(info_);
 	}
+}
+
+void InfoPanel::clearTab()
+{
+	tabBeingCleared_=true;
+	tab_->clear();
+	tabBeingCleared_=false;
 }
 
 bool InfoPanel::frozen() const

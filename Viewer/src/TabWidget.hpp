@@ -35,6 +35,7 @@ public:
 	void setTabIcon(int,QPixmap);
 	int count() const;
 	void clear();
+	bool beingCleared() const {return beingCleared_;}
 
 public Q_SLOTS:
 	void removeTab(int);
@@ -60,6 +61,7 @@ private:
 	QTabBar *bar_;
 	QStackedWidget *stacked_;
 	QToolButton* addTb_;
+	bool beingCleared_;
 };
 
 #endif

@@ -85,7 +85,7 @@ public Q_SLOTS:
 Q_SIGNALS:
 	void selectionChanged(VInfo_ptr);
 
-protected:
+private:
 	void reset(VInfo_ptr node);
 	void adjustInfo(VInfo_ptr node);
     void adjustTabs(VInfo_ptr node);
@@ -93,10 +93,11 @@ protected:
 	InfoPanelItemHandler* findHandler(InfoPanelDef*);
 	InfoPanelItem* findItem(QWidget* w);
 	InfoPanelItemHandler* createHandler(InfoPanelDef*);
+	void clearTab();
 
 	QList<InfoPanelItemHandler*> items_;
-	//std::map<InfoPanelDef*,InfoPanelItem*>
 	VInfo_ptr info_;
+	bool tabBeingCleared_;
 };
 
 #endif

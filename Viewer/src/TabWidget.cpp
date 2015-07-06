@@ -16,7 +16,8 @@
 #include <QVBoxLayout>
 
 TabWidget::TabWidget(QWidget* parent) :
-		QWidget(parent)
+		QWidget(parent),
+		beingCleared_(false)
 {
 	//Main layout
 	QVBoxLayout* layout = new QVBoxLayout(this);
@@ -134,9 +135,11 @@ int TabWidget::indexOfWidget(QWidget *w) const
 
 void TabWidget::clear()
 {
+	beingCleared_=true;
 	while (bar_->count() > 0) {
 		removeTab(0);
 	}
+	beingCleared_=false;
 }
 
 void TabWidget::addTab(QWidget *w, QPixmap pix, QString name)
