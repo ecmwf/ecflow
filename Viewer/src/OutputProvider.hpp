@@ -19,7 +19,7 @@
 class OutputProvider : public InfoProvider
 {
 public:
-	 OutputProvider(InfoPresenter* owner) :
+	 explicit OutputProvider(InfoPresenter* owner) :
 		 InfoProvider(owner,VTask::OutputTask) {}
 
 	 void visit(VInfoNode*);

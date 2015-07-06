@@ -18,7 +18,7 @@
 class VParam : public VPropertyObserver
 {
 public:
-		VParam(const std::string& name);
+		explicit VParam(const std::string& name);
 
 		QString name() const {return qName_;}
 		const std::string& strName() const {return name_;}

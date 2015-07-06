@@ -863,7 +863,7 @@ void NodePathWidget::readSettings(VSettings* vs)
 	ival=vs->get<int>("active",1);
 	active((ival==1)?true:false);
 
-	ival=vs->get<int>("stayInParent",1);
+	//ival=vs->get<int>("stayInParent",1);
 	//stayInParent_=(ival==1)?true:false;
 
 	vs->endGroup();

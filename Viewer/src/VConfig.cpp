@@ -30,7 +30,7 @@ VConfig::VConfig()
 
 VConfig::~VConfig()
 {
-    for(std::vector<VProperty*>::iterator it=groups_.begin(); it != groups_.end(); it++)
+    for(std::vector<VProperty*>::iterator it=groups_.begin(); it != groups_.end(); ++it)
     {
         delete *it;
     }
@@ -205,7 +205,7 @@ VProperty* VConfig::cloneServerGui(VProperty *linkTarget)
 
 	std::vector<VProperty*> chVec;
 	cGr->collectChildren(chVec);
-	for(std::vector<VProperty*>::iterator it=chVec.begin(); it != chVec.end(); it++)
+	for(std::vector<VProperty*>::iterator it=chVec.begin(); it != chVec.end(); ++it)
 	{
 		VProperty *p=*it;
 		if(p->link())
@@ -238,7 +238,7 @@ void VConfig::saveSettings(const std::string& parFile,VProperty* guiProp,VSettin
 	std::vector<VProperty*> linkVec;
 	guiProp->collectLinks(linkVec);
 
-	for(std::vector<VProperty*>::const_iterator it=linkVec.begin(); it != linkVec.end(); it++)
+	for(std::vector<VProperty*>::const_iterator it=linkVec.begin(); it != linkVec.end(); ++it)
 	{
 		if((*it)->changed())
 			pt.put((*it)->path(),(*it)->valueAsString());
@@ -293,7 +293,7 @@ void VConfig::loadSettings(const std::string& parFile,VProperty* guiProp)
 	    return;
     }
 
-	for(std::vector<VProperty*>::const_iterator it=linkVec.begin(); it != linkVec.end(); it++)
+	for(std::vector<VProperty*>::const_iterator it=linkVec.begin(); it != linkVec.end(); ++it)
 	{
 		if(pt.get_child_optional((*it)->path()) != boost::none)
 		{

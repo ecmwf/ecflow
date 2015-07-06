@@ -23,7 +23,7 @@ class TabWidget : public QWidget
     Q_OBJECT
 
 public:
-    TabWidget(QWidget *parent=0);
+    explicit TabWidget(QWidget *parent=0);
 
 	int currentIndex() const;
 	int indexOfWidget(QWidget*) const;

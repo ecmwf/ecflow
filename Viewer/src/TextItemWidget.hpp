@@ -18,7 +18,7 @@
 class TextItemWidget : public QWidget, protected Ui::TextItemWidget
 {
 public:
-	TextItemWidget(QWidget *parent=0);
+	explicit TextItemWidget(QWidget *parent=0);
 };
 
 #endif

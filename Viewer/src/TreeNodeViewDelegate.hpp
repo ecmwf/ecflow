@@ -26,7 +26,7 @@ class PropertyMapper;
 class TreeNodeViewDelegate : public QStyledItemDelegate, public VPropertyObserver
 {
 public:
-	TreeNodeViewDelegate(QWidget *parent=0);
+	explicit TreeNodeViewDelegate(QWidget *parent=0);
 	~TreeNodeViewDelegate();
 
 	void paint(QPainter *painter,const QStyleOptionViewItem &option,

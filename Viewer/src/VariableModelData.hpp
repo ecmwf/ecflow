@@ -24,7 +24,7 @@ class ServerHandler;
 class VariableModelData
 {
 public:
-	VariableModelData(VInfo_ptr info);
+	explicit VariableModelData(VInfo_ptr info);
 	virtual ~VariableModelData() {};
 
 	std::string fullPath();

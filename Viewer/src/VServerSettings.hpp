@@ -37,7 +37,7 @@ public:
 	static void importRcFiles();
 
 protected:
-	VServerSettings(ServerHandler* server);
+	explicit VServerSettings(ServerHandler* server);
 	~VServerSettings();
 
 	VProperty* property(Param par) const;

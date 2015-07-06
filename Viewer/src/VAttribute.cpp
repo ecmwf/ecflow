@@ -139,26 +139,16 @@ static VGenvarAttribute genvarAttr("genvar");
 
 
 VAttribute::VAttribute(const std::string& name) :
-		VParam(name),
-		prop_(0)
+		VParam(name)
 {
 	//items_.push_back(this);
 	items_[name]=this;
 }
 
-
-void VAttribute::setProperty(VProperty* prop)
-{
-    prop_=prop; 
-    
-    //Cache label in VParam;
-    label_=prop_->param("label");
-   }
-
 std::vector<VParam*> VAttribute::filterItems()
 {
 	std::vector<VParam*> v;
-	for(std::map<std::string,VAttribute*>::const_iterator it=items_.begin(); it != items_.end(); it++)
+	for(std::map<std::string,VAttribute*>::const_iterator it=items_.begin(); it != items_.end(); ++it)
 	{
 		v.push_back(it->second);
 	}
@@ -190,7 +180,7 @@ int VAttribute::totalNum(const VNode *vnode)
 		return 0;
 
 	int total=0;
-	for(std::map<std::string,VAttribute*>::const_iterator it=items_.begin(); it != items_.end(); it++)
+	for(std::map<std::string,VAttribute*>::const_iterator it=items_.begin(); it != items_.end(); ++it)
 	{
 		int n=it->second->num(vnode);
 		total+=n;
@@ -207,7 +197,7 @@ bool VAttribute::getType(VNode *vnode,int row,VAttribute **type)
 		return false;
 
 	int totalRow=0;
-	for(std::map<std::string,VAttribute*>::const_iterator it=items_.begin(); it != items_.end(); it++)
+	for(std::map<std::string,VAttribute*>::const_iterator it=items_.begin(); it != items_.end(); ++it)
 	{
 		int size=it->second->num(vnode);
 		if(row-totalRow >=0 && row-totalRow < size)
@@ -230,7 +220,7 @@ bool VAttribute::getData(VNode *vnode,int row,VAttribute **type,QStringList& dat
 		return false;
 
 	int totalRow=0;
-	for(std::map<std::string,VAttribute*>::const_iterator it=items_.begin(); it != items_.end(); it++)
+	for(std::map<std::string,VAttribute*>::const_iterator it=items_.begin(); it != items_.end(); ++it)
 	{
 		int size=0;
 		if(it->second->getData(vnode,row-totalRow,size,data))
@@ -517,7 +507,6 @@ bool VTimeAttribute::getData(VNode *vnode,int row,int& size,QStringList& data)
 
 	if(row >=0 && row < tV.size()+tdV.size()+ cV.size())
 	{
-			int n=row;
 			data << qName_;
 			if(row < tV.size())
 				data << QString::fromStdString(tV.at(row).name());
@@ -554,7 +543,6 @@ bool VDateAttribute::getData(VNode *vnode,int row,int& size,QStringList& data)
 
 	if(row >=0 && row < dV.size()+dayV.size())
 	{
-		int n=row;
 		data << qName_;
 		if(row < dV.size())
 			 data << QString::fromStdString(dV.at(row).name());

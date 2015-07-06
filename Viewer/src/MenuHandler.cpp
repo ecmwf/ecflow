@@ -403,7 +403,8 @@ QMenu *Menu::generateMenu(std::vector<VInfo_ptr> nodes, QWidget *parent)
 // MenuItem class functions
 // ------------------------
 
-MenuItem::MenuItem(const std::string &name) : name_(name), action_(0), isSubMenu_(false), isDivider_(false)
+MenuItem::MenuItem(const std::string &name) : name_(name), action_(0), isSubMenu_(false), isDivider_(false),
+		 visibleCondition_(NULL), enabledCondition_(NULL)
 {
     if (name == "-")
     {

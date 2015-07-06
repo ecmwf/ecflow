@@ -71,7 +71,7 @@ class ServerFilterMenu : public QObject, public ServerListObserver, public Serve
 Q_OBJECT
 
 public:
-	ServerFilterMenu(QMenu* parent);
+	explicit ServerFilterMenu(QMenu* parent);
 	~ServerFilterMenu();
 
 	void reload(ServerFilter*);
@@ -106,7 +106,7 @@ class FilterWidget : public QWidget
 Q_OBJECT
 
 public:
-	FilterWidget(QWidget* parent=0);
+	explicit FilterWidget(QWidget* parent=0);
 	void reload(VParamSet*);
 
 protected Q_SLOTS:

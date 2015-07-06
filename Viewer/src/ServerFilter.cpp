@@ -69,7 +69,7 @@ ServerFilter::ServerFilter()
 
 ServerFilter::~ServerFilter()
 {
-	for(std::vector<ServerItem*>::const_iterator it=items_.begin(); it != items_.end(); it++)
+	for(std::vector<ServerItem*>::const_iterator it=items_.begin(); it != items_.end(); ++it)
 	{
 		(*it)->removeObserver(this);
 	}
@@ -135,7 +135,7 @@ void ServerFilter::notifyServerItemDeletion(ServerItem *server)
 
 bool ServerFilter::isFiltered(ServerItem* item) const
 {
-	for(std::vector<ServerItem*>::const_iterator it=items_.begin(); it != items_.end(); it++)
+	for(std::vector<ServerItem*>::const_iterator it=items_.begin(); it != items_.end(); ++it)
 	{
 		if((*it) == item)
 			return true;
@@ -146,7 +146,7 @@ bool ServerFilter::isFiltered(ServerItem* item) const
 void ServerFilter::writeSettings(VSettings* vs) const
 {
 	std::vector<std::string> array;
-	for(std::vector<ServerItem*>::const_iterator it=items_.begin(); it != items_.end(); it++)
+	for(std::vector<ServerItem*>::const_iterator it=items_.begin(); it != items_.end(); ++it)
 	{
 		array.push_back((*it)->name());
 	}
@@ -177,7 +177,7 @@ void ServerFilter::readSettings(VSettings* vs)
 
 void ServerFilter::broadcastAdd(ServerItem *server)
 {
-	for(std::vector<ServerFilterObserver*>::const_iterator it=observers_.begin(); it != observers_.end(); it++)
+	for(std::vector<ServerFilterObserver*>::const_iterator it=observers_.begin(); it != observers_.end(); ++it)
 	{
 			(*it)->notifyServerFilterAdded(server);
 	}
@@ -185,7 +185,7 @@ void ServerFilter::broadcastAdd(ServerItem *server)
 
 void ServerFilter::broadcastRemove(ServerItem *server)
 {
-	for(std::vector<ServerFilterObserver*>::const_iterator it=observers_.begin(); it != observers_.end(); it++)
+	for(std::vector<ServerFilterObserver*>::const_iterator it=observers_.begin(); it != observers_.end(); ++it)
 	{
 			(*it)->notifyServerFilterRemoved(server);
 	}
@@ -193,7 +193,7 @@ void ServerFilter::broadcastRemove(ServerItem *server)
 
 void ServerFilter::broadcastChange(ServerItem *server)
 {
-	for(std::vector<ServerFilterObserver*>::const_iterator it=observers_.begin(); it != observers_.end(); it++)
+	for(std::vector<ServerFilterObserver*>::const_iterator it=observers_.begin(); it != observers_.end(); ++it)
 	{
 			(*it)->notifyServerFilterChanged(server);
 	}

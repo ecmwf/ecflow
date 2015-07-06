@@ -26,7 +26,7 @@ class TimeItemWidget
 		       
 {
 public:
-	TimeItemWidget(QWidget *parent=0);
+	explicit TimeItemWidget(QWidget *parent=0);
 
 	void reload(VInfo_ptr);
 	QWidget* realWidget();

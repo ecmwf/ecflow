@@ -42,7 +42,7 @@ ServerItem* ServerList::itemAt(int index)
 
 ServerItem* ServerList::find(const std::string& name)
 {
-	for(std::vector<ServerItem*>::const_iterator it=items_.begin(); it != items_.end(); it++)
+	for(std::vector<ServerItem*>::const_iterator it=items_.begin(); it != items_.end(); ++it)
 	{
 		if((*it)->name() == name)
 			return *it;
@@ -99,7 +99,7 @@ void ServerList::reset(ServerItem* item,const std::string& name,const std::strin
 std::string ServerList::uniqueName(const std::string& name)
 {
 	bool hasIt=false;
-	for(std::vector<ServerItem*>::const_iterator it=items_.begin(); it != items_.end(); it++)
+	for(std::vector<ServerItem*>::const_iterator it=items_.begin(); it != items_.end(); ++it)
 	{
 		if((*it)->name() == name)
 		{
@@ -119,7 +119,7 @@ std::string ServerList::uniqueName(const std::string& name)
 		std::string currentName=name+"_"+c.str();
 
 		hasIt=false;
-		for(std::vector<ServerItem*>::const_iterator it=items_.begin(); it != items_.end(); it++)
+		for(std::vector<ServerItem*>::const_iterator it=items_.begin(); it != items_.end(); ++it)
 		{
 			if((*it)->name() == currentName)
 			{
@@ -202,7 +202,7 @@ void ServerList::save()
 
 	out << "#Name Host Port" << std::endl;
 
-	for(std::vector<ServerItem*>::iterator it=items_.begin(); it != items_.end(); it++)
+	for(std::vector<ServerItem*>::iterator it=items_.begin(); it != items_.end(); ++it)
 	{
 		out << (*it)->name() << "," << (*it)->host() << "," <<  (*it)->port() << std::endl;
 	}
@@ -273,6 +273,6 @@ void ServerList::removeObserver(ServerListObserver* o)
 
 void ServerList::broadcastChanged()
 {
-	for(std::vector<ServerListObserver*>::const_iterator it=observers_.begin(); it != observers_.end(); it++)
+	for(std::vector<ServerListObserver*>::const_iterator it=observers_.begin(); it != observers_.end(); ++it)
 		(*it)->notifyServerListChanged();
 }

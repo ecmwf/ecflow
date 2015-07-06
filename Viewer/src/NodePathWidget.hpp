@@ -80,7 +80,7 @@ class NodePathWidget : public QWidget, public NodeObserver, public ServerObserve
 Q_OBJECT
 
 public:
-	NodePathWidget(QWidget* parent=0);
+	explicit NodePathWidget(QWidget* parent=0);
 	~NodePathWidget();
 
 	bool active() const {return active_;}

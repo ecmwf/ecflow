@@ -30,7 +30,7 @@ public:
 class TriggerScene : public QGraphicsScene
 {
 public:
-	TriggerScene(QWidget *parent=0);
+	explicit TriggerScene(QWidget *parent=0);
 
 	void reset(VInfo_ptr info);
 };
@@ -38,7 +38,7 @@ public:
 class TriggerView : public QGraphicsView
 {
 public:
-	TriggerView(QWidget *parent=0);
+	explicit TriggerView(QWidget *parent=0);
 };
 
 #endif

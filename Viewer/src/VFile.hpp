@@ -36,7 +36,7 @@ public:
 protected:
 	VFile(const std::string& name,const std::string& str,bool deleteFile=true);
 	VFile(const std::string& str,bool deleteFile= true);
-	VFile(bool deleteFile= true);
+	explicit VFile(bool deleteFile= true);
 
 	std::string path_;
 	bool  deleteFile_;

@@ -46,7 +46,7 @@ public:
 	void removeObserver(ServerItemObserver*);
 
 protected:
-	ServerItem(const std::string&);
+	explicit ServerItem(const std::string&);
 	ServerItem(const std::string&,const std::string&,const std::string&);
 	 ~ServerItem();
 

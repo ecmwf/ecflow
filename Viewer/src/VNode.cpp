@@ -543,7 +543,7 @@ int VServer::totalNumOfTopLevel(int idx) const
 void VServer::clear()
 {
 	//Delete the children nodes. It will recursively delete all the nodes.
-	for(std::vector<VNode*>::const_iterator it=children_.begin(); it != children_.end(); it++)
+	for(std::vector<VNode*>::const_iterator it=children_.begin(); it != children_.end(); ++it)
 	{
 		deleteNode(*it);
 	}
@@ -709,7 +709,7 @@ void VServer::scan(VNode *node)
 
 	totalNum_+=nodes.size();
 
-	for(std::vector<node_ptr>::const_iterator it=nodes.begin(); it != nodes.end(); it++)
+	for(std::vector<node_ptr>::const_iterator it=nodes.begin(); it != nodes.end(); ++it)
 	{
 		VNode* vn=new VNode(node,*it);
 		scan(vn);

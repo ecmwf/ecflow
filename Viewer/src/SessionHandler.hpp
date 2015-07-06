@@ -16,7 +16,7 @@
 class SessionItem
 {
 public:
-	SessionItem(const std::string&);
+	explicit SessionItem(const std::string&);
 	virtual ~SessionItem() {};
 
 	void  name(const std::string& name);

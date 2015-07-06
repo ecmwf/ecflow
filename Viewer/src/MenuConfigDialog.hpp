@@ -24,7 +24,7 @@ public:
   {
   }
 
-  ConfigTreeWidget(QSplitter*s) : QTreeWidget(s)
+  explicit ConfigTreeWidget(QSplitter*s) : QTreeWidget(s)
   {
     resize(200, 300);
 
@@ -67,7 +67,7 @@ class MenuConfigDialog : public QDialog, private Ui::MenuConfigDialog
 	Q_OBJECT
 
 public:
-	MenuConfigDialog(QWidget *parent = 0);
+	explicit MenuConfigDialog(QWidget *parent = 0);
 	~MenuConfigDialog() {};
 
 	void updateMenuTree(Menu *menu);

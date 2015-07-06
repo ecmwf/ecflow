@@ -26,7 +26,7 @@ class VNState : public VParam
 {
 public:
 	VNState(const std::string& name,NState::State);
-	VNState(const std::string& name);
+	explicit VNState(const std::string& name);
 
     //Nodes
 	static QString toName(const VNode*);

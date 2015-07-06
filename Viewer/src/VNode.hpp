@@ -133,7 +133,7 @@ class VServer : public VNode
 	friend class ServerHandler;
 
 public:
-	VServer(ServerHandler*);
+	explicit VServer(ServerHandler*);
 	~VServer();
 
 	ServerHandler* server() const {return server_;}

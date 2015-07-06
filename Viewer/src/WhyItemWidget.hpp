@@ -22,7 +22,7 @@ class VNode;
 class WhyItemWidget : public TextItemWidget, public InfoPanelItem
 {
 public:
-	WhyItemWidget(QWidget *parent=0);
+	explicit WhyItemWidget(QWidget *parent=0);
 
 	void reload(VInfo_ptr);
 	QWidget* realWidget();

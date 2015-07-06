@@ -135,7 +135,7 @@ public:
 class TypeNodeCondition : public BaseNodeCondition
 {
 public:
-    TypeNodeCondition(NodeExpressionParser::NodeType type) {type_ = type;};
+    explicit TypeNodeCondition(NodeExpressionParser::NodeType type) {type_ = type;};
     ~TypeNodeCondition() {};
 
     bool execute(VInfo_ptr nodeInfo);
@@ -150,7 +150,7 @@ private:
 class StateNodeCondition : public BaseNodeCondition
 {
 public:
-    StateNodeCondition(QString stateName) {stateName_ = stateName;};
+    explicit StateNodeCondition(QString stateName) {stateName_ = stateName;};
     ~StateNodeCondition() {};
 
     bool execute(VInfo_ptr nodeInfo);
@@ -165,7 +165,7 @@ private:
 class UserLevelCondition : public BaseNodeCondition
 {
 public:
-    UserLevelCondition(QString userLevelName) {userLevelName_ = userLevelName;};
+    explicit UserLevelCondition(QString userLevelName) {userLevelName_ = userLevelName;};
     ~UserLevelCondition() {};
 
     bool execute(VInfo_ptr nodeInfo);
@@ -180,7 +180,7 @@ private:
 class NodeAttributeCondition : public BaseNodeCondition
 {
 public:
-    NodeAttributeCondition(QString nodeAttrName) {nodeAttrName_ = nodeAttrName;};
+    explicit NodeAttributeCondition(QString nodeAttrName) {nodeAttrName_ = nodeAttrName;};
     ~NodeAttributeCondition() {};
 
     bool execute(VInfo_ptr nodeInfo);

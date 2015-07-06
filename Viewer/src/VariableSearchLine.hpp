@@ -21,7 +21,7 @@ class  VariableSearchLine : public AbstractSearchLine
     Q_OBJECT
 
 public:
-     VariableSearchLine(QWidget *parent);
+     explicit VariableSearchLine(QWidget *parent);
     ~VariableSearchLine();
     void setView(QTreeView* view);
 

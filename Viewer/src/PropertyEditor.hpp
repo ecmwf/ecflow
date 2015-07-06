@@ -23,7 +23,7 @@ class VProperty;
 class PropertyEditor : public QWidget, protected Ui::PropertyEditor
 {
 public:
-    PropertyEditor(QWidget *parent=0);
+    explicit PropertyEditor(QWidget *parent=0);
     ~PropertyEditor();
 
     void edit(VProperty*);

@@ -20,7 +20,7 @@
 class HistoryItemWidget : public TextItemWidget, public InfoPanelItem
 {
 public:
-	HistoryItemWidget(QWidget *parent=0);
+	explicit HistoryItemWidget(QWidget *parent=0);
 
 	void reload(VInfo_ptr);
 	QWidget* realWidget();

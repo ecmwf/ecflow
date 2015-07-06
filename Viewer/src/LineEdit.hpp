@@ -21,7 +21,7 @@ class LineEdit : public QLineEdit
 Q_OBJECT
 
 public:
-	LineEdit (QWidget *parent=0);
+	explicit LineEdit (QWidget *parent=0);
 	void setDecoration(QPixmap);
 
 public Q_SLOTS:

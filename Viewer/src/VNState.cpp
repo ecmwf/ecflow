@@ -60,7 +60,7 @@ VNState::VNState(const std::string& name) :
 std::vector<VParam*> VNState::filterItems()
 {
 	std::vector<VParam*> v;
-	for(std::map<std::string,VNState*>::const_iterator it=items_.begin(); it != items_.end(); it++)
+	for(std::map<std::string,VNState*>::const_iterator it=items_.begin(); it != items_.end(); ++it)
 	{
 			v.push_back(it->second);
 	}

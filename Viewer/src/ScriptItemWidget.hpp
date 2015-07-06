@@ -17,7 +17,7 @@
 class ScriptItemWidget : public CodeItemWidget, public InfoPanelItem
 {
 public:
-	ScriptItemWidget(QWidget *parent=0);
+	explicit ScriptItemWidget(QWidget *parent=0);
 
 	void reload(VInfo_ptr);
 	QWidget* realWidget();

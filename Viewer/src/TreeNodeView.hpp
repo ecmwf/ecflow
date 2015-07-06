@@ -29,7 +29,7 @@ class TreeNodeView : public QTreeView, public NodeViewBase
 Q_OBJECT
 
 public:
-	TreeNodeView(QWidget *parent=0);
+	explicit TreeNodeView(QWidget *parent=0);
 	~TreeNodeView();
 
 	void reload();

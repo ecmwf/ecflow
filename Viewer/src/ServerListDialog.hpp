@@ -23,7 +23,7 @@ class ServerListModel;
 class ServerDialogChecker
 {
 protected:
-	ServerDialogChecker(QString txt) : errorText_(txt) {};
+	explicit ServerDialogChecker(QString txt) : errorText_(txt) {};
 
 	bool checkName(QString name);
 	bool checkHost(QString host);
@@ -55,7 +55,7 @@ class ServerAddDialog : public QDialog, private Ui::ServerAddDialog, public Serv
 Q_OBJECT
 
 public:
-	ServerAddDialog(QWidget* parent=0);
+	explicit ServerAddDialog(QWidget* parent=0);
 
 	QString name() const;
 	QString host() const;
@@ -105,7 +105,7 @@ protected:
 class ServerListModel : public QAbstractItemModel
 {
 public:
-	ServerListModel(QObject *parent=0);
+	explicit ServerListModel(QObject *parent=0);
 	~ServerListModel();
 
 	virtual int columnCount (const QModelIndex& parent = QModelIndex() ) const;

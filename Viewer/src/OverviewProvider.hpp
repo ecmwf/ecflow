@@ -17,7 +17,7 @@ class InfoPanelItem;
 class OverviewProvider : public InfoProvider
 {
 public:
-	OverviewProvider(InfoPresenter* owner);
+	explicit OverviewProvider(InfoPresenter* owner);
 
 	//From VInfoVisitor
 	void visit(VInfoServer*);

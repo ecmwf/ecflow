@@ -30,7 +30,7 @@ VParamSet::VParamSet()
 
 void VParamSet::init(const std::vector<VParam*>& items)
 {
-	for(std::vector<VParam*>::const_iterator it=items.begin(); it != items.end(); it++)
+	for(std::vector<VParam*>::const_iterator it=items.begin(); it != items.end(); ++it)
 	{
 		all_.insert((*it));
 	}
@@ -46,7 +46,7 @@ bool VParamSet::isSet(VParam* p) const
 
 bool VParamSet::isSet(const std::string &name) const
 {
-	for(std::set<VParam*>::const_iterator it=current_.begin(); it != current_.end(); it++)
+	for(std::set<VParam*>::const_iterator it=current_.begin(); it != current_.end(); ++it)
 	{
 		if((*it)->strName() == name)
 				return true;
@@ -57,7 +57,7 @@ bool VParamSet::isSet(const std::string &name) const
 void VParamSet::current(const std::set<std::string>& names)
 {
 	current_.clear();
-	for(std::set<VParam*>::const_iterator it=all_.begin(); it != all_.end(); it++)
+	for(std::set<VParam*>::const_iterator it=all_.begin(); it != all_.end(); ++it)
 	{
 			if(names.find((*it)->strName()) != names.end())
 				current_.insert(*it);
@@ -70,7 +70,7 @@ void VParamSet::writeSettings(VSettings *vs)
 {
 	std::vector<std::string> array;
 
-	for(std::set<VParam*>::const_iterator it=current_.begin(); it != current_.end(); it++)
+	for(std::set<VParam*>::const_iterator it=current_.begin(); it != current_.end(); ++it)
 	{
 		array.push_back((*it)->strName());
 	}
@@ -88,7 +88,7 @@ void VParamSet::readSettings(VSettings* vs)
 	for(std::vector<std::string>::const_iterator it = array.begin(); it != array.end(); ++it)
 	{
 		std::string name=*it;
-		for(std::set<VParam*>::const_iterator itA=all_.begin(); itA != all_.end(); itA++)
+		for(std::set<VParam*>::const_iterator itA=all_.begin(); itA != all_.end(); ++itA)
 		{
 			if((*itA)->strName() == name)
 					current_.insert(*itA);

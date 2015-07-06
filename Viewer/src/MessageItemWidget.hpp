@@ -17,7 +17,7 @@
 class MessageItemWidget : public TextItemWidget, public InfoPanelItem
 {
 public:
-	MessageItemWidget(QWidget *parent=0);
+	explicit MessageItemWidget(QWidget *parent=0);
 
 	void reload(VInfo_ptr);
 	QWidget* realWidget();

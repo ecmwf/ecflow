@@ -47,7 +47,7 @@ Q_SIGNALS:
 	void selectionChanged(VInfo_ptr);
 
 protected:
-	NodeWidget(QWidget* parent=0);
+	explicit NodeWidget(QWidget* parent=0);
 	virtual ~NodeWidget();
 
 	AbstractNodeModel* model_;

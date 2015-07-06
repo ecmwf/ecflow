@@ -222,7 +222,7 @@ void VTreeServer::notifyBeginNodeChange(const VNode* node, const std::vector<ecf
 	else
 	{
 		//Check the aspects
-		for(std::vector<ecf::Aspect::Type>::const_iterator it=aspect.begin(); it != aspect.end(); it++)
+		for(std::vector<ecf::Aspect::Type>::const_iterator it=aspect.begin(); it != aspect.end(); ++it)
 		{
 			//Changes in the nodes
 			if(*it == ecf::Aspect::STATE || *it == ecf::Aspect::DEFSTATUS ||
@@ -604,7 +604,7 @@ void VModelData::notifyServerFilterRemoved(ServerItem* item)
 		return;
 
 	int i=0;
-	for(std::vector<VModelServer*>::iterator it=servers_.begin(); it!= servers_.end(); it++)
+	for(std::vector<VModelServer*>::iterator it=servers_.begin(); it!= servers_.end(); ++it)
 	{
 		if((*it)->server_ == item->serverHandler())
 		{

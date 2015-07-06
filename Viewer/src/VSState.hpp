@@ -25,7 +25,7 @@ class VSState : public VParam
 {
 public:
 	VSState(const std::string& name,SState::State);
-	VSState(const std::string& name);
+	explicit VSState(const std::string& name);
 
     static bool isRunningState(ServerHandler*);
 	static QString toName(ServerHandler*);

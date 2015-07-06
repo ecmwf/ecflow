@@ -20,7 +20,10 @@
 //
 //========================================================
 
-EditItemWidget::EditItemWidget(QWidget *parent) : QWidget(parent)
+EditItemWidget::EditItemWidget(QWidget *parent) :
+   QWidget(parent),
+   preproc_(false),
+   alias_(false)
 {
 	setupUi(this);
 

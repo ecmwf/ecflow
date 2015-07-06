@@ -23,7 +23,7 @@
 class VariableDelegate : public QStyledItemDelegate
 {
 public:
-    VariableDelegate(QWidget *parent=0);
+    explicit VariableDelegate(QWidget *parent=0);
     void paint(QPainter *painter,const QStyleOptionViewItem &option,
                    const QModelIndex& index) const;
     QSize sizeHint(const QStyleOptionViewItem & option, const QModelIndex & index ) const;
@@ -37,7 +37,7 @@ protected:
 class VariableView : public QTreeView
 {
 public:
-	VariableView(QWidget *parent=0);
+	explicit VariableView(QWidget *parent=0);
 
 protected:
 	void drawBranches(QPainter* painter,const QRect& rect,const QModelIndex& index ) const;

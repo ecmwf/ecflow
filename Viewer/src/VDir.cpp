@@ -42,7 +42,7 @@ void VDir::path(const std::string& path,bool doReload)
 
 void VDir::clear()
 {
-	for(std::vector<VDirItem*>::iterator it=items_.begin(); it != items_.end(); it++)
+	for(std::vector<VDirItem*>::iterator it=items_.begin(); it != items_.end(); ++it)
 		delete (*it);
 }
 
@@ -51,7 +51,7 @@ void VDir::addItem(const std::string& name, unsigned int size,unsigned int mtime
 	VDirItem* item=new VDirItem;
 
 	boost::filesystem::path p(name);
-	std::string dirName=p.parent_path().string();
+	//std::string dirName=p.parent_path().string();
 	std::string fileName=p.leaf().string();
 
 	item->name_=fileName;

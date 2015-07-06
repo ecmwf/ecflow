@@ -26,7 +26,7 @@ class ActionHandler : public QObject
 {
 Q_OBJECT
 public:
-		ActionHandler(QWidget*);
+		explicit ActionHandler(QWidget*);
 
 		void contextMenu(std::vector<VInfo_ptr>,QPoint);
 Q_SIGNALS:

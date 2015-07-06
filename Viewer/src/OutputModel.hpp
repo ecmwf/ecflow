@@ -11,7 +11,7 @@
 class OutputModel : public QAbstractItemModel
 {
 public:
-	OutputModel(QObject *parent=0);
+	explicit OutputModel(QObject *parent=0);
 
    	void setData(VDir_ptr dir);
    	void clearData();
@@ -41,7 +41,7 @@ protected:
 class OutputSortModel : public QSortFilterProxyModel
 {
 public:
-	OutputSortModel(QObject *parent=0);
+	explicit OutputSortModel(QObject *parent=0);
 	~OutputSortModel() {};
 
 	bool lessThan(const QModelIndex &left, const QModelIndex &right) const;

@@ -25,7 +25,7 @@ class OutputItemWidget : public QWidget, public InfoPanelItem, protected Ui::Out
 Q_OBJECT
 
 public:
-	OutputItemWidget(QWidget *parent=0);
+	explicit OutputItemWidget(QWidget *parent=0);
 
 	void reload(VInfo_ptr);
 	QWidget* realWidget();

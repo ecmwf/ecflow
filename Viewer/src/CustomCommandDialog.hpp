@@ -20,7 +20,7 @@ class CustomCommandDialog : public QDialog, private Ui::CustomCommandDialog
 	Q_OBJECT
 
 public:
-	CustomCommandDialog(QWidget *parent = 0);
+	explicit CustomCommandDialog(QWidget *parent = 0);
 	~CustomCommandDialog() {};
 
     QString command() {return commandDesigner_->command();};

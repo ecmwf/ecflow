@@ -40,56 +40,56 @@ std::map<std::string,VIcon*> VIcon::items_;
 class VWaitIcon : public VIcon
 {
 public:
-	VWaitIcon(const std::string& name) : VIcon(name) {};
+	explicit VWaitIcon(const std::string& name) : VIcon(name) {};
 	bool show(VNode*);
 };
 
 class VRerunIcon : public VIcon
 {
 public:
-	VRerunIcon(const std::string& name) : VIcon(name) {};
+	explicit VRerunIcon(const std::string& name) : VIcon(name) {};
 	bool show(VNode*);
 };
 
 class VMessageIcon : public VIcon
 {
 public:
-	VMessageIcon(const std::string& name) : VIcon(name) {};
+	explicit VMessageIcon(const std::string& name) : VIcon(name) {};
 	bool show(VNode*);
 };
 
 class VCompleteIcon : public VIcon
 {
 public:
-	VCompleteIcon(const std::string& name) : VIcon(name) {};
+	explicit VCompleteIcon(const std::string& name) : VIcon(name) {};
 	bool show(VNode*);
 };
 
 class VTimeIcon : public VIcon
 {
 public:
-	VTimeIcon(const std::string& name) : VIcon(name) {};
+	explicit VTimeIcon(const std::string& name) : VIcon(name) {};
 	bool show(VNode*);
 };
 
 class VDateIcon : public VIcon
 {
 public:
-	VDateIcon(const std::string& name) : VIcon(name) {};
+	explicit VDateIcon(const std::string& name) : VIcon(name) {};
 	bool show(VNode*);
 };
 
 class VZombieIcon : public VIcon
 {
 public:
-	VZombieIcon(const std::string& name) : VIcon(name) {};
+	explicit VZombieIcon(const std::string& name) : VIcon(name) {};
 	bool show(VNode*);
 };
 
 class VLateIcon : public VIcon
 {
 public:
-	VLateIcon(const std::string& name) : VIcon(name) {};
+	explicit VLateIcon(const std::string& name) : VIcon(name) {};
 	bool show(VNode*);
 };
 
@@ -116,8 +116,7 @@ static VLateIcon lateIcon("late");
 
 VIcon::VIcon(const std::string& name) :
 		VParam(name),
-		pix_(0),
-		prop_(0)
+		pix_(0)
 {
 	items_[name]=this;
 }
@@ -160,15 +159,6 @@ QPixmap* VIcon::pixmap(int size)
 	return pix_;
 }
 
-void VIcon::setProperty(VProperty* prop)
-{
-    prop_=prop;
-
-    //Cache label in VParam;
-    label_=prop_->param("label");
-}
-
-
 //===============================================================
 //
 // Static methods
@@ -178,7 +168,7 @@ void VIcon::setProperty(VProperty* prop)
 std::vector<VParam*> VIcon::filterItems()
 {
 	std::vector<VParam*> v;
-	for(std::map<std::string,VIcon*>::const_iterator it=items_.begin(); it != items_.end(); it++)
+	for(std::map<std::string,VIcon*>::const_iterator it=items_.begin(); it != items_.end(); ++it)
 	{
 		v.push_back(it->second);
 	}
@@ -203,7 +193,7 @@ QVariantList VIcon::pixmapList(VNode *vnode,VParamSet *filter)
 	if(!vnode)
 		return lst;
 
-	for(std::map<std::string,VIcon*>::const_iterator it=items_.begin(); it != items_.end(); it++)
+	for(std::map<std::string,VIcon*>::const_iterator it=items_.begin(); it != items_.end(); ++it)
 	{
 			if(filter->current().find(it->second) != filter->current().end())
 			{

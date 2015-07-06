@@ -17,7 +17,7 @@
 class OverviewItemWidget : public TextItemWidget, public InfoPanelItem
 {
 public:
-	OverviewItemWidget(QWidget *parent=0);
+	explicit OverviewItemWidget(QWidget *parent=0);
 
 	void reload(VInfo_ptr);
 	QWidget* realWidget();

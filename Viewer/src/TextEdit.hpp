@@ -19,7 +19,7 @@ class TextEdit : public QPlainTextEdit
 Q_OBJECT
 
 public:
-    TextEdit(QWidget* parent = 0);
+    explicit TextEdit(QWidget* parent = 0);
 	~TextEdit();
 
     void lineNumberAreaPaintEvent(QPaintEvent *event);
@@ -56,7 +56,7 @@ private:
 class LineNumberArea : public QWidget
 {
 public:
-    LineNumberArea(TextEdit *editor) : QWidget(editor) {textEditor = editor;}
+    explicit LineNumberArea(TextEdit *editor) : QWidget(editor) {textEditor = editor;}
     QSize sizeHint() const {return QSize(textEditor->lineNumberAreaWidth(), 0);}
 
 protected:

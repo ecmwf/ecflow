@@ -32,7 +32,7 @@ class BaseNodeCondition;
 class MenuItem
 {
 public:
-    MenuItem(const std::string &name);
+    explicit MenuItem(const std::string &name);
     ~MenuItem();
 
     void setCommand(const std::string &command);
@@ -84,7 +84,7 @@ private:
 class Menu
 {
 public:
-    Menu(const std::string &name);
+    explicit Menu(const std::string &name);
     ~Menu();
     QString exec(std::vector<Node *> nodes);
     std::string &name()       {return name_;};

@@ -20,7 +20,7 @@ class BaseNodeCondition;
 class InfoPanelDef
 {
 public:
-	InfoPanelDef(const std::string&);
+	explicit InfoPanelDef(const std::string&);
 
 	std::string name() const {return name_;}
 	std::string label() const {return label_;}

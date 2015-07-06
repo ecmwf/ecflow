@@ -113,7 +113,7 @@ void OverviewItemWidget::nodeChanged(const VNode* node, const std::vector<ecf::A
 
 void OverviewItemWidget::defsChanged(const std::vector<ecf::Aspect::Type>& aspect)
 {
-	for(std::vector<ecf::Aspect::Type>::const_iterator it=aspect.begin(); it != aspect.end(); it++)
+	for(std::vector<ecf::Aspect::Type>::const_iterator it=aspect.begin(); it != aspect.end(); ++it)
 	{
 		if(*it == ecf::Aspect::SERVER_STATE || *it == ecf::Aspect::SERVER_VARIABLE || *it == ecf::Aspect::ADD_REMOVE_ATTR)
 		{

@@ -23,7 +23,7 @@ class PropertyDialog : public QDialog, private Ui::PropertyDialog
 Q_OBJECT    
     
 public:
-    PropertyDialog(QWidget *parent=0);
+    explicit PropertyDialog(QWidget *parent=0);
     ~PropertyDialog() {};
 
     bool configChanged() const {return configChanged_;}

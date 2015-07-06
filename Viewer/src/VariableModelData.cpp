@@ -101,7 +101,7 @@ const std::string& VariableModelData::value(int index) const
 
 bool VariableModelData::hasName(const std::string& n) const
 {
-	for(std::vector<Variable>::const_iterator it=vars_.begin(); it != vars_.end(); it++)
+	for(std::vector<Variable>::const_iterator it=vars_.begin(); it != vars_.end(); ++it)
 	{
 		if((*it).name() == n)
 		{
@@ -109,7 +109,7 @@ bool VariableModelData::hasName(const std::string& n) const
 		}
 	}
 
-	for(std::vector<Variable>::const_iterator it=genVars_.begin(); it != genVars_.end(); it++)
+	for(std::vector<Variable>::const_iterator it=genVars_.begin(); it != genVars_.end(); ++it)
 	{
 		if((*it).name() == n)
 		{
@@ -273,7 +273,7 @@ void VariableModelDataHandler::reload(VInfo_ptr info)
 
 		std::vector<VNode*> nodes=info->node()->ancestors(VNode::ChildToParentSort);
 
-		for(std::vector<VNode*>::iterator it=nodes.begin(); it != nodes.end(); it++)
+		for(std::vector<VNode*>::iterator it=nodes.begin(); it != nodes.end(); ++it)
 		{
 			VNode* n=*it;
 
@@ -300,7 +300,7 @@ void VariableModelDataHandler::reload()
 	//Notifies the model that a change will happen
 	Q_EMIT reloadBegin();
 
-	for(std::vector<VariableModelData*>::iterator it=data_.begin(); it != data_.end(); it++)
+	for(std::vector<VariableModelData*>::iterator it=data_.begin(); it != data_.end(); ++it)
 	{
 		(*it)->reload();
 	}
@@ -314,7 +314,7 @@ void VariableModelDataHandler::clear()
 	//Notifies the model that a change will happen
 	Q_EMIT reloadBegin();
 
-	for(std::vector<VariableModelData*>::iterator it=data_.begin(); it != data_.end(); it++)
+	for(std::vector<VariableModelData*>::iterator it=data_.begin(); it != data_.end(); ++it)
 	{
 		delete *it;
 	}
@@ -343,14 +343,11 @@ VariableModelData* VariableModelDataHandler::data(int index) const
 //It is called when a node was changed.
 void VariableModelDataHandler::nodeChanged(const VNode* node, const std::vector<ecf::Aspect::Type>& aspect)
 {
-	bool changed=false;
-
 	//Check if some variables were added or removed.
-	for(std::vector<ecf::Aspect::Type>::const_iterator it=aspect.begin(); it != aspect.end(); it++)
+	for(std::vector<ecf::Aspect::Type>::const_iterator it=aspect.begin(); it != aspect.end(); ++it)
 	{
 		if(*it == ecf::Aspect::ADD_REMOVE_ATTR)
 		{
-			bool changed=false;
 			for(unsigned int i=0; i < data_.size(); i++)
 			{
 				//Do not check the server
@@ -377,7 +374,7 @@ void VariableModelDataHandler::nodeChanged(const VNode* node, const std::vector<
 
 
 	//Check if some variables' value changed
-	for(std::vector<ecf::Aspect::Type>::const_iterator it=aspect.begin(); it != aspect.end(); it++)
+	for(std::vector<ecf::Aspect::Type>::const_iterator it=aspect.begin(); it != aspect.end(); ++it)
 	{
 		//A variable's value changed
 		if(*it == ecf::Aspect::NODE_VARIABLE)
@@ -418,7 +415,7 @@ void VariableModelDataHandler::defsChanged(const std::vector<ecf::Aspect::Type>&
 
 	int dIndex=data_.size()-1;
 
-	for(std::vector<ecf::Aspect::Type>::const_iterator it=aspect.begin(); it != aspect.end(); it++)
+	for(std::vector<ecf::Aspect::Type>::const_iterator it=aspect.begin(); it != aspect.end(); ++it)
 	{
 		if(*it == ecf::Aspect::SERVER_VARIABLE)
 		{

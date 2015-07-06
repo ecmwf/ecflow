@@ -25,7 +25,7 @@ bool VReply::textFromFile(const std::string& fileName)
 void VReply::text(const std::vector<std::string>& msg)
 {
 	text_.clear();
-	for(std::vector<std::string>::const_iterator it=msg.begin(); it != msg.end(); it++)
+	for(std::vector<std::string>::const_iterator it=msg.begin(); it != msg.end(); ++it)
 	{
 			text_+=*it + "\n";
 	}

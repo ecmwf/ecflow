@@ -13,7 +13,7 @@ class SuiteFilter;
 class SuiteModel : public QAbstractItemModel
 {
 public:
-   	SuiteModel(QObject *parent=0);
+   	explicit SuiteModel(QObject *parent=0);
    	~SuiteModel();
 
    	int columnCount (const QModelIndex& parent = QModelIndex() ) const;

@@ -85,7 +85,7 @@ friend class  TableNodeFilter;
 
 public:
 	enum Scope {NodeState};
-	NodeFilterDef(Scope);
+	explicit NodeFilterDef(Scope);
 	NodeStateFilter* nodeState() const {return nodeState_;}
 
 Q_SIGNALS:
@@ -126,7 +126,7 @@ protected:
 class TreeNodeFilter : public NodeFilter
 {
 public:
-	TreeNodeFilter(NodeFilterDef* def);
+	explicit TreeNodeFilter(NodeFilterDef* def);
 	void reset(ServerHandler* server);
 	bool isFiltered(VNode* node);
 	int  matchCount();
@@ -142,7 +142,7 @@ private:
 class TableNodeFilter : public NodeFilter
 {
 public:
-	TableNodeFilter(NodeFilterDef* def);
+	explicit TableNodeFilter(NodeFilterDef* def);
 	void reset(ServerHandler* server);
 	bool isFiltered(VNode* node);
 	int  matchCount() {return static_cast<int>(match_.size());};

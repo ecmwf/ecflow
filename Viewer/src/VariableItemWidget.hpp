@@ -28,7 +28,7 @@ class VariableSearchLine;
 class VariableDialogChecker
 {
 protected:
-	VariableDialogChecker(QString txt) : errorText_(txt) {};
+	explicit VariableDialogChecker(QString txt) : errorText_(txt) {};
 
 	bool checkName(QString name);
 	bool checkValue(QString value);
@@ -81,7 +81,7 @@ class VariableItemWidget : public QWidget, public InfoPanelItem, protected Ui::V
 Q_OBJECT
 
 public:
-	VariableItemWidget(QWidget *parent=0);
+	explicit VariableItemWidget(QWidget *parent=0);
 	~VariableItemWidget();
 
 	void reload(VInfo_ptr);

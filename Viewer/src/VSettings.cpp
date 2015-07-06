@@ -123,7 +123,7 @@ void VSettings::put(const std::string& key,const std::string& val)
 void VSettings::put(const std::string& key,const std::vector<std::string>& val)
 {
 	boost::property_tree::ptree array;
-	for(std::vector<std::string>::const_iterator it=val.begin(); it != val.end(); it++)
+	for(std::vector<std::string>::const_iterator it=val.begin(); it != val.end(); ++it)
 	{
 		array.push_back(std::make_pair("",(*it)));
 	}

@@ -35,7 +35,7 @@ class PropertyLine;
 class PropertyLineFactory
 {
 public:
-	PropertyLineFactory(VProperty::Type);
+	explicit PropertyLineFactory(VProperty::Type);
 	virtual ~PropertyLineFactory();
 
 	virtual PropertyLine* make(VProperty* p,QWidget* w) = 0;

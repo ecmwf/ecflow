@@ -335,7 +335,7 @@ void ServerComThread::updateRegSuites()
 	//-----------------------------------------------------------------------
 
 	std::vector<std::string> delSuites;
-	for(std::vector<std::string>::iterator it=regSuites.begin(); it != regSuites.end(); it++)
+	for(std::vector<std::string>::iterator it=regSuites.begin(); it != regSuites.end(); ++it)
 	{
 		bool found=0;
 		for(size_t i = 0; i < defSuites.size(); ++i)
@@ -369,7 +369,7 @@ void ServerComThread::updateRegSuites()
 		const std::vector<std::string>& loadedSuites=ci_->server_reply().get_string_vec();
 
 		std::vector<std::string> addSuites;
-		for(std::vector<std::string>::const_iterator it=loadedSuites.begin(); it != loadedSuites.end(); it++)
+		for(std::vector<std::string>::const_iterator it=loadedSuites.begin(); it != loadedSuites.end(); ++it)
 		{
 			if(std::find(filteredSuites_.begin(),filteredSuites_.end(),*it) != filteredSuites_.end() &&
 			   std::find(regSuites.begin(),regSuites.end(),*it) != regSuites.end())
@@ -414,7 +414,7 @@ void ServerComThread::updateRegSuites()
 void ServerComThread::update(const Node* node, const std::vector<ecf::Aspect::Type>& types)
 {
 	UserMessage::message(UserMessage::DBG, false, std::string("ServerComThread::update - node: ") + node->name());
-	for(std::vector<ecf::Aspect::Type>::const_iterator it=types.begin(); it != types.end(); it++)
+	for(std::vector<ecf::Aspect::Type>::const_iterator it=types.begin(); it != types.end(); ++it)
 		UserMessage::message(UserMessage::DBG, false, std::string(" aspect: ") + boost::lexical_cast<std::string>(*it));
 
 	if(rescanNeed_)
@@ -446,7 +446,7 @@ void ServerComThread::update(const Node* node, const std::vector<ecf::Aspect::Ty
 void ServerComThread::update(const Defs* dc, const std::vector<ecf::Aspect::Type>& types)
 {
 	UserMessage::message(UserMessage::DBG, false, std::string("ServerComThread::update - defs: "));
-	for(std::vector<ecf::Aspect::Type>::const_iterator it=types.begin(); it != types.end(); it++)
+	for(std::vector<ecf::Aspect::Type>::const_iterator it=types.begin(); it != types.end(); ++it)
 			UserMessage::message(UserMessage::DBG, false, std::string(" aspect: ") + boost::lexical_cast<std::string>(*it));
 
 	if(rescanNeed_)
@@ -541,7 +541,7 @@ void ServerComThread::attach(Node *node)
 	std::vector<node_ptr> nodes;
 	node->immediateChildren(nodes);
 
-	for(std::vector<node_ptr>::const_iterator it=nodes.begin(); it != nodes.end(); it++)
+	for(std::vector<node_ptr>::const_iterator it=nodes.begin(); it != nodes.end(); ++it)
 	{
 		attach((*it).get());
 	}
@@ -577,7 +577,7 @@ void ServerComThread::detach(Node *node)
 	std::vector<node_ptr> nodes;
 	node->immediateChildren(nodes);
 
-	for(std::vector<node_ptr>::const_iterator it=nodes.begin(); it != nodes.end(); it++)
+	for(std::vector<node_ptr>::const_iterator it=nodes.begin(); it != nodes.end(); ++it)
 	{
 		detach((*it).get());
 	}

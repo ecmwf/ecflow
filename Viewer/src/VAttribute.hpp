@@ -18,15 +18,12 @@
 #include "VParam.hpp"
 
 class VNode;
-class VProperty;
 
 class VAttribute : public VParam
 {
 public:
 	explicit VAttribute(const std::string& name);
 	virtual ~VAttribute() {};
-
-    void setProperty(VProperty*);
     
 	static std::vector<VParam*> filterItems();
 	
@@ -43,8 +40,7 @@ public:
 protected:
 	virtual bool getData(VNode *vnode,int row,int& totalRow,QStringList& data)=0;
 	virtual int num(const VNode* vnode)=0;
-    
-    VProperty* prop_;
+
 
 private:
 	static std::map<std::string,VAttribute*> items_;

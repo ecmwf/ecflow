@@ -102,12 +102,12 @@ void ServerItem::removeObserver(ServerItemObserver* o)
 
 void ServerItem::broadcastChanged()
 {
-	for(std::vector<ServerItemObserver*>::const_iterator it=observers_.begin(); it != observers_.end(); it++)
+	for(std::vector<ServerItemObserver*>::const_iterator it=observers_.begin(); it != observers_.end(); ++it)
 		(*it)->notifyServerItemChanged(this);
 }
 
 void ServerItem::broadcastDeletion()
 {
-	for(std::vector<ServerItemObserver*>::const_iterator it=observers_.begin(); it != observers_.end(); it++)
+	for(std::vector<ServerItemObserver*>::const_iterator it=observers_.begin(); it != observers_.end(); ++it)
 		(*it)->notifyServerItemDeletion(this);
 }

@@ -132,7 +132,7 @@ void EditProvider::submit(const std::vector<std::string>& txt,bool alias)
     // Extract user variables
     //---------------------------
 
-    static std::string defMicro="%";
+    //static std::string defMicro="%";
     static std::string comStartText = "comment - ecf user variables";
     static std::string comEndText   = "end - ecf user variables";
 

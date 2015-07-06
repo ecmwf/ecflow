@@ -524,13 +524,13 @@ void TreeNodeViewDelegate::renderMeter(QPainter *painter,QStringList data,const 
 	int	val=data.at(2).toInt();
 	int	min=data.at(3).toInt();
 	int	max=data.at(4).toInt();
-	bool colChange=data.at(5).toInt();
+	//bool colChange=data.at(5).toInt();
 	QString name=data.at(1) + ":";
 	QString valStr=data.at(2) + " (" +
 			QString::number(100.*static_cast<float>(val)/static_cast<float>(max-min)) + "%)";
 
 	int offset=2;
-	int gap=5;
+	//int gap=5;
 
 	//The border rect (we will adjust its  width)
 	QRect fillRect=option.rect.adjusted(offset,1,0,-1);
