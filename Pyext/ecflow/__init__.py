@@ -10,3 +10,9 @@ from ecflow import *
 # In applying this licence, ECMWF does not waive the privileges and immunities 
 # granted to it by virtue of its status as an intergovernmental organisation 
 # nor does it submit to any jurisdiction.  
+
+"""
+The ecFlow python module
+"""
+
+# http://stackoverflow.com/questions/13040646/how-do-i-create-documentation-with-pydoc
