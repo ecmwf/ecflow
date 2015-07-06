@@ -12,12 +12,12 @@
 #define HISTORYITEMWIDGET_HPP_
 
 #include "InfoPanelItem.hpp"
-#include "TextItemWidget.hpp"
+#include "CodeItemWidget.hpp"
 #include "VInfo.hpp"
 
 #include "ServerHandler.hpp"
 
-class HistoryItemWidget : public TextItemWidget, public InfoPanelItem
+class HistoryItemWidget : public CodeItemWidget, public InfoPanelItem
 {
 public:
 	explicit HistoryItemWidget(QWidget *parent=0);

@@ -14,5 +14,24 @@ CodeItemWidget::CodeItemWidget(QWidget *parent) : QWidget(parent)
 {
 	setupUi(this);
 
+	QFont f;
+	f.setFamily("Monospace");
+	//f.setFamily("Courier");
+	f.setStyleHint(QFont::TypeWriter);
+	f.setFixedPitch(true);
+	textEdit_->setFont(f);
+
 	searchLine_->setEditor(textEdit_);
+
+	searchLine_->setVisible(false);
+}
+
+
+void CodeItemWidget::on_searchTb_toggled(bool b)
+{
+	searchLine_->setVisible(b);
+	if(b)
+	{
+		searchLine_->setFocus();
+	}
 }

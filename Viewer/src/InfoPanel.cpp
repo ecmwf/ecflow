@@ -37,7 +37,8 @@ bool InfoPanelItemHandler::match(const std::vector<InfoPanelDef*>& ids) const
 
 void  InfoPanelItemHandler::addToTab(QTabWidget *tab)
 {
-	tab->addTab(item_->realWidget(),QString::fromStdString(def_->label()));
+	int idx=tab->addTab(item_->realWidget(),QString::fromStdString(def_->label()));
+	tab->setTabIcon(idx,QPixmap(":/viewer/" + QString::fromStdString(def_->icon())));
 }
 
 //==============================================

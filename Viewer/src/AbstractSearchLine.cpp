@@ -32,6 +32,8 @@ AbstractSearchLine::AbstractSearchLine(QWidget* parent) : QWidget(parent)
 	greenColour_=QColor(186,249,206);
 
 	status_=true;
+
+	setFocusProxy(searchLine_);
 }
 
 AbstractSearchLine::~AbstractSearchLine()

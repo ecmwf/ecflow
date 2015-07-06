@@ -1,5 +1,6 @@
 <RCC>
   <qresource prefix="viewer">
+    <file>../images/search.svg</file>
     <file>../images/info.svg</file>
     <file>../images/add_info.svg</file>
     <file>../images/add_table.svg</file>
@@ -13,6 +14,7 @@
     <file alias="icon_rerun.png">../images/icon_rerun.png</file>
     <file alias="icon_Z.png">../images/icon_Z.png</file>
     <file alias="icon_waiting.png">../images/icon_waiting.png</file>
+    <file alias="script.png">../images/icon_Script.png</file>    
     <file>../images/arrow_up.svg</file>
     <file>../images/arrow_down.svg</file>
     <file>../images/add.svg</file>

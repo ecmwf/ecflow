@@ -22,15 +22,10 @@
 //========================================================
 
 OverviewItemWidget::OverviewItemWidget(QWidget *parent) :
-  TextItemWidget(parent),
+  CodeItemWidget(parent),
   lastScrollPos_(0)
 {
-	QFont f;
-	f.setFamily("Monospace");
-	//f.setFamily("Courier");
-	f.setStyleHint(QFont::TypeWriter);
-	f.setFixedPitch(true);
-	textEdit_->setFont(f);
+	fileLabel_->hide();
 	textEdit_->setShowLineNumbers(false);
 
 	Highlighter* ih=new Highlighter(textEdit_->document(),"info");

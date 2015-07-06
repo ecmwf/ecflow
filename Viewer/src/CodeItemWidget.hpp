@@ -17,8 +17,13 @@
 
 class CodeItemWidget : public QWidget, protected Ui::CodeItemWidget
 {
+Q_OBJECT
+
 public:
 	explicit CodeItemWidget(QWidget *parent=0);
+
+public Q_SLOTS:
+	void on_searchTb_toggled(bool b);
 };
 
 #endif

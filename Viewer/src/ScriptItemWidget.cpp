@@ -22,17 +22,9 @@
 
 ScriptItemWidget::ScriptItemWidget(QWidget *parent) : CodeItemWidget(parent)
 {
-    QFont f;
-	f.setFamily("Monospace");
-	//f.setFamily("Courier");
-	f.setStyleHint(QFont::TypeWriter);
-	f.setFixedPitch(true);
-	textEdit_->setFont(f);
-
     Highlighter* ih=new Highlighter(textEdit_->document(),"script");
 
 	infoProvider_=new ScriptProvider(this);
-  
 }
 
 QWidget* ScriptItemWidget::realWidget()

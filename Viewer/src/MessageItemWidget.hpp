@@ -12,9 +12,9 @@
 #define MESSAGEITEMWIDGET_HPP_
 
 #include "InfoPanelItem.hpp"
-#include "TextItemWidget.hpp"
+#include "CodeItemWidget.hpp"
 
-class MessageItemWidget : public TextItemWidget, public InfoPanelItem
+class MessageItemWidget : public CodeItemWidget, public InfoPanelItem
 {
 public:
 	explicit MessageItemWidget(QWidget *parent=0);

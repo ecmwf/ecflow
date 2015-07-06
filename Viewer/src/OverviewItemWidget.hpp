@@ -12,9 +12,9 @@
 #define OVERVIEWITEMWIDGET_HPP_
 
 #include "InfoPanelItem.hpp"
-#include "TextItemWidget.hpp"
+#include "CodeItemWidget.hpp"
 
-class OverviewItemWidget : public TextItemWidget, public InfoPanelItem
+class OverviewItemWidget : public CodeItemWidget, public InfoPanelItem
 {
 public:
 	explicit OverviewItemWidget(QWidget *parent=0);

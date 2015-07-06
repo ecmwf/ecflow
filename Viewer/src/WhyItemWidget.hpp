@@ -14,12 +14,12 @@
 #include <QPlainTextEdit>
 
 #include "InfoPanelItem.hpp"
-#include "TextItemWidget.hpp"
+#include "CodeItemWidget.hpp"
 #include "VInfo.hpp"
 
 class VNode;
 
-class WhyItemWidget : public TextItemWidget, public InfoPanelItem
+class WhyItemWidget : public CodeItemWidget, public InfoPanelItem
 {
 public:
 	explicit WhyItemWidget(QWidget *parent=0);

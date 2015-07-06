@@ -66,7 +66,6 @@ set(viewer_srcs
     TableNodeView.cpp
     TableNodeWidget.cpp
     TextEdit.cpp
-    TextItemWidget.cpp
     TimeItemWidget.cpp
     TriggerItemWidget.cpp
     TreeNodeModel.cpp
@@ -110,6 +109,7 @@ set(viewer_moc_files AbstractNodeModel.hpp
     ActionHandler.hpp
     Animation.hpp
     CommandDesignerWidget.hpp
+    CodeItemWidget.hpp
     CustomCommandDialog.hpp
     Dashboard.hpp
     EditItemWidget.hpp
@@ -169,7 +169,6 @@ set(viewer_wrap_ui_files
     ServerSettingsItemWidget.ui
     SuiteItemWidget.ui
     TableNodeWidget.ui
-    TextItemWidget.ui
     TreeNodeWidget.ui
     TriggerItemWidget.ui          
     VariableAddDialog.ui

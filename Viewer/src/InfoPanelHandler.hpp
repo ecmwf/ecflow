@@ -24,6 +24,7 @@ public:
 
 	std::string name() const {return name_;}
 	std::string label() const {return label_;}
+	std::string icon() const {return icon_;}
 	BaseNodeCondition* visibleCondition() const {return visibleCondition_;}
 
 	void setLabel(const std::string& s) {label_=s;}

@@ -12,9 +12,12 @@
 #include "InfoProvider.hpp"
 #include "VReply.hpp"
 
-HistoryItemWidget::HistoryItemWidget(QWidget *parent) : TextItemWidget(parent)
+HistoryItemWidget::HistoryItemWidget(QWidget *parent) : CodeItemWidget(parent)
 {
-    infoProvider_=new HistoryProvider(this);
+	fileLabel_->hide();
+	textEdit_->setShowLineNumbers(false);
+
+	infoProvider_=new HistoryProvider(this);
 }
 
 QWidget* HistoryItemWidget::realWidget()

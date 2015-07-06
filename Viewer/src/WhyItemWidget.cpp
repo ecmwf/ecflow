@@ -18,8 +18,10 @@
 //
 //========================================================
 
-WhyItemWidget::WhyItemWidget(QWidget *parent) : TextItemWidget(parent)
+WhyItemWidget::WhyItemWidget(QWidget *parent) : CodeItemWidget(parent)
 {
+	fileLabel_->hide();
+	textEdit_->setShowLineNumbers(false);
 }
 
 QWidget* WhyItemWidget::realWidget()

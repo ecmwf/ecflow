@@ -20,6 +20,7 @@
         {
         	"name"    : "script",
             "label"   : "Script",
+            "icon"    : "script.png",
             "visible_for" : "task"            
         }, 
         
