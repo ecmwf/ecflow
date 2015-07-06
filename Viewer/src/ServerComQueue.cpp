@@ -273,9 +273,23 @@ void ServerComQueue::slotRun()
 		return;
 	}
 
-	//UserMessage::message(UserMessage::DBG, false, std::string("ServerComQueue::slotRun"));
-	current_=tasks_.front();
-	tasks_.pop_front();
+	//We search for the first non-cancelled/aborted task
+	while(!tasks_.empty())
+	{
+		current_=tasks_.front();
+		tasks_.pop_front();
+		if(current_->status() != VTask::CANCELLED &&
+		   current_->status() != VTask::ABORTED )
+		{
+			break;
+		}
+	}
+
+	if(!current_)
+	{
+		timer_->stop();
+		return;
+	}
 
 	//UserMessage::message(UserMessage::DBG, false,"     --> run task: " +  current_->typeString());
 
