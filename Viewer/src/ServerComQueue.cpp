@@ -139,7 +139,7 @@ void ServerComQueue::reset()
 	VTask_ptr task=VTask::create(VTask::ResetTask);
 	tasks_.push_back(task);
 
-	//We start the timeer with a shorter interval
+	//We start the timer with a shorter interval
 	timer_->start(100);
 }
 
@@ -197,9 +197,15 @@ void ServerComQueue::addTask(VTask_ptr task)
 		return;
 
 	tasks_.push_back(task);
-	if(!timer_->isActive() && state_ != SuspendedState)
+	if(state_ != SuspendedState)
 	{
-		timer_->start(timeout_);
+		if(!timer_->isActive())
+		{
+			//we immediately execute the "current" task
+			slotRun();
+			//and only start the timer after it
+			timer_->start(timeout_);
+		}
 	}
 }
 

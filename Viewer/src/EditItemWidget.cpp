@@ -31,6 +31,7 @@ EditItemWidget::EditItemWidget(QWidget *parent) :
 
 	Highlighter* ih=new Highlighter(textEdit_->document(),"script");
 
+	searchLine_->setVisible(false);
 
 	//connect(submitTb_,SIGNAL(clicked(bool)),
 	//		this,SLOT(on_submitTb__clicked(bool)));
@@ -99,6 +100,13 @@ void EditItemWidget::on_submitTb__clicked(bool)
 	EditProvider* ep=static_cast<EditProvider*>(infoProvider_);
 	ep->submit(txt,alias());
 }
+
+void EditItemWidget::on_searchTb__toggled(bool b)
+{
+	searchLine_->setVisible(b);
+}
+
+
 
 bool EditItemWidget::alias() const
 {

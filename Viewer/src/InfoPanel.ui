@@ -21,7 +21,7 @@
     <number>0</number>
    </property>
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout_2">
+    <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="1,0,0,0">
      <item>
       <widget class="NodePathWidget" name="bcWidget_" native="true"/>
      </item>

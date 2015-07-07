@@ -56,6 +56,8 @@ InfoPanel::InfoPanel(QWidget* parent) :
 	frozenTb->setChecked(false);
 	detachedTb->setChecked(false);
 
+	frozenTb->hide();
+	detachedTb->hide();
 
 	connect(tab_,SIGNAL(currentChanged(int)),
 				    this,SLOT(slotCurrentWidgetChanged(int)));
