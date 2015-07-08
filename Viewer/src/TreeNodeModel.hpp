@@ -65,8 +65,8 @@ public Q_SLOTS:
 	void slotResetBranch(VModelServer*,const VNode*);
 	void slotBeginServerScan(VModelServer* server,int);
 	void slotEndServerScan(VModelServer* server,int);
-	void slotBeginServerClear(VModelServer* server);
-	void slotEndServerClear(VModelServer* server);
+	void slotBeginServerClear(VModelServer* server,int);
+	void slotEndServerClear(VModelServer* server,int);
 
 Q_SIGNALS:
 	void filterChanged();

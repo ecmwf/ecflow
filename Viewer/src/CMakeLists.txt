@@ -112,6 +112,7 @@ set(viewer_moc_files AbstractNodeModel.hpp
     CodeItemWidget.hpp
     CustomCommandDialog.hpp
     Dashboard.hpp
+    DashboardWidget.hpp
     EditItemWidget.hpp
     FilterWidget.hpp              
     InfoPanel.hpp

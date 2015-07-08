@@ -20,6 +20,7 @@
 
 class Node;
 class VNode;
+class VServer;
 
 class NodeFilter;
 class NodeFilterDef;
@@ -62,13 +63,14 @@ Q_SIGNALS:
 	void attributesChanged(VModelServer*,const VNode*);
 	void beginServerScan(VModelServer*,int);
 	void endServerScan(VModelServer*,int);
-	void beginServerClear(VModelServer*);
-	void endServerClear(VModelServer*);
+	void beginServerClear(VModelServer*,int);
+	void endServerClear(VModelServer*,int);
 	void rerender();
 
 protected:
 	ServerHandler *server_;
 	NodeFilter* filter_;
+	NodeFilter* cachedFilter_;
 };
 
 class VTreeServer : public VModelServer
@@ -107,6 +109,12 @@ public:
 	 //From ServerObserver
 	 void notifyDefsChanged(ServerHandler* server, const std::vector<ecf::Aspect::Type>& a) {};
 	 void notifyServerDelete(ServerHandler* server) {};
+	 void notifyBeginServerClear(ServerHandler* server);
+     void notifyEndServerClear(ServerHandler* server);
+     void notifyBeginServerScan(ServerHandler* server,const VServerChange&);
+	 void notifyEndServerScan(ServerHandler* server);
+	 void notifyServerConnectState(ServerHandler* server);
+	 void notifyServerActivityChanged(ServerHandler* server);
 
 	 //From NodeObserver
 	 void notifyBeginNodeChange(const VNode*, const std::vector<ecf::Aspect::Type>&,const VNodeChange&);
@@ -115,6 +123,9 @@ public:
 	 void notifyEndNodeClear(const VNode*) {};
 	 void notifyBeginNodeScan(const VNode*,const VNodeChange& change) {};
 	 void notifyEndNodeScan(const VNode*) {};
+
+private:
+	 bool useCachedFilter_;
 };
 
 //This class defines the data a given Node Model (Tree or Table) displays. The
@@ -148,6 +159,9 @@ public:
 	int numOfFiltered(int index) const;
 	bool isFiltered(VNode *node) const;
 	VNode* getNodeFromFilter(int totalRow);
+	int posInFilter(const VNode *node) const;
+	int posInFilter(VModelServer*,const VNode *node) const;
+	bool identifyInFilter(VModelServer* server,int& start,int& count,VNode**);
 
 	//From ServerFilterObserver
 	void notifyServerFilterAdded(ServerItem*);
@@ -180,8 +194,8 @@ Q_SIGNALS:
 	void attributesChanged(VModelServer*,const VNode*);
 	void beginServerScan(VModelServer*,int);
 	void endServerScan(VModelServer*,int);
-	void beginServerClear(VModelServer*);
-	void endServerClear(VModelServer*);
+	void beginServerClear(VModelServer*,int);
+	void endServerClear(VModelServer*,int);
 	void rerender();
 
 protected:

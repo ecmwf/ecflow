@@ -21,7 +21,7 @@
     <number>0</number>
    </property>
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="1,0,0,0">
+    <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="1,0,0">
      <item>
       <widget class="NodePathWidget" name="bcWidget_" native="true"/>
      </item>
@@ -39,25 +39,19 @@
       </spacer>
      </item>
      <item>
-      <widget class="QToolButton" name="detachedTb">
+      <widget class="QToolButton" name="optionTb_">
+       <property name="toolTip">
+        <string>Info panel options</string>
+       </property>
        <property name="text">
-        <string>Detached</string>
+        <string>...</string>
        </property>
-       <property name="checkable">
-        <bool>true</bool>
+       <property name="icon">
+        <iconset resource="viewer.qrc">
+         <normaloff>:/viewer/images/configure.svg</normaloff>:/viewer/images/configure.svg</iconset>
        </property>
-       <property name="autoRaise">
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QToolButton" name="frozenTb">
-       <property name="text">
-        <string>Frozen</string>
-       </property>
-       <property name="checkable">
-        <bool>true</bool>
+       <property name="popupMode">
+        <enum>QToolButton::InstantPopup</enum>
        </property>
        <property name="autoRaise">
         <bool>true</bool>
@@ -79,7 +73,7 @@
     </widget>
    </item>
   </layout>
-  <action name="actionDetached">
+  <action name="actionDetached_">
    <property name="checkable">
     <bool>true</bool>
    </property>
@@ -87,7 +81,7 @@
     <string>Detached</string>
    </property>
   </action>
-  <action name="actionFrozen">
+  <action name="actionFrozen_">
    <property name="checkable">
     <bool>true</bool>
    </property>
@@ -95,7 +89,15 @@
     <string>Frozen</string>
    </property>
    <property name="toolTip">
-    <string>Do not update panel when node changes</string>
+    <string>Do not update panel when node is updated</string>
+   </property>
+  </action>
+  <action name="actionBreadcrumbs_">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Breadcrumbs</string>
    </property>
   </action>
  </widget>

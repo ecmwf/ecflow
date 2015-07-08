@@ -10,6 +10,7 @@
 #include "TableNodeModel.hpp"
 
 #include <QDebug>
+#include <QMetaMethod>
 
 #include "ChangeMgrSingleton.hpp"
 
@@ -28,8 +29,40 @@
 TableNodeModel::TableNodeModel(VModelData *data,IconFilter* icons,QObject *parent) :
 	AbstractNodeModel(data,icons,parent)
 {
-	//connect(data_,SIGNAL(dataChanged()),
-	//		this, SIGNAL
+
+	//Filter changed
+	connect(data_,SIGNAL(filterChanged()),
+			this,SIGNAL(filterChanged()));
+
+	//We need connect the rest of the VModelData signals to local slots
+
+	//Loop over the methods of the VModelServer
+	for(int i = 0; i < data_->staticMetaObject.methodCount(); i++)
+	{
+		//Get the method signature
+		const char* sg=data_->staticMetaObject.method(i).signature();
+
+		//Check if it is a signal
+		if(data_->staticMetaObject.indexOfSignal(sg) != -1)
+		{
+			QString localSlot(sg);
+			if(!localSlot.isEmpty())
+			{
+				QChar first=localSlot.at(0);
+
+				localSlot="slot" + localSlot.replace(0,1,first.toUpper());
+
+				//Check if it is a slot in the current class as well
+				int idx=staticMetaObject.indexOfSlot(localSlot.toStdString().c_str());
+				if(idx != -1)
+				{
+					//We simply relay this signal
+					connect(data_,data_->staticMetaObject.method(i),
+							this,staticMetaObject.method(idx));
+				}
+			}
+		}
+	}
 }
 
 int TableNodeModel::columnCount( const QModelIndex& /*parent */ ) const
@@ -39,6 +72,8 @@ int TableNodeModel::columnCount( const QModelIndex& /*parent */ ) const
 
 int TableNodeModel::rowCount( const QModelIndex& parent) const
 {
+	//qDebug() << "rowCount" << parent;
+
 	//There are no servers
 	if(!hasData())
 	{
@@ -49,17 +84,16 @@ int TableNodeModel::rowCount( const QModelIndex& parent) const
 	{
 		return 0;
 	}
-	//
+	//"parent" is the root
 	else if(!parent.isValid())
 	{
+		//We the total number of nodes displayed
 		int cnt=0;
 		for(int i=0; i < data_->count(); i++)
 		{
 			cnt+=data_->numOfFiltered(i);
 		}
-
-
-		qDebug() << "table count" << cnt;
+		//qDebug() << "table count" << cnt;
 
 		return cnt;
 	}
@@ -78,33 +112,8 @@ QVariant TableNodeModel::data( const QModelIndex& index, int role ) const
 		return QVariant();
 	}
 
-	//qDebug() << "data" << index << role;
-
-	//Server
-	/*if(isServer(index))
-	{
-		return serverData(index,role);
-	}*/
-
+	//We only display nodes!!
 	return nodeData(index,role);
-}
-
-QVariant TableNodeModel::serverData(const QModelIndex& index,int role) const
-{
-	if(role == FilterRole)
-			return true;
-
-	else if(index.column() == 0)
-	{
-		if(ServerHandler *server=indexToRealServer(index))
-		{
-			if(role == Qt::DisplayRole)
-			{
-					return QString::fromStdString(server->longName());
-			}
-		}
-	}
-	return QVariant();
 }
 
 QVariant TableNodeModel::nodeData(const QModelIndex& index, int role) const
@@ -112,19 +121,21 @@ QVariant TableNodeModel::nodeData(const QModelIndex& index, int role) const
 	if(role == Qt::BackgroundRole && index.column() != 1)
 		return QVariant();
 
+	qDebug() << "data" <<  index;
+
+
 	VNode* vnode=indexToNode(index);
 	if(!vnode || !vnode->node())
 		return QVariant();
-
 	if(role == Qt::DisplayRole)
 	{
 		switch(index.column())
 		{
-		case 0: return QString::fromStdString(vnode->node()->absNodePath());
-		case 1: return VNState::toName(vnode);
+		case 0: return QString::fromStdString(vnode->absNodePath());
+		case 1: return vnode->stateName();
 		case 2:
 		{
-				ServerHandler* s=ServerHandler::find(vnode);
+				ServerHandler* s=vnode->server();
 				return (s)?QString::fromStdString(s->name()):QString();
 		}
 		default: return QVariant();
@@ -132,10 +143,9 @@ QVariant TableNodeModel::nodeData(const QModelIndex& index, int role) const
 	}
 	else if(role == Qt::BackgroundRole)
 	{
-		return VNState::toColour(vnode);
+		return vnode->stateColour();
 	}
 	else if(role == FilterRole)
-		//return static_cast<int>(node->dstate());
 		return true;
 
 	return QVariant();
@@ -173,118 +183,12 @@ QModelIndex TableNodeModel::index( int row, int column, const QModelIndex & pare
 		return createIndex(row,column,node);
 	}
 
-	/*int cnt=0;
-	ServerHandler *server=0;
-	for(int i=0; i < servers_->count(); i++)
-	{
-		NodeFilter *filterservers_->filter(i));
-		if(row-cnt < filter->resultCount())
-		{
-			server=servers_->server(i);
-			break;
-		}
-		cnt+=filter->resultCount());
-	}
-
-	if(server)
-	{
-		if(Node *node=server->findNode(row))
-				return createIndex(row,column,node);
-	}*/
-
 	return QModelIndex();
-
-	/*//When parent is the root this index refers to a server
-	if(!parent.isValid())
-	{
-		//For the server the internalId is its row index + 1
-		if(row < servers_.count())
-		{
-			return createIndex(row,column,row+1);
-		}
-		else
-			return QModelIndex();
-	}
-
-	//We are under one of the servers
-	else
-	{
-		node_ptr childNode;
-
-		//The parent is a server
-		if(ServerHandler* server=indexToServer(parent))
-		{
-			//If there is a rootnode for the server
-			if(Node *rn=rootNode(server))
-			{
-				//qDebug() << "  -->rootNode" << rn->absNodePath().c_str();
-				return createIndex(row,column,rn);
-			}
-			//There is no root node: we show the whole tree for the server.
-			//So this item must be a suite!
-			else
-			{
-				if(Node *node=server->findNode(row))
-					return createIndex(row,column,node);
-			}
-		}
-		//Parent is not the server: the parent must be another node
-		else
-		{
-			return QModelIndex();
-		}
-	}
-
-	return QModelIndex();*/
-
 }
 
 QModelIndex TableNodeModel::parent(const QModelIndex &child) const
 {
 	//Parent is always the root!!!
-	return QModelIndex();
-
-
-	//If the child is a server the parent is the root
-	if(isServer(child))
-		return QModelIndex();
-
-	//Get the node
-	VNode* node=indexToNode(child);
-	if(!node)
-		return QModelIndex();
-
-	//Check if it is a rootNode
-	/*QMapIterator<ServerHandler*, Node*> it(rootNodes_);
-	while(it.hasNext())
-	{
-		it.next();
-
-		//For a rootnode the parent is the server
-		if(it.value() == node)
-		{
-			return serverToIndex(it.key());
-		}
-	}*/
-
-	//The node is not a rootnode
-
-	//Get the parent node
-	return serverToIndex(ServerHandler::find(node));
-
-	//Node *parentNode=node->parent();
-
-	/*//If there is no parent node it is a suite so its parent is a server
-	if(!parentNode)
-	{
-		return serverToIndex(ServerHandler::find(node));
-	}
-	//else it is a non-suite node so its parent must be another node
-	else
-	{
-		return QModelIndex();
-	}*/
-
 	return QModelIndex();
 }
 
@@ -294,7 +198,7 @@ QModelIndex TableNodeModel::parent(const QModelIndex &child) const
 //
 //----------------------------------------------
 
-bool TableNodeModel::isServer(const QModelIndex & index) const
+/*bool TableNodeModel::isServer(const QModelIndex & index) const
 {
 	//For servers the internal id is set to their position in servers_ + 1
 	if(index.isValid())
@@ -303,10 +207,10 @@ bool TableNodeModel::isServer(const QModelIndex & index) const
 		return (id >=0 && id < data_->count());
 	}
 	return false;
-}
+}*/
 
 
-ServerHandler* TableNodeModel::indexToRealServer(const QModelIndex & index) const
+/*ServerHandler* TableNodeModel::indexToRealServer(const QModelIndex & index) const
 {
 	//For servers the internal id is set to their position in servers_ + 1
 	if(index.isValid())
@@ -327,9 +231,9 @@ VModelServer* TableNodeModel::indexToServer(const QModelIndex & index) const
 	}
 	return NULL;
 }
+*/
 
-
-QModelIndex TableNodeModel::serverToIndex(ServerHandler* server) const
+/*QModelIndex TableNodeModel::serverToIndex(ServerHandler* server) const
 {
 	//For servers the internal id is set to their position in servers_ + 1
 	int i;
@@ -347,42 +251,47 @@ QModelIndex TableNodeModel::serverToIndex(VModelServer* server) const
 			return createIndex(i,0,i+1);
 
 	return QModelIndex();
-}
+}*/
 
 
 VNode* TableNodeModel::indexToNode( const QModelIndex & index) const
 {
-	//return NULL;
-
 	if(index.isValid())
 	{
-		//if(!isServer(index))
-		//{
-			return static_cast<VNode*>(index.internalPointer());
-		//}
-
+		return static_cast<VNode*>(index.internalPointer());
 	}
 	return NULL;
 }
 
 QModelIndex TableNodeModel::nodeToIndex(const VNode* node, int column) const
 {
-	return QModelIndex();
+	if(!node)
+		return QModelIndex();
 
-	/*if(!node)
-			return QModelIndex();
-
-	if(node->parent() != 0)
+	int row=0;
+	if((row=data_->posInFilter(node)) != -1)
 	{
-		int row=ServerHandler::indexOfImmediateChild(node);
-		if(row != -1)
-		{
-				return createIndex(row,column,node);
-		}
+		return createIndex(row,column,(VNode*)node);
 	}
-
-	return QModelIndex();*/
+	return QModelIndex();
 }
+
+
+//Find the index for the node when we know what the server is!
+QModelIndex TableNodeModel::nodeToIndex(VModelServer* server,const VNode* node, int column) const
+{
+	if(!node)
+		return QModelIndex();
+
+	int row=0;
+	if((row=data_->posInFilter(server,node)) != -1)
+	{
+		return createIndex(row,column,(VNode*)node);
+	}
+	return QModelIndex();
+}
+
+
 
 VInfo_ptr TableNodeModel::nodeInfo(const QModelIndex&)
 {
@@ -390,12 +299,68 @@ VInfo_ptr TableNodeModel::nodeInfo(const QModelIndex&)
 	return info;
 }
 
-
-void TableNodeModel::resetStateFilter(bool broadcast)
+//The node changed (it status etc)
+void TableNodeModel::slotNodeChanged(VModelServer* server,const VNode* node)
 {
-	/*beginResetModel();
-	servers_->filter(config_->stateFilter());
-	endResetModel();*/
+	if(!node)
+		return;
 
+	QModelIndex index=nodeToIndex(server,node,0);
+
+	if(!index.isValid())
+		return;
+
+	Q_EMIT dataChanged(index,index);
 }
 
+void TableNodeModel::slotBeginServerScan(VModelServer* server,int num)
+{
+	assert(active_ == true);
+
+	if(num >0)
+	{
+		int start=-1;
+		int count=-1;
+
+		VNode* firstNode=NULL;
+		data_->identifyInFilter(server,start,count,&firstNode);
+		assert(firstNode);
+
+		QModelIndex idx=createIndex(start,0,firstNode);
+		beginInsertRows(idx,0,count-1);
+	}
+}
+
+void TableNodeModel::slotEndServerScan(VModelServer* server,int num)
+{
+	assert(active_ == true);
+
+	if(num >0)
+		endInsertRows();
+}
+
+void TableNodeModel::slotBeginServerClear(VModelServer* server,int num)
+{
+	assert(active_ == true);
+
+	if(num >0)
+	{
+		int start=-1;
+		int count=-1;
+
+		VNode* firstNode=NULL;
+		data_->identifyInFilter(server,start,count,&firstNode);
+		assert(firstNode);
+
+		QModelIndex idx=createIndex(start,0,firstNode);
+		beginRemoveRows(idx,0,count-1);
+	}
+}
+
+void TableNodeModel::slotEndServerClear(VModelServer* server,int num)
+{
+	assert(active_ == true);
+
+	if(num >0)
+		endRemoveRows();
+}

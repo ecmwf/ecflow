@@ -14,12 +14,15 @@
 
 #include "NodeWidget.hpp"
 
-class VConfig;
+class NodeStateFilter;
+class VParamFilterMenu;
 class VSettings;
+
 
 class TableNodeWidget : public NodeWidget, protected Ui::TableNodeWidget
 {
 Q_OBJECT
+
 public:
 	TableNodeWidget(ServerFilter* servers,QWidget* parent=0);
 	void writeSettings(VSettings*);
@@ -28,6 +31,9 @@ public:
 public Q_SLOTS:
 	void on_actionBreadcrumbs_triggered(bool b);
 
+private:
+	NodeStateFilter *states_;
+	VParamFilterMenu *stateFilterMenu_;
 };
 
 #endif

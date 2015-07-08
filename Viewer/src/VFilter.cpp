@@ -151,7 +151,10 @@ NodeFilterDef::NodeFilterDef(Scope scope) : nodeState_(0)
 	}
 }
 
-NodeFilter::NodeFilter(NodeFilterDef* def,ResultMode resultMode) : def_(def), resultMode_(resultMode)
+NodeFilter::NodeFilter(NodeFilterDef* def,ResultMode resultMode) :
+		def_(def),
+		resultMode_(resultMode),
+		beingReset_(false)
 {
 
 }
@@ -182,8 +185,10 @@ bool TreeNodeFilter::isFiltered(VNode* node)
 	return false;
 }
 
-void TreeNodeFilter::reset(ServerHandler* server)
+void TreeNodeFilter::beginReset(ServerHandler* server)
 {
+	beingReset_=true;
+
 	result_.clear();
 	resultMode_=StoreNonMatched;
 
@@ -204,6 +209,11 @@ void TreeNodeFilter::reset(ServerHandler* server)
 	{
 		filterState(root->childAt(j),def_->nodeState_);
 	}
+}
+
+void TreeNodeFilter::endReset()
+{
+	beingReset_=false;
 }
 
 bool TreeNodeFilter::filterState(VNode* node,VParamSet* stateFilter)
@@ -231,36 +241,71 @@ bool TreeNodeFilter::filterState(VNode* node,VParamSet* stateFilter)
 
 int TreeNodeFilter::matchCount()
 {
+	if(beingReset_)
+		return 0;
+
 	if(resultMode_==StoreMatched)
 	{
 		return static_cast<int>(result_.size());
 	}
-	return -1;
+	return 0;
 };
 
 int TreeNodeFilter::nonMatchCount()
 {
+	if(beingReset_)
+			return 0;
+
 	if(resultMode_==StoreNonMatched)
 	{
 		return static_cast<int>(result_.size());
 	}
-	return -1;
+	return 0;
+}
+
+int TreeNodeFilter::realMatchCount()
+{
+	return 0;
+}
+
+VNode* TreeNodeFilter::realMatchAt(int)
+{
+	return NULL;
 }
 
 
+
+//===========================================================
+// TableNodeFilter
+//===========================================================
+
 TableNodeFilter::TableNodeFilter(NodeFilterDef* def) : NodeFilter(def,StoreMatched)
 {
-	type_.insert("suite");
+	//type_.insert("suite");
 }
 
 bool TableNodeFilter::isFiltered(VNode* node)
 {
+	if(beingReset_)
+		return false;
+
 	return (std::find(match_.begin(), match_.end(), node) != match_.end());
 }
 
-void TableNodeFilter::reset(ServerHandler* server)
+void TableNodeFilter::clear()
 {
 	match_.clear();
+}
+
+void TableNodeFilter::beginReset(ServerHandler* server)
+{
+	beingReset_=true;
+
+	match_.clear();
+
+	VServer* s=server->vRoot();
+
+	s->collect(match_);
 
 	//If all states are visible
 	//if(sf->isComplete())
@@ -272,10 +317,54 @@ void TableNodeFilter::reset(ServerHandler* server)
 	}*/
 }
 
-VNode* TableNodeFilter::match(int i)
+void TableNodeFilter::endReset()
 {
-		assert(i>=0 && i < match_.size());
-		return match_.at(i);
+	beingReset_=false;
 }
 
+VNode* TableNodeFilter::matchAt(int i)
+{
+	if(beingReset_)
+		return NULL;
+
+	if(match_.empty())
+		return NULL;
+
+	assert(i>=0 && i < match_.size());
+	return match_.at(i);
+}
+
+int TableNodeFilter::matchPos(const VNode* node)
+{
+	if(beingReset_)
+		return -1;
+
+	std::vector<VNode*>::const_iterator it=std::find(match_.begin(), match_.end(), node);
+	if(it != match_.end())
+		return it-match_.begin();
+
+	return -1;
+}
+
+int TableNodeFilter:: matchCount()
+{
+	if(beingReset_)
+		return 0;
+
+	return static_cast<int>(match_.size());
+}
+
+int TableNodeFilter::realMatchCount()
+{
+	return static_cast<int>(match_.size());
+}
+
+VNode* TableNodeFilter::realMatchAt(int i)
+{
+	if(match_.empty())
+		return NULL;
+
+	assert(i>=0 && i < match_.size());
+	return match_.at(i);
+}
 

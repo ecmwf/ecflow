@@ -31,6 +31,40 @@
 
 int Dashboard::maxWidgetNum_=20;
 
+//============================================================
+//
+// DashBoardDock
+//
+//============================================================
+
+DashboardDock::DashboardDock(QString baseTitle,QWidget * parent) :
+	QDockWidget(baseTitle,parent),
+	baseTitle_(baseTitle)
+{
+}
+
+void DashboardDock::showEvent(QShowEvent* event)
+{
+	QWidget::showEvent(event);
+}
+
+void DashboardDock::closeEvent (QCloseEvent *event)
+{
+	QWidget::closeEvent(event);
+	Q_EMIT closeRequested();
+}
+
+void DashboardDock::slotAddToTitle(QString txt)
+{
+	setWindowTitle(baseTitle_ + txt);
+}
+
+//============================================================
+//
+// DashBoard
+//
+//============================================================
+
 Dashboard::Dashboard(QString rootNode,QWidget *parent) :
         QMainWindow(parent)
 {
@@ -131,6 +165,9 @@ DashboardWidget* Dashboard::addWidget(const std::string& type,const std::string&
 
     connect(dw,SIGNAL(closeRequested()),
     		this,SLOT(slotDockClose()));
+
+    connect(w,SIGNAL(addToTitle(QString)),
+		    dw,SLOT(slotAddToTitle(QString)));
 
     return w;
 }
@@ -395,21 +432,4 @@ std::string Dashboard::widgetSettingsId(int i)
 {
 	return "widget_" + boost::lexical_cast<std::string>(i);
 }
-
-
-
-void DashboardDock::showEvent(QShowEvent* event)
-{
-	QWidget::showEvent(event);
-}
-
-void DashboardDock::closeEvent (QCloseEvent *event)
-{
-	QWidget::closeEvent(event);
-	Q_EMIT closeRequested();
-}
-
-
-
-
 

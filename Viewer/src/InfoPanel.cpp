@@ -10,6 +10,7 @@
 #include "InfoPanel.hpp"
 
 #include <QDebug>
+#include <QMenu>
 #include <QToolButton>
 #include <QVBoxLayout>
 
@@ -53,18 +54,27 @@ InfoPanel::InfoPanel(QWidget* parent) :
 {
 	setupUi(this);
 
-	frozenTb->setChecked(false);
-	detachedTb->setChecked(false);
-
-	frozenTb->hide();
-	detachedTb->hide();
-
 	connect(tab_,SIGNAL(currentChanged(int)),
 				    this,SLOT(slotCurrentWidgetChanged(int)));
 
-
 	connect(bcWidget_,SIGNAL(selected(VInfo_ptr)),
 			this,SIGNAL(selectionChanged(VInfo_ptr)));
+
+	//Builds the menu for the settings tool button
+	QMenu *menu=new QMenu(this);
+	menu->setTearOffEnabled(true);
+
+	menu->addAction(actionBreadcrumbs_);
+	menu->addAction(actionDetached_);
+	menu->addAction(actionFrozen_);
+
+	//Sets the menu on the toolbutton
+	optionTb_->setMenu(menu);
+
+	//Initialise action state
+	actionBreadcrumbs_->setChecked(bcWidget_->active());
+	actionFrozen_->setChecked(false);
+	actionDetached_->setChecked(false);
 }
 
 InfoPanel::~InfoPanel()
@@ -116,15 +126,15 @@ void InfoPanel::reset(VInfo_ptr info)
 	bcWidget_->setPath(info);
 }
 
-//This slot is called when the info objec is selected
-void InfoPanel::slotReload(VInfo_ptr node)
+//This slot is called when the info object is selected
+void InfoPanel::slotReload(VInfo_ptr info)
 {
-	//When the panel is disabled (i.e. the dock parent is hidden) or the mode is detached it cannot receive
+	//When the mode is detached it cannot receive
 	//the reload request
-	if(!isEnabled() || detached())
+	if(info_ && info_.get() && detached())
 		return;
 
-	reset(node);
+	reset(info);
 }
 
 //Set the new VInfo object.
@@ -282,7 +292,7 @@ InfoPanelItemHandler* InfoPanel::findHandler(InfoPanelDef* def)
 	Q_FOREACH(InfoPanelItemHandler *d,items_)
 	{
 			if(d->def() == def)
-					return d;
+				return d;
 	}
 
 	return createHandler(def);
@@ -292,6 +302,9 @@ InfoPanelItemHandler* InfoPanel::createHandler(InfoPanelDef* def)
 {
 	if(InfoPanelItem *iw=InfoPanelItemFactory::create(def->name()))
 	{
+		iw->setFrozen(frozen());
+		iw->setDetached(detached());
+
 		InfoPanelItemHandler* h=new InfoPanelItemHandler(def,iw);
 		items_ << h;
 		return h;
@@ -322,20 +335,72 @@ void InfoPanel::clearTab()
 	tabBeingCleared_=false;
 }
 
+
+void InfoPanel::on_actionBreadcrumbs__toggled(bool b)
+{
+	if(b)
+	{
+		bcWidget_->active(true);
+		bcWidget_->setPath(info_);
+	}
+	else
+	{
+		bcWidget_->active(false);
+	}
+
+	//bcWidget_->clear();
+}
+
+void InfoPanel::on_actionFrozen__toggled(bool b)
+{
+	Q_FOREACH(InfoPanelItemHandler *item,items_)
+	{
+		item->item()->setFrozen(b);
+	}
+	updateTitle();
+}
+
+void InfoPanel::on_actionDetached__toggled(bool b)
+{
+	Q_FOREACH(InfoPanelItemHandler *item,items_)
+	{
+		item->item()->setDetached(b);
+	}
+	updateTitle();
+}
+
 bool InfoPanel::frozen() const
 {
-	return frozenTb->isChecked();
+	return actionFrozen_->isChecked();
 }
 
 bool InfoPanel::detached() const
 {
-	return detachedTb->isChecked();
+	return actionDetached_->isChecked();
 }
 
-void InfoPanel::detached(bool b)
+void InfoPanel::updateTitle()
 {
-	detachedTb->setChecked(b);
+	QString txt;
+	if(frozen())
+		txt+="frozen";
+
+	if(detached())
+	{
+		if(!txt.isEmpty())
+		{
+			txt+=",";
+		}
+		txt+="detached";
+	}
+	if(!txt.isEmpty())
+	{
+		txt="(" + txt + ")";
+	}
+
+	Q_EMIT addToTitle(txt);
 }
+
 
 void InfoPanel::notifyDataLost(VInfo* info)
 {
@@ -416,6 +481,11 @@ void InfoPanel::writeSettings(VSettings* vs)
 {
 	vs->put("type","info");
 	vs->put("dockId",id_);
+
+	bcWidget_->writeSettings(vs);
+
+	vs->putAsBool("frozen",frozen());
+	vs->putAsBool("detached",detached());
 }
 
 void InfoPanel::readSettings(VSettings* vs)
@@ -425,4 +495,19 @@ void InfoPanel::readSettings(VSettings* vs)
 	{
 		return;
 	}
+
+	//--------------------------
+	//Breadcrumbs
+	//--------------------------
+
+	bcWidget_->readSettings(vs);
+
+	//Synchronise the action and the breadcrumbs state
+	//This will not emit the trigered signal of the action!!
+	actionBreadcrumbs_->setChecked(bcWidget_->active());
+
+	actionFrozen_->setChecked(vs->getAsBool("frozen",frozen()));
+	actionDetached_->setChecked(vs->getAsBool("detached",detached()));
+
 }
+

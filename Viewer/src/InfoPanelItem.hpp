@@ -29,13 +29,16 @@ class InfoPanelItem : public VTaskObserver, public InfoPresenter, public NodeObs
 friend class InfoPanel;
 
 public:
-	InfoPanelItem() : loaded_(false), useAncestors_(false) {};
+	InfoPanelItem() : loaded_(false), useAncestors_(false),
+	                  frozen_(false), detached_(false) {};
 	virtual ~InfoPanelItem(){};
 
 	bool loaded() const {return loaded_;}
 	virtual void reload(VInfo_ptr info)=0;
 	virtual QWidget* realWidget()=0;
 	virtual void clearContents()=0;
+	void setFrozen(bool);
+	void setDetached(bool);
 
 	//From VTaskObserver
 	void taskChanged(VTask_ptr) {};
@@ -63,6 +66,8 @@ protected:
 	
 	bool loaded_;
     bool useAncestors_;
+    bool frozen_;
+    bool detached_;
 };
 
 class InfoPanelItemFactory

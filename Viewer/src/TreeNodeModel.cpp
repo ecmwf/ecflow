@@ -1032,7 +1032,7 @@ void TreeNodeModel::slotEndServerScan(VModelServer* server,int num)
 
 //The server clear has started. It well remove all the nodes except the root node.
 //So we need to remove all the rows belonging to the rootnode.
-void TreeNodeModel::slotBeginServerClear(VModelServer* server)
+void TreeNodeModel::slotBeginServerClear(VModelServer* server,int)
 {
 	assert(active_ == true);
 
@@ -1047,7 +1047,7 @@ void TreeNodeModel::slotBeginServerClear(VModelServer* server)
 	}
 }
 //The server clear has finished. The tree is empty only containing the rootnode
-void TreeNodeModel::slotEndServerClear(VModelServer* server)
+void TreeNodeModel::slotEndServerClear(VModelServer* server,int)
 {
 	assert(active_ == true);
 	endRemoveRows();

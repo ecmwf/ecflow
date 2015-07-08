@@ -34,14 +34,19 @@ class DashboardDock : public QDockWidget
 Q_OBJECT
 
 public:
-	DashboardDock(QString title,QWidget * parent=0) : QDockWidget(title,parent) {};
+	DashboardDock(QString title,QWidget * parent=0);
 
 Q_SIGNALS:
 	void closeRequested();
 
+public Q_SLOTS:
+	void slotAddToTitle(QString);
+
 protected:
 	void showEvent(QShowEvent* event);
 	void closeEvent (QCloseEvent *event);
+
+	QString baseTitle_;
 };
 
 

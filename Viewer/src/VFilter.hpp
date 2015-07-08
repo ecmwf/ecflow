@@ -109,17 +109,25 @@ public:
 	NodeFilter(NodeFilterDef* def,ResultMode resultMode);
 	virtual ~NodeFilter() {};
 
-	virtual void reset(ServerHandler* server)=0;
-    virtual bool isFiltered(VNode* node)=0;
+	virtual void clear()=0;
+	virtual void beginReset(ServerHandler* server)=0;
+	virtual void endReset()=0;
+
+	virtual bool isFiltered(VNode* node)=0;
     virtual int  matchCount()=0;
     virtual int  nonMatchCount()=0;
-    virtual VNode* match(int i)=0;
+    virtual VNode* matchAt(int i)=0;
+    virtual int matchPos(const VNode*)=0;
+
+    virtual int realMatchCount()=0;
+    virtual VNode* realMatchAt(int)=0;
 
 protected:
     NodeFilterDef* def_;
     std::set<std::string> type_;
     ResultMode resultMode_;
 	std::set<VNode*> result_;
+	bool beingReset_;
 
 };
 
@@ -127,11 +135,19 @@ class TreeNodeFilter : public NodeFilter
 {
 public:
 	explicit TreeNodeFilter(NodeFilterDef* def);
-	void reset(ServerHandler* server);
+
+	void clear() {};
+	void beginReset(ServerHandler* server);
+	void endReset();
+
 	bool isFiltered(VNode* node);
 	int  matchCount();
 	int  nonMatchCount();
-	VNode* match(int i) {return NULL;}
+	VNode* matchAt(int i) {return NULL;}
+	int matchPos(const VNode*) {return -1;}
+
+	int realMatchCount();
+	VNode* realMatchAt(int);
 
 private:
 	bool filterState(VNode* node,VParamSet* stateFilter);
@@ -143,11 +159,19 @@ class TableNodeFilter : public NodeFilter
 {
 public:
 	explicit TableNodeFilter(NodeFilterDef* def);
-	void reset(ServerHandler* server);
+
+	void clear();
+	void beginReset(ServerHandler* server);
+	void endReset();
+
 	bool isFiltered(VNode* node);
-	int  matchCount() {return static_cast<int>(match_.size());};
+	int  matchCount();
 	int  nonMatchCount() {return -1;}
-	VNode* match(int i);
+	VNode* matchAt(int i);
+	int matchPos(const VNode*);
+
+	int realMatchCount();
+	VNode* realMatchAt(int);
 
 private:
 	std::vector<VNode*> match_;

@@ -38,11 +38,11 @@ public:
 	InfoPanelDef* def() const {return def_;}
 
 protected:
-		void addToTab(QTabWidget *);
+	void addToTab(QTabWidget *);
 
 private:
-		InfoPanelDef* def_;
-		InfoPanelItem* item_;
+	InfoPanelDef* def_;
+	InfoPanelItem* item_;
 };
 
 
@@ -55,7 +55,6 @@ public:
 	virtual ~InfoPanel();
 	bool frozen() const;
 	bool detached() const;
-	void detached(bool);
 	void clear();
 
 	//From DashboardWidget
@@ -81,6 +80,9 @@ public:
 public Q_SLOTS:
 	void slotReload(VInfo_ptr node);
 	void slotCurrentWidgetChanged(int);
+	void on_actionBreadcrumbs__toggled(bool b);
+	void on_actionFrozen__toggled(bool b);
+	void on_actionDetached__toggled(bool b);
 
 Q_SIGNALS:
 	void selectionChanged(VInfo_ptr);
@@ -94,6 +96,7 @@ private:
 	InfoPanelItem* findItem(QWidget* w);
 	InfoPanelItemHandler* createHandler(InfoPanelDef*);
 	void clearTab();
+	void updateTitle();
 
 	QList<InfoPanelItemHandler*> items_;
 	VInfo_ptr info_;

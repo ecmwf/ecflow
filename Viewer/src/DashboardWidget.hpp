@@ -20,6 +20,8 @@ class VSettings;
 
 class DashboardWidget : public QWidget
 {
+Q_OBJECT
+
 public:
 	explicit DashboardWidget(QWidget* parent=0) : QWidget(parent) {};
 	virtual ~DashboardWidget() {};
@@ -33,63 +35,11 @@ public:
 
 	void id(const std::string& id) {id_=id;}
 
+Q_SIGNALS:
+	void addToTitle(QString);
+
 protected:
 	std::string id_;
 };
-
-
-/*
-class DashboardDock : public QDockWidget
-{
-public:
-	DashboardDock(QString label,DashboardWidget* dw,QWidget * parent=0);
-	DashboardWidget* dashboardWidget() const {return dw_;}
-
-protected:
-	void showEvent(QShowEvent* event);
-	void closeEvent (QCloseEvent *event);
-
-	DashboardWidget* dw_;
-	bool closed_;
-};
-
-
-
-
-DashboardDock::DashboardDock(QString label,DashboardWidget* dw,QWidget * parent) :
-   QDockWidget(label,parent),
-   dw_(dw),
-   closed_(true)
-{
-	//setAllowedAreas(Qt::BottomDockWidgetArea |
-	//			Qt::RightDockWidgetArea);
-
-	//setFeatures(QDockWidget::DockWidgetClosable | QDockWidget::DockWidgetMovable |
-	//			QDockWidget::DockWidgetFloatable);
-
-	//_=new InfoPanel(parent);
-
-	//Just to be sure that init is correct
-
-
-	setWidget(dw_);
-}
-
-void DashboardDock::showEvent(QShowEvent* event)
-{
-	QWidget::showEvent(event);
-}
-
-void DashboardDock::closeEvent (QCloseEvent *event)
-{
-	QWidget::closeEvent(event);
-
-	//closed_=true;
-	//infoPanel_->clear();
-	//infoPanel_->setEnabled(false);
-}
-
-*/
-
 
 #endif

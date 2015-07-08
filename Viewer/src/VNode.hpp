@@ -78,6 +78,7 @@ public:
     int indexOfChild(const VNode* vn) const;
     int indexOfChild(node_ptr n) const;
     VNode* findChild(const std::string& name) const;
+    void collect(std::vector<VNode*>& vec) const;
 
     //Get all the variables
     virtual void variables(std::vector<Variable>& vars);

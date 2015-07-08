@@ -22,6 +22,8 @@ class ServerHandler;
 
 class TableNodeModel : public AbstractNodeModel
 {
+Q_OBJECT
+
 public:
    	TableNodeModel(VModelData *data,IconFilter* icons,QObject *parent=0);
 
@@ -36,20 +38,26 @@ public:
 
    	VInfo_ptr nodeInfo(const QModelIndex&);
 
-protected:
-   	bool isServer(const QModelIndex & index) const;
-	ServerHandler* indexToRealServer(const QModelIndex & index) const;
-	VModelServer* indexToServer(const QModelIndex & index) const;
-	QModelIndex serverToIndex(ServerHandler*) const;
-	QModelIndex serverToIndex(VModelServer*) const;
+public Q_SLOTS:
+	void slotNodeChanged(VModelServer* server,const VNode* node);
+	void slotBeginServerScan(VModelServer* server,int num);
+	void slotEndServerScan(VModelServer* server,int num);
+	void slotBeginServerClear(VModelServer* server,int num);
+   	void slotEndServerClear(VModelServer* server,int num);
 
-	QModelIndex nodeToIndex(const VNode*,int column=0) const;
+protected:
+   	bool isServer(const QModelIndex & index) const {return false;}
+	ServerHandler* indexToRealServer(const QModelIndex & index) const {return NULL;}
+	VModelServer* indexToServer(const QModelIndex & index) const {return NULL;}
+	QModelIndex serverToIndex(ServerHandler*) const {return QModelIndex();}
+	//QModelIndex serverToIndex(VModelServer*) const;
+
+   	QModelIndex nodeToIndex(VModelServer* server,const VNode* node, int column) const;
+   	QModelIndex nodeToIndex(const VNode*,int column=0) const;
 	VNode* indexToNode( const QModelIndex & index) const;
 
-	QVariant serverData(const QModelIndex& index,int role) const;
 	QVariant nodeData(const QModelIndex& index,int role) const;
-
-	void resetStateFilter(bool broadcast);
+	QVariant serverData(const QModelIndex& index,int role) const {return QVariant();}
 };
 
 #endif

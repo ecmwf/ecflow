@@ -170,6 +170,15 @@ VNode *VNode::findChild(const std::string& name) const
 	return 0;
 }
 
+void VNode::collect(std::vector<VNode*>& vec) const
+{
+	for(int i=0; i < numOfChildren(); i++)
+	{
+		vec.push_back(children_.at(i));
+		children_.at(i)->collect(vec);
+	}
+}
+
 VNode* VNode::find(const std::vector<std::string>& pathVec)
 {
 	if(pathVec.size() == 0)
