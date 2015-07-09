@@ -94,6 +94,12 @@ public:
 	//From ServerObserver
 	void notifyDefsChanged(ServerHandler* server,const std::vector<ecf::Aspect::Type>&);
 	void notifyServerDelete(ServerHandler* server);
+	void notifyBeginServerClear(ServerHandler* server) {};
+	void notifyEndServerClear(ServerHandler* server) {};
+	void notifyBeginServerScan(ServerHandler* server,const VServerChange&) {};
+	void notifyEndServerScan(ServerHandler* server) {};
+	void notifyServerConnectState(ServerHandler* server);
+	void notifyServerActivityChanged(ServerHandler* server);
 
 	void writeSettings(VSettings *vs);
 	void readSettings(VSettings *vs);
@@ -118,6 +124,7 @@ protected:
 	int findInPath(VInfo_ptr p1,VInfo_ptr p2,bool sameServer);
 	void infoIndex(int idx);
 	void paintEvent(QPaintEvent *);
+	void reset();
 
 	QList<NodePathNodeItem*> nodeItems_;
 	QList<NodePathMenuItem*> menuItems_;

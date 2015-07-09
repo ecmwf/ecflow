@@ -14,6 +14,7 @@
 #include <QToolButton>
 #include <QVBoxLayout>
 
+#include "DashboardDock.hpp"
 #include "InfoPanelItem.hpp"
 #include "InfoPanelHandler.hpp"
 #include "ServerHandler.hpp"
@@ -61,7 +62,7 @@ InfoPanel::InfoPanel(QWidget* parent) :
 			this,SIGNAL(selectionChanged(VInfo_ptr)));
 
 	//Builds the menu for the settings tool button
-	QMenu *menu=new QMenu(this);
+	/*QMenu *menu=new QMenu(this);
 	menu->setTearOffEnabled(true);
 
 	menu->addAction(actionBreadcrumbs_);
@@ -69,7 +70,7 @@ InfoPanel::InfoPanel(QWidget* parent) :
 	menu->addAction(actionFrozen_);
 
 	//Sets the menu on the toolbutton
-	optionTb_->setMenu(menu);
+	optionTb_->setMenu(menu);*/
 
 	//Initialise action state
 	actionBreadcrumbs_->setChecked(bcWidget_->active());
@@ -86,6 +87,22 @@ InfoPanel::~InfoPanel()
 	{
 		info_->removeObserver(this);
 	}
+}
+
+void InfoPanel::populateTitleBar(DashboardDockTitleWidget* tw)
+{
+	QMenu *menu=new QMenu(this);
+	menu->setTearOffEnabled(true);
+
+	menu->addAction(actionBreadcrumbs_);
+	menu->addAction(actionDetached_);
+	menu->addAction(actionFrozen_);
+
+	//Sets the menu on the toolbutton
+	tw->optionsTb()->setMenu(menu);
+
+	//This will set the title
+	updateTitle();
 }
 
 void InfoPanel::clear()
@@ -381,6 +398,8 @@ bool InfoPanel::detached() const
 
 void InfoPanel::updateTitle()
 {
+	QString baseTxt="<b>Info</b>";
+
 	QString txt;
 	if(frozen())
 		txt+="frozen";
@@ -393,12 +412,17 @@ void InfoPanel::updateTitle()
 		}
 		txt+="detached";
 	}
+
 	if(!txt.isEmpty())
 	{
-		txt="(" + txt + ")";
+		txt=baseTxt + " (" + txt + ")";
+	}
+	else
+	{
+		txt=baseTxt;
 	}
 
-	Q_EMIT addToTitle(txt);
+	Q_EMIT titleUpdated(txt);
 }
 
 

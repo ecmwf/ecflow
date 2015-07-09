@@ -21,9 +21,11 @@ class QStackedLayout;
 class QWidget;
 
 class AbstractNodeModel;
+class AttributeFilter;
 class IconFilter;
-class NodeFilter;
+class NodeFilterDef;
 class NodeFilterModel;
+class NodeStateFilter;
 class VModelData;
 class NodePathWidget;
 class NodeViewBase;
@@ -53,10 +55,13 @@ protected:
 	AbstractNodeModel* model_;
 	NodeFilterModel* filterModel_;
 	NodeViewBase* view_;
-	IconFilter* icons_;
-	NodeFilter* filter_;
 	VModelData* data_;
 
+	IconFilter* icons_;
+	AttributeFilter* atts_;
+
+	NodeFilterDef* filterDef_;
+	NodeStateFilter *states_;
 };
 
 #endif

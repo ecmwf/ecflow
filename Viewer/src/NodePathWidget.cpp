@@ -407,12 +407,16 @@ void NodePathWidget::adjust(VInfo_ptr info,ServerHandler** serverOut,bool &sameS
 }
 
 
+void NodePathWidget::reset()
+{
+	setPath(info_);
+}
+
 void NodePathWidget::setPath(QString)
 {
 	if(!active_)
 	  		return;
 }
-
 
 void NodePathWidget::setPath(VInfo_ptr info)
 {
@@ -836,6 +840,16 @@ void NodePathWidget::notifyServerDelete(ServerHandler* server)
 		//called the server actually loops through its observers and notify them.
 		clear(false);
 	}
+}
+
+void NodePathWidget::notifyServerConnectState(ServerHandler* server)
+{
+	reset();
+}
+
+void NodePathWidget::notifyServerActivityChanged(ServerHandler* server)
+{
+	reset();
 }
 
 void NodePathWidget::paintEvent(QPaintEvent *)

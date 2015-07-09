@@ -12,43 +12,16 @@
 
 #include "Viewer.hpp"
 
-#include <QSplitter>
 #include <QMainWindow>
-#include <QDockWidget>
 
 #include "ServerFilter.hpp"
 #include "VInfo.hpp"
 #include "VSettings.hpp"
 
-#include <boost/property_tree/ptree.hpp>
-
 class DashboardWidget;
 class ServerFilter;
 class ServerItem;
 class VComboSettings;
-
-
-class DashboardDock : public QDockWidget
-{
-
-Q_OBJECT
-
-public:
-	DashboardDock(QString title,QWidget * parent=0);
-
-Q_SIGNALS:
-	void closeRequested();
-
-public Q_SLOTS:
-	void slotAddToTitle(QString);
-
-protected:
-	void showEvent(QShowEvent* event);
-	void closeEvent (QCloseEvent *event);
-
-	QString baseTitle_;
-};
-
 
 class Dashboard : public QMainWindow, public ServerFilterObserver
 {

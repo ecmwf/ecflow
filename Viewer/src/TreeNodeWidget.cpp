@@ -13,6 +13,7 @@
 #include "NodeViewBase.hpp"
 
 #include "AbstractNodeModel.hpp"
+#include "DashboardDock.hpp"
 #include "NodeFilterModel.hpp"
 #include "NodePathWidget.hpp"
 #include "TreeNodeModel.hpp"
@@ -28,7 +29,7 @@ TreeNodeWidget::TreeNodeWidget(ServerFilter* servers,QWidget* parent) : NodeWidg
 	//Init qt-creator form
 	setupUi(this);
 
-	//Define the icon filter for the model. It controls what icons
+	/*//Define the icon filter for the model. It controls what icons
 	//are displayed next to the nodes. This is exposed via a menu.
 	icons_=new IconFilter;
 
@@ -40,7 +41,7 @@ TreeNodeWidget::TreeNodeWidget(ServerFilter* servers,QWidget* parent) : NodeWidg
 	NodeFilterDef *filterDef_=new NodeFilterDef(NodeFilterDef::NodeState);
 
 	//The node status filter is exposed via a menu. So we need a reference to it.
-	states_=filterDef_->nodeState();
+	states_=filterDef_->nodeState();*/
 
 	//Create the data handler for the tree model.
 	data_=new VModelData(servers,filterDef_,VModelData::TreeModel);
@@ -78,6 +79,39 @@ TreeNodeWidget::TreeNodeWidget(ServerFilter* servers,QWidget* parent) : NodeWidg
 				view_->realWidget(),SLOT(slotRerender()));
 
 	//Builds the menu for the settings tool button
+	/*QMenu *menu=new QMenu(this);
+	menu->setTearOffEnabled(true);
+
+	menu->addAction(actionBreadcrumbs);
+	QMenu *menuState=menu->addMenu(tr("Status"));
+	QMenu *menuType=menu->addMenu(tr("Attribute"));
+	QMenu *menuIcon=menu->addMenu(tr("Icon"));
+
+	menuState->setTearOffEnabled(true);
+	menuType->setTearOffEnabled(true);
+	menuIcon->setTearOffEnabled(true);
+
+	//stateFilterMenu_=new StateFilterMenu(menuState,filter_->menu());
+	attrFilterMenu_=new VParamFilterMenu(menuType,atts_);
+	iconFilterMenu_=new VParamFilterMenu(menuIcon,icons_);
+	stateFilterMenu_=new VParamFilterMenu(menuState,states_,VParamFilterMenu::ColourDecor);
+
+	//Sets the menu on the toolbutton
+	viewTb->setMenu(menu);*/
+
+	//This will not emit the trigered signal of the action!!
+	//Synchronise the action and the breadcrumbs state
+	actionBreadcrumbs->setChecked(bcWidget_->active());
+
+}
+
+TreeNodeWidget::~TreeNodeWidget()
+{
+}
+
+void TreeNodeWidget::populateTitleBar(DashboardDockTitleWidget* tw)
+{
+	//Builds the menu for the settings tool button
 	QMenu *menu=new QMenu(this);
 	menu->setTearOffEnabled(true);
 
@@ -96,14 +130,12 @@ TreeNodeWidget::TreeNodeWidget(ServerFilter* servers,QWidget* parent) : NodeWidg
 	stateFilterMenu_=new VParamFilterMenu(menuState,states_,VParamFilterMenu::ColourDecor);
 
 	//Sets the menu on the toolbutton
-	viewTb->setMenu(menu);
+	tw->optionsTb()->setMenu(menu);
 
-
-	//This will not emit the trigered signal of the action!!
-	//Synchronise the action and the breadcrumbs state
-	actionBreadcrumbs->setChecked(bcWidget_->active());
-
+	//Sets the title
+	tw->slotUpdateTitle("<b>Tree</b>");
 }
+
 
 void TreeNodeWidget::on_actionBreadcrumbs_triggered(bool b)
 {

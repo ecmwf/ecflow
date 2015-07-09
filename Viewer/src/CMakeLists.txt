@@ -10,6 +10,7 @@ set(viewer_srcs
     CommandDesignerWidget.cpp
     CustomCommandDialog.cpp
     Dashboard.cpp
+    DashboardDock.cpp
     DirectoryHandler.cpp
     EditItemWidget.cpp
     EditProvider.cpp
@@ -112,6 +113,7 @@ set(viewer_moc_files AbstractNodeModel.hpp
     CodeItemWidget.hpp
     CustomCommandDialog.hpp
     Dashboard.hpp
+    DashboardDock.hpp
     DashboardWidget.hpp
     EditItemWidget.hpp
     FilterWidget.hpp              
@@ -155,6 +157,7 @@ set(viewer_wrap_ui_files
     CommandDesignerWidget.ui 
     CustomCommandDialog.ui 
     CodeItemWidget.ui
+    DashboardDockTitleWidget.ui
     EditItemWidget.ui
     InfoPanel.ui    
     MainWindow.ui 

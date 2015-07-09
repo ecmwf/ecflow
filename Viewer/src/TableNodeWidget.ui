@@ -18,7 +18,7 @@
     <number>0</number>
    </property>
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout_2">
+    <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="1,0">
      <item>
       <widget class="NodePathWidget" name="bcWidget_" native="true"/>
      </item>
@@ -34,29 +34,6 @@
         </size>
        </property>
       </spacer>
-     </item>
-     <item>
-      <widget class="QToolButton" name="viewTb">
-       <property name="toolTip">
-        <string>View options</string>
-       </property>
-       <property name="text">
-        <string>Detached</string>
-       </property>
-       <property name="icon">
-        <iconset resource="viewer.qrc">
-         <normaloff>:/viewer/images/configure.svg</normaloff>:/viewer/images/configure.svg</iconset>
-       </property>
-       <property name="checkable">
-        <bool>true</bool>
-       </property>
-       <property name="popupMode">
-        <enum>QToolButton::InstantPopup</enum>
-       </property>
-       <property name="autoRaise">
-        <bool>true</bool>
-       </property>
-      </widget>
      </item>
     </layout>
    </item>

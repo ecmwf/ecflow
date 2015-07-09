@@ -12,6 +12,7 @@
 #include <iostream>
 
 #include <QApplication>
+#include <QFile>
 
 #include "File.hpp"
 #include "MainWindow.hpp"
@@ -37,6 +38,17 @@ int main(int argc, char **argv)
 
     //Initialise the config and other paths
     DirectoryHandler::init(std::string(argv[0]));  // we need to tell the Directory class where we started from
+
+    //Set the stylesheet
+    std::string styleSheetFileName="viewer.qss";
+    std::string styleSheetPath=DirectoryHandler::concatenate(DirectoryHandler::etcDir(),styleSheetFileName);
+
+    QFile shFile(QString::fromStdString(styleSheetPath));
+    if(shFile.open(QIODevice::ReadOnly | QIODevice::Text))
+    {
+    	 app.setStyleSheet(shFile.readAll());
+    }
+    shFile.close();
 
     //Load the configurable menu items
     std::string menuFilename("ecflowview_menus.json");

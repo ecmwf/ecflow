@@ -25,6 +25,10 @@ Q_OBJECT
 
 public:
 	TableNodeWidget(ServerFilter* servers,QWidget* parent=0);
+	~TableNodeWidget();
+
+	void populateTitleBar(DashboardDockTitleWidget* tw);
+
 	void writeSettings(VSettings*);
 	void readSettings(VSettings*);
 
@@ -32,7 +36,6 @@ public Q_SLOTS:
 	void on_actionBreadcrumbs_triggered(bool b);
 
 private:
-	NodeStateFilter *states_;
 	VParamFilterMenu *stateFilterMenu_;
 };
 

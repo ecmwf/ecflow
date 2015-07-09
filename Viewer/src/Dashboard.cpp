@@ -1,4 +1,3 @@
-
 //============================================================================
 // Copyright 2014 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
@@ -11,6 +10,7 @@
 
 #include "Dashboard.hpp"
 
+#include "DashboardDock.hpp"
 #include "InfoPanel.hpp"
 #include "NodeWidget.hpp"
 #include "ServerHandler.hpp"
@@ -23,47 +23,15 @@
 #include "VSettings.hpp"
 #include "VNState.hpp"
 
+#include <QApplication>
 #include <QDebug>
 #include <QVBoxLayout>
 #include <QLabel>
 #include <QDockWidget>
+#include <QStyle>
 #include <QToolButton>
 
 int Dashboard::maxWidgetNum_=20;
-
-//============================================================
-//
-// DashBoardDock
-//
-//============================================================
-
-DashboardDock::DashboardDock(QString baseTitle,QWidget * parent) :
-	QDockWidget(baseTitle,parent),
-	baseTitle_(baseTitle)
-{
-}
-
-void DashboardDock::showEvent(QShowEvent* event)
-{
-	QWidget::showEvent(event);
-}
-
-void DashboardDock::closeEvent (QCloseEvent *event)
-{
-	QWidget::closeEvent(event);
-	Q_EMIT closeRequested();
-}
-
-void DashboardDock::slotAddToTitle(QString txt)
-{
-	setWindowTitle(baseTitle_ + txt);
-}
-
-//============================================================
-//
-// DashBoard
-//
-//============================================================
 
 Dashboard::Dashboard(QString rootNode,QWidget *parent) :
         QMainWindow(parent)
@@ -150,24 +118,18 @@ DashboardWidget* Dashboard::addWidget(const std::string& type,const std::string&
 
 	//Create a dockwidget at the right
     //QDockWidget *dw = new QDockWidget(tr(type.c_str()), this);
-	DashboardDock *dw = new DashboardDock(tr(type.c_str()), this);
+	DashboardDock *dw = new DashboardDock(w, this);
 
     dw->setAllowedAreas(Qt::RightDockWidgetArea);
 
     //Store the dockId  in the dockwidget (as objectName)
     dw->setObjectName(QString::fromStdString(dockId));
 
-    //Add the db-widget to the dockwidget
-    dw->setWidget(w);
-
     //Add the dockwidget to the dashboard
     addDockWidget(Qt::RightDockWidgetArea, dw);
 
     connect(dw,SIGNAL(closeRequested()),
     		this,SLOT(slotDockClose()));
-
-    connect(w,SIGNAL(addToTitle(QString)),
-		    dw,SLOT(slotAddToTitle(QString)));
 
     return w;
 }

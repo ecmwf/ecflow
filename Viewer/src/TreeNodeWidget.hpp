@@ -27,6 +27,9 @@ Q_OBJECT
 
 public:
 	TreeNodeWidget(ServerFilter*,QWidget* parent=0);
+	~TreeNodeWidget();
+
+	void populateTitleBar(DashboardDockTitleWidget* tw);
 
 	bool selectFirstServerInView();
 	void writeSettings(VSettings*);
@@ -36,9 +39,6 @@ protected Q_SLOTS:
 	void on_actionBreadcrumbs_triggered(bool b);
 
 protected:
-	NodeStateFilter *states_;
-	AttributeFilter* atts_;
-
 	VParamFilterMenu *stateFilterMenu_;
 	VParamFilterMenu *attrFilterMenu_;
 	VParamFilterMenu *iconFilterMenu_;

@@ -12,6 +12,7 @@
 #include "NodeViewBase.hpp"
 
 #include "AbstractNodeModel.hpp"
+#include "DashboardDock.hpp"
 #include "FilterWidget.hpp"
 #include "NodeFilterModel.hpp"
 #include "NodePathWidget.hpp"
@@ -26,7 +27,7 @@ TableNodeWidget::TableNodeWidget(ServerFilter* servers,QWidget * parent) : NodeW
 	//Init qt-creator form
 	setupUi(this);
 
-	//Define the icon filter for the model. It controls what icons
+	/*//Define the icon filter for the model. It controls what icons
 	//are displayed next to the nodes. This is exposed via a menu.
 	icons_=new IconFilter;
 
@@ -34,7 +35,7 @@ TableNodeWidget::TableNodeWidget(ServerFilter* servers,QWidget * parent) : NodeW
 	NodeFilterDef *filterDef_=new NodeFilterDef(NodeFilterDef::NodeState);
 
 	//The node status filter is exposed via a menu. So we need a reference to it.
-	states_=filterDef_->nodeState();
+	states_=filterDef_->nodeState();*/
 
 	//Create the data handler for the tree model.
 	data_=new VModelData(servers,filterDef_,VModelData::TableModel);
@@ -74,6 +75,33 @@ TableNodeWidget::TableNodeWidget(ServerFilter* servers,QWidget * parent) : NodeW
 
 
 	//Builds the menu for the settings tool button
+	/*QMenu *menu=new QMenu(this);
+	menu->setTearOffEnabled(true);
+
+	menu->addAction(actionBreadcrumbs);
+	QMenu *menuState=menu->addMenu(tr("Status"));
+
+	menuState->setTearOffEnabled(true);
+
+	//stateFilterMenu_=new StateFilterMenu(menuState,filter_->menu());
+	stateFilterMenu_=new VParamFilterMenu(menuState,states_,VParamFilterMenu::ColourDecor);
+
+	//Sets the menu on the toolbutton
+	viewTb->setMenu(menu);*/
+
+	//This will not emit the trigered signal of the action!!
+	//Synchronise the action and the breadcrumbs state
+	actionBreadcrumbs->setChecked(bcWidget_->active());
+}
+
+TableNodeWidget::~TableNodeWidget()
+{
+
+}
+
+void TableNodeWidget::populateTitleBar(DashboardDockTitleWidget* tw)
+{
+	//Builds the menu for the settings tool button
 	QMenu *menu=new QMenu(this);
 	menu->setTearOffEnabled(true);
 
@@ -86,13 +114,11 @@ TableNodeWidget::TableNodeWidget(ServerFilter* servers,QWidget * parent) : NodeW
 	stateFilterMenu_=new VParamFilterMenu(menuState,states_,VParamFilterMenu::ColourDecor);
 
 	//Sets the menu on the toolbutton
-	viewTb->setMenu(menu);
+	tw->optionsTb()->setMenu(menu);
 
-	//This will not emit the trigered signal of the action!!
-	//Synchronise the action and the breadcrumbs state
-	actionBreadcrumbs->setChecked(bcWidget_->active());
+	//Sets the title
+	tw->slotUpdateTitle("<b>Table</b>");
 }
-
 
 void TableNodeWidget::on_actionBreadcrumbs_triggered(bool b)
 {

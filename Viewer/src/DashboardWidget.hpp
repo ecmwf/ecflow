@@ -16,6 +16,7 @@
 
 #include "VInfo.hpp"
 
+class DashboardDockTitleWidget;
 class VSettings;
 
 class DashboardWidget : public QWidget
@@ -26,6 +27,7 @@ public:
 	explicit DashboardWidget(QWidget* parent=0) : QWidget(parent) {};
 	virtual ~DashboardWidget() {};
 
+	virtual void populateTitleBar(DashboardDockTitleWidget*)=0;
 	virtual void reload()=0;
 	virtual void rerender()=0;
 	virtual bool selectFirstServerInView() {return false;};
@@ -36,7 +38,7 @@ public:
 	void id(const std::string& id) {id_=id;}
 
 Q_SIGNALS:
-	void addToTitle(QString);
+	void titleUpdated(QString);
 
 protected:
 	std::string id_;

@@ -18,8 +18,9 @@
 
 #include "ui_InfoPanel.h"
 
-class QDockWidget;
 class QTabWidget;
+
+class DashboardDockTitleWidget;
 class InfoPanel;
 class InfoPanelDef;
 class InfoPanelItem;
@@ -58,6 +59,7 @@ public:
 	void clear();
 
 	//From DashboardWidget
+	void populateTitleBar(DashboardDockTitleWidget*);
 	void reload() {};
 	void rerender() {};
 	void writeSettings(VSettings*);
