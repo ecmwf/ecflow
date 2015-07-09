@@ -279,12 +279,13 @@ menu "Extra"
   ! (SERVER|SUITE,ALL,'tail log', 'sh /usr/bin/xterm -e rsh %ECF_NODE% tail -f %ECF_HOME%/%ECF_LOG%&')
 (SERVER|SUITE,ALL,'tail log', 'sh /usr/bin/xterm -e tail -f /tmp/$USER/$HOST*.ecf.log&')
   (ALL,ALL,'-',SEPARATOR) 
-  (SERVER|SUITE,ALL,'svr load','ecflow_client --server_load')
-  (SERVER|SUITE,ALL,'svr load log','ecflow_client --server_load %ECF_LOG%')
-  (SERVER|SUITE,ALL,'svr load home/log','ecflow_client --server_load %ECF_HOME%/%ECF_LOG%')
-  (SERVER|SUITE,ALL,'show png','sh ${EOG:-eog} %ECF_NODE%.%ECF_PORT%.png')
+  (SERVER|SUITE,ALL,'svr load','ecflow_load.sh -h %ECF_HOME% -l %ECF_LOG% -n %ECF_NODE% -p %ECF_PORT%')
+!  (SERVER|SUITE,ALL,'svr load','ecflow_client --server_load')
+!  (SERVER|SUITE,ALL,'svr load log','ecflow_client --server_load %ECF_LOG%')
+!  (SERVER|SUITE,ALL,'svr load home/log','ecflow_client --server_load %ECF_HOME%/%ECF_LOG%')
+!  (SERVER|SUITE,ALL,'show png','sh ${EOG:-eog} %ECF_NODE%.%ECF_PORT%.png')
 ! one menu to replace four previous when it works
-  (SERVER|SUITE,ALL,'show load','sh ecflow_show_load.sh -n %ECF_NODE% -p %ECF_PORT% -h %ECF_HOME% %ECF_LOG%')
+!  (SERVER|SUITE,ALL,'show load','sh ecflow_show_load.sh -n %ECF_NODE% -p %ECF_PORT% -h %ECF_HOME% %ECF_LOG%')
 
   (ALL,ALL,'-',SEPARATOR)
   (SERVER|SUITE,ALL,'overwrite', 'write menu')
