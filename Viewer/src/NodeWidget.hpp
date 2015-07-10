@@ -55,7 +55,6 @@ protected:
 	AbstractNodeModel* model_;
 	NodeFilterModel* filterModel_;
 	NodeViewBase* view_;
-	VModelData* data_;
 
 	IconFilter* icons_;
 	AttributeFilter* atts_;

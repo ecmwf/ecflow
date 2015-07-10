@@ -33,11 +33,18 @@
 //
 //=======================================
 
-TreeNodeModel::TreeNodeModel(VModelData *data,AttributeFilter *atts,IconFilter* icons,QObject *parent) :
-   AbstractNodeModel(data,icons,parent),
-   atts_(atts)
-
+TreeNodeModel::TreeNodeModel(ServerFilter* serverFilter,NodeFilterDef* filterDef,
+		                     AttributeFilter *atts,IconFilter* icons,QObject *parent) :
+   AbstractNodeModel(parent),
+   data_(0),
+   atts_(atts),
+   icons_(icons)
 {
+	//Create the data handler for the tree model.
+	data_=new VTreeModelData(filterDef,this);
+
+	data_->reset(serverFilter);
+
 	//Attribute filter changes
 	connect(atts_,SIGNAL(changed()),
 				this,SIGNAL(filterChanged()));
@@ -45,41 +52,14 @@ TreeNodeModel::TreeNodeModel(VModelData *data,AttributeFilter *atts,IconFilter* 
 	//Icon filter changes
 	connect(icons_,SIGNAL(changed()),
 			this,SIGNAL(filterChanged()));
-
-	//Filter changed
-	connect(data_,SIGNAL(filterChanged()),
-			this,SIGNAL(filterChanged()));
-
-	//We need connect the rest of the VModelData signals to local slots
-
-	//Loop over the methods of the VModelServer
-	for(int i = 0; i < data_->staticMetaObject.methodCount(); i++)
-	{
-		//Get the method signature
-		const char* sg=data_->staticMetaObject.method(i).signature();
-
-		//Check if it is a signal
-		if(data_->staticMetaObject.indexOfSignal(sg) != -1)
-		{
-			QString localSlot(sg);
-			if(!localSlot.isEmpty())
-			{
-				QChar first=localSlot.at(0);
-
-				localSlot="slot" + localSlot.replace(0,1,first.toUpper());
-
-				//Check if it is a slot in the current class as well
-				int idx=staticMetaObject.indexOfSlot(localSlot.toStdString().c_str());
-				if(idx != -1)
-				{
-					//We simply relay this signal
-					connect(data_,data_->staticMetaObject.method(i),
-							this,staticMetaObject.method(idx));
-				}
-			}
-		}
-	}
 }
+
+
+VModelData* TreeNodeModel::data() const
+{
+	return data_;
+}
+
 
 int TreeNodeModel::columnCount( const QModelIndex& /*parent */ ) const
 {
@@ -307,9 +287,6 @@ QVariant TreeNodeModel::nodeData(const QModelIndex& index, int role) const
 			}
 			return QVariant();
 		}
-
-
-
 	}
 
 	return QVariant();
@@ -367,32 +344,6 @@ QVariant TreeNodeModel::attributesData(const QModelIndex& index, int role) const
 		VAttribute* type=0;
 		return node->getAttributeData(index.row(),&type);
 	}
-
-
-	/*
-
-	//Here we have to be sure this is an attribute!
-	Node *node=static_cast<Node*>(index.internalPointer());
-	if(!node)
-		return QVariant();
-
-	QStringList attrData;
-	//VParam::Type type;
-	VAttribute* type;
-	VAttribute::getData(node,index.row(),&type,attrData);
-
-	if(role == FilterRole)
-	{
-		if(atts_->isSet(type))
-		{
-			return QVariant(true);
-		}
-		return QVariant(false);
-	}
-	else if(role == Qt::DisplayRole)
-	{
-		return attrData;
-	}*/
 
 	return QVariant();
 }
@@ -824,7 +775,6 @@ void TreeNodeModel::slotBeginAddRemoveAttributes(VModelServer* server,const VNod
 	//At this point the model state is based on currentNum!!!!
 }
 
-
 //Attributes were added or removed
 void TreeNodeModel::slotEndAddRemoveAttributes(VModelServer* server,const VNode* node,int currentNum,int cachedNum)
 {
@@ -856,150 +806,6 @@ void TreeNodeModel::slotEndAddRemoveAttributes(VModelServer* server,const VNode*
 	//we always add or remove attributes at the end of the attribute list!!! Then the
 	//call below will update all the attributes of the node in the tree).
 	slotAttributesChanged(server,node);
-}
-
-
-//Nodes were added or removed
-void TreeNodeModel::slotAddRemoveNodes(VModelServer* server,const VNode* node,int currentNum,int cachedNum)
-{
-	int diff=currentNum-cachedNum;
-	if(diff==0)
-		return;
-
-	//Find the index of the node. This call does not use the
-	//number of attributes of the node so it is safe.
-	QModelIndex parent=nodeToIndex(server,node,0);
-	if(!parent.isValid())
-		return;
-
-	int attrNum=node->attrNum();
-
-	//At this point the model state is based on cachedNum!!!!
-	//Insertion
-	if(diff > 0)
-	{
-		//We add extra rows to the end of the attributes
-		beginInsertRows(parent,attrNum+cachedNum,attrNum+cachedNum+diff-1);
-		endInsertRows();
-	}
-	//Deletion
-	else if(diff <0)
-	{
-		//We remove rows from the end
-		beginRemoveRows(parent,attrNum+cachedNum+diff,attrNum+cachedNum-1);
-		endRemoveRows();
-	}
-
-	//At this point the model state is based on currentNum!!!!
-}
-
-
-
-//A new node was added. posInNodes tells us the position within the nodes before
-//the new node has to be inserted.
-void TreeNodeModel::slotBeginAddRemoveNode(VModelServer* server,const VNode* node,int posInNodes,int cnt)
-{
-	if(!node)
-		return;
-
-	//Find the index of the node.
-	QModelIndex parent=nodeToIndex(server,node,0);
-	if(!parent.isValid())
-		return;
-
-	//At this point the model state is based the un-updated VNode!!!!
-	//So we need to pretend we have the old number of nodes.
-
-	int attrNum=node->attrNum();
-	int pos=attrNum+posInNodes;
-
-	if(cnt >0)
-	{
-		beginInsertRows(parent,pos,pos+cnt-1);
-	}
-	else if(cnt< 0)
-	{
-		beginRemoveRows(parent,pos,pos-cnt+-1);
-	}
-}
-
-void TreeNodeModel::slotEndAddRemoveNode(VModelServer* server,const VNode* node,bool add)
-{
-	if(!node)
-		return;
-
-	if(add)
-		endInsertRows();
-	else
-		endRemoveRows();
-}
-
-//The server clear has started. It well remove all the nodes except the root node.
-//So we need to remove all the rows belonging to the rootnode.
-void TreeNodeModel::slotBeginNodeClear(VModelServer* server,const VNode *node)
-{
-	assert(active_ == true);
-
-	Q_EMIT clearBegun(node);
-
-	QModelIndex idx=nodeToIndex(server,node,0);
-	if(idx.isValid())
-	{
-		int num=rowCount(idx);
-		beginRemoveRows(idx,0,num-1);
-	}
-}
-//The server clear has finished. The tree is empty only containing the rootnode
-void TreeNodeModel::slotEndNodeClear()
-{
-	assert(active_ == true);
-	endRemoveRows();
-}
-
-//The server clear has started. It well remove all the nodes except the root node.
-//So we need to remove all the rows belonging to the rootnode.
-void TreeNodeModel::slotBeginNodeScan(VModelServer* server,const VNode *node,int num)
-{
-	assert(active_ == true);
-
-	QModelIndex idx=nodeToIndex(server,node,0);
-	if(idx.isValid())
-	{
-		if(num > 0)
-		{
-			beginInsertRows(idx,0,num-1);
-		}
-	}
-}
-
-//The server clear has finished. The tree is empty only containing the rootnode
-void TreeNodeModel::slotEndNodeScan(VModelServer* server,const VNode *node)
-{
-	assert(active_ == true);
-	endInsertRows();
-
-	Q_EMIT scanEnded(node);
-}
-
-//The whole branch belonging to the node has to be reset!!!
-void TreeNodeModel::slotResetBranch(VModelServer* server,const VNode* node)
-{
-	if(!node)
-		return;
-
-	//brute force approach
-
-	QModelIndex idx=nodeToIndex(server,node,0);
-	QModelIndex parentIdx=parent(idx);
-
-	//Remove the node
-	beginRemoveRows(parentIdx,idx.row(),idx.row());
-	endRemoveRows();
-
-	//Add it back again
-	beginInsertRows(parentIdx,idx.row(),idx.row());
-	endInsertRows();
-
 }
 
 //The server scan has started (to populate the tree). At this point the tree is empty only containing the

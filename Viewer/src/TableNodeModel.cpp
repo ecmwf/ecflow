@@ -26,43 +26,20 @@
 //
 //=======================================================
 
-TableNodeModel::TableNodeModel(VModelData *data,IconFilter* icons,QObject *parent) :
-	AbstractNodeModel(data,icons,parent)
+
+TableNodeModel::TableNodeModel(ServerFilter* serverFilter,NodeFilterDef* filterDef,QObject *parent) :
+	AbstractNodeModel(parent),
+	data_(0)
 {
+	//Create the data handler for the model.
+	data_=new VTableModelData(filterDef,this);
 
-	//Filter changed
-	connect(data_,SIGNAL(filterChanged()),
-			this,SIGNAL(filterChanged()));
+	data_->reset(serverFilter);
+}
 
-	//We need connect the rest of the VModelData signals to local slots
-
-	//Loop over the methods of the VModelServer
-	for(int i = 0; i < data_->staticMetaObject.methodCount(); i++)
-	{
-		//Get the method signature
-		const char* sg=data_->staticMetaObject.method(i).signature();
-
-		//Check if it is a signal
-		if(data_->staticMetaObject.indexOfSignal(sg) != -1)
-		{
-			QString localSlot(sg);
-			if(!localSlot.isEmpty())
-			{
-				QChar first=localSlot.at(0);
-
-				localSlot="slot" + localSlot.replace(0,1,first.toUpper());
-
-				//Check if it is a slot in the current class as well
-				int idx=staticMetaObject.indexOfSlot(localSlot.toStdString().c_str());
-				if(idx != -1)
-				{
-					//We simply relay this signal
-					connect(data_,data_->staticMetaObject.method(i),
-							this,staticMetaObject.method(idx));
-				}
-			}
-		}
-	}
+VModelData* TableNodeModel::data() const
+{
+	return data_;
 }
 
 int TableNodeModel::columnCount( const QModelIndex& /*parent */ ) const
@@ -198,62 +175,6 @@ QModelIndex TableNodeModel::parent(const QModelIndex &child) const
 //
 //----------------------------------------------
 
-/*bool TableNodeModel::isServer(const QModelIndex & index) const
-{
-	//For servers the internal id is set to their position in servers_ + 1
-	if(index.isValid())
-	{
-		int id=index.internalId()-1;
-		return (id >=0 && id < data_->count());
-	}
-	return false;
-}*/
-
-
-/*ServerHandler* TableNodeModel::indexToRealServer(const QModelIndex & index) const
-{
-	//For servers the internal id is set to their position in servers_ + 1
-	if(index.isValid())
-	{
-		int id=index.internalId()-1;
-		return data_->realServer(id);
-	}
-	return NULL;
-}
-
-VModelServer* TableNodeModel::indexToServer(const QModelIndex & index) const
-{
-	//For servers the internal id is set to their position in servers_ + 1
-	if(index.isValid())
-	{
-		int id=index.internalId()-1;
-		return data_->server(id);
-	}
-	return NULL;
-}
-*/
-
-/*QModelIndex TableNodeModel::serverToIndex(ServerHandler* server) const
-{
-	//For servers the internal id is set to their position in servers_ + 1
-	int i;
-	if((i=data_->indexOfServer(server))!= -1)
-			return createIndex(i,0,i+1);
-
-	return QModelIndex();
-}
-
-QModelIndex TableNodeModel::serverToIndex(VModelServer* server) const
-{
-	//For servers the internal id is set to their position in servers_ + 1
-	int i;
-	if((i=data_->indexOfServer(server))!= -1)
-			return createIndex(i,0,i+1);
-
-	return QModelIndex();
-}*/
-
-
 VNode* TableNodeModel::indexToNode( const QModelIndex & index) const
 {
 	if(index.isValid())
@@ -297,6 +218,31 @@ VInfo_ptr TableNodeModel::nodeInfo(const QModelIndex&)
 {
 	VInfo_ptr info;
 	return info;
+}
+
+
+//Server is about to be added
+void TableNodeModel::slotServerAddBegin(int row)
+{
+	//beginInsertRows(QModelIndex(),row,row);
+}
+
+//Addition of the new server has finished
+void TableNodeModel::slotServerAddEnd()
+{
+	//endInsertRows();
+}
+
+//Server is about to be removed
+void TableNodeModel::slotServerRemoveBegin(int row)
+{
+	//beginRemoveRows(QModelIndex(),row,row);
+}
+
+//Removal of the server has finished
+void TableNodeModel::slotServerRemoveEnd()
+{
+	//endRemoveRows();
 }
 
 //The node changed (it status etc)

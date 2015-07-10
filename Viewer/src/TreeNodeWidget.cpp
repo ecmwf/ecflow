@@ -19,7 +19,6 @@
 #include "TreeNodeModel.hpp"
 #include "TreeNodeView.hpp"
 #include "VFilter.hpp"
-#include "VModelData.hpp"
 #include "VSettings.hpp"
 
 #include "FilterWidget.hpp"
@@ -29,25 +28,10 @@ TreeNodeWidget::TreeNodeWidget(ServerFilter* servers,QWidget* parent) : NodeWidg
 	//Init qt-creator form
 	setupUi(this);
 
-	/*//Define the icon filter for the model. It controls what icons
-	//are displayed next to the nodes. This is exposed via a menu.
-	icons_=new IconFilter;
-
-	//Define the attribute filter for the model. It controls what attributes
-	//are displayed for a given node. This is exposed via a menu.
-	atts_=new AttributeFilter;
-
-	//This defines how to filter the nodes in the tree. We only want to filter according to node status.
-	NodeFilterDef *filterDef_=new NodeFilterDef(NodeFilterDef::NodeState);
-
-	//The node status filter is exposed via a menu. So we need a reference to it.
-	states_=filterDef_->nodeState();*/
-
-	//Create the data handler for the tree model.
-	data_=new VModelData(servers,filterDef_,VModelData::TreeModel);
-
 	//Create the tree model. It uses the datahandler to access the data.
-	model_=new TreeNodeModel(data_,atts_,icons_,parent);
+	model_=new TreeNodeModel(servers,filterDef_,atts_,icons_,parent);
+
+	//data_->reset(servers);
 
 	//Create a filter model for the tree.
 	filterModel_=new NodeFilterModel(model_,parent);
@@ -75,29 +59,8 @@ TreeNodeWidget::TreeNodeWidget(ServerFilter* servers,QWidget* parent) : NodeWidg
 	connect(model_,SIGNAL(scanEnded(const VNode*)),
 				view_->realWidget(),SLOT(slotRestoreExpand(const VNode*)));
 
-	connect(data_,SIGNAL(rerender()),
+	connect(model_,SIGNAL(rerender()),
 				view_->realWidget(),SLOT(slotRerender()));
-
-	//Builds the menu for the settings tool button
-	/*QMenu *menu=new QMenu(this);
-	menu->setTearOffEnabled(true);
-
-	menu->addAction(actionBreadcrumbs);
-	QMenu *menuState=menu->addMenu(tr("Status"));
-	QMenu *menuType=menu->addMenu(tr("Attribute"));
-	QMenu *menuIcon=menu->addMenu(tr("Icon"));
-
-	menuState->setTearOffEnabled(true);
-	menuType->setTearOffEnabled(true);
-	menuIcon->setTearOffEnabled(true);
-
-	//stateFilterMenu_=new StateFilterMenu(menuState,filter_->menu());
-	attrFilterMenu_=new VParamFilterMenu(menuType,atts_);
-	iconFilterMenu_=new VParamFilterMenu(menuIcon,icons_);
-	stateFilterMenu_=new VParamFilterMenu(menuState,states_,VParamFilterMenu::ColourDecor);
-
-	//Sets the menu on the toolbutton
-	viewTb->setMenu(menu);*/
 
 	//This will not emit the trigered signal of the action!!
 	//Synchronise the action and the breadcrumbs state

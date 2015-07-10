@@ -21,10 +21,8 @@
 #include "VNState.hpp"
 
 
-AbstractNodeModel::AbstractNodeModel(VModelData *data,IconFilter* icons,QObject *parent) :
+AbstractNodeModel::AbstractNodeModel(QObject *parent) :
    QAbstractItemModel(parent),
-   data_(data),
-   icons_(icons),
    active_(false)
 {
 	//At this point the model is not active and it cannot see its data!
@@ -46,7 +44,7 @@ void AbstractNodeModel::active(bool active)
 		//When the model becomes active we reload everything
 		if(active_)
 		{
-			data_->runFilter(false);
+			data()->runFilter(false);
 			//init();
 
 			//Initialises the filter
@@ -57,7 +55,7 @@ void AbstractNodeModel::active(bool active)
 		//release all the resources
 		else
 		{
-			data_->clear(); //clean();
+			data()->clear(); //clean();
 		}
 
 		endResetModel();
@@ -122,7 +120,7 @@ void AbstractNodeModel::reload()
 
 bool AbstractNodeModel::hasData() const
 {
-	return (active_&& data_->count() > 0);
+	return (active_ && data()->count() > 0);
 }
 
 void AbstractNodeModel::dataIsAboutToChange()

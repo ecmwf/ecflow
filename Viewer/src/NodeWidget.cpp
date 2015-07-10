@@ -21,7 +21,6 @@ NodeWidget::NodeWidget(QWidget* parent) : DashboardWidget(parent),
    model_(0),
    filterModel_(0),
    view_(0),
-   data_(0),
    icons_(0),
    atts_(0),
    filterDef_(0),
@@ -45,7 +44,6 @@ NodeWidget::NodeWidget(QWidget* parent) : DashboardWidget(parent),
 NodeWidget::~NodeWidget()
 {
 	//We only need to delete the non-qobject members
-	delete data_;
 	delete icons_;
 	delete atts_;
 	delete filterDef_;

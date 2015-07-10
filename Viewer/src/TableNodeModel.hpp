@@ -16,16 +16,17 @@
 #include "VInfo.hpp"
 
 class Node;
-class NodeFilter;
+class NodeFilterDef;
 class ServerFilter;
 class ServerHandler;
+class VTableModelData;
 
 class TableNodeModel : public AbstractNodeModel
 {
 Q_OBJECT
 
 public:
-   	TableNodeModel(VModelData *data,IconFilter* icons,QObject *parent=0);
+   	TableNodeModel(ServerFilter* serverFilter,NodeFilterDef* filterDef,QObject *parent=0);
 
 	int columnCount (const QModelIndex& parent = QModelIndex() ) const;
    	int rowCount (const QModelIndex& parent = QModelIndex() ) const;
@@ -38,26 +39,38 @@ public:
 
    	VInfo_ptr nodeInfo(const QModelIndex&);
 
+   	VModelData* data() const;
+
 public Q_SLOTS:
-	void slotNodeChanged(VModelServer* server,const VNode* node);
-	void slotBeginServerScan(VModelServer* server,int num);
-	void slotEndServerScan(VModelServer* server,int num);
-	void slotBeginServerClear(VModelServer* server,int num);
-   	void slotEndServerClear(VModelServer* server,int num);
+   	void slotServerAddBegin(int row);
+   	void slotServerAddEnd();
+   	void slotServerRemoveBegin(int row);
+   	void slotServerRemoveEnd();
+
+   	void slotDataChanged(VModelServer*) {}
+   	void slotNodeChanged(VModelServer*,const VNode*);
+   	void slotAttributesChanged(VModelServer*,const VNode*) {};
+   	void slotBeginAddRemoveAttributes(VModelServer*,const VNode*,int,int) {};
+   	void slotEndAddRemoveAttributes(VModelServer*,const VNode*,int,int) {};
+
+   	void slotBeginServerScan(VModelServer* server,int);
+   	void slotEndServerScan(VModelServer* server,int);
+   	void slotBeginServerClear(VModelServer* server,int);
+   	void slotEndServerClear(VModelServer* server,int);
 
 protected:
    	bool isServer(const QModelIndex & index) const {return false;}
 	ServerHandler* indexToRealServer(const QModelIndex & index) const {return NULL;}
 	VModelServer* indexToServer(const QModelIndex & index) const {return NULL;}
 	QModelIndex serverToIndex(ServerHandler*) const {return QModelIndex();}
-	//QModelIndex serverToIndex(VModelServer*) const;
 
    	QModelIndex nodeToIndex(VModelServer* server,const VNode* node, int column) const;
    	QModelIndex nodeToIndex(const VNode*,int column=0) const;
 	VNode* indexToNode( const QModelIndex & index) const;
 
 	QVariant nodeData(const QModelIndex& index,int role) const;
-	QVariant serverData(const QModelIndex& index,int role) const {return QVariant();}
+
+	VTableModelData* data_;
 };
 
 #endif

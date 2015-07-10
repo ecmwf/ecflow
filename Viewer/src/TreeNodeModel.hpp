@@ -19,18 +19,19 @@
 #include "VInfo.hpp"
 
 class AttributeFilter;
-class NodeFilter;
+class NodeFilterDef;
 class ServerFilter;
 class ServerHandler;
-
 class VModelServer;
+class VTreeModelData;
 
 class TreeNodeModel : public AbstractNodeModel
 {
 Q_OBJECT
 
 public:
-   	TreeNodeModel(VModelData *data,AttributeFilter *atts,IconFilter* icons,QObject *parent=0);
+   	TreeNodeModel(ServerFilter* serverFilter,NodeFilterDef* filterDef,
+                  AttributeFilter *atts,IconFilter* icons,QObject *parent=0);
 
    	int columnCount (const QModelIndex& parent = QModelIndex() ) const;
    	int rowCount (const QModelIndex& parent = QModelIndex() ) const;
@@ -44,25 +45,23 @@ public:
 
    	VInfo_ptr nodeInfo(const QModelIndex& index);
 
+   	VModelData* data() const;
+
 public Q_SLOTS:
 	void slotIconFilterChanged();
+
 	void slotServerAddBegin(int row);
 	void slotServerAddEnd();
 	void slotServerRemoveBegin(int row);
 	void slotServerRemoveEnd();
+
 	void slotDataChanged(VModelServer*);
 	void slotNodeChanged(VModelServer*,const VNode*);
 	void slotAttributesChanged(VModelServer*,const VNode*);
 	void slotBeginAddRemoveAttributes(VModelServer*,const VNode*,int,int);
 	void slotEndAddRemoveAttributes(VModelServer*,const VNode*,int,int);
-	void slotAddRemoveNodes(VModelServer*,const VNode*,int,int);
-	void slotBeginAddRemoveNode(VModelServer*,const VNode*,int,int);
-	void slotEndAddRemoveNode(VModelServer*,const VNode*,bool);
-	void slotBeginNodeClear(VModelServer* server,const VNode *node);
-	void slotEndNodeClear();
-	void slotBeginNodeScan(VModelServer* server,const VNode *node,int num);
-	void slotEndNodeScan(VModelServer* server,const VNode *node);
-	void slotResetBranch(VModelServer*,const VNode*);
+
+	//void slotResetBranch(VModelServer*,const VNode*);
 	void slotBeginServerScan(VModelServer* server,int);
 	void slotEndServerScan(VModelServer* server,int);
 	void slotBeginServerClear(VModelServer* server,int);
@@ -92,7 +91,9 @@ private:
 	QVariant attributesData(const QModelIndex& index,int role) const;
 
 	//Attribute filter
+	VTreeModelData* data_;
 	AttributeFilter* atts_;
+	IconFilter* icons_;
 };
 
 

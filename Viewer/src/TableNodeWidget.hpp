@@ -18,7 +18,6 @@ class NodeStateFilter;
 class VParamFilterMenu;
 class VSettings;
 
-
 class TableNodeWidget : public NodeWidget, protected Ui::TableNodeWidget
 {
 Q_OBJECT
