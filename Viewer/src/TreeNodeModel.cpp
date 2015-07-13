@@ -45,6 +45,21 @@ TreeNodeModel::TreeNodeModel(ServerFilter* serverFilter,NodeFilterDef* filterDef
 
 	data_->reset(serverFilter);
 
+	//---------------------------------------
+	// Handle change in the filters' state
+	//---------------------------------------
+
+	//TODO
+	//We could use this
+	//
+	//  Q_EMIT dataChanged(QModelIndex(), QModelIndex());
+	//
+	//because this should trigger the re-rendering of the whole view according to
+	//some blogs. However, this does not work!!!!! So we emit the filterChanged() signal that
+	//will finally call invalidate() in the filter model.
+	//
+	//However it is very expensive!! There should be a better way!!!
+
 	//Attribute filter changes
 	connect(atts_,SIGNAL(changed()),
 				this,SIGNAL(filterChanged()));
@@ -52,6 +67,8 @@ TreeNodeModel::TreeNodeModel(ServerFilter* serverFilter,NodeFilterDef* filterDef
 	//Icon filter changes
 	connect(icons_,SIGNAL(changed()),
 			this,SIGNAL(filterChanged()));
+
+	//State filter changes (handled in data_)!!!
 }
 
 
@@ -664,19 +681,8 @@ VInfo_ptr TreeNodeModel::nodeInfo(const QModelIndex& index)
 }
 
 //----------------------------------------
-// Filter
+// Slots
 //----------------------------------------
-
-//This slot is called when the icon filter changes
-void TreeNodeModel::slotIconFilterChanged()
-{
-	//This should trigger the re-rendering of the whole view according to
-	//some blogs. However, this does not work!!!!!
-	//Q_EMIT dataChanged(QModelIndex(), QModelIndex());
-
-	//This is very expensive!! There should be a better way!!!
-	Q_EMIT filterChanged();
-}
 
 //Server is about to be added
 void TreeNodeModel::slotServerAddBegin(int row)

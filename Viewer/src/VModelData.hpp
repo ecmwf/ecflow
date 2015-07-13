@@ -61,6 +61,7 @@ Q_SIGNALS:
 	void beginServerClear(VModelServer*,int);
 	void endServerClear(VModelServer*,int);
 
+	void filterChanged();
 	void rerender();
 
 protected:
@@ -86,10 +87,15 @@ public:
 	 void notifyEndServerScan(ServerHandler* server);
 	 void notifyServerConnectState(ServerHandler* server);
 	 void notifyServerActivityChanged(ServerHandler* server);
+	 void notifyEndServerSync(ServerHandler* server);
 
 	 //From NodeObserver
 	 void notifyBeginNodeChange(const VNode*, const std::vector<ecf::Aspect::Type>&,const VNodeChange&);
 	 void notifyEndNodeChange(const VNode*, const std::vector<ecf::Aspect::Type>&,const VNodeChange&);
+
+protected:
+	 int nodeStateChangeCnt_;
+
 };
 
 class VTableServer : public VModelServer
@@ -141,7 +147,7 @@ public:
 	VModelServer* server(int) const;
 	int indexOfServer(ServerHandler* s) const;
 	int numOfNodes(int) const;
-	bool isFiltered(VNode *node) const;
+	virtual bool isFiltered(VNode *node) const=0;
 
 	//From ServerFilterObserver
 	void notifyServerFilterAdded(ServerItem*);
@@ -176,6 +182,7 @@ public:
 
 	bool identifyTopLevelNode(const VNode* node,VModelServer**,int& index);
 	VNode* topLevelNode(void*,int);
+	bool isFiltered(VNode *node) const;
 
 protected:
 	void add(ServerHandler *server);
@@ -192,6 +199,7 @@ public:
 	int posInFilter(const VNode *node) const;
 	int posInFilter(VModelServer*,const VNode *node) const;
 	bool identifyInFilter(VModelServer* server,int& start,int& count,VNode**);
+	bool isFiltered(VNode *node) const;
 
 protected:
 	void add(ServerHandler *server);

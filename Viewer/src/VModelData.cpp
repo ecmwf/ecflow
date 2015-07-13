@@ -86,7 +86,8 @@ void VModelServer::runFilter()
 //It takes ownership of the filter
 
 VTreeServer::VTreeServer(ServerHandler *server,NodeFilterDef* filterDef) :
-   VModelServer(server)
+   VModelServer(server),
+   nodeStateChangeCnt_(0)
 {
 	filter_=new TreeNodeFilter(filterDef);
 
@@ -122,15 +123,8 @@ void VTreeServer::notifyBeginServerScan(ServerHandler* server,const VServerChang
 
 void VTreeServer::notifyEndServerScan(ServerHandler* server)
 {
+	runFilter();
 	Q_EMIT endServerScan(this,server->vRoot()->numOfChildren());
-
-	if(filter_)
-	{
-		/*if(filter_->update(node->node()))
-		{
-			Q_EMIT dataChanged(this);
-		}*/
-	}
 }
 
 void VTreeServer::notifyBeginServerClear(ServerHandler* server)
@@ -140,15 +134,8 @@ void VTreeServer::notifyBeginServerClear(ServerHandler* server)
 
 void VTreeServer::notifyEndServerClear(ServerHandler* server)
 {
+	runFilter();
 	Q_EMIT endServerClear(this,-1);
-
-	if(filter_)
-	{
-		/*if(filter_->update(node->node()))
-		{
-			Q_EMIT dataChanged(this);
-		}*/
-	}
 }
 
 void VTreeServer::notifyServerConnectState(ServerHandler* server)
@@ -159,6 +146,22 @@ void VTreeServer::notifyServerConnectState(ServerHandler* server)
 void VTreeServer::notifyServerActivityChanged(ServerHandler* server)
 {
 	Q_EMIT dataChanged(this);
+}
+
+//This is called when a normal sync (no reset or rescan) is finished. We have delayed the update of the
+//filter to this point but now we need to do it.
+void VTreeServer::notifyEndServerSync(ServerHandler* server)
+{
+	if(nodeStateChangeCnt_ >0)
+	{
+		nodeStateChangeCnt_=0;
+
+		if(!filter_->isNull())
+		{
+			runFilter();
+			Q_EMIT filterChanged();
+		}
+	}
 }
 
 //--------------------------------------------------
@@ -241,13 +244,10 @@ void VTreeServer::notifyBeginNodeChange(const VNode* node, const std::vector<ecf
 		}
 	}
 
-	//We need to check if it changes the filter state
-	if(runFilter && filter_)
+	//We do not run the filter now but wait until the sync is finished!
+	if(runFilter)
 	{
-		/*if(filter_->update(node->node()))
-		{
-			Q_EMIT dataChanged(this);
-		}*/
+		nodeStateChangeCnt_++;
 	}
 }
 
@@ -256,7 +256,6 @@ void VTreeServer::notifyEndNodeChange(const VNode* node, const std::vector<ecf::
 	if(node==NULL)
 		return;
 
-	bool runFilter=false;
 	bool attrNumCh=(std::find(aspect.begin(),aspect.end(),ecf::Aspect::ADD_REMOVE_ATTR) != aspect.end());
 	bool nodeNumCh=(std::find(aspect.begin(),aspect.end(),ecf::Aspect::ADD_REMOVE_NODE) != aspect.end());
 
@@ -391,8 +390,9 @@ VModelData::VModelData(NodeFilterDef *filterDef,AbstractNodeModel* model) :
 	connect(filterDef_,SIGNAL(changed()),
 			this,SLOT(slotFilterDefChanged()));
 
+	//The model relays this signal
 	connect(this,SIGNAL(filterChanged()),
-			model_,SLOT(slotFilterChanged()));
+			model_,SIGNAL(filterChanged()));
 
 	connect(this,SIGNAL(serverAddBegin(int)),
 			model_,SLOT(slotServerAddBegin(int)));
@@ -440,6 +440,10 @@ void VModelData::connectToModel(VModelServer* d)
 
 	connect(d,SIGNAL(endServerClear(VModelServer*,int)),
 		model_,SLOT(slotEndServerClear(VModelServer*,int)));
+
+	//The model relays this signal
+	connect(d,SIGNAL(filterChanged()),
+				model_,SIGNAL(filterChanged()));
 
 	//The model relays this signal
 	connect(d,SIGNAL(rerender()),
@@ -511,25 +515,6 @@ int VModelData::indexOfServer(ServerHandler* s) const
 			return i;
 	return -1;
 }
-
-//This has to be very fast!!!
-bool VModelData::isFiltered(VNode *node) const
-{
-	return true;
-
-	//TODO: make it work again
-
-	/*ServerHandler* server=node->server();
-	int id=indexOfServer(server);
-	if(id != -1 && servers_.at(id)->filter_)
-	{
-		return servers_.at(id)->filter_->isFiltered(node);
-	}
-
-	return true;*/
-}
-
-
 int VModelData::numOfNodes(int index) const
 {
 	if(VModelServer *d=server(index))
@@ -538,8 +523,6 @@ int VModelData::numOfNodes(int index) const
 	}
 	return 0;
 }
-
-
 
 void VModelData::runFilter(bool broadcast)
 {
@@ -656,6 +639,18 @@ bool VTreeModelData::identifyTopLevelNode(const VNode* node,VModelServer** serve
 	}
 
 	return false;
+}
+
+//This has to be very fast!!!
+bool VTreeModelData::isFiltered(VNode *node) const
+{
+	int id=indexOfServer(node->server());
+	if(id != -1)
+	{
+		return servers_.at(id)->filter_->isFiltered(node);
+	}
+
+	return true;
 }
 
 
@@ -783,4 +778,10 @@ int VTableModelData::numOfFiltered(int index) const
 
 	}
 	return 0;
+}
+
+//This has to be very fast!!!
+bool VTableModelData::isFiltered(VNode *node) const
+{
+	return true;
 }

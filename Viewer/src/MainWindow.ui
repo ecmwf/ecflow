@@ -230,15 +230,6 @@
     <string>Add info panel</string>
    </property>
   </action>
-  <action name="actionShowInInfoPanel">
-   <property name="icon">
-    <iconset resource="viewer.qrc">
-     <normaloff>:/viewer/images/info.svg</normaloff>:/viewer/images/info.svg</iconset>
-   </property>
-   <property name="text">
-    <string>Show info panel</string>
-   </property>
-  </action>
   <action name="actionAddTreeWidget">
    <property name="icon">
     <iconset resource="viewer.qrc">

@@ -48,8 +48,6 @@ public:
    	VModelData* data() const;
 
 public Q_SLOTS:
-	void slotIconFilterChanged();
-
 	void slotServerAddBegin(int row);
 	void slotServerAddEnd();
 	void slotServerRemoveBegin(int row);

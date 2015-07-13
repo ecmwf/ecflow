@@ -165,6 +165,11 @@ TreeNodeFilter::TreeNodeFilter(NodeFilterDef* def) : NodeFilter(def,StoreNonMatc
 
 }
 
+bool TreeNodeFilter::isNull()
+{
+	return def_->nodeState_->isComplete();
+}
+
 bool TreeNodeFilter::isFiltered(VNode* node)
 {
 	if(resultMode_==StoreNonMatched)
@@ -184,6 +189,14 @@ bool TreeNodeFilter::isFiltered(VNode* node)
 
 	return false;
 }
+
+bool TreeNodeFilter::update(const VNode *node)
+{
+	beginReset(node->server());
+	endReset();
+	return true;
+}
+
 
 void TreeNodeFilter::beginReset(ServerHandler* server)
 {
@@ -284,6 +297,11 @@ TableNodeFilter::TableNodeFilter(NodeFilterDef* def) : NodeFilter(def,StoreMatch
 	//type_.insert("suite");
 }
 
+bool TableNodeFilter::isNull()
+{
+	return def_->nodeState_->isComplete();
+}
+
 bool TableNodeFilter::isFiltered(VNode* node)
 {
 	if(beingReset_)
@@ -295,6 +313,13 @@ bool TableNodeFilter::isFiltered(VNode* node)
 void TableNodeFilter::clear()
 {
 	match_.clear();
+}
+
+bool TableNodeFilter::update(const VNode *node)
+{
+	beginReset(node->server());
+	endReset();
+	return true;
 }
 
 void TableNodeFilter::beginReset(ServerHandler* server)

@@ -840,6 +840,11 @@ void ServerHandler::clientTaskFinished(VTask_ptr task,const ServerReply& serverR
 				//This will update the suites
 				rescanTree();
 			}
+			else
+			{
+				broadcast(&ServerObserver::notifyEndServerSync);
+			}
+
 
 			UserMessage::message(UserMessage::DBG, false, std::string(" --> Update suite filter after sync"));
 			comQueue_->addSuiteListTask();

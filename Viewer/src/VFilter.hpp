@@ -112,7 +112,9 @@ public:
 	virtual void clear()=0;
 	virtual void beginReset(ServerHandler* server)=0;
 	virtual void endReset()=0;
+	virtual bool update(const VNode*)=0;
 
+	virtual bool isNull()=0;
 	virtual bool isFiltered(VNode* node)=0;
     virtual int  matchCount()=0;
     virtual int  nonMatchCount()=0;
@@ -139,7 +141,9 @@ public:
 	void clear() {};
 	void beginReset(ServerHandler* server);
 	void endReset();
+	bool update(const VNode*);
 
+	bool isNull();
 	bool isFiltered(VNode* node);
 	int  matchCount();
 	int  nonMatchCount();
@@ -163,7 +167,9 @@ public:
 	void clear();
 	void beginReset(ServerHandler* server);
 	void endReset();
+	bool update(const VNode*);
 
+	bool isNull();
 	bool isFiltered(VNode* node);
 	int  matchCount();
 	int  nonMatchCount() {return -1;}
