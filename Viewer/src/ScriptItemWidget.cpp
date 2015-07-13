@@ -11,6 +11,7 @@
 
 #include "Highlighter.hpp"
 #include "InfoProvider.hpp"
+#include "MessageLabel.hpp"
 #include "VNode.hpp"
 #include "VReply.hpp"
 
@@ -36,6 +37,8 @@ void ScriptItemWidget::reload(VInfo_ptr info)
 {
     loaded_=true;
     info_=info;
+
+    messageLabel_->hide();
 
     if(!info.get() || !info->isNode() || !info->node())
     {
@@ -72,7 +75,9 @@ void ScriptItemWidget::infoProgress(VReply* reply)
 void ScriptItemWidget::infoFailed(VReply* reply)
 {
     QString s=QString::fromStdString(reply->errorText());
-    textEdit_->setPlainText(s);
+    //textEdit_->setPlainText(s);
+    
+    messageLabel_->showError(s);
 }
 
 

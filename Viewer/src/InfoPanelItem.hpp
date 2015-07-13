@@ -55,6 +55,7 @@ public:
 protected:
 	void adjust(VInfo_ptr);
 	void clear();
+	virtual void updateWidgetState()=0;
 
 	//Notifications about the server changes
 	virtual void defsChanged(const std::vector<ecf::Aspect::Type>&)=0;

@@ -45,6 +45,7 @@ protected Q_SLOTS:
 protected:
 	bool preproc() const;
 	bool alias() const;
+	void updateWidgetState() {};
 
 	bool preproc_;
 	bool alias_;

@@ -36,6 +36,9 @@ public:
 	void defsChanged(const std::vector<ecf::Aspect::Type>&) {};
 
   QGraphicsView* view() { return graphicsView; }
+
+protected:
+   void updateWidgetState() {};
 };
 
 #endif

@@ -26,6 +26,8 @@ OverviewItemWidget::OverviewItemWidget(QWidget *parent) :
   lastScrollPos_(0)
 {
 	fileLabel_->hide();
+	externalTb_->hide();
+
 	textEdit_->setShowLineNumbers(false);
 
 	Highlighter* ih=new Highlighter(textEdit_->document(),"info");
@@ -95,6 +97,9 @@ void OverviewItemWidget::infoFailed(VReply* reply)
 //At this point we can be sure that the node is handled by this item.
 void OverviewItemWidget::nodeChanged(const VNode* node, const std::vector<ecf::Aspect::Type>& aspect)
 {
+	if(frozen_)
+		return;
+
 	for(std::vector<ecf::Aspect::Type>::const_iterator it=aspect.begin(); it != aspect.end(); ++it)
 	{
 		if(*it == ecf::Aspect::STATE || *it == ecf::Aspect::ADD_REMOVE_NODE || *it == ecf::Aspect::ADD_REMOVE_ATTR ||
@@ -108,6 +113,9 @@ void OverviewItemWidget::nodeChanged(const VNode* node, const std::vector<ecf::A
 
 void OverviewItemWidget::defsChanged(const std::vector<ecf::Aspect::Type>& aspect)
 {
+	if(frozen_)
+		return;
+
 	for(std::vector<ecf::Aspect::Type>::const_iterator it=aspect.begin(); it != aspect.end(); ++it)
 	{
 		if(*it == ecf::Aspect::SERVER_STATE || *it == ecf::Aspect::SERVER_VARIABLE || *it == ecf::Aspect::ADD_REMOVE_ATTR)
@@ -120,6 +128,9 @@ void OverviewItemWidget::defsChanged(const std::vector<ecf::Aspect::Type>& aspec
 
 void OverviewItemWidget::connectStateChanged()
 {
+	if(frozen_)
+			return;
+
 	reload();
 }
 

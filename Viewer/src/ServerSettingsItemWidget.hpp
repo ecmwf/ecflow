@@ -39,6 +39,9 @@ public:
 
 public Q_SLOTS:
 	void slotClicked(QAbstractButton* button);
+
+protected:
+	void updateWidgetState() {};
 };
 
 #endif

@@ -27,6 +27,8 @@ public:
 	void reset();
 
 	const std::string& errorText() const {return errorText_;}
+	const std::string& warningText() const {return warningText_;}
+	const std::string& infoText() const {return infoText_;}
 	const std::string& text() const {return text_;}
 	Status status() const {return status_;}
 	const std::string fileName() const {return fileName_;}
@@ -39,11 +41,16 @@ public:
 	void text(const std::vector<std::string>& msg);
 	void text(const std::string& s) {text_=s;}
 	void errorText(const std::string& s) {errorText_=s;}
+	void setWarningText(const std::string& s) {warningText_=s;}
+	void setInfoText(const std::string& s) {infoText_=s;}
 	void fileName(const std::string& s) {fileName_=s;}
 	void fileReadMode(FileReadMode m) {readMode_=m;}
 	void fileReadMethod(const std::string& m) {readMethod_=m;}
 	void tmpFile(VFile_ptr f) {tmpFile_=f;}
 	void zombies(const std::vector<Zombie>& z) { zombies_=z;}
+
+	bool hasWarning() const {return !warningText_.empty();}
+	bool hasInfo() const {return !infoText_.empty();}
 
 	void prependText(const std::string&);
 	void appendText(const std::string&);
@@ -53,6 +60,8 @@ public:
 protected:
 	Status status_;
 	std::string errorText_;
+	std::string warningText_;
+	std::string infoText_;
 	std::string text_;
 	std::string fileName_;
 	FileReadMode readMode_;

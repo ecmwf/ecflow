@@ -48,7 +48,7 @@ protected Q_SLOTS:
 	void on_okTb_clicked(bool);
 
 protected:
-	void updateButtonStatus();
+	void updateWidgetState();
 
 	SuiteModel *model_;
 };

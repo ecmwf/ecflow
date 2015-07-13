@@ -5,7 +5,7 @@
     <file>../images/configure.svg</file>
     <file>../images/reset.svg</file>
     <file>../images/search.svg</file>
-    <file>../images/info.svg</file>
+    <file alias="info.svg">../images/info.svg</file>
     <file>../images/add_info.svg</file>
     <file>../images/add_table.svg</file>
     <file>../images/add_tree.svg</file>
@@ -35,9 +35,11 @@
     <file alias="edit.svg">../images/edit.svg</file>
     <file alias="editcopy.svg">../images/editcopy.svg</file>
     <file alias="editpaste.svg">../images/editpaste.svg</file>
+    <file alias="error.svg">../images/error.svg</file>
     <file alias="filesave.svg">../images/filesave.svg</file>
     <file alias="filter_decor.svg">../images/filter_decor.svg</file>
-    <file alias="search_decor.svg">../images/search_decor.svg</file>
+    <file alias="script.svg">../images/script.svg</file>    
+    <file alias="search_decor.svg">../images/search_decor.svg</file>    
     <file alias="spinning_wheel.gif">../images/spinning_wheel.gif</file>
     <file alias="warning.svg">../images/warning.svg</file>
   </qresource>

@@ -46,6 +46,9 @@ protected Q_SLOTS:
 	void on_deleteTb_clicked(bool);
 	void on_killTb_clicked(bool);
 
+protected:
+	void updateWidgetState() {};
+
 private:
 	void command(const std::string& cmdName);
 

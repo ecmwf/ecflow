@@ -45,9 +45,11 @@ protected Q_SLOTS:
 protected:
 	void updateDir(VDir_ptr dir);
 	void enableDir(bool);
+	void updateWidgetState() {};
 
 	OutputModel* dirModel_;
 	OutputSortModel* dirSortModel_;
+
 };
 
 #endif

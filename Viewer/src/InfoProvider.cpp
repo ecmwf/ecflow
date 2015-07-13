@@ -14,10 +14,9 @@
 
 #include <boost/algorithm/string/predicate.hpp>
 
-InfoProvider::InfoProvider(InfoPresenter* owner,VTask::Type taskType,const std::string& fileVarName) :
+InfoProvider::InfoProvider(InfoPresenter* owner,VTask::Type taskType) :
 	owner_(owner),
-	taskType_(taskType),
-	fileVarName_(fileVarName)
+	taskType_(taskType)
 {
 	reply_=new VReply();
 }
@@ -80,22 +79,38 @@ void InfoProvider::visit(VInfoNode* info)
 
     VNode *n=info->node();
 
+    std::string fileName;
+
     //We try to read the file directly from the disk
     if(!fileVarName_.empty() && info->server()->readFromDisk())
     {
     	//Get the fileName
-    	std::string fileName=n->genVariable(fileVarName_);
+    	fileName=n->genVariable(fileVarName_);
 
-    	if(reply_->textFromFile(fileName))
+    	if(fileName.empty())
+    	{
+    		reply_->setInfoText(fileNotDefinedText_);
+    		owner_->infoReady(reply_);
+    		return;
+    	}
+    	else if(reply_->textFromFile(fileName))
     	{
     		owner_->infoReady(reply_);
     		return;
     	}
+    	else
+    	{
+    		reply_->setWarningText(fileMissingText_);
+    		owner_->infoReady(reply_);
+    		return;
+    	}
     }
-    //Otherwise we try to get the file contents from the server
-    //(this will go through the threaded communication)
     else
     {
+    	//Otherwise we try to get the file contents from the server
+
+    	//(this will go through the threaded communication)
+
     	//Define a task for getting the info from the server.
     	task_=VTask::create(taskType_,n,this);
 
@@ -130,4 +145,58 @@ void  InfoProvider::taskChanged(VTask_ptr task)
             break;
     }
 }
+
+
+
+JobProvider::JobProvider(InfoPresenter* owner) :
+		InfoProvider(owner,VTask::JobTask)
+{
+	fileVarName_="ECF_JOB";
+}
+
+ManualProvider::ManualProvider(InfoPresenter* owner) :
+	InfoProvider(owner,VTask::ManualTask)
+{
+	fileVarName_="ECF_MANUAL";
+	fileNotDefinedText_="Manual is <b><u>not</u></b> available";
+	fileMissingText_="Manual is <b><u>not</u></b> available";
+}
+
+MessageProvider::MessageProvider(InfoPresenter* owner) :
+	InfoProvider(owner,VTask::MessageTask)
+{
+
+}
+
+ScriptProvider::ScriptProvider(InfoPresenter* owner) :
+		InfoProvider(owner,VTask::ScriptTask)
+{
+	fileVarName_="ECF_SCRIPT";
+}
+
+HistoryProvider::HistoryProvider(InfoPresenter* owner) :
+	InfoProvider(owner,VTask::HistoryTask)
+{
+
+}
+
+ZombieProvider::ZombieProvider(InfoPresenter* owner) :
+		InfoProvider(owner,VTask::ZombieListTask)
+{
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 

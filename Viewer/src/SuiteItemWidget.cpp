@@ -34,7 +34,7 @@ SuiteItemWidget::SuiteItemWidget(QWidget *parent) : QWidget(parent)
 
 	suiteView->setModel(model_);
 
-	updateButtonStatus();
+	updateWidgetState();
 
 }
 
@@ -55,7 +55,7 @@ void SuiteItemWidget::reload(VInfo_ptr info)
 			model_->setData(sf);
 			enableTb->setChecked(sf->isEnabled());
 			autoTb->setChecked(sf->autoAddNewSuites());
-			updateButtonStatus();
+			updateWidgetState();
 		}
 		else
 		{
@@ -73,7 +73,7 @@ void SuiteItemWidget::clearContents()
 	model_->setData(0);
 }
 
-void SuiteItemWidget::updateButtonStatus()
+void SuiteItemWidget::updateWidgetState()
 {
 	if(enableTb->isChecked())
 	{
@@ -110,7 +110,7 @@ void SuiteItemWidget::on_enableTb_clicked(bool val)
 		model_->reloadData();
 	}
 
-	updateButtonStatus();
+	updateWidgetState();
 }
 
 void SuiteItemWidget::on_selectAllTb_clicked(bool)

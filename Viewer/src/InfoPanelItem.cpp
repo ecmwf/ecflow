@@ -97,12 +97,13 @@ void InfoPanelItem::clear()
 
 void InfoPanelItem::setFrozen(bool b)
 {
-
+	frozen_=b;
+	updateWidgetState();
 }
 
 void InfoPanelItem::setDetached(bool b)
 {
-
+	detached_=b;
 }
 
 //From NodeObserver

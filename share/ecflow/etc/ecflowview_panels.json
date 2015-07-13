@@ -8,6 +8,7 @@
         {
             "name"    : "overview",
             "label"   : "Info",
+            "icon"	  : "info.svg",
             "visible_for" : "server or node"
         },
 
@@ -20,7 +21,7 @@
         {
         	"name"    : "script",
             "label"   : "Script",
-            "icon"    : "script.png",
+            "icon"    : "script.svg",
             "visible_for" : "task"            
         }, 
         

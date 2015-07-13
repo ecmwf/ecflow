@@ -61,6 +61,9 @@ InfoPanel::InfoPanel(QWidget* parent) :
 	connect(bcWidget_,SIGNAL(selected(VInfo_ptr)),
 			this,SIGNAL(selectionChanged(VInfo_ptr)));
 
+
+	tab_->setIconSize(QSize(12,12));
+
 	//Builds the menu for the settings tool button
 	/*QMenu *menu=new QMenu(this);
 	menu->setTearOffEnabled(true);

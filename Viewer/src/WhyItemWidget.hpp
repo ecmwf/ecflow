@@ -31,6 +31,9 @@ public:
 	void nodeChanged(const VNode*, const std::vector<ecf::Aspect::Type>&) {};
 	void defsChanged(const std::vector<ecf::Aspect::Type>&) {};
 
+protected:
+	void updateWidgetState() {};
+
 private:
 	QString why(VNode* n) const;
 

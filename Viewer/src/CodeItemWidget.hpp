@@ -24,6 +24,7 @@ public:
 
 public Q_SLOTS:
 	void on_searchTb_toggled(bool b);
+
 };
 
 #endif

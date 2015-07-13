@@ -34,9 +34,9 @@ public:
 
 protected:
 	void reload();
+	void updateWidgetState() {};
 
 	int lastScrollPos_;
-
 };
 
 #endif

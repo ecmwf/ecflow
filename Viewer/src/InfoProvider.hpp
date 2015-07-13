@@ -20,7 +20,7 @@ class InfoPanelItem;
 class InfoProvider : public VTaskObserver, public VInfoVisitor
 {
 public:
-	InfoProvider(InfoPresenter* owner,VTask::Type,const std::string& fileVarName="");
+	InfoProvider(InfoPresenter* owner,VTask::Type);
 	virtual ~InfoProvider();
 
 	void info(VInfo_ptr);
@@ -41,50 +41,46 @@ protected:
 	VReply* reply_;
 	VTask::Type taskType_;
 	std::string fileVarName_;
-	//std::map<std::string,std::string> params_;
+	std::string fileNotDefinedText_;
+	std::string fileMissingText_;
 };
 
 class JobProvider : public InfoProvider
 {
 public:
-	 explicit JobProvider(InfoPresenter* owner) :
-		 InfoProvider(owner,VTask::JobTask,"ECF_JOB") {}
+	 explicit JobProvider(InfoPresenter* owner);
 };
 
 
 class ManualProvider : public InfoProvider
 {
 public:
-	 explicit ManualProvider(InfoPresenter* owner) :
-		 InfoProvider(owner,VTask::ManualTask,"ECF_MANUAL") {}
+	 explicit ManualProvider(InfoPresenter* owner);
 };
 
 class MessageProvider : public InfoProvider
 {
 public:
-	 explicit MessageProvider(InfoPresenter* owner) :
-		 InfoProvider(owner,VTask::MessageTask) {}
+	 explicit MessageProvider(InfoPresenter* owner);
 };
 
 class ScriptProvider : public InfoProvider
 {
 public:
-	 explicit ScriptProvider(InfoPresenter* owner) :
-		 InfoProvider(owner,VTask::ScriptTask,"ECF_SCRIPT") {}
+	 explicit ScriptProvider(InfoPresenter* owner);
 };
 
 class HistoryProvider : public InfoProvider
 {
 public:
-	 explicit HistoryProvider(InfoPresenter* owner) :
-		 InfoProvider(owner,VTask::HistoryTask) {}
+	 explicit HistoryProvider(InfoPresenter* owner);
+
 };
 
 class ZombieProvider : public InfoProvider
 {
 public:
-	 explicit ZombieProvider(InfoPresenter* owner) :
-		 InfoProvider(owner,VTask::ZombieListTask) {}
+	 explicit ZombieProvider(InfoPresenter* owner);
 };
 
 
