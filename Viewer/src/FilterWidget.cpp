@@ -60,6 +60,22 @@ VParamFilterMenu::VParamFilterMenu(QMenu * parent,VParamSet* filter,DecorMode de
 		}
 	}
 
+	QAction *ac = new QAction(this);
+	ac->setSeparator(true);
+	menu_->addAction(ac);
+
+	ac = new QAction(this);
+	ac->setText(tr("Select all"));
+	menu_->addAction(ac);
+	connect(ac,SIGNAL(triggered(bool)),
+			this,SLOT(slotSelectAll(bool)));
+
+	ac = new QAction(this);
+	ac->setText(tr("Unselect all"));
+	menu_->addAction(ac);
+	connect(ac,SIGNAL(triggered(bool)),
+			this,SLOT(slotUnselectAll(bool)));
+
 	reload();
 }
 
@@ -78,15 +94,43 @@ void VParamFilterMenu::addAction(QString name,QString id)
 					this,SLOT(slotChanged(bool)));
 }
 
+void VParamFilterMenu::slotSelectAll(bool)
+{
+	Q_FOREACH(QAction* ac,menu_->actions())
+	{
+		if(!ac->isSeparator() &&
+			ac->isCheckable())
+		{
+			ac->setChecked(true);
+		}
+	}
+
+	slotChanged(true);
+}
+
+void VParamFilterMenu::slotUnselectAll(bool)
+{
+	Q_FOREACH(QAction* ac,menu_->actions())
+	{
+		if(!ac->isSeparator() &&
+			ac->isCheckable())
+		{
+			ac->setChecked(false);
+		}
+	}
+
+	slotChanged(true);
+}
+
 void VParamFilterMenu::slotChanged(bool)
 {
 	std::set<std::string> items;
 	Q_FOREACH(QAction* ac,menu_->actions())
 	{
-		if(!ac->isSeparator())
+		if(!ac->isSeparator() &&
+			ac->isCheckable() && ac->isChecked())
 		{
-			if(ac->isChecked())
-					items.insert(ac->data().toString().toStdString());
+			items.insert(ac->data().toString().toStdString());
 		}
 	}
 

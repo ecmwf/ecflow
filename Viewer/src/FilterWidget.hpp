@@ -37,6 +37,8 @@ public:
 
 protected Q_SLOTS:
 	void slotChanged(bool);
+	void slotSelectAll(bool);
+	void slotUnselectAll(bool);
 
 protected:
 	void addAction(QString name,QString id);

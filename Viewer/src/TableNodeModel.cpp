@@ -98,7 +98,7 @@ QVariant TableNodeModel::nodeData(const QModelIndex& index, int role) const
 	if(role == Qt::BackgroundRole && index.column() != 1)
 		return QVariant();
 
-	qDebug() << "data" <<  index;
+	//qDebug() << "data" <<  index;
 
 
 	VNode* vnode=indexToNode(index);

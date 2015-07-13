@@ -88,7 +88,7 @@ void TableNodeView::slotSelectItem(const QModelIndex&)
 	if(lst.count() > 0)
 	{
 		VInfo_ptr info=model_->nodeInfo(lst.front());
-		if(!info->isEmpty())
+		if(info && !info->isEmpty())
 		{
 			Q_EMIT selectionChanged(info);
 		}

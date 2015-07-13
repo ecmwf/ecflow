@@ -330,16 +330,8 @@ void TableNodeFilter::beginReset(ServerHandler* server)
 
 	VServer* s=server->vRoot();
 
+	//TODO: implement the filter!!!
 	s->collect(match_);
-
-	//If all states are visible
-	//if(sf->isComplete())
-	//	return;
-
-	/*for(unsigned int j=0; j < server->numSuites();j++)
-	{
-		match_.push_back(server->suiteAt(j).get());
-	}*/
 }
 
 void TableNodeFilter::endReset()
