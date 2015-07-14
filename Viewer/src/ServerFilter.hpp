@@ -61,5 +61,4 @@ private:
 	std::vector<ServerFilterObserver*> observers_;
 };
 
-
 #endif

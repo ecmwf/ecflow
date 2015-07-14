@@ -14,49 +14,6 @@
 #include "ServerList.hpp"
 #include "VSettings.hpp"
 
-/*
-ServerFilterItem::ServerFilterItem(const std::string& name) //,const std::string& host,const std::string& port)
-{
-	server_=ServerItem::find(name); //,host,port);
-	server_->addObserver(this);
-
-	ServerHandler* h=ServerHandler::find(server_->host(),server_->port());
-	if(!h)
-		ServerHandler::addServer(server_->host(),server_->port());
-}
-
-ServerFilterItem::~ServerFilterItem()
-{
-}
-
-bool ServerFilterItem::hasSuiteFilter()
-{
-	return (suiteFilter_.size()>0);
-}
-
-void ServerFilterItem::addToSuiteFilter(const std::string& suite)
-{
-	suiteFilter_.insert(suite);
-}
-
-void ServerFilterItem::removeFromSuiteFilter(const std::string& suite)
-{
-	std::set<std::string>::iterator it=suiteFilter_.find(suite);
-	if(it != suiteFilter_.end())
-		suiteFilter_.erase(it);
-}
-
-ServerHandler* ServerFilterItem::serverHandler() const
-{
-	if(server_)
-	{
-		return ServerHandler::find(server_->host(),server_->port());
-	}
-
-	return 0;
-}
-*/
-
 //==============================================
 //
 // ServerFilter
@@ -80,15 +37,15 @@ void ServerFilter::addServer(ServerItem *item,bool broadcast)
 {
 	if(item && ServerList::instance()->find(item->name()) == item)
 	{
-			//ServerFilterItem* s=new ServerFilterItem(item->name(),item->host(),item->port());
-			//ServerItem* s=new ServerFilterItem(item->name());
+		//ServerFilterItem* s=new ServerFilterItem(item->name(),item->host(),item->port());
+		//ServerItem* s=new ServerFilterItem(item->name());
 
-			items_.push_back(item);
+		items_.push_back(item);
 
-			item->addObserver(this);
+		item->addObserver(this);
 
-			if(broadcast)
-				broadcastAdd(item);
+		if(broadcast)
+			broadcastAdd(item);
 	}
 }
 
@@ -163,11 +120,11 @@ void ServerFilter::readSettings(VSettings* vs)
 
 	for(std::vector<std::string>::const_iterator it = array.begin(); it != array.end(); ++it)
 	{
-			std::string name=*it;
-			if(ServerItem* s=ServerList::instance()->find(name))
-			{
-				addServer(s,false);
-			}
+		std::string name=*it;
+		if(ServerItem* s=ServerList::instance()->find(name))
+		{
+			addServer(s,true);
+		}
 	}
 }
 
@@ -179,7 +136,7 @@ void ServerFilter::broadcastAdd(ServerItem *server)
 {
 	for(std::vector<ServerFilterObserver*>::const_iterator it=observers_.begin(); it != observers_.end(); ++it)
 	{
-			(*it)->notifyServerFilterAdded(server);
+		(*it)->notifyServerFilterAdded(server);
 	}
 }
 
@@ -187,7 +144,7 @@ void ServerFilter::broadcastRemove(ServerItem *server)
 {
 	for(std::vector<ServerFilterObserver*>::const_iterator it=observers_.begin(); it != observers_.end(); ++it)
 	{
-			(*it)->notifyServerFilterRemoved(server);
+		(*it)->notifyServerFilterRemoved(server);
 	}
 }
 
@@ -195,7 +152,7 @@ void ServerFilter::broadcastChange(ServerItem *server)
 {
 	for(std::vector<ServerFilterObserver*>::const_iterator it=observers_.begin(); it != observers_.end(); ++it)
 	{
-			(*it)->notifyServerFilterChanged(server);
+		(*it)->notifyServerFilterChanged(server);
 	}
 }
 

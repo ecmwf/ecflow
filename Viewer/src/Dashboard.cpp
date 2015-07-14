@@ -11,6 +11,7 @@
 #include "Dashboard.hpp"
 
 #include "DashboardDock.hpp"
+#include "DashboardTitle.hpp"
 #include "InfoPanel.hpp"
 #include "NodeWidget.hpp"
 #include "ServerHandler.hpp"
@@ -19,16 +20,12 @@
 #include "TreeNodeWidget.hpp"
 #include "UserMessage.hpp"
 #include "VFilter.hpp"
-#include "VNode.hpp"
 #include "VSettings.hpp"
-#include "VNState.hpp"
 
-#include <QApplication>
 #include <QDebug>
 #include <QVBoxLayout>
 #include <QLabel>
 #include <QDockWidget>
-#include <QStyle>
 #include <QToolButton>
 
 int Dashboard::maxWidgetNum_=20;
@@ -42,7 +39,8 @@ Dashboard::Dashboard(QString rootNode,QWidget *parent) :
 
 	//The serverfilter. It holds the list of servers displayed by this dashboard.
 	serverFilter_=new ServerFilter();
-	serverFilter_->addObserver(this);
+
+	titleHandler_=new DashboardTitle(serverFilter_,this);
 
 	//Central widget - we need to create it but we do not
 	//use it. So we can hide it!
@@ -53,13 +51,15 @@ Dashboard::Dashboard(QString rootNode,QWidget *parent) :
 	layout()->setContentsMargins(0,0,0,0);
 
 	setDockOptions(QMainWindow::AnimatedDocks|QMainWindow::AllowTabbedDocks|QMainWindow::AllowNestedDocks);
+
+	connect(titleHandler_,SIGNAL(changed(QString,QPixmap)),
+			this,SLOT(slotTitle(QString,QPixmap)));
 }
 
 Dashboard::~Dashboard()
 {
 	delete serverFilter_;
 }
-
 
 DashboardWidget* Dashboard::addWidget(const std::string& type)
 {
@@ -160,7 +160,7 @@ void Dashboard::currentSelection(VInfo_ptr n)
 //-----------------------
 // Title
 //-----------------------
-
+/*
 void Dashboard::updateTitle()
 {
 	const int marginX=0;
@@ -216,6 +216,12 @@ void Dashboard::updateTitle()
 
 	Q_EMIT titleChanged(this,"",pix);
 }
+*/
+
+void Dashboard::slotTitle(QString s,QPixmap p)
+{
+	Q_EMIT titleChanged(this,s,p);
+}
 
 //------------------------
 // Rescan
@@ -223,14 +229,8 @@ void Dashboard::updateTitle()
 
 void Dashboard::reload()
 {
-	//if(NodeWidget *ctl=handler_->currentControl())
-	//	ctl->reload();
-
-
 	for(int i=0; i < widgets_.count(); i++)
 		widgets_.at(i)->reload();
-
-	updateTitle();
 }
 
 void Dashboard::rerender()
@@ -238,7 +238,7 @@ void Dashboard::rerender()
 	for(int i=0; i < widgets_.count(); i++)
 		widgets_.at(i)->rerender();
 
-	updateTitle();
+	titleHandler_->updateTitle();
 }
 
 //------------------------
@@ -254,24 +254,6 @@ Viewer::ViewMode Dashboard::viewMode()
 void Dashboard::setViewMode(Viewer::ViewMode mode)
 {
 	//handler_->setCurrentMode(mode);
-}
-
-//------------------------------------------
-// React to changes in ServerFilter
-//------------------------------------------
-
-void Dashboard::notifyServerFilterAdded(ServerItem*)
-{
-	updateTitle();
-}
-void Dashboard::notifyServerFilterRemoved(ServerItem*)
-{
-	updateTitle();
-}
-
-void Dashboard::notifyServerFilterChanged(ServerItem*)
-{
-	updateTitle();
 }
 
 //----------------------------------
@@ -334,12 +316,7 @@ void Dashboard::readSettings(VComboSettings* vs)
 	if(vs->containsQs("state"))
 		restoreState(vs->getQs("state").toByteArray());
 
-	//Update the dashboard title
-	updateTitle();
-
 	selectFirstServerInView();
-
-
 }
 
 

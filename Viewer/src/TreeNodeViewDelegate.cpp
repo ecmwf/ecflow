@@ -247,6 +247,10 @@ void TreeNodeViewDelegate::renderServer(QPainter *painter,const QModelIndex& ind
 	//Adjust the filled rect width
 	fillRect.setRight(textRect.right()+offset);
 
+	QRect halfRect=fillRect;
+	halfRect.setY(halfRect.center().y());
+	halfRect.adjust(1,0,-1,-1);
+
 	currentRight=fillRect.right();
 
 	//The pixmap (optional)
@@ -343,17 +347,15 @@ void TreeNodeViewDelegate::renderServer(QPainter *painter,const QModelIndex& ind
 
 	//Draw bg rect
 	QColor bg=index.data(Qt::BackgroundRole).value<QColor>();
-	painter->setBrush(bg);
-	painter->setPen((option.state & QStyle::State_Selected)?nodeSelectPen_:nodePen_);
+	QColor borderCol=bg.darker(125);
+	painter->fillRect(fillRect,bg);
+	//painter->setPen((option.state & QStyle::State_Selected)?nodeSelectPen_:nodePen_);
+	painter->setPen((option.state & QStyle::State_Selected)?nodeSelectPen_:QPen(borderCol));
+	painter->drawRect(fillRect);
 
-	if(nodeRectRad_ <=0)
-	{
-		painter->drawRect(fillRect);
-	}
-	else
-	{
-		painter->drawRoundedRect(fillRect,nodeRectRad_,nodeRectRad_);
-	}
+	//Draw shading
+	QColor shCol= bg.darker(110);
+	painter->fillRect(halfRect,shCol);
 
 	//painter->fillRect(fillRect,bg);
 	//painter->setPen((option.state & QStyle::State_Selected)?nodeSelectPen_:nodePen_);
@@ -425,6 +427,10 @@ void TreeNodeViewDelegate::renderNode(QPainter *painter,const QModelIndex& index
 	//Adjust the filled rect width
 	fillRect.setRight(textRect.right()+offset);
 
+	QRect halfRect=fillRect;
+	halfRect.setY(halfRect.center().y());
+	halfRect.adjust(1,0,-1,-1);
+
 	int currentRight=fillRect.right();
 
 	//Icons area
@@ -481,9 +487,15 @@ void TreeNodeViewDelegate::renderNode(QPainter *painter,const QModelIndex& index
 
 	//Draw bg rect
 	QColor bg=index.data(Qt::BackgroundRole).value<QColor>();
+	QColor borderCol=bg.darker(125);
 	painter->fillRect(fillRect,bg);
-	painter->setPen((option.state & QStyle::State_Selected)?nodeSelectPen_:nodePen_);
+	//painter->setPen((option.state & QStyle::State_Selected)?nodeSelectPen_:nodePen_);
+	painter->setPen((option.state & QStyle::State_Selected)?nodeSelectPen_:QPen(borderCol));
 	painter->drawRect(fillRect);
+
+	//Draw shading
+	QColor shCol= bg.darker(110);
+	painter->fillRect(halfRect,shCol);
 
 	//Draw text
 	QColor fg=index.data(Qt::ForegroundRole).value<QColor>();

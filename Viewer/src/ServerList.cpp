@@ -70,12 +70,12 @@ void ServerList::remove(ServerItem *item)
 	std::vector<ServerItem*>::iterator it=std::find(items_.begin(),items_.end(),item);
 	if(it != items_.end())
 	{
-			items_.erase(it);
-			item->broadcastDeletion();
-			delete item;
+		items_.erase(it);
+		item->broadcastDeletion();
+		delete item;
 
-			save();
-			broadcastChanged();
+		save();
+		broadcastChanged();
 	}
 }
 

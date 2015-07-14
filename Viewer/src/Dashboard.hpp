@@ -18,12 +18,13 @@
 #include "VInfo.hpp"
 #include "VSettings.hpp"
 
+class DashboardTitle;
 class DashboardWidget;
 class ServerFilter;
 class ServerItem;
 class VComboSettings;
 
-class Dashboard : public QMainWindow, public ServerFilterObserver
+class Dashboard : public QMainWindow
 {
     Q_OBJECT
 
@@ -42,13 +43,6 @@ public:
 	void currentSelection(VInfo_ptr n);
 	void selectFirstServer();
 
-	void updateTitle();
-
-	//From  ServerFilterObserver
-	void notifyServerFilterAdded(ServerItem*);
-	void notifyServerFilterRemoved(ServerItem*);
-	void notifyServerFilterChanged(ServerItem*);
-
 	void writeSettings(VComboSettings*);
 	void readSettings(VComboSettings*);
 
@@ -59,6 +53,9 @@ Q_SIGNALS:
     void selectionChanged(VInfo_ptr);
 	void titleChanged(QWidget*,QString,QPixmap);
 
+protected Q_SLOTS:
+	void slotTitle(QString,QPixmap);
+
 private:
 	DashboardWidget* addWidget(const std::string& type,const std::string& dockId);
 	QString uniqueDockId();
@@ -67,6 +64,7 @@ private:
 	VInfo_ptr currentSelectionInView();
 
 	ServerFilter* serverFilter_;
+	DashboardTitle* titleHandler_;
 	QList<DashboardWidget*> widgets_;
 	static int maxWidgetNum_;
 };

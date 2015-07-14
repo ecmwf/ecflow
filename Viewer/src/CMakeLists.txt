@@ -11,6 +11,7 @@ set(viewer_srcs
     CustomCommandDialog.cpp
     Dashboard.cpp
     DashboardDock.cpp
+    DashboardTitle.cpp
     DirectoryHandler.cpp
     EditItemWidget.cpp
     EditProvider.cpp
@@ -115,6 +116,7 @@ set(viewer_moc_files AbstractNodeModel.hpp
     CustomCommandDialog.hpp
     Dashboard.hpp
     DashboardDock.hpp
+    DashboardTitle.hpp
     DashboardWidget.hpp
     EditItemWidget.hpp
     FilterWidget.hpp              
