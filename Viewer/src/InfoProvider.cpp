@@ -172,6 +172,10 @@ ScriptProvider::ScriptProvider(InfoPresenter* owner) :
 		InfoProvider(owner,VTask::ScriptTask)
 {
 	fileVarName_="ECF_SCRIPT";
+	fileNotDefinedText_="Script is <b><u>not</u></b> available";
+	fileMissingText_="Script <b><u>not</u></b> found! <br> Check <b>ECF_FILES</b> or <b>ECF_HOME</b> directories,  \
+			 for read access. Check for file presence and read access below files directory \
+             or this may be a <i>dummy</i> task";
 }
 
 HistoryProvider::HistoryProvider(InfoPresenter* owner) :

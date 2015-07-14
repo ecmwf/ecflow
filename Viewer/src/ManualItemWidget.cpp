@@ -78,8 +78,8 @@ void ManualItemWidget::infoReady(VReply* reply)
 
 void ManualItemWidget::infoProgress(VReply* reply)
 {
-    QString s=QString::fromStdString(reply->text());
-    messageLabel_->showInfo(s);
+   // QString s=QString::fromStdString(reply->text());
+    messageLabel_->showInfo(QString::fromStdString(reply->infoText()));
 }
 
 void ManualItemWidget::infoFailed(VReply* reply)

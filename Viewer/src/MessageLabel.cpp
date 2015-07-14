@@ -28,7 +28,7 @@ MessageLabel::MessageLabel(QWidget *parent) :
 	if(typeData.empty())
 	{
 		typeData[InfoType]=MessageLabelData(":/viewer/info.svg","Info","rgb(227,242,252)","rgb(180,194,230)");
-		typeData[WarningType]=MessageLabelData(":/viewer/warning.svg","Warning","rgb(255,231,231)","rgb(223,152,152)");
+		typeData[WarningType]=MessageLabelData(":/viewer/warning.svg","Warning","rgb(255,198,63)","rgb(255,140,0)");
 		typeData[ErrorType]=MessageLabelData(":/viewer/error.svg","Error","rgb(255,231,231)","rgb(223,152,152)");
 	}
 

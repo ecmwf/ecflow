@@ -23,6 +23,8 @@
 
 ScriptItemWidget::ScriptItemWidget(QWidget *parent) : CodeItemWidget(parent)
 {
+    messageLabel_->hide();
+    
     Highlighter* ih=new Highlighter(textEdit_->document(),"script");
 
 	infoProvider_=new ScriptProvider(this);
@@ -48,7 +50,7 @@ void ScriptItemWidget::reload(VInfo_ptr info)
     else
     {
         clearContents();
-        fileLabel_->setText(tr("File: ") + QString::fromStdString(info->node()->genVariable("ECF_SCRIPT")));
+        fileLabel_->setText(tr("<b>File:</b> ") + QString::fromStdString(info->node()->genVariable("ECF_SCRIPT")));
         infoProvider_->info(info_);
     }	
 }
@@ -58,27 +60,35 @@ void ScriptItemWidget::clearContents()
     loaded_=false;
     fileLabel_->clear();
     textEdit_->clear();
+    messageLabel_->hide();
 }
 
 void ScriptItemWidget::infoReady(VReply* reply)
 {
     QString s=QString::fromStdString(reply->text());
     textEdit_->setPlainText(s);
+    
+    if(reply->hasWarning())
+    {
+        messageLabel_->showWarning(QString::fromStdString(reply->warningText()));
+    }
+    else if(reply->hasInfo())
+    {
+        messageLabel_->showInfo(QString::fromStdString(reply->infoText()));
+    }
 }
 
 void ScriptItemWidget::infoProgress(VReply* reply)
 {
     QString s=QString::fromStdString(reply->text());
-    textEdit_->setPlainText(s);
+    messageLabel_->showInfo(QString::fromStdString(reply->infoText()));
 }
 
 void ScriptItemWidget::infoFailed(VReply* reply)
 {
     QString s=QString::fromStdString(reply->errorText());
-    //textEdit_->setPlainText(s);
-    
+    //textEdit_->setPlainText(s);   
     messageLabel_->showError(s);
 }
-
 
 static InfoPanelItemMaker<ScriptItemWidget> maker1("script");
