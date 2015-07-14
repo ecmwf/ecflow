@@ -16,7 +16,9 @@
 
 JobItemWidget::JobItemWidget(QWidget *parent) : CodeItemWidget(parent)
 {
-    Highlighter* ih=new Highlighter(textEdit_->document(),"script");
+	messageLabel_->hide();
+
+	Highlighter* ih=new Highlighter(textEdit_->document(),"script");
 
     infoProvider_=new JobProvider(this);
 }
@@ -31,6 +33,8 @@ void JobItemWidget::reload(VInfo_ptr info)
     loaded_=true;
     info_=info;
 
+    messageLabel_->hide();
+
     //Info must be a node
     if(!info_.get() || !info_->isNode() || !info_->node())
     {
@@ -39,7 +43,7 @@ void JobItemWidget::reload(VInfo_ptr info)
     else
     {
         clearContents();
-        fileLabel_->setText(tr("File: ") + QString::fromStdString(info_->node()->genVariable("ECF_JOB")));
+        fileLabel_->setText(tr("<b>File:</b> ") + QString::fromStdString(info_->node()->genVariable("ECF_JOB")));
         infoProvider_->info(info_);
     }   
 }
@@ -48,24 +52,34 @@ void JobItemWidget::clearContents()
 {
     loaded_=false;
     textEdit_->clear();
+    messageLabel_->hide();
 }
 
 void JobItemWidget::infoReady(VReply* reply)
 {
     QString s=QString::fromStdString(reply->text());
     textEdit_->setPlainText(s);
+
+    if(reply->hasWarning())
+    {
+    	messageLabel_->showWarning(QString::fromStdString(reply->warningText()));
+    }
+    else if(reply->hasInfo())
+    {
+    	messageLabel_->showInfo(QString::fromStdString(reply->infoText()));
+    }
 }
 
 void JobItemWidget::infoProgress(VReply* reply)
 {
-    QString s=QString::fromStdString(reply->text());
-    textEdit_->setPlainText(s);
+    QString s=QString::fromStdString(reply->infoText());
+    messageLabel_->showInfo(s);
 }
 
 void JobItemWidget::infoFailed(VReply* reply)
 {
     QString s=QString::fromStdString(reply->errorText());
-    textEdit_->setPlainText(s);
+    messageLabel_->showError(s);
 }
 
 static InfoPanelItemMaker<JobItemWidget> maker1("job");

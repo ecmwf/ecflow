@@ -35,6 +35,9 @@ public:
 	void taskChanged(VTask_ptr);
 
 protected:
+	virtual void handleFileNotDefined(VReply *reply);
+	virtual void handleFileMissing(const std::string& fileName,VReply *reply);
+
 	InfoPresenter* owner_;
 	VInfo_ptr info_;
 	VTask_ptr task_;
@@ -49,8 +52,9 @@ class JobProvider : public InfoProvider
 {
 public:
 	 explicit JobProvider(InfoPresenter* owner);
+protected:
+	 void handleFileMissing(const std::string& fileName,VReply *reply);
 };
-
 
 class ManualProvider : public InfoProvider
 {
@@ -74,7 +78,6 @@ class HistoryProvider : public InfoProvider
 {
 public:
 	 explicit HistoryProvider(InfoPresenter* owner);
-
 };
 
 class ZombieProvider : public InfoProvider

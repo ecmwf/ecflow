@@ -108,6 +108,8 @@ public:
 
     const std::string& nodeType();
 
+    virtual void why(std::vector<std::string>& theReasonWhy) const;
+
     LogServer_ptr logServer();
 
 protected:
@@ -173,6 +175,8 @@ public:
 	//server variables are searched.
 	std::string findVariable(const std::string& key,bool substitute=false) const;
 	std::string findInheritedVariable(const std::string& key,bool substitute=false) const;
+
+	void why(std::vector<std::string>& theReasonWhy) const;
 
 protected:
 	//Clear contents and rebuild the whole tree.

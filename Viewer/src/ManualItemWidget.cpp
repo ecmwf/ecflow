@@ -46,8 +46,6 @@ void ManualItemWidget::reload(VInfo_ptr nodeInfo)
     else
     {
         clearContents();
-        //TODO: figure it if we can get the filename for the manual
-        //fileLabel_->setText(tr("File: ") + QString::fromStdString(info_->genVariable("ECF_SCRIPT")));
         infoProvider_->info(info_);
     }   
 }

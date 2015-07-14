@@ -89,8 +89,7 @@ void InfoProvider::visit(VInfoNode* info)
 
     	if(fileName.empty())
     	{
-    		reply_->setInfoText(fileNotDefinedText_);
-    		owner_->infoReady(reply_);
+    		handleFileNotDefined(reply_);
     		return;
     	}
     	else if(reply_->textFromFile(fileName))
@@ -100,15 +99,13 @@ void InfoProvider::visit(VInfoNode* info)
     	}
     	else
     	{
-    		reply_->setWarningText(fileMissingText_);
-    		owner_->infoReady(reply_);
+    		handleFileMissing(fileName,reply_);
     		return;
     	}
     }
+    //Otherwise we try to get the file contents from the server
     else
     {
-    	//Otherwise we try to get the file contents from the server
-
     	//(this will go through the threaded communication)
 
     	//Define a task for getting the info from the server.
@@ -118,6 +115,18 @@ void InfoProvider::visit(VInfoNode* info)
     	//in the reply will be prepended to the string we generated above.
     	info->server()->run(task_);
     }
+}
+
+void InfoProvider::handleFileNotDefined(VReply *reply)
+{
+	reply->setInfoText(fileNotDefinedText_);
+	owner_->infoReady(reply_);
+}
+
+void InfoProvider::handleFileMissing(const std::string& fileName,VReply *reply)
+{
+	reply->setWarningText(fileMissingText_);
+	owner_->infoReady(reply_);
 }
 
 void  InfoProvider::taskChanged(VTask_ptr task)
@@ -147,11 +156,29 @@ void  InfoProvider::taskChanged(VTask_ptr task)
 }
 
 
-
 JobProvider::JobProvider(InfoPresenter* owner) :
 		InfoProvider(owner,VTask::JobTask)
 {
 	fileVarName_="ECF_JOB";
+
+	fileNotDefinedText_="Job is <b><u>not</u></b> defined";
+
+	fileMissingText_="Job <b><u>not</u></b> found! <br> Check <b>ECF_HOME</b> directory  \
+				 for read/write access. Check for file presence and read access below. \
+	             The file may have been deleted or this may be a '<i>dummy</i>' task";
+}
+
+void JobProvider::handleFileMissing(const std::string& fileName,VReply *reply)
+{
+	if(fileName.find(".job0") != std::string::npos)
+	{
+		reply->setInfoText("No job to be expected when <b>TRYNO</b> is 0!");
+	}
+	else
+	{
+		reply->setWarningText(fileMissingText_);
+	}
+	owner_->infoReady(reply_);
 }
 
 ManualProvider::ManualProvider(InfoPresenter* owner) :
@@ -172,10 +199,10 @@ ScriptProvider::ScriptProvider(InfoPresenter* owner) :
 		InfoProvider(owner,VTask::ScriptTask)
 {
 	fileVarName_="ECF_SCRIPT";
-	fileNotDefinedText_="Script is <b><u>not</u></b> available";
+	fileNotDefinedText_="Script is <b><u>not</u></b> defined";
 	fileMissingText_="Script <b><u>not</u></b> found! <br> Check <b>ECF_FILES</b> or <b>ECF_HOME</b> directories,  \
 			 for read access. Check for file presence and read access below files directory \
-             or this may be a <i>dummy</i> task";
+             or this may be a '<i>dummy</i>' task";
 }
 
 HistoryProvider::HistoryProvider(InfoPresenter* owner) :
@@ -189,17 +216,6 @@ ZombieProvider::ZombieProvider(InfoPresenter* owner) :
 {
 
 }
-
-
-
-
-
-
-
-
-
-
-
 
 
 

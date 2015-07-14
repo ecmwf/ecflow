@@ -35,7 +35,7 @@ protected:
 	void updateWidgetState() {};
 
 private:
-	QString why(VNode* n) const;
+	QString why() const;
 
 
 };

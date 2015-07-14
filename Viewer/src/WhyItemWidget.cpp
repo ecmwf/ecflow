@@ -20,6 +20,7 @@
 
 WhyItemWidget::WhyItemWidget(QWidget *parent) : CodeItemWidget(parent)
 {
+	messageLabel_->hide();
 	fileLabel_->hide();
 	textEdit_->setShowLineNumbers(false);
 }
@@ -34,9 +35,9 @@ void WhyItemWidget::reload(VInfo_ptr info)
 	loaded_=true;
 	info_=info;
 
-	if(info_ && info_.get() && info_->isNode())
+	if(info_ && info_.get())
 	{
-		textEdit_->setPlainText(why(info_->node()));
+		textEdit_->setPlainText(why());
 	}
 	else
 	{
@@ -50,20 +51,29 @@ void WhyItemWidget::clearContents()
 	textEdit_->clear();
 }
 
-QString WhyItemWidget::why(VNode* node) const
+QString WhyItemWidget::why() const
 {
 	QString s;
 
-	if(node && node->node())
+	std::vector<std::string> theReasonWhy;
+
+	if(info_ && info_.get())
 	{
-		node_ptr n=node->node();
-		std::vector<std::string> theReasonWhy;
-		n->bottom_up_why(theReasonWhy);
-		for (std::vector<std::string>::const_iterator it=theReasonWhy.begin(); it != theReasonWhy.end(); ++it)
-			s+=QString::fromStdString(*it) + "\n";
+		if(info_->isServer())
+		{
+			info_->node()->why(theReasonWhy);
+		}
+		else if(info_->isNode() && info_->node())
+		{
+			info_->node()->why(theReasonWhy);
+		}
 	}
+
+	for (std::vector<std::string>::const_iterator it=theReasonWhy.begin(); it != theReasonWhy.end(); ++it)
+		s+=QString::fromStdString(*it) + "\n";
 
     return s;
 }
 
 static InfoPanelItemMaker<WhyItemWidget> maker1("why");
+

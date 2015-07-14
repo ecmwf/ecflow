@@ -69,7 +69,8 @@ void MessageLabel::showMessage(const Type& type,QString msg)
 
 		currentType_=type;
 	}
-	//msg.replace("\n","<br>");
+
+	msg.replace("\n","<br>");
 
 	QString s="<table><tr><td><img src=\'" + it->second.icon_ + "\' /></td><td><b>" + it->second.title_ + ": </b>";
 	s+="<br>" + msg + "</td></tr></table>";

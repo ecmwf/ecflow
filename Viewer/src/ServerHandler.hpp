@@ -59,10 +59,9 @@ public:
 	Activity activity() const {return activity_;}
 	ConnectState* connectState() const {return connectState_;}
 	bool communicating() {return communicating_;}
-	bool readFromDisk() const {return readFromDisk_;}
+	bool readFromDisk() const;
 	SuiteFilter* suiteFilter() const {return suiteFilter_;}
 	void updateSuiteFilter(SuiteFilter*);
-
 
 	void connectServer();
 	void disconnectServer();
@@ -100,7 +99,6 @@ public:
 	static void command(std::vector<VInfo_ptr>,std::string, bool resolve);
 
 	static ServerHandler* find(const std::string& name);
-	static ServerHandler* find(VNode *node);
 
 	static void addServerCommand(const std::string &name, const std::string& command);
 	static std::string resolveServerCommand(const std::string &name);
@@ -127,8 +125,6 @@ protected:
 	bool communicating_;
 	std::vector<NodeObserver*> nodeObservers_;
 	std::vector<ServerObserver*> serverObservers_;
-
-	bool readFromDisk_;
 
     VServer* vRoot_;
 

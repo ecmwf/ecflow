@@ -454,6 +454,13 @@ const std::string&  VNode::nodeType()
 	return defaultStr;
 }
 
+void VNode::why(std::vector<std::string>& theReasonWhy) const
+{
+	if(node_ && node_.get())
+	{
+		node_->bottom_up_why(theReasonWhy);
+	}
+}
 
 /*
 //Get the triggers list for the Triggers view
@@ -869,6 +876,15 @@ QColor  VServer::stateFontColour() const
 	return VSState::toFontColour(server_);
 }
 
+void VServer::why(std::vector<std::string>& theReasonWhy) const
+{
+	ServerDefsAccess defsAccess(server_);  // will reliquish its resources on destruction
+	defs_ptr defs = defsAccess.defs();
+	if (!defs)
+		return;
+
+	defs->why(theReasonWhy);
+}
 
 QString VServer::toolTip()
 {

@@ -51,7 +51,6 @@ ServerHandler::ServerHandler(const std::string& name,const std::string& host, co
    updating_(false),
    communicating_(false),
    comQueue_(0),
-   readFromDisk_(true),
    activity_(NoActivity),
    connectState_(new ConnectState()),
    suiteFilter_(new SuiteFilter()),
@@ -1245,6 +1244,11 @@ void ServerHandler::updateSuiteFilter(const std::vector<std::string>& loadedSuit
 
 }
 
+bool ServerHandler::readFromDisk() const
+{
+	return conf_->boolValue(VServerSettings::ReadFromDisk);
+}
+
 void ServerHandler::confChanged(VServerSettings::Param par,VProperty* prop)
 {
 	switch(par)
@@ -1287,31 +1291,5 @@ ServerHandler* ServerHandler::find(const std::string& name)
 	for(std::vector<ServerHandler*>::const_iterator it=servers_.begin(); it != servers_.end(); ++it)
 			if((*it)->name() == name)
 					return *it;
-	return NULL;
-}
-
-ServerHandler* ServerHandler::find(VNode *node)
-{
-	// XXXXX here we should protect access to the definitions, but we
-	// don't yet know which defs we are accessing!
-
-	//TODO!!!!!
-	//Reimplement this
-
-	/*if(node)
-	{
-		if(Defs* defs = node->defs())
-		{
-			const ServerState& st=defs->server();
-
-			//It is a question if this solution is fast enough. We may need to store
-			//directly the server name in ServerState
-			st.find_variable("nameInViewer");
-
-			return ServerHandler::find(st.find_variable("nameInViewer"));
-		}
-	}*/
-
-
 	return NULL;
 }
