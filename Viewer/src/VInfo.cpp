@@ -82,6 +82,17 @@ VInfo::~VInfo()
 		(*it)->notifyDelete(this);
 }
 
+void VInfo::notifyServerDelete(ServerHandler* server)
+{
+	//This function is called from the server destructor. We do not remove this object from the ServerObservers
+
+	server_=NULL;
+	node_=NULL;
+
+	//o->notifyDataLost(this);
+}
+
+
 void VInfo::notifyBeginServerClear(ServerHandler* server)
 {
 	node_=NULL;

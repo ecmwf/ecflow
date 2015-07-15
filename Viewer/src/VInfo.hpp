@@ -68,7 +68,7 @@ public:
 
 	//Form ServerObserver
 	void notifyDefsChanged(ServerHandler* server, const std::vector<ecf::Aspect::Type>& a) {};
-	void notifyServerDelete(ServerHandler* server) {} ;
+	void notifyServerDelete(ServerHandler* server);
 	void notifyBeginServerClear(ServerHandler* server);
 	void notifyEndServerClear(ServerHandler* server) {};
 	void notifyBeginServerScan(ServerHandler* server,const VServerChange&) {};

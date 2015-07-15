@@ -36,7 +36,7 @@ public:
 
 	enum ChangeAspect {Reset,Added,Removed};
 
-	const std::vector<ServerItem*> items() const {return items_;}
+	const std::vector<ServerItem*>& items() const {return items_;}
 	void addServer(ServerItem*,bool broadcast=true);
 	void removeServer(ServerItem*);
     bool isFiltered(ServerItem*) const;

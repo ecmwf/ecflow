@@ -67,9 +67,7 @@ public:
 	void disconnectServer();
 	void reset();
 
-	static void resetFirst();
-
-	int update();
+	void refresh();
 	void setUpdatingStatus(bool newStatus) {updating_ = newStatus;}
 
 	VServer* vRoot() const {return vRoot_;}
@@ -102,7 +100,6 @@ public:
 
 	static void addServerCommand(const std::string &name, const std::string& command);
 	static std::string resolveServerCommand(const std::string &name);
-	static void updateAll();
 
 
 protected:
@@ -154,7 +151,7 @@ private:
 
 	void updateSuiteFilter(const std::vector<std::string>&);
 
-	//Handle the update timer
+	//Handle the refresh timer
 	void stopRefreshTimer();
 	void startRefreshTimer();
 	void updateRefreshTimer();

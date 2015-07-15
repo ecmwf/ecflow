@@ -110,15 +110,12 @@ void MainWindow::on_actionQuit_triggered()
 
 void MainWindow::on_actionRefresh_triggered()
 {
-	ServerHandler::updateAll();
+	nodePanel_->refreshCurrent();
 }
 
 void MainWindow::on_actionReset_triggered()
 {
-	ServerHandler::resetFirst();
-
-	//ServerHandler::updateAll();
-	//MainWindow::reload();
+	nodePanel_->resetCurrent();
 }
 
 void MainWindow::on_actionPreferences_triggered()

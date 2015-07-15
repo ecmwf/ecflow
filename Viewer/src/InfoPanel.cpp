@@ -443,6 +443,9 @@ void InfoPanel::notifyDataLost(VInfo* info)
 
 void InfoPanel::notifyDefsChanged(ServerHandler *server, const std::vector<ecf::Aspect::Type>& aspect)
 {
+	if(frozen())
+		return;
+
 	if(info_.get())
 	{
 		if(info_->server() && info_->server() == server)
@@ -475,6 +478,9 @@ void InfoPanel::notifyEndServerScan(ServerHandler* server)
 
 void InfoPanel::notifyServerConnectState(ServerHandler* server)
 {
+	if(frozen())
+		return;
+
 	if(info_.get())
 	{
 		if(info_->server() && info_->server() == server)
@@ -490,6 +496,10 @@ void InfoPanel::notifyServerConnectState(ServerHandler* server)
 
 void InfoPanel::notifyServerSuiteFilterChanged(ServerHandler* server)
 {
+	//TODO: does frozen make sense in this case?
+	if(frozen())
+		return;
+
 	if(info_.get())
 	{
 		if(info_->server() && info_->server() == server)

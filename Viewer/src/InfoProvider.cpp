@@ -81,40 +81,50 @@ void InfoProvider::visit(VInfoNode* info)
 
     std::string fileName;
 
+    bool done=false;
+
     //We try to read the file directly from the disk
-    if(!fileVarName_.empty() && info->server()->readFromDisk())
+    if(info->server()->readFromDisk())
     {
-    	//Get the fileName
-    	fileName=n->genVariable(fileVarName_);
+    	//There is a variable defined for the filename
+    	if(!fileVarName_.empty())
+    	{
+    		//Get the fileName
+    		fileName=n->genVariable(fileVarName_);
 
-    	if(fileName.empty())
-    	{
-    		handleFileNotDefined(reply_);
-    		return;
-    	}
-    	else if(reply_->textFromFile(fileName))
-    	{
-    		owner_->infoReady(reply_);
-    		return;
-    	}
-    	else
-    	{
-    		handleFileMissing(fileName,reply_);
-    		return;
+    		//No filename is defined
+    		if(fileName.empty())
+    		{
+    			handleFileNotDefined(reply_);
+    			return;
+    		}
+    		else
+    		{
+    			if(reply_->textFromFile(fileName))
+    			{
+    				owner_->infoReady(reply_);
+    				return;
+    			}
+    			else
+    			{
+    				//handleFileMissing(fileName,reply_);
+    				//return;
+    			}
+    		}
     	}
     }
-    //Otherwise we try to get the file contents from the server
-    else
-    {
-    	//(this will go through the threaded communication)
 
-    	//Define a task for getting the info from the server.
-    	task_=VTask::create(taskType_,n,this);
 
-    	//Run the task in the server. When it finish taskFinished() is called. The text returned
-    	//in the reply will be prepended to the string we generated above.
-    	info->server()->run(task_);
-    }
+    //We try to get the file contents from the server
+    //(this will go through the threaded communication)
+
+    //Define a task for getting the info from the server.
+    task_=VTask::create(taskType_,n,this);
+
+    //Run the task in the server. When it finish taskFinished() is called. The text returned
+    //in the reply will be prepended to the string we generated above.
+    info->server()->run(task_);
+
 }
 
 void InfoProvider::handleFileNotDefined(VReply *reply)

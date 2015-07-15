@@ -358,33 +358,21 @@ void ServerHandler::manual(VTask_ptr task)
 	comQueue_->addTask(task);
 }
 
-
-void ServerHandler::updateAll()
+void ServerHandler::refresh()
 {
-	for(std::vector<ServerHandler*>::const_iterator it=servers_.begin(); it != servers_.end(); ++it)
-	{
-		(*it)->update();
-		//(*it)->resetRefreshTimer();  // to avoid too many server requests
-	}
-}
-
-int ServerHandler::update()
-{
-	//We add and update task to the queue. On startup this function can be called
+	//We add and refresh task to the queue. On startup this function can be called
 	//before the comQueue_ was created so we need to check if it exists.
 	if(comQueue_)
 	{
 		comQueue_->addNewsTask();
 	}
-
-	return 0;
 }
 
 //This slot is called by the timer regularly to get news from the server.
 void ServerHandler::refreshServerInfo()
 {
 	UserMessage::message(UserMessage::DBG, false, std::string("auto refreshing server info for ") + name());
-	update();
+	refresh();
 }
 
 std::string ServerHandler::commandToString(const std::vector<std::string>& cmd)
@@ -535,7 +523,7 @@ void ServerHandler::command(std::vector<VInfo_ptr> info, std::string cmd, bool r
 
 			//serverHandler->targetNodeNames_.clear();      // reset the target node names for next time
 			//serverHandler->targetNodeFullNames_.clear();  // reset the target node names for next time
-			//serverHandler->update();
+			//serverHandler->refresh();
 		}
 	}
 	else
@@ -654,7 +642,7 @@ void ServerHandler::slotNodeChanged(const Node* nc, const std::vector<ecf::Aspec
 	}
 }
 
-//When this slot is called we must be in the middle of an update.
+//When this slot is called we must be in the middle of an refresh.
 void ServerHandler::slotNodeDeleted(const std::string& fullPath)
 {
 	UserMessage::message(UserMessage::DBG, false, std::string("ServerHandler::slotNodeDeleted"));
@@ -703,7 +691,7 @@ void ServerHandler::slotDefsChanged(const std::vector<ecf::Aspect::Type>& a)
 		(*it)->notifyDefsChanged(this,a);
 }
 
-//When this slot is called we must be in the middle of an update.
+//When this slot is called we must be in the middle of an refresh.
 void ServerHandler::slotDefsDeleted()
 {
 	UserMessage::message(UserMessage::DBG, false, std::string("ServerHandler::slotDefsDeleted"));
@@ -711,7 +699,7 @@ void ServerHandler::slotDefsDeleted()
 	//There are significant changes. We will suspend the queue until the update finishes.
 	comQueue_->suspend();
 
-	//The  safest is to clear the tree. When the update is finished we will
+	//The  safest is to clear the tree. When the refresh is finished we will
 	//rescan the tree.
 	clearTree();
 }
@@ -1006,19 +994,11 @@ void ServerHandler::connectServer()
 		startRefreshTimer();
 
 		//Try to get the news
-		update();
+		refresh();
 
 		//TODO: attach the observers!!!!
 	}
 }
-
-//It is just for testing
-void ServerHandler::resetFirst()
-{
-	if(servers_.size() > 0)
-		servers_.at(0)->reset();
-}
-
 
 void ServerHandler::reset()
 {

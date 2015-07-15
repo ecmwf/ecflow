@@ -10,7 +10,7 @@
 #include "NodePanel.hpp"
 
 #include "Dashboard.hpp"
-#include "MainWindow.hpp"
+#include "ServerHandler.hpp"
 #include "VSettings.hpp"
 
 #include <QDebug>
@@ -40,14 +40,9 @@ NodePanel::~NodePanel()
 
 Dashboard *NodePanel::addWidget(QString id)
 {
-	//if(path.isEmpty())
-	//  	return 0;
-
   	Dashboard  *nw=new Dashboard("",this);
 
-	//QString name=fw->currentFolderName();
   	QString name("node");
-	//QPixmap pix=MvQIconProvider::pixmap(fw->currentFolder(),24);
   	QPixmap pix;
 
 	addTab(nw,pix,name);
@@ -59,19 +54,6 @@ Dashboard *NodePanel::addWidget(QString id)
 	connect(nw,SIGNAL(titleChanged(QWidget*,QString,QPixmap)),
 				this,SLOT(slotTabTitle(QWidget*,QString,QPixmap)));
 
-	/*connect(fw,SIGNAL(pathChanged()),
-		this,SLOT(slotPathChanged()));
-
-	connect(fw,SIGNAL(iconCommandRequested(QString,IconObjectH)),
-		this,SLOT(slotIconCommand(QString,IconObjectH)));
-
-	connect(fw,SIGNAL(desktopCommandRequested(QString,QPoint)),
-		this,SLOT(slotDesktopCommand(QString,QPoint)));
-
-	connect(fw,SIGNAL(itemInfoChanged(QString)),
-		this,SIGNAL(itemInfoChanged(QString)));*/
-
-	//setDefaults(this);
 
 	return nw;
 }
@@ -237,6 +219,38 @@ void NodePanel::rerender()
 		{
 			if(Dashboard* nw=static_cast<Dashboard*>(w))
 				nw->rerender();
+		}
+	}
+}
+
+
+void NodePanel::refreshCurrent()
+{
+	ServerFilter* filter=serverFilter();
+	if(!filter)
+		return;
+
+	for(std::vector<ServerItem*>::const_iterator it=filter->items().begin(); it != filter->items().end(); ++it)
+	{
+		if(ServerHandler *sh=(*it)->serverHandler())
+		{
+			sh->refresh();
+		}
+	}
+}
+
+
+void NodePanel::resetCurrent()
+{
+	ServerFilter* filter=serverFilter();
+	if(!filter)
+		return;
+
+	for(std::vector<ServerItem*>::const_iterator it=filter->items().begin(); it != filter->items().end(); ++it)
+	{
+		if(ServerHandler *sh=(*it)->serverHandler())
+		{
+			sh->reset();
 		}
 	}
 }
