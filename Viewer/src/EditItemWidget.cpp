@@ -44,18 +44,13 @@ QWidget* EditItemWidget::realWidget()
 
 void EditItemWidget::reload(VInfo_ptr info)
 {
+	clearContents();
+
 	loaded_=true;
 	info_=info;
 
-	if(!info.get())
+	if(info_ && info_.get())
 	{
-		clearContents();
-	}
-	else
-	{
-		//Clear the contents
-		clearContents();
-
 		//Get file contents
 		EditProvider* ep=static_cast<EditProvider*>(infoProvider_);
 		ep->preproc(preproc());
@@ -65,6 +60,7 @@ void EditItemWidget::reload(VInfo_ptr info)
 
 void EditItemWidget::clearContents()
 {
+	InfoPanelItem::clear();
 	textEdit_->clear();
 }
 

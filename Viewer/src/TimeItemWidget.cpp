@@ -37,6 +37,7 @@ void TimeItemWidget::reload(VInfo_ptr nodeInfo)
 
 void TimeItemWidget::clearContents()
 {
+	InfoPanelItem::clear();
 }
 
 

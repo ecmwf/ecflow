@@ -30,6 +30,8 @@ QWidget* TriggerItemWidget::realWidget()
 
 void TriggerItemWidget::reload(VInfo_ptr nodeInfo)
 {
+	clearContents();
+
 	loaded_=true;
 
 	if(nodeInfo.get() != 0 && nodeInfo->isNode())
@@ -45,7 +47,7 @@ void TriggerItemWidget::reload(VInfo_ptr nodeInfo)
 
 void TriggerItemWidget::clearContents()
 {
-	loaded_=false;
+	InfoPanelItem::clear();
 }
 
 static InfoPanelItemMaker<TriggerItemWidget> maker1("trigger");

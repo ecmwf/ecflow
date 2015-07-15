@@ -59,10 +59,6 @@ public:
 
 	virtual void accept(VInfoVisitor*)=0;
 
-	//static VInfo_ptr make(ServerHandler*);
-	//static VInfo_ptr make(VNode*,ServerHandler* server=0);
-	//static VInfo_ptr make(VAttribute*,int,VNode*);
-
 	void addObserver(VInfoObserver*);
 	void removeObserver(VInfoObserver*);
 
@@ -79,6 +75,7 @@ public:
 
 protected:
 	VInfo(ServerHandler* server,VNode* node);
+	void dataLost();
 
 	mutable ServerHandler* server_;
 	mutable std::string nodePath_;

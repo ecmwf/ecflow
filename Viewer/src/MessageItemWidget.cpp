@@ -21,7 +21,6 @@ MessageItemWidget::MessageItemWidget(QWidget *parent) : CodeItemWidget(parent)
     Highlighter* ih=new Highlighter(textEdit_->document(),"message");
 
     infoProvider_=new MessageProvider(this);
-
 }
 
 QWidget* MessageItemWidget::realWidget()
@@ -29,16 +28,14 @@ QWidget* MessageItemWidget::realWidget()
     return this;
 }
 
-void MessageItemWidget::reload(VInfo_ptr nodeInfo)
+void MessageItemWidget::reload(VInfo_ptr info)
 {
-    loaded_=true;
-    info_=nodeInfo;
+	clearContents();
 
-    if(!nodeInfo.get())
-    {
-        textEdit_->clear();
-    }
-    else
+	loaded_=true;
+    info_=info;
+
+    if(info_ && info_.get())
     {
         clearContents();
         infoProvider_->info(info_);
@@ -47,7 +44,7 @@ void MessageItemWidget::reload(VInfo_ptr nodeInfo)
 
 void MessageItemWidget::clearContents()
 {
-    loaded_=false;
+    InfoPanelItem::clear();
     textEdit_->clear();
 }
 
@@ -68,6 +65,5 @@ void MessageItemWidget::infoFailed(VReply* reply)
     QString s=QString::fromStdString(reply->errorText());
     textEdit_->setPlainText(s);
 }
-
 
 static InfoPanelItemMaker<MessageItemWidget> maker1("message");

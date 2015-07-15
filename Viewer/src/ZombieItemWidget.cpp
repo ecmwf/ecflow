@@ -38,7 +38,6 @@ ZombieItemWidget::ZombieItemWidget(QWidget *parent) : QWidget(parent)
 	connect(zombieView->selectionModel(),SIGNAL(currentChanged(QModelIndex,QModelIndex)),
 			this,SLOT(slotItemSelected(QModelIndex,QModelIndex)));
 
-
 }
 
 QWidget* ZombieItemWidget::realWidget()
@@ -48,6 +47,8 @@ QWidget* ZombieItemWidget::realWidget()
 
 void ZombieItemWidget::reload(VInfo_ptr info)
 {
+	clearContents();
+
 	loaded_=true;
 	info_=info;
 
@@ -55,15 +56,11 @@ void ZombieItemWidget::reload(VInfo_ptr info)
 	{
 		infoProvider_->info(info_);
 	}
-	else
-	{
-		clearContents();
-	}
 }
 
 void ZombieItemWidget::clearContents()
 {
-	loaded_=false;
+	InfoPanelItem::clear();
 	model_->clearData();
 }
 
@@ -72,7 +69,6 @@ void ZombieItemWidget::infoReady(VReply* reply)
 	//We need to know what task it was!
 	model_->setData(reply->zombies());
 }
-
 
 void ZombieItemWidget::infoFailed(VReply* reply)
 {

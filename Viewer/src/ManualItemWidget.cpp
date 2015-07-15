@@ -32,28 +32,23 @@ QWidget* ManualItemWidget::realWidget()
     return this;
 }
 
-void ManualItemWidget::reload(VInfo_ptr nodeInfo)
+void ManualItemWidget::reload(VInfo_ptr info)
 {
-    loaded_=true;
-    info_=nodeInfo;
+	clearContents();
+
+	loaded_=true;
+    info_=info;
     messageLabel_->hide();
 
-    if(!nodeInfo.get())
+    if(info_ && info_.get())
     {
-        //fileLabel_->clear();
-    	textEdit_->clear();
-    }
-    else
-    {
-        clearContents();
         infoProvider_->info(info_);
     }   
 }
 
 void ManualItemWidget::clearContents()
 {
-    loaded_=false;
-   // fileLabel_->clear();
+    InfoPanelItem::clear();
     textEdit_->clear();
     messageLabel_->hide();
 

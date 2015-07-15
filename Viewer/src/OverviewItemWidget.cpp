@@ -42,16 +42,13 @@ QWidget* OverviewItemWidget::realWidget()
 
 void OverviewItemWidget::reload(VInfo_ptr info)
 {
+	clearContents();
+
 	//set the info
 	adjust(info);
 
-	if(!info_.get())
+	if(info_ && info.get())
 	{
-		textEdit_->clear();
-	}
-	else
-	{
-		clearContents();
 		infoProvider_->info(info_);
 	}
 
@@ -69,7 +66,7 @@ void OverviewItemWidget::reload()
 
 void OverviewItemWidget::clearContents()
 {
-	loaded_=false;
+	InfoPanelItem::clear();
 	textEdit_->clear();
 }
 

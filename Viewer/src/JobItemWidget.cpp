@@ -30,19 +30,16 @@ QWidget* JobItemWidget::realWidget()
 
 void JobItemWidget::reload(VInfo_ptr info)
 {
-    loaded_=true;
+	clearContents();
+
+	loaded_=true;
     info_=info;
 
     messageLabel_->hide();
 
     //Info must be a node
-    if(!info_.get() || !info_->isNode() || !info_->node())
+    if(info_.get() && info_->isNode() && info_->node())
     {
-        textEdit_->clear();
-    }
-    else
-    {
-        clearContents();
         fileLabel_->setText(tr("<b>File:</b> ") + QString::fromStdString(info_->node()->genVariable("ECF_JOB")));
         infoProvider_->info(info_);
     }   
@@ -50,7 +47,7 @@ void JobItemWidget::reload(VInfo_ptr info)
 
 void JobItemWidget::clearContents()
 {
-    loaded_=false;
+    InfoPanelItem::clear();
     textEdit_->clear();
     messageLabel_->hide();
 }

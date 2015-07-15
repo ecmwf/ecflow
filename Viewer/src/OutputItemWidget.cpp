@@ -74,18 +74,13 @@ QWidget* OutputItemWidget::realWidget()
 
 void OutputItemWidget::reload(VInfo_ptr info)
 {
+	clearContents();
+
 	loaded_=true;
 	info_=info;
 
-	if(!info.get())
+    if(info_ && info_.get())
 	{
-		clearContents();
-	}
-    else
-	{
-	    //Clear the contents
-    	clearContents();
-
 	    //Get file contents
 	    infoProvider_->info(info_);
 
@@ -130,6 +125,8 @@ void OutputItemWidget::enableDir(bool status)
 void OutputItemWidget::clearContents()
 {
 	//loaded_=false;
+
+	InfoPanelItem::clear();
 
 	fileLabel_->clear();
 	textEdit_->clear();

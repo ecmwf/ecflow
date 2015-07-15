@@ -45,6 +45,8 @@ QWidget* SuiteItemWidget::realWidget()
 
 void SuiteItemWidget::reload(VInfo_ptr info)
 {
+	clearContents();
+
 	loaded_=true;
 	info_=info;
 
@@ -57,20 +59,13 @@ void SuiteItemWidget::reload(VInfo_ptr info)
 			autoTb->setChecked(sf->autoAddNewSuites());
 			updateWidgetState();
 		}
-		else
-		{
-			model_->setData(0);
-		}
-	}
-	else
-	{
-		clearContents();
 	}
 }
 
 void SuiteItemWidget::clearContents()
 {
 	model_->setData(0);
+	InfoPanelItem::clear();
 }
 
 void SuiteItemWidget::updateWidgetState()

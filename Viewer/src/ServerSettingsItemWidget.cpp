@@ -35,6 +35,8 @@ QWidget* ServerSettingsItemWidget::realWidget()
 
 void ServerSettingsItemWidget::reload(VInfo_ptr info)
 {
+	clearContents();
+
 	loaded_=true;
 	info_=info;
 
@@ -50,11 +52,15 @@ void ServerSettingsItemWidget::reload(VInfo_ptr info)
 
 void ServerSettingsItemWidget::clearContents()
 {
-	loaded_=false;
+	InfoPanelItem::clear();
+	//TODO: properly set gui state
 }
 
 void ServerSettingsItemWidget::slotClicked(QAbstractButton* button)
 {
+	if(!loaded_)
+		return;
+
 	switch(buttonBox_->standardButton(button))
 	{
 	case QDialogButtonBox::Apply:

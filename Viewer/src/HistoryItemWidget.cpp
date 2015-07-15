@@ -27,24 +27,20 @@ QWidget* HistoryItemWidget::realWidget()
 
 void HistoryItemWidget::reload(VInfo_ptr info)
 {
-    loaded_=true;
+	clearContents();
+
+	loaded_=true;
     info_=info;
 
-    if(!info.get())
+    if(info_ && info_.get())
     {
-        textEdit_->clear();
-    }
-    else
-    {
-        clearContents();
-        //fileLabel_->setText(tr("File: ") + QString::fromStdString(info_->genVariable("ECF_JOB")));
         infoProvider_->info(info_);
     }
 }
 
 void HistoryItemWidget::clearContents()
 {
-    loaded_=false;
+    InfoPanelItem::clear();
     textEdit_->clear();
 }
 

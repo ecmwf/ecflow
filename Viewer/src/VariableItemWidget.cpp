@@ -309,6 +309,8 @@ QWidget* VariableItemWidget::realWidget()
 //A new info object is set
 void VariableItemWidget::reload(VInfo_ptr info)
 {
+	clearContents();
+
 	adjust(info);
 	data_->reload(info);
 	varView->expandAll();

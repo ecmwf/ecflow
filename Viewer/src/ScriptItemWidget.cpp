@@ -37,6 +37,8 @@ QWidget* ScriptItemWidget::realWidget()
 
 void ScriptItemWidget::reload(VInfo_ptr info)
 {
+    clearContents();
+    
     loaded_=true;
     info_=info;
 
@@ -44,12 +46,10 @@ void ScriptItemWidget::reload(VInfo_ptr info)
 
     if(!info.get() || !info->isNode() || !info->node())
     {
-        fileLabel_->clear();
-        textEdit_->clear();
+       return;
     }
     else
     {
-        clearContents();
         fileLabel_->setText(tr("<b>File:</b> ") + QString::fromStdString(info->node()->genVariable("ECF_SCRIPT")));
         infoProvider_->info(info_);
     }	
@@ -57,7 +57,7 @@ void ScriptItemWidget::reload(VInfo_ptr info)
 
 void ScriptItemWidget::clearContents()
 {
-    loaded_=false;
+    InfoPanelItem::clear();
     fileLabel_->clear();
     textEdit_->clear();
     messageLabel_->hide();

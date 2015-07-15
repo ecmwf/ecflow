@@ -32,6 +32,8 @@ QWidget* WhyItemWidget::realWidget()
 
 void WhyItemWidget::reload(VInfo_ptr info)
 {
+	clearContents();
+
 	loaded_=true;
 	info_=info;
 
@@ -39,15 +41,11 @@ void WhyItemWidget::reload(VInfo_ptr info)
 	{
 		textEdit_->setPlainText(why());
 	}
-	else
-	{
-		textEdit_->clear();
-	}
 }
 
 void WhyItemWidget::clearContents()
 {
-	loaded_=false;
+	InfoPanelItem::clear();
 	textEdit_->clear();
 }
 

@@ -89,9 +89,20 @@ void VInfo::notifyServerDelete(ServerHandler* server)
 	server_=NULL;
 	node_=NULL;
 
-	//o->notifyDataLost(this);
+	dataLost();
 }
 
+void VInfo::dataLost()
+{
+	std::vector<VInfoObserver*> obsTmp=observers_;
+	observers_.clear();
+
+	for(std::vector<VInfoObserver*>::iterator it=obsTmp.begin(); it != obsTmp.end(); ++it)
+	{
+		VInfoObserver* o=*it;
+		o->notifyDataLost(this);
+	}
+}
 
 void VInfo::notifyBeginServerClear(ServerHandler* server)
 {
@@ -105,13 +116,7 @@ void VInfo::notifyEndServerScan(ServerHandler* server)
 		node_=server_->vRoot()->find(nodePath_);
 		if(!node_)
 		{
-			for(std::vector<VInfoObserver*>::iterator it=observers_.begin(); it != observers_.end(); ++it)
-			{
-				VInfoObserver* o=*it;
-
-				observers_.erase(it);
-				o->notifyDataLost(this);
-			}
+			dataLost();
 		}
 	}
 }

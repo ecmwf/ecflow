@@ -92,6 +92,8 @@ void InfoPanelItem::clear()
   	  	info_->server()->removeNodeObserver(this);
   	}
 
+	info_.reset();
+
 	loaded_=false;
 }
 

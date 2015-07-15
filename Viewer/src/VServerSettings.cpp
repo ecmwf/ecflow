@@ -25,6 +25,7 @@
 
 #include <boost/property_tree/json_parser.hpp>
 #include <boost/algorithm/string.hpp>
+#include <boost/filesystem/operations.hpp>
 
 std::map<VServerSettings::Param,std::string> VServerSettings::parNames_;
 VProperty* VServerSettings::globalProp_=0;
@@ -128,11 +129,14 @@ void VServerSettings::loadSettings()
 	VConfig::instance()->loadSettings(fName,guiProp_);
 
 	//Some  settings are read through VSettings
-	VSettings vs(fName);
-	vs.read();
-	vs.beginGroup("suite_filter");
-	server_->suiteFilter()->readSettings(&vs);
-	vs.endGroup();
+	if(boost::filesystem::exists(fName))
+	{
+		VSettings vs(fName);
+		vs.read();
+		vs.beginGroup("suite_filter");
+		server_->suiteFilter()->readSettings(&vs);
+		vs.endGroup();
+	}
 }
 
 void VServerSettings::saveSettings()
