@@ -109,6 +109,9 @@ void InfoPanelItem::setDetached(bool b)
 //From NodeObserver
 void InfoPanelItem::notifyBeginNodeChange(const VNode* node, const std::vector<ecf::Aspect::Type>& aspect,const VNodeChange&)
 {
+	if(frozen_)
+		return;
+
 	if(!loaded_)
         return;
     

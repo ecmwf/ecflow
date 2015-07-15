@@ -23,6 +23,10 @@ OutputItemWidget::OutputItemWidget(QWidget *parent) :
 {
 	setupUi(this);
 
+	messageLabel_->hide();
+	dirLabel_->hide();
+	searchLine_->hide();
+
 	QFont f;
 	f.setFamily("Monospace");
 	//f.setFamily("Courier");
@@ -52,6 +56,15 @@ OutputItemWidget::OutputItemWidget(QWidget *parent) :
 	//When the selection changes in the view
 	connect(outputView_->selectionModel(),SIGNAL(currentChanged(QModelIndex,QModelIndex)),
 			this,SLOT(slotOutputSelected(QModelIndex,QModelIndex)));
+
+	//Splitter
+	int wHeight=size().height();
+	if(wHeight > 100)
+	{
+		QList<int> sizes;
+		sizes << wHeight-80 << 80;
+		splitter_->setSizes(sizes);
+	}
 }
 
 QWidget* OutputItemWidget::realWidget()
@@ -89,13 +102,13 @@ void OutputItemWidget::updateDir(VDir_ptr dir)
 	if(status)
 	{
 		dirModel_->setData(dir);
-		dirLabel_->update(dir);
+		//dirLabel_->update(dir);
 		dirWidget_->show();
 	}
 	else
 	{
 		dirWidget_->hide();
-		dirLabel_->clear();
+		//dirLabel_->clear();
 		dirModel_->clearData();
 	}
 }
@@ -109,7 +122,7 @@ void OutputItemWidget::enableDir(bool status)
 	else
 	{
 		dirWidget_->hide();
-		dirLabel_->clear();
+		//dirLabel_->clear();
 		dirModel_->clearData();
 	}
 }
@@ -160,6 +173,15 @@ void OutputItemWidget::infoFailed(VReply* reply)
     //Update the file label
     fileLabel_->update(reply);
 
+}
+
+void OutputItemWidget::on_searchTb__toggled(bool b)
+{
+	searchLine_->setVisible(b);
+	if(b)
+	{
+		searchLine_->setFocus();
+	}
 }
 
 //This slot is called when a file item is selected in the output view.

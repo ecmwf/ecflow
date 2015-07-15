@@ -43,7 +43,7 @@ class VariablePropDialog : public QDialog, private Ui::VariablePropDialog //, pu
 Q_OBJECT
 
 public:
-	VariablePropDialog(VariableModelData* data,QString name,QString value,bool genVar,QWidget* parent=0);
+	VariablePropDialog(VariableModelData* data,QString name,QString value,bool genVar,bool frozen,QWidget* parent=0);
 
 	QString name() const;
 	QString value() const;
@@ -104,7 +104,7 @@ protected:
 	void duplicateItem(const QModelIndex& index);
 	void addItem(const QModelIndex& index);
 	void removeItem(const QModelIndex& index);
-	void updateWidgetState() {};
+	void updateWidgetState();
 
 	void nodeChanged(const VNode*, const std::vector<ecf::Aspect::Type>&);
 	void defsChanged(const std::vector<ecf::Aspect::Type>&);

@@ -81,9 +81,18 @@ QFrame[breadcrumbs="1"] {
   Info panel text
 ------------------------------*/
 
-TextEdit[readOnly="true"] { 
+/*TextEdit[readOnly="true"] { 
+    background-color: rgb(242,242,242);
+}*/
+
+QPlainTextEdit[readOnly="true"] { 
     background-color: rgb(242,242,242);
 }
+
+QLineEdit[readOnly="true"] { 
+    background-color: rgb(242,242,242);
+}
+
 
 /*----------------------------
   File info label

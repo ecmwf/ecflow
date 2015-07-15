@@ -12,6 +12,7 @@
 #include <QDebug>
 #include <QItemSelectionModel>
 #include <QMessageBox>
+#include <QPushButton>
 #include <QVBoxLayout>
 
 #include "LineEdit.hpp"
@@ -75,7 +76,7 @@ void VariableDialogChecker::error(QString msg)
 //
 //======================================
 
-VariablePropDialog::VariablePropDialog(VariableModelData *data,QString name, QString value,bool genVar,QWidget *parent) :
+VariablePropDialog::VariablePropDialog(VariableModelData *data,QString name, QString value,bool genVar,bool frozen,QWidget *parent) :
    QDialog(parent),
    genVar_(genVar),
    data_(data)
@@ -87,6 +88,17 @@ VariablePropDialog::VariablePropDialog(VariableModelData *data,QString name, QSt
 	typeLabel_->setText(genVar?tr("generated variable"):tr("variable"));
 	nameEdit_->setText(name);
 	valueEdit_->setPlainText(value);
+
+	if(frozen)
+	{
+		nameEdit_->setReadOnly(true);
+		valueEdit_->setReadOnly(true);
+
+		QPushButton* sb=buttonBox_->button(QDialogButtonBox::Save);
+		assert(sb);
+		sb->setEnabled(false);
+	}
+
 }
 
 void VariablePropDialog::accept()
@@ -317,6 +329,13 @@ void VariableItemWidget::slotItemSelected(const QModelIndex& idx,const QModelInd
 	checkActionState();
 }
 
+
+void VariableItemWidget::updateWidgetState()
+{
+	checkActionState();
+}
+
+
 void VariableItemWidget::checkActionState()
 {
 	QModelIndex vIndex=varView->currentIndex();
@@ -334,16 +353,32 @@ void VariableItemWidget::checkActionState()
 		//Variables
 		if(model_->isVariable(index))
 		{
-			actionAdd->setEnabled(true);
+			if(frozen_)
+			{
+				actionAdd->setEnabled(false);
+				actionDelete->setEnabled(false);
+			}
+			else
+			{
+				actionAdd->setEnabled(true);
+				actionDelete->setEnabled(true);
+			}
 			actionProp->setEnabled(true);
-			actionDelete->setEnabled(true);
 		}
 		//Server or nodes
 		else
 		{
-			actionAdd->setEnabled(true);
+			if(frozen_)
+			{
+				actionAdd->setEnabled(false);
+				actionDelete->setEnabled(false);
+			}
+			else
+			{
+				actionAdd->setEnabled(true);
+				actionDelete->setEnabled(false);
+			}
 			actionProp->setEnabled(false);
-			actionDelete->setEnabled(false);
 		}
 	}
 }
@@ -362,9 +397,9 @@ void VariableItemWidget::editItem(const QModelIndex& index)
 	if(data && model_->variable(vIndex,name,value,genVar))
 	{
 		//Start edit dialog
-		VariablePropDialog d(data,name,value,genVar,this);
+		VariablePropDialog d(data,name,value,genVar,frozen_,this);
 
-		if(d.exec()== QDialog::Accepted)
+		if(d.exec()== QDialog::Accepted && !frozen_)
 		{
 			model_->setVariable(vIndex,name,d.value());
 		}
@@ -373,6 +408,9 @@ void VariableItemWidget::editItem(const QModelIndex& index)
 
 void VariableItemWidget::duplicateItem(const QModelIndex& index)
 {
+	if(frozen_)
+			return;
+
 	QString name;
 	QString value;
 	bool genVar;
@@ -396,6 +434,9 @@ void VariableItemWidget::duplicateItem(const QModelIndex& index)
 
 void VariableItemWidget::addItem(const QModelIndex& index)
 {
+	if(frozen_)
+		return;
+
 	QModelIndex vIndex=sortModel_->mapToSource(index);
 
 	if(VariableModelData* data=model_->indexToData(vIndex))
@@ -412,6 +453,9 @@ void VariableItemWidget::addItem(const QModelIndex& index)
 
 void VariableItemWidget::removeItem(const QModelIndex& index)
 {
+	if(frozen_)
+		return;
+
 	QString name;
 	QString value;
 	bool genVar;

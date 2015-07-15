@@ -41,6 +41,7 @@ public:
 
 protected Q_SLOTS:
 	void slotOutputSelected(QModelIndex,QModelIndex);
+	void on_searchTb__toggled(bool b);
 
 protected:
 	void updateDir(VDir_ptr dir);
