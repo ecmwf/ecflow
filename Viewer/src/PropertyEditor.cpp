@@ -12,6 +12,7 @@
 
 #include <QDebug>
 #include <QGroupBox>
+#include <QHBoxLayout>
 #include <QLabel>
 #include <QToolButton>
 
@@ -100,29 +101,36 @@ void PropertyEditor::addItem(VProperty* vProp,QGridLayout* gridLayout)
     		if(lw)
     		{
     			gridLayout->addWidget(lw,row,0,Qt::AlignLeft);
-    			gridLayout->addWidget(item->item(),row,1,Qt::AlignLeft);
-    			col=2;
+
+    			if(slw)
+    			{
+    				QHBoxLayout* hb=new QHBoxLayout;
+    				hb->addWidget(item->item());
+    				hb->addWidget(slw);
+    				gridLayout->addLayout(hb,row,1,Qt::AlignLeft);
+    			}
+    			else
+    			{
+    				gridLayout->addWidget(item->item(),row,1,Qt::AlignLeft);
+    			}
+
     		}
     		else
     		{
     			gridLayout->addWidget(item->item(),row,0,1,2,Qt::AlignLeft);
-    			col=3;
+
     		}
 
-    		if(slw)
-    		{
-    			gridLayout->addWidget(slw,row,col,Qt::AlignLeft);
-    		}
 
     		QWidget *bw=item->button();
     		if(bw)
-    			gridLayout->addWidget(bw,row,4);
+    			gridLayout->addWidget(bw,row,2);
 
 
     		QToolButton* defTb=item->defaultTb();
     		if(defTb)
     		{
-    			gridLayout->addWidget(defTb,row,5);
+    			gridLayout->addWidget(defTb,row,3);
     		}
 
     		lineItems_ << item;
@@ -135,7 +143,7 @@ void PropertyEditor::addItem(VProperty* vProp,QGridLayout* gridLayout)
 		groupBox->setObjectName("editorGroupBox");
 		QGridLayout *grid=new QGridLayout();
 		grid->setColumnStretch(1,1);
-		grid->setColumnStretch(2,1);
+		//grid->setColumnStretch(2,1);
 		//grid->setColumnStretch(3,1);
 
 		groupBox->setLayout(grid);
@@ -143,7 +151,7 @@ void PropertyEditor::addItem(VProperty* vProp,QGridLayout* gridLayout)
 
 		//add it to the main layout
 		int row=grid_->rowCount();
-		grid_->addWidget(groupBox,row,0,2,5);
+		grid_->addWidget(groupBox,row,0,2,4);
 
 		//Loop over the children of the group
 		Q_FOREACH(VProperty* chProp,vProp->children())

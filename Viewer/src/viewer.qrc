@@ -2,7 +2,7 @@
   <qresource prefix="viewer">
     <file>../images/dock_float.svg</file>
     <file>../images/dock_close.svg</file>
-    <file>../images/configure.svg</file>
+    <file alias="configure.svg">../images/configure.svg</file>
     <file>../images/reset.svg</file>
     <file>../images/search.svg</file>
     <file alias="info.svg">../images/info.svg</file>

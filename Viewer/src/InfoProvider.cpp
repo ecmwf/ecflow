@@ -93,13 +93,13 @@ void InfoProvider::visit(VInfoNode* info)
     		fileName=n->genVariable(fileVarName_);
 
     		//No filename is defined
-    		if(fileName.empty())
+    		/*if(fileName.empty())
     		{
     			handleFileNotDefined(reply_);
     			return;
     		}
     		else
-    		{
+    		{*/
     			if(reply_->textFromFile(fileName))
     			{
     				owner_->infoReady(reply_);
@@ -110,7 +110,7 @@ void InfoProvider::visit(VInfoNode* info)
     				//handleFileMissing(fileName,reply_);
     				//return;
     			}
-    		}
+    		//}
     	}
     }
 

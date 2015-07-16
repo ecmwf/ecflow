@@ -7,6 +7,13 @@
                         "bold"    : "true"
                                 
                 },
+                
+                "keyword" : {
+                    "pattern" : "(def|edit)",                       
+                    "colour"  : "rgb(0,0,0)",
+                    "bold"    : "true"
+                }, 
+                
                 "genvar" : {
                         "pattern" : "^\\s*(# time-date-dependencies|# edit|edit)",                       
                         "colour"  : "rgb(128,128,128)",
