@@ -24,20 +24,28 @@ PropertyEditor::PropertyEditor(QWidget* parent) : QWidget(parent), group_(0)
     setupUi(this);
 
     grid_->setColumnStretch(1,1);
+    grid_->setColumnStretch(2,1);
+    grid_->setColumnStretch(3,1);
 }
 
 PropertyEditor::~PropertyEditor()
 {
 }
 
-void PropertyEditor::edit(VProperty * vGroup)
+void PropertyEditor::edit(VProperty * vGroup,QString label)
 {
 	 clear();
 
 	 group_=vGroup;
 
-	 headerLabel_->setText(group_->param("desc"));
-
+	 if(label.isEmpty())
+	 {
+		 headerLabel_->setText(group_->param("desc"));
+	 }
+	 else
+	 {
+		 headerLabel_->setText(label);
+	 }
 	 build();
 }
 
@@ -84,27 +92,37 @@ void PropertyEditor::addItem(VProperty* vProp,QGridLayout* gridLayout)
     		item->reset(vProp->link()->value());
 
     		int row=gridLayout->rowCount();
+    		int col=0;
 
     		QLabel* lw=item->label();
+    		QLabel* slw=item->suffixLabel();
+
     		if(lw)
     		{
     			gridLayout->addWidget(lw,row,0,Qt::AlignLeft);
     			gridLayout->addWidget(item->item(),row,1,Qt::AlignLeft);
+    			col=2;
     		}
     		else
     		{
     			gridLayout->addWidget(item->item(),row,0,1,2,Qt::AlignLeft);
+    			col=3;
+    		}
+
+    		if(slw)
+    		{
+    			gridLayout->addWidget(slw,row,col,Qt::AlignLeft);
     		}
 
     		QWidget *bw=item->button();
     		if(bw)
-    			gridLayout->addWidget(bw,row,2);
+    			gridLayout->addWidget(bw,row,4);
 
 
     		QToolButton* defTb=item->defaultTb();
     		if(defTb)
     		{
-    			gridLayout->addWidget(defTb,row,3);
+    			gridLayout->addWidget(defTb,row,5);
     		}
 
     		lineItems_ << item;
@@ -117,12 +135,15 @@ void PropertyEditor::addItem(VProperty* vProp,QGridLayout* gridLayout)
 		groupBox->setObjectName("editorGroupBox");
 		QGridLayout *grid=new QGridLayout();
 		grid->setColumnStretch(1,1);
+		grid->setColumnStretch(2,1);
+		//grid->setColumnStretch(3,1);
+
 		groupBox->setLayout(grid);
 		gridLayout=grid;
 
 		//add it to the main layout
 		int row=grid_->rowCount();
-		grid_->addWidget(groupBox,row,0,2,3);
+		grid_->addWidget(groupBox,row,0,2,5);
 
 		//Loop over the children of the group
 		Q_FOREACH(VProperty* chProp,vProp->children())

@@ -65,10 +65,17 @@ PropertyLine* PropertyLineFactory::create(VProperty* p,QWidget* w)
 PropertyLine::PropertyLine(VProperty* vProp,bool addLabel,QWidget * parent) :
 	QObject(parent),
 	prop_(vProp),
-	label_(0)
+	label_(0),
+	suffixLabel_(0)
 {
 	if(addLabel)
 		label_=new QLabel(vProp->param("label"),parent);
+
+	QString suffixText=vProp->param("suffix");
+	if(!suffixText.isEmpty())
+	{
+		suffixLabel_=new QLabel(suffixText);
+	}
 
 	defaultTb_= new QToolButton(parent);
 	defaultTb_->setText("Default");
@@ -100,6 +107,8 @@ void PropertyLine::checkState()
 
 StringPropertyLine::StringPropertyLine(VProperty* vProp,QWidget * parent) : PropertyLine(vProp,parent)
 {
+	label_->setText(label_->text() + ":");
+
 	le_=new QLineEdit(parent);
 
 	connect(le_,SIGNAL(textEdited(QString)),
@@ -151,6 +160,8 @@ void StringPropertyLine::slotEdited(QString)
 
 ColourPropertyLine::ColourPropertyLine(VProperty* vProp,QWidget * parent) : PropertyLine(vProp,true,parent)
 {
+	label_->setText(label_->text() + ":");
+
 	QFont f;
 	QFontMetrics fm(f);
 	int height=fm.height();
@@ -222,6 +233,8 @@ QVariant ColourPropertyLine::currentValue()
 
 FontPropertyLine::FontPropertyLine(VProperty* vProp,QWidget * parent) : PropertyLine(vProp,true,parent)
 {
+	label_->setText(label_->text() + ":");
+
 	lName_=new QLabel(parent);
 
 	tbEdit_=new QToolButton(parent);
@@ -286,6 +299,8 @@ QVariant FontPropertyLine::currentValue()
 
 IntPropertyLine::IntPropertyLine(VProperty* vProp,QWidget * parent) : PropertyLine(vProp,true,parent)
 {
+	label_->setText(label_->text() + ":");
+
 	le_=new QLineEdit(parent);
 	QIntValidator* validator=new QIntValidator(le_);
 

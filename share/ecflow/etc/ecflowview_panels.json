@@ -106,6 +106,7 @@
         {
         	"name"    : "server_settings",
             "label"   : "Settings",
+            "icon"	  : "configure.svg",
             "visible_for" : "server"
              
         }  

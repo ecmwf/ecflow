@@ -26,7 +26,7 @@ public:
     explicit PropertyEditor(QWidget *parent=0);
     ~PropertyEditor();
 
-    void edit(VProperty*);
+    void edit(VProperty*,QString label=QString());
     bool applyChange();
     VProperty* property() const {return group_;}
 

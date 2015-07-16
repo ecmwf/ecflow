@@ -115,7 +115,7 @@ QSize TreeNodeViewDelegate::sizeHint(const QStyleOptionViewItem & option, const 
 
 	QFontMetrics fm(font_);
 	int h=fm.height();
-	return QSize(size.width(),h+10);
+	return QSize(size.width(),h+8);
 }
 
 void TreeNodeViewDelegate::paint(QPainter *painter,const QStyleOptionViewItem &option,
@@ -223,7 +223,7 @@ void TreeNodeViewDelegate::renderServer(QPainter *painter,const QModelIndex& ind
 	int currentRight=0;
 
 	QFontMetrics fm(font_);
-	int deltaH=(option.rect.height()-(fm.height()+6))/2;
+	int deltaH=(option.rect.height()-(fm.height()+4))/2;
 
 	//The initial filled rect (we will adjust its  width)
 	//QRect fillRect=option.rect.adjusted(offset,1,0,-2);
@@ -411,7 +411,7 @@ void TreeNodeViewDelegate::renderNode(QPainter *painter,const QModelIndex& index
 	int offset=4;
 
 	QFontMetrics fm(font_);
-	int deltaH=(option.rect.height()-(fm.height()+6))/2;
+	int deltaH=(option.rect.height()-(fm.height()+4))/2;
 
 	//The initial filled rect (we will adjust its  width)
 	QRect fillRect=option.rect.adjusted(offset,deltaH,0,-deltaH-1);
@@ -428,7 +428,7 @@ void TreeNodeViewDelegate::renderNode(QPainter *painter,const QModelIndex& index
 	fillRect.setRight(textRect.right()+offset);
 
 	QRect halfRect=fillRect;
-	halfRect.setY(halfRect.center().y());
+	halfRect.setY(fillRect.center().y());
 	halfRect.adjust(1,0,-1,-1);
 
 	int currentRight=fillRect.right();

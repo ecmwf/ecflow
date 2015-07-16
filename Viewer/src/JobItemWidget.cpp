@@ -18,7 +18,7 @@ JobItemWidget::JobItemWidget(QWidget *parent) : CodeItemWidget(parent)
 {
 	messageLabel_->hide();
 
-	Highlighter* ih=new Highlighter(textEdit_->document(),"script");
+	Highlighter* ih=new Highlighter(textEdit_->document(),"job");
 
     infoProvider_=new JobProvider(this);
 }

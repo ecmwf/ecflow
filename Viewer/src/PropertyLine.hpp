@@ -69,6 +69,7 @@ public:
 	virtual ~PropertyLine() {}
 
 	QLabel* label() {return label_;};
+	QLabel* suffixLabel() {return suffixLabel_;};
 	virtual QWidget* item()=0;
 	virtual QWidget* button()=0;
 	QToolButton* defaultTb() {return defaultTb_;};
@@ -85,6 +86,7 @@ protected:
 	VProperty* prop_;
 	QVariant val_;
 	QLabel* label_;
+	QLabel* suffixLabel_;
 	QToolButton* defaultTb_;
 };
 

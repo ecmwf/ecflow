@@ -1,17 +1,17 @@
 {
         "info"  : {
 
-                        "main" : {
-                        		"pattern" : "^\\s*(name|type|status|at)\\s+:",                      
-                                "colour"  : "rgb(0,0,128)",
-                        		"bold"    : "true"
+        		"main" : {
+                       	"pattern" : "^\\s*(name|type|status|at)\\s+:",                      
+                        "colour"  : "rgb(0,0,128)",
+                        "bold"    : "true"
                                 
-                        },
-                        "genvar" : {
-                        		"pattern" : "^\\s*(# time-date-dependencies|# edit|edit)",                       
-                                "colour"  : "rgb(128,128,128)",
-                        		"italic"  : "true"
-                        }                     
+                },
+                "genvar" : {
+                        "pattern" : "^\\s*(# time-date-dependencies|# edit|edit)",                       
+                        "colour"  : "rgb(128,128,128)",
+                        "italic"  : "true"
+                }                     
         },
 
         "script"  : {
@@ -22,9 +22,25 @@
                                 
                         },
                         "var" : {
-                                "pattern" : "(DAY))",                       
+                                "pattern" : "(DAY)",                       
                                 "colour"  : "rgb(0,0,255)",
                                 "bold"  : "true"
                         }                     
-        }
+        },
+        
+        "job"  : {
+
+            "comment" : {
+                "pattern" : "^#(.*)\\n",                      
+                "colour"  : "rgb(140,140,140)",
+                "italic"  : "true"                                         
+            },
+            
+            "var" : {
+                 "pattern" : "(ECF_\\S+)",                       
+                 "colour"  : "rgb(0,0,255)",
+                    "bold"  : "true"
+            }  
+        }       
 }
+

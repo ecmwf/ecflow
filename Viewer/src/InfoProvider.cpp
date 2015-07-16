@@ -171,9 +171,9 @@ JobProvider::JobProvider(InfoPresenter* owner) :
 {
 	fileVarName_="ECF_JOB";
 
-	fileNotDefinedText_="Job is <b><u>not</u></b> defined";
+	fileNotDefinedText_="Job is <b>not</b> defined";
 
-	fileMissingText_="Job <b><u>not</u></b> found! <br> Check <b>ECF_HOME</b> directory  \
+	fileMissingText_="Job <b>not</b> found! <br> Check <b>ECF_HOME</b> directory  \
 				 for read/write access. Check for file presence and read access below. \
 	             The file may have been deleted or this may be a '<i>dummy</i>' task";
 }
@@ -195,8 +195,8 @@ ManualProvider::ManualProvider(InfoPresenter* owner) :
 	InfoProvider(owner,VTask::ManualTask)
 {
 	fileVarName_="ECF_MANUAL";
-	fileNotDefinedText_="Manual is <b><u>not</u></b> available";
-	fileMissingText_="Manual is <b><u>not</u></b> available";
+	fileNotDefinedText_="Manual is <b>not</b> available";
+	fileMissingText_="Manual is <b>not</b> available";
 }
 
 MessageProvider::MessageProvider(InfoPresenter* owner) :
@@ -209,8 +209,8 @@ ScriptProvider::ScriptProvider(InfoPresenter* owner) :
 		InfoProvider(owner,VTask::ScriptTask)
 {
 	fileVarName_="ECF_SCRIPT";
-	fileNotDefinedText_="Script is <b><u>not</u></b> defined";
-	fileMissingText_="Script <b><u>not</u></b> found! <br> Check <b>ECF_FILES</b> or <b>ECF_HOME</b> directories,  \
+	fileNotDefinedText_="Script is <b>not</b> defined";
+	fileMissingText_="Script <b>not/b> found! <br> Check <b>ECF_FILES</b> or <b>ECF_HOME</b> directories,  \
 			 for read access. Check for file presence and read access below files directory \
              or this may be a '<i>dummy</i>' task";
 }
