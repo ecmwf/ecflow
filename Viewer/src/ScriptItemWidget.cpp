@@ -42,8 +42,6 @@ void ScriptItemWidget::reload(VInfo_ptr info)
     loaded_=true;
     info_=info;
 
-    messageLabel_->hide();
-
     if(!info.get() || !info->isNode() || !info->node())
     {
        return;
@@ -65,6 +63,8 @@ void ScriptItemWidget::clearContents()
 
 void ScriptItemWidget::infoReady(VReply* reply)
 {
+    messageLabel_->hide();
+    
     QString s=QString::fromStdString(reply->text());
     textEdit_->setPlainText(s);
     

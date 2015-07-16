@@ -154,10 +154,17 @@ void  InfoProvider::taskChanged(VTask_ptr task)
             task_.reset();
             break;
         case VTask::ABORTED:
-        case VTask::CANCELLED:
         case VTask::REJECTED:
-            reply_->errorText(task->reply()->errorText());
-            owner_->infoFailed(reply_);
+           reply_->errorText(task->reply()->errorText());
+           owner_->infoFailed(reply_);
+           //We do not need the task anymore.
+           task_.reset();break;
+        case VTask::CANCELLED:
+            if(!task->reply()->errorText().empty())
+        	{
+            	reply_->errorText(task->reply()->errorText());
+            	owner_->infoFailed(reply_);
+        	}
             //We do not need the task anymore.
             task_.reset();break;
         default:

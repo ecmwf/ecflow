@@ -16,31 +16,71 @@
 
         "script"  : {
 
-                        "preproc" : {
-                                "pattern" : "^\\s*(%include\\s*<\\S*>|%manual|%comment|%nopp|%end|%ecfmicro \\S+)",                      
-                                "colour"  : "rgb(0,140,0)"                           
+                "preproc" : {
+                        "pattern" : "^\\s*(%include\\s*<\\S*>|%manual|%comment|%nopp|%end|%ecfmicro \\S+)",                      
+                        "colour"  : "rgb(0,140,0)"                           
                                 
-                        },
-                        "var" : {
-                                "pattern" : "(DAY)",                       
-                                "colour"  : "rgb(0,0,255)",
-                                "bold"  : "true"
-                        }                     
+                 },
+           
+                 "keyword" : {
+                     "pattern" : "(if|then|elif|else|fi|case|esac)",                       
+                     "colour"  : "rgb(0,0,0)",
+                     "bold"    : "true"
+                 }, 
+                 
+                 "command" : {
+                     "pattern" : "(echo|exit|export|sleep)",                       
+                     "colour"  : "rgb(136,0,136)",
+                     "bold"    : "true"
+                 }, 
+                 
+                 "shell" : {
+                     "pattern" : "(ecflow_client)",                       
+                     "colour"  : "rgb(204,0,204)",
+                     "bold"    : "true"
+                 }, 
+                 
+                 "oper" : {
+                     "pattern" : "(=|!=)",                       
+                     "colour"  : "rgb(0,140,0)"                    
+                 }, 
+                 
+                 
+                 "var" : {
+                      "pattern" : "(%\\S+%)",                       
+                      "colour"  : "rgb(0,0,255)",
+                      "bold"  : "true"
+                 },
+                
+                 "comment" : {
+                     "pattern" : "(#[^\n]*)",                     
+                     "colour"  : "rgb(100,100,100)",
+                     "italic"  : "true"                                         
+                 }
+                 
+                 
         },
         
         "job"  : {
 
             "comment" : {
-                "pattern" : "^#(.*)\\n",                      
+                "pattern" : "(#.*)\\n",                      
                 "colour"  : "rgb(140,140,140)",
                 "italic"  : "true"                                         
             },
             
             "var" : {
                  "pattern" : "(ECF_\\S+)",                       
-                 "colour"  : "rgb(0,0,255)",
-                    "bold"  : "true"
-            }  
+                 "colour"  : "rgb(22,100,44)"
+                   
+            },
+            
+            "command" : {
+                "pattern" : "(exit)",                       
+                "colour"  : "rgb(136,0,136)"               	
+           }  
+            
+            
         }       
 }
 
