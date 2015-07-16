@@ -92,25 +92,15 @@ void InfoProvider::visit(VInfoNode* info)
     		//Get the fileName
     		fileName=n->genVariable(fileVarName_);
 
-    		//No filename is defined
-    		/*if(fileName.empty())
+    		if(reply_->textFromFile(fileName))
     		{
-    			handleFileNotDefined(reply_);
+    			owner_->infoReady(reply_);
     			return;
     		}
-    		else
-    		{*/
-    			if(reply_->textFromFile(fileName))
-    			{
-    				owner_->infoReady(reply_);
-    				return;
-    			}
-    			else
-    			{
-    				//handleFileMissing(fileName,reply_);
-    				//return;
-    			}
-    		//}
+    		else if(handleFileMissing(fileName,reply_))
+    		{
+    			return;
+    		}
     	}
     }
 
@@ -133,10 +123,12 @@ void InfoProvider::handleFileNotDefined(VReply *reply)
 	owner_->infoReady(reply_);
 }
 
-void InfoProvider::handleFileMissing(const std::string& fileName,VReply *reply)
+bool InfoProvider::handleFileMissing(const std::string& fileName,VReply *reply)
 {
-	reply->setWarningText(fileMissingText_);
-	owner_->infoReady(reply_);
+	return false;
+
+	//reply->setWarningText(fileMissingText_);
+	//owner_->infoReady(reply_);
 }
 
 void  InfoProvider::taskChanged(VTask_ptr task)
@@ -185,17 +177,21 @@ JobProvider::JobProvider(InfoPresenter* owner) :
 	             The file may have been deleted or this may be a '<i>dummy</i>' task";
 }
 
-void JobProvider::handleFileMissing(const std::string& fileName,VReply *reply)
+bool JobProvider::handleFileMissing(const std::string& fileName,VReply *reply)
 {
 	if(fileName.find(".job0") != std::string::npos)
 	{
 		reply->setInfoText("No job to be expected when <b>TRYNO</b> is 0!");
+		owner_->infoReady(reply_);
+		return true;
 	}
-	else
+
+
+	/*else
 	{
 		reply->setWarningText(fileMissingText_);
-	}
-	owner_->infoReady(reply_);
+	}*/
+	return false;
 }
 
 ManualProvider::ManualProvider(InfoPresenter* owner) :

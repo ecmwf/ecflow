@@ -67,6 +67,10 @@ void ManualItemWidget::infoReady(VReply* reply)
     {
     	messageLabel_->showInfo(QString::fromStdString(reply->infoText()));
     }
+    else if(s.isEmpty())
+    {
+    	messageLabel_->showInfo("Manual is <b>not</b> available");
+    }
 }
 
 void ManualItemWidget::infoProgress(VReply* reply)

@@ -36,7 +36,7 @@ public:
 
 protected:
 	virtual void handleFileNotDefined(VReply *reply);
-	virtual void handleFileMissing(const std::string& fileName,VReply *reply);
+	virtual bool handleFileMissing(const std::string& fileName,VReply *reply);
 
 	InfoPresenter* owner_;
 	VInfo_ptr info_;
@@ -53,7 +53,7 @@ class JobProvider : public InfoProvider
 public:
 	 explicit JobProvider(InfoPresenter* owner);
 protected:
-	 void handleFileMissing(const std::string& fileName,VReply *reply);
+	 bool handleFileMissing(const std::string& fileName,VReply *reply);
 };
 
 class ManualProvider : public InfoProvider
