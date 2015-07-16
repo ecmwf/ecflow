@@ -35,23 +35,33 @@
                  }, 
                  
                  "shell" : {
-                     "pattern" : "(ecflow_client)",                       
+                     "pattern" : "(ecflow_client|grep|cat)",                       
                      "colour"  : "rgb(204,0,204)",
                      "bold"    : "true"
                  }, 
                  
                  "oper" : {
-                     "pattern" : "(=|!=)",                       
+                     "pattern" : "(=|!=|-gt|-ge|-eq|-lt|-le)",                       
                      "colour"  : "rgb(0,140,0)"                    
                  }, 
+                    
+                 "heredoc" : {
+                     "pattern" : "(<<\\s*\\S+\\s*>|EOF)",                       
+                     "colour"  : "rgb(34,51,136)",
+                     "bold"    : "true"
+                 }, 
                  
-                 
+                 "string" : {
+                     "pattern" : "(\"[^\"]*\")",                       
+                     "colour"  : "rgb(191,3,3)"
+                 },   
+              
                  "var" : {
-                      "pattern" : "(%\\S+%)",                       
-                      "colour"  : "rgb(0,0,255)",
-                      "bold"  : "true"
-                 },
-                
+                     "pattern" : "(%\\S+%)",                       
+                     "colour"  : "rgb(0,0,255)",
+                     "bold"  : "true"
+                },
+                                
                  "comment" : {
                      "pattern" : "(#[^\n]*)",                     
                      "colour"  : "rgb(100,100,100)",
