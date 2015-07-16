@@ -10,6 +10,9 @@
 5_od3     vsms2 43333
 5_webapps ecflow-minos 3813
 9_ode     vsms3 31415
+rdcx          vsmsrdcx                314112
+rdcx1	vecfrdcx1	11081
+rdcx2	vecfrdcx2	11082
 rdda1	vecfrdda1	11001
 rdda2	vecfrdda2	11002
 rddi1	vecfrddi1	11011
