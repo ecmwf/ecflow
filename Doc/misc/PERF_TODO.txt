@@ -182,7 +182,7 @@ BEST* so far Client/test/TestPerfForLargeDefs::=================================
     Total elapsed time = 12 seconds
     6.88 --> 7.98
 
-   oetzi{/var/tmp/ma0/clientRoot/workspace/MyProject/AParser}:1043 --> bin/gcc-4.2.1/release/perf_aparser_timer /var/tmp/ma0/BIG_DEFS/3199.def
+   oetzi{/tmp/ma0/workspace/ecflow/AParser}:1043 --> bin/gcc-4.2.1/release/perf_aparser_timer /var/tmp/ma0/BIG_DEFS/3199.def
    Parsing Node tree and AST creation time = 4.59 parse(1)
    Checkpt(TEXT_ARCHIVE) and reload , time taken   = 7.85 file_size(55963684)  result(1) msg()
    Total elapsed time = 12 seconds
@@ -191,7 +191,7 @@ BEST* so far Client/test/TestPerfForLargeDefs::=================================
    // Note: the Download(Sync-FULL) does not take defs destruction into account.
       
    opensuse103
-      oetzi{/var/tmp/ma0/clientRoot/workspace/MyProject}:352 --> Client/bin/gcc-4.2.1/release/perf_test_large_defs
+      oetzi{/tmp/ma0/workspace/ecflow}:352 --> Client/bin/gcc-4.2.1/release/perf_test_large_defs
       Running 1 test case...
       Client:: ...test_perf_for_large_defs:   port(3142)
       /var/tmp/ma0/BIG_DEFS/3199.def Delete:0 Load:12 Begin:3  Download(Sync):7, 0, 0, 0, 0  
@@ -380,14 +380,14 @@ o <DONE>events meter, labels, use into child attributes
          /var/tmp/ma0/BIG_DEFS/3199.def Delete:0 Load:14 Begin:3 Download: 9, 10, 10, 10, 10 Avg: 9.8
          /var/tmp/ma0/BIG_DEFS/mega.def Delete:0 Load:2 Begin:0 Download: 2, 1, 1, 1, 1 Avg: 1.2
 
-        oetzi{/var/tmp/ma0/clientRoot/workspace/MyProject/AParser}:483 --> bin/gcc-4.2.1/release/perf_aparser_timer /var/tmp/ma0/BIG_DEFS/3199.def
+        oetzi{/tmp/ma0/workspace/ecflow/AParser}:483 --> bin/gcc-4.2.1/release/perf_aparser_timer /var/tmp/ma0/BIG_DEFS/3199.def
          Parsing Node tree and AST creation time = 5.13 parse(1)
          Checkpt(TEXT_ARCHIVE) and reload , time taken   = 9.63 file_size(58317543)  result(1) msg()
          Total elapsed time = 14 seconds
    
 0 <DONE>Node suspended, state is being persisted ???
 
-   oetzi{/var/tmp/ma0/clientRoot/workspace/MyProject}:520 --> AParser/bin/gcc-4.2.1/release/perf_aparser_timer /var/tmp/ma0/BIG_DEFS/3199.def
+   oetzi{/tmp/ma0/workspace/ecflow}:520 --> AParser/bin/gcc-4.2.1/release/perf_aparser_timer /var/tmp/ma0/BIG_DEFS/3199.def
    Parsing Node tree and AST creation time = 5.18 parse(1)
    Checkpt(TEXT_ARCHIVE) and reload , time taken   = 9.4 file_size(57675793)  result(1) msg()
    Total elapsed time = 14 seconds
@@ -397,14 +397,14 @@ o <DONE> Move zombie & verify attr to a separate class , rarely used
       /var/tmp/ma0/BIG_DEFS/3199.def Delete:0 Load:15 Begin:4 Download: 8, 9, 9, 9, 10 Avg: 9
       /var/tmp/ma0/BIG_DEFS/mega.def Delete:0 Load:2 Begin:0 Download: 2, 1, 1, 1, 1 Avg: 1.2
 
-        oetzi{/var/tmp/ma0/clientRoot/workspace/MyProject/AParser}:538 --> bin/gcc-4.2.1/release/perf_aparser_timer /var/tmp/ma0/BIG_DEFS/3199.def
+        oetzi{/tmp/ma0/workspace/ecflow/AParser}:538 --> bin/gcc-4.2.1/release/perf_aparser_timer /var/tmp/ma0/BIG_DEFS/3199.def
          Parsing Node tree and AST creation time = 5.34 parse(1)
          Checkpt(TEXT_ARCHIVE) and reload , time taken   = 9.09 file_size(56071732)  result(1) msg()
          Total elapsed time = 14 seconds
 
 o <DONE> Removed shared ptrs form trigger and complete expressions
 
-   oetzi{/var/tmp/ma0/clientRoot/workspace/MyProject}:646 --> Client/bin/gcc-4.2.1/release/perf_test_large_defs 
+   oetzi{/tmp/ma0/workspace/ecflow}:646 --> Client/bin/gcc-4.2.1/release/perf_test_large_defs 
    Running 1 test case...
    Starting server
    Client:: ...test_perf_for_large_defs:   port(3142)
@@ -412,7 +412,7 @@ o <DONE> Removed shared ptrs form trigger and complete expressions
    /var/tmp/ma0/BIG_DEFS/mega.def Delete:0 Load:2 Begin:0 Download: 2, 1, 1, 1, 1 Avg: 1.2
    8.8->9.8
 
-   oetzi{/var/tmp/ma0/clientRoot/workspace/MyProject/AParser}:11 --> bin/gcc-4.2.1/release/perf_aparser_timer /var/tmp/ma0/BIG_DEFS/3199.def
+   oetzi{/tmp/ma0/workspace/ecflow/AParser}:11 --> bin/gcc-4.2.1/release/perf_aparser_timer /var/tmp/ma0/BIG_DEFS/3199.def
    Parsing Node tree and AST creation time = 4.44 parse(1)
    Checkpt(TEXT_ARCHIVE) and reload , time taken   = 8.7 file_size(56071728)  result(1) msg()
    Total elapsed time = 13 seconds
@@ -420,13 +420,13 @@ o <DONE> Removed shared ptrs form trigger and complete expressions
 
 o <DONE> Move: Generate suite generate variables, do not persist them.
  
-  oetzi{/var/tmp/ma0/clientRoot/workspace/MyProject/AParser}:782 --> bin/gcc-4.2.1/release/perf_aparser_timer /var/tmp/ma0/BIG_DEFS/3199.def
+  oetzi{/tmp/ma0/workspace/ecflow/AParser}:782 --> bin/gcc-4.2.1/release/perf_aparser_timer /var/tmp/ma0/BIG_DEFS/3199.def
   Parsing Node tree and AST creation time = 4.4 parse(1)
   Checkpt(TEXT_ARCHIVE) and reload , time taken   = 8.66 file_size(56069424)  result(1) msg()
   Total elapsed time = 13 seconds
    8.66->8.78
    
-   oetzi{/var/tmp/ma0/clientRoot/workspace/MyProject}:778 --> Client/bin/gcc-4.2.1/release/perf_test_large_defs
+   oetzi{/tmp/ma0/workspace/ecflow}:778 --> Client/bin/gcc-4.2.1/release/perf_test_large_defs
    Running 1 test case...
    Starting server
    Client:: ...test_perf_for_large_defs:   port(3142)
@@ -435,7 +435,7 @@ o <DONE> Move: Generate suite generate variables, do not persist them.
 
 o <DONE>Calendar: Do not persist cache data
 
-   oetzi{/var/tmp/ma0/clientRoot/workspace/MyProject}:831 --> AParser/bin/gcc-4.2.1/release/perf_aparser_timer /var/tmp/ma0/BIG_DEFS/3199.def
+   oetzi{/tmp/ma0/workspace/ecflow}:831 --> AParser/bin/gcc-4.2.1/release/perf_aparser_timer /var/tmp/ma0/BIG_DEFS/3199.def
    Parsing Node tree and AST creation time = 4.38 parse(1)
    Checkpt(TEXT_ARCHIVE) and reload , time taken   = 8.65 file_size(56069114)  result(1) msg()
    Total elapsed time = 13 seconds
@@ -443,14 +443,14 @@ o <DONE>Calendar: Do not persist cache data
 
 o <DONE> Track_never objects which are never serialised through pointers
 
-   oetzi{/var/tmp/ma0/clientRoot/workspace/MyProject}:1060 --> Client/bin/gcc-4.2.1/release/perf_test_large_defs 
+   oetzi{/tmp/ma0/workspace/ecflow}:1060 --> Client/bin/gcc-4.2.1/release/perf_test_large_defs 
    Running 1 test case...
    Starting server
    Client:: ...test_perf_for_large_defs:   port(3142)
    /var/tmp/ma0/BIG_DEFS/3199.def Delete:0 Load:14 Begin:3 Download: 7, 8, 8, 8, 8 Avg: 7.8
    /var/tmp/ma0/BIG_DEFS/mega.def Delete:0 Load:2 Begin:0 Download: 2, 1, 1, 1, 1 Avg: 1.2
 
-   oetzi{/var/tmp/ma0/clientRoot/workspace/MyProject/AParser}:1043 --> bin/gcc-4.2.1/release/perf_aparser_timer /var/tmp/ma0/BIG_DEFS/3199.def
+   oetzi{/tmp/ma0/workspace/ecflow/AParser}:1043 --> bin/gcc-4.2.1/release/perf_aparser_timer /var/tmp/ma0/BIG_DEFS/3199.def
    Parsing Node tree and AST creation time = 4.59 parse(1)
    Checkpt(TEXT_ARCHIVE) and reload , time taken   = 7.89 file_size(55963684)  result(1) msg()
    Total elapsed time = 12 seconds
@@ -490,7 +490,7 @@ o <DONE> Cache the de-serialisation in the server when returning the FULL defini
     Issues: The check pt should really update the cache, however
     the check pt includes the edit history ???
    
-   oetzi{/var/tmp/ma0/clientRoot/workspace/MyProject}:555 --> Client/bin/gcc-4.2.1/release/perf_test_large_defs 
+   oetzi{/tmp/ma0/workspace/ecflow}:555 --> Client/bin/gcc-4.2.1/release/perf_test_large_defs 
    Running 1 test case...
    Client:: ...test_perf_for_large_defs:   port(3142)
    /var/tmp/ma0/BIG_DEFS/3199.def Delete:0 Load:14 Begin:3  Download(Sync):9, 0, 0, 0, 0  
@@ -521,7 +521,7 @@ o <DONE> track_never on pointers
    Checkpt(TEXT_ARCHIVE) and reload , time taken   = 8.99 file_size(55712891)  result(1) msg()
    Total elapsed time = 13 seconds
 
-  oetzi{/var/tmp/ma0/clientRoot/workspace/MyProject}:646 --> Client/bin/gcc-4.2.1/release/perf_test_large_defs 
+  oetzi{/tmp/ma0/workspace/ecflow}:646 --> Client/bin/gcc-4.2.1/release/perf_test_large_defs 
    Running 1 test case...
    Starting server
    Client:: ...test_perf_for_large_defs:   port(3142)
@@ -578,14 +578,14 @@ o <DONE> Repeat: These are rarely used. Current serialised by value.
 o <DONE> Make Repeat a ptr, rename RepeatBase to Repeat
 
    There was no *SIGNIFICANT* improvement in measured performance, compared to current fastest
-   oetzi{/var/tmp/ma0/clientRoot/workspace/MyProject}:439 --> Client/bin/gcc-4.2.1/release/perf_test_large_defs       
+   oetzi{/tmp/ma0/workspace/ecflow}:439 --> Client/bin/gcc-4.2.1/release/perf_test_large_defs       
    Running 1 test case...
    Starting server
    Client:: ...test_perf_for_large_defs:   port(3142)
    /var/tmp/ma0/BIG_DEFS/3199.def Delete:0 Load:17 Begin:3 Download: 9, 10, 10, 10, 11 Avg: 10.1
    /var/tmp/ma0/BIG_DEFS/mega.def Delete:0 Load:3 Begin:0 Download: 1, 2, 1, 1, 1 Avg: 1.2
 
-   oetzi{/var/tmp/ma0/clientRoot/workspace/MyProject/AParser}:431 --> bin/gcc-4.2.1/release/perf_aparser_timer /var/tmp/ma0/BIG_DEFS/3199.def
+   oetzi{/tmp/ma0/workspace/ecflow/AParser}:431 --> bin/gcc-4.2.1/release/perf_aparser_timer /var/tmp/ma0/BIG_DEFS/3199.def
    Parsing Node tree and AST creation time = 4.44 parse(1)
    Checkpt(TEXT_ARCHIVE) and reload and compare, time taken   = 10.1 file_size(60235654)  result(1) msg()
    Total elapsed time = 14 seconds        

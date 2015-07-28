@@ -14,8 +14,8 @@ ps -ef | grep ma0 | grep ecbuild | grep debug | grep ecflow_server | cut -c9-14 
 ps -ef | grep ma0 | grep gcc | grep ecflow_server | cut -c9-14 | xargs kill -9
 ps -ef | grep ma0 | grep gcc | grep ecflow_client | cut -c9-14 | xargs kill -9
 
-ps -ef | grep ma0 | grep clientRoot | grep ecbuild | grep debug | cut -c9-14 | xargs kill -9
-ps -ef | grep ma0 | grep clientRoot | grep ecbuild | grep release | cut -c9-14 | xargs kill -9
+ps -ef | grep ma0 | grep workspace | grep ecbuild | grep debug | cut -c9-14 | xargs kill -9
+ps -ef | grep ma0 | grep workspace | grep ecbuild | grep release | cut -c9-14 | xargs kill -9
 
 # kill any jobs
 ps -ef | grep ma0  | grep job | grep test | cut -c9-14 | xargs kill -9

@@ -48,10 +48,10 @@ import glob
 # o Make sure origin file, has the right permissions
 # o Copy file to different directory, and change the permissions
 #   since file(COPY) does rename files
-#   configure_file(setup.py.in /tmp/ma0/clientRoot/workspace/working-directory/ecflow/ecbuild/release/CMakeFiles/setup.py)
+#   configure_file(setup.py.in /tmp/ma0/workspace/ecflow/ecbuild/release/CMakeFiles/setup.py)
 #       now copy the temporary into the final destination, setting the permissions
-#   file(COPY /tmp/ma0/clientRoot/workspace/working-directory/ecflow/ecbuild/release/CMakeFiles/setup.py
-#     DESTINATION /tmp/ma0/clientRoot/workspace/working-directory/ecflow/ecbuild/release
+#   file(COPY /tmp/ma0/workspace/ecflow/ecbuild/release/CMakeFiles/setup.py
+#     DESTINATION /tmp/ma0/workspace/ecflow/ecbuild/release
 #     FILE_PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ
 #     GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
 # ============================================================================
@@ -61,29 +61,29 @@ import glob
 # to get this to work, you will need to include the path
 # to your boost installation and  ecflow includes
 boost_root=os.getenv("BOOST_ROOT") 
-include_dirs = [ "/tmp/ma0/clientRoot/workspace/working-directory/ecflow/Pyext/../ACore/src", 
-                 "/tmp/ma0/clientRoot/workspace/working-directory/ecflow/Pyext/../ANattr/src", 
-                 "/tmp/ma0/clientRoot/workspace/working-directory/ecflow/Pyext/../ANode/src",
-                 "/tmp/ma0/clientRoot/workspace/working-directory/ecflow/Pyext/../AParser/src",
-                 "/tmp/ma0/clientRoot/workspace/working-directory/ecflow/Pyext/../Base/src",
-                 "/tmp/ma0/clientRoot/workspace/working-directory/ecflow/Pyext/../Base/src/cts",
-                 "/tmp/ma0/clientRoot/workspace/working-directory/ecflow/Pyext/../Base/src/stc",
-                 "/tmp/ma0/clientRoot/workspace/working-directory/ecflow/Pyext/../CSim/src", 
-                 "/tmp/ma0/clientRoot/workspace/working-directory/ecflow/Pyext/../Client/src",
-                 "/tmp/ma0/clientRoot/workspace/working-directory/ecflow/Pyext/src",
+include_dirs = [ "/tmp/ma0/workspace/ecflow/Pyext/../ACore/src", 
+                 "/tmp/ma0/workspace/ecflow/Pyext/../ANattr/src", 
+                 "/tmp/ma0/workspace/ecflow/Pyext/../ANode/src",
+                 "/tmp/ma0/workspace/ecflow/Pyext/../AParser/src",
+                 "/tmp/ma0/workspace/ecflow/Pyext/../Base/src",
+                 "/tmp/ma0/workspace/ecflow/Pyext/../Base/src/cts",
+                 "/tmp/ma0/workspace/ecflow/Pyext/../Base/src/stc",
+                 "/tmp/ma0/workspace/ecflow/Pyext/../CSim/src", 
+                 "/tmp/ma0/workspace/ecflow/Pyext/../Client/src",
+                 "/tmp/ma0/workspace/ecflow/Pyext/src",
                  boost_root,
                ]
 
 # define the library directories to include any extra libraries that may be needed.
 # Give preference to release libs   
 boost_lib_dir = boost_root + "/stage/lib/"
-library_dirs = ['/tmp/ma0/clientRoot/workspace/working-directory/ecflow/ecbuild/release/ACore',
-                '/tmp/ma0/clientRoot/workspace/working-directory/ecflow/ecbuild/release/ANattr/',
-                '/tmp/ma0/clientRoot/workspace/working-directory/ecflow/ecbuild/release/ANode/',
-                '/tmp/ma0/clientRoot/workspace/working-directory/ecflow/ecbuild/release/AParser/', 
-                '/tmp/ma0/clientRoot/workspace/working-directory/ecflow/ecbuild/release/Base/', 
-                '/tmp/ma0/clientRoot/workspace/working-directory/ecflow/ecbuild/release/CSim/', 
-                '/tmp/ma0/clientRoot/workspace/working-directory/ecflow/ecbuild/release/Client/', 
+library_dirs = ['/tmp/ma0/workspace/ecflow/ecbuild/release/ACore',
+                '/tmp/ma0/workspace/ecflow/ecbuild/release/ANattr/',
+                '/tmp/ma0/workspace/ecflow/ecbuild/release/ANode/',
+                '/tmp/ma0/workspace/ecflow/ecbuild/release/AParser/', 
+                '/tmp/ma0/workspace/ecflow/ecbuild/release/Base/', 
+                '/tmp/ma0/workspace/ecflow/ecbuild/release/CSim/', 
+                '/tmp/ma0/workspace/ecflow/ecbuild/release/Client/', 
                 boost_lib_dir  
                ]
 
@@ -121,10 +121,10 @@ setup( name='ecflow',
        author      = 'ECMWF',
        description = """ecflow Python interface""",
        packages = [ 'ecflow' ],
-       package_dir={'ecflow': '/tmp/ma0/clientRoot/workspace/working-directory/ecflow/Pyext/ecflow'},
+       package_dir={'ecflow': '/tmp/ma0/workspace/ecflow/Pyext/ecflow'},
        ext_modules=[ Extension( 
                               'ecflow.ecflow', 
-                              glob.glob(os.path.join('/tmp/ma0/clientRoot/workspace/working-directory/ecflow/Pyext/src', '*.cpp')), 
+                              glob.glob(os.path.join('/tmp/ma0/workspace/ecflow/Pyext/src', '*.cpp')), 
                               include_dirs=include_dirs, 
                               library_dirs=library_dirs, 
                               libraries=libraries,
