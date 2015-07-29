@@ -7,7 +7,7 @@ import glob
 # ========================================================================
 # Usage:
 #   cd $WK; cd ecbuild/release/; sh -x ../../cmake.sh release; make ; make install
-#   calling 'sh -x ../../cmake.sh release' will generate steup.py from setup.py.in
+#   calling 'sh -x ../../cmake.sh release' will generate setup.py from setup.py.in
 # Issues:
 #   Can not test cmake install, since it will always install to 
 #     /usr/local/apps/python/current/lib/python2.7/site-packages/ecflow
