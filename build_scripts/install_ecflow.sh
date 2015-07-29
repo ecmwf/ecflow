@@ -7,6 +7,8 @@
 ## granted to it by virtue of its status as an intergovernmental organisation 
 ## nor does it submit to any jurisdiction. 
 
+## OLD bjam based install, not used anymore. kept for reference
+##
 ## This script will install ecflow dependent on the host
 ##
 ## Expect an optional argument [ debug | release | test ]
