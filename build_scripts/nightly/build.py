@@ -673,7 +673,7 @@ def build_boost( boost ):
     
     
 def add_suite_variables( suite ):
-    suite.add_variable("ECFLOW_TAR_DIR","/var/tmp/ma0/clientRoot/workspace")
+    suite.add_variable("ECFLOW_TAR_DIR","/var/tmp/ma0/workspace")
     suite.add_variable("ECF_HOME", os.getenv("SCRATCH") + "/nightly")
     suite.add_variable("ECF_INCLUDE",os.getenv("SCRATCH") + "/nightly")
     suite.add_variable("USER","ma0")
@@ -703,7 +703,7 @@ def add_suite_variables( suite ):
 # Defs
 # ================================================================================    
 defs = ecflow.Defs()
-defs.add_variable("ECFLOW_TAR_DIR","/var/tmp/ma0/clientRoot/workspace")
+defs.add_variable("ECFLOW_TAR_DIR","/var/tmp/ma0/workspace")
 
 print "build experiment"
 with defs.add_suite("experiment") as experiment:

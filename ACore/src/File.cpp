@@ -922,7 +922,7 @@ std::string File::root_source_dir()
             Str::split( lines[i],lineTokens,":");
             if (lineTokens.size() != 2) throw std::runtime_error("File::root_source_dir(): could not parse CTestTestfile.cmake for source directory");
 
-            // This may be of the form: # Source directory: /tmp/ma0/clientRoot/workspace/working-directory/ecflow/ACore
+            // This may be of the form: # Source directory: /tmp/ma0/workspace/ecflow/ACore
             std::string source_directory = lineTokens[1];
             boost::algorithm::trim(source_directory);
 

@@ -142,5 +142,5 @@ tar -rvf  $ECFLOWTAR --exclude=.git ecbuild/
 ls -lh $ECFLOWTAR
 gzip $ECFLOWTAR
 
-# Move tar file to /var/tmp/ma0/clientRoot/workspace
+# Move tar file to /var/tmp/ma0/
 mv $ECFLOWTAR.gz ../.

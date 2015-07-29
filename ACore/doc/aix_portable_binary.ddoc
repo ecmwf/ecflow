@@ -357,7 +357,7 @@ Linux,
 > > > This shows a problem with XL/C compiler beta2 compiler.
 > > > This program produces the following output on Linux:
 > > >
-> > > oetzi{/var/tmp/ma0/clientRoot/workspace/MyProject/SCRATCH}:719 -->
+> > > oetzi{/var/tmp/ma0/workspace/MyProject/SCRATCH}:719 -->
 > > > bin/gcc-4.2.1/debug/test
 > > > Text archive Saving -1:-1 OK
 > > > Text archive Restoring -1:-1 OK
