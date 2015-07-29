@@ -95,13 +95,11 @@ ecbuild_add_test( TARGET py_u_TestMigrate
 #    *AND* for testing python install to local directory
 # ==========================================================================
 
-message( STATUS "python found,  CMAKE_PYTHON_INSTALL_TYPE=${CMAKE_PYTHON_INSTALL_TYPE}")
-
-# CMAKE_PYTHON_INSTALL_TYPE = [ local | setup ]
+# CMAKE_PYTHON_INSTALL_TYPE = [ local | setup | not defined ]
    
 if( CMAKE_PYTHON_INSTALL_TYPE MATCHES  "local"  OR NOT DEFINED CMAKE_PYTHON_INSTALL_TYPE )
    
-      message(STATUS "python install *LOCAL* ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+      message(STATUS "python install *LOCAL* +++ lib/python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}/site-packages/ecflow +++++++")
       set(PYTHON_SITE "lib/python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}/site-packages" )
       set(PYTHON_DEST "${PYTHON_SITE}/ecflow" )
       
@@ -111,6 +109,7 @@ if( CMAKE_PYTHON_INSTALL_TYPE MATCHES  "local"  OR NOT DEFINED CMAKE_PYTHON_INST
       install( FILES   ecflow/__init__.py  DESTINATION ${PYTHON_DEST} )
       
 else()
+	  message( STATUS "python found,  CMAKE_PYTHON_INSTALL_TYPE=${CMAKE_PYTHON_INSTALL_TYPE}")
 
       # -------------------------------------------------------------------------------------
       # Install using setup.py
