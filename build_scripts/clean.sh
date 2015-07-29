@@ -21,7 +21,6 @@ rm -rf Server/bin
 rm -rf Test/bin
 rm -rf Pyext/bin 
 rm -rf view/bin 
-rm -rf bin
    
 # remove generated files
 rm -rf Doc/online/_build/*
