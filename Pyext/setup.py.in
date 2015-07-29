@@ -96,12 +96,13 @@ libraries = [ 'core' , 'nodeattr', 'node', 'libparser', 'base', 'libsimu', 'libc
               'boost_date_time-mt', 
               'boost_python-mt' ]
 
- 
+# Using gcc-4.8 with boost 1.53 on linux requires these flags
+extra_compile_args = ['-ftemplate-depth-512', '-Wno-unused-local-typedefs' ]
+extra_link_args = []
+
 # extra compile flags needed for AIX only
 # Note setup.py will add -q64 -qcpluscmt -DNDEBUG  automatically
 # Note: two extra_compile_args, debug and release, use the debug for testing and faster compiles
-extra_compile_args = ['-ftemplate-depth-512', '-Wno-unused-local-typedefs' ]
-extra_link_args = []
 if sys.platform.startswith("aix"):
    extra_compile_args =  [ '-qsuppress=1540-0198', '-O3', '-qstrict', '-qfuncsect', '-qeh', '-qrtti'  ]
    #extra_compile_args = [ '-qsuppress=1540-0198',  '-qNOOPTimize', '-qnoinline', '-qfullpath', '-qfuncsect', '-qeh', '-qrtti' ]
