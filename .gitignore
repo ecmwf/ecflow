@@ -4,6 +4,7 @@
 
 # cmake
 ecbuild/
+build/
 
 # ecflow 
 bin/
