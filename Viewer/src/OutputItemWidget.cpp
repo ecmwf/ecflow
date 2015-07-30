@@ -27,14 +27,8 @@ OutputItemWidget::OutputItemWidget(QWidget *parent) :
 	dirLabel_->hide();
 	searchLine_->hide();
 
-	QFont f;
-	f.setFamily("Monospace");
-	//f.setFamily("Courier");
-	f.setStyleHint(QFont::TypeWriter);
-	f.setFixedPitch(true);
-	textEdit_->setFont(f);
 
-	Highlighter* ih=new Highlighter(textEdit_->document(),"output");
+	//Highlighter* ih=new Highlighter(textEdit_->document(),"output");
 
 	infoProvider_=new OutputProvider(this);
 
@@ -75,6 +69,16 @@ QWidget* OutputItemWidget::realWidget()
 void OutputItemWidget::reload(VInfo_ptr info)
 {
 	clearContents();
+
+	// note that setting the font does not work when in the constructor
+	// so we put it here
+	QFont f;
+	f.setFamily("Monospace");
+	//f.setFamily("Courier");
+	f.setStyleHint(QFont::TypeWriter);
+	f.setFixedPitch(true);
+	textEdit_->setFont(f);
+
 
 	loaded_=true;
 	info_=info;
