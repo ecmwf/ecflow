@@ -31,41 +31,44 @@ ecbuild_add_test( TARGET       u_aparser
                   BOOST
                   SOURCES      ${test_srcs}
                   LIBS         libparser 
+                  INCLUDES     ../ANode/test
                   TEST_DEPENDS u_anode
-                 )
-
-
-#
-# Tests parser for a single defs file but with a range of tests
-#
-list( APPEND t2_src test/TestSingleDefsFile.cpp test/PersistHelper.cpp )                    
-ecbuild_add_test( TARGET   perf_aparser
-                  BOOST
-                  SOURCES  ${t2_src}
-                  LIBS     libparser
                 )
 
-#
-# Timer for arbitary defs file,  
-#
-list( APPEND t3_src test/ParseTimer.cpp  test/PersistHelper.cpp )                    
-ecbuild_add_test( TARGET   perf_aparser_timer
-                  ARGS     ${CMAKE_CURRENT_SOURCE_DIR}/test/data/single_defs/mega.def
-                  SOURCES  ${t3_src}
-                  LIBS     libparser 
-                  INCLUDES ../ANode/test
-                           ${Boost_INCLUDE_DIRS} 
-                 )
+
+if (ENABLE_ALL_TESTS)
+	#
+	# Tests parser for a single defs file but with a range of tests
+	#
+	list( APPEND t2_src test/TestSingleDefsFile.cpp test/PersistHelper.cpp )                    
+	ecbuild_add_test( TARGET   perf_aparser
+                      BOOST
+                      SOURCES  ${t2_src}
+                      LIBS     libparser
+                    )
+
+	#
+	# Timer for arbitary defs file,  
+	#
+    list( APPEND t3_src test/ParseTimer.cpp  test/PersistHelper.cpp )                    
+    ecbuild_add_test( TARGET   perf_aparser_timer
+                      ARGS     ${CMAKE_CURRENT_SOURCE_DIR}/test/data/single_defs/mega.def
+                      SOURCES  ${t3_src}
+                      LIBS     libparser 
+                      INCLUDES ../ANode/test
+                               ${Boost_INCLUDE_DIRS} 
+                    )
 
 
-#
-# Tests parser for a single defs file.  
-#
-list( APPEND t4_src test/ParseOnly.cpp )                    
-ecbuild_add_test( TARGET   perf_aparser_only
-                  ARGS     ${CMAKE_CURRENT_SOURCE_DIR}/test/data/single_defs/mega.def
-                  SOURCES  ${t4_src}
-                  LIBS     libparser
-                  INCLUDES ../ANode/test
-                           ${Boost_INCLUDE_DIRS} 
-                 )
+	#
+	# Tests parser for a single defs file.  
+	#
+	list( APPEND t4_src test/ParseOnly.cpp )                    
+	ecbuild_add_test( TARGET   perf_aparser_only
+                      ARGS     ${CMAKE_CURRENT_SOURCE_DIR}/test/data/single_defs/mega.def
+                      SOURCES  ${t4_src}
+                      LIBS     libparser
+                      INCLUDES ../ANode/test
+                               ${Boost_INCLUDE_DIRS} 
+                   )
+endif()

@@ -19,14 +19,16 @@
 # major=$(cat VERSION.cmake   | grep 'set( ECFLOW_MAJOR'   | awk '{print $3}'| sed 's/["]//g')
 # minor=$(cat VERSION.cmake   | grep 'set( ECFLOW_MINOR'   | awk '{print $3}'| sed 's/["]//g')
 #
-########################################################################
+##############################################################################
 
 cmake_minimum_required( VERSION 2.8.4 FATAL_ERROR )
 
+# ===========================================================================
 # Change the default if NO CMAKE_BUILD_TYPE specified
 if (NOT DEFINED CMAKE_BUILD_TYPE)
      set(CMAKE_BUILD_TYPE Release CACHE STRING "Build Configuration type" FORCE)
 endif()
+
 
 project( ecflow CXX )
 
@@ -58,11 +60,13 @@ message( STATUS "ECFLOW_VERSION       : ${ECFLOW_VERSION_STR}" )
 # Options , be aware of caching, when modifying on the command line. 
 # Ideally start fresh or remove cache CmakeCache.txt in build dir
 # =========================================================================================
-option( ENABLE_PYTHON         "enable python interface"   ON  )
-option( ENABLE_GUI            "Build ecflowview"          ON  )
+option( ENABLE_PYTHON    "enable python interface"                              ON  )
+option( ENABLE_GUI       "Build ecflowview"                                     ON  )
+option( ENABLE_ALL_TESTS "This includes performance/migration/regression tests" OFF )
 
 message( STATUS "ENABLE_PYTHON         : ${ENABLE_PYTHON}" )
 message( STATUS "ENABLE_GUI            : ${ENABLE_GUI}" )
+message( STATUS "ENABLE_ALL_TESTS      : ${ENABLE_ALL_TESTS}" )
 
 # ======================================================================================
 # GUI requires X11 and Motif

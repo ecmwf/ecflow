@@ -46,6 +46,7 @@ cmake .. -DCMAKE_INSTALL_PREFIX=$prefix_arg  \
          # -DCMAKE_BUILD_TYPE=Release 
          # -DENABLE_GUI=OFF    \
          # -DENABLE_PYTHON=OFF  \
+         # -DENABLE_ALL_TESTS=ON  \
          # -DCMAKE_PYTHON_INSTALL_TYPE=local \
          # -DCMAKE_CXX_FLAGS="-Wall -Wno-unused-local-typedefs" \
          # -DCMAKE_CXX_COMPILER=xlC_r"

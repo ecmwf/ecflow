@@ -6,7 +6,7 @@ list( APPEND srcs
    src/Simulator.cpp
    src/SimulatorVisitor.cpp
 )
-ecbuild_add_library( TARGET libsimu
+ecbuild_add_library( TARGET   libsimu
                      NOINSTALL
                      TYPE     STATIC
                      SOURCES  ${srcs}
@@ -39,12 +39,15 @@ ecbuild_add_test( TARGET   c_csim
                   TEST_DEPENDS u_base
                  )
 
-ecbuild_add_test( TARGET    c_csim_single
-                  BOOST
-                  SOURCES   test/TestSingleSimulator.cpp test/TestUtil.cpp
-                  LIBS      libsimu   
-                            pthread 
-                  INCLUDES  ../ANode/test
-                  TEST_DEPENDS u_base
+if (ENABLE_ALL_TESTS)
+
+	ecbuild_add_test( TARGET       c_csim_single
+                      BOOST
+                      SOURCES      test/TestSingleSimulator.cpp test/TestUtil.cpp
+                      LIBS         libsimu   
+                                   pthread 
+                      INCLUDES     ../ANode/test
+                      TEST_DEPENDS u_base
                  )
-                   
+endif()
+              
