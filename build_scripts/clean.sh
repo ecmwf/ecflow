@@ -33,6 +33,7 @@ rm -rf Pyext/test.def
 rm -rf Pyext/build
 rm -rf Pyext/timestamp
 rm -rf bin
+rm -rf build
 rm -rf RemoteSystemsTempFiles
 rm -rf *.dat
 rm -rf *.log
