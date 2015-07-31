@@ -24,6 +24,7 @@
 
 #include "Gnuplot.hpp"
 #include "File_r.hpp"
+#include "File.hpp"
 #include "Str.hpp"
 #include "NodePath.hpp"
 #include "Host.hpp"
@@ -45,13 +46,19 @@ Gnuplot::Gnuplot( const std::string& log_file,
       ss << "Gnuplot::Gnuplot: The log file " << log_file << " does not exist\n";
       throw std::runtime_error( ss.str() );
    }
+
+   std::string path_to_gnuplot = File::which("gnuplot");
+   if ( path_to_gnuplot.empty()) {
+      std::stringstream ss;
+	  ss << "Gnuplot::Gnuplot: could not find gnuplot on $PATH.";
+	  throw std::runtime_error(ss.str());
+   }
 }
 
 void Gnuplot::show_server_load() const
 {
    std::string gnuplot_dat_file    = host_.prefix_host_and_port(port_,"gnuplot.dat");
    std::string gnuplot_script_file = host_.prefix_host_and_port(port_,"gnuplot.script");
-
 
    // The vector index is the order in which suites are found, this will be used to place the suite in the correct column
    std::vector<SuiteLoad> suite_vec;
