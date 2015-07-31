@@ -83,7 +83,7 @@ void OutputItemWidget::reload(VInfo_ptr info)
 	loaded_=true;
 	info_=info;
 
-    if(info_ && info_.get())
+	if(info_ && info_.get())
 	{
 	    //Get file contents
 	    infoProvider_->info(info_);
@@ -93,7 +93,10 @@ void OutputItemWidget::reload(VInfo_ptr info)
 	    updateDir(op->directory());
 
 	}
+
+	automaticSearchForKeywords();
 }
+
 void OutputItemWidget::updateDir(VDir_ptr dir)
 {
 	bool status=(dir && dir.get());
@@ -185,6 +188,29 @@ void OutputItemWidget::on_searchTb__toggled(bool b)
 	}
 }
 
+
+// search for a highlight any of the pre-defined keywords so that
+// the (probably) most important piece of information is highlighted
+void OutputItemWidget::automaticSearchForKeywords()
+{
+	QStringList keywords;
+	keywords << "--abort" << "--complete" << "xabort" << "xcomplete"
+	         << "ERROR" << "System Billing Units";
+	bool found = false;
+	int i = 0;
+	QTextDocument::FindFlags findFlags = QTextDocument::FindBackward;
+
+	// find any of the keywords and stop at the first one
+	while (!found && i < keywords.size())
+	
+	{
+		found = textEdit_->findString(keywords.at(i), findFlags);
+		i++;
+	}
+}
+
+
+
 //This slot is called when a file item is selected in the output view.
 void OutputItemWidget::slotOutputSelected(QModelIndex,QModelIndex)
 {
@@ -194,6 +220,8 @@ void OutputItemWidget::slotOutputSelected(QModelIndex,QModelIndex)
 	//Get the file via the provider. This will call infoReady() etc. in the end.
 	OutputProvider* op=static_cast<OutputProvider*>(infoProvider_);
 	op->file(fullName);
+
+	automaticSearchForKeywords();
 }
 
 static InfoPanelItemMaker<OutputItemWidget> maker1("output");

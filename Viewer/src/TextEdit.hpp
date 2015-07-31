@@ -32,6 +32,7 @@ public:
     QChar characterBehindCursor(QTextCursor *cursor=0);
 
     int numLinesSelected();
+    bool findString(const QString &,QTextDocument::FindFlags,bool replace=false,const QString &r=emptyString_);
 
 private Q_SLOTS:
      void updateLineNumberAreaWidth(int newBlockCount);
@@ -50,6 +51,9 @@ private:
     bool showLineNum_;
     QWidget *lineNumArea_;
     int rightMargin_;
+    QString  lastFindString_;
+    QTextDocument::FindFlags lastFindFlags_;
+    static QString emptyString_;
 };
 
 

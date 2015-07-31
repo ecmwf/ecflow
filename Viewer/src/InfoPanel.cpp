@@ -273,10 +273,11 @@ void InfoPanel::adjustTabs(VInfo_ptr info)
 		}
 	}
 
-	if(currentItem)
-	{
-		currentItem->reload(info);
-	}
+	// the reload is not necessary because it is already triggered by setCurrentIndex
+	//if(currentItem)
+	//{
+	//currentItem->reload(info);
+	//}
 }
 
 InfoPanelItem* InfoPanel::findItem(QWidget* w)

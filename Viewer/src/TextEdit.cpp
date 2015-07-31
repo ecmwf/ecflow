@@ -260,3 +260,70 @@ void TextEdit::lineNumberAreaPaintEvent(QPaintEvent *event)
         ++blockNumber;
     }
 }
+
+
+QString TextEdit::emptyString_ ;  // used as a default argument to findString()
+
+bool TextEdit::findString(const QString &s,QTextDocument::FindFlags flags, bool replace, const QString &r)
+{
+
+    lastFindString_ = s;      // store for repeat searches
+    lastFindFlags_  = flags;  // store for repeat searches
+    bool found = false;
+
+    if (find(s,flags))  // find and select the string - were we successful?
+    {
+        //statusMessage("", 0);
+        found = true;
+    }
+    else    // did not find the string
+    {
+        if (1)  // 'wraparound' search - on by default, we can add a user option if it might be useful to turn it off
+        {
+            QTextCursor original_cursor = textCursor();   // get the document's cursor
+            QTextCursor cursor(original_cursor);
+
+            if (flags & QTextDocument::FindBackward)        // move to the start or end of the document to continue the search
+                cursor.movePosition(QTextCursor::End);
+            else
+                cursor.movePosition(QTextCursor::Start);
+
+            setTextCursor(cursor);              // send the cursor back to the document
+
+            if (find(s,flags))                  // search again, from the new position
+            {
+                //statusMessage("", 0);
+                found = true;
+            }
+            else
+            {
+                setTextCursor(original_cursor);  // not found - restore the cursor to its original position
+            }
+        }
+    }
+
+
+    if (found)
+    {
+        if (replace)
+        {
+            // perform the 'replace'
+            insertPlainText (r);
+            
+            // highlight the replaced text - the current text cursor will be
+            // at the end of the replaced text, so we move it back to the start
+            // (anchored so that the text is selected)
+            QTextCursor cursor = textCursor();   // get the document's cursor
+            cursor.movePosition(QTextCursor::Left, QTextCursor::KeepAnchor, r.length());
+            setTextCursor(cursor);               // send the cursor back to the document
+        }
+        ensureCursorVisible();
+    }
+
+    else
+    {
+        //statusMessage(tr("Searched whole file, string not found"), 5000);
+    }
+
+    return found;
+}
