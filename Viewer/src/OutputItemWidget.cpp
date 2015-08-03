@@ -51,6 +51,8 @@ OutputItemWidget::OutputItemWidget(QWidget *parent) :
 	connect(outputView_->selectionModel(),SIGNAL(currentChanged(QModelIndex,QModelIndex)),
 			this,SLOT(slotOutputSelected(QModelIndex,QModelIndex)));
 
+	searchLine_->setEditor(textEdit_);
+
 	//Splitter
 	int wHeight=size().height();
 	if(wHeight > 100)
@@ -94,7 +96,7 @@ void OutputItemWidget::reload(VInfo_ptr info)
 
 	}
 
-	automaticSearchForKeywords();
+	searchOnReload();
 }
 
 void OutputItemWidget::updateDir(VDir_ptr dir)
@@ -210,6 +212,22 @@ void OutputItemWidget::automaticSearchForKeywords()
 }
 
 
+// Called when we load a new node's information into the panel, or
+// when we move to the panel from another one.
+// If the search box is open, then search for the first matching item;
+// otherwise, search for a pre-configured list of keywords.
+void OutputItemWidget::searchOnReload()
+{
+	if (searchLine_->isVisible() && !searchLine_->isEmpty())
+	{
+		searchLine_->slotFindNext();
+	}
+	else
+	{
+		automaticSearchForKeywords();
+	}
+}
+
 
 //This slot is called when a file item is selected in the output view.
 void OutputItemWidget::slotOutputSelected(QModelIndex,QModelIndex)
@@ -221,7 +239,7 @@ void OutputItemWidget::slotOutputSelected(QModelIndex,QModelIndex)
 	OutputProvider* op=static_cast<OutputProvider*>(infoProvider_);
 	op->file(fullName);
 
-	automaticSearchForKeywords();
+	searchOnReload();
 }
 
 static InfoPanelItemMaker<OutputItemWidget> maker1("output");

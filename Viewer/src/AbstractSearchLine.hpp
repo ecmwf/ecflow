@@ -22,6 +22,7 @@ public:
 	explicit AbstractSearchLine(QWidget *parent=0);
 	~AbstractSearchLine();
 	virtual void clear();
+	virtual bool isEmpty();
 
 public Q_SLOTS:
 	virtual void slotFind(QString)=0;

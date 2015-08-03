@@ -46,6 +46,11 @@ void AbstractSearchLine::clear()
 	searchLine_->clear();
 }
 
+bool AbstractSearchLine::isEmpty()
+{
+	return searchLine_->text().isEmpty();
+}
+
 void AbstractSearchLine::updateButtons(bool found)
 {
 	status_=found;

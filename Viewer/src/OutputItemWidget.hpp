@@ -50,6 +50,7 @@ protected:
 	void updateDir(VDir_ptr dir);
 	void enableDir(bool);
 	void updateWidgetState() {};
+	void searchOnReload();
 
 	OutputModel* dirModel_;
 	OutputSortModel* dirSortModel_;
