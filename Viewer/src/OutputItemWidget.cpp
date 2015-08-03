@@ -38,6 +38,7 @@ OutputItemWidget::OutputItemWidget(QWidget *parent) :
 	outputView_->setUniformRowHeights(true);
 	outputView_->setAlternatingRowColors(true);
 	outputView_->setSortingEnabled(true);
+	outputView_->sortByColumn(3, Qt::DescendingOrder);  // sort with latest files first (0-based)
 
 	//The models
 	dirModel_=new OutputModel(this);
