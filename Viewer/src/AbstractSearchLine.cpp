@@ -7,6 +7,7 @@
 // nor does it submit to any jurisdiction.
 //============================================================================
 
+#include <QShortcut>
 #include "AbstractSearchLine.hpp"
 
 AbstractSearchLine::AbstractSearchLine(QWidget* parent) : QWidget(parent)
@@ -30,6 +31,16 @@ AbstractSearchLine::AbstractSearchLine(QWidget* parent) : QWidget(parent)
 	oriColour_=QColor(searchLine_->palette().color(QPalette::Base));
 	redColour_=QColor(247,230,230);
 	greenColour_=QColor(186,249,206);
+
+
+
+	// for the 'find next' functionality, although Qt (at the time of writing) uses
+	// both F3 and CTRL-G for most platforms, this is not true for Linux. Therefore,
+	// we have to add CTRL-G ourselves.
+
+	QKeySequence ctrlg(tr("Ctrl+G"));
+    QShortcut *shortcut = new QShortcut(ctrlg, parent); // should be destroyed by parent
+    connect(shortcut, SIGNAL(activated()), this, SLOT(slotFindNext()));
 
 	status_=true;
 
