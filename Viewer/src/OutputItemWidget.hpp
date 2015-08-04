@@ -39,12 +39,13 @@ public:
 	void nodeChanged(const VNode*, const std::vector<ecf::Aspect::Type>&) {};
 	void defsChanged(const std::vector<ecf::Aspect::Type>&) {};
 
-	void automaticSearchForKeywords();
+	bool automaticSearchForKeywords();
 
 
 protected Q_SLOTS:
 	void slotOutputSelected(QModelIndex,QModelIndex);
 	void on_searchTb__toggled(bool b);
+	void on_reloadTb_clicked();
 
 protected:
 	void updateDir(VDir_ptr dir);
@@ -54,6 +55,7 @@ protected:
 
 	OutputModel* dirModel_;
 	OutputSortModel* dirSortModel_;
+	bool userClickedReload_;
 
 };
 

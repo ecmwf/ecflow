@@ -63,8 +63,8 @@ void PlainTextSearchLine::slotFindNext()
 	{
 		if(editor_->find(searchLine_->text()) == false)
 		{
-      			QTextCursor cursor(editor_->textCursor());
-      			cursor.movePosition(QTextCursor::Start);
+			QTextCursor cursor(editor_->textCursor());
+			cursor.movePosition(QTextCursor::Start);
 			editor_->setTextCursor(cursor);
 			editor_->find(searchLine_->text());
 		}
@@ -82,8 +82,8 @@ void PlainTextSearchLine::slotFindPrev()
 	{
 		if(editor_->find(searchLine_->text(),flags) == false)
 		{
-      			QTextCursor cursor(editor_->textCursor());
-      			cursor.movePosition(QTextCursor::End);
+			QTextCursor cursor(editor_->textCursor());
+			cursor.movePosition(QTextCursor::End);
 			editor_->setTextCursor(cursor);
 			editor_->find(searchLine_->text(),flags);
 		}

@@ -26,6 +26,7 @@ OutputItemWidget::OutputItemWidget(QWidget *parent) :
 	messageLabel_->hide();
 	dirLabel_->hide();
 	searchLine_->hide();
+	userClickedReload_ = false;
 
 
 	//Highlighter* ih=new Highlighter(textEdit_->document(),"output");
@@ -51,6 +52,11 @@ OutputItemWidget::OutputItemWidget(QWidget *parent) :
 	//When the selection changes in the view
 	connect(outputView_->selectionModel(),SIGNAL(currentChanged(QModelIndex,QModelIndex)),
 			this,SLOT(slotOutputSelected(QModelIndex,QModelIndex)));
+
+	//When the user clicks on the 'refresh' button
+	connect(reloadTb_,SIGNAL(clicked()),
+			this,SLOT(on_reloadTb_clicked()));
+
 
 	searchLine_->setEditor(textEdit_);
 
@@ -192,13 +198,21 @@ void OutputItemWidget::on_searchTb__toggled(bool b)
 }
 
 
+void OutputItemWidget::on_reloadTb_clicked()
+{
+	userClickedReload_ = true;
+	reload(info_);
+	userClickedReload_ = false;
+}
+
+
 // search for a highlight any of the pre-defined keywords so that
 // the (probably) most important piece of information is highlighted
-void OutputItemWidget::automaticSearchForKeywords()
+bool OutputItemWidget::automaticSearchForKeywords()
 {
 	QStringList keywords;
 	keywords << "--abort" << "--complete" << "xabort" << "xcomplete"
-	         << "ERROR" << "System Billing Units";
+	         << "System Billing Units";
 	bool found = false;
 	int i = 0;
 	QTextDocument::FindFlags findFlags = QTextDocument::FindBackward;
@@ -210,13 +224,17 @@ void OutputItemWidget::automaticSearchForKeywords()
 		found = textEdit_->findString(keywords.at(i), findFlags);
 		i++;
 	}
+
+	return found;
 }
 
 
 // Called when we load a new node's information into the panel, or
 // when we move to the panel from another one.
 // If the search box is open, then search for the first matching item;
-// otherwise, search for a pre-configured list of keywords.
+// otherwise, search for a pre-configured list of keywords. If none
+// are found, and the user has clicked on the 'reload' button then
+// we just go to the last line of the output
 void OutputItemWidget::searchOnReload()
 {
 	if (searchLine_->isVisible() && !searchLine_->isEmpty())
@@ -225,7 +243,17 @@ void OutputItemWidget::searchOnReload()
 	}
 	else
 	{
-		automaticSearchForKeywords();
+		if (!automaticSearchForKeywords())
+		{
+			if (userClickedReload_)
+			{
+				// move the cursor to the start of the last line
+				QTextCursor cursor = textEdit_->textCursor();
+				cursor.movePosition(QTextCursor::End);
+				cursor.movePosition(QTextCursor::StartOfLine);
+				textEdit_->setTextCursor(cursor);   
+			}
+		}
 	}
 }
 

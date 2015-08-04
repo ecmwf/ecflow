@@ -31,7 +31,7 @@
         <number>1</number>
        </property>
        <item>
-        <layout class="QHBoxLayout" name="horizontalLayout" stretch="1,0,0">
+        <layout class="QHBoxLayout" name="horizontalLayout" stretch="1,0,0,0">
          <property name="spacing">
           <number>1</number>
          </property>
@@ -81,6 +81,23 @@
            </property>
            <property name="autoRaise">
             <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QToolButton" name="reloadTb_">
+           <property name="toolTip">
+            <string>Reload the output</string>
+           </property>
+           <property name="text">
+            <string>...</string>
+           </property>
+           <property name="icon">
+            <iconset resource="viewer.qrc">
+             <normaloff>:/viewer/images/reload.svg</normaloff>:/viewer/images/reload.svg</iconset>
+           </property>
+           <property name="shortcut">
+            <string>Ctrl+R</string>
            </property>
           </widget>
          </item>
