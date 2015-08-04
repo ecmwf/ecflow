@@ -38,6 +38,17 @@ namespace fs = boost::filesystem;
 using namespace std;
 using namespace ecf;
 
+/**
+* Make available program's arguments to all tests, recieving
+* this fixture.
+*/
+struct ArgsFixture {
+   ArgsFixture(): argc(boost::unit_test::framework::master_test_suite().argc),
+                  argv(boost::unit_test::framework::master_test_suite().argv){}
+   int argc;
+   char **argv;
+};
+
 BOOST_AUTO_TEST_SUITE( ClientTestSuite )
 
 // ************************************************************************************
@@ -88,15 +99,16 @@ void do_test_migration(
    }
 }
 
-BOOST_AUTO_TEST_CASE( test_migration )
+
+BOOST_FIXTURE_TEST_CASE( test_migration,ArgsFixture )
 {
-   if (fs::exists("/var/tmp/ma0/ECFLOW_TEST/migration")) {
+   if (argc == 2 && fs::exists(argv[1])) {
       /// This will remove checkpt and backup , to avoid server from loading it. (i.e from previous test)
       InvokeServer invokeServer("Client:: ...test_migration:",SCPort::next());
 
       ClientInvoker theClient(invokeServer.host(), invokeServer.port());
       int error_cnt = 0;
-      do_test_migration(theClient,invokeServer.host(), invokeServer.port(),"/var/tmp/ma0/ECFLOW_TEST/migration",error_cnt);
+      do_test_migration(theClient,invokeServer.host(), invokeServer.port(),argv[1],error_cnt);
       BOOST_REQUIRE_MESSAGE( error_cnt == 0, "Migration test failed " << error_cnt << " times " );
    }
    else {
