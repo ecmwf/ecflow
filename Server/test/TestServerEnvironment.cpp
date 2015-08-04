@@ -166,8 +166,10 @@ BOOST_AUTO_TEST_CASE( test_server_config_file )
    expected_variables.push_back( "ECF_MICRO" );
    expected_variables.push_back( "ECF_PID" );
    expected_variables.push_back( "ECF_VERSION" );
+   expected_variables.push_back( "ECF_LISTS" );
    expected_variables.push_back(  Str::ECF_PORT() );
    expected_variables.push_back( "ECF_NODE");
+   expected_variables.push_back( "ECF_INTERVAL");
 
    std::vector<std::pair<std::string,std::string> > server_vars;
    serverEnv.variables(server_vars);
@@ -208,7 +210,7 @@ BOOST_AUTO_TEST_CASE( test_server_config_file )
          BOOST_CHECK_MESSAGE(p.second == fs::current_path().string(),"for ECF_HOME expected " << fs::current_path().string() << " but found " << p.second);
          continue;
       }
-      if (string("ECF_PORT") == p.first) {
+      if (string("ECF_PORT") == p.first && !getenv("ECF_PORT")) {
          BOOST_CHECK_MESSAGE(p.second == Str::DEFAULT_PORT_NUMBER(),"for ECF_PORT expected " <<  Str::DEFAULT_PORT_NUMBER() << " but found " << p.second);
          continue;
       }
@@ -289,8 +291,10 @@ BOOST_AUTO_TEST_CASE( test_server_environment_variables )
    expected_variables.push_back( "ECF_MICRO" );
    expected_variables.push_back( "ECF_PID" );
    expected_variables.push_back( "ECF_VERSION" );
+   expected_variables.push_back( "ECF_LISTS" );
    expected_variables.push_back(  Str::ECF_PORT() );
    expected_variables.push_back( "ECF_NODE");
+   expected_variables.push_back( "ECF_INTERVAL");
 
    std::vector<std::pair<std::string,std::string> > server_vars;
    serverEnv.variables(server_vars);

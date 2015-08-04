@@ -1,0 +1,3 @@
+suite s1
+repeat date YMD 20090901 20091001 -1 # start date is < end date, when delta < 0
+endsuite

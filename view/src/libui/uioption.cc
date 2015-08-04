@@ -30,7 +30,7 @@ option_form_p option_form = (option_form_p) NULL;
 
 void option_form_c::create (Widget parent, char *widget_name)
 {
-	Widget children[5];      /* Children to manage */
+	Widget children[10];      /* Children to manage */
 	Arg al[64];                    /* Arg List */
 	register int ac = 0;           /* Arg Count */
 	Widget frame1 = (Widget)NULL;
@@ -87,6 +87,9 @@ void option_form_c::create (Widget parent, char *widget_name)
         Widget toggle20 = (Widget)NULL;
         Widget separator20 = (Widget)NULL;
 
+	Widget form15 = (Widget)NULL;
+	Widget toggle15 = (Widget)NULL;
+	Widget separator15 = (Widget)NULL;
 
         if ( !widget_name )
                 widget_name = "Server options";
@@ -161,6 +164,19 @@ void option_form_c::create (Widget parent, char *widget_name)
 	XtSetArg(al[ac], XmNalignment, XmALIGNMENT_BEGINNING); ac++;
 	aliases = XmCreateToggleButton ( form14, "aliases", al, ac );
 
+	/* 20150216 */
+	ac = 0;
+	form15 = XmCreateForm ( form1, "form15", al, ac );
+	XtSetArg(al[ac], XmNindicatorType, XmONE_OF_MANY); ac++;
+	XtSetArg(al[ac], XmNset, FALSE); ac++;
+	toggle15 = XmCreateToggleButtonGadget ( form15, "@late_family", al, ac );
+	ac = 0;
+	XtSetArg(al[ac], XmNorientation, XmVERTICAL); ac++;
+	separator15 = XmCreateSeparator ( form15, "separator1", al, ac );
+	ac = 0;
+	XtSetArg(al[ac], XmNalignment, XmALIGNMENT_BEGINNING); ac++;
+	late_family = XmCreateToggleButton ( form15, "late_family", al, ac );
+
 	ac = 0;
 	frame3 = XmCreateFrame ( form_, "frame3", al, ac );
 	XtSetArg(al[ac], XmNchildType, XmFRAME_TITLE_CHILD); ac++;
@@ -192,7 +208,6 @@ void option_form_c::create (Widget parent, char *widget_name)
 
         /* 201404 */
         ac = 0;
-        // form20 = XmCreateForm ( form10, "form20", al, ac );
         form21 = XmCreateForm ( form10, "form21", al, ac );
         XtSetArg(al[ac], XmNindicatorType, XmONE_OF_MANY); ac++;
         XtSetArg(al[ac], XmNset, FALSE); ac++;
@@ -358,6 +373,13 @@ void option_form_c::create (Widget parent, char *widget_name)
 	XtSetArg(al[ac], XmNleftAttachment, XmATTACH_FORM); ac++;
 	XtSetArg(al[ac], XmNrightAttachment, XmATTACH_FORM); ac++;
 	XtSetValues ( form14,al, ac );
+	ac = 0;
+
+	XtSetArg(al[ac], XmNtopAttachment, XmATTACH_WIDGET); ac++;
+	XtSetArg(al[ac], XmNtopWidget, form14); ac++;
+	XtSetArg(al[ac], XmNleftAttachment, XmATTACH_FORM); ac++;
+	XtSetArg(al[ac], XmNrightAttachment, XmATTACH_FORM); ac++;
+	XtSetValues ( form15,al, ac );
 	ac = 0;
 
 	XtSetArg(al[ac], XmNtopAttachment, XmATTACH_FORM); ac++;
@@ -533,11 +555,48 @@ void option_form_c::create (Widget parent, char *widget_name)
 	XtManageChildren(children, ac);
 
 	ac = 0;
+	XtSetArg(al[ac], XmNtopAttachment, XmATTACH_FORM); ac++;
+	XtSetArg(al[ac], XmNbottomAttachment, XmATTACH_FORM); ac++;
+	XtSetArg(al[ac], XmNleftAttachment, XmATTACH_FORM); ac++;
+	XtSetValues ( toggle15,al, ac );
+	ac = 0;
+
+	XtSetArg(al[ac], XmNtopAttachment, XmATTACH_FORM); ac++;
+	XtSetArg(al[ac], XmNtopOffset, 4); ac++;
+	XtSetArg(al[ac], XmNbottomAttachment, XmATTACH_FORM); ac++;
+	XtSetArg(al[ac], XmNbottomOffset, 4); ac++;
+	XtSetArg(al[ac], XmNleftAttachment, XmATTACH_WIDGET); ac++;
+	XtSetArg(al[ac], XmNleftOffset, 4); ac++;
+	XtSetArg(al[ac], XmNleftWidget, toggle15); ac++;
+	XtSetArg(al[ac], XmNrightAttachment, XmATTACH_NONE); ac++;
+	XtSetValues ( separator15,al, ac );
+	ac = 0;
+
+	XtSetArg(al[ac], XmNtopAttachment, XmATTACH_FORM); ac++;
+	XtSetArg(al[ac], XmNbottomAttachment, XmATTACH_FORM); ac++;
+	XtSetArg(al[ac], XmNleftAttachment, XmATTACH_WIDGET); ac++;
+	XtSetArg(al[ac], XmNleftOffset, 4); ac++;
+	XtSetArg(al[ac], XmNleftWidget, separator15); ac++;
+        XtSetArg(al[ac], XmNrightAttachment, XmATTACH_FORM); ac++;
+        XtSetValues ( late_family,al, ac );
+        ac = 0;
+        XtAddCallback (toggle15, XmNvalueChangedCallback,
+                       &option_form_c:: useCB, (XtPointer) this);
+        XtAddCallback (late_family,  XmNvalueChangedCallback,
+                       &option_form_c:: changedCB, (XtPointer) this);
+
+        children[ac++] = toggle15;
+        children[ac++] = separator15;
+	children[ac++] = late_family;
+	XtManageChildren(children, ac);
+
+	ac = 0;
 	children[ac++] = form7;
 	children[ac++] = form8;
 	children[ac++] = form9;
 	children[ac++] = form13;
 	children[ac++] = form14;
+	children[ac++] = form15;
 	XtManageChildren(children, ac);
 	ac = 0;
 	children[ac++] = label1;

@@ -367,8 +367,7 @@ SimpleBaseWidget request, new;
 static void Destroy(SimpleBaseWidget w)
 {
 	Widget clip,scroll,ww;
-
-	printf("Destroy(SimpleBaseWidget w)\n");
+	//printf("Destroy(SimpleBaseWidget w)\n");
 
 	NodeReset((Widget)w);
 
@@ -1273,16 +1272,26 @@ int            n_args;
   
   {
     int min, max, value, slider_size, inc, page_inc;
-    SetArg(XmNminimum,&min);
-    SetArg(XmNmaximum,&max);    
-    SetArg(XmNvalue,&value);    
+  
+    ac = 0;
+    XtSetArg(al[ac], XmNminimum,&min); ac++;
+    XtSetArg(al[ac], XmNmaximum,&max); ac++;   
+    XtGetValues(v_scroll, al, ac);
+    XmScrollBarGetValues(v_scroll,&value,&slider_size,&inc,&page_inc);
+
+    /* SetArg(XmNvalue,&value);    
     SetArg(XmNsliderSize,&slider_size);    
     SetArg(XmNincrement,&inc);    
-    SetArg(XmNpageIncrement,&page_inc);    
+    SetArg(XmNpageIncrement,&page_inc);    */
     
-    GetValues(v_scroll);
-    /* XmScrollBarGetValues(v_scroll, value, slider_size, inc, page_inc); */
+    /* GetValues(v_scroll);
+    XmScrollBarGetValues(v_scroll, value, slider_size, inc, page_inc); */
     
+    ac = 0;
+    XtSetArg(al[ac],XmNx,&x_parent);ac++;
+    XtSetArg(al[ac],XmNy,&y_parent);ac++;
+    XtGetValues(swin,al,ac);
+
     int arg = atoi(args[0]);
     dh = (abs(arg) > 5) ? page_inc : inc;
 
@@ -1298,6 +1307,10 @@ int            n_args;
         value += dh;
     }
 
+    ac = 0;
+    XtSetArg(al[ac],XmNx,x);ac++;
+    XtSetArg(al[ac],XmNy,y);ac++;
+    XtSetValues(swin,al,ac);
     XmScrollBarSetValues(v_scroll,value,slider_size, inc, page_inc,TRUE);
   }
 #endif

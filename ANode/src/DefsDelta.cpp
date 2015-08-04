@@ -17,6 +17,8 @@
 #include "ChangeMgrSingleton.hpp"
 using namespace std;
 
+//#define DEBUG_MEMENTO 1
+
 //===============================================================
 // DefsDelta
 
@@ -31,9 +33,15 @@ void DefsDelta::init(unsigned int client_state_change_no)
 }
 
 
-bool DefsDelta::incremental_sync(defs_ptr client_def) const
+bool DefsDelta::incremental_sync(defs_ptr client_def, std::vector<std::string>& changed_nodes) const
 {
 	if (!client_def.get()) return false;
+
+   if (ChangeMgrSingleton::exists() && ChangeMgrSingleton::instance()->in_notification()) {
+      // For debug: place a break point here: It appear as Change manager observers, has called another client to server command
+      std::cout << "ecflow:ClientInvoker::incremental_sync() called in the middle of ChangeMgrSingleton::notification.\n";
+      std::cout << "It appears that change observer have called *ANOTHER* client->server command in the middle synchronising client definition\n";
+   }
 
    /// - Sets notification flag, so that observers can also query if they are in
    ///   the middle of notification.
@@ -48,12 +56,20 @@ bool DefsDelta::incremental_sync(defs_ptr client_def) const
 #ifdef DEBUG_MEMENTO
 		std::cout << "DefsDelta::incremental_sync compound_mementos_.size() = " << compound_mementos_.size() << "\n";
 #endif
-		std::for_each(compound_mementos_.begin(),compound_mementos_.end(), boost::bind(&CompoundMemento::incremental_sync,_1,client_def));
+		std::for_each(compound_mementos_.begin(),compound_mementos_.end(),
+		              boost::bind(&CompoundMemento::incremental_sync,_1,client_def,boost::ref(changed_nodes)));
 	}
 	catch ( std::exception& e) {
 		throw std::runtime_error("Could not apply incremental server changes to client defs, because: " + string(e.what()));
 	}
 
+	// For each compound memento, we should have a changed node,
+   // If the assertion fails, then the sync in the observers, would have called another client->server command in the middle synchronising
+	if ( compound_mementos_.size() != changed_nodes.size()) {
+	   std::cout << "DefsDelta::incremental_sync: ERROR **** compound_mementos_.size() " << compound_mementos_.size() << "  changed_nodes.size(): " << changed_nodes.size() << " differ.\n";
+	}
+	// assert( compound_mementos_.size() == changed_nodes.size()); // FIXME restore for long term GUI test
+ 
 	// return true if there were any changes made
 	return !compound_mementos_.empty();
 }

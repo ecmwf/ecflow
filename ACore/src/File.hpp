@@ -30,12 +30,15 @@ public:
 	static size_t MAX_LINES();  //  max number of lines, default to 10000
 	static const std::string& JOB_EXTN();  // ".job"
 	static const std::string& MAN_EXTN();  // ".man"
-   static const std::string& USR_EXTN();  // ".usr"
-   static const std::string& ECF_EXTN();  // ".ecf"
+	static const std::string& USR_EXTN();  // ".usr"
+	static const std::string& ECF_EXTN();  // ".ecf"
+
+	/// Search for the file, in $PATH return the first path that matches or an empty file, if not
+	static std::string which(const std::string& file);
 
 	/// expect string of the form ".ecf" or ".sms"
-   static void set_ecf_extn(const std::string&);
-   static const std::string& ecf_extn(); // return ".ecf" | ".sms" | ".py"
+	static void set_ecf_extn(const std::string&);
+	static const std::string& ecf_extn(); // return ".ecf" | ".sms" | ".py"
 
 	/// return the file extension
 	static std::string getExt(const std::string& file);
@@ -47,16 +50,16 @@ public:
 	/// represent a line in the file. returns true if file open ok , false otherwise
 	/// The additional parameter ignoreEmptyLine  can be used to ignore empty lines
 	/// **Always reads _WHOLE_ file. Not suitable for very large files **
- 	static bool splitFileIntoLines(const std::string& filename, std::vector<std::string>& lines, bool ignoreEmptyLine = false);
+	static bool splitFileIntoLines(const std::string& filename, std::vector<std::string>& lines, bool ignoreEmptyLine = false);
 
- 	/// This is suitable for large files. > several gigabytes, since it does load the entire file
- 	static std::string get_last_n_lines(const std::string& filename,int last_n_lines, std::string& error_msg);
+	/// This is suitable for large files. > several gigabytes, since it does load the entire file
+	static std::string get_last_n_lines(const std::string& filename,int last_n_lines, std::string& error_msg);
 
- 	/// returns the first n line of a file, does not read all the file, hence suitable for very large files
-   static std::string get_first_n_lines(const std::string& filename,int n_lines, std::string& error_msg);
+	/// returns the first n line of a file, does not read all the file, hence suitable for very large files
+	static std::string get_first_n_lines(const std::string& filename,int n_lines, std::string& error_msg);
 
- 	/// Opens the file and returns the contents
- 	static bool open(const std::string& filePath, std::string& contents);
+	/// Opens the file and returns the contents
+	static bool open(const std::string& filePath, std::string& contents);
 
 	/// Given a file spath, and a vector of lines, creates a file. returns true if success
 	/// else returns false and an error message
@@ -67,36 +70,33 @@ public:
 	/// Return the first file that matches
 	/// return true if file found false otherwise
 	static bool find(
-	                  const boost::filesystem::path& dir_path,    // from this directory downwards
-	                  const std::string&             file_name,   // search for this name,
-	                  boost::filesystem::path&       path_found   // placing path here if found
-				    );
+			const boost::filesystem::path& dir_path,    // from this directory downwards
+			const std::string&             file_name,   // search for this name,
+			boost::filesystem::path&       path_found   // placing path here if found
+	);
 
 	/// recursively look for a file, given a starting directory
 	/// Returns _ALL_ files that match
- 	static void findAll(
-	                  const boost::filesystem::path& dir_path,            // from this directory downwards
-	                  const std::string&             file_name,           // search for this name,
-	                  std::vector<boost::filesystem::path>& paths_found   // placing path here if found
-				    );
+	static void findAll(
+			const boost::filesystem::path& dir_path,            // from this directory downwards
+			const std::string&             file_name,           // search for this name,
+			std::vector<boost::filesystem::path>& paths_found   // placing path here if found
+	);
 
-   // returns the workspace directory by looking for the string ecflow up the hierarchy
- 	// Will throw a exception std::runtime_error is directory not found
-   static std::string workspace_dir();
 
 	/// recursively look for a file, given a starting directory and path token
 	/// Returns the first match found
 	static std::string findPath(
-	                  const boost::filesystem::path& dir_path,    // from this directory downwards
-	                  const std::string&             file_name,   // search for this name,
-	                  const std::string&             leafDir      // path must contain this string
-				    );
+			const boost::filesystem::path& dir_path,    // from this directory downwards
+			const std::string&             file_name,   // search for this name,
+			const std::string&             leafDir      // path must contain this string
+	);
 
-   static std::string findPath(
-                     const boost::filesystem::path&  dir_path,    // from this directory downwards
-                     const std::string&              file_name,   // search for this name,
-                     const std::vector<std::string>& tokens       // path must contain all these tokens
-                );
+	static std::string findPath(
+			const boost::filesystem::path&  dir_path,    // from this directory downwards
+			const std::string&              file_name,   // search for this name,
+			const std::vector<std::string>& tokens       // path must contain all these tokens
+	);
 
 	/// Create missing directories. This is *NOT* the same as boost::create_directories
 	/// as that only works with directories. This function assumes that if a "." exist
@@ -114,10 +114,10 @@ public:
 	/// Returns the difference between 2 files.
 	/// Ignore lines that contain strings in the ignoreVec
 	static  std::string diff(const std::string& file,
-	                         const std::string& file2,
-	                         const std::vector<std::string>& ignoreVec,
-	                         std::string& errorMsg,
-	                         bool ignoreBlanksLine  = true);
+			const std::string& file2,
+			const std::vector<std::string>& ignoreVec,
+			std::string& errorMsg,
+			bool ignoreBlanksLine  = true);
 
 	/// Do a backward search of rootPath + nodePath + fileExtn
 	/// If task path if of the form /suite/family/family2/task, then we keep
@@ -143,6 +143,11 @@ public:
 
 	// Locate test data
 	static std::string test_data(const std::string& rel_path, const std::string& dir);
+
+	// return root source
+	static bool cmake_build();
+	static std::string root_source_dir();
+	static std::string root_build_dir();
 };
 
 }

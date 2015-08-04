@@ -151,8 +151,6 @@ STC_Cmd_ptr CtsCmd::doHandleRequest(AbstractServer* as) const
          break;
       }
       case CtsCmd::FORCE_DEP_EVAL: {
-         if (!as->defs()) throw std::runtime_error( "No definition in server") ;
-
          // The Default JobsParam does *not* allow Job creation, & hence => does not submit jobs
          // The default does *not* allow job spawning
          Jobs jobs(as->defs());
@@ -182,22 +180,30 @@ STC_Cmd_ptr CtsCmd::doHandleRequest(AbstractServer* as) const
 static const char* server_load_desc() {
    /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
    return
-            "Shows the server load graphically, by parsing the log file.\n"
-            "If no log file is provided, then the log file path is obtained from\n"
-            "the server. *If* this file is accessible from the client, then a\n"
-            "graphical view of the server load is shown.\n"
-            "This command assumes that gnuplot is available on $PATH. This command\n"
-            "produces two files in the CWD 'gnuplot.dat' and 'gnuplot.script'.\n"
-            "This generated script can be manually changed, to see different rendering\n"
-            "effects. i.e. just run 'gnuplot gnuplot.script'\n\n"
-            "  arg1 = <optional> path to log file\n"
+            "Generates gnuplot files that show the server load graphically.\n"
+            "This is done by parsing the log file. If no log file is provided,\n"
+            "then the log file path is obtained from the server. If the returned\n"
+            "log file path is not accessible an error is returned\n"
+            "This command produces a three files in the CWD.\n"
+            "    o <host>.<port>.gnuplot.dat\n"
+            "    o <host>.<port>.gnuplot.script\n"
+            "    o <host>.<port>.png\n\n"
+            "The generated script can be manually changed, to see different rendering\n"
+            "effects. i.e. just run 'gnuplot <host>.<port>.gnuplot.script'\n\n"
+            "  arg1 = <optional> path to log file\n\n"
             "If the path to log file is known, it is *preferable* to use this,\n"
-            "rather than requesting the log path from the server.\n"
+            "rather than requesting the log path from the server.\n\n"
             "Usage:\n"
-            "   --server_load=/path/to_log_file  # parses log and shows a gnuplot window\n"
-            "   --server_load                    # log file path is requested from server\n"
-            "                                    # which is then used to produce gnuplot window\n"
-            "                                    # *AVOID* if log file path is accessible"
+            "   --server_load=/path/to_log_file  # Parses log and generate gnuplot files\n"
+            "   --server_load                    # Log file path is requested from server\n"
+            "                                    # which is then used to generate gnuplot files\n"
+            "                                    # *AVOID* if log file path is accessible\n\n"
+            "Now use any png viewer to see the output i.e\n\n"
+            "> display   <host>.<port>.png\n"
+            "> feh       <host>.<port>.png\n"
+            "> eog       <host>.<port>.png\n"
+            "> xdg-open  <host>.<port>.png\n"
+            "> w3m       <host>.<port>.png\n"
             ;
 }
 
@@ -382,7 +388,9 @@ void CtsCmd::create( 	Cmd_ptr& cmd,
          if (ac->under_test())  return;
 
          // No need to call server. Parse the log file to create gnu_plot file.
-         Gnuplot::show_server_load(log_file);
+         Gnuplot gnuplot(log_file,ac->host(),ac->port() );
+         gnuplot.show_server_load();
+
          return; // Don't create command, since with log file, it is client specific only
       }
    }

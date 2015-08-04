@@ -18,7 +18,7 @@
 #       src/tmpnam.c 
 #       src/line.c 
 #       src/x.c 
-       
+
 list( APPEND srcs_cc
    src/aborted.cc
    src/alerts.cc
@@ -172,21 +172,6 @@ file( GLOB srcs_cpp     RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "src/*.cpp"        
 file( GLOB libicon_srcs RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "src/libicon/*.cc" )
 file( GLOB libxec_srcs  RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "src/libxec/*.c"   )
 file( GLOB libui_srcs   RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "src/libui/*.cc"   )
-
-# ======================================================================================
-
-find_package( X11 )
-debug_var( X11_INCLUDE_DIR )
-debug_var( X11_LIBRARIES )  
-debug_var( X11_Xt_INCLUDE_PATH )
-debug_var( X11_Xt_LIB )
-debug_var( X11_Xpm_INCLUDE_PATH )
-debug_var( X11_Xpm_LIB )
-
-find_package( Motif )
-debug_var( MOTIF_INCLUDE_DIR )
-debug_var( MOTIF_LIBRARIES )  
- 
  
 # =======================================================================================
 find_package( CMath )
@@ -202,6 +187,23 @@ find_package( Threads )
 #
 add_definitions( -D_GNU_SOURCE -DUNIX -Dunix -Dlinux -DECFLOW_SHARED_DIR="${CMAKE_INSTALL_PREFIX}/share/ecflow" )
 
+
+# local includes
+include_directories( src
+                     src/libicon
+                     src/libxec
+                     src/libui
+                     ../ACore/src 
+                     ../ANattr/src
+                     ../ANode/src
+                     ../AParser/src
+                     ../Base/src
+                     ../Base/src/cts
+                     ../Base/src/stc
+                     ../Client/src
+                    )
+
+# in ecbuild_add_library INCLUDES is only for external includes
 ecbuild_add_library(TARGET    libecflowview
 				        CONDITION MOTIF_FOUND AND X11_FOUND AND CMAKE_THREAD_LIBS_INIT
                     SOURCES  
@@ -209,18 +211,6 @@ ecbuild_add_library(TARGET    libecflowview
                     TEMPLATES
                               src/array.cc
                     INCLUDES 
-                              src
-                              src/libicon
-                              src/libxec
-                              src/libui
-                              ../ACore/src 
-                              ../ANattr/src
-                              ../ANode/src
-                              ../AParser/src
-                              ../Base/src
-                              ../Base/src/cts
-                              ../Base/src/stc
-                              ../Client/src
                               ${X11_INCLUDE_DIR}
                               ${MOTIF_INCLUDE_DIR}
                    )
@@ -231,6 +221,8 @@ ecbuild_add_library(TARGET    libecflowview
 #    o Xp       libxprint does not appear to be used ?
 #    o fl       fast lexical analyser generator, not used ?
 # ========================================================================
+# ECFLOW-143 SUP-1212
+SET_SOURCE_FILES_PROPERTIES(src/host.cc PROPERTIES COMPILE_FLAGS "-O0")
 
 ecbuild_add_executable( TARGET    ecflowview
                         SOURCES   
@@ -258,6 +250,7 @@ ecbuild_add_test( TARGET  test-view
                   SOURCES   test/TestRunner.cpp test/TestView.cpp
                   LIBS      libharness    
                   INCLUDES  ../Test/src
+                  TEST_DEPENDS s_test_zombies
                 )
                           
 # ===================================================================
@@ -268,5 +261,4 @@ install ( FILES       ${CMAKE_SOURCE_DIR}/view/src/ecflowview.menu
                       ${CMAKE_SOURCE_DIR}/view/servers
           DESTINATION share/ecflow
           PERMISSIONS OWNER_READ GROUP_READ WORLD_READ OWNER_EXECUTE GROUP_EXECUTE WORLD_EXECUTE
-        )
-        
+        )        

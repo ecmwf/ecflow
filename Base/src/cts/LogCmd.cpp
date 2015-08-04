@@ -87,22 +87,14 @@ STC_Cmd_ptr LogCmd::doHandleRequest(AbstractServer* as) const
                Log::instance()->new_path(new_path_); // will throw for errors
 
                // Update the corresponding server variable
-               if (as->defs()) {
-                  NameValueVec vec;
-                  vec.push_back(std::make_pair(Str::ECF_LOG(),Log::instance()->path()));
-                  as->defs()->set_server().add_or_update_server_variables(vec);
-               }
+               NameValueVec vec;
+               vec.push_back(std::make_pair(Str::ECF_LOG(),Log::instance()->path()));
+               as->defs()->set_server().add_or_update_server_variables(vec);
             }
             else {
-               if (as->defs()) {
-                  // User could have overridden ECF_LOG variable
-                  const std::string& log_file_name = as->defs()->server().find_variable(Str::ECF_LOG());
-                  Log::instance()->new_path(log_file_name);  // will throw for errors
-               }
-               else {
-                  // Re-use reload the existing file, flushing will close file, next log command will re-open it
-                  Log::instance()->flush();
-               }
+               // User could have overridden ECF_LOG variable
+               const std::string& log_file_name = as->defs()->server().find_variable(Str::ECF_LOG());
+               Log::instance()->new_path(log_file_name);  // will throw for errors
             }
 
             as->stats().ECF_LOG_ = Log::instance()->path();  // do NOT update number of requests

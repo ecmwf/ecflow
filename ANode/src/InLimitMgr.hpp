@@ -94,7 +94,7 @@ public:
  	         const std::string& task_path // The task that completed or aborted. Gives up the token
  	) const;
 
- 	/// Check to see if inlimit's can reference thier Limits
+ 	/// Check to see if inlimit's can reference their Limits
  	void check(std::string& errorMsg, std::string& warningMsg,bool reportErrors, bool reportWarnings) const;
 
  	/// Add externs where the inlimit reference to limits can not be resolved

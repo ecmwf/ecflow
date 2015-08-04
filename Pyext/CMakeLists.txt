@@ -2,25 +2,35 @@
 
 file( GLOB srcs RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "src/*.cpp" "src/*.hpp" )
 
-ecbuild_add_library( TARGET   ecflow
-                     TYPE     MODULE
-                     SOURCES  ${srcs}
-					 CONDITION PYTHONLIBS_FOUND
-                     LIBS     libclient libsimu base libparser node nodeattr core
-                              ${Boost_PYTHON_LIBRARY} 
-                              ${PYTHON_LIBRARIES}
-                     INCLUDES ../ACore/src 
-                            ../ANattr/src
-                            ../ANode/src
-                            ../AParser/src
-                            ../Base/src
-                            ../Base/src/cts
-                            ../Base/src/stc
-                            ../Client/src
-                            ../CSim/src
-                            ${Boost_INCLUDE_DIRS}
-                            ${PYTHON_INCLUDE_DIRS} 
+# =====================================================================
+# local includes
+include_directories(  
+                     ../ACore/src 
+                     ../ANattr/src
+                     ../ANode/src
+                     ../AParser/src
+                     ../Base/src
+                     ../Base/src/cts
+                     ../Base/src/stc
+                     ../Client/src
+                     ../CSim/src
                     )
+
+# =====================================================================     
+# INCLUDES here is for external includes           
+ecbuild_add_library( TARGET    ecflow
+                     TYPE      MODULE
+                     SOURCES   ${srcs}
+					 CONDITION PYTHONLIBS_FOUND
+                     LIBS      libclient libsimu base libparser node nodeattr core
+                               ${PYTHON_LIBRARIES}
+                     INCLUDES 
+                               ${Boost_INCLUDE_DIRS}
+                               ${PYTHON_INCLUDE_DIRS} 
+                    )
+
+# This ensures that for debug config, we only link with debug boost libs, for other configs, we link with optimised boost libs                 
+target_link_libraries(ecflow debug ${Boost_PYTHON_LIBRARY_DEBUG}  ${Boost_PYTHON_LIBRARY_RELEASE})
 
 #
 # Override default behaviour that add RPATHS during install
@@ -33,15 +43,19 @@ set_target_properties(ecflow PROPERTIES
                              PREFIX ""
                              INSTALL_RPATH ""
                      )
+                     
+# =====================================================================
+# tests 
 
-### tests 
+ecbuild_add_test( TARGET py_u_TestMigrate
+                  TYPE PYTHON 
+                  ARGS ${CMAKE_CURRENT_SOURCE_DIR}/migrate/py_u_TestMigrate.py
+                  ENVIRONMENT "PYTHONPATH=${CMAKE_BINARY_DIR}/lib" )
 
-list( APPEND tests
+list( APPEND u_tests
         py_u_TestAddDelete   
         py_u_TestAddDeleteFunc 
         py_u_TestAddNodeFunc  
-        py_s_TestClientApi    
-        py_s_TestPythonChildApi
         py_u_TestDefs         
         py_u_TestDefsCheck    
         py_u_TestDerivable   
@@ -57,34 +71,53 @@ list( APPEND tests
         py_u_TestUserManual    
         py_u_TestWith         
 )
-
-foreach( test ${tests} )
+foreach( test ${u_tests} )
 
     ecbuild_add_test( TARGET ${test} 
                       TYPE PYTHON 
-                      ARGS ${CMAKE_CURRENT_SOURCE_DIR}/test/${test}.py
-                      ENVIRONMENT "PYTHONPATH=${CMAKE_BINARY_DIR}/lib" )
+                      ARGS        ${CMAKE_CURRENT_SOURCE_DIR}/test/${test}.py
+                      ENVIRONMENT "PYTHONPATH=${CMAKE_BINARY_DIR}/lib" 
+                      TEST_DEPENDS u_base
+                     )
 endforeach()
 
 
-ecbuild_add_test( TARGET py_u_TestMigrate
-                  TYPE PYTHON 
-                  ARGS ${CMAKE_CURRENT_SOURCE_DIR}/migrate/py_u_TestMigrate.py
-                  ENVIRONMENT "PYTHONPATH=${CMAKE_BINARY_DIR}/lib" )
+if ( ENABLE_ALL_TESTS)
+	list( APPEND s_tests
+	        py_s_TestClientApi    
+	        py_s_TestPythonChildApi
+	)
+	
+	foreach( test ${s_tests} )
+	
+	    ecbuild_add_test( TARGET ${test} 
+	                      TYPE PYTHON 
+	                      ARGS        ${CMAKE_CURRENT_SOURCE_DIR}/test/${test}.py
+	                      ENVIRONMENT "PYTHONPATH=${CMAKE_BINARY_DIR}/lib" 
+	                      TEST_DEPENDS u_base
+	                     )
+	endforeach()
+	
+	set_property(TEST py_s_TestClientApi      APPEND PROPERTY DEPENDS s_test)
+	set_property(TEST py_s_TestPythonChildApi APPEND PROPERTY DEPENDS py_s_TestClientApi)
+endif()
 
 
 # ==========================================================================
 # install
+#    -DCMAKE_PYTHON_INSTALL_TYPE = [ local | setup ]
+#    local : this will install to $INSTALL_PREFIX/$release.$major.$minor/lib/python2.7/site-packages/ecflow/
+#    setup : experimental only,python way of installing
+#
+#    -DCMAKE_PYTHON_INSTALL_PREFIX should *only* used when using python setup.py (CMAKE_PYTHON_INSTALL_TYPE=setup)
+#    *AND* for testing python install to local directory
 # ==========================================================================
-if( ENABLE_PYTHON )
 
-   message( STATUS "python found,  CMAKE_PYTHON_INSTALL_TYPE=${CMAKE_PYTHON_INSTALL_TYPE}")
-
-   # CMAKE_PYTHON_INSTALL_TYPE = [ local | setup ]
+# CMAKE_PYTHON_INSTALL_TYPE = [ local | setup | not defined ]
    
-   if( CMAKE_PYTHON_INSTALL_TYPE MATCHES  "local"  OR NOT DEFINED CMAKE_PYTHON_INSTALL_TYPE )
+if( CMAKE_PYTHON_INSTALL_TYPE MATCHES  "local"  OR NOT DEFINED CMAKE_PYTHON_INSTALL_TYPE )
    
-      message(STATUS "python install *LOCAL* ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+      message(STATUS "python install *LOCAL* +++ lib/python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}/site-packages/ecflow +++++++")
       set(PYTHON_SITE "lib/python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}/site-packages" )
       set(PYTHON_DEST "${PYTHON_SITE}/ecflow" )
       
@@ -93,7 +126,8 @@ if( ENABLE_PYTHON )
              )
       install( FILES   ecflow/__init__.py  DESTINATION ${PYTHON_DEST} )
       
-   else()
+else()
+	  message( STATUS "python found,  CMAKE_PYTHON_INSTALL_TYPE=${CMAKE_PYTHON_INSTALL_TYPE}")
 
       # -------------------------------------------------------------------------------------
       # Install using setup.py
@@ -107,7 +141,7 @@ if( ENABLE_PYTHON )
       set(SETUP_PY_IN "${CMAKE_CURRENT_SOURCE_DIR}/setup.py.in")
       set(SETUP_PY    "${CMAKE_CURRENT_SOURCE_DIR}/setup.py")
       set(DEPS        "${CMAKE_CURRENT_SOURCE_DIR}/ecflow/__init__.py")
-      set(OUTPUT      "${CMAKE_CURRENT_SOURCE_DIR}/build/timestamp")
+      set(OUTPUT      "${CMAKE_CURRENT_SOURCE_DIR}/timestamp")
 
       configure_file(${SETUP_PY_IN} ${SETUP_PY} )
 
@@ -126,6 +160,4 @@ if( ENABLE_PYTHON )
       else()
          install(CODE "execute_process(COMMAND ${PYTHON} ${SETUP_PY} install)")
       endif()
-   endif()
-
 endif()

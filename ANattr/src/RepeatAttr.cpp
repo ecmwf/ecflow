@@ -197,20 +197,38 @@ RepeatDate::RepeatDate( const std::string& variable,
    if ( !Str::valid_name( variable ) ) {
       throw std::runtime_error("RepeatDate::RepeatDate: Invalid name: " + variable);
    }
-	if (start > end) {
-	   std::stringstream ss; ss << "repeat " << variable << " " << start << " " << end << " " << delta;
-		throw std::runtime_error("Invalid Repeat date: The end must be greater than the start date" + ss.str());
-	}
-	std::string theStart = boost::lexical_cast< std::string >(start);
-	if (theStart.size() != 8) {
-	   std::stringstream ss; ss << "repeat " << variable << " " << start << " " << end << " " << delta;
-		throw std::runtime_error("Invalid Repeat date: The start is not a valid date. Please use yyyymmdd format." + ss.str());
- 	}
-	std::string theEnd = boost::lexical_cast< std::string >(end);
-	if (theEnd.size() != 8) {
+
+   if (delta == 0) {
       std::stringstream ss; ss << "repeat " << variable << " " << start << " " << end << " " << delta;
-		throw std::runtime_error("Invalid Repeat date: The end is not a valid date. Please use yyyymmdd format." + ss.str());
- 	}
+      throw std::runtime_error("Invalid Repeat date: the delta can not be zero" + ss.str());
+   }
+
+   std::string theStart = boost::lexical_cast< std::string >(start);
+   if (theStart.size() != 8) {
+      std::stringstream ss; ss << "repeat " << variable << " " << start << " " << end << " " << delta;
+      throw std::runtime_error("Invalid Repeat date: The start is not a valid date. Please use yyyymmdd format." + ss.str());
+   }
+   std::string theEnd = boost::lexical_cast< std::string >(end);
+   if (theEnd.size() != 8) {
+      std::stringstream ss; ss << "repeat " << variable << " " << start << " " << end << " " << delta;
+      throw std::runtime_error("Invalid Repeat date: The end is not a valid date. Please use yyyymmdd format." + ss.str());
+   }
+
+
+   if (delta_ > 0) {
+      // assert end => start
+      if (!(end >= start)) {
+         std::stringstream ss; ss << "repeat " << variable << " " << start << " " << end << " " << delta;
+         throw std::runtime_error("Invalid Repeat date: The end must be greater than the start date, when delta is positive " + ss.str());
+      }
+   }
+   else {
+      // assert start >= end
+      if (!(start >= end)) {
+         std::stringstream ss; ss << "repeat " << variable << " " << start << " " << end << " " << delta;
+         throw std::runtime_error("Invalid Repeat date: The start must be greater than the end date, when delta is negative " + ss.str());
+      }
+   }
 
 	// Use date lib to check YMD
 	try {
@@ -251,14 +269,16 @@ long RepeatDate::last_valid_value() const
 long RepeatDate::last_valid_value_minus(int val) const
 {
    long last_value = last_valid_value();
-   long julian = sms_repeat_date_to_julian(last_value - val);
+   long julian = sms_repeat_date_to_julian(last_value);
+   julian -= val;
    return sms_repeat_julian_to_date(julian);
 }
 
 long RepeatDate::last_valid_value_plus(int val) const
 {
    long last_value = last_valid_value();
-   long julian = sms_repeat_date_to_julian(last_value + val);
+   long julian = sms_repeat_date_to_julian(last_value);
+   julian += val;
    return sms_repeat_julian_to_date(julian);
 }
 
@@ -327,8 +347,10 @@ std::string RepeatDate::value_as_string(int index) const
 
 void RepeatDate::increment()
 {
-   long julian = sms_repeat_date_to_julian(value_ + delta_);
+   long julian = sms_repeat_date_to_julian(value_);
+   julian += delta_;
    value_ = sms_repeat_julian_to_date(julian);
+
    incr_state_change_no();
 }
 
@@ -363,11 +385,31 @@ void RepeatDate::change( const std::string& newdate)
 
 void RepeatDate::changeValue(long the_new_date)
 {
-	if (the_new_date < start_ || the_new_date > end_) {
-		std::stringstream ss;
-		ss << "RepeatDate::changeValue: " << toString() << "\nThe new date should be in the range[" << start_ << " : " << end_ << "] but found " << the_new_date;
-		throw std::runtime_error(ss.str());
-	}
+   if (delta_ > 0) {
+      if (the_new_date < start_ || the_new_date > end_) {
+         std::stringstream ss;
+         ss << "RepeatDate::changeValue: " << toString() << "\nThe new date should be in the range[" << start_ << " : " << end_ << "] but found " << the_new_date;
+         throw std::runtime_error(ss.str());
+      }
+   }
+   else {
+      if (the_new_date > start_ || the_new_date < end_) {
+         std::stringstream ss;
+         ss << "RepeatDate::changeValue: " << toString() << "\nThe new date should be in the range[" << start_ << " : " << end_ << "] but found " << the_new_date;
+         throw std::runtime_error(ss.str());
+      }
+   }
+
+   // Check new value is in step. ECFLOW-325 repeat date 7
+   long julian_new_date = sms_repeat_date_to_julian(the_new_date);
+   long julian_start = sms_repeat_date_to_julian(start_);
+   long diff = julian_new_date - julian_start;
+   if ( diff % delta_ != 0 ) {
+       std::stringstream ss;
+       ss << "RepeatDate::changeValue: " << toString() << "\nThe new date " << the_new_date << " is not in line with the delta/step";
+       throw std::runtime_error(ss.str());
+   }
+
 	set_value(the_new_date);
 }
 
@@ -381,31 +423,6 @@ void RepeatDate::set_value(long the_new_date)
    value_ = the_new_date;
    incr_state_change_no();
 }
-
-//int RepeatDate::length() const
-//{
-//	std::string start = boost::lexical_cast<std::string>(start_);
-//	std::string end = boost::lexical_cast<std::string>(end_);
-//	date startDate(from_undelimited_string(start));
-//	date endDate(from_undelimited_string(end));
-//	date_period period(startDate,endDate);
-// 	return  ( period.length().days() / delta_);
-//}
-
-//void RepeatDate::truncate(int theLength)
-//{
-//	LOG_ASSERT(theLength < length(),"RepeatDate::truncate");
-////	cout << "   RepeatDate::truncate by " <<  theLength << " BEFORE " << toString();
-//
-//	long julian = 0;
-//	if (delta_ > 0) julian = sms_repeat_date_to_julian(start_ + theLength);
-//	else            julian = sms_repeat_date_to_julian(start_ - theLength);
-//
-//	end_ = sms_repeat_julian_to_date(julian);
-//
-////	cout << " AFTER " << toString() << "\n";
-//}
-
 
 //======================================================================================
 

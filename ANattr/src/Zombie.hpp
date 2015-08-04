@@ -91,6 +91,7 @@ public:
 	bool empty() const { return path_to_task_.empty(); }
 
 	/// returns in seconds the age the zombie is allowed to live
+	/// Server typically checks every 60 seconds, hence this is lowest valid value that has effect
 	int allowed_age() const;
 
 /// mutators

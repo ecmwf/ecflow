@@ -58,12 +58,7 @@ NState::State theComputedNodeState( const std::vector<T>& nodeVec, bool immediat
   	if (activeCount > 0)     return NState::ACTIVE;
  	if (submittedCount > 0)  return NState::SUBMITTED;
  	if (queuedCount > 0)     return NState::QUEUED;
- 	if (completeCount > 0 && completeCount == static_cast<int>(theVecSize)) {
- 		return NState::COMPLETE;
- 	}
- 	if (completeCount > 0) {
- 		return NState::QUEUED;
- 	}
+ 	if (completeCount > 0)   return NState::COMPLETE;
  	return NState::UNKNOWN;
 }
 }

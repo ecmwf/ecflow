@@ -265,9 +265,16 @@ int ClientInvoker::do_invoke_cmd(Cmd_ptr cts_cmd) const
 	if (testInterface_) return 0;       // The testInterface_ flag allows testing of client interface, parsing of args, without needing to contact server
 	assert(!clientEnv_.host().empty()); // make sure host is NOT empty.
 
+   if (ChangeMgrSingleton::exists() && ChangeMgrSingleton::instance()->in_notification()) {
+      // place break point here, Change mgr observers, calling *ANOTHER* client->server command, in a middle of update to observers
+      std::cout << "***********************************************************\n";
+      std::cout << "ecflow:ClientInvoker::do_invoke_cmd() "; cts_cmd->print(cout); std::cout << " called in the middle of ChangeMgrSingleton::notification. !!!!!!!!\n";
+      std::cout << "***********************************************************\n";
+   }
+
 	/// retry_connection_period_ specifies the time to wait, before retrying to connect to server.
 	/// Added to get round glitches in the network.
-	/// However for ping() always default to 1 second. This avoids 20 second wait in release mode.
+	/// However for ping() always default to 1 second. This avoids 10 second wait in release mode.
 	/// We do this both for the CLI(command level interface) and python api
 	unsigned int retry_connection_period = retry_connection_period_;
 	if (cts_cmd->ping_cmd()) retry_connection_period = 1;
@@ -1085,8 +1092,17 @@ std::string ClientInvoker::find_free_port(int seed_port_number, bool debug)
          the_port++;
       }
       catch ( std::runtime_error& e) {
-         if (debug) cout << "   Found free port " << free_port << "\n";
-         break;
+         std::string error_msg = e.what();
+         if (debug) cout << "   " << e.what();
+         if (error_msg.find("authentication failed") != std::string::npos) {
+            if (debug) cout << "   Could not connect, due to authentication failure, hence port " << the_port << " is used,trying next port\n";
+            the_port++;
+            continue;
+         }
+         else {
+            if (debug) cout << "   Found free port " << free_port << "\n";
+            break;
+         }
       }
    }
    return free_port;

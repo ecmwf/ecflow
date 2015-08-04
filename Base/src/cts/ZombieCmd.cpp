@@ -58,12 +58,9 @@ STC_Cmd_ptr ZombieCmd::doHandleRequest(AbstractServer* as) const
 	// The first zombie whose corresponding task where password does *NOT* match is acted upon
 	Task* task = NULL;
 	if ( process_id_.empty() && password_.empty()) {
-		defs_ptr defs = as->defs();
-		if (defs.get()) {
-			node_ptr node = defs->findAbsNode(path_);
-			if (node.get())  task = node->isTask();
-		}
- 	}
+	   node_ptr node = as->defs()->findAbsNode(path_);
+	   if (node.get()) task = node->isTask();
+	}
 
 	switch (user_action_) {
 

@@ -1,0 +1,18 @@
+# 4.0.1
+defs_state MIGRATE state>:queued flag:message state_change:1500811 modify_change:48
+  edit ECF_LOG '/vol/emos_nc/output/ecflow/vali.21801.ecf.log'
+  edit SMSNAME '0'
+  history /s2s_devel/ecmf/back MSG:[15:53:06 21.10.2014] --replace=/s2s_devel/ecmf/back s2s_devel.def parent  :emos
+  history /s2s_devel/ecmf/enfh MSG:[13:45:53 12.11.2014] --alter change label last_run 20141023 /s2s_devel/ecmf/enfh/  :emosMSG:[13:45:53 12.11.2014] --alter change label next_run 99999999 /s2s_devel/ecmf/enfh/  :emosMSG:[16:54:11 12.11.2014] --alter change label last_run 20140929
+20141002
+20141016
+20141023 /s2s_devel/ecmf/enfh/  :emosMSG:[16:54:11 12.11.2014] --alter change label next_run 20141023 /s2s_devel/ecmf/enfh/  :emosMSG:[16:58:54 12.11.2014] --alter change label last_run 20141023 /s2s_devel/ecmf/enfh/  :emosMSG:[16:58:54 12.11.2014] --alter change label next_run 20141023 /s2s_devel/ecmf/enfh/  :emosMSG:[17:01:39 12.11.2014] --alter change label last_run 20141023 /s2s_devel/ecmf/enfh/  :emosMSG:[17:01:39 12.11.2014] --alter change label next_run 20141027 /s2s_devel/ecmf/enfh/  :emosMSG:[14:17:38 13.11.2014] --resume  :marmMSG:[14:27:42 13.11.2014] --resume  :marmMSG:[14:44:53 13.11.2014] --resume  :marmMSG:[16:36:20 13.11.2014] --resume  :marmMSG:[16:42:34 13.11.2014] --resume  :marmMSG:[10:54:42 14.11.2014] --resume  :marmMSG:[11:07:40 14.11.2014] --alter change label next_run 20141030 /s2s_devel/ecmf/enfh  :emosMSG:[11:07:40 14.11.2014] --alter change label last_run 20141023 /s2s_devel/ecmf/enfh  :emosMSG:[11:07:40 14.11.2014] --requeue force /s2s_devel/ecmf/enfh  :emosMSG:[11:29:28 14.11.2014] --resume  :marmMSG:[11:46:15 14.11.2014] --resume  :marmMSG:[14:05:53 14.11.2014] --requeue force /s2s_devel/ecmf/enfh  :emos
+  history /s2s_devel/ecmf/enfh/back MSG:[13:38:30 11.11.2014] --alter change event doIt set /s2s_devel/ecmf/enfh/back  :emosMSG:[15:14:11 11.11.2014] --alter change event doIt set /s2s_devel/ecmf/enfh/back  :emosMSG:[15:15:54 11.11.2014] --alter change event doIt set /s2s_devel/ecmf/enfh/back  :emosMSG:[15:18:10 11.11.2014] --alter change event doIt set /s2s_devel/ecmf/enfh/back  :emosMSG:[16:21:22 11.11.2014] --requeue force /s2s_devel/ecmf/enfh/back  :marmMSG:[16:28:32 11.11.2014] --alter change event doIt set /s2s_devel/ecmf/enfh/back  :emosMSG:[17:01:18 13.11.2014] --replace=/s2s_devel/ecmf/enfh/back s2s_devel.def parent  :emosMSG:[10:53:07 14.11.2014] --replace=/s2s_devel/ecmf/enfh/back s2s_devel.def parent  :emos
+suite limits #  begun:1 state:complete flag:message suspended:1
+  defstatus complete
+  limit archive 3
+  calendar initTime:2014-Feb-20 09:26:31 suiteTime:2014-Sep-24 13:36:00 duration:6484:09:29 initLocalTime:2014-Feb-20 09:26:31 lastTime:2014-Nov-17 13:36:00 calendarIncrement:00:01:00
+endsuite
+suite tigge_lam #  begun:1 state:queued dur:9742:11:35 flag:message,no_reque suspended:1
+  defstatus suspended
+endsuite

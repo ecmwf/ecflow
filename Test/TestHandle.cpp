@@ -341,7 +341,6 @@ BOOST_AUTO_TEST_CASE( test_handle_add_remove_add )
 
    TestFixture::client().set_throw_on_error( true );
    std::vector<std::string> suites_s0_s1_s2; suites_s0_s1_s2.push_back("s0"); suites_s0_s1_s2.push_back("s1"); suites_s0_s1_s2.push_back("s2");
-   std::vector<std::pair<unsigned int, std::vector<std::string> > > ch_suites;
 
    {
       // register suites s0

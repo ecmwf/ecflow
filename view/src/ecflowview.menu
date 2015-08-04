@@ -128,7 +128,7 @@ menu 'MAIN'
     'ecflow_client --shutdown yes','Shutdown the server in <node_name>?',NO)
   (SERVER,~HALTED,         'Halt',     
     'ecflow_client --halt yes','Halt the server in <node_name>?',NO)
-  (SERVER,HALTED,          'Terminate',
+  (SERVER,HALTED|UNKNOWN,          'Terminate',
     'ecflow_client --terminate yes','Terminate the server in <node_name>?',NO)
   (ALL,ALL,'-',SEPARATOR,'',YES)
   (SERVER,ALL,             'Checkpoint','ecflow_client --check_pt','',YES)
@@ -160,6 +160,8 @@ menu 'MAIN'
   (ALL,ALL,'-',SEPARATOR)
   (SERVER, ALL ,  'Options...',  WINDOW(Options)  )
   (SERVER, ALL ,  'Extra',  MENU  )
+  (SERVER, ALL ,  'Ping',  'sh ecflow_client --port %ECF_PORT% --host %ECF_NODE% --ping' )
+  (SERVER, ALL ,  'Stat',  'sh ecflow_client --port %ECF_PORT% --host %ECF_NODE% --stats' )
 }
 
 menu 'Web' 
@@ -259,12 +261,10 @@ menu "Special"
   (TASK|ALIAS,ALL,'Free password','ecflow_client --alter add variable ECF_PASS FREE <full_name>')
   (TASK|ALIAS,ALL,'ClearZ','ecflow_client --alter clear_flag zombie <full_name>')
   (TASK|ALIAS,ALL,'ClearLate','ecflow_client --alter clear_flag late <full_name>')
+  (TASK|ALIAS,ALL,'ClearKill','ecflow_client --alter clear_flag killed <full_name>')
 
   (FAMILY, ~ACTIVE & ~SUBMITTED, 'Execute', 'ecflow_client --run <full_name>')
   ((SUITE|FAMILY|TASK), SELECTION, 'Plug into selected node', PLUG)
-  (TASK|ALIAS, SELECTION, 'Compare Edit (vs selected)', COMP( 'compare' , 'edit' ))
-  (TASK|ALIAS, SELECTION, 'Compare EditPP (vs selected)', COMP( 'compare' , 'editpp'))
-  (TASK|ALIAS, SELECTION, 'Compare output (vs selected)', COMP('compare' , 'output'))
   (FAMILY|TASK,ALL,'get','ecflow_client --get <full_name>')
   (TASK,ALL,'status','ecflow_client --status <full_name>')
   (SUITE|SERVER, ALL, 'Collect...',  WINDOW(Collector))
@@ -278,6 +278,15 @@ menu "Extra"
   (SERVER,ALL,'ClearLate','ecflow_client --alter clear_flag late <full_name>')
   ! (SERVER|SUITE,ALL,'tail log', 'sh /usr/bin/xterm -e rsh %ECF_NODE% tail -f %ECF_HOME%/%ECF_LOG%&')
 (SERVER|SUITE,ALL,'tail log', 'sh /usr/bin/xterm -e tail -f /tmp/$USER/$HOST*.ecf.log&')
+  (ALL,ALL,'-',SEPARATOR) 
+  (SERVER|SUITE,ALL,'svr load','ecflow_load.sh -h %ECF_HOME% -l %ECF_LOG% -n %ECF_NODE% -p %ECF_PORT%')
+!  (SERVER|SUITE,ALL,'svr load','ecflow_client --server_load')
+!  (SERVER|SUITE,ALL,'svr load log','ecflow_client --server_load %ECF_LOG%')
+!  (SERVER|SUITE,ALL,'svr load home/log','ecflow_client --server_load %ECF_HOME%/%ECF_LOG%')
+!  (SERVER|SUITE,ALL,'show png','sh ${EOG:-eog} %ECF_NODE%.%ECF_PORT%.png')
+! one menu to replace four previous when it works
+!  (SERVER|SUITE,ALL,'show load','sh ecflow_show_load.sh -n %ECF_NODE% -p %ECF_PORT% -h %ECF_HOME% %ECF_LOG%')
+
   (ALL,ALL,'-',SEPARATOR)
   (SERVER|SUITE,ALL,'overwrite', 'write menu')
   (SERVER|SUITE,ALL,'edit menu', 'sh /usr/bin/xterm -e vi ~/.ecflowrc/ecflowview.menu')
@@ -293,9 +302,6 @@ menu "Extra"
   (SERVER|SUITE,ALL,'log get','ecflow_client --log get')
   (SERVER|SUITE,ALL,'log clear','ecflow_client --log clear')
   (SERVER|SUITE,ALL,'log new','ecflow_client --log new')
-  (ALL,ALL,'-',SEPARATOR)
-  (SERVER|SUITE,ALL,'svr load','ecflow_client --server_load')
-  (SERVER|SUITE,ALL,'svr load local','ecflow_client --server_load %ECF_HOME%/%ECF_LOG%')
   (ALL,ALL,'-',SEPARATOR)
   (SERVER|SUITE,ALL,'client logging on','ecflow_client --enable_logging')
   (SERVER|SUITE,ALL,'client loggging off','ecflow_client --disable_logging')

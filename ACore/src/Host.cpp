@@ -24,14 +24,25 @@ using namespace std;
 namespace ecf {
 
 Host::Host() {
+   get_host_name();
+}
 
-	char  hostNameArray[255];
-	if (gethostname(hostNameArray,255) != -1) {
-		the_host_name_ = string(hostNameArray);
- 	}
-	else {
-		std::runtime_error("Host::Host() failed, could not get host name?\n");
- 	}
+Host::Host(const std::string& host)
+: the_host_name_(host)
+{
+   if (the_host_name_ == Str::LOCALHOST()) {
+      get_host_name();
+   }
+}
+
+void Host::get_host_name() {
+   char  hostNameArray[255];
+   if (gethostname(hostNameArray,255) != -1) {
+      the_host_name_ = string(hostNameArray);
+   }
+   else {
+      std::runtime_error("Host::Host() failed, could not get host name?\n");
+   }
 }
 
 std::string Host::name() const { return the_host_name_; }

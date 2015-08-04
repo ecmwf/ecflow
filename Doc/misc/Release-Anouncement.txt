@@ -1,28 +1,44 @@
  ======================================================================================
 Subject: New release of ecFlow now available  
 
-A new version of the ecFlow(4.0.6) has been released:
+A new version of the ecFlow(4.0.7) has been released:
 
-#Please be aware that A new ecflow release candidate is planned.
-#If you are using the test version then the link will
-#be changed.
-
-This release is accessible from: /usr/local/apps/ecflow/4.0.6
+This release is accessible from: /usr/local/apps/ecflow/4.0.7
 on the following platforms:
 
-   o linux 10.3                (garm)
    o linux 11.3                (anubis/opensuse113)
    o linux 13.1                (opensuse131)
    o redhat/RHEL 6.4           (ecgb,sappa,sappb)
-   o linux cluster             (lxa/lxb)
+   o linux cluster             (lxab/lxc)
+   o virtual machines          (vsms1 -> operational and research VM are linked to this)
    o Operational linux cluster (lxop)
    o cca/ccb/cct               (cray XC30) 
  
 The release includes the following changes:
 
-    server:         ECFLOW-175  label filtering from log file( don't log missing labels)
-    server:         ECFLOW-174 get log history, causes server memory to grow
-    server:         ECFLOW-169 investigate the slow response on RD virtual machines
+    ecflowview:     ECFLOW-179 ecflowview can not terminate a empty server
+    ecflowview:     ECFLOW-180  ecflowview make more responsive by reducing re-try connection period
+    ecflowview:     PS-42 ecflowview/xcdp menu disappears when latest selected server is unselected
+    ecflowview:     ECFLOW-184 ecflowview crashes due to long variable contents
+    ecflowview:     remove COMP from ecflowview.menu file
+    ecflowview:     Enable history for the server node.
+    ecflowview:     ECFLOW-194 editing limits not reflected in GUI
+    ecflowview:     add access to top node messages,
+    ecflowview:     display origin for job output (logserver name and port)
+    ecflowview:     ECFLOW-227 Allow popups in ecflowview when the "late" command is defined at family level
+    ecflowview:     ECFLOW-200 variables substitution for top (server) node can be used with context menu
+    ecflowview:     ECFLOW-241 investigate slow ecflowview, with variables
+    server:         ECFLOW-182 Allow variable to be added to server, even if no defs exists
+    server:         ECFLOW-187 Improve message from --zombie_adopt when it does not work
+    server:         ECFLOW-189 resume, ignores dependencies higher up the tree
+    server:         ECFLOW-195 Maintain label contents in ecflowview on requeue
+    server:         ECFLOW-196 release limit token when task is requeued from parent family
+    server:         ECFLOW-224  add ECF_LIST to server variables for documentation
+    server:         ECFLOW-230 Allow ECF_OUT variable substuition when generating ECF_JOBOUT
+    server:         ECFLOW-231 add variable substution for the defs
+    server:         ECFLOW-240 reloading whitelist file should show the CWD, on failure
+    python:         ECFLOW-199 extend ecFlow Python API to access incremental updates
+    python:         ECFLOW-238 change cron.set_time_seried(hout,min,bool) so that last arg is optional(false)
  
 To use a specific version use the module functionality.
 This will setup the PATHS for client server and python extension
@@ -33,11 +49,11 @@ i.e.
 
    module avail ecflow
    module unload ecflow 
-   module load ecflow/4.0.6
+   module load ecflow/4.0.7
       
 Alternatively use:
 
-   export ECFLOW_VERSION=4.0.6
+   export ECFLOW_VERSION=4.0.7
    use ecflow
    
             
@@ -47,7 +63,7 @@ The client/Server from one release should not be mixed with another.
 To avoid this problem it is *highly* recommended that you use a 
 specific version:
 
-   module load ecflow/4.0.6
+   module load ecflow/4.0.7
 
 Additionally references to ecflow_client in the scripts(.ecf) should use
 the server variable %ECF_VERSION% to locate the executable, this ensures
@@ -69,7 +85,7 @@ Documentation
 =======================================================================
 The user manual(word and pdf formats) are available from:
 
-   /usr/local/apps/ecflow/4.0.6/doc
+   /usr/local/apps/ecflow/4.0.7/doc
 
 The online documentation and tutorial are accessible from:
 

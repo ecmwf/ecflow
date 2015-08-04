@@ -427,6 +427,7 @@ bool Submittable::submit_job_only( JobsParam& jobsParam)
    flag().clear(ecf::Flag::NO_SCRIPT);
    flag().clear(ecf::Flag::EDIT_FAILED);
    flag().clear(ecf::Flag::JOBCMD_FAILED);
+   requeue_labels(); // ECFLOW-195, requeue no longer resets labels on tasks, hence we do it at task run time.
 
    try {
       // Locate the ecf files corresponding to the jobs.
@@ -854,6 +855,12 @@ void SubGenVariables::update_generated_variables() const
       genvar_ecfjobout_.value_by_ref() = ecf_home;
    }
    else  {
+      // For metabuilder, where we use %ECF_HOME% for ECF_OUT
+      char micro = '%';
+      if (ecf_out.find(micro) != std::string::npos) {
+         NameValueMap user_edit_variables;
+         submittable_->variable_substitution(ecf_out,user_edit_variables,micro);
+      }
       genvar_ecfjobout_.value_by_ref().reserve( ecf_out.size() + theAbsNodePath.size() + 1 + the_try_no.size());
       genvar_ecfjobout_.value_by_ref() = ecf_out;
    }

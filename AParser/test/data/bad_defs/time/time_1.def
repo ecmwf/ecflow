@@ -1,6 +1,4 @@
-suite suiteName
-   time 19:00                   # suites don't have a time, See  ECFLOW-106 Times/Dates attributes attached to suite node
-   family familyName0	
-   endfamily
+suite a
+   time 19:00  # suites don't have a time, See see SUP-1198, ECFLOW-106 Times/Dates attributes attached to suite node
 endsuite
 

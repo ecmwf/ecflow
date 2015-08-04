@@ -232,7 +232,9 @@ private:
    }
 };
 
-
+// Note:: Difference between RepeatEnumerated and  RepeatString, is that
+// RepeatEnumerated::value() will return the value at the index if cast-able to integer,
+// whereas RepeatString::value() will always return the index.
 class RepeatEnumerated : public RepeatBase {
 public:
    RepeatEnumerated( const std::string& variable, const std::vector<std::string>& theEnums);

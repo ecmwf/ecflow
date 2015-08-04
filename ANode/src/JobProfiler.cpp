@@ -27,11 +27,11 @@ using namespace std;
 //   - sleep(1) in EcfFile , i.e when creating the job output
 //
 
-static size_t task_threshold_ = 2000;
+static size_t task_threshold_ = 4000;
 
 namespace ecf {
 
-int JobProfiler::task_threshold_default() { return 2000;}
+int JobProfiler::task_threshold_default() { return 4000;}
 
 // =================================================================================
 JobProfiler::JobProfiler(Task* node,JobsParam& jobsParam, size_t threshold)

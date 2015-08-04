@@ -53,6 +53,7 @@ Server::Server( ServerEnvironment& serverEnv ) :
    thread_pool_size_(serverEnv.threads()),
    new_connection_(),
 #endif
+   defs_(Defs::create()),      // ECFLOW-182
    traverser_   (this,  io_service_, serverEnv ),
    checkPtSaver_(this,  io_service_, &serverEnv ),
    serverState_(SState::HALTED),
@@ -100,7 +101,13 @@ Server::Server( ServerEnvironment& serverEnv ) :
    // Update log file:
    ecf::log(Log::MSG, "Server initial state is HALTED");
 
-   load_check_pt_file_on_startup();
+   // The defs_ *MUST* be updated with the server state
+   // When we load from the check pt file we call update_defs_server_state();
+   if (!load_check_pt_file_on_startup()) {
+
+      // No check pt files loaded, update defs, with server state
+      update_defs_server_state();           // works on def_
+   }
 
    /// Setup globals used to detect incremental changes to the definition
    Ecf::set_server(true);
@@ -366,7 +373,7 @@ void Server::handle_terminate()
 
 // ============================== other privates ===========================================
 
-void Server::load_check_pt_file_on_startup()
+bool Server::load_check_pt_file_on_startup()
 {
    // On start up we want different behaviour.
    // If check pt file exists and we can't load then we want to exit
@@ -375,11 +382,11 @@ void Server::load_check_pt_file_on_startup()
    LogToCout logToCout;
    bool checkpt_failed = false;
    if (restore_from_checkpt(serverEnv_.checkPtFilename(),checkpt_failed)) {
-      return;
+      return true;
    }
    bool backup_checkpt_failed = false;
    if (restore_from_checkpt(serverEnv_.oldCheckPtFilename(),backup_checkpt_failed)) {
-      return;
+      return true;
    }
 
    if (backup_checkpt_failed && !fs::exists(serverEnv_.checkPtFilename())) {
@@ -389,6 +396,7 @@ void Server::load_check_pt_file_on_startup()
    if (checkpt_failed && !fs::exists(serverEnv_.oldCheckPtFilename())) {
       throw std::runtime_error("Can not start server, please handle the checkpoint file first");
    }
+   return false;
 }
 
 void Server::loadCheckPtFile()
@@ -415,17 +423,6 @@ bool Server::restore_from_checkpt(const std::string& filename,bool& failed)
       LOG(Log::MSG, "Loading check point file " << filename << " port = " << serverEnv_.port());
 
       try {
-         if (!defs_.get()) {
-            // Do the things that can throw
-            defs_ptr defs = Defs::create();
-            defs->restore_from_checkpt(filename); // this can throw
-
-            // change state
-            defs_ = defs;
-            update_defs_server_state();           // works on def_
-            //cout << "Server::restore_from_checkpt SUCCEDED found " << defs_->suiteVec().size() << " suites\n";
-            return true;
-         }
          defs_->restore_from_checkpt(filename);   // this can throw
          update_defs_server_state();              // works on def_
          //cout << "Server::restore_from_checkpt SUCCEDED found " << defs_->suiteVec().size() << " suites\n";
@@ -446,50 +443,41 @@ void Server::update_defs_server_state()
 {
    /// The Job submission interval, and host port are not persisted, on the DEFS
    /// Hence when restoring from a checkpoint file, Be sure to update server state
-   if (defs_.get())  {
-      // Do any *one* time setup on the defs
 
-      // Set the server environment *ON* the defs, so that generate variables can be created.
-      // gets the environment as read in by the server, and make available for defs
-      // ECF_HOME .
-      // ECF_CHECK ecf.check
-      // ECF_CHECKOLD ecf.check.b
-      std::vector<std::pair<std::string,std::string> > envVec;
-      serverEnv_.variables(envVec);
-      defs_->set_server().add_or_update_server_variables(envVec);
+   // Do any *one* time setup on the defs
 
-      defs_->set_server().hostPort(  hostPort() );
-      defs_->set_server().set_state( serverState_ );
+   // Set the server environment *ON* the defs, so that generate variables can be created.
+   // gets the environment as read in by the server, and make available for defs
+   // ECF_HOME .
+   // ECF_CHECK ecf.check
+   // ECF_CHECKOLD ecf.check.b
+   std::vector<std::pair<std::string,std::string> > envVec;
+   serverEnv_.variables(envVec);
+   defs_->set_server().add_or_update_server_variables(envVec);
 
-      // let the defs store the job submission interval, & whether we want job generation.testing can disable this
-      defs_->set_server().jobSubmissionInterval(  serverEnv_.submitJobsInterval() );
-      defs_->set_server().jobGeneration( serverEnv_.jobGeneration() );
-      LOG_ASSERT( defs_->server().jobSubmissionInterval() != 0 ,"");
+   defs_->set_server().hostPort(  hostPort() );
+   defs_->set_server().set_state( serverState_ );
 
-      /// System needs defs to handle process that have died, and need to flagged as aborted
-      ecf::System::instance()->setDefs(defs_);
-   }
+   // let the defs store the job submission interval, & whether we want job generation.testing can disable this
+   defs_->set_server().jobSubmissionInterval(  serverEnv_.submitJobsInterval() );
+   defs_->set_server().jobGeneration( serverEnv_.jobGeneration() );
+   LOG_ASSERT( defs_->server().jobSubmissionInterval() != 0 ,"");
+
+   /// System needs defs to handle process that have died, and need to flagged as aborted
+   ecf::System::instance()->setDefs(defs_);
 }
 
 void Server::set_server_state(SState::State ss)
 {
    serverState_ = ss;
    stats().status_ = static_cast<int>(serverState_);
-   if (defs_.get()) defs_->set_server().set_state( serverState_ );
+   defs_->set_server().set_state( serverState_ );
 }
 
 
 /// ======================================================================================
 /// AbstractServer function.
 /// ======================================================================================
-
-void Server::create_defs()
-{
-   if (!defs_.get()) {
-      defs_ = Defs::create();
-      update_defs_server_state(); // Do any *one* time setup on the defs
-   }
-}
 
 std::pair<std::string,std::string> Server::hostPort() const
 {
@@ -498,33 +486,20 @@ std::pair<std::string,std::string> Server::hostPort() const
 
 void Server::updateDefs( defs_ptr defs, bool force)
 {
-   if (defs_.get() == NULL) {
-      if (serverEnv_.debug()) cout << "   Server::updateDefs: First time load of Node tree. Updating defs with server environment" << endl;
+   if (serverEnv_.debug()) std::cout << "   Server::updateDefs: Loading new suites" << endl;
 
-      defs_ = defs;
+   // After the absorb, input defs will be left with NO suites.
+   defs_->absorb(defs.get(),force);
 
-      update_defs_server_state(); // Do any *one* time setup on the defs
-   }
-   else {
-      if (serverEnv_.debug()) std::cout << "   Server::updateDefs: Loading new suites" << endl;
-
-      // After the absorb, input defs will be left with NO suites.
-      defs_->absorb(defs.get(),force);
-   }
-
-   if (defs_) {
-      defs_->set_most_significant_state();
-      LOG_ASSERT( defs_->server().jobSubmissionInterval() != 0 ,"");
-   }
+   defs_->set_most_significant_state();
+   LOG_ASSERT( defs_->server().jobSubmissionInterval() != 0 ,"");
 }
 
 void Server::clear_defs()
 {
    if (serverEnv_.debug()) cout << "   Server::clear_defs()" << endl;
 
-   if (defs_.get()) {
-      defs_->clear();
-   }
+   defs_->clear();
 }
 
 void Server::checkPtDefs(ecf::CheckPt::Mode m, int check_pt_interval, int check_pt_save_time_alarm)
@@ -559,7 +534,7 @@ void Server::restore_defs_from_checkpt()
       throw std::runtime_error( "Can not restore from checkpt the server must be halted first");
    }
 
-   if (defs_.get() && !defs_->suiteVec().empty()) {
+   if (!defs_->suiteVec().empty()) {
       // suites must be deleted manually first
       throw std::runtime_error( "Can not restore from checkpt the server suites must be deleted first");
    }

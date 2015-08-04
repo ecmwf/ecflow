@@ -67,7 +67,7 @@ private:
    static std::string port_file(const std::string& the_port)
    {
       // We need the *SAME* location so that different process find the same file. Get to the workspace directory
-      std::string path = File::workspace_dir();
+      std::string path = File::root_build_dir();
       //std::cout << "\nworkspace_dir = " << path << " ------------------------------------------------------\n";
       path += "/ECF_PORT_used_";
       path += the_port;

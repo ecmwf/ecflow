@@ -96,7 +96,7 @@ void search::searchCB(Widget,XtPointer)
     rege_ = XmToggleButtonGetState(toggle11_);
     glob_ = XmToggleButtonGetState(toggle12_);
     subs_ = XmToggleButtonGetState(toggle13_);
-  } else { icas_ = true; subs_ = rege_ = glob_ = false; }
+  } else { icas_ = true; subs_ = true; rege_ = glob_ = false; }
 
   result::clear();
   searchable::look_for(*this, !XmToggleButtonGetState(where_));
@@ -137,15 +137,12 @@ void search::next(node& n)
   if (ok) ok &= check(n,special_flags_);	
   if (ok && name_) {
     if (subs_) {
+      bool res = n.match(name_);
       if (icas_) 
-    	ok &= 0==strncasecmp(name_, n.name().c_str(), strlen(name_));      
-      else 
-    	ok &= 0==strncmp(name_, n.name().c_str(), strlen(name_));
-      // if (icas_) { // ignore case
-      // 	ok &= strcasestr(n.name().c_str(),name_) != 0; 
-      // } else { // case sensitive, accept longest names
-      // 	ok &= n.match(name_);
-      // } 
+    	res |= !strncasecmp(name_, n.name().c_str(), strlen(name_));      
+      else 	
+	res |= !strncmp(name_, n.name().c_str(), strlen(name_));
+      ok &= res;
     } else if (glob_) {
 	std::string path (n.name());
 	std::string pattern (name_);    
@@ -259,7 +256,8 @@ void search::miscCB(Widget,XtPointer)
 {
   if(XmToggleButtonGetState(misc_)) {
     XmToggleButtonSetState(icase_, True, False);
-    XmToggleButtonSetState(toggle12_, True, False);
+    // XmToggleButtonSetState(toggle12_, True, False); // glob
+    XmToggleButtonSetState(toggle13_, True, False); // substring
     XtManageChild(misc_rowcol_); 
     XtManageChild(fname_); 
     XtManageChild(icase_);

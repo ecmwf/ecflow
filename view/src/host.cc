@@ -177,6 +177,7 @@ host::host( const std::string& name, const std::string& host, int number )
 	 , new_suites_(this, "new_suites", true)
 	 , zombie_(this, "zombie", false)
 	 , aliases_(this, "aliases", false)
+	 , late_family_(this, "late_family", false)
 	 , to_check_(this, "to_check", false)
 	 , chkmail_(true)
 	 , top_(0)
@@ -213,6 +214,7 @@ ehost::ehost( const std::string& name, const std::string& h, int number )
    try {
       std::string port = boost::lexical_cast<std::string>(number);
       client_.set_host_port(host_.c_str(), port);
+      client_.set_retry_connection_period(1);
    }
    catch ( std::exception& e ) {
       gui::message("# Exception caught in host::host ");
@@ -357,7 +359,7 @@ void host::run()
    if (drift_) drift(5, maximum_ * 60);
 }
 
-tmp_file host::file( node& n, std::string name )
+tmp_file host::file(node& n, std::string name)
 {
    return tmp_file(NULL);
 }
@@ -375,11 +377,11 @@ tmp_file host::jobcheck( node& n, const std::string &cmd )
 tmp_file ehost::jobcheck( node& n, const std::string &cmd )
 {
    std::string subcmd = n.variable(cmd);
-   //std::string user = n.variable("USER");
    std::string job = n.variable("ECF_JOB");
    std::string stat = job + ".stat";
-   if (n.__node__()) if (n.__node__()->get_node()) n.__node__()->get_node()->variableSubsitution(
-            subcmd);
+   if (n.__node__()) 
+     if (n.__node__()->get_node()) 
+       n.__node__()->get_node()->variableSubsitution(subcmd);
    std::string check = "sh " + subcmd;
    command(check);
    return tmp_file(stat.c_str(), false);
@@ -718,7 +720,6 @@ bool ehost::create_tree( int hh, int min, int sec )
    }
 
    if (!top) { 
-     // XECFDEBUG { std::cout << "# no top\n"; }
      return false;
    }
    if (top_) {
@@ -737,7 +738,6 @@ bool ehost::create_tree( int hh, int min, int sec )
       if (top) { 
 	int num = 0; node *n = top->kids(); 
 	while (n) { num += 1; n = n->next(); } 
-	// std::cout << "# num " << num << "\n";
       }
       std::cout << "# usage: " << vmu << " " << res << "\n";
    }
@@ -843,7 +843,9 @@ void host::restarted( node& n )
 
 void host::late( node& n )
 {
-   if (late_) late::show(n);
+  if (late_family_ && n.type() == NODE_FAMILY)
+    late::show(n);
+  else if (late_) late::show(n);
 }
 
 void host::zombie( node& n )
@@ -1063,6 +1065,12 @@ int host::do_plug( node* into, node* from )
    return 0;
 }
 
+struct dup_slash { // INT-74
+  bool operator() (char x, char y) const {
+    return x=='/' && y=='/';
+  };
+};
+
 tmp_file ehost::sfile( node& n, std::string name )
 {
    loghost_ = n.variable("ECF_LOGHOST", true);
@@ -1077,13 +1085,14 @@ tmp_file ehost::sfile( node& n, std::string name )
 tmp_file host::sfile( node& n, std::string name )
 {
    if (name == ecf_node::none()) return tmp_file((const char*) NULL);
+   name.erase(std::unique(name.begin(), name.end(), dup_slash()), name.end()); // INT-74
    const char *cname = name.c_str();
 
    std::string::size_type pos = loghost_.find(n.variable("ECF_MICRO"));
    if (std::string::npos == pos && loghost_ != ecf_node::none()) {
-      logsvr the_log_server(loghost_, logport_);
-      if (the_log_server.ok()) {
-         tmp_file tmp = the_log_server.getfile(name);
+      logsvr log_server(loghost_, logport_);
+      if (log_server.ok()) {
+         tmp_file tmp = log_server.getfile(name);
          if (access(tmp.c_str(), R_OK) == 0) return tmp;
       }
    }
@@ -1094,39 +1103,12 @@ tmp_file host::sfile( node& n, std::string name )
 
    try {
       n.serv().command(clientName, "--file", "-n", cname, host::maxLines, 0x0);
-   }
-   catch ( std::exception &e ) {
+   } catch ( std::exception &e ) {
       gui::error("cannot get file from server: %s", e.what());
    }
 
-   return tmp_file((const char*) NULL);
+   return tmp_file(cname, false);
 }
-
-//bool ecf_guess_name( node& n, char* fn )
-//{
-//   int tn = atoi(n.variable("ECF_TRYNO").c_str());
-//   std::string home = n.variable("ECF_HOME");
-//   const char *suite = n.variable("SUITE").c_str();
-//   const char *family = n.variable("FAMILY").c_str();
-//   const char *task = n.variable("TASK").c_str();
-//   std::string jout = n.variable("ECF_JOBOUT", true);
-//
-//   if (home == ecf_node::none()) home = n.variable("SMSHOME", true);
-//   if (jout == ecf_node::none()) jout = n.variable("SMSJOBOUT", true);
-//
-//   sprintf(fn, "%s", jout.c_str());
-//   if (access(fn, R_OK) == 0) {
-//      return true;
-//   }
-//   sprintf(fn, "/%s/%s/%s/%s.%d", home.c_str(), suite, family, task, tn > 0 ? tn : 1);
-//
-//   if (access(fn, R_OK) == 0) {
-//      return true;
-//   }
-//   sprintf(fn, "/%s/%s.old/%s/%s.%d", home.c_str(), suite, family, task, tn > 0 ? tn : 1);
-//
-//   return access(fn, R_OK) == 0;
-//}
 
 const str& host::timefile()
 {
@@ -1231,7 +1213,7 @@ void ehost::login()
       if (!connect_mngt(true)) {
          gui::message("%s: no reply", name());
          logout();
-         connected_ = false; // tree_->connected(false);
+         connected_ = false;
          connect_ = false;
          return;
       }
@@ -1291,10 +1273,12 @@ void ehost::login()
    update();
 }
 
-tmp_file ehost::file( node& n, std::string name )
+tmp_file ehost::file(node& n, std::string name)
 {
   std::string error;
-   bool read = direct_read_;
+  bool read = direct_read_;
+  name.erase(std::unique(name.begin(), name.end(), dup_slash()), name.end()); // INT-74
+
   if (name == "ECF_SCRIPT") {
     error = "no script!\n"
       "check ECF_FILES or ECF_HOME directories, for read access\n"
@@ -1352,7 +1336,8 @@ tmp_file ehost::file( node& n, std::string name )
 
          // Do *not* assign 'client_.server_reply().get_string()' to a separate string, since
          // in the case of job output the string could be several megabytes.
-         return tmp_file(client_.server_reply().get_string());
+         return tmp_file( client_.server_reply().get_string()
+			  + "\n# file is served by ecflow-server\n" );
       } catch ( std::exception &e ) {
  	std::cerr << "host::file-error:" << e.what() << "\n";
          gui::message("host::file-error: %s", e.what());
@@ -1606,6 +1591,7 @@ int ehost::update()
             // there were some kind of changes in the server
             // request the changes from the server & sync with
             // defs on client_
+
             client_.sync_local();
             // full_sync==true:  no notification on the GUI side
 
@@ -1801,11 +1787,9 @@ void host::login( const std::string& name, int num )
 void ehost::stats( std::ostream& buf )
 {
    gui::message("%s: fetching stats", name());
-   // std::stringstream buf;
    try {
       client_.stats();
       client_.server_reply().stats().show(buf);
-      // f.push(buf.str());
    }
    catch ( std::exception& e ) {
    }

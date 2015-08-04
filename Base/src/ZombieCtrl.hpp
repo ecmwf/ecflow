@@ -60,6 +60,7 @@ public:
 
 
 	/// remove all zombies, older than their allowed age
+ 	/// Server typically checks every 60 seconds
 	void remove_stale_zombies(const boost::posix_time::ptime& time_now);
 
 

@@ -1,7 +1,7 @@
  Install steps
  =============
  
- 0/ These Steps should be encapsulated by $WK/build/install.sh ***************
+ 0/ These Steps should be encapsulated by $WK/build_scripts/install.sh ***************
  
  1/ Become emos user. Required for write access to installation directory
     Note: 
@@ -30,7 +30,7 @@
  
  4/ Change directory to ecflow root.
  
-    linux 32 : cd /var/tmp/ma0/clientRoot/workspace/git/working-directory
+    linux 32 : cd /var/tmp/ma0/workspace/ecflow/
     linux 64 : cd /vol/ecf/ecflow_1_9_0
     hpux     : cd /scratch/ma/emos/ma0/hpia64/ecflow_1_9_0
     AIX      : cd /s1a/emos_esuite/emos_data/sms/ecflow_1_9_0

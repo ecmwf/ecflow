@@ -83,18 +83,17 @@ private:
 private:
 
    // abort server if check pt files exist, but can't be loaded
-   void load_check_pt_file_on_startup();
+   bool load_check_pt_file_on_startup();
    void loadCheckPtFile();
    bool restore_from_checkpt(const std::string& filename, bool& failed);
    void update_defs_server_state();
    void set_server_state(SState::State);
 
-private:
+protected: // Allow test to override
 
    /// AbstractServer functions
    virtual SState::State state() const { return serverState_; }
    virtual std::pair<std::string,std::string> hostPort() const;
-   virtual void create_defs();
    virtual defs_ptr defs() const { return defs_;}
    virtual void updateDefs(defs_ptr,bool force);
    virtual void clear_defs();

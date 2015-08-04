@@ -111,6 +111,9 @@ fname=$rcdir/$(echo $host | cut -c1-5).$USER.$ECF_PORT # OK as long as ecgate no
 mkdir -p $rcdir
 ecflow_client --port $ECF_PORT --host $(cat $fname) --ping  && echo "server is already started" && exit 0 || :
 
+servers=$HOME/.ecflowrc/servers
+localh=$(uname -n)
+
 case $host in
  sappa*) 
 if [[ $(ssh sappa hostname) != $host ]]; then
@@ -172,10 +175,13 @@ EOF
   fi
 ) 
 
-  file=$HOME/.ecflowrc/servers
   nick=ecgate1
-  grep "^ecgate " $file || echo "ecgate  ecgate  $ECF_PORT" >> $file
-  grep "^$nick  " $file || echo "$nick $nick $ECF_PORT" >> $file
+  grep "^ecgate " $servers || echo "ecgate  ecgate  $ECF_PORT" >> $servers
+  grep "^$nick  " $servers || echo "$nick   $nick   $ECF_PORT" >> $servers
+;;
+
+$localh )
+  grep "^$localh" $servers || echo "$localh $localh $ECF_PORT" >> $servers
 ;;
 esac
  

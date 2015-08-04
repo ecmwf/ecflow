@@ -12,12 +12,14 @@
 //
 // Description :
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
-
+//#include <iostream>
 #include "ServerReply.hpp"
 
 /// *Note* server_reply_.client_handle_ is kept until the next call to register a new client_handle
 /// The client invoker can be used multiple times, hence keep value of defs, and client handle in server reply
-void ServerReply::clear_for_invoke(bool command_line_interface) {
+void ServerReply::clear_for_invoke(bool command_line_interface)
+{
+   //std::cout << "ServerReply::clear_for_invoke\n";
 	cli_ =  command_line_interface;
 	in_sync_ = false;
 	full_sync_ = false;
@@ -25,9 +27,12 @@ void ServerReply::clear_for_invoke(bool command_line_interface) {
 	block_client_on_home_server_ = false;
 	block_client_server_halted_ = false;
 	block_client_zombie_detected_ = false;
+	host_.clear();
+	port_.clear();
 	error_msg_.clear();
 	str_.clear();
 	zombies_.clear();
 	str_vec_.clear();
 	client_handle_suites_.clear();
+	changed_nodes_.clear();
 }

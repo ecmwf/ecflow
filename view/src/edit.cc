@@ -94,12 +94,13 @@ void edit::show(node& n)
     return;    
   }
 
+  try {
   xec_LoadText(text_, tmpname, True);
   xec_LoadText(text_, tmp.c_str(), True);
   
   XmTextSetInsertionPosition(text_,0);
   XmTextShowPosition(text_, 0);
-  
+  } catch (...) { std::cerr << "# WAR: cannot load " << tmpname << "\n";}
   loading_ = False;
 }
 
@@ -142,7 +143,7 @@ void edit::submitCB(Widget,XtPointer)
 {
   bool alias = XmToggleButtonGetState(alias_);
   bool run   = true;
-  char line[1024];
+  char line[4096];
   node *nd = get_node();
   
   if(nd) {

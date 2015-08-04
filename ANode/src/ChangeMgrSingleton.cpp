@@ -97,10 +97,54 @@ void ChangeMgrSingleton::detach(Defs* n,AbstractObserver* a)
    }
 }
 
+//static void dump_aspect_vec(std::vector<ecf::Aspect::Type>& aspects_vec, const std::string& desc)
+//{
+//   cout << desc;
+//   for(size_t i = 0; i <  aspects_vec.size(); i++) {
+//      switch (aspects_vec[i]) {
+//         case ecf::Aspect::NOT_DEFINED: cout << "NOT_DEFINED "; break;
+//         case ecf::Aspect::ORDER: cout << "ORDER "; break;
+//         case ecf::Aspect::ADD_REMOVE_NODE: cout << "ADD_REMOVE_NODE "; break;
+//         case ecf::Aspect::ADD_REMOVE_ATTR:cout << "ADD_REMOVE_ATTR "; break;
+//         case ecf::Aspect::METER:cout << "METER "; break;
+//         case ecf::Aspect::EVENT:cout << "EVENT "; break;
+//         case ecf::Aspect::LABEL:cout << "LABEL "; break;
+//         case ecf::Aspect::LIMIT:cout << "LIMIT "; break;
+//         case ecf::Aspect::STATE:cout << "STATE "; break;
+//         case ecf::Aspect::DEFSTATUS:cout << "DEFSTATUS "; break;
+//         case ecf::Aspect::SUSPENDED:cout << "SUSPENDED "; break;
+//         case ecf::Aspect::SERVER_STATE:cout << "SERVER_STATE "; break;
+//         case ecf::Aspect::SERVER_VARIABLE:cout << "SERVER_VARIABLE "; break;
+//         case ecf::Aspect::EXPR_TRIGGER:cout << "EXPR_TRIGGER "; break;
+//         case ecf::Aspect::EXPR_COMPLETE:cout << "EXPR_COMPLETE "; break;
+//         case ecf::Aspect::REPEAT:cout << "REPEAT "; break;
+//         case ecf::Aspect::NODE_VARIABLE:cout << "NODE_VARIABLE "; break;
+//         case ecf::Aspect::LATE:cout << "LATE "; break;
+//         case ecf::Aspect::TODAY:cout << "TODAY "; break;
+//         case ecf::Aspect::TIME:cout << "TIME "; break;
+//         case ecf::Aspect::DAY:cout << "DAY "; break;
+//         case ecf::Aspect::CRON:cout << "CRON "; break;
+//         case ecf::Aspect::DATE:cout << "DATE "; break;
+//         case ecf::Aspect::FLAG:cout << "FLAG "; break;
+//         case ecf::Aspect::SUBMITTABLE:cout << "SUBMITTABLE "; break;
+//         case ecf::Aspect::SUITE_CLOCK:cout << "SUITE_CLOCK "; break;
+//         case ecf::Aspect::SUITE_BEGIN:cout << "SUITE_BEGIN "; break;
+//         case ecf::Aspect::SUITE_CALENDAR:cout << "SUITE_CALENDAR "; break;
+//         case ecf::Aspect::ALIAS_NUMBER:cout << "ALIAS_NUMBER "; break;
+//         default: cout << "OOPS-unknown!! "; break;
+//      }
+//   }
+//   cout << "\n";
+//}
+
 void ChangeMgrSingleton::notify(node_ptr n)
 {
    NodeObserverMap_t::iterator i = map_.find(n.get());
    if (i != map_.end()) {
+//#ifdef DEBUG
+//      dump_aspect_vec(aspects_vec_,"ChangeMgrSingleton::notify(node_ptr n)******************************\n");
+//#endif
+
       (*i).second->update(n.get(),aspects_vec_);
       return;
    }
@@ -122,6 +166,10 @@ void ChangeMgrSingleton::notify(defs_ptr defs)
 {
    DefsObserverMap_t::iterator i = defs_map_.find(defs.get());
    if (i != defs_map_.end()) {
+//#ifdef DEBUG
+//      dump_aspect_vec(aspects_vec_,"ChangeMgrSingleton::notify(defs_ptr defs)******************************\n");
+//#endif
+
       (*i).second->update(defs.get(),aspects_vec_);
       return;
    }

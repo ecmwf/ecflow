@@ -262,9 +262,11 @@ BOOST_AUTO_TEST_CASE( test_client_interface )
 
    /// test alter
    BOOST_REQUIRE_MESSAGE( theClient.alter("/s1","add","zombie","ecf:fob::10") == 0,"--alter should return 0\n" << theClient.errorMsg());
+   BOOST_REQUIRE_MESSAGE( theClient.alter("/s1","add","zombie","ecf:fob::") == 0,"--alter should return 0\n" << theClient.errorMsg());
    BOOST_REQUIRE_MESSAGE( theClient.alter("/s1","add","zombie","user:fob::10") == 0,"--alter should return 0\n" << theClient.errorMsg());
    BOOST_REQUIRE_MESSAGE( theClient.alter("/s1","add","zombie","path:fob::10") == 0,"--alter should return 0\n" << theClient.errorMsg());
    BOOST_REQUIRE_MESSAGE( theClient.alter("/s1","add","zombie","path:fob::") == 0,"--alter should return 0\n" << theClient.errorMsg());
+   BOOST_REQUIRE_MESSAGE( theClient.alter("/s1","add","zombie","ecf:fob:init,event,meter,label,wait,complete,abort:10") == 0,"--alter should return 0\n" << theClient.errorMsg());
    BOOST_REQUIRE_MESSAGE( theClient.alter("/s1","add","zombie","ecf:fob:init,event,meter,label,wait,complete:10") == 0,"--alter should return 0\n" << theClient.errorMsg());
    BOOST_REQUIRE_MESSAGE( theClient.alter("/s1","add","zombie","ecf:fail:init,event,meter,label,wait,complete:10000") == 0,"--alter should return 0\n" << theClient.errorMsg());
    BOOST_REQUIRE_MESSAGE( theClient.alter("/s1","add","zombie","ecf:adopt:init,event,meter,label,wait,complete:23") == 0,"--alter should return 0\n" << theClient.errorMsg());

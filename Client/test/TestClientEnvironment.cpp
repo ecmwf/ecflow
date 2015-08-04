@@ -157,6 +157,10 @@ BOOST_AUTO_TEST_CASE( test_client_environment_errors )
       cout << "Client:: ...test_client_environment_errors-ECF_ALLOW_NEW_CLIENT_OLD_SERVER: ignoring test when ECF_ALLOW_NEW_CLIENT_OLD_SERVER specified\n";
       return;
    }
+   if (getenv("ECF_PORT")) {
+      cout << "Client:: ...test_client_environment_errors-ECF_ALLOW_NEW_CLIENT_OLD_SERVER: ignoring test when ECF_PORT specified\n";
+      return;
+   }
 
    std::cout << "Client:: ...test_client_environment_errors-ECF_ALLOW_NEW_CLIENT_OLD_SERVER" << endl;
    {
@@ -167,6 +171,7 @@ BOOST_AUTO_TEST_CASE( test_client_environment_errors )
    }
 
    {
+      // ONLY run this test if enviroment variable ECF_PORT not defined
       std::string env = "ECF_ALLOW_NEW_CLIENT_OLD_SERVER=";
       env += Str::LOCALHOST(); env += ":"; env += Str::DEFAULT_PORT_NUMBER(); env += ":xx";
       BOOST_CHECK_MESSAGE(putenv(const_cast<char*>(env.c_str())) == 0,"putenv failed for " << env);
@@ -201,6 +206,10 @@ BOOST_AUTO_TEST_CASE( test_client_environment )
 {
    if (getenv("ECF_ALLOW_NEW_CLIENT_OLD_SERVER")) {
       cout << "Client:: ...test_client_environment-ECF_ALLOW_NEW_CLIENT_OLD_SERVER: ignoring test when ECF_ALLOW_NEW_CLIENT_OLD_SERVER specified\n";
+      return;
+   }
+   if (getenv("ECF_PORT")) {
+      cout << "Client:: ...test_client_environment-ECF_ALLOW_NEW_CLIENT_OLD_SERVER: ignoring test when ECF_PORT specified\n";
       return;
    }
 

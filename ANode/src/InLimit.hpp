@@ -44,7 +44,7 @@ public:
    bool operator==(const InLimit& rhs) const;
 
    const std::string& name() const { return  name_;}             // must be defined
-   const std::string& pathToNode() const { return  pathToNode_;} // can be empty
+   const std::string& pathToNode() const { return  pathToNode_;} // can be empty,the node referenced by the In-Limit, this should hold the Limit.
    int tokens() const { return tokens_;}
 
    std::string toString() const;

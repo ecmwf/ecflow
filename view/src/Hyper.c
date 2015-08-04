@@ -841,35 +841,45 @@ int            n_args;
 
   // https://software.ecmwf.int/issues/browse/SUP-646
 
-  /* printf("## mouse 1\n"); */
+  printf("## mouse 1\n");
   if(!clip) return;
   swin = XtParent(clip);
 
-  /* printf("## mouse 2\n"); */
+  printf("## mouse 2\n");
   // if(!swin || !XmIsScrolledWindow(swin)) return;
   if(!swin) return;
 
-  /* printf("## mouse 3\n"); */
+  printf("## mouse 3\n");
   // 20131126 if (n_args != 1) return;
   SetArg(XmNverticalScrollBar  , &v_scroll);
   GetValues(swin);
   
-  {
-    int min = 0;
-    int max = 80; 
-    int value = 0;
-    int slider_size = 80;
-    int inc = 10;
-    int page_inc = 100;
-    SetArg(XmNminimum,&min); /* ??? */
+  {	
+    Position        x_parent,y_parent;	Position x,y;
+    int min= 0, max= 80, value= 0, slider_size = 80, inc = 10, page_inc = 100;
+    /* SetArg(XmNminimum,&min);
     SetArg(XmNmaximum,&max);    
     SetArg(XmNvalue,&value);    
     SetArg(XmNsliderSize,&slider_size);    
-    SetArg(XmNincrement,&inc);    
+    SetArg(XmNincrement,&inc);  */   
     /* SetArg(XmNpageIncrement,&page_inc);     ??? */ 
-    
-    GetValues(v_scroll);
-    /* XmScrollBarGetValues(v_scroll, value, slider_size, inc, page_inc); */
+    ac = 0;
+    XtSetArg(al[ac],XmNverticalScrollBar, &v_scroll );ac++;
+    XtGetValues(swin,al,ac);
+  
+    ac = 0;
+    XtSetArg(al[ac], XmNminimum,&min); ac++;
+    XtSetArg(al[ac], XmNmaximum,&max); ac++;   
+    XtGetValues(v_scroll, al, ac);
+    XmScrollBarGetValues(v_scroll,&value,&slider_size,&inc,&page_inc);
+
+    ac = 0;
+    XtSetArg(al[ac],XmNx,&x_parent);ac++;
+    XtSetArg(al[ac],XmNy,&y_parent);ac++;
+    XtGetValues(swin,al,ac);
+
+    /* GetValues(v_scroll);
+    XmScrollBarGetValues(v_scroll, value, slider_size, inc, page_inc); */
     
     int arg = atoi(args[0]);
     dh = (abs(arg) > 5) ? page_inc : inc;
@@ -885,7 +895,10 @@ int            n_args;
       else
         value += dh;
     }
-
+    ac = 0;
+    XtSetArg(al[ac],XmNx,x);ac++;
+    XtSetArg(al[ac],XmNy,y);ac++;
+    XtSetValues(swin,al,ac);
     XmScrollBarSetValues(v_scroll,value,slider_size, inc, page_inc,TRUE);
   }
 #endif
@@ -984,60 +997,58 @@ XtPointer data;
 
     while((c = (get_next_char)(&data)))
     {
-
         /* New line */
-
-        if(c == '\n')
+      if(c == '\n')
         {
-            word[i]=0;
-            /* if(i) add_to_text(w,word,mode); */
-            if(i) {									/* add offset */
-				add_to_text(w,word,mode,offset);	/* add offset */
-				offset+=i;                          /* increment offset */
-			}										/* add offset */
-            /* add_to_text(w,NULL,NEWLINE); */
-            add_to_text(w,NULL,NEWLINE, offset);	/* add offset */
-            i = 0;
+	  word[i]=0;
+	  /* if(i) add_to_text(w,word,mode); */
+	  if(i) {				/* add offset */
+	    add_to_text(w,word,mode,offset);	/* add offset */
+	    offset+=i;                          /* increment offset */
+	  }					/* add offset */
+	  /* add_to_text(w,NULL,NEWLINE); */
+	  add_to_text(w,NULL,NEWLINE, offset);	/* add offset */
+	  i = 0;
         }
-
+      
         /* Start of highlight */
 
-        else if(c == soh)
+      else if(c == soh)
         {
-            word[i]=0;
-            /* if(i) add_to_text(w,word,mode); */
-            if(i) {									/* add offset */
-				add_to_text(w,word,mode,offset);	/* add offset */
-				offset += i;                       /* increment offset */
-			}										/* add offset */
-            mode = HIGHLIGHT;
-            i = 0;
+	  word[i]=0;
+	  /* if(i) add_to_text(w,word,mode); */
+	  if(i) {									/* add offset */
+	    add_to_text(w,word,mode,offset);	/* add offset */
+	    offset += i;                       /* increment offset */
+	  }										/* add offset */
+	  mode = HIGHLIGHT;
+	  i = 0;
         }
-
-        /* End of highlight */
-
-        else if(c == eoh)
+      
+      /* End of highlight */
+      
+      else if(c == eoh)
         {
-            word[i]=0;
-            /* if(i) add_to_text(w,word,mode); */
-            if(i) {						/* add offset */
-				add_to_text(w,word,mode,offset); /* add offset */
-				offset += i+2;         /* increment offset, 2 to iclude tags */
-			}							/* add offset */
-            mode = NORMAL;
-            i = 0;
+	  word[i]=0;
+	  /* if(i) add_to_text(w,word,mode); */
+	  if(i) {						/* add offset */
+	    add_to_text(w,word,mode,offset); /* add offset */
+	    offset += i+2;         /* increment offset, 2 to iclude tags */
+	  }							/* add offset */
+	  mode = NORMAL;
+	  i = 0;
         }
-        else 
+      else 
         {
-            if(c=='\t') c = ' ';
-            word[i++] = c;
-            if(i==MAX_LINE_SIZE)
+	  if(c=='\t') c = ' ';
+	  word[i++] = c;
+	  if(i==MAX_LINE_SIZE)
             {
-                word[--i]=0;
-                /* add_to_text(w,word,mode); */
-                add_to_text(w,word,mode,offset);	/* add offset */
-                i=0;
-                word[i++] = c;
+	      word[--i]=0;
+	      /* add_to_text(w,word,mode); */
+	      add_to_text(w,word,mode,offset);	/* add offset */
+	      i=0;
+	      word[i++] = c;
             }
         }
     }
@@ -1371,10 +1382,7 @@ HyperWidget h;
             v_page,TRUE);
         if(dh) XmScrollBarSetValues(h_scroll,h_val+dh,h_size,h_inc,
             h_page,TRUE);
-
-
     }
-
 
 #endif /* MOTIF */
 }
@@ -1478,11 +1486,10 @@ Boolean  wrap;
 #else
 
 Boolean HyperGrep(Widget widget,
-				  char *word,
-				  Boolean ignore_case,
-				  Boolean from_start,
-				  Boolean wrap)
-
+		  char *word,
+		  Boolean ignore_case,
+		  Boolean from_start,
+		  Boolean wrap)
 #endif
 
 {

@@ -346,11 +346,13 @@ void ServerEnvironment::variables(std::vector<std::pair<std::string,std::string>
 	else                 theRetVec.push_back( std::make_pair(std::string("ECF_LOG"), std::string() ));
 	theRetVec.push_back( std::make_pair(std::string("ECF_CHECK"), ecf_checkpt_file_) );
 	theRetVec.push_back( std::make_pair(std::string("ECF_CHECKOLD"), ecf_backup_checkpt_file_) );
+   theRetVec.push_back( std::make_pair(std::string("ECF_INTERVAL"), boost::lexical_cast<std::string>(submitJobsInterval_)) );
 
 	// These variable are read in from the environment, but are not exposed
 	// since they only affect the server
 	// ECF_CHECKINTERVAL
-	// ECF_LISTS
+
+   theRetVec.push_back( std::make_pair(std::string("ECF_LISTS"), ecf_white_list_file_) ); // read only variable, changing it has no effect
 
 	// variables that can be overridden, in the suite definition
 	theRetVec.push_back( std::make_pair(std::string("ECF_JOB_CMD"), ecf_cmd_) );
@@ -368,6 +370,7 @@ void ServerEnvironment::variables(std::vector<std::pair<std::string,std::string>
 
 bool ServerEnvironment::reloadWhiteListFile(std::string& errorMsg)
 {
+   if (debug()) cout << "ServerEnvironment::reloadWhiteListFile:(" << ecf_white_list_file_ << ") CWD(" << fs::current_path().string() << ")\n";
 	if (ecf_white_list_file_.empty()) {
 		errorMsg += "The ECF_LISTS file ";
 		errorMsg += ecf_white_list_file_;
@@ -377,7 +380,7 @@ bool ServerEnvironment::reloadWhiteListFile(std::string& errorMsg)
 	if (!fs::exists(ecf_white_list_file_)) {
 		errorMsg += "The ECF_LISTS file ";
 		errorMsg += ecf_white_list_file_;
-		errorMsg += " does not exist.";
+      errorMsg += " does not exist. Server CWD : " + fs::current_path().string();
 		return false;
 	}
 
@@ -388,6 +391,8 @@ bool ServerEnvironment::reloadWhiteListFile(std::string& errorMsg)
 
  		validUsers_.clear();
  		validUsers_ = validUsers;
+
+ 	   if (debug())  std::cout << dump_valid_users() << "\n";
  		return true;
  	}
  	return false;

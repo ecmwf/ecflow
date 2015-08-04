@@ -910,8 +910,8 @@ BOOST_AUTO_TEST_CASE( test_zombie_kill )
           sleep(1);
        }
    }
-   bool task_became_blocked = false;
    {
+      bool task_became_blocked = false;
       // wait for process to be die
       AssertTimer assertTimer(timeout,false); // Bomb out after n seconds, fall back if test fail
       while (1) {

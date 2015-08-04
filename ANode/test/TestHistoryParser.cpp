@@ -36,7 +36,7 @@ static std::string dump(const std::vector<std::string>& vec)
 
 BOOST_AUTO_TEST_CASE( test_defs_history_parser )
 {
-   cout << "ACore:: ...test_defs_history_parser\n";
+   cout << "ANode:: ...test_defs_history_parser\n";
 
    {
       string str1("MSG:[12:03:55 21.8.2013] --shutdown=yes :map");

@@ -39,7 +39,6 @@ public:
 
 	virtual SState::State state() const { return  SState::RUNNING;}
 	virtual std::pair<std::string,std::string> hostPort() const { assert(defs_.get()); return defs_->server().hostPort(); }
-   virtual void create_defs() { if (!defs_.get()) defs_ = Defs::create();}
 	virtual defs_ptr defs() const { return defs_;}
 	virtual void updateDefs(defs_ptr d, bool force) { assert(defs_.get()); defs_->absorb(d.get(),force); }
  	virtual void clear_defs() { if (defs_.get()) defs_->clear(); } // dont delete since we pass in Fixture defs. Otherwise it will crash

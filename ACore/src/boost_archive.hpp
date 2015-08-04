@@ -49,9 +49,12 @@ namespace ecf {
 
 /// Utility class for boost archive version
 ///
+/// Boost archive version is specified in: $BOOST_ROOT/libs/serialization/src/basic_archive.cpp
+///
 /// boost 1.47 serialisation library archive version = 9
 /// boost 1.53 serialisation library archive version = 10
 /// boost 1.56 serialisation library archive version = 11 // however no change in library ?
+/// boost 1.57 serialisation library archive version = 11
 ///
 /// boost supports old -> new only. In our case typically new_client needs to talk to old server
 /// Hence if new client archive version is newer we need to set to archive version used by server.

@@ -1,0 +1,38 @@
+%include <head.h>
+
+# ======================================================================
+# Run LOCALLY
+# ======================================================================
+export WK=%WK%
+
+if [[ %SET_TO_TEST_SCRIPT% = true ]] ; then
+   echo "Test only"
+else
+   cd $WK;
+   
+   # Parse ONLY. Test timing of loading a large DEFS from disk to memory
+   time AParser/bin/%COMPILER_VERSION%/release/perf_aparser_only /var/tmp/ma0/BIG_DEFS/3199.def
+   time AParser/bin/%COMPILER_VERSION%/release/perf_aparser_only /var/tmp/ma0/BIG_DEFS/vsms2.31415.def
+   
+   
+   # This will first load large defs in memory, then check pt and reload
+   # The check and reload mimics the client server communication
+   # and give a good indication of timing independent of the network
+   AParser/bin/%COMPILER_VERSION%/release/perf_aparser_timer /var/tmp/ma0/BIG_DEFS/3199.def
+   AParser/bin/%COMPILER_VERSION%/release/perf_aparser_timer /var/tmp/ma0/BIG_DEFS/vsms2.31415.def
+   
+   
+   # Client/server for large defs( /var/tmp/ma0/BIG_DEFS/*.def)
+   # This will time:
+   #  - incremental get defs            first will be equivalent to getting the full defs.
+   #                                    Uses same client, hence only first increment should be used, since no other DM changes
+   #  - full sync using cache           When full defs requested, we cache de-serealisation cost for each change to defs
+   #                                    Done with a new client each time to get an average
+   #  - full sync without cache         Done with same client, but full defs requested each time.
+   #                                    Note: second and subsequent calls will be more expensive
+   #                                          since they take defs destruction into account.
+   #
+   Client/bin/%COMPILER_VERSION%/release/perf_test_large_defs
+fi
+
+%include <tail.h>

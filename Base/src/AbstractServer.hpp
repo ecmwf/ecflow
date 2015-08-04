@@ -44,10 +44,7 @@ public:
 	/// returns the server host and port number
 	virtual std::pair<std::string,std::string> hostPort() const = 0;
 
-	/// Create a new defs, if the definition already exists does nothing
-	virtual void create_defs() = 0;
-
-	/// returns the defs held by the server
+	/// returns the defs held by the server. This should always exist. ECFLOW-182
 	virtual defs_ptr defs() const = 0;
 
 	/// Update the defs help by the server. This allows multiple suites to loaded

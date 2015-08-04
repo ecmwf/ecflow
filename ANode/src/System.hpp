@@ -30,7 +30,7 @@ namespace ecf {
 /// phase 2: Invocation of ECF_JOB_CMD, this creates the *real* job which communicates with the server
 /// For TEST     :ECF_JOB_CMD = "%ECF_JOB% 1> %ECF_JOBOUT% 2>&1
 /// 	this collapses phase 1 and 2, to a single step
-/// For Operation:ECF_JOB_CMD = ecf_submit %USER% %SCHOST% %ECFJOB% %ECFJOBOUT%'
+/// For Operation:ECF_JOB_CMD = ecf_submit %USER% %REMOTE_HOST% %ECFJOB% %ECFJOBOUT%'
 ///   	This uses ecf_submit,This spawns the process to the different load levellers depending on OS, etc.
 ///   and hence involves at least 2 process.
 /// This class handles phase 1, we capture the death of the child process

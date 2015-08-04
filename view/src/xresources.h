@@ -14,6 +14,37 @@
 /*=============================================================================================*/
 
 #ifndef BRIDGE
+/*
+"ecFlowview.*DrawingAreaInput.baseTranslations: #augment    \
+      <Key>osfUp:      scroll-one-line-up()\\n\
+      <Key>osfDown:    scroll-one-line-down()\\n\
+      <KeyUp>Prior:    previous-page()\\n\
+      <KeyUp>Next:     next-page()\\n\
+      <Key>Up:         scroll-one-line-up()   \\n\
+      <Key>Down:       scroll-one-line-down() \\n\
+      <KeyUp>KP_Prior: previous-page()\\n\
+      <KeyUp>KP_Next:  next-page()\\n\
+      <KeyUp>KP_Up:    scroll-one-line-up()   \\n\
+      <KeyUp>KP_Down:  scroll-one-line-down() \n\
+ Shift<Btn5Down>: previous-page()   \\n\
+ Shift<Btn4Down>: next-page() \\n\
+      <Btn5Down>: scroll-one-line-up()   \\n\
+      <Btn4Down>: scroll-one-line-down() \n"
+"*XmSpinBox.accelerators: #augment \
+      <Btn5Down>: SpinBPrior()\\n\
+      <Btn5Up>:SpinBDisarm()\\n\
+      <Btn4Down>: SpinBNext()\\n\
+      <Btn4Up>: SpinBDisarm()\\n\
+      <Key>osfUp:SpinBNext()\\n\
+      <Key>osfDown: SpinBPrior()\\n\
+      <KeyUp>osfUp: SpinBDisarm()\\n\
+      <KeyUp>osfDown: SpinBDisarm()\\n\
+      <Key>osfLeft:  SpinBLeft()\\n\
+      <Key>osfRight: SpinBRight()\\n\
+      <KeyUp>osfLeft:  SpinBDisarm()\\n\
+      <KeyUp>osfRight: SpinBDisarm()\\n\
+      <Key>osfBeginLine: SpinBFirst()\\n\
+      <Key>osfEndLine: SpinBLast()\n" */
 
 static char* xresources = (char*) "\n"
 "ecFlowview*File.accelerator: Ctrl<Key>f\n"
@@ -127,8 +158,8 @@ static char* xresources = (char*) "\n"
       <KeyUp>KP_Down:  scroll-one-line-down() \n\
  Shift<Btn5Down>: previous-page()   \\n\
  Shift<Btn4Down>: next-page() \\n\
-      <Btn5Down>: scroll-one-line-up()   \\n\
-      <Btn4Down>: scroll-one-line-down() \n"
+      <Btn5Down>: increment(-10)   \\n\
+      <Btn4Down>: increment(10) \n"
 "*XmSpinBox.accelerators: #augment \
       <Btn5Down>: SpinBPrior()\\n\
       <Btn5Up>:SpinBDisarm()\\n\
@@ -147,8 +178,10 @@ static char* xresources = (char*) "\n"
 
 "ecFlowview*@zombied.labelString: Use default settings\n"
 "ecFlowview*@aliases.labelString: Use default settings\n"
+"ecFlowview*@late_family.labelString: Use default settings\n"
 "ecFlowview*zombied.labelString: Zombies\n"
 "ecFlowview*aliases.labelString: Aborted or restarted aliases\n"
+"ecFlowview*late_family.labelString: Late family\n"
 
 "ecFlowview*File.labelString: File\n"
 "ecFlowview*.XmText.background: OldLace\n"
@@ -254,7 +287,7 @@ static char* xresources = (char*) "\n"
 "ecFlowview*menu_show_current.labelString: Show selected node\n"
 "ecFlowview*menu_unfold_all.accelerator: Ctrl<Key>U\n"
 "ecFlowview*menu_unfold_all.labelString: Unfold all\n"
-"ecFlowview*new_suites.labelString: Register to new suites\n"
+"ecFlowview*new_suites.labelString: Register to new suites (restart application to consider change)\n"
 "ecFlowview*new_window.labelString: New window...\n"
 "ecFlowview*optionMenu1.labelString: Action:\n"
 "ecFlowview*poll.labelString: Get server status regularly\n"
@@ -452,8 +485,10 @@ static char* xresources = (char*) "\n"
 
 "XCdp*@zombied.labelString: Use default settings\n"
 "XCdp*@aliases.labelString: Use default settings\n"
+"XCdp*@late_family.labelString: Use default settings\n"
 "XCdp*zombied.labelString: Zombies\n"
 "XCdp*aliases.labelString: Aborted or restarted aliases\n"
+"XCdp*late_family.labelString: Late family\n"
 
 "XCdp*File.labelString: File\n"
 "XCdp*.XmText.background: OldLace\n"

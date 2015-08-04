@@ -118,8 +118,8 @@ class search_me : public runnable {
 	  // find_.search("ecflow_client",true,false,false,true); 
 	  find_.search("xcomplete",true,false,false,true);
 	  find_.search("xabort",true,false,false,true);
-	  find_.search(" --complete",true,false,false,true);
-	  find_.search(" --abort",true,false,false,true);
+	  find_.search("--complete",true,false,false,true);
+	  find_.search("--abort",true,false,false,true);
 	  find_.no_message();
 	  find_.pending(0);
 	  delete this;
@@ -169,20 +169,25 @@ void output::show(node& n)
   new search_me(*this);  
 }
 
+struct dup_slash { // INT-74
+  bool operator() (char x, char y) const {
+    return x=='/' && y=='/';
+  };
+};
+
 void output::load(node& n)
 {
-	if(file_) 
-		XmTextSetString(name_,(char*)file_);
-	else 
-		clear();
-
-	if(file_) {
-	  tmp_file f = n.serv().file(n,file_);
-	  text_window::load(f);
-	} else {	  
-	  tmp_file f = n.serv().output(n);
-	  text_window::load(f);
-	}
+  if(file_) {
+    std::string name (file_);
+    name.erase(std::unique(name.begin(), name.end(), dup_slash()), name.end()); // INT-74
+    XmTextSetString(name_,(char*)name.c_str()); /* ??? */
+    tmp_file f = n.serv().file(n,name);
+    text_window::load(f);
+  } else {	  
+    clear();
+    tmp_file f = n.serv().output(n);
+    text_window::load(f);
+  }
 }
 
 void output::updateCB(Widget,XtPointer data)

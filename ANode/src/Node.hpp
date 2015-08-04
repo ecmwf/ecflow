@@ -143,6 +143,11 @@ public:
    /// Since alter clock, should not change node state. This is left for user to re-queue the suite
    virtual void requeue_time_attrs();
 
+   /// Previously < 4.0.6 requeue always reset the labels on requeue.
+   /// However ECFLOW-195 suggest some user prefer to see the last label value.
+   /// hence we will only reset the labels on the tasks when task is being run.
+   void requeue_labels();
+
    /// This functionality is only required during interactive force or run
    /// Avoid running the task on the same time slot, by missing the next time slot.
    /// Requires we set a flag, to avoid the requeue resetting the time slots
@@ -528,6 +533,14 @@ public:
    /// If not attached to parent returns std::numeric_limits<std::size_t>::max();
    size_t position() const;
 
+   /// called at the end of state change function
+   /// ** Every time we set the state on a nodecontainer, we call handleStateChange
+   /// ** This by default works out the most significant state of the children
+   /// ** ie. the computed state. Hence setting the state on Suite/Family is really
+   /// ** meaningless, since it will always be the computed state.
+   /// ** For Aliases we only update the limits, and do not bubble up state changes
+   virtual void handleStateChange() = 0; // can end up changing state
+
 protected:
    /// Used in conjunction with Node::position()
    /// returns std::numeric_limits<std::size_t>::max() if child not found
@@ -559,13 +572,6 @@ protected:
    friend class NodeContainer;
    virtual bool doDeleteChild(Node* child) { return false;}
 
-   /// called at the end of state change function
-   /// ** Every time we set the state on a nodecontainer, we call handleStateChange
-   /// ** This by default works out the most significant state of the children
-   /// ** ie. the computed state. Hence setting the state on Suite/Family is really
-   /// ** meaningless, since it will always be the computed state.
-   /// ** For Aliases we only update the limits, and do not bubble up state changes
-   virtual void handleStateChange() = 0; // can end up changing state
 
    /// This function is called as a part of handling state change.
    /// When a suite completes it can be re-queued due to:

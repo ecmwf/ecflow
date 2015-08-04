@@ -19,7 +19,6 @@
 #include "arch.h"
 #include "repeat_node.h"
 #include "show.h"
-// #include "text_lister.h"
 #include "host.h"
 const int  REPEAT_SHOWN = 3;
 #include "ecflowview.h"
@@ -88,7 +87,8 @@ void repeat_node::sizeNode(Widget w,XRectangle* r,bool tree) {
 int repeat_node::start() const
 {
 #ifdef BRIDGE
-  if (tree_) return ((sms_repeat*) tree_)->start;
+  if (tree_) 
+    return ((sms_repeat*) tree_)->start;
 #endif
   if (get()) 
     return get()->start();
@@ -101,7 +101,8 @@ int repeat_node::last() const
   if (tree_) { 
     sms_repeat* r = (sms_repeat*)tree_;
     switch (r->mode) {
-    case REPEAT_INTEGER: return (r->end - r->start)/r->step + 1;
+    case REPEAT_INTEGER: 
+      return (r->end - r->start)/r->step + 1;
     case REPEAT_ENUMERATED:    
     case REPEAT_STRING: { int n = 0; sms_list *l = r->str;
         while(l) { n++; l = l->next; }
@@ -110,20 +111,24 @@ int repeat_node::last() const
       return (ecf_repeat_date_to_julian(r->end) - 
               ecf_repeat_date_to_julian(r->start))/
         r->step + 1; }
-    default: return r->end;
+    default: 
+      return r->end;
     }
   }
 #endif
-  if (get()) return get()->end(); 
+  if (get()) 
+    return get()->end(); 
   return 0;
 }
 
 int repeat_node::step() const
 {
 #ifdef BRIDGE
-  if (tree_) return ((sms_repeat*) tree_)->step;
+  if (tree_) 
+    return ((sms_repeat*) tree_)->step;
 #endif
-  if (get()) return get()->step() > 0 ? get()->step() : 1;
+  if (get()) 
+    return get()->step() > 0 ? get()->step() : 1;
   return 1;
 }
 
@@ -133,26 +138,31 @@ int repeat_node::current() const
   if (tree_) { 
     sms_repeat* r = (sms_repeat*)tree_;
     switch (r->mode) {
-    case REPEAT_INTEGER: return (r->status - r->start)/r->step;
+    case REPEAT_INTEGER: 
+      return (r->status - r->start)/r->step;
     case REPEAT_ENUMERATED: { int rc = 0;
        sms_list *item = r->str;
        char current[255];
        while (item) {
          sprintf(current,"%d",r->status);
-         if (!strcmp(item->name, current)) return rc;
+         if (!strcmp(item->name, current)) 
+	   return rc;
          rc++; item = item->next;
        }
        return rc; }
-    case REPEAT_STRING: return r->status;
+    case REPEAT_STRING: 
+      return r->status;
     case REPEAT_DATE: 
       return (ecf_repeat_date_to_julian(r->status) - 
               ecf_repeat_date_to_julian(r->start))/r->step; 
-    default: return r->status;
+    default: 
+      return r->status;
     }
   }
 #endif
-  // if (get()) return get()->last_valid_value();
-  if (get()) return get()->index_or_value();
+  if (get()) {
+    return get()->index_or_value();    
+  }
   return 0;
 }
 
@@ -162,19 +172,25 @@ void repeat_node::value(char* n,int i) const
   if (tree_) {
     sms_repeat* r = (sms_repeat*)tree_;
     switch (r->mode) {
-    case REPEAT_INTEGER: { sprintf(n,"%d",r->start + i*r->step); return; }
+    case REPEAT_INTEGER: { 
+      sprintf(n,"%d",r->start + i*r->step); 
+      return; }
     case REPEAT_ENUMERATED:    
     case REPEAT_STRING: { int j = 0; sms_list *l = r->str;
-        while(l && j != i) { j++; l = l->next; } if(l) strcpy(n,l->name); return; }
+        while(l && j != i) { j++; l = l->next; } if(l) strcpy(n,l->name); 
+	return; }
     case REPEAT_DATE: {
       sprintf(n,"%ld",ecf_repeat_julian_to_date
-              (ecf_repeat_date_to_julian(r->start) + i*r->step)); return; }
-    default: return;
+              (ecf_repeat_date_to_julian(r->start) + i*r->step)); 
+      return; }
+    default: 
+      return;
     }
   }
 #endif
-  if (get() && n) 
+  if (get() && n) {
     sprintf(n,"%s",get()->value_as_string(i).c_str());
+  }
 }
 
 //===============================================================
@@ -188,7 +204,7 @@ xmstring repeat_node::make_label_tree()
         int first  = curr - REPEAT_SHOWN/2;
         static xmstring space(" ");
         {
-        if(first<0)             first = 0;
+        if(first<0)                    first = 0;
         if(end -first<REPEAT_SHOWN)    first = end  - REPEAT_SHOWN;
         if(end <=REPEAT_SHOWN)         first = 0;
 
@@ -244,14 +260,14 @@ void repeat_node::info(std::ostream& f)
   int i;
 
   if(end > 50) {
-    for(i=0 ; i < 20 ; i++) {
+    for(i=0 ; i < 22 ; i++) {
       value(buf,i);
       f << char( (i == cur) ? '>' : ' ') << buf << "\n";
     }
     
     f << "...\n";
 
-    for(i= end-20 ; i < end ; i++) {
+    for(i= end-22 ; i < end ; i++) {
       value(buf,i);
       f << char( (i == cur) ? '>' : ' ') << buf << "\n";
     }
@@ -271,8 +287,10 @@ const char* repeat_node::status_name() const
   int end    = last();
   int cur    = current();
 
-  if(cur < 0)    return "not started";
-  if(cur >= end) return "finished";
+  if(cur < 0)    
+    return "not started";
+  if(cur >= end) 
+    return "finished";
 
   value(buf,cur);
   return buf;
@@ -286,4 +304,6 @@ void repeat_node::perlify(FILE* f)
   perl_member(f,"current",current());  
 }
 
-Boolean repeat_node::visible() const { return show::want(show::repeat); }
+Boolean repeat_node::visible() const { 
+  return show::want(show::repeat); 
+}

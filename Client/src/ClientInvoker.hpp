@@ -336,6 +336,11 @@ private:
 	mutable ClientEnvironment clientEnv_;         // Will read the environment *once* on construction. Must be before Client options
 	mutable ClientOptions     args_;              // Used for argument parsing & creating client request
 	mutable ServerReply server_reply_;            // stores the local defs, client_handle, & all server replies
+
+   /// For use by python interface,
+   std::vector<std::string>::const_iterator changed_node_paths_begin() const { return server_reply_.changed_nodes().begin();}
+   std::vector<std::string>::const_iterator changed_node_paths_end() const { return server_reply_.changed_nodes().end();}
+   friend void export_Client();
 };
 
 // Allow logging and debug output of request round trip times

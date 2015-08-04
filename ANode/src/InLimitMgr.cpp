@@ -424,11 +424,13 @@ void InLimitMgr::resolveInLimit(InLimit& inLimit) const
 
 void InLimitMgr::resolveInLimitReferences() const
 {
-	std::string errorMsg;
-	std::string warningMsg;
    size_t theSize = inLimitVec_.size();
-   for(size_t i = 0; i < theSize; i++) {
-      resolveInLimit(inLimitVec_[i], errorMsg, warningMsg,  false,   false) ;
+   if (theSize > 0) {
+      std::string warningMsg;
+      std::string errorMsg;
+      for(size_t i = 0; i < theSize; i++) {
+         resolveInLimit(inLimitVec_[i], errorMsg, warningMsg,  false,   false) ;
+      }
    }
 }
 

@@ -132,7 +132,7 @@ if __name__ == "__main__":
   
         suite.add_variable("ECF_HOME", ARGS.ecf_home)
         suite.add_variable("ECF_INCLUDE", ARGS.ecf_home + "/includes")
-        suite.add_variable("ECF_CLIENT_EXE_PATH", os.getenv("WK") + "/Client/bin/gcc\-4.5/debug/ecflow_client")
+        suite.add_variable("ECF_CLIENT_EXE_PATH", os.getenv("WK") + "/Client/bin/gcc\-4.8/debug/ecflow_client")
         suite.add_variable("SLEEP", "10")  # not strictly required since default is 1 second
 
 

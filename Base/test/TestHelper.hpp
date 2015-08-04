@@ -78,6 +78,11 @@ public:
 	   BOOST_REQUIRE_MESSAGE(n->state() == expected,"Expected state " << NState::toString(expected) << " but found " << NState::toString(n->state()) << " for " << n->debugNodePath());
 	}
 
+   static void test_state(node_ptr n,DState::State expected)
+   {
+      BOOST_REQUIRE_MESSAGE(n->dstate() == expected,"Expected state " << DState::toString(expected) << " but found " << DState::toString(n->dstate()) << " for " << n->debugNodePath());
+   }
+
 private:
 	TestHelper() {}
 };

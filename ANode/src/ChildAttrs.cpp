@@ -24,16 +24,28 @@ using namespace ecf;
 using namespace std;
 
 ///////////////////////////////////////////////////////////////////////////////////////////
-void ChildAttrs::begin() {
+void ChildAttrs::begin()
+{
    for(size_t i = 0; i < meters_.size(); i++)     {   meters_[i].reset(); }
    for(size_t i = 0; i < events_.size(); i++)     {   events_[i].reset(); }
    for(size_t i = 0; i < labels_.size(); i++)     {   labels_[i].reset(); }
 }
 
-void ChildAttrs::requeue() {
+void ChildAttrs::requeue()
+{
    for(size_t i = 0; i < meters_.size(); i++)     {   meters_[i].reset(); }
    for(size_t i = 0; i < events_.size(); i++)     {   events_[i].reset(); }
-   for(size_t i = 0; i < labels_.size(); i++)     {   labels_[i].reset(); }
+
+   // ECFLOW-195, only clear labels, if they are on Suites/Family not tasks(typically only specified on tasks)
+   if (node_ && node_->isNodeContainer()) {
+      for(size_t i = 0; i < labels_.size(); i++)  {   labels_[i].reset(); }
+   }
+}
+
+void ChildAttrs::requeue_labels()
+{
+   // ECFLOW-195, clear labels before a task is run.
+   for(size_t i = 0; i < labels_.size(); i++)  {   labels_[i].reset(); }
 }
 
 void ChildAttrs::clear()

@@ -31,11 +31,11 @@ public:
 
   logsvr(std::string host,std::string port);
 
-	~logsvr(); // Change to virtual if base class
-
-	tmp_file getfile(std::string name);
-	ecf_dir* getdir(const char* name);
-	bool     ok() const { return soc_ >= 0; }
+  ~logsvr(); // Change to virtual if base class
+  
+  tmp_file getfile(std::string name);
+  ecf_dir* getdir(const char* name);
+  bool     ok() const { return soc_ >= 0; }
 
 private:
 
@@ -45,6 +45,8 @@ private:
 	int  soc_;
 
 	void connect(std::string,int);
+
+	std::string host_, port_;
 };
 
 inline void destroy(logsvr**) {}

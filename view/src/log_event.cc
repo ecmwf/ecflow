@@ -120,7 +120,7 @@ void log_event::load(host& h,const char* name,bool reset)
 
 		sprintf(cmd,"%s/%s",vartmp,varlog.c_str());
 		if (stat(cmd, &st) == (-1)) {
-		  sprintf(cmd,"rcp %s:%s/%s %s/.", varnod.c_str(), varhom.c_str(), varlog.c_str(), 
+		  sprintf(cmd,"scp %s:%s/%s %s/.", varnod.c_str(), varhom.c_str(), varlog.c_str(), 
 			  getenv((char*)"TMPDIR"));
 		  printf("%s\n", cmd);
 		  system(cmd);
@@ -128,7 +128,7 @@ void log_event::load(host& h,const char* name,bool reset)
 		  ::sleep(1);
 		  sprintf(cmd,"%s/%s",vartmp,varlog.c_str());
 		  { if (stat(cmd, &st) == (-1)) {
-		      sprintf(cmd,"scp %s:%s/%s %s/.", varnod.c_str(), varhom.c_str(), varlog.c_str(), 
+		      sprintf(cmd,"rcp %s:%s/%s %s/.", varnod.c_str(), varhom.c_str(), varlog.c_str(), 
 			      getenv((char*)"TMPDIR"));
 		      printf("%s\n", cmd);
 		      system(cmd);

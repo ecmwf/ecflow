@@ -248,8 +248,8 @@ const Variable& ServerState::findVariable(const std::string& name) const
    std::vector<Variable>::const_iterator var_end = user_variables_.end();
    for(std::vector<Variable>::const_iterator i = user_variables_.begin(); i!=var_end; ++i) {
       if ((*i).name() == name) {
-//       cerr << "FOUND '" << (*i).first << "'   '" << (*i).second << "'\n";
          LOG_ASSERT(!(*i).theValue().empty(),"");
+         // if ((*i).theValue().empty() )  std::cout << (*i).name() << " has a empty value\n";
          return (*i);
       }
    }
@@ -258,8 +258,8 @@ const Variable& ServerState::findVariable(const std::string& name) const
    std::vector<Variable>::const_iterator ser_var_end = server_variables_.end();
    for(std::vector<Variable>::const_iterator i = server_variables_.begin(); i!=ser_var_end; ++i) {
       if ((*i).name() == name) {
-//       cerr << "FOUND '" << (*i).first << "'   '" << (*i).second << "'\n";
          LOG_ASSERT(!(*i).theValue().empty(),"");
+         // if ((*i).theValue().empty() )  std::cout << (*i).name() << " has a empty value\n";
          return (*i);
       }
    }
@@ -285,6 +285,112 @@ bool ServerState::variable_exists(const std::string& name) const
    return false;
 }
 
+bool ServerState::variableSubsitution(std::string& cmd) const
+{
+   // scan the command for variables, and substitute
+   // We can also have
+   //
+   // "%<VAR>:<substitute>% i.e if VAR exist use it, else use substitute
+   //
+   // ************************************************************************************************************
+   // Special case handling for user variables, and generated variables, which take precedence over node variables
+   // ************************************************************************************************************
+   //
+   // i.e VAR is defined as BILL
+   //  %VAR:fred --f%  will either be "BILL" or if VAR is not defined "fred --f"
+   //
+   // Infinite recursion. Its possible to end up with infinite recursion:
+   //    edit hello '%hello%'  # string like %hello% will cause infinite recursion
+   //    edit fred '%bill%'
+   //    edit bill '%fred%'   # should be 10
+   // To prevent this we will use a simple count
+   char micro = '%';
+   const Variable& micro_var = findVariable(Str::ECF_MICRO());
+   if (!micro_var.empty() && !micro_var.theValue().empty() ) micro = micro_var.theValue()[0];
+
+   bool double_micro_found = false;
+   std::string::size_type pos = 0;
+   int count = 0;
+   while ( 1 ) {
+      // A while loop here is used to:
+      //    a/ Allow for multiple substitution on a single line. i.e %ECF_FILES% -I %ECF_INCLUDE%"
+      //    b/ Allow for recursive substitution. %fred% -> %bill%--> 10
+
+      size_t firstPercentPos = cmd.find( micro, pos );
+      if ( firstPercentPos == string::npos ) break;
+
+      size_t secondPercentPos = cmd.find( micro, firstPercentPos + 1 );
+      if ( secondPercentPos == string::npos ) break;
+
+      if ( secondPercentPos - firstPercentPos <= 1 ) {
+         // handle %% with no characters in between, skip over
+         // i.e to handle "printf %%02d %HOUR:00%" --> "printf %02d 00"   i.e if HOUR not defined
+         pos = secondPercentPos + 1;
+         double_micro_found = true;
+         continue;
+      }
+      else pos = 0;
+
+      string percentVar( cmd.begin() + firstPercentPos+1, cmd.begin() + secondPercentPos );
+
+      // First search user variable (*ONLY* set when doing user edit's the script)
+      // Handle case: cmd = "%fred:bill% and where we have user variable "fred:bill"
+      // Handle case: cmd = "%fred%      and where we have user variable "fred"
+      // If we fail to find the variable we return false.
+      // Note: When a variable is found, it can have an empty value  which is still valid
+      const Variable& variable = findVariable( percentVar );
+      if (!variable.empty() ) {
+         std::string varValue = variable.theValue();
+         cmd.replace( firstPercentPos, secondPercentPos - firstPercentPos + 1, varValue );
+      }
+      else {
+
+         size_t firstColon = percentVar.find( ':' );
+         if (firstColon != string::npos) {
+
+            string var(percentVar.begin(), percentVar.begin() + firstColon);
+
+            const Variable& variable2 = findVariable( var );
+            if (!variable2.empty() ) {
+               std::string varValue = variable2.theValue();
+               cmd.replace( firstPercentPos, secondPercentPos - firstPercentPos + 1, varValue );
+            }
+            else {
+               string substitute (percentVar.begin()+ firstColon+1, percentVar.end());
+               cmd.replace(firstPercentPos,secondPercentPos-firstPercentPos+1,substitute);
+            }
+         }
+         else {
+            // No Colon, Can't find in user variables, or node variable, hence can't go any further
+            return false;
+         }
+      }
+
+      // Simple Check for infinite recursion
+      if (count > 100)  return false;
+      count++;
+   }
+
+   if (double_micro_found) {
+      // replace all double micro with a single micro, this must be a single parse
+      // date +%%Y%%m%%d" ==> date +%Y%m%d
+      // %%%%             ==> %%            // i.e single parse
+      std::string doubleEcfMicro;
+      doubleEcfMicro += micro;
+      doubleEcfMicro += micro;
+      size_t last_pos = 0;
+      while ( 1 ) {
+          string::size_type ecf_double_micro_pos = cmd.find( doubleEcfMicro , last_pos);
+          if ( ecf_double_micro_pos != std::string::npos ) {
+             cmd.erase( cmd.begin() + ecf_double_micro_pos );
+             last_pos = ecf_double_micro_pos + 1;
+          }
+          else break;
+       }
+   }
+
+   return true;
+}
 
 void ServerState::set_user_variables(const std::vector<Variable>& e)
 {
@@ -320,6 +426,7 @@ void ServerState::setup_default_server_variables(std::vector<Variable>&  server_
    server_variables.push_back( Variable(string("ECF_URL"), Ecf::URL() ));
    server_variables.push_back( Variable(string("ECF_LOG"), host.ecf_log_file(port) ));
    server_variables.push_back( Variable(string("ECF_INTERVAL"), string("60") ));            // Check time dependencies and submit any jobs
+   server_variables.push_back( Variable(string("ECF_LISTS"), host.ecf_lists_file(port) ));
    server_variables.push_back( Variable(string("ECF_CHECK"), host.ecf_checkpt_file(port) ));
    server_variables.push_back( Variable(string("ECF_CHECKOLD"), host.ecf_backup_checkpt_file(port)));
    server_variables.push_back( Variable(string("ECF_CHECKINTERVAL"), string("120") ));      //The interval in seconds to save check point file

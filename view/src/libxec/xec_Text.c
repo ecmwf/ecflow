@@ -319,7 +319,7 @@ void* xec_MapText(Widget w,const char *fname,int* z)
 {
 	FILE    *fp = NULL;
 	long    length;
-	int 	ret = 0;
+	//int 	ret = 0;  warning: variable ‘ret’ set but not used [-Wunused-but-set-variable]
 	char *m;
 	mapped_text *p;
 	XEvent ev;
@@ -336,7 +336,7 @@ void* xec_MapText(Widget w,const char *fname,int* z)
 		fseek(fp,0L,2);
 		if (errno)
 		{
-			ret = errno;
+			//ret = errno;
 			fclose(fp);
 			return NULL;
 		}
@@ -344,7 +344,7 @@ void* xec_MapText(Widget w,const char *fname,int* z)
 		length=ftell(fp);
 		if (errno)
 		{
-			ret = errno;
+			//ret = errno;
 			fclose(fp);
 			return NULL;
 		}
@@ -352,7 +352,7 @@ void* xec_MapText(Widget w,const char *fname,int* z)
 		fseek(fp,0L,0);
 		if (errno)
 		{
-			ret = errno;
+			//ret = errno;
 			fclose(fp);
 			return NULL;
 		}

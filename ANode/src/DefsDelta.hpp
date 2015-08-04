@@ -26,7 +26,6 @@
 //
 // Note:: updating state_change_no() on the *client side*  a no-op() it has no effect
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
-
 #include <boost/serialization/level.hpp>
 #include <boost/serialization/tracking.hpp>
 #include "Memento.hpp"
@@ -53,9 +52,10 @@ public:
 
  	///=========================================================================
  	/// *Client side*
-	/// Applies the mementos to the client defs. Can raise std::runtime_error.
+	/// Applies the mementos to the client defs and record all changed nodes.
+   /// Can raise std::runtime_error.
  	/// Note:: updating state_change_no() on the *client side*  has *no effect*
-	bool incremental_sync(defs_ptr client_def) const;
+	bool incremental_sync(defs_ptr client_def, std::vector<std::string>& changed_nodes) const;
 
 
 	/// =========================================================================

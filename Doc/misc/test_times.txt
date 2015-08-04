@@ -150,9 +150,9 @@ Server statistics
    Port                            3142
    Up since                        2012-Dec-19 15:38:30
    Job sub' interval               3s
-   ECF_HOME                        /var/tmp/ma0/clientRoot/workspace/MyProject
-   ECF_LOG                         /var/tmp/ma0/clientRoot/workspace/MyProject/Test/data/ECF_HOME_release/test_alias/test_alias.def_log
-   ECF_CHECK                       /var/tmp/ma0/clientRoot/workspace/MyProject/oetzi.3142.ecf.check
+   ECF_HOME                        /tmp/ma0/workspace/ecflow
+   ECF_LOG                         /tmp/ma0/workspace/ecflow/Test/data/ECF_HOME_release/test_alias/test_alias.def_log
+   ECF_CHECK                       /tmp/ma0/workspace/ecflow/oetzi.3142.ecf.check
    Check pt interval               120s
    Check pt mode                   CHECK_ON_TIME
    Check pt save time alarm        30s
