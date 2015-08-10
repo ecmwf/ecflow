@@ -43,9 +43,8 @@ public:
 			doStart(port_,disable_job_generation,remove_checkpt_file_before_server_start);
 		}
 		else {
-			// Start of test, clear any existing defs on remote server
-			// Assuming this has been started on DEFAULT_PORT_NUMBER, can't use existing port_
-			port_ = ecf::Str::DEFAULT_PORT_NUMBER();
+			// Start of test, clear any existing defs on remote/localhost server
+			// Assuming this has been started on input port
 			std::string test_name = msg;
          test_name += " on ";
          test_name += host_;

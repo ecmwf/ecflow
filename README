@@ -75,11 +75,11 @@ cmake
   > make install
   > make test 
   
-* Optionally you can specify install prefix directory and to build the most optimised:
+* Optionally you can specify install prefix directory and to build debug :
   > cd /tmp/ecflow_build/ecFlow-4.0.8-Source
   > mkdir build; cd build
-  > cmake .. -DCMAKE_INSTALL_PREFIX=/var/tmp/ma0/cmake/ecflow \
-             -DCMAKE_BUILD_TYPE=Release
+  > cmake .. -DCMAKE_INSTALL_PREFIX=/var/tmp/$USER/install/cmake/ecflow \
+             -DCMAKE_BUILD_TYPE=Debug
   > make -j2
   > make install
 
@@ -87,7 +87,7 @@ cmake
    
   > cd /tmp/ecflow_build/ecFlow-4.0.8-Source
   > mkdir build; cd build
-  > cmake .. -DCMAKE_INSTALL_PREFIX=/var/tmp/ma0/cmake/ecflow \
+  > cmake .. -DCMAKE_INSTALL_PREFIX=/var/tmp/$USER/install/cmake/ecflow \
              -DCMAKE_BUILD_TYPE=Release \
              -DENABLE_GUI=OFF    \
              -DENABLE_PYTHON=OFF
@@ -113,6 +113,7 @@ cmake
              -DCMAKE_CXX_COMPILER=xlC_r"
   > make -j2
   > make install
+
 
 boost/bjam
 =====================================================================

@@ -1,5 +1,5 @@
 #!/bin/sh
-#set -x
+set -x
 #set -u
 #==========================================================================
 ##.TITLE   ECMWF utility for ECFLOW
@@ -107,80 +107,22 @@ export ECF_LISTS=${ECF_LISTS:-$ECF_HOME/ecf.lists}
 # Update kill and status command for ecgate
 
 rcdir=$HOME/.ecflowrc
-fname=$rcdir/$(echo $host | cut -c1-5).$USER.$ECF_PORT # OK as long as ecgate node is under 10
+fname=$rcdir/$(echo $host | cut -c1-4).$USER.$ECF_PORT 
+# cut is useful when the server may be moved from node to node 
+# 4 is common string here, so that the same file is used for all nodes
+
 mkdir -p $rcdir
 ecflow_client --port $ECF_PORT --host $(cat $fname) --ping  && echo "server is already started" && exit 0 || :
 
 servers=$HOME/.ecflowrc/servers
 localh=$(uname -n)
 
+. /home/ma/emos/bin/ecflow_site.sh || : # site specific settings come here
+# . ecflow_start_site.sh || :
+
 case $host in
- sappa*) 
-if [[ $(ssh sappa hostname) != $host ]]; then
-  echo "please start ecflow on the generic node only"; 
-  exit 1; 
-fi
-
-echo "$host" > $fname
-host=sappa
-  file=$HOME/.ecfhostfile_sappa
-  touch $file
-  grep sappa00 $file || cat >> $file <<EOF
-sappa00
-sappa01
-sappa02
-sappa03
-EOF
-;;
- sappb*) 
-if [[ $(ssh sappb hostname) != $host ]]; then
-  echo "please start ecflow on the generic node only"; 
-  exit 1; 
-fi
-
-echo "$host" > $fname
-host=sappb
-  file=$HOME/.ecfhostfile_sappb
-  touch $file
-  grep sappb00 $file || cat >> $file <<EOF
-sappb00
-sappb01
-sappb02
-sappb03
-EOF
-;;
- ecga*)
-    echo "$host" > $fname
-    host=ecgate
-    ECF_KILL_CMD='${ECF_KILL:=/home/ma/emos/bin/ecfkill} %USER% %HOST% %ECF_RID% %ECF_JOB% > %ECF_JOB%.kill 2>&1'
-    ECF_STATUS_CMD='${ECF_STAT:=/home/ma/emos/bin/ecfstatus} %USER% %HOST% %ECF_RID% %ECF_JOB% > %ECF_JOB%.stat 2>&1'
-    export ECF_KILL_CMD ECF_STATUS_CMD
-
-# ===============================================================================
-# Update host and create hosts file
-
-  file=$HOME/.ecfhostfile
-  grep ecga00 $file || ( cat >> $file <<EOF
-ecga00
-ecga01
-ecga02
-ecga03
-ecga04
-ecga05
-EOF
-
-  if [ "$USER" != emos ] ; then
-    rcp $file $USER@c2a:~/.ecfhostfile || :
-    rcp $file $USER@c2b:~/.ecfhostfile || :
-  fi
-) 
-
-  nick=ecgate1
-  grep "^ecgate " $servers || echo "ecgate  ecgate  $ECF_PORT" >> $servers
-  grep "^$nick  " $servers || echo "$nick   $nick   $ECF_PORT" >> $servers
-;;
-
 $localh )
+  # create one line in servers file so that viewer show this server among servers list
   grep "^$localh" $servers || echo "$localh $localh $ECF_PORT" >> $servers
 ;;
 esac

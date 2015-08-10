@@ -72,6 +72,29 @@ const std::string& File::MAN_EXTN() { static const std::string MAN_EXTN = ".man"
 const std::string& File::USR_EXTN() { static const std::string USR_EXTN = ".usr"; return USR_EXTN; }
 const std::string& File::ECF_EXTN() { static const std::string ECF_EXTN = ".ecf"; return ECF_EXTN; }
 
+
+/// Search for the file, in $PATH return the first path that matches or an empty file, if not
+std::string File::which(const std::string& file)
+{
+	std::string env_paths = getenv("PATH");
+	if (!env_paths.empty()) {
+		std::string path;
+		std::vector<std::string> paths;
+		Str::split(env_paths,paths,":");
+		size_t path_size = paths.size();
+		for(size_t i=0; i < path_size; ++i) {
+			path.clear();
+			path = paths[i];
+			path += '/';
+			path += file;
+			if (fs::exists(path)) {
+				return paths[i];
+			}
+		}
+	}
+	return std::string();
+}
+
 std::string File::getExt(const std::string& s)
 {
 	size_t i = s.rfind('.',s.length());

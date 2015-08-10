@@ -117,7 +117,7 @@ exe perf_test_large_defs : [ glob test/TestSinglePerf.cpp  ]   [ glob test/SCPor
            <variant>debug:<define>DEBUG
          ;
          
-exe test_migration : [ glob test/TestMigration.cpp  ]   [ glob test/SCPort.cpp  ]
+exe m_test_migration : [ glob test/TestMigration.cpp  ]   [ glob test/SCPort.cpp  ]
            /theCore//core
            /theNodeAttr//nodeattr
            /theNode//node

@@ -223,10 +223,10 @@ BOOST_AUTO_TEST_CASE( test_ecf_include_file )
 }
 
 
-BOOST_AUTO_TEST_CASE( test_ecf_include_multi_paths )
+BOOST_AUTO_TEST_CASE( test_ecf_include_multi_paths_ECFLOW_261 )
 {
    // The specific files are specified in ECF_INCLUDE with multiple paths
-   cout << "ANode:: ...test_ecf_include_multi_paths";
+   cout << "ANode:: ...test_ecf_include_multi_paths_ECFLOW_261";
 
    // This test FAIL's randomly on the cray in BATCH mode, but passes in interactive mode.
    if (getenv("ECFLOW_CRAY_BATCH")) {

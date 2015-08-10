@@ -23,6 +23,7 @@
 #include "InvokeServer.hpp"
 #include "SCPort.hpp"
 #include "Str.hpp"
+#include "File.hpp"
 
 namespace fs = boost::filesystem;
 using namespace std;
@@ -32,6 +33,13 @@ BOOST_AUTO_TEST_SUITE( ClientTestSuite )
 
 BOOST_AUTO_TEST_CASE( test_server_load )
 {
+   // Check if gnuplot is found on the path, on the RPM machines gnuplot not always installed
+   std::string path_to_gnuplot = File::which("gnuplot");
+   if ( path_to_gnuplot.empty()) {
+	   cout << "Client:: ...test_server_load -----> gnuplot not found on $PATH *IGNORING* test\n";
+	   return;
+   }
+
    // This will remove check pt and backup file before server start, to avoid the server from loading previous test data
    InvokeServer invokeServer("Client:: ...test_server_load",SCPort::next());
 
@@ -75,6 +83,7 @@ BOOST_AUTO_TEST_CASE( test_server_load )
    std::string gnuplot_dat_file    = the_host.prefix_host_and_port(invokeServer.port(),"gnuplot.dat");
    std::string gnuplot_script_file = the_host.prefix_host_and_port(invokeServer.port(),"gnuplot.script");
    std::string gnuplot_png_file = the_host.prefix_host_and_port(invokeServer.port(),"png");
+
 
    BOOST_REQUIRE_MESSAGE(fs::exists(gnuplot_dat_file),CtsApi::server_load_arg() << " failed file(" << gnuplot_dat_file << ") not generated");
    BOOST_REQUIRE_MESSAGE(fs::exists(gnuplot_script_file),CtsApi::server_load_arg() << " failed file(" << gnuplot_script_file << ") not generated");

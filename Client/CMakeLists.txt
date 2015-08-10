@@ -96,29 +96,32 @@ ecbuild_add_test( TARGET    s_client
                   TEST_DEPENDS u_base
                  )
 
-# 
-# Simple stand alone test
-#
-ecbuild_add_test( TARGET   perf_test_large_defs 
-                  BOOST
-                  SOURCES  test/TestSinglePerf.cpp test/SCPort.cpp
-                  LIBS     libclient 
-                  INCLUDES ../ANode/test
-                           ../Base/test 
-                  TEST_DEPENDS u_base
+
+if (ENABLE_ALL_TESTS)
+	# 
+	# Simple stand alone test
+	#
+	ecbuild_add_test( TARGET   perf_test_large_defs 
+                      BOOST
+                      SOURCES  test/TestSinglePerf.cpp test/SCPort.cpp
+                      LIBS     libclient 
+                      INCLUDES ../ANode/test
+                               ../Base/test 
+                      TEST_DEPENDS u_base
                 )
                
-# 
-# test migration
-#
-ecbuild_add_test( TARGET test_migration
-                  BOOST
-                  SOURCES  test/TestMigration.cpp test/SCPort.cpp
-                  LIBS     libclient 
-                  INCLUDES ../ANode/test
-                           ../Base/test 
-                  TEST_DEPENDS u_base
-                )
+	# 
+	# test migration
+	#
+	ecbuild_add_test( TARGET m_test_migration
+                      BOOST
+                      SOURCES  test/TestMigration.cpp test/SCPort.cpp
+                      LIBS     libclient 
+                      INCLUDES ../ANode/test
+                               ../Base/test 
+                      TEST_DEPENDS u_base
+                    )
+endif()
 
 # ===================================================================
 # install

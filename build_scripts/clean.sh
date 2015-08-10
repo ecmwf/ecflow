@@ -21,7 +21,6 @@ rm -rf Server/bin
 rm -rf Test/bin
 rm -rf Pyext/bin 
 rm -rf view/bin 
-rm -rf bin
    
 # remove generated files
 rm -rf Doc/online/_build/*
@@ -32,7 +31,9 @@ rm -rf view/data/ECF_HOME_release*
 rm -rf AParser/test/data/single_defs/mega.def_log
 rm -rf Pyext/test.def
 rm -rf Pyext/build
+rm -rf Pyext/timestamp
 rm -rf bin
+rm -rf build
 rm -rf RemoteSystemsTempFiles
 rm -rf *.dat
 rm -rf *.log

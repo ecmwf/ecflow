@@ -27,9 +27,11 @@ namespace ecf {
 
 class SCPort {
 public:
+   /// Check ECF_HOST and ECF_PORT first, otherwise calls next_only
+   static std::string next();
 
-	/// make sure we have a unique port, each time next() is called;
-	static std::string next();
+	/// make sure we have a unique port, each time next_only() is called;
+   static std::string next_only();
 
 private:
 	SCPort();

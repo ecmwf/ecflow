@@ -66,12 +66,13 @@ ecbuild_add_test(TARGET  u_anode
                  TEST_DEPENDS u_anattr
                  )
 
-
-list( APPEND stest_srcs   test/TestSingleExprParse.cpp )                    
-ecbuild_add_test( TARGET       u_anode_stest
-                  BOOST
-                  SOURCES      ${stest_srcs}
-                  LIBS         node 
-                  TEST_DEPENDS u_anattr
-                 )
+if (ENABLE_ALL_TESTS)
+	list( APPEND stest_srcs   test/TestSingleExprParse.cpp )                    
+	ecbuild_add_test( TARGET       u_anode_stest
+                      BOOST
+                      SOURCES      ${stest_srcs}
+                      LIBS         node 
+                      TEST_DEPENDS u_anattr
+                    )
+endif()
 

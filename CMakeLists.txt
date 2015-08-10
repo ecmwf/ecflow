@@ -19,9 +19,16 @@
 # major=$(cat VERSION.cmake   | grep 'set( ECFLOW_MAJOR'   | awk '{print $3}'| sed 's/["]//g')
 # minor=$(cat VERSION.cmake   | grep 'set( ECFLOW_MINOR'   | awk '{print $3}'| sed 's/["]//g')
 #
-########################################################################
+##############################################################################
 
 cmake_minimum_required( VERSION 2.8.4 FATAL_ERROR )
+
+# ===========================================================================
+# Change the default if NO CMAKE_BUILD_TYPE specified
+if (NOT DEFINED CMAKE_BUILD_TYPE)
+     set(CMAKE_BUILD_TYPE Release CACHE STRING "Build Configuration type" FORCE)
+endif()
+
 
 project( ecflow CXX )
 
@@ -58,9 +65,11 @@ option( ENABLE_PYTHON         "enable python interface"   ON  )
 option( ENABLE_GUI            "Build ecflowview"          ON  )
 option( ENABLE_VIEWER         "enable the Qt version of ecflowview" ON  )
 option( ENABLE_QT5            "enable Qt5"                          OFF )
+option( ENABLE_ALL_TESTS "This includes performance/migration/regression tests" OFF )
 
-message( STATUS "ENABLE_PYTHON        : ${ENABLE_PYTHON}" )
-message( STATUS "ENABLE_GUI           : ${ENABLE_GUI}" )
+message( STATUS "ENABLE_PYTHON         : ${ENABLE_PYTHON}" )
+message( STATUS "ENABLE_GUI            : ${ENABLE_GUI}" )
+message( STATUS "ENABLE_ALL_TESTS      : ${ENABLE_ALL_TESTS}" )
 
 # ======================================================================================
 # GUI requires X11 and Motif
@@ -68,20 +77,20 @@ message( STATUS "ENABLE_GUI           : ${ENABLE_GUI}" )
 
 if(ENABLE_GUI)
   find_package( X11 )
-  if ( X11_FOUND )
-	debug_var( X11_INCLUDE_DIR )
-	debug_var( X11_LIBRARIES )  
-	debug_var( X11_Xt_INCLUDE_PATH )
-	debug_var( X11_Xt_LIB )
-	debug_var( X11_Xpm_INCLUDE_PATH )
-	debug_var( X11_Xpm_LIB )
-  endif()
+#  if ( X11_FOUND )
+#	debug_var( X11_INCLUDE_DIR )
+#	debug_var( X11_LIBRARIES )  
+#	debug_var( X11_Xt_INCLUDE_PATH )
+#	debug_var( X11_Xt_LIB )
+#	debug_var( X11_Xpm_INCLUDE_PATH )
+#	debug_var( X11_Xpm_LIB )
+#  endif()
 
   find_package( Motif )
-  if ( MOTIF_FOUND )
-	debug_var( MOTIF_INCLUDE_DIR )
-	debug_var( MOTIF_LIBRARIES )  
-  endif()
+#  if ( MOTIF_FOUND )
+#	debug_var( MOTIF_INCLUDE_DIR )
+#	debug_var( MOTIF_LIBRARIES )  
+#  endif()
 endif()
  
 # =========================================================================================
@@ -97,10 +106,10 @@ set(Boost_USE_STATIC_LIBS        ON)
 set(Boost_USE_MULTITHREADED      ON)
 set(Boost_NO_SYSTEM_PATHS        ON)
 set(Boost_DETAILED_FAILURE_MSG   ON)
-set(Boost_DEBUG                  ON)
+#set(Boost_DEBUG                  ON)
 
 find_package( Boost 1.53.0 REQUIRED COMPONENTS python serialization system thread unit_test_framework test_exec_monitor filesystem program_options date_time )
-#
+
 # Available boost lib should be referenced as:
 #
 #    ${Boost_SYSTEM_LIBRARY}
@@ -113,7 +122,9 @@ find_package( Boost 1.53.0 REQUIRED COMPONENTS python serialization system threa
 #    ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} 
 #    ${Boost_TEST_EXEC_MONITOR_LIBRARY} 
 
-message( STATUS "Boost_LIBRARIES     : ${Boost_LIBRARIES}" )
+
+#message( STATUS "Boost_LIBRARIES     : ${Boost_LIBRARIES}" )
+
 
 
 # =========================================================================================
@@ -179,8 +190,8 @@ add_subdirectory( Test )
 
 if (ENABLE_PYTHON)
     ecbuild_find_python( VERSION 2.7 REQUIRED )
-    debug_var(PYTHON_LIBRARIES)
-    debug_var(PYTHON_INCLUDE_DIR)
+    #debug_var(PYTHON_LIBRARIES)
+    #debug_var(PYTHON_INCLUDE_DIR)
 	add_subdirectory( Pyext )
 endif()	
 	

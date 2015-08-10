@@ -128,12 +128,13 @@ fi
 
 cmake ../../../ecflow -DCMAKE_MODULE_PATH=$WK/../ecbuild/cmake \
             -DCMAKE_BUILD_TYPE=$cmake_build_type \
-            -DCMAKE_INSTALL_PREFIX=/var/tmp/ma0/cmake/ecflow/$release.$major.$minor \
+            -DCMAKE_INSTALL_PREFIX=/var/tmp/$USER/install/cmake/ecflow/$release.$major.$minor \
             -DCMAKE_PYTHON_INSTALL_TYPE=local \
             -DENABLE_WARNINGS=ON \
+            -DENABLE_ALL_TESTS=ON \
             -DCMAKE_CXX_FLAGS="-Wno-unused-local-typedefs" \
             ${cmake_extra_options}
-            #-DCMAKE_PYTHON_INSTALL_PREFIX=/var/tmp/ma0/cmake/ecflow/$release.$major.$minor/lib/python2.7/site-packages/ecflow
+            #-DCMAKE_PYTHON_INSTALL_PREFIX=/var/tmp/$USER/install/cmake/ecflow/$release.$major.$minor/lib/python2.7/site-packages/ecflow
         
 # =============================================================================================
 if [[ $make_arg = make ]] ; then
@@ -176,13 +177,13 @@ fi
 # NOTES:
 # Boost:  
 #  By default it looks for environment variable BOOST_ROOT, if not it can specified on the command line. i.e
-#  -DBOOST_ROOT=/var/tmp/ma0/boost/boost_1_53_0
+#  -DBOOST_ROOT=/var/tmp/$USER/boost/boost_1_53_0
 
 # ============================================================================================
 # Python:
 # -DCMAKE_PYTHON_INSTALL_TYPE = [ local | setup ]
 #    local : this will install to $INSTALL_PREFIX/$release.$major.$minor/lib/python2.7/site-packages/ecflow/
-#    setup : experimental only,python way of installing
+#    setup : experimental only, python way of installing
 #
 #    -DCMAKE_PYTHON_INSTALL_PREFIX should *only* used when using python setup.py (CMAKE_PYTHON_INSTALL_TYPE=setup)
 #    *AND* for testing python install to local directory

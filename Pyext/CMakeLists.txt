@@ -2,6 +2,7 @@
 
 file( GLOB srcs RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "src/*.cpp" "src/*.hpp" )
 
+# =====================================================================
 # local includes
 include_directories(  
                      ../ACore/src 
@@ -14,7 +15,8 @@ include_directories(
                      ../Client/src
                      ../CSim/src
                     )
-      
+
+# =====================================================================     
 # INCLUDES here is for external includes           
 ecbuild_add_library( TARGET    ecflow
                      TYPE      MODULE
@@ -41,15 +43,19 @@ set_target_properties(ecflow PROPERTIES
                              PREFIX ""
                              INSTALL_RPATH ""
                      )
+                     
+# =====================================================================
+# tests 
 
-### tests 
+ecbuild_add_test( TARGET py_u_TestMigrate
+                  TYPE PYTHON 
+                  ARGS ${CMAKE_CURRENT_SOURCE_DIR}/migrate/py_u_TestMigrate.py
+                  ENVIRONMENT "PYTHONPATH=${CMAKE_BINARY_DIR}/lib" )
 
-list( APPEND tests
+list( APPEND u_tests
         py_u_TestAddDelete   
         py_u_TestAddDeleteFunc 
         py_u_TestAddNodeFunc  
-        py_s_TestClientApi    
-        py_s_TestPythonChildApi
         py_u_TestDefs         
         py_u_TestDefsCheck    
         py_u_TestDerivable   
@@ -65,8 +71,7 @@ list( APPEND tests
         py_u_TestUserManual    
         py_u_TestWith         
 )
-
-foreach( test ${tests} )
+foreach( test ${u_tests} )
 
     ecbuild_add_test( TARGET ${test} 
                       TYPE PYTHON 
@@ -76,13 +81,26 @@ foreach( test ${tests} )
                      )
 endforeach()
 
-set_property(TEST py_s_TestClientApi      APPEND PROPERTY DEPENDS s_test)
-set_property(TEST py_s_TestPythonChildApi APPEND PROPERTY DEPENDS py_s_TestClientApi)
 
-ecbuild_add_test( TARGET py_u_TestMigrate
-                  TYPE PYTHON 
-                  ARGS ${CMAKE_CURRENT_SOURCE_DIR}/migrate/py_u_TestMigrate.py
-                  ENVIRONMENT "PYTHONPATH=${CMAKE_BINARY_DIR}/lib" )
+if ( ENABLE_ALL_TESTS)
+	list( APPEND s_tests
+	        py_s_TestClientApi    
+	        py_s_TestPythonChildApi
+	)
+	
+	foreach( test ${s_tests} )
+	
+	    ecbuild_add_test( TARGET ${test} 
+	                      TYPE PYTHON 
+	                      ARGS        ${CMAKE_CURRENT_SOURCE_DIR}/test/${test}.py
+	                      ENVIRONMENT "PYTHONPATH=${CMAKE_BINARY_DIR}/lib" 
+	                      TEST_DEPENDS u_base
+	                     )
+	endforeach()
+	
+	set_property(TEST py_s_TestClientApi      APPEND PROPERTY DEPENDS s_test)
+	set_property(TEST py_s_TestPythonChildApi APPEND PROPERTY DEPENDS py_s_TestClientApi)
+endif()
 
 
 # ==========================================================================
@@ -95,13 +113,11 @@ ecbuild_add_test( TARGET py_u_TestMigrate
 #    *AND* for testing python install to local directory
 # ==========================================================================
 
-message( STATUS "python found,  CMAKE_PYTHON_INSTALL_TYPE=${CMAKE_PYTHON_INSTALL_TYPE}")
-
-# CMAKE_PYTHON_INSTALL_TYPE = [ local | setup ]
+# CMAKE_PYTHON_INSTALL_TYPE = [ local | setup | not defined ]
    
 if( CMAKE_PYTHON_INSTALL_TYPE MATCHES  "local"  OR NOT DEFINED CMAKE_PYTHON_INSTALL_TYPE )
    
-      message(STATUS "python install *LOCAL* ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+      message(STATUS "python install *LOCAL* +++ lib/python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}/site-packages/ecflow +++++++")
       set(PYTHON_SITE "lib/python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}/site-packages" )
       set(PYTHON_DEST "${PYTHON_SITE}/ecflow" )
       
@@ -111,6 +127,7 @@ if( CMAKE_PYTHON_INSTALL_TYPE MATCHES  "local"  OR NOT DEFINED CMAKE_PYTHON_INST
       install( FILES   ecflow/__init__.py  DESTINATION ${PYTHON_DEST} )
       
 else()
+	  message( STATUS "python found,  CMAKE_PYTHON_INSTALL_TYPE=${CMAKE_PYTHON_INSTALL_TYPE}")
 
       # -------------------------------------------------------------------------------------
       # Install using setup.py

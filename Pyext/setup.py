@@ -48,10 +48,10 @@ import glob
 # o Make sure origin file, has the right permissions
 # o Copy file to different directory, and change the permissions
 #   since file(COPY) does rename files
-#   configure_file(setup.py.in /tmp/ma0/workspace/ecflow/ecbuild/release/CMakeFiles/setup.py)
+#   configure_file(setup.py.in /tmp/ma0/workspace/ecflow/build/CMakeFiles/setup.py)
 #       now copy the temporary into the final destination, setting the permissions
-#   file(COPY /tmp/ma0/workspace/ecflow/ecbuild/release/CMakeFiles/setup.py
-#     DESTINATION /tmp/ma0/workspace/ecflow/ecbuild/release
+#   file(COPY /tmp/ma0/workspace/ecflow/build/CMakeFiles/setup.py
+#     DESTINATION /tmp/ma0/workspace/ecflow/build
 #     FILE_PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ
 #     GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
 # ============================================================================
@@ -77,13 +77,13 @@ include_dirs = [ "/tmp/ma0/workspace/ecflow/Pyext/../ACore/src",
 # define the library directories to include any extra libraries that may be needed.
 # Give preference to release libs   
 boost_lib_dir = boost_root + "/stage/lib/"
-library_dirs = ['/tmp/ma0/workspace/ecflow/ecbuild/release/ACore',
-                '/tmp/ma0/workspace/ecflow/ecbuild/release/ANattr/',
-                '/tmp/ma0/workspace/ecflow/ecbuild/release/ANode/',
-                '/tmp/ma0/workspace/ecflow/ecbuild/release/AParser/', 
-                '/tmp/ma0/workspace/ecflow/ecbuild/release/Base/', 
-                '/tmp/ma0/workspace/ecflow/ecbuild/release/CSim/', 
-                '/tmp/ma0/workspace/ecflow/ecbuild/release/Client/', 
+library_dirs = ['/tmp/ma0/workspace/ecflow/build/ACore',
+                '/tmp/ma0/workspace/ecflow/build/ANattr/',
+                '/tmp/ma0/workspace/ecflow/build/ANode/',
+                '/tmp/ma0/workspace/ecflow/build/AParser/', 
+                '/tmp/ma0/workspace/ecflow/build/Base/', 
+                '/tmp/ma0/workspace/ecflow/build/CSim/', 
+                '/tmp/ma0/workspace/ecflow/build/Client/', 
                 boost_lib_dir  
                ]
 
@@ -95,11 +95,12 @@ libraries = [ 'core' , 'nodeattr', 'node', 'libparser', 'base', 'libsimu', 'libc
               'boost_program_options-mt',
               'boost_date_time-mt', 
               'boost_python-mt' ]
+
  
 # extra compile flags needed for AIX only
 # Note setup.py will add -q64 -qcpluscmt -DNDEBUG  automatically
 # Note: two extra_compile_args, debug and release, use the debug for testing and faster compiles
-extra_compile_args = []
+extra_compile_args = ['-ftemplate-depth-512', '-Wno-unused-local-typedefs' ]
 extra_link_args = []
 if sys.platform.startswith("aix"):
    extra_compile_args =  [ '-qsuppress=1540-0198', '-O3', '-qstrict', '-qfuncsect', '-qeh', '-qrtti'  ]
@@ -117,7 +118,7 @@ if sys.platform.startswith("aix"):
 #   lib/python2.7/site-packages/ecflow/ecflow.so
 #                                     __init__.py               
 setup( name='ecflow', 
-       version='4.0.5', 
+       version='4.0.8', 
        author      = 'ECMWF',
        description = """ecflow Python interface""",
        packages = [ 'ecflow' ],
