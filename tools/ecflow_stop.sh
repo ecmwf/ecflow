@@ -26,11 +26,8 @@ export TZ=GMT LANG=en_GB.UTG-8
 host=$(hostname)
 backup_server=false
 
-case $host in 
-sappa*) host=sappa;;
-sappb*) host=sappb;;
-ecga*)  host=ecgate;;
-esac
+. /home/ma/emos/bin/ecflow_site.sh || : # site specific settings come here
+# . ecflow_start_site.sh || :
 
 #==========================================================================
 # Syntax
@@ -80,8 +77,7 @@ fi
 
 date -u
 echo ""
-echo "User \"$username\" attempting to stop ecf server on $host:$port_number" 
- 
+echo "User \"$username\" attempting to stop ecf server on $host:$port_number"
 #==========================================================================
 echo "";
 echo "Checking if the server is already running on $host:$port_number" 
@@ -90,7 +86,10 @@ export ECF_PORT=$port_number
 export ECF_NODE=$host
 set -x
 rcdir=$HOME/.ecflowrc
-fname=$rcdir/$(echo $ECF_NODE | cut -c1-5).$USER.$ECF_PORT # OK as long as ecgate node is under 10
+fname=$rcdir/$(echo $ECF_NODE | cut -c1-4).$USER.$ECF_PORT 
+# cut is useful when the server may be moved from node to node 
+# 4 is common string here, so that the same file is used for all nodes
+
 if [[ -f $fname ]]; then host=$(cat $fname); fi
 
 ecflow_client --host $host --ping 
