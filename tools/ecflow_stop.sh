@@ -62,7 +62,7 @@ esac
 done
 
 #==========================================================================
-# port_number is set based on the unique users numeric uid.
+# PORT NUMBER is set based on the unique users numeric uid.
 username=`id -u`
 
 if [ -z "$ecf_port" ] ; then
@@ -76,15 +76,11 @@ else
    port_number=$ecf_port
 fi
 
-#==========================================================================
-#
-date -u
-echo ""
-echo "User \"$username\" attempting to stop ecf server on $host:$port_number"
-echo "";
-echo "Checking if the server is already running on $host:$port_number" 
-
 export ECF_PORT=$port_number
+
+#==========================================================================
+# HOST
+date -u
 
 rcdir=$HOME/.ecflowrc
 fname=$rcdir/$(echo $host | cut -c1-4).$USER.$ECF_PORT 
@@ -93,7 +89,14 @@ fname=$rcdir/$(echo $host | cut -c1-4).$USER.$ECF_PORT
 
 if [[ -f $fname ]]; then host=$(cat $fname); fi
 
-ecflow_client --host $host --ping 
+echo ""
+echo "User \"$username\" attempting to stop ecf server on $host:$port_number"
+echo "";
+echo "Checking if the server is running on $host:$port_number" 
+
+export ECF_NODE=$host
+
+ecflow_client --ping 
 if [ $? -eq 1 ]; then
   echo "";
   echo "... The server on $host:$port_number has already been stopped" 
@@ -104,8 +107,8 @@ fi
 echo "";
 echo Halting, check pointing and terminating the server
 
-ecflow_client  --host $host --halt=yes
-ecflow_client  --host $host --check_pt
-ecflow_client  --host $host --terminate=yes
+ecflow_client  --halt=yes
+ecflow_client  --check_pt
+ecflow_client  --terminate=yes
 
 exit 0
