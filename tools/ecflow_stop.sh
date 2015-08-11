@@ -1,7 +1,7 @@
 #!/bin/sh
 #==========================================================================
 ##.TITLE   ECMWF utility for ecFlow
-##.NAME    ecf_stop
+##.NAME    ecflow_stop.sh
 ##.SECTION ECFLOW
 ##.AUTHOR  Avi
 ## Revision    : $Revision: #10 $ 
@@ -26,8 +26,9 @@ export TZ=GMT LANG=en_GB.UTG-8
 host=$(hostname)
 backup_server=false
 
+# =========================================================================
+# Update host, site specific
 . /home/ma/emos/bin/ecflow_site.sh || : # site specific settings come here
-# . ecflow_start_site.sh || :
 
 #==========================================================================
 # Syntax
@@ -75,18 +76,18 @@ else
    port_number=$ecf_port
 fi
 
+#==========================================================================
+#
 date -u
 echo ""
 echo "User \"$username\" attempting to stop ecf server on $host:$port_number"
-#==========================================================================
 echo "";
 echo "Checking if the server is already running on $host:$port_number" 
 
 export ECF_PORT=$port_number
-export ECF_NODE=$host
-set -x
+
 rcdir=$HOME/.ecflowrc
-fname=$rcdir/$(echo $ECF_NODE | cut -c1-4).$USER.$ECF_PORT 
+fname=$rcdir/$(echo $host | cut -c1-4).$USER.$ECF_PORT 
 # cut is useful when the server may be moved from node to node 
 # 4 is common string here, so that the same file is used for all nodes
 
