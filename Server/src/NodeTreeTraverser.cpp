@@ -181,7 +181,7 @@ void NodeTreeTraverser::do_traverse()
 		/// This will happen from time to time, hence only report, for real wayward times
 		int diff = diff_from_last_time - submitJobsIntervalInSeconds;
 		if (diff > (submitJobsIntervalInSeconds * 0.25)) {
-			LOG(Log::WAR, ": interval is (" << submitJobsIntervalInSeconds << " seconds)  but took (" << diff_from_last_time  <<  " seconds)" );
+			LOG(Log::WAR, ": interval is (" << submitJobsIntervalInSeconds << " seconds) but took (" << diff_from_last_time  <<  " seconds)" );
 		}
 	}
 
