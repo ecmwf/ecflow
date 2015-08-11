@@ -140,8 +140,6 @@ void OutputItemWidget::enableDir(bool status)
 
 void OutputItemWidget::clearContents()
 {
-	//loaded_=false;
-
 	InfoPanelItem::clear();
 
 	fileLabel_->clear();

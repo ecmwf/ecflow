@@ -9,7 +9,7 @@
                 },
                 
                 "keyword" : {
-                    "pattern" : "(def|edit)",                       
+                    "pattern" : "(def|edit|cron|endtask|label|event)",                       
                     "colour"  : "rgb(0,0,0)",
                     "bold"    : "true"
                 }, 

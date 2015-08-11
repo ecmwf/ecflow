@@ -104,7 +104,6 @@ void InfoProvider::visit(VInfoNode* info)
     	}
     }
 
-
     //We try to get the file contents from the server
     //(this will go through the threaded communication)
 
@@ -163,7 +162,6 @@ void  InfoProvider::taskChanged(VTask_ptr task)
             break;
     }
 }
-
 
 JobProvider::JobProvider(InfoPresenter* owner) :
 		InfoProvider(owner,VTask::JobTask)

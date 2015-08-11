@@ -27,6 +27,12 @@ EditItemWidget::EditItemWidget(QWidget *parent) :
 {
 	setupUi(this);
 
+	QFont f("Courier");
+	f.setStyleHint(QFont::TypeWriter);
+	f.setFixedPitch(true);
+	f.setPointSize(10);
+	textEdit_->setFont(f);
+
 	infoProvider_=new EditProvider(this);
 
 	Highlighter* ih=new Highlighter(textEdit_->document(),"script");

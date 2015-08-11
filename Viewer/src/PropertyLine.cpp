@@ -189,9 +189,15 @@ QWidget* ColourPropertyLine::button()
 
 void ColourPropertyLine::reset(QVariant v)
 {
-	QPalette pal = cb_->palette();
+	QColor c=v.value<QColor>();
+
+	QString sh("QToolButton{background: rgb(" + QString::number(c.red()) + "," +
+			QString::number(c.green()) + "," + QString::number(c.blue()) + ");}");
+	cb_->setStyleSheet(sh);
+
+	/*QPalette pal = cb_->palette();
 	pal.setColor(QPalette::Window, v.value<QColor>());
-	cb_->setPalette(pal);
+	cb_->setPalette(pal);*/
 	PropertyLine::checkState();
 }
 

@@ -14,11 +14,10 @@ CodeItemWidget::CodeItemWidget(QWidget *parent) : QWidget(parent)
 {
 	setupUi(this);
 
-	QFont f;
-	f.setFamily("Monospace");
-	//f.setFamily("Courier");
+	QFont f("Courier");
 	f.setStyleHint(QFont::TypeWriter);
 	f.setFixedPitch(true);
+	f.setPointSize(10);
 	textEdit_->setFont(f);
 
 	searchLine_->setEditor(textEdit_);

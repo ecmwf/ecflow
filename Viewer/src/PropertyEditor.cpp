@@ -93,7 +93,6 @@ void PropertyEditor::addItem(VProperty* vProp,QGridLayout* gridLayout)
     		item->reset(vProp->link()->value());
 
     		int row=gridLayout->rowCount();
-    		int col=0;
 
     		QLabel* lw=item->label();
     		QLabel* slw=item->suffixLabel();
@@ -113,14 +112,11 @@ void PropertyEditor::addItem(VProperty* vProp,QGridLayout* gridLayout)
     			{
     				gridLayout->addWidget(item->item(),row,1,Qt::AlignLeft);
     			}
-
     		}
     		else
     		{
     			gridLayout->addWidget(item->item(),row,0,1,2,Qt::AlignLeft);
-
     		}
-
 
     		QWidget *bw=item->button();
     		if(bw)

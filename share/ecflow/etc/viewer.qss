@@ -93,7 +93,6 @@ QLineEdit[readOnly="true"] {
     background-color: rgb(242,242,242);
 }
 
-
 /*----------------------------
   File info label
 ------------------------------*/
