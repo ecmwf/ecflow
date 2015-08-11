@@ -32,12 +32,6 @@
         },    
         
         {
-        	"name"    : "jobstatus",
-            "label"   : "Job status",
-            "visible_for" : "task"            
-        },   
-        
-        {
         	"name"    : "output",
             "label"   : "Output",
             "visible_for" : "task"            

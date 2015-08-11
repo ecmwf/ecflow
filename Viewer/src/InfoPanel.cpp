@@ -51,7 +51,8 @@ void  InfoPanelItemHandler::addToTab(QTabWidget *tab)
 
 InfoPanel::InfoPanel(QWidget* parent) :
   DashboardWidget(parent),
-  tabBeingCleared_(false)
+  tabBeingCleared_(false),
+  tabBeingAdjusted_(false)
 {
 	setupUi(this);
 
@@ -239,10 +240,12 @@ void InfoPanel::adjustTabs(VInfo_ptr info)
 	//A new set of tabs is needed!
 	if(match != ids.size())
 	{
-		//Remember the current widget
-		//QWidget *current=tab_->currentWidget();
+		//We set this flag true so that the change of the current tab should not
+		//trigger a reload! We want to reload the current tab only after the
+		//tab adjustment.
+		tabBeingAdjusted_=true;
 
-		//Remove the pages but does not delete them
+		//Remove the pages but does not delete them.
 		clearTab();
 
         for(std::vector<InfoPanelDef*>::iterator it=ids.begin(); it != ids.end(); ++it)
@@ -271,13 +274,15 @@ void InfoPanel::adjustTabs(VInfo_ptr info)
 			tab_->setCurrentIndex(0);
 			currentItem=findItem(tab_->widget(0));
 		}
+
+		tabBeingAdjusted_=false;
 	}
 
-	// the reload is not necessary because it is already triggered by setCurrentIndex
-	//if(currentItem)
-	//{
-	//currentItem->reload(info);
-	//}
+	//We reload the current tab
+	if(currentItem)
+	{
+		currentItem->reload(info);
+	}
 }
 
 InfoPanelItem* InfoPanel::findItem(QWidget* w)
@@ -336,7 +341,7 @@ InfoPanelItemHandler* InfoPanel::createHandler(InfoPanelDef* def)
 
 void InfoPanel::slotCurrentWidgetChanged(int idx)
 {
-	if(tabBeingCleared_)
+	if(tabBeingCleared_ || tabBeingAdjusted_)
 		return;
 
 	if(!info_.get())

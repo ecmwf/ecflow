@@ -50,4 +50,4 @@ void TriggerItemWidget::clearContents()
 	InfoPanelItem::clear();
 }
 
-static InfoPanelItemMaker<TriggerItemWidget> maker1("trigger");
+static InfoPanelItemMaker<TriggerItemWidget> maker1("triggers");
