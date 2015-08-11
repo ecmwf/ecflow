@@ -28,7 +28,6 @@ OutputItemWidget::OutputItemWidget(QWidget *parent) :
 	searchLine_->hide();
 	userClickedReload_ = false;
 
-
 	//Highlighter* ih=new Highlighter(textEdit_->document(),"output");
 
 	infoProvider_=new OutputProvider(this);
@@ -53,11 +52,6 @@ OutputItemWidget::OutputItemWidget(QWidget *parent) :
 	connect(outputView_->selectionModel(),SIGNAL(currentChanged(QModelIndex,QModelIndex)),
 			this,SLOT(slotOutputSelected(QModelIndex,QModelIndex)));
 
-	//When the user clicks on the 'refresh' button
-	connect(reloadTb_,SIGNAL(clicked()),
-			this,SLOT(on_reloadTb_clicked()));
-
-
 	searchLine_->setEditor(textEdit_);
 
 	//Splitter
@@ -81,13 +75,11 @@ void OutputItemWidget::reload(VInfo_ptr info)
 
 	// note that setting the font does not work when in the constructor
 	// so we put it here
-	QFont f;
-	f.setFamily("Monospace");
-	//f.setFamily("Courier");
+	QFont f("Courier");
 	f.setStyleHint(QFont::TypeWriter);
 	f.setFixedPitch(true);
+	f.setPointSize(10);
 	textEdit_->setFont(f);
-
 
 	loaded_=true;
 	info_=info;
@@ -195,14 +187,12 @@ void OutputItemWidget::on_searchTb__toggled(bool b)
 	}
 }
 
-
-void OutputItemWidget::on_reloadTb_clicked()
+void OutputItemWidget::on_reloadTb__clicked()
 {
 	userClickedReload_ = true;
 	reload(info_);
 	userClickedReload_ = false;
 }
-
 
 // search for a highlight any of the pre-defined keywords so that
 // the (probably) most important piece of information is highlighted
@@ -217,7 +207,6 @@ bool OutputItemWidget::automaticSearchForKeywords()
 
 	// find any of the keywords and stop at the first one
 	while (!found && i < keywords.size())
-	
 	{
 		found = textEdit_->findString(keywords.at(i), findFlags);
 		i++;
@@ -225,7 +214,6 @@ bool OutputItemWidget::automaticSearchForKeywords()
 
 	return found;
 }
-
 
 // Called when we load a new node's information into the panel, or
 // when we move to the panel from another one.
@@ -254,7 +242,6 @@ void OutputItemWidget::searchOnReload()
 		}
 	}
 }
-
 
 //This slot is called when a file item is selected in the output view.
 void OutputItemWidget::slotOutputSelected(QModelIndex,QModelIndex)

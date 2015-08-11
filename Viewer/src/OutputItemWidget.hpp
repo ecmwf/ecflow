@@ -41,11 +41,10 @@ public:
 
 	bool automaticSearchForKeywords();
 
-
 protected Q_SLOTS:
 	void slotOutputSelected(QModelIndex,QModelIndex);
 	void on_searchTb__toggled(bool b);
-	void on_reloadTb_clicked();
+	void on_reloadTb__clicked();
 
 protected:
 	void updateDir(VDir_ptr dir);
