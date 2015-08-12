@@ -850,6 +850,7 @@ void ServerHandler::clientTaskFinished(VTask_ptr task,const ServerReply& serverR
 		case VTask::ScriptTask:
 		case VTask::ManualTask:
 		case VTask::HistoryTask:
+		case VTask::JobTask:
 		case VTask::OutputTask:
 		{
 			task->reply()->text(serverReply.get_string());
