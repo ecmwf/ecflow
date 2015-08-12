@@ -50,7 +50,7 @@ LogCmd::LogCmd(const std::string& path)
    //             as that could be on a different machine.
    // ECFLOW-174, Never get the full log, as this can make server consume to much memory
    //             default taken from get_last_n_lines_default
-   // ECFLOW-377. should remove leading/trailing spaces form path
+   // ECFLOW-377, should remove leading/trailing spaces from path
    boost::algorithm::trim(new_path_);
 }
 
@@ -97,7 +97,11 @@ STC_Cmd_ptr LogCmd::doHandleRequest(AbstractServer* as) const
             }
             else {
                // User could have overridden ECF_LOG variable
-               const std::string& log_file_name = as->defs()->server().find_variable(Str::ECF_LOG());
+               std::string log_file_name = as->defs()->server().find_variable(Str::ECF_LOG());
+
+               // ECFLOW-377 should remove leading/trailing spaces from path
+               boost::algorithm::trim(log_file_name);
+
                Log::instance()->new_path(log_file_name);  // will throw for errors
             }
 

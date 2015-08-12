@@ -13,8 +13,17 @@
 // Description :
 //============================================================================
 #include <boost/test/unit_test.hpp>
+#include "boost/filesystem/operations.hpp"
+#include "boost/filesystem/path.hpp"
 #include "ClientToServerCmd.hpp"
+#include "TestHelper.hpp"
+#include "Defs.hpp"
+#include "Log.hpp"
+#include "File.hpp"
+#include "Str.hpp"
 
+using namespace boost;
+namespace fs = boost::filesystem;
 using namespace std;
 using namespace ecf;
 
@@ -26,13 +35,13 @@ BOOST_AUTO_TEST_CASE( test_log_cmd )
 
    {
       LogCmd log_cmd;
-      BOOST_REQUIRE_MESSAGE(log_cmd.api() ==  LogCmd::GET," expected GET at the default");
+      BOOST_REQUIRE_MESSAGE(log_cmd.api() ==  LogCmd::GET," expected GET as the default");
       BOOST_REQUIRE_MESSAGE(log_cmd.new_path() == "","expected empty path but found " << log_cmd.new_path());
    }
 
    {
       LogCmd log_cmd("/a/path");
-      BOOST_REQUIRE_MESSAGE(log_cmd.api() ==  LogCmd::NEW," expected GET at the default");
+      BOOST_REQUIRE_MESSAGE(log_cmd.api() ==  LogCmd::NEW," expected NEW as the default api when path provided");
       BOOST_REQUIRE_MESSAGE(log_cmd.new_path() == "/a/path","expected 'a/path' but found " << log_cmd.new_path());
    }
 
@@ -49,6 +58,35 @@ BOOST_AUTO_TEST_CASE( test_log_cmd )
       LogCmd log_cmd(" /a/path ");
       BOOST_CHECK_MESSAGE(log_cmd.new_path() == "/a/path","expected '/a/path' but found '" << log_cmd.new_path() << "'");
    }
+
+   // Create a new log file, equivalent --log=new .../Base/test/new_logfile.txt
+   // LogCmd::doHandleRequest needs log file to have been created first
+   std::string old_log_file = File::test_data("Base/test/old_logfile.txt","Base");
+   Log::instance()->create(old_log_file);
+
+   std::string new_log_file = File::test_data("Base/test/new_logfile.txt ","Base");          // ECFLOW-377 note extra space at the end
+   std::string expected_new_log_file = File::test_data("Base/test/new_logfile.txt","Base");  // space removed
+
+   Defs defs;
+   TestHelper::invokeRequest(&defs,Cmd_ptr( new LogCmd(new_log_file)), false /* check_change_numbers */);
+   BOOST_CHECK_MESSAGE( defs.server().find_variable("ECF_LOG") == expected_new_log_file , "expected to find ECF_LOG with value '" << expected_new_log_file << "' but found '" << defs.server().find_variable("ECF_LOG") << "'");
+   BOOST_CHECK_MESSAGE( Log::instance()->path() == expected_new_log_file , "expected to find ECF_LOG with value '" << expected_new_log_file << "' but found '" << defs.server().find_variable("ECF_LOG") << "'");
+
+
+   // Update ECF_LOG to have a *SPACE* at the end.  ECFLOW-377
+   NameValueVec vec;
+   vec.push_back(std::make_pair(Str::ECF_LOG(), new_log_file));
+   defs.set_server().add_or_update_server_variables(vec);
+   BOOST_CHECK_MESSAGE( defs.server().find_variable("ECF_LOG") == new_log_file , "expected to find ECF_LOG with value '" << new_log_file << "' but found '" << defs.server().find_variable("ECF_LOG") << "'");
+
+   // INVOKE log command where we update log file from ECF_LOG, equivalent --log=new
+   TestHelper::invokeRequest(&defs,Cmd_ptr( new LogCmd(LogCmd::NEW)), false /* check_change_numbers */);
+   BOOST_CHECK_MESSAGE( Log::instance()->path() == expected_new_log_file , "expected to find Log::instance()->path() with value '" << expected_new_log_file << "' but found '" << defs.server().find_variable("ECF_LOG") << "'");
+
+   // tidy up
+   Log::instance()->destroy();
+   fs::remove(old_log_file);  // remove generated log file
+   fs::remove(expected_new_log_file);  // remove generated log file
 }
 
 BOOST_AUTO_TEST_SUITE_END()
