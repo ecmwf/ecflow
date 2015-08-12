@@ -8,17 +8,24 @@
                                 
                 },
                 
-                "keyword" : {
-                    "pattern" : "(def|edit|cron|endtask|label|event)",                       
+                "def" : {
+                    "pattern" : "^(task|endtask|suite|endsuite|family|endfamily|server|endserver)",                       
                     "colour"  : "rgb(0,0,0)",
                     "bold"    : "true"
                 }, 
                 
-                "genvar" : {
-                        "pattern" : "^\\s*(# time-date-dependencies|# edit|edit)",                       
-                        "colour"  : "rgb(128,128,128)",
-                        "italic"  : "true"
-                }                     
+                "keyword" : {
+                    "pattern" : "(edit|cron|label|event|defstatus)",                       
+                    "colour"  : "rgb(136,0,136)",               
+                    "bold"    : "true"
+                }, 
+                         
+                "comment" : {
+                    "pattern" : "(#[^\n]*)",                     
+                    "colour"  : "rgb(100,100,100)",
+                    "italic"  : "true"                                         
+                }               
+                
         },
 
         "script"  : {

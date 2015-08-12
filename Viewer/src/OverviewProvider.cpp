@@ -193,7 +193,7 @@ void OverviewProvider::nodeInfo(VInfoNode* info,std::stringstream& f)
 	//Header
 	f << "name    : " << nodeName << "\n";
 	f << "type    : " << typeName << "\n";
-	f << "status   : " << statusName << "\n";
+	f << "status  : " << statusName << "\n";
 
 	node_ptr nn=node->node();
 

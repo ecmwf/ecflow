@@ -87,11 +87,11 @@ void OutputItemWidget::reload(VInfo_ptr info)
 
 	// note that setting the font does not work when in the constructor
 	// so we put it here
-	QFont f("Courier");
+	/*QFont f("Courier");
 	f.setStyleHint(QFont::TypeWriter);
 	f.setFixedPitch(true);
 	f.setPointSize(10);
-	textEdit_->setFont(f);
+	textEdit_->setFont(f);*/
 
 	loaded_=true;
 	info_=info;

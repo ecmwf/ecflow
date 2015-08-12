@@ -31,6 +31,12 @@ TextEdit::TextEdit(QWidget * parent) :
     		lineNumArea_,SLOT(update()));
 
     updateLineNumberAreaWidth(0);
+
+    QFont f("Courier");
+    f.setStyleHint(QFont::TypeWriter);
+    f.setFixedPitch(true);
+    f.setPointSize(10);
+    setFont(f);
 }
 
 TextEdit::~TextEdit()

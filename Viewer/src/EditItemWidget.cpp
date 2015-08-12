@@ -27,11 +27,11 @@ EditItemWidget::EditItemWidget(QWidget *parent) :
 {
 	setupUi(this);
 
-	QFont f("Courier");
+	/*QFont f("Courier");
 	f.setStyleHint(QFont::TypeWriter);
 	f.setFixedPitch(true);
 	f.setPointSize(10);
-	textEdit_->setFont(f);
+	textEdit_->setFont(f);*/
 
 	infoProvider_=new EditProvider(this);
 
