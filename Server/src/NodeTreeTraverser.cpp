@@ -379,9 +379,9 @@ void NodeTreeTraverser::traverse_node_tree_and_job_generate(
 			// std::cout << "Job generation *timed* out: start time:" << start_time << "  time_out_time:" << time_out_time << "  poll_time:" << next_poll_time_ << "\n";
 
 			// It could be that we started job generation a few seconds before the poll time,
-			// Hence to avoid excessive warnings, Only warn if time_out_time > next_poll_time_ and  forgive about 3  seconds
+			// Hence to avoid excessive warnings, Only warn if time_out_time > next_poll_time_ and forgive about 5 seconds
 			if (!time_out_time.is_special() && time_out_time > next_poll_time_ ) {
-				int leeway = ( serverEnv_.submitJobsInterval() == 60) ? 3 : 1;
+				int leeway = ( serverEnv_.submitJobsInterval() == 60) ? 5 : 1;
 				time_duration duration = time_out_time - next_poll_time_;
 				if ( duration.total_seconds() >= leeway) {
 
