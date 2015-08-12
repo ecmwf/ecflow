@@ -17,16 +17,20 @@
 #include <QDebug>
 #include <QFile>
 #include <QItemSelectionModel>
+#include <QTimer>
+
+int OutputItemWidget::updateDirTimeout_=1000*60;
 
 OutputItemWidget::OutputItemWidget(QWidget *parent) :
-	QWidget(parent)
+	QWidget(parent),
+	userClickedReload_(false),
+	ignoreOutputSelection_(false)
 {
 	setupUi(this);
 
 	messageLabel_->hide();
 	dirLabel_->hide();
 	searchLine_->hide();
-	userClickedReload_ = false;
 
 	//Highlighter* ih=new Highlighter(textEdit_->document(),"output");
 
@@ -52,6 +56,7 @@ OutputItemWidget::OutputItemWidget(QWidget *parent) :
 	connect(outputView_->selectionModel(),SIGNAL(currentChanged(QModelIndex,QModelIndex)),
 			this,SLOT(slotOutputSelected(QModelIndex,QModelIndex)));
 
+	//Connect the searchline to the editor
 	searchLine_->setEditor(textEdit_);
 
 	//Splitter
@@ -62,6 +67,13 @@ OutputItemWidget::OutputItemWidget(QWidget *parent) :
 		sizes << wHeight-80 << 80;
 		splitter_->setSizes(sizes);
 	}
+
+	//Dir contents update timer
+	updateDirTimer_=new QTimer(this);
+	updateDirTimer_->setInterval(updateDirTimeout_);
+
+	connect(updateDirTimer_,SIGNAL(timeout()),
+			this,SLOT(slotUpdateDir()));
 }
 
 QWidget* OutputItemWidget::realWidget()
@@ -89,31 +101,78 @@ void OutputItemWidget::reload(VInfo_ptr info)
 	    //Get file contents
 	    infoProvider_->info(info_);
 
-	    //Get directory contents
-	    OutputProvider* op=static_cast<OutputProvider*>(infoProvider_);
-	    updateDir(op->directory());
-
+	    //Start contents update timer
+	    updateDirTimer_->start();
 	}
-
-	searchOnReload();
 }
 
-void OutputItemWidget::updateDir(VDir_ptr dir)
+std::string OutputItemWidget::currentFullName() const
 {
+	QModelIndex current=dirSortModel_->mapToSource(outputView_->currentIndex());
+
+	std::string fullName;
+	OutputProvider* op=static_cast<OutputProvider*>(infoProvider_);
+
+	if(current.isValid())
+	{
+		fullName=dirModel_->fullName(current);
+	}
+	else
+	{
+		fullName=op->joboutFileName();
+	}
+
+	return fullName;
+}
+
+void OutputItemWidget::reloadCurrentFile()
+{
+	if(info_ && info_.get() )
+	{
+		std::string fullName=currentFullName();
+		OutputProvider* op=static_cast<OutputProvider*>(infoProvider_);
+
+		//Get the file via the provider. This will call infoReady() etc. in the end.
+		op->file(fullName);
+	}
+}
+
+void OutputItemWidget::updateDir(bool restartTimer)
+{
+	if(restartTimer)
+		updateDirTimer_->stop();
+
+	OutputProvider* op=static_cast<OutputProvider*>(infoProvider_);
+	VDir_ptr dir=op->directory();
+
 	bool status=(dir && dir.get());
 
 	if(status)
 	{
+		//Remember the selection
+		std::string fullName=currentFullName();
+
 		dirModel_->setData(dir);
-		//dirLabel_->update(dir);
 		dirWidget_->show();
+
+		//Try the preserve the selection
+		ignoreOutputSelection_=true;
+		outputView_->setCurrentIndex(dirSortModel_->fullNameToIndex(fullName));
+		ignoreOutputSelection_=false;
 	}
 	else
 	{
 		dirWidget_->hide();
-		//dirLabel_->clear();
 		dirModel_->clearData();
 	}
+
+	if(restartTimer)
+		updateDirTimer_->start(updateDirTimeout_);
+}
+
+void OutputItemWidget::slotUpdateDir()
+{
+	updateDir(false);
 }
 
 void OutputItemWidget::enableDir(bool status)
@@ -125,13 +184,14 @@ void OutputItemWidget::enableDir(bool status)
 	else
 	{
 		dirWidget_->hide();
-		//dirLabel_->clear();
 		dirModel_->clearData();
 	}
 }
 
 void OutputItemWidget::clearContents()
 {
+	updateDirTimer_->stop();
+
 	InfoPanelItem::clear();
 
 	fileLabel_->clear();
@@ -158,14 +218,20 @@ void OutputItemWidget::infoReady(VReply* reply)
     	textEdit_->setPlainText(s);
     }
 
+    searchOnReload();
+
     //Update the file label
     fileLabel_->update(reply);
+
+    updateDir(true);
 }
 
 void OutputItemWidget::infoProgress(VReply* reply)
 {
     QString s=QString::fromStdString(reply->text());
     textEdit_->setPlainText(s);
+
+    updateDir(true);
 }
 
 void OutputItemWidget::infoFailed(VReply* reply)
@@ -176,6 +242,7 @@ void OutputItemWidget::infoFailed(VReply* reply)
     //Update the file label
     fileLabel_->update(reply);
 
+    updateDir(true);
 }
 
 void OutputItemWidget::on_searchTb__toggled(bool b)
@@ -190,7 +257,7 @@ void OutputItemWidget::on_searchTb__toggled(bool b)
 void OutputItemWidget::on_reloadTb__clicked()
 {
 	userClickedReload_ = true;
-	reload(info_);
+	reloadCurrentFile();
 	userClickedReload_ = false;
 }
 
@@ -246,14 +313,8 @@ void OutputItemWidget::searchOnReload()
 //This slot is called when a file item is selected in the output view.
 void OutputItemWidget::slotOutputSelected(QModelIndex,QModelIndex)
 {
-	QModelIndex current=dirSortModel_->mapToSource(outputView_->currentIndex());
-	std::string fullName=dirModel_->fullName(current);
-
-	//Get the file via the provider. This will call infoReady() etc. in the end.
-	OutputProvider* op=static_cast<OutputProvider*>(infoProvider_);
-	op->file(fullName);
-
-	searchOnReload();
+	if(!ignoreOutputSelection_)
+		reloadCurrentFile();
 }
 
 static InfoPanelItemMaker<OutputItemWidget> maker1("output");

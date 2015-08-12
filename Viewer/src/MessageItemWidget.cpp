@@ -37,7 +37,6 @@ void MessageItemWidget::reload(VInfo_ptr info)
 
     if(info_ && info_.get())
     {
-        clearContents();
         infoProvider_->info(info_);
     }
 }

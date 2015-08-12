@@ -84,6 +84,8 @@ QVariant  OutputModel::data(const QModelIndex& index, int role) const
 	{
 		switch(index.column())
 		{
+		case 0:
+			return QString::fromStdString(fullName(index));
 		case 1:
 			return static_cast<float>(item->size_)/1024.;
 		case 2:
@@ -105,8 +107,8 @@ QVariant OutputModel::headerData( const int section, const Qt::Orientation orien
 	{
    	case 0: return tr("Name");
    	case 1: return tr("Size");
-   	case 2: return tr("Modified (ago)");
-   	case 3: return tr("Modified (full)");
+   	case 2: return tr("Modified");
+   	case 3: return tr("Modified");
    	default: return QVariant();
    	}
 
@@ -141,7 +143,7 @@ bool OutputModel::hasData() const
 	return dir_ && dir_.get();
 }
 
-std::string OutputModel::fullName(const QModelIndex& index)
+std::string OutputModel::fullName(const QModelIndex& index) const
 {
 	if(!hasData())
 		return std::string();
@@ -166,7 +168,7 @@ QString OutputModel::formatSize(unsigned int size) const
 QString OutputModel::formatDate(const std::time_t& t) const
 {
   	QDateTime dt=QDateTime::fromTime_t(t);
-	return dt.toString("yyyy-MM-dd hh:mm");
+	return dt.toString("yyyy-MM-dd hh:mm:ss");
 }
 
 QString OutputModel::formatAgo(const std::time_t& t) const
@@ -247,6 +249,20 @@ bool OutputSortModel::filterAcceptsRow(int sourceRow,const QModelIndex& sourcePa
 	return true;
 }
 
+QModelIndex OutputSortModel::fullNameToIndex(const std::string& fullName)
+{
+	QString name=QString::fromStdString(fullName);
+
+	for(int i=0; i < rowCount(QModelIndex()); i++)
+	{
+		QModelIndex idx=index(i,0);
+		if(name.endsWith(data(idx,Qt::DisplayRole).toString()))
+		{
+			return idx;
+		}
+	}
+	return QModelIndex();
+}
 
 
 

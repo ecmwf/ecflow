@@ -99,6 +99,9 @@
            <property name="shortcut">
             <string>Ctrl+R</string>
            </property>
+           <property name="autoRaise">
+            <bool>true</bool>
+           </property>
           </widget>
          </item>
         </layout>

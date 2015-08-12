@@ -138,6 +138,7 @@ void ServerComThread::run()
 			case VTask::JobTask:
 			case VTask::ManualTask:
 			case VTask::ScriptTask:
+			case VTask::OutputTask:
 			{
 				UserMessage::message(UserMessage::DBG, false, std::string(" FILE"));
 				ci_->file(nodePath_,params_["clientPar"]);

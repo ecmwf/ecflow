@@ -19,6 +19,7 @@
 
 class OutputModel;
 class OutputSortModel;
+class QTime;
 
 class OutputItemWidget : public QWidget, public InfoPanelItem, protected Ui::OutputItemWidget
 {
@@ -43,18 +44,24 @@ public:
 
 protected Q_SLOTS:
 	void slotOutputSelected(QModelIndex,QModelIndex);
+	void slotUpdateDir();
 	void on_searchTb__toggled(bool b);
 	void on_reloadTb__clicked();
 
 protected:
-	void updateDir(VDir_ptr dir);
+	void updateDir(bool);
 	void enableDir(bool);
 	void updateWidgetState() {};
 	void searchOnReload();
+	void reloadCurrentFile();
+	std::string currentFullName() const;
 
 	OutputModel* dirModel_;
 	OutputSortModel* dirSortModel_;
 	bool userClickedReload_;
+	bool ignoreOutputSelection_;
+	QTimer* updateDirTimer_;
+	static int updateDirTimeout_;
 
 };
 

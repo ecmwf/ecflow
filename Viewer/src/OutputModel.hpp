@@ -26,7 +26,7 @@ public:
    	QModelIndex index (int, int, const QModelIndex& parent = QModelIndex() ) const;
    	QModelIndex parent (const QModelIndex & ) const;
 
-   	std::string fullName(const QModelIndex& index);
+   	std::string fullName(const QModelIndex& index) const;
 
 protected:
    	bool hasData() const;
@@ -46,6 +46,8 @@ public:
 
 	bool lessThan(const QModelIndex &left, const QModelIndex &right) const;
 	bool filterAcceptsRow(int,const QModelIndex &) const;
+
+	QModelIndex fullNameToIndex(const std::string& fullName);
 };
 
 

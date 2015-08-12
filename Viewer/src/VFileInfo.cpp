@@ -20,7 +20,7 @@ QString  VFileInfo::formatSize() const
 QString  VFileInfo::formatModDate() const
 {
 	QDateTime dt=lastModified();
-	return dt.toString("yyyy-MM-dd hh:mm");
+	return dt.toString("yyyy-MM-dd hh:mm:ss");
 }
 
 QString  VFileInfo::formatPermissions() const
@@ -55,7 +55,7 @@ QString VFileInfo::formatSize(unsigned int size)
 QString VFileInfo::formatDate(const std::time_t& t)
 {
   	QDateTime dt=QDateTime::fromTime_t(t);
-	return dt.toString("yyyy-MM-dd hh:mm");
+	return dt.toString("yyyy-MM-dd hh:mm:ss");
 }
 
 QString VFileInfo::formatDateAgo(const std::time_t& t)

@@ -167,12 +167,20 @@ void OutputProvider::fetchFile(ServerHandler *server,VNode *n,const std::string&
 	//Set the filename in reply
 	reply_->fileName(fileName);
 
-    //Joubout variable is not defined
-    if(isJobout && fileName.empty())
-    {
-    	reply_->errorText("Variable ECF_JOBOUT is not defined!");
-    	owner_->infoFailed(reply_);
-    }
+	if(fileName.empty())
+	{
+		//Joubout variable is not defined or empty
+		if(isJobout)
+		{
+			reply_->errorText("Variable ECF_JOBOUT is not defined!");
+			owner_->infoFailed(reply_);
+		}
+		else
+		{
+			reply_->errorText("Output file is not defined!");
+			owner_->infoFailed(reply_);
+		}
+	}
 
     //Check if it is tryno 0
     if(boost::algorithm::ends_with(fileName,".0"))
@@ -203,7 +211,8 @@ void OutputProvider::fetchFile(ServerHandler *server,VNode *n,const std::string&
     			return;
     		}
     	}
-    	else
+
+    	if(isJobout)
     	{
     		reply_->fileReadMode(VReply::ServerReadMode);
 
@@ -328,6 +337,16 @@ VDir_ptr OutputProvider::fetchLocalDir(const std::string& path)
 	return res;
 }
 
+
+std::string OutputProvider::joboutFileName() const
+{
+	if(info_ && info_->isNode() && info_->node() && info_->node()->node())
+	{
+		return info_->node()->findVariable("ECF_JOBOUT",true);
+	}
+
+	return std::string();
+}
 
 
 

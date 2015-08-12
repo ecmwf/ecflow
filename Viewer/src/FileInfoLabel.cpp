@@ -45,7 +45,10 @@ void FileInfoLabel::update(VReply* reply)
 	if(!reply)
 		clear();
 
+	QString labelText;
+	QString ttText;
 	QString s;
+
 	QColor col(Qt::black);
 	QColor colText("#000010");
 	QColor colSize(0,0,255);
@@ -58,12 +61,13 @@ void FileInfoLabel::update(VReply* reply)
 		s="<b><font color=" + col.name() + ">File: </font></b>";
 		s+="<font color=" + colErr.name() + "> ??? </font>";
 		setText(s);
+		setToolTip(QString());
 		return;
 	}
 
 	//Name
-	s="<b><font color=" + col.name() + ">File: </font></b>";
-	s+="<font color=" +colText.name() + ">" + fileName + "</font>";
+	labelText="<b><font color=" + col.name() + ">File: </font></b>";
+	labelText+="<font color=" +colText.name() + ">" + fileName + "</font>";
 
 	VFileInfo f(fileName);
 
@@ -73,10 +77,10 @@ void FileInfoLabel::update(VReply* reply)
 		VFileInfo f(fileName);
 		if(f.exists())
 		{
-			s+="<br>";
+			//s+="<br>";
 
-			s+="<b><font color=" + col.name() + "> Size: </font></b>";
-			s+="<font color=" + colSize.name() + ">" + f.formatSize() + "</font>";
+			labelText+="<b><font color=" + col.name() + "> Size: </font></b>";
+			labelText+="<font color=" + colSize.name() + "> " + f.formatSize() + "</font>";
 
 			s+="<b><font color=" + col.name() + "> Permissions: </font></b>";
 			s+="<font color=" + colText.name() + ">" + f.formatPermissions() + "</font>";
@@ -97,7 +101,7 @@ void FileInfoLabel::update(VReply* reply)
 	}
 	else if(reply->fileReadMode() == VReply::ServerReadMode)
 	{
-		s+="<br>";
+		//s+="<br>";
 		s+="<b><font color=" + col.name() + "> Access method: </font></b>";
 		int rowLimit=10000;
 		s+="<font color=" + colText.name() + "> through server (first " + QString::number(rowLimit) + "lines)</font>";
@@ -111,9 +115,9 @@ void FileInfoLabel::update(VReply* reply)
 			VFileInfo f(QString::fromStdString(tmp->path()));
 			if(f.exists())
 			{
-				s+="<br>";
-				s+="<b><font color=" + col.name() + "> Size: </font></b>";
-				s+="<font color=" + colSize.name() + ">" + f.formatSize() + "</font>";
+				//s+="<br>";
+				labelText+="<b><font color=" + col.name() + "> Size: </font></b>";
+				labelText+="<font color=" + colSize.name() + "> " + f.formatSize() + "</font>";
 			}
 		}
 		s+="<br>";
@@ -121,7 +125,10 @@ void FileInfoLabel::update(VReply* reply)
 		s+="<font color=" + colText.name() + "> " + QString::fromStdString(reply->fileReadMethod()) + "</font>";
 	}
 
-	setText(s);
+	ttText=s;
+
+	setText(labelText);
+	setToolTip(ttText);
 }
 
 void DirInfoLabel::update(VDir_ptr dir)

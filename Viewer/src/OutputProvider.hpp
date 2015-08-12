@@ -30,6 +30,8 @@ public:
 	 //Get a particular jobout file
 	 void file(const std::string& fileName);
 
+	 std::string joboutFileName() const;
+
 private:
 	 void fetchFile(ServerHandler *server,VNode *n,const std::string& fileName,bool isJobout);
 	 bool fetchFileViaLogServer(VNode *n,const std::string& fileName);
