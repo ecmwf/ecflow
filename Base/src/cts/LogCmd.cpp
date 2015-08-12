@@ -15,6 +15,8 @@
 #include "boost/filesystem/path.hpp"
 #include "boost/filesystem/operations.hpp"
 
+#include <boost/algorithm/string/trim.hpp>
+
 #include "ClientToServerCmd.hpp"
 #include "AbstractServer.hpp"
 #include "AbstractClientEnv.hpp"
@@ -48,6 +50,8 @@ LogCmd::LogCmd(const std::string& path)
    //             as that could be on a different machine.
    // ECFLOW-174, Never get the full log, as this can make server consume to much memory
    //             default taken from get_last_n_lines_default
+   // ECFLOW-377. should remove leading/trailing spaces form path
+   boost::algorithm::trim(new_path_);
 }
 
 std::ostream& LogCmd::print(std::ostream& os) const
