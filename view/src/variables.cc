@@ -210,8 +210,8 @@ void variables::show( node& n )
 		  const std::string& name = (*it).name();
 		  if (std::find(shown.begin(), shown.end(), name) == shown.end()) {
 		    if (name=="ECF_NODE" || name=="ECF_PORT" ||
-			name=="ECF_PID"  || name=="ECF_VERSION" || name=="ECF_LISTS" // security ???
-			) {
+			name=="ECF_LISTS" || // security ???
+			name=="ECF_PID"  || name=="ECF_VERSION") {
 		      snprintf(buffer, 1024, fmt3, name.c_str(), (*it).theValue().c_str());
 		    } else {
 		      snprintf(buffer, 1024, fmt1, name.c_str(), (*it).theValue().c_str());
