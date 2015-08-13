@@ -62,6 +62,7 @@ void variables::show( node& n )
    int valsize = 0;
    char fmt1[256];
    char fmt2[256];
+   char fmt3[256];
    node* m = &n;
 
    XtSetSensitive(edit_, True);
@@ -134,6 +135,7 @@ void variables::show( node& n )
    if (!varsize) return;
    snprintf(fmt1, 256, "(%%-%ds = %%-%ds)", varsize, valsize);
    snprintf(fmt2, 256, " %%-%ds = %%-%ds ", varsize, valsize);
+   snprintf(fmt3, 256, "[%%-%ds = %%-%ds]", varsize, valsize);
    {
      std::vector<std::string> shown;     
       char buffer[1024];
@@ -167,6 +169,17 @@ void variables::show( node& n )
 
             if (ecf) {
                gvar.clear();
+               gvar = ecf->variables();
+               std::sort(gvar.begin(), gvar.end(), cless_than());
+               gvar_end = gvar.end();
+               for(it = gvar.begin(); it != gvar_end; ++it) {
+		  const std::string& name = (*it).name();
+		  if (std::find(shown.begin(), shown.end(), name) == shown.end()) {
+		    snprintf(buffer, 1024, fmt2, name.c_str(), (*it).theValue().c_str());
+		    xec_AddFontListItem(list_, buffer, 0);
+		    shown.push_back(name); }
+               }
+
                ecf->gen_variables(gvar);
                for(it = gvar.begin(); it != gvar.end(); ++it) {
                   if ((*it).name() == "" || 
@@ -179,28 +192,9 @@ void variables::show( node& n )
 		    xec_AddFontListItem(list_, buffer, 0);
 		    shown.push_back(name); }
                }
-
-               gvar = ecf->variables();
-               std::sort(gvar.begin(), gvar.end(), cless_than());
-               gvar_end = gvar.end();
-               for(it = gvar.begin(); it != gvar_end; ++it) {
-		  const std::string& name = (*it).name();
-		  if (std::find(shown.begin(), shown.end(), name) == shown.end()) {
-		    snprintf(buffer, 1024, fmt2, name.c_str(), (*it).theValue().c_str());
-		    xec_AddFontListItem(list_, buffer, 0);
-		    shown.push_back(name); }
-               }
             }
-            if (defs) {
-               gvar = defs->server().server_variables();
-               for(it = gvar.begin(); it !=  gvar.end(); ++it) {
-		  const std::string& name = (*it).name();
-		  if (std::find(shown.begin(), shown.end(), name) == shown.end()) {
-		    snprintf(buffer, 1024, fmt1, name.c_str(), (*it).theValue().c_str());
-		    xec_AddFontListItem(list_, buffer, 0);
-		    shown.push_back(name); }
-               }
 
+            if (defs) {
                gvar = defs->server().user_variables();
                std::sort(gvar.begin(), gvar.end(), cless_than());
                for(it = gvar.begin(); it !=  gvar.end(); ++it) {
@@ -208,6 +202,21 @@ void variables::show( node& n )
 		  if (std::find(shown.begin(), shown.end(), name) == shown.end()) {
 		 snprintf(buffer, 1024, fmt2, name.c_str(), (*it).theValue().c_str());
 		 xec_AddFontListItem(list_, buffer, 0);
+		    shown.push_back(name); }
+               }
+
+               gvar = defs->server().server_variables();
+               for(it = gvar.begin(); it !=  gvar.end(); ++it) {
+		  const std::string& name = (*it).name();
+		  if (std::find(shown.begin(), shown.end(), name) == shown.end()) {
+		    if (name=="ECF_NODE" || name=="ECF_PORT" ||
+			name=="ECF_PID"  || name=="ECF_VERSION" || name=="ECF_LISTS" // security ???
+			) {
+		      snprintf(buffer, 1024, fmt3, name.c_str(), (*it).theValue().c_str());
+		    } else {
+		      snprintf(buffer, 1024, fmt1, name.c_str(), (*it).theValue().c_str());
+		    }
+		    xec_AddFontListItem(list_, buffer, 0);
 		    shown.push_back(name); }
                }
             }
