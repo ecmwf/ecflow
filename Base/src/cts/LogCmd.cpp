@@ -77,6 +77,20 @@ bool LogCmd::equals(ClientToServerCmd* rhs) const
 	return UserCmd::equals(rhs);
 }
 
+// changed for release 4.1.0
+bool LogCmd::isWrite() const
+{
+   switch (api_) {
+      case LogCmd::GET:   return false;  break;
+      case LogCmd::CLEAR: return false; break;
+      case LogCmd::FLUSH: return false; break;
+      case LogCmd::NEW:   return true;  break;
+      case LogCmd::PATH:  return false; break;
+      default : throw std::runtime_error( "LogCmd::isWrite: Unrecognised log api command,") ;
+   }
+   return false;
+}
+
 STC_Cmd_ptr LogCmd::doHandleRequest(AbstractServer* as) const
 {
 	as->update_stats().log_cmd_++;
@@ -90,13 +104,15 @@ STC_Cmd_ptr LogCmd::doHandleRequest(AbstractServer* as) const
             if (!new_path_.empty()) {
                Log::instance()->new_path(new_path_); // will throw for errors
 
-               // Update the corresponding server variable
-               NameValueVec vec;
-               vec.push_back(std::make_pair(Str::ECF_LOG(),Log::instance()->path()));
-               as->defs()->set_server().add_or_update_server_variables(vec);
+               // *NOTE* calling --log=new <path> should be treated the *SAME* as editing ECF_LOG in the GUI
+               //        This is done adding it as a *USER* variable. This overloads the server variables
+               //        It also allows us to see the change in GUI. Note: Defs/server_variables are not synced
+               // ECFLOW-376
+               as->defs()->set_server().add_or_update_user_variables(Str::ECF_LOG(),Log::instance()->path());
             }
             else {
                // User could have overridden ECF_LOG variable
+               // *FIRST* look at user variables, then look at *server* variables.
                std::string log_file_name = as->defs()->server().find_variable(Str::ECF_LOG());
 
                // ECFLOW-377 should remove leading/trailing spaces from path

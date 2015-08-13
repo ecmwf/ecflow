@@ -67,17 +67,18 @@ BOOST_AUTO_TEST_CASE( test_log_cmd )
    std::string new_log_file = File::test_data("Base/test/new_logfile.txt ","Base");          // ECFLOW-377 note extra space at the end
    std::string expected_new_log_file = File::test_data("Base/test/new_logfile.txt","Base");  // space removed
 
+   // ECFLOW-376 --log=new <path> should be treated same as changing ECF_LOG from the gui. i.e added as a user variable. hence visible in GUI
    Defs defs;
    TestHelper::invokeRequest(&defs,Cmd_ptr( new LogCmd(new_log_file)), false /* check_change_numbers */);
    BOOST_CHECK_MESSAGE( defs.server().find_variable("ECF_LOG") == expected_new_log_file , "expected to find ECF_LOG with value '" << expected_new_log_file << "' but found '" << defs.server().find_variable("ECF_LOG") << "'");
+   BOOST_CHECK_MESSAGE( defs.server().find_user_variable("ECF_LOG") == expected_new_log_file , "expected to find ECF_LOG in the *USER* variables '" << expected_new_log_file << "' but found '" << defs.server().find_user_variable("ECF_LOG") << "'");
    BOOST_CHECK_MESSAGE( Log::instance()->path() == expected_new_log_file , "expected to find ECF_LOG with value '" << expected_new_log_file << "' but found '" << defs.server().find_variable("ECF_LOG") << "'");
 
 
    // Update ECF_LOG to have a *SPACE* at the end.  ECFLOW-377
-   NameValueVec vec;
-   vec.push_back(std::make_pair(Str::ECF_LOG(), new_log_file));
-   defs.set_server().add_or_update_server_variables(vec);
+   defs.set_server().add_or_update_user_variables(Str::ECF_LOG(),new_log_file);
    BOOST_CHECK_MESSAGE( defs.server().find_variable("ECF_LOG") == new_log_file , "expected to find ECF_LOG with value '" << new_log_file << "' but found '" << defs.server().find_variable("ECF_LOG") << "'");
+
 
    // INVOKE log command where we update log file from ECF_LOG, equivalent --log=new
    TestHelper::invokeRequest(&defs,Cmd_ptr( new LogCmd(LogCmd::NEW)), false /* check_change_numbers */);
@@ -88,6 +89,7 @@ BOOST_AUTO_TEST_CASE( test_log_cmd )
    fs::remove(old_log_file);  // remove generated log file
    fs::remove(expected_new_log_file);  // remove generated log file
 }
+
 
 BOOST_AUTO_TEST_SUITE_END()
 
