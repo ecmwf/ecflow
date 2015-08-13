@@ -281,6 +281,7 @@ void CtsCmd::addOption(boost::program_options::options_description& desc) const
          desc.add_options()( CtsApi::reloadwsfileArg(),
                   "Reload the white list file.\n"
                   "The white list file is used to authenticate 'user' commands.\n"
+                  "File path is specified by ECF_LISTS environment, read by the server on startup\n"
                   "Raises an error if file does not exist, or fails to parse\n"
                   "Expected format for this file is:\n\n"
                   "# comment\n"
