@@ -86,6 +86,8 @@ public:
 	void confChanged(VServerSettings::Param,VProperty*);
 	VServerSettings* conf() const {return conf_;}
 
+	bool isLocalHost() {return localHostName_ == host_;}
+
 	static void saveSettings();
 
 	static const std::vector<ServerHandler*>& servers() {return servers_;}
@@ -100,7 +102,6 @@ public:
 
 	static void addServerCommand(const std::string &name, const std::string& command);
 	static std::string resolveServerCommand(const std::string &name);
-
 
 protected:
 	ServerHandler(const std::string& name,const std::string& host,const std::string&  port);
@@ -193,6 +194,8 @@ private:
 	ConnectState* connectState_;
 
 	VServerSettings* conf_;
+
+	static std::string localHostName_;
 };
     
 #endif

@@ -39,9 +39,11 @@
 #include <boost/algorithm/string/join.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/lexical_cast.hpp>
+#include <boost/asio/ip/host_name.hpp>
 
 std::vector<ServerHandler*> ServerHandler::servers_;
 std::map<std::string, std::string> ServerHandler::commands_;
+std::string ServerHandler::localHostName_;
 
 ServerHandler::ServerHandler(const std::string& name,const std::string& host, const std::string& port) :
    name_(name),
@@ -56,6 +58,11 @@ ServerHandler::ServerHandler(const std::string& name,const std::string& host, co
    suiteFilter_(new SuiteFilter()),
    conf_(0)
 {
+	if(localHostName_.empty())
+	{
+		localHostName_=boost::asio::ip::host_name();
+	}
+
 	//Create longname
 	longName_=host_ + "@" + port_;
 

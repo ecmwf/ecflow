@@ -18,8 +18,6 @@
 #include <boost/filesystem/path.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 
-
-
 //Node
 void OutputProvider::visit(VInfoNode* info)
 {
@@ -133,7 +131,7 @@ void OutputProvider::file(const std::string& fileName)
 
 void OutputProvider::fetchFile(ServerHandler *server,VNode *n,const std::string& fileName,bool isJobout)
 {
-	if(!n || !n->node())
+	if(!n || !n->node() || !server)
     {
     	owner_->infoFailed(reply_);
     	return;
@@ -142,6 +140,7 @@ void OutputProvider::fetchFile(ServerHandler *server,VNode *n,const std::string&
 	//Set the filename in reply
 	reply_->fileName(fileName);
 
+	//No filename is available
 	if(fileName.empty())
 	{
 		//Joubout variable is not defined or empty
@@ -155,6 +154,8 @@ void OutputProvider::fetchFile(ServerHandler *server,VNode *n,const std::string&
 			reply_->setErrorText("Output file is not defined!");
 			owner_->infoFailed(reply_);
 		}
+
+		return;
 	}
 
     //Check if it is tryno 0
@@ -165,17 +166,39 @@ void OutputProvider::fetchFile(ServerHandler *server,VNode *n,const std::string&
     	return;
     }
 
-    //Try to use the logserver to fetch the file
-    else if(fetchFileViaLogServer(n,fileName))
+    //The host is the localhost
+    if(server->isLocalHost())
     {
-    	owner_->infoReady(reply_);
-    	return;
-    }
+    	//First we try to read the file directly from the disk
+    	if(!isJobout || server->readFromDisk())
+    	{
+    	    //Get the fileName
+    	    if(reply_->textFromFile(fileName))
+    	    {
+    	    	reply_->fileReadMode(VReply::LocalReadMode);
+    	    	owner_->infoReady(reply_);
+    	    	return;
+    	    }
+    	}
 
-    //We try to read the file directly from the disk
-    else if(server)
+    	//Then we try the logserver
+    	if(fetchFileViaLogServer(n,fileName))
+    	{
+    		owner_->infoReady(reply_);
+    	    return;
+    	}
+    }
+    //The host is another machine
+    else
     {
-    	//We try to read the file directly from the disk
+    	//First we try to use the logserver to fetch the file
+    	if(fetchFileViaLogServer(n,fileName))
+    	{
+    		owner_->infoReady(reply_);
+    		return;
+    	}
+
+    	//Then we try to read the file directly from the disk
     	if(!isJobout || server->readFromDisk())
     	{
     		//Get the fileName
@@ -186,27 +209,23 @@ void OutputProvider::fetchFile(ServerHandler *server,VNode *n,const std::string&
     			return;
     		}
     	}
-
-    	if(isJobout)
-    	{
-    		reply_->fileReadMode(VReply::ServerReadMode);
-
-    		//Define a task for getting the info from the server.
-    		task_=VTask::create(taskType_,n,this);
-
-    		//Run the task in the server. When it finish taskFinished() is called. The text returned
-    		//in the reply will be prepended to the string we generated above.
-    		server->run(task_);
-    		return;
-    	}
     }
-    else
+
+    //Finally we try the server if it is the jobout file
+    if(isJobout)
     {
-    	reply_->setErrorText("No server found!!");
-    	owner_->infoFailed(reply_);
-    	return;
+    	reply_->fileReadMode(VReply::ServerReadMode);
+
+        //Define a task for getting the info from the server.
+        task_=VTask::create(taskType_,n,this);
+
+        //Run the task in the server. When it finish taskFinished() is called. The text returned
+        //in the reply will be prepended to the string we generated above.
+        server->run(task_);
+        return;
     }
 
+    //If we are we coud not get the file
     owner_->infoFailed(reply_);
 }
 

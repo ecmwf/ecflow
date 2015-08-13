@@ -117,21 +117,38 @@ std::string OutputItemWidget::currentFullName() const
 	return fullName;
 }
 
-void OutputItemWidget::reloadCurrentFile()
+void OutputItemWidget::getLatestFile()
 {
 	messageLabel_->hide();
+	fileLabel_->clear();
+	textEdit_->clear();
 
-	if(info_ && info_.get() )
+	//Get the latest file contents
+	infoProvider_->info(info_);
+}
+
+void OutputItemWidget::getCurrentFile()
+{
+	messageLabel_->hide();
+	fileLabel_->clear();
+	textEdit_->clear();
+
+	if(info_ && info_.get())
 	{
 		std::string fullName=currentFullName();
 		OutputProvider* op=static_cast<OutputProvider*>(infoProvider_);
-
-		//Get the file via the provider. This will call infoReady() etc. in the end.
 		op->file(fullName);
 	}
 }
 
 void OutputItemWidget::updateDir(bool restartTimer)
+{
+	//Remember the selection
+	std::string fullName=currentFullName();
+	updateDir(restartTimer,fullName);
+}
+
+void OutputItemWidget::updateDir(bool restartTimer,const std::string& selectFullName)
 {
 	if(restartTimer)
 		updateDirTimer_->stop();
@@ -143,15 +160,13 @@ void OutputItemWidget::updateDir(bool restartTimer)
 
 	if(status)
 	{
-		//Remember the selection
-		std::string fullName=currentFullName();
-
 		dirModel_->setData(dir);
+		outputView_->selectionModel()->clearSelection();
 		dirWidget_->show();
 
-		//Try the preserve the selection
+		//Try to preserve the selection
 		ignoreOutputSelection_=true;
-		outputView_->setCurrentIndex(dirSortModel_->fullNameToIndex(fullName));
+		outputView_->setCurrentIndex(dirSortModel_->fullNameToIndex(selectFullName));
 		ignoreOutputSelection_=false;
 	}
 	else
@@ -227,14 +242,15 @@ void OutputItemWidget::infoReady(VReply* reply)
     //Update the file label
     fileLabel_->update(reply);
 
-    updateDir(true);
+    //Update the dir widget and select the proper file in the list
+    updateDir(true,reply->fileName());
 }
 
 void OutputItemWidget::infoProgress(VReply* reply)
 {
 	messageLabel_->showInfo(QString::fromStdString(reply->infoText()));
 
-    updateDir(true);
+    //updateDir(true);
 }
 
 void OutputItemWidget::infoFailed(VReply* reply)
@@ -260,7 +276,7 @@ void OutputItemWidget::on_searchTb__toggled(bool b)
 void OutputItemWidget::on_reloadTb__clicked()
 {
 	userClickedReload_ = true;
-	reloadCurrentFile();
+	getLatestFile();
 	userClickedReload_ = false;
 }
 
@@ -314,10 +330,10 @@ void OutputItemWidget::searchOnReload()
 }
 
 //This slot is called when a file item is selected in the output view.
-void OutputItemWidget::slotOutputSelected(QModelIndex,QModelIndex)
+void OutputItemWidget::slotOutputSelected(QModelIndex idx1,QModelIndex idx2)
 {
 	if(!ignoreOutputSelection_)
-		reloadCurrentFile();
+		getCurrentFile();
 }
 
 static InfoPanelItemMaker<OutputItemWidget> maker1("output");

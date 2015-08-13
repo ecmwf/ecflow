@@ -50,10 +50,12 @@ protected Q_SLOTS:
 
 protected:
 	void updateDir(bool);
+	void updateDir(bool,const std::string&);
 	void enableDir(bool);
 	void updateWidgetState() {};
 	void searchOnReload();
-	void reloadCurrentFile();
+	void getCurrentFile();
+	void getLatestFile();
 	std::string currentFullName() const;
 
 	OutputModel* dirModel_;
