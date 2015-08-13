@@ -86,7 +86,7 @@ public:
 	void confChanged(VServerSettings::Param,VProperty*);
 	VServerSettings* conf() const {return conf_;}
 
-	bool isLocalHost() {return localHostName_ == host_;}
+	bool isLocalHost() {return (localHostName_ == host_ || host_ == "localhost");}
 
 	static void saveSettings();
 
