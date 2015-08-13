@@ -71,6 +71,8 @@ void FileInfoLabel::update(VReply* reply)
 
 	VFileInfo f(fileName);
 
+	s="";
+
 	//Local read
 	if(reply->fileReadMode() == VReply::LocalReadMode)
 	{

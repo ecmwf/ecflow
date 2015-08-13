@@ -35,6 +35,7 @@ public:
 	bool isGenVar(int index) const;
 	int varNum() const;
 	bool hasName(const std::string& n) const;
+	VNode* node() const;
 
 	void buildAlterCommand(std::vector<std::string>& cmd,
 			           const std::string& action, const std::string& type,

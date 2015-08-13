@@ -65,6 +65,14 @@ std::string VariableModelData::type()
 	return (info_->isNode())?"node":"server";
 }
 
+VNode* VariableModelData::node() const
+{
+	if(info_ && info_->isNode())
+		return info_->node();
+
+	return NULL;
+}
+
 const std::string& VariableModelData::name(int index) const
 {
 	if(index < 0 || index >= varNum())
@@ -343,35 +351,40 @@ VariableModelData* VariableModelDataHandler::data(int index) const
 //It is called when a node was changed.
 void VariableModelDataHandler::nodeChanged(const VNode* node, const std::vector<ecf::Aspect::Type>& aspect)
 {
+	int dataIndex=-1;
+	for(unsigned int i=0; i < data_.size(); i++)
+	{
+		if(data_.at(i)->node() == node)
+		{
+			dataIndex=i;
+			break;
+		}
+	}
+
+	if(dataIndex == -1)
+		assert(0);
+
 	//Check if some variables were added or removed.
 	for(std::vector<ecf::Aspect::Type>::const_iterator it=aspect.begin(); it != aspect.end(); ++it)
 	{
 		if(*it == ecf::Aspect::ADD_REMOVE_ATTR)
 		{
-			for(unsigned int i=0; i < data_.size(); i++)
+			//If the number of the variables not the same we reset the whole model
+			int cntDiff=data_.at(dataIndex)->checkUpdateDiff();
+			if(cntDiff != 0)
 			{
-				//Do not check the server
-				if(data_.at(i)->type() == "server")
-					continue;
+				//Notifies the model that rows will be added or removed for this data item
+				Q_EMIT addRemoveBegin(dataIndex,cntDiff);
+				data_.at(dataIndex)->reload();
+				Q_EMIT addRemoveEnd(cntDiff);
 
-				//If the number of the variables not the same we reset the whole model
-				int cntDiff=data_.at(i)->checkUpdateDiff();
-				if(cntDiff != 0)
-				{
-					//Notifies the model that rows will be added or removed for this data item
-					Q_EMIT addRemoveBegin(i,cntDiff);
-					data_.at(i)->reload();
-					Q_EMIT addRemoveEnd(cntDiff);
+				//Update the data item in the model
+				Q_EMIT dataChanged(dataIndex);
 
-					//Update the data item in the model
-					Q_EMIT dataChanged(i);
-				}
+				return;
 			}
-
-			break;
 		}
 	}
-
 
 	//Check if some variables' value changed
 	for(std::vector<ecf::Aspect::Type>::const_iterator it=aspect.begin(); it != aspect.end(); ++it)
@@ -379,23 +392,23 @@ void VariableModelDataHandler::nodeChanged(const VNode* node, const std::vector<
 		//A variable's value changed
 		if(*it == ecf::Aspect::NODE_VARIABLE)
 		{
-			//Do not check the server
-			for(unsigned int i=0; i < data_.size(); i++)
+			//Update the names/values
+			if(data_.at(dataIndex)->update())
 			{
-				//Do not check the server
-				if(data_.at(i)->type() == "server")
-					continue;
-
-				//Update the names/values
-				if(data_.at(i)->update())
-				{
-					//Update the data item in the model
-					Q_EMIT dataChanged(i);
-				}
+				//Update the data item in the model
+				Q_EMIT dataChanged(dataIndex);
 			}
-
-			break;
+			return;
 		}
+	}
+
+	//If we are here no update happened. However, here we need to update the generated
+	//variables because there is no notification (aspect) to indicate their change. So as a safety
+	//measure we try to update them within each update call!!
+	if(data_.at(dataIndex)->update())
+	{
+		//Update the data item in the model
+		Q_EMIT dataChanged(dataIndex);
 	}
 }
 

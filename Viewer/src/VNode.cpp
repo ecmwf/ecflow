@@ -748,6 +748,21 @@ void VServer::beginUpdate(VNode* node,const std::vector<ecf::Aspect::Type>& aspe
 	//all VNode functions have to return the values valid before the update happened!!!!!!!
 	//The main goal of this function is to cleverly provide the views with some information about the nature of the update.
 
+	if(node->node())
+	{
+		Suite *s=NULL;
+		s=node->node()->isSuite();
+		if(!s)
+		{
+			s=node->node()->suite();
+		}
+
+		if(s && s->begun())
+		{
+			node->node()->update_generated_variables();
+		}
+	}
+
 	bool attrNumCh=(std::find(aspect.begin(),aspect.end(),ecf::Aspect::ADD_REMOVE_ATTR) != aspect.end());
 	bool nodeNumCh=(std::find(aspect.begin(),aspect.end(),ecf::Aspect::ADD_REMOVE_NODE) != aspect.end());
 
