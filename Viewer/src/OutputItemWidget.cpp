@@ -85,14 +85,6 @@ void OutputItemWidget::reload(VInfo_ptr info)
 {
 	clearContents();
 
-	// note that setting the font does not work when in the constructor
-	// so we put it here
-	/*QFont f("Courier");
-	f.setStyleHint(QFont::TypeWriter);
-	f.setFixedPitch(true);
-	f.setPointSize(10);
-	textEdit_->setFont(f);*/
-
 	loaded_=true;
 	info_=info;
 
@@ -127,6 +119,8 @@ std::string OutputItemWidget::currentFullName() const
 
 void OutputItemWidget::reloadCurrentFile()
 {
+	messageLabel_->hide();
+
 	if(info_ && info_.get() )
 	{
 		std::string fullName=currentFullName();
@@ -194,6 +188,7 @@ void OutputItemWidget::clearContents()
 
 	InfoPanelItem::clear();
 
+	messageLabel_->hide();
 	fileLabel_->clear();
 	textEdit_->clear();
 
@@ -202,7 +197,16 @@ void OutputItemWidget::clearContents()
 
 void OutputItemWidget::infoReady(VReply* reply)
 {
-    VFile_ptr f=reply->tmpFile();
+	if(reply->hasWarning())
+	{
+		messageLabel_->showWarning(QString::fromStdString(reply->warningText()));
+	}
+	else if(reply->hasInfo())
+	{
+	    messageLabel_->showInfo(QString::fromStdString(reply->infoText()));
+	}
+
+	VFile_ptr f=reply->tmpFile();
 
     //If the info is stored in a tmp file
     if(f && f.get())
@@ -228,16 +232,15 @@ void OutputItemWidget::infoReady(VReply* reply)
 
 void OutputItemWidget::infoProgress(VReply* reply)
 {
-    QString s=QString::fromStdString(reply->text());
-    textEdit_->setPlainText(s);
+	messageLabel_->showInfo(QString::fromStdString(reply->infoText()));
 
     updateDir(true);
 }
 
 void OutputItemWidget::infoFailed(VReply* reply)
 {
-    QString s=QString::fromStdString(reply->errorText());
-    textEdit_->setPlainText(s);
+	QString s=QString::fromStdString(reply->errorText());
+	messageLabel_->showError(s);
 
     //Update the file label
     fileLabel_->update(reply);

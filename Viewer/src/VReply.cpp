@@ -27,7 +27,7 @@ void VReply::text(const std::vector<std::string>& msg)
 	text_.clear();
 	for(std::vector<std::string>::const_iterator it=msg.begin(); it != msg.end(); ++it)
 	{
-			text_+=*it + "\n";
+		text_+=*it + "\n";
 	}
 }
 
@@ -43,6 +43,14 @@ void VReply::appendText(const std::string& txt)
 
 void VReply::reset()
 {
+	status_=NoStatus;
 	text_.clear();
 	errorText_.clear();
+	warningText_.clear();
+	infoText_.clear();
+	fileName_.clear();
+	zombies_.clear();
+	readMode_=NoReadMode;
+	readMethod_.clear();
+	tmpFile_.reset();
 }

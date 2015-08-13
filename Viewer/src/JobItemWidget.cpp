@@ -35,8 +35,6 @@ void JobItemWidget::reload(VInfo_ptr info)
 	loaded_=true;
     info_=info;
 
-    messageLabel_->hide();
-
     //Info must be a node
     if(info_.get() && info_->isNode() && info_->node())
     {

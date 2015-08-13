@@ -18,31 +18,6 @@
 #include <boost/filesystem/path.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 
-/*void  InfoProvider::taskChanged(VTask_ptr task)
-{
-    if(task_ != task)
-        return;
-
-    switch(task->status())
-    {
-        case VTask::FINISHED:
-            //We prepend the results to the existing text
-            reply_->text(task->reply()->text());
-            owner_->infoReady(reply_);
-            //We do not need the task anymore.
-            task_.reset();
-            break;
-        case VTask::ABORTED:
-        case VTask::CANCELLED:
-        case VTask::REJECTED:
-            reply_->errorText(task->reply()->errorText());
-            owner_->infoFailed(reply_);
-            //We do not need the task anymore.
-            task_.reset();break;
-        default:
-            break;
-    }
-}*/
 
 
 //Node
@@ -172,12 +147,12 @@ void OutputProvider::fetchFile(ServerHandler *server,VNode *n,const std::string&
 		//Joubout variable is not defined or empty
 		if(isJobout)
 		{
-			reply_->errorText("Variable ECF_JOBOUT is not defined!");
+			reply_->setErrorText("Variable ECF_JOBOUT is not defined!");
 			owner_->infoFailed(reply_);
 		}
 		else
 		{
-			reply_->errorText("Output file is not defined!");
+			reply_->setErrorText("Output file is not defined!");
 			owner_->infoFailed(reply_);
 		}
 	}
@@ -185,8 +160,8 @@ void OutputProvider::fetchFile(ServerHandler *server,VNode *n,const std::string&
     //Check if it is tryno 0
     if(boost::algorithm::ends_with(fileName,".0"))
     {
-    	reply_->errorText("No output to be expected when TRYNO is 0!");
-    	owner_->infoFailed(reply_);
+    	reply_->setInfoText("No output to be expected when TRYNO is 0!");
+    	owner_->infoReady(reply_);
     	return;
     }
 
@@ -227,7 +202,7 @@ void OutputProvider::fetchFile(ServerHandler *server,VNode *n,const std::string&
     }
     else
     {
-    	reply_->errorText("No server found!!");
+    	reply_->setErrorText("No server found!!");
     	owner_->infoFailed(reply_);
     	return;
     }

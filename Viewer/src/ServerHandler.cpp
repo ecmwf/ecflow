@@ -944,7 +944,7 @@ void ServerHandler::clientTaskFailed(VTask_ptr task,const std::string& errMsg)
 			break;
 		}
 		default:
-			task->reply()->errorText(errMsg);
+			task->reply()->setErrorText(errMsg);
 			task->status(VTask::ABORTED);
 			break;
 

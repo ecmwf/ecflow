@@ -40,7 +40,7 @@ public:
 	bool textFromFile(const std::string&);
 	void text(const std::vector<std::string>& msg);
 	void text(const std::string& s) {text_=s;}
-	void errorText(const std::string& s) {errorText_=s;}
+	void setErrorText(const std::string& s) {errorText_=s;}
 	void setWarningText(const std::string& s) {warningText_=s;}
 	void setInfoText(const std::string& s) {infoText_=s;}
 	void fileName(const std::string& s) {fileName_=s;}
