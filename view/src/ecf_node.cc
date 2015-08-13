@@ -362,7 +362,8 @@ void ecf_concrete_node<Node>::make_subtree()
 
    std::vector<Variable>::const_iterator it;
    for(it = gvar.begin(); it != gvar.end(); ++it)
-      if (!(*it == Variable::EMPTY())) add_kid(make_node(*it, this, 'g'));
+      if (!(*it == Variable::EMPTY())) 
+	add_kid(make_node(*it, this, 'g'));
       else std::cerr << "# empty variable\n";
 
 #ifdef SORT_VAR
@@ -446,7 +447,8 @@ void ecf_concrete_node<Suite>::make_subtree()
 
    std::vector<Variable>::const_iterator it;
    for(it = gvar.begin(); it != gvar.end(); ++it)
-      if (!(*it == Variable::EMPTY())) add_kid(make_node(*it, this, 'g'));
+      if (!(*it == Variable::EMPTY())) 
+	add_kid(make_node(*it, this, 'g'));
       else std::cerr << "# empty variable\n";
 
    std::string info = "";
@@ -1440,15 +1442,17 @@ void ecf_concrete_node<Defs>::make_subtree()
    ChangeMgrSingleton::instance()->attach(owner_, this);
    make_kids_list(this, owner_->suiteVec());
 
-   std::vector<Variable> gvar = owner_->server().user_variables();
+   std::vector<Variable> gvar = owner_->server().server_variables();
+   std::vector<Variable>::const_iterator it;
+   for(it = gvar.begin(); it != gvar.end(); ++it)
+      if (!(*it == Variable::EMPTY())) 
+	add_kid(make_node(*it, this, 'g'));
+      else std::cerr << "# empty variable\n";
+
+   gvar = owner_->server().user_variables();
    std::sort(gvar.begin(), gvar.end(), cless_than());
    make_kids_list(this, gvar);
 
-   std::vector<Variable>::const_iterator it;
-   gvar = owner_->server().server_variables();
-   for(it = gvar.begin(); it != gvar.end(); ++it)
-      if (!(*it == Variable::EMPTY())) add_kid(make_node(*it, this, 'g'));
-      else std::cerr << "# empty variable\n";
 }
 
 template<>
