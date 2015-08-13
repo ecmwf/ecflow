@@ -24,15 +24,22 @@ public:
 	virtual void clear();
 	virtual bool isEmpty();
 
+	bool caseSensitive() {return caseSensitive_;};
+	bool wholeWords()    {return wholeWords_;};
+
 public Q_SLOTS:
 	virtual void slotFind(QString)=0;
 	virtual void slotFindNext()=0;
 	virtual void slotFindPrev()=0;
+	void on_actionCaseSensitive__toggled(bool);
+	void on_actionWholeWords__toggled(bool);
 
 protected:
 	void updateButtons(bool);
 
 	bool status_;
+	bool caseSensitive_;
+	bool wholeWords_;
 
 	QColor   oriColour_;
 	QColor   redColour_;

@@ -37,16 +37,18 @@ void PlainTextSearchLine::slotFind(QString txt)
 	if(!editor_)
 		return;
 
+	QTextDocument::FindFlags flags = findFlags();
+
 	QTextCursor cursor(editor_->textCursor());
 	cursor.movePosition(QTextCursor::StartOfWord);
 	editor_->setTextCursor(cursor);
 
-	if(editor_->find(txt)==false)
+	if(editor_->find(txt, flags)==false)
 	{
       	cursor=editor_->textCursor();
 		cursor.movePosition(QTextCursor::Start);
 		editor_->setTextCursor(cursor);
-		updateButtons(editor_->find(txt));
+		updateButtons(editor_->find(txt, flags));
 	}
 	else
 	{
@@ -61,12 +63,13 @@ void PlainTextSearchLine::slotFindNext()
 
 	if(status_==true)
 	{
-		if(editor_->find(searchLine_->text()) == false)
+		QTextDocument::FindFlags flags(findFlags());
+		if(editor_->find(searchLine_->text(), flags) == false)
 		{
 			QTextCursor cursor(editor_->textCursor());
 			cursor.movePosition(QTextCursor::Start);
 			editor_->setTextCursor(cursor);
-			editor_->find(searchLine_->text());
+			editor_->find(searchLine_->text(), flags);
 		}
 	}
 }
@@ -76,10 +79,9 @@ void PlainTextSearchLine::slotFindPrev()
 	if(!editor_)
 			return;
 
-	QTextDocument::FindFlags flags=QTextDocument::FindBackward;
-
 	if(status_==true)
 	{
+		QTextDocument::FindFlags flags = findFlags() | QTextDocument::FindBackward;
 		if(editor_->find(searchLine_->text(),flags) == false)
 		{
 			QTextCursor cursor(editor_->textCursor());
@@ -88,4 +90,21 @@ void PlainTextSearchLine::slotFindPrev()
 			editor_->find(searchLine_->text(),flags);
 		}
 	}
+}
+
+QTextDocument::FindFlags PlainTextSearchLine::findFlags()
+{
+	QTextDocument::FindFlags flags;
+
+	if(caseSensitive()) 
+	{
+		flags = flags | QTextDocument::FindCaseSensitively;
+	}
+
+	if(wholeWords()) 
+	{
+		flags = flags | QTextDocument::FindWholeWords;
+	}
+
+	return flags;
 }

@@ -31,6 +31,8 @@ public Q_SLOTS:
 	void slotFindPrev(bool) {slotFindPrev();}
 
 protected:
+    QTextDocument::FindFlags findFlags();
+
 	QPlainTextEdit* editor_;
 
 };

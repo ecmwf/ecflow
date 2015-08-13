@@ -8,6 +8,7 @@
 //============================================================================
 
 #include <QShortcut>
+#include <QMenu>
 #include "AbstractSearchLine.hpp"
 
 AbstractSearchLine::AbstractSearchLine(QWidget* parent) : QWidget(parent)
@@ -44,7 +45,20 @@ AbstractSearchLine::AbstractSearchLine(QWidget* parent) : QWidget(parent)
 
 	status_=true;
 
+
 	setFocusProxy(searchLine_);
+
+
+
+	// set the menu on the Options toolbutton
+	caseSensitive_ = false;
+	wholeWords_    = false;
+	QMenu *menu=new QMenu(this);
+	menu->addAction(actionCaseSensitive_);
+	menu->addAction(actionWholeWords_);
+	optionsPb_->setMenu(menu);
+
+
 }
 
 AbstractSearchLine::~AbstractSearchLine()
@@ -87,4 +101,14 @@ void AbstractSearchLine::updateButtons(bool found)
 			searchLine_->setPalette(p);
 		}
 	}
+}
+
+void AbstractSearchLine::on_actionCaseSensitive__toggled(bool b)
+{
+    caseSensitive_ = b;
+}
+
+void AbstractSearchLine::on_actionWholeWords__toggled(bool b)
+{
+    wholeWords_ = b;
 }
