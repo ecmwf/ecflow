@@ -107,7 +107,7 @@ int TreeNodeModel::rowCount( const QModelIndex& parent) const
 	{
 		if(VModelServer *md=indexToServer(parent))
 		{
-			return md->topLevelNodeNum();
+			return md->attrNum()+md->topLevelNodeNum();
 		}
 	}
 	//"parent" is a node
@@ -171,7 +171,7 @@ QVariant TreeNodeModel::data( const QModelIndex& index, int role ) const
 	//We only continue for the relevant roles for attributes
 	if(role == IconRole)
 	{
-			return QVariant();
+		return QVariant();
 	}
 
 	//Attribute
@@ -335,8 +335,22 @@ QVariant TreeNodeModel::attributesData(const QModelIndex& index, int role) const
 			return QVariant(false);
 	}
 
+	VNode *node=NULL;
+
 	//Here we have to be sure this is an attribute!
-	VNode *node=static_cast<VNode*>(index.internalPointer());
+
+	//Server attribute
+	VModelServer *server=data_->server(index.internalPointer());
+	if(server)
+	{
+		node=server->realServer()->vRoot();
+	}
+	//Node attribute
+	else
+	{
+		node=static_cast<VNode*>(index.internalPointer());
+	}
+
 	if(!node)
 		return QVariant();
 
@@ -435,17 +449,16 @@ QModelIndex TreeNodeModel::parent(const QModelIndex &child) const
 	if(isServer(child))
 		return QModelIndex();
 
-	//Child is a topLevel node (suite). Its internal pointer points to a server.
 	int row=-1;
 
-	//If "child"'s internal pointer is a server (i.e. it is a topLevel node (suite))
-	//the parent is this server.
+	//If the "child"'s internal pointer is a server it can be a server attribute or a topLevel node (suite)
+	//and the parent is this server.
 	if((row=data_->indexOfServer(child.internalPointer())) != -1)
 	{
 		return createIndex(row,0,(void*)NULL);
 	}
 
-	//The "child" cannot be a topLevel node so it must be a node or an attribute.
+	//The "child" cannot be a server attribute or a topLevel node so it must be a node or an attribute.
 	//Its internal pointer must point to the parent node.
 	else if(VNode *parentNode=static_cast<VNode*>(child.internalPointer()))
 	{
@@ -456,8 +469,10 @@ QModelIndex TreeNodeModel::parent(const QModelIndex &child) const
 			row=-1;
 		    if(data_->identifyTopLevelNode(parentNode,&server,row))
 			{
-				//qDebug() << "PARENT 1" << child << server->realServer()->name().c_str();
-		    	return createIndex(row,0,server);
+				int serverAttrNum=server->attrNum();
+
+		    	//qDebug() << "PARENT 1" << child << server->realServer()->name().c_str();
+		    	return createIndex(serverAttrNum+row,0,server);
 			}
 		}
 		//The parent is a non topLevel node (non-suite): its internal pointer
@@ -498,7 +513,7 @@ bool TreeNodeModel::isAttribute(const QModelIndex & index) const
 
 ServerHandler* TreeNodeModel::indexToRealServer(const QModelIndex & index) const
 {
-	//For servers the internal id is a nul pointer
+	//For servers the internal id is a null pointer
 	if(index.isValid())
 	{
 		if(index.internalPointer() == NULL)
@@ -510,7 +525,7 @@ ServerHandler* TreeNodeModel::indexToRealServer(const QModelIndex & index) const
 
 VModelServer* TreeNodeModel::indexToServer(const QModelIndex & index) const
 {
-	//For servers the internal id is a nul pointer
+	//For servers the internal id is a null pointer
 	if(index.isValid())
 	{
 		if(index.internalPointer() == NULL)
@@ -546,14 +561,25 @@ VNode* TreeNodeModel::indexToNode( const QModelIndex & index) const
 	//If it is not a sever ...
 	if(index.isValid() && !isServer(index))
 	{
-		//If it is a top level node (suite) the internal pointer has to point
-		//to a server pointer.
-		if(VNode *n=data_->topLevelNode(index.internalPointer(),index.row()))
+		//If the internal pointer is a server it is either a server attribute or a
+		//top level node (suite)
+		if(VModelServer *server=data_->server(index.internalPointer()))
 		{
-			return n;
+			int serverAttNum=server->attrNum();
+
+			//It is an attribute
+			if(index.row() < serverAttNum)
+			{
+				return NULL;
+			}
+			//It is a top level node
+			else
+			{
+				return server->topLevelNode(index.row()-serverAttNum);
+			}
 		}
 
-		//Otherwise the internal pointer points to the parent node
+		//Otherwise the internal pointer points to the parent node.
 		else if(VNode *parentNode=static_cast<VNode*>(index.internalPointer()))
 		{
 			int attNum=parentNode->attrNum();
@@ -586,6 +612,7 @@ QModelIndex TreeNodeModel::nodeToIndex(const VNode* node, int column) const
 		int row=-1;
 		data_->identifyTopLevelNode(node,&server,row);
 		{
+			row+=server->attrNum();
 			return createIndex(row,column,server);
 		}
 	}
@@ -615,6 +642,7 @@ QModelIndex TreeNodeModel::nodeToIndex(VModelServer* server,const VNode* node, i
 		int row=server->indexOfTopLevelNode(node);
 		if(row != -1)
 		{
+			row+=server->attrNum();
 			return createIndex(row,column,server);
 		}
 	}
@@ -653,11 +681,19 @@ VInfo_ptr TreeNodeModel::nodeInfo(const QModelIndex& index)
 		return VInfoServer::create(s);
 	}
 
-	//If it is a top level node (suite) the internal pointer has to point
-	//to a server pointer.
-	if(VNode *n=data_->topLevelNode(index.internalPointer(),index.row()))
+
+	//If the internal pointer is a server it is either a server attribute or a
+	//top level node (suite)
+	if(VModelServer *server=data_->server(index.internalPointer()))
 	{
-		return VInfoNode::create(n);
+		int serverAttNum=server->attrNum();
+
+		//It is a top level node
+		if(index.row() >= serverAttNum)
+		{
+			VNode *n=server->topLevelNode(index.row()-serverAttNum);
+			return VInfoNode::create(n);
+		}
 	}
 
 	//Otherwise the internal pointer points to the parent node

@@ -253,12 +253,18 @@ void VAttribute::load(VProperty* group)
 
 int VMeterAttribute::num(const VNode *vnode)
 {
+	if(vnode->isServer())
+		return 0;
+
 	node_ptr node=vnode->node();
 	return (node.get())?static_cast<int>(node->meters().size()):0;
 }
 
 bool VMeterAttribute::getData(VNode *vnode,int row,int& size,QStringList& data)
 {
+	if(vnode->isServer())
+		return false;
+
 	node_ptr node=vnode->node();
 	if(!node.get())
 		return false;
@@ -282,12 +288,18 @@ bool VMeterAttribute::getData(VNode *vnode,int row,int& size,QStringList& data)
 
 int VLabelAttribute::num(const VNode *vnode)
 {
+	if(vnode->isServer())
+		return 0;
+
 	node_ptr node=vnode->node();
 	return (node.get())?static_cast<int>(node->labels().size()):0;
 }
 
 bool VLabelAttribute::getData(VNode *vnode,int row,int& size,QStringList& data)
 {
+	if(vnode->isServer())
+		return false;
+
 	node_ptr node=vnode->node();
 	if(!node.get())
 		return false;
@@ -310,12 +322,18 @@ bool VLabelAttribute::getData(VNode *vnode,int row,int& size,QStringList& data)
 
 int VEventAttribute::num(const VNode *vnode)
 {
+	if(vnode->isServer())
+		return 0;
+
 	node_ptr node=vnode->node();
 	return (node.get())? static_cast<int>(node->events().size()):0;
 }
 
 bool VEventAttribute::getData(VNode *vnode,int row,int& size,QStringList& data)
 {
+	if(vnode->isServer())
+		return false;
+
 	node_ptr node=vnode->node();
 	if(!node.get())
 			return false;
@@ -338,24 +356,30 @@ bool VEventAttribute::getData(VNode *vnode,int row,int& size,QStringList& data)
 
 int VGenvarAttribute::num(const VNode *vnode)
 {
-	node_ptr node=vnode->node();
+	return vnode->genVariablesNum();
+
+	/*node_ptr node=vnode->node();
 	if(node.get())
 	{
 		std::vector<Variable> genV;
 		node->gen_variables(genV);
 		return static_cast<int>(genV.size());
 	}
-	return 0;
+	return 0;*/
 }
 
 bool VGenvarAttribute::getData(VNode *vnode,int row,int& size,QStringList& data)
 {
-	node_ptr node=vnode->node();
+	std::vector<Variable> genV;
+	vnode->genVariables(genV);
+
+	/*node_ptr node=vnode->node();
 	if(!node.get())
 			return false;
 
 	std::vector<Variable> genV;
-	node->gen_variables(genV);
+	node->gen_variables(genV);*/
+
 	if(row >=0 && row < genV.size())
 	{
 		data << qName_ <<
@@ -373,25 +397,47 @@ bool VGenvarAttribute::getData(VNode *vnode,int row,int& size,QStringList& data)
 
 int VVarAttribute::num(const VNode *vnode)
 {
-	node_ptr node=vnode->node();
-	return (node.get())?static_cast<int>(node->variables().size()):0;
+	return vnode->variablesNum();
+
+	//node_ptr node=vnode->node();
+	//return (node.get())?static_cast<int>(node->variables().size()):0;
 }
 
 bool VVarAttribute::getData(VNode *vnode,int row,int& size,QStringList& data)
 {
-	node_ptr node=vnode->node();
-	if(!node.get())
+	std::string name,val;
+
+	if(vnode->isServer())
+	{
+		std::vector<Variable> v;
+		vnode->variables(v);
+		node_ptr node=vnode->node();
+		if(row >=0 && row < v.size())
+		{
+			data << qName_ <<
+					QString::fromStdString(v.at(row).name()) <<
+					QString::fromStdString(v.at(row).theValue());
+			return true;
+		}
+		size=v.size();
+	}
+	else
+	{
+		node_ptr node=vnode->node();
+		if(!node.get())
 			return false;
 
-	const std::vector<Variable>& v=node->variables();
-	if(row >=0 && row < v.size())
-	{
-		data << qName_ <<
-				QString::fromStdString(v.at(row).name()) <<
-				QString::fromStdString(v.at(row).theValue());
-		return true;
+		const std::vector<Variable>& v=node->variables();
+		if(row >=0 && row < v.size())
+		{
+			data << qName_ <<
+					QString::fromStdString(v.at(row).name()) <<
+					QString::fromStdString(v.at(row).theValue());
+			return true;
+		}
+		size=v.size();
 	}
-	size=v.size();
+
 	return false;
 }
 
@@ -401,12 +447,18 @@ bool VVarAttribute::getData(VNode *vnode,int row,int& size,QStringList& data)
 
 int VLimitAttribute::num(const VNode *vnode)
 {
+	if(vnode->isServer())
+		return 0;
+
 	node_ptr node=vnode->node();
 	return (node.get())?static_cast<int>(node->limits().size()):0;
 }
 
 bool VLimitAttribute::getData(VNode *vnode,int row,int& size,QStringList& data)
 {
+	if(vnode->isServer())
+		return false;
+
 	node_ptr node=vnode->node();
 	if(!node.get())
 		return false;
@@ -430,12 +482,18 @@ bool VLimitAttribute::getData(VNode *vnode,int row,int& size,QStringList& data)
 
 int VLimiterAttribute::num(const VNode *vnode)
 {
+	if(vnode->isServer())
+		return 0;
+
 	node_ptr node=vnode->node();
 	return (node)?static_cast<int>(node->inlimits().size()):0;
 }
 
 bool VLimiterAttribute::getData(VNode *vnode,int row,int& size,QStringList& data)
 {
+	if(vnode->isServer())
+		return false;
+
 	node_ptr node=vnode->node();
 	if(!node.get())
 		return false;
@@ -458,6 +516,9 @@ bool VLimiterAttribute::getData(VNode *vnode,int row,int& size,QStringList& data
 
 int VTriggerAttribute::num(const VNode *vnode)
 {
+	if(vnode->isServer())
+		return 0;
+
 	node_ptr node=vnode->node();
 	if(!node.get())
 		return false;
@@ -467,6 +528,9 @@ int VTriggerAttribute::num(const VNode *vnode)
 
 bool VTriggerAttribute::getData(VNode *vnode,int row,int& size,QStringList& data)
 {
+	if(vnode->isServer())
+		return false;
+
 	node_ptr node=vnode->node();
 	if(!node.get())
 		return false;
@@ -491,12 +555,18 @@ bool VTriggerAttribute::getData(VNode *vnode,int row,int& size,QStringList& data
 
 int VTimeAttribute::num(const VNode *vnode)
 {
+	if(vnode->isServer())
+		return 0;
+
 	node_ptr node=vnode->node();
 	return (node.get())?static_cast<int>(node->timeVec().size() + node->todayVec().size()+ node->crons().size()):0;
 }
 
 bool VTimeAttribute::getData(VNode *vnode,int row,int& size,QStringList& data)
 {
+	if(vnode->isServer())
+		return false;
+
 	node_ptr node=vnode->node();
 	if(!node.get())
 		return false;
@@ -528,12 +598,18 @@ bool VTimeAttribute::getData(VNode *vnode,int row,int& size,QStringList& data)
 
 int VDateAttribute::num(const VNode *vnode)
 {
+	if(vnode->isServer())
+		return 0;
+
 	node_ptr node=vnode->node();
 	return (node.get())?static_cast<int>(node->dates().size() + node->days().size()):0;
 }
 
 bool VDateAttribute::getData(VNode *vnode,int row,int& size,QStringList& data)
 {
+	if(vnode->isServer())
+		return false;
+
 	node_ptr node=vnode->node();
 	if(!node.get())
 		return false;
@@ -563,12 +639,18 @@ bool VDateAttribute::getData(VNode *vnode,int row,int& size,QStringList& data)
 
 int VRepeatAttribute::num(const VNode *vnode)
 {
+	if(vnode->isServer())
+		return 0;
+
 	node_ptr node=vnode->node();
 	return (node.get())?((node->repeat().empty())?0:1):0;
 }
 
 bool VRepeatAttribute::getData(VNode *vnode,int row,int& size,QStringList& data)
 {
+	if(vnode->isServer())
+		return false;
+
 	node_ptr node=vnode->node();
 	if(!node.get())
 		return false;
@@ -590,12 +672,18 @@ bool VRepeatAttribute::getData(VNode *vnode,int row,int& size,QStringList& data)
 
 int VLateAttribute::num(const VNode *vnode)
 {
+	if(vnode->isServer())
+		return 0;
+
 	node_ptr node=vnode->node();
 	return (node.get())?((node->get_late())?1:0):0;
 }
 
 bool VLateAttribute::getData(VNode *vnode,int row,int& size,QStringList& data)
 {
+	if(vnode->isServer())
+		return false;
+
 	node_ptr node=vnode->node();
 	if(!node.get())
 		return false;

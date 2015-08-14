@@ -50,22 +50,27 @@ VModelServer::~VModelServer()
 
 VNode* VModelServer::topLevelNode(int row) const
 {
-  return server_->vRoot()->childAt(row);
+	return server_->vRoot()->childAt(row);
 }
 
 int VModelServer::indexOfTopLevelNode(const VNode* node) const
 {
-  return server_->vRoot()->indexOfChild(node);
+	return server_->vRoot()->indexOfChild(node);
 }
 
 int VModelServer::topLevelNodeNum() const
 {
-  return server_->vRoot()->numOfChildren();
+	return server_->vRoot()->numOfChildren();
 }
 
 int VModelServer::totalNodeNum() const
 {
-  return server_->vRoot()->totalNum();
+	return server_->vRoot()->totalNum();
+}
+
+int VModelServer::attrNum() const
+{
+	return server_->vRoot()->attrNum();
 }
 
 void VModelServer::runFilter()
@@ -118,13 +123,14 @@ void VTreeServer::notifyDefsChanged(ServerHandler* server, const std::vector<ecf
 
 void VTreeServer::notifyBeginServerScan(ServerHandler* server,const VServerChange& change)
 {
-	Q_EMIT beginServerScan(this,change.suiteNum_);
+	Q_EMIT beginServerScan(this,change.attrNum_+change.suiteNum_);
 }
 
 void VTreeServer::notifyEndServerScan(ServerHandler* server)
 {
 	runFilter();
-	Q_EMIT endServerScan(this,server->vRoot()->numOfChildren());
+	Q_EMIT endServerScan(this,
+			server->vRoot()->attrNum()+server->vRoot()->numOfChildren());
 }
 
 void VTreeServer::notifyBeginServerClear(ServerHandler* server)
@@ -498,7 +504,6 @@ ServerHandler* VModelData::realServer(int n) const
 	return (n >=0 && n < servers_.size())?servers_.at(n)->server_:0;
 }
 
-
 int VModelData::indexOfServer(void* idPointer) const
 {
 	for(unsigned int i=0; i < servers_.size(); i++)
@@ -506,6 +511,24 @@ int VModelData::indexOfServer(void* idPointer) const
 			return i;
 
 	return -1;
+}
+
+ServerHandler* VModelData::realServer(void* idPointer) const
+{
+	for(unsigned int i=0; i < servers_.size(); i++)
+		if(servers_.at(i) == idPointer)
+			return servers_.at(i)->server_;
+
+	return NULL;
+}
+
+VModelServer* VModelData::server(void* idPointer) const
+{
+	for(unsigned int i=0; i < servers_.size(); i++)
+		if(servers_.at(i) == idPointer)
+			return servers_.at(i);
+
+	return NULL;
 }
 
 int VModelData::indexOfServer(ServerHandler* s) const

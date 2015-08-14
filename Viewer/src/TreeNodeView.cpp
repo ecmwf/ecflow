@@ -24,6 +24,8 @@
 TreeNodeView::TreeNodeView(QWidget* parent) :
 	QTreeView(parent)
 {
+	setProperty("style","nodeView");
+
 	expandState_=new ExpandState();
 	actionHandler_=new ActionHandler(this);
 
@@ -41,7 +43,7 @@ TreeNodeView::TreeNodeView(QWidget* parent) :
 	setSelectionMode(QAbstractItemView::ExtendedSelection);
 
 	//!!!!We need to do it because:
-	//The background colour between the views left border and the nodes cannot be
+	//The background colour between the view's left border and the nodes cannot be
 	//controlled by delegates or stylesheets. It always takes the QPalette::Highlight
 	//colour from the palette. Here we set this to transparent so that Qt could leave
 	//this area empty and we will fill it appropriately in our delegate.

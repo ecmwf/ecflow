@@ -45,8 +45,9 @@ public:
 class VServerChange
 {
 public:
-	VServerChange() : suiteNum_(-1) {}
+	VServerChange() : suiteNum_(-1), attrNum_(-1) {}
 	int suiteNum_;
+	int attrNum_;
 };
 
 class VNode
@@ -81,6 +82,8 @@ public:
     void collect(std::vector<VNode*>& vec) const;
 
     //Get all the variables
+    virtual int variablesNum() const;
+    virtual int genVariablesNum() const;
     virtual void variables(std::vector<Variable>& vars);
     virtual void genVariables(std::vector<Variable>& genVars);
 
@@ -168,6 +171,8 @@ public:
 	VNode* find(const std::string& fullPath);
 
 	//Get all the variables
+    int variablesNum() const;
+	int genVariablesNum() const;
 	void variables(std::vector<Variable>& vars);
 	void genVariables(std::vector<Variable>& genVars);
 

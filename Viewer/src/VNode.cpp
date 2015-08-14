@@ -269,6 +269,27 @@ std::string VNode::findInheritedVariable(const std::string& key,bool substitute)
     return val;
 }
 
+int VNode::variablesNum() const
+{
+	if(node_.get())
+		return static_cast<int>(node_->variables().size());
+
+	return 0;
+}
+
+int VNode::genVariablesNum() const
+{
+	std::vector<Variable> gv;
+
+	if(node_.get())
+	{
+		node_->gen_variables(gv);
+		return static_cast<int>(gv.size());
+	}
+
+	return 0;
+}
+
 void VNode::variables(std::vector<Variable>& vars)
 {
 	vars.clear();
@@ -282,7 +303,6 @@ void VNode::genVariables(std::vector<Variable>& genVars)
 	if(node_.get())
 		node_->gen_variables(genVars);
 }
-
 
 std::string VNode::absNodePath() const
 {
@@ -350,11 +370,11 @@ LogServer_ptr VNode::logServer()
 
 	std::string logHost=findInheritedVariable("ECF_LOGHOST",true);
 	std::string logPort=findInheritedVariable("ECF_LOGPORT");
-	if(logHost.empty())
-	{
-		logHost=findInheritedVariable("LOGHOST",true);
-		logPort=findInheritedVariable("LOGPORT");
-	}
+	//if(logHost.empty())
+	//{
+	//	logHost=findInheritedVariable("LOGHOST",true);
+	//	logPort=findInheritedVariable("LOGPORT");
+	//}
 
 	std::string micro=findInheritedVariable("ECF_MICRO");
 	if(!logHost.empty() && !logPort.empty() &&
@@ -603,6 +623,24 @@ void VServer::deleteNode(VNode* node)
 // Variables
 //------------------------------------------
 
+int VServer::variablesNum() const
+{
+	ServerDefsAccess defsAccess(server_);
+	if(defsAccess.defs())
+		return static_cast<int>(defsAccess.defs()->server().user_variables().size());
+
+	return 0;
+}
+
+int VServer::genVariablesNum() const
+{
+	ServerDefsAccess defsAccess(server_);
+	if(defsAccess.defs())
+		return static_cast<int>(defsAccess.defs()->server().server_variables().size());
+
+	return 0;
+}
+
 void VServer::variables(std::vector<Variable>& vars)
 {
 	vars.clear();
@@ -684,14 +722,20 @@ void VServer::beginScan(VServerChange& change)
 	//Clear the contents
 	clear();
 
-	//Get the Defs
-	ServerDefsAccess defsAccess(server_);  // will reliquish its resources on destruction
-	defs_ptr defs = defsAccess.defs();
-	if (!defs)
-		return;
+	//Get the Defs.
+	{
+		ServerDefsAccess defsAccess(server_);  // will reliquish its resources on destruction
+		defs_ptr defs = defsAccess.defs();
+		if (!defs)
+			return;
 
-	const std::vector<suite_ptr> &suites = defs->suiteVec();
-	change.suiteNum_=suites.size();
+		const std::vector<suite_ptr> &suites = defs->suiteVec();
+		change.suiteNum_=suites.size();
+	}
+
+	//This will use ServerDefsAccess as well. So we have to be sure that t=the mutex is
+	//released at this point.
+	change.attrNum_=currentAttrNum();
 }
 
 //Build the whole tree.
@@ -700,20 +744,26 @@ void VServer::endScan()
 	totalNum_=0;
 
 	//Get the Defs
-	ServerDefsAccess defsAccess(server_);  // will reliquish its resources on destruction
-	defs_ptr defs = defsAccess.defs();
-	if (!defs)
-		return;
-
-	//Scan the suits.This will recursively scan all nodes in the tree.
-	const std::vector<suite_ptr> &suites = defs->suiteVec();
-
-	for(unsigned int i=0; i < suites.size();i++)
 	{
-		VNode* vn=new VNode(this,suites.at(i));
-		totalNum_++;
-		scan(vn);
+		ServerDefsAccess defsAccess(server_);  // will reliquish its resources on destruction
+		defs_ptr defs = defsAccess.defs();
+		if (!defs)
+			return;
+
+		//Scan the suits.This will recursively scan all nodes in the tree.
+		const std::vector<suite_ptr> &suites = defs->suiteVec();
+
+		for(unsigned int i=0; i < suites.size();i++)
+		{
+			VNode* vn=new VNode(this,suites.at(i));
+			totalNum_++;
+			scan(vn);
+		}
 	}
+
+	//This will use ServerDefsAccess as well. So we have to be sure that the mutex is
+	//released at this point.
+	endUpdateAttrNum();
 }
 
 void VServer::scan(VNode *node)

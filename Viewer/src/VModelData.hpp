@@ -46,6 +46,7 @@ public:
     VNode* topLevelNode(int row) const;
     int totalNodeNum() const;
     void runFilter();
+    int attrNum() const;
 
 
 Q_SIGNALS:
@@ -143,8 +144,10 @@ public:
 
 	int count() const {return static_cast<int>(servers_.size());}
 	int  indexOfServer(void*) const;
+	ServerHandler* realServer(void*) const;
 	ServerHandler* realServer(int) const;
 	VModelServer* server(int) const;
+	VModelServer* server(void*) const;
 	int indexOfServer(ServerHandler* s) const;
 	int numOfNodes(int) const;
 	virtual bool isFiltered(VNode *node) const=0;
