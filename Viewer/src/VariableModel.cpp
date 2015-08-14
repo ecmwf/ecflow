@@ -20,8 +20,6 @@ QColor VariableModel::genVarCol_=QColor(34,51,136);
 QColor VariableModel::blockBgCol_=QColor(122,122,122);
 QColor VariableModel::blockFgCol_=QColor(255,255,255);
 
-QStringList VariableModel::readOnlyGenVars_;
-
 //=======================================================================
 //
 // VariabletModel
@@ -46,13 +44,6 @@ VariableModel::VariableModel(VariableModelDataHandler* data,QObject *parent) :
 
 	connect(data_,SIGNAL(dataChanged(int)),
 						this,SLOT(slotDataChanged(int)));
-
-	if(readOnlyGenVars_.isEmpty())
-	{
-		readOnlyGenVars_ << "ECF_NODE" << "ECF_PORT" << "ECF_PID" << "ECF_VERSION" <<
-				"ECF_LISTS";
-	}
-
 }
 
 bool VariableModel::hasData() const
@@ -172,7 +163,7 @@ QVariant VariableModel::data( const QModelIndex& index, int role ) const
 
 		else if(role == ReadOnlyRole)
         {
-			return (readOnlyGenVars_.contains(QString::fromStdString(d->name(row))))?true:false;
+			return (d->isReadOnly(row))?true:false;
         }
 
 		return QVariant();

@@ -33,6 +33,8 @@ public:
 	const std::string& name(int index) const;
 	const std::string& value(int index) const;
 	bool isGenVar(int index) const;
+	bool isReadOnly(int index) const;
+	bool isReadOnly(const std::string& varName) const;
 	int varNum() const;
 	bool hasName(const std::string& n) const;
 	VNode* node() const;
@@ -54,6 +56,8 @@ public:
 	std::vector<Variable> genVars_;
 
 	VInfo_ptr info_;
+
+	static QStringList readOnlyVars_;
 };
 
 class VariableModelDataHandler : public QObject

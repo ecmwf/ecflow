@@ -61,7 +61,6 @@ protected:
 	static QColor genVarCol_;
 	static QColor blockBgCol_;
 	static QColor blockFgCol_;
-	static QStringList readOnlyGenVars_;
 };
 
 

@@ -18,6 +18,8 @@
 
 static std::string defaultStr("");
 
+QStringList VariableModelData::readOnlyVars_;
+
 //==========================================
 //
 // VariableModelData
@@ -28,6 +30,12 @@ VariableModelData::VariableModelData(VInfo_ptr info) :
 		info_(info)
 {
 	reload();
+
+	if(readOnlyVars_.isEmpty())
+	{
+		readOnlyVars_ << "ECF_NODE" << "ECF_PORT" << "ECF_PID" << "ECF_VERSION" <<
+				"ECF_LISTS";
+	}
 }
 
 void VariableModelData::clear()
@@ -62,7 +70,15 @@ std::string VariableModelData::name()
 
 std::string VariableModelData::type()
 {
-	return (info_->isNode())?"node":"server";
+	if(info_)
+	{
+		if(info_->isServer())
+			return "server";
+		else if(info_->node())
+			return info_->node()->nodeType();
+	}
+
+	return std::string();
 }
 
 VNode* VariableModelData::node() const
@@ -179,6 +195,17 @@ bool VariableModelData::isGenVar(int index) const
 {
 	return (index >= vars_.size());
 }
+
+bool VariableModelData::isReadOnly(int index) const
+{
+	return isReadOnly(name(index));
+}
+
+bool VariableModelData::isReadOnly(const std::string& varName) const
+{
+	return readOnlyVars_.contains(QString::fromStdString(varName));
+}
+
 
 int VariableModelData::varNum() const
 {

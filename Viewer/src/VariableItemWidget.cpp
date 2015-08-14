@@ -83,13 +83,29 @@ VariablePropDialog::VariablePropDialog(VariableModelData *data,QString name, QSt
 {
 	setupUi(this);
 
-	parentLabel_->setText(QString::fromStdString(data_->fullPath()) + " (" +
-			    QString::fromStdString(data_->type()) +")");
-	typeLabel_->setText(genVar?tr("generated variable"):tr("variable"));
+	QString parentTxt="<b>" + QString::fromStdString(data_->fullPath()) + " </b> (type: " +
+		    QString::fromStdString(data_->type());
+
+	if(data_->type() ==  "server")
+	{
+		parentTxt+=" name: <b>" + QString::fromStdString(data_->name()) + "</b>";
+	}
+
+	parentTxt+=")";
+	parentLabel_->setText(parentTxt);
+
+	QString typeTxt=genVar?tr("<b>generated variable</b>"):tr("<b>user variable</b>");
+	bool readOnly=data_->isReadOnly(name.toStdString());
+	if(readOnly)
+	{
+		typeTxt+=" (read only)";
+	}
+
+	typeLabel_->setText(typeTxt);
 	nameEdit_->setText(name);
 	valueEdit_->setPlainText(value);
 
-	if(frozen)
+	if(frozen || readOnly)
 	{
 		nameEdit_->setReadOnly(true);
 		valueEdit_->setReadOnly(true);
