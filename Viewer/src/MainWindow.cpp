@@ -25,6 +25,8 @@
 
 
 #include "MainWindow.hpp"
+
+#include "AboutDialog.hpp"
 #include "FilterWidget.hpp"
 #include "InfoPanel.hpp"
 #include "NodePathWidget.hpp"
@@ -50,7 +52,7 @@ MainWindow::MainWindow(QStringList idLst,QWidget *parent) : QMainWindow(parent)
     
     setAttribute(Qt::WA_DeleteOnClose);
 
-    setWindowTitle("ecflow_ui (" + QString::fromStdString(ecf::Version::raw()) + ")");
+    setWindowTitle("EcflowUI (" + QString::fromStdString(ecf::Version::raw()) + ")");
 
     //Create the main layout
     QVBoxLayout* layout=new QVBoxLayout();
@@ -165,6 +167,11 @@ void MainWindow::on_actionShowInInfoPanel_triggered()
 {
 }
 
+void MainWindow::on_actionAbout_triggered()
+{
+    AboutDialog d;
+    d.exec();
+}
 
 void MainWindow::slotCurrentChangedInPanel()
 {
@@ -178,6 +185,7 @@ void MainWindow::slotCurrentChangedInPanel()
 	 //updateIconSizeActionState();
 	 //updateSearchPanel();
 }
+
 
 void MainWindow::reloadContents()
 {

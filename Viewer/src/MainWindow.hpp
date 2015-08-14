@@ -58,6 +58,7 @@ protected Q_SLOTS:
 	void on_actionAddTableWidget_triggered();
 	void on_actionAddInfoPanel_triggered();
 	void on_actionPreferences_triggered();
+	void on_actionAbout_triggered();
 
 	void slotCurrentChangedInPanel();
 

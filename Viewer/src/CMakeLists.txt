@@ -1,6 +1,7 @@
 
 set(viewer_srcs   
     ViewerMain.cpp
+    AboutDialog.cpp
     AbstractNodeModel.cpp
     AbstractSearchLine.cpp
     ActionHandler.cpp
@@ -158,6 +159,7 @@ set(viewer_moc_files AbstractNodeModel.hpp
 )
 
 set(viewer_wrap_ui_files
+    AboutDialog.ui
     CommandDesignerWidget.ui 
     CustomCommandDialog.ui 
     CodeItemWidget.ui

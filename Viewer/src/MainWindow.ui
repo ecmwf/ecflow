@@ -68,6 +68,7 @@
     <property name="title">
      <string>&amp;Help</string>
     </property>
+    <addaction name="actionAbout"/>
    </widget>
    <widget class="QMenu" name="menuServer">
     <property name="tearOffEnabled">
@@ -252,6 +253,11 @@
    </property>
    <property name="toolTip">
     <string>Add table widget</string>
+   </property>
+  </action>
+  <action name="actionAbout">
+   <property name="text">
+    <string>About EcflowUI</string>
    </property>
   </action>
  </widget>
