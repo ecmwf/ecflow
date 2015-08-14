@@ -1,1 +1,9 @@
+#
+# This file is copied over to <install-directory>/share/ecflow/.
+# Use this file to list the servers you want to make visible
+# 
+# <server-name>  <host>   <port>
+# test1          machine1 31415
+# test2          machine1 31416
+# operation      hostxx   3147
 localhost localhost 3141
