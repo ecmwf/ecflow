@@ -38,12 +38,9 @@ public:
 	static void load(VProperty* group);
 
 protected:
-	QPixmap* pixmap(int size);
+	void initPixmap();
+	QPixmap pixmap(int size);
 	virtual bool show(VNode*)=0;
-
-	//QApplication makes some initializations of Qt itself, before which no "complex" Qt objects can be created.
-	//Since QPixmap is a complex object it cannot be used in static initialiaztion unless we make it a pointer.
-	QPixmap* pix_;
 
 	static std::map<std::string,VIcon*> items_;
 };

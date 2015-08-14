@@ -14,11 +14,7 @@ CodeItemWidget::CodeItemWidget(QWidget *parent) : QWidget(parent)
 {
 	setupUi(this);
 
-	/*QFont f("Courier");
-	f.setStyleHint(QFont::TypeWriter);
-	f.setFixedPitch(true);
-	f.setPointSize(10);
-	textEdit_->setFont(f);*/
+	externalTb_->hide();
 
 	searchLine_->setEditor(textEdit_);
 

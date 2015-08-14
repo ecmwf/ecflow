@@ -20,6 +20,7 @@ set(viewer_srcs
     FilterWidget.cpp
     Highlighter.cpp
     HistoryItemWidget.cpp
+    IconProvider.cpp
     InfoPanel.cpp 
     InfoPanelItem.cpp   
     InfoPanelHandler.cpp

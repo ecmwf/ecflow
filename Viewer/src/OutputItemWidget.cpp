@@ -160,8 +160,8 @@ void OutputItemWidget::updateDir(bool restartTimer,const std::string& selectFull
 
 	if(status)
 	{
-		dirModel_->setData(dir);
 		outputView_->selectionModel()->clearSelection();
+		dirModel_->setData(dir);
 		dirWidget_->show();
 
 		//Try to preserve the selection

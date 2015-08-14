@@ -15,6 +15,13 @@
 #include "ServerHandler.hpp"
 #include "VariableModelData.hpp"
 
+QColor VariableModel::varCol_=QColor(Qt::black);
+QColor VariableModel::genVarCol_=QColor(34,51,136);
+QColor VariableModel::blockBgCol_=QColor(122,122,122);
+QColor VariableModel::blockFgCol_=QColor(255,255,255);
+
+QStringList VariableModel::readOnlyGenVars_;
+
 //=======================================================================
 //
 // VariabletModel
@@ -39,6 +46,12 @@ VariableModel::VariableModel(VariableModelDataHandler* data,QObject *parent) :
 
 	connect(data_,SIGNAL(dataChanged(int)),
 						this,SLOT(slotDataChanged(int)));
+
+	if(readOnlyGenVars_.isEmpty())
+	{
+		readOnlyGenVars_ << "ECF_NODE" << "ECF_PORT" << "ECF_PID" << "ECF_VERSION" <<
+				"ECF_LISTS";
+	}
 
 }
 
@@ -89,11 +102,11 @@ QVariant VariableModel::data( const QModelIndex& index, int role ) const
 
 	//Data lookup can be costly so we immediately return a default value for all
 	//the cases where the default should be used.
-	if(role != Qt::DisplayRole && role != Qt::BackgroundRole && role != Qt::ForegroundRole)
+	if(role != Qt::DisplayRole && role != Qt::BackgroundRole && role != Qt::ForegroundRole &&
+	   role != ReadOnlyRole)
 	{
 		return QVariant();
 	}
-	//qDebug() << "data" << index << role;
 
 	int row=index.row();
 	int level=indexToLevel(index);
@@ -101,12 +114,16 @@ QVariant VariableModel::data( const QModelIndex& index, int role ) const
 	//Server or node
 	if(level == 1)
 	{
+		if(role == ReadOnlyRole)
+			return QVariant();
+
 		if(role == Qt:: BackgroundRole)
-            return QColor(122,122,122);
+            return blockBgCol_;
         
-        if(role == Qt::ForegroundRole)
-            return QColor(255,255,255);
+		else if(role == Qt::ForegroundRole)
+            return blockFgCol_;
         
+
         VariableModelData *d=data_->data(row);
 		if(!d)
 		{
@@ -133,13 +150,15 @@ QVariant VariableModel::data( const QModelIndex& index, int role ) const
 			return QVariant();
 		}
 
-		//Generated variable
-		if(d->isGenVar(row))
+		if(role == Qt::ForegroundRole)
 		{
-			if(role == Qt::ForegroundRole)
-					return QColor(70,70,70);
+			//Generated variable
+			if(d->isGenVar(row))
+				return genVarCol_;
+			else
+				return varCol_;
 		}
-        if(role == Qt::DisplayRole)
+		else if(role == Qt::DisplayRole)
         {    
 		    if(index.column() == 0)
 		    {
@@ -150,7 +169,12 @@ QVariant VariableModel::data( const QModelIndex& index, int role ) const
 			    return QString::fromStdString(d->value(row));
 		    }
         }
-        
+
+		else if(role == ReadOnlyRole)
+        {
+			return (readOnlyGenVars_.contains(QString::fromStdString(d->name(row))))?true:false;
+        }
+
 		return QVariant();
 	}
 
@@ -324,7 +348,6 @@ VariableModelData* VariableModel::indexToData(const QModelIndex& index) const
 	return NULL;
 }
 
-
 //----------------------------------------------
 //
 // Server to index mapping and lookup
@@ -406,7 +429,6 @@ void VariableModel::slotAddRemoveEnd(int diff)
 		endRemoveRows();
 	}
 }
-
 
 void VariableModel::slotDataChanged(int block)
 {

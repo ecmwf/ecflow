@@ -11,8 +11,11 @@
 
 #include <QApplication>
 #include <QDebug>
+#include <QImageReader>
 #include <QPainter>
 
+#include "IconProvider.hpp"
+#include "VariableModel.hpp"
 #include "VParam.hpp"
 
 //========================================================
@@ -26,6 +29,17 @@ VariableDelegate::VariableDelegate(QWidget *parent) : QStyledItemDelegate(parent
     selectPen_=QPen(QColor(125,162,206));
     selectBrush_=QBrush(QColor(193,220,252,110));
     borderPen_=QPen(QColor(180,180,180));
+
+    QImageReader imgR(":/viewer/padlock.svg");
+    if(imgR.canRead())
+    {
+    	QFont font;
+    	QFontMetrics fm(font);
+    	int size=fm.height()+2;
+    	imgR.setScaledSize(QSize(size,size));
+    	QImage img=imgR.read();
+    	lockPix_=QPixmap(QPixmap::fromImage(img));
+    }
 }
 
 void VariableDelegate::paint(QPainter *painter,const QStyleOptionViewItem &option,
@@ -86,9 +100,6 @@ void VariableDelegate::paint(QPainter *painter,const QStyleOptionViewItem &optio
 
     	//QRect fillRect=option.rect.adjusted(0,1,-1,-textRect.height()-1);
         painter->fillRect(selectRect,selectBrush_);
-        //painter->setPen(selectPen_);
-        //painter->drawLine(fullRect.topLeft(),fullRect.topRight());
-        //painter->drawLine(fullRect.bottomLeft(),fullRect.bottomRight());
     }
 
     //Render the horizontal border for rows. We only render the top border line.
@@ -110,6 +121,18 @@ void VariableDelegate::paint(QPainter *painter,const QStyleOptionViewItem &optio
     if(index.column() == 0 && !hasChild)
     {
     	textRect.setLeft(option.rect.x()-17);
+
+    	bool locked=index.data(VariableModel::ReadOnlyRole).toBool();
+    	if(locked)
+    	{
+    		QPixmap lockPix=IconProvider::lockPixmap(textRect.height()-6);
+
+    		QRect lockRect(textRect.left()-4-lockPix.width(),
+    				       textRect.top()+(textRect.height()-lockPix.height())/2,
+    			           lockPix.width(),lockPix.height());
+
+    		painter->drawPixmap(lockRect,lockPix);
+    	}
     }
     
     if(index.column() == 1)

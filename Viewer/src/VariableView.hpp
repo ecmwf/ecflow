@@ -32,6 +32,7 @@ protected:
     QPen selectPen_;
     QBrush selectBrush_;
     QPen borderPen_;
+    QPixmap lockPix_;
 };
 
 class VariableView : public QTreeView

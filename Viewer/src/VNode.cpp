@@ -748,6 +748,7 @@ void VServer::beginUpdate(VNode* node,const std::vector<ecf::Aspect::Type>& aspe
 	//all VNode functions have to return the values valid before the update happened!!!!!!!
 	//The main goal of this function is to cleverly provide the views with some information about the nature of the update.
 
+	//Update the generated variables. There is no notification about their change so we have to to do it!!!
 	if(node->node())
 	{
 		Suite *s=NULL;

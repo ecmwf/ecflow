@@ -23,6 +23,8 @@ friend class VariableSortModel;
 public:
    	VariableModel(VariableModelDataHandler* data,QObject *parent=0);
 
+   	enum CustomItemRole {ReadOnlyRole = Qt::UserRole+1};
+
    	int columnCount (const QModelIndex& parent = QModelIndex() ) const;
    	int rowCount (const QModelIndex& parent = QModelIndex() ) const;
 
@@ -55,6 +57,11 @@ protected:
     void identify(const QModelIndex& index,int& parent,int& row) const;
 
 	VariableModelDataHandler* data_;
+	static QColor varCol_;
+	static QColor genVarCol_;
+	static QColor blockBgCol_;
+	static QColor blockFgCol_;
+	static QStringList readOnlyGenVars_;
 };
 
 

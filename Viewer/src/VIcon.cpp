@@ -20,6 +20,7 @@
 #include <unistd.h>
 #include <map>
 
+#include "IconProvider.hpp"
 #include "Submittable.hpp"
 #include "UserMessage.hpp"
 #include "VConfigLoader.hpp"
@@ -115,48 +116,34 @@ static VLateIcon lateIcon("late");
 //==========================================================
 
 VIcon::VIcon(const std::string& name) :
-		VParam(name),
-		pix_(0)
+		VParam(name)
 {
 	items_[name]=this;
 }
 
 VIcon::~VIcon()
 {
-	delete pix_;
 }
 
-
-QPixmap* VIcon::pixmap(int size)
+void VIcon::initPixmap()
 {
-	if(!pix_)
+	if(!prop_)
 	{
-		bool created=false;
-		if(prop_)
-		{
-			if(VProperty* p=prop_->findChild("icon"))
-			{
-				QImageReader imgR(":/viewer/" + p->value().toString());
-				if(imgR.canRead())
-				{
-					created=true;
-					imgR.setScaledSize(QSize(size,size));
-					QImage img=imgR.read();
-					pix_=new QPixmap(QPixmap::fromImage(img));
-				}
-			}
-		}
-
-		if(!created)
-		{
-			pix_=new QPixmap();
-
-			UserMessage::message(UserMessage::WARN, true,
-					std::string("Warning! VConfig::pixmap() unable to create icon image for: " + strName()));
-		}
+		UserMessage::message(UserMessage::WARN, true,
+				std::string("Warning! VIcon::initPixmap() unable to create icon image for: " + strName()));
+		return;
 	}
 
-	return pix_;
+	//Add icon to iconprovider
+	if(VProperty* ip=prop_->findChild("icon"))
+	{
+		IconProvider::add(":/viewer/" + ip->value().toString(),name());
+	}
+}
+
+QPixmap VIcon::pixmap(int size)
+{
+	return IconProvider::pixmap(name(),size);
 }
 
 //===============================================================
@@ -200,36 +187,13 @@ QVariantList VIcon::pixmapList(VNode *vnode,VParamSet *filter)
 				VIcon *v=it->second;
 				if(v->show(vnode) )
 				{
-					lst << *(v->pixmap(16));
+					lst << v->pixmap(16);
 				}
 			}
 	}
 
 	return lst;
 }
-
-/*void VIcon::init(const std::string& parFile)
-{
-	//std::string parFile("/home/graphics/cgr/ecflowview_icon.json");
-	std::map<std::string,std::map<std::string,std::string> > vals;
-
-	VParam::init(parFile,"icon",vals);
-
-	for(std::map<std::string,std::map<std::string,std::string> >::const_iterator it=vals.begin(); it != vals.end(); it++)
-	{
-		std::string name=it->first;
-		//Assign the information we read to an existing VAttribute object
-		if(VIcon* obj=VIcon::find(name))
-				obj->addAttributes(it->second);
-
-		//We are in trouble: the icon defined in the JSON file does not correspond to any of the VIcon objects!!!
-		else
-		{
-			UserMessage::message(UserMessage::ERROR, true,
-					std::string("Error, icon defined in JSON file does not belong to any attribute objects : " + name));
-		}
-	}
-}*/
 
 void VIcon::load(VProperty* group)
 {
@@ -238,6 +202,7 @@ void VIcon::load(VProperty* group)
          if(VIcon* obj=VIcon::find(p->strName()))
          {
             obj->setProperty(p);
+            obj->initPixmap();
          }
     }
 }
