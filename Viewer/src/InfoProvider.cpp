@@ -81,8 +81,6 @@ void InfoProvider::visit(VInfoNode* info)
 
     std::string fileName;
 
-    bool done=false;
-
     //We try to read the file directly from the disk
     if(info->server()->readFromDisk())
     {

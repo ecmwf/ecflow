@@ -66,7 +66,7 @@ void ServerSettingsItemWidget::slotClicked(QAbstractButton* button)
 	{
 	case QDialogButtonBox::Apply:
 		{
-			bool changed=editor_->applyChange();
+			editor_->applyChange();
 		}
 		break;
 	default:

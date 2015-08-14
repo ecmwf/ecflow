@@ -18,7 +18,7 @@
 class IconItem
 {
 public:
-  	IconItem(QString);
+  	explicit IconItem(QString);
 	QPixmap pixmap(int);
 
 protected:

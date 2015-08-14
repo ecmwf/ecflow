@@ -229,6 +229,7 @@ Menu *MenuHandler::findMenu(const std::string &name)
 
 MenuItem* MenuHandler::newItem(const std::string &name)
 {
+	return NULL;
 }
 
 bool MenuHandler::addItemToMenu(MenuItem *item, const std::string &menuName)
@@ -239,6 +240,7 @@ bool MenuHandler::addItemToMenu(MenuItem *item, const std::string &menuName)
     if (menu)
     {
         menu->addItem(item);
+        return true;
     }
     else
     {
@@ -246,6 +248,8 @@ bool MenuHandler::addItemToMenu(MenuItem *item, const std::string &menuName)
                              menuName + " to add item " + item->name() + " to."));
         return false;
     }
+
+    return false;
 }
 
 

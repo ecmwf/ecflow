@@ -684,7 +684,6 @@ bool VTableModelData::identifyInFilter(VModelServer* server,int& start,int& coun
 	count=-1;
 	*node=NULL;
 
-	int totalRow=0;
 	if(server)
 	{
 		*node=server->filter_->realMatchAt(0);
@@ -709,9 +708,9 @@ bool VTableModelData::identifyInFilter(VModelServer* server,int& start,int& coun
 //This has to be very fast!!!
 int VTableModelData::posInFilter(VModelServer* server,const VNode *node) const
 {
-	int totalRow=0;
 	if(server)
 	{
+		int totalRow=0;
 		for(unsigned int i=0; i < servers_.size(); i++)
 		{
 			NodeFilter *filter=servers_.at(i)->filter_;

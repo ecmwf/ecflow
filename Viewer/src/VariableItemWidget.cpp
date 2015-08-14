@@ -171,8 +171,8 @@ VariableAddDialog::VariableAddDialog(VariableModelData *data,QWidget *parent) :
 	setupUi(this);
 
 	label_->setText(tr("Add new variable for ") +
-			"<b>" + QString::fromStdString(data->type()) + "</b>: " +
-			QString::fromStdString(data->name()));
+			QString::fromStdString(data->type()) + ":<b> " +
+			QString::fromStdString(data->name()) + "</b>");
 }
 
 VariableAddDialog::VariableAddDialog(VariableModelData *data,QString name, QString value,QWidget *parent) :
@@ -182,8 +182,8 @@ VariableAddDialog::VariableAddDialog(VariableModelData *data,QString name, QStri
 	setupUi(this);
 
 	label_->setText(tr("Add new variable for ") +
-			"<b>" + QString::fromStdString(data->type()) + "</b>: " +
-			QString::fromStdString(data->name()));
+			QString::fromStdString(data->type()) + ":<<b> " +
+			QString::fromStdString(data->name()) + "</b>");
 
 	nameEdit_->setText(name + "_copy");
 	valueEdit_->setText(value);
@@ -480,11 +480,14 @@ void VariableItemWidget::removeItem(const QModelIndex& index)
 
 	QModelIndex vIndex=sortModel_->mapToSource(index);
 
+	VariableModelData* data=model_->indexToData(vIndex);
+
 	//Get the data from the model
-	if(model_->variable(vIndex,name,value,genVar))
+	if(data && model_->variable(vIndex,name,value,genVar))
 	{
 		if(QMessageBox::question(0,tr("Confirm: delete variable"),
-						tr("Are you sure that you want to delete variable <b>") + name + "</b>?",
+						tr("Are you sure that you want to delete variable <b>") + name + "</b> from " +
+						QString::fromStdString(data->type()) + " <b>" + QString::fromStdString(data->name()) +  "</b>?",
 					    QMessageBox::Ok | QMessageBox::Cancel,QMessageBox::Cancel) == QMessageBox::Ok)
 		{
 			model_->removeVariable(vIndex,name,value);

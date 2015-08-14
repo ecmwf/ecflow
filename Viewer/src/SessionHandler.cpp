@@ -93,9 +93,7 @@ void SessionHandler::remove(SessionItem*)
 
 void SessionHandler::current(SessionItem* item)
 {
-	std::vector<SessionItem*>::const_iterator it;
-
-	if((it=std::find(sessions_.begin(),sessions_.end(),item)) != sessions_.end())
+	if(std::find(sessions_.begin(),sessions_.end(),item) != sessions_.end())
 	{
 		current_=item;
 		load();
