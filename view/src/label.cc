@@ -12,6 +12,7 @@
 //
 // Description : 
 //=============================================================================================
+#include <boost/algorithm/string.hpp>    
 
 #include "label_node.h"
 #include "show.h"
@@ -38,10 +39,14 @@ xmstring label_node::make_label_tree()
 
 void label_node::drawNode(Widget w,XRectangle* r,bool)
 {
+  std::string msg = value();
+  boost::algorithm::to_lower(msg);
+  bool red = std::string::npos != msg.find("error");
+
     XmStringDraw(XtDisplay(w),XtWindow(w),
         smallfont(),
         labelTree(),
-        blackGC(),
+        red ? redGC() : blackGC(),
         r->x+2,
         r->y+2,
         r->width,
