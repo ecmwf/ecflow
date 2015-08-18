@@ -24,7 +24,7 @@
     <widget class="NodePathWidget" name="bcWidget_" native="true"/>
    </item>
    <item>
-    <widget class="TreeNodeView" name="viewWidget_" native="true">
+    <widget class="QWidget" name="viewHolder_" native="true">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
        <horstretch>0</horstretch>
@@ -62,12 +62,6 @@
    <class>NodePathWidget</class>
    <extends>QWidget</extends>
    <header>NodePathWidget.hpp</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>TreeNodeView</class>
-   <extends>QWidget</extends>
-   <header location="global">TreeNodeView.hpp</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

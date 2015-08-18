@@ -20,5 +20,19 @@
  					"default": "font()"
  				}
 			}
+    },
+    
+    "table_columns": {
+    	
+    	"path" : {
+    		"label" : "Node",
+    		"tooltip" : "Node"
+    	},
+    	"status" : {
+    		"label" : "Status"
+    	},
+    	"event" : {
+    		"label" : "Event"
+    	}   	
     }
 }

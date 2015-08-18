@@ -45,9 +45,10 @@ public:
 class VServerChange
 {
 public:
-	VServerChange() : suiteNum_(-1), attrNum_(-1) {}
+	VServerChange() : suiteNum_(-1), attrNum_(-1), totalNum_(-1) {}
 	int suiteNum_;
 	int attrNum_;
+	int totalNum_;
 };
 
 class VNode
@@ -129,7 +130,6 @@ protected:
     std::vector<VNode*> children_;
     mutable short attrNum_;
     mutable short cachedAttrNum_;
-    //mutable std::string name_;
 };
 
 //This is the root node representing the Server.
@@ -155,6 +155,10 @@ public:
 	VNode* toVNode(const Node* nc) const;
 	void beginUpdate(VNode* node,const std::vector<ecf::Aspect::Type>& aspect,VNodeChange&);
 	void endUpdate(VNode* node,const std::vector<ecf::Aspect::Type>& aspect,const VNodeChange&);
+
+	VNode* nodeAt(int) const;
+	int indexOfNode(const VNode* vn) const;
+	const std::vector<VNode*>& nodes() const {return nodes_;}
 
 	QString toolTip();
 
@@ -197,6 +201,7 @@ private:
     ServerHandler* server_;
     int totalNum_;
     std::vector<int> totalNumInChild_;
+    std::vector<VNode*> nodes_;
 };
 
 

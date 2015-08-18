@@ -32,7 +32,8 @@ TextEdit::TextEdit(QWidget * parent) :
 
     updateLineNumberAreaWidth(0);
 
-    QFont f("Courier");
+    //QFont f("Courier");
+    QFont f("Monospace");
     f.setStyleHint(QFont::TypeWriter);
     f.setFixedPitch(true);
     f.setPointSize(10);

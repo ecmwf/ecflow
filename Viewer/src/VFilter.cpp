@@ -141,11 +141,18 @@ IconFilter::IconFilter() : VParamSet()
 
 NodeFilterDef::NodeFilterDef(Scope scope) : nodeState_(0)
 {
-	if(scope == NodeState)
-		nodeState_=new NodeStateFilter;
+	nodeState_=new NodeStateFilter;
+
+	//if(scope == NodeStateScope)
+	//	nodeState_=new NodeStateFilter;
+
+	//else if(scope == GeneralScope)
+	//	nodeState_=new NodeStateFilter;
 
 	if(nodeState_)
 	{
+		exprStr_="state = all";
+
 		connect(nodeState_,SIGNAL(changed()),
 					this,SIGNAL(changed()));
 	}
@@ -330,8 +337,16 @@ void TableNodeFilter::beginReset(ServerHandler* server)
 
 	VServer* s=server->vRoot();
 
+	for(size_t i=0; i < s->nodes().size(); i++)
+	{
+		if(def_->nodeState_->isSet(VNState::toState(s->nodes().at(i))))
+		{
+			match_.push_back(s->nodes().at(i));
+		}
+	}
+
 	//TODO: implement the filter!!!
-	s->collect(match_);
+	//s->collect(match_);
 }
 
 void TableNodeFilter::endReset()

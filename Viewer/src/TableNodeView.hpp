@@ -11,22 +11,26 @@
 #ifndef TABLENODEVIEW_HPP_
 #define TABLENODEVIEW_HPP_
 
+#include <QHeaderView>
 #include <QTreeView>
 
 #include "NodeViewBase.hpp"
 
 #include "VInfo.hpp"
 
+class QComboBox;
+
 class ActionHandler;
 class TableNodeModel;
 class NodeFilterModel;
+class NodeFilterDef;
 
 class TableNodeView : public QTreeView, public NodeViewBase
 {
 Q_OBJECT
 
 public:
-	explicit TableNodeView(QWidget *parent=0);
+	explicit TableNodeView(NodeFilterModel* model,NodeFilterDef* filterDef,QWidget *parent=0);
 	void reload() {};
 	void rerender() {};
 	QWidget* realWidget();
@@ -35,11 +39,14 @@ public:
 	void selectFirstServer() {}
 	void setModel(NodeFilterModel *model);
 
+	void readSettings(VSettings* vs);
+
 public Q_SLOTS:
 	void slotSelectItem(const QModelIndex&);
 	void slotDoubleClickItem(const QModelIndex&);
 	void slotContextMenu(const QPoint &position);
 	void slotViewCommand(std::vector<VInfo_ptr>,QString);
+	void slotHeaderContextMenu(const QPoint &position);
 
 Q_SIGNALS:
 	void selectionChanged(VInfo_ptr);
@@ -51,6 +58,23 @@ protected:
 	ActionHandler* actionHandler_;
 };
 
+class TableNodeHeader : public QHeaderView
+{
+Q_OBJECT
+
+public:
+	explicit TableNodeHeader(QWidget *parent=0);
+
+	QSize sizeHint() const;
+
+public Q_SLOTS:
+	void slotSectionResized(int i);
+
+protected:
+	void showEvent(QShowEvent *QSize);
+
+	QMap<int, QComboBox *> combo_;
+};
 
 #endif
 

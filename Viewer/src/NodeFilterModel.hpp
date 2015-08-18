@@ -15,6 +15,7 @@
 #include "VInfo.hpp"
 
 class AbstractNodeModel;
+class NodeFilterDef;
 
 class NodeFilterModel : public QSortFilterProxyModel
 {

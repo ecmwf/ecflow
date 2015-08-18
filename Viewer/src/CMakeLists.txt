@@ -29,6 +29,7 @@ set(viewer_srcs
     JobItemWidget.cpp
     LineEdit.cpp
     LogEvent.cpp
+    LogModel.cpp
     LogServer.cpp
     MainWindow.cpp
     ManualItemWidget.cpp 
@@ -36,6 +37,7 @@ set(viewer_srcs
     MenuHandler.cpp
     MessageLabel.cpp
     MessageItemWidget.cpp
+    ModelColumn.cpp
     NodeExpression.cpp
     NodeFilterModel.cpp
     NodePanel.cpp
@@ -67,6 +69,7 @@ set(viewer_srcs
     SuiteFilter.cpp
     SuiteModel.cpp
     TabWidget.cpp 
+    TableFilterWidget.cpp
     TableNodeModel.cpp
     TableNodeView.cpp
     TableNodeWidget.cpp
@@ -141,6 +144,7 @@ set(viewer_moc_files AbstractNodeModel.hpp
     ServerSettingsItemWidget.hpp
     SuiteItemWidget.hpp
     TabWidget.hpp
+    TableFilterWidget.hpp
     TableNodeModel.hpp 
     TableNodeView.hpp 
     TableNodeWidget.hpp             
@@ -165,6 +169,7 @@ set(viewer_wrap_ui_files
     CodeItemWidget.ui
     DashboardDockTitleWidget.ui
     EditItemWidget.ui
+    HistoryItemWidget.ui
     InfoPanel.ui    
     MainWindow.ui 
     TimeItemWidget.ui
@@ -178,6 +183,7 @@ set(viewer_wrap_ui_files
     ServerListDialog.ui
     ServerSettingsItemWidget.ui
     SuiteItemWidget.ui
+    TableFilterWidget.ui
     TableNodeWidget.ui
     TreeNodeWidget.ui
     TriggerItemWidget.ui          

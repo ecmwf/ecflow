@@ -33,12 +33,6 @@ NodeWidget::NodeWidget(QWidget* parent) : DashboardWidget(parent),
 	//Define the attribute filter for the model. It controls what attributes
 	//are displayed for a given node. This is exposed via a menu.
 	atts_=new AttributeFilter;
-
-	//This defines how to filter the nodes in the tree. We only want to filter according to node status.
-	filterDef_=new NodeFilterDef(NodeFilterDef::NodeState);
-
-	//The node status filter is exposed via a menu. So we need a reference to it.
-	states_=filterDef_->nodeState();
 }
 
 NodeWidget::~NodeWidget()
@@ -46,7 +40,9 @@ NodeWidget::~NodeWidget()
 	//We only need to delete the non-qobject members
 	delete icons_;
 	delete atts_;
-	delete filterDef_;
+
+	if(filterDef_)
+		delete filterDef_;
 }
 
 QWidget* NodeWidget::widget()

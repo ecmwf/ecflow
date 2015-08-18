@@ -15,6 +15,7 @@
 #include "AbstractNodeModel.hpp"
 #include "VInfo.hpp"
 
+class ModelColumn;
 class Node;
 class NodeFilterDef;
 class ServerFilter;
@@ -71,6 +72,7 @@ protected:
 	QVariant nodeData(const QModelIndex& index,int role) const;
 
 	VTableModelData* data_;
+	ModelColumn* columns_;
 };
 
 #endif

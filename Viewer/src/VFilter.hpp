@@ -73,8 +73,9 @@ public:
 	IconFilter();
 };
 
+
 class TreeNodeFilter;
-class  TableNodeFilter;
+class TableNodeFilter;
 
 class NodeFilterDef : public QObject
 {
@@ -84,16 +85,22 @@ friend class  TreeNodeFilter;
 friend class  TableNodeFilter;
 
 public:
-	enum Scope {NodeState};
+	enum Scope {NodeStateScope,GeneralScope};
 	explicit NodeFilterDef(Scope);
 	NodeStateFilter* nodeState() const {return nodeState_;}
+
+	const std::string& exprStr() const {return exprStr_;}
 
 Q_SIGNALS:
 	void changed();
 
 protected:
 	//NodeStateFilter *serverState_;
+	std::string exprStr_;
 	NodeStateFilter *nodeState_;
+	std::string nodePath_;
+	std::string nodeType_;
+
 	//AttributeFilter *attribute_;
 	//std::string nodeType_;
 	//std::string nodeName_;

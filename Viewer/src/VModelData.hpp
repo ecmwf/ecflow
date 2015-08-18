@@ -114,6 +114,7 @@ public:
 	 void notifyEndServerScan(ServerHandler* server);
 	 void notifyServerConnectState(ServerHandler* server);
 	 void notifyServerActivityChanged(ServerHandler* server);
+	 void notifyEndServerSync(ServerHandler* server);
 
 	 //From NodeObserver
 	 void notifyBeginNodeChange(const VNode*, const std::vector<ecf::Aspect::Type>&,const VNodeChange&);
@@ -121,6 +122,7 @@ public:
 
 private:
 	 bool useCachedFilter_;
+	 size_t totalNumBeforeClear_;
 };
 
 //This class defines the data a given Node Model (Tree or Table) displays. The
@@ -201,6 +203,7 @@ public:
 	VNode* getNodeFromFilter(int totalRow);
 	int posInFilter(const VNode *node) const;
 	int posInFilter(VModelServer*,const VNode *node) const;
+	int pos(VModelServer* server,VNode**);
 	bool identifyInFilter(VModelServer* server,int& start,int& count,VNode**);
 	bool isFiltered(VNode *node) const;
 

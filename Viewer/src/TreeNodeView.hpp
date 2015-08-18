@@ -29,7 +29,7 @@ class TreeNodeView : public QTreeView, public NodeViewBase
 Q_OBJECT
 
 public:
-	explicit TreeNodeView(QWidget *parent=0);
+	explicit TreeNodeView(NodeFilterModel* model,NodeFilterDef* filterDef,QWidget *parent=0);
 	~TreeNodeView();
 
 	void reload();
@@ -39,6 +39,8 @@ public:
 	void currentSelection(VInfo_ptr n);
 	void selectFirstServer();
 	void setModel(NodeFilterModel* model);
+
+	void readSettings(VSettings* vs) {};
 
 public Q_SLOTS:
 	void slotSelectItem(const QModelIndex&);

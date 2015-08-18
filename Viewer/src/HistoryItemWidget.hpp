@@ -12,12 +12,15 @@
 #define HISTORYITEMWIDGET_HPP_
 
 #include "InfoPanelItem.hpp"
-#include "CodeItemWidget.hpp"
 #include "VInfo.hpp"
 
 #include "ServerHandler.hpp"
 
-class HistoryItemWidget : public CodeItemWidget, public InfoPanelItem
+#include "ui_HistoryItemWidget.h"
+
+class LogModel;
+
+class HistoryItemWidget :  public QWidget, public InfoPanelItem, protected Ui::HistoryItemWidget
 {
 public:
 	explicit HistoryItemWidget(QWidget *parent=0);
@@ -37,6 +40,9 @@ public:
 
 protected:
 	void updateWidgetState() {};
+
+	LogModel* model_;
+
 };
 
 #endif

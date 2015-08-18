@@ -39,6 +39,7 @@ public:
 
 	bool textFromFile(const std::string&);
 	void text(const std::vector<std::string>& msg);
+	void setTextVec(const std::vector<std::string>& msg) {textVec_=msg;;}
 	void text(const std::string& s) {text_=s;}
 	void setErrorText(const std::string& s) {errorText_=s;}
 	void setWarningText(const std::string& s) {warningText_=s;}
@@ -63,6 +64,7 @@ protected:
 	std::string warningText_;
 	std::string infoText_;
 	std::string text_;
+	std::vector<std::string> textVec_;
 	std::string fileName_;
 	FileReadMode readMode_;
 	std::string  readMethod_;

@@ -7,9 +7,32 @@
 // nor does it submit to any jurisdiction.
 //============================================================================
 
-#include "NodeViewBase.hpp"
+#ifndef TABLEFILTERWIDGET_INC_
+#define TABLEFILTERWIDGET_INC_
 
-NodeViewBase::NodeViewBase(NodeFilterModel* model,NodeFilterDef* filterDef) : model_(model), filterDef_(filterDef)
+#include "ui_TableFilterWidget.h"
+
+#include <QWidget>
+
+class NodeFilterDef;
+
+class TableFilterWidget : public QWidget, private Ui::TableFilterWidget
 {
+Q_OBJECT
 
-}
+public:
+    explicit TableFilterWidget(QWidget *parent=0);
+    ~TableFilterWidget() {};
+
+    void build(NodeFilterDef*);
+
+public Q_SLOTS:
+
+
+private:
+	NodeFilterDef* filterDef_;
+
+};
+
+#endif
+

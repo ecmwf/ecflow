@@ -63,8 +63,9 @@
         },  
         
         {
-        	"name"    : "history",
-             "label"   : "History",
+        	 "name"   : "history",
+             "label"  : "Log",
+             "icon"	  : "log.svg",
              "visible_for" : "server"
              
         },  

@@ -10,14 +10,19 @@
 #include "HistoryItemWidget.hpp"
 
 #include "InfoProvider.hpp"
+#include "LogModel.hpp"
 #include "VReply.hpp"
 
-HistoryItemWidget::HistoryItemWidget(QWidget *parent) : CodeItemWidget(parent)
+HistoryItemWidget::HistoryItemWidget(QWidget *parent) : QWidget(parent)
 {
+	setupUi(this);
+
 	fileLabel_->hide();
-	textEdit_->setShowLineNumbers(false);
 
 	infoProvider_=new HistoryProvider(this);
+
+	model_=new LogModel(this);
+	treeView_->setModel(model_);
 }
 
 QWidget* HistoryItemWidget::realWidget()
@@ -41,25 +46,23 @@ void HistoryItemWidget::reload(VInfo_ptr info)
 void HistoryItemWidget::clearContents()
 {
     InfoPanelItem::clear();
-    textEdit_->clear();
+    model_->clearData();
 }
 
 void HistoryItemWidget::infoReady(VReply* reply)
 {
-    QString s=QString::fromStdString(reply->text());
-    textEdit_->setPlainText(s);
+    //QString s=QString::fromStdString(reply->text());
+    model_->setData(reply->text());
 }
 
 void HistoryItemWidget::infoProgress(VReply* reply)
 {
     QString s=QString::fromStdString(reply->text());
-    textEdit_->setPlainText(s);
 }
 
 void HistoryItemWidget::infoFailed(VReply* reply)
 {
     QString s=QString::fromStdString(reply->errorText());
-    textEdit_->setPlainText(s);
 }
 
 static InfoPanelItemMaker<HistoryItemWidget> maker1("history");

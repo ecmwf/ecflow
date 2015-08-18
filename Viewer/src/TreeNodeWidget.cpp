@@ -9,13 +9,13 @@
 
 #include "TreeNodeWidget.hpp"
 
-
-#include "NodeViewBase.hpp"
+#include <QHBoxLayout>
 
 #include "AbstractNodeModel.hpp"
 #include "DashboardDock.hpp"
 #include "NodeFilterModel.hpp"
 #include "NodePathWidget.hpp"
+#include "NodeViewBase.hpp"
 #include "TreeNodeModel.hpp"
 #include "TreeNodeView.hpp"
 #include "VFilter.hpp"
@@ -28,6 +28,9 @@ TreeNodeWidget::TreeNodeWidget(ServerFilter* servers,QWidget* parent) : NodeWidg
 	//Init qt-creator form
 	setupUi(this);
 
+	//This defines how to filter the nodes in the tree. We only want to filter according to node status.
+	filterDef_=new NodeFilterDef(NodeFilterDef::NodeStateScope);
+
 	//Create the tree model. It uses the datahandler to access the data.
 	model_=new TreeNodeModel(servers,filterDef_,atts_,icons_,parent);
 
@@ -36,11 +39,15 @@ TreeNodeWidget::TreeNodeWidget(ServerFilter* servers,QWidget* parent) : NodeWidg
 	//Create a filter model for the tree.
 	filterModel_=new NodeFilterModel(model_,parent);
 
-	//Set the model on the view.
-	viewWidget_->setModel(filterModel_);
+	//Create the view
+	QHBoxLayout *hb=new QHBoxLayout(viewHolder_);
+	hb->setContentsMargins(0,0,0,0);
+	hb->setSpacing(0);
+	TreeNodeView *tv=new TreeNodeView(filterModel_,filterDef_,this);
+	hb->addWidget(tv);
 
 	//Store the pointer to the (non-QObject) base class of the view!!!
-	view_=viewWidget_;
+	view_=tv;
 
 	//Signals-slots
 
@@ -65,6 +72,9 @@ TreeNodeWidget::TreeNodeWidget(ServerFilter* servers,QWidget* parent) : NodeWidg
 	//This will not emit the trigered signal of the action!!
 	//Synchronise the action and the breadcrumbs state
 	actionBreadcrumbs->setChecked(bcWidget_->active());
+
+	//The node status filter is exposed via a menu. So we need a reference to it.
+	states_=filterDef_->nodeState();
 
 }
 

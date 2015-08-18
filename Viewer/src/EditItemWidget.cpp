@@ -37,6 +37,8 @@ EditItemWidget::EditItemWidget(QWidget *parent) :
 
 	Highlighter* ih=new Highlighter(textEdit_->document(),"script");
 
+	searchLine_->setEditor(textEdit_);
+
 	searchLine_->setVisible(false);
 
 	//connect(submitTb_,SIGNAL(clicked(bool)),

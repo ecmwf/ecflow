@@ -13,6 +13,7 @@
 
 #include <QApplication>
 #include <QFile>
+#include <QStyleFactory>
 
 #include "File.hpp"
 #include "MainWindow.hpp"
@@ -35,6 +36,13 @@ int main(int argc, char **argv)
     //}
 
     QApplication app(argc, argv);
+
+    //Set the style
+    QString style="plastique";
+    if(QStyleFactory::keys().contains(style))
+    {
+    	app.setStyle(style);
+    }
 
     //Initialise the config and other paths
     DirectoryHandler::init(std::string(argv[0]));  // we need to tell the Directory class where we started from

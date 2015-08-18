@@ -591,6 +591,9 @@ void VServer::clear()
 
 	//A sanity check
 	assert(totalNum_ == 0);
+
+	//Deallocate the nodes vector
+	nodes_=std::vector<VNode*>();
 }
 
 //Clear the contents of a particular VNode
@@ -731,6 +734,10 @@ void VServer::beginScan(VServerChange& change)
 
 		const std::vector<suite_ptr> &suites = defs->suiteVec();
 		change.suiteNum_=suites.size();
+
+		std::vector<node_ptr> nv;
+		defs->get_all_nodes(nv);
+		change.totalNum_=change.suiteNum_+nv.size();
 	}
 
 	//This will use ServerDefsAccess as well. So we have to be sure that t=the mutex is
@@ -764,6 +771,12 @@ void VServer::endScan()
 	//This will use ServerDefsAccess as well. So we have to be sure that the mutex is
 	//released at this point.
 	endUpdateAttrNum();
+
+	if(totalNum_ > 0)
+	{
+		nodes_.reserve(totalNum_);
+		collect(nodes_);
+	}
 }
 
 void VServer::scan(VNode *node)
@@ -773,11 +786,12 @@ void VServer::scan(VNode *node)
 	std::vector<node_ptr> nodes;
 	node->node()->immediateChildren(nodes);
 
-	totalNum_+=nodes.size();
+	//totalNum_+=nodes.size();
 
 	for(std::vector<node_ptr>::const_iterator it=nodes.begin(); it != nodes.end(); ++it)
 	{
 		VNode* vn=new VNode(node,*it);
+		totalNum_++;
 		scan(vn);
 	}
 
@@ -785,6 +799,22 @@ void VServer::scan(VNode *node)
 	{
 		 totalNumInChild_.push_back(totalNum_-prevTotalNum);
 	}
+}
+
+VNode* VServer::nodeAt(int idx) const
+{
+	assert(idx>=0 && idx < nodes_.size());
+	return nodes_.at(idx);
+}
+
+int VServer::indexOfNode(const VNode* vn) const
+{
+	for(int i=0; i < nodes_.size(); i++)
+	{
+		if(nodes_.at(i) == vn)
+			return i;
+	}
+	return -1;
 }
 
 //----------------------------------------------

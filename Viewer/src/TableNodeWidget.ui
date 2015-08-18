@@ -13,32 +13,25 @@
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout">
+  <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0,1">
+   <property name="spacing">
+    <number>0</number>
+   </property>
    <property name="margin">
     <number>0</number>
    </property>
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="1,0">
+    <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="1">
+     <property name="spacing">
+      <number>1</number>
+     </property>
      <item>
       <widget class="NodePathWidget" name="bcWidget_" native="true"/>
-     </item>
-     <item>
-      <spacer name="horizontalSpacer_2">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>40</width>
-         <height>20</height>
-        </size>
-       </property>
-      </spacer>
      </item>
     </layout>
    </item>
    <item>
-    <widget class="TableNodeView" name="viewWidget_" native="true">
+    <widget class="TableFilterWidget" name="filterW_" native="true">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
        <horstretch>0</horstretch>
@@ -46,6 +39,9 @@
       </sizepolicy>
      </property>
     </widget>
+   </item>
+   <item>
+    <widget class="QWidget" name="viewHolder_" native="true"/>
    </item>
   </layout>
   <action name="actionBreadcrumbs">
@@ -59,17 +55,6 @@
     <string>Show breadcrumbs</string>
    </property>
   </action>
-  <action name="actionFrozen">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Frozen</string>
-   </property>
-   <property name="toolTip">
-    <string>Do not update panel when node changes</string>
-   </property>
-  </action>
  </widget>
  <customwidgets>
   <customwidget>
@@ -79,9 +64,9 @@
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>TableNodeView</class>
+   <class>TableFilterWidget</class>
    <extends>QWidget</extends>
-   <header>TableNodeView.hpp</header>
+   <header>TableFilterWidget.hpp</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

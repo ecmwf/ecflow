@@ -15,11 +15,13 @@
 
 class QWidget;
 class NodeFilterModel;
+class NodeFilterDef;
+class VSettings;
 
 class NodeViewBase
 {
 public:
-		explicit NodeViewBase(NodeFilterModel* model=0);
+		explicit NodeViewBase(NodeFilterModel *model,NodeFilterDef*filterDef);
 		virtual ~NodeViewBase(){};
 
 		virtual void reload()=0;
@@ -29,8 +31,11 @@ public:
 		virtual void selectFirstServer()=0;
 		virtual void currentSelection(VInfo_ptr n)=0;
 
+		virtual void readSettings(VSettings* vs)=0;
+
 protected:
 		NodeFilterModel* model_;
+		NodeFilterDef* filterDef_;
 };
 
 #endif

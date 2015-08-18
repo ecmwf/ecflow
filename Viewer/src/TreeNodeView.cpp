@@ -21,8 +21,8 @@
 #include "TreeNodeViewDelegate.hpp"
 #include "VNode.hpp"
 
-TreeNodeView::TreeNodeView(QWidget* parent) :
-	QTreeView(parent)
+TreeNodeView::TreeNodeView(NodeFilterModel* model,NodeFilterDef* filterDef,QWidget* parent) :
+	QTreeView(parent), NodeViewBase(model,filterDef)
 {
 	setProperty("style","nodeView");
 
