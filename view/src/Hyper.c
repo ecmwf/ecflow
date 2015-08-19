@@ -823,40 +823,30 @@ int            n_args;
   Widget swin;
   Widget v_scroll;
 
-  int ac = 0;
-
-//  Position    x_grep,y_grep;
-//  Dimension   h_grep,w_grep;
-//  Position    x_clip,y_clip;
-//  Dimension   h_clip,w_clip;
-//  Position    dv=0,dh=0;
-//  int min,max;
-//  int v_val,v_size,v_inc,v_page;
-//  int h_val,h_size,h_inc,h_page;
-//  Position x,y;
-  
+  int ac = 0; 
   Position    dh=0;
 
   Arg al[5];
 
-  // https://software.ecmwf.int/issues/browse/SUP-646
+  /* https://software.ecmwf.int/issues/browse/SUP-646 */
 
   printf("## mouse 1\n");
   if(!clip) return;
   swin = XtParent(clip);
 
   printf("## mouse 2\n");
-  // if(!swin || !XmIsScrolledWindow(swin)) return;
+  /* if(!swin || !XmIsScrolledWindow(swin)) return; */
   if(!swin) return;
 
   printf("## mouse 3\n");
-  // 20131126 if (n_args != 1) return;
+  /* 20131126 if (n_args != 1) return; */
   SetArg(XmNverticalScrollBar  , &v_scroll);
   GetValues(swin);
   
   {	
     Position        x_parent,y_parent;	Position x,y;
     int min= 0, max= 80, value= 0, slider_size = 80, inc = 10, page_inc = 100;
+    int arg = atoi(args[0]);
     /* SetArg(XmNminimum,&min);
     SetArg(XmNmaximum,&max);    
     SetArg(XmNvalue,&value);    
@@ -881,7 +871,6 @@ int            n_args;
     /* GetValues(v_scroll);
     XmScrollBarGetValues(v_scroll, value, slider_size, inc, page_inc); */
     
-    int arg = atoi(args[0]);
     dh = (abs(arg) > 5) ? page_inc : inc;
 
     if (arg < 0) {

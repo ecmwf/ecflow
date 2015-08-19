@@ -108,6 +108,8 @@ void edit_label_form_c::create (Widget parent, char *widget_name)
 	XtAddCallback (value_, XmNvalueChangedCallback,&edit_label_form_c:: changedCB, (XtPointer) this);
 	XtManageChild(value_);
 	children[ac++] = label1;
+	children[ac++] = scrolledText1; /* 20150819 */
+	children[ac++] = scrolledText2; /* 20150819 */
 	XtManageChildren(children, ac);
 	ac = 0;
 	XtAddCallback (default_, XmNvalueChangedCallback,&edit_label_form_c:: changedCB, (XtPointer) this);
