@@ -46,10 +46,6 @@
     		"label" : "Type",
     		"tooltip" : "Type of zombie"
     	},
-    	"creation" : {
-    		"label" : "Created",
-    		"tooltip" : "Creation time"
-    	},
     	"duration" : {
     		"label" : "Duration",
     		"tooltip" : "Duration"

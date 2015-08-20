@@ -517,7 +517,25 @@ void InfoPanel::notifyServerSuiteFilterChanged(ServerHandler* server)
 			}
 		}
 	}
+}
 
+void InfoPanel::notifyServerSyncFinished(ServerHandler* server)
+{
+	//TODO: does frozen make sense in this case?
+	if(frozen())
+		return;
+
+	if(info_.get())
+	{
+		if(info_->server() && info_->server() == server)
+		{
+			//Dispatch the change
+			Q_FOREACH(InfoPanelItemHandler *item,items_)
+			{
+				item->item()->serverSyncFinished();
+			}
+		}
+	}
 }
 
 void InfoPanel::writeSettings(VSettings* vs)

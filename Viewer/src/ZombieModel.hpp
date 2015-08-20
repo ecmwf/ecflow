@@ -27,11 +27,11 @@ public:
    	QModelIndex parent (const QModelIndex & ) const;
 
 	void setData(const std::vector<Zombie>&);
+	bool updateData(const std::vector<Zombie>&);
     void clearData();
+    bool hasData() const;
 
 protected:
-	bool hasData() const;
-
 	std::vector<Zombie> data_;
 	ModelColumn* columns_;
 };

@@ -78,6 +78,7 @@ public:
 	void notifyEndServerScan(ServerHandler* server);
 	void notifyServerConnectState(ServerHandler* server);
 	void notifyServerSuiteFilterChanged(ServerHandler* server);
+	void notifyServerSyncFinished(ServerHandler* server);
 
 public Q_SLOTS:
 	void slotReload(VInfo_ptr node);

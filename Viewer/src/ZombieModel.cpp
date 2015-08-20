@@ -35,6 +35,49 @@ void ZombieModel::setData(const std::vector<Zombie>& data)
 	endResetModel();
 }
 
+bool ZombieModel::updateData(const std::vector<Zombie>& data)
+{
+	bool sameAs=false;
+	if(hasData() && data.size() == data_.size())
+	{
+		sameAs=true;
+		for(std::vector<Zombie>::const_iterator it=data.begin(); it != data.end(); it++)
+		{
+			bool hasIt=false;
+			std::string p=(*it).path_to_task();
+			for(std::vector<Zombie>::const_iterator itM=data_.begin(); itM != data_.end(); itM++)
+			{
+				if(p == (*itM).path_to_task())
+				{
+					hasIt=true;
+					break;
+				}
+			}
+
+			if(!hasIt)
+			{
+				sameAs=false;
+				break;
+			}
+		}
+	}
+
+	if(sameAs)
+	{
+		data_=data;
+		Q_EMIT dataChanged(index(0,0),index(data_.size()-1,columns_->count()));
+		return false;
+	}
+	else
+	{
+		beginResetModel();
+		data_=data;
+		endResetModel();
+		return true;
+	}
+}
+
+
 void ZombieModel::clearData()
 {
 	beginResetModel();

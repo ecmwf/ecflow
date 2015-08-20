@@ -46,15 +46,22 @@ protected Q_SLOTS:
 	void on_actionFoboff_triggered();
 	void on_actionDelete_triggered();
 	void on_actionKill_triggered();
+	void on_reloadTb__clicked(bool);
+	void slotItemSelected(QModelIndex,QModelIndex);
 
 protected:
 	void updateWidgetState() {};
+	void serverSyncFinished();
 
 private:
 	void command(const std::string& cmdName);
+	void updateContents();
+	void checkActionState();
 
 	ZombieModel *model_;
 	QSortFilterProxyModel* sortModel_;
+	bool commandSent_;
+	QStringList lastSelection_;
 };
 
 #endif
