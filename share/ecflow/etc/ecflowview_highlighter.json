@@ -37,26 +37,20 @@
                  },
            
                  "keyword" : {
-                     "pattern" : "(if|then|elif|else|fi|case|esac)",                       
+                     "pattern" : "\\b(if|then|elif|else|fi|case|esac|set|for|in|done|do|while|try:)\\b",                       
                      "colour"  : "rgb(0,0,0)",
                      "bold"    : "true"
-                 }, 
+                 },                        
                  
-                 "command" : {
-                     "pattern" : "(echo|exit|export|sleep)",                       
-                     "colour"  : "rgb(136,0,136)",
-                     "bold"    : "true"
-                 }, 
-                 
-                 "shell" : {
-                     "pattern" : "(ecflow_client|grep|cat)",                       
+                 "ecfcommand" : {
+                     "pattern" : "\\b(ecflow_client)\\b",                       
                      "colour"  : "rgb(204,0,204)",
                      "bold"    : "true"
                  }, 
                  
                  "oper" : {
                      "pattern" : "(=|!=|-gt|-ge|-eq|-lt|-le)",                       
-                     "colour"  : "rgb(0,140,0)"                    
+                     "colour"  : "rgb(0,110,40)"                    
                  }, 
                     
                  "heredoc" : {
@@ -64,18 +58,52 @@
                      "colour"  : "rgb(34,51,136)",
                      "bold"    : "true"
                  }, 
-                 
-                 "string" : {
-                     "pattern" : "(\"[^\"]*\")",                       
-                     "colour"  : "rgb(191,3,3)"
-                 },   
-              
-                 "var" : {
+                            
+                 "ecfvar" : {
                      "pattern" : "(%\\S+%)",                       
-                     "colour"  : "rgb(0,0,255)",
+                     "colour"  : "rgb(16,40,170)",
                      "bold"  : "true"
                 },
-                                
+                    
+                "leftvalue" : {
+                    "pattern" : "(\\S+)\\s*=",                       
+                    "colour"  : "rgb(0,110,40)"                   
+               },
+                
+               "shellvar" : {
+                   "pattern" : "(\\$\\S+|\\))",                       
+                   "colour"  : "rgb(0,110,40)"                   
+              },
+               
+              
+              "command" : {
+                  "pattern" : "\\b(awk|banner|cat|cd|chmod|chown|cp|echo|exit|export|find|grep|hostname|ln|ls|mkdir|mv|printf|pwd|return|rm|sed|sleep|sort|trap|true|uname|wait)\\b",                       
+                  "colour"  : "rgb(136,0,136)",
+                  "bold"    : "true"
+              }, 
+              
+              "othercommand" : {
+                  "pattern" : "\\b(cmake|ctest|git|module)\\b",                       
+                  "colour"  : "rgb(204,0,204)",
+                  "bold"    : "true"
+              }, 
+              
+              "function" : {
+            	  "pattern" : "(\\S+\\s*\\(\\))",
+            	  "colour"  : "rgb(16,40,170)"        
+              },
+              
+               "string" : {
+                   "pattern" : "(\"[^\"]*\"|'[^']*')",                       
+                   "colour"  : "rgb(191,3,3)"
+               },   
+ 
+               "shell-syntax" : {
+                   "pattern" : "(\\[|\\]|;)",                       
+                   "colour"  : "rgb(0,0,0)",
+                   "bold"	 : "true"
+               }, 
+               
                  "comment" : {
                      "pattern" : "(#[^\n]*)",                     
                      "colour"  : "rgb(100,100,100)",
@@ -86,25 +114,78 @@
         },
         
         "job"  : {
+         
+             "keyword" : {
+                 "pattern" : "\\b(if|then|elif|else|fi|case|esac|set|for|in|done|do|while|try:)\\b",                       
+                 "colour"  : "rgb(0,0,0)",
+                 "bold"    : "true"
+             },                        
+             
+             "ecfcommand" : {
+                 "pattern" : "\\b(ecflow_client)\\b",                       
+                 "colour"  : "rgb(204,0,204)",
+                 "bold"    : "true"
+             }, 
+             
+             "oper" : {
+                 "pattern" : "(=|!=|-gt|-ge|-eq|-lt|-le)",                       
+                 "colour"  : "rgb(0,110,40)"                    
+             }, 
+                
+             "heredoc" : {
+                 "pattern" : "(<<\\s*\\S+\\s*>|EOF)",                       
+                 "colour"  : "rgb(34,51,136)",
+                 "bold"    : "true"
+             }, 
+                        
+                
+            "leftvalue" : {
+                "pattern" : "(\\S+)\\s*=",                       
+                "colour"  : "rgb(0,110,40)"                   
+           },
+            
+           "shellvar" : {
+               "pattern" : "(\\$\\S+|\\))",                       
+               "colour"  : "rgb(0,110,40)"                   
+          },
+           
+          "command" : {
+              "pattern" : "\\b(awk|banner|cat|cd|chmod|chown|cp|echo|eval|exec|exit|export|find|grep|hostname|ln|ls|mkdir|mv|printf|pwd|return|rm|sed|sleep|sort|trap|true|uname|wait)\\b",                       
+              "colour"  : "rgb(136,0,136)",
+              "bold"    : "true"
+          }, 
+        
+          "othercommand" : {
+              "pattern" : "\\b(cmake|ctest|git|module)\\b",                       
+              "colour"  : "rgb(204,0,204)",
+              "bold"    : "true"
+          }, 
+          
+          "function" : {
+        	  "pattern" : "(\\S+\\s*\\(\\))",
+        	  "colour"  : "rgb(16,40,170)"        
+          },
+          
+           "string" : {
+               "pattern" : "(\"[^\"]*\"|'[^']*')",                       
+               "colour"  : "rgb(191,3,3)"
+           },   
 
-            "comment" : {
-                "pattern" : "(#.*)\\n",                      
-                "colour"  : "rgb(140,140,140)",
-                "italic"  : "true"                                         
-            },
-            
-            "var" : {
-                 "pattern" : "(ECF_\\S+)",                       
-                 "colour"  : "rgb(22,100,44)"
-                   
-            },
-            
-            "command" : {
-                "pattern" : "(exit)",                       
-                "colour"  : "rgb(136,0,136)"               	
-           }  
-            
-            
-        }       
+           "shell-syntax" : {
+               "pattern" : "(\\[|\\]|;)",                       
+               "colour"  : "rgb(0,0,0)",
+               "bold"	 : "true"
+           }, 
+           
+             "comment" : {
+                 "pattern" : "(#[^\n]*)",                     
+                 "colour"  : "rgb(100,100,100)",
+                 "italic"  : "true"                                         
+             }
+             
+             
+    }
+        
+        
 }
 

@@ -34,5 +34,53 @@
     	"event" : {
     		"label" : "Event"
     	}   	
-    }
+    },
+    
+    "zombie_columns": {
+    	
+    	"path" : {
+    		"label" : "Path",
+    		"tooltip" : "Path of task node"
+    	},
+    	"type" : {
+    		"label" : "Type",
+    		"tooltip" : "Type of zombie"
+    	},
+    	"creation" : {
+    		"label" : "Created",
+    		"tooltip" : "Creation time"
+    	},
+    	"duration" : {
+    		"label" : "Duration",
+    		"tooltip" : "Duration"
+    	},
+    	"allowed" : {
+    		"label" : "Allowed",
+    		"tooltip" : "The age the zombie is allowed to live. Server typically checks every 60 seconds, hence this is lowest valid value that has effect"
+    	},
+    	"password" : {
+    		"label" : "Password",
+    		"tooltip" : "Password of the job"
+    	},    	
+    	"pid" : {
+    		"label" : "Pid",
+    		"tooltip" : "Process or remote id"
+    	},
+    	"tryno" : {
+    		"label" : "Try no",
+    		"tooltip" : "Try number"
+    	},
+    	"action" : {
+    		"label" : "Action",
+    		"tooltip" : "User action"
+    	},
+    	"child" : {
+    		"label" : "Child cmd",
+    		"tooltip" : "Child command"
+    	},
+    	"calls" : {
+    		"label" : "Calls",
+    		"tooltip" : "password of the job"
+    	}   	
+    }    
 }

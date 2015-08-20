@@ -41,6 +41,7 @@ public:
 	static QPixmap lockPixmap(int);
 	static QPixmap warningPixmap(int);
 	static QPixmap errorPixmap(int);
+	static QPixmap infoPixmap(int);
 
 private:
 	static IconItem* icon(QString name);

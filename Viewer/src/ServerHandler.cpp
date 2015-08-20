@@ -319,6 +319,7 @@ void ServerHandler::run(VTask_ptr task)
 	case VTask::ScriptPreprocTask:
 	case VTask::ScriptEditTask:
 	case VTask::ScriptSubmitTask:
+	case VTask::ZombieListTask:
 		comQueue_->addTask(task);
 		break;
 	default:
@@ -867,7 +868,7 @@ void ServerHandler::clientTaskFinished(VTask_ptr task,const ServerReply& serverR
 
 		case VTask::MessageTask:
 		{
-			task->reply()->text(serverReply.get_string_vec());
+			task->reply()->setTextVec(serverReply.get_string_vec());
 			task->status(VTask::FINISHED);
 			break;
 		}

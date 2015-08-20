@@ -84,6 +84,11 @@ QTreeView[style="nodeView"] {
     background: rgb(242,242,242);
 }
 
+
+QAbstractItemView  {
+    alternate-background-color: rgb(248,247,246);
+}
+
 /*----------------------------
   Info panel text
 ------------------------------*/

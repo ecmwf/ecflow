@@ -9,12 +9,19 @@
 
 #include "ZombieModel.hpp"
 
+#include "ModelColumn.hpp"
+
 #include <QDebug>
 
-ZombieModel::ZombieModel(QObject *parent) :
-          QAbstractItemModel(parent)
-{
+#include "boost/date_time/posix_time/posix_time.hpp"
 
+ZombieModel::ZombieModel(QObject *parent) :
+          QAbstractItemModel(parent),
+          columns_(0)
+{
+	columns_=ModelColumn::def("zombie_columns");
+
+	assert(columns_);
 }
 
 ZombieModel::~ZombieModel()
@@ -40,9 +47,9 @@ bool ZombieModel::hasData() const
 	return !data_.empty();
 }
 
-int ZombieModel::columnCount( const QModelIndex& /*parent */ ) const
+int ZombieModel::columnCount( const QModelIndex& /*parent */) const
 {
-   	 return 11;
+   	 return columns_->count();
 }
 
 int ZombieModel::rowCount( const QModelIndex& parent) const
@@ -71,85 +78,41 @@ QVariant ZombieModel::data( const QModelIndex& index, int role ) const
 		return QVariant();
 	}
 
-
-	/*
-	ecf::Child::ZombieType type() const { return zombie_type_;}
-		ecf::Child::CmdType last_child_cmd() const { return last_child_cmd_; }
-		const ZombieAttr& attr() const { return attr_;}
-		int calls() const { return calls_;}
-
-		std::string type_str() const;
-		const std::string& jobs_password() const { return jobs_password_; }
-		const std::string& path_to_task() const { return path_to_task_; }
-		const std::string& process_or_remote_id() const { return process_or_remote_id_; }
-	 	int try_no() const { return try_no_; }
-		int duration() const { return duration_; }
-		ecf::User::Action user_action() const;
-		std::string user_action_str() const;
-
-
-		const boost::posix_time::ptime&  creation_time() const { return creation_time_; }
-
-		bool empty() const { return path_to_task_.empty(); }
-
-		/// returns in seconds the age the zombie is allowed to live
-		/// Server typically checks every 60 seconds, hence this is lowest valid value that has effect
-		int allowed_age() const;
-
-		*/
-
 	int row=index.row();
 	if(row < 0 || row >= data_.size())
 		return QVariant();
 
+	QString id=columns_->id(index.column());
+
 	if(role == Qt::DisplayRole)
 	{
-		switch(index.column())
-		{
-		case 0:
+		if(id == "path")
 			return QString::fromStdString(data_.at(row).path_to_task());
-			break;
-		case 1:
+		else if(id == "type")
 			return QString::fromStdString(data_.at(row).type_str());
-			break;
-		case 2:
+		else if(id == "tryno")
 			return data_.at(row).try_no();
-			break;
-		case 3:
-			return data_.at(row).duration();
-			break;
-		case 4:
-			{
-				//const boost::posix_time::ptime& =  data_.at(row).creation_time();
-				return QVariant();
-			}
-			break;
-
-		case 5:
-			return QString::number(data_.at(row).allowed_age()) + " s";
-			break;
-		case 6:
-			return data_.at(row).calls();
-			break;
-
-		case 7:
-			return QString::fromStdString(data_.at(row).user_action_str());
-			break;
-		case 8:
-			return QString::fromStdString(data_.at(row).jobs_password());
-			break;
-
-		case 9:
-			return data_.at(row).last_child_cmd();
-			break;
-
-		case 10:
-			return QString::fromStdString(data_.at(row).process_or_remote_id());
-			break;
-
-		default:
-			break;
+		else if(id == "duration")
+			return QString::number(data_.at(row).duration()) + " s";
+		else if(id == "creation")
+		{
+			const boost::posix_time::ptime& t=  data_.at(row).creation_time();
+			return QString::fromStdString(boost::posix_time::to_simple_string(t));
 		}
+		else if(id == "allowed")
+			return QString::number(data_.at(row).allowed_age()) + " s";
+		else if(id == "calls")
+			return data_.at(row).calls();
+		else if(id == "action")
+			return QString::fromStdString(data_.at(row).user_action_str());
+		else if(id == "password")
+			return QString::fromStdString(data_.at(row).jobs_password());
+		else if(id == "child")
+			return QString::fromStdString(ecf::Child::to_string(data_.at(row).last_child_cmd()));
+		else if(id == "pid")
+			return QString::fromStdString(data_.at(row).process_or_remote_id());
+		else
+			return QVariant();
 	}
 
 	return QVariant();
@@ -157,46 +120,15 @@ QVariant ZombieModel::data( const QModelIndex& index, int role ) const
 
 QVariant ZombieModel::headerData( const int section, const Qt::Orientation orient , const int role ) const
 {
-	if ( orient != Qt::Horizontal || (role != Qt::DisplayRole &&  role != Qt::ToolTipRole))
+	if ( orient != Qt::Horizontal || (role != Qt::DisplayRole && role != Qt::UserRole ))
       		  return QAbstractItemModel::headerData( section, orient, role );
 
-   	if(role == Qt::DisplayRole)
-   	{
-   		switch ( section )
-   		{
-   		case 0: return tr("Path");
-   		case 1: return tr("Type");
-   		case 2: return tr("Try no");
-   		case 3: return tr("Duration");
-   		case 4: return tr("Creation");
-   		case 5: return tr("Allowed age");
-   		case 6: return tr("Calls");
-   		case 7: return tr("User action");
-   		case 8: return tr("Password");
-   		case 9: return tr("Child cmd");
-   		case 10: return tr("Id");
-   		default: return QVariant();
-   		}
-   	}
-   	else if(role== Qt::ToolTipRole)
-   	{
-   		switch ( section )
-   		{
-   		case 0: return tr("Path to the task node");
-   		case 1: return tr("Type of the zombie");
-   		case 2: return tr("Try number");
-   		case 3: return tr("Duration");
-   		case 4: return tr("Creation time");
-   		case 5: return tr("The age the zombie is allowed to live. Server typically checks every 60 seconds, hence this is lowest valid value that has effect");
-   		case 6: return tr("Number of calls");
-   		case 7: return tr("User action");
-   		case 8: return tr("Password of the job");
-   		case 9: return tr("Last child command");
-   		case 10: return tr("Process or remote id");
-   		default: return QVariant();
-   		}
-   	}
-    return QVariant();
+	if(role == Qt::DisplayRole)
+		return columns_->label(section);
+	else if(role == Qt::UserRole)
+		return columns_->id(section);
+
+	return QVariant();
 }
 
 QModelIndex ZombieModel::index( int row, int column, const QModelIndex & parent ) const

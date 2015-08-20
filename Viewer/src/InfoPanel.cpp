@@ -63,7 +63,7 @@ InfoPanel::InfoPanel(QWidget* parent) :
 			this,SIGNAL(selectionChanged(VInfo_ptr)));
 
 
-	tab_->setIconSize(QSize(12,12));
+	tab_->setIconSize(QSize(16,16));
 
 	//Builds the menu for the settings tool button
 	/*QMenu *menu=new QMenu(this);

@@ -68,4 +68,4 @@ ModelColumnItem::ModelColumnItem(const std::string& id) : index_(-1)
 }
 
 static SimpleLoader<ModelColumn> loaderTable("table_columns");
-//static SimpleLoader<ModelColumn> loaderTree("tree_columns");
+static SimpleLoader<ModelColumn> loaderTree("zombie_columns");

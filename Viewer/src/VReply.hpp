@@ -30,6 +30,7 @@ public:
 	const std::string& warningText() const {return warningText_;}
 	const std::string& infoText() const {return infoText_;}
 	const std::string& text() const {return text_;}
+	const std::vector<std::string>& textVec() const {return textVec_;}
 	Status status() const {return status_;}
 	const std::string fileName() const {return fileName_;}
 	FileReadMode fileReadMode() const {return readMode_;}

@@ -172,7 +172,7 @@ set(viewer_wrap_ui_files
     HistoryItemWidget.ui
     InfoPanel.ui    
     MainWindow.ui 
-    TimeItemWidget.ui
+    MessageItemWidget.ui
     MenuConfigDialog.ui
     OutputItemWidget.ui 
     PropertyDialog.ui
@@ -185,6 +185,7 @@ set(viewer_wrap_ui_files
     SuiteItemWidget.ui
     TableFilterWidget.ui
     TableNodeWidget.ui
+    TimeItemWidget.ui
     TreeNodeWidget.ui
     TriggerItemWidget.ui          
     VariableAddDialog.ui

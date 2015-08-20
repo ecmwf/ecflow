@@ -12,9 +12,12 @@
 #define MESSAGEITEMWIDGET_HPP_
 
 #include "InfoPanelItem.hpp"
-#include "CodeItemWidget.hpp"
 
-class MessageItemWidget : public CodeItemWidget, public InfoPanelItem
+#include "ui_MessageItemWidget.h"
+
+class LogModel;
+
+class MessageItemWidget : public QWidget, public InfoPanelItem, protected Ui::MessageItemWidget
 {
 public:
 	explicit MessageItemWidget(QWidget *parent=0);
@@ -33,6 +36,8 @@ public:
 
 protected:
 	void updateWidgetState() {};
+
+	LogModel* model_;
 
 };
 

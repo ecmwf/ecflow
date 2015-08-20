@@ -19,10 +19,11 @@ static IconItem unknownIcon(":/desktop/unknown.svg");
 static IconItem linkIcon(":/desktop/link.svg");
 static IconItem linkBrokenIcon(":/desktop/link_broken.svg");
 static IconItem lockIcon(":/viewer/padlock.svg");
-static IconItem warningIcon(":/desktop/warning.svg");
-static IconItem errorIcon(":/desktop/error.svg");
+static IconItem warningIcon(":/viewer/warning.svg");
+static IconItem errorIcon(":/viewer/error.svg");
 static IconItem bookmarkGroupIcon(":/desktop/bookmark_group.svg");
 static IconItem embeddedIcon(":/desktop/embedded.svg");
+static IconItem infoIcon(":/viewer/info.svg");
 
 std::map<QString,IconItem*> IconProvider::icons_;
 
@@ -109,6 +110,11 @@ QPixmap IconProvider::warningPixmap(int size)
 QPixmap IconProvider::errorPixmap(int size)
 {
 	 return errorIcon.pixmap(size);
+}
+
+QPixmap IconProvider::infoPixmap(int size)
+{
+	 return infoIcon.pixmap(size);
 }
 
 static IconProvider	iconProvider;

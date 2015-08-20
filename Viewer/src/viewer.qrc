@@ -39,10 +39,16 @@
     <file alias="filesave.svg">../images/filesave.svg</file>
     <file alias="filter_decor.svg">../images/filter_decor.svg</file>
     <file alias="log.svg">../images/log.svg</file>
+    <file alias="log_info.svg">../images/log_info.svg</file>
+    <file alias="log_error.svg">../images/log_error.svg</file>
+    <file alias="manual.svg">../images/manual.svg</file>
+    <file alias="message.svg">../images/message.svg</file>   
     <file alias="padlock.svg">../images/padlock.svg</file>
+    <file alias="rescue.svg">../images/rescue.svg</file>
     <file alias="script.svg">../images/script.svg</file>    
     <file alias="search_decor.svg">../images/search_decor.svg</file>    
     <file alias="spinning_wheel.gif">../images/spinning_wheel.gif</file>
+    <file alias="terminate.svg">../images/terminate.svg</file>
     <file alias="warning.svg">../images/warning.svg</file>
   </qresource>
 </RCC>

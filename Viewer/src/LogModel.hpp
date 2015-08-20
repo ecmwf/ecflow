@@ -3,6 +3,11 @@
 
 #include <QAbstractItemModel>
 #include <QSortFilterProxyModel>
+#include <QStyledItemDelegate>
+
+
+
+#include <vector>
 
 class LogModelLine
 {
@@ -34,6 +39,7 @@ public:
    	QModelIndex parent (const QModelIndex & ) const;
 
 	void setData(const std::string&);
+	void setData(const std::vector<std::string>&);
     void clearData();
 
 protected:
@@ -41,5 +47,18 @@ protected:
 
 	QList<LogModelLine> data_;
 };
+
+class LogDelegate : public QStyledItemDelegate
+{
+public:
+    explicit LogDelegate(QWidget *parent=0);
+    void paint(QPainter *painter,const QStyleOptionViewItem &option,
+                   const QModelIndex& index) const;
+
+    QSize sizeHint(const QStyleOptionViewItem & option, const QModelIndex & index ) const;
+
+};
+
+
 
 #endif

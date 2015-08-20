@@ -15,6 +15,7 @@
         {
         	"name"    : "manual",
             "label"   : "Manual",
+            "icon"    : "manual.svg",
             "visible_for" : "node"            
         },    
        
@@ -80,6 +81,7 @@
         {
         	"name"    : "message",
             "label"   : "Messages",
+            "icon"	  : "message.svg",
             "visible_for" : "server or node"
              
         },     

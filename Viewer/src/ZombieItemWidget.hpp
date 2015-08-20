@@ -19,6 +19,7 @@
 #include "ui_ZombieItemWidget.h"
 
 class ZombieModel;
+class QSortFilterProxyModel;
 
 class ZombieItemWidget : public QWidget, public InfoPanelItem, protected Ui::ZombieItemWidget
 {
@@ -40,11 +41,11 @@ public:
 	void defsChanged(const std::vector<ecf::Aspect::Type>&) {};
 
 protected Q_SLOTS:
-	void on_terminateTb_toggled(bool);
-	void on_rescueTb_toggled(bool);
-	void on_foboffTb_clicked(bool);
-	void on_deleteTb_clicked(bool);
-	void on_killTb_clicked(bool);
+	void on_actionTerminate_triggered();
+	void on_actionRescue_triggered();
+	void on_actionFoboff_triggered();
+	void on_actionDelete_triggered();
+	void on_actionKill_triggered();
 
 protected:
 	void updateWidgetState() {};
@@ -53,6 +54,7 @@ private:
 	void command(const std::string& cmdName);
 
 	ZombieModel *model_;
+	QSortFilterProxyModel* sortModel_;
 };
 
 #endif

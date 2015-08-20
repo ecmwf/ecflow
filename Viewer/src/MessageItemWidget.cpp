@@ -9,18 +9,21 @@
 
 #include "MessageItemWidget.hpp"
 
-#include "Highlighter.hpp"
 #include "InfoProvider.hpp"
 #include "VReply.hpp"
 
-MessageItemWidget::MessageItemWidget(QWidget *parent) : CodeItemWidget(parent)
-{
-    fileLabel_->hide();
-    textEdit_->setShowLineNumbers(false);
+#include "LogModel.hpp"
 
-    Highlighter* ih=new Highlighter(textEdit_->document(),"message");
+MessageItemWidget::MessageItemWidget(QWidget *parent) : QWidget(parent)
+{
+    setupUi(this);
+
+    searchLine_->setVisible(false);
 
     infoProvider_=new MessageProvider(this);
+
+    model_=new LogModel(this);
+    treeView_->setModel(model_);
 }
 
 QWidget* MessageItemWidget::realWidget()
@@ -44,25 +47,23 @@ void MessageItemWidget::reload(VInfo_ptr info)
 void MessageItemWidget::clearContents()
 {
     InfoPanelItem::clear();
-    textEdit_->clear();
+
+    model_->clearData();
 }
 
 void MessageItemWidget::infoReady(VReply* reply)
 {
-    QString s=QString::fromStdString(reply->text());
-    textEdit_->setPlainText(s);
+    model_->setData(reply->textVec());
 }
 
 void MessageItemWidget::infoProgress(VReply* reply)
 {
     QString s=QString::fromStdString(reply->text());
-    textEdit_->setPlainText(s);
 }
 
 void MessageItemWidget::infoFailed(VReply* reply)
 {
     QString s=QString::fromStdString(reply->errorText());
-    textEdit_->setPlainText(s);
 }
 
 static InfoPanelItemMaker<MessageItemWidget> maker1("message");

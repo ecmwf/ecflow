@@ -234,7 +234,8 @@ void TextEdit::lineNumberAreaPaintEvent(QPaintEvent *event)
     QFont fontNormal(font());   // the font to use for most line numbers
     QFont fontBold(fontNormal);  // the font to use for the current line number
     fontBold.setBold(true);
-    painter.setPen(Qt::blue);
+    //painter.setPen(Qt::blue);
+    painter.setPen(QColor(108,108,108));
 
     painter.setFont(fontNormal);
 

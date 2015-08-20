@@ -8,6 +8,8 @@
 
 #include "Zombie.hpp"
 
+class ModelColumn;
+
 class ZombieModel : public QAbstractItemModel
 {
 public:
@@ -31,6 +33,8 @@ protected:
 	bool hasData() const;
 
 	std::vector<Zombie> data_;
+	ModelColumn* columns_;
 };
+
 
 #endif

@@ -18,11 +18,14 @@ HistoryItemWidget::HistoryItemWidget(QWidget *parent) : QWidget(parent)
 	setupUi(this);
 
 	fileLabel_->hide();
+	searchLine_->setVisible(false);
 
 	infoProvider_=new HistoryProvider(this);
 
 	model_=new LogModel(this);
 	treeView_->setModel(model_);
+
+	treeView_->setItemDelegate(new LogDelegate(this));
 }
 
 QWidget* HistoryItemWidget::realWidget()
@@ -51,7 +54,6 @@ void HistoryItemWidget::clearContents()
 
 void HistoryItemWidget::infoReady(VReply* reply)
 {
-    //QString s=QString::fromStdString(reply->text());
     model_->setData(reply->text());
 }
 

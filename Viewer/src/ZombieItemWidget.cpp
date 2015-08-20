@@ -9,8 +9,8 @@
 
 #include "ZombieItemWidget.hpp"
 
-
 #include <QItemSelectionModel>
+#include <QSortFilterProxyModel>
 
 #include "ServerHandler.hpp"
 #include "VNode.hpp"
@@ -32,12 +32,29 @@ ZombieItemWidget::ZombieItemWidget(QWidget *parent) : QWidget(parent)
 
 	model_=new ZombieModel(this);
 
-	zombieView->setModel(model_);
+	sortModel_=new QSortFilterProxyModel(this);
+	sortModel_->setSourceModel(model_);
+
+	zombieView->setModel(sortModel_);
 
 	//The selection changes in the view
 	connect(zombieView->selectionModel(),SIGNAL(currentChanged(QModelIndex,QModelIndex)),
 			this,SLOT(slotItemSelected(QModelIndex,QModelIndex)));
 
+
+	//Build context menu
+	zombieView->addAction(actionTerminate);
+	zombieView->addAction(actionRescue);
+	zombieView->addAction(actionFoboff);
+	zombieView->addAction(actionDelete);
+	zombieView->addAction(actionKill);
+
+	//Add actions for the pushbuttons
+	terminateTb_->setDefaultAction(actionTerminate);
+	rescueTb_->setDefaultAction(actionRescue);
+	foboffTb_->setDefaultAction(actionFoboff);
+	deleteTb_->setDefaultAction(actionDelete);
+	killTb_->setDefaultAction(actionKill);
 }
 
 QWidget* ZombieItemWidget::realWidget()
@@ -75,27 +92,27 @@ void ZombieItemWidget::infoFailed(VReply* reply)
     QString s=QString::fromStdString(reply->errorText());
 }
 
-void ZombieItemWidget::on_terminateTb_toggled(bool)
+void ZombieItemWidget::on_actionTerminate_triggered()
 {
 	command("zombie_fail");
 }
 
-void ZombieItemWidget::on_rescueTb_toggled(bool val)
+void ZombieItemWidget::on_actionRescue_triggered()
 {
 	command("zombie_adopt");
 }
 
-void ZombieItemWidget::on_foboffTb_clicked(bool)
+void ZombieItemWidget::on_actionFoboff_triggered()
 {
 	command("zombie_fob");
 }
 
-void ZombieItemWidget::on_deleteTb_clicked(bool)
+void ZombieItemWidget::on_actionDelete_triggered()
 {
 	command("zombie_remove");
 }
 
-void ZombieItemWidget::on_killTb_clicked(bool)
+void ZombieItemWidget::on_actionKill_triggered()
 {
 	command("zombie_kill");
 }
