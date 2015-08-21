@@ -58,6 +58,8 @@ ZombieItemWidget::ZombieItemWidget(QWidget *parent) :
 	foboffTb_->setDefaultAction(actionFoboff);
 	deleteTb_->setDefaultAction(actionDelete);
 	killTb_->setDefaultAction(actionKill);
+
+	checkActionState();
 }
 
 QWidget* ZombieItemWidget::realWidget()
@@ -83,6 +85,7 @@ void ZombieItemWidget::clearContents()
 {
 	InfoPanelItem::clear();
 	model_->clearData();
+	checkActionState();
 }
 
 void ZombieItemWidget::updateContents()
@@ -160,13 +163,14 @@ void ZombieItemWidget::infoReady(VReply* reply)
 			zombieView->resizeColumnToContents(i);
 		}
 	}
-
+	checkActionState();
 }
 
 void ZombieItemWidget::infoFailed(VReply* reply)
 {
 	commandSent_=false;
-	QString s=QString::fromStdString(reply->errorText());
+	//QString s=QString::fromStdString(reply->errorText());
+	checkActionState();
 }
 
 void ZombieItemWidget::on_actionTerminate_triggered()

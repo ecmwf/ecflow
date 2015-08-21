@@ -85,8 +85,11 @@ QTreeView[style="nodeView"] {
 }
 
 
-QAbstractItemView  {
+QAbstractItemView::item {
     alternate-background-color: rgb(248,247,246);
+    border-top-color: transparent;
+    border-left-color: transparent; 
+        border-right-color: transparent;
 }
 
 /*----------------------------
@@ -132,10 +135,10 @@ QGroupBox#editorGroupBox {
   Dock widget
 ------------------------------*/
 
-QWidget#DashboardDockTitleWidget {
+/*QWidget#DashboardDockTitleWidget {
      border: 1px solid rgb(60,60,60);
      background: rgb(26, 246, 246);       
-}     
+}*/     
      
 /*----------------------------
   Variable tree view

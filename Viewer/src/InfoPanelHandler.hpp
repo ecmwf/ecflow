@@ -25,10 +25,12 @@ public:
 	std::string name() const {return name_;}
 	std::string label() const {return label_;}
 	std::string icon() const {return icon_;}
+	std::string show() const {return show_;}
 	BaseNodeCondition* visibleCondition() const {return visibleCondition_;}
 
 	void setLabel(const std::string& s) {label_=s;}
 	void setIcon(const std::string& s) {icon_=s;}
+	void setShow(const std::string& s) {show_=s;}
 	void setVisibleCondition(BaseNodeCondition *visibleCond) {visibleCondition_=visibleCond;}
 	void setEnabledCondition(BaseNodeCondition *enabledCond) {enabledCondition_=enabledCond;}
 
@@ -36,6 +38,7 @@ protected:
 	std::string name_;
 	std::string label_;
 	std::string icon_;
+	std::string show_;
 
 	BaseNodeCondition *visibleCondition_;
 	BaseNodeCondition *enabledCondition_;
@@ -48,6 +51,7 @@ public:
 
 	void init(const std::string& file);
 	void visible(VInfo_ptr info,std::vector<InfoPanelDef*>& lst);
+	const std::vector<InfoPanelDef*>& panels() const {return panels_;}
 
 	static InfoPanelHandler* instance();
 

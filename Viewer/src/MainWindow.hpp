@@ -12,14 +12,10 @@
 
 #include <QMainWindow>
 #include <QSettings>
-#include <QTreeWidget>
 
 #include "ui_MainWindow.h"
 
-#include "Defs.hpp"
-#include "DirectoryHandler.hpp"
-#include "SessionHandler.hpp"
-#include "Viewer.hpp"
+#include "VInfo.hpp"
 
 #include <boost/property_tree/ptree.hpp>
 
@@ -27,6 +23,7 @@ class QActionGroup;
 class InfoPanel;
 class NodePanel;
 class ServerFilterMenu;
+class SessionItem;
 class VComboSettings;
 
 class MainWindow : public QMainWindow, private Ui::MainWindow
@@ -61,6 +58,7 @@ protected Q_SLOTS:
 	void on_actionAbout_triggered();
 
 	void slotCurrentChangedInPanel();
+	void slotSelectionChanged(VInfo_ptr);
 
 private:
     void init(MainWindow*);
@@ -82,9 +80,9 @@ private:
     static MainWindow* findWindow(QWidget *childW);
     static void configChanged(MainWindow *);
 
-
     ServerFilterMenu* serverFilterMenu_;
     NodePanel* nodePanel_;
+    QList<QAction*> infoPanelItemActions_;
 
     static bool quitStarted_;
     static QList<MainWindow*> windows_;

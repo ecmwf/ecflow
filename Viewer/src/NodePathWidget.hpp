@@ -112,6 +112,7 @@ protected Q_SLOTS:
 	void slotContextMenu(const QPoint&);
 	void nodeItemSelected();
 	void menuItemSelected();
+	void slotRefreshServer();
 
 Q_SIGNALS:
 	void selected(VInfo_ptr);
@@ -133,6 +134,7 @@ protected:
 	VInfo_ptr info_;
 	VInfo_ptr infoFull_;
 	int infoIndex_;
+	QToolButton* reloadTb_;
 
 	//When it is set to "true": if a node item (i.e. not a menu) is selected the breadcrumbs
 	//will stay the same and only will change the current node/selection!

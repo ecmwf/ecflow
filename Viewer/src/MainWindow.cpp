@@ -15,6 +15,7 @@
 #include <QDialog>
 #include <QDockWidget>
 #include <QMessageBox>
+#include <QPixmap>
 #include <QSplitter>
 #include <QToolBar>
 #include <QVBoxLayout>
@@ -29,12 +30,14 @@
 #include "AboutDialog.hpp"
 #include "FilterWidget.hpp"
 #include "InfoPanel.hpp"
+#include "InfoPanelHandler.hpp"
+#include "MenuConfigDialog.hpp"
 #include "NodePathWidget.hpp"
 #include "NodePanel.hpp"
 #include "PropertyDialog.hpp"
 #include "ServerHandler.hpp"
 #include "ServerListDialog.hpp"
-#include "MenuConfigDialog.hpp"
+#include "SessionHandler.hpp"
 #include "UserMessage.hpp"
 #include "VConfig.hpp"
 #include "VSettings.hpp"
@@ -70,8 +73,24 @@ MainWindow::MainWindow(QStringList idLst,QWidget *parent) : QMainWindow(parent)
     
     connect(nodePanel_,SIGNAL(currentWidgetChanged()),
     		this,SLOT(slotCurrentChangedInPanel()));
-}
 
+    connect(nodePanel_,SIGNAL(selectionChanged(VInfo_ptr)),
+    			this,SLOT(slotSelectionChanged(VInfo_ptr)));
+
+    //Set tabs according to the current set of roles
+    for(std::vector<InfoPanelDef*>::const_iterator it=InfoPanelHandler::instance()->panels().begin();
+    	it != InfoPanelHandler::instance()->panels().end(); it++)
+    {
+    	if((*it)->show().find("toolbar") != std::string::npos)
+    	{
+    		QAction *ac=toolBar->addAction(QString::fromStdString((*it)->label()));
+    		QPixmap pix(":/viewer/" + QString::fromStdString((*it)->icon()));
+    		ac->setIcon(QIcon(pix));
+    		ac->setData(QString::fromStdString((*it)->name()));
+    		infoPanelItemActions_ << ac;
+    	}
+    }
+}
 
 MainWindow::~MainWindow()
 {
@@ -186,6 +205,27 @@ void MainWindow::slotCurrentChangedInPanel()
 	 //updateSearchPanel();
 }
 
+void MainWindow::slotSelectionChanged(VInfo_ptr info)
+{
+	std::vector<InfoPanelDef*> ids;
+	InfoPanelHandler::instance()->visible(info,ids);
+
+	Q_FOREACH(QAction* ac,infoPanelItemActions_)
+	{
+		ac->setEnabled(false);
+
+		std::string name=ac->data().toString().toStdString();
+
+		for(std::vector<InfoPanelDef*>::const_iterator it=ids.begin(); it != ids.end(); it++)
+		{
+			 if((*it)->name() == name)
+			 {
+				ac->setEnabled(true);
+				break;
+			 }
+		}
+	}
+}
 
 void MainWindow::reloadContents()
 {

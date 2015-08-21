@@ -204,11 +204,12 @@ NodePathServerItem::NodePathServerItem(int index,QString name,QColor col,bool se
 NodePathMenuItem::NodePathMenuItem(int index,QWidget * parent) :
   NodePathItem(MenuType, index,parent)
 {
-	if(index_==0)
+	/*if(index_==0)
 		setText("/");
 	else
-		setText("/");
+		setText("/");*/
 
+	setArrowType(Qt::RightArrow);
 	setObjectName("pathMenuTb");
 };
 
@@ -223,6 +224,7 @@ NodePathMenuItem::NodePathMenuItem(int index,QWidget * parent) :
 
 NodePathWidget::NodePathWidget(QWidget *parent) :
   QWidget(parent),
+  reloadTb_(0),
   stayInParent_(false),
   infoIndex_(-1),
   active_(true)
@@ -601,6 +603,26 @@ void NodePathWidget::setPath(VInfo_ptr info)
 
 	layout_->addStretch(1);
 
+	//Reload
+	//if(actionReload_)
+	//{
+		if(!reloadTb_)
+		{
+			reloadTb_=new QToolButton(this);
+			//reloadTb_->setDefaultAction(actionReload_);
+			reloadTb_->setIcon(QPixmap(":/viewer/reload.svg"));
+			reloadTb_->setToolTip(tr("Refresh server"));
+			reloadTb_->setAutoRaise(true);
+				//reloadTb_->setIconSize(QSize(20,20));
+			reloadTb_->setObjectName("pathIconTb");
+
+			connect(reloadTb_,SIGNAL(clicked()),
+				this,SLOT(slotRefreshServer()));
+
+		}
+		layout_->addWidget(reloadTb_);
+	//}
+
 	//Set the current node index (used only in "stay in parent" mode). If we are here it must be the last node!
 	infoIndex(lst.size()-1);
 }
@@ -850,6 +872,15 @@ void NodePathWidget::notifyServerConnectState(ServerHandler* server)
 void NodePathWidget::notifyServerActivityChanged(ServerHandler* server)
 {
 	reset();
+}
+
+
+void  NodePathWidget::slotRefreshServer()
+{
+	if(info_ && info_->server())
+	{
+		info_->server()->refresh();
+	}
 }
 
 void NodePathWidget::paintEvent(QPaintEvent *)

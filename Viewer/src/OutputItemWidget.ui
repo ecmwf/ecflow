@@ -94,7 +94,7 @@
            </property>
            <property name="icon">
             <iconset resource="viewer.qrc">
-             <normaloff>:/viewer/images/reload.svg</normaloff>:/viewer/images/reload.svg</iconset>
+             <normaloff>:/viewer/reload.svg</normaloff>:/viewer/reload.svg</iconset>
            </property>
            <property name="shortcut">
             <string>Ctrl+R</string>

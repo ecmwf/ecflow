@@ -127,8 +127,8 @@ void TreeNodeView::currentSelection(VInfo_ptr info)
 	QModelIndex idx=model_->infoToIndex(info);
 	if(idx.isValid())
 	{
-			setCurrentIndex(idx);
-			Q_EMIT selectionChanged(info);
+		setCurrentIndex(idx);
+		Q_EMIT selectionChanged(info);
 	}
 }
 
