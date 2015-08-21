@@ -45,6 +45,7 @@
     <file alias="message.svg">../images/message.svg</file> 
     <file alias="output.svg">../images/output.svg</file> 
     <file alias="padlock.svg">../images/padlock.svg</file>
+    <file alias="path_arrow.svg">../images/path_arrow.svg</file>
     <file alias="reload.svg">../images/reload.svg</file>
     <file alias="rescue.svg">../images/rescue.svg</file>
     <file alias="script.svg">../images/script.svg</file>    

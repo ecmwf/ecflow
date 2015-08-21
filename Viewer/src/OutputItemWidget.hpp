@@ -17,6 +17,7 @@
 
 #include "ui_OutputItemWidget.h"
 
+class Highlighter;
 class OutputModel;
 class OutputSortModel;
 class QTime;
@@ -27,6 +28,7 @@ Q_OBJECT
 
 public:
 	explicit OutputItemWidget(QWidget *parent=0);
+	~OutputItemWidget();
 
 	void reload(VInfo_ptr);
 	QWidget* realWidget();
@@ -63,6 +65,7 @@ protected:
 	bool userClickedReload_;
 	bool ignoreOutputSelection_;
 	QTimer* updateDirTimer_;
+	Highlighter* jobHighlighter_;
 	static int updateDirTimeout_;
 
 };

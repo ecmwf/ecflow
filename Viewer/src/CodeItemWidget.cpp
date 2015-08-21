@@ -16,6 +16,8 @@ CodeItemWidget::CodeItemWidget(QWidget *parent) : QWidget(parent)
 
 	externalTb_->hide();
 
+	fileLabel_->setProperty("fileInfo","1");
+
 	searchLine_->setEditor(textEdit_);
 
 	searchLine_->setVisible(false);

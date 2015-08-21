@@ -407,7 +407,7 @@ bool InfoPanel::detached() const
 
 void InfoPanel::updateTitle()
 {
-	QString baseTxt="<b>Info</b>";
+	QString baseTxt="<b>Info panel</b>";
 
 	QString txt;
 	if(frozen())

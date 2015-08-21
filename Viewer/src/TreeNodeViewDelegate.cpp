@@ -354,7 +354,7 @@ void TreeNodeViewDelegate::renderServer(QPainter *painter,const QModelIndex& ind
 	painter->drawRect(fillRect);
 
 	//Draw shading
-	QColor shCol= bg.darker(110);
+	QColor shCol= bg.darker(108);
 	painter->fillRect(halfRect,shCol);
 
 	//painter->fillRect(fillRect,bg);
@@ -494,7 +494,7 @@ void TreeNodeViewDelegate::renderNode(QPainter *painter,const QModelIndex& index
 	painter->drawRect(fillRect);
 
 	//Draw shading
-	QColor shCol= bg.darker(110);
+	QColor shCol= bg.darker(108);
 	painter->fillRect(halfRect,shCol);
 
 	//Draw text

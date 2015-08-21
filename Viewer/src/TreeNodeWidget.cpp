@@ -106,7 +106,7 @@ void TreeNodeWidget::populateTitleBar(DashboardDockTitleWidget* tw)
 	tw->optionsTb()->setMenu(menu);
 
 	//Sets the title
-	tw->slotUpdateTitle("<b>Tree</b>");
+	tw->slotUpdateTitle("<b>Tree view</b>");
 }
 
 

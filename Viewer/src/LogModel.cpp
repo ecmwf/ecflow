@@ -250,18 +250,6 @@ QModelIndex LogModel::parent(const QModelIndex &child) const
 	return QModelIndex();
 }
 
-
-#include "VariableView.hpp"
-
-#include <QApplication>
-#include <QDebug>
-#include <QImageReader>
-#include <QPainter>
-
-#include "IconProvider.hpp"
-#include "VariableModel.hpp"
-#include "VParam.hpp"
-
 //========================================================
 //
 // LogDelegate
@@ -270,20 +258,7 @@ QModelIndex LogModel::parent(const QModelIndex &child) const
 
 LogDelegate::LogDelegate(QWidget *parent) : QStyledItemDelegate(parent)
 {
-    /*selectPen_=QPen(QColor(125,162,206));
-    selectBrush_=QBrush(QColor(193,220,252,110));
-    borderPen_=QPen(QColor(180,180,180));
 
-    QImageReader imgR(":/viewer/padlock.svg");
-    if(imgR.canRead())
-    {
-    	QFont font;
-    	QFontMetrics fm(font);
-    	int size=fm.height()+2;
-    	imgR.setScaledSize(QSize(size,size));
-    	QImage img=imgR.read();
-    	lockPix_=QPixmap(QPixmap::fromImage(img));
-    }*/
 }
 
 void LogDelegate::paint(QPainter *painter,const QStyleOptionViewItem &option,
@@ -291,7 +266,7 @@ void LogDelegate::paint(QPainter *painter,const QStyleOptionViewItem &option,
 {
 	return QStyledItemDelegate::paint(painter,option,index);
 
-	if(index.column()==11)
+	/*if(index.column()==11)
 	{
 		QStyleOptionViewItemV4 vopt(option);
 		initStyleOption(&vopt, index);
@@ -312,114 +287,7 @@ void LogDelegate::paint(QPainter *painter,const QStyleOptionViewItem &option,
 	else
 	{
 		QStyledItemDelegate::paint(painter,option,index);
-	}
-
-
-	/*
-	QStyleOptionViewItemV4 vopt(option);
-    initStyleOption(&vopt, index);
-
-    const QStyle *style = vopt.widget ? vopt.widget->style() : QApplication::style();
-    const QWidget* widget = vopt.widget;
-
-    //This indicates that the item is a parent item (node or server),
-    // hence it has branch controls.
-    bool hasChild=!index.parent().isValid();
-
-    //Save painter state
-    painter->save();
-
-    //The background rect
-    QRect bgRect=option.rect;
-
-    //For variables in the first column we want to extend the item
-    //rect to the left for the background painting.
-    if(index.column()==0 && !hasChild)
-    {
-    	bgRect.setX(0);
-    }
-
-    //Paint item highlight!! It is taken from the UserRole
-    QColor highCol=index.data(Qt::UserRole).value<QColor>();
-    if(highCol.isValid())
-    {
-    	painter->fillRect(bgRect.adjusted(1,1,-1,-1),highCol);
-    }
-    //otherwise paint item background!!
-    else
-    {
-    	//Paint the item background
-    	QColor bg=index.data(Qt::BackgroundRole).value<QColor>();
-    	if(bg.isValid())
-    	{
-    		painter->fillRect(bgRect,bg);
-    	}
-    }
-
-    //Paint selection. This should be transparent.
-    if(!hasChild && (option.state & QStyle::State_Selected))
-    {
-    	//The selection rect
-    	QRect selectRect=option.rect.adjusted(0,1,0,-1);
-
-    	//For the first column we extend the selection
-    	//rect to left edge.
-    	if(index.column()==0)
-    	{
-    		selectRect.setX(0);
-    	}
-
-    	//QRect fillRect=option.rect.adjusted(0,1,-1,-textRect.height()-1);
-        painter->fillRect(selectRect,selectBrush_);
-    }
-
-    //Render the horizontal border for rows. We only render the top border line.
-    //With this technique we miss the bottom border line of the last row!!!
-    QRect fullRect=QRect(0,option.rect.y(),painter->device()->width(),option.rect.height());
-    painter->setPen(borderPen_);
-    painter->drawLine(bgRect.topLeft(),bgRect.topRight());
-
-    if(index.column() == 0 && !hasChild)
-    {
-    	painter->drawLine(bgRect.topRight(),bgRect.bottomRight());
-    }
-
-    //Display text
-    QString text=index.data(Qt::DisplayRole).toString();
-    QRect textRect = style->subElementRect(QStyle::SE_ItemViewItemText, &vopt, widget);
-
-    //For variables in the first column we move the text to the left.
-    if(index.column() == 0 && !hasChild)
-    {
-    	textRect.setLeft(option.rect.x()-17);
-
-    	bool locked=index.data(VariableModel::ReadOnlyRole).toBool();
-    	if(locked)
-    	{
-    		QPixmap lockPix=IconProvider::lockPixmap(textRect.height()-6);
-
-    		QRect lockRect(textRect.left()-4-lockPix.width(),
-    				       textRect.top()+(textRect.height()-lockPix.height())/2,
-    			           lockPix.width(),lockPix.height());
-
-    		painter->drawPixmap(lockRect,lockPix);
-    	}
-    }
-
-    if(index.column() == 1)
-    {
-        textRect.adjust(2,0,2,0);
-    }
-
-    QColor fg=index.data(Qt::ForegroundRole).value<QColor>();
-    if(!fg.isValid())
-    	   fg=Qt::black;
-
-    painter->setPen(fg);
-    painter->drawText(textRect,Qt::AlignLeft | Qt::AlignVCenter,text);
-
-    //Restore painter state
-    painter->restore();*/
+	}*/
 }
 
 
@@ -427,12 +295,7 @@ QSize LogDelegate::sizeHint(const QStyleOptionViewItem & option, const QModelInd
 {
 	QSize size=QStyledItemDelegate::sizeHint(option,index);
 
-	size+=QSize(0,4);
+	size+=QSize(0,2);
 
     return size;
 }
-
-
-
-
-

@@ -112,7 +112,7 @@ void NodePathNodeItem::resetStyle()
 		st.replace("TEXT-COLOR","black");
 
 		//Border
-		st.replace("BORDER","2px solid black");
+		st.replace("BORDER","1px solid black");
 	}
 	//Non selected
 	else
@@ -127,11 +127,11 @@ void NodePathNodeItem::resetStyle()
 		st.replace("TEXT-COLOR","black");
 
 		//Border
-		st.replace("BORDER","1px solid "+ col_.name());
+		st.replace("BORDER","1px solid rgb(180,180,180)");    //+ col_.name());
 
 	}
 
-	st.replace("HOVER-COLOR","rgb(230,230,230)");
+	st.replace("HOVER-COLOR",col_.darker(104).name());
 
 
 	//Colour
@@ -208,8 +208,6 @@ NodePathMenuItem::NodePathMenuItem(int index,QWidget * parent) :
 		setText("/");
 	else
 		setText("/");*/
-
-	setArrowType(Qt::RightArrow);
 	setObjectName("pathMenuTb");
 };
 

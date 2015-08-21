@@ -40,11 +40,10 @@ public:
 
 	void setData(const std::string&);
 	void setData(const std::vector<std::string>&);
+	bool hasData() const;
     void clearData();
 
 protected:
-	bool hasData() const;
-
 	QList<LogModelLine> data_;
 };
 

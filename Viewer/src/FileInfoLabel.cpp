@@ -21,16 +21,16 @@ FileInfoLabel::FileInfoLabel(QWidget* parent) : QLabel(parent)
 	setProperty("fileInfo","1");
 
     //Set size policy
-	QSizePolicy sizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
+	/*QSizePolicy sizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
     sizePolicy.setHorizontalStretch(0);
     sizePolicy.setVerticalStretch(0);
     sizePolicy.setHeightForWidth(this->sizePolicy().hasHeightForWidth());
     setSizePolicy(sizePolicy);
     //setMinimumSize(QSize(0, 60));
-    //setMaximumSize(QSize(16777215, 45));
+    //setMaximumSize(QSize(16777215, 45));*/
 
-	setMargin(8);
-	setAlignment(Qt::AlignLeft);
+	setMargin(2);
+	setAlignment(Qt::AlignLeft|Qt::AlignVCenter);
 
 	//Other settings
     setAutoFillBackground(true);

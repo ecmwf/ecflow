@@ -13,6 +13,8 @@
 #include "LogModel.hpp"
 #include "VReply.hpp"
 
+static bool firstRun=true;
+
 HistoryItemWidget::HistoryItemWidget(QWidget *parent) : QWidget(parent)
 {
 	setupUi(this);
@@ -23,8 +25,9 @@ HistoryItemWidget::HistoryItemWidget(QWidget *parent) : QWidget(parent)
 	infoProvider_=new HistoryProvider(this);
 
 	model_=new LogModel(this);
-	treeView_->setModel(model_);
 
+	treeView_->setProperty("log","1");
+	treeView_->setModel(model_);
 	treeView_->setItemDelegate(new LogDelegate(this));
 }
 
@@ -55,6 +58,16 @@ void HistoryItemWidget::clearContents()
 void HistoryItemWidget::infoReady(VReply* reply)
 {
     model_->setData(reply->text());
+
+    //Adjust column size if it is the first run
+    if(firstRun && model_->hasData())
+    {
+    	firstRun=false;
+    	for(int i=0; i < model_->columnCount()-1; i++)
+    	{
+    			treeView_->resizeColumnToContents(i);
+    	}
+    }
 }
 
 void HistoryItemWidget::infoProgress(VReply* reply)

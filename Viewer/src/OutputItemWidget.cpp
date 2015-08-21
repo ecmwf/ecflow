@@ -24,7 +24,8 @@ int OutputItemWidget::updateDirTimeout_=1000*60;
 OutputItemWidget::OutputItemWidget(QWidget *parent) :
 	QWidget(parent),
 	userClickedReload_(false),
-	ignoreOutputSelection_(false)
+	ignoreOutputSelection_(false),
+	jobHighlighter_(0)
 {
 	setupUi(this);
 
@@ -32,7 +33,11 @@ OutputItemWidget::OutputItemWidget(QWidget *parent) :
 	dirLabel_->hide();
 	searchLine_->hide();
 
-	//Highlighter* ih=new Highlighter(textEdit_->document(),"output");
+	fileLabel_->setProperty("fileInfo","1");
+
+	//This highlighter only works for jobs
+	jobHighlighter_=new Highlighter(textEdit_->document(),"job");
+	jobHighlighter_->setDocument(NULL);
 
 	infoProvider_=new OutputProvider(this);
 
@@ -59,7 +64,7 @@ OutputItemWidget::OutputItemWidget(QWidget *parent) :
 	//Connect the searchline to the editor
 	searchLine_->setEditor(textEdit_);
 
-	//Splitter
+	//Set splitter's initial size.
 	int wHeight=size().height();
 	if(wHeight > 100)
 	{
@@ -74,6 +79,14 @@ OutputItemWidget::OutputItemWidget(QWidget *parent) :
 
 	connect(updateDirTimer_,SIGNAL(timeout()),
 			this,SLOT(slotUpdateDir()));
+}
+
+OutputItemWidget::~OutputItemWidget()
+{
+	if(jobHighlighter_ && !jobHighlighter_->parent())
+	{
+		delete jobHighlighter_;
+	}
 }
 
 QWidget* OutputItemWidget::realWidget()
@@ -219,6 +232,24 @@ void OutputItemWidget::infoReady(VReply* reply)
 	else if(reply->hasInfo())
 	{
 	    messageLabel_->showInfo(QString::fromStdString(reply->infoText()));
+	}
+
+	//For job files we set the proper highlighter
+	if(reply->fileName().find(".job") != std::string::npos)
+	{
+		if(!jobHighlighter_)
+		{
+			jobHighlighter_=new Highlighter(textEdit_->document(),"job");
+		}
+		else if(jobHighlighter_->document() != textEdit_->document())
+		{
+			jobHighlighter_->setDocument(textEdit_->document());
+		}
+	}
+	else if(jobHighlighter_)
+	{
+
+		jobHighlighter_->setDocument(NULL);
 	}
 
 	VFile_ptr f=reply->tmpFile();

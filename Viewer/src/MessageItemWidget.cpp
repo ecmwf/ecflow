@@ -14,6 +14,8 @@
 
 #include "LogModel.hpp"
 
+static bool firstRun=true;
+
 MessageItemWidget::MessageItemWidget(QWidget *parent) : QWidget(parent)
 {
     setupUi(this);
@@ -23,7 +25,10 @@ MessageItemWidget::MessageItemWidget(QWidget *parent) : QWidget(parent)
     infoProvider_=new MessageProvider(this);
 
     model_=new LogModel(this);
+
+    treeView_->setProperty("log","1");
     treeView_->setModel(model_);
+    treeView_->setItemDelegate(new LogDelegate(this));
 }
 
 QWidget* MessageItemWidget::realWidget()
@@ -54,6 +59,16 @@ void MessageItemWidget::clearContents()
 void MessageItemWidget::infoReady(VReply* reply)
 {
     model_->setData(reply->textVec());
+
+    //Adjust column size if it is the first run
+    if(firstRun && model_->hasData())
+    {
+    	firstRun=false;
+    	for(int i=0; i < model_->columnCount()-1; i++)
+    	{
+    			treeView_->resizeColumnToContents(i);
+    	}
+    }
 }
 
 void MessageItemWidget::infoProgress(VReply* reply)

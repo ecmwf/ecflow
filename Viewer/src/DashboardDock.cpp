@@ -10,12 +10,42 @@
 
 #include "DashboardDock.hpp"
 
+#include <QPalette>
+#include <QPainter>
+#include <QPixmap>
+
 #include "DashboardWidget.hpp"
 
 DashboardDockTitleWidget::DashboardDockTitleWidget(QWidget *parent) :
 		QWidget(parent)
 {
 	setupUi(this);
+
+	/*QPalette p=palette();
+	p.setColor(QPalette::Window,QColor(230,230,230));
+	setPalette(p);*/
+
+/*
+	QPixmap pix(8,8);
+	pix.fill(Qt::transparent);
+
+	QPainter painter(&pix);
+
+	painter.setRenderHints(QPainter::Antialiasing,true);
+	painter.setPen(Qt::NoPen);
+	painter.setBrush(QColor(179,179,179));
+	painter.drawEllipse(QPoint(3,3),1,1);
+	painter.drawEllipse(QPoint(6,6),1,1);
+
+	QBrush b(pix);
+
+	QPalette p=leftLabel_->palette();
+	p.setBrush(QPalette::Window,b);
+	leftLabel_->setPalette(p);
+
+	p=rightLabel_->palette();
+	p.setBrush(QPalette::Window,b);
+	rightLabel_->setPalette(p);*/
 }
 
 QSize DashboardDockTitleWidget::sizeHint() const
