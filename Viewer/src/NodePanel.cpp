@@ -10,6 +10,7 @@
 #include "NodePanel.hpp"
 
 #include "Dashboard.hpp"
+#include "InfoPanel.hpp"
 #include "ServerHandler.hpp"
 #include "VSettings.hpp"
 
@@ -156,6 +157,21 @@ void NodePanel::addToDashboard(const std::string& type)
 {
 	if(Dashboard *w=currentDashboard())
 		w->addWidget(type);
+}
+
+void NodePanel::addInfoToDashboard(const std::string& name)
+{
+	if(Dashboard *w=currentDashboard())
+	{
+		if(DashboardWidget *dw=w->addWidget("info"))
+		{
+			if(InfoPanel* ip=static_cast<InfoPanel*>(dw))
+			{
+				ip->setCurrent(name);
+			}
+		}
+
+	}
 }
 
 void NodePanel::slotTabTitle(QWidget* w,QString text,QPixmap pix)

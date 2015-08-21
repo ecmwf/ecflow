@@ -57,6 +57,7 @@ public:
 	bool frozen() const;
 	bool detached() const;
 	void clear();
+	void setCurrent(const std::string& name);
 
 	//From DashboardWidget
 	void populateTitleBar(DashboardDockTitleWidget*);

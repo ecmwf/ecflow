@@ -125,8 +125,8 @@ void VariablePropDialog::accept()
 	if(!data_->hasName(name.toStdString()))
 	{
 		if(QMessageBox::question(0,tr("Confirm: create new variable"),
-									tr("You are about to cretae a <b>new</b> variable<br>Do you want to proceed?"),
-						    QMessageBox::Save|QMessageBox::Cancel,QMessageBox::Cancel) == QMessageBox::Cancel)
+									tr("You are about to create a <b>new</b> variable<br>Do you want to proceed?"),
+						    QMessageBox::Ok|QMessageBox::Cancel,QMessageBox::Cancel) == QMessageBox::Cancel)
 			{
 				QDialog::reject();
 				return;
@@ -135,10 +135,9 @@ void VariablePropDialog::accept()
 
 	if(genVar_)
 	{
-		if(QMessageBox::Ok!=
-				QMessageBox::question(0,QObject::tr("Confirm: change variable"),
-						"You are about to modify a <b>generated variable</b>.<br>Do you want to proceed?"),
-						QMessageBox::Save|QMessageBox::Cancel,QMessageBox::Cancel)
+		if(QMessageBox::question(0,QObject::tr("Confirm: change variable"),
+						tr("You are about to modify a <b>generated variable</b>.<br>Do you want to proceed?"),
+					QMessageBox::Ok|QMessageBox::Cancel,QMessageBox::Cancel)  == QMessageBox::Cancel)
 		{
 			QDialog::reject();
 			return;
@@ -308,6 +307,9 @@ VariableItemWidget::VariableItemWidget(QWidget *parent)
 	propTb->setDefaultAction(actionProp);
 	exportTb->setDefaultAction(actionExport);
 
+	//TODO: implemet it
+	actionExport->setEnabled(false);
+
 	//Initialise action state (it depends on the selection)
 	checkActionState();
 }
@@ -419,7 +421,16 @@ void VariableItemWidget::editItem(const QModelIndex& index)
 
 		if(d.exec()== QDialog::Accepted && !frozen_)
 		{
-			model_->setVariable(vIndex,name,d.value());
+			//We assign new value to a variable
+			if(data->hasName(d.name().toStdString()))
+			{
+				model_->setVariable(vIndex,name,d.value());
+			}
+			//A new variable is added
+			else
+			{
+				data->add(d.name().toStdString(),d.value().toStdString());
+			}
 		}
 	}
 }

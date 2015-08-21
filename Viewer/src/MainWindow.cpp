@@ -83,10 +83,14 @@ MainWindow::MainWindow(QStringList idLst,QWidget *parent) : QMainWindow(parent)
     {
     	if((*it)->show().find("toolbar") != std::string::npos)
     	{
-    		QAction *ac=toolBar->addAction(QString::fromStdString((*it)->label()));
+    		QAction *ac=panelToolBar->addAction(QString::fromStdString((*it)->label()));
     		QPixmap pix(":/viewer/" + QString::fromStdString((*it)->icon()));
     		ac->setIcon(QIcon(pix));
     		ac->setData(QString::fromStdString((*it)->name()));
+
+    		connect(ac,SIGNAL(triggered()),
+    				this,SLOT(slotOpenPanel()));
+
     		infoPanelItemActions_ << ac;
     	}
     }
@@ -226,6 +230,16 @@ void MainWindow::slotSelectionChanged(VInfo_ptr info)
 		}
 	}
 }
+
+void MainWindow::slotOpenPanel()
+{
+	if(QAction* ac=static_cast<QAction*>(sender()))
+	{
+		std::string name=ac->data().toString().toStdString();
+		nodePanel_->addInfoToDashboard(name);
+	}
+}
+
 
 void MainWindow::reloadContents()
 {

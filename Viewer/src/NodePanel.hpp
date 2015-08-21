@@ -44,6 +44,7 @@ public:
 	void resetCurrent();
 	VInfo_ptr currentSelection();
 	void addToDashboard(const std::string& type);
+	void addInfoToDashboard(const std::string& name);
 
 	void writeSettings(VComboSettings*);
 	void readSettings(VComboSettings*);

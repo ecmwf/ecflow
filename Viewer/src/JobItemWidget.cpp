@@ -18,6 +18,9 @@ JobItemWidget::JobItemWidget(QWidget *parent) : CodeItemWidget(parent)
 {
 	messageLabel_->hide();
 
+	//Remove the first spacer item!!
+	removeSpacer();
+
 	Highlighter* ih=new Highlighter(textEdit_->document(),"job");
 
     infoProvider_=new JobProvider(this);

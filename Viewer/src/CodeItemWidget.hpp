@@ -25,6 +25,9 @@ public:
 public Q_SLOTS:
 	void on_searchTb_toggled(bool b);
 
+protected:
+	void removeSpacer();
+
 };
 
 #endif

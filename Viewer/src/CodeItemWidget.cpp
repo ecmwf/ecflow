@@ -24,6 +24,21 @@ CodeItemWidget::CodeItemWidget(QWidget *parent) : QWidget(parent)
 }
 
 
+void CodeItemWidget::removeSpacer()
+{
+	//Remove the first spcer item!!
+	for(int i=0; horizontalLayout->count(); i++)
+	{
+		if(QSpacerItem* sp=horizontalLayout->itemAt(i)->spacerItem())
+		{
+			horizontalLayout->takeAt(i);
+			delete sp;
+			break;
+		}
+	}
+}
+
+
 void CodeItemWidget::on_searchTb_toggled(bool b)
 {
 	searchLine_->setVisible(b);

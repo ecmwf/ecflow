@@ -109,6 +109,21 @@ void InfoPanel::populateTitleBar(DashboardDockTitleWidget* tw)
 	updateTitle();
 }
 
+void InfoPanel::setCurrent(const std::string& name)
+{
+	for(int i=0; i < tab_->count(); i++)
+	{
+		if(InfoPanelItemHandler* d=findHandler(tab_->widget(i)))
+		{
+			//Clear the contents
+			if(d->def() && d->def()->name() == name)
+			{
+				tab_->setCurrentIndex(i);
+			}
+		}
+	}
+}
+
 void InfoPanel::clear()
 {
 	if(info_ && info_.get())
