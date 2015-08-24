@@ -163,7 +163,8 @@ void NodePanel::addInfoToDashboard(const std::string& name)
 {
 	if(Dashboard *w=currentDashboard())
 	{
-		if(DashboardWidget *dw=w->addWidget("info"))
+		//if(DashboardWidget *dw=w->addWidget("info"))
+		if(DashboardWidget *dw=w->addDialog("info"))
 		{
 			if(InfoPanel* ip=static_cast<InfoPanel*>(dw))
 			{

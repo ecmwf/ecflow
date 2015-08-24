@@ -11,6 +11,7 @@ set(viewer_srcs
     CommandDesignerWidget.cpp
     CustomCommandDialog.cpp
     Dashboard.cpp
+    DashboardDialog.cpp
     DashboardDock.cpp
     DashboardTitle.cpp
     DirectoryHandler.cpp
@@ -167,6 +168,7 @@ set(viewer_wrap_ui_files
     CommandDesignerWidget.ui 
     CustomCommandDialog.ui 
     CodeItemWidget.ui
+    DashboardDialog.ui
     DashboardDockTitleWidget.ui
     EditItemWidget.ui
     HistoryItemWidget.ui

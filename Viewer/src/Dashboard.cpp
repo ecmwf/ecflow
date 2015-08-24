@@ -10,6 +10,7 @@
 
 #include "Dashboard.hpp"
 
+#include "DashboardDialog.hpp"
 #include "DashboardDock.hpp"
 #include "DashboardTitle.hpp"
 #include "InfoPanel.hpp"
@@ -134,12 +135,87 @@ DashboardWidget* Dashboard::addWidget(const std::string& type,const std::string&
     return w;
 }
 
+DashboardWidget* Dashboard::addDialog(const std::string& type)
+{
+	DashboardWidget *w=0;
+
+	//Create a dashboard widget
+	if(type == "tree")
+	{
+		NodeWidget* ctl=new TreeNodeWidget(serverFilter_,this);
+		//ctl->active(true);
+		connect(ctl,SIGNAL(selectionChanged(VInfo_ptr)),
+					this,SIGNAL(selectionChanged(VInfo_ptr)));
+
+		w=ctl;//widgets_ << ctl;
+	}
+	else if(type == "table")
+	{
+		NodeWidget* ctl=new TableNodeWidget(serverFilter_,this);
+		//ctl->active(true);
+		w=ctl;//widgets_ << ctl;
+	}
+	else if(type == "info")
+	{
+		InfoPanel* ctl=new InfoPanel(this);
+		connect(this,SIGNAL(selectionChanged(VInfo_ptr)),
+					ctl,SLOT(slotReload(VInfo_ptr)));
+
+		VInfo_ptr info=currentSelectionInView();
+		if(info && info.get())
+			ctl->slotReload(info);
+
+		w=ctl;//widgets_ << ctl;
+	}
+
+	//If the db-widget creation fails we should do something!!!
+	if(!w)
+		return 0;
+
+	DashboardDialog* dia=new DashboardDialog(this);
+
+	connect(dia,SIGNAL(finished()),
+			this,SLOT(slotDialogFinished()));
+
+	dia->add(w);
+	dia->show();
+
+
+	/*
+	//Store dockId in the db-widget
+	//w->id(dockId);
+
+	widgets_ << w;
+
+	//Create a dockwidget at the right
+    //QDockWidget *dw = new QDockWidget(tr(type.c_str()), this);
+	DashboardDock *dw = new DashboardDock(w, this);
+
+    dw->setAllowedAreas(Qt::RightDockWidgetArea);
+
+    //Store the dockId  in the dockwidget (as objectName)
+    dw->setObjectName(QString::fromStdString(dockId));
+
+    //Add the dockwidget to the dashboard
+    addDockWidget(Qt::RightDockWidgetArea, dw);
+
+    connect(dw,SIGNAL(closeRequested()),
+    		this,SLOT(slotDockClose()));*/
+
+    return w;
+}
+
+
 void Dashboard::slotDockClose()
 {
-	if(DashboardDock *dw=static_cast<DashboardDock*>(sender()))
+	if(DashboardDock *dock=static_cast<DashboardDock*>(sender()))
 	{
-		widgets_.removeOne(static_cast<DashboardWidget*>(dw->widget()));
-		dw->deleteLater();
+		if(DashboardWidget* dw=static_cast<DashboardWidget*>(dock->widget()))
+		{
+			widgets_.removeOne(dw);
+			disconnect(this,0,dw,0);
+			dw->deleteLater();
+		}
 	}
 }
 
@@ -221,6 +297,18 @@ void Dashboard::updateTitle()
 void Dashboard::slotTitle(QString s,QPixmap p)
 {
 	Q_EMIT titleChanged(this,s,p);
+}
+
+//------------------------
+// Dialogs
+//------------------------
+
+void Dashboard::slotDialogFinished()
+{
+	if(DashboardDialog* dia=static_cast<DashboardDialog*>(sender()))
+	{
+		disconnect(this,0,dia->dashboardWidget(),0);
+	}
 }
 
 //------------------------

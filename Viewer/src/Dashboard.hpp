@@ -36,6 +36,7 @@ public:
 	void rerender();
 
 	DashboardWidget* addWidget(const std::string& type);
+	DashboardWidget* addDialog(const std::string& type);
 	Viewer::ViewMode viewMode();
 	void setViewMode(Viewer::ViewMode);
 	ServerFilter* serverFilter() const {return serverFilter_;}
@@ -48,6 +49,7 @@ public:
 
 public Q_SLOTS:
 	void slotDockClose();
+	void slotDialogFinished();
 
 Q_SIGNALS:
     void selectionChanged(VInfo_ptr);

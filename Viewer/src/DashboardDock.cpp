@@ -10,9 +10,8 @@
 
 #include "DashboardDock.hpp"
 
+#include <QLinearGradient>
 #include <QPalette>
-#include <QPainter>
-#include <QPixmap>
 
 #include "DashboardWidget.hpp"
 
@@ -21,31 +20,31 @@ DashboardDockTitleWidget::DashboardDockTitleWidget(QWidget *parent) :
 {
 	setupUi(this);
 
-	/*QPalette p=palette();
-	p.setColor(QPalette::Window,QColor(230,230,230));
-	setPalette(p);*/
+	setProperty("dockTitle","1");
 
-/*
-	QPixmap pix(8,8);
-	pix.fill(Qt::transparent);
+	//We define the style here because it did not work from the qss file
+	QPalette p=palette();
+	QLinearGradient gr(0,0,0,1);
+	gr.setCoordinateMode(QGradient::ObjectBoundingMode);
+	gr.setColorAt(0,QColor(130,130,130));
+	gr.setColorAt(0.4,QColor(120,120,120));
+	gr.setColorAt(0.41,QColor(112,112,112));
+	gr.setColorAt(1,QColor(95,95,95));
+	p.setBrush(QPalette::Window,gr);
+	setPalette(p);
 
-	QPainter painter(&pix);
+	p=titleLabel_->palette();
+	p.setColor(QPalette::WindowText,Qt::white);
+	titleLabel_->setPalette(p);
 
-	painter.setRenderHints(QPainter::Antialiasing,true);
-	painter.setPen(Qt::NoPen);
-	painter.setBrush(QColor(179,179,179));
-	painter.drawEllipse(QPoint(3,3),1,1);
-	painter.drawEllipse(QPoint(6,6),1,1);
-
-	QBrush b(pix);
-
-	QPalette p=leftLabel_->palette();
-	p.setBrush(QPalette::Window,b);
-	leftLabel_->setPalette(p);
-
-	p=rightLabel_->palette();
-	p.setBrush(QPalette::Window,b);
-	rightLabel_->setPalette(p);*/
+	//Set the initial state of the float tool button
+	if(QDockWidget *dw = qobject_cast<QDockWidget*>(parentWidget()))
+	{
+		if(!dw->features().testFlag(QDockWidget::DockWidgetFloatable))
+		{
+			floatTb_->setEnabled(false);
+		}
+	}
 }
 
 QSize DashboardDockTitleWidget::sizeHint() const
@@ -71,8 +70,11 @@ void DashboardDockTitleWidget::on_floatTb__clicked(bool)
 {
 	if(QDockWidget *dw = qobject_cast<QDockWidget*>(parentWidget()))
 	{
-		bool current=dw->isFloating();
-		dw->setFloating(!current);
+		if(dw->features().testFlag(QDockWidget::DockWidgetFloatable))
+		{
+			bool current=dw->isFloating();
+			dw->setFloating(!current);
+		}
 	}
 }
 
@@ -98,6 +100,8 @@ void DashboardDockTitleWidget::slotUpdateTitle(QString txt)
 DashboardDock::DashboardDock(DashboardWidget *dw,QWidget * parent) :
 	QDockWidget(parent)
 {
+	setFeatures(QDockWidget::DockWidgetClosable|QDockWidget::DockWidgetMovable);
+
 	DashboardDockTitleWidget *dt=new DashboardDockTitleWidget(this);
 
 	setTitleBarWidget(dt);
