@@ -125,7 +125,7 @@ QModelIndex OutputModel::index( int row, int column, const QModelIndex & parent 
 	//When parent is the root this index refers to a node or server
 	if(!parent.isValid())
 	{
-		return createIndex(row,column,0);
+		return createIndex(row,column,static_cast<void*>(0));
 	}
 
 	return QModelIndex();

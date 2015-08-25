@@ -521,7 +521,7 @@ QVariant ServerListModel::headerData(int section,Qt::Orientation ori,int role) c
 
 QModelIndex ServerListModel::index(int row, int column, const QModelIndex& /*parent*/) const
 {
-	return createIndex(row,column,0);
+	return createIndex(row,column,static_cast<void*>(0));
 }
 
 QModelIndex ServerListModel::parent(const QModelIndex &) const

@@ -18,18 +18,25 @@ class DashboardWidget;
 
 class DashboardDialog : public QDialog, protected Ui::DashboardDialog
 {
+Q_OBJECT
 
 public:
 	explicit DashboardDialog(QWidget *parent=0);
-
-	void add(DashboardWidget*);
+    ~DashboardDialog();
+	
+    void add(DashboardWidget*);
 	DashboardWidget* dashboardWidget() const {return dw_;}
 
+public Q_SLOTS:	
+	void reject();
+	
 protected:
 	void closeEvent(QCloseEvent * event);
-
+    void readSettings();
+    void writeSettings();
+    
 	DashboardWidget* dw_;
-
+    
 };
 
 #endif

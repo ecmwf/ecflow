@@ -13,6 +13,7 @@
 #include "DashboardWidget.hpp"
 
 #include <QCloseEvent>
+#include <QSettings>
 
 DashboardDialog::DashboardDialog(QWidget *parent) :
 		QDialog(parent),
@@ -21,6 +22,13 @@ DashboardDialog::DashboardDialog(QWidget *parent) :
 	setupUi(this);
 
 	setAttribute(Qt::WA_DeleteOnClose);
+
+	readSettings();
+}
+
+DashboardDialog::~DashboardDialog()
+{
+	dw_->deleteLater();
 }
 
 void DashboardDialog::add(DashboardWidget* dw)
@@ -30,9 +38,43 @@ void DashboardDialog::add(DashboardWidget* dw)
 	layout_->insertWidget(0,dw_,1);
 }
 
+void DashboardDialog::reject()
+{
+	writeSettings();
+	QDialog::reject();
+}
 
 void DashboardDialog::closeEvent(QCloseEvent * event)
 {
 	event->accept();
-	dw_->deleteLater();
+	writeSettings();
+}
+
+void DashboardDialog::writeSettings()
+{
+	QSettings settings("ECMWF","ecflowUI-DashboardDialog");
+
+	//We have to clear it so that should not remember all the previous values
+	settings.clear();
+
+	settings.beginGroup("main");
+	settings.setValue("size",size());
+	settings.endGroup();
+}
+
+void DashboardDialog::readSettings()
+{
+	QSettings settings("ECMWF","ecflowUI-DashboardDialog");
+
+	settings.beginGroup("main");
+	if(settings.contains("size"))
+	{
+		resize(settings.value("size").toSize());
+	}
+	else
+	{
+	  	resize(QSize(520,500));
+	}
+
+	settings.endGroup();
 }

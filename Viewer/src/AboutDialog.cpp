@@ -21,7 +21,6 @@ AboutDialog::AboutDialog(QWidget* parent) : QDialog(parent)
 
     QString title="EcflowUI";
     QString ecfVersionTxt=QString::fromStdString(ecf::Version::raw());
-
     QString desc=QString::fromStdString(ecf::Version::description());
     QString descTxt="<b>ecflow version:</b> " + ecfVersionTxt;
 
@@ -46,6 +45,11 @@ AboutDialog::AboutDialog(QWidget* parent) : QDialog(parent)
 
     descTxt+="<br><b>compiled on:</b> " +desc.section("Compiled on",1,1);
 
+    const char *qtv=qVersion();
+    if(qtv)
+    {
+    	descTxt+="<br><b>Qt version: </b>" + QString(qtv);
+    }
 
     QString logoTxt;
     logoTxt+="<h3>&nbsp;&nbsp;" + title + "</h3>";

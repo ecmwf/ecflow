@@ -59,6 +59,7 @@ protected Q_SLOTS:
 	void slotTitle(QString,QPixmap);
 
 private:
+	DashboardWidget* addWidgetCore(const std::string& type);
 	DashboardWidget* addWidget(const std::string& type,const std::string& dockId);
 	QString uniqueDockId();
 	static std::string widgetSettingsId(int i);

@@ -43,6 +43,14 @@ int main(int argc, char **argv)
     {
     	app.setStyle(style);
     }
+    else
+    {
+    	style="fusion";
+    	if(QStyleFactory::keys().contains(style))
+        {
+    		app.setStyle(style);
+        }
+    }
 
     //Initialise the config and other paths
     DirectoryHandler::init(std::string(argv[0]));  // we need to tell the Directory class where we started from

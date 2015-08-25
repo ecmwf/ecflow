@@ -86,6 +86,11 @@
     </property>
     <addaction name="actionReset"/>
     <addaction name="actionRefresh"/>
+    <addaction name="separator"/>
+    <addaction name="actionAddTreeWidget"/>
+    <addaction name="actionAddTableWidget"/>
+    <addaction name="actionAddInfoPanel"/>
+    <addaction name="actionAddLogPanel"/>
    </widget>
    <addaction name="menuLl"/>
    <addaction name="menuEdit"/>
@@ -116,9 +121,6 @@
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
-   <addaction name="actionAddTreeWidget"/>
-   <addaction name="actionAddTableWidget"/>
-   <addaction name="actionAddInfoPanel"/>
   </widget>
   <widget class="QToolBar" name="panelToolBar">
    <property name="windowTitle">
@@ -248,7 +250,7 @@
      <normaloff>:/viewer/images/add_tree.svg</normaloff>:/viewer/images/add_tree.svg</iconset>
    </property>
    <property name="text">
-    <string>Add tree</string>
+    <string>Add tree view</string>
    </property>
    <property name="toolTip">
     <string>Add tree widget</string>
@@ -260,7 +262,7 @@
      <normaloff>:/viewer/images/add_table.svg</normaloff>:/viewer/images/add_table.svg</iconset>
    </property>
    <property name="text">
-    <string>Add table</string>
+    <string>Add table view</string>
    </property>
    <property name="toolTip">
     <string>Add table widget</string>
@@ -269,6 +271,11 @@
   <action name="actionAbout">
    <property name="text">
     <string>About EcflowUI</string>
+   </property>
+  </action>
+  <action name="actionAddLogPanel">
+   <property name="text">
+    <string>Add log panel</string>
    </property>
   </action>
  </widget>

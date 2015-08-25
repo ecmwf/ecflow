@@ -121,6 +121,7 @@ set(viewer_moc_files AbstractNodeModel.hpp
     CodeItemWidget.hpp
     CustomCommandDialog.hpp
     Dashboard.hpp
+    DashboardDialog.hpp
     DashboardDock.hpp
     DashboardTitle.hpp
     DashboardWidget.hpp

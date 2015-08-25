@@ -21,11 +21,11 @@
     <linearGradient
        id="linearGradient3796">
       <stop
-         style="stop-color:#2ca02c;stop-opacity:1;"
+         style="stop-color:#4a7bc5;stop-opacity:1"
          offset="0"
          id="stop3798" />
       <stop
-         style="stop-color:#71d771;stop-opacity:1;"
+         style="stop-color:#8eb1e5;stop-opacity:1"
          offset="1"
          id="stop3800" />
     </linearGradient>
@@ -226,10 +226,10 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="16.15625"
-     inkscape:cx="-0.089573377"
-     inkscape:cy="16"
+     inkscape:cx="-10.023809"
+     inkscape:cy="16.061896"
      inkscape:document-units="px"
-     inkscape:current-layer="layer1"
+     inkscape:current-layer="layer3"
      showgrid="true"
      inkscape:window-width="1920"
      inkscape:window-height="1140"
@@ -284,7 +284,7 @@
      style="display:inline">
     <path
        sodipodi:type="arc"
-       style="fill:url(#linearGradient3802);fill-opacity:1;fill-rule:evenodd;stroke:#97ae9c;stroke-width:1.17856538;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0"
+       style="fill:url(#linearGradient3802);fill-opacity:1;fill-rule:evenodd;stroke:#558ed8;stroke-width:1.17856538000000000;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0"
        id="path3022"
        sodipodi:cx="-7"
        sodipodi:cy="18.5"
