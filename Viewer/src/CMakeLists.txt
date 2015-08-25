@@ -111,7 +111,13 @@ set(viewer_srcs
     ZombieItemWidget.cpp
     ZombieModel.cpp)
 
-include(${QT_USE_FILE})
+if(ECFLOW_QT5)
+    include_directories(${ECFLOW_QT_INCLUDE_DIR})
+else()
+    include(${QT_USE_FILE}) 
+    set(ECFLOW_QT_LIBRARIES ${QT_LIBRARIES})
+endif()
+
 
 set(viewer_moc_files AbstractNodeModel.hpp
     AbstractSearchLine.hpp
@@ -197,7 +203,7 @@ set(viewer_wrap_ui_files
     ZombieItemWidget.ui
 )
 
-if(METVIEW_QT5)
+if(ECFLOW_QT5)
   QT5_WRAP_CPP(VIEWER_MOC ${viewer_moc_files} )
   QT5_ADD_RESOURCES (VIEWER_RES viewer.qrc)
   QT5_WRAP_UI       (VIEWER_FORMS_HEADERS ${viewer_wrap_ui_files})
@@ -224,7 +230,7 @@ ecbuild_add_executable( TARGET   ecflow_ui
     LIBS     core nodeattr node libparser base libclient 
      pthread ${Ecflow_Boost_LIBS}
      m crypt dl fl
-     ${QT_LIBRARIES}
+     ${ECFLOW_QT_LIBRARIES}
 )
 
 list(REMOVE_ITEM viewer_srcs ViewerMain.cpp)
@@ -245,6 +251,6 @@ ecbuild_add_executable( TARGET   ecflow_ui_log
     LIBS     core nodeattr node libparser base libclient 
      pthread ${Ecflow_Boost_LIBS}
      m 
-     ${QT_LIBRARIES}
+     ${ECFLOW_QT_LIBRARIES}
     DEFINITIONS MAIN_LOG
 )
