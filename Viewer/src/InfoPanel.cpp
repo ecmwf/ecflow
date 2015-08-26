@@ -57,11 +57,10 @@ InfoPanel::InfoPanel(QWidget* parent) :
 	setupUi(this);
 
 	connect(tab_,SIGNAL(currentChanged(int)),
-				    this,SLOT(slotCurrentWidgetChanged(int)));
+        this,SLOT(slotCurrentWidgetChanged(int)));
 
 	connect(bcWidget_,SIGNAL(selected(VInfo_ptr)),
-			this,SIGNAL(selectionChanged(VInfo_ptr)));
-
+		this,SIGNAL(selectionChanged(VInfo_ptr)));
 
 	tab_->setIconSize(QSize(16,16));
 

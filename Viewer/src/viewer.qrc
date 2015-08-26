@@ -37,6 +37,7 @@
     <file alias="error.svg">../images/error.svg</file>
     <file alias="filesave.svg">../images/filesave.svg</file>
     <file alias="filter_decor.svg">../images/filter_decor.svg</file>
+    <file alias="overview.svg">../images/overview.svg</file>
     <file alias="job.svg">../images/job.svg</file>
     <file alias="log.svg">../images/log.svg</file>
     <file alias="log_info.svg">../images/log_info.svg</file>

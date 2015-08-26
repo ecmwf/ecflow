@@ -21,7 +21,7 @@
     <linearGradient
        id="linearGradient4022">
       <stop
-         style="stop-color:#c16e39;stop-opacity:1;"
+         style="stop-color:#f8d080;stop-opacity:1;"
          offset="0"
          id="stop4024" />
       <stop
@@ -287,12 +287,22 @@
        inkscape:collect="always"
        xlink:href="#linearGradient4022"
        id="linearGradient4028"
+       x1="15.474243"
+       y1="17.019863"
+       x2="24.904482"
+       y2="27.528622"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="matrix(1.1184951,0,0,1.1170291,0.4774533,-1.7391335)" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient4022"
+       id="linearGradient3062"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="matrix(1.1184951,0,0,1.1170291,-32.53588,-1.6858002)"
        x1="24.867817"
        y1="25.566343"
        x2="7.881609"
-       y2="6.8069892"
-       gradientUnits="userSpaceOnUse"
-       gradientTransform="matrix(1.1184951,0,0,1.1170291,0.4774533,-1.7391335)" />
+       y2="6.8069892" />
   </defs>
   <sodipodi:namedview
      id="base"
@@ -302,7 +312,7 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="18.75"
-     inkscape:cx="14.632093"
+     inkscape:cx="-6.255977"
      inkscape:cy="14.353522"
      inkscape:document-units="px"
      inkscape:current-layer="layer2"
@@ -310,8 +320,8 @@
      inkscape:snap-grids="false"
      inkscape:window-width="1408"
      inkscape:window-height="1096"
-     inkscape:window-x="222"
-     inkscape:window-y="0"
+     inkscape:window-x="447"
+     inkscape:window-y="80"
      inkscape:window-maximized="0"
      showguides="true"
      inkscape:guide-bbox="true">
@@ -331,7 +341,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
         <cc:license
            rdf:resource="Apache License 2.0" />
         <dc:creator>
@@ -374,15 +384,15 @@
        inkscape:connector-curvature="0"
        id="path3911-1"
        d="m 6.0699294,29.537682 0,-26.8086989 22.3699046,0 0,26.8086989 z"
-       style="fill:url(#linearGradient4028);fill-opacity:1;stroke:#623f0a;stroke-width:0.99999994px;stroke-linecap:butt;stroke-linejoin:round;stroke-opacity:1;display:inline" />
+       style="fill:url(#linearGradient4028);fill-opacity:1;stroke:#ab6301;stroke-width:0.99999994000000003px;stroke-linecap:butt;stroke-linejoin:round;stroke-opacity:1;display:inline" />
     <path
-       style="fill:none;stroke:#3b2c05;stroke-width:3;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+       style="fill:none;stroke:#413004;stroke-width:3;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
        d="m 3.6272383,7.8434584 c 0.1048726,0.1016596 6.4795577,0 6.4795577,0"
        id="path4030"
        inkscape:connector-curvature="0"
        sodipodi:nodetypes="cc" />
     <rect
-       style="fill:#2e2932;fill-opacity:1;fill-rule:evenodd;stroke:none"
+       style="fill:#8b5818;fill-opacity:1;fill-rule:evenodd;stroke:none"
        id="rect4048"
        width="11.275421"
        height="4.7804022"
@@ -396,9 +406,9 @@
        inkscape:connector-curvature="0"
        id="path4094"
        d="m 3.6272383,15.547706 c 0.1048726,0.10166 6.4795577,0 6.4795577,0"
-       style="fill:none;stroke:#3b2c05;stroke-width:3;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" />
+       style="fill:none;stroke:#413004;stroke-width:3;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" />
     <path
-       style="fill:none;stroke:#3b2c05;stroke-width:3;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+       style="fill:none;stroke:#413004;stroke-width:3;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
        d="m 3.5243882,23.940176 c 0.1048726,0.10166 6.4795578,0 6.4795578,0"
        id="path4096"
        inkscape:connector-curvature="0"

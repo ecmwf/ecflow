@@ -8,7 +8,7 @@
         {
             "name"    : "overview",
             "label"   : "Info",
-            "icon"	  : "info.svg",
+            "icon"	  : "overview.svg",
             "show"    : "toolbar",
             "visible_for" : "server or node"
         },
