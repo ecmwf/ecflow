@@ -62,6 +62,11 @@ ZombieItemWidget::ZombieItemWidget(QWidget *parent) :
 	checkActionState();
 }
 
+ZombieItemWidget::~ZombieItemWidget()
+{
+
+}
+
 QWidget* ZombieItemWidget::realWidget()
 {
 	return this;

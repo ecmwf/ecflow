@@ -27,7 +27,7 @@ Q_OBJECT
 
 public:
 	explicit ZombieItemWidget(QWidget *parent=0);
-
+    ~ZombieItemWidget();
 	void reload(VInfo_ptr);
 	QWidget* realWidget();
 	void clearContents();

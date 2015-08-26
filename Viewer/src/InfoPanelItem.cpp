@@ -48,6 +48,12 @@ InfoPanelItem* InfoPanelItemFactory::create(const std::string& name)
 //
 //=======================================================
 
+
+InfoPanelItem::~InfoPanelItem()
+{
+	clear();
+}
+
 //Set the new VInfo object.
 //We also we need to manage the node observers. The InfoItem 
 //will be the observer of the server of the object stored in

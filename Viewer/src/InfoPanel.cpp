@@ -84,13 +84,10 @@ InfoPanel::InfoPanel(QWidget* parent) :
 
 InfoPanel::~InfoPanel()
 {
-	Q_FOREACH(InfoPanelItemHandler *d,items_)
-			delete d;
+	clear();
 
-	if(info_ && info_.get())
-	{
-		info_->removeObserver(this);
-	}
+	Q_FOREACH(InfoPanelItemHandler *d,items_)
+		delete d;
 }
 
 void InfoPanel::populateTitleBar(DashboardDockTitleWidget* tw)
@@ -126,8 +123,14 @@ void InfoPanel::setCurrent(const std::string& name)
 
 void InfoPanel::clear()
 {
+	//Unregister from observer lists
 	if(info_ && info_.get())
 	{
+		if(info_->server())
+		{
+			info_->server()->removeServerObserver(this);
+		}
+
 		info_->removeObserver(this);
 	}
 
@@ -345,6 +348,10 @@ InfoPanelItemHandler* InfoPanel::createHandler(InfoPanelDef* def)
 	{
 		iw->setFrozen(frozen());
 		iw->setDetached(detached());
+
+		//iw will be added to the tab so the tab will be its parent. Moreover
+		//the tab will stay its parent even if iw got removed from the tab!
+		//So when the tab is deleted all the iw-s will be correctly deleted as well.
 
 		InfoPanelItemHandler* h=new InfoPanelItemHandler(def,iw);
 		items_ << h;

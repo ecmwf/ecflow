@@ -31,7 +31,7 @@ friend class InfoPanel;
 public:
 	InfoPanelItem() : loaded_(false), useAncestors_(false),
 	                  frozen_(false), detached_(false) {};
-	virtual ~InfoPanelItem(){};
+	virtual ~InfoPanelItem();
 
 	bool loaded() const {return loaded_;}
 	virtual void reload(VInfo_ptr info)=0;

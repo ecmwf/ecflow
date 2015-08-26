@@ -32,12 +32,12 @@ TreeNodeWidget::TreeNodeWidget(ServerFilter* servers,QWidget* parent) : NodeWidg
 	filterDef_=new NodeFilterDef(NodeFilterDef::NodeStateScope);
 
 	//Create the tree model. It uses the datahandler to access the data.
-	model_=new TreeNodeModel(servers,filterDef_,atts_,icons_,parent);
+	model_=new TreeNodeModel(servers,filterDef_,atts_,icons_,this);
 
 	//data_->reset(servers);
 
 	//Create a filter model for the tree.
-	filterModel_=new NodeFilterModel(model_,parent);
+	filterModel_=new NodeFilterModel(model_,this);
 
 	//Create the view
 	QHBoxLayout *hb=new QHBoxLayout(viewHolder_);

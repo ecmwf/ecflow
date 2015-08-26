@@ -87,6 +87,7 @@ MainWindow::MainWindow(QStringList idLst,QWidget *parent) : QMainWindow(parent)
     		QPixmap pix(":/viewer/" + QString::fromStdString((*it)->icon()));
     		ac->setIcon(QIcon(pix));
     		ac->setData(QString::fromStdString((*it)->name()));
+    		ac->setEnabled(false);
 
     		connect(ac,SIGNAL(triggered()),
     				this,SLOT(slotOpenPanel()));
