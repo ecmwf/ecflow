@@ -44,6 +44,7 @@ set(viewer_srcs
     NodePanel.cpp
     NodePathWidget.cpp
     NodeViewBase.cpp
+    NodeViewDelegate.cpp
     NodeWidget.cpp
     OutputModel.cpp
     OutputItemWidget.cpp

@@ -9,22 +9,25 @@
             "name"    : "overview",
             "label"   : "Info",
             "icon"	  : "overview.svg",
+            "dock_icon"	  : "overview.svg",
             "show"    : "toolbar",
             "visible_for" : "server or node"
         },
 
         {
-        	"name"    : "manual",
+            "name"    : "manual",
             "label"   : "Manual",
             "icon"    : "manual.svg",
+            "dock_icon"    : "manual.svg",
             "show"    : "toolbar",
             "visible_for" : "node"            
         },    
        
         {
-        	"name"    : "script",
+            "name"    : "script",
             "label"   : "Script",
             "icon"    : "script.svg",
+            "dock_icon"    : "script.svg",
             "show"    : "toolbar",
             "visible_for" : "task"            
         }, 
@@ -33,6 +36,7 @@
         	"name"    : "job",
             "label"   : "Job",
             "icon"	  : "job.svg",
+            "dock_icon"	  : "job_dock.svg",
             "show"    : "toolbar",
             "visible_for" : "task"            
         },    
@@ -41,6 +45,7 @@
         	"name"    : "output",
             "label"   : "Output",
             "icon"    : "output.svg",
+            "dock_icon"    : "output.svg",
             "show"    : "toolbar",
             "visible_for" : "task"            
         },    
@@ -49,6 +54,7 @@
         	"name"    : "why",
             "label"   : "Why?",
             "icon"    : "why.svg",
+            "dock_icon"    : "why_dock.svg",
             "show" : "toolbar",
             "visible_for" : "server or node"            
         },  
@@ -69,6 +75,7 @@
         	"name"    : "variable",
              "label"  : "Variables",
              "icon"   : "variable.svg",
+             "dock_icon"   : "variable_dock.svg",
              "show"   : "toolbar",
              "visible_for" : "server or node"
              
@@ -78,6 +85,7 @@
         	 "name"   : "history",
              "label"  : "Log",
              "icon"	  : "log.svg",
+             "dock_icon"	  : "log.svg",
              "show"   : "toolbar",
              "visible_for" : "server"
              
@@ -87,6 +95,7 @@
         	"name"    : "edit",
             "label"   : "Edit",
             "icon"	  : "edit.svg",
+            "dock_icon"	  : "edit.svg",
             "show"    : "toolbar",
             "visible_for" : "task"            
         } ,   
@@ -96,6 +105,7 @@
         	"name"    : "message",
             "label"   : "Messages",
             "icon"	  : "message.svg",
+            "dock_icon"	  : "message.svg",
             "show"    : "toolbar",
             "visible_for" : "server or node"
              
@@ -105,6 +115,7 @@
         	"name"    : "zombie",
             "label"   : "Zombies",
             "icon"	  : "zombie.svg",
+            "dock_icon"	  : "zombie.svg",
             "show" 	  : "toolbar",
             "visible_for" : "server"
              

@@ -44,13 +44,20 @@ public:
 	void currentSelection(VInfo_ptr info);
 	void reload();
 	void rerender();
+	QList<QAction*> dockTitleActions() {return infoPanelActions_;}
 
 Q_SIGNALS:
 	void selectionChanged(VInfo_ptr);
+	void popInfoPanel(QString);
+
+protected Q_SLOTS:
+	void slotInfoPanelAction();
 
 protected:
 	explicit NodeWidget(QWidget* parent=0);
 	virtual ~NodeWidget();
+
+	void updateActionState(VInfo_ptr);
 
 	AbstractNodeModel* model_;
 	NodeFilterModel* filterModel_;
@@ -61,6 +68,10 @@ protected:
 
 	NodeFilterDef* filterDef_;
 	NodeStateFilter *states_;
+
+private:
+	void createActions();
+	QList<QAction*> infoPanelActions_;
 };
 
 #endif

@@ -11,11 +11,12 @@
 #include "NodeViewBase.hpp"
 
 #include "AbstractNodeModel.hpp"
+#include "InfoPanelHandler.hpp"
 #include "NodeFilterModel.hpp"
 #include "VFilter.hpp"
 #include "VModelData.hpp"
 
-#include <QWidget>
+#include <QAction>
 
 NodeWidget::NodeWidget(QWidget* parent) : DashboardWidget(parent),
    model_(0),
@@ -33,6 +34,8 @@ NodeWidget::NodeWidget(QWidget* parent) : DashboardWidget(parent),
 	//Define the attribute filter for the model. It controls what attributes
 	//are displayed for a given node. This is exposed via a menu.
 	atts_=new AttributeFilter;
+
+	createActions();
 }
 
 NodeWidget::~NodeWidget()
@@ -81,3 +84,63 @@ bool NodeWidget::active() const
 {
 	return model_->active();
 }
+
+void NodeWidget::createActions()
+{
+    for(std::vector<InfoPanelDef*>::const_iterator it=InfoPanelHandler::instance()->panels().begin();
+    	it != InfoPanelHandler::instance()->panels().end(); it++)
+    {
+    	if((*it)->show().find("toolbar") != std::string::npos)
+    	{
+    		QAction *ac=new QAction(QString::fromStdString((*it)->label()),this);
+            QPixmap pix(":/viewer/" + QString::fromStdString((*it)->dockIcon()));
+    		ac->setIcon(QIcon(pix));
+    		ac->setData(QString::fromStdString((*it)->name()));
+    		ac->setEnabled(false);
+
+    		connect(ac,SIGNAL(triggered()),
+                   this,SLOT(slotInfoPanelAction()));
+
+    		infoPanelActions_ << ac;
+    	}
+    }
+}
+
+void NodeWidget::slotInfoPanelAction()
+{
+    if(QAction* ac=static_cast<QAction*>(sender()))
+    {
+        Q_EMIT popInfoPanel(ac->data().toString());
+    }
+}
+
+void NodeWidget::updateActionState(VInfo_ptr info)
+{
+    std::vector<InfoPanelDef*> ids;
+    InfoPanelHandler::instance()->visible(info,ids);
+
+    Q_FOREACH(QAction* ac,infoPanelActions_)
+    {
+        ac->setEnabled(false);
+
+        std::string name=ac->data().toString().toStdString();
+
+        for(std::vector<InfoPanelDef*>::const_iterator it=ids.begin(); it != ids.end(); it++)
+        {
+             if((*it)->name() == name)
+             {
+                ac->setEnabled(true);
+                break;
+             }
+        }
+    }
+}
+
+
+
+
+
+
+
+
+

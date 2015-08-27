@@ -382,6 +382,11 @@ void InfoPanel::clearTab()
 	tabBeingCleared_=false;
 }
 
+void InfoPanel::setDetached(bool b)
+{
+    actionDetached_->setChecked(b);
+}
+
 
 void InfoPanel::on_actionBreadcrumbs__toggled(bool b)
 {

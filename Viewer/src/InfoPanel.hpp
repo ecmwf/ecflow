@@ -58,6 +58,7 @@ public:
 	bool detached() const;
 	void clear();
 	void setCurrent(const std::string& name);
+    void setDetached(bool);
 
 	//From DashboardWidget
 	void populateTitleBar(DashboardDockTitleWidget*);

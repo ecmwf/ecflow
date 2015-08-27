@@ -42,10 +42,50 @@ DashboardDockTitleWidget::DashboardDockTitleWidget(QWidget *parent) :
 	{
 		if(!dw->features().testFlag(QDockWidget::DockWidgetFloatable))
 		{
-			floatTb_->setEnabled(false);
+            //floatTb_->setEnabled(false);
+            floatTb_->hide();
 		}
 	}
 }
+
+void DashboardDockTitleWidget::addActions(QList<QAction*> lst)
+{  
+    Q_FOREACH(QAction* ac,lst)
+	{
+    	 QToolButton *tb=new QToolButton(this);
+         tb->setDefaultAction(ac);
+         tb->setAutoRaise(true);
+         actionLayout_->addWidget(tb);
+
+         if(!ac->isEnabled())
+             tb->hide();
+
+         actionTbList_ << tb;
+
+         connect(ac,SIGNAL(changed()),
+                 this,SLOT(slotActionChanged()));
+    }
+
+    //Hide the separator line if no buttons were added
+    if(actionTbList_.isEmpty())
+        line_->hide();
+}
+
+void DashboardDockTitleWidget::slotActionChanged()
+{
+    Q_FOREACH(QToolButton *tb, actionTbList_)
+    {
+        if(!tb->isEnabled())
+        {
+            tb->hide();
+        }
+        else
+        {
+            tb->show();
+        }
+    }
+}
+
 
 QSize DashboardDockTitleWidget::sizeHint() const
 {
@@ -105,6 +145,8 @@ DashboardDock::DashboardDock(DashboardWidget *dw,QWidget * parent) :
 	DashboardDockTitleWidget *dt=new DashboardDockTitleWidget(this);
 
 	setTitleBarWidget(dt);
+
+	dt->addActions(dw->dockTitleActions());
 
 	connect(dw,SIGNAL(titleUpdated(QString)),
 			dt,SLOT(slotUpdateTitle(QString)));

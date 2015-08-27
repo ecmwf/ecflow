@@ -62,6 +62,53 @@ Dashboard::~Dashboard()
 	delete serverFilter_;
 }
 
+
+DashboardWidget* Dashboard::addWidgetCore(const std::string& type)
+{
+	DashboardWidget *w=0;
+
+	//Create a dashboard widget
+	if(type == "tree")
+	{
+		NodeWidget* ctl=new TreeNodeWidget(serverFilter_,this);
+
+		connect(ctl,SIGNAL(selectionChanged(VInfo_ptr)),
+				this,SIGNAL(selectionChanged(VInfo_ptr)));
+
+		connect(ctl,SIGNAL(popInfoPanel(QString)),
+				this,SLOT(slotPopInfoPanel(QString)));
+
+		w=ctl;
+	}
+	else if(type == "table")
+	{
+		NodeWidget* ctl=new TableNodeWidget(serverFilter_,this);
+
+		connect(ctl,SIGNAL(selectionChanged(VInfo_ptr)),
+				this,SIGNAL(selectionChanged(VInfo_ptr)));
+
+		connect(ctl,SIGNAL(popInfoPanel(QString)),
+				this,SLOT(slotPopInfoPanel(QString)));
+
+		w=ctl;
+	}
+	else if(type == "info")
+	{
+		InfoPanel* ctl=new InfoPanel(this);
+		connect(this,SIGNAL(selectionChanged(VInfo_ptr)),
+					ctl,SLOT(slotReload(VInfo_ptr)));
+
+		VInfo_ptr info=currentSelectionInView();
+		if(info && info.get())
+			ctl->slotReload(info);
+
+		w=ctl;
+	}
+
+	return w;
+}
+
+
 DashboardWidget* Dashboard::addWidget(const std::string& type)
 {
 	//Get a unique dockId stored as objectName
@@ -77,36 +124,7 @@ DashboardWidget* Dashboard::addWidget(const std::string& type)
 
 DashboardWidget* Dashboard::addWidget(const std::string& type,const std::string& dockId)
 {
-	DashboardWidget *w=0;
-
-	//Create a dashboard widget
-	if(type == "tree")
-	{
-		NodeWidget* ctl=new TreeNodeWidget(serverFilter_,this);
-		//ctl->active(true);
-		connect(ctl,SIGNAL(selectionChanged(VInfo_ptr)),
-					this,SIGNAL(selectionChanged(VInfo_ptr)));
-
-		w=ctl;//widgets_ << ctl;
-	}
-	else if(type == "table")
-	{
-		NodeWidget* ctl=new TableNodeWidget(serverFilter_,this);
-		//ctl->active(true);
-		w=ctl;//widgets_ << ctl;
-	}
-	else if(type == "info")
-	{
-		InfoPanel* ctl=new InfoPanel(this);
-		connect(this,SIGNAL(selectionChanged(VInfo_ptr)),
-					ctl,SLOT(slotReload(VInfo_ptr)));
-
-		VInfo_ptr info=currentSelectionInView();
-		if(info && info.get())
-			ctl->slotReload(info);
-
-		w=ctl;//widgets_ << ctl;
-	}
+	DashboardWidget *w=Dashboard::addWidgetCore(type);
 
 	//If the db-widget creation fails we should do something!!!
 	if(!w)
@@ -117,8 +135,7 @@ DashboardWidget* Dashboard::addWidget(const std::string& type,const std::string&
 
 	widgets_ << w;
 
-	//Create a dockwidget at the right
-    //QDockWidget *dw = new QDockWidget(tr(type.c_str()), this);
+    //Create a dockwidget
 	DashboardDock *dw = new DashboardDock(w, this);
 
     dw->setAllowedAreas(Qt::RightDockWidgetArea);
@@ -137,36 +154,7 @@ DashboardWidget* Dashboard::addWidget(const std::string& type,const std::string&
 
 DashboardWidget* Dashboard::addDialog(const std::string& type)
 {
-	DashboardWidget *w=0;
-
-	//Create a dashboard widget
-	if(type == "tree")
-	{
-		NodeWidget* ctl=new TreeNodeWidget(serverFilter_,this);
-		//ctl->active(true);
-		connect(ctl,SIGNAL(selectionChanged(VInfo_ptr)),
-					this,SIGNAL(selectionChanged(VInfo_ptr)));
-
-		w=ctl;//widgets_ << ctl;
-	}
-	else if(type == "table")
-	{
-		NodeWidget* ctl=new TableNodeWidget(serverFilter_,this);
-		//ctl->active(true);
-		w=ctl;//widgets_ << ctl;
-	}
-	else if(type == "info")
-	{
-		InfoPanel* ctl=new InfoPanel(this);
-		connect(this,SIGNAL(selectionChanged(VInfo_ptr)),
-					ctl,SLOT(slotReload(VInfo_ptr)));
-
-		VInfo_ptr info=currentSelectionInView();
-		if(info && info.get())
-			ctl->slotReload(info);
-
-		w=ctl;//widgets_ << ctl;
-	}
+	DashboardWidget *w=Dashboard::addWidgetCore(type);
 
 	//If the db-widget creation fails we should do something!!!
 	if(!w)
@@ -179,28 +167,6 @@ DashboardWidget* Dashboard::addDialog(const std::string& type)
 
 	dia->add(w);
 	dia->show();
-
-
-	/*
-	//Store dockId in the db-widget
-	//w->id(dockId);
-
-	widgets_ << w;
-
-	//Create a dockwidget at the right
-    //QDockWidget *dw = new QDockWidget(tr(type.c_str()), this);
-	DashboardDock *dw = new DashboardDock(w, this);
-
-    dw->setAllowedAreas(Qt::RightDockWidgetArea);
-
-    //Store the dockId  in the dockwidget (as objectName)
-    dw->setObjectName(QString::fromStdString(dockId));
-
-    //Add the dockwidget to the dashboard
-    addDockWidget(Qt::RightDockWidgetArea, dw);
-
-    connect(dw,SIGNAL(closeRequested()),
-    		this,SLOT(slotDockClose()));*/
 
     return w;
 }
@@ -233,66 +199,17 @@ void Dashboard::currentSelection(VInfo_ptr n)
 	//	ctl->currentSelection(n);
 }
 
-//-----------------------
-// Title
-//-----------------------
-/*
-void Dashboard::updateTitle()
+void Dashboard::slotPopInfoPanel(QString name)
 {
-	const int marginX=0;
-	const int marginY=0;
-	const int textMarginX=2;
-	const int textMarginY=1;
-	const int gap=8;
-	QFont f;
-	QFontMetrics fm(f);
-
-	//Compute the pixmap size
-	int w=0;
-	int h=fm.height()+2*marginY+2*textMarginY;
-
-	QStringList texts;
-	QList<QRect> textRects;
-	QList<QRect> fillRects;
-	QList<QColor> fillColors;
-	QList<QColor> textColors;
-
-	int xp=marginX;
-	int yp=marginY;
-	const std::vector<ServerItem*> items=serverFilter_->items();
-	for(std::vector<ServerItem*>::const_iterator it=items.begin(); it != items.end(); ++it)
+	if(DashboardWidget *dw=addDialog("info"))
 	{
-		//Get text
-		QString str=QString::fromStdString((*it)->name());
-		textRects << QRect(xp+textMarginX,yp+textMarginY,fm.width(str),fm.height());
-		texts << str;
-
-		//Get server status
-		ServerHandler* server=(*it)->serverHandler();
-		fillColors << server->vRoot()->stateColour();
-		textColors << server->vRoot()->stateFontColour();
-		fillRects << QRect(xp,yp,fm.width(str)+2*textMarginX,fm.height()+2*textMarginY);
-
-		xp=fillRects.back().right()+gap;
+		if(InfoPanel* ip=static_cast<InfoPanel*>(dw))
+		{
+            ip->setDetached(true);
+			ip->setCurrent(name.toStdString());
+		}
 	}
-	w=xp-gap+marginX;
-
-	//Render the pixmap
-	QPixmap pix(w,h);
-	pix.fill(Qt::transparent);
-	QPainter painter(&pix);
-
-	for(int i=0; i < texts.count(); i++)
-	{
-		painter.setPen(Qt::NoPen);
-		painter.fillRect(fillRects[i],fillColors[i]);
-		painter.setPen(QPen(textColors[i]));
-		painter.drawText(textRects[i],texts[i]);
-	}
-
-	Q_EMIT titleChanged(this,"",pix);
 }
-*/
 
 void Dashboard::slotTitle(QString s,QPixmap p)
 {

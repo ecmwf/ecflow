@@ -50,6 +50,7 @@ public:
 public Q_SLOTS:
 	void slotDockClose();
 	void slotDialogFinished();
+	void slotPopInfoPanel(QString);
 
 Q_SIGNALS:
     void selectionChanged(VInfo_ptr);

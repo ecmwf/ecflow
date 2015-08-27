@@ -19,6 +19,7 @@ AboutDialog::AboutDialog(QWidget* parent) : QDialog(parent)
 {
     setupUi(this);
 
+
     QString title="EcflowUI";
     QString ecfVersionTxt=QString::fromStdString(ecf::Version::raw());
     QString desc=QString::fromStdString(ecf::Version::description());

@@ -7,7 +7,7 @@
 // nor does it submit to any jurisdiction.
 //============================================================================
 
-#include "TreeNodeViewDelegate.hpp"
+#include "NodeViewDelegate.hpp"
 
 #include <QApplication>
 #include <QDebug>
@@ -15,16 +15,14 @@
 #include <QPainter>
 
 #include "AbstractNodeModel.hpp"
-#include "Animation.hpp"
 #include "PropertyMapper.hpp"
 
 static std::vector<std::string> propVec;
 
-TreeNodeViewDelegate::TreeNodeViewDelegate(QWidget *parent) :
+NodeViewDelegate::NodeViewDelegate(QWidget *parent) :
     QStyledItemDelegate(parent),
     prop_(0),
-    nodeRectRad_(0),
-    drawChildCount_(true)
+    nodeRectRad_(0)
 {
 	//Property
 	if(propVec.empty())
@@ -36,9 +34,6 @@ TreeNodeViewDelegate::TreeNodeViewDelegate(QWidget *parent) :
 	prop_=new PropertyMapper(propVec,this);
 
 	updateSettings();
-
-	//The parent must be the view!!!
-	animation_=new AnimationHandler(parent);
 
 	hoverPen_=QPen(QColor(201,201,201));
 	hoverBrush_=QBrush(QColor(250,250,250,210));
@@ -61,32 +56,32 @@ TreeNodeViewDelegate::TreeNodeViewDelegate(QWidget *parent) :
 		errPix_=QPixmap(QPixmap::fromImage(img));
 	}
 
-	attrRenderers_["meter"]=&TreeNodeViewDelegate::renderMeter;
-	attrRenderers_["label"]=&TreeNodeViewDelegate::renderLabel;
-	attrRenderers_["event"]=&TreeNodeViewDelegate::renderEvent;
-	attrRenderers_["var"]=&TreeNodeViewDelegate::renderVar;
-	attrRenderers_["genvar"]=&TreeNodeViewDelegate::renderGenvar;
-	attrRenderers_["limit"]=&TreeNodeViewDelegate::renderLimit;
-	attrRenderers_["limiter"]=&TreeNodeViewDelegate::renderLimiter;
-	attrRenderers_["trigger"]=&TreeNodeViewDelegate::renderTrigger;
-	attrRenderers_["time"]=&TreeNodeViewDelegate::renderTime;
-	attrRenderers_["date"]=&TreeNodeViewDelegate::renderDate;
-	attrRenderers_["repeat"]=&TreeNodeViewDelegate::renderRepeat;
-	attrRenderers_["late"]=&TreeNodeViewDelegate::renderLate;
+	attrRenderers_["meter"]=&NodeViewDelegate::renderMeter;
+	attrRenderers_["label"]=&NodeViewDelegate::renderLabel;
+	attrRenderers_["event"]=&NodeViewDelegate::renderEvent;
+	attrRenderers_["var"]=&NodeViewDelegate::renderVar;
+	attrRenderers_["genvar"]=&NodeViewDelegate::renderGenvar;
+	attrRenderers_["limit"]=&NodeViewDelegate::renderLimit;
+	attrRenderers_["limiter"]=&NodeViewDelegate::renderLimiter;
+	attrRenderers_["trigger"]=&NodeViewDelegate::renderTrigger;
+	attrRenderers_["time"]=&NodeViewDelegate::renderTime;
+	attrRenderers_["date"]=&NodeViewDelegate::renderDate;
+	attrRenderers_["repeat"]=&NodeViewDelegate::renderRepeat;
+	attrRenderers_["late"]=&NodeViewDelegate::renderLate;
 }
 
-TreeNodeViewDelegate::~TreeNodeViewDelegate()
+NodeViewDelegate::~NodeViewDelegate()
 {
-	delete animation_;
 	delete prop_;
 }
 
-void TreeNodeViewDelegate::notifyChange(VProperty* p)
+void NodeViewDelegate::notifyChange(VProperty* p)
 {
 	updateSettings();
 }
 
-void TreeNodeViewDelegate::updateSettings()
+/*
+void NodeViewDelegate::updateSettings()
 {
 	if(VProperty* p=prop_->find("view.tree.nodeRectRadius"))
 	{
@@ -108,8 +103,9 @@ void TreeNodeViewDelegate::updateSettings()
 		drawChildCount_=p->value().toBool();
 	}
 }
+*/
 
-QSize TreeNodeViewDelegate::sizeHint(const QStyleOptionViewItem & option, const QModelIndex & index ) const
+QSize NodeViewDelegate::sizeHint(const QStyleOptionViewItem & option, const QModelIndex & index ) const
 {
 	QSize size=QStyledItemDelegate::sizeHint(option,index);
 
@@ -118,7 +114,7 @@ QSize TreeNodeViewDelegate::sizeHint(const QStyleOptionViewItem & option, const 
 	return QSize(size.width(),h+8);
 }
 
-void TreeNodeViewDelegate::paint(QPainter *painter,const QStyleOptionViewItem &option,
+void NodeViewDelegate::paint(QPainter *painter,const QStyleOptionViewItem &option,
 		           const QModelIndex& index) const
 {
 	//Background
@@ -162,6 +158,9 @@ void TreeNodeViewDelegate::paint(QPainter *painter,const QStyleOptionViewItem &o
 		painter->fillRect(bandRect,lostConnectBandBrush_);
 
 	}
+
+
+	/*
 
 	//First column (nodes)
 	if(index.column() == 0)
@@ -212,11 +211,11 @@ void TreeNodeViewDelegate::paint(QPainter *painter,const QStyleOptionViewItem &o
 	painter->restore();
 
 	//else
-	//	QStyledItemDelegate::paint(painter,option,index);
+	//	QStyledItemDelegate::paint(painter,option,index);*/
 }
 
-
-void TreeNodeViewDelegate::renderServer(QPainter *painter,const QModelIndex& index,
+/*
+void NodeViewDelegate::renderServer(QPainter *painter,const QModelIndex& index,
 		                                   const QStyleOptionViewItemV4& option,QString text) const
 {
 	int offset=4;
@@ -405,7 +404,7 @@ void TreeNodeViewDelegate::renderServer(QPainter *painter,const QModelIndex& ind
 }
 
 
-void TreeNodeViewDelegate::renderNode(QPainter *painter,const QModelIndex& index,
+void NodeViewDelegate::renderNode(QPainter *painter,const QModelIndex& index,
         							const QStyleOptionViewItemV4& option,QString text) const
 {
 	int offset=4;
@@ -527,7 +526,7 @@ void TreeNodeViewDelegate::renderNode(QPainter *painter,const QModelIndex& index
 // "meter" name  value min  max colChange
 //========================================================
 
-void TreeNodeViewDelegate::renderMeter(QPainter *painter,QStringList data,const QStyleOptionViewItemV4& option) const
+void NodeViewDelegate::renderMeter(QPainter *painter,QStringList data,const QStyleOptionViewItemV4& option) const
 {
 	if(data.count() != 6)
 			return;
@@ -608,7 +607,7 @@ void TreeNodeViewDelegate::renderMeter(QPainter *painter,QStringList data,const 
 // "label" name  value
 //========================================================
 
-void TreeNodeViewDelegate::renderLabel(QPainter *painter,QStringList data,const QStyleOptionViewItemV4& option) const
+void NodeViewDelegate::renderLabel(QPainter *painter,QStringList data,const QStyleOptionViewItemV4& option) const
 {
 	if(data.count() < 2)
 			return;
@@ -675,7 +674,7 @@ void TreeNodeViewDelegate::renderLabel(QPainter *painter,QStringList data,const 
 // "event" name  value
 //========================================================
 
-void TreeNodeViewDelegate::renderEvent(QPainter *painter,QStringList data,const QStyleOptionViewItemV4& option) const
+void NodeViewDelegate::renderEvent(QPainter *painter,QStringList data,const QStyleOptionViewItemV4& option) const
 {
 	if(data.count() < 2)
 		return;
@@ -736,7 +735,7 @@ void TreeNodeViewDelegate::renderEvent(QPainter *painter,QStringList data,const 
 
 
 
-void TreeNodeViewDelegate::renderVar(QPainter *painter,QStringList data,const QStyleOptionViewItemV4& option) const
+void NodeViewDelegate::renderVar(QPainter *painter,QStringList data,const QStyleOptionViewItemV4& option) const
 {
 	QString text;
 
@@ -783,7 +782,7 @@ void TreeNodeViewDelegate::renderVar(QPainter *painter,QStringList data,const QS
 	}
 }
 
-void TreeNodeViewDelegate::renderGenvar(QPainter *painter,QStringList data,const QStyleOptionViewItemV4& option) const
+void NodeViewDelegate::renderGenvar(QPainter *painter,QStringList data,const QStyleOptionViewItemV4& option) const
 {
 	QString text;
 
@@ -830,7 +829,7 @@ void TreeNodeViewDelegate::renderGenvar(QPainter *painter,QStringList data,const
 	}
 }
 
-void TreeNodeViewDelegate::renderLimit(QPainter *painter,QStringList data,const QStyleOptionViewItemV4& option) const
+void NodeViewDelegate::renderLimit(QPainter *painter,QStringList data,const QStyleOptionViewItemV4& option) const
 {
 	if(data.count() != 4)
 			return;
@@ -926,7 +925,7 @@ void TreeNodeViewDelegate::renderLimit(QPainter *painter,QStringList data,const 
 	}
 }
 
-void TreeNodeViewDelegate::renderLimiter(QPainter *painter,QStringList data,const QStyleOptionViewItemV4& option) const
+void NodeViewDelegate::renderLimiter(QPainter *painter,QStringList data,const QStyleOptionViewItemV4& option) const
 {
 	if(data.count() != 3)
 			return;
@@ -970,10 +969,12 @@ void TreeNodeViewDelegate::renderLimiter(QPainter *painter,QStringList data,cons
 		painter->restore();
 	}
 }
+*/
 
-void TreeNodeViewDelegate::renderTrigger(QPainter *painter,QStringList data,const QStyleOptionViewItemV4& option) const
+/*
+void NodeViewDelegate::renderTrigger(QPainter *painter,QStringList data,const QStyleOptionViewItemV4& option) const
 {
-	/*if(data.count() !=3)
+	if(data.count() !=3)
 			return;
 
 	QString	text=data.at(2);
@@ -998,10 +999,11 @@ void TreeNodeViewDelegate::renderTrigger(QPainter *painter,QStringList data,cons
 
 			painter->drawText(textRect,Qt::AlignLeft | Qt::AlignVCenter,text);
 		}
-	}*/
-}
+	}
+}*/
 
-void TreeNodeViewDelegate::renderTime(QPainter *painter,QStringList data,const QStyleOptionViewItemV4& option) const
+/*
+void NodeViewDelegate::renderTime(QPainter *painter,QStringList data,const QStyleOptionViewItemV4& option) const
 {
 	if(data.count() != 2)
 			return;
@@ -1046,7 +1048,7 @@ void TreeNodeViewDelegate::renderTime(QPainter *painter,QStringList data,const Q
 	}
 }
 
-void TreeNodeViewDelegate::renderDate(QPainter *painter,QStringList data,const QStyleOptionViewItemV4& option) const
+void NodeViewDelegate::renderDate(QPainter *painter,QStringList data,const QStyleOptionViewItemV4& option) const
 {
 	if(data.count() != 2)
 			return;
@@ -1096,7 +1098,7 @@ void TreeNodeViewDelegate::renderDate(QPainter *painter,QStringList data,const Q
 // "repeat" name  value
 //========================================================
 
-void TreeNodeViewDelegate::renderRepeat(QPainter *painter,QStringList data,const QStyleOptionViewItemV4& option) const
+void NodeViewDelegate::renderRepeat(QPainter *painter,QStringList data,const QStyleOptionViewItemV4& option) const
 {
 	if(data.count() != 3)
 			return;
@@ -1154,10 +1156,12 @@ void TreeNodeViewDelegate::renderRepeat(QPainter *painter,QStringList data,const
 		painter->restore();
 	}
 }
+*/
 
-void TreeNodeViewDelegate::renderLate(QPainter *painter,QStringList data,const QStyleOptionViewItemV4& option) const
+/*
+void NodeViewDelegate::renderLate(QPainter *painter,QStringList data,const QStyleOptionViewItemV4& option) const
 {
-	/*if(data.count() !=2)
+	if(data.count() !=2)
 			return;
 
 	QString	text=data.at(1);
@@ -1182,5 +1186,6 @@ void TreeNodeViewDelegate::renderLate(QPainter *painter,QStringList data,const Q
 
 			painter->drawText(textRect,Qt::AlignLeft | Qt::AlignVCenter,text);
 		}
-	}*/
+	}
 }
+*/

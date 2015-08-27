@@ -37,6 +37,7 @@ public:
 
 protected Q_SLOTS:
 	void on_actionBreadcrumbs_triggered(bool b);
+	void slotSelectionChangedInView(VInfo_ptr info);
 
 protected:
 	VParamFilterMenu *stateFilterMenu_;

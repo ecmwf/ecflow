@@ -59,7 +59,6 @@ protected Q_SLOTS:
 
 	void slotCurrentChangedInPanel();
 	void slotSelectionChanged(VInfo_ptr);
-	void slotOpenPanel();
 
 private:
     void init(MainWindow*);
@@ -83,7 +82,6 @@ private:
 
     ServerFilterMenu* serverFilterMenu_;
     NodePanel* nodePanel_;
-    QList<QAction*> infoPanelItemActions_;
 
     static bool quitStarted_;
     static QList<MainWindow*> windows_;

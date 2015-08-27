@@ -39,6 +39,7 @@
     <file alias="filter_decor.svg">../images/filter_decor.svg</file>
     <file alias="overview.svg">../images/overview.svg</file>
     <file alias="job.svg">../images/job.svg</file>
+    <file alias="job_dock.svg">../images/job_dock.svg</file>
     <file alias="log.svg">../images/log.svg</file>
     <file alias="log_info.svg">../images/log_info.svg</file>
     <file alias="log_error.svg">../images/log_error.svg</file>
@@ -54,8 +55,10 @@
     <file alias="spinning_wheel.gif">../images/spinning_wheel.gif</file>
     <file alias="terminate.svg">../images/terminate.svg</file>   
     <file alias="variable.svg">../images/variable.svg</file>
+    <file alias="variable_dock.svg">../images/variable_dock.svg</file>
     <file alias="warning.svg">../images/warning.svg</file>
     <file alias="why.svg">../images/why.svg</file>
+    <file alias="why_dock.svg">../images/why_dock.svg</file>
     <file alias="zombie.svg">../images/zombie.svg</file>
   </qresource>
 </RCC>

@@ -15,6 +15,7 @@
 #include "ui_DashboardDockTitleWidget.h"
 
 class DashboardWidget;
+class QToolButton;
 
 class DashboardDockTitleWidget : public QWidget, protected Ui::DashboardDockTitleWidget
 {
@@ -22,16 +23,23 @@ Q_OBJECT
 
 public:
 	explicit DashboardDockTitleWidget(QWidget *parent=0);
-	QSize sizeHint() const;
+
+    void addInfoPanelActions();
+    QSize sizeHint() const;
 	QSize minimumSizeHint() const;
 	QToolButton* optionsTb() const;
+	void addActions(QList<QAction*> lst);
 
 public Q_SLOTS:
 	void slotUpdateTitle(QString txt);
 
 protected Q_SLOTS:
 	void on_floatTb__clicked(bool);
-	void on_closeTb__clicked(bool);
+    void on_closeTb__clicked(bool);
+    void slotActionChanged();
+
+protected:
+    QList<QToolButton*> actionTbList_;
 };
 
 class DashboardDock : public QDockWidget

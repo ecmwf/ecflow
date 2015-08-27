@@ -159,22 +159,6 @@ void NodePanel::addToDashboard(const std::string& type)
 		w->addWidget(type);
 }
 
-void NodePanel::addInfoToDashboard(const std::string& name)
-{
-	if(Dashboard *w=currentDashboard())
-	{
-		//if(DashboardWidget *dw=w->addWidget("info"))
-		if(DashboardWidget *dw=w->addDialog("info"))
-		{
-			if(InfoPanel* ip=static_cast<InfoPanel*>(dw))
-			{
-				ip->setCurrent(name);
-			}
-		}
-
-	}
-}
-
 void NodePanel::slotTabTitle(QWidget* w,QString text,QPixmap pix)
 {
 	int index=indexOfWidget(w);

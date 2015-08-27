@@ -52,19 +52,22 @@ TreeNodeWidget::TreeNodeWidget(ServerFilter* servers,QWidget* parent) : NodeWidg
 	//Signals-slots
 
 	connect(view_->realWidget(),SIGNAL(selectionChanged(VInfo_ptr)),
-	    		bcWidget_,SLOT(setPath(VInfo_ptr)));
+            this,SLOT(slotSelectionChangedInView(VInfo_ptr)));
+
+	//connect(view_->realWidget(),SIGNAL(selectionChanged(VInfo_ptr)),
+	//    		bcWidget_,SLOT(setPath(VInfo_ptr)));
 
 	connect(bcWidget_,SIGNAL(selected(VInfo_ptr)),
 			view_->realWidget(),SLOT(slotSetCurrent(VInfo_ptr)));
 
-	connect(view_->realWidget(),SIGNAL(selectionChanged(VInfo_ptr)),
-			this,SIGNAL(selectionChanged(VInfo_ptr)));
+	//connect(view_->realWidget(),SIGNAL(selectionChanged(VInfo_ptr)),
+	//		this,SIGNAL(selectionChanged(VInfo_ptr)));
 
-	connect(model_,SIGNAL(clearBegun(const VNode*)),
+    connect(model_,SIGNAL(clearBegun(const VNode*)),
 			view_->realWidget(),SLOT(slotSaveExpand(const VNode*)));
 
 	connect(model_,SIGNAL(scanEnded(const VNode*)),
-				view_->realWidget(),SLOT(slotRestoreExpand(const VNode*)));
+                view_->realWidget(),SLOT(slotRestoreExpand(const VNode*)));
 
 	connect(model_,SIGNAL(rerender()),
 				view_->realWidget(),SLOT(slotRerender()));
@@ -107,6 +110,13 @@ void TreeNodeWidget::populateTitleBar(DashboardDockTitleWidget* tw)
 
 	//Sets the title
 	tw->slotUpdateTitle("<b>Tree view</b>");
+}
+
+void TreeNodeWidget::slotSelectionChangedInView(VInfo_ptr info)
+{
+	updateActionState(info);
+	bcWidget_->setPath(info);
+	Q_EMIT selectionChanged(info);
 }
 
 

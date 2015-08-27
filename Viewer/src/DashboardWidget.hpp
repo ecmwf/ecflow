@@ -13,6 +13,7 @@
 #include <string>
 #include <QDockWidget>
 #include <QWidget>
+#include <QAction>
 
 #include "VInfo.hpp"
 
@@ -32,6 +33,8 @@ public:
 	virtual void rerender()=0;
 	virtual bool selectFirstServerInView() {return false;};
 	virtual VInfo_ptr currentSelection() {return VInfo_ptr(); }
+	virtual QList<QAction*> dockTitleActions() {return QList<QAction*>();}
+
 	virtual void writeSettings(VSettings*)=0;
 	virtual void readSettings(VSettings*)=0;
 
