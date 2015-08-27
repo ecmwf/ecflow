@@ -31,8 +31,9 @@ public:
 	void writeSettings(VSettings*);
 	void readSettings(VSettings*);
 
-public Q_SLOTS:
+protected Q_SLOTS:
 	void on_actionBreadcrumbs_triggered(bool b);
+    void slotSelectionChangedInView(VInfo_ptr info);
 
 private:
 	VParamFilterMenu *stateFilterMenu_;

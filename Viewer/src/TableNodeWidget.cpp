@@ -55,14 +55,12 @@ TableNodeWidget::TableNodeWidget(ServerFilter* servers,QWidget * parent) : NodeW
 
 	//Signals-slots
 
-	connect(view_->realWidget(),SIGNAL(selectionChanged(VInfo_ptr)),
-	    		bcWidget_,SLOT(setPath(VInfo_ptr)));
+    connect(view_->realWidget(),SIGNAL(selectionChanged(VInfo_ptr)),
+            this,SLOT(slotSelectionChangedInView(VInfo_ptr)));
 
-	connect(bcWidget_,SIGNAL(selected(VInfo_ptr)),
-			view_->realWidget(),SLOT(slotSetCurrent(VInfo_ptr)));
+    connect(bcWidget_,SIGNAL(selected(VInfo_ptr)),
+            view_->realWidget(),SLOT(slotSetCurrent(VInfo_ptr)));
 
-	connect(view_->realWidget(),SIGNAL(selectionChanged(VInfo_ptr)),
-			this,SIGNAL(selectionChanged(VInfo_ptr)));
 
 	connect(model_,SIGNAL(clearBegun(const VNode*)),
 			view_->realWidget(),SLOT(slotSaveExpand(const VNode*)));
@@ -106,6 +104,14 @@ void TableNodeWidget::populateTitleBar(DashboardDockTitleWidget* tw)
 
 	//Sets the title
 	tw->slotUpdateTitle("<b>Table</b>");
+}
+
+
+void TableNodeWidget::slotSelectionChangedInView(VInfo_ptr info)
+{
+    updateActionState(info);
+    bcWidget_->setPath(info);
+    Q_EMIT selectionChanged(info);
 }
 
 void TableNodeWidget::on_actionBreadcrumbs_triggered(bool b)

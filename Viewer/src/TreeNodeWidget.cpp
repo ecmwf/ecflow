@@ -54,14 +54,8 @@ TreeNodeWidget::TreeNodeWidget(ServerFilter* servers,QWidget* parent) : NodeWidg
 	connect(view_->realWidget(),SIGNAL(selectionChanged(VInfo_ptr)),
             this,SLOT(slotSelectionChangedInView(VInfo_ptr)));
 
-	//connect(view_->realWidget(),SIGNAL(selectionChanged(VInfo_ptr)),
-	//    		bcWidget_,SLOT(setPath(VInfo_ptr)));
-
 	connect(bcWidget_,SIGNAL(selected(VInfo_ptr)),
 			view_->realWidget(),SLOT(slotSetCurrent(VInfo_ptr)));
-
-	//connect(view_->realWidget(),SIGNAL(selectionChanged(VInfo_ptr)),
-	//		this,SIGNAL(selectionChanged(VInfo_ptr)));
 
     connect(model_,SIGNAL(clearBegun(const VNode*)),
 			view_->realWidget(),SLOT(slotSaveExpand(const VNode*)));
@@ -109,7 +103,7 @@ void TreeNodeWidget::populateTitleBar(DashboardDockTitleWidget* tw)
 	tw->optionsTb()->setMenu(menu);
 
 	//Sets the title
-	tw->slotUpdateTitle("<b>Tree view</b>");
+    tw->slotUpdateTitle("<b>Tree</b>");
 }
 
 void TreeNodeWidget::slotSelectionChangedInView(VInfo_ptr info)
