@@ -111,13 +111,8 @@ void NodePanel::slotCurrentWidgetChanged(int /*index*/)
 
 void  NodePanel::slotNewTab()
 {
-	addWidget("");
-
-	/*if(Folder *f=currentFolder())
-	{
-		QString p=QString::fromStdString(f->fullName());
-		addWidget(p);
-	}*/
+    Dashboard *w=addWidget("");
+    w->addWidget("tree");
 }
 
 VInfo_ptr NodePanel::currentSelection()
@@ -156,7 +151,9 @@ ServerFilter* NodePanel::serverFilter()
 void NodePanel::addToDashboard(const std::string& type)
 {
 	if(Dashboard *w=currentDashboard())
-		w->addWidget(type);
+    {
+        w->addWidget(type);
+    }
 }
 
 void NodePanel::slotTabTitle(QWidget* w,QString text,QPixmap pix)
