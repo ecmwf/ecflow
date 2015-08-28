@@ -11,7 +11,6 @@ show_error_and_exit() {
    echo "  "
    echo "   make           - run make after cmake"
    echo "   test           - run all the tests"
-   echo "   new_viewer     - Build new viewer"
    echo "   test_safe      - only run deterministic tests"
    echo "   san            - is short for clang thread sanitiser"
    echo "   package_source - produces ecFlow-4.0.8-Source.tar.gz file, for users"
@@ -29,7 +28,6 @@ clang_arg=
 clang_sanitiser_arg=
 mode_arg=release
 verbose_arg=
-new_viewer_arg=
 while [[ "$#" != 0 ]] ; do   
    if [[ "$1" = debug || "$1" = release ]] ; then
       mode_arg=$1
@@ -49,8 +47,6 @@ while [[ "$#" != 0 ]] ; do
       test_arg=$1
    elif  [[ "$1" = test_safe ]] ; then
       test_safe_arg=$1
-   elif  [[ "$1" = new_viewer ]] ; then
-      new_viewer_arg=$1
    else
    	 show_error_and_exit
    fi
@@ -90,9 +86,11 @@ if [[ "$clang_sanitiser_arg" = san ]] ; then
 	module load clang
 	cmake_extra_options="$cmake_extra_options -DCMAKE_C_FLAGS=-fsanitize=thread"
 fi
-if [[ "$new_viewer_arg" = new_viewer ]] ; then
-	cmake_extra_options="$cmake_extra_options -DENABLE_VIEWER=ON"
+if [[ "$ARCH" = cray ]] ; then
+    cmake_extra_options="$cmake_extra_options -DENABLE_VIEWER=OFF"
+    module swap PrgEnv-cray PrgEnv-gnu
 fi
+
 
 # ====================================================================================
 # Use for local install
@@ -101,13 +99,15 @@ major=$(cat VERSION.cmake   | grep 'set( ECFLOW_MAJOR'   | awk '{print $3}'| sed
 minor=$(cat VERSION.cmake   | grep 'set( ECFLOW_MINOR'   | awk '{print $3}'| sed 's/["]//g')
 
 # ====================================================================================
-rm -rf ../bdir/$mode_arg/ecflow
+#rm -rf ../bdir/$mode_arg/ecflow
 
 # clean up source before packaging, do this after deleting ecbuild
 if [[ $package_source_arg = package_source ]] ; then
-	source $WK/build_scripts/clean.sh
+	source build_scripts/clean.sh
 fi
 
+source_dir=$(pwd)
+workspace=$(pwd)/..
 mkdir -p ../bdir/$mode_arg/ecflow
 cd ../bdir/$mode_arg/ecflow
 
@@ -118,6 +118,7 @@ if [[ $mode_arg = debug ]] ; then
 else
     cmake_build_type=Release
 fi
+
 
 # =============================================================================================
 if [[ $test_arg = test || $test_safe_arg = test_safe ]] ; then
@@ -143,7 +144,9 @@ fi
 #   *AND* for testing python install to local directory
 #
 
-cmake ../../../ecflow -DCMAKE_MODULE_PATH=$WK/../ecbuild/cmake \
+cmake $source_dir \
+            -DCMAKE_MODULE_PATH=$workspace/ecbuild/cmake \
+            $options \
             -DCMAKE_BUILD_TYPE=$cmake_build_type \
             -DCMAKE_INSTALL_PREFIX=/var/tmp/$USER/install/cmake/ecflow/$release.$major.$minor \
             -DCMAKE_PYTHON_INSTALL_TYPE=local \
@@ -161,8 +164,6 @@ if [[ $make_arg = make ]] ; then
 		make -j8
 	fi
 fi
-
-
 
 # =============================================================================================
 if [[ $package_source_arg = package_source ]] ; then
