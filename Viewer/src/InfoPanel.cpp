@@ -60,7 +60,7 @@ InfoPanel::InfoPanel(QWidget* parent) :
             this,SLOT(slotCurrentWidgetChanged(int)));
 
     connect(bcWidget_,SIGNAL(selected(VInfo_ptr)),
-        this,SLOT(slotReload(VInfo_ptr)));
+        this,SLOT(slotReloadFromBc(VInfo_ptr)));
 
 	tab_->setIconSize(QSize(16,16));
 
@@ -201,6 +201,13 @@ void InfoPanel::slotReload(VInfo_ptr info)
 
 	reset(info);
 }
+
+//This slot is called when the info object is selected
+void InfoPanel::slotReloadFromBc(VInfo_ptr info)
+{
+    reset(info);
+}
+
 
 //Set the new VInfo object.
 //We also we need to manage the node observers. The InfoItem

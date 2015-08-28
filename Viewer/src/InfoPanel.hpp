@@ -87,10 +87,13 @@ public:
 
 public Q_SLOTS:
 	void slotReload(VInfo_ptr node);
-	void slotCurrentWidgetChanged(int);
-	void on_actionBreadcrumbs__toggled(bool b);
-	void on_actionFrozen__toggled(bool b);
-	void on_actionDetached__toggled(bool b);
+
+protected Q_SLOTS:
+    void slotReloadFromBc(VInfo_ptr node);
+    void slotCurrentWidgetChanged(int);
+    void on_actionBreadcrumbs__toggled(bool b);
+    void on_actionFrozen__toggled(bool b);
+    void on_actionDetached__toggled(bool b);
 
 Q_SIGNALS:
 	void selectionChanged(VInfo_ptr);

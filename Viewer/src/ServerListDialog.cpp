@@ -25,7 +25,7 @@
 //
 //======================================
 
-bool ServerDialogChecker::checkName(QString name)
+bool ServerDialogChecker::checkName(QString name,QString oriName)
 {
 	if(name.simplified().isEmpty())
 	{
@@ -38,10 +38,10 @@ bool ServerDialogChecker::checkName(QString name)
 		return false;
 	}
 
-	if(ServerList::instance()->find(name.toStdString()))
-	{
-			error(QObject::tr("The specified server already exists! Please select a different name!"));
-			return false;
+    if(oriName != name && ServerList::instance()->find(name.toStdString()) )
+	{           
+        error(QObject::tr("The specified server already exists! Please select a different name!"));
+        return false;
 	}
 
 	return true;
@@ -147,7 +147,8 @@ bool ServerAddDialog::addToView() const
 
 ServerEditDialog::ServerEditDialog(QString name, QString host, QString port,QWidget *parent) :
    QDialog(parent),
-   ServerDialogChecker(tr("Cannot modify server!"))
+   ServerDialogChecker(tr("Cannot modify server!")),
+   oriName_(name)
 {
 	setupUi(this);
 
@@ -167,7 +168,7 @@ void ServerEditDialog::accept()
 	QString host=hostEdit->text();
 	QString port=portEdit->text();
 
-	if(!checkName(name) || !checkHost(host) || !checkPort(port))
+    if(!checkName(name,oriName_) || !checkHost(host) || !checkPort(port))
 		return;
 
 	QDialog::accept();

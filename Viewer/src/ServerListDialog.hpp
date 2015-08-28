@@ -25,7 +25,7 @@ class ServerDialogChecker
 protected:
 	explicit ServerDialogChecker(QString txt) : errorText_(txt) {};
 
-	bool checkName(QString name);
+    bool checkName(QString name,QString oriName=QString());
 	bool checkHost(QString host);
 	bool checkPort(QString port);
 	void error(QString msg);
@@ -47,6 +47,9 @@ public:
 
 public Q_SLOTS:
 	void accept();
+
+private:
+    QString oriName_;
 
 };
 
