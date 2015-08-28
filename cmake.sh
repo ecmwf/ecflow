@@ -74,6 +74,7 @@ set -x # echo script lines as they are executed
 # ====================================================================
 # To load module automatically requires Korn shell, system start scripts
 # auto adds ability to module load
+module load cmake
 cmake_extra_options=""
 if [[ "$clang_arg" = clang ]] ; then
 	module unload gnu
