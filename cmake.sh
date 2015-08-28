@@ -64,6 +64,7 @@ if [ ${#mode_arg} -eq 0 ] ; then
    exit 1
 fi
 
+ 
 echo "copy_tarball_arg=$copy_tarball_arg"
 echo "package_source_arg=$package_source_arg"
 echo "make_arg=$make_arg"
@@ -101,15 +102,15 @@ major=$(cat VERSION.cmake   | grep 'set( ECFLOW_MAJOR'   | awk '{print $3}'| sed
 minor=$(cat VERSION.cmake   | grep 'set( ECFLOW_MINOR'   | awk '{print $3}'| sed 's/["]//g')
 
 # ====================================================================================
-rm -rf ../cmake_build_dir/ecflow/$mode_arg
+rm -rf ../bdir/$mode_arg/ecflow
 
 # clean up source before packaging, do this after deleting ecbuild
 if [[ $package_source_arg = package_source ]] ; then
 	source $WK/build_scripts/clean.sh
 fi
 
-mkdir -p ../cmake_build_dir/ecflow/$mode_arg
-cd ../cmake_build_dir/ecflow/$mode_arg
+mkdir -p ../bdir/$mode_arg/ecflow
+cd ../bdir/$mode_arg/ecflow
 
 # ====================================================================================  
 cmake_build_type=
