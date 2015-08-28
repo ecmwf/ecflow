@@ -119,6 +119,23 @@ else
     cmake_build_type=Release
 fi
 
+# =============================================================================================
+if [[ $test_arg = test || $test_safe_arg = test_safe ]] ; then
+	ctest -R ^u_
+	ctest -R c_
+	ctest -R py_u
+	ctest -R s_client
+	if [[  $test_safe_arg = test_safe ]] ; then
+	   exit 0
+	fi
+fi
+if [[ $test_arg = test ]] ; then
+	ctest -R s_test
+	ctest -R py_s
+	exit 0
+fi
+
+
 # ====================================================================================
 #
 # -DCMAKE_PYTHON_INSTALL_TYPE = [ local | setup ]
@@ -145,17 +162,7 @@ if [[ $make_arg = make ]] ; then
 	fi
 fi
 
-# =============================================================================================
-if [[ $test_arg = test || $test_safe_arg = test_safe ]] ; then
-	ctest -R ^u_
-	ctest -R c_
-	ctest -R py_u
-	ctest -R s_client
-fi
-if [[ $test_arg = test ]] ; then
-	ctest -R s_test
-	ctest -R py_s
-fi
+
 
 # =============================================================================================
 if [[ $package_source_arg = package_source ]] ; then
