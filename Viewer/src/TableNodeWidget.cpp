@@ -85,7 +85,7 @@ TableNodeWidget::~TableNodeWidget()
 
 }
 
-void TableNodeWidget::populateTitleBar(DashboardDockTitleWidget* tw)
+void TableNodeWidget::populateDockTitleBar(DashboardDockTitleWidget* tw)
 {
 	//Builds the menu for the settings tool button
 	QMenu *menu=new QMenu(this);

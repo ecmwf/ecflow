@@ -18,6 +18,7 @@
 
 #include "ui_InfoPanel.h"
 
+class QMenu;
 class QTabWidget;
 
 class DashboardDockTitleWidget;
@@ -60,8 +61,10 @@ public:
 	void setCurrent(const std::string& name);
     void setDetached(bool);
 
-	//From DashboardWidget
-	void populateTitleBar(DashboardDockTitleWidget*);
+    void populateDialog();
+
+    //From DashboardWidget
+    void populateDockTitleBar(DashboardDockTitleWidget*);
 	void reload() {};
 	void rerender() {};
 	void writeSettings(VSettings*);
@@ -102,6 +105,7 @@ private:
 	InfoPanelItemHandler* createHandler(InfoPanelDef*);
 	void clearTab();
 	void updateTitle();
+    QMenu* buildOptionsMenu();
 
 	QList<InfoPanelItemHandler*> items_;
 	VInfo_ptr info_;

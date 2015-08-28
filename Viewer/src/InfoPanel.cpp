@@ -56,8 +56,8 @@ InfoPanel::InfoPanel(QWidget* parent) :
 {
 	setupUi(this);
 
-	connect(tab_,SIGNAL(currentChanged(int)),
-        this,SLOT(slotCurrentWidgetChanged(int)));
+    connect(tab_,SIGNAL(currentChanged(int)),
+            this,SLOT(slotCurrentWidgetChanged(int)));
 
 	connect(bcWidget_,SIGNAL(selected(VInfo_ptr)),
 		this,SIGNAL(selectionChanged(VInfo_ptr)));
@@ -89,20 +89,47 @@ InfoPanel::~InfoPanel()
 		delete d;
 }
 
-void InfoPanel::populateTitleBar(DashboardDockTitleWidget* tw)
+QMenu* InfoPanel::buildOptionsMenu()
 {
-	QMenu *menu=new QMenu(this);
-	menu->setTearOffEnabled(true);
+    QMenu *menu=new QMenu(this);
+    menu->setTearOffEnabled(true);
 
-	menu->addAction(actionBreadcrumbs_);
-	menu->addAction(actionDetached_);
-	menu->addAction(actionFrozen_);
+    menu->addAction(actionBreadcrumbs_);
+    menu->addAction(actionDetached_);
+    menu->addAction(actionFrozen_);
+
+    return menu;
+}
+
+//When the infopanel is in a dockwidget we add the option actions
+//to the dockwidget title bar widget
+void InfoPanel::populateDockTitleBar(DashboardDockTitleWidget* tw)
+{
+    QMenu *menu=buildOptionsMenu();
 
 	//Sets the menu on the toolbutton
 	tw->optionsTb()->setMenu(menu);
 
 	//This will set the title
 	updateTitle();
+}
+
+//When the infopanel is in a dialog we need to add the optionsTb to the dialog.
+void InfoPanel::populateDialog()
+{
+    QMenu *menu=buildOptionsMenu();
+
+    QToolButton* optionsTb=new QToolButton(this);
+    optionsTb->setAutoRaise(true);
+    optionsTb->setIcon(QPixmap(":/viewer/configure.svg"));
+    optionsTb->setPopupMode(QToolButton::InstantPopup);
+    optionsTb->setToolTip(tr("Options"));
+    optionsTb->setMenu(menu);
+
+    tab_->setCornerWidget(optionsTb);
+
+    //This will set the dialog title
+    updateTitle();
 }
 
 void InfoPanel::setCurrent(const std::string& name)
@@ -409,7 +436,7 @@ void InfoPanel::on_actionFrozen__toggled(bool b)
 	{
 		item->item()->setFrozen(b);
 	}
-	updateTitle();
+    updateTitle();
 }
 
 void InfoPanel::on_actionDetached__toggled(bool b)

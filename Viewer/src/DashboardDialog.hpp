@@ -29,6 +29,7 @@ public:
 
 public Q_SLOTS:	
 	void reject();
+    void slotUpdateTitle(QString);
 	
 protected:
 	void closeEvent(QCloseEvent * event);

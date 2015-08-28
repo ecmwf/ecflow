@@ -79,7 +79,7 @@ TreeNodeWidget::~TreeNodeWidget()
 {
 }
 
-void TreeNodeWidget::populateTitleBar(DashboardDockTitleWidget* tw)
+void TreeNodeWidget::populateDockTitleBar(DashboardDockTitleWidget* tw)
 {
 	//Builds the menu for the settings tool button
 	QMenu *menu=new QMenu(this);

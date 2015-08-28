@@ -151,7 +151,7 @@ DashboardDock::DashboardDock(DashboardWidget *dw,QWidget * parent) :
 	connect(dw,SIGNAL(titleUpdated(QString)),
 			dt,SLOT(slotUpdateTitle(QString)));
 
-	dw->populateTitleBar(dt);
+    dw->populateDockTitleBar(dt);
 
 	setWidget(dw);
 }

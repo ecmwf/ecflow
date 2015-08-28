@@ -162,10 +162,10 @@ DashboardWidget* Dashboard::addDialog(const std::string& type)
 
 	DashboardDialog* dia=new DashboardDialog(this);
 
-	connect(dia,SIGNAL(finished()),
-			this,SLOT(slotDialogFinished()));
+    connect(dia,SIGNAL(finished(int)),
+            this,SLOT(slotDialogFinished(int)));
 
-	dia->add(w);
+    dia->add(w);
 	dia->show();
 
     return w;
@@ -220,7 +220,7 @@ void Dashboard::slotTitle(QString s,QPixmap p)
 // Dialogs
 //------------------------
 
-void Dashboard::slotDialogFinished()
+void Dashboard::slotDialogFinished(int)
 {
 	if(DashboardDialog* dia=static_cast<DashboardDialog*>(sender()))
 	{

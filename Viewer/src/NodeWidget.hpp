@@ -44,7 +44,8 @@ public:
 	void currentSelection(VInfo_ptr info);
 	void reload();
 	void rerender();
-	QList<QAction*> dockTitleActions() {return infoPanelActions_;}
+    void populateDialog() {};
+    QList<QAction*> dockTitleActions() {return infoPanelActions_;}
 
 Q_SIGNALS:
 	void selectionChanged(VInfo_ptr);

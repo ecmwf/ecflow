@@ -47,17 +47,15 @@ public:
 	void writeSettings(VComboSettings*);
 	void readSettings(VComboSettings*);
 
-public Q_SLOTS:
-	void slotDockClose();
-	void slotDialogFinished();
-	void slotPopInfoPanel(QString);
-
 Q_SIGNALS:
     void selectionChanged(VInfo_ptr);
 	void titleChanged(QWidget*,QString,QPixmap);
 
 protected Q_SLOTS:
 	void slotTitle(QString,QPixmap);
+    void slotDockClose();
+    void slotDialogFinished(int);
+    void slotPopInfoPanel(QString);
 
 private:
 	DashboardWidget* addWidgetCore(const std::string& type);

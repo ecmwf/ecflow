@@ -26,7 +26,7 @@ public:
 	TableNodeWidget(ServerFilter* servers,QWidget* parent=0);
 	~TableNodeWidget();
 
-	void populateTitleBar(DashboardDockTitleWidget* tw);
+    void populateDockTitleBar(DashboardDockTitleWidget* tw);
 
 	void writeSettings(VSettings*);
 	void readSettings(VSettings*);

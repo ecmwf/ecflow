@@ -29,7 +29,7 @@ public:
 	TreeNodeWidget(ServerFilter*,QWidget* parent=0);
 	~TreeNodeWidget();
 
-	void populateTitleBar(DashboardDockTitleWidget* tw);
+	void populateDockTitleBar(DashboardDockTitleWidget* tw);
 
 	bool selectFirstServerInView();
 	void writeSettings(VSettings*);

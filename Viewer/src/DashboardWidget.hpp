@@ -28,8 +28,9 @@ public:
 	explicit DashboardWidget(QWidget* parent=0) : QWidget(parent) {};
 	virtual ~DashboardWidget() {};
 
-	virtual void populateTitleBar(DashboardDockTitleWidget*)=0;
-	virtual void reload()=0;
+    virtual void populateDockTitleBar(DashboardDockTitleWidget*)=0;
+    virtual void populateDialog()=0;
+    virtual void reload()=0;
 	virtual void rerender()=0;
 	virtual bool selectFirstServerInView() {return false;};
 	virtual VInfo_ptr currentSelection() {return VInfo_ptr(); }
