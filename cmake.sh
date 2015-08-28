@@ -15,6 +15,7 @@ show_error_and_exit() {
    echo "   make           - run make after cmake"
    echo "   test           - run all the tests"
    echo "   test_safe      - only run deterministic tests"
+   echo "   ctest          - all ctest -R <test> -V"
    echo "   san            - is short for clang thread sanitiser"
    echo "   package_source - produces ecFlow-4.0.8-Source.tar.gz file, for users"
    echo "                    copies the tar file to $SCRATCH"
@@ -25,9 +26,11 @@ show_error_and_exit() {
 copy_tarball_arg=
 package_source_arg=
 make_arg=
+make_only_arg=
 test_arg=
 test_safe_arg=
 clang_arg=
+intel_arg=
 clang_sanitiser_arg=
 mode_arg=release
 verbose_arg=
@@ -35,14 +38,28 @@ ctest_arg=
 while [[ "$#" != 0 ]] ; do   
    if [[ "$1" = debug || "$1" = release ]] ; then
       mode_arg=$1
-   elif  [[ "$1" = clang ]] ; then
-      clang_arg=$1
-   elif  [[ "$1" = san ]] ; then
-      clang_sanitiser_arg=$1
+   elif  [[ "$1" = make_only ]] ; then
+      make_only_arg=make
+      shift
+      while [[ "$#" != 0 ]] ; do
+         make_only_arg="$make_only_arg $1"
+         shift
+      done
+      break
    elif  [[ "$1" = make ]] ; then
       make_arg=$1
-   elif  [[ "$1" = verbose ]] ; then
-      verbose_arg=$1
+      shift
+      while [[ "$#" != 0 ]] ; do
+         make_arg="$make_arg $1"
+         shift
+      done
+      break
+   elif  [[ "$1" = clang ]] ; then
+      clang_arg=$1
+   elif  [[ "$1" = intel ]] ; then
+      intel_arg=$1
+   elif  [[ "$1" = san ]] ; then
+      clang_sanitiser_arg=$1
    elif  [[ "$1" = package_source ]] ; then
       package_source_arg=$1
    elif  [[ "$1" = copy_tarball ]] ; then
@@ -95,7 +112,12 @@ if [[ "$clang_sanitiser_arg" = san ]] ; then
 fi
 if [[ "$ARCH" = cray ]] ; then
     cmake_extra_options="$cmake_extra_options -DENABLE_VIEWER=OFF"
-    module swap PrgEnv-cray PrgEnv-gnu
+    
+    if [[ $intel_arg = intel ]] ; then
+        module swap PrgEnv-cray PrgEnv-intel
+    else
+    	module swap PrgEnv-cray PrgEnv-gnu
+    fi
 fi
 
 # ====================================================================================  
@@ -113,8 +135,6 @@ major=$(cat VERSION.cmake   | grep 'set( ECFLOW_MAJOR'   | awk '{print $3}'| sed
 minor=$(cat VERSION.cmake   | grep 'set( ECFLOW_MINOR'   | awk '{print $3}'| sed 's/["]//g')
 
 # ====================================================================================
-#rm -rf ../bdir/$mode_arg/ecflow
-
 # clean up source before packaging, do this after deleting ecbuild
 if [[ $package_source_arg = package_source ]] ; then
 	source build_scripts/clean.sh
@@ -124,6 +144,8 @@ fi
 # Change directory
 source_dir=$(pwd)
 workspace=$(pwd)/..
+
+#rm -rf ../bdir/$mode_arg/ecflow
 mkdir -p ../bdir/$mode_arg/ecflow
 cd ../bdir/$mode_arg/ecflow
 
@@ -150,6 +172,11 @@ if [[ "$ctest_arg" != "" ]] ; then
 	exit 0
 fi
 
+if [[ "$make_only_arg" != "" ]] ; then
+	$make_only_arg
+	exit 0
+fi
+
 # ====================================================================================
 #
 # -DCMAKE_PYTHON_INSTALL_TYPE = [ local | setup ]
@@ -169,12 +196,9 @@ cmake $source_dir \
             #-DCMAKE_PYTHON_INSTALL_PREFIX=/var/tmp/$USER/install/cmake/ecflow/$release.$major.$minor/lib/python2.7/site-packages/ecflow
         
 # =============================================================================================
-if [[ $make_arg = make ]] ; then
-	if [[ $verbose_arg = verbose ]] ; then
-		make -j8 VERBOSE=1
-	else
-		make -j8
-	fi
+if [[ "$make_arg" != "" ]] ; then
+	$make_arg
+	exit 0
 fi
 
 # =============================================================================================
@@ -191,7 +215,6 @@ if [[ $package_source_arg = package_source ]] ; then
 	
 	cp ecFlow-$release.$major.$minor-Source.tar.gz $SCRATCH/.
 fi
-
 
 # =========================================================================================
 # NOTES:
