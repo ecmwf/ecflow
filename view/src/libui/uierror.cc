@@ -50,6 +50,7 @@ void error_shell_c::create (Widget parent, char *widget_name)
 	XtAddCallback (form_, XmNcancelCallback,&error_shell_c:: cancelCB, (XtPointer) this);
 	XtAddCallback (form_, XmNhelpCallback,&error_shell_c:: helpCB, (XtPointer) this);
 	XtUnmanageChild ( button28 );
+	XtUnmanageChild ( button30 );
 }
 
 void error_shell_c::helpCB( Widget widget, XtPointer client_data, XtPointer call_data )

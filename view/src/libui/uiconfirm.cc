@@ -29,9 +29,9 @@ void confirm_shell_c::create (Widget parent, char *widget_name)
   /* Widget children[6];      // Children to manage */
 	Arg al[64];                    /* Arg List */
 	register int ac = 0;           /* Arg Count */
-	Widget button20 = (Widget)NULL;
+	// Widget button20 = (Widget)NULL;
 	Widget button21 = (Widget)NULL;
-	Widget button22 = (Widget)NULL;
+	// Widget button22 = (Widget)NULL;
 
 	if ( !widget_name )
 		widget_name = "confirm_shell";
@@ -47,10 +47,12 @@ void confirm_shell_c::create (Widget parent, char *widget_name)
 	XtSetArg(al[ac], XmNdefaultButtonType, XmDIALOG_CANCEL_BUTTON); ac++;
 	form_ = XmCreateMessageBox ( confirm_shell, "form_", al, ac );
 	ac = 0;
-	button20 = XmMessageBoxGetChild ( form_, XmDIALOG_CANCEL_BUTTON );
+	// button20 = 
+	XmMessageBoxGetChild ( form_, XmDIALOG_CANCEL_BUTTON );
 	button21 = XmMessageBoxGetChild ( form_, XmDIALOG_HELP_BUTTON );
 	label_ = XmMessageBoxGetChild ( form_, XmDIALOG_MESSAGE_LABEL );
-	button22 = XmMessageBoxGetChild ( form_, XmDIALOG_OK_BUTTON );
+	// button22 = 
+	XmMessageBoxGetChild ( form_, XmDIALOG_OK_BUTTON );
 	XtSetArg(al[ac], XmNsensitive, FALSE); ac++;
 	XtSetValues ( button21,al, ac );
 	ac = 0;

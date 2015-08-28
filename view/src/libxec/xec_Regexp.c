@@ -64,7 +64,7 @@ char *buf;
 #define GETC()      (*sp++)
 #define PEEKC()     (*sp)
 #define UNGETC(c)   (--sp)
-#define RETURN(c)   return;
+#define RETURN(c)   return NULL; 
 #define ERROR(c)    fprintf(stderr,"Warning regexp error %d\n",c)
 
 #include <regexp.h>
