@@ -4,6 +4,9 @@
 set -e # stop the shell on first error
 set -u # fail when using an undefined variable
 
+# ensure correct permission for installation
+umask 0022
+
 # ====================================================================
 show_error_and_exit() {
    echo "cmake.sh expects at least one argument"
@@ -28,6 +31,7 @@ clang_arg=
 clang_sanitiser_arg=
 mode_arg=release
 verbose_arg=
+ctest_arg=
 while [[ "$#" != 0 ]] ; do   
    if [[ "$1" = debug || "$1" = release ]] ; then
       mode_arg=$1
@@ -47,6 +51,14 @@ while [[ "$#" != 0 ]] ; do
       test_arg=$1
    elif  [[ "$1" = test_safe ]] ; then
       test_safe_arg=$1
+   elif [[ "$1" = ctest ]] ;     then  
+      ctest_arg=$1 ; 
+      shift
+      while [[ "$#" != 0 ]] ; do
+         ctest_arg="$ctest_arg $1"
+         shift
+      done
+      break
    else
    	 show_error_and_exit
    fi
@@ -54,11 +66,6 @@ while [[ "$#" != 0 ]] ; do
    # shift remove last argument
    shift
 done
-
-#if [ ${#mode_arg} -eq 0 ] ; then
-#   echo "cmake.sh expects mode i.e. debug or release"
-#   exit 1
-#fi
 
 echo "copy_tarball_arg=$copy_tarball_arg"
 echo "package_source_arg=$package_source_arg"
@@ -134,6 +141,12 @@ fi
 if [[ $test_arg = test ]] ; then
 	ctest -R s_test
 	ctest -R py_s
+	exit 0
+fi
+
+# ctest 
+if [[ "$ctest_arg" != "" ]] ; then
+	$ctest_arg
 	exit 0
 fi
 
