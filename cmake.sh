@@ -55,12 +55,11 @@ while [[ "$#" != 0 ]] ; do
    shift
 done
 
-if [ ${#mode_arg} -eq 0 ] ; then
-   echo "cmake.sh expects mode i.e. debug or release"
-   exit 1
-fi
+#if [ ${#mode_arg} -eq 0 ] ; then
+#   echo "cmake.sh expects mode i.e. debug or release"
+#   exit 1
+#fi
 
- 
 echo "copy_tarball_arg=$copy_tarball_arg"
 echo "package_source_arg=$package_source_arg"
 echo "make_arg=$make_arg"
@@ -91,6 +90,13 @@ if [[ "$ARCH" = cray ]] ; then
     module swap PrgEnv-cray PrgEnv-gnu
 fi
 
+# ====================================================================================  
+cmake_build_type=
+if [[ $mode_arg = debug ]] ; then
+    cmake_build_type=Debug
+else
+    cmake_build_type=Release
+fi
 
 # ====================================================================================
 # Use for local install
@@ -106,18 +112,12 @@ if [[ $package_source_arg = package_source ]] ; then
 	source build_scripts/clean.sh
 fi
 
+# =======================================================================================
+# Change directory
 source_dir=$(pwd)
 workspace=$(pwd)/..
 mkdir -p ../bdir/$mode_arg/ecflow
 cd ../bdir/$mode_arg/ecflow
-
-# ====================================================================================  
-cmake_build_type=
-if [[ $mode_arg = debug ]] ; then
-    cmake_build_type=Debug
-else
-    cmake_build_type=Release
-fi
 
 
 # =============================================================================================
@@ -135,7 +135,6 @@ if [[ $test_arg = test ]] ; then
 	ctest -R py_s
 	exit 0
 fi
-
 
 # ====================================================================================
 #
