@@ -1,0 +1,215 @@
+/*----------------------------
+  Mainwindow
+------------------------------*/
+
+QMainWindow { 
+    icon-size:  20px;
+}  
+
+/*QToolBar {
+  	top-padding: 1px;
+	bottom-padding: 1px;
+  	icon-size:  20px;
+}*/	
+
+QToolBar > QToolButton {
+  	padding:  1px;
+}	
+
+/* ----------------------------
+  Breadcrumbs 
+-------------------------------*/
+
+QWidget[breadcrumbs="1"] {
+	background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 rgb(245,245,245), stop: 1 rgb(242,242,242));
+	border-radius: 4px; 
+    border-color: rgb(140,140,140);
+    /*border-top-width: 4px;*/ 
+}
+
+QToolButton#pathNameTb {
+     	border-radius: 0px;
+     	padding: 0px; 
+		color: black;	
+ }
+
+QToolButton#pathNameTb:hover{
+	    background:  qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #deebf6, stop: 1 #bed8ee);
+        border: 1px solid rgb(160, 160, 160);
+     	border-radius: 0px;
+        padding: 0px; 		
+ }
+
+QToolButton#pathIconTb{
+        border: none;
+        padding: 0px; 		
+ }
+
+QToolButton#pathIconTb:hover{
+        background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 rgb(253,253,253), stop: 1 rgb(227,227,227));
+	    border: 1px solid rgb(180, 180, 180);
+     	border-radius: 0px;
+        padding: 0px; 		
+ }
+
+QToolButton#pathMenuTb{
+        image: url(":/viewer/path_arrow.svg");
+	    border: none;
+        padding: 0px; 		
+}
+
+QToolButton#pathMenuTb:hover{
+	background:  qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 blue, stop 0.5 red, stop: 1 white);
+        border: 1px solid rgb(160, 160, 160);
+     	border-radius: 0px;
+        padding: 0px; 	
+}
+
+
+/*----------------------------
+  Icon folder view
+------------------------------*/
+
+/* QGraphicsview cannot be set from qss only its 
+baseclass QFrame. So we need to set QFrame here! */
+QFrame[breadcrumbs="1"] {
+	background: rgb(252, 252, 252);
+	border: 0; 
+}
+
+/*----------------------------
+  TreeView
+------------------------------*/
+QTreeView[style="nodeView"] {  
+    background: rgb(255,255,255);
+}
+
+
+/*-----------------------------
+  Log
+ -----------------------------*/
+
+QTreeView[log="1"]::item {
+    alternate-background-color: rgb(248,247,246);
+    border: 1px solid rgb(210,210,210);
+    border-top-color: transparent;
+    border-left-color: transparent; 
+    border-right-color: transparent;
+}
+
+QTreeView[log="1"]::item:selected {
+   background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #f0f7fd, stop: 1 #b9cfec);
+   color: black;
+}
+
+/*----------------------------
+  Info panel text
+------------------------------*/
+
+QPlainTextEdit[readOnly="false"] { 
+    background-color: rgb(245,245,245);
+}
+
+QPlainTextEdit[readOnly="true"] { 
+    background-color: rgb(245,245,245);
+}
+
+QLineEdit[readOnly="true"] { 
+    background-color: rgb(251,251,251);
+}
+
+/*----------------------------
+  File info label
+------------------------------*/
+  
+QLabel[fileInfo="1"] {
+     border: 1px solid rgb(160,160,160);
+     background: rgb(242, 242, 242);  
+}
+  
+/*----------------------------
+  Property editor
+------------------------------*/
+  
+QLabel#headerLabel_ {
+     border: 1px solid rgb(60,60,60);
+     background: rgb(246, 246, 246);  
+}
+   
+QGroupBox#editorGroupBox {
+   
+   font-weight: bold;
+}   
+     
+/*----------------------------
+  Dock widget
+------------------------------*/
+
+QWidget[dockTitle="11"]  {
+     background: rgb(26, 246, 246);       
+}  
+     
+/*----------------------------
+  Variable tree view
+------------------------------*/
+
+QTreeView[var="1"]::branch:!has-children {  
+   background: white;
+   border: 1px solid #BBBBBB;
+   border-top-color: transparent;
+   border-left-color: transparent; 
+   border-right-color: transparent;
+}
+ 
+
+QTreeView[var="1"]::branch:!has-children {
+      image: none;
+} 
+ 
+QTreeView[var="1"]::branch:!has-children:alternate {
+      background: rgb(248,247,246);
+} 
+ 
+/* 
+QTreeView[var="1"]::branch:alternate {
+      background: rgb(248,247,246);
+} 
+*/
+QTreeView[var="1"]::item:has-children {
+      background: rgb(122,122,122);
+      color: white;
+} 
+/*
+QTreeView[var="1"]::branch:has-children {
+      background: rgb(122,122,122);
+} 
+*/
+/*
+QTreeView[var="1"]::branch:has-children:closed {
+         border-image: none;
+         image: url(":/viewer/drawer_close.svg");
+}
+
+QTreeView[var="1"]::branch:has-children:open {
+         border-image: none;
+         image: url(":/viewer/drawer_open.svg");
+}
+*/
+
+/*QAbstractItemView {
+    alternate-background-color: #FFE6BF;
+        background: #FFF2DE;
+    selection-background-color: rgb(194, 221, 255);
+}*/
+
+QTreeView[var="1"]::item  {
+    border: 1px solid #BBBBBB;
+    border-top-color: transparent;
+    border-left-color: transparent; 
+    border-right-color: transparent;
+ }
+
+QTreeView::item:selected[var="1"] {
+   background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #f0f7fd, stop: 1 #b9cfec);
+}
+

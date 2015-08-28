@@ -1,0 +1,461 @@
+{
+    "file_id" : "ecflowview menu configuration",
+
+    "file_version" : "1.0",
+
+    "menus" :
+    [
+        {
+            "name"    : "Node",
+            "modes"   : ["Context", "Bar"],
+            "parent"  : "None"
+        },
+
+        {
+            "name"    : "Delete",
+            "modes"   : ["Submenu"]
+        },
+
+        {
+            "name"    : "Order",
+            "modes"   : ["Submenu"]
+        },
+
+        {
+            "name"    : "Force",
+            "modes"   : ["Submenu"]
+        },
+
+        {
+            "name"    : "Defstatus",
+            "modes"   : ["Submenu"]
+        }
+
+    ],
+
+
+
+    "menu_items" :
+    [
+
+
+        {
+            "menu"           : "Node",
+            "name"           : "Suspend",
+            "visible_for"    : "not suspended and node",
+            "command"        : "ecflow_client --suspend <full_name>"
+        },
+
+        {
+            "menu"           : "Node",
+            "name"           : "Resume",
+            "visible_for"    : "suspended and node",
+            "command"        : "ecflow_client --resume <full_name>"
+        },
+
+        {
+            "menu"           : "Node",
+            "name"           : "Rerun",
+            "visible_for"    : "task",
+            "enabled_for"    : "(not active) and (not submitted)",
+            "command"        : "ecflow_client --force queued <full_name>"
+        },
+
+        {
+            "menu"           : "Node",
+            "name"           : "Set complete",
+            "visible_for"    : "task or alias",
+            "enabled_for"    : "submitted or active",
+            "command"        : "ecflow_client --force complete <full_name>",
+            "question"       : "Have you checked that the job is not active anymore (jobstatus)?",
+            "default_answer" : "Yes"
+        },
+
+        {
+            "menu"           : "Node",
+            "name"           : "Set aborted",
+            "visible_for"    : "task or alias",
+            "enabled_for"    : "submitted or active",
+            "command"        : "ecflow_client --force aborted <full_name>"
+        },
+        {
+            "menu"           : "Node",
+            "name"           : "Set aborted",
+            "visible_for"    : "task or alias",
+            "enabled_for"    : "unknown or queued or complete",
+            "command"        : "ecflow_client --force aborted <full_name>",
+            "question"       : "Have you checked that the job is not active anymore (jobstatus)?",
+            "default_answer" : "Yes"
+        },
+        {
+            "menu"           : "Node",
+            "name"           : "Execute",
+            "visible_for"    : "task or alias",
+            "enabled_for"    : "(not active) and (not submitted)",
+            "command"        : "ecflow_client --run <full_name>"
+        },
+
+        {
+            "menu"           : "Node",
+            "name"           : "Requeue",
+            "visible_for"    : "task or suite or family",
+            "enabled_for"    : "(not active) and (not submitted)",
+            "command"        : "ecflow_client --requeue force <full_name>",
+            "question"       : "Confirm requeuing of <full_name>",
+            "default_answer" : "Yes"
+        },
+
+        {
+            "menu"           : "Node",
+            "name"           : "Requeue aborted",
+            "visible_for"    : "suite or family",
+            "enabled_for"    : "aborted or suspended",
+            "command"        : "ecflow_client --requeue abort <full_name>",
+            "question"       : "Confirm requeuing of aborted tasks from <full_name>",
+            "default_answer" : "Yes"
+        },
+
+        {
+            "menu"           : "Node",
+            "name"           : "-"
+        },
+
+        {
+            "menu"           : "Node",
+            "name"           : "Delete",
+            "type"           : "Submenu",
+            "visible_for"    : "suite or task or family",
+            "enabled_for"    : "(queued or suspended or active) and (has_triggers or has_time or has_date)",
+            "command"        : "None"
+        },
+
+        {
+            "menu"           : "Node",
+            "name"           : "Special",
+            "type"           : "Submenu",
+            "visible_for"    : "node or alias",
+            "command"        : "None"
+        },
+
+        {
+            "name"           : "Defstatus",
+            "type"           : "Submenu",
+            "menu"           : "Node",
+            "visible_for"    : "node or alias",
+            "command"        : "None"
+        },
+
+        {
+            "menu"           : "Node",
+            "name"           : "Force",
+            "type"           : "Submenu",
+            "visible_for"    : "node and admin",
+            "command"        : "None"
+        },
+
+        {
+            "menu"           : "Node",
+            "name"           : "Order",
+            "type"           : "Submenu",
+            "visible_for"    : "(node or alias) and admin",
+            "command"        : "None"
+        },
+
+        {
+            "name"           : "-",
+            "menu"           : "Node"
+        },
+
+        {
+            "menu"           : "Node",
+            "name"           : "Begin",
+            "visible_for"    : "suite and (oper or admin)",
+            "enabled_for"    : "unknown or complete",
+            "command"        : "ecflow_client --begin <node_name>"
+        },
+
+        {
+            "menu"           : "Node",
+            "name"           : "Cancel",
+            "visible_for"    : "suite and (oper or admin)",
+            "enabled_for"    : "(not active) and (not submitted)",
+            "command"        : "ecflow_client --delete yes <full_name>",
+            "question"       : "Do you really want to cancel suite <full_name> ?",
+            "default_answer" : "No"
+        },
+
+
+        {
+            "menu"           : "Node",
+            "name"           : "Set",
+            "visible_for"    : "event",
+            "enabled_for"    : "clear",
+            "command"        : "ecflow_client --alter change event <node_name> set <parent_name>"
+        },
+        {
+            "menu"           : "Node",
+            "name"           : "Clear",
+            "visible_for"    : "event",
+            "enabled_for"    : "set",
+            "command"        : "ecflow_client --alter change event <node_name> clear <parent_name>"
+        },
+
+
+
+        {
+            "menu"           : "Node",
+            "name"           : "Unlock",
+            "visible_for"    : "server and (oper or admin) and locked",
+            "command"        : "unlock -y",
+            "question"       : "Before going further, please check why the server was locked.",
+            "default_answer" : "No"
+        },
+
+        {
+            "menu"           : "Node",
+            "name"           : "Restart",
+            "visible_for"    : "server",
+            "enabled_for"    : "shutdown or halted",
+            "command"        : "ecflow_client --restart yes",
+            "question"       : "Restart the server in <node_name>?",
+            "default_answer" : "No"
+        },
+
+        {
+            "menu"           : "Node",
+            "name"           : "Shutdown",
+            "visible_for"    : "server",
+            "enabled_for"    : "not shutdown",
+            "command"        : "ecflow_client --shutdown yes",
+            "question"       : "Shutdown the server in <node_name>?",
+            "default_answer" : "No"
+        },
+
+        {
+            "menu"           : "Node",
+            "name"           : "Halt",
+            "visible_for"    : "server",
+            "enabled_for"    : "not halted",
+            "command"        : "ecflow_client --halt yes",
+            "question"       : "Halt the server in <node_name>?",
+            "default_answer" : "No"
+        },
+
+        {
+            "menu"           : "Node",
+            "name"           : "Terminate",
+            "visible_for"    : "server",
+            "enabled_for"    : "halted or unknown",
+            "command"        : "ecflow_client --terminate yes",
+            "question"       : "Terminate the server in <node_name>?",
+            "default_answer" : "No"
+        },
+
+        {
+            "menu"           : "Node",
+            "name"           : "-"
+        },
+
+        {
+            "menu"           : "Node",
+            "name"           : "Checkpoint",
+            "visible_for"    : "server",
+            "command"        : "ecflow_client --check_pt"
+        },
+
+        {
+            "menu"           : "Node",
+            "name"           : "Recover",
+            "visible_for"    : "server",
+            "enabled_for"    : "halted",
+            "command"        : "ecflow_client --restore_from_checkpt",
+            "question"       : "Recover the server in <node_name>?",
+            "default_answer" : "No"
+        },
+
+
+
+
+        {
+            "menu"           : "Node",
+            "name"           : "Reset",
+            "visible_for"    : "limit",
+            "command"        : "ecflow_client --alter change limit_value <node_name> 0 <parent_name>",
+            "question"       : "Confirm resetting <full_name>",
+            "default_answer" : "Yes"
+        },
+
+        {
+            "menu"           : "Node",
+            "name"           : "Remove",
+            "visible_for"    : "alias",
+            "command"        : "ecflow_client --delete yes <full_name>",
+            "question"       : "Confirm remove alias <full_name>",
+            "default_answer" : "Yes"
+        },
+
+
+        {
+            "menu"           : "Node",
+            "name"           : "-"
+        },
+
+
+
+
+
+
+
+
+
+        {
+            "menu"           : "Node",
+            "name"           : "-"
+        },
+
+        {
+            "menu"           : "Node",
+            "name"           : "Set as root",
+            "enabled_for"    : "suite or task or family"
+        },
+
+        {
+            "menu"           : "Node",
+            "name"           : "-"
+        },
+
+        {
+            "menu"           : "Node",
+            "name"           : "Custom...",
+            "command"        : "CUSTOM_COMMAND"
+        },
+
+
+
+
+
+        {
+            "menu"           : "Delete",
+            "name"           : "All dependencies",
+            "enabled_for"    : "has_triggers or has_time or has_date",
+            "command"        : "ecflow_client --free-dep all <full_name>"
+        },
+        {
+            "menu"           : "Delete",
+            "name"           : "Trigger dependencies",
+            "enabled_for"    : "has_triggers",
+            "command"        : "ecflow_client --free-dep trigger <full_name>"
+        },
+        {
+            "menu"           : "Delete",
+            "name"           : "Time dependencies",
+            "enabled_for"    : "has_time",
+            "command"        : "ecflow_client --free-dep time <full_name>"
+        },
+        {
+            "menu"           : "Delete",
+            "name"           : "Date dependencies",
+            "enabled_for"    : "has_date",
+            "command"        : "ecflow_client --free-dep date <full_name>"
+        },
+
+
+
+
+        {
+            "menu"           : "Order",
+            "name"           : "Top",
+            "command"        : "ecflow_client --order <full_name> top"
+        },
+        {
+            "menu"           : "Order",
+            "name"           : "Up",
+            "command"        : "ecflow_client --order <full_name> up"
+        },
+        {
+            "menu"           : "Order",
+            "name"           : "Down",
+            "command"        : "ecflow_client --order <full_name> down"
+        },
+        {
+            "menu"           : "Order",
+            "name"           : "Bottom",
+            "command"        : "ecflow_client --order <full_name> bottom"
+        },
+        {
+            "menu"           : "Order",
+            "name"           : "Alphabetically",
+            "command"        : "ecflow_client --order <full_name> alpha"
+        },
+
+
+
+        {
+            "menu"           : "Force",
+            "name"           : "Unknown",
+            "visible_for"    : "node",
+            "enabled_for"    : "not unknown",
+            "command"        : "ecflow_client --force unknown recursive <full_name>"
+        },
+        {
+            "menu"           : "Force",
+            "name"           : "Complete",
+            "visible_for"    : "node",
+            "enabled_for"    : "not complete and not active and not submitted",
+            "command"        : "ecflow_client --force complete recursive <full_name>",
+            "question"       : "Check running/queued jobs and Confirm force complete of <full_name>",
+            "default_answer" : "No"
+        },
+        {
+            "menu"           : "Force",
+            "name"           : "Queued",
+            "visible_for"    : "node",
+            "enabled_for"    : "not queued and not active and not submitted",
+            "command"        : "ecflow_client --force queued recursive <full_name>"
+        },
+        {
+            "menu"           : "Force",
+            "name"           : "Submitted",
+            "visible_for"    : "node",
+            "enabled_for"    : "not submitted and not active",
+            "command"        : "ecflow_client --force submitted recursive <full_name>"
+        },
+        {
+            "menu"           : "Force",
+            "name"           : "Active",
+            "visible_for"    : "node",
+            "enabled_for"    : "not active",
+            "command"        : "ecflow_client --force active recursive <full_name>"
+        },
+        {
+            "menu"           : "Force",
+            "name"           : "Aborted",
+            "visible_for"    : "node",
+            "enabled_for"    : "not active",
+            "command"        : "ecflow_client --force aborted recursive <full_name>",
+            "question"       : "Check running/queued jobs and Confirm force submitted of <full_name>",
+            "default_answer" : "Yes"
+        },
+
+
+
+        {
+            "menu"           : "Defstatus",
+            "name"           : "Complete",
+            "visible_for"    : "node",
+            "command"        : "ecflow_client --alter change defstatus complete <full_name>"
+        },
+        {
+            "menu"           : "Defstatus",
+            "name"           : "Queued",
+            "visible_for"    : "node",
+            "command"        : "ecflow_client --alter change defstatus queued <full_name>"
+        }
+
+
+
+
+
+    ]
+
+}

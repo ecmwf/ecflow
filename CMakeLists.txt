@@ -37,7 +37,8 @@ set( CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH} 
 
 include( ecbuild_system )
 
-ecbuild_requires_macro_version( 1.3 )
+ecbuild_requires_macro_version( 1.6 )
+
 
 ###############################################################################
 # local project
@@ -60,8 +61,10 @@ message( STATUS "ECFLOW_VERSION       : ${ECFLOW_VERSION_STR}" )
 # Options , be aware of caching, when modifying on the command line. 
 # Ideally start fresh or remove cache CmakeCache.txt in build dir
 # =========================================================================================
-option( ENABLE_PYTHON    "enable python interface"                              ON  )
-option( ENABLE_GUI       "Build ecflowview"                                     ON  )
+option( ENABLE_PYTHON         "enable python interface"   ON  )
+option( ENABLE_GUI            "Build ecflowview"          ON  )
+option( ENABLE_VIEWER         "enable the Qt version of ecflowview" ON  )
+option( ENABLE_QT5            "enable Qt5"                          OFF )
 option( ENABLE_ALL_TESTS "This includes performance/migration/regression tests" OFF )
 
 message( STATUS "ENABLE_PYTHON         : ${ENABLE_PYTHON}" )
@@ -72,24 +75,23 @@ message( STATUS "ENABLE_ALL_TESTS      : ${ENABLE_ALL_TESTS}" )
 # GUI requires X11 and Motif
 # ======================================================================================
 
-find_package( X11 )
-
-#if ( X11_FOUND )
+if(ENABLE_GUI)
+  find_package( X11 )
+#  if ( X11_FOUND )
 #	debug_var( X11_INCLUDE_DIR )
 #	debug_var( X11_LIBRARIES )  
 #	debug_var( X11_Xt_INCLUDE_PATH )
 #	debug_var( X11_Xt_LIB )
 #	debug_var( X11_Xpm_INCLUDE_PATH )
 #	debug_var( X11_Xpm_LIB )
-#endif()
+#  endif()
 
-find_package( Motif )
-
-#if ( MOTIF_FOUND )
+  find_package( Motif )
+#  if ( MOTIF_FOUND )
 #	debug_var( MOTIF_INCLUDE_DIR )
 #	debug_var( MOTIF_LIBRARIES )  
-#endif()
- 
+#  endif()
+endif()
  
 # =========================================================================================
 # Boost
@@ -124,6 +126,45 @@ find_package( Boost 1.53.0 REQUIRED COMPONENTS python serialization system threa
 #message( STATUS "Boost_LIBRARIES     : ${Boost_LIBRARIES}" )
 
 
+
+# =========================================================================================
+# Qt
+# =========================================================================================
+
+if(ENABLE_VIEWER)
+ if( ENABLE_QT5 )
+      find_package(Qt5Widgets REQUIRED)
+      find_package(Qt5Gui REQUIRED)
+#      find_package(Qt5Network REQUIRED)
+#      find_package(Qt5Xml REQUIRED)
+#      find_package(Qt5XmlPatterns REQUIRED)
+#      find_package(Qt5PrintSupport REQUIRED)
+
+      if( Qt5Widgets_FOUND )
+          message(STATUS "Qt5 version ${Qt5Widgets_VERSION_STRING} was found")
+          SET(ECFLOW_QT_INCLUDE_DIR ${Qt5Widgets_INCLUDE_DIRS} ${Qt5Gui_INCLUDE_DIR})
+          SET(ECFLOW_QT_LIBRARIES ${Qt5Widgets_LIBRARIES} ${Qt5Gui_LIBRARIES})
+          set( ECFLOW_QT 1)
+          set( ECFLOW_QT5 1)
+          add_definitions( -DECFLOW_QT5 )
+          #We need to disable keywords because there is a problem in using Qt and boost together.
+          ADD_DEFINITIONS(-DQT_NO_KEYWORDS)
+      else()
+          message(FATAL_ERROR "Qt5 was NOT found - this is required for the new user interface")
+      endif()
+  else( ENABLE_QT5 )
+    find_package(Qt4 4.6.2 REQUIRED QtCore QtGui )
+    if( QT_FOUND )
+        set( ECFLOW_QT 1)
+        #We need to disable keywords because there is a problem in using Qt and boost together.
+        ADD_DEFINITIONS(-DQT_NO_KEYWORDS)
+    else()
+        message(FATAL_ERROR "Qt was not found - this is required for the new user interface")
+    endif()
+  endif( ENABLE_QT5 )
+endif()
+
+
 # =========================================================================================
 # debug
 # =========================================================================================
@@ -156,6 +197,11 @@ if (ENABLE_PYTHON)
     #debug_var(PYTHON_LIBRARIES)
     #debug_var(PYTHON_INCLUDE_DIR)
 	add_subdirectory( Pyext )
+endif()	
+	
+if(ENABLE_VIEWER)
+    add_subdirectory( Viewer )
+    add_subdirectory( share )
 endif()
 
 if( ENABLE_GUI AND X11_FOUND AND MOTIF_FOUND )
@@ -191,7 +237,7 @@ install( FILES
 )
 
 # install documentation         
-install( FILES
+install (FILES  
             ${CMAKE_SOURCE_DIR}/Doc/user-manual/client_options.docx  
             ${CMAKE_SOURCE_DIR}/Doc/user-manual/user_manual.docx    
             ${CMAKE_SOURCE_DIR}/Doc/user-manual/user_manual.pdf    

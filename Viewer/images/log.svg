@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="32"
+   height="32"
+   id="svg1455"
+   sodipodi:version="0.32"
+   inkscape:version="0.47 r22583"
+   sodipodi:docname="log.svg"
+   inkscape:export-xdpi="120.00000"
+   inkscape:export-ydpi="120.00000"
+   version="1.1"
+   style="display:inline">
+  <defs
+     id="defs3" />
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="13.90625"
+     inkscape:cx="3.087099"
+     inkscape:cy="15.435982"
+     inkscape:current-layer="layer3"
+     showgrid="true"
+     inkscape:document-units="px"
+     inkscape:grid-bbox="true"
+     inkscape:window-width="1213"
+     inkscape:window-height="690"
+     inkscape:window-x="636"
+     inkscape:window-y="12"
+     inkscape:window-maximized="0"
+     inkscape:snap-smooth-nodes="false"
+     inkscape:object-nodes="false"
+     inkscape:snap-grids="false">
+    <inkscape:grid
+       type="xygrid"
+       id="grid3734"
+       empspacing="5"
+       visible="true"
+       enabled="true"
+       snapvisiblegridlinesonly="true" />
+  </sodipodi:namedview>
+  <metadata
+     id="metadata7">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title />
+        <cc:license
+           rdf:resource="Apache License 2.0" />
+        <dc:creator>
+          <cc:Agent>
+            <dc:title />
+          </cc:Agent>
+        </dc:creator>
+        <dc:publisher>
+          <cc:Agent>
+            <dc:title>ECMWF</dc:title>
+          </cc:Agent>
+        </dc:publisher>
+        <dc:language>en-GB</dc:language>
+        <dc:subject>
+          <rdf:Bag>
+            <rdf:li>Metview icon</rdf:li>
+          </rdf:Bag>
+        </dc:subject>
+        <dc:description>Metview icon</dc:description>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:groupmode="layer"
+     id="layer2"
+     inkscape:label="book"
+     style="display:inline">
+    <path
+       style="fill:#5a7e8c;fill-opacity:1;stroke:#23205f;stroke-width:1.04872465000000004px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       d="M 16.56064,27.30401 29.743852,21.813133 22.692367,8.1601396 12.881604,12.018594 3.3347987,7.7103514 5.5756327,23.011803 16.56064,27.30401 z"
+       id="path2875"
+       sodipodi:nodetypes="ccccccc" />
+  </g>
+  <g
+     id="layer1"
+     inkscape:label="page"
+     inkscape:groupmode="layer"
+     transform="translate(0,-16)"
+     style="display:inline">
+    <path
+       style="fill:#f9f9f9;stroke:#6f777b;stroke-width:0.62923479;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+       d="m 16.790579,42.933004 10.960463,-7.049099 -7.281426,-14.098199 -7.511365,6.307089 3.832328,14.840209 z"
+       id="path3664"
+       sodipodi:nodetypes="ccccc" />
+  </g>
+  <g
+     inkscape:groupmode="layer"
+     id="layer3"
+     inkscape:label="page2">
+    <path
+       style="fill:#f9f9f9;fill-opacity:1;stroke:#6f777b;stroke-width:0.62923479;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;display:inline"
+       d="M 13.264837,12.018593 16.795317,26.870257 21.497451,15.758428 16.362992,1.237932 13.264837,12.018593 z"
+       id="path3660"
+       sodipodi:nodetypes="ccccc" />
+    <path
+       style="fill:#f9f9f9;stroke:#6f777b;stroke-width:0.62923479;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;display:inline"
+       d="M 16.790579,27.229809 7.1361197,21.799387 4.546071,5.9762356 l 8.488826,5.9681564 3.755682,15.285417 z"
+       id="path3662"
+       sodipodi:nodetypes="ccccc" />
+  </g>
+</svg>

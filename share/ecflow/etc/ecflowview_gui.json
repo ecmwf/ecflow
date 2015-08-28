@@ -1,0 +1,147 @@
+{
+	"gui" : {
+							
+ 		"Nodes":  {
+ 			
+ 			"desc" : "Node properties",
+ 					 			
+ 			"group" : {
+ 				"title" : "Node state=unknown",
+ 				"prefix" : "nstate.unknown", 				
+ 				
+ 				"line" :  "fill_colour",
+				"line" :  "font_colour"
+			},					 				
+ 			
+
+			"group" : {
+ 				"title" : "Complete",
+ 				"prefix" : "nstate.complete", 				
+ 				
+ 				"line" :  "fill_colour",
+				"line" :  "font_colour"
+			},	
+			
+			"group" : {
+ 				"title" : "Queued",
+ 				"prefix" : "nstate.queued", 				
+ 				
+ 				"line" :  "fill_colour",
+				"line" :  "font_colour"
+			},	
+			
+			
+			"group" : {
+ 				"title" : "Aborted",
+ 				"prefix" : "nstate.aborted", 				
+ 				
+ 				"line" :  "fill_colour",
+				"line" :  "font_colour"
+			},			
+			
+			"group" : {
+ 				"title" : "Submitted",
+ 				"prefix" : "nstate.submitted", 				
+ 				
+ 				"line" :  "fill_colour",
+				"line" :  "font_colour"
+			},	
+	
+			"group" : {
+ 				"title" : "Active",
+ 				"prefix" : "nstate.active", 				
+ 				
+ 				"line" :  "fill_colour",
+				"line" :  "font_colour"
+			},	
+			
+			"group" : {
+ 				"title" : "Suspended",
+ 				"prefix" : "nstate.suspended", 				
+ 				
+ 				"line" :  "fill_colour",
+				"line" :  "font_colour"
+			},	
+			
+ 			"group" : {
+ 				"title" : "Halted",
+ 				"prefix" : "sstate.halted",				
+ 				
+ 				"line" : "fill_colour", 				
+ 				"line" : "font_colour" 				
+ 			},
+ 			
+			"group" : {
+ 				"title" : "Shutdown",
+ 				"prefix" : "sstate.shutdown",				
+ 				
+ 				"line" : "fill_colour", 				
+ 				"line" : "font_colour" 				
+ 			},
+ 			
+ 			"group" : {
+ 				"title" : "Running",
+ 				"prefix" : "sstate.running",				
+ 				
+ 				"line" : "fill_colour", 				
+ 				"line" : "font_colour" 				
+ 			},
+ 			
+ 			"group" : {
+ 				"title" : "Disconnected",
+ 				"prefix" : "sstate.running",				
+ 				
+ 				"line" : "fill_colour", 				
+ 				"line" : "font_colour" 				
+ 			}
+			
+ 		},	
+ 			
+ 		"server": {
+ 			
+ 			"desc" : "Server options",
+ 			
+ 			"group" : {
+ 				
+ 				"title" : "Update",
+ 				"prefix" : "server.update",
+ 				
+ 				"line" : "update",
+ 				"line" : "updateRateInSec",
+ 				"line" : "adaptiveUpdate",
+ 				"line" : "maxAdaptiveUpdateRateInMin"
+ 			},
+ 			
+ 			"group" : {
+				
+				"title" : "Files",
+				"prefix" : "server.files",
+				
+				"line" : "readFilesFromDisk",
+				"line" : "maxJobFileLines"				
+			},
+
+			"group" : {
+				
+				"title" : "Popup",
+				"prefix" : "server.popup",
+				
+				"line" : "aborted",
+				"line" : "restarted",
+				"line" : "late",
+				"line" : "zombie",
+				"line" : "alias"
+			}
+ 		
+ 		},
+
+ 		"Tree view" : {
+ 			
+ 			"desc" : "Tree view options",
+ 			 			
+ 			"line" : "view.tree.font",
+ 			"line" : "view.tree.nodeRectRadius",
+ 			"line" : "view.tree.displayChildCount" 
+ 		}		
+ 	}
+}

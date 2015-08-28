@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>TableNodeWidget</class>
+ <widget class="QWidget" name="TableNodeWidget">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>683</width>
+    <height>491</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0,1">
+   <property name="spacing">
+    <number>0</number>
+   </property>
+   <property name="margin">
+    <number>0</number>
+   </property>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="1">
+     <property name="spacing">
+      <number>1</number>
+     </property>
+     <item>
+      <widget class="NodePathWidget" name="bcWidget_" native="true"/>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <widget class="TableFilterWidget" name="filterW_" native="true">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QWidget" name="viewHolder_" native="true"/>
+   </item>
+  </layout>
+  <action name="actionBreadcrumbs">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Breadcrumbs</string>
+   </property>
+   <property name="toolTip">
+    <string>Show breadcrumbs</string>
+   </property>
+  </action>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>NodePathWidget</class>
+   <extends>QWidget</extends>
+   <header>NodePathWidget.hpp</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>TableFilterWidget</class>
+   <extends>QWidget</extends>
+   <header>TableFilterWidget.hpp</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
+ <resources>
+  <include location="viewer.qrc"/>
+ </resources>
+ <connections/>
+</ui>
