@@ -53,6 +53,7 @@ void DashboardDockTitleWidget::addActions(QList<QAction*> lst)
     Q_FOREACH(QAction* ac,lst)
 	{
     	 QToolButton *tb=new QToolButton(this);
+         tb->setProperty("docktitle","1");
          tb->setDefaultAction(ac);
          tb->setAutoRaise(true);
          actionLayout_->addWidget(tb);

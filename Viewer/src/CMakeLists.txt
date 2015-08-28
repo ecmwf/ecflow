@@ -75,6 +75,7 @@ set(viewer_srcs
     TableFilterWidget.cpp
     TableNodeModel.cpp
     TableNodeView.cpp
+    TableNodeViewDelegate.cpp
     TableNodeWidget.cpp
     TextEdit.cpp
     TimeItemWidget.cpp

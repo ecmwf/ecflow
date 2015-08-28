@@ -28,14 +28,15 @@ public:
 	explicit NodeViewDelegate(QWidget *parent=0);
 	~NodeViewDelegate();
 
-	void paint(QPainter *painter,const QStyleOptionViewItem &option,
-		           const QModelIndex& index) const;
-	QSize sizeHint(const QStyleOptionViewItem & option, const QModelIndex & index ) const;
+    //void paint(QPainter *painter,const QStyleOptionViewItem &option,
+    //	           const QModelIndex& index) const;
+
+    QSize sizeHint(const QStyleOptionViewItem & option, const QModelIndex & index ) const;
 
 	void notifyChange(VProperty*);
 
 protected:
-	virtual void updateSettings() {};
+    virtual void updateSettings()=0;
 
 	/*void renderServer(QPainter *painter,const QModelIndex& index,
 			            const QStyleOptionViewItemV4& option,QString text) const;
@@ -73,7 +74,7 @@ protected:
 	//AnimationHandler* animation_;
 
 	PropertyMapper* prop_;
-	int nodeRectRad_;
+    //int nodeRectRad_;
 	QFont font_;
 	//bool drawChildCount_;
 

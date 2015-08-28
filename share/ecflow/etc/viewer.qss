@@ -65,6 +65,12 @@ QToolButton#pathMenuTb:hover{
         padding: 0px; 	
 }
 
+QLabel[previewLabel="1"] {
+    border-radius: 4px;
+    background: rgb(231,210,139);
+    border: 2px solid rgb(210,210,210);
+}
+
 
 /*----------------------------
   Icon folder view
@@ -148,7 +154,20 @@ QGroupBox#editorGroupBox {
 QWidget[dockTitle="11"]  {
      background: rgb(26, 246, 246);       
 }  
-     
+
+QToolButton[docktitle="1"] {
+    border-radius: 0px;
+    padding: 0px;
+    icon-size:  16px;
+}
+
+QToolButton[docktitle="1"]:hover {
+    border-radius: 0px;
+    padding: 0px;
+    icon-size:  16px;
+    background: rgb(140,140,140);
+}
+
 /*----------------------------
   Variable tree view
 ------------------------------*/

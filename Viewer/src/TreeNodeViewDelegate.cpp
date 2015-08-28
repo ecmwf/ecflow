@@ -21,8 +21,6 @@
 static std::vector<std::string> propVec;
 
 TreeNodeViewDelegate::TreeNodeViewDelegate(QWidget *parent) :
-    QStyledItemDelegate(parent),
-    prop_(0),
     nodeRectRad_(0),
     drawChildCount_(true)
 {
@@ -33,14 +31,14 @@ TreeNodeViewDelegate::TreeNodeViewDelegate(QWidget *parent) :
 		propVec.push_back("view.tree.displayChildCount");
 	}
 
-	prop_=new PropertyMapper(propVec,this);
+    prop_=new PropertyMapper(propVec,this);
 
-	updateSettings();
+    updateSettings();
 
 	//The parent must be the view!!!
 	animation_=new AnimationHandler(parent);
 
-	hoverPen_=QPen(QColor(201,201,201));
+    /*hoverPen_=QPen(QColor(201,201,201));
 	hoverBrush_=QBrush(QColor(250,250,250,210));
 	selectPen_=QPen(QColor(125,162,206));
 	selectBrush_=QBrush(QColor(193,220,252,110));
@@ -59,9 +57,9 @@ TreeNodeViewDelegate::TreeNodeViewDelegate(QWidget *parent) :
 		imgR.setScaledSize(QSize(size,size));
 		QImage img=imgR.read();
 		errPix_=QPixmap(QPixmap::fromImage(img));
-	}
+    }*/
 
-	attrRenderers_["meter"]=&TreeNodeViewDelegate::renderMeter;
+    /*attrRenderers_["meter"]=&TreeNodeViewDelegate::renderMeter;
 	attrRenderers_["label"]=&TreeNodeViewDelegate::renderLabel;
 	attrRenderers_["event"]=&TreeNodeViewDelegate::renderEvent;
 	attrRenderers_["var"]=&TreeNodeViewDelegate::renderVar;
@@ -72,19 +70,19 @@ TreeNodeViewDelegate::TreeNodeViewDelegate(QWidget *parent) :
 	attrRenderers_["time"]=&TreeNodeViewDelegate::renderTime;
 	attrRenderers_["date"]=&TreeNodeViewDelegate::renderDate;
 	attrRenderers_["repeat"]=&TreeNodeViewDelegate::renderRepeat;
-	attrRenderers_["late"]=&TreeNodeViewDelegate::renderLate;
+    attrRenderers_["late"]=&TreeNodeViewDelegate::renderLate;*/
 }
 
 TreeNodeViewDelegate::~TreeNodeViewDelegate()
 {
 	delete animation_;
-	delete prop_;
+    //delete prop_;
 }
 
-void TreeNodeViewDelegate::notifyChange(VProperty* p)
+/*void TreeNodeViewDelegate::notifyChange(VProperty* p)
 {
 	updateSettings();
-}
+}*/
 
 void TreeNodeViewDelegate::updateSettings()
 {
@@ -109,14 +107,15 @@ void TreeNodeViewDelegate::updateSettings()
 	}
 }
 
-QSize TreeNodeViewDelegate::sizeHint(const QStyleOptionViewItem & option, const QModelIndex & index ) const
+/*QSize TreeNodeViewDelegate::sizeHint(const QStyleOptionViewItem & option, const QModelIndex & index ) const
 {
 	QSize size=QStyledItemDelegate::sizeHint(option,index);
 
 	QFontMetrics fm(font_);
 	int h=fm.height();
 	return QSize(size.width(),h+8);
-}
+}*/
+
 
 void TreeNodeViewDelegate::paint(QPainter *painter,const QStyleOptionViewItem &option,
 		           const QModelIndex& index) const

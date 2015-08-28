@@ -21,10 +21,9 @@ static std::vector<std::string> propVec;
 
 NodeViewDelegate::NodeViewDelegate(QWidget *parent) :
     QStyledItemDelegate(parent),
-    prop_(0),
-    nodeRectRad_(0)
+    prop_(0)
 {
-	//Property
+    /*//Property
 	if(propVec.empty())
 	{
 		propVec.push_back("view.tree.font");
@@ -33,7 +32,7 @@ NodeViewDelegate::NodeViewDelegate(QWidget *parent) :
 
 	prop_=new PropertyMapper(propVec,this);
 
-	updateSettings();
+    updateSettings();*/
 
 	hoverPen_=QPen(QColor(201,201,201));
 	hoverBrush_=QBrush(QColor(250,250,250,210));
@@ -72,7 +71,8 @@ NodeViewDelegate::NodeViewDelegate(QWidget *parent) :
 
 NodeViewDelegate::~NodeViewDelegate()
 {
-	delete prop_;
+    if(prop_)
+        delete prop_;
 }
 
 void NodeViewDelegate::notifyChange(VProperty* p)
@@ -114,6 +114,7 @@ QSize NodeViewDelegate::sizeHint(const QStyleOptionViewItem & option, const QMod
 	return QSize(size.width(),h+8);
 }
 
+/*
 void NodeViewDelegate::paint(QPainter *painter,const QStyleOptionViewItem &option,
 		           const QModelIndex& index) const
 {
@@ -128,27 +129,6 @@ void NodeViewDelegate::paint(QPainter *painter,const QStyleOptionViewItem &optio
 	painter->save();
 
 	//Selection - we only do it once
-	/*if(index.column() == 0)
-	{
-		QRect fullRect=QRect(0,option.rect.y(),painter->device()->width(),option.rect.height());
-
-		if(option.state & QStyle::State_Selected)
-		{
-			//QRect fillRect=option.rect.adjusted(0,1,-1,-textRect.height()-1);
-			painter->fillRect(fullRect,selectBrush_);
-			painter->setPen(selectPen_);
-			painter->drawLine(fullRect.topLeft(),fullRect.topRight());
-			painter->drawLine(fullRect.bottomLeft(),fullRect.bottomRight());
-		}
-		else if(option.state & QStyle::State_MouseOver)
-		{
-			//QRect fillRect=option.rect.adjusted(0,1,-1,-1);
-			painter->fillRect(fullRect,hoverBrush_);
-			painter->setPen(hoverPen_);
-			painter->drawLine(fullRect.topLeft(),fullRect.topRight());
-			painter->drawLine(fullRect.bottomLeft(),fullRect.bottomRight());
-		}
-	}*/
 
 	if(index.data(AbstractNodeModel::ConnectionRole).toInt() == 0)
 	{
@@ -158,10 +138,6 @@ void NodeViewDelegate::paint(QPainter *painter,const QStyleOptionViewItem &optio
 		painter->fillRect(bandRect,lostConnectBandBrush_);
 
 	}
-
-
-	/*
-
 	//First column (nodes)
 	if(index.column() == 0)
 	{
@@ -210,9 +186,11 @@ void NodeViewDelegate::paint(QPainter *painter,const QStyleOptionViewItem &optio
 
 	painter->restore();
 
-	//else
-	//	QStyledItemDelegate::paint(painter,option,index);*/
+    else
+        QStyledItemDelegate::paint(painter,option,index);
 }
+
+*/
 
 /*
 void NodeViewDelegate::renderServer(QPainter *painter,const QModelIndex& index,

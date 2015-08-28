@@ -16,6 +16,7 @@
 #include <QPen>
 #include <QStyledItemDelegate>
 
+#include "NodeViewDelegate.hpp"
 #include "VProperty.hpp"
 
 #include <string>
@@ -23,20 +24,21 @@
 class AnimationHandler;
 class PropertyMapper;
 
-class TreeNodeViewDelegate : public QStyledItemDelegate, public VPropertyObserver
+class TreeNodeViewDelegate : public NodeViewDelegate   //, public QStyledItemDelegate, public VPropertyObserver
 {
 public:
 	explicit TreeNodeViewDelegate(QWidget *parent=0);
 	~TreeNodeViewDelegate();
 
-	void paint(QPainter *painter,const QStyleOptionViewItem &option,
-		           const QModelIndex& index) const;
-	QSize sizeHint(const QStyleOptionViewItem & option, const QModelIndex & index ) const;
+    void paint(QPainter *painter,const QStyleOptionViewItem &option,
+                   const QModelIndex& index) const;
 
-	void notifyChange(VProperty*);
+    //QSize sizeHint(const QStyleOptionViewItem & option, const QModelIndex & index ) const;
+
+    //void notifyChange(VProperty*);
 
 protected:
-	void updateSettings();
+    void updateSettings();
 
 	void renderServer(QPainter *painter,const QModelIndex& index,
 			            const QStyleOptionViewItemV4& option,QString text) const;
@@ -44,9 +46,9 @@ protected:
 	void renderNode(QPainter *painter,const QModelIndex& index,
             		const QStyleOptionViewItemV4& option,QString text) const;
 
-	typedef void (TreeNodeViewDelegate::*AttributeRendererProc)(QPainter *painter,QStringList data,const QStyleOptionViewItemV4& option) const;
+    //typedef void (TreeNodeViewDelegate::*AttributeRendererProc)(QPainter *painter,QStringList data,const QStyleOptionViewItemV4& option) const;
 
-	void renderMeter(QPainter *painter,QStringList data,const QStyleOptionViewItemV4& option) const;
+    void renderMeter(QPainter *painter,QStringList data,const QStyleOptionViewItemV4& option) const;
 	void renderLabel(QPainter *painter,QStringList data,const QStyleOptionViewItemV4& option) const;
 	void renderEvent(QPainter *painter,QStringList data,const QStyleOptionViewItemV4& option) const;
 	void renderVar(QPainter *painter,QStringList data,const QStyleOptionViewItemV4& option) const;
@@ -57,25 +59,25 @@ protected:
 	void renderTime(QPainter *painter,QStringList data,const QStyleOptionViewItemV4& option) const;
 	void renderDate(QPainter *painter,QStringList data,const QStyleOptionViewItemV4& option) const;
 	void renderRepeat(QPainter *painter,QStringList data,const QStyleOptionViewItemV4& option) const;
-	void renderLate(QPainter *painter,QStringList data,const QStyleOptionViewItemV4& option) const;
+    void renderLate(QPainter *painter,QStringList data,const QStyleOptionViewItemV4& option) const;
 
-	QPen hoverPen_;
+    /*QPen hoverPen_;
 	QBrush hoverBrush_;
 	QPen selectPen_;
 	QBrush selectBrush_;
 	QPen nodePen_;
 	QPen nodeSelectPen_;
-	QPixmap errPix_;
+    QPixmap errPix_;
 
 	QBrush lostConnectBgBrush_;
-	QBrush lostConnectBandBrush_;
+    QBrush lostConnectBandBrush_;*/
 
-	QMap<QString,AttributeRendererProc> attrRenderers_;
+    //QMap<QString,AttributeRendererProc> attrRenderers_;
 	AnimationHandler* animation_;
 
-	PropertyMapper* prop_;
-	int nodeRectRad_;
-	QFont font_;
+    //PropertyMapper* prop_;
+    int nodeRectRad_;
+    //QFont font_;
 	bool drawChildCount_;
 
 	QFont serverNumFont_;

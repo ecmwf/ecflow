@@ -19,6 +19,7 @@
 #include "FilterWidget.hpp"
 #include "NodeFilterModel.hpp"
 #include "TableNodeModel.hpp"
+#include "TableNodeViewDelegate.hpp"
 #include "VFilter.hpp"
 #include "VSettings.hpp"
 
@@ -80,6 +81,10 @@ TableNodeView::TableNodeView(NodeFilterModel* model,NodeFilterDef* filterDef,QWi
 
 
 	QTreeView::setModel(model_);
+
+    //Create delegate to the view
+    TableNodeViewDelegate *delegate=new TableNodeViewDelegate(this);
+    setItemDelegate(delegate);
 }
 
 void TableNodeView::setModel(NodeFilterModel *model)

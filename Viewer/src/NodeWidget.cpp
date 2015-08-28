@@ -94,8 +94,8 @@ void NodeWidget::createActions()
     	{
     		QAction *ac=new QAction(QString::fromStdString((*it)->label()),this);
             QPixmap pix(":/viewer/" + QString::fromStdString((*it)->dockIcon()));
-    		ac->setIcon(QIcon(pix));
-    		ac->setData(QString::fromStdString((*it)->name()));
+    		ac->setIcon(QIcon(pix));       
+            ac->setData(QString::fromStdString((*it)->name()));
     		ac->setEnabled(false);
 
     		connect(ac,SIGNAL(triggered()),

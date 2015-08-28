@@ -30,7 +30,10 @@
     	},
     	"status" : {
     		"label" : "Status"
-    	},
+        },
+        "icon" : {
+            "label" : "Icon"
+        },
     	"event" : {
     		"label" : "Event"
     	}   	

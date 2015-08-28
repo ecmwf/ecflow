@@ -14,6 +14,7 @@
 #include <QComboBox>
 #include <QDialog>
 #include <QDockWidget>
+#include <QLabel>
 #include <QMessageBox>
 #include <QPixmap>
 #include <QSplitter>
@@ -76,6 +77,15 @@ MainWindow::MainWindow(QStringList idLst,QWidget *parent) : QMainWindow(parent)
     connect(nodePanel_,SIGNAL(selectionChanged(VInfo_ptr)),
     			this,SLOT(slotSelectionChanged(VInfo_ptr)));
 
+    //Add temporary preview label
+    QLabel *label=new QLabel(" This is a preview version! ",this);
+    label->setAutoFillBackground(true);
+    label->setProperty("previewLabel","1");
+
+    QLabel *label1=new QLabel("      ",this);
+
+    viewToolBar->addWidget(label1);
+    viewToolBar->addWidget(label);
 }
 
 MainWindow::~MainWindow()
