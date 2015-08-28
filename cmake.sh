@@ -145,7 +145,6 @@ fi
 
 cmake $source_dir \
             -DCMAKE_MODULE_PATH=$workspace/ecbuild/cmake \
-            $options \
             -DCMAKE_BUILD_TYPE=$cmake_build_type \
             -DCMAKE_INSTALL_PREFIX=/var/tmp/$USER/install/cmake/ecflow/$release.$major.$minor \
             -DCMAKE_PYTHON_INSTALL_TYPE=local \
