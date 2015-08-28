@@ -126,7 +126,7 @@ void top_shell_c::create (Display *display, char *app_name, int app_argc, char *
 	Widget button14 = (Widget)NULL;
 	Widget button6 = (Widget)NULL;
 	Widget drawingArea1 = (Widget)NULL;
-	Widget button8 = (Widget)NULL;
+	/* Widget button8 = (Widget)NULL; */
 	Widget button177 = (Widget)NULL;
 	Widget drawingArea2 = (Widget)NULL;
 	Widget button189 = (Widget)NULL;
@@ -301,7 +301,7 @@ XtSetArg(al[ac],XmNmnemonic,'m'); ac++;        /* mnemonic */
 	XtSetArg(al[ac], XmNmarginWidth, 0); ac++;
 	XtSetArg(al[ac], XmNmarginHeight, 0); ac++;
 	XtSetArg(al[ac], XmNdefaultButtonShadowThickness, 0); ac++;
-	button8 = XmCreatePushButton ( tools_, "Chat", al, ac );
+	/* button8 = XmCreatePushButton ( tools_, "Chat", al, ac ); */
 	ac = 0;
 	XtSetArg(al[ac], XmNmarginWidth, 0); ac++;
 	XtSetArg(al[ac], XmNmarginHeight, 0); ac++;
@@ -784,7 +784,7 @@ XtSetArg(al[ac],XmNmnemonic,'m'); ac++;        /* mnemonic */
 	children[ac++] = button14;
 	children[ac++] = button6;
 	children[ac++] = drawingArea1;
-	// children[ac++] = button8;
+	/* children[ac++] = button8; */
 	children[ac++] = button177;
 	children[ac++] = drawingArea2;
 	children[ac++] = button189;

@@ -1,6 +1,10 @@
 
-o Migration of ecflow release in OPS and research
-
+JIRA ISSUES:
+ECFLOW-136 Label, event. meter child commands persisting if node not found in server
+  -> excessive label commands appear to cause client to hang/suspend
+  -> top suggested show that most of process are in state 'D' UN-interable sleep (This is typically I/O related)
+  -> it was a gpfs/file which causes page faulting > 500 simulataneos client
+  
  
 Client 
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8

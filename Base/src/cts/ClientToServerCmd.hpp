@@ -81,7 +81,7 @@ public:
 
    /// A command can be read only command or write only command
    /// A read only command will not change the state of the suites in the server
-   /// A write only command can modify the statue of suite in the server
+   /// A write only command can modify the state of suite in the server
    /// Used by the server for authentication since only write only users are allowed to edit.
    virtual bool isWrite() const { return false; /* returning false means read only */ }
 
@@ -887,6 +887,7 @@ public:
    virtual std::ostream& print(std::ostream& os) const;
    virtual bool equals(ClientToServerCmd*) const;
 
+   virtual bool isWrite() const;
    virtual const char* theArg() const { return arg();}
    virtual void addOption(boost::program_options::options_description& desc) const;
    virtual void create( 	Cmd_ptr& cmd,

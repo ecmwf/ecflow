@@ -33,12 +33,12 @@
 
 /* Avi: Added to fix: warning: implicit declaration of function ‘_XmTextUpdateLineTable’ */
 extern void _XmTextUpdateLineTable(
-                        Widget widget,
-                        XmTextPosition start,
-                        XmTextPosition end,
-                        XmTextBlock block,
-                        // int update) ; // JIRA:ECFLOW-48
-                        Boolean update) ; // JIRA:ECFLOW-48
+				   Widget widget,
+				   XmTextPosition start,
+				   XmTextPosition end,
+				   XmTextBlock block,
+				   Boolean update) ; 
+/* JIRA:ECFLOW-48   int update) ; */
 
 #ifndef MAP_FAILED
 #define MAP_FAILED ((void *)(-1))
@@ -319,7 +319,7 @@ void* xec_MapText(Widget w,const char *fname,int* z)
 {
 	FILE    *fp = NULL;
 	long    length;
-	//int 	ret = 0;  warning: variable ‘ret’ set but not used [-Wunused-but-set-variable]
+	/*int 	ret = 0;  warning: variable ‘ret’ set but not used [-Wunused-but-set-variable] */
 	char *m;
 	mapped_text *p;
 	XEvent ev;
@@ -336,7 +336,6 @@ void* xec_MapText(Widget w,const char *fname,int* z)
 		fseek(fp,0L,2);
 		if (errno)
 		{
-			//ret = errno;
 			fclose(fp);
 			return NULL;
 		}
@@ -344,7 +343,6 @@ void* xec_MapText(Widget w,const char *fname,int* z)
 		length=ftell(fp);
 		if (errno)
 		{
-			//ret = errno;
 			fclose(fp);
 			return NULL;
 		}
@@ -352,17 +350,15 @@ void* xec_MapText(Widget w,const char *fname,int* z)
 		fseek(fp,0L,0);
 		if (errno)
 		{
-			//ret = errno;
 			fclose(fp);
 			return NULL;
 		}
 
-		/* f = w; */
-		/* while(f && !XmIsForm(f)) */
-			/* f = XtParent(f); */
-
-		/* if(!f) return NULL; */
-
+		/* f = w; 
+		   while(f && !XmIsForm(f)) 
+		   f = XtParent(f); 		   
+		   if(!f) return NULL; */
+		
 
 		m = mmap(NULL,length,PROT_READ,MAP_SHARED,fileno(fp),0);
 		if((void*)m == MAP_FAILED)

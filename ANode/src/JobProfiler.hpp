@@ -32,7 +32,6 @@ class JobProfiler  : private boost::noncopyable  {
 public:
    // Note: 1000 milliseconds = 1 second
    JobProfiler(Task*,JobsParam&,size_t threshold /* expected to be milli seconds */);
-   JobProfiler( JobsParam&);
    ~JobProfiler();
 
    static void set_task_threshold(size_t threshold);

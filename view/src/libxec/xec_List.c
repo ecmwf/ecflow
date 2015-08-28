@@ -199,7 +199,7 @@ int xec_DumpList(FILE *f,char *fmt,Widget w)
 
 Boolean xec_ListSearch(Widget w,char   *word,Boolean nocase,Boolean fromstart,Boolean wrap)
 {
-  // ARG_DEF(5);
+  /* ARG_DEF(5); */
 	int first = 0;
 	int count,sel_count,vis_count;
 	XmString	*items,*sel_items;

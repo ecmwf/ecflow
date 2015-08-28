@@ -33,7 +33,6 @@
 #include "CalendarUpdateParams.hpp"
 #include "SuiteChanged.hpp"
 #include "ChangeMgrSingleton.hpp"
-#include "JobProfiler.hpp"
 #include "JobsParam.hpp"
 
 using namespace ecf;
@@ -177,9 +176,7 @@ bool Suite::resolveDependencies(JobsParam& jobsParam)
 {
  	if (begun_) {
 
- 	   if (jobsParam.timed_out_of_job_generation()) return false;
- 	   JobProfiler profile_me(jobsParam);
- 	   if (jobsParam.timed_out_of_job_generation()) return false;
+ 	   if (jobsParam.check_for_job_generation_timeout()) return false;
 
  	   SuiteChanged1 changed(this);
   		return NodeContainer::resolveDependencies(jobsParam);

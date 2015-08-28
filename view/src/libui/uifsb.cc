@@ -49,13 +49,13 @@ void fsb_shell_c::create (Widget parent, char *widget_name)
 	ac = 0;
 	button42 = XmSelectionBoxGetChild ( form_, XmDIALOG_CANCEL_BUTTON );
 	button44 = XmSelectionBoxGetChild ( form_, XmDIALOG_OK_BUTTON );
-
-
 	label_ = XmCreateLabel ( form_, "label_", al, ac );
 	XtAddCallback (form_, XmNokCallback,&fsb_shell_c:: okCB, (XtPointer) this);
 	XtAddCallback (form_, XmNcancelCallback,&fsb_shell_c:: cancelCB, (XtPointer) this);
 	XtAddCallback (form_, XmNhelpCallback,&fsb_shell_c:: helpCB, (XtPointer) this);
 	children[ac++] = label_;
+	children[ac++] = button42; /* 20150819 */
+	children[ac++] = button44; /* 20150819 */
 	XtManageChildren(children, ac);
 	ac = 0;
 }

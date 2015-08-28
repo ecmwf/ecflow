@@ -28,7 +28,6 @@
 #include "Str.hpp"
 #include "Indentor.hpp"
 #include "DefsDelta.hpp"
-#include "JobProfiler.hpp"
 #include "JobsParam.hpp"
 
 using namespace ecf;
@@ -72,9 +71,7 @@ void Family::begin()
 
 bool Family::resolveDependencies(JobsParam& jobsParam)
 {
-   if (jobsParam.timed_out_of_job_generation()) return false;
-   JobProfiler profile_me(jobsParam);
-   if (jobsParam.timed_out_of_job_generation()) return false;
+   if (jobsParam.check_for_job_generation_timeout()) return false;
 
    return NodeContainer::resolveDependencies(jobsParam);
 }

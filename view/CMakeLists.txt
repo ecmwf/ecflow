@@ -260,5 +260,5 @@ ecbuild_add_test( TARGET  test-view
 install ( FILES       ${CMAKE_SOURCE_DIR}/view/src/ecflowview.menu 
                       ${CMAKE_SOURCE_DIR}/view/servers
           DESTINATION share/ecflow
-          PERMISSIONS OWNER_READ GROUP_READ WORLD_READ OWNER_EXECUTE GROUP_EXECUTE WORLD_EXECUTE
+          PERMISSIONS OWNER_READ OWNER_WRITE GROUP_READ WORLD_READ OWNER_EXECUTE GROUP_EXECUTE WORLD_EXECUTE
         )        

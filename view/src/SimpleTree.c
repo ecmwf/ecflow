@@ -81,11 +81,11 @@ static XtResource resources[] = {
 
 };
 
-// https://software.ecmwf.int/issues/browse/SUP-646
+/* https://software.ecmwf.int/issues/browse/SUP-646 */
 static void xincrement();
 static XtActionsRec actionsList[] = {
     { "increment",(XtActionProc) xincrement},
-}; // 
+}; /* */
 
 SimpleTreeClassRec simpletreeClassRec = {
 	{
@@ -385,7 +385,7 @@ static void Layout(Widget w,long *maxWidth,long *maxHeight)
 		w_max = MAX(w_max,w->r.width);
 	}
 
-	//int dh = h_max / 2;
+	/* int dh = h_max / 2; */
 
 	h_max += tw->simpletree.v_min_space;
 	w_max += tw->simpletree.h_min_space;
