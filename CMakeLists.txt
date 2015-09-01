@@ -63,12 +63,30 @@ message( STATUS "ECFLOW_VERSION       : ${ECFLOW_VERSION_STR}" )
 # =========================================================================================
 option( ENABLE_PYTHON         "enable python interface"   ON  )
 option( ENABLE_GUI            "Build ecflowview"          ON  )
-option( ENABLE_VIEWER         "enable the Qt version of ecflowview" ON  )
-option( ENABLE_QT5            "enable Qt5"                          OFF )
-option( ENABLE_ALL_TESTS "This includes performance/migration/regression tests" OFF )
+option( ENABLE_QT5            "enable Qt5"                OFF )
+option( ENABLE_ALL_TESTS      "This includes performance/migration/regression tests" OFF )
+
+
+# Qt4 and Qt5 require different packages to be found, so we need to know
+# in advance which version to search for (user-specified so that it
+# works on systems with both installed)
+if(ENABLE_QT5)
+    list(APPEND QT_DEPS "Qt5Widgets REQUIRED 5.0.0")
+    list(APPEND QT_DEPS "Qt5Gui REQUIRED 5.0.0")
+else()
+    set(QT_DEPS "Qt4 4.8.0 REQUIRED QtCore QtGui" )
+endif()
+
+ecbuild_add_option( FEATURE VIEWER
+                    DEFAULT ON
+                    DESCRIPTION       "the Qt version of the viewer"
+                    REQUIRED_PACKAGES "${QT_DEPS}" )
+
 
 message( STATUS "ENABLE_PYTHON         : ${ENABLE_PYTHON}" )
 message( STATUS "ENABLE_GUI            : ${ENABLE_GUI}" )
+message( STATUS "ENABLE_VIEWER         : ${ENABLE_VIEWER}" )
+message( STATUS "ENABLE_QT5            : ${ENABLE_QT5}" )
 message( STATUS "ENABLE_ALL_TESTS      : ${ENABLE_ALL_TESTS}" )
 
 # ======================================================================================
@@ -133,8 +151,8 @@ find_package( Boost 1.53.0 REQUIRED COMPONENTS python serialization system threa
 
 if(ENABLE_VIEWER)
  if( ENABLE_QT5 )
-      find_package(Qt5Widgets REQUIRED)
-      find_package(Qt5Gui REQUIRED)
+      #find_package(Qt5Widgets REQUIRED)
+      #find_package(Qt5Gui REQUIRED)
 #      find_package(Qt5Network REQUIRED)
 #      find_package(Qt5Xml REQUIRED)
 #      find_package(Qt5XmlPatterns REQUIRED)
@@ -153,7 +171,7 @@ if(ENABLE_VIEWER)
           message(FATAL_ERROR "Qt5 was NOT found - this is required for the new user interface")
       endif()
   else( ENABLE_QT5 )
-    find_package(Qt4 4.6.2 REQUIRED QtCore QtGui )
+    #find_package(Qt4 4.6.2 REQUIRED QtCore QtGui )
     if( QT_FOUND )
         set( ECFLOW_QT 1)
         #We need to disable keywords because there is a problem in using Qt and boost together.
