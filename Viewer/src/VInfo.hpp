@@ -140,7 +140,7 @@ public:
 	void accept(VInfoVisitor*);
 
 	std::string name() {return std::string();}
-    std::string path() {return std::string();};
+    std::string path() {return std::string();}
 
 	static VInfo_ptr create(ServerHandler*,VNode*,VAttribute*,int);
 

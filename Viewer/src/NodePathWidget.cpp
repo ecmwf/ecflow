@@ -231,7 +231,7 @@ NodePathWidget::NodePathWidget(QWidget *parent) :
 
 	layout_=new QHBoxLayout(this);
 	layout_->setSpacing(0);
-	layout_->setContentsMargins(6,1,6,1);
+    layout_->setContentsMargins(6,3,4,2);
 	setLayout(layout_);
 
 	//QFont f(QApplication::font());

@@ -37,6 +37,9 @@ DashboardDockTitleWidget::DashboardDockTitleWidget(QWidget *parent) :
 	p.setColor(QPalette::WindowText,Qt::white);
 	titleLabel_->setPalette(p);
 
+    optionsTb_->setProperty("docktitle","1");
+    closeTb_->setProperty("docktitle","1");
+
 	//Set the initial state of the float tool button
 	if(QDockWidget *dw = qobject_cast<QDockWidget*>(parentWidget()))
 	{

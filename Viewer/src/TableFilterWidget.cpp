@@ -27,8 +27,13 @@ void TableFilterWidget::build(NodeFilterDef* def)
 {
 	filterDef_=def;
 
+    exprLabel_->hide();
+
 	//
-	QToolButton *tb=new QToolButton(this);
+    QToolButton *tb=new QToolButton(this);
+    tb->setText("Status");
+    tb->setAutoRaise(true);
+    tb->setPopupMode(QToolButton::InstantPopup);
 
 	buttonLayout_->addWidget(tb);
 
