@@ -37,7 +37,7 @@
      <x>0</x>
      <y>0</y>
      <width>852</width>
-     <height>21</height>
+     <height>19</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuLl">
@@ -159,7 +159,7 @@
      <normaloff>:/viewer/images/configure.svg</normaloff>:/viewer/images/configure.svg</iconset>
    </property>
    <property name="text">
-    <string>&amp;Preferences</string>
+    <string>&amp;Preferences ...</string>
    </property>
   </action>
   <action name="actionNewTab">
@@ -225,7 +225,7 @@
   </action>
   <action name="actionManageServers">
    <property name="text">
-    <string>&amp;Manage servers</string>
+    <string>&amp;Manage servers ...</string>
    </property>
   </action>
   <action name="actionAddInfoPanel">
@@ -263,7 +263,7 @@
   </action>
   <action name="actionAbout">
    <property name="text">
-    <string>About EcflowUI</string>
+    <string>About EcflowUI ...</string>
    </property>
   </action>
   <action name="actionAddLogPanel">

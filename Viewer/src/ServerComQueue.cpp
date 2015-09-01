@@ -64,9 +64,6 @@ ServerComQueue::~ServerComQueue()
 	//until it finishes its task.
 	comThread_->wait();
 
-	//Detach the thread from the ClientInvoker
-	comThread_->detach();
-
 	//Send a logout task
 	VTask_ptr task=VTask::create(VTask::LogOutTask);
 	comThread_->task(task);
@@ -123,13 +120,9 @@ void ServerComQueue::reset()
 	//This state has the highest priority.
 	state_=ResetState;
 
-
 	//If the comthread is running we need to wait
 	//until it finishes its task.
 	comThread_->wait();
-
-	//Detach the thread from the ClientInvoker
-	comThread_->detach();
 
 	//The thread cannot be running
 	assert(comThread_->isRunning() == false);

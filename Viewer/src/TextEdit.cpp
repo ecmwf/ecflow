@@ -37,6 +37,7 @@ TextEdit::TextEdit(QWidget * parent) :
     f.setStyleHint(QFont::TypeWriter);
     f.setFixedPitch(true);
     f.setPointSize(10);
+    f.setStyleStrategy(QFont::PreferAntialias);
     setFont(f);
 }
 

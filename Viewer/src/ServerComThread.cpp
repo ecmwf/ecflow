@@ -203,7 +203,8 @@ void ServerComThread::run()
 
 			case VTask::LogOutTask:
 				UserMessage::message(UserMessage::DBG, false, std::string(" LOGOUT"));
-				if(ci_->client_handle() > 0)
+                detach();
+                if(ci_->client_handle() > 0)
 				{
 					ci_->ch1_drop();
 				}
@@ -441,7 +442,7 @@ void ServerComThread::update_delete(const Node* nc)
 	Node *n=const_cast<Node*>(nc);
 	ChangeMgrSingleton::instance()->detach(n,this);
 
-	UserMessage::message(UserMessage::DBG, false, std::string("Update delete: ") + n->name());
+    //UserMessage::message(UserMessage::DBG, false, std::string("Update delete: ") + n->name());
 }
 
 //Here we suppose that when nodes are deleted this method is called for the ones on

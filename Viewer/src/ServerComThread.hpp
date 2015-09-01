@@ -48,10 +48,6 @@ public:
 	void update_delete(const Node*);
 	void update_delete(const Defs*);
 
-	bool attached() const {return attached_;}
-	void attach();
-	void detach();
-
 Q_SIGNALS:
 	void nodeChanged(const Node*, const std::vector<ecf::Aspect::Type>&);
 	void defsChanged(const std::vector<ecf::Aspect::Type>&);
@@ -68,7 +64,9 @@ protected:
 
 private:
 	void attach(Node *node);
-	void detach(Node *node);
+    void detach(Node *node);
+    void attach();
+    void detach();
 
 	ServerHandler *server_;
 	ClientInvoker *ci_;
