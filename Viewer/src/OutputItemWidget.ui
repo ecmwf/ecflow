@@ -17,7 +17,16 @@
    <property name="spacing">
     <number>1</number>
    </property>
-   <property name="margin">
+   <property name="leftMargin">
+    <number>0</number>
+   </property>
+   <property name="topMargin">
+    <number>0</number>
+   </property>
+   <property name="rightMargin">
+    <number>0</number>
+   </property>
+   <property name="bottomMargin">
     <number>0</number>
    </property>
    <item>
@@ -81,7 +90,7 @@
            </property>
            <property name="icon">
             <iconset resource="viewer.qrc">
-             <normaloff>:/viewer/reload.svg</normaloff>:/viewer/reload.svg</iconset>
+             <normaloff>:/viewer/sync.svg</normaloff>:/viewer/sync.svg</iconset>
            </property>
            <property name="shortcut">
             <string>Ctrl+R</string>
@@ -126,7 +135,16 @@
        <property name="spacing">
         <number>1</number>
        </property>
-       <property name="margin">
+       <property name="leftMargin">
+        <number>0</number>
+       </property>
+       <property name="topMargin">
+        <number>0</number>
+       </property>
+       <property name="rightMargin">
+        <number>0</number>
+       </property>
+       <property name="bottomMargin">
         <number>0</number>
        </property>
        <item>

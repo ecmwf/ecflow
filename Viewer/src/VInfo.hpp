@@ -51,11 +51,12 @@ public:
 	virtual bool isAtrribute()  {return false;}
 	virtual bool isEmpty()  {return true;}
 
-	ServerHandler* server() {return server_;};
+    ServerHandler* server() {return server_;}
 	VNode* node()  {return node_;}
 	virtual VAttribute* attribute() {return NULL;}
 
 	virtual std::string name()=0;
+    virtual std::string path()=0;
 
 	virtual void accept(VInfoVisitor*)=0;
 
@@ -63,15 +64,15 @@ public:
 	void removeObserver(VInfoObserver*);
 
 	//Form ServerObserver
-	void notifyDefsChanged(ServerHandler* server, const std::vector<ecf::Aspect::Type>& a) {};
-	void notifyServerDelete(ServerHandler* server);
-	void notifyBeginServerClear(ServerHandler* server);
-	void notifyEndServerClear(ServerHandler* server) {};
-	void notifyBeginServerScan(ServerHandler* server,const VServerChange&) {};
-	void notifyEndServerScan(ServerHandler* server);
-	void notifyServerConnectState(ServerHandler* server) {};
-	void notifyServerActivityChanged(ServerHandler* server) {};
-	void notifyServerSuiteFilterChanged(ServerHandler* server) {};
+    void notifyDefsChanged(ServerHandler* server, const std::vector<ecf::Aspect::Type>& a) {}
+    void notifyServerDelete(ServerHandler* server);
+    void notifyBeginServerClear(ServerHandler* server);
+    void notifyEndServerClear(ServerHandler* server) {}
+    void notifyBeginServerScan(ServerHandler* server,const VServerChange&) {}
+    void notifyEndServerScan(ServerHandler* server);
+    void notifyServerConnectState(ServerHandler* server) {}
+    void notifyServerActivityChanged(ServerHandler* server) {}
+    void notifyServerSuiteFilterChanged(ServerHandler* server) {}
 
 protected:
 	VInfo(ServerHandler* server,VNode* node);
@@ -97,7 +98,7 @@ public:
     //void variables(std::vector<Variable>& vars);
     //void genVariables(std::vector<Variable>& vars);
     std::string name();
-    //std::string fullPath() {return name();}
+    std::string path();
 
     static VInfo_ptr create(ServerHandler*);
 
@@ -114,7 +115,9 @@ public:
 	bool isEmpty() {return false;}
 
 	void accept(VInfoVisitor*);
-	//const std::string&  nodeType();
+    std::string path();
+
+    //const std::string&  nodeType();
 
 	//virtual std::string genVariable(const std::string& key);
 	//void variables(std::vector<Variable>& vars);
@@ -137,6 +140,7 @@ public:
 	void accept(VInfoVisitor*);
 
 	std::string name() {return std::string();}
+    std::string path() {return std::string();};
 
 	static VInfo_ptr create(ServerHandler*,VNode*,VAttribute*,int);
 

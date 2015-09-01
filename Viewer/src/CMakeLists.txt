@@ -194,6 +194,7 @@ set(viewer_wrap_ui_files
     ServerEditDialog.ui 
     ServerListDialog.ui
     ServerSettingsItemWidget.ui
+    SessionDialog.ui
     SuiteItemWidget.ui
     TableFilterWidget.ui
     TableNodeWidget.ui

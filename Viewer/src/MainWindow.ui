@@ -37,7 +37,7 @@
      <x>0</x>
      <y>0</y>
      <width>852</width>
-     <height>19</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuLl">
@@ -50,6 +50,9 @@
     <addaction name="separator"/>
     <addaction name="actionNewTab"/>
     <addaction name="actionNewWindow"/>
+    <addaction name="separator"/>
+    <addaction name="actionSessions"/>
+    <addaction name="actionManageSessions"/>
     <addaction name="separator"/>
     <addaction name="actionClose"/>
     <addaction name="actionQuit"/>
@@ -269,6 +272,16 @@
    </property>
    <property name="text">
     <string>Add log panel</string>
+   </property>
+  </action>
+  <action name="actionSessions">
+   <property name="text">
+    <string>Sessions</string>
+   </property>
+  </action>
+  <action name="actionManageSessions">
+   <property name="text">
+    <string>Manage sessions ...</string>
    </property>
   </action>
  </widget>

@@ -30,10 +30,7 @@ ServerComThread::ServerComThread(ServerHandler *server, ClientInvoker *ci) :
 		server_(server),
 		ci_(ci),
 		taskType_(VTask::NoTask),
-		attached_(false),
 		rescanNeed_(false),
-		nodeToDelete_(false),
-		defsToDelete_(false),
 		hasSuiteFilter_(false),
 		autoAddNewSuites_(false)
 {
@@ -79,15 +76,13 @@ void ServerComThread::task(VTask_ptr task)
 
 void ServerComThread::run()
 {
-	//This flag indicates if we get a notification through the observers about
-	//the deletion of the defs or a nodes
-	defsToDelete_=false;
-	nodeToDelete_=false;
-
 	//Can we use it? We are in the thread!!!
 	//UserMessage::message(UserMessage::DBG, false, std::string("  ServerComThread::run start"));
 
 	UserMessage::message(UserMessage::DBG, false, std::string("ServerComThread::run path: ") + nodePath_);
+
+    //Init flags
+    rescanNeed_=false;
 
 	try
  	{
@@ -112,16 +107,21 @@ void ServerComThread::run()
 
 			case VTask::SyncTask:
 			{
-				ServerDefsAccess defsAccess(server_);
-				UserMessage::message(UserMessage::DBG, false, std::string(" SYNC"));
-				ci_->sync_local();
-				UserMessage::message(UserMessage::DBG, false, std::string(" SYNC FINISHED"));
+                {
+                    ServerDefsAccess defsAccess(server_);
+                    UserMessage::message(UserMessage::DBG, false, std::string(" SYNC"));
+                    ci_->sync_local();
+                    UserMessage::message(UserMessage::DBG, false, std::string(" SYNC FINISHED"));
+                }
 
 				//If there was a significant change
-				//we need to update the registered suites
-				if(defsToDelete_ || nodeToDelete_)
-				{
-					updateRegSuites();
+                //we need attach the nodes to the observer and
+                //update the registered suites. Server handler will update its tree when it is modified.
+                if(ci_->server_reply().full_sync())
+                {
+                    UserMessage::message(UserMessage::DBG, false, std::string("   --> full sync happened!"));
+                    attach();
+                    updateRegSuites();
 				}
 
 				break;
@@ -223,17 +223,15 @@ void ServerComThread::run()
 
 		UserMessage::message(UserMessage::DBG, false, std::string("  ServerComThread::run failed: ") + errorString);
 
-		//Reset update flags
-		defsToDelete_=false;
-		nodeToDelete_=false;
+        //Reset flags
+        rescanNeed_=false;
 
 		//This will stop the thread.
 		return;
 	}
 
-	//Reset update flags
-	defsToDelete_=false;
-	nodeToDelete_=false;
+    //Reset flags
+    rescanNeed_=false;
 
 	//Can we use it? We are in the thread!!!
 	//UserMessage::message(UserMessage::DBG, false, std::string("  ServerComThread::run finished"));
@@ -243,6 +241,9 @@ void ServerComThread::run()
 void ServerComThread::reset()
 {
 	UserMessage::message(UserMessage::DBG, false,"ServerComThread::reset -- begin");
+
+    //Detach the nodes from the observer
+    detach();
 
 	//sleep(15);
 	{
@@ -290,7 +291,7 @@ void ServerComThread::reset()
 		UserMessage::message(UserMessage::DBG, false, std::string(" INIT SYNC FINISHED"));
 	}
 
-	//Attach the observers to the server
+    //Attach the nodes to the observer
 	attach();
 
 	UserMessage::message(UserMessage::DBG, false,"ServerComThread::reset -- end");
@@ -388,37 +389,15 @@ void ServerComThread::updateRegSuites()
 	UserMessage::message(UserMessage::DBG, false, std::string("Suite update finished"));
 }
 
-/*void ServerComThread::suites()
-{
-	if(hasSuiteFilter_)
-	{
-		//get the list of loaded suites
-		try
-		{
-			ci_->suites();
-		}
-		catch
-		{
-			const std::vector<std::string>& loadedSuites=ci_->server_reply().get_string_vec();
-		}
-		std::vector<std::string> defSuites;
-	const std::vector<suite_ptr>& sv = ci_->defs()->suiteVec();
-	for(std::vector<suite_ptr>::const_iterator it=sv.begin(); it != sv.end(); it++)
-	{
-		defSuites.push_back((*it)->name());
-	}
-
-	Q_EMIT suiteListChanged(loadedSuites,defSuites);
-}*/
-
-
 void ServerComThread::update(const Node* node, const std::vector<ecf::Aspect::Type>& types)
 {
 	UserMessage::message(UserMessage::DBG, false, std::string("ServerComThread::update - node: ") + node->name());
 	for(std::vector<ecf::Aspect::Type>::const_iterator it=types.begin(); it != types.end(); ++it)
 		UserMessage::message(UserMessage::DBG, false, std::string(" aspect: ") + boost::lexical_cast<std::string>(*it));
 
-	if(rescanNeed_)
+    //If anything was requested to be deleted in the thread we do not go further
+    //because it will trigger a full rescan in ServerHandler!
+    if(rescanNeed_)
 	{
 		UserMessage::message(UserMessage::DBG, false, std::string(" -->  No signal emitted (rescan needed)"));
 		return;
@@ -432,13 +411,7 @@ void ServerComThread::update(const Node* node, const std::vector<ecf::Aspect::Ty
 		return;
 	}
 
-	//If anything was requested to be deleted in the thread we ignore this notification,
-	//because the deletion will trigger a full rescan!!!
-	/*if(defsToDelete_ || nodeToDelete_)
-	{
-		return;
-	}*/
-
+    //This will notify SeverHandler
 	UserMessage::message(UserMessage::DBG, false, std::string(" -->  nodeChanged() emitted"));
 	Q_EMIT nodeChanged(node,types);
 }
@@ -450,12 +423,15 @@ void ServerComThread::update(const Defs* dc, const std::vector<ecf::Aspect::Type
 	for(std::vector<ecf::Aspect::Type>::const_iterator it=types.begin(); it != types.end(); ++it)
 			UserMessage::message(UserMessage::DBG, false, std::string(" aspect: ") + boost::lexical_cast<std::string>(*it));
 
-	if(rescanNeed_)
+    //If anything was requested to be deleted in the thread we do not go further
+    //because it will trigger a full rescan in ServerHandler!
+    if(rescanNeed_)
 	{
 		UserMessage::message(UserMessage::DBG, false, std::string(" -->  No signal emitted (rescan needed)"));
 	    return;
 	}
 
+    //This will notify SeverHandler
 	UserMessage::message(UserMessage::DBG, false, std::string(" -->  defsChanged() emitted"));
 	Q_EMIT defsChanged(types);
 }
@@ -465,27 +441,7 @@ void ServerComThread::update_delete(const Node* nc)
 	Node *n=const_cast<Node*>(nc);
 	ChangeMgrSingleton::instance()->detach(n,this);
 
-
-	/*Node *n=const_cast<Node*>(nc);
-
 	UserMessage::message(UserMessage::DBG, false, std::string("Update delete: ") + n->name());
-
-	//If the defs was asked to be deleted in the thread we ignore the node's deletion and
-	//do not emit a signal!! We also ignore it if another node has been already asked to
-	//be deleted in the thread.!!!
-
-	if(!defsToDelete_ && !nodeToDelete_)
-	{
-		nodeToDelete_=true;
-
-		//Once this signal is emitted we reset the whole server!!!!
-		//So we want to emit it only once during the thread.
-		UserMessage::message(UserMessage::DBG, false, std::string("     -->signal emitted"));
-		Q_EMIT nodeDeleted(nc->name());
-	}
-
-	ChangeMgrSingleton::instance()->detach(n,this);*/
-
 }
 
 //Here we suppose that when nodes are deleted this method is called for the ones on
@@ -495,29 +451,19 @@ void ServerComThread::update_delete(const Defs* dc)
 	Defs *d=const_cast<Defs*>(dc);
 	ChangeMgrSingleton::instance()->detach(d,this);
 
-	/*UserMessage::message(UserMessage::DBG, false, std::string("Update defs delete: "));
+    UserMessage::message(UserMessage::DBG, false, std::string("Update defs delete: "));
 
-	if(!defsToDelete_)
-	{
-		//Indicate that the defs is asked to be deleted in the thread
-		defsToDelete_=true;
+    rescanNeed_=true;
 
-		//Once this signal is emitted we reset the whole server!!!!
-		//So we want to emit it only once during the thread.
-		UserMessage::message(UserMessage::DBG, false, std::string("     -->signal emitted"));
-		Q_EMIT defsDeleted();
-	}
-
-	Defs *d=const_cast<Defs*>(dc);
-	ChangeMgrSingleton::instance()->detach(static_cast<Defs*>(d),this);*/
+    //We do not notify the rescanNeed() signal here because when the defs is deleted we are
+    //either in reset() or during a sync_local() that will will result in a
+    //server_reply().full_sync() == true.
+    //In both cases ServerHandler will properly update the tree!
 }
 
 //Register each node to the observer
 void ServerComThread::attach()
 {
-	if(attached_)
-		return;
-
 	ServerDefsAccess defsAccess(server_);  // will reliquish its resources on destruction
 	defs_ptr d = defsAccess.defs();
 	if(d == NULL)
@@ -530,8 +476,6 @@ void ServerComThread::attach()
 	{
 		attach(suites.at(i).get());
 	}
-
-	attached_=true;
 }
 
 //Add a node to the observer
@@ -551,9 +495,6 @@ void ServerComThread::attach(Node *node)
 //Remove each node from the observer
 void ServerComThread::detach()
 {
-	if(!attached_)
-		return;
-
 	ServerDefsAccess defsAccess(server_);  // will reliquish its resources on destruction
 	defs_ptr d = defsAccess.defs();
 	if(d == NULL)
@@ -566,8 +507,6 @@ void ServerComThread::detach()
 	{
 		detach(suites.at(i).get());
 	}
-
-	attached_=false;
 }
 
 //Remove each node from the observer

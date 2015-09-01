@@ -307,9 +307,15 @@ bool VLabelAttribute::getData(VNode *vnode,int row,int& size,QStringList& data)
 	const std::vector<Label>&  v=node->labels();
 	if(row >=0 && row < v.size())
 	{
-		data << qName_ <<
+        std::string val=v.at(row).new_value();
+        if(val.empty() || val == " ")
+        {
+            val=v.at(row).value();
+        }
+
+        data << qName_ <<
 					QString::fromStdString(v.at(row).name()) <<
-					QString::fromStdString(v.at(row).value());
+                    QString::fromStdString(val);
 		return true;
 	}
 	size=v.size();

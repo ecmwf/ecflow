@@ -168,6 +168,11 @@ std::string VInfoServer::name()
 	return std::string();
 }
 
+std::string VInfoServer::path()
+{
+    return name() + ":/";
+}
+
 //=========================================
 //
 // VInfoNode
@@ -202,6 +207,18 @@ std::string VInfoNode::name()
 		return node_->strName();
 
 	return std::string();
+}
+
+std::string VInfoNode::path()
+{
+    std::string p;
+    if(server_)
+       p=server_->name();
+
+    if(node_ && node_->node())
+        p+=":/" + node_->absNodePath();
+
+    return p;
 }
 
 //=========================================

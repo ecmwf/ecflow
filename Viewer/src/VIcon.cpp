@@ -182,14 +182,14 @@ QVariantList VIcon::pixmapList(VNode *vnode,VParamSet *filter)
 
 	for(std::map<std::string,VIcon*>::const_iterator it=items_.begin(); it != items_.end(); ++it)
 	{
-			if(filter->current().find(it->second) != filter->current().end())
-			{
-				VIcon *v=it->second;
-				if(v->show(vnode) )
-				{
-					lst << v->pixmap(16);
-				}
-			}
+            VIcon *v=it->second;
+            if(!filter || filter->current().find(it->second) != filter->current().end())
+            {
+                if(v->show(vnode) )
+                {
+                   lst << v->pixmap(16);
+                }
+            }
 	}
 
 	return lst;

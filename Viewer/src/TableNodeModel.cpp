@@ -17,6 +17,7 @@
 #include "ModelColumn.hpp"
 #include "ServerHandler.hpp"
 #include "VFilter.hpp"
+#include "VIcon.hpp"
 #include "VModelData.hpp"
 #include "VNode.hpp"
 #include "VNState.hpp"
@@ -120,8 +121,8 @@ QVariant TableNodeModel::nodeData(const QModelIndex& index, int role) const
 			return vnode->stateName();
 		else if(id == "event")
 			return "event";
-
-
+        else if(id == "icon")
+            return VIcon::pixmapList(vnode,0);
 		/*
 		switch(index.column())
 		{
@@ -241,25 +242,29 @@ VInfo_ptr TableNodeModel::nodeInfo(const QModelIndex& index)
 //Server is about to be added
 void TableNodeModel::slotServerAddBegin(int row)
 {
-	//beginInsertRows(QModelIndex(),row,row);
+    beginResetModel();
+    //beginInsertRows(QModelIndex(),row,row);
 }
 
 //Addition of the new server has finished
 void TableNodeModel::slotServerAddEnd()
 {
-	//endInsertRows();
+    endResetModel();
+    //endInsertRows();
 }
 
 //Server is about to be removed
 void TableNodeModel::slotServerRemoveBegin(int row)
 {
-	//beginRemoveRows(QModelIndex(),row,row);
+     beginResetModel();
+     //beginRemoveRows(QModelIndex(),row,row);
 }
 
 //Removal of the server has finished
 void TableNodeModel::slotServerRemoveEnd()
 {
-	//endRemoveRows();
+    endResetModel();
+    //endRemoveRows();
 }
 
 //The node changed (it status etc)

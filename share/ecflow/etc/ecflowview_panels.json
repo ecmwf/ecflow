@@ -18,7 +18,7 @@
             "name"    : "manual",
             "label"   : "Manual",
             "icon"    : "manual.svg",
-            "dock_icon"    : "manual.svg",
+            "dock_icon"    : "manual_dock.svg",
             "show"    : "toolbar",
             "visible_for" : "node"            
         },    
@@ -27,7 +27,7 @@
             "name"    : "script",
             "label"   : "Script",
             "icon"    : "script.svg",
-            "dock_icon"    : "script.svg",
+            "dock_icon"    : "script_dock.svg",
             "show"    : "toolbar",
             "visible_for" : "task"            
         }, 
@@ -45,7 +45,7 @@
         	"name"    : "output",
             "label"   : "Output",
             "icon"    : "output.svg",
-            "dock_icon"    : "output.svg",
+            "dock_icon"    : "output_dock.svg",
             "show"    : "toolbar",
             "visible_for" : "task"            
         },    
@@ -105,7 +105,7 @@
         	"name"    : "message",
             "label"   : "Messages",
             "icon"	  : "message.svg",
-            "dock_icon"	  : "message.svg",
+            "dock_icon"	  : "message_dock.svg",
             "show"    : "toolbar",
             "visible_for" : "server or node"
              
@@ -115,7 +115,7 @@
         	"name"    : "zombie",
             "label"   : "Zombies",
             "icon"	  : "zombie.svg",
-            "dock_icon"	  : "zombie.svg",
+            "dock_icon"	  : "zombie_dock.svg",
             "show" 	  : "toolbar",
             "visible_for" : "server"
              

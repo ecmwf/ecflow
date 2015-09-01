@@ -619,6 +619,12 @@ void TreeNodeViewDelegate::renderLabel(QPainter *painter,QStringList data,const 
 
 	int offset=2;
 
+    if(name=="host:")
+    {
+        qDebug() << data;
+        qDebug() << " -->" << name << val;
+    }
+
 	//The border rect (we will adjust its  width)
 	QRect fillRect=option.rect.adjusted(offset,1,0,-1);
 	if(option.state & QStyle::State_Selected)

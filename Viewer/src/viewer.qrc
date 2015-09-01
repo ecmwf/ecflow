@@ -44,21 +44,27 @@
     <file alias="log_info.svg">../images/log_info.svg</file>
     <file alias="log_error.svg">../images/log_error.svg</file>
     <file alias="manual.svg">../images/manual.svg</file>
-    <file alias="message.svg">../images/message.svg</file> 
+    <file alias="manual_dock.svg">../images/manual_dock.svg</file>
+    <file alias="message.svg">../images/message.svg</file>
+    <file alias="message_dock.svg">../images/message_dock.svg</file>
     <file alias="output.svg">../images/output.svg</file> 
+    <file alias="output_dock.svg">../images/output_dock.svg</file>
     <file alias="padlock.svg">../images/padlock.svg</file>
     <file alias="path_arrow.svg">../images/path_arrow.svg</file>
     <file alias="reload.svg">../images/reload.svg</file>
     <file alias="rescue.svg">../images/rescue.svg</file>
-    <file alias="script.svg">../images/script.svg</file>    
+    <file alias="script.svg">../images/script.svg</file>
+    <file alias="script_dock.svg">../images/script_dock.svg</file>
     <file alias="search_decor.svg">../images/search_decor.svg</file>    
     <file alias="spinning_wheel.gif">../images/spinning_wheel.gif</file>
-    <file alias="terminate.svg">../images/terminate.svg</file>   
+    <file alias="sync.svg">../images/sync.svg</file>
+    <file alias="terminate.svg">../images/terminate.svg</file>
     <file alias="variable.svg">../images/variable.svg</file>
     <file alias="variable_dock.svg">../images/variable_dock.svg</file>
     <file alias="warning.svg">../images/warning.svg</file>
     <file alias="why.svg">../images/why.svg</file>
     <file alias="why_dock.svg">../images/why_dock.svg</file>
     <file alias="zombie.svg">../images/zombie.svg</file>
+    <file alias="zombie_dock.svg">../images/zombie_dock.svg</file>
   </qresource>
 </RCC>

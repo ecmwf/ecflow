@@ -206,7 +206,9 @@ void TableNodeViewDelegate::renderIcons(QPainter *painter,const QModelIndex& ind
     //Icons area
     QList<QPixmap> pixLst;
     QList<QRect> pixRectLst;
-    QVariant va=index.data(AbstractNodeModel::IconRole);
+    //QVariant va=index.data(AbstractNodeModel::IconRole);
+    QVariant va=index.data(Qt::DisplayRole);
+
     if(va.type() == QVariant::List)
     {
             QVariantList lst=va.toList();
@@ -226,7 +228,7 @@ void TableNodeViewDelegate::renderIcons(QPainter *painter,const QModelIndex& ind
 
     //Define clipping
     int rightPos=currentRight+1;
-    const bool setClipRect = rightPos > option.rect.right();
+    const bool setClipRect = false; //rightPos > option.rect.right();
     if(setClipRect)
     {
         painter->save();

@@ -78,11 +78,8 @@ private:
 	std::vector<std::string> contents_;
 	NameValueVec vars_;
 	std::string nodePath_;
-	bool attached_;
-	bool rescanNeed_;
-	bool defsToDelete_;
-	bool nodeToDelete_;
-	bool hasSuiteFilter_;;
+	bool rescanNeed_;	
+    bool hasSuiteFilter_;
 	std::vector<std::string> filteredSuites_;
 	bool autoAddNewSuites_;
 };

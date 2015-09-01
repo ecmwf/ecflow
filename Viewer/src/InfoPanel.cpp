@@ -189,6 +189,9 @@ void InfoPanel::reset(VInfo_ptr info)
 
 	//Set breadcrumbs
 	bcWidget_->setPath(info);
+
+
+    updateTitle();
 }
 
 //This slot is called when the info object is selected
@@ -490,6 +493,11 @@ void InfoPanel::updateTitle()
 	{
 		txt=baseTxt;
 	}
+
+    if(info_ && info_.get())
+    {
+        txt+=" - " + QString::fromStdString(info_->path());
+    }
 
 	Q_EMIT titleUpdated(txt);
 }
