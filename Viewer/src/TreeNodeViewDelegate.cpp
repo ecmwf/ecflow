@@ -536,9 +536,10 @@ void TreeNodeViewDelegate::renderMeter(QPainter *painter,QStringList data,const 
 	int	min=data.at(3).toInt();
 	int	max=data.at(4).toInt();
 	//bool colChange=data.at(5).toInt();
-	QString name=data.at(1) + ":";
+    float percent=static_cast<float>(val)/static_cast<float>(max-min);
+    QString name=data.at(1) + ":";
 	QString valStr=data.at(2) + " (" +
-			QString::number(100.*static_cast<float>(val)/static_cast<float>(max-min)) + "%)";
+            QString::number(100.*percent) + "%)";
 
 	int offset=2;
 	//int gap=5;
@@ -585,6 +586,11 @@ void TreeNodeViewDelegate::renderMeter(QPainter *painter,QStringList data,const 
 	painter->fillRect(stRect,QColor(229,229,229));
 	painter->setPen(QColor(180,180,180));
 	painter->drawRect(stRect);
+
+    //Draw progress
+    QRect progRect=stRect;
+    progRect.setWidth(stRect.width()*percent);
+    painter->fillRect(progRect,Qt::blue);
 
 	//Draw name
 	painter->setPen(Qt::black);
