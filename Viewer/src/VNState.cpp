@@ -94,7 +94,6 @@ VNState* VNState::toRealState(const VNode *n)
 
 	node_ptr node=n->node();
 
-
 	std::map<NState::State,VNState*>::const_iterator it=stateMap_.find(node->state());
 	if(it != stateMap_.end())
 		return it->second;
@@ -132,6 +131,12 @@ VNState* VNState::find(const std::string& name)
 QColor VNState::toColour(const VNode *n)
 {
 	VNState *obj=VNState::toState(n);
+	return (obj)?(obj->colour()):QColor();
+}
+
+QColor VNState::toRealColour(const VNode *n)
+{
+	VNState *obj=VNState::toRealState(n);
 	return (obj)?(obj->colour()):QColor();
 }
 

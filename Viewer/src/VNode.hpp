@@ -103,6 +103,7 @@ public:
     virtual QString defaultStateName();
     virtual bool isSuspended() const;
     virtual QColor  stateColour() const;
+    virtual QColor  realStateColour() const;
     virtual QColor  stateFontColour() const;
 
     bool hasAccessed() const;

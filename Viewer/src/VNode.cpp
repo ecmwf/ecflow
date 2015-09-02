@@ -354,6 +354,11 @@ QColor  VNode::stateColour() const
 	return VNState::toColour(this);
 }
 
+QColor  VNode::realStateColour() const
+{
+	return VNState::toRealColour(this);
+}
+
 QColor  VNode::stateFontColour() const
 {
 	return VNState::toFontColour(this);

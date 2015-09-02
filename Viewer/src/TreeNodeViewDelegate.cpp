@@ -230,6 +230,7 @@ void TreeNodeViewDelegate::renderServer(QPainter *painter,const QModelIndex& ind
 	if(option.state & QStyle::State_Selected)
 		fillRect.adjust(0,0,0,0);
 
+
 	//Pixmap rect
 	//QRect pixRect = QRect(fillRect.left()+offset,
 	//		fillRect.top()+(fillRect.height()-serverPix_.height())/2,
@@ -417,6 +418,25 @@ void TreeNodeViewDelegate::renderNode(QPainter *painter,const QModelIndex& index
 	if(option.state & QStyle::State_Selected)
 		fillRect.adjust(0,0,0,-0);
 
+	//get the colours
+	QColor bg,realBg;
+	QVariant bgVa=index.data(Qt::BackgroundRole);
+	bool hasRealBg=false;
+	if(bgVa.type() == QVariant::List)
+	{
+		QVariantList lst=bgVa.toList();
+		if(lst.count() ==  2)
+		{
+			hasRealBg=true;
+			bg=lst[0].value<QColor>();
+			realBg=lst[1].value<QColor>();
+		}
+	}
+	else
+	{
+		bg=bgVa.value<QColor>();
+	}
+
 	//The text rectangle
 	QRect textRect = fillRect.adjusted(offset,0,0,0);
 
@@ -431,6 +451,13 @@ void TreeNodeViewDelegate::renderNode(QPainter *painter,const QModelIndex& index
 	halfRect.adjust(1,0,-1,-1);
 
 	int currentRight=fillRect.right();
+
+	QRect realRect;
+	if(hasRealBg)
+	{
+		realRect=QRect(fillRect.right()+1,fillRect.top(),6,fillRect.height());
+		currentRight=realRect.right()+2;
+	}
 
 	//Icons area
 	QList<QPixmap> pixLst;
@@ -485,7 +512,7 @@ void TreeNodeViewDelegate::renderNode(QPainter *painter,const QModelIndex& index
 	}
 
 	//Draw bg rect
-	QColor bg=index.data(Qt::BackgroundRole).value<QColor>();
+	//QColor bg=index.data(Qt::BackgroundRole).value<QColor>();
 	QColor borderCol=bg.darker(125);
 	painter->fillRect(fillRect,bg);
 	//painter->setPen((option.state & QStyle::State_Selected)?nodeSelectPen_:nodePen_);
@@ -496,10 +523,20 @@ void TreeNodeViewDelegate::renderNode(QPainter *painter,const QModelIndex& index
 	QColor shCol= bg.darker(108);
 	painter->fillRect(halfRect,shCol);
 
+	if(hasRealBg)
+	{
+		QColor realBorderCol=realBg.darker(125);
+		painter->fillRect(realRect,realBg);
+		painter->setPen((option.state & QStyle::State_Selected)?nodeSelectPen_:QPen(realBorderCol)));
+		painter->drawRect(realRect);
+	}
+
+
 	//Draw text
 	QColor fg=index.data(Qt::ForegroundRole).value<QColor>();
 	painter->setPen(fg);
 	painter->drawText(textRect,Qt::AlignLeft | Qt::AlignVCenter,text);
+
 
 	//Draw icons
 	for(int i=0; i < pixLst.count(); i++)

@@ -278,7 +278,16 @@ QVariant TreeNodeModel::nodeData(const QModelIndex& index, int role) const
 			return QVariant(data_->isFiltered(vnode));
 
 		else if(role == Qt::BackgroundRole)
-			return vnode->stateColour() ;
+		{
+			if(vnode->isSuspended())
+			{
+				QVariantList lst;
+				lst << vnode->stateColour() << vnode->realStateColour();
+				return lst;
+			}
+			else
+				return vnode->stateColour() ;
+		}
 
 		else if(role == Qt::ForegroundRole)
 			return vnode->stateFontColour();
