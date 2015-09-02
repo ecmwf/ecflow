@@ -527,7 +527,7 @@ void TreeNodeViewDelegate::renderNode(QPainter *painter,const QModelIndex& index
 	{
 		QColor realBorderCol=realBg.darker(125);
 		painter->fillRect(realRect,realBg);
-		painter->setPen((option.state & QStyle::State_Selected)?nodeSelectPen_:QPen(realBorderCol)));
+		painter->setPen((option.state & QStyle::State_Selected)?nodeSelectPen_:QPen(realBorderCol));
 		painter->drawRect(realRect);
 	}
 
