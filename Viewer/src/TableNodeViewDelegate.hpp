@@ -15,6 +15,7 @@
 #include <QMap>
 #include <QPen>
 #include <QStyledItemDelegate>
+#include <QStyleOptionViewItem>
 
 #include "NodeViewDelegate.hpp"
 #include "VProperty.hpp"
@@ -41,6 +42,9 @@ protected:
 
     void renderIcons(QPainter *painter,const QModelIndex& index,
                     const QStyleOptionViewItemV4& option) const;
+
+    void renderStatus(QPainter *painter,const QModelIndex& index,
+                            const QStyleOptionViewItemV4& option) const;
 
     //typedef void (TreeNodeViewDelegate::*AttributeRendererProc)(QPainter *painter,QStringList data,const QStyleOptionViewItemV4& option) const;
 

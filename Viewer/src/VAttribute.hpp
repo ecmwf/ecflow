@@ -27,8 +27,8 @@ public:
     
 	static std::vector<VParam*> filterItems();
 	
-	static bool getType(VNode *vnode,int row,VAttribute **type);
-	static bool getData(VNode* vnode,int row,VAttribute** type,QStringList& data);
+	static VAttribute* getType(VNode *vnode,int row);
+	static bool getData(VNode* vnode,int row,VAttribute* &type,QStringList& data);
 	static int totalNum(const VNode *vnode);
 	static void init(const std::string& parFile);
 	

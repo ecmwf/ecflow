@@ -17,16 +17,7 @@
    <property name="spacing">
     <number>1</number>
    </property>
-   <property name="leftMargin">
-    <number>0</number>
-   </property>
-   <property name="topMargin">
-    <number>0</number>
-   </property>
-   <property name="rightMargin">
-    <number>0</number>
-   </property>
-   <property name="bottomMargin">
+   <property name="margin">
     <number>0</number>
    </property>
    <item>
@@ -46,14 +37,8 @@
          </property>
          <item>
           <widget class="FileInfoLabel" name="fileLabel_">
-           <property name="autoFillBackground">
-            <bool>false</bool>
-           </property>
            <property name="text">
             <string/>
-           </property>
-           <property name="textInteractionFlags">
-            <set>Qt::NoTextInteraction</set>
            </property>
           </widget>
          </item>
@@ -135,16 +120,7 @@
        <property name="spacing">
         <number>1</number>
        </property>
-       <property name="leftMargin">
-        <number>0</number>
-       </property>
-       <property name="topMargin">
-        <number>0</number>
-       </property>
-       <property name="rightMargin">
-        <number>0</number>
-       </property>
-       <property name="bottomMargin">
+       <property name="margin">
         <number>0</number>
        </property>
        <item>

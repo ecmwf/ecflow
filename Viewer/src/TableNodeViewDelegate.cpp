@@ -14,6 +14,8 @@
 #include <QImageReader>
 #include <QPainter>
 
+#include <QStyleOptionViewItem>
+
 #include "AbstractNodeModel.hpp"
 #include "Animation.hpp"
 #include "ModelColumn.hpp"
@@ -168,6 +170,10 @@ void TableNodeViewDelegate::paint(QPainter *painter,const QStyleOptionViewItem &
 
         }*/
     }
+    else if(id == "status")
+    {
+    	 renderStatus(painter,index,vopt);
+    }
     /*//rest of the columns
     else if(index.column() < 3)
     {
@@ -179,7 +185,14 @@ void TableNodeViewDelegate::paint(QPainter *painter,const QStyleOptionViewItem &
     }*/
 
     else
-        QStyledItemDelegate::paint(painter,option,index);
+    {
+    	QString text=index.data(Qt::DisplayRole).toString();
+    	QRect textRect = style->subElementRect(QStyle::SE_ItemViewItemText, &vopt, widget);
+    	painter->setPen(Qt::black);
+    	painter->drawText(textRect,Qt::AlignLeft | Qt::AlignVCenter,text);
+    }
+
+        //QStyledItemDelegate::paint(painter,option,index);
 
 
     painter->restore();
@@ -212,7 +225,7 @@ void TableNodeViewDelegate::renderIcons(QPainter *painter,const QModelIndex& ind
     if(va.type() == QVariant::List)
     {
             QVariantList lst=va.toList();
-            int xp=currentRight+5;
+            int xp=fillRect.x()+5;
             int yp=fillRect.top();
             for(int i=0; i < lst.count(); i++)
             {
@@ -240,6 +253,51 @@ void TableNodeViewDelegate::renderIcons(QPainter *painter,const QModelIndex& ind
     {
         painter->drawPixmap(pixRectLst[i],pixLst[i]);
     }
+
+    if(setClipRect)
+    {
+        painter->restore();
+    }
+}
+
+void TableNodeViewDelegate::renderStatus(QPainter *painter,const QModelIndex& index,
+                                    const QStyleOptionViewItemV4& option) const
+{
+    int offset=4;
+
+    QFontMetrics fm(font_);
+    int deltaH=(option.rect.height()-(fm.height()+4))/2;
+
+    //The initial filled rect (we will adjust its  width)
+    QRect fillRect=option.rect.adjusted(offset,deltaH,0,-deltaH-1);
+    if(option.state & QStyle::State_Selected)
+        fillRect.adjust(0,0,0,-0);
+
+    int currentRight=fillRect.right();
+
+    //The text rectangle
+    QString text=index.data(Qt::DisplayRole).toString();
+    int textWidth=fm.width(text);
+    QRect textRect = fillRect.adjusted(offset,0,0,0);
+    textRect.setWidth(textWidth);
+
+    //Define clipping
+    int rightPos=currentRight+1;
+    const bool setClipRect = false; //rightPos > option.rect.right();
+    if(setClipRect)
+    {
+        painter->save();
+        painter->setClipRect(option.rect);
+    }
+
+    //Fill rect
+    QColor bgCol=index.data(Qt::BackgroundRole).value<QColor>();
+    painter->fillRect(fillRect,bgCol);
+
+    //Draw text
+    painter->setPen(Qt::black);
+    painter->drawText(textRect,Qt::AlignLeft | Qt::AlignVCenter,text);
+
 
     if(setClipRect)
     {

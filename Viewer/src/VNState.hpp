@@ -32,9 +32,11 @@ public:
 	static QString toName(const VNode*);
 	static QString toDefaultStateName(const VNode*);
 	static QColor  toColour(const VNode* n);
+	static QColor  toRealColour(const VNode* n);
 	static QColor  toFontColour(const VNode* n);
 	static VNState* toState(const VNode* n);
 	static VNState* toDefaultState(const VNode* n);
+	static VNState* toRealState(const VNode* n);
 
 	//Server
 	static QString toName(ServerHandler*);

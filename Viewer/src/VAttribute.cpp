@@ -189,12 +189,10 @@ int VAttribute::totalNum(const VNode *vnode)
 	return total;
 }
 
-bool VAttribute::getType(VNode *vnode,int row,VAttribute **type)
+VAttribute* VAttribute::getType(VNode *vnode,int row)
 {
-	*type=0;
-
 	if(!vnode)
-		return false;
+		return NULL;
 
 	int totalRow=0;
 	for(std::map<std::string,VAttribute*>::const_iterator it=items_.begin(); it != items_.end(); ++it)
@@ -202,19 +200,18 @@ bool VAttribute::getType(VNode *vnode,int row,VAttribute **type)
 		int size=it->second->num(vnode);
 		if(row-totalRow >=0 && row-totalRow < size)
 		{
-			*type=it->second;
-			return true;
+			return it->second;
 		}
 		totalRow+=size;
 	}
 
-	return false;
+	return NULL;
 }
 
 
-bool VAttribute::getData(VNode *vnode,int row,VAttribute **type,QStringList& data)
+bool VAttribute::getData(VNode *vnode,int row,VAttribute* &type,QStringList& data)
 {
-	*type=0;
+	type=0;
 
 	if(!vnode)
 		return false;
@@ -225,7 +222,7 @@ bool VAttribute::getData(VNode *vnode,int row,VAttribute **type,QStringList& dat
 		int size=0;
 		if(it->second->getData(vnode,row-totalRow,size,data))
 		{
-			*type=it->second;
+			type=it->second;
 			return true;
 		}
 		totalRow+=size;

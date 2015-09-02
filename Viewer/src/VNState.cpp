@@ -75,7 +75,6 @@ VNState* VNState::toState(const VNode *n)
 
 	node_ptr node=n->node();
 
-	//VParam::Type type;
 	if(node->isSuspended())
 			return items_["suspended"];
 	else
@@ -84,6 +83,21 @@ VNState* VNState::toState(const VNode *n)
 		if(it != stateMap_.end())
 			return it->second;
 	}
+
+	return NULL;
+}
+
+VNState* VNState::toRealState(const VNode *n)
+{
+	if(!n || !n->node().get())
+		return NULL;
+
+	node_ptr node=n->node();
+
+
+	std::map<NState::State,VNState*>::const_iterator it=stateMap_.find(node->state());
+	if(it != stateMap_.end())
+		return it->second;
 
 	return NULL;
 }

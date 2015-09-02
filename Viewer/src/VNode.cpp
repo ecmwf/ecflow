@@ -105,7 +105,7 @@ short VNode::currentAttrNum() const
 	return VAttribute::totalNum(this);
 }
 
-QStringList VNode::getAttributeData(int row,VAttribute** type)
+QStringList VNode::getAttributeData(int row,VAttribute*& type)
 {
 	QStringList lst;
 	VAttribute::getData(this,row,type,lst);
@@ -114,9 +114,7 @@ QStringList VNode::getAttributeData(int row,VAttribute** type)
 
 VAttribute* VNode::getAttributeType(int row)
 {
-	VAttribute** type;
-	VAttribute::getType(this,row,type);
-	return *type;
+	return VAttribute::getType(this,row);
 }
 
 void VNode::addChild(VNode* vn)

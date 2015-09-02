@@ -373,7 +373,7 @@ QVariant TreeNodeModel::attributesData(const QModelIndex& index, int role) const
 	else if(role == Qt::DisplayRole)
 	{
 		VAttribute* type=0;
-		return node->getAttributeData(index.row(),&type);
+		return node->getAttributeData(index.row(),type);
 	}
 
 	return QVariant();

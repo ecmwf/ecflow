@@ -71,7 +71,7 @@ public:
     short cachedAttrNum() const;
     short attrNum() const;
 
-    QStringList getAttributeData(int,VAttribute**);
+    QStringList getAttributeData(int,VAttribute*&);
     VAttribute* getAttributeType(int);
 
     VNode* parent() const {return parent_;}

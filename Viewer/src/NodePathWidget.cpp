@@ -597,6 +597,15 @@ void NodePathWidget::setPath(VInfo_ptr info)
 
 			layout_->addWidget(menuItem);
 		}
+		//If it is a task (it has no children) we need
+		//to be sure that the menu is not shown
+		else
+		{
+			if(i == menuItems_.count()-1)
+			{
+				delete menuItems_.takeLast();
+			}
+		}
 	}
 
 	layout_->addStretch(1);
