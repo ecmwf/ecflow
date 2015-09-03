@@ -90,14 +90,17 @@ QTreeView[style="nodeView"] {
     background: rgb(255,255,255);
 }
 
+QTreeView[style="nodeView"]::item {
+    alternate-background-color: rgb(248,247,246);
+}
 
 /*-----------------------------
   Log
  -----------------------------*/
 
 QTreeView[log="1"]::item {
-    alternate-background-color: rgb(248,247,246);
-    border: 1px solid rgb(210,210,210);
+    alternate-background-color: rgb(250,250,250);    
+    border: 1px solid rgb(230,230,230);
     border-top-color: transparent;
     border-left-color: transparent; 
     border-right-color: transparent;
@@ -172,7 +175,7 @@ QToolButton[docktitle="1"]:hover {
   Variable tree view
 ------------------------------*/
 
-QTreeView[var="1"]::branch:!has-children {  
+/*QTreeView[var="1"]::branch:!has-children {  
    background: white;
    border: 1px solid #BBBBBB;
    border-top-color: transparent;
@@ -186,9 +189,9 @@ QTreeView[var="1"]::branch:!has-children {
 } 
  
 QTreeView[var="1"]::branch:!has-children:alternate {
-      background: rgb(248,247,246);
+      background: rgb(200,0,0);
 } 
- 
+ */
 /* 
 QTreeView[var="1"]::branch:alternate {
       background: rgb(248,247,246);

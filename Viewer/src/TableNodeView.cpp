@@ -25,6 +25,8 @@
 
 TableNodeView::TableNodeView(NodeFilterModel* model,NodeFilterDef* filterDef,QWidget* parent) : QTreeView(parent), NodeViewBase(model,filterDef)
 {
+	setProperty("style","nodeView");
+
 	setRootIsDecorated(false);
 
 	setSortingEnabled(true);

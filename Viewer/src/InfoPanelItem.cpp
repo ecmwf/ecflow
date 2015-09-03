@@ -39,6 +39,7 @@ InfoPanelItem* InfoPanelItemFactory::create(const std::string& name)
 	//Default
 	//return  new MvQTextLine(e,p);
 	//return new MvQLineEditItem(e,p) ;
+
 	return 0;
 }
 

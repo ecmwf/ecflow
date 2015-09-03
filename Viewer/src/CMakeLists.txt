@@ -218,6 +218,9 @@ else()
 endif()
 
 
+add_definitions( -DECFLOW_SHARED_DIR="${CMAKE_INSTALL_PREFIX}/share/ecflow" )
+
+
 ecbuild_add_executable( TARGET   ecflow_ui
     SOURCES  ${viewer_srcs} ${VIEWER_MOC} ${VIEWER_RES} ${VIEWER_FORMS_HEADERS}
     INCLUDES .

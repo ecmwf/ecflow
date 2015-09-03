@@ -35,7 +35,7 @@ DirectoryHandler::DirectoryHandler()
 // where all the other directories are
 // -----------------------------------------------------------------------------
 
-void DirectoryHandler::init(const std::string& exePath)
+void DirectoryHandler::init(const std::string& exeStr)
 {
 	//Sets paths in the home directory
 	if(char *h=getenv("HOME"))
@@ -68,21 +68,43 @@ void DirectoryHandler::init(const std::string& exePath)
 		}
 	}
 
-
 	//Sets paths in the system directory
-    boost::filesystem::path path(exePath);
-    boost::filesystem::path binDir   = path.parent_path();
-    boost::filesystem::path rootDir  = binDir.parent_path();
-    rootDir  /= "share";
+    boost::filesystem::path exePath(exeStr);
 
-    boost::filesystem::path shareDir = rootDir;
-    shareDir /= "ecflow";
+    //If the executable path does not exist we
+    //will use  the value of the ECFLOW_SHARED_DIR macro to get
+	//the location of the "share/ecflow" dir.
+	if(!boost::filesystem::exists(exePath))
+	{
+		 boost::filesystem::path shareDir(ECFLOW_SHARED_DIR);
+		 if(!boost::filesystem::exists(shareDir))
+		 {
+			 UserMessage::message(UserMessage::ERROR, true,
+			 	  std::string("Shared dir " + shareDir.string() + " does not exist! EcflowUI cannot be launched!"));
+			 exit(0);
+		 }
 
-    boost::filesystem::path etcDir   = shareDir;
-    etcDir /= "etc";
+		 boost::filesystem::path etcDir   = shareDir;
+		 etcDir /= "etc";
 
-    shareDir_ = shareDir.string();
-    etcDir_   = etcDir.string();
+		 shareDir_ = shareDir.string();
+		 etcDir_   = etcDir.string();
+	}
+	//If the executable path exits we probably use relative paths to it.
+	else
+	{
+		//TODO: make it work when we run it from within "bin"
+		boost::filesystem::path shareDir  = exePath.parent_path().parent_path();
+
+		shareDir  /= "share";
+		shareDir /= "ecflow";
+
+		boost::filesystem::path etcDir   = shareDir;
+		etcDir /= "etc";
+
+		shareDir_ = shareDir.string();
+		etcDir_   = etcDir.string();
+	}
 }
 
 
