@@ -72,6 +72,7 @@ public:
     short attrNum() const;
 
     QStringList getAttributeData(int,VAttribute*&);
+    bool getAttributeData(const std::string& type,int row, QStringList&);
     VAttribute* getAttributeType(int);
 
     VNode* parent() const {return parent_;}

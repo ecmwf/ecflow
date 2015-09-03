@@ -28,9 +28,6 @@ public:
 	explicit NodeViewDelegate(QWidget *parent=0);
 	~NodeViewDelegate();
 
-    //void paint(QPainter *painter,const QStyleOptionViewItem &option,
-    //	           const QModelIndex& index) const;
-
     QSize sizeHint(const QStyleOptionViewItem & option, const QModelIndex & index ) const;
 
 	void notifyChange(VProperty*);
@@ -38,26 +35,20 @@ public:
 protected:
     virtual void updateSettings()=0;
 
-	/*void renderServer(QPainter *painter,const QModelIndex& index,
-			            const QStyleOptionViewItemV4& option,QString text) const;
-
-	void renderNode(QPainter *painter,const QModelIndex& index,
-            		const QStyleOptionViewItemV4& option,QString text) const;*/
-
 	typedef void (NodeViewDelegate::*AttributeRendererProc)(QPainter *painter,QStringList data,const QStyleOptionViewItemV4& option) const;
 
-	virtual void renderMeter(QPainter *painter,QStringList data,const QStyleOptionViewItemV4& option) const {};
-	virtual void renderLabel(QPainter *painter,QStringList data,const QStyleOptionViewItemV4& option) const {};
-	virtual void renderEvent(QPainter *painter,QStringList data,const QStyleOptionViewItemV4& option) const {};
-	virtual void renderVar(QPainter *painter,QStringList data,const QStyleOptionViewItemV4& option) const {};
-	virtual void renderGenvar(QPainter *painter,QStringList data,const QStyleOptionViewItemV4& option) const {};
-	virtual void renderLimit(QPainter *painter,QStringList data,const QStyleOptionViewItemV4& option) const {};
-	virtual void renderLimiter(QPainter *painter,QStringList data,const QStyleOptionViewItemV4& option) const {};
-	virtual void renderTrigger(QPainter *painter,QStringList data,const QStyleOptionViewItemV4& option) const {};
-	virtual void renderTime(QPainter *painter,QStringList data,const QStyleOptionViewItemV4& option) const {};
-	virtual void renderDate(QPainter *painter,QStringList data,const QStyleOptionViewItemV4& option) const {};
-	virtual void renderRepeat(QPainter *painter,QStringList data,const QStyleOptionViewItemV4& option) const {};
-	virtual void renderLate(QPainter *painter,QStringList data,const QStyleOptionViewItemV4& option) const {};
+	virtual void renderMeter(QPainter *painter,QStringList data,const QStyleOptionViewItemV4& option) const;
+	virtual void renderLabel(QPainter *painter,QStringList data,const QStyleOptionViewItemV4& option) const;
+	virtual void renderEvent(QPainter *painter,QStringList data,const QStyleOptionViewItemV4& option) const;
+	virtual void renderVar(QPainter *painter,QStringList data,const QStyleOptionViewItemV4& option) const;
+	virtual void renderGenvar(QPainter *painter,QStringList data,const QStyleOptionViewItemV4& option) const;
+	virtual void renderLimit(QPainter *painter,QStringList data,const QStyleOptionViewItemV4& option) const;
+	virtual void renderLimiter(QPainter *painter,QStringList data,const QStyleOptionViewItemV4& option) const;
+	virtual void renderTrigger(QPainter *painter,QStringList data,const QStyleOptionViewItemV4& option) const;
+	virtual void renderTime(QPainter *painter,QStringList data,const QStyleOptionViewItemV4& option) const;
+	virtual void renderDate(QPainter *painter,QStringList data,const QStyleOptionViewItemV4& option) const;
+	virtual void renderRepeat(QPainter *painter,QStringList data,const QStyleOptionViewItemV4& option) const;
+	virtual void renderLate(QPainter *painter,QStringList data,const QStyleOptionViewItemV4& option) const;
 
 	QPen hoverPen_;
 	QBrush hoverBrush_;
@@ -71,16 +62,9 @@ protected:
 	QBrush lostConnectBandBrush_;
 
 	QMap<QString,AttributeRendererProc> attrRenderers_;
-	//AnimationHandler* animation_;
 
 	PropertyMapper* prop_;
-    //int nodeRectRad_;
 	QFont font_;
-	//bool drawChildCount_;
-
-	//QFont serverNumFont_;
-	//QFont suiteNumFont_;
-	//QFont serverInfoFont_;
 
 };
 

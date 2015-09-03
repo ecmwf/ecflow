@@ -29,11 +29,12 @@ public:
 	
 	static VAttribute* getType(VNode *vnode,int row);
 	static bool getData(VNode* vnode,int row,VAttribute* &type,QStringList& data);
+	static bool getData(const std::string& type,VNode* vnode,int row,QStringList& data);
 	static int totalNum(const VNode *vnode);
 	static void init(const std::string& parFile);
 	
 	static VAttribute* find(const std::string& name);
-    
+
     //Called from VConfigLoader
     static void load(VProperty*);
 

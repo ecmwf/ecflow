@@ -91,7 +91,7 @@ QVariant TableNodeModel::data( const QModelIndex& index, int role ) const
 	//Data lookup can be costly so we immediately return a default value for all
 	//the cases where the default should be used.
 	if( !index.isValid() ||
-	   (role != Qt::DisplayRole && role != Qt::ToolTipRole && role != Qt::BackgroundRole && role != FilterRole))
+	   (role != Qt::DisplayRole && role != Qt::ToolTipRole && role != Qt::BackgroundRole && role != FilterRole && role != IconRole))
     {
 		return QVariant();
 	}
@@ -102,15 +102,10 @@ QVariant TableNodeModel::data( const QModelIndex& index, int role ) const
 
 QVariant TableNodeModel::nodeData(const QModelIndex& index, int role) const
 {
-	if(role == Qt::BackgroundRole && index.column() != 1)
-		return QVariant();
-
-	//qDebug() << "data" <<  index;
-
-
 	VNode* vnode=indexToNode(index);
 	if(!vnode || !vnode->node())
 		return QVariant();
+
 	if(role == Qt::DisplayRole)
 	{
 		QString id=columns_->id(index.column());
@@ -119,29 +114,36 @@ QVariant TableNodeModel::nodeData(const QModelIndex& index, int role) const
 			return QString::fromStdString(vnode->absNodePath());
 		else if(id == "status")
 			return vnode->stateName();
-		else if(id == "event")
-			return "event";
+		else if(id == "type")
+			return QString::fromStdString(vnode->nodeType());
+
+		//Attributes
+		else if(id == "event" || id == "label" || id == "meter" || id == "trigger")
+		{
+			QStringList lst;
+			if(vnode->getAttributeData(id.toStdString(),0,lst))
+				return lst;
+			else
+				return QVariant();
+		}
+
         else if(id == "icon")
             return VIcon::pixmapList(vnode,0);
-		/*
-		switch(index.column())
-		{
-		case 0: return QString::fromStdString(vnode->absNodePath());
-		case 1: return vnode->stateName();
-		case 2:
-		{
-				ServerHandler* s=vnode->server();
-				return (s)?QString::fromStdString(s->name()):QString();
-		}*/
-		//default: return QVariant();
-		//}
 	}
 	else if(role == Qt::BackgroundRole)
 	{
 		return vnode->stateColour();
 	}
 	else if(role == FilterRole)
-		return data_->isFiltered(vnode); //true;
+		return data_->isFiltered(vnode);
+
+	else if(role == IconRole)
+	{
+		if(columns_->id(index.column()) =="path")
+			return VIcon::pixmapList(vnode,0);
+		else
+			return QVariant();
+	}
 
 	return QVariant();
 }

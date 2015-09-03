@@ -80,30 +80,6 @@ void NodeViewDelegate::notifyChange(VProperty* p)
 	updateSettings();
 }
 
-/*
-void NodeViewDelegate::updateSettings()
-{
-	if(VProperty* p=prop_->find("view.tree.nodeRectRadius"))
-	{
-		nodeRectRad_=p->value().toInt();
-	}
-	if(VProperty* p=prop_->find("view.tree.font"))
-	{
-		font_=p->value().value<QFont>();
-
-		serverInfoFont_=font_;
-		serverNumFont_=font_;
-		serverNumFont_.setBold(true);
-		suiteNumFont_=font_;
-		suiteNumFont_.setBold(true);
-
-	}
-	if(VProperty* p=prop_->find("view.tree.displayChildCount"))
-	{
-		drawChildCount_=p->value().toBool();
-	}
-}
-*/
 
 QSize NodeViewDelegate::sizeHint(const QStyleOptionViewItem & option, const QModelIndex & index ) const
 {
@@ -114,390 +90,6 @@ QSize NodeViewDelegate::sizeHint(const QStyleOptionViewItem & option, const QMod
 	return QSize(size.width(),h+8);
 }
 
-/*
-void NodeViewDelegate::paint(QPainter *painter,const QStyleOptionViewItem &option,
-		           const QModelIndex& index) const
-{
-	//Background
-	QStyleOptionViewItemV4 vopt(option);
-	initStyleOption(&vopt, index);
-
-	const QStyle *style = vopt.widget ? vopt.widget->style() : QApplication::style();
-	const QWidget* widget = vopt.widget;
-
-	//Save painter state
-	painter->save();
-
-	//Selection - we only do it once
-
-	if(index.data(AbstractNodeModel::ConnectionRole).toInt() == 0)
-	{
-		QRect fullRect=QRect(0,option.rect.y(),painter->device()->width(),option.rect.height());
-		painter->fillRect(fullRect,lostConnectBgBrush_);
-		QRect bandRect=QRect(0,option.rect.y(),5,option.rect.height());
-		painter->fillRect(bandRect,lostConnectBandBrush_);
-
-	}
-	//First column (nodes)
-	if(index.column() == 0)
-	{
-		QVariant tVar=index.data(Qt::DisplayRole);
-		QRect textRect = style->subElementRect(QStyle::SE_ItemViewItemText, &vopt, widget);
-
-		painter->setFont(font_);
-
-		if(tVar.type() == QVariant::String)
-		{
-			QString text=index.data(Qt::DisplayRole).toString();
-			if(index.data(AbstractNodeModel::ServerRole).toInt() ==0)
-			{
-				renderServer(painter,index,vopt,text);
-			}
-			else
-			{
-				renderNode(painter,index,vopt,text);
-			}
-		}
-		//Render attributes
-		else if(tVar.type() == QVariant::StringList)
-		{
-			QStringList lst=tVar.toStringList();
-			if(lst.count() > 0)
-			{
-				QMap<QString,AttributeRendererProc>::const_iterator it=attrRenderers_.find(lst.at(0));
-				if(it != attrRenderers_.end())
-				{
-					AttributeRendererProc a=it.value();
-					(this->*a)(painter,lst,vopt);
-				}
-			}
-
-		}
-	}
-	//rest of the columns
-	else if(index.column() < 3)
-	{
-		QString text=index.data(Qt::DisplayRole).toString();
-		QRect textRect = style->subElementRect(QStyle::SE_ItemViewItemText, &vopt, widget);
-		painter->setPen(Qt::black);
-		painter->drawText(textRect,Qt::AlignLeft | Qt::AlignVCenter,text);
-
-	}
-
-	painter->restore();
-
-    else
-        QStyledItemDelegate::paint(painter,option,index);
-}
-
-*/
-
-/*
-void NodeViewDelegate::renderServer(QPainter *painter,const QModelIndex& index,
-		                                   const QStyleOptionViewItemV4& option,QString text) const
-{
-	int offset=4;
-	int currentRight=0;
-
-	QFontMetrics fm(font_);
-	int deltaH=(option.rect.height()-(fm.height()+4))/2;
-
-	//The initial filled rect (we will adjust its  width)
-	//QRect fillRect=option.rect.adjusted(offset,1,0,-2);
-	QRect fillRect=option.rect.adjusted(offset,deltaH,0,-deltaH-1);
-	if(option.state & QStyle::State_Selected)
-		fillRect.adjust(0,0,0,0);
-
-	//Pixmap rect
-	//QRect pixRect = QRect(fillRect.left()+offset,
-	//		fillRect.top()+(fillRect.height()-serverPix_.height())/2,
-	//		serverPix_.width(),
-	//		serverPix_.height());
-
-	//The text rectangle
-	QRect textRect = fillRect;
-	textRect.setLeft(fillRect.left()+offset);
-
-	int textWidth=fm.width(text);
-	textRect.setWidth(textWidth);
-
-	//Adjust the filled rect width
-	fillRect.setRight(textRect.right()+offset);
-
-	QRect halfRect=fillRect;
-	halfRect.setY(halfRect.center().y());
-	halfRect.adjust(1,0,-1,-1);
-
-	currentRight=fillRect.right();
-
-	//The pixmap (optional)
-	QRect pixRect;
-
-	bool hasPix=(index.data(AbstractNodeModel::IconRole).toString() == "d");
-
-	if(hasPix)
-	{
-		pixRect = QRect(fillRect.right()+fm.width('A'),
-				fillRect.top()+(fillRect.height()-errPix_.height())/2,
-				errPix_.width(),
-				errPix_.height());
-
-		hasPix=true;
-		currentRight=pixRect.right();
-	}
-
-	//The info rectangle (optional)
-	QRect infoRect;
-	QString infoTxt=index.data(AbstractNodeModel::InfoRole).toString();
-	bool hasInfo=(infoTxt.isEmpty() == false);
-
-	if(hasInfo)
-	{
-		//infoFont.setBold(true);
-		fm=QFontMetrics(serverInfoFont_);
-
-		int infoWidth=fm.width(infoTxt);
-		infoRect = textRect;
-		infoRect.setLeft(currentRight+fm.width('A'));
-		infoRect.setWidth(infoWidth);
-		currentRight=infoRect.right();
-	}
-
-	//The load icon (optional)
-	QRect loadRect;
-	bool hasLoad=index.data(AbstractNodeModel::LoadRole).toBool();
-	Animation* an=0;
-
-	//Update load animation
-	if(hasLoad)
-	{
-		an=animation_->find(Animation::ServerLoadType,true);
-
-		loadRect = QRect(currentRight+fm.width('A'),
-						fillRect.top()+(fillRect.height()-an->scaledSize().height())/2,
-						an->scaledSize().width(),
-						an->scaledSize().height());
-
-		currentRight=loadRect.right();
-
-		//Add this index to the animations
-		an->addTarget(index);
-	}
-	//Stops load animation
-	else
-	{
-		if((an=animation_->find(Animation::ServerLoadType,false)) != NULL)
-			an->removeTarget(index);
-	}
-
-	//The node number (optional)
-	QRect numRect;
-	QString numTxt;
-	bool hasNum=false;
-
-	if(drawChildCount_)
-	{
-		QVariant va=index.data(AbstractNodeModel::NodeNumRole);
-		hasNum=(va.isNull() == false);
-		if(hasNum)
-		{
-			numTxt="(" + QString::number(va.toInt()) + ")";
-
-			fm=QFontMetrics(serverNumFont_);
-
-			int numWidth=fm.width(numTxt);
-			numRect = textRect;
-			numRect.setLeft(currentRight+fm.width('A'));
-			numRect.setWidth(numWidth);
-			currentRight=numRect.right();
-		}
-	}
-
-	//Define clipping
-	int rightPos=currentRight+1;
-	const bool setClipRect = rightPos > option.rect.right();
-	if(setClipRect)
-	{
-		painter->save();
-		painter->setClipRect(option.rect);
-	}
-
-	//Draw bg rect
-	QColor bg=index.data(Qt::BackgroundRole).value<QColor>();
-	QColor borderCol=bg.darker(125);
-	painter->fillRect(fillRect,bg);
-	//painter->setPen((option.state & QStyle::State_Selected)?nodeSelectPen_:nodePen_);
-	painter->setPen((option.state & QStyle::State_Selected)?nodeSelectPen_:QPen(borderCol));
-	painter->drawRect(fillRect);
-
-	//Draw shading
-	QColor shCol= bg.darker(108);
-	painter->fillRect(halfRect,shCol);
-
-	//painter->fillRect(fillRect,bg);
-	//painter->setPen((option.state & QStyle::State_Selected)?nodeSelectPen_:nodePen_);
-	//painter->drawRect(fillRect);
-
-	//Draw text
-	QColor fg=index.data(Qt::ForegroundRole).value<QColor>();
-	painter->setPen(fg);
-	painter->drawText(textRect,Qt::AlignLeft | Qt::AlignVCenter,text);
-
-	//Draw pixmap if needed
-	if(hasPix)
-	{
-		painter->drawPixmap(pixRect,errPix_);
-	}
-
-	//Draw info
-	if(hasInfo)
-	{
-		painter->setPen(Qt::black);
-		painter->setFont(serverInfoFont_);
-		painter->drawText(infoRect,Qt::AlignLeft | Qt::AlignVCenter,infoTxt);
-	}
-
-	//Draw number
-	if(hasNum)
-	{
-		painter->setPen(Qt::black);
-		painter->setFont(serverNumFont_);
-		painter->drawText(numRect,Qt::AlignLeft | Qt::AlignVCenter,numTxt);
-	}
-
-	//Draw load animation
-	if(hasLoad)
-	{
-		Animation* an=animation_->find(Animation::ServerLoadType,false);
-		if(an)
-		{
-			painter->drawPixmap(loadRect,an->currentPixmap());
-		}
-	}
-
-	if(setClipRect)
-	{
-		painter->restore();
-	}
-}
-
-
-void NodeViewDelegate::renderNode(QPainter *painter,const QModelIndex& index,
-        							const QStyleOptionViewItemV4& option,QString text) const
-{
-	int offset=4;
-
-	QFontMetrics fm(font_);
-	int deltaH=(option.rect.height()-(fm.height()+4))/2;
-
-	//The initial filled rect (we will adjust its  width)
-	QRect fillRect=option.rect.adjusted(offset,deltaH,0,-deltaH-1);
-	if(option.state & QStyle::State_Selected)
-		fillRect.adjust(0,0,0,-0);
-
-	//The text rectangle
-	QRect textRect = fillRect.adjusted(offset,0,0,0);
-
-	int textWidth=fm.width(text);
-	textRect.setWidth(textWidth);
-
-	//Adjust the filled rect width
-	fillRect.setRight(textRect.right()+offset);
-
-	QRect halfRect=fillRect;
-	halfRect.setY(fillRect.center().y());
-	halfRect.adjust(1,0,-1,-1);
-
-	int currentRight=fillRect.right();
-
-	//Icons area
-	QList<QPixmap> pixLst;
-	QList<QRect> pixRectLst;
-	QVariant va=index.data(AbstractNodeModel::IconRole);
-	if(va.type() == QVariant::List)
-	{
-			QVariantList lst=va.toList();
-			int xp=currentRight+5;
-			int yp=fillRect.top();
-			for(int i=0; i < lst.count(); i++)
-			{
-				pixLst << lst[i].value<QPixmap>();
-				pixRectLst << QRect(xp,yp,pixLst.back().width(),pixLst.back().height());
-				xp+=pixLst.back().width();
-			}
-
-			if(!pixRectLst.isEmpty())
-				currentRight=pixRectLst.back().right();
-	}
-
-	//The node number (optional)
-	QRect numRect;
-	QString numTxt;
-	bool hasNum=false;
-
-	if(drawChildCount_)
-	{
-		va=index.data(AbstractNodeModel::NodeNumRole);
-		hasNum=(va.isNull() == false);
-
-		if(hasNum)
-		{
-			numTxt="(" + QString::number(va.toInt()) + ")";
-			fm=QFontMetrics(suiteNumFont_);
-
-			int numWidth=fm.width(numTxt);
-			numRect = textRect;
-			numRect.setLeft(currentRight+fm.width('A'));
-			numRect.setWidth(numWidth);
-			currentRight=numRect.right();
-		}
-	}
-
-	//Define clipping
-	int rightPos=currentRight+1;
-	const bool setClipRect = rightPos > option.rect.right();
-	if(setClipRect)
-	{
-		painter->save();
-		painter->setClipRect(option.rect);
-	}
-
-	//Draw bg rect
-	QColor bg=index.data(Qt::BackgroundRole).value<QColor>();
-	QColor borderCol=bg.darker(125);
-	painter->fillRect(fillRect,bg);
-	//painter->setPen((option.state & QStyle::State_Selected)?nodeSelectPen_:nodePen_);
-	painter->setPen((option.state & QStyle::State_Selected)?nodeSelectPen_:QPen(borderCol));
-	painter->drawRect(fillRect);
-
-	//Draw shading
-	QColor shCol= bg.darker(108);
-	painter->fillRect(halfRect,shCol);
-
-	//Draw text
-	QColor fg=index.data(Qt::ForegroundRole).value<QColor>();
-	painter->setPen(fg);
-	painter->drawText(textRect,Qt::AlignLeft | Qt::AlignVCenter,text);
-
-	//Draw icons
-	for(int i=0; i < pixLst.count(); i++)
-	{
-		painter->drawPixmap(pixRectLst[i],pixLst[i]);
-	}
-
-	//Draw number
-	if(hasNum)
-	{
-		painter->setPen(QColor(120,120,120));
-		painter->setFont(suiteNumFont_);
-		painter->drawText(numRect,Qt::AlignLeft | Qt::AlignVCenter,numTxt);
-	}
-
-	if(setClipRect)
-	{
-		painter->restore();
-	}
-}
 
 //========================================================
 // data is encoded as a QStringList as follows:
@@ -514,9 +106,10 @@ void NodeViewDelegate::renderMeter(QPainter *painter,QStringList data,const QSty
 	int	min=data.at(3).toInt();
 	int	max=data.at(4).toInt();
 	//bool colChange=data.at(5).toInt();
-	QString name=data.at(1) + ":";
+    float percent=static_cast<float>(val-min)/static_cast<float>(max-min);
+    QString name=data.at(1) + ":";
 	QString valStr=data.at(2) + " (" +
-			QString::number(100.*static_cast<float>(val)/static_cast<float>(max-min)) + "%)";
+            QString::number(100.*percent) + "%)";
 
 	int offset=2;
 	//int gap=5;
@@ -563,6 +156,11 @@ void NodeViewDelegate::renderMeter(QPainter *painter,QStringList data,const QSty
 	painter->fillRect(stRect,QColor(229,229,229));
 	painter->setPen(QColor(180,180,180));
 	painter->drawRect(stRect);
+
+    //Draw progress
+    QRect progRect=stRect;
+    progRect.setWidth(stRect.width()*percent);
+    painter->fillRect(progRect,Qt::blue);
 
 	//Draw name
 	painter->setPen(Qt::black);
@@ -947,12 +545,10 @@ void NodeViewDelegate::renderLimiter(QPainter *painter,QStringList data,const QS
 		painter->restore();
 	}
 }
-*/
 
-/*
 void NodeViewDelegate::renderTrigger(QPainter *painter,QStringList data,const QStyleOptionViewItemV4& option) const
 {
-	if(data.count() !=3)
+	/*if(data.count() !=3)
 			return;
 
 	QString	text=data.at(2);
@@ -977,10 +573,9 @@ void NodeViewDelegate::renderTrigger(QPainter *painter,QStringList data,const QS
 
 			painter->drawText(textRect,Qt::AlignLeft | Qt::AlignVCenter,text);
 		}
-	}
-}*/
+	}*/
+}
 
-/*
 void NodeViewDelegate::renderTime(QPainter *painter,QStringList data,const QStyleOptionViewItemV4& option) const
 {
 	if(data.count() != 2)
@@ -1134,12 +729,10 @@ void NodeViewDelegate::renderRepeat(QPainter *painter,QStringList data,const QSt
 		painter->restore();
 	}
 }
-*/
 
-/*
 void NodeViewDelegate::renderLate(QPainter *painter,QStringList data,const QStyleOptionViewItemV4& option) const
 {
-	if(data.count() !=2)
+	/*if(data.count() !=2)
 			return;
 
 	QString	text=data.at(1);
@@ -1164,6 +757,10 @@ void NodeViewDelegate::renderLate(QPainter *painter,QStringList data,const QStyl
 
 			painter->drawText(textRect,Qt::AlignLeft | Qt::AlignVCenter,text);
 		}
-	}
+	}*/
 }
-*/
+
+
+
+
+

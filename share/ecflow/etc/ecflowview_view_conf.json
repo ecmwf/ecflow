@@ -31,12 +31,21 @@
     	"status" : {
     		"label" : "Status"
         },
-        "icon" : {
-            "label" : "Icon"
+        "type" : {
+            "label" : "Type"
         },
-    	"event" : {
-    		"label" : "Event"
-    	}   	
+    	"trigger" : {
+            "label" : "Trigger"
+        },
+    	"label" : {
+            "label" : "Label"
+        },
+        "event" : {
+            "label" : "Event"
+        },    
+        "meter" : {
+    		"label" : "Meter"
+    	}	
     },
     
     "zombie_columns": {

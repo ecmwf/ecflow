@@ -117,6 +117,11 @@ VAttribute* VNode::getAttributeType(int row)
 	return VAttribute::getType(this,row);
 }
 
+bool VNode::getAttributeData(const std::string& type,int row,QStringList& data)
+{
+	return VAttribute::getData(type,this,row,data);
+}
+
 void VNode::addChild(VNode* vn)
 {
 	children_.push_back(vn);

@@ -231,6 +231,17 @@ bool VAttribute::getData(VNode *vnode,int row,VAttribute* &type,QStringList& dat
 	return false;
 }
 
+bool VAttribute::getData(const std::string& type,VNode* vnode,int row,QStringList& data)
+{
+	if(VAttribute* va=find(type))
+	{
+		int size=0;
+		return va->getData(vnode,row,size,data);
+	}
+	return false;
+}
+
+
 void VAttribute::load(VProperty* group)
 {
     Q_FOREACH(VProperty* p,group->children())
@@ -241,8 +252,6 @@ void VAttribute::load(VProperty* group)
          }   
     }    
 }
-
-
 
 //================================
 // Meters
@@ -313,7 +322,8 @@ bool VLabelAttribute::getData(VNode *vnode,int row,int& size,QStringList& data)
         data << qName_ <<
 					QString::fromStdString(v.at(row).name()) <<
                     QString::fromStdString(val);
-		return true;
+
+        return true;
 	}
 	size=v.size();
 	return false;
