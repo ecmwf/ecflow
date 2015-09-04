@@ -179,7 +179,7 @@ void TreeNodeView::handleContextMenu(QModelIndex indexClicked,QModelIndexList in
 		for(int i=0; i < indexLst.count(); i++)
 		{
 			VInfo_ptr info=model_->nodeInfo(indexLst[i]);
-			if(!info->isEmpty())
+			if(info && !info->isEmpty())
 				nodeLst.push_back(info);
 		}
 

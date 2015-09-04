@@ -262,9 +262,11 @@ QAction *MenuHandler::invokeMenu(const std::string &menuName, std::vector<VInfo_
     {
         QMenu *qMenu = menu->generateMenu(nodes, parent);
 
-        selectedAction = qMenu->exec(pos);
-
-        delete qMenu;
+        if (qMenu)
+        {
+            selectedAction = qMenu->exec(pos);
+            delete qMenu;
+        }
     }
 
     return selectedAction;
@@ -303,6 +305,11 @@ QMenu *Menu::generateMenu(std::vector<VInfo_ptr> nodes, QWidget *parent)
     bool showIcompatibleItems = true;
     QMenu *qmenu=new QMenu(parent);	
     qmenu->setTitle(QString::fromStdString(name()));
+
+
+    if (nodes.empty())
+        return NULL;
+
 
     //qmenu->setWindowFlags(Qt::Tool);
     //qmenu->setWindowTitle("my title");
