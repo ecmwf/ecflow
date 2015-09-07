@@ -1,0 +1,22 @@
+{
+    "notification":  {
+
+            "aborted": {
+                "background": "rgb(255,0,0)",
+                "foregorund": "rgb(0,0,0)",
+                "border":     "rgb(200,200,200)",
+                "title"  :    "Change: aborted tasks",
+                "labelText" : "Aborted tasks"         
+             },
+ 
+            "restarted": {
+                "background": "rgb(255,0,0)",
+                "foregorund": "rgb(0,0,0)",
+                "border":     "rgb(200,200,200)",
+                "title"  :    "Change: restarted tasks",
+                "labelText" : "Restarted tasks"               
+            }
+       
+       }
+
+}

@@ -23,6 +23,7 @@
 class ServerHandler;
 class VAttribute;
 class VServer;
+class VServerSettings;
 
 //Describes the major changes during an update
 class VNodeChange
@@ -45,7 +46,7 @@ public:
 class VServerChange
 {
 public:
-	VServerChange() : suiteNum_(-1), attrNum_(-1), totalNum_(-1) {}
+	VServerChange() : suiteNum_(0), attrNum_(0), totalNum_(0) {}
 	int suiteNum_;
 	int attrNum_;
 	int totalNum_;
@@ -100,6 +101,7 @@ public:
     bool sameName(const std::string& name) const;
     virtual std::string strName() const;
     virtual QString name() const;
+    std::string serverName() const;
     virtual QString stateName();
     virtual QString defaultStateName();
     virtual bool isSuspended() const;
@@ -115,6 +117,8 @@ public:
     const std::string& nodeType();
 
     virtual void why(std::vector<std::string>& theReasonWhy) const;
+
+    void check(VServerSettings* conf,bool);
 
     LogServer_ptr logServer();
 

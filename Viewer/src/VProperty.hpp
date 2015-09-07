@@ -59,6 +59,7 @@ public:
     std::string valueAsString() const;
     Type type() const {return type_;}
     QString param(QString name);
+    QColor paramToColour(QString name) {return toColour(param(name).toStdString()) ;}
 
     void setDefaultValue(const std::string&);
     void setValue(const std::string&);

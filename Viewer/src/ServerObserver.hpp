@@ -10,6 +10,7 @@
 #ifndef SERVEROBSERVER_HPP_
 #define SERVEROBSERVER_HPP_
 
+#include <vector>
 #include "Aspect.hpp"
 
 class ServerHandler;

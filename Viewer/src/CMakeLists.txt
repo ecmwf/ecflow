@@ -6,6 +6,9 @@ set(viewer_srcs
     AbstractSearchLine.cpp
     ActionHandler.cpp
     Animation.cpp
+    ChangeNotify.cpp
+    ChangeNotifyDialog.cpp
+    ChangeNotifyModel.cpp
     CodeItemWidget.cpp
     ConnectState.cpp
     CommandDesignerWidget.cpp
@@ -96,6 +99,7 @@ set(viewer_srcs
     VFileInfo.cpp
     VModelData.cpp
     VNode.cpp
+    VNodeList.cpp
     VNState.cpp
     VParam.cpp
     VProperty.cpp   
@@ -126,6 +130,8 @@ set(viewer_moc_files AbstractNodeModel.hpp
     AbstractSearchLine.hpp
     ActionHandler.hpp
     Animation.hpp
+    ChangeNotifyDialog.hpp
+    ChangeNotifyModel.hpp
     CommandDesignerWidget.hpp
     CodeItemWidget.hpp
     CustomCommandDialog.hpp
@@ -170,11 +176,13 @@ set(viewer_moc_files AbstractNodeModel.hpp
     VariableSearchLine.hpp
     VFilter.hpp
     VModelData.hpp
+    VNodeList.hpp
     ZombieItemWidget.hpp
 )
 
 set(viewer_wrap_ui_files
     AboutDialog.ui
+    ChangeNotifyDialog.ui
     CommandDesignerWidget.ui 
     CustomCommandDialog.ui 
     CodeItemWidget.ui

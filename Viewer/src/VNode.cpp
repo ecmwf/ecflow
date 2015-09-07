@@ -22,6 +22,7 @@
 #include "VSState.hpp"
 
 #include <boost/algorithm/string.hpp>
+#include "ChangeNotify.hpp"
 
 //=================================================
 // VNode
@@ -339,6 +340,15 @@ QString VNode::name() const
 	//return (node_)?QString::fromStdString(node_->name()):QString();
 }
 
+std::string VNode::serverName() const
+{
+	if(ServerHandler* s=server())
+	{
+		return s->name();
+	}
+	return std::string();
+}
+
 QString VNode::stateName()
 {
 	return VNState::toName(this);
@@ -489,6 +499,86 @@ void VNode::why(std::vector<std::string>& theReasonWhy) const
 		node_->bottom_up_why(theReasonWhy);
 	}
 }
+
+
+void VNode::check(VServerSettings* conf,bool stateChange)
+{
+	NState::State new_status = node_->state();
+
+	if(stateChange)
+	{
+		//Check for aborted
+		if(new_status == NState::ABORTED)
+		{
+			if(conf->boolValue(VServerSettings::AbortedPopup))
+			{
+				ChangeNotify::add("aborted",this);
+			}
+		}
+	}
+}
+	/*
+
+
+
+	NState::State new_status = node_->status();
+	const ecf::Flag& new_flags=node_->get_flag();
+
+	boost::posix_time::ptime t=node_->state_change_time();
+    //return the state and duration time(relative to when suite was begun) when the state change happened
+	std::pair<NState,boost::posix_time::time_duration> get_state() const { return state_;}
+
+
+   int new_try_no = tryno();
+
+
+
+
+
+	if(new_status != old_status_ && new_status == STATUS_ABORTED)
+		serv().aborted(*this);
+
+	if(new_try_no > 1 && new_try_no != old_tryno_ && (
+	         new_status == STATUS_SUBMITTED ||
+	         new_status == STATUS_ACTIVE))
+		      serv().restarted(*this);
+
+	bool new_is_late = is_late(new_flags);
+	if(new_is_late != is_late(old_flags_)) {
+		if(new_is_late)
+                  serv().late(*this);
+		else
+                  late::hide(*this);
+	}
+
+	bool new_is_zombie = is_zombie(new_flags);
+	if(new_is_zombie != is_zombie(old_flags_)) {
+		if(new_is_zombie)
+                  serv().zombie(*this);
+		else
+                  zombie::hide(*this);
+	}
+
+//
+//	if(is_to_check(new_flags) != is_to_check(old_flags_)) {
+//		if(is_to_check(new_flags))
+//                  serv().to_check(*this);
+//		else
+//                  to_check::hide(*this);
+//	}
+
+	old_flags_ = new_flags;
+	old_status_ = new_status;
+	old_tryno_ = new_try_no;*/
+
+
+
+
+
+
+
+
+
 
 /*
 //Get the triggers list for the Triggers view
@@ -849,6 +939,12 @@ void VServer::beginUpdate(VNode* node,const std::vector<ecf::Aspect::Type>& aspe
 		if(s && s->begun())
 		{
 			node->node()->update_generated_variables();
+		}
+
+		if(node->nodeType() == "task")
+		{
+			bool stateCh=(std::find(aspect.begin(),aspect.end(),ecf::Aspect::STATE) != aspect.end());
+			node->check(server_->conf(),stateCh);
 		}
 	}
 

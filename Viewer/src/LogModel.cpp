@@ -264,7 +264,7 @@ LogDelegate::LogDelegate(QWidget *parent) : QStyledItemDelegate(parent)
 void LogDelegate::paint(QPainter *painter,const QStyleOptionViewItem &option,
                    const QModelIndex& index) const
 {
-	return QStyledItemDelegate::paint(painter,option,index);
+	QStyledItemDelegate::paint(painter,option,index);
 
 	/*if(index.column()==11)
 	{

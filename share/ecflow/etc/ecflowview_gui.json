@@ -126,6 +126,7 @@
 				"title" : "Popup",
 				"prefix" : "server.popup",
 				
+				"line" : "sound",
 				"line" : "aborted",
 				"line" : "restarted",
 				"line" : "late",

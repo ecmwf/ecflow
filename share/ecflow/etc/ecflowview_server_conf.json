@@ -58,6 +58,12 @@
 				"label" : "Popup notifications",
 				"tooltip" : "Popup notifications", 
 				
+				"sound" : {
+				    "label": "Play sound",
+                    "tooltip": "Play sound",                          
+                    "default": "false"
+                },    
+				
 				"aborted": {
             		"label": "Aborted tasks",
             		"tooltip": "aborted tasks",                          

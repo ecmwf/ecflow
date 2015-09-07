@@ -145,8 +145,7 @@ ServerHandler::~ServerHandler()
 	saveConf();
 
 	//Notify the observers
-	for(std::vector<ServerObserver*>::const_iterator it=serverObservers_.begin(); it != serverObservers_.end(); ++it)
-			(*it)->notifyServerDelete(this);
+	broadcast(&ServerObserver::notifyServerDelete);
 
 	//The queue must be deleted before the client, since the thread might
 	//be running a job on the client!!
@@ -732,7 +731,12 @@ void ServerHandler::removeServerObserver(ServerObserver *obs)
 
 void ServerHandler::broadcast(SoMethod proc)
 {
-	for(std::vector<ServerObserver*>::const_iterator it=serverObservers_.begin(); it != serverObservers_.end(); ++it)
+	//When the observers are being notified (in a loop) they might
+	//want to remove themselves from the observer list. This will cause a crash. To avoid
+	//this we create a copy of the observers and use it in the notification loop.
+	std::vector<ServerObserver*> sObsCopy=serverObservers_;
+
+	for(std::vector<ServerObserver*>::const_iterator it=sObsCopy.begin(); it != sObsCopy.end(); ++it)
 		((*it)->*proc)(this);
 }
 
@@ -1245,6 +1249,8 @@ void ServerHandler::confChanged(VServerSettings::Param par,VProperty* prop)
 	{
 	case VServerSettings::UpdateRate:
 		updateRefreshTimer();
+		break;
+	case VServerSettings::AbortedPopup:
 		break;
 	default:
 		break;
