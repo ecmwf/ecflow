@@ -450,11 +450,29 @@
             "name"           : "Queued",
             "visible_for"    : "node",
             "command"        : "ecflow_client --alter change defstatus queued <full_name>"
+        },
+
+        {
+            "menu"           : "Node",
+            "name"           : "-"
+        },
+
+        {
+            "menu"           : "Node",
+            "name"           : "Info ...",
+            "visible_for"    : "server or node",        
+            "command"        : "overview",
+            "handler"        : "info_panel",
+            "icon"           : "overview.svg"          
+        }, 
+        {
+            "menu"           : "Node",
+            "name"           : "Script ...",
+            "visible_for"    : "task",        
+            "command"        : "script",
+            "handler"        : "info_panel",
+            "icon"           : "script.svg"          
         }
-
-
-
-
 
     ]
 

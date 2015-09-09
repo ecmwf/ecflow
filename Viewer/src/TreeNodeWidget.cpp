@@ -54,6 +54,9 @@ TreeNodeWidget::TreeNodeWidget(ServerFilter* servers,QWidget* parent) : NodeWidg
 	connect(view_->realWidget(),SIGNAL(selectionChanged(VInfo_ptr)),
             this,SLOT(slotSelectionChangedInView(VInfo_ptr)));
 
+	connect(view_->realWidget(),SIGNAL(infoPanelCommand(VInfo_ptr,QString)),
+	            this,SIGNAL(popInfoPanel(VInfo_ptr,QString)));
+
 	connect(bcWidget_,SIGNAL(selected(VInfo_ptr)),
 			view_->realWidget(),SLOT(slotSetCurrent(VInfo_ptr)));
 

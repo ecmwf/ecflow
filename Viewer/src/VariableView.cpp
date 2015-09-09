@@ -26,8 +26,8 @@
 
 VariableDelegate::VariableDelegate(QWidget *parent) : QStyledItemDelegate(parent)
 {
-    selectPen_=QPen(QColor(125,162,206));
-    selectBrush_=QBrush(QColor(193,220,252,110));
+	selectPen_=QPen(QColor(8,117,182));
+    selectBrush_=QBrush(QColor(200,222,250));
     borderPen_=QPen(QColor(230,230,230));
 
     QImageReader imgR(":/viewer/padlock.svg");
@@ -169,7 +169,7 @@ QSize VariableDelegate::sizeHint(const QStyleOptionViewItem & option, const QMod
 //
 //========================================================
 
-VariableView::VariableView(QWidget* parent) : QTreeView(parent)
+VariableView::VariableView(QWidget* parent) : TreeView(parent)
 {
 	setProperty("var","1");
 

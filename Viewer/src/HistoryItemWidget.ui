@@ -114,14 +114,17 @@ background: rgb(242, 242, 242);  </string>
     </widget>
    </item>
    <item>
-    <widget class="QTreeView" name="treeView_">
-     <property name="alternatingRowColors">
-      <bool>true</bool>
+    <widget class="TreeView" name="treeView_">
+     <property name="selectionMode">
+      <enum>QAbstractItemView::SingleSelection</enum>
      </property>
      <property name="rootIsDecorated">
       <bool>false</bool>
      </property>
      <property name="uniformRowHeights">
+      <bool>true</bool>
+     </property>
+     <property name="allColumnsShowFocus">
       <bool>true</bool>
      </property>
     </widget>
@@ -147,6 +150,11 @@ background: rgb(242, 242, 242);  </string>
    <class>FileInfoLabel</class>
    <extends>QLabel</extends>
    <header location="global">FileInfoLabel.hpp</header>
+  </customwidget>
+  <customwidget>
+   <class>TreeView</class>
+   <extends>QTreeView</extends>
+   <header location="global">TreeView.hpp</header>
   </customwidget>
  </customwidgets>
  <resources>

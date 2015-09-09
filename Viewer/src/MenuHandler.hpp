@@ -39,6 +39,8 @@ public:
     //bool compatibleWithNode(VInfo_ptr nodeInfo);
     //void addValidType(std::string type);
     //void addValidState(std::string type);
+    void setHandler(const std::string &handler);
+    void setIcon(const std::string &icon);
     void setAsSubMenu() {isSubMenu_ = true;};
     void setVisibleCondition(BaseNodeCondition *cond) {visibleCondition_ = cond;};
     void setEnabledCondition(BaseNodeCondition *cond) {enabledCondition_ = cond;};
@@ -47,6 +49,8 @@ public:
     bool isSubMenu()      {return isSubMenu_;};
     bool isDivider()      {return isDivider_;};
     std::string &name()   {return name_;};
+    const std::string handler() const {return handler_;}
+    const std::string command() const {return command_;}
     QAction     *action() {return action_;};
 
 private:
@@ -58,6 +62,7 @@ private:
     std::string command_;
     std::string question_;
     std::string defaultAnswer_;
+    std::string handler_;
 
     //std::vector<NodeType>      validNodeTypes_;
     //std::vector<DState::State> validNodeStates_;
@@ -117,6 +122,7 @@ public:
     static QAction *invokeMenu(const std::string &menuName, std::vector<VInfo_ptr> nodes, QPoint pos, QWidget *parent);
     static bool addItemToMenu(MenuItem *item, const std::string &menuName);
     static Menu *findMenu(const std::string &name);
+    static MenuItem* findItem(QAction*);
     static MenuItem* newItem(const std::string &name);
     static void addMenu(Menu *menu) {menus_.push_back(menu);};
 

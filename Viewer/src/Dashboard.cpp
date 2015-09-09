@@ -75,8 +75,8 @@ DashboardWidget* Dashboard::addWidgetCore(const std::string& type)
 		connect(ctl,SIGNAL(selectionChanged(VInfo_ptr)),
 				this,SIGNAL(selectionChanged(VInfo_ptr)));
 
-		connect(ctl,SIGNAL(popInfoPanel(QString)),
-				this,SLOT(slotPopInfoPanel(QString)));
+		connect(ctl,SIGNAL(popInfoPanel(VInfo_ptr,QString)),
+				this,SLOT(slotPopInfoPanel(VInfo_ptr,QString)));
 
 		w=ctl;
 	}
@@ -87,8 +87,8 @@ DashboardWidget* Dashboard::addWidgetCore(const std::string& type)
 		connect(ctl,SIGNAL(selectionChanged(VInfo_ptr)),
 				this,SIGNAL(selectionChanged(VInfo_ptr)));
 
-		connect(ctl,SIGNAL(popInfoPanel(QString)),
-				this,SLOT(slotPopInfoPanel(QString)));
+		connect(ctl,SIGNAL(popInfoPanel(VInfo_ptr,QString)),
+				this,SLOT(slotPopInfoPanel(VInfo_ptr,QString)));
 
 		w=ctl;
 	}
@@ -97,10 +97,6 @@ DashboardWidget* Dashboard::addWidgetCore(const std::string& type)
 		InfoPanel* ctl=new InfoPanel(this);
 		connect(this,SIGNAL(selectionChanged(VInfo_ptr)),
 					ctl,SLOT(slotReload(VInfo_ptr)));
-
-		VInfo_ptr info=currentSelectionInView();
-		if(info && info.get())
-			ctl->slotReload(info);
 
 		w=ctl;
 	}
@@ -118,6 +114,18 @@ DashboardWidget* Dashboard::addWidget(const std::string& type)
 
 	//At this point the widgets can be inactive. Reload will make them active!!!
 	w->reload();
+
+	if(type == "info")
+	{
+		VInfo_ptr info=currentSelectionInView();
+		if(info && info.get())
+		{
+			if(InfoPanel* ip=static_cast<InfoPanel*>(w))
+			{
+				ip->slotReload(info);
+			}
+		}
+	}
 
 	return w;
 }
@@ -207,6 +215,19 @@ void Dashboard::slotPopInfoPanel(QString name)
 		{
             ip->setDetached(true);
 			ip->setCurrent(name.toStdString());
+		}
+	}
+}
+
+void Dashboard::slotPopInfoPanel(VInfo_ptr info,QString name)
+{
+	if(DashboardWidget *dw=addDialog("info"))
+	{
+		if(InfoPanel* ip=static_cast<InfoPanel*>(dw))
+		{
+            ip->setDetached(true);
+            ip->slotReload(info);
+            ip->setCurrent(name.toStdString());
 		}
 	}
 }

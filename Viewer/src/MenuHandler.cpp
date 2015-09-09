@@ -123,6 +123,8 @@ bool MenuHandler::readMenuConfigFile(const std::string &configFile)
                 std::string type     = ItemDef.get("type",        "Command");
                 std::string enabled  = ItemDef.get("enabled_for", "");
                 std::string visible  = ItemDef.get("visible_for", "");
+                std::string handler  = ItemDef.get("handler", "");
+                std::string icon     = ItemDef.get("icon", "");
                 //std::cout << "  " << name << " :" << menuName << std::endl;
 
                 UserMessage::message(UserMessage::DBG, false, std::string("  " + name));
@@ -147,7 +149,8 @@ bool MenuHandler::readMenuConfigFile(const std::string &configFile)
                 }
                 item->setVisibleCondition(visibleCond);
 
-
+                item->setHandler(handler);
+                item->setIcon(icon);
 
                 if (type == "Submenu")
                     item->setAsSubMenu();
@@ -226,6 +229,21 @@ Menu *MenuHandler::findMenu(const std::string &name)
     return NULL; // if we got to here, then the menu was not found
 }
 
+MenuItem* MenuHandler::findItem(QAction* ac)
+{
+	for(std::vector<Menu*>::iterator itMenus = menus_.begin(); itMenus != menus_.end(); ++itMenus)
+	{
+		for(std::vector<MenuItem*>::iterator it=(*itMenus)->items().begin(); it!=(*itMenus)->items().end(); ++it)
+		{
+			if((*it)->action() == ac)
+			{
+				return *it;
+			}
+		}
+	}
+
+	return NULL;
+}
 
 MenuItem* MenuHandler::newItem(const std::string &name)
 {
@@ -441,7 +459,22 @@ void MenuItem::setCommand(const std::string &command)
 
     if (action_)
         action_->setStatusTip(QString(command.c_str()));  // so we see the command in the status bar
-};
+}
+
+void MenuItem::setHandler(const std::string& handler)
+{
+    handler_ = handler;
+}
+
+void MenuItem::setIcon(const std::string& icon)
+{
+	if(!icon.empty())
+	{
+		action_->setIcon(QPixmap(":/viewer/" + QString::fromStdString(icon)));
+	}
+}
+
+
 
 // // adds an entry to the list of valid node types for this menu item
 // void MenuItem::addValidType(std::string type)

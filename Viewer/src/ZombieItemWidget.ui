@@ -157,7 +157,7 @@
     </layout>
    </item>
    <item>
-    <widget class="QTreeView" name="zombieView">
+    <widget class="TreeView" name="zombieView">
      <property name="contextMenuPolicy">
       <enum>Qt::ActionsContextMenu</enum>
      </property>
@@ -223,6 +223,13 @@
    </property>
   </action>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>TreeView</class>
+   <extends>QTreeView</extends>
+   <header>TreeView.hpp</header>
+  </customwidget>
+ </customwidgets>
  <resources>
   <include location="viewer.qrc"/>
  </resources>

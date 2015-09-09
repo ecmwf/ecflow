@@ -89,6 +89,7 @@ set(viewer_srcs
     TreeNodeView.cpp
     TreeNodeViewDelegate.cpp
     TreeNodeWidget.cpp
+    TreeView.cpp
     TriggerView.cpp
     UserMessage.cpp
     VAttribute.cpp

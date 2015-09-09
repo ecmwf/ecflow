@@ -110,7 +110,7 @@ void NodeWidget::slotInfoPanelAction()
 {
     if(QAction* ac=static_cast<QAction*>(sender()))
     {
-        Q_EMIT popInfoPanel(ac->data().toString());
+    	Q_EMIT popInfoPanel(view_->currentSelection(),ac->data().toString());
     }
 }
 

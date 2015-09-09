@@ -222,15 +222,15 @@ QVariant LogModel::data( const QModelIndex& index, int role ) const
 			}
 		}
 	}
-
+/*
 	else if(role == Qt::BackgroundRole)
 	{
-		/*if(data_.at(row).type_ == LogModelLine::ErrorType)
+		if(data_.at(row).type_ == LogModelLine::ErrorType)
 		{
 		 return QColor(223,152,152);
-		}*/
+		}
 	}
-
+*/
 
 	else if(role == Qt::FontRole)
 	{

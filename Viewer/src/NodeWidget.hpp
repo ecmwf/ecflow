@@ -49,7 +49,7 @@ public:
 
 Q_SIGNALS:
 	void selectionChanged(VInfo_ptr);
-	void popInfoPanel(QString);
+	void popInfoPanel(VInfo_ptr,QString);
 
 protected Q_SLOTS:
 	void slotInfoPanelAction();

@@ -237,15 +237,6 @@ VariableItemWidget::VariableItemWidget(QWidget *parent)
 	model_=new VariableModel(data_,this);
 	sortModel_= new VariableSortModel(model_,this);
     
-    //!!!!We need to do it because:
-    //The background colour between the tree view's left border and the items in the first column cannot be
-    //controlled by delegates or stylesheets. It always takes the QPalette::Highlight
-    //colour from the palette. Here we set this to transparent so that Qt could leave
-    //this area empty and we will fill it appropriately in our delegate.
-    QPalette pal=varView->palette();
-    pal.setColor(QPalette::Highlight,Qt::transparent);
-    varView->setPalette(pal);
-
     //Set the model on the view
     varView->setModel(sortModel_);
 

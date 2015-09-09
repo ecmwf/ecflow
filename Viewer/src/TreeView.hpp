@@ -7,31 +7,15 @@
 // nor does it submit to any jurisdiction.
 //
 //============================================================================
+#ifndef VIEWER_SRC_TREEVIEW_HPP_
+#define VIEWER_SRC_TREEVIEW_HPP_
 
-#ifndef VIEWER_SRC_FILEWATCHER_HPP_
-#define VIEWER_SRC_FILEWATCHER_HPP_
+#include <QTreeView>
 
-#include <QFileSystemWatcher>
-#include <QFile>
-#include <QStringList>
-
-class FileWatcher : public QFileSystemWatcher
+class TreeView : public QTreeView
 {
-Q_OBJECT
-
 public:
-	FileWatcher(const std::string& filePath,qint64 offset,QObject* parent);
-
-protected Q_SLOTS:
-	void slotChanged(const QString& path);
-
-Q_SIGNALS:
-	void linesAppended(QStringList);
-
-protected:
-	QFile file_;
-	qint64 offset_;
+	TreeView(QWidget* parent=0);
 };
 
-
-#endif /* VIEWER_SRC_FILEWATCHER_HPP_ */
+#endif /* VIEWER_SRC_TREEVIEW_HPP_ */

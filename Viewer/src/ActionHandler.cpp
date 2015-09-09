@@ -11,6 +11,10 @@ ActionHandler::ActionHandler(QWidget *view) : QObject(view), parent_(view)
 	connect(this,SIGNAL(viewCommand(std::vector<VInfo_ptr>,QString)),
 			parent_,SLOT(slotViewCommand(std::vector<VInfo_ptr>,QString)));
 
+
+	connect(this,SIGNAL(infoPanelCommand(VInfo_ptr,QString)),
+				parent_,SIGNAL(infoPanelCommand(VInfo_ptr,QString)));
+
 	//makeShortcut();
 }
 
@@ -20,7 +24,18 @@ void ActionHandler::contextMenu(std::vector<VInfo_ptr> nodesLst,QPoint pos)
 
     if(action)
     {
-        if(action->iconText() == "Set as root")
+    	MenuItem* item=MenuHandler::findItem(action);
+    	if(item)
+    	{
+    		if(item->handler() == "info_panel")
+    		{
+    			Q_EMIT infoPanelCommand(nodesLst.at(0),QString::fromStdString(item->command()));
+    			return;
+    		}
+    	}
+
+
+    	if(action->iconText() == "Set as root")
         {
             Q_EMIT viewCommand(nodesLst,"set_as_root");
         }

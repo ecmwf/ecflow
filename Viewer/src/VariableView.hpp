@@ -16,7 +16,8 @@
 #include <QMap>
 #include <QPen>
 #include <QStyledItemDelegate>
-#include <QTreeView>
+
+#include "TreeView.hpp"
 
 #include <string>
 
@@ -35,7 +36,7 @@ protected:
     QPixmap lockPix_;
 };
 
-class VariableView : public QTreeView
+class VariableView : public TreeView
 {
 public:
 	explicit VariableView(QWidget *parent=0);

@@ -13,6 +13,7 @@
 #define VIEWER_SRC_LOGPROVIDER_HPP_
 
 #include <QObject>
+#include <QStringList>
 
 #include "VDir.hpp"
 #include "VInfo.hpp"

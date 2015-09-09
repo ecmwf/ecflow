@@ -17,16 +17,7 @@
    <property name="spacing">
     <number>1</number>
    </property>
-   <property name="leftMargin">
-    <number>0</number>
-   </property>
-   <property name="topMargin">
-    <number>0</number>
-   </property>
-   <property name="rightMargin">
-    <number>0</number>
-   </property>
-   <property name="bottomMargin">
+   <property name="margin">
     <number>0</number>
    </property>
    <item>
@@ -100,14 +91,17 @@
     </widget>
    </item>
    <item>
-    <widget class="QTreeView" name="treeView_">
-     <property name="alternatingRowColors">
-      <bool>true</bool>
+    <widget class="TreeView" name="treeView_">
+     <property name="selectionMode">
+      <enum>QAbstractItemView::ExtendedSelection</enum>
      </property>
      <property name="rootIsDecorated">
       <bool>false</bool>
      </property>
      <property name="uniformRowHeights">
+      <bool>true</bool>
+     </property>
+     <property name="allColumnsShowFocus">
       <bool>true</bool>
      </property>
     </widget>
@@ -127,7 +121,12 @@
   <customwidget>
    <class>MessageLabel</class>
    <extends>QLabel</extends>
-   <header location="global">MessageLabel.hpp</header>
+   <header>MessageLabel.hpp</header>
+  </customwidget>
+  <customwidget>
+   <class>TreeView</class>
+   <extends>QTreeView</extends>
+   <header location="global">TreeView.hpp</header>
   </customwidget>
  </customwidgets>
  <resources>

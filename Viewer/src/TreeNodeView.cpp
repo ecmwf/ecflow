@@ -12,6 +12,7 @@
 #include <QApplication>
 #include <QDebug>
 #include <QHeaderView>
+#include <QPalette>
 #include <QScrollBar>
 
 #include "ActionHandler.hpp"
@@ -48,7 +49,7 @@ TreeNodeView::TreeNodeView(NodeFilterModel* model,NodeFilterDef* filterDef,QWidg
 	//colour from the palette. Here we set this to transparent so that Qt could leave
 	//this area empty and we will fill it appropriately in our delegate.
 	QPalette pal=palette();
-	pal.setColor(QPalette::Highlight,Qt::transparent);
+	pal.setColor(QPalette::Highlight,QColor(128,128,128,0));//Qt::transparent);
 	setPalette(pal);
 
 	//Hide header
@@ -205,7 +206,6 @@ void TreeNodeView::slotViewCommand(std::vector<VInfo_ptr> nodeLst,QString cmd)
 		expandAll();
 	}*/
 }
-
 
 void TreeNodeView::reload()
 {
