@@ -123,8 +123,8 @@
       <string/>
      </property>
      <property name="icon">
-      <iconset>
-       <normaloff>:/viewer/images/configure.svg</normaloff>:/viewer/images/configure.svg</iconset>
+      <iconset resource="viewer.qrc">
+       <normaloff>:/viewer/dock_config.svg</normaloff>:/viewer/dock_config.svg</iconset>
      </property>
      <property name="checkable">
       <bool>false</bool>
@@ -152,7 +152,7 @@
       <string/>
      </property>
      <property name="icon">
-      <iconset>
+      <iconset resource="viewer.qrc">
        <normaloff>:/viewer/images/dock_float.svg</normaloff>:/viewer/images/dock_float.svg</iconset>
      </property>
      <property name="checkable">
@@ -184,7 +184,7 @@
       <string/>
      </property>
      <property name="icon">
-      <iconset>
+      <iconset resource="viewer.qrc">
        <normaloff>:/viewer/images/dock_close.svg</normaloff>:/viewer/images/dock_close.svg</iconset>
      </property>
      <property name="iconSize">
@@ -200,6 +200,8 @@
    </item>
   </layout>
  </widget>
- <resources/>
+ <resources>
+  <include location="viewer.qrc"/>
+ </resources>
  <connections/>
 </ui>

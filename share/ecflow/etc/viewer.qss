@@ -171,6 +171,10 @@ QToolButton[docktitle="1"]:hover {
     background: rgb(140,140,140);
 }
 
+QToolButton[docktitle="1"]::menu-indicator {
+    image: url(:/viewer/dock_menu_indicator.png);   
+}
+
 /*----------------------------
   Variable tree view
 ------------------------------*/

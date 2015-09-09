@@ -62,7 +62,7 @@ background: rgb(242, 242, 242);  </string>
       </spacer>
      </item>
      <item>
-      <widget class="QToolButton" name="searchTb">
+      <widget class="QToolButton" name="searchTb_">
        <property name="toolTip">
         <string>Show search bar</string>
        </property>

@@ -19,6 +19,7 @@ HistoryItemWidget::HistoryItemWidget(QWidget *parent) : QWidget(parent)
 {
 	setupUi(this);
 
+	searchTb_->setEnabled(false);
 	searchLine_->setVisible(false);
 
 	infoProvider_=new LogProvider(this);
@@ -62,7 +63,7 @@ void HistoryItemWidget::infoReady(VReply* reply)
     model_->setData(reply->text());
     adjustColumnSize();
     fileLabel_->update(reply,"(Last 100 lines)");
-
+    treeView_->scrollTo(model_->lastIndex());
     updateWidgetState();
 }
 
@@ -106,6 +107,14 @@ void HistoryItemWidget::adjustColumnSize()
 	   {
 		   treeView_->resizeColumnToContents(i);
 	   }
+	}
+}
+
+void HistoryItemWidget::on_reloadTb__clicked(bool)
+{
+	if(info_ && info_.get())
+	{
+		infoProvider_->info(info_);
 	}
 }
 

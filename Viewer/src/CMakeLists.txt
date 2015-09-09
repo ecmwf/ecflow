@@ -144,7 +144,8 @@ set(viewer_moc_files AbstractNodeModel.hpp
     DashboardWidget.hpp
     EditItemWidget.hpp
     FileWatcher.hpp
-    FilterWidget.hpp              
+    FilterWidget.hpp
+    HistoryItemWidget.hpp              
     InfoPanel.hpp
     LineEdit.hpp
     LogProvider.hpp

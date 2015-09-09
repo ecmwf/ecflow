@@ -22,6 +22,8 @@ class LogModel;
 
 class HistoryItemWidget :  public QWidget, public InfoPanelItem, protected Ui::HistoryItemWidget
 {
+Q_OBJECT
+
 public:
 	explicit HistoryItemWidget(QWidget *parent=0);
 
@@ -37,6 +39,9 @@ public:
 
 	void nodeChanged(const VNode*, const std::vector<ecf::Aspect::Type>&) {};
 	void defsChanged(const std::vector<ecf::Aspect::Type>&) {};
+
+protected Q_SLOTS:
+	void on_reloadTb__clicked(bool);
 
 protected:
 	void updateWidgetState();

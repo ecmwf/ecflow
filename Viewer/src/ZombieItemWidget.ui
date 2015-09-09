@@ -147,7 +147,7 @@
        </property>
        <property name="icon">
         <iconset resource="viewer.qrc">
-         <normaloff>:/viewer/reload.svg</normaloff>:/viewer/reload.svg</iconset>
+         <normaloff>:/viewer/sync.svg</normaloff>:/viewer/sync.svg</iconset>
        </property>
        <property name="autoRaise">
         <bool>true</bool>

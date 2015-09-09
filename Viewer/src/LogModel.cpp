@@ -178,15 +178,15 @@ QVariant LogModel::data( const QModelIndex& index, int role ) const
 				switch(data_.at(row).type_)
 				{
 				case LogModelLine::MessageType:
-					return "MSG";
+					return "MSG ";
 				case LogModelLine::LogType:
-					return "LOG";
+					return "LOG ";
 				case LogModelLine::ErrorType:
-					return "ERR";
+					return "ERR ";
 				case LogModelLine::WarningType:
-					return "WAR";
+					return "WAR ";
 				case LogModelLine::DebugType:
-					return "DBG";
+					return "DBG ";
 				default:
 					return QVariant();
 				}
@@ -223,14 +223,23 @@ QVariant LogModel::data( const QModelIndex& index, int role ) const
 		}
 	}
 
+	else if(role == Qt::BackgroundRole)
+	{
+		/*if(data_.at(row).type_ == LogModelLine::ErrorType)
+		{
+		 return QColor(223,152,152);
+		}*/
+	}
+
+
 	else if(role == Qt::FontRole)
 	{
 		QFont f;
 
-		if(data_.at(row).type_ == LogModelLine::ErrorType)
+		/*if(data_.at(row).type_ == LogModelLine::ErrorType)
 		{
 			f.setBold(true);
-		}
+		}*/
 
 		return f;
 	}
