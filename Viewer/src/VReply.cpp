@@ -22,6 +22,7 @@ bool VReply::textFromFile(const std::string& fileName)
 	return false;
 }
 
+
 void VReply::text(const std::vector<std::string>& msg)
 {
 	text_.clear();

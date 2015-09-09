@@ -27,6 +27,7 @@ public:
 	virtual void infoReady(VReply*) {};
 	virtual void infoFailed(VReply*) {};
 	virtual void infoProgress(VReply*) {};
+	virtual void infoAppended(VReply*) {};
 	VInfo_ptr info() const {return info_;}
 
 protected:

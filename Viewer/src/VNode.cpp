@@ -758,6 +758,23 @@ void VServer::genVariables(std::vector<Variable>& vars)
 		vars=defsAccess.defs()->server().server_variables();
 }
 
+std::string VServer::genVariable(const std::string& key) const
+{
+    std::string val;
+    ServerDefsAccess defsAccess(server_);
+    if (defsAccess.defs())
+    {
+    	const std::vector<Variable>& vars=defsAccess.defs()->server().server_variables();
+    	for(std::vector<Variable>::const_iterator it=vars.begin(); it != vars.end(); it++)
+    	{
+    		if((*it).name() == key)
+    			val=(*it).theValue();
+    	}
+    }
+
+    return val;
+}
+
 //------------------------------------------
 // Find
 //------------------------------------------

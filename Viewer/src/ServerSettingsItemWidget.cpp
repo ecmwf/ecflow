@@ -37,7 +37,7 @@ void ServerSettingsItemWidget::reload(VInfo_ptr info)
 {
 	clearContents();
 
-	loaded_=true;
+	enabled_=true;
 	info_=info;
 
 	if(info_ && info_.get() && info_->isServer() && info_->server())
@@ -59,7 +59,7 @@ void ServerSettingsItemWidget::clearContents()
 
 void ServerSettingsItemWidget::slotClicked(QAbstractButton* button)
 {
-	if(!loaded_)
+	if(!enabled_)
 		return;
 
 	switch(buttonBox_->standardButton(button))

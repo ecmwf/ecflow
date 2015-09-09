@@ -23,6 +23,7 @@ set(viewer_srcs
     EditProvider.cpp
     ExpandState.cpp
     FileInfoLabel.cpp
+    FileWatcher.cpp
     FilterWidget.cpp
     Highlighter.cpp
     HistoryItemWidget.cpp
@@ -35,6 +36,7 @@ set(viewer_srcs
     LineEdit.cpp
     LogEvent.cpp
     LogModel.cpp
+    LogProvider.cpp
     LogServer.cpp
     MainWindow.cpp
     ManualItemWidget.cpp 
@@ -141,9 +143,11 @@ set(viewer_moc_files AbstractNodeModel.hpp
     DashboardTitle.hpp
     DashboardWidget.hpp
     EditItemWidget.hpp
+    FileWatcher.hpp
     FilterWidget.hpp              
     InfoPanel.hpp
     LineEdit.hpp
+    LogProvider.hpp
     MainWindow.hpp
     MenuConfigDialog.hpp
     NodeFilterModel.hpp            

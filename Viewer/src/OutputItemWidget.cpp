@@ -98,7 +98,7 @@ void OutputItemWidget::reload(VInfo_ptr info)
 {
 	clearContents();
 
-	loaded_=true;
+	enabled_=true;
 	info_=info;
 
 	if(info_ && info_.get())

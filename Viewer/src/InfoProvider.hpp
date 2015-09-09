@@ -25,6 +25,13 @@ public:
 
 	void info(VInfo_ptr);
 	void command(VTask::Type);
+	virtual void clear();
+
+	bool enabled() const {return enabled_;}
+	void setEnabled(bool);
+	bool autoUpdate() const {return autoUpdate_;}
+	void setAutoUpdate(bool);
+	bool inAutoUpdate() const {return inAutoUpdate_;}
 
 	//From VInfoVisitor
 	void visit(VInfoServer*);
@@ -37,6 +44,7 @@ public:
 protected:
 	virtual void handleFileNotDefined(VReply *reply);
 	virtual bool handleFileMissing(const std::string& fileName,VReply *reply);
+	virtual void optionsChanged() {}
 
 	InfoPresenter* owner_;
 	VInfo_ptr info_;
@@ -46,6 +54,9 @@ protected:
 	std::string fileVarName_;
 	std::string fileNotDefinedText_;
 	std::string fileMissingText_;
+	bool enabled_;
+	bool autoUpdate_;
+	bool inAutoUpdate_;
 };
 
 class JobProvider : public InfoProvider

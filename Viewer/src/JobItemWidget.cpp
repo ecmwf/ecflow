@@ -35,7 +35,7 @@ void JobItemWidget::reload(VInfo_ptr info)
 {
 	clearContents();
 
-	loaded_=true;
+	enabled_=true;
     info_=info;
 
     //Info must be a node

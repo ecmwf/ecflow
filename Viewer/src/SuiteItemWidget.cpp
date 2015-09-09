@@ -47,7 +47,7 @@ void SuiteItemWidget::reload(VInfo_ptr info)
 {
 	clearContents();
 
-	loaded_=true;
+	enabled_=true;
 	info_=info;
 
 	if(info_.get() && info_->isServer() && info_->server())

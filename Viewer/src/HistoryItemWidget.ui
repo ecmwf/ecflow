@@ -17,16 +17,7 @@
    <property name="spacing">
     <number>1</number>
    </property>
-   <property name="leftMargin">
-    <number>0</number>
-   </property>
-   <property name="topMargin">
-    <number>0</number>
-   </property>
-   <property name="rightMargin">
-    <number>0</number>
-   </property>
-   <property name="bottomMargin">
+   <property name="margin">
     <number>0</number>
    </property>
    <item>
@@ -35,7 +26,7 @@
       <number>1</number>
      </property>
      <item>
-      <widget class="QLabel" name="fileLabel_">
+      <widget class="FileInfoLabel" name="fileLabel_">
        <property name="autoFillBackground">
         <bool>false</bool>
        </property>
@@ -150,7 +141,12 @@ background: rgb(242, 242, 242);  </string>
   <customwidget>
    <class>MessageLabel</class>
    <extends>QLabel</extends>
-   <header location="global">MessageLabel.hpp</header>
+   <header>MessageLabel.hpp</header>
+  </customwidget>
+  <customwidget>
+   <class>FileInfoLabel</class>
+   <extends>QLabel</extends>
+   <header location="global">FileInfoLabel.hpp</header>
   </customwidget>
  </customwidgets>
  <resources>

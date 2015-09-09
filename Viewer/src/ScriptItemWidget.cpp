@@ -42,7 +42,7 @@ void ScriptItemWidget::reload(VInfo_ptr info)
 {
     clearContents();
     
-    loaded_=true;
+    enabled_=true;
     info_=info;
 
     if(!info.get() || !info->isNode() || !info->node())

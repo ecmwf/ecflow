@@ -32,7 +32,7 @@ QWidget* TimeItemWidget::realWidget()
 
 void TimeItemWidget::reload(VInfo_ptr nodeInfo)
 {
-	loaded_=true;
+	enabled_=true;
 }
 
 void TimeItemWidget::clearContents()

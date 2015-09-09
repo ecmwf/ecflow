@@ -29,14 +29,16 @@ class InfoPanelItem : public VTaskObserver, public InfoPresenter, public NodeObs
 friend class InfoPanel;
 
 public:
-	InfoPanelItem() : loaded_(false), useAncestors_(false),
-	                  frozen_(false), detached_(false) {};
+	InfoPanelItem() : enabled_(false), useAncestors_(false),
+	                  frozen_(false), detached_(false), tryToKeepContents_(false) {};
 	virtual ~InfoPanelItem();
 
-	bool loaded() const {return loaded_;}
+
 	virtual void reload(VInfo_ptr info)=0;
 	virtual QWidget* realWidget()=0;
 	virtual void clearContents()=0;
+	bool enabled() const {return enabled_;}
+	virtual void setEnabled(bool);
 	void setFrozen(bool);
 	void setDetached(bool);
 
@@ -54,7 +56,7 @@ public:
 
 protected:
 	void adjust(VInfo_ptr);
-	void clear();
+	virtual void clear();
 	virtual void updateWidgetState()=0;
 
 	//Notifications about the server changes
@@ -66,10 +68,11 @@ protected:
 	//Notifications about the node changes
 	virtual void nodeChanged(const VNode*, const std::vector<ecf::Aspect::Type>&)=0;
 	
-	bool loaded_;
+	bool enabled_;
     bool useAncestors_;
     bool frozen_;
     bool detached_;
+    bool tryToKeepContents_;
 };
 
 class InfoPanelItemFactory

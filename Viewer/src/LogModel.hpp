@@ -19,9 +19,9 @@
 class LogModelLine
 {
 public:
-	LogModelLine(QString);
+	explicit LogModelLine(QString);
 
-	enum Type {NoType,MessageType,ErrorType,LogType};
+	enum Type {NoType,MessageType,ErrorType,LogType,WarningType,DebugType};
 
 	QString date_;
 	QString entry_;
@@ -47,8 +47,10 @@ public:
 
 	void setData(const std::string&);
 	void setData(const std::vector<std::string>&);
+	void appendData(const std::vector<std::string>&);
 	bool hasData() const;
     void clearData();
+    QModelIndex lastIndex() const;
 
 protected:
 	QList<LogModelLine> data_;

@@ -9,7 +9,7 @@
 
 #include "HistoryItemWidget.hpp"
 
-#include "InfoProvider.hpp"
+#include "LogProvider.hpp"
 #include "LogModel.hpp"
 #include "VReply.hpp"
 
@@ -19,16 +19,18 @@ HistoryItemWidget::HistoryItemWidget(QWidget *parent) : QWidget(parent)
 {
 	setupUi(this);
 
-	fileLabel_->hide();
 	searchLine_->setVisible(false);
 
-	infoProvider_=new HistoryProvider(this);
+	infoProvider_=new LogProvider(this);
+	infoProvider_->setAutoUpdate(true);
 
 	model_=new LogModel(this);
 
 	treeView_->setProperty("log","1");
 	treeView_->setModel(model_);
 	treeView_->setItemDelegate(new LogDelegate(this));
+
+	updateWidgetState();
 }
 
 QWidget* HistoryItemWidget::realWidget()
@@ -40,7 +42,7 @@ void HistoryItemWidget::reload(VInfo_ptr info)
 {
 	clearContents();
 
-	loaded_=true;
+	//active_=true;
     info_=info;
 
     if(info_ && info_.get())
@@ -52,22 +54,16 @@ void HistoryItemWidget::reload(VInfo_ptr info)
 void HistoryItemWidget::clearContents()
 {
     InfoPanelItem::clear();
-    model_->clearData();
+	model_->clearData();
 }
 
 void HistoryItemWidget::infoReady(VReply* reply)
 {
     model_->setData(reply->text());
+    adjustColumnSize();
+    fileLabel_->update(reply,"(Last 100 lines)");
 
-    //Adjust column size if it is the first run
-    if(firstRun && model_->hasData())
-    {
-    	firstRun=false;
-    	for(int i=0; i < model_->columnCount()-1; i++)
-    	{
-    			treeView_->resizeColumnToContents(i);
-    	}
-    }
+    updateWidgetState();
 }
 
 void HistoryItemWidget::infoProgress(VReply* reply)
@@ -78,6 +74,40 @@ void HistoryItemWidget::infoProgress(VReply* reply)
 void HistoryItemWidget::infoFailed(VReply* reply)
 {
     QString s=QString::fromStdString(reply->errorText());
+
+    updateWidgetState();
 }
+
+void HistoryItemWidget::infoAppended(VReply* reply)
+{
+    model_->appendData(reply->textVec());
+    adjustColumnSize();
+    treeView_->scrollTo(model_->lastIndex());
+
+    updateWidgetState();
+}
+
+void HistoryItemWidget::updateWidgetState()
+{
+	if(infoProvider_->autoUpdate() == frozen_)
+	{
+		infoProvider_->setAutoUpdate(!frozen_);
+	}
+	reloadTb_->setEnabled(!infoProvider_->autoUpdate() || !infoProvider_->inAutoUpdate());
+}
+
+//Adjust column size if it is the first run
+void HistoryItemWidget::adjustColumnSize()
+{
+	if(firstRun && model_->hasData())
+	{
+	   firstRun=false;
+	   for(int i=0; i < model_->columnCount()-1; i++)
+	   {
+		   treeView_->resizeColumnToContents(i);
+	   }
+	}
+}
+
 
 static InfoPanelItemMaker<HistoryItemWidget> maker1("history");

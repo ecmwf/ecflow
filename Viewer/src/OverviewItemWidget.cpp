@@ -52,7 +52,7 @@ void OverviewItemWidget::reload(VInfo_ptr info)
 		infoProvider_->info(info_);
 	}
 
-	loaded_=true;
+	enabled_=true;
 }
 
 void OverviewItemWidget::reload()

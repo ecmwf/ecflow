@@ -8,31 +8,29 @@
 //
 //============================================================================
 
-#ifndef FILEINFOLABEL_HPP_
-#define FILEINFOLABEL_HPP_
+#ifndef VIEWER_SRC_FILEWATCHER_HPP_
+#define VIEWER_SRC_FILEWATCHER_HPP_
 
-#include <QLabel>
+#include <QFileSystemWatcher>
+#include <QFile>
 
-#include "VDir.hpp"
-
-class VReply;
-
-class FileInfoLabel : public QLabel
+class FileWatcher : public QFileSystemWatcher
 {
+Q_OBJECT
+
 public:
-	explicit FileInfoLabel(QWidget* parent=0);
+	FileWatcher(const std::string& filePath,qint64 offset,QObject* parent);
 
-	void update(VReply*,QString str=QString());
+protected Q_SLOTS:
+	void slotChanged(const QString& path);
 
+Q_SIGNALS:
+	void linesAppended(QStringList);
+
+protected:
+	QFile file_;
+	qint64 offset_;
 };
 
-class DirInfoLabel : public FileInfoLabel
-{
-public:
-	explicit DirInfoLabel(QWidget* parent=0) : FileInfoLabel(parent) {}
 
-	void update(VDir_ptr);
-
-};
-
-#endif
+#endif /* VIEWER_SRC_FILEWATCHER_HPP_ */

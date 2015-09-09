@@ -40,7 +40,7 @@ FileInfoLabel::FileInfoLabel(QWidget* parent) : QLabel(parent)
 
 }
 
-void FileInfoLabel::update(VReply* reply)
+void FileInfoLabel::update(VReply* reply,QString extraText)
 {
 	if(!reply)
 		clear();
@@ -128,6 +128,11 @@ void FileInfoLabel::update(VReply* reply)
 	}
 
 	ttText=s;
+
+	if(!extraText.isEmpty())
+	{
+		labelText += " <i>" + extraText + "</i>";
+	}
 
 	setText(labelText);
 	setToolTip(ttText);

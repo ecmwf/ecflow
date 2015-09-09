@@ -41,65 +41,6 @@ void OutputProvider::visit(VInfoNode* info)
     std::string fileName=n->findVariable("ECF_JOBOUT",true);
 
     fetchFile(server,n,fileName,true);
-
-
-    /*
-    reply_->fileName(fileName);
-
-    //Joubout variable is not defined
-    if(fileName.empty())
-    {
-    	reply_->errorText("Variable ECF_JOBOUT is not defined!");
-    	owner_->infoFailed(reply_);
-    }
-
-    //Check if it is tryno 0
-    if(boost::algorithm::ends_with(fileName,".0"))
-    {
-    	reply_->errorText("No output to be expected when TRYNO is 0!");
-    	owner_->infoFailed(reply_);
-    	return;
-    }
-
-    //Try to use the logserver to fetch the file
-    else if(fetchFileViaLogServer(n,fileName))
-    {
-    	owner_->infoReady(reply_);
-    	return;
-    }
-
-    //We try to read the file directly from the disk
-    else if(info->server())
-    {
-    	//We try to read the file directly from the disk
-    	if(info->server()->readFromDisk())
-    	{
-    		//Get the fileName
-    		if(reply_->textFromFile(fileName))
-    		{
-    			reply_->fileReadMode(VReply::LocalReadMode);
-    			owner_->infoReady(reply_);
-    			return;
-    		}
-    	}
-    	else
-    	{
-    		reply_->fileReadMode(VReply::ServerReadMode);
-
-    		//Define a task for getting the info from the server.
-    		task_=VTask::create(taskType_,info->node(),this);
-
-    		//Run the task in the server. When it finish taskFinished() is called. The text returned
-    		//in the reply will be prepended to the string we generated above.
-    		info->server()->run(task_);
-    		return;
-    	}
-    }
-    else
-    {
-    	reply_->errorText("No server found!!");
-    	owner_->infoFailed(reply_);
-    }*/
 }
 
 //Get a file

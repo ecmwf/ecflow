@@ -279,7 +279,8 @@ void InfoPanel::adjustTabs(VInfo_ptr info)
 	{
 		if(InfoPanelItemHandler* d=findHandler(tab_->widget(i)))
 		{
-			//Clear the contents
+			//Disable and force to clear the contents
+			d->item()->setEnabled(false);
 			d->item()->clearContents();
 
 			if(d->match(ids))
@@ -335,6 +336,7 @@ void InfoPanel::adjustTabs(VInfo_ptr info)
 	//We reload the current tab
 	if(currentItem)
 	{
+		currentItem->setEnabled(true);
 		currentItem->reload(info);
 	}
 }
@@ -405,10 +407,24 @@ void InfoPanel::slotCurrentWidgetChanged(int idx)
 	if(!info_.get())
 		return;
 
-	if(InfoPanelItem* item=findItem(tab_->widget(idx)))
+	if(InfoPanelItem* current=findItem(tab_->widget(idx)))
 	{
-		if(!item->loaded())
-			item->reload(info_);
+		//Enable the current item
+		current->setEnabled(true);
+
+		//Reload the item if it is needed
+		if(!current->info())
+			current->reload(info_);
+
+		//Disable the others
+		for(int i=0; i < tab_->count(); i++)
+		{
+			if(InfoPanelItemHandler* d=findHandler(tab_->widget(i)))
+			{
+				if(d->item() != current)
+					d->item()->setEnabled(false);
+			}
+		}
 	}
 }
 

@@ -34,6 +34,14 @@ LogModelLine::LogModelLine(QString s) : type_(NoType)
 	{
 		type_=ErrorType;
 	}
+	else if(t.contains("WAR:"))
+	{
+		type_=WarningType;
+	}
+	else if(t.contains("DBG:"))
+	{
+		type_=DebugType;
+	}
 }
 
 
@@ -42,6 +50,7 @@ LogModel::LogModel(QObject *parent) :
 {
 	IconProvider::add(":/viewer/log_error.svg","log_error");
 	IconProvider::add(":/viewer/log_info.svg","log_info");
+	IconProvider::add(":/viewer/log_warning.svg","log_warning");
 }
 
 LogModel::~LogModel()
@@ -80,6 +89,37 @@ void LogModel::setData(const std::vector<std::string>& data)
 	}
 	endResetModel();
 }
+
+void LogModel::appendData(const std::vector<std::string>& data)
+{
+	int num=0;
+
+	for(std::vector<std::string>::const_iterator it=data.begin(); it != data.end(); it++)
+	{
+		QString s=QString::fromStdString(*it);
+		if(!s.simplified().isEmpty())
+		{
+			num++;
+		}
+	}
+
+	if(num >0)
+	{
+		beginInsertRows(QModelIndex(),rowCount(),rowCount()+num-1);
+
+		for(std::vector<std::string>::const_iterator it=data.begin(); it != data.end(); it++)
+		{
+			QString s=QString::fromStdString(*it);
+			if(!s.simplified().isEmpty())
+			{
+				data_ << LogModelLine(s);
+			}
+		}
+
+		endInsertRows();
+	}
+}
+
 
 
 void LogModel::clearData()
@@ -143,6 +183,10 @@ QVariant LogModel::data( const QModelIndex& index, int role ) const
 					return "LOG";
 				case LogModelLine::ErrorType:
 					return "ERR";
+				case LogModelLine::WarningType:
+					return "WAR";
+				case LogModelLine::DebugType:
+					return "DBG";
 				default:
 					return QVariant();
 				}
@@ -171,6 +215,8 @@ QVariant LogModel::data( const QModelIndex& index, int role ) const
 					return IconProvider::pixmap("log_info",12);
 				case LogModelLine::ErrorType:
 					return IconProvider::pixmap("log_error",12);
+				case LogModelLine::WarningType:
+					return IconProvider::pixmap("log_warning",12);
 				default:
 					return QVariant();
 			}
@@ -248,6 +294,11 @@ QModelIndex LogModel::index( int row, int column, const QModelIndex & parent ) c
 QModelIndex LogModel::parent(const QModelIndex &child) const
 {
 	return QModelIndex();
+}
+
+QModelIndex LogModel::lastIndex() const
+{
+	return index(rowCount()-1,0);
 }
 
 //========================================================

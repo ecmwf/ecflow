@@ -16,7 +16,10 @@
 
 InfoProvider::InfoProvider(InfoPresenter* owner,VTask::Type taskType) :
 	owner_(owner),
-	taskType_(taskType)
+	taskType_(taskType),
+	enabled_(false),
+	autoUpdate_(false),
+	inAutoUpdate_(false)
 {
 	reply_=new VReply();
 }
@@ -24,8 +27,16 @@ InfoProvider::InfoProvider(InfoPresenter* owner,VTask::Type taskType) :
 InfoProvider::~InfoProvider()
 {
 	delete reply_;
+	clear();
+}
+
+void InfoProvider::clear()
+{
 	if(task_)
 		task_->status(VTask::CANCELLED);
+
+	reply_->reset();
+	info_.reset();
 }
 
 void InfoProvider::info(VInfo_ptr info)
@@ -160,6 +171,19 @@ void  InfoProvider::taskChanged(VTask_ptr task)
             break;
     }
 }
+
+void InfoProvider::setEnabled(bool b)
+{
+	enabled_=b;
+	optionsChanged();
+}
+
+void InfoProvider::setAutoUpdate(bool b)
+{
+	autoUpdate_=b;
+	optionsChanged();
+}
+
 
 JobProvider::JobProvider(InfoPresenter* owner) :
 		InfoProvider(owner,VTask::JobTask)

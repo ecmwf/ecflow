@@ -334,7 +334,7 @@ void VariableItemWidget::reload(VInfo_ptr info)
 	varView->expandAll();
 	varView->resizeColumnToContents(0);
 	//varView->reload(info);
-	loaded_=true;
+	enabled_=true;
 }
 
 void VariableItemWidget::clearContents()

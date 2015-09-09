@@ -32,7 +32,7 @@ void TriggerItemWidget::reload(VInfo_ptr nodeInfo)
 {
 	clearContents();
 
-	loaded_=true;
+	enabled_=true;
 
 	if(nodeInfo.get() != 0 && nodeInfo->isNode())
 	{

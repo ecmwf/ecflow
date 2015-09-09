@@ -9,6 +9,7 @@
 
 #include "InfoPanelItem.hpp"
 
+#include "InfoProvider.hpp"
 #include "ServerHandler.hpp"
 #include "VNode.hpp"
 
@@ -101,8 +102,45 @@ void InfoPanelItem::clear()
 
 	info_.reset();
 
-	loaded_=false;
+	if(infoProvider_)
+	{
+		infoProvider_->clear();
+	}
 }
+
+//This function is called when an info panel item (i.e. a tab) becomes visible ot the infopanel
+// is being reset. The info_ might be unset.
+//properly set.
+void InfoPanelItem::setEnabled(bool enabled)
+{
+	enabled_=enabled;
+
+	if(enabled_)
+	{
+		//Enable the infoProvider
+		if(infoProvider_)
+			infoProvider_->setEnabled(true);
+
+		//If we do not want to keep the contents reload the item
+		if(!frozen_ && !tryToKeepContents_)
+			reload(info_);
+
+	}
+	else
+	{
+		//Disable the info provider
+		if(infoProvider_)
+				infoProvider_->setEnabled(false);
+
+		//If we do not want to keep the contents clear the item
+		if(!frozen_ && !tryToKeepContents_)
+			clearContents();
+
+	}
+
+	updateWidgetState();
+}
+
 
 void InfoPanelItem::setFrozen(bool b)
 {
@@ -113,6 +151,7 @@ void InfoPanelItem::setFrozen(bool b)
 void InfoPanelItem::setDetached(bool b)
 {
 	detached_=b;
+	updateWidgetState();
 }
 
 //From NodeObserver
@@ -121,7 +160,7 @@ void InfoPanelItem::notifyBeginNodeChange(const VNode* node, const std::vector<e
 	if(frozen_)
 		return;
 
-	if(!loaded_)
+	if(!enabled_)
         return;
     
     //Check if there is data in info

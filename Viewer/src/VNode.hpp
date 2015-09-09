@@ -90,7 +90,7 @@ public:
     virtual void variables(std::vector<Variable>& vars);
     virtual void genVariables(std::vector<Variable>& genVars);
 
-    std::string genVariable(const std::string& key) const;
+    virtual std::string genVariable(const std::string& key) const;
     virtual std::string findVariable(const std::string& key,bool substitute=false) const;
 
     //Find a variable in the given node or in its ancestors. Both the variables and the
@@ -185,6 +185,7 @@ public:
 	int genVariablesNum() const;
 	void variables(std::vector<Variable>& vars);
 	void genVariables(std::vector<Variable>& genVars);
+	std::string genVariable(const std::string& key) const;
 
 	//Find a variable in the Defs. Both the user_variables and the
 	//server variables are searched.
