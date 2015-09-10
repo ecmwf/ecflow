@@ -45,7 +45,7 @@ public:
 	void reload();
 	void rerender();
     void populateDialog() {};
-    QList<QAction*> dockTitleActions() {return infoPanelActions_;}
+    QList<QAction*> dockTitleActions() {return dockActions_;}
 
 Q_SIGNALS:
 	void selectionChanged(VInfo_ptr);
@@ -72,6 +72,7 @@ protected:
 
 private:
 	void createActions();
+	QList<QAction*> dockActions_;
 	QList<QAction*> infoPanelActions_;
 };
 

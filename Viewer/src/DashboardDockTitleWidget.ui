@@ -110,12 +110,6 @@
    </item>
    <item>
     <widget class="QToolButton" name="optionsTb_">
-     <property name="maximumSize">
-      <size>
-       <width>16</width>
-       <height>16</height>
-      </size>
-     </property>
      <property name="toolTip">
       <string>Options</string>
      </property>
@@ -139,12 +133,6 @@
    </item>
    <item>
     <widget class="QToolButton" name="floatTb_">
-     <property name="maximumSize">
-      <size>
-       <width>16</width>
-       <height>16</height>
-      </size>
-     </property>
      <property name="toolTip">
       <string>Float</string>
      </property>

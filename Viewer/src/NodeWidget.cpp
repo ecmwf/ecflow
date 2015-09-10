@@ -17,6 +17,7 @@
 #include "VModelData.hpp"
 
 #include <QAction>
+#include <QMenu>
 
 NodeWidget::NodeWidget(QWidget* parent) : DashboardWidget(parent),
    model_(0),
@@ -87,13 +88,22 @@ bool NodeWidget::active() const
 
 void NodeWidget::createActions()
 {
-    for(std::vector<InfoPanelDef*>::const_iterator it=InfoPanelHandler::instance()->panels().begin();
+	QAction* infoAc=new QAction(" ",this);
+	QPixmap pix(":/viewer/dock_info.svg");
+	infoAc->setIcon(QIcon(pix));
+	infoAc->setToolTip(tr("Start up information panel as dialog"));
+	dockActions_ << infoAc;
+
+	QMenu *menu=new QMenu(this);
+
+	for(std::vector<InfoPanelDef*>::const_iterator it=InfoPanelHandler::instance()->panels().begin();
     	it != InfoPanelHandler::instance()->panels().end(); it++)
     {
     	if((*it)->show().find("toolbar") != std::string::npos)
     	{
     		QAction *ac=new QAction(QString::fromStdString((*it)->label()),this);
-            QPixmap pix(":/viewer/" + QString::fromStdString((*it)->dockIcon()));
+            //QPixmap pix(":/viewer/" + QString::fromStdString((*it)->dockIcon()));
+    		QPixmap pix(":/viewer/" + QString::fromStdString((*it)->icon()));
     		ac->setIcon(QIcon(pix));       
             ac->setData(QString::fromStdString((*it)->name()));
     		ac->setEnabled(false);
@@ -102,8 +112,12 @@ void NodeWidget::createActions()
                    this,SLOT(slotInfoPanelAction()));
 
     		infoPanelActions_ << ac;
+
+    		menu->addAction(ac);
     	}
     }
+
+	infoAc->setMenu(menu);
 }
 
 void NodeWidget::slotInfoPanelAction()
@@ -135,9 +149,6 @@ void NodeWidget::updateActionState(VInfo_ptr info)
         }
     }
 }
-
-
-
 
 
 

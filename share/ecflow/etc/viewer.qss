@@ -184,13 +184,13 @@ QWidget[dockTitle="11"]  {
 QToolButton[docktitle="1"] {
     border-radius: 0px;
     padding: 0px;
-    icon-size:  16px;
+    icon-size:  18px;
 }
 
 QToolButton[docktitle="1"]:hover {
     border-radius: 0px;
     padding: 0px;
-    icon-size:  16px;
+    icon-size:  18px;
     background: rgb(140,140,140);
 }
 
