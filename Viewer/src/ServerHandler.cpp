@@ -105,17 +105,11 @@ ServerHandler::ServerHandler(const std::string& name,const std::string& host, co
 
 	//The ServerComThread is observing the actual server and its nodes. When there is a change it
 	//emits a signal to notify the ServerHandler about it.
-	connect(comThread,SIGNAL(nodeChanged(const Node*, const std::vector<ecf::Aspect::Type>&)),
-					 this,SLOT(slotNodeChanged(const Node*, const std::vector<ecf::Aspect::Type>&)));
+	connect(comThread,SIGNAL(nodeChanged(const Node*, std::vector<ecf::Aspect::Type>)),
+					 this,SLOT(slotNodeChanged(const Node*, std::vector<ecf::Aspect::Type>)));
 
-	connect(comThread,SIGNAL(defsChanged(const std::vector<ecf::Aspect::Type>&)),
-				     this,SLOT(slotDefsChanged(const std::vector<ecf::Aspect::Type>&)));
-
-	connect(comThread,SIGNAL(nodeDeleted(const std::string&)),
-					 this,SLOT(slotNodeDeleted(const std::string&)));
-
-	connect(comThread,SIGNAL(defsDeleted()),
-					 this,SLOT(slotDefsDeleted()));
+	connect(comThread,SIGNAL(defsChanged(std::vector<ecf::Aspect::Type>)),
+				     this,SLOT(slotDefsChanged(std::vector<ecf::Aspect::Type>)));
 
 	connect(comThread,SIGNAL(rescanNeed()),
 					 this,SLOT(slotRescanNeed()));
@@ -606,7 +600,7 @@ std::string ServerHandler::resolveServerCommand(const std::string &name)
 //======================================================================================
 
 //This slot is called when a node changes.
-void ServerHandler::slotNodeChanged(const Node* nc, const std::vector<ecf::Aspect::Type>& aspect)
+void ServerHandler::slotNodeChanged(const Node* nc,std::vector<ecf::Aspect::Type> aspect)
 {
 	UserMessage::message(UserMessage::DBG, false, std::string("ServerHandler::slotNodeChanged - node: ") + nc->name());
 	for(std::vector<ecf::Aspect::Type>::const_iterator it=aspect.begin(); it != aspect.end(); ++it)
@@ -649,13 +643,6 @@ void ServerHandler::slotNodeChanged(const Node* nc, const std::vector<ecf::Aspec
 	}
 }
 
-//When this slot is called we must be in the middle of an refresh.
-void ServerHandler::slotNodeDeleted(const std::string& fullPath)
-{
-	UserMessage::message(UserMessage::DBG, false, std::string("ServerHandler::slotNodeDeleted"));
-
-}
-
 void ServerHandler::addNodeObserver(NodeObserver *obs)
 {
 	std::vector<NodeObserver*>::iterator it=std::find(nodeObservers_.begin(),nodeObservers_.end(),obs);
@@ -692,23 +679,10 @@ void ServerHandler::broadcast(NoMethodV1 proc,const VNode* node,const std::vecto
 //---------------------------------------------------------------------------
 
 //This slot is called when the Defs change.
-void ServerHandler::slotDefsChanged(const std::vector<ecf::Aspect::Type>& a)
+void ServerHandler::slotDefsChanged(std::vector<ecf::Aspect::Type> a)
 {
 	for(std::vector<ServerObserver*>::const_iterator it=serverObservers_.begin(); it != serverObservers_.end(); ++it)
 		(*it)->notifyDefsChanged(this,a);
-}
-
-//When this slot is called we must be in the middle of an refresh.
-void ServerHandler::slotDefsDeleted()
-{
-	UserMessage::message(UserMessage::DBG, false, std::string("ServerHandler::slotDefsDeleted"));
-
-	//There are significant changes. We will suspend the queue until the update finishes.
-	comQueue_->suspend();
-
-	//The  safest is to clear the tree. When the refresh is finished we will
-	//rescan the tree.
-	clearTree();
 }
 
 void ServerHandler::addServerObserver(ServerObserver *obs)

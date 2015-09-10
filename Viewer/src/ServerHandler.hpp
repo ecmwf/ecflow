@@ -135,10 +135,8 @@ protected:
 private Q_SLOTS:
 	void errorMessage(std::string message); // invoked when an error message is received
 	void refreshServerInfo();
-	void slotNodeChanged(const Node* n, const std::vector<ecf::Aspect::Type>& a);
-	void slotDefsChanged(const std::vector<ecf::Aspect::Type>& a);
-	void slotNodeDeleted(const std::string& fullPath);
-	void slotDefsDeleted();
+	void slotNodeChanged(const Node* n, std::vector<ecf::Aspect::Type>);
+	void slotDefsChanged(std::vector<ecf::Aspect::Type>);
 	void slotRescanNeed();
 
 private:

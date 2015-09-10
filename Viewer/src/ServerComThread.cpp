@@ -392,9 +392,13 @@ void ServerComThread::updateRegSuites()
 
 void ServerComThread::update(const Node* node, const std::vector<ecf::Aspect::Type>& types)
 {
+	std::vector<ecf::Aspect::Type> typesCopy=types;
+
 	UserMessage::message(UserMessage::DBG, false, std::string("ServerComThread::update - node: ") + node->name());
 	for(std::vector<ecf::Aspect::Type>::const_iterator it=types.begin(); it != types.end(); ++it)
+	{
 		UserMessage::message(UserMessage::DBG, false, std::string(" aspect: ") + boost::lexical_cast<std::string>(*it));
+	}
 
     //If anything was requested to be deleted in the thread we do not go further
     //because it will trigger a full rescan in ServerHandler!
@@ -420,6 +424,8 @@ void ServerComThread::update(const Node* node, const std::vector<ecf::Aspect::Ty
 
 void ServerComThread::update(const Defs* dc, const std::vector<ecf::Aspect::Type>& types)
 {
+	std::vector<ecf::Aspect::Type> typesCopy=types;
+
 	UserMessage::message(UserMessage::DBG, false, std::string("ServerComThread::update - defs: "));
 	for(std::vector<ecf::Aspect::Type>::const_iterator it=types.begin(); it != types.end(); ++it)
 			UserMessage::message(UserMessage::DBG, false, std::string(" aspect: ") + boost::lexical_cast<std::string>(*it));
@@ -434,7 +440,7 @@ void ServerComThread::update(const Defs* dc, const std::vector<ecf::Aspect::Type
 
     //This will notify SeverHandler
 	UserMessage::message(UserMessage::DBG, false, std::string(" -->  defsChanged() emitted"));
-	Q_EMIT defsChanged(types);
+	Q_EMIT defsChanged(typesCopy);
 }
 
 void ServerComThread::update_delete(const Node* nc)

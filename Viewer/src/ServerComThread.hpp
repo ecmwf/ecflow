@@ -49,10 +49,8 @@ public:
 	void update_delete(const Defs*);
 
 Q_SIGNALS:
-	void nodeChanged(const Node*, const std::vector<ecf::Aspect::Type>&);
-	void defsChanged(const std::vector<ecf::Aspect::Type>&);
-	void nodeDeleted(const std::string&);
-	void defsDeleted();
+	void nodeChanged(const Node*, std::vector<ecf::Aspect::Type>);
+	void defsChanged(std::vector<ecf::Aspect::Type>);
 	void rescanNeed();
 	void failed(std::string message);
 	void suiteListChanged(const std::vector<std::string>&,const std::vector<std::string>&);
