@@ -67,7 +67,7 @@ QToolButton#pathMenuTb:hover{
 
 QLabel[previewLabel="1"] {
     border-radius: 4px;
-    background: rgb(231,210,139);
+    background: rgb(255,180,180);
     border: 2px solid rgb(210,210,210);
 }
 

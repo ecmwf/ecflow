@@ -78,7 +78,7 @@ MainWindow::MainWindow(QStringList idLst,QWidget *parent) : QMainWindow(parent)
     			this,SLOT(slotSelectionChanged(VInfo_ptr)));
 
     //Add temporary preview label
-    QLabel *label=new QLabel(" This is a preview version! ",this);
+    QLabel *label=new QLabel(" This is a preview version and has not been verified for operational use! ",this);
     label->setAutoFillBackground(true);
     label->setProperty("previewLabel","1");
 
