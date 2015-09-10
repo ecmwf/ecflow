@@ -185,6 +185,14 @@ QToolButton[docktitle="1"] {
     border-radius: 0px;
     padding: 0px;
     icon-size:  18px;
+    background: transparent;
+}
+
+QToolButton[docktitle="1"]:!focus {
+    border-radius: 0px;
+    padding: 0px;
+    icon-size:  18px;
+    background: transparent;
 }
 
 QToolButton[docktitle="1"]:hover {

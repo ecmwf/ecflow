@@ -109,16 +109,16 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="18.75"
-     inkscape:cx="7.6298067"
-     inkscape:cy="15.420625"
+     inkscape:cx="23.252936"
+     inkscape:cy="15.51908"
      inkscape:document-units="px"
      inkscape:current-layer="layer2"
      showgrid="true"
      inkscape:snap-grids="false"
      inkscape:window-width="1408"
      inkscape:window-height="1093"
-     inkscape:window-x="335"
-     inkscape:window-y="19"
+     inkscape:window-x="370"
+     inkscape:window-y="39"
      inkscape:window-maximized="0"
      showguides="true"
      inkscape:guide-bbox="true">
@@ -193,37 +193,27 @@
          y="15.146667" /></text>
     <text
        xml:space="preserve"
-       style="font-size:18px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;fill:#ff2a2a;fill-opacity:1;stroke:none;font-family:DejaVu Serif;-inkscape-font-specification:DejaVu Serif"
-       x="1.2848665"
-       y="21.194996"
+       style="font-size:31.33018303px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;fill:#003380;fill-opacity:1;stroke:none;font-family:Monospace;-inkscape-font-specification:Monospace"
+       x="-0.15020625"
+       y="27.353823"
        id="text3791"
-       transform="scale(0.96004164,1.0416215)"><tspan
+       transform="scale(1.0238296,0.97672504)"><tspan
          sodipodi:role="line"
          id="tspan3793"
-         x="1.2848665"
-         y="21.194996"
-         style="font-size:18px;font-style:normal;font-variant:normal;font-weight:500;font-stretch:normal;fill:#000000;font-family:Century Schoolbook L;-inkscape-font-specification:Century Schoolbook L Medium">A</tspan></text>
+         x="-0.15020625"
+         y="27.353823"
+         style="font-size:31.33018303px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;fill:#003380;font-family:Monospace;-inkscape-font-specification:Monospace">V<tspan
+   style="font-size:16px"
+   id="tspan3781" /></tspan></text>
     <path
-       style="fill:none;stroke:#000000;stroke-width:1.5;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
-       d="m 14.924018,13.013333 c 6.471965,0 6.471965,0 6.471965,0"
+       style="fill:none;stroke:#003380;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+       d="m 20.20402,18.826665 c 8.371964,0 8.371964,0 8.371964,0"
        id="path3008"
        inkscape:connector-curvature="0" />
     <path
        inkscape:connector-curvature="0"
        id="path3010"
-       d="m 14.977352,17.333334 c 6.471965,0 6.471965,0 6.471965,0"
-       style="fill:none;stroke:#000000;stroke-width:1.5;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" />
-    <text
-       xml:space="preserve"
-       style="font-size:18px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;fill:#ff2a2a;fill-opacity:1;stroke:none;display:inline;font-family:DejaVu Serif;-inkscape-font-specification:DejaVu Serif"
-       x="23.495291"
-       y="21.319038"
-       id="text3791-8"
-       transform="scale(0.96004163,1.0416215)"><tspan
-         sodipodi:role="line"
-         id="tspan3793-7"
-         x="23.495291"
-         y="21.319038"
-         style="font-size:18px;font-style:normal;font-variant:normal;font-weight:500;font-stretch:normal;fill:#000000;font-family:Century Schoolbook L;-inkscape-font-specification:Century Schoolbook L Medium">1</tspan></text>
+       d="m 20.330688,13.386668 c 8.371964,0 8.371964,0 8.371964,0"
+       style="fill:#003380;stroke:#003380;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" />
   </g>
 </svg>

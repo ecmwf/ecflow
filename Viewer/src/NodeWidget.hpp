@@ -73,6 +73,7 @@ protected:
 private:
 	void createActions();
 	QList<QAction*> dockActions_;
+	QMap<QString,QAction*> dockActionMap_;
 	QList<QAction*> infoPanelActions_;
 };
 

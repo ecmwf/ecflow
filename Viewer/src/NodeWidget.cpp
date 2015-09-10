@@ -93,15 +93,17 @@ void NodeWidget::createActions()
 	infoAc->setIcon(QIcon(pix));
 	infoAc->setToolTip(tr("Start up information panel as dialog"));
 	dockActions_ << infoAc;
+	dockActionMap_["info"]=infoAc;
 
 	QMenu *menu=new QMenu(this);
+	infoAc->setMenu(menu);
 
 	for(std::vector<InfoPanelDef*>::const_iterator it=InfoPanelHandler::instance()->panels().begin();
     	it != InfoPanelHandler::instance()->panels().end(); it++)
     {
     	if((*it)->show().find("toolbar") != std::string::npos)
     	{
-    		QAction *ac=new QAction(QString::fromStdString((*it)->label()),this);
+    		QAction *ac=new QAction(QString::fromStdString((*it)->label()) + "...",this);
             //QPixmap pix(":/viewer/" + QString::fromStdString((*it)->dockIcon()));
     		QPixmap pix(":/viewer/" + QString::fromStdString((*it)->icon()));
     		ac->setIcon(QIcon(pix));       
@@ -112,12 +114,8 @@ void NodeWidget::createActions()
                    this,SLOT(slotInfoPanelAction()));
 
     		infoPanelActions_ << ac;
-
-    		menu->addAction(ac);
     	}
     }
-
-	infoAc->setMenu(menu);
 }
 
 void NodeWidget::slotInfoPanelAction()
@@ -133,20 +131,29 @@ void NodeWidget::updateActionState(VInfo_ptr info)
     std::vector<InfoPanelDef*> ids;
     InfoPanelHandler::instance()->visible(info,ids);
 
+    QAction *infoAc=dockActionMap_["info"];
+    assert(infoAc);
+
+    QMenu* menu=infoAc->menu();
+    assert(menu);
+
+    menu->clear();
+
     Q_FOREACH(QAction* ac,infoPanelActions_)
     {
-        ac->setEnabled(false);
+    	ac->setEnabled(false);
 
-        std::string name=ac->data().toString().toStdString();
+    	std::string name=ac->data().toString().toStdString();
 
-        for(std::vector<InfoPanelDef*>::const_iterator it=ids.begin(); it != ids.end(); it++)
-        {
-             if((*it)->name() == name)
-             {
-                ac->setEnabled(true);
-                break;
-             }
-        }
+    	for(std::vector<InfoPanelDef*>::const_iterator it=ids.begin(); it != ids.end(); it++)
+    	{
+    		if((*it)->name() == name)
+    		{
+    			ac->setEnabled(true);
+    			menu->addAction(ac);
+    			break;
+    		}
+    	}
     }
 }
 
