@@ -418,8 +418,6 @@ int VVarAttribute::num(const VNode *vnode)
 
 bool VVarAttribute::getData(VNode *vnode,int row,int& size,QStringList& data)
 {
-	std::string name,val;
-
 	if(vnode->isServer())
 	{
 		std::vector<Variable> v;
