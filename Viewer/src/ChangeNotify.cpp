@@ -17,9 +17,9 @@
 #include "VNodeList.hpp"
 #include "VProperty.hpp"
 
-#ifdef ECFLOW_QT5
-#include <QSoundEffect>
-#endif
+//#ifdef ECFLOW_QT5
+//#include <QSoundEffect>
+//#endif
 
 #include <QDebug>
 
@@ -57,13 +57,13 @@ void ChangeNotify::add(VNode *node)
 
 	dialog()->show();
 
-#ifdef ECFLOW_QT5
-	QSoundEffect effect(dialog_);
-	effect.setSource(QUrl::fromLocalFile("file:/usr/share/xemacs/xemacs-packages/etc/sounds/boing.wav"));
-	effect.setLoopCount(1);
-	effect.setVolume(0.25f);
-	effect.play();
-#endif
+//#ifdef ECFLOW_QT5
+//	QSoundEffect effect(dialog_);
+//	effect.setSource(QUrl::fromLocalFile("file:/usr/share/xemacs/xemacs-packages/etc/sounds/boing.wav"));
+//	effect.setLoopCount(1);
+//	effect.setVolume(0.25f);
+//	effect.play();
+//#endif
 
 }
 
