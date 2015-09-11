@@ -23,7 +23,8 @@ InfoPanelHandler* InfoPanelHandler::instance_=0;
 InfoPanelDef::InfoPanelDef(const std::string& name) :
 	name_(name),
 	visibleCondition_(0),
-	enabledCondition_(0)
+	enabledCondition_(0),
+	hidden_(false)
 {
 
 }
@@ -88,6 +89,11 @@ void InfoPanelHandler::init(const std::string &configFile)
                 std::string enabled  = panelPt.get("enabled_for", "");
                 std::string visible  = panelPt.get("visible_for", "");
 
+                if(panelPt.get("hidden", "") == "1")
+                {
+                	def->setHidden(true);
+                }
+
                 BaseNodeCondition *enabledCond = NodeExpressionParser::parseWholeExpression(enabled);
                 if (enabledCond == NULL)
                 {
@@ -116,7 +122,7 @@ void InfoPanelHandler::visible(VInfo_ptr info,std::vector<InfoPanelDef*>& lst)
 {
 	for(std::vector<InfoPanelDef*>::const_iterator it=panels_.begin(); it != panels_.end(); ++it)
 	{
-          if((*it)->visibleCondition()->execute(info))
+          if(!(*it)->hidden() && (*it)->visibleCondition()->execute(info))
         	 lst.push_back((*it));
     }
 }

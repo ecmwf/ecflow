@@ -17,16 +17,7 @@
    <property name="sizeConstraint">
     <enum>QLayout::SetMinimumSize</enum>
    </property>
-   <property name="leftMargin">
-    <number>0</number>
-   </property>
-   <property name="topMargin">
-    <number>0</number>
-   </property>
-   <property name="rightMargin">
-    <number>0</number>
-   </property>
-   <property name="bottomMargin">
+   <property name="margin">
     <number>0</number>
    </property>
    <item>
@@ -123,6 +114,9 @@
      </property>
      <item>
       <widget class="QLineEdit" name="pathLine_">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
        <property name="placeholderText">
         <string>Node</string>
        </property>

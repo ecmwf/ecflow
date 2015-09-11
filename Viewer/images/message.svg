@@ -21,11 +21,11 @@
     <linearGradient
        id="linearGradient3800">
       <stop
-         style="stop-color:#fffff1;stop-opacity:1;"
+         style="stop-color:#f1fdff;stop-opacity:1;"
          offset="0"
          id="stop3802" />
       <stop
-         style="stop-color:#f6eb4c;stop-opacity:1;"
+         style="stop-color:#c4d3d9;stop-opacity:1;"
          offset="1"
          id="stop3804" />
     </linearGradient>
@@ -34,11 +34,11 @@
       <stop
          id="stop3788"
          offset="0"
-         style="stop-color:#f1f4a4;stop-opacity:1;" />
+         style="stop-color:#ffffff;stop-opacity:1;" />
       <stop
          id="stop3790"
          offset="1"
-         style="stop-color:#f6eb4c;stop-opacity:1;" />
+         style="stop-color:#b2d0de;stop-opacity:1;" />
     </linearGradient>
     <linearGradient
        id="linearGradient4010">
@@ -203,10 +203,10 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="18.75"
-     inkscape:cx="12.133333"
+     inkscape:cx="3.893333"
      inkscape:cy="15.38"
      inkscape:document-units="px"
-     inkscape:current-layer="layer2"
+     inkscape:current-layer="layer3"
      showgrid="true"
      inkscape:snap-grids="false"
      inkscape:window-width="1408"
@@ -230,7 +230,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
         <cc:license
            rdf:resource="Apache License 2.0" />
         <dc:creator>
@@ -260,10 +260,10 @@
      style="display:inline">
     <path
        style="fill:url(#linearGradient3992);fill-opacity:1;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-       d="m 3.8933333,29.253333 0,-25.9999997 23.9999997,0 0,16.9999997 L 19.386666,29.36 c -4.666667,0 -15.4933327,-0.106667 -15.4933327,-0.106667 z"
+       d="m 3.8933333,29.253333 0,-25.9999997 23.9999997,0 0,16.9999997 -4.400074,4.710424 -0.239444,0.256332 L 19.386666,29.36 c -4.666667,0 -15.4933327,-0.106667 -15.4933327,-0.106667 z"
        id="path3195"
        inkscape:connector-curvature="0"
-       sodipodi:nodetypes="cccccc" />
+       sodipodi:nodetypes="cccccccc" />
   </g>
   <g
      inkscape:groupmode="layer"
@@ -276,6 +276,16 @@
        id="path3016"
        inkscape:connector-curvature="0"
        sodipodi:nodetypes="cccc" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       d="M 8.2666222,9.1665012 23.62671,9.0734989"
+       id="path3022"
+       inkscape:connector-curvature="0" />
+    <path
+       inkscape:connector-curvature="0"
+       id="path3026"
+       d="m 8.2132889,14.393168 15.3600881,-0.093"
+       style="fill:none;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
   </g>
   <g
      inkscape:groupmode="layer"
