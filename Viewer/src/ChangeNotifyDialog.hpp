@@ -30,6 +30,7 @@ public:
 	void init(VProperty*,ChangeNotifyModel*);
 	void addTab(const std::string id,VProperty* prop, ChangeNotifyModel* model);
 	void setCurrentTab(const std::string&);
+	void setEnabledTab(const std::string& id,bool b);
 
 public Q_SLOTS:
 	void on_closePb__clicked(bool b);

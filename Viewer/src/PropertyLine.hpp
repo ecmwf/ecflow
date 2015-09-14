@@ -73,6 +73,7 @@ public:
 	virtual QWidget* item()=0;
 	virtual QWidget* button()=0;
 	QToolButton* defaultTb() {return defaultTb_;};
+	QToolButton* masterTb() {return masterTb_;};
 
 	virtual void reset(QVariant)=0;
 	virtual bool applyChange()=0;
@@ -80,6 +81,7 @@ public:
 
 protected Q_SLOTS:
 	void slotResetToDefault(bool);
+	void slotMaster(bool b);
 	void checkState();
 
 protected:
@@ -88,6 +90,7 @@ protected:
 	QLabel* label_;
 	QLabel* suffixLabel_;
 	QToolButton* defaultTb_;
+	QToolButton* masterTb_;
 };
 
 //-------------------------------------

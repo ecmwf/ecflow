@@ -52,13 +52,14 @@ public:
 	explicit ChangeNotifyWidget(QWidget *parent=0);
 	~ChangeNotifyWidget();
 
-	//static void changed(QString id);
-	//static void add(const std::string& id,VProperty* prop);
+	static void setEnabled(const std::string& id,bool b);
 
 protected:
 	void addTb(ChangeNotify*);
+	ChangeNotifyButton* findButton(const std::string& id);
 
 	QHBoxLayout* layout_;
+	std::map<std::string,ChangeNotifyButton*> buttons_;
 	static std::vector<ChangeNotifyWidget*> widgets_;
 };
 

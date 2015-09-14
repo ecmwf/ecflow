@@ -66,7 +66,9 @@ PropertyLine::PropertyLine(VProperty* vProp,bool addLabel,QWidget * parent) :
 	QObject(parent),
 	prop_(vProp),
 	label_(0),
-	suffixLabel_(0)
+	suffixLabel_(0),
+	defaultTb_(0),
+	masterTb_(0)
 {
 	if(addLabel)
 		label_=new QLabel(vProp->param("label"),parent);
@@ -78,12 +80,22 @@ PropertyLine::PropertyLine(VProperty* vProp,bool addLabel,QWidget * parent) :
 	}
 
 	defaultTb_= new QToolButton(parent);
-	defaultTb_->setText("Default");
 	defaultTb_->setToolTip(tr("Reset to default value"));
     defaultTb_->setIcon(QPixmap(":/viewer/reset_to_default.svg"));
 
-	connect(defaultTb_,SIGNAL(clicked(bool)),
-			this,SLOT(slotResetToDefault(bool)));
+    connect(defaultTb_,SIGNAL(clicked(bool)),
+    	    this,SLOT(slotResetToDefault(bool)));
+
+    if(vProp->master())
+    {
+    	masterTb_=new QToolButton(parent);
+    	masterTb_->setCheckable(true);
+    	masterTb_->setText("Use global");
+    	masterTb_->setToolTip(tr("Use global server settings"));
+
+    	connect(masterTb_,SIGNAL(toggled(bool)),
+    				this,SLOT(slotMaster(bool)));
+    }
 }
 
 void PropertyLine::slotResetToDefault(bool)
@@ -98,6 +110,21 @@ void PropertyLine::checkState()
 		defaultTb_->setEnabled(true);
 	else
 		defaultTb_->setEnabled(false);
+}
+
+void PropertyLine::slotMaster(bool b)
+{
+	if(b)
+	{
+		reset(prop_->master()->value());
+		defaultTb_->setEnabled(false);
+	}
+	else
+	{
+		defaultTb_->setEnabled(true);
+		checkState();
+	}
+
 }
 
 //=========================================================================

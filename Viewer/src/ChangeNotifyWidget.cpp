@@ -142,11 +142,33 @@ ChangeNotifyWidget::~ChangeNotifyWidget()
 		widgets_.erase(it);
 }
 
+ChangeNotifyButton* ChangeNotifyWidget::findButton(const std::string& id)
+{
+	std::map<std::string,ChangeNotifyButton*>::const_iterator it=buttons_.find(id);
+	if(it != buttons_.end())
+		return it->second;
+
+	return 0;
+}
+
+
 void ChangeNotifyWidget::addTb(ChangeNotify* notifier)
 {
 	ChangeNotifyButton *tb=new ChangeNotifyButton(this);
 	tb->setNotifier(notifier);
 	layout_->addWidget(tb);
+	buttons_[notifier->id()]=tb;
+}
+
+void ChangeNotifyWidget::setEnabled(const std::string& id,bool b)
+{
+	for(std::vector<ChangeNotifyWidget*>::iterator it=widgets_.begin(); it!= widgets_.end(); it++)
+	{
+		if(ChangeNotifyButton* tb=(*it)->findButton(id))
+		{
+			tb->setEnabled(b);
+		}
+	}
 }
 
 /*

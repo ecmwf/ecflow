@@ -110,54 +110,57 @@ void PropertyEditor::addItem(VProperty* vProp)
 
 void PropertyEditor::addLine(VProperty *vProp,QGridLayout *gridLayout)
 {
-        PropertyLine* item = PropertyLineFactory::create(vProp->link(),true,this);
+	PropertyLine* item = PropertyLineFactory::create(vProp->link(),true,this);
 
-        if(item)
+    if(item)
+    {
+    	item->reset(vProp->link()->value());
+
+        int row=gridLayout->rowCount();
+
+        QLabel* lw=item->label();
+        QLabel* slw=item->suffixLabel();
+
+        if(lw)
         {
-            item->reset(vProp->link()->value());
+        	gridLayout->addWidget(lw,row,0,Qt::AlignLeft);
 
-       
-            
-            int row=gridLayout->rowCount();
-
-            QLabel* lw=item->label();
-            QLabel* slw=item->suffixLabel();
-
-            if(lw)
+            if(slw)
             {
-                gridLayout->addWidget(lw,row,0,Qt::AlignLeft);
-
-                if(slw)
-                {
-                    QHBoxLayout* hb=new QHBoxLayout;
-                    hb->addWidget(item->item());
-                    hb->addWidget(slw);
-                    gridLayout->addLayout(hb,row,1,Qt::AlignLeft);
-                }
-                else
-                {
-                    gridLayout->addWidget(item->item(),row,1,Qt::AlignLeft);
-                }
+            	QHBoxLayout* hb=new QHBoxLayout;
+                hb->addWidget(item->item());
+                hb->addWidget(slw);
+                gridLayout->addLayout(hb,row,1,Qt::AlignLeft);
             }
             else
             {
-                gridLayout->addWidget(item->item(),row,0,1,2,Qt::AlignLeft);
+                gridLayout->addWidget(item->item(),row,1,Qt::AlignLeft);
             }
-
-            QWidget *bw=item->button();
-            if(bw)
-                gridLayout->addWidget(bw,row,2);
-
-
-            QToolButton* defTb=item->defaultTb();
-            if(defTb)
-            {
-                gridLayout->addWidget(defTb,row,3);
-            }
-
-            lineItems_ << item;
         }
-    
+        else
+        {
+        	gridLayout->addWidget(item->item(),row,0,1,2,Qt::AlignLeft);
+        }
+
+        QWidget *bw=item->button();
+        if(bw)
+            gridLayout->addWidget(bw,row,2);
+
+
+        QToolButton* defTb=item->defaultTb();
+        if(defTb)
+        {
+           gridLayout->addWidget(defTb,row,3);
+        }
+
+        QToolButton* masterTb=item->masterTb();
+        if(masterTb)
+        {
+           gridLayout->addWidget(masterTb,row,4);
+        }
+
+       lineItems_ << item;
+    }
 }    
 
 void PropertyEditor::addGroup(VProperty* vProp)

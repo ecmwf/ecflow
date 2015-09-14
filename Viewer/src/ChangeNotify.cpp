@@ -88,6 +88,25 @@ void ChangeNotify::make()
 	}
 }
 
+void ChangeNotify::setEnabled(const std::string& id,bool en)
+{
+	if(ChangeNotify* obj=ChangeNotify::find(id))
+	{
+		obj->setEnabled(en);
+	}
+}
+
+void ChangeNotify::setEnabled(bool en)
+{
+	if(en == false)
+	{
+		data_->clear();
+	}
+
+	dialog()->setEnabledTab(id_,en);
+	ChangeNotifyWidget::setEnabled(id_,en);
+}
+
 ChangeNotify*  ChangeNotify::find(const std::string& id)
 {
 	std::map<std::string,ChangeNotify*>::iterator it=items.find(id);
@@ -111,6 +130,7 @@ void ChangeNotify::load(VProperty* group)
     	}
     }
 }
+
 
 ChangeNotifyDialog* ChangeNotify::dialog()
 {

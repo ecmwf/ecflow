@@ -34,15 +34,17 @@ public:
 	//ChangeNotifyDialog* dialog() const {return dialog_;}
 	ChangeNotifyModel* model() const {return model_;}
 
-	//Called from VConfigLoader
-	static void load(VProperty* group);
-
+	static void setEnabled(const std::string&,bool);
 	static void populate(ChangeNotifyWidget* w);
 	static void showDialog(const std::string& id);
+
+	//Called from VConfigLoader
+	static void load(VProperty* group);
 
 protected:
 	void make();
 	void add(VNode*,bool,bool);
+	void setEnabled(bool);
 	static ChangeNotify* find(const std::string&);
 	static ChangeNotifyDialog* dialog();
 

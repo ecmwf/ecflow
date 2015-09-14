@@ -82,6 +82,7 @@ public:
     VProperty* link() const {return link_;}
 
     void setMaster(VProperty*);
+    VProperty* master() const {return master_;}
     VProperty *clone(bool addLink,bool setMaster);
 
     void addObserver(VPropertyObserver*);

@@ -88,6 +88,15 @@ void ChangeNotifyDialog::setCurrentTab(const std::string& id)
 	}
 }
 
+void ChangeNotifyDialog::setEnabledTab(const std::string& id,bool b)
+{
+	std::map<std::string,int>::const_iterator it=tabMap_.find(id);
+	if(it != tabMap_.end())
+	{
+		tab_->setTabEnabled(it->second,b);
+	}
+}
+
 void ChangeNotifyDialog::on_closePb__clicked(bool b)
 {
 	hide();

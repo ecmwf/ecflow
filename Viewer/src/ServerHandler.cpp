@@ -16,6 +16,7 @@
 #include "ArgvCreator.hpp"
 #include "Str.hpp"
 
+#include "ChangeNotify.hpp"
 #include "ConnectState.hpp"
 #include "DirectoryHandler.hpp"
 #include "NodeObserver.hpp"
@@ -1224,13 +1225,33 @@ void ServerHandler::confChanged(VServerSettings::Param par,VProperty* prop)
 	case VServerSettings::UpdateRate:
 		updateRefreshTimer();
 		break;
-	case VServerSettings::AbortedPopup:
+	case VServerSettings::AbortedEnabled:
+		ServerHandler::checkNotificationState(par,"aborted");
 		break;
 	default:
 		break;
 	}
 
 }
+
+
+void ServerHandler::checkNotificationState(VServerSettings::Param par,const std::string& id)
+{
+	bool enabled=false;
+	for(std::vector<ServerHandler*>::const_iterator it=servers_.begin(); it != servers_.end(); ++it)
+	{
+		ServerHandler *s=*it;
+
+		if(s->conf()->boolValue(par))
+		{
+			enabled=true;
+			break;
+		}
+	}
+
+	ChangeNotify::setEnabled(id,enabled);
+}
+
 
 void ServerHandler::saveSettings()
 {
