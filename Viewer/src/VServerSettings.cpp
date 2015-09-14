@@ -44,7 +44,7 @@ VServerSettings::VServerSettings(ServerHandler* server) :
 		parNames_[MaxJobFileLines]="server.files.maxJobFileLines";
 		parNames_[ReadFromDisk]="server.files.readFilesFromDisk";
 
-		parNames_[AbortedPopup]="server.popup.aborted";
+		parNames_[AbortedPopup]="server.notification.aborted.enabled";
 	}
 
 	assert(globalProp_);

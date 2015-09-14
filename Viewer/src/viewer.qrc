@@ -3,7 +3,7 @@
     <file>../images/dock_float.svg</file>
     <file>../images/dock_close.svg</file>
     <file alias="configure.svg">../images/configure.svg</file>
-    <file>../images/reset.svg</file>
+    <file alias="reset.svg">../images/reset.svg</file>
     <file>../images/search.svg</file>
     <file alias="info.svg">../images/info.svg</file>
     <file>../images/add_info.svg</file>
@@ -34,6 +34,7 @@
     <file alias="dock_info.svg">../images/dock_info.svg</file>
     <file alias="dock_menu_indicator.png">../images/dock_menu_indicator.png</file>
     <file alias="clear_left.svg">../images/clear_left.svg</file>
+    <file alias="colour.svg">../images/colour.svg</file>
     <file alias="edit.svg">../images/edit.svg</file>
     <file alias="editcopy.svg">../images/editcopy.svg</file>
     <file alias="editpaste.svg">../images/editpaste.svg</file>
@@ -56,6 +57,7 @@
     <file alias="path_arrow.svg">../images/path_arrow.svg</file>
     <file alias="reload.svg">../images/reload.svg</file>
     <file alias="rescue.svg">../images/rescue.svg</file>
+    <file alias="reset_to_default.svg">../images/reset_to_default.svg</file>
     <file alias="script.svg">../images/script.svg</file>
     <file alias="script_dock.svg">../images/script_dock.svg</file>
     <file alias="search_decor.svg">../images/search_decor.svg</file>    

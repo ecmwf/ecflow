@@ -1,106 +1,94 @@
 {
 	"gui" : {
 							
- 		"Nodes":  {
+ 		"states":  {
+ 			"label": "States",
+ 			"desc" : "States",
+ 			"icon" : "colour.svg",
+            "grid" : {
+                   "title" : "Nodes",                                    
+                    "h1" : "Fill colour",
+                    "h2" : "Font colour",                  
+                    
+                    "row" : {
+                            "label" : "Unknown",
+                            "prefix" :   "nstate.unknown",		 		       
+ 				            "line" :  "fill_colour",
+				            "line" :  "font_colour"
+			        },					 				
+			        "row" : {
+                            "label" : "Complete",
+                            "prefix" :   "nstate.complete",                     
+                            "line" :  "fill_colour",
+                            "line" :  "font_colour"
+                    },  
+                    "row" : {
+                            "label" : "Queued",
+                            "prefix" :   "nstate.queued",                     
+                            "line" :  "fill_colour",
+                            "line" :  "font_colour"
+                     },  
+                     "row" : {
+                            "label" : "Aborted",
+                            "prefix" :   "nstate.aborted",                     
+                            "line" :  "fill_colour",
+                            "line" :  "font_colour"
+                     },                                  
+                     "row" : {
+                            "label" : "Submitted",
+                            "prefix" :   "nstate.submitted",                     
+                            "line" :  "fill_colour",
+                            "line" :  "font_colour"
+                      },  
+                      "row" : {
+                            "label" : "Active",
+                            "prefix" :   "nstate.active",                     
+                            "line" :  "fill_colour",
+                            "line" :  "font_colour"
+                      },  			
+			          "row" : {
+                            "label" : "Suspended ",
+                            "prefix" :   "nstate.suspended",                     
+                            "line" :  "fill_colour",
+                            "line" :  "font_colour"
+                      }
+                
+			
+			},
+	        "grid" : {
+                "title" : "Servers",                                    
+                   
+                "h1" : "Fill colour",
+                "h2" : "Font colour",
+                    
+                        "row" : {
+                            "label" : "Halted",
+                            "prefix" :   "sstate.halted",                     
+                            "line" :  "fill_colour",
+                            "line" :  "font_colour"
+                        },                                  
+                        "row" : {
+                            "label" : "Shutdown  ",
+                            "prefix" :   "sstate.shutdown",                     
+                            "line" :  "fill_colour",
+                            "line" :  "font_colour"
+                        },  
+                        "row" : {
+                            "label" : "Running",
+                            "prefix" :   "sstate.running",                     
+                            "line" :  "fill_colour",
+                            "line" :  "font_colour"
+                        }  		
  			
- 			"desc" : "Node properties",
- 					 			
- 			"group" : {
- 				"title" : "Node state=unknown",
- 				"prefix" : "nstate.unknown", 				
- 				
- 				"line" :  "fill_colour",
-				"line" :  "font_colour"
-			},					 				
- 			
-
-			"group" : {
- 				"title" : "Complete",
- 				"prefix" : "nstate.complete", 				
- 				
- 				"line" :  "fill_colour",
-				"line" :  "font_colour"
-			},	
-			
-			"group" : {
- 				"title" : "Queued",
- 				"prefix" : "nstate.queued", 				
- 				
- 				"line" :  "fill_colour",
-				"line" :  "font_colour"
-			},	
-			
-			
-			"group" : {
- 				"title" : "Aborted",
- 				"prefix" : "nstate.aborted", 				
- 				
- 				"line" :  "fill_colour",
-				"line" :  "font_colour"
-			},			
-			
-			"group" : {
- 				"title" : "Submitted",
- 				"prefix" : "nstate.submitted", 				
- 				
- 				"line" :  "fill_colour",
-				"line" :  "font_colour"
-			},	
-	
-			"group" : {
- 				"title" : "Active",
- 				"prefix" : "nstate.active", 				
- 				
- 				"line" :  "fill_colour",
-				"line" :  "font_colour"
-			},	
-			
-			"group" : {
- 				"title" : "Suspended",
- 				"prefix" : "nstate.suspended", 				
- 				
- 				"line" :  "fill_colour",
-				"line" :  "font_colour"
-			},	
-			
- 			"group" : {
- 				"title" : "Halted",
- 				"prefix" : "sstate.halted",				
- 				
- 				"line" : "fill_colour", 				
- 				"line" : "font_colour" 				
- 			},
- 			
-			"group" : {
- 				"title" : "Shutdown",
- 				"prefix" : "sstate.shutdown",				
- 				
- 				"line" : "fill_colour", 				
- 				"line" : "font_colour" 				
- 			},
- 			
- 			"group" : {
- 				"title" : "Running",
- 				"prefix" : "sstate.running",				
- 				
- 				"line" : "fill_colour", 				
- 				"line" : "font_colour" 				
- 			},
- 			
- 			"group" : {
- 				"title" : "Disconnected",
- 				"prefix" : "sstate.running",				
- 				
- 				"line" : "fill_colour", 				
- 				"line" : "font_colour" 				
+ 						
  			}
 			
  		},	
  			
  		"server": {
- 			
- 			"desc" : "Server options",
- 			
+ 			"label" : "Server options",
+ 		    "desc" : "Server options",
+ 			"icon" : "server.svg",
  			"group" : {
  				
  				"title" : "Update",
@@ -121,23 +109,59 @@
 				"line" : "maxJobFileLines"				
 			},
 
-			"group" : {
+			"grid" : {
+				"title" : "Notifications",
+			
+				"h1" : "Enabled",
+				"h2" : "Popup dialog",
+				"h3" : "Play sound",
 				
-				"title" : "Popup",
-				"prefix" : "server.popup",
-				
-				"line" : "sound",
-				"line" : "aborted",
-				"line" : "restarted",
-				"line" : "late",
-				"line" : "zombie",
-				"line" : "alias"
+				"row" : {
+					"label" : "Aborted",
+					"prefix" : "server.notification.aborted",
+                    "line" : "enabled",
+					"line" : "popup",
+					"line" : "sound",
+					"line" : "soundFile"
+				},
+                "row" : {
+                    "label" : "Restarted",
+                    "prefix" : "server.notification.restarted",
+                    "line" : "enabled",
+                    "line" : "popup",
+                    "line" : "sound",
+                    "line" : "soundFile"
+                },
+                "row" : {
+                    "label" : "Late tasks",
+                    "prefix" : "server.notification.late",
+                    "line" : "enabled",
+                    "line" : "popup",
+                    "line" : "sound",
+                    "line" : "soundFile"
+                },
+                "row" : {
+                    "label" : "Zombies",
+                    "prefix" : "server.notification.zombie",
+                    "line" : "enabled",
+                    "line" : "popup",
+                    "line" : "sound",
+                    "line" : "soundFile"
+                },
+                 "row" : {
+                    "label" : "Restarted or aborted aliases",
+                    "prefix" : "server.notification.alias",
+                    "line" : "enabled",
+                    "line" : "popup",
+                    "line" : "sound",
+                    "line" : "soundFile"
+                }
 			}
  		
  		},
 
  		"Tree view" : {
- 			
+ 			"visible" : "false",
  			"desc" : "Tree view options",
  			 			
  			"line" : "view.tree.font",

@@ -16,27 +16,11 @@
 
 class ChangeNotifyDialog;
 class ChangeNotifyModel;
+class ChangeNotifyWidget;
 class VProperty;
 class VNode;
 class VNodeList;
-/*
-class ChangeNotifyConf  {
-public:
-	//ChangeNotifyConf(QColor headerBg,QColor headerFg,QString title,QString header) :
-	//	headerBg_(headerBg), headerFg_(headerFg), title_(title), header_(header) {}
 
-	ChangeNotifyConf()  {};
-
-	//Called from VConfigLoader
-		static void load(VProperty* group);
-
-
-	QColor headerBg_;
-	QColor headerFg_;
-	QString title_;
-	QString headertext_;
-};
-*/
 class ChangeNotify
 {
 public:
@@ -45,23 +29,29 @@ public:
 	static void add(const std::string&,VNode*);
 	void add(VNode*);
 
+	const std::string& id() const {return id_;}
 	VNodeList* data() const {return data_;};
-	ChangeNotifyDialog* dialog() const {return dialog_;}
+	//ChangeNotifyDialog* dialog() const {return dialog_;}
 	ChangeNotifyModel* model() const {return model_;}
 
 	//Called from VConfigLoader
 	static void load(VProperty* group);
 
+	static void populate(ChangeNotifyWidget* w);
+	static void showDialog(const std::string& id);
+
 protected:
 	void make();
 	static ChangeNotify* find(const std::string&);
+	static ChangeNotifyDialog* dialog();
+
 
 	std::string id_;
 	VNodeList* data_;
-	ChangeNotifyDialog* dialog_;
 	ChangeNotifyModel* model_;
 
 	VProperty* prop_;
+	static ChangeNotifyDialog* dialog_;
 };
 
 class AbortedNotify : public ChangeNotify

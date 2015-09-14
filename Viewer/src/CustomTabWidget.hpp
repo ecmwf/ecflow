@@ -8,32 +8,21 @@
 //
 //============================================================================
 
-#ifndef CHANGENOTIFYDIALOG_HPP_
-#define CHNAGENOTIFYDIALOG_HPP_
+#ifndef VIEWER_SRC_CUSTOMTABWIDGET_HPP_
+#define VIEWER_SRC_CUSTOMTABWIDGET_HPP_
 
-#include <QDialog>
+#include <QTabWidget>
 
-#include "ui_ChangeNotifyDialog.h"
-
-class ChangeNotifyModel;
-class VProperty;
-
-class ChangeNotifyDialog : public QDialog, protected Ui::ChangeNotifyDialog
+class CustomTabWidget : public QTabWidget
 {
-Q_OBJECT
-
 public:
-	explicit ChangeNotifyDialog(QWidget *parent=0);
+	CustomTabWidget(QWidget* parent=0);
 
-	void init(VProperty*,ChangeNotifyModel*);
-	void addTab(const std::string id,VProperty* prop, ChangeNotifyModel* model);
-
-public Q_SLOTS:
-	void on_closePb__clicked(bool b);
-	void on_clearCPb__clicked(bool b);
+	void setCustomIcon(int index, QPixmap pix);
 
 protected:
-	ChangeNotifyModel* model_;
+	QSize maxIconSize() const;
 };
 
-#endif
+
+#endif /* VIEWER_SRC_CUSTOMTABWIDGET_HPP_ */

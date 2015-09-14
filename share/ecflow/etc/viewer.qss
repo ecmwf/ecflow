@@ -214,6 +214,14 @@ QTreeView[var="1"]::item {
     alternate-background-color: rgb(250,250,250);
 }
 
+/*---------------------------------
+  Tab widget
+------------------------------------*/
+/*QTabBar[change="1"]::tab {
+    padding : 2px;
+}*/
+
+
 /*QTreeView[var="1"]::branch:!has-children {  
    background: white;
    border: 1px solid #BBBBBB;

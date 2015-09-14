@@ -38,8 +38,8 @@ public:
 	explicit PropertyLineFactory(VProperty::Type);
 	virtual ~PropertyLineFactory();
 
-	virtual PropertyLine* make(VProperty* p,QWidget* w) = 0;
-	static PropertyLine* create(VProperty* p,QWidget* w);
+	virtual PropertyLine* make(VProperty* p,bool,QWidget* w) = 0;
+	static PropertyLine* create(VProperty* p,bool,QWidget* w);
 
 private:
 	explicit PropertyLineFactory(const PropertyLineFactory&);
@@ -50,7 +50,7 @@ private:
 template<class T>
 class PropertyLineMaker : public PropertyLineFactory
 {
-	PropertyLine* make(VProperty* p,QWidget* w) { return new T(p,w); }
+	PropertyLine* make(VProperty* p,bool addLabel,QWidget* w) { return new T(p,addLabel,w); }
 public:
 	explicit PropertyLineMaker(VProperty::Type t) : PropertyLineFactory(t) {}
 };
@@ -99,7 +99,7 @@ class StringPropertyLine : public PropertyLine
 	Q_OBJECT
 
 public:
-	StringPropertyLine(VProperty* vProp,QWidget * parent=0);
+	StringPropertyLine(VProperty* vProp,bool addLabel,QWidget * parent=0);
 	QWidget* item();
 	QWidget* button();
 	void reset(QVariant);
@@ -122,7 +122,7 @@ class ColourPropertyLine : public PropertyLine
 Q_OBJECT
 
 public:
-	ColourPropertyLine(VProperty* vProp,QWidget * parent=0);
+	ColourPropertyLine(VProperty* vProp,bool addLabel,QWidget * parent=0);
 	QWidget* item();
 	QWidget* button();
 	void reset(QVariant);
@@ -134,6 +134,7 @@ private Q_SLOTS:
 
 private:
 	QToolButton* cb_;
+	QColor currentCol_;
 };
 
 //-------------------------------------
@@ -145,7 +146,7 @@ class FontPropertyLine : public PropertyLine
 Q_OBJECT
 
 public:
-	FontPropertyLine(VProperty* vProp,QWidget * parent=0);
+	FontPropertyLine(VProperty* vProp,bool addLabel,QWidget * parent=0);
 	QWidget* item();
 	QWidget* button();
 	void reset(QVariant);
@@ -170,7 +171,7 @@ class IntPropertyLine : public PropertyLine
 	Q_OBJECT
 
 public:
-	IntPropertyLine(VProperty* vProp,QWidget * parent=0);
+	IntPropertyLine(VProperty* vProp,bool addLabel,QWidget * parent=0);
 	QWidget* item();
 	QWidget* button();
 	void reset(QVariant);
@@ -193,7 +194,7 @@ class BoolPropertyLine : public PropertyLine
 	Q_OBJECT
 
 public:
-	BoolPropertyLine(VProperty* vProp,QWidget * parent=0);
+	BoolPropertyLine(VProperty* vProp,bool addLabel,QWidget * parent=0);
 	QWidget* item();
 	QWidget* button();
 	void reset(QVariant);

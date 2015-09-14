@@ -49,10 +49,21 @@
       <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
      </property>
      <widget class="QWidget" name="scrollAreaWidgetContents">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>0</y>
+        <width>480</width>
+        <height>446</height>
+       </rect>
+      </property>
       <layout class="QVBoxLayout" name="verticalLayout_2">
        <property name="sizeConstraint">
         <enum>QLayout::SetMinAndMaxSize</enum>
        </property>
+       <item>
+        <layout class="QVBoxLayout" name="vBox_"/>
+       </item>
        <item>
         <layout class="QGridLayout" name="grid_"/>
        </item>

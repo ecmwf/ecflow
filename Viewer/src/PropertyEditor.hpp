@@ -33,9 +33,14 @@ public:
 private:
     void clear();
     void build();
-    void addItem(VProperty* vProp,QGridLayout* grid);
+    void addItem(VProperty*);
+    void addLine(VProperty* vProp,QGridLayout* grid);
+    void addGroup(VProperty*);
+    void addGrid(VProperty*);
+    void addGridRow(VProperty* prop,QGridLayout *grid);
 
     VProperty* group_;
+    QGridLayout* currentGrid_;
     QList<PropertyLine*> lineItems_;
 };
 

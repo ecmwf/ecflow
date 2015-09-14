@@ -29,6 +29,7 @@
 #include "MainWindow.hpp"
 
 #include "AboutDialog.hpp"
+#include "ChangeNotifyWidget.hpp"
 #include "FilterWidget.hpp"
 #include "InfoPanel.hpp"
 #include "MenuConfigDialog.hpp"
@@ -86,6 +87,9 @@ MainWindow::MainWindow(QStringList idLst,QWidget *parent) : QMainWindow(parent)
 
     viewToolBar->addWidget(label1);
     viewToolBar->addWidget(label);
+
+    ChangeNotifyWidget* chw=new ChangeNotifyWidget(this);
+    viewToolBar->addWidget(chw);
 }
 
 MainWindow::~MainWindow()

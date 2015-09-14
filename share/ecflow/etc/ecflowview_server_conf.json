@@ -54,46 +54,91 @@
                     }
             },
             
-            "popup": {
+            "notification": {
 				"label" : "Popup notifications",
 				"tooltip" : "Popup notifications", 
 				
-				"sound" : {
-				    "label": "Play sound",
-                    "tooltip": "Play sound",                          
-                    "default": "false"
-                },    
-				
-				"aborted": {
-            		"label": "Aborted tasks",
-            		"tooltip": "aborted tasks",                          
-            		"default": "true"
+                "aborted" : {
+                    "label" : "Aborted",
+
+                    "enabled" : {
+                        "default" : "true"
+    
+                    },
+                    "popup" : {
+                        "default" : "true"
+                    },
+				    "sound" : {
+				        "label": "Play sound",
+                        "tooltip": "Play sound",                          
+                        "default": "false"
+                    }    
+				},
+                "restarted" : {
+                    "label" : "Restarted",
+
+                    "enabled" : {
+                        "default" : "true"
+    
+                    },
+                    "popup" : {
+                        "default" : "true"
+                    },
+                    "sound" : {
+                        "label": "Play sound",
+                        "tooltip": "Play sound",                          
+                        "default": "false"
+                    }    
                 },
+               "late" : {
+                    "label" : "Late tasks",
+
+                    "enabled" : {
+                        "default" : "false"
+    
+                    },
+                    "popup" : {
+                        "default" : "false"
+                    },
+                    "sound" : {
+                        "label": "Play sound",
+                        "tooltip": "Play sound",                          
+                        "default": "false"
+                    }    
+                },		
+               "zombie" : {
+                    "label" : "Zombies",
+
+                    "enabled" : {
+                        "default" : "false"
+    
+                    },
+                    "popup" : {
+                        "default" : "false"
+                    },
+                    "sound" : {
+                        "label": "Play sound",
+                        "tooltip": "Play sound",                          
+                        "default": "false"
+                    }    
+                },              	
+               "alias" : {
+                    "label" : "Aborted or restarted aliases",
+
+                    "enabled" : {
+                        "default" : "false"
+    
+                    },
+                    "popup" : {
+                        "default" : "false"
+                    },
+                    "sound" : {
+                        "label": "Play sound",
+                        "tooltip": "Play sound",                          
+                        "default": "false"
+                    }    
+                }                 
             	
-                "restarted": {
-            		"label": "Restarted tasks",
-            		"tooltip": "restarted tasks",                          
-            		"default": "true"
-            	},
-            	
-            	"late": {
-            		"label": "Late tasks",
-            		"tooltip": "late tasks",                          
-            		"default": "true"
-            	},
-            	
-            	"zombie": {
-            		"label": "Zombies",
-            		"tooltip": "zombies",                          
-            		"default": "false"
-            	}, 
-            	
-            	"alias": {
-            		"label": "Aborted or restarted aliases",
-            		"tooltip": "aborted or restarted aliases",                          
-            		"default": "false"
-            	}
-              	
             }          
 
      }

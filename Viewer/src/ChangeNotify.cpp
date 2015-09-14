@@ -12,6 +12,7 @@
 
 #include "ChangeNotifyDialog.hpp"
 #include "ChangeNotifyModel.hpp"
+#include "ChangeNotifyWidget.hpp"
 #include "VConfigLoader.hpp"
 #include "VNode.hpp"
 #include "VNodeList.hpp"
@@ -30,11 +31,13 @@ static std::map<std::string,ChangeNotify*> items;
 static AbortedNotify abortedNotify("aborted");
 static RestartedNotify restaredtNotify("restarted");
 
+ChangeNotifyDialog* ChangeNotify::dialog_=0;
+
 ChangeNotify::ChangeNotify(const std::string& id) :
 	id_(id),
 	data_(0),
 	model_(0),
-	dialog_(0),
+	//dialog_(0),
 	prop_(0)
 {
 	items[id] = this;
@@ -74,8 +77,8 @@ void ChangeNotify::make()
 		data_=new VNodeList();
 		model_=new ChangeNotifyModel();
 		model_->setData(data_);
-		dialog_=new ChangeNotifyDialog();
-		dialog_->init(prop_,model_);
+		//dialog_=new ChangeNotifyDialog();
+		//dialog_->init(prop_,model_);
 	}
 }
 
@@ -101,6 +104,35 @@ void ChangeNotify::load(VProperty* group)
     	}
     }
 }
+
+ChangeNotifyDialog* ChangeNotify::dialog()
+{
+	if(!dialog_)
+	{
+		dialog_=new ChangeNotifyDialog();
+		for(std::map<std::string,ChangeNotify*>::iterator it=items.begin(); it != items.end(); ++it)
+		{
+			dialog_->addTab(it->first,it->second->prop_,it->second->model_);
+		}
+	}
+
+	return dialog_;
+}
+
+void  ChangeNotify::showDialog(const std::string& id)
+{
+	dialog()->show();
+}
+
+void ChangeNotify::populate(ChangeNotifyWidget* w)
+{
+	for(std::map<std::string,ChangeNotify*>::iterator it=items.begin(); it != items.end(); ++it)
+	{
+		w->addTb(it->second);
+	}
+}
+
+
 
 static SimpleLoader<ChangeNotify> loaderTable("notification");
 

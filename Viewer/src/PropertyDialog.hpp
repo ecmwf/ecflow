@@ -33,12 +33,17 @@ public:
 
 public Q_SLOTS:
     void accept();
+    void reject();
     void slotChangePage(QListWidgetItem *current, QListWidgetItem *previous);
 
 private:
     void build();
-    void addPage(QWidget *w,QIcon icon,QString txt);
+    void addPage(QWidget *w,QPixmap pix,QString txt);
     void manageChange();
+
+    void closeEvent(QCloseEvent * event);
+    void readSettings();
+    void writeSettings();
 
     QList<PropertyEditor*> editors_;
     bool configChanged_;

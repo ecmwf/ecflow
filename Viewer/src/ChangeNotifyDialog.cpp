@@ -11,10 +11,12 @@
 #include "ChangeNotifyDialog.hpp"
 
 #include "ChangeNotifyModel.hpp"
+#include "TreeView.hpp"
 #include "VNodeList.hpp"
 #include "VProperty.hpp"
 
 #include <QDebug>
+#include <QPainter>
 
 ChangeNotifyDialog::ChangeNotifyDialog(QWidget *parent) :
 	QDialog(parent),
@@ -22,13 +24,13 @@ ChangeNotifyDialog::ChangeNotifyDialog(QWidget *parent) :
 {
 	setupUi(this);
 
-	model_=new ChangeNotifyModel(this);
-	treeView_->setModel(model_);
+	//model_=new ChangeNotifyModel(this);
+	//treeView_->setModel(model_);
 }
 
 void ChangeNotifyDialog::init(VProperty* prop, ChangeNotifyModel* model)
 {
-	model_=model;
+	/*model_=model;
 	treeView_->setModel(model_);
 
 	if(prop)
@@ -42,7 +44,38 @@ void ChangeNotifyDialog::init(VProperty* prop, ChangeNotifyModel* model)
 		label_->setStyleSheet(sh);
 		label_->setText(prop->param("labelText"));
 		setWindowTitle(prop->param("title"));
-	}
+	}*/
+}
+
+void ChangeNotifyDialog::addTab(const std::string id,VProperty* prop, ChangeNotifyModel* model)
+{
+	TreeView* tree=new TreeView(this);
+	tree->setRootIsDecorated(false);
+	tree->setUniformRowHeights(true);
+	tree->setModel(model);
+
+	//Create icon for tab
+	QFont f;
+	QFontMetrics fm(f);
+	QString labelText=prop->param("labelText");
+	int h=fm.height();
+	int w=fm.width(labelText);
+	int margin=4;
+	QPixmap pix(2*margin+w,2*margin+h);
+	pix.fill(prop->paramToColour("background"));
+
+	QRect labelRect(margin,margin+1,w,h);
+
+	QPainter painter(&pix);
+	//painter.setBrush(prop->paramToColour("background"));
+	//painter.setPen(prop->paramToColour("border"));
+	//painter.drawRect(labelRect);
+
+	painter.setPen(prop->paramToColour("foreground"));
+	painter.drawText(labelRect,labelText);
+
+	tab_->addTab(tree,"");
+	tab_->setCustomIcon(tab_->count()-1,pix);
 }
 
 
@@ -54,5 +87,16 @@ void ChangeNotifyDialog::on_closePb__clicked(bool b)
 void ChangeNotifyDialog::on_clearCPb__clicked(bool b)
 {
 	hide();
-	model_->data()->clear();
+	//model_->data()->clear();
 }
+
+
+
+
+
+
+
+
+
+
+

@@ -13,7 +13,7 @@
   <property name="windowTitle">
    <string>Change notification</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout" stretch="0,1,0">
+  <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0,0">
    <property name="spacing">
     <number>1</number>
    </property>
@@ -31,11 +31,11 @@
     </widget>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout">
-     <item>
-      <widget class="QTreeView" name="treeView_"/>
-     </item>
-    </layout>
+    <widget class="CustomTabWidget" name="tab_">
+     <property name="currentIndex">
+      <number>-1</number>
+     </property>
+    </widget>
    </item>
    <item>
     <layout class="QHBoxLayout" name="hbl">
@@ -70,6 +70,14 @@
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>CustomTabWidget</class>
+   <extends>QTabWidget</extends>
+   <header location="global">CustomTabWidget.hpp</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

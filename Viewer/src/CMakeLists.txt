@@ -9,10 +9,13 @@ set(viewer_srcs
     ChangeNotify.cpp
     ChangeNotifyDialog.cpp
     ChangeNotifyModel.cpp
+    ChangeNotifyWidget.cpp
     CodeItemWidget.cpp
     ConnectState.cpp
     CommandDesignerWidget.cpp
+    ConfigListDelegate.cpp
     CustomCommandDialog.cpp
+    CustomTabWidget.cpp
     Dashboard.cpp
     DashboardDialog.cpp
     DashboardDock.cpp
@@ -135,6 +138,7 @@ set(viewer_moc_files AbstractNodeModel.hpp
     Animation.hpp
     ChangeNotifyDialog.hpp
     ChangeNotifyModel.hpp
+    ChangeNotifyWidget.hpp
     CommandDesignerWidget.hpp
     CodeItemWidget.hpp
     CustomCommandDialog.hpp

@@ -17,6 +17,8 @@
 #include "SessionHandler.hpp"
 #include "UserMessage.hpp"
 
+#include <QDebug>
+
 #include <boost/property_tree/json_parser.hpp>
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/path.hpp>
@@ -145,9 +147,12 @@ void VConfig::loadProperty(const boost::property_tree::ptree& pt,VProperty *prop
     		if(!prefix.isEmpty())
     			val=prefix.toStdString() + "." + val;
 
+            qDebug() << "line" << prefix << val.c_str();
+            
     		if(VProperty* lineEditProp=find(val))
     		{
-    			chProp->setLink(lineEditProp);
+    			qDebug() << "  link found!";
+                chProp->setLink(lineEditProp);
     		}
     	}
         //Here we only load the properties with

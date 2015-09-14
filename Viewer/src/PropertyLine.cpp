@@ -43,7 +43,7 @@ PropertyLineFactory::~PropertyLineFactory()
 	// Not called
 }
 
-PropertyLine* PropertyLineFactory::create(VProperty* p,QWidget* w)
+PropertyLine* PropertyLineFactory::create(VProperty* p,bool addLabel,QWidget* w)
 {
 	if(!p)
 		return 0;
@@ -51,7 +51,7 @@ PropertyLine* PropertyLineFactory::create(VProperty* p,QWidget* w)
 	VProperty::Type t=p->type();
 	std::map<VProperty::Type,PropertyLineFactory*>::iterator j = makers->find(t);
 	if(j != makers->end())
-		return (*j).second->make(p,w);
+		return (*j).second->make(p,addLabel,w);
 
 	return 0;
 }
@@ -80,6 +80,7 @@ PropertyLine::PropertyLine(VProperty* vProp,bool addLabel,QWidget * parent) :
 	defaultTb_= new QToolButton(parent);
 	defaultTb_->setText("Default");
 	defaultTb_->setToolTip(tr("Reset to default value"));
+    defaultTb_->setIcon(QPixmap(":/viewer/reset_to_default.svg"));
 
 	connect(defaultTb_,SIGNAL(clicked(bool)),
 			this,SLOT(slotResetToDefault(bool)));
@@ -105,9 +106,10 @@ void PropertyLine::checkState()
 //
 //=========================================================================
 
-StringPropertyLine::StringPropertyLine(VProperty* vProp,QWidget * parent) : PropertyLine(vProp,parent)
+StringPropertyLine::StringPropertyLine(VProperty* vProp,bool addLabel,QWidget * parent) : PropertyLine(vProp,addLabel,parent)
 {
-	label_->setText(label_->text() + ":");
+	if(label_)
+        label_->setText(label_->text() + ":");
 
 	le_=new QLineEdit(parent);
 
@@ -158,14 +160,15 @@ void StringPropertyLine::slotEdited(QString)
 //
 //=========================================================================
 
-ColourPropertyLine::ColourPropertyLine(VProperty* vProp,QWidget * parent) : PropertyLine(vProp,true,parent)
+ColourPropertyLine::ColourPropertyLine(VProperty* vProp,bool addLabel,QWidget * parent) : PropertyLine(vProp,addLabel,parent)
 {
-	label_->setText(label_->text() + ":");
+	if(label_)
+        label_->setText(label_->text() + ":");
 
 	QFont f;
 	QFontMetrics fm(f);
 	int height=fm.height();
-	int width=fm.width("AAAAAAAAAA");
+	int width=fm.width("AAAAAAA");
 
 	cb_=new QToolButton(parent);
 	cb_->setAutoFillBackground(true);
@@ -195,9 +198,8 @@ void ColourPropertyLine::reset(QVariant v)
 			QString::number(c.green()) + "," + QString::number(c.blue()) + ");}");
 	cb_->setStyleSheet(sh);
 
-	/*QPalette pal = cb_->palette();
-	pal.setColor(QPalette::Window, v.value<QColor>());
-	cb_->setPalette(pal);*/
+	currentCol_=c;
+
 	PropertyLine::checkState();
 }
 
@@ -228,7 +230,7 @@ bool ColourPropertyLine::applyChange()
 
 QVariant ColourPropertyLine::currentValue()
 {
-	return cb_->palette().color(QPalette::Window);
+	return currentCol_;
 }
 
 //=========================================================================
@@ -237,9 +239,10 @@ QVariant ColourPropertyLine::currentValue()
 //
 //=========================================================================
 
-FontPropertyLine::FontPropertyLine(VProperty* vProp,QWidget * parent) : PropertyLine(vProp,true,parent)
+FontPropertyLine::FontPropertyLine(VProperty* vProp,bool addLabel,QWidget * parent) : PropertyLine(vProp,addLabel,parent)
 {
-	label_->setText(label_->text() + ":");
+	if(label_)
+        label_->setText(label_->text() + ":");
 
 	lName_=new QLabel(parent);
 
@@ -303,9 +306,10 @@ QVariant FontPropertyLine::currentValue()
 //
 //=========================================================================
 
-IntPropertyLine::IntPropertyLine(VProperty* vProp,QWidget * parent) : PropertyLine(vProp,true,parent)
+IntPropertyLine::IntPropertyLine(VProperty* vProp,bool addLabel,QWidget * parent) : PropertyLine(vProp,addLabel,parent)
 {
-	label_->setText(label_->text() + ":");
+	if(label_)
+        label_->setText(label_->text() + ":");
 
 	le_=new QLineEdit(parent);
 	QIntValidator* validator=new QIntValidator(le_);
@@ -372,7 +376,7 @@ void IntPropertyLine::slotEdited(QString)
 //
 //=========================================================================
 
-BoolPropertyLine::BoolPropertyLine(VProperty* vProp,QWidget * parent) : PropertyLine(vProp,false,parent)
+BoolPropertyLine::BoolPropertyLine(VProperty* vProp,bool addLabel,QWidget * parent) : PropertyLine(vProp,false,parent)
 {
 	cb_=new QCheckBox(vProp->param("label"));
 

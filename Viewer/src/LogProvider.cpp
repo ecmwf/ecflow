@@ -117,6 +117,9 @@ void LogProvider::fetchFile(ServerHandler *server,const std::string& fileName)
     	{
     		reply_->fileReadMode(VReply::LocalReadMode);
 
+    		if(autoUpdate_)
+    			inAutoUpdate_=true;
+
     		owner_->infoReady(reply_);
 
     		//Try to track the changes in the log file
