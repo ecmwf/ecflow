@@ -397,7 +397,7 @@ void ServerComThread::update(const Node* node, const std::vector<ecf::Aspect::Ty
 	UserMessage::message(UserMessage::DBG, false, std::string("ServerComThread::update - node: ") + node->name());
 	for(std::vector<ecf::Aspect::Type>::const_iterator it=types.begin(); it != types.end(); ++it)
 	{
-		UserMessage::message(UserMessage::DBG, false, std::string(" aspect: ") + boost::lexical_cast<std::string>(*it));
+		//UserMessage::message(UserMessage::DBG, false, std::string(" aspect: ") + boost::lexical_cast<std::string>(*it));
 	}
 
     //If anything was requested to be deleted in the thread we do not go further
