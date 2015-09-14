@@ -39,6 +39,8 @@ public Q_SLOTS:
 	void slotClicked(bool);
 
 protected:
+	void updateIcon();
+
 	ChangeNotify* notifier_;
 };
 

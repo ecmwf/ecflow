@@ -62,14 +62,12 @@
                     "label" : "Aborted",
 
                     "enabled" : {
-                        "default" : "true"
-    
+                        "default" : "true"    
                     },
                     "popup" : {
                         "default" : "true"
                     },
-				    "sound" : {
-				        "label": "Play sound",
+				    "sound" : {				 
                         "tooltip": "Play sound",                          
                         "default": "false"
                     }    
@@ -84,8 +82,7 @@
                     "popup" : {
                         "default" : "true"
                     },
-                    "sound" : {
-                        "label": "Play sound",
+                    "sound" : {                     
                         "tooltip": "Play sound",                          
                         "default": "false"
                     }    
@@ -94,14 +91,12 @@
                     "label" : "Late tasks",
 
                     "enabled" : {
-                        "default" : "false"
-    
+                        "default" : "false"    
                     },
                     "popup" : {
                         "default" : "false"
                     },
-                    "sound" : {
-                        "label": "Play sound",
+                    "sound" : {                       
                         "tooltip": "Play sound",                          
                         "default": "false"
                     }    
@@ -116,8 +111,7 @@
                     "popup" : {
                         "default" : "false"
                     },
-                    "sound" : {
-                        "label": "Play sound",
+                    "sound" : {                        
                         "tooltip": "Play sound",                          
                         "default": "false"
                     }    
@@ -132,8 +126,7 @@
                     "popup" : {
                         "default" : "false"
                     },
-                    "sound" : {
-                        "label": "Play sound",
+                    "sound" : {                     
                         "tooltip": "Play sound",                          
                         "default": "false"
                     }    

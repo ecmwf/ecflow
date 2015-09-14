@@ -510,9 +510,12 @@ void VNode::check(VServerSettings* conf,bool stateChange)
 		//Check for aborted
 		if(new_status == NState::ABORTED)
 		{
-			if(conf->boolValue(VServerSettings::AbortedPopup))
+			if(conf->boolValue(VServerSettings::AbortedEnabled))
 			{
-				ChangeNotify::add("aborted",this);
+				bool popup=conf->boolValue(VServerSettings::AbortedPopup);
+				bool sound=conf->boolValue(VServerSettings::AbortedSound);
+
+				ChangeNotify::add("aborted",this,popup,sound);
 			}
 		}
 	}

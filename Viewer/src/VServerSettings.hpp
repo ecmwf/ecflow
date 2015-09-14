@@ -21,7 +21,11 @@ class VServerSettings : public VPropertyObserver
 
 public:
 	enum Param {UpdateRate,AdaptiveUpdate,MaxAdaptiveUpdateRate,MaxJobFileLines,ReadFromDisk,
-	           AbortedPopup};
+	           AbortedEnabled,AbortedPopup,AbortedSound,AbortedSoundFile,
+			   RestartedEnabled,RestartedPopup, RestartedSound,RestartedSoundFile,
+			   LateEnabled,LatePopup,LateSound, LateSoundFile,
+			   ZombieEnabled,ZombiePopup,ZombieSound,ZombieSoundFile,
+			   AliasEnabled,AliasPopup,AliasSound,AliasSoundFile};
 
 	int intValue(Param par) const;
 	bool boolValue(Param par) const;

@@ -2,8 +2,8 @@
 	"gui" : {
 							
  		"states":  {
- 			"label": "States",
- 			"desc" : "States",
+ 			"label": "Status",
+ 			"desc" : "Status",
  			"icon" : "colour.svg",
             "grid" : {
                    "title" : "Nodes",                                    

@@ -13,6 +13,8 @@
 
 #include <QDialog>
 
+#include <map>
+
 #include "ui_ChangeNotifyDialog.h"
 
 class ChangeNotifyModel;
@@ -27,6 +29,7 @@ public:
 
 	void init(VProperty*,ChangeNotifyModel*);
 	void addTab(const std::string id,VProperty* prop, ChangeNotifyModel* model);
+	void setCurrentTab(const std::string&);
 
 public Q_SLOTS:
 	void on_closePb__clicked(bool b);
@@ -34,6 +37,7 @@ public Q_SLOTS:
 
 protected:
 	ChangeNotifyModel* model_;
+	std::map<std::string,int> tabMap_;
 };
 
 #endif

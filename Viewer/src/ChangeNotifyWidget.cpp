@@ -11,6 +11,7 @@
 #include "ChangeNotifyWidget.hpp"
 
 #include <QHBoxLayout>
+#include <QPainter>
 #include <QSignalMapper>
 #include <QToolButton>
 
@@ -27,13 +28,14 @@ ChangeNotifyButton::ChangeNotifyButton(QWidget* parent) :
 	notifier_(0)
 {
 	setAutoRaise(true);
+	setIconSize(QSize(20,20));
 }
 
 void ChangeNotifyButton::setNotifier(ChangeNotify* notifier)
 {
 	notifier_=notifier;
 
-	setText(QString::fromStdString(notifier_->id()));
+	//setText(QString::fromStdString(notifier_->id()));
 
 	connect(this,SIGNAL(clicked(bool)),
 			this,SLOT(slotClicked(bool)));
@@ -43,10 +45,13 @@ void ChangeNotifyButton::setNotifier(ChangeNotify* notifier)
 
 	connect(notifier_->data(),SIGNAL((endReset())),
 				this,SLOT(slotReset()));
+
+	updateIcon();
 }
 
 void ChangeNotifyButton::slotAppend()
 {
+	updateIcon();
 }
 
 void ChangeNotifyButton::slotReset()
@@ -57,6 +62,68 @@ void ChangeNotifyButton::slotClicked(bool)
 {
 	ChangeNotify::showDialog(notifier_->id());
 }
+
+void ChangeNotifyButton::updateIcon()
+{
+	QString text;
+	QString numText("0");
+
+	if(notifier_->prop())
+	{
+		text=notifier_->prop()->param("widgetText");
+	}
+
+	if(notifier_->data())
+	{
+		numText=QString::number(notifier_->data()->size());
+	}
+
+	QColor bg;
+	QColor fg;
+	QColor border;
+
+	if(notifier_->prop())
+	{
+		bg=notifier_->prop()->paramToColour("background");
+		fg=notifier_->prop()->paramToColour("foreground");
+		border=notifier_->prop()->paramToColour("border");
+	}
+
+	QFont f;
+	f.setBold(true);
+	f.setPointSize(10);
+	QFontMetrics fm(f);
+	int w=fm.width(text + 4 + numText + 2);
+	int h=20;//fm.height()+2;
+
+	QPixmap pix(w,h);
+	pix.fill(QColor(255,255,255,0));
+	QPainter painter(&pix);
+	painter.setRenderHint(QPainter::Antialiasing,true);
+	painter.setRenderHint(QPainter::TextAntialiasing,true);
+
+	QRect textRect(0,0,fm.width(text)+4,h);
+	painter.setBrush(bg);
+	painter.setPen(border);
+	painter.drawRoundedRect(textRect,4,4);
+	painter.setPen(fg);
+	painter.setFont(f);
+	painter.drawText(textRect,Qt::AlignHCenter|Qt::AlignVCenter,text);
+
+	QRect numRect(textRect.right()+2,h-fm.ascent()-2,fm.width(numText)+4,fm.ascent()+2);
+	painter.setBrush(Qt::blue);
+	painter.setPen(Qt::white);
+	painter.drawRoundedRect(numRect,6,6);
+	painter.setFont(f);
+	painter.drawText(numRect,Qt::AlignHCenter|Qt::AlignVCenter,numText);
+
+	setIconSize(QSize(w,h));
+	setIcon(pix);
+
+}
+
+
+
 
 
 ChangeNotifyWidget::ChangeNotifyWidget(QWidget *parent) : QWidget(parent)

@@ -76,8 +76,17 @@ void ChangeNotifyDialog::addTab(const std::string id,VProperty* prop, ChangeNoti
 
 	tab_->addTab(tree,"");
 	tab_->setCustomIcon(tab_->count()-1,pix);
+	tabMap_[id]=tab_->count()-1;
 }
 
+void ChangeNotifyDialog::setCurrentTab(const std::string& id)
+{
+	std::map<std::string,int>::const_iterator it=tabMap_.find(id);
+	if(it != tabMap_.end())
+	{
+		tab_->setCurrentIndex(it->second);
+	}
+}
 
 void ChangeNotifyDialog::on_closePb__clicked(bool b)
 {

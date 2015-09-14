@@ -6,7 +6,8 @@
                 "foregorund": "rgb(0,0,0)",
                 "border":     "rgb(200,200,200)",
                 "title"  :    "Change: aborted tasks",
-                "labelText" : "Aborted"         
+                "labelText" : "Aborted",
+                "widgetText" : "A"         
              },
  
             "restarted": {
@@ -14,7 +15,8 @@
                 "foregorund": "rgb(0,0,0)",
                 "border":     "rgb(200,200,200)",
                 "title"  :    "Change: restarted tasks",
-                "labelText" : "Restarted"               
+                "labelText" : "Restarted", 
+                "widgetText" : "Re"                   
             }
        
        }

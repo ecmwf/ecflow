@@ -38,8 +38,6 @@ void ConfigListDelegate::paint(QPainter *painter,const QStyleOptionViewItem &opt
     const QStyle *style = vopt.widget ? vopt.widget->style() : QApplication::style();
     const QWidget* widget = vopt.widget;
 
-    qDebug() << index << option.rect;
-
     QPixmap pix=index.data(Qt::DecorationRole).value<QPixmap>();
 
     //Save painter state
@@ -51,7 +49,6 @@ void ConfigListDelegate::paint(QPainter *painter,const QStyleOptionViewItem &opt
     //Paint selection. This should be transparent.
     if(option.state & QStyle::State_Selected)
     {
-       	//QRect fillRect=option.rect.adjusted(0,1,-1,-textRect.height()-1);
         painter->fillRect(bgRect,QColor(200,222,250));
     }
 

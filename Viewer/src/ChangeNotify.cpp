@@ -44,22 +44,28 @@ ChangeNotify::ChangeNotify(const std::string& id) :
 }
 
 
-void ChangeNotify::add(const std::string& id,VNode *node)
+void ChangeNotify::add(const std::string& id,VNode *node,bool popup,bool sound)
 {
 	if(ChangeNotify* obj=ChangeNotify::find(id))
 	{
-		obj->add(node);
+		obj->add(node,popup,sound);
 	}
 }
 
-void ChangeNotify::add(VNode *node)
+void ChangeNotify::add(VNode *node,bool popup,bool sound)
 {
 	make();
 
 	data_->add(node);
 
-	dialog()->show();
-
+	if(popup)
+	{
+		dialog()->setCurrentTab(id_);
+		dialog()->show();
+		dialog()->raise();
+	}
+	if(sound)
+	{
 //#ifdef ECFLOW_QT5
 //	QSoundEffect effect(dialog_);
 //	effect.setSource(QUrl::fromLocalFile("file:/usr/share/xemacs/xemacs-packages/etc/sounds/boing.wav"));
@@ -67,7 +73,7 @@ void ChangeNotify::add(VNode *node)
 //	effect.setVolume(0.25f);
 //	effect.play();
 //#endif
-
+	}
 }
 
 void ChangeNotify::make()
@@ -100,6 +106,7 @@ void ChangeNotify::load(VProperty* group)
     	std::string id=p->strName();
     	if(ChangeNotify* obj=ChangeNotify::find(id))
     	{
+    		obj->make();
     		obj->prop_=p;
     	}
     }

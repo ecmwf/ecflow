@@ -26,11 +26,11 @@ class ChangeNotify
 public:
 	ChangeNotify(const std::string& id);
 
-	static void add(const std::string&,VNode*);
-	void add(VNode*);
+	static void add(const std::string&,VNode*,bool,bool);
 
 	const std::string& id() const {return id_;}
 	VNodeList* data() const {return data_;};
+	VProperty* prop() const {return prop_;}
 	//ChangeNotifyDialog* dialog() const {return dialog_;}
 	ChangeNotifyModel* model() const {return model_;}
 
@@ -42,6 +42,7 @@ public:
 
 protected:
 	void make();
+	void add(VNode*,bool,bool);
 	static ChangeNotify* find(const std::string&);
 	static ChangeNotifyDialog* dialog();
 

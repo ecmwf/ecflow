@@ -44,7 +44,25 @@ VServerSettings::VServerSettings(ServerHandler* server) :
 		parNames_[MaxJobFileLines]="server.files.maxJobFileLines";
 		parNames_[ReadFromDisk]="server.files.readFilesFromDisk";
 
-		parNames_[AbortedPopup]="server.notification.aborted.enabled";
+		parNames_[AbortedEnabled]="server.notification.aborted.enabled";
+		parNames_[AbortedPopup]="server.notification.aborted.popup";
+		parNames_[AbortedSound]="server.notification.aborted.sound";
+
+		parNames_[RestartedEnabled]="server.notification.restarted.enabled";
+		parNames_[RestartedPopup]="server.notification.restarted.popup";
+		parNames_[RestartedSound]="server.notification.restarted.sound";
+
+		parNames_[LateEnabled]="server.notification.late.enabled";
+		parNames_[LatePopup]="server.notification.late.popup";
+		parNames_[LateSound]="server.notification.late.sound";
+
+		parNames_[ZombieEnabled]="server.notification.zombie.enabled";
+		parNames_[ZombiePopup]="server.notification.zombie.popup";
+		parNames_[ZombieSound]="server.notification.zombie.sound";
+
+		parNames_[AliasEnabled]="server.notification.alias.enabled";
+		parNames_[AliasPopup]="server.notification.alias.popup";
+		parNames_[AliasSound]="server.notification.alias.sound";
 	}
 
 	assert(globalProp_);
@@ -230,27 +248,32 @@ void VServerSettings::importRcFiles()
 					//Popup
 					else if(par[0] == "aborted")
 					{
-						pt.put("server.popup.aborted",par[1]);
+						pt.put("server.notification.aborted.enabled",par[1]);
+						pt.put("server.notification.aborted.popup",par[1]);
 						hasValue=true;
 					}
 					else if(par[0] == "restarted")
 					{
-						pt.put("server.popup.restarted",par[1]);
+						pt.put("server.notification.restarted.enabled",par[1]);
+						pt.put("server.notification.restarted.popup",par[1]);
 						hasValue=true;
 					}
 					else if(par[0] == "late")
 					{
-						pt.put("server.popup.late",par[1]);
+						pt.put("server.notification.late.enabled",par[1]);
+						pt.put("server.notification.late.popup",par[1]);
 						hasValue=true;
 					}
 					else if(par[0] == "zombies")
 					{
-						pt.put("server.popup.zombie",par[1]);
+						pt.put("server.notification.zombie.enabled",par[1]);
+						pt.put("server.notification.zombie.popup",par[1]);
 						hasValue=true;
 					}
 					else if(par[0] == "aliases")
 					{
-						pt.put("server.popup.alias",par[1]);
+						pt.put("server.notification.alias.enabled",par[1]);
+						pt.put("server.notification.alias.popup",par[1]);
 						hasValue=true;
 					}
 					//Suites
