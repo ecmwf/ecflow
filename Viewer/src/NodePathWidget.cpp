@@ -93,7 +93,6 @@ void NodePathNodeItem::reset(QString name,QColor col)
 	}
 }
 
-
 void NodePathNodeItem::resetStyle()
 {
 	QString st;
@@ -888,6 +887,11 @@ void  NodePathWidget::slotRefreshServer()
 	{
 		info_->server()->refresh();
 	}
+}
+
+void NodePathWidget::rerender()
+{
+	reset();
 }
 
 void NodePathWidget::paintEvent(QPaintEvent *)

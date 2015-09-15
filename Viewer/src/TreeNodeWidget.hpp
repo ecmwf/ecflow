@@ -31,6 +31,7 @@ public:
 
 	void populateDockTitleBar(DashboardDockTitleWidget* tw);
 
+	void rerender();
 	bool selectFirstServerInView();
 	void writeSettings(VSettings*);
 	void readSettings(VSettings*);

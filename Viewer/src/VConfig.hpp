@@ -37,6 +37,7 @@ public:
     VProperty* cloneServerGui(VProperty *linkTarget);
 
     void saveSettings();
+    void importSettings();
 
 protected:
     VConfig();
@@ -46,6 +47,8 @@ protected:
     void loadSettings();
     void saveSettings(const std::string& parFile,VProperty* guiProp,VSettings* vs);
     void loadSettings(const std::string& parFile,VProperty* guiProp);
+    void loadSettings(const boost::property_tree::ptree& pt,VProperty* guiProp);
+    bool readRcFile(const std::string& rcFile,boost::property_tree::ptree& pt);
 
     VProperty* group(const std::string& name);
 

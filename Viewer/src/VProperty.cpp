@@ -281,6 +281,21 @@ void VProperty::setMaster(VProperty* m)
 	master_->addObserver(this);
 }
 
+void VProperty::setUseMaster(bool b)
+{
+	assert(master_);
+
+	if(useMaster_ != b)
+	{
+		useMaster_=b;
+
+		if(useMaster_)
+		{
+			value_=master_->value_;
+		}
+	}
+}
+
 VProperty* VProperty::clone(bool addLink,bool setMaster)
 {
 	VProperty *cp=new VProperty(strName_);
@@ -308,6 +323,15 @@ VProperty* VProperty::clone(bool addLink,bool setMaster)
 	}
 
 	return cp;
+}
+
+void VProperty::notifyChange(VProperty* p)
+{
+	if(master_ && p== master_ && useMaster_)
+	{
+		value_=master_->value_;
+		dispatchChange();
+	}
 }
 
 //=============================

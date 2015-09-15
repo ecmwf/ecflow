@@ -262,7 +262,7 @@
        x2="2.2564189"
        y2="25.726259"
        gradientUnits="userSpaceOnUse"
-       gradientTransform="matrix(0.77976303,0,0,0.76912919,0.0689839,7.3549502)" />
+       gradientTransform="matrix(0.4703733,0,0,0.76912919,0.26049211,7.3549502)" />
     <linearGradient
        inkscape:collect="always"
        id="linearGradient4194">
@@ -361,7 +361,7 @@
     <rect
        style="fill:url(#linearGradient4200);fill-opacity:1;stroke:#4d4d4d;stroke-width:0.80585694;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
        id="rect3804-6"
-       width="24.023535"
+       width="14.49162"
        height="23.896389"
        x="0.55164707"
        y="7.7034259"
@@ -374,14 +374,6 @@
        x="0.83681494"
        y="8.0130262"
        ry="0.27575642" />
-    <rect
-       style="fill:#004455;fill-opacity:1;stroke:none;display:inline"
-       id="rect4858"
-       width="6.4622827"
-       height="2.8239846"
-       x="14.206254"
-       y="16.678402"
-       ry="0.35299808" />
     <ellipse
        style="fill:url(#linearGradient3813);fill-opacity:1;fill-rule:evenodd;stroke:#4b8600;stroke-width:0.66774601000000000;stroke-opacity:1;display:inline"
        id="path2978-9"
@@ -416,14 +408,6 @@
        width="6.4622827"
        id="rect4864"
        style="fill:#004455;fill-opacity:1;stroke:none;display:inline" />
-    <rect
-       style="fill:#004455;fill-opacity:1;stroke:none;display:inline"
-       id="rect4866"
-       width="6.4622827"
-       height="2.8239846"
-       x="14.206254"
-       y="23.301228"
-       ry="0.35299808" />
   </g>
   <g
      inkscape:groupmode="layer"

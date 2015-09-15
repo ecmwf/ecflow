@@ -83,12 +83,14 @@ public:
 
     void setMaster(VProperty*);
     VProperty* master() const {return master_;}
+    void setUseMaster(bool);
+    bool useMaster() const {return useMaster_;}
     VProperty *clone(bool addLink,bool setMaster);
 
     void addObserver(VPropertyObserver*);
     void removeObserver(VPropertyObserver*);
 
-    void notifyChange(VProperty*) {}
+    void notifyChange(VProperty*);
 
     static bool isColour(const std::string&);
     static bool isFont(const std::string&);

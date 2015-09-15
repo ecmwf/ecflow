@@ -132,6 +132,14 @@ void TableNodeWidget::on_actionBreadcrumbs_triggered(bool b)
 	//bcWidget_->clear();
 }
 
+
+void TableNodeWidget::rerender()
+{
+	bcWidget_->rerender();
+	view_->rerender();
+}
+
+
 void TableNodeWidget::writeSettings(VSettings* vs)
 {
 	vs->put("type","table");

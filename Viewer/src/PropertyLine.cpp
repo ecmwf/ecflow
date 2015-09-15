@@ -82,6 +82,7 @@ PropertyLine::PropertyLine(VProperty* vProp,bool addLabel,QWidget * parent) :
 	defaultTb_= new QToolButton(parent);
 	defaultTb_->setToolTip(tr("Reset to default value"));
     defaultTb_->setIcon(QPixmap(":/viewer/reset_to_default.svg"));
+    defaultTb_->setAutoRaise(true);
 
     connect(defaultTb_,SIGNAL(clicked(bool)),
     	    this,SLOT(slotResetToDefault(bool)));
@@ -92,10 +93,30 @@ PropertyLine::PropertyLine(VProperty* vProp,bool addLabel,QWidget * parent) :
     	masterTb_->setCheckable(true);
     	masterTb_->setText("Use global");
     	masterTb_->setToolTip(tr("Use global server settings"));
+    	masterTb_->setIcon(QPixmap(":/viewer/chain.svg"));
+    	masterTb_->setAutoRaise(true);
+    	masterTb_->setChecked(vProp->useMaster());
 
     	connect(masterTb_,SIGNAL(toggled(bool)),
     				this,SLOT(slotMaster(bool)));
+
     }
+}
+
+void PropertyLine::init()
+{
+	if(prop_->master())
+	{
+		if(masterTb_->isChecked() != prop_->useMaster())
+			masterTb_->setChecked(prop_->useMaster());
+		else
+			slotMaster(prop_->useMaster());
+
+	}
+	else
+	{
+		reset(prop_->value());
+	}
 }
 
 void PropertyLine::slotResetToDefault(bool)
@@ -106,6 +127,9 @@ void PropertyLine::slotResetToDefault(bool)
 
 void PropertyLine::checkState()
 {
+	if(prop_->master() && prop_->useMaster())
+		return;
+
 	if(prop_->defaultValue() != currentValue())
 		defaultTb_->setEnabled(true);
 	else
@@ -114,15 +138,18 @@ void PropertyLine::checkState()
 
 void PropertyLine::slotMaster(bool b)
 {
+	prop_->setUseMaster(b);
+	reset(prop_->value());
 	if(b)
 	{
-		reset(prop_->master()->value());
 		defaultTb_->setEnabled(false);
+		setEnabledEditable(false);
 	}
 	else
 	{
 		defaultTb_->setEnabled(true);
 		checkState();
+		setEnabledEditable(true);
 	}
 
 }
@@ -181,6 +208,12 @@ void StringPropertyLine::slotEdited(QString)
 	PropertyLine::checkState();
 }
 
+
+void StringPropertyLine::setEnabledEditable(bool b)
+{
+	le_->setEnabled(b);
+}
+
 //=========================================================================
 //
 // ColourPropertyLine
@@ -198,7 +231,7 @@ ColourPropertyLine::ColourPropertyLine(VProperty* vProp,bool addLabel,QWidget * 
 	int width=fm.width("AAAAAAA");
 
 	cb_=new QToolButton(parent);
-	cb_->setAutoFillBackground(true);
+	//cb_->setAutoFillBackground(true);
     cb_->setFixedWidth(width);
     cb_->setFixedHeight(height+2);
     cb_->setToolTip(tr("Click to select a colour"));
@@ -220,9 +253,21 @@ QWidget* ColourPropertyLine::button()
 void ColourPropertyLine::reset(QVariant v)
 {
 	QColor c=v.value<QColor>();
+	QColor b=c.darker(160);
 
-	QString sh("QToolButton{background: rgb(" + QString::number(c.red()) + "," +
-			QString::number(c.green()) + "," + QString::number(c.blue()) + ");}");
+	QString cStr="rgb(" + QString::number(c.red()) + "," +
+			QString::number(c.green()) + "," +
+			QString::number(c.blue()) + ")";
+
+	QString bStr="rgb(" + QString::number(b.red()) + "," +
+				QString::number(b.green()) + "," +
+				QString::number(b.blue()) + ")";
+
+	QString sh("QToolButton{background: " + cStr + ";" +
+			"border-radius: 0px; " +
+	        "padding: 0px; " +
+			"border: 1px solid " + bStr + ";}");
+
 	cb_->setStyleSheet(sh);
 
 	currentCol_=c;
@@ -259,6 +304,12 @@ QVariant ColourPropertyLine::currentValue()
 {
 	return currentCol_;
 }
+
+void ColourPropertyLine::setEnabledEditable(bool b)
+{
+	cb_->setEnabled(b);
+}
+
 
 //=========================================================================
 //
@@ -325,6 +376,11 @@ bool FontPropertyLine::applyChange()
 QVariant FontPropertyLine::currentValue()
 {
 	return font_;
+}
+
+void FontPropertyLine::setEnabledEditable(bool b)
+{
+	tbEdit_->setEnabled(b);
 }
 
 //=========================================================================
@@ -397,6 +453,11 @@ void IntPropertyLine::slotEdited(QString)
 	PropertyLine::checkState();
 }
 
+void IntPropertyLine::setEnabledEditable(bool b)
+{
+	le_->setEnabled(b);
+}
+
 //=========================================================================
 //
 // BoolPropertyLine
@@ -448,6 +509,12 @@ void BoolPropertyLine::slotStateChanged(int)
 {
 	PropertyLine::checkState();
 }
+
+void BoolPropertyLine::setEnabledEditable(bool b)
+{
+	cb_->setEnabled(b);
+}
+
 
 static PropertyLineMaker<StringPropertyLine> makerStr(VProperty::StringType);
 static PropertyLineMaker<ColourPropertyLine> makerCol(VProperty::ColourType);

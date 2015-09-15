@@ -17,6 +17,30 @@
                 "title"  :    "Change: restarted tasks",
                 "labelText" : "Restarted", 
                 "widgetText" : "Re"                   
+            }, 
+            "late": {
+                "background": "rgb(64,224,208)",
+                "foregorund": "rgb(0,0,0)",
+                "border":     "rgb(200,200,200)",
+                "title"  :    "Change: late tasks",
+                "labelText" : "Late", 
+                "widgetText" : "L"                   
+            },
+            "zombie": {
+                "background": "rgb(64,224,208)",
+                "foregorund": "rgb(0,0,0)",
+                "border":     "rgb(200,200,200)",
+                "title"  :    "Change: zombies",
+                "labelText" : "Zombies", 
+                "widgetText" : "Z"                   
+            },
+            "alias": {
+                "background": "rgb(64,224,208)",
+                "foregorund": "rgb(0,0,0)",
+                "border":     "rgb(200,200,200)",
+                "title"  :    "Change: aliases",
+                "labelText" : "Aliases", 
+                "widgetText" : "Al"                   
             }
        
        }

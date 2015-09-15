@@ -101,6 +101,8 @@ public:
 	void notifyServerConnectState(ServerHandler* server);
 	void notifyServerActivityChanged(ServerHandler* server);
 
+	void rerender();
+
 	void writeSettings(VSettings *vs);
 	void readSettings(VSettings *vs);
 

@@ -75,6 +75,7 @@ public:
 	QToolButton* defaultTb() {return defaultTb_;};
 	QToolButton* masterTb() {return masterTb_;};
 
+	void init();
 	virtual void reset(QVariant)=0;
 	virtual bool applyChange()=0;
 	virtual QVariant currentValue()=0;
@@ -85,6 +86,8 @@ protected Q_SLOTS:
 	void checkState();
 
 protected:
+	virtual void setEnabledEditable(bool)=0;
+
 	VProperty* prop_;
 	QVariant val_;
 	QLabel* label_;
@@ -112,6 +115,9 @@ public:
 public Q_SLOTS:
 	void slotEdited(QString);
 
+protected:
+	void setEnabledEditable(bool);
+
 private:
 	QLineEdit* le_;
 };
@@ -134,6 +140,9 @@ public:
 
 private Q_SLOTS:
 	void slotEdit(bool);
+
+protected:
+	void setEnabledEditable(bool);
 
 private:
 	QToolButton* cb_;
@@ -158,6 +167,9 @@ public:
 
 private Q_SLOTS:
 	void slotEdit(bool);
+
+protected:
+	void setEnabledEditable(bool);
 
 private:
 	QLabel* lName_;
@@ -184,6 +196,9 @@ public:
 public Q_SLOTS:
 	void slotEdited(QString);
 
+protected:
+	void setEnabledEditable(bool);
+
 private:
 	QLineEdit* le_;
 };
@@ -206,6 +221,9 @@ public:
 
 public Q_SLOTS:
 	void slotStateChanged(int);
+
+protected:
+	void setEnabledEditable(bool);
 
 private:
 	QCheckBox* cb_;

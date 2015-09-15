@@ -622,6 +622,11 @@ void InfoPanel::notifyServerSyncFinished(ServerHandler* server)
 	}
 }
 
+void InfoPanel::rerender()
+{
+	bcWidget_->rerender();
+}
+
 void InfoPanel::writeSettings(VSettings* vs)
 {
 	vs->put("type","info");

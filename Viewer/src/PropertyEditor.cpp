@@ -114,7 +114,8 @@ void PropertyEditor::addLine(VProperty *vProp,QGridLayout *gridLayout)
 
     if(item)
     {
-    	item->reset(vProp->link()->value());
+    	item->init();
+    	//item->reset(vProp->link()->value());
 
         int row=gridLayout->rowCount();
 
@@ -250,7 +251,8 @@ void PropertyEditor::addGridRow(VProperty* vProp,QGridLayout *grid)
 
             if(item)
             {
-                item->reset(chProp->link()->value());
+                item->init();
+            	//item->reset(chProp->link()->value());
 
             //QLabel* lw=item->label();
             //QLabel* slw=item->suffixLabel();
@@ -263,11 +265,16 @@ void PropertyEditor::addGridRow(VProperty* vProp,QGridLayout *grid)
 
 
             QToolButton* defTb=item->defaultTb();
-            if(defTb)
+            QToolButton* masterTb=item->masterTb();
+            if(defTb || masterTb)
             {
                 QHBoxLayout *hb=new QHBoxLayout();
                 hb->addWidget(item->item());
-                hb->addWidget(defTb);
+                if(defTb)
+                	hb->addWidget(defTb);
+                if(masterTb)
+                	hb->addWidget(masterTb);
+
                 hb->addSpacing(15);
                 hb->addStretch(1);
                 grid->addLayout(hb,row,col);

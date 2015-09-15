@@ -66,7 +66,7 @@ public:
     //From DashboardWidget
     void populateDockTitleBar(DashboardDockTitleWidget*);
 	void reload() {};
-	void rerender() {};
+	void rerender();
 	void writeSettings(VSettings*);
 	void readSettings(VSettings*);
 

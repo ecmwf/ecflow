@@ -76,7 +76,7 @@ int main(int argc, char **argv)
     std::string menuPath = DirectoryHandler::concatenate(DirectoryHandler::etcDir(), menuFilename);
     MenuHandler::readMenuConfigFile(menuPath);
 
-    //Load the infopanel definition
+    //Load the info panel definition
     std::string panelFile = DirectoryHandler::concatenate(DirectoryHandler::etcDir(), "ecflowview_panels.json");
     InfoPanelHandler::instance()->init(panelFile);
 
@@ -88,7 +88,10 @@ int main(int argc, char **argv)
     
     //Import server settings from the previous viewer
     if(DirectoryHandler::isFirstStartUp())
+    {
+    	VConfig::instance()->importSettings();
     	VServerSettings::importRcFiles();
+    }
     
     //Initialise highlighter
     Highlighter::init(DirectoryHandler::concatenate(DirectoryHandler::etcDir(),

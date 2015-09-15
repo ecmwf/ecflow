@@ -20,6 +20,7 @@
 #include <QDebug>
 
 #include <boost/property_tree/json_parser.hpp>
+#include <boost/algorithm/string.hpp>
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/path.hpp>
 
@@ -305,5 +306,259 @@ void VConfig::loadSettings(const std::string& parFile,VProperty* guiProp)
 			std::string val=pt.get<std::string>((*it)->path());
 			(*it)->setValue(val);
 		}
+		else
+		{
+			if((*it)->master())
+			{
+				(*it)->setUseMaster(true);
+			}
+		}
+
 	}
 }
+
+void VConfig::loadSettings(const boost::property_tree::ptree& pt,VProperty* guiProp)
+{
+	std::vector<VProperty*> linkVec;
+	guiProp->collectLinks(linkVec);
+
+	for(std::vector<VProperty*>::const_iterator it=linkVec.begin(); it != linkVec.end(); ++it)
+	{
+		if(pt.get_child_optional((*it)->path()) != boost::none)
+		{
+			std::string val=pt.get<std::string>((*it)->path());
+			(*it)->setValue(val);
+		}
+	}
+}
+
+void VConfig::importSettings()
+{
+	boost::property_tree::ptree pt;
+
+	std::string globalRcFile(DirectoryHandler::concatenate(DirectoryHandler::rcDir(),"user.default.options"));
+	if(readRcFile(globalRcFile,pt))
+	{
+		VProperty* gr=VConfig::find("gui");
+		loadSettings(pt,gr);
+		VConfig::saveSettings();
+	}
+}
+
+bool VConfig::readRcFile(const std::string& rcFile,boost::property_tree::ptree& pt)
+{
+	std::ifstream in(rcFile.c_str());
+
+	if(!in.good())
+		return false;;
+
+	bool hasValue=false;
+
+	std::string line;
+	while(getline(in,line))
+	{
+		std::string buf;
+		std::stringstream ssdata(line);
+		std::vector<std::string> vec;
+
+		while(ssdata >> buf)
+		{
+			vec.push_back(buf);
+		}
+
+		if(vec.size() >= 1)
+		{
+			std::vector<std::string> par;
+			boost::split(par,vec[0],boost::is_any_of(":"));
+
+			if(par.size()==2)
+			{
+				//Update
+				if(par[0] == "timeout")
+				{
+					pt.put("server.update.updateRateInSec",par[1]);
+					hasValue=true;
+				}
+				else if(par[0] == "poll")
+				{
+					pt.put("server.update.update",par[1]);
+					hasValue=true;
+				}
+
+				else if(par[0] == "drift")
+				{
+					pt.put("server.update.adaptiveUpdate",par[1]);
+					hasValue=true;
+				}
+				else if(par[0] == "maximum")
+				{
+					pt.put("server.update.maxAdaptiveUpdateRateInMin",par[1]);
+					hasValue=true;
+				}
+
+				//Files
+				else if(par[0] == "direct_read")
+				{
+					pt.put("server.files.readFilesFromDisk",par[1]);
+					hasValue=true;
+				}
+				else if(par[0] == "jobfile_length")
+				{
+					pt.put("server.files.maxJobFileLines",par[1]);
+					hasValue=true;
+				}
+
+				//Popup
+				else if(par[0] == "aborted")
+				{
+					pt.put("server.notification.aborted.enabled",par[1]);
+					pt.put("server.notification.aborted.popup",par[1]);
+					hasValue=true;
+				}
+				else if(par[0] == "restarted")
+				{
+					pt.put("server.notification.restarted.enabled",par[1]);
+					pt.put("server.notification.restarted.popup",par[1]);
+					hasValue=true;
+				}
+				else if(par[0] == "late")
+				{
+					pt.put("server.notification.late.enabled",par[1]);
+					pt.put("server.notification.late.popup",par[1]);
+					hasValue=true;
+				}
+				else if(par[0] == "zombies")
+				{
+					pt.put("server.notification.zombie.enabled",par[1]);
+					pt.put("server.notification.zombie.popup",par[1]);
+					hasValue=true;
+				}
+				else if(par[0] == "aliases")
+				{
+					pt.put("server.notification.alias.enabled",par[1]);
+					pt.put("server.notification.alias.popup",par[1]);
+					hasValue=true;
+				}
+				//Suites
+				else if(par[0] == "new_suites")
+				{
+					pt.put("suite_filter.autoAddNew",par[1]);
+					hasValue=true;
+
+				}
+				else if(par[0] == "suites")
+				{
+					boost::property_tree::ptree suites;
+					suites.push_back(std::make_pair("",par[1]));
+
+					for(unsigned int j=1; j < vec.size(); j++)
+					{
+						suites.push_back(std::make_pair("",vec.at(j)));
+					}
+
+					pt.put_child("suite_filter.suites",suites);
+
+					pt.put("suite_filter.enabled","true");
+
+					hasValue=true;
+				}
+			}
+		}
+
+	} //while(getline)
+
+	in.close();
+
+	return hasValue;
+
+}
+/*
+void VConfig::decodeShowMask()
+{
+
+option<int> show::status32_ (globals::instance(), "show_mask32", 0);
+
+option<int> show::status_ (globals::instance(), "show_mask",
+			     (1<<show::unknown)
+			     |(1<<show::suspended)
+			     |(1<<show::complete)
+			     |(1<<show::queued)
+			     |(1<<show::submitted)
+			     |(1<<show::active)
+			     |(1<<show::aborted)
+			     |(1<<show::time_dependant)
+			     |(1<<show::late_nodes)
+			   //			     |(1<<show::migrated_nodes)
+			     |(1<<show::rerun_tasks)
+			     |(1<<show::nodes_with_messages)
+			     |(1<<show::label)
+			     |(1<<show::meter)
+			     |(1<<show::event)
+			     |(1<<show::repeat)
+			     |(1<<show::time)
+			     |(1<<show::date)
+			     |(1<<show::late)
+			     |(1<<show::inlimit)
+			     |(1<<show::limit)
+			     |(1<<show::trigger)
+			     //	& (~(1<<show::variable))
+			     //	& (~(1<<show::genvar))
+			     |(1<<show::time_icon)
+			     |(1<<show::date_icon)
+			     |(1<<show::late_icon)
+			     |(1<<show::waiting_icon)
+			     |(1<<show::rerun_icon)
+			   // |(1<<show::migrated_icon)
+			     |(1<<show::message_icon)
+ // & (~(1<<show::defstatus_icon)) & (~(1<<show::zombie_icon))
+			     );
+
+show::show(int f) : flag_(f) {
+  status_ = status_ & (~(1<<show::variable));
+  status_ = status_ & (~(1<<show::genvar));
+}
+
+show::~show() {}
+
+void show::on()
+{
+  if (flag_ > 31) {
+    status32_ = int(status32_) | (1<<(flag_-32));
+  } else {
+    status_   = int(status_  ) | (1<<(flag_));
+  }
+}
+
+void show::off()
+{
+  if (flag_ == show::all) {
+    status_ = 0xFFFF ; status32_ = 0xFFFF;
+    status32_ = (int) (status32_) & (~(1<<(show::none-32)));
+    status32_ = (int) (status32_) & (~(1<<(show::all -32)));
+  } else if (flag_ == show::none) {
+    status_ = 0; status32_ = 0;
+  } else if (flag_ > 31) {
+    status32_ = int(status32_) & (~(1<<(flag_-32)));
+  } else {
+    status_   = int(status_)   & (~(1<<flag_));
+  }
+}
+
+bool show::wanted()
+{
+  if (flag_ > 31) {
+    return (int(status32_) & (1<<(flag_-32))) != 0;
+  } else {
+    return (int(status_  ) & (1<<flag_))    != 0;
+  }
+
+*/
+
+
+
+
+
+
+
+
+

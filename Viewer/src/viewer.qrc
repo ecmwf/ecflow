@@ -26,15 +26,15 @@
     <file>../images/configure.svg</file>
     <file>../images/exit.svg</file>
     <file alias="add_tab.svg">../images/add_tab.svg</file>
+    <file alias="chain.svg">../images/chain.svg</file> 
+    <file alias="clear_left.svg">../images/clear_left.svg</file>
+    <file alias="colour.svg">../images/colour.svg</file>
     <file alias="directory_arrow.svg">../images/directory_arrow.svg</file>
-    <file alias="server.svg">../images/server.svg</file>
-    <file alias="drawer_open.svg">../images/drawer_open.svg</file>
-    <file alias="drawer_close.svg">../images/drawer_close.svg</file>
     <file alias="dock_config.svg">../images/dock_config.svg</file>
     <file alias="dock_info.svg">../images/dock_info.svg</file>
     <file alias="dock_menu_indicator.png">../images/dock_menu_indicator.png</file>
-    <file alias="clear_left.svg">../images/clear_left.svg</file>
-    <file alias="colour.svg">../images/colour.svg</file>
+    <file alias="drawer_open.svg">../images/drawer_open.svg</file>
+    <file alias="drawer_close.svg">../images/drawer_close.svg</file>
     <file alias="edit.svg">../images/edit.svg</file>
     <file alias="editcopy.svg">../images/editcopy.svg</file>
     <file alias="editpaste.svg">../images/editpaste.svg</file>
@@ -61,6 +61,7 @@
     <file alias="script.svg">../images/script.svg</file>
     <file alias="script_dock.svg">../images/script_dock.svg</file>
     <file alias="search_decor.svg">../images/search_decor.svg</file>    
+    <file alias="server.svg">../images/server.svg</file>
     <file alias="spinning_wheel.gif">../images/spinning_wheel.gif</file>
     <file alias="sync.svg">../images/sync.svg</file>
     <file alias="terminate.svg">../images/terminate.svg</file>

@@ -132,6 +132,12 @@ void TreeNodeWidget::on_actionBreadcrumbs_triggered(bool b)
 	//bcWidget_->clear();
 }
 
+void TreeNodeWidget::rerender()
+{
+	bcWidget_->rerender();
+	view_->rerender();
+}
+
 bool TreeNodeWidget::selectFirstServerInView()
 {
 	view_->selectFirstServer();

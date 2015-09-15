@@ -43,7 +43,6 @@ public:
 	VInfo_ptr currentSelection();
 	void currentSelection(VInfo_ptr info);
 	void reload();
-	void rerender();
     void populateDialog() {};
     QList<QAction*> dockTitleActions() {return dockActions_;}
 

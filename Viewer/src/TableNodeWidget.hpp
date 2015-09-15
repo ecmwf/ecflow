@@ -27,6 +27,7 @@ public:
 	~TableNodeWidget();
 
     void populateDockTitleBar(DashboardDockTitleWidget* tw);
+    void rerender();
 
 	void writeSettings(VSettings*);
 	void readSettings(VSettings*);

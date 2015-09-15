@@ -48,6 +48,8 @@ protected:
 	void loadSettings();
 	void saveSettings();
 
+	//static bool readRcFile(const std::string& rcFile,boost::property_tree::ptree& pt);
+
 	ServerHandler* server_;
 	VProperty* prop_;
 	VProperty* guiProp_;

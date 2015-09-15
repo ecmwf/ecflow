@@ -28,8 +28,11 @@
 
 static std::map<std::string,ChangeNotify*> items;
 
-static AbortedNotify abortedNotify("aborted");
-static RestartedNotify restaredtNotify("restarted");
+static ChangeNotify abortedNotify("aborted");
+static ChangeNotify restaredtNotify("restarted");
+static ChangeNotify lateNotify("late");
+static ChangeNotify zombieNotify("zombie");
+static ChangeNotify aliasNotify("alias");
 
 ChangeNotifyDialog* ChangeNotify::dialog_=0;
 
