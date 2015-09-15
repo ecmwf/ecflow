@@ -253,6 +253,15 @@ void NodePanel::resetCurrent()
 	}
 }
 
+void NodePanel::init()
+{
+	Dashboard* nw=addWidget("");
+	if(nw)
+	{
+		nw->addWidget("tree");
+	}
+}
+
 //==========================================================
 //
 // Save/restore settings

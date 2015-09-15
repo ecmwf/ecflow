@@ -99,7 +99,9 @@ MainWindow::~MainWindow()
 
 void MainWindow::init(MainWindow *win)
 {
-  	if(!win)
+	nodePanel_->init();
+
+	if(!win)
 	  	return;
 }
 

@@ -508,7 +508,7 @@
             "menu"           : "Node",
             "name"           : "Output ...",
             "visible_for"    : "task",        
-            "command"        : "otput",
+            "command"        : "output",
             "handler"        : "info_panel",
             "icon"           : "output.svg"          
         },

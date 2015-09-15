@@ -125,6 +125,7 @@ bool MenuHandler::readMenuConfigFile(const std::string &configFile)
                 std::string visible  = ItemDef.get("visible_for", "");
                 std::string handler  = ItemDef.get("handler", "");
                 std::string icon     = ItemDef.get("icon", "");
+                std::string hidden   = ItemDef.get("hidden", "false");
                 //std::cout << "  " << name << " :" << menuName << std::endl;
 
                 UserMessage::message(UserMessage::DBG, false, std::string("  " + name));
@@ -151,6 +152,8 @@ bool MenuHandler::readMenuConfigFile(const std::string &configFile)
 
                 item->setHandler(handler);
                 item->setIcon(icon);
+                if(hidden == "true")
+                	item->setHidden(true);
 
                 if (type == "Submenu")
                     item->setAsSubMenu();
@@ -379,6 +382,9 @@ QMenu *Menu::generateMenu(std::vector<VInfo_ptr> nodes, QWidget *parent)
     {
         //  is this item valid for the current selection?
 
+    	if((*itItems)->hidden())
+    		continue;
+
         bool visible = true;
 
         for (std::vector<VInfo_ptr>::iterator itNodes = nodes.begin(); itNodes != nodes.end(); ++itNodes)
@@ -432,8 +438,14 @@ QMenu *Menu::generateMenu(std::vector<VInfo_ptr> nodes, QWidget *parent)
 // MenuItem class functions
 // ------------------------
 
-MenuItem::MenuItem(const std::string &name) : name_(name), action_(0), isSubMenu_(false), isDivider_(false),
-		 visibleCondition_(NULL), enabledCondition_(NULL)
+MenuItem::MenuItem(const std::string &name) :
+   name_(name),
+   action_(0),
+   hidden_(false),
+   visibleCondition_(NULL),
+   enabledCondition_(NULL),
+   isSubMenu_(false),
+   isDivider_(false)
 {
     if (name == "-")
     {

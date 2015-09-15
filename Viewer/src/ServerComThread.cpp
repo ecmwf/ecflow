@@ -94,8 +94,20 @@ void ServerComThread::run()
 				UserMessage::message(UserMessage::DBG, false, std::string(" COMMAND"));
 				ArgvCreator argvCreator(command_);
 				//UserMessage::message(UserMessage::DBG, false, argvCreator.toString());
+
 				ci_->invoke(argvCreator.argc(), argvCreator.argv());
+
+				/*ci_->news_local();
+				switch (ci_->server_reply().get_news())
+				{
+					case ServerReply::NO_NEWS:
+					case ServerReply::NEWS:
+						ci_->sync_local();
+						break;
+					case ServerReply::DO_FULL_SYNC:
+
 				break;
+				}*/
 			}
 
 			case VTask::NewsTask:
@@ -115,7 +127,7 @@ void ServerComThread::run()
                 }
 
 				//If there was a significant change
-                //we need attach the nodes to the observer and
+                //we need to attach the nodes to the observer and
                 //update the registered suites. Server handler will update its tree when it is modified.
                 if(ci_->server_reply().full_sync())
                 {

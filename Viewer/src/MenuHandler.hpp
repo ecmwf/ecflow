@@ -41,6 +41,7 @@ public:
     //void addValidState(std::string type);
     void setHandler(const std::string &handler);
     void setIcon(const std::string &icon);
+    void setHidden(bool b) {hidden_=b;}
     void setAsSubMenu() {isSubMenu_ = true;};
     void setVisibleCondition(BaseNodeCondition *cond) {visibleCondition_ = cond;};
     void setEnabledCondition(BaseNodeCondition *cond) {enabledCondition_ = cond;};
@@ -51,6 +52,7 @@ public:
     std::string &name()   {return name_;};
     const std::string handler() const {return handler_;}
     const std::string command() const {return command_;}
+    bool hidden() const {return hidden_;}
     QAction     *action() {return action_;};
 
 private:
@@ -63,6 +65,7 @@ private:
     std::string question_;
     std::string defaultAnswer_;
     std::string handler_;
+    bool hidden_;
 
     //std::vector<NodeType>      validNodeTypes_;
     //std::vector<DState::State> validNodeStates_;

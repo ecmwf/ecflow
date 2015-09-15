@@ -151,7 +151,9 @@ ChangeNotifyDialog* ChangeNotify::dialog()
 
 void  ChangeNotify::showDialog(const std::string& id)
 {
+	dialog()->setCurrentTab(id);
 	dialog()->show();
+	dialog()->raise();
 }
 
 void ChangeNotify::populate(ChangeNotifyWidget* w)
@@ -161,8 +163,6 @@ void ChangeNotify::populate(ChangeNotifyWidget* w)
 		w->addTb(it->second);
 	}
 }
-
-
 
 static SimpleLoader<ChangeNotify> loaderTable("notification");
 
