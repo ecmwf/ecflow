@@ -37,8 +37,14 @@ public Q_SLOTS:
 	void on_clearCPb__clicked(bool b);
 
 protected:
+	std::string tabToId(int tabIdx);
+	int idToTab(const std::string& id);
+	void writeSettings();
+	void readSettings();
+
 	ChangeNotifyModel* model_;
-	std::map<std::string,int> tabMap_;
+	std::map<std::string,int> idToTabMap_;
+	std::map<int,std::string> tabToIdMap_;
 };
 
 #endif

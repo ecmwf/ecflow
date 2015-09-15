@@ -156,6 +156,15 @@ void  ChangeNotify::showDialog(const std::string& id)
 	dialog()->raise();
 }
 
+void ChangeNotify::clearData(const std::string& id)
+{
+	if(ChangeNotify* obj=ChangeNotify::find(id))
+	{
+		obj->data()->clear();
+	}
+}
+
+
 void ChangeNotify::populate(ChangeNotifyWidget* w)
 {
 	for(std::map<std::string,ChangeNotify*>::iterator it=items.begin(); it != items.end(); ++it)

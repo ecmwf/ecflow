@@ -37,6 +37,7 @@ public:
 	static void setEnabled(const std::string&,bool);
 	static void populate(ChangeNotifyWidget* w);
 	static void showDialog(const std::string& id);
+	static void clearData(const std::string& id);
 
 	//Called from VConfigLoader
 	static void load(VProperty* group);

@@ -10,6 +10,7 @@
 
 #include "ChangeNotifyDialog.hpp"
 
+#include "ChangeNotify.hpp"
 #include "ChangeNotifyModel.hpp"
 #include "TreeView.hpp"
 #include "VNodeList.hpp"
@@ -17,6 +18,8 @@
 
 #include <QDebug>
 #include <QPainter>
+#include <QSettings>
+#include <QVariant>
 
 ChangeNotifyDialog::ChangeNotifyDialog(QWidget *parent) :
 	QDialog(parent),
@@ -76,24 +79,26 @@ void ChangeNotifyDialog::addTab(const std::string id,VProperty* prop, ChangeNoti
 
 	tab_->addTab(tree,"");
 	tab_->setCustomIcon(tab_->count()-1,pix);
-	tabMap_[id]=tab_->count()-1;
+	int idx=tab_->count()-1;
+	idToTabMap_[id]=idx;
+	tabToIdMap_[idx]=id;
 }
 
 void ChangeNotifyDialog::setCurrentTab(const std::string& id)
 {
-	std::map<std::string,int>::const_iterator it=tabMap_.find(id);
-	if(it != tabMap_.end())
+	int tabIdx=idToTab(id);
+	if(tabIdx != -1)
 	{
-		tab_->setCurrentIndex(it->second);
+		tab_->setCurrentIndex(tabIdx);
 	}
 }
 
 void ChangeNotifyDialog::setEnabledTab(const std::string& id,bool b)
 {
-	std::map<std::string,int>::const_iterator it=tabMap_.find(id);
-	if(it != tabMap_.end())
+	int tabIdx=idToTab(id);
+	if(tabIdx != -1)
 	{
-		tab_->setTabEnabled(it->second,b);
+		tab_->setTabEnabled(tabIdx,b);
 	}
 }
 
@@ -105,11 +110,60 @@ void ChangeNotifyDialog::on_closePb__clicked(bool b)
 void ChangeNotifyDialog::on_clearCPb__clicked(bool b)
 {
 	hide();
-	//model_->data()->clear();
+	int idx=tab_->currentIndex();
+	if(idx != -1)
+	{
+		ChangeNotify::clearData(tabToId(idx));
+	}
+}
+
+std::string ChangeNotifyDialog::tabToId(int tabIdx)
+{
+	std::map<int,std::string>::const_iterator it=tabToIdMap_.find(tabIdx);
+		if(it != tabToIdMap_.end())
+			return it->second;
+
+	return std::string();
+}
+
+int ChangeNotifyDialog::idToTab(const std::string& id)
+{
+	std::map<std::string,int>::const_iterator it=idToTabMap_.find(id);
+	if(it != idToTabMap_.end())
+		return it->second;
+
+	return -1;
 }
 
 
+void ChangeNotifyDialog::writeSettings()
+{
+	QSettings settings("ECMWF","ecflowUI-PropertyDialog");
 
+	//We have to clear it so that should not remember all the previous values
+	settings.clear();
+
+	settings.beginGroup("main");
+	settings.setValue("size",size());
+	settings.endGroup();
+}
+
+void ChangeNotifyDialog::readSettings()
+{
+	QSettings settings("ECMWF","ecflowUI-PropertyDialog");
+
+	settings.beginGroup("main");
+	if(settings.contains("size"))
+	{
+		resize(settings.value("size").toSize());
+	}
+	else
+	{
+	  	resize(QSize(440,380));
+	}
+
+	settings.endGroup();
+}
 
 
 

@@ -43,7 +43,7 @@ void ChangeNotifyButton::setNotifier(ChangeNotify* notifier)
 	connect(notifier_->data(),SIGNAL(endAppendRow()),
 			this,SLOT(slotAppend()));
 
-	connect(notifier_->data(),SIGNAL((endReset())),
+	connect(notifier_->data(),SIGNAL(endReset()),
 				this,SLOT(slotReset()));
 
 	updateIcon();
@@ -56,6 +56,7 @@ void ChangeNotifyButton::slotAppend()
 
 void ChangeNotifyButton::slotReset()
 {
+	updateIcon();
 }
 
 void ChangeNotifyButton::slotClicked(bool)
@@ -121,9 +122,6 @@ void ChangeNotifyButton::updateIcon()
 	setIcon(pix);
 
 }
-
-
-
 
 
 ChangeNotifyWidget::ChangeNotifyWidget(QWidget *parent) : QWidget(parent)
