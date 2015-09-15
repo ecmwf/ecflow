@@ -40,6 +40,7 @@ public:
     //void addValidType(std::string type);
     //void addValidState(std::string type);
     void setHandler(const std::string &handler);
+    void setQuestion(const std::string &question) {question_=question;}
     void setIcon(const std::string &icon);
     void setHidden(bool b) {hidden_=b;}
     void setAsSubMenu() {isSubMenu_ = true;};
@@ -52,6 +53,7 @@ public:
     std::string &name()   {return name_;};
     const std::string handler() const {return handler_;}
     const std::string command() const {return command_;}
+    const std::string question() const {return question_;}
     bool hidden() const {return hidden_;}
     QAction     *action() {return action_;};
 

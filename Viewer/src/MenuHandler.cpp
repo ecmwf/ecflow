@@ -123,6 +123,7 @@ bool MenuHandler::readMenuConfigFile(const std::string &configFile)
                 std::string type     = ItemDef.get("type",        "Command");
                 std::string enabled  = ItemDef.get("enabled_for", "");
                 std::string visible  = ItemDef.get("visible_for", "");
+                std::string question = ItemDef.get("question", "");
                 std::string handler  = ItemDef.get("handler", "");
                 std::string icon     = ItemDef.get("icon", "");
                 std::string hidden   = ItemDef.get("hidden", "false");
@@ -150,8 +151,10 @@ bool MenuHandler::readMenuConfigFile(const std::string &configFile)
                 }
                 item->setVisibleCondition(visibleCond);
 
+                item->setQuestion(question);
                 item->setHandler(handler);
                 item->setIcon(icon);
+
                 if(hidden == "true")
                 	item->setHidden(true);
 

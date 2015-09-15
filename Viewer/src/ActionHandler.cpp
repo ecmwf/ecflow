@@ -2,6 +2,8 @@
 
 #include <QAction>
 #include <QMenu>
+#include <QMessageBox>
+
 #include "ServerHandler.hpp"
 #include "MenuHandler.hpp"
 #include "CustomCommandDialog.hpp"
@@ -34,7 +36,6 @@ void ActionHandler::contextMenu(std::vector<VInfo_ptr> nodesLst,QPoint pos)
     		}
     	}
 
-
     	if(action->iconText() == "Set as root")
         {
             Q_EMIT viewCommand(nodesLst,"set_as_root");
@@ -49,7 +50,18 @@ void ActionHandler::contextMenu(std::vector<VInfo_ptr> nodesLst,QPoint pos)
         }
         else
         {
-            ServerHandler::command(nodesLst,action->iconText().toStdString(), true);
+        	bool ok=true;
+        	if(item && !item->question().empty())
+        	{
+        		if(QMessageBox::question(parent_,tr("Question"),QString::fromStdString(item->question()),
+        				QMessageBox::Ok | QMessageBox::Cancel, QMessageBox::Ok) != QMessageBox::Ok)
+        		{
+        			ok=false;
+        		}
+        	}
+
+        	if(ok)
+        		ServerHandler::command(nodesLst,action->iconText().toStdString(), true);
         }
     }
 
