@@ -84,6 +84,46 @@
  			}
 			
  		},	
+ 		
+ 	  "notification":  {
+            "label": "Notifications",
+            "desc" : "Notifications",
+            "icon" : "colour.svg",
+            "grid" : {
+                    "title" : "Colours",                                    
+                    "h1" : "Fill colour",
+                    "h2" : "Font colour",                                      
+                            
+                    "row" : {
+                            "label" : "Restarted",
+                            "prefix" :  "notification.restarted",                     
+                            "line" :  "fill_colour",
+                            "line" :  "font_colour"                                                 
+                    },  
+                    "row" : {
+                            "label" : "Late",
+                            "prefix" :  "notification.late",                     
+                            "line" :  "fill_colour",
+                            "line" :  "font_colour"                       
+                    },  
+ 		            "row" : {
+                            "label" : "Zombie",
+                            "prefix" :  "notification.zombie",                     
+                            "line" :  "fill_colour",
+                            "line" :  "font_colour"                    
+                    },  
+ 		            "row" : {
+                            "label" : "Aborted or restarted aliases",
+                            "prefix" :  "notification.alias",                     
+                            "line" :  "fill_colour",
+                            "line" :  "font_colour"                    
+                    }  
+ 		        },
+ 		     "note" : {
+ 		            "default" : "For <b>Aborted</b> notifications colours are taken from the Status colour settings"
+ 		        }     
+ 		},        
+ 		
  			
  		"server": {
  			"label" : "Server options",

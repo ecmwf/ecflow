@@ -19,7 +19,6 @@
 #include "MainWindow.hpp"
 #include "ServerHandler.hpp"
 #include "MenuHandler.hpp"
-#include "ChangeNotify.hpp"
 #include "InfoPanelHandler.hpp"
 #include "DirectoryHandler.hpp"
 #include "Highlighter.hpp"
@@ -97,9 +96,6 @@ int main(int argc, char **argv)
     //Initialise highlighter
     Highlighter::init(DirectoryHandler::concatenate(DirectoryHandler::etcDir(),
     		      "ecflowview_highlighter.json"));
-
-    //Initialise the notifications
-    ChangeNotify::init();
 
     //Build the GUI
     MainWindow::init();

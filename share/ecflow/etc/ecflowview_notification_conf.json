@@ -2,8 +2,14 @@
     "notification":  {
 
             "aborted": {
-                "background": "rgb(255,0,0)",
-                "foregorund": "rgb(0,0,0)",
+                "fill_colour" : {
+                    "label" : "Colour",
+                    "default": "rgb(255,0,0)"
+                },
+                "font_colour" : {
+                    "label" : "Font colour",
+                    "default": "rgb(0,0,0)"
+                },                            
                 "border":     "rgb(200,200,200)",
                 "title"  :    "Change: aborted tasks",
                 "labelText" : "Aborted",
@@ -12,8 +18,14 @@
              },
  
             "restarted": {
-                "background": "rgb(64,224,208)",
-                "foregorund": "rgb(0,0,0)",
+                "fill_colour" : {
+                    "label" : "Colour",
+                    "default": "rgb(64,224,208)"
+                },
+                "font_colour" : {
+                    "label" : "Font colour",
+                    "default": "rgb(0,0,0)"
+                },                              
                 "border":     "rgb(200,200,200)",
                 "title"  :    "Change: restarted tasks",
                 "labelText" : "Restarted", 
@@ -21,8 +33,14 @@
                 "tooltip"    : "Notifications for tasks having <b>restarted</b>"                   
             }, 
             "late": {
-                "background": "rgb(64,224,208)",
-                "foregorund": "rgb(0,0,0)",
+                "fill_colour" : {
+                    "label" : "Colour",
+                    "default": "rgb(64,224,208)"
+                },
+                "font_colour" : {
+                    "label" : "Font colour",
+                    "default": "rgb(0,0,0)"
+                },                            
                 "border":     "rgb(200,200,200)",
                 "title"  :    "Change: late tasks",
                 "labelText" : "Late", 
@@ -30,8 +48,14 @@
                 "tooltip"    : "Notifications for tasks becoming <b>late</b>"                      
             },
             "zombie": {
-                "background": "rgb(64,224,208)",
-                "foregorund": "rgb(0,0,0)",
+                "fill_colour" : {
+                    "label" : "Colour",
+                    "default": "rgb(64,224,208)"
+                },
+                "font_colour" : {
+                    "label" : "Font colour",
+                    "default": "rgb(0,0,0)"
+                },                                
                 "border":     "rgb(200,200,200)",
                 "title"  :    "Change: zombies",
                 "labelText" : "Zombies", 
@@ -39,8 +63,14 @@
                 "tooltip"    : "Notifications for tasks becoming <b>zombies</b>"                     
             },
             "alias": {
-                "background": "rgb(64,224,208)",
-                "foregorund": "rgb(0,0,0)",
+                "fill_colour" : {
+                    "label" : "Colour",
+                    "default": "rgb(64,224,208)"
+                },
+                "font_colour" : {
+                    "label" : "Font colour",
+                    "default": "rgb(0,0,0)"
+                },                               
                 "border":     "rgb(200,200,200)",
                 "title"  :    "Change: aliases",
                 "labelText" : "Aliases", 

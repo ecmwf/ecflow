@@ -17,7 +17,7 @@
 
 #include "ui_ChangeNotifyDialog.h"
 
-class ChangeNotifyModel;
+class ChangeNotify;
 class VProperty;
 
 class ChangeNotifyDialog : public QDialog, protected Ui::ChangeNotifyDialog
@@ -27,10 +27,10 @@ Q_OBJECT
 public:
 	explicit ChangeNotifyDialog(QWidget *parent=0);
 
-	void init(VProperty*,ChangeNotifyModel*);
-	void addTab(const std::string id,VProperty* prop, ChangeNotifyModel* model);
+	void addTab(ChangeNotify*);
 	void setCurrentTab(const std::string&);
 	void setEnabledTab(const std::string& id,bool b);
+	void updateSettings(ChangeNotify*);
 
 public Q_SLOTS:
 	void on_closePb__clicked(bool b);
@@ -39,10 +39,10 @@ public Q_SLOTS:
 protected:
 	std::string tabToId(int tabIdx);
 	int idToTab(const std::string& id);
+	void decorateTab(int,VProperty*);
 	void writeSettings();
 	void readSettings();
 
-	ChangeNotifyModel* model_;
 	std::map<std::string,int> idToTabMap_;
 	std::map<int,std::string> tabToIdMap_;
 };

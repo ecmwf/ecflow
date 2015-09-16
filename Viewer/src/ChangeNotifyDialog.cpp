@@ -22,41 +22,31 @@
 #include <QVariant>
 
 ChangeNotifyDialog::ChangeNotifyDialog(QWidget *parent) :
-	QDialog(parent),
-	model_(0)
+	QDialog(parent)
 {
 	setupUi(this);
-
-	//model_=new ChangeNotifyModel(this);
-	//treeView_->setModel(model_);
 }
 
-void ChangeNotifyDialog::init(VProperty* prop, ChangeNotifyModel* model)
+void ChangeNotifyDialog::addTab(ChangeNotify* notifier)
 {
-	/*model_=model;
-	treeView_->setModel(model_);
+	const std::string& id=notifier->id();
 
-	if(prop)
-	{
-		QString sh="QLabel{ \
-		   background: " + prop->paramToColour("background").name() + "; \
-		   color: " + prop->paramToColour("foreground").name() + "; \
-	       border: 1px solid " +  prop->paramToColour("border").name() + "; \
-	       padding: 4 px; }";
-
-		label_->setStyleSheet(sh);
-		label_->setText(prop->param("labelText"));
-		setWindowTitle(prop->param("title"));
-	}*/
-}
-
-void ChangeNotifyDialog::addTab(const std::string id,VProperty* prop, ChangeNotifyModel* model)
-{
 	TreeView* tree=new TreeView(this);
 	tree->setRootIsDecorated(false);
 	tree->setUniformRowHeights(true);
-	tree->setModel(model);
+	tree->setModel(notifier->model());
 
+	tab_->addTab(tree,"");
+
+	int idx=tab_->count()-1;
+	idToTabMap_[id]=idx;
+	tabToIdMap_[idx]=id;
+
+	decorateTab(idx,notifier->prop());
+}
+
+void ChangeNotifyDialog::decorateTab(int tabIdx,VProperty *prop)
+{
 	//Create icon for tab
 	QFont f;
 	QFontMetrics fm(f);
@@ -65,7 +55,16 @@ void ChangeNotifyDialog::addTab(const std::string id,VProperty* prop, ChangeNoti
 	int w=fm.width(labelText);
 	int margin=4;
 	QPixmap pix(2*margin+w,2*margin+h);
-	pix.fill(prop->paramToColour("background"));
+
+	QColor bgCol(Qt::gray);
+	if(VProperty *p=prop->findChild("fill_colour"))
+		bgCol=p->value().value<QColor>();
+
+	QColor fgCol(Qt::black);
+	if(VProperty *p=prop->findChild("font_colour"))
+		fgCol=p->value().value<QColor>();
+
+	pix.fill(bgCol);
 
 	QRect labelRect(margin,margin+1,w,h);
 
@@ -74,15 +73,12 @@ void ChangeNotifyDialog::addTab(const std::string id,VProperty* prop, ChangeNoti
 	//painter.setPen(prop->paramToColour("border"));
 	//painter.drawRect(labelRect);
 
-	painter.setPen(prop->paramToColour("foreground"));
+	painter.setPen(fgCol);
 	painter.drawText(labelRect,labelText);
 
-	tab_->addTab(tree,"");
-	tab_->setCustomIcon(tab_->count()-1,pix);
-	int idx=tab_->count()-1;
-	idToTabMap_[id]=idx;
-	tabToIdMap_[idx]=id;
+	tab_->setCustomIcon(tabIdx,pix);
 }
+
 
 void ChangeNotifyDialog::setCurrentTab(const std::string& id)
 {
@@ -135,6 +131,14 @@ int ChangeNotifyDialog::idToTab(const std::string& id)
 	return -1;
 }
 
+void ChangeNotifyDialog::updateSettings(ChangeNotify* notifier)
+{
+	std::map<std::string,int>::const_iterator it=idToTabMap_.find(notifier->id());
+	if(it != idToTabMap_.end())
+	{
+		decorateTab(it->second,notifier->prop());
+	}
+}
 
 void ChangeNotifyDialog::writeSettings()
 {
@@ -164,11 +168,3 @@ void ChangeNotifyDialog::readSettings()
 
 	settings.endGroup();
 }
-
-
-
-
-
-
-
-

@@ -38,6 +38,7 @@ private:
     void addGroup(VProperty*);
     void addGrid(VProperty*);
     void addGridRow(VProperty* prop,QGridLayout *grid);
+    void addNote(VProperty* vProp);
 
     VProperty* group_;
     QGridLayout* currentGrid_;

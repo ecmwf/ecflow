@@ -86,14 +86,18 @@ void ChangeNotifyButton::updateIcon()
 
 	}
 
-	QColor bg;
-	QColor fg;
+	QColor bgCol(Qt::gray);
+	QColor fgCol(Qt::black);
 	QColor border;
 
 	if(notifier_->prop())
 	{
-		bg=notifier_->prop()->paramToColour("background");
-		fg=notifier_->prop()->paramToColour("foreground");
+		if(VProperty *p=notifier_->prop()->findChild("fill_colour"))
+			bgCol=p->value().value<QColor>();
+
+		if(VProperty *p=notifier_->prop()->findChild("font_colour"))
+			fgCol=p->value().value<QColor>();
+
 		border=notifier_->prop()->paramToColour("border");
 	}
 
@@ -116,10 +120,10 @@ void ChangeNotifyButton::updateIcon()
 	painter.setRenderHint(QPainter::TextAntialiasing,true);
 
 	QRect textRect(0,0,fm.width(text)+6,h);
-	painter.setBrush(bg);
+	painter.setBrush(bgCol);
 	painter.setPen(border);
 	painter.drawRoundedRect(textRect,2,2);
-	painter.setPen(fg);
+	painter.setPen(fgCol);
 	painter.setFont(f);
 	painter.drawText(textRect,Qt::AlignHCenter|Qt::AlignVCenter,text);
 
@@ -137,7 +141,6 @@ void ChangeNotifyButton::updateIcon()
 	setIcon(pix);
 
 }
-
 
 ChangeNotifyWidget::ChangeNotifyWidget(QWidget *parent) : QWidget(parent)
 {
@@ -189,27 +192,13 @@ void ChangeNotifyWidget::setEnabled(const std::string& id,bool b)
 	}
 }
 
-/*
-void ChangeNotifyWidget::update(const std::string& id)
+void ChangeNotifyWidget::updateSettings(const std::string& id)
 {
-	std::map<std::string,QToolButton*>::iterator it=tbMap_.find(id)
-	if(it != tbMap_.end())
+	for(std::vector<ChangeNotifyWidget*>::iterator it=widgets_.begin(); it!= widgets_.end(); it++)
 	{
-		QToolButton *tb=it->second;
-
-		ChangeNotify* n=ChangeNotify::find(id)
-
-		if(it != widgets_.end())
-}
-*/
-/*
-void ChangeNotifyWidget::changed(const std::string& id)
-{
-	for(std::vector<ChangeNotifyWidget*>::iterator it=widgets_.begin(); it != widgets_.end(); it++)
-	{
-		(*it)->update(id);
+		if(ChangeNotifyButton* tb=(*it)->findButton(id))
+		{
+			tb->updateIcon();
+		}
 	}
-
-	//ids <<  id;
 }
-*/

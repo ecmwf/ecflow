@@ -14,6 +14,8 @@
 #include <map>
 #include <string>
 
+#include "VProperty.hpp"
+
 class ChangeNotifyDialog;
 class ChangeNotifyModel;
 class ChangeNotifyWidget;
@@ -21,7 +23,7 @@ class VProperty;
 class VNode;
 class VNodeList;
 
-class ChangeNotify
+class ChangeNotify : public VPropertyObserver
 {
 public:
 	ChangeNotify(const std::string& id);
@@ -32,8 +34,10 @@ public:
 	ChangeNotifyModel* model() const {return model_;}
 	bool isEnabled() const {return enabled_;}
 
+	//Form VPropertyObserver
+	void notifyChange(VProperty*);
+
 	static void add(const std::string&,VNode*,bool,bool);
-	static void init();
 	static void setEnabled(const std::string&,bool);
 	static void populate(ChangeNotifyWidget* w);
 	static void showDialog(const std::string& id);
@@ -43,9 +47,12 @@ public:
 	static void load(VProperty* group);
 
 protected:
-	void make();
 	void add(VNode*,bool,bool);
 	void setEnabled(bool);
+	void setProperty(VProperty* prop);
+	void loadServerSettings();
+	virtual void loadNodeState() {};
+
 	static ChangeNotify* find(const std::string&);
 	static ChangeNotifyDialog* dialog();
 
@@ -61,16 +68,9 @@ class AbortedNotify : public ChangeNotify
 {
 public:
 	AbortedNotify(const std::string& id) : ChangeNotify(id) {}
+protected:
+	void loadNodeState();
 };
-
-class RestartedNotify : public ChangeNotify
-{
-public:
-	RestartedNotify(const std::string& id) : ChangeNotify(id) {}
-};
-
-
-
 
 
 #endif

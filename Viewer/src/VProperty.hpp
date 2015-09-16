@@ -81,7 +81,7 @@ public:
     void setLink(VProperty* p) {link_=p;}
     VProperty* link() const {return link_;}
 
-    void setMaster(VProperty*);
+    void setMaster(VProperty*,bool useMaster=false);
     VProperty* master() const {return master_;}
     void setUseMaster(bool);
     bool useMaster() const {return useMaster_;}

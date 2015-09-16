@@ -108,7 +108,7 @@ void VConfig::loadInit(const std::string& parFile)
         VProperty *grProp=new VProperty(groupName);
         groups_.push_back(grProp);
 
-        UserMessage::message(UserMessage::DBG,false,std::string("Read config group: ") + groupName);
+        UserMessage::message(UserMessage::DBG,false,std::string("VConfig::loadInit() read config group: ") + groupName);
 
         //Load the property parameters. It will recursively add all the
         //children properties.
@@ -131,6 +131,8 @@ void VConfig::loadProperty(const boost::property_tree::ptree& pt,VProperty *prop
     	std::string name=it->first;
     	ptree ptProp=it->second;
 
+    	UserMessage::message(UserMessage::DBG,false,"   VConfig::loadProperty() read item: " + name);
+
     	//Default value
     	if(name == "default")
     	{
@@ -148,12 +150,16 @@ void VConfig::loadProperty(const boost::property_tree::ptree& pt,VProperty *prop
     		if(!prefix.isEmpty())
     			val=prefix.toStdString() + "." + val;
 
-            qDebug() << "line" << prefix << val.c_str();
+    		UserMessage::message(UserMessage::DBG,false,"   VConfig::loadProperty() line: " + val);
             
     		if(VProperty* lineEditProp=find(val))
     		{
-    			qDebug() << "  link found!";
+    			UserMessage::message(UserMessage::DBG,false,"     --> link found");
                 chProp->setLink(lineEditProp);
+    		}
+    		else
+    		{
+    			UserMessage::message(UserMessage::DBG,false,"     --> link NOT found");
     		}
     	}
         //Here we only load the properties with

@@ -105,7 +105,13 @@ void PropertyEditor::addItem(VProperty* vProp)
     {
         currentGrid_=0;
         addGrid(vProp);
-    }    
+    }
+    else if(vProp->name() == "note")
+    {
+        currentGrid_=0;
+        addNote(vProp);
+    }
+
 }
 
 void PropertyEditor::addLine(VProperty *vProp,QGridLayout *gridLayout)
@@ -242,6 +248,10 @@ void PropertyEditor::addGridRow(VProperty* vProp,QGridLayout *grid)
     QLabel* label=new QLabel(labelText);
     grid->addWidget(label,row,0);
 
+
+    qDebug() << "grid" << vProp->path().c_str();
+
+
     int col=1;
     Q_FOREACH(VProperty* chProp,vProp->children())
     {
@@ -291,6 +301,16 @@ void PropertyEditor::addGridRow(VProperty* vProp,QGridLayout *grid)
     }
 
 
+}
+
+void PropertyEditor::addNote(VProperty* vProp)
+{
+    if(vProp->name() != "note")
+        return;
+
+    vBox_->addSpacing(5);
+    QLabel *label=new QLabel("<b>Note:</b> " + vProp->value().toString());
+    vBox_->addWidget(label);
 }
 
 

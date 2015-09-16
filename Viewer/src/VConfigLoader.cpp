@@ -12,7 +12,8 @@
 
 #include <map>
 
-typedef std::map<std::string,VConfigLoader*> Map;
+
+typedef std::multimap<std::string,VConfigLoader*> Map;
 
 static Map* makers = 0;
 
@@ -31,11 +32,20 @@ VConfigLoader::~VConfigLoader()
 
 bool VConfigLoader::process(const std::string& name,VProperty *prop)
 {
-    Map::iterator it = makers->find(name);
-    if(it != makers->end())
+    Map::size_type entries=makers->count(name);
+    Map::iterator it=makers->find(name);
+
+    bool retVal=false;
+    for(Map::size_type cnt=0; cnt != entries; ++cnt, ++it)
+    {
+    	(*it).second->load(prop);
+    	retVal=true;
+    }
+
+   /* if(it != makers->end())
     {
         (*it).second->load(prop);
         return true;
-    }
-    return false;
+    }*/
+    return retVal;
 }   

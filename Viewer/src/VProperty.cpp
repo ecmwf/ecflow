@@ -288,13 +288,15 @@ std::string VProperty::path()
 	return strName_;
 }
 
-void VProperty::setMaster(VProperty* m)
+void VProperty::setMaster(VProperty* m,bool useMaster)
 {
 	if(master_)
 		master_->removeObserver(this);
 
 	master_=m;
 	master_->addObserver(this);
+
+	setUseMaster(useMaster);
 }
 
 void VProperty::setUseMaster(bool b)

@@ -23,10 +23,13 @@ class QSignalMapper;
 
 class ChangeNotify;
 class VProperty;
+class ChangeNotifyWidget;
 
 class ChangeNotifyButton : public QToolButton
 {
 Q_OBJECT
+
+friend class ChangeNotifyWidget;
 
 public:
 	explicit ChangeNotifyButton(QWidget* parent=0);
@@ -53,6 +56,7 @@ public:
 	~ChangeNotifyWidget();
 
 	static void setEnabled(const std::string& id,bool b);
+	static void updateSettings(const std::string& id);
 
 protected:
 	void addTb(ChangeNotify*);

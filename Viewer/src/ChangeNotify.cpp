@@ -30,13 +30,19 @@
 
 static std::map<std::string,ChangeNotify*> items;
 
-static ChangeNotify abortedNotify("aborted");
+static AbortedNotify abortedNotify("aborted");
 static ChangeNotify restaredtNotify("restarted");
 static ChangeNotify lateNotify("late");
 static ChangeNotify zombieNotify("zombie");
 static ChangeNotify aliasNotify("alias");
 
 ChangeNotifyDialog* ChangeNotify::dialog_=0;
+
+//==============================================
+//
+// ChangeNotify
+//
+//==============================================
 
 ChangeNotify::ChangeNotify(const std::string& id) :
 	id_(id),
@@ -52,19 +58,8 @@ ChangeNotify::ChangeNotify(const std::string& id) :
 	items[id] = this;
 }
 
-
-void ChangeNotify::add(const std::string& id,VNode *node,bool popup,bool sound)
-{
-	if(ChangeNotify* obj=ChangeNotify::find(id))
-	{
-		obj->add(node,popup,sound);
-	}
-}
-
 void ChangeNotify::add(VNode *node,bool popup,bool sound)
 {
-	//make();
-
 	data_->add(node);
 
 	if(popup)
@@ -85,25 +80,6 @@ void ChangeNotify::add(VNode *node,bool popup,bool sound)
 	}
 }
 
-void ChangeNotify::make()
-{
-	if(!data_)
-	{
-		data_=new VNodeList();
-		model_=new ChangeNotifyModel();
-		model_->setData(data_);
-		//dialog_=new ChangeNotifyDialog();
-		//dialog_->init(prop_,model_);
-	}
-}
-
-void ChangeNotify::setEnabled(const std::string& id,bool en)
-{
-	if(ChangeNotify* obj=ChangeNotify::find(id))
-	{
-		obj->setEnabled(en);
-	}
-}
 
 void ChangeNotify::setEnabled(bool en)
 {
@@ -118,6 +94,45 @@ void ChangeNotify::setEnabled(bool en)
 	ChangeNotifyWidget::setEnabled(id_,en);
 }
 
+void ChangeNotify::setProperty(VProperty* prop)
+{
+	prop_=prop;
+
+	if(VProperty* p=prop->findChild("fill_colour"))
+		p->addObserver(this);
+
+	if(VProperty* p=prop->findChild("font_colour"))
+		p->addObserver(this);
+}
+
+void ChangeNotify::notifyChange(VProperty* prop)
+{
+	dialog()->updateSettings(this);
+	ChangeNotifyWidget::updateSettings(id_);
+}
+
+//-----------------------------------
+//
+// Static methods
+//
+//-----------------------------------
+
+void ChangeNotify::add(const std::string& id,VNode *node,bool popup,bool sound)
+{
+	if(ChangeNotify* obj=ChangeNotify::find(id))
+	{
+		obj->add(node,popup,sound);
+	}
+}
+
+void ChangeNotify::setEnabled(const std::string& id,bool en)
+{
+	if(ChangeNotify* obj=ChangeNotify::find(id))
+	{
+		obj->setEnabled(en);
+	}
+}
+
 ChangeNotify*  ChangeNotify::find(const std::string& id)
 {
 	std::map<std::string,ChangeNotify*>::iterator it=items.find(id);
@@ -129,19 +144,52 @@ ChangeNotify*  ChangeNotify::find(const std::string& id)
 
 void ChangeNotify::load(VProperty* group)
 {
-	for(int i=0; i < group->children().size(); i++)
-    {
-    	VProperty *p=group->children().at(i);
+	if(group->name() == "notification")
+	{
+		UserMessage::message(UserMessage::DBG, false,"ChangeNotify:load() -- > notification");
 
-    	std::string id=p->strName();
-    	if(ChangeNotify* obj=ChangeNotify::find(id))
-    	{
-    		//obj->make();
-    		obj->prop_=p;
-    	}
-    }
+		for(int i=0; i < group->children().size(); i++)
+		{
+			VProperty *p=group->children().at(i);
+			if(ChangeNotify* obj=ChangeNotify::find(p->strName()))
+			{
+				obj->setProperty(p);
+			}
+		}
+	}
+	else if(group->name() == "server")
+	{
+		for(std::map<std::string,ChangeNotify*>::iterator it=items.begin(); it != items.end(); ++it)
+		{
+			it->second->loadServerSettings();
+		}
+	}
+	else if(group->name() == "nstate")
+	{
+		for(std::map<std::string,ChangeNotify*>::iterator it=items.begin(); it != items.end(); ++it)
+		{
+			it->second->loadNodeState();
+		}
+	}
 }
 
+void ChangeNotify::loadServerSettings()
+{
+	UserMessage::message(UserMessage::DBG, false,"ChangeNotify::loadServerSettings() --> " + id_);
+
+	std::string v("server.notification." + id_ + ".enabled");
+	UserMessage::message(UserMessage::DBG, false," property: " +  v);
+
+	if(VProperty *p=VConfig::instance()->find(v))
+	{
+		setEnabled(p->value().toBool());
+	}
+	else
+	{
+		UserMessage::message(UserMessage::ERROR, false,
+			std::string("  Error!  Unable to find property: " + v));
+	}
+}
 
 ChangeNotifyDialog* ChangeNotify::dialog()
 {
@@ -150,7 +198,7 @@ ChangeNotifyDialog* ChangeNotify::dialog()
 		dialog_=new ChangeNotifyDialog();
 		for(std::map<std::string,ChangeNotify*>::iterator it=items.begin(); it != items.end(); ++it)
 		{
-			dialog_->addTab(it->first,it->second->prop_,it->second->model_);
+			dialog_->addTab(it->second);
 		}
 	}
 
@@ -172,7 +220,6 @@ void ChangeNotify::clearData(const std::string& id)
 	}
 }
 
-
 void ChangeNotify::populate(ChangeNotifyWidget* w)
 {
 	for(std::map<std::string,ChangeNotify*>::iterator it=items.begin(); it != items.end(); ++it)
@@ -181,25 +228,35 @@ void ChangeNotify::populate(ChangeNotifyWidget* w)
 	}
 }
 
-void ChangeNotify::init()
+//==================================================
+//
+// AbortedNotify
+//
+//==================================================
+
+void AbortedNotify::loadNodeState()
 {
-	for(std::map<std::string,ChangeNotify*>::iterator it=items.begin(); it != items.end(); ++it)
+	if(VProperty *nsp=VConfig::instance()->find("nstate.aborted"))
 	{
-		std::string v("server.notification." + it->first + ".enabled");
+		VProperty* master=nsp->findChild("fill_colour");
+		VProperty* local=prop_->findChild("fill_colour");
 
-		UserMessage::message(UserMessage::DBG, false,"ChangeNotify:init() " + v);
-
-		if(VProperty *p=VConfig::instance()->find(v))
+		if(master && local)
 		{
-			it->second->setEnabled(p->value().toBool());
+			local->setMaster(master,true);
 		}
-		else
+
+		master=nsp->findChild("font_colour");
+		local=prop_->findChild("font_colour");
+
+		if(master && local)
 		{
-			UserMessage::message(UserMessage::ERROR, false,
-					std::string("Error! ChangeNotify::init() unable to find property: " + v));
+			local->setMaster(master,true);
 		}
 	}
+
 }
 
-static SimpleLoader<ChangeNotify> loaderTable("notification");
-
+static SimpleLoader<ChangeNotify> loaderNotify("notification");
+static SimpleLoader<ChangeNotify> loaderServerNotify("server");
+static SimpleLoader<ChangeNotify> loaderStateNotify("nstate");
