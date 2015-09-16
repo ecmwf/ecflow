@@ -40,6 +40,8 @@ PropertyDialog::PropertyDialog(QWidget* parent) :
 	build();
 
 	readSettings();
+
+	list_->setCurrentRow(0);
 }
 
 void PropertyDialog::closeEvent(QCloseEvent * event)

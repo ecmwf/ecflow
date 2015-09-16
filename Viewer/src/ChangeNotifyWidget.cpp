@@ -27,6 +27,7 @@ ChangeNotifyButton::ChangeNotifyButton(QWidget* parent) :
 	QToolButton(parent),
 	notifier_(0)
 {
+	setProperty("notify","1");
 	setAutoRaise(true);
 	setIconSize(QSize(20,20));
 }
@@ -35,7 +36,8 @@ void ChangeNotifyButton::setNotifier(ChangeNotify* notifier)
 {
 	notifier_=notifier;
 
-	//setText(QString::fromStdString(notifier_->id()));
+	if(notifier_->prop())
+		setToolTip(notifier_->prop()->param("tooltip"));
 
 	connect(this,SIGNAL(clicked(bool)),
 			this,SLOT(slotClicked(bool)));
@@ -67,7 +69,7 @@ void ChangeNotifyButton::slotClicked(bool)
 void ChangeNotifyButton::updateIcon()
 {
 	QString text;
-	QString numText("0");
+	QString numText;
 
 	if(notifier_->prop())
 	{
@@ -76,7 +78,12 @@ void ChangeNotifyButton::updateIcon()
 
 	if(notifier_->data())
 	{
-		numText=QString::number(notifier_->data()->size());
+		int num=notifier_->data()->size();
+		if(num > 0 && num < 10)
+			numText=QString::number(num);
+		else if(num > 10)
+			numText="9+";
+
 	}
 
 	QColor bg;
@@ -92,10 +99,15 @@ void ChangeNotifyButton::updateIcon()
 
 	QFont f;
 	f.setBold(true);
-	f.setPointSize(10);
+	f.setPointSize(f.pointSize()+1);
 	QFontMetrics fm(f);
-	int w=fm.width(text + 4 + numText + 2);
-	int h=20;//fm.height()+2;
+	int w;
+	if(!numText.isEmpty())
+		w=fm.width(text) + 6 + fm.width(numText) + 2;
+	else
+		w=fm.width(text) + 6;
+
+	int h=fm.height()+6;
 
 	QPixmap pix(w,h);
 	pix.fill(QColor(255,255,255,0));
@@ -103,20 +115,23 @@ void ChangeNotifyButton::updateIcon()
 	painter.setRenderHint(QPainter::Antialiasing,true);
 	painter.setRenderHint(QPainter::TextAntialiasing,true);
 
-	QRect textRect(0,0,fm.width(text)+4,h);
+	QRect textRect(0,0,fm.width(text)+6,h);
 	painter.setBrush(bg);
 	painter.setPen(border);
-	painter.drawRoundedRect(textRect,4,4);
+	painter.drawRoundedRect(textRect,2,2);
 	painter.setPen(fg);
 	painter.setFont(f);
 	painter.drawText(textRect,Qt::AlignHCenter|Qt::AlignVCenter,text);
 
-	QRect numRect(textRect.right()+2,h-fm.ascent()-2,fm.width(numText)+4,fm.ascent()+2);
-	painter.setBrush(Qt::blue);
-	painter.setPen(Qt::white);
-	painter.drawRoundedRect(numRect,6,6);
-	painter.setFont(f);
-	painter.drawText(numRect,Qt::AlignHCenter|Qt::AlignVCenter,numText);
+	if(!numText.isEmpty())
+	{
+		QRect numRect(textRect.right()-1,0,fm.width(numText)+4,fm.ascent()+4);
+		painter.setBrush(QColor(58,126,194));
+		painter.setPen(Qt::white);
+		painter.drawRoundedRect(numRect,4,4);
+		painter.setFont(f);
+		painter.drawText(numRect,Qt::AlignHCenter|Qt::AlignVCenter,numText);
+	}
 
 	setIconSize(QSize(w,h));
 	setIcon(pix);
@@ -127,6 +142,8 @@ void ChangeNotifyButton::updateIcon()
 ChangeNotifyWidget::ChangeNotifyWidget(QWidget *parent) : QWidget(parent)
 {
 	layout_=new QHBoxLayout(this);
+	layout_->setContentsMargins(0,0,0,0);
+	layout_->setSpacing(0);
 
 	ChangeNotify::populate(this);
 
@@ -155,6 +172,9 @@ void ChangeNotifyWidget::addTb(ChangeNotify* notifier)
 	ChangeNotifyButton *tb=new ChangeNotifyButton(this);
 	tb->setNotifier(notifier);
 	layout_->addWidget(tb);
+	if(!notifier->isEnabled())
+		tb->setEnabled(false);
+
 	buttons_[notifier->id()]=tb;
 }
 

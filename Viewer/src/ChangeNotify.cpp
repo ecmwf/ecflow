@@ -13,6 +13,8 @@
 #include "ChangeNotifyDialog.hpp"
 #include "ChangeNotifyModel.hpp"
 #include "ChangeNotifyWidget.hpp"
+#include "UserMessage.hpp"
+#include "VConfig.hpp"
 #include "VConfigLoader.hpp"
 #include "VNode.hpp"
 #include "VNodeList.hpp"
@@ -38,11 +40,15 @@ ChangeNotifyDialog* ChangeNotify::dialog_=0;
 
 ChangeNotify::ChangeNotify(const std::string& id) :
 	id_(id),
+	enabled_(false),
 	data_(0),
 	model_(0),
-	//dialog_(0),
 	prop_(0)
 {
+	data_=new VNodeList();
+	model_=new ChangeNotifyModel();
+	model_->setData(data_);
+
 	items[id] = this;
 }
 
@@ -57,7 +63,7 @@ void ChangeNotify::add(const std::string& id,VNode *node,bool popup,bool sound)
 
 void ChangeNotify::add(VNode *node,bool popup,bool sound)
 {
-	make();
+	//make();
 
 	data_->add(node);
 
@@ -101,7 +107,9 @@ void ChangeNotify::setEnabled(const std::string& id,bool en)
 
 void ChangeNotify::setEnabled(bool en)
 {
-	if(en == false)
+	enabled_=en;
+
+	if(!enabled_)
 	{
 		data_->clear();
 	}
@@ -128,7 +136,7 @@ void ChangeNotify::load(VProperty* group)
     	std::string id=p->strName();
     	if(ChangeNotify* obj=ChangeNotify::find(id))
     	{
-    		obj->make();
+    		//obj->make();
     		obj->prop_=p;
     	}
     }
@@ -170,6 +178,26 @@ void ChangeNotify::populate(ChangeNotifyWidget* w)
 	for(std::map<std::string,ChangeNotify*>::iterator it=items.begin(); it != items.end(); ++it)
 	{
 		w->addTb(it->second);
+	}
+}
+
+void ChangeNotify::init()
+{
+	for(std::map<std::string,ChangeNotify*>::iterator it=items.begin(); it != items.end(); ++it)
+	{
+		std::string v("server.notification." + it->first + ".enabled");
+
+		UserMessage::message(UserMessage::DBG, false,"ChangeNotify:init() " + v);
+
+		if(VProperty *p=VConfig::instance()->find(v))
+		{
+			it->second->setEnabled(p->value().toBool());
+		}
+		else
+		{
+			UserMessage::message(UserMessage::ERROR, false,
+					std::string("Error! ChangeNotify::init() unable to find property: " + v));
+		}
 	}
 }
 

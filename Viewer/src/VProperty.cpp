@@ -81,31 +81,44 @@ void VProperty::setDefaultValue(const std::string& val)
 
 void VProperty::setValue(const std::string& val)
 {
-    if(isColour(val))
+    bool changed=false;
+
+	if(isColour(val))
     {
-        value_=toColour(val);
+        QColor col=toColour(val);
+		changed=(value_.value<QColor>() != col);
+		value_=col;
     }
     else if(isFont(val))
     {
-        value_=toFont(val);
+    	QFont font=toFont(val);
+    	changed=(value_.value<QFont>() != font);
+    	value_=font;
     }
 
     else if(isNumber(val))
     {
-    	value_=toNumber(val);
+    	int num=toNumber(val);
+    	changed=(value_.toInt() != num);
+    	value_=num;
     }
     else if(isBool(val))
     {
-       	value_=toBool(val);
+    	bool b=toBool(val);
+    	changed=(value_.toBool() != b);
+    	value_=b;
     }
+
     if(!defaultValue_.isNull() &&
             defaultValue_.type() != value_.type())
     {
-        value_=defaultValue_;
-        //An error messages should be shown!
+        changed=true;
+    	value_=defaultValue_;
+        //An error message should be shown!
     }
 
-    dispatchChange();
+    if(changed)
+    	dispatchChange();
 }
 
 void VProperty::setValue(QVariant val)
@@ -116,9 +129,12 @@ void VProperty::setValue(QVariant val)
         return;
     }
 
+    bool changed=(value_ != val);
+
     value_=val;
 
-    dispatchChange();
+    if(changed)
+    	dispatchChange();
 }
 
 std::string VProperty::valueAsString() const

@@ -27,8 +27,10 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/filesystem/operations.hpp>
 
+std::map<VServerSettings::Param,std::string> VServerSettings::notifyIds_;
 std::map<VServerSettings::Param,std::string> VServerSettings::parNames_;
 VProperty* VServerSettings::globalProp_=0;
+
 
 VServerSettings::VServerSettings(ServerHandler* server) :
 	server_(server),
@@ -63,6 +65,12 @@ VServerSettings::VServerSettings(ServerHandler* server) :
 		parNames_[AliasEnabled]="server.notification.alias.enabled";
 		parNames_[AliasPopup]="server.notification.alias.popup";
 		parNames_[AliasSound]="server.notification.alias.sound";
+	}
+
+	if(notifyIds_.empty())
+	{
+		notifyIds_[AbortedEnabled]="aborted";
+		notifyIds_[RestartedEnabled]="restarted";
 	}
 
 	assert(globalProp_);
@@ -136,6 +144,16 @@ void VServerSettings::notifyChange(VProperty* p)
 	{
 		assert(0);
 	}
+}
+
+std::string VServerSettings::notificationId(Param par)
+{
+	std::map<Param,std::string>::iterator it=notifyIds_.find(par);
+	if(it != notifyIds_.end())
+	{
+		return it->second;
+	}
+	return std::string();
 }
 
 void VServerSettings::loadSettings()

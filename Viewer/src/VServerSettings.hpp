@@ -32,6 +32,8 @@ public:
 
 	VProperty* guiProp() const {return guiProp_;}
 
+	static std::string notificationId(Param);
+
 	//From VPropertyObserver
 	void notifyChange(VProperty*);
 
@@ -58,6 +60,7 @@ protected:
 
 	static std::map<Param,std::string> parNames_;
 	static VProperty* globalProp_;
+	static std::map<Param,std::string> notifyIds_;
 };
 
 #endif

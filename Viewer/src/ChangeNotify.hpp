@@ -26,14 +26,14 @@ class ChangeNotify
 public:
 	ChangeNotify(const std::string& id);
 
-	static void add(const std::string&,VNode*,bool,bool);
-
 	const std::string& id() const {return id_;}
 	VNodeList* data() const {return data_;};
 	VProperty* prop() const {return prop_;}
-	//ChangeNotifyDialog* dialog() const {return dialog_;}
 	ChangeNotifyModel* model() const {return model_;}
+	bool isEnabled() const {return enabled_;}
 
+	static void add(const std::string&,VNode*,bool,bool);
+	static void init();
 	static void setEnabled(const std::string&,bool);
 	static void populate(ChangeNotifyWidget* w);
 	static void showDialog(const std::string& id);
@@ -49,11 +49,10 @@ protected:
 	static ChangeNotify* find(const std::string&);
 	static ChangeNotifyDialog* dialog();
 
-
 	std::string id_;
+	bool enabled_;
 	VNodeList* data_;
 	ChangeNotifyModel* model_;
-
 	VProperty* prop_;
 	static ChangeNotifyDialog* dialog_;
 };

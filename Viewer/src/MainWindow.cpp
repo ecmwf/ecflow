@@ -88,6 +88,10 @@ MainWindow::MainWindow(QStringList idLst,QWidget *parent) : QMainWindow(parent)
     viewToolBar->addWidget(label1);
     viewToolBar->addWidget(label);
 
+    QWidget* spacer = new QWidget();
+    spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    viewToolBar->addWidget(spacer);
+
     ChangeNotifyWidget* chw=new ChangeNotifyWidget(this);
     viewToolBar->addWidget(chw);
 }

@@ -113,7 +113,7 @@ protected:
 	void clientTaskFailed(VTask_ptr task,const std::string& errMsg);
 
 	static std::string commandToString(const std::vector<std::string>& cmd);
-	static void checkNotificationState(VServerSettings::Param par,const std::string& id);
+	static void checkNotificationState(VServerSettings::Param par);
 
 	std::string name_;
 	std::string host_;

@@ -72,6 +72,13 @@ QLabel[previewLabel="1"] {
     border: 2px solid rgb(210,210,210);
 }
 
+/*-----------------------------
+  Notifications
+------------------------------*/
+
+QToolButton[notify="1"] {
+    padding: 1px;
+}
 
 /*----------------------------
   Icon folder view

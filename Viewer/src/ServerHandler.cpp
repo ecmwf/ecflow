@@ -1226,7 +1226,11 @@ void ServerHandler::confChanged(VServerSettings::Param par,VProperty* prop)
 		updateRefreshTimer();
 		break;
 	case VServerSettings::AbortedEnabled:
-		ServerHandler::checkNotificationState(par,"aborted");
+	case VServerSettings::RestartedEnabled:
+	case VServerSettings::LateEnabled:
+	case VServerSettings::ZombieEnabled:
+	case VServerSettings::AliasEnabled:
+		checkNotificationState(par);
 		break;
 	default:
 		break;
@@ -1234,10 +1238,14 @@ void ServerHandler::confChanged(VServerSettings::Param par,VProperty* prop)
 
 }
 
-
-void ServerHandler::checkNotificationState(VServerSettings::Param par,const std::string& id)
+void ServerHandler::checkNotificationState(VServerSettings::Param par)
 {
+	std::string id=VServerSettings::notificationId(par);
+
+	assert(!id.empty());
+
 	bool enabled=false;
+
 	for(std::vector<ServerHandler*>::const_iterator it=servers_.begin(); it != servers_.end(); ++it)
 	{
 		ServerHandler *s=*it;
@@ -1266,6 +1274,7 @@ void ServerHandler::saveConf()
 
 void ServerHandler::loadConf()
 {
+	//This will call confChanged for any non-default settings
 	conf_->loadSettings();
 }
 
