@@ -20,6 +20,7 @@
 #include <QLabel>
 #include <QWidgetAction>
 #include <QDebug>
+#include <QObject>
 
 #include "Str.hpp"
 #include "MenuHandler.hpp"
@@ -342,28 +343,37 @@ QMenu *Menu::generateMenu(std::vector<VInfo_ptr> nodes, QWidget *parent)
     // add an inactive action(!) to the top of the menu in order to show which
     // node has been selected
 
+    QLabel *nodeLabel = NULL;
+
     if (nodes.size() == 1)
     {
-        /*
-        QLabel *nodeLabel = new QLabel(QString::fromStdString((*nodes[0]).node()->name()));
-        nodeLabel->setStyleSheet("QLabel { background-color : red; color : blue; }");
-        nodeLabel->setAlignment(Qt::AlignHCenter);
-        
-        nodeLabel->setObjectName("nodeLabel");
-        QWidgetAction *action = new QWidgetAction(0);
-        action->setDefaultWidget(nodeLabel);
-        */
+        //single node selected put a label with the node name + colour
+        nodeLabel = new QLabel(QString::fromStdString((*nodes[0]).name()));
 
-        QAction *action = new QAction(0);
-        action->setText(QString::fromStdString((*nodes[0]).name()));
-        qmenu->addAction(action);
-        action->setParent(parent);
-        action->setEnabled(false);
-        QFont menuTitleFont;
-        menuTitleFont.setBold(true);
-        menuTitleFont.setItalic(true);
-        action->setFont(menuTitleFont);
+        QPalette labelPalette;
+        labelPalette.setColor(QPalette::Window,     (*nodes[0]).node()->stateColour());
+        labelPalette.setColor(QPalette::WindowText, Qt::black);
+        nodeLabel->setAutoFillBackground(true);
+        nodeLabel->setPalette(labelPalette);
     }
+    else
+    {
+        // multiple nodes selected - say how many
+        nodeLabel = new QLabel(QObject::tr("%1 nodes selected").arg(nodes.size()));
+    }
+
+    QFont menuTitleFont;
+    menuTitleFont.setBold(true);
+    menuTitleFont.setItalic(true);
+    nodeLabel->setFont(menuTitleFont);
+    nodeLabel->setAlignment(Qt::AlignHCenter);
+    nodeLabel->setObjectName("nodeLabel");
+
+    QWidgetAction *action = new QWidgetAction(0);
+    action->setDefaultWidget(nodeLabel);
+    action->setEnabled(false);
+    action->setParent(parent);
+    qmenu->addAction(action);
 
     //TypeNodeCondition  typeCondFamily   (MenuItem::FAMILY);
     //TypeNodeCondition  typeCondTask     (MenuItem::TASK);
