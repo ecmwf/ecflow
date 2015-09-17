@@ -214,6 +214,9 @@
    <property name="text">
     <string>Configure Node &amp;Menu</string>
    </property>
+   <property name="visible">
+    <bool>false</bool>
+   </property>
   </action>
   <action name="actionContents">
    <property name="text">
