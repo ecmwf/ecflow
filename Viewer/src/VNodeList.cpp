@@ -40,6 +40,27 @@ void VNodeList::add(VNode *node)
 	Q_EMIT beginAppendRow();
 	data_.push_back(node);
 	Q_EMIT endAppendRow();
+
+	if(s)
+		activeData_.push_back(s->name() + ":/" + node->absNodePath());
+}
+
+void VNodeList::remove(VNode *node)
+{
+	std::vector<VNode*>::const_iterator it=std::find(data_.begin(),data_.end(),node);
+	if(it != data_.end())
+	{
+		/*int row=it -data_.begin();
+
+		Q_EMIT beginRemoveRow(row);
+		data_.erase(it);
+		Q_EMIT endRemoveRow(row);*/
+	}
+
+
+	//ServerHandler *s=node->server();
+	//std::string p=s->name():
+
 }
 
 void VNodeList::clear()
@@ -65,7 +86,19 @@ void VNodeList::clear(ServerHandler* server)
 	std::vector<VNode*> prev=data_;
 	data_.clear();
 
-	for(std::vector<VNode*>::const_iterator it=prev.begin(); it != prev.end(); it++)
+	std::vector<std::string> activeDataOri=activeData_;
+	activeData_.clear();
+
+	std::string serverPattern=server->name() + ":/";
+	for(std::vector<std::string>::iterator it=activeDataOri.begin(); it != activeDataOri.end(); ++it)
+	{
+		if((*it).find(serverPattern) != 0)
+		{
+			activeData_.push_back(*it);
+		}
+	}
+
+	for(std::vector<VNode*>::const_iterator it=prev.begin(); it != prev.end(); ++it)
 	{
 		ServerHandler *s=(*it)->server();
 		if(s && s==server)

@@ -96,7 +96,11 @@ void ChangeNotify::setEnabled(bool en)
 		data_->clear();
 	}
 
-	dialog()->setEnabledTab(this,en);
+	if(dialog_)
+	{
+		dialog()->setEnabledTab(this,en);
+	}
+
 	ChangeNotifyWidget::setEnabled(id_,en);
 }
 

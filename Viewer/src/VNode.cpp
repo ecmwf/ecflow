@@ -518,7 +518,18 @@ void VNode::check(VServerSettings* conf,bool stateChange)
 				ChangeNotify::add("aborted",this,popup,sound);
 			}
 		}
+		else
+		{
+			//ChangeNotify::check("aborted",this);
+		}
 	}
+
+/*
+	if(flagChange)
+	{
+
+	}
+*/
 }
 	/*
 

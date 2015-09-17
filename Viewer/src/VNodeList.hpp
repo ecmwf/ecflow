@@ -30,6 +30,7 @@ public:
  	int size() const {return data_.size();}
  	VNode* nodeAt(int i) const {assert(i>=0 && i < data_.size()); return data_.at(i);}
  	void add(VNode*);
+ 	void remove(VNode*);
  	void clear();
 
     //From ServerObserver
@@ -54,6 +55,7 @@ protected:
      void clear(ServerHandler*);
 
      std::vector<VNode*> data_;
+     std::vector<std::string> activeData_;
 };
 
 #endif /* VIEWER_SRC_VNODELIST_HPP_ */
