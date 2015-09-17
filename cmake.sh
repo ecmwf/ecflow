@@ -35,6 +35,7 @@ clang_sanitiser_arg=
 mode_arg=release
 verbose_arg=
 ctest_arg=
+clean_arg=
 while [[ "$#" != 0 ]] ; do   
    if [[ "$1" = debug || "$1" = release ]] ; then
       mode_arg=$1
@@ -58,6 +59,8 @@ while [[ "$#" != 0 ]] ; do
       clang_arg=$1
    elif  [[ "$1" = intel ]] ; then
       intel_arg=$1
+   elif  [[ "$1" = clean ]] ; then
+      clean_arg=$1
    elif  [[ "$1" = san ]] ; then
       clang_sanitiser_arg=$1
    elif  [[ "$1" = package_source ]] ; then
@@ -145,7 +148,10 @@ fi
 source_dir=$(pwd)
 workspace=$(pwd)/..
 
-#rm -rf ../bdir/$mode_arg/ecflow
+if [[ $clean_arg = clean ]] ; then
+	rm -rf ../bdir/$mode_arg/ecflow
+fi
+
 mkdir -p ../bdir/$mode_arg/ecflow
 cd ../bdir/$mode_arg/ecflow
 
