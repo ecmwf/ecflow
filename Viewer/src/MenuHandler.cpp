@@ -352,7 +352,7 @@ QMenu *Menu::generateMenu(std::vector<VInfo_ptr> nodes, QWidget *parent)
 
         QPalette labelPalette;
         labelPalette.setColor(QPalette::Window,     (*nodes[0]).node()->stateColour());
-        labelPalette.setColor(QPalette::WindowText, Qt::black);
+        labelPalette.setColor(QPalette::WindowText, QColor(96,96,96));
         nodeLabel->setAutoFillBackground(true);
         nodeLabel->setPalette(labelPalette);
     }
