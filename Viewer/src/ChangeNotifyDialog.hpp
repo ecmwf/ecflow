@@ -26,25 +26,29 @@ Q_OBJECT
 
 public:
 	explicit ChangeNotifyDialog(QWidget *parent=0);
+	~ChangeNotifyDialog();
 
 	void addTab(ChangeNotify*);
-	void setCurrentTab(const std::string&);
-	void setEnabledTab(const std::string& id,bool b);
+	void setCurrentTab(ChangeNotify*);
+	void setEnabledTab(ChangeNotify*,bool b);
 	void updateSettings(ChangeNotify*);
 
 public Q_SLOTS:
+	void on_tab__currentChanged(int);
 	void on_closePb__clicked(bool b);
 	void on_clearCPb__clicked(bool b);
 
 protected:
-	std::string tabToId(int tabIdx);
-	int idToTab(const std::string& id);
+	ChangeNotify* tabToNtf(int tabIdx);
+	int ntfToTab(ChangeNotify*);
 	void decorateTab(int,VProperty*);
+	void closeEvent(QCloseEvent*);
 	void writeSettings();
 	void readSettings();
 
-	std::map<std::string,int> idToTabMap_;
-	std::map<int,std::string> tabToIdMap_;
+	std::map<ChangeNotify*,int> ntfToTabMap_;
+	std::map<int,ChangeNotify*> tabToNtfMap_;
+	bool ignoreCurrentChange_;
 };
 
 #endif

@@ -16,15 +16,29 @@
 #include "VNodeList.hpp"
 #include "VProperty.hpp"
 
+#include <QCloseEvent>
 #include <QDebug>
 #include <QPainter>
 #include <QSettings>
 #include <QVariant>
 
 ChangeNotifyDialog::ChangeNotifyDialog(QWidget *parent) :
-	QDialog(parent)
+	QDialog(parent),
+	ignoreCurrentChange_(false)
 {
 	setupUi(this);
+
+	tab_->setProperty("notify","1");
+	tab_->tabBar()->setExpanding(false);
+
+	clearOnCloseCb_->setChecked(true);
+
+	readSettings();
+}
+
+ChangeNotifyDialog::~ChangeNotifyDialog()
+{
+	writeSettings();
 }
 
 void ChangeNotifyDialog::addTab(ChangeNotify* notifier)
@@ -36,11 +50,13 @@ void ChangeNotifyDialog::addTab(ChangeNotify* notifier)
 	tree->setUniformRowHeights(true);
 	tree->setModel(notifier->model());
 
+	ignoreCurrentChange_=true;
 	tab_->addTab(tree,"");
+	ignoreCurrentChange_=false;
 
 	int idx=tab_->count()-1;
-	idToTabMap_[id]=idx;
-	tabToIdMap_[idx]=id;
+	ntfToTabMap_[notifier]=idx;
+	tabToNtfMap_[idx]=notifier;
 
 	decorateTab(idx,notifier->prop());
 }
@@ -53,8 +69,7 @@ void ChangeNotifyDialog::decorateTab(int tabIdx,VProperty *prop)
 	QString labelText=prop->param("labelText");
 	int h=fm.height();
 	int w=fm.width(labelText);
-	int margin=4;
-	QPixmap pix(2*margin+w,2*margin+h);
+	int margin=3;
 
 	QColor bgCol(Qt::gray);
 	if(VProperty *p=prop->findChild("fill_colour"))
@@ -64,43 +79,84 @@ void ChangeNotifyDialog::decorateTab(int tabIdx,VProperty *prop)
 	if(VProperty *p=prop->findChild("font_colour"))
 		fgCol=p->value().value<QColor>();
 
-	pix.fill(bgCol);
 
-	QRect labelRect(margin,margin+1,w,h);
+	QPixmap pix;
 
-	QPainter painter(&pix);
-	//painter.setBrush(prop->paramToColour("background"));
-	//painter.setPen(prop->paramToColour("border"));
-	//painter.drawRect(labelRect);
+	//Create icon for tab
+	if(0) //tabIdx == tab_->currentIndex())
+	{
+		pix=QPixmap(2*margin+w,2*margin+h);
 
-	painter.setPen(fgCol);
-	painter.drawText(labelRect,labelText);
+		pix.fill(bgCol);
+
+		QRect labelRect(margin,margin+1,w,h);
+
+		QPainter painter(&pix);
+
+		painter.setPen(fgCol);
+		painter.drawText(labelRect,Qt::AlignVCenter|Qt::AlignHCenter,labelText);
+	}
+	else
+	{
+		pix=QPixmap(2*margin+w,2*margin+h+2);
+
+		pix.fill(Qt::transparent);
+
+		QRect labelRect(margin,margin+1,w,h);
+
+		QPainter painter(&pix);
+
+		painter.setPen(fgCol);
+		painter.drawText(labelRect,Qt::AlignVCenter|Qt::AlignHCenter,labelText);
+
+		QRect lineRect(labelRect.left(),labelRect.bottom()+1,
+					   labelRect.width(),3);
+
+		painter.fillRect(lineRect,bgCol);
+	}
 
 	tab_->setCustomIcon(tabIdx,pix);
 }
 
 
-void ChangeNotifyDialog::setCurrentTab(const std::string& id)
+void ChangeNotifyDialog::setCurrentTab(ChangeNotify *ntf)
 {
-	int tabIdx=idToTab(id);
+	int tabIdx=ntfToTab(ntf);
 	if(tabIdx != -1)
 	{
 		tab_->setCurrentIndex(tabIdx);
 	}
 }
 
-void ChangeNotifyDialog::setEnabledTab(const std::string& id,bool b)
+void ChangeNotifyDialog::setEnabledTab(ChangeNotify* ntf,bool b)
 {
-	int tabIdx=idToTab(id);
+	int tabIdx=ntfToTab(ntf);
 	if(tabIdx != -1)
 	{
 		tab_->setTabEnabled(tabIdx,b);
 	}
 }
 
+void ChangeNotifyDialog::on_tab__currentChanged(int)
+{
+	if(ignoreCurrentChange_)
+		return;
+}
+
+
 void ChangeNotifyDialog::on_closePb__clicked(bool b)
 {
 	hide();
+
+	if(clearOnCloseCb_->isChecked())
+	{
+		int idx=tab_->currentIndex();
+		if(idx != -1)
+		{
+			if(ChangeNotify *ntf=tabToNtf(idx))
+				ntf->clearData();
+		}
+	}
 }
 
 void ChangeNotifyDialog::on_clearCPb__clicked(bool b)
@@ -109,23 +165,24 @@ void ChangeNotifyDialog::on_clearCPb__clicked(bool b)
 	int idx=tab_->currentIndex();
 	if(idx != -1)
 	{
-		ChangeNotify::clearData(tabToId(idx));
+		if(ChangeNotify *ntf=tabToNtf(idx))
+			ntf->clearData();
 	}
 }
 
-std::string ChangeNotifyDialog::tabToId(int tabIdx)
+ChangeNotify* ChangeNotifyDialog::tabToNtf(int tabIdx)
 {
-	std::map<int,std::string>::const_iterator it=tabToIdMap_.find(tabIdx);
-		if(it != tabToIdMap_.end())
+	std::map<int,ChangeNotify*>::const_iterator it=tabToNtfMap_.find(tabIdx);
+		if(it != tabToNtfMap_.end())
 			return it->second;
 
-	return std::string();
+	return 0;
 }
 
-int ChangeNotifyDialog::idToTab(const std::string& id)
+int ChangeNotifyDialog::ntfToTab(ChangeNotify* ntf)
 {
-	std::map<std::string,int>::const_iterator it=idToTabMap_.find(id);
-	if(it != idToTabMap_.end())
+	std::map<ChangeNotify*,int>::const_iterator it=ntfToTabMap_.find(ntf);
+	if(it != ntfToTabMap_.end())
 		return it->second;
 
 	return -1;
@@ -133,28 +190,35 @@ int ChangeNotifyDialog::idToTab(const std::string& id)
 
 void ChangeNotifyDialog::updateSettings(ChangeNotify* notifier)
 {
-	std::map<std::string,int>::const_iterator it=idToTabMap_.find(notifier->id());
-	if(it != idToTabMap_.end())
+	std::map<ChangeNotify*,int>::const_iterator it=ntfToTabMap_.find(notifier);
+	if(it != ntfToTabMap_.end())
 	{
 		decorateTab(it->second,notifier->prop());
 	}
 }
 
+void ChangeNotifyDialog::closeEvent(QCloseEvent* e)
+{
+	writeSettings();
+	e->accept();
+}
+
 void ChangeNotifyDialog::writeSettings()
 {
-	QSettings settings("ECMWF","ecflowUI-PropertyDialog");
+	QSettings settings("ECMWF","ecflowUI-ChangeNotifyDialog");
 
 	//We have to clear it so that should not remember all the previous values
 	settings.clear();
 
 	settings.beginGroup("main");
 	settings.setValue("size",size());
+	settings.setValue("clearOnClose",clearOnCloseCb_->isChecked());
 	settings.endGroup();
 }
 
 void ChangeNotifyDialog::readSettings()
 {
-	QSettings settings("ECMWF","ecflowUI-PropertyDialog");
+	QSettings settings("ECMWF","ecflowUI-ChangeNotifyDialog");
 
 	settings.beginGroup("main");
 	if(settings.contains("size"))
@@ -164,6 +228,11 @@ void ChangeNotifyDialog::readSettings()
 	else
 	{
 	  	resize(QSize(440,380));
+	}
+
+	if(settings.contains("clearOnClose"))
+	{
+		clearOnCloseCb_->setChecked(settings.value("clearOnClose").toBool());
 	}
 
 	settings.endGroup();

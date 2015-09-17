@@ -33,6 +33,8 @@ public:
 	VProperty* prop() const {return prop_;}
 	ChangeNotifyModel* model() const {return model_;}
 	bool isEnabled() const {return enabled_;}
+	void clearData();
+	void showDialog();
 
 	//Form VPropertyObserver
 	void notifyChange(VProperty*);
@@ -40,8 +42,8 @@ public:
 	static void add(const std::string&,VNode*,bool,bool);
 	static void setEnabled(const std::string&,bool);
 	static void populate(ChangeNotifyWidget* w);
-	static void showDialog(const std::string& id);
-	static void clearData(const std::string& id);
+	//static void showDialog(const std::string& id);
+	//static void clearData(const std::string& id);
 
 	//Called from VConfigLoader
 	static void load(VProperty* group);

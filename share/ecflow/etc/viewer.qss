@@ -80,6 +80,10 @@ QToolButton[notify="1"] {
     padding: 1px;
 }
 
+QTabBar[notify="1"]::tab {
+    padding : 2px;
+}
+
 /*----------------------------
   Icon folder view
 ------------------------------*/

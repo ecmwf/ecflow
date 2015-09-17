@@ -20,6 +20,8 @@
 #include "VNodeList.hpp"
 #include "VProperty.hpp"
 
+#include <stdlib.h>
+
 //#ifdef ECFLOW_QT5
 //#include <QSoundEffect>
 //#endif
@@ -64,12 +66,16 @@ void ChangeNotify::add(VNode *node,bool popup,bool sound)
 
 	if(popup)
 	{
-		dialog()->setCurrentTab(id_);
+		dialog()->setCurrentTab(this);
 		dialog()->show();
 		dialog()->raise();
 	}
 	if(sound)
 	{
+		const char *soundCmd = "play -q /usr/share/xemacs/xemacs-packages/etc/sounds/boing.wav";
+		if (system(soundCmd))
+			UserMessage::message(UserMessage::DBG, false,"ChangeNotify:add() could not play sound alert");
+
 //#ifdef ECFLOW_QT5
 //	QSoundEffect effect(dialog_);
 //	effect.setSource(QUrl::fromLocalFile("file:/usr/share/xemacs/xemacs-packages/etc/sounds/boing.wav"));
@@ -90,7 +96,7 @@ void ChangeNotify::setEnabled(bool en)
 		data_->clear();
 	}
 
-	dialog()->setEnabledTab(id_,en);
+	dialog()->setEnabledTab(this,en);
 	ChangeNotifyWidget::setEnabled(id_,en);
 }
 
@@ -110,6 +116,19 @@ void ChangeNotify::notifyChange(VProperty* prop)
 	dialog()->updateSettings(this);
 	ChangeNotifyWidget::updateSettings(id_);
 }
+
+void ChangeNotify::clearData()
+{
+	data_->clear();
+}
+
+void ChangeNotify::showDialog()
+{
+	dialog()->setCurrentTab(this);
+	dialog()->show();
+	dialog()->raise();
+}
+
 
 //-----------------------------------
 //
@@ -205,20 +224,21 @@ ChangeNotifyDialog* ChangeNotify::dialog()
 	return dialog_;
 }
 
-void  ChangeNotify::showDialog(const std::string& id)
+/*
+void  ChangeNotify::showDialog(ChangeNotifyconst std::string& id)
 {
 	dialog()->setCurrentTab(id);
 	dialog()->show();
 	dialog()->raise();
 }
-
-void ChangeNotify::clearData(const std::string& id)
+*/
+/*void ChangeNotify::clearData(const std::string& id)
 {
 	if(ChangeNotify* obj=ChangeNotify::find(id))
 	{
 		obj->data()->clear();
 	}
-}
+}*/
 
 void ChangeNotify::populate(ChangeNotifyWidget* w)
 {

@@ -63,7 +63,7 @@ void ChangeNotifyButton::slotReset()
 
 void ChangeNotifyButton::slotClicked(bool)
 {
-	ChangeNotify::showDialog(notifier_->id());
+	notifier_->showDialog();
 }
 
 void ChangeNotifyButton::updateIcon()
