@@ -430,6 +430,12 @@ VModelData::VModelData(NodeFilterDef *filterDef,AbstractNodeModel* model) :
 	connect(filterDef_,SIGNAL(changed()),
 			this,SLOT(slotFilterDefChanged()));
 
+	connect(this,SIGNAL(filterDeleteBegin()),
+			model_,SLOT(slotFilterDeleteBegin()));
+
+	connect(this,SIGNAL(filterDeleteEnd()),
+			model_,SLOT(slotFilterDeleteEnd()));
+
 	//The model relays this signal
 	connect(this,SIGNAL(filterChanged()),
 			model_,SIGNAL(filterChanged()));
@@ -642,6 +648,13 @@ void VModelData::notifyServerFilterRemoved(ServerItem* item)
 void VModelData::notifyServerFilterChanged(ServerItem* item)
 {
 	//Q_EMIT dataChanged();
+}
+
+void VModelData::notifyServerFilterDelete()
+{
+	Q_EMIT filterDeleteBegin();
+	clear();
+	Q_EMIT filterDeleteEnd();
 }
 
 void VModelData::slotFilterDefChanged()

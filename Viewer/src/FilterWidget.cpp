@@ -288,32 +288,28 @@ void ServerFilterMenu::reload(ServerFilter *filter)
 
 	filter_=filter;
 
-	if(!filter_)
-		return;
 
 	if(filter_)
-	{
-			filter_->addObserver(this);
-			reload();
-	}
+		filter_->addObserver(this);
 
+	reload();
 }
 
 //Reset actions state when a new filter is loaded
 void ServerFilterMenu::reload()
 {
-	if(!filter_)
-		return;
+	//if(!filter_)
+	//	return;
 
 	Q_FOREACH(QAction* ac,acLst_)
 	{
 		if(!ac->isSeparator())
 		{
-				if(ServerItem *item=ServerList::instance()->itemAt(ac->data().toInt()))
-				{
-					//Triggered() will not be called!!
-					ac->setChecked(filter_->isFiltered(item));
-				}
+			if(ServerItem *item=ServerList::instance()->itemAt(ac->data().toInt()))
+			{
+				//Triggered() will not be called!!
+				ac->setChecked((filter_)?filter_->isFiltered(item):false);
+			}
 		}
 	}
 }
@@ -342,8 +338,10 @@ void ServerFilterMenu::notifyServerFilterChanged(ServerItem*)
 	reload();
 }
 
-
-
+void ServerFilterMenu::notifyServerFilterDelete()
+{
+	reload(0);
+}
 
 
 FilterWidget::FilterWidget(QWidget *parent) :

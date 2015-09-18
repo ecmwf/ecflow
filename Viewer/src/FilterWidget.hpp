@@ -85,6 +85,7 @@ public:
 	void notifyServerFilterAdded(ServerItem*);
 	void notifyServerFilterRemoved(ServerItem*);
 	void notifyServerFilterChanged(ServerItem*);
+	void notifyServerFilterDelete();
 
 protected Q_SLOTS:
 	void slotChanged(bool);

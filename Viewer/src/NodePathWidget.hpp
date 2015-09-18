@@ -46,9 +46,9 @@ protected:
 class NodePathNodeItem : public NodePathItem
 {
 public:
-	NodePathNodeItem(int index,QString name,QColor col,bool current,QWidget* parent=0);
-	void reset(QString name,QColor col,bool selected);
-	void reset(QString name,QColor col);
+	NodePathNodeItem(int index,QString name,QColor col,QColor fontCol,bool current,QWidget* parent=0);
+	void reset(QString name,QColor col,QColor fontCol,bool selected);
+	void reset(QString name,QColor col,QColor fontCol);
     void colour(QColor col);
     void current(bool);
 
@@ -59,13 +59,14 @@ protected:
     QString qss_;
     QString qssSelected_;
 	QColor col_;
+	QColor fontCol_;
 	bool current_;
 };
 
 class NodePathServerItem : public NodePathNodeItem
 {
 public:
-	NodePathServerItem(int index,QString name,QColor col,bool current,QWidget* parent=0);
+	NodePathServerItem(int index,QString name,QColor col,QColor,bool current,QWidget* parent=0);
 };
 
 class NodePathMenuItem : public NodePathItem

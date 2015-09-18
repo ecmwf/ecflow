@@ -26,6 +26,7 @@ public:
 	virtual void notifyServerFilterAdded(ServerItem*)=0;
 	virtual void notifyServerFilterRemoved(ServerItem*)=0;
 	virtual void notifyServerFilterChanged(ServerItem*)=0;
+	virtual void notifyServerFilterDelete()=0;
 };
 
 class ServerFilter : public ServerItemObserver

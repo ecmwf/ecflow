@@ -32,6 +32,7 @@ public:
 	void notifyServerFilterAdded(ServerItem* item);
 	void notifyServerFilterRemoved(ServerItem* item);
 	void notifyServerFilterChanged(ServerItem*);
+	void notifyServerFilterDelete();
 
 	void notifyDefsChanged(ServerHandler* server, const std::vector<ecf::Aspect::Type>& a);
 	void notifyServerDelete(ServerHandler* server);

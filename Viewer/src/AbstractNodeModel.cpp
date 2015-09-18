@@ -128,6 +128,18 @@ void AbstractNodeModel::dataIsAboutToChange()
 	beginResetModel();
 }
 
+void AbstractNodeModel::slotFilterDeleteBegin()
+{
+	beginResetModel();
+}
+
+
+void  AbstractNodeModel::slotFilterDeleteEnd()
+{
+	endResetModel();
+}
+
+
 //----------------------------------------------
 //
 // Server to index mapping and lookup

@@ -60,10 +60,12 @@ protected Q_SLOTS:
 	void slotCurrentChangedInPanel();
 	void slotSelectionChanged(VInfo_ptr);
 
+	void slotOpenInfoPanel();
+
 private:
     void init(MainWindow*);
     void closeEvent(QCloseEvent*);
-
+    void addInfoPanelActions(QToolBar *toolbar);
     void reloadContents();
     void rerenderContents();
 
@@ -82,6 +84,8 @@ private:
 
     ServerFilterMenu* serverFilterMenu_;
     NodePanel* nodePanel_;
+    QList<QAction*> infoPanelActions_;
+    VInfo_ptr selection_;
 
     static bool quitStarted_;
     static QList<MainWindow*> windows_;

@@ -32,6 +32,7 @@
 #include "ChangeNotifyWidget.hpp"
 #include "FilterWidget.hpp"
 #include "InfoPanel.hpp"
+#include "InfoPanelHandler.hpp"
 #include "MenuConfigDialog.hpp"
 #include "NodePathWidget.hpp"
 #include "NodePanel.hpp"
@@ -56,7 +57,7 @@ MainWindow::MainWindow(QStringList idLst,QWidget *parent) : QMainWindow(parent)
     
     setAttribute(Qt::WA_DeleteOnClose);
 
-    setWindowTitle("EcflowUI (" + QString::fromStdString(ecf::Version::raw()) + ")");
+    setWindowTitle("EcflowUI (" + QString::fromStdString(ecf::Version::raw()) + ")  -  Preview version");
 
     //Create the main layout
     QVBoxLayout* layout=new QVBoxLayout();
@@ -92,6 +93,10 @@ MainWindow::MainWindow(QStringList idLst,QWidget *parent) : QMainWindow(parent)
     spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     viewToolBar->addWidget(spacer);
 
+    //QToolBar* ipToolBar=new QToolBar(this);
+    addInfoPanelActions(viewToolBar);
+    //addToolBar(ipToolBar);
+
     /*ChangeNotifyWidget* chw=new ChangeNotifyWidget(this);
     viewToolBar->addWidget(chw);*/
 }
@@ -108,6 +113,28 @@ void MainWindow::init(MainWindow *win)
 	if(!win)
 	  	return;
 }
+
+void MainWindow::addInfoPanelActions(QToolBar *toolbar)
+{
+   for(std::vector<InfoPanelDef*>::const_iterator it=InfoPanelHandler::instance()->panels().begin();
+		   it != InfoPanelHandler::instance()->panels().end(); it++)
+   {
+	   if((*it)->show().find("toolbar") != std::string::npos)
+	   {
+		   QAction *ac=toolbar->addAction(QString::fromStdString((*it)->label()));
+		   QPixmap pix(":/viewer/" + QString::fromStdString((*it)->icon()));
+		   ac->setIcon(QIcon(pix));
+		   ac->setData(QString::fromStdString((*it)->name()));
+
+		   connect(ac,SIGNAL(triggered()),
+				   this,SLOT(slotOpenInfoPanel()));
+
+		   infoPanelActions_ << ac;
+	   }
+   }
+}
+
+
 
 //==============================================================
 //
@@ -200,6 +227,8 @@ void MainWindow::on_actionAbout_triggered()
 
 void MainWindow::slotCurrentChangedInPanel()
 {
+	slotSelectionChanged(nodePanel_->currentSelection());
+
 	//filterWidget_->reload(nodePanel_->viewFilter());
 
 	serverFilterMenu_->reload(nodePanel_->serverFilter());
@@ -213,6 +242,35 @@ void MainWindow::slotCurrentChangedInPanel()
 
 void MainWindow::slotSelectionChanged(VInfo_ptr info)
 {
+	selection_=info;
+
+	std::vector<InfoPanelDef*> ids;
+	InfoPanelHandler::instance()->visible(selection_,ids);
+
+	Q_FOREACH(QAction* ac,infoPanelActions_)
+	{
+		ac->setEnabled(false);
+
+		std::string name=ac->data().toString().toStdString();
+
+		for(std::vector<InfoPanelDef*>::const_iterator it=ids.begin(); it != ids.end(); it++)
+		{
+			 if((*it)->name() == name)
+			 {
+				ac->setEnabled(true);
+				break;
+			 }
+		}
+	}
+}
+
+void MainWindow::slotOpenInfoPanel()
+{
+	if(QAction* ac=static_cast<QAction*>(sender()))
+	{
+		std::string name=ac->data().toString().toStdString();
+		nodePanel_->openDialog(selection_,name);
+	}
 }
 
 void MainWindow::reloadContents()

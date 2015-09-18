@@ -51,12 +51,14 @@ Q_SIGNALS:
     void selectionChanged(VInfo_ptr);
 	void titleChanged(QWidget*,QString,QPixmap);
 
+public Q_SLOTS:
+	void slotPopInfoPanel(VInfo_ptr,QString);
+
 protected Q_SLOTS:
 	void slotTitle(QString,QPixmap);
     void slotDockClose();
     void slotDialogFinished(int);
     void slotPopInfoPanel(QString);
-    void slotPopInfoPanel(VInfo_ptr,QString);
 
 private:
 	DashboardWidget* addWidgetCore(const std::string& type);

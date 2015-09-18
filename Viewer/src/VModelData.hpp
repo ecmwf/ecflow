@@ -158,12 +158,15 @@ public:
 	void notifyServerFilterAdded(ServerItem*);
 	void notifyServerFilterRemoved(ServerItem*);
 	void notifyServerFilterChanged(ServerItem*);
+	void notifyServerFilterDelete();
 
 public Q_SLOTS:
 	void slotFilterDefChanged();
 
 Q_SIGNALS:
 	void filterChanged();
+	void filterDeleteBegin();
+	void filterDeleteEnd();
 	void serverAddBegin(int);
 	void serverAddEnd();
 	void serverRemoveBegin(int);

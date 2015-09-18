@@ -16,9 +16,9 @@
    version="1.1"
    inkscape:version="0.48.4 r9939"
    sodipodi:docname="splash_screen.svg"
-   inkscape:export-filename="D:\work\ecflow\splash_screen.png"
-   inkscape:export-xdpi="120"
-   inkscape:export-ydpi="120">
+   inkscape:export-filename="/var/tmp/cgr/git/ecflow/Viewer/images/splash_screen.png"
+   inkscape:export-xdpi="150"
+   inkscape:export-ydpi="150">
   <defs
      id="defs4">
     <linearGradient
@@ -105,18 +105,6 @@
        y2="65.718857"
        gradientUnits="userSpaceOnUse"
        gradientTransform="matrix(1.0806175,0,0,1.0294118,0.03857296,852.36218)" />
-    <filter
-       inkscape:collect="always"
-       id="filter3825"
-       x="-0.08313741"
-       width="1.1662748"
-       y="-0.15224844"
-       height="1.3044969">
-      <feGaussianBlur
-         inkscape:collect="always"
-         stdDeviation="3.1394306"
-         id="feGaussianBlur3827" />
-    </filter>
     <linearGradient
        inkscape:collect="always"
        xlink:href="#linearGradient3837"
@@ -415,6 +403,18 @@
          stdDeviation="1.0230013"
          id="feGaussianBlur4515" />
     </filter>
+    <filter
+       inkscape:collect="always"
+       id="filter4128"
+       x="-0.012798987"
+       width="1.025598"
+       y="-0.13166636"
+       height="1.2633327">
+      <feGaussianBlur
+         inkscape:collect="always"
+         stdDeviation="0.77273529"
+         id="feGaussianBlur4130" />
+    </filter>
   </defs>
   <sodipodi:namedview
      id="base"
@@ -424,16 +424,16 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="2.69831"
-     inkscape:cx="136.23054"
-     inkscape:cy="92.844768"
+     inkscape:cx="66.742601"
+     inkscape:cy="93.030069"
      inkscape:document-units="px"
-     inkscape:current-layer="layer5"
+     inkscape:current-layer="layer8"
      showgrid="false"
      width="200px"
-     inkscape:window-width="1366"
-     inkscape:window-height="706"
-     inkscape:window-x="-8"
-     inkscape:window-y="-8"
+     inkscape:window-width="1920"
+     inkscape:window-height="1140"
+     inkscape:window-x="-4"
+     inkscape:window-y="-4"
      inkscape:window-maximized="1"
      showguides="true"
      inkscape:guide-bbox="true">
@@ -450,7 +450,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title />
+        <dc:title></dc:title>
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -707,7 +707,7 @@
        xml:space="preserve"
        id="flowRoot3768-5"
        style="font-size:43.23317719px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#1a1a1a;fill-opacity:1;stroke:none;display:inline;filter:url(#filter4513);font-family:Sans"
-       transform="matrix(0.95970142,0,0,0.9831043,90.645065,38.98171)"><flowRegion
+       transform="matrix(0.95970142,0,0,0.9831043,91.015667,35.646289)"><flowRegion
          id="flowRegion3770-5"><rect
            id="rect3772-5"
            width="262.82318"
@@ -716,7 +716,7 @@
            y="41.005802"
            style="font-size:43.23317719px;fill:#1a1a1a;fill-opacity:1;stroke:none" /></flowRegion><flowPara
          id="flowPara3774-6"
-         style="font-size:43.23317719px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;fill:#1a1a1a;fill-opacity:1;stroke:none;font-family:Arial;-inkscape-font-specification:Arial Bold">ecflow UI</flowPara></flowRoot>  </g>
+         style="font-size:43.23317719px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;fill:#1a1a1a;fill-opacity:1;stroke:none;font-family:Arial;-inkscape-font-specification:Arial Bold">ecFlowUI</flowPara></flowRoot>  </g>
   <g
      inkscape:groupmode="layer"
      id="layer2"
@@ -726,7 +726,7 @@
        xml:space="preserve"
        id="flowRoot3768"
        style="font-size:43.23317719px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#d7d7d7;fill-opacity:1;stroke:none;font-family:Sans"
-       transform="matrix(0.95970142,0,0,0.9831043,87.51778,34.536259)"><flowRegion
+       transform="matrix(0.95970142,0,0,0.9831043,87.888382,31.200838)"><flowRegion
          id="flowRegion3770"><rect
            id="rect3772"
            width="262.82318"
@@ -913,17 +913,31 @@
          y="144.42261"
          style="font-size:5.94701147px;fill:#eaeaea;fill-opacity:1">suite 3</tspan></text>
     <flowRoot
+       transform="matrix(0.99786724,0,0,1.0694625,70.226549,106.14301)"
+       style="font-size:19.36024475px;font-style:normal;font-weight:bold;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#291919;fill-opacity:1;stroke:none;display:inline;filter:url(#filter4128);font-family:Sans;-inkscape-font-specification:Sans Bold"
+       id="flowRoot3904"
+       xml:space="preserve"><flowRegion
+         id="flowRegion3906"><rect
+           style="font-size:19.36024475px;font-weight:bold;fill:#291919;fill-opacity:1;stroke:none;-inkscape-font-specification:Sans Bold"
+           y="28.781721"
+           x="61.519989"
+           height="35.741665"
+           width="170.43861"
+           id="rect3908" /></flowRegion><flowPara
+         style="font-size:19.36024475px;font-weight:bold;fill:#291919;fill-opacity:1;stroke:none;-inkscape-font-specification:Sans Bold"
+         id="flowPara3910">Preview version</flowPara></flowRoot>    <flowRoot
        xml:space="preserve"
        id="flowRoot3144"
-       style="font-size:20px;font-style:normal;font-weight:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;display:inline;font-family:Sans"
-       transform="translate(67.130149,111.51698)"><flowRegion
-         id="flowRegion3146"><rect
+       style="font-size:19.36024474999999967px;font-style:normal;font-weight:bold;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#d79029;fill-opacity:1;stroke:none;stroke-width:0.38720485999999998;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;display:inline;font-family:Sans;-inkscape-font-specification:Sans Bold"
+       transform="matrix(0.99786724,0,0,1.0694625,67.632333,103.54879)"><flowRegion
+         id="flowRegion3146"
+         style="stroke-width:0.38720486"><rect
            id="rect3148"
-           width="163.80623"
-           height="32.613003"
+           width="170.43861"
+           height="35.741665"
            x="61.519989"
            y="28.781721"
-           style="font-size:20px" /></flowRegion><flowPara
+           style="font-size:19.36024474999999967px;font-weight:bold;fill:#d79029;fill-opacity:1;stroke:none;stroke-width:0.38720485999999998;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;-inkscape-font-specification:Sans Bold" /></flowRegion><flowPara
          id="flowPara3150"
-         style="font-size:20px;fill:#ff7f2a">Preview version</flowPara></flowRoot>  </g>
+         style="font-size:19.36024474999999967px;font-weight:bold;fill:#d79029;fill-opacity:1;stroke:none;stroke-width:0.38720485999999998;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;-inkscape-font-specification:Sans Bold">Preview version</flowPara></flowRoot>  </g>
 </svg>

@@ -195,10 +195,7 @@ void Dashboard::slotDockClose()
 
 VInfo_ptr Dashboard::currentSelection()
 {
-	//if(NodeWidget *ctl=handler_->currentControl())
-	//	return  ctl->currentSelection();
-
-	return VInfo_ptr();
+	return currentSelectionInView();
 }
 
 void Dashboard::currentSelection(VInfo_ptr n)

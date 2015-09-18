@@ -55,6 +55,9 @@ Q_SIGNALS:
 	void rerender();
 
 public Q_SLOTS:
+	void slotFilterDeleteBegin();
+	void slotFilterDeleteEnd();
+
 	virtual void slotServerAddBegin(int row)=0;
 	virtual void slotServerAddEnd()=0;
 	virtual void slotServerRemoveBegin(int row)=0;

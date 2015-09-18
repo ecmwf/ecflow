@@ -22,9 +22,10 @@
 #include "VSState.hpp"
 #include "VSettings.hpp"
 
-NodePathNodeItem::NodePathNodeItem(int index,QString name,QColor col,bool selected,QWidget * parent) :
+NodePathNodeItem::NodePathNodeItem(int index,QString name,QColor col,QColor fontCol,bool selected,QWidget * parent) :
   NodePathItem(NodeType,index,parent),
   col_(col),
+  fontCol_(fontCol),
   current_(selected)
 {
 	//Stylesheet
@@ -68,27 +69,29 @@ NodePathNodeItem::NodePathNodeItem(int index,QString name,QColor col,bool select
 	setFont(f);
 };
 
-void NodePathNodeItem::reset(QString name,QColor col,bool current)
+void NodePathNodeItem::reset(QString name,QColor col,QColor fontCol,bool current)
 {
 	if(text() != name)
 		setText(name);
 
-	if(col_ != col || current_!=current)
+	if(col_ != col || fontCol_ != fontCol || current_!=current)
 	{
 		col_=col;
+		fontCol_=fontCol;
 		current_=current;
 		resetStyle();
 	}
 }
 
-void NodePathNodeItem::reset(QString name,QColor col)
+void NodePathNodeItem::reset(QString name,QColor col,QColor fontCol)
 {
 	if(text() != name)
 		setText(name);
 
-	if(col_ != col)
+	if(col_ != col || fontCol_ != fontCol)
 	{
 		col_=col;
+		fontCol_=fontCol;
 		resetStyle();
 	}
 }
@@ -108,7 +111,7 @@ void NodePathNodeItem::resetStyle()
 		st.replace("FONT","bold");
 
 		//Text color
-		st.replace("TEXT-COLOR","black");
+		st.replace("TEXT-COLOR",fontCol_.name());
 
 		//Border
 		st.replace("BORDER","1px solid black");
@@ -123,7 +126,7 @@ void NodePathNodeItem::resetStyle()
 		st.replace("FONT","normal");
 
 		//Text color
-		st.replace("TEXT-COLOR","black");
+		st.replace("TEXT-COLOR",fontCol_.name());
 
 		//Border
 		st.replace("BORDER","1px solid rgb(180,180,180)");    //+ col_.name());
@@ -172,6 +175,7 @@ bool NodePathNodeItem::isDark(QColor col) const
 	return darkBg;
 }
 
+/*
 void NodePathNodeItem::colour(QColor col)
 {
 	if(col_!= col)
@@ -180,7 +184,7 @@ void NodePathNodeItem::colour(QColor col)
 		resetStyle();
 	}
 }
-
+*/
 void NodePathNodeItem::current(bool current)
 {
 	if(current_!=current)
@@ -191,8 +195,8 @@ void NodePathNodeItem::current(bool current)
 }
 
 
-NodePathServerItem::NodePathServerItem(int index,QString name,QColor col,bool selected,QWidget * parent) :
-  NodePathNodeItem(index,name,col,selected,parent)
+NodePathServerItem::NodePathServerItem(int index,QString name,QColor col,QColor fontCol,bool selected,QWidget * parent) :
+  NodePathNodeItem(index,name,col,fontCol,selected,parent)
 {
 	//setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
 	//setIcon(QPixmap(":/viewer/server.svg"));
@@ -529,6 +533,7 @@ void NodePathWidget::setPath(VInfo_ptr info)
 
 		VNode *n=lst.at(i);
 		col=n->stateColour();
+		QColor fontCol=n->stateFontColour();
 		name=n->name();
 		bool hasChildren=hasChildren=(n->numOfChildren() >0);
 
@@ -552,19 +557,19 @@ void NodePathWidget::setPath(VInfo_ptr info)
 		if(i < nodeItems_.count())
 		{
 			nodeItem=nodeItems_.at(i);
-			nodeItem->reset(name,col,false);
+			nodeItem->reset(name,col,fontCol,false);
 		}
 		else
 		{
 			//Server
 			if(i==0)
 			{
-				nodeItem=new NodePathServerItem(i,name,col,false,this);
+				nodeItem=new NodePathServerItem(i,name,col,fontCol,false,this);
 			}
 			//Node
 			else
 			{
-				nodeItem=new NodePathNodeItem(i,name,col,false,this);
+				nodeItem=new NodePathNodeItem(i,name,col,fontCol,false,this);
 			}
 			nodeItems_ << nodeItem;
 			connect(nodeItem,SIGNAL(clicked()),
@@ -812,7 +817,7 @@ void NodePathWidget::notifyBeginNodeChange(const VNode* node, const std::vector<
 				{
 					if(i < nodeItems_.count())
 					{
-						nodeItems_.at(i)->reset(node->name(),node->stateColour());
+						nodeItems_.at(i)->reset(node->name(),node->stateColour(),node->stateFontColour());
 					}
 					return;
 				}
@@ -851,7 +856,8 @@ void NodePathWidget::notifyDefsChanged(ServerHandler* server,const std::vector<e
 			if(nodeItems_.count() > 0)
 			{
 				nodeItems_.at(0)->reset(server->vRoot()->name(),
-						                server->vRoot()->stateColour());
+						                server->vRoot()->stateColour(),
+										server->vRoot()->stateFontColour());
 			}
 
 		}

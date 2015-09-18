@@ -37,7 +37,7 @@
      <x>0</x>
      <y>0</y>
      <width>852</width>
-     <height>19</height>
+     <height>24</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuLl">
@@ -122,9 +122,6 @@
     <bool>false</bool>
    </attribute>
    <addaction name="actionRefresh"/>
-   <addaction name="separator"/>
-   <addaction name="actionAddTableWidget"/>
-   <addaction name="actionAddInfoPanel"/>
   </widget>
   <action name="actionClose">
    <property name="icon">
@@ -192,7 +189,7 @@
   </action>
   <action name="actionReset">
    <property name="icon">
-    <iconset resource="viewer.qrc">
+    <iconset>
      <normaloff>:/viewer/images/reset.svg</normaloff>:/viewer/images/reset.svg</iconset>
    </property>
    <property name="text">

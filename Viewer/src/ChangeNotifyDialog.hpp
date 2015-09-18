@@ -36,7 +36,6 @@ public:
 public Q_SLOTS:
 	void on_tab__currentChanged(int);
 	void on_closePb__clicked(bool b);
-	void on_clearCPb__clicked(bool b);
 
 protected:
 	ChangeNotify* tabToNtf(int tabIdx);

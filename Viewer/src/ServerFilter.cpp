@@ -26,6 +26,14 @@ ServerFilter::ServerFilter()
 
 ServerFilter::~ServerFilter()
 {
+	std::vector<ServerFilterObserver*> obsCopy=observers_;
+
+	for(std::vector<ServerFilterObserver*>::const_iterator it=obsCopy.begin(); it != obsCopy.end(); ++it)
+	{
+		(*it)->notifyServerFilterDelete();
+	}
+
+
 	for(std::vector<ServerItem*>::const_iterator it=items_.begin(); it != items_.end(); ++it)
 	{
 		(*it)->removeObserver(this);

@@ -156,6 +156,14 @@ void NodePanel::addToDashboard(const std::string& type)
     }
 }
 
+void NodePanel::openDialog(VInfo_ptr info,const std::string& type)
+{
+	if(Dashboard *w=currentDashboard())
+	{
+	    w->slotPopInfoPanel(info,QString::fromStdString(type));
+	}
+}
+
 void NodePanel::slotTabTitle(QWidget* w,QString text,QPixmap pix)
 {
 	int index=indexOfWidget(w);

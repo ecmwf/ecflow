@@ -83,7 +83,7 @@ bool NodeWidget::active() const
 
 void NodeWidget::createActions()
 {
-	QAction* infoAc=new QAction(" ",this);
+	/*QAction* infoAc=new QAction(" ",this);
 	QPixmap pix(":/viewer/dock_info.svg");
 	infoAc->setIcon(QIcon(pix));
 	infoAc->setToolTip(tr("Start up information panel as dialog"));
@@ -110,20 +110,20 @@ void NodeWidget::createActions()
 
     		infoPanelActions_ << ac;
     	}
-    }
+    }*/
 }
 
 void NodeWidget::slotInfoPanelAction()
 {
-    if(QAction* ac=static_cast<QAction*>(sender()))
+    /*if(QAction* ac=static_cast<QAction*>(sender()))
     {
     	Q_EMIT popInfoPanel(view_->currentSelection(),ac->data().toString());
-    }
+    }*/
 }
 
 void NodeWidget::updateActionState(VInfo_ptr info)
 {
-    std::vector<InfoPanelDef*> ids;
+   /* std::vector<InfoPanelDef*> ids;
     InfoPanelHandler::instance()->visible(info,ids);
 
     QAction *infoAc=dockActionMap_["info"];
@@ -149,7 +149,7 @@ void NodeWidget::updateActionState(VInfo_ptr info)
     			break;
     		}
     	}
-    }
+    }*/
 }
 
 

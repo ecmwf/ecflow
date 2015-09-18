@@ -23,7 +23,8 @@ DashboardTitle::DashboardTitle(ServerFilter* filter,QObject *parent) :
 
 DashboardTitle::~DashboardTitle()
 {
-	filter_->removeObserver(this);
+	if(filter_)
+		filter_->removeObserver(this);
 }
 
 void DashboardTitle::notifyServerFilterAdded(ServerItem* item)
@@ -43,6 +44,12 @@ void DashboardTitle::notifyServerFilterRemoved(ServerItem* item)
 void DashboardTitle::notifyServerFilterChanged(ServerItem*)
 {
 	updateTitle();
+}
+
+void DashboardTitle::notifyServerFilterDelete()
+{
+	filter_->removeObserver(this);
+	filter_=0;
 }
 
 void DashboardTitle::notifyDefsChanged(ServerHandler* server, const std::vector<ecf::Aspect::Type>& a)
@@ -77,6 +84,9 @@ void DashboardTitle::notifyServerActivityChanged(ServerHandler* server)
 
 void DashboardTitle::updateTitle()
 {
+	if(!filter_)
+		return;
+
 	const int marginX=0;
 	const int marginY=0;
 	const int textMarginX=2;

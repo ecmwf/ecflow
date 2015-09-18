@@ -158,7 +158,7 @@ void ChangeNotifyDialog::on_closePb__clicked(bool b)
 		}
 	}
 }
-
+/*
 void ChangeNotifyDialog::on_clearCPb__clicked(bool b)
 {
 	hide();
@@ -169,7 +169,7 @@ void ChangeNotifyDialog::on_clearCPb__clicked(bool b)
 			ntf->clearData();
 	}
 }
-
+*/
 ChangeNotify* ChangeNotifyDialog::tabToNtf(int tabIdx)
 {
 	std::map<int,ChangeNotify*>::const_iterator it=tabToNtfMap_.find(tabIdx);
