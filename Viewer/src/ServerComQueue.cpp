@@ -25,7 +25,7 @@ ServerComQueue::ServerComQueue(ServerHandler *server,ClientInvoker *client, Serv
 	server_(server),
 	client_(client),
 	comThread_(comThread),
-	timeout_(1000),
+	timeout_(500),
 	state_(SuspendedState), //the queue is enabled but not running
 	taskIsBeingFinished_(false),
 	taskIsBeingFailed_(false)
@@ -132,6 +132,7 @@ void ServerComQueue::reset()
 	VTask_ptr task=VTask::create(VTask::ResetTask);
 	tasks_.push_back(task);
 
+	//TODO: why do we not run it directly
 	//We start the timer with a shorter interval
 	timer_->start(100);
 }
@@ -185,6 +186,10 @@ void ServerComQueue::addTask(VTask_ptr task)
 	if(!task)
 		return;
 
+	if(!tasks_.empty() && task->type() ==  VTask::ZombieListTask && tasks_.back()->type() == task->type())
+		return;
+
+
 	if(state_ == DisabledState || state_ == ResetState ||
 	  (task && task->type() ==VTask::ResetTask) )
 		return;
@@ -207,6 +212,9 @@ void ServerComQueue::addNewsTask()
 	if(state_ == DisabledState || state_ == ResetState)
 		return;
 
+	if(!tasks_.empty() && tasks_.back()->type() == VTask::NewsTask)
+		return;
+
 	VTask_ptr task=VTask::create(VTask::NewsTask);
 	addTask(task);
 }
@@ -214,6 +222,9 @@ void ServerComQueue::addNewsTask()
 void ServerComQueue::addSyncTask()
 {
 	if(state_ == DisabledState || state_ == ResetState)
+		return;
+
+	if(!tasks_.empty() && tasks_.back()->type() == VTask::SyncTask)
 		return;
 
 	VTask_ptr task=VTask::create(VTask::SyncTask);
@@ -225,6 +236,9 @@ void ServerComQueue::addSuiteListTask()
 	if(state_ == DisabledState || state_ == ResetState)
 		return;
 
+	if(!tasks_.empty() && tasks_.back()->type() == VTask::SuiteListTask)
+		return;
+
 	VTask_ptr task=VTask::create(VTask::SuiteListTask);
 	addTask(task);
 }
@@ -232,6 +246,9 @@ void ServerComQueue::addSuiteListTask()
 void ServerComQueue::addSuiteAutoRegisterTask()
 {
 	if(state_ == DisabledState || state_ == ResetState)
+		return;
+
+	if(!tasks_.empty() && tasks_.back()->type() == VTask::SuiteAutoRegisterTask)
 		return;
 
 	VTask_ptr task=VTask::create(VTask::SuiteAutoRegisterTask);
