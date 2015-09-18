@@ -31,7 +31,6 @@ std::map<VServerSettings::Param,std::string> VServerSettings::notifyIds_;
 std::map<VServerSettings::Param,std::string> VServerSettings::parNames_;
 VProperty* VServerSettings::globalProp_=0;
 
-
 VServerSettings::VServerSettings(ServerHandler* server) :
 	server_(server),
 	prop_(NULL),
@@ -46,31 +45,31 @@ VServerSettings::VServerSettings(ServerHandler* server) :
 		parNames_[MaxJobFileLines]="server.files.maxJobFileLines";
 		parNames_[ReadFromDisk]="server.files.readFilesFromDisk";
 
-		parNames_[AbortedEnabled]="server.notification.aborted.enabled";
-		parNames_[AbortedPopup]="server.notification.aborted.popup";
-		parNames_[AbortedSound]="server.notification.aborted.sound";
+		parNames_[NotifyAbortedEnabled]="server.notification.aborted.enabled";
+		parNames_[NotifyAbortedPopup]="server.notification.aborted.popup";
+		parNames_[NotifyAbortedSound]="server.notification.aborted.sound";
 
-		parNames_[RestartedEnabled]="server.notification.restarted.enabled";
-		parNames_[RestartedPopup]="server.notification.restarted.popup";
-		parNames_[RestartedSound]="server.notification.restarted.sound";
+		parNames_[NotifyRestartedEnabled]="server.notification.restarted.enabled";
+		parNames_[NotifyRestartedPopup]="server.notification.restarted.popup";
+		parNames_[NotifyRestartedSound]="server.notification.restarted.sound";
 
-		parNames_[LateEnabled]="server.notification.late.enabled";
-		parNames_[LatePopup]="server.notification.late.popup";
-		parNames_[LateSound]="server.notification.late.sound";
+		parNames_[NotifyLateEnabled]="server.notification.late.enabled";
+		parNames_[NotifyLatePopup]="server.notification.late.popup";
+		parNames_[NotifyLateSound]="server.notification.late.sound";
 
-		parNames_[ZombieEnabled]="server.notification.zombie.enabled";
-		parNames_[ZombiePopup]="server.notification.zombie.popup";
-		parNames_[ZombieSound]="server.notification.zombie.sound";
+		parNames_[NotifyZombieEnabled]="server.notification.zombie.enabled";
+		parNames_[NotifyZombiePopup]="server.notification.zombie.popup";
+		parNames_[NotifyZombieSound]="server.notification.zombie.sound";
 
-		parNames_[AliasEnabled]="server.notification.alias.enabled";
-		parNames_[AliasPopup]="server.notification.alias.popup";
-		parNames_[AliasSound]="server.notification.alias.sound";
-	}
+		parNames_[NotifyAliasEnabled]="server.notification.alias.enabled";
+		parNames_[NotifyAliasPopup]="server.notification.alias.popup";
+		parNames_[NotifyAliasSound]="server.notification.alias.sound";
 
-	if(notifyIds_.empty())
-	{
-		notifyIds_[AbortedEnabled]="aborted";
-		notifyIds_[RestartedEnabled]="restarted";
+		notifyIds_[NotifyAbortedEnabled]="aborted";
+		notifyIds_[NotifyRestartedEnabled]="restarted";
+		notifyIds_[NotifyLateEnabled]="late";
+		notifyIds_[NotifyZombieEnabled]="zombie";
+		notifyIds_[NotifyAliasEnabled]="alias";
 	}
 
 	assert(globalProp_);
@@ -148,7 +147,7 @@ void VServerSettings::notifyChange(VProperty* p)
 
 std::string VServerSettings::notificationId(Param par)
 {
-	std::map<Param,std::string>::iterator it=notifyIds_.find(par);
+	std::map<Param,std::string>::const_iterator it=notifyIds_.find(par);
 	if(it != notifyIds_.end())
 	{
 		return it->second;
@@ -189,30 +188,6 @@ void VServerSettings::saveSettings()
 	VConfig::instance()->saveSettings(fName,guiProp_,&vs);
 }
 
-/*
-void VServerSettings::importGlobalRcFile()
-{
-	SessionItem* cs=SessionHandler::instance()->current();
-
-	//Global settings
-	VProperty* gr=VConfig::find("gui.server"); //assert(globalProp_);
-
-	std::string globalRcFile(DirectoryHandler::concatenate(DirectoryHandler::rcDir(),"user.default.options"));
-
-	using boost::property_tree::ptree;
-	ptree pt;
-
-	if(readRcFile(globalRcFile,pt))
-	{
-		VConfig::importSettings(pt)
-
-		//Global settings
-			VProperty* gr=VConfig::find("gui.server"); //assert(globalProp_);
-		VConfig::instance()->loadSettings(pt,gr);
-		VConfig::saveSettings();
-	}
-}
-*/
 
 void VServerSettings::importRcFiles()
 {
@@ -234,276 +209,6 @@ void VServerSettings::importRcFiles()
 		}
 	}
 }
-
-
-/*
-		std::ifstream in(rcFile.c_str());
-
-		if(!in.good())
-			continue;
-
-		using boost::property_tree::ptree;
-		ptree pt;
-
-		bool hasValue=false;
-
-		std::string line;
-		while(getline(in,line))
-		{
-			std::string buf;
-			std::stringstream ssdata(line);
-			std::vector<std::string> vec;
-
-			while(ssdata >> buf)
-			{
-				vec.push_back(buf);
-			}
-
-			if(vec.size() >= 1)
-			{
-				std::vector<std::string> par;
-				boost::split(par,vec[0],boost::is_any_of(":"));
-
-				if(par.size()==2)
-				{
-					//Update
-					if(par[0] == "timeout")
-					{
-						pt.put("server.update.updateRateInSec",par[1]);
-						hasValue=true;
-					}
-					else if(par[0] == "poll")
-					{
-						pt.put("server.update.update",par[1]);
-						hasValue=true;
-					}
-
-					else if(par[0] == "drift")
-					{
-						pt.put("server.update.adaptiveUpdate",par[1]);
-						hasValue=true;
-					}
-					else if(par[0] == "maximum")
-					{
-						pt.put("server.update.maxAdaptiveUpdateRateInMin",par[1]);
-						hasValue=true;
-					}
-
-					//Files
-					else if(par[0] == "direct_read")
-					{
-						pt.put("server.files.readFilesFromDisk",par[1]);
-						hasValue=true;
-					}
-					else if(par[0] == "jobfile_length")
-					{
-						pt.put("server.files.maxJobFileLines",par[1]);
-						hasValue=true;
-					}
-
-					//Popup
-					else if(par[0] == "aborted")
-					{
-						pt.put("server.notification.aborted.enabled",par[1]);
-						pt.put("server.notification.aborted.popup",par[1]);
-						hasValue=true;
-					}
-					else if(par[0] == "restarted")
-					{
-						pt.put("server.notification.restarted.enabled",par[1]);
-						pt.put("server.notification.restarted.popup",par[1]);
-						hasValue=true;
-					}
-					else if(par[0] == "late")
-					{
-						pt.put("server.notification.late.enabled",par[1]);
-						pt.put("server.notification.late.popup",par[1]);
-						hasValue=true;
-					}
-					else if(par[0] == "zombies")
-					{
-						pt.put("server.notification.zombie.enabled",par[1]);
-						pt.put("server.notification.zombie.popup",par[1]);
-						hasValue=true;
-					}
-					else if(par[0] == "aliases")
-					{
-						pt.put("server.notification.alias.enabled",par[1]);
-						pt.put("server.notification.alias.popup",par[1]);
-						hasValue=true;
-					}
-					//Suites
-					else if(par[0] == "new_suites")
-					{
-						pt.put("suite_filter.autoAddNew",par[1]);
-						hasValue=true;
-
-					}
-					else if(par[0] == "suites")
-					{
-						boost::property_tree::ptree suites;
-						suites.push_back(std::make_pair("",par[1]));
-
-						for(unsigned int j=1; j < vec.size(); j++)
-						{
-							suites.push_back(std::make_pair("",vec.at(j)));
-						}
-
-						pt.put_child("suite_filter.suites",suites);
-
-						pt.put("suite_filter.enabled","true");
-
-						hasValue=true;
-
-					}
-				}
-			}
-
-		} //while(getline)
-
-		in.close();
-
-		if(hasValue)
-		{
-			std::string jsonName=cs->serverFile(name);
-			write_json(jsonName,pt);
-		}
-
-	}
-}
-*/
-/*
-bool VServerSettings::readRcFile(const std::string& rcFile,boost::property_tree::ptree& pt)
-{
-	std::ifstream in(rcFile.c_str());
-
-	if(!in.good())
-		return false;;
-
-	bool hasValue=false;
-
-	std::string line;
-	while(getline(in,line))
-	{
-		std::string buf;
-		std::stringstream ssdata(line);
-		std::vector<std::string> vec;
-
-		while(ssdata >> buf)
-		{
-			vec.push_back(buf);
-		}
-
-		if(vec.size() >= 1)
-		{
-			std::vector<std::string> par;
-			boost::split(par,vec[0],boost::is_any_of(":"));
-
-			if(par.size()==2)
-			{
-				//Update
-				if(par[0] == "timeout")
-				{
-					pt.put("server.update.updateRateInSec",par[1]);
-					hasValue=true;
-				}
-				else if(par[0] == "poll")
-				{
-					pt.put("server.update.update",par[1]);
-					hasValue=true;
-				}
-
-				else if(par[0] == "drift")
-				{
-					pt.put("server.update.adaptiveUpdate",par[1]);
-					hasValue=true;
-				}
-				else if(par[0] == "maximum")
-				{
-					pt.put("server.update.maxAdaptiveUpdateRateInMin",par[1]);
-					hasValue=true;
-				}
-
-				//Files
-				else if(par[0] == "direct_read")
-				{
-					pt.put("server.files.readFilesFromDisk",par[1]);
-					hasValue=true;
-				}
-				else if(par[0] == "jobfile_length")
-				{
-					pt.put("server.files.maxJobFileLines",par[1]);
-					hasValue=true;
-				}
-
-				//Popup
-				else if(par[0] == "aborted")
-				{
-					pt.put("server.notification.aborted.enabled",par[1]);
-					pt.put("server.notification.aborted.popup",par[1]);
-					hasValue=true;
-				}
-				else if(par[0] == "restarted")
-				{
-					pt.put("server.notification.restarted.enabled",par[1]);
-					pt.put("server.notification.restarted.popup",par[1]);
-					hasValue=true;
-				}
-				else if(par[0] == "late")
-				{
-					pt.put("server.notification.late.enabled",par[1]);
-					pt.put("server.notification.late.popup",par[1]);
-					hasValue=true;
-				}
-				else if(par[0] == "zombies")
-				{
-					pt.put("server.notification.zombie.enabled",par[1]);
-					pt.put("server.notification.zombie.popup",par[1]);
-					hasValue=true;
-				}
-				else if(par[0] == "aliases")
-				{
-					pt.put("server.notification.alias.enabled",par[1]);
-					pt.put("server.notification.alias.popup",par[1]);
-					hasValue=true;
-				}
-				//Suites
-				else if(par[0] == "new_suites")
-				{
-					pt.put("suite_filter.autoAddNew",par[1]);
-					hasValue=true;
-
-				}
-				else if(par[0] == "suites")
-				{
-					boost::property_tree::ptree suites;
-					suites.push_back(std::make_pair("",par[1]));
-
-					for(unsigned int j=1; j < vec.size(); j++)
-					{
-						suites.push_back(std::make_pair("",vec.at(j)));
-					}
-
-					pt.put_child("suite_filter.suites",suites);
-
-					pt.put("suite_filter.enabled","true");
-
-					hasValue=true;
-
-				}
-			}
-		}
-
-	} //while(getline)
-
-	in.close();
-
-	return hasValue;
-
-}
-*/
-
-
 
 //Called from VConfigLoader
 void VServerSettings::load(VProperty* p)

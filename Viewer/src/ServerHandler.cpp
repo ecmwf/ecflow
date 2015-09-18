@@ -1225,24 +1225,23 @@ void ServerHandler::confChanged(VServerSettings::Param par,VProperty* prop)
 	case VServerSettings::UpdateRate:
 		updateRefreshTimer();
 		break;
-	case VServerSettings::AbortedEnabled:
-	case VServerSettings::RestartedEnabled:
-	case VServerSettings::LateEnabled:
-	case VServerSettings::ZombieEnabled:
-	case VServerSettings::AliasEnabled:
+	case VServerSettings::NotifyAbortedEnabled:
+	case VServerSettings::NotifyRestartedEnabled:
+	case VServerSettings::NotifyLateEnabled:
+	case VServerSettings::NotifyZombieEnabled:
+	case VServerSettings::NotifyAliasEnabled:
 		checkNotificationState(par);
 		break;
 	default:
 		break;
 	}
-
 }
 
 void ServerHandler::checkNotificationState(VServerSettings::Param par)
 {
 	std::string id=VServerSettings::notificationId(par);
-
-	assert(!id.empty());
+	if(id.empty())
+		return;
 
 	bool enabled=false;
 

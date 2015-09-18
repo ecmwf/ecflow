@@ -11,7 +11,7 @@
 #ifndef CHANGENOTIFYMODEL_HPP_
 #define CHANGENOTIFYMODEL_HPP_
 
-#include <QAbstractItemModel>
+#include <QSortFilterProxyModel>
 
 #include <vector>
 
@@ -40,6 +40,8 @@ public:
 public Q_SLOTS:
 	void slotBeginAppendRow();
 	void slotEndAppendRow();
+	void slotBeginRemoveRow(int);
+	void slotEndRemoveRow(int);
 	void slotBeginReset();
 	void slotEndReset();
 

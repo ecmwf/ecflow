@@ -27,6 +27,7 @@
 //#endif
 
 #include <QDebug>
+#include <QSortFilterProxyModel>
 
 #include <map>
 
@@ -51,18 +52,31 @@ ChangeNotify::ChangeNotify(const std::string& id) :
 	enabled_(false),
 	data_(0),
 	model_(0),
+	proxyModel_(0),
 	prop_(0)
 {
+
 	data_=new VNodeList();
 	model_=new ChangeNotifyModel();
 	model_->setData(data_);
 
+	proxyModel_=new QSortFilterProxyModel();
+	proxyModel_->setSourceModel(model_);
+	proxyModel_->setFilterFixedString("1");
+	proxyModel_->setFilterKeyColumn(0);
+
 	items[id] = this;
+}
+
+QAbstractItemModel* ChangeNotify::model() const
+{
+	return proxyModel_;
 }
 
 void ChangeNotify::add(VNode *node,bool popup,bool sound)
 {
 	data_->add(node);
+	proxyModel_->invalidate();
 
 	if(popup)
 	{
@@ -96,6 +110,8 @@ void ChangeNotify::setEnabled(bool en)
 		data_->clear();
 	}
 
+	proxyModel_->invalidate();
+
 	if(dialog_)
 	{
 		dialog()->setEnabledTab(this,en);
@@ -123,7 +139,8 @@ void ChangeNotify::notifyChange(VProperty* prop)
 
 void ChangeNotify::clearData()
 {
-	data_->clear();
+	data_->hide();
+	proxyModel_->invalidate();
 }
 
 void ChangeNotify::showDialog()

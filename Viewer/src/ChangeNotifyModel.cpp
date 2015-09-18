@@ -41,6 +41,12 @@ void ChangeNotifyModel::setData(VNodeList *data)
 	connect(data_,SIGNAL(endAppendRow()),
 			this,SLOT(slotEndAppendRow()));
 
+	connect(data_,SIGNAL(beginRemoveRow(int)),
+				this,SLOT(slotBeginRemoveRow(int)));
+
+	connect(data_,SIGNAL(endAppendRow()),
+				this,SLOT(slotEndAppendRow()));
+
 	connect(data_,SIGNAL(beginReset()),
 			this,SLOT(slotBeginReset()));
 
@@ -87,19 +93,29 @@ QVariant ChangeNotifyModel::data( const QModelIndex& index, int role ) const
 
 	if(role == Qt::DisplayRole)
 	{
-		VNode *node=data_->nodeAt(row);
+		VNodeListItem *item=data_->itemAt(row);
+		assert(item);
 
 		switch(index.column())
 		{
 		case 0:
-			return QString::fromStdString(node->serverName());
+			return QString::fromStdString(item->node()->serverName());
 			break;
 		case 1:
-			return QString::fromStdString(node->absNodePath());
+			return QString::fromStdString(item->node()->absNodePath());
+			break;
+		case 2:
+			return item->time();
 			break;
 		default:
 			break;
 		}
+	}
+	else if(role == Qt::UserRole)
+	{
+		VNodeListItem *item=data_->itemAt(row);
+		assert(item);
+		return (item->isVisible())?1:0;
 	}
 	return QVariant();
 }
@@ -163,6 +179,16 @@ void ChangeNotifyModel::slotBeginAppendRow()
 void ChangeNotifyModel::slotEndAppendRow()
 {
 	endInsertRows();
+}
+
+void ChangeNotifyModel::slotBeginRemoveRow(int row)
+{
+	beginRemoveRows(QModelIndex(),row,row);
+}
+
+void ChangeNotifyModel::slotEndRemoveRow(int row)
+{
+	endRemoveRows();
 }
 
 void ChangeNotifyModel::slotBeginReset()

@@ -13,6 +13,8 @@
 
 #include "VProperty.hpp"
 
+#include <set>
+
 class ServerHandler;
 
 class VServerSettings : public VPropertyObserver
@@ -21,17 +23,15 @@ class VServerSettings : public VPropertyObserver
 
 public:
 	enum Param {UpdateRate,AdaptiveUpdate,MaxAdaptiveUpdateRate,MaxJobFileLines,ReadFromDisk,
-	           AbortedEnabled,AbortedPopup,AbortedSound,AbortedSoundFile,
-			   RestartedEnabled,RestartedPopup, RestartedSound,RestartedSoundFile,
-			   LateEnabled,LatePopup,LateSound, LateSoundFile,
-			   ZombieEnabled,ZombiePopup,ZombieSound,ZombieSoundFile,
-			   AliasEnabled,AliasPopup,AliasSound,AliasSoundFile};
+	           NotifyAbortedEnabled, NotifyAbortedPopup, NotifyAbortedSound,
+			   NotifyRestartedEnabled, NotifyRestartedPopup, NotifyRestartedSound,
+			   NotifyLateEnabled, NotifyLatePopup, NotifyLateSound,
+			   NotifyZombieEnabled, NotifyZombiePopup, NotifyZombieSound,
+			   NotifyAliasEnabled, NotifyAliasPopup, NotifyAliasSound};
 
 	int intValue(Param par) const;
 	bool boolValue(Param par) const;
-
 	VProperty* guiProp() const {return guiProp_;}
-
 	static std::string notificationId(Param);
 
 	//From VPropertyObserver
@@ -49,8 +49,6 @@ protected:
 	VProperty* property(Param par) const;
 	void loadSettings();
 	void saveSettings();
-
-	//static bool readRcFile(const std::string& rcFile,boost::property_tree::ptree& pt);
 
 	ServerHandler* server_;
 	VProperty* prop_;

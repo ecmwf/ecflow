@@ -503,6 +503,9 @@ void VNode::why(std::vector<std::string>& theReasonWhy) const
 
 void VNode::check(VServerSettings* conf,bool stateChange)
 {
+	//TODO: implement it
+	return;
+
 	NState::State new_status = node_->state();
 
 	if(stateChange)
@@ -510,10 +513,10 @@ void VNode::check(VServerSettings* conf,bool stateChange)
 		//Check for aborted
 		if(new_status == NState::ABORTED)
 		{
-			if(conf->boolValue(VServerSettings::AbortedEnabled))
+			if(conf->boolValue(VServerSettings::NotifyAbortedEnabled))
 			{
-				bool popup=conf->boolValue(VServerSettings::AbortedPopup);
-				bool sound=conf->boolValue(VServerSettings::AbortedSound);
+				bool popup=conf->boolValue(VServerSettings::NotifyAbortedPopup);
+				bool sound=conf->boolValue(VServerSettings::NotifyAbortedSound);
 
 				ChangeNotify::add("aborted",this,popup,sound);
 			}

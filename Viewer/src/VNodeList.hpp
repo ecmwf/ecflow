@@ -16,8 +16,25 @@
 
 #include <QObject>
 
-#include <assert.h>
 #include <vector>
+
+class VNodeList;
+
+class VNodeListItem
+{
+friend class VNodeList;
+
+public:
+	VNodeListItem(VNode* n,QString time) : node_(n), visible_(true), time_(time) {}
+	VNode *node() const {return node_;}
+	bool isVisible() const {return visible_;}
+	QString time() const {return time_;}
+
+protected:
+	VNode* node_;
+	bool visible_;
+	QString time_;
+};
 
 class VNodeList : public QObject, public ServerObserver, public NodeObserver
 {
@@ -28,10 +45,12 @@ public:
  	~VNodeList();
 
  	int size() const {return data_.size();}
- 	VNode* nodeAt(int i) const {assert(i>=0 && i < data_.size()); return data_.at(i);}
+ 	VNodeListItem* itemAt(int i);
  	void add(VNode*);
  	void remove(VNode*);
  	void clear();
+ 	void hide();
+ 	bool contains(VNode*);
 
     //From ServerObserver
  	void notifyDefsChanged(ServerHandler* server, const std::vector<ecf::Aspect::Type>& a) {};
@@ -48,14 +67,16 @@ public:
 Q_SIGNALS:
      void beginAppendRow();
      void endAppendRow();
+     void beginRemoveRow(int);
+     void endRemoveRow(int);
      void beginReset();
      void endReset();
 
 protected:
+     void clearData(bool hideOnly);
      void clear(ServerHandler*);
 
-     std::vector<VNode*> data_;
-     std::vector<std::string> activeData_;
+     std::vector<VNodeListItem*> data_;
 };
 
 #endif /* VIEWER_SRC_VNODELIST_HPP_ */

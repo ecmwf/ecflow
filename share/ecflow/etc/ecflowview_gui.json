@@ -86,6 +86,7 @@
  		},	
  		
  	  "notification":  {
+            "visible" : "false",
             "label": "Notifications",
             "desc" : "Notifications",
             "icon" : "colour.svg",
@@ -149,10 +150,10 @@
 				"line" : "maxJobFileLines"				
 			},
 
-			"grid" : {
+			"grid-hidden" : {
 				"title" : "Notifications",
 			
-				"h1" : "Enabled",
+				"h1" : "Show in status bar",
 				"h2" : "Popup dialog",
 				"h3" : "Play sound",
 				

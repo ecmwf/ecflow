@@ -23,6 +23,9 @@ class VProperty;
 class VNode;
 class VNodeList;
 
+class QAbstractItemModel;
+class QSortFilterProxyModel;
+
 class ChangeNotify : public VPropertyObserver
 {
 public:
@@ -31,7 +34,7 @@ public:
 	const std::string& id() const {return id_;}
 	VNodeList* data() const {return data_;};
 	VProperty* prop() const {return prop_;}
-	ChangeNotifyModel* model() const {return model_;}
+	QAbstractItemModel* model() const;
 	bool isEnabled() const {return enabled_;}
 	void clearData();
 	void showDialog();
@@ -62,6 +65,7 @@ protected:
 	bool enabled_;
 	VNodeList* data_;
 	ChangeNotifyModel* model_;
+	QSortFilterProxyModel* proxyModel_;
 	VProperty* prop_;
 	static ChangeNotifyDialog* dialog_;
 };

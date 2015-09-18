@@ -79,21 +79,21 @@ MainWindow::MainWindow(QStringList idLst,QWidget *parent) : QMainWindow(parent)
     			this,SLOT(slotSelectionChanged(VInfo_ptr)));
 
     //Add temporary preview label
-    QLabel *label=new QLabel(" This is a preview version and has not been verified for operational use! ",this);
+    /*QLabel *label=new QLabel(" This is a preview version and has not been verified for operational use! ",this);
     label->setAutoFillBackground(true);
     label->setProperty("previewLabel","1");
 
     QLabel *label1=new QLabel("      ",this);
 
     viewToolBar->addWidget(label1);
-    viewToolBar->addWidget(label);
+    viewToolBar->addWidget(label);*/
 
     QWidget* spacer = new QWidget();
     spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     viewToolBar->addWidget(spacer);
 
-    ChangeNotifyWidget* chw=new ChangeNotifyWidget(this);
-    viewToolBar->addWidget(chw);
+    /*ChangeNotifyWidget* chw=new ChangeNotifyWidget(this);
+    viewToolBar->addWidget(chw);*/
 }
 
 MainWindow::~MainWindow()

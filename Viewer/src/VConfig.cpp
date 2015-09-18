@@ -417,31 +417,31 @@ bool VConfig::readRcFile(const std::string& rcFile,boost::property_tree::ptree& 
 				//Popup
 				else if(par[0] == "aborted")
 				{
-					pt.put("server.notification.aborted.enabled",par[1]);
+					pt.put("server.notification.aborted.button",par[1]);
 					pt.put("server.notification.aborted.popup",par[1]);
 					hasValue=true;
 				}
 				else if(par[0] == "restarted")
 				{
-					pt.put("server.notification.restarted.enabled",par[1]);
+					pt.put("server.notification.restarted.button",par[1]);
 					pt.put("server.notification.restarted.popup",par[1]);
 					hasValue=true;
 				}
 				else if(par[0] == "late")
 				{
-					pt.put("server.notification.late.enabled",par[1]);
+					pt.put("server.notification.late.button",par[1]);
 					pt.put("server.notification.late.popup",par[1]);
 					hasValue=true;
 				}
 				else if(par[0] == "zombies")
 				{
-					pt.put("server.notification.zombie.enabled",par[1]);
+					pt.put("server.notification.zombie.button",par[1]);
 					pt.put("server.notification.zombie.popup",par[1]);
 					hasValue=true;
 				}
 				else if(par[0] == "aliases")
 				{
-					pt.put("server.notification.alias.enabled",par[1]);
+					pt.put("server.notification.alias.button",par[1]);
 					pt.put("server.notification.alias.popup",par[1]);
 					hasValue=true;
 				}
