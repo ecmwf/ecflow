@@ -85,6 +85,7 @@ void InfoPanelHandler::init(const std::string &configFile)
                 def->setIcon(panelPt.get("icon",""));
                 def->setDockIcon(panelPt.get("dock_icon",""));
                 def->setShow(panelPt.get("show",""));
+                def->setTooltip(panelPt.get("tooltip",""));
 
                 std::string enabled  = panelPt.get("enabled_for", "");
                 std::string visible  = panelPt.get("visible_for", "");

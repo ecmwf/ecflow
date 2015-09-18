@@ -27,6 +27,7 @@ public:
     std::string icon() const {return icon_;}
     std::string dockIcon() const {return dockIcon_;}
 	std::string show() const {return show_;}
+	std::string tooltip() const {return tooltip_;}
 	bool hidden() const {return hidden_;}
 	BaseNodeCondition* visibleCondition() const {return visibleCondition_;}
 
@@ -34,6 +35,7 @@ public:
     void setIcon(const std::string& s) {icon_=s;}
     void setDockIcon(const std::string& s) {dockIcon_=s;}
 	void setShow(const std::string& s) {show_=s;}
+	void setTooltip(const std::string& tooltip) {tooltip_=tooltip;}
 	void setVisibleCondition(BaseNodeCondition *visibleCond) {visibleCondition_=visibleCond;}
 	void setEnabledCondition(BaseNodeCondition *enabledCond) {enabledCondition_=enabledCond;}
 	void setHidden(bool b) {hidden_=b;}
@@ -44,6 +46,7 @@ protected:
 	std::string icon_;
     std::string dockIcon_;
 	std::string show_;
+	std::string tooltip_;
 	bool hidden_;
 
 	BaseNodeCondition *visibleCondition_;
