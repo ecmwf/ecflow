@@ -100,7 +100,7 @@ QFrame[breadcrumbs="1"] {
 ------------------------------*/
 
 QTreeView[style="nodeView"] {  
-    background: rgb(255,255,255);
+    background: rgb(250,250,250);
 }
 
 QTreeView[style="nodeView"]::item {

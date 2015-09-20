@@ -1,10 +1,18 @@
 {
 	"gui" : {
 							
- 		"states":  {
- 			"label": "Status",
- 			"desc" : "Status",
+ 		"appearance":  {
+ 			"label": "Appearence",
+ 			"desc" : "Appearence",
  			"icon" : "colour.svg",
+            
+            "group" : {
+                "title" : "Node rendering",
+                "prefix" : "view.common",
+                
+                "line" : "node_style",
+                "line" : "node_gradient"
+            },                        
             "grid" : {
                    "title" : "Nodes",                                    
                     "h1" : "Fill colour",

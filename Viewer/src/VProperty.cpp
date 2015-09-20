@@ -168,7 +168,10 @@ std::string VProperty::valueAsString() const
 
 void VProperty::setParam(QString name,QString value)
 {
-	params_[name]=value;
+	if(name == "values")
+        type_=StringComboType;
+        
+    params_[name]=value;
 }
 
 QString VProperty::param(QString name)

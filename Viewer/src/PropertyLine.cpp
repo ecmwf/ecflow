@@ -11,6 +11,7 @@
 #include "PropertyLine.hpp"
 
 #include <QCheckBox>
+#include <QComboBox>
 #include <QColorDialog>
 #include <QDebug>
 #include <QFontDialog>
@@ -21,6 +22,7 @@
 #include <QPalette>
 #include <QToolButton>
 
+#include <assert.h>
 
 static std::map<VProperty::Type,PropertyLineFactory*>* makers = 0;
 
@@ -515,9 +517,83 @@ void BoolPropertyLine::setEnabledEditable(bool b)
 	cb_->setEnabled(b);
 }
 
+//=========================================================================
+//
+// ComboPropertyLine
+//
+//=========================================================================
+
+ComboPropertyLine::ComboPropertyLine(VProperty* vProp,bool addLabel,QWidget * parent) : PropertyLine(vProp,addLabel,parent)
+{
+	cb_=new QComboBox(parent);//(vProp->param("label"));
+
+	connect(cb_,SIGNAL(currentIndexChanged(int)),
+			   this,SLOT(slotCurrentChanged(int)));
+
+	QStringList lst=prop_->param("values_label").split("/");
+    QStringList lstData=prop_->param("values").split("/");
+    assert(lst.count() == lstData.count());
+	for(int i=0; i < lst.count(); i++)
+		cb_->addItem(lst[i],lstData[i]);
+}
+
+QWidget* ComboPropertyLine::item()
+{
+	return cb_;
+}
+
+QWidget* ComboPropertyLine::button()
+{
+	return NULL;
+}
+
+void ComboPropertyLine::reset(QVariant v)
+{
+	QStringList lst=prop_->param("values").split("/");
+	int idx=lst.indexOf(v.toString());
+	if(idx != -1)
+		cb_->setCurrentIndex(idx);
+
+	PropertyLine::checkState();
+}
+
+bool ComboPropertyLine::applyChange()
+{
+	QString v=prop_->value().toString();
+    
+    int idx=cb_->currentIndex();
+    
+    if(idx != -1)
+    {
+        QString currentDataVal=cb_->itemData(idx).toString();
+        if(v != currentDataVal)
+        {
+		    prop_->setValue(currentDataVal);
+		    return true;
+        }    
+	}
+
+	return false;
+}
+
+QVariant ComboPropertyLine::currentValue()
+{
+	return cb_->currentText();
+}
+
+void ComboPropertyLine::slotCurrentChanged(int)
+{
+    PropertyLine::checkState();
+}
+
+void ComboPropertyLine::setEnabledEditable(bool b)
+{
+	cb_->setEnabled(b);
+}
 
 static PropertyLineMaker<StringPropertyLine> makerStr(VProperty::StringType);
 static PropertyLineMaker<ColourPropertyLine> makerCol(VProperty::ColourType);
 static PropertyLineMaker<FontPropertyLine> makerFont(VProperty::FontType);
 static PropertyLineMaker<IntPropertyLine> makerInt(VProperty::IntType);
 static PropertyLineMaker<BoolPropertyLine> makerBool(VProperty::BoolType);
+static PropertyLineMaker<ComboPropertyLine> makerCombo(VProperty::StringComboType);

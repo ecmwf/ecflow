@@ -12,6 +12,7 @@
 #include <QApplication>
 #include <QDebug>
 #include <QImageReader>
+#include <QLinearGradient>
 #include <QPainter>
 
 #include "AbstractNodeModel.hpp"
@@ -20,15 +21,22 @@
 
 static std::vector<std::string> propVec;
 
+int TreeNodeViewDelegate::lighter_=150;
+
+
 TreeNodeViewDelegate::TreeNodeViewDelegate(QWidget *parent) :
     nodeRectRad_(0),
-    drawChildCount_(true)
+    drawChildCount_(true),
+    nodeStyle_(ClassicNodeStyle),
+    useNodeGrad_(true)
 {
 	//Property
 	if(propVec.empty())
 	{
 		propVec.push_back("view.tree.font");
 		propVec.push_back("view.tree.displayChildCount");
+        propVec.push_back("view.common.node_style");
+        propVec.push_back("view.common.node_gradient");
 	}
 
     prop_=new PropertyMapper(propVec,this);
@@ -37,6 +45,10 @@ TreeNodeViewDelegate::TreeNodeViewDelegate(QWidget *parent) :
 
 	//The parent must be the view!!!
 	animation_=new AnimationHandler(parent);
+
+	grad_.setCoordinateMode(QGradient::ObjectBoundingMode);
+	grad_.setStart(0,0);
+	grad_.setFinalStop(0,1);
 
     /*hoverPen_=QPen(QColor(201,201,201));
 	hoverBrush_=QBrush(QColor(250,250,250,210));
@@ -86,7 +98,19 @@ TreeNodeViewDelegate::~TreeNodeViewDelegate()
 
 void TreeNodeViewDelegate::updateSettings()
 {
-	if(VProperty* p=prop_->find("view.tree.nodeRectRadius"))
+	if(VProperty* p=prop_->find("view.common.node_style"))
+    {
+        if(p->value().toString() == "classic")
+            nodeStyle_=ClassicNodeStyle;
+        else
+            nodeStyle_=BoxAndTextNodeStyle;
+    }
+    if(VProperty* p=prop_->find("view.common.node_gradient"))
+    {
+        useNodeGrad_=p->value().toBool();
+    }
+        
+    if(VProperty* p=prop_->find("view.tree.nodeRectRadius"))
 	{
 		nodeRectRad_=p->value().toInt();
 	}
@@ -218,40 +242,55 @@ void TreeNodeViewDelegate::paint(QPainter *painter,const QStyleOptionViewItem &o
 void TreeNodeViewDelegate::renderServer(QPainter *painter,const QModelIndex& index,
 		                                   const QStyleOptionViewItemV4& option,QString text) const
 {
-	int offset=4;
-	int currentRight=0;
+	bool selected=option.state & QStyle::State_Selected;
+    int offset=4;
 
 	QFontMetrics fm(font_);
 	int deltaH=(option.rect.height()-(fm.height()+4))/2;
 
 	//The initial filled rect (we will adjust its  width)
 	//QRect fillRect=option.rect.adjusted(offset,1,0,-2);
-	QRect fillRect=option.rect.adjusted(offset,deltaH,0,-deltaH-1);
+	QRect itemRect=option.rect.adjusted(offset,deltaH,0,-deltaH-1);
 	if(option.state & QStyle::State_Selected)
-		fillRect.adjust(0,0,0,0);
+		itemRect.adjust(0,0,0,0);
 
+	int currentRight=itemRect.left();
 
-	//Pixmap rect
-	//QRect pixRect = QRect(fillRect.left()+offset,
-	//		fillRect.top()+(fillRect.height()-serverPix_.height())/2,
-	//		serverPix_.width(),
-	//		serverPix_.height());
+	QRect stateRect;
+	QRect fillRect;
+	QRect halfRect;
+
+	if(nodeStyle_ == BoxAndTextNodeStyle)
+	{
+		stateRect=QRect(itemRect.x()+offset,itemRect.y(),itemRect.height(),itemRect.height());
+		currentRight=stateRect.right();
+	}
+	else
+	{
+		fillRect=itemRect;
+	}
 
 	//The text rectangle
-	QRect textRect = fillRect;
-	textRect.setLeft(fillRect.left()+offset);
-
+	QRect textRect=itemRect;
+	textRect.setLeft(currentRight+offset);
 	int textWidth=fm.width(text);
 	textRect.setWidth(textWidth);
 
 	//Adjust the filled rect width
-	fillRect.setRight(textRect.right()+offset);
+	if(nodeStyle_ == ClassicNodeStyle)
+	{
+		fillRect.setRight(textRect.right()+offset);
 
-	QRect halfRect=fillRect;
-	halfRect.setY(halfRect.center().y());
-	halfRect.adjust(1,0,-1,-1);
+		halfRect=fillRect;
+		halfRect.setY(halfRect.center().y());
+		halfRect.adjust(1,0,-1,-1);
 
-	currentRight=fillRect.right();
+		currentRight=fillRect.right();
+	}
+	else
+	{
+		currentRight=textRect.right();
+	}
 
 	//The pixmap (optional)
 	QRect pixRect;
@@ -260,8 +299,8 @@ void TreeNodeViewDelegate::renderServer(QPainter *painter,const QModelIndex& ind
 
 	if(hasPix)
 	{
-		pixRect = QRect(fillRect.right()+fm.width('A'),
-				fillRect.top()+(fillRect.height()-errPix_.height())/2,
+		pixRect = QRect(currentRight+fm.width('A'),
+				fillRect.top()+(itemRect.height()-errPix_.height())/2,
 				errPix_.width(),
 				errPix_.height());
 
@@ -297,7 +336,7 @@ void TreeNodeViewDelegate::renderServer(QPainter *painter,const QModelIndex& ind
 		an=animation_->find(Animation::ServerLoadType,true);
 
 		loadRect = QRect(currentRight+fm.width('A'),
-						fillRect.top()+(fillRect.height()-an->scaledSize().height())/2,
+						fillRect.top()+(itemRect.height()-an->scaledSize().height())/2,
 						an->scaledSize().width(),
 						an->scaledSize().height());
 
@@ -345,27 +384,54 @@ void TreeNodeViewDelegate::renderServer(QPainter *painter,const QModelIndex& ind
 		painter->setClipRect(option.rect);
 	}
 
-	//Draw bg rect
+	//Draw state/node rect
 	QColor bg=index.data(Qt::BackgroundRole).value<QColor>();
+    QColor fg=index.data(Qt::ForegroundRole).value<QColor>();
+    renderNodeCell(painter,bg,QColor(),fg,stateRect,fillRect,QRect(),textRect,text,selected);
+    
+	/*QColor bg=index.data(Qt::BackgroundRole).value<QColor>();
+	QColor bgLight=bg.lighter(lighter_);
 	QColor borderCol=bg.darker(125);
-	painter->fillRect(fillRect,bg);
-	//painter->setPen((option.state & QStyle::State_Selected)?nodeSelectPen_:nodePen_);
-	painter->setPen((option.state & QStyle::State_Selected)?nodeSelectPen_:QPen(borderCol));
-	painter->drawRect(fillRect);
 
-	//Draw shading
-	QColor shCol= bg.darker(108);
-	painter->fillRect(halfRect,shCol);
-
-	//painter->fillRect(fillRect,bg);
-	//painter->setPen((option.state & QStyle::State_Selected)?nodeSelectPen_:nodePen_);
-	//painter->drawRect(fillRect);
+    QBrush bgBrush;
+    if(useNodeGrad_)
+    {    
+	    grad_.setColorAt(0,bgLight);
+	    grad_.setColorAt(1,bg);
+        bgBrush=QBrush(grad_);
+    }
+    else
+    {
+        bgBrush.setColor(bg);
+    }    
+    
+	if(nodeStyle_ == BoxAndTextNodeStyle)
+	{
+		painter->setBrush(bgBrush);
+		painter->setPen(borderCol);
+		painter->drawRect(stateRect);
+	}
+	else
+	{
+		painter->setBrush(bgBrush);
+		painter->setPen((option.state & QStyle::State_Selected)?nodeSelectPen_:QPen(borderCol));
+		painter->drawRect(fillRect);
+	}
 
 	//Draw text
 	QColor fg=index.data(Qt::ForegroundRole).value<QColor>();
 	painter->setPen(fg);
 	painter->drawText(textRect,Qt::AlignLeft | Qt::AlignVCenter,text);
 
+	//selection
+	if(nodeStyle_ == BoxAndTextNodeStyle && (option.state & QStyle::State_Selected))
+	{
+		painter->setPen(nodeSelectPen_);
+		QRect selRect=stateRect;
+		selRect.setRight(textRect.right()+1);
+		painter->drawRect(selRect);
+	}
+    */
 	//Draw pixmap if needed
 	if(hasPix)
 	{
@@ -408,15 +474,17 @@ void TreeNodeViewDelegate::renderServer(QPainter *painter,const QModelIndex& ind
 void TreeNodeViewDelegate::renderNode(QPainter *painter,const QModelIndex& index,
         							const QStyleOptionViewItemV4& option,QString text) const
 {
-	int offset=4;
+	
+    bool selected=option.state & QStyle::State_Selected;
+    int offset=4;
 
 	QFontMetrics fm(font_);
 	int deltaH=(option.rect.height()-(fm.height()+4))/2;
 
 	//The initial filled rect (we will adjust its  width)
-	QRect fillRect=option.rect.adjusted(offset,deltaH,0,-deltaH-1);
+	QRect itemRect=option.rect.adjusted(offset,deltaH,0,-deltaH-1);
 	if(option.state & QStyle::State_Selected)
-		fillRect.adjust(0,0,0,-0);
+		itemRect.adjust(0,0,0,-0);
 
 	//get the colours
 	QColor bg,realBg;
@@ -437,26 +505,58 @@ void TreeNodeViewDelegate::renderNode(QPainter *painter,const QModelIndex& index
 		bg=bgVa.value<QColor>();
 	}
 
-	//The text rectangle
-	QRect textRect = fillRect.adjusted(offset,0,0,0);
+	int currentRight=itemRect.left();
 
+	QRect stateRect;
+	QRect fillRect;
+	QRect halfRect;
+	QRect realRect;
+
+	if(nodeStyle_ == BoxAndTextNodeStyle)
+	{
+		stateRect=QRect(itemRect.x()+offset,itemRect.y(),itemRect.height(),itemRect.height());
+		currentRight=stateRect.right();
+
+		if(hasRealBg)
+		{
+			realRect=QRect(stateRect.right()+1,stateRect.top(),6,stateRect.height());
+			currentRight=realRect.right()+2;
+		}
+
+		currentRight+=offset;
+	}
+	else
+	{
+		fillRect=itemRect;
+	}
+
+
+	//The text rectangle
+	QRect textRect=itemRect;
+	textRect.setLeft(currentRight+offset);
 	int textWidth=fm.width(text);
 	textRect.setWidth(textWidth);
 
 	//Adjust the filled rect width
-	fillRect.setRight(textRect.right()+offset);
-
-	QRect halfRect=fillRect;
-	halfRect.setY(fillRect.center().y());
-	halfRect.adjust(1,0,-1,-1);
-
-	int currentRight=fillRect.right();
-
-	QRect realRect;
-	if(hasRealBg)
+	if(nodeStyle_ == ClassicNodeStyle)
 	{
-		realRect=QRect(fillRect.right()+1,fillRect.top(),6,fillRect.height());
-		currentRight=realRect.right()+2;
+		fillRect.setRight(textRect.right()+offset);
+
+		halfRect=fillRect;
+		halfRect.setY(halfRect.center().y());
+		halfRect.adjust(1,0,-1,-1);
+
+		currentRight=fillRect.right();
+
+		if(hasRealBg)
+		{
+			realRect=QRect(fillRect.right()+1,fillRect.top(),6,fillRect.height());
+			currentRight=realRect.right()+2;
+		}
+	}
+	else
+	{
+		currentRight=textRect.right();
 	}
 
 	//Icons area
@@ -467,7 +567,7 @@ void TreeNodeViewDelegate::renderNode(QPainter *painter,const QModelIndex& index
 	{
 			QVariantList lst=va.toList();
 			int xp=currentRight+5;
-			int yp=fillRect.top();
+			int yp=itemRect.top();
 			for(int i=0; i < lst.count(); i++)
 			{
 				pixLst << lst[i].value<QPixmap>();
@@ -511,32 +611,68 @@ void TreeNodeViewDelegate::renderNode(QPainter *painter,const QModelIndex& index
 		painter->setClipRect(option.rect);
 	}
 
-	//Draw bg rect
-	//QColor bg=index.data(Qt::BackgroundRole).value<QColor>();
+	QColor fg=index.data(Qt::ForegroundRole).value<QColor>();
+	renderNodeCell(painter,bg,realBg,fg,stateRect,fillRect,realRect,textRect,text,selected);
+	
+    /*
+	QColor bgLight=bg.lighter(lighter_);
 	QColor borderCol=bg.darker(125);
-	painter->fillRect(fillRect,bg);
-	//painter->setPen((option.state & QStyle::State_Selected)?nodeSelectPen_:nodePen_);
-	painter->setPen((option.state & QStyle::State_Selected)?nodeSelectPen_:QPen(borderCol));
-	painter->drawRect(fillRect);
 
-	//Draw shading
-	QColor shCol= bg.darker(108);
-	painter->fillRect(halfRect,shCol);
+    QBrush bgBrush;
+	if(useNodeGrad_)
+    {
+        grad_.setColorAt(0,bgLight);
+    	grad_.setColorAt(1,bg);
+        bgBrush=QBrush(grad_);
+    }
+    else
+        bgBrush=QBrush(bg);
+
+    
+	//Draw state/node rect
+	if(nodeStyle_ == BoxAndTextNodeStyle)
+	{
+		painter->setBrush(bgBrush);
+		painter->setPen(borderCol);
+		painter->drawRect(stateRect);
+	}
+	else
+	{
+		painter->setBrush(bgBrush);
+		painter->setPen((option.state & QStyle::State_Selected)?nodeSelectPen_:QPen(borderCol));
+		painter->drawRect(fillRect);
+	}
+
+	painter->setBrush(Qt::NoBrush);
 
 	if(hasRealBg)
 	{
 		QColor realBorderCol=realBg.darker(125);
 		painter->fillRect(realRect,realBg);
-		painter->setPen((option.state & QStyle::State_Selected)?nodeSelectPen_:QPen(realBorderCol));
+
+		if(nodeStyle_ == BoxAndTextNodeStyle)
+			painter->setPen(realBorderCol);
+		else
+			painter->setPen((option.state & QStyle::State_Selected)?nodeSelectPen_:QPen(realBorderCol));
+
 		painter->drawRect(realRect);
 	}
 
-
+    */
+    
 	//Draw text
-	QColor fg=index.data(Qt::ForegroundRole).value<QColor>();
+	/*QColor fg=index.data(Qt::ForegroundRole).value<QColor>();
 	painter->setPen(fg);
 	painter->drawText(textRect,Qt::AlignLeft | Qt::AlignVCenter,text);
 
+	//selection
+	if(nodeStyle_ == BoxAndTextNodeStyle && (option.state & QStyle::State_Selected))
+	{
+		painter->setPen(nodeSelectPen_);
+		QRect selRect=stateRect;
+		selRect.setRight(textRect.right()+1);
+		painter->drawRect(selRect);
+	}*/
 
 	//Draw icons
 	for(int i=0; i < pixLst.count(); i++)
@@ -556,4 +692,64 @@ void TreeNodeViewDelegate::renderNode(QPainter *painter,const QModelIndex& index
 	{
 		painter->restore();
 	}
+}
+
+void TreeNodeViewDelegate::renderNodeCell(QPainter *painter,QColor bg,QColor realBg,QColor fg,
+                                        QRect stateRect,QRect fillRect,QRect realRect,QRect textRect, QString text,
+                                        bool selected) const
+{    
+    QColor bgLight=bg.lighter(lighter_);
+    QColor borderCol=bg.darker(125);
+
+    QBrush bgBrush;
+    if(useNodeGrad_)
+    {
+        grad_.setColorAt(0,bgLight);
+        grad_.setColorAt(1,bg);
+        bgBrush=QBrush(grad_);
+    }
+    else
+        bgBrush=QBrush(bg);
+
+    
+    //Draw state/node rect
+    if(nodeStyle_ == BoxAndTextNodeStyle)
+    {
+        painter->setBrush(bgBrush);
+        painter->setPen(borderCol);
+        painter->drawRect(stateRect);
+    }
+    else
+    {
+        painter->setBrush(bgBrush);
+        painter->setPen(selected?nodeSelectPen_:QPen(borderCol));
+        painter->drawRect(fillRect);
+    }
+
+    painter->setBrush(Qt::NoBrush);
+
+    if(!realRect.isEmpty())
+    {
+        QColor realBorderCol=realBg.darker(125);
+        painter->fillRect(realRect,realBg);
+
+        if(nodeStyle_ == BoxAndTextNodeStyle)
+            painter->setPen(realBorderCol);
+        else
+            painter->setPen(selected?nodeSelectPen_:QPen(realBorderCol));
+
+        painter->drawRect(realRect);
+    }
+    //Draw text
+    painter->setPen(fg);
+    painter->drawText(textRect,Qt::AlignLeft | Qt::AlignVCenter,text);
+
+    //selection
+    if(nodeStyle_ == BoxAndTextNodeStyle && selected)
+    {
+        painter->setPen(nodeSelectPen_);
+        QRect selRect=stateRect;
+        selRect.setRight(textRect.right()+1);
+        painter->drawRect(selRect);
+    }
 }

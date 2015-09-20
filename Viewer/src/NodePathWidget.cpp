@@ -12,209 +12,302 @@
 #include <QDebug>
 #include <QHBoxLayout>
 #include <QMenu>
-#include <QStyleOption>
+#include <QMouseEvent>
 #include <QPainter>
+#include <QPolygon>
+#include <QStyleOption>
+#include <QToolButton>
 #include <QVector>
 
 #include "VNode.hpp"
+#include "VProperty.hpp"
+#include "PropertyMapper.hpp"
 #include "ServerHandler.hpp"
 #include "VNState.hpp"
 #include "VSState.hpp"
 #include "VSettings.hpp"
 
-NodePathNodeItem::NodePathNodeItem(int index,QString name,QColor col,QColor fontCol,bool selected,QWidget * parent) :
-  NodePathItem(NodeType,index,parent),
-  col_(col),
-  fontCol_(fontCol),
-  current_(selected)
+static std::vector<std::string> propVec;
+
+BcWidget::BcWidget(QWidget* parent) : 
+    QWidget(parent),
+    hPadding_(2),
+    vPadding_(2),
+    triLen_(10),
+    width_(0),
+    height_(0),
+    emptyText_("No selection"),
+    useGrad_(true),
+    gradLighter_(150)
 {
-	//Stylesheet
+    font_=QFont();
+    QFontMetrics fm(font_);
+    
+    height_=fm.height()+2*vPadding_;
+    
+    setMouseTracking(true);
+    
+    //Property
+    if(propVec.empty())
+    {
+        propVec.push_back("view.common.node_style");
+        propVec.push_back("view.common.node_gradient");
+    }
 
-	qss_="QToolButton {\
-			    border-radius: 0px; \
-		     	padding: 0px; \
-				border: BORDER;\
-			    font-weight: FONT;\
-				background: BASE-COLOR;\
-			    color: TEXT-COLOR; \
-		 }\
-		     QToolButton:hover{\
-		    	 border: BORDER;\
-		    	 border-radius: 0px; \
-		    	 padding: 0px; \
-		    	 background: HOVER-COLOR;\
-			     font-weight: FONT; \
-		 }";
-
-	qssSelected_="QToolButton {\
-			    border: BORDER;\
-				border-radius: 0px; \
-		     	padding: 0px; \
-			    font-weight: FONT;\
-				background: BASE-COLOR;\
-			    color: TEXT-COLOR; \
-		 }\
-		     QToolButton:hover{\
-		    	 border: BORDER;\
-		    	 border-radius: 0px; \
-		    	 padding: 0px; \
-		    	 background: HOVER-COLOR;\
-		 }";
-
-	setText(name+" ");
-	resetStyle();
-
-	QFont f;
-	f.setPointSize(8);
-	setFont(f);
-};
-
-void NodePathNodeItem::reset(QString name,QColor col,QColor fontCol,bool current)
-{
-	if(text() != name)
-		setText(name);
-
-	if(col_ != col || fontCol_ != fontCol || current_!=current)
-	{
-		col_=col;
-		fontCol_=fontCol;
-		current_=current;
-		resetStyle();
-	}
+    prop_=new PropertyMapper(propVec,this);
+   
+    updateSettings();
 }
 
-void NodePathNodeItem::reset(QString name,QColor col,QColor fontCol)
+BcWidget::~BcWidget()
 {
-	if(text() != name)
-		setText(name);
+    delete prop_;
+}    
 
-	if(col_ != col || fontCol_ != fontCol)
-	{
-		col_=col;
-		fontCol_=fontCol;
-		resetStyle();
-	}
+void BcWidget::notifyChange(VProperty *p)
+{
+    updateSettings();
+}    
+    
+void BcWidget::updateSettings()
+{
+    //if(VProperty *p=prop_->find("view.common.node_style"))
+    //    node_style=p->value().toString()';
+    if(VProperty *p=prop_->find("view.common.node_gradient"))
+        useGrad_=p->value().toBool();
+}    
+
+void BcWidget::clear()
+{
+    items_.clear();
+}
+    
+void BcWidget::reset(int idx,QString text,QColor bgCol,QColor fontCol)
+{
+    if(idx >=0 && idx < items_.count())
+    {
+        bool newText=(text != items_.at(idx)->text_);
+        
+        if(newText)
+            items_.at(idx)->text_=text;
+        
+        items_.at(idx)->bgCol_=bgCol;
+        items_.at(idx)->fontCol_=fontCol;
+        
+        if(newText)
+           reset(items_);
+        else
+        {
+            updatePixmap(idx); 
+            update();
+        }    
+    }
+}    
+    
+void BcWidget::reset(QList<NodePathItem*> items)
+{
+    items_=items;
+    
+    QFontMetrics fm(font_);
+    int xp=0;
+    int yp=0;
+    for(int i=0; i < items_.count(); i++)
+    {
+        int len=fm.width(items_.at(i)->text_);
+        
+        QRect textRect;
+        items_.at(i)->borderCol_=items_.at(i)->bgCol_.darker(140);
+                
+        QVector<QPoint> vec;
+        QVector<QPoint> menuVec;
+        if(i ==0)
+        {
+            textRect=QRect(xp+hPadding_,yp+vPadding_,len,yp+height_-2*vPadding_);
+            
+            vec << QPoint(xp,yp);            
+            vec << QPoint(xp+len,yp);
+            vec << QPoint(xp+len+triLen_,yp+height_/2);
+            vec << QPoint(xp+len,yp+height_);
+            vec << QPoint(xp,yp+height_);
+            
+            menuVec << QPoint(xp+len+2,yp+2);
+            menuVec << QPoint(xp+len+triLen_-2,yp+height_/2);
+            menuVec << QPoint(xp+len+2,yp+height_-2);
+            
+            xp+=len+triLen_;
+        }
+        else
+        {
+            textRect=QRect(xp+hPadding_,yp+vPadding_,len,yp+height_-2*vPadding_);
+            
+            vec << QPoint(xp-triLen_,yp);            
+            vec << QPoint(xp+len,yp);
+            vec << QPoint(xp+len+triLen_,yp+height_/2);
+            vec << QPoint(xp+len,yp+height_);
+            vec << QPoint(xp-triLen_,yp+height_);
+            vec << QPoint(xp,yp+height_/2);
+            
+            menuVec << QPoint(xp+len+2,yp+2);
+            menuVec << QPoint(xp+len+triLen_-2,yp+height_/2);
+            menuVec << QPoint(xp+len+2,yp+height_-2);
+            
+            xp+=len+triLen_;
+        } 
+        
+        items_.at(i)->shape_=QPolygon(vec);
+        items_.at(i)->menuShape_=QPolygon(menuVec);
+        items_.at(i)->textRect_=textRect;
+    }
+
+    width_=xp;
+    
+    if(items_.count() ==0)
+    {
+        int len=fm.width(emptyText_);
+        emptyRect_=QRect(xp,yp,len,height_);
+        width_=xp+len+4;
+    }    
+    
+    crePixmap();
+    
+    resize(width_,height_);
+    
+    update();
+}  
+
+
+void BcWidget::crePixmap()
+{        
+    pix_=QPixmap(width_,height_);
+    pix_.fill(Qt::transparent);
+    
+    QPainter painter(&pix_);
+    painter.setRenderHints(QPainter::Antialiasing,true);
+    
+    if(items_.count() == 0)
+    {
+        painter.setPen(Qt::black);
+        painter.drawText(emptyRect_,Qt::AlignHCenter | Qt::AlignVCenter, emptyText_);
+    }
+    else
+    {    
+        for(int i=0; i < items_.count(); i++)
+        {
+            items_.at(i)->draw(&painter,useGrad_,gradLighter_);
+        }
+    }    
+}  
+
+void BcWidget::updatePixmap(int idx)
+{
+    if(idx >=0 && idx < items_.count())
+    {
+         QPainter painter(&pix_);
+         painter.setRenderHints(QPainter::Antialiasing,true);
+         items_.at(idx)->draw(&painter,useGrad_,gradLighter_);
+    }        
+}    
+
+void BcWidget::paintEvent(QPaintEvent*)
+{
+    QPainter painter(this);
+    painter.drawPixmap(0,0,pix_);    
 }
 
-void NodePathNodeItem::resetStyle()
+void BcWidget::mouseMoveEvent(QMouseEvent *event)
+{   
+    bool changed=false;
+    for(int i=0; i < items_.count(); i++)
+    {
+        if(items_.at(i)->menuShape_.containsPoint(event->pos(),Qt::OddEvenFill))
+        {
+            if(items_.at(i)->showMenu_ == false)
+            {
+                items_.at(i)->showMenu_=true;
+                updatePixmap(i);
+                changed=true;
+            }    
+        }
+        else
+        {
+             if(items_.at(i)->showMenu_ == true)
+            {
+                items_.at(i)->showMenu_=false;
+                updatePixmap(i);
+                changed=true;
+            }    
+        }
+    }
+    
+    if(changed)     
+        update();
+}    
+void BcWidget::mousePressEvent(QMouseEvent *event)
+{   
+   for(int i=0; i < items_.count(); i++)
+    {
+        if(items_.at(i)->hasMenu_ && items_.at(i)->menuShape_.containsPoint(event->pos(),Qt::OddEvenFill)) 
+        {
+            qDebug() << "menu selected"; 
+            Q_EMIT menuSelected(i,event->pos());
+            return;
+        }
+        else if(items_.at(i)->shape_.containsPoint(event->pos(),Qt::OddEvenFill))
+        {
+            Q_EMIT itemSelected(i);
+            return;
+        }    
+    }
+}    
+
+NodePathItem::NodePathItem(int index,QString text,QColor bgCol,QColor fontCol,bool hasMenu,bool current) :
+    index_(index),
+    text_(text),
+    bgCol_(bgCol),
+    fontCol_(fontCol),
+    current_(current),
+    hasMenu_(hasMenu),
+    showMenu_(false),
+    menuCol_(QColor(0,0,0))
 {
-	QString st;
+    grad_.setCoordinateMode(QGradient::ObjectBoundingMode);
+    grad_.setStart(0,0);
+    grad_.setFinalStop(0,1);
+}    
 
-	//Selected
-	if(current_)
-	{
-		st=qssSelected_;
-
-		st.replace("BASE-COLOR",col_.name());
-
-		//Font
-		st.replace("FONT","bold");
-
-		//Text color
-		st.replace("TEXT-COLOR",fontCol_.name());
-
-		//Border
-		st.replace("BORDER","1px solid black");
-	}
-	//Non selected
-	else
-	{
-		st=qss_;
-		st.replace("BASE-COLOR",col_.name());
-
-		//Font
-		st.replace("FONT","normal");
-
-		//Text color
-		st.replace("TEXT-COLOR",fontCol_.name());
-
-		//Border
-		st.replace("BORDER","1px solid rgb(180,180,180)");    //+ col_.name());
-
-	}
-
-	st.replace("HOVER-COLOR",col_.darker(104).name());
-
-
-	//Colour
-	//st.replace("BASE-COLOR",col_.name()).replace("HOVER-COLOR",col_.darker(125).name());
-
-	/*st.replace("BASE-COLOR",col_.name());
-	st.replace("HOVER-COLOR","rgb(230,230,230)");
-
-	//Font
-	st.replace("FONT",current_?"bold":"normal");
-
-	//Text color
-	//st.replace("TEXT-COLOR",isDark(col_)?"white":"black");
-	st.replace("TEXT-COLOR","black");
-
-	//Border
-	//st.replace("BORDER",current_?"2px solid rgb(40, 40, 40)":"1px solid rgb(160, 160, 160)");
-
-	st.replace("BORDER",current_?"2px solid "+ col_.name():"2px solid " +  col_.name());*/
-
-
-	setStyleSheet(st);
+void NodePathItem::setCurrent(bool)
+{
 }
 
-bool NodePathNodeItem::isDark(QColor col) const
-{
-	int h=col.hue();
-	int lg=col.lightness();
-	bool darkBg=false;
-	if(h < 10 || h > 220)
-	{
-		if(lg <180)
-				darkBg=true;
-	}
-	else if(lg < 110)
-	{
-		darkBg=true;
-	}
-	return darkBg;
+void NodePathItem::draw(QPainter  *painter,bool useGrad,int lighter)
+{    
+    painter->setPen(borderCol_);
+    
+    QBrush bgBrush;
+       
+    if(useGrad)
+    {
+        QColor bgLight=bgCol_.lighter(lighter);
+        grad_.setColorAt(0,bgLight);
+        grad_.setColorAt(1,bgCol_); 
+        bgBrush=QBrush(grad_);
+    }
+    else
+        bgBrush=QBrush(bgCol_);
+    
+    painter->setBrush(bgBrush);
+    painter->drawPolygon(shape_);
+        
+    painter->setPen(fontCol_);
+    painter->drawText(textRect_,Qt::AlignVCenter | Qt::AlignHCenter,text_);  
+    
+    if(hasMenu_ && showMenu_)
+    {
+        painter->setPen(menuCol_);
+        painter->setBrush(menuCol_);
+        painter->drawPolygon(menuShape_);
+    }    
 }
-
-/*
-void NodePathNodeItem::colour(QColor col)
-{
-	if(col_!= col)
-	{
-		col_=col;
-		resetStyle();
-	}
-}
-*/
-void NodePathNodeItem::current(bool current)
-{
-	if(current_!=current)
-	{
-		current_=current;
-		resetStyle();
-	}
-}
-
-
-NodePathServerItem::NodePathServerItem(int index,QString name,QColor col,QColor fontCol,bool selected,QWidget * parent) :
-  NodePathNodeItem(index,name,col,fontCol,selected,parent)
-{
-	//setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
-	//setIcon(QPixmap(":/viewer/server.svg"));
-}
-
-
-
-NodePathMenuItem::NodePathMenuItem(int index,QWidget * parent) :
-  NodePathItem(MenuType, index,parent)
-{
-	/*if(index_==0)
-		setText("/");
-	else
-		setText("/");*/
-	setObjectName("pathMenuTb");
-};
-
-
 
 
 //=============================================================
@@ -226,8 +319,6 @@ NodePathMenuItem::NodePathMenuItem(int index,QWidget * parent) :
 NodePathWidget::NodePathWidget(QWidget *parent) :
   QWidget(parent),
   reloadTb_(0),
-  stayInParent_(false),
-  infoIndex_(-1),
   active_(true)
 {
 	setProperty("breadcrumbs","1");
@@ -237,8 +328,26 @@ NodePathWidget::NodePathWidget(QWidget *parent) :
     layout_->setContentsMargins(6,3,4,2);
 	setLayout(layout_);
 
-	//QFont f(QApplication::font());
-	//QFontMetrics fm(f);
+    bc_=new BcWidget(this);
+    layout_->addWidget(bc_);
+    
+    connect(bc_,SIGNAL(itemSelected(int)),
+             this,SLOT(slotNodeSelected(int)));
+    connect(bc_,SIGNAL(menuSelected(int,QPoint)),
+             this,SLOT(slotMenuSelected(int,QPoint)));
+    
+    reloadTb_=new QToolButton(this);
+    //reloadTb_->setDefaultAction(actionReload_);
+    reloadTb_->setIcon(QPixmap(":/viewer/reload.svg"));
+    reloadTb_->setToolTip(tr("Refresh server"));
+    reloadTb_->setAutoRaise(true);
+    //reloadTb_->setIconSize(QSize(20,20));
+    reloadTb_->setObjectName("pathIconTb");
+
+    connect(reloadTb_,SIGNAL(clicked()),
+            this,SLOT(slotRefreshServer()));
+
+    layout_->addWidget(reloadTb_);
 }
 
 NodePathWidget::~NodePathWidget()
@@ -255,37 +364,20 @@ void NodePathWidget::clear(bool detachObservers)
 	}
 
 	info_.reset();
-	infoIndex_=-1;
-
-	clearLayout();
-
-	int cnt=nodeItems_.count();
-	for(int i=0; i < cnt; i++)
-	{
-			delete nodeItems_.takeLast();
-
-	}
-	cnt=menuItems_.count();
-	for(int i=0; i < cnt; i++)
-	{
-		delete menuItems_.takeLast();
-
-	}
+    
+    clearItems();	
 }
 
-//We delete the layout items but not the widget they contain
-void NodePathWidget::clearLayout()
+void NodePathWidget::clearItems()
 {
-  	QLayoutItem *item;
- 	while( (item = layout_->takeAt(0)) != 0)
-	{
-     	if(QWidget *w=item->widget())
-     	{
-     		layout_->removeWidget(w);
-     		//delete w;
-     	}
-     	delete item;
- 	}
+    bc_->clear();
+
+    int cnt=nodeItems_.count();
+    for(int i=0; i < cnt; i++)
+    {
+        delete nodeItems_.takeLast();
+    }
+    nodeItems_.clear();
 }
 
 void NodePathWidget::active(bool active)
@@ -308,65 +400,6 @@ void NodePathWidget::active(bool active)
 void NodePathWidget::slotContextMenu(const QPoint& pos)
 {
 
-}
-
-void NodePathWidget::infoIndex(int idx)
-{
-	if(infoIndex_ >=0 && infoIndex_  < nodeItems_.count())
-	{
-		nodeItems_.at(infoIndex_)->current(false);
-	}
-
-	infoIndex_=idx;
-
-	if(infoIndex_ >=0 && infoIndex_  < nodeItems_.count())
-	{
-			nodeItems_.at(infoIndex_)->current(true);
-	}
-}
-
-//Find p1 in p2
-int NodePathWidget::findInPath(VInfo_ptr p1,VInfo_ptr p2,bool sameServer)
-{
-	return -1;
-
-	//TODO: reimplement if needed
-
-	/*if(!p1 || !p1.get())
-		return -1;
-
-	//The servers are the same
-	if(sameServer)
-	{
-		if(p1->isServer())
-			return 0;
-	}
-	else
-	{
-		return -1;
-	}
-
-	int idx=-1;
-	std::vector<VNode*> lst1=p1->ancestors(VInfo::ParentToChildOrder);
-	std::vector<VNode*> lst2=p2->ancestors(VInfo::ParentToChildOrder);
-
-	if(lst1.size() > lst2.size())
-		return -1;
-
-	for(unsigned int i=0; i < lst1.size(); i++)
-	{
-			qDebug() << lst1.at(i) << lst2.at(i);
-
-			if(lst1.at(i) != lst2.at(i))
-			{
-				idx=-1;
-				break;
-			}
-			else
-				idx=i+1;
-	}
-
-	return idx;*/
 }
 
 void NodePathWidget::adjust(VInfo_ptr info,ServerHandler** serverOut,bool &sameServer)
@@ -439,57 +472,11 @@ void NodePathWidget::setPath(VInfo_ptr info)
   		clear();
   		return;
   	}
-
-	/*ServerHandler *server=0;
-  	bool sameServer=false;
-
-  	//Check if there is data in info
-  	if(info.get())
-  	{
-  		server=info->server();
-
-  		sameServer=(info_)?(info_->server() == server):false;
-
-  		//Handle observers
-  		if(!sameServer)
-  		{
-  			if(info_ && info_->server())
-  				info_->server()->removeNodeObserver(this);
-
-  			info->server()->addNodeObserver(this);
-  		}
-  	}
-  	//If the there is no data we clean everything and return
   	else
-  	{
-  	  		clear();
-  			//if(info_ && info_->server())
-  	  		//		info_->server()->removeNodeObserver(this);
-
-  	  		//info_=info;
-  	  		//infoIndex_=-1;
-  	  		//clearContents();
-  	  		return;
-  	}*/
-
-  	//Check "stay in parent" mode
-  	if(stayInParent_)
-  	{
-  		//If the new path is part of the current path we just set the
-  		//current node index and return.
-  		int idx=findInPath(info_,info_ori,sameServer);
-  		if(idx != -1)
-  		{
-  			infoIndex(idx);
-  			return;
-  		}
-  	}
-
-  	//We do not stay in parent mode or the new path is not part of the current one.
-
-  	//Now it is safe to do this assignment //????
-  	//info_=info;
-
+    {    
+        clearItems();
+    }
+   
 	//Get the node list including the server
   	std::vector<VNode*> lst;
   	if(info_->node())
@@ -497,26 +484,6 @@ void NodePathWidget::setPath(VInfo_ptr info)
   		lst=info_->node()->ancestors(VNode::ParentToChildSort);
   	}
 
-  	//--------------------------------------------
-  	// Cleaning (as much as needed)
-  	//--------------------------------------------
-
-  	//Clear the layout (widgets are not deleted in this step!)
-  	clearLayout();
-
-	//Delete
-	int cnt=nodeItems_.count();
-	for(unsigned int i=lst.size(); i < cnt; i++)
-	{
-			delete nodeItems_.takeLast();
-
-	}
-	cnt=menuItems_.count();
-	for(unsigned int i=lst.size(); i < cnt; i++)
-	{
-		delete menuItems_.takeLast();
-
-	}
 	//--------------------------------------------
 	// Reset/rebuild the contents
 	//--------------------------------------------
@@ -529,132 +496,37 @@ void NodePathWidget::setPath(VInfo_ptr info)
 
 		QColor col;
 		QString name;
-		NodePathNodeItem* nodeItem=0;
+		NodePathItem* nodeItem=0;
 
 		VNode *n=lst.at(i);
-		col=n->stateColour();
+		col=n->stateColour(); 
 		QColor fontCol=n->stateFontColour();
 		name=n->name();
 		bool hasChildren=hasChildren=(n->numOfChildren() >0);
 
-		//Server
-		/*if(i==0)
-		{
-			col=QColor(255,255,255);
-			col=VSState::toColour(server);
-			name=QString::fromStdString(server->name());
-			hasChildren=true;
-		}
-			//Node
-			else
-			{
-				VNode *n=lst.at(i);
-				col=n->stateColour();
-				name=n->name();
-				hasChildren=(n->numOfChildren() >0);
-			}
-	*/
-		if(i < nodeItems_.count())
-		{
-			nodeItem=nodeItems_.at(i);
-			nodeItem->reset(name,col,fontCol,false);
-		}
-		else
-		{
-			//Server
-			if(i==0)
-			{
-				nodeItem=new NodePathServerItem(i,name,col,fontCol,false,this);
-			}
-			//Node
-			else
-			{
-				nodeItem=new NodePathNodeItem(i,name,col,fontCol,false,this);
-			}
-			nodeItems_ << nodeItem;
-			connect(nodeItem,SIGNAL(clicked()),
-			  		     this,SLOT(nodeItemSelected()));
-		}
-
-		layout_->addWidget(nodeItem);
-
-		//-----------------------------------------
-		// Create sub item (connector or menu)
-		//-----------------------------------------
-
-		if(hasChildren)
-		{
-			NodePathMenuItem* menuItem=0;
-
-			if(i >= menuItems_.count())
-			{
-				menuItem= new NodePathMenuItem(i,this);
-
-				menuItems_ << menuItem;
-				connect(menuItem,SIGNAL(clicked()),
-					   this,SLOT(menuItemSelected()));
-			}
-			else
-			{
-				menuItem=menuItems_.at(i);
-			}
-
-			layout_->addWidget(menuItem);
-		}
-		//If it is a task (it has no children) we need
-		//to be sure that the menu is not shown
-		else
-		{
-			if(i == menuItems_.count()-1)
-			{
-				delete menuItems_.takeLast();
-			}
-		}
+	    nodeItem=new NodePathItem(i,name,col,fontCol,hasChildren,false);			
+		nodeItems_ << nodeItem;           
 	}
 
-	layout_->addStretch(1);
-
-	//Reload
-	//if(actionReload_)
-	//{
-		if(!reloadTb_)
-		{
-			reloadTb_=new QToolButton(this);
-			//reloadTb_->setDefaultAction(actionReload_);
-			reloadTb_->setIcon(QPixmap(":/viewer/reload.svg"));
-			reloadTb_->setToolTip(tr("Refresh server"));
-			reloadTb_->setAutoRaise(true);
-				//reloadTb_->setIconSize(QSize(20,20));
-			reloadTb_->setObjectName("pathIconTb");
-
-			connect(reloadTb_,SIGNAL(clicked()),
-				this,SLOT(slotRefreshServer()));
-
-		}
-		layout_->addWidget(reloadTb_);
-	//}
-
-	//Set the current node index (used only in "stay in parent" mode). If we are here it must be the last node!
-	infoIndex(lst.size()-1);
+	bc_->reset(nodeItems_);
+	
+	//layout_->addStretch(1);	
 }
 
-void  NodePathWidget::nodeItemSelected()
+void  NodePathWidget::slotNodeSelected(int idx)
 {
-	NodePathNodeItem* item=static_cast<NodePathNodeItem*>(sender());
-	int idx=nodeItems_.indexOf(item);
-	if(idx != -1 && idx != infoIndex_)
+	if(idx != -1)
 	{
 		Q_EMIT selected(nodeAt(idx));
 	}
 }
 
-void  NodePathWidget::menuItemSelected()
+void  NodePathWidget::slotMenuSelected(int idx,QPoint bcPos)
 {
-	NodePathMenuItem* item=static_cast<NodePathMenuItem*>(sender());
-	int idx=menuItems_.indexOf(item);
 	if(idx != -1)
 	{
-		loadMenu(mapToGlobal(item->pos()+QPoint(0,item->size().height()/2)),nodeAt(idx));
+		qDebug() << sender() << "slotMenu";
+        loadMenu(bc_->mapToGlobal(bcPos),nodeAt(idx));
 	}
 }
 
@@ -728,7 +600,9 @@ void NodePathWidget::loadMenu(const QPoint& pos,VInfo_ptr p)
 
 		if(acLst.count() > 0)
 		{
-			if(QAction *ac=QMenu::exec(acLst,pos,acLst.front(),this))
+			qDebug() << "load menu";
+            
+            if(QAction *ac=QMenu::exec(acLst,pos,acLst.front(),this))
 			{
 				int idx=ac->data().toInt();
 				VInfo_ptr res=VInfoNode::create(node->childAt(idx));
@@ -816,8 +690,8 @@ void NodePathWidget::notifyBeginNodeChange(const VNode* node, const std::vector<
 				if(nodes.at(i) == node)
 				{
 					if(i < nodeItems_.count())
-					{
-						nodeItems_.at(i)->reset(node->name(),node->stateColour(),node->stateFontColour());
+					{						
+                        bc_->reset(i,node->name(),node->stateColour(),node->stateFontColour());
 					}
 					return;
 				}
@@ -855,7 +729,7 @@ void NodePathWidget::notifyDefsChanged(ServerHandler* server,const std::vector<e
 		{
 			if(nodeItems_.count() > 0)
 			{
-				nodeItems_.at(0)->reset(server->vRoot()->name(),
+				bc_->reset(0,server->vRoot()->name(),
 						                server->vRoot()->stateColour(),
 										server->vRoot()->stateFontColour());
 			}
@@ -913,7 +787,6 @@ void NodePathWidget::writeSettings(VSettings *vs)
 {
 	vs->beginGroup("breadcrumbs");
 	vs->put("active",active_);
-	vs->put("stayInParent",stayInParent_);
 	vs->endGroup();
 }
 
@@ -924,9 +797,6 @@ void NodePathWidget::readSettings(VSettings* vs)
 
 	ival=vs->get<int>("active",1);
 	active((ival==1)?true:false);
-
-	//ival=vs->get<int>("stayInParent",1);
-	//stayInParent_=(ival==1)?true:false;
 
 	vs->endGroup();
 }

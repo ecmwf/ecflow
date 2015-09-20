@@ -12,6 +12,7 @@
 #define TreeNodeViewDelegate_HPP_
 
 #include <QBrush>
+#include <QLinearGradient>
 #include <QMap>
 #include <QPen>
 #include <QStyledItemDelegate>
@@ -44,14 +45,25 @@ protected:
 	void renderNode(QPainter *painter,const QModelIndex& index,
             		const QStyleOptionViewItemV4& option,QString text) const;
 
-	AnimationHandler* animation_;
+	void renderNodeCell(QPainter *painter,QColor bg,QColor realBg,QColor fg,
+                      QRect stateRect,QRect filleRect,QRect realRect,QRect textRect, QString text,
+                      bool selected) const;
+                                        
+    enum NodeStyle {ClassicNodeStyle,BoxAndTextNodeStyle};
+                    
+    AnimationHandler* animation_;
 
     int nodeRectRad_;
 	bool drawChildCount_;
-
+    NodeStyle nodeStyle_;
+    bool useNodeGrad_;
+    
 	QFont serverNumFont_;
 	QFont suiteNumFont_;
 	QFont serverInfoFont_;
+
+	mutable QLinearGradient grad_;
+	static int lighter_;
 
 };
 

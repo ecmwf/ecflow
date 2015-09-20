@@ -17,6 +17,7 @@
 #include <QObject>
 #include <QVariant>
 
+class  QComboBox;
 class  QCheckBox;
 class  QLabel;
 class  QLineEdit;
@@ -227,6 +228,32 @@ protected:
 
 private:
 	QCheckBox* cb_;
+};
+
+//-------------------------------------
+// Combo box editor
+//------------------------------------
+
+class ComboPropertyLine : public PropertyLine
+{
+	Q_OBJECT
+
+public:
+	ComboPropertyLine(VProperty* vProp,bool addLabel,QWidget * parent=0);
+	QWidget* item();
+	QWidget* button();
+	void reset(QVariant);
+	bool applyChange();
+	QVariant currentValue();
+
+public Q_SLOTS:
+	void slotCurrentChanged(int);
+
+protected:
+	void setEnabledEditable(bool);
+
+private:
+	QComboBox* cb_;
 };
 
 

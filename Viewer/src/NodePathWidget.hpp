@@ -10,69 +10,99 @@
 #ifndef NODEPATHWIDGET_H
 #define NODEPATHWIDGET_H
 
-#include <QGraphicsView>
-#include <QGraphicsObject>
-#include <QGraphicsScene>
-#include <QToolButton>
-
 #include "NodeObserver.hpp"
 #include "ServerObserver.hpp"
 #include "VInfo.hpp"
+#include "VProperty.hpp"
+
+#include <QLinearGradient>
+#include <QWidget>
 
 #include <string>
 
 class QAction;
 class QHBoxLayout;
 class QMenu;
-class QSignalMapper;
 class QToolButton;
 
 class Node;
 class NodePathWidget;
+class PropertyMapper;
+class VProperty;
 class VSettings;
 
-class NodePathItem : public QToolButton
-{
-public:
-	enum Type {NodeType,MenuType,ElideType};
-	NodePathItem(Type type,int index,QWidget* parent=0) : QToolButton(parent), type_(type), index_(index) {};
-	int index() const {return index_;}
+class NodePathItem;
 
+class BcWidget : public QWidget, public VPropertyObserver
+{
+    
+Q_OBJECT
+
+public:
+    explicit BcWidget(QWidget *parent=0);
+    ~BcWidget();
+    
+    void reset(QList<NodePathItem*>);
+    void reset(int idx,QString text,QColor bgCol,QColor fontCol);
+    void clear();
+    
+    void notifyChange(VProperty*);
+
+Q_SIGNALS:
+    void itemSelected(int);
+    void menuSelected(int,QPoint);
+    
 protected:
-	Type type_;
-	int index_;
+    void paintEvent(QPaintEvent*);
+    void mouseMoveEvent(QMouseEvent *event);
+    void mousePressEvent(QMouseEvent* event);
+    
+    void updateSettings();
+    void reset(int);
+    void crePixmap();
+    void updatePixmap(int);
+    
+    QFont font_;
+    QPixmap pix_;
+    int hPadding_;
+    int vPadding_;
+    int triLen_;
+    int width_;
+    int height_;
+    QString emptyText_;
+    QRect emptyRect_;
+    QList<NodePathItem*> items_; 
+    
+    PropertyMapper* prop_;
+    bool useGrad_;
+    int gradLighter_;
 };
 
-class NodePathNodeItem : public NodePathItem
-{
-public:
-	NodePathNodeItem(int index,QString name,QColor col,QColor fontCol,bool current,QWidget* parent=0);
-	void reset(QString name,QColor col,QColor fontCol,bool selected);
-	void reset(QString name,QColor col,QColor fontCol);
-    void colour(QColor col);
-    void current(bool);
 
+class NodePathItem 
+{
+
+friend class BcWidget;    
+    
+public:
+    NodePathItem(int index,QString text,QColor bgCol,QColor fontCol,bool hasMenu,bool current);
+    void setCurrent(bool);
+    void draw(QPainter*,bool,int);
+    
 protected:
-    void resetStyle();
-    bool isDark(QColor col) const;
-
-    QString qss_;
-    QString qssSelected_;
-	QColor col_;
-	QColor fontCol_;
-	bool current_;
-};
-
-class NodePathServerItem : public NodePathNodeItem
-{
-public:
-	NodePathServerItem(int index,QString name,QColor col,QColor,bool current,QWidget* parent=0);
-};
-
-class NodePathMenuItem : public NodePathItem
-{
-public:
-	NodePathMenuItem(int index,QWidget* parent=0);
+    int index_;
+    QString text_;
+    QColor bgCol_;
+    QColor borderCol_;
+    QColor fontCol_;
+    QPolygon shape_;
+    QRect textRect_;
+    bool current_;
+    bool hasMenu_;
+    QPolygon menuShape_;
+    bool showMenu_;
+    QColor menuCol_;
+    QLinearGradient grad_;
 };
 
 
@@ -113,36 +143,32 @@ public Q_SLOTS:
 
 protected Q_SLOTS:
 	void slotContextMenu(const QPoint&);
-	void nodeItemSelected();
-	void menuItemSelected();
+	void slotNodeSelected(int);
+	void slotMenuSelected(int,QPoint);
 	void slotRefreshServer();
 
 Q_SIGNALS:
 	void selected(VInfo_ptr);
 
 protected:
-	void clearLayout();
+	void clearItems();
 	void adjust(VInfo_ptr info,ServerHandler** serverOut,bool &sameServer);
 	void loadMenu(const QPoint& pos,VInfo_ptr p);
 	VInfo_ptr nodeAt(int);
-	int findInPath(VInfo_ptr p1,VInfo_ptr p2,bool sameServer);
 	void infoIndex(int idx);
 	void paintEvent(QPaintEvent *);
 	void reset();
+    void updateSettings();
 
-	QList<NodePathNodeItem*> nodeItems_;
-	QList<NodePathMenuItem*> menuItems_;
-
+	QList<NodePathItem*> nodeItems_;
+	
 	QHBoxLayout* layout_;
 	VInfo_ptr info_;
 	VInfo_ptr infoFull_;
-	int infoIndex_;
 	QToolButton* reloadTb_;
-
-	//When it is set to "true": if a node item (i.e. not a menu) is selected the breadcrumbs
-	//will stay the same and only will change the current node/selection!
-	bool stayInParent_;
-
+    BcWidget* bc_;
+   
+   
 	//When active_ is "true" the widget is visible and can receive and display data. When it
 	//is "false" the widget is hidden and cannot hold any data.
 	bool active_;

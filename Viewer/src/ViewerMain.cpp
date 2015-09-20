@@ -36,15 +36,17 @@ int main(int argc, char **argv)
     //    return 1;
     //}
 
+
     QApplication app(argc, argv);
 
+
     //Spash screen
-	QPixmap pixmap(":/viewer/splash_screen.png");
+	/*QPixmap pixmap(":/viewer/splash_screen.png");
     QSplashScreen splash(pixmap);
 
     splash.showMessage("Loading resources ...",Qt::AlignBottom | Qt::AlignLeft);
     splash.show();
-    app.processEvents();
+    app.processEvents();*/
 
 
     //Set the style
@@ -107,12 +109,12 @@ int main(int argc, char **argv)
     Highlighter::init(DirectoryHandler::concatenate(DirectoryHandler::etcDir(),
     		      "ecflowview_highlighter.json"));
 
-    for(int i=0; i < 8; i++)
+   /* for(int i=0; i < 8; i++)
     {
     	sleep(1);
     	app.processEvents();
     }
-
+*/
 
     //Build the GUI
     MainWindow::init();
@@ -125,7 +127,7 @@ int main(int argc, char **argv)
 
     //MainWindow.printDefTree(argv[1], atoi(argv[2]));
 
-    splash.close();
+   // splash.close();
 
     //Show all the windows
     MainWindow::showWindows();

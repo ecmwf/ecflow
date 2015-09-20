@@ -50,7 +50,7 @@ public:
     explicit VProperty(const std::string& name);
     ~VProperty();
 
-    enum Type {StringType,IntType,BoolType,ColourType,FontType};
+    enum Type {StringType,IntType,BoolType,ColourType,FontType,StringComboType};
 
     QString name() const {return name_;}
     const std::string& strName() const {return strName_;}

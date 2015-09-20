@@ -1,6 +1,19 @@
 {
     "view":  {
 
+            "common" : {
+                "node_style" : {
+                    "label" : "Node rendering style",
+                    "default" : "classic",
+                    "values"  : "classic/modern",
+                    "values_label" : "Text in status rectangle (classic)/Separate text and status rectangle"
+                },    
+                "node_gradient" : {
+                    "label" : "Gradient shading for nodes",
+                    "default" : "true"
+                }    
+       
+            },
             "tree": {
             	
                 "font" : {
