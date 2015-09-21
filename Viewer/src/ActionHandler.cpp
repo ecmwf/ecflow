@@ -87,7 +87,8 @@ void ActionHandler::contextMenu(std::vector<VInfo_ptr> nodesLst,QPoint pos)
                 msgBox.setText(QString::fromStdString(question));
                 msgBox.setTextFormat(Qt::RichText);
                 msgBox.setIcon(QMessageBox::Question);
-                if (msgBox.exec())
+                msgBox.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
+                if (msgBox.exec() == QMessageBox::Cancel)
                 {
                     ok=false;
                 }
