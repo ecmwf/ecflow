@@ -23,6 +23,7 @@
 #include "InfoPanelHandler.hpp"
 #include "DirectoryHandler.hpp"
 #include "Highlighter.hpp"
+#include "Palette.hpp"
 #include "ServerList.hpp"
 #include "VConfig.hpp"
 #include "VServerSettings.hpp"
@@ -109,7 +110,12 @@ int main(int argc, char **argv)
     Highlighter::init(DirectoryHandler::concatenate(DirectoryHandler::etcDir(),
     		      "ecflowview_highlighter.json"));
 
-   /* for(int i=0; i < 8; i++)
+
+    //Initialise the system palette
+    Palette::load(DirectoryHandler::concatenate(DirectoryHandler::etcDir(),
+		      "ecflowview_palette.json"));
+
+    /* for(int i=0; i < 8; i++)
     {
     	sleep(1);
     	app.processEvents();

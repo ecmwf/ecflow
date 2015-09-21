@@ -60,6 +60,7 @@ set(viewer_srcs
     OutputProvider.cpp
     OverviewItemWidget.cpp
     OverviewProvider.cpp
+    Palette.cpp
     PlainTextSearchLine.cpp
     PropertyDialog.cpp
     PropertyEditor.cpp
