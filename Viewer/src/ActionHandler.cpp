@@ -1,9 +1,21 @@
+//============================================================================
+// Copyright 2014 ECMWF.
+// This software is licensed under the terms of the Apache Licence version 2.0
+// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+// In applying this licence, ECMWF does not waive the privileges and immunities
+// granted to it by virtue of its status as an intergovernmental organisation
+// nor does it submit to any jurisdiction.
+//
+//============================================================================
+
+
 #include "ActionHandler.hpp"
 
 #include <QAction>
 #include <QMenu>
 #include <QMessageBox>
 
+#include "Str.hpp"
 #include "ServerHandler.hpp"
 #include "MenuHandler.hpp"
 #include "CustomCommandDialog.hpp"
@@ -53,15 +65,36 @@ void ActionHandler::contextMenu(std::vector<VInfo_ptr> nodesLst,QPoint pos)
         	bool ok=true;
         	if(item && !item->question().empty())
         	{
-        		if(QMessageBox::question(parent_,tr("Question"),QString::fromStdString(item->question()),
-        				QMessageBox::Ok | QMessageBox::Cancel, QMessageBox::Ok) != QMessageBox::Ok)
-        		{
-        			ok=false;
-        		}
-        	}
+                std::string nodeNames("<ul>");
+                for(int i=0; i < nodesLst.size(); i++)
+                {
+                    nodeNames += "<li><b>";
+                    nodeNames += nodesLst[i]->path();
+                    nodeNames += "</b></li>";
+                    //if (i < nodesLst.size()-1)
+                    //    nodeNames += "<br>";
+                }
+                nodeNames += "</ul>";
 
-        	if(ok)
-        		ServerHandler::command(nodesLst,action->iconText().toStdString(), true);
+                std::string question(item->question());
+
+			    std::string placeholder("<full_name>");
+			    ecf::Str::replace_all(question, placeholder, nodeNames);
+                placeholder = "<node_name>";
+			    ecf::Str::replace_all(question, placeholder, nodeNames);
+
+                QMessageBox msgBox;
+                msgBox.setText(QString::fromStdString(question));
+                msgBox.setTextFormat(Qt::RichText);
+                msgBox.setIcon(QMessageBox::Question);
+                if (msgBox.exec())
+                {
+                    ok=false;
+                }
+            }
+
+            if(ok)
+                ServerHandler::command(nodesLst,action->iconText().toStdString(), true);
         }
     }
 
