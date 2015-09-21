@@ -29,7 +29,10 @@ ChangeNotifyDialog::ChangeNotifyDialog(QWidget *parent) :
 	setupUi(this);
 
 	tab_->setProperty("notify","1");
+
+#ifdef ECFLOW_QT5
 	tab_->tabBar()->setExpanding(false);
+#endif
 
 	clearOnCloseCb_->setChecked(true);
 

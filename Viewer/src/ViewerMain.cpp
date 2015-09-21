@@ -12,6 +12,7 @@
 #include <iostream>
 
 #include <QApplication>
+#include <QDebug>
 #include <QFile>
 #include <QSplashScreen>
 #include <QStyleFactory>
@@ -50,16 +51,18 @@ int main(int argc, char **argv)
     app.processEvents();*/
 
 
+    QStringList styleLst=QStyleFactory::keys();
+
     //Set the style
-    QString style="plastique";
-    if(QStyleFactory::keys().contains(style))
+    QString style="Plastique";
+    if(styleLst.contains(style))
     {
     	app.setStyle(style);
     }
     else
     {
-    	style="fusion";
-    	if(QStyleFactory::keys().contains(style))
+    	style="Fusion";
+    	if(styleLst.contains(style))
         {
     		app.setStyle(style);
         }
