@@ -181,7 +181,7 @@
     <string>Refresh</string>
    </property>
    <property name="toolTip">
-    <string>Refresh</string>
+    <string>Refresh &lt;b&gt;all servers&lt;/b&gt; in current tab</string>
    </property>
    <property name="shortcut">
     <string>F5</string>

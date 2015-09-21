@@ -9,6 +9,7 @@
 
 #include "PropertyDialog.hpp"
 
+#include <QAbstractButton>
 #include <QCloseEvent>
 #include <QSettings>
 
@@ -36,6 +37,9 @@ PropertyDialog::PropertyDialog(QWidget* parent) :
 
 	connect(list_,SIGNAL(currentItemChanged(QListWidgetItem*,QListWidgetItem*)),
             this, SLOT(slotChangePage(QListWidgetItem*,QListWidgetItem*)));
+
+	connect(buttonBox_,SIGNAL(clicked(QAbstractButton*)),
+			this,SLOT(slotButton(QAbstractButton*)));
 
 	build();
 
@@ -75,10 +79,15 @@ void PropertyDialog::build()
 	}
 }
 
+void PropertyDialog::apply()
+{
+	manageChange();
+}
+
 void PropertyDialog::accept()
 {
 	manageChange();
-	readSettings();
+	writeSettings();
     QDialog::accept();
 }    
 
@@ -106,6 +115,15 @@ void PropertyDialog::slotChangePage(QListWidgetItem *current, QListWidgetItem *p
 
      page_->setCurrentIndex(list_->row(current));
 }
+
+void PropertyDialog::slotButton(QAbstractButton* pb)
+{
+	if(buttonBox_->buttonRole(pb) == QDialogButtonBox::ApplyRole)
+	{
+		apply();
+	}
+}
+
 
 void PropertyDialog::manageChange()
 {

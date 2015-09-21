@@ -14,6 +14,8 @@
 
 #include <QDialog>
 
+class QAbstractButton;
+
 class PropertyEditor;
 class VProperty;
 
@@ -35,11 +37,13 @@ public Q_SLOTS:
     void accept();
     void reject();
     void slotChangePage(QListWidgetItem *current, QListWidgetItem *previous);
+    void slotButton(QAbstractButton*);
 
 private:
     void build();
     void addPage(QWidget *w,QPixmap pix,QString txt);
     void manageChange();
+    void apply();
 
     void closeEvent(QCloseEvent * event);
     void readSettings();

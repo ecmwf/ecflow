@@ -45,7 +45,7 @@
     </layout>
    </item>
    <item>
-    <widget class="QDialogButtonBox" name="buttonBox">
+    <widget class="QDialogButtonBox" name="buttonBox_">
      <property name="standardButtons">
       <set>QDialogButtonBox::Apply|QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
      </property>
@@ -56,7 +56,7 @@
  <resources/>
  <connections>
   <connection>
-   <sender>buttonBox</sender>
+   <sender>buttonBox_</sender>
    <signal>accepted()</signal>
    <receiver>PropertyDialog</receiver>
    <slot>accept()</slot>
@@ -72,7 +72,7 @@
    </hints>
   </connection>
   <connection>
-   <sender>buttonBox</sender>
+   <sender>buttonBox_</sender>
    <signal>rejected()</signal>
    <receiver>PropertyDialog</receiver>
    <slot>reject()</slot>

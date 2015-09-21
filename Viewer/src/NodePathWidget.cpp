@@ -15,6 +15,7 @@
 #include <QMouseEvent>
 #include <QPainter>
 #include <QPolygon>
+#include <QSizePolicy>
 #include <QStyleOption>
 #include <QToolButton>
 #include <QVector>
@@ -32,18 +33,22 @@ static std::vector<std::string> propVec;
 BcWidget::BcWidget(QWidget* parent) : 
     QWidget(parent),
     hPadding_(2),
-    vPadding_(2),
+    vPadding_(1),
+	hMargin_(1),
+	vMargin_(1),
     triLen_(10),
+	gap_(4),
     width_(0),
-    height_(0),
+    itemHeight_(0),
     emptyText_("No selection"),
     useGrad_(true),
     gradLighter_(150)
 {
     font_=QFont();
     QFontMetrics fm(font_);
-    
-    height_=fm.height()+2*vPadding_;
+
+    itemHeight_=fm.height()+2*vPadding_;
+    height_=itemHeight_+2*vMargin_;
     
     setMouseTracking(true);
     
@@ -57,12 +62,18 @@ BcWidget::BcWidget(QWidget* parent) :
     prop_=new PropertyMapper(propVec,this);
    
     updateSettings();
+
+    setSizePolicy(QSizePolicy::Preferred,QSizePolicy::Minimum);
+    setMinimumSize(width_,height_);
+
+    reset(items_);
 }
 
 BcWidget::~BcWidget()
 {
     delete prop_;
 }    
+
 
 void BcWidget::notifyChange(VProperty *p)
 {
@@ -109,69 +120,65 @@ void BcWidget::reset(QList<NodePathItem*> items)
     items_=items;
     
     QFontMetrics fm(font_);
-    int xp=0;
-    int yp=0;
+    int xp=hMargin_;
+    int yp=vMargin_;
+
     for(int i=0; i < items_.count(); i++)
     {
         int len=fm.width(items_.at(i)->text_);
         
         QRect textRect;
-        items_.at(i)->borderCol_=items_.at(i)->bgCol_.darker(140);
+        items_.at(i)->borderCol_=items_.at(i)->bgCol_.darker(125);
                 
         QVector<QPoint> vec;
         QVector<QPoint> menuVec;
         if(i ==0)
         {
-            textRect=QRect(xp+hPadding_,yp+vPadding_,len,yp+height_-2*vPadding_);
+            textRect=QRect(xp+hPadding_,yp,len,itemHeight_);
             
             vec << QPoint(xp,yp);            
             vec << QPoint(xp+len,yp);
-            vec << QPoint(xp+len+triLen_,yp+height_/2);
-            vec << QPoint(xp+len,yp+height_);
-            vec << QPoint(xp,yp+height_);
+            vec << QPoint(xp+len+triLen_,yp+itemHeight_/2);
+            vec << QPoint(xp+len,yp+itemHeight_);
+            vec << QPoint(xp,yp+itemHeight_);
             
-            menuVec << QPoint(xp+len+2,yp+2);
-            menuVec << QPoint(xp+len+triLen_-2,yp+height_/2);
-            menuVec << QPoint(xp+len+2,yp+height_-2);
-            
-            xp+=len+triLen_;
+            xp+=len+triLen_+gap_;
         }
         else
         {
-            textRect=QRect(xp+hPadding_,yp+vPadding_,len,yp+height_-2*vPadding_);
+            textRect=QRect(xp+hPadding_,yp,len,itemHeight_);
             
             vec << QPoint(xp-triLen_,yp);            
             vec << QPoint(xp+len,yp);
-            vec << QPoint(xp+len+triLen_,yp+height_/2);
-            vec << QPoint(xp+len,yp+height_);
-            vec << QPoint(xp-triLen_,yp+height_);
-            vec << QPoint(xp,yp+height_/2);
+            vec << QPoint(xp+len+triLen_,yp+itemHeight_/2);
+            vec << QPoint(xp+len,yp+itemHeight_);
+            vec << QPoint(xp-triLen_,yp+itemHeight_);
+            vec << QPoint(xp,yp+itemHeight_/2);
             
-            menuVec << QPoint(xp+len+2,yp+2);
-            menuVec << QPoint(xp+len+triLen_-2,yp+height_/2);
-            menuVec << QPoint(xp+len+2,yp+height_-2);
-            
-            xp+=len+triLen_;
+            xp+=len+triLen_+gap_;
         } 
         
+
+        if(i < items_.count()-1)
+        	xp+=1;
+
         items_.at(i)->shape_=QPolygon(vec);
-        items_.at(i)->menuShape_=QPolygon(menuVec);
         items_.at(i)->textRect_=textRect;
     }
 
-    width_=xp;
+    width_=xp+hMargin_;
     
     if(items_.count() ==0)
     {
         int len=fm.width(emptyText_);
-        emptyRect_=QRect(xp,yp,len,height_);
+        emptyRect_=QRect(xp+hPadding_,yp,len,itemHeight_);
         width_=xp+len+4;
     }    
     
     crePixmap();
     
     resize(width_,height_);
-    
+
     update();
 }  
 
@@ -216,46 +223,28 @@ void BcWidget::paintEvent(QPaintEvent*)
 
 void BcWidget::mouseMoveEvent(QMouseEvent *event)
 {   
-    bool changed=false;
-    for(int i=0; i < items_.count(); i++)
-    {
-        if(items_.at(i)->menuShape_.containsPoint(event->pos(),Qt::OddEvenFill))
-        {
-            if(items_.at(i)->showMenu_ == false)
-            {
-                items_.at(i)->showMenu_=true;
-                updatePixmap(i);
-                changed=true;
-            }    
-        }
-        else
-        {
-             if(items_.at(i)->showMenu_ == true)
-            {
-                items_.at(i)->showMenu_=false;
-                updatePixmap(i);
-                changed=true;
-            }    
-        }
-    }
-    
-    if(changed)     
-        update();
-}    
+
+}
+
 void BcWidget::mousePressEvent(QMouseEvent *event)
 {   
-   for(int i=0; i < items_.count(); i++)
+	if(event->button() != Qt::RightButton && event->button() != Qt::LeftButton)
+		return;
+
+	for(int i=0; i < items_.count(); i++)
     {
-        if(items_.at(i)->hasMenu_ && items_.at(i)->menuShape_.containsPoint(event->pos(),Qt::OddEvenFill)) 
-        {
-            qDebug() << "menu selected"; 
-            Q_EMIT menuSelected(i,event->pos());
-            return;
-        }
-        else if(items_.at(i)->shape_.containsPoint(event->pos(),Qt::OddEvenFill))
-        {
-            Q_EMIT itemSelected(i);
-            return;
+		if(items_.at(i)->shape_.containsPoint(event->pos(),Qt::OddEvenFill))
+		{
+			if(event->button() == Qt::RightButton)
+			{
+				Q_EMIT menuSelected(i,event->pos());
+				return;
+			}
+			else if(event->button() == Qt::LeftButton)
+			{
+				Q_EMIT itemSelected(i);
+				return;
+			}
         }    
     }
 }    
@@ -266,9 +255,7 @@ NodePathItem::NodePathItem(int index,QString text,QColor bgCol,QColor fontCol,bo
     bgCol_(bgCol),
     fontCol_(fontCol),
     current_(current),
-    hasMenu_(hasMenu),
-    showMenu_(false),
-    menuCol_(QColor(0,0,0))
+    hasMenu_(hasMenu)
 {
     grad_.setCoordinateMode(QGradient::ObjectBoundingMode);
     grad_.setStart(0,0);
@@ -281,7 +268,14 @@ void NodePathItem::setCurrent(bool)
 
 void NodePathItem::draw(QPainter  *painter,bool useGrad,int lighter)
 {    
-    painter->setPen(borderCol_);
+    if(current_)
+    {
+    	painter->setPen(QPen(Qt::black,2));
+    }
+    else
+    {
+    	painter->setPen(QPen(borderCol_,0));
+    }
     
     QBrush bgBrush;
        
@@ -297,16 +291,15 @@ void NodePathItem::draw(QPainter  *painter,bool useGrad,int lighter)
     
     painter->setBrush(bgBrush);
     painter->drawPolygon(shape_);
-        
+
+    if(current_)
+    {
+    	painter->setPen(QPen(borderCol_,0));
+    }
+
     painter->setPen(fontCol_);
     painter->drawText(textRect_,Qt::AlignVCenter | Qt::AlignHCenter,text_);  
     
-    if(hasMenu_ && showMenu_)
-    {
-        painter->setPen(menuCol_);
-        painter->setBrush(menuCol_);
-        painter->drawPolygon(menuShape_);
-    }    
 }
 
 
@@ -325,7 +318,7 @@ NodePathWidget::NodePathWidget(QWidget *parent) :
 
 	layout_=new QHBoxLayout(this);
 	layout_->setSpacing(0);
-    layout_->setContentsMargins(6,3,4,2);
+    layout_->setContentsMargins(2,2,3,2);
 	setLayout(layout_);
 
     bc_=new BcWidget(this);
@@ -504,7 +497,7 @@ void NodePathWidget::setPath(VInfo_ptr info)
 		name=n->name();
 		bool hasChildren=hasChildren=(n->numOfChildren() >0);
 
-	    nodeItem=new NodePathItem(i,name,col,fontCol,hasChildren,false);			
+	    nodeItem=new NodePathItem(i,name,col,fontCol,hasChildren,(i == lst.size()-1)?true:false);
 		nodeItems_ << nodeItem;           
 	}
 
@@ -555,30 +548,6 @@ VInfo_ptr NodePathWidget::nodeAt(int idx)
 			else
 				return VInfoNode::create(n);
 		}
-
-		/*
-		//The last item
-		if(idx == nodeItems_.count()-1)
-			return info_;
-
-		//Server
-		if(idx == 0)
-		{
-			VInfo_ptr res=VInfoServer::make(server);
-			qDebug() << "selected" << server->name().c_str();
-			return res;
-		}
-		//Node
-		else if(info_->node())
-		{
-			std::vector<VNode*> nodes=info_->node()->ancestors(VNode::ParentToChildSort);
-			if(idx-1 < nodes.size())
-			{
-				VInfo_ptr res=VInfoNode::make(nodes.at(idx-1));
-				qDebug() << "selected" << nodes.at(idx-1)->node()->absNodePath().c_str();
-				return res;
-			}
-		}*/
 	}
 
 	return VInfo_ptr();
@@ -615,59 +584,6 @@ void NodePathWidget::loadMenu(const QPoint& pos,VInfo_ptr p)
 			delete ac;
 		}
 	}
-
-	/*
-	if(p->isServer() && p->server())
-	{
-		ServerHandler* server=p->server();
-		VServer* root=server->vRoot();
-
-		for(unsigned int i=0; i < root->numOfChildren(); i++)
-		{
-			if(VNode* node=root->childAt(i))
-			{
-				QAction *ac=new QAction(node->name(),this);
-				ac->setData(i);
-				acLst << ac;
-			}
-		}
-		if(acLst.count() > 0)
-		{
-			if(QAction *ac=QMenu::exec(acLst,pos,acLst.front(),this))
-			{
-				int idx=ac->data().toInt();
-				VInfo_ptr res(VInfo::make(root->childAt(idx),server));
-				Q_EMIT selected(res);
-			}
-		}
-
-	}
-	else if(VNode *node=p->node())
-	{
-		for(unsigned int i=0; i < node->numOfChildren(); i++)
-		{
-			QAction *ac=new QAction(node->childAt(i)->name(),this);
-			ac->setData(i);
-			acLst << ac;
-		}
-
-		if(acLst.count() > 0)
-		{
-			if(QAction *ac=QMenu::exec(acLst,pos,acLst.front(),this))
-			{
-				int idx=ac->data().toInt();
-				//ServerHandler* server=p->server();
-				ServerHandler* server=info_->server();
-				VInfo_ptr res(VInfo::make(node->childAt(idx),server));
-				Q_EMIT selected(res);
-			}
-		}
-	}
-
-	Q_FOREACH(QAction* ac,acLst)
-	{
-		delete ac;
-	}*/
 }
 
 void NodePathWidget::notifyBeginNodeChange(const VNode* node, const std::vector<ecf::Aspect::Type>& aspect,const VNodeChange&)

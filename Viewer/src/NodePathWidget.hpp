@@ -66,9 +66,13 @@ protected:
     QPixmap pix_;
     int hPadding_;
     int vPadding_;
+    int hMargin_;
+    int vMargin_;
     int triLen_;
+    int gap_;
     int width_;
     int height_;
+    int itemHeight_;
     QString emptyText_;
     QRect emptyRect_;
     QList<NodePathItem*> items_; 
@@ -99,9 +103,6 @@ protected:
     QRect textRect_;
     bool current_;
     bool hasMenu_;
-    QPolygon menuShape_;
-    bool showMenu_;
-    QColor menuCol_;
     QLinearGradient grad_;
 };
 
