@@ -24,7 +24,7 @@
             		"tooltip": "complete",
             		"fill_colour" : {
             			"label" : "Colour",
-            			"default": "rgb(255,255,0)"
+            			"default": "rgb(255,238,1)"
             		},
             		"font_colour" : {
 						"label" : "Font colour",
@@ -37,7 +37,7 @@
         			"tooltip": "queued",
         			"fill_colour" : {
         				"label" : "Colour",
-        				"default": "rgb(224,240,255)"
+        				"default": "rgb(173,216,230)"
         			},
         			"font_colour" : {
 						"label" : "Font colour",
@@ -50,7 +50,7 @@
     			"tooltip": "aborted",
     			"fill_colour" : {
     				"label" : "Colour",
-    				"default": "rgb(255,0,0)"
+    				"default": "rgb(255,59,53)"
     			},
     			"font_colour" : {
 					"label" : "Font colour",
@@ -76,7 +76,7 @@
     			"tooltip": "active",
     			"fill_colour" : {
     				"label" : "Colour",
-    				"default": "rgb(0,255,0)"
+    				"default": "rgb(74,255,61)"
     			},    			
     			"font_colour" : {
 					"label" : "Font colour",
@@ -89,7 +89,7 @@
     			"tooltip": "suspended",
     			"fill_colour" : {
     				"label" : "Colour",
-    				"default": "rgb(255,166,0)"
+    				"default": "rgb(100,223,0)"
     			},    			
     			"font_colour" : {
 					"label" : "Font colour",

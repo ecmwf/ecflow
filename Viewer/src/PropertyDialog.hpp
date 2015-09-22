@@ -28,7 +28,7 @@ public:
     explicit PropertyDialog(QWidget *parent=0);
     ~PropertyDialog() {};
 
-    bool configChanged() const {return configChanged_;}
+    bool isConfigChanged() const {return configChanged_;}
 
     //Called from VConfigLoader
     static void load(VProperty*);
@@ -39,10 +39,13 @@ public Q_SLOTS:
     void slotChangePage(QListWidgetItem *current, QListWidgetItem *previous);
     void slotButton(QAbstractButton*);
 
+Q_SIGNALS:
+	void configChanged();
+
 private:
     void build();
     void addPage(QWidget *w,QPixmap pix,QString txt);
-    void manageChange();
+    void manageChange(bool);
     void apply();
 
     void closeEvent(QCloseEvent * event);

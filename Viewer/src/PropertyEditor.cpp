@@ -25,10 +25,6 @@ PropertyEditor::PropertyEditor(QWidget* parent) : QWidget(parent),
     currentGrid_(0)
 {
     setupUi(this);
-
-    grid_->setColumnStretch(1,1);
-    grid_->setColumnStretch(2,1);
-    grid_->setColumnStretch(3,1);
 }
 
 PropertyEditor::~PropertyEditor()
@@ -61,7 +57,7 @@ void PropertyEditor::clear()
 	{
 		if(QWidget *w=item->widget())
 		{
-		    grid_->removeWidget(w);
+			vBox_->removeWidget(w);
 		    delete w;
 		}
 
@@ -241,16 +237,21 @@ void PropertyEditor::addGrid(VProperty* vProp)
 void PropertyEditor::addGridRow(VProperty* vProp,QGridLayout *grid)
 {
     if(vProp->name() != "row")
-        return;
+    {
+    	if(vProp->name() == "note")
+    	{
+    		 QLabel *empty=new QLabel(" ");
+    		 grid->addWidget(empty,grid->rowCount(),0,1,-1,Qt::AlignVCenter);
+    		 QLabel *label=new QLabel("&nbsp;&nbsp;&nbsp;<b>Note:</b> " + vProp->value().toString());
+    		 grid->addWidget(label,grid->rowCount(),0,1,-1,Qt::AlignVCenter);
+    	}
+    	return;
+    }
 
     int row=grid->rowCount();
     QString labelText=vProp->param("label");
     QLabel* label=new QLabel(labelText);
     grid->addWidget(label,row,0);
-
-
-    qDebug() << "grid" << vProp->path().c_str();
-
 
     int col=1;
     Q_FOREACH(VProperty* chProp,vProp->children())

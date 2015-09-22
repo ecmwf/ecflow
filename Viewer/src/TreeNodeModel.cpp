@@ -136,7 +136,7 @@ QVariant TreeNodeModel::data( const QModelIndex& index, int role ) const
 	   (role != Qt::DisplayRole && role != Qt::ToolTipRole && role != Qt::BackgroundRole &&
 	    role != Qt::ForegroundRole &&
 	    role != FilterRole && role != IconRole && role != ServerRole && role != NodeNumRole &&
-	    role != InfoRole && role != LoadRole && role != ConnectionRole))
+	    role != InfoRole && role != LoadRole && role != ConnectionRole && role != AttributeRole ))
     {
 		return QVariant();
 	}
@@ -148,6 +148,12 @@ QVariant TreeNodeModel::data( const QModelIndex& index, int role ) const
 			return 0;
 		else
 			return -1;
+	}
+
+	//If font
+	if(role == AttributeRole)
+	{
+		return isAttribute(index);
 	}
 
 	//Server
@@ -517,7 +523,7 @@ bool TreeNodeModel::isNode(const QModelIndex & index) const
 
 bool TreeNodeModel::isAttribute(const QModelIndex & index) const
 {
-	return (index.isValid() && !isNode(index) && !isServer(index));
+	return (index.isValid() && !isServer(index) && !isNode(index));
 }
 
 ServerHandler* TreeNodeModel::indexToRealServer(const QModelIndex & index) const

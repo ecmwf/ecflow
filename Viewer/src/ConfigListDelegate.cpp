@@ -59,6 +59,7 @@ void ConfigListDelegate::paint(QPainter *painter,const QStyleOptionViewItem &opt
     //text
     QString text=index.data(Qt::DisplayRole).toString();
     QFont f;
+    f.setBold(true);
     QFontMetrics fm(f);
     int textW=fm.width(text);
     QRect textRect(bgRect.center().x()-textW/2,pixRect.bottom()+gap_,textW,fm.height());

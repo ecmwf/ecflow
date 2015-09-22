@@ -124,7 +124,7 @@ void NodeViewDelegate::renderMeter(QPainter *painter,QStringList data,const QSty
 	stRect.setWidth(50);
 
 	//The text rectangle
-	QFont nameFont=font_;
+	QFont nameFont=attrFont_;
 	nameFont.setBold(true);
 	QFontMetrics fm(nameFont);
 	int nameWidth=fm.width(name);
@@ -133,7 +133,7 @@ void NodeViewDelegate::renderMeter(QPainter *painter,QStringList data,const QSty
 	nameRect.setWidth(nameWidth);
 
 	//The value rectangle
-	QFont valFont=font_;
+	QFont valFont=attrFont_;
 	fm=QFontMetrics(valFont);
 	int valWidth=fm.width(valStr);
 	QRect valRect = nameRect;
@@ -201,7 +201,7 @@ void NodeViewDelegate::renderLabel(QPainter *painter,QStringList data,const QSty
 			fillRect.adjust(0,1,0,-1);
 
 	//The text rectangle
-	QFont nameFont=font_;
+	QFont nameFont=attrFont_;
 	nameFont.setBold(true);
 	QFontMetrics fm(nameFont);
 	int nameWidth=fm.width(name);
@@ -209,7 +209,7 @@ void NodeViewDelegate::renderLabel(QPainter *painter,QStringList data,const QSty
 	nameRect.setWidth(nameWidth);
 
 	//The value rectangle
-	QFont valFont=font_;
+	QFont valFont=attrFont_;
 	fm=QFontMetrics(valFont);
 	int valWidth=fm.width(val);
 	QRect valRect = nameRect;
@@ -274,7 +274,7 @@ void NodeViewDelegate::renderEvent(QPainter *painter,QStringList data,const QSty
 	cRect.setWidth(cRect.height());
 
 	//The text rectangle
-	QFont font=font_;
+	QFont font=attrFont_;
 	QFontMetrics fm(font);
 	int nameWidth=fm.width(name);
 	QRect nameRect = fillRect.adjusted(offset,0,0,0);
@@ -328,7 +328,7 @@ void NodeViewDelegate::renderVar(QPainter *painter,QStringList data,const QStyle
 				fillRect.adjust(0,1,0,-1);
 
 	//The text rectangle
-	QFont font=font_;
+	QFont font=attrFont_;
 	//nameFont.setBold(true);
 	QFontMetrics fm(font);
 	int textWidth=fm.width(text);
@@ -375,7 +375,7 @@ void NodeViewDelegate::renderGenvar(QPainter *painter,QStringList data,const QSt
 				fillRect.adjust(0,1,0,-1);
 
 	//The text rectangle
-	QFont font=font_;
+	QFont font=attrFont_;
 	//nameFont.setBold(true);
 	QFontMetrics fm(font);
 	int textWidth=fm.width(text);
@@ -417,7 +417,7 @@ void NodeViewDelegate::renderLimit(QPainter *painter,QStringList data,const QSty
 	QString valStr=QString::number(val) + "/" + QString::number(max);
 	bool drawItem=(max < 21);
 
-	QFontMetrics fm(font_);
+	QFontMetrics fm(attrFont_);
 	int offset=2;
 	int gap=fm.width('A');
 	int itemSize=6;
@@ -430,7 +430,7 @@ void NodeViewDelegate::renderLimit(QPainter *painter,QStringList data,const QSty
 			fillRect.adjust(0,1,0,-1);
 
 	//The text rectangle
-	QFont nameFont=font_;
+	QFont nameFont=attrFont_;
 	nameFont.setBold(true);
 	fm=QFontMetrics(nameFont);
 	int nameWidth=fm.width(name);
@@ -439,7 +439,7 @@ void NodeViewDelegate::renderLimit(QPainter *painter,QStringList data,const QSty
 	nameRect.setWidth(nameWidth+offset);
 
 	//The value rectangle
-	QFont valFont=font_;
+	QFont valFont=attrFont_;
 	fm=QFontMetrics(valFont);
 	int valWidth=fm.width(valStr);
 	QRect valRect = nameRect;
@@ -516,7 +516,7 @@ void NodeViewDelegate::renderLimiter(QPainter *painter,QStringList data,const QS
 			fillRect.adjust(0,1,0,-1);
 
 	//The text rectangle
-	QFont nameFont=font_;
+	QFont nameFont=attrFont_;
 	//nameFont.setBold(true);
 	QFontMetrics fm(nameFont);
 	int nameWidth=fm.width(name);
@@ -561,7 +561,7 @@ void NodeViewDelegate::renderTrigger(QPainter *painter,QStringList data,const QS
 		fillRect.adjust(0,1,0,-1);
 
 	//The text rectangle
-	QFont font=font_;
+	QFont font=attrFont_;
 	QFontMetrics fm(font);
 	int textWidth=fm.width(text);
 	QRect textRect = fillRect.adjusted(offset,0,0,0);
@@ -610,7 +610,7 @@ void NodeViewDelegate::renderTime(QPainter *painter,QStringList data,const QStyl
 			fillRect.adjust(0,1,0,-1);
 
 	//The text rectangle
-	QFont nameFont=font_;
+	QFont nameFont=attrFont_;
 	//nameFont.setBold(true);
 	QFontMetrics fm(nameFont);
 	int nameWidth=fm.width(name);
@@ -655,7 +655,7 @@ void NodeViewDelegate::renderDate(QPainter *painter,QStringList data,const QStyl
 			fillRect.adjust(0,1,0,-1);
 
 	//The text rectangle
-	QFont nameFont=font_;
+	QFont nameFont=attrFont_;
 	//nameFont.setBold(true);
 	QFontMetrics fm(nameFont);
 	int nameWidth=fm.width(name);
@@ -706,7 +706,7 @@ void NodeViewDelegate::renderRepeat(QPainter *painter,QStringList data,const QSt
 			fillRect.adjust(0,1,0,-1);
 
 	//The text rectangle
-	QFont nameFont=font_;
+	QFont nameFont=attrFont_;
 	nameFont.setBold(true);
 	QFontMetrics fm(nameFont);
 	int nameWidth=fm.width(name);
@@ -714,7 +714,7 @@ void NodeViewDelegate::renderRepeat(QPainter *painter,QStringList data,const QSt
 	nameRect.setWidth(nameWidth);
 
 	//The value rectangle
-	QFont valFont=font_;
+	QFont valFont=attrFont_;
 	fm=QFontMetrics(valFont);
 	int valWidth=fm.width(val);
 	QRect valRect = nameRect;

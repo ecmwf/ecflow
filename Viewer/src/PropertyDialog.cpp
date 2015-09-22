@@ -29,9 +29,11 @@ PropertyDialog::PropertyDialog(QWidget* parent) :
 	setupUi(this);
 
 	QFont f;
+	f.setBold(true);
 	QFontMetrics fm(f);
 	int maxW=fm.width("Server options ATAT");
 	list_->setMaximumWidth(maxW+6);
+	list_->setFont(f);
 
 	list_->setItemDelegate(new ConfigListDelegate(32,maxW,this));
 
@@ -81,12 +83,12 @@ void PropertyDialog::build()
 
 void PropertyDialog::apply()
 {
-	manageChange();
+	manageChange(true);
 }
 
 void PropertyDialog::accept()
 {
-	manageChange();
+	manageChange(false);
 	writeSettings();
     QDialog::accept();
 }    
@@ -125,7 +127,7 @@ void PropertyDialog::slotButton(QAbstractButton* pb)
 }
 
 
-void PropertyDialog::manageChange()
+void PropertyDialog::manageChange(bool inApply)
 {
 	Q_FOREACH(PropertyEditor* ed,editors_)
 	{
@@ -134,7 +136,10 @@ void PropertyDialog::manageChange()
 			VProperty* p=ed->property();
 			if(p && p->name() != "server")
 			{
-				configChanged_=true;
+				if(inApply)
+					Q_EMIT configChanged();
+				else
+					configChanged_=true;
 			}
 		}
 	}

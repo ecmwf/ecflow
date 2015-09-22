@@ -179,6 +179,7 @@ set(viewer_moc_files AbstractNodeModel.hpp
     TextEdit.hpp
     TreeNodeModel.hpp
     TreeNodeView.hpp           
+    TreeNodeViewDelegate.hpp
     TreeNodeWidget.hpp
     UserMessage.hpp
     VariableItemWidget.hpp
