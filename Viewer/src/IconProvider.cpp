@@ -26,6 +26,9 @@ static IconItem embeddedIcon(":/desktop/embedded.svg");
 static IconItem infoIcon(":/viewer/info.svg");
 
 std::map<QString,IconItem*> IconProvider::icons_;
+std::map<int,IconItem*> IconProvider::iconsById_;
+
+static int idCnt=0;
 
 //===========================================
 //
@@ -33,7 +36,7 @@ std::map<QString,IconItem*> IconProvider::icons_;
 //
 //===========================================
 
-IconItem::IconItem(QString path) : path_(path)
+IconItem::IconItem(QString path) : path_(path), id_(idCnt++)
 {
 }
 
@@ -73,14 +76,18 @@ IconProvider::IconProvider()
 {
 }
 
-void IconProvider::add(QString path,QString name)
+int IconProvider::add(QString path,QString name)
 {
 	std::map<QString,IconItem*>::iterator it=icons_.find(name);
 	if(it == icons_.end())
 	{
 		IconItem *p=new IconItem(path);
 		icons_[name]=p;
+		iconsById_[p->id()]=p;
+		return p->id();
 	}
+
+	return it->second->id();
 }
 
 IconItem* IconProvider::icon(QString name)
@@ -92,9 +99,23 @@ IconItem* IconProvider::icon(QString name)
 	return &unknownIcon;
 }
 
+IconItem* IconProvider::icon(int id)
+{
+	std::map<int,IconItem*>::iterator it=iconsById_.find(id);
+	if(it != iconsById_.end())
+		return it->second;
+
+	return &unknownIcon;
+}
+
 QPixmap IconProvider::pixmap(QString name,int size)
 {
 	return icon(name)->pixmap(size);
+}
+
+QPixmap IconProvider::pixmap(int id,int size)
+{
+	return icon(id)->pixmap(size);
 }
 
 QPixmap IconProvider::lockPixmap(int size)

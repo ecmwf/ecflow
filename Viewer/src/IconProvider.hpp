@@ -20,12 +20,14 @@ class IconItem
 public:
   	explicit IconItem(QString);
 	QPixmap pixmap(int);
+	int id () const {return id_;}
 
 protected:
   	static void greyOut(QImage &);
 
   	QString path_;
 	std::map<int,QPixmap> pixmaps_;
+	int id_;
 };
 
 
@@ -34,9 +36,10 @@ class IconProvider
 public:
 	IconProvider();
 
-	static void add(QString path,QString name);
+	static int add(QString path,QString name);
 
 	static QPixmap pixmap(QString name,int size);
+	static QPixmap pixmap(int id,int size);
 
 	static QPixmap lockPixmap(int);
 	static QPixmap warningPixmap(int);
@@ -45,8 +48,10 @@ public:
 
 private:
 	static IconItem* icon(QString name);
+	static IconItem* icon(int id);
 
 	static std::map<QString,IconItem*> icons_;
+	static std::map<int,IconItem*> iconsById_;
 };
 
 #endif

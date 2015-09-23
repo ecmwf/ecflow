@@ -17,6 +17,7 @@
 
 #include "AbstractNodeModel.hpp"
 #include "Animation.hpp"
+#include "IconProvider.hpp"
 #include "PropertyMapper.hpp"
 
 static std::vector<std::string> propVec;
@@ -41,6 +42,7 @@ TreeNodeViewDelegate::TreeNodeViewDelegate(QWidget *parent) :
 	suiteNumFont_=font_;
 	suiteNumFont_.setBold(true);
 
+	adjustIconSize();
 
 	//Property
 	if(propVec.empty())
@@ -97,12 +99,15 @@ void TreeNodeViewDelegate::updateSettings()
     if(VProperty* p=prop_->find("view.tree.nodeFontSize"))
     {
     	int newSize=p->value().toInt();
+
     	if(font_.pointSize() != newSize)
     	{
     		font_.setPointSize(p->value().toInt());
     		serverInfoFont_=font_;
     		serverNumFont_.setPointSize(newSize);
     		suiteNumFont_.setPointSize(newSize);
+    		adjustIconSize();
+
     		Q_EMIT sizeHintChangedGlobal();
     	}
     }
@@ -577,17 +582,22 @@ void TreeNodeViewDelegate::renderNode(QPainter *painter,const QModelIndex& index
 	//Icons area
 	QList<QPixmap> pixLst;
 	QList<QRect> pixRectLst;
+
 	QVariant va=index.data(AbstractNodeModel::IconRole);
 	if(va.type() == QVariant::List)
 	{
 			QVariantList lst=va.toList();
 			int xp=currentRight+5;
-			int yp=itemRect.top();
+			int yp=textRect.center().y()-iconSize_/2;
 			for(int i=0; i < lst.count(); i++)
 			{
-				pixLst << lst[i].value<QPixmap>();
-				pixRectLst << QRect(xp,yp,pixLst.back().width(),pixLst.back().height());
-				xp+=pixLst.back().width();
+				int id=lst[i].toInt();
+				if(id != -1)
+				{
+					pixLst << IconProvider::pixmap(id,iconSize_);
+					pixRectLst << QRect(xp,yp,pixLst.back().width(),pixLst.back().height());
+					xp+=pixLst.back().width();
+				}
 			}
 
 			if(!pixRectLst.isEmpty())

@@ -116,7 +116,8 @@ static VLateIcon lateIcon("late");
 //==========================================================
 
 VIcon::VIcon(const std::string& name) :
-		VParam(name)
+		VParam(name),
+		pixId_(-1)
 {
 	items_[name]=this;
 }
@@ -137,7 +138,7 @@ void VIcon::initPixmap()
 	//Add icon to iconprovider
 	if(VProperty* ip=prop_->findChild("icon"))
 	{
-		IconProvider::add(":/viewer/" + ip->value().toString(),name());
+		pixId_=IconProvider::add(":/viewer/" + ip->value().toString(),name());
 	}
 }
 
@@ -172,7 +173,6 @@ VIcon* VIcon::find(const std::string& name)
 	return NULL;
 }
 
-
 //Create the pixmap containing all the relevant icons for the given node according to the filter.
 QVariantList VIcon::pixmapList(VNode *vnode,VParamSet *filter)
 {
@@ -185,9 +185,9 @@ QVariantList VIcon::pixmapList(VNode *vnode,VParamSet *filter)
             VIcon *v=it->second;
             if(!filter || filter->current().find(it->second) != filter->current().end())
             {
-                if(v->show(vnode) )
+                if(v->show(vnode))
                 {
-                   lst << v->pixmap(16);
+                   lst << v->pixId_;
                 }
             }
 	}
