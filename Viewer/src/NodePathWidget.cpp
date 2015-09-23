@@ -333,7 +333,7 @@ NodePathWidget::NodePathWidget(QWidget *parent) :
     
     reloadTb_=new QToolButton(this);
     //reloadTb_->setDefaultAction(actionReload_);
-    reloadTb_->setIcon(QPixmap(":/viewer/reload.svg"));
+    reloadTb_->setIcon(QPixmap(":/viewer/reload_one.svg"));
     reloadTb_->setToolTip(tr("Refresh server"));
     reloadTb_->setAutoRaise(true);
     //reloadTb_->setIconSize(QSize(20,20));
