@@ -419,6 +419,19 @@ void NodePathWidget::adjust(VInfo_ptr info,ServerHandler** serverOut,bool &sameS
 
   			info->server()->addServerObserver(this);
   			info->server()->addNodeObserver(this);
+
+  			if(server)
+  			{
+  				if(reloadTb_)
+  				{
+  					reloadTb_->setToolTip("Reload server <b>" + QString::fromStdString(server->name()) + "</b>");
+  				}
+  			}
+  			else
+  			{
+  				reloadTb_->setToolTip("Reload server");
+  			}
+
   		}
   	}
   	//If the there is no data we clean everything and return
@@ -429,12 +442,16 @@ void NodePathWidget::adjust(VInfo_ptr info,ServerHandler** serverOut,bool &sameS
   	  		info_->server()->removeServerObserver(this);
   	  		info_->server()->removeNodeObserver(this);
   	  	}
+
+  	  	reloadTb_->setToolTip("Reload server");
   	}
 
   	//Set the info
   	info_=info;
 
   	*serverOut=server;
+
+
 }
 
 
