@@ -4,7 +4,7 @@
             "common" : {
                 "node_style" : {
                     "label" : "Node rendering style",
-                    "default" : "classic",
+                    "default" : "modern",
                     "values"  : "classic/modern",
                     "values_label" : "Text in status rectangle (classic)/Separate text and status rectangle"
                 },    

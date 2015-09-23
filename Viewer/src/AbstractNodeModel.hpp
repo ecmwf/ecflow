@@ -37,7 +37,8 @@ public:
    		                 ServerRole = Qt::UserRole+3, NodeNumRole = Qt::UserRole+4,
    						 InfoRole = Qt::UserRole+5, LoadRole = Qt::UserRole+6,
    						 ConnectionRole = Qt::UserRole+7, ServerDataRole = Qt::UserRole+8,
-   						 NodeDataRole = Qt::UserRole+9, AttributeRole = Qt::UserRole+10};
+   						 NodeDataRole = Qt::UserRole+9, AttributeRole = Qt::UserRole+10,
+						 AttributeLineRole = Qt::UserRole+11	};
 
 	void dataIsAboutToChange();
 	virtual VInfo_ptr nodeInfo(const QModelIndex& index)=0;

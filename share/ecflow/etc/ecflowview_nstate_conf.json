@@ -89,7 +89,7 @@
     			"tooltip": "suspended",
     			"fill_colour" : {
     				"label" : "Colour",
-    				"default": "rgb(100,223,0)"
+    				"default": "rgb(239,191,0)"
     			},    			
     			"font_colour" : {
 					"label" : "Font colour",

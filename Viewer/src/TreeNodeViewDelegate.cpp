@@ -33,6 +33,15 @@ TreeNodeViewDelegate::TreeNodeViewDelegate(QWidget *parent) :
 	attrFont_=font_;
 	attrFont_.setPointSize(8);
 
+	serverInfoFont_=font_;
+
+	serverInfoFont_=font_;
+	serverNumFont_.setBold(true);
+
+	suiteNumFont_=font_;
+	suiteNumFont_.setBold(true);
+
+
 	//Property
 	if(propVec.empty())
 	{
@@ -91,6 +100,9 @@ void TreeNodeViewDelegate::updateSettings()
     	if(font_.pointSize() != newSize)
     	{
     		font_.setPointSize(p->value().toInt());
+    		serverInfoFont_=font_;
+    		serverNumFont_.setPointSize(newSize);
+    		suiteNumFont_.setPointSize(newSize);
     		Q_EMIT sizeHintChangedGlobal();
     	}
     }
@@ -125,11 +137,21 @@ QSize TreeNodeViewDelegate::sizeHint(const QStyleOptionViewItem & option, const 
 {
 	QSize size=QStyledItemDelegate::sizeHint(option,index);
 
-	if(index.data(AbstractNodeModel::AttributeRole).toBool())
+	int attLineNum=0;
+	if((attLineNum=index.data(AbstractNodeModel::AttributeLineRole).toInt()) > 0)
 	{
 		QFontMetrics fm(attrFont_);
 		int h=fm.height();
-		return QSize(size.width(),h+6);
+		if(attLineNum==1)
+			return QSize(size.width(),h+6);
+		else
+		{
+			QStringList lst;
+			for(int i=0; i < attLineNum; i++)
+				lst << "1";
+
+			return QSize(size.width(),fm.size(0,lst.join('\n')).height()+6);
+		}
 	}
 
 	QFontMetrics fm(font_);
@@ -692,7 +714,7 @@ void TreeNodeViewDelegate::renderNodeCell(QPainter *painter,QColor bg,QColor rea
     {
         painter->setPen(nodeSelectPen_);
         QRect selRect=stateRect;
-        selRect.setRight(textRect.right()+1);
+        selRect.setRight(textRect.right()+2);
         painter->drawRect(selRect);
     }
 }
