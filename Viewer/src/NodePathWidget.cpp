@@ -37,7 +37,7 @@ BcWidget::BcWidget(QWidget* parent) :
 	hMargin_(1),
 	vMargin_(1),
     triLen_(10),
-	gap_(4),
+	gap_(5),
     width_(0),
     itemHeight_(0),
     emptyText_("No selection"),
@@ -159,8 +159,8 @@ void BcWidget::reset(QList<NodePathItem*> items)
         } 
         
 
-        if(i < items_.count()-1)
-        	xp+=1;
+       // if(i < items_.count()-1)
+       // 	xp+=1;
 
         items_.at(i)->shape_=QPolygon(vec);
         items_.at(i)->textRect_=textRect;
@@ -268,14 +268,16 @@ void NodePathItem::setCurrent(bool)
 
 void NodePathItem::draw(QPainter  *painter,bool useGrad,int lighter)
 {    
-    if(current_)
+   /* if(current_)
     {
     	painter->setPen(QPen(Qt::black,2));
     }
     else
     {
     	painter->setPen(QPen(borderCol_,0));
-    }
+    }*/
+
+    painter->setPen(QPen(borderCol_,0));
     
     QBrush bgBrush;
        
@@ -292,10 +294,10 @@ void NodePathItem::draw(QPainter  *painter,bool useGrad,int lighter)
     painter->setBrush(bgBrush);
     painter->drawPolygon(shape_);
 
-    if(current_)
+    /*if(current_)
     {
     	painter->setPen(QPen(borderCol_,0));
-    }
+    }*/
 
     painter->setPen(fontCol_);
     painter->drawText(textRect_,Qt::AlignVCenter | Qt::AlignHCenter,text_);  

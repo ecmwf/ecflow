@@ -63,7 +63,6 @@ AbstractSearchLine::AbstractSearchLine(QWidget* parent) : QWidget(parent)
 
 AbstractSearchLine::~AbstractSearchLine()
 {
-	clear();
 }
 
 void AbstractSearchLine::clear()

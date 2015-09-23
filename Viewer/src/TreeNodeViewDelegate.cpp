@@ -287,7 +287,7 @@ void TreeNodeViewDelegate::renderServer(QPainter *painter,const QModelIndex& ind
 	if(nodeStyle_ == BoxAndTextNodeStyle)
 	{
 		stateRect=QRect(itemRect.x()+offset,itemRect.y(),itemRect.height(),itemRect.height());
-		currentRight=stateRect.right();
+		currentRight=stateRect.right()+offset;
 	}
 	else
 	{
@@ -317,8 +317,11 @@ void TreeNodeViewDelegate::renderServer(QPainter *painter,const QModelIndex& ind
 	}
 
 	//The pixmap (optional)
+	bool hasPix=false;
+
 	QRect pixRect;
 
+	/*
 	bool hasPix=(index.data(AbstractNodeModel::IconRole).toString() == "d");
 
 	if(hasPix)
@@ -331,6 +334,7 @@ void TreeNodeViewDelegate::renderServer(QPainter *painter,const QModelIndex& ind
 		hasPix=true;
 		currentRight=pixRect.right();
 	}
+	*/
 
 	//The info rectangle (optional)
 	QRect infoRect;
@@ -413,49 +417,6 @@ void TreeNodeViewDelegate::renderServer(QPainter *painter,const QModelIndex& ind
     QColor fg=index.data(Qt::ForegroundRole).value<QColor>();
     renderNodeCell(painter,bg,QColor(),fg,stateRect,fillRect,QRect(),textRect,text,selected);
     
-	/*QColor bg=index.data(Qt::BackgroundRole).value<QColor>();
-	QColor bgLight=bg.lighter(lighter_);
-	QColor borderCol=bg.darker(125);
-
-    QBrush bgBrush;
-    if(useNodeGrad_)
-    {    
-	    grad_.setColorAt(0,bgLight);
-	    grad_.setColorAt(1,bg);
-        bgBrush=QBrush(grad_);
-    }
-    else
-    {
-        bgBrush.setColor(bg);
-    }    
-    
-	if(nodeStyle_ == BoxAndTextNodeStyle)
-	{
-		painter->setBrush(bgBrush);
-		painter->setPen(borderCol);
-		painter->drawRect(stateRect);
-	}
-	else
-	{
-		painter->setBrush(bgBrush);
-		painter->setPen((option.state & QStyle::State_Selected)?nodeSelectPen_:QPen(borderCol));
-		painter->drawRect(fillRect);
-	}
-
-	//Draw text
-	QColor fg=index.data(Qt::ForegroundRole).value<QColor>();
-	painter->setPen(fg);
-	painter->drawText(textRect,Qt::AlignLeft | Qt::AlignVCenter,text);
-
-	//selection
-	if(nodeStyle_ == BoxAndTextNodeStyle && (option.state & QStyle::State_Selected))
-	{
-		painter->setPen(nodeSelectPen_);
-		QRect selRect=stateRect;
-		selRect.setRight(textRect.right()+1);
-		painter->drawRect(selRect);
-	}
-    */
 	//Draw pixmap if needed
 	if(hasPix)
 	{

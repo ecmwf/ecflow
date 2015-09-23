@@ -20,6 +20,8 @@
 #include <unistd.h>
 #include <map>
 
+#include "ExprAst.hpp"
+
 #include "IconProvider.hpp"
 #include "Submittable.hpp"
 #include "UserMessage.hpp"
@@ -257,21 +259,18 @@ bool  VMessageIcon::show(VNode *n)
 
 bool  VCompleteIcon::show(VNode *n)
 {
-	 /*if (!owner_) return False;
-	  else if (!owner_)
-	    return False;
-	  else if (owner_->defstatus() == STATUS_COMPLETE)
-	    return True;
-	  Node* ecf = __node__() ? __node__()->get_node() : 0;
-	  if (ecf) {
-	    AstTop* t = ecf->completeAst();
-	    if (t)
-	      if (t->evaluate())
-	        return True;
-	  }
-	  return False;*/
+	if(!n || !n->node())
+		return false;
 
-	  return false;
+	node_ptr node=n->node();
+	if(!node.get()) return false;
+
+	if(AstTop* t = node->completeAst())
+	{
+		if(t->evaluate())
+			return true;
+	}
+	return false;
 }
 
 //==========================================================
