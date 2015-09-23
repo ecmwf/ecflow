@@ -21,6 +21,7 @@
 #include "UserMessage.hpp"
 
 #include <algorithm>
+#include <sstream>
 
 #include <boost/algorithm/string/join.hpp>
 #include <boost/algorithm/string/predicate.hpp>
@@ -409,7 +410,9 @@ void ServerComThread::update(const Node* node, const std::vector<ecf::Aspect::Ty
 	UserMessage::message(UserMessage::DBG, false, std::string("ServerComThread::update - node: ") + node->name());
 	for(std::vector<ecf::Aspect::Type>::const_iterator it=types.begin(); it != types.end(); ++it)
 	{
-		//UserMessage::message(UserMessage::DBG, false, std::string(" aspect: ") + boost::lexical_cast<std::string>(*it));
+		std::stringstream ss;
+		ss << *it;
+		UserMessage::message(UserMessage::DBG, false, std::string(" aspect: ") + ss.str());
 	}
 
     //If anything was requested to be deleted in the thread we do not go further
@@ -440,7 +443,11 @@ void ServerComThread::update(const Defs* dc, const std::vector<ecf::Aspect::Type
 
 	UserMessage::message(UserMessage::DBG, false, std::string("ServerComThread::update - defs: "));
 	for(std::vector<ecf::Aspect::Type>::const_iterator it=types.begin(); it != types.end(); ++it)
-			UserMessage::message(UserMessage::DBG, false, std::string(" aspect: ") + boost::lexical_cast<std::string>(*it));
+	{
+		std::stringstream ss;
+		ss << *it;
+		UserMessage::message(UserMessage::DBG, false, std::string(" aspect: ") + ss.str());
+	}
 
     //If anything was requested to be deleted in the thread we do not go further
     //because it will trigger a full rescan in ServerHandler!

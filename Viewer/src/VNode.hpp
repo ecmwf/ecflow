@@ -75,6 +75,7 @@ public:
     QStringList getAttributeData(int,VAttribute*&);
     bool getAttributeData(const std::string& type,int row, QStringList&);
     VAttribute* getAttributeType(int);
+    int getAttributeLineNum(int row);
 
     VNode* parent() const {return parent_;}
     int numOfChildren() const { return static_cast<int>(children_.size());}

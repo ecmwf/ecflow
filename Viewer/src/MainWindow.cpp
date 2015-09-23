@@ -175,15 +175,25 @@ void MainWindow::on_actionReset_triggered()
 
 void MainWindow::on_actionPreferences_triggered()
 {
-    PropertyDialog d;
+    PropertyDialog* d=new PropertyDialog; //belongs to the whole app
 
-	if(d.exec() == QDialog::Accepted)
+    connect(d,SIGNAL(configChanged()),
+    		this,SLOT(slotConfigChanged()));
+
+	if(d->exec() == QDialog::Accepted)
 	{
-		if(d.configChanged())
+		if(d->isConfigChanged())
 		{
 			configChanged(this);
 		}
     }
+
+	delete d;
+}
+
+void MainWindow::slotConfigChanged()
+{
+	configChanged(this);
 }
 
 void MainWindow::on_actionConfigureNodeMenu_triggered()

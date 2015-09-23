@@ -120,11 +120,11 @@ void NodeViewDelegate::renderMeter(QPainter *painter,QStringList data,const QSty
 			fillRect.adjust(0,1,0,-1);
 
 	//The status rectangle
-	QRect stRect=fillRect.adjusted(offset,2,0,-2);
+	QRect stRect=fillRect.adjusted(offset,fillRect.height()/6,0,-fillRect.height()/6);
 	stRect.setWidth(50);
 
 	//The text rectangle
-	QFont nameFont=font_;
+	QFont nameFont=attrFont_;
 	nameFont.setBold(true);
 	QFontMetrics fm(nameFont);
 	int nameWidth=fm.width(name);
@@ -133,7 +133,7 @@ void NodeViewDelegate::renderMeter(QPainter *painter,QStringList data,const QSty
 	nameRect.setWidth(nameWidth);
 
 	//The value rectangle
-	QFont valFont=font_;
+	QFont valFont=attrFont_;
 	fm=QFontMetrics(valFont);
 	int valWidth=fm.width(valStr);
 	QRect valRect = nameRect;
@@ -191,7 +191,7 @@ void NodeViewDelegate::renderLabel(QPainter *painter,QStringList data,const QSty
 	QString name=data.at(1) + ":";
 	QString val;
 	if(data.count() > 2)
-			val=data.at(2);
+		val=data.at(2);
 
 	int offset=2;
 
@@ -200,24 +200,64 @@ void NodeViewDelegate::renderLabel(QPainter *painter,QStringList data,const QSty
 	if(option.state & QStyle::State_Selected)
 			fillRect.adjust(0,1,0,-1);
 
-	//The text rectangle
-	QFont nameFont=font_;
+
+	int multiCnt=val.count('\n');
+
+	QRect nameRect;
+	QRect valRect;
+	QRect multiValRect;
+
+	QFont nameFont=attrFont_;
 	nameFont.setBold(true);
-	QFontMetrics fm(nameFont);
-	int nameWidth=fm.width(name);
-	QRect nameRect = fillRect.adjusted(offset,0,0,0);
-	nameRect.setWidth(nameWidth);
+	QFont valFont=attrFont_;
+	QString multiVal;
 
-	//The value rectangle
-	QFont valFont=font_;
-	fm=QFontMetrics(valFont);
-	int valWidth=fm.width(val);
-	QRect valRect = nameRect;
-	valRect.setLeft(nameRect.right()+fm.width('A'));
-	valRect.setWidth(valWidth);
+	if(multiCnt ==0 )
+	{
+		//The text rectangle
+		QFontMetrics fm(nameFont);
+		int nameWidth=fm.width(name);
+		nameRect = fillRect.adjusted(offset,0,0,0);
+		nameRect.setWidth(nameWidth);
 
-	//Adjust the filled rect width
-	fillRect.setRight(valRect.right()+offset);
+		//The value rectangle
+		fm=QFontMetrics(valFont);
+		int valWidth=fm.width(val);
+		valRect = nameRect;
+		valRect.setLeft(nameRect.right()+fm.width('A'));
+		valRect.setWidth(valWidth);
+
+		//Adjust the filled rect width
+		fillRect.setRight(valRect.right()+offset);
+	}
+	else
+	{
+		QStringList vals=val.split('\n');
+		val=vals[0];
+		vals.removeFirst();
+		multiVal=vals.join('\n');
+
+		//The text rectangle
+		QFontMetrics fm(nameFont);
+		int nameWidth=fm.width(name);
+		nameRect = fillRect.adjusted(offset,0,0,0);
+		nameRect.setWidth(nameWidth);
+		nameRect.setHeight(fm.height()+offset);
+
+		//The value rectangle
+		fm=QFontMetrics(valFont);
+		int valWidth=fm.width(val);
+		valRect = nameRect;
+		valRect.setLeft(nameRect.right()+fm.width('A'));
+		valRect.setWidth(valWidth);
+		nameRect.setHeight(fm.height()+offset);
+
+		//Multiple line
+		multiValRect = QRect(nameRect.x(),
+				nameRect.bottom()+offset/2,
+				fm.width(multiVal),
+				fillRect.bottom()-(nameRect.bottom()+offset));
+	}
 
 	//Define clipping
 	int rightPos=fillRect.right()+1;
@@ -237,6 +277,12 @@ void NodeViewDelegate::renderLabel(QPainter *painter,QStringList data,const QSty
 	painter->setPen(Qt::black);
 	painter->setFont(valFont);
 	painter->drawText(valRect,Qt::AlignLeft | Qt::AlignVCenter,val);
+
+	if(multiCnt > 0)
+	{
+		painter->setFont(valFont);
+		painter->drawText(multiValRect,Qt::AlignLeft | Qt::AlignTop,multiVal);
+	}
 
 	if(setClipRect)
 	{
@@ -274,7 +320,7 @@ void NodeViewDelegate::renderEvent(QPainter *painter,QStringList data,const QSty
 	cRect.setWidth(cRect.height());
 
 	//The text rectangle
-	QFont font=font_;
+	QFont font=attrFont_;
 	QFontMetrics fm(font);
 	int nameWidth=fm.width(name);
 	QRect nameRect = fillRect.adjusted(offset,0,0,0);
@@ -328,7 +374,7 @@ void NodeViewDelegate::renderVar(QPainter *painter,QStringList data,const QStyle
 				fillRect.adjust(0,1,0,-1);
 
 	//The text rectangle
-	QFont font=font_;
+	QFont font=attrFont_;
 	//nameFont.setBold(true);
 	QFontMetrics fm(font);
 	int textWidth=fm.width(text);
@@ -375,7 +421,7 @@ void NodeViewDelegate::renderGenvar(QPainter *painter,QStringList data,const QSt
 				fillRect.adjust(0,1,0,-1);
 
 	//The text rectangle
-	QFont font=font_;
+	QFont font=attrFont_;
 	//nameFont.setBold(true);
 	QFontMetrics fm(font);
 	int textWidth=fm.width(text);
@@ -417,7 +463,7 @@ void NodeViewDelegate::renderLimit(QPainter *painter,QStringList data,const QSty
 	QString valStr=QString::number(val) + "/" + QString::number(max);
 	bool drawItem=(max < 21);
 
-	QFontMetrics fm(font_);
+	QFontMetrics fm(attrFont_);
 	int offset=2;
 	int gap=fm.width('A');
 	int itemSize=6;
@@ -430,7 +476,7 @@ void NodeViewDelegate::renderLimit(QPainter *painter,QStringList data,const QSty
 			fillRect.adjust(0,1,0,-1);
 
 	//The text rectangle
-	QFont nameFont=font_;
+	QFont nameFont=attrFont_;
 	nameFont.setBold(true);
 	fm=QFontMetrics(nameFont);
 	int nameWidth=fm.width(name);
@@ -439,7 +485,7 @@ void NodeViewDelegate::renderLimit(QPainter *painter,QStringList data,const QSty
 	nameRect.setWidth(nameWidth+offset);
 
 	//The value rectangle
-	QFont valFont=font_;
+	QFont valFont=attrFont_;
 	fm=QFontMetrics(valFont);
 	int valWidth=fm.width(valStr);
 	QRect valRect = nameRect;
@@ -516,7 +562,7 @@ void NodeViewDelegate::renderLimiter(QPainter *painter,QStringList data,const QS
 			fillRect.adjust(0,1,0,-1);
 
 	//The text rectangle
-	QFont nameFont=font_;
+	QFont nameFont=attrFont_;
 	//nameFont.setBold(true);
 	QFontMetrics fm(nameFont);
 	int nameWidth=fm.width(name);
@@ -561,7 +607,7 @@ void NodeViewDelegate::renderTrigger(QPainter *painter,QStringList data,const QS
 		fillRect.adjust(0,1,0,-1);
 
 	//The text rectangle
-	QFont font=font_;
+	QFont font=attrFont_;
 	QFontMetrics fm(font);
 	int textWidth=fm.width(text);
 	QRect textRect = fillRect.adjusted(offset,0,0,0);
@@ -610,7 +656,7 @@ void NodeViewDelegate::renderTime(QPainter *painter,QStringList data,const QStyl
 			fillRect.adjust(0,1,0,-1);
 
 	//The text rectangle
-	QFont nameFont=font_;
+	QFont nameFont=attrFont_;
 	//nameFont.setBold(true);
 	QFontMetrics fm(nameFont);
 	int nameWidth=fm.width(name);
@@ -655,7 +701,7 @@ void NodeViewDelegate::renderDate(QPainter *painter,QStringList data,const QStyl
 			fillRect.adjust(0,1,0,-1);
 
 	//The text rectangle
-	QFont nameFont=font_;
+	QFont nameFont=attrFont_;
 	//nameFont.setBold(true);
 	QFontMetrics fm(nameFont);
 	int nameWidth=fm.width(name);
@@ -706,7 +752,7 @@ void NodeViewDelegate::renderRepeat(QPainter *painter,QStringList data,const QSt
 			fillRect.adjust(0,1,0,-1);
 
 	//The text rectangle
-	QFont nameFont=font_;
+	QFont nameFont=attrFont_;
 	nameFont.setBold(true);
 	QFontMetrics fm(nameFont);
 	int nameWidth=fm.width(name);
@@ -714,7 +760,7 @@ void NodeViewDelegate::renderRepeat(QPainter *painter,QStringList data,const QSt
 	nameRect.setWidth(nameWidth);
 
 	//The value rectangle
-	QFont valFont=font_;
+	QFont valFont=attrFont_;
 	fm=QFontMetrics(valFont);
 	int valWidth=fm.width(val);
 	QRect valRect = nameRect;
@@ -751,33 +797,49 @@ void NodeViewDelegate::renderRepeat(QPainter *painter,QStringList data,const QSt
 
 void NodeViewDelegate::renderLate(QPainter *painter,QStringList data,const QStyleOptionViewItemV4& option) const
 {
-	/*if(data.count() !=2)
+
+	if(data.count() != 2)
 			return;
 
-	QString	text=data.at(1);
+	QString name="late: " + data.at(1);
 
-	QFont font;
-	QFontMetrics fm(font);
-	int textWidth=fm.width(text);
 	int offset=2;
 
-	textRect.setWidth(textWidth);
-	QRect fillRect=textRect.adjusted(-offset,1,2*offset,-2);
-	textRect.moveLeft(textRect.x()+offset);
+	//The border rect (we will adjust its  width)
+	QRect fillRect=option.rect.adjusted(offset,1,0,-1);
+	if(option.state & QStyle::State_Selected)
+			fillRect.adjust(0,1,0,-1);
 
-	if(fillRect.left() < optRect.right())
+	//The text rectangle
+	QFont nameFont=attrFont_;
+	QFontMetrics fm(nameFont);
+	int nameWidth=fm.width(name);
+	QRect nameRect = fillRect.adjusted(offset,0,0,0);
+	nameRect.setWidth(nameWidth);
+
+	//Adjust the filled rect width
+	fillRect.setRight(nameRect.right()+offset);
+
+	//Define clipping
+	int rightPos=fillRect.right()+1;
+	const bool setClipRect = rightPos > option.rect.right();
+	if(setClipRect)
 	{
-		if(textRect.left() < optRect.right())
-		{
-			if(textRect.right()>=optRect.right())
-				textRect.setRight(optRect.right());
+		painter->save();
+		painter->setClipRect(option.rect);
+	}
 
-			painter->setPen(Qt::black);
+	//Draw name
+	painter->setPen(Qt::black);
+	painter->setFont(nameFont);
+	painter->drawText(nameRect,Qt::AlignLeft | Qt::AlignVCenter,name);
 
-			painter->drawText(textRect,Qt::AlignLeft | Qt::AlignVCenter,text);
-		}
-	}*/
+	if(setClipRect)
+	{
+		painter->restore();
+	}
 }
+
 
 
 

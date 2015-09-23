@@ -4,15 +4,21 @@
             "common" : {
                 "node_style" : {
                     "label" : "Node rendering style",
-                    "default" : "classic",
+                    "default" : "modern",
                     "values"  : "classic/modern",
                     "values_label" : "Text in status rectangle (classic)/Separate text and status rectangle"
                 },    
                 "node_gradient" : {
                     "label" : "Gradient shading for nodes",
                     "default" : "true"
-                }    
-       
+                },    
+                "fontSize" : {
+                    "label": "Application",
+                    "suffix" : "points",                                           
+                    "default": "9",
+                    "min" : "7",
+                    "max" : "20"
+                  } 
             },
             "tree": {
             	
@@ -23,7 +29,23 @@
 				"displayChildCount" : {
 					"label" : "Display number of child nodes for servers/suites",
 					"default": "true"
-				}           
+				}, 
+				
+				"nodeFontSize" : {
+                    "label": "Nodes (tree view)",
+                    "suffix" : "points",                                           
+                    "default": "9",
+                    "min" : "7",
+                    "max" : "20"
+                  },  
+                  
+                 "attributeFontSize" : {
+                    "label": "Attributes (tree view)",
+                    "suffix" : "points",                                           
+                    "default": "8",
+                    "min" : "7",
+                    "max" : "20"
+                  }     	          
             },
 
             "table": {
@@ -31,8 +53,31 @@
             	"font" : {
  					"label" : "Font",
  					"default": "font()"
- 				}
-			}
+ 				},
+ 				
+ 				"fontSize" : {
+                    "label": "Table view",
+                    "suffix" : "points",                                           
+                    "default": "9",
+                    "min" : "7",
+                    "max" : "20"
+                  } 
+ 				
+ 				
+			},
+			
+	       "textEditor" : {
+			     
+			     "fontSize" : {
+			        "label": "Text editors",
+                    "suffix" : "points",                                           
+                    "default": "9",
+                    "min" : "7",
+                    "max" : "20"
+                  } 
+                 
+			} 
+		     
     },
     
     "table_columns": {

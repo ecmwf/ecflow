@@ -59,8 +59,8 @@ protected Q_SLOTS:
 
 	void slotCurrentChangedInPanel();
 	void slotSelectionChanged(VInfo_ptr);
-
 	void slotOpenInfoPanel();
+	void slotConfigChanged();
 
 private:
     void init(MainWindow*);

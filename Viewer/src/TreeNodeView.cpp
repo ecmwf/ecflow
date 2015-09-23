@@ -23,7 +23,9 @@
 #include "VNode.hpp"
 
 TreeNodeView::TreeNodeView(NodeFilterModel* model,NodeFilterDef* filterDef,QWidget* parent) :
-	QTreeView(parent), NodeViewBase(model,filterDef)
+	QTreeView(parent),
+	NodeViewBase(model,filterDef),
+    needItemsLayout_(false)
 {
 	setProperty("style","nodeView");
 
@@ -37,9 +39,12 @@ TreeNodeView::TreeNodeView(NodeFilterModel* model,NodeFilterDef* filterDef,QWidg
 	TreeNodeViewDelegate *delegate=new TreeNodeViewDelegate(this);
 	setItemDelegate(delegate);
 
+	connect(delegate,SIGNAL(sizeHintChangedGlobal()),
+			this,SLOT(slotSizeHintChangedGlobal()));
+
 	//setRootIsDecorated(false);
 	setAllColumnsShowFocus(true);
-	setUniformRowHeights(true);
+	//setUniformRowHeights(true);
 	setMouseTracking(true);
 	setSelectionMode(QAbstractItemView::ExtendedSelection);
 
@@ -215,7 +220,15 @@ void TreeNodeView::reload()
 
 void TreeNodeView::rerender()
 {
-	viewport()->update();
+	if(needItemsLayout_)
+	{
+		doItemsLayout();
+		needItemsLayout_=false;
+	}
+	else
+	{
+		viewport()->update();
+	}
 }
 
 void TreeNodeView::slotRerender()
@@ -233,6 +246,13 @@ void TreeNodeView::slotRepaint(Animation* an)
 		update(idx);
 	}
 }
+
+
+void TreeNodeView::slotSizeHintChangedGlobal()
+{
+	needItemsLayout_=true;
+}
+
 
 
 //====================================================

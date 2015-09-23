@@ -60,6 +60,7 @@ set(viewer_srcs
     OutputProvider.cpp
     OverviewItemWidget.cpp
     OverviewProvider.cpp
+    Palette.cpp
     PlainTextSearchLine.cpp
     PropertyDialog.cpp
     PropertyEditor.cpp
@@ -178,6 +179,7 @@ set(viewer_moc_files AbstractNodeModel.hpp
     TextEdit.hpp
     TreeNodeModel.hpp
     TreeNodeView.hpp           
+    TreeNodeViewDelegate.hpp
     TreeNodeWidget.hpp
     UserMessage.hpp
     VariableItemWidget.hpp

@@ -2,9 +2,10 @@
 	"gui" : {
 							
  		"appearance":  {
- 			"label": "Appearence",
- 			"desc" : "Appearence",
+ 			"label": "Appearance",
+ 			"desc" : "Appearance",
  			"icon" : "colour.svg",
+            
             
             "group" : {
                 "title" : "Node rendering",
@@ -12,9 +13,19 @@
                 
                 "line" : "node_style",
                 "line" : "node_gradient"
-            },                        
+            },
+            
+             "group" : {
+                "title" : "Font size",
+                "prefix" : "view",
+                             
+                "line" : "tree.nodeFontSize",
+                "line" : "tree.attributeFontSize"
+             
+            },
+                                    
             "grid" : {
-                   "title" : "Nodes",                                    
+                   "title" : "Status",                                    
                     "h1" : "Fill colour",
                     "h2" : "Font colour",                  
                     
@@ -59,15 +70,11 @@
                             "prefix" :   "nstate.suspended",                     
                             "line" :  "fill_colour",
                             "line" :  "font_colour"
-                      }
+                      },
                 
-			
-			},
-	        "grid" : {
-                "title" : "Servers",                                    
-                   
-                "h1" : "Fill colour",
-                "h2" : "Font colour",
+			             "note" : {
+			             "default" : "the states below are only valid for <b>servers</b>"
+			             },  
                     
                         "row" : {
                             "label" : "Halted",

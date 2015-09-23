@@ -52,6 +52,7 @@ public Q_SLOTS:
 	void slotRestoreExpand(const VNode* node);
 	void slotRepaint(Animation*);
 	void slotRerender();
+	void slotSizeHintChangedGlobal();
 
 Q_SIGNALS:
 	void selectionChanged(VInfo_ptr);
@@ -65,6 +66,7 @@ protected:
 
 	ActionHandler* actionHandler_;
 	ExpandState *expandState_;
+	bool needItemsLayout_;
 };
 
 #endif

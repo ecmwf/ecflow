@@ -65,6 +65,7 @@ protected:
 
 	PropertyMapper* prop_;
 	QFont font_;
+	QFont attrFont_;
 
 };
 

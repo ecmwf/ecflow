@@ -17,6 +17,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 
+#include <algorithm>
 #include <map>
 
 #include "VNode.hpp"
@@ -66,6 +67,7 @@ public:
 	explicit VLabelAttribute(const std::string& n) : VAttribute(n) {};
 	int num(const VNode *node);
 	bool getData(VNode *node,int row,int& size,QStringList& data);
+	int lineNum(const VNode* vnode,int row);
 };
 
 class VDateAttribute : public VAttribute
@@ -189,7 +191,7 @@ int VAttribute::totalNum(const VNode *vnode)
 	return total;
 }
 
-VAttribute* VAttribute::getType(VNode *vnode,int row)
+VAttribute* VAttribute::getType(const VNode *vnode,int row)
 {
 	if(!vnode)
 		return NULL;
@@ -241,6 +243,24 @@ bool VAttribute::getData(const std::string& type,VNode* vnode,int row,QStringLis
 	return false;
 }
 
+int VAttribute::getLineNum(const VNode *vnode,int row)
+{
+	if(!vnode)
+		return 1;
+
+	int totalRow=0;
+	for(std::map<std::string,VAttribute*>::const_iterator it=items_.begin(); it != items_.end(); ++it)
+	{
+		int size=it->second->num(vnode);
+		if(row-totalRow >=0 && row-totalRow < size)
+		{
+			return it->second->lineNum(vnode,row-totalRow);
+		}
+		totalRow+=size;
+	}
+
+	return 1;
+}
 
 void VAttribute::load(VProperty* group)
 {
@@ -322,11 +342,33 @@ bool VLabelAttribute::getData(VNode *vnode,int row,int& size,QStringList& data)
         data << qName_ <<
 					QString::fromStdString(v.at(row).name()) <<
                     QString::fromStdString(val);
-
         return true;
 	}
 	size=v.size();
 	return false;
+}
+
+int VLabelAttribute::lineNum(const VNode* vnode,int row)
+{
+	if(vnode->isServer())
+		return 1;
+
+	node_ptr node=vnode->node();
+	if(!node.get())
+		return 1;
+
+	const std::vector<Label>&  v=node->labels();
+	if(row >=0 && row < v.size())
+	{
+	    std::string val=v.at(row).new_value();
+	    if(val.empty() || val == " ")
+	    {
+	    	val=v.at(row).value();
+	    }
+	    return std::count(val.begin(), val.end(), '\n')+1;
+	}
+
+	return 1;
 }
 
 //================================

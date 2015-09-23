@@ -13,6 +13,7 @@
 #include "VNode.hpp"
 #include "VReply.hpp"
 #include "ServerHandler.hpp"
+#include "UserMessage.hpp"
 
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/path.hpp>
@@ -245,15 +246,13 @@ VDir_ptr OutputProvider::fetchLocalDir(const std::string& path)
 
 	boost::filesystem::path p(path);
 
-	//it is a directory
-	if(boost::filesystem::is_directory(p))
-	{
-		return res;
-	}
-
-	//It is a file
-	else
-	{
+	try {
+		//Is it a directory?
+		if(boost::filesystem::is_directory(p))
+		{
+			return res;
+		}
+		//It must be a file
 		if(boost::filesystem::exists(p.parent_path()))
 		{
 			std::string dirName=p.parent_path().string();
@@ -267,7 +266,14 @@ VDir_ptr OutputProvider::fetchLocalDir(const std::string& path)
 				return res;
 			}
 		}
+
 	}
+	catch (const boost::filesystem::filesystem_error& e)
+	{
+		UserMessage::message(UserMessage::WARN,false,"fetchLocalDir failed:" + std::string(e.what()));
+		return res;
+	}
+
 
 	return res;
 }

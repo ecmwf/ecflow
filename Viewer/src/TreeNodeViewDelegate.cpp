@@ -30,6 +30,18 @@ TreeNodeViewDelegate::TreeNodeViewDelegate(QWidget *parent) :
     nodeStyle_(ClassicNodeStyle),
     useNodeGrad_(true)
 {
+	attrFont_=font_;
+	attrFont_.setPointSize(8);
+
+	serverInfoFont_=font_;
+
+	serverInfoFont_=font_;
+	serverNumFont_.setBold(true);
+
+	suiteNumFont_=font_;
+	suiteNumFont_.setBold(true);
+
+
 	//Property
 	if(propVec.empty())
 	{
@@ -37,6 +49,8 @@ TreeNodeViewDelegate::TreeNodeViewDelegate(QWidget *parent) :
 		propVec.push_back("view.tree.displayChildCount");
         propVec.push_back("view.common.node_style");
         propVec.push_back("view.common.node_gradient");
+        propVec.push_back("view.tree.nodeFontSize");
+        propVec.push_back("view.tree.attributeFontSize");
 	}
 
     prop_=new PropertyMapper(propVec,this);
@@ -49,40 +63,6 @@ TreeNodeViewDelegate::TreeNodeViewDelegate(QWidget *parent) :
 	grad_.setCoordinateMode(QGradient::ObjectBoundingMode);
 	grad_.setStart(0,0);
 	grad_.setFinalStop(0,1);
-
-    /*hoverPen_=QPen(QColor(201,201,201));
-	hoverBrush_=QBrush(QColor(250,250,250,210));
-	selectPen_=QPen(QColor(125,162,206));
-	selectBrush_=QBrush(QColor(193,220,252,110));
-	nodePen_=QPen(QColor(180,180,180));
-	nodeSelectPen_=QPen(QColor(0,0,0),2);
-
-	lostConnectBgBrush_=QBrush(QColor(150,150,150,150),Qt::Dense7Pattern);
-	lostConnectBandBrush_=QBrush(QColor(255,166,0,150));
-
-	QImageReader imgR(":/viewer/warning.svg");
-	if(imgR.canRead())
-	{
-		QFont font;
-		QFontMetrics fm(font);
-		int size=fm.height()+2;
-		imgR.setScaledSize(QSize(size,size));
-		QImage img=imgR.read();
-		errPix_=QPixmap(QPixmap::fromImage(img));
-    }*/
-
-    /*attrRenderers_["meter"]=&TreeNodeViewDelegate::renderMeter;
-	attrRenderers_["label"]=&TreeNodeViewDelegate::renderLabel;
-	attrRenderers_["event"]=&TreeNodeViewDelegate::renderEvent;
-	attrRenderers_["var"]=&TreeNodeViewDelegate::renderVar;
-	attrRenderers_["genvar"]=&TreeNodeViewDelegate::renderGenvar;
-	attrRenderers_["limit"]=&TreeNodeViewDelegate::renderLimit;
-	attrRenderers_["limiter"]=&TreeNodeViewDelegate::renderLimiter;
-	attrRenderers_["trigger"]=&TreeNodeViewDelegate::renderTrigger;
-	attrRenderers_["time"]=&TreeNodeViewDelegate::renderTime;
-	attrRenderers_["date"]=&TreeNodeViewDelegate::renderDate;
-	attrRenderers_["repeat"]=&TreeNodeViewDelegate::renderRepeat;
-    attrRenderers_["late"]=&TreeNodeViewDelegate::renderLate;*/
 }
 
 TreeNodeViewDelegate::~TreeNodeViewDelegate()
@@ -114,15 +94,37 @@ void TreeNodeViewDelegate::updateSettings()
 	{
 		nodeRectRad_=p->value().toInt();
 	}
+    if(VProperty* p=prop_->find("view.tree.nodeFontSize"))
+    {
+    	int newSize=p->value().toInt();
+    	if(font_.pointSize() != newSize)
+    	{
+    		font_.setPointSize(p->value().toInt());
+    		serverInfoFont_=font_;
+    		serverNumFont_.setPointSize(newSize);
+    		suiteNumFont_.setPointSize(newSize);
+    		Q_EMIT sizeHintChangedGlobal();
+    	}
+    }
+    if(VProperty* p=prop_->find("view.tree.attributeFontSize"))
+    {
+    	int newSize=p->value().toInt();
+    	if(attrFont_.pointSize() != newSize)
+    	{
+    		attrFont_.setPointSize(p->value().toInt());
+    		Q_EMIT sizeHintChangedGlobal();
+    	}
+    }
+
 	if(VProperty* p=prop_->find("view.tree.font"))
 	{
-		font_=p->value().value<QFont>();
+		/*font_=p->value().value<QFont>();
 
 		serverInfoFont_=font_;
 		serverNumFont_=font_;
 		serverNumFont_.setBold(true);
 		suiteNumFont_=font_;
-		suiteNumFont_.setBold(true);
+		suiteNumFont_.setBold(true);*/
 
 	}
 	if(VProperty* p=prop_->find("view.tree.displayChildCount"))
@@ -131,14 +133,31 @@ void TreeNodeViewDelegate::updateSettings()
 	}
 }
 
-/*QSize TreeNodeViewDelegate::sizeHint(const QStyleOptionViewItem & option, const QModelIndex & index ) const
+QSize TreeNodeViewDelegate::sizeHint(const QStyleOptionViewItem & option, const QModelIndex & index ) const
 {
 	QSize size=QStyledItemDelegate::sizeHint(option,index);
+
+	int attLineNum=0;
+	if((attLineNum=index.data(AbstractNodeModel::AttributeLineRole).toInt()) > 0)
+	{
+		QFontMetrics fm(attrFont_);
+		int h=fm.height();
+		if(attLineNum==1)
+			return QSize(size.width(),h+6);
+		else
+		{
+			QStringList lst;
+			for(int i=0; i < attLineNum; i++)
+				lst << "1";
+
+			return QSize(size.width(),fm.size(0,lst.join('\n')).height()+6);
+		}
+	}
 
 	QFontMetrics fm(font_);
 	int h=fm.height();
 	return QSize(size.width(),h+8);
-}*/
+}
 
 
 void TreeNodeViewDelegate::paint(QPainter *painter,const QStyleOptionViewItem &option,
@@ -509,7 +528,6 @@ void TreeNodeViewDelegate::renderNode(QPainter *painter,const QModelIndex& index
 
 	QRect stateRect;
 	QRect fillRect;
-	QRect halfRect;
 	QRect realRect;
 
 	if(nodeStyle_ == BoxAndTextNodeStyle)
@@ -519,7 +537,8 @@ void TreeNodeViewDelegate::renderNode(QPainter *painter,const QModelIndex& index
 
 		if(hasRealBg)
 		{
-			realRect=QRect(stateRect.right()+1,stateRect.top(),6,stateRect.height());
+			int realW=stateRect.width()/3;
+			realRect=QRect(stateRect.right()-realW,stateRect.top(),realW+1,stateRect.height());
 			currentRight=realRect.right()+2;
 		}
 
@@ -540,11 +559,7 @@ void TreeNodeViewDelegate::renderNode(QPainter *painter,const QModelIndex& index
 	//Adjust the filled rect width
 	if(nodeStyle_ == ClassicNodeStyle)
 	{
-		fillRect.setRight(textRect.right()+offset);
-
-		halfRect=fillRect;
-		halfRect.setY(halfRect.center().y());
-		halfRect.adjust(1,0,-1,-1);
+		fillRect.setRight(textRect.right()+offset+1);
 
 		currentRight=fillRect.right();
 
@@ -613,66 +628,6 @@ void TreeNodeViewDelegate::renderNode(QPainter *painter,const QModelIndex& index
 
 	QColor fg=index.data(Qt::ForegroundRole).value<QColor>();
 	renderNodeCell(painter,bg,realBg,fg,stateRect,fillRect,realRect,textRect,text,selected);
-	
-    /*
-	QColor bgLight=bg.lighter(lighter_);
-	QColor borderCol=bg.darker(125);
-
-    QBrush bgBrush;
-	if(useNodeGrad_)
-    {
-        grad_.setColorAt(0,bgLight);
-    	grad_.setColorAt(1,bg);
-        bgBrush=QBrush(grad_);
-    }
-    else
-        bgBrush=QBrush(bg);
-
-    
-	//Draw state/node rect
-	if(nodeStyle_ == BoxAndTextNodeStyle)
-	{
-		painter->setBrush(bgBrush);
-		painter->setPen(borderCol);
-		painter->drawRect(stateRect);
-	}
-	else
-	{
-		painter->setBrush(bgBrush);
-		painter->setPen((option.state & QStyle::State_Selected)?nodeSelectPen_:QPen(borderCol));
-		painter->drawRect(fillRect);
-	}
-
-	painter->setBrush(Qt::NoBrush);
-
-	if(hasRealBg)
-	{
-		QColor realBorderCol=realBg.darker(125);
-		painter->fillRect(realRect,realBg);
-
-		if(nodeStyle_ == BoxAndTextNodeStyle)
-			painter->setPen(realBorderCol);
-		else
-			painter->setPen((option.state & QStyle::State_Selected)?nodeSelectPen_:QPen(realBorderCol));
-
-		painter->drawRect(realRect);
-	}
-
-    */
-    
-	//Draw text
-	/*QColor fg=index.data(Qt::ForegroundRole).value<QColor>();
-	painter->setPen(fg);
-	painter->drawText(textRect,Qt::AlignLeft | Qt::AlignVCenter,text);
-
-	//selection
-	if(nodeStyle_ == BoxAndTextNodeStyle && (option.state & QStyle::State_Selected))
-	{
-		painter->setPen(nodeSelectPen_);
-		QRect selRect=stateRect;
-		selRect.setRight(textRect.right()+1);
-		painter->drawRect(selRect);
-	}*/
 
 	//Draw icons
 	for(int i=0; i < pixLst.count(); i++)
@@ -730,9 +685,19 @@ void TreeNodeViewDelegate::renderNodeCell(QPainter *painter,QColor bg,QColor rea
 
     if(!realRect.isEmpty())
     {
-        QColor realBorderCol=realBg.darker(125);
-        painter->fillRect(realRect,realBg);
+        if(useNodeGrad_)
+        {
+        	QColor realBgLight=realBg.lighter(lighter_);
+            grad_.setColorAt(0,realBgLight);
+            grad_.setColorAt(1,realBg);
+            bgBrush=QBrush(grad_);
+        }
+        else
+            bgBrush=QBrush(realBg);
 
+        painter->fillRect(realRect,bgBrush);
+
+        QColor realBorderCol=realBg.darker(125);
         if(nodeStyle_ == BoxAndTextNodeStyle)
             painter->setPen(realBorderCol);
         else
@@ -749,7 +714,7 @@ void TreeNodeViewDelegate::renderNodeCell(QPainter *painter,QColor bg,QColor rea
     {
         painter->setPen(nodeSelectPen_);
         QRect selRect=stateRect;
-        selRect.setRight(textRect.right()+1);
+        selRect.setRight(textRect.right()+2);
         painter->drawRect(selRect);
     }
 }

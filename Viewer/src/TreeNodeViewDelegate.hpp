@@ -27,6 +27,8 @@ class PropertyMapper;
 
 class TreeNodeViewDelegate : public NodeViewDelegate
 {
+Q_OBJECT
+
 public:
 	explicit TreeNodeViewDelegate(QWidget *parent=0);
 	~TreeNodeViewDelegate();
@@ -34,7 +36,10 @@ public:
     void paint(QPainter *painter,const QStyleOptionViewItem &option,
                    const QModelIndex& index) const;
 
-    //QSize sizeHint(const QStyleOptionViewItem & option, const QModelIndex & index ) const;
+    QSize sizeHint(const QStyleOptionViewItem & option, const QModelIndex & index ) const;
+
+Q_SIGNALS:
+    void sizeHintChangedGlobal();
 
 protected:
     void updateSettings();
@@ -58,7 +63,8 @@ protected:
     NodeStyle nodeStyle_;
     bool useNodeGrad_;
     
-	QFont serverNumFont_;
+
+    QFont serverNumFont_;
 	QFont suiteNumFont_;
 	QFont serverInfoFont_;
 

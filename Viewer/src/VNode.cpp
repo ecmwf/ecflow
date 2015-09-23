@@ -123,6 +123,11 @@ bool VNode::getAttributeData(const std::string& type,int row,QStringList& data)
 	return VAttribute::getData(type,this,row,data);
 }
 
+int VNode::getAttributeLineNum(int row)
+{
+	return VAttribute::getLineNum(this,row);
+}
+
 void VNode::addChild(VNode* vn)
 {
 	children_.push_back(vn);

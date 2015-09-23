@@ -27,11 +27,12 @@ public:
     
 	static std::vector<VParam*> filterItems();
 	
-	static VAttribute* getType(VNode *vnode,int row);
+	static VAttribute* getType(const VNode *vnode,int row);
 	static bool getData(VNode* vnode,int row,VAttribute* &type,QStringList& data);
 	static bool getData(const std::string& type,VNode* vnode,int row,QStringList& data);
 	static int totalNum(const VNode *vnode);
 	static void init(const std::string& parFile);
+	static int getLineNum(const VNode *vnode,int row);
 	
 	static VAttribute* find(const std::string& name);
 
@@ -41,7 +42,7 @@ public:
 protected:
 	virtual bool getData(VNode *vnode,int row,int& totalRow,QStringList& data)=0;
 	virtual int num(const VNode* vnode)=0;
-
+	virtual int lineNum(const VNode* vnode,int row) {return 1;}
 
 private:
 	static std::map<std::string,VAttribute*> items_;

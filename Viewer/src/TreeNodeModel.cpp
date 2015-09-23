@@ -136,7 +136,7 @@ QVariant TreeNodeModel::data( const QModelIndex& index, int role ) const
 	   (role != Qt::DisplayRole && role != Qt::ToolTipRole && role != Qt::BackgroundRole &&
 	    role != Qt::ForegroundRole &&
 	    role != FilterRole && role != IconRole && role != ServerRole && role != NodeNumRole &&
-	    role != InfoRole && role != LoadRole && role != ConnectionRole))
+	    role != InfoRole && role != LoadRole && role != ConnectionRole && role != AttributeRole && role != AttributeLineRole ))
     {
 		return QVariant();
 	}
@@ -150,9 +150,17 @@ QVariant TreeNodeModel::data( const QModelIndex& index, int role ) const
 			return -1;
 	}
 
+	if(role == AttributeRole)
+	{
+		return isAttribute(index);
+	}
+
 	//Server
 	if(isServer(index))
 	{
+		if(role == AttributeLineRole)
+			return 0;
+
 		return serverData(index,role);
 	}
 
@@ -165,6 +173,9 @@ QVariant TreeNodeModel::data( const QModelIndex& index, int role ) const
 	//Node
 	if(isNode(index))
 	{
+		if(role == AttributeLineRole)
+			return 0;
+
 		return nodeData(index,role);
 	}
 
@@ -332,7 +343,7 @@ QVariant TreeNodeModel::attributesData(const QModelIndex& index, int role) const
 	if(index.column()!=0)
 		return QVariant();
 
-	if(role != Qt::BackgroundRole && role != FilterRole && role != Qt::DisplayRole && role != ConnectionRole)
+	if(role != Qt::BackgroundRole && role != FilterRole && role != Qt::DisplayRole && role != ConnectionRole && role != AttributeLineRole )
 		return QVariant();
 
 	if(role == Qt::BackgroundRole)
@@ -383,6 +394,10 @@ QVariant TreeNodeModel::attributesData(const QModelIndex& index, int role) const
 	{
 		VAttribute* type=0;
 		return node->getAttributeData(index.row(),type);
+	}
+	else if(role ==  AttributeLineRole)
+	{
+		return node->getAttributeLineNum(index.row());
 	}
 
 	return QVariant();
@@ -517,7 +532,7 @@ bool TreeNodeModel::isNode(const QModelIndex & index) const
 
 bool TreeNodeModel::isAttribute(const QModelIndex & index) const
 {
-	return (index.isValid() && !isNode(index) && !isServer(index));
+	return (index.isValid() && !isServer(index) && !isNode(index));
 }
 
 ServerHandler* TreeNodeModel::indexToRealServer(const QModelIndex & index) const

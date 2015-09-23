@@ -578,7 +578,14 @@ bool ComboPropertyLine::applyChange()
 
 QVariant ComboPropertyLine::currentValue()
 {
-	return cb_->currentText();
+	int idx=cb_->currentIndex();
+
+	if(idx != -1)
+	{
+	    return cb_->itemData(idx).toString();
+	}
+
+	return QString();
 }
 
 void ComboPropertyLine::slotCurrentChanged(int)

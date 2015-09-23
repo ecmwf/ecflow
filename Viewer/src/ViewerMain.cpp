@@ -12,6 +12,7 @@
 #include <iostream>
 
 #include <QApplication>
+#include <QDebug>
 #include <QFile>
 #include <QSplashScreen>
 #include <QStyleFactory>
@@ -23,6 +24,7 @@
 #include "InfoPanelHandler.hpp"
 #include "DirectoryHandler.hpp"
 #include "Highlighter.hpp"
+#include "Palette.hpp"
 #include "ServerList.hpp"
 #include "VConfig.hpp"
 #include "VServerSettings.hpp"
@@ -49,16 +51,18 @@ int main(int argc, char **argv)
     app.processEvents();*/
 
 
+    QStringList styleLst=QStyleFactory::keys();
+
     //Set the style
-    QString style="plastique";
-    if(QStyleFactory::keys().contains(style))
+    QString style="Plastique";
+    if(styleLst.contains(style))
     {
     	app.setStyle(style);
     }
     else
     {
-    	style="fusion";
-    	if(QStyleFactory::keys().contains(style))
+    	style="Fusion";
+    	if(styleLst.contains(style))
         {
     		app.setStyle(style);
         }
@@ -109,7 +113,12 @@ int main(int argc, char **argv)
     Highlighter::init(DirectoryHandler::concatenate(DirectoryHandler::etcDir(),
     		      "ecflowview_highlighter.json"));
 
-   /* for(int i=0; i < 8; i++)
+
+    //Initialise the system palette
+    Palette::load(DirectoryHandler::concatenate(DirectoryHandler::etcDir(),
+		      "ecflowview_palette.json"));
+
+    /* for(int i=0; i < 8; i++)
     {
     	sleep(1);
     	app.processEvents();

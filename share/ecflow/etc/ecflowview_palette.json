@@ -1,0 +1,54 @@
+{       
+    "active" : {
+        "window"      : "rgb(220,221,222)",                       
+        "windowtext"  : "rgb(20,19,18)",
+        "base"        : "rgb(255,255,255)",
+        "alternatebase"   : "rgb(241,241,240)",
+        "text"        : "rgb(20,19,18)",
+        "button"      : "rgb(232,231,230)",
+        "buttontext"  : "rgb(20,20,20)",
+        "brighttext"  : "rgb(255,255,255)",
+        "light"       : "rgb(225,225,225)",
+        "midlight"    : "rgb(233,232,231)",
+        "dark"        : "rgb(125,124,123)",
+        "mid"         : "rgb(187,185,184)",
+        "shadow"      : "rgb(70,69,68)",
+        "highligt"    : "rgb(65,139,212)",
+        "highligtedtext"  : "rgb(255,255,255)"
+    },
+    
+    "inactive" : {
+        "window"      : "rgb(220,221,222)",                       
+        "windowtext"  : "rgb(20,19,18)",
+        "base"        : "rgb(255,255,255)",
+        "alternatebase"   : "rgb(241,241,240)",
+        "text"        : "rgb(20,19,18)",
+        "button"      : "rgb(232,231,230)",
+        "buttontext"  : "rgb(20,20,20)",
+        "brighttext"  : "rgb(255,255,255)",
+        "light"       : "rgb(225,225,225)",
+        "midlight"    : "rgb(233,232,231)",
+        "dark"        : "rgb(125,124,123)",
+        "mid"         : "rgb(187,185,184)",
+        "shadow"      : "rgb(70,69,68)",
+        "highligt"    : "rgb(65,139,212)",
+        "highligtedtext"  : "rgb(255,255,255)"
+    }, 
+    "disabled" : {
+        "window"      : "rgb(210,211,212)",                       
+        "windowtext"  : "rgb(146,145,144)",
+        "base"        : "rgb(244,244,244)",
+        "alternatebase"   : "rgb(241,241,240)",
+        "text"        : "rgb(165,164,164)",
+        "button"      : "rgb(242,241,240)",
+        "buttontext"  : "rgb(181,180,189)",
+        "brighttext"  : "rgb(255,255,255)",
+        "light"       : "rgb(245,245,245)",
+        "midlight"    : "rgb(234,233,232)",
+        "dark"        : "rgb(139,138,137)",
+        "mid"         : "rgb(219,218,216)",
+        "shadow"      : "rgb(70,69,68)",
+        "highligt"    : "rgb(214,213,211)",
+        "highligtedtext"  : "rgb(146,145,144)"
+    }      
+}    
