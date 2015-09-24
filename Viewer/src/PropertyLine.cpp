@@ -19,7 +19,9 @@
 #include <QIntValidator>
 #include <QLabel>
 #include <QLineEdit>
+#include <QPainter>
 #include <QPalette>
+#include <QPushButton>
 #include <QToolButton>
 
 #include <assert.h>
@@ -235,8 +237,12 @@ ColourPropertyLine::ColourPropertyLine(VProperty* vProp,bool addLabel,QWidget * 
 	cb_=new QToolButton(parent);
 	//cb_->setAutoFillBackground(true);
     cb_->setFixedWidth(width);
-    cb_->setFixedHeight(height+2);
+    cb_->setFixedHeight(height+8);
+    cb_->setIconSize(QSize(cb_->width()-8,cb_->height()-8));
+
     cb_->setToolTip(tr("Click to select a colour"));
+
+    cb_->setProperty("colourTb","1");
 
 	connect(cb_,SIGNAL(clicked(bool)),
 			this,SLOT(slotEdit(bool)));
@@ -255,22 +261,19 @@ QWidget* ColourPropertyLine::button()
 void ColourPropertyLine::reset(QVariant v)
 {
 	QColor c=v.value<QColor>();
-	QColor b=c.darker(160);
 
-	QString cStr="rgb(" + QString::number(c.red()) + "," +
-			QString::number(c.green()) + "," +
-			QString::number(c.blue()) + ")";
+	QPixmap pix(cb_->iconSize());
+	pix.fill(c);
+	QPainter painter(&pix);
+	painter.setPen(QColor(60,60,60));
+	painter.drawLine(0,0,pix.width(),0);
+	painter.drawLine(0,0,0,pix.height());
+	painter.setPen(QColor(240,240,240));
+	painter.drawLine(pix.width(),1,pix.width(),pix.height()-1);
+	painter.drawLine(0,pix.height()-1,pix.width(),pix.height()-1);
 
-	QString bStr="rgb(" + QString::number(b.red()) + "," +
-				QString::number(b.green()) + "," +
-				QString::number(b.blue()) + ")";
+	cb_->setIcon(pix);
 
-	QString sh("QToolButton{background: " + cStr + ";" +
-			"border-radius: 0px; " +
-	        "padding: 0px; " +
-			"border: 1px solid " + bStr + ";}");
-
-	cb_->setStyleSheet(sh);
 
 	currentCol_=c;
 
