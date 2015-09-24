@@ -740,7 +740,6 @@ public:
 
    virtual std::ostream& print(std::ostream& os) const;
    virtual bool equals(ClientToServerCmd*) const;
-   virtual bool isWrite() const;
 
    virtual const char* theArg() const;
    virtual void addOption(boost::program_options::options_description& desc) const;
