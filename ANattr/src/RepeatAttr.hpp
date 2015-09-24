@@ -102,6 +102,8 @@ public:
    //	virtual int length() const  = 0;
    //	virtual void truncate(int length) = 0;
 
+   virtual bool is_repeat_day() const { return false; }
+
 protected:
    void incr_state_change_no();
 
@@ -388,6 +390,8 @@ public:
    //	virtual int length() const { return 0;}    // because its infinite for use by simulator
    //	virtual void truncate(int) {}
 
+   virtual bool is_repeat_day() const { return true; }
+
 private:
    RepeatDay( int step, bool valid) : RepeatBase("day"), step_(step),valid_(valid)  {}
 
@@ -454,6 +458,8 @@ public:
 
    // Allows Repeat's to be returned by reference
    static const Repeat& EMPTY();
+
+   bool is_repeat_day() const { return (repeatType_) ? repeatType_->is_repeat_day() : false; }
 
    /// Expose base for the GUI only, use with caution
    RepeatBase* repeatBase() const { return repeatType_;}
