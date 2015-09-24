@@ -149,7 +149,7 @@ VFile_ptr LogServer::getFile(std::string name)
 	write(soc_,name.c_str(),name.size());
 	write(soc_,"\n",1);
 
-	const int size = 64*1204;
+	const int size = 64*1024;
 	char buf[size];
 	unsigned int len = 0;
 	int total = 0;
@@ -157,10 +157,13 @@ VFile_ptr LogServer::getFile(std::string name)
 	VFile_ptr out(VFile::create(false));
 	FILE *f = fopen(out->path().c_str(),"w");
 
+	printf("outFile: %s\n",out->path().c_str());
+
+
 	if(!f)
 	{
-	  char buf[2048];
-	  sprintf(buf,"Cannot create %s",out->path().c_str());
+	  char buf_loc[2048];
+	  sprintf(buf_loc,"Cannot create %s",out->path().c_str());
 	  //gui::syserr(buf);
 	  return empty;
 	}
@@ -169,8 +172,8 @@ VFile_ptr LogServer::getFile(std::string name)
 	{
 	  if(fwrite(buf,1,len,f) != len)
 	    {
-	      char buf[2048];
-	      sprintf(buf,"Write error on %s",out->path().c_str());
+	      char buf_loc[2048];
+	      sprintf(buf_loc,"Write error on %s",out->path().c_str());
 	      //gui::syserr(buf);
 	      fclose(f);
 	      return empty;
@@ -178,12 +181,12 @@ VFile_ptr LogServer::getFile(std::string name)
 	  total += len;
 	}
 
-	fwrite(buf,1,size,f);
+	//fwrite(buf,1,size,f);
 
 	if(fclose(f))
 	{
-	  char buf[2048];
-	  sprintf(buf,"Write error on %s",out->path().c_str());
+	  char buf_loc[2048];
+	  sprintf(buf_loc,"Write error on %s",out->path().c_str());
 	  //gui::syserr(buf);
 	  return empty;
 	}
