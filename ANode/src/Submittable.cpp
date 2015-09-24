@@ -259,8 +259,8 @@ EcfFile Submittable::locatedEcfFile() const
    // o/ ECF_SCRIPT Generated VARIABLE  absolute path, check if files exists
    //    The variable MUST exist, but the file may not
    // o/ ECF_FETCH (user variable)
-   //    if this variable exist, we need to flag it, somehow
-   //    So that when we open the sms file, we use popen.
+   //    if this variable exist, we need to flag it,
+   //    So that that file is obtained from running the command. (Output of popen)
    // o/ ECF_FILES (Typically in the definition file, defines a directory)
    // o/ ECF_HOME
    std::string reasonEcfFileNotFound;

@@ -885,7 +885,7 @@ bool Node::variableSubsitution(std::string& cmd) const
 bool Node::variable_substitution(std::string& cmd, const NameValueMap& user_edit_variables, char micro) const
 {
    // scan the command for variables, and substitute
-   // edit ECF_FETCH "/home/ma/map/sms/smsfectch -F %ECF_FILES% -I %ECF_INCLUDE%"
+   // edit cmd "/home/ma/map/sms/smsfectch -F %ECF_FILES% -I %ECF_INCLUDE%"
    // We can also have
    //
    // "%<VAR>:<substitute>% i.e if VAR exist use it, else use substitute
