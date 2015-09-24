@@ -12,10 +12,10 @@
     <file alias="icon_calendar.png">../images/icon_calendar.png</file>
     <file alias="icon_clock.png">../images/icon_clock.png</file>
     <file alias="icon_complete.png">../images/icon_complete.png</file>
-    <file>../images/icon_defstatus.png</file>
-    <file alias="icon_late.png">../images/icon_late.png</file>
-    <file alias="icon_message.png">../images/icon_message.png</file>
-    <file alias="icon_rerun.png">../images/icon_rerun.png</file>
+    <file alias="icon_defstatus.png">../images/icon_defstatus.png</file>
+    <file alias="icon_late.svg">../images/icon_late.svg</file>
+    <file alias="icon_message.svg">../images/icon_message.svg</file>
+    <file alias="icon_rerun.svg">../images/icon_rerun.svg</file>
     <file alias="icon_Z.png">../images/icon_Z.png</file>
     <file alias="icon_waiting.png">../images/icon_waiting.png</file>
     <file alias="script.png">../images/icon_Script.png</file>
@@ -51,11 +51,12 @@
     <file alias="manual_dock.svg">../images/manual_dock.svg</file>
     <file alias="message.svg">../images/message.svg</file>
     <file alias="message_dock.svg">../images/message_dock.svg</file>
-    <file alias="output.svg">../images/output.svg</file> 
+    <file alias="output.svg">../images/output.svg</file>
     <file alias="output_dock.svg">../images/output_dock.svg</file>
     <file alias="padlock.svg">../images/padlock.svg</file>
     <file alias="path_arrow.svg">../images/path_arrow.svg</file>
     <file alias="reload.svg">../images/reload.svg</file>
+    <file alias="reload_one.svg">../images/reload_one.svg</file>
     <file alias="rescue.svg">../images/rescue.svg</file>
     <file alias="reset_to_default.svg">../images/reset_to_default.svg</file>
     <file alias="script.svg">../images/script.svg</file>

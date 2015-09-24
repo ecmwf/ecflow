@@ -15,7 +15,7 @@
                  "label" : "Rerun",
                  "tooltip" : "",
                  "icon" : {      
-                     "default" : "icon_rerun.png"
+                     "default" : "icon_rerun.svg"
                  }
                 
             },
@@ -23,14 +23,14 @@
                  "label" : "Message",
                  "tooltip" : "Has user messages. User has issued a command since the last begin.",
                  "icon"  : {
-                	 "default": "icon_message.png"
+                	 "default": "icon_message.svg"
                   }
             },
             "complete" : {
             	 "label" : "Complete",
             	 "tooltip" : "",
                  "icon"  : {	 
-                	 "default" : "icon_complete.png"
+                	 "default" : "icon_defstatus.png"
                  }		 
             },
             "time" : {
@@ -58,7 +58,7 @@
                 "label" : "Late",
                 "tooltip" : "Node is late.",               
                 "icon"  : {
-                	"default" : "icon_late.png"
+                	"default" : "icon_late.svg"
                 }
             }
      }

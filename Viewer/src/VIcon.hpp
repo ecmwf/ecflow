@@ -42,6 +42,8 @@ protected:
 	QPixmap pixmap(int size);
 	virtual bool show(VNode*)=0;
 
+	int pixId_;
+
 	static std::map<std::string,VIcon*> items_;
 };
 

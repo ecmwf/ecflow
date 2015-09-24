@@ -12,16 +12,25 @@
 
 #include "DashboardWidget.hpp"
 
+#include <QAbstractButton>
 #include <QCloseEvent>
+#include <QPushButton>
 #include <QSettings>
 
 DashboardDialog::DashboardDialog(QWidget *parent) :
-		QDialog(parent),
-		dw_(0)
+	QDialog(parent),
+	dw_(0)
 {
 	setupUi(this);
 
 	setAttribute(Qt::WA_DeleteOnClose);
+
+	//Disable the default button
+	Q_FOREACH(QAbstractButton* b,buttonBox_->buttons())
+	{
+		if(QPushButton* pb=buttonBox_->button(buttonBox_->standardButton(b)) )
+			pb->setAutoDefault(false);
+	}
 
 	readSettings();
 }
@@ -57,7 +66,6 @@ void DashboardDialog::closeEvent(QCloseEvent * event)
 
 void DashboardDialog::slotUpdateTitle(QString txt)
 {
-
     setWindowTitle(txt.remove("<b>").remove("</b>"));
 }
 

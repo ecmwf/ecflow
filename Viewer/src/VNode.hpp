@@ -105,6 +105,7 @@ public:
     std::string serverName() const;
     virtual QString stateName();
     virtual QString defaultStateName();
+    virtual bool isDefaultStateComplete();
     virtual bool isSuspended() const;
     virtual QColor  stateColour() const;
     virtual QColor  realStateColour() const;

@@ -21,7 +21,8 @@ static std::vector<std::string> propVec;
 
 NodeViewDelegate::NodeViewDelegate(QWidget *parent) :
     QStyledItemDelegate(parent),
-    prop_(0)
+    prop_(0),
+	iconSize_(16)
 {
     /*//Property
 	if(propVec.empty())
@@ -89,6 +90,26 @@ QSize NodeViewDelegate::sizeHint(const QStyleOptionViewItem & option, const QMod
 	int h=fm.height();
 	return QSize(size.width(),h+8);
 }
+
+void NodeViewDelegate::adjustIconSize()
+{
+	QFontMetrics fm(font_);
+	int h=fm.height();
+	iconSize_=h;
+	if(iconSize_ % 2 == 1)
+		iconSize_+1;
+
+	/*if(h > 14 && h < 19 )
+		iconSize_=16;
+	else if( h < 22)
+		iconSize_=20;
+	else if( h < 29)
+		iconSize_=24;
+	else if (h < 38)
+		iconSize=32;
+	else if ()*/
+}
+
 
 
 //========================================================

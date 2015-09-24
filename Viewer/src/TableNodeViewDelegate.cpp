@@ -18,6 +18,7 @@
 
 #include "AbstractNodeModel.hpp"
 #include "Animation.hpp"
+#include "IconProvider.hpp"
 #include "ModelColumn.hpp"
 #include "PropertyMapper.hpp"
 
@@ -28,6 +29,8 @@ TableNodeViewDelegate::TableNodeViewDelegate(QWidget *parent)
 	borderPen_=QPen(QColor(230,230,230));
 
 	columns_=ModelColumn::def("table_columns");
+
+	adjustIconSize();
 
     //Property
     if(propVec.empty())
@@ -183,12 +186,16 @@ void TableNodeViewDelegate::renderNode(QPainter *painter,const QModelIndex& inde
 	{
 		QVariantList lst=va.toList();
 		int xp=currentRight+5;
-		int yp=fillRect.top();
+		int yp=textRect.center().y()-iconSize_/2;
 		for(int i=0; i < lst.count(); i++)
 		{
-			pixLst << lst[i].value<QPixmap>();
-			pixRectLst << QRect(xp,yp,pixLst.back().width(),pixLst.back().height());
-			xp+=pixLst.back().width();
+			int id=lst[i].toInt();
+			if(id != -1)
+			{
+				pixLst << IconProvider::pixmap(id,iconSize_);
+				pixRectLst << QRect(xp,yp,pixLst.back().width(),pixLst.back().height());
+				xp+=pixLst.back().width();
+			}
 		}
 
 		if(!pixRectLst.isEmpty())

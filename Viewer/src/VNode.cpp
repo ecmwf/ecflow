@@ -359,10 +359,19 @@ QString VNode::stateName()
 	return VNState::toName(this);
 }
 
+bool VNode::isDefaultStateComplete()
+{
+	if(node_)
+		return (node_->defStatus() == DState::COMPLETE);
+
+	return false;
+}
+
 QString VNode::defaultStateName()
 {
 	return VNState::toDefaultStateName(this);
 }
+
 
 bool VNode::isSuspended() const
 {

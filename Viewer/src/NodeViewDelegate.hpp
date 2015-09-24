@@ -33,7 +33,8 @@ public:
 	void notifyChange(VProperty*);
 
 protected:
-    virtual void updateSettings()=0;
+	void adjustIconSize();
+	virtual void updateSettings()=0;
 
 	typedef void (NodeViewDelegate::*AttributeRendererProc)(QPainter *painter,QStringList data,const QStyleOptionViewItemV4& option) const;
 
@@ -66,6 +67,7 @@ protected:
 	PropertyMapper* prop_;
 	QFont font_;
 	QFont attrFont_;
+	int iconSize_;
 
 };
 

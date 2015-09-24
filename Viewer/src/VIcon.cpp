@@ -20,6 +20,8 @@
 #include <unistd.h>
 #include <map>
 
+#include "ExprAst.hpp"
+
 #include "IconProvider.hpp"
 #include "Submittable.hpp"
 #include "UserMessage.hpp"
@@ -116,7 +118,8 @@ static VLateIcon lateIcon("late");
 //==========================================================
 
 VIcon::VIcon(const std::string& name) :
-		VParam(name)
+		VParam(name),
+		pixId_(-1)
 {
 	items_[name]=this;
 }
@@ -137,7 +140,7 @@ void VIcon::initPixmap()
 	//Add icon to iconprovider
 	if(VProperty* ip=prop_->findChild("icon"))
 	{
-		IconProvider::add(":/viewer/" + ip->value().toString(),name());
+		pixId_=IconProvider::add(":/viewer/" + ip->value().toString(),name());
 	}
 }
 
@@ -172,7 +175,6 @@ VIcon* VIcon::find(const std::string& name)
 	return NULL;
 }
 
-
 //Create the pixmap containing all the relevant icons for the given node according to the filter.
 QVariantList VIcon::pixmapList(VNode *vnode,VParamSet *filter)
 {
@@ -185,9 +187,9 @@ QVariantList VIcon::pixmapList(VNode *vnode,VParamSet *filter)
             VIcon *v=it->second;
             if(!filter || filter->current().find(it->second) != filter->current().end())
             {
-                if(v->show(vnode) )
+                if(v->show(vnode))
                 {
-                   lst << v->pixmap(16);
+                   lst << v->pixId_;
                 }
             }
 	}
@@ -257,21 +259,21 @@ bool  VMessageIcon::show(VNode *n)
 
 bool  VCompleteIcon::show(VNode *n)
 {
-	 /*if (!owner_) return False;
-	  else if (!owner_)
-	    return False;
-	  else if (owner_->defstatus() == STATUS_COMPLETE)
-	    return True;
-	  Node* ecf = __node__() ? __node__()->get_node() : 0;
-	  if (ecf) {
-	    AstTop* t = ecf->completeAst();
-	    if (t)
-	      if (t->evaluate())
-	        return True;
-	  }
-	  return False;*/
+	if(!n || !n->node())
+		return false;
 
-	  return false;
+	node_ptr node=n->node();
+	if(!node.get()) return false;
+
+	if(n->isDefaultStateComplete())
+		return true;
+
+	if(AstTop* t = node->completeAst())
+	{
+		if(t->evaluate())
+			return true;
+	}
+	return false;
 }
 
 //==========================================================

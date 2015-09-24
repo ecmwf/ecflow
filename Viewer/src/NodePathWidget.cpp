@@ -37,7 +37,7 @@ BcWidget::BcWidget(QWidget* parent) :
 	hMargin_(1),
 	vMargin_(1),
     triLen_(10),
-	gap_(4),
+	gap_(5),
     width_(0),
     itemHeight_(0),
     emptyText_("No selection"),
@@ -159,8 +159,8 @@ void BcWidget::reset(QList<NodePathItem*> items)
         } 
         
 
-        if(i < items_.count()-1)
-        	xp+=1;
+       // if(i < items_.count()-1)
+       // 	xp+=1;
 
         items_.at(i)->shape_=QPolygon(vec);
         items_.at(i)->textRect_=textRect;
@@ -268,14 +268,16 @@ void NodePathItem::setCurrent(bool)
 
 void NodePathItem::draw(QPainter  *painter,bool useGrad,int lighter)
 {    
-    if(current_)
+   /* if(current_)
     {
     	painter->setPen(QPen(Qt::black,2));
     }
     else
     {
     	painter->setPen(QPen(borderCol_,0));
-    }
+    }*/
+
+    painter->setPen(QPen(borderCol_,0));
     
     QBrush bgBrush;
        
@@ -292,10 +294,10 @@ void NodePathItem::draw(QPainter  *painter,bool useGrad,int lighter)
     painter->setBrush(bgBrush);
     painter->drawPolygon(shape_);
 
-    if(current_)
+    /*if(current_)
     {
     	painter->setPen(QPen(borderCol_,0));
-    }
+    }*/
 
     painter->setPen(fontCol_);
     painter->drawText(textRect_,Qt::AlignVCenter | Qt::AlignHCenter,text_);  
@@ -331,7 +333,7 @@ NodePathWidget::NodePathWidget(QWidget *parent) :
     
     reloadTb_=new QToolButton(this);
     //reloadTb_->setDefaultAction(actionReload_);
-    reloadTb_->setIcon(QPixmap(":/viewer/reload.svg"));
+    reloadTb_->setIcon(QPixmap(":/viewer/reload_one.svg"));
     reloadTb_->setToolTip(tr("Refresh server"));
     reloadTb_->setAutoRaise(true);
     //reloadTb_->setIconSize(QSize(20,20));
@@ -417,6 +419,19 @@ void NodePathWidget::adjust(VInfo_ptr info,ServerHandler** serverOut,bool &sameS
 
   			info->server()->addServerObserver(this);
   			info->server()->addNodeObserver(this);
+
+  			if(server)
+  			{
+  				if(reloadTb_)
+  				{
+  					reloadTb_->setToolTip("Reload server <b>" + QString::fromStdString(server->name()) + "</b>");
+  				}
+  			}
+  			else
+  			{
+  				reloadTb_->setToolTip("Reload server");
+  			}
+
   		}
   	}
   	//If the there is no data we clean everything and return
@@ -427,12 +442,16 @@ void NodePathWidget::adjust(VInfo_ptr info,ServerHandler** serverOut,bool &sameS
   	  		info_->server()->removeServerObserver(this);
   	  		info_->server()->removeNodeObserver(this);
   	  	}
+
+  	  	reloadTb_->setToolTip("Reload server");
   	}
 
   	//Set the info
   	info_=info;
 
   	*serverOut=server;
+
+
 }
 
 
