@@ -192,6 +192,9 @@ void top_shell_c::create (Display *display, char *app_name, int app_argc, char *
                 app_class_name = appName;
 
 	std::string title = appName;
+	if (getenv("ECFLOWVIEW_TITLE"))
+	  title = getenv("ECFLOWVIEW_TITLE");
+
 	title += " (" + ecf::Version::raw();
 #ifdef DEBUG 
 	title += "-debug";
