@@ -155,7 +155,7 @@ QSize TreeNodeViewDelegate::sizeHint(const QStyleOptionViewItem & option, const 
 			for(int i=0; i < attLineNum; i++)
 				lst << "1";
 
-			return QSize(size.width(),fm.size(0,lst.join('\n')).height()+6);
+			return QSize(size.width(),fm.size(0,lst.join(QString('\n'))).height()+6);
 		}
 	}
 

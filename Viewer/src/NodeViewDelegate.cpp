@@ -256,7 +256,8 @@ void NodeViewDelegate::renderLabel(QPainter *painter,QStringList data,const QSty
 		QStringList vals=val.split('\n');
 		val=vals[0];
 		vals.removeFirst();
-		multiVal=vals.join('\n');
+
+		multiVal=vals.join(QString('\n'));
 
 		//The text rectangle
 		QFontMetrics fm(nameFont);
