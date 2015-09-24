@@ -30,7 +30,7 @@
             	 "label" : "Complete",
             	 "tooltip" : "",
                  "icon"  : {	 
-                	 "default" : "icon_complete.png"
+                	 "default" : "icon_defstatus.png"
                  }		 
             },
             "time" : {

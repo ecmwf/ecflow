@@ -265,6 +265,9 @@ bool  VCompleteIcon::show(VNode *n)
 	node_ptr node=n->node();
 	if(!node.get()) return false;
 
+	if(n->isDefaultStateComplete())
+		return true;
+
 	if(AstTop* t = node->completeAst())
 	{
 		if(t->evaluate())

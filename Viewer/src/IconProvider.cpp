@@ -40,6 +40,7 @@ IconItem::IconItem(QString path) : path_(path), id_(idCnt++)
 {
 }
 
+
 QPixmap IconItem::pixmap(int size)
 {
  	 std::map<int,QPixmap>::iterator it=pixmaps_.find(size);
@@ -57,7 +58,7 @@ QPixmap IconItem::pixmap(int size)
 		}
 		else
 		{
-		  	pix=unknownIcon.pixmap(size);
+		  	unknownIcon.pixmap(size);
 		}
 
 		pixmaps_[size]=pix;
