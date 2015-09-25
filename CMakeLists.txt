@@ -240,6 +240,11 @@ ecbuild_dont_pack( DIRS
                     Doc/func_spec Doc/misc Doc/New_viewer Doc/newsletter Doc/online Doc/presentations Doc/tac
 )
 
+# temporary until its officially released
+if (NOT ENABLE_VIEWER)
+   ecbuild_dont_pack( DIRS Viewer )
+endif()  
+
 # =========================================================================================
 # install scripts
 # =========================================================================================
