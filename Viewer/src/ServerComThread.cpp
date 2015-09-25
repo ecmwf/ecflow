@@ -14,6 +14,7 @@
 #include "ClientInvoker.hpp"
 #include "ArgvCreator.hpp"
 
+#include "ChangeMgrAccess.hpp"
 #include "ServerDefsAccess.hpp"
 #include "ServerComQueue.hpp"
 #include "ServerHandler.hpp"
@@ -109,6 +110,7 @@ void ServerComThread::run()
 
 				break;
 				}*/
+				break;
 			}
 
 			case VTask::NewsTask:
@@ -495,26 +497,31 @@ void ServerComThread::attach()
 	if(d == NULL)
 		return;
 
-	ChangeMgrSingleton::instance()->attach(d.get(),this);
+	ChangeMgrAccess chAccess;
+	ChangeMgrSingleton* chm=chAccess.changeManager();
+	chm->attach(d.get(),this);
+
+	//ChangeMgrSingleton::instance()->attach(d.get(),this);
 
 	const std::vector<suite_ptr> &suites = d->suiteVec();
 	for(unsigned int i=0; i < suites.size();i++)
 	{
-		attach(suites.at(i).get());
+		attach(suites.at(i).get(),chm);
 	}
 }
 
 //Add a node to the observer
-void ServerComThread::attach(Node *node)
+void ServerComThread::attach(Node *node,ChangeMgrSingleton* chm)
 {
-	ChangeMgrSingleton::instance()->attach(node,this);
+	chm->attach(node,this);
+	//ChangeMgrSingleton::instance()->attach(node,this);
 
 	std::vector<node_ptr> nodes;
 	node->immediateChildren(nodes);
 
 	for(std::vector<node_ptr>::const_iterator it=nodes.begin(); it != nodes.end(); ++it)
 	{
-		attach((*it).get());
+		attach((*it).get(),chm);
 	}
 }
 
@@ -526,25 +533,30 @@ void ServerComThread::detach()
 	if(d == NULL)
 		return;
 
-	ChangeMgrSingleton::instance()->detach(d.get(),this);
+	ChangeMgrAccess chAccess;
+	ChangeMgrSingleton* chm=chAccess.changeManager();
+	chm->detach(d.get(),this);
+
+	//ChangeMgrSingleton::instance()->detach(d.get(),this);
 
 	const std::vector<suite_ptr> &suites = d->suiteVec();
 	for(unsigned int i=0; i < suites.size();i++)
 	{
-		detach(suites.at(i).get());
+		detach(suites.at(i).get(),chm);
 	}
 }
 
 //Remove each node from the observer
-void ServerComThread::detach(Node *node)
+void ServerComThread::detach(Node *node,ChangeMgrSingleton* chm)
 {
-	ChangeMgrSingleton::instance()->detach(node,this);
+	chm->detach(node,this);
+	//ChangeMgrSingleton::instance()->detach(node,this);
 
 	std::vector<node_ptr> nodes;
 	node->immediateChildren(nodes);
 
 	for(std::vector<node_ptr>::const_iterator it=nodes.begin(); it != nodes.end(); ++it)
 	{
-		detach((*it).get());
+		detach((*it).get(),chm);
 	}
 }

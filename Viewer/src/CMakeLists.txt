@@ -6,6 +6,7 @@ set(viewer_srcs
     AbstractSearchLine.cpp
     ActionHandler.cpp
     Animation.cpp
+    ChangeMgrAccess.cpp
     ChangeNotify.cpp
     ChangeNotifyDialog.cpp
     ChangeNotifyModel.cpp

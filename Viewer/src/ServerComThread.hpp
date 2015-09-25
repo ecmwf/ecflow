@@ -22,6 +22,7 @@
 
 #include <QThread>
 
+class ChangeMgrSingleton;
 class ClientInvoker;
 class ServerComQueue;
 class ServerHandler;
@@ -61,8 +62,8 @@ protected:
 	void updateRegSuites();
 
 private:
-	void attach(Node *node);
-    void detach(Node *node);
+	void attach(Node *node,ChangeMgrSingleton*);
+    void detach(Node *node,ChangeMgrSingleton*);
     void attach();
     void detach();
 
