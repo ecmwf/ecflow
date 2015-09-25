@@ -213,8 +213,8 @@ add_subdirectory( Test )
 
 if (ENABLE_PYTHON)
     ecbuild_find_python( VERSION 2.7 REQUIRED )
-    #debug_var(PYTHON_LIBRARIES)
-    #debug_var(PYTHON_INCLUDE_DIR)
+    debug_var(PYTHON_LIBRARIES)
+    debug_var(PYTHON_INCLUDE_DIR)
 	add_subdirectory( Pyext )
 endif()	
 	
