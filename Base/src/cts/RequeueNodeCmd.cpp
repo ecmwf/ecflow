@@ -87,9 +87,9 @@ STC_Cmd_ptr RequeueNodeCmd::doHandleRequest(AbstractServer* as) const
 	            taskVec[i]->requeue( true /* reset repeats */,
 	                                 clear_suspended_in_child_nodes,
 	                                 true /* reset_next_time_slot */);
+	            taskVec[i]->set_most_significant_state_up_node_tree(); // Must in loop and not outside ECFLOW-428
 	         }
 	      }
-         theNodeToRequeue->set_most_significant_state_up_node_tree();
 
          // Call handleStateChange on parent, to avoid requeue same node again.
          Node* parent = theNodeToRequeue->parent();
