@@ -24,6 +24,7 @@ ecbuild_add_library( TARGET   node
 list( APPEND test_srcs
 test/Test_ECFLOW-195.cpp
 test/Test_ECFLOW-247.cpp
+test/Test_ECFLOW-417.cpp
 test/TestAdd.cpp
 test/TestAlias.cpp
 test/TestChangeMgrSingleton.cpp

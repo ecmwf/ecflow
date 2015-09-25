@@ -157,7 +157,7 @@ o ALias creation
              Aliases are used for testing, and hence should not be 
              time dependent.
    - REMOVE: Repeats, but add repeat name as a user variable
-   - REMOVE: User supplied variables ECF_SCRIPT, ECF_JOBOUT, ECF_JOB and ECF_NAME, ECF_FETCH
+   - REMOVE: User supplied variables ECF_SCRIPT, ECF_JOBOUT, ECF_JOB and ECF_NAME,  
              are ignored and generated variables override them, otherwise 
              job output could be lost.
    - REMOVE: Auto-cancel attribute , otherwise output will not be readable
