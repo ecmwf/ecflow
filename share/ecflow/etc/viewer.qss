@@ -72,6 +72,13 @@ QLabel[previewLabel="1"] {
     border: 2px solid rgb(210,210,210);
 }
 
+/* Property editor */
+
+QToolButton[colorTb="1"] {    
+       border-radius: 2px;
+       padding: 0px; 
+}           
+
 /*-----------------------------
   Notifications
 ------------------------------*/
