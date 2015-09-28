@@ -143,3 +143,4 @@ Process
      Then check this file in for, for the other platforms.
      
 0/ Reset metabuilder ecflow git_tag, back to develop
+0/ Reset CmakeLists.txt to enable Viewer and package_source
