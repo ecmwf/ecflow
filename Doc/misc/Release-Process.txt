@@ -40,7 +40,7 @@ Process
      Team->Push Branch
      *otherwise* the option Team->Push Upstream  may well be greyed out.
 
-0/ Update ECFLOW_GIT_BRANCH to "4.0.9" in the nightly build.py or meta-builder(settings/ecflow/ecflow.py# git_tag=release/4.0.9)
+0/ Update ECFLOW_GIT_BRANCH to "4.0.9" in meta-builder(settings/ecflow/ecflow.py# git_tag=release/4.0.9)
    Then use the meta builder to build/install.
    Note: if used 
      > git flow release start 4.0.9    # -> it will create a branch release/4.0.9
@@ -68,11 +68,14 @@ Process
          cd /usr/local/apps/ecflow
          scp -r 4.0.9 emos@cca:/usr/local/apps/ecflow/.
       
-   READHAT: If we built on ecgb/redhat we can copy release to sappa/sappab 
+   REDHAT: If we built on ecgb/redhat we can copy release to sappa/sappab 
   
-         scp -r 4.0.9 emos@sappa:/usr/local/apps/ecflow/.
+         scp -r 4.0.9 deploy@sappa:/usr/local/apps/ecflow/.
+         scp -r 4.0.9 deploy@sappb:/usr/local/apps/ecflow/.
+         
+         or try with emos  and password.
          scp -r 4.0.9 emos@sappb:/usr/local/apps/ecflow/.
-      
+         
    VIRTUAL Machines: These should treated like regular machines. 
          - These are based on opensuse113, hence we need top copy over exe for this
          - For a list of machines see view/server.od( vsms1,vmsm2,vsms3,vali)
