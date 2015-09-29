@@ -65,10 +65,15 @@ EditHistoryMgr::~EditHistoryMgr()
          }
          else {
             // Read only command, that is making data model changes, oops ?
+            // TODO, Can happen when check pt command set late flag, even though ist read only command.
+            //       i.e when saving takes more the 30 seconds
             std::stringstream ss;
             cts_cmd_->print(ss);
             cout << "cmd " << ss.str() << " should return true from isWrite() ******************\n";
-            cout << "Read only command is making data changes to defs.?????\n";
+            cout << "Read only command is making data changes to defs ?????\n";
+            cout << "Ecf::state_change_no() " << Ecf::state_change_no() << " Ecf::modify_change_no() " << Ecf::modify_change_no() << "\n";
+            cout << "state_change_no_       " << state_change_no_       << " modify_change_no_       " << modify_change_no_ << "\n";
+            cout.flush();
          }
       }
    }
