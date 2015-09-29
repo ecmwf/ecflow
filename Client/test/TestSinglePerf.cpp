@@ -101,7 +101,7 @@ void time_load_and_downloads(
             cout << " Begin:               " << duration_timer.elapsed().total_milliseconds() << "ms" << endl;
          }
          {
-            cout << " Download(Sync):      ";
+            cout << " Download(Sync):      "; cout.flush();
             for(int i = 0; i < count; i++) {
                DurationTimer duration_timer;
                theClient.sync_local();
@@ -112,7 +112,7 @@ void time_load_and_downloads(
          }
          {
             // On construction of Defs, hence should be slightly faster
-            cout << " Download(Sync-FULL): ";
+            cout << " Download(Sync-FULL): "; cout.flush();
             double total = 0;
             for(int i = 0; i < count; i++) {
                ClientInvoker client(host,port);
@@ -127,7 +127,7 @@ void time_load_and_downloads(
          {
             // This should more expensive on second call, due to destruction of
             // defs(on theClient) from previous calls
-            cout << " Download(FULL):      ";
+            cout << " Download(FULL):      "; cout.flush();
             double total = 0;
             for(int i = 0; i < count; i++) {
                DurationTimer duration_timer;
@@ -147,21 +147,21 @@ void time_load_and_downloads(
                if (i == 6000) break;  //  > 9000 really slows down, could be logging ??
             }
             {
-               cout << " Suspend " << paths.size() << " tasks : ";
+               cout << " Suspend " << paths.size() << " tasks : "; cout.flush();
                DurationTimer duration_timer;
                theClient.suspend(paths);
                cout << (double)duration_timer.elapsed().total_milliseconds()/(double)1000;
             }
             sync_and_news_local(theClient);
             {
-               cout << " Resume " << paths.size() << " tasks  : ";
+               cout << " Resume " << paths.size() << " tasks  : "; cout.flush();
                DurationTimer duration_timer;
                theClient.resume(paths);
                cout << (double)duration_timer.elapsed().total_milliseconds()/(double)1000;
             }
             sync_and_news_local(theClient);
             {
-               cout << " force  " << paths.size() << " tasks  : ";
+               cout << " force  " << paths.size() << " tasks  : "; cout.flush();
                DurationTimer duration_timer;
                theClient.force(paths,"complete");
                cout << (double)duration_timer.elapsed().total_milliseconds()/(double)1000;
@@ -171,13 +171,13 @@ void time_load_and_downloads(
          {
             // This should more expensive on second call, due to destruction of
             // defs(on theClient) from previous calls
-            cout << " Check pt:            ";
+            cout << " Check pt:            "; cout.flush();
             double total = 0;
             for(int i = 0; i < count; i++) {
                DurationTimer duration_timer;
                theClient.checkPtDefs();
                int seconds = duration_timer.elapsed().total_milliseconds();
-               cout << seconds << " ";
+               cout << seconds << " "; cout.flush();
                total += seconds;
             }
             cout << ": Avg:" << (double)(total)/((double)count*1000) << "ms" << endl;
@@ -211,52 +211,7 @@ BOOST_AUTO_TEST_CASE( test_perf_for_large_defs )
 BOOST_AUTO_TEST_SUITE_END()
 
 // Sept 2015, desktop
-//^Ceurydice{/var/tmp/ma0/workspace/ecflow}:189 --> Client/bin/gcc-4.8/release/perf_test_large_defs
-//Running 1 test case...
-//Client:: ...test_perf_for_large_defs:   port(3144)
-//
-///var/tmp/ma0/BIG_DEFS/od.def  : file size 11081032
-//Warning: TASK /lbc/perle/local/perle has a inlimit ../process:excl :The referenced FAMILY '/lbc/perle/process' does not define the limit excl
-//
-// Load:                1378ms
-// Begin:               265ms
-// Download(Sync):      790 3 0 0 0 0 0 0 0 0 :(milli-seconds) sync_local() with the same Client. First call updates cache.
-// Download(Sync-FULL): 442 433 445 444 444 436 447 435 445 441 : Avg:0.4412(sec)  : sync_local() with *different* clients. Uses Cache
-// Download(FULL):      795 816 825 865 877 890 963 913 931 938 : Avg:0.8813(sec)  : get_defs() from same client
-// Suspend 6001 tasks : 0.07   news_local() : 0   sync_local() : 0.077
-// Resume 6001 tasks  : 0.028   news_local() : 0   sync_local() : 0.055
-// force  6001 tasks  : 0.1   news_local() : 0   sync_local() : 0.109
-// Check pt:            385 369 361 358 360 360 366 359 360 359 : Avg:0.3637ms
-// Delete:              138ms
-//
-///var/tmp/ma0/BIG_DEFS/vsms2.31415.def  : file size 153539843
-// Load:                8449ms
-// Begin:               620ms
-// Download(Sync):      5528 32 0 0 0 0 0 0 0 0 :(milli-seconds) sync_local() with the same Client. First call updates cache.
-//^Ceurydice{/var/tmp/ma0/workspace/ecflow}:190 --> Server::handle_write: Broken pipe : for request --sync_full=0 :ma0
-//
-//eurydice{/var/tmp/ma0/workspace/ecflow}:190 --> Client/bin/gcc-4.8/release/perf_test_large_defs
-//Running 1 test case...
-//Client:: ...test_perf_for_large_defs:   port(3145)
-//
-///var/tmp/ma0/BIG_DEFS/od.def  : file size 11081032
-//Warning: TASK /lbc/perle/local/perle has a inlimit ../process:excl :The referenced FAMILY '/lbc/perle/process' does not define the limit excl
-//
-// Load:                1424ms
-// Begin:               243ms
-// Download(Sync):      794 4 0 0 0 0 0 0 0 0 :(milli-seconds) sync_local() with the same Client. First call updates cache.
-// Download(Sync-FULL): 449 467 451 453 458 447 453 455 451 458 : Avg:0.4542(sec)  : sync_local() with *different* clients. Uses Cache
-// Download(FULL):      815 812 839 862 884 894 907 927 945 932 : Avg:0.8817(sec)  : get_defs() from same client
-// Suspend 6001 tasks : 0.028   news_local() : 0   sync_local() : 0.078
-// Resume 6001 tasks  : 0.026   news_local() : 0   sync_local() : 0.053
-// force  6001 tasks  : 1.819   news_local() : 0   sync_local() : 0.11
-// Check pt:            2502 2503 28571 2645 28543 2646 29191 2638 29500 2652 : Avg:13.1391ms
-// Delete:              210ms
-//
-///var/tmp/ma0/BIG_DEFS/vsms2.31415.def  : file size 153539843
-// Load:                8784ms
-// Begin:               617ms
-// Download(Sync):      5325 0 0 0 0 0 0 0 0 0 :(milli-seconds) sync_local() with the same Client. First call updates cache.
+
 //^Ceurydice{/var/tmp/ma0/workspace/ecflow}:191 --> Client/bin/gcc-4.8/release/perf_test_large_defs
 //Running 1 test case...
 //Client:: ...test_perf_for_large_defs:   port(3146)

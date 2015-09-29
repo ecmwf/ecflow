@@ -224,26 +224,36 @@ bool AlterCmd::equals(ClientToServerCmd* rhs) const
 
 std::ostream& AlterCmd::print(std::ostream& os) const
 {
-	std::string alter_type,attr_type;
-	if (del_attr_type_ != AlterCmd::DELETE_ATTR_ND) {
-		alter_type = "delete";
-		attr_type = to_string(del_attr_type_);
-	}
-	else if (change_attr_type_ != AlterCmd::CHANGE_ATTR_ND) {
-		alter_type = "change";
-		attr_type = to_string(change_attr_type_);
-	}
-	else if (add_attr_type_ != AlterCmd::ADD_ATTR_ND) {
-		alter_type = "add";
-		attr_type = to_string(add_attr_type_);
-	}
-	else if (flag_type_ != Flag::NOT_SET) {
-		if (flag_) alter_type = "set_flag";
-		else       alter_type = "clear_flag";
-		attr_type = Flag::enum_to_string(flag_type_);
-	}
+   return my_print(os,paths_);
+}
 
-	return user_cmd(os,CtsApi::to_string(CtsApi::alter(paths_,alter_type,attr_type,name_,value_)));
+std::ostream& AlterCmd::print(std::ostream& os, const std::string& path) const
+{
+   std::vector<std::string> paths(1,path);
+   return my_print(os,paths);
+}
+
+std::ostream& AlterCmd::my_print(std::ostream& os, const std::vector<std::string>& paths) const
+{
+   std::string alter_type,attr_type;
+   if (del_attr_type_ != AlterCmd::DELETE_ATTR_ND) {
+      alter_type = "delete";
+      attr_type = to_string(del_attr_type_);
+   }
+   else if (change_attr_type_ != AlterCmd::CHANGE_ATTR_ND) {
+      alter_type = "change";
+      attr_type = to_string(change_attr_type_);
+   }
+   else if (add_attr_type_ != AlterCmd::ADD_ATTR_ND) {
+      alter_type = "add";
+      attr_type = to_string(add_attr_type_);
+   }
+   else if (flag_type_ != Flag::NOT_SET) {
+      if (flag_) alter_type = "set_flag";
+      else       alter_type = "clear_flag";
+      attr_type = Flag::enum_to_string(flag_type_);
+   }
+   return user_cmd(os,CtsApi::to_string(CtsApi::alter(paths,alter_type,attr_type,name_,value_)));
 }
 
 STC_Cmd_ptr AlterCmd::alter_server_state(AbstractServer* as) const
@@ -363,10 +373,6 @@ STC_Cmd_ptr AlterCmd::doHandleRequest(AbstractServer* as) const
 			else       node->flag().clear(flag_type_);
 		}
 	}
-
-	// Clear up memory allocated to path.
-	// When dealing with several thousands paths, this makes a *HUGE* difference
-	vector<string>().swap(paths_); // clear paths_ and minimise its capacity
 
 	std::string error_msg = ss.str();
 	if (!error_msg.empty()) {

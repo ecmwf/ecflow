@@ -53,7 +53,13 @@ class ClientToServerCmd  {
 public:
    virtual ~ClientToServerCmd();
 
+   /// The second print is for use by EditHistoryMgr when we have commands that take multiple paths
+   /// The EditHistoryMgr records what command was applied to each node. However when logging the
+   /// the command we do not want logs all the paths, for each node.(performance bottleneck
+   /// when dealing with thousands of paths)
    virtual std::ostream& print(std::ostream& os) const = 0;
+   virtual std::ostream& print(std::ostream& os, const std::string& path) const { return print(os); }
+
    virtual bool equals(ClientToServerCmd* rhs) const = 0;
 
    /// Called by the _server_ to service the client depending on the Command
@@ -840,6 +846,8 @@ public:
    bool force() const { return force_;}
 
    virtual std::ostream& print(std::ostream& os) const;
+   virtual std::ostream& print(std::ostream& os, const std::string& path) const;
+
    virtual bool equals(ClientToServerCmd*) const;
    virtual bool isWrite() const;
    virtual bool delete_all_cmd() const;
@@ -852,10 +860,12 @@ public:
 private:
    virtual STC_Cmd_ptr doHandleRequest(AbstractServer*) const;
 
+   std::ostream& my_print(std::ostream& os, const std::vector<std::string>& paths) const;
+
 private:
    Api api_;
    bool force_;
-   mutable std::vector<std::string> paths_; // mutable to allow swap to clear & reclaim memory, as soon as possible
+   std::vector<std::string> paths_;
 
    friend class boost::serialization::access;
    template<class Archive>
@@ -1037,6 +1047,7 @@ public:
 
    virtual bool isWrite() const { return true; }
    virtual std::ostream& print(std::ostream& os) const;
+   virtual std::ostream& print(std::ostream& os, const std::string& path) const;
    virtual bool equals(ClientToServerCmd*) const;
 
    virtual const char* theArg() const { return arg();}
@@ -1116,6 +1127,7 @@ public:
 
    virtual bool isWrite() const { return true; }
    virtual std::ostream& print(std::ostream& os) const;
+   virtual std::ostream& print(std::ostream& os, const std::string& path) const;
    virtual bool equals(ClientToServerCmd*) const;
 
    virtual const char* theArg() const { return arg();}
@@ -1130,7 +1142,7 @@ private:
    virtual STC_Cmd_ptr doHandleRequest(AbstractServer*) const;
 
 private:
-   mutable std::vector<std::string> paths_; // mutable to allow swap to clear & reclaim memory, as soon as possible
+   std::vector<std::string> paths_;
    bool        force_;
    bool        test_;   // only for test, hence we don't serialise this
 
@@ -1304,6 +1316,7 @@ public:
 
    virtual bool isWrite() const { return true; }
    virtual std::ostream& print(std::ostream& os) const;
+   virtual std::ostream& print(std::ostream& os, const std::string& path) const;
    virtual bool equals(ClientToServerCmd*) const;
 
    virtual const char* theArg() const { return arg();}
@@ -1318,7 +1331,7 @@ private:
    virtual STC_Cmd_ptr doHandleRequest(AbstractServer*) const;
 
 private:
-   mutable std::vector<std::string> paths_; // mutable to allow swap to clear & reclaim memory, as soon as possible
+   std::vector<std::string> paths_;
    std::string              stateOrEvent_;
    bool                     recursive_;
    bool                     setRepeatToLastValue_;
@@ -1364,6 +1377,7 @@ public:
 
    virtual bool isWrite() const { return true; }
    virtual std::ostream& print(std::ostream& os) const;
+   virtual std::ostream& print(std::ostream& os, const std::string& path) const;
    virtual bool equals(ClientToServerCmd*) const;
 
    virtual const char* theArg() const { return arg();}
@@ -1378,7 +1392,7 @@ private:
    virtual STC_Cmd_ptr doHandleRequest(AbstractServer*) const;
 
 private:
-   mutable std::vector<std::string> paths_; // mutable to allow swap to clear & reclaim memory, as soon as possible
+   std::vector<std::string> paths_;
    bool          trigger_;
    bool          all_;
    bool          date_;
@@ -1452,6 +1466,7 @@ public:
 
    virtual bool isWrite() const { return true; }
    virtual std::ostream& print(std::ostream& os) const;
+   virtual std::ostream& print(std::ostream& os, const std::string& path) const;
    virtual bool equals(ClientToServerCmd*) const;
 
    virtual const char* theArg() const { return arg();}
@@ -1471,8 +1486,10 @@ private:
    void createChange( Cmd_ptr& cmd,       std::vector<std::string>& options,       std::vector<std::string>& paths) const;
    void create_flag(  Cmd_ptr& cmd, const std::vector<std::string>& options, const std::vector<std::string>& paths, bool flag) const;
 
+   std::ostream& my_print(std::ostream& os, const std::vector<std::string>& paths) const;
+
 private:
-   mutable std::vector<std::string> paths_; // mutable to allow swap to clear & reclaim memory, as soon as possible
+   std::vector<std::string> paths_;
    std::string              name_;
    std::string              value_;
    Add_attr_type            add_attr_type_;

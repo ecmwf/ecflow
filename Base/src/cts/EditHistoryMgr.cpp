@@ -65,7 +65,7 @@ EditHistoryMgr::~EditHistoryMgr()
          }
          else {
             // Read only command, that is making data model changes, oops ?
-            // TODO, Can happen when check pt command set late flag, even though ist read only command.
+            // TODO, Can happen when check pt command set late flag, even though its read only command.
             //       i.e when saving takes more the 30 seconds
             std::stringstream ss;
             cts_cmd_->print(ss);
@@ -84,10 +84,18 @@ EditHistoryMgr::~EditHistoryMgr()
 
 void EditHistoryMgr::add_edit_history(const std::string& path) const
 {
+   // Note: if the cts_cmd_, had thousands of paths, calling  cts_cmd_->print(ss); will append those paths to the
+   //       output, HUGE performance bottle neck, Since we are recording what command was applied to each node
+   //       we ONLY need the single path.
+   //
+   //       The old code hacked around this issue by doing vector<string>().swap(paths_);in handleRequest()
+   //       This caused its own set of problems. JIRA 434
+   // See: Client/bin/gcc-4.8/release/perf_test_large_defs
+
    // record all the user edits to the node. Reuse the time stamp cache created in handleRequest()
    std::stringstream ss;
    ss << "MSG:";
    if (Log::instance()) ss << Log::instance()->get_cached_time_stamp();
-   cts_cmd_->print(ss);
+   cts_cmd_->print(ss,path); // custom print
    as_->defs()->add_edit_history(path,ss.str());
 }

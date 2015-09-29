@@ -43,14 +43,25 @@ PathsCmd::PathsCmd(Api api,const std::string& absNodePath, bool force)
 
 std::ostream& PathsCmd::print(std::ostream& os) const
 {
+   return my_print(os,paths_);
+}
+
+std::ostream& PathsCmd::print(std::ostream& os, const std::string& path) const
+{
+   std::vector<std::string> paths(1,path);
+   return my_print(os,paths);
+}
+
+std::ostream& PathsCmd::my_print(std::ostream& os,const std::vector<std::string>& paths) const
+{
    switch (api_) {
-      case PathsCmd::DELETE:             return user_cmd(os,CtsApi::to_string(CtsApi::delete_node(paths_,force_))); break;
-      case PathsCmd::SUSPEND:            return user_cmd(os,CtsApi::to_string(CtsApi::suspend(paths_))); break;
-      case PathsCmd::RESUME:             return user_cmd(os,CtsApi::to_string(CtsApi::resume(paths_))); break;
-      case PathsCmd::KILL:               return user_cmd(os,CtsApi::to_string(CtsApi::kill(paths_))); break;
-      case PathsCmd::STATUS:             return user_cmd(os,CtsApi::to_string(CtsApi::status(paths_))); break;
-      case PathsCmd::CHECK:              return user_cmd(os,CtsApi::to_string(CtsApi::check(paths_))); break;
-      case PathsCmd::EDIT_HISTORY:       return user_cmd(os,CtsApi::to_string(CtsApi::edit_history(paths_))); break;
+      case PathsCmd::DELETE:             return user_cmd(os,CtsApi::to_string(CtsApi::delete_node(paths,force_))); break;
+      case PathsCmd::SUSPEND:            return user_cmd(os,CtsApi::to_string(CtsApi::suspend(paths))); break;
+      case PathsCmd::RESUME:             return user_cmd(os,CtsApi::to_string(CtsApi::resume(paths))); break;
+      case PathsCmd::KILL:               return user_cmd(os,CtsApi::to_string(CtsApi::kill(paths))); break;
+      case PathsCmd::STATUS:             return user_cmd(os,CtsApi::to_string(CtsApi::status(paths))); break;
+      case PathsCmd::CHECK:              return user_cmd(os,CtsApi::to_string(CtsApi::check(paths))); break;
+      case PathsCmd::EDIT_HISTORY:       return user_cmd(os,CtsApi::to_string(CtsApi::edit_history(paths))); break;
       case PathsCmd::NO_CMD:       break;
       default: assert(false);break;
    }
@@ -272,10 +283,6 @@ STC_Cmd_ptr PathsCmd::doHandleRequest(AbstractServer* as) const
 
       default: assert(false); break;
    }
-
-   // Clear up memory allocated to path.
-   // When dealing with several thousands paths, this makes a *HUGE* difference
-   vector<string>().swap(paths_); // clear paths_ and minimise its capacity
 
    std::string error_msg = ss.str();
    if (!error_msg.empty()) {
