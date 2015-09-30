@@ -75,7 +75,8 @@
         {
         	"name"    : "time",
             "label"   : "Time line",
-            "visible_for" : "x"            
+            "hidden"  : "1",  
+            "visible_for" : "server or node"            
         },  
         
         {

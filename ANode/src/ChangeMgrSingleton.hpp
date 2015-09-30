@@ -40,6 +40,9 @@ public:
    void attach(Defs*,AbstractObserver*);
 	void detach(Node*,AbstractObserver*);
 	void detach(Defs*,AbstractObserver*);
+    
+    ///Detach all nodes and defs from the given observer
+    void detach(AbstractObserver*);
 
    /// Used in debug:
    size_t no_of_node_observers() const { return map_.size(); }

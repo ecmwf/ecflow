@@ -129,13 +129,23 @@ void ServerComThread::run()
                     UserMessage::message(UserMessage::DBG, false, std::string(" SYNC FINISHED"));
                 }
 
-				//If there was a significant change
-                //we need to attach the nodes to the observer and
-                //update the registered suites. Server handler will update its tree when it is modified.
-                if(ci_->server_reply().full_sync())
+				//If a rescan is needed we need to attach the nodes to the observer (the observer is already cleared)
+                //and update the registered suites. ServerHandler is already notified about about this change via a signal,
+                //so it has already cleared its tree.
+                if(rescanNeed_)
+                {
+                	UserMessage::message(UserMessage::DBG, false, std::string("   --> rescan needed!"));
+                	attach();
+                	updateRegSuites();
+                }
+
+                //If there was a significant change
+                //we need to reattach the nodes to the observer and
+                //update the registered suites. Server handler will update its tree when the thread finishes.
+                else if(ci_->server_reply().full_sync())
                 {
                     UserMessage::message(UserMessage::DBG, false, std::string("   --> full sync happened!"));
-                    attach();
+                    reAttach();
                     updateRegSuites();
 				}
 
@@ -258,8 +268,11 @@ void ServerComThread::reset()
 {
 	UserMessage::message(UserMessage::DBG, false,"ServerComThread::reset -- begin");
 
-    //Detach the nodes from the observer
+    //Detach the defs and then nodes from the observer
     detach();
+
+    //Notify ServerHandler
+    Q_EMIT rescanNeed();
 
 	//sleep(15);
 	{
@@ -405,31 +418,50 @@ void ServerComThread::updateRegSuites()
 	UserMessage::message(UserMessage::DBG, false, std::string("Suite update finished"));
 }
 
+//This is an observer notification method!!
 void ServerComThread::update(const Node* node, const std::vector<ecf::Aspect::Type>& types)
 {
+	//This function can only be called during a SYNC_LOCAl task!!!!
+	assert(taskType_ == VTask::SyncTask);
+
 	std::vector<ecf::Aspect::Type> typesCopy=types;
 
 	UserMessage::message(UserMessage::DBG, false, std::string("ServerComThread::update - node: ") + node->name());
 	for(std::vector<ecf::Aspect::Type>::const_iterator it=types.begin(); it != types.end(); ++it)
 	{
+		int i=*it;
 		std::stringstream ss;
-		ss << *it;
+		ss << i;
 		UserMessage::message(UserMessage::DBG, false, std::string(" aspect: ") + ss.str());
 	}
 
-    //If anything was requested to be deleted in the thread we do not go further
-    //because it will trigger a full rescan in ServerHandler!
+    //If a node was already requested to be added/deleted in the thread we do not go further. At the end of the sync
+	//we will regenerate everything (the tree as well in ServerHandle).
     if(rescanNeed_)
 	{
 		UserMessage::message(UserMessage::DBG, false, std::string(" -->  No signal emitted (rescan needed)"));
 		return;
 	}
 
+    //This is a radical change
 	if(std::find(types.begin(),types.end(),ecf::Aspect::ADD_REMOVE_NODE) != types.end())
 	{
 		UserMessage::message(UserMessage::DBG, false, std::string(" --> Rescan needed"));
 		rescanNeed_=true;
+
+		//Here we can be sure that defs changed radically and tree we handle in ServerHandler will be cleared.
+		//We detach the observer from the defs and all the nodes. This call will block access to the
+		//ChangeMgrSingleton from any other threads.
+		detach();
+
+		//At this point there is nothing observed!
+
+		//We notify ServerHandler about the radical changes. When ServerHandler receives this signal
+		//it will clear its tree, which stores shared pointers to the nodes (node_ptr). We do not observe these nodes
+		//any more, so when these pointers are reset we can be sure that update_delete() will not be called.!!!
 		Q_EMIT rescanNeed();
+
+		//When the sync is finished we need to attach to the new set of nodes the updated defs contains!!!
 		return;
 	}
 
@@ -446,8 +478,9 @@ void ServerComThread::update(const Defs* dc, const std::vector<ecf::Aspect::Type
 	UserMessage::message(UserMessage::DBG, false, std::string("ServerComThread::update - defs: "));
 	for(std::vector<ecf::Aspect::Type>::const_iterator it=types.begin(); it != types.end(); ++it)
 	{
+		int i=*it;
 		std::stringstream ss;
-		ss << *it;
+		ss << i;
 		UserMessage::message(UserMessage::DBG, false, std::string(" aspect: ") + ss.str());
 	}
 
@@ -464,29 +497,44 @@ void ServerComThread::update(const Defs* dc, const std::vector<ecf::Aspect::Type
 	Q_EMIT defsChanged(typesCopy);
 }
 
+//This can never be called!!
 void ServerComThread::update_delete(const Node* nc)
 {
+	assert(0);
+
 	Node *n=const_cast<Node*>(nc);
 	ChangeMgrSingleton::instance()->detach(n,this);
 
     //UserMessage::message(UserMessage::DBG, false, std::string("Update delete: ") + n->name());
 }
 
-//Here we suppose that when nodes are deleted this method is called for the ones on
-//the topmost level!!!
 void ServerComThread::update_delete(const Defs* dc)
 {
-	Defs *d=const_cast<Defs*>(dc);
-	ChangeMgrSingleton::instance()->detach(d,this);
-
     UserMessage::message(UserMessage::DBG, false, std::string("Update defs delete: "));
 
-    rescanNeed_=true;
+    if(rescanNeed_)
+	{
+		UserMessage::message(UserMessage::DBG, false, std::string(" -->  No signal emitted (rescan needed)"));
+	    return;
+	}
 
-    //We do not notify the rescanNeed() signal here because when the defs is deleted we are
-    //either in reset() or during a sync_local() that will will result in a
-    //server_reply().full_sync() == true.
-    //In both cases ServerHandler will properly update the tree!
+    //This is a radical change
+    rescanNeed_=true;
+    UserMessage::message(UserMessage::DBG, false, std::string(" --> Rescan needed"));
+
+    //Here we can be sure that defs changed radically and tree we handle in ServerHandler will be cleared.
+    //We detach the observer from the defs and all the nodes. This call will block access to the
+    //ChangeMgrSingleton from any other threads.
+    detach();
+
+    //At this point there is nothing observed!
+
+    //We notify ServerHandler about the radical changes. When ServerHandler receives this signal
+    //it will clear its tree, which stores shared pointers to the nodes (node_ptr). We do not observe these nodes
+    //any more, so when these pointers are reset we can be sure that update_delete() will not be called.!!!
+    Q_EMIT rescanNeed();
+
+    //When the sync is finished we need to attach to the new set of nodes the updated defs contains!!!
 }
 
 //Register each node to the observer
@@ -525,9 +573,33 @@ void ServerComThread::attach(Node *node,ChangeMgrSingleton* chm)
 	}
 }
 
-//Remove each node from the observer
+void ServerComThread::reAttach()
+{
+	ChangeMgrAccess chAccess;
+	ChangeMgrSingleton* chm=chAccess.changeManager();
+
+	chm->detach(this);
+
+	ServerDefsAccess defsAccess(server_);  // will reliquish its resources on destruction
+	defs_ptr d = defsAccess.defs();
+	if(d == NULL)
+		return;
+
+	const std::vector<suite_ptr> &suites = d->suiteVec();
+	for(unsigned int i=0; i < suites.size();i++)
+	{
+		attach(suites.at(i).get(),chm);
+	}
+}
+
+//Remove the defs and each node from the observer in one go
 void ServerComThread::detach()
 {
+	ChangeMgrAccess chAccess;
+	ChangeMgrSingleton* chm=chAccess.changeManager();
+	chm->detach(this);
+
+	/*
 	ServerDefsAccess defsAccess(server_);  // will reliquish its resources on destruction
 	defs_ptr d = defsAccess.defs();
 	if(d == NULL)
@@ -543,13 +615,13 @@ void ServerComThread::detach()
 	for(unsigned int i=0; i < suites.size();i++)
 	{
 		detach(suites.at(i).get(),chm);
-	}
+	}*/
 }
 
 //Remove each node from the observer
 void ServerComThread::detach(Node *node,ChangeMgrSingleton* chm)
 {
-	chm->detach(node,this);
+	/*chm->detach(node,this);
 	//ChangeMgrSingleton::instance()->detach(node,this);
 
 	std::vector<node_ptr> nodes;
@@ -558,5 +630,5 @@ void ServerComThread::detach(Node *node,ChangeMgrSingleton* chm)
 	for(std::vector<node_ptr>::const_iterator it=nodes.begin(); it != nodes.end(); ++it)
 	{
 		detach((*it).get(),chm);
-	}
+	}*/
 }

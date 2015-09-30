@@ -181,14 +181,31 @@ void ServerComQueue::suspend()
 	}
 }
 
+bool ServerComQueue::hasTask(VTask::Type t) const
+{
+	for(std::deque<VTask_ptr>::const_iterator it=tasks_.begin(); it != tasks_.end(); ++it)
+	{
+		if(*it && (*it)->type() == t && (*it)->status() != VTask::CANCELLED &&
+		   (*it)->status() != VTask::ABORTED )
+			return true;
+
+	}
+	return false;
+}
+
+bool ServerComQueue::isNextTask(VTask::Type t) const
+{
+	return (!tasks_.empty() && tasks_.back()->type() == t);
+}
+
+
 void ServerComQueue::addTask(VTask_ptr task)
 {
 	if(!task)
 		return;
 
-	if(!tasks_.empty() && task->type() ==  VTask::ZombieListTask && tasks_.back()->type() == task->type())
+	if(isNextTask(VTask::ZombieListTask) && tasks_.back()->type() == task->type())
 		return;
-
 
 	if(state_ == DisabledState || state_ == ResetState ||
 	  (task && task->type() ==VTask::ResetTask) )
@@ -212,7 +229,7 @@ void ServerComQueue::addNewsTask()
 	if(state_ == DisabledState || state_ == ResetState)
 		return;
 
-	if(!tasks_.empty() && tasks_.back()->type() == VTask::NewsTask)
+	if(isNextTask(VTask::NewsTask))
 		return;
 
 	VTask_ptr task=VTask::create(VTask::NewsTask);
@@ -224,7 +241,7 @@ void ServerComQueue::addSyncTask()
 	if(state_ == DisabledState || state_ == ResetState)
 		return;
 
-	if(!tasks_.empty() && tasks_.back()->type() == VTask::SyncTask)
+	if(isNextTask(VTask::SyncTask))
 		return;
 
 	VTask_ptr task=VTask::create(VTask::SyncTask);
@@ -236,7 +253,7 @@ void ServerComQueue::addSuiteListTask()
 	if(state_ == DisabledState || state_ == ResetState)
 		return;
 
-	if(!tasks_.empty() && tasks_.back()->type() == VTask::SuiteListTask)
+	if(isNextTask(VTask::SuiteListTask))
 		return;
 
 	VTask_ptr task=VTask::create(VTask::SuiteListTask);
@@ -248,7 +265,7 @@ void ServerComQueue::addSuiteAutoRegisterTask()
 	if(state_ == DisabledState || state_ == ResetState)
 		return;
 
-	if(!tasks_.empty() && tasks_.back()->type() == VTask::SuiteAutoRegisterTask)
+	if(isNextTask(VTask::SuiteAutoRegisterTask))
 		return;
 
 	VTask_ptr task=VTask::create(VTask::SuiteAutoRegisterTask);

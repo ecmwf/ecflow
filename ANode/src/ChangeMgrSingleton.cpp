@@ -97,6 +97,40 @@ void ChangeMgrSingleton::detach(Defs* n,AbstractObserver* a)
    }
 }
 
+void ChangeMgrSingleton::detach(AbstractObserver* a)
+{
+    DefsObserverMap_t::iterator itD=defs_map_.begin();
+    while(itD != defs_map_.end())
+    {
+        if(itD->second == a)
+        {
+            DefsObserverMap_t::iterator itErase=itD;
+            ++itD;
+            defs_map_.erase(itErase);
+        }
+        else
+        {
+            ++itD;
+        }    
+    }
+    
+    NodeObserverMap_t::iterator itN=map_.begin();
+    while(itN != map_.end())
+    {
+        if(itN->second == a)
+        {
+            NodeObserverMap_t::iterator itErase=itN;
+            ++itN;
+            map_.erase(itErase);
+        }
+        else
+        {
+            ++itN;
+        }    
+    }
+        
+    
+}
 //static void dump_aspect_vec(std::vector<ecf::Aspect::Type>& aspects_vec, const std::string& desc)
 //{
 //   cout << desc;

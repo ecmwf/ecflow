@@ -65,6 +65,7 @@ private:
 	void attach(Node *node,ChangeMgrSingleton*);
     void detach(Node *node,ChangeMgrSingleton*);
     void attach();
+    void reAttach();
     void detach();
 
 	ServerHandler *server_;

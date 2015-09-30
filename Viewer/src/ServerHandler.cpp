@@ -780,7 +780,7 @@ void ServerHandler::clientTaskFinished(VTask_ptr task,const ServerReply& serverR
 					}
 					else
 					{
-						comQueue_->addSyncTask(); //comThread()->sendCommand(this, client_, ServerComThread::SYNC);
+						comQueue_->addSyncTask();
 					}
 					break;
 				}
@@ -1010,8 +1010,8 @@ void ServerHandler::reset()
 	//A safety measure
 	comQueue_->suspend();
 
-	//Clear the tree
-	clearTree();
+	//Clear the tree. The thread will notify us when it is safe to do
+	//clearTree();
 
 	//--------------------------------------
 	// Second part of reset: loading
