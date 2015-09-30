@@ -158,11 +158,13 @@ protected:
    /// finds the associated node and adds to edit history nodes
    void add_node_for_edit_history(AbstractServer* as, const std::string& absNodepath) const;
    void add_node_for_edit_history(node_ptr) const;
+   void add_node_path_for_edit_history(const std::string& absNodepath) const;
 
 private:
    friend class GroupCTSCmd;
    friend class EditHistoryMgr;
-   mutable std::vector<weak_node_ptr> edit_history_nodes_;  // NOT persisted
+   mutable std::vector<weak_node_ptr> edit_history_nodes_;       // NOT persisted
+   mutable std::vector<std::string>   edit_history_node_paths_;  // NOT persisted, used when deleting
 
 private:
    friend class boost::serialization::access;

@@ -184,6 +184,8 @@ STC_Cmd_ptr PathsCmd::doHandleRequest(AbstractServer* as) const
                   LOG(Log::ERR,"Delete: Could not find node at path " << paths_[i]);
                   continue;
                }
+               // since node is to be deleted, we need to record the paths.
+               add_node_path_for_edit_history(paths_[i]);
 
                if (!force_) check_for_active_or_submitted_tasks(as,theNodeToDelete);
                else         as->zombie_ctrl().add_user_zombies(theNodeToDelete);

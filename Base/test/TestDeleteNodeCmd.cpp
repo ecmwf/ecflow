@@ -22,6 +22,7 @@
 #include "TestHelper.hpp"
 #include "DefsStructureParser.hpp"
 #include "DurationTimer.hpp"
+#include "Str.hpp"
 
 using namespace std;
 using namespace ecf;
@@ -49,11 +50,20 @@ BOOST_AUTO_TEST_CASE( test_delete_node_cmd )
       std::vector<std::string> paths; paths.reserve(vec.size());
       BOOST_FOREACH(alias_ptr t, vec) { paths.push_back(t->absNodePath()); }
 
+      size_t edit_history_size_before = fixtureDef.defsfile_.get_edit_history(Str::ROOT_PATH()).size();
       BOOST_CHECK_MESSAGE( !paths.empty(),"Expected paths to be specified, *OTHERWISE* we delete all nodes");
       PathsCmd cmd(PathsCmd::DELETE,paths);
       cmd.setup_user_authentification();
       STC_Cmd_ptr returnCmd  = cmd.handleRequest( &mockServer );
       BOOST_CHECK_MESSAGE(returnCmd->ok(),"Failed to delete aliases");
+      {
+         // ECFLOW-434
+         const std::deque<std::string>& edit_history = fixtureDef.defsfile_.get_edit_history(Str::ROOT_PATH());
+         size_t edit_history_size_after = edit_history_size_before + paths.size();
+         if ( edit_history_size_after > Defs::max_edit_history_size_per_node())
+            edit_history_size_after = Defs::max_edit_history_size_per_node();
+         BOOST_CHECK_MESSAGE( edit_history.size() == edit_history_size_after, "Expected   " << edit_history_size_after << " edit history but found " << edit_history.size());
+      }
 
       std::vector<alias_ptr> afterDeleteVec;
       fixtureDef.defsfile_.get_all_aliases(afterDeleteVec);
@@ -70,10 +80,19 @@ BOOST_AUTO_TEST_CASE( test_delete_node_cmd )
 	   BOOST_FOREACH(Task* t, vec) { paths.push_back(t->absNodePath()); }
 
       BOOST_CHECK_MESSAGE( !paths.empty(),"Expected paths to be specified, *OTHERWISE* we delete all nodes");
+      size_t edit_history_size_before = fixtureDef.defsfile_.get_edit_history(Str::ROOT_PATH()).size();
       PathsCmd cmd(PathsCmd::DELETE,paths);
 	   cmd.setup_user_authentification();
 	   STC_Cmd_ptr returnCmd  = cmd.handleRequest( &mockServer );
 	   BOOST_CHECK_MESSAGE(returnCmd->ok(),"Failed to delete tasks");
+      {
+         const std::deque<std::string>& edit_history = fixtureDef.defsfile_.get_edit_history(Str::ROOT_PATH());
+         size_t edit_history_size_after = edit_history_size_before + paths.size();
+         if ( edit_history_size_after > Defs::max_edit_history_size_per_node())
+            edit_history_size_after = Defs::max_edit_history_size_per_node();
+         BOOST_CHECK_MESSAGE( edit_history.size() == edit_history_size_after, "Expected   " << edit_history_size_after << " edit history but found " << edit_history.size());
+      }
+
 
 		std::vector<Task*> afterDeleteVec;
 		fixtureDef.defsfile_.getAllTasks(afterDeleteVec);
@@ -107,20 +126,36 @@ BOOST_AUTO_TEST_CASE( test_delete_node_cmd )
 		      BOOST_FOREACH(family_ptr f, familyVec) { paths.push_back(f->absNodePath()); }
 
 		      if (!paths.empty()) {
+		         size_t edit_history_size_before = fixtureDef.defsfile_.get_edit_history(Str::ROOT_PATH()).size();
 		         PathsCmd cmd(PathsCmd::DELETE,paths);
 		         cmd.setup_user_authentification();
 		         STC_Cmd_ptr returnCmd  = cmd.handleRequest( &mockServer );
 		         BOOST_CHECK_MESSAGE(returnCmd->ok(),"Failed to delete families");
 		         BOOST_REQUIRE_MESSAGE( s->familyVec().empty(),"Expected all Families to be deleted but found " << s->familyVec().size());
+		         {
+		            const std::deque<std::string>& edit_history = fixtureDef.defsfile_.get_edit_history(Str::ROOT_PATH());
+	               size_t edit_history_size_after = edit_history_size_before + paths.size();
+	               if ( edit_history_size_after > Defs::max_edit_history_size_per_node())
+	                  edit_history_size_after = Defs::max_edit_history_size_per_node();
+		            BOOST_CHECK_MESSAGE( edit_history.size() == edit_history_size_after, "Expected   " << edit_history_size_after << " edit history but found " << edit_history.size());
+		         }
 		      }
 		   }
 
 			// delete the suite
+         size_t edit_history_size_before = fixtureDef.defsfile_.get_edit_history(Str::ROOT_PATH()).size();
 			std::string absNodePath = s->absNodePath();
 	      PathsCmd cmd(PathsCmd::DELETE,absNodePath);
 			cmd.setup_user_authentification();
 			STC_Cmd_ptr returnCmd  = cmd.handleRequest( &mockServer );
 			BOOST_CHECK_MESSAGE(returnCmd->ok(),"Failed to delete suite at path " << absNodePath);
+	      {
+            const std::deque<std::string>& edit_history = fixtureDef.defsfile_.get_edit_history(Str::ROOT_PATH());
+            size_t edit_history_size_after = edit_history_size_before + 1;
+            if ( edit_history_size_after > Defs::max_edit_history_size_per_node())
+               edit_history_size_after = Defs::max_edit_history_size_per_node();
+            BOOST_CHECK_MESSAGE( edit_history.size() == edit_history_size_after, "Expected   " << edit_history_size_after << " edit history but found " << edit_history.size());
+	      }
 		}
 
 		BOOST_REQUIRE_MESSAGE( fixtureDef.defsfile_.suiteVec().empty(),"Expected all Suites to be deleted but found " << fixtureDef.defsfile_.suiteVec().size());

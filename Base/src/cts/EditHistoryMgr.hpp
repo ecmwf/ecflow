@@ -31,6 +31,7 @@ public:
 
 private:
    void add_edit_history(const std::string& path) const;
+   void add_delete_edit_history(const std::string& path) const;
 
 private:
    const ClientToServerCmd* cts_cmd_;
