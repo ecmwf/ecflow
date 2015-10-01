@@ -23,6 +23,7 @@
 #include "boost/filesystem/path.hpp"
 #include <boost/test/unit_test.hpp>
 #include "ServerTestHarness.hpp"
+#include "TestFixture.hpp"
 #include "DurationTimer.hpp"
 #include "Defs.hpp"
 #include "Suite.hpp"
@@ -121,6 +122,7 @@ BOOST_AUTO_TEST_CASE( test_view )
    // remove generated data
    fs::remove(pipename.c_str());
    fs::remove_all(rcdir);
+   fs::remove_all(TestFixture::smshome());
 }
 
 BOOST_AUTO_TEST_SUITE_END()

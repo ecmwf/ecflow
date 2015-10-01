@@ -47,8 +47,8 @@ public:
 	bool operator==(const Family& rhs) const;
 
 	virtual void collateChanges(DefsDelta&) const;
-   void set_memento(const OrderMemento* m) { NodeContainer::set_memento(m); }
-   void set_memento(const ChildrenMemento* m) { NodeContainer::set_memento(m); }
+   void set_memento(const OrderMemento* m,std::vector<ecf::Aspect::Type>& aspects) { NodeContainer::set_memento(m,aspects); }
+   void set_memento(const ChildrenMemento* m,std::vector<ecf::Aspect::Type>& aspects) { NodeContainer::set_memento(m,aspects); }
 
    virtual void read_state(const std::string& line,const std::vector<std::string>& lineTokens);
 private:

@@ -108,10 +108,10 @@ public:
    virtual bool checkInvariants(std::string& errorMsg) const;
 
    virtual void collateChanges(DefsDelta&) const;
-   void set_memento(const OrderMemento* m);
-   void set_memento(const AliasChildrenMemento* m);
-   void set_memento(const AliasNumberMemento* m);
-   void set_memento(const SubmittableMemento* m) { Submittable::set_memento(m); }
+   void set_memento(const OrderMemento* m,std::vector<ecf::Aspect::Type>& aspects);
+   void set_memento(const AliasChildrenMemento* m,std::vector<ecf::Aspect::Type>& aspects);
+   void set_memento(const AliasNumberMemento* m,std::vector<ecf::Aspect::Type>& aspects);
+   void set_memento(const SubmittableMemento* m,std::vector<ecf::Aspect::Type>& aspects) { Submittable::set_memento(m,aspects); }
 
    virtual void read_state(const std::string& line,const std::vector<std::string>& lineTokens);
 private:

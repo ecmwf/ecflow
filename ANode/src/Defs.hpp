@@ -47,6 +47,7 @@
 #include "Archive.hpp"
 
 class Limit;
+class AbstractObserver;
 namespace ecf { class NodeTreeVisitor; class CalendarUpdateParams; } // forward declare
 
 class Defs : private boost::noncopyable {
@@ -258,14 +259,15 @@ public:
    const std::deque<std::string>& get_edit_history(const std::string& path) const;
    void save_edit_history(bool f) const { save_edit_history_ = f ;}
    static const std::deque<std::string>& empty_edit_history();
+   static size_t max_edit_history_size_per_node() { return 20; }
 
    /// Memento functions:
    void collateChanges(unsigned int client_handle,DefsDelta&) const;
-   void set_memento(const StateMemento* );
-   void set_memento(const ServerStateMemento* );
-   void set_memento(const ServerVariableMemento* );
-   void set_memento(const OrderMemento* );
-   void set_memento(const FlagMemento* );
+   void set_memento(const StateMemento*,std::vector<ecf::Aspect::Type>& aspects );
+   void set_memento(const ServerStateMemento*,std::vector<ecf::Aspect::Type>& aspects );
+   void set_memento(const ServerVariableMemento*,std::vector<ecf::Aspect::Type>& aspects );
+   void set_memento(const OrderMemento*,std::vector<ecf::Aspect::Type>& aspects );
+   void set_memento(const FlagMemento*,std::vector<ecf::Aspect::Type>& aspects );
 
    /// Find the max state change number for defs only. This includes:
    ///   o the Defs state.
@@ -337,6 +339,21 @@ private:
    std::set<std::string> externs_;                      // NOT persisted
 
    friend class SaveEditHistoryWhenCheckPointing;
+
+private:
+   /// Observer notifications Start. Allow client to query if they are in syncing with server
+   void notify_start() { in_notification_ = true;  }
+   void notify_end()   { in_notification_ = false; }
+   bool in_notification_;
+   std::vector<AbstractObserver*> observers_;
+   friend class ChangeStartNotification;
+   void notify_delete();
+public:
+   void notify(const std::vector<ecf::Aspect::Type>& aspects);
+   void attach(AbstractObserver*);
+   void detach(AbstractObserver*);
+   bool in_notification() const { return in_notification_;}
+
 private:
    friend class boost::serialization::access;
    template<class Archive>
@@ -393,6 +410,17 @@ private:
 private:
    std::vector<std::string> log_types_;
    std::vector<std::string> parsed_messages_;
+};
+
+
+
+// Start notification. End notification automatically signalled, Even if exception raised.
+class ChangeStartNotification : private boost::noncopyable {
+public:
+   ChangeStartNotification(defs_ptr defs) : defs_ptr_(defs) { defs_ptr_->notify_start();}
+   ~ChangeStartNotification() {  defs_ptr_->notify_end();}
+private:
+   defs_ptr defs_ptr_;
 };
 
 

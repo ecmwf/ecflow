@@ -21,7 +21,6 @@
 #include "TestHelper.hpp"
 #include "System.hpp"
 #include "PrintStyle.hpp"
-#include "ChangeMgrSingleton.hpp"
 #include "Defs.hpp"
 
 using namespace std;
@@ -81,7 +80,6 @@ BOOST_AUTO_TEST_CASE( test_ECFLOW_189 )
 
    /// Destroy System singleton to avoid valgrind from complaining
    System::destroy();
-   ChangeMgrSingleton::destroy();
 }
 
 BOOST_AUTO_TEST_SUITE_END()

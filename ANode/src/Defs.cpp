@@ -36,10 +36,10 @@
 #include "JobCreationCtrl.hpp"
 #include "ResolveExternsVisitor.hpp"
 #include "DefsDelta.hpp"
-#include "ChangeMgrSingleton.hpp"
 #include "ExprDuplicate.hpp"
 #include "Version.hpp"
 #include "Indentor.hpp"
+#include "AbstractObserver.hpp"
 
 using namespace ecf;
 using namespace std;
@@ -53,7 +53,8 @@ Defs::Defs() :
    updateCalendarCount_(0),
    order_state_change_no_(0),
    save_edit_history_(false),
-   client_suite_mgr_(this)
+   client_suite_mgr_(this),
+   in_notification_(false)
 {
 }
 
@@ -65,10 +66,8 @@ defs_ptr Defs::create()
 Defs::~Defs()
 {
 //    cout << "   Deleting defs "\n";
-   // Don't create the ChangeMgrSingleton during destruct sequence. (i.e in unit cases)
-   // Since that will cause a memory leak
-   if (!Ecf::server() && ChangeMgrSingleton::exists()) {
-      ChangeMgrSingleton::instance()->notify_delete( this );
+   if (!Ecf::server() ) {
+      notify_delete();
    }
 
    // Duplicate AST are held in a static map. Delete them, to avoid valgrind complaining
@@ -1303,38 +1302,38 @@ unsigned int Defs::defs_only_max_state_change_no() const
    return max_change_no;
 }
 
-void Defs::set_memento(const StateMemento* memento) {
+void Defs::set_memento(const StateMemento* memento,std::vector<ecf::Aspect::Type>& aspects) {
 
 #ifdef DEBUG_MEMENTO
 	std::cout << "Defs::set_memento(const StateMemento* memento)\n";
 #endif
-   ChangeMgrSingleton::instance()->add_aspect(ecf::Aspect::STATE);
+   aspects.push_back(ecf::Aspect::STATE);
 	set_state( memento->state_ );
 }
 
-void Defs::set_memento( const ServerStateMemento* memento ) {
+void Defs::set_memento( const ServerStateMemento* memento,std::vector<ecf::Aspect::Type>& aspects ) {
 #ifdef DEBUG_MEMENTO
 	std::cout << "Defs::set_memento(const ServerStateMemento* memento)\n";
 #endif
-   ChangeMgrSingleton::instance()->add_aspect(ecf::Aspect::SERVER_STATE);
+   aspects.push_back(ecf::Aspect::SERVER_STATE);
 	server_.set_state( memento->state_ );
 }
 
-void Defs::set_memento( const ServerVariableMemento* memento ) {
+void Defs::set_memento( const ServerVariableMemento* memento,std::vector<ecf::Aspect::Type>& aspects ) {
 #ifdef DEBUG_MEMENTO
    std::cout << "Defs::set_memento(const ServerVariableMemento* memento)\n";
 #endif
 
    if (server_.user_variables().size() != memento->serverEnv_.size()) {
-      ChangeMgrSingleton::instance()->add_aspect(ecf::Aspect::ADD_REMOVE_ATTR);
+      aspects.push_back(ecf::Aspect::ADD_REMOVE_ATTR);
    }
 
-   ChangeMgrSingleton::instance()->add_aspect(ecf::Aspect::SERVER_VARIABLE);
+   aspects.push_back(ecf::Aspect::SERVER_VARIABLE);
 
    server_.set_user_variables( memento->serverEnv_);
 }
 
-void Defs::set_memento( const OrderMemento* memento ) {
+void Defs::set_memento( const OrderMemento* memento,std::vector<ecf::Aspect::Type>& aspects ) {
 #ifdef DEBUG_MEMENTO
    std::cout << "Defs::set_memento(const OrderMemento* memento)\n";
 #endif
@@ -1361,17 +1360,16 @@ void Defs::set_memento( const OrderMemento* memento ) {
        std::cout << "Defs::set_memento could not find all the names\n";
        return;
    }
-   ChangeMgrSingleton::instance()->add_aspect(ecf::Aspect::ORDER);
+   aspects.push_back(ecf::Aspect::ORDER);
    suiteVec_ = vec;
 }
 
-
-void Defs::set_memento( const FlagMemento* memento ) {
+void Defs::set_memento( const FlagMemento* memento,std::vector<ecf::Aspect::Type>& aspects ) {
 
 #ifdef DEBUG_MEMENTO
    std::cout << "Defs::set_memento(const FlagMemento* memento)\n";
 #endif
-   ChangeMgrSingleton::instance()->add_aspect(ecf::Aspect::FLAG);
+   aspects.push_back(ecf::Aspect::FLAG);
    flag_.set_flag( memento->flag_.flag() );
 }
 
@@ -1386,7 +1384,7 @@ void Defs::add_edit_history(const std::string& path, const std::string& request)
    }
    else {
       (*i).second.push_back(request);
-      if ((*i).second.size() > 20) {
+      if ((*i).second.size() > Defs::max_edit_history_size_per_node()) {
          (*i).second.pop_front();
       }
    }
@@ -1405,6 +1403,45 @@ const std::deque<std::string>& Defs::empty_edit_history()
 {
    static std::deque<std::string> static_edit_history;
    return static_edit_history;
+}
+
+// =====================================================================================
+
+void Defs::notify_delete()
+{
+   // make a copy, to avoid iterating over observer list that is being changed
+   std::vector<AbstractObserver*> copy_of_observers = observers_;
+   for(size_t i = 0; i < copy_of_observers.size(); i++) {
+      copy_of_observers[i]->update_delete(this);
+   }
+
+   /// Check to make sure that the Observer called detach
+   /// We can not call detach ourselves, since the the client needs to
+   /// call detach in the case where the graphical tree is destroyed by user
+   /// In this case the Subject/Node is being deleted.
+   assert(observers_.empty());
+}
+
+void Defs::notify(const std::vector<ecf::Aspect::Type>& aspects)
+{
+   for(size_t i = 0; i < observers_.size(); i++) {
+      observers_[i]->update(this,aspects);
+   }
+}
+
+void Defs::attach(AbstractObserver* obs)
+{
+   observers_.push_back(obs);
+}
+
+void Defs::detach(AbstractObserver* obs)
+{
+   for(size_t i = 0; i < observers_.size(); i++) {
+      if (observers_[i] == obs) {
+         observers_.erase( observers_.begin() + i) ;
+         return;
+      }
+   }
 }
 
 // =====================================================================================

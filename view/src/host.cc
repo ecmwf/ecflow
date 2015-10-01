@@ -112,7 +112,6 @@
 #endif
 
 #include "Version.hpp"
-#include "ChangeMgrSingleton.hpp"
 
 #include "panel_window.h"
 #include <stdio.h>
@@ -121,6 +120,8 @@
 
 #include "menus.h"
 /* #include <proc/readproc.h> */
+
+using namespace std;
 
 bool Updating::do_full_redraw_ = false;
 
@@ -895,18 +896,8 @@ void host::redraw( bool create )
 {
    if (create) {
      SelectNode select(this->name());
-      XECFDEBUG {
-         std::cout << ChangeMgrSingleton::instance()->no_of_node_observers() << std::endl
-                   << ChangeMgrSingleton::instance()->no_of_def_observers() << std::endl;
-      }
 
       if (top_) top_->unlink(true);
-      XECFDEBUG {
-         std::cout << ChangeMgrSingleton::instance()->no_of_node_observers() << std::endl
-                   << ChangeMgrSingleton::instance()->no_of_def_observers() << std::endl;
-         // assert(ChangeMgrSingleton::instance()->no_of_node_observers() == 0);
-         // assert(ChangeMgrSingleton::instance()->no_of_def_observers() == 0);
-      }
       create_tree(0, 0, 0);
    }
    else if (tree_) tree_->update_tree(true);
@@ -1168,8 +1159,17 @@ void host::login()
 {
 }
 
-bool check_version( const char* v1, const char* v2 )
+bool check_version( const std::string& server_version,  const std::string& viewer_version )
 {
+   // We know viewer version 4.1.0 is still compatible with old server versions 4.0.x
+//   cout  << "server version '" << server_version << "'\n";
+//   cout  << "viewer version '" << viewer_version << "'\n";
+   if (viewer_version == "4.1.0" && server_version.find("4.0.") != std::string::npos) {
+      return true;
+   }
+
+   const char* v1 = server_version.c_str();
+   const char* v2 = viewer_version.c_str();
    int num = 0;
    while ( v1 && v2 && num < 2 ) {
       if (*v1 == '.') num++;
@@ -1229,7 +1229,7 @@ void ehost::login()
           }
       }
       else {
-         if (!check_version(server_version.c_str(), ecf::Version::raw().c_str())) {
+         if (!check_version(server_version, ecf::Version::raw())) {
             if (!confirm::ask(
                      false,
                      "%s (%s@%d): version mismatch, server is %s, client is %s\ntry to connect anyway?",

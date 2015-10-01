@@ -17,7 +17,7 @@
 * ecfFlow consists of two tar files i.e. :
    
    - boost_1_53_0.tar.gz
-   - ecFlow-4.0.8-Source.tar.gz
+   - ecFlow-4.0.9-Source.tar.gz
    
 * Create a directory for the build::
 
@@ -28,16 +28,16 @@
 * Un-zip then un-tar the two file files::
 
   > tar -zxf boost_1_53_0.tar.gz
-  > tar -zxf ecFlow-4.0.8-Source.tar.gz
+  > tar -zxf ecFlow-4.0.9-Source.tar.gz
    
 * You should have two directories created::
 
    - boost_1_53_0
-   - ecFlow-4.0.8-Source
+   - ecFlow-4.0.9-Source
     
 * Create two environment variables. These are used by some of scripts::
 
-  > export WK=/tmp/ecflow_build/ecFlow-4.0.8-Source
+  > export WK=/tmp/ecflow_build/ecFlow-4.0.9-Source
   > export BOOST_ROOT=/tmp/ecflow_build/boost_1_53_0
    
 * There are two ways of building ecflow, boost-build/bjam or cmake
@@ -68,7 +68,7 @@ cmake
 =====================================================================
 
 * 
-  > cd /tmp/ecflow_build/ecFlow-4.0.8-Source
+  > cd /tmp/ecflow_build/ecFlow-4.0.9-Source
   > mkdir build; cd build
   > cmake ..  
   > make -j2
@@ -76,7 +76,7 @@ cmake
   > make test 
   
 * Optionally you can specify install prefix directory and to build debug :
-  > cd /tmp/ecflow_build/ecFlow-4.0.8-Source
+  > cd /tmp/ecflow_build/ecFlow-4.0.9-Source
   > mkdir build; cd build
   > cmake .. -DCMAKE_INSTALL_PREFIX=/var/tmp/$USER/install/cmake/ecflow \
              -DCMAKE_BUILD_TYPE=Debug
@@ -85,7 +85,7 @@ cmake
 
 * Optionally if you do *NOT* want to build the GUI or use the python api:
    
-  > cd /tmp/ecflow_build/ecFlow-4.0.8-Source
+  > cd /tmp/ecflow_build/ecFlow-4.0.9-Source
   > mkdir build; cd build
   > cmake .. -DCMAKE_INSTALL_PREFIX=/var/tmp/$USER/install/cmake/ecflow \
              -DCMAKE_BUILD_TYPE=Release \
@@ -96,7 +96,7 @@ cmake
 
 * Optionally if you did not export BOOST_ROOT you can specify on the command line:
 
-  > cd /tmp/ecflow_build/ecFlow-4.0.8-Source
+  > cd /tmp/ecflow_build/ecFlow-4.0.9-Source
   > mkdir build; cd build
   > cmake .. -DCMAKE_INSTALL_PREFIX=/usr/local/apps/ecflow \
              -DCMAKE_BUILD_TYPE=Release \
@@ -106,7 +106,7 @@ cmake
 
 * On some platforms(AIX) you may need to specify the c++ compiler
 
-  > cd /tmp/ecflow_build/ecFlow-4.0.8-Source
+  > cd /tmp/ecflow_build/ecFlow-4.0.9-Source
   > mkdir build; cd build
   > cmake .. -DCMAKE_INSTALL_PREFIX=/usr/local/apps/ecflow \
              -DCMAKE_BUILD_TYPE=Release \

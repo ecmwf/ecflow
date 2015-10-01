@@ -51,6 +51,12 @@ std::ostream& RequeueNodeCmd::print(std::ostream& os) const
  	return user_cmd(os,CtsApi::to_string(CtsApi::requeue(paths_,to_string(option_))));
 }
 
+std::ostream& RequeueNodeCmd::print(std::ostream& os, const std::string& path) const
+{
+   std::vector<std::string> paths(1,path);
+   return user_cmd(os,CtsApi::to_string(CtsApi::requeue(paths,to_string(option_))));
+}
+
 STC_Cmd_ptr RequeueNodeCmd::doHandleRequest(AbstractServer* as) const
 {
 	as->update_stats().requeue_node_++;
@@ -145,10 +151,6 @@ STC_Cmd_ptr RequeueNodeCmd::doHandleRequest(AbstractServer* as) const
          if (parent) parent->handleStateChange();  // ECFLOW-359
 	   }
 	}
-
-   // Clear up memory allocated to path *ASAP*
-   // When dealing with several thousands paths, this makes a *HUGE* difference
-   vector<string>().swap(paths_); // clear paths_ and minimise its capacity
 
    std::string error_msg = ss.str();
    if (!error_msg.empty()) {

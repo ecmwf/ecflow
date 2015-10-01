@@ -10,7 +10,6 @@
 #include "ServerComThread.hpp"
 
 #include "Defs.hpp"
-#include "ChangeMgrSingleton.hpp"
 #include "ClientInvoker.hpp"
 #include "ArgvCreator.hpp"
 
@@ -465,7 +464,7 @@ void ServerComThread::update(const Defs* dc, const std::vector<ecf::Aspect::Type
 void ServerComThread::update_delete(const Node* nc)
 {
 	Node *n=const_cast<Node*>(nc);
-	ChangeMgrSingleton::instance()->detach(n,this);
+	n->detach(this);
 
     //UserMessage::message(UserMessage::DBG, false, std::string("Update delete: ") + n->name());
 }
@@ -475,7 +474,7 @@ void ServerComThread::update_delete(const Node* nc)
 void ServerComThread::update_delete(const Defs* dc)
 {
 	Defs *d=const_cast<Defs*>(dc);
-	ChangeMgrSingleton::instance()->detach(d,this);
+	d->detach(this);
 
     UserMessage::message(UserMessage::DBG, false, std::string("Update defs delete: "));
 
@@ -495,7 +494,7 @@ void ServerComThread::attach()
 	if(d == NULL)
 		return;
 
-	ChangeMgrSingleton::instance()->attach(d.get(),this);
+	d->attach(this);
 
 	const std::vector<suite_ptr> &suites = d->suiteVec();
 	for(unsigned int i=0; i < suites.size();i++)
@@ -507,7 +506,7 @@ void ServerComThread::attach()
 //Add a node to the observer
 void ServerComThread::attach(Node *node)
 {
-	ChangeMgrSingleton::instance()->attach(node,this);
+   node->attach(this);
 
 	std::vector<node_ptr> nodes;
 	node->immediateChildren(nodes);
@@ -526,7 +525,7 @@ void ServerComThread::detach()
 	if(d == NULL)
 		return;
 
-	ChangeMgrSingleton::instance()->detach(d.get(),this);
+	d->detach(this);
 
 	const std::vector<suite_ptr> &suites = d->suiteVec();
 	for(unsigned int i=0; i < suites.size();i++)
@@ -538,7 +537,7 @@ void ServerComThread::detach()
 //Remove each node from the observer
 void ServerComThread::detach(Node *node)
 {
-	ChangeMgrSingleton::instance()->detach(node,this);
+	node->detach(this);
 
 	std::vector<node_ptr> nodes;
 	node->immediateChildren(nodes);

@@ -67,7 +67,8 @@ STC_Cmd_ptr ClientToServerCmd::handleRequest(AbstractServer* as) const
       return halted;
    }
 
-   // mark edited nodes, with edit history
+   // mark edited nodes, with edit history. relies on doHandleRequest to populate edit_history_nodes_/paths
+   // hence must at the same scope level
    EditHistoryMgr edit_history_mgr(this,as);
 
    // Handle the request, and return the reply back to the client
@@ -158,6 +159,11 @@ void ClientToServerCmd::add_node_for_edit_history(AbstractServer* as,const std::
 void ClientToServerCmd::add_node_for_edit_history(node_ptr the_node) const
 {
    if (the_node.get()) edit_history_nodes_.push_back(the_node);
+}
+
+void ClientToServerCmd::add_node_path_for_edit_history(const std::string& absNodepath) const
+{
+   edit_history_node_paths_.push_back(absNodepath);
 }
 
 BOOST_CLASS_EXPORT_IMPLEMENT(ServerVersionCmd)
