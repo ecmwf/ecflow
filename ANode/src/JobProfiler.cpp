@@ -45,17 +45,6 @@ JobProfiler::JobProfiler(Task* node,JobsParam& jobsParam, size_t threshold)
 	}
 }
 
-JobProfiler::JobProfiler( JobsParam& jobsParam)
-: node_(0),
-  jobsParam_(jobsParam),
-  start_time_(boost::posix_time::microsec_clock::universal_time()),
-  threshold_(0)
-{
-	if (!jobsParam_.next_poll_time().is_special() && start_time_ >= jobsParam_.next_poll_time()) {
-		jobsParam_.set_timed_out_of_job_generation(start_time_);
-	}
-}
-
 JobProfiler::~JobProfiler()
 {
    if (node_) {

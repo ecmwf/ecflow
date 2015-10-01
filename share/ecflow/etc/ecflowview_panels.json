@@ -1,0 +1,152 @@
+{
+    "file_id" : "ecflowview menu configuration",
+
+    "file_version" : "1.0",
+
+    "info_panel" :
+    [
+        {
+            "name"    : "overview",
+            "label"   : "Info",
+            "icon"	  : "overview.svg",
+            "dock_icon"	  : "overview.svg",
+            "show"    : "toolbar",
+            "tooltip" : "Open <b>info</b> tab in a new Info Panel dialog",
+            "visible_for" : "server or node"
+        },
+
+        {
+            "name"    : "manual",
+            "label"   : "Manual",
+            "icon"    : "manual.svg",
+            "dock_icon"    : "manual_dock.svg",
+            "show"    : "toolbar",
+            "tooltip" : "Open <b>manual</b> tab in a new Info Panel dialog",
+            "visible_for" : "node"            
+        },    
+       
+        {
+            "name"    : "script",
+            "label"   : "Script",
+            "icon"    : "script.svg",
+            "dock_icon"    : "script_dock.svg",
+            "show"    : "toolbar",
+            "tooltip" : "Open <b>script</b> tab in a new Info Panel dialog",
+            "visible_for" : "task"            
+        }, 
+        
+        {
+        	"name"    : "job",
+            "label"   : "Job",
+            "icon"	  : "job.svg",
+            "dock_icon"	  : "job_dock.svg",
+            "show"    : "toolbar", 
+            "tooltip" : "Open <b>job</b> tab in a new Info Panel dialog",
+            "visible_for" : "task"            
+        },    
+        
+        {
+        	"name"    : "output",
+            "label"   : "Output",
+            "icon"    : "output.svg",
+            "dock_icon"    : "output_dock.svg",
+            "show"    : "toolbar",
+            "tooltip" : "Open <b>output</b> tab in a new Info Panel dialog",
+            "visible_for" : "task"            
+        },    
+        
+        {
+        	"name"    : "why",
+            "label"   : "Why?",
+            "icon"    : "why.svg",
+            "dock_icon"    : "why_dock.svg",
+            "show" : "toolbar",
+            "tooltip" : "Open <b>why</b> tab in a new Info Panel dialog",
+            "visible_for" : "server or node"            
+        },  
+        
+        {
+        	"name"    : "triggers",
+            "label"   : "Triggers",
+            "visible_for" : "node",
+            "hidden"  : "1"            
+        },  
+        
+        {
+        	"name"    : "time",
+            "label"   : "Time line",
+            "visible_for" : "x"            
+        },  
+        
+        {
+        	"name"    : "variable",
+             "label"  : "Variables",
+             "icon"   : "variable.svg",
+             "dock_icon"   : "variable_dock.svg",
+             "show"   : "toolbar",
+             "tooltip" : "Open <b>variables</b> tab in a new Info Panel dialog",
+             "visible_for" : "server or node"
+             
+        },  
+        
+        {
+        	 "name"   : "history",
+             "label"  : "Server log",
+             "icon"	  : "log.svg",
+             "dock_icon"	  : "log.svg",
+             "show"   : "toolbar",
+             "tooltip" : "Open <b>server log</b> tab in a new Info Panel dialog",
+             "visible_for" : "server"
+             
+        },  
+        
+        {
+        	"name"    : "edit",
+            "label"   : "Edit",
+            "icon"	  : "edit.svg",
+            "dock_icon"	  : "edit.svg",
+            "show"    : "toolbar",
+            "tooltip" : "Open <b>edit</b> tab in a new Info Panel dialog",            
+            "visible_for" : "task"            
+        } ,   
+       
+        
+        {
+        	"name"    : "message",
+            "label"   : "Messages",
+            "icon"	  : "message.svg",
+            "dock_icon"	  : "message_dock.svg",
+            "show"    : "toolbar",
+            "tooltip" : "Open <b>messages</b> tab in a new Info Panel dialog",                
+            "visible_for" : "server or node"
+             
+        },     
+        
+        {
+        	"name"    : "zombie",
+            "label"   : "Zombies",
+            "icon"	  : "zombie.svg",
+            "dock_icon"	  : "zombie_dock.svg",
+            "show" 	  : "toolbar",
+            "tooltip" : "Open <b>zombies</b> tab in a new Info Panel dialog",  
+            "visible_for" : "server"
+             
+        },     
+        
+        {
+        	"name"    : "suite",
+            "label"   : "Suites",
+            "visible_for" : "server"
+             
+        },
+        
+        {
+        	"name"    : "server_settings",
+            "label"   : "Settings",
+            "icon"	  : "configure.svg",
+            "visible_for" : "server"
+             
+        }  
+        
+    ]
+}

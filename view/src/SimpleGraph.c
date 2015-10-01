@@ -54,16 +54,8 @@
 
 
 static void Initialize();
-//static void ConstraintInitialize();
-//static void ConstraintDestroy();
-//static Boolean ConstraintSetValues();
 static void Destroy();
 static Boolean SetValues();
-//static XtGeometryResult GeometryManager();
-//static void ChangeManaged();
-//static Boolean insert_new_node();
-//static void delete_node();
-//static void new_layout();
 static void Redisplay();
 static void compute_positions(SimpleGraphWidget,int);
 static void set_positions(SimpleGraphWidget,long*,long*);
@@ -304,108 +296,105 @@ SimpleGraphWidget current, request, new;
 }
 
 
+/*
+static int first_kid(SimpleGraphWidget w,NodeStruct *n)
+{
+	int i;
+	for(i=0;i<n->pcnt;i++)
+		if(MANAGED(&PARENTS(w,n,i)))
+			return i;
+	return -1;
+}
 
-//static int first_kid(SimpleGraphWidget w,NodeStruct *n)
-//{
-//	int i;
-//	for(i=0;i<n->pcnt;i++)
-//		if(MANAGED(&PARENTS(w,n,i)))
-//			return i;
-//	return -1;
-//}
-//
-//static int last_kid(SimpleGraphWidget w,NodeStruct *n)
-//{
-//	int i;
-//
-//	if(n->pcnt)
-//		for(i= n->pcnt - 1;i>=0;i--)
-//			if(MANAGED(&PARENTS(w,n,i)))
-//				return i;
-//	return -1;
-//}
+static int last_kid(SimpleGraphWidget w,NodeStruct *n)
+{
+	int i;
+
+	if(n->pcnt)
+		for(i= n->pcnt - 1;i>=0;i--)
+			if(MANAGED(&PARENTS(w,n,i)))
+				return i;
+	return -1;
+	} 
 
 
-//static void line(SimpleGraphWidget w,int x1,int y1,int x2,int y2,int gc)
-//{
-//	GC topGC = w->manager.top_shadow_GC;
-//	GC midGC = w->manager.background_GC;
-//	GC botGC = w->manager.bottom_shadow_GC;
-//	if(gc) midGC = w->simplegraph.gc[gc % GC_COUNT];
-//
-//	if(x1 == x2)
-//	{
-//		/* vertical */
-//
-//		XDrawLine(XtDisplay(w),XtWindow(w),
-//		    topGC,x1-1,y1,x2-1,y2);
-//		XDrawLine(XtDisplay(w),XtWindow(w),
-//		    midGC,x1,y1,x2,y2);
-//		XDrawLine(XtDisplay(w),XtWindow(w),
-//		    botGC,x1+1,y1,x2+1,y2);
-//	}
-//	else
-//	{
-//		/* horizontal */
-//
-//		XDrawLine(XtDisplay(w),XtWindow(w),
-//		    topGC,x1,y1-1,x2,y2-1);
-//		XDrawLine(XtDisplay(w),XtWindow(w),
-//		    midGC,x1,y1,x2,y2);
-//		XDrawLine(XtDisplay(w),XtWindow(w),
-//		    botGC,x1,y1+1,x2,y2+1);
-//	}
-//}
+static void line(SimpleGraphWidget w,int x1,int y1,int x2,int y2,int gc)
+{
+	GC topGC = w->manager.top_shadow_GC;
+	GC midGC = w->manager.background_GC;
+	GC botGC = w->manager.bottom_shadow_GC;
+	if(gc) midGC = w->simplegraph.gc[gc % GC_COUNT];
 
-//static void arrow(SimpleGraphWidget fw,int x1,int y1,int x2,int y2,int gc)
-//{
-//	int x;
-//	int y;
-//	int size = 11;
-//	int h = size;
-//	int w = size;
-//	unsigned int d;
-//
-//	GC topGC = fw->manager.top_shadow_GC;
-//	GC midGC = fw->manager.background_GC;
-//	GC botGC = fw->manager.bottom_shadow_GC;
-//	if(gc) midGC = fw->simplegraph.gc[gc % GC_COUNT];
-//
-//	if(x1 > x2)
-//	{
-//		d = XmARROW_LEFT;
-//		x = (x1 + x2)/2 - size/2;
-//		y = y1 - size/2;
-//	}
-//	else if(x1 < x2)
-//	{
-//		d = XmARROW_RIGHT;
-//		x = (x2 + x1)/2 - size/2;
-//		y = y1 - size/2;
-//	}
-//	else if(y2 >= y1)
-//	{
-//		d = XmARROW_DOWN;
-//		y = (y2 + y1)/2 - size/2;
-//		x = x1 - size/2;
-//	}
-//	else
-//	{
-//		d = XmARROW_UP;
-//		y = (y1 + y2)/2 - size/2;
-//		x = x1 - size/2;
-//	}
-//
-//
-//	_XmDrawArrow(XtDisplay(fw),XtWindow(fw),
-//	    topGC,
-//	    botGC,
-//	    midGC,
-//	    x,y,w,h,1,d);
-//
-//}
-//
-//static int minspace = 10;
+	if(x1 == x2)
+	{
+		XDrawLine(XtDisplay(w),XtWindow(w),
+		    topGC,x1-1,y1,x2-1,y2);
+		XDrawLine(XtDisplay(w),XtWindow(w),
+		    midGC,x1,y1,x2,y2);
+		XDrawLine(XtDisplay(w),XtWindow(w),
+		    botGC,x1+1,y1,x2+1,y2);
+	}
+	else
+	{
+		XDrawLine(XtDisplay(w),XtWindow(w),
+		    topGC,x1,y1-1,x2,y2-1);
+		XDrawLine(XtDisplay(w),XtWindow(w),
+		    midGC,x1,y1,x2,y2);
+		XDrawLine(XtDisplay(w),XtWindow(w),
+		    botGC,x1,y1+1,x2,y2+1);
+	}
+}
+
+static void arrow(SimpleGraphWidget fw,int x1,int y1,int x2,int y2,int gc)
+{
+	int x;
+	int y;
+	int size = 11;
+	int h = size;
+	int w = size;
+	unsigned int d;
+
+	GC topGC = fw->manager.top_shadow_GC;
+	GC midGC = fw->manager.background_GC;
+	GC botGC = fw->manager.bottom_shadow_GC;
+	if(gc) midGC = fw->simplegraph.gc[gc % GC_COUNT];
+
+	if(x1 > x2)
+	{
+		d = XmARROW_LEFT;
+		x = (x1 + x2)/2 - size/2;
+		y = y1 - size/2;
+	}
+	else if(x1 < x2)
+	{
+		d = XmARROW_RIGHT;
+		x = (x2 + x1)/2 - size/2;
+		y = y1 - size/2;
+	}
+	else if(y2 >= y1)
+	{
+		d = XmARROW_DOWN;
+		y = (y2 + y1)/2 - size/2;
+		x = x1 - size/2;
+	}
+	else
+	{
+		d = XmARROW_UP;
+		y = (y1 + y2)/2 - size/2;
+		x = x1 - size/2;
+	}
+
+
+	_XmDrawArrow(XtDisplay(fw),XtWindow(fw),
+	    topGC,
+	    botGC,
+	    midGC,
+	    x,y,w,h,1,d);
+
+}
+
+static int minspace = 10;
+*/
 
 static void bezier_arrow(Widget w,GC gc,XPoint* p,int npoints)
 {

@@ -1,0 +1,228 @@
+{
+	"gui" : {
+							
+ 		"appearance":  {
+ 			"label": "Appearance",
+ 			"desc" : "Appearance",
+ 			"icon" : "colour.svg",
+            
+            
+            "group" : {
+                "title" : "Node rendering",
+                "prefix" : "view.common",
+                
+                "line" : "node_style",
+                "line" : "node_gradient"
+            },
+            
+             "group" : {
+                "title" : "Font size",
+                "prefix" : "view",
+                             
+                "line" : "tree.nodeFontSize",
+                "line" : "tree.attributeFontSize"
+             
+            },
+                                    
+            "grid" : {
+                   "title" : "Status",                                    
+                    "h1" : "Fill colour",
+                    "h2" : "Font colour",                  
+                    
+                    "row" : {
+                            "label" : "Unknown",
+                            "prefix" :   "nstate.unknown",		 		       
+ 				            "line" :  "fill_colour",
+				            "line" :  "font_colour"
+			        },					 				
+			        "row" : {
+                            "label" : "Complete",
+                            "prefix" :   "nstate.complete",                     
+                            "line" :  "fill_colour",
+                            "line" :  "font_colour"
+                    },  
+                    "row" : {
+                            "label" : "Queued",
+                            "prefix" :   "nstate.queued",                     
+                            "line" :  "fill_colour",
+                            "line" :  "font_colour"
+                     },  
+                     "row" : {
+                            "label" : "Aborted",
+                            "prefix" :   "nstate.aborted",                     
+                            "line" :  "fill_colour",
+                            "line" :  "font_colour"
+                     },                                  
+                     "row" : {
+                            "label" : "Submitted",
+                            "prefix" :   "nstate.submitted",                     
+                            "line" :  "fill_colour",
+                            "line" :  "font_colour"
+                      },  
+                      "row" : {
+                            "label" : "Active",
+                            "prefix" :   "nstate.active",                     
+                            "line" :  "fill_colour",
+                            "line" :  "font_colour"
+                      },  			
+			          "row" : {
+                            "label" : "Suspended ",
+                            "prefix" :   "nstate.suspended",                     
+                            "line" :  "fill_colour",
+                            "line" :  "font_colour"
+                      },
+                
+			             "note" : {
+			             "default" : "the states below are only valid for <b>servers</b>"
+			             },  
+                    
+                        "row" : {
+                            "label" : "Halted",
+                            "prefix" :   "sstate.halted",                     
+                            "line" :  "fill_colour",
+                            "line" :  "font_colour"
+                        },                                  
+                        "row" : {
+                            "label" : "Shutdown  ",
+                            "prefix" :   "sstate.shutdown",                     
+                            "line" :  "fill_colour",
+                            "line" :  "font_colour"
+                        },  
+                        "row" : {
+                            "label" : "Running",
+                            "prefix" :   "sstate.running",                     
+                            "line" :  "fill_colour",
+                            "line" :  "font_colour"
+                        }  		
+ 			
+ 						
+ 			}
+			
+ 		},	
+ 		
+ 	  "notification":  {
+            "visible" : "false",
+            "label": "Notifications",
+            "desc" : "Notifications",
+            "icon" : "colour.svg",
+            "grid" : {
+                    "title" : "Colours",                                    
+                    "h1" : "Fill colour",
+                    "h2" : "Font colour",                                      
+                            
+                    "row" : {
+                            "label" : "Restarted",
+                            "prefix" :  "notification.restarted",                     
+                            "line" :  "fill_colour",
+                            "line" :  "font_colour"                                                 
+                    },  
+                    "row" : {
+                            "label" : "Late",
+                            "prefix" :  "notification.late",                     
+                            "line" :  "fill_colour",
+                            "line" :  "font_colour"                       
+                    },  
+ 		            "row" : {
+                            "label" : "Zombie",
+                            "prefix" :  "notification.zombie",                     
+                            "line" :  "fill_colour",
+                            "line" :  "font_colour"                    
+                    },  
+ 		            "row" : {
+                            "label" : "Aborted or restarted aliases",
+                            "prefix" :  "notification.alias",                     
+                            "line" :  "fill_colour",
+                            "line" :  "font_colour"                    
+                    }  
+ 		        },
+ 		     "note" : {
+ 		            "default" : "For <b>Aborted</b> notifications colours are taken from the Status colour settings"
+ 		        }     
+ 		},        
+ 		
+ 			
+ 		"server": {
+ 			"label" : "Server options",
+ 		    "desc" : "Server options",
+ 			"icon" : "server.svg",
+ 			"group" : {
+ 				
+ 				"title" : "Update",
+ 				"prefix" : "server.update",
+ 				
+ 				"line" : "update",
+ 				"line" : "updateRateInSec",
+ 				"line" : "adaptiveUpdate",
+ 				"line" : "maxAdaptiveUpdateRateInMin"
+ 			},
+ 			
+ 			"group" : {
+				
+				"title" : "Files",
+				"prefix" : "server.files",
+				
+				"line" : "readFilesFromDisk",
+				"line" : "maxJobFileLines"				
+			},
+
+			"grid-hidden" : {
+				"title" : "Notifications",
+			
+				"h1" : "Show in status bar",
+				"h2" : "Popup dialog",
+				"h3" : "Play sound",
+				
+				"row" : {
+					"label" : "Aborted",
+					"prefix" : "server.notification.aborted",
+                    "line" : "enabled",
+					"line" : "popup",
+					"line" : "sound",
+					"line" : "soundFile"
+				},
+                "row" : {
+                    "label" : "Restarted",
+                    "prefix" : "server.notification.restarted",
+                    "line" : "enabled",
+                    "line" : "popup",
+                    "line" : "sound",
+                    "line" : "soundFile"
+                },
+                "row" : {
+                    "label" : "Late tasks",
+                    "prefix" : "server.notification.late",
+                    "line" : "enabled",
+                    "line" : "popup",
+                    "line" : "sound",
+                    "line" : "soundFile"
+                },
+                "row" : {
+                    "label" : "Zombies",
+                    "prefix" : "server.notification.zombie",
+                    "line" : "enabled",
+                    "line" : "popup",
+                    "line" : "sound",
+                    "line" : "soundFile"
+                },
+                 "row" : {
+                    "label" : "Restarted or aborted aliases",
+                    "prefix" : "server.notification.alias",
+                    "line" : "enabled",
+                    "line" : "popup",
+                    "line" : "sound",
+                    "line" : "soundFile"
+                }
+			}
+ 		
+ 		},
+
+ 		"Tree view" : {
+ 			"visible" : "false",
+ 			"desc" : "Tree view options",
+ 			 			
+ 			"line" : "view.tree.font",
+ 			"line" : "view.tree.nodeRectRadius",
+ 			"line" : "view.tree.displayChildCount" 
+ 		}		
+ 	}
+}

@@ -1,0 +1,138 @@
+{
+    "server":  {
+
+            "label" : "Server options",
+
+            "update": {
+            	"label" : "Update",
+            	"tooltip" : "update",      
+            
+            	"update": {
+            		"label": "Enable automatic update",                     
+            		"default": "true"
+                },
+            	           	
+            	"updateRateInSec": {
+            		"label": "Update frequency",
+            		"suffix" : "seconds", 
+            		"tooltip": "update frequency",                          
+            		"default": "60",
+            		"min" : "0"
+                },
+                
+                "adaptiveUpdate": {
+                	"label": "Adaptive update frequency",
+                	"tooltip": "Adaptive update frequency",                          
+                	"default": "true"
+                },
+			
+                "maxAdaptiveUpdateRateInMin": {
+                	"label": "Maximum adaptive update frequency",
+                	"suffix" : "minutes", 
+                	"tooltip": "Maximum adaptive update frequency",                          
+                	"default": "60",
+                	"min" : "0"
+                }
+            }, 
+
+			"files": {
+				"label" : "Files",
+				"tooltip" : "files", 
+				
+				"readFilesFromDisk": {
+            		"label": "Read files from disk when possible",
+            		"tooltip": "",                          
+            		"default": "true"
+                	},
+            
+            	"maxJobFileLines": {
+                	"label": "Maximum size of job files",
+                	"suffix" : "lines", 
+                	"tooltip": "",                          
+                	"default": "15000",
+                	"min" : "0"	
+                    }
+            },
+            
+            "notification": {
+				"label" : "Popup notifications",
+				"tooltip" : "Popup notifications", 
+				
+                "aborted" : {
+                    "label" : "Aborted",
+
+                    "enabled" : {
+                        "default" : "true"    
+                    },
+                    "popup" : {
+                        "default" : "true"
+                    },
+				    "sound" : {				 
+                        "tooltip": "Play sound",                          
+                        "default": "false"
+                    }    
+				},
+                "restarted" : {
+                    "label" : "Restarted",
+
+                    "enabled" : {
+                        "default" : "true"
+    
+                    },
+                    "popup" : {
+                        "default" : "true"
+                    },
+                    "sound" : {                     
+                        "tooltip": "Play sound",                          
+                        "default": "false"
+                    }    
+                },
+               "late" : {
+                    "label" : "Late tasks",
+
+                    "enabled" : {
+                        "default" : "false"    
+                    },
+                    "popup" : {
+                        "default" : "false"
+                    },
+                    "sound" : {                       
+                        "tooltip": "Play sound",                          
+                        "default": "false"
+                    }    
+                },		
+               "zombie" : {
+                    "label" : "Zombies",
+
+                    "enabled" : {
+                        "default" : "false"
+    
+                    },
+                    "popup" : {
+                        "default" : "false"
+                    },
+                    "sound" : {                        
+                        "tooltip": "Play sound",                          
+                        "default": "false"
+                    }    
+                },              	
+               "alias" : {
+                    "label" : "Aborted or restarted aliases",
+
+                    "enabled" : {
+                        "default" : "false"
+    
+                    },
+                    "popup" : {
+                        "default" : "false"
+                    },
+                    "sound" : {                     
+                        "tooltip": "Play sound",                          
+                        "default": "false"
+                    }    
+                }                 
+            	
+            }          
+
+     }
+}

@@ -1,6 +1,8 @@
 # eclipse
 .settings/
 .pydevproject
+.cproject
+.project
 
 # cmake
 ecbuild/

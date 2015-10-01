@@ -159,54 +159,44 @@ SimpleBaseClassRec simplebaseClassRec = {
 
 WidgetClass simplebaseWidgetClass = (WidgetClass) &simplebaseClassRec;
 
-//static void find_visible_part(Widget w,Position *x,Position *y,
-//	Dimension* width, Dimension* height)
-//{
-//    Position root_x,root_y;
-//    Widget   p = w;
-//
-//    *width  = w->core.width;
-//    *height = w->core.height;
-//    XtTranslateCoords(w,0,0,&root_x,&root_y);
-//
-//    *x = 0;
-//    *y = 0;
-//
-//    while((p = XtParent(p)))
-//    {
-//        Position  rx,ry;
-//        Dimension w,h;
-//
-//        /*
-//           make all computations in the root's coordinate system
-//        */
-//
-//        XtTranslateCoords(p,0,0,&rx,&ry);
-//
-//        w = p->core.width;
-//        h = p->core.height;
-//
-//        /*
-//            use the smallest rectangle
-//        */
-//
-//        if(w < *width)  *width  = w;
-//        if(h < *height) *height = h;
-//
-//        if(rx>root_x) root_x = rx;
-//        if(ry>root_y) root_y = ry;
-//
-//        /* stop when reach a shell, don't go to top level shell */
-//        if(XtIsShell(p)) break;
-//    }
-//
-//    /* Back to the widget's coordinate system */
-//
-//    XtTranslateCoords(w,0,0,x,y);
-//    *x = root_x - *x;
-//    *y = root_y - *y;
-//}
+/*
+static void find_visible_part(Widget w,Position *x,Position *y,
+	Dimension* width, Dimension* height)
+{
+   Position root_x,root_y;
+   Widget   p = w;
 
+   *width  = w->core.width;
+   *height = w->core.height;
+   XtTranslateCoords(w,0,0,&root_x,&root_y);
+
+   *x = 0;
+   *y = 0;
+
+   while((p = XtParent(p)))
+   {
+       Position  rx,ry;
+       Dimension w,h;
+
+       XtTranslateCoords(p,0,0,&rx,&ry);
+
+       w = p->core.width;
+       h = p->core.height;
+
+       if(w < *width)  *width  = w;
+       if(h < *height) *height = h;
+
+       if(rx>root_x) root_x = rx;
+       if(ry>root_y) root_y = ry;
+
+       if(XtIsShell(p)) break;
+   }
+
+   XtTranslateCoords(w,0,0,x,y);
+   *x = root_x - *x;
+   *y = root_y - *y;
+}
+*/
 
 /*-----------------------------------------------------------------*/
 /* Find which gadget was called                                    */
@@ -224,7 +214,7 @@ Boolean   *continue_dispatch;
 
 	x = event->xbutton.x;
 	y = event->xbutton.y;
-	// printf("bclick\n");
+	/* printf("bclick\n"); */
 
 	for (i = 0; i < w -> composite.num_children; i++)
 	{
@@ -367,7 +357,7 @@ SimpleBaseWidget request, new;
 static void Destroy(SimpleBaseWidget w)
 {
 	Widget clip,scroll,ww;
-	//printf("Destroy(SimpleBaseWidget w)\n");
+	/* printf("Destroy(SimpleBaseWidget w)\n"); */
 
 	NodeReset((Widget)w);
 
@@ -770,10 +760,10 @@ void NodeHideAll(Widget _w)
 Boolean NodeVisibility(Widget _w,int node,Boolean vis)
 {
 	SimpleBaseWidget w = (SimpleBaseWidget)_w;
-	if (!w) {
+	NodeStruct *p = w ? w->simplebase.nodes + node : NULL;
+	if (!w) 
 	  return False;
-	}
-	NodeStruct *p = w->simplebase.nodes + node;
+	
 	if( node < 0 || node >= w->simplebase.count) return vis;
 	if (0 == p) { 
 	  fprintf(stderr, "unexpected\n");
@@ -1145,7 +1135,7 @@ void sb_clear_dummy_nodes(SimpleBaseWidget gw)
 
 		}
 	}
-	// printf("remove_dummy_nodes: %d\n",cnt);
+	/* printf("remove_dummy_nodes: %d\n",cnt); */
 }
 
 int sb_insert_dummy_node(SimpleBaseWidget gw,int np,int nk)
@@ -1246,17 +1236,6 @@ int            n_args;
   Widget v_scroll;
 
   int ac = 0;
-
-//  Position    x_grep,y_grep;
-//  Dimension   h_grep,w_grep;
-//  Position    x_clip,y_clip;
-//  Dimension   h_clip,w_clip;
-//  Position    dv=0,dh=0;
-//  int min,max;
-//  int v_val,v_size,v_inc,v_page;
-//  int h_val,h_size,h_inc,h_page;
-//  Position x,y;
-  
   Arg al[5];
 
   /* printf("## mouse 1\n"); */

@@ -33,12 +33,12 @@
 #include "CalendarUpdateParams.hpp"
 #include "SuiteChanged.hpp"
 #include "ChangeMgrSingleton.hpp"
-#include "JobProfiler.hpp"
 #include "JobsParam.hpp"
 
 using namespace ecf;
 using namespace std;
 using namespace boost::posix_time;
+using namespace boost::gregorian;
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 //#define DEBUG_FIND_NODE 1
@@ -117,7 +117,7 @@ void Suite::requeue(
    // update the modify change number.
    Ecf::incr_modify_change_no();
 
-   begin_calendar();
+   requeue_calendar();
 
    NodeContainer::requeue(resetRepeats,
                           clear_suspended_in_child_nodes,
@@ -145,6 +145,32 @@ void Suite::begin_calendar()
 	   calendar_.begin(Calendar::second_clock_time());
 	}
 }
+
+void Suite::requeue_calendar()
+{
+   // ECFLOW-417
+   // Need special handling for a Suite with hybrid clock and repeat day variable.
+   // Basically on re-queue, we need to update calendar date by the repeat day variable
+   if ( clockAttr_.get() && clockAttr_->hybrid() && repeat().is_repeat_day()) {
+
+      // Get the current time, but with the *existing* date of the suite
+      boost::gregorian::date suite_date = calendar_.suiteTime().date();
+      suite_date += date_duration(repeat().step());
+
+      ptime suiteTime = ptime(suite_date, Calendar::second_clock_time().time_of_day() );
+      calendar_.begin( suiteTime );
+
+      // make sure update variable regenerates all suite variables, i.e like ECF_DATE, etc
+      // Needed since we have changed calendar date
+      if (suite_gen_variables_)  suite_gen_variables_->force_update();
+
+      return;
+   }
+
+   // Carry on same as before
+   begin_calendar();
+}
+
 
 void Suite::updateCalendar( const ecf::CalendarUpdateParams & calParams, std::vector<node_ptr>& auto_cancelled_nodes )
 {
@@ -177,9 +203,7 @@ bool Suite::resolveDependencies(JobsParam& jobsParam)
 {
  	if (begun_) {
 
- 	   if (jobsParam.timed_out_of_job_generation()) return false;
- 	   JobProfiler profile_me(jobsParam);
- 	   if (jobsParam.timed_out_of_job_generation()) return false;
+ 	   if (jobsParam.check_for_job_generation_timeout()) return false;
 
  	   SuiteChanged1 changed(this);
   		return NodeContainer::resolveDependencies(jobsParam);
@@ -321,16 +345,30 @@ void Suite::changeClockType(const std::string& clockType)
 void Suite::changeClockDate(const std::string& theDate)
 {
    // See ISSUES: Suite::changeClockType
-   int day,month,year;
-   DateAttr::getDate(theDate,day,month,year);
-   if (day == 0 || month == 0 || year == 0)  throw std::runtime_error("Suite::changeClockDate Invalid clock date:" + theDate );
+   int dayy,month,year;
+   DateAttr::getDate(theDate,dayy,month,year);
+   if (dayy == 0 || month == 0 || year == 0)  throw std::runtime_error("Suite::changeClockDate Invalid clock date:" + theDate );
+
+   // ECFLOW-417
+   // By default the user *IS* expected to requeue afterwards. However in the case where we
+   // have a hybrid clock *AND* repeat day, the calendar date will be updated after the requeue.
+   // This will update calendar by repeat days.
+   // Hence take this into account by decrementing by number of days
+   if ( clockAttr_.get() && clockAttr_->hybrid() && repeat().is_repeat_day()) {
+      boost::gregorian::date theDate( year, month, dayy );
+      theDate -= date_duration(repeat().step());
+      dayy = theDate.day();
+      month = theDate.month();
+      year = theDate.year();
+   }
+
 
    SuiteChanged1 changed(this);
    if (clockAttr_.get())  {
-      clockAttr_->date(day,month,year);      // this will check the date and update state change_no
+      clockAttr_->date(dayy,month,year);      // this will check the date and update state change_no
    }
    else {
-      addClock( ClockAttr(day,month,year) ); // will update state change_no
+      addClock( ClockAttr(dayy,month,year) ); // will update state change_no
    }
 
    handle_clock_attribute_change();
@@ -388,6 +426,9 @@ void Suite::handle_clock_attribute_change()
    //       *not* mark hybrid (day,date,cron) as complete
    //       since these nodes could be in a active/submitted state.
    NodeContainer::requeue_time_attrs();
+
+   // make sure we regenerate all suite variables, i.e like ECF_DATE, etc
+   if (suite_gen_variables_)  suite_gen_variables_->force_update();
 
    update_generated_variables();
 }
@@ -593,7 +634,8 @@ SuiteGenVariables::SuiteGenVariables(const Suite* s)
    genvar_month_("MONTH", "", false ),
    genvar_smsdate_("ECF_DATE", "", false ),
    genvar_clock_("ECF_CLOCK", "", false ),
-   genvar_time_("ECF_TIME", "", false ){}
+   genvar_time_("ECF_TIME", "", false ),
+   force_update_(false){}
 
 void SuiteGenVariables::update_generated_variables() const
 {
@@ -641,8 +683,9 @@ void SuiteGenVariables::update_generated_variables() const
    // The following generated variable need only be updated if NULL or if day changed
    // Under: HYBRID the day will never change, hence a one time update
    // **********************************************************************
-   if (genvar_yyyy_.theValue().empty() || suite_->calendar_.dayChanged()) {
+   if (genvar_yyyy_.theValue().empty() || suite_->calendar_.dayChanged() || force_update_) {
 
+      force_update_ = false;
       genvar_yyyy_.set_value(boost::lexical_cast<std::string>(suite_->calendar_.year()));
       genvar_dow_.set_value( boost::lexical_cast<std::string>(suite_->calendar_.day_of_week()) );
       genvar_doy_.set_value( boost::lexical_cast<std::string>(suite_->calendar_.day_of_year()) );

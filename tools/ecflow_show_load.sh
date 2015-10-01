@@ -84,8 +84,4 @@ fi
 
 exit 0
 load=./ecflow_show_load.sh
-$load -p 32222 -n vsms2 -h /tmp/emos/sms/ -l vsms2.ecf.2.log -z
-$load -p 43333 -n vsms2 -h /tmp/emos/sms/ -l vsms2.ecf.3.log -z
-$load -p 31415 -n vsms3 -h /tmp/emos/sms/ -l vsms3.ecf.e.log -z
-$load -p 32112 -n vsms1 -h /tmp/emos/sms/ -l vsms1.ecf.1.log -z
-$load -p 1630 -n eurus -z
+$load -p $ECF_PORT -n $ECF_NODE -h $TMPDIR/. -l ${ECF_NODE}.ecf.${ECF_PORT}.log -z

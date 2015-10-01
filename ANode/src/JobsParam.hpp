@@ -65,6 +65,9 @@ public:
    void set_timed_out_of_job_generation(const boost::posix_time::ptime& t) { time_out_time_ = t; timed_out_of_job_generation_ = true;}
    bool timed_out_of_job_generation() const { return timed_out_of_job_generation_; }
 
+   // ensure that we avoid job generation close the server poll time.
+   bool check_for_job_generation_timeout();
+
 private:
    bool timed_out_of_job_generation_;
 	bool createJobs_;

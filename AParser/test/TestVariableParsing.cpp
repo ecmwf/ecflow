@@ -52,8 +52,8 @@ BOOST_AUTO_TEST_CASE( test_single_defs ) {
 //  	    edit INT2 '11'                                             # comment
 //  	    edit YMD  '20091012'                                        # comment
 //  	 	family family
-//  			edit ECF_FETCH  "smsfetch -F %ECF_FILES% -I %ECF_INCLUDE%"  # comment line
-//  			edit ECF_FETCH2 'smsfetch -F %ECF_FILES% -I %ECF_INCLUDE%'  #comment line
+//  			edit var  "smsfetch -F %ECF_FILES% -I %ECF_INCLUDE%"  # comment line
+//  			edit var2 'smsfetch -F %ECF_FILES% -I %ECF_INCLUDE%'  #comment line
 //  			task t2
 //  		endfamily
 //  	endsuite

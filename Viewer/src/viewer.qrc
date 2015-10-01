@@ -1,0 +1,78 @@
+<RCC>
+  <qresource prefix="viewer">
+    <file>../images/dock_float.svg</file>
+    <file>../images/dock_close.svg</file>
+    <file alias="configure.svg">../images/configure.svg</file>
+    <file alias="reset.svg">../images/reset.svg</file>
+    <file>../images/search.svg</file>
+    <file alias="info.svg">../images/info.svg</file>
+    <file>../images/add_info.svg</file>
+    <file>../images/add_table.svg</file>
+    <file>../images/add_tree.svg</file>
+    <file alias="icon_calendar.png">../images/icon_calendar.png</file>
+    <file alias="icon_clock.png">../images/icon_clock.png</file>
+    <file alias="icon_complete.png">../images/icon_complete.png</file>
+    <file alias="icon_defstatus.png">../images/icon_defstatus.png</file>
+    <file alias="icon_late.svg">../images/icon_late.svg</file>
+    <file alias="icon_message.svg">../images/icon_message.svg</file>
+    <file alias="icon_rerun.svg">../images/icon_rerun.svg</file>
+    <file alias="icon_Z.png">../images/icon_Z.png</file>
+    <file alias="icon_waiting.png">../images/icon_waiting.png</file>
+    <file alias="script.png">../images/icon_Script.png</file>
+    <file>../images/arrow_up.svg</file>
+    <file>../images/arrow_down.svg</file>
+    <file>../images/add.svg</file>
+    <file>../images/close.svg</file>
+    <file>../images/configure.svg</file>
+    <file>../images/exit.svg</file>
+    <file alias="add_tab.svg">../images/add_tab.svg</file>
+    <file alias="chain.svg">../images/chain.svg</file> 
+    <file alias="clear_left.svg">../images/clear_left.svg</file>
+    <file alias="colour.svg">../images/colour.svg</file>
+    <file alias="directory_arrow.svg">../images/directory_arrow.svg</file>
+    <file alias="dock_config.svg">../images/dock_config.svg</file>
+    <file alias="dock_info.svg">../images/dock_info.svg</file>
+    <file alias="dock_menu_indicator.png">../images/dock_menu_indicator.png</file>
+    <file alias="drawer_open.svg">../images/drawer_open.svg</file>
+    <file alias="drawer_close.svg">../images/drawer_close.svg</file>
+    <file alias="edit.svg">../images/edit.svg</file>
+    <file alias="editcopy.svg">../images/editcopy.svg</file>
+    <file alias="editpaste.svg">../images/editpaste.svg</file>
+    <file alias="error.svg">../images/error.svg</file>
+    <file alias="filesave.svg">../images/filesave.svg</file>
+    <file alias="filter_decor.svg">../images/filter_decor.svg</file>
+    <file alias="overview.svg">../images/overview.svg</file>
+    <file alias="job.svg">../images/job.svg</file>
+    <file alias="job_dock.svg">../images/job_dock.svg</file>
+    <file alias="log.svg">../images/log.svg</file>
+    <file alias="log_info.svg">../images/log_info.svg</file>
+    <file alias="log_error.svg">../images/log_error.svg</file>
+    <file alias="manual.svg">../images/manual.svg</file>
+    <file alias="manual_dock.svg">../images/manual_dock.svg</file>
+    <file alias="message.svg">../images/message.svg</file>
+    <file alias="message_dock.svg">../images/message_dock.svg</file>
+    <file alias="output.svg">../images/output.svg</file>
+    <file alias="output_dock.svg">../images/output_dock.svg</file>
+    <file alias="padlock.svg">../images/padlock.svg</file>
+    <file alias="path_arrow.svg">../images/path_arrow.svg</file>
+    <file alias="reload.svg">../images/reload.svg</file>
+    <file alias="reload_one.svg">../images/reload_one.svg</file>
+    <file alias="rescue.svg">../images/rescue.svg</file>
+    <file alias="reset_to_default.svg">../images/reset_to_default.svg</file>
+    <file alias="script.svg">../images/script.svg</file>
+    <file alias="script_dock.svg">../images/script_dock.svg</file>
+    <file alias="search_decor.svg">../images/search_decor.svg</file>    
+    <file alias="server.svg">../images/server.svg</file>
+    <file alias="spinning_wheel.gif">../images/spinning_wheel.gif</file>
+    <file alias="splash_screen.png">../images/splash_screen.png</file>
+    <file alias="sync.svg">../images/sync.svg</file>
+    <file alias="terminate.svg">../images/terminate.svg</file>
+    <file alias="variable.svg">../images/variable.svg</file>
+    <file alias="variable_dock.svg">../images/variable_dock.svg</file>
+    <file alias="warning.svg">../images/warning.svg</file>
+    <file alias="why.svg">../images/why.svg</file>
+    <file alias="why_dock.svg">../images/why_dock.svg</file>
+    <file alias="zombie.svg">../images/zombie.svg</file>
+    <file alias="zombie_dock.svg">../images/zombie_dock.svg</file>
+  </qresource>
+</RCC>

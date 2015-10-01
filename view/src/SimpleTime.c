@@ -41,21 +41,11 @@
 #define ARC   2
 
 static void             Initialize();
-//static void             ConstraintInitialize();
-//static Boolean          ConstraintSetValues();
-//static void             Resize();
 static void             Print();
 static void             Layout(Widget,long*,long*);
 static void             Destroy();
 static Boolean          SetValues();
-//static void             insert_new_node();
-//static void             delete_node();
-//static void             new_layout();
 static void             Redisplay();
-//static int              compute_positions();
-//static void             shift_subsimpletime();
-//static void             set_positions();
-/* static void             reset(); */
 
 void SimpleBaseShow(Widget _w,XRectangle* r,XEvent* ev);
 
@@ -260,10 +250,6 @@ static void time_of(SimpleTimeWidget w,int x,int* d,int* t)
 
 static void time_out(SimpleTimeWidget w,XtIntervalId id)
 {
-	// time_t   t = time(0);
-	/* struct tm *tt = gmtime(&t); */
-
-
 	if(XtIsRealized((Widget)w) && XtIsManaged((Widget)w))
 	{
 #if 0
@@ -357,11 +343,11 @@ static void line_in(SimpleTimeWidget w,int x1,int y1,int x2,int y2)
 	    x1+1,y1+1,x2+1,y2+1);
 }
 
-//static void line_out(SimpleTimeWidget w,int x1,int y1,int x2,int y2)
-//{
-//	XDrawLine(XtDisplay(w), XtWindow(w), w->simpletime.gc,
-//	    x1,y1,x2,y2);
-//}
+/*static void line_out(SimpleTimeWidget w,int x1,int y1,int x2,int y2)
+{
+	XDrawLine(XtDisplay(w), XtWindow(w), w->simpletime.gc,
+	    x1,y1,x2,y2);
+	    } */
 
 static void Redisplay (SimpleTimeWidget w, XEvent *event, Region region)
 {
@@ -527,11 +513,7 @@ static void calc_arc(SimpleTimeWidget tw,NodeStruct* w,int arc)
 static void Layout(Widget w,long *maxWidth,long *maxHeight)
 {
 	SimpleTimeWidget tw = (SimpleTimeWidget)w;
-//	XtGeometryResult    result;
-//	Dimension           replyWidth = 0, replyHeight = 0;
 	int i;
-//	int nlines = 0;
-//	Position		*lines;
 	int arc = 0;
 
 	XmString s = XmStringCreateSimple("0123456789:- ");
@@ -755,7 +737,8 @@ void TimeEventTime(Widget _w,XEvent* e,DateTime *dt)
 
 int TimeDiff(DateTime dt1,DateTime dt2)
 {
-	long long x1,x2;
+  /* long long x1,x2; */
+	long x1,x2;
 	int d1 = date_to_julian(dt1.date);
 	int d2 = date_to_julian(dt2.date);
 	int t1 = time_to_sec(dt1.time);

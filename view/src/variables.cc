@@ -62,6 +62,7 @@ void variables::show( node& n )
    int valsize = 0;
    char fmt1[256];
    char fmt2[256];
+   char fmt3[256];
    node* m = &n;
 
    XtSetSensitive(edit_, True);
@@ -134,6 +135,7 @@ void variables::show( node& n )
    if (!varsize) return;
    snprintf(fmt1, 256, "(%%-%ds = %%-%ds)", varsize, valsize);
    snprintf(fmt2, 256, " %%-%ds = %%-%ds ", varsize, valsize);
+   snprintf(fmt3, 256, "[%%-%ds = %%-%ds]", varsize, valsize);
    {
      std::vector<std::string> shown;     
       char buffer[1024];
@@ -167,6 +169,17 @@ void variables::show( node& n )
 
             if (ecf) {
                gvar.clear();
+               gvar = ecf->variables();
+               std::sort(gvar.begin(), gvar.end(), cless_than());
+               gvar_end = gvar.end();
+               for(it = gvar.begin(); it != gvar_end; ++it) {
+		  const std::string& name = (*it).name();
+		  if (std::find(shown.begin(), shown.end(), name) == shown.end()) {
+		    snprintf(buffer, 1024, fmt2, name.c_str(), (*it).theValue().c_str());
+		    xec_AddFontListItem(list_, buffer, 0);
+		    shown.push_back(name); }
+               }
+
                ecf->gen_variables(gvar);
                for(it = gvar.begin(); it != gvar.end(); ++it) {
                   if ((*it).name() == "" || 
@@ -179,28 +192,9 @@ void variables::show( node& n )
 		    xec_AddFontListItem(list_, buffer, 0);
 		    shown.push_back(name); }
                }
-
-               gvar = ecf->variables();
-               std::sort(gvar.begin(), gvar.end(), cless_than());
-               gvar_end = gvar.end();
-               for(it = gvar.begin(); it != gvar_end; ++it) {
-		  const std::string& name = (*it).name();
-		  if (std::find(shown.begin(), shown.end(), name) == shown.end()) {
-		    snprintf(buffer, 1024, fmt2, name.c_str(), (*it).theValue().c_str());
-		    xec_AddFontListItem(list_, buffer, 0);
-		    shown.push_back(name); }
-               }
             }
-            if (defs) {
-               gvar = defs->server().server_variables();
-               for(it = gvar.begin(); it !=  gvar.end(); ++it) {
-		  const std::string& name = (*it).name();
-		  if (std::find(shown.begin(), shown.end(), name) == shown.end()) {
-		    snprintf(buffer, 1024, fmt1, name.c_str(), (*it).theValue().c_str());
-		    xec_AddFontListItem(list_, buffer, 0);
-		    shown.push_back(name); }
-               }
 
+            if (defs) {
                gvar = defs->server().user_variables();
                std::sort(gvar.begin(), gvar.end(), cless_than());
                for(it = gvar.begin(); it !=  gvar.end(); ++it) {
@@ -208,6 +202,19 @@ void variables::show( node& n )
 		  if (std::find(shown.begin(), shown.end(), name) == shown.end()) {
 		 snprintf(buffer, 1024, fmt2, name.c_str(), (*it).theValue().c_str());
 		 xec_AddFontListItem(list_, buffer, 0);
+		    shown.push_back(name); }
+               }
+
+               gvar = defs->server().server_variables();
+               for(it = gvar.begin(); it !=  gvar.end(); ++it) {
+		  const std::string& name = (*it).name();
+		  if (std::find(shown.begin(), shown.end(), name) == shown.end()) {
+		    bool readOnly = name=="ECF_NODE" || name=="ECF_PORT" ||
+		      name=="ECF_LISTS" || // security ???
+		      name=="ECF_PID"  || name=="ECF_VERSION";
+		    snprintf(buffer, 1024, readOnly ? fmt3 : fmt1, 
+			     name.c_str(), (*it).theValue().c_str());
+		    xec_AddFontListItem(list_, buffer, 0);
 		    shown.push_back(name); }
                }
             }
@@ -221,9 +228,12 @@ void variables::show( node& n )
 Boolean variables::enabled( node& n )
 {
    int type = n.type();
-   if (type == NODE_SUPER || type == NODE_FAMILY || type == NODE_TASK || type == NODE_ALIAS) return True;
+   if (type == NODE_SUPER || type == NODE_FAMILY || type == NODE_TASK 
+       || type == NODE_ALIAS) 
+     return True;
    for(node* run = n.kids(); run; run = run->next())
-      if (run->type() == NODE_VARIABLE) return True;
+      if (run->type() == NODE_VARIABLE) 
+	return True;
    return False;
 }
 
@@ -250,6 +260,7 @@ void variables::browseCB( Widget w, XtPointer data )
       r += 2;
 
       if (*p == '(') r[strlen(r) - 1] = 0;
+      if (*p == '[') r[strlen(r) - 1] = 0;
 
       while ( *r && r[strlen(r) - 1] == ' ' )
          r[strlen(r) - 1] = 0;
@@ -306,6 +317,7 @@ void search_item( Widget text_w, XtPointer client_data, XtPointer call_data, Wid
             q[strlen(q) - 1] = 0;
          r += 2;
          if (*p == '(') r[strlen(r) - 1] = 0;
+         if (*p == '[') r[strlen(r) - 1] = 0; // readOnly variables
          while ( *r && r[strlen(r) - 1] == ' ' )
             r[strlen(r) - 1] = 0;
          XmTextSetString(nam, q);
@@ -374,18 +386,17 @@ void variables::setCB( Widget, XtPointer )
       }
 
       if (n != 0 && n->isGenVariable(name) && ok) {
-         ok = confirm::ask(True, "This variable is a generated variable\n"
-                           "Do you want to proceed?");
+	ok = confirm::ask(True, "This variable is a generated variable\n"
+			  "Do you want to proceed?");
       }
 
       if (ok) {
          bool add = true;
-         if (get_node()->__node__()) add = get_node()->__node__()->variable(name)
-                  == ecf_node::none();
-         if (get_node()->__node__())
-            get_node()->serv().command(clientName, "--alter", add ? "add" : "change", "variable",
-                                       name, value, get_node()->full_name().c_str(), NULL);
-         else
+         if (get_node()->__node__()) {
+	   add = get_node()->__node__()->variable(name) == ecf_node::none();
+	   get_node()->serv().command(clientName, "--alter", add ? "add" : "change", "variable",
+				      name, value, get_node()->full_name().c_str(), NULL);
+         } else
             get_node()->serv().command("alter", "-v", get_node()->full_name().c_str(), name, value,
                                        NULL);
          if (add) update();

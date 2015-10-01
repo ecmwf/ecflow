@@ -45,7 +45,7 @@ public:
    static void create(const std::string& the_port)
    {
       std::string the_file = port_file( the_port );
-   //   std::cout << "EcfPortLock::create " << the_file << "\n";
+//      std::cout << "EcfPortLock::create " << the_file << " ---------------------------------------------------\n";
       std::string errorMsg;
       if (!ecf::File::create(the_file,"",errorMsg)) {
          std::stringstream sb;
@@ -57,7 +57,7 @@ public:
    static void remove(const std::string& the_port)
    {
       std::string the_file = port_file(the_port);
-   //   std::cout << "EcfPortLock::remove " << the_file << "\n";
+//      std::cout << "EcfPortLock::remove " << the_file << " --------------------------------------------------\n";
       boost::filesystem::remove(the_file);
    }
 
@@ -66,12 +66,17 @@ private:
 
    static std::string port_file(const std::string& the_port)
    {
-      // We need the *SAME* location so that different process find the same file. Get to the workspace directory
-      std::string path = File::root_build_dir();
-      //std::cout << "\nworkspace_dir = " << path << " ------------------------------------------------------\n";
+      // We need the *SAME* location so that different process find the same file.
+      // When going across compiler the root_build_dir is not sufficient
+      char* ecf_port_lock_dir = getenv("ECF_PORT_LOCK_DIR");
+      std::string path;
+      if (ecf_port_lock_dir) path = ecf_port_lock_dir;
+      else                   path = File::root_build_dir();
+
       path += "/ECF_PORT_used_";
       path += the_port;
       path += ".lock";
+
       return path;
    }
 };

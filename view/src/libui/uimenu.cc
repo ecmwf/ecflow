@@ -41,7 +41,7 @@ void menu_form_c::create (Widget parent, char *widget_name)
 	Widget rowcol2 = (Widget)NULL;
 	Widget label1 = (Widget)NULL;
 	Widget optionMenu1 = (Widget)NULL;
-	Widget label2 = (Widget)NULL;
+	// Widget label2 = (Widget)NULL;
 	Widget cascade1 = (Widget)NULL;
 	Widget button1 = (Widget)NULL;
 	Widget button2 = (Widget)NULL;
@@ -82,7 +82,7 @@ void menu_form_c::create (Widget parent, char *widget_name)
 	label1 = XmCreateLabel ( rowcol2, "Title:", al, ac );
 	title_ = XmCreateTextField ( rowcol2, "title_", al, ac );
 	optionMenu1 = XmCreateOptionMenu ( rowcol2, "optionMenu1", al, ac );
-	label2 = XmOptionLabelGadget ( optionMenu1 );
+	// label2 = XmOptionLabelGadget ( optionMenu1 ); /* 20150819 */
 	cascade1 = XmOptionButtonGadget ( optionMenu1 );
 	actions_ = XmCreatePulldownMenu ( optionMenu1, "actions_", al, ac );
 	button1 = XmCreatePushButton ( actions_, "Ecf command", al, ac );

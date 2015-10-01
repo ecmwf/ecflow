@@ -200,4 +200,49 @@ BOOST_AUTO_TEST_CASE( test_ecflow_359 )
 //   cout << the_defs;
 }
 
+
+BOOST_AUTO_TEST_CASE( test_ecflow_428 )
+{
+   cout << "Base:: ...test_ECFLOW-428\n";
+   //   suite s1
+   //     family f1
+   //       family f2
+   //          task t1
+   //          task t2
+
+   // Set t1 to aborted, then call reque aborted on suite s1
+   // This should result ALL nodes to be in a queued state
+
+   defs_ptr the_defs = Defs::create();
+   suite_ptr suite = the_defs->add_suite( "s1" ) ;
+   suite->addDefStatus(DState::SUSPENDED);
+   family_ptr f1 = suite->add_family("f1");
+   family_ptr f2 = f1->add_family("f1");
+   task_ptr t1 = f2->add_task("t1");
+   task_ptr t2 = f2->add_task("t2");
+
+//   PrintStyle::setStyle(PrintStyle::STATE);
+//   cout << the_defs;
+
+   the_defs->beginAll();
+
+   // set t1 to aborted state
+   TestHelper::invokeRequest(the_defs.get(),
+                             Cmd_ptr( new ForceCmd(t1->absNodePath(), "aborted", false /*recursive */, false /* set Repeat to last value */)));
+   TestHelper::test_state(t1,NState::ABORTED);
+   TestHelper::test_state(t2,NState::QUEUED);
+   TestHelper::test_state(f1,NState::ABORTED);
+   TestHelper::test_state(f2,NState::ABORTED);
+   TestHelper::test_state(suite,NState::ABORTED);
+
+   // Now reque aborted tasks for suite
+   TestHelper::invokeRequest(the_defs.get(),Cmd_ptr( new RequeueNodeCmd(suite->absNodePath(), RequeueNodeCmd::ABORT)));
+
+   // *Suite* should now be queued
+   TestHelper::test_state(suite,NState::QUEUED);
+   TestHelper::test_state(f1,NState::QUEUED);
+   TestHelper::test_state(f2,NState::QUEUED);
+   TestHelper::test_state(t1,NState::QUEUED);
+   TestHelper::test_state(t2,NState::QUEUED);
+}
 BOOST_AUTO_TEST_SUITE_END()

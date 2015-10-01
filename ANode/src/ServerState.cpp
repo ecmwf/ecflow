@@ -216,6 +216,18 @@ void ServerState::delete_user_variable( const std::string& var)
    }
 }
 
+const std::string& ServerState::find_user_variable(const std::string& theVarName) const
+{
+   std::vector<Variable>::const_iterator user_var_end = user_variables_.end();
+   for(std::vector<Variable>::const_iterator i = user_variables_.begin(); i!=user_var_end; ++i) {
+      if ((*i).name() == theVarName) {
+         LOG_ASSERT(!(*i).theValue().empty(),"");
+         return (*i).theValue();
+      }
+   }
+   return Str::EMPTY();
+}
+
 const std::string& ServerState::find_variable(const std::string& theVarName) const
 {
    // SEARCH USER variables FIRST

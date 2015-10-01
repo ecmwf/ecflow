@@ -83,7 +83,7 @@ bool VariableParser::doParse(
 
    // i.e
    //  0     1         2
-   // edit ECF_FETCH "smsfetch -F %ECF_FILES% -I %ECF_INCLUDE%"  #fred
+   // edit var_name "smsfetch -F %ECF_FILES% -I %ECF_INCLUDE%"  #fred
    std::string value; value.reserve(line.size()-4);
    for (size_t i = 2; i < line_tokens_size; ++i) {
       if ( lineTokens[i].at( 0 ) == '#' ) break;

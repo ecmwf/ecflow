@@ -1,7 +1,7 @@
 #!/bin/ksh
 #==========================================================================
 ##.TITLE   EMOS - METAPS utilities
-##.NAME    sms_submit
+##.NAME    ecf_cmd
 ##.SECTION EMOS
 ##.DATE    2005-09-12
 ##.VERSION 1.0
@@ -284,7 +284,7 @@ if [ $# -lt 3 ] ; then
   echo
   echo "usage: $0 <user> <host> file remote_output [node_suffix]"
   echo
-  echo "example: $0 uid ecgate task.job1"
+  echo "example: $0 uid host task.job1"
   echo "while node_suffix is empty, host-batch node is the target, "
   echo "      else \$node\$nodesuffix is the replacement target"
   echo  
@@ -316,17 +316,15 @@ subfile=${file}.sub
 hostname=$(hostname)
 
 case $host in
-    bilbo | belegorn | boromir | denethor | faramir | acq | pp1 | diss) type=pbs;;
+    xxx_pbs) type=pbs;;
     vpp* )    type=vppnqs;;
-    swarm | linux_cluster | lxa | lxb | lxab )    type=sge_qsub;;
-    ecgate1 | ecgb* | ecgt* ) type=slurm;;
-    ecgate  | ecga* | c2* )   type=ll;;
+    xxx_sge )    type=sge_qsub;;
+    xxx_slurm ) type=slurm;;
+    xxx_ll* )   type=ll;;
     $hostname | localhost )   type=local;;
-    datasvc)                  type=ssh;;
-    * )                       type=rsh;;
+    xxx_rsh)                  type=rsh;;
+    * )                       type=ssh;;
 esac
-
-# if [[ $type = "local" ]] && [[ $hostname = @(ecg*|vsms*) ]]; then type=ssh; fi
 
 #--------------------------------------------------------------------------
 # determine job file type and output directory
@@ -341,7 +339,7 @@ elif egrep -i "^#.*@.*queue" $file > /dev/null ; then
   jtype=ll
   output=$(egrep -i "^#.*@.*output" $file | cut -d"=" -f 2 | head -1)
 
-elif [[ $host == @(ecgb*|ecgt0*|ecgate1) ]] ; then
+elif [[ $host == @(xxx_slurm) ]] ; then
   jtype=slurm
   output=$(egrep -i "^#.*-o" $file | cut -d" " -f 3 | head -1)
 
@@ -467,7 +465,7 @@ fi
 
 #rsh $host -l $user /usr/local/apps/propbs/bin/pbsqsub < $file || ERROR "Failed to submit job to PBS (possible failure of rsh)."
 
-if [[ $(uname -n) == @(ecgb*|vsms*|sms-map) ]]; then
+if [[ $(uname -n) == @(xxx_slurm) ]]; then
   $SSH -l $user $host /usr/local/apps/propbs/bin/pbsqsub -f $file > $subfile 2>&1 || \
       ERROR "Failed to submit job to PBS. " 
 else
@@ -655,7 +653,7 @@ if [[ $host == @(c2*) ]] ; then
   fi
 fi
 
-if [[ $(uname -n) == @(ecgb*|vsms*|sms-map) ]]; then
+if [[ $(uname -n) == @(xxx_slurm) ]]; then
   $SSH -l $user ${host} \
       "unset WAITQUEUE ; $LL_ROOT/llsubmit - 2>&1 " < $file > $subfile 2>&1 || \
       ERROR "Failed to submit job to LoadLeveler. $?" 
@@ -727,7 +725,7 @@ fi
 #--------------------------------------------------------------------------
   mv ${file}__ $file
 
-  if [[ $hostname == @(ecgb*|ecgate1) ]]; then
+  if [[ $hostname == @(xxx_slurm) ]]; then
       touch $output
       $SLURM_ROOT/sbatch < ${file} > $subfile 2>&1 \
       || ERROR "Job submission failed (${file})." 
@@ -791,7 +789,7 @@ esac
 
 if [[ $type == local ]] ; then
   cmd=""
-elif [[ $hostname == @(ecgb*|vsms*) ]] ; then
+elif [[ $hostname == @(xxx_slurm) ]] ; then
   cmd="$SSH -l $user $host "
 else
   cmd="rsh $host -l $user "
@@ -831,14 +829,14 @@ mv -f ${file}__ $file
 if [[ $type == local ]] ; then
 
     case $hostname in
-        ecg* | vsms*)  nohup $RUNSHELL -x $file > $output 2>&1 &             ;;
+        xxx_slurm )  nohup $RUNSHELL -x $file > $output 2>&1 &             ;;
         *) standalone -o $output -s $RUNSHELL < $file || ERROR "Job submission to standalone failed."
             ;;
         esac
 else
 
     case $hostname in
-        ecg* | vsms*)  # $cmd "nohup $RUNSHELL -x $file > $output 2>&1 &"             
+        xxx_slurm )  # $cmd "nohup $RUNSHELL -x $file > $output 2>&1 &"
             $cmd "$STANDALONE -o $output -s $RUNSHELL" < $file  > $subfile || \
                 ERROR "Job submission to rsh standalone failed."
             ;;
@@ -853,16 +851,3 @@ fi
 esac
 
 exit 0
-
-ssh-keygen -t dsa
-scp ~/.ssh/id_dsa.pub ecgate:.ssh/authorized_keys2
-ssh-agent sh -c 'ssh-add < /dev/null && bash' 
-
-
-ssh-keygen -t rsa
-ssh server "mkdir .ssh; chmod 0700 .ssh"
-scp .ssh/id_rsa.pub server:.ssh/authorized_keys2
-scp $HOME/.ssh/id_rsa.pub c2a:$HOME/.ssh/authorized_keys2
-scp $HOME/.ssh/id_rsa.pub c2b:$HOME/.ssh/authorized_keys2
-
-cp $HOME/.ssh/id_rsa.pub $HOME/.ssh/authorized_keys2

@@ -28,9 +28,9 @@
 class EcfFile {
 public:
 	/// use default copy constructor, assignment, destructor
-	/// ECF_FETCH/SMSFETCH is mainly used by research. i.e to obtain scripts and includes
+	/// ECF_FETCH  is used obtain the script from running a command  i.e.
 	/// from the version control system. This has not been implemented yet.
-	EcfFile(Node*, const std::string& path_to_script_or_fetch_cmd, bool fetchCommand =  false);
+	EcfFile(Node*, const std::string& path_to_script_or_fetch_cmd, bool fetchCommand = false);
 
 	// The path to the ecf file, empty path means that ecf file could not be located
 	const std::string& path() const { return script_path_or_cmd_;}

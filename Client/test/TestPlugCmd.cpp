@@ -309,10 +309,10 @@ BOOST_AUTO_TEST_CASE( test_server_plug_cmd )
  	   }
 
  	   // Start additional local server, special constructor. need false flag, to avoid ambiguity, with the other constructor.
- 	   std::string port2 = SCPort::next();
+ 	   std::string port2 = SCPort::next_only();
  	   InvokeServer invokeServer2(port2,false);
 
- 	   test_plug_on_multiple_server(ClientEnvironment::hostSpecified(), Str::DEFAULT_PORT_NUMBER(),
+ 	   test_plug_on_multiple_server(ClientEnvironment::hostSpecified(), ClientEnvironment::portSpecified(),
  	                                Str::LOCALHOST(), port2);
  	}
 }

@@ -1,0 +1,83 @@
+{
+    "notification":  {
+
+            "aborted": {
+                "fill_colour" : {
+                    "label" : "Colour",
+                    "default": "rgb(255,0,0)"
+                },
+                "font_colour" : {
+                    "label" : "Font colour",
+                    "default": "rgb(0,0,0)"
+                },                            
+                "border":     "rgb(200,200,200)",
+                "title"  :    "Change: aborted tasks",
+                "labelText" : "Aborted",
+                "widgetText" : "A",
+                "tooltip"    : "Notifications for tasks becoming <b>aborted</b>"        
+             },
+ 
+            "restarted": {
+                "fill_colour" : {
+                    "label" : "Colour",
+                    "default": "rgb(64,224,208)"
+                },
+                "font_colour" : {
+                    "label" : "Font colour",
+                    "default": "rgb(0,0,0)"
+                },                              
+                "border":     "rgb(200,200,200)",
+                "title"  :    "Change: restarted tasks",
+                "labelText" : "Restarted", 
+                "widgetText" : "Re",
+                "tooltip"    : "Notifications for tasks having <b>restarted</b>"                   
+            }, 
+            "late": {
+                "fill_colour" : {
+                    "label" : "Colour",
+                    "default": "rgb(64,224,208)"
+                },
+                "font_colour" : {
+                    "label" : "Font colour",
+                    "default": "rgb(0,0,0)"
+                },                            
+                "border":     "rgb(200,200,200)",
+                "title"  :    "Change: late tasks",
+                "labelText" : "Late", 
+                "widgetText" : "L",
+                "tooltip"    : "Notifications for tasks becoming <b>late</b>"                      
+            },
+            "zombie": {
+                "fill_colour" : {
+                    "label" : "Colour",
+                    "default": "rgb(64,224,208)"
+                },
+                "font_colour" : {
+                    "label" : "Font colour",
+                    "default": "rgb(0,0,0)"
+                },                                
+                "border":     "rgb(200,200,200)",
+                "title"  :    "Change: zombies",
+                "labelText" : "Zombies", 
+                "widgetText" : "Z",
+                "tooltip"    : "Notifications for tasks becoming <b>zombies</b>"                     
+            },
+            "alias": {
+                "fill_colour" : {
+                    "label" : "Colour",
+                    "default": "rgb(64,224,208)"
+                },
+                "font_colour" : {
+                    "label" : "Font colour",
+                    "default": "rgb(0,0,0)"
+                },                               
+                "border":     "rgb(200,200,200)",
+                "title"  :    "Change: aliases",
+                "labelText" : "Aliases", 
+                "widgetText" : "Al",
+                "tooltip"    : "Notifications for <b>aliases</b> becoming <b>aborted</b> or having <b>restarted</b>"                    
+            }
+       
+       }
+
+}

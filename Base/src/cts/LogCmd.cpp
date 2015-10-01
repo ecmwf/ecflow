@@ -15,6 +15,8 @@
 #include "boost/filesystem/path.hpp"
 #include "boost/filesystem/operations.hpp"
 
+#include <boost/algorithm/string/trim.hpp>
+
 #include "ClientToServerCmd.hpp"
 #include "AbstractServer.hpp"
 #include "AbstractClientEnv.hpp"
@@ -48,6 +50,8 @@ LogCmd::LogCmd(const std::string& path)
    //             as that could be on a different machine.
    // ECFLOW-174, Never get the full log, as this can make server consume to much memory
    //             default taken from get_last_n_lines_default
+   // ECFLOW-377, should remove leading/trailing spaces from path
+   boost::algorithm::trim(new_path_);
 }
 
 std::ostream& LogCmd::print(std::ostream& os) const
@@ -73,6 +77,20 @@ bool LogCmd::equals(ClientToServerCmd* rhs) const
 	return UserCmd::equals(rhs);
 }
 
+// changed for release 4.1.0
+bool LogCmd::isWrite() const
+{
+   switch (api_) {
+      case LogCmd::GET:   return false;  break;
+      case LogCmd::CLEAR: return false; break;
+      case LogCmd::FLUSH: return false; break;
+      case LogCmd::NEW:   return true;  break;
+      case LogCmd::PATH:  return false; break;
+      default : throw std::runtime_error( "LogCmd::isWrite: Unrecognised log api command,") ;
+   }
+   return false;
+}
+
 STC_Cmd_ptr LogCmd::doHandleRequest(AbstractServer* as) const
 {
 	as->update_stats().log_cmd_++;
@@ -86,14 +104,20 @@ STC_Cmd_ptr LogCmd::doHandleRequest(AbstractServer* as) const
             if (!new_path_.empty()) {
                Log::instance()->new_path(new_path_); // will throw for errors
 
-               // Update the corresponding server variable
-               NameValueVec vec;
-               vec.push_back(std::make_pair(Str::ECF_LOG(),Log::instance()->path()));
-               as->defs()->set_server().add_or_update_server_variables(vec);
+               // *NOTE* calling --log=new <path> should be treated the *SAME* as editing ECF_LOG in the GUI
+               //        This is done adding it as a *USER* variable. This overloads the server variables
+               //        It also allows us to see the change in GUI. Note: Defs/server_variables are not synced
+               // ECFLOW-376
+               as->defs()->set_server().add_or_update_user_variables(Str::ECF_LOG(),Log::instance()->path());
             }
             else {
                // User could have overridden ECF_LOG variable
-               const std::string& log_file_name = as->defs()->server().find_variable(Str::ECF_LOG());
+               // *FIRST* look at user variables, then look at *server* variables.
+               std::string log_file_name = as->defs()->server().find_variable(Str::ECF_LOG());
+
+               // ECFLOW-377 should remove leading/trailing spaces from path
+               boost::algorithm::trim(log_file_name);
+
                Log::instance()->new_path(log_file_name);  // will throw for errors
             }
 

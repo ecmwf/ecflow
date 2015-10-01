@@ -1,0 +1,152 @@
+{
+    "view":  {
+
+            "common" : {
+                "node_style" : {
+                    "label" : "Node rendering style",
+                    "default" : "modern",
+                    "values"  : "classic/modern",
+                    "values_label" : "Text in status rectangle (classic)/Separate text and status rectangle"
+                },    
+                "node_gradient" : {
+                    "label" : "Gradient shading for nodes",
+                    "default" : "true"
+                },    
+                "fontSize" : {
+                    "label": "Application",
+                    "suffix" : "points",                                           
+                    "default": "9",
+                    "min" : "7",
+                    "max" : "20"
+                  } 
+            },
+            "tree": {
+            	
+                "font" : {
+					"label" : "Font",
+					"default": "font(Sans Serif,9,-1,5,50,0,0,0,0,0)"
+				},
+				"displayChildCount" : {
+					"label" : "Display number of child nodes for servers/suites",
+					"default": "true"
+				}, 
+				
+				"nodeFontSize" : {
+                    "label": "Nodes (tree view)",
+                    "suffix" : "points",                                           
+                    "default": "9",
+                    "min" : "7",
+                    "max" : "20"
+                  },  
+                  
+                 "attributeFontSize" : {
+                    "label": "Attributes (tree view)",
+                    "suffix" : "points",                                           
+                    "default": "8",
+                    "min" : "7",
+                    "max" : "20"
+                  }     	          
+            },
+
+            "table": {
+            
+            	"font" : {
+ 					"label" : "Font",
+ 					"default": "font()"
+ 				},
+ 				
+ 				"fontSize" : {
+                    "label": "Table view",
+                    "suffix" : "points",                                           
+                    "default": "9",
+                    "min" : "7",
+                    "max" : "20"
+                  } 
+ 				
+ 				
+			},
+			
+	       "textEditor" : {
+			     
+			     "fontSize" : {
+			        "label": "Text editors",
+                    "suffix" : "points",                                           
+                    "default": "9",
+                    "min" : "7",
+                    "max" : "20"
+                  } 
+                 
+			} 
+		     
+    },
+    
+    "table_columns": {
+    	
+    	"path" : {
+    		"label" : "Node",
+    		"tooltip" : "Node"
+    	},
+    	"status" : {
+    		"label" : "Status"
+        },
+        "type" : {
+            "label" : "Type"
+        },
+    	"trigger" : {
+            "label" : "Trigger"
+        },
+    	"label" : {
+            "label" : "Label"
+        },
+        "event" : {
+            "label" : "Event"
+        },    
+        "meter" : {
+    		"label" : "Meter"
+    	}	
+    },
+    
+    "zombie_columns": {
+    	
+    	"path" : {
+    		"label" : "Path",
+    		"tooltip" : "Path of task node"
+    	},
+    	"type" : {
+    		"label" : "Type",
+    		"tooltip" : "Type of zombie"
+    	},
+    	"duration" : {
+    		"label" : "Duration",
+    		"tooltip" : "Duration"
+    	},
+    	"allowed" : {
+    		"label" : "Allowed",
+    		"tooltip" : "The age the zombie is allowed to live. Server typically checks every 60 seconds, hence this is lowest valid value that has effect"
+    	},
+    	"password" : {
+    		"label" : "Password",
+    		"tooltip" : "Password of the job"
+    	},    	
+    	"pid" : {
+    		"label" : "Pid",
+    		"tooltip" : "Process or remote id"
+    	},
+    	"tryno" : {
+    		"label" : "Try no",
+    		"tooltip" : "Try number"
+    	},
+    	"action" : {
+    		"label" : "Action",
+    		"tooltip" : "User action"
+    	},
+    	"child" : {
+    		"label" : "Child cmd",
+    		"tooltip" : "Child command"
+    	},
+    	"calls" : {
+    		"label" : "Calls",
+    		"tooltip" : "password of the job"
+    	}   	
+    }    
+}

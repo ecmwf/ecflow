@@ -76,7 +76,6 @@ exit 1
 esac
 done
  
-
 # =================================================================================
 # port_number is set based on the unique users numeric uid.
 
@@ -98,88 +97,37 @@ fi
 export ECF_PORT=$port_number
 
 #===============================================================================
-# if working directory not set then set to current directory  
+# Setup ECF_HOME 
 
 export ECF_HOME=${ecf_home_directory:-$HOME/ecflow_server}
 export ECF_LISTS=${ECF_LISTS:-$ECF_HOME/ecf.lists}
 
 # ===============================================================================
-# Update kill and status command for ecgate
+# If server is already started the exit
 
 rcdir=$HOME/.ecflowrc
-fname=$rcdir/$(echo $host | cut -c1-5).$USER.$ECF_PORT # OK as long as ecgate node is under 10
+fname=$rcdir/$(echo $host | cut -c1-4).$USER.$ECF_PORT 
+# cut is useful when the server may be moved from node to node 
+# 4 is common string here, so that the same file is used for all nodes
+
+if [[ -f $fname ]]; then host=$(cat $fname); fi
+
 mkdir -p $rcdir
-ecflow_client --port $ECF_PORT --host $(cat $fname) --ping  && echo "server is already started" && exit 0 || :
+ecflow_client --port $ECF_PORT --host $host --ping  && echo "server is already started" && exit 0 || :
 
 servers=$HOME/.ecflowrc/servers
 localh=$(uname -n)
 
+# =================================================================================
+# site specific settings come here
+#
+. /home/ma/emos/bin/ecflow_site.sh || : 
+
+
+# ==================================================================================
+# create one line in servers file so that viewer shows this server among servers list
+#
 case $host in
- sappa*) 
-if [[ $(ssh sappa hostname) != $host ]]; then
-  echo "please start ecflow on the generic node only"; 
-  exit 1; 
-fi
-
-echo "$host" > $fname
-host=sappa
-  file=$HOME/.ecfhostfile_sappa
-  touch $file
-  grep sappa00 $file || cat >> $file <<EOF
-sappa00
-sappa01
-sappa02
-sappa03
-EOF
-;;
- sappb*) 
-if [[ $(ssh sappb hostname) != $host ]]; then
-  echo "please start ecflow on the generic node only"; 
-  exit 1; 
-fi
-
-echo "$host" > $fname
-host=sappb
-  file=$HOME/.ecfhostfile_sappb
-  touch $file
-  grep sappb00 $file || cat >> $file <<EOF
-sappb00
-sappb01
-sappb02
-sappb03
-EOF
-;;
- ecga*)
-    echo "$host" > $fname
-    host=ecgate
-    ECF_KILL_CMD='${ECF_KILL:=/home/ma/emos/bin/ecfkill} %USER% %HOST% %ECF_RID% %ECF_JOB% > %ECF_JOB%.kill 2>&1'
-    ECF_STATUS_CMD='${ECF_STAT:=/home/ma/emos/bin/ecfstatus} %USER% %HOST% %ECF_RID% %ECF_JOB% > %ECF_JOB%.stat 2>&1'
-    export ECF_KILL_CMD ECF_STATUS_CMD
-
-# ===============================================================================
-# Update host and create hosts file
-
-  file=$HOME/.ecfhostfile
-  grep ecga00 $file || ( cat >> $file <<EOF
-ecga00
-ecga01
-ecga02
-ecga03
-ecga04
-ecga05
-EOF
-
-  if [ "$USER" != emos ] ; then
-    rcp $file $USER@c2a:~/.ecfhostfile || :
-    rcp $file $USER@c2b:~/.ecfhostfile || :
-  fi
-) 
-
-  nick=ecgate1
-  grep "^ecgate " $servers || echo "ecgate  ecgate  $ECF_PORT" >> $servers
-  grep "^$nick  " $servers || echo "$nick   $nick   $ECF_PORT" >> $servers
-;;
-
 $localh )
   grep "^$localh" $servers || echo "$localh $localh $ECF_PORT" >> $servers
 ;;
@@ -187,19 +135,21 @@ esac
  
 date -u
 
+# ======================================================================================
 # set up default environment variables
+#
 export ECF_NODE=$host
-export ECF_LOG=$host.$ECF_PORT.ecf.log
-export ECF_CHECK=$host.$ECF_PORT.check
-export ECF_CHECKOLD=$host.$ECF_PORT.check.b
+export ECF_LOG=$ECF_NODE.$ECF_PORT.ecf.log
+export ECF_CHECK=$ECF_NODE.$ECF_PORT.check
+export ECF_CHECKOLD=$ECF_NODE.$ECF_PORT.check.b
 if [ "$verbose" = "false" ]; then
      export ECF_OUT=/dev/null
 else
-     export ECF_OUT=$host.$ECF_PORT.ecf.out
+     export ECF_OUT=$ECF_NODE.$ECF_PORT.ecf.out
 fi
 
 echo 
-echo User \"$username\" attempting to start ecf server on \"$host\" using ECF_PORT \"$ECF_PORT\" and with:
+echo User \"$username\" attempting to start ecf server on \"$ECF_NODE\" using ECF_PORT \"$ECF_PORT\" and with:
 echo "ECF_HOME     : \"$ECF_HOME\""
 echo "ECF_LOG      : \"$ECF_LOG\""
 echo "ECF_CHECK    : \"$ECF_CHECK\""
@@ -207,24 +157,22 @@ echo "ECF_CHECKOLD : \"$ECF_CHECKOLD\""
 if [ "$verbose" = "false" ]; then
      echo "ECF_OUT      : \"/dev/null\""
 else
-     echo "ECF_OUT      : \"$host.$ECF_PORT.ecf.out\""
+     echo "ECF_OUT      : \"$ECF_NODE.$ECF_PORT.ecf.out\""
 fi
 echo 
 
 #==========================================================================
 
 echo "client version is $(ecflow_client --version)"
-# echo "server version is $(ecflow_server --version)"
-echo "Checking if the server is already running on $host and port $ECF_PORT"
+echo "Checking if the server is already running on $ECF_NODE and port $ECF_PORT"
 ecflow_client --ping 
 if [ $? -eq 0 ]; then
-  echo "... The server on $host:$ECF_PORT is already running. Use 'netstat -lnptu' for listing active port" 
+  echo "... The server on $ECF_NODE:$ECF_PORT is already running. Use 'netstat -lnptu' for listing active port" 
   exit 1
 fi
 
-
 #==========================================================================
-
+#
 echo "";
 echo Backing up check point and log files
 
@@ -243,12 +191,11 @@ cp $ECF_CHECK    log/ 2>/dev/null
 cp $ECF_CHECKOLD log/ 2>/dev/null
 cp $ECF_LOG      log/ 2>/dev/null
 
-if [ -f $host.$ECF_PORT.ecf.out ]; then
-   cp $host.$ECF_PORT.ecf.out log/ 2>/dev/null
+if [ -f $ECF_NODE.$ECF_PORT.ecf.out ]; then
+   cp $ECF_NODE.$ECF_PORT.ecf.out log/ 2>/dev/null
 fi
 
 set -e
-
 
 # =============================================================================
 # ecFlow server start in the background.
@@ -282,7 +229,7 @@ fi
 echo 
 echo "To view server on ecflowview - goto Edit/Preferences/Servers and enter"
 echo "Name        : <unique ecFlow server name>"
-echo "Host        : $host"
+echo "Host        : $ECF_NODE"
 echo "Port Number : $ECF_PORT"
 echo
 

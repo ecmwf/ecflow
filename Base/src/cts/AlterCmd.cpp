@@ -224,26 +224,36 @@ bool AlterCmd::equals(ClientToServerCmd* rhs) const
 
 std::ostream& AlterCmd::print(std::ostream& os) const
 {
-	std::string alter_type,attr_type;
-	if (del_attr_type_ != AlterCmd::DELETE_ATTR_ND) {
-		alter_type = "delete";
-		attr_type = to_string(del_attr_type_);
-	}
-	else if (change_attr_type_ != AlterCmd::CHANGE_ATTR_ND) {
-		alter_type = "change";
-		attr_type = to_string(change_attr_type_);
-	}
-	else if (add_attr_type_ != AlterCmd::ADD_ATTR_ND) {
-		alter_type = "add";
-		attr_type = to_string(add_attr_type_);
-	}
-	else if (flag_type_ != Flag::NOT_SET) {
-		if (flag_) alter_type = "set_flag";
-		else       alter_type = "clear_flag";
-		attr_type = Flag::enum_to_string(flag_type_);
-	}
+   return my_print(os,paths_);
+}
 
-	return user_cmd(os,CtsApi::to_string(CtsApi::alter(paths_,alter_type,attr_type,name_,value_)));
+std::ostream& AlterCmd::print(std::ostream& os, const std::string& path) const
+{
+   std::vector<std::string> paths(1,path);
+   return my_print(os,paths);
+}
+
+std::ostream& AlterCmd::my_print(std::ostream& os, const std::vector<std::string>& paths) const
+{
+   std::string alter_type,attr_type;
+   if (del_attr_type_ != AlterCmd::DELETE_ATTR_ND) {
+      alter_type = "delete";
+      attr_type = to_string(del_attr_type_);
+   }
+   else if (change_attr_type_ != AlterCmd::CHANGE_ATTR_ND) {
+      alter_type = "change";
+      attr_type = to_string(change_attr_type_);
+   }
+   else if (add_attr_type_ != AlterCmd::ADD_ATTR_ND) {
+      alter_type = "add";
+      attr_type = to_string(add_attr_type_);
+   }
+   else if (flag_type_ != Flag::NOT_SET) {
+      if (flag_) alter_type = "set_flag";
+      else       alter_type = "clear_flag";
+      attr_type = Flag::enum_to_string(flag_type_);
+   }
+   return user_cmd(os,CtsApi::to_string(CtsApi::alter(paths,alter_type,attr_type,name_,value_)));
 }
 
 STC_Cmd_ptr AlterCmd::alter_server_state(AbstractServer* as) const
@@ -251,10 +261,13 @@ STC_Cmd_ptr AlterCmd::alter_server_state(AbstractServer* as) const
 	if ( del_attr_type_ == AlterCmd::DEL_VARIABLE) {
 		as->defs()->set_server().delete_user_variable(name_);
 	}
-	else if ( change_attr_type_ == AlterCmd::VARIABLE ) {
-		as->defs()->set_server().add_or_update_user_variables(name_,value_);
-	}
-	else if (add_attr_type_ == AlterCmd::ADD_VARIABLE) {
+	else if ( change_attr_type_ == AlterCmd::VARIABLE  || add_attr_type_ == AlterCmd::ADD_VARIABLE) {
+
+	   // ECFLOW-380: ECF_NODE, ECF_PORT, ECF_PID, ECF_VERSION, ECF_LISTS
+	   if (name_ == Str::ECF_NODE() || name_ == Str::ECF_PORT() || name_ == "ECF_PID" || name_ == "ECF_VERSION" || name_ == "ECF_LISTS" ) {
+	      std::stringstream ss; ss << "AlterCmd:: Can not add or change read only server variable " << name_;
+	      throw std::runtime_error(ss.str());
+	   }
 		as->defs()->set_server().add_or_update_user_variables(name_,value_);
 	}
 
@@ -361,10 +374,6 @@ STC_Cmd_ptr AlterCmd::doHandleRequest(AbstractServer* as) const
 		}
 	}
 
-	// Clear up memory allocated to path.
-	// When dealing with several thousands paths, this makes a *HUGE* difference
-	vector<string>().swap(paths_); // clear paths_ and minimise its capacity
-
 	std::string error_msg = ss.str();
 	if (!error_msg.empty()) {
 		throw std::runtime_error( error_msg ) ;
@@ -375,33 +384,33 @@ STC_Cmd_ptr AlterCmd::doHandleRequest(AbstractServer* as) const
 
 const char* AlterCmd::arg()  { return CtsApi::alterArg();}
 const char* AlterCmd::desc() {
-	/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
-	return  "Alter the node according to the options.\n"
-			"To add/delete/change server variables use '/' for the path.\n"
-			"  arg1 = [ delete | change | add | set_flag | clear_flag]\n"
-			"           one option must be specified\n"
-			"  arg2 = For delete:\n"
-			"           [ variable | time | today | date  | day | cron | event | meter |\n"
-			"             label | trigger | complete | repeat | limit | inlimit | limit_path | zombie ]\n"
-			"         For change:\n"
-			"           [ variable | clock_type | clock_gain | clock_date | clock_sync  | event | meter | label |\n"
-			"             trigger  | complete   | repeat     | limit_max  | limit_value | defstatus ]\n"
-			"             *NOTE* If the clock is changed, then the suite will need to be re-queued in order for\n"
-			"             the change to take effect fully.\n"
-			"         For add:\n"
-			"           [ variable | time | today | date | day | zombie ]\n"
-			"         For set_flag and clear_flag:\n"
-			"           [ force_aborted | user_edit | task_aborted | edit_failed |\n"
-			"             ecfcmd_failed | no_script | killed | migrated | late |\n"
-			"             message | complete | queue_limit | task_waiting | locked | zombie ]\n"
-			"  arg3 = name/value\n"
-			"         when changing, attributes like variable,meter,event,label,limits\n"
-			"         we expect arguments to be quoted\n"
-			"  arg4 = new_value\n"
-			"         specifies the new value only used for 'change'\n"
-			"         values with spaces must be quoted\n"
-			"  arg5 = paths : At lease one path required. The paths must start with a leading '/' character\n\n"
-			;
+   /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
+   return  "Alter the node according to the options.\n"
+         "To add/delete/change server variables use '/' for the path.\n"
+         "  arg1 = [ delete | change | add | set_flag | clear_flag]\n"
+         "           one option must be specified\n"
+         "  arg2 = For delete:\n"
+         "           [ variable | time | today | date  | day | cron | event | meter |\n"
+         "             label | trigger | complete | repeat | limit | inlimit | limit_path | zombie ]\n"
+         "         For change:\n"
+         "           [ variable | clock_type | clock_gain | clock_date | clock_sync  | event | meter | label |\n"
+         "             trigger  | complete   | repeat     | limit_max  | limit_value | defstatus ]\n"
+         "             *NOTE* If the clock is changed, then the suite will need to be re-queued in order for\n"
+         "             the change to take effect fully.\n"
+         "         For add:\n"
+         "           [ variable | time | today | date | day | zombie ]\n"
+         "         For set_flag and clear_flag:\n"
+         "           [ force_aborted | user_edit | task_aborted | edit_failed |\n"
+         "             ecfcmd_failed | no_script | killed | migrated | late |\n"
+         "             message | complete | queue_limit | task_waiting | locked | zombie ]\n"
+         "  arg3 = name/value\n"
+         "         when changing, attributes like variable,meter,event,label,limits\n"
+         "         we expect arguments to be quoted\n"
+         "  arg4 = new_value\n"
+         "         specifies the new value only used for 'change'\n"
+         "         values with spaces must be quoted\n"
+         "  arg5 = paths : At lease one path required. The paths must start with a leading '/' character\n\n"
+         ;
 }
 
 void AlterCmd::addOption(boost::program_options::options_description& desc) const {

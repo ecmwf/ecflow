@@ -78,11 +78,6 @@ const char* ClientHandleCmd::theArg() const
 	return NULL;
 }
 
-bool ClientHandleCmd::isWrite() const {
-   if (api_ == ClientHandleCmd::SUITES) return false;
-   return true;
-}
-
 STC_Cmd_ptr ClientHandleCmd::doHandleRequest(AbstractServer* as) const
 {
    as->update_stats().ch_cmd_++;
