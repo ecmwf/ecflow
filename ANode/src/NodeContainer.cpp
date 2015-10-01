@@ -35,7 +35,6 @@
 #include "NodeState.hpp"
 #include "SuiteChanged.hpp"
 #include "DefsDelta.hpp"
-#include "ChangeMgrSingleton.hpp"
 #include "Str.hpp"
 
 using namespace ecf;
@@ -170,7 +169,7 @@ void NodeContainer::incremental_changes( DefsDelta& changes, compound_memento_pt
    Node::incremental_changes(changes, comp);
 }
 
-void NodeContainer::set_memento( const OrderMemento* memento ) {
+void NodeContainer::set_memento( const OrderMemento* memento,std::vector<ecf::Aspect::Type>& aspects ) {
 #ifdef DEBUG_MEMENTO
    std::cout << "NodeContainer::set_memento( const OrderMemento* ) " << debugNodePath() << "\n";
 #endif
@@ -198,15 +197,15 @@ void NodeContainer::set_memento( const OrderMemento* memento ) {
        return;
    }
 
-   ChangeMgrSingleton::instance()->add_aspect(ecf::Aspect::ORDER);
+   aspects.push_back(ecf::Aspect::ORDER);
    nodeVec_ = vec;
 }
 
-void NodeContainer::set_memento( const ChildrenMemento* memento ) {
+void NodeContainer::set_memento( const ChildrenMemento* memento,std::vector<ecf::Aspect::Type>& aspects ) {
 #ifdef DEBUG_MEMENTO
    std::cout << "NodeContainer::set_memento( const OrderMemento* ) " << debugNodePath() << "\n";
 #endif
-   ChangeMgrSingleton::instance()->add_aspect(ecf::Aspect::ADD_REMOVE_NODE);
+   aspects.push_back(ecf::Aspect::ADD_REMOVE_NODE);
    nodeVec_ = memento->children_;
 
    // setup child parent pointers

@@ -21,7 +21,6 @@ class ecf_node;
 #include "ecflowview.h"
 #include <iostream>
 #include <deque>
-#include <ChangeMgrSingleton.hpp>
 class node;
 #include <boost/shared_ptr.hpp>
 #include <boost/enable_shared_from_this.hpp>

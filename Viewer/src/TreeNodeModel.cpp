@@ -12,8 +12,6 @@
 #include <QDebug>
 #include <QMetaMethod>
 
-#include "ChangeMgrSingleton.hpp"
-
 #include "ConnectState.hpp"
 #include "VFilter.hpp"
 #include "ServerFilter.hpp"

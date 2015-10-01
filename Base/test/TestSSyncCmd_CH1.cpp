@@ -25,7 +25,6 @@
 #include "Ecf.hpp"
 #include "NodeFwd.hpp"
 #include "SuiteChanged.hpp"
-#include "ChangeMgrSingleton.hpp"
 
 using namespace std;
 using namespace ecf;
@@ -569,9 +568,6 @@ BOOST_AUTO_TEST_CASE( test_ssync_using_handle  )
    test_sync_scaffold(s0_change_clock_type_to_real,"s0_change_clock_type_to_real", true/* expect a full sync */);
    test_sync_scaffold(s0_change_clock_date,"s0_change_clock_date", true/* expect a full sync */);
    test_sync_scaffold(s0_change_clock_sync,"s0_change_clock_sync", true/* expect a full sync */);
-
-   /// Keep valgrind happy
-   ChangeMgrSingleton::destroy();
 }
 
 

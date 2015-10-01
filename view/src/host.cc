@@ -112,7 +112,6 @@
 #endif
 
 #include "Version.hpp"
-#include "ChangeMgrSingleton.hpp"
 
 #include "panel_window.h"
 #include <stdio.h>
@@ -895,18 +894,8 @@ void host::redraw( bool create )
 {
    if (create) {
      SelectNode select(this->name());
-      XECFDEBUG {
-         std::cout << ChangeMgrSingleton::instance()->no_of_node_observers() << std::endl
-                   << ChangeMgrSingleton::instance()->no_of_def_observers() << std::endl;
-      }
 
       if (top_) top_->unlink(true);
-      XECFDEBUG {
-         std::cout << ChangeMgrSingleton::instance()->no_of_node_observers() << std::endl
-                   << ChangeMgrSingleton::instance()->no_of_def_observers() << std::endl;
-         // assert(ChangeMgrSingleton::instance()->no_of_node_observers() == 0);
-         // assert(ChangeMgrSingleton::instance()->no_of_def_observers() == 0);
-      }
       create_tree(0, 0, 0);
    }
    else if (tree_) tree_->update_tree(true);

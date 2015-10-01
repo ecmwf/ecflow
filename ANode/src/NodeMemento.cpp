@@ -19,7 +19,6 @@
 #include "DefsDelta.hpp"
 #include "ExprAst.hpp"
 #include "Stl.hpp"
-#include "ChangeMgrSingleton.hpp"
 
 using namespace ecf;
 using namespace std;
@@ -280,79 +279,79 @@ void Node::incremental_changes( DefsDelta& changes, compound_memento_ptr& comp) 
 }
 
 
-void Node::set_memento(const StateMemento* memento) {
+void Node::set_memento(const StateMemento* memento,std::vector<ecf::Aspect::Type>& aspects) {
 
 #ifdef DEBUG_MEMENTO
 	std::cout << "Node::set_memento(const StateMemento* memento) " << debugNodePath() << "  " << NState::toString(memento->state_) << "\n";
 #endif
-   ChangeMgrSingleton::instance()->add_aspect(ecf::Aspect::STATE);
+   aspects.push_back(ecf::Aspect::STATE);
 	setStateOnly( memento->state_ );
 }
 
 
-void Node::set_memento( const NodeDefStatusDeltaMemento* memento ) {
+void Node::set_memento( const NodeDefStatusDeltaMemento* memento,std::vector<ecf::Aspect::Type>& aspects ) {
 #ifdef DEBUG_MEMENTO
 	std::cout << "Node::set_memento(const NodeDefStatusDeltaMemento* memento) " << debugNodePath() << "\n";
 #endif
-   ChangeMgrSingleton::instance()->add_aspect(ecf::Aspect::DEFSTATUS);
+   aspects.push_back(ecf::Aspect::DEFSTATUS);
 	defStatus_.setState(  memento->state_ );
 }
 
 
-void Node::set_memento( const SuspendedMemento* memento ) {
+void Node::set_memento( const SuspendedMemento* memento,std::vector<ecf::Aspect::Type>& aspects ) {
 #ifdef DEBUG_MEMENTO
 	std::cout << "Node::set_memento(const SuspendedMemento* memento) " << debugNodePath() << "\n";
 #endif
-   ChangeMgrSingleton::instance()->add_aspect(ecf::Aspect::SUSPENDED);
+   aspects.push_back(ecf::Aspect::SUSPENDED);
 	if (memento->suspended_) suspend();
 	else                     clearSuspended();
 }
 
 
-void Node::set_memento( const NodeEventMemento* memento ) {
+void Node::set_memento( const NodeEventMemento* memento,std::vector<ecf::Aspect::Type>& aspects ) {
 
 #ifdef DEBUG_MEMENTO
 	std::cout << "Node::set_memento(const NodeEventMemento* memento) " << debugNodePath() << "\n";
 #endif
 	if (child_attrs_) {
-	   child_attrs_->set_memento(memento);
+	   child_attrs_->set_memento(memento,aspects);
 	   return;
 	}
 	addEvent( memento->event_);
 }
 
-void Node::set_memento( const NodeMeterMemento* memento ) {
+void Node::set_memento( const NodeMeterMemento* memento,std::vector<ecf::Aspect::Type>& aspects ) {
 
 #ifdef DEBUG_MEMENTO
 	std::cout << "Node::set_memento(const NodeMeterMemento* memento) " << debugNodePath() << "\n";
 #endif
    if (child_attrs_) {
-      child_attrs_->set_memento(memento);
+      child_attrs_->set_memento(memento,aspects);
       return;
    }
 	addMeter(memento->meter_);
 }
 
-void Node::set_memento( const NodeLabelMemento* memento ) {
+void Node::set_memento( const NodeLabelMemento* memento,std::vector<ecf::Aspect::Type>& aspects ) {
 
 #ifdef DEBUG_MEMENTO
 	std::cout << "Node::set_memento(const NodeLabelMemento* memento) " << debugNodePath() << "\n";
 #endif
 	if (child_attrs_) {
-	   child_attrs_->set_memento(memento);
+	   child_attrs_->set_memento(memento,aspects);
 	   return;
 	}
 	addLabel(memento->label_);
 }
 
-void Node::set_memento( const NodeTriggerMemento* memento ) {
+void Node::set_memento( const NodeTriggerMemento* memento,std::vector<ecf::Aspect::Type>& aspects ) {
 
 #ifdef DEBUG_MEMENTO
 	std::cout << "Node::set_memento(const NodeTriggerMemento* memento) " << debugNodePath() << "\n";
 #endif
 
 	if (triggerExpr_) {
-	   ChangeMgrSingleton::instance()->add_aspect(ecf::Aspect::EXPR_TRIGGER);
+	   aspects.push_back(ecf::Aspect::EXPR_TRIGGER);
 		if (memento->exp_.isFree()) freeTrigger();
 		else                        clearTrigger();
 		return;
@@ -362,14 +361,14 @@ void Node::set_memento( const NodeTriggerMemento* memento ) {
 	add_trigger_expression( memento->exp_);
 }
 
-void Node::set_memento( const NodeCompleteMemento* memento ) {
+void Node::set_memento( const NodeCompleteMemento* memento,std::vector<ecf::Aspect::Type>& aspects ) {
 
 #ifdef DEBUG_MEMENTO
 	std::cout << "Node::set_memento(const NodeCompleteMemento* memento) " << debugNodePath() << "\n";
 #endif
 
 	if (completeExpr_) {
-	   ChangeMgrSingleton::instance()->add_aspect(ecf::Aspect::EXPR_COMPLETE);
+	   aspects.push_back(ecf::Aspect::EXPR_COMPLETE);
 		if (memento->exp_.isFree()) freeComplete();
 		else                        clearComplete();
 		return;
@@ -379,14 +378,14 @@ void Node::set_memento( const NodeCompleteMemento* memento ) {
 	add_complete_expression( memento->exp_);
 }
 
-void Node::set_memento( const NodeRepeatMemento* memento ) {
+void Node::set_memento( const NodeRepeatMemento* memento,std::vector<ecf::Aspect::Type>& aspects ) {
 
 #ifdef DEBUG_MEMENTO
 	std::cout << "Node::set_memento(const NodeRepeatMemento* memento) " << debugNodePath() << "\n";
 #endif
 
 	if (!repeat_.empty()) {
-	   ChangeMgrSingleton::instance()->add_aspect(ecf::Aspect::REPEAT);
+	   aspects.push_back(ecf::Aspect::REPEAT);
 
       // Note: the node is incremented one past, the last value
       // In Node we increment() then check for validity
@@ -404,7 +403,7 @@ void Node::set_memento( const NodeRepeatMemento* memento ) {
 	addRepeat(memento->repeat_);
 }
 
-void Node::set_memento( const NodeLimitMemento* memento ) {
+void Node::set_memento( const NodeLimitMemento* memento,std::vector<ecf::Aspect::Type>& aspects ) {
 
 #ifdef DEBUG_MEMENTO
 	std::cout << "Node::set_memento(const NodeLimitMemento* memento) " << debugNodePath() << "  " << memento->limit_.toString() << "\n";
@@ -412,7 +411,7 @@ void Node::set_memento( const NodeLimitMemento* memento ) {
 
 	limit_ptr limit = find_limit(memento->limit_.name());
 	if (limit.get())  {
-      ChangeMgrSingleton::instance()->add_aspect(ecf::Aspect::LIMIT);
+      aspects.push_back(ecf::Aspect::LIMIT);
 	   limit->set_state(  memento->limit_.theLimit(), memento->limit_.value(), memento->limit_.paths() );
 		return;
 	}
@@ -421,7 +420,7 @@ void Node::set_memento( const NodeLimitMemento* memento ) {
 	addLimit(memento->limit_);
 }
 
-void Node::set_memento( const NodeInLimitMemento* memento ) {
+void Node::set_memento( const NodeInLimitMemento* memento,std::vector<ecf::Aspect::Type>& aspects ) {
 
 #ifdef DEBUG_MEMENTO
 	std::cout << "Node::set_memento(const NodeInLimitMemento* memento) " << debugNodePath() << "\n";
@@ -432,7 +431,7 @@ void Node::set_memento( const NodeInLimitMemento* memento ) {
 	addInLimit(memento->inlimit_);
 }
 
-void Node::set_memento( const NodeVariableMemento* memento ) {
+void Node::set_memento( const NodeVariableMemento* memento,std::vector<ecf::Aspect::Type>& aspects ) {
 
 #ifdef DEBUG_MEMENTO
 	std::cout << "Node::set_memento(const NodeVariableMemento* memento) " << debugNodePath() << "\n";
@@ -443,7 +442,7 @@ void Node::set_memento( const NodeVariableMemento* memento ) {
 	for(size_t i = 0; i < theSize; i++) {
 		if (varVec_[i].name() == memento->var_.name()) {
 			varVec_[i].set_value( memento->var_.theValue() );
-			ChangeMgrSingleton::instance()->add_aspect(ecf::Aspect::NODE_VARIABLE);
+			aspects.push_back(ecf::Aspect::NODE_VARIABLE);
 			return;
 		}
  	}
@@ -452,14 +451,14 @@ void Node::set_memento( const NodeVariableMemento* memento ) {
  	addVariable(memento->var_);
 }
 
-void Node::set_memento( const NodeLateMemento* memento ) {
+void Node::set_memento( const NodeLateMemento* memento,std::vector<ecf::Aspect::Type>& aspects ) {
 
 #ifdef DEBUG_MEMENTO
 	std::cout << "Node::set_memento(const NodeLateMemento* memento) " << debugNodePath() << "\n";
 #endif
 
 	if (lateAttr_) {
-	   ChangeMgrSingleton::instance()->add_aspect(ecf::Aspect::LATE);
+	   aspects.push_back(ecf::Aspect::LATE);
 		lateAttr_->setLate(memento->late_.isLate());
 		return;
 	}
@@ -468,14 +467,14 @@ void Node::set_memento( const NodeLateMemento* memento ) {
 	addLate(memento->late_);
 }
 
-void Node::set_memento( const NodeTodayMemento* memento ) {
+void Node::set_memento( const NodeTodayMemento* memento,std::vector<ecf::Aspect::Type>& aspects ) {
 
 #ifdef DEBUG_MEMENTO
 	std::cout << "Node::set_memento(const NodeTodayMemento* memento) " << debugNodePath() << "\n";
 #endif
 
-   if (time_dep_attrs_ && time_dep_attrs_->set_memento(memento) ) {
-      ChangeMgrSingleton::instance()->add_aspect(ecf::Aspect::TODAY);
+   if (time_dep_attrs_ && time_dep_attrs_->set_memento(memento,aspects) ) {
+      aspects.push_back(ecf::Aspect::TODAY);
       return;
    }
 
@@ -483,14 +482,14 @@ void Node::set_memento( const NodeTodayMemento* memento ) {
 	addToday(memento->attr_);
 }
 
-void Node::set_memento( const NodeTimeMemento* memento ) {
+void Node::set_memento( const NodeTimeMemento* memento,std::vector<ecf::Aspect::Type>& aspects ) {
 
 #ifdef DEBUG_MEMENTO
 	std::cout << "Node::set_memento(const NodeTimeMemento* memento) " << debugNodePath() << "\n";
 #endif
 
-   if (time_dep_attrs_ && time_dep_attrs_->set_memento(memento) ) {
-      ChangeMgrSingleton::instance()->add_aspect(ecf::Aspect::TIME);
+   if (time_dep_attrs_ && time_dep_attrs_->set_memento(memento,aspects) ) {
+      aspects.push_back(ecf::Aspect::TIME);
       return;
    }
 
@@ -498,15 +497,15 @@ void Node::set_memento( const NodeTimeMemento* memento ) {
 	addTime(memento->attr_);
 }
 
-void Node::set_memento( const NodeDayMemento* memento ) {
+void Node::set_memento( const NodeDayMemento* memento,std::vector<ecf::Aspect::Type>& aspects ) {
 
 #ifdef DEBUG_MEMENTO
 	std::cout << "Node::set_memento(const NodeDayMemento* memento) " << debugNodePath() << "\n";
 #endif
 
 
-   if (time_dep_attrs_ && time_dep_attrs_->set_memento(memento) ) {
-      ChangeMgrSingleton::instance()->add_aspect(ecf::Aspect::DAY);
+   if (time_dep_attrs_ && time_dep_attrs_->set_memento(memento,aspects) ) {
+      aspects.push_back(ecf::Aspect::DAY);
       return;
    }
 
@@ -514,14 +513,14 @@ void Node::set_memento( const NodeDayMemento* memento ) {
 	addDay(memento->attr_);
 }
 
-void Node::set_memento( const NodeDateMemento* memento ) {
+void Node::set_memento( const NodeDateMemento* memento,std::vector<ecf::Aspect::Type>& aspects ) {
 
 #ifdef DEBUG_MEMENTO
    std::cout << "Node::set_memento(const NodeDateMemento* memento) " << debugNodePath() << "\n";
 #endif
 
-   if (time_dep_attrs_ && time_dep_attrs_->set_memento(memento) ) {
-      ChangeMgrSingleton::instance()->add_aspect(ecf::Aspect::DATE);
+   if (time_dep_attrs_ && time_dep_attrs_->set_memento(memento,aspects) ) {
+      aspects.push_back(ecf::Aspect::DATE);
       return;
    }
 
@@ -529,15 +528,15 @@ void Node::set_memento( const NodeDateMemento* memento ) {
    addDate(memento->attr_);
 }
 
-void Node::set_memento( const NodeCronMemento* memento ) {
+void Node::set_memento( const NodeCronMemento* memento,std::vector<ecf::Aspect::Type>& aspects ) {
 
 #ifdef DEBUG_MEMENTO
 	std::cout << "Node::set_memento(const NodeCronMemento* memento) " << debugNodePath() << "\n";
 #endif
 
 
-   if (time_dep_attrs_ && time_dep_attrs_->set_memento(memento) ) {
-      ChangeMgrSingleton::instance()->add_aspect(ecf::Aspect::CRON);
+   if (time_dep_attrs_ && time_dep_attrs_->set_memento(memento,aspects) ) {
+      aspects.push_back(ecf::Aspect::CRON);
       return;
    }
 
@@ -545,17 +544,17 @@ void Node::set_memento( const NodeCronMemento* memento ) {
 	addCron(memento->attr_);
 }
 
-void Node::set_memento( const FlagMemento* memento ) {
+void Node::set_memento( const FlagMemento* memento,std::vector<ecf::Aspect::Type>& aspects ) {
 
 #ifdef DEBUG_MEMENTO
 	std::cout << "Node::set_memento(const FlagMemento* memento) " << debugNodePath() << "\n";
 #endif
-   ChangeMgrSingleton::instance()->add_aspect(ecf::Aspect::FLAG);
+   aspects.push_back(ecf::Aspect::FLAG);
 
 	flag_.set_flag( memento->flag_.flag() );
 }
 
-void Node::set_memento( const NodeZombieMemento* memento ) {
+void Node::set_memento( const NodeZombieMemento* memento,std::vector<ecf::Aspect::Type>& aspects ) {
 
 #ifdef DEBUG_MEMENTO
    std::cout << "Node::set_memento(const NodeZombieMemento* memento) " << debugNodePath() << "\n";
@@ -570,7 +569,7 @@ void Node::set_memento( const NodeZombieMemento* memento ) {
    addZombie(memento->attr_);
 }
 
-void Node::set_memento( const NodeVerifyMemento* memento ) {
+void Node::set_memento( const NodeVerifyMemento* memento,std::vector<ecf::Aspect::Type>& aspects ) {
 
 #ifdef DEBUG_MEMENTO
 	std::cout << "Node::set_memento(const NodeVerifyMemento* memento) " << debugNodePath() << "\n";

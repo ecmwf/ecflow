@@ -14,7 +14,6 @@
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 
 #include "Memento.hpp"
-#include "ChangeMgrSingleton.hpp"
 #include "Str.hpp"
 
 using namespace std;
@@ -29,11 +28,11 @@ Memento::~Memento() {}
 void CompoundMemento::incremental_sync(defs_ptr client_def,std::vector<std::string>& changed_nodes) const
 {
    /// Clear out aspects, for this Memento.
-   ///   Aspects are added to ChangeMgrSingleton, via do_incremental_* functions
+   ///   Aspects are added via do_incremental_* / set_mememto functions
    ///   AND in *this* function when node attributes have been added or deleted.
-   ChangeMgrSingleton::instance()->clear_aspects();
+   aspects_.clear();
 
-   // Record changes nodes for the python interface
+   // Record changes nodes for the Python interface
    changed_nodes.push_back(absNodePath_);
 
 	node_ptr node = client_def->findAbsNode(absNodePath_);
@@ -44,11 +43,12 @@ void CompoundMemento::incremental_sync(defs_ptr client_def,std::vector<std::stri
  		cout << "CompoundMemento::incremental_sync: ROOT_PATH   changed_nodes.size()=" << changed_nodes.size() << "\n";
 #endif
  		BOOST_FOREACH(memento_ptr m, vec_) {
-  			m->do_incremental_defs_sync( client_def.get() );
+  			m->do_incremental_defs_sync( client_def.get(), aspects_);
  		}
 
  		/// Notify any interested parties incremental changes
- 		ChangeMgrSingleton::instance()->notify(client_def);
+      /// Aspects records the kind of changes.
+ 		client_def->notify( aspects_);
 	}
  	else {
 
@@ -57,7 +57,7 @@ void CompoundMemento::incremental_sync(defs_ptr client_def,std::vector<std::stri
 #endif
 
  		if (clear_attributes_) {
- 		   ChangeMgrSingleton::instance()->add_aspect(ecf::Aspect::ADD_REMOVE_ATTR);
+ 		   aspects_.push_back(ecf::Aspect::ADD_REMOVE_ATTR);
  			node->clear();
  		}
 
@@ -68,15 +68,16 @@ void CompoundMemento::incremental_sync(defs_ptr client_def,std::vector<std::stri
 
  		BOOST_FOREACH(memento_ptr m, vec_) {
 // 		std::cout << "memento = " << typeid(*m.get()).name() << "\n";
- 			if (task)        m->do_incremental_task_sync( task );
-         else if (alias)  m->do_incremental_alias_sync( alias );
-         else if (suite)  m->do_incremental_suite_sync( suite );
- 			else if (family) m->do_incremental_family_sync( family );
- 			m->do_incremental_node_sync( node.get() );
+ 			if (task)        m->do_incremental_task_sync( task, aspects_ );
+         else if (alias)  m->do_incremental_alias_sync( alias, aspects_ );
+         else if (suite)  m->do_incremental_suite_sync( suite , aspects_);
+ 			else if (family) m->do_incremental_family_sync( family, aspects_ );
+ 			m->do_incremental_node_sync( node.get(), aspects_ );
  		}
 
  		/// Notify any interested parties that Node has made incremental changes
- 		ChangeMgrSingleton::instance()->notify(node);
+ 		/// Aspects records the kind of changes.
+ 		node->notify( aspects_ );
  	}
 }
 

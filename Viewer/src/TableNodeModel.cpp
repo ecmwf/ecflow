@@ -12,7 +12,6 @@
 #include <QDebug>
 #include <QMetaMethod>
 
-#include "ChangeMgrSingleton.hpp"
 
 #include "ModelColumn.hpp"
 #include "ServerHandler.hpp"
