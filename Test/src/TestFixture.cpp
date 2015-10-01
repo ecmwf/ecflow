@@ -30,7 +30,6 @@
 #include "CtsApi.hpp"
 #include "PrintStyle.hpp"
 #include "Host.hpp"
-#include "ChangeMgrSingleton.hpp" // keep valgrind happy
 #include "Rtt.hpp"
 #include "EcfPortLock.hpp"
 
@@ -252,9 +251,6 @@ TestFixture::~TestFixture()
       // remove the lock file
       EcfPortLock::remove( port_ );
 
-      // keep valgrind happy
-      ChangeMgrSingleton::destroy();
-
       // destroy, so that we flush the rtt_filename
       Rtt::destroy();
 
@@ -335,9 +331,42 @@ std::string TestFixture::local_ecf_home()
 {
    std::string rel_path = project_test_dir_;
 #ifdef DEBUG
-   rel_path += "/data/ECF_HOME_debug";
+
+#if defined(_AIX)
+   rel_path += "/data/ECF_HOME_debug_aix";
+#elif defined(HPUX)
+   rel_path += "/data/ECF_HOME_debug_hpux";
 #else
-   rel_path += "/data/ECF_HOME_release";
+#if defined(__clang__)
+   rel_path += "/data/ECF_HOME_debug_clang";
+#elif defined(__INTEL_COMPILER)
+   rel_path += "/data/ECF_HOME_debug_intel";
+#elif defined(_CRAYC)
+   rel_path += "/data/ECF_HOME_debug_cray";
+#else
+   rel_path += "/data/ECF_HOME_debug_gnu";
+#endif
+#endif
+
+#else
+
+#if defined(_AIX)
+   rel_path += "/data/ECF_HOME_release_aix";
+#elif defined(HPUX)
+   rel_path += "/data/ECF_HOME_release_hpux";
+#else
+#if defined(__clang__)
+   rel_path += "/data/ECF_HOME_release_clang";
+#elif defined(__INTEL_COMPILER)
+   rel_path += "/data/ECF_HOME_release_intel";
+#elif defined(_CRAYC)
+   rel_path += "/data/ECF_HOME_release_cray";
+#else
+   rel_path += "/data/ECF_HOME_release_gnu";
+#endif
+#endif
+
+
 #endif
 
    std::string absolute_path = File::test_data(rel_path,project_test_dir_);

@@ -42,6 +42,13 @@ std::ostream& RunNodeCmd::print(std::ostream& os) const
  	return user_cmd(os,CtsApi::to_string(CtsApi::run(paths_,force_)));
 }
 
+std::ostream& RunNodeCmd::print(std::ostream& os, const std::string& path) const
+{
+   std::vector<std::string> paths(1,path);
+   return user_cmd(os,CtsApi::to_string(CtsApi::run(paths,force_)));
+}
+
+
 STC_Cmd_ptr RunNodeCmd::doHandleRequest(AbstractServer* as) const
 {
 	as->update_stats().run_node_++;
@@ -90,10 +97,6 @@ STC_Cmd_ptr RunNodeCmd::doHandleRequest(AbstractServer* as) const
          LOG(Log::ERR,"RunNodeCmd: Failed for " << paths_[i] << " : " << jobsParam.getErrorMsg());
  	   }
 	}
-
-   // Clear up memory allocated to path *ASAP*
-   // When dealing with several thousands paths, this makes a *HUGE* difference
-   vector<string>().swap(paths_); // clear paths_ and minimise its capacity
 
    std::string error_msg = ss.str();
    if (!error_msg.empty()) {

@@ -32,7 +32,6 @@
 #include "Log.hpp"
 #include "CalendarUpdateParams.hpp"
 #include "SuiteChanged.hpp"
-#include "ChangeMgrSingleton.hpp"
 #include "JobsParam.hpp"
 
 using namespace ecf;
@@ -50,10 +49,8 @@ using namespace boost::gregorian;
 Suite::~Suite()
 {
 //	std::cout << "Suite::~Suite() " << debugNodePath() << "\n";
-   // Don't create the ChangeMgrSingleton during destruct sequence. (i.e in unit cases)
-   // Since that will cause a memory leak
-   if (!Ecf::server() && ChangeMgrSingleton::exists()) {
-      ChangeMgrSingleton::instance()->notify_delete( this );
+   if (!Ecf::server()) {
+      notify_delete();
    }
    delete suite_gen_variables_;
 }
@@ -553,30 +550,30 @@ void Suite::collateChanges(DefsDelta& changes) const
    }
 }
 
-void Suite::set_memento( const SuiteClockMemento* memento ) {
+void Suite::set_memento( const SuiteClockMemento* memento,std::vector<ecf::Aspect::Type>& aspects ) {
 #ifdef DEBUG_MEMENTO
 	std::cout << "Suite::set_memento( const SuiteClockMemento*) " << debugNodePath() << "\n";
 #endif
-   ChangeMgrSingleton::instance()->add_aspect(ecf::Aspect::SUITE_CLOCK);
+   aspects.push_back(ecf::Aspect::SUITE_CLOCK);
 
  	changeClock(memento->clockAttr_);
 }
 
-void Suite::set_memento( const SuiteBeginDeltaMemento* memento ) {
+void Suite::set_memento( const SuiteBeginDeltaMemento* memento,std::vector<ecf::Aspect::Type>& aspects ) {
 #ifdef DEBUG_MEMENTO
 	std::cout << "Suite::set_memento( const SuiteBeginDeltaMemento* ) " << debugNodePath() << "\n";
 #endif
-   ChangeMgrSingleton::instance()->add_aspect(ecf::Aspect::SUITE_BEGIN);
+   aspects.push_back(ecf::Aspect::SUITE_BEGIN);
 
 	begun_ = memento->begun_;
 }
 
-void Suite::set_memento( const SuiteCalendarMemento* memento ) {
+void Suite::set_memento( const SuiteCalendarMemento* memento,std::vector<ecf::Aspect::Type>& aspects ) {
 #ifdef DEBUG_MEMENTO
 	std::cout << "Suite::set_memento( const SuiteCalendarMemento* ) " << debugNodePath() << "\n";
 #endif
 
-   ChangeMgrSingleton::instance()->add_aspect(ecf::Aspect::SUITE_CALENDAR);
+   aspects.push_back(ecf::Aspect::SUITE_CALENDAR);
 
 	// The calendar does *NOT* persist the calendar type (hybrid/real) since we can derive this for clock attribute
 	// Hence make sure calendar/clock are in sync. part of the suite invariants

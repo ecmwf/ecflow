@@ -213,8 +213,8 @@ add_subdirectory( Test )
 
 if (ENABLE_PYTHON)
     ecbuild_find_python( VERSION 2.7 REQUIRED )
-    #debug_var(PYTHON_LIBRARIES)
-    #debug_var(PYTHON_INCLUDE_DIR)
+    debug_var(PYTHON_LIBRARIES)
+    debug_var(PYTHON_INCLUDE_DIR)
 	add_subdirectory( Pyext )
 endif()	
 	
@@ -235,10 +235,16 @@ endif()
 ecbuild_dont_pack( DIRS 
                    	ACore/doc ANattr/doc ANode/doc Client/doc Pyext/doc Server/doc
                    	ecbuild
+                   	Viewer
                     SCRATCH 
                     build_scripts/nightly build_scripts/test_bench
                     Doc/func_spec Doc/misc Doc/New_viewer Doc/newsletter Doc/online Doc/presentations Doc/tac
 )
+
+# temporary until its officially released
+if (NOT ENABLE_VIEWER)
+   ecbuild_dont_pack( DIRS Viewer )
+endif()  
 
 # =========================================================================================
 # install scripts

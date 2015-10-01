@@ -10,7 +10,6 @@
 #include "ServerComThread.hpp"
 
 #include "Defs.hpp"
-#include "ChangeMgrSingleton.hpp"
 #include "ClientInvoker.hpp"
 #include "ArgvCreator.hpp"
 
@@ -503,7 +502,7 @@ void ServerComThread::update_delete(const Node* nc)
 	assert(0);
 
 	Node *n=const_cast<Node*>(nc);
-	ChangeMgrSingleton::instance()->detach(n,this);
+	n->detach(this);
 
     //UserMessage::message(UserMessage::DBG, false, std::string("Update delete: ") + n->name());
 }

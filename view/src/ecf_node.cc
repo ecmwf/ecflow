@@ -17,7 +17,6 @@
 #include "host.h"
 #include "node.h"
 #include "tree.h"
-#include "ChangeMgrSingleton.hpp"
 #include "NodeAttr.hpp"
 #include "Variable.hpp"
 #include "dummy_node.h"
@@ -283,7 +282,7 @@ void ecf_concrete_node<Defs>::why( std::ostream &f ) const
 }
 
 #define UNLINK(T) template<> void ecf_concrete_node<T>::unlink(bool detach) \
-{ if (!owner_) return; if (detach) ChangeMgrSingleton::instance()->detach(owner_,this); owner_ = 0x0; }
+{ if (!owner_) return; if (detach) owner_->detach(this); owner_ = 0x0; }
 UNLINK(Alias)
 UNLINK(Task)
 UNLINK(Family)
@@ -311,7 +310,7 @@ void ecf_concrete_node<Alias>::make_subtree()
 
    full_name_ = owner_->absNodePath();
 
-   ChangeMgrSingleton::instance()->attach(owner_, this);
+   owner_->attach(this);
    n->update_generated_variables();
 
    std::vector<Variable> gvar;
@@ -346,7 +345,7 @@ void ecf_concrete_node<Node>::make_subtree()
    Node* n = owner_;
 
    full_name_ = owner_->absNodePath();
-   ChangeMgrSingleton::instance()->attach(owner_, this);
+   owner_->attach(this);
 
    if (owner_->suite()->begun()) owner_->update_generated_variables();
 
@@ -436,7 +435,7 @@ void ecf_concrete_node<Suite>::make_subtree()
 
    full_name_ = owner_->absNodePath(); // "/" + n->name();
 
-   ChangeMgrSingleton::instance()->attach(owner_, this);
+   owner_->attach(this);
 
    std::vector<node_ptr> kids;
    n->immediateChildren(kids);
@@ -1439,7 +1438,7 @@ void ecf_concrete_node<Defs>::make_subtree()
    full_name_ = "/";
    if (!owner_) return;
 
-   ChangeMgrSingleton::instance()->attach(owner_, this);
+   owner_->attach(this);
    make_kids_list(this, owner_->suiteVec());
 
    std::vector<Variable> gvar = owner_->server().server_variables();

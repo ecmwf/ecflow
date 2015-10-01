@@ -39,7 +39,6 @@
 #include "Ecf.hpp"
 #include "DefsDelta.hpp"
 #include "TaskScriptGenerator.hpp"
-#include "ChangeMgrSingleton.hpp"
 #include "Extract.hpp"
 #include "JobProfiler.hpp"
 
@@ -52,10 +51,8 @@ using namespace boost;
 
 Task::~Task()
 {
-   // Don't create the ChangeMgrSingleton during destruct sequence. (i.e in unit cases)
-   // Since that will cause a memory leak
-   if (!Ecf::server() && ChangeMgrSingleton::exists()) {
-      ChangeMgrSingleton::instance()->notify_delete( this );
+   if (!Ecf::server()) {
+       notify_delete();
    }
 }
 
@@ -755,7 +752,7 @@ void Task::collateChanges(DefsDelta& changes) const
    for(size_t t = 0; t < vec_size; t++)   { aliases_[t]->collateChanges(changes); }
 }
 
-void Task::set_memento( const OrderMemento* memento ) {
+void Task::set_memento( const OrderMemento* memento,std::vector<ecf::Aspect::Type>& aspects ) {
 #ifdef DEBUG_MEMENTO
    std::cout << "Task::set_memento( const OrderMemento* ) " << debugNodePath() << "\n";
 #endif
@@ -783,16 +780,16 @@ void Task::set_memento( const OrderMemento* memento ) {
        return;
    }
 
-   ChangeMgrSingleton::instance()->add_aspect(ecf::Aspect::ORDER);
+   aspects.push_back(ecf::Aspect::ORDER);
    aliases_ = vec;
 }
 
-void Task::set_memento( const AliasChildrenMemento* memento ) {
+void Task::set_memento( const AliasChildrenMemento* memento,std::vector<ecf::Aspect::Type>& aspects ) {
 #ifdef DEBUG_MEMENTO
    std::cout << "Task::set_memento( const AliasChildrenMemento* ) " << debugNodePath() << "\n";
 #endif
 
-   ChangeMgrSingleton::instance()->add_aspect(ecf::Aspect::ADD_REMOVE_NODE);
+   aspects.push_back(ecf::Aspect::ADD_REMOVE_NODE);
    aliases_ = memento->children_;
 
    // set up alias parent pointers. since they are *NOT* serialised.
@@ -802,11 +799,11 @@ void Task::set_memento( const AliasChildrenMemento* memento ) {
    }
 }
 
-void Task::set_memento( const AliasNumberMemento* memento ) {
+void Task::set_memento( const AliasNumberMemento* memento,std::vector<ecf::Aspect::Type>& aspects ) {
 #ifdef DEBUG_MEMENTO
    std::cout << "Task::set_memento( const AliasNumberMemento* ) " << debugNodePath() << "\n";
 #endif
 
-   ChangeMgrSingleton::instance()->add_aspect(ecf::Aspect::ALIAS_NUMBER);
+   aspects.push_back(ecf::Aspect::ALIAS_NUMBER);
    alias_no_ = memento->alias_no_;
 }
