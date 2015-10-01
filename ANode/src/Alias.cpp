@@ -30,7 +30,6 @@
 #include "Str.hpp"
 #include "File.hpp"
 #include "Indentor.hpp"
-#include "ChangeMgrSingleton.hpp"
 #include "PrintStyle.hpp"
 
 namespace fs = boost::filesystem;
@@ -52,10 +51,8 @@ Alias::Alias()
 
 Alias::~Alias()
 {
-   // Don't create the ChangeMgrSingleton during destruct sequence. (i.e in unit cases)
-   // Since that will cause a memory leak
-   if (!Ecf::server() && ChangeMgrSingleton::exists()) {
-      ChangeMgrSingleton::instance()->notify_delete( this );
+   if (!Ecf::server()) {
+      notify_delete();
    }
 }
 

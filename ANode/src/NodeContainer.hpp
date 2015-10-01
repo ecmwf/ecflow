@@ -38,8 +38,8 @@ public:
 	virtual void status();
 	virtual void top_down_why(std::vector<std::string>& theReasonWhy) const;
 	virtual void collateChanges(DefsDelta&) const;
-   void set_memento(const OrderMemento* );
-   void set_memento(const ChildrenMemento* );
+   void set_memento(const OrderMemento*,std::vector<ecf::Aspect::Type>& aspects );
+   void set_memento(const ChildrenMemento*,std::vector<ecf::Aspect::Type>& aspects );
    virtual void order(Node* immediateChild, NOrder::Order);
 
 	virtual bool hasAutoCancel() const;

@@ -31,7 +31,6 @@
 #include "SCPort.hpp"
 #include "Str.hpp"
 #include "System.hpp"             // kill singleton for valgrind
-#include "ChangeMgrSingleton.hpp" // kill singleton for valgrind
 
 namespace fs = boost::filesystem;
 using namespace std;
@@ -242,7 +241,6 @@ BOOST_AUTO_TEST_CASE( test_client_lifecyle )
 
    /// Destroy singleton's to avoid valgrind from complaining
    System::destroy();
-   ChangeMgrSingleton::destroy();
 }
 
 BOOST_AUTO_TEST_SUITE_END()

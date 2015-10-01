@@ -35,6 +35,7 @@
 #include "Ecf.hpp"
 #include "SuiteChanged.hpp"
 #include "CmdContext.hpp"
+#include "AbstractObserver.hpp"
 
 using namespace ecf;
 using namespace std;
@@ -1831,6 +1832,52 @@ void Node::update_repeat_genvar() const
       repeat_.update_repeat_genvar();
    }
 }
+
+void Node::notify_delete()
+{
+   // make a copy, to avoid iterating over observer list that is being changed
+   std::vector<AbstractObserver*> copy_of_observers = observers_;
+   for(size_t i = 0; i < copy_of_observers.size(); i++) {
+      copy_of_observers[i]->update_delete(this);
+   }
+
+   /// Check to make sure that the Observer called detach
+   /// We can not call detach ourselves, since the the client needs to
+   /// call detach in the case where the graphical tree is destroyed by user
+   /// In this case the Subject/Node is being deleted.
+   assert(observers_.empty());
+
+#ifdef DEBUG_NODE
+   if (!observers_.empty()) {
+      /// Its not safe to call debugNodePath()/absNodePath() since that will traverse the parent
+      /// This may not be safe during a delete.
+      std::cout << "notify_delete : Node is not observed : " << name() << "\n";
+   }
+#endif
+}
+
+void Node::notify(const std::vector<ecf::Aspect::Type>& aspects)
+{
+   for(size_t i = 0; i < observers_.size(); i++) {
+      observers_[i]->update(this,aspects);
+   }
+}
+
+void Node::attach(AbstractObserver* obs)
+{
+   observers_.push_back(obs);
+}
+
+void Node::detach(AbstractObserver* obs)
+{
+   for(size_t i = 0; i < observers_.size(); i++) {
+      if (observers_[i] == obs) {
+         observers_.erase( observers_.begin() + i) ;
+         return;
+      }
+   }
+}
+
 
 static std::vector<ecf::TimeAttr>  timeVec_;
 static std::vector<ecf::TodayAttr> todayVec_;

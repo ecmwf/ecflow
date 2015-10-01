@@ -11,7 +11,6 @@
 
 #include <QDebug>
 
-#include "ChangeMgrSingleton.hpp"
 
 #include "ServerFilter.hpp"
 #include "ServerHandler.hpp"

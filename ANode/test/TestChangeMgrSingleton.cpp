@@ -18,7 +18,6 @@
 #include "Suite.hpp"
 #include "Family.hpp"
 #include "Task.hpp"
-#include "ChangeMgrSingleton.hpp"
 #include "AbstractObserver.hpp"
 
 using namespace std;
@@ -26,10 +25,14 @@ using namespace ecf;
 
 class MyObserver : public AbstractObserver {
 public:
-   MyObserver(Defs* defs) : update_count_(0) { ChangeMgrSingleton::instance()->attach(defs,this); }
-   MyObserver(Node* node) : update_count_(0) { ChangeMgrSingleton::instance()->attach(node,this); }
+   MyObserver(Defs* defs) : update_count_(0),defs_(defs),node_(NULL) { defs->attach(this); }
+   MyObserver(Node* node) : update_count_(0),defs_(NULL),node_(node) { node->attach(this); }
 
-   virtual ~MyObserver() {/* std::cout << "~MyObserver()\n"; */ }
+   virtual ~MyObserver() {
+      /* std::cout << "~MyObserver()\n"; */
+      if (defs_) defs_->detach(this);
+      if (node_) node_->detach(this);
+   }
 
    virtual void update(const Node*, const std::vector<ecf::Aspect::Type>&){update_count_++;}
    virtual void update(const Defs*, const std::vector<ecf::Aspect::Type>&){update_count_++;}
@@ -37,16 +40,18 @@ public:
    /// After this call, the node will be deleted, hence observers must *NOT* use the pointers
    virtual void update_delete(const Node* node) {
       //std::cout << "update_delete(const Node* node)\n";
-      ChangeMgrSingleton::instance()->detach(const_cast<Node*>(node),this);
+      const_cast<Node*>(node)->detach(this);
    }
    virtual void update_delete(const Defs* defs) {
       //std::cout << "update_delete(const Defs* node)\n";
-      ChangeMgrSingleton::instance()->detach(const_cast<Defs*>(defs),this);
+      const_cast<Defs*>(defs)->detach(this);
    }
 
    int update_count() const { return update_count_;}
 private:
    int update_count_;
+   Defs* defs_;
+   Node* node_;
 };
 
 
@@ -59,23 +64,16 @@ BOOST_AUTO_TEST_CASE( test_change_mgr_singleton )
       defs_ptr theDefs = Defs::create();
 
       MyObserver defs_obs(theDefs.get());
-      BOOST_CHECK_MESSAGE(ChangeMgrSingleton::instance()->no_of_def_observers() == 1,"Expected one observer");
 
-//      MyObserver defs_obs2(theDefs.get());
-//      MyObserver defs_obs3(theDefs.get());
-//      BOOST_CHECK_MESSAGE(ChangeMgrSingleton::instance()->no_of_def_observers() == 3,"Expected 3 observer");
-
-      ChangeMgrSingleton::instance()->notify(theDefs);
-      ChangeMgrSingleton::instance()->notify(theDefs);
-      ChangeMgrSingleton::instance()->notify(theDefs);
-      ChangeMgrSingleton::instance()->notify(theDefs);
-      ChangeMgrSingleton::instance()->notify(theDefs);
+      std::vector<ecf::Aspect::Type> aspects;
+      theDefs->notify(aspects);
+      theDefs->notify(aspects);
+      theDefs->notify(aspects);
+      theDefs->notify(aspects);
+      theDefs->notify(aspects);
       BOOST_CHECK_MESSAGE( defs_obs.update_count() == 5,"Expected 5 update");
-//      BOOST_CHECK_MESSAGE( defs_obs2.update_count() == 5,"Expected 5 update");
-//      BOOST_CHECK_MESSAGE( defs_obs3.update_count() == 5,"Expected 5 update");
 
       theDefs.reset();
-      BOOST_CHECK_MESSAGE(ChangeMgrSingleton::instance()->no_of_def_observers() == 0,"Expected no observer");
    }
 
    {
@@ -96,18 +94,12 @@ BOOST_AUTO_TEST_CASE( test_change_mgr_singleton )
          for(size_t i = 0; i < node_vec.size(); ++i) {
             obs_vec.push_back( new MyObserver( node_vec[i].get() ) );
          }
-         BOOST_CHECK_MESSAGE(ChangeMgrSingleton::instance()->no_of_node_observers() == 3,"Expected 3 observer");
-
-//         // Now add another set of observers
-//         for(size_t i = 0; i < node_vec.size(); ++i) {
-//            obs_vec.push_back( new MyObserver( node_vec[i].get() ) );
-//         }
-//         BOOST_CHECK_MESSAGE(ChangeMgrSingleton::instance()->no_of_node_observers() == 6,"Expected 6 observer");
 
          // Do some updates
+         std::vector<ecf::Aspect::Type> aspects;
          for(size_t i = 0; i < node_vec.size(); ++i) {
-            ChangeMgrSingleton::instance()->notify(node_vec[i]);
-            ChangeMgrSingleton::instance()->notify(node_vec[i]);
+            node_vec[i]->notify(aspects);
+            node_vec[i]->notify(aspects);
          }
          for(size_t i = 0; i < obs_vec.size(); ++i) {
             BOOST_CHECK_MESSAGE( obs_vec[i]->update_count() == 2,"Expected 2 updates");
@@ -117,13 +109,9 @@ BOOST_AUTO_TEST_CASE( test_change_mgr_singleton )
       // make sure no node_ptr are in scope as they can *delay*
       // the destructor to the end of the scope, and hence affect this test
       delete theDefs;
-      BOOST_CHECK_MESSAGE(ChangeMgrSingleton::instance()->no_of_node_observers() == 0,"Expected no observer but found " << ChangeMgrSingleton::instance()->no_of_node_observers());
 
       for(size_t i = 0; i < obs_vec.size(); ++i) { delete  obs_vec[i]; }
    }
-
-   // keep valgrind happy
-   ChangeMgrSingleton::destroy();
 }
 
 

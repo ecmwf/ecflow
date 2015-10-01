@@ -21,7 +21,6 @@
 #include "Log.hpp"
 #include "PrintStyle.hpp"
 #include "NodeTreeVisitor.hpp"
-#include "ChangeMgrSingleton.hpp"
 #include "Ecf.hpp"
 
 #include "Stl.hpp"
@@ -38,10 +37,8 @@ using namespace std;
 // Check the variable names. i.e we know they are valid
 Family::~Family()
 {
-   // Don't create the ChangeMgrSingleton during destruct sequence. (i.e in unit cases)
-   // Since that will cause a memory leak
-   if (!Ecf::server() && ChangeMgrSingleton::exists()) {
-      ChangeMgrSingleton::instance()->notify_delete( this );
+   if (!Ecf::server()) {
+      notify_delete();
    }
 
    delete fam_gen_variables_;

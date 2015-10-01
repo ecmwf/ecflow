@@ -30,7 +30,6 @@
 #include "CtsApi.hpp"
 #include "PrintStyle.hpp"
 #include "Host.hpp"
-#include "ChangeMgrSingleton.hpp" // keep valgrind happy
 #include "Rtt.hpp"
 #include "EcfPortLock.hpp"
 
@@ -251,9 +250,6 @@ TestFixture::~TestFixture()
 
       // remove the lock file
       EcfPortLock::remove( port_ );
-
-      // keep valgrind happy
-      ChangeMgrSingleton::destroy();
 
       // destroy, so that we flush the rtt_filename
       Rtt::destroy();

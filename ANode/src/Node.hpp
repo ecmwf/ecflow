@@ -56,7 +56,9 @@
 #include "MiscAttrs.hpp"
 #include "NodeFwd.hpp"
 #include "Flag.hpp"
+#include "Aspect.hpp"
 
+class AbstractObserver;
 namespace ecf { class Simulator; class SimulatorVisitor; class DefsAnalyserVisitor; class FlatAnalyserVisitor; } // forward declare for friendship
 namespace ecf { class Calendar; class NodeTreeVisitor; } // forward declare class
 
@@ -431,27 +433,27 @@ public:
    virtual void collateChanges(DefsDelta& ) const = 0;
    void incremental_changes(DefsDelta&, compound_memento_ptr& comp) const;
 
-   void set_memento(const StateMemento* );
-   void set_memento(const NodeDefStatusDeltaMemento* );
-   void set_memento(const SuspendedMemento* );
-   void set_memento(const NodeEventMemento* );
-   void set_memento(const NodeMeterMemento* );
-   void set_memento(const NodeLabelMemento* );
-   void set_memento(const NodeTriggerMemento* );
-   void set_memento(const NodeCompleteMemento* );
-   void set_memento(const NodeRepeatMemento* );
-   void set_memento(const NodeLimitMemento* );
-   void set_memento(const NodeInLimitMemento* );
-   void set_memento(const NodeVariableMemento* );
-   void set_memento(const NodeLateMemento* );
-   void set_memento(const NodeTodayMemento* );
-   void set_memento(const NodeTimeMemento* );
-   void set_memento(const NodeDayMemento* );
-   void set_memento(const NodeCronMemento* );
-   void set_memento(const NodeDateMemento* );
-   void set_memento(const NodeZombieMemento* );
-   void set_memento(const NodeVerifyMemento* );
-   void set_memento(const FlagMemento* );
+   void set_memento(const StateMemento*,std::vector<ecf::Aspect::Type>& aspects );
+   void set_memento(const NodeDefStatusDeltaMemento*,std::vector<ecf::Aspect::Type>& aspects );
+   void set_memento(const SuspendedMemento*,std::vector<ecf::Aspect::Type>& aspects );
+   void set_memento(const NodeEventMemento*,std::vector<ecf::Aspect::Type>& aspects );
+   void set_memento(const NodeMeterMemento*,std::vector<ecf::Aspect::Type>& aspects );
+   void set_memento(const NodeLabelMemento*,std::vector<ecf::Aspect::Type>& aspects );
+   void set_memento(const NodeTriggerMemento*,std::vector<ecf::Aspect::Type>& aspects );
+   void set_memento(const NodeCompleteMemento*,std::vector<ecf::Aspect::Type>& aspects );
+   void set_memento(const NodeRepeatMemento*,std::vector<ecf::Aspect::Type>& aspects );
+   void set_memento(const NodeLimitMemento*,std::vector<ecf::Aspect::Type>& aspects );
+   void set_memento(const NodeInLimitMemento*,std::vector<ecf::Aspect::Type>& aspects );
+   void set_memento(const NodeVariableMemento*,std::vector<ecf::Aspect::Type>& aspects );
+   void set_memento(const NodeLateMemento*,std::vector<ecf::Aspect::Type>& aspects );
+   void set_memento(const NodeTodayMemento*,std::vector<ecf::Aspect::Type>& aspects );
+   void set_memento(const NodeTimeMemento*,std::vector<ecf::Aspect::Type>& aspects );
+   void set_memento(const NodeDayMemento*,std::vector<ecf::Aspect::Type>& aspects );
+   void set_memento(const NodeCronMemento*,std::vector<ecf::Aspect::Type>& aspects );
+   void set_memento(const NodeDateMemento*,std::vector<ecf::Aspect::Type>& aspects );
+   void set_memento(const NodeZombieMemento*,std::vector<ecf::Aspect::Type>& aspects );
+   void set_memento(const NodeVerifyMemento*,std::vector<ecf::Aspect::Type>& aspects );
+   void set_memento(const FlagMemento*,std::vector<ecf::Aspect::Type>& aspects );
 
    // Find functions: ============================================================
    // Will search for a node by name(ie not a path) first on siblings, then on a parent
@@ -592,6 +594,15 @@ protected:
    // returns node state without trailing new lines
    virtual std::string write_state() const;
    virtual void read_state(const std::string& line,const std::vector<std::string>& lineTokens);
+
+   // Observer notifications
+protected:
+   std::vector<AbstractObserver*> observers_;
+   void notify_delete();
+public:
+   void notify(const std::vector<ecf::Aspect::Type>& aspects);
+   void attach(AbstractObserver*);
+   void detach(AbstractObserver*);
 
 private:
    void why(std::vector<std::string>& theReasonWhy) const;

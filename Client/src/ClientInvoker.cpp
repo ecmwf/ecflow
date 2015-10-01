@@ -27,7 +27,6 @@
 #include "Rtt.hpp"
 #include "Ecf.hpp"
 #include "DurationTimer.hpp"
-#include "ChangeMgrSingleton.hpp"
 #include "TimeStamp.hpp"
 #include "Log.hpp"
 
@@ -265,13 +264,6 @@ int ClientInvoker::do_invoke_cmd(Cmd_ptr cts_cmd) const
 	if (testInterface_) return 0;       // The testInterface_ flag allows testing of client interface, parsing of args, without needing to contact server
 	assert(!clientEnv_.host().empty()); // make sure host is NOT empty.
 
-   if (ChangeMgrSingleton::exists() && ChangeMgrSingleton::instance()->in_notification()) {
-      // place break point here, Change mgr observers, calling *ANOTHER* client->server command, in a middle of update to observers
-      std::cout << "***********************************************************\n";
-      std::cout << "ecflow:ClientInvoker::do_invoke_cmd() "; cts_cmd->print(cout); std::cout << " called in the middle of ChangeMgrSingleton::notification. !!!!!!!!\n";
-      std::cout << "***********************************************************\n";
-   }
-
 	/// retry_connection_period_ specifies the time to wait, before retrying to connect to server.
 	/// Added to get round glitches in the network.
 	/// However for ping() always default to 1 second. This avoids 10 second wait in release mode.
@@ -474,15 +466,17 @@ int ClientInvoker::sync(defs_ptr& client_defs) const
 
 int ClientInvoker::sync_local() const
 {
-   // Prevent infinite loops in change observers.
-   // This can be removed  when we do the new ecflowview. TODO
-   if (ChangeMgrSingleton::exists() && ChangeMgrSingleton::instance()->in_notification()) {
-      std::cout << "ecflow:ClientInvoker::sync_local() called in the middle of ChangeMgrSingleton::notification. Ignoring..... \n";
-      return 0;
-   }
-
    defs_ptr defs = server_reply_.client_defs();
+
    if (defs.get()) {
+
+      // Prevent infinite loops in change observers.
+      // This can be removed  when we do the new ecflowview. TODO
+      if ( defs->in_notification()) {
+         std::cout << "ecflow:ClientInvoker::sync_local() called in the middle of notification. Ignoring..... \n";
+         return 0;
+      }
+
       if (testInterface_) return invoke(CtsApi::sync(server_reply_.client_handle(),defs->state_change_no(), defs->modify_change_no()));
       return invoke( Cmd_ptr( new CSyncCmd(CSyncCmd::SYNC,server_reply_.client_handle(), defs->state_change_no(), defs->modify_change_no() ) ) );
    }

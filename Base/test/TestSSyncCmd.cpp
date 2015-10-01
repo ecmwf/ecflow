@@ -25,7 +25,6 @@
 #include "Ecf.hpp"
 #include "NodeFwd.hpp"
 #include "SuiteChanged.hpp"
-#include "ChangeMgrSingleton.hpp"
 #include "CalendarUpdateParams.hpp"
 
 using namespace std;
@@ -373,9 +372,6 @@ BOOST_AUTO_TEST_CASE( test_ssync_cmd  )
 
    test_sync_scaffold(set_defs_flag,"set_defs_flag");
    test_sync_scaffold(set_defs_state,"set_defs_state");
-
-	/// Keep valgrind happy
-	ChangeMgrSingleton::destroy();
 }
 
 BOOST_AUTO_TEST_SUITE_END()

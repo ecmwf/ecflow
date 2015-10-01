@@ -48,7 +48,7 @@ public:
    virtual const std::string& script_extension() const;
 
    virtual void collateChanges(DefsDelta&) const;
-   void set_memento(const SubmittableMemento* m) { Submittable::set_memento(m); }
+   void set_memento(const SubmittableMemento* m,std::vector<ecf::Aspect::Type>& aspects) { Submittable::set_memento(m,aspects); }
 
    virtual node_ptr find_node_up_the_tree(const std::string& name) const;
 
