@@ -79,7 +79,7 @@ else()
 endif()
 
 ecbuild_add_option( FEATURE VIEWER
-                    DEFAULT OFF
+                    DEFAULT ON
                     DESCRIPTION       "the Qt version of the viewer"
                     REQUIRED_PACKAGES "${QT_DEPS}" )
 
