@@ -1386,7 +1386,7 @@ void Defs::add_edit_history(const std::string& path, const std::string& request)
    }
    else {
       (*i).second.push_back(request);
-      if ((*i).second.size() > 20) {
+      if ((*i).second.size() > Defs::max_edit_history_size_per_node()) {
          (*i).second.pop_front();
       }
    }

@@ -41,6 +41,7 @@ bool CheckPtCmd::equals(ClientToServerCmd* rhs) const
 
 bool CheckPtCmd::isWrite() const
 {
+   // TODO: if save to takes to long, the the late flag is set. Even when command is read only ?
    if (mode_ != ecf::CheckPt::UNDEFINED) return true;
    if (check_pt_interval_ != 0) return true;
    if (check_pt_save_time_alarm_ != 0) return true;

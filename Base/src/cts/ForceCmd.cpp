@@ -46,6 +46,12 @@ std::ostream& ForceCmd::print(std::ostream& os) const
    return user_cmd(os,CtsApi::to_string(CtsApi::force(paths_,stateOrEvent_,recursive_,setRepeatToLastValue_)));
 }
 
+std::ostream& ForceCmd::print(std::ostream& os, const std::string& path) const
+{
+   std::vector<std::string> paths(1,path);
+   return user_cmd(os,CtsApi::to_string(CtsApi::force(paths,stateOrEvent_,recursive_,setRepeatToLastValue_)));
+}
+
 STC_Cmd_ptr ForceCmd::doHandleRequest(AbstractServer* as) const
 {
 	as->update_stats().force_++;
@@ -131,13 +137,6 @@ STC_Cmd_ptr ForceCmd::doHandleRequest(AbstractServer* as) const
  	      node->setRepeatToLastValueHierarchically();
  	   }
  	}
-
-   // Clear up memory allocated to path. *ASAP*
- 	// When paths is very large, freeing memory has big impact on performance
- 	// i.e comment this out and run Client/test/TestSinglePerf.cpp  -> ecflow test_performance to see the effect
- 	// Commands run after this are considerably slower.Looks like it still retained in memory dues to shared ptr, slightly longer
-   // When dealing with several thousands paths, this makes a *HUGE* difference
-   vector<string>().swap(paths_); // clear paths_ and minimise its capacity *ASAP*
 
    std::string error_msg = error_ss.str();
    if (!error_msg.empty()) {
