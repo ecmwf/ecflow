@@ -13,7 +13,6 @@
 #include "ClientInvoker.hpp"
 #include "ArgvCreator.hpp"
 
-#include "ChangeMgrAccess.hpp"
 #include "ServerDefsAccess.hpp"
 #include "ServerComQueue.hpp"
 #include "ServerHandler.hpp"
@@ -451,7 +450,7 @@ void ServerComThread::update(const Node* node, const std::vector<ecf::Aspect::Ty
 		//Here we can be sure that defs changed radically and tree we handle in ServerHandler will be cleared.
 		//We detach the observer from the defs and all the nodes. This call will block access to the
 		//ChangeMgrSingleton from any other threads.
-		detach();
+		//detach();
 
 		//At this point there is nothing observed!
 
@@ -496,11 +495,8 @@ void ServerComThread::update(const Defs* dc, const std::vector<ecf::Aspect::Type
 	Q_EMIT defsChanged(typesCopy);
 }
 
-//This can never be called!!
 void ServerComThread::update_delete(const Node* nc)
 {
-	assert(0);
-
 	Node *n=const_cast<Node*>(nc);
 	n->detach(this);
 
@@ -511,7 +507,10 @@ void ServerComThread::update_delete(const Defs* dc)
 {
     UserMessage::message(UserMessage::DBG, false, std::string("Update defs delete: "));
 
-    if(rescanNeed_)
+    Defs *d=const_cast<Defs*>(dc);
+    d->detach(this);
+
+   /* if(rescanNeed_)
 	{
 		UserMessage::message(UserMessage::DBG, false, std::string(" -->  No signal emitted (rescan needed)"));
 	    return;
@@ -532,7 +531,7 @@ void ServerComThread::update_delete(const Defs* dc)
     //it will clear its tree, which stores shared pointers to the nodes (node_ptr). We do not observe these nodes
     //any more, so when these pointers are reset we can be sure that update_delete() will not be called.!!!
     Q_EMIT rescanNeed();
-
+*/
     //When the sync is finished we need to attach to the new set of nodes the updated defs contains!!!
 }
 
@@ -544,37 +543,30 @@ void ServerComThread::attach()
 	if(d == NULL)
 		return;
 
-	ChangeMgrAccess chAccess;
-	ChangeMgrSingleton* chm=chAccess.changeManager();
-	chm->attach(d.get(),this);
-
-	//ChangeMgrSingleton::instance()->attach(d.get(),this);
+	d->attach(this);
 
 	const std::vector<suite_ptr> &suites = d->suiteVec();
 	for(unsigned int i=0; i < suites.size();i++)
 	{
-		attach(suites.at(i).get(),chm);
+		attach(suites.at(i).get());
 	}
 }
 
 //Add a node to the observer
-void ServerComThread::attach(Node *node,ChangeMgrSingleton* chm)
+void ServerComThread::attach(Node *node)
 {
-	chm->attach(node,this);
-	//ChangeMgrSingleton::instance()->attach(node,this);
-
 	std::vector<node_ptr> nodes;
 	node->immediateChildren(nodes);
 
 	for(std::vector<node_ptr>::const_iterator it=nodes.begin(); it != nodes.end(); ++it)
 	{
-		attach((*it).get(),chm);
+		(*it)->attach(this);
 	}
 }
 
 void ServerComThread::reAttach()
 {
-	ChangeMgrAccess chAccess;
+	/*ChangeMgrAccess chAccess;
 	ChangeMgrSingleton* chm=chAccess.changeManager();
 
 	chm->detach(this);
@@ -588,15 +580,15 @@ void ServerComThread::reAttach()
 	for(unsigned int i=0; i < suites.size();i++)
 	{
 		attach(suites.at(i).get(),chm);
-	}
+	}*/
 }
 
 //Remove the defs and each node from the observer in one go
 void ServerComThread::detach()
 {
-	ChangeMgrAccess chAccess;
-	ChangeMgrSingleton* chm=chAccess.changeManager();
-	chm->detach(this);
+	//ChangeMgrAccess chAccess;
+	//ChangeMgrSingleton* chm=chAccess.changeManager();
+	//chm->detach(this);
 
 	/*
 	ServerDefsAccess defsAccess(server_);  // will reliquish its resources on destruction
@@ -618,7 +610,7 @@ void ServerComThread::detach()
 }
 
 //Remove each node from the observer
-void ServerComThread::detach(Node *node,ChangeMgrSingleton* chm)
+void ServerComThread::detach(Node *node)
 {
 	/*chm->detach(node,this);
 	//ChangeMgrSingleton::instance()->detach(node,this);

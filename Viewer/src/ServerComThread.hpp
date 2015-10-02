@@ -62,8 +62,8 @@ protected:
 	void updateRegSuites();
 
 private:
-	void attach(Node *node,ChangeMgrSingleton*);
-    void detach(Node *node,ChangeMgrSingleton*);
+	void attach(Node *node);
+    void detach(Node *node);
     void attach();
     void reAttach();
     void detach();
