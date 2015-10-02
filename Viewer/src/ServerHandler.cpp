@@ -1010,8 +1010,8 @@ void ServerHandler::reset()
 	//A safety measure
 	comQueue_->suspend();
 
-	//Clear the tree. The thread will notify us when it is safe to do
-	//clearTree();
+	//Clear the tree.
+	clearTree();
 
 	//--------------------------------------
 	// Second part of reset: loading

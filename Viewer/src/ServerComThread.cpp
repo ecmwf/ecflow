@@ -120,33 +120,8 @@ void ServerComThread::run()
 
 			case VTask::SyncTask:
 			{
-                {
-                    ServerDefsAccess defsAccess(server_);
-                    UserMessage::message(UserMessage::DBG, false, std::string(" SYNC"));
-                    ci_->sync_local();
-                    UserMessage::message(UserMessage::DBG, false, std::string(" SYNC FINISHED"));
-                }
-
-				//If a rescan is needed we need to attach the nodes to the observer (the observer is already cleared)
-                //and update the registered suites. ServerHandler is already notified about about this change via a signal,
-                //so it has already cleared its tree.
-                if(rescanNeed_)
-                {
-                	UserMessage::message(UserMessage::DBG, false, std::string("   --> rescan needed!"));
-                	attach();
-                	updateRegSuites();
-                }
-
-                //If there was a significant change
-                //we need to reattach the nodes to the observer and
-                //update the registered suites. Server handler will update its tree when the thread finishes.
-                else if(ci_->server_reply().full_sync())
-                {
-                    UserMessage::message(UserMessage::DBG, false, std::string("   --> full sync happened!"));
-                    reAttach();
-                    updateRegSuites();
-				}
-
+				UserMessage::message(UserMessage::DBG, false, std::string(" SYNC"));
+				sync_local();
 				break;
 			}
 
@@ -262,64 +237,93 @@ void ServerComThread::run()
 }
 
 
+void ServerComThread::sync_local()
+{
+	//For this part we need to lock the mutex on defs
+	{
+		ServerDefsAccess defsAccess(server_);
+
+		UserMessage::message(UserMessage::DBG, false, "ServerComThread::sync -- begin");
+		ci_->sync_local();
+		UserMessage::message(UserMessage::DBG, false, std::string("ServerComThread::sync -- end"));
+
+		//If a rescan or fullscan is needed we have either added/remove nodes or deleted the defs.
+		//So there were significant changes.
+
+		//We detach the nodes currently available in defs, then we attach them again. We can still have nodes
+		//that were removed from the defs but are still attached. These will be detached when in ServerHandler we
+		//clear the tree. This tree contains shared pointers to the nodes, so when the tree is cleared
+		//the shared pointer are reset, the node descturctor is called and finally update_delete is called and
+		//we can detach the node.
+
+		if(rescanNeed_ || ci_->server_reply().full_sync())
+		{
+			UserMessage::message(UserMessage::DBG, false, std::string("   --> rescan needed!"));
+			detach(defsAccess.defs());
+			attach(defsAccess.defs());
+		}
+	}
+
+	if(rescanNeed_ || ci_->server_reply().full_sync())
+	{
+		updateRegSuites();
+	}
+}
+
+
 void ServerComThread::reset()
 {
 	UserMessage::message(UserMessage::DBG, false,"ServerComThread::reset -- begin");
 
+	//Lock the mutex on defs
+	ServerDefsAccess defsAccess(server_);
+
     //Detach the defs and then nodes from the observer
-    detach();
+    detach(defsAccess.defs());
 
-    //Notify ServerHandler
-    Q_EMIT rescanNeed();
+	/// registering with empty set would lead
+	//      to retrieve all server content,
+	//      opposite of expected result
 
-	//sleep(15);
+	//If we have already set a handle we
+	//need to drop it.
+	if(ci_->client_handle() > 0)
 	{
-		ServerDefsAccess defsAccess(server_);
-
-		/// registering with empty set would lead
-		//      to retrieve all server content,
-		//      opposite of expected result
-
-		//If we have already set a handle we
-		//need to drop it.
-		if(ci_->client_handle() > 0)
+		try
 		{
-			try
-			{
-				ci_->ch1_drop();
-			}
-			catch (std::exception &e)
-			{
-				UserMessage::message(UserMessage::DBG, false, std::string("no drop possible") + e.what());
-			}
+			ci_->ch1_drop();
 		}
-
-		if(hasSuiteFilter_)
+		catch (std::exception &e)
 		{
-			//reset client handle + defs
-			ci_->reset();
-
-			if(!filteredSuites_.empty())
-			{
-				UserMessage::message(UserMessage::DBG, false, std::string(" REGISTER SUITES"));
-
-				//This will add a new handle to the client
-				ci_->ch_register(autoAddNewSuites_, filteredSuites_);
-			}
+			UserMessage::message(UserMessage::DBG, false, std::string("no drop possible") + e.what());
 		}
-		else
-		{
-			// reset client handle + defs
-			ci_->reset();
-		}
-
-		UserMessage::message(UserMessage::DBG, false, std::string(" INIT SYNC"));
-		ci_->sync_local();
-		UserMessage::message(UserMessage::DBG, false, std::string(" INIT SYNC FINISHED"));
 	}
 
+	if(hasSuiteFilter_)
+	{
+		//reset client handle + defs
+		ci_->reset();
+
+		if(!filteredSuites_.empty())
+		{
+			UserMessage::message(UserMessage::DBG, false, std::string(" REGISTER SUITES"));
+
+			//This will add a new handle to the client
+			ci_->ch_register(autoAddNewSuites_, filteredSuites_);
+		}
+	}
+	else
+	{
+		// reset client handle + defs
+		ci_->reset();
+	}
+
+	UserMessage::message(UserMessage::DBG, false, std::string(" INIT SYNC"));
+	ci_->sync_local();
+	UserMessage::message(UserMessage::DBG, false, std::string(" INIT SYNC FINISHED"));
+
     //Attach the nodes to the observer
-	attach();
+	attach(defsAccess.defs());
 
 	UserMessage::message(UserMessage::DBG, false,"ServerComThread::reset -- end");
 }
@@ -447,20 +451,13 @@ void ServerComThread::update(const Node* node, const std::vector<ecf::Aspect::Ty
 		UserMessage::message(UserMessage::DBG, false, std::string(" --> Rescan needed"));
 		rescanNeed_=true;
 
-		//Here we can be sure that defs changed radically and tree we handle in ServerHandler will be cleared.
-		//We detach the observer from the defs and all the nodes. This call will block access to the
-		//ChangeMgrSingleton from any other threads.
-		//detach();
-
-		//At this point there is nothing observed!
-
 		//We notify ServerHandler about the radical changes. When ServerHandler receives this signal
-		//it will clear its tree, which stores shared pointers to the nodes (node_ptr). We do not observe these nodes
-		//any more, so when these pointers are reset we can be sure that update_delete() will not be called.!!!
+		//it will clear its tree, which stores shared pointers to the nodes (node_ptr). If these pointers are
+		//reset update_delete() might be called, so it should not write any shared variables!
 		Q_EMIT rescanNeed();
 
-		//When the sync is finished we need to attach to the new set of nodes the updated defs contains!!!
 		return;
+
 	}
 
     //This will notify SeverHandler
@@ -499,10 +496,11 @@ void ServerComThread::update_delete(const Node* nc)
 {
 	Node *n=const_cast<Node*>(nc);
 	n->detach(this);
-
     //UserMessage::message(UserMessage::DBG, false, std::string("Update delete: ") + n->name());
 }
 
+//This only be called when ComThread is running or from the ComThread desctructor. So it is safe to set
+//rescanNeed in it.
 void ServerComThread::update_delete(const Defs* dc)
 {
     UserMessage::message(UserMessage::DBG, false, std::string("Update defs delete: "));
@@ -510,36 +508,33 @@ void ServerComThread::update_delete(const Defs* dc)
     Defs *d=const_cast<Defs*>(dc);
     d->detach(this);
 
-   /* if(rescanNeed_)
-	{
-		UserMessage::message(UserMessage::DBG, false, std::string(" -->  No signal emitted (rescan needed)"));
-	    return;
-	}
+    //If we are in  a SYNC_LOCAl task!!!!
+    if(taskType_ == VTask::SyncTask)
+    {
+    	//We notify ServerHandler about the radical changes. When ServerHandler receives this signal
+    	//it will clear its tree, which stores shared pointers to the nodes (node_ptr). If these pointers are
+    	//reset update_delete() might be called, so it should not write any shared variables!
+    	Q_EMIT rescanNeed();
 
-    //This is a radical change
-    rescanNeed_=true;
-    UserMessage::message(UserMessage::DBG, false, std::string(" --> Rescan needed"));
-
-    //Here we can be sure that defs changed radically and tree we handle in ServerHandler will be cleared.
-    //We detach the observer from the defs and all the nodes. This call will block access to the
-    //ChangeMgrSingleton from any other threads.
-    detach();
-
-    //At this point there is nothing observed!
-
-    //We notify ServerHandler about the radical changes. When ServerHandler receives this signal
-    //it will clear its tree, which stores shared pointers to the nodes (node_ptr). We do not observe these nodes
-    //any more, so when these pointers are reset we can be sure that update_delete() will not be called.!!!
-    Q_EMIT rescanNeed();
-*/
-    //When the sync is finished we need to attach to the new set of nodes the updated defs contains!!!
+    	rescanNeed_=true;
+    }
 }
 
-//Register each node to the observer
+//Attach each node and the defs to the observer
 void ServerComThread::attach()
 {
 	ServerDefsAccess defsAccess(server_);  // will reliquish its resources on destruction
 	defs_ptr d = defsAccess.defs();
+	if(d == NULL)
+		return;
+
+	attach(d);
+}
+
+//Attach  each node and the defs to the observer. The access to
+//the defs is safe so we do not need to set a mutex on it.
+void ServerComThread::attach(defs_ptr d)
+{
 	if(d == NULL)
 		return;
 
@@ -552,7 +547,7 @@ void ServerComThread::attach()
 	}
 }
 
-//Add a node to the observer
+//Attach a node to the observer
 void ServerComThread::attach(Node *node)
 {
 	std::vector<node_ptr> nodes;
@@ -564,62 +559,42 @@ void ServerComThread::attach(Node *node)
 	}
 }
 
-void ServerComThread::reAttach()
-{
-	/*ChangeMgrAccess chAccess;
-	ChangeMgrSingleton* chm=chAccess.changeManager();
-
-	chm->detach(this);
-
-	ServerDefsAccess defsAccess(server_);  // will reliquish its resources on destruction
-	defs_ptr d = defsAccess.defs();
-	if(d == NULL)
-		return;
-
-	const std::vector<suite_ptr> &suites = d->suiteVec();
-	for(unsigned int i=0; i < suites.size();i++)
-	{
-		attach(suites.at(i).get(),chm);
-	}*/
-}
-
-//Remove the defs and each node from the observer in one go
+//Detach each node and the defs from the observer
 void ServerComThread::detach()
 {
-	//ChangeMgrAccess chAccess;
-	//ChangeMgrSingleton* chm=chAccess.changeManager();
-	//chm->detach(this);
-
-	/*
 	ServerDefsAccess defsAccess(server_);  // will reliquish its resources on destruction
 	defs_ptr d = defsAccess.defs();
 	if(d == NULL)
 		return;
 
-	ChangeMgrAccess chAccess;
-	ChangeMgrSingleton* chm=chAccess.changeManager();
-	chm->detach(d.get(),this);
+	detach(d);
+}
 
-	//ChangeMgrSingleton::instance()->detach(d.get(),this);
+
+//Detach each node and the defs from the observer.  The access to
+//the defs is safe so we do not need to set a mutex on it.
+void ServerComThread::detach(defs_ptr d)
+{
+	if(d == NULL)
+		return;
+
+	d->detach(this);
 
 	const std::vector<suite_ptr> &suites = d->suiteVec();
 	for(unsigned int i=0; i < suites.size();i++)
 	{
-		detach(suites.at(i).get(),chm);
-	}*/
+		detach(suites.at(i).get());
+	}
 }
 
-//Remove each node from the observer
+//Detach a node from the observer
 void ServerComThread::detach(Node *node)
 {
-	/*chm->detach(node,this);
-	//ChangeMgrSingleton::instance()->detach(node,this);
-
 	std::vector<node_ptr> nodes;
 	node->immediateChildren(nodes);
 
 	for(std::vector<node_ptr>::const_iterator it=nodes.begin(); it != nodes.end(); ++it)
 	{
-		detach((*it).get(),chm);
-	}*/
+		(*it)->detach(this);
+	}
 }

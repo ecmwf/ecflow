@@ -41,7 +41,6 @@ public:
 	~ServerComThread();
 
 	void task(VTask_ptr);
-	void stop();
 
 	//From AbstractObserver
 	void update(const Node*, const std::vector<ecf::Aspect::Type>&);
@@ -59,14 +58,16 @@ Q_SIGNALS:
 protected:
 	void run();
 	void reset();
+	void sync_local();
 	void updateRegSuites();
 
 private:
-	void attach(Node *node);
-    void detach(Node *node);
     void attach();
-    void reAttach();
+    void attach(defs_ptr d);
+    void attach(Node *node);
     void detach();
+    void detach(defs_ptr d);
+    void detach(Node *node);
 
 	ServerHandler *server_;
 	ClientInvoker *ci_;
