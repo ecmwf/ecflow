@@ -121,6 +121,8 @@
 #include "menus.h"
 /* #include <proc/readproc.h> */
 
+using namespace std;
+
 bool Updating::do_full_redraw_ = false;
 
 class SelectNode {
@@ -1157,8 +1159,17 @@ void host::login()
 {
 }
 
-bool check_version( const char* v1, const char* v2 )
+bool check_version( const std::string& server_version,  const std::string& viewer_version )
 {
+   // We know viewer version 4.1.0 is still compatible with old server versions 4.0.x
+//   cout  << "server version '" << server_version << "'\n";
+//   cout  << "viewer version '" << viewer_version << "'\n";
+   if (viewer_version == "4.1.0" && server_version.find("4.0.") != std::string::npos) {
+      return true;
+   }
+
+   const char* v1 = server_version.c_str();
+   const char* v2 = viewer_version.c_str();
    int num = 0;
    while ( v1 && v2 && num < 2 ) {
       if (*v1 == '.') num++;
@@ -1218,7 +1229,7 @@ void ehost::login()
           }
       }
       else {
-         if (!check_version(server_version.c_str(), ecf::Version::raw().c_str())) {
+         if (!check_version(server_version, ecf::Version::raw())) {
             if (!confirm::ask(
                      false,
                      "%s (%s@%d): version mismatch, server is %s, client is %s\ntry to connect anyway?",

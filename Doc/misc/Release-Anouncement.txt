@@ -1,14 +1,14 @@
  ======================================================================================
 Subject: New release of ecFlow now available  
 
-A new version of the ecFlow(4.0.8) has been released:
+A new version of the ecFlow(4.0.9) has been released:
 
-This release is accessible from: /usr/local/apps/ecflow/4.0.8
+This release is accessible from: /usr/local/apps/ecflow/4.0.9
 on the following platforms:
 
    o linux 11.3                (opensuse113)
    o linux 13.1                (opensuse131)
-   o redhat/RHEL 6.4           (ecgb,sappa,sappb)
+   o redhat/RHEL 6.4           (ecgb,sappb)
    o linux cluster             (lxab/lxc/lxop)
    o virtual machines          (vsms1 -> operational and research VM are linked to this)
    o Operational linux cluster (lxop)
@@ -16,30 +16,14 @@ on the following platforms:
  
 The release includes the following changes:
 
-    server:            ECFLOW-247 Family goes complete despite child that was aborted
-    server:            ECFLOW-261 extend ECF_INCLUDE to a set of paths, to search for headers
-    server:            ECFLOW-274 %include "../head.h", means search relative to script location, does not work
-    server:            ECFLOW-282 Allow RepeatDate to go backwards
-    server:            ECFLOW-322 late warnings too early on quick tasks?
-    server:            ECFLOW-325 ecflow repeat date should not allow new values that are out of step
-    server:            ECFLOW-324 limit over-subscription when user executes a task
-    server:            ECFLOW-337 day and time attributes of a task not working as expected
-    server:            ECFLOW-330 server_load output in a file
-    server:            ECFLOW-344 Task doesn't stay aborted when --force=aborted and ECF_TRIES > 1
-    server:            ECFLOW-347 Node status incorrect when children are unknown and complete
-    server:            ECFLOW-359 repeats not looping on parent, when child is requeued
-    python:            ECFLOW-352 add zombie control to python api
-    ecflowview:        INT-74 - log server proof against // Resolved prevent double slash when requesting output from log-server
-    ecflowview:        do not show duplicated variables (variables tab)
-    ecflowview:        print warning (stderr) when repeat date does not match, between gui and ecflow (step 7)
-    ecflowview:        better handling for updates (edit variable while displayed on main window)
-    ecflowview:        info label to report about number of tasks, attributes, values for HOST and ECF_JOB_CMD (export ECFLOWVIEW_INFO_LABEL)
-    ecflowview:        ECFLOW-307 When a task has failed, opening output should be positioned on error/abort
-    installation:   ECFLOW-308 cmake: update so that building of viewer is configurable
-    installation:   ECFLOW-311 Package ecbuild correctly in export tarball
-    installation:   ECFLOW-340 Tried to compile ecflow on AIX machine
-    installation:   ECFLOW-369 ecflow tests take to long during 'make check'
-    installation:   ECFLOW-370 test fail when building rpm, if gnuplot not found
+    server:            ECFLOW-377 ecflow allows creation of log file with space at the end
+    server:            ECFLOW-378 Refactor the code that checks the timeout for node resolution
+    server:            ECFLOW-380 Do not allow READ ONLY server variables to be changed
+    server:            ECFLOW-417 clock hybrid, with repeat day, should update calendar to next day on requeue
+    server:            ECFLOW-422 registering to view suites, should be treated as a read only operation. (likewise for add/remove suites and drop user)
+    server:            ECFLOW-428 requeue aborted tasks leads to parent families remaining aborted
+    ecflowview:        ECFLOW-376  Change the log path, not reflected in the GUI
+    ecflowview:        ECFLOWVIEW_TITLE is read from the environment to change title 
  
 To use a specific version use the module functionality.
 This will setup the PATHS for client server and python extension
@@ -47,7 +31,7 @@ Note: The GUI(ecflowview) is only available on linux
 
    module avail ecflow
    module unload ecflow 
-   module load ecflow/4.0.8
+   module load ecflow/4.0.9
       
             
 Compatibility
@@ -56,7 +40,7 @@ The client/Server from one release should not be mixed with another.
 To avoid this problem it is *highly* recommended that you use a 
 specific version:
 
-   module load ecflow/4.0.8
+   module load ecflow/4.0.9
 
 Additionally references to ecflow_client in the scripts(.ecf) should use
 the server variable %ECF_VERSION% to locate the executable, this ensures
@@ -78,7 +62,7 @@ Documentation
 =======================================================================
 The user manual(word and pdf formats) are available from:
 
-   /usr/local/apps/ecflow/4.0.8/doc
+   /usr/local/apps/ecflow/4.0.9/doc
 
 The online documentation and tutorial are accessible from:
 
