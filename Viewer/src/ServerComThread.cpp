@@ -553,9 +553,11 @@ void ServerComThread::attach(Node *node)
 	std::vector<node_ptr> nodes;
 	node->immediateChildren(nodes);
 
+	node->attach(this);
+
 	for(std::vector<node_ptr>::const_iterator it=nodes.begin(); it != nodes.end(); ++it)
 	{
-		(*it)->attach(this);
+		attach((*it).get());
 	}
 }
 
@@ -593,8 +595,10 @@ void ServerComThread::detach(Node *node)
 	std::vector<node_ptr> nodes;
 	node->immediateChildren(nodes);
 
+	node->detach(this);
+
 	for(std::vector<node_ptr>::const_iterator it=nodes.begin(); it != nodes.end(); ++it)
 	{
-		(*it)->detach(this);
+		detach((*it).get());
 	}
 }
