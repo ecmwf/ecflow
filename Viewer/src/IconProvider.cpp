@@ -15,7 +15,7 @@
 #include <QImageReader>
 #include <QPainter>
 
-static IconItem unknownIcon(":/desktop/unknown.svg");
+static UnknownIconItem unknownIcon(":/desktop/unknown.svg");
 static IconItem linkIcon(":/desktop/link.svg");
 static IconItem linkBrokenIcon(":/desktop/link_broken.svg");
 static IconItem lockIcon(":/viewer/padlock.svg");
@@ -40,7 +40,6 @@ IconItem::IconItem(QString path) : path_(path), id_(idCnt++)
 {
 }
 
-
 QPixmap IconItem::pixmap(int size)
 {
  	 std::map<int,QPixmap>::iterator it=pixmaps_.find(size);
@@ -58,7 +57,7 @@ QPixmap IconItem::pixmap(int size)
 		}
 		else
 		{
-		  	unknownIcon.pixmap(size);
+		  	pix=unknownIcon.pixmap(size);
 		}
 
 		pixmaps_[size]=pix;
@@ -66,6 +65,22 @@ QPixmap IconItem::pixmap(int size)
 	 }
 	 return QPixmap();
 }
+
+QPixmap IconItem::unknown(int size)
+{
+	return unknownIcon.pixmap(size);
+}
+
+UnknownIconItem::UnknownIconItem(QString path) : IconItem(path)
+{
+
+}
+
+QPixmap UnknownIconItem::unknown(int size)
+{
+	return QPixmap();
+}
+
 
 //===========================================
 //

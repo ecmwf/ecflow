@@ -104,6 +104,7 @@ void BcWidget::reset(int idx,QString text,QColor bgCol,QColor fontCol)
         
         items_.at(idx)->bgCol_=bgCol;
         items_.at(idx)->fontCol_=fontCol;
+        items_.at(idx)->borderCol_=bgCol.darker(125);
         
         if(newText)
            reset(items_);

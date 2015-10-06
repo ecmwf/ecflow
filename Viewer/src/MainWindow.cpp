@@ -97,8 +97,13 @@ MainWindow::MainWindow(QStringList idLst,QWidget *parent) : QMainWindow(parent)
     addInfoPanelActions(viewToolBar);
     //addToolBar(ipToolBar);
 
+    //Status bar
+
+    //Add notification widget
     ChangeNotifyWidget* chw=new ChangeNotifyWidget(this);
-    viewToolBar->addWidget(chw);
+    statusBar()->addPermanentWidget(chw);
+
+
 }
 
 MainWindow::~MainWindow()

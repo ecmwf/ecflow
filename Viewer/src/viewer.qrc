@@ -67,6 +67,7 @@
     <file alias="splash_screen.png">../images/splash_screen.png</file>
     <file alias="sync.svg">../images/sync.svg</file>
     <file alias="terminate.svg">../images/terminate.svg</file>
+    <file alias="unknown.svg">../images/unknown.svg</file>
     <file alias="variable.svg">../images/variable.svg</file>
     <file alias="variable_dock.svg">../images/variable_dock.svg</file>
     <file alias="warning.svg">../images/warning.svg</file>

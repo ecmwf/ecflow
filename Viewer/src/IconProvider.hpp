@@ -19,15 +19,27 @@ class IconItem
 {
 public:
   	explicit IconItem(QString);
+  	virtual ~IconItem() {};
+
 	QPixmap pixmap(int);
 	int id () const {return id_;}
 
 protected:
   	static void greyOut(QImage &);
+  	virtual QPixmap unknown(int);
 
   	QString path_;
 	std::map<int,QPixmap> pixmaps_;
 	int id_;
+};
+
+class UnknownIconItem : public IconItem
+{
+public:
+  	explicit UnknownIconItem(QString);
+
+protected:
+  	QPixmap unknown(int);
 };
 
 
