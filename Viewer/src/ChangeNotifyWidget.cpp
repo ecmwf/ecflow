@@ -45,6 +45,9 @@ void ChangeNotifyButton::setNotifier(ChangeNotify* notifier)
 	connect(notifier_->data(),SIGNAL(endAppendRow()),
 			this,SLOT(slotAppend()));
 
+	connect(notifier_->data(),SIGNAL(endRemoveRow(int)),
+					this,SLOT(slotRemoveRow(int)));
+
 	connect(notifier_->data(),SIGNAL(endReset()),
 				this,SLOT(slotReset()));
 
@@ -52,6 +55,11 @@ void ChangeNotifyButton::setNotifier(ChangeNotify* notifier)
 }
 
 void ChangeNotifyButton::slotAppend()
+{
+	updateIcon();
+}
+
+void ChangeNotifyButton::slotRemoveRow(int)
 {
 	updateIcon();
 }

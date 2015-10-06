@@ -38,6 +38,7 @@ public:
 
 public Q_SLOTS:
 	void slotAppend();
+	void slotRemoveRow(int);
 	void slotReset();
 	void slotClicked(bool);
 

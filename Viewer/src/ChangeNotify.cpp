@@ -55,28 +55,28 @@ ChangeNotify::ChangeNotify(const std::string& id) :
 	proxyModel_(0),
 	prop_(0)
 {
-
 	data_=new VNodeList();
 	model_=new ChangeNotifyModel();
 	model_->setData(data_);
 
 	proxyModel_=new QSortFilterProxyModel();
 	proxyModel_->setSourceModel(model_);
-	proxyModel_->setFilterFixedString("1");
-	proxyModel_->setFilterKeyColumn(0);
+	//proxyModel_->setFilterFixedString("1");
+	//proxyModel_->setFilterKeyColumn(0);
+	proxyModel_->setDynamicSortFilter(true);
 
 	items[id] = this;
 }
 
 QAbstractItemModel* ChangeNotify::model() const
 {
-	return proxyModel_;
+	return model_; //proxyModel_;
 }
 
 void ChangeNotify::add(VNode *node,bool popup,bool sound)
 {
 	data_->add(node);
-	proxyModel_->invalidate();
+	//proxyModel_->invalidate();
 
 	if(popup)
 	{
@@ -100,6 +100,10 @@ void ChangeNotify::add(VNode *node,bool popup,bool sound)
 	}
 }
 
+void ChangeNotify::remove(VNode *node)
+{
+	data_->remove(node);
+}
 
 void ChangeNotify::setEnabled(bool en)
 {
@@ -139,8 +143,8 @@ void ChangeNotify::notifyChange(VProperty* prop)
 
 void ChangeNotify::clearData()
 {
-	data_->hide();
-	proxyModel_->invalidate();
+	data_->clear();
+	//proxyModel_->invalidate();
 }
 
 void ChangeNotify::showDialog()
@@ -162,6 +166,14 @@ void ChangeNotify::add(const std::string& id,VNode *node,bool popup,bool sound)
 	if(ChangeNotify* obj=ChangeNotify::find(id))
 	{
 		obj->add(node,popup,sound);
+	}
+}
+
+void ChangeNotify::remove(const std::string& id,VNode *node)
+{
+	if(ChangeNotify* obj=ChangeNotify::find(id))
+	{
+		obj->remove(node);
 	}
 }
 

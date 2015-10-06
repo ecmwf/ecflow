@@ -115,6 +115,7 @@ set(viewer_srcs
     VSettings.cpp
     VSState.cpp
     VTask.cpp
+    VTaskNode.cpp
     VariableModel.cpp
     VariableModelData.cpp
     VariableItemWidget.cpp

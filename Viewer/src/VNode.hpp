@@ -25,6 +25,16 @@ class VAttribute;
 class VServer;
 class VServerSettings;
 
+class VNodeInternalState
+{
+public:
+	VNodeInternalState() : tryNo_(0), flag_(0) {}
+
+	unsigned char tryNo_;
+	unsigned char flag_;
+};
+
+
 //Describes the major changes during an update
 class VNodeChange
 {
@@ -110,6 +120,8 @@ public:
     virtual QColor  stateColour() const;
     virtual QColor  realStateColour() const;
     virtual QColor  stateFontColour() const;
+    virtual int tryNo() const;
+    virtual void internalState(VNodeInternalState&) {};
 
     bool hasAccessed() const;
     bool isAncestor(const VNode* n);
@@ -120,9 +132,8 @@ public:
 
     virtual void why(std::vector<std::string>& theReasonWhy) const;
 
-    void check(VServerSettings* conf,bool);
-
     LogServer_ptr logServer();
+
 
 protected:
     void clear();
@@ -131,6 +142,8 @@ protected:
     short currentAttrNum() const;
     bool isAttrNumInitialised() const {return attrNum_!=-1;}
     VNode* find(const std::vector<std::string>& pathVec);
+    virtual void check(VServerSettings* conf,bool) {};
+    virtual void check(VServerSettings* conf,const VNodeInternalState&) {};
 
     //Node* node_;
     node_ptr node_;
@@ -141,7 +154,6 @@ protected:
 };
 
 //This is the root node representing the Server.
-
 class VServer : public VNode
 {
 	friend class ServerHandler;
@@ -178,6 +190,7 @@ public:
 	QColor  stateColour() const;
 	QColor  stateFontColour() const;
 	std::string strName() const;
+	int tryNo() const {return 0;}
 
 	void suites(std::vector<std::string>&);
 	VNode* find(const std::string& fullPath);
@@ -204,13 +217,15 @@ protected:
 private:
 	void clear();
 	//void clear(VNode*);
-    void scan(VNode*);
-    void deleteNode(VNode* node);
+    void scan(VNode*,bool);
+    void deleteNode(VNode* node,bool);
 
     ServerHandler* server_;
     int totalNum_;
     std::vector<int> totalNumInChild_;
     std::vector<VNode*> nodes_;
+
+    std::map<std::string,VNodeInternalState> prevNodeState_;
 };
 
 

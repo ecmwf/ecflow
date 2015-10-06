@@ -15,6 +15,56 @@
 
 #include <QDateTime>
 
+//========================================================
+//
+//  VNodeListItem
+//
+//========================================================
+
+VNodeListItem::VNodeListItem(VNode* n) :node_(n)
+{
+	if(n)
+	{
+		server_=n->server()->name();
+		path_=n->absNodePath();
+		time_=QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss");
+	}
+}
+
+bool VNodeListItem::sameAs(VNode *node) const
+{
+	if(!node) return false;
+
+	if(node_)
+		return (node_ == node);
+
+	return (server_== node->server()->name() && path_ == node->absNodePath());
+}
+
+void VNodeListItem::invalidateNode()
+{
+	node_=NULL;
+}
+
+bool VNodeListItem::updateNode(ServerHandler* s)
+{
+	if(node_)
+		return (node_->server() == s);
+	else if(s->name() == server_)
+	{
+		node_=s->vRoot()->find(path_);
+		return (node_ != NULL);
+	}
+
+	return false;
+}
+
+//========================================================
+//
+//  VNodeList
+//
+//========================================================
+
 VNodeList::VNodeList(QObject *parent) : QObject(parent)
 {
 }
@@ -26,10 +76,10 @@ VNodeList::~VNodeList()
 
 VNodeListItem* VNodeList::itemAt(int i)
 {
-	if(i > 0 && i < data_.size())
+	if(i >= 0 && i < data_.size())
 		return data_.at(i);
 
-	return 0;
+	return NULL;
 }
 
 void VNodeList::add(VNode *node)
@@ -38,14 +88,14 @@ void VNodeList::add(VNode *node)
 		return;
 
 	ServerHandler *s=node->server();
-	if(s)
-	{
-		s->addServerObserver(this);
-		s->addNodeObserver(this);
-	}
+	if(!s)
+		return;
+
+	attach(s);
 
 	Q_EMIT beginAppendRow();
-	data_.push_back(new VNodeListItem(node,QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss")));
+	data_.push_back(new VNodeListItem(node));
+	serverCnt_[s]++;
 	Q_EMIT endAppendRow();
 }
 
@@ -53,14 +103,26 @@ void VNodeList::remove(VNode *node)
 {
 	for(std::vector<VNodeListItem*>::iterator it=data_.begin(); it != data_.end(); it++)
 	{
-		if((*it)->node_ == node)
+		if((*it)->sameAs(node))
 		{
 			int row=it -data_.begin();
 
 			Q_EMIT beginRemoveRow(row);
 			delete *it;
 			data_.erase(it);
+
+			std::map<ServerHandler*,int>::iterator it=serverCnt_.find(node->server());
+			if(it != serverCnt_.end())
+			{
+				it->second--;
+				if(it->second == 0)
+				{
+					detach(node->server());
+				}
+			}
+
 			Q_EMIT endRemoveRow(row);
+
 			return;
 		}
 	}
@@ -70,46 +132,31 @@ bool VNodeList::contains(VNode *node)
 {
 	for(std::vector<VNodeListItem*>::const_iterator it=data_.begin(); it != data_.end(); it++)
 	{
-		if((*it)->node_ == node)
+		if((*it)->sameAs(node))
 			return true;
 	}
+
 	return false;
 }
 
-void VNodeList::hide()
-{
-	clearData(true);
-}
 
 void VNodeList::clear()
 {
-	clearData(false);
-}
-
-void VNodeList::clearData(bool hideOnly)
-{
 	Q_EMIT beginReset();
 
-	if(!hideOnly)
+	for(std::map<ServerHandler*,int>::const_iterator it=serverCnt_.begin(); it != serverCnt_.end(); it++)
 	{
-		for(std::vector<VNodeListItem*>::const_iterator it=data_.begin(); it != data_.end(); it++)
-		{
-			if(ServerHandler *s=(*it)->node_->server())
-			{
-				s->removeServerObserver(this);
-				s->removeNodeObserver(this);
-			}
-
-			delete *it;
-		}
-
-		data_.clear();
+		it->first->removeServerObserver(this);
+		it->first->removeNodeObserver(this);
 	}
-	else
+	serverCnt_.clear();
+
+	for(std::vector<VNodeListItem*>::const_iterator it=data_.begin(); it != data_.end(); it++)
 	{
-		for(std::vector<VNodeListItem*>::const_iterator it=data_.begin(); it != data_.end(); it++)
-			(*it)->visible_=false;
+		delete *it;
 	}
+
+	data_.clear();
 
 	Q_EMIT endReset();
 }
@@ -119,19 +166,77 @@ void VNodeList::clear(ServerHandler* server)
 	std::vector<VNodeListItem*> prev=data_;
 	data_.clear();
 
+	detach(server);
+
 	for(std::vector<VNodeListItem*>::const_iterator it=prev.begin(); it != prev.end(); ++it)
 	{
 		ServerHandler *s=(*it)->node_->server();
-		if(s && s==server)
+		if((*it)->server() == s->name())
 		{
-			s->removeServerObserver(this);
-			s->removeNodeObserver(this);
 			delete *it;
 		}
 		else
 		{
 			data_.push_back(*it);
 		}
+	}
+}
+
+void VNodeList::serverClear(ServerHandler* server)
+{
+	for(std::vector<VNodeListItem*>::const_iterator it=data_.begin(); it != data_.end(); ++it)
+	{
+		if(server->name() == (*it)->server())
+		{
+			(*it)->invalidateNode();
+		}
+	}
+}
+
+void VNodeList::serverScan(ServerHandler* server)
+{
+	std::vector<VNodeListItem*> prev=data_;
+	data_.clear();
+
+	serverCnt_[server]=0;
+
+	for(std::vector<VNodeListItem*>::const_iterator it=prev.begin(); it != prev.end(); ++it)
+	{
+		if(server->name() == (*it)->server())
+		{
+			if((*it)->updateNode(server))
+			{
+				data_.push_back(*it);
+				serverCnt_[server]++;
+			}
+			else
+				delete *it;
+		}
+	}
+
+	if(serverCnt_[server] == 0)
+		detach(server);
+}
+
+
+void VNodeList::attach(ServerHandler *s)
+{
+	if(serverCnt_.find(s) != serverCnt_.end())
+	{
+		s->addServerObserver(this);
+		s->addNodeObserver(this);
+		serverCnt_[s]=0;
+	}
+}
+
+void VNodeList::detach(ServerHandler* s)
+{
+	std::map<ServerHandler*,int>::iterator it=serverCnt_.find(s);
+	if(it != serverCnt_.end())
+	{
+		serverCnt_.erase(it);
+		s->removeServerObserver(this);
+		s->removeNodeObserver(this);
 	}
 }
 
@@ -144,14 +249,24 @@ void VNodeList::notifyServerDelete(ServerHandler* server)
 
 void VNodeList::notifyBeginServerClear(ServerHandler* server)
 {
-	Q_EMIT beginReset();
-	clear(server);
+	serverClear(server);
 }
 
 void VNodeList::notifyEndServerClear(ServerHandler* server)
 {
+}
+
+void VNodeList::notifyBeginServerScan(ServerHandler* server,const VServerChange&)
+{
+	Q_EMIT beginReset();
+}
+
+void VNodeList::notifyEndServerScan(ServerHandler* server)
+{
+	serverScan(server);
 	Q_EMIT endReset();
 }
+
 
 void VNodeList::notifyBeginNodeChange(const VNode*, const std::vector<ecf::Aspect::Type>&,const VNodeChange&)
 {

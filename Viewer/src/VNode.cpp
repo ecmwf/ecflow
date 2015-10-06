@@ -20,9 +20,9 @@
 #include "VFileInfo.hpp"
 #include "VNState.hpp"
 #include "VSState.hpp"
+#include "VTaskNode.hpp"
 
 #include <boost/algorithm/string.hpp>
-#include "ChangeNotify.hpp"
 
 //=================================================
 // VNode
@@ -187,6 +187,16 @@ void VNode::collect(std::vector<VNode*>& vec) const
 		children_.at(i)->collect(vec);
 	}
 }
+
+int VNode::tryNo() const
+{
+	std::string v=genVariable("ECF_TRYNO");
+	if(v.empty())
+		return 0;
+
+	return boost::lexical_cast<int>(v);
+}
+
 
 VNode* VNode::find(const std::vector<std::string>& pathVec)
 {
@@ -514,149 +524,6 @@ void VNode::why(std::vector<std::string>& theReasonWhy) const
 	}
 }
 
-
-void VNode::check(VServerSettings* conf,bool stateChange)
-{
-	//TODO: implement it
-	return;
-
-	NState::State new_status = node_->state();
-
-	if(stateChange)
-	{
-		//Check for aborted
-		if(new_status == NState::ABORTED)
-		{
-			if(conf->boolValue(VServerSettings::NotifyAbortedEnabled))
-			{
-				bool popup=conf->boolValue(VServerSettings::NotifyAbortedPopup);
-				bool sound=conf->boolValue(VServerSettings::NotifyAbortedSound);
-
-				ChangeNotify::add("aborted",this,popup,sound);
-			}
-		}
-		else
-		{
-			//ChangeNotify::check("aborted",this);
-		}
-	}
-
-/*
-	if(flagChange)
-	{
-
-	}
-*/
-}
-	/*
-
-
-
-	NState::State new_status = node_->status();
-	const ecf::Flag& new_flags=node_->get_flag();
-
-	boost::posix_time::ptime t=node_->state_change_time();
-    //return the state and duration time(relative to when suite was begun) when the state change happened
-	std::pair<NState,boost::posix_time::time_duration> get_state() const { return state_;}
-
-
-   int new_try_no = tryno();
-
-
-
-
-
-	if(new_status != old_status_ && new_status == STATUS_ABORTED)
-		serv().aborted(*this);
-
-	if(new_try_no > 1 && new_try_no != old_tryno_ && (
-	         new_status == STATUS_SUBMITTED ||
-	         new_status == STATUS_ACTIVE))
-		      serv().restarted(*this);
-
-	bool new_is_late = is_late(new_flags);
-	if(new_is_late != is_late(old_flags_)) {
-		if(new_is_late)
-                  serv().late(*this);
-		else
-                  late::hide(*this);
-	}
-
-	bool new_is_zombie = is_zombie(new_flags);
-	if(new_is_zombie != is_zombie(old_flags_)) {
-		if(new_is_zombie)
-                  serv().zombie(*this);
-		else
-                  zombie::hide(*this);
-	}
-
-//
-//	if(is_to_check(new_flags) != is_to_check(old_flags_)) {
-//		if(is_to_check(new_flags))
-//                  serv().to_check(*this);
-//		else
-//                  to_check::hide(*this);
-//	}
-
-	old_flags_ = new_flags;
-	old_status_ = new_status;
-	old_tryno_ = new_try_no;*/
-
-
-
-
-
-
-
-
-
-
-/*
-//Get the triggers list for the Triggers view
-void VNode::triggers(TriggerList& tlr)
-{
-	//Check the node itself
-	if(tlr.self())
-	{
-		if(node_ && !node_->isSuite())
-		{
-			std::set<VNode*> theSet;
-			std::set<VNode*>::iterator sit;
-			AstCollateXNodesVisitor astVisitor(theSet);
-
-			if(node_->completeAst())
-				node_->completeAst()->accept(astVisitor);
-
-			if(node_->triggerAst())
-				node_->triggerAst()->accept(astVisitor);
-
-			for (sit = theSet.begin(); sit != theSet.end(); ++sit)
-				tlr.next_node( *(*sit), 0, trigger_lister::normal, *sit);
-     }
-
-	 //Go through the attributes
-     for(std::vector<VNode*>::iterator it=children_.begin(); it!= children_.end(); it++)
-     {
-        int type = node_->type();
-        {
-           ecf_concrete_node<InLimit const> *c =
-                    dynamic_cast<ecf_concrete_node<InLimit const>*> (n->__node__());
-           InLimit const * i = c ? c->get() : 0;
-           if (i) {
-              node *xn = 0;
-              if ((xn = find_limit(i->pathToNode(), i->name())))
-                 tlr.next_node(*xn,0,trigger_lister::normal,xn);
-           }
-        }
-        if (type == NODE_DATE || type == NODE_TIME)
-           tlr.next_node(*n,0,trigger_lister::normal,n);
-     }
-    }
-  }
-
-*/
-
-
 //=================================================
 //
 // VNodeRoot - this represents the server
@@ -707,10 +574,14 @@ int VServer::totalNumOfTopLevel(int idx) const
 //Clear the whole contents
 void VServer::clear()
 {
+	prevNodeState_.clear();
+
+	bool hasNotifications=server_->conf()->notificationsEnabled();
+
 	//Delete the children nodes. It will recursively delete all the nodes.
 	for(std::vector<VNode*>::const_iterator it=children_.begin(); it != children_.end(); ++it)
 	{
-		deleteNode(*it);
+		deleteNode(*it,hasNotifications);
 	}
 
 	//Clear the children vector
@@ -740,11 +611,22 @@ void VServer::clear()
 }*/
 
 //Delete a particular node
-void VServer::deleteNode(VNode* node)
+void VServer::deleteNode(VNode* node,bool hasNotifications)
 {
 	for(unsigned int i=0; i < node->numOfChildren(); i++)
 	{
-		deleteNode(node->childAt(i));
+		deleteNode(node->childAt(i),hasNotifications);
+	}
+
+	//If there are notifications we need to save previous state
+	if(hasNotifications)
+	{
+		if(node->node_->isTask())
+		{
+			VNodeInternalState st;
+			node->internalState(st);
+			prevNodeState_[node->absNodePath()]=st;
+		}
 	}
 
 	delete node;
@@ -903,6 +785,8 @@ void VServer::endScan()
 		if (!defs)
 			return;
 
+		bool hasNotifications=server_->conf()->notificationsEnabled();
+
 		//Scan the suits.This will recursively scan all nodes in the tree.
 		const std::vector<suite_ptr> &suites = defs->suiteVec();
 
@@ -910,7 +794,7 @@ void VServer::endScan()
 		{
 			VNode* vn=new VNode(this,suites.at(i));
 			totalNum_++;
-			scan(vn);
+			scan(vn,hasNotifications);
 		}
 	}
 
@@ -925,7 +809,7 @@ void VServer::endScan()
 	}
 }
 
-void VServer::scan(VNode *node)
+void VServer::scan(VNode *node,bool hasNotifications)
 {
 	int prevTotalNum=totalNum_;
 
@@ -936,9 +820,26 @@ void VServer::scan(VNode *node)
 
 	for(std::vector<node_ptr>::const_iterator it=nodes.begin(); it != nodes.end(); ++it)
 	{
-		VNode* vn=new VNode(node,*it);
+		VNode* vn=NULL;
+		if((*it)->isTask())
+		{
+			vn=new VTaskNode(node,*it);
+
+			//If there are notifications we need to check them using the previous state
+			if(hasNotifications)
+			{
+				std::string path=(*it)->absNodePath();
+				std::map<std::string,VNodeInternalState>::const_iterator itP=prevNodeState_.find(path);
+				if(itP != prevNodeState_.end())
+					vn->check(server_->conf(),itP->second);
+			}
+		}
+		else
+		{
+			vn=new VNode(node,*it);
+		}
 		totalNum_++;
-		scan(vn);
+		scan(vn,hasNotifications);
 	}
 
 	if(node->parent() == this)

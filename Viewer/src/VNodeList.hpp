@@ -16,6 +16,7 @@
 
 #include <QObject>
 
+#include <map>
 #include <vector>
 
 class VNodeList;
@@ -25,14 +26,19 @@ class VNodeListItem
 friend class VNodeList;
 
 public:
-	VNodeListItem(VNode* n,QString time) : node_(n), visible_(true), time_(time) {}
+	VNodeListItem(VNode* n);
 	VNode *node() const {return node_;}
-	bool isVisible() const {return visible_;}
+	const std::string& server() const {return server_;}
+	const std::string& path() const {return path_;}
 	QString time() const {return time_;}
+	bool sameAs(VNode *node) const;
+	void invalidateNode();
+	bool updateNode(ServerHandler*);
 
 protected:
 	VNode* node_;
-	bool visible_;
+	std::string server_;
+	std::string path_;
 	QString time_;
 };
 
@@ -49,7 +55,6 @@ public:
  	void add(VNode*);
  	void remove(VNode*);
  	void clear();
- 	void hide();
  	bool contains(VNode*);
 
     //From ServerObserver
@@ -57,8 +62,8 @@ public:
  	void notifyServerDelete(ServerHandler* server);
     void notifyBeginServerClear(ServerHandler* server);
  	void notifyEndServerClear(ServerHandler* server);
- 	void notifyBeginServerScan(ServerHandler* server,const VServerChange&) {};
-    void notifyEndServerScan(ServerHandler* server) {};
+ 	void notifyBeginServerScan(ServerHandler* server,const VServerChange&);
+    void notifyEndServerScan(ServerHandler* server);
 
  	//From NodeObserver
     void notifyBeginNodeChange(const VNode*, const std::vector<ecf::Aspect::Type>&,const VNodeChange&);
@@ -75,8 +80,13 @@ Q_SIGNALS:
 protected:
      void clearData(bool hideOnly);
      void clear(ServerHandler*);
+     void serverClear(ServerHandler*);
+     void serverScan(ServerHandler*);
+     void attach(ServerHandler*);
+     void detach(ServerHandler*);
 
      std::vector<VNodeListItem*> data_;
+     std::map<ServerHandler*,int> serverCnt_;
 };
 
 #endif /* VIEWER_SRC_VNODELIST_HPP_ */

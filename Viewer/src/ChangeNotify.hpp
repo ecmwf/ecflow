@@ -35,6 +35,7 @@ public:
 	VNodeList* data() const {return data_;};
 	VProperty* prop() const {return prop_;}
 	QAbstractItemModel* model() const;
+	QSortFilterProxyModel* proxyModel() const {return proxyModel_;}
 	bool isEnabled() const {return enabled_;}
 	void clearData();
 	void showDialog();
@@ -43,6 +44,7 @@ public:
 	void notifyChange(VProperty*);
 
 	static void add(const std::string&,VNode*,bool,bool);
+	static void remove(const std::string&,VNode*);
 	static void setEnabled(const std::string&,bool);
 	static void populate(ChangeNotifyWidget* w);
 	//static void showDialog(const std::string& id);
@@ -53,6 +55,7 @@ public:
 
 protected:
 	void add(VNode*,bool,bool);
+	void remove(VNode*);
 	void setEnabled(bool);
 	void setProperty(VProperty* prop);
 	void loadServerSettings();

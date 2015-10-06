@@ -155,6 +155,16 @@ std::string VServerSettings::notificationId(Param par)
 	return std::string();
 }
 
+bool VServerSettings::notificationsEnabled() const
+{
+	for(std::map<Param,std::string>::const_iterator it=notifyIds_.begin(); it != notifyIds_.end(); it++)
+	{
+		if(boolValue(it->first))
+			return true;
+	}
+	return false;
+}
+
 void VServerSettings::loadSettings()
 {
 	SessionItem* cs=SessionHandler::instance()->current();

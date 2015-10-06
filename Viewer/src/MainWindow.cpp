@@ -97,8 +97,8 @@ MainWindow::MainWindow(QStringList idLst,QWidget *parent) : QMainWindow(parent)
     addInfoPanelActions(viewToolBar);
     //addToolBar(ipToolBar);
 
-    /*ChangeNotifyWidget* chw=new ChangeNotifyWidget(this);
-    viewToolBar->addWidget(chw);*/
+    ChangeNotifyWidget* chw=new ChangeNotifyWidget(this);
+    viewToolBar->addWidget(chw);
 }
 
 MainWindow::~MainWindow()
