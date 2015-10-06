@@ -220,7 +220,7 @@ void ZombieItemWidget::command(const std::string& cmdName)
 			std::vector<std::string> paths;
 			Q_FOREACH(QModelIndex idx,lst)
 			{
-				paths.push_back(model_->data(idx,Qt::DisplayRole).toString().toStdString());
+				paths.push_back(model_->data(sortModel_->mapToSource(idx),Qt::DisplayRole).toString().toStdString());
 			}
 
 			std::vector<std::string> cmd;
