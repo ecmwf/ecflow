@@ -57,7 +57,7 @@ QPixmap IconItem::pixmap(int size)
 		}
 		else
 		{
-		  	pix=unknownIcon.pixmap(size);
+		  	pix=unknown(size);
 		}
 
 		pixmaps_[size]=pix;

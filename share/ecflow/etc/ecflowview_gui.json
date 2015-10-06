@@ -101,10 +101,10 @@
  		},	
  		
  	  "notification":  {
-            "visible" : "false",
+            "visible" : "true",
             "label": "Notifications",
             "desc" : "Notifications",
-            "icon" : "colour.svg",
+            "icon" : "notification.svg",
             "grid" : {
                     "title" : "Colours",                                    
                     "h1" : "Fill colour",
