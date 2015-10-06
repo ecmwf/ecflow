@@ -84,6 +84,15 @@ void ChangeNotify::add(VNode *node,bool popup,bool sound)
 		dialog()->show();
 		dialog()->raise();
 	}
+	else
+	{
+		if(dialog()->isVisible())
+		{
+			dialog()->setCurrentTab(this);
+			dialog()->raise();
+		}
+	}
+
 	if(sound)
 	{
 		const char *soundCmd = "play -q /usr/share/xemacs/xemacs-packages/etc/sounds/boing.wav";

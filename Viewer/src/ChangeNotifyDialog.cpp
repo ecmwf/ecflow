@@ -36,6 +36,10 @@ ChangeNotifyDialog::ChangeNotifyDialog(QWidget *parent) :
 
 	clearOnCloseCb_->setChecked(true);
 
+	grad_.setCoordinateMode(QGradient::ObjectBoundingMode);
+	grad_.setStart(0,0);
+	grad_.setFinalStop(0,1);
+
 	readSettings();
 }
 
@@ -83,19 +87,25 @@ void ChangeNotifyDialog::decorateTab(int tabIdx,VProperty *prop)
 		fgCol=p->value().value<QColor>();
 
 
+	QColor bgLight=bgCol.lighter(150);
+	grad_.setColorAt(0,bgLight);
+	grad_.setColorAt(1,bgCol);
+	QBrush bgBrush(grad_);
+
 	QPixmap pix;
 
 	//Create icon for tab
-	if(0) //tabIdx == tab_->currentIndex())
+	if(1) //tabIdx == tab_->currentIndex())
 	{
 		pix=QPixmap(2*margin+w,2*margin+h);
 
-		pix.fill(bgCol);
+		pix.fill(Qt::transparent);
 
-		QRect labelRect(margin,margin+1,w,h);
+		QRect labelRect(0,0,pix.width(),pix.height());
 
 		QPainter painter(&pix);
 
+		painter.fillRect(labelRect,bgBrush);
 		painter.setPen(fgCol);
 		painter.drawText(labelRect,Qt::AlignVCenter|Qt::AlignHCenter,labelText);
 	}
@@ -115,7 +125,7 @@ void ChangeNotifyDialog::decorateTab(int tabIdx,VProperty *prop)
 		QRect lineRect(labelRect.left(),labelRect.bottom()+1,
 					   labelRect.width(),3);
 
-		painter.fillRect(lineRect,bgCol);
+		painter.fillRect(lineRect,bgBrush);
 	}
 
 	tab_->setCustomIcon(tabIdx,pix);
@@ -161,10 +171,9 @@ void ChangeNotifyDialog::on_closePb__clicked(bool b)
 		}
 	}
 }
-/*
-void ChangeNotifyDialog::on_clearCPb__clicked(bool b)
+
+void ChangeNotifyDialog::on_clearPb__clicked(bool b)
 {
-	hide();
 	int idx=tab_->currentIndex();
 	if(idx != -1)
 	{
@@ -172,7 +181,7 @@ void ChangeNotifyDialog::on_clearCPb__clicked(bool b)
 			ntf->clearData();
 	}
 }
-*/
+
 ChangeNotify* ChangeNotifyDialog::tabToNtf(int tabIdx)
 {
 	std::map<int,ChangeNotify*>::const_iterator it=tabToNtfMap_.find(tabIdx);

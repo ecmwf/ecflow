@@ -30,6 +30,10 @@ ChangeNotifyButton::ChangeNotifyButton(QWidget* parent) :
 	setProperty("notify","1");
 	setAutoRaise(true);
 	setIconSize(QSize(20,20));
+
+	grad_.setCoordinateMode(QGradient::ObjectBoundingMode);
+	grad_.setStart(0,0);
+	grad_.setFinalStop(0,1);
 }
 
 void ChangeNotifyButton::setNotifier(ChangeNotify* notifier)
@@ -128,7 +132,12 @@ void ChangeNotifyButton::updateIcon()
 	painter.setRenderHint(QPainter::TextAntialiasing,true);
 
 	QRect textRect(0,0,fm.width(text)+6,h);
-	painter.setBrush(bgCol);
+
+	QColor bgLight=bgCol.lighter(150);
+	grad_.setColorAt(0,bgLight);
+	grad_.setColorAt(1,bgCol);
+
+	painter.setBrush(QBrush(grad_));
 	painter.setPen(border);
 	painter.drawRoundedRect(textRect,2,2);
 	painter.setPen(fgCol);

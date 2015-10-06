@@ -12,6 +12,7 @@
 #define CHNAGENOTIFYDIALOG_HPP_
 
 #include <QDialog>
+#include <QLinearGradient>
 
 #include <map>
 
@@ -36,6 +37,7 @@ public:
 public Q_SLOTS:
 	void on_tab__currentChanged(int);
 	void on_closePb__clicked(bool b);
+	void on_clearPb__clicked(bool b);
 
 protected:
 	ChangeNotify* tabToNtf(int tabIdx);
@@ -48,6 +50,7 @@ protected:
 	std::map<ChangeNotify*,int> ntfToTabMap_;
 	std::map<int,ChangeNotify*> tabToNtfMap_;
 	bool ignoreCurrentChange_;
+	QLinearGradient grad_;
 };
 
 #endif
