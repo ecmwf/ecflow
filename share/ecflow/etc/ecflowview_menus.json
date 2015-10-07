@@ -65,8 +65,9 @@
             "menu"           : "Node",
             "name"           : "Set complete",
             "visible_for"    : "task or alias",
-            "enabled_for"    : "submitted or active",
+            "enabled_for"    : "submitted or active or unknown or queued or aborted",
             "command"        : "ecflow_client --force complete <full_name>",
+            "question_for"   : "submitted or active",
             "question"       : "Have you checked that the job is not active anymore (jobstatus)?",
             "default_answer" : "Yes"
         },
@@ -75,18 +76,13 @@
             "menu"           : "Node",
             "name"           : "Set aborted",
             "visible_for"    : "task or alias",
-            "enabled_for"    : "submitted or active",
-            "command"        : "ecflow_client --force aborted <full_name>"
-        },
-        {
-            "menu"           : "Node",
-            "name"           : "Set aborted",
-            "visible_for"    : "task or alias",
-            "enabled_for"    : "unknown or queued or complete",
+            "enabled_for"    : "submitted or active or unknown or queued or complete",
             "command"        : "ecflow_client --force aborted <full_name>",
+            "question_for"   : "submitted or active",
             "question"       : "Have you checked that the job is not active anymore (jobstatus)?",
             "default_answer" : "Yes"
         },
+
         {
             "menu"           : "Node",
             "name"           : "Execute",
