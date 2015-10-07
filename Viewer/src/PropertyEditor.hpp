@@ -26,7 +26,7 @@ public:
     explicit PropertyEditor(QWidget *parent=0);
     ~PropertyEditor();
 
-    void edit(VProperty*,QString label=QString());
+    void edit(VProperty*,QString pixmap,QString label=QString());
     bool applyChange();
     VProperty* property() const {return group_;}
 
@@ -34,11 +34,12 @@ private:
     void clear();
     void build();
     void addItem(VProperty*);
-    void addLine(VProperty* vProp,QGridLayout* grid);
+    PropertyLine* addLine(VProperty* vProp,QGridLayout* grid);
     void addGroup(VProperty*);
     void addGrid(VProperty*);
     void addGridRow(VProperty* prop,QGridLayout *grid);
-    void addNote(VProperty* vProp);
+    void addNotification(VProperty* prop);
+	void addNote(VProperty* vProp);
 
     VProperty* group_;
     QGridLayout* currentGrid_;

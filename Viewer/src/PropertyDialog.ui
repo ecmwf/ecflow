@@ -25,6 +25,12 @@
    </property>
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout">
+     <property name="spacing">
+      <number>4</number>
+     </property>
+     <property name="margin">
+      <number>2</number>
+     </property>
      <item>
       <widget class="QListWidget" name="list_">
        <property name="sizePolicy">

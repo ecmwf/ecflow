@@ -67,7 +67,7 @@ class PropertyLine: public QObject
 
 public:
 	PropertyLine(VProperty*,bool addLabel,QWidget* parent=0);
-	virtual ~PropertyLine() {}
+	virtual ~PropertyLine();
 
 	QLabel* label() {return label_;};
 	QLabel* suffixLabel() {return suffixLabel_;};
@@ -75,22 +75,27 @@ public:
 	virtual QWidget* button()=0;
 	QToolButton* defaultTb() {return defaultTb_;};
 	QToolButton* masterTb() {return masterTb_;};
+	VProperty* property() const {return prop_;}
 
 	void init();
-	virtual void reset(QVariant)=0;
 	virtual bool applyChange()=0;
 	virtual QVariant currentValue()=0;
+
+public Q_SLOTS:
+	virtual void slotReset(QVariant)=0;
 
 protected Q_SLOTS:
 	void slotResetToDefault(bool);
 	void slotMaster(bool b);
 	void checkState();
 
+Q_SIGNALS:
+	void changed(VProperty*,QVariant);
+
 protected:
 	virtual void setEnabledEditable(bool)=0;
 
 	VProperty* prop_;
-	QVariant val_;
 	QLabel* label_;
 	QLabel* suffixLabel_;
 	QToolButton* defaultTb_;
@@ -109,12 +114,12 @@ public:
 	StringPropertyLine(VProperty* vProp,bool addLabel,QWidget * parent=0);
 	QWidget* item();
 	QWidget* button();
-	void reset(QVariant);
 	bool applyChange();
 	QVariant currentValue();
 
 public Q_SLOTS:
 	void slotEdited(QString);
+	void slotReset(QVariant);
 
 protected:
 	void setEnabledEditable(bool);
@@ -135,12 +140,12 @@ public:
 	ColourPropertyLine(VProperty* vProp,bool addLabel,QWidget * parent=0);
 	QWidget* item();
 	QWidget* button();
-	void reset(QVariant);
 	bool applyChange();
 	QVariant currentValue();
 
 private Q_SLOTS:
 	void slotEdit(bool);
+	void slotReset(QVariant);
 
 protected:
 	void setEnabledEditable(bool);
@@ -162,12 +167,12 @@ public:
 	FontPropertyLine(VProperty* vProp,bool addLabel,QWidget * parent=0);
 	QWidget* item();
 	QWidget* button();
-	void reset(QVariant);
 	bool applyChange();
 	QVariant currentValue();
 
 private Q_SLOTS:
 	void slotEdit(bool);
+	void slotReset(QVariant);
 
 protected:
 	void setEnabledEditable(bool);
@@ -190,12 +195,12 @@ public:
 	IntPropertyLine(VProperty* vProp,bool addLabel,QWidget * parent=0);
 	QWidget* item();
 	QWidget* button();
-	void reset(QVariant);
 	bool applyChange();
 	QVariant currentValue();
 
 public Q_SLOTS:
 	void slotEdited(QString);
+	void slotReset(QVariant);
 
 protected:
 	void setEnabledEditable(bool);
@@ -216,12 +221,12 @@ public:
 	BoolPropertyLine(VProperty* vProp,bool addLabel,QWidget * parent=0);
 	QWidget* item();
 	QWidget* button();
-	void reset(QVariant);
 	bool applyChange();
 	QVariant currentValue();
 
 public Q_SLOTS:
 	void slotStateChanged(int);
+	void slotReset(QVariant);
 
 protected:
 	void setEnabledEditable(bool);
@@ -242,12 +247,12 @@ public:
 	ComboPropertyLine(VProperty* vProp,bool addLabel,QWidget * parent=0);
 	QWidget* item();
 	QWidget* button();
-	void reset(QVariant);
 	bool applyChange();
 	QVariant currentValue();
 
 public Q_SLOTS:
 	void slotCurrentChanged(int);
+	void slotReset(QVariant);
 
 protected:
 	void setEnabledEditable(bool);

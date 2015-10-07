@@ -100,6 +100,8 @@ void ChangeNotifyButton::updateIcon()
 
 	QColor bgCol(Qt::gray);
 	QColor fgCol(Qt::black);
+	QColor countBgCol(58,126,194);
+	QColor countFgCol(Qt::white);
 	QColor border;
 
 	if(notifier_->prop())
@@ -107,8 +109,14 @@ void ChangeNotifyButton::updateIcon()
 		if(VProperty *p=notifier_->prop()->findChild("fill_colour"))
 			bgCol=p->value().value<QColor>();
 
-		if(VProperty *p=notifier_->prop()->findChild("font_colour"))
+		if(VProperty *p=notifier_->prop()->findChild("text_colour"))
 			fgCol=p->value().value<QColor>();
+
+		if(VProperty *p=notifier_->prop()->findChild("count_fill_colour"))
+			countBgCol=p->value().value<QColor>();
+
+		if(VProperty *p=notifier_->prop()->findChild("count_text_colour"))
+			countFgCol=p->value().value<QColor>();
 
 		border=notifier_->prop()->paramToColour("border");
 	}
@@ -147,8 +155,8 @@ void ChangeNotifyButton::updateIcon()
 	if(!numText.isEmpty())
 	{
 		QRect numRect(textRect.right()-1,0,fm.width(numText)+4,fm.ascent()+4);
-		painter.setBrush(QColor(58,126,194));
-		painter.setPen(Qt::white);
+		painter.setBrush(countBgCol);
+		painter.setPen(countFgCol);
 		painter.drawRoundedRect(numRect,4,4);
 		painter.setFont(f);
 		painter.drawText(numRect,Qt::AlignHCenter|Qt::AlignVCenter,numText);

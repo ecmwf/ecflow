@@ -54,11 +54,11 @@
     <linearGradient
        id="linearGradient3602">
       <stop
-         style="stop-color:#df7e51;stop-opacity:1;"
+         style="stop-color:#facd66;stop-opacity:1;"
          offset="0"
          id="stop3604" />
       <stop
-         style="stop-color:#e26d2a;stop-opacity:1;"
+         style="stop-color:#e29b2a;stop-opacity:1;"
          offset="1"
          id="stop3606" />
     </linearGradient>
@@ -67,10 +67,10 @@
        xlink:href="#linearGradient3602"
        id="linearGradient3693"
        gradientUnits="userSpaceOnUse"
-       x1="10.265114"
-       y1="19.769867"
-       x2="22.784647"
-       y2="11.6725" />
+       x1="5.6476073"
+       y1="9.7607422"
+       x2="16.754726"
+       y2="6.5932426" />
     <linearGradient
        inkscape:collect="always"
        xlink:href="#linearGradient3756"
@@ -85,10 +85,10 @@
        inkscape:collect="always"
        xlink:href="#linearGradient3602"
        id="linearGradient3786"
-       x1="10.265114"
-       y1="19.769867"
-       x2="29.627617"
-       y2="16.559999"
+       x1="5.6476073"
+       y1="9.7607422"
+       x2="18.491278"
+       y2="26.818108"
        gradientUnits="userSpaceOnUse" />
   </defs>
   <sodipodi:namedview
@@ -98,18 +98,18 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="16.220941"
-     inkscape:cx="6.3828022"
-     inkscape:cy="17.249159"
+     inkscape:zoom="17.46875"
+     inkscape:cx="16"
+     inkscape:cy="16.057245"
      inkscape:document-units="px"
-     inkscape:current-layer="layer4"
+     inkscape:current-layer="layer3"
      showgrid="true"
      inkscape:snap-grids="false"
-     inkscape:window-width="1366"
-     inkscape:window-height="706"
-     inkscape:window-x="-8"
-     inkscape:window-y="-8"
-     inkscape:window-maximized="1"
+     inkscape:window-width="886"
+     inkscape:window-height="731"
+     inkscape:window-x="882"
+     inkscape:window-y="302"
+     inkscape:window-maximized="0"
      showguides="true"
      inkscape:guide-bbox="true">
     <inkscape:grid
@@ -128,7 +128,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
         <cc:license
            rdf:resource="Apache License 2.0" />
         <dc:creator>

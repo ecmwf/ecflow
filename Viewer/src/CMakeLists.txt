@@ -8,6 +8,7 @@ set(viewer_srcs
     Animation.cpp
     ChangeNotify.cpp
     ChangeNotifyDialog.cpp
+    ChangeNotifyEditor.cpp
     ChangeNotifyModel.cpp
     ChangeNotifyWidget.cpp
     CodeItemWidget.cpp
@@ -139,6 +140,7 @@ set(viewer_moc_files AbstractNodeModel.hpp
     ActionHandler.hpp
     Animation.hpp
     ChangeNotifyDialog.hpp
+    ChangeNotifyEditor.hpp
     ChangeNotifyModel.hpp
     ChangeNotifyWidget.hpp
     CommandDesignerWidget.hpp
@@ -196,6 +198,7 @@ set(viewer_moc_files AbstractNodeModel.hpp
 set(viewer_wrap_ui_files
     AboutDialog.ui
     ChangeNotifyDialog.ui
+    ChangeNotifyEditor.ui
     CommandDesignerWidget.ui 
     CustomCommandDialog.ui 
     CodeItemWidget.ui

@@ -75,9 +75,9 @@ PropertyLine::PropertyLine(VProperty* vProp,bool addLabel,QWidget * parent) :
 	masterTb_(0)
 {
 	if(addLabel)
-		label_=new QLabel(vProp->param("label"),parent);
+		label_=new QLabel(prop_->param("label"),parent);
 
-	QString suffixText=vProp->param("suffix");
+	QString suffixText=prop_->param("suffix");
 	if(!suffixText.isEmpty())
 	{
 		suffixLabel_=new QLabel(suffixText);
@@ -91,7 +91,7 @@ PropertyLine::PropertyLine(VProperty* vProp,bool addLabel,QWidget * parent) :
     connect(defaultTb_,SIGNAL(clicked(bool)),
     	    this,SLOT(slotResetToDefault(bool)));
 
-    if(vProp->master())
+    if(prop_->master())
     {
     	masterTb_=new QToolButton(parent);
     	masterTb_->setCheckable(true);
@@ -99,12 +99,16 @@ PropertyLine::PropertyLine(VProperty* vProp,bool addLabel,QWidget * parent) :
     	masterTb_->setToolTip(tr("Use global server settings"));
     	masterTb_->setIcon(QPixmap(":/viewer/chain.svg"));
     	masterTb_->setAutoRaise(true);
-    	masterTb_->setChecked(vProp->useMaster());
+    	masterTb_->setChecked(prop_->useMaster());
 
     	connect(masterTb_,SIGNAL(toggled(bool)),
-    				this,SLOT(slotMaster(bool)));
-
+    			this,SLOT(slotMaster(bool)));
     }
+
+}
+
+PropertyLine::~PropertyLine()
+{
 }
 
 void PropertyLine::init()
@@ -119,13 +123,13 @@ void PropertyLine::init()
 	}
 	else
 	{
-		reset(prop_->value());
+		slotReset(prop_->value());
 	}
 }
 
 void PropertyLine::slotResetToDefault(bool)
 {
-	reset(prop_->defaultValue());
+	slotReset(prop_->defaultValue());
 	checkState();
 }
 
@@ -143,7 +147,7 @@ void PropertyLine::checkState()
 void PropertyLine::slotMaster(bool b)
 {
 	prop_->setUseMaster(b);
-	reset(prop_->value());
+	slotReset(prop_->value());
 	if(b)
 	{
 		defaultTb_->setEnabled(false);
@@ -155,8 +159,8 @@ void PropertyLine::slotMaster(bool b)
 		checkState();
 		setEnabledEditable(true);
 	}
-
 }
+
 
 //=========================================================================
 //
@@ -185,7 +189,7 @@ QWidget* StringPropertyLine::button()
 	return NULL;
 }
 
-void StringPropertyLine::reset(QVariant v)
+void StringPropertyLine::slotReset(QVariant v)
 {
 	le_->setText(v.toString());
 	PropertyLine::checkState();
@@ -258,7 +262,7 @@ QWidget* ColourPropertyLine::button()
 	return NULL;
 }
 
-void ColourPropertyLine::reset(QVariant v)
+void ColourPropertyLine::slotReset(QVariant v)
 {
 	QColor c=v.value<QColor>();
 
@@ -287,7 +291,7 @@ void ColourPropertyLine::slotEdit(bool)
 
 	if(col.isValid())
 	{
-		reset(col);
+		slotReset(col);
 	}
 }
 
@@ -346,7 +350,7 @@ QWidget* FontPropertyLine::button()
 	return tbEdit_;
 }
 
-void FontPropertyLine::reset(QVariant v)
+void FontPropertyLine::slotReset(QVariant v)
 {
 	font_=v.value<QFont>();
 	lName_->setText(font_.toString());
@@ -430,7 +434,7 @@ QWidget* IntPropertyLine::button()
 	return NULL;
 }
 
-void IntPropertyLine::reset(QVariant v)
+void IntPropertyLine::slotReset(QVariant v)
 {
 	le_->setText(QString::number(v.toInt()));
 	PropertyLine::checkState();
@@ -487,7 +491,7 @@ QWidget* BoolPropertyLine::button()
 	return NULL;
 }
 
-void BoolPropertyLine::reset(QVariant v)
+void BoolPropertyLine::slotReset(QVariant v)
 {
 	cb_->setChecked(v.toBool());
 	PropertyLine::checkState();
@@ -513,6 +517,7 @@ QVariant BoolPropertyLine::currentValue()
 void BoolPropertyLine::slotStateChanged(int)
 {
 	PropertyLine::checkState();
+	Q_EMIT changed(prop_,cb_->isChecked());
 }
 
 void BoolPropertyLine::setEnabledEditable(bool b)
@@ -550,7 +555,7 @@ QWidget* ComboPropertyLine::button()
 	return NULL;
 }
 
-void ComboPropertyLine::reset(QVariant v)
+void ComboPropertyLine::slotReset(QVariant v)
 {
 	QStringList lst=prop_->param("values").split("/");
 	int idx=lst.indexOf(v.toString());

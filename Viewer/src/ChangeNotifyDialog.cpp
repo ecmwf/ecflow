@@ -83,7 +83,7 @@ void ChangeNotifyDialog::decorateTab(int tabIdx,VProperty *prop)
 		bgCol=p->value().value<QColor>();
 
 	QColor fgCol(Qt::black);
-	if(VProperty *p=prop->findChild("font_colour"))
+	if(VProperty *p=prop->findChild("text_colour"))
 		fgCol=p->value().value<QColor>();
 
 

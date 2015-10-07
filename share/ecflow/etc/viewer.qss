@@ -125,12 +125,12 @@ QTreeView[style="nodeView"]::item {
 
 QTreeView::item:selected 
 {
-    background: rgb(200,222,250);
+    background: rgb(180,204,234);
     color: black;
-    border-top:  1px solid rgb(8,117,182); 
+    /*border-top:  1px solid rgb(8,117,182); 
     border-bottom:  1px solid rgb(8,117,182);
     border-left-color: transparent; 
-    border-right-color: transparent;
+    border-right-color: transparent;*/
     
 }
 
@@ -181,9 +181,14 @@ QLabel[fileInfo="1"] {
 /*----------------------------
   Property editor
 ------------------------------*/
+ 
+QWidget[editorHeader="1"] {
+     background: rgb(253, 253, 253);
+     border: 1px solid rgb(160,160,160);
+} 
   
 QLabel#headerLabel_ {
-     background: rgb(235, 235, 235);
+     border: none;
      color:  rgb(90, 90, 90);
      font-weight: bold;
      font-size: 11pt; 

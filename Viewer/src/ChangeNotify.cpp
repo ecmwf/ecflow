@@ -140,7 +140,13 @@ void ChangeNotify::setProperty(VProperty* prop)
 	if(VProperty* p=prop->findChild("fill_colour"))
 		p->addObserver(this);
 
-	if(VProperty* p=prop->findChild("font_colour"))
+	if(VProperty* p=prop->findChild("text_colour"))
+		p->addObserver(this);
+
+	if(VProperty* p=prop->findChild("count_fill_colour"))
+		p->addObserver(this);
+
+	if(VProperty* p=prop->findChild("count_text_colour"))
 		p->addObserver(this);
 }
 
@@ -308,8 +314,8 @@ void AbortedNotify::loadNodeState()
 			local->setMaster(master,true);
 		}
 
-		master=nsp->findChild("font_colour");
-		local=prop_->findChild("font_colour");
+		master=nsp->findChild("text_colour");
+		local=prop_->findChild("text_colour");
 
 		if(master && local)
 		{

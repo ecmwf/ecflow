@@ -67,6 +67,7 @@ public:
     void setParam(QString,QString);
 
     std::string path();
+    VProperty* parent() const {return parent_;}
     void setParent(VProperty* p) {parent_=p;}
     bool hasChildren() const {return children_.count() >0;}
     QList<VProperty*> children() const {return children_;}

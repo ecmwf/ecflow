@@ -105,41 +105,70 @@
             "label": "Notifications",
             "desc" : "Notifications",
             "icon" : "notification.svg",
-            "grid" : {
-                    "title" : "Colours",                                    
-                    "h1" : "Fill colour",
-                    "h2" : "Font colour",                                      
-                            
-                    "row" : {
-                            "label" : "Restarted",
-                            "prefix" :  "notification.restarted",                     
-                            "line" :  "fill_colour",
-                            "line" :  "font_colour"                                                 
-                    },  
-                    "row" : {
-                            "label" : "Late",
-                            "prefix" :  "notification.late",                     
-                            "line" :  "fill_colour",
-                            "line" :  "font_colour"                       
-                    },  
- 		            "row" : {
-                            "label" : "Zombie",
-                            "prefix" :  "notification.zombie",                     
-                            "line" :  "fill_colour",
-                            "line" :  "font_colour"                    
-                    },  
- 		            "row" : {
-                            "label" : "Aborted or restarted aliases",
-                            "prefix" :  "notification.alias",                     
-                            "line" :  "fill_colour",
-                            "line" :  "font_colour"                    
-                    }  
- 		        },
- 		     "note" : {
- 		            "default" : "For <b>Aborted</b> notifications colours are taken from the Status colour settings"
- 		        }     
+            
+            "custom-notification" : {
+                 "title" : "Options",               
+            
+                "row" : {
+                    "label" : "Aborted",            
+                    "line" : "server.notification.aborted.enabled",
+                    "line" : "server.notification.aborted.popup",
+                    "line" : "server.notification.aborted.sound",
+                    "line" : "server.notification.aborted.soundFile",
+                    "line" : "notification.restarted.count_fill_colour",
+                    "line" : "notification.restarted.count_text_colour",  
+                    "note" : {
+                        "default" : "For <b>Aborted</b> notifications colours are taken from the <u>Status</u> colour settings"
+                    }       
+                },
+                "row" : {
+                    "label" : "Restarted",                 
+                    "line" : "server.notification.restarted.enabled",
+                    "line" : "server.notification.restarted.popup",
+                    "line" : "server.notification.restarted.sound",
+                    "line" : "server.notification.restarted.soundFile",
+                    "line" : "notification.restarted.fill_colour",
+                    "line" : "notification.restarted.text_colour",
+                    "line" : "notification.restarted.count_fill_colour",
+                    "line" : "notification.restarted.count_text_colour"    
+                },
+                "row" : {
+                    "label" : "Late tasks",
+                    "line" : "server.notification.late.enabled",                   
+                    "line" : "server.notification.late.popup",
+                    "line" : "server.notification.late.sound",
+                    "line" : "server.notification.late.soundFile",
+                    "line" : "notification.late.fill_colour",
+                    "line" : "notification.late.text_colour",
+                    "line" : "notification.late.count_fill_colour",
+                    "line" : "notification.late.count_text_colour"
+                     
+                     
+                },
+                "row" : {
+                    "label" : "Zombies",                    
+                    "line" : "server.notification.zombie.enabled",
+                    "line" : "server.notification.zombie.popup",
+                    "line" : "server.notification.zombie.sound",
+                    "line" : "server.notification.zombie.soundFile",
+                    "line" : "notification.zombie.fill_colour",
+                    "line" : "notification.zombie.text_colour",
+                    "line" : "notification.zombie.count_fill_colour",
+                    "line" : "notification.zombie.count_text_colour" 
+                },
+                 "row" : {
+                    "label" : "Restarted or aborted aliases",                    
+                    "line" : "server.notification.alias.enabled",
+                    "line" : "server.notification.alias.popup",
+                    "line" : "server.notification.alias.sound",
+                    "line" : "server.notification.alias.soundFile",
+                    "line" : "notification.alias.fill_colour",
+                    "line" : "notification.alias.text_colour",
+                    "line" : "notification.alias.count_fill_colour",
+                    "line" : "notification.alias.count_text_colour"
+                }                                  
+            }                      		   
  		},        
- 		
  			
  		"server": {
  			"label" : "Server options",
