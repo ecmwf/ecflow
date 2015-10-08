@@ -230,7 +230,7 @@ void ZombieItemWidget::command(const std::string& cmdName)
 
 			commandSent_=true;
 
-			info_->server()->command(paths,cmd,false);
+			info_->server()->command(paths,cmd);
 		}
 	}
 }

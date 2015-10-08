@@ -169,7 +169,7 @@ void VariableModelData::setValue(int index,const std::string& val)
 	std::vector<std::string> cmd;
 	buildAlterCommand(cmd,"change","variable",name(index),val);
 
-	ServerHandler::command(info_,cmd,false);
+	ServerHandler::command(info_,cmd);
 }
 
 void VariableModelData::add(const std::string& name,const std::string& val)
@@ -177,7 +177,7 @@ void VariableModelData::add(const std::string& name,const std::string& val)
 	std::vector<std::string> cmd;
 	buildAlterCommand(cmd,(hasName(name))?"change":"add","variable",name,val);
 
-	ServerHandler::command(info_,cmd,false);
+	ServerHandler::command(info_,cmd);
 }
 
 void VariableModelData::remove(int index,const std::string& varName)
@@ -187,7 +187,7 @@ void VariableModelData::remove(int index,const std::string& varName)
 		std::vector<std::string> cmd;
 		buildAlterCommand(cmd,"delete","variable",varName,"");
 
-		ServerHandler::command(info_,cmd,false);
+		ServerHandler::command(info_,cmd);
 	}
 }
 

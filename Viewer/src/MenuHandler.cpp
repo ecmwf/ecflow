@@ -175,9 +175,6 @@ bool MenuHandler::readMenuConfigFile(const std::string &configFile)
                 addItemToMenu(item, menuName);
                 //std::cout << "   added" << std::endl;
 
-                // tell the ServerHandler how to translate from the item name to an actual command
-                ServerHandler::addServerCommand(name, command);
-
 
                 // parse the valid node types/states for this menu item
 

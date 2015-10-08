@@ -43,7 +43,6 @@
 #include <boost/asio/ip/host_name.hpp>
 
 std::vector<ServerHandler*> ServerHandler::servers_;
-std::map<std::string, std::string> ServerHandler::commands_;
 std::string ServerHandler::localHostName_;
 
 ServerHandler::ServerHandler(const std::string& name,const std::string& host, const std::string& port) :
@@ -384,7 +383,7 @@ std::string ServerHandler::commandToString(const std::vector<std::string>& cmd)
 
 //Send a command to a server. The command is specified as a string vector, while the node or server for that
 //the command will be applied is specified in a VInfo object.
-void ServerHandler::command(VInfo_ptr info,const std::vector<std::string>& cmd, bool resolve)
+void ServerHandler::command(VInfo_ptr info,const std::vector<std::string>& cmd)
 {
 	std::vector<std::string> realCommand=cmd;
 
@@ -439,15 +438,9 @@ void ServerHandler::command(VInfo_ptr info,const std::vector<std::string>& cmd, 
 //Send the same command for a list of objects (nodes/servers) specified in a VInfo vector.
 //The command is specified as a string.
 
-void ServerHandler::command(std::vector<VInfo_ptr> info, std::string cmd, bool resolve)
+void ServerHandler::command(std::vector<VInfo_ptr> info, std::string cmd)
 {
-	std::string realCommand;
-
-	// is this a shortcut name for a command, or the actual command itself?
-	if (resolve)
-		realCommand = resolveServerCommand(cmd);
-	else
-		realCommand = cmd;
+	std::string realCommand(cmd);
 
 	std::vector<ServerHandler *> targetServers;
 
@@ -537,7 +530,7 @@ void ServerHandler::command(std::vector<VInfo_ptr> info, std::string cmd, bool r
 //Send the same command for a list of nodes specified by their paths.
 //The command is specified as a string.
 
-void ServerHandler::command(const std::vector<std::string>& fullPaths, const std::vector<std::string>& cmd, bool resolve)
+void ServerHandler::command(const std::vector<std::string>& fullPaths, const std::vector<std::string>& cmd)
 {
 	std::vector<std::string> realCommand=cmd;
 
@@ -570,30 +563,6 @@ void ServerHandler::command(const std::vector<std::string>& fullPaths, const std
 	}
 }
 
-void ServerHandler::addServerCommand(const std::string &name, const std::string& command)
-{
-	commands_[name] = command;
-}
-
-std::string ServerHandler::resolveServerCommand(const std::string &name)
-{
-	std::string realCommand;
-
-	// is this command registered?
-	std::map<std::string,std::string>::iterator it = commands_.find(name);
-
-	if (it != commands_.end())
-	{
-		realCommand = it->second;
-	}
-	else
-	{
-		realCommand = "";
-		UserMessage::message(UserMessage::WARN, true, std::string("Command: ") + name + " is not registered" );
-	}
-
-	return realCommand;
-}
 
 
 //======================================================================================

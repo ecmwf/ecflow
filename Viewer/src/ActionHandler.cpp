@@ -57,7 +57,7 @@ void ActionHandler::contextMenu(std::vector<VInfo_ptr> nodesLst,QPoint pos)
             CustomCommandDialog customCommandDialog(0);
             if (customCommandDialog.exec() == QDialog::Accepted)
             {
-                ServerHandler::command(nodesLst, customCommandDialog.command().toStdString(), false);
+                ServerHandler::command(nodesLst, customCommandDialog.command().toStdString());
             }
         }
         else
@@ -95,7 +95,8 @@ void ActionHandler::contextMenu(std::vector<VInfo_ptr> nodesLst,QPoint pos)
             }
 
             if(ok)
-                ServerHandler::command(nodesLst,action->iconText().toStdString(), true);
+                ServerHandler::command(nodesLst,item->command());
+                //ServerHandler::command(nodesLst,action->iconText().toStdString(), true);
         }
     }
 

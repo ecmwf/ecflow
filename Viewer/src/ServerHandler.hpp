@@ -94,14 +94,11 @@ public:
 	static ServerHandler* addServer(const std::string &name,const std::string &host, const std::string &port);
 	static void removeServer(ServerHandler*);
 
-	void command(const std::vector<std::string>& fullPaths, const std::vector<std::string>& cmd, bool resolve);
-	static void command(VInfo_ptr,const std::vector<std::string>&, bool resolve);
-	static void command(std::vector<VInfo_ptr>,std::string, bool resolve);
+	void command(const std::vector<std::string>& fullPaths, const std::vector<std::string>& cmd);
+	static void command(VInfo_ptr,const std::vector<std::string>&);
+	static void command(std::vector<VInfo_ptr>,std::string);
 
 	static ServerHandler* find(const std::string& name);
-
-	static void addServerCommand(const std::string &name, const std::string& command);
-	static std::string resolveServerCommand(const std::string &name);
 
 protected:
 	ServerHandler(const std::string& name,const std::string& host,const std::string&  port);
@@ -131,7 +128,6 @@ protected:
     SuiteFilter* suiteFilter_;
 
 	static std::vector<ServerHandler*> servers_;
-	static std::map<std::string, std::string> commands_;
 
 private Q_SLOTS:
 	void errorMessage(std::string message); // invoked when an error message is received
