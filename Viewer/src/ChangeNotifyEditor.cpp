@@ -30,6 +30,9 @@ ChangeNotifyEditor::ChangeNotifyEditor(QWidget* parent) : QWidget(parent)
 	connect(tree_,SIGNAL(activated(QModelIndex)),
 			this,SLOT(slotRowSelected(QModelIndex)));
 
+	connect(tree_,SIGNAL(clicked(QModelIndex)),
+			this,SLOT(slotRowSelected(QModelIndex)));
+
 	assert(stacked_->count()==0);
 
 	QFont f;
@@ -39,6 +42,10 @@ ChangeNotifyEditor::ChangeNotifyEditor(QWidget* parent) : QWidget(parent)
 
 void ChangeNotifyEditor::addRow(QString label,QList<PropertyLine*> lineLst,QWidget *stackContents)
 {
+	PropertyLine* enabledLine=0;
+	PropertyLine* popupLine=0;
+	PropertyLine* soundLine=0;
+
 	QList<VProperty*> propLst;
 	Q_FOREACH(PropertyLine* pl,lineLst)
 	{
@@ -48,14 +55,39 @@ void ChangeNotifyEditor::addRow(QString label,QList<PropertyLine*> lineLst,QWidg
 
 			if(pl->property()->name() == "enabled")
 			{
-				connect(model_,SIGNAL(enabledChanged(QVariant)),
-						pl,SLOT(slotReset(QVariant)));
-
-				connect(pl,SIGNAL(changed(VProperty*,QVariant)),
-						model_,SLOT(slotEnabledChanged(VProperty*,QVariant)));
+				enabledLine=pl;
+			}
+			if(pl->property()->name() == "popup")
+			{
+				popupLine=pl;
+			}
+			if(pl->property()->name() == "sound")
+			{
+				soundLine=pl;
 			}
 		}
 	}
+
+	if(enabledLine)
+	{
+		connect(model_,SIGNAL(enabledChanged(VProperty*,QVariant)),
+				enabledLine,SLOT(slotReset(VProperty*,QVariant)));
+
+		connect(enabledLine,SIGNAL(changed(VProperty*,QVariant)),
+				model_,SLOT(slotEnabledChanged(VProperty*,QVariant)));
+
+		if(popupLine)
+		{
+			connect(enabledLine,SIGNAL(changed(VProperty*,QVariant)),
+					popupLine,SLOT(slotEnabled(VProperty*,QVariant)));
+		}
+		if(soundLine)
+		{
+			connect(enabledLine,SIGNAL(changed(VProperty*,QVariant)),
+					soundLine,SLOT(slotEnabled(VProperty*,QVariant)));
+		}
+	}
+
 	model_->add(label,propLst);
 
 	QWidget* w=new QWidget(this);
@@ -78,6 +110,9 @@ void ChangeNotifyEditor::addRow(QString label,QList<PropertyLine*> lineLst,QWidg
 
 void ChangeNotifyEditor::slotRowSelected(const QModelIndex& idx)
 {
+	if(idx.row() == stacked_->currentIndex())
+		return;
+
 	if(idx.row() >= 0 && idx.row() < stacked_->count())
 	{
 		stacked_->setCurrentIndex(idx.row());
@@ -193,7 +228,7 @@ bool ChangeNotifyEditorModel::setData(const QModelIndex& index,const QVariant& v
 			bool checked=(value.toInt() == Qt::Checked)?true:false;
 			data_[row].enabledVal_=checked;
 			Q_EMIT dataChanged(index,index);
-			Q_EMIT enabledChanged(checked);
+			Q_EMIT enabledChanged(data_[row].enabled_,checked);
 			return true;
 		}
 	}

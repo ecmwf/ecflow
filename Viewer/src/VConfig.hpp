@@ -30,6 +30,8 @@ public:
     
     static VConfig* instance();
     
+    const std::string& appName() {return appName_;}
+    const std::string& appLongName() {return appLongName_;}
     void init(const std::string& parDir);
     const std::vector<VProperty*>& groups() {return groups_;}
     VProperty* find(const std::string& path);
@@ -54,6 +56,8 @@ protected:
 
     static VConfig* instance_;
     
+    std::string appName_;
+    std::string appLongName_;
     std::vector<VProperty*> groups_;
 };
 

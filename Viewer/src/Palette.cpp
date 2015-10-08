@@ -14,6 +14,7 @@
 #include "VProperty.hpp"
 
 #include <QApplication>
+#include <QDebug>
 #include <QMap>
 #include <QPalette>
 
@@ -100,6 +101,8 @@ void Palette::load(const std::string& parFile)
 				QColor col=VProperty::toColour(val);
 				if(col.isValid())
 				{
+					QColor cc=palette.color(group,itP.value());
+							qDebug() << itP.value() << cc.red() << cc.green() << cc.blue();
 					palette.setColor(group,itP.value(),col);
 				}
 			}

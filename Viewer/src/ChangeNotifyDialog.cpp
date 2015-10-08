@@ -22,6 +22,36 @@
 #include <QSettings>
 #include <QVariant>
 
+ChangeNotifyDialogWidget::ChangeNotifyDialogWidget(QWidget *parent) : QWidget(parent)
+{
+	setupUi(this);
+}
+
+void ChangeNotifyDialogWidget::init(ChangeNotify* notifier)
+{
+	tree_->setModel(notifier->model());
+
+	QString txt=notifier->prop()->param("description");
+	label_->setText(txt);
+
+	update(notifier);
+}
+
+void ChangeNotifyDialogWidget::update(ChangeNotify* notifier)
+{
+	QColor bgCol(Qt::gray);
+	if(VProperty *p=notifier->prop()->findChild("fill_colour"))
+		bgCol=p->value().value<QColor>();
+
+	QColor bgLight=bgCol.lighter(150);
+
+	QString st="QLabel { \
+					background: qlineargradient(x1 :0, y1: 0, x2: 0, y2: 1, \
+					     stop: 0 " + bgLight.name() + ", stop: 1 " + bgLight.name() + "); }";
+
+	label_->setStyleSheet(st);
+}
+
 ChangeNotifyDialog::ChangeNotifyDialog(QWidget *parent) :
 	QDialog(parent),
 	ignoreCurrentChange_(false)
@@ -52,20 +82,46 @@ void ChangeNotifyDialog::addTab(ChangeNotify* notifier)
 {
 	const std::string& id=notifier->id();
 
-	TreeView* tree=new TreeView(this);
-	tree->setRootIsDecorated(false);
-	tree->setUniformRowHeights(true);
-	tree->setModel(notifier->model());
+	ChangeNotifyDialogWidget* w=new ChangeNotifyDialogWidget(this);
+	w->init(notifier);
 
 	ignoreCurrentChange_=true;
-	tab_->addTab(tree,"");
+	tab_->addTab(w,"");
 	ignoreCurrentChange_=false;
 
 	int idx=tab_->count()-1;
 	ntfToTabMap_[notifier]=idx;
 	tabToNtfMap_[idx]=notifier;
+	tabWidgets_[idx]=w;
+
+	if(idx ==  tab_->currentIndex())
+		updateStyleSheet(notifier->prop());
 
 	decorateTab(idx,notifier->prop());
+}
+
+void ChangeNotifyDialog::updateStyleSheet(VProperty *currentProp)
+{
+	QColor bgCol(Qt::gray);
+	if(VProperty *p=currentProp->findChild("fill_colour"))
+		bgCol=p->value().value<QColor>();
+
+	QColor bgLight=bgCol.lighter(150);
+
+	QString st="QTabBar::tab:selected { \
+				background: qlineargradient(x1 :0, y1: 0, x2: 0, y2: 1, \
+						stop: 0 " + bgLight.name() + ", stop: 1 " + bgCol.name() + "); }";
+
+	tab_->setStyleSheet(st);
+}
+
+void ChangeNotifyDialog::decorateTabs()
+{
+	for(std::map<int,ChangeNotify*>::const_iterator it=tabToNtfMap_.begin(); it != tabToNtfMap_.end(); it++)
+	{
+		int idx=it->first;
+		decorateTab(idx,it->second->prop());
+	}
 }
 
 void ChangeNotifyDialog::decorateTab(int tabIdx,VProperty *prop)
@@ -95,7 +151,7 @@ void ChangeNotifyDialog::decorateTab(int tabIdx,VProperty *prop)
 	QPixmap pix;
 
 	//Create icon for tab
-	if(1) //tabIdx == tab_->currentIndex())
+	if(tabIdx == tab_->currentIndex())
 	{
 		pix=QPixmap(2*margin+w,2*margin+h);
 
@@ -105,7 +161,7 @@ void ChangeNotifyDialog::decorateTab(int tabIdx,VProperty *prop)
 
 		QPainter painter(&pix);
 
-		painter.fillRect(labelRect,bgBrush);
+		//painter.fillRect(labelRect,bgBrush);
 		painter.setPen(fgCol);
 		painter.drawText(labelRect,Qt::AlignVCenter|Qt::AlignHCenter,labelText);
 	}
@@ -150,12 +206,17 @@ void ChangeNotifyDialog::setEnabledTab(ChangeNotify* ntf,bool b)
 	}
 }
 
-void ChangeNotifyDialog::on_tab__currentChanged(int)
+void ChangeNotifyDialog::on_tab__currentChanged(int idx)
 {
 	if(ignoreCurrentChange_)
 		return;
-}
 
+	if(ChangeNotify* notifier=tabToNtf(idx))
+	{
+		updateStyleSheet(notifier->prop());
+		decorateTabs();
+	}
+}
 
 void ChangeNotifyDialog::on_closePb__clicked(bool b)
 {
@@ -205,7 +266,15 @@ void ChangeNotifyDialog::updateSettings(ChangeNotify* notifier)
 	std::map<ChangeNotify*,int>::const_iterator it=ntfToTabMap_.find(notifier);
 	if(it != ntfToTabMap_.end())
 	{
-		decorateTab(it->second,notifier->prop());
+		int idx=it->second;
+		if(tab_->isTabEnabled(idx))
+		{
+			if(idx == tab_->currentIndex())
+			{
+				updateStyleSheet(notifier->prop());
+			}
+			decorateTab(it->second,notifier->prop());
+		}
 	}
 }
 

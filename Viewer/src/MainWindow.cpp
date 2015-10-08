@@ -23,9 +23,6 @@
 
 #include <QDebug>
 
-#include "Version.hpp"
-
-
 #include "MainWindow.hpp"
 
 #include "AboutDialog.hpp"
@@ -57,7 +54,7 @@ MainWindow::MainWindow(QStringList idLst,QWidget *parent) : QMainWindow(parent)
     
     setAttribute(Qt::WA_DeleteOnClose);
 
-    setWindowTitle("EcflowUI (" + QString::fromStdString(ecf::Version::raw()) + ")  -  Preview version");
+    setWindowTitle(QString::fromStdString(VConfig::instance()->appLongName()) + "  -  Preview version");
 
     //Create the main layout
     QVBoxLayout* layout=new QVBoxLayout();
@@ -460,7 +457,9 @@ bool MainWindow::aboutToClose(MainWindow* win)
 
 bool MainWindow::aboutToQuit(MainWindow* topWin)
 {
-  	if(QMessageBox::question(0,tr("Confirm quit"),tr("Do you want to quit ecFlowView?"),
+  	if(QMessageBox::question(0,tr("Confirm quit"),
+  			     tr("Do you want to quit ") +
+  			     QString::fromStdString(VConfig::instance()->appName()) + "?",
 			     QMessageBox::Yes | QMessageBox::Cancel,QMessageBox::Cancel) == QMessageBox::Yes)
 	{
 		quitStarted_=true;

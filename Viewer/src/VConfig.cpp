@@ -17,6 +17,8 @@
 #include "SessionHandler.hpp"
 #include "UserMessage.hpp"
 
+#include "Version.hpp"
+
 #include <QDebug>
 
 #include <boost/property_tree/json_parser.hpp>
@@ -28,7 +30,8 @@ VConfig* VConfig::instance_=0;
 
 VConfig::VConfig()
 {
-
+	appName_="ecFlowUI";
+	appLongName_=appName_ + " (" + ecf::Version::raw() + ")";
 }
 
 VConfig::~VConfig()
@@ -74,6 +77,10 @@ void VConfig::init(const std::string& parDirPath)
    //Read gui definition for the editable properties
    std::string guiFile=DirectoryHandler::concatenate(parDir.string(),"ecflowview_gui.json");
    loadInit(guiFile);
+
+   //Read gui definition for the editable properties tahat can be cutomised per server
+   std::string guiServerFile=DirectoryHandler::concatenate(parDir.string(),"ecflowview_gui_server.json");
+   loadInit(guiServerFile);
 
    //Load existing user settings for the editable properties
    loadSettings();
@@ -209,7 +216,7 @@ VProperty* VConfig::group(const std::string& name)
 
 VProperty* VConfig::cloneServerGui(VProperty *linkTarget)
 {
-	VProperty* gr=find("gui.server");
+	VProperty* gr=find("gui_server.server");
 
 	assert(gr);
 
@@ -226,10 +233,10 @@ VProperty* VConfig::cloneServerGui(VProperty *linkTarget)
 		}
 	}
 
-
 	return cGr;
 }
 
+//Saves the global settings that can be edited through the gui
 void VConfig::saveSettings()
 {
 	SessionItem* cs=SessionHandler::instance()->current();
@@ -240,7 +247,7 @@ void VConfig::saveSettings()
 	saveSettings(fName,guiProp,NULL);
 }
 
-
+//Saves the settings per server that can be edited through the servers option gui
 void VConfig::saveSettings(const std::string& parFile,VProperty* guiProp,VSettings* vs)
 {
 	using boost::property_tree::ptree;
@@ -252,8 +259,17 @@ void VConfig::saveSettings(const std::string& parFile,VProperty* guiProp,VSettin
 
 	for(std::vector<VProperty*>::const_iterator it=linkVec.begin(); it != linkVec.end(); ++it)
 	{
-		if((*it)->changed())
+		if((*it)->master())
+		{
+			if((*it)->useMaster())
+			{
+				pt.put((*it)->path(),(*it)->valueAsString());
+			}
+		}
+		else if((*it)->changed())
+		{
 			pt.put((*it)->path(),(*it)->valueAsString());
+		}
 	}
 
 	//Add settings stored in VSettings
@@ -269,6 +285,7 @@ void VConfig::saveSettings(const std::string& parFile,VProperty* guiProp,VSettin
 	write_json(parFile,pt);
 }
 
+//Loads the global settings that can be edited through the gui
 void VConfig::loadSettings()
 {
 	SessionItem* cs=SessionHandler::instance()->current();
@@ -279,8 +296,7 @@ void VConfig::loadSettings()
 	loadSettings(parFile,guiProp);
 }
 
-
-
+//Loads the settings per server that can be edited through the servers option gui
 void VConfig::loadSettings(const std::string& parFile,VProperty* guiProp)
 {
 	std::vector<VProperty*> linkVec;

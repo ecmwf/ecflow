@@ -267,6 +267,12 @@ ChangeNotifyDialog* ChangeNotify::dialog()
 		{
 			dialog_->addTab(it->second);
 		}
+
+		for(std::map<std::string,ChangeNotify*>::iterator it=items.begin(); it != items.end(); ++it)
+		{
+			dialog_->setEnabledTab(it->second,it->second->isEnabled());
+		}
+
 	}
 
 	return dialog_;

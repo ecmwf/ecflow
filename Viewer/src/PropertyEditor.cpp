@@ -29,6 +29,8 @@ PropertyEditor::PropertyEditor(QWidget* parent) : QWidget(parent),
     setupUi(this);
 
     headerWidget_->setProperty("editorHeader","1");
+    //scArea_->setProperty("editor","1");
+    scAreaContents_->setProperty("editorArea","1");
 }
 
 PropertyEditor::~PropertyEditor()
@@ -57,6 +59,10 @@ void PropertyEditor::edit(VProperty * vGroup,QString pixmapStr,QString label)
 	 {
 		 QPixmap pix=IconProvider::pixmap(pixmapStr,20);
 		 pixLabel_->setPixmap(pix);
+	 }
+	 else
+	 {
+		 pixLabel_->clear();
 	 }
 
 	 build();
@@ -332,7 +338,23 @@ void PropertyEditor::addNotification(VProperty* vProp)
 
     ChangeNotifyEditor* ne=new ChangeNotifyEditor(this);
 
-    vBox_->addWidget(ne);
+    bool useGroup=(vProp->param("group") == "true");
+
+    if(useGroup)
+    {
+    	QString labelText=vProp->param("title");
+    	QGroupBox *groupBox = new QGroupBox(labelText);
+    	groupBox->setObjectName("editorGroupBox");
+    	QVBoxLayout* vb=new QVBoxLayout();
+    	groupBox->setLayout(vb);
+    	vb->addWidget(ne);
+    	vBox_->addWidget(groupBox);
+
+    }
+    else
+    {
+    	vBox_->addWidget(ne);
+    }
 
     //Add rows
     Q_FOREACH(VProperty* chProp,vProp->children())

@@ -89,7 +89,7 @@
      <property name="alignment">
       <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
      </property>
-     <widget class="QWidget" name="scrollAreaWidgetContents">
+     <widget class="QWidget" name="scAreaContents_">
       <property name="geometry">
        <rect>
         <x>0</x>
@@ -97,6 +97,9 @@
         <width>498</width>
         <height>472</height>
        </rect>
+      </property>
+      <property name="autoFillBackground">
+       <bool>false</bool>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout_2">
        <property name="sizeConstraint">

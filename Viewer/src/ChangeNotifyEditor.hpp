@@ -83,7 +83,7 @@ public Q_SLOTS:
    	void slotEnabledChanged(VProperty* prop,QVariant v);
 
 Q_SIGNALS:
-	void enabledChanged(QVariant);
+	void enabledChanged(VProperty*,QVariant);
 
 protected:
 	QList<ChangeNotifyEditorModelData> data_;

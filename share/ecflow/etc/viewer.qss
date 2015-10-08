@@ -189,16 +189,21 @@ QWidget[editorHeader="1"] {
   
 QLabel#headerLabel_ {
      border: none;
-     color:  rgb(90, 90, 90);
+     color:  rgb(40, 41, 42);
      font-weight: bold;
      font-size: 11pt; 
 }
    
 QGroupBox#editorGroupBox {
    
-   font-weight: bold;
+   font-weight: normal;
 }   
-     
+
+QWidget[editorArea="1"] {
+    background-color: rgb(245,245,244);
+} 
+    
+   
 /*----------------------------
   Dock widget
 ------------------------------*/

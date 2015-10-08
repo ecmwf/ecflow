@@ -1,0 +1,67 @@
+{
+    "gui_server" : {
+                                 
+        "server": {
+            "label" : "Server options",
+            "desc" : "Server options",
+            "icon" : "server.svg",
+            
+            "group" : {
+                
+                "title" : "Update",
+                "prefix" : "server.update",
+                
+                "line" : "update",
+                "line" : "updateRateInSec",
+                "line" : "adaptiveUpdate",
+                "line" : "maxAdaptiveUpdateRateInMin"
+            },
+            
+            "group" : {                
+                "title" : "Files",
+                "prefix" : "server.files",
+                
+                "line" : "readFilesFromDisk",
+                "line" : "maxJobFileLines"              
+            },
+
+            "custom-notification" : {
+                "title" : "Notifications",               
+                "group" : "true",
+                
+                "row" : {
+                    "label" : "Aborted",            
+                    "line" : "server.notification.aborted.enabled",
+                    "line" : "server.notification.aborted.popup",
+                    "line" : "server.notification.aborted.sound"
+                  
+                },
+                "row" : {
+                    "label" : "Restarted",                 
+                    "line" : "server.notification.restarted.enabled",
+                    "line" : "server.notification.restarted.popup",
+                    "line" : "server.notification.restarted.sound"                 
+                   
+                },
+                "row" : {
+                    "label" : "Late tasks",
+                    "line" : "server.notification.late.enabled",                   
+                    "line" : "server.notification.late.popup",
+                    "line" : "server.notification.late.sound"
+                },
+                "row" : {
+                    "label" : "Zombies",                    
+                    "line" : "server.notification.zombie.enabled",
+                    "line" : "server.notification.zombie.popup",
+                    "line" : "server.notification.zombie.sound"                                       
+                },
+                 "row" : {
+                    "label" : "Restarted or aborted aliases",                    
+                    "line" : "server.notification.alias.enabled",
+                    "line" : "server.notification.alias.popup",
+                    "line" : "server.notification.alias.sound"                                   
+                }                                  
+            }                              
+        }                     
+    }
+}

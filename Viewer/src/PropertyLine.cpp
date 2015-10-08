@@ -72,7 +72,8 @@ PropertyLine::PropertyLine(VProperty* vProp,bool addLabel,QWidget * parent) :
 	label_(0),
 	suffixLabel_(0),
 	defaultTb_(0),
-	masterTb_(0)
+	masterTb_(0),
+	enabled_(true)
 {
 	if(addLabel)
 		label_=new QLabel(prop_->param("label"),parent);
@@ -133,15 +134,44 @@ void PropertyLine::slotResetToDefault(bool)
 	checkState();
 }
 
+void PropertyLine::slotEnabled(VProperty*,QVariant v)
+{
+	if(enabled_ != v.toBool())
+	{
+		enabled_=v.toBool();
+		checkState();
+	}
+}
+
 void PropertyLine::checkState()
 {
+	if(label_)
+	{
+		label_->setEnabled(enabled_);
+	}
+	if(masterTb_)
+	{
+		masterTb_->setEnabled(enabled_);
+	}
+	if(suffixLabel_)
+	{
+		suffixLabel_->setEnabled(enabled_);
+	}
+
+	defaultTb_->setEnabled(enabled_);
+
+	setEnabledEditable(enabled_);
+
 	if(prop_->master() && prop_->useMaster())
 		return;
 
-	if(prop_->defaultValue() != currentValue())
-		defaultTb_->setEnabled(true);
-	else
-		defaultTb_->setEnabled(false);
+	if(enabled_)
+	{
+		if(prop_->defaultValue() != currentValue())
+			defaultTb_->setEnabled(true);
+		else
+			defaultTb_->setEnabled(false);
+	}
 }
 
 void PropertyLine::slotMaster(bool b)
@@ -159,6 +189,12 @@ void PropertyLine::slotMaster(bool b)
 		checkState();
 		setEnabledEditable(true);
 	}
+}
+
+void PropertyLine::slotReset(VProperty* prop,QVariant v)
+{
+	if(prop == prop_)
+		slotReset(v);
 }
 
 
@@ -524,6 +560,9 @@ void BoolPropertyLine::setEnabledEditable(bool b)
 {
 	cb_->setEnabled(b);
 }
+
+
+
 
 //=========================================================================
 //

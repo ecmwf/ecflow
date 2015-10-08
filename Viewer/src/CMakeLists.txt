@@ -198,6 +198,7 @@ set(viewer_moc_files AbstractNodeModel.hpp
 set(viewer_wrap_ui_files
     AboutDialog.ui
     ChangeNotifyDialog.ui
+    ChangeNotifyDialogWidget.ui
     ChangeNotifyEditor.ui
     CommandDesignerWidget.ui 
     CustomCommandDialog.ui 

@@ -80,7 +80,7 @@
                     "default": "rgb(64,224,208)"
                 },
                 "text_colour" : {
-                    "label" : "Fill colour",
+                    "label" : "Text colour",
                     "default": "rgb(0,0,0)"
                 }, 
                 "count_fill_colour" : {
@@ -104,7 +104,7 @@
                     "default": "rgb(64,224,208)"
                 },
                 "text_colour" : {
-                    "label" : "Fill colour",
+                    "label" : "Text colour",
                     "default": "rgb(0,0,0)"
                 }, 
                 "count_fill_colour" : {

@@ -83,6 +83,8 @@ public:
 
 public Q_SLOTS:
 	virtual void slotReset(QVariant)=0;
+    virtual void slotReset(VProperty*,QVariant);
+    virtual void slotEnabled(VProperty*,QVariant);
 
 protected Q_SLOTS:
 	void slotResetToDefault(bool);
@@ -100,6 +102,7 @@ protected:
 	QLabel* suffixLabel_;
 	QToolButton* defaultTb_;
 	QToolButton* masterTb_;
+	bool enabled_;
 };
 
 //-------------------------------------

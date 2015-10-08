@@ -156,7 +156,7 @@
      <normaloff>:/viewer/images/configure.svg</normaloff>:/viewer/images/configure.svg</iconset>
    </property>
    <property name="text">
-    <string>&amp;Preferences ...</string>
+    <string>&amp;Configure ...</string>
    </property>
   </action>
   <action name="actionNewTab">

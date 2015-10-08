@@ -115,8 +115,8 @@
                     "line" : "server.notification.aborted.popup",
                     "line" : "server.notification.aborted.sound",
                     "line" : "server.notification.aborted.soundFile",
-                    "line" : "notification.restarted.count_fill_colour",
-                    "line" : "notification.restarted.count_text_colour",  
+                    "line" : "notification.aborted.count_fill_colour",
+                    "line" : "notification.aborted.count_text_colour",  
                     "note" : {
                         "default" : "For <b>Aborted</b> notifications colours are taken from the <u>Status</u> colour settings"
                     }       

@@ -28,6 +28,10 @@ PropertyDialog::PropertyDialog(QWidget* parent) :
 {
 	setupUi(this);
 
+	QString wt=windowTitle();
+	wt+="  -  " + QString::fromStdString(VConfig::instance()->appLongName());
+	setWindowTitle(wt);
+
 	QFont f;
 	f.setBold(true);
 	QFontMetrics fm(f);

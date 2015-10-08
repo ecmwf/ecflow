@@ -13,13 +13,28 @@
 
 #include <QDialog>
 #include <QLinearGradient>
+#include <QWidget>
 
 #include <map>
 
 #include "ui_ChangeNotifyDialog.h"
+#include "ui_ChangeNotifyDialogWidget.h"
 
 class ChangeNotify;
 class VProperty;
+
+class QLabel;
+
+class ChangeNotifyDialogWidget : public QWidget, protected Ui::ChangeNotifyDialogWidget
+{
+public:
+	explicit ChangeNotifyDialogWidget(QWidget* parent=0);
+	~ChangeNotifyDialogWidget() {};
+
+	void init(ChangeNotify*);
+	void update(ChangeNotify*);
+};
+
 
 class ChangeNotifyDialog : public QDialog, protected Ui::ChangeNotifyDialog
 {
@@ -42,13 +57,16 @@ public Q_SLOTS:
 protected:
 	ChangeNotify* tabToNtf(int tabIdx);
 	int ntfToTab(ChangeNotify*);
+	void decorateTabs();
 	void decorateTab(int,VProperty*);
+	void updateStyleSheet(VProperty *currentProp);
 	void closeEvent(QCloseEvent*);
 	void writeSettings();
 	void readSettings();
 
 	std::map<ChangeNotify*,int> ntfToTabMap_;
 	std::map<int,ChangeNotify*> tabToNtfMap_;
+	std::map<int,ChangeNotifyDialogWidget*> tabWidgets_;
 	bool ignoreCurrentChange_;
 	QLinearGradient grad_;
 };
