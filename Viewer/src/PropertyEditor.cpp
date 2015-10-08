@@ -29,42 +29,48 @@ PropertyEditor::PropertyEditor(QWidget* parent) : QWidget(parent),
     setupUi(this);
 
     headerWidget_->setProperty("editorHeader","1");
-    //scArea_->setProperty("editor","1");
+    scArea_->setProperty("editor","1");
     scAreaContents_->setProperty("editorArea","1");
+
+    pixLabel_->clear();
 }
 
 PropertyEditor::~PropertyEditor()
 {
 }
 
-void PropertyEditor::edit(VProperty * vGroup,QString pixmapStr,QString label)
+void PropertyEditor::edit(VProperty * vGroup,QPixmap pix)
 {
 	 clear();
 
 	 group_=vGroup;
 
-	 QString txt;
-	 if(label.isEmpty())
-	 {
-		 txt=group_->param("desc");
-	 }
-	 else
-	 {
-		 txt=label;
-	 }
+	 QString txt=group_->param("desc");
 	 headerLabel_->setText(txt);
 
+	 pixLabel_->setPixmap(pix);
 
-	 if(!pixmapStr.isEmpty())
+	 build();
+}
+
+void PropertyEditor::edit(VProperty * vGroup,QString serverName)
+{
+	 clear();
+
+	 group_=vGroup;
+
+	 headerWidget_->hide();
+
+	 serverName_=serverName;
+	 /*
+	 QString txt=group_->param("desc");
+	 if(!txt.isEmpty())
 	 {
-		 QPixmap pix=IconProvider::pixmap(pixmapStr,20);
-		 pixLabel_->setPixmap(pix);
-	 }
-	 else
-	 {
-		 pixLabel_->clear();
+		 txt.replace("_SERVER_",serverName);
 	 }
 
+	 headerLabel_->setText(txt);
+*/
 	 build();
 }
 
@@ -394,8 +400,12 @@ void PropertyEditor::addNote(VProperty* vProp)
     if(vProp->name() != "note")
         return;
 
+    QString txt=vProp->value().toString();
+    txt.replace("_SERVER_",(serverName_.isEmpty())?"?":"<b>" + serverName_ + "</b>");
+
     vBox_->addSpacing(5);
-    QLabel *label=new QLabel("<b>Note:</b> " + vProp->value().toString());
+    QLabel *label=new QLabel("<b>Note:</b> " + txt);
+    label->setWordWrap(true);
     vBox_->addWidget(label);
 }
 

@@ -71,16 +71,18 @@ void PropertyDialog::build()
                   continue;
             
 			  QPixmap pix(32,32);
+			  QPixmap edPix;
               QString iconStr=vPage->param("icon");
 
               if(!iconStr.isEmpty())
               {
             	  IconProvider::add(":/viewer/" + iconStr,iconStr);
             	  pix=IconProvider::pixmap(iconStr,32);
+            	  edPix=IconProvider::pixmap(iconStr,20);
               }    
 
               PropertyEditor* ed=new PropertyEditor(this);
-              ed->edit(vPage,iconStr);
+              ed->edit(vPage,edPix);
 
               addPage(ed,pix,vPage->param("label"));
 			  editors_ << ed;

@@ -199,8 +199,12 @@ QGroupBox#editorGroupBox {
    font-weight: normal;
 }   
 
+QScrollArea[editor="1"] {
+    border: none;
+}
+
 QWidget[editorArea="1"] {
-    background-color: rgb(245,245,244);
+    background-color: rgb(245,244,244);
 } 
     
    

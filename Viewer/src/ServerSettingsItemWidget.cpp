@@ -42,8 +42,8 @@ void ServerSettingsItemWidget::reload(VInfo_ptr info)
 
 	if(info_ && info_.get() && info_->isServer() && info_->server())
 	{
-		editor_->edit(info_->server()->conf()->guiProp(),"",
-				"Settings for server " + QString::fromStdString(info_->server()->name()));
+		editor_->edit(info_->server()->conf()->guiProp(),
+				QString::fromStdString(info_->server()->name()));
 	}
 	else
 	{

@@ -26,7 +26,8 @@ public:
     explicit PropertyEditor(QWidget *parent=0);
     ~PropertyEditor();
 
-    void edit(VProperty*,QString pixmap,QString label=QString());
+    void edit(VProperty*,QPixmap pixmap);
+    void edit(VProperty*,QString label);
     bool applyChange();
     VProperty* property() const {return group_;}
 
@@ -44,6 +45,7 @@ private:
     VProperty* group_;
     QGridLayout* currentGrid_;
     QList<PropertyLine*> lineItems_;
+    QString serverName_;
 };
 
 
