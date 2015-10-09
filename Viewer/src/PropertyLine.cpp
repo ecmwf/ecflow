@@ -122,7 +122,6 @@ void PropertyLine::init()
 			masterTb_->setChecked(prop_->useMaster());
 		else
 			slotMaster(prop_->useMaster());
-
 	}
 	else
 	{
@@ -140,7 +139,7 @@ void PropertyLine::slotEnabled(VProperty*,QVariant v)
 {
 	if(enabled_ != v.toBool())
 	{
-		if(!(prop_->master() && prop_->useMaster()))
+		if(!masterTb_->isChecked())
 		{
 			enabled_=v.toBool();
 			checkState();
@@ -167,7 +166,7 @@ void PropertyLine::checkState()
 
 	setEnabledEditable(enabled_);
 
-	if(prop_->master() && prop_->useMaster())
+	if(masterTb_->isChecked())
 		return;
 
 	if(enabled_)
@@ -179,10 +178,21 @@ void PropertyLine::checkState()
 	}
 }
 
+bool PropertyLine::applyMaster()
+{
+	if(masterTb_ && prop_->useMaster() != masterTb_->isChecked())
+	{
+		prop_->setUseMaster(masterTb_->isChecked());
+		return true;
+	}
+	return false;
+}
+
+
 void PropertyLine::slotMaster(bool b)
 {
-	prop_->setUseMaster(b);
-	slotReset(prop_->value());
+	//prop_->setUseMaster(b);
+	slotReset(prop_->master()->value());
 	if(b)
 	{
 		defaultTb_->setEnabled(false);
@@ -238,6 +248,8 @@ void StringPropertyLine::slotReset(QVariant v)
 
 bool StringPropertyLine::applyChange()
 {
+	PropertyLine::applyMaster();
+
 	QString v=oriVal_.toString();
 	if(v != le_->text())
 	{
@@ -338,6 +350,8 @@ void ColourPropertyLine::slotEdit(bool)
 
 bool ColourPropertyLine::applyChange()
 {
+	PropertyLine::applyMaster();
+
 	QColor v=oriVal_.value<QColor>();
 	QColor c=currentValue().value<QColor>();
 
@@ -414,6 +428,8 @@ void FontPropertyLine::slotEdit(bool)
 
 bool FontPropertyLine::applyChange()
 {
+	PropertyLine::applyMaster();
+
 	if(oriVal_.value<QFont>() != font_)
 	{
 		prop_->setValue(font_);
@@ -482,6 +498,8 @@ void IntPropertyLine::slotReset(QVariant v)
 
 bool IntPropertyLine::applyChange()
 {
+	PropertyLine::applyMaster();
+
 	int cv=le_->text().toInt();
 	if(oriVal_.toInt() != cv)
 	{
@@ -538,6 +556,8 @@ void BoolPropertyLine::slotReset(QVariant v)
 
 bool BoolPropertyLine::applyChange()
 {
+	PropertyLine::applyMaster();
+
 	if(oriVal_.toBool() != cb_->isChecked())
 	{
 		prop_->setValue(cb_->isChecked());
@@ -607,7 +627,9 @@ void ComboPropertyLine::slotReset(QVariant v)
 
 bool ComboPropertyLine::applyChange()
 {
-    int idx=cb_->currentIndex();
+    PropertyLine::applyMaster();
+
+	int idx=cb_->currentIndex();
     
     if(idx != -1)
     {

@@ -93,9 +93,11 @@ protected Q_SLOTS:
 
 Q_SIGNALS:
 	void changed(VProperty*,QVariant);
+	void masterChanged(bool);
 
 protected:
 	virtual void setEnabledEditable(bool)=0;
+	bool applyMaster();
 
 	VProperty* prop_;
 	QLabel* label_;
