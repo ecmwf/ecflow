@@ -20,6 +20,7 @@ swap
 *.def_log
 *.glog
 *.def.glog
+ACore/src/ecflow_version.h
 
 # hack to ignore naw.def.glog
 **/naw.def.glog

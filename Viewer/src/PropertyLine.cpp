@@ -304,11 +304,12 @@ ColourPropertyLine::ColourPropertyLine(VProperty* vProp,bool addLabel,QWidget * 
 	int height=fm.height();
 	int width=fm.width("AAAAAAA");
 
+	int border=4;
 	cb_=new QToolButton(parent);
 	//cb_->setAutoFillBackground(true);
     cb_->setFixedWidth(width);
-    cb_->setFixedHeight(height+8);
-    cb_->setIconSize(QSize(cb_->width()-8,cb_->height()-8));
+    cb_->setFixedHeight(height+border);
+    cb_->setIconSize(QSize(cb_->width()-border,cb_->height()-border));
 
     cb_->setToolTip(tr("Click to select a colour"));
 
