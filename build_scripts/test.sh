@@ -45,7 +45,6 @@ echo "mode=$mode compiler=$compiler_arg safe=$safe"
 
 #======================================================================
 # remove python test, so that they are rerun
-cd $WK
 rm -rf Pyext/bin/*.test   
 
 # Remove any lock file create by tests which used EcfPortLock.hpp
