@@ -76,6 +76,9 @@ void ChangeNotifyEditor::addRow(QString label,QList<PropertyLine*> lineLst,QWidg
 		connect(enabledLine,SIGNAL(changed(VProperty*,QVariant)),
 				model_,SLOT(slotEnabledChanged(VProperty*,QVariant)));
 
+		connect(enabledLine,SIGNAL(masterChanged(VProperty*,bool)),
+				model_,SLOT(slotEnabledMasterChanged(VProperty*,bool)));
+
 		if(popupLine)
 		{
 			connect(enabledLine,SIGNAL(changed(VProperty*,QVariant)),
@@ -150,6 +153,7 @@ void ChangeNotifyEditorModel::add(QString label,QList<VProperty*> propLst)
 			{
 				d.enabled_=p;
 				d.enabledVal_=p->value().toBool();
+				d.enabledMaster_=(p->master() && p->useMaster());
 
 				//Get the description
 				if(p->parent())
@@ -285,6 +289,13 @@ QModelIndex ChangeNotifyEditorModel::parent(const QModelIndex &child) const
 
 Qt::ItemFlags ChangeNotifyEditorModel::flags( const QModelIndex & index) const
 {
+	int row=index.row();
+	if(row >=0 && row <= data_.count() &&
+	   index.column() ==0 && data_.at(row).enabledMaster_)
+	{
+		return Qt::ItemIsUserCheckable| Qt::ItemIsSelectable;
+	}
+
 	Qt::ItemFlags defaultFlags=Qt::ItemIsEnabled | Qt::ItemIsSelectable;
 
 	if(index.isValid() && index.column() ==0)
@@ -311,3 +322,21 @@ void ChangeNotifyEditorModel::slotEnabledChanged(VProperty* prop,QVariant v)
 		}
 	}
 }
+
+void ChangeNotifyEditorModel::slotEnabledMasterChanged(VProperty* prop,bool b)
+{
+	for(int i=0; i < data_.count(); i++)
+	{
+		if(data_.at(i).enabled_ == prop)
+		{
+			QModelIndex idx=index(i,0);
+			data_[i].enabledMaster_=b;
+			if(b)
+			{
+				data_[i].enabledMaster_=b;
+			}
+			Q_EMIT dataChanged(idx,idx);
+		}
+	}
+}
+

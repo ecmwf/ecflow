@@ -93,7 +93,7 @@ protected Q_SLOTS:
 
 Q_SIGNALS:
 	void changed(VProperty*,QVariant);
-	void masterChanged(bool);
+	void masterChanged(VProperty*,bool);
 
 protected:
 	virtual void setEnabledEditable(bool)=0;

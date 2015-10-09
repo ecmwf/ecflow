@@ -139,7 +139,7 @@ void PropertyLine::slotEnabled(VProperty*,QVariant v)
 {
 	if(enabled_ != v.toBool())
 	{
-		if(!masterTb_->isChecked())
+		if(masterTb_ && !masterTb_->isChecked())
 		{
 			enabled_=v.toBool();
 			checkState();
@@ -166,7 +166,7 @@ void PropertyLine::checkState()
 
 	setEnabledEditable(enabled_);
 
-	if(masterTb_->isChecked())
+	if(masterTb_ && masterTb_->isChecked())
 		return;
 
 	if(enabled_)
@@ -204,6 +204,8 @@ void PropertyLine::slotMaster(bool b)
 		checkState();
 		setEnabledEditable(true);
 	}
+
+	Q_EMIT masterChanged(prop_,b);
 }
 
 void PropertyLine::slotReset(VProperty* prop,QVariant v)

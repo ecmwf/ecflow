@@ -42,19 +42,13 @@ private:
 class ChangeNotifyEditorModelData
 {
 public:
-	ChangeNotifyEditorModelData() : enabled_(NULL), enabledVal_(false) {} //popup_(NULL),
-			//sound_(NULL), soundFile_(NULL), fill_(NULL), font_(NULL) {}
+	ChangeNotifyEditorModelData() : enabled_(NULL), enabledMaster_(false), enabledVal_(false) {}
 
 	QString label_;
 	QString desc_;
 	VProperty* enabled_;
+	bool enabledMaster_;
 	bool enabledVal_;
-
-	//VProperty* popup_;
-	//VProperty* sound_;
-	//VProperty* soundFile_;
-	//VProperty* fill_;
-	//VProperty* font_;
 };
 
 
@@ -81,6 +75,7 @@ public:
 
 public Q_SLOTS:
    	void slotEnabledChanged(VProperty* prop,QVariant v);
+   	void slotEnabledMasterChanged(VProperty* prop,bool b);
 
 Q_SIGNALS:
 	void enabledChanged(VProperty*,QVariant);
