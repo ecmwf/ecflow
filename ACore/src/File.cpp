@@ -32,6 +32,7 @@
 #include "NodePath.hpp"
 #include "Str.hpp"
 #include "Ecf.hpp"
+#include "ecflow_version.h"
 
 using namespace std;
 using namespace boost;
@@ -40,7 +41,7 @@ namespace fs = boost::filesystem;
 //#define DEBUG_SERVER_PATH 1
 //#define DEBUG_CLIENT_PATH 1
 
-static std::string workspace_dir()
+static std::string bjam_workspace_dir()
 {
    // We need the *SAME* location so that different process find the same file. Get to the workspace directory
    boost::filesystem::path current_path = boost::filesystem::current_path();
@@ -53,7 +54,7 @@ static std::string workspace_dir()
       if (count == 100) {
          char* workspace = getenv("WK");
          if (workspace == NULL) {
-            throw std::runtime_error("File::workspace_dir() failed to find ecflow in a directory name, up the directory tree and WK undefined");
+            throw std::runtime_error("File::bjam_workspace_dir() failed to find ecflow in a directory name, up the directory tree and WK undefined");
          }
          std::string the_workspace_dir = workspace;
          return the_workspace_dir;
@@ -725,7 +726,7 @@ static std::string find_bjam_ecf_server_path()
 #endif
 
    // bjam uses in source tree, for build, which is in the workspace dir
-   std::string bin_dir = workspace_dir() + "/Server/bin/";
+   std::string bin_dir = bjam_workspace_dir() + "/Server/bin/";
 
 #ifdef DEBUG_SERVER_PATH
    cout << "  Searching under: " << bin_dir << "\n";
@@ -772,7 +773,7 @@ std::string File::find_ecf_server_path()
 {
    if (File::cmake_build()) {
 
-      std::string path = File::root_build_dir();
+      std::string path = CMAKE_ECFLOW_BUILD_DIR;
       path += "/bin/";
       path += Ecf::SERVER_NAME();
 
@@ -793,7 +794,7 @@ static std::string find_bjam_ecf_client_path()
 #endif
 
    // Bjam uses, in source build
-   std::string binDir = workspace_dir() + "/Client/bin/";
+   std::string binDir = bjam_workspace_dir() + "/Client/bin/";
 
    // We need to take into account that on linux, we may have the GNU and CLANG executables
    // Hence we need to distinguish between them.
@@ -835,7 +836,7 @@ std::string File::find_ecf_client_path()
 {
    if (File::cmake_build()) {
 
-      std::string path = File::root_build_dir();
+      std::string path = CMAKE_ECFLOW_BUILD_DIR;
       path += "/bin/";
       path += Ecf::CLIENT_NAME();
 
@@ -928,51 +929,8 @@ std::string File::root_source_dir()
       if (count == 10000) break;
    }
 
-
-
-   // cmake,  CTestTestfile.cmake exists in the sub-directories and root directories
-   // File CTestTestfile.cmake, lists the source directory.
-   std::string cmake_test_file = the_current_path + "/CTestTestfile.cmake";
-   if (!fs::exists(cmake_test_file))
-      throw std::runtime_error("File::root_source_dir(): could not find file CTestTestfile.cmake at path " + cmake_test_file);
-
-   std::vector<std::string> lines;
-   if (splitFileIntoLines(cmake_test_file,lines, true)) {
-      for(size_t i = 0; i < lines.size(); i++) {
-         if (lines[i].find("Source directory") != std::string::npos) {
-
-            std::vector< std::string > lineTokens;
-            Str::split( lines[i],lineTokens,":");
-            if (lineTokens.size() != 2) throw std::runtime_error("File::root_source_dir(): could not parse CTestTestfile.cmake for source directory");
-
-            // This may be of the form: # Source directory: /tmp/ma0/workspace/ecflow/ACore
-            std::string source_directory = lineTokens[1];
-            boost::algorithm::trim(source_directory);
-
-            std::vector< std::string > pathTokens;
-            Str::split( source_directory,pathTokens,"/");
-            if (pathTokens.empty()) throw std::runtime_error("File::root_source_dir(): could not extract source directory from " + source_directory);
-
-            for(size_t i = pathTokens.size()-1; i > 0 ; i-- ) {
-               if (pathTokens[i] != "ecflow")  pathTokens.erase( pathTokens.begin() + i);
-               else break;
-            }
-
-            std::string path;
-            for(size_t i =0; i < pathTokens.size(); i++) {
-               path += "/";
-               path += pathTokens[i];
-            }
-            return path;
-         }
-      }
-      throw std::runtime_error("File::root_source_dir(): could not find text 'Source directory' in " + cmake_test_file );
-   }
-   else {
-      throw std::runtime_error("File::root_source_dir(): could not open file " + cmake_test_file );
-   }
-
-   return std::string();
+   // cmake
+   return CMAKE_ECFLOW_SOURCE_DIR;
 }
 
 std::string File::root_build_dir()
