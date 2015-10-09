@@ -15,8 +15,6 @@
 #include <QLinearGradient>
 #include <QWidget>
 
-#include <map>
-
 #include "ui_ChangeNotifyDialog.h"
 #include "ui_ChangeNotifyDialogWidget.h"
 
@@ -27,12 +25,26 @@ class QLabel;
 
 class ChangeNotifyDialogWidget : public QWidget, protected Ui::ChangeNotifyDialogWidget
 {
+ Q_OBJECT
+
 public:
 	explicit ChangeNotifyDialogWidget(QWidget* parent=0);
 	~ChangeNotifyDialogWidget() {};
 
 	void init(ChangeNotify*);
 	void update(ChangeNotify*);
+	ChangeNotify* notifier() const {return notifier_;}
+
+public Q_SLOTS:
+	void slotAppend();
+	void slotRemoveRow(int);
+	void slotReset();
+
+Q_SIGNALS:
+	void contentsChanged();
+
+protected:
+	ChangeNotify* notifier_;
 };
 
 
@@ -53,20 +65,19 @@ public Q_SLOTS:
 	void on_tab__currentChanged(int);
 	void on_closePb__clicked(bool b);
 	void on_clearPb__clicked(bool b);
+	void slotContentsChanged();
 
 protected:
 	ChangeNotify* tabToNtf(int tabIdx);
 	int ntfToTab(ChangeNotify*);
 	void decorateTabs();
-	void decorateTab(int,VProperty*);
+	void decorateTab(int,ChangeNotify*);
 	void updateStyleSheet(VProperty *currentProp);
 	void closeEvent(QCloseEvent*);
 	void writeSettings();
 	void readSettings();
 
-	std::map<ChangeNotify*,int> ntfToTabMap_;
-	std::map<int,ChangeNotify*> tabToNtfMap_;
-	std::map<int,ChangeNotifyDialogWidget*> tabWidgets_;
+	QList<ChangeNotifyDialogWidget*> tabWidgets_;
 	bool ignoreCurrentChange_;
 	QLinearGradient grad_;
 };
