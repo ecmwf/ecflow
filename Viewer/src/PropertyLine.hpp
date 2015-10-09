@@ -162,6 +162,7 @@ protected:
 private:
 	QToolButton* cb_;
 	QColor currentCol_;
+	QString styleSheet_;
 };
 
 //-------------------------------------

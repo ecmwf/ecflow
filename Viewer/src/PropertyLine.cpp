@@ -304,16 +304,12 @@ ColourPropertyLine::ColourPropertyLine(VProperty* vProp,bool addLabel,QWidget * 
 	int height=fm.height();
 	int width=fm.width("AAAAAAA");
 
-	int border=4;
 	cb_=new QToolButton(parent);
-	//cb_->setAutoFillBackground(true);
     cb_->setFixedWidth(width);
-    cb_->setFixedHeight(height+border);
-    cb_->setIconSize(QSize(cb_->width()-border,cb_->height()-border));
-
+    cb_->setFixedHeight(height+2);
     cb_->setToolTip(tr("Click to select a colour"));
 
-    cb_->setProperty("colourTb","1");
+    styleSheet_="QToolButton { background: BG;  border: 1px solid rgb(120,120,120); border-radius: 2px;}";
 
 	connect(cb_,SIGNAL(clicked(bool)),
 			this,SLOT(slotEdit(bool)));
@@ -333,18 +329,11 @@ void ColourPropertyLine::slotReset(QVariant v)
 {
 	QColor c=v.value<QColor>();
 
-	QPixmap pix(cb_->iconSize());
-	pix.fill(c);
-	QPainter painter(&pix);
-	painter.setPen(QColor(60,60,60));
-	painter.drawLine(0,0,pix.width(),0);
-	painter.drawLine(0,0,0,pix.height());
-	painter.setPen(QColor(240,240,240));
-	painter.drawLine(pix.width(),1,pix.width(),pix.height()-1);
-	painter.drawLine(0,pix.height()-1,pix.width(),pix.height()-1);
+	QString st=styleSheet_;
+	st.replace("BG","rgb(" + QString::number(c.red()) + "," +
+			QString::number(c.green()) + "," + QString::number(c.blue()) + ")");
 
-	cb_->setIcon(pix);
-
+	cb_->setStyleSheet(st);
 
 	currentCol_=c;
 

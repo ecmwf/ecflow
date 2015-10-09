@@ -7,7 +7,7 @@
 #define ECFLOW_MAJOR     "1"
 #define ECFLOW_MINOR     "0"
 
-#define CMAKE_ECFLOW_SOURCE_DIR "/tmp/ma0/workspace/ecflow"
-#define CMAKE_ECFLOW_BUILD_DIR  "/tmp/ma0/workspace/bdir/release/ecflow"
+#define CMAKE_ECFLOW_SOURCE_DIR "/tmp/cgr/git/ecflow"
+#define CMAKE_ECFLOW_BUILD_DIR  "/tmp/cgr/build/ecflow/viewer_qt5"
 
 #endif 
