@@ -94,10 +94,12 @@ protected Q_SLOTS:
 Q_SIGNALS:
 	void changed(VProperty*,QVariant);
 	void masterChanged(VProperty*,bool);
+	void changed();
 
 protected:
 	virtual void setEnabledEditable(bool)=0;
 	bool applyMaster();
+	void valueChanged();
 
 	VProperty* prop_;
 	QLabel* label_;
@@ -106,6 +108,7 @@ protected:
 	QToolButton* masterTb_;
 	bool enabled_;
 	QVariant oriVal_;
+	bool doNotEmitChange_;
 };
 
 //-------------------------------------

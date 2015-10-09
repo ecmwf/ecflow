@@ -193,6 +193,9 @@ PropertyLine* PropertyEditor::addLine(VProperty *vProp,QGridLayout *gridLayout)
            gridLayout->addWidget(masterTb,row,4);
         }
 
+       connect(item,SIGNAL(changed()),
+    		   this,SIGNAL(changed()));
+
        lineItems_ << item;
     }
 
@@ -328,6 +331,8 @@ void PropertyEditor::addGridRow(VProperty* vProp,QGridLayout *grid)
                  grid->addWidget(item->item(),row,col,Qt::AlignLeft);
             }    
 
+            connect(item,SIGNAL(changed()),
+               		   this,SIGNAL(changed()));
                 lineItems_ << item;
                 col++;
             }

@@ -73,7 +73,8 @@ PropertyLine::PropertyLine(VProperty* vProp,bool addLabel,QWidget * parent) :
 	suffixLabel_(0),
 	defaultTb_(0),
 	masterTb_(0),
-	enabled_(true)
+	enabled_(true),
+	doNotEmitChange_(false)
 {
 	oriVal_=prop_->value();
 
@@ -116,6 +117,7 @@ PropertyLine::~PropertyLine()
 
 void PropertyLine::init()
 {
+	doNotEmitChange_=true;
 	if(prop_->master())
 	{
 		if(masterTb_->isChecked() != prop_->useMaster())
@@ -127,6 +129,7 @@ void PropertyLine::init()
 	{
 		slotReset(prop_->value());
 	}
+	doNotEmitChange_=false;
 }
 
 void PropertyLine::slotResetToDefault(bool)
@@ -206,6 +209,8 @@ void PropertyLine::slotMaster(bool b)
 	}
 
 	Q_EMIT masterChanged(prop_,b);
+
+	valueChanged();
 }
 
 void PropertyLine::slotReset(VProperty* prop,QVariant v)
@@ -214,6 +219,11 @@ void PropertyLine::slotReset(VProperty* prop,QVariant v)
 		slotReset(v);
 }
 
+void PropertyLine::valueChanged()
+{
+	if(!doNotEmitChange_)
+		Q_EMIT changed();
+}
 
 //=========================================================================
 //
@@ -246,6 +256,7 @@ void StringPropertyLine::slotReset(QVariant v)
 {
 	le_->setText(v.toString());
 	PropertyLine::checkState();
+	valueChanged();
 }
 
 bool StringPropertyLine::applyChange()
@@ -269,8 +280,8 @@ QVariant StringPropertyLine::currentValue()
 void StringPropertyLine::slotEdited(QString)
 {
 	PropertyLine::checkState();
+	valueChanged();
 }
-
 
 void StringPropertyLine::setEnabledEditable(bool b)
 {
@@ -337,6 +348,7 @@ void ColourPropertyLine::slotReset(QVariant v)
 	currentCol_=c;
 
 	PropertyLine::checkState();
+	valueChanged();
 }
 
 void ColourPropertyLine::slotEdit(bool)
@@ -412,6 +424,7 @@ void FontPropertyLine::slotReset(QVariant v)
 	font_=v.value<QFont>();
 	lName_->setText(font_.toString());
 	PropertyLine::checkState();
+	valueChanged();
 }
 
 void FontPropertyLine::slotEdit(bool)
@@ -426,6 +439,7 @@ void FontPropertyLine::slotEdit(bool)
 		lName_->setText(f.toString());
 		font_=f;
 	}
+	valueChanged();
 }
 
 bool FontPropertyLine::applyChange()
@@ -496,6 +510,7 @@ void IntPropertyLine::slotReset(QVariant v)
 {
 	le_->setText(QString::number(v.toInt()));
 	PropertyLine::checkState();
+	valueChanged();
 }
 
 bool IntPropertyLine::applyChange()
@@ -519,6 +534,7 @@ QVariant IntPropertyLine::currentValue()
 void IntPropertyLine::slotEdited(QString)
 {
 	PropertyLine::checkState();
+	valueChanged();
 }
 
 void IntPropertyLine::setEnabledEditable(bool b)
@@ -554,6 +570,7 @@ void BoolPropertyLine::slotReset(QVariant v)
 {
 	cb_->setChecked(v.toBool());
 	PropertyLine::checkState();
+	valueChanged();
 }
 
 bool BoolPropertyLine::applyChange()
@@ -576,16 +593,13 @@ QVariant BoolPropertyLine::currentValue()
 void BoolPropertyLine::slotStateChanged(int)
 {
 	PropertyLine::checkState();
-	Q_EMIT changed(prop_,cb_->isChecked());
+	valueChanged();
 }
 
 void BoolPropertyLine::setEnabledEditable(bool b)
 {
 	cb_->setEnabled(b);
 }
-
-
-
 
 //=========================================================================
 //
@@ -625,6 +639,7 @@ void ComboPropertyLine::slotReset(QVariant v)
 		cb_->setCurrentIndex(idx);
 
 	PropertyLine::checkState();
+	valueChanged();
 }
 
 bool ComboPropertyLine::applyChange()
@@ -661,6 +676,7 @@ QVariant ComboPropertyLine::currentValue()
 void ComboPropertyLine::slotCurrentChanged(int)
 {
     PropertyLine::checkState();
+    valueChanged();
 }
 
 void ComboPropertyLine::setEnabledEditable(bool b)

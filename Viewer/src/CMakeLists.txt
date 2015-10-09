@@ -166,6 +166,7 @@ set(viewer_moc_files AbstractNodeModel.hpp
     NodeWidget.hpp
     OutputItemWidget.hpp
     PropertyDialog.hpp             
+    PropertyEditor.hpp
     PropertyLine.hpp
     PlainTextSearchLine.hpp
     ServerComQueue.hpp

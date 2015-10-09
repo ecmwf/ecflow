@@ -22,6 +22,8 @@ class VProperty;
 
 class PropertyEditor : public QWidget, protected Ui::PropertyEditor
 {
+Q_OBJECT
+
 public:
     explicit PropertyEditor(QWidget *parent=0);
     ~PropertyEditor();
@@ -30,6 +32,9 @@ public:
     void edit(VProperty*,QString label);
     bool applyChange();
     VProperty* property() const {return group_;}
+
+Q_SIGNALS:
+	void changed();
 
 private:
     void clear();

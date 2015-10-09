@@ -172,7 +172,7 @@ bool ServerList::load()
 	{
 		//We ignore comment lines
 		std::string buf=boost::trim_left_copy(line);
-		if(buf.size() > 1 && buf.at(0) == '#')
+		if(buf.size() > 0 && buf.at(0) == '#')
 			continue;
 
 		std::vector<std::string> sv;
@@ -220,7 +220,10 @@ bool ServerList::readRcFile()
 		std::string line;
 		while(getline(in,line))
 		{
-			std::string buf;
+			std::string buf=boost::trim_left_copy(line);
+			if(buf.size() > 0 && buf.at(0) == '#')
+				continue;
+
 			std::stringstream ssdata(line);
 			std::vector<std::string> vec;
 
@@ -253,7 +256,10 @@ bool ServerList::readSystemFile()
 		std::string line;
 		while(getline(in,line))
 		{
-			std::string buf;
+			std::string buf=boost::trim_left_copy(line);
+			if(buf.size() >0 && buf.at(0) == '#')
+					continue;
+
 			std::stringstream ssdata(line);
 			std::vector<std::string> vec;
 
