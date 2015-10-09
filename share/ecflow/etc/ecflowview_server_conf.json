@@ -98,11 +98,11 @@
 
                     "enabled" : {
                         "label"   : "Enabled",
-                        "default" : "false"    
+                        "default" : "true"    
                     },
                     "popup" : {
                         "label"   : "Popup dialog",
-                        "default" : "false"
+                        "default" : "true"
                     },
                     "sound" : {                       
                         "label": "Play sound",

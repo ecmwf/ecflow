@@ -103,6 +103,7 @@ protected:
 	QToolButton* defaultTb_;
 	QToolButton* masterTb_;
 	bool enabled_;
+	QVariant oriVal_;
 };
 
 //-------------------------------------

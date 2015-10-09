@@ -39,6 +39,14 @@ VProperty::~VProperty()
     children_.clear();
 }
 
+QVariant VProperty::value() const
+{
+	if(master_ && useMaster_)
+		return master_->value();
+
+	return value_;
+}
+
 
 void VProperty::setDefaultValue(const std::string& val)
 {
@@ -81,9 +89,12 @@ void VProperty::setDefaultValue(const std::string& val)
 
 void VProperty::setValue(const std::string& val)
 {
-    bool changed=false;
+	if(master_ && useMaster_)
+		return;
 
-	if(isColour(val))
+	bool changed=false;
+
+    if(isColour(val))
     {
         QColor col=toColour(val);
 		changed=(value_.value<QColor>() != col);
@@ -123,7 +134,10 @@ void VProperty::setValue(const std::string& val)
 
 void VProperty::setValue(QVariant val)
 {
-    if(!defaultValue_.isNull() &&
+	if(master_ && useMaster_)
+		return;
+
+	if(!defaultValue_.isNull() &&
             defaultValue_.type() != val.type())
     {
         return;
@@ -144,19 +158,19 @@ std::string VProperty::valueAsString() const
 	switch(type_)
 	{
 	case StringType:
-		s=value_.toString();
+		s=value().toString();
 		break;
 	case IntType:
 		s=QString::number(value_.toInt());
 		break;
 	case BoolType:
-		s=(value_.toBool() == true)?"true":"false";
+		s=(value().toBool() == true)?"true":"false";
 		break;
 	case ColourType:
-		s=VProperty::toString(value_.value<QColor>());
+		s=VProperty::toString(value().value<QColor>());
 		break;
 	case FontType:
-		s=VProperty::toString(value_.value<QFont>());
+		s=VProperty::toString(value().value<QFont>());
 		break;
 	default:
 		break;
@@ -269,7 +283,7 @@ void VProperty::collectChildren(std::vector<VProperty*>& chVec) const
 
 bool VProperty:: changed() const
 {
-	return value_ != defaultValue_;
+	return value() != defaultValue_;
 }
 
 void VProperty::collectLinks(std::vector<VProperty*>& linkVec)
@@ -317,7 +331,7 @@ void VProperty::setUseMaster(bool b)
 	}
 }
 
-VProperty* VProperty::clone(bool addLink,bool setMaster)
+VProperty* VProperty::clone(bool addLink,bool setMaster,bool useMaster)
 {
 	VProperty *cp=new VProperty(strName_);
 
@@ -334,12 +348,12 @@ VProperty* VProperty::clone(bool addLink,bool setMaster)
 
 	if(setMaster)
 	{
-		cp->setMaster(this);
+		cp->setMaster(this,useMaster);
 	}
 
 	Q_FOREACH(VProperty* p,children_)
 	{
-		VProperty *ch=p->clone(addLink,setMaster);
+		VProperty *ch=p->clone(addLink,setMaster,useMaster);
 		cp->addChild(ch);
 	}
 

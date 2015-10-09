@@ -123,7 +123,7 @@ void ChangeNotifyButton::updateIcon()
 
 	QFont f;
 	f.setBold(true);
-	f.setPointSize(f.pointSize()+1);
+	f.setPointSize(f.pointSize());
 	QFontMetrics fm(f);
 	int w;
 	if(!numText.isEmpty())

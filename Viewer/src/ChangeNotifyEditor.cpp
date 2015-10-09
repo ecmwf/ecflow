@@ -80,11 +80,17 @@ void ChangeNotifyEditor::addRow(QString label,QList<PropertyLine*> lineLst,QWidg
 		{
 			connect(enabledLine,SIGNAL(changed(VProperty*,QVariant)),
 					popupLine,SLOT(slotEnabled(VProperty*,QVariant)));
+
+			//init
+			popupLine->slotEnabled(popupLine->property(),enabledLine->property()->value());
 		}
 		if(soundLine)
 		{
 			connect(enabledLine,SIGNAL(changed(VProperty*,QVariant)),
 					soundLine,SLOT(slotEnabled(VProperty*,QVariant)));
+
+			//init
+			soundLine->slotEnabled(soundLine->property(),enabledLine->property()->value());
 		}
 	}
 
@@ -105,7 +111,6 @@ void ChangeNotifyEditor::addRow(QString label,QList<PropertyLine*> lineLst,QWidg
 	{
 		tree_->resizeColumnToContents(i);
 	}
-
 }
 
 void ChangeNotifyEditor::slotRowSelected(const QModelIndex& idx)

@@ -55,7 +55,7 @@ public:
     QString name() const {return name_;}
     const std::string& strName() const {return strName_;}
     QVariant defaultValue() const {return defaultValue_;}
-    QVariant value() const {return value_;}
+    QVariant value() const;
     std::string valueAsString() const;
     Type type() const {return type_;}
     QString param(QString name);
@@ -86,7 +86,7 @@ public:
     VProperty* master() const {return master_;}
     void setUseMaster(bool);
     bool useMaster() const {return useMaster_;}
-    VProperty *clone(bool addLink,bool setMaster);
+    VProperty *clone(bool addLink,bool setMaster,bool useMaster=false);
 
     void addObserver(VPropertyObserver*);
     void removeObserver(VPropertyObserver*);

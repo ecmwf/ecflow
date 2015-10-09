@@ -74,7 +74,7 @@ VServerSettings::VServerSettings(ServerHandler* server) :
 
 	assert(globalProp_);
 
-	prop_=globalProp_->clone(false,true);
+	prop_=globalProp_->clone(false,true,true); //they all use their master by default!
 
 	for(std::map<Param,std::string>::const_iterator it=parNames_.begin(); it != parNames_.end(); ++it)
 	{
@@ -171,7 +171,7 @@ void VServerSettings::loadSettings()
 	std::string fName=cs->serverFile(server_->name());
 
 	//Load settings stored in VProperty
-	VConfig::instance()->loadSettings(fName,guiProp_);
+	VConfig::instance()->loadSettings(fName,guiProp_,false);
 
 	//Some  settings are read through VSettings
 	if(boost::filesystem::exists(fName))
@@ -195,7 +195,7 @@ void VServerSettings::saveSettings()
 	server_->suiteFilter()->writeSettings(&vs);
 	vs.endGroup();
 
-	VConfig::instance()->saveSettings(fName,guiProp_,&vs);
+	VConfig::instance()->saveSettings(fName,guiProp_,&vs,false);
 }
 
 

@@ -181,10 +181,19 @@ void ChangeNotifyDialog::decorateTab(int tabIdx,ChangeNotify* notifier)
 
 	VProperty *prop=notifier->prop();
 
+	QString numText;
+	if(notifier->data())
+	{
+		int num=notifier->data()->size();
+		if(num > 0)
+			numText=" (" + QString::number(num) + ")";
+	}
+
+
 	//Create icon for tab
 	QFont f;
 	QFontMetrics fm(f);
-	QString labelText=prop->param("labelText");
+	QString labelText=prop->param("labelText")+ numText;
 	int textH=fm.height();
 	int textW=fm.width(labelText);
 	int margin=3;
@@ -214,21 +223,12 @@ void ChangeNotifyDialog::decorateTab(int tabIdx,ChangeNotify* notifier)
 	numF.setBold(true);
 	numF.setPointSize(f.pointSize()-1);
 	QFontMetrics numFm(numF);
-	QString numText;
-
-	if(notifier->data())
-	{
-		int num=notifier->data()->size();
-		if(num > 0 && num < 10)
-			numText=QString::number(num);
-		else if(num > 10)
-			numText="9+";
-	}
 
 	int w;
 	int h=2*margin+textH+4;
 	if(!numText.isEmpty())
-		w=2*margin+textW + 3 + numFm.width(numText) + 3;
+		//w=2*margin+textW + 3 + numFm.width(numText) + 3;
+		w=2*margin+textW;
 	else
 		w=2*margin+textW;
 
@@ -298,7 +298,7 @@ void ChangeNotifyDialog::decorateTab(int tabIdx,ChangeNotify* notifier)
 		painter.fillRect(lineRect,bgCol);
 	}
 
-	if(!numText.isEmpty())
+	/*if(!numText.isEmpty())
 	{
 		painter.setRenderHint(QPainter::Antialiasing,true);
 		painter.setRenderHint(QPainter::TextAntialiasing,true);
@@ -310,7 +310,7 @@ void ChangeNotifyDialog::decorateTab(int tabIdx,ChangeNotify* notifier)
 		painter.setFont(numF);
 		painter.setPen(countFgCol);
 		painter.drawText(numRect,Qt::AlignHCenter|Qt::AlignVCenter,numText);
-	}
+	}*/
 
 	tab_->setCustomIcon(tabIdx,pix);
 }

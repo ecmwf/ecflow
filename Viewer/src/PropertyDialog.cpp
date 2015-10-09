@@ -138,10 +138,12 @@ void PropertyDialog::slotButton(QAbstractButton* pb)
 
 void PropertyDialog::manageChange(bool inApply)
 {
+	bool hasChange=false;
 	Q_FOREACH(PropertyEditor* ed,editors_)
 	{
 		if(ed->applyChange())
 		{
+			hasChange=true;
 			VProperty* p=ed->property();
 			if(p && p->name() != "server")
 			{
@@ -152,6 +154,9 @@ void PropertyDialog::manageChange(bool inApply)
 			}
 		}
 	}
+
+	if(hasChange)
+		VConfig::instance()->saveSettings();
 }
 
 void PropertyDialog::load(VProperty* p)

@@ -244,31 +244,35 @@ void VConfig::saveSettings()
 
 	VProperty *guiProp=group("gui");
 
-	saveSettings(fName,guiProp,NULL);
+	saveSettings(fName,guiProp,NULL,true);
 }
 
 //Saves the settings per server that can be edited through the servers option gui
-void VConfig::saveSettings(const std::string& parFile,VProperty* guiProp,VSettings* vs)
+void VConfig::saveSettings(const std::string& parFile,VProperty* guiProp,VSettings* vs,bool global)
 {
 	using boost::property_tree::ptree;
 	ptree pt;
 
-	//Get editable properties
+	//Get editable properties. We will operate on the links.
 	std::vector<VProperty*> linkVec;
 	guiProp->collectLinks(linkVec);
 
 	for(std::vector<VProperty*>::const_iterator it=linkVec.begin(); it != linkVec.end(); ++it)
 	{
-		if((*it)->master())
+		if(global)
 		{
-			if((*it)->useMaster())
+			if((*it)->changed())
 			{
 				pt.put((*it)->path(),(*it)->valueAsString());
 			}
 		}
-		else if((*it)->changed())
+
+		else
 		{
-			pt.put((*it)->path(),(*it)->valueAsString());
+			if(!(*it)->useMaster())
+			{
+				pt.put((*it)->path(),(*it)->valueAsString());
+			}
 		}
 	}
 
@@ -293,12 +297,13 @@ void VConfig::loadSettings()
 
 	VProperty *guiProp=group("gui");
 
-	loadSettings(parFile,guiProp);
+	loadSettings(parFile,guiProp,false);
 }
 
 //Loads the settings per server that can be edited through the servers option gui
-void VConfig::loadSettings(const std::string& parFile,VProperty* guiProp)
+void VConfig::loadSettings(const std::string& parFile,VProperty* guiProp,bool global)
 {
+	//We will operate on the links
 	std::vector<VProperty*> linkVec;
 	guiProp->collectLinks(linkVec);
 
@@ -326,20 +331,18 @@ void VConfig::loadSettings(const std::string& parFile,VProperty* guiProp)
 		if(pt.get_child_optional((*it)->path()) != boost::none)
 		{
 			std::string val=pt.get<std::string>((*it)->path());
+
+			if(!global)
+			{
+				(*it)->setUseMaster(false);
+			}
+
 			(*it)->setValue(val);
 		}
-		else
-		{
-			if((*it)->master())
-			{
-				(*it)->setUseMaster(true);
-			}
-		}
-
 	}
 }
 
-void VConfig::loadSettings(const boost::property_tree::ptree& pt,VProperty* guiProp)
+void VConfig::loadImportedSettings(const boost::property_tree::ptree& pt,VProperty* guiProp)
 {
 	std::vector<VProperty*> linkVec;
 	guiProp->collectLinks(linkVec);
@@ -350,6 +353,10 @@ void VConfig::loadSettings(const boost::property_tree::ptree& pt,VProperty* guiP
 		{
 			std::string val=pt.get<std::string>((*it)->path());
 			(*it)->setValue(val);
+		}
+		else if((*it)->master())
+		{
+			(*it)->setUseMaster(true);
 		}
 	}
 }
@@ -362,7 +369,7 @@ void VConfig::importSettings()
 	if(readRcFile(globalRcFile,pt))
 	{
 		VProperty* gr=VConfig::find("gui");
-		loadSettings(pt,gr);
+		loadImportedSettings(pt,gr);
 		VConfig::saveSettings();
 	}
 }
@@ -433,31 +440,31 @@ bool VConfig::readRcFile(const std::string& rcFile,boost::property_tree::ptree& 
 				//Popup
 				else if(par[0] == "aborted")
 				{
-					pt.put("server.notification.aborted.button",par[1]);
+					pt.put("server.notification.aborted.enabled",par[1]);
 					pt.put("server.notification.aborted.popup",par[1]);
 					hasValue=true;
 				}
 				else if(par[0] == "restarted")
 				{
-					pt.put("server.notification.restarted.button",par[1]);
+					pt.put("server.notification.restarted.enabled",par[1]);
 					pt.put("server.notification.restarted.popup",par[1]);
 					hasValue=true;
 				}
 				else if(par[0] == "late")
 				{
-					pt.put("server.notification.late.button",par[1]);
+					pt.put("server.notification.late.enabled",par[1]);
 					pt.put("server.notification.late.popup",par[1]);
 					hasValue=true;
 				}
 				else if(par[0] == "zombies")
 				{
-					pt.put("server.notification.zombie.button",par[1]);
+					pt.put("server.notification.zombie.enabled",par[1]);
 					pt.put("server.notification.zombie.popup",par[1]);
 					hasValue=true;
 				}
 				else if(par[0] == "aliases")
 				{
-					pt.put("server.notification.alias.button",par[1]);
+					pt.put("server.notification.alias.enabled",par[1]);
 					pt.put("server.notification.alias.popup",par[1]);
 					hasValue=true;
 				}

@@ -75,6 +75,8 @@ PropertyLine::PropertyLine(VProperty* vProp,bool addLabel,QWidget * parent) :
 	masterTb_(0),
 	enabled_(true)
 {
+	oriVal_=prop_->value();
+
 	if(addLabel)
 		label_=new QLabel(prop_->param("label"),parent);
 
@@ -138,8 +140,11 @@ void PropertyLine::slotEnabled(VProperty*,QVariant v)
 {
 	if(enabled_ != v.toBool())
 	{
-		enabled_=v.toBool();
-		checkState();
+		if(!(prop_->master() && prop_->useMaster()))
+		{
+			enabled_=v.toBool();
+			checkState();
+		}
 	}
 }
 
@@ -233,7 +238,7 @@ void StringPropertyLine::slotReset(QVariant v)
 
 bool StringPropertyLine::applyChange()
 {
-	QString v=prop_->value().toString();
+	QString v=oriVal_.toString();
 	if(v != le_->text())
 	{
 		prop_->setValue(le_->text());
@@ -333,7 +338,7 @@ void ColourPropertyLine::slotEdit(bool)
 
 bool ColourPropertyLine::applyChange()
 {
-	QColor v=prop_->value().value<QColor>();
+	QColor v=oriVal_.value<QColor>();
 	QColor c=currentValue().value<QColor>();
 
 	if(v != c)
@@ -409,8 +414,7 @@ void FontPropertyLine::slotEdit(bool)
 
 bool FontPropertyLine::applyChange()
 {
-	QFont v=prop_->value().value<QFont>();
-	if(v != font_)
+	if(oriVal_.value<QFont>() != font_)
 	{
 		prop_->setValue(font_);
 		return true;
@@ -478,9 +482,8 @@ void IntPropertyLine::slotReset(QVariant v)
 
 bool IntPropertyLine::applyChange()
 {
-	int v=prop_->value().toInt();
 	int cv=le_->text().toInt();
-	if(v != cv)
+	if(oriVal_.toInt() != cv)
 	{
 		prop_->setValue(cv);
 		return true;
@@ -535,9 +538,7 @@ void BoolPropertyLine::slotReset(QVariant v)
 
 bool BoolPropertyLine::applyChange()
 {
-	int v=prop_->value().toBool();
-
-	if(v != cb_->isChecked())
+	if(oriVal_.toBool() != cb_->isChecked())
 	{
 		prop_->setValue(cb_->isChecked());
 		return true;
@@ -606,14 +607,12 @@ void ComboPropertyLine::slotReset(QVariant v)
 
 bool ComboPropertyLine::applyChange()
 {
-	QString v=prop_->value().toString();
-    
     int idx=cb_->currentIndex();
     
     if(idx != -1)
     {
         QString currentDataVal=cb_->itemData(idx).toString();
-        if(v != currentDataVal)
+        if(oriVal_.toString() != currentDataVal)
         {
 		    prop_->setValue(currentDataVal);
 		    return true;
