@@ -297,7 +297,7 @@ void VConfig::loadSettings()
 
 	VProperty *guiProp=group("gui");
 
-	loadSettings(parFile,guiProp,false);
+	loadSettings(parFile,guiProp,true);
 }
 
 //Loads the settings per server that can be edited through the servers option gui

@@ -118,7 +118,7 @@
                 "border":     "rgb(200,200,200)",
                 "title"  :    "Change: aliases",
                 "labelText" : "Aliases", 
-                "widgetText" : "Al",
+                "widgetText" : "As",
                 "tooltip"    : "Notifications for <b>aliases</b> becoming <b>aborted</b> or having <b>restarted</b>", 
                 "description" : "An alias becomes aborted or restarted"                      
             }
