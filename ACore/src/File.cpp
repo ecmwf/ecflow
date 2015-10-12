@@ -25,7 +25,6 @@
 #include <boost/foreach.hpp>
 #include <boost/tokenizer.hpp>
 
-
 #include "File.hpp"
 #include "File_r.hpp"
 #include "Log.hpp"
@@ -34,36 +33,16 @@
 #include "Ecf.hpp"
 #include "ecflow_version.h"
 
+#ifdef CMAKE
+#include "ecflow_source_build_dir.h"
+#endif
+
 using namespace std;
 using namespace boost;
 namespace fs = boost::filesystem;
 
 //#define DEBUG_SERVER_PATH 1
 //#define DEBUG_CLIENT_PATH 1
-
-static std::string bjam_workspace_dir()
-{
-   // We need the *SAME* location so that different process find the same file. Get to the workspace directory
-   boost::filesystem::path current_path = boost::filesystem::current_path();
-   std::string stem = current_path.stem().string();
-   int count = 0;
-   while( stem.find("ecflow") == std::string::npos) {
-      current_path = current_path.parent_path();
-      stem = current_path.stem().string();
-      count++;
-      if (count == 100) {
-         char* workspace = getenv("WK");
-         if (workspace == NULL) {
-            throw std::runtime_error("File::bjam_workspace_dir() failed to find ecflow in a directory name, up the directory tree and WK undefined");
-         }
-         std::string the_workspace_dir = workspace;
-         return the_workspace_dir;
-      }
-   }
-   std::string the_workspace_dir = current_path.string();  // cos string is returned by reference
-   return the_workspace_dir;
-}
-
 
 namespace ecf {
 
@@ -718,6 +697,33 @@ bool File::removeDir( const boost::filesystem::path& p)
 	return true;
 }
 
+// =======================================================================================================
+// bjam
+// =======================================================================================================
+#ifndef CMAKE
+
+static std::string bjam_workspace_dir()
+{
+   // We need the *SAME* location so that different process find the same file. Get to the workspace directory
+   boost::filesystem::path current_path = boost::filesystem::current_path();
+   std::string stem = current_path.stem().string();
+   int count = 0;
+   while( stem.find("ecflow") == std::string::npos) {
+      current_path = current_path.parent_path();
+      stem = current_path.stem().string();
+      count++;
+      if (count == 100) {
+         char* workspace = getenv("WK");
+         if (workspace == NULL) {
+            throw std::runtime_error("File::bjam_workspace_dir() failed to find ecflow in a directory name, up the directory tree and WK undefined");
+         }
+         std::string the_workspace_dir = workspace;
+         return the_workspace_dir;
+      }
+   }
+   std::string the_workspace_dir = current_path.string();  // cos string is returned by reference
+   return the_workspace_dir;
+}
 
 static std::string find_bjam_ecf_server_path()
 {
@@ -768,25 +774,6 @@ static std::string find_bjam_ecf_server_path()
 #endif
 }
 
-
-std::string File::find_ecf_server_path()
-{
-   if (File::cmake_build()) {
-
-      std::string path = CMAKE_ECFLOW_BUILD_DIR;
-      path += "/bin/";
-      path += Ecf::SERVER_NAME();
-
-#ifdef DEBUG_SERVER_PATH
-      cout << " File::find_ecf_server_path() path = " << path << "\n";
-#endif
-      return path;
-   }
-
-   return find_bjam_ecf_server_path();
-}
-
-
 static std::string find_bjam_ecf_client_path()
 {
 #ifdef DEBUG_CLIENT_PATH
@@ -831,25 +818,46 @@ static std::string find_bjam_ecf_client_path()
    return path;
 #endif
 }
+#endif
+
+
+
+std::string File::find_ecf_server_path()
+{
+#ifdef CMAKE
+   std::string path = CMAKE_ECFLOW_BUILD_DIR;
+   path += "/bin/";
+   path += Ecf::SERVER_NAME();
+
+#ifdef DEBUG_SERVER_PATH
+   cout << " File::find_ecf_server_path() path = " << path << "\n";
+#endif
+
+   return path;
+
+#else
+
+   return find_bjam_ecf_server_path();
+#endif
+}
 
 std::string File::find_ecf_client_path()
 {
-   if (File::cmake_build()) {
-
-      std::string path = CMAKE_ECFLOW_BUILD_DIR;
-      path += "/bin/";
-      path += Ecf::CLIENT_NAME();
-
-#ifdef DEBUG_CLIENT_PATH
-      cout << " File::find_ecf_client_path() returning path " << path << "\n";
-#endif
-      return path;
-   }
+#ifdef CMAKE
+   std::string path = CMAKE_ECFLOW_BUILD_DIR;
+   path += "/bin/";
+   path += Ecf::CLIENT_NAME();
 
 #ifdef DEBUG_CLIENT_PATH
-   cout << " File::find_ecf_server_path() using bjam\n";
+   cout << " File::find_ecf_client_path() returning path " << path << "\n";
 #endif
+
+   return path;
+
+#else
+
    return find_bjam_ecf_client_path();
+#endif
 }
 
 
@@ -891,19 +899,12 @@ std::string File::test_data(const std::string& rel_path, const std::string& dir)
 }
 
 
-bool File::cmake_build()
-{
-   fs::path current_path = fs::current_path();
-   std::string the_current_path = current_path.string();
-   std::string cmakecache_txt = the_current_path + "/CTestTestfile.cmake";
-   if (fs::exists(cmakecache_txt)) {
-      return true;
-   }
-   return false;
-}
-
 std::string File::root_source_dir()
 {
+#ifdef CMAKE
+   return CMAKE_ECFLOW_SOURCE_DIR;
+#endif
+
    // bjam
    fs::path current_path = fs::current_path();
    std::string the_current_path = current_path.string();
@@ -926,11 +927,9 @@ std::string File::root_source_dir()
 
       stem = current_path.stem().string();
       count++;
-      if (count == 10000) break;
+      if (count == 1000) break;
    }
-
-   // cmake
-   return CMAKE_ECFLOW_SOURCE_DIR;
+   return string();
 }
 
 std::string File::root_build_dir()

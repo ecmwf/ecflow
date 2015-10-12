@@ -2,9 +2,15 @@
 # If new src or test is added make sure you touch this file
 #
 
+# Only really needed for File.cpp
+add_definitions( -DCMAKE )
+
 # We place generated file in /ACore/src/ so that we can still use boost build
 configure_file( ecflow_version.h.in ${CMAKE_SOURCE_DIR}/ACore/src/ecflow_version.h )
 
+# place in binary directory since this is different for each user
+configure_file( ecflow_source_build_dir.h.in ${CMAKE_BINARY_DIR}/ecflow_source_build_dir.h )
+		
 # Use transitive nature: i.e if any lib/exe uses lib core, they
 # will also inherit the boost libs.
 #
@@ -14,7 +20,8 @@ ecbuild_add_library( TARGET core
                      TYPE     STATIC
                      SOURCES  ${srcs}
                      INCLUDES src
-                              ${Boost_INCLUDE_DIRS} 
+                              ${Boost_INCLUDE_DIRS}
+                              ${CMAKE_BINARY_DIR} 
                     )
 
 # This ensures that for debug config, we only link with debug boost libs, for other configs, we link with optimised boost libs

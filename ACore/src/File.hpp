@@ -145,7 +145,6 @@ public:
 	static std::string test_data(const std::string& rel_path, const std::string& dir);
 
 	// return root source
-	static bool cmake_build();
 	static std::string root_source_dir();
 	static std::string root_build_dir();
 };
