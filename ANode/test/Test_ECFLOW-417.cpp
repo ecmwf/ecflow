@@ -73,6 +73,7 @@ BOOST_AUTO_TEST_CASE( test_ECFLOW_417_real_clock )
 
 BOOST_AUTO_TEST_CASE( test_ECFLOW_417_hybrid_clock )
 {
+   // ECFLOW-417
    // For a suite with a hybrid clock *AND* repeat day. requue should update calendar date, by the repeat day interval
    cout << "ANode:: ...test_ECFLOW_417_hybrid_clock  \n";
 
