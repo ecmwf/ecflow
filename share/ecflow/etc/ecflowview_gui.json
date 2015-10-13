@@ -126,7 +126,7 @@
                                     "line" : "notification.aborted.count_fill_colour",
                                     "line" : "notification.aborted.count_text_colour",  
                                     "note" : {
-                                        "default" : "For <b>Aborted</b> notifications colours are taken from the <u>Status</u> colour settings"
+                                        "default" : "For <b>Aborted</b> notifications other colours are taken from the <u>Status</u> colour settings"
                                     }   
                                 },                                     
                                 "group" : {
@@ -239,7 +239,7 @@
 
                 "tab" : {
                     "label" : "Global settings",
-                    "line"  : "notification.global_settings.max_items"
+                    "line"  : "notification.settings.max_item_num"
                 } 
             }                   		   
  		},        

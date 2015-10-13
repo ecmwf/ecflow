@@ -65,7 +65,9 @@ bool VNodeListItem::updateNode(ServerHandler* s)
 //
 //========================================================
 
-VNodeList::VNodeList(QObject *parent) : QObject(parent)
+VNodeList::VNodeList(QObject *parent) :
+   QObject(parent),
+   maxNum_(200)
 {
 }
 
@@ -82,10 +84,21 @@ VNodeListItem* VNodeList::itemAt(int i)
 	return NULL;
 }
 
+void VNodeList::setMaxNum(int maxNum)
+{
+	if(maxNum_ != maxNum)
+	{
+		maxNum_=maxNum;
+		trim();
+	}
+}
+
 void VNodeList::add(VNode *node)
 {
 	if(contains(node))
 		return;
+
+	trim();
 
 	ServerHandler *s=node->server();
 	if(!s)
@@ -127,6 +140,45 @@ void VNodeList::remove(VNode *node)
 		}
 	}
 }
+
+void VNodeList::trim()
+{
+	int cnt=data_.size();
+	bool doTrim=(cnt > maxNum_);
+
+	if(doTrim)
+	{
+		//Q_EMIT beginRemoveRows(row);
+	}
+
+	for(int row=cnt-1; row >= maxNum_; row--)
+	{
+		VNode *node=data_.back()->node();
+
+		delete data_.back();
+
+		if(node)
+		{
+			std::map<ServerHandler*,int>::iterator it=serverCnt_.find(node->server());
+			if(it != serverCnt_.end())
+			{
+				it->second--;
+				if(it->second == 0)
+				{
+					detach(node->server());
+				}
+			}
+		}
+
+		data_.pop_back();
+	}
+
+	if(doTrim)
+	{
+		//Q_EMIT endRemoveRow(row);
+	}
+}
+
 
 bool VNodeList::contains(VNode *node)
 {

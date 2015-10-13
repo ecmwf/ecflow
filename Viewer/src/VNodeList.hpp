@@ -56,6 +56,7 @@ public:
  	void remove(VNode*);
  	void clear();
  	bool contains(VNode*);
+ 	void setMaxNum(int);
 
     //From ServerObserver
  	void notifyDefsChanged(ServerHandler* server, const std::vector<ecf::Aspect::Type>& a) {};
@@ -74,6 +75,8 @@ Q_SIGNALS:
      void endAppendRow();
      void beginRemoveRow(int);
      void endRemoveRow(int);
+     void beginRemoveRows(int,int);
+     void endRemoveRows(int,int);
      void beginReset();
      void endReset();
 
@@ -84,9 +87,11 @@ protected:
      void serverScan(ServerHandler*);
      void attach(ServerHandler*);
      void detach(ServerHandler*);
+     void trim();
 
      std::vector<VNodeListItem*> data_;
      std::map<ServerHandler*,int> serverCnt_;
+     int maxNum_;
 };
 
 #endif /* VIEWER_SRC_VNODELIST_HPP_ */

@@ -258,6 +258,14 @@ void ChangeNotify::load(VProperty* group)
 				obj->setProperty(p);
 			}
 		}
+
+		if(VProperty* p=group->find("notification.settings.max_item_num"))
+		{
+			for(std::map<std::string,ChangeNotify*>::iterator it=items.begin(); it != items.end(); ++it)
+			{
+				it->second->data_->setMaxNum(p->value().toInt());
+			}
+		}
 	}
 	else if(group->name() == "server")
 	{

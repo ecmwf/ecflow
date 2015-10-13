@@ -460,7 +460,9 @@ void PropertyEditor::addTab(VProperty* vProp,QTabWidget* tab)
     Q_FOREACH(VProperty* chProp,vProp->children())
     {
         addItem(chProp,vb);
-    }    
+    }
+
+    vb->addStretch(1);
 }    
 
 void PropertyEditor::addNote(VProperty* vProp,QVBoxLayout* layout)

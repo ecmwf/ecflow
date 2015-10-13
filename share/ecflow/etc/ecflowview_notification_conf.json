@@ -1,13 +1,14 @@
 {
     "notification":  {
             
-            "global_options" : {
-                    "max_items" : {
+            "settings" : {
+                    "max_item_num" : {
                         "label" : "Maximum number of notifications kept in the list",
                         "default" : "200",
                         "min" :  "10",
                         "max" : "500"
-                     },                           
+                     }
+            },                                    
             "aborted": {
                 "fill_colour" : {
                     "label" : "Backgorund colour",
