@@ -74,13 +74,15 @@ public:
    	Qt::ItemFlags flags ( const QModelIndex & index) const;
 
 public Q_SLOTS:
-   	void slotEnabledChanged(VProperty* prop,QVariant v);
-   	void slotEnabledMasterChanged(VProperty* prop,bool b);
+   	void slotEnabledChanged(QVariant v);
+   	void slotEnabledMasterChanged(bool b);
 
 Q_SIGNALS:
 	void enabledChanged(VProperty*,QVariant);
 
 protected:
+	int lineToRow(PropertyLine* line) const;
+
 	QList<ChangeNotifyEditorModelData> data_;
 };
 

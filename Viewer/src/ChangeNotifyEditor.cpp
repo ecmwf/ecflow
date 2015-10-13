@@ -65,6 +65,7 @@ void ChangeNotifyEditor::addRow(QString label,QList<PropertyLine*> lineLst,QWidg
 			{
 				soundLine=pl;
 			}
+
 		}
 	}
 
@@ -73,27 +74,26 @@ void ChangeNotifyEditor::addRow(QString label,QList<PropertyLine*> lineLst,QWidg
 		connect(model_,SIGNAL(enabledChanged(VProperty*,QVariant)),
 				enabledLine,SLOT(slotReset(VProperty*,QVariant)));
 
-		connect(enabledLine,SIGNAL(changed(VProperty*,QVariant)),
-				model_,SLOT(slotEnabledChanged(VProperty*,QVariant)));
+		connect(enabledLine,SIGNAL(changed(QVariant)),
+				model_,SLOT(slotEnabledChanged(QVariant)));
 
-		connect(enabledLine,SIGNAL(masterChanged(VProperty*,bool)),
-				model_,SLOT(slotEnabledMasterChanged(VProperty*,bool)));
+		connect(enabledLine,SIGNAL(masterChanged(bool)),
+				model_,SLOT(slotEnabledMasterChanged(bool)));
 
 		if(popupLine)
 		{
-			connect(enabledLine,SIGNAL(changed(VProperty*,QVariant)),
-					popupLine,SLOT(slotEnabled(VProperty*,QVariant)));
-
+			connect(enabledLine,SIGNAL(changed(QVariant)),
+					popupLine,SLOT(slotEnabled(QVariant)));
 			//init
-			popupLine->slotEnabled(popupLine->property(),enabledLine->property()->value());
+			popupLine->slotEnabled(enabledLine->property()->value());
 		}
 		if(soundLine)
 		{
-			connect(enabledLine,SIGNAL(changed(VProperty*,QVariant)),
-					soundLine,SLOT(slotEnabled(VProperty*,QVariant)));
+			connect(enabledLine,SIGNAL(changed(QVariant)),
+					soundLine,SLOT(slotEnabled(QVariant)));
 
 			//init
-			soundLine->slotEnabled(soundLine->property(),enabledLine->property()->value());
+			soundLine->slotEnabled(enabledLine->property()->value());
 		}
 	}
 
@@ -304,39 +304,53 @@ Qt::ItemFlags ChangeNotifyEditorModel::flags( const QModelIndex & index) const
 	return defaultFlags;
 }
 
-
-void ChangeNotifyEditorModel::slotEnabledChanged(VProperty* prop,QVariant v)
+int ChangeNotifyEditorModel::lineToRow(PropertyLine* line) const
 {
 	for(int i=0; i < data_.count(); i++)
 	{
-		if(data_.at(i).enabled_ == prop)
+		if(data_.at(i).enabled_ == line->property())
 		{
-			//We want to avoid circular dependencies (e.g. this function is triggered from
-			//setData. So we have to check if the value is different from the stored one!
-			if(data_.at(i).enabledVal_ != v.toBool())
-			{
-				data_[i].enabledVal_=v.toBool();
-				QModelIndex idx=index(i,0);
+			return i;
+		}
+	}
+	return -1;
+}
+
+
+void ChangeNotifyEditorModel::slotEnabledChanged(QVariant v)
+{
+	PropertyLine *line=static_cast<PropertyLine*>(sender());
+	assert(line);
+
+	int row=lineToRow(line);
+	if(row != -1)
+	{
+		//We want to avoid circular dependencies (e.g. this function is triggered from
+		//setData. So we have to check if the value is different from the stored one!
+		if(data_.at(row).enabledVal_ != v.toBool())
+		{
+			data_[row].enabledVal_=v.toBool();
+				QModelIndex idx=index(row,0);
 				Q_EMIT dataChanged(idx,idx);
-			}
 		}
 	}
 }
 
-void ChangeNotifyEditorModel::slotEnabledMasterChanged(VProperty* prop,bool b)
+void ChangeNotifyEditorModel::slotEnabledMasterChanged(bool b)
 {
-	for(int i=0; i < data_.count(); i++)
+	PropertyLine *line=static_cast<PropertyLine*>(sender());
+	assert(line);
+
+	int row=lineToRow(line);
+	if(row != -1)
 	{
-		if(data_.at(i).enabled_ == prop)
+		QModelIndex idx=index(row,0);
+		data_[row].enabledMaster_=b;
+		if(b)
 		{
-			QModelIndex idx=index(i,0);
-			data_[i].enabledMaster_=b;
-			if(b)
-			{
-				data_[i].enabledMaster_=b;
-			}
-			Q_EMIT dataChanged(idx,idx);
+			data_[row].enabledMaster_=b;
 		}
+		Q_EMIT dataChanged(idx,idx);
 	}
 }
 

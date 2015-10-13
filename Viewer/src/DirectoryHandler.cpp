@@ -12,6 +12,8 @@
 #include <boost/filesystem/path.hpp>
 #include <boost/foreach.hpp>
 
+#include <boost/regex.hpp>
+
 #include <boost/algorithm/string/predicate.hpp>
 
 #include "DirectoryHandler.hpp"
@@ -117,18 +119,23 @@ std::string DirectoryHandler::concatenate(const std::string &path1, const std::s
 }
 
 
-void DirectoryHandler::findFiles(const std::string &dirPath,const std::string &startsWith,std::vector<std::string>& res)
+void DirectoryHandler::findFiles(const std::string &dirPath,const std::string &filterStr,std::vector<std::string>& res)
 {
 	boost::filesystem::path path(dirPath);
-
     boost::filesystem::directory_iterator it(path), eod;
+
+    const boost::regex expr(filterStr);
 
     BOOST_FOREACH(boost::filesystem::path const &p, std::make_pair(it, eod ))
     {
-        if(is_regular_file(p) && boost::algorithm::starts_with(p.filename().string(),startsWith))
+    	boost::smatch what;
+    	std::string fileName=p.filename().string();
+
+        if(is_regular_file(p) &&
+        	//boost::algorithm::starts_with(p.filename().string(),startsWith))
+        	boost::regex_match(fileName, what,expr))
         {
-            std::string filename = p.filename().string();
-            res.push_back(filename);
+            res.push_back(fileName);
         }
     }
 }

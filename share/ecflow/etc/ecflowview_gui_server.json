@@ -6,7 +6,7 @@
             "icon" : "server.svg",
             
             "note" : {
-                "default" : "These are the <i>Server options</i> and <i>Notifications</i> parameters specifically set for server _SERVER_."
+                "default" : "These are the <i>Server options</i> and <i>Notifications</i> parameters specifically set for server %SERVER%."
             },
             
             "group" : {

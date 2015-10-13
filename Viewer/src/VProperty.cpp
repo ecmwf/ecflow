@@ -13,6 +13,7 @@
 #include <QDebug>
 #include <QRegExp>
 
+#include "Sound.hpp"
 #include "UserMessage.hpp"
 
 #include <boost/algorithm/string.hpp>
@@ -25,6 +26,7 @@ VProperty::VProperty(const std::string& name) :
    master_(0),
    useMaster_(false),
    type_(StringType),
+   guiType_(StringGui),
    link_(0)
 {
 }
@@ -55,30 +57,42 @@ void VProperty::setDefaultValue(const std::string& val)
     {
         defaultValue_=toColour(val);
         type_=ColourType;
+        guiType_=ColourGui;
     }
 	//Font
 	else if(isFont(val))
 	{
 	   defaultValue_=toFont(val);
 	   type_=FontType;
+	   guiType_=FontGui;
+	}
+	//Sound
+	else if(isSound(val))
+	{
+	   defaultValue_=QString::fromStdString(val);
+	   type_=SoundType;
+	   guiType_=SoundGui;
 	}
     //int
     else if(isNumber(val))
     {
        	defaultValue_=toNumber(val);
         type_=IntType;
+        guiType_=IntGui;
     }
     //bool
     else if(isBool(val))
     {
         defaultValue_=toBool(val);
         type_=BoolType;
+        guiType_=BoolGui;
     }
     //text
     else
     {
     	defaultValue_=QString::fromStdString(val);
     	type_=StringType;
+    	guiType_=StringGui;
     }
     
     if(value_.isNull())
@@ -118,6 +132,13 @@ void VProperty::setValue(const std::string& val)
     	bool b=toBool(val);
     	changed=(value_.toBool() != b);
     	value_=b;
+    }
+    //Sound or string
+    else
+    {
+    	QString str=QString::fromStdString(val);
+    	changed=(value_ != str);
+    	value_=str;
     }
 
     if(!defaultValue_.isNull() &&
@@ -171,6 +192,8 @@ std::string VProperty::valueAsString() const
 		break;
 	case FontType:
 		s=VProperty::toString(value().value<QFont>());
+	case SoundType:
+		s=value().toString();
 		break;
 	default:
 		break;
@@ -183,8 +206,13 @@ std::string VProperty::valueAsString() const
 void VProperty::setParam(QString name,QString value)
 {
 	if(name == "values")
-        type_=StringComboType;
-        
+	{
+		if(type_ == SoundType)
+			guiType_=SoundComboGui;
+		else
+			guiType_=StringComboGui;
+	}
+
     params_[name]=value;
 }
 
@@ -385,6 +413,11 @@ bool VProperty::isFont(const std::string& val)
     return QString::fromStdString(val).simplified().startsWith("font(");
 }
 
+bool VProperty::isSound(const std::string& val)
+{
+    return Sound::instance()->isSoundFile(val);
+}
+
 bool VProperty::isNumber(const std::string& val)
 {
 	QString str=QString::fromStdString(val);
@@ -448,4 +481,5 @@ QString VProperty::toString(QFont f)
 {
 	return "font(" + f.toString() + ")";
 }
+
 

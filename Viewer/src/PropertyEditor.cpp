@@ -14,6 +14,7 @@
 #include <QGroupBox>
 #include <QHBoxLayout>
 #include <QLabel>
+#include <QTabWidget>
 #include <QToolButton>
 
 #include "ChangeNotifyEditor.hpp"
@@ -62,15 +63,7 @@ void PropertyEditor::edit(VProperty * vGroup,QString serverName)
 	 headerWidget_->hide();
 
 	 serverName_=serverName;
-	 /*
-	 QString txt=group_->param("desc");
-	 if(!txt.isEmpty())
-	 {
-		 txt.replace("_SERVER_",serverName);
-	 }
 
-	 headerLabel_->setText(txt);
-*/
 	 build();
 }
 
@@ -101,19 +94,46 @@ void PropertyEditor::build()
 	//Loop over the children of the group
     Q_FOREACH(VProperty* vProp,group_->children())
     {
-        addItem(vProp);
+        addItem(vProp,vBox_);
 
     }
+
+    addHelpers();
 }
 
-void PropertyEditor::addItem(VProperty* vProp)
+void PropertyEditor::addHelpers()
+{
+	QMap<std::string,PropertyLine*> lineMap;
+	Q_FOREACH(PropertyLine* line,lineItems_)
+	{
+		lineMap[line->property()->path()]=line;
+	}
+
+	Q_FOREACH(PropertyLine* line,lineItems_)
+	{
+		QString h=line->property()->param("helpers");
+		if(!h.isEmpty())
+		{
+			Q_FOREACH(QString s,h.split("/"))
+			{
+				if(PropertyLine* hl=lineMap.value(s.toStdString(),NULL))
+				{
+					line->addHelper(hl);
+				}
+			}
+		}
+	}
+}
+
+
+void PropertyEditor::addItem(VProperty* vProp,QVBoxLayout *layout)
 {
     if(vProp->name() == "line")
     {
     	if (!currentGrid_)
         {
             currentGrid_=new QGridLayout();
-            vBox_->addLayout(currentGrid_);
+            layout->addLayout(currentGrid_);
         }    
         addLine(vProp,currentGrid_);
     }     
@@ -121,23 +141,34 @@ void PropertyEditor::addItem(VProperty* vProp)
     else if(vProp->name() == "group")
     {
 		currentGrid_=0;
-        addGroup(vProp);
+        addGroup(vProp,layout);
     }
     else if(vProp->name() == "grid")
     {
         currentGrid_=0;
-        addGrid(vProp);
+        addGrid(vProp,layout);
     }
     else if(vProp->name() == "custom-notification")
     {
         currentGrid_=0;
-        addNotification(vProp);
+        addNotification(vProp,layout);
     }
     else if(vProp->name() == "note")
     {
-        currentGrid_=0;
-        addNote(vProp);
+        if(currentGrid_)
+        {
+        	addNote(vProp,currentGrid_);
+        }
+        else
+        {
+        	addNote(vProp,layout);
+        }
     }
+    else if(vProp->name() == "tabs")
+    {
+        currentGrid_=0;
+        addTabs(vProp,layout);
+    }     
 
 }
 
@@ -202,7 +233,7 @@ PropertyLine* PropertyEditor::addLine(VProperty *vProp,QGridLayout *gridLayout)
     return item;
 }    
 
-void PropertyEditor::addGroup(VProperty* vProp)
+void PropertyEditor::addGroup(VProperty* vProp,QVBoxLayout * layout)
 {
    if(vProp->name() != "group")
       return;
@@ -220,17 +251,19 @@ void PropertyEditor::addGroup(VProperty* vProp)
         //add it to the main layout
         //nt row=grid_->rowCount();
         //grid_->addWidget(groupBox,row,0,2,4);
-        vBox_->addWidget(groupBox);
+        layout->addWidget(groupBox);
         
+        currentGrid_=grid;
         //Loop over the children of the group
         Q_FOREACH(VProperty* chProp,vProp->children())
         {
             //Add each item to the the editor
-            addLine(chProp,grid);
-    }
+            addItem(chProp,layout);
+        }
+        currentGrid_=0;
 }
 
-void PropertyEditor::addGrid(VProperty* vProp)
+void PropertyEditor::addGrid(VProperty* vProp,QVBoxLayout *layout)
 {
     if(vProp->name() != "grid")
         return;
@@ -244,7 +277,7 @@ void PropertyEditor::addGrid(VProperty* vProp)
         //int row=grid_->rowCount();
         //grid_->addLayout(grid,row,0,2,4);
     
-    vBox_->addWidget(groupBox);
+    layout->addWidget(groupBox);
         
     //Add header
     for(int i=1; i < 10; i++)
@@ -342,7 +375,7 @@ void PropertyEditor::addGridRow(VProperty* vProp,QGridLayout *grid)
 
 }
 
-void PropertyEditor::addNotification(VProperty* vProp)
+void PropertyEditor::addNotification(VProperty* vProp,QVBoxLayout* layout)
 {
     if(vProp->name() != "custom-notification")
         return;
@@ -359,12 +392,12 @@ void PropertyEditor::addNotification(VProperty* vProp)
     	QVBoxLayout* vb=new QVBoxLayout();
     	groupBox->setLayout(vb);
     	vb->addWidget(ne);
-    	vBox_->addWidget(groupBox);
+    	layout->addWidget(groupBox);
 
     }
     else
     {
-    	vBox_->addWidget(ne);
+    	layout->addWidget(ne);
     }
 
     //Add rows
@@ -376,42 +409,87 @@ void PropertyEditor::addNotification(VProperty* vProp)
 
     		QList<PropertyLine*> lineLst;
 
-    		QGroupBox *groupBox = new QGroupBox(labelText);
-    		groupBox->setObjectName("editorGroupBox");
-    		QGridLayout* grid=new QGridLayout();
-    		groupBox->setLayout(grid);
+    		QWidget* w=new QWidget(this);
+    		QVBoxLayout* vb=new QVBoxLayout(w);
+    		vb->setContentsMargins(0,4,0,4);
 
+            currentGrid_=0;
+            
+            int lineLstPos=lineItems_.count();
     		Q_FOREACH(VProperty* lineProp,chProp->children())
     	    {
-    	        if(lineProp->name() == "line")
-    	        {
-    	        	lineLst << addLine(lineProp,grid);
-    	        }
-    	        else if(lineProp->name() == "note")
-    	    	{
-    	    		 QLabel *empty=new QLabel(" ");
-    	    		 grid->addWidget(empty,grid->rowCount(),0,1,-1,Qt::AlignVCenter);
-    	    		 QLabel *label=new QLabel("&nbsp;&nbsp;&nbsp;<b>Note:</b> " + lineProp->value().toString());
-    	    		 grid->addWidget(label,grid->rowCount(),0,1,-1,Qt::AlignVCenter);
-    	    	}
+    	        addItem(lineProp,vb);
     	    }
-    		ne->addRow(labelText,lineLst,groupBox);
+    	    for(int i=lineLstPos; i < lineItems_.count(); i++)
+                lineLst << lineItems_[i];
+    	    
+    		ne->addRow(labelText,lineLst,w);
     	 }
      }
 }
 
-void PropertyEditor::addNote(VProperty* vProp)
+void PropertyEditor::addTabs(VProperty* vProp,QVBoxLayout *layout)
+{
+    if(vProp->name() != "tabs")
+        return;
+    
+    QTabWidget *t=new QTabWidget(this);
+    layout->addWidget(t);
+   
+    int col=1;
+    Q_FOREACH(VProperty* chProp,vProp->children())
+    {
+        if(chProp->name() == "tab")
+        {
+            addTab(chProp,t);
+        }    
+    }
+} 
+
+void PropertyEditor::addTab(VProperty* vProp,QTabWidget* tab)
+{
+    if(vProp->name() != "tab")
+        return;
+
+    QWidget *w=new QWidget(this);
+    QVBoxLayout* vb=new QVBoxLayout();
+    w->setLayout(vb);
+    
+    tab->addTab(w,vProp->param("label"));
+    
+    Q_FOREACH(VProperty* chProp,vProp->children())
+    {
+        addItem(chProp,vb);
+    }    
+}    
+
+void PropertyEditor::addNote(VProperty* vProp,QVBoxLayout* layout)
 {
     if(vProp->name() != "note")
         return;
 
     QString txt=vProp->value().toString();
-    txt.replace("_SERVER_",(serverName_.isEmpty())?"?":"<b>" + serverName_ + "</b>");
+    txt.replace("%SERVER%",(serverName_.isEmpty())?"?":"<b>" + serverName_ + "</b>");
 
-    vBox_->addSpacing(5);
+    layout->addSpacing(5);
     QLabel *label=new QLabel("<b>Note:</b> " + txt);
     label->setWordWrap(true);
-    vBox_->addWidget(label);
+    layout->addWidget(label);
+}
+
+void PropertyEditor::addNote(VProperty* vProp,QGridLayout* layout)
+{
+    if(vProp->name() != "note")
+        return;
+
+    QString txt=vProp->value().toString();
+    txt.replace("%SERVER%",(serverName_.isEmpty())?"?":"<b>" + serverName_ + "</b>");
+
+
+    QLabel *empty=new QLabel(" ");
+    layout->addWidget(empty,layout->rowCount(),0,1,-1,Qt::AlignVCenter);
+   	QLabel *label=new QLabel("&nbsp;&nbsp;&nbsp;<b>Note:</b> " + txt);
+    layout->addWidget(label,layout->rowCount(),0,1,-1,Qt::AlignVCenter);
 }
 
 

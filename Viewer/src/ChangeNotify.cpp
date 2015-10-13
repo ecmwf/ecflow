@@ -13,6 +13,7 @@
 #include "ChangeNotifyDialog.hpp"
 #include "ChangeNotifyModel.hpp"
 #include "ChangeNotifyWidget.hpp"
+#include "Sound.hpp"
 #include "UserMessage.hpp"
 #include "VConfig.hpp"
 #include "VConfigLoader.hpp"
@@ -86,26 +87,43 @@ void ChangeNotify::add(VNode *node,bool popup,bool sound)
 	}
 	else
 	{
-		if(dialog()->isVisible())
-		{
+		if(!dialog()->isVisible())
 			dialog()->setCurrentTab(this);
+		else
 			dialog()->raise();
-		}
 	}
 
 	if(sound)
 	{
-		const char *soundCmd = "play -q /usr/share/xemacs/xemacs-packages/etc/sounds/boing.wav";
-		if (system(soundCmd))
-			UserMessage::message(UserMessage::DBG, false,"ChangeNotify:add() could not play sound alert");
+		bool sys=true;
+		std::string fName;
+		int loop=0;
+		if(VProperty* p=prop_->findChild("sound_file_type"))
+		{
+			sys=(p->value() == "system");
+		}
 
-//#ifdef ECFLOW_QT5
-//	QSoundEffect effect(dialog_);
-//	effect.setSource(QUrl::fromLocalFile("file:/usr/share/xemacs/xemacs-packages/etc/sounds/boing.wav"));
-//	effect.setLoopCount(1);
-//	effect.setVolume(0.25f);
-//	effect.play();
-//#endif
+		if(sys)
+		{
+			if(VProperty* p=prop_->findChild("sound_system_file"))
+			{
+				fName=p->valueAsString();
+			}
+		}
+
+		if(fName.empty())
+			return;
+
+		if(VProperty* p=prop_->findChild("sound_loop"))
+		{
+			loop=p->value().toInt();
+		}
+
+		if(sys)
+		{
+			Sound::instance()->playSystem(fName,loop);
+		}
+
 	}
 }
 
@@ -148,10 +166,27 @@ void ChangeNotify::setProperty(VProperty* prop)
 
 	if(VProperty* p=prop->findChild("count_text_colour"))
 		p->addObserver(this);
+
+	if(VProperty* p=prop->findChild("sound_system_file"))
+	{
+		QStringList lst;
+		const std::vector<std::string>& vals=Sound::instance()->sysSounds();
+		for(std::vector<std::string>::const_iterator it=vals.begin(); it != vals.end(); it++)
+		{
+			lst << QString::fromStdString(*it);
+		}
+		p->setParam("values",lst.join("/"));
+		p->setParam("values_label",lst.join("/"));
+		p->setParam("dir",QString::fromStdString(Sound::instance()->sysDir()));
+	}
+
 }
 
 void ChangeNotify::notifyChange(VProperty* prop)
 {
+	if(prop->name().contains("sound",Qt::CaseInsensitive))
+		return;
+
 	dialog()->updateSettings(this);
 	ChangeNotifyWidget::updateSettings(id_);
 }

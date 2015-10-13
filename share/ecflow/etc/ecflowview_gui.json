@@ -72,9 +72,9 @@
                             "line" :  "font_colour"
                       },
                 
-			             "note" : {
+			          "note" : {
 			             "default" : "the states below are only valid for <b>servers</b>"
-			             },  
+			           },  
                     
                         "row" : {
                             "label" : "Halted",
@@ -104,70 +104,144 @@
             "visible" : "true",
             "label": "Notifications",
             "desc" : "Notifications",
-            "icon" : "notification.svg",
+            "icon" : "notification.svg",           
+
+            "tabs"  : {
+                 "tab" : {
+                     "label"  : "Notification types",   
+
+                      "custom-notification" : {
+                          "title" : "Options",               
             
-            "custom-notification" : {
-                 "title" : "Options",               
-            
-                "row" : {
-                    "label" : "Aborted",            
-                    "line" : "server.notification.aborted.enabled",
-                    "line" : "server.notification.aborted.popup",
-                    "line" : "server.notification.aborted.sound",
-                    "line" : "server.notification.aborted.soundFile",
-                    "line" : "notification.aborted.count_fill_colour",
-                    "line" : "notification.aborted.count_text_colour",  
-                    "note" : {
-                        "default" : "For <b>Aborted</b> notifications colours are taken from the <u>Status</u> colour settings"
-                    }       
-                },
-                "row" : {
-                    "label" : "Restarted",                 
-                    "line" : "server.notification.restarted.enabled",
-                    "line" : "server.notification.restarted.popup",
-                    "line" : "server.notification.restarted.sound",
-                    "line" : "server.notification.restarted.soundFile",
-                    "line" : "notification.restarted.fill_colour",
-                    "line" : "notification.restarted.text_colour",
-                    "line" : "notification.restarted.count_fill_colour",
-                    "line" : "notification.restarted.count_text_colour"    
-                },
-                "row" : {
-                    "label" : "Late tasks",
-                    "line" : "server.notification.late.enabled",                   
-                    "line" : "server.notification.late.popup",
-                    "line" : "server.notification.late.sound",
-                    "line" : "server.notification.late.soundFile",
-                    "line" : "notification.late.fill_colour",
-                    "line" : "notification.late.text_colour",
-                    "line" : "notification.late.count_fill_colour",
-                    "line" : "notification.late.count_text_colour"
-                     
-                     
-                },
-                "row" : {
-                    "label" : "Zombies",                    
-                    "line" : "server.notification.zombie.enabled",
-                    "line" : "server.notification.zombie.popup",
-                    "line" : "server.notification.zombie.sound",
-                    "line" : "server.notification.zombie.soundFile",
-                    "line" : "notification.zombie.fill_colour",
-                    "line" : "notification.zombie.text_colour",
-                    "line" : "notification.zombie.count_fill_colour",
-                    "line" : "notification.zombie.count_text_colour" 
-                },
-                 "row" : {
-                    "label" : "Restarted or aborted aliases",                    
-                    "line" : "server.notification.alias.enabled",
-                    "line" : "server.notification.alias.popup",
-                    "line" : "server.notification.alias.sound",
-                    "line" : "server.notification.alias.soundFile",
-                    "line" : "notification.alias.fill_colour",
-                    "line" : "notification.alias.text_colour",
-                    "line" : "notification.alias.count_fill_colour",
-                    "line" : "notification.alias.count_text_colour"
-                }                                  
-            }                      		   
+                          "row" : {
+                               "label" : "Aborted",                                          
+                               "group" : {
+                                    "title" : "Settings",                                                          
+                                    "line" : "server.notification.aborted.enabled",
+                                    "line" : "server.notification.aborted.popup",
+                                    "line" : "server.notification.aborted.sound"
+                                },                                  
+                               "group" : {
+                                    "title" : "Colour",
+                                    "line" : "notification.aborted.count_fill_colour",
+                                    "line" : "notification.aborted.count_text_colour",  
+                                    "note" : {
+                                        "default" : "For <b>Aborted</b> notifications colours are taken from the <u>Status</u> colour settings"
+                                    }   
+                                },                                     
+                                "group" : {
+                                    "title" : "Sound",
+                                    "line" : "notification.aborted.sound_file_type",
+                                    "line" : "notification.aborted.sound_system_file",
+                                    "line" : "notification.aborted.sound_user_file",
+                                    "line" : "notification.aborted.sound_volume",
+                                    "line" : "notification.aborted.sound_repeat"
+                                }                                    
+                             },
+                            "row" : {
+                                 "label" : "Restarted",  
+                                 "group" : {
+                                    "title" : "Settings",                                                   
+                                    "line" : "server.notification.restarted.enabled",
+                                    "line" : "server.notification.restarted.popup",
+                                    "line" : "server.notification.restarted.sound"
+                                 },
+                                 "group" : {
+                                    "title" : "Colour",                             
+                                    "line" : "notification.restarted.fill_colour",
+                                    "line" : "notification.restarted.text_colour",
+                                    "line" : "notification.restarted.count_fill_colour",
+                                    "line" : "notification.restarted.count_text_colour"
+                                  },
+                                  "group" : {
+                                     "title" : "Sound",
+                                     "line" : "notification.restarted.sound_file_type",
+                                     "line" : "notification.restarted.sound_system_file",
+                                     "line" : "notification.restarted.sound_user_file",
+                                     "line" : "notification.restarted.sound_volume",
+                                     "line" : "notification.restarted.sound_repeat"
+                                    }                                         
+                              },
+                             "row" : {
+                                  "label" : "Late tasks",
+                                  "group" : {                    
+                                     "title" : "Settings",  
+                                     "line" : "server.notification.late.enabled",                   
+                                     "line" : "server.notification.late.popup",
+                                     "line" : "server.notification.late.sound"
+                                   },  
+                                  "group" : {
+                                     "title" : "Colour", 
+                                     "line" : "notification.late.fill_colour",
+                                     "line" : "notification.late.text_colour",
+                                     "line" : "notification.late.count_fill_colour",
+                                     "line" : "notification.late.count_text_colour"
+                                   },
+                                  "group" : {
+                                     "title" : "Sound",
+                                     "line" : "notification.late.sound_file_type",
+                                     "line" : "notification.late.sound_system_file",
+                                     "line" : "notification.late.sound_user_file",
+                                     "line" : "notification.late.sound_volume",
+                                     "line" : "notification.late.sound_repeat"                                                                   
+                                   }
+                                },
+                              "row" : {
+                                   "label" : "Zombies",  
+                                   "group" : {                    
+                                      "title" : "Settings",                                                       
+                                      "line" : "server.notification.zombie.enabled",
+                                      "line" : "server.notification.zombie.popup",
+                                      "line" : "server.notification.zombie.sound"
+                                    },
+                                   "group" : {
+                                      "title" : "Colour",  
+                                       "line" : "notification.zombie.fill_colour",
+                                       "line" : "notification.zombie.text_colour",
+                                       "line" : "notification.zombie.count_fill_colour",
+                                       "line" : "notification.zombie.count_text_colour" 
+                                   },
+                                   "group" : {
+                                      "title" : "Sound",
+                                      "line" : "notification.zombie.sound_file_type",
+                                      "line" : "notification.zombie.sound_system_file",
+                                      "line" : "notification.zombie.sound_user_file",
+                                      "line" : "notification.zombie.sound_volume",
+                                      "line" : "notification.zombie.sound_repeat"                                        
+                                   }    
+                                },
+                              "row" : {
+                                   "label" : "Restarted or aborted aliases",  
+                                   "group" : {                    
+                                      "title" : "Settings",                          
+                                      "line" : "server.notification.alias.enabled",
+                                      "line" : "server.notification.alias.popup",
+                                      "line" : "server.notification.alias.sound"
+                                   },
+                                   "group" : {
+                                      "title" : "Colour",                                                                                 
+                                      "line" : "notification.alias.fill_colour",
+                                      "line" : "notification.alias.text_colour",
+                                      "line" : "notification.alias.count_fill_colour",
+                                      "line" : "notification.alias.count_text_colour"
+                                   }, 
+                                   "group" : {
+                                      "title" : "Sound",
+                                      "line" : "notification.alias.sound_file_type",
+                                      "line" : "notification.alias.sound_system_file",
+                                      "line" : "notification.alias.sound_user_file",
+                                      "line" : "notification.alias.sound_volume",
+                                      "line" : "notification.alias.sound_repeat"                                                                             
+                                   }       
+                              }                                  
+                        } 
+                }, 
+
+                "tab" : {
+                    "label" : "Global settings",
+                    "line"  : "notification.global_settings.max_items"
+                } 
+            }                   		   
  		},        
  			
  		"server": {

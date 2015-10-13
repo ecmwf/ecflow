@@ -15,7 +15,6 @@ set (files ecflowview_menus.json
            ecflowview_view_conf.json
            viewer.qss)
 
-
 # for each file, copy it into the build directory at build time
 # and install it into the installation directory at install time (!)
 foreach( f ${files} )
@@ -25,4 +24,3 @@ foreach( f ${files} )
              DESTINATION share/ecflow/etc
              PERMISSIONS OWNER_WRITE OWNER_READ GROUP_READ WORLD_READ)
 endforeach()
-

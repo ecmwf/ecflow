@@ -24,9 +24,11 @@
 #include <QPushButton>
 #include <QToolButton>
 
+#include "Sound.hpp"
+
 #include <assert.h>
 
-static std::map<VProperty::Type,PropertyLineFactory*>* makers = 0;
+static std::map<VProperty::GuiType,PropertyLineFactory*>* makers = 0;
 
 //=========================================================================
 //
@@ -34,10 +36,10 @@ static std::map<VProperty::Type,PropertyLineFactory*>* makers = 0;
 //
 //=========================================================================
 
-PropertyLineFactory::PropertyLineFactory(VProperty::Type type)
+PropertyLineFactory::PropertyLineFactory(VProperty::GuiType type)
 {
 	if(makers == 0)
-		makers = new std::map<VProperty::Type,PropertyLineFactory*>;
+		makers = new std::map<VProperty::GuiType,PropertyLineFactory*>;
 
 	(*makers)[type] = this;
 }
@@ -52,8 +54,8 @@ PropertyLine* PropertyLineFactory::create(VProperty* p,bool addLabel,QWidget* w)
 	if(!p)
 		return 0;
 
-	VProperty::Type t=p->type();
-	std::map<VProperty::Type,PropertyLineFactory*>::iterator j = makers->find(t);
+	VProperty::GuiType t=p->guiType();
+	std::map<VProperty::GuiType,PropertyLineFactory*>::iterator j = makers->find(t);
 	if(j != makers->end())
 		return (*j).second->make(p,addLabel,w);
 
@@ -138,11 +140,11 @@ void PropertyLine::slotResetToDefault(bool)
 	checkState();
 }
 
-void PropertyLine::slotEnabled(VProperty*,QVariant v)
+void PropertyLine::slotEnabled(QVariant v)
 {
 	if(enabled_ != v.toBool())
 	{
-		if(masterTb_ && !masterTb_->isChecked())
+		if(!masterTb_ || !masterTb_->isChecked())
 		{
 			enabled_=v.toBool();
 			checkState();
@@ -208,7 +210,7 @@ void PropertyLine::slotMaster(bool b)
 		setEnabledEditable(true);
 	}
 
-	Q_EMIT masterChanged(prop_,b);
+	Q_EMIT masterChanged(b);
 
 	valueChanged();
 }
@@ -223,6 +225,12 @@ void PropertyLine::valueChanged()
 {
 	if(!doNotEmitChange_)
 		Q_EMIT changed();
+}
+
+void PropertyLine::addHelper(PropertyLine* line)
+{
+	if(line)
+		helpers_[line->property()->name()]=line;
 }
 
 //=========================================================================
@@ -561,6 +569,10 @@ void BoolPropertyLine::slotReset(QVariant v)
 	cb_->setChecked(v.toBool());
 	PropertyLine::checkState();
 	valueChanged();
+
+	//BoolLines emit this signal because they might control
+	//other lines' status
+	Q_EMIT changed(currentValue());
 }
 
 bool BoolPropertyLine::applyChange()
@@ -584,6 +596,10 @@ void BoolPropertyLine::slotStateChanged(int)
 {
 	PropertyLine::checkState();
 	valueChanged();
+
+	//BoolLines emit this signal because they might control
+	//other lines' status
+	Q_EMIT changed(currentValue());
 }
 
 void BoolPropertyLine::setEnabledEditable(bool b)
@@ -599,6 +615,9 @@ void BoolPropertyLine::setEnabledEditable(bool b)
 
 ComboPropertyLine::ComboPropertyLine(VProperty* vProp,bool addLabel,QWidget * parent) : PropertyLine(vProp,addLabel,parent)
 {
+	if(label_)
+	    label_->setText(label_->text() + ":");
+
 	cb_=new QComboBox(parent);//(vProp->param("label"));
 
 	connect(cb_,SIGNAL(currentIndexChanged(int)),
@@ -606,6 +625,9 @@ ComboPropertyLine::ComboPropertyLine(VProperty* vProp,bool addLabel,QWidget * pa
 
 	QStringList lst=prop_->param("values_label").split("/");
     QStringList lstData=prop_->param("values").split("/");
+    if(prop_->param("values_label").simplified().isEmpty())
+        lst=lstData;
+    
     assert(lst.count() == lstData.count());
 	for(int i=0; i < lst.count(); i++)
 		cb_->addItem(lst[i],lstData[i]);
@@ -674,9 +696,54 @@ void ComboPropertyLine::setEnabledEditable(bool b)
 	cb_->setEnabled(b);
 }
 
-static PropertyLineMaker<StringPropertyLine> makerStr(VProperty::StringType);
-static PropertyLineMaker<ColourPropertyLine> makerCol(VProperty::ColourType);
-static PropertyLineMaker<FontPropertyLine> makerFont(VProperty::FontType);
-static PropertyLineMaker<IntPropertyLine> makerInt(VProperty::IntType);
-static PropertyLineMaker<BoolPropertyLine> makerBool(VProperty::BoolType);
-static PropertyLineMaker<ComboPropertyLine> makerCombo(VProperty::StringComboType);
+//=========================================================================
+//
+// SoundComboPropertyLine
+//
+//=========================================================================
+
+SoundComboPropertyLine::SoundComboPropertyLine(VProperty* vProp,bool addLabel,QWidget * parent) :
+	ComboPropertyLine(vProp,addLabel,parent),
+	playTb_(NULL)
+{
+	playTb_=new QToolButton(parent);
+	playTb_->setText("play");
+	playTb_->setToolTip(tr("Play sound"));
+
+	connect(playTb_,SIGNAL(clicked(bool)),
+			this,SLOT(slotPlay(bool)));
+}
+
+QWidget* SoundComboPropertyLine::item()
+{
+	return cb_;
+}
+
+QWidget* SoundComboPropertyLine::button()
+{
+	return playTb_;
+}
+
+void SoundComboPropertyLine::setEnabledEditable(bool b)
+{
+	cb_->setEnabled(b);
+	playTb_->setEnabled(b);
+}
+
+void SoundComboPropertyLine::slotPlay(bool)
+{
+	int repeat=0;
+	if(PropertyLine* line=helpers_.value("sound_repeat",NULL))
+		repeat=line->currentValue().toInt();
+
+	Sound::instance()->playSystem(currentValue().toString().toStdString(),repeat);
+}
+
+
+static PropertyLineMaker<StringPropertyLine> makerStr(VProperty::StringGui);
+static PropertyLineMaker<ColourPropertyLine> makerCol(VProperty::ColourGui);
+static PropertyLineMaker<FontPropertyLine> makerFont(VProperty::FontGui);
+static PropertyLineMaker<IntPropertyLine> makerInt(VProperty::IntGui);
+static PropertyLineMaker<BoolPropertyLine> makerBool(VProperty::BoolGui);
+static PropertyLineMaker<ComboPropertyLine> makerCombo(VProperty::StringComboGui);
+static PropertyLineMaker<SoundComboPropertyLine> makerSoundCombo(VProperty::SoundComboGui);

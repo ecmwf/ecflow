@@ -16,6 +16,7 @@
 #include "ui_PropertyEditor.h"
 
 class QGridLayout;
+class QTabWidget;
 
 class PropertyLine;
 class VProperty;
@@ -39,13 +40,18 @@ Q_SIGNALS:
 private:
     void clear();
     void build();
-    void addItem(VProperty*);
+    void addHelpers();
+
+    void addItem(VProperty*,QVBoxLayout*);
     PropertyLine* addLine(VProperty* vProp,QGridLayout* grid);
-    void addGroup(VProperty*);
-    void addGrid(VProperty*);
+    void addGroup(VProperty*,QVBoxLayout*);
+    void addGrid(VProperty*,QVBoxLayout*);
     void addGridRow(VProperty* prop,QGridLayout *grid);
-    void addNotification(VProperty* prop);
-	void addNote(VProperty* vProp);
+    void addNotification(VProperty* prop,QVBoxLayout*);
+    void addTabs(VProperty*,QVBoxLayout*);
+    void addTab(VProperty*,QTabWidget*);
+	void addNote(VProperty* vProp,QVBoxLayout*);
+	void addNote(VProperty* vProp,QGridLayout* layout);
 
     VProperty* group_;
     QGridLayout* currentGrid_;

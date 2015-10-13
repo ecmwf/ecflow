@@ -36,7 +36,7 @@ class PropertyLine;
 class PropertyLineFactory
 {
 public:
-	explicit PropertyLineFactory(VProperty::Type);
+	explicit PropertyLineFactory(VProperty::GuiType);
 	virtual ~PropertyLineFactory();
 
 	virtual PropertyLine* make(VProperty* p,bool,QWidget* w) = 0;
@@ -53,7 +53,7 @@ class PropertyLineMaker : public PropertyLineFactory
 {
 	PropertyLine* make(VProperty* p,bool addLabel,QWidget* w) { return new T(p,addLabel,w); }
 public:
-	explicit PropertyLineMaker(VProperty::Type t) : PropertyLineFactory(t) {}
+	explicit PropertyLineMaker(VProperty::GuiType t) : PropertyLineFactory(t) {}
 };
 
 
@@ -77,6 +77,8 @@ public:
 	QToolButton* masterTb() {return masterTb_;};
 	VProperty* property() const {return prop_;}
 
+	void addHelper(PropertyLine*);
+
 	void init();
 	virtual bool applyChange()=0;
 	virtual QVariant currentValue()=0;
@@ -84,7 +86,7 @@ public:
 public Q_SLOTS:
 	virtual void slotReset(QVariant)=0;
     virtual void slotReset(VProperty*,QVariant);
-    virtual void slotEnabled(VProperty*,QVariant);
+    virtual void slotEnabled(QVariant);
 
 protected Q_SLOTS:
 	void slotResetToDefault(bool);
@@ -92,8 +94,8 @@ protected Q_SLOTS:
 	void checkState();
 
 Q_SIGNALS:
-	void changed(VProperty*,QVariant);
-	void masterChanged(VProperty*,bool);
+	void changed(QVariant);
+	void masterChanged(bool);
 	void changed();
 
 protected:
@@ -109,6 +111,7 @@ protected:
 	bool enabled_;
 	QVariant oriVal_;
 	bool doNotEmitChange_;
+	QMap<QString,PropertyLine*> helpers_;
 };
 
 //-------------------------------------
@@ -267,9 +270,34 @@ public Q_SLOTS:
 protected:
 	void setEnabledEditable(bool);
 
-private:
+protected:
 	QComboBox* cb_;
 };
+
+//-------------------------------------
+// Combo box editor
+//------------------------------------
+
+class SoundComboPropertyLine : public ComboPropertyLine
+{
+	Q_OBJECT
+
+public:
+	SoundComboPropertyLine(VProperty* vProp,bool addLabel,QWidget * parent=0);
+	QWidget* item();
+	QWidget* button();
+
+public Q_SLOTS:
+	void slotPlay(bool);
+
+protected:
+	void setEnabledEditable(bool);
+
+private:
+	QToolButton* playTb_;
+
+};
+
 
 
 #endif

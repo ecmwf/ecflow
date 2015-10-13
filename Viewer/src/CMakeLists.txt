@@ -78,6 +78,7 @@ set(viewer_srcs
     ServerListDialog.cpp
     ServerSettingsItemWidget.cpp
     SessionHandler.cpp
+    Sound.cpp
     SuiteItemWidget.cpp
     SuiteFilter.cpp
     SuiteModel.cpp
@@ -261,7 +262,7 @@ ecbuild_add_executable( TARGET   ecflow_ui
      ${Boost_INCLUDE_DIRS} 
     ${CMAKE_CURRENT_BINARY_DIR}
     LIBS     core nodeattr node libparser base libclient 
-     pthread ${Ecflow_Boost_LIBS}
+     pthread ${Boost_LIBRARIES}
      m crypt dl fl
      ${ECFLOW_QT_LIBRARIES}
 )
@@ -285,7 +286,7 @@ if(${build_ecflow_ui_log})
          ${Boost_INCLUDE_DIRS} 
         ${CMAKE_CURRENT_BINARY_DIR}
         LIBS     core nodeattr node libparser base libclient 
-         pthread ${Ecflow_Boost_LIBS}
+         pthread ${Boost_LIBRARIES}
          m 
          ${ECFLOW_QT_LIBRARIES}
         DEFINITIONS MAIN_LOG
