@@ -72,12 +72,16 @@ PropertyLine::PropertyLine(VProperty* vProp,bool addLabel,QWidget * parent) :
 	label_(0),
 	suffixLabel_(0),
 	defaultTb_(0),
-	masterTb_(0)
+	masterTb_(0),
+	enabled_(true),
+	doNotEmitChange_(false)
 {
-	if(addLabel)
-		label_=new QLabel(vProp->param("label"),parent);
+	oriVal_=prop_->value();
 
-	QString suffixText=vProp->param("suffix");
+	if(addLabel)
+		label_=new QLabel(prop_->param("label"),parent);
+
+	QString suffixText=prop_->param("suffix");
 	if(!suffixText.isEmpty())
 	{
 		suffixLabel_=new QLabel(suffixText);
@@ -91,7 +95,7 @@ PropertyLine::PropertyLine(VProperty* vProp,bool addLabel,QWidget * parent) :
     connect(defaultTb_,SIGNAL(clicked(bool)),
     	    this,SLOT(slotResetToDefault(bool)));
 
-    if(vProp->master())
+    if(prop_->master())
     {
     	masterTb_=new QToolButton(parent);
     	masterTb_->setCheckable(true);
@@ -99,51 +103,99 @@ PropertyLine::PropertyLine(VProperty* vProp,bool addLabel,QWidget * parent) :
     	masterTb_->setToolTip(tr("Use global server settings"));
     	masterTb_->setIcon(QPixmap(":/viewer/chain.svg"));
     	masterTb_->setAutoRaise(true);
-    	masterTb_->setChecked(vProp->useMaster());
+    	masterTb_->setChecked(prop_->useMaster());
 
     	connect(masterTb_,SIGNAL(toggled(bool)),
-    				this,SLOT(slotMaster(bool)));
-
+    			this,SLOT(slotMaster(bool)));
     }
+
+}
+
+PropertyLine::~PropertyLine()
+{
 }
 
 void PropertyLine::init()
 {
+	doNotEmitChange_=true;
 	if(prop_->master())
 	{
 		if(masterTb_->isChecked() != prop_->useMaster())
 			masterTb_->setChecked(prop_->useMaster());
 		else
 			slotMaster(prop_->useMaster());
-
 	}
 	else
 	{
-		reset(prop_->value());
+		slotReset(prop_->value());
 	}
+	doNotEmitChange_=false;
 }
 
 void PropertyLine::slotResetToDefault(bool)
 {
-	reset(prop_->defaultValue());
+	slotReset(prop_->defaultValue());
 	checkState();
+}
+
+void PropertyLine::slotEnabled(VProperty*,QVariant v)
+{
+	if(enabled_ != v.toBool())
+	{
+		if(masterTb_ && !masterTb_->isChecked())
+		{
+			enabled_=v.toBool();
+			checkState();
+		}
+	}
 }
 
 void PropertyLine::checkState()
 {
-	if(prop_->master() && prop_->useMaster())
+	if(label_)
+	{
+		label_->setEnabled(enabled_);
+	}
+	if(masterTb_)
+	{
+		masterTb_->setEnabled(enabled_);
+	}
+	if(suffixLabel_)
+	{
+		suffixLabel_->setEnabled(enabled_);
+	}
+
+	defaultTb_->setEnabled(enabled_);
+
+	setEnabledEditable(enabled_);
+
+	if(masterTb_ && masterTb_->isChecked())
 		return;
 
-	if(prop_->defaultValue() != currentValue())
-		defaultTb_->setEnabled(true);
-	else
-		defaultTb_->setEnabled(false);
+	if(enabled_)
+	{
+		if(prop_->defaultValue() != currentValue())
+			defaultTb_->setEnabled(true);
+		else
+			defaultTb_->setEnabled(false);
+	}
 }
+
+bool PropertyLine::applyMaster()
+{
+	if(masterTb_ && prop_->useMaster() != masterTb_->isChecked())
+	{
+		prop_->setUseMaster(masterTb_->isChecked());
+		return true;
+	}
+	return false;
+}
+
 
 void PropertyLine::slotMaster(bool b)
 {
-	prop_->setUseMaster(b);
-	reset(prop_->value());
+	//prop_->setUseMaster(b);
+	slotReset(prop_->master()->value());
 	if(b)
 	{
 		defaultTb_->setEnabled(false);
@@ -156,6 +208,21 @@ void PropertyLine::slotMaster(bool b)
 		setEnabledEditable(true);
 	}
 
+	Q_EMIT masterChanged(prop_,b);
+
+	valueChanged();
+}
+
+void PropertyLine::slotReset(VProperty* prop,QVariant v)
+{
+	if(prop == prop_)
+		slotReset(v);
+}
+
+void PropertyLine::valueChanged()
+{
+	if(!doNotEmitChange_)
+		Q_EMIT changed();
 }
 
 //=========================================================================
@@ -185,15 +252,18 @@ QWidget* StringPropertyLine::button()
 	return NULL;
 }
 
-void StringPropertyLine::reset(QVariant v)
+void StringPropertyLine::slotReset(QVariant v)
 {
 	le_->setText(v.toString());
 	PropertyLine::checkState();
+	valueChanged();
 }
 
 bool StringPropertyLine::applyChange()
 {
-	QString v=prop_->value().toString();
+	PropertyLine::applyMaster();
+
+	QString v=oriVal_.toString();
 	if(v != le_->text())
 	{
 		prop_->setValue(le_->text());
@@ -210,8 +280,8 @@ QVariant StringPropertyLine::currentValue()
 void StringPropertyLine::slotEdited(QString)
 {
 	PropertyLine::checkState();
+	valueChanged();
 }
-
 
 void StringPropertyLine::setEnabledEditable(bool b)
 {
@@ -234,11 +304,12 @@ ColourPropertyLine::ColourPropertyLine(VProperty* vProp,bool addLabel,QWidget * 
 	int height=fm.height();
 	int width=fm.width("AAAAAAA");
 
+	int border=4;
 	cb_=new QToolButton(parent);
 	//cb_->setAutoFillBackground(true);
     cb_->setFixedWidth(width);
-    cb_->setFixedHeight(height+8);
-    cb_->setIconSize(QSize(cb_->width()-8,cb_->height()-8));
+    cb_->setFixedHeight(height+border);
+    cb_->setIconSize(QSize(cb_->width()-border,cb_->height()-border));
 
     cb_->setToolTip(tr("Click to select a colour"));
 
@@ -258,7 +329,7 @@ QWidget* ColourPropertyLine::button()
 	return NULL;
 }
 
-void ColourPropertyLine::reset(QVariant v)
+void ColourPropertyLine::slotReset(QVariant v)
 {
 	QColor c=v.value<QColor>();
 
@@ -278,6 +349,7 @@ void ColourPropertyLine::reset(QVariant v)
 	currentCol_=c;
 
 	PropertyLine::checkState();
+	valueChanged();
 }
 
 void ColourPropertyLine::slotEdit(bool)
@@ -287,13 +359,15 @@ void ColourPropertyLine::slotEdit(bool)
 
 	if(col.isValid())
 	{
-		reset(col);
+		slotReset(col);
 	}
 }
 
 bool ColourPropertyLine::applyChange()
 {
-	QColor v=prop_->value().value<QColor>();
+	PropertyLine::applyMaster();
+
+	QColor v=oriVal_.value<QColor>();
 	QColor c=currentValue().value<QColor>();
 
 	if(v != c)
@@ -346,11 +420,12 @@ QWidget* FontPropertyLine::button()
 	return tbEdit_;
 }
 
-void FontPropertyLine::reset(QVariant v)
+void FontPropertyLine::slotReset(QVariant v)
 {
 	font_=v.value<QFont>();
 	lName_->setText(font_.toString());
 	PropertyLine::checkState();
+	valueChanged();
 }
 
 void FontPropertyLine::slotEdit(bool)
@@ -365,12 +440,14 @@ void FontPropertyLine::slotEdit(bool)
 		lName_->setText(f.toString());
 		font_=f;
 	}
+	valueChanged();
 }
 
 bool FontPropertyLine::applyChange()
 {
-	QFont v=prop_->value().value<QFont>();
-	if(v != font_)
+	PropertyLine::applyMaster();
+
+	if(oriVal_.value<QFont>() != font_)
 	{
 		prop_->setValue(font_);
 		return true;
@@ -430,17 +507,19 @@ QWidget* IntPropertyLine::button()
 	return NULL;
 }
 
-void IntPropertyLine::reset(QVariant v)
+void IntPropertyLine::slotReset(QVariant v)
 {
 	le_->setText(QString::number(v.toInt()));
 	PropertyLine::checkState();
+	valueChanged();
 }
 
 bool IntPropertyLine::applyChange()
 {
-	int v=prop_->value().toInt();
+	PropertyLine::applyMaster();
+
 	int cv=le_->text().toInt();
-	if(v != cv)
+	if(oriVal_.toInt() != cv)
 	{
 		prop_->setValue(cv);
 		return true;
@@ -456,6 +535,7 @@ QVariant IntPropertyLine::currentValue()
 void IntPropertyLine::slotEdited(QString)
 {
 	PropertyLine::checkState();
+	valueChanged();
 }
 
 void IntPropertyLine::setEnabledEditable(bool b)
@@ -487,17 +567,18 @@ QWidget* BoolPropertyLine::button()
 	return NULL;
 }
 
-void BoolPropertyLine::reset(QVariant v)
+void BoolPropertyLine::slotReset(QVariant v)
 {
 	cb_->setChecked(v.toBool());
 	PropertyLine::checkState();
+	valueChanged();
 }
 
 bool BoolPropertyLine::applyChange()
 {
-	int v=prop_->value().toBool();
+	PropertyLine::applyMaster();
 
-	if(v != cb_->isChecked())
+	if(oriVal_.toBool() != cb_->isChecked())
 	{
 		prop_->setValue(cb_->isChecked());
 		return true;
@@ -513,6 +594,7 @@ QVariant BoolPropertyLine::currentValue()
 void BoolPropertyLine::slotStateChanged(int)
 {
 	PropertyLine::checkState();
+	valueChanged();
 }
 
 void BoolPropertyLine::setEnabledEditable(bool b)
@@ -550,7 +632,7 @@ QWidget* ComboPropertyLine::button()
 	return NULL;
 }
 
-void ComboPropertyLine::reset(QVariant v)
+void ComboPropertyLine::slotReset(QVariant v)
 {
 	QStringList lst=prop_->param("values").split("/");
 	int idx=lst.indexOf(v.toString());
@@ -558,18 +640,19 @@ void ComboPropertyLine::reset(QVariant v)
 		cb_->setCurrentIndex(idx);
 
 	PropertyLine::checkState();
+	valueChanged();
 }
 
 bool ComboPropertyLine::applyChange()
 {
-	QString v=prop_->value().toString();
-    
-    int idx=cb_->currentIndex();
+    PropertyLine::applyMaster();
+
+	int idx=cb_->currentIndex();
     
     if(idx != -1)
     {
         QString currentDataVal=cb_->itemData(idx).toString();
-        if(v != currentDataVal)
+        if(oriVal_.toString() != currentDataVal)
         {
 		    prop_->setValue(currentDataVal);
 		    return true;
@@ -594,6 +677,7 @@ QVariant ComboPropertyLine::currentValue()
 void ComboPropertyLine::slotCurrentChanged(int)
 {
     PropertyLine::checkState();
+    valueChanged();
 }
 
 void ComboPropertyLine::setEnabledEditable(bool b)

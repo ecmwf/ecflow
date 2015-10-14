@@ -1328,6 +1328,11 @@ std::ostream& Node::print(std::ostream& os) const
    repeat_.print(os);
 
    BOOST_FOREACH(const Variable& v, varVec_ )       { v.print(os); }
+   if ( PrintStyle::getStyle() == PrintStyle::STATE ) {
+      std::vector<Variable> gvec;
+      gen_variables(gvec);
+      BOOST_FOREACH(const Variable& v, gvec ) { v.print(os); }
+   }
    BOOST_FOREACH(limit_ptr l, limitVec_)            { l->print(os); }
    inLimitMgr_.print(os);
    if (child_attrs_) child_attrs_->print(os);

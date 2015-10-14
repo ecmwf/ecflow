@@ -3,79 +3,124 @@
 
             "aborted": {
                 "fill_colour" : {
-                    "label" : "Colour",
+                    "label" : "Backgorund colour",
                     "default": "rgb(255,0,0)"
                 },
-                "font_colour" : {
-                    "label" : "Font colour",
+                "text_colour" : {
+                    "label" : "Text colour",
                     "default": "rgb(0,0,0)"
-                },                            
+                },    
+                "count_fill_colour" : {
+                    "label" : "Notification count background colour",
+                    "default": "rgb(58,126,194))"
+                },
+                "count_text_colour" : {
+                    "label" : "Notification count text colour",
+                    "default": "rgb(255,255,255)"
+                },                                            
                 "border":     "rgb(200,200,200)",
                 "title"  :    "Change: aborted tasks",
                 "labelText" : "Aborted",
-                "widgetText" : "A",
-                "tooltip"    : "Notifications for tasks becoming <b>aborted</b>"        
+                "widgetText" : "A",            
+                "tooltip"    : "Notifications for tasks which have been <b>aborted</b>",
+                "description" : "Notify when a task becomes aborted"        
              },
  
             "restarted": {
                 "fill_colour" : {
-                    "label" : "Colour",
+                    "label" : "Backgorund colour",
                     "default": "rgb(64,224,208)"
                 },
-                "font_colour" : {
-                    "label" : "Font colour",
+                "text_colour" : {
+                    "label" : "Text colour",
                     "default": "rgb(0,0,0)"
-                },                              
+                },  
+                "count_fill_colour" : {
+                    "label" : "Notification count background colour",
+                    "default": "rgb(58,126,194))"
+                },
+                "count_text_colour" : {
+                    "label" : "Notification count text colour",
+                    "default": "rgb(255,255,255)"
+                },                                   
                 "border":     "rgb(200,200,200)",
                 "title"  :    "Change: restarted tasks",
                 "labelText" : "Restarted", 
                 "widgetText" : "Re",
-                "tooltip"    : "Notifications for tasks having <b>restarted</b>"                   
+                "tooltip"    : "Notifications for tasks which have been <b>restarted</b>",
+                "description" : "Notify when a task is restarted"                    
             }, 
             "late": {
                 "fill_colour" : {
-                    "label" : "Colour",
+                    "label" : "Backgorund colour",
                     "default": "rgb(64,224,208)"
                 },
-                "font_colour" : {
-                    "label" : "Font colour",
+                "text_colour" : {
+                    "label" : "Backgorund colour",
                     "default": "rgb(0,0,0)"
-                },                            
+                },  
+                "count_fill_colour" : {
+                    "label" : "Notification count background colour",
+                    "default": "rgb(58,126,194))"
+                },
+                "count_text_colour" : {
+                    "label" : "Notification count text colour",
+                    "default": "rgb(255,255,255)"
+                },                                       
                 "border":     "rgb(200,200,200)",
                 "title"  :    "Change: late tasks",
                 "labelText" : "Late", 
                 "widgetText" : "L",
-                "tooltip"    : "Notifications for tasks becoming <b>late</b>"                      
+                "tooltip"    : "Notifications for tasks which have become <b>late</b>",
+                "description" : "Notify when a task becomes late"                        
             },
             "zombie": {
                 "fill_colour" : {
-                    "label" : "Colour",
+                    "label" : "Backgorund colour",
                     "default": "rgb(64,224,208)"
                 },
-                "font_colour" : {
-                    "label" : "Font colour",
+                "text_colour" : {
+                    "label" : "Text colour",
                     "default": "rgb(0,0,0)"
-                },                                
+                }, 
+                "count_fill_colour" : {
+                    "label" : "Notification count background colour",
+                    "default": "rgb(58,126,194))"
+                },
+                "count_text_colour" : {
+                    "label" : "Notification count text colour",
+                    "default": "rgb(255,255,255)"
+                },                                             
                 "border":     "rgb(200,200,200)",
                 "title"  :    "Change: zombies",
                 "labelText" : "Zombies", 
                 "widgetText" : "Z",
-                "tooltip"    : "Notifications for tasks becoming <b>zombies</b>"                     
+                "tooltip"    : "Notifications for tasks which have become <b>zombies</b>",
+                 "description" : "Notify when a task becomes a zombie"                     
             },
             "alias": {
                 "fill_colour" : {
-                    "label" : "Colour",
+                    "label" : "Backgorund colour",
                     "default": "rgb(64,224,208)"
                 },
-                "font_colour" : {
-                    "label" : "Font colour",
+                "text_colour" : {
+                    "label" : "Text colour",
                     "default": "rgb(0,0,0)"
-                },                               
+                }, 
+                "count_fill_colour" : {
+                    "label" : "Notification count background colour",
+                    "default": "rgb(58,126,194))"
+                },
+                "count_text_colour" : {
+                    "label" : "Notification count text colour",
+                    "default": "rgb(255,255,255)"
+                },                                            
                 "border":     "rgb(200,200,200)",
                 "title"  :    "Change: aliases",
                 "labelText" : "Aliases", 
-                "widgetText" : "Al",
-                "tooltip"    : "Notifications for <b>aliases</b> becoming <b>aborted</b> or having <b>restarted</b>"                    
+                "widgetText" : "As",
+                "tooltip"    : "Notifications for <b>aliases</b> which have become <b>aborted</b> or have been <b>restarted</b>", 
+                "description" : "Notify when an alias becomes aborted or is restarted"                      
             }
        
        }

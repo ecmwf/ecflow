@@ -55,28 +55,28 @@ ChangeNotify::ChangeNotify(const std::string& id) :
 	proxyModel_(0),
 	prop_(0)
 {
-
 	data_=new VNodeList();
 	model_=new ChangeNotifyModel();
 	model_->setData(data_);
 
 	proxyModel_=new QSortFilterProxyModel();
 	proxyModel_->setSourceModel(model_);
-	proxyModel_->setFilterFixedString("1");
-	proxyModel_->setFilterKeyColumn(0);
+	//proxyModel_->setFilterFixedString("1");
+	//proxyModel_->setFilterKeyColumn(0);
+	proxyModel_->setDynamicSortFilter(true);
 
 	items[id] = this;
 }
 
 QAbstractItemModel* ChangeNotify::model() const
 {
-	return proxyModel_;
+	return model_; //proxyModel_;
 }
 
 void ChangeNotify::add(VNode *node,bool popup,bool sound)
 {
 	data_->add(node);
-	proxyModel_->invalidate();
+	//proxyModel_->invalidate();
 
 	if(popup)
 	{
@@ -84,6 +84,15 @@ void ChangeNotify::add(VNode *node,bool popup,bool sound)
 		dialog()->show();
 		dialog()->raise();
 	}
+	else
+	{
+		if(dialog()->isVisible())
+		{
+			dialog()->setCurrentTab(this);
+			dialog()->raise();
+		}
+	}
+
 	if(sound)
 	{
 		const char *soundCmd = "play -q /usr/share/xemacs/xemacs-packages/etc/sounds/boing.wav";
@@ -100,6 +109,10 @@ void ChangeNotify::add(VNode *node,bool popup,bool sound)
 	}
 }
 
+void ChangeNotify::remove(VNode *node)
+{
+	data_->remove(node);
+}
 
 void ChangeNotify::setEnabled(bool en)
 {
@@ -127,7 +140,13 @@ void ChangeNotify::setProperty(VProperty* prop)
 	if(VProperty* p=prop->findChild("fill_colour"))
 		p->addObserver(this);
 
-	if(VProperty* p=prop->findChild("font_colour"))
+	if(VProperty* p=prop->findChild("text_colour"))
+		p->addObserver(this);
+
+	if(VProperty* p=prop->findChild("count_fill_colour"))
+		p->addObserver(this);
+
+	if(VProperty* p=prop->findChild("count_text_colour"))
 		p->addObserver(this);
 }
 
@@ -139,8 +158,8 @@ void ChangeNotify::notifyChange(VProperty* prop)
 
 void ChangeNotify::clearData()
 {
-	data_->hide();
-	proxyModel_->invalidate();
+	data_->clear();
+	//proxyModel_->invalidate();
 }
 
 void ChangeNotify::showDialog()
@@ -162,6 +181,14 @@ void ChangeNotify::add(const std::string& id,VNode *node,bool popup,bool sound)
 	if(ChangeNotify* obj=ChangeNotify::find(id))
 	{
 		obj->add(node,popup,sound);
+	}
+}
+
+void ChangeNotify::remove(const std::string& id,VNode *node)
+{
+	if(ChangeNotify* obj=ChangeNotify::find(id))
+	{
+		obj->remove(node);
 	}
 }
 
@@ -240,6 +267,12 @@ ChangeNotifyDialog* ChangeNotify::dialog()
 		{
 			dialog_->addTab(it->second);
 		}
+
+		for(std::map<std::string,ChangeNotify*>::iterator it=items.begin(); it != items.end(); ++it)
+		{
+			dialog_->setEnabledTab(it->second,it->second->isEnabled());
+		}
+
 	}
 
 	return dialog_;
@@ -287,8 +320,8 @@ void AbortedNotify::loadNodeState()
 			local->setMaster(master,true);
 		}
 
-		master=nsp->findChild("font_colour");
-		local=prop_->findChild("font_colour");
+		master=nsp->findChild("text_colour");
+		local=prop_->findChild("text_colour");
 
 		if(master && local)
 		{

@@ -44,10 +44,13 @@ public:
     void setIcon(const std::string &icon);
     void setHidden(bool b) {hidden_=b;}
     void setAsSubMenu() {isSubMenu_ = true;};
-    void setVisibleCondition(BaseNodeCondition *cond) {visibleCondition_ = cond;};
-    void setEnabledCondition(BaseNodeCondition *cond) {enabledCondition_ = cond;};
-    BaseNodeCondition *visibleCondition() {return visibleCondition_;};
-    BaseNodeCondition *enabledCondition() {return enabledCondition_;};
+    void setVisibleCondition(BaseNodeCondition *cond)  {visibleCondition_  = cond;};
+    void setEnabledCondition(BaseNodeCondition *cond)  {enabledCondition_  = cond;};
+    void setQuestionCondition(BaseNodeCondition *cond) {questionCondition_ = cond;};
+    BaseNodeCondition *visibleCondition()  {return visibleCondition_;};
+    BaseNodeCondition *enabledCondition()  {return enabledCondition_;};
+    BaseNodeCondition *questionCondition() {return questionCondition_;};
+    bool shouldAskQuestion(std::vector<VInfo_ptr> &nodes);
     bool isSubMenu()      {return isSubMenu_;};
     bool isDivider()      {return isDivider_;};
     std::string &name()   {return name_;};
@@ -75,6 +78,7 @@ private:
 
     BaseNodeCondition *visibleCondition_;
     BaseNodeCondition *enabledCondition_;
+    BaseNodeCondition *questionCondition_;
 
     bool isSubMenu_;
     bool isDivider_;

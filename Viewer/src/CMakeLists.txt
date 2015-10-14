@@ -8,6 +8,7 @@ set(viewer_srcs
     Animation.cpp
     ChangeNotify.cpp
     ChangeNotifyDialog.cpp
+    ChangeNotifyEditor.cpp
     ChangeNotifyModel.cpp
     ChangeNotifyWidget.cpp
     CodeItemWidget.cpp
@@ -115,6 +116,7 @@ set(viewer_srcs
     VSettings.cpp
     VSState.cpp
     VTask.cpp
+    VTaskNode.cpp
     VariableModel.cpp
     VariableModelData.cpp
     VariableItemWidget.cpp
@@ -138,6 +140,7 @@ set(viewer_moc_files AbstractNodeModel.hpp
     ActionHandler.hpp
     Animation.hpp
     ChangeNotifyDialog.hpp
+    ChangeNotifyEditor.hpp
     ChangeNotifyModel.hpp
     ChangeNotifyWidget.hpp
     CommandDesignerWidget.hpp
@@ -163,6 +166,7 @@ set(viewer_moc_files AbstractNodeModel.hpp
     NodeWidget.hpp
     OutputItemWidget.hpp
     PropertyDialog.hpp             
+    PropertyEditor.hpp
     PropertyLine.hpp
     PlainTextSearchLine.hpp
     ServerComQueue.hpp
@@ -195,6 +199,8 @@ set(viewer_moc_files AbstractNodeModel.hpp
 set(viewer_wrap_ui_files
     AboutDialog.ui
     ChangeNotifyDialog.ui
+    ChangeNotifyDialogWidget.ui
+    ChangeNotifyEditor.ui
     CommandDesignerWidget.ui 
     CustomCommandDialog.ui 
     CodeItemWidget.ui

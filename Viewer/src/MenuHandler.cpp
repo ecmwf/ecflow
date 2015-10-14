@@ -124,6 +124,7 @@ bool MenuHandler::readMenuConfigFile(const std::string &configFile)
                 std::string type     = ItemDef.get("type",        "Command");
                 std::string enabled  = ItemDef.get("enabled_for", "");
                 std::string visible  = ItemDef.get("visible_for", "");
+                std::string questFor = ItemDef.get("question_for","");
                 std::string question = ItemDef.get("question", "");
                 std::string handler  = ItemDef.get("handler", "");
                 std::string icon     = ItemDef.get("icon", "");
@@ -152,6 +153,15 @@ bool MenuHandler::readMenuConfigFile(const std::string &configFile)
                 }
                 item->setVisibleCondition(visibleCond);
 
+                BaseNodeCondition *questionCond = NodeExpressionParser::parseWholeExpression(questFor);
+                if (questionCond == NULL)
+                {
+                    UserMessage::message(UserMessage::ERROR, true, std::string("Error, unable to parse question condition: " + questFor));
+                    questionCond = new FalseNodeCondition();
+                }
+                item->setQuestionCondition(questionCond);
+
+
                 item->setQuestion(question);
                 item->setHandler(handler);
                 item->setIcon(icon);
@@ -164,9 +174,6 @@ bool MenuHandler::readMenuConfigFile(const std::string &configFile)
 
                 addItemToMenu(item, menuName);
                 //std::cout << "   added" << std::endl;
-
-                // tell the ServerHandler how to translate from the item name to an actual command
-                ServerHandler::addServerCommand(name, command);
 
 
                 // parse the valid node types/states for this menu item
@@ -497,6 +504,20 @@ void MenuItem::setIcon(const std::string& icon)
 	{
 		action_->setIcon(QPixmap(":/viewer/" + QString::fromStdString(icon)));
 	}
+}
+
+
+bool MenuItem::shouldAskQuestion(std::vector<VInfo_ptr> &nodes)
+{
+    bool askQuestion = false;
+
+    // ask the question if any of the nodes require it
+    for (std::vector<VInfo_ptr>::iterator itNodes = nodes.begin(); itNodes != nodes.end(); ++itNodes)
+    {
+        askQuestion = askQuestion || questionCondition()->execute(*itNodes);
+    }
+
+    return askQuestion;
 }
 
 

@@ -157,7 +157,6 @@ void ServerList::init()
 		{
 			readSystemFile();
 		}
-
 		save();
 	}
 }
@@ -173,7 +172,7 @@ bool ServerList::load()
 	{
 		//We ignore comment lines
 		std::string buf=boost::trim_left_copy(line);
-		if(buf.size() > 1 && buf.at(0) == '#')
+		if(buf.size() > 0 && buf.at(0) == '#')
 			continue;
 
 		std::vector<std::string> sv;
@@ -221,7 +220,10 @@ bool ServerList::readRcFile()
 		std::string line;
 		while(getline(in,line))
 		{
-			std::string buf;
+			std::string buf=boost::trim_left_copy(line);
+			if(buf.size() > 0 && buf.at(0) == '#')
+				continue;
+
 			std::stringstream ssdata(line);
 			std::vector<std::string> vec;
 
@@ -246,7 +248,38 @@ bool ServerList::readRcFile()
 
 bool ServerList::readSystemFile()
 {
-	return false;
+	std::string path(DirectoryHandler::concatenate(DirectoryHandler::shareDir(), "servers"));
+	std::ifstream in(path.c_str());
+
+	if(in.good())
+	{
+		std::string line;
+		while(getline(in,line))
+		{
+			std::string buf=boost::trim_left_copy(line);
+			if(buf.size() >0 && buf.at(0) == '#')
+					continue;
+
+			std::stringstream ssdata(line);
+			std::vector<std::string> vec;
+
+			while(ssdata >> buf)
+			{
+				vec.push_back(buf);
+			}
+
+			if(vec.size() >= 3)
+			{
+				add(vec[0],vec[1],vec[2]);
+			}
+		}
+	}
+	else
+		return false;
+
+	in.close();
+
+	return true;
 }
 
 //===========================================================

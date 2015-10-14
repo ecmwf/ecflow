@@ -13,6 +13,10 @@
 #include "ServerHandler.hpp"
 #include "VNode.hpp"
 
+#include <QPushButton>
+
+#include <assert.h>
+
 //========================================================
 //
 // ServerSettingsItemWidget
@@ -26,6 +30,12 @@ ServerSettingsItemWidget::ServerSettingsItemWidget(QWidget *parent) : QWidget(pa
 	connect(buttonBox_,SIGNAL(clicked(QAbstractButton*)),
 			this,SLOT(slotClicked(QAbstractButton *)));
 
+	QPushButton* applyPb=buttonBox_->button(QDialogButtonBox::Apply);
+    assert(applyPb);
+	applyPb->setEnabled(false);
+
+	connect(editor_,SIGNAL(changed()),
+		this,SLOT(slotEditorChanged()));
 }
 
 QWidget* ServerSettingsItemWidget::realWidget()
@@ -43,7 +53,8 @@ void ServerSettingsItemWidget::reload(VInfo_ptr info)
 	if(info_ && info_.get() && info_->isServer() && info_->server())
 	{
 		editor_->edit(info_->server()->conf()->guiProp(),
-				"Settings for server " + QString::fromStdString(info_->server()->name()));
+				QString::fromStdString(info_->server()->name()));
+
 	}
 	else
 	{
@@ -55,6 +66,13 @@ void ServerSettingsItemWidget::clearContents()
 {
 	InfoPanelItem::clear();
 	//TODO: properly set gui state
+}
+
+void  ServerSettingsItemWidget::slotEditorChanged()
+{
+	QPushButton* applyPb=buttonBox_->button(QDialogButtonBox::Apply);
+	assert(applyPb);
+	applyPb->setEnabled(true);
 }
 
 void ServerSettingsItemWidget::slotClicked(QAbstractButton* button)

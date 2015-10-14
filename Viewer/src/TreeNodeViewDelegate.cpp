@@ -364,7 +364,7 @@ void TreeNodeViewDelegate::renderServer(QPainter *painter,const QModelIndex& ind
 		an=animation_->find(Animation::ServerLoadType,true);
 
 		loadRect = QRect(currentRight+fm.width('A'),
-						fillRect.top()+(itemRect.height()-an->scaledSize().height())/2,
+						itemRect.top()+(itemRect.height()-an->scaledSize().height())/2,
 						an->scaledSize().width(),
 						an->scaledSize().height());
 
@@ -503,7 +503,7 @@ void TreeNodeViewDelegate::renderNode(QPainter *painter,const QModelIndex& index
 
 		if(hasRealBg)
 		{
-			int realW=stateRect.width()/3;
+			int realW=stateRect.width()/4;
 			realRect=QRect(stateRect.right()-realW,stateRect.top(),realW+1,stateRect.height());
 			currentRight=realRect.right()+2;
 		}

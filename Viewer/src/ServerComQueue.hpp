@@ -61,6 +61,8 @@ protected Q_SLOTS:
 
 protected:
 	void endReset();
+	bool hasTask(VTask::Type t) const;
+	bool isNextTask(VTask::Type t) const;
 
 	ServerHandler *server_;
 	ClientInvoker* client_;

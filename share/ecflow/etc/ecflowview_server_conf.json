@@ -62,12 +62,15 @@
                     "label" : "Aborted",
 
                     "enabled" : {
+                        "label"   : "Enabled",
                         "default" : "true"    
                     },
                     "popup" : {
-                        "default" : "true"
+                         "label"   : "Popup dialog",
+                         "default" : "true"
                     },
 				    "sound" : {				 
+                        "label": "Play sound",
                         "tooltip": "Play sound",                          
                         "default": "false"
                     }    
@@ -76,13 +79,16 @@
                     "label" : "Restarted",
 
                     "enabled" : {
-                        "default" : "true"
+                         "label"   : "Enabled",
+                         "default" : "true"
     
                     },
                     "popup" : {
+                        "label"   : "Popup dialog",
                         "default" : "true"
                     },
                     "sound" : {                     
+                        "label": "Play sound",
                         "tooltip": "Play sound",                          
                         "default": "false"
                     }    
@@ -91,12 +97,15 @@
                     "label" : "Late tasks",
 
                     "enabled" : {
-                        "default" : "false"    
+                        "label"   : "Enabled",
+                        "default" : "true"    
                     },
                     "popup" : {
-                        "default" : "false"
+                        "label"   : "Popup dialog",
+                        "default" : "true"
                     },
                     "sound" : {                       
+                        "label": "Play sound",
                         "tooltip": "Play sound",                          
                         "default": "false"
                     }    
@@ -105,13 +114,16 @@
                     "label" : "Zombies",
 
                     "enabled" : {
+                        "label"   : "Enabled",
                         "default" : "false"
     
                     },
                     "popup" : {
+                        "label"   : "Popup dialog",
                         "default" : "false"
                     },
                     "sound" : {                        
+                        "label": "Play sound",
                         "tooltip": "Play sound",                          
                         "default": "false"
                     }    
@@ -120,14 +132,16 @@
                     "label" : "Aborted or restarted aliases",
 
                     "enabled" : {
+                        "label"   : "Enabled",
                         "default" : "false"
     
                     },
                     "popup" : {
-                        "default" : "false"
+                         "label"   : "Popup dialog",
+                         "default" : "false"
                     },
                     "sound" : {                     
-                        "tooltip": "Play sound",                          
+                        "label": "Play sound",                          
                         "default": "false"
                     }    
                 }                 

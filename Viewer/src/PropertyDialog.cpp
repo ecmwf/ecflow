@@ -28,6 +28,10 @@ PropertyDialog::PropertyDialog(QWidget* parent) :
 {
 	setupUi(this);
 
+	QString wt=windowTitle();
+	wt+="  -  " + QString::fromStdString(VConfig::instance()->appLongName());
+	setWindowTitle(wt);
+
 	QFont f;
 	f.setBold(true);
 	QFontMetrics fm(f);
@@ -66,15 +70,20 @@ void PropertyDialog::build()
 			  if(vPage->param("visible") == "false")
                   continue;
             
-              PropertyEditor* ed=new PropertyEditor(this);
-			  ed->edit(vPage);
 			  QPixmap pix(32,32);
+			  QPixmap edPix;
               QString iconStr=vPage->param("icon");
+
               if(!iconStr.isEmpty())
               {
             	  IconProvider::add(":/viewer/" + iconStr,iconStr);
             	  pix=IconProvider::pixmap(iconStr,32);
+            	  edPix=IconProvider::pixmap(iconStr,20);
               }    
+
+              PropertyEditor* ed=new PropertyEditor(this);
+              ed->edit(vPage,edPix);
+
               addPage(ed,pix,vPage->param("label"));
 			  editors_ << ed;
 		}
@@ -129,10 +138,12 @@ void PropertyDialog::slotButton(QAbstractButton* pb)
 
 void PropertyDialog::manageChange(bool inApply)
 {
+	bool hasChange=false;
 	Q_FOREACH(PropertyEditor* ed,editors_)
 	{
 		if(ed->applyChange())
 		{
+			hasChange=true;
 			VProperty* p=ed->property();
 			if(p && p->name() != "server")
 			{
@@ -143,6 +154,9 @@ void PropertyDialog::manageChange(bool inApply)
 			}
 		}
 	}
+
+	if(hasChange)
+		VConfig::instance()->saveSettings();
 }
 
 void PropertyDialog::load(VProperty* p)

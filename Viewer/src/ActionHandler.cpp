@@ -57,13 +57,13 @@ void ActionHandler::contextMenu(std::vector<VInfo_ptr> nodesLst,QPoint pos)
             CustomCommandDialog customCommandDialog(0);
             if (customCommandDialog.exec() == QDialog::Accepted)
             {
-                ServerHandler::command(nodesLst, customCommandDialog.command().toStdString(), false);
+                ServerHandler::command(nodesLst, customCommandDialog.command().toStdString());
             }
         }
         else
         {
         	bool ok=true;
-        	if(item && !item->question().empty())
+        	if(item && !item->question().empty() && item->shouldAskQuestion(nodesLst))
         	{
                 std::string nodeNames("<ul>");
                 for(int i=0; i < nodesLst.size(); i++)
@@ -95,7 +95,8 @@ void ActionHandler::contextMenu(std::vector<VInfo_ptr> nodesLst,QPoint pos)
             }
 
             if(ok)
-                ServerHandler::command(nodesLst,action->iconText().toStdString(), true);
+                ServerHandler::command(nodesLst,item->command());
+                //ServerHandler::command(nodesLst,action->iconText().toStdString(), true);
         }
     }
 

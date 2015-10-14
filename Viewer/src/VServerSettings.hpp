@@ -32,6 +32,7 @@ public:
 	int intValue(Param par) const;
 	bool boolValue(Param par) const;
 	VProperty* guiProp() const {return guiProp_;}
+	bool notificationsEnabled() const;
 	static std::string notificationId(Param);
 
 	//From VPropertyObserver

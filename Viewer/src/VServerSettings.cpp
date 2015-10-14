@@ -74,7 +74,7 @@ VServerSettings::VServerSettings(ServerHandler* server) :
 
 	assert(globalProp_);
 
-	prop_=globalProp_->clone(false,true);
+	prop_=globalProp_->clone(false,true,true); //they all use their master by default!
 
 	for(std::map<Param,std::string>::const_iterator it=parNames_.begin(); it != parNames_.end(); ++it)
 	{
@@ -155,13 +155,23 @@ std::string VServerSettings::notificationId(Param par)
 	return std::string();
 }
 
+bool VServerSettings::notificationsEnabled() const
+{
+	for(std::map<Param,std::string>::const_iterator it=notifyIds_.begin(); it != notifyIds_.end(); it++)
+	{
+		if(boolValue(it->first))
+			return true;
+	}
+	return false;
+}
+
 void VServerSettings::loadSettings()
 {
 	SessionItem* cs=SessionHandler::instance()->current();
 	std::string fName=cs->serverFile(server_->name());
 
 	//Load settings stored in VProperty
-	VConfig::instance()->loadSettings(fName,guiProp_);
+	VConfig::instance()->loadSettings(fName,guiProp_,false);
 
 	//Some  settings are read through VSettings
 	if(boost::filesystem::exists(fName))
@@ -185,7 +195,7 @@ void VServerSettings::saveSettings()
 	server_->suiteFilter()->writeSettings(&vs);
 	vs.endGroup();
 
-	VConfig::instance()->saveSettings(fName,guiProp_,&vs);
+	VConfig::instance()->saveSettings(fName,guiProp_,&vs,false);
 }
 
 

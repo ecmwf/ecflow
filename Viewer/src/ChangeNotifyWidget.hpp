@@ -11,6 +11,7 @@
 #ifndef VIEWER_SRC_CHANGENOTIFYWIDGET_HPP_
 #define VIEWER_SRC_CHANGENOTIFYWIDGET_HPP_
 
+#include <QLinearGradient>
 #include <QToolButton>
 #include <QWidget>
 
@@ -38,6 +39,7 @@ public:
 
 public Q_SLOTS:
 	void slotAppend();
+	void slotRemoveRow(int);
 	void slotReset();
 	void slotClicked(bool);
 
@@ -45,6 +47,7 @@ protected:
 	void updateIcon();
 
 	ChangeNotify* notifier_;
+	QLinearGradient grad_;
 };
 
 class ChangeNotifyWidget : public QWidget

@@ -16,6 +16,8 @@
 #include <QLabel>
 #include <QToolButton>
 
+#include "ChangeNotifyEditor.hpp"
+#include "IconProvider.hpp"
 #include "PropertyLine.hpp"
 #include "VConfig.hpp"
 #include "VProperty.hpp"
@@ -25,26 +27,50 @@ PropertyEditor::PropertyEditor(QWidget* parent) : QWidget(parent),
     currentGrid_(0)
 {
     setupUi(this);
+
+    headerWidget_->setProperty("editorHeader","1");
+    scArea_->setProperty("editor","1");
+    scAreaContents_->setProperty("editorArea","1");
+
+    pixLabel_->clear();
 }
 
 PropertyEditor::~PropertyEditor()
 {
 }
 
-void PropertyEditor::edit(VProperty * vGroup,QString label)
+void PropertyEditor::edit(VProperty * vGroup,QPixmap pix)
 {
 	 clear();
 
 	 group_=vGroup;
 
-	 if(label.isEmpty())
+	 QString txt=group_->param("desc");
+	 headerLabel_->setText(txt);
+
+	 pixLabel_->setPixmap(pix);
+
+	 build();
+}
+
+void PropertyEditor::edit(VProperty * vGroup,QString serverName)
+{
+	 clear();
+
+	 group_=vGroup;
+
+	 headerWidget_->hide();
+
+	 serverName_=serverName;
+	 /*
+	 QString txt=group_->param("desc");
+	 if(!txt.isEmpty())
 	 {
-		 headerLabel_->setText(group_->param("desc"));
+		 txt.replace("_SERVER_",serverName);
 	 }
-	 else
-	 {
-		 headerLabel_->setText(label);
-	 }
+
+	 headerLabel_->setText(txt);
+*/
 	 build();
 }
 
@@ -102,6 +128,11 @@ void PropertyEditor::addItem(VProperty* vProp)
         currentGrid_=0;
         addGrid(vProp);
     }
+    else if(vProp->name() == "custom-notification")
+    {
+        currentGrid_=0;
+        addNotification(vProp);
+    }
     else if(vProp->name() == "note")
     {
         currentGrid_=0;
@@ -110,7 +141,7 @@ void PropertyEditor::addItem(VProperty* vProp)
 
 }
 
-void PropertyEditor::addLine(VProperty *vProp,QGridLayout *gridLayout)
+PropertyLine* PropertyEditor::addLine(VProperty *vProp,QGridLayout *gridLayout)
 {
 	PropertyLine* item = PropertyLineFactory::create(vProp->link(),true,this);
 
@@ -162,8 +193,13 @@ void PropertyEditor::addLine(VProperty *vProp,QGridLayout *gridLayout)
            gridLayout->addWidget(masterTb,row,4);
         }
 
+       connect(item,SIGNAL(changed()),
+    		   this,SIGNAL(changed()));
+
        lineItems_ << item;
     }
+
+    return item;
 }    
 
 void PropertyEditor::addGroup(VProperty* vProp)
@@ -295,6 +331,8 @@ void PropertyEditor::addGridRow(VProperty* vProp,QGridLayout *grid)
                  grid->addWidget(item->item(),row,col,Qt::AlignLeft);
             }    
 
+            connect(item,SIGNAL(changed()),
+               		   this,SIGNAL(changed()));
                 lineItems_ << item;
                 col++;
             }
@@ -304,13 +342,75 @@ void PropertyEditor::addGridRow(VProperty* vProp,QGridLayout *grid)
 
 }
 
+void PropertyEditor::addNotification(VProperty* vProp)
+{
+    if(vProp->name() != "custom-notification")
+        return;
+
+    ChangeNotifyEditor* ne=new ChangeNotifyEditor(this);
+
+    bool useGroup=(vProp->param("group") == "true");
+
+    if(useGroup)
+    {
+    	QString labelText=vProp->param("title");
+    	QGroupBox *groupBox = new QGroupBox(labelText);
+    	groupBox->setObjectName("editorGroupBox");
+    	QVBoxLayout* vb=new QVBoxLayout();
+    	groupBox->setLayout(vb);
+    	vb->addWidget(ne);
+    	vBox_->addWidget(groupBox);
+
+    }
+    else
+    {
+    	vBox_->addWidget(ne);
+    }
+
+    //Add rows
+    Q_FOREACH(VProperty* chProp,vProp->children())
+    {
+    	if(chProp->name() == "row")
+    	{
+    		QString labelText=chProp->param("label");
+
+    		QList<PropertyLine*> lineLst;
+
+    		QGroupBox *groupBox = new QGroupBox(labelText);
+    		groupBox->setObjectName("editorGroupBox");
+    		QGridLayout* grid=new QGridLayout();
+    		groupBox->setLayout(grid);
+
+    		Q_FOREACH(VProperty* lineProp,chProp->children())
+    	    {
+    	        if(lineProp->name() == "line")
+    	        {
+    	        	lineLst << addLine(lineProp,grid);
+    	        }
+    	        else if(lineProp->name() == "note")
+    	    	{
+    	    		 QLabel *empty=new QLabel(" ");
+    	    		 grid->addWidget(empty,grid->rowCount(),0,1,-1,Qt::AlignVCenter);
+    	    		 QLabel *label=new QLabel("&nbsp;&nbsp;&nbsp;<b>Note:</b> " + lineProp->value().toString());
+    	    		 grid->addWidget(label,grid->rowCount(),0,1,-1,Qt::AlignVCenter);
+    	    	}
+    	    }
+    		ne->addRow(labelText,lineLst,groupBox);
+    	 }
+     }
+}
+
 void PropertyEditor::addNote(VProperty* vProp)
 {
     if(vProp->name() != "note")
         return;
 
+    QString txt=vProp->value().toString();
+    txt.replace("_SERVER_",(serverName_.isEmpty())?"?":"<b>" + serverName_ + "</b>");
+
     vBox_->addSpacing(5);
-    QLabel *label=new QLabel("<b>Note:</b> " + vProp->value().toString());
+    QLabel *label=new QLabel("<b>Note:</b> " + txt);
+    label->setWordWrap(true);
     vBox_->addWidget(label);
 }
 
