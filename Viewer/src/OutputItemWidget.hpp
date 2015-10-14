@@ -48,6 +48,7 @@ protected Q_SLOTS:
 	void slotOutputSelected(QModelIndex,QModelIndex);
 	void slotUpdateDir();
 	void on_searchTb__toggled(bool b);
+	void on_gotoLineTb__clicked();
 	void on_reloadTb__clicked();
 
 protected:

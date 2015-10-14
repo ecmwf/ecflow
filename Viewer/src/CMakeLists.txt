@@ -29,6 +29,7 @@ set(viewer_srcs
     FileInfoLabel.cpp
     FileWatcher.cpp
     FilterWidget.cpp
+    GotoLineDialog.cpp
     Highlighter.cpp
     HistoryItemWidget.cpp
     IconProvider.cpp
@@ -155,6 +156,7 @@ set(viewer_moc_files AbstractNodeModel.hpp
     EditItemWidget.hpp
     FileWatcher.hpp
     FilterWidget.hpp
+    GotoLineDialog.hpp
     HistoryItemWidget.hpp              
     InfoPanel.hpp
     LineEdit.hpp
@@ -208,6 +210,7 @@ set(viewer_wrap_ui_files
     DashboardDialog.ui
     DashboardDockTitleWidget.ui
     EditItemWidget.ui
+    GotoLineDialog.ui
     HistoryItemWidget.ui
     InfoPanel.ui    
     MainWindow.ui 

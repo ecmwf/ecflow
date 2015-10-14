@@ -304,6 +304,11 @@ void OutputItemWidget::on_searchTb__toggled(bool b)
 	}
 }
 
+void OutputItemWidget::on_gotoLineTb__clicked()
+{
+	textEdit_->gotoLine();
+}
+
 void OutputItemWidget::on_reloadTb__clicked()
 {
 	userClickedReload_ = true;

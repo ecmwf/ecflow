@@ -110,7 +110,10 @@ void EditItemWidget::on_searchTb__toggled(bool b)
 	searchLine_->setVisible(b);
 }
 
-
+void EditItemWidget::on_gotoLineTb__clicked()
+{
+	textEdit_->gotoLine();
+}
 
 bool EditItemWidget::alias() const
 {

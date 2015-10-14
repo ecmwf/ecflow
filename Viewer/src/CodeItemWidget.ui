@@ -67,7 +67,7 @@
      <item>
       <widget class="QToolButton" name="searchTb">
        <property name="toolTip">
-        <string>Show search bar</string>
+        <string>Show search bar (CTRL-F)</string>
        </property>
        <property name="text">
         <string>...</string>
@@ -81,6 +81,26 @@
        </property>
        <property name="checkable">
         <bool>true</bool>
+       </property>
+       <property name="autoRaise">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QToolButton" name="gotoLineTb_">
+       <property name="toolTip">
+        <string>Goto line number (CTRL-L)</string>
+       </property>
+       <property name="text">
+        <string>...</string>
+       </property>
+       <property name="icon">
+        <iconset resource="viewer.qrc">
+         <normaloff>:/viewer/images/goto_line.svg</normaloff>:/viewer/images/goto_line.svg</iconset>
+       </property>
+       <property name="shortcut">
+        <string>Ctrl+L</string>
        </property>
        <property name="autoRaise">
         <bool>true</bool>

@@ -47,3 +47,8 @@ void CodeItemWidget::on_searchTb_toggled(bool b)
 		searchLine_->setFocus();
 	}
 }
+
+void CodeItemWidget::on_gotoLineTb__clicked()
+{
+	textEdit_->gotoLine();
+}

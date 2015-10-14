@@ -1,5 +1,6 @@
 <RCC>
   <qresource prefix="viewer">
+    <file>../images/goto_line.svg</file>
     <file>../images/dock_float.svg</file>
     <file>../images/dock_close.svg</file>
     <file alias="configure.svg">../images/configure.svg</file>
@@ -26,7 +27,7 @@
     <file>../images/configure.svg</file>
     <file>../images/exit.svg</file>
     <file alias="add_tab.svg">../images/add_tab.svg</file>
-    <file alias="chain.svg">../images/chain.svg</file> 
+    <file alias="chain.svg">../images/chain.svg</file>
     <file alias="clear_left.svg">../images/clear_left.svg</file>
     <file alias="colour.svg">../images/colour.svg</file>
     <file alias="directory_arrow.svg">../images/directory_arrow.svg</file>
@@ -62,7 +63,7 @@
     <file alias="reset_to_default.svg">../images/reset_to_default.svg</file>
     <file alias="script.svg">../images/script.svg</file>
     <file alias="script_dock.svg">../images/script_dock.svg</file>
-    <file alias="search_decor.svg">../images/search_decor.svg</file>    
+    <file alias="search_decor.svg">../images/search_decor.svg</file>
     <file alias="server.svg">../images/server.svg</file>
     <file alias="spinning_wheel.gif">../images/spinning_wheel.gif</file>
     <file alias="splash_screen.png">../images/splash_screen.png</file>

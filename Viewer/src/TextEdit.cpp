@@ -8,6 +8,7 @@
 //============================================================================
 
 #include "TextEdit.hpp"
+#include "GotoLineDialog.hpp"
 
 #include <QDebug>
 #include <QFile>
@@ -17,7 +18,8 @@
 TextEdit::TextEdit(QWidget * parent) :
     QPlainTextEdit(parent),
     showLineNum_(true),
-    rightMargin_(2)
+    rightMargin_(2),
+    gotoLineDialog_(0)
 {
     lineNumArea_ = new LineNumberArea(this);
 
@@ -43,6 +45,7 @@ TextEdit::TextEdit(QWidget * parent) :
 
 TextEdit::~TextEdit()
 {
+    if (gotoLineDialog_) delete gotoLineDialog_;
 }
 
 void TextEdit::setShowLineNumbers(bool b)
@@ -335,4 +338,66 @@ bool TextEdit::findString(const QString &s,QTextDocument::FindFlags flags, bool 
     }
 
     return found;
+}
+
+
+// ---------------------------------------------------------------------------
+// TextEdit::gotoLine
+// triggered when the user asks to bring up the 'go to line' dialog
+// ---------------------------------------------------------------------------
+
+void TextEdit::gotoLine()
+{
+    // create the dialog if it does not already exist
+
+    if (!gotoLineDialog_) 
+    {
+        gotoLineDialog_ = new GotoLineDialog(this);
+
+        connect(gotoLineDialog_, SIGNAL(gotoLine(int)), this, SLOT(gotoLine(int)));
+    }
+
+
+    // if created, set it up and display it
+
+    if (gotoLineDialog_) 
+    {
+        gotoLineDialog_->show();
+        gotoLineDialog_->raise();
+        gotoLineDialog_->activateWindow();
+        gotoLineDialog_->setupUIBeforeShow();
+    }
+}
+
+// ---------------------------------------------------------------------------
+// TextEdit::gotoLine
+// triggered from the GotoLine dialog when the user wants to go to that line
+// ---------------------------------------------------------------------------
+
+void TextEdit::gotoLine(int line)
+{
+    int bn = 0;
+    QTextBlock b;
+
+    if (line <= document()->blockCount())
+    {
+        for (b = document()->begin(); b != document()->end(); b = b.next())
+        {
+            if (bn == line-1)
+            {
+                QTextCursor cursor = textCursor();   // get the document's cursor
+                cursor.setPosition (b.position());               // set it to the right position
+                cursor.select(QTextCursor::LineUnderCursor);     // select the whole line
+                setTextCursor(cursor);               // send the cursor back to the document
+                break;
+            }
+            bn++;
+        }
+    }
+    
+    else
+    {
+        // line number outside range of line numbers
+        // TODO: disable the 'ok' button if the number is out of range
+    }
 }

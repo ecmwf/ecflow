@@ -13,6 +13,7 @@
 #include <QPlainTextEdit>
 
 class LineNumberArea;
+class GotoLineDialog;
 
 class TextEdit : public QPlainTextEdit
 {
@@ -34,9 +35,13 @@ public:
     int numLinesSelected();
     bool findString(const QString &,QTextDocument::FindFlags,bool replace=false,const QString &r=emptyString_);
 
+public Q_SLOTS:
+     void gotoLine();
+
 private Q_SLOTS:
      void updateLineNumberAreaWidth(int newBlockCount);
      void updateLineNumberArea(const QRect &, int);
+     void gotoLine(int line);
 
 Q_SIGNALS:
     void focusRegained ();
@@ -53,6 +58,7 @@ private:
     int rightMargin_;
     QString  lastFindString_;
     QTextDocument::FindFlags lastFindFlags_;
+    GotoLineDialog *gotoLineDialog_;
     static QString emptyString_;
 };
 

@@ -1,35 +1,37 @@
 //============================================================================
-// Copyright 2014 ECMWF.
+// Copyright 2015 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
 // granted to it by virtue of its status as an intergovernmental organisation
 // nor does it submit to any jurisdiction.
-//
 //============================================================================
 
-#ifndef CODEITEMWIDGET_HPP_
-#define CODEITEMWIDGET_HPP_
+#ifndef GotoLineDialog_H
+#define GotoLineDialog_H
 
-#include <QWidget>
+#include "ui_GotoLineDialog.h"
 
-#include "ui_CodeItemWidget.h"
+using namespace std;
 
-class CodeItemWidget : public QWidget, protected Ui::CodeItemWidget
+
+class GotoLineDialog : public QDialog, private Ui::GotoLineDialogQ
 {
-Q_OBJECT
+    Q_OBJECT
 
 public:
-	explicit CodeItemWidget(QWidget *parent=0);
+    GotoLineDialog(QWidget *parent = 0);
+    ~GotoLineDialog();
+    void setupUIBeforeShow();
+
+Q_SIGNALS:
+    void gotoLine(int line);   // emitted when the user says 'ok'
+
 
 public Q_SLOTS:
-	void on_searchTb_toggled(bool b);
-	void on_gotoLineTb__clicked();
-
-protected:
-	void removeSpacer();
+    void done();
+    void setButtonStatus();
 
 };
 
 #endif
-
