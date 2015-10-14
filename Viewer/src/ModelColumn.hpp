@@ -22,7 +22,7 @@ class ModelColumnItem
 {
 friend class ModelColumn;
 public:
-	ModelColumnItem(const std::string& id);
+	explicit ModelColumnItem(const std::string& id);
 
 protected:
 	QString label_;
@@ -36,7 +36,7 @@ protected:
 class ModelColumn
 {
 public:
-	ModelColumn(const std::string& id);
+	explicit ModelColumn(const std::string& id);
 
 	int count() const {return items_.size();}
 	int indexOf(const std::string&) const;

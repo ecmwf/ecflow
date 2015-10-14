@@ -29,7 +29,7 @@ class QSortFilterProxyModel;
 class ChangeNotify : public VPropertyObserver
 {
 public:
-	ChangeNotify(const std::string& id);
+	explicit ChangeNotify(const std::string& id);
 
 	const std::string& id() const {return id_;}
 	VNodeList* data() const {return data_;};
@@ -76,7 +76,7 @@ protected:
 class AbortedNotify : public ChangeNotify
 {
 public:
-	AbortedNotify(const std::string& id) : ChangeNotify(id) {}
+	explicit AbortedNotify(const std::string& id) : ChangeNotify(id) {}
 protected:
 	void loadNodeState();
 };

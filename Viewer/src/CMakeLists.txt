@@ -13,6 +13,7 @@ set(viewer_srcs
     ChangeNotifyWidget.cpp
     CodeItemWidget.cpp
     ConnectState.cpp
+    ComboMulti.cpp
     CommandDesignerWidget.cpp
     ConfigListDelegate.cpp
     CustomCommandDialog.cpp
@@ -69,6 +70,7 @@ set(viewer_srcs
     PropertyLine.cpp
     PropertyMapper.cpp
     ScriptItemWidget.cpp
+    NodeSearchDialog.cpp
     ServerComQueue.cpp
     ServerComThread.cpp
     ServerDefsAccess.cpp
@@ -145,6 +147,7 @@ set(viewer_moc_files AbstractNodeModel.hpp
     ChangeNotifyEditor.hpp
     ChangeNotifyModel.hpp
     ChangeNotifyWidget.hpp
+    ComboMulti.hpp
     CommandDesignerWidget.hpp
     CodeItemWidget.hpp
     CustomCommandDialog.hpp
@@ -166,6 +169,7 @@ set(viewer_moc_files AbstractNodeModel.hpp
     NodeFilterModel.hpp            
     NodePanel.hpp
     NodePathWidget.hpp            
+    NodeSearchDialog.hpp
     NodeWidget.hpp
     OutputItemWidget.hpp
     PropertyDialog.hpp             
@@ -216,6 +220,7 @@ set(viewer_wrap_ui_files
     MainWindow.ui 
     MessageItemWidget.ui
     MenuConfigDialog.ui
+    NodeSearchDialog.ui
     OutputItemWidget.ui 
     PropertyDialog.ui
     PropertyEditor.ui

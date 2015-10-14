@@ -20,7 +20,7 @@ class GotoLineDialog : public QDialog, private Ui::GotoLineDialogQ
     Q_OBJECT
 
 public:
-    GotoLineDialog(QWidget *parent = 0);
+    explicit GotoLineDialog(QWidget *parent = 0);
     ~GotoLineDialog();
     void setupUIBeforeShow();
 

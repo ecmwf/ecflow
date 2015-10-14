@@ -7,14 +7,9 @@
 // nor does it submit to any jurisdiction.
 //============================================================================
 
-#ifdef ECFLOW_QT5
- #include <QtWidgets>
-#else
- #include <QtGui>
-#endif
-
 #include "GotoLineDialog.hpp"
 
+#include <QPushButton>
 
 GotoLineDialog::GotoLineDialog(QWidget *parent) : QDialog(parent)
 {

@@ -26,7 +26,7 @@ class VNodeListItem
 friend class VNodeList;
 
 public:
-	VNodeListItem(VNode* n);
+	explicit VNodeListItem(VNode* n);
 	VNode *node() const {return node_;}
 	const std::string& server() const {return server_;}
 	const std::string& path() const {return path_;}
