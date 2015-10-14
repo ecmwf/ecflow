@@ -48,7 +48,7 @@ void ChangeNotifyModel::setData(VNodeList *data)
 			this,SLOT(slotEndRemoveRow(int)));
 
 	connect(data_,SIGNAL(beginRemoveRows(int,int)),
-			this,SLOT(slotBeginRemoveRow(int,int)));
+			this,SLOT(slotBeginRemoveRows(int,int)));
 
 	connect(data_,SIGNAL(endRemoveRows(int,int)),
 			this,SLOT(slotEndRemoveRows(int,int)));

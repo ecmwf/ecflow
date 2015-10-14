@@ -42,7 +42,7 @@ private:
 	bool prevZombie() const;
 	bool prevLate() const;
 
-	enum FlagPos {AbortedPos=0x01,ZombiePos=0x02,LatePos=0x04};
+	enum FlagMask {AbortedMask=0x01,ZombieMask=0x02,LateMask=0x04};
 	unsigned char prevTryNo_;
 	unsigned char prevFlag_;
 };

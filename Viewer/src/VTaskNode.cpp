@@ -48,19 +48,19 @@ void VTaskNode::updatePrev(int tn,bool aborted,bool zombie,bool late)
 	prevTryNo_=tn;
 
 	if(aborted)
-		prevFlag_ |= 0x01 << AbortedPos;
+		prevFlag_ |= AbortedMask; //(0x01 << AbortedPos);
 	else
-		prevFlag_ &= ~(0x01 << AbortedPos);
+		prevFlag_ &= ~AbortedMask; //0x01 << AbortedPos);
 
 	if(zombie)
-		prevFlag_ |= 0x01 << ZombiePos;
+		prevFlag_ |= ZombieMask;
 	else
-		prevFlag_ &= ~(0x01 << ZombiePos);
+		prevFlag_ &= ~ZombieMask;
 
 	if(late)
-		prevFlag_ |= 0x01 << LatePos;
+		prevFlag_ |= LateMask;
 	else
-		prevFlag_ &= ~(0x01 << LatePos);
+		prevFlag_ &= ~LateMask;
 }
 
 bool VTaskNode::isZombie() const
@@ -79,17 +79,17 @@ bool VTaskNode::isLate() const
 
 bool VTaskNode::prevAborted() const
 {
-	return prevFlag_ & AbortedPos;
+	return prevFlag_ & AbortedMask;
 }
 
 bool VTaskNode::prevZombie() const
 {
-	return prevFlag_ & ZombiePos;
+	return prevFlag_ & ZombieMask;
 }
 
 bool VTaskNode::prevLate() const
 {
-	return prevFlag_ & LatePos;
+	return prevFlag_ & LateMask;
 }
 
 void VTaskNode::check(VServerSettings* conf,const VNodeInternalState& st)

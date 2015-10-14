@@ -57,7 +57,7 @@
         
         {
         	"name"    : "why",
-            "label"   : "Why?",
+            "label"   : "Why",
             "icon"    : "why.svg",
             "dock_icon"    : "why_dock.svg",
             "show" : "toolbar",

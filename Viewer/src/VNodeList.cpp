@@ -99,8 +99,6 @@ void VNodeList::add(VNode *node)
 	if(contains(node))
 		return;
 
-	trim();
-
 	ServerHandler *s=node->server();
 	if(!s)
 		return;
@@ -111,10 +109,15 @@ void VNodeList::add(VNode *node)
 	data_.push_back(new VNodeListItem(node));
 	serverCnt_[s]++;
 	Q_EMIT endAppendRow();
+
+	trim();
 }
 
 void VNodeList::remove(VNode *node)
 {
+	if(!node)
+		return;
+
 	for(std::vector<VNodeListItem*>::iterator it=data_.begin(); it != data_.end(); it++)
 	{
 		if((*it)->sameAs(node))
@@ -125,15 +128,7 @@ void VNodeList::remove(VNode *node)
 			delete *it;
 			data_.erase(it);
 
-			std::map<ServerHandler*,int>::iterator it=serverCnt_.find(node->server());
-			if(it != serverCnt_.end())
-			{
-				it->second--;
-				if(it->second == 0)
-				{
-					detach(node->server());
-				}
-			}
+			detach(node);
 
 			Q_EMIT endRemoveRow(row);
 
@@ -160,15 +155,7 @@ void VNodeList::trim()
 
 		if(node)
 		{
-			std::map<ServerHandler*,int>::iterator it=serverCnt_.find(node->server());
-			if(it != serverCnt_.end())
-			{
-				it->second--;
-				if(it->second == 0)
-				{
-					detach(node->server());
-				}
-			}
+			detach(node);
 		}
 
 		data_.erase(data_.begin());
@@ -270,7 +257,7 @@ void VNodeList::serverScan(ServerHandler* server)
 
 void VNodeList::attach(ServerHandler *s)
 {
-	if(serverCnt_.find(s) != serverCnt_.end())
+	if(serverCnt_.find(s) == serverCnt_.end())
 	{
 		s->addServerObserver(this);
 		s->addNodeObserver(this);
@@ -286,6 +273,19 @@ void VNodeList::detach(ServerHandler* s)
 		serverCnt_.erase(it);
 		s->removeServerObserver(this);
 		s->removeNodeObserver(this);
+	}
+}
+
+void VNodeList::detach(VNode *node)
+{
+	std::map<ServerHandler*,int>::iterator it=serverCnt_.find(node->server());
+	if(it != serverCnt_.end())
+	{
+		it->second--;
+		if(it->second == 0)
+		{
+			detach(node->server());
+		}
 	}
 }
 

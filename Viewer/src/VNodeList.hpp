@@ -87,6 +87,7 @@ protected:
      void serverScan(ServerHandler*);
      void attach(ServerHandler*);
      void detach(ServerHandler*);
+     void detach(VNode*);
      void trim();
 
      std::vector<VNodeListItem*> data_;
