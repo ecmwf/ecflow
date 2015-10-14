@@ -76,6 +76,7 @@ public:
 	QToolButton* defaultTb() {return defaultTb_;};
 	QToolButton* masterTb() {return masterTb_;};
 	VProperty* property() const {return prop_;}
+	VProperty* guiProperty() const {return guiProp_;}
 
 	void addHelper(PropertyLine*);
 
@@ -104,6 +105,7 @@ protected:
 	void valueChanged();
 
 	VProperty* prop_;
+	VProperty* guiProp_;
 	QLabel* label_;
 	QLabel* suffixLabel_;
 	QToolButton* defaultTb_;

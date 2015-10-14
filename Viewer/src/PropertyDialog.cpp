@@ -51,7 +51,8 @@ PropertyDialog::PropertyDialog(QWidget* parent) :
 
 	readSettings();
 
-	list_->setCurrentRow(0);
+	if(list_->count() >0 && list_->currentRow() == -1)
+		list_->setCurrentRow(0);
 }
 
 void PropertyDialog::closeEvent(QCloseEvent * event)
@@ -173,6 +174,7 @@ void PropertyDialog::writeSettings()
 
 	settings.beginGroup("main");
 	settings.setValue("size",size());
+	settings.setValue("current",list_->currentRow());
 	settings.endGroup();
 }
 
@@ -190,6 +192,12 @@ void PropertyDialog::readSettings()
 	  	resize(QSize(550,540));
 	}
 
+	if(settings.contains("current"))
+	{
+		int current=settings.value("current").toInt();
+		if(current >=0)
+			list_->setCurrentRow(current);
+	}
 	settings.endGroup();
 }
 

@@ -111,7 +111,7 @@ void PropertyEditor::addHelpers()
 
 	Q_FOREACH(PropertyLine* line,lineItems_)
 	{
-		QString h=line->property()->param("helpers");
+		QString h=line->guiProperty()->param("helpers");
 		if(!h.isEmpty())
 		{
 			Q_FOREACH(QString s,h.split("/"))
@@ -174,7 +174,7 @@ void PropertyEditor::addItem(VProperty* vProp,QVBoxLayout *layout)
 
 PropertyLine* PropertyEditor::addLine(VProperty *vProp,QGridLayout *gridLayout)
 {
-	PropertyLine* item = PropertyLineFactory::create(vProp->link(),true,this);
+	PropertyLine* item = PropertyLineFactory::create(vProp,true,this);
 
     if(item)
     {
@@ -327,7 +327,7 @@ void PropertyEditor::addGridRow(VProperty* vProp,QGridLayout *grid)
     {
         if(chProp->name() == "line")
         {
-            PropertyLine* item = PropertyLineFactory::create(chProp->link(),false,this);
+            PropertyLine* item = PropertyLineFactory::create(chProp,false,this);
 
             if(item)
             {

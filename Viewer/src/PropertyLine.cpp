@@ -51,10 +51,10 @@ PropertyLineFactory::~PropertyLineFactory()
 
 PropertyLine* PropertyLineFactory::create(VProperty* p,bool addLabel,QWidget* w)
 {
-	if(!p)
+	if(!p || !p->link())
 		return 0;
 
-	VProperty::GuiType t=p->guiType();
+	VProperty::GuiType t=p->link()->guiType();
 	std::map<VProperty::GuiType,PropertyLineFactory*>::iterator j = makers->find(t);
 	if(j != makers->end())
 		return (*j).second->make(p,addLabel,w);
@@ -68,9 +68,10 @@ PropertyLine* PropertyLineFactory::create(VProperty* p,bool addLabel,QWidget* w)
 //
 //=========================================================================
 
-PropertyLine::PropertyLine(VProperty* vProp,bool addLabel,QWidget * parent) :
+PropertyLine::PropertyLine(VProperty* guiProp,bool addLabel,QWidget * parent) :
 	QObject(parent),
-	prop_(vProp),
+	prop_(NULL),
+	guiProp_(guiProp),
 	label_(0),
 	suffixLabel_(0),
 	defaultTb_(0),
@@ -78,6 +79,9 @@ PropertyLine::PropertyLine(VProperty* vProp,bool addLabel,QWidget * parent) :
 	enabled_(true),
 	doNotEmitChange_(false)
 {
+	prop_=guiProp_->link();
+	assert(prop_);
+
 	oriVal_=prop_->value();
 
 	if(addLabel)
@@ -239,7 +243,7 @@ void PropertyLine::addHelper(PropertyLine* line)
 //
 //=========================================================================
 
-StringPropertyLine::StringPropertyLine(VProperty* vProp,bool addLabel,QWidget * parent) : PropertyLine(vProp,addLabel,parent)
+StringPropertyLine::StringPropertyLine(VProperty* guiProp,bool addLabel,QWidget * parent) : PropertyLine(guiProp,addLabel,parent)
 {
 	if(label_)
         label_->setText(label_->text() + ":");
@@ -302,7 +306,7 @@ void StringPropertyLine::setEnabledEditable(bool b)
 //
 //=========================================================================
 
-ColourPropertyLine::ColourPropertyLine(VProperty* vProp,bool addLabel,QWidget * parent) : PropertyLine(vProp,addLabel,parent)
+ColourPropertyLine::ColourPropertyLine(VProperty* guiProp,bool addLabel,QWidget * parent) : PropertyLine(guiProp,addLabel,parent)
 {
 	if(label_)
         label_->setText(label_->text() + ":");
@@ -393,7 +397,7 @@ void ColourPropertyLine::setEnabledEditable(bool b)
 //
 //=========================================================================
 
-FontPropertyLine::FontPropertyLine(VProperty* vProp,bool addLabel,QWidget * parent) : PropertyLine(vProp,addLabel,parent)
+FontPropertyLine::FontPropertyLine(VProperty* guiProp,bool addLabel,QWidget * parent) : PropertyLine(guiProp,addLabel,parent)
 {
 	if(label_)
         label_->setText(label_->text() + ":");
@@ -468,7 +472,7 @@ void FontPropertyLine::setEnabledEditable(bool b)
 //
 //=========================================================================
 
-IntPropertyLine::IntPropertyLine(VProperty* vProp,bool addLabel,QWidget * parent) : PropertyLine(vProp,addLabel,parent)
+IntPropertyLine::IntPropertyLine(VProperty* guiProp,bool addLabel,QWidget * parent) : PropertyLine(guiProp,addLabel,parent)
 {
 	if(label_)
         label_->setText(label_->text() + ":");
@@ -476,13 +480,13 @@ IntPropertyLine::IntPropertyLine(VProperty* vProp,bool addLabel,QWidget * parent
 	le_=new QLineEdit(parent);
 	QIntValidator* validator=new QIntValidator(le_);
 
-	QString s=vProp->param("max");
+	QString s=guiProp->param("max");
 	if(!s.isEmpty())
 	{
 		validator->setTop(s.toInt());
 	}
 
-	s=vProp->param("min");
+	s=guiProp->param("min");
 	if(!s.isEmpty())
 	{
 			validator->setBottom(s.toInt());
@@ -546,9 +550,9 @@ void IntPropertyLine::setEnabledEditable(bool b)
 //
 //=========================================================================
 
-BoolPropertyLine::BoolPropertyLine(VProperty* vProp,bool addLabel,QWidget * parent) : PropertyLine(vProp,false,parent)
+BoolPropertyLine::BoolPropertyLine(VProperty* guiProp,bool addLabel,QWidget * parent) : PropertyLine(guiProp,false,parent)
 {
-	cb_=new QCheckBox(vProp->param("label"));
+	cb_=new QCheckBox(prop_->param("label"));
 
 	connect(cb_,SIGNAL(stateChanged(int)),
 			   this,SLOT(slotStateChanged(int)));
@@ -613,7 +617,7 @@ void BoolPropertyLine::setEnabledEditable(bool b)
 //
 //=========================================================================
 
-ComboPropertyLine::ComboPropertyLine(VProperty* vProp,bool addLabel,QWidget * parent) : PropertyLine(vProp,addLabel,parent)
+ComboPropertyLine::ComboPropertyLine(VProperty* guiProp,bool addLabel,QWidget * parent) : PropertyLine(guiProp,addLabel,parent)
 {
 	if(label_)
 	    label_->setText(label_->text() + ":");
@@ -702,8 +706,8 @@ void ComboPropertyLine::setEnabledEditable(bool b)
 //
 //=========================================================================
 
-SoundComboPropertyLine::SoundComboPropertyLine(VProperty* vProp,bool addLabel,QWidget * parent) :
-	ComboPropertyLine(vProp,addLabel,parent),
+SoundComboPropertyLine::SoundComboPropertyLine(VProperty* guiProp,bool addLabel,QWidget * parent) :
+	ComboPropertyLine(guiProp,addLabel,parent),
 	playTb_(NULL)
 {
 	playTb_=new QToolButton(parent);

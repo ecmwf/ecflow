@@ -88,6 +88,7 @@ void VNodeList::setMaxNum(int maxNum)
 {
 	if(maxNum_ != maxNum)
 	{
+		assert(maxNum>0);
 		maxNum_=maxNum;
 		trim();
 	}
@@ -144,18 +145,18 @@ void VNodeList::remove(VNode *node)
 void VNodeList::trim()
 {
 	int cnt=data_.size();
-	bool doTrim=(cnt > maxNum_);
+	bool doTrim=(cnt >0 && cnt > maxNum_);
 
-	if(doTrim)
-	{
-		//Q_EMIT beginRemoveRows(row);
-	}
+	if(!doTrim)
+		return;
+
+	Q_EMIT beginRemoveRows(0,cnt-maxNum_-1);
 
 	for(int row=cnt-1; row >= maxNum_; row--)
 	{
-		VNode *node=data_.back()->node();
+		VNode *node=data_.front()->node();
 
-		delete data_.back();
+		delete data_.front();
 
 		if(node)
 		{
@@ -170,15 +171,11 @@ void VNodeList::trim()
 			}
 		}
 
-		data_.pop_back();
+		data_.erase(data_.begin());
 	}
 
-	if(doTrim)
-	{
-		//Q_EMIT endRemoveRow(row);
-	}
+	Q_EMIT endRemoveRows(0,cnt-maxNum_-1);
 }
-
 
 bool VNodeList::contains(VNode *node)
 {

@@ -42,10 +42,16 @@ void ChangeNotifyModel::setData(VNodeList *data)
 			this,SLOT(slotEndAppendRow()));
 
 	connect(data_,SIGNAL(beginRemoveRow(int)),
-				this,SLOT(slotBeginRemoveRow(int)));
+			this,SLOT(slotBeginRemoveRow(int)));
 
 	connect(data_,SIGNAL(endRemoveRow(int)),
-				this,SLOT(slotEndRemoveRow(int)));
+			this,SLOT(slotEndRemoveRow(int)));
+
+	connect(data_,SIGNAL(beginRemoveRows(int,int)),
+			this,SLOT(slotBeginRemoveRow(int,int)));
+
+	connect(data_,SIGNAL(endRemoveRows(int,int)),
+			this,SLOT(slotEndRemoveRows(int,int)));
 
 	connect(data_,SIGNAL(beginReset()),
 			this,SLOT(slotBeginReset()));
@@ -186,6 +192,17 @@ void ChangeNotifyModel::slotEndRemoveRow(int row)
 {
 	endRemoveRows();
 }
+
+void ChangeNotifyModel::slotBeginRemoveRows(int rowStart,int rowEnd)
+{
+	beginRemoveRows(QModelIndex(),rowStart,rowEnd);
+}
+
+void ChangeNotifyModel::slotEndRemoveRows(int,int)
+{
+	endRemoveRows();
+}
+
 
 void ChangeNotifyModel::slotBeginReset()
 {

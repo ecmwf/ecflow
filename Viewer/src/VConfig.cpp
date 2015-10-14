@@ -146,11 +146,12 @@ void VConfig::loadProperty(const boost::property_tree::ptree& pt,VProperty *prop
     		std::string val=ptProp.get_value<std::string>();
     		prop->setDefaultValue(val);
     	}
-    	else if(name == "line")
+
+    	//If it is just a key/value pair "line"
+    	else if(name == "line" && ptProp.empty())
     	{
     		VProperty *chProp=new VProperty(name);
     		prop->addChild(chProp);
-
     		std::string val=ptProp.get_value<std::string>();
 
     		QString prefix=prop->param("prefix");
@@ -169,8 +170,27 @@ void VConfig::loadProperty(const boost::property_tree::ptree& pt,VProperty *prop
     			UserMessage::message(UserMessage::DBG,false,"     --> link NOT found");
     		}
     	}
+    	//If the property is a "line" (i.e. a line with additional parameters)
+    	else if(prop->name() == "line" && name ==  "link")
+    	{
+    		std::string val=ptProp.get_value<std::string>();
+
+    		UserMessage::message(UserMessage::DBG,false,"   VConfig::loadProperty() line link: " + val);
+
+    		if(VProperty* lineEditProp=find(val))
+    		{
+    			UserMessage::message(UserMessage::DBG,false,"     --> link found");
+    			   prop->setLink(lineEditProp);
+    		}
+    		else
+    		{
+    			   UserMessage::message(UserMessage::DBG,false,"     --> link NOT found");
+    		}
+    	}
+
+
         //Here we only load the properties with
-        //children (i.e. key/value pairs (like "label" etc above)
+        //children (i.e. key/value pairs (like "line" etc above)
         //are ignored.
     	else if(!ptProp.empty())
         {

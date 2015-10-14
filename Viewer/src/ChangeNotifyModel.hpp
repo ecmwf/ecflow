@@ -42,6 +42,8 @@ public Q_SLOTS:
 	void slotEndAppendRow();
 	void slotBeginRemoveRow(int);
 	void slotEndRemoveRow(int);
+	void slotBeginRemoveRows(int,int);
+	void slotEndRemoveRows(int,int);
 	void slotBeginReset();
 	void slotEndReset();
 

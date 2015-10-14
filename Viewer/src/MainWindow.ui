@@ -189,8 +189,8 @@
   </action>
   <action name="actionReset">
    <property name="icon">
-    <iconset>
-     <normaloff>:/viewer/images/reset.svg</normaloff>:/viewer/images/reset.svg</iconset>
+    <iconset resource="viewer.qrc">
+     <normaloff>:/viewer/reset.svg</normaloff>:/viewer/reset.svg</iconset>
    </property>
    <property name="text">
     <string>Reset</string>

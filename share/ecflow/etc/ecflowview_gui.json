@@ -132,9 +132,12 @@
                                 "group" : {
                                     "title" : "Sound",
                                     "line" : "notification.aborted.sound_file_type",
-                                    "line" : "notification.aborted.sound_system_file",
+                                    "line" : {
+                                        "link" : "notification.aborted.sound_system_file",
+                                        "helpers" : "notification.aborted.sound_volume/notification.aborted.sound_repeat"
+                                    },    
                                     "line" : "notification.aborted.sound_user_file",
-                                    "line" : "notification.aborted.sound_volume",
+                                    "line" : "notification.aborted.sound_volume_tmp",
                                     "line" : "notification.aborted.sound_repeat"
                                 }                                    
                              },
@@ -155,10 +158,13 @@
                                   },
                                   "group" : {
                                      "title" : "Sound",
-                                     "line" : "notification.restarted.sound_file_type",
-                                     "line" : "notification.restarted.sound_system_file",
+                                     "line" : "notification.restarted.sound_file_type",                                    
+                                     "line" : {
+                                        "link" : "notification.restarted.sound_system_file",
+                                        "helpers" : "notification.restarted.sound_volume/notification.restarted.sound_repeat"
+                                     },   
                                      "line" : "notification.restarted.sound_user_file",
-                                     "line" : "notification.restarted.sound_volume",
+                                     "line" : "notification.restarted.sound_volume_tmp",
                                      "line" : "notification.restarted.sound_repeat"
                                     }                                         
                               },
@@ -179,10 +185,13 @@
                                    },
                                   "group" : {
                                      "title" : "Sound",
-                                     "line" : "notification.late.sound_file_type",
-                                     "line" : "notification.late.sound_system_file",
+                                     "line" : "notification.late.sound_file_type",                                     
+                                     "line" : {
+                                        "link" : "notification.late.sound_system_file",
+                                        "helpers" : "notification.late.sound_volume/notification.late.sound_repeat"
+                                     },   
                                      "line" : "notification.late.sound_user_file",
-                                     "line" : "notification.late.sound_volume",
+                                     "line" : "notification.late.sound_volume_tmp",
                                      "line" : "notification.late.sound_repeat"                                                                   
                                    }
                                 },
@@ -203,10 +212,13 @@
                                    },
                                    "group" : {
                                       "title" : "Sound",
-                                      "line" : "notification.zombie.sound_file_type",
-                                      "line" : "notification.zombie.sound_system_file",
+                                      "line" : "notification.zombie.sound_file_type",                                      
+                                      "line" : {
+                                         "link" : "notification.zombie.sound_system_file",
+                                         "helpers" : "notification.zombie.sound_volume/notification.zombie.sound_repeat"
+                                      },   
                                       "line" : "notification.zombie.sound_user_file",
-                                      "line" : "notification.zombie.sound_volume",
+                                      "line" : "notification.zombie.sound_volume_tmp",
                                       "line" : "notification.zombie.sound_repeat"                                        
                                    }    
                                 },
@@ -227,10 +239,13 @@
                                    }, 
                                    "group" : {
                                       "title" : "Sound",
-                                      "line" : "notification.alias.sound_file_type",
-                                      "line" : "notification.alias.sound_system_file",
+                                      "line" : "notification.alias.sound_file_type",                                     
+                                       "line" : {
+                                          "link" : "notification.alias.sound_system_file",
+                                          "helpers" : "notification.alias.sound_volume/notification.alias.sound_repeat"
+                                      },  
                                       "line" : "notification.alias.sound_user_file",
-                                      "line" : "notification.alias.sound_volume",
+                                      "line" : "notification.alias.sound_volume_tmp",
                                       "line" : "notification.alias.sound_repeat"                                                                             
                                    }       
                               }                                  

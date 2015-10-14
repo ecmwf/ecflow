@@ -3,10 +3,11 @@
             
             "settings" : {
                     "max_item_num" : {
-                        "label" : "Maximum number of notifications kept in the list",
+                        "label" : "Maximum notification list size",
                         "default" : "200",
                         "min" :  "10",
-                        "max" : "500"
+                        "max" : "500",
+                        "suffix": "items"
                      }
             },                                    
             "aborted": {
@@ -35,14 +36,12 @@
                 "sound_system_file" : {
                     "label" : "Built in sound", 
                     "default" : "tone.ogg",
-                    "values" : "",
-                    "helpers" : "notification.aborted.sound_volume/notification.aborted.sound_repeat"
+                    "values" : ""                   
                 }, 
                 "sound_user_file" : {
                     "label" : "Sound file", 
                     "default" : "*.ogg",
-                    "default_dir" : "/usr/share/sounds",
-                    "helpers" : "notification.aborted.sound_volume/notification.aborted.sound_repeat"
+                    "default_dir" : "/usr/share/sounds"                   
                 },
                 "sound_volume" : {
                     "label" : "Volume",
@@ -89,14 +88,12 @@
                 "sound_system_file" : {
                     "label" : "Built in sound", 
                     "default" : "tone.ogg",
-                    "values" : "",
-                    "helpers" : "notification.restarted.sound_volume/notification.restarted.sound_repeat"
+                    "values" : ""                    
                 }, 
                 "sound_user_file" : {
                     "label" : "Sound file", 
                     "default" : "*.ogg",
-                    "default_dir" : "/usr/share/sounds",
-                    "helpers" : "notification.restarted.sound_volume/notification.restarted.sound_repeat"
+                    "default_dir" : "/usr/share/sounds"                    
                 },
                 "sound_volume" : {
                     "label" : "Volume",
@@ -143,14 +140,12 @@
                 "sound_system_file" : {
                     "label" : "Built in sound", 
                     "default" : "tone.ogg",
-                    "values" : "",
-                    "helpers" : "notification.late.sound_volume/notification.late.sound_repeat"
+                    "values" : ""                    
                 }, 
                 "sound_user_file" : {
                     "label" : "Sound file", 
                     "default" : "*.ogg",
-                    "default_dir" : "/usr/share/sounds",
-                    "helpers" : "notification.late.sound_volume/notification.late.sound_repeat"
+                    "default_dir" : "/usr/share/sounds"                    
                 },
                 "sound_volume" : {
                     "label" : "Volume",
@@ -196,14 +191,12 @@
                 "sound_system_file" : {
                     "label" : "Built in sound", 
                     "default" : "tone.ogg",
-                    "values" : "",
-                    "helpers" : "notification.zombie.sound_volume/notification.zombie.sound_repeat"
+                    "values" : ""                    
                 }, 
                 "sound_user_file" : {
                     "label" : "Sound file", 
                     "default" : "*.ogg",
-                    "default_dir" : "/usr/share/sounds",
-                    "helpers" : "notification.zombie.sound_volume/notification.zombie.sound_repeat"
+                    "default_dir" : "/usr/share/sounds"                    
                 },
                 "sound_volume" : {
                     "label" : "Volume",
@@ -249,14 +242,12 @@
                 "sound_system_file" : {
                     "label" : "Built in sound", 
                     "default" : "tone.ogg",
-                    "values" : "",
-                    "helpers" : "notification.alias.sound_volume/notification.alias.sound_repeat"
+                    "values" : ""                    
                 }, 
                 "sound_user_file" : {
                     "label" : "Sound file", 
                     "default" : "*.ogg",
-                    "default_dir" : "/usr/share/sounds",
-                    "helpers" : "notification.alias.sound_volume/notification.alias.sound_repeat"
+                    "default_dir" : "/usr/share/sounds"                    
                 },
                 "sound_volume" : {
                     "label" : "Volume",

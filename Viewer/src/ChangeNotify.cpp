@@ -167,8 +167,13 @@ void ChangeNotify::setProperty(VProperty* prop)
 	if(VProperty* p=prop->findChild("count_text_colour"))
 		p->addObserver(this);
 
+	if(VProperty* p=prop->findChild("sound_file_type"))
+		p->addObserver(this);
+
 	if(VProperty* p=prop->findChild("sound_system_file"))
 	{
+		p->addObserver(this);
+
 		QStringList lst;
 		const std::vector<std::string>& vals=Sound::instance()->sysSounds();
 		for(std::vector<std::string>::const_iterator it=vals.begin(); it != vals.end(); it++)
@@ -178,14 +183,28 @@ void ChangeNotify::setProperty(VProperty* prop)
 		p->setParam("values",lst.join("/"));
 		p->setParam("values_label",lst.join("/"));
 		p->setParam("dir",QString::fromStdString(Sound::instance()->sysDir()));
+		p->addObserver(this);
 	}
 
+	if(VProperty* p=prop->findChild("sound_user_file"))
+		p->addObserver(this);
+
+	if(VProperty* p=prop->findChild("sound_volume"))
+		p->addObserver(this);
+
+	if(VProperty* p=prop->findChild("sound_repeat"))
+		p->addObserver(this);
 }
 
 void ChangeNotify::notifyChange(VProperty* prop)
 {
 	if(prop->name().contains("sound",Qt::CaseInsensitive))
 		return;
+
+	if(prop->name() == "max_item_num")
+	{
+		data_->setMaxNum(prop->value().toInt());
+	}
 
 	dialog()->updateSettings(this);
 	ChangeNotifyWidget::updateSettings(id_);
@@ -259,10 +278,12 @@ void ChangeNotify::load(VProperty* group)
 			}
 		}
 
+		//This should be observed by each notification object
 		if(VProperty* p=group->find("notification.settings.max_item_num"))
 		{
 			for(std::map<std::string,ChangeNotify*>::iterator it=items.begin(); it != items.end(); ++it)
 			{
+				p->addObserver(it->second);
 				it->second->data_->setMaxNum(p->value().toInt());
 			}
 		}
