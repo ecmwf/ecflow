@@ -49,7 +49,7 @@ PropertyLineFactory::~PropertyLineFactory()
 	// Not called
 }
 
-PropertyLine* PropertyLineFactory::create(VProperty* p,bool addLabel,QWidget* w)
+PropertyLine* PropertyLineFactory::create(VProperty* p,bool addLabel,QWidget* parent)
 {
 	if(!p || !p->link())
 		return 0;
@@ -57,7 +57,7 @@ PropertyLine* PropertyLineFactory::create(VProperty* p,bool addLabel,QWidget* w)
 	VProperty::GuiType t=p->link()->guiType();
 	std::map<VProperty::GuiType,PropertyLineFactory*>::iterator j = makers->find(t);
 	if(j != makers->end())
-		return (*j).second->make(p,addLabel,w);
+		return (*j).second->make(p,addLabel,parent);
 
 	return 0;
 }
@@ -90,7 +90,7 @@ PropertyLine::PropertyLine(VProperty* guiProp,bool addLabel,QWidget * parent) :
 	QString suffixText=prop_->param("suffix");
 	if(!suffixText.isEmpty())
 	{
-		suffixLabel_=new QLabel(suffixText);
+		suffixLabel_=new QLabel(suffixText,parent);
 	}
 
 	defaultTb_= new QToolButton(parent);
@@ -552,7 +552,7 @@ void IntPropertyLine::setEnabledEditable(bool b)
 
 BoolPropertyLine::BoolPropertyLine(VProperty* guiProp,bool addLabel,QWidget * parent) : PropertyLine(guiProp,false,parent)
 {
-	cb_=new QCheckBox(prop_->param("label"));
+	cb_=new QCheckBox(prop_->param("label"),parent);
 
 	connect(cb_,SIGNAL(stateChanged(int)),
 			   this,SLOT(slotStateChanged(int)));

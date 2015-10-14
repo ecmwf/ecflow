@@ -42,21 +42,22 @@ private:
     void build();
     void addHelpers();
 
-    void addItem(VProperty*,QVBoxLayout*);
-    PropertyLine* addLine(VProperty* vProp,QGridLayout* grid);
-    void addGroup(VProperty*,QVBoxLayout*);
-    void addGrid(VProperty*,QVBoxLayout*);
-    void addGridRow(VProperty* prop,QGridLayout *grid);
-    void addNotification(VProperty* prop,QVBoxLayout*);
-    void addTabs(VProperty*,QVBoxLayout*);
+    void addItem(VProperty*,QVBoxLayout*,QWidget*);
+    PropertyLine* addLine(VProperty* vProp,QGridLayout* grid,QWidget*);
+    void addGroup(VProperty*,QVBoxLayout*,QWidget*);
+    void addGrid(VProperty*,QVBoxLayout*,QWidget*);
+    void addGridRow(VProperty* prop,QGridLayout *grid,QWidget*);
+    void addNotification(VProperty* prop,QVBoxLayout*,QWidget*);
+    void addTabs(VProperty*,QVBoxLayout*,QWidget*);
     void addTab(VProperty*,QTabWidget*);
-	void addNote(VProperty* vProp,QVBoxLayout*);
-	void addNote(VProperty* vProp,QGridLayout* layout);
+	void addNote(VProperty* vProp,QVBoxLayout*,QWidget*);
+	void addNote(VProperty* vProp,QGridLayout* layout,QWidget*);
 
     VProperty* group_;
     QGridLayout* currentGrid_;
     QList<PropertyLine*> lineItems_;
     QString serverName_;
+    QWidget* holder_;
 };
 
 
