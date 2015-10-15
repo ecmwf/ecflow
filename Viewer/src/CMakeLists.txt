@@ -76,7 +76,6 @@ set(viewer_srcs
     ServerDefsAccess.cpp
     ServerHandler.cpp
     ServerFilter.cpp
-    ServerFilterObserver.hpp
     ServerItem.cpp
     ServerList.cpp
     ServerListDialog.cpp
@@ -85,6 +84,7 @@ set(viewer_srcs
     Sound.cpp
     SuiteItemWidget.cpp
     SuiteFilter.cpp
+    SuiteFilterObserver.hpp
     SuiteModel.cpp
     TabWidget.cpp 
     TableFilterWidget.cpp

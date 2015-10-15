@@ -22,5 +22,4 @@ public:
 	  virtual void notifyChange(SuiteFilter*)=0;
 	  virtual void notifyDelete(SuiteFilter*)=0;
 };
-
 #endif /* VIEWER_SRC_SUITEFILTEROBSERVER_HPP_ */
