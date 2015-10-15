@@ -1330,8 +1330,8 @@ std::ostream& Node::print(std::ostream& os) const
    BOOST_FOREACH(const Variable& v, varVec_ )       { v.print(os); }
 
    if ( PrintStyle::getStyle() == PrintStyle::STATE ) {
-      // Distinguish normal variable form generated, by adding a #
-      // This also allows it be read in again and compared.
+      // Distinguish normal variable from generated, by adding a #
+      // This also allows it be read in again and compared in the AParser/tests
       std::vector<Variable> gvec;
       gen_variables(gvec);
       BOOST_FOREACH(const Variable& v, gvec ) { v.print_generated(os); }
