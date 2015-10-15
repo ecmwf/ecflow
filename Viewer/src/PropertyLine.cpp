@@ -200,15 +200,15 @@ bool PropertyLine::applyMaster()
 
 void PropertyLine::slotMaster(bool b)
 {
-	//prop_->setUseMaster(b);
-	slotReset(prop_->master()->value());
 	if(b)
 	{
+		slotReset(prop_->master()->value());
 		defaultTb_->setEnabled(false);
 		setEnabledEditable(false);
 	}
 	else
 	{
+		slotReset(prop_->value());
 		defaultTb_->setEnabled(true);
 		checkState();
 		setEnabledEditable(true);

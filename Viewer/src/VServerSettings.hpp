@@ -35,6 +35,8 @@ public:
 	bool notificationsEnabled() const;
 	static std::string notificationId(Param);
 
+	void saveSettings();
+
 	//From VPropertyObserver
 	void notifyChange(VProperty*);
 
@@ -49,7 +51,6 @@ protected:
 
 	VProperty* property(Param par) const;
 	void loadSettings();
-	void saveSettings();
 
 	ServerHandler* server_;
 	VProperty* prop_;

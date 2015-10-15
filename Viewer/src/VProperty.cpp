@@ -192,6 +192,7 @@ std::string VProperty::valueAsString() const
 		break;
 	case FontType:
 		s=VProperty::toString(value().value<QFont>());
+		break;
 	case SoundType:
 		s=value().toString();
 		break;
@@ -366,6 +367,7 @@ VProperty* VProperty::clone(bool addLink,bool setMaster,bool useMaster)
 	cp->value_=value_;
 	cp->defaultValue_=defaultValue_;
 	cp->type_=type_;
+	cp->guiType_=guiType_;
 
 	if(addLink)
 	{

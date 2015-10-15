@@ -54,7 +54,6 @@ void ServerSettingsItemWidget::reload(VInfo_ptr info)
 	{
 		editor_->edit(info_->server()->conf()->guiProp(),
 				QString::fromStdString(info_->server()->name()));
-
 	}
 	else
 	{
@@ -84,7 +83,11 @@ void ServerSettingsItemWidget::slotClicked(QAbstractButton* button)
 	{
 	case QDialogButtonBox::Apply:
 		{
-			editor_->applyChange();
+			if(editor_->applyChange())
+			{
+				if(info_ && info_->server())
+					info_->server()->conf()->saveSettings();
+			}
 		}
 		break;
 	default:
