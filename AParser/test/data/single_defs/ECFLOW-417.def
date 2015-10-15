@@ -1,0 +1,6 @@
+suite s1
+   repeat day 1
+   clock hybrid  
+   task t1
+      time 15:42
+endsuite
