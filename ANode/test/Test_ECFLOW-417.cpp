@@ -15,13 +15,17 @@
 #include "Family.hpp"
 #include "Task.hpp"
 #include "PrintStyle.hpp"
+#include "CalendarUpdateParams.hpp"
 
 #include <boost/test/unit_test.hpp>
+#include <boost/date_time/posix_time/time_formatters.hpp>
 #include <iostream>
 #include <stdlib.h>
 
 using namespace std;
 using namespace ecf;
+using namespace boost::posix_time;
+using namespace boost::gregorian;
 
 BOOST_AUTO_TEST_SUITE( NodeTestSuite )
 
@@ -126,6 +130,27 @@ BOOST_AUTO_TEST_CASE( test_ECFLOW_417_hybrid_clock )
       const Variable& ecf_date = s1->findGenVariable("ECF_DATE");
       BOOST_CHECK_MESSAGE(!ecf_date.empty(),"Did not find ECF_DATE");
       BOOST_CHECK_MESSAGE(ecf_date.theValue() == "20151010","expected 20151010 but found " << ecf_date.theValue());
+   }
+
+   // Now update calendar for more than 24 hours, and calendar date should *NOT* change for hybrid
+   {
+      boost::posix_time::ptime time_now = s1->calendar().suiteTime();
+      boost::posix_time::time_duration serverPollPeriod = boost::posix_time::time_duration(0,1,0,0);
+      std::string expectedDate = "2015-Oct-10";
+
+      for(int hour=1; hour <= 60; hour++) {
+
+         // Update calendar every hour, for 60 hours
+         time_now += hours(1);
+         CalendarUpdateParams param(time_now, serverPollPeriod, true, /* serverRunning */ false /* forTest */ );
+
+         defs->updateCalendar( param );
+
+         // cout << "hour = " << hour << " timeAfterUpdate " << to_simple_string(s1->calendar().suiteTime()) <<  "\n";
+
+         std::string actualDate = to_simple_string(s1->calendar().suiteTime().date());
+         BOOST_CHECK_MESSAGE( actualDate == expectedDate,"Expected '" << expectedDate << "' but found " << actualDate << " at hour " << hour);
+      }
    }
 }
 
