@@ -38,6 +38,7 @@ public:
 
    const std::string& name() const   { return  name_;}
    std::ostream& print(std::ostream&) const;
+   std::ostream& print_generated(std::ostream&) const;
    bool empty() const { return name_.empty(); }
 
    void set_value(const std::string& v) { value_ = v; }
