@@ -60,6 +60,11 @@ std::ostream& Variable::print( std::ostream& os ) const {
    return Indentor::indent( os ) << toString() << "\n";
 }
 
+std::ostream& Variable::print_generated( std::ostream& os ) const {
+   Indentor in;
+   return Indentor::indent( os ) << "# " << toString() << "\n";
+}
+
 std::string Variable::toString() const
 {
    std::string ret; ret.reserve(name_.size() + value_.size() + 8);
