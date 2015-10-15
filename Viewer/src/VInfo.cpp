@@ -111,7 +111,11 @@ void VInfo::notifyBeginServerClear(ServerHandler* server)
 
 void VInfo::notifyEndServerScan(ServerHandler* server)
 {
-	if(isNode())
+	if(isServer())
+	{
+		node_=server_->vRoot();
+	}
+	else if(isNode())
 	{
 		node_=server_->vRoot()->find(nodePath_);
 		if(!node_)

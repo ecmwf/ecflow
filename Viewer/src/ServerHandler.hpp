@@ -61,7 +61,9 @@ public:
 	bool communicating() {return communicating_;}
 	bool readFromDisk() const;
 	SuiteFilter* suiteFilter() const {return suiteFilter_;}
+
 	void updateSuiteFilter(SuiteFilter*);
+	void updateSuiteFilterWithDefs();
 
 	void connectServer();
 	void disconnectServer();
@@ -145,7 +147,8 @@ private:
 	void connectionLost(const std::string& errMsg);
 	bool connectionGained();
 
-	void updateSuiteFilter(const std::vector<std::string>&);
+	void updateSuiteFilterWithLoaded(const std::vector<std::string>&);
+	void updateSuiteFilter();
 
 	//Handle the refresh timer
 	void stopRefreshTimer();

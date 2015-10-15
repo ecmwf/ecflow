@@ -13,6 +13,7 @@
 #include <string>
 #include <vector>
 
+class SuiteFilterObserver;
 class VSettings;
 
 template <class T>
@@ -33,7 +34,6 @@ private:
 
 };
 
-
 class SuiteFilterItem
 {
 public:
@@ -51,12 +51,14 @@ class SuiteFilter
 {
 public:
 	SuiteFilter() : autoAddNew_(false), enabled_(false) {}
+	~SuiteFilter();
 
 	enum ChangeFlag {AutoAddChanged=1,EnabledChanged=2,ItemChanged=4};
 
 	SuiteFilter* clone();
 
 	const std::vector<std::string>& filter() const {return filter_;}
+	const std::vector<std::string>& loaded() const {return loaded_;}
 	const std::vector<SuiteFilterItem> items() const {return items_;}
 
 	void current(const std::vector<std::string>& suites);
@@ -72,8 +74,13 @@ public:
 	void unselectAll();
 
 	bool update(SuiteFilter*);
-	void setLoaded(const std::vector<std::string>& loaded);
+	bool setLoaded(const std::vector<std::string>& loaded,bool checkDiff=true);
+	bool loadedSameAs(const std::vector<std::string>& loaded) const;
 	const FlagSet<ChangeFlag>& changeFlags() {return changeFlags_;}
+
+	bool hasObserver() const {return !observers_.empty();}
+	void addObserver(SuiteFilterObserver*);
+	void removeObserver(SuiteFilterObserver*);
 
 	void readSettings(VSettings *vs);
 	void writeSettings(VSettings *vs);
@@ -81,14 +88,19 @@ public:
 private:
 	void clear();
 	void adjust();
+	void broadcastChange();
 
+	//All the suites currently loaded onto the server
     std::vector<std::string> loaded_;
-    std::vector<std::string> defs_;
-	std::vector<std::string> filter_;
+
+    //The suites we want to filter (they might not be loaded)
+    std::vector<std::string> filter_;
+
 	std::vector<SuiteFilterItem> items_;
 	bool autoAddNew_;
 	bool enabled_;
 	FlagSet<ChangeFlag> changeFlags_;
+	std::vector<SuiteFilterObserver*> observers_;
 };
 
 

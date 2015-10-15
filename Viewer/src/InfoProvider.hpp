@@ -91,6 +91,12 @@ public:
 	 explicit HistoryProvider(InfoPresenter* owner);
 };
 
+class SuiteProvider : public InfoProvider
+{
+public:
+	 explicit SuiteProvider(InfoPresenter* owner);
+};
+
 class ZombieProvider : public InfoProvider
 {
 public:

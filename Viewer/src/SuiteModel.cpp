@@ -14,16 +14,31 @@
 #include "SuiteFilter.hpp"
 
 SuiteModel::SuiteModel(QObject *parent) :
-          QAbstractItemModel(parent),
-          data_(0)
+     QAbstractItemModel(parent),
+     data_(0),
+     realData_(0)
 {
 
 }
 
 SuiteModel::~SuiteModel()
 {
+	beginResetModel();
+	clearData();
+	endResetModel();
+}
+
+void SuiteModel::clearData()
+{
 	if(data_)
 		delete data_;
+
+	data_=0;
+
+	if(realData_)
+		realData_->removeObserver(this);
+
+	realData_=0;
 }
 
 void SuiteModel::setData(SuiteFilter* filter)
@@ -32,14 +47,46 @@ void SuiteModel::setData(SuiteFilter* filter)
 
 	if(data_ && data_ != filter)
 	{
-		delete data_;
-		data_=0;
+		clearData();
 	}
 
-	if(filter && data_ != filter)
+	if(filter)
+	{
 		data_=filter->clone();
+		realData_=filter;
+		realData_->addObserver(this);
+	}
 
 	endResetModel();
+}
+
+void SuiteModel::notifyChange(SuiteFilter *filter)
+{
+	if(filter && filter == realData_)
+	{
+		updateData();
+	}
+}
+
+void SuiteModel::notifyDelete(SuiteFilter *filter)
+{
+	if(filter && filter == realData_)
+	{
+		beginResetModel();
+		clearData();
+		endResetModel();
+	}
+}
+
+void SuiteModel::updateData()
+{
+	if(realData_ && data_ &&
+	 !data_->loadedSameAs(realData_->loaded()))
+	{
+		beginResetModel();
+		data_->setLoaded(realData_->loaded());
+		endResetModel();
+	}
 }
 
 void SuiteModel::reloadData()
@@ -47,7 +94,6 @@ void SuiteModel::reloadData()
 	beginResetModel();
 	endResetModel();
 }
-
 
 bool SuiteModel::hasData() const
 {

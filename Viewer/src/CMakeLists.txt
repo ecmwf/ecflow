@@ -76,6 +76,7 @@ set(viewer_srcs
     ServerDefsAccess.cpp
     ServerHandler.cpp
     ServerFilter.cpp
+    ServerFilterObserver.hpp
     ServerItem.cpp
     ServerList.cpp
     ServerListDialog.cpp

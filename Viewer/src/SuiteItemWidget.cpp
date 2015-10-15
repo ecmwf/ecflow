@@ -9,6 +9,7 @@
 
 #include "SuiteItemWidget.hpp"
 
+#include "InfoProvider.hpp"
 #include "ServerHandler.hpp"
 #include "SuiteFilter.hpp"
 #include "SuiteModel.hpp"
@@ -25,10 +26,7 @@ SuiteItemWidget::SuiteItemWidget(QWidget *parent) : QWidget(parent)
 {
 	setupUi(this);
 
-	//infoProvider_=new EditProvider(this);
-
-	//connect(submitTb_,SIGNAL(clicked(bool)),
-	//		this,SLOT(on_submitTb__clicked(bool)));
+	infoProvider_=new SuiteProvider(this);
 
 	model_=new SuiteModel(this);
 
@@ -52,14 +50,56 @@ void SuiteItemWidget::reload(VInfo_ptr info)
 
 	if(info_.get() && info_->isServer() && info_->server())
 	{
-		if(SuiteFilter *sf=info_->server()->suiteFilter())
+		//Get the current suitefilter
+		SuiteFilter *sf=info_->server()->suiteFilter();
+
+		assert(sf);
+
+		//The model will be an observer of the suitefilter
+		model_->setData(sf);
+
+		enableTb->setChecked(sf->isEnabled());
+		autoTb->setChecked(sf->autoAddNewSuites());
+		updateWidgetState();
+
+		//We update the filter because it might not show the current status. If
+		//there is a change the model will be notified
+
+		//If the filter is disabled we update the filter with the
+		//current list of suites in the defs. These are all the suites
+		//loaded to the server.
+		if(!sf->isEnabled())
 		{
-			model_->setData(sf);
-			enableTb->setChecked(sf->isEnabled());
-			autoTb->setChecked(sf->autoAddNewSuites());
-			updateWidgetState();
+			info_->server()->updateSuiteFilterWithDefs();
+		}
+		//If the filter is enabled we need to fetch the total list of suites
+		//loaded onto the server directly from the server (through the thread)
+		else
+		{
+			//inforReady or infoFailed will always be called.
+			infoProvider_->info(info_);
 		}
 	}
+}
+
+void SuiteItemWidget::updateData()
+{
+	/*if(info_.get() && info_->isServer() && info_->server())
+	{
+		model_->updateData(info_->server()->suiteFilter());
+	}*/
+}
+
+void SuiteItemWidget::infoReady(VReply* reply)
+{
+	//updateData();
+}
+
+void SuiteItemWidget::infoFailed(VReply* reply)
+{
+	//commandSent_=false;
+	//QString s=QString::fromStdString(reply->errorText());
+	//checkActionState();
 }
 
 void SuiteItemWidget::clearContents()
@@ -130,13 +170,10 @@ void SuiteItemWidget::on_okTb_clicked(bool)
 {
 	if(info_.get() && info_->isServer() && info_->server())
 	{
+		//This replace the edited filter in model the one
+		//stored by the server
 		info_->server()->updateSuiteFilter(model_->filter());
 	}
-}
-
-void SuiteItemWidget::suiteFilterChanged()
-{
-	model_->reloadData();
 }
 
 static InfoPanelItemMaker<SuiteItemWidget> maker1("suite");

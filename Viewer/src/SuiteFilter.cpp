@@ -9,6 +9,7 @@
 
 #include "SuiteFilter.hpp"
 
+#include "SuiteFilterObserver.hpp"
 #include "VSettings.hpp"
 #include "VProperty.hpp"
 
@@ -29,7 +30,7 @@ SuiteFilterItem::SuiteFilterItem(const SuiteFilterItem& other) :
 
 //=================================================================
 //
-// SuiteFilterItem
+// SuiteFilter
 //
 //=================================================================
 
@@ -39,10 +40,20 @@ SuiteFilterItem::SuiteFilterItem(const SuiteFilterItem& other) :
 	adjust();
 }*/
 
+SuiteFilter::~SuiteFilter()
+{
+	std::vector<SuiteFilterObserver*> obsCopy=observers_;
+	for(std::vector<SuiteFilterObserver*>::const_iterator it=obsCopy.begin(); it != obsCopy.end(); ++it)
+	{
+		(*it)->notifyDelete(this);
+	}
+}
+
 void SuiteFilter::clear()
 {
 	items_.clear();
 	filter_.clear();
+	broadcastChange();
 }
 
 void SuiteFilter::adjust()
@@ -69,6 +80,8 @@ void SuiteFilter::adjust()
 			items_.push_back(SuiteFilterItem(*it,false,true));
 		}
 	}
+
+	broadcastChange();
 }
 
 void SuiteFilter::setFiltered(int index,bool val)
@@ -107,10 +120,63 @@ SuiteFilter* SuiteFilter::clone()
 }
 
 
-void SuiteFilter::setLoaded(const std::vector<std::string>& loaded)
+bool SuiteFilter::loadedSameAs(const std::vector<std::string>& loaded) const
 {
-	loaded_=loaded;
-	adjust();
+	if(loaded.size() != loaded_.size())
+		return false;
+	else
+	{
+		for(unsigned int i=0; i < loaded.size(); i++)
+		{
+			if(loaded.at(i) != loaded_.at(i))
+			{
+				return false;
+			}
+		}
+	}
+	return true;
+}
+
+/*
+bool SuiteFilter::setLoadedInDefs(const std::vector<std::string>& loadedInDefs)
+{
+	bool changed=false;
+	std::vector<std::string> loadedTmp=loaded_;
+	for(std::vector<std::string>::const_iterator it=loadedInDefs.begin(); it != loadedInDefs.end(); ++it)
+	{
+		std::vector<std::string>::const_iterator itF=std::find(loaded_.begin(),loaded_.end(),*it);
+		if(itF != loaded_.end())
+		{
+			loadedTmp.push_back(*it);
+			changed=true;
+		}
+	}
+
+	if(changed)
+	{
+		loaded_=loadedTmp;
+		adjust();
+	}
+
+	return changed;
+
+}
+*/
+
+bool SuiteFilter::setLoaded(const std::vector<std::string>& loaded,bool checkDiff)
+{
+	bool same=false;
+	if(checkDiff)
+		same=loadedSameAs(loaded);
+
+	if(!checkDiff || !same)
+	{
+		loaded_=loaded;
+		adjust();
+		return true;
+	}
+
+	return !same;
 }
 
 
@@ -170,6 +236,30 @@ void SuiteFilter::unselectAll()
 {
 	filter_.clear();
 	adjust();
+}
+
+void SuiteFilter::addObserver(SuiteFilterObserver* o)
+{
+	assert(o);
+
+	std::vector<SuiteFilterObserver*>::const_iterator it=std::find(observers_.begin(),observers_.end(),o);
+	if(it == observers_.end())
+		observers_.push_back(o);
+}
+
+void SuiteFilter::removeObserver(SuiteFilterObserver* o)
+{
+	std::vector<SuiteFilterObserver*>::iterator it=std::find(observers_.begin(),observers_.end(),o);
+	if(it != observers_.end())
+		observers_.erase(it);
+}
+
+void SuiteFilter::broadcastChange()
+{
+	for(std::vector<SuiteFilterObserver*>::const_iterator it=observers_.begin(); it != observers_.end(); ++it)
+	{
+		(*it)->notifyChange(this);
+	}
 }
 
 void SuiteFilter::readSettings(VSettings *vs)

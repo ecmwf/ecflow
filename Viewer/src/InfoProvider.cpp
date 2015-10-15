@@ -244,6 +244,13 @@ HistoryProvider::HistoryProvider(InfoPresenter* owner) :
 
 }
 
+SuiteProvider::SuiteProvider(InfoPresenter* owner) :
+		InfoProvider(owner,VTask::SuiteListTask)
+{
+
+}
+
+
 ZombieProvider::ZombieProvider(InfoPresenter* owner) :
 		InfoProvider(owner,VTask::ZombieListTask)
 {

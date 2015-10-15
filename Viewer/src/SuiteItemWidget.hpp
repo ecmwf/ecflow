@@ -32,11 +32,10 @@ public:
 	void clearContents();
 
 	//From VInfoPresenter
-	void infoReady(VReply*) {};
-	void infoFailed(VReply*) {};
+	void infoReady(VReply*);
+	void infoFailed(VReply*);
 	void infoProgress(VReply*) {};
 
-	void suiteFilterChanged();
 	void nodeChanged(const VNode*, const std::vector<ecf::Aspect::Type>&) {};
 	void defsChanged(const std::vector<ecf::Aspect::Type>&) {};
 
@@ -48,6 +47,7 @@ protected Q_SLOTS:
 	void on_okTb_clicked(bool);
 
 protected:
+	void updateData();
 	void updateWidgetState();
 
 	SuiteModel *model_;

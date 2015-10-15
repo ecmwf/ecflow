@@ -2,15 +2,13 @@
 #define SUITEMODEL_H
 
 #include <QAbstractItemModel>
-#include <QSortFilterProxyModel>
+//#include <QSortFilterProxyModel>
 
-#include <vector>
-
-#include "NodeObserver.hpp"
+#include "SuiteFilterObserver.hpp"
 
 class SuiteFilter;
 
-class SuiteModel : public QAbstractItemModel
+class SuiteModel : public QAbstractItemModel, public SuiteFilterObserver
 {
 public:
    	explicit SuiteModel(QObject *parent=0);
@@ -27,14 +25,21 @@ public:
    	QModelIndex index (int, int, const QModelIndex& parent = QModelIndex() ) const;
    	QModelIndex parent (const QModelIndex & ) const;
 
-	void reloadData();
 	void setData(SuiteFilter* filter);
+	void reloadData();
+
    	SuiteFilter* filter() const {return data_;}
+
+   	void notifyChange(SuiteFilter*);
+   	void notifyDelete(SuiteFilter*);
 
 protected:
 	bool hasData() const;
+	void clearData();
+	void updateData();
 
 	SuiteFilter* data_;
+	SuiteFilter* realData_;
 };
 
 #endif

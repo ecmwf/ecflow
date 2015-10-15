@@ -264,12 +264,11 @@ void ServerComThread::sync_local()
 		}
 	}
 
-	if(rescanNeed_ || ci_->server_reply().full_sync())
+	/*if(rescanNeed_ || ci_->server_reply().full_sync())
 	{
 		updateRegSuites();
-	}
+	}*/
 }
-
 
 void ServerComThread::reset()
 {
@@ -278,7 +277,7 @@ void ServerComThread::reset()
 	//Lock the mutex on defs
 	ServerDefsAccess defsAccess(server_);
 
-    //Detach the defs and then nodes from the observer
+    //Detach the defs and the nodes from the observer
     detach(defsAccess.defs());
 
 	/// registering with empty set would lead
@@ -329,6 +328,7 @@ void ServerComThread::reset()
 }
 
 
+//Called from sync local!!!
 void ServerComThread::updateRegSuites()
 {
 	if(!hasSuiteFilter_)

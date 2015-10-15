@@ -312,6 +312,7 @@ void ServerHandler::run(VTask_ptr task)
 	case VTask::ScriptPreprocTask:
 	case VTask::ScriptEditTask:
 	case VTask::ScriptSubmitTask:
+	case VTask::SuiteListTask:
 	case VTask::ZombieListTask:
 		comQueue_->addTask(task);
 		break;
@@ -788,9 +789,8 @@ void ServerHandler::clientTaskFinished(VTask_ptr task,const ServerReply& serverR
 				broadcast(&ServerObserver::notifyEndServerSync);
 			}
 
-
-			UserMessage::message(UserMessage::DBG, false, std::string(" --> Update suite filter after sync"));
-			comQueue_->addSuiteListTask();
+			//UserMessage::message(UserMessage::DBG, false, std::string(" --> Update suite filter after sync"));
+			//comQueue_->addSuiteListTask();
 
 			break;
 		}
@@ -799,7 +799,6 @@ void ServerHandler::clientTaskFinished(VTask_ptr task,const ServerReply& serverR
 		{
 			//If not yet connected but the sync task was successful
 			resetFinished();
-			comQueue_->addSuiteListTask();
 			break;
 		}
 
@@ -852,7 +851,9 @@ void ServerHandler::clientTaskFinished(VTask_ptr task,const ServerReply& serverR
 
 		case VTask::SuiteListTask:
 		{
-			updateSuiteFilter(serverReply.get_string_vec());
+			//Update the suite filter with the list of suites actually loaded onto the server.
+			//If the suitefilter is enabled this might have only a subset of it in our tree.
+			updateSuiteFilterWithLoaded(serverReply.get_string_vec());
 			break;
 		}
 
@@ -1031,6 +1032,9 @@ void ServerHandler::resetFinished()
 	//Notify the observers that scan has ended
 	broadcast(&ServerObserver::notifyEndServerScan);
 
+	//The suites might have been changed
+	updateSuiteFilter();
+
 	//Restart the timer
 	startRefreshTimer();
 
@@ -1126,6 +1130,9 @@ void ServerHandler::rescanTree()
 	//Restart the queue
 	comQueue_->start();
 
+	//The suites might have been changed
+	updateSuiteFilter();
+
 	//Start the timer
 	startRefreshTimer();
 
@@ -1153,34 +1160,48 @@ void ServerHandler::updateSuiteFilter(SuiteFilter* sf)
 			reset();
 		}
 	}
-
 }
-//This is called internally after an update!!!
-void ServerHandler::updateSuiteFilter(const std::vector<std::string>& loadedSuites)
+
+//Update the suite filter with the list of suites actually loaded onto the server.
+//If the suitefilter is enabled this might have only a subset of it in our tree.
+void ServerHandler::updateSuiteFilterWithLoaded(const std::vector<std::string>& loadedSuites)
 {
-	//std::vector<std::string> defSuites;
-	//vRoot_->suites(defSuites);
 	suiteFilter_->setLoaded(loadedSuites);
-	broadcast(&ServerObserver::notifyServerSuiteFilterChanged);
-
-	//if(suiteFilter_->isEnabled())
-	//{
-	/*	ServerDefsAccess defsAccess(this);  // will reliquish its resources on destruction
-		defs_ptr defs = defsAccess.defs();
-		if(defs != NULL)
-		{
-			std::vector<std::string> suites;
-			const std::vector<suite_ptr>& suitVec = defs->suiteVec();
-			for(std::vector<suite_ptr>::const_iterator it=suitVec.begin(); it != suitVec.end(); it++)
-			{
-				suites.push_back((*it)->name());
-			}
-
-			suiteFilter_->current(suites);
-		}
-	//}*/
-
 }
+
+//Update the suite filter with the list of suites stored in the defs (in the tree). It only
+//makes sense if the filter is disabled since in this case the defs stores all the loaded servers.
+void ServerHandler::updateSuiteFilterWithDefs()
+{
+	if(suiteFilter_->isEnabled())
+		return;
+
+	std::vector<std::string> defSuites;
+	vRoot_->suites(defSuites);
+	suiteFilter_->setLoaded(defSuites);
+}
+
+//Only called internally after reset or serverscan!!
+void ServerHandler::updateSuiteFilter()
+{
+	bool hasObserver=suiteFilter_->hasObserver();
+
+	//We only fetch the full list of loaded suites from the server
+	//via the thread when the suiteFilter is observerved and it is
+	//enabled!
+	if(hasObserver && suiteFilter_->isEnabled())
+	{
+		//This will call updateSuiteFilterWithLoaded()
+		comQueue_->addSuiteListTask();
+	}
+	else
+	{
+		std::vector<std::string> defSuites;
+		vRoot_->suites(defSuites);
+		suiteFilter_->setLoaded(defSuites);
+	}
+}
+
 
 bool ServerHandler::readFromDisk() const
 {
