@@ -1,0 +1,7 @@
+#ifndef ecflow_source_build_dir_h
+#define ecflow_source_build_dir_h
+ 
+#define CMAKE_ECFLOW_SOURCE_DIR "@PROJECT_SOURCE_DIR@"
+#define CMAKE_ECFLOW_BUILD_DIR  "@PROJECT_BINARY_DIR@"
+
+#endif 
