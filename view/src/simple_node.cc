@@ -723,9 +723,6 @@ Boolean simple_node::ecfFlag(int n) const
 
 Boolean simple_node::show_it() const
 {
-  if(((node*)this) == selection::current_node())
-    return True;  
-  
   if(show::want(show::time_dependant) && (hasDate() || hasTime()))
     return True;
   
@@ -763,6 +760,11 @@ Boolean simple_node::show_it() const
 Boolean simple_node::visible() const
 {
   int wanted = status() - STATUS_UNKNOWN + show::unknown;
+  if(selection::current_node())
+    if (selection::current_node()->full_name() == this->full_name())
+      return True;
+  if(this == selection::current_node()) return True;
+
   if((wanted < 32 && (show::want(wanted))) || show::want32(wanted)) 
     return True;
 

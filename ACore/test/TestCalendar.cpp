@@ -376,8 +376,15 @@ BOOST_AUTO_TEST_CASE( test_calendar_hybrid )
 
 	std::string expectedDate = "2010-Feb-10";
 
-	for(int hour=1; hour < 60; hour++) {
-		// Update calendar every hour, for 60 hours
+	// Check cache is correct
+   int expected_day_of_week  = calendar.day_of_week();
+   int expected_day_of_year  = calendar.day_of_year();
+   int expected_day_of_month  = calendar.day_of_month();
+   int expected_month  = calendar.month();
+   int expected_year  = calendar.year();
+
+	for(int hour=1; hour < 73; hour++) {
+		// Update calendar every hour, for 73 hours
 		// the date should be the same, i.e 2009, Feb, 10th
 
  		ptime timeBeforeUpdate = calendar.suiteTime();
@@ -389,7 +396,7 @@ BOOST_AUTO_TEST_CASE( test_calendar_hybrid )
 //		cerr << "hour = " << hour << " timeBeforeUpdate " << to_simple_string(timeBeforeUpdate)
 //		    << "   timeAfterUpdate = " << to_simple_string(timeAfterUpdate) <<  "\n";
 
-		if (hour != 24 && hour != 48) {
+		if (hour != 24 && hour != 48 && hour != 72) {
 			time_period diff(timeBeforeUpdate,timeAfterUpdate);
  			time_duration gap = diff.length();
 			BOOST_CHECK_MESSAGE( gap.hours() == 1,"Expected one hour difference but found " << gap.hours() << " at hour " << hour);
@@ -397,6 +404,18 @@ BOOST_AUTO_TEST_CASE( test_calendar_hybrid )
 
 		std::string actualDate = to_simple_string(calendar.suiteTime().date());
   		BOOST_CHECK_MESSAGE( actualDate == expectedDate,"Expected '" << expectedDate << "' but found " << actualDate << " at hour " << hour);
+
+  		// check cache ECFLOW-458
+  	   int actual_day_of_week  = calendar.day_of_week();
+  	   int actual_day_of_year  = calendar.day_of_year();
+  	   int actual_day_of_month  = calendar.day_of_month();
+  	   int actual_month  = calendar.month();
+  	   int actual_year  = calendar.year();
+      BOOST_CHECK_MESSAGE( actual_day_of_week == expected_day_of_week,"Expected day of week '" << expected_day_of_week << "' but found " << actual_day_of_week << " at hour " << hour);
+      BOOST_CHECK_MESSAGE( actual_day_of_year == expected_day_of_year,"Expected day of year '" << expected_day_of_year << "' but found " << actual_day_of_year << " at hour " << hour);
+      BOOST_CHECK_MESSAGE( actual_day_of_month == expected_day_of_month,"Expected day of month '" << expected_day_of_month << "' but found " << actual_day_of_month << " at hour " << hour);
+      BOOST_CHECK_MESSAGE( actual_month == expected_month,"Expected month '" << expected_month << "' but found " << actual_month << " at hour " << hour);
+      BOOST_CHECK_MESSAGE( actual_year == expected_year,"Expected year '" << expected_year << "' but found " << actual_year << " at hour " << hour);
  	}
 }
 
@@ -409,16 +428,32 @@ BOOST_AUTO_TEST_CASE( test_day_changed_for_real )
 	calendar.init(ptime(date(2010,2,10), minutes(0)), Calendar::REAL);
  	BOOST_CHECK_MESSAGE(!calendar.hybrid(),"calendar type should be real");
 
+   // Check cache is correct
+   int expected_day_of_week  = calendar.day_of_week();
+   int expected_day_of_year  = calendar.day_of_year();
+   int expected_day_of_month  = calendar.day_of_month();
+
 	for(int hour=1; hour < 73; hour++) {
 		// Update calendar every hour, for 72 hours
  		calendar.update( time_duration( hours(1) ) );
 
 		if (hour == 24 || hour == 48 || hour == 72) {
 			BOOST_CHECK_MESSAGE( calendar.dayChanged(),"Expected day change at hour " << hour << " calendar " << calendar.toString());
+			expected_day_of_week++;
+			expected_day_of_year++;
+			expected_day_of_month++;
  		}
 		else {
 			BOOST_CHECK_MESSAGE( !calendar.dayChanged(),"Un-Expected day change at hour " << hour << " calendar " << calendar.toString());
 		}
+
+      // check cache ECFLOW-458
+      int actual_day_of_week  = calendar.day_of_week();
+      int actual_day_of_year  = calendar.day_of_year();
+      int actual_day_of_month  = calendar.day_of_month();
+      BOOST_CHECK_MESSAGE( actual_day_of_week == expected_day_of_week,"Expected day of week '" << expected_day_of_week << "' but found " << actual_day_of_week << " at hour " << hour);
+      BOOST_CHECK_MESSAGE( actual_day_of_year == expected_day_of_year,"Expected day of year '" << expected_day_of_year << "' but found " << actual_day_of_year << " at hour " << hour);
+      BOOST_CHECK_MESSAGE( actual_day_of_month == expected_day_of_month,"Expected day of month '" << expected_day_of_month << "' but found " << actual_day_of_month << " at hour " << hour);
  	}
 }
 
@@ -426,13 +461,18 @@ BOOST_AUTO_TEST_CASE( test_day_changed_for_hybrid )
 {
 	cout << "ACore:: ...test_day_changed_for_hybrid\n";
 
-	// init the calendar to 2009, Feb, 10th,  0 minutes past midnight
+	// init the calendar
 	Calendar calendar; // default clock is real
-	calendar.init(ptime(date(2010,2,10), minutes(0)),Calendar::HYBRID);
+	calendar.init(ptime(date(2015,10,31), minutes(0)),Calendar::HYBRID);
  	BOOST_CHECK_MESSAGE(calendar.hybrid(),"calendar type should be hybrid");
 
  	// HYBRID calendars allow for day change but not date.
  	std::string expected_date = to_simple_string(calendar.date());
+
+   // Check cache is correct
+   int expected_day_of_week  = calendar.day_of_week();
+   int expected_day_of_year  = calendar.day_of_year();
+   int expected_day_of_month = calendar.day_of_month();
 
 	for(int hour=1; hour < 73; hour++) {
   		// Update calendar every hour, for 72 hours
@@ -448,6 +488,14 @@ BOOST_AUTO_TEST_CASE( test_day_changed_for_hybrid )
  		else {
  			BOOST_CHECK_MESSAGE( !calendar.dayChanged(),"Un-Expected day change at hour " << hour << " calendar " << calendar.toString());
  		}
+
+      // check cache ECFLOW-458
+      int actual_day_of_week  = calendar.day_of_week();
+      int actual_day_of_year  = calendar.day_of_year();
+      int actual_day_of_month = calendar.day_of_month();
+      BOOST_CHECK_MESSAGE( actual_day_of_week == expected_day_of_week,"Expected day of week '" << expected_day_of_week << "' but found " << actual_day_of_week << " at hour " << hour);
+      BOOST_CHECK_MESSAGE( actual_day_of_year == expected_day_of_year,"Expected day of year '" << expected_day_of_year << "' but found " << actual_day_of_year << " at hour " << hour);
+      BOOST_CHECK_MESSAGE( actual_day_of_month == expected_day_of_month,"Expected day of month '" << expected_day_of_month << "' but found " << actual_day_of_month << " at hour " << hour);
 	}
 }
 
