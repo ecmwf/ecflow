@@ -55,8 +55,11 @@ bool Node::findParentVariableValue(const std::string& name, std::string& theValu
    //   o/ default settings for ECF_HOME,ECF_LOG, ECF_CHECK,ECF_CHECKOLD,ECF_CHECKINTERVAL
    //                           ECF_INTERVAL ECF_CHECKMODE ECF_JOB_CMD ECF_MICRO ECF_TRIES ECF_PORT, ECF_NODE
    //   o/ These values are updated from the server environment when the BEGIN cmd is called.
-   theValue = defs()->server().find_variable(name);
-   if ( !theValue.empty() ) return true;
+   Defs* the_defs = defs();
+   if ( the_defs ) {
+      theValue = the_defs->server().find_variable(name);
+      if ( !theValue.empty() ) return true;
+   }
    return false; // the variable can not be found
 }
 
@@ -75,8 +78,11 @@ bool Node::find_parent_gen_variable_value(const std::string& name, std::string& 
     //   o/ default settings for ECF_HOME,ECF_LOG, ECF_CHECK,ECF_CHECKOLD,ECF_CHECKINTERVAL
     //                           ECF_INTERVAL ECF_CHECKMODE ECF_JOB_CMD ECF_MICRO ECF_TRIES ECF_PORT, ECF_NODE
     //   o/ These values are updated from the server environment when the BEGIN cmd is called.
-    theValue = defs()->server().find_variable(name);
-    if ( !theValue.empty() ) return true;
+    Defs* the_defs = defs();
+    if ( the_defs ) {
+       theValue = the_defs->server().find_variable(name);
+       if ( !theValue.empty() ) return true;
+    }
     return false; // the variable can not be found
 }
 
@@ -91,8 +97,13 @@ bool Node::findParentUserVariableValue(const std::string& name, std::string& the
    }
 
    // If all else fails search defs environment, returns empty string if match not found
-   theValue = defs()->server().find_variable(name);
-   if ( !theValue.empty() ) return true;
+   Defs* the_defs = defs();
+   if ( the_defs ) {
+      // Note: when calling ecflow_client --get_state /suite/task
+      // The node can be detached from the defs.
+      theValue = the_defs->server().find_variable(name);
+      if ( !theValue.empty() ) return true;
+   }
    return false; // the variable can not be found
 }
 
@@ -108,8 +119,13 @@ const std::string& Node::find_parent_user_variable_value(const std::string& name
       theParent = theParent->parent();
    }
 
-   // If all else fails search defs environment, returns empty string if match not found
-   return defs()->server().find_variable(name);
+   Defs* the_defs = defs();
+   if ( the_defs ) {
+      // Note: when calling ecflow_client --get_state /suite/task
+      // The node can be detached from the defs.
+      return the_defs->server().find_variable(name);
+   }
+   return Str::EMPTY();
 }
 
 bool Node::user_variable_exists(const std::string& name) const
@@ -125,7 +141,13 @@ bool Node::user_variable_exists(const std::string& name) const
    }
 
    // If all else fails search defs environment, returns empty string if match not found
-   return defs()->server().variable_exists(name);
+   Defs* the_defs = defs();
+   if ( the_defs ) {
+      // Note: when calling ecflow_client --get_state /suite/task
+      // The node can be detached from the defs.
+      return the_defs->server().variable_exists(name);
+   }
+   return false;
 }
 
 const Variable& Node::findVariable(const std::string& name) const
