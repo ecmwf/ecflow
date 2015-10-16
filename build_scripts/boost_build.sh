@@ -136,6 +136,7 @@ echo "using compiler $tool with build $1 variants "
 ./bjam --build-dir=./tmpBuildDir toolset=$tool $CXXFLAGS stage link=static --layout=$layout --with-test variant=debug  -j2
 ./bjam --build-dir=./tmpBuildDir toolset=$tool $CXXFLAGS stage link=static --layout=$layout --with-thread variant=debug  -j2
 ./bjam --build-dir=./tmpBuildDir toolset=$tool $CXXFLAGS stage link=static --layout=$layout --with-regex variant=debug  -j2   # ecflowUi
+ 
 
 
 # ========================================================================
