@@ -89,6 +89,7 @@ private:
 	void clear();
 	void adjust();
 	void broadcastChange();
+	void checkForNewLoaded(const std::vector<std::string>& loaded);
 
 	//All the suites currently loaded onto the server
     std::vector<std::string> loaded_;

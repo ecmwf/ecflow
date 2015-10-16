@@ -56,6 +56,23 @@ void SuiteFilter::clear()
 	broadcastChange();
 }
 
+void SuiteFilter::checkForNewLoaded(const std::vector<std::string>& loaded)
+{
+	if(enabled_ && autoAddNew_)
+	{
+		for(std::vector<std::string>::const_iterator it=loaded.begin(); it != loaded.end(); ++it)
+		{
+			if(std::find(loaded_.begin(), loaded_.end(),*it) == loaded_.end())
+			{
+				if(std::find(filter_.begin(), filter_.end(),*it) == filter_.end())
+				{
+					filter_.push_back(*it);
+				}
+			}
+		}
+	}
+}
+
 void SuiteFilter::adjust()
 {
 	items_.clear();
@@ -171,6 +188,7 @@ bool SuiteFilter::setLoaded(const std::vector<std::string>& loaded,bool checkDif
 
 	if(!checkDiff || !same)
 	{
+		checkForNewLoaded(loaded);
 		loaded_=loaded;
 		adjust();
 		return true;

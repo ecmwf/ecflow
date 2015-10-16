@@ -40,15 +40,18 @@ public:
 	void defsChanged(const std::vector<ecf::Aspect::Type>&) {};
 
 protected Q_SLOTS:
-	void on_autoTb_clicked(bool);
+	void on_autoCb_clicked(bool);
 	void on_enableTb_clicked(bool);
 	void on_selectAllTb_clicked(bool);
 	void on_unselectAllTb_clicked(bool);
+	void on_syncTb_clicked(bool);
 	void on_okTb_clicked(bool);
+	void slotModelEdited(const QModelIndex&,const QModelIndex&);
 
 protected:
 	void updateData();
 	void updateWidgetState();
+	void settingsChanged();
 
 	SuiteModel *model_;
 };

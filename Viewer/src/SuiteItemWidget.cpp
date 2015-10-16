@@ -32,8 +32,15 @@ SuiteItemWidget::SuiteItemWidget(QWidget *parent) : QWidget(parent)
 
 	suiteView->setModel(model_);
 
-	updateWidgetState();
+	connect(model_,SIGNAL(dataChanged(QModelIndex,QModelIndex)),
+			this,SLOT(slotModelEdited(QModelIndex,QModelIndex)));
 
+	//messageLabel->hide();
+
+	okTb->setEnabled(false);
+	enableTb->setChecked(false);
+
+	updateWidgetState();
 }
 
 QWidget* SuiteItemWidget::realWidget()
@@ -59,7 +66,8 @@ void SuiteItemWidget::reload(VInfo_ptr info)
 		model_->setData(sf);
 
 		enableTb->setChecked(sf->isEnabled());
-		autoTb->setChecked(sf->autoAddNewSuites());
+		autoCb->setChecked(sf->autoAddNewSuites());
+
 		updateWidgetState();
 
 		//We update the filter because it might not show the current status. If
@@ -106,35 +114,53 @@ void SuiteItemWidget::clearContents()
 {
 	model_->setData(0);
 	InfoPanelItem::clear();
+	okTb->setEnabled(false);
+	//messageLabel->hide();
 }
 
 void SuiteItemWidget::updateWidgetState()
 {
 	if(enableTb->isChecked())
 	{
-		autoTb->setEnabled(true);
+		autoCb->setEnabled(true);
 		selectAllTb->setEnabled(true);
 		unselectAllTb->setEnabled(true);
 
 		if(SuiteFilter* sf=model_->filter())
 		{
-			autoTb->setChecked(sf->autoAddNewSuites());
+			autoCb->setChecked(sf->autoAddNewSuites());
+
+			if(!sf->autoAddNewSuites())
+			{
+				syncTb->setEnabled(true);
+			}
+			else
+			{
+				syncTb->setEnabled(false);
+			}
+		}
+		else
+		{
+			syncTb->setEnabled(false);
 		}
 	}
 	else
 	{
-		autoTb->setEnabled(false);
+		autoCb->setEnabled(false);
 		selectAllTb->setEnabled(false);
 		unselectAllTb->setEnabled(false);
+		syncTb->setEnabled(false);
 	}
 }
 
-void SuiteItemWidget::on_autoTb_clicked(bool val)
+void SuiteItemWidget::on_autoCb_clicked(bool val)
 {
 	if(SuiteFilter* sf=model_->filter())
 	{
 		sf->setAutoAddNewSuites(val);
 	}
+
+	updateWidgetState();
 }
 
 void SuiteItemWidget::on_enableTb_clicked(bool val)
@@ -143,6 +169,7 @@ void SuiteItemWidget::on_enableTb_clicked(bool val)
 	{
 		sf->setEnabled(val);
 		model_->reloadData();
+		settingsChanged();
 	}
 
 	updateWidgetState();
@@ -154,6 +181,7 @@ void SuiteItemWidget::on_selectAllTb_clicked(bool)
 	{
 		sf->selectAll();
 		model_->reloadData();
+		settingsChanged();
 	}
 }
 
@@ -163,6 +191,16 @@ void SuiteItemWidget::on_unselectAllTb_clicked(bool)
 	{
 		sf->unselectAll();
 		model_->reloadData();
+		settingsChanged();
+	}
+}
+
+//get a fresh suite list from the server
+void SuiteItemWidget::on_syncTb_clicked(bool)
+{
+	if(info_.get() && info_->isServer() && info_->server())
+	{
+		infoProvider_->info(info_);
 	}
 }
 
@@ -173,7 +211,24 @@ void SuiteItemWidget::on_okTb_clicked(bool)
 		//This replace the edited filter in model the one
 		//stored by the server
 		info_->server()->updateSuiteFilter(model_->filter());
+		okTb->setEnabled(false);
 	}
 }
+
+void SuiteItemWidget::slotModelEdited(const QModelIndex&,const QModelIndex&)
+{
+	settingsChanged();
+}
+
+void SuiteItemWidget::settingsChanged()
+{
+	if(!okTb->isEnabled())
+	{
+		okTb->setEnabled(true);
+		//messageLabel->show();
+		//messageLabel->showInfo("The suite filter changed!");
+	}
+}
+
 
 static InfoPanelItemMaker<SuiteItemWidget> maker1("suite");

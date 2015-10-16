@@ -3,9 +3,11 @@
 #ifndef MESSAGELABEL_HPP_
 #define MESSAGELABEL_HPP_
 
-#include <QLabel>
+#include <QWidget>
 
-class MessageLabel : public QLabel
+class QLabel;
+
+class MessageLabel : public QWidget
 {
 public:
 	explicit MessageLabel(QWidget *parent=0);
@@ -20,6 +22,8 @@ private:
 	void showMessage(const Type&,QString);
 
 	Type currentType_;
+	QLabel *pixLabel_;
+	QLabel* msgLabel_;
 
 };
 

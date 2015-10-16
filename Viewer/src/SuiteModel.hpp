@@ -2,7 +2,7 @@
 #define SUITEMODEL_H
 
 #include <QAbstractItemModel>
-//#include <QSortFilterProxyModel>
+#include <QColor>
 
 #include "SuiteFilterObserver.hpp"
 
@@ -40,6 +40,8 @@ protected:
 
 	SuiteFilter* data_;
 	SuiteFilter* realData_;
+	QColor presentCol_;
+	QColor notPresentCol_;
 };
 
 #endif

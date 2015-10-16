@@ -16,7 +16,9 @@
 SuiteModel::SuiteModel(QObject *parent) :
      QAbstractItemModel(parent),
      data_(0),
-     realData_(0)
+     realData_(0),
+	 presentCol_(QColor(1,128,73)),
+	 notPresentCol_(QColor(255,0,0))
 {
 
 }
@@ -169,19 +171,18 @@ QVariant SuiteModel::data( const QModelIndex& index, int role ) const
 		if(index.column()==0)
 			return (data_->items().at(row).filtered_)?QVariant(Qt::Checked):QVariant(Qt::Unchecked);
 	}
-	/*else if(role == Qt::ForegroundRole)
+	else if(role == Qt::ForegroundRole)
 	{
-		if(data_->isEnabled())
+		if(!data_->isEnabled())
 		{
 			return QVariant();
 		}
-		else
+		else if(index.column() == 1)
 		{
-			return QColor(200,200,200);
+			return (data_->items().at(row).present_)?presentCol_:notPresentCol_;
 		}
-	}*/
-
-
+		return QVariant();
+	}
 
 	return QVariant();
 }
@@ -214,7 +215,7 @@ QVariant SuiteModel::headerData( const int section, const Qt::Orientation orient
    		switch ( section )
    		{
    		case 0: return tr("Suite");
-   		case 1: return tr("Load status");
+   		case 1: return tr("Status on server");
    		default: return QVariant();
    		}
    	}
@@ -222,8 +223,8 @@ QVariant SuiteModel::headerData( const int section, const Qt::Orientation orient
    	{
    		switch ( section )
    		{
-   		case 0: return tr("Suite name");
-   		case 1: return tr("Indicates if the suite is <b>loaded</b> to the server or not");
+   		case 0: return tr("Suite filter status");
+   		case 1: return tr("Indicates if the suite is currently <b>loaded</b> on the server");
    		default: return QVariant();
    		}
    	}
