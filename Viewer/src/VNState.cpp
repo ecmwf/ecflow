@@ -158,6 +158,12 @@ QString VNState::toDefaultStateName(const VNode *n)
 	return (obj)?(obj->name()):QString();
 }
 
+QString VNState::toRealStateName(const VNode *n)
+{
+    VNState *obj=VNState::toRealState(n);
+    return (obj)?(obj->name()):QString();
+}
+
 //==================================================
 // Server state
 //==================================================

@@ -310,7 +310,7 @@ QVariant TreeNodeModel::nodeData(const QModelIndex& index, int role) const
 		}
 		else if(role == Qt::ToolTipRole)
 		{
-			//return VNState::toName(node);
+			return vnode->toolTip();
 		}
 
 		//The number of nodes a suite has

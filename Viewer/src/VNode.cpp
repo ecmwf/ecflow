@@ -524,6 +524,27 @@ void VNode::why(std::vector<std::string>& theReasonWhy) const
 	}
 }
 
+QString VNode::toolTip()
+{    
+    QString txt="<b>Name</b>: " + name() + "<br>";
+    txt+="<b>Path</b>: " + QString::fromStdString(absNodePath()) + "<br>";
+    txt+="<b>Type</b>: " + QString::fromStdString(nodeType()) + "<br>";
+    
+    txt+="<b>Status</b>: " + stateName() + "<br>";
+    if(isSuspended())        
+        txt+="<b>Real status</b>: " + VNState::toRealStateName(this) + "<br>";
+          
+    txt+="<b>Default status</b>: " + defaultStateName() + "<br>";
+    
+    txt+="<b>Server:</b> " + QString::fromStdString(server()->name()) + "<br>";
+    txt+="<b>Host</b>: " + QString::fromStdString(server()->host());
+    txt+=" <b>Port</b>: " + QString::fromStdString(server()->port());
+    
+    return txt;
+}   
+
+
+
 //=================================================
 //
 // VNodeRoot - this represents the server

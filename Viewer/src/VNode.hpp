@@ -129,7 +129,8 @@ public:
     VNode* ancestorAt(int idx,SortMode sortMode);
 
     const std::string& nodeType();
-
+    virtual QString toolTip();
+    
     virtual void why(std::vector<std::string>& theReasonWhy) const;
 
     LogServer_ptr logServer();
