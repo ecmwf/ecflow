@@ -462,10 +462,11 @@
         },         
         {
             "menu"           : "Node",
-            "name"           : "Suites ...",
+            "name"           : "Suite filter ...",
             "visible_for"    : "server",        
             "command"        : "suite",
-            "handler"        : "info_panel"           
+            "handler"        : "info_panel",
+            "icon"           : "filter.svg"          
         }, 
         {
             "menu"           : "Node",

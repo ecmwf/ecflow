@@ -136,7 +136,8 @@
         
         {
         	"name"    : "suite",
-            "label"   : "Suites",
+            "label"   : "Suite filter",
+            "icon"    : "filter.svg",
             "visible_for" : "server"
              
         },
