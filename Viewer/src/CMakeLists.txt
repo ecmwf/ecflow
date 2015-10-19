@@ -254,6 +254,14 @@ else()
 endif()
 
 
+# add all the images as dependencies of the resource file so that it is
+# automatically recompiled when an image changes
+file( GLOB image_files "${CMAKE_CURRENT_SOURCE_DIR}/../images/*.*" )
+ADD_CUSTOM_TARGET(Qt_resource_cpp DEPENDS ${VIEWER_RES})
+ADD_DEPENDENCIES(Qt_resource_cpp ${image_files})
+
+
+
 add_definitions( -DECFLOW_SHARED_DIR="${CMAKE_INSTALL_PREFIX}/share/ecflow" )
 
 
