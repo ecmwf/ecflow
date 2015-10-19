@@ -58,8 +58,8 @@ static void set_positions(SimpleTreeWidget,long*,long*);
 /* putting this into comments makes ctrl-left button for collector
    disappear !! */
 static char defaultTranslations[] = "\
- Shift<Btn5Down>: increment(1)\n       Shift<Btn4Down>: increment(-1)  \n\
-      <Btn5Down>: increment(10)\n           <Btn4Down>: increment(-10) \n\
+ Shift<Btn5Down>: increment(10)\n       Shift<Btn4Down>: increment(-10)  \n\
+      <Btn5Down>: increment(1)\n           <Btn4Down>: increment(-1) \n\
 <BtnDown>:DrawingAreaInput()\n\
 <BtnUp>:DrawingAreaInput()\n\
 <Key>osfActivate:DrawingAreaInput()\n\

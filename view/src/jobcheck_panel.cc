@@ -62,7 +62,8 @@ void jobcheck_panel::show(node& n)
 Boolean jobcheck_panel::enabled(node& n)
 {
   if (n.type() != NODE_TASK && n.type() != NODE_ALIAS) return False;
-  if (n.status() != STATUS_SUBMITTED && n.status() != STATUS_ACTIVE) return False;
+  if (n.status() != STATUS_SUBMITTED && n.status() != STATUS_ACTIVE) 
+    return False;
   const std::string& cmd = n.__node__() ? cmd_str_ecf : cmd_str_sms;
   return n.variable(cmd).size() > 7;
 }

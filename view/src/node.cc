@@ -453,7 +453,8 @@ const std::string& node::name() const
 #ifdef BRIDGE
   if (tree_) { return name_; }
 #endif
-  if (owner_) return owner_->name();
+  if (owner_) 
+    return owner_->name();
   return ecf_node::no_owner();
 }
 
@@ -462,7 +463,8 @@ const std::string& node::full_name() const
 #ifdef BRIDGE
   if (tree_) { return full_name_; }
 #endif
-  if (owner_) return owner_->full_name();
+  if (owner_) 
+    return owner_->full_name();
   return ecf_node::no_owner();
 }
 
@@ -471,7 +473,8 @@ const std::string& node::net_name() const
 #ifdef BRIDGE
   if (tree_) { static std::string fn = sms_node_full_name(tree_); return fn; }
 #endif
-  if (owner_) return owner_->full_name();
+  if (owner_) 
+    return owner_->full_name();
   return ecf_node::no_owner();
 }
 
