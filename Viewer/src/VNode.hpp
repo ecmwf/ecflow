@@ -62,6 +62,20 @@ public:
 	int totalNum_;
 };
 
+class VServerCache
+{
+public:
+	std::vector<Variable> vars_;
+    std::vector<Variable> genVars_;
+    ecf::Flag flag_;
+
+    void clear() {
+    	vars_.clear();
+    	genVars_.clear();
+    	flag_.reset();
+    }
+};
+
 class VNode
 {
 friend class VServer;
@@ -127,6 +141,8 @@ public:
     bool isAncestor(const VNode* n);
     std::vector<VNode*> ancestors(SortMode sortMode);
     VNode* ancestorAt(int idx,SortMode sortMode);
+
+    virtual bool isFlagSet(ecf::Flag::Type f) const;
 
     const std::string& nodeType();
     virtual QString toolTip();
@@ -208,6 +224,8 @@ public:
 	std::string findVariable(const std::string& key,bool substitute=false) const;
 	std::string findInheritedVariable(const std::string& key,bool substitute=false) const;
 
+	bool isFlagSet(ecf::Flag::Type f) const;
+
 	void why(std::vector<std::string>& theReasonWhy) const;
 
 protected:
@@ -220,11 +238,18 @@ private:
 	//void clear(VNode*);
     void scan(VNode*,bool);
     void deleteNode(VNode* node,bool);
+    std::string substituteVariableValue(const std::string& val) const;
+    void updateCache();
+    void updateCache(defs_ptr defs);
 
     ServerHandler* server_;
     int totalNum_;
     std::vector<int> totalNumInChild_;
     std::vector<VNode*> nodes_;
+
+    VServerCache cache_;
+    std::vector<Variable> prevGenVars_;
+    ecf::Flag prevFlag_;
 
     std::map<std::string,VNodeInternalState> prevNodeState_;
 };

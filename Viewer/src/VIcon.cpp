@@ -18,7 +18,6 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
-#include <map>
 
 #include "ExprAst.hpp"
 
@@ -31,6 +30,7 @@
 #include "VProperty.hpp"
 
 std::map<std::string,VIcon*> VIcon::items_;
+std::vector<VIcon*> VIcon::itemsVec_;
 
 //==========================================================
 //
@@ -96,20 +96,29 @@ public:
 	bool show(VNode*);
 };
 
+class VSlowIcon : public VIcon
+{
+public:
+	explicit VSlowIcon(const std::string& name) : VIcon(name) {};
+	bool show(VNode*);
+};
+
 //==========================================================
 //
 // Create VIcon instances
 //
 //==========================================================
 
-static VWaitIcon waitIcon("wait");
-static VRerunIcon rerunIcon("rerun");
+//This also defines the order the icons will appear in the views
 static VMessageIcon messageIcon("message");
+static VRerunIcon rerunIcon("rerun");
 static VCompleteIcon completeIcon("complete");
+static VLateIcon lateIcon("late");
 static VTimeIcon timeIcon("time");
 static VDateIcon dateIcon("date");
+static VWaitIcon waitIcon("wait");
 static VZombieIcon zombieIcon("zombie");
-static VLateIcon lateIcon("late");
+static VSlowIcon slowIcon("slow");
 
 //==========================================================
 //
@@ -122,6 +131,7 @@ VIcon::VIcon(const std::string& name) :
 		pixId_(-1)
 {
 	items_[name]=this;
+	itemsVec_.push_back(this);
 }
 
 VIcon::~VIcon()
@@ -182,16 +192,17 @@ QVariantList VIcon::pixmapList(VNode *vnode,VParamSet *filter)
 	if(!vnode)
 		return lst;
 
-	for(std::map<std::string,VIcon*>::const_iterator it=items_.begin(); it != items_.end(); ++it)
+	for(std::vector<VIcon*>::const_iterator it=itemsVec_.begin(); it != itemsVec_.end(); ++it)
 	{
-            VIcon *v=it->second;
-            if(!filter || filter->current().find(it->second) != filter->current().end())
-            {
-                if(v->show(vnode))
-                {
-                   lst << v->pixId_;
-                }
-            }
+		VIcon *v=*it;
+
+        if(!filter || filter->current().find(v) != filter->current().end())
+        {
+       	   if(v->show(vnode))
+           {
+           	   lst << v->pixId_;
+           }
+        }
 	}
 
 	return lst;
@@ -216,20 +227,25 @@ static SimpleLoader<VIcon> loader("icon");
 // Wait
 //==========================================================
 
+//Task only
 bool  VWaitIcon::show(VNode *n)
 {
-	node_ptr node=n->node();
-	if(!node.get()) return false;
+	if(!n || n->isServer())
+		return false;
 
-	return node->flag().is_set(ecf::Flag::WAIT);
+	return n->isFlagSet(ecf::Flag::WAIT);
 }
 
 //==========================================================
 // Rerun
 //==========================================================
 
-bool  VRerunIcon::show(VNode *n)
+//Task only
+bool VRerunIcon::show(VNode *n)
 {
+	if(!n || n->isServer())
+		return false;
+
 	node_ptr node=n->node();
 	if(!node.get()) return false;
 
@@ -245,21 +261,26 @@ bool  VRerunIcon::show(VNode *n)
 // Message
 //==========================================================
 
-bool  VMessageIcon::show(VNode *n)
+//Node and server
+bool VMessageIcon::show(VNode *n)
 {
-	node_ptr node=n->node();
-	if(!node.get()) return false;
+	if(!n)
+		return false;
 
-	return node->flag().is_set(ecf::Flag::MESSAGE);
+	return n->isFlagSet(ecf::Flag::MESSAGE);
 }
 
 //==========================================================
 // Complete
 //==========================================================
 
-bool  VCompleteIcon::show(VNode *n)
+//Task only
+bool VCompleteIcon::show(VNode *n)
 {
-	if(!n || !n->node())
+	if(!n || n->isServer())
+		return false;
+
+	if(!n->node())
 		return false;
 
 	node_ptr node=n->node();
@@ -280,8 +301,12 @@ bool  VCompleteIcon::show(VNode *n)
 // Date
 //==========================================================
 
+//Node only?
 bool  VDateIcon::show(VNode *n)
 {
+	if(!n || n->isServer())
+		return false;
+
 	node_ptr node=n->node();
 
 	if(!node.get()) return false;
@@ -293,8 +318,12 @@ bool  VDateIcon::show(VNode *n)
 // Time
 //==========================================================
 
+//Node only?
 bool  VTimeIcon::show(VNode *n)
 {
+	if(!n || n->isServer())
+		return false;
+
 	node_ptr node=n->node();
 
 	//Check if time is held
@@ -312,23 +341,37 @@ bool  VTimeIcon::show(VNode *n)
 // Zombie
 //==========================================================
 
+//Node only?
 bool VZombieIcon::show(VNode *n)
 {
-	node_ptr node=n->node();
-	if(!node.get()) return false;
+	if(!n)
+		return false;
 
-	return node->flag().is_set(ecf::Flag::ZOMBIE);
+	return n->isFlagSet(ecf::Flag::ZOMBIE);
 }
 
 //==========================================================
 // Late
 //==========================================================
 
+//Node and server
 bool VLateIcon::show(VNode *n)
 {
-	node_ptr node=n->node();
-	if(!node.get()) return false;
+	if(!n || n->isServer())
+		return false;
 
-	return node->flag().is_set(ecf::Flag::LATE);
+	return n->isFlagSet(ecf::Flag::LATE);
 }
 
+//==========================================================
+// Slow
+//==========================================================
+
+//Server only
+bool VSlowIcon::show(VNode *n)
+{
+	if(!n || !n->isServer())
+		return false;
+
+	return n->isFlagSet(ecf::Flag::LATE);
+}

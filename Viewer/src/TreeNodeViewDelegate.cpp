@@ -316,6 +316,32 @@ void TreeNodeViewDelegate::renderServer(QPainter *painter,const QModelIndex& ind
 		currentRight=textRect.right();
 	}
 
+
+	//Icons area
+	QList<QPixmap> pixLst;
+	QList<QRect> pixRectLst;
+
+	QVariant va=index.data(AbstractNodeModel::IconRole);
+	if(va.type() == QVariant::List)
+	{
+		QVariantList lst=va.toList();
+		int xp=currentRight+5;
+		int yp=itemRect.center().y()-iconSize_/2;
+		for(int i=0; i < lst.count(); i++)
+		{
+			int id=lst[i].toInt();
+			if(id != -1)
+			{
+				pixLst << IconProvider::pixmap(id,iconSize_);
+				pixRectLst << QRect(xp,yp,pixLst.back().width(),pixLst.back().height());
+				xp+=pixLst.back().width()+iconGap_;
+			}
+		}
+
+		if(!pixRectLst.isEmpty())
+			currentRight=pixRectLst.back().right();
+	}
+
 	//The pixmap (optional)
 	bool hasPix=false;
 
@@ -417,6 +443,13 @@ void TreeNodeViewDelegate::renderServer(QPainter *painter,const QModelIndex& ind
     QColor fg=index.data(Qt::ForegroundRole).value<QColor>();
     renderNodeCell(painter,bg,QColor(),fg,stateRect,fillRect,QRect(),textRect,text,selected);
     
+
+	//Draw icons
+	for(int i=0; i < pixLst.count(); i++)
+	{
+		painter->drawPixmap(pixRectLst[i],pixLst[i]);
+	}
+
 	//Draw pixmap if needed
 	if(hasPix)
 	{
@@ -549,7 +582,7 @@ void TreeNodeViewDelegate::renderNode(QPainter *painter,const QModelIndex& index
 	{
 			QVariantList lst=va.toList();
 			int xp=currentRight+5;
-			int yp=textRect.center().y()-iconSize_/2;
+			int yp=itemRect.center().y()-iconSize_/2;
 			for(int i=0; i < lst.count(); i++)
 			{
 				int id=lst[i].toInt();
@@ -557,7 +590,7 @@ void TreeNodeViewDelegate::renderNode(QPainter *painter,const QModelIndex& index
 				{
 					pixLst << IconProvider::pixmap(id,iconSize_);
 					pixRectLst << QRect(xp,yp,pixLst.back().width(),pixLst.back().height());
-					xp+=pixLst.back().width();
+					xp+=pixLst.back().width()+iconGap_;
 				}
 			}
 

@@ -8,7 +8,7 @@
         		"label" : "Waiting", 
         		"tooltip" : "A running task is waiting for a trigger.",
                 "icon" : {      
-                	"default" : "icon_waiting.png"
+                	"default" : "icon_waiting.svg"
                 }
         	},      
             "rerun" : {
@@ -37,21 +37,21 @@
                  "label" : "Time",
                  "tooltip" : "Node has a time dependency.",
                  "icon"  : {
-                	 "default" : "icon_clock.png"
+                	 "default" : "icon_clock.svg"
                  }
             },                      
             "date" : {
                  "label" : "Date",
                  "tooltip" : "Node has date or day dependency.",
                  "icon"  : { 
-                	 "default" : "icon_calendar.png"
+                	 "default" : "icon_calendar.svg"
                  }
             },
             "zombie" : {
                 "label" : "Zombie",
                 "tooltip" : "",
                 "icon"  : {
-                	"default" :"icon_Z.png"
+                	"default" :"icon_zombie.svg"
                 }
             },
             "late" : {
@@ -59,6 +59,13 @@
                 "tooltip" : "Node is late.",               
                 "icon"  : {
                 	"default" : "icon_late.svg"
+                }
+            },
+            "slow" : {
+                "label" : "Slow server write",
+                "tooltip" : "Slow chekpoint file or job fle writing.",               
+                "icon"  : {
+                    "default" : "icon_slow.svg"
                 }
             }
      }

@@ -244,7 +244,7 @@ QVariant TreeNodeModel::serverData(const QModelIndex& index,int role) const
 			return (server->activity() == ServerHandler::LoadActivity);
 
 		//icon decoration
-		else if(role == IconRole)
+		/*else if(role == IconRole)
 		{
 			//TODO: add a proper iconprovider
 			ConnectState* st=server->connectState();
@@ -254,6 +254,14 @@ QVariant TreeNodeModel::serverData(const QModelIndex& index,int role) const
 				return "d";
 			}
 			return QVariant();
+		}*/
+
+		else if(role == IconRole)
+		{
+			if(icons_->isEmpty())
+				return QVariant();
+			else
+				return VIcon::pixmapList(server->vRoot(),icons_);
 		}
 
 		//Tooltip

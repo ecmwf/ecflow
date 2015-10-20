@@ -45,6 +45,7 @@ protected:
 	int pixId_;
 
 	static std::map<std::string,VIcon*> items_;
+	static std::vector<VIcon*> itemsVec_;
 };
 
 #endif

@@ -7,6 +7,7 @@
    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
    xmlns:svg="http://www.w3.org/2000/svg"
    xmlns="http://www.w3.org/2000/svg"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    width="32"
@@ -16,7 +17,28 @@
    inkscape:version="0.48.4 r9939"
    sodipodi:docname="icon_complete.svg">
   <defs
-     id="defs4" />
+     id="defs4">
+    <linearGradient
+       id="linearGradient5324">
+      <stop
+         style="stop-color:#7cbd17;stop-opacity:1;"
+         offset="0"
+         id="stop5326" />
+      <stop
+         style="stop-color:#b1e060;stop-opacity:1;"
+         offset="1"
+         id="stop5328" />
+    </linearGradient>
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient5324"
+       id="linearGradient5330"
+       x1="18.005625"
+       y1="26.582415"
+       x2="10.748308"
+       y2="7.0853157"
+       gradientUnits="userSpaceOnUse" />
+  </defs>
   <sodipodi:namedview
      id="base"
      pagecolor="#ffffff"
@@ -25,16 +47,16 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="16.15625"
-     inkscape:cx="4.772336"
-     inkscape:cy="14.48913"
+     inkscape:cx="19.957224"
+     inkscape:cy="15.790581"
      inkscape:document-units="px"
      inkscape:current-layer="layer2"
      showgrid="true"
      inkscape:snap-to-guides="false"
      inkscape:snap-grids="false"
      inkscape:window-width="1920"
-     inkscape:window-height="1140"
-     inkscape:window-x="-4"
+     inkscape:window-height="1180"
+     inkscape:window-x="1916"
      inkscape:window-y="-4"
      inkscape:window-maximized="1">
     <inkscape:grid
@@ -63,7 +85,7 @@
      inkscape:label="Layer"
      style="display:inline">
     <circle
-       style="fill:#7cbd17;fill-opacity:1;fill-rule:evenodd;stroke:#079121;stroke-width:1.07259773999999997;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       style="fill:url(#linearGradient5330);fill-opacity:1;fill-rule:evenodd;stroke:#136922;stroke-width:1.50000000000000000;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
        id="path3346"
        cx="15.955303"
        cy="16.060171"

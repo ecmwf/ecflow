@@ -516,6 +516,15 @@ const std::string&  VNode::nodeType()
 	return defaultStr;
 }
 
+bool VNode::isFlagSet(ecf::Flag::Type f) const
+{
+	if(node_ && node_.get())
+	{
+		return node_->flag().is_set(f);
+	}
+	return false;
+}
+
 void VNode::why(std::vector<std::string>& theReasonWhy) const
 {
 	if(node_ && node_.get())
@@ -595,11 +604,15 @@ int VServer::totalNumOfTopLevel(int idx) const
 //Clear the whole contents
 void VServer::clear()
 {
+	if(totalNum_==0)
+		return;
+
+	cache_.clear();
 	prevNodeState_.clear();
 
 	bool hasNotifications=server_->conf()->notificationsEnabled();
 
-	//Delete the children nodes. It will recursively delete all the nodes.
+	//Delete the children nodes. It will recursively delete all the nodes. It also saves the prevNodeState!!
 	for(std::vector<VNode*>::const_iterator it=children_.begin(); it != children_.end(); ++it)
 	{
 		deleteNode(*it,hasNotifications);
@@ -660,53 +673,37 @@ void VServer::deleteNode(VNode* node,bool hasNotifications)
 
 int VServer::variablesNum() const
 {
-	ServerDefsAccess defsAccess(server_);
-	if(defsAccess.defs())
-		return static_cast<int>(defsAccess.defs()->server().user_variables().size());
-
-	return 0;
+	return cache_.vars_.size();
 }
 
 int VServer::genVariablesNum() const
 {
-	ServerDefsAccess defsAccess(server_);
-	if(defsAccess.defs())
-		return static_cast<int>(defsAccess.defs()->server().server_variables().size());
-
-	return 0;
+	return cache_.genVars_.size();
 }
 
 void VServer::variables(std::vector<Variable>& vars)
 {
 	vars.clear();
-	ServerDefsAccess defsAccess(server_);
-	if (defsAccess.defs())
-		vars=defsAccess.defs()->server().user_variables();
+	vars=cache_.vars_;
 }
 
 void VServer::genVariables(std::vector<Variable>& vars)
 {
 	vars.clear();
-	ServerDefsAccess defsAccess(server_);
-	if (defsAccess.defs())
-		vars=defsAccess.defs()->server().server_variables();
+	vars=cache_.genVars_;
 }
 
 std::string VServer::genVariable(const std::string& key) const
 {
-    std::string val;
-    ServerDefsAccess defsAccess(server_);
-    if (defsAccess.defs())
-    {
-    	const std::vector<Variable>& vars=defsAccess.defs()->server().server_variables();
-    	for(std::vector<Variable>::const_iterator it=vars.begin(); it != vars.end(); it++)
-    	{
-    		if((*it).name() == key)
-    			val=(*it).theValue();
-    	}
-    }
+	std::string val;
 
-    return val;
+	for(std::vector<Variable>::const_iterator it=cache_.genVars_.begin(); it != cache_.genVars_.end(); ++it)
+	{
+	   if((*it).name() == key)
+		   val=(*it).theValue();
+	}
+
+	return val;
 }
 
 //------------------------------------------
@@ -741,26 +738,55 @@ std::string VServer::findVariable(const std::string& key,bool substitute) const
 {
 	std::string val;
 
-	ServerDefsAccess defsAccess(server_);  // will reliquish its resources on destruction
-	defs_ptr defs = defsAccess.defs();
-	if (!defs)
-		return val;
+	//Search user variables first
+	for(std::vector<Variable>::const_iterator it=cache_.vars_.begin(); it != cache_.vars_.end(); ++it)
+	{
+		if((*it).name() == key)
+		{
+			val=(*it).theValue();
+			if(substitute)
+				val=substituteVariableValue(val);
 
-	const Variable& var=defs->server().findVariable(key);
-    if(!var.empty())
-    {
-    	val=var.theValue();
-    	if(substitute)
-    	{
-    		//defs->server().variableSubsitution(val);
-    	}
-    }
-    return val;
+			return val;
+		}
+	}
+
+	//Then search server variables
+	for(std::vector<Variable>::const_iterator it=cache_.genVars_.begin(); it != cache_.genVars_.end(); ++it)
+	{
+		if((*it).name() == key)
+		{
+			val=(*it).theValue();
+			if(substitute)
+				val=substituteVariableValue(val);
+
+			return val;
+		}
+	}
+
+	return val;
 }
 
 std::string VServer::findInheritedVariable(const std::string& key,bool substitute) const
 {
 	return findVariable(key,substitute);
+}
+
+std::string VServer::substituteVariableValue(const std::string& inVal) const
+{
+	std::string val=inVal;
+
+	if(val.empty())
+		return val;
+
+	ServerDefsAccess defsAccess(server_);  // will reliquish its resources on destruction
+	defs_ptr defs = defsAccess.defs();
+	if (!defs)
+		return val;
+
+	defs->server().variableSubsitution(val);
+
+	return val;
 }
 
 //----------------------------------------------
@@ -787,6 +813,9 @@ void VServer::beginScan(VServerChange& change)
 		std::vector<node_ptr> nv;
 		defs->get_all_nodes(nv);
 		change.totalNum_=change.suiteNum_+nv.size();
+
+		//We need to update the cache server variables
+		updateCache(defs);
 	}
 
 	//This will use ServerDefsAccess as well. So we have to be sure that t=the mutex is
@@ -885,6 +914,7 @@ int VServer::indexOfNode(const VNode* vn) const
 	return -1;
 }
 
+
 //----------------------------------------------
 // Update
 //----------------------------------------------
@@ -895,6 +925,17 @@ void VServer::beginUpdate(VNode* node,const std::vector<ecf::Aspect::Type>& aspe
 	//views do not know about this change. So at this point (this is the begin step of the update)
 	//all VNode functions have to return the values valid before the update happened!!!!!!!
 	//The main goal of this function is to cleverly provide the views with some information about the nature of the update.
+
+	//We need to update the cache server variables
+	if(node == this)
+	{
+		if(std::find(aspect.begin(),aspect.end(),ecf::Aspect::SERVER_VARIABLE) != aspect.end() ||
+		   std::find(aspect.begin(),aspect.end(),ecf::Aspect::FLAG) != aspect.end())
+		{
+			//This will use the defs!!!
+			updateCache();
+		}
+	}
 
 	//Update the generated variables. There is no notification about their change so we have to to do it!!!
 	if(node->node())
@@ -1054,6 +1095,32 @@ void VServer::why(std::vector<std::string>& theReasonWhy) const
 		return;
 
 	defs->why(theReasonWhy);
+}
+
+
+
+bool VServer::isFlagSet(ecf::Flag::Type f) const
+{
+	return cache_.flag_.is_set(f);
+}
+
+void VServer::updateCache()
+{
+	cache_.clear();
+
+	ServerDefsAccess defsAccess(server_);  // will reliquish its resources on destruction
+	defs_ptr defs = defsAccess.defs();
+	if (!defs)
+		return;
+
+	updateCache(defs);
+}
+
+void VServer::updateCache(defs_ptr defs)
+{
+	cache_.vars_=defs->server().user_variables();
+	cache_.genVars_=defs->server().server_variables();
+	cache_.flag_=defs->flag();
 }
 
 QString VServer::toolTip()

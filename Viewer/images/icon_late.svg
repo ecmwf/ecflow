@@ -19,14 +19,13 @@
   <defs
      id="defs4">
     <linearGradient
-       inkscape:collect="always"
        id="linearGradient3753">
       <stop
          style="stop-color:#ffbc91;stop-opacity:1"
          offset="0"
          id="stop3755" />
       <stop
-         style="stop-color:#ff7f2a;stop-opacity:1"
+         style="stop-color:#ffe9db;stop-opacity:1;"
          offset="1"
          id="stop3757" />
     </linearGradient>
@@ -34,10 +33,10 @@
        inkscape:collect="always"
        xlink:href="#linearGradient3753"
        id="linearGradient3759"
-       x1="12.337715"
-       y1="5.7708321"
-       x2="19.854168"
-       y2="25.584114"
+       x1="8.5794878"
+       y1="6.7143216"
+       x2="16.095942"
+       y2="20.866665"
        gradientUnits="userSpaceOnUse" />
   </defs>
   <sodipodi:namedview
@@ -48,8 +47,8 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="16.15625"
-     inkscape:cx="-2.9425175"
-     inkscape:cy="14.458182"
+     inkscape:cx="-12.50538"
+     inkscape:cy="14.520078"
      inkscape:document-units="px"
      inkscape:current-layer="layer2"
      showgrid="true"

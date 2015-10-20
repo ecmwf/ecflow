@@ -68,6 +68,7 @@ protected:
 	QFont font_;
 	QFont attrFont_;
 	int iconSize_;
+	int iconGap_;
 
 };
 

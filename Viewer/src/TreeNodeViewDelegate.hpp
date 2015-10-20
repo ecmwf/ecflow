@@ -62,7 +62,6 @@ protected:
 	bool drawChildCount_;
     NodeStyle nodeStyle_;
     bool useNodeGrad_;
-    
 
     QFont serverNumFont_;
 	QFont suiteNumFont_;
