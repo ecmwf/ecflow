@@ -32,7 +32,7 @@
             "dock_icon"    : "script_dock.svg",
             "show"    : "toolbar",
             "tooltip" : "Open <b>script</b> tab in a new Info Panel dialog",
-            "visible_for" : "task"            
+            "visible_for" : "task or alias"            
         }, 
         
         {
@@ -42,7 +42,7 @@
             "dock_icon"	  : "job_dock.svg",
             "show"    : "toolbar", 
             "tooltip" : "Open <b>job</b> tab in a new Info Panel dialog",
-            "visible_for" : "task"            
+            "visible_for" : "task or alias"            
         },    
         
         {
@@ -52,7 +52,7 @@
             "dock_icon"    : "output_dock.svg",
             "show"    : "toolbar",
             "tooltip" : "Open <b>output</b> tab in a new Info Panel dialog",
-            "visible_for" : "task"            
+            "visible_for" : "task or alias"            
         },    
         
         {
@@ -108,7 +108,7 @@
             "dock_icon"	  : "edit.svg",
             "show"    : "toolbar",
             "tooltip" : "Open <b>edit</b> tab in a new Info Panel dialog",            
-            "visible_for" : "task"            
+            "visible_for" : "task or alias"            
         } ,   
        
         
