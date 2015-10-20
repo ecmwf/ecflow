@@ -122,6 +122,7 @@
     <bool>false</bool>
    </attribute>
    <addaction name="actionRefresh"/>
+   <addaction name="actionSearch"/>
   </widget>
   <action name="actionClose">
    <property name="icon">
@@ -282,6 +283,15 @@
   <action name="actionManageSessions">
    <property name="text">
     <string>Manage sessions ...</string>
+   </property>
+  </action>
+  <action name="actionSearch">
+   <property name="icon">
+    <iconset resource="viewer.qrc">
+     <normaloff>:/viewer/search_decor.svg</normaloff>:/viewer/search_decor.svg</iconset>
+   </property>
+   <property name="text">
+    <string>Search</string>
    </property>
   </action>
  </widget>

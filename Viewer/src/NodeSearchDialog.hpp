@@ -3,11 +3,10 @@
 
 #include <QDialog>
 
-namespace Ui {
-class NodeSearchDialog;
-}
+#include "ui_NodeSearchDialog.h"
 
-class NodeSearchDialog : public QDialog
+
+class NodeSearchDialog : public QDialog, protected Ui::NodeSearchDialog
 {
     Q_OBJECT
 
@@ -15,8 +14,6 @@ public:
     explicit NodeSearchDialog(QWidget *parent = 0);
     ~NodeSearchDialog();
 
-private:
-    Ui::NodeSearchDialog *ui;
 };
 
 #endif

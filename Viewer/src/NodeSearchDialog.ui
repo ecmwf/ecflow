@@ -7,84 +7,180 @@
     <x>0</x>
     <y>0</y>
     <width>611</width>
-    <height>575</height>
+    <height>683</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Dialog</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0,0">
+  <layout class="QVBoxLayout" name="verticalLayout_2">
    <item>
-    <widget class="QTabWidget" name="tabWidget">
-     <property name="currentIndex">
-      <number>1</number>
+    <widget class="QSplitter" name="splitter">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
      </property>
-     <widget class="QWidget" name="tab">
-      <attribute name="title">
-       <string>Servers</string>
-      </attribute>
+     <widget class="QWidget" name="filtersPanel_" native="true">
+      <layout class="QVBoxLayout" name="verticalLayout_4">
+       <item>
+        <widget class="QPushButton" name="pushButton">
+         <property name="text">
+          <string>PushButton</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QListView" name="listView"/>
+       </item>
+      </layout>
      </widget>
-     <widget class="QWidget" name="tab_2">
-      <attribute name="title">
-       <string>Nodes</string>
-      </attribute>
-      <layout class="QGridLayout" name="gridLayout_2">
-       <item row="2" column="0">
-        <widget class="QLabel" name="label_2">
-         <property name="text">
-          <string>Status:</string>
-         </property>
-        </widget>
+     <widget class="QWidget" name="layoutWidget">
+      <layout class="QVBoxLayout" name="verticalLayout">
+       <property name="leftMargin">
+        <number>5</number>
+       </property>
+       <property name="topMargin">
+        <number>5</number>
+       </property>
+       <property name="rightMargin">
+        <number>5</number>
+       </property>
+       <property name="bottomMargin">
+        <number>5</number>
+       </property>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout">
+         <item>
+          <widget class="QToolButton" name="toolButton_2">
+           <property name="text">
+            <string>Advanced mode</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QToolButton" name="toolButton">
+           <property name="text">
+            <string>Save filter as</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
        </item>
-       <item row="0" column="3">
-        <widget class="QLineEdit" name="lineEdit"/>
+       <item>
+        <layout class="QGridLayout" name="gridLayout">
+         <item row="0" column="1">
+          <widget class="QLineEdit" name="searchLe_"/>
+         </item>
+         <item row="11" column="0">
+          <widget class="QLabel" name="label_4">
+           <property name="text">
+            <string>Node flags:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="9" column="0">
+          <widget class="QLabel" name="label_2">
+           <property name="text">
+            <string>Node status:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="10" column="0">
+          <widget class="QLabel" name="label_5">
+           <property name="text">
+            <string>Node attributes:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="8" column="0">
+          <widget class="QLabel" name="label_3">
+           <property name="text">
+            <string>Node type:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="7" column="0">
+          <widget class="QLabel" name="label_6">
+           <property name="text">
+            <string>Search root:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="0">
+          <widget class="QLabel" name="label">
+           <property name="text">
+            <string>Name:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="1">
+          <layout class="QGridLayout" name="gridLayout_2">
+           <item row="1" column="0">
+            <widget class="QCheckBox" name="checkBox">
+             <property name="text">
+              <string>Wildcards</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="0">
+            <widget class="QCheckBox" name="checkBox_2">
+             <property name="text">
+              <string>Case sensitive</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="1">
+            <widget class="QCheckBox" name="checkBox_3">
+             <property name="text">
+              <string>Whole words</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="1">
+            <widget class="QCheckBox" name="checkBox_4">
+             <property name="text">
+              <string>Regexp</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item row="0" column="2">
+          <widget class="QPushButton" name="pushButton_2">
+           <property name="text">
+            <string>Find</string>
+           </property>
+           <property name="icon">
+            <iconset resource="viewer.qrc">
+             <normaloff>:/viewer/search_decor.svg</normaloff>:/viewer/search_decor.svg</iconset>
+           </property>
+          </widget>
+         </item>
+         <item row="8" column="1" colspan="2">
+          <widget class="ComboMulti" name="typeCb_"/>
+         </item>
+         <item row="9" column="1" colspan="2">
+          <widget class="ComboMulti" name="stateCb_"/>
+         </item>
+         <item row="10" column="1" colspan="2">
+          <widget class="ComboMulti" name="attrCb_"/>
+         </item>
+         <item row="11" column="1" colspan="2">
+          <widget class="ComboMulti" name="flagCb_"/>
+         </item>
+         <item row="7" column="1" colspan="2">
+          <widget class="QLineEdit" name="rootLe_"/>
+         </item>
+        </layout>
        </item>
-       <item row="0" column="0">
-        <widget class="QLabel" name="label">
-         <property name="text">
-          <string>Name:</string>
-         </property>
-        </widget>
+       <item>
+        <widget class="QPlainTextEdit" name="plainTextEdit"/>
        </item>
-       <item row="2" column="3">
-        <widget class="ComboMulti" name="nodeStateCb_"/>
-       </item>
-       <item row="3" column="3">
-        <widget class="QComboBox" name="comboBox"/>
-       </item>
-       <item row="1" column="0">
-        <widget class="QLabel" name="label_3">
-         <property name="text">
-          <string>Type:</string>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="3">
-        <widget class="ComboMulti" name="nodeTypeCb_"/>
-       </item>
-       <item row="3" column="0">
-        <widget class="QLabel" name="label_4">
-         <property name="text">
-          <string>Flags:</string>
-         </property>
-        </widget>
+       <item>
+        <widget class="QTreeView" name="treeView"/>
        </item>
       </layout>
      </widget>
     </widget>
-   </item>
-   <item>
-    <spacer name="verticalSpacer">
-     <property name="orientation">
-      <enum>Qt::Vertical</enum>
-     </property>
-     <property name="sizeHint" stdset="0">
-      <size>
-       <width>20</width>
-       <height>40</height>
-      </size>
-     </property>
-    </spacer>
    </item>
    <item>
     <widget class="QDialogButtonBox" name="buttonBox">
@@ -97,6 +193,10 @@
     </widget>
    </item>
   </layout>
+  <zorder>listView</zorder>
+  <zorder>layoutWidget</zorder>
+  <zorder></zorder>
+  <zorder>buttonBox</zorder>
  </widget>
  <customwidgets>
   <customwidget>
@@ -105,7 +205,9 @@
    <header location="global">ComboMulti.hpp</header>
   </customwidget>
  </customwidgets>
- <resources/>
+ <resources>
+  <include location="viewer.qrc"/>
+ </resources>
  <connections>
   <connection>
    <sender>buttonBox</sender>

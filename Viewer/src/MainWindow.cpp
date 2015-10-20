@@ -33,6 +33,7 @@
 #include "MenuConfigDialog.hpp"
 #include "NodePathWidget.hpp"
 #include "NodePanel.hpp"
+#include "NodeSearchDialog.hpp"
 #include "PropertyDialog.hpp"
 #include "ServerHandler.hpp"
 #include "ServerListDialog.hpp"
@@ -100,6 +101,7 @@ MainWindow::MainWindow(QStringList idLst,QWidget *parent) : QMainWindow(parent)
     ChangeNotifyWidget* chw=new ChangeNotifyWidget(this);
     statusBar()->addPermanentWidget(chw);
 
+    actionSearch->setVisible(false);
 
 }
 
@@ -203,6 +205,15 @@ void MainWindow::on_actionConfigureNodeMenu_triggered()
     MenuConfigDialog menuConfigDialog;
     
 	if(menuConfigDialog.exec() == QDialog::Accepted)
+	{
+    }
+}
+
+void MainWindow::on_actionSearch_triggered()
+{
+    NodeSearchDialog d;
+
+	if(d.exec() == QDialog::Accepted)
 	{
     }
 }
