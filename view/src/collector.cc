@@ -32,7 +32,7 @@ extern "C" {
 collector::collector()
 {
 
-  const int commands_nb = 20;          
+  const int commands_nb = 22;          
   static char* commands[commands_nb] = {
     (char *) "ecflow_client --zombie_fob <full_name>" ,
     (char *) "ecflow_client --zombie_fail <full_name>" ,
@@ -54,6 +54,8 @@ collector::collector()
     (char *) "ecflow_client --alter change defstatus complete <full_name>",
     (char *) "ecflow_client --force complete <full_name>",
     (char *) "ecflow_client --force aborted  <full_name>",
+    (char *) "###",
+    (char *) "sh python %PYDEF:0% %SUITE% <full_name> %ECF_NODE% # aka replace",
     };
 
 	create(gui::top());	

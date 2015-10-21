@@ -760,10 +760,17 @@ Boolean simple_node::show_it() const
 Boolean simple_node::visible() const
 {
   int wanted = status() - STATUS_UNKNOWN + show::unknown;
-  if(selection::current_node())
-    if (selection::current_node()->full_name() == this->full_name())
+  try {
+    if(selection::current_node())
+      if (selection::current_node()->full_name() == this->full_name())
+	return True;
+    if(this == selection::current_node()) 
       return True;
-  if(this == selection::current_node()) return True;
+  }
+  catch ( std::exception& e ) {
+      gui::message("# problem with selection?");
+      gui::message(e.what());      
+  }
 
   if((wanted < 32 && (show::want(wanted))) || show::want32(wanted)) 
     return True;
