@@ -66,15 +66,22 @@ void ActionHandler::contextMenu(std::vector<VInfo_ptr> nodesLst,QPoint pos)
         	if(item && !item->question().empty() && item->shouldAskQuestion(nodesLst))
         	{
                 std::string nodeNames("<ul>");
-                for(int i=0; i < nodesLst.size(); i++)
+                if (nodesLst.size() == 1)
                 {
-                    nodeNames += "<li><b>";
-                    nodeNames += nodesLst[i]->path();
-                    nodeNames += "</b></li>";
-                    //if (i < nodesLst.size()-1)
-                    //    nodeNames += "<br>";
+                    nodeNames = nodesLst[0]->path();
                 }
-                nodeNames += "</ul>";
+                else
+                {
+                    for(int i=0; i < nodesLst.size(); i++)
+                    {
+                        nodeNames += "<li><b>";
+                        nodeNames += nodesLst[i]->path();
+                        nodeNames += "</b></li>";
+                        //if (i < nodesLst.size()-1)
+                        //    nodeNames += "<br>";
+                    }
+                    nodeNames += "</ul>";
+                }
 
                 std::string question(item->question());
 
