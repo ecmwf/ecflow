@@ -19,7 +19,7 @@
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
      </property>
-     <widget class="QWidget" name="filtersPanel_" native="true">
+     <widget class="QWidget" name="queryListPanel_" native="true">
       <layout class="QVBoxLayout" name="verticalLayout_4">
        <item>
         <widget class="QPushButton" name="pushButton">
@@ -57,9 +57,35 @@
           </widget>
          </item>
          <item>
+          <widget class="QToolButton" name="queryListTb_">
+           <property name="toolTip">
+            <string>Show/hide query list</string>
+           </property>
+           <property name="text">
+            <string>Query panel</string>
+           </property>
+           <property name="checkable">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QToolButton" name="queryTb_">
+           <property name="text">
+            <string>Show query</string>
+           </property>
+           <property name="checkable">
+            <bool>true</bool>
+           </property>
+           <property name="autoRaise">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
           <widget class="QToolButton" name="toolButton">
            <property name="text">
-            <string>Save filter as</string>
+            <string>Save query as ...</string>
            </property>
           </widget>
          </item>
@@ -70,38 +96,42 @@
          <item row="0" column="1">
           <widget class="QLineEdit" name="searchLe_"/>
          </item>
-         <item row="11" column="0">
+         <item row="10" column="0">
           <widget class="QLabel" name="label_4">
            <property name="text">
             <string>Node flags:</string>
            </property>
           </widget>
          </item>
-         <item row="9" column="0">
+         <item row="8" column="0">
           <widget class="QLabel" name="label_2">
            <property name="text">
             <string>Node status:</string>
            </property>
           </widget>
          </item>
-         <item row="10" column="0">
-          <widget class="QLabel" name="label_5">
+         <item row="0" column="2">
+          <widget class="QPushButton" name="findPb_">
            <property name="text">
-            <string>Node attributes:</string>
+            <string>Find</string>
+           </property>
+           <property name="icon">
+            <iconset resource="viewer.qrc">
+             <normaloff>:/viewer/search_decor.svg</normaloff>:/viewer/search_decor.svg</iconset>
            </property>
           </widget>
          </item>
-         <item row="8" column="0">
+         <item row="7" column="0">
           <widget class="QLabel" name="label_3">
            <property name="text">
             <string>Node type:</string>
            </property>
           </widget>
          </item>
-         <item row="7" column="0">
-          <widget class="QLabel" name="label_6">
+         <item row="6" column="0">
+          <widget class="QLabel" name="label_8">
            <property name="text">
-            <string>Search root:</string>
+            <string>Root node:</string>
            </property>
           </widget>
          </item>
@@ -111,6 +141,23 @@
             <string>Name:</string>
            </property>
           </widget>
+         </item>
+         <item row="3" column="2">
+          <widget class="QToolButton" name="inResetTb_">
+           <property name="toolTip">
+            <string>Reset</string>
+           </property>
+           <property name="text">
+            <string>...</string>
+           </property>
+           <property name="icon">
+            <iconset resource="viewer.qrc">
+             <normaloff>:/viewer/reset_to_default.svg</normaloff>:/viewer/reset_to_default.svg</iconset>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="1">
+          <widget class="ComboMulti" name="inCb_"/>
          </item>
          <item row="2" column="1">
           <layout class="QGridLayout" name="gridLayout_2">
@@ -129,9 +176,9 @@
             </widget>
            </item>
            <item row="0" column="1">
-            <widget class="QCheckBox" name="checkBox_3">
+            <widget class="QCheckBox" name="exactMatchCh_">
              <property name="text">
-              <string>Whole words</string>
+              <string>Exact match</string>
              </property>
             </widget>
            </item>
@@ -144,36 +191,102 @@
            </item>
           </layout>
          </item>
-         <item row="0" column="2">
-          <widget class="QPushButton" name="pushButton_2">
+         <item row="4" column="0">
+          <widget class="QLabel" name="label_6">
            <property name="text">
-            <string>Find</string>
-           </property>
-           <property name="icon">
-            <iconset resource="viewer.qrc">
-             <normaloff>:/viewer/search_decor.svg</normaloff>:/viewer/search_decor.svg</iconset>
+            <string>Servers:</string>
            </property>
           </widget>
          </item>
-         <item row="8" column="1" colspan="2">
+         <item row="3" column="0">
+          <widget class="QLabel" name="label_5">
+           <property name="text">
+            <string>Search in:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="4" column="1">
+          <widget class="ComboMulti" name="serverCb_"/>
+         </item>
+         <item row="4" column="2">
+          <widget class="QToolButton" name="serverResetTb_">
+           <property name="toolTip">
+            <string>Reset</string>
+           </property>
+           <property name="text">
+            <string>...</string>
+           </property>
+           <property name="icon">
+            <iconset resource="viewer.qrc">
+             <normaloff>:/viewer/reset_to_default.svg</normaloff>:/viewer/reset_to_default.svg</iconset>
+           </property>
+          </widget>
+         </item>
+         <item row="7" column="1">
           <widget class="ComboMulti" name="typeCb_"/>
          </item>
-         <item row="9" column="1" colspan="2">
+         <item row="7" column="2">
+          <widget class="QToolButton" name="typeResetTb_">
+           <property name="toolTip">
+            <string>Reset</string>
+           </property>
+           <property name="text">
+            <string>...</string>
+           </property>
+           <property name="icon">
+            <iconset resource="viewer.qrc">
+             <normaloff>:/viewer/reset_to_default.svg</normaloff>:/viewer/reset_to_default.svg</iconset>
+           </property>
+          </widget>
+         </item>
+         <item row="8" column="1">
           <widget class="ComboMulti" name="stateCb_"/>
          </item>
-         <item row="10" column="1" colspan="2">
-          <widget class="ComboMulti" name="attrCb_"/>
+         <item row="8" column="2">
+          <widget class="QToolButton" name="stateResetTb_">
+           <property name="toolTip">
+            <string>Reset</string>
+           </property>
+           <property name="text">
+            <string>...</string>
+           </property>
+           <property name="icon">
+            <iconset resource="viewer.qrc">
+             <normaloff>:/viewer/reset_to_default.svg</normaloff>:/viewer/reset_to_default.svg</iconset>
+           </property>
+          </widget>
          </item>
-         <item row="11" column="1" colspan="2">
+         <item row="10" column="1">
           <widget class="ComboMulti" name="flagCb_"/>
          </item>
-         <item row="7" column="1" colspan="2">
+         <item row="10" column="2">
+          <widget class="QToolButton" name="flagResetTb_">
+           <property name="toolTip">
+            <string>Reset</string>
+           </property>
+           <property name="text">
+            <string>...</string>
+           </property>
+           <property name="icon">
+            <iconset resource="viewer.qrc">
+             <normaloff>:/viewer/reset_to_default.svg</normaloff>:/viewer/reset_to_default.svg</iconset>
+           </property>
+          </widget>
+         </item>
+         <item row="6" column="1">
           <widget class="QLineEdit" name="rootLe_"/>
          </item>
         </layout>
        </item>
        <item>
-        <widget class="QPlainTextEdit" name="plainTextEdit"/>
+        <widget class="QLabel" name="queryLabel_">
+         <property name="text">
+          <string>Query</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPlainTextEdit" name="queryTe_"/>
        </item>
        <item>
         <widget class="QTreeView" name="treeView"/>

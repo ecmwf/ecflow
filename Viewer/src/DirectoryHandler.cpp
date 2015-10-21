@@ -65,7 +65,8 @@ void DirectoryHandler::init(const std::string& exeStr)
 			catch(const boost::filesystem::filesystem_error& err)
 			{
 				UserMessage::message(UserMessage::ERROR, true,
-								std::string("Could not create configDir: " + configDir_ + " reason: " + err.what()));
+						std::string("Could not create configDir: " + configDir_ + " reason: " + err.what()));
+				exit(1);
 			}
 		}
 	}

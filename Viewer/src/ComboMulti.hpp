@@ -13,14 +13,20 @@ public:
     virtual ~ComboMulti();
     bool eventFilter(QObject *object, QEvent *event);
     virtual void paintEvent(QPaintEvent *);
-    void SetDisplayText(QString text);
-    QString GetDisplayText() const;
+    void setDisplayText(QString text);
+    QString displayText() const;
+    QStringList selection() const {return selection_;}
 
 public Q_SLOTS:
     void slotChecked();
+    void clearSelection();
+
+Q_SIGNALS:
+	void selectionChanged();
 
 private:
     QString dpyText_;
+    QStringList selection_;
 };
 
 class ComboMultiDelegate : public QItemDelegate

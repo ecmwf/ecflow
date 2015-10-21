@@ -177,15 +177,47 @@
                "bold"	 : "true"
            }, 
            
-             "comment" : {
+           "comment" : {
                  "pattern" : "(#[^\n]*)",                     
                  "colour"  : "rgb(100,100,100)",
                  "italic"  : "true"                                         
-             }
-             
-             
-    }
-        
-        
+            }                          
+        },
+ 
+        "query"  : {
+
+             "oper" : {
+                 "pattern" : "(=|~)",                       
+                 "colour"  : "rgb(0,110,40)"                    
+             }, 
+             "logical" : {
+                "pattern" : "(or|and)",                       
+                "colour"  : "rgb(50,50,50)",               
+                "bold"    : "true"
+             }, 
+             "keyword" : {
+                "pattern" : "(from)",                       
+                "colour"  : "rgb(16,40,170)",               
+                "bold"    : "true"
+             }, 
+             "state" : {
+              "pattern" : "\\b(aborted|active|queued|complete|submitted|suspended|unknown)\\b",                       
+              "colour"  : "rgb(136,0,136)",
+              "bold"    : "false"
+            },
+             "type" : {
+              "pattern" : "\\b(server|suite|family|task|alias)\\b",                       
+              "colour"  : "rgb(136,0,136)",
+              "bold"    : "false"
+            },  
+            "string" : {
+               "pattern" : "(\"[^\"]*\"|'[^']*')",                       
+               "colour"  : "rgb(0,0,240)"
+           }, 
+            "any" : {
+               "pattern" : "(ANY)",                       
+               "colour"  : "rgb(0,0,240)"
+           }                                                                                  
+        }       
 }
 

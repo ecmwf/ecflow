@@ -212,6 +212,7 @@ void MainWindow::on_actionConfigureNodeMenu_triggered()
 void MainWindow::on_actionSearch_triggered()
 {
     NodeSearchDialog d;
+    d.setServerFilter(nodePanel_->serverFilter());
 
 	if(d.exec() == QDialog::Accepted)
 	{

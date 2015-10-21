@@ -69,6 +69,7 @@ set(viewer_srcs
     PropertyEditor.cpp
     PropertyLine.cpp
     PropertyMapper.cpp
+    QueryHandler.cpp
     ScriptItemWidget.cpp
     NodeSearchDialog.cpp
     ServerComQueue.cpp

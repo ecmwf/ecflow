@@ -26,7 +26,7 @@ public:
     static std::string concatenate(const std::string &path1, const std::string &path2);
     static void createDir(const std::string& path);
 
-    static void findFiles(const std::string &dirPath,const std::string &startsWith,
+    static void findFiles(const std::string &dirPath,const std::string &regExpPattern,
     		    std::vector<std::string>& res);
 
     static bool isFirstStartUp();

@@ -25,6 +25,7 @@
 #include "DirectoryHandler.hpp"
 #include "Highlighter.hpp"
 #include "Palette.hpp"
+#include "QueryHandler.hpp"
 #include "ServerList.hpp"
 #include "VConfig.hpp"
 #include "VServerSettings.hpp"
@@ -96,6 +97,10 @@ int main(int argc, char **argv)
     std::string panelFile = DirectoryHandler::concatenate(DirectoryHandler::etcDir(), "ecflowview_panels.json");
     InfoPanelHandler::instance()->init(panelFile);
 
+    //Load the queries
+    std::string queryDir = DirectoryHandler::concatenate(DirectoryHandler::configDir(), "query");
+    QueryHandler::instance()->init(queryDir);
+
     //Initialise the server list
     ServerList::instance()->init();
 
@@ -108,7 +113,7 @@ int main(int argc, char **argv)
     	VConfig::instance()->importSettings();
     	VServerSettings::importRcFiles();
     }
-    
+
     //Initialise highlighter
     Highlighter::init(DirectoryHandler::concatenate(DirectoryHandler::etcDir(),
     		      "ecflowview_highlighter.json"));
