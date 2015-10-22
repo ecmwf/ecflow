@@ -41,6 +41,7 @@ public:
     static std::string typeName(const NodeType);
     static bool        isUserLevel(const std::string &str);
     static bool        isNodeAttribute(const std::string &str);
+    static bool        isWhatToSearchIn(const std::string &str, bool &isAttribute);
 
 private:
     static std::vector<BaseNodeCondition *> popLastNOperands(std::vector<BaseNodeCondition *> &inOperands, int n);
@@ -59,12 +60,15 @@ public:
     virtual bool execute(VInfo_ptr nodeInfo) = 0;
     virtual int  numOperands() {return 0;};
     virtual std::string print() = 0;
+    virtual bool operand2IsArbitraryString() {return false;};
 
     void setOperands(std::vector<BaseNodeCondition *> ops) {operands_ = ops;};
+    bool containsAttributeSearch();
 
 
 protected:
     std::vector<BaseNodeCondition *> operands_;
+    virtual bool searchInAttributes() {return false;};
 };
 
 // -----------------------------------------------------------------
@@ -106,6 +110,19 @@ public:
     std::string print() {return std::string("not") + "(" + operands_[0]->print() + ")";};
 };
 
+// -----------------------------------------------------------------
+
+class StringMatchCondition : public BaseNodeCondition
+{
+public:
+    StringMatchCondition()  {};
+    ~StringMatchCondition() {};
+
+    bool execute(VInfo_ptr nodeInfo);
+    int  numOperands() {return 2;};
+    std::string print() {return operands_[0]->print() + " = " + operands_[1]->print();};
+    bool operand2IsArbitraryString() {return true;};
+};
 // -----------------------------------------------------------------
 
 class TrueNodeCondition : public BaseNodeCondition
@@ -189,5 +206,47 @@ public:
 private:
     QString nodeAttrName_;
 };
+
+// -----------------------------------------------------------------
+
+class WhatToSearchInOperand : public BaseNodeCondition
+{
+public:
+    explicit WhatToSearchInOperand(std::string what, bool &attr);
+    ~WhatToSearchInOperand();
+
+    std::string name() {return what_;};
+    bool execute(VInfo_ptr nodeInfo) {return false;}; // not called
+    std::string print() {return what_;};
+    std::string what() {return what_;};
+
+private:
+    std::string what_;  // TODO XXX: optimise - we should store an enum here
+    bool searchInAttributes_;
+
+    void searchInAttributes(bool attr) {searchInAttributes_ = attr;};
+    bool searchInAttributes() {return searchInAttributes_;};
+};
+
+// -----------------------------------------------------------------
+
+class WhatToSearchForOperand : public BaseNodeCondition
+{
+public:
+    explicit WhatToSearchForOperand(std::string what) {what_ = what;};
+    ~WhatToSearchForOperand();
+
+    std::string name() {return what_;};
+    bool execute(VInfo_ptr nodeInfo) {return false;}; // not called
+    std::string print() {return what_;};
+    std::string what() {return what_;};
+
+private:
+    std::string what_;
+};
+
+
+
+
 
 #endif

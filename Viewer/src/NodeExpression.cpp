@@ -65,6 +65,25 @@ bool NodeExpressionParser::isNodeAttribute(const std::string &str)
 }
 
 
+bool NodeExpressionParser::isWhatToSearchIn(const std::string &str, bool &isAttribute)
+{
+    // list of non-attribute items that we can search in
+    if (str == "name")
+    {
+        isAttribute = false;
+        return true;
+    }
+
+    // list of attributes that we can search in
+    else if (str == "label_name" || str == "label_value")
+    {
+        isAttribute = true;
+        return true;
+    }
+
+    return false;
+}
+
 
 // NodeExpressionParser::popLastNOperands
 // - utility function to remove and return the last n operands from
@@ -127,78 +146,107 @@ BaseNodeCondition *NodeExpressionParser::parseExpression()
 
         if (i_ != tokens_.end())
         {
-            // node types
-            NodeExpressionParser::NodeType type = NodeExpressionParser::nodeType(*i_);
-            if (type != BAD)
+
+            // are we expecting an arbitrary string?
+            if ((funcStack.size() > 0) && (funcStack.back()->operand2IsArbitraryString()))
             {
-                TypeNodeCondition *typeCond = new TypeNodeCondition(type);
-                operandStack.push_back(typeCond);
-                result = typeCond;
+                WhatToSearchForOperand *whatToSearchFor = new WhatToSearchForOperand(*i_);
+                operandStack.push_back(whatToSearchFor);
+                result = whatToSearchFor;
                 updatedOperands = true;
             }
-
-            // node/server states
-            else if (DState::isValid(*i_) || VSState::find(*i_))
-            {
-                StateNodeCondition *stateCond = new StateNodeCondition(QString::fromStdString(*i_));
-                operandStack.push_back(stateCond);
-                result = stateCond;
-                updatedOperands = true;
-            }
-
-            // user level
-            else if (isUserLevel(*i_))
-            {
-                UserLevelCondition *userCond = new UserLevelCondition(QString::fromStdString(*i_));
-                operandStack.push_back(userCond);
-                result = userCond;
-                updatedOperands = true;
-            }
-
-            // node attribute
-            else if (isNodeAttribute(*i_))
-            {
-                NodeAttributeCondition *attrCond = new NodeAttributeCondition(QString::fromStdString(*i_));
-                operandStack.push_back(attrCond);
-                result = attrCond;
-                updatedOperands = true;
-            }
-
-            // logical operators
-            else if (*i_ == "and")
-            {
-                AndNodeCondition *andCond = new AndNodeCondition();
-                funcStack.push_back(andCond);
-                result = andCond;
-            }
-
-            else if (*i_ == "or")
-            {
-                OrNodeCondition *orCond = new OrNodeCondition();
-                funcStack.push_back(orCond);
-                result = orCond;
-            }
-
-            else if (*i_ == "not")
-            {
-                NotNodeCondition *notCond = new NotNodeCondition();
-                funcStack.push_back(notCond);
-                result = notCond;
-            }
-            else if (*i_ == "(")
-            {
-                ++i_;
-                result = NodeExpressionParser::parseExpression();
-                operandStack.push_back(result);
-            }
-            else if (*i_ == ")")
-            {
-                return result;
-            }
-
             else
             {
-                tokenOk = false;
+                bool attr = false;
+
+                // node types
+                NodeExpressionParser::NodeType type = NodeExpressionParser::nodeType(*i_);
+                if (type != BAD)
+                {
+                    TypeNodeCondition *typeCond = new TypeNodeCondition(type);
+                    operandStack.push_back(typeCond);
+                    result = typeCond;
+                    updatedOperands = true;
+                }
+
+                // node/server states
+                else if (DState::isValid(*i_) || VSState::find(*i_))
+                {
+                    StateNodeCondition *stateCond = new StateNodeCondition(QString::fromStdString(*i_));
+                    operandStack.push_back(stateCond);
+                    result = stateCond;
+                    updatedOperands = true;
+                }
+
+                // user level
+                else if (isUserLevel(*i_))
+                {
+                    UserLevelCondition *userCond = new UserLevelCondition(QString::fromStdString(*i_));
+                    operandStack.push_back(userCond);
+                    result = userCond;
+                    updatedOperands = true;
+                }
+
+                // node attribute
+                else if (isNodeAttribute(*i_))
+                {
+                    NodeAttributeCondition *attrCond = new NodeAttributeCondition(QString::fromStdString(*i_));
+                    operandStack.push_back(attrCond);
+                    result = attrCond;
+                    updatedOperands = true;
+                }
+
+                else if (isWhatToSearchIn(*i_, attr))
+                {
+                    WhatToSearchInOperand *searchCond = new WhatToSearchInOperand(*i_, attr);
+                    operandStack.push_back(searchCond);
+                    result = searchCond;
+                    updatedOperands = true;
+                }
+
+                // logical operators
+                else if (*i_ == "and")
+                {
+                    AndNodeCondition *andCond = new AndNodeCondition();
+                    funcStack.push_back(andCond);
+                    result = andCond;
+                }
+
+                else if (*i_ == "or")
+                {
+                    OrNodeCondition *orCond = new OrNodeCondition();
+                    funcStack.push_back(orCond);
+                    result = orCond;
+                }
+
+                else if (*i_ == "not")
+                {
+                    NotNodeCondition *notCond = new NotNodeCondition();
+                    funcStack.push_back(notCond);
+                    result = notCond;
+                }
+                else if (*i_ == "=")
+                {
+                    StringMatchCondition *stringMatchCond = new StringMatchCondition();
+                    funcStack.push_back(stringMatchCond);
+                    result = stringMatchCond;
+                }
+
+                else if (*i_ == "(")
+                {
+                    ++i_;
+                    result = NodeExpressionParser::parseExpression();
+                    operandStack.push_back(result);
+                }
+                else if (*i_ == ")")
+                {
+                    return result;
+                }
+
+                else
+                {
+                    tokenOk = false;
+                }
             }
         }
         
@@ -244,6 +292,23 @@ BaseNodeCondition *NodeExpressionParser::parseExpression()
 }
 
 
+
+
+// -----------------------------------------------------------------
+
+bool BaseNodeCondition::containsAttributeSearch()
+{
+    bool contains = false;
+
+    // check child condition nodes
+    for (int i = 0; i < operands_.size(); i++)
+    {
+        contains = contains | operands_[i]->containsAttributeSearch();
+    }
+
+    // check this condition node
+    contains = contains | searchInAttributes();
+}
 
 // -----------------------------------------------------------------
 
@@ -303,6 +368,23 @@ bool UserLevelCondition::execute(VInfo_ptr nodeInfo)
     return true;
 };
 
+
+// -----------------------------------------------------------------
+
+bool StringMatchCondition::execute(VInfo_ptr nodeInfo)
+{
+    WhatToSearchForOperand *searchForOperand = static_cast<WhatToSearchForOperand*> (operands_[0]);
+    WhatToSearchInOperand  *searchInOperand  = static_cast<WhatToSearchInOperand*>  (operands_[1]);
+
+    std::string searchIn = searchInOperand->what();
+
+    //TODO  XXXX check - name, label, variable, etc
+    if (searchIn == "name")
+        return nodeInfo->name() == searchForOperand->what();
+    else
+        return false;
+};
+
 // -----------------------------------------------------------------
 
 bool NodeAttributeCondition::execute(VInfo_ptr nodeInfo)
@@ -340,3 +422,13 @@ bool NodeAttributeCondition::execute(VInfo_ptr nodeInfo)
     return false;
 };
 
+
+WhatToSearchInOperand::WhatToSearchInOperand(std::string what, bool &attr)
+{
+    what_ = what;
+    searchInAttributes_ = attr;
+};
+
+
+WhatToSearchInOperand::~WhatToSearchInOperand() {};
+WhatToSearchForOperand::~WhatToSearchForOperand() {};
