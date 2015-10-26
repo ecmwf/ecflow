@@ -26,6 +26,8 @@
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/lexical_cast.hpp>
 
+#include <QDebug>
+
 ServerComThread::ServerComThread(ServerHandler *server, ClientInvoker *ci) :
 		server_(server),
 		ci_(ci),

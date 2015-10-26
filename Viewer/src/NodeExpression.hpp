@@ -57,7 +57,8 @@ public:
     BaseNodeCondition() {};
     virtual ~BaseNodeCondition() {};
 
-    virtual bool execute(VInfo_ptr nodeInfo) = 0;
+    bool execute(VInfo_ptr nodeInfo);
+    virtual bool execute(VNode* node) = 0;
     virtual int  numOperands() {return 0;};
     virtual std::string print() = 0;
     virtual bool operand2IsArbitraryString() {return false;};
@@ -79,7 +80,7 @@ public:
     AndNodeCondition() {};
     ~AndNodeCondition() {};
 
-    bool execute(VInfo_ptr nodeInfo) {return operands_[0]->execute(nodeInfo) && operands_[1]->execute(nodeInfo);};
+    bool execute(VNode* node);
     int  numOperands() {return 2;};
     std::string print() {return std::string("and") + "(" + operands_[0]->print() + "," + operands_[1]->print() + ")";};
 };
@@ -92,7 +93,7 @@ public:
     OrNodeCondition()  {};
     ~OrNodeCondition() {};
 
-    bool execute(VInfo_ptr nodeInfo) {return operands_[0]->execute(nodeInfo) || operands_[1]->execute(nodeInfo);};
+    bool execute(VNode* node);
     int  numOperands() {return 2;};
     std::string print() {return std::string("or") + "(" + operands_[0]->print() + "," + operands_[1]->print() + ")";};
 };
@@ -105,7 +106,7 @@ public:
     NotNodeCondition()  {};
     ~NotNodeCondition() {};
 
-    bool execute(VInfo_ptr nodeInfo) {return !(operands_[0]->execute(nodeInfo));};
+    bool execute(VNode* node);
     int  numOperands() {return 1;};
     std::string print() {return std::string("not") + "(" + operands_[0]->print() + ")";};
 };
@@ -118,7 +119,7 @@ public:
     StringMatchCondition()  {};
     ~StringMatchCondition() {};
 
-    bool execute(VInfo_ptr nodeInfo);
+    bool execute(VNode *node);
     int  numOperands() {return 2;};
     std::string print() {return operands_[0]->print() + " = " + operands_[1]->print();};
     bool operand2IsArbitraryString() {return true;};
@@ -131,7 +132,7 @@ public:
     TrueNodeCondition()  {};
     ~TrueNodeCondition() {};
 
-    bool execute(VInfo_ptr nodeInfo) {return true;};
+    bool execute(VNode*) {return true;};
     std::string print() {return std::string("true");};
 };
 
@@ -143,7 +144,7 @@ public:
     FalseNodeCondition()  {};
     ~FalseNodeCondition() {};
 
-    bool execute(VInfo_ptr nodeInfo) {return false;};
+    bool execute(VNode*) {return false;};
     std::string print() {return std::string("false");};
 };
 
@@ -155,7 +156,7 @@ public:
     explicit TypeNodeCondition(NodeExpressionParser::NodeType type) {type_ = type;};
     ~TypeNodeCondition() {};
 
-    bool execute(VInfo_ptr nodeInfo);
+    bool execute(VNode* node);
     std::string print() {return NodeExpressionParser::typeName(type_);};
 
 private:
@@ -170,7 +171,7 @@ public:
     explicit StateNodeCondition(QString stateName) {stateName_ = stateName;};
     ~StateNodeCondition() {};
 
-    bool execute(VInfo_ptr nodeInfo);
+    bool execute(VNode* node);
     std::string print() {return stateName_.toStdString();};
 
 private:
@@ -185,7 +186,7 @@ public:
     explicit UserLevelCondition(QString userLevelName) {userLevelName_ = userLevelName;};
     ~UserLevelCondition() {};
 
-    bool execute(VInfo_ptr nodeInfo);
+    bool execute(VNode*);
     std::string print() {return userLevelName_.toStdString();};
 
 private:
@@ -200,7 +201,7 @@ public:
     explicit NodeAttributeCondition(QString nodeAttrName) {nodeAttrName_ = nodeAttrName;};
     ~NodeAttributeCondition() {};
 
-    bool execute(VInfo_ptr nodeInfo);
+    bool execute(VNode*);
     std::string print() {return nodeAttrName_.toStdString();};
 
 private:
@@ -216,7 +217,7 @@ public:
     ~WhatToSearchInOperand();
 
     std::string name() {return what_;};
-    bool execute(VInfo_ptr nodeInfo) {return false;}; // not called
+    bool execute(VNode* node) {return false;}; // not called
     std::string print() {return what_;};
     std::string what() {return what_;};
 
@@ -237,7 +238,7 @@ public:
     ~WhatToSearchForOperand();
 
     std::string name() {return what_;};
-    bool execute(VInfo_ptr nodeInfo) {return false;}; // not called
+    bool execute(VNode* node) {return false;}; // not called
     std::string print() {return what_;};
     std::string what() {return what_;};
 

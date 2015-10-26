@@ -69,7 +69,6 @@ void ComboMulti::paintEvent(QPaintEvent *)
         opt.currentText = "ANY";
     else
     {
-        qDebug() << "paint" << dpyText_;
         opt.currentText = dpyText_;
     }
     painter.drawComplexControl(QStyle::CC_ComboBox, opt);
@@ -101,8 +100,6 @@ void ComboMulti::slotChecked()
 
     setDisplayText(s);
 
-    qDebug() << "text" << s;
-
     update();
 
     Q_EMIT selectionChanged();
@@ -116,6 +113,15 @@ void ComboMulti::clearSelection()
 	}
 
 	slotChecked();
+}
+
+void ComboMulti::selectSoleItem()
+{
+	if(count() == 1)
+	{
+		setItemData(0,true,Qt::UserRole);
+		slotChecked();
+	}
 }
 
 void ComboMulti::setDisplayText(QString text)
@@ -191,8 +197,6 @@ void ComboMultiDelegate::setModelData(QWidget *editor, QAbstractItemModel *model
     data.insert(Qt::DisplayRole,myEditor->text());
     data.insert(Qt::UserRole,value);
     model->setItemData(index,data);
-
-    qDebug() << "EDIT" << myEditor->text() << value;
 
     Q_EMIT itemChecked();
 

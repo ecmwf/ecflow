@@ -292,8 +292,16 @@ BaseNodeCondition *NodeExpressionParser::parseExpression()
 }
 
 
+bool BaseNodeCondition::execute(VInfo_ptr nodeInfo)
+{
+	if(!nodeInfo || !nodeInfo.get())
+		return true;
 
+	if(!nodeInfo->isServer() && !nodeInfo->isNode())
+			return false;
 
+	return execute(nodeInfo->node());
+}
 // -----------------------------------------------------------------
 
 bool BaseNodeCondition::containsAttributeSearch()
@@ -308,18 +316,58 @@ bool BaseNodeCondition::containsAttributeSearch()
 
     // check this condition node
     contains = contains | searchInAttributes();
+
+    return contains;
 }
 
-// -----------------------------------------------------------------
+//=========================================================================
+//
+//  AndNodeCondition
+//
+//=========================================================================
 
-bool TypeNodeCondition::execute(VInfo_ptr nodeInfo)
+bool AndNodeCondition::execute(VNode* node)
 {
-    if (type_ == NodeExpressionParser::SERVER && nodeInfo->isServer())
+	return operands_[0]->execute(node) && operands_[1]->execute(node);
+}
+
+//=========================================================================
+//
+//  OrNodeCondition
+//
+//=========================================================================
+
+bool OrNodeCondition::execute(VNode* node)
+{
+	return operands_[0]->execute(node) || operands_[1]->execute(node);
+}
+
+
+//=========================================================================
+//
+//  NotNodeCondition
+//
+//=========================================================================
+
+bool NotNodeCondition::execute(VNode* node)
+{
+	return !(operands_[0]->execute(node));
+}
+
+//=========================================================================
+//
+//  TypeNodeCondition
+//
+//=========================================================================
+
+bool TypeNodeCondition::execute(VNode* vnode)
+{
+    if (type_ == NodeExpressionParser::SERVER && vnode->isServer())
         return true;
 
-    if(nodeInfo->isNode())
+    if(!vnode->isServer())
     {
-        node_ptr node = nodeInfo->node()->node();
+        node_ptr node = vnode->node();
 
         if (type_ == NodeExpressionParser::SUITE && node->isSuite())
             return true;
@@ -338,14 +386,20 @@ bool TypeNodeCondition::execute(VInfo_ptr nodeInfo)
     }
 
     return false;
-};
+}
 
+//=========================================================================
+//
+//  StateNodeCondition
+//
+//=========================================================================
 
-// -----------------------------------------------------------------
-
-bool StateNodeCondition::execute(VInfo_ptr nodeInfo)
+bool StateNodeCondition::execute(VNode* vnode)
 {
-    if (nodeInfo->isServer())
+    return vnode->stateName() == stateName_;
+
+    /*
+	if (vnode->isServer())
     {
         return (VSState::toName(nodeInfo->server()) == stateName_);
     }
@@ -355,23 +409,30 @@ bool StateNodeCondition::execute(VInfo_ptr nodeInfo)
         return (VNState::toName(nodeInfo->node()) == stateName_);
     }
 
-    return false;
-};
+    return false;*/
+}
 
-// -----------------------------------------------------------------
+//=========================================================================
+//
+//  UserLevelCondition
+//
+//=========================================================================
 
-bool UserLevelCondition::execute(VInfo_ptr nodeInfo)
+bool UserLevelCondition::execute(VNode* vnode)
 {
     // since we don't currently have the concept of user levels, we just 
     // return true for now
 
     return true;
-};
+}
 
+//=========================================================================
+//
+//  UserLevelCondition
+//
+//=========================================================================
 
-// -----------------------------------------------------------------
-
-bool StringMatchCondition::execute(VInfo_ptr nodeInfo)
+bool StringMatchCondition::execute(VNode *node)
 {
     WhatToSearchForOperand *searchForOperand = static_cast<WhatToSearchForOperand*> (operands_[0]);
     WhatToSearchInOperand  *searchInOperand  = static_cast<WhatToSearchInOperand*>  (operands_[1]);
@@ -380,16 +441,16 @@ bool StringMatchCondition::execute(VInfo_ptr nodeInfo)
 
     //TODO  XXXX check - name, label, variable, etc
     if (searchIn == "name")
-        return nodeInfo->name() == searchForOperand->what();
+        return node->strName() == searchForOperand->what();
     else
         return false;
 };
 
 // -----------------------------------------------------------------
 
-bool NodeAttributeCondition::execute(VInfo_ptr nodeInfo)
+bool NodeAttributeCondition::execute(VNode* vnode)
 {
-    if (nodeInfo->isServer())
+    if (vnode->isServer())
     {
         if (nodeAttrName_ == "locked")  
         {
@@ -397,9 +458,9 @@ bool NodeAttributeCondition::execute(VInfo_ptr nodeInfo)
         }
     }
 
-    if(nodeInfo->isNode())
+    else //if(nodeInfo->isNode())
     {
-        node_ptr node = nodeInfo->node()->node();
+        node_ptr node = vnode->node();
 
         if (nodeAttrName_ == "has_time")
         {

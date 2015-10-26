@@ -16,6 +16,7 @@ public:
     void setDisplayText(QString text);
     QString displayText() const;
     QStringList selection() const {return selection_;}
+    void selectSoleItem();
 
 public Q_SLOTS:
     void slotChecked();

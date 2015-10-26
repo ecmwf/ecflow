@@ -24,8 +24,8 @@
 #include "InfoPanelHandler.hpp"
 #include "DirectoryHandler.hpp"
 #include "Highlighter.hpp"
+#include "NodeQueryHandler.hpp"
 #include "Palette.hpp"
-#include "QueryHandler.hpp"
 #include "ServerList.hpp"
 #include "VConfig.hpp"
 #include "VServerSettings.hpp"
@@ -99,7 +99,7 @@ int main(int argc, char **argv)
 
     //Load the queries
     std::string queryDir = DirectoryHandler::concatenate(DirectoryHandler::configDir(), "query");
-    QueryHandler::instance()->init(queryDir);
+    NodeQueryHandler::instance()->init(queryDir);
 
     //Initialise the server list
     ServerList::instance()->init();

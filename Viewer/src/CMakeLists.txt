@@ -6,6 +6,7 @@ set(viewer_srcs
     AbstractSearchLine.cpp
     ActionHandler.cpp
     Animation.cpp
+    AttributeSearchPanel.cpp
     ChangeNotify.cpp
     ChangeNotifyDialog.cpp
     ChangeNotifyEditor.cpp
@@ -55,6 +56,10 @@ set(viewer_srcs
     NodeFilterModel.cpp
     NodePanel.cpp
     NodePathWidget.cpp
+    NodeQuery.cpp
+    NodeQueryDialog.cpp
+    NodeQueryEngine.cpp
+    NodeQueryHandler.cpp
     NodeViewBase.cpp
     NodeViewDelegate.cpp
     NodeWidget.cpp
@@ -69,9 +74,7 @@ set(viewer_srcs
     PropertyEditor.cpp
     PropertyLine.cpp
     PropertyMapper.cpp
-    QueryHandler.cpp
     ScriptItemWidget.cpp
-    NodeSearchDialog.cpp
     ServerComQueue.cpp
     ServerComThread.cpp
     ServerDefsAccess.cpp
@@ -145,6 +148,7 @@ set(viewer_moc_files AbstractNodeModel.hpp
     AbstractSearchLine.hpp
     ActionHandler.hpp
     Animation.hpp
+    AttributeSearchPanel.hpp
     ChangeNotifyDialog.hpp
     ChangeNotifyEditor.hpp
     ChangeNotifyModel.hpp
@@ -171,7 +175,8 @@ set(viewer_moc_files AbstractNodeModel.hpp
     NodeFilterModel.hpp            
     NodePanel.hpp
     NodePathWidget.hpp            
-    NodeSearchDialog.hpp
+    NodeQueryDialog.hpp
+    NodeQueryEngine.hpp
     NodeWidget.hpp
     OutputItemWidget.hpp
     PropertyDialog.hpp             
@@ -207,6 +212,7 @@ set(viewer_moc_files AbstractNodeModel.hpp
 
 set(viewer_wrap_ui_files
     AboutDialog.ui
+    AttributeSearchPanel.ui
     ChangeNotifyDialog.ui
     ChangeNotifyDialogWidget.ui
     ChangeNotifyEditor.ui
@@ -216,13 +222,16 @@ set(viewer_wrap_ui_files
     DashboardDialog.ui
     DashboardDockTitleWidget.ui
     EditItemWidget.ui
+    EventSearchWidget.ui
     GotoLineDialog.ui
     HistoryItemWidget.ui
     InfoPanel.ui    
+    LabelSearchWidget.ui
     MainWindow.ui 
     MessageItemWidget.ui
     MenuConfigDialog.ui
-    NodeSearchDialog.ui
+    NodeQueryDialog.ui
+    NodeQuerySaveDialog.ui
     OutputItemWidget.ui 
     PropertyDialog.ui
     PropertyEditor.ui

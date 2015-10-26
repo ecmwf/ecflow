@@ -33,7 +33,6 @@
 #include "MenuConfigDialog.hpp"
 #include "NodePathWidget.hpp"
 #include "NodePanel.hpp"
-#include "NodeSearchDialog.hpp"
 #include "PropertyDialog.hpp"
 #include "ServerHandler.hpp"
 #include "ServerListDialog.hpp"
@@ -44,6 +43,7 @@
 
 #include <boost/lexical_cast.hpp>
 #include <boost/property_tree/json_parser.hpp>
+#include "NodeQueryDialog.hpp"
 
 bool MainWindow::quitStarted_=false;
 QList<MainWindow*> MainWindow::windows_;
@@ -101,7 +101,7 @@ MainWindow::MainWindow(QStringList idLst,QWidget *parent) : QMainWindow(parent)
     ChangeNotifyWidget* chw=new ChangeNotifyWidget(this);
     statusBar()->addPermanentWidget(chw);
 
-    actionSearch->setVisible(false);
+    //actionSearch->setVisible(false);
 
 }
 
@@ -138,8 +138,6 @@ void MainWindow::addInfoPanelActions(QToolBar *toolbar)
 	   }
    }
 }
-
-
 
 //==============================================================
 //
@@ -211,12 +209,13 @@ void MainWindow::on_actionConfigureNodeMenu_triggered()
 
 void MainWindow::on_actionSearch_triggered()
 {
-    NodeSearchDialog d;
-    d.setServerFilter(nodePanel_->serverFilter());
+    NodeQueryDialog* d=new NodeQueryDialog(this);
+    d->setServerFilter(nodePanel_->serverFilter());
+    d->show();
 
-	if(d.exec() == QDialog::Accepted)
+	/*if(d.exec() == QDialog::Accepted)
 	{
-    }
+    }*/
 }
 
 void MainWindow::on_actionManageServers_triggered()
