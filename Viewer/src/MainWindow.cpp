@@ -101,7 +101,7 @@ MainWindow::MainWindow(QStringList idLst,QWidget *parent) : QMainWindow(parent)
     ChangeNotifyWidget* chw=new ChangeNotifyWidget(this);
     statusBar()->addPermanentWidget(chw);
 
-    //actionSearch->setVisible(false);
+    actionSearch->setVisible(false);
 
 }
 
