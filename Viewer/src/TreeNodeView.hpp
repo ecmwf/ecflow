@@ -16,15 +16,18 @@
 #include "NodeViewBase.hpp"
 
 #include "VInfo.hpp"
+#include "VProperty.hpp"
 
 class ActionHandler;
 class Animation;
 class ExpandNode;
 class ExpandState;
 class NodeFilterModel;
+class PropertyMapper;
 class TreeNodeModel;
+class TreeNodeViewDelegate;
 
-class TreeNodeView : public QTreeView, public NodeViewBase
+class TreeNodeView : public QTreeView, public NodeViewBase, public VPropertyObserver
 {
 Q_OBJECT
 
@@ -39,6 +42,8 @@ public:
 	void currentSelection(VInfo_ptr n);
 	void selectFirstServer();
 	void setModel(NodeFilterModel* model);
+
+	void notifyChange(VProperty* p);
 
 	void readSettings(VSettings* vs) {};
 
@@ -63,10 +68,14 @@ protected:
 	void handleContextMenu(QModelIndex indexClicked,QModelIndexList indexLst,QPoint globalPos,QPoint widgetPos,QWidget *widget);
 	void saveExpand(ExpandNode *parentExpand,const QModelIndex& idx);
 	void restoreExpand(ExpandNode *expand,const VNode* node);
+	void adjustIndentation(int);
 
 	ActionHandler* actionHandler_;
 	ExpandState *expandState_;
 	bool needItemsLayout_;
+	int defaultIndentation_;
+	TreeNodeViewDelegate* delegate_;
+	PropertyMapper* prop_;
 };
 
 #endif

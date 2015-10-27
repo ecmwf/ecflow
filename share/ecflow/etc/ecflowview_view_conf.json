@@ -26,26 +26,33 @@
 					"label" : "Font",
 					"default": "font(Sans Serif,9,-1,5,50,0,0,0,0,0)"
 				},
-				"displayChildCount" : {
-					"label" : "Display number of child nodes for servers/suites",
+				"display_child_count" : {
+					"label" : "Display number of children for servers/suites",
 					"default": "true"
 				}, 
 				
 				"nodeFontSize" : {
-                    "label": "Nodes (tree view)",
+                    "label": "Nodes",
                     "suffix" : "points",                                           
                     "default": "9",
                     "min" : "7",
-                    "max" : "20"
+                    "max" : "32"
                   },  
                   
                  "attributeFontSize" : {
-                    "label": "Attributes (tree view)",
+                    "label" : "Attributes",
                     "suffix" : "points",                                           
                     "default": "8",
                     "min" : "7",
-                    "max" : "20"
-                  }     	          
+                    "max" : "32"
+                  },
+                 "indentation" : {
+                    "label" : "Indentation",
+                    "suffix" : "pixels",
+                    "default" : "20",
+                    "min" : "0",
+                    "max" : "100"  
+                 }      	          
             },
 
             "table": {

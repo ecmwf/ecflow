@@ -29,7 +29,8 @@ TreeNodeViewDelegate::TreeNodeViewDelegate(QWidget *parent) :
     nodeRectRad_(0),
     drawChildCount_(true),
     nodeStyle_(ClassicNodeStyle),
-    useNodeGrad_(true)
+    useNodeGrad_(true),
+	indentation_(0)
 {
 	attrFont_=font_;
 	attrFont_.setPointSize(8);
@@ -48,7 +49,7 @@ TreeNodeViewDelegate::TreeNodeViewDelegate(QWidget *parent) :
 	if(propVec.empty())
 	{
 		propVec.push_back("view.tree.font");
-		propVec.push_back("view.tree.displayChildCount");
+		propVec.push_back("view.tree.display_child_count");
         propVec.push_back("view.common.node_style");
         propVec.push_back("view.common.node_gradient");
         propVec.push_back("view.tree.nodeFontSize");
@@ -132,7 +133,7 @@ void TreeNodeViewDelegate::updateSettings()
 		suiteNumFont_.setBold(true);*/
 
 	}
-	if(VProperty* p=prop_->find("view.tree.displayChildCount"))
+	if(VProperty* p=prop_->find("view.tree.display_child_count"))
 	{
 		drawChildCount_=p->value().toBool();
 	}
@@ -172,6 +173,15 @@ void TreeNodeViewDelegate::paint(QPainter *painter,const QStyleOptionViewItem &o
 	QStyleOptionViewItemV4 vopt(option);
 	initStyleOption(&vopt, index);
 
+	//Both the plastique and fusion styles render the tree expand indicator in the middle of the
+	//indentation rectangle. This rectangle spans as far as the left hand side of the option rect that the
+	//delegate renders into. For large indentations there can be a big gap between the indicator and
+	//rendered item. To avoid it we expand the opt rect to the left to get it closer to the
+	//indicator as much as possible.
+
+	if(indentation_>0)
+		vopt.rect.setLeft(vopt.rect.x()-indentation_/2 + 10);
+
 	const QStyle *style = vopt.widget ? vopt.widget->style() : QApplication::style();
 	const QWidget* widget = vopt.widget;
 
@@ -203,9 +213,9 @@ void TreeNodeViewDelegate::paint(QPainter *painter,const QStyleOptionViewItem &o
 
 	if(index.data(AbstractNodeModel::ConnectionRole).toInt() == 0)
 	{
-		QRect fullRect=QRect(0,option.rect.y(),painter->device()->width(),option.rect.height());
+		QRect fullRect=QRect(0,vopt.rect.y(),painter->device()->width(),vopt.rect.height());
 		painter->fillRect(fullRect,lostConnectBgBrush_);
-		QRect bandRect=QRect(0,option.rect.y(),5,option.rect.height());
+		QRect bandRect=QRect(0,vopt.rect.y(),5,vopt.rect.height());
 		painter->fillRect(bandRect,lostConnectBandBrush_);
 
 	}
@@ -274,7 +284,7 @@ void TreeNodeViewDelegate::renderServer(QPainter *painter,const QModelIndex& ind
 
 	//The initial filled rect (we will adjust its  width)
 	//QRect fillRect=option.rect.adjusted(offset,1,0,-2);
-	QRect itemRect=option.rect.adjusted(offset,deltaH,0,-deltaH-1);
+	QRect itemRect=option.rect.adjusted(2*offset,deltaH,0,-deltaH-1);
 	if(option.state & QStyle::State_Selected)
 		itemRect.adjust(0,0,0,0);
 
@@ -286,7 +296,7 @@ void TreeNodeViewDelegate::renderServer(QPainter *painter,const QModelIndex& ind
 
 	if(nodeStyle_ == BoxAndTextNodeStyle)
 	{
-		stateRect=QRect(itemRect.x()+offset,itemRect.y(),itemRect.height(),itemRect.height());
+		stateRect=QRect(itemRect.x(),itemRect.y(),itemRect.height(),itemRect.height());
 		currentRight=stateRect.right()+offset;
 	}
 	else
@@ -500,7 +510,7 @@ void TreeNodeViewDelegate::renderNode(QPainter *painter,const QModelIndex& index
 	int deltaH=(option.rect.height()-(fm.height()+4))/2;
 
 	//The initial filled rect (we will adjust its  width)
-	QRect itemRect=option.rect.adjusted(offset,deltaH,0,-deltaH-1);
+	QRect itemRect=option.rect.adjusted(2*offset,deltaH,0,-deltaH-1);
 	if(option.state & QStyle::State_Selected)
 		itemRect.adjust(0,0,0,-0);
 
@@ -531,7 +541,7 @@ void TreeNodeViewDelegate::renderNode(QPainter *painter,const QModelIndex& index
 
 	if(nodeStyle_ == BoxAndTextNodeStyle)
 	{
-		stateRect=QRect(itemRect.x()+offset,itemRect.y(),itemRect.height(),itemRect.height());
+		stateRect=QRect(itemRect.x(),itemRect.y(),itemRect.height(),itemRect.height());
 		currentRight=stateRect.right();
 
 		if(hasRealBg)

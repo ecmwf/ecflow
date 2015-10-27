@@ -38,6 +38,9 @@ public:
 
     QSize sizeHint(const QStyleOptionViewItem & option, const QModelIndex & index ) const;
 
+    void setIndentation(int o) {indentation_=o;}
+
+
 Q_SIGNALS:
     void sizeHintChangedGlobal();
 
@@ -53,7 +56,7 @@ protected:
 	void renderNodeCell(QPainter *painter,QColor bg,QColor realBg,QColor fg,
                       QRect stateRect,QRect filleRect,QRect realRect,QRect textRect, QString text,
                       bool selected) const;
-                                        
+
     enum NodeStyle {ClassicNodeStyle,BoxAndTextNodeStyle};
                     
     AnimationHandler* animation_;
@@ -62,6 +65,7 @@ protected:
 	bool drawChildCount_;
     NodeStyle nodeStyle_;
     bool useNodeGrad_;
+    int indentation_;
 
     QFont serverNumFont_;
 	QFont suiteNumFont_;

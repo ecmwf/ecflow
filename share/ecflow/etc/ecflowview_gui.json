@@ -6,75 +6,69 @@
  			"desc" : "Appearance",
  			"icon" : "colour.svg",
             
-            
-            "group" : {
-                "title" : "Node rendering",
-                "prefix" : "view.common",
+            "tabs"  : {
+                 "tab" : {
+                    "label"  : "Common",   
+ 
+                    "group" : {
+                        "title" : "Node rendering",
+                        "prefix" : "view.common",
                 
-                "line" : "node_style",
-                "line" : "node_gradient"
-            },
-            
-             "group" : {
-                "title" : "Font size",
-                "prefix" : "view",
-                             
-                "line" : "tree.nodeFontSize",
-                "line" : "tree.attributeFontSize"
-             
-            },
-                                    
-            "grid" : {
-                   "title" : "Status",                                    
-                    "h1" : "Fill colour",
-                    "h2" : "Font colour",                  
+                        "line" : "node_style",
+                        "line" : "node_gradient"
+                    },
+                              
+                    "grid" : {
+                        "title" : "Status",                                    
+                        "h1" : "Fill colour",
+                        "h2" : "Font colour",                  
                     
-                    "row" : {
+                        "row" : {
                             "label" : "Unknown",
                             "prefix" :   "nstate.unknown",		 		       
  				            "line" :  "fill_colour",
 				            "line" :  "font_colour"
-			        },					 				
-			        "row" : {
+			             },					 				
+			             "row" : {
                             "label" : "Complete",
                             "prefix" :   "nstate.complete",                     
                             "line" :  "fill_colour",
                             "line" :  "font_colour"
-                    },  
-                    "row" : {
+                        },  
+                        "row" : {
                             "label" : "Queued",
                             "prefix" :   "nstate.queued",                     
                             "line" :  "fill_colour",
                             "line" :  "font_colour"
-                     },  
-                     "row" : {
+                        },  
+                        "row" : {
                             "label" : "Aborted",
                             "prefix" :   "nstate.aborted",                     
                             "line" :  "fill_colour",
                             "line" :  "font_colour"
-                     },                                  
-                     "row" : {
+                        },                                  
+                        "row" : {
                             "label" : "Submitted",
                             "prefix" :   "nstate.submitted",                     
                             "line" :  "fill_colour",
                             "line" :  "font_colour"
-                      },  
-                      "row" : {
+                        },  
+                        "row" : {
                             "label" : "Active",
                             "prefix" :   "nstate.active",                     
                             "line" :  "fill_colour",
                             "line" :  "font_colour"
-                      },  			
-			          "row" : {
+                        },  			
+			             "row" : {
                             "label" : "Suspended ",
                             "prefix" :   "nstate.suspended",                     
                             "line" :  "fill_colour",
                             "line" :  "font_colour"
-                      },
+                        },
                 
-			          "note" : {
+			             "note" : {
 			             "default" : "the states below are only valid for <b>servers</b>"
-			           },  
+			             },  
                     
                         "row" : {
                             "label" : "Halted",
@@ -95,9 +89,30 @@
                             "line" :  "font_colour"
                         }  		
  			
- 						
- 			}
-			
+ 				   }		
+ 			    }, 
+ 			    
+ 			    "tab" : {
+                  
+                    "label"  : "Tree view",   
+ 
+                    "group" : {
+                        "title" : "Options",
+                        "prefix" : "view.tree",
+                
+                        "line" : "display_child_count",
+                        "line" : "indentation"
+                    },
+            
+                    "group" : {
+                        "title" : "Font size",
+                        "prefix" : "view",
+                                
+                        "line" : "tree.nodeFontSize",
+                        "line" : "tree.attributeFontSize"
+                    }                                                           
+                }                   
+			}
  		},	
  		
  	  "notification":  {

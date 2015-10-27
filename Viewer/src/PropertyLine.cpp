@@ -279,6 +279,7 @@ bool StringPropertyLine::applyChange()
 	if(v != le_->text())
 	{
 		prop_->setValue(le_->text());
+		oriVal_=prop_->value();
 		return true;
 	}
 	return false;
@@ -374,6 +375,7 @@ bool ColourPropertyLine::applyChange()
 	if(v != c)
 	{
 		prop_->setValue(c);
+		oriVal_=prop_->value();
 		return true;
 	}
 
@@ -451,6 +453,7 @@ bool FontPropertyLine::applyChange()
 	if(oriVal_.value<QFont>() != font_)
 	{
 		prop_->setValue(font_);
+		oriVal_=prop_->value();
 		return true;
 	}
 	return false;
@@ -523,6 +526,7 @@ bool IntPropertyLine::applyChange()
 	if(oriVal_.toInt() != cv)
 	{
 		prop_->setValue(cv);
+		oriVal_=prop_->value();
 		return true;
 	}
 	return false;
@@ -586,6 +590,7 @@ bool BoolPropertyLine::applyChange()
 	if(oriVal_.toBool() != cb_->isChecked())
 	{
 		prop_->setValue(cb_->isChecked());
+		oriVal_=prop_->value();
 		return true;
 	}
 	return false;
@@ -670,6 +675,7 @@ bool ComboPropertyLine::applyChange()
         if(oriVal_.toString() != currentDataVal)
         {
 		    prop_->setValue(currentDataVal);
+		    oriVal_=prop_->value();
 		    return true;
         }    
 	}

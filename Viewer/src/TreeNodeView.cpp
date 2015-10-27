@@ -19,13 +19,16 @@
 #include "Animation.hpp"
 #include "ExpandState.hpp"
 #include "NodeFilterModel.hpp"
+#include "PropertyMapper.hpp"
 #include "TreeNodeViewDelegate.hpp"
 #include "VNode.hpp"
 
 TreeNodeView::TreeNodeView(NodeFilterModel* model,NodeFilterDef* filterDef,QWidget* parent) :
 	QTreeView(parent),
 	NodeViewBase(model,filterDef),
-    needItemsLayout_(false)
+    needItemsLayout_(false),
+	defaultIndentation_(indentation()),
+	prop_(NULL)
 {
 	setProperty("style","nodeView");
 
@@ -36,10 +39,10 @@ TreeNodeView::TreeNodeView(NodeFilterModel* model,NodeFilterDef* filterDef,QWidg
 	setModel(model_);
 
 	//Create delegate to the view
-	TreeNodeViewDelegate *delegate=new TreeNodeViewDelegate(this);
-	setItemDelegate(delegate);
+	delegate_=new TreeNodeViewDelegate(this);
+	setItemDelegate(delegate_);
 
-	connect(delegate,SIGNAL(sizeHintChangedGlobal()),
+	connect(delegate_,SIGNAL(sizeHintChangedGlobal()),
 			this,SLOT(slotSizeHintChangedGlobal()));
 
 	//setRootIsDecorated(false);
@@ -74,12 +77,21 @@ TreeNodeView::TreeNodeView(NodeFilterModel* model,NodeFilterDef* filterDef,QWidg
 			this,SLOT(slotDoubleClickItem(const QModelIndex)));
 
 	expandAll();
+
+	//Properties
+	std::vector<std::string> propVec;
+	propVec.push_back("view.tree.indentation");
+	prop_=new PropertyMapper(propVec,this);
+
+	//Initialise indentation
+	adjustIndentation(prop_->find("view.tree.indentation")->value().toInt());
 }
 
 TreeNodeView::~TreeNodeView()
 {
 	delete expandState_;
 	delete actionHandler_;
+	delete prop_;
 }
 
 void TreeNodeView::setModel(NodeFilterModel *model)
@@ -253,7 +265,22 @@ void TreeNodeView::slotSizeHintChangedGlobal()
 	needItemsLayout_=true;
 }
 
+void TreeNodeView::adjustIndentation(int offset)
+{
+	if(offset >=0)
+	{
+		setIndentation(defaultIndentation_+offset);
+		delegate_->setIndentation(indentation());
+	}
+}
 
+void TreeNodeView::notifyChange(VProperty* p)
+{
+	if(p->path() == "view.tree.indentation")
+    {
+		adjustIndentation(p->value().toInt());
+    }
+}
 
 //====================================================
 // Expand state management
