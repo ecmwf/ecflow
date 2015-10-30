@@ -492,6 +492,14 @@ std::ostream& Defs::print(std::ostream& os) const
 	if (!PrintStyle::defsStyle()) {
 	   os << write_state();
 	}
+	if (PrintStyle::getStyle() == PrintStyle::STATE) {
+	   os << "# server variable\n";
+	   const std::vector<Variable>& server_variables = server().server_variables();
+	   BOOST_FOREACH(const Variable& var, server_variables) { var.print_generated(os);}
+      os << "# user variable\n";
+      const std::vector<Variable>& user_variables = server().user_variables();
+      BOOST_FOREACH(const Variable& var, user_variables) { var.print_generated(os);}
+	}
 
 	set<string>::const_iterator extern_end = externs_.end();
 	for(set<string>::const_iterator i = externs_.begin(); i != extern_end; ++i) {
