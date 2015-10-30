@@ -50,16 +50,18 @@ ServerItem* ServerList::find(const std::string& name)
 	return 0;
 }
 
-ServerItem* ServerList::add(const std::string& name,const std::string& host,const std::string& port)
+ServerItem* ServerList::add(const std::string& name,const std::string& host,const std::string& port,bool favourite,bool saveIt)
 {
 	//Check if there is an item with the same name. names have to be unique!
 	if(find(name))
 		return 0;
 
-	ServerItem* item=new ServerItem(name,host,port);
+	ServerItem* item=new ServerItem(name,host,port,favourite);
 	items_.push_back(item);
 
-	save();
+	if(saveIt)
+		save();
+
 	broadcastChanged();
 
 	return item;
@@ -71,7 +73,7 @@ void ServerList::remove(ServerItem *item)
 	if(it != items_.end())
 	{
 		items_.erase(it);
-		item->broadcastDeletion();
+		//item->broadcastDeletion();
 		delete item;
 
 		save();
@@ -95,6 +97,16 @@ void ServerList::reset(ServerItem* item,const std::string& name,const std::strin
 	}
 }
 
+void ServerList::setFavourite(ServerItem* item,bool b)
+{
+	std::vector<ServerItem*>::iterator it=std::find(items_.begin(),items_.end(),item);
+	if(it != items_.end())
+	{
+		item->setFavourite(b);
+		for(std::vector<ServerListObserver*>::const_iterator it=observers_.begin(); it != observers_.end(); ++it)
+			(*it)->notifyServerListFavouriteChanged(item);
+	}
+}
 
 std::string ServerList::uniqueName(const std::string& name)
 {
@@ -178,9 +190,13 @@ bool ServerList::load()
 		std::vector<std::string> sv;
 		boost::split(sv,line,boost::is_any_of(","));
 
+		bool favourite=false;
+		if(sv.size() >= 4)
+			favourite=(sv[3]=="1")?true:false;
+
 		if(sv.size() >= 3)
 		{
-			add(sv[0],sv[1],sv[2]);
+			add(sv[0],sv[1],sv[2],favourite,false);
 		}
 	}
 
@@ -199,11 +215,12 @@ void ServerList::save()
 	if(!out.good())
 		  	return;
 
-	out << "#Name Host Port" << std::endl;
+	out << "#Name Host Port Favourite" << std::endl;
 
 	for(std::vector<ServerItem*>::iterator it=items_.begin(); it != items_.end(); ++it)
 	{
-		out << (*it)->name() << "," << (*it)->host() << "," <<  (*it)->port() << std::endl;
+		std::string fav=((*it)->isFavourite())?"1":"0";
+		out << (*it)->name() << "," << (*it)->host() << "," <<  (*it)->port() <<  "," <<  fav <<  std::endl;
 	}
 	out.close();
 }
@@ -234,7 +251,7 @@ bool ServerList::readRcFile()
 
 			if(vec.size() >= 3)
 			{
-					add(vec[0],vec[1],vec[2]);
+				add(vec[0],vec[1],vec[2],false,false);
 			}
 		}
 	}
@@ -270,7 +287,7 @@ bool ServerList::readSystemFile()
 
 			if(vec.size() >= 3)
 			{
-				add(vec[0],vec[1],vec[2]);
+				add(vec[0],vec[1],vec[2],false,false);
 			}
 		}
 	}

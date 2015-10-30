@@ -46,6 +46,8 @@
     <file alias="editcopy.svg">../images/editcopy.svg</file>
     <file alias="editpaste.svg">../images/editpaste.svg</file>
     <file alias="error.svg">../images/error.svg</file>
+    <file alias="favourite.svg">../images/favourite.svg</file>
+    <file alias="favourite_empty.svg">../images/favourite_empty.svg</file>
     <file alias="filesave.svg">../images/filesave.svg</file>
     <file alias="filter_decor.svg">../images/filter_decor.svg</file>
     <file alias="filter.svg">../images/filter.svg</file>
@@ -55,6 +57,7 @@
     <file alias="log.svg">../images/log.svg</file>
     <file alias="log_info.svg">../images/log_info.svg</file>
     <file alias="log_error.svg">../images/log_error.svg</file>
+    <file alias="manage_server.svg">../images/manage_server.svg</file>
     <file alias="manual.svg">../images/manual.svg</file>
     <file alias="manual_dock.svg">../images/manual_dock.svg</file>
     <file alias="message.svg">../images/message.svg</file>

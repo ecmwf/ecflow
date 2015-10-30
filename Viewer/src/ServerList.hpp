@@ -22,6 +22,7 @@ public:
 	ServerListObserver() {};
 	virtual ~ServerListObserver() {};
 	virtual void notifyServerListChanged()=0;
+	virtual void notifyServerListFavouriteChanged(ServerItem*)=0;
 };
 
 class ServerList
@@ -32,9 +33,10 @@ public:
 	ServerItem* find(const std::string& name);
 
 	//Can be added or changed only via these static methods
-	ServerItem* add(const std::string&,const std::string&,const std::string&);
+	ServerItem* add(const std::string&,const std::string&,const std::string&,bool,bool saveIt=true);
 	void remove(ServerItem*);
 	void reset(ServerItem*,const std::string& name,const std::string& host,const std::string& port);
+	void setFavourite(ServerItem*,bool);
 
 	std::string uniqueName(const std::string&);
 
@@ -58,6 +60,7 @@ protected:
 	bool readSystemFile();
 
 	void broadcastChanged();
+	void broadcastChanged(ServerItem*);
 
 	std::vector<ServerItem*> items_;
 	std::string serversPath_;

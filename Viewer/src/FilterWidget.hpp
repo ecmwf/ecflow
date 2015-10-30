@@ -48,25 +48,6 @@ protected:
 	DecorMode decorMode_;
 };
 
-/*
-class StateFilterMenu : public AbstractFilterMenu
-{
-public:
-	StateFilterMenu(QMenu* parent);
-};
-
-class AttributeFilterMenu : public AbstractFilterMenu
-{
-public:
-	AttributeFilterMenu(QMenu* parent);
-};
-
-class IconFilterMenu : public AbstractFilterMenu
-{
-public:
-	IconFilterMenu(QMenu* parent);
-};
-*/
 
 class ServerFilterMenu : public QObject, public ServerListObserver, public ServerFilterObserver
 {
@@ -77,9 +58,11 @@ public:
 	~ServerFilterMenu();
 
 	void reload(ServerFilter*);
+	void aboutToDestroy(); //Called when the parent mainwindow is being destroyed
 
 	//From ServerListObserver
 	void notifyServerListChanged();
+	void notifyServerListFavouriteChanged(ServerItem*);
 
 	//From ConfigObserver
 	void notifyServerFilterAdded(ServerItem*);
@@ -93,36 +76,19 @@ protected Q_SLOTS:
 protected:
 	void init();
 	void clear();
-	void addAction(QString name,int id);
+	QAction* createAction(QString name,int id);
 	void reload();
+	void buildFavourite();
+	void clearFavourite();
+	void syncActionState(QString,bool);
 
 	QMenu*  menu_;
-	QList<QAction*> acLst_;
+	QMenu*  allMenu_;
+	QMap<QString,QAction*> acAllMap_;
+	QMap<QString,QAction*> acFavMap_;
 	ServerFilter* filter_;
-};
-
-
-
-
-class FilterWidget : public QWidget
-{
-Q_OBJECT
-
-public:
-	explicit FilterWidget(QWidget* parent=0);
-	void reload(VParamSet*);
-
-protected Q_SLOTS:
-	void slotChanged(bool);
-
-Q_SIGNALS:
-	void filterChanged(QSet<DState::State>);
-
-private:
-	QToolButton* createButton(QString,QString,QColor);
-
-	QMap<DState::State,QToolButton*> items_;
-	VParamSet* data_;
+	QFont font_;
+	QFont loadFont_;
 };
 
 #endif

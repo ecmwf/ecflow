@@ -123,6 +123,7 @@
    </attribute>
    <addaction name="actionRefresh"/>
    <addaction name="actionSearch"/>
+   <addaction name="actionManageServers"/>
   </widget>
   <action name="actionClose">
    <property name="icon">
@@ -200,14 +201,6 @@
     <string>Reset</string>
    </property>
   </action>
-  <action name="actionServers">
-   <property name="text">
-    <string>Servers</string>
-   </property>
-   <property name="toolTip">
-    <string>Server selection</string>
-   </property>
-  </action>
   <action name="actionConfigureNodeMenu">
    <property name="text">
     <string>Configure Node &amp;Menu</string>
@@ -225,8 +218,15 @@
    </property>
   </action>
   <action name="actionManageServers">
+   <property name="icon">
+    <iconset resource="viewer.qrc">
+     <normaloff>:/viewer/manage_server.svg</normaloff>:/viewer/manage_server.svg</iconset>
+   </property>
    <property name="text">
     <string>&amp;Manage servers ...</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+N</string>
    </property>
   </action>
   <action name="actionAddInfoPanel">

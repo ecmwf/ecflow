@@ -108,6 +108,7 @@ MainWindow::MainWindow(QStringList idLst,QWidget *parent) : QMainWindow(parent)
 MainWindow::~MainWindow()
 {
 	qDebug() << "exit";
+	serverFilterMenu_->aboutToDestroy();
 }
 
 void MainWindow::init(MainWindow *win)
