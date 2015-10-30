@@ -425,12 +425,12 @@ void NodePathWidget::adjust(VInfo_ptr info,ServerHandler** serverOut,bool &sameS
   			{
   				if(reloadTb_)
   				{
-  					reloadTb_->setToolTip("Reload server <b>" + QString::fromStdString(server->name()) + "</b>");
+  					reloadTb_->setToolTip("Refresh server <b>" + QString::fromStdString(server->name()) + "</b>");
   				}
   			}
   			else
   			{
-  				reloadTb_->setToolTip("Reload server");
+  				reloadTb_->setToolTip("Refresh server");
   			}
 
   		}

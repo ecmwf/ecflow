@@ -91,7 +91,10 @@
      <string>View</string>
     </property>
     <addaction name="actionReset"/>
+    <addaction name="actionResetSelected"/>
+    <addaction name="separator"/>
     <addaction name="actionRefresh"/>
+    <addaction name="actionRefreshSelected"/>
     <addaction name="separator"/>
     <addaction name="actionAddTreeWidget"/>
     <addaction name="actionAddTableWidget"/>
@@ -121,7 +124,7 @@
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
-   <addaction name="actionRefresh"/>
+   <addaction name="actionRefreshSelected"/>
    <addaction name="actionSearch"/>
    <addaction name="actionManageServers"/>
   </widget>
@@ -180,13 +183,10 @@
      <normaloff>:/viewer/reload.svg</normaloff>:/viewer/reload.svg</iconset>
    </property>
    <property name="text">
-    <string>Refresh</string>
+    <string>Refresh all servers</string>
    </property>
    <property name="toolTip">
     <string>Refresh &lt;b&gt;all servers&lt;/b&gt; in current tab</string>
-   </property>
-   <property name="shortcut">
-    <string>F5</string>
    </property>
   </action>
   <action name="actionReset">
@@ -195,7 +195,7 @@
      <normaloff>:/viewer/reset.svg</normaloff>:/viewer/reset.svg</iconset>
    </property>
    <property name="text">
-    <string>Reset</string>
+    <string>Reset all servers</string>
    </property>
    <property name="toolTip">
     <string>Reset</string>
@@ -224,6 +224,9 @@
    </property>
    <property name="text">
     <string>&amp;Manage servers ...</string>
+   </property>
+   <property name="toolTip">
+    <string>Manage servers&lt;br&gt;&lt;code&gt;Ctrl+N&lt;/code&gt;</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+N</string>
@@ -292,6 +295,26 @@
    </property>
    <property name="text">
     <string>Search</string>
+   </property>
+  </action>
+  <action name="actionRefreshSelected">
+   <property name="icon">
+    <iconset resource="viewer.qrc">
+     <normaloff>:/viewer/reload_one.svg</normaloff>:/viewer/reload_one.svg</iconset>
+   </property>
+   <property name="text">
+    <string>Refresh selected server</string>
+   </property>
+   <property name="shortcut">
+    <string>F5</string>
+   </property>
+  </action>
+  <action name="actionResetSelected">
+   <property name="text">
+    <string>Reset selected server</string>
+   </property>
+   <property name="toolTip">
+    <string>Reset &lt;b&gt;selected&lt;/b&gt; server in current tab</string>
    </property>
   </action>
  </widget>

@@ -48,6 +48,8 @@ protected Q_SLOTS:
 	void on_actionQuit_triggered();
 	void on_actionRefresh_triggered();
 	void on_actionReset_triggered();
+	void on_actionRefreshSelected_triggered();
+	void on_actionResetSelected_triggered();
 	void on_actionConfigureNodeMenu_triggered();
 	void on_actionManageServers_triggered();
 	void on_actionShowInInfoPanel_triggered();
@@ -69,6 +71,7 @@ private:
     void addInfoPanelActions(QToolBar *toolbar);
     void reloadContents();
     void rerenderContents();
+    void updateRefreshActions();
 
     void writeSettings(VComboSettings*);
     void readSettings(VComboSettings*);

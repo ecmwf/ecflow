@@ -95,6 +95,10 @@ MainWindow::MainWindow(QStringList idLst,QWidget *parent) : QMainWindow(parent)
     addInfoPanelActions(viewToolBar);
     //addToolBar(ipToolBar);
 
+    //Actions based on selection
+    actionRefreshSelected->setEnabled(false);
+    actionResetSelected->setEnabled(false);
+
     //Status bar
 
     //Add notification widget
@@ -174,6 +178,28 @@ void MainWindow::on_actionRefresh_triggered()
 void MainWindow::on_actionReset_triggered()
 {
 	nodePanel_->resetCurrent();
+}
+
+void MainWindow::on_actionRefreshSelected_triggered()
+{
+	if(selection_ && selection_.get())
+	{
+		if(ServerHandler* s=selection_->server())
+		{
+			s->refresh();
+		}
+	}
+}
+
+void MainWindow::on_actionResetSelected_triggered()
+{
+	if(selection_ && selection_.get())
+	{
+		if(ServerHandler* s=selection_->server())
+		{
+			s->reset();
+		}
+	}
 }
 
 void MainWindow::on_actionPreferences_triggered()
@@ -287,7 +313,45 @@ void MainWindow::slotSelectionChanged(VInfo_ptr info)
 			 }
 		}
 	}
+
+	updateRefreshActions();
 }
+
+void MainWindow::updateRefreshActions()
+{
+	QString serverName;
+	if(selection_ && selection_.get())
+	{
+		if(ServerHandler* s=selection_->server())
+		{
+			serverName=QString::fromStdString(s->name());
+		}
+	}
+
+	bool hasSel=(selection_ && selection_.get());
+	actionRefreshSelected->setEnabled(hasSel);
+	actionResetSelected->setEnabled(hasSel);
+
+	if(serverName.isEmpty())
+	{
+		QString tnew=tr("Refresh <b>selected</b> server<br>") +
+					 + "<code>" + actionRefreshSelected->shortcut().toString() + "</code>";
+
+		actionRefreshSelected->setToolTip(tnew);
+	}
+	else
+	{
+		QString t=actionRefreshSelected->toolTip();
+		if(!t.contains(serverName))
+		{
+			QString tnew=tr("Refresh server <b>") + serverName + tr("</b><br>") +
+			 + "<code>" + actionRefreshSelected->shortcut().toString() + "</code>";
+
+			actionRefreshSelected->setToolTip(tnew);
+		}
+	}
+}
+
 
 void MainWindow::slotOpenInfoPanel()
 {

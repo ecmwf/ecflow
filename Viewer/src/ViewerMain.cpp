@@ -70,9 +70,9 @@ int main(int argc, char **argv)
     }
 
     //Set font size for application
-    QFont font=app.font();
-    font.setPointSize(9);
-    app.setFont(font);
+    //QFont font=app.font();
+    //font.setPointSize(9);
+    //app.setFont(font);
 
     //Initialise the config and other paths
     DirectoryHandler::init(std::string(argv[0]));  // we need to tell the Directory class where we started from
