@@ -194,6 +194,14 @@ QLabel#headerLabel_ {
      font-size: 11pt; 
 }
    
+QLabel[editorNotifyHeader="1"] {
+     background: rgb(253, 253, 253);
+     border: 1px solid rgb(160,160,160);    
+     /*color:  rgb(40, 41, 42);
+     font-weight: bold;
+     font-size: 11pt;*/
+}
+
 QGroupBox#editorGroupBox {
    
    font-weight: normal;
