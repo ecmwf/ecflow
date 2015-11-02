@@ -192,7 +192,7 @@ void ChangeNotify::setProperty(VProperty* prop)
 	if(VProperty* p=prop->findChild("sound_volume"))
 		p->addObserver(this);
 
-	if(VProperty* p=prop->findChild("sound_repeat"))
+	if(VProperty* p=prop->findChild("sound_loop"))
 		p->addObserver(this);
 }
 

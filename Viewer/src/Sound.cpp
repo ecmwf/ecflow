@@ -49,7 +49,7 @@ Sound* Sound::instance_=NULL;
 
 Sound::Sound() :
 	prevPlayedAt_(0),
-	delay_(3),
+	delay_(2),
 	prop_(NULL)
 {
 	formats_=".+\\.(wav|mp3|ogg|oga)";
@@ -74,15 +74,15 @@ Sound* Sound::instance()
 	return instance_;
 }
 
-void Sound::playSystem(const std::string& fName,int repeat)
+void Sound::playSystem(const std::string& fName,int loopCount)
 {
 	std::string fullName=DirectoryHandler::concatenate(sysDir_, fName);
-	play(fullName,repeat);
+	play(fullName,loopCount);
 }
 
-void Sound::play(const std::string& fName,int repeat)
+void Sound::play(const std::string& fName,int loopCount)
 {
-	assert(repeat < 6);
+	assert(loopCount < 6);
 
 	time_t t=time(NULL);
 	if(t < prevPlayedAt_+delay_)
@@ -96,7 +96,7 @@ void Sound::play(const std::string& fName,int repeat)
 	{
 		std::string cmd=currentCmd_;
 		boost::replace_first(cmd,"%FILE%",fName);
-		boost::replace_first(cmd,"%REPEAT%",boost::lexical_cast<std::string>(repeat));
+		boost::replace_first(cmd,"%REPEAT%",boost::lexical_cast<std::string>(loopCount-1));
 		if(system(cmd.c_str()))
 		{
 			UserMessage::message(UserMessage::DBG, false,"Sound::play() could not play sound alert. Command: " +  cmd);

@@ -12,6 +12,7 @@
 
 #include <QDebug>
 #include <QGroupBox>
+#include <QFrame>
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QTabWidget>
@@ -372,7 +373,9 @@ void PropertyEditor::addNotification(VProperty* vProp,QVBoxLayout* layout,QWidge
     if(vProp->name() != "custom-notification")
         return;
 
-    ChangeNotifyEditor* ne=new ChangeNotifyEditor(parent);
+    //ChangeNotifyEditor* ne=new ChangeNotifyEditor(parent);
+
+    QTabWidget* tab=new QTabWidget(parent);
 
     bool useGroup=(vProp->param("group") == "true");
 
@@ -383,13 +386,13 @@ void PropertyEditor::addNotification(VProperty* vProp,QVBoxLayout* layout,QWidge
     	groupBox->setObjectName("editorGroupBox");
     	QVBoxLayout* vb=new QVBoxLayout();
     	groupBox->setLayout(vb);
-    	vb->addWidget(ne);
+    	vb->addWidget(tab);
     	layout->addWidget(groupBox);
 
     }
     else
     {
-    	layout->addWidget(ne);
+    	layout->addWidget(tab);
     }
 
     //Add rows
@@ -403,10 +406,18 @@ void PropertyEditor::addNotification(VProperty* vProp,QVBoxLayout* layout,QWidge
 
     		QWidget* w=new QWidget(parent);
     		QVBoxLayout* vb=new QVBoxLayout(w);
-    		vb->setContentsMargins(0,4,0,4);
+    		//vb->setContentsMargins(4,4,4,4);
 
             currentGrid_=0;
             
+            if(VProperty *root=VConfig::instance()->find(chProp->param("root").toStdString()))
+            {
+            	QLabel *labelDesc=new QLabel(tr("Description: <b>") + root->param("description") + "</b>",w);
+            	//labelDesc->setProperty("editorNotifyHeader","1");
+            	vb->addWidget(labelDesc);
+            	vb->addSpacing(5);
+            }
+
             int lineLstPos=lineItems_.count();
     		Q_FOREACH(VProperty* lineProp,chProp->children())
     	    {
@@ -414,8 +425,48 @@ void PropertyEditor::addNotification(VProperty* vProp,QVBoxLayout* layout,QWidge
     	    }
     	    for(int i=lineLstPos; i < lineItems_.count(); i++)
                 lineLst << lineItems_[i];
-    	    
-    		ne->addRow(labelText,lineLst,w);
+
+    	    tab->addTab(w,labelText);
+
+    	    //Connect up different components
+    	    PropertyLine* enabledLine=0;
+    	    PropertyLine* popupLine=0;
+    	    PropertyLine* soundLine=0;
+    	    Q_FOREACH(PropertyLine* pl,lineLst)
+    		{
+    			if(pl->property()->name() == "enabled")
+    			{
+    				enabledLine=pl;
+    			}
+    			if(pl->property()->name() == "popup")
+    			{
+    				popupLine=pl;
+    			}
+    			if(pl->property()->name() == "sound")
+    			{
+    				soundLine=pl;
+    			}
+    		}
+
+    		if(enabledLine)
+    		{
+    			if(popupLine)
+    			{
+    				connect(enabledLine,SIGNAL(changed(QVariant)),
+    						popupLine,SLOT(slotEnabled(QVariant)));
+    				//init
+    				popupLine->slotEnabled(enabledLine->property()->value());
+    			}
+    			if(soundLine)
+    			{
+    				connect(enabledLine,SIGNAL(changed(QVariant)),
+    						soundLine,SLOT(slotEnabled(QVariant)));
+    				//init
+    				soundLine->slotEnabled(enabledLine->property()->value());
+    			}
+    		}
+
+    		//ne->addRow(labelText,lineLst,w);
     	 }
      }
 }
@@ -479,9 +530,15 @@ void PropertyEditor::addNote(VProperty* vProp,QGridLayout* layout,QWidget *paren
     QString txt=vProp->value().toString();
     txt.replace("%SERVER%",(serverName_.isEmpty())?"?":"<b>" + serverName_ + "</b>");
 
-    QLabel *empty=new QLabel(" ",parent);
-    layout->addWidget(empty,layout->rowCount(),0,1,-1,Qt::AlignVCenter);
-   	QLabel *label=new QLabel("&nbsp;&nbsp;&nbsp;<b>Note:</b> " + txt,parent);
+    //QLabel *empty=new QLabel(" ",parent);
+    //layout->addWidget(empty,layout->rowCount(),0,1,-1,Qt::AlignVCenter);
+   	//QLabel *label=new QLabel("&nbsp;&nbsp;&nbsp;<b>Note:</b> " + txt,parent);
+
+    //QFrame* fr=new QFrame(parent);
+    //fr->setFrameShape(QFrame::HLine);
+    //layout->addWidget(fr,layout->rowCount(),0,1,-1,Qt::AlignVCenter);
+
+    QLabel *label=new QLabel("<table><tr><td><b>Note:</b></td><td>" + txt + "</td></tr></table>",parent);
     layout->addWidget(label,layout->rowCount(),0,1,-1,Qt::AlignVCenter);
 }
 

@@ -33,11 +33,16 @@ ChangeNotifyEditor::ChangeNotifyEditor(QWidget* parent) : QWidget(parent)
 	connect(tree_,SIGNAL(clicked(QModelIndex)),
 			this,SLOT(slotRowSelected(QModelIndex)));
 
-	assert(stacked_->count()==0);
+	assert(tab_->count()==0);
+	//assert(stacked_->count()==0);
 
 	QFont f;
 	QFontMetrics fm(f);
-	tree_->setFixedHeight((fm.height()+4)*5.5);
+	//tree_->setFixedHeight((fm.height()+4)*5.5);
+
+	tree_->setFixedWidth(fm.width("Restartedaaa")+30);
+
+	//tab_->hide();
 }
 
 void ChangeNotifyEditor::addRow(QString label,QList<PropertyLine*> lineLst,QWidget *stackContents)
@@ -106,7 +111,8 @@ void ChangeNotifyEditor::addRow(QString label,QList<PropertyLine*> lineLst,QWidg
 	vb->addWidget(stackContents);
 	vb->addStretch(1);
 
-	stacked_->addWidget(w);
+	//stacked_->addWidget(w);
+	tab_->addTab(w,label);
 
 	tree_->setCurrentIndex(model_->index(0,0));
 
@@ -118,13 +124,19 @@ void ChangeNotifyEditor::addRow(QString label,QList<PropertyLine*> lineLst,QWidg
 
 void ChangeNotifyEditor::slotRowSelected(const QModelIndex& idx)
 {
-	if(idx.row() == stacked_->currentIndex())
+	//if(idx.row() == stacked_->currentIndex())
+	if(idx.row() == tab_->currentIndex())
 		return;
 
-	if(idx.row() >= 0 && idx.row() < stacked_->count())
+	if(idx.row() >= 0 && idx.row() < tab_->count())
+	{
+		tab_->setCurrentIndex(idx.row());
+	}
+
+	/*if(idx.row() >= 0 && idx.row() < stacked_->count())
 	{
 		stacked_->setCurrentIndex(idx.row());
-	}
+	}*/
 }
 
 ChangeNotifyEditorModel::ChangeNotifyEditorModel(QObject *parent) :
@@ -172,7 +184,7 @@ void ChangeNotifyEditorModel::add(QString label,QList<VProperty*> propLst)
 
 int ChangeNotifyEditorModel::columnCount( const QModelIndex& /*parent */ ) const
 {
-   	 return 3;
+   	 return 2;
 }
 
 int ChangeNotifyEditorModel::rowCount( const QModelIndex& parent) const
@@ -255,7 +267,7 @@ QVariant ChangeNotifyEditorModel::headerData( const int section, const Qt::Orien
    	{
    		switch ( section )
    		{
-   		case 0: return tr("Enabled ");
+   		case 0: return tr("E");
    		case 1: return tr("Title");
    		case 2: return tr("Description");
    		default: return QVariant();

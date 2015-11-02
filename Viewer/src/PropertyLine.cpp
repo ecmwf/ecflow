@@ -742,11 +742,11 @@ void SoundComboPropertyLine::setEnabledEditable(bool b)
 
 void SoundComboPropertyLine::slotPlay(bool)
 {
-	int repeat=0;
-	if(PropertyLine* line=helpers_.value("sound_repeat",NULL))
-		repeat=line->currentValue().toInt();
+	int loopCount=1;
+	if(PropertyLine* line=helpers_.value("sound_loop",NULL))
+		loopCount=line->currentValue().toInt();
 
-	Sound::instance()->playSystem(currentValue().toString().toStdString(),repeat);
+	Sound::instance()->playSystem(currentValue().toString().toStdString(),loopCount);
 }
 
 
