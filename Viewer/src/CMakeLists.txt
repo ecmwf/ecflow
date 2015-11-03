@@ -60,6 +60,7 @@ set(viewer_srcs
     NodeQueryDialog.cpp
     NodeQueryEngine.cpp
     NodeQueryHandler.cpp
+    NodeQueryWidget.cpp
     NodeViewBase.cpp
     NodeViewDelegate.cpp
     NodeWidget.cpp
@@ -177,6 +178,7 @@ set(viewer_moc_files AbstractNodeModel.hpp
     NodePathWidget.hpp            
     NodeQueryDialog.hpp
     NodeQueryEngine.hpp
+    NodeQueryWidget.hpp
     NodeWidget.hpp
     OutputItemWidget.hpp
     PropertyDialog.hpp             
@@ -232,6 +234,7 @@ set(viewer_wrap_ui_files
     MenuConfigDialog.ui
     NodeQueryDialog.ui
     NodeQuerySaveDialog.ui
+    NodeQueryWidget.ui
     OutputItemWidget.ui 
     PropertyDialog.ui
     PropertyEditor.ui
