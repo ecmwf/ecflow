@@ -14,6 +14,7 @@
 #include <string>
 #include <vector>
 
+#include <QStringList>
 #include <QThread>
 
 class BaseNodeCondition;
