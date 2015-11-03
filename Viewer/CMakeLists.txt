@@ -9,6 +9,8 @@
 #  "/tmp/ma0/workspace/ecflow/Viewer/src/../images/zombie_dock.svg" of target
 #  "Qt_resource_cpp" does not exist.
 
-cmake_policy(SET CMP0046 OLD)
+if (POLICY CMP0046)
+  cmake_policy(SET CMP0046 OLD)
+endif()
 
 add_subdirectory( src )
