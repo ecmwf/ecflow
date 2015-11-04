@@ -12,6 +12,7 @@
 #include "NodeQueryWidget.hpp"
 
 #include "ComboMulti.hpp"
+#include "CustomListWidget.hpp"
 #include "Highlighter.hpp"
 #include "NodeQuery.hpp"
 #include "NodeQueryEngine.hpp"
@@ -105,36 +106,43 @@ NodeQueryWidget::NodeQueryWidget(QWidget *parent) :
     Highlighter* ih=new Highlighter(queryTe_->document(),"query");
 
     //Max item num
-    numSpin_->setRange(1,100000);
-    numSpin_->setValue(10000);
+    numSpin_->setRange(1,500000);
+    numSpin_->setValue(50000);
     numCh_->setChecked(true);
     connect(numCh_,SIGNAL(clicked(bool)),
     		numSpin_,SLOT(setEnabled(bool)));
 
+    //Servers
+    serverResetTb_->setEnabled(serverCb_->hasSelection());
+
     //Node type
-    typeCb_->addItem("server");
-    typeCb_->addItem("suite");
-    typeCb_->addItem("family");
-    typeCb_->addItem("task");
-    typeCb_->addItem("alias");
+    QStringList typeLst;
+    typeLst << "server" << "suite" << "family" << "task" << "alias";
+    typeList_->addItems(typeLst,false);
 
     //Node state
-    stateCb_->addItem("aborted");
-    stateCb_->addItem("active");
-    stateCb_->addItem("complete");
-    stateCb_->addItem("queued");
-    stateCb_->addItem("submitted");
-    stateCb_->addItem("suspended");
-    stateCb_->addItem("unknown");
+    QStringList stateLst;
+    stateLst << "aborted" << "active" << "complete" << "queued" << "submitted" << "suspended" << "unknown";
+    stateList_->addItems(stateLst,false);
 
-    //Flags
-    flagCb_->addItem("is_late");
-    flagCb_->addItem("has_date");
-    flagCb_->addItem("has_message");
-    flagCb_->addItem("has_time");
-    flagCb_->addItem("is_rerun");
-    flagCb_->addItem("is_waiting");
-    flagCb_->addItem("is_zombie");
+    //Node flags
+    QStringList flagLst;
+    flagLst << "is_late" << "has_date" << "has_message" << "has_time" << "is_rerun" << "is_waiting" << "is_zombie";
+    flagList_->addItems(flagLst,false);
+
+    //Attributes
+    attrList_->addItems(attrPanel_->groupNames(),false);
+
+    int listHeight=(fm.height()+2)*7+6;
+    typeList_->setFixedHeight(listHeight);
+    stateList_->setFixedHeight(listHeight);
+    flagList_->setFixedHeight(listHeight);
+    attrList_->setFixedHeight(listHeight);
+
+    typeResetTb_->setEnabled(typeList_->hasSelection());
+    stateResetTb_->setEnabled(stateList_->hasSelection());
+    flagResetTb_->setEnabled(flagList_->hasSelection());
+    attrResetTb_->setEnabled(attrList_->hasSelection());
 
 
     connect(exactMatchCh_,SIGNAL(clicked(bool)),
@@ -150,30 +158,46 @@ NodeQueryWidget::NodeQueryWidget(QWidget *parent) :
             this,SLOT(slotSearchTermEdited(QString)));
 
     connect(serverCb_,SIGNAL(selectionChanged()),
-               this,SLOT(check()));
+            this,SLOT(slotServerCbChanged()));
 
-    connect(stateCb_,SIGNAL(selectionChanged()),
-            this,SLOT(slotStateCbChanged()));
+    connect(serverResetTb_,SIGNAL(clicked()),
+          	serverCb_,SLOT(clearSelection()));
 
-    connect(typeCb_,SIGNAL(selectionChanged()),
-    		this,SLOT(slotTypeCbChanged()));
+    //Lists
+    connect(typeList_,SIGNAL(selectionChanged()),
+           this,SLOT(slotTypeListChanged()));
 
-    connect(flagCb_,SIGNAL(selectionChanged()),
-            this,SLOT(slotFlagCbChanged()));
+    connect(stateList_,SIGNAL(selectionChanged()),
+           this,SLOT(slotStateListChanged()));
 
-    //Reset buttons
+    connect(flagList_,SIGNAL(selectionChanged()),
+           this,SLOT(slotFlagListChanged()));
+
+    connect(attrList_,SIGNAL(selectionChanged()),
+               this,SLOT(slotAttrListChanged()));
+
+    // List reset buttons
     connect(stateResetTb_,SIGNAL(clicked()),
-    		stateCb_,SLOT(clearSelection()));
+    		stateList_,SLOT(clearSelection()));
 
     connect(typeResetTb_,SIGNAL(clicked()),
-        	typeCb_,SLOT(clearSelection()));
+        	typeList_,SLOT(clearSelection()));
 
     connect(flagResetTb_,SIGNAL(clicked()),
-            flagCb_,SLOT(clearSelection()));
+            flagList_,SLOT(clearSelection()));
+
+    connect(attrResetTb_,SIGNAL(clicked()),
+            attrList_,SLOT(clearSelection()));
 
     //attributes
-    connect(attrW_,SIGNAL(queryChanged()),
-    		this,SLOT(buildQueryString()));
+    //connect(attrW_,SIGNAL(queryChanged()),
+    //		this,SLOT(buildQueryString()));
+
+    //Show hide def panel
+    defPanelTb_->setText("Definitions <<");
+    connect(defPanelTb_,SIGNAL(clicked(bool)),
+           this,SLOT(slotShowDefPanel(bool)));
+
 
     //Find button
     findPb_->setProperty("startSearch","1");
@@ -185,12 +209,9 @@ NodeQueryWidget::NodeQueryWidget(QWidget *parent) :
     connect(findPb_,SIGNAL(clicked()),
     		this,SLOT(slotFind()));
 
-    tab_->setCurrentIndex(0);
-
-    tab_->setFixedHeight(190);
-
-    //Read the qt settings
-    //readSettings();
+    //Close button
+    connect(closePb_,SIGNAL(clicked()),
+        	this,SIGNAL(closeClicked()));
 
     check();
 
@@ -253,26 +274,19 @@ NodeQueryWidget::~NodeQueryWidget()
 		serverFilter_->removeObserver(this);
 }
 
-
-/*void NodeQueryWidget::closeEvent(QCloseEvent * event)
+void NodeQueryWidget::slotShowDefPanel(bool)
 {
-	event->accept();
-	writeSettings();
+	defPanel_->setVisible(!defPanel_->isVisible());
+
+	if(defPanel_->isVisible())
+	{
+		defPanelTb_->setText("Definitions <<");
+	}
+	else
+	{
+		defPanelTb_->setText("Definitions >>");
+	}
 }
-
-
-void NodeQueryWidget::accept()
-{
-	writeSettings();
-    QDialog::accept();
-}
-
-
-void NodeQueryWidget::reject()
-{
-	writeSettings();
-	QDialog::reject();
-}*/
 
 void NodeQueryWidget::slotExactMatch(bool)
 {
@@ -291,22 +305,41 @@ void NodeQueryWidget::slotRootNodeEdited(QString)
 	check();
 }
 
-void NodeQueryWidget::slotTypeCbChanged()
+void NodeQueryWidget::slotServerCbChanged()
 {
+	serverResetTb_->setEnabled(serverCb_->hasSelection());
+	check();
+}
+
+void NodeQueryWidget::slotTypeListChanged()
+{
+	typeResetTb_->setEnabled(typeList_->hasSelection());
 	buildQueryString();
 	check();
 }
 
-void NodeQueryWidget::slotStateCbChanged()
+void NodeQueryWidget::slotStateListChanged()
 {
+	stateResetTb_->setEnabled(stateList_->hasSelection());
 	buildQueryString();
 	check();
 }
 
-void NodeQueryWidget::slotFlagCbChanged()
+void NodeQueryWidget::slotFlagListChanged()
 {
+	flagResetTb_->setEnabled(flagList_->hasSelection());
 	buildQueryString();
 	check();
+}
+
+void NodeQueryWidget::slotAttrListChanged()
+{
+	attrResetTb_->setEnabled(attrList_->hasSelection());
+	attrPanel_->setSelection(attrList_->selection());
+	//filterBox_->layout()->invalidate();
+
+	//buildQueryString();
+	//check();
 }
 
 void NodeQueryWidget::check()
@@ -347,23 +380,23 @@ void NodeQueryWidget::buildQueryString()
 		sTerm="\'" +  sTerm + "\'";
  	}*/
 
-	if(stateCb_->selection().count() >0)
+	if(stateList_->selection().count() >0)
 	{
-		s+="( " + stateCb_->selection().join(" or ") + " )";
+		s+="( " + stateList_->selection().join(" or ") + " )";
 	}
 
-	if(typeCb_->selection().count() >0)
+	if(typeList_->selection().count() >0)
 	{
 		if(!s.isEmpty())
 			s+=" and ";
-		s+="( " + typeCb_->selection().join(" or ") + " )";
+		s+="( " + typeList_->selection().join(" or ") + " )";
 	}
 
-	if(flagCb_->selection().count() >0)
+	if(flagList_->selection().count() >0)
 	{
 		if(!s.isEmpty())
 			s+=" and ";
-		s+="( " + flagCb_->selection().join(" or ") + " )";
+		s+="( " + flagList_->selection().join(" or ") + " )";
 	}
 
 	QString eqPart;
@@ -384,13 +417,13 @@ void NodeQueryWidget::buildQueryString()
 	}
 
 	//Attributes
-	QString attr=attrW_->query();
+	/*QString attr=attrW_->query();
 	if(!attr.isEmpty())
 	{
 		if(!eqPart.isEmpty())
 			eqPart+=" or ";
 		eqPart+=attr;
-	}
+	}*/
 
 	if(!eqPart.isEmpty())
 	{
@@ -579,50 +612,6 @@ void NodeQueryWidget::slotSaveQueryAs()
 		NodeQueryHandler::instance()->add(n,true);
 	}
 }
-
-//------------------------------------------
-// Settings read/write
-//------------------------------------------
-/*
-void NodeQueryWidget::writeSettings()
-{
-	QSettings settings("ECMWF","ecflowUI-NodeSearchDialog");
-
-	//We have to clear it so that should not remember all the previous values
-	settings.clear();
-
-	settings.beginGroup("main");
-	settings.setValue("size",size());
-	//settings.setValue("current",list_->currentRow());
-	settings.endGroup();
-}
-
-void NodeQueryWidget::readSettings()
-{
-	QSettings settings("ECMWF","ecflowUI-NodeSearchDialog");
-
-	settings.beginGroup("main");
-	if(settings.contains("size"))
-	{
-		resize(settings.value("size").toSize());
-	}
-	else
-	{
-	  	resize(QSize(550,540));
-	}
-
-	//if(settings.contains("current"))
-	//{
-	//	int current=settings.value("current").toInt();
-	//	if(current >=0)
-	//		list_->setCurrentRow(current);
-	//}
-	//settings.endGroup();
-}
-
-*/
-
-
 
 NodeQueryModel::NodeQueryModel(QObject *parent) :
      QAbstractItemModel(parent)

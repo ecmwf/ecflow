@@ -57,10 +57,13 @@ public:
 protected Q_SLOTS:
 	//void accept();
     //void reject();
-    void buildQueryString();
-	void slotTypeCbChanged();
-	void slotStateCbChanged();
-	void slotFlagCbChanged();
+	void slotShowDefPanel(bool);
+	void buildQueryString();
+	void slotServerCbChanged();
+	void slotTypeListChanged();
+	void slotStateListChanged();
+	void slotFlagListChanged();
+	void slotAttrListChanged();
 	void slotSearchTermEdited(QString);
 	void slotRootNodeEdited(QString);
 	void slotExactMatch(bool);
@@ -72,15 +75,13 @@ protected Q_SLOTS:
 	void slotQueryFinished();
 	void slotSaveQueryAs();
 
-protected:
-	//void closeEvent(QCloseEvent * event);
+Q_SIGNALS:
+	void closeClicked();
 
 private:
 	void updateServers();
 	void initAttr();
 	void updateQuery();
-    //void readSettings();
-    //void writeSettings();
 
 	NodeQuery* query_;
 	NodeQueryEngine* engine_;
@@ -137,7 +138,6 @@ public:
 protected:
 	std::vector<NodeQuery*> data_;
 };
-
 
 
 #endif /* VIEWER_SRC_NODEQUERYWIDGET_HPP_ */

@@ -15,6 +15,7 @@ public:
     virtual void paintEvent(QPaintEvent *);
     void setDisplayText(QString text);
     QString displayText() const;
+    bool hasSelection() const {return !selection_.isEmpty();}
     QStringList selection() const {return selection_;}
     void selectSoleItem();
 

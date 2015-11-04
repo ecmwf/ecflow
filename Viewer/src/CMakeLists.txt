@@ -18,6 +18,7 @@ set(viewer_srcs
     CommandDesignerWidget.cpp
     ConfigListDelegate.cpp
     CustomCommandDialog.cpp
+    CustomListWidget.cpp
     CustomTabWidget.cpp
     Dashboard.cpp
     DashboardDialog.cpp
@@ -158,6 +159,7 @@ set(viewer_moc_files AbstractNodeModel.hpp
     CommandDesignerWidget.hpp
     CodeItemWidget.hpp
     CustomCommandDialog.hpp
+    CustomListWidget.hpp
     Dashboard.hpp
     DashboardDialog.hpp
     DashboardDock.hpp
@@ -214,7 +216,6 @@ set(viewer_moc_files AbstractNodeModel.hpp
 
 set(viewer_wrap_ui_files
     AboutDialog.ui
-    AttributeSearchPanel.ui
     ChangeNotifyDialog.ui
     ChangeNotifyDialogWidget.ui
     ChangeNotifyEditor.ui
@@ -224,11 +225,9 @@ set(viewer_wrap_ui_files
     DashboardDialog.ui
     DashboardDockTitleWidget.ui
     EditItemWidget.ui
-    EventSearchWidget.ui
     GotoLineDialog.ui
     HistoryItemWidget.ui
     InfoPanel.ui    
-    LabelSearchWidget.ui
     MainWindow.ui 
     MessageItemWidget.ui
     MenuConfigDialog.ui

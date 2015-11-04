@@ -10,6 +10,9 @@ NodeQueryDialog::NodeQueryDialog(QWidget *parent) :
 {
     setupUi(this);
 
+    connect(queryWidget,SIGNAL(closeClicked()),
+    		this,SLOT(accept()));
+
     //Read the qt settings
     readSettings();
 }

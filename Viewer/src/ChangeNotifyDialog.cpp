@@ -359,6 +359,8 @@ void ChangeNotifyDialog::on_closePb__clicked(bool b)
 				ntf->clearData();
 		}
 	}
+
+	writeSettings();
 }
 
 void ChangeNotifyDialog::on_clearPb__clicked(bool b)
