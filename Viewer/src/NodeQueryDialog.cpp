@@ -5,10 +5,16 @@
 #include <QDebug>
 #include <QSettings>
 
+#include "VConfig.hpp"
+
 NodeQueryDialog::NodeQueryDialog(QWidget *parent) :
     QDialog(parent)
 {
     setupUi(this);
+
+	QString wt=windowTitle();
+	wt+="  -  " + QString::fromStdString(VConfig::instance()->appLongName());
+	setWindowTitle(wt);
 
     connect(queryWidget,SIGNAL(closeClicked()),
     		this,SLOT(accept()));

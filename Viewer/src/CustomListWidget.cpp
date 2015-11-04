@@ -11,6 +11,7 @@
 #include "CustomListWidget.hpp"
 
 #include <QListWidgetItem>
+#include <QPainter>
 
 CustomListWidget::CustomListWidget(QWidget* parent) : QListWidget(parent)
 {
@@ -26,6 +27,25 @@ void CustomListWidget::addItems(QStringList lst,bool checkState)
 	for(int i=0; i < count(); i++)
 	{
 		item(i)->setCheckState((checkState)?Qt::Checked:Qt::Unchecked);
+	}
+}
+
+void CustomListWidget::addItems(QStringList lst,bool checkState,QList<QColor> colLst)
+{
+	addItems(lst,checkState);
+
+	for(int i=0; i < count() && i < colLst.count(); i++)
+	{
+		QColor col=colLst[i];
+		if(col.isValid())
+		{
+			QPixmap pix(10,10);
+			QPainter painter(&pix);
+			pix.fill(col);
+			painter.setPen(Qt::black);
+			painter.drawRect(0,0,9,9);
+			item(i)->setIcon(pix);
+		}
 	}
 }
 

@@ -213,7 +213,6 @@ ServerListDialog::ServerListDialog(Mode mode,ServerFilter *filter,QWidget *paren
 {
 	setupUi(this);
 
-
 	QString wt=windowTitle();
 	wt+="  -  " + QString::fromStdString(VConfig::instance()->appLongName());
 	setWindowTitle(wt);

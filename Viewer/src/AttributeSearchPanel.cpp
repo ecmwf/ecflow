@@ -31,6 +31,7 @@ public:
 	virtual ~AttrLineDesc() {}
 
 	virtual QString value()=0;
+	QString name()  const {return name_;}
 	int row() const {return row_;}
 
 protected:
@@ -82,7 +83,7 @@ QString AttrGroupDesc::query() const
 		{
 			if(!q.isEmpty())
 				q+=" or ";
-			q+=s;
+			q+=line->name() + " =\'" + s + "\'";
 		}
 	}
 
@@ -165,13 +166,13 @@ AttributeSearchPanel::AttributeSearchPanel(QWidget* parent) :
 	addStringLine("Late name","late_name","late");
 	addStringLine("Limit name","limit_name","limit");
 	addStringLine("Limit value","limit_value","limit");
-	addStringLine("Limit limit","limit_limit","limit");
+	addStringLine("Limit max","limit_max","limit");
 	addStringLine("Limiter name","limiter_name","limiter");
 	addStringLine("Meter name","meter_name","meter");
 	addStringLine("Repeat name","repeat_name","repeat");
 	addStringLine("Repeat value","repeat_value","repeat");
 	addStringLine("Time name","time_name","time");
-	addStringLine("Trigger","trigger","trigger");
+	addStringLine("Trigger expression","trigger_expression","trigger");
 	addStringLine("Variable name","variable_name","variable");
 	addStringLine("Variable value","variable_value","variable");
 
@@ -246,6 +247,8 @@ void AttributeSearchPanel::setSelection(QStringList lst)
 		show();
 
 	selection_=lst;
+
+	buildQuery();
 }
 
 void AttributeSearchPanel::clearSelection()
@@ -271,7 +274,7 @@ void AttributeSearchPanel::buildQuery()
 		{
 			if(!query_.isEmpty())
 				query_+=" or ";
-			query_=it.value()->query();
+			query_+=it.value()->query();
 		}
 	}
 

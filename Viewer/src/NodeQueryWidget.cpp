@@ -18,6 +18,7 @@
 #include "NodeQueryEngine.hpp"
 #include "NodeQueryHandler.hpp"
 #include "ServerFilter.hpp"
+#include "VNState.hpp"
 
 #include <QtGlobal>
 #include <QCloseEvent>
@@ -123,7 +124,20 @@ NodeQueryWidget::NodeQueryWidget(QWidget *parent) :
     //Node state
     QStringList stateLst;
     stateLst << "aborted" << "active" << "complete" << "queued" << "submitted" << "suspended" << "unknown";
-    stateList_->addItems(stateLst,false);
+    QList<QColor> stateColLst;
+    Q_FOREACH(QString s,stateLst)
+    {
+    	if(VNState* vn=VNState::find(s.toStdString()))
+    	{
+    		stateColLst << vn->colour();
+    	}
+    	else
+    	{
+    		stateColLst << QColor();
+    	}
+    }
+
+    stateList_->addItems(stateLst,false,stateColLst);
 
     //Node flags
     QStringList flagLst;
@@ -190,14 +204,13 @@ NodeQueryWidget::NodeQueryWidget(QWidget *parent) :
             attrList_,SLOT(clearSelection()));
 
     //attributes
-    //connect(attrW_,SIGNAL(queryChanged()),
-    //		this,SLOT(buildQueryString()));
+    connect(attrPanel_,SIGNAL(queryChanged()),
+    		this,SLOT(buildQueryString()));
 
     //Show hide def panel
     defPanelTb_->setText("Definitions <<");
     connect(defPanelTb_,SIGNAL(clicked(bool)),
            this,SLOT(slotShowDefPanel(bool)));
-
 
     //Find button
     findPb_->setProperty("startSearch","1");
@@ -379,10 +392,25 @@ void NodeQueryWidget::buildQueryString()
 	{
 		sTerm="\'" +  sTerm + "\'";
  	}*/
-
-	if(stateList_->selection().count() >0)
+	//Node name
+	QString namePart;
+	QString name=nameLe_->text().simplified();
+	QString path=pathLe_->text().simplified();
+	if(!name.isEmpty())
 	{
-		s+="( " + stateList_->selection().join(" or ") + " )";
+		namePart="node_name = \'" +  name + "\'";
+	}
+	if(!path.isEmpty())
+	{
+		if(!namePart.isEmpty())
+			namePart+=" or ";
+
+		namePart+="node_path = \'" +  path + "\'";
+	}
+
+	if(!namePart.isEmpty())
+	{
+		s="(" + namePart + ")";
 	}
 
 	if(typeList_->selection().count() >0)
@@ -392,6 +420,13 @@ void NodeQueryWidget::buildQueryString()
 		s+="( " + typeList_->selection().join(" or ") + " )";
 	}
 
+	if(stateList_->selection().count() >0)
+	{
+		if(!s.isEmpty())
+			s+=" and ";
+		s+="( " + stateList_->selection().join(" or ") + " )";
+	}
+
 	if(flagList_->selection().count() >0)
 	{
 		if(!s.isEmpty())
@@ -399,38 +434,13 @@ void NodeQueryWidget::buildQueryString()
 		s+="( " + flagList_->selection().join(" or ") + " )";
 	}
 
-	QString eqPart;
-
-	//Node name
-	QString name=nameLe_->text().simplified();
-	if(!name.isEmpty())
-	{
-		eqPart="node_name = \'" +  name + "\'";
-	}
-
-	QString path=pathLe_->text().simplified();
-	if(!path.isEmpty())
-	{
-		if(!eqPart.isEmpty())
-			eqPart+=" or ";
-		eqPart+="node_path = \'" +  path + "\'";
-	}
-
 	//Attributes
-	/*QString attr=attrW_->query();
+	QString attrPart;
+	QString attr=attrPanel_->query();
 	if(!attr.isEmpty())
 	{
-		if(!eqPart.isEmpty())
-			eqPart+=" or ";
-		eqPart+=attr;
-	}*/
-
-	if(!eqPart.isEmpty())
-	{
-		if(!s.isEmpty())
-			s+=" and (" + eqPart + ")";
-		else
-			s=eqPart;
+		attrPart="(" + attr + ")";
+		s+=" and " + attrPart;
 	}
 
 	queryTe_->setPlainText(s);

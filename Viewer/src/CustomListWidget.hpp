@@ -20,6 +20,7 @@ public:
 	explicit CustomListWidget(QWidget* parent=0);
 
 	void addItems(QStringList lst,bool checkState);
+	void addItems(QStringList lst,bool checkState,QList<QColor>);
 	QStringList selection() const;
 	bool hasSelection() const;
 
