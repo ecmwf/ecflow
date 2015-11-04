@@ -383,6 +383,7 @@ void NodeQueryWidget::check()
 void NodeQueryWidget::buildQueryString()
 {
 	QString s;
+	int rowNum=0;
 	/*QString nameTerm; //=searchLe_->text().simplified();
 	if(sTerm.isEmpty())
 	{
@@ -392,6 +393,7 @@ void NodeQueryWidget::buildQueryString()
 	{
 		sTerm="\'" +  sTerm + "\'";
  	}*/
+
 	//Node name
 	QString namePart;
 	QString name=nameLe_->text().simplified();
@@ -410,28 +412,32 @@ void NodeQueryWidget::buildQueryString()
 
 	if(!namePart.isEmpty())
 	{
-		s="(" + namePart + ")";
+		s="( " + namePart + " )";
+		rowNum++;
 	}
 
 	if(typeList_->selection().count() >0)
 	{
 		if(!s.isEmpty())
-			s+=" and ";
+			s+=" and \n";
 		s+="( " + typeList_->selection().join(" or ") + " )";
+		rowNum++;
 	}
 
 	if(stateList_->selection().count() >0)
 	{
 		if(!s.isEmpty())
-			s+=" and ";
+			s+=" and \n";
 		s+="( " + stateList_->selection().join(" or ") + " )";
+		rowNum++;
 	}
 
 	if(flagList_->selection().count() >0)
 	{
 		if(!s.isEmpty())
-			s+=" and ";
+			s+=" and \n";
 		s+="( " + flagList_->selection().join(" or ") + " )";
+		rowNum++;
 	}
 
 	//Attributes
@@ -439,11 +445,24 @@ void NodeQueryWidget::buildQueryString()
 	QString attr=attrPanel_->query();
 	if(!attr.isEmpty())
 	{
-		attrPart="(" + attr + ")";
-		s+=" and " + attrPart;
+		attrPart="( " + attr + " )";
+		s+=" and \n" + attrPart;
+		rowNum++;
 	}
 
+	int oldRowNum=queryTe_->toPlainText().count("\n")+1;
+	if(oldRowNum==0 && !queryTe_->toPlainText().isEmpty())
+		oldRowNum=1;
+
 	queryTe_->setPlainText(s);
+
+	if(oldRowNum != rowNum && oldRowNum > 3 || rowNum > 3)
+	{
+		QFont f;
+		QFontMetrics fm(f);
+
+		queryTe_->setFixedHeight((fm.height()+2)*rowNum+6);
+	}
 }
 
 //------------------------------------------
@@ -519,7 +538,7 @@ void NodeQueryWidget::notifyServerFilterDelete()
 
 void NodeQueryWidget::updateQuery()
 {
-	query_->setQuery(queryTe_->toPlainText().toStdString());
+	query_->setQuery(queryTe_->toPlainText().replace("\n","").toStdString());
 
 	//options
 	NodeQueryOptions opt;
