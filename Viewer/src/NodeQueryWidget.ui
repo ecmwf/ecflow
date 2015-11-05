@@ -39,7 +39,7 @@
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="">
+     <widget class="QWidget" name="layoutWidget">
       <layout class="QHBoxLayout" name="horizontalLayout_4" stretch="0,0">
        <property name="spacing">
         <number>10</number>
@@ -299,9 +299,7 @@
                 </layout>
                </item>
                <item>
-                <widget class="AttributeSearchPanel" name="attrPanel_" native="true">
-                 <zorder>queryTe_</zorder>
-                </widget>
+                <widget class="AttributeSearchPanel" name="attrPanel_" native="true"/>
                </item>
               </layout>
              </widget>
@@ -336,7 +334,7 @@
              <number>0</number>
             </property>
             <item>
-             <widget class="QTreeView" name="resTree_"/>
+             <widget class="NodeQueryResultView" name="resTree_"/>
             </item>
             <item>
              <layout class="QHBoxLayout" name="horizontalLayout_3">
@@ -509,6 +507,11 @@
    <class>CustomListWidget</class>
    <extends>QListWidget</extends>
    <header>CustomListWidget.hpp</header>
+  </customwidget>
+  <customwidget>
+   <class>NodeQueryResultView</class>
+   <extends>QTreeView</extends>
+   <header>NodeQueryResultView.hpp</header>
   </customwidget>
  </customwidgets>
  <resources>

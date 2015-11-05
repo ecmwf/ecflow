@@ -5,9 +5,10 @@
 // In applying this licence, ECMWF does not waive the privileges and immunities
 // granted to it by virtue of its status as an intergovernmental organisation
 // nor does it submit to any jurisdiction.
+//
 //============================================================================
 
-#include "TableNodeViewDelegate.hpp"
+#include "NodeQueryViewDelegate.hpp"
 
 #include <QApplication>
 #include <QDebug>
@@ -24,13 +25,13 @@
 
 static std::vector<std::string> propVec;
 
-TableNodeViewDelegate::TableNodeViewDelegate(QWidget *parent)
+NodeQueryViewDelegate::NodeQueryViewDelegate(QWidget *parent)
 {
 	borderPen_=QPen(QColor(230,230,230));
 
-	columns_=ModelColumn::def("table_columns");
+	columns_=ModelColumn::def("query_columns");
 
-	adjustIconSize();
+	/*adjustIconSize();
 
     //Property
     if(propVec.empty())
@@ -41,20 +42,28 @@ TableNodeViewDelegate::TableNodeViewDelegate(QWidget *parent)
 
     prop_=new PropertyMapper(propVec,this);
 
-    updateSettings();
+    updateSettings();*/
 }
 
-TableNodeViewDelegate::~TableNodeViewDelegate()
+NodeQueryViewDelegate::~NodeQueryViewDelegate()
 {
 }
 
-void TableNodeViewDelegate::updateSettings()
+void NodeQueryViewDelegate::updateSettings()
 {
 
 }
 
+QSize NodeQueryViewDelegate::sizeHint(const QStyleOptionViewItem & option, const QModelIndex & index ) const
+{
+	QSize size=QStyledItemDelegate::sizeHint(option,index);
 
-void TableNodeViewDelegate::paint(QPainter *painter,const QStyleOptionViewItem &option,
+	QFontMetrics fm(font_);
+	int h=fm.height();
+	return QSize(size.width(),h+4);
+}
+
+void NodeQueryViewDelegate::paint(QPainter *painter,const QStyleOptionViewItem &option,
                    const QModelIndex& index) const
 {
     //Background
@@ -102,7 +111,6 @@ void TableNodeViewDelegate::paint(QPainter *painter,const QStyleOptionViewItem &
 
     QString id=columns_->id(index.column());
 
-
     if(id == "path")
     {
     	QString text=index.data(Qt::DisplayRole).toString();
@@ -114,7 +122,7 @@ void TableNodeViewDelegate::paint(QPainter *painter,const QStyleOptionViewItem &
     }
 
     //Render attributes
-    else if(id == "event" || id == "label" || id == "meter" || id == "trigger")
+    else if(id == "attribute")
     {
     	QVariant va=index.data(Qt::DisplayRole);
     	if(va.type() == QVariant::StringList)
@@ -138,7 +146,26 @@ void TableNodeViewDelegate::paint(QPainter *painter,const QStyleOptionViewItem &
     	QString text=index.data(Qt::DisplayRole).toString();
     	QRect textRect = style->subElementRect(QStyle::SE_ItemViewItemText, &vopt, widget);
     	painter->setPen(Qt::black);
-    	painter->drawText(textRect,Qt::AlignLeft | Qt::AlignVCenter,text);
+
+    	int rightPos=textRect.right()+1;
+    	const bool setClipRect = rightPos > option.rect.right();
+    	if(setClipRect)
+    	{
+    	   painter->save();
+    	   painter->setClipRect(option.rect);
+    	}
+
+    	QVariant alg=index.data(Qt::TextAlignmentRole);
+    	if(alg.isValid())
+    		painter->drawText(textRect,alg.value<Qt::Alignment>(),text);
+    	else
+    		painter->drawText(textRect,Qt::AlignLeft | Qt::AlignVCenter,text);
+
+        if(setClipRect)
+    	{
+    	   painter->restore();
+    	}
+
     }
 
     //Render the horizontal border for rows. We only render the top border line.
@@ -154,7 +181,7 @@ void TableNodeViewDelegate::paint(QPainter *painter,const QStyleOptionViewItem &
 
 
 
-void TableNodeViewDelegate::renderNode(QPainter *painter,const QModelIndex& index,
+void NodeQueryViewDelegate::renderNode(QPainter *painter,const QModelIndex& index,
         							const QStyleOptionViewItemV4& option,QString text) const
 {
 	int offset=4;
@@ -229,7 +256,7 @@ void TableNodeViewDelegate::renderNode(QPainter *painter,const QModelIndex& inde
 	}
 }
 
-void TableNodeViewDelegate::renderStatus(QPainter *painter,const QModelIndex& index,
+void NodeQueryViewDelegate::renderStatus(QPainter *painter,const QModelIndex& index,
                                     const QStyleOptionViewItemV4& option) const
 {
     int offset=4;
@@ -251,26 +278,36 @@ void TableNodeViewDelegate::renderStatus(QPainter *painter,const QModelIndex& in
     textRect.setWidth(textWidth);
 
     if(textRect.right() > currentRight)
-        currentRight=textRect.right();
+    	currentRight=textRect.right();
 
     //Define clipping
     int rightPos=currentRight+1;
     const bool setClipRect = rightPos > option.rect.right();
     if(setClipRect)
     {
-        painter->save();
-        QRect cr=option.rect.adjusted(0,0,-offset,0);
-        painter->setClipRect(cr);
+    	painter->save();
+    	QRect cr=option.rect.adjusted(0,0,-offset,0);
+    	painter->setClipRect(cr);
     }
 
     //Fill rect
-    QColor bgCol=index.data(Qt::BackgroundRole).value<QColor>();
-    painter->fillRect(fillRect,bgCol);
+    QColor bg=index.data(Qt::BackgroundRole).value<QColor>();
+    QColor bgLight=bg.lighter(lighter_);
+    QBrush bgBrush;
+    if(useStateGrad_)
+    {
+       grad_.setColorAt(0,bgLight);
+       grad_.setColorAt(1,bg);
+       bgBrush=QBrush(grad_);
+    }
+    else
+       bgBrush=QBrush(bg);
+
+    painter->fillRect(fillRect,bgBrush);
 
     //Draw text
     painter->setPen(Qt::black);
     painter->drawText(textRect,Qt::AlignLeft | Qt::AlignVCenter,text);
-
 
     if(setClipRect)
     {

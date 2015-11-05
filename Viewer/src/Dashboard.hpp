@@ -43,6 +43,7 @@ public:
 	VInfo_ptr currentSelection();
 	void currentSelection(VInfo_ptr n);
 	void selectFirstServer();
+	void addQueryDialog();
 
 	void writeSettings(VComboSettings*);
 	void readSettings(VComboSettings*);

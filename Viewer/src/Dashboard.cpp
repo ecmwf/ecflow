@@ -14,6 +14,8 @@
 #include "DashboardDock.hpp"
 #include "DashboardTitle.hpp"
 #include "InfoPanel.hpp"
+#include "NodeQueryDialog.hpp"
+#include "NodeQueryWidget.hpp"
 #include "NodeWidget.hpp"
 #include "ServerHandler.hpp"
 #include "ServerFilter.hpp"
@@ -179,6 +181,23 @@ DashboardWidget* Dashboard::addDialog(const std::string& type)
     return w;
 }
 
+void Dashboard::addQueryDialog()
+{
+	//It will delete itself on close!!
+	NodeQueryDialog* d=new NodeQueryDialog(this);
+	d->queryWidget()->setServerFilter(serverFilter_);
+
+	for(int i=0; i < widgets_.count(); i++)
+	{
+		if(widgets_.at(i)->type() == "tree")
+		{
+			connect(d->queryWidget(),SIGNAL(selectionChanged(VInfo_ptr)),
+				    widgets_.at(i),SLOT(setCurrentSelection(VInfo_ptr)));
+		}
+	}
+
+	d->show();
+}
 
 void Dashboard::slotDockClose()
 {

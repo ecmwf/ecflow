@@ -87,6 +87,29 @@
 		     
     },
     
+    "query_columns": {
+        
+        "server" : {
+            "label" : "Server",
+            "tooltip" : "Server"
+        },
+        "path" : {
+            "label" : "Node",
+            "tooltip" : "Node"
+        },
+        "status" : {
+            "label" : "St",
+            "tooltip" : "Node status"
+        },
+        "type" : {
+            "label" : "T",
+            "tooltip" : "Node type"
+        },
+        "attribute" : {
+            "label" : "Attribute"
+        }       
+    },
+    
     "table_columns": {
     	
     	"path" : {

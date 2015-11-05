@@ -87,6 +87,7 @@ public:
 
 public Q_SLOTS:
 	void slotReload(VInfo_ptr node);
+	void setCurrentSelection(VInfo_ptr node) {slotReload(node);}
 
 protected Q_SLOTS:
     void slotReloadFromBc(VInfo_ptr node);

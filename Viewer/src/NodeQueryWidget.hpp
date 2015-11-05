@@ -15,6 +15,7 @@
 #include <QWidget>
 
 #include "ServerFilter.hpp"
+#include "VInfo.hpp"
 
 #include "ui_NodeQueryWidget.h"
 #include "ui_NodeQuerySaveDialog.h"
@@ -22,8 +23,7 @@
 class NodeQuery;
 class NodeQueryEngine;
 class NodeQueryListModel;
-class NodeQueryModel;
-class QSortFilterProxyModel;
+class NodeQueryResultModel;
 
 class NodeQuerySaveDialog : public QDialog, protected Ui::NodeQuerySaveDialog
 {
@@ -77,6 +77,7 @@ protected Q_SLOTS:
 
 Q_SIGNALS:
 	void closeClicked();
+	void selectionChanged(VInfo_ptr);
 
 private:
 	void updateServers();
@@ -85,38 +86,11 @@ private:
 
 	NodeQuery* query_;
 	NodeQueryEngine* engine_;
-	NodeQueryModel* model_;
-	QSortFilterProxyModel* sortModel_;
+	NodeQueryResultModel* model_;
 
 	NodeQueryListModel* queryListModel_;
 	ServerFilter* serverFilter_;
 };
-
-class NodeQueryModel : public QAbstractItemModel
-{
- Q_OBJECT
-public:
-   	explicit NodeQueryModel(QObject *parent=0);
-   	~NodeQueryModel();
-
-   	int columnCount (const QModelIndex& parent = QModelIndex() ) const;
-   	int rowCount (const QModelIndex& parent = QModelIndex() ) const;
-
-   	QVariant data (const QModelIndex& , int role = Qt::DisplayRole ) const;
-   	QVariant headerData(int,Qt::Orientation,int role = Qt::DisplayRole ) const;
-
-   	QModelIndex index (int, int, const QModelIndex& parent = QModelIndex() ) const;
-   	QModelIndex parent (const QModelIndex & ) const;
-
-   	void clearData();
-
-public Q_SLOTS:
-	void appendRow(QStringList);
-
-protected:
-	QList<QStringList> data_;
-};
-
 
 class NodeQueryListModel : public QAbstractItemModel
 {

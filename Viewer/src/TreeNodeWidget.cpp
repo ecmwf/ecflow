@@ -23,7 +23,7 @@
 
 #include "FilterWidget.hpp"
 
-TreeNodeWidget::TreeNodeWidget(ServerFilter* servers,QWidget* parent) : NodeWidget(parent)
+TreeNodeWidget::TreeNodeWidget(ServerFilter* servers,QWidget* parent) : NodeWidget("tree",parent)
 {
 	//Init qt-creator form
 	setupUi(this);
@@ -147,7 +147,7 @@ bool TreeNodeWidget::selectFirstServerInView()
 
 void TreeNodeWidget::writeSettings(VSettings* vs)
 {
-	vs->put("type",std::string("tree"));
+	vs->put("type",type_);
 	vs->put("dockId",id_);
 
 	bcWidget_->writeSettings(vs);
@@ -160,7 +160,7 @@ void TreeNodeWidget::writeSettings(VSettings* vs)
 void TreeNodeWidget::readSettings(VSettings* vs)
 {
 	std::string type=vs->get<std::string>("type","");
-	if(type != "tree")
+	if(type != type_)
 		return;
 
 	//This will not emit the changed signal. So the "observers" will

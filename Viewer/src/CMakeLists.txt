@@ -61,6 +61,10 @@ set(viewer_srcs
     NodeQueryDialog.cpp
     NodeQueryEngine.cpp
     NodeQueryHandler.cpp
+    NodeQueryResultData.hpp
+    NodeQueryResultModel.cpp
+    NodeQueryResultView.cpp
+    NodeQueryViewDelegate.cpp
     NodeQueryWidget.cpp
     NodeViewBase.cpp
     NodeViewDelegate.cpp
@@ -180,6 +184,8 @@ set(viewer_moc_files AbstractNodeModel.hpp
     NodePathWidget.hpp            
     NodeQueryDialog.hpp
     NodeQueryEngine.hpp
+    NodeQueryResultModel.hpp
+    NodeQueryResultView.hpp
     NodeQueryWidget.hpp
     NodeWidget.hpp
     OutputItemWidget.hpp

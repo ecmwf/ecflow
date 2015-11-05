@@ -41,20 +41,23 @@ public:
 	NodeViewBase* view() const {return view_;}
 	QWidget* widget();
 	VInfo_ptr currentSelection();
-	void currentSelection(VInfo_ptr info);
+	//void currentSelection(VInfo_ptr info);
 	void reload();
     void populateDialog() {};
     QList<QAction*> dockTitleActions() {return dockActions_;}
+
+public Q_SLOTS:
+	void setCurrentSelection(VInfo_ptr);
+
+protected Q_SLOTS:
+	void slotInfoPanelAction();
 
 Q_SIGNALS:
 	void selectionChanged(VInfo_ptr);
 	void popInfoPanel(VInfo_ptr,QString);
 
-protected Q_SLOTS:
-	void slotInfoPanelAction();
-
 protected:
-	explicit NodeWidget(QWidget* parent=0);
+	explicit NodeWidget(const std::string& type,QWidget* parent=0);
 	virtual ~NodeWidget();
 
 	void updateActionState(VInfo_ptr);

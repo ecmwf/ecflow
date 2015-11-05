@@ -19,12 +19,20 @@
 #include "UserMessage.hpp"
 #include "VNode.hpp"
 
+static bool metaRegistered=false;
 
 NodeQueryEngine::NodeQueryEngine(QObject* parent) :
 	QThread(parent),
 	query_(NULL),
 	parser_(NULL)
 {
+	//We will need to pass various non-Qt types via signals and slots
+	//So we need to register these types.
+	if(!metaRegistered)
+	{
+		qRegisterMetaType<NodeQueryResultData>("NodeQueryResultData");
+		metaRegistered=true;
+	}
 }
 
 NodeQueryEngine::~NodeQueryEngine()
@@ -111,10 +119,7 @@ void NodeQueryEngine::runRecursively(VNode *node)
 	{
 		UserMessage::message(UserMessage::DBG,false,"FOUND: " + node->absNodePath());
 
-		QStringList  lst;
-		lst << QString::fromStdString(node->server()->name());
-		lst << QString::fromStdString(node->absNodePath());
-		Q_EMIT found(lst);
+		broadcastFind(node);
 	}
 
 	for(int i=0; i < node->numOfChildren(); i++)
@@ -122,3 +127,29 @@ void NodeQueryEngine::runRecursively(VNode *node)
 		runRecursively(node->childAt(i));
 	}
 }
+
+void NodeQueryEngine::broadcastFind(VNode* node)
+{
+	NodeQueryResultData d;
+
+	QStringList lst;
+	if(node->server())
+		d.server_=QString::fromStdString(node->server()->name());
+
+	d.path_=QString::fromStdString(node->absNodePath());
+	d.state_=node->stateName();
+	//d.state_.truncate(2);
+	d.stateCol_=node->stateColour();
+	d.type_=QString::fromStdString(node->nodeType());
+	//d.type_.truncate(1);
+
+	Q_EMIT found(d);
+}
+
+
+
+
+
+
+
+

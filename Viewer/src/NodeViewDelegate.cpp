@@ -17,13 +17,16 @@
 #include "AbstractNodeModel.hpp"
 #include "PropertyMapper.hpp"
 
+int NodeViewDelegate::lighter_=150;
+
 static std::vector<std::string> propVec;
 
 NodeViewDelegate::NodeViewDelegate(QWidget *parent) :
     QStyledItemDelegate(parent),
     prop_(0),
 	iconSize_(16),
-	iconGap_(3)
+	iconGap_(3),
+	useStateGrad_(true)
 {
     /*//Property
 	if(propVec.empty())
@@ -56,6 +59,10 @@ NodeViewDelegate::NodeViewDelegate(QWidget *parent) :
 		QImage img=imgR.read();
 		errPix_=QPixmap(QPixmap::fromImage(img));
 	}
+
+	grad_.setCoordinateMode(QGradient::ObjectBoundingMode);
+	grad_.setStart(0,0);
+	grad_.setFinalStop(0,1);
 
 	attrRenderers_["meter"]=&NodeViewDelegate::renderMeter;
 	attrRenderers_["label"]=&NodeViewDelegate::renderLabel;

@@ -25,7 +25,7 @@ class DashboardWidget : public QWidget
 Q_OBJECT
 
 public:
-	explicit DashboardWidget(QWidget* parent=0) : QWidget(parent) {};
+	DashboardWidget(const std::string& type, QWidget* parent=0) : QWidget(parent), type_(type), acceptSetCurrent_(false) {};
 	virtual ~DashboardWidget() {};
 
     virtual void populateDockTitleBar(DashboardDockTitleWidget*)=0;
@@ -39,13 +39,19 @@ public:
 	virtual void writeSettings(VSettings*)=0;
 	virtual void readSettings(VSettings*)=0;
 
+	const std::string type() const {return type_;}
 	void id(const std::string& id) {id_=id;}
+
+public Q_SLOTS:
+	virtual void setCurrentSelection(VInfo_ptr)=0;
 
 Q_SIGNALS:
 	void titleUpdated(QString);
 
 protected:
 	std::string id_;
+	std::string type_;
+	bool acceptSetCurrent_;
 };
 
 #endif

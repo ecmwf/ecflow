@@ -26,7 +26,7 @@
 
 #include <QHBoxLayout>
 
-TableNodeWidget::TableNodeWidget(ServerFilter* servers,QWidget * parent) : NodeWidget(parent)
+TableNodeWidget::TableNodeWidget(ServerFilter* servers,QWidget * parent) : NodeWidget("table",parent)
 {
 	//Init qt-creator form
 	setupUi(this);
@@ -142,7 +142,7 @@ void TableNodeWidget::rerender()
 
 void TableNodeWidget::writeSettings(VSettings* vs)
 {
-	vs->put("type","table");
+	vs->put("type",type_);
 	vs->put("dockId",id_);
 
 	bcWidget_->writeSettings(vs);
@@ -155,7 +155,7 @@ void TableNodeWidget::writeSettings(VSettings* vs)
 void TableNodeWidget::readSettings(VSettings* vs)
 {
 	std::string type=vs->get<std::string>("type","");
-	if(type != "table")
+	if(type != type_)
 		return;
 
 	//This will not emit the changed signal. So the "observers" will

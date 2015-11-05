@@ -50,7 +50,7 @@ void  InfoPanelItemHandler::addToTab(QTabWidget *tab)
 //==============================================
 
 InfoPanel::InfoPanel(QWidget* parent) :
-  DashboardWidget(parent),
+  DashboardWidget("info",parent),
   tabBeingCleared_(false),
   tabBeingAdjusted_(false)
 {
@@ -629,7 +629,7 @@ void InfoPanel::rerender()
 
 void InfoPanel::writeSettings(VSettings* vs)
 {
-	vs->put("type","info");
+	vs->put("type",type_);
 	vs->put("dockId",id_);
 
 	bcWidget_->writeSettings(vs);
@@ -641,7 +641,7 @@ void InfoPanel::writeSettings(VSettings* vs)
 void InfoPanel::readSettings(VSettings* vs)
 {
 	std::string type=vs->get<std::string>("type","");
-	if(type != "info")
+	if(type != type_)
 	{
 		return;
 	}

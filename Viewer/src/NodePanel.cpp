@@ -163,6 +163,14 @@ void NodePanel::openDialog(VInfo_ptr info,const std::string& type)
 	    w->slotPopInfoPanel(info,QString::fromStdString(type));
 	}
 }
+void NodePanel::addQueryDialog()
+{
+	if(Dashboard *w=currentDashboard())
+	{
+		w->addQueryDialog();
+	}
+}
+
 
 void NodePanel::slotTabTitle(QWidget* w,QString text,QPixmap pix)
 {

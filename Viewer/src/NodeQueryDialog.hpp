@@ -17,7 +17,7 @@ public:
     explicit NodeQueryDialog(QWidget *parent = 0);
     ~NodeQueryDialog();
 
-    void setServerFilter(ServerFilter*);
+    NodeQueryWidget* queryWidget() const;
 
 protected Q_SLOTS:
 	void accept();

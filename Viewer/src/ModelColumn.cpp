@@ -67,5 +67,6 @@ ModelColumnItem::ModelColumnItem(const std::string& id) : index_(-1)
 	id_=QString::fromStdString(id);
 }
 
+static SimpleLoader<ModelColumn> loaderQuery("query_columns");
 static SimpleLoader<ModelColumn> loaderTable("table_columns");
-static SimpleLoader<ModelColumn> loaderTree("zombie_columns");
+static SimpleLoader<ModelColumn> loaderZombie("zombie_columns");

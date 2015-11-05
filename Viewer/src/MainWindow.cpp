@@ -43,7 +43,6 @@
 
 #include <boost/lexical_cast.hpp>
 #include <boost/property_tree/json_parser.hpp>
-#include "NodeQueryDialog.hpp"
 
 bool MainWindow::quitStarted_=false;
 QList<MainWindow*> MainWindow::windows_;
@@ -236,13 +235,8 @@ void MainWindow::on_actionConfigureNodeMenu_triggered()
 
 void MainWindow::on_actionSearch_triggered()
 {
-    NodeQueryDialog* d=new NodeQueryDialog(this);
-    d->setServerFilter(nodePanel_->serverFilter());
-    d->show();
-
-	/*if(d.exec() == QDialog::Accepted)
-	{
-    }*/
+    //It takes ownership of the dialogue.
+    nodePanel_->addQueryDialog();
 }
 
 void MainWindow::on_actionManageServers_triggered()

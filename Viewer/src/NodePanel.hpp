@@ -46,6 +46,7 @@ public:
 	void addToDashboard(const std::string& type);
 	void init();
 	void openDialog(VInfo_ptr,const std::string& type);
+	void addQueryDialog();
 
 	void writeSettings(VComboSettings*);
 	void readSettings(VComboSettings*);

@@ -12,11 +12,13 @@ NodeQueryDialog::NodeQueryDialog(QWidget *parent) :
 {
     setupUi(this);
 
+    setAttribute(Qt::WA_DeleteOnClose);
+
 	QString wt=windowTitle();
 	wt+="  -  " + QString::fromStdString(VConfig::instance()->appLongName());
 	setWindowTitle(wt);
 
-    connect(queryWidget,SIGNAL(closeClicked()),
+    connect(queryWidget_,SIGNAL(closeClicked()),
     		this,SLOT(accept()));
 
     //Read the qt settings
@@ -25,6 +27,11 @@ NodeQueryDialog::NodeQueryDialog(QWidget *parent) :
 
 NodeQueryDialog::~NodeQueryDialog()
 {
+}
+
+NodeQueryWidget* NodeQueryDialog::queryWidget() const
+{
+	return queryWidget_;
 }
 
 void NodeQueryDialog::closeEvent(QCloseEvent * event)
@@ -44,11 +51,6 @@ void NodeQueryDialog::reject()
 {
 	writeSettings();
 	QDialog::reject();
-}
-
-void NodeQueryDialog::setServerFilter(ServerFilter* sf)
-{
-	queryWidget->setServerFilter(sf);
 }
 
 //------------------------------------------

@@ -17,6 +17,8 @@
 #include <QStringList>
 #include <QThread>
 
+#include "NodeQueryResultData.hpp"
+
 class BaseNodeCondition;
 class ServerHandler;
 class VNode;
@@ -37,7 +39,7 @@ public:
 	void exec(const NodeQuery& query,NodeFilter* filter);
 
 Q_SIGNALS:
-	void found(QStringList);
+	void found(NodeQueryResultData);
 
 protected:
 	void run();
@@ -45,6 +47,7 @@ protected:
 private:
 	void run(ServerHandler*,VNode*);
 	void runRecursively(VNode *node);
+	void broadcastFind(VNode*);
 
 	NodeQuery* query_;
 	BaseNodeCondition* parser_;

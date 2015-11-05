@@ -22,14 +22,10 @@
 
 static std::vector<std::string> propVec;
 
-int TreeNodeViewDelegate::lighter_=150;
-
-
 TreeNodeViewDelegate::TreeNodeViewDelegate(QWidget *parent) :
     nodeRectRad_(0),
     drawChildCount_(true),
     nodeStyle_(ClassicNodeStyle),
-    useNodeGrad_(true),
 	indentation_(0)
 {
 	attrFont_=font_;
@@ -62,10 +58,6 @@ TreeNodeViewDelegate::TreeNodeViewDelegate(QWidget *parent) :
 
 	//The parent must be the view!!!
 	animation_=new AnimationHandler(parent);
-
-	grad_.setCoordinateMode(QGradient::ObjectBoundingMode);
-	grad_.setStart(0,0);
-	grad_.setFinalStop(0,1);
 }
 
 TreeNodeViewDelegate::~TreeNodeViewDelegate()
@@ -90,7 +82,7 @@ void TreeNodeViewDelegate::updateSettings()
     }
     if(VProperty* p=prop_->find("view.common.node_gradient"))
     {
-        useNodeGrad_=p->value().toBool();
+        useStateGrad_=p->value().toBool();
     }
         
     if(VProperty* p=prop_->find("view.tree.nodeRectRadius"))
@@ -671,7 +663,7 @@ void TreeNodeViewDelegate::renderNodeCell(QPainter *painter,QColor bg,QColor rea
     QColor borderCol=bg.darker(125);
 
     QBrush bgBrush;
-    if(useNodeGrad_)
+    if(useStateGrad_)
     {
         grad_.setColorAt(0,bgLight);
         grad_.setColorAt(1,bg);
@@ -699,7 +691,7 @@ void TreeNodeViewDelegate::renderNodeCell(QPainter *painter,QColor bg,QColor rea
 
     if(!realRect.isEmpty())
     {
-        if(useNodeGrad_)
+        if(useStateGrad_)
         {
         	QColor realBgLight=realBg.lighter(lighter_);
             grad_.setColorAt(0,realBgLight);

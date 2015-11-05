@@ -8,7 +8,6 @@
 //
 //============================================================================
 
-
 #include "NodeQueryWidget.hpp"
 
 #include "ComboMulti.hpp"
@@ -17,6 +16,8 @@
 #include "NodeQuery.hpp"
 #include "NodeQueryEngine.hpp"
 #include "NodeQueryHandler.hpp"
+#include "NodeQueryHandler.hpp"
+#include "NodeQueryResultModel.hpp"
 #include "ServerFilter.hpp"
 #include "VNState.hpp"
 
@@ -26,7 +27,6 @@
 #include <QMessageBox>
 #include <QPalette>
 #include <QSettings>
-#include <QSortFilterProxyModel>
 #include <QVBoxLayout>
 
 //======================================================
@@ -232,14 +232,11 @@ NodeQueryWidget::NodeQueryWidget(QWidget *parent) :
     // Result tree/model
     //--------------------------------
 
-    model_=new NodeQueryModel(this);
-    sortModel_=new QSortFilterProxyModel(this);
-    sortModel_->setSourceModel(model_);
+    model_=new NodeQueryResultModel(this);
+    resTree_->setSourceModel(model_);
 
-    resTree_->setRootIsDecorated(false);
-    resTree_->setSortingEnabled(true);
-    resTree_->setUniformRowHeights(true);
-    resTree_->setModel(sortModel_);
+    connect(resTree_,SIGNAL(selectionChanged(VInfo_ptr)),
+    		this,SIGNAL(selectionChanged(VInfo_ptr)));
 
     //--------------------------------
     // Query
@@ -253,8 +250,8 @@ NodeQueryWidget::NodeQueryWidget(QWidget *parent) :
 
     engine_=new NodeQueryEngine(this);
 
-    connect(engine_,SIGNAL(found(QStringList)),
-    		model_, SLOT(appendRow(QStringList)));
+    connect(engine_,SIGNAL(found(NodeQueryResultData)),
+    		model_, SLOT(appendRow(NodeQueryResultData)));
 
     connect(engine_,SIGNAL(started()),
     		this,SLOT(slotQueryStarted()));
@@ -597,7 +594,7 @@ void NodeQueryWidget::slotStop()
 
 void NodeQueryWidget::slotAddResult(QStringList res)
 {
-	model_->appendRow(res);
+	//model_->appendRow(res);
 }
 
 void NodeQueryWidget::slotQueryStarted()
@@ -624,6 +621,10 @@ void NodeQueryWidget::slotQueryFinished()
 	queryProgress_->setValue(1);
 
 	progressLabel_->setText(QString::number(model_->rowCount()) + " items found");
+
+	for(int i=0; i < model_->columnCount()-1; i++)
+		resTree_->resizeColumnToContents(i);
+
 }
 
 //------------------------------------------
@@ -642,6 +643,8 @@ void NodeQueryWidget::slotSaveQueryAs()
 	}
 }
 
+
+/*
 NodeQueryModel::NodeQueryModel(QObject *parent) :
      QAbstractItemModel(parent)
 {
@@ -666,7 +669,7 @@ void NodeQueryModel::appendRow(QStringList lst)
 	endInsertRows();
 }
 
-int NodeQueryModel::columnCount( const QModelIndex& /*parent */ ) const
+int NodeQueryModel::columnCount( const QModelIndex& ) const
 {
    	 return 3;
 }
@@ -746,6 +749,9 @@ QModelIndex NodeQueryModel::parent(const QModelIndex &child) const
 {
 	return QModelIndex();
 }
+
+*/
+
 
 NodeQueryListModel::NodeQueryListModel(QObject *parent) :
      QAbstractItemModel(parent)

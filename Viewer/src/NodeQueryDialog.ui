@@ -18,7 +18,7 @@
     <number>4</number>
    </property>
    <item>
-    <widget class="NodeQueryWidget" name="queryWidget" native="true"/>
+    <widget class="NodeQueryWidget" name="queryWidget_" native="true"/>
    </item>
   </layout>
  </widget>

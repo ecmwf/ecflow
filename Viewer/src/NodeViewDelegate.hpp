@@ -12,6 +12,7 @@
 #define NODEVIEWDELEGATE_HPP_
 
 #include <QBrush>
+#include <QLinearGradient>
 #include <QMap>
 #include <QPen>
 #include <QStyledItemDelegate>
@@ -69,6 +70,10 @@ protected:
 	QFont attrFont_;
 	int iconSize_;
 	int iconGap_;
+
+	bool useStateGrad_;
+	mutable QLinearGradient grad_;
+	static int lighter_;
 
 };
 
