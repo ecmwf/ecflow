@@ -261,6 +261,7 @@ class host : public extent<host>
 
 	virtual void reset(bool full=false, bool sync=true) {};
 	virtual bool connect_mngt(bool connect);
+	void set_loghost(node& n);
 
 	bool updating_; // SUP-423
 	option<int>       jobfile_length_;

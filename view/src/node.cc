@@ -495,11 +495,11 @@ void node::search(node_lister& s)
   }
 }
 
-std::string node::variable(const std::string& name, bool subsitute)
+std::string node::variable(const std::string& name, bool substitute)
 {
   for (node* run = kids(); run; run = run->next())
     if (run->type() == NODE_VARIABLE && run->name() == name) {
-      return ((variable_node*) run)->get_var(subsitute);
+      return ((variable_node*) run)->get_var(substitute);
     }
   
   return ecf_node::none();
