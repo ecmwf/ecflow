@@ -512,9 +512,7 @@ void host::set_loghost(node& n)
    std::string rid    =  n.variable("ECF_RID", true);
    if (rid == ecf_node::none()) return; 
 
-   bool use_altern = (rid.find(bkup) != std::string::npos ||
-		      n.variable("ECF_JOB_CMD").find("SCHOST") != std::string::npos);
-   
+   bool use_altern = (rid.find(bkup) != std::string::npos);  
    if (!use_altern) return;
 
    std::string extn   =  n.variable("LOG_EXTN", true);     
