@@ -23,7 +23,7 @@ public:
 	explicit CodeItemWidget(QWidget *parent=0);
 
 public Q_SLOTS:
-	void on_searchTb_toggled(bool b);
+	void on_searchTb__clicked();
 	void on_gotoLineTb__clicked();
 
 protected:

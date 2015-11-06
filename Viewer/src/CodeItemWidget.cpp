@@ -38,14 +38,11 @@ void CodeItemWidget::removeSpacer()
 	}
 }
 
-
-void CodeItemWidget::on_searchTb_toggled(bool b)
+void CodeItemWidget::on_searchTb__clicked()
 {
-	searchLine_->setVisible(b);
-	if(b)
-	{
-		searchLine_->setFocus();
-	}
+	searchLine_->setVisible(true);
+	searchLine_->setFocus();
+	searchLine_->selectAll();
 }
 
 void CodeItemWidget::on_gotoLineTb__clicked()

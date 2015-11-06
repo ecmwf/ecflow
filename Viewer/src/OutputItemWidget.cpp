@@ -295,13 +295,11 @@ void OutputItemWidget::infoFailed(VReply* reply)
     updateDir(true);
 }
 
-void OutputItemWidget::on_searchTb__toggled(bool b)
+void OutputItemWidget::on_searchTb__clicked()
 {
-	searchLine_->setVisible(b);
-	if(b)
-	{
-		searchLine_->setFocus();
-	}
+	searchLine_->setVisible(true);
+	searchLine_->setFocus();
+	searchLine_->selectAll();
 }
 
 void OutputItemWidget::on_gotoLineTb__clicked()

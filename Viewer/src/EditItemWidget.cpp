@@ -105,9 +105,11 @@ void EditItemWidget::on_submitTb__clicked(bool)
 	ep->submit(txt,alias());
 }
 
-void EditItemWidget::on_searchTb__toggled(bool b)
+void EditItemWidget::on_searchTb__clicked()
 {
-	searchLine_->setVisible(b);
+	searchLine_->setVisible(true);
+	searchLine_->setFocus();
+	searchLine_->selectAll();
 }
 
 void EditItemWidget::on_gotoLineTb__clicked()

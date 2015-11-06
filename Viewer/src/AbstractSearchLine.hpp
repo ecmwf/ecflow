@@ -23,6 +23,7 @@ public:
 	virtual ~AbstractSearchLine();
 	virtual void clear();
 	virtual bool isEmpty();
+	void selectAll();
 
 	bool caseSensitive() {return caseSensitive_;};
 	bool wholeWords()    {return wholeWords_;};
@@ -31,6 +32,7 @@ public Q_SLOTS:
 	virtual void slotFind(QString)=0;
 	virtual void slotFindNext()=0;
 	virtual void slotFindPrev()=0;
+	void slotClose();
 	void on_actionCaseSensitive__toggled(bool);
 	void on_actionWholeWords__toggled(bool);
 

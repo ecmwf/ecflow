@@ -40,7 +40,7 @@ public:
 protected Q_SLOTS:
 	void on_preprocTb__toggled(bool);
 	void on_submitTb__clicked(bool);
-	void on_searchTb__toggled(bool);
+	void on_searchTb__clicked();
 	void on_gotoLineTb__clicked();
 
 protected:

@@ -7,6 +7,7 @@
 // nor does it submit to any jurisdiction.
 //============================================================================
 
+#include <QtGlobal>
 #include <QShortcut>
 #include <QMenu>
 #include "AbstractSearchLine.hpp"
@@ -15,7 +16,15 @@ AbstractSearchLine::AbstractSearchLine(QWidget* parent) : QWidget(parent)
 {
 	setupUi(this);
 
-	//searchLine_->setDecoration(QPixmap(":/viewer/filter_decor.svg"));
+
+#if QT_VERSION >= QT_VERSION_CHECK(4, 7, 0)
+	searchLine_->setPlaceholderText(tr("Find"));
+	label_->hide();
+#endif
+
+#if QT_VERSION >= QT_VERSION_CHECK(5, 2, 0)
+	searchLine_->setClearButtonEnabled(true);
+#endif
 
 	connect(searchLine_, SIGNAL(textChanged(QString)),
 		this, SLOT(slotFind(QString)));
@@ -23,17 +32,22 @@ AbstractSearchLine::AbstractSearchLine(QWidget* parent) : QWidget(parent)
 	connect(searchLine_, SIGNAL( returnPressed()),
 		this, SLOT(slotFindNext()));
 
-	connect(nextPb_, SIGNAL(clicked()),
+	connect(actionNext_,SIGNAL(triggered()),
 		this, SLOT(slotFindNext()));
 
-	connect(prevPb_,SIGNAL(clicked()),
+	connect(actionPrev_,SIGNAL(triggered()),
 		this, SLOT(slotFindPrev()));
+
+	connect(closeTb_,SIGNAL(clicked()),
+		this, SLOT(slotClose()));
+
+
+	nextTb_->setDefaultAction(actionNext_);
+	prevTb_->setDefaultAction(actionPrev_);
 
 	oriColour_=QColor(searchLine_->palette().color(QPalette::Base));
 	redColour_=QColor(247,230,230);
 	greenColour_=QColor(186,249,206);
-
-
 
 	// for the 'find next' functionality, although Qt (at the time of writing) uses
 	// both F3 and CTRL-G for most platforms, this is not true for Linux. Therefore,
@@ -45,10 +59,7 @@ AbstractSearchLine::AbstractSearchLine(QWidget* parent) : QWidget(parent)
 
 	status_=true;
 
-
 	setFocusProxy(searchLine_);
-
-
 
 	// set the menu on the Options toolbutton
 	caseSensitive_ = false;
@@ -56,9 +67,7 @@ AbstractSearchLine::AbstractSearchLine(QWidget* parent) : QWidget(parent)
 	QMenu *menu=new QMenu(this);
 	menu->addAction(actionCaseSensitive_);
 	menu->addAction(actionWholeWords_);
-	optionsPb_->setMenu(menu);
-
-
+	optionsTb_->setMenu(menu);
 }
 
 AbstractSearchLine::~AbstractSearchLine()
@@ -73,6 +82,11 @@ void AbstractSearchLine::clear()
 bool AbstractSearchLine::isEmpty()
 {
 	return searchLine_->text().isEmpty();
+}
+
+void AbstractSearchLine::selectAll()
+{
+	searchLine_->selectAll();
 }
 
 void AbstractSearchLine::updateButtons(bool found)
@@ -100,6 +114,11 @@ void AbstractSearchLine::updateButtons(bool found)
 			searchLine_->setPalette(p);
 		}
 	}
+}
+
+void AbstractSearchLine::slotClose()
+{
+	hide();
 }
 
 void AbstractSearchLine::on_actionCaseSensitive__toggled(bool b)

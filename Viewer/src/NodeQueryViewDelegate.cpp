@@ -155,10 +155,10 @@ void NodeQueryViewDelegate::paint(QPainter *painter,const QStyleOptionViewItem &
     	   painter->setClipRect(option.rect);
     	}
 
-    	QVariant alg=index.data(Qt::TextAlignmentRole);
+    	/*QVariant alg=index.data(Qt::TextAlignmentRole);
     	if(alg.isValid())
     		painter->drawText(textRect,alg.value<Qt::Alignment>(),text);
-    	else
+    	else*/
     		painter->drawText(textRect,Qt::AlignLeft | Qt::AlignVCenter,text);
 
         if(setClipRect)
