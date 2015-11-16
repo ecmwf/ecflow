@@ -341,13 +341,23 @@ std::string simple_node::variable(const std::string& name, bool substitute)
 {
   if (__node__())
     if (__node__()->get_node()) {    
+      std::string value;
       const Variable & var = __node__()->get_node()->findVariable(name);
       if (!var.empty())  {
-        std::string value = var.theValue();
-        if (substitute)
+        value = var.theValue();
+        if (substitute) {
+	  __node__()->get_node()->update_generated_variables();
           __node__()->get_node()->variableSubsitution(value);
+	}
         return value; 
-      } // return var.theValue();
+      } else {
+	__node__()->get_node()->findParentVariableValue(name, value);
+        if (substitute) {
+	  __node__()->get_node()->update_generated_variables();
+          __node__()->get_node()->variableSubsitution(value);
+	}
+	if (!value.empty()) return value;
+      }
     }
   for (node *run = kids(); run; run = run->next()) {
     if (run->type() == NODE_VARIABLE && run->name() == name) {
