@@ -5,25 +5,26 @@
 // In applying this licence, ECMWF does not waive the privileges and immunities
 // granted to it by virtue of its status as an intergovernmental organisation
 // nor does it submit to any jurisdiction.
+//
 //============================================================================
 
-#include "ServerDefsAccess.hpp"
+#ifndef VIEWER_SRC_STRINGMATCHCOMBO_HPP_
+#define VIEWER_SRC_STRINGMATCHCOMBO_HPP_
 
-#include "ServerHandler.hpp"
+#include <QComboBox>
 
-ServerDefsAccess::ServerDefsAccess(ServerHandler *server) :
-	server_(server)
+#include "NodeQuery.hpp"
+
+class StringMatchCombo : public QComboBox
 {
-	server_->defsMutex_.lock();  // lock the resource on construction
-}
+Q_OBJECT
 
+public:
+	StringMatchCombo(QWidget* parent=0);
 
-ServerDefsAccess::~ServerDefsAccess()
-{
-	server_->defsMutex_.unlock();  // unlock the resource on destruction
-}
+	NodeQueryStringOption::MatchMode matchMode(int) const;
+	NodeQueryStringOption::MatchMode currentMatchMode() const;
+	void setMatchMode(NodeQueryStringOption::MatchMode mode);
+};
 
-defs_ptr ServerDefsAccess::defs()
-{
-	return server_->defs();		// the resource will always be locked when we use it
-}
+#endif /* VIEWER_SRC_STRINGMATCHCOMBO_HPP_ */

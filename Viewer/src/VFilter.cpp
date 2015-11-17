@@ -9,6 +9,8 @@
 
 #include "VFilter.hpp"
 
+#include "NodeQuery.hpp"
+#include "NodeQueryEngine.hpp"
 #include "VNState.hpp"
 #include "VAttribute.hpp"
 #include "VIcon.hpp"
@@ -17,6 +19,10 @@
 #include "VSettings.hpp"
 
 #include "ServerHandler.hpp"
+
+#include <QDebug>
+
+#include <algorithm>
 
 //==============================================
 //
@@ -156,16 +162,42 @@ NodeFilterDef::NodeFilterDef(Scope scope) : nodeState_(0)
 		connect(nodeState_,SIGNAL(changed()),
 					this,SIGNAL(changed()));
 	}
+
+	query_=new NodeQuery("tmp");
+	QStringList sel("aborted");
+	query_->setStateSelection(sel);
+}
+
+NodeFilterDef::~NodeFilterDef()
+{
+	delete query_;
+}
+
+NodeQuery* NodeFilterDef::query() const
+{
+	return query_;
+}
+
+void NodeFilterDef::setQuery(NodeQuery* q)
+{
+	query_->swap(q);
+	Q_EMIT changed();
 }
 
 NodeFilter::NodeFilter(NodeFilterDef* def,ResultMode resultMode) :
-		def_(def),
-		resultMode_(resultMode),
-		beingReset_(false)
+	def_(def),
+	resultMode_(resultMode),
+	beingReset_(false),
+	res_(0),
+	matchMode_(VectorMatch)
 {
-
+	queryEngine_=new NodeFilterEngine(this);
 }
 
+NodeFilter::~NodeFilter()
+{
+	delete queryEngine_;
+}
 
 TreeNodeFilter::TreeNodeFilter(NodeFilterDef* def) : NodeFilter(def,StoreNonMatched)
 {
@@ -271,7 +303,7 @@ int TreeNodeFilter::matchCount()
 	return 0;
 };
 
-int TreeNodeFilter::nonMatchCount()
+/*int TreeNodeFilter::nonMatchCount()
 {
 	if(beingReset_)
 			return 0;
@@ -281,17 +313,17 @@ int TreeNodeFilter::nonMatchCount()
 		return static_cast<int>(result_.size());
 	}
 	return 0;
-}
+}*/
 
-int TreeNodeFilter::realMatchCount()
+/*int TreeNodeFilter::realMatchCount()
 {
 	return 0;
-}
+}*/
 
-VNode* TreeNodeFilter::realMatchAt(int)
+/*VNode* TreeNodeFilter::realMatchAt(int)
 {
 	return NULL;
-}
+}*/
 
 
 
@@ -301,7 +333,6 @@ VNode* TreeNodeFilter::realMatchAt(int)
 
 TableNodeFilter::TableNodeFilter(NodeFilterDef* def) : NodeFilter(def,StoreMatched)
 {
-	//type_.insert("suite");
 }
 
 bool TableNodeFilter::isNull()
@@ -311,10 +342,10 @@ bool TableNodeFilter::isNull()
 
 bool TableNodeFilter::isFiltered(VNode* node)
 {
-	if(beingReset_)
+	if(beingReset_ || matchMode_ == NoneMatch)
 		return false;
 
-	return (std::find(match_.begin(), match_.end(), node) != match_.end());
+	return res_[node->index()];
 }
 
 void TableNodeFilter::clear()
@@ -333,20 +364,36 @@ void TableNodeFilter::beginReset(ServerHandler* server)
 {
 	beingReset_=true;
 
-	match_.clear();
-
-	VServer* s=server->vRoot();
-
-	for(size_t i=0; i < s->nodes().size(); i++)
+	if(!def_->query_->hasServer(server->name()))
 	{
-		if(def_->nodeState_->isSet(VNState::toState(s->nodes().at(i))))
+		matchMode_=NoneMatch;
+
+		//Deallocates
+		res_=std::vector<bool>();
+	}
+	else
+	{
+		int num=server->vRoot()->totalNum();
+		if(num != res_.size())
 		{
-			match_.push_back(s->nodes().at(i));
+			//Reallocates
+			res_=std::vector<bool>();
+			res_.reserve(num);
+			for(size_t i=0; i < num; i++)
+			{
+				res_.push_back(false);
+			}
 		}
+		else
+		{
+			std::fill(res_.begin(),res_.end(),false);
+		}
+
+
+		queryEngine_->setQuery(def_->query_);
+		queryEngine_->runQuery(server);
 	}
 
-	//TODO: implement the filter!!!
-	//s->collect(match_);
 }
 
 void TableNodeFilter::endReset()
@@ -354,49 +401,10 @@ void TableNodeFilter::endReset()
 	beingReset_=false;
 }
 
-VNode* TableNodeFilter::matchAt(int i)
-{
-	if(beingReset_)
-		return NULL;
-
-	if(match_.empty())
-		return NULL;
-
-	assert(i>=0 && i < match_.size());
-	return match_.at(i);
-}
-
-int TableNodeFilter::matchPos(const VNode* node)
-{
-	if(beingReset_)
-		return -1;
-
-	std::vector<VNode*>::const_iterator it=std::find(match_.begin(), match_.end(), node);
-	if(it != match_.end())
-		return it-match_.begin();
-
-	return -1;
-}
 
 int TableNodeFilter:: matchCount()
 {
-	if(beingReset_)
-		return 0;
-
-	return static_cast<int>(match_.size());
+	return 0;
 }
 
-int TableNodeFilter::realMatchCount()
-{
-	return static_cast<int>(match_.size());
-}
-
-VNode* TableNodeFilter::realMatchAt(int i)
-{
-	if(match_.empty())
-		return NULL;
-
-	assert(i>=0 && i < match_.size());
-	return match_.at(i);
-}
 

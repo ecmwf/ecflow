@@ -36,6 +36,7 @@
     <file alias="add_tab.svg">../images/add_tab.svg</file>
     <file alias="chain.svg">../images/chain.svg</file>
     <file alias="clear_left.svg">../images/clear_left.svg</file>
+    <file alias="case_sensitive.svg">../images/case_sensitive.svg</file>
     <file alias="colour.svg">../images/colour.svg</file>
     <file alias="directory_arrow.svg">../images/directory_arrow.svg</file>
     <file alias="dock_config.svg">../images/dock_config.svg</file>

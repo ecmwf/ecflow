@@ -13,8 +13,8 @@
 #include "VNode.hpp"
 
 #include <QDebug>
+#include <QTime>
 #include "NodeQueryResultModel.hpp"
-
 
 NodeQueryResultModel::NodeQueryResultModel(QObject *parent) :
           QAbstractItemModel(parent),
@@ -40,6 +40,23 @@ void  NodeQueryResultModel::appendRow(NodeQueryResultData dInput)
 
 	NodeQueryResultData* d=new NodeQueryResultData(dInput);
 	data_ << d;
+
+	Q_EMIT endInsertRows();
+}
+
+void  NodeQueryResultModel::appendRows(QList<NodeQueryResultData> dInput)
+{
+	if(dInput.isEmpty())
+		return;
+
+	int num=data_.count();
+	Q_EMIT beginInsertRows(QModelIndex(),num,num+dInput.count()-1);
+
+	for(int i=0; i < dInput.count(); i++)
+	{
+		NodeQueryResultData* d=new NodeQueryResultData(dInput.at(i));
+		data_ << d;
+	}
 
 	Q_EMIT endInsertRows();
 }
@@ -101,24 +118,30 @@ QVariant NodeQueryResultModel::data( const QModelIndex& index, int role ) const
 	QString id=columns_->id(index.column());
 
 	NodeQueryResultData* d=data_.at(row);
+	VNode* node=d->node_;
 
 	if(role == Qt::DisplayRole)
 	{
 		if(id == "path")
-			return d->path_;
+		{
+			return QString::fromStdString(node->absNodePath());
+		}
 		else if(id == "server")
-			return d->server_;
+		{
+			if(node->server())
+				return QString::fromStdString(node->server()->name());
+		}
 		else if(id == "type")
-			return d->type_;
+			return QString::fromStdString(node->nodeType());
 		else if(id == "status")
-			return d->state_;
+			return node->stateName();
 
 		return QVariant();
 	}
 	else if(role == Qt::BackgroundRole)
 	{
 		if(id == "status")
-			return d->stateCol_;
+			return node->stateColour();
 
 		return QVariant();
 	}
@@ -190,7 +213,7 @@ VInfo_ptr NodeQueryResultModel::nodeInfo(const QModelIndex& index)
 	{
 		NodeQueryResultData* d=data_.at(index.row());
 
-		if(ServerHandler *s=ServerHandler::find(d->server_.toStdString()))
+		/*if(ServerHandler *s=ServerHandler::find(d->server_.toStdString()))
 		{
 			if(d->path_.isEmpty() || d->path_ == "/")
 			{
@@ -201,7 +224,7 @@ VInfo_ptr NodeQueryResultModel::nodeInfo(const QModelIndex& index)
 			{
 				return VInfoNode::create(node);
 			}
-		}
+		}*/
 	}
 
     VInfo_ptr res;

@@ -34,7 +34,7 @@ NodeQueryResultView::NodeQueryResultView(QWidget* parent) :
 	actionHandler_=new ActionHandler(this);
 
 	sortModel_=new QSortFilterProxyModel(this);
-	sortModel_->setDynamicSortFilter(true);
+	//sortModel_->setDynamicSortFilter(true);
 	setModel(sortModel_);
 
 	//Create delegate to the view

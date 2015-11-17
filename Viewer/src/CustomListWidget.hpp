@@ -23,6 +23,7 @@ public:
 	void addItems(QStringList lst,bool checkState,QList<QColor>);
 	QStringList selection() const;
 	bool hasSelection() const;
+	void setSelection(QStringList sel);
 
 public Q_SLOTS:
 	void clearSelection();

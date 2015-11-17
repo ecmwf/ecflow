@@ -5,25 +5,31 @@
 // In applying this licence, ECMWF does not waive the privileges and immunities
 // granted to it by virtue of its status as an intergovernmental organisation
 // nor does it submit to any jurisdiction.
+//
 //============================================================================
 
-#include "ServerDefsAccess.hpp"
+#ifndef VIEWER_SRC_CASESENSITIVEBUTTON_HPP_
+#define VIEWER_SRC_CASESENSITIVEBUTTON_HPP_
 
-#include "ServerHandler.hpp"
+#include <QToolButton>
 
-ServerDefsAccess::ServerDefsAccess(ServerHandler *server) :
-	server_(server)
+#include <map>
+
+class CaseSensitiveButton : public QToolButton
 {
-	server_->defsMutex_.lock();  // lock the resource on construction
-}
+Q_OBJECT
 
+public:
+	explicit CaseSensitiveButton(QWidget* parent=0);
 
-ServerDefsAccess::~ServerDefsAccess()
-{
-	server_->defsMutex_.unlock();  // unlock the resource on destruction
-}
+protected Q_SLOTS:
+	void slotClicked(bool);
 
-defs_ptr ServerDefsAccess::defs()
-{
-	return server_->defs();		// the resource will always be locked when we use it
-}
+Q_SIGNALS:
+	void changed(bool);
+
+private:
+	std::map<bool,QString> tooltip_;
+};
+
+#endif /* VIEWER_SRC_CASESENSITIVEBUTTON_HPP_ */

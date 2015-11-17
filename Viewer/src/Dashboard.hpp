@@ -43,7 +43,7 @@ public:
 	VInfo_ptr currentSelection();
 	void currentSelection(VInfo_ptr n);
 	void selectFirstServer();
-	void addQueryDialog();
+	void addSearchDialog();
 
 	void writeSettings(VComboSettings*);
 	void readSettings(VComboSettings*);
@@ -54,6 +54,7 @@ Q_SIGNALS:
 
 public Q_SLOTS:
 	void slotPopInfoPanel(VInfo_ptr,QString);
+	void slotCommand(VInfo_ptr,QString);
 
 protected Q_SLOTS:
 	void slotTitle(QString,QPixmap);
@@ -68,6 +69,7 @@ private:
 	static std::string widgetSettingsId(int i);
 	void selectFirstServerInView();
 	VInfo_ptr currentSelectionInView();
+	void addSearchDialog(VInfo_ptr);
 
 	ServerFilter* serverFilter_;
 	DashboardTitle* titleHandler_;

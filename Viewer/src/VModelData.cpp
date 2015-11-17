@@ -9,6 +9,7 @@
 
 #include "VModelData.hpp"
 
+#include "NodeQuery.hpp"
 #include "VFilter.hpp"
 #include "ServerHandler.hpp"
 #include "VAttribute.hpp"
@@ -734,7 +735,6 @@ bool VTreeModelData::isFiltered(VNode *node) const
 VTableModelData::VTableModelData(NodeFilterDef* filterDef,AbstractNodeModel* model) :
 		VModelData(filterDef,model)
 {
-
 }
 
 void VTableModelData::add(ServerHandler *server)
@@ -841,10 +841,9 @@ int VTableModelData::posInFilter(VModelServer* server,const VNode *node) const
 		for(unsigned int i=0; i < servers_.size(); i++)
 		{
 			ServerHandler *s=servers_.at(i)->realServer();
-
 			if(servers_.at(i) == server)
 			{
-				int pos=s->vRoot()->indexOfNode(node);
+				int pos=node->index();
 				if(pos != -1)
 				{
 					totalRow+=pos;
@@ -861,33 +860,6 @@ int VTableModelData::posInFilter(VModelServer* server,const VNode *node) const
 	}
 
 	return -1;
-
-
-	/*if(server)
-	{
-		int totalRow=0;
-		for(unsigned int i=0; i < servers_.size(); i++)
-		{
-			NodeFilter *filter=servers_.at(i)->filter_;
-			if(servers_.at(i) == server)
-			{
-				int pos=filter->matchPos(node);
-				if(pos != -1)
-				{
-					totalRow+=filter->matchPos(node);
-					return totalRow;
-				}
-				else
-					return -1;
-			}
-			else
-			{
-				totalRow+=filter->matchCount();
-			}
-		}
-	}
-
-	return -1;*/
 }
 
 //This has to be very fast!!!
@@ -945,11 +917,11 @@ VNode* VTableModelData::getNodeFromFilter(int totalRow)
 //Return the number of filtered nodes for the given server
 int VTableModelData::numOfFiltered(int index) const
 {
-	if(VModelServer *d=server(index))
+	/*if(VModelServer *d=server(index))
 	{
 		return d->filter_->matchCount();
 
-	}
+	}*/
 	return 0;
 }
 

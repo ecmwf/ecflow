@@ -7,6 +7,7 @@ set(viewer_srcs
     ActionHandler.cpp
     Animation.cpp
     AttributeSearchPanel.cpp
+    CaseSensitiveButton.cpp
     ChangeNotify.cpp
     ChangeNotifyDialog.cpp
     ChangeNotifyEditor.cpp
@@ -54,21 +55,25 @@ set(viewer_srcs
     MessageItemWidget.cpp
     ModelColumn.cpp
     NodeExpression.cpp
+    NodeFilterDialog.cpp
     NodeFilterModel.cpp
     NodePanel.cpp
     NodePathWidget.cpp
     NodeQuery.cpp
-    NodeQueryDialog.cpp
+    NodeQueryCombo.cpp
+    NodeQueryEditor.cpp
     NodeQueryEngine.cpp
     NodeQueryHandler.cpp
     NodeQueryResultData.hpp
     NodeQueryResultModel.cpp
     NodeQueryResultView.cpp
     NodeQueryViewDelegate.cpp
-    NodeQueryWidget.cpp
+    NodeSearchDialog.cpp
+    NodeSearchWidget.cpp
     NodeViewBase.cpp
     NodeViewDelegate.cpp
     NodeWidget.cpp
+    OneLineTextEdit.cpp
     OutputModel.cpp
     OutputItemWidget.cpp
     OutputProvider.cpp
@@ -92,6 +97,7 @@ set(viewer_srcs
     ServerSettingsItemWidget.cpp
     SessionHandler.cpp
     Sound.cpp
+    StringMatchCombo.cpp
     SuiteItemWidget.cpp
     SuiteFilter.cpp
     SuiteFilterObserver.hpp
@@ -155,6 +161,7 @@ set(viewer_moc_files AbstractNodeModel.hpp
     ActionHandler.hpp
     Animation.hpp
     AttributeSearchPanel.hpp
+    CaseSensitiveButton.hpp
     ChangeNotifyDialog.hpp
     ChangeNotifyEditor.hpp
     ChangeNotifyModel.hpp
@@ -179,14 +186,17 @@ set(viewer_moc_files AbstractNodeModel.hpp
     LogProvider.hpp
     MainWindow.hpp
     MenuConfigDialog.hpp
+    NodeFilterDialog.hpp
     NodeFilterModel.hpp            
     NodePanel.hpp
-    NodePathWidget.hpp            
-    NodeQueryDialog.hpp
+    NodePathWidget.hpp
+    NodeQueryCombo.hpp           
+    NodeQueryEditor.hpp
     NodeQueryEngine.hpp
     NodeQueryResultModel.hpp
     NodeQueryResultView.hpp
-    NodeQueryWidget.hpp
+    NodeSearchDialog.hpp
+    NodeSearchWidget.hpp
     NodeWidget.hpp
     OutputItemWidget.hpp
     PropertyDialog.hpp             
@@ -198,6 +208,7 @@ set(viewer_moc_files AbstractNodeModel.hpp
     ServerHandler.hpp
     ServerListDialog.hpp
     ServerSettingsItemWidget.hpp
+    StringMatchCombo.hpp
     SuiteItemWidget.hpp
     TabWidget.hpp
     TableFilterWidget.hpp
@@ -237,9 +248,11 @@ set(viewer_wrap_ui_files
     MainWindow.ui 
     MessageItemWidget.ui
     MenuConfigDialog.ui
-    NodeQueryDialog.ui
+    NodeFilterDialog.ui
+    NodeQueryEditor.ui
     NodeQuerySaveDialog.ui
-    NodeQueryWidget.ui
+    NodeSearchDialog.ui
+    NodeSearchWidget.ui
     OutputItemWidget.ui 
     PropertyDialog.ui
     PropertyEditor.ui

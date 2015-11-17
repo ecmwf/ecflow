@@ -161,6 +161,7 @@ private:
 	void manual(VTask_ptr req);
 
 	defs_ptr defs();
+	defs_ptr safelyAccessSimpleDefsMembers();
 
 	void setActivity(Activity activity);
 
@@ -180,6 +181,7 @@ private:
 	void loadConf();
 
 	QMutex           defsMutex_;
+	defs_ptr defs_;
 
 	ServerComQueue* comQueue_;
 
@@ -190,6 +192,7 @@ private:
 
 	Activity activity_;
 	ConnectState* connectState_;
+	SState::State prevServerState_;
 
 	VServerSettings* conf_;
 

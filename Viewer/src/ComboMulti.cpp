@@ -105,6 +105,18 @@ void ComboMulti::slotChecked()
     Q_EMIT selectionChanged();
 }
 
+void ComboMulti::setSelection(QStringList lst)
+{
+	for(int i=0; i < count(); i++)
+	{
+		setItemData(i,false,Qt::UserRole);
+		if(lst.contains(itemText(i)))
+			setItemData(i,true,Qt::UserRole);
+	}
+
+	slotChecked();
+}
+
 void ComboMulti::clearSelection()
 {
 	for(int i=0; i < count(); i++)
@@ -134,6 +146,14 @@ QString ComboMulti::displayText() const
     return dpyText_;
 }
 
+QStringList ComboMulti::all() const
+{
+	QStringList lst;
+	for(int i=0; i < count(); i++)
+		lst << itemText(i);
+
+	return lst;
+}
 
 //==========================================================
 //

@@ -5,25 +5,28 @@
 // In applying this licence, ECMWF does not waive the privileges and immunities
 // granted to it by virtue of its status as an intergovernmental organisation
 // nor does it submit to any jurisdiction.
+//
 //============================================================================
 
-#include "ServerDefsAccess.hpp"
+#include "CaseSensitiveButton.hpp"
 
-#include "ServerHandler.hpp"
-
-ServerDefsAccess::ServerDefsAccess(ServerHandler *server) :
-	server_(server)
+CaseSensitiveButton::CaseSensitiveButton(QWidget *parent) : QToolButton(parent)
 {
-	server_->defsMutex_.lock();  // lock the resource on construction
+	connect(this,SIGNAL(clicked(bool)),
+			this,SLOT(slotClicked(bool)));
+
+	setCheckable(true);
+	setIcon(QPixmap(":/viewer/case_sensitive.svg"));
+
+	tooltip_[true]=tr("Case sensitivity is <b>on</b>. Toggle to turn it off.");
+	tooltip_[false]=tr("Case sensitivity is <b>off</b>. Toggle to turn it on.");
+
+	setToolTip(tooltip_[false]);
 }
 
-
-ServerDefsAccess::~ServerDefsAccess()
+void CaseSensitiveButton::slotClicked(bool b)
 {
-	server_->defsMutex_.unlock();  // unlock the resource on destruction
+	setToolTip(tooltip_[b]);
+	Q_EMIT changed(b);
 }
 
-defs_ptr ServerDefsAccess::defs()
-{
-	return server_->defs();		// the resource will always be locked when we use it
-}

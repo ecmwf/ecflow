@@ -56,7 +56,8 @@ ServerHandler::ServerHandler(const std::string& name,const std::string& host, co
    activity_(NoActivity),
    connectState_(new ConnectState()),
    suiteFilter_(new SuiteFilter()),
-   conf_(0)
+   conf_(0),
+   prevServerState_(SState::RUNNING)
 {
 	if(localHostName_.empty())
 	{
@@ -219,49 +220,84 @@ void ServerHandler::removeServer(ServerHandler* server)
 	}
 }
 
+//This function can be called many times so we need to avoid locking the mutex.
 SState::State ServerHandler::serverState()
 {
+	SState::State state;
 	if(connectState_->state() != ConnectState::Normal || activity() == LoadActivity)
-		return SState::RUNNING;
-
-	ServerDefsAccess defsAccess(this);  // will reliquish its resources on destruction
-	defs_ptr defs = defsAccess.defs();
-	if(defs != NULL)
 	{
-		ServerState& st=defs->set_server();
-		return st.get_state();
+		prevServerState_= SState::RUNNING;
+
 	}
-	return SState::RUNNING;
+	//If we are here we can be sure that the defs pointer is not being deleted!! We
+	//access it without locking the mutex!!!
+	else
+	{
+		//If get the defs can be 100% sure that it is not being deleted!! So we can
+		//access it without locking the mutex!!!
+		defs_ptr d=safelyAccessSimpleDefsMembers();
+		if(d && d.get())
+		{
+			prevServerState_= d->set_server().get_state();
+			return prevServerState_;
+		}
+	}
+
+	return prevServerState_;
 }
 
+//This function can be called many times so we need to avoid locking the mutex.
 NState::State ServerHandler::state(bool& suspended)
 {
 	if(connectState_->state() != ConnectState::Normal || activity() == LoadActivity)
 		return NState::UNKNOWN;
 
 	suspended=false;
-	ServerDefsAccess defsAccess(this);  // will reliquish its resources on destruction
-	defs_ptr defs = defsAccess.defs();
-	if(defs != NULL)
+
+	defs_ptr d=safelyAccessSimpleDefsMembers();
+	if(d && d.get())
 	{
-		suspended=defs->isSuspended();
-		return defs->state();
+		suspended=d->isSuspended();
+		return d->state();
 	}
+
 	return NState::UNKNOWN;
 }
 
 defs_ptr ServerHandler::defs()
 {
+	defs_ptr null;
+
 	if(client_)
 	{
 		return client_->defs();
 	}
 	else
 	{
-		defs_ptr null;
 		return null;
 	}
 }
+
+defs_ptr ServerHandler::safelyAccessSimpleDefsMembers()
+{
+	defs_ptr null;
+
+	//The defs might be deleted during reset so it cannot be accessed.
+	if(activity_ == LoadActivity)
+	{
+		return null;
+	}
+	//Otherwise it is safe to access certain non-vector members
+	else if(client_)
+	{
+		return client_->defs();
+	}
+	else
+	{
+		return null;
+	}
+}
+
 
 void ServerHandler::errorMessage(std::string message)
 {
@@ -650,10 +686,29 @@ void ServerHandler::broadcast(NoMethodV1 proc,const VNode* node,const std::vecto
 //---------------------------------------------------------------------------
 
 //This slot is called when the Defs change.
-void ServerHandler::slotDefsChanged(std::vector<ecf::Aspect::Type> a)
+void ServerHandler::slotDefsChanged(std::vector<ecf::Aspect::Type> aspect)
 {
+	UserMessage::message(UserMessage::DBG, false, std::string("ServerHandler::slotDefsChanged"));
+	for(std::vector<ecf::Aspect::Type>::const_iterator it=aspect.begin(); it != aspect.end(); ++it)
+		UserMessage::message(UserMessage::DBG, false, std::string(" aspect: ") + boost::lexical_cast<std::string>(*it));
+
+	//Begin update for the VNode
+	VNodeChange change;
+	vRoot_->beginUpdate(aspect);
+
+	//Notify the observers
+	//broadcast(&NodeObserver::notifyBeginNodeChange,vn,aspect,change);
+
+	//End update for the VNode
+	//vRoot_->endUpdate(vn,aspect,change);
+
+	//Notify the observers
+	//broadcast(&NodeObserver::notifyEndNodeChange,vn,aspect,change);
+
+	//UserMessage::message(UserMessage::DBG, false," --> Update applied");
+
 	for(std::vector<ServerObserver*>::const_iterator it=serverObservers_.begin(); it != serverObservers_.end(); ++it)
-		(*it)->notifyDefsChanged(this,a);
+		(*it)->notifyDefsChanged(this,aspect);
 }
 
 void ServerHandler::addServerObserver(ServerObserver *obs)

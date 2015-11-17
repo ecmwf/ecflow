@@ -447,7 +447,18 @@
             "visible_for"    : "node",
             "command"        : "ecflow_client --alter change defstatus queued <full_name>"
         },
-
+        {
+            "menu"           : "Node",
+            "name"           : "-"
+        },
+        {
+            "menu"           : "Node",
+            "name"           : "Search ...",
+            "visible_for"    : "server or node",        
+            "command"        : "search",
+            "handler"        : "dashboard",
+            "icon"           : "search.svg"          
+        },         
         {
             "menu"           : "Node",
             "name"           : "-"

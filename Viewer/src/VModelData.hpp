@@ -25,6 +25,7 @@ class VServer;
 class AbstractNodeModel;
 class NodeFilter;
 class NodeFilterDef;
+class NodeQUery;
 class ServerHandler;
 class VParamSet;
 
@@ -212,7 +213,6 @@ public:
 
 protected:
 	void add(ServerHandler *server);
-
 };
 
 #endif

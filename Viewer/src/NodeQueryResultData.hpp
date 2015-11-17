@@ -11,8 +11,9 @@
 #ifndef VIEWER_SRC_NODEQUERYRESULTDATA_HPP_
 #define VIEWER_SRC_NODEQUERYRESULTDATA_HPP_
 
-#include <QColor>
 #include <QString>
+
+class VNode;
 
 class NodeQueryResultData
 {
@@ -21,27 +22,18 @@ class NodeQueryResultData
 
 public:
 
-	NodeQueryResultData() {}
-
+	NodeQueryResultData() : node_(NULL) {}
+	NodeQueryResultData(VNode* node) : node_(node) {}
 	NodeQueryResultData(const NodeQueryResultData& d)
 	{
-		server_=d.server_;
-		path_=d.path_;
-		state_=d.state_;
-		stateCol_=d.stateCol_;
-		type_=d.type_;
+		node_=d.node_;
 		attr_=d.attr_;
 	}
 
 protected:
-	QString server_;
-	QString path_;
-	QString state_;
-	QColor stateCol_;
-	QString type_;
+	VNode* node_;
 	QStringList attr_;
 };
-
 
 
 #endif /* VIEWER_SRC_NODEQUERYRESULTDATA_HPP_ */

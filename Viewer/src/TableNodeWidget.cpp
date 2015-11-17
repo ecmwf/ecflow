@@ -41,7 +41,7 @@ TableNodeWidget::TableNodeWidget(ServerFilter* servers,QWidget * parent) : NodeW
 	filterModel_=new NodeFilterModel(model_,this);
 
 	//Build the filter widget
-	filterW_->build(filterDef_);
+	filterW_->build(filterDef_,servers);
 
 	//Create the view
 	QHBoxLayout *hb=new QHBoxLayout(viewHolder_);

@@ -16,6 +16,7 @@
 class QGridLayout;
 class QStandardItemModel;
 class AttrGroupDesc;
+class NodeQuery;
 
 class AttributeSearchPanel : public QWidget
 {
@@ -24,8 +25,10 @@ class AttributeSearchPanel : public QWidget
 public:
     explicit AttributeSearchPanel(QWidget *parent = 0);
     ~AttributeSearchPanel();
-    QString query() const {return query_;}
+    //QString query() const {return query_;}
     QStringList groupNames() const;
+    void setQuery(NodeQuery*);
+    void init();
 
 public Q_SLOTS:
     void buildQuery();
@@ -34,6 +37,8 @@ public Q_SLOTS:
 
 protected Q_SLOTS:
 	void slotTextEdited(QString);
+	void slotMatchChanged(int);
+	void slotCaseChanged(bool);
 
 Q_SIGNALS:
 	void queryChanged();
@@ -41,7 +46,7 @@ Q_SIGNALS:
 private:
 	void addStringLine(QString labelTxt,QString text,QString group);
 
-	QString query_;
+	NodeQuery* query_;
 	QMap<QString,AttrGroupDesc*> groups_;
 	QGridLayout* grid_;
 	QStringList selection_;

@@ -98,11 +98,11 @@
             "tooltip" : "Node"
         },
         "status" : {
-            "label" : "St",
+            "label" : "State",
             "tooltip" : "Node status"
         },
         "type" : {
-            "label" : "T",
+            "label" : "Type",
             "tooltip" : "Node type"
         },
         "attribute" : {

@@ -25,9 +25,11 @@ ActionHandler::ActionHandler(QWidget *view) : QObject(view), parent_(view)
 	connect(this,SIGNAL(viewCommand(std::vector<VInfo_ptr>,QString)),
 			parent_,SLOT(slotViewCommand(std::vector<VInfo_ptr>,QString)));
 
-
 	connect(this,SIGNAL(infoPanelCommand(VInfo_ptr,QString)),
-				parent_,SIGNAL(infoPanelCommand(VInfo_ptr,QString)));
+			parent_,SIGNAL(infoPanelCommand(VInfo_ptr,QString)));
+
+	connect(this,SIGNAL(dashboardCommand(VInfo_ptr,QString)),
+			parent_,SIGNAL(dashboardCommand(VInfo_ptr,QString)));
 
 	//makeShortcut();
 }
@@ -44,6 +46,11 @@ void ActionHandler::contextMenu(std::vector<VInfo_ptr> nodesLst,QPoint pos)
     		if(item->handler() == "info_panel")
     		{
     			Q_EMIT infoPanelCommand(nodesLst.at(0),QString::fromStdString(item->command()));
+    			return;
+    		}
+    		else if(item->handler() == "dashboard")
+    		{
+    			Q_EMIT dashboardCommand(nodesLst.at(0),QString::fromStdString(item->command()));
     			return;
     		}
     	}

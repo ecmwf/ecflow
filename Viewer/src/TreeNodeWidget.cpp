@@ -55,7 +55,10 @@ TreeNodeWidget::TreeNodeWidget(ServerFilter* servers,QWidget* parent) : NodeWidg
             this,SLOT(slotSelectionChangedInView(VInfo_ptr)));
 
 	connect(view_->realWidget(),SIGNAL(infoPanelCommand(VInfo_ptr,QString)),
-	            this,SIGNAL(popInfoPanel(VInfo_ptr,QString)));
+	        this,SIGNAL(popInfoPanel(VInfo_ptr,QString)));
+
+	connect(view_->realWidget(),SIGNAL(dashboardCommand(VInfo_ptr,QString)),
+			this,SIGNAL(dashboardCommand(VInfo_ptr,QString)));
 
 	connect(bcWidget_,SIGNAL(selected(VInfo_ptr)),
 			view_->realWidget(),SLOT(slotSetCurrent(VInfo_ptr)));
@@ -64,10 +67,10 @@ TreeNodeWidget::TreeNodeWidget(ServerFilter* servers,QWidget* parent) : NodeWidg
 			view_->realWidget(),SLOT(slotSaveExpand(const VNode*)));
 
 	connect(model_,SIGNAL(scanEnded(const VNode*)),
-                view_->realWidget(),SLOT(slotRestoreExpand(const VNode*)));
+            view_->realWidget(),SLOT(slotRestoreExpand(const VNode*)));
 
 	connect(model_,SIGNAL(rerender()),
-				view_->realWidget(),SLOT(slotRerender()));
+	        view_->realWidget(),SLOT(slotRerender()));
 
 	//This will not emit the trigered signal of the action!!
 	//Synchronise the action and the breadcrumbs state

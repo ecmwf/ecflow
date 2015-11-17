@@ -174,7 +174,6 @@ QModelIndex ChangeNotifyModel::parent(const QModelIndex &child) const
 
 void ChangeNotifyModel::slotBeginAppendRow()
 {
-	qDebug() << "size" << data_->size();
 	beginInsertRows(QModelIndex(),data_->size(),data_->size());
 }
 

@@ -42,12 +42,15 @@ public:
 
     void clearData();
     bool hasData() const;
+    //void addDataStart();
+    //void addDataEnd();
 
     VInfo_ptr nodeInfo(const QModelIndex&);
     QModelIndex infoToIndex(VInfo_ptr);
 
 public Q_SLOTS:
 	void appendRow(NodeQueryResultData);
+	void appendRows(QList<NodeQueryResultData>);
 
 protected:
 	QList<NodeQueryResultData*> data_;

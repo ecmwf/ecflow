@@ -236,7 +236,7 @@ void MainWindow::on_actionConfigureNodeMenu_triggered()
 void MainWindow::on_actionSearch_triggered()
 {
     //It takes ownership of the dialogue.
-    nodePanel_->addQueryDialog();
+    nodePanel_->addSearchDialog();
 }
 
 void MainWindow::on_actionManageServers_triggered()

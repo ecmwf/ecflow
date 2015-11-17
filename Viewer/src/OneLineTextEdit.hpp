@@ -5,25 +5,22 @@
 // In applying this licence, ECMWF does not waive the privileges and immunities
 // granted to it by virtue of its status as an intergovernmental organisation
 // nor does it submit to any jurisdiction.
+//
 //============================================================================
 
-#include "ServerDefsAccess.hpp"
+#ifndef VIEWER_SRC_ONELINETEXTEDIT_HPP_
+#define VIEWER_SRC_ONELINETEXTEDIT_HPP_
 
-#include "ServerHandler.hpp"
+#include <QPlainTextEdit>
 
-ServerDefsAccess::ServerDefsAccess(ServerHandler *server) :
-	server_(server)
+class OneLineTextEdit : public QPlainTextEdit
 {
-	server_->defsMutex_.lock();  // lock the resource on construction
-}
+public:
+	OneLineTextEdit(QWidget* parent=0);
+	QSize sizeHint() const;
+
+};
 
 
-ServerDefsAccess::~ServerDefsAccess()
-{
-	server_->defsMutex_.unlock();  // unlock the resource on destruction
-}
 
-defs_ptr ServerDefsAccess::defs()
-{
-	return server_->defs();		// the resource will always be locked when we use it
-}
+#endif /* VIEWER_SRC_ONELINETEXTEDIT_HPP_ */

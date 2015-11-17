@@ -17,81 +17,79 @@
 #include "ServerDefsAccess.hpp"
 #include "ServerHandler.hpp"
 #include "UserMessage.hpp"
+#include "VFilter.hpp"
 #include "VNode.hpp"
 
 static bool metaRegistered=false;
 
 NodeQueryEngine::NodeQueryEngine(QObject* parent) :
 	QThread(parent),
-	query_(NULL),
-	parser_(NULL)
+	query_(new NodeQuery("tmp")),
+	parser_(NULL),
+	stopIt_(false),
+	cnt_(0),
+	scanCnt_(0),
+	maxNum_(200000),
+	chunkSize_(100)
 {
 	//We will need to pass various non-Qt types via signals and slots
 	//So we need to register these types.
 	if(!metaRegistered)
 	{
 		qRegisterMetaType<NodeQueryResultData>("NodeQueryResultData");
+		qRegisterMetaType<QList<NodeQueryResultData> >("QList<NodeQueryResultData>");
 		metaRegistered=true;
 	}
 }
 
 NodeQueryEngine::~NodeQueryEngine()
 {
-	if(query_)
-		delete query_;
+	delete query_;
+
+	if(parser_)
+		delete parser_;
 }
 
-void NodeQueryEngine::exec(NodeQuery* query)
+void NodeQueryEngine::runQuery(NodeQuery* query)
 {
 	if(isRunning())
 		wait();
 
-	if(query_)
-	{
-		delete query_;
-		query_=NULL;
-	}
+	stopIt_=false;
+	res_.clear();
+	cnt_=0;
+	scanCnt_=0;
 
-	query_=query->clone();
+	query_->swap(query);
 
 	servers_.clear();
 
 	if(parser_)
 		delete parser_;
 
-	parser_=NodeExpressionParser::parseWholeExpression(query_->query());
+	parser_=NodeExpressionParser::parseWholeExpression(query_->query().toStdString());
 	if(parser_ == NULL)
 	{
-		UserMessage::message(UserMessage::ERROR, true, std::string("Error, unable to parse enabled condition: " + query_->query()));
+		UserMessage::message(UserMessage::ERROR, true, std::string("Error, unable to parse enabled condition: " + query_->query().toStdString()));
 		return;
 	}
 
-	for(std::vector<std::string>::const_iterator it=query_->servers().begin(); it != query_->servers().end(); ++it)
+	Q_FOREACH(QString s,query_->servers())
 	{
-		if(ServerHandler* server=ServerHandler::find(*it))
+		if(ServerHandler* server=ServerHandler::find(s.toStdString()))
+		{
 			servers_.push_back(server);
+		}
 	}
 
 	//Start thread execution
 	start();
 }
 
-void NodeQueryEngine::exec(const NodeQuery& query,NodeFilter* filter)
+void NodeQueryEngine::stopQuery()
 {
-	/*query_=query;
-
-	if(parser_)
-		delete parser_;
-
-	parser_=NodeExpressionParser::parseWholeExpression(query_.query());
-	if(parser_ == NULL)
-	{
-		UserMessage::message(UserMessage::ERROR, true, std::string("Error, unable to parse enabled condition: " + query_.query()));
-		return;
-	}*/
-	//run(server,server->vRoot());
+	stopIt_=true;
 }
-
 
 void NodeQueryEngine::run()
 {
@@ -105,7 +103,15 @@ void NodeQueryEngine::run()
 		//ServerDefsAccess defs(server);
 
 		run(server,server->vRoot());
+
+		if(stopIt_)
+		{
+			broadcastChunk(true);
+			return;
+		}
 	}
+
+	broadcastChunk(true);
 }
 
 void NodeQueryEngine::run(ServerHandler *server,VNode* root)
@@ -115,11 +121,118 @@ void NodeQueryEngine::run(ServerHandler *server,VNode* root)
 
 void NodeQueryEngine::runRecursively(VNode *node)
 {
+	if(stopIt_)
+		return;
+
 	if(parser_->execute(node))
 	{
-		UserMessage::message(UserMessage::DBG,false,"FOUND: " + node->absNodePath());
-
 		broadcastFind(node);
+	}
+
+	scanCnt_++;
+
+	for(int i=0; i < node->numOfChildren(); i++)
+	{
+		runRecursively(node->childAt(i));
+		if(stopIt_)
+			return;
+	}
+}
+
+void NodeQueryEngine::broadcastFind(VNode* node)
+{
+	NodeQueryResultData d(node);
+
+	//Add to res vector
+	res_ << d;
+
+	broadcastChunk(false);
+
+	cnt_++;
+
+	if(cnt_ >= maxNum_)
+	{
+		broadcastChunk(true);
+		stopIt_=true;
+	}
+}
+
+void NodeQueryEngine::broadcastChunk(bool force)
+{
+	bool doIt=false;
+	if(!force)
+	{
+		if(res_.count() >= chunkSize_)
+		{
+			doIt=true;
+		}
+	}
+	else if(!res_.isEmpty())
+	{
+		doIt=true;
+	}
+
+	if(doIt)
+	{
+		Q_EMIT found(res_);
+		res_.clear();
+	}
+}
+
+
+
+NodeFilterEngine::NodeFilterEngine(NodeFilter* owner) :
+	query_(new NodeQuery("tmp")),
+	parser_(NULL),
+	server_(NULL),
+	owner_(owner)
+{
+}
+
+NodeFilterEngine::~NodeFilterEngine()
+{
+	delete query_;
+
+	if(parser_)
+		delete parser_;
+}
+
+void NodeFilterEngine::setQuery(NodeQuery* query)
+{
+	query_->swap(query);
+
+	if(parser_)
+		delete parser_;
+
+	parser_=NodeExpressionParser::parseWholeExpression(query_->query().toStdString());
+	if(parser_ == NULL)
+	{
+		UserMessage::message(UserMessage::ERROR, true, std::string("Error, unable to parse enabled condition: " + query_->query().toStdString()));
+	}
+}
+
+
+void NodeFilterEngine::runQuery(ServerHandler* server)
+{
+	if(!query_)
+		return;
+
+	server_=server;
+	if(!server_)
+		return;
+
+	if(!parser_)
+		return;
+
+	runRecursively(server_->vRoot());
+}
+
+void NodeFilterEngine::runRecursively(VNode *node)
+{
+	if(!node->isServer() && parser_->execute(node))
+	{
+		//UserMessage::message(UserMessage::DBG,false,"FOUND: " + node->absNodePath());
+		owner_->res_[node->index()]=1;
 	}
 
 	for(int i=0; i < node->numOfChildren(); i++)
@@ -128,23 +241,12 @@ void NodeQueryEngine::runRecursively(VNode *node)
 	}
 }
 
-void NodeQueryEngine::broadcastFind(VNode* node)
-{
-	NodeQueryResultData d;
 
-	QStringList lst;
-	if(node->server())
-		d.server_=QString::fromStdString(node->server()->name());
 
-	d.path_=QString::fromStdString(node->absNodePath());
-	d.state_=node->stateName();
-	//d.state_.truncate(2);
-	d.stateCol_=node->stateColour();
-	d.type_=QString::fromStdString(node->nodeType());
-	//d.type_.truncate(1);
 
-	Q_EMIT found(d);
-}
+
+
+
 
 
 

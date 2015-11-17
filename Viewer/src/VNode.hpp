@@ -144,6 +144,8 @@ public:
 
     virtual bool isFlagSet(ecf::Flag::Type f) const;
 
+    int index() const {return index_;}
+
     const std::string& nodeType();
     virtual QString toolTip();
     
@@ -161,6 +163,7 @@ protected:
     VNode* find(const std::vector<std::string>& pathVec);
     virtual void check(VServerSettings* conf,bool) {};
     virtual void check(VServerSettings* conf,const VNodeInternalState&) {};
+    void setIndex(int i) {index_=i;}
 
     //Node* node_;
     node_ptr node_;
@@ -168,6 +171,7 @@ protected:
     std::vector<VNode*> children_;
     mutable short attrNum_;
     mutable short cachedAttrNum_;
+    int index_;
 };
 
 //This is the root node representing the Server.
@@ -192,9 +196,9 @@ public:
 	VNode* toVNode(const Node* nc) const;
 	void beginUpdate(VNode* node,const std::vector<ecf::Aspect::Type>& aspect,VNodeChange&);
 	void endUpdate(VNode* node,const std::vector<ecf::Aspect::Type>& aspect,const VNodeChange&);
+	void beginUpdate(const std::vector<ecf::Aspect::Type>& aspect);
 
 	VNode* nodeAt(int) const;
-	int indexOfNode(const VNode* vn) const;
 	const std::vector<VNode*>& nodes() const {return nodes_;}
 
 	QString toolTip();

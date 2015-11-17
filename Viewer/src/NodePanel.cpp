@@ -163,11 +163,11 @@ void NodePanel::openDialog(VInfo_ptr info,const std::string& type)
 	    w->slotPopInfoPanel(info,QString::fromStdString(type));
 	}
 }
-void NodePanel::addQueryDialog()
+void NodePanel::addSearchDialog()
 {
 	if(Dashboard *w=currentDashboard())
 	{
-		w->addQueryDialog();
+		w->addSearchDialog();
 	}
 }
 

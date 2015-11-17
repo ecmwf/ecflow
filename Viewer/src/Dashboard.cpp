@@ -14,8 +14,6 @@
 #include "DashboardDock.hpp"
 #include "DashboardTitle.hpp"
 #include "InfoPanel.hpp"
-#include "NodeQueryDialog.hpp"
-#include "NodeQueryWidget.hpp"
 #include "NodeWidget.hpp"
 #include "ServerHandler.hpp"
 #include "ServerFilter.hpp"
@@ -30,6 +28,8 @@
 #include <QLabel>
 #include <QDockWidget>
 #include <QToolButton>
+#include "NodeSearchDialog.hpp"
+#include "NodeSearchWidget.hpp"
 
 int Dashboard::maxWidgetNum_=20;
 
@@ -79,6 +79,9 @@ DashboardWidget* Dashboard::addWidgetCore(const std::string& type)
 
 		connect(ctl,SIGNAL(popInfoPanel(VInfo_ptr,QString)),
 				this,SLOT(slotPopInfoPanel(VInfo_ptr,QString)));
+
+		connect(ctl,SIGNAL(dashboardCommand(VInfo_ptr,QString)),
+				this,SLOT(slotCommand(VInfo_ptr,QString)));
 
 		w=ctl;
 	}
@@ -181,11 +184,30 @@ DashboardWidget* Dashboard::addDialog(const std::string& type)
     return w;
 }
 
-void Dashboard::addQueryDialog()
+void Dashboard::addSearchDialog()
 {
 	//It will delete itself on close!!
-	NodeQueryDialog* d=new NodeQueryDialog(this);
+	NodeSearchDialog* d=new NodeSearchDialog(this);
 	d->queryWidget()->setServerFilter(serverFilter_);
+
+	for(int i=0; i < widgets_.count(); i++)
+	{
+		if(widgets_.at(i)->type() == "tree")
+		{
+			connect(d->queryWidget(),SIGNAL(selectionChanged(VInfo_ptr)),
+				    widgets_.at(i),SLOT(setCurrentSelection(VInfo_ptr)));
+		}
+	}
+
+	d->show();
+}
+
+void Dashboard::addSearchDialog(VInfo_ptr info)
+{
+	//It will delete itself on close!!
+	NodeSearchDialog* d=new NodeSearchDialog(this);
+	d->queryWidget()->setServerFilter(serverFilter_);
+	d->queryWidget()->setRootNode(info);
 
 	for(int i=0; i < widgets_.count(); i++)
 	{
@@ -251,6 +273,19 @@ void Dashboard::slotPopInfoPanel(VInfo_ptr info,QString name)
 void Dashboard::slotTitle(QString s,QPixmap p)
 {
 	Q_EMIT titleChanged(this,s,p);
+}
+
+
+
+void Dashboard::slotCommand(VInfo_ptr info,QString cmd)
+{
+	if(!info || !info.get() )
+		return;
+
+	if(cmd == "search")
+	{
+		addSearchDialog(info);
+	}
 }
 
 //------------------------

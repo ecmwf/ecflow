@@ -15,6 +15,7 @@
 #include <QWidget>
 
 class NodeFilterDef;
+class ServerFilter;
 
 class TableFilterWidget : public QWidget, private Ui::TableFilterWidget
 {
@@ -24,14 +25,14 @@ public:
     explicit TableFilterWidget(QWidget *parent=0);
     ~TableFilterWidget() {};
 
-    void build(NodeFilterDef*);
+    void build(NodeFilterDef*,ServerFilter*);
 
 public Q_SLOTS:
-
+	void slotEdit();
 
 private:
 	NodeFilterDef* filterDef_;
-
+	ServerFilter* serverFilter_;
 };
 
 #endif

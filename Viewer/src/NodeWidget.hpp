@@ -55,6 +55,7 @@ protected Q_SLOTS:
 Q_SIGNALS:
 	void selectionChanged(VInfo_ptr);
 	void popInfoPanel(VInfo_ptr,QString);
+	void dashboardCommand(VInfo_ptr,QString);
 
 protected:
 	explicit NodeWidget(const std::string& type,QWidget* parent=0);

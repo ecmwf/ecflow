@@ -5,25 +5,25 @@
 // In applying this licence, ECMWF does not waive the privileges and immunities
 // granted to it by virtue of its status as an intergovernmental organisation
 // nor does it submit to any jurisdiction.
+//
 //============================================================================
+#ifndef VIEWER_SRC_NODEQUERYCOMBO_HPP_
+#define VIEWER_SRC_NODEQUERYCOMBO_HPP_
 
-#include "ServerDefsAccess.hpp"
+#include <QComboBox>
 
-#include "ServerHandler.hpp"
-
-ServerDefsAccess::ServerDefsAccess(ServerHandler *server) :
-	server_(server)
+class NodeQueryCombo : public QComboBox
 {
-	server_->defsMutex_.lock();  // lock the resource on construction
-}
+Q_OBJECT
 
+public:
+	explicit NodeQueryCombo(QWidget* parent=0);
 
-ServerDefsAccess::~ServerDefsAccess()
-{
-	server_->defsMutex_.unlock();  // unlock the resource on destruction
-}
+protected Q_SLOTS:
+	void slotCurrentChanged(int current);
 
-defs_ptr ServerDefsAccess::defs()
-{
-	return server_->defs();		// the resource will always be locked when we use it
-}
+Q_SIGNALS:
+	void changed(QString);
+};
+
+#endif /* VIEWER_SRC_NODEQUERYCOMBO_HPP_ */

@@ -10,11 +10,16 @@
 
 #include "AttributeSearchPanel.hpp"
 
+#include "CaseSensitiveButton.hpp"
+#include "NodeQuery.hpp"
+#include "StringMatchCombo.hpp"
+
 #include <QtGlobal>
 #include <QDebug>
 #include <QGridLayout>
 #include <QLabel>
 #include <QLineEdit>
+#include <QVariant>
 
 #include <assert.h>
 
@@ -136,7 +141,8 @@ void AttrGroupDesc::show()
 //======================================================
 
 AttributeSearchPanel::AttributeSearchPanel(QWidget* parent) :
-	QWidget(parent)
+	QWidget(parent),
+	query_(NULL)
 {
 	//setupUi(this);
 
@@ -147,15 +153,23 @@ AttributeSearchPanel::AttributeSearchPanel(QWidget* parent) :
 	vb->addLayout(grid_);
 
 	//Build groups
-	QStringList attGroupNames;
-	attGroupNames << "date" << "event" << "label" << "late" << "limit" << "limiter" << "meter"
-	    	   << "repeat" << "time" << "trigger" << "variable";
+	//QStringList attGroupNames;
+	//attGroupNames << "date" << "event" << "label" << "late" << "limit" << "limiter" << "meter"
+	//    	   << "repeat" << "time" << "trigger" << "variable";
 
-	Q_FOREACH(QString grName,attGroupNames)
+	Q_FOREACH(QString grName,NodeQuery::attrGroupTerms())
 	{
 		AttrGroupDesc* gr=new AttrGroupDesc(grName,grid_);
 		groups_[grName]=gr;
+
+		Q_FOREACH(QString name,NodeQuery::attrTerms(grName))
+		{
+			QString label=name;
+			addStringLine(label,name,grName);
+		}
 	}
+
+	/*
 
 	//Populate groups
 	addStringLine("Date name","date_name","date");
@@ -175,7 +189,7 @@ AttributeSearchPanel::AttributeSearchPanel(QWidget* parent) :
 	addStringLine("Trigger expression","trigger_expression","trigger");
 	addStringLine("Variable name","variable_name","variable");
 	addStringLine("Variable value","variable_value","variable");
-
+*/
 	//Initialise lines
 	QMapIterator<QString,AttrGroupDesc*> it(groups_);
 	while (it.hasNext())
@@ -196,10 +210,23 @@ AttributeSearchPanel::~AttributeSearchPanel()
 	}
 }
 
+void AttributeSearchPanel::setQuery(NodeQuery* query)
+{
+	query_=query;
+}
+
+
+
 void AttributeSearchPanel::addStringLine(QString labelTxt,QString text,QString group)
 {
 	QLabel *label=new QLabel(labelTxt + ":",this);
 	QLineEdit* le=new QLineEdit(this);
+	StringMatchCombo *matchCb=new StringMatchCombo(this);
+	CaseSensitiveButton* caseTb=new CaseSensitiveButton(this);
+
+	le->setProperty("id",text);
+	matchCb->setProperty("id",text);
+	caseTb->setProperty("id",text);
 
 #if QT_VERSION >= QT_VERSION_CHECK(5, 2, 0)
     le->setClearButtonEnabled(true);
@@ -208,9 +235,17 @@ void AttributeSearchPanel::addStringLine(QString labelTxt,QString text,QString g
 	int row=grid_->rowCount();
 	grid_->addWidget(label,row,0);
 	grid_->addWidget(le,row,1);
+	grid_->addWidget(matchCb,row,2);
+	grid_->addWidget(caseTb,row,3);
 
 	connect(le,SIGNAL(textEdited(QString)),
 			this,SLOT(slotTextEdited(QString)));
+
+	connect(matchCb,SIGNAL(currentIndexChanged(int)),
+			this,SLOT(slotMatchChanged(int)));
+
+	connect(caseTb,SIGNAL(changed(bool)),
+			this,SLOT(slotCaseChanged(bool)));
 
 	AttrLineStringDesc* line=new AttrLineStringDesc(text,row,le);
 
@@ -256,14 +291,52 @@ void AttributeSearchPanel::clearSelection()
 	setSelection(QStringList());
 }
 
-void AttributeSearchPanel::slotTextEdited(QString)
+void AttributeSearchPanel::slotTextEdited(QString val)
 {
+	if(QLineEdit *le=static_cast<QLineEdit*>(sender()))
+	{
+		QString id=le->property("id").toString();
+		if(NodeQueryStringOption *op=query_->stringOption(id))
+		{
+			op->setValue(val);
+		}
+	}
+
 	buildQuery();
 }
 
+void AttributeSearchPanel::slotMatchChanged(int val)
+{
+	if(StringMatchCombo *cb=static_cast<StringMatchCombo*>(sender()))
+	{
+		QString id=cb->property("id").toString();
+		if(NodeQueryStringOption *op=query_->stringOption(id))
+		{
+			op->setMatchMode(static_cast<NodeQueryStringOption::MatchMode>(val));
+		}
+	}
+
+	buildQuery();
+}
+
+void AttributeSearchPanel::slotCaseChanged(bool val)
+{
+	if(CaseSensitiveButton *tb=static_cast<CaseSensitiveButton*>(sender()))
+	{
+		QString id=tb->property("id").toString();
+		if(NodeQueryStringOption *op=query_->stringOption(id))
+		{
+			op->setCaseSensitive(val);
+		}
+	}
+
+	buildQuery();
+}
+
+
 void AttributeSearchPanel::buildQuery()
 {
-	query_.clear();
+	/*query_.clear();
 
 	QMapIterator<QString,AttrGroupDesc*> it(groups_);
 	while (it.hasNext())
@@ -278,10 +351,15 @@ void AttributeSearchPanel::buildQuery()
 		}
 	}
 
-	Q_EMIT queryChanged();
+	Q_EMIT queryChanged();*/
 }
 
 QStringList AttributeSearchPanel::groupNames() const
 {
 	return groups_.keys();
 }
+
+void AttributeSearchPanel::init()
+{
+}
+

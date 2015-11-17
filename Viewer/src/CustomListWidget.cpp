@@ -87,3 +87,14 @@ void CustomListWidget::clearSelection()
 	}
 	Q_EMIT selectionChanged();
 }
+
+void CustomListWidget::setSelection(QStringList sel)
+{
+	for(int i=0; i < count(); i++)
+	{
+		item(i)->setCheckState(Qt::Unchecked);
+		if(sel.contains(item(i)->text()))
+			item(i)->setCheckState(Qt::Checked);
+	}
+}
+

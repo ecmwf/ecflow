@@ -17,7 +17,9 @@ public:
     QString displayText() const;
     bool hasSelection() const {return !selection_.isEmpty();}
     QStringList selection() const {return selection_;}
+    QStringList all() const;
     void selectSoleItem();
+    void setSelection(QStringList);
 
 public Q_SLOTS:
     void slotChecked();

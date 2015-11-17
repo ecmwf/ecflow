@@ -1,13 +1,21 @@
-
-#include "NodeQueryDialog.hpp"
+//============================================================================
+// Copyright 2015 ECMWF.
+// This software is licensed under the terms of the Apache Licence version 2.0
+// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+// In applying this licence, ECMWF does not waive the privileges and immunities
+// granted to it by virtue of its status as an intergovernmental organisation
+// nor does it submit to any jurisdiction.
+//
+//============================================================================
 
 #include <QCloseEvent>
 #include <QDebug>
 #include <QSettings>
 
+#include "NodeSearchDialog.hpp"
 #include "VConfig.hpp"
 
-NodeQueryDialog::NodeQueryDialog(QWidget *parent) :
+NodeSearchDialog::NodeSearchDialog(QWidget *parent) :
     QDialog(parent)
 {
     setupUi(this);
@@ -25,29 +33,29 @@ NodeQueryDialog::NodeQueryDialog(QWidget *parent) :
     readSettings();
 }
 
-NodeQueryDialog::~NodeQueryDialog()
+NodeSearchDialog::~NodeSearchDialog()
 {
 }
 
-NodeQueryWidget* NodeQueryDialog::queryWidget() const
+NodeSearchWidget* NodeSearchDialog::queryWidget() const
 {
 	return queryWidget_;
 }
 
-void NodeQueryDialog::closeEvent(QCloseEvent * event)
+void NodeSearchDialog::closeEvent(QCloseEvent * event)
 {
+	queryWidget_->slotStop(); //The search thread might be running!!
 	event->accept();
 	writeSettings();
 }
 
-void NodeQueryDialog::accept()
+void NodeSearchDialog::accept()
 {
 	writeSettings();
     QDialog::accept();
 }
 
-
-void NodeQueryDialog::reject()
+void NodeSearchDialog::reject()
 {
 	writeSettings();
 	QDialog::reject();
@@ -57,9 +65,9 @@ void NodeQueryDialog::reject()
 // Settings read/write
 //------------------------------------------
 
-void NodeQueryDialog::writeSettings()
+void NodeSearchDialog::writeSettings()
 {
-	QSettings settings("ECMWF","ecFlowUI-NodeQueryDialog");
+	QSettings settings("ECMWF","ecFlowUI-NodeSearchDialog");
 
 	//We have to clear it so that should not remember all the previous values
 	settings.clear();
@@ -70,9 +78,9 @@ void NodeQueryDialog::writeSettings()
 	settings.endGroup();
 }
 
-void NodeQueryDialog::readSettings()
+void NodeSearchDialog::readSettings()
 {
-	QSettings settings("ECMWF","ecFlowUI-NodeQueryDialog");
+	QSettings settings("ECMWF","ecFlowUI-NodeSearchDialog");
 
 	settings.beginGroup("main");
 	if(settings.contains("size"))

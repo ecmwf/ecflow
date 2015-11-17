@@ -35,11 +35,13 @@ public:
 	explicit NodeQueryEngine(QObject* parent=0);
 	~NodeQueryEngine();
 
-	void exec(NodeQuery* query);
-	void exec(const NodeQuery& query,NodeFilter* filter);
+	void runQuery(NodeQuery* query);
+	void stopQuery();
+	int scannedCount() const {return scanCnt_;}
 
 Q_SIGNALS:
 	void found(NodeQueryResultData);
+	void found(QList<NodeQueryResultData>);
 
 protected:
 	void run();
@@ -48,11 +50,38 @@ private:
 	void run(ServerHandler*,VNode*);
 	void runRecursively(VNode *node);
 	void broadcastFind(VNode*);
+	void broadcastChunk(bool);
 
 	NodeQuery* query_;
 	BaseNodeCondition* parser_;
 	std::vector<ServerHandler*> servers_;
-	std::vector<std::string> res_;
+	int cnt_;
+	int scanCnt_;
+	int maxNum_;
+	int chunkSize_;
+	QList<NodeQueryResultData> res_;
+	bool stopIt_;
+
 };
+
+class NodeFilterEngine
+{
+
+public:
+	explicit NodeFilterEngine(NodeFilter*);
+	~NodeFilterEngine();
+
+	void runQuery(ServerHandler*);
+	void setQuery(NodeQuery*);
+
+private:
+	void runRecursively(VNode *node);
+
+	NodeQuery* query_;
+	BaseNodeCondition* parser_;
+	ServerHandler* server_;
+	NodeFilter *owner_;
+};
+
 
 #endif /* VIEWER_SRC_NODEQUERYENGINE_HPP_ */
