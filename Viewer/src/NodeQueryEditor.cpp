@@ -290,8 +290,8 @@ void NodeQueryEditor::init()
 
 	initIsOn_=false;
 
+	updateQueryTe();
 	checkGuiState();
-
 }
 
 void NodeQueryEditor::setQueryTeCanExpand(bool b)
