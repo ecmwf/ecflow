@@ -579,7 +579,12 @@ void ServerHandler::command(const std::vector<std::string>& fullPaths, const std
 
 		for(unsigned int i=0; i < fullPaths.size(); ++i)
 		{
-			fullNameStr+= " " +  fullPaths[i];
+			if(i>0)
+			{
+				fullNameStr+= " ";
+			}
+
+			fullNameStr+=fullPaths[i];
 		}
 
 		//Replace placeholders with real node names
