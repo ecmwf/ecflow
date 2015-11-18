@@ -107,6 +107,12 @@ public:
 	QString extQueryString() const {return extQuery_;}
 	void buildQueryString();
 
+	int maxNum() const {return maxNum_;}
+	void setMaxNum(int m) {maxNum_=m;}
+
+	void setCaseSensitive(bool b) {caseSensitive_=b;}
+	bool caseSensitive() const {return caseSensitive_;}
+
 	NodeQueryStringOption* stringOption(QString name) const;
 
 	QStringList typeSelection() const;
@@ -137,6 +143,8 @@ protected:
 	QStringList servers_;
     QString query_;
     QString extQuery_;
+    bool caseSensitive_;
+    int maxNum_;
 
 	QMap<QString,NodeQueryStringOption*> stringOptions_;
 	QMap<QString,NodeQuerySelectOption*> selectOptions_;
@@ -147,6 +155,8 @@ protected:
 	static QStringList flagTerms_;
 	static QStringList attrGroupTerms_;
 	static QMap<QString,QStringList> attrTerms_;
+
+	static bool defaultCaseSensitive_;
 };
 
 #endif /* VIEWER_SRC_NODEQUERY_HPP_ */

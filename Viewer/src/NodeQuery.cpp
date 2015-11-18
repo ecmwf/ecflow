@@ -114,7 +114,9 @@ void NodeQuerySelectOption::load(VSettings* vs)
 
 NodeQuery::NodeQuery(const std::string& name) :
   name_(name),
-  advanced_(false)
+  advanced_(false),
+  caseSensitive_(false),
+  maxNum_(50000)
 {
 	if(nodeTerms_.isEmpty())
 	{
@@ -186,8 +188,11 @@ void NodeQuery::swap(const NodeQuery* q)
 {
 	advanced_=q->advanced_;
 	query_=q->query_;
+	extQuery_=q->extQuery_;
 	rootNode_=q->rootNode_;
 	servers_=q->servers_;
+	caseSensitive_=q->caseSensitive_;
+	maxNum_=q->maxNum_;
 
 	Q_FOREACH(QString s,stringOptions_.keys())
 	{
@@ -221,19 +226,16 @@ bool NodeQuery::hasServer(const std::string& name) const
 QStringList NodeQuery::typeSelection() const
 {
 	return selectOptions_.value("type")->selection_;
-
 }
 
 QStringList NodeQuery::stateSelection() const
 {
 	return selectOptions_.value("state")->selection_;
-
 }
 
 QStringList NodeQuery::flagSelection() const
 {
 	return selectOptions_["flag"]->selection_;
-
 }
 
 NodeQueryStringOption*  NodeQuery::stringOption(QString name) const
@@ -404,6 +406,12 @@ void NodeQuery::buildQueryString()
 void NodeQuery::load(VSettings* vs)
 {
 	advanced_=vs->getAsBool("advanced",advanced_);
+	caseSensitive_=vs->getAsBool("case",caseSensitive_);
+
+	int maxNum=maxNum_;
+	maxNum=vs->get<int>("maxNum",maxNum_);
+	if(maxNum_ > 1 && maxNum < 5000000)
+		maxNum_=maxNum;
 
 	std::vector<std::string> v;
 	vs->get("servers",v);
@@ -429,6 +437,11 @@ void NodeQuery::load(VSettings* vs)
 void NodeQuery::save(VSettings* vs)
 {
     vs->putAsBool("advanced",advanced_);
+
+    if(caseSensitive_)
+    	vs->putAsBool("case",caseSensitive_);
+
+    vs->put("maxNum",maxNum_);
 
     std::vector<std::string> v;
     Q_FOREACH(QString s, servers_)

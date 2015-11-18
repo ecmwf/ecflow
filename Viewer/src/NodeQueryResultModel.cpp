@@ -202,20 +202,22 @@ VInfo_ptr NodeQueryResultModel::nodeInfo(const QModelIndex& index)
 
 	if(index.row() >=0 && index.row() <= data_->size())
 	{
-		//NodeQueryResultData* d=data_.at(index.row());
+		NodeQueryResultItem* d=data_->itemAt(index.row());
 
-		/*if(ServerHandler *s=ServerHandler::find(d->server_.toStdString()))
+		if(ServerHandler *s=d->server_)
 		{
-			if(d->path_.isEmpty() || d->path_ == "/")
+			if(d->node_)
 			{
-				return VInfoServer::create(s);
+				if(d->node_->isServer())
+				{
+					return VInfoServer::create(s);
+				}
+				else
+				{
+					return VInfoNode::create(d->node_);
+				}
 			}
-
-			if(VNode* node=s->vRoot()->find(d->path_.toStdString()))
-			{
-				return VInfoNode::create(node);
-			}
-		}*/
+		}
 	}
 
     VInfo_ptr res;

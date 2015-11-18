@@ -29,7 +29,7 @@ NodeQueryEngine::NodeQueryEngine(QObject* parent) :
 	stopIt_(false),
 	cnt_(0),
 	scanCnt_(0),
-	maxNum_(200000),
+	maxNum_(250000),
 	chunkSize_(100),
 	rootNode_(0)
 {
@@ -66,6 +66,8 @@ void NodeQueryEngine::runQuery(NodeQuery* query)
 	rootNode_=0;
 
 	query_->swap(query);
+
+	maxNum_=query_->maxNum();
 
 	servers_.clear();
 

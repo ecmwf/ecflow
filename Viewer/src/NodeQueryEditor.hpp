@@ -76,6 +76,8 @@ protected Q_SLOTS:
 	void slotAttrListChanged();
 	void slotSaveQueryAs();
 	void slotAdvMode(bool b);
+	void slotMaxNum(int);
+	void slotCase(bool);
 
 Q_SIGNALS:
 	void queryEnabledChanged(bool);

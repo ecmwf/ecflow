@@ -27,6 +27,7 @@ class NodeQueryResultItem
 {
 	friend class NodeQueryEngine;
 	friend class NodeQueryResult;
+	friend class NodeQueryResultModel;
 
 public:
 	NodeQueryResultItem() : node_(NULL), server_(NULL) {}
@@ -49,14 +50,12 @@ protected:
 	std::string path_;
 };
 
-
 struct Pos
 {
 	Pos() : pos_(-1), cnt_(0) {}
 	int pos_;
 	int cnt_;
 };
-
 
 struct NodeQueryResultBlock : public Pos
 {

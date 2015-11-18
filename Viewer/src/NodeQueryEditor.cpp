@@ -109,11 +109,16 @@ NodeQueryEditor::NodeQueryEditor(QWidget *parent) :
 
     //Max item num
     numSpin_->setRange(10,250000);
-    numSpin_->setValue(50000);
+    numSpin_->setValue(query_->maxNum());
     numSpin_->setToolTip(tr("The maximum possible value is: ") + QString::number(numSpin_->maximum()));
-    //numCh_->setChecked(true);
-   // connect(numCh_,SIGNAL(clicked(bool)),
-    //		numSpin_,SLOT(setEnabled(bool)));
+
+    connect(numSpin_,SIGNAL(valueChanged(int)),
+            this,SLOT(slotMaxNum(int)));
+
+    caseCb_->setChecked(query_->caseSensitive());
+
+    connect(caseCb_,SIGNAL(clicked(bool)),
+    		this,SLOT(slotCase(bool)));
 
     //-------------------------
     // Scope
@@ -129,28 +134,28 @@ NodeQueryEditor::NodeQueryEditor(QWidget *parent) :
             serverCb_,SLOT(clearSelection()));
 
     //Root
-    connect(rootLe_,SIGNAL(textEdited(QString)),
+    connect(rootLe_,SIGNAL(textChanged(QString)),
            this,SLOT(slotRootNodeEdited(QString)));
 
     //Name
-    connect(nameLe_,SIGNAL(textEdited(QString)),
+    connect(nameLe_,SIGNAL(textChanged(QString)),
            this,SLOT(slotNameEdited(QString)));
 
     connect(nameMatchCb_,SIGNAL(currentIndexChanged(int)),
            this,SLOT(slotNameMatchChanged(int)));
 
-    connect(nameCaseTb_,SIGNAL(changed(bool)),
-           this,SLOT(slotNameCaseChanged(bool)));
+    /*connect(nameCaseTb_,SIGNAL(changed(bool)),
+           this,SLOT(slotNameCaseChanged(bool)));*/
 
     //Path
-    connect(pathLe_,SIGNAL(textEdited(QString)),
+    connect(pathLe_,SIGNAL(textChanged(QString)),
            this,SLOT(slotPathEdited(QString)));
 
     connect(pathMatchCb_,SIGNAL(currentIndexChanged(int)),
            this,SLOT(slotPathMatchChanged(int)));
 
-    connect(pathCaseTb_,SIGNAL(changed(bool)),
-           this,SLOT(slotPathCaseChanged(bool)));
+    /*connect(pathCaseTb_,SIGNAL(changed(bool)),
+           this,SLOT(slotPathCaseChanged(bool)));*/
 
     //-------------------------
     // Filter
@@ -251,6 +256,9 @@ void NodeQueryEditor::init()
 {
 	initIsOn_=true;
 
+	numSpin_->setValue(query_->maxNum());
+	caseCb_->setChecked(query_->caseSensitive());
+
 	//Servers
 	QStringList servers=query_->servers();
 	if(servers == serverCb_->all())
@@ -263,14 +271,14 @@ void NodeQueryEditor::init()
 	assert(op);
 	nameLe_->setText(op->value());
 	nameMatchCb_->setMatchMode(op->matchMode());
-	nameCaseTb_->setChecked(op->caseSensitive());
+	//nameCaseTb_->setChecked(op->caseSensitive());
 
 	//Node path
 	op=query_->stringOption("node_path");
 	assert(op);
 	pathLe_->setText(op->value());
 	pathMatchCb_->setMatchMode(op->matchMode());
-	pathCaseTb_->setChecked(op->caseSensitive());
+	//pathCaseTb_->setChecked(op->caseSensitive());
 
 	//Lists
 	typeList_->setSelection(query_->typeSelection());
@@ -304,6 +312,7 @@ void NodeQueryEditor::toggleDefPanelVisible()
 	bool b=isDefPanelVisible();
 	scopeBox_->setVisible(!b);
 	filterBox_->setVisible(!b);
+	optionBox_->setVisible(!b);
 }
 
 bool NodeQueryEditor::isDefPanelVisible() const
@@ -324,6 +333,18 @@ void NodeQueryEditor::slotAdvMode(bool b)
 	{
 		adjustQueryTe();
 	}
+}
+
+void NodeQueryEditor::slotMaxNum(int v)
+{
+	if(!initIsOn_)
+		query_->setMaxNum(v);
+}
+
+void NodeQueryEditor::slotCase(bool b)
+{
+	if(!initIsOn_)
+		query_->setCaseSensitive(b);
 }
 
 void NodeQueryEditor::slotServerCbChanged()
@@ -378,16 +399,17 @@ void NodeQueryEditor::slotNameMatchChanged(int val)
 	}
 }
 
+
 void NodeQueryEditor::slotNameCaseChanged(bool val)
 {
-	if(!initIsOn_)
+	/*if(!initIsOn_)
 	{
 		NodeQueryStringOption* op=query_->stringOption("node_name");
 		assert(op);
 		op->setCaseSensitive(val);
 		updateQueryTe();
 		checkGuiState();
-	}
+	}*/
 }
 
 void NodeQueryEditor::slotPathEdited(QString val)
@@ -416,14 +438,14 @@ void NodeQueryEditor::slotPathMatchChanged(int val)
 
 void NodeQueryEditor::slotPathCaseChanged(bool val)
 {
-	if(!initIsOn_)
+	/*if(!initIsOn_)
 	{
 		NodeQueryStringOption* op=query_->stringOption("node_path");
 		assert(op);
 		op->setCaseSensitive(val);
 		updateQueryTe();
 		checkGuiState();
-	}
+	}*/
 }
 
 void NodeQueryEditor::slotTypeListChanged()

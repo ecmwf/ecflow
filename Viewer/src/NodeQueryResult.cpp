@@ -76,21 +76,21 @@ QString NodeQueryResultItem::typeStr() const
 	if(node_)
 		return QString::fromStdString(node_->nodeType());
 
-	return QString();
+	return QString("???");
 }
 
 QString NodeQueryResultItem::stateStr() const
 {
 	if(node_)
 		return node_->stateName();
-	return QString();
+	return QString("???");
 }
 
 QColor NodeQueryResultItem::stateColour() const
 {
 	if(node_)
 		return node_->stateColour();
-	return QColor();
+	return QColor(Qt::transparent);
 }
 
 void NodeQueryResultBlock::add(VNode* node,int pos)
