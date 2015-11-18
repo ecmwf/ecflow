@@ -37,6 +37,10 @@ protected:
 	void adjustIconSize();
 	virtual void updateSettings()=0;
 
+
+	virtual void renderStatus(QPainter *painter,const QModelIndex& index,
+	                          const QStyleOptionViewItemV4& option) const;
+
 	typedef void (NodeViewDelegate::*AttributeRendererProc)(QPainter *painter,QStringList data,const QStyleOptionViewItemV4& option) const;
 
 	virtual void renderMeter(QPainter *painter,QStringList data,const QStyleOptionViewItemV4& option) const;

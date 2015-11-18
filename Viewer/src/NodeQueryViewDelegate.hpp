@@ -40,10 +40,6 @@ protected:
     void renderNode(QPainter *painter,const QModelIndex& index,
             							const QStyleOptionViewItemV4& option,QString text) const;
 
-    void renderStatus(QPainter *painter,const QModelIndex& index,
-                            const QStyleOptionViewItemV4& option) const;
-
-
     ModelColumn* columns_;
     QPen borderPen_;
 
