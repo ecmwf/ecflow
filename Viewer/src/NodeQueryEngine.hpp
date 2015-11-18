@@ -17,7 +17,7 @@
 #include <QStringList>
 #include <QThread>
 
-#include "NodeQueryResultData.hpp"
+#include "NodeQueryResultTmp.hpp"
 
 class BaseNodeCondition;
 class ServerHandler;
@@ -39,9 +39,13 @@ public:
 	void stopQuery();
 	int scannedCount() const {return scanCnt_;}
 
+protected Q_SLOTS:
+	void slotFinished();
+	void slotFailed();
+
 Q_SIGNALS:
-	void found(NodeQueryResultData);
-	void found(QList<NodeQueryResultData>);
+	void found(NodeQueryResultTmp_ptr);
+	void found(QList<NodeQueryResultTmp_ptr>);
 
 protected:
 	void run();
@@ -59,8 +63,9 @@ private:
 	int scanCnt_;
 	int maxNum_;
 	int chunkSize_;
-	QList<NodeQueryResultData> res_;
+	QList<NodeQueryResultTmp_ptr> res_;
 	bool stopIt_;
+	VNode* rootNode_;
 
 };
 

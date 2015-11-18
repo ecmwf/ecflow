@@ -81,19 +81,8 @@ protected:
 	bool hasData() const;
 
 	virtual void resetStateFilter(bool broadcast) {};
-
-	//virtual bool isServer(const QModelIndex & index) const=0;
-	//virtual ServerHandler* indexToRealServer(const QModelIndex & index) const=0;
-
-	//virtual VModelServer* indexToServer(const QModelIndex & index) const=0;
 	virtual QModelIndex serverToIndex(ServerHandler*) const=0;
 
-	//virtual VNode* indexToNode( const QModelIndex & index) const=0;
-
-	//virtual QVariant serverData(const QModelIndex& index,int role) const=0;
-	//virtual QVariant nodeData(const QModelIndex& index,int role) const=0;
-
-	//IconFilter *icons_;
 	bool active_;
 };
 

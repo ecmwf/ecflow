@@ -15,6 +15,7 @@
 #include "NodeQueryEngine.hpp"
 #include "NodeQueryHandler.hpp"
 #include "NodeQueryHandler.hpp"
+#include "NodeQueryResult.hpp"
 #include "NodeQueryResultModel.hpp"
 #include "ServerFilter.hpp"
 #include "UserMessage.hpp"
@@ -95,11 +96,11 @@ NodeSearchWidget::NodeSearchWidget(QWidget *parent) :
 
     engine_=new NodeQueryEngine(this);
 
-    connect(engine_,SIGNAL(found(QList<NodeQueryResultData>)),
-    		model_, SLOT(appendRows(QList<NodeQueryResultData>)));
+    connect(engine_,SIGNAL(found(QList<NodeQueryResultTmp_ptr>)),
+    		model_->data(), SLOT(add(QList<NodeQueryResultTmp_ptr>)));
 
-    connect(engine_,SIGNAL(found(NodeQueryResultData)),
-    	    model_, SLOT(appendRow(NodeQueryResultData)));
+    connect(engine_,SIGNAL(found(NodeQueryResultTmp_ptr)),
+    	    model_->data(),SLOT(add(NodeQueryResultTmp_ptr)));
 
     connect(engine_,SIGNAL(started()),
     		this,SLOT(slotQueryStarted()));

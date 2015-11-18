@@ -64,7 +64,7 @@ set(viewer_srcs
     NodeQueryEditor.cpp
     NodeQueryEngine.cpp
     NodeQueryHandler.cpp
-    NodeQueryResultData.hpp
+    NodeQueryResult.cpp
     NodeQueryResultModel.cpp
     NodeQueryResultView.cpp
     NodeQueryViewDelegate.cpp
@@ -193,6 +193,7 @@ set(viewer_moc_files AbstractNodeModel.hpp
     NodeQueryCombo.hpp           
     NodeQueryEditor.hpp
     NodeQueryEngine.hpp
+    NodeQueryResult.hpp
     NodeQueryResultModel.hpp
     NodeQueryResultView.hpp
     NodeSearchDialog.hpp

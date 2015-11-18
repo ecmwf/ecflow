@@ -108,11 +108,12 @@ NodeQueryEditor::NodeQueryEditor(QWidget *parent) :
     //------------------
 
     //Max item num
-    numSpin_->setRange(1,500000);
+    numSpin_->setRange(10,250000);
     numSpin_->setValue(50000);
-    numCh_->setChecked(true);
-    connect(numCh_,SIGNAL(clicked(bool)),
-    		numSpin_,SLOT(setEnabled(bool)));
+    numSpin_->setToolTip(tr("The maximum possible value is: ") + QString::number(numSpin_->maximum()));
+    //numCh_->setChecked(true);
+   // connect(numCh_,SIGNAL(clicked(bool)),
+    //		numSpin_,SLOT(setEnabled(bool)));
 
     //-------------------------
     // Scope
@@ -232,8 +233,8 @@ NodeQueryEditor::NodeQueryEditor(QWidget *parent) :
 
     advModeTb_->hide();
 
-    numSpin_->hide();
-    numCh_->hide();
+   // numSpin_->hide();
+    //numCh_->hide();
 
     checkGuiState();
 }
@@ -654,6 +655,11 @@ void NodeQueryEditor::setRootNode(VInfo_ptr info)
 //------------------------------------------
 // Query
 //------------------------------------------
+
+int NodeQueryEditor::maxNum() const
+{
+	return numSpin_->value();
+}
 
 NodeQuery* NodeQueryEditor::query() const
 {

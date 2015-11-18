@@ -13,14 +13,12 @@
 
 #include <QAbstractItemModel>
 #include <QColor>
-#include <QSortFilterProxyModel>
+//#include <QSortFilterProxyModel>
 
-#include <vector>
-
-#include "NodeQueryResultData.hpp"
 #include "VInfo.hpp"
 
 class ModelColumn;
+class NodeQueryResult;
 
 class NodeQueryResultModel : public QAbstractItemModel
 {
@@ -40,7 +38,8 @@ public:
    	QModelIndex index (int, int, const QModelIndex& parent = QModelIndex() ) const;
    	QModelIndex parent (const QModelIndex & ) const;
 
-    void clearData();
+   	NodeQueryResult *data() const {return data_;}
+   	void clearData();
     bool hasData() const;
     //void addDataStart();
     //void addDataEnd();
@@ -49,11 +48,20 @@ public:
     QModelIndex infoToIndex(VInfo_ptr);
 
 public Q_SLOTS:
-	void appendRow(NodeQueryResultData);
-	void appendRows(QList<NodeQueryResultData>);
+    void slotBeginAppendRow();
+    void slotEndAppendRow();
+    void slotBeginAppendRows(int);
+    void slotEndAppendRows(int);
+    void slotBeginRemoveRow(int);
+    void slotEndRemoveRow(int);
+    void slotBeginRemoveRows(int,int);
+    void slotEndRemoveRows(int,int);
+    void slotBeginReset();
+    void slotEndReset();
+    void slotStateChanged(const VNode*,int,int);
 
 protected:
-	QList<NodeQueryResultData*> data_;
+	NodeQueryResult *data_;
 	ModelColumn* columns_;
 };
 

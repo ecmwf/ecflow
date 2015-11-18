@@ -54,6 +54,7 @@ public:
     void setQueryTeCanExpand(bool);
     void toggleDefPanelVisible();
     bool isDefPanelVisible() const;
+    int maxNum() const;
 
     void notifyServerFilterAdded(ServerItem*);
     void notifyServerFilterRemoved(ServerItem*);

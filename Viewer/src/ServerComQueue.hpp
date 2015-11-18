@@ -36,7 +36,7 @@ public:
 	ServerComQueue(ServerHandler *server,ClientInvoker* client,ServerComThread* comThread);
 	~ServerComQueue();
 
-	enum State {RunningState,SuspendedState,ResetState,DisabledState};
+	enum State {NoState,RunningState,SuspendedState,ResetState,DisabledState};
 	State state() const {return state_;}
 
 	void addTask(VTask_ptr);
@@ -48,7 +48,8 @@ public:
 	void enable();
 	void disable();
 	void start();
-	void suspend();
+	void suspend(bool);
+	bool prepareReset();
 	void reset();
 	bool isSuspended() const {return state_==SuspendedState;}
 

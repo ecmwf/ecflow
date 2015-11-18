@@ -30,16 +30,20 @@ NodeQueryEngine::NodeQueryEngine(QObject* parent) :
 	cnt_(0),
 	scanCnt_(0),
 	maxNum_(200000),
-	chunkSize_(100)
+	chunkSize_(100),
+	rootNode_(0)
 {
 	//We will need to pass various non-Qt types via signals and slots
 	//So we need to register these types.
 	if(!metaRegistered)
 	{
-		qRegisterMetaType<NodeQueryResultData>("NodeQueryResultData");
-		qRegisterMetaType<QList<NodeQueryResultData> >("QList<NodeQueryResultData>");
+		qRegisterMetaType<NodeQueryResultTmp_ptr>("NodeQueryResultTmp_ptr");
+		qRegisterMetaType<QList<NodeQueryResultTmp_ptr> >("QList<NodeQueryResultTmp_ptr>");
 		metaRegistered=true;
 	}
+
+	connect(this,SIGNAL(finished()),
+			this,SLOT(slotFinished()));
 }
 
 NodeQueryEngine::~NodeQueryEngine()
@@ -59,6 +63,7 @@ void NodeQueryEngine::runQuery(NodeQuery* query)
 	res_.clear();
 	cnt_=0;
 	scanCnt_=0;
+	rootNode_=0;
 
 	query_->swap(query);
 
@@ -82,6 +87,20 @@ void NodeQueryEngine::runQuery(NodeQuery* query)
 		}
 	}
 
+	if(!query_->rootNode().empty())
+	{
+		if(servers_.size() != 1)
+			return;
+
+		rootNode_=servers_.at(0)->vRoot()->find(query_->rootNode());
+	}
+
+	//Notify the servers that the search began
+	Q_FOREACH(ServerHandler* s,servers_)
+	{
+		s->searchBegan();
+	}
+
 	//Start thread execution
 	start();
 }
@@ -93,21 +112,23 @@ void NodeQueryEngine::stopQuery()
 
 void NodeQueryEngine::run()
 {
-	for(std::vector<ServerHandler*>::const_iterator it=servers_.begin(); it != servers_.end(); ++it)
+	if(rootNode_)
 	{
-		ServerHandler *server=*it;
-
-		//Set the mutex on the server defs. We do not allow sycn while the
-		//search is running.
-		//TODO: avoid blocking the main (gui) thread
-		//ServerDefsAccess defs(server);
-
-		run(server,server->vRoot());
-
-		if(stopIt_)
+		run(servers_.at(0),rootNode_);
+	}
+	else
+	{
+		for(std::vector<ServerHandler*>::const_iterator it=servers_.begin(); it != servers_.end(); ++it)
 		{
-			broadcastChunk(true);
-			return;
+			ServerHandler *server=*it;
+
+			run(server,server->vRoot());
+
+			if(stopIt_)
+			{
+				broadcastChunk(true);
+				return;
+			}
 		}
 	}
 
@@ -141,7 +162,7 @@ void NodeQueryEngine::runRecursively(VNode *node)
 
 void NodeQueryEngine::broadcastFind(VNode* node)
 {
-	NodeQueryResultData d(node);
+	NodeQueryResultTmp_ptr d(new NodeQueryResultTmp(node));
 
 	//Add to res vector
 	res_ << d;
@@ -179,7 +200,19 @@ void NodeQueryEngine::broadcastChunk(bool force)
 	}
 }
 
+void NodeQueryEngine::slotFinished()
+{
+	//Notify the servers that the search finished
+	Q_FOREACH(ServerHandler* s,servers_)
+	{
+		s->searchFinished();
+	}
+}
 
+void NodeQueryEngine::slotFailed()
+{
+
+}
 
 NodeFilterEngine::NodeFilterEngine(NodeFilter* owner) :
 	query_(new NodeQuery("tmp")),

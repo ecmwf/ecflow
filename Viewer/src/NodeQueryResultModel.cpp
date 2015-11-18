@@ -8,13 +8,14 @@
 //
 //============================================================================
 
+#include "NodeQueryResultModel.hpp"
+
 #include "ModelColumn.hpp"
+#include "NodeQueryResult.hpp"
 #include "ServerHandler.hpp"
 #include "VNode.hpp"
 
 #include <QDebug>
-#include <QTime>
-#include "NodeQueryResultModel.hpp"
 
 NodeQueryResultModel::NodeQueryResultModel(QObject *parent) :
           QAbstractItemModel(parent),
@@ -23,60 +24,57 @@ NodeQueryResultModel::NodeQueryResultModel(QObject *parent) :
 	columns_=ModelColumn::def("query_columns");
 
 	assert(columns_);
+
+	data_=new NodeQueryResult(this);
+
+	connect(data_,SIGNAL(beginAppendRow()),
+			this,SLOT(slotBeginAppendRow()));
+
+	connect(data_,SIGNAL(endAppendRow()),
+			this,SLOT(slotEndAppendRow()));
+
+	connect(data_,SIGNAL(beginAppendRows(int)),
+			this,SLOT(slotBeginAppendRows(int)));
+
+	connect(data_,SIGNAL(endAppendRows(int)),
+			this,SLOT(slotEndAppendRows(int)));
+
+	connect(data_,SIGNAL(beginRemoveRow(int)),
+			this,SLOT(slotBeginRemoveRow(int)));
+
+	connect(data_,SIGNAL(endRemoveRow(int)),
+			this,SLOT(slotEndRemoveRow(int)));
+
+	connect(data_,SIGNAL(beginRemoveRows(int,int)),
+			this,SLOT(slotBeginRemoveRows(int,int)));
+
+	connect(data_,SIGNAL(endRemoveRows(int,int)),
+			this,SLOT(slotEndRemoveRows(int,int)));
+
+	connect(data_,SIGNAL(beginReset()),
+			this,SLOT(slotBeginReset()));
+
+	connect(data_,SIGNAL(endReset()),
+			this,SLOT(slotEndReset()));
+
+	connect(data_,SIGNAL(stateChanged(const VNode*,int,int)),
+			this,SLOT(slotStateChanged(const VNode*,int,int)));
+
 }
 
 NodeQueryResultModel::~NodeQueryResultModel()
 {
-	Q_FOREACH(NodeQueryResultData* d,data_)
-	{
-		delete d;
-	}
 }
 
-void  NodeQueryResultModel::appendRow(NodeQueryResultData dInput)
-{
-	int num=data_.count();
-	Q_EMIT beginInsertRows(QModelIndex(),num,num);
-
-	NodeQueryResultData* d=new NodeQueryResultData(dInput);
-	data_ << d;
-
-	Q_EMIT endInsertRows();
-}
-
-void  NodeQueryResultModel::appendRows(QList<NodeQueryResultData> dInput)
-{
-	if(dInput.isEmpty())
-		return;
-
-	int num=data_.count();
-	Q_EMIT beginInsertRows(QModelIndex(),num,num+dInput.count()-1);
-
-	for(int i=0; i < dInput.count(); i++)
-	{
-		NodeQueryResultData* d=new NodeQueryResultData(dInput.at(i));
-		data_ << d;
-	}
-
-	Q_EMIT endInsertRows();
-}
 
 void NodeQueryResultModel::clearData()
 {
-	beginResetModel();
-
-	Q_FOREACH(NodeQueryResultData* d,data_)
-	{
-		delete d;
-	}
-	data_.clear();
-
-	endResetModel();
+	data_->clear();
 }
 
 bool NodeQueryResultModel::hasData() const
 {
-	return !data_.isEmpty();
+	return data_->size() > 0;
 }
 
 int NodeQueryResultModel::columnCount( const QModelIndex& /*parent */) const
@@ -92,7 +90,7 @@ int NodeQueryResultModel::rowCount( const QModelIndex& parent) const
 	//Parent is the root:
 	if(!parent.isValid())
 	{
-		return data_.count();
+		return data_->size();
 	}
 
 	return 0;
@@ -112,36 +110,29 @@ QVariant NodeQueryResultModel::data( const QModelIndex& index, int role ) const
 	}
 
 	int row=index.row();
-	if(row < 0 || row >= data_.size())
+	if(row < 0 || row >= data_->size())
 		return QVariant();
 
 	QString id=columns_->id(index.column());
 
-	NodeQueryResultData* d=data_.at(row);
-	VNode* node=d->node_;
+	NodeQueryResultItem* d=data_->itemAt(row);
 
 	if(role == Qt::DisplayRole)
 	{
 		if(id == "path")
-		{
-			return QString::fromStdString(node->absNodePath());
-		}
+			return d->pathStr();
 		else if(id == "server")
-		{
-			if(node->server())
-				return QString::fromStdString(node->server()->name());
-		}
+			return d->serverStr();
 		else if(id == "type")
-			return QString::fromStdString(node->nodeType());
+			return d->typeStr();
 		else if(id == "status")
-			return node->stateName();
-
+			return d->stateStr();
 		return QVariant();
 	}
 	else if(role == Qt::BackgroundRole)
 	{
 		if(id == "status")
-			return node->stateColour();
+			return d->stateColour();
 
 		return QVariant();
 	}
@@ -209,9 +200,9 @@ VInfo_ptr NodeQueryResultModel::nodeInfo(const QModelIndex& index)
 		return res;
 	}
 
-	if(index.row() >=0 && index.row() <= data_.count())
+	if(index.row() >=0 && index.row() <= data_->size())
 	{
-		NodeQueryResultData* d=data_.at(index.row());
+		//NodeQueryResultData* d=data_.at(index.row());
 
 		/*if(ServerHandler *s=ServerHandler::find(d->server_.toStdString()))
 		{
@@ -251,12 +242,75 @@ QModelIndex NodeQueryResultModel::infoToIndex(VInfo_ptr info)
 	return QModelIndex();
 }
 
+void  NodeQueryResultModel::slotBeginAppendRow()
+{
+	int num=data_->size();
+	Q_EMIT beginInsertRows(QModelIndex(),num,num);
 
 
+	Q_EMIT endInsertRows();
+}
 
+void  NodeQueryResultModel::slotEndAppendRow()
+{
+	Q_EMIT endInsertRows();
+}
 
+void  NodeQueryResultModel::slotBeginAppendRows(int n)
+{
+	if(n <= 0)
+		return;
 
+	int num=data_->size();
+	Q_EMIT beginInsertRows(QModelIndex(),num,num+n-1);
+}
 
+void  NodeQueryResultModel::slotEndAppendRows(int n)
+{
+	if(n <= 0)
+		return;
+	Q_EMIT endInsertRows();
+}
 
+void NodeQueryResultModel::slotBeginRemoveRow(int row)
+{
+	beginRemoveRows(QModelIndex(),row,row);
+}
 
+void NodeQueryResultModel::slotEndRemoveRow(int row)
+{
+	endRemoveRows();
+}
 
+void NodeQueryResultModel::slotBeginRemoveRows(int rowStart,int rowEnd)
+{
+	beginRemoveRows(QModelIndex(),rowStart,rowEnd);
+}
+
+void NodeQueryResultModel::slotEndRemoveRows(int,int)
+{
+	endRemoveRows();
+}
+
+void NodeQueryResultModel::slotBeginReset()
+{
+	beginResetModel();
+}
+
+void NodeQueryResultModel::slotEndReset()
+{
+	endResetModel();
+}
+
+void NodeQueryResultModel::slotStateChanged(const VNode*,int pos,int cnt)
+{
+	int col=columns_->indexOf("status");
+
+	if(col != -1)
+	{
+		QModelIndex fromIdx=index(pos,col);
+		QModelIndex toIdx=index(pos+cnt-1,col);
+
+		Q_EMIT dataChanged(fromIdx,toIdx);
+	}
+}

@@ -1018,36 +1018,31 @@ void ServerHandler::reset()
 {
 	UserMessage::message(UserMessage::DBG, false, std::string("ServerHandler::reset"));
 
-	//We are in the middle of a reset
-	if(comQueue_->state() == ServerComQueue::ResetState)
-	{
-		UserMessage::message(UserMessage::DBG, false, " --> skip reset - it is already running");
-		return;
-	}
-
 	//---------------------------------
 	// First part of reset: clearing
 	//---------------------------------
 
-	//Stop the timer
-	stopRefreshTimer();
+	if(comQueue_->prepareReset())
+	{
+		//Stop the timer
+		stopRefreshTimer();
 
-	//A safety measure
-	comQueue_->suspend();
+		// First part of reset: clear the tree
+		clearTree();
 
-	//Clear the tree.
-	clearTree();
+		// Second part of reset: loading
 
-	//--------------------------------------
-	// Second part of reset: loading
-	//--------------------------------------
+		//Indicate that we reload the defs
+		setActivity(LoadActivity);
 
-	//Indicate that we reload the defs
-	setActivity(LoadActivity);
-
-	//NOTE: at this point the queue is not running but reset() will start it.
-	//While the queue is in reset mode it does not accept tasks.
-	comQueue_->reset();
+		//NOTE: at this point the queue is not running but reset() will start it.
+		//While the queue is in reset mode it does not accept tasks.
+		comQueue_->reset();
+	}
+	else
+	{
+		UserMessage::message(UserMessage::DBG, false, " --> skip reset");
+	}
 }
 
 //The reset was successful
@@ -1154,7 +1149,7 @@ void ServerHandler::rescanTree()
 	stopRefreshTimer();
 
 	//Stop the queue as a safety measure: we do not want any changes during the rescan
-	comQueue_->suspend();
+	comQueue_->suspend(false);
 
 	//clear the tree
 	clearTree();
@@ -1320,6 +1315,23 @@ void ServerHandler::loadConf()
 {
 	//This will call confChanged for any non-default settings
 	conf_->loadSettings();
+}
+
+//--------------------------------------------
+// Other
+//--------------------------------------------
+
+void ServerHandler::searchBegan()
+{
+	UserMessage::message(UserMessage::DBG, false,"(" + name() + ") ServerHandler::searchBegan -- suspend queue");
+	comQueue_->suspend(true);
+}
+
+void ServerHandler::searchFinished()
+{
+	UserMessage::message(UserMessage::DBG, false, "(" + name() + ") ServerHandler::searchFinished -- start queue");
+	comQueue_->start();
+
 }
 
 //--------------------------------------------------------------

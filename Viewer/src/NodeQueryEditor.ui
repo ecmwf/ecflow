@@ -67,9 +67,9 @@
       </widget>
      </item>
      <item>
-      <widget class="QCheckBox" name="numCh_">
+      <widget class="QLabel" name="label_4">
        <property name="text">
-        <string>Max results:</string>
+        <string>Max results: </string>
        </property>
       </widget>
      </item>
@@ -82,6 +82,9 @@
         </sizepolicy>
        </property>
       </widget>
+     </item>
+     <item>
+      <widget class="CaseSensitiveButton" name="caseTb_"/>
      </item>
     </layout>
    </item>
@@ -180,26 +183,15 @@
       </property>
       <item>
        <layout class="QGridLayout" name="gridLayout_3">
-        <item row="1" column="6">
-         <widget class="QLabel" name="label_8">
+        <item row="1" column="2" colspan="4">
+         <widget class="QLabel" name="label_5">
           <property name="text">
-           <string>Node flags</string>
+           <string>Node status</string>
           </property>
          </widget>
         </item>
-        <item row="1" column="8">
-         <widget class="QLabel" name="label_10">
-          <property name="text">
-           <string>Attributes</string>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="0">
-         <widget class="QLabel" name="label">
-          <property name="text">
-           <string>Node type</string>
-          </property>
-         </widget>
+        <item row="3" column="9" colspan="2">
+         <widget class="CustomListWidget" name="attrList_"/>
         </item>
         <item row="1" column="1">
          <widget class="QToolButton" name="typeResetTb_">
@@ -215,30 +207,34 @@
           </property>
          </widget>
         </item>
-        <item row="1" column="7">
-         <widget class="QToolButton" name="flagResetTb_">
+        <item row="1" column="0">
+         <widget class="QLabel" name="label">
           <property name="text">
-           <string>...</string>
-          </property>
-          <property name="icon">
-           <iconset resource="viewer.qrc">
-            <normaloff>:/viewer/reset_to_default.svg</normaloff>:/viewer/reset_to_default.svg</iconset>
-          </property>
-          <property name="autoRaise">
-           <bool>true</bool>
+           <string>Node type</string>
           </property>
          </widget>
         </item>
-        <item row="3" column="6" colspan="2">
+        <item row="3" column="7" colspan="2">
          <widget class="CustomListWidget" name="flagList_"/>
-        </item>
-        <item row="3" column="2" colspan="4">
-         <widget class="CustomListWidget" name="stateList_"/>
         </item>
         <item row="3" column="0" colspan="2">
          <widget class="CustomListWidget" name="typeList_"/>
         </item>
+        <item row="1" column="7">
+         <widget class="QLabel" name="label_8">
+          <property name="text">
+           <string>Node flags</string>
+          </property>
+         </widget>
+        </item>
         <item row="1" column="9">
+         <widget class="QLabel" name="label_10">
+          <property name="text">
+           <string>Attributes</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="10">
          <widget class="QToolButton" name="attrResetTb_">
           <property name="text">
            <string>...</string>
@@ -252,63 +248,36 @@
           </property>
          </widget>
         </item>
-        <item row="3" column="8" colspan="2">
-         <widget class="CustomListWidget" name="attrList_"/>
-        </item>
-        <item row="1" column="5">
-         <layout class="QHBoxLayout" name="horizontalLayout">
-          <property name="spacing">
-           <number>1</number>
-          </property>
-          <item>
-           <spacer name="horizontalSpacer_2">
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>40</width>
-              <height>20</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-          <item>
-           <widget class="QToolButton" name="stateAllTb_">
-            <property name="text">
-             <string>...</string>
-            </property>
-            <property name="icon">
-             <iconset resource="viewer.qrc">
-              <normaloff>:/viewer/select_all.svg</normaloff>:/viewer/select_all.svg</iconset>
-            </property>
-            <property name="autoRaise">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QToolButton" name="stateResetTb_">
-            <property name="text">
-             <string>...</string>
-            </property>
-            <property name="icon">
-             <iconset resource="viewer.qrc">
-              <normaloff>:/viewer/unselect_all.svg</normaloff>:/viewer/unselect_all.svg</iconset>
-            </property>
-            <property name="autoRaise">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </item>
-        <item row="1" column="2" colspan="3">
-         <widget class="QLabel" name="label_5">
+        <item row="1" column="8">
+         <widget class="QToolButton" name="flagResetTb_">
           <property name="text">
-           <string>Node status</string>
+           <string>...</string>
+          </property>
+          <property name="icon">
+           <iconset resource="viewer.qrc">
+            <normaloff>:/viewer/reset_to_default.svg</normaloff>:/viewer/reset_to_default.svg</iconset>
+          </property>
+          <property name="autoRaise">
+           <bool>true</bool>
           </property>
          </widget>
+        </item>
+        <item row="1" column="6">
+         <widget class="QToolButton" name="stateResetTb_">
+          <property name="text">
+           <string>...</string>
+          </property>
+          <property name="icon">
+           <iconset resource="viewer.qrc">
+            <normaloff>:/viewer/reset_to_default.svg</normaloff>:/viewer/reset_to_default.svg</iconset>
+          </property>
+          <property name="autoRaise">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="2" colspan="5">
+         <widget class="CustomListWidget" name="stateList_"/>
         </item>
        </layout>
       </item>

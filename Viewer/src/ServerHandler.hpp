@@ -100,6 +100,9 @@ public:
 	static void command(VInfo_ptr,const std::vector<std::string>&);
 	static void command(std::vector<VInfo_ptr>,std::string);
 
+	void searchBegan();
+	void searchFinished();
+
 	static ServerHandler* find(const std::string& name);
 
 protected:
