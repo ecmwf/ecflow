@@ -184,6 +184,21 @@ void NodeFilterDef::setQuery(NodeQuery* q)
 	Q_EMIT changed();
 }
 
+void NodeFilterDef::writeSettings(VSettings *vs)
+{
+	vs->beginGroup("query");
+	query_->save(vs);
+	vs->endGroup();
+}
+
+void NodeFilterDef::readSettings(VSettings *vs)
+{
+	vs->beginGroup("query");
+	query_->load(vs);
+	vs->endGroup();
+	Q_EMIT changed();
+}
+
 NodeFilter::NodeFilter(NodeFilterDef* def,ResultMode resultMode) :
 	def_(def),
 	resultMode_(resultMode),

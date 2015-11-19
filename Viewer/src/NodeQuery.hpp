@@ -157,6 +157,7 @@ protected:
 	static QMap<QString,QStringList> attrTerms_;
 
 	static bool defaultCaseSensitive_;
+	static int defaultMaxNum_;
 };
 
 #endif /* VIEWER_SRC_NODEQUERY_HPP_ */

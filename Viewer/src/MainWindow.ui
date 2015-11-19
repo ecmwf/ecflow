@@ -291,7 +291,7 @@
   <action name="actionSearch">
    <property name="icon">
     <iconset resource="viewer.qrc">
-     <normaloff>:/viewer/search_decor.svg</normaloff>:/viewer/search_decor.svg</iconset>
+     <normaloff>:/viewer/images/search.svg</normaloff>:/viewer/images/search.svg</iconset>
    </property>
    <property name="text">
     <string>Search</string>

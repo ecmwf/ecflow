@@ -47,7 +47,7 @@ void TableFilterWidget::slotEdit()
 	{
 		filterDef_->setQuery(d.query());
 		qDebug() << "table query" << filterDef_->query()->extQueryString();
-		queryTe_->setPlainText(filterDef_->query()->extQueryString());
+		//queryTe_->setPlainText(filterDef_->query()->extQueryString());
 	}
 }
 
@@ -56,6 +56,9 @@ void TableFilterWidget::build(NodeFilterDef* def,ServerFilter *sf)
 	filterDef_=def;
 	serverFilter_=sf;
 	qDebug() << filterDef_->query()->stateSelection();
+
+	connect(filterDef_,SIGNAL(changed()),
+			this,SLOT(slotDefChanged()));
 
 	/*exprLabel_->hide();
 
@@ -75,7 +78,10 @@ void TableFilterWidget::build(NodeFilterDef* def,ServerFilter *sf)
 
 	tb->setMenu(menu);*/
 
-	queryTe_->setPlainText(filterDef_->query()->extQueryString());
+	slotDefChanged();
 }
 
-
+void TableFilterWidget::slotDefChanged()
+{
+	queryTe_->setPlainText(filterDef_->query()->extQueryString());
+}

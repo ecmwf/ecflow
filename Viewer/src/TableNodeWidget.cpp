@@ -148,6 +148,8 @@ void TableNodeWidget::writeSettings(VSettings* vs)
 	bcWidget_->writeSettings(vs);
 
 	states_->writeSettings(vs);
+	filterDef_->writeSettings(vs);
+
 	//atts_->writeSettings(vs);
 	//icons_->writeSettings(vs);
 }
@@ -163,6 +165,7 @@ void TableNodeWidget::readSettings(VSettings* vs)
 	states_->readSettings(vs);
 	//atts_->readSettings(vs);
 	//icons_->readSettings(vs);
+	filterDef_->readSettings(vs);
 
 	//The model at this point is inactive (not using its data). We make it active:
 	//	-it will instruct its data provider to filter the data according

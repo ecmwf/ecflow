@@ -29,6 +29,7 @@ public:
 
 public Q_SLOTS:
 	void slotEdit();
+	void slotDefChanged();
 
 private:
 	NodeFilterDef* filterDef_;

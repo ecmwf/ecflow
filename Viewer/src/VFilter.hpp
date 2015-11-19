@@ -98,6 +98,8 @@ public:
 	NodeQuery* query() const;
 	void setQuery(NodeQuery*);
 
+	void writeSettings(VSettings *vs);
+	void readSettings(VSettings *vs);
 
 Q_SIGNALS:
 	void changed();

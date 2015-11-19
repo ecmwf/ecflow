@@ -22,6 +22,7 @@ QStringList NodeQuery::stateTerms_;
 QStringList NodeQuery::flagTerms_;
 QStringList NodeQuery::attrGroupTerms_;
 QMap<QString,QStringList> NodeQuery::attrTerms_;
+int NodeQuery::defaultMaxNum_=50000;
 
 NodeQueryStringOption::NodeQueryStringOption(QString name) :
   name_(name),
@@ -84,31 +85,25 @@ void NodeQuerySelectOption::save(VSettings* vs)
 {
     if(selection_.isEmpty())
         return;
-        
-    vs->beginGroup(name_.toStdString());
+
     std::vector<std::string> v;
     Q_FOREACH(QString s, selection_)
         v.push_back(s.toStdString());
         
-    vs->put("selection",v);
-    vs->endGroup();   
+    vs->put(name_.toStdString(),v);
 }
 
 void NodeQuerySelectOption::load(VSettings* vs)
 {
     if(!vs->contains(name_.toStdString()))
         return;
-    
-    vs->beginGroup(name_.toStdString());
-    
+
     std::vector<std::string> v;
-    vs->get("selection",v);
+    vs->get(name_.toStdString(),v);
     
     selection_.clear();
     for(std::vector<std::string>::const_iterator it=v.begin(); it != v.end(); ++it)
         selection_ << QString::fromStdString(*it);
-    
-    vs->endGroup();   
 }
 
 
@@ -116,7 +111,7 @@ NodeQuery::NodeQuery(const std::string& name) :
   name_(name),
   advanced_(false),
   caseSensitive_(false),
-  maxNum_(50000)
+  maxNum_(defaultMaxNum_)
 {
 	if(nodeTerms_.isEmpty())
 	{
@@ -430,25 +425,32 @@ void NodeQuery::load(VSettings* vs)
     {
         selectOptions_[s]->load(vs);
     }
-            
-	query_=QString::fromStdString(vs->get("query",query_.toStdString()));
+
+    buildQueryString();
+
+	//query_=QString::fromStdString(vs->get("query",query_.toStdString()));
 }
 
 void NodeQuery::save(VSettings* vs)
 {
-    vs->putAsBool("advanced",advanced_);
+    if(advanced_)
+    	vs->putAsBool("advanced",advanced_);
 
     if(caseSensitive_)
     	vs->putAsBool("case",caseSensitive_);
 
-    vs->put("maxNum",maxNum_);
+    if(maxNum_ != defaultMaxNum_)
+    	vs->put("maxNum",maxNum_);
 
     std::vector<std::string> v;
     Q_FOREACH(QString s, servers_)
     	v.push_back(s.toStdString());
 
-    vs->put("servers",v);
-	vs->put("rootNode",rootNode_);
+    if(!v.empty())
+    	vs->put("servers",v);
+
+    if(!rootNode_.empty())
+		vs->put("rootNode",rootNode_);
     
 	Q_FOREACH(QString s,stringOptions_.keys())
     {
@@ -460,7 +462,7 @@ void NodeQuery::save(VSettings* vs)
         selectOptions_[s]->save(vs);
     }
         
-    vs->put("query",query_.toStdString());
+    //vs->put("query",query_.toStdString());
 }
 
 
