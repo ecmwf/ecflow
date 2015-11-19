@@ -68,7 +68,7 @@ bool NodeExpressionParser::isNodeAttribute(const std::string &str)
 bool NodeExpressionParser::isWhatToSearchIn(const std::string &str, bool &isAttribute)
 {
     // list of non-attribute items that we can search in
-    if (str == "name")
+    if (str == "node_name")
     {
         isAttribute = false;
         return true;
@@ -106,15 +106,48 @@ std::vector<BaseNodeCondition *> NodeExpressionParser::popLastNOperands(std::vec
 BaseNodeCondition *NodeExpressionParser::parseWholeExpression(std::string expr)
 {
     std::vector<std::string> tokens;
-    std::string delimiters(" ");
-
-    UserMessage::message(UserMessage::DBG, false, std::string("    in: ") + expr);
+    char delimiter = ' ';
+    char insideQuote = '\0';  // \0 if not inside a quote, \' if we are inside a quote
+                              // will not handle the case of nested quotes!
 
     ecf::Str::replace_all(expr, std::string("("), std::string(" ( "));
     ecf::Str::replace_all(expr, std::string(")"), std::string(" ) "));
 
-    boost::algorithm::to_lower(expr); // convert to lowercase
-    ecf::Str::split(expr, tokens, delimiters);
+    //boost::algorithm::to_lower(expr); // convert to lowercase
+
+    int    index  = 0;
+    int    length = expr.length();
+    std::string token  = "";
+
+
+    // loop through each character in the string
+
+    while (index < length)
+    {
+        char c = expr[index];
+
+        if (c == '\'')  // a quote character?
+        {
+            if (insideQuote == '\'')   // this is the closing quote
+                insideQuote = '\0';    // note that we are no longer inside a quote 
+            else
+                insideQuote = '\'';    // this is an opening quote
+        }
+        else if (c == delimiter && insideQuote == '\0') // a delimeter but not inside a quote?
+        {
+            if (token.length()>0)
+                tokens.push_back(token);
+            token ="";
+        }
+        else
+            token += c;
+
+        index++;
+    }
+
+    if(token.length()>0)
+        tokens.push_back(token);
+
 
     setTokens(tokens);
 
@@ -440,8 +473,11 @@ bool StringMatchCondition::execute(VNode *node)
     std::string searchIn = searchInOperand->what();
 
     //TODO  XXXX check - name, label, variable, etc
-    if (searchIn == "name")
-        return node->strName() == searchForOperand->what();
+    if (searchIn == "node_name")
+    {
+        bool ok =node->strName() == searchForOperand->what();
+        return (ok);
+    }
     else
         return false;
 };
