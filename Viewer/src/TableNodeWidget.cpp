@@ -59,7 +59,10 @@ TableNodeWidget::TableNodeWidget(ServerFilter* servers,QWidget * parent) : NodeW
             this,SLOT(slotSelectionChangedInView(VInfo_ptr)));
 
     connect(view_->realWidget(),SIGNAL(infoPanelCommand(VInfo_ptr,QString)),
-                this,SLOT(popInfoPanel(VInfo_ptr,QString)));
+    	    this,SIGNAL(popInfoPanel(VInfo_ptr,QString)));
+
+	connect(view_->realWidget(),SIGNAL(dashboardCommand(VInfo_ptr,QString)),
+			this,SIGNAL(dashboardCommand(VInfo_ptr,QString)));
 
     connect(bcWidget_,SIGNAL(selected(VInfo_ptr)),
             view_->realWidget(),SLOT(slotSetCurrent(VInfo_ptr)));

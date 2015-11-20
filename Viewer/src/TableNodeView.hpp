@@ -51,6 +51,7 @@ public Q_SLOTS:
 Q_SIGNALS:
 	void selectionChanged(VInfo_ptr);
 	void infoPanelCommand(VInfo_ptr,QString);
+	void dashboardCommand(VInfo_ptr,QString);
 
 protected:
 	QModelIndexList selectedList();
