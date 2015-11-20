@@ -126,7 +126,7 @@ public:
     StringMatchBase()  {};
     ~StringMatchBase() {};
 
-    virtual bool match(std::string str1, std::string str2) = 0;
+    virtual bool match(std::string searchFor, std::string searchIn) = 0;
 };
 
 class StringMatchExact : public StringMatchBase
@@ -135,7 +135,7 @@ public:
     StringMatchExact()  {};
     ~StringMatchExact() {};
 
-    bool match(std::string str1, std::string str2);
+    bool match(std::string searchFor, std::string searchIn);
 };
 
 class StringMatchContains : public StringMatchBase
@@ -144,7 +144,7 @@ public:
     StringMatchContains()  {};
     ~StringMatchContains() {};
 
-    bool match(std::string str1, std::string str2);
+    bool match(std::string searchFor, std::string searchIn);
 };
 
 class StringMatchWildcard : public StringMatchBase
@@ -153,7 +153,7 @@ public:
     StringMatchWildcard()  {};
     ~StringMatchWildcard() {};
 
-    bool match(std::string str1, std::string str2);
+    bool match(std::string searchFor, std::string searchIn);
 };
 
 class StringMatchRegexp : public StringMatchBase
@@ -162,7 +162,7 @@ public:
     StringMatchRegexp()  {};
     ~StringMatchRegexp() {};
 
-    bool match(std::string str1, std::string str2);
+    bool match(std::string searchFor, std::string searchIn);
 };
 
 // -----------------------------------------------------------------

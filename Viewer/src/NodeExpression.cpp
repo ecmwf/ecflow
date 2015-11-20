@@ -8,6 +8,8 @@
 //
 //============================================================================
 
+#include <QRegExp>
+
 #include <boost/algorithm/string.hpp>
 
 #include "Str.hpp"
@@ -480,25 +482,29 @@ bool UserLevelCondition::execute(VNode* vnode)
 //
 //=========================================================================
 
-
-bool StringMatchExact::match(std::string str1, std::string str2)
+bool StringMatchExact::match(std::string searchFor, std::string searchIn)
 {
-    return str1 == str2;
+    return searchFor == searchIn;
 }
 
-bool StringMatchContains::match(std::string str1, std::string str2)
+bool StringMatchContains::match(std::string searchFor, std::string searchIn)
 {
-    return str1 == str2;
+    QRegExp regexp(QString::fromStdString(searchFor));
+    int index = regexp.indexIn(QString::fromStdString(searchIn));
+    return (index != -1);  // -1 means no match
 }
 
-bool StringMatchWildcard::match(std::string str1, std::string str2)
+bool StringMatchWildcard::match(std::string searchFor, std::string searchIn)
 {
-    return str1 == str2;
+    QRegExp regexp(QString::fromStdString(searchFor));
+    regexp.setPatternSyntax(QRegExp::Wildcard);
+    return regexp.exactMatch(QString::fromStdString(searchIn));
 }
 
-bool StringMatchRegexp::match(std::string str1, std::string str2)
+bool StringMatchRegexp::match(std::string searchFor, std::string searchIn)
 {
-    return str1 == str2;
+    QRegExp regexp(QString::fromStdString(searchFor));
+    return regexp.exactMatch(QString::fromStdString(searchIn));
 }
 
 //=========================================================================
@@ -539,7 +545,7 @@ bool StringMatchCondition::execute(VNode *node)
     //TODO  XXXX check - name, label, variable, etc
     if (searchIn == "node_name")
     {
-        bool ok = matcher_->match(node->strName(), searchForOperand->what());
+        bool ok = matcher_->match(searchForOperand->what(), node->strName());
         return (ok);
     }
     else
