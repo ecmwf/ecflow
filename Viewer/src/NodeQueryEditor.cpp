@@ -399,6 +399,7 @@ void NodeQueryEditor::slotRootNodeEdited(QString s)
 	if(!initIsOn_)
 	{
 		query_->setRootNode(rootLe_->text().simplified().toStdString());
+		updateQueryTe();
 		checkGuiState();
 	}
 }
@@ -595,8 +596,7 @@ void NodeQueryEditor::adjustQueryTe(int rn)
 
 	if(!queryTeCanExpand_)
 	{
-		QFont f;
-		QFontMetrics fm(f);
+		QFontMetrics fm(queryTe_->font());
 
 		queryTe_->setFixedHeight((fm.height()+2)*rowNum+6);
 	}

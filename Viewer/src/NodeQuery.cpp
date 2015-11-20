@@ -293,28 +293,28 @@ void NodeQuery::buildQueryString()
 	}
 	if(!nodePart.isEmpty())
 	{
-		nodePart="( " + nodePart + " )";
+		nodePart="(" + nodePart + ")";
 	}
 
 	//Type
 	QString typePart;
 	if(typeSelection().count() >0)
 	{
-		typePart="( " + typeSelection().join(" or ") + " )";
+		typePart="(" + typeSelection().join(" or ") + ")";
 	}
 
 	//State
 	QString statePart;
 	if(stateSelection().count() >0)
 	{
-		statePart="( " + stateSelection().join(" or ") + " )";
+		statePart="(" + stateSelection().join(" or ") + ")";
 	}
 
 	//Flage
 	QString flagPart;
 	if(flagSelection().count() >0)
 	{
-		flagPart="( " + flagSelection().join(" or ") + " )";
+		flagPart="(" + flagSelection().join(" or ") + ")";
 	}
 
 	//Attributes
@@ -346,7 +346,7 @@ void NodeQuery::buildQueryString()
 
 	if(!attrPart.isEmpty())
 	{
-		attrPart="( " + attrPart + " )";
+		attrPart="(" + attrPart + ")";
 	}
 
 	//Put everything together
@@ -398,20 +398,22 @@ void NodeQuery::buildQueryString()
 	//Extended query
 	QString scopePart;
 	if(!servers_.isEmpty() && !allServers_)
-		scopePart="server = " + servers_.join(", ");
+		scopePart="servers = \'" + servers_.join(", ") + "\'";
 
-	if(!rootNode_.empty())
+	if(servers_.size() == 1 && !rootNode_.empty())
 	{
 		if(!scopePart.isEmpty())
 			scopePart+=" and ";
 
-		scopePart+="root_node = " + QString::fromStdString(rootNode_);
+		scopePart+="root_node = \'" + QString::fromStdString(rootNode_) + "\'";
 	}
 
-	if(!scopePart.isEmpty())
-		extQuery_["scope"]="( " + scopePart + " )";
+	extQuery_["scope"]=scopePart;
 
-	QString opPart="( max_results = " + QString::number(maxNum_);
+	if(query_.isEmpty())
+		extQuery_["node"] = "ANY";
+
+	QString opPart="max_results = " + QString::number(maxNum_);
 	if(query_.contains("="))
 	{
 		opPart+=" and ";
@@ -420,19 +422,17 @@ void NodeQuery::buildQueryString()
 		else
 			opPart+="case_insensitive";
 	}
-	extQuery_["options"]=opPart + " )";
-
-
+	extQuery_["options"]=opPart;
 }
 
 QString NodeQuery::extQueryString(bool multi) const
 {
-	multi=true;
 	QString str;
+
 	if(multi)
 	{
 		if(!extQuery_.value("scope").isEmpty())
-			str+="scope:  " + extQuery_.value("scope");
+			str+="scope:   " + extQuery_.value("scope");
 
 		QStringList nodeParts;
 		nodeParts << "node" << "type" << "state" << "flag";
@@ -440,13 +440,13 @@ QString NodeQuery::extQueryString(bool multi) const
 		{
 			if(!extQuery_.value(s).isEmpty())
 			{
-				if(!str.isEmpty()&& !str.contains("node:   "))
+				if(!str.isEmpty() && !str.contains("nodes:   "))
 					str+="\n";
 
-				if(!str.contains("node:   "))
-					str+="node:   "+ extQuery_.value(s);
+				if(!str.contains("nodes:   "))
+					str+="nodes:   "+ extQuery_.value(s);
 				else
-					str+=" and\n        " +extQuery_.value(s);
+					str+=" and\n         " + extQuery_.value(s);
 			}
 		}
 
@@ -454,7 +454,36 @@ QString NodeQuery::extQueryString(bool multi) const
 		{
 			if(!str.isEmpty())
 				str+="\n";
-			str+="options:" + extQuery_.value("options");
+			str+="options: " + extQuery_.value("options");
+		}
+	}
+
+	else
+	{
+		if(!extQuery_.value("scope").isEmpty())
+			str+="scope: " + extQuery_.value("scope");
+
+		QStringList nodeParts;
+		nodeParts << "node" << "type" << "state" << "flag";
+		Q_FOREACH(QString s,nodeParts)
+		{
+			if(!extQuery_.value(s).isEmpty())
+			{
+				if(!str.isEmpty() && !str.contains("nodes: "))
+					str+=" ";
+
+				if(!str.contains("nodes: "))
+					str+="nodes: "+ extQuery_.value(s);
+				else
+					str+=" and " + extQuery_.value(s);
+			}
+		}
+
+		if(!extQuery_.value("options").isEmpty())
+		{
+			if(!str.isEmpty())
+				str+=" ";
+			str+="options: " + extQuery_.value("options");
 		}
 	}
 
