@@ -110,7 +110,7 @@ fname=$rcdir/$(echo $host | cut -c1-4).$USER.$ECF_PORT
 # cut is useful when the server may be moved from node to node 
 # 4 is common string here, so that the same file is used for all nodes
 
-if [[ -f $fname ]]; then host=$(cat $fname); fi
+if [ -f $fname ]; then host=$(cat $fname); fi
 
 mkdir -p $rcdir
 ecflow_client --port $ECF_PORT --host $host --ping  && echo "server is already started" && exit 0 || :
@@ -121,7 +121,9 @@ localh=$(uname -n)
 # =================================================================================
 # site specific settings come here
 #
-. /home/ma/emos/bin/ecflow_site.sh || : 
+if [ -f /home/ma/emos/bin/ecflow_site.sh ] ; then
+. /home/ma/emos/bin/ecflow_site.sh 
+fi
 
 
 # ==================================================================================
