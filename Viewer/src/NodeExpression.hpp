@@ -111,20 +111,87 @@ public:
     std::string print() {return std::string("not") + "(" + operands_[0]->print() + ")";};
 };
 
+
+
+// --------------------------------
+// String matching utitlity classes
+// --------------------------------
+
+// note that it would be ideal for the match() function to take references to strings
+// for efficiency, but this is not always possible.
+
+class StringMatchBase
+{
+public:
+    StringMatchBase()  {};
+    ~StringMatchBase() {};
+
+    virtual bool match(std::string str1, std::string str2) = 0;
+};
+
+class StringMatchExact : public StringMatchBase
+{
+public:
+    StringMatchExact()  {};
+    ~StringMatchExact() {};
+
+    bool match(std::string str1, std::string str2);
+};
+
+class StringMatchContains : public StringMatchBase
+{
+public:
+    StringMatchContains()  {};
+    ~StringMatchContains() {};
+
+    bool match(std::string str1, std::string str2);
+};
+
+class StringMatchWildcard : public StringMatchBase
+{
+public:
+    StringMatchWildcard()  {};
+    ~StringMatchWildcard() {};
+
+    bool match(std::string str1, std::string str2);
+};
+
+class StringMatchRegexp : public StringMatchBase
+{
+public:
+    StringMatchRegexp()  {};
+    ~StringMatchRegexp() {};
+
+    bool match(std::string str1, std::string str2);
+};
+
 // -----------------------------------------------------------------
+
+// -------------------------
+// String matching condition
+// -------------------------
 
 class StringMatchCondition : public BaseNodeCondition
 {
 public:
-    StringMatchCondition()  {};
-    ~StringMatchCondition() {};
+    enum MatchMode {ContainsMatch=0,WildcardMatch=1,RegexpMatch=2};
+
+    StringMatchCondition(StringMatchCondition::MatchMode matchMode);
+    ~StringMatchCondition() {if (matcher_) delete matcher_;};
 
     bool execute(VNode *node);
     int  numOperands() {return 2;};
     std::string print() {return operands_[0]->print() + " = " + operands_[1]->print();};
     bool operand2IsArbitraryString() {return true;};
+private:
+    StringMatchBase *matcher_;
 };
+
 // -----------------------------------------------------------------
+
+// ---------------------------
+// Basic true/false conditions
+// ---------------------------
 
 class TrueNodeCondition : public BaseNodeCondition
 {
@@ -135,8 +202,6 @@ public:
     bool execute(VNode*) {return true;};
     std::string print() {return std::string("true");};
 };
-
-// -----------------------------------------------------------------
 
 class FalseNodeCondition : public BaseNodeCondition
 {
@@ -149,6 +214,10 @@ public:
 };
 
 // -----------------------------------------------------------------
+
+// -------------------
+// Node type condition
+// -------------------
 
 class TypeNodeCondition : public BaseNodeCondition
 {
@@ -165,6 +234,10 @@ private:
 
 // -----------------------------------------------------------------
 
+// --------------------
+// Node state condition
+// --------------------
+
 class StateNodeCondition : public BaseNodeCondition
 {
 public:
@@ -179,6 +252,10 @@ private:
 };
 
 // -----------------------------------------------------------------
+
+// --------------------
+// User level condition
+// --------------------
 
 class UserLevelCondition : public BaseNodeCondition
 {
@@ -195,6 +272,10 @@ private:
 
 // -----------------------------------------------------------------
 
+// ------------------------
+// Node attribute condition
+// ------------------------
+
 class NodeAttributeCondition : public BaseNodeCondition
 {
 public:
@@ -209,6 +290,10 @@ private:
 };
 
 // -----------------------------------------------------------------
+
+// -----------------
+// Search conditions
+// -----------------
 
 class WhatToSearchInOperand : public BaseNodeCondition
 {

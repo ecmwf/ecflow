@@ -260,7 +260,21 @@ BaseNodeCondition *NodeExpressionParser::parseExpression()
                 }
                 else if (*i_ == "=")
                 {
-                    StringMatchCondition *stringMatchCond = new StringMatchCondition();
+                    StringMatchCondition *stringMatchCond = new StringMatchCondition(StringMatchCondition::WildcardMatch);
+                    funcStack.push_back(stringMatchCond);
+                    result = stringMatchCond;
+                }
+
+                else if (*i_ == "~")
+                {
+                    StringMatchCondition *stringMatchCond = new StringMatchCondition(StringMatchCondition::ContainsMatch);
+                    funcStack.push_back(stringMatchCond);
+                    result = stringMatchCond;
+                }
+
+                else if (*i_ == "=~")
+                {
+                    StringMatchCondition *stringMatchCond = new StringMatchCondition(StringMatchCondition::RegexpMatch);
                     funcStack.push_back(stringMatchCond);
                     result = stringMatchCond;
                 }
@@ -459,11 +473,61 @@ bool UserLevelCondition::execute(VNode* vnode)
     return true;
 }
 
+
 //=========================================================================
 //
-//  UserLevelCondition
+//  String match utility functions
 //
 //=========================================================================
+
+
+bool StringMatchExact::match(std::string str1, std::string str2)
+{
+    return str1 == str2;
+}
+
+bool StringMatchContains::match(std::string str1, std::string str2)
+{
+    return str1 == str2;
+}
+
+bool StringMatchWildcard::match(std::string str1, std::string str2)
+{
+    return str1 == str2;
+}
+
+bool StringMatchRegexp::match(std::string str1, std::string str2)
+{
+    return str1 == str2;
+}
+
+//=========================================================================
+//
+//  String match condition
+//
+//=========================================================================
+
+StringMatchCondition::StringMatchCondition(StringMatchCondition::MatchMode matchMode)
+{
+    switch (matchMode)
+    {
+        case ContainsMatch:
+            matcher_ = new StringMatchContains();
+            break;
+        case WildcardMatch:
+            matcher_ = new StringMatchWildcard();
+            break;
+        case RegexpMatch:
+            matcher_ = new StringMatchRegexp();
+            break;
+        default:
+            UserMessage::message(UserMessage::ERROR, false, "StringMatchCondition: bad matchMode");
+            matcher_ = new StringMatchExact();
+            break;
+    }
+}
+
+
 
 bool StringMatchCondition::execute(VNode *node)
 {
@@ -475,7 +539,7 @@ bool StringMatchCondition::execute(VNode *node)
     //TODO  XXXX check - name, label, variable, etc
     if (searchIn == "node_name")
     {
-        bool ok =node->strName() == searchForOperand->what();
+        bool ok = matcher_->match(node->strName(), searchForOperand->what());
         return (ok);
     }
     else
