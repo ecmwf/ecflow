@@ -46,7 +46,7 @@ void TableFilterWidget::slotEdit()
 	if(d.exec() == QDialog::Accepted)
 	{
 		filterDef_->setQuery(d.query());
-		qDebug() << "table query" << filterDef_->query()->extQueryString();
+		qDebug() << "table query" << filterDef_->query()->extQueryString(false);
 		//queryTe_->setPlainText(filterDef_->query()->extQueryString());
 	}
 }
@@ -83,12 +83,12 @@ void TableFilterWidget::build(NodeFilterDef* def,ServerFilter *sf)
 
 void TableFilterWidget::slotDefChanged()
 {
-	QStringList lst=filterDef_->query()->extQueryString();
+	/*QStringList lst=filterDef_->query()->extQueryString();
 	QString q;
 	if(lst.count() > 1)
 		q=lst.join(" and ");
 	else if(lst.count()==1)
-		q=lst.front();
+		q=lst.front();*/
 
-	queryTe_->setPlainText(q);
+	queryTe_->setPlainText(filterDef_->query()->extQueryString(false));
 }

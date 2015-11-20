@@ -17,9 +17,11 @@
 #include <QStringList>
 #include <QMap>
 
+#include "StringMatchMode.hpp"
 #include "VSettings.hpp"
 
 class NodeQuery;
+
 
 class NodeQueryStringOption
 {
@@ -29,17 +31,17 @@ public:
 	NodeQueryStringOption(QString name);
 	void swap(const NodeQueryStringOption*);
 
-	enum MatchMode {ContainsMatch=0,WildcardMatch=1,RegexpMatch=2};
+	//enum MatchMode {ContainsMatch=0,WildcardMatch=1,RegexpMatch=2};
 
 	QString name() const {return name_;}
 	QString value() const {return value_;}
-	MatchMode matchMode() const {return matchMode_;}
-	QString matchOperator() const;
-	int matchModeAsInt() const {return static_cast<int>(matchMode_);}
+	const StringMatchMode&  matchMode() const {return matchMode_;}
+	QString matchOperator() const {return QString::fromStdString(matchMode_.matchOperator());}
 	bool caseSensitive() const {return caseSensitive_;}
 
 	void setValue(QString s) {value_=s;}
-	void setMatchMode(MatchMode m) {matchMode_=m;}
+	void setMatchMode(StringMatchMode::Mode m) {matchMode_.setMode(m);}
+	void setMatchMode(const StringMatchMode& m) {matchMode_=m;}
 	void setCaseSensitive(bool b) {caseSensitive_=b;}
 
 	void load(VSettings*);
@@ -48,12 +50,12 @@ public:
 protected:
 	QString name_;
 	QString value_;
-	MatchMode matchMode_;
+	StringMatchMode matchMode_;
 	bool caseSensitive_;
     
-    static MatchMode defaultMatchMode_;
+    static StringMatchMode::Mode defaultMatchMode_;
     static bool defaultCaseSensitive_;
-	static QMap<MatchMode,QString> matchOper_;
+	//static QMap<MatchMode,QString> matchOper_;
 };
 
 class NodeQuerySelectOption
@@ -95,7 +97,7 @@ public:
 	void setRootNode(const std::string& rootNode) {rootNode_=rootNode;}
 	const std::string& rootNode() const {return rootNode_;}
 
-	void setServers(QStringList servers) {servers_=servers;}
+	void setServers(QStringList servers,bool all=false) {servers_=servers; allServers_=all;}
 	//const std::vector<std::string>& servers() const {return servers_;}
 	QStringList servers() const {return servers_;}
 	bool hasServer(const std::string& name) const;
@@ -104,7 +106,7 @@ public:
 	//const NodeQueryOptions& options() const {return options_;}
 
 	QString queryString(bool update=true);
-	QStringList extQueryString() const {return extQuery_;}
+	QString extQueryString(bool) const;
 	void buildQueryString();
 
 	int maxNum() const {return maxNum_;}
@@ -141,8 +143,9 @@ protected:
 	bool advanced_;	
 	std::string rootNode_;
 	QStringList servers_;
+	bool allServers_;
     QString query_;
-    QStringList extQuery_;
+    QMap<QString,QString> extQuery_;
     bool caseSensitive_;
     int maxNum_;
 

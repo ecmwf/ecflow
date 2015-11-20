@@ -12,9 +12,9 @@
 
 #include "VSettings.hpp"
 
-NodeQueryStringOption::MatchMode NodeQueryStringOption::defaultMatchMode_=NodeQueryStringOption::WildcardMatch;
+StringMatchMode::Mode NodeQueryStringOption::defaultMatchMode_=StringMatchMode::WildcardMatch;
 bool NodeQueryStringOption::defaultCaseSensitive_=false;
-QMap<NodeQueryStringOption::MatchMode,QString> NodeQueryStringOption::matchOper_;
+//QMap<NodeQueryStringOption::MatchMode,QString> NodeQueryStringOption::matchOper_;
 
 QStringList NodeQuery::nodeTerms_;
 QStringList NodeQuery::typeTerms_;
@@ -29,12 +29,12 @@ NodeQueryStringOption::NodeQueryStringOption(QString name) :
   matchMode_(defaultMatchMode_),
   caseSensitive_(defaultCaseSensitive_)
 {
-	if(matchOper_.isEmpty())
+	/*if(matchOper_.isEmpty())
 	{
 		matchOper_[ContainsMatch]="~";
 		matchOper_[WildcardMatch]="=";
 		matchOper_[RegexpMatch]="=~";
-	}
+	}*/
 }
 
 void NodeQueryStringOption::swap(const NodeQueryStringOption* op)
@@ -45,20 +45,20 @@ void NodeQueryStringOption::swap(const NodeQueryStringOption* op)
 }
 
 
-QString NodeQueryStringOption::matchOperator() const
+/*QString NodeQueryStringOption::matchOperator() const
 {
 	return matchOper_.value(matchMode_);
-}
+}*/
 
 void NodeQueryStringOption::save(VSettings* vs)
 {
-    if(value_.isEmpty() && matchMode_ == defaultMatchMode_ &&
+    if(value_.isEmpty() && matchMode_.mode() == defaultMatchMode_ &&
        caseSensitive_ == defaultCaseSensitive_)
         return;
         
     vs->beginGroup(name_.toStdString());
     vs->put("value",value_.toStdString());
-    vs->put("matchMode",matchModeAsInt());
+    vs->put("matchMode",matchMode_.toInt());
     vs->putAsBool("caseSensistive",caseSensitive_);
     vs->endGroup();   
 }
@@ -71,7 +71,7 @@ void NodeQueryStringOption::load(VSettings* vs)
     
     vs->beginGroup(name_.toStdString());
     value_=QString::fromStdString(vs->get("value",value_.toStdString())); 
-    matchMode_=static_cast<MatchMode>(vs->get<int>("matchMode",matchModeAsInt()));
+    matchMode_.setMode(static_cast<StringMatchMode::Mode>(vs->get<int>("matchMode",matchMode_.toInt())));
     caseSensitive_=vs->getAsBool("caseSensistive",caseSensitive_);
     vs->endGroup();   
 }
@@ -110,6 +110,7 @@ void NodeQuerySelectOption::load(VSettings* vs)
 NodeQuery::NodeQuery(const std::string& name) :
   name_(name),
   advanced_(false),
+  allServers_(false),
   caseSensitive_(false),
   maxNum_(defaultMaxNum_)
 {
@@ -276,23 +277,23 @@ QString NodeQuery::queryString(bool update)
 void NodeQuery::buildQueryString()
 {
 	//Scope
-	QString scopePart;
+	QString nodePart;
 	QString name=stringOptions_["node_name"]->value().simplified();
 	QString path=stringOptions_["node_path"]->value().simplified();
 	if(!name.isEmpty())
 	{
-		scopePart="node_name " + stringOptions_["node_name"]->matchOperator() + " \'" +  name + "\'";
+		nodePart="node_name " + stringOptions_["node_name"]->matchOperator() + " \'" +  name + "\'";
 	}
 	if(!path.isEmpty())
 	{
-		if(!scopePart.isEmpty())
-			scopePart+=" or ";
+		if(!nodePart.isEmpty())
+			nodePart+=" or ";
 
-		scopePart+="node_path " + stringOptions_["node_path"]->matchOperator() + " \'" +  path + "\'";
+		nodePart+="node_path " + stringOptions_["node_path"]->matchOperator() + " \'" +  path + "\'";
 	}
-	if(!scopePart.isEmpty())
+	if(!nodePart.isEmpty())
 	{
-		scopePart="( " + scopePart + " )";
+		nodePart="( " + nodePart + " )";
 	}
 
 	//Type
@@ -352,10 +353,10 @@ void NodeQuery::buildQueryString()
 	query_.clear();
 	extQuery_.clear();
 
-	if(!scopePart.isEmpty())
+	if(!nodePart.isEmpty())
 	{
-		query_+=scopePart;
-		extQuery_ << scopePart;
+		query_+=nodePart;
+		extQuery_["node"]=nodePart;
 	}
 
 	if(!typePart.isEmpty())
@@ -364,7 +365,7 @@ void NodeQuery::buildQueryString()
 			query_+=" and ";
 
 		query_+=typePart;
-		extQuery_ << typePart;
+		extQuery_["type"]=typePart;
 	}
 
 	if(!statePart.isEmpty())
@@ -373,7 +374,7 @@ void NodeQuery::buildQueryString()
 			query_+=" and ";
 
 		query_+=statePart;
-		extQuery_ << statePart;
+		extQuery_["state"]=statePart;
 	}
 
 	if(!flagPart.isEmpty())
@@ -382,7 +383,7 @@ void NodeQuery::buildQueryString()
 			query_+=" and ";
 
 		query_+=flagPart;
-		extQuery_ << flagPart;
+		extQuery_["flag"]=flagPart;
 	}
 
 	if(!attrPart.isEmpty())
@@ -391,18 +392,24 @@ void NodeQuery::buildQueryString()
 			query_+=" and ";
 
 		query_+=attrPart;
-		extQuery_ << attrPart;
+		extQuery_["attr"]=attrPart;
 	}
 
 	//Extended query
+	QString scopePart;
+	if(!servers_.isEmpty() && !allServers_)
+		scopePart="server = " + servers_.join(", ");
+
 	if(!rootNode_.empty())
 	{
-		extQuery_.push_front("( root_node = " + QString::fromStdString(rootNode_) + " )");
+		if(!scopePart.isEmpty())
+			scopePart+=" and ";
+
+		scopePart+="root_node = " + QString::fromStdString(rootNode_);
 	}
 
-	if(!servers_.isEmpty())
-		extQuery_.push_front("( server = " + servers_.join(", ") + " )");
-
+	if(!scopePart.isEmpty())
+		extQuery_["scope"]="( " + scopePart + " )";
 
 	QString opPart="( max_results = " + QString::number(maxNum_);
 	if(query_.contains("="))
@@ -413,7 +420,45 @@ void NodeQuery::buildQueryString()
 		else
 			opPart+="case_insensitive";
 	}
-	extQuery_  << opPart + " )";
+	extQuery_["options"]=opPart + " )";
+
+
+}
+
+QString NodeQuery::extQueryString(bool multi) const
+{
+	multi=true;
+	QString str;
+	if(multi)
+	{
+		if(!extQuery_.value("scope").isEmpty())
+			str+="scope:  " + extQuery_.value("scope");
+
+		QStringList nodeParts;
+		nodeParts << "node" << "type" << "state" << "flag";
+		Q_FOREACH(QString s,nodeParts)
+		{
+			if(!extQuery_.value(s).isEmpty())
+			{
+				if(!str.isEmpty()&& !str.contains("node:   "))
+					str+="\n";
+
+				if(!str.contains("node:   "))
+					str+="node:   "+ extQuery_.value(s);
+				else
+					str+=" and\n        " +extQuery_.value(s);
+			}
+		}
+
+		if(!extQuery_.value("options").isEmpty())
+		{
+			if(!str.isEmpty())
+				str+="\n";
+			str+="options:" + extQuery_.value("options");
+		}
+	}
+
+	return str;
 }
 
 

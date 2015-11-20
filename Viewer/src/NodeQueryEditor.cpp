@@ -91,15 +91,28 @@ NodeQueryEditor::NodeQueryEditor(QWidget *parent) :
     rootLe_->setClearButtonEnabled(true);
 #endif
 
+#if QT_VERSION >= QT_VERSION_CHECK(4, 7, 0)
+	nameLe_->setPlaceholderText(tr("ANY"));
+	pathLe_->setPlaceholderText(tr("ANY"));
+#endif
+
 	//-------------------------
     // Query display
 	//-------------------------
 
-    QFont f;
+	//QFont f("Courier");
+	QFont f("Monospace");
+	f.setStyleHint(QFont::TypeWriter);
+	f.setFixedPitch(true);
+	f.setPointSize(10);
+	f.setStyleStrategy(QFont::PreferAntialias);
+	queryTe_->setFont(f);
+
 	QFontMetrics fm(f);
 
 	queryTe_->setFixedHeight((fm.height()+2)*3+6);
 	queryTe_->setReadOnly(true);
+	queryTe_->setWordWrapMode(QTextOption::NoWrap);
 
     Highlighter* ih=new Highlighter(queryTe_->document(),"query");
 
@@ -369,11 +382,12 @@ void NodeQueryEditor::slotServerCbChanged()
 		//Server list
 		if(serverCb_->hasSelection())
 		{
-			query_->setServers(serverCb_->selection());
+			query_->setServers(serverCb_->selection(),
+				(serverCb_->selection().count() == serverCb_->count()));
 		}
 		else
 		{
-			query_->setServers(serverCb_->all());
+			query_->setServers(serverCb_->all(),true);
 		}
 		updateQueryTe();
 		checkGuiState();
@@ -530,14 +544,14 @@ void NodeQueryEditor::checkGuiState()
 void NodeQueryEditor::updateQueryTe()
 {
 	query_->buildQueryString();
-	QString q;
+	/*QString q;
 	QStringList lst=query_->extQueryString();
 	if(lst.count() > 1)
 		q=lst.join(" and\n");
 	else if(lst.count()==1)
-		q=lst.front();
+		q=lst.front();*/
 
-	setQueryTe(q);
+	setQueryTe(query_->extQueryString(true));
 }
 
 void NodeQueryEditor::setQueryTe(QString s)

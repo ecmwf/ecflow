@@ -15,31 +15,30 @@
 StringMatchCombo::StringMatchCombo(QWidget* parent) : QComboBox(parent)
 {
 	//addItem("Exact match","=");
-	addItem("Contains",NodeQueryStringOption::ContainsMatch);
-	addItem("Matches",NodeQueryStringOption::WildcardMatch);
-	addItem("Regexp",NodeQueryStringOption::RegexpMatch);
+	addItem("Contains",StringMatchMode::ContainsMatch);
+	addItem("Matches",StringMatchMode::WildcardMatch);
+	addItem("Regexp",StringMatchMode::RegexpMatch);
 
 	setCurrentIndex(1);
 }
 
-NodeQueryStringOption::MatchMode StringMatchCombo::matchMode(int index) const
+StringMatchMode::Mode StringMatchCombo::matchMode(int index) const
 {
 	if(index >=0 && index < count())
 	{
-		return static_cast<NodeQueryStringOption::MatchMode>(itemData(index).toInt());
+		return static_cast<StringMatchMode::Mode>(itemData(index).toInt());
 	}
-	return NodeQueryStringOption::WildcardMatch;
+	return StringMatchMode::WildcardMatch;
 }
 
-NodeQueryStringOption::MatchMode StringMatchCombo::currentMatchMode() const
+StringMatchMode::Mode StringMatchCombo::currentMatchMode() const
 {
 	return matchMode(currentIndex());
-
 }
 
-void StringMatchCombo::setMatchMode(NodeQueryStringOption::MatchMode mode)
+void StringMatchCombo::setMatchMode(const StringMatchMode& mode)
 {
-	int im=static_cast<int>(mode);
+	int im=mode.toInt();
 	for(int i=0; i < count(); i++)
 	{
 		if(itemData(i).toInt() == im)

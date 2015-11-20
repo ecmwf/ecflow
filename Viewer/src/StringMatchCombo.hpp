@@ -13,18 +13,18 @@
 
 #include <QComboBox>
 
-#include "NodeQuery.hpp"
+#include "StringMatchMode.hpp"
 
 class StringMatchCombo : public QComboBox
 {
 Q_OBJECT
 
 public:
-	StringMatchCombo(QWidget* parent=0);
+	explicit StringMatchCombo(QWidget* parent=0);
 
-	NodeQueryStringOption::MatchMode matchMode(int) const;
-	NodeQueryStringOption::MatchMode currentMatchMode() const;
-	void setMatchMode(NodeQueryStringOption::MatchMode mode);
+	StringMatchMode::Mode matchMode(int) const;
+	StringMatchMode::Mode currentMatchMode() const;
+	void setMatchMode(const StringMatchMode& mode);
 };
 
 #endif /* VIEWER_SRC_STRINGMATCHCOMBO_HPP_ */

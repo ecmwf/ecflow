@@ -312,7 +312,7 @@ void AttributeSearchPanel::slotMatchChanged(int val)
 		QString id=cb->property("id").toString();
 		if(NodeQueryStringOption *op=query_->stringOption(id))
 		{
-			op->setMatchMode(static_cast<NodeQueryStringOption::MatchMode>(val));
+			op->setMatchMode(cb->currentMatchMode());
 		}
 	}
 

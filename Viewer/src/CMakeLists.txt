@@ -98,6 +98,7 @@ set(viewer_srcs
     SessionHandler.cpp
     Sound.cpp
     StringMatchCombo.cpp
+    StringMatchMode.cpp
     SuiteItemWidget.cpp
     SuiteFilter.cpp
     SuiteFilterObserver.hpp
