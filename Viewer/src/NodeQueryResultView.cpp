@@ -30,6 +30,7 @@ NodeQueryResultView::NodeQueryResultView(QWidget* parent) :
 
 {
 	//setProperty("style","nodeView");
+	setProperty("view","query");
 
 	actionHandler_=new ActionHandler(this);
 

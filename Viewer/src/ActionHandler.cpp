@@ -36,7 +36,9 @@ ActionHandler::ActionHandler(QWidget *view) : QObject(view), parent_(view)
 
 void ActionHandler::contextMenu(std::vector<VInfo_ptr> nodesLst,QPoint pos)
 {
-    QAction *action = MenuHandler::invokeMenu("Node", nodesLst,pos,  parent_);
+
+    std::string view=parent_->property("view").toString().toStdString();
+    QAction *action = MenuHandler::invokeMenu("Node", nodesLst,pos,  parent_,view);
 
     if(action)
     {

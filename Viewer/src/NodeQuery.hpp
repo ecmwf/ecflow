@@ -104,7 +104,7 @@ public:
 	//const NodeQueryOptions& options() const {return options_;}
 
 	QString queryString(bool update=true);
-	QString extQueryString() const {return extQuery_;}
+	QStringList extQueryString() const {return extQuery_;}
 	void buildQueryString();
 
 	int maxNum() const {return maxNum_;}
@@ -142,7 +142,7 @@ protected:
 	std::string rootNode_;
 	QStringList servers_;
     QString query_;
-    QString extQuery_;
+    QStringList extQuery_;
     bool caseSensitive_;
     int maxNum_;
 

@@ -113,6 +113,11 @@ NodeSearchWidget::NodeSearchWidget(QWidget *parent) :
     //-------------------
 
     queryProgress_->hide();
+
+	resW_->hide();
+	editor_->setQueryTeCanExpand(true);
+	//mainLayout_->setStretch(1,0);
+	//mainLayout_->setStretch(0,1);
 }
 
 NodeSearchWidget::~NodeSearchWidget()
@@ -154,6 +159,12 @@ void NodeSearchWidget::slotQueryEnabledChanged(bool queryEnabled)
 
 void NodeSearchWidget::slotFind()
 {
+	if(!resW_->isVisible())
+	{
+		resW_->show();
+		editor_->setQueryTeCanExpand(false);
+	}
+
 	adjustColumns();
 
 	//Clear the results

@@ -40,6 +40,7 @@ public:
     //void addValidType(std::string type);
     //void addValidState(std::string type);
     void setHandler(const std::string &handler);
+    void setViews(const std::vector<std::string> &views) {views_=views;};
     void setQuestion(const std::string &question) {question_=question;}
     void setIcon(const std::string &icon);
     void setHidden(bool b) {hidden_=b;}
@@ -55,6 +56,7 @@ public:
     bool isDivider()      {return isDivider_;};
     std::string &name()   {return name_;};
     const std::string handler() const {return handler_;}
+    bool isValidView(const std::string&) const;
     const std::string command() const {return command_;}
     const std::string question() const {return question_;}
     bool hidden() const {return hidden_;}
@@ -70,6 +72,7 @@ private:
     std::string question_;
     std::string defaultAnswer_;
     std::string handler_;
+    std::vector<std::string> views_;
     bool hidden_;
 
     //std::vector<NodeType>      validNodeTypes_;
@@ -103,7 +106,7 @@ public:
     QString exec(std::vector<Node *> nodes);
     std::string &name()       {return name_;};
     void addItem(MenuItem *item) {items_.push_back(item);};
-    QMenu *generateMenu(std::vector<VInfo_ptr> nodes, QWidget *parent);
+    QMenu *generateMenu(std::vector<VInfo_ptr> nodes, QWidget *parent,const std::string& view);
     std::vector<MenuItem *>& items() {return items_;};
 
 
@@ -128,7 +131,7 @@ public:
 
     //Menu *createMenu(QString &name);
     static bool readMenuConfigFile(const std::string &configFile);
-    static QAction *invokeMenu(const std::string &menuName, std::vector<VInfo_ptr> nodes, QPoint pos, QWidget *parent);
+    static QAction *invokeMenu(const std::string &menuName, std::vector<VInfo_ptr> nodes, QPoint pos, QWidget *parent,const std::string& view);
     static bool addItemToMenu(MenuItem *item, const std::string &menuName);
     static Menu *findMenu(const std::string &name);
     static MenuItem* findItem(QAction*);

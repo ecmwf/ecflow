@@ -31,6 +31,7 @@ TreeNodeView::TreeNodeView(NodeFilterModel* model,NodeFilterDef* filterDef,QWidg
 	prop_(NULL)
 {
 	setProperty("style","nodeView");
+	setProperty("view","tree");
 
 	expandState_=new ExpandState();
 	actionHandler_=new ActionHandler(this);

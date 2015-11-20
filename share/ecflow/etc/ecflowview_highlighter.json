@@ -205,7 +205,11 @@
               "colour"  : "rgb(136,0,136)",
               "bold"    : "false"
             },
-             
+             "server" : {
+              "pattern" : "\\b(server|root_node)\\b",                       
+              "colour"  : "rgb(136,0,136)",
+              "bold"    : "false"
+            }, 
             "state" : {
               "pattern" : "\\b(aborted|active|queued|complete|submitted|suspended|unknown)\\b",                       
               "colour"  : "rgb(136,0,136)",
@@ -225,11 +229,19 @@
               "pattern" : "\\b(date|date_name|event|event_name|label|label_name|label_value|late|late_name|limit|limit_name|limit_value|limit_max|limiter|limiter_name|meter|meter_name|repeat|repeat_name|repeat_value|time|time_name|trigger|trigger_expression|variable|variable_name|variable_value)\\b",                       
               "colour"  : "rgb(136,0,136)",
               "bold"    : "false"
-            },              
+            },   
+             "option" : {
+               "pattern" : "\\b(max_results|case_sensitive|case_insensitive)\\b",                       
+               "colour"  : "rgb(16,40,170)"
+           }, 
+             "int" : {
+               "pattern" : "(\\d+')",                       
+               "colour"  : "rgb(0,0,240)"
+           },            
             "string" : {
                "pattern" : "(\"[^\"]*\"|'[^']*')",                       
                "colour"  : "rgb(0,0,240)"
-           }, 
+           },  
             "any" : {
                "pattern" : "(ANY)",                       
                "colour"  : "rgb(0,0,240)"

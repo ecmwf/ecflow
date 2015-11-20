@@ -127,8 +127,10 @@ bool MenuHandler::readMenuConfigFile(const std::string &configFile)
                 std::string questFor = ItemDef.get("question_for","");
                 std::string question = ItemDef.get("question", "");
                 std::string handler  = ItemDef.get("handler", "");
+                std::string views    = ItemDef.get("view", "");
                 std::string icon     = ItemDef.get("icon", "");
                 std::string hidden   = ItemDef.get("hidden", "false");
+
                 //std::cout << "  " << name << " :" << menuName << std::endl;
 
                 UserMessage::message(UserMessage::DBG, false, std::string("  " + name));
@@ -165,6 +167,18 @@ bool MenuHandler::readMenuConfigFile(const std::string &configFile)
                 item->setQuestion(question);
                 item->setHandler(handler);
                 item->setIcon(icon);
+
+                if(!views.empty())
+                {
+                	std::vector<std::string> viewsVec;
+                	QStringList vLst=QString::fromStdString(views).split("/");
+                	for(int i=0; i < vLst.count(); i++)
+                	{
+                		viewsVec.push_back(vLst[i].toStdString());
+                	}
+
+                	item->setViews(viewsVec);
+                }
 
                 if(hidden == "true")
                 	item->setHidden(true);
@@ -285,14 +299,14 @@ bool MenuHandler::addItemToMenu(MenuItem *item, const std::string &menuName)
 }
 
 
-QAction *MenuHandler::invokeMenu(const std::string &menuName, std::vector<VInfo_ptr> nodes, QPoint pos, QWidget *parent)
+QAction *MenuHandler::invokeMenu(const std::string &menuName, std::vector<VInfo_ptr> nodes, QPoint pos, QWidget *parent,const std::string& view)
 {
     QAction *selectedAction = NULL;
     Menu *menu = findMenu(menuName);
 
     if (menu)
     {
-        QMenu *qMenu = menu->generateMenu(nodes, parent);
+        QMenu *qMenu = menu->generateMenu(nodes, parent, view);
 
         if (qMenu)
         {
@@ -332,20 +346,16 @@ Menu::~Menu()
 }
 
 
-QMenu *Menu::generateMenu(std::vector<VInfo_ptr> nodes, QWidget *parent)
+QMenu *Menu::generateMenu(std::vector<VInfo_ptr> nodes, QWidget *parent,const std::string& view)
 {
-    bool showIcompatibleItems = true;
     QMenu *qmenu=new QMenu(parent);	
     qmenu->setTitle(QString::fromStdString(name()));
-
 
     if (nodes.empty())
         return NULL;
 
-
     //qmenu->setWindowFlags(Qt::Tool);
     //qmenu->setWindowTitle("my title");
-
 
     // add an inactive action(!) to the top of the menu in order to show which
     // node has been selected
@@ -376,11 +386,12 @@ QMenu *Menu::generateMenu(std::vector<VInfo_ptr> nodes, QWidget *parent)
     nodeLabel->setAlignment(Qt::AlignHCenter);
     nodeLabel->setObjectName("nodeLabel");
 
-    QWidgetAction *action = new QWidgetAction(0);
-    action->setDefaultWidget(nodeLabel);
-    action->setEnabled(false);
-    action->setParent(parent);
-    qmenu->addAction(action);
+    QWidgetAction *wAction = new QWidgetAction(qmenu);
+    //Qt doc says: the ownership of the widget is passed to the widgetaction.
+    //So when the action is deleted it will be deleted as well.
+    wAction->setDefaultWidget(nodeLabel);
+    wAction->setEnabled(false);
+    qmenu->addAction(wAction);
 
     //TypeNodeCondition  typeCondFamily   (MenuItem::FAMILY);
     //TypeNodeCondition  typeCondTask     (MenuItem::TASK);
@@ -403,6 +414,9 @@ QMenu *Menu::generateMenu(std::vector<VInfo_ptr> nodes, QWidget *parent)
         //  is this item valid for the current selection?
 
     	if((*itItems)->hidden())
+    		continue;
+
+    	if(!(*itItems)->isValidView(view))
     		continue;
 
         bool visible = true;
@@ -430,7 +444,7 @@ QMenu *Menu::generateMenu(std::vector<VInfo_ptr> nodes, QWidget *parent)
                 Menu *menu = MenuHandler::findMenu((*itItems)->name());
                 if (menu)
                 {
-                    QMenu *subMenu = menu->generateMenu(nodes, 0);
+                    QMenu *subMenu = menu->generateMenu(nodes, 0, view);
                     qmenu->addMenu(subMenu);
                     subMenu->setEnabled(enabled);
                 }
@@ -441,14 +455,15 @@ QMenu *Menu::generateMenu(std::vector<VInfo_ptr> nodes, QWidget *parent)
             }
             else
             {
-                QAction *action = (*itItems)->action();
+                //When we add the action to the menu its parent (NULL a.i. the QApplication) does not change.
+            	//So when the menu is deleted the action is not deleted.
+            	//At least this is the behaviour with Qt 4.8. and 5.5.
+            	QAction *action = (*itItems)->action();
                 qmenu->addAction(action);
-                action->setParent(parent);
                 action->setEnabled(enabled);
             }
         }
     }
-
 
     return qmenu;
 }
@@ -464,6 +479,7 @@ MenuItem::MenuItem(const std::string &name) :
    hidden_(false),
    visibleCondition_(NULL),
    enabledCondition_(NULL),
+   questionCondition_(NULL),
    isSubMenu_(false),
    isDivider_(false)
 {
@@ -477,7 +493,6 @@ MenuItem::MenuItem(const std::string &name) :
         action_->setText(QString(name.c_str()));
     }
 }
-
 
 MenuItem::~MenuItem()
 {
@@ -506,7 +521,6 @@ void MenuItem::setIcon(const std::string& icon)
 	}
 }
 
-
 bool MenuItem::shouldAskQuestion(std::vector<VInfo_ptr> &nodes)
 {
     bool askQuestion = false;
@@ -520,6 +534,13 @@ bool MenuItem::shouldAskQuestion(std::vector<VInfo_ptr> &nodes)
     return askQuestion;
 }
 
+bool MenuItem::isValidView(const std::string& view) const
+{
+	if(views_.empty())
+		return true;
+
+	return (std::find(views_.begin(),views_.end(),view) != views_.end());
+}
 
 
 // // adds an entry to the list of valid node types for this menu item

@@ -214,7 +214,7 @@ NodeQueryEditor::NodeQueryEditor(QWidget *parent) :
     connect(attrResetTb_,SIGNAL(clicked()),
             attrList_,SLOT(clearSelection()));
 
-    int listHeight=(fm.height()+2)*7+6;
+    int listHeight=(fm.height()+2)*6+6;
     typeList_->setFixedHeight(listHeight);
     stateList_->setFixedHeight(listHeight);
     flagList_->setFixedHeight(listHeight);
@@ -236,10 +236,17 @@ NodeQueryEditor::NodeQueryEditor(QWidget *parent) :
     connect(advModeTb_,SIGNAL(clicked(bool)),
        		this,SLOT(slotAdvMode(bool)));
 
-    advModeTb_->hide();
+    queryManageW_->hide();
 
-   // numSpin_->hide();
-    //numCh_->hide();
+    /*advModeTb_->hide();
+    queryCbLabel_->hide();
+    queryCb_->hide();
+    saveAsTb_->hide();
+    saveTb_->hide();*/
+
+    attrList_->hide();
+    attrLabel_->hide();
+    attrResetTb_->hide();
 
     checkGuiState();
 }
@@ -338,13 +345,19 @@ void NodeQueryEditor::slotAdvMode(bool b)
 void NodeQueryEditor::slotMaxNum(int v)
 {
 	if(!initIsOn_)
+	{
 		query_->setMaxNum(v);
+		updateQueryTe();
+	}
 }
 
 void NodeQueryEditor::slotCase(bool b)
 {
 	if(!initIsOn_)
+	{
 		query_->setCaseSensitive(b);
+		updateQueryTe();
+	}
 }
 
 void NodeQueryEditor::slotServerCbChanged()
@@ -362,6 +375,7 @@ void NodeQueryEditor::slotServerCbChanged()
 		{
 			query_->setServers(serverCb_->all());
 		}
+		updateQueryTe();
 		checkGuiState();
 	}
 }
@@ -502,24 +516,26 @@ void NodeQueryEditor::checkGuiState()
 	rootLabel_->setEnabled(oneServer);
 	rootLe_->setEnabled(oneServer);
 
-	bool canBeRun=(!query_->queryString().isEmpty() ||
-	  (rootLe_->isEnabled() && !rootLe_->text().simplified().isEmpty()));
+	/*bool canBeRun=(!serverCb_->selection().isEmpty() ||
+		           !query_->queryString().isEmpty() ||
+	               (rootLe_->isEnabled() && !rootLe_->text().simplified().isEmpty()));
 
-	if(canBeRun_ != canBeRun)
-	{
+	//if(canBeRun_ != canBeRun)
+	//{
 		canBeRun_=canBeRun;
 		Q_EMIT queryEnabledChanged(canBeRun_);
-	}
+	//}*/
 }
 
 void NodeQueryEditor::updateQueryTe()
 {
-	QString q=query_->queryString();
-
-	//Break into lines
-	QStringList lst=q.split(") and ");
+	query_->buildQueryString();
+	QString q;
+	QStringList lst=query_->extQueryString();
 	if(lst.count() > 1)
-		q=lst.join(") and\n");
+		q=lst.join(" and\n");
+	else if(lst.count()==1)
+		q=lst.front();
 
 	setQueryTe(q);
 }

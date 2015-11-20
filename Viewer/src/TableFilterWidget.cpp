@@ -83,5 +83,12 @@ void TableFilterWidget::build(NodeFilterDef* def,ServerFilter *sf)
 
 void TableFilterWidget::slotDefChanged()
 {
-	queryTe_->setPlainText(filterDef_->query()->extQueryString());
+	QStringList lst=filterDef_->query()->extQueryString();
+	QString q;
+	if(lst.count() > 1)
+		q=lst.join(" and ");
+	else if(lst.count()==1)
+		q=lst.front();
+
+	queryTe_->setPlainText(q);
 }

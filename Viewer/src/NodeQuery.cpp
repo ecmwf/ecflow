@@ -350,51 +350,70 @@ void NodeQuery::buildQueryString()
 
 	//Put everything together
 	query_.clear();
+	extQuery_.clear();
 
 	if(!scopePart.isEmpty())
+	{
 		query_+=scopePart;
+		extQuery_ << scopePart;
+	}
 
 	if(!typePart.isEmpty())
 	{
 		if(!query_.isEmpty())
 			query_+=" and ";
+
 		query_+=typePart;
+		extQuery_ << typePart;
 	}
 
 	if(!statePart.isEmpty())
 	{
 		if(!query_.isEmpty())
 			query_+=" and ";
+
 		query_+=statePart;
+		extQuery_ << statePart;
 	}
 
 	if(!flagPart.isEmpty())
 	{
 		if(!query_.isEmpty())
 			query_+=" and ";
+
 		query_+=flagPart;
+		extQuery_ << flagPart;
 	}
 
 	if(!attrPart.isEmpty())
 	{
 		if(!query_.isEmpty())
 			query_+=" and ";
+
 		query_+=attrPart;
+		extQuery_ << attrPart;
 	}
 
 	//Extended query
-	extQuery_.clear();
-
-	if(!servers_.isEmpty())
-		extQuery_="servers = " + servers_.join(", ") + "; ";
-
 	if(!rootNode_.empty())
 	{
-		//if(!extQuery_.isEmpty())
-		//	extQuery_+="\n";
-		extQuery_+="root_node = " + QString::fromStdString(rootNode_) + "; ";
+		extQuery_.push_front("( root_node = " + QString::fromStdString(rootNode_) + " )");
 	}
-	extQuery_+=query_;
+
+	if(!servers_.isEmpty())
+		extQuery_.push_front("( server = " + servers_.join(", ") + " )");
+
+
+	QString opPart="( max_results = " + QString::number(maxNum_);
+	if(query_.contains("="))
+	{
+		opPart+=" and ";
+		if(caseSensitive_)
+			opPart+="case_sensitive";
+		else
+			opPart+="case_insensitive";
+	}
+	extQuery_  << opPart + " )";
 }
 
 

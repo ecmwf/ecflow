@@ -1,12 +1,11 @@
 <RCC>
   <qresource prefix="viewer">
-    <file>../images/close.svg</file>
     <file>../images/goto_line.svg</file>
     <file>../images/dock_float.svg</file>
     <file>../images/dock_close.svg</file>
     <file alias="configure.svg">../images/configure.svg</file>
     <file alias="reset.svg">../images/reset.svg</file>
-    <file>../images/search.svg</file>
+    <file alias="search.svg">../images/search.svg</file>
     <file alias="info.svg">../images/info.svg</file>
     <file>../images/add_info.svg</file>
     <file>../images/add_table.svg</file>

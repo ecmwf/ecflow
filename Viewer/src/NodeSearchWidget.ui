@@ -15,12 +15,12 @@
   </property>
   <layout class="QHBoxLayout" name="horizontalLayout">
    <item>
-    <layout class="QVBoxLayout" name="verticalLayout_3" stretch="0,1">
+    <layout class="QVBoxLayout" name="mainLayout_" stretch="0,1">
      <item>
       <widget class="NodeQueryEditor" name="editor_" native="true"/>
      </item>
      <item>
-      <widget class="QWidget" name="widget" native="true">
+      <widget class="QWidget" name="resW_" native="true">
        <layout class="QVBoxLayout" name="verticalLayout_9" stretch="1,0">
         <property name="spacing">
          <number>4</number>

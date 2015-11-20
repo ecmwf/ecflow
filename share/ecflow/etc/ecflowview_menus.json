@@ -312,7 +312,8 @@
         {
             "menu"           : "Node",
             "name"           : "Set as root",
-            "enabled_for"    : "suite or task or family"
+            "enabled_for"    : "suite or task or family",
+            "hidden"         : "true"
         },
 
         {
@@ -457,6 +458,7 @@
             "visible_for"    : "server or node",        
             "command"        : "search",
             "handler"        : "dashboard",
+            "view"           : "tree/table",
             "icon"           : "search.svg"          
         },         
         {
