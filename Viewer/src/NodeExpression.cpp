@@ -105,7 +105,7 @@ std::vector<BaseNodeCondition *> NodeExpressionParser::popLastNOperands(std::vec
 
 
 
-BaseNodeCondition *NodeExpressionParser::parseWholeExpression(std::string expr)
+BaseNodeCondition *NodeExpressionParser::parseWholeExpression(std::string expr, bool caseSensitiveStringMatch)
 {
     std::vector<std::string> tokens;
     char delimiter = ' ';
@@ -153,11 +153,11 @@ BaseNodeCondition *NodeExpressionParser::parseWholeExpression(std::string expr)
 
     setTokens(tokens);
 
-    return parseExpression();
+    return parseExpression(caseSensitiveStringMatch);
 }
 
 
-BaseNodeCondition *NodeExpressionParser::parseExpression()
+BaseNodeCondition *NodeExpressionParser::parseExpression(bool caseSensitiveStringMatch)
 {
     BaseNodeCondition *result = NULL;
 
@@ -263,7 +263,7 @@ BaseNodeCondition *NodeExpressionParser::parseExpression()
 
                 else if(StringMatchMode::operToMode(*i_) != StringMatchMode::InvalidMatch)
                 {
-                    StringMatchCondition *stringMatchCond = new StringMatchCondition(StringMatchMode::operToMode(*i_));
+                    StringMatchCondition *stringMatchCond = new StringMatchCondition(StringMatchMode::operToMode(*i_), caseSensitiveStringMatch);
                     funcStack.push_back(stringMatchCond);
                     result = stringMatchCond;
                 }
@@ -271,7 +271,7 @@ BaseNodeCondition *NodeExpressionParser::parseExpression()
                 else if (*i_ == "(")
                 {
                     ++i_;
-                    result = NodeExpressionParser::parseExpression();
+                    result = NodeExpressionParser::parseExpression(caseSensitiveStringMatch);
                     operandStack.push_back(result);
                 }
                 else if (*i_ == ")")
@@ -476,21 +476,24 @@ bool StringMatchExact::match(std::string searchFor, std::string searchIn)
 
 bool StringMatchContains::match(std::string searchFor, std::string searchIn)
 {
-    QRegExp regexp(QString::fromStdString(searchFor));
+    Qt::CaseSensitivity cs = (caseSensitive_) ? Qt::CaseSensitive : Qt::CaseInsensitive;
+    QRegExp regexp(QString::fromStdString(searchFor), cs);
     int index = regexp.indexIn(QString::fromStdString(searchIn));
     return (index != -1);  // -1 means no match
 }
 
 bool StringMatchWildcard::match(std::string searchFor, std::string searchIn)
 {
-    QRegExp regexp(QString::fromStdString(searchFor));
+    Qt::CaseSensitivity cs = (caseSensitive_) ? Qt::CaseSensitive : Qt::CaseInsensitive;
+    QRegExp regexp(QString::fromStdString(searchFor), cs);
     regexp.setPatternSyntax(QRegExp::Wildcard);
     return regexp.exactMatch(QString::fromStdString(searchIn));
 }
 
 bool StringMatchRegexp::match(std::string searchFor, std::string searchIn)
 {
-    QRegExp regexp(QString::fromStdString(searchFor));
+    Qt::CaseSensitivity cs = (caseSensitive_) ? Qt::CaseSensitive : Qt::CaseInsensitive;
+    QRegExp regexp(QString::fromStdString(searchFor), cs);
     return regexp.exactMatch(QString::fromStdString(searchIn));
 }
 
@@ -500,22 +503,22 @@ bool StringMatchRegexp::match(std::string searchFor, std::string searchIn)
 //
 //=========================================================================
 
-StringMatchCondition::StringMatchCondition(StringMatchMode::Mode matchMode)
+StringMatchCondition::StringMatchCondition(StringMatchMode::Mode matchMode, bool caseSensitive)
 {
     switch (matchMode)
     {
         case StringMatchMode::ContainsMatch:
-            matcher_ = new StringMatchContains();
+            matcher_ = new StringMatchContains(caseSensitive);
             break;
         case StringMatchMode::WildcardMatch:
-            matcher_ = new StringMatchWildcard();
+            matcher_ = new StringMatchWildcard(caseSensitive);
             break;
         case StringMatchMode::RegexpMatch:
-            matcher_ = new StringMatchRegexp();
+            matcher_ = new StringMatchRegexp(caseSensitive);
             break;
         default:
             UserMessage::message(UserMessage::ERROR, false, "StringMatchCondition: bad matchMode");
-            matcher_ = new StringMatchExact();
+            matcher_ = new StringMatchExact(caseSensitive);
             break;
     }
 }

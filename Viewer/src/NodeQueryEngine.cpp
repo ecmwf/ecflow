@@ -74,7 +74,7 @@ void NodeQueryEngine::runQuery(NodeQuery* query)
 	if(parser_)
 		delete parser_;
 
-	parser_=NodeExpressionParser::parseWholeExpression(query_->query().toStdString());
+	parser_=NodeExpressionParser::parseWholeExpression(query_->query().toStdString(), query->caseSensitive());
 	if(parser_ == NULL)
 	{
 		UserMessage::message(UserMessage::ERROR, true, std::string("Error, unable to parse enabled condition: " + query_->query().toStdString()));

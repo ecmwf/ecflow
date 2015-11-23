@@ -34,8 +34,8 @@ public:
     enum NodeType {SERVER, SUITE, FAMILY, TASK, ALIAS, NODE, BAD};
 
 
-    static BaseNodeCondition *parseWholeExpression(std::string);
-    static BaseNodeCondition *parseExpression();
+    static BaseNodeCondition *parseWholeExpression(std::string, bool caseSensitiveStringMatch=true);
+    static BaseNodeCondition *parseExpression(bool caseSensitiveStringMatch);
     static void               setTokens(std::vector<std::string> &tokens) {tokens_ = tokens; i_ = tokens_.begin();};
 
     static NodeType    nodeType(const std::string &name);
@@ -124,16 +124,19 @@ public:
 class StringMatchBase
 {
 public:
-    StringMatchBase()  {};
+    StringMatchBase(bool caseSensitive)  {caseSensitive_ = caseSensitive;};
     ~StringMatchBase() {};
 
     virtual bool match(std::string searchFor, std::string searchIn) = 0;
+
+protected:
+    bool caseSensitive_;
 };
 
 class StringMatchExact : public StringMatchBase
 {
 public:
-    StringMatchExact()  {};
+    StringMatchExact(bool caseSensitive) : StringMatchBase(caseSensitive) {};
     ~StringMatchExact() {};
 
     bool match(std::string searchFor, std::string searchIn);
@@ -142,7 +145,7 @@ public:
 class StringMatchContains : public StringMatchBase
 {
 public:
-    StringMatchContains()  {};
+    StringMatchContains(bool caseSensitive)  : StringMatchBase(caseSensitive) {};
     ~StringMatchContains() {};
 
     bool match(std::string searchFor, std::string searchIn);
@@ -151,7 +154,7 @@ public:
 class StringMatchWildcard : public StringMatchBase
 {
 public:
-    StringMatchWildcard()  {};
+    StringMatchWildcard(bool caseSensitive)  : StringMatchBase(caseSensitive) {};
     ~StringMatchWildcard() {};
 
     bool match(std::string searchFor, std::string searchIn);
@@ -160,7 +163,7 @@ public:
 class StringMatchRegexp : public StringMatchBase
 {
 public:
-    StringMatchRegexp()  {};
+    StringMatchRegexp(bool caseSensitive)  : StringMatchBase(caseSensitive) {};
     ~StringMatchRegexp() {};
 
     bool match(std::string searchFor, std::string searchIn);
@@ -175,7 +178,7 @@ public:
 class StringMatchCondition : public BaseNodeCondition
 {
 public:
-    StringMatchCondition(StringMatchMode::Mode matchMode);
+    StringMatchCondition(StringMatchMode::Mode matchMode, bool caseSensitive);
     ~StringMatchCondition() {if (matcher_) delete matcher_;};
 
     bool execute(VNode *node);
