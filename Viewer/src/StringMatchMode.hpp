@@ -17,7 +17,7 @@
 class StringMatchMode
 {
 public:
-	enum Mode {ContainsMatch=0,WildcardMatch=1,RegexpMatch=2};
+	enum Mode {InvalidMatch=-1,ContainsMatch=0,WildcardMatch=1,RegexpMatch=2};
 
 	StringMatchMode();
 	StringMatchMode(Mode m);

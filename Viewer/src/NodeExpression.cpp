@@ -260,23 +260,10 @@ BaseNodeCondition *NodeExpressionParser::parseExpression()
                     funcStack.push_back(notCond);
                     result = notCond;
                 }
-                else if (*i_ == "=")
-                {
-                    StringMatchCondition *stringMatchCond = new StringMatchCondition(StringMatchCondition::WildcardMatch);
-                    funcStack.push_back(stringMatchCond);
-                    result = stringMatchCond;
-                }
 
-                else if (*i_ == "~")
+                else if(StringMatchMode::operToMode(*i_) != StringMatchMode::InvalidMatch)
                 {
-                    StringMatchCondition *stringMatchCond = new StringMatchCondition(StringMatchCondition::ContainsMatch);
-                    funcStack.push_back(stringMatchCond);
-                    result = stringMatchCond;
-                }
-
-                else if (*i_ == "=~")
-                {
-                    StringMatchCondition *stringMatchCond = new StringMatchCondition(StringMatchCondition::RegexpMatch);
+                    StringMatchCondition *stringMatchCond = new StringMatchCondition(StringMatchMode::operToMode(*i_));
                     funcStack.push_back(stringMatchCond);
                     result = stringMatchCond;
                 }
@@ -513,17 +500,17 @@ bool StringMatchRegexp::match(std::string searchFor, std::string searchIn)
 //
 //=========================================================================
 
-StringMatchCondition::StringMatchCondition(StringMatchCondition::MatchMode matchMode)
+StringMatchCondition::StringMatchCondition(StringMatchMode::Mode matchMode)
 {
     switch (matchMode)
     {
-        case ContainsMatch:
+        case StringMatchMode::ContainsMatch:
             matcher_ = new StringMatchContains();
             break;
-        case WildcardMatch:
+        case StringMatchMode::WildcardMatch:
             matcher_ = new StringMatchWildcard();
             break;
-        case RegexpMatch:
+        case StringMatchMode::RegexpMatch:
             matcher_ = new StringMatchRegexp();
             break;
         default:

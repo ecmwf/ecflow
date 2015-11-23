@@ -52,5 +52,5 @@ StringMatchMode::Mode StringMatchMode::operToMode(const std::string& op)
 		if(op == it->second)
 			return it->first;
 	}
-	return WildcardMatch;
+	return InvalidMatch;
 }

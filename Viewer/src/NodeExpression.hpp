@@ -16,6 +16,7 @@
 #include "VSState.hpp"
 #include "VNode.hpp"
 #include "VInfo.hpp"
+#include "StringMatchMode.hpp"
 
 
 // ----------------------
@@ -174,9 +175,7 @@ public:
 class StringMatchCondition : public BaseNodeCondition
 {
 public:
-    enum MatchMode {ContainsMatch=0,WildcardMatch=1,RegexpMatch=2};
-
-    StringMatchCondition(StringMatchCondition::MatchMode matchMode);
+    StringMatchCondition(StringMatchMode::Mode matchMode);
     ~StringMatchCondition() {if (matcher_) delete matcher_;};
 
     bool execute(VNode *node);
