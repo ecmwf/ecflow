@@ -157,6 +157,8 @@ void TableNodeViewDelegate::paint(QPainter *painter,const QStyleOptionViewItem &
 void TableNodeViewDelegate::renderNode(QPainter *painter,const QModelIndex& index,
         							const QStyleOptionViewItemV4& option,QString text) const
 {
+	bool selected=option.state & QStyle::State_Selected;
+
 	int offset=4;
 
 	QFontMetrics fm(font_);
@@ -164,8 +166,8 @@ void TableNodeViewDelegate::renderNode(QPainter *painter,const QModelIndex& inde
 
 	//The initial filled rect (we will adjust its  width)
 	QRect fillRect=option.rect.adjusted(offset,deltaH,0,-deltaH-1);
-	if(option.state & QStyle::State_Selected)
-		fillRect.adjust(0,0,0,-0);
+	if(selected)
+		fillRect.adjust(0,0,0,0);
 
 	//The text rectangle
 	QRect textRect = fillRect.adjusted(offset,0,0,0);
@@ -216,6 +218,13 @@ void TableNodeViewDelegate::renderNode(QPainter *painter,const QModelIndex& inde
 	painter->setPen(fg);
 	painter->drawText(textRect,Qt::AlignLeft | Qt::AlignVCenter,text);
 
+
+	if(selected)
+	{
+		painter->setPen(nodeSelectPen_);
+		QRect selRect=textRect.adjusted(-2,0,2,0);
+		painter->drawRect(selRect);
+	}
 
 	//Draw icons
 	for(int i=0; i < pixLst.count(); i++)
