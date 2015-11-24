@@ -67,6 +67,9 @@ TableNodeWidget::TableNodeWidget(ServerFilter* servers,QWidget * parent) : NodeW
     connect(bcWidget_,SIGNAL(selected(VInfo_ptr)),
             view_->realWidget(),SLOT(slotSetCurrent(VInfo_ptr)));
 
+    connect(view_->realWidget(),SIGNAL(headerButtonClicked(QString,QPoint)),
+    		filterW_,SLOT(slotHeaderFilter(QString,QPoint)));
+
 
 	connect(model_,SIGNAL(clearBegun(const VNode*)),
 			view_->realWidget(),SLOT(slotSaveExpand(const VNode*)));

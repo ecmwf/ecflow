@@ -11,12 +11,14 @@
 
 #include <QDebug>
 #include <QHBoxLayout>
+#include <QLinearGradient>
 #include <QPainter>
 #include <QPixmap>
 #include <QToolButton>
 
 #include "VNState.hpp"
 #include "VAttribute.hpp"
+#include "VConfig.hpp"
 #include "VIcon.hpp"
 #include "VFilter.hpp"
 
@@ -43,17 +45,49 @@ VParamFilterMenu::VParamFilterMenu(QMenu * parent,VParamSet* filter,DecorMode de
 
 	if(decorMode_ == ColourDecor)
 	{
+		QLinearGradient grad;
+		grad.setCoordinateMode(QGradient::ObjectBoundingMode);
+		grad.setStart(0,0);
+		grad.setFinalStop(0,1);
+
+		int lighter=150;
+		bool useStateGrad=true;
+		if(VProperty* p=VConfig::instance()->find("view.common.node_gradient"))
+		{
+		    useStateGrad=p->value().toBool();
+		}
+
+		QFont f;
+		QFontMetrics fm(f);
+		int pixSize=fm.height()-2;
+
 		Q_FOREACH(QAction* ac,menu_->actions())
 		{
 			if(!ac->isSeparator())
 			{
 				if(VNState* vs=VNState::find(ac->data().toString().toStdString()))
 				{
-					QPixmap pix(10,10);
+	    		    //Fill rect
+				    QColor bg=vs->colour();
+				    QColor bgLight=bg.lighter(lighter);
+				    QColor border=bg.darker(125);
+				    QBrush bgBrush;
+				    if(useStateGrad)
+				    {
+				       grad.setColorAt(0,bgLight);
+				       grad.setColorAt(1,bg);
+				       bgBrush=QBrush(grad);
+				    }
+				    else
+				       bgBrush=QBrush(bg);
+
+					QPixmap pix(pixSize,pixSize);
 					QPainter painter(&pix);
-					pix.fill(vs->colour());
-					painter.setPen(Qt::black);
-					painter.drawRect(0,0,9,9);
+
+					QRect fillRect(0,0,pixSize,pixSize);
+					painter.fillRect(fillRect,bgBrush);
+					painter.setPen(border);
+					painter.drawRect(fillRect.adjusted(0,0,-1,-1));
 					ac->setIcon(pix);
 				}
 			}

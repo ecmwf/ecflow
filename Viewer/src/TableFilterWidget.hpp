@@ -30,6 +30,7 @@ public:
 public Q_SLOTS:
 	void slotEdit();
 	void slotDefChanged();
+	void slotHeaderFilter(QString column,QPoint globalPos);
 
 private:
 	NodeFilterDef* filterDef_;

@@ -385,7 +385,7 @@ void NodeQueryEditor::slotServerCbChanged()
 			query_->setServers(serverCb_->selection(),
 				(serverCb_->selection().count() == serverCb_->count()));
 		}
-		else
+		else if(serverCb_->count() > 0)
 		{
 			query_->setServers(serverCb_->all(),true);
 		}

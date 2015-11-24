@@ -79,6 +79,9 @@ void TableFilterWidget::build(NodeFilterDef* def,ServerFilter *sf)
 	tb->setMenu(menu);*/
 
 	slotDefChanged();
+
+
+
 }
 
 void TableFilterWidget::slotDefChanged()
@@ -91,4 +94,19 @@ void TableFilterWidget::slotDefChanged()
 		q=lst.front();*/
 
 	queryTe_->setPlainText(filterDef_->query()->extQueryString(false));
+}
+
+void TableFilterWidget::slotHeaderFilter(QString column,QPoint globalPos)
+{
+	if(column == "status")
+	{
+		QMenu *menu=new QMenu(this);
+		//stateFilterMenu_=new StateFilterMenu(menuState,filter_->menu());
+		VParamFilterMenu* sfm= new VParamFilterMenu(menu,filterDef_->nodeState(),
+					VParamFilterMenu::ColourDecor);
+
+		menu->exec(globalPos);
+
+		delete menu;
+	}
 }

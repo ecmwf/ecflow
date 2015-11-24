@@ -187,6 +187,7 @@ void NodeQuery::swap(const NodeQuery* q)
 	extQuery_=q->extQuery_;
 	rootNode_=q->rootNode_;
 	servers_=q->servers_;
+	allServers_=q->allServers_;
 	caseSensitive_=q->caseSensitive_;
 	maxNum_=q->maxNum_;
 

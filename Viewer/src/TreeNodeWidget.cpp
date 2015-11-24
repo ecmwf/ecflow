@@ -92,8 +92,8 @@ void TreeNodeWidget::populateDockTitleBar(DashboardDockTitleWidget* tw)
 	menu->setTearOffEnabled(true);
 
 	menu->addAction(actionBreadcrumbs);
-	QMenu *menuState=menu->addMenu(tr("Status"));
-	QMenu *menuType=menu->addMenu(tr("Attribute"));
+	QMenu *menuState=new QMenu(this); //menu->addMenu(tr("Status"));
+	QMenu *menuType=new QMenu(this); //menu->addMenu(tr("Attribute"));
 	QMenu *menuIcon=menu->addMenu(tr("Icon"));
 
 	menuState->setTearOffEnabled(true);
@@ -110,6 +110,22 @@ void TreeNodeWidget::populateDockTitleBar(DashboardDockTitleWidget* tw)
 
 	//Sets the title
     tw->slotUpdateTitle("<b>Tree</b>");
+    
+    QList<QAction*> acLst;
+    QAction* acState=new QAction(this);
+    acState->setIcon(QPixmap(":viewer/status.svg"));
+    acState->setToolTip("Status filter");
+    acState->setMenu(menuState);
+    acLst << acState;
+
+    QAction* acAttr=new QAction(this);
+    acAttr->setIcon(QPixmap(":viewer/attribute.svg"));
+    acAttr->setToolTip("Attribute filter");
+    //acAttr->setText("Attributes ");
+    acAttr->setMenu(menuType);
+    acLst << acAttr;
+
+    tw->addActions(acLst);
 }
 
 void TreeNodeWidget::slotSelectionChangedInView(VInfo_ptr info)
