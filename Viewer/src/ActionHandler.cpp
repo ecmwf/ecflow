@@ -8,6 +8,7 @@
 //
 //============================================================================
 
+#include <algorithm>
 
 #include "ActionHandler.hpp"
 
@@ -81,13 +82,26 @@ void ActionHandler::contextMenu(std::vector<VInfo_ptr> nodesLst,QPoint pos)
                 }
                 else
                 {
-                    for(int i=0; i < nodesLst.size(); i++)
+                    const int maxItems = 5;  // list no more than this number of nodes
+                    int numNodes = nodesLst.size();
+                    int numItemsToList = std::min(numNodes, 5);
+
+                    for(int i=0; i < numItemsToList; i++)
                     {
                         nodeNames += "<li><b>";
                         nodeNames += nodesLst[i]->path();
                         nodeNames += "</b></li>";
                         //if (i < nodesLst.size()-1)
                         //    nodeNames += "<br>";
+                    }
+                    if(numItemsToList < nodesLst.size())
+                    {
+                        std::string numExtra;  // to convert from int to string
+                        std::ostringstream ss;
+                        ss << (numNodes-numItemsToList);
+                        numExtra = ss.str();
+
+                        nodeNames += "<b>...and " + numExtra + " more </b></li>";
                     }
                     nodeNames += "</ul>";
                 }
