@@ -35,6 +35,7 @@ public Q_SLOTS:
 	void slotClose();
 	void on_actionCaseSensitive__toggled(bool);
 	void on_actionWholeWords__toggled(bool);
+    void matchModeChanged(int newIndex);
 
 protected:
 	void updateButtons(bool);

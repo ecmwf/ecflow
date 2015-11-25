@@ -41,6 +41,8 @@ AbstractSearchLine::AbstractSearchLine(QWidget* parent) : QWidget(parent)
 	connect(closeTb_,SIGNAL(clicked()),
 		this, SLOT(slotClose()));
 
+	connect(matchModeCb_,SIGNAL(currentIndexChanged(int)),
+		this, SLOT(matchModeChanged(int)));
 
 	nextTb_->setDefaultAction(actionNext_);
 	prevTb_->setDefaultAction(actionPrev_);
@@ -68,6 +70,8 @@ AbstractSearchLine::AbstractSearchLine(QWidget* parent) : QWidget(parent)
 	menu->addAction(actionCaseSensitive_);
 	menu->addAction(actionWholeWords_);
 	optionsTb_->setMenu(menu);
+
+    matchModeChanged(1);  // dummy call to initialise the 'whole words' option state
 }
 
 AbstractSearchLine::~AbstractSearchLine()
@@ -129,4 +133,12 @@ void AbstractSearchLine::on_actionCaseSensitive__toggled(bool b)
 void AbstractSearchLine::on_actionWholeWords__toggled(bool b)
 {
     wholeWords_ = b;
+}
+
+void AbstractSearchLine::matchModeChanged(int notUsed)
+{
+    if(matchModeCb_->currentMatchMode() == StringMatchMode::ContainsMatch)
+        actionWholeWords_->setEnabled(true);
+    else
+        actionWholeWords_->setEnabled(false);
 }
