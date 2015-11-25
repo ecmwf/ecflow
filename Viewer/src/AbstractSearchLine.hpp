@@ -42,6 +42,7 @@ protected:
 	bool status_;
 	bool caseSensitive_;
 	bool wholeWords_;
+    StringMatchMode matchMode_;
 
 	QColor   oriColour_;
 	QColor   redColour_;

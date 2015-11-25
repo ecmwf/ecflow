@@ -32,45 +32,96 @@ void PlainTextSearchLine::setEditor(QPlainTextEdit *e)
 	editor_=e;
 }
 
+
+bool PlainTextSearchLine::findString (QString str, QTextDocument::FindFlags extraFlags, bool gotoStartOfWord, int iteration)
+{
+	QTextDocument::FindFlags flags = findFlags() | extraFlags;
+
+	QTextCursor cursor(editor_->textCursor());
+
+	if (gotoStartOfWord)	// go to start of word?
+		cursor.movePosition(QTextCursor::StartOfWord);
+
+	editor_->setTextCursor(cursor);
+
+	bool found = false;
+
+	switch (matchModeCb_->currentMatchMode())
+	{
+		case StringMatchMode::ContainsMatch:
+		{
+			found = editor_->find(str, flags);
+			break;
+		}
+		case StringMatchMode::WildcardMatch:
+		{
+			QRegExp regexp(str);
+			Qt::CaseSensitivity cs = (flags & QTextDocument::FindCaseSensitively) ? Qt::CaseSensitive : Qt::CaseInsensitive;
+			regexp.setCaseSensitivity(cs);
+			regexp.setPatternSyntax(QRegExp::Wildcard);
+
+			cursor = editor_->document()->find(regexp, editor_->textCursor(), flags);  // perform the search
+
+			if (!cursor.isNull())
+				editor_->setTextCursor(cursor);  // mark the selection of the match
+
+			found = (!cursor.isNull());
+			break;
+			break;
+		}
+		case StringMatchMode::RegexpMatch:
+		{
+			QRegExp regexp(str);
+			Qt::CaseSensitivity cs = (flags & QTextDocument::FindCaseSensitively) ? Qt::CaseSensitive : Qt::CaseInsensitive;
+			regexp.setCaseSensitivity(cs);
+
+			cursor = editor_->document()->find(regexp, editor_->textCursor(), flags);  // perform the search
+
+			if (!cursor.isNull())
+				editor_->setTextCursor(cursor);  // mark the selection of the match
+
+			found = (!cursor.isNull());
+			break;
+		}
+		default:
+		{
+			break;
+		}
+	}
+
+	// if not found, then go back to the top and try again (wraparound)
+	if (!found && (iteration == 0))
+	{
+		cursor=editor_->textCursor();
+		if (extraFlags & QTextDocument::FindBackward)
+			cursor.movePosition(QTextCursor::End);
+		else
+			cursor.movePosition(QTextCursor::Start);
+		editor_->setTextCursor(cursor);
+		found = findString(str, extraFlags, gotoStartOfWord, 1); // iteration=1 to avoid infinite wraparound!
+	}
+
+	return (found);
+}
+
+
 void PlainTextSearchLine::slotFind(QString txt)
 {
 	if(!editor_)
 		return;
 
-	QTextDocument::FindFlags flags = findFlags();
-
-	QTextCursor cursor(editor_->textCursor());
-	cursor.movePosition(QTextCursor::StartOfWord);
-	editor_->setTextCursor(cursor);
-
-	if(editor_->find(txt, flags)==false)
-	{
-      	cursor=editor_->textCursor();
-		cursor.movePosition(QTextCursor::Start);
-		editor_->setTextCursor(cursor);
-		updateButtons(editor_->find(txt, flags));
-	}
-	else
-	{
-		updateButtons(true);
-	}
+	bool found = findString(txt, 0, true, 0);
+	updateButtons(found);
 }
 
 void PlainTextSearchLine::slotFindNext()
 {
 	if(!editor_)
-			return;
+		return;
 
-	if(status_==true)
+	if(status_ == true)
 	{
-		QTextDocument::FindFlags flags(findFlags());
-		if(editor_->find(searchLine_->text(), flags) == false)
-		{
-			QTextCursor cursor(editor_->textCursor());
-			cursor.movePosition(QTextCursor::Start);
-			editor_->setTextCursor(cursor);
-			editor_->find(searchLine_->text(), flags);
-		}
+		findString(searchLine_->text(), 0, false, 0);
 	}
 }
 
@@ -81,14 +132,7 @@ void PlainTextSearchLine::slotFindPrev()
 
 	if(status_==true)
 	{
-		QTextDocument::FindFlags flags = findFlags() | QTextDocument::FindBackward;
-		if(editor_->find(searchLine_->text(),flags) == false)
-		{
-			QTextCursor cursor(editor_->textCursor());
-			cursor.movePosition(QTextCursor::End);
-			editor_->setTextCursor(cursor);
-			editor_->find(searchLine_->text(),flags);
-		}
+		findString(searchLine_->text(), QTextDocument::FindBackward, false, 0);
 	}
 }
 

@@ -14,7 +14,7 @@
 
 #include "AbstractSearchLine.hpp"
 
-class  PlainTextSearchLine : public AbstractSearchLine
+class PlainTextSearchLine : public AbstractSearchLine
 {
 	Q_OBJECT
 
@@ -27,12 +27,12 @@ public Q_SLOTS:
 	void slotFind(QString);
 	void slotFindNext();
 	void slotFindPrev();
-	void slotFindNext(bool) { slotFindNext();}
+	void slotFindNext(bool) {slotFindNext();}
 	void slotFindPrev(bool) {slotFindPrev();}
 
 protected:
-    QTextDocument::FindFlags findFlags();
-
+	QTextDocument::FindFlags findFlags();
+	bool findString (QString str, QTextDocument::FindFlags extraFlags, bool gotoStartOfWord, int iteration);
 	QPlainTextEdit* editor_;
 
 };
