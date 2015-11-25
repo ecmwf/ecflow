@@ -14,6 +14,7 @@
 #include <string>
 #include <vector>
 
+#include <QColor>
 #include <QStringList>
 #include <QMap>
 
@@ -107,6 +108,7 @@ public:
 
 	QString queryString(bool update=true);
 	QString extQueryString(bool) const;
+	QString extQueryHtml(bool multi,QColor bgCol,int firstColWidth) const;
 	void buildQueryString();
 
 	int maxNum() const {return maxNum_;}
@@ -122,10 +124,20 @@ public:
 	QStringList flagSelection() const;
 	QStringList attrGroupSelection() const;
 
+	std::vector<std::string> typeSelectionVec() const;
+	std::vector<std::string>stateSelectionVec() const;
+	std::vector<std::string>flagSelectionVec() const;
+	std::vector<std::string>attrGroupSelectionVec() const;
+
 	void setTypeSelection(QStringList);
 	void setStateSelection(QStringList);
 	void setFlagSelection(QStringList);
 	void setAttrGroupSelection(QStringList);
+
+	void setTypeSelection(const std::vector<std::string>&);
+	void setStateSelection(const std::vector<std::string>&);
+	void setFlagSelection(const std::vector<std::string>&);
+	void setAttrGroupSelection(const std::vector<std::string>&);
 
 	static QStringList typeTerms() {return typeTerms_;}
 	static QStringList stateTerms() {return stateTerms_;}
@@ -138,6 +150,8 @@ public:
 
 protected:
 	void checkDir();
+	std::vector<std::string> lstToVec(QStringList) const;
+	QStringList vecToLst(const std::vector<std::string>&) const;
 
 	std::string name_;
 	bool advanced_;	

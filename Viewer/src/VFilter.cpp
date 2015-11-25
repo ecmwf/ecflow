@@ -60,6 +60,16 @@ bool VParamSet::isSet(const std::string &name) const
 	return false;
 }
 
+QStringList VParamSet::currentAsList() const
+{
+	QStringList lst;
+	for(std::set<VParam*>::const_iterator it=current_.begin(); it != current_.end(); ++it)
+	{
+		lst << QString::fromStdString((*it)->strName());
+	}
+	return lst;
+}
+
 void VParamSet::current(const std::set<std::string>& names)
 {
 	current_.clear();
@@ -71,6 +81,19 @@ void VParamSet::current(const std::set<std::string>& names)
 
 	Q_EMIT changed();
 }
+
+void VParamSet::current(QStringList names)
+{
+	current_.clear();
+	for(std::set<VParam*>::const_iterator it=all_.begin(); it != all_.end(); ++it)
+	{
+			if(names.contains(QString::fromStdString((*it)->strName())))
+				current_.insert(*it);
+	}
+
+	Q_EMIT changed();
+}
+
 
 void VParamSet::writeSettings(VSettings *vs)
 {

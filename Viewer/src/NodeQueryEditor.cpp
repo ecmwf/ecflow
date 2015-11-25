@@ -100,14 +100,16 @@ NodeQueryEditor::NodeQueryEditor(QWidget *parent) :
     // Query display
 	//-------------------------
 
+
 	//QFont f("Courier");
-	QFont f("Monospace");
+	/*QFont f("Monospace");
 	f.setStyleHint(QFont::TypeWriter);
 	f.setFixedPitch(true);
 	f.setPointSize(10);
 	f.setStyleStrategy(QFont::PreferAntialias);
-	queryTe_->setFont(f);
+	queryTe_->setFont(f);*/
 
+	QFont f;
 	QFontMetrics fm(f);
 
 	queryTe_->setFixedHeight((fm.height()+2)*3+6);
@@ -507,6 +509,8 @@ void NodeQueryEditor::slotFlagListChanged()
 		query_->setFlagSelection(flagList_->selection());
 		updateQueryTe();
 		checkGuiState();
+
+		qDebug() << "flag changed" << query_->queryString();
 	}
 }
 
@@ -552,7 +556,13 @@ void NodeQueryEditor::updateQueryTe()
 	else if(lst.count()==1)
 		q=lst.front();*/
 
-	setQueryTe(query_->extQueryString(true));
+
+	qDebug() << "udpate" << query_->queryString();
+	qDebug() << "udpate" << query_->extQueryString(false);
+	qDebug() << "udpate" << query_->extQueryString(true);
+
+	QColor bg(241,241,241);
+	setQueryTe(query_->extQueryHtml(true,bg,65));
 }
 
 void NodeQueryEditor::setQueryTe(QString s)
@@ -565,7 +575,12 @@ void NodeQueryEditor::setQueryTe(QString s)
 	if(oldRowNum==0 && !queryTe_->toPlainText().isEmpty())
 		oldRowNum=1;
 
-	queryTe_->setPlainText(s);
+	queryTe_->setHtml(s);
+
+	//for(QTextBlock it = queryTe->document()->begin(); it != queruTe_->document()->end(); it = it.next())
+	//{
+	//	QTextBlockFormat f=it.textBlockFormat();
+	//}
 
 	if(!queryTeCanExpand_)
 	{

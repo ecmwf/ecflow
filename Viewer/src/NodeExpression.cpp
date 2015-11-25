@@ -14,6 +14,7 @@
 
 #include "Str.hpp"
 #include "Node.hpp"
+#include "Submittable.hpp"
 
 #include "NodeExpression.hpp"
 #include "UserMessage.hpp"
@@ -61,6 +62,15 @@ bool NodeExpressionParser::isUserLevel(const std::string &str)
 bool NodeExpressionParser::isNodeAttribute(const std::string &str)
 {
     if (str == "has_triggers" || str == "has_time" || str == "has_date" || str == "locked")
+        return true;
+    else
+        return false;
+}
+
+bool NodeExpressionParser::isNodeFlag(const std::string &str)
+{
+    if (str == "is_late" || str == "has_message" ||
+    	str == "is_rerun" || str == "is_waiting" || str == "is_zombie")
         return true;
     else
         return false;
@@ -228,6 +238,14 @@ BaseNodeCondition *NodeExpressionParser::parseExpression(bool caseSensitiveStrin
                     NodeAttributeCondition *attrCond = new NodeAttributeCondition(QString::fromStdString(*i_));
                     operandStack.push_back(attrCond);
                     result = attrCond;
+                    updatedOperands = true;
+                }
+                // node flag
+                else if (isNodeFlag(*i_))
+                {
+                    NodeFlagCondition *flagCond = new NodeFlagCondition(QString::fromStdString(*i_));
+                    operandStack.push_back(flagCond);
+                    result = flagCond;
                     updatedOperands = true;
                 }
 
@@ -540,7 +558,7 @@ bool StringMatchCondition::execute(VNode *node)
     }
     else
         return false;
-};
+}
 
 // -----------------------------------------------------------------
 
@@ -577,14 +595,50 @@ bool NodeAttributeCondition::execute(VNode* vnode)
     }
 
     return false;
-};
+}
 
+// -----------------------------------------------------------------
+
+bool NodeFlagCondition::execute(VNode* vnode)
+{
+	if (vnode->isServer())
+	{
+		return false;
+	}
+	else //if(nodeInfo->isNode())
+	{
+		if(nodeFlagName_ == "is_zombie")
+			return vnode->isFlagSet(ecf::Flag::ZOMBIE);
+
+		if(nodeFlagName_ == "has_message")
+			return vnode->isFlagSet(ecf::Flag::MESSAGE);
+
+		else if(nodeFlagName_ == "is_late")
+			return vnode->isFlagSet(ecf::Flag::LATE);
+
+		else if(nodeFlagName_ == "is_rerun")
+		{
+			node_ptr node=vnode->node();
+			if(!node.get()) return false;
+
+			if(Submittable* s = node->isSubmittable())
+			{
+				return (s->try_no() > 1);
+			}
+			return false;
+		}
+		else if(nodeFlagName_ == "is_waiting")
+			return vnode->isFlagSet(ecf::Flag::WAIT);
+
+	}
+	return false;
+}
 
 WhatToSearchInOperand::WhatToSearchInOperand(std::string what, bool &attr)
 {
     what_ = what;
     searchInAttributes_ = attr;
-};
+}
 
 
 WhatToSearchInOperand::~WhatToSearchInOperand() {};

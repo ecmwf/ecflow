@@ -113,6 +113,17 @@ void TableNodeWidget::populateDockTitleBar(DashboardDockTitleWidget* tw)
 
 	//Sets the title
 	tw->slotUpdateTitle("<b>Table</b>");
+
+    QList<QAction*> acLst;
+    QAction* acFilterEdit=new QAction(this);
+    acFilterEdit->setIcon(QPixmap(":viewer/filter_edit.svg"));
+    acFilterEdit->setToolTip("Edit filter ...");
+    acLst << acFilterEdit;
+
+    connect(acFilterEdit,SIGNAL(triggered()),
+    		filterW_,SLOT(slotEdit()));
+
+    tw->addActions(acLst);
 }
 
 

@@ -74,6 +74,8 @@ void NodeQueryEngine::runQuery(NodeQuery* query)
 	if(parser_)
 		delete parser_;
 
+	UserMessage::message(UserMessage::DBG, true, std::string("Query: " + query_->query().toStdString()));
+
 	parser_=NodeExpressionParser::parseWholeExpression(query_->query().toStdString(), query->caseSensitive());
 	if(parser_ == NULL)
 	{

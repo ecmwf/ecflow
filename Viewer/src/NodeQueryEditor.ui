@@ -321,7 +321,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QPlainTextEdit" name="queryTe_"/>
+      <widget class="QTextEdit" name="queryTe_"/>
      </item>
     </layout>
    </item>

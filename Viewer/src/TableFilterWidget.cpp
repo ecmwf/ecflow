@@ -29,10 +29,6 @@ TableFilterWidget::TableFilterWidget(QWidget *parent) :
 	setupUi(this);
 
 	//queryTe_->setFixedHeight(18);
-
-	connect(editTb_,SIGNAL(clicked()),
-			this,SLOT(slotEdit()));
-
 }
 
 void TableFilterWidget::slotEdit()
@@ -46,6 +42,8 @@ void TableFilterWidget::slotEdit()
 	if(d.exec() == QDialog::Accepted)
 	{
 		filterDef_->setQuery(d.query());
+		qDebug() << "query" << d.query()->queryString();
+		qDebug() << "query" << filterDef_->query()->queryString();
 		qDebug() << "table query" << filterDef_->query()->extQueryString(false);
 		//queryTe_->setPlainText(filterDef_->query()->extQueryString());
 	}
@@ -93,19 +91,27 @@ void TableFilterWidget::slotDefChanged()
 	else if(lst.count()==1)
 		q=lst.front();*/
 
-	queryTe_->setPlainText(filterDef_->query()->extQueryString(false));
+	QColor bg(240,240,240);
+	queryTe_->setHtml(filterDef_->query()->extQueryHtml(false,bg,0));
 }
 
 void TableFilterWidget::slotHeaderFilter(QString column,QPoint globalPos)
 {
+	NodeQuery *query=filterDef_->query();
+
 	if(column == "status")
 	{
 		QMenu *menu=new QMenu(this);
 		//stateFilterMenu_=new StateFilterMenu(menuState,filter_->menu());
-		VParamFilterMenu* sfm= new VParamFilterMenu(menu,filterDef_->nodeState(),
-					VParamFilterMenu::ColourDecor);
 
-		menu->exec(globalPos);
+		NodeStateFilter sf;
+		sf.current(query->stateSelection());
+		VParamFilterMenu* sfm= new VParamFilterMenu(menu,&sf,VParamFilterMenu::ColourDecor);
+
+		if(menu->exec(globalPos) != NULL)
+		{
+			query->setStateSelection(sf.currentAsList());
+		}
 
 		delete menu;
 	}

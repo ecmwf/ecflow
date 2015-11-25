@@ -10,6 +10,8 @@
 
 #include "NodeQuery.hpp"
 
+#include <QDebug>
+
 #include "VSettings.hpp"
 
 StringMatchMode::Mode NodeQueryStringOption::defaultMatchMode_=StringMatchMode::WildcardMatch;
@@ -150,7 +152,7 @@ NodeQuery::NodeQuery(const std::string& name) :
 	selectOptions_["type"]=new NodeQuerySelectOption("type");
 	selectOptions_["state"]=new NodeQuerySelectOption("state");
 	selectOptions_["flag"]=new NodeQuerySelectOption("flag");
-	selectOptions_["attr"]=new NodeQuerySelectOption("flag");
+	selectOptions_["attr"]=new NodeQuerySelectOption("attr");
 }
 
 NodeQuery::~NodeQuery()
@@ -225,14 +227,29 @@ QStringList NodeQuery::typeSelection() const
 	return selectOptions_.value("type")->selection_;
 }
 
+std::vector<std::string> NodeQuery::typeSelectionVec() const
+{
+	return lstToVec(selectOptions_.value("type")->selection_);
+}
+
 QStringList NodeQuery::stateSelection() const
 {
 	return selectOptions_.value("state")->selection_;
 }
 
+std::vector<std::string> NodeQuery::stateSelectionVec() const
+{
+	return lstToVec(selectOptions_.value("state")->selection_);
+}
+
 QStringList NodeQuery::flagSelection() const
 {
 	return selectOptions_["flag"]->selection_;
+}
+
+std::vector<std::string> NodeQuery::flagSelectionVec() const
+{
+	return lstToVec(selectOptions_["flag"]->selection_);
 }
 
 NodeQueryStringOption*  NodeQuery::stringOption(QString name) const
@@ -248,14 +265,30 @@ QStringList NodeQuery::attrGroupSelection() const
 	return selectOptions_["attr"]->selection_;
 }
 
+std::vector<std::string> NodeQuery::attrGroupSelectionVec() const
+{
+	return lstToVec(selectOptions_["attr"]->selection_);
+}
+
 void NodeQuery::setTypeSelection(QStringList lst)
 {
 	selectOptions_["type"]->selection_=lst;
 }
 
+void NodeQuery::setTypeSelection(const std::vector<std::string>& vec)
+{
+	selectOptions_["type"]->selection_=vecToLst(vec);
+}
+
+
 void NodeQuery::setStateSelection(QStringList lst)
 {
 	selectOptions_["state"]->selection_=lst;
+}
+
+void NodeQuery::setStateSelection(const std::vector<std::string>& vec)
+{
+	selectOptions_["state"]->selection_=vecToLst(vec);
 }
 
 void NodeQuery::setFlagSelection(QStringList lst)
@@ -263,9 +296,19 @@ void NodeQuery::setFlagSelection(QStringList lst)
 	selectOptions_["flag"]->selection_=lst;
 }
 
+void NodeQuery::setFlagSelection(const std::vector<std::string>& vec)
+{
+	selectOptions_["flag"]->selection_=vecToLst(vec);
+}
+
 void NodeQuery::setAttrGroupSelection(QStringList lst)
 {
 	selectOptions_["attr"]->selection_=lst;
+}
+
+void NodeQuery::setAttrGroupSelection(const std::vector<std::string>& vec)
+{
+	selectOptions_["attr"]->selection_=vecToLst(vec);
 }
 
 QString NodeQuery::queryString(bool update)
@@ -311,12 +354,14 @@ void NodeQuery::buildQueryString()
 		statePart="(" + stateSelection().join(" or ") + ")";
 	}
 
-	//Flage
+	//Flag
 	QString flagPart;
 	if(flagSelection().count() >0)
 	{
 		flagPart="(" + flagSelection().join(" or ") + ")";
 	}
+
+	qDebug() << "flag selection" << flagSelection() << flagPart;
 
 	//Attributes
 	QString attrPart;
@@ -344,6 +389,8 @@ void NodeQuery::buildQueryString()
 			attrPart+=" or ";
 		attrPart+=grPart;
 	}
+
+	qDebug() << "attr selection" << attrPart;
 
 	if(!attrPart.isEmpty())
 	{
@@ -378,6 +425,9 @@ void NodeQuery::buildQueryString()
 		extQuery_["state"]=statePart;
 	}
 
+	qDebug() << "flagPart " << flagPart;
+	qDebug() << "  --> " << query_;
+
 	if(!flagPart.isEmpty())
 	{
 		if(!query_.isEmpty())
@@ -386,6 +436,7 @@ void NodeQuery::buildQueryString()
 		query_+=flagPart;
 		extQuery_["flag"]=flagPart;
 	}
+	qDebug() << "  --> " << query_;
 
 	if(!attrPart.isEmpty())
 	{
@@ -395,6 +446,8 @@ void NodeQuery::buildQueryString()
 		query_+=attrPart;
 		extQuery_["attr"]=attrPart;
 	}
+
+	qDebug() << "  --> " << query_;
 
 	//Extended query
 	QString scopePart;
@@ -424,13 +477,15 @@ void NodeQuery::buildQueryString()
 			opPart+="case_insensitive";
 	}
 	extQuery_["options"]=opPart;
+
+	qDebug() << "  --> " << query_;
 }
 
 QString NodeQuery::extQueryString(bool multi) const
 {
 	QString str;
 
-	if(multi)
+	/*if(multi)
 	{
 		if(!extQuery_.value("scope").isEmpty())
 			str+="scope:   " + extQuery_.value("scope");
@@ -457,7 +512,41 @@ QString NodeQuery::extQueryString(bool multi) const
 				str+="\n";
 			str+="options: " + extQuery_.value("options");
 		}
-	}
+	}*/
+	if(multi)
+	{
+			str="<table width=\"100%\" cellpadding=\"6\">";
+			if(!extQuery_.value("scope").isEmpty())
+				str+="<tr><td width=\"60\" bgcolor=\"#EEEEEE\">scope</td><td bgcolor=\"#EEEEEE\">" + extQuery_.value("scope") + "</tr></td>";
+
+			QStringList nodeParts;
+			nodeParts << "node" << "type" << "state" << "flag";
+			Q_FOREACH(QString s,nodeParts)
+			{
+				if(!extQuery_.value(s).isEmpty())
+				{
+					//if(!str.isEmpty() && !str.contains("<td>nodes"))
+					//	str+="<br>";
+
+					if(!str.contains("nodes</td>"))
+						str+="<tr><td bgcolor=\"#EEEEEE\">nodes</td><td bgcolor=\"#EEEEEE\">"+ extQuery_.value(s);
+					else
+						str+=" and<br>         " + extQuery_.value(s);
+				}
+			}
+
+			if(str.contains("<td>nodes"))
+				str+="</td></tr>";
+
+			if(!extQuery_.value("options").isEmpty())
+			{
+				//if(!str.isEmpty())
+				//	str+="\n";
+				str+="<tr><td bgcolor=\"#EEEEEE\">options</td><td bgcolor=\"#EEEEEE\">" + extQuery_.value("options") +"</td></tr>";
+			}
+
+			str+="</table>";
+		}
 
 	else
 	{
@@ -471,7 +560,7 @@ QString NodeQuery::extQueryString(bool multi) const
 			if(!extQuery_.value(s).isEmpty())
 			{
 				if(!str.isEmpty() && !str.contains("nodes: "))
-					str+=" ";
+					str+=" | ";
 
 				if(!str.contains("nodes: "))
 					str+="nodes: "+ extQuery_.value(s);
@@ -483,7 +572,7 @@ QString NodeQuery::extQueryString(bool multi) const
 		if(!extQuery_.value("options").isEmpty())
 		{
 			if(!str.isEmpty())
-				str+=" ";
+				str+=" | ";
 			str+="options: " + extQuery_.value("options");
 		}
 	}
@@ -491,6 +580,100 @@ QString NodeQuery::extQueryString(bool multi) const
 	return str;
 }
 
+
+QString NodeQuery::extQueryHtml(bool multi,QColor bgCol,int firstColWidth) const
+{
+	QString str;
+	QString bg=bgCol.name();
+
+	if(multi)
+	{
+			str="<table width=\"100%\" cellPadding=\"2\">";
+			if(!extQuery_.value("scope").isEmpty())
+				str+="<tr><td width=\"" + QString::number(firstColWidth) + "\" bgcolor=\"" + bg +
+				       "\">scope</td><td bgcolor=\"" + bg + "\">" + extQuery_.value("scope") + "</tr></td>";
+
+			QStringList nodeParts;
+			nodeParts << "node" << "type" << "state" << "flag";
+			Q_FOREACH(QString s,nodeParts)
+			{
+				if(!extQuery_.value(s).isEmpty())
+				{
+					//if(!str.isEmpty() && !str.contains("<td>nodes"))
+					//	str+="<br>";
+
+					if(!str.contains("nodes</td>"))
+						str+="<tr><td bgcolor=\"" + bg + "\">nodes</td><td bgcolor=\"" + bg + "\">"+ extQuery_.value(s);
+					else
+						str+=" and<br> " + extQuery_.value(s);
+				}
+			}
+
+			if(str.contains("nodes</td>"))
+				str+="</td></tr>";
+
+			if(!extQuery_.value("options").isEmpty())
+			{
+				//if(!str.isEmpty())
+				//	str+="\n";
+				str+="<tr><td bgcolor=\"" + bg + "\">options</td><td bgcolor=\"" + bg + "\">" + extQuery_.value("options") +"</td></tr>";
+			}
+
+			str+="</table>";
+		}
+
+	else
+	{
+		QString css;
+		css = "<style type=\"text/css\">";
+		css += "table.tbl {border-width: 1px;border-style: solid;border-color: \"#AAAAAA\";margin-top: 0px;margin-bottom: 0px;color: black;}";
+		//css += "table.tbl td {padding: 3px;}";
+		//css += "table.tbl th {padding: 3px;}";
+		css+="</style>";
+
+		QString bgDark=bgCol.darker(110).name();
+		str="<table cellSpacing=\"0\" class=\"tbl\">";
+
+		if(!extQuery_.value("scope").isEmpty())
+			str+="<tr><td bgcolor=\"" + bgDark + "\">&nbsp;scope&nbsp;</td>" +
+			"<td bgcolor=\"" + bg + "\">&nbsp;" + extQuery_.value("scope") + "&nbsp;</td><td>&nbsp;&nbsp;</td>";
+
+		QStringList nodeParts;
+		nodeParts << "node" << "type" << "state" << "flag";
+		Q_FOREACH(QString s,nodeParts)
+		{
+			if(!extQuery_.value(s).isEmpty())
+			{
+				//if(!str.isEmpty() && !str.contains("nodes: "))
+				//	str+=" | ";
+
+				if(!str.contains("nodes"))
+					str+="&nbsp;<td  bgcolor=\"" + bgDark + "\">&nbsp;nodes&nbsp;</td><td bgcolor=\"" + bg + "\">&nbsp;"+ extQuery_.value(s);
+				else
+					str+=" and " + extQuery_.value(s);
+			}
+		}
+
+		if(str.contains("nodes</td>"))
+			str+="&nbsp</td></td><td>&nbsp;&nbsp;</td>";
+
+		if(!extQuery_.value("options").isEmpty())
+		{
+			//if(!str.isEmpty())
+			//	str+=" | ";
+			str+="&nbsp;<td bgcolor=\"" + bgDark + "\"> &nbsp;options&nbsp;</td><td bgcolor=\"" + bg + "\">&nbsp;" + extQuery_.value("options") + "&nbsp;</td>";
+		}
+
+		if(str.contains("<tr>"))
+			str+="</tr>";
+
+		str+="</table>";
+
+		str=css+str;
+	}
+
+	return str;
+}
 
 void NodeQuery::load(VSettings* vs)
 {
@@ -559,5 +742,20 @@ void NodeQuery::save(VSettings* vs)
     //vs->put("query",query_.toStdString());
 }
 
+std::vector<std::string> NodeQuery::lstToVec(QStringList lst) const
+{
+	std::vector<std::string> vec;
+	Q_FOREACH(QString s,lst)
+		vec.push_back(s.toStdString());
+	return vec;
+}
+
+QStringList NodeQuery::vecToLst(const std::vector<std::string>& vec) const
+{
+	QStringList lst;
+	for(std::vector<std::string>::const_iterator it=vec.begin(); it != vec.end(); ++it)
+		lst << QString::fromStdString(*it);
+	return lst;
+}
 
 

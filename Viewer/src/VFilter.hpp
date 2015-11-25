@@ -14,6 +14,7 @@
 #include <vector>
 
 #include <QObject>
+#include <QStringList>
 
 #include "VParam.hpp"
 
@@ -36,7 +37,9 @@ public:
 	virtual ~VParamSet() {};
 
 	const std::set<VParam*>& current() const {return current_;}
+	QStringList currentAsList() const;
 	void current(const std::set<std::string>&);
+	void current(QStringList);
 	const std::set<VParam*>& all() const {return all_;}
 
 	bool isEmpty() const {return current_.empty();}

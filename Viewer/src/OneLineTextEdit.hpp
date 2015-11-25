@@ -11,9 +11,9 @@
 #ifndef VIEWER_SRC_ONELINETEXTEDIT_HPP_
 #define VIEWER_SRC_ONELINETEXTEDIT_HPP_
 
-#include <QPlainTextEdit>
+#include <QTextEdit>
 
-class OneLineTextEdit : public QPlainTextEdit
+class OneLineTextEdit : public QTextEdit
 {
 public:
 	OneLineTextEdit(QWidget* parent=0);

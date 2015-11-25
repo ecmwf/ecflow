@@ -51,7 +51,8 @@
     <file alias="favourite.svg">../images/favourite.svg</file>
     <file alias="favourite_empty.svg">../images/favourite_empty.svg</file>
     <file alias="filesave.svg">../images/filesave.svg</file>
-    <file alias="filter_decor.svg">../images/filter_decor.svg</file>
+    <file alias="filter_decor.svg">../images/filter_decor.svg</file> 
+    <file alias="filter_edit.svg">../images/filter_edit.svg</file>
     <file alias="filter.svg">../images/filter.svg</file>
     <file alias="overview.svg">../images/overview.svg</file>
     <file alias="job.svg">../images/job.svg</file>

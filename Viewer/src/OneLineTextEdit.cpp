@@ -13,10 +13,11 @@
 #include "Highlighter.hpp"
 
 #include <QApplication>
+#include <QDebug>
 #include <QStyle>
 #include <QStyleOptionFrameV3>
 
-OneLineTextEdit::OneLineTextEdit(QWidget* parent) :  QPlainTextEdit(parent)
+OneLineTextEdit::OneLineTextEdit(QWidget* parent) :  QTextEdit(parent)
 {
 	setReadOnly(true);
 	setWordWrapMode(QTextOption::NoWrap);
@@ -24,17 +25,25 @@ OneLineTextEdit::OneLineTextEdit(QWidget* parent) :  QPlainTextEdit(parent)
 	setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 	setSizePolicy(QSizePolicy::Preferred,QSizePolicy::Fixed);
 
-	QSize s=sizeHint();
-	setFixedHeight(s.height());
+	document()->setDocumentMargin(0);
+
+	QFont f;
+	QFontMetrics fm(f);
+
+	int h=fm.height()+fm.leading() + 1 +6;
+
+	setFixedHeight(h);
 
 	Highlighter* ih=new Highlighter(document(),"query");
 }
 
 QSize OneLineTextEdit::sizeHint() const
 {
-    QFontMetrics fm(font());
+    return QTextEdit::sizeHint();
+	/*
+	QFontMetrics fm(font());
     QStyleOptionFrameV3 opt;
-    QString text = document()->toPlainText();
+    QString text = document()->toHtml();
 
     int h = qMax(fm.height(), 14) + 4;
     int w = fm.width(text) + 4;
@@ -46,7 +55,7 @@ QSize OneLineTextEdit::sizeHint() const
         &opt,
         QSize(w, h).expandedTo(QApplication::globalStrut()),
         this
-    );
+    );*/
 }
 
 

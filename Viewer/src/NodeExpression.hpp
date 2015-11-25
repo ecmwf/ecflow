@@ -42,6 +42,7 @@ public:
     static std::string typeName(const NodeType);
     static bool        isUserLevel(const std::string &str);
     static bool        isNodeAttribute(const std::string &str);
+    static bool        isNodeFlag(const std::string &str);
     static bool        isWhatToSearchIn(const std::string &str, bool &isAttribute);
 
 private:
@@ -291,6 +292,24 @@ private:
     QString nodeAttrName_;
 };
 
+// -----------------------------------------------------------------
+
+// ------------------------
+// Node attribute condition
+// ------------------------
+
+class NodeFlagCondition : public BaseNodeCondition
+{
+public:
+    explicit NodeFlagCondition(QString nodeFlagName) {nodeFlagName_ = nodeFlagName;};
+    ~NodeFlagCondition() {};
+
+    bool execute(VNode*);
+    std::string print() {return nodeFlagName_.toStdString();};
+
+private:
+    QString nodeFlagName_;
+};
 // -----------------------------------------------------------------
 
 // -----------------
