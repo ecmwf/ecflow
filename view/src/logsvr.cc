@@ -203,7 +203,7 @@ tmp_file logsvr::getfile(std::string name)
 ecf_dir *logsvr::getdir(const char* name)
 {
 	if(soc_ < 0)
-		return 0;
+	  return 0;
 
 	write(soc_,"list ",5);	
 	write(soc_,name,strlen(name));
@@ -221,23 +221,22 @@ ecf_dir *logsvr::getdir(const char* name)
 		if( (s = new ecf_dir()))
 		{
 		  s->next = 0x0;
-			char name[2048];
-			sscanf(buf,"%d %d %d %d %d %d %d %s",
-			       & s->mode,
-			       & s->uid,
-			       & s->gid,
-			       & s->size,
-			       & s->atime,
-			       & s->mtime,
-			       & s->ctime,
-			       name);
-				
-			s->name_ = strdup(name);
-			// ecf_list_add(&dir,s);
-			if (dir) {
-			  s->next = dir->next;
-			  dir->next = s;
-			} else dir = s;
+		  char name[2048];
+		  sscanf(buf,"%d %d %d %d %d %d %d %s",
+			 & s->mode,
+			 & s->uid,
+			 & s->gid,
+			 & s->size,
+			 & s->atime,
+			 & s->mtime,
+			 & s->ctime,
+			 name);
+		  
+		  s->name_ = strdup(name);
+		  if (dir) {
+		    s->next = dir->next;
+		    dir->next = s;
+		  } else dir = s;
 		}
 	}
 
