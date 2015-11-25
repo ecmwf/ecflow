@@ -47,3 +47,7 @@ python $WK/build_scripts/nightly/load.py
 # Start the viewer
 # =======================================================================
 ecflowview &
+
+module load ecflow/4.1.0-develop
+ecflow_ui &
+

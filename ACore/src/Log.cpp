@@ -329,7 +329,7 @@ void LogImpl::append(const std::string& message)
 void LogImpl::check_file_write(const std::string& message) const
 {
    bool file_is_good = file_.good();
-   if (!file_is_good) cout << "LogImpl::append: Could not write to log file! File system full?" << endl;
+   if (!file_is_good) cout << "LogImpl::append: Could not write to log file! File system full? Try --log=flush !" << endl;
    if (LogToCout::ok() || !file_is_good) {
       Indentor::indent(cout) << message << endl;
    }

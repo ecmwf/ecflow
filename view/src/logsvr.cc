@@ -134,7 +134,6 @@ void logsvr::connect(std::string host,int port)
 	}
 	::alarm(0);
 	sigaction(SIGALRM, &old, &sa);
-	
 }
 
 logsvr::~logsvr()

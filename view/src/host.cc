@@ -15,6 +15,8 @@
 
 #include <stdarg.h>
 #include <stdio.h>
+#include <iostream> // shared_ptr
+#include <memory>
 #include <unistd.h>
 #include <string>
 #include <list>
@@ -384,19 +386,23 @@ tmp_file ehost::jobcheck( node& n, const std::string &cmd )
      if (n.__node__()->get_node()) 
        n.__node__()->get_node()->variableSubsitution(subcmd);
    std::string check = "sh " + subcmd;
-   command(check);
-   return tmp_file(stat.c_str(), false);
+
+   // tmp_file out(NULL);
+   char *tmp = tmpnam("ecf_checkXXXX");
+   command(check + " > " + tmp);
+   return tmp_file(tmp);
+   // return tmp_file(stat.c_str(), false);
 }
 
 tmp_file host::jobstatus( node& n, const std::string &cmd )
 {
-   return tmp_file(0);
+   return tmp_file(0x0);
 }
 
 tmp_file ehost::jobstatus( node& n, const std::string &cmd )
 {
    command(clientName, "--status", n.full_name().c_str(), 0x0);
-   return tmp_file(0);
+   return tmp_file(0x0);
 }
 
 bool host::zombies( int mode, const char* name )
@@ -487,7 +493,7 @@ bool ehost::zombies( int mode, const char* name )
    return true;
 }
 
-void ehost::dir( node& n, const char* path, lister<ecf_dir>& l )
+void host::set_loghost(node& n)
 {
    loghost_ = n.variable("ECF_LOGHOST", true);
    logport_ = n.variable("ECF_LOGPORT");
@@ -495,23 +501,72 @@ void ehost::dir( node& n, const char* path, lister<ecf_dir>& l )
       loghost_ = n.variable("LOGHOST", true);
       logport_ = n.variable("LOGPORT");
    }
+   /* dynamic submission with load balacing may lead to 
+      ECF_LOGHOST incorrect: let's fix that */
+   std::string host =  n.variable("SCHOST", true);   
+   std::string bkup   =  n.variable("SCHOST_BKUP", true);
+   if (bkup == ecf_node::none()) { /* ECMWF specific below; a better way? */
+     if (host == "cca")      bkup = "ccb";
+     else if (host == "ccb") bkup = "cca";
+   }
+   if (bkup == ecf_node::none()) return; 
+
+   std::string rid =  n.variable("ECF_RID");
+   if (rid == ecf_node::none()) return; 
+
+   bool use_altern = (rid.find(bkup) != std::string::npos);  
+   if (!use_altern) return;
+
+   size_t beg = loghost_.find(host);
+   if (beg == std::string::npos) return; // not found
+   loghost_ = n.variable("ECF_LOGHOST", true).replace(beg, host.length(), bkup);
+   std::cout << "#MSG: using alternative loghost " + loghost_ << "\n";
+}
+
+void ehost::dir( node& n, const char* path, lister<ecf_dir>& l )
+{
+   set_loghost(n); 
    std::string::size_type pos = loghost_.find(n.variable("ECF_MICRO"));
    if (std::string::npos != pos) return;
    host::dir(n, path, l);
 }
 
+bool use_ecf_out_cmd(node&n, std::string path, lister<ecf_dir>* l, bool dir, 
+		     std::string& content)
+{
+  /* used in conjonction with, for example:
+     edit ECF_OUTPUT_CMD "/home/ma/map/bin/trimurti-out.sh -u %USER:0% -h %SCHOST:0% -j %ECF_JOB:0% -o %ECF_JOBOUT:0% -r %ECF_RID:0%" 
+  */
+  std::string cmd = n.variable("ECF_OUTPUT_CMD", true);
+  if (cmd == ecf_node::none()) return false;
+  if (cmd.length() < 3) return false; // may be empty space characters, ignore cmd
+  if (!path.empty()) cmd += " -f " + path;
+  if (dir) cmd += " -d";
+  boost::shared_ptr<FILE> pipe(popen(cmd.c_str(), "r"), pclose);
+  if (!pipe) return false;
+  char line[4096];
+  while (!feof(pipe.get()))
+    if (fgets(line, 4096, pipe.get()) != NULL)
+      // if (dir && l) l->scan(line); else
+      content += line;
+  return true;
+}
+
 void host::dir( node& n, const char* path, lister<ecf_dir>& l )
 {
    gui::message("%s: fetching file list", this->name());
-   if (loghost_ != ecf_node::none()) {
-      logsvr the_log_server(loghost_, logport_);
+   std::string content;
+   if (use_ecf_out_cmd(n, path, &l, 1, content))
+     { } 
+   else if (loghost_ != ecf_node::none()) {
+      logsvr log_server(loghost_, logport_);
 
-      if (the_log_server.ok()) {
-         std::auto_ptr<ecf_dir> dir(the_log_server.getdir(path));
+      if (log_server.ok()) {
+         std::auto_ptr<ecf_dir> dir(log_server.getdir(path));
 
          if (dir.get()) {
             l.scan(dir.get());
-            return;
+            // return; // 20151115 add both remote + local?
          }
       }
    }
@@ -953,27 +1008,40 @@ int host::do_comp( node* into, node* from, const std::string& a, const std::stri
 {
    if (!into || !from) return 0;
    std::stringstream out;
-   out << "${COMPARE:=/home/ma/map/bin/compare.sh} " << from->full_name() << ":";
+   out << "${COMPARE:=/home/ma/map/bin/compare.sh} " 
+       << from->full_name() << ":";
    if (from->variable("ECF_NODE") != "(none)") {
-      out << from->variable("ECF_NODE") << ":" << from->variable("ECF_PORT") << ":"
-          << from->variable("ECF_LOGHOST", true) << ":" << from->variable("ECF_LOGPORT", true)
+      out << from->variable("ECF_NODE") << ":" 
+	  << from->variable("ECF_PORT") << ":"
+
+          << from->variable("ECF_LOGHOST", true) << ":" 
+	  << from->variable("ECF_LOGPORT", true)
+
           << ":" << from->variable("ECF_JOBOUT", true) << " \t";
    }
    else {
-      out << from->variable("SMSNODE") << ":" << from->variable("SMS_PROG") << ":"
-          << from->variable("SMSLOGHOST", true) << ":" << from->variable("SMSLOGPORT", true) << ":"
+      out << from->variable("SMSNODE") << ":" 
+	  << from->variable("SMS_PROG") << ":"
+
+          << from->variable("SMSLOGHOST", true) << ":" 
+	  << from->variable("SMSLOGPORT", true) << ":"
+
           << from->variable("SMSJOBOUT", true) << " \t";
    }
 
    out << into->full_name() << ":";
    if (into->variable("ECF_NODE") != "(none)") {
-      out << into->variable("ECF_NODE") << ":" << into->variable("ECF_PORT") << ":"
-          << into->variable("ECF_LOGHOST", true) << ":" << into->variable("ECF_LOGPORT", true)
+      out << into->variable("ECF_NODE") << ":" 
+	  << into->variable("ECF_PORT") << ":"
+          << into->variable("ECF_LOGHOST", true) << ":" 
+	  << into->variable("ECF_LOGPORT", true)
           << ":" << into->variable("ECF_JOBOUT", true) << " \t";
    }
    else {
-      out << into->variable("SMSNODE") << ":" << into->variable("SMS_PROG") << ":"
-          << into->variable("SMSLOGHOST", true) << ":" << into->variable("SMSLOGPORT", true) << ":"
+      out << into->variable("SMSNODE") << ":" 
+	  << into->variable("SMS_PROG") << ":"
+          << into->variable("SMSLOGHOST", true) << ":" 
+	  << into->variable("SMSLOGPORT", true) << ":"
           << into->variable("SMSJOBOUT", true) << " \t";
    }
    out << a << " \t" << b << "\n";
@@ -1070,12 +1138,7 @@ struct dup_slash { // INT-74
 
 tmp_file ehost::sfile( node& n, std::string name )
 {
-   loghost_ = n.variable("ECF_LOGHOST", true);
-   logport_ = n.variable("ECF_LOGPORT");
-   if (loghost_ == ecf_node::none()) {
-      loghost_ = n.variable("LOGHOST", true);
-      logport_ = n.variable("LOGPORT");
-   }
+  // set_loghost(n); 
    return host::sfile(n, name);
 }
 
@@ -1310,17 +1373,17 @@ tmp_file ehost::file(node& n, std::string name)
     error = "no output to be expected when TRYNO is 0!\n";
     return tmp_file(error);
   } else if (name != ecf_node::none()) { // Try logserver
-      loghost_ = n.variable("ECF_LOGHOST", true);
-      logport_ = n.variable("ECF_LOGPORT");
-      if (loghost_ == ecf_node::none()) {
-         loghost_ = n.variable("LOGHOST", true);
-         logport_ = n.variable("LOGPORT");
-      }
+    // set_loghost(n); 
       std::string::size_type pos = loghost_.find(n.variable("ECF_MICRO"));
-      if (std::string::npos == pos && loghost_ != ecf_node::none()) {
-         logsvr the_log_server(loghost_, logport_);
-         if (the_log_server.ok()) {
-            tmp_file tmp = the_log_server.getfile(name); // allow more than latest output
+      std::string content;
+      if (use_ecf_out_cmd(n, name, NULL, false, content)) {
+	tmp_file tmp(content); // tmpnam(NULL));
+	// tmp << content;
+	return tmp;
+      } else if (std::string::npos == pos && loghost_ != ecf_node::none()) {
+         logsvr log_server(loghost_, logport_);
+         if (log_server.ok()) {
+            tmp_file tmp = log_server.getfile(name); // allow more than latest output
             if (access(tmp.c_str(), R_OK) == 0) return tmp;
          }
       }

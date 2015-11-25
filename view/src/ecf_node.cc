@@ -1292,7 +1292,10 @@ std::string ecf_concrete_node<Suite>::get_var( const std::string& name, bool is_
       const Variable& var = owner_->findVariable(name);
       if (!var.empty()) {
          std::string value = var.theValue();
-         if (substitute) owner_->variableSubsitution(value);
+         if (substitute) {
+	   owner_->update_generated_variables();
+	   owner_->variableSubsitution(value);
+	 }
          return value;
       }
    }
@@ -1310,7 +1313,10 @@ std::string ecf_concrete_node<Node>::get_var( const std::string& name, bool is_g
       const Variable& var = owner_->findVariable(name);
       if (!var.empty()) {
          std::string value = var.theValue();
-         if (substitute) owner_->variableSubsitution(value);
+         if (substitute) {
+	   owner_->update_generated_variables();
+	   owner_->variableSubsitution(value);
+	 }
          return value;
       }
    }
@@ -1328,7 +1334,10 @@ std::string ecf_concrete_node<Defs>::get_var( const std::string& name, bool is_g
       const Variable& var = owner_->server().findVariable(name);
       if (!var.empty()) {
          std::string value = var.theValue();
-         if (substitute) owner_->server().variableSubsitution(value);
+         if (substitute) {
+	   // owner_->update_generated_variables();
+	   owner_->server().variableSubsitution(value);
+	 }
          return value;
       }
    }
