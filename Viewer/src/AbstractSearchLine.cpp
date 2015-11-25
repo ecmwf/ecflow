@@ -71,7 +71,8 @@ AbstractSearchLine::AbstractSearchLine(QWidget* parent) : QWidget(parent)
 	menu->addAction(actionWholeWords_);
 	optionsTb_->setMenu(menu);
 
-    matchModeChanged(1);  // dummy call to initialise the 'whole words' option state
+    matchModeCb_->setMatchMode(StringMatchMode::ContainsMatch);  // set the default match mode
+    //matchModeChanged(1);  // dummy call to initialise the 'whole words' option state
 }
 
 AbstractSearchLine::~AbstractSearchLine()
