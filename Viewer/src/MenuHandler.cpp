@@ -18,19 +18,20 @@
 #include <QMessageBox>
 #include <QMenu>
 #include <QLabel>
+#include <QLinearGradient>
 #include <QWidgetAction>
 #include <QDebug>
 #include <QObject>
+#include <QVBoxLayout>
 
 #include "Str.hpp"
 #include "MenuHandler.hpp"
 #include "ServerHandler.hpp"
 #include "UserMessage.hpp"
 #include "NodeExpression.hpp"
-
+#include "VConfig.hpp"
 
 std::vector<Menu *> MenuHandler::menus_;
-
 
 MenuHandler::MenuHandler()
 {
@@ -360,6 +361,10 @@ QMenu *Menu::generateMenu(std::vector<VInfo_ptr> nodes, QWidget *parent,const st
     // add an inactive action(!) to the top of the menu in order to show which
     // node has been selected
 
+    buildMenuTitle(nodes,qmenu);
+
+    /*
+
     QLabel *nodeLabel = NULL;
 
     if (nodes.size() == 1)
@@ -367,11 +372,36 @@ QMenu *Menu::generateMenu(std::vector<VInfo_ptr> nodes, QWidget *parent,const st
         //single node selected put a label with the node name + colour
         nodeLabel = new QLabel(QString::fromStdString((*nodes[0]).name()));
 
+        QBrush bgBrush(nodes.at(0)->node()->stateColour());
+
+        if(VProperty* p=VConfig::instance()->find("view.common.node_gradient"))
+        {
+            if(p->value().toBool())
+            {
+            	int lighter=150;
+            	QColor bg=bgBrush.color();
+            	QColor bgLight=bg.lighter(lighter);
+            	QColor border=bg.darker(125);
+
+            	QLinearGradient grad;
+            	grad.setCoordinateMode(QGradient::ObjectBoundingMode);
+            	grad.setStart(0,0);
+            	grad.setFinalStop(0,1);
+
+            	grad.setColorAt(0,bgLight);
+                grad.setColorAt(1,bg);
+            	bgBrush=QBrush(grad);
+             }
+        }
+
         QPalette labelPalette;
-        labelPalette.setColor(QPalette::Window,     (*nodes[0]).node()->stateColour());
-        labelPalette.setColor(QPalette::WindowText, QColor(96,96,96));
+        labelPalette.setBrush(QPalette::Window,bgBrush);
+        labelPalette.setColor(QPalette::WindowText,nodes.at(0)->node()->stateFontColour());//QColor(96,96,96));
         nodeLabel->setAutoFillBackground(true);
         nodeLabel->setPalette(labelPalette);
+
+    	QString titleQss="QLabel {padding: 2px;}";
+    	nodeLabel->setStyleSheet(titleQss);
     }
     else
     {
@@ -386,13 +416,21 @@ QMenu *Menu::generateMenu(std::vector<VInfo_ptr> nodes, QWidget *parent,const st
     nodeLabel->setAlignment(Qt::AlignHCenter);
     nodeLabel->setObjectName("nodeLabel");
 
+    QWidget* titleW=new QWidget(qmenu);
+    QVBoxLayout *titleLayout=new QVBoxLayout(titleW);
+    titleLayout->setContentsMargins(2,2,2,2);
+    titleLayout->addWidget(nodeLabel);
+    nodeLabel->setParent(titleW);
+
     QWidgetAction *wAction = new QWidgetAction(qmenu);
     //Qt doc says: the ownership of the widget is passed to the widgetaction.
     //So when the action is deleted it will be deleted as well.
-    wAction->setDefaultWidget(nodeLabel);
+    wAction->setDefaultWidget(titleW);
     wAction->setEnabled(false);
     qmenu->addAction(wAction);
 
+
+*/
     //TypeNodeCondition  typeCondFamily   (MenuItem::FAMILY);
     //TypeNodeCondition  typeCondTask     (MenuItem::TASK);
     //StateNodeCondition stateCondUnknown ("unknown");
@@ -466,6 +504,78 @@ QMenu *Menu::generateMenu(std::vector<VInfo_ptr> nodes, QWidget *parent,const st
     }
 
     return qmenu;
+}
+
+void Menu::buildMenuTitle(std::vector<VInfo_ptr> nodes, QMenu* qmenu)
+{
+	QLabel *nodeLabel = NULL;
+
+	if (nodes.size() == 1)
+	{
+		VNode *node=nodes.at(0)->node();
+
+		if(!node)
+			return;
+
+		//single node selected put a label with the node name + colour
+		nodeLabel = new QLabel(node->name());
+
+		QBrush bgBrush(node->stateColour());
+
+		if(VProperty* p=VConfig::instance()->find("view.common.node_gradient"))
+		{
+			if(p->value().toBool())
+			{
+				int lighter=150;
+				QColor bg=bgBrush.color();
+				QColor bgLight=bg.lighter(lighter);
+				QColor border=bg.darker(125);
+
+				QLinearGradient grad;
+				grad.setCoordinateMode(QGradient::ObjectBoundingMode);
+				grad.setStart(0,0);
+				grad.setFinalStop(0,1);
+
+				grad.setColorAt(0,bgLight);
+				grad.setColorAt(1,bg);
+				bgBrush=QBrush(grad);
+			}
+		}
+
+		QPalette labelPalette;
+		labelPalette.setBrush(QPalette::Window,bgBrush);
+		labelPalette.setColor(QPalette::WindowText,node->stateFontColour());//QColor(96,96,96));
+		nodeLabel->setAutoFillBackground(true);
+		nodeLabel->setPalette(labelPalette);
+
+		QString titleQss="QLabel {padding: 2px;}";
+		nodeLabel->setStyleSheet(titleQss);
+	}
+	else
+	{
+		// multiple nodes selected - say how many
+		nodeLabel = new QLabel(QObject::tr("%1 nodes selected").arg(nodes.size()));
+	}
+
+	QFont menuTitleFont;
+	menuTitleFont.setBold(true);
+	menuTitleFont.setItalic(true);
+	nodeLabel->setFont(menuTitleFont);
+	nodeLabel->setAlignment(Qt::AlignHCenter);
+	nodeLabel->setObjectName("nodeLabel");
+
+	QWidget* titleW=new QWidget(qmenu);
+	QVBoxLayout *titleLayout=new QVBoxLayout(titleW);
+	titleLayout->setContentsMargins(2,2,2,2);
+	titleLayout->addWidget(nodeLabel);
+	nodeLabel->setParent(titleW);
+
+	QWidgetAction *wAction = new QWidgetAction(qmenu);
+	//Qt doc says: the ownership of the widget is passed to the widgetaction.
+	//So when the action is deleted it will be deleted as well.
+	wAction->setDefaultWidget(titleW);
+	//wAction->setEnabled(false);
+	qmenu->addAction(wAction);
 }
 
 

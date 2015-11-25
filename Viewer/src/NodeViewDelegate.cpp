@@ -398,7 +398,7 @@ void NodeViewDelegate::renderEvent(QPainter *painter,QStringList data,const QSty
 	QString name=data.at(1);
 	bool val=false;
 	if(data.count() > 2) val=(data.at(2) == "1");
-	QColor cCol=(val)?(Qt::blue):(Qt::gray);
+	QColor cCol=(val)?(Qt::blue):QColor(240,240,240);
 
 	int offset=2;
 
@@ -561,7 +561,7 @@ void NodeViewDelegate::renderLimit(QPainter *painter,QStringList data,const QSty
 	int offset=2;
 	int gap=fm.width('A');
 	int itemSize=6;
-	QColor itemEmptyCol(Qt::gray);
+	QColor itemEmptyCol(240,240,240);
 	QColor itemCol(Qt::green);
 
 	//The border rect (we will adjust its  width)
@@ -696,7 +696,7 @@ void NodeViewDelegate::renderTrigger(QPainter *painter,QStringList data,const QS
 	int offset=2;
 
 	//The border rect (we will adjust its  width)
-	QRect fillRect=option.rect.adjusted(offset,1,0,-1);
+	QRect fillRect=option.rect.adjusted(offset,2,0,-2);
 	if(option.state & QStyle::State_Selected)
 		fillRect.adjust(0,1,0,-1);
 

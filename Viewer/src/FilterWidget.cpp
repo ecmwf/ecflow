@@ -11,10 +11,14 @@
 
 #include <QDebug>
 #include <QHBoxLayout>
+#include <QLabel>
 #include <QLinearGradient>
 #include <QPainter>
+#include <QPalette>
 #include <QPixmap>
 #include <QToolButton>
+#include <QVBoxLayout>
+#include <QWidgetAction>
 
 #include "VNState.hpp"
 #include "VAttribute.hpp"
@@ -31,11 +35,18 @@
 //
 //===========================================
 
-VParamFilterMenu::VParamFilterMenu(QMenu * parent,VParamSet* filter,DecorMode decorMode) :
+VParamFilterMenu::VParamFilterMenu(QMenu * parent,VParamSet* filter,QString title,ItemMode itemMode,DecorMode decorMode) :
  	menu_(parent),
 	filter_(filter),
+	itemMode_(itemMode),
 	decorMode_(decorMode)
 {
+	buildTitle(title,parent);
+
+	QAction* acSep = new QAction(this);
+	acSep->setSeparator(true);
+	menu_->addAction(acSep);
+
 	//Param name must be unique
 	for(std::set<VParam*>::const_iterator it=filter_->all().begin(); it != filter_->all().end(); ++it)
 	{
@@ -98,20 +109,72 @@ VParamFilterMenu::VParamFilterMenu(QMenu * parent,VParamSet* filter,DecorMode de
 	ac->setSeparator(true);
 	menu_->addAction(ac);
 
-	ac = new QAction(this);
-	ac->setText(tr("Select all"));
-	menu_->addAction(ac);
-	connect(ac,SIGNAL(triggered(bool)),
-			this,SLOT(slotSelectAll(bool)));
-
-	ac = new QAction(this);
-	ac->setText(tr("Unselect all"));
-	menu_->addAction(ac);
-	connect(ac,SIGNAL(triggered(bool)),
+	if(itemMode_ == FilterMode)
+	{
+		ac = new QAction(this);
+		ac->setText(tr("Clear filter"));
+		menu_->addAction(ac);
+		connect(ac,SIGNAL(triggered(bool)),
 			this,SLOT(slotUnselectAll(bool)));
+	}
+	else
+	{
+		ac = new QAction(this);
+		ac->setText(tr("Show all"));
+		menu_->addAction(ac);
+		connect(ac,SIGNAL(triggered(bool)),
+					this,SLOT(slotSelectAll(bool)));
+
+		ac = new QAction(this);
+		ac->setText(tr("Hide all"));
+		menu_->addAction(ac);
+		connect(ac,SIGNAL(triggered(bool)),
+			this,SLOT(slotUnselectAll(bool)));
+
+	}
 
 	reload();
 }
+
+void VParamFilterMenu::buildTitle(QString title,QMenu* parent)
+{
+	QLabel* titleLabel=new QLabel(title,menu_);
+	QFont f=menu_->font();
+	f.setBold(true);
+	titleLabel->setFont(f);
+	titleLabel->setAlignment(Qt::AlignHCenter);
+	titleLabel->setAutoFillBackground(true);
+	QPalette pal=titleLabel->palette();
+	QColor winCol=menu_->palette().color(QPalette::Window);
+	pal.setColor(QPalette::Window,QColor(237,238,238));
+	titleLabel->setPalette(pal);
+
+	int titlePadding=3;
+	int topMargin=2;
+	if(parent && parent->isTearOffEnabled())
+	{
+		titlePadding=1;
+		topMargin=0;
+	}
+
+	QString titleQss="QLabel {padding: " + QString::number(titlePadding) + "px;}";
+	titleLabel->setStyleSheet(titleQss);
+
+	QWidget *w=new QWidget(menu_);
+	QVBoxLayout *vb=new QVBoxLayout(w);
+	vb->setContentsMargins(2,topMargin,2,2);
+	//vb->addSpacing(2);
+	vb->addWidget(titleLabel);
+	//vb->addSpacing(2);
+
+	QWidgetAction *titleAc = new QWidgetAction(menu_);
+	//Qt doc says: the ownership of the widget is passed to the widgetaction.
+	//So when the action is deleted it will be deleted as well.
+	titleAc->setDefaultWidget(w);
+	//titleAc->setEnabled(false);
+	menu_->addAction(titleAc);
+}
+
 
 void VParamFilterMenu::addAction(QString name,QString id)
 {

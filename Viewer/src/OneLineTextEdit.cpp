@@ -25,7 +25,7 @@ OneLineTextEdit::OneLineTextEdit(QWidget* parent) :  QTextEdit(parent)
 	setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 	setSizePolicy(QSizePolicy::Preferred,QSizePolicy::Fixed);
 
-	document()->setDocumentMargin(0);
+	document()->setDocumentMargin(2);
 
 	QFont f;
 	QFontMetrics fm(f);

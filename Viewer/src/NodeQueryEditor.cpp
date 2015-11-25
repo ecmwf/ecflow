@@ -481,9 +481,9 @@ void NodeQueryEditor::slotPathCaseChanged(bool val)
 
 void NodeQueryEditor::slotTypeListChanged()
 {
+	typeResetTb_->setEnabled(typeList_->hasSelection());
 	if(!initIsOn_)
 	{
-		typeResetTb_->setEnabled(typeList_->hasSelection());
 		query_->setTypeSelection(typeList_->selection());
 		updateQueryTe();
 		checkGuiState();
@@ -492,9 +492,9 @@ void NodeQueryEditor::slotTypeListChanged()
 
 void NodeQueryEditor::slotStateListChanged()
 {
+	stateResetTb_->setEnabled(stateList_->hasSelection());
 	if(!initIsOn_)
 	{
-		stateResetTb_->setEnabled(stateList_->hasSelection());
 		query_->setStateSelection(stateList_->selection());
 		updateQueryTe();
 		checkGuiState();
@@ -503,9 +503,9 @@ void NodeQueryEditor::slotStateListChanged()
 
 void NodeQueryEditor::slotFlagListChanged()
 {
+	flagResetTb_->setEnabled(flagList_->hasSelection());
 	if(!initIsOn_)
 	{
-		flagResetTb_->setEnabled(flagList_->hasSelection());
 		query_->setFlagSelection(flagList_->selection());
 		updateQueryTe();
 		checkGuiState();

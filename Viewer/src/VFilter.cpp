@@ -136,7 +136,6 @@ NodeStateFilter::NodeStateFilter() : VParamSet()
 	settingsId_="state";
 	std::vector<VParam*> v=VNState::filterItems();
 	init(v);
-	current_=all_;
 }
 
 
@@ -151,6 +150,12 @@ AttributeFilter::AttributeFilter() : VParamSet()
 	settingsId_="attribute";
 	std::vector<VParam*> v=VAttribute::filterItems();
 	init(v);
+
+	for(std::set<VParam*>::const_iterator it=all_.begin(); it != all_.end(); ++it)
+	{
+		if((*it)->strName() != "var" && (*it)->strName() != "genvar")
+			current_.insert(*it);
+	}
 }
 
 //==============================================
@@ -283,12 +288,12 @@ void TreeNodeFilter::beginReset(ServerHandler* server)
 	resultMode_=StoreNonMatched;
 
 	//If all states are visible
-	if(def_->nodeState_->isComplete())
+	if(def_->nodeState_->isComplete() || def_->nodeState_->isEmpty())
 	{
 		return;
 	}
 
-	else if(def_->nodeState_->isEmpty())
+	else //if(def_->nodeState_->isEmpty())
 	{
 		resultMode_=StoreMatched;
 		return;

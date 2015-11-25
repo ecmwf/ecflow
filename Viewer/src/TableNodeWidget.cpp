@@ -106,7 +106,8 @@ void TableNodeWidget::populateDockTitleBar(DashboardDockTitleWidget* tw)
 	menuState->setTearOffEnabled(true);
 
 	//stateFilterMenu_=new StateFilterMenu(menuState,filter_->menu());
-	stateFilterMenu_=new VParamFilterMenu(menuState,states_,VParamFilterMenu::ColourDecor);
+	stateFilterMenu_=new VParamFilterMenu(menuState,states_,"Status filter",
+			        VParamFilterMenu::FilterMode,VParamFilterMenu::ColourDecor);
 
 	//Sets the menu on the toolbutton
 	tw->optionsTb()->setMenu(menu);

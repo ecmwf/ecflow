@@ -111,6 +111,8 @@ public:
 
 
 private:
+    void buildMenuTitle(std::vector<VInfo_ptr> nodes, QMenu* qmenu);
+
     std::string             name_;
     std::vector<MenuItem *> items_;
 

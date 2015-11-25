@@ -196,8 +196,8 @@
                 "bold"    : "false"
              }, 
              "keyword" : {
-                "pattern" : "(scope|nodes|options)",                       
-                "colour"  : "rgb(135,136,136)",               
+                "pattern" : "(scope|scope:|nodes|nodes:|options|options:)",                       
+                "colour"  : "rgb(73,73,73)",               
                 "bold"    : "true"
              }, 
              "node" : {

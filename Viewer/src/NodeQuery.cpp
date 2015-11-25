@@ -202,6 +202,8 @@ void NodeQuery::swap(const NodeQuery* q)
 	{
 		selectOptions_[s]->swap(q->selectOptions_.value(s));
 	}
+
+	buildQueryString();
 }
 
 void  NodeQuery::setName(const std::string& name)
@@ -631,12 +633,12 @@ QString NodeQuery::extQueryHtml(bool multi,QColor bgCol,int firstColWidth) const
 		//css += "table.tbl th {padding: 3px;}";
 		css+="</style>";
 
-		QString bgDark=bgCol.darker(110).name();
+		QString bgDark=bgCol.darker(108).name();
 		str="<table cellSpacing=\"0\" class=\"tbl\">";
 
 		if(!extQuery_.value("scope").isEmpty())
-			str+="<tr><td bgcolor=\"" + bgDark + "\">&nbsp;scope&nbsp;</td>" +
-			"<td bgcolor=\"" + bg + "\">&nbsp;" + extQuery_.value("scope") + "&nbsp;</td><td>&nbsp;&nbsp;</td>";
+			str+="<tr><td bgcolor=\"" + bg + "\">&nbsp;scope:&nbsp;</td>" +
+			"<td bgcolor=\"" + bgDark + "\">&nbsp;" + extQuery_.value("scope") + "&nbsp;</td><td>&nbsp;&nbsp;</td>";
 
 		QStringList nodeParts;
 		nodeParts << "node" << "type" << "state" << "flag";
@@ -648,20 +650,20 @@ QString NodeQuery::extQueryHtml(bool multi,QColor bgCol,int firstColWidth) const
 				//	str+=" | ";
 
 				if(!str.contains("nodes"))
-					str+="&nbsp;<td  bgcolor=\"" + bgDark + "\">&nbsp;nodes&nbsp;</td><td bgcolor=\"" + bg + "\">&nbsp;"+ extQuery_.value(s);
+					str+="&nbsp;<td  bgcolor=\"" + bg + "\">&nbsp;nodes:&nbsp;</td><td bgcolor=\"" + bgDark + "\">&nbsp;"+ extQuery_.value(s);
 				else
 					str+=" and " + extQuery_.value(s);
 			}
 		}
 
-		if(str.contains("nodes</td>"))
-			str+="&nbsp</td></td><td>&nbsp;&nbsp;</td>";
+		if(str.contains("nodes:"))
+			str+="&nbsp;</td></td><td>&nbsp;&nbsp;</td>";
 
 		if(!extQuery_.value("options").isEmpty())
 		{
 			//if(!str.isEmpty())
 			//	str+=" | ";
-			str+="&nbsp;<td bgcolor=\"" + bgDark + "\"> &nbsp;options&nbsp;</td><td bgcolor=\"" + bg + "\">&nbsp;" + extQuery_.value("options") + "&nbsp;</td>";
+			str+="&nbsp;<td bgcolor=\"" + bg + "\"> &nbsp;options:&nbsp;</td><td bgcolor=\"" + bgDark + "\">&nbsp;" + extQuery_.value("options") + "&nbsp;</td>";
 		}
 
 		if(str.contains("<tr>"))
@@ -669,7 +671,7 @@ QString NodeQuery::extQueryHtml(bool multi,QColor bgCol,int firstColWidth) const
 
 		str+="</table>";
 
-		str=css+str;
+		//str=css+str;
 	}
 
 	return str;

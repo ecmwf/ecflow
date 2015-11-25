@@ -83,12 +83,6 @@
     <property name="title">
      <string>&amp;Servers</string>
     </property>
-    <addaction name="actionReset"/>
-    <addaction name="actionResetSelected"/>
-    <addaction name="separator"/>
-    <addaction name="actionRefresh"/>
-    <addaction name="actionRefreshSelected"/>
-    <addaction name="separator"/>
     <addaction name="actionManageServers"/>
     <addaction name="separator"/>
    </widget>
@@ -107,9 +101,20 @@
     </property>
     <addaction name="actionSearch"/>
    </widget>
+   <widget class="QMenu" name="menuRefresh">
+    <property name="title">
+     <string>&amp;Refresh</string>
+    </property>
+    <addaction name="actionReset"/>
+    <addaction name="actionResetSelected"/>
+    <addaction name="separator"/>
+    <addaction name="actionRefresh"/>
+    <addaction name="actionRefreshSelected"/>
+   </widget>
    <addaction name="menuLl"/>
    <addaction name="menuEdit"/>
    <addaction name="menuView"/>
+   <addaction name="menuRefresh"/>
    <addaction name="menuServer"/>
    <addaction name="menu_Tools"/>
    <addaction name="menu_Help"/>

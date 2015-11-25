@@ -97,22 +97,25 @@ void TableFilterWidget::slotDefChanged()
 
 void TableFilterWidget::slotHeaderFilter(QString column,QPoint globalPos)
 {
-	NodeQuery *query=filterDef_->query();
-
+	NodeQuery *q=filterDef_->query()->clone();
 	if(column == "status")
 	{
 		QMenu *menu=new QMenu(this);
 		//stateFilterMenu_=new StateFilterMenu(menuState,filter_->menu());
 
 		NodeStateFilter sf;
-		sf.current(query->stateSelection());
-		VParamFilterMenu* sfm= new VParamFilterMenu(menu,&sf,VParamFilterMenu::ColourDecor);
+		sf.current(q->stateSelection());
+		VParamFilterMenu* sfm= new VParamFilterMenu(menu,&sf,"Status filter",
+				          VParamFilterMenu::FilterMode,VParamFilterMenu::ColourDecor);
 
 		if(menu->exec(globalPos) != NULL)
 		{
-			query->setStateSelection(sf.currentAsList());
+			q->setStateSelection(sf.currentAsList());
+			filterDef_->setQuery(q);
 		}
 
 		delete menu;
 	}
+
+	delete q;
 }
