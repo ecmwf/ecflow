@@ -562,7 +562,7 @@ void NodeViewDelegate::renderLimit(QPainter *painter,QStringList data,const QSty
 	int offset=2;
 	int itemOffset=3;
 	int gap=fm.width('A');
-	int itemSize=fm.ascent();
+	int itemSize=fm.ascent()-2;
 	QColor itemEmptyCol(240,240,240);
 	QColor itemCol(Qt::green);
 
@@ -622,9 +622,9 @@ void NodeViewDelegate::renderLimit(QPainter *painter,QStringList data,const QSty
 	//Draw items
 	if(drawItem)
 	{
-		painter->setRenderHint(QPainter::Antialiasing,true);
+		//painter->setRenderHint(QPainter::Antialiasing,true);
 		painter->setBrush(itemCol);
-		int yItem=fillRect.center().y()-itemSize/2;
+		int yItem=option.rect.y()+(option.rect.height()-itemSize)/2;
 		for(int i=0; i < max; i++)
 		{
 			if(i==val)
@@ -632,9 +632,11 @@ void NodeViewDelegate::renderLimit(QPainter *painter,QStringList data,const QSty
 				painter->setBrush(itemEmptyCol);
 			}
 			painter->drawEllipse(xItem,yItem,itemSize,itemSize);
+			//painter->drawLine(xItem,fillRect.center().y(),xItem+itemSize,fillRect.center().y());
+
 			xItem+=itemOffset+itemSize;
 		}
-		painter->setRenderHint(QPainter::Antialiasing,false);
+		//painter->setRenderHint(QPainter::Antialiasing,false);
 	}
 
 	if(setClipRect || drawItem)
