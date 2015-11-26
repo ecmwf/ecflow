@@ -266,7 +266,7 @@ bool TreeNodeFilter::isFiltered(VNode* node)
 		if(result_.empty())
 			return false;
 
-		return (std::find(result_.begin(), result_.end(), node) == result_.end());
+		return (std::find(result_.begin(), result_.end(), node) != result_.end());
 	}
 
 	return false;
@@ -296,7 +296,6 @@ void TreeNodeFilter::beginReset(ServerHandler* server)
 	else //if(def_->nodeState_->isEmpty())
 	{
 		resultMode_=StoreMatched;
-		return;
 	}
 
 	VServer* root=server->vRoot();
@@ -328,7 +327,7 @@ bool TreeNodeFilter::filterState(VNode* node,VParamSet* stateFilter)
 	}
 
 
-	if(!ok)
+	if(ok)
 		result_.insert(node);
 
 	return ok;
