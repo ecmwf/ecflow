@@ -22,6 +22,7 @@
 
 class NodeQuery;
 class NodeFilterEngine;
+class ServerFilter;
 class ServerHandler;
 class VNode;
 class VSettings;
@@ -92,7 +93,7 @@ friend class  TableNodeFilter;
 
 public:
 	enum Scope {NodeStateScope,GeneralScope};
-	explicit NodeFilterDef(Scope);
+	NodeFilterDef(ServerFilter*,Scope);
 	~NodeFilterDef();
 
 	NodeStateFilter* nodeState() const {return nodeState_;}
@@ -108,7 +109,7 @@ Q_SIGNALS:
 	void changed();
 
 protected:
-	//NodeStateFilter *serverState_;
+	ServerFilter *serverFilter_;
 	std::string exprStr_;
 	NodeStateFilter *nodeState_;
 	std::string nodePath_;

@@ -109,12 +109,13 @@ void NodeQuerySelectOption::load(VSettings* vs)
 }
 
 
-NodeQuery::NodeQuery(const std::string& name) :
+NodeQuery::NodeQuery(const std::string& name,bool ignoreMaxNum) :
   name_(name),
   advanced_(false),
   allServers_(false),
   caseSensitive_(false),
-  maxNum_(defaultMaxNum_)
+  maxNum_(defaultMaxNum_),
+  ignoreMaxNum_(ignoreMaxNum)
 {
 	if(nodeTerms_.isEmpty())
 	{
@@ -192,6 +193,7 @@ void NodeQuery::swap(const NodeQuery* q)
 	allServers_=q->allServers_;
 	caseSensitive_=q->caseSensitive_;
 	maxNum_=q->maxNum_;
+	ignoreMaxNum_=q->ignoreMaxNum_;
 
 	Q_FOREACH(QString s,stringOptions_.keys())
 	{
@@ -218,10 +220,28 @@ void NodeQuery::setQuery(QString query)
 
 bool NodeQuery::hasServer(const std::string& name) const
 {
+	qDebug() << "servers" << servers_;
+
 	if(servers_.empty())
 		return true;
 
 	return servers_.contains(QString::fromStdString(name));
+}
+
+void NodeQuery::checkAllServers(QStringList all)
+{
+	if(all.count() != servers_.count())
+		allServers_=false;
+
+	Q_FOREACH(QString s,all)
+		if(!servers_.contains(s))
+		{
+			allServers_=false;
+			buildQueryString();
+		}
+
+	allServers_=true;
+	buildQueryString();
 }
 
 QStringList NodeQuery::typeSelection() const
@@ -446,22 +466,30 @@ void NodeQuery::buildQueryString()
 
 		scopePart+="root_node = \'" + QString::fromStdString(rootNode_) + "\'";
 	}
-
-	extQuery_["scope"]=scopePart;
+	if(!scopePart.isEmpty())
+		extQuery_["scope"]=scopePart;
 
 	if(query_.isEmpty())
 		extQuery_["node"] = "ANY";
 
-	QString opPart="max_results = " + QString::number(maxNum_);
+	QString opPart;
+	if(!ignoreMaxNum_)
+	{
+		opPart="max_results = " + QString::number(maxNum_);
+	}
+
 	if(query_.contains("="))
 	{
-		opPart+=" and ";
+		if(!opPart.isEmpty())
+			opPart+=" and ";
 		if(caseSensitive_)
 			opPart+="case_sensitive";
 		else
 			opPart+="case_insensitive";
 	}
-	extQuery_["options"]=opPart;
+
+	if(!opPart.isEmpty())
+		extQuery_["options"]=opPart;
 }
 
 QString NodeQuery::extQueryHtml(bool multi,QColor bgCol,int firstColWidth) const

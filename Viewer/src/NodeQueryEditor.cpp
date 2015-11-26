@@ -281,6 +281,9 @@ void NodeQueryEditor::init()
 	numSpin_->setValue(query_->maxNum());
 	caseCb_->setChecked(query_->caseSensitive());
 
+	numSpin_->setEnabled(!query_->ignoreMaxNum());
+	numLabel_->setEnabled(!query_->ignoreMaxNum());
+
 	//Servers
 	QStringList servers=query_->servers();
 	if(servers == serverCb_->all())

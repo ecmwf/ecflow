@@ -32,7 +32,7 @@ TableNodeWidget::TableNodeWidget(ServerFilter* servers,QWidget * parent) : NodeW
 	setupUi(this);
 
 	//This defines how to filter the nodes in the tree. We only want to filter according to node status.
-	filterDef_=new NodeFilterDef(NodeFilterDef::GeneralScope);
+	filterDef_=new NodeFilterDef(servers,NodeFilterDef::GeneralScope);
 
 	//Create the table model. It uses the datahandler to access the data.
 	model_=new TableNodeModel(servers,filterDef_,this);
@@ -70,7 +70,6 @@ TableNodeWidget::TableNodeWidget(ServerFilter* servers,QWidget * parent) : NodeW
     connect(view_->realWidget(),SIGNAL(headerButtonClicked(QString,QPoint)),
     		filterW_,SLOT(slotHeaderFilter(QString,QPoint)));
 
-
 	connect(model_,SIGNAL(clearBegun(const VNode*)),
 			view_->realWidget(),SLOT(slotSaveExpand(const VNode*)));
 
@@ -79,7 +78,6 @@ TableNodeWidget::TableNodeWidget(ServerFilter* servers,QWidget * parent) : NodeW
 
 	connect(model_,SIGNAL(rerender()),
 				view_->realWidget(),SLOT(slotRerender()));
-
 
 	//This will not emit the trigered signal of the action!!
 	//Synchronise the action and the breadcrumbs state

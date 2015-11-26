@@ -82,7 +82,7 @@ protected:
 class NodeQuery
 {
 public:
-	explicit NodeQuery(const std::string& name);
+	NodeQuery(const std::string& name,bool ignoreMaxNum=false);
 	~NodeQuery();
     NodeQuery* clone();
 	NodeQuery* clone(const std::string& name);
@@ -102,12 +102,14 @@ public:
 	//const std::vector<std::string>& servers() const {return servers_;}
 	QStringList servers() const {return servers_;}
 	bool hasServer(const std::string& name) const;
+	void checkAllServers(QStringList servers);
 
 	QString extQueryHtml(bool multi,QColor bgCol,int firstColWidth) const;
 	void buildQueryString();
 
 	int maxNum() const {return maxNum_;}
 	void setMaxNum(int m) {maxNum_=m;}
+	bool ignoreMaxNum() const {return ignoreMaxNum_;}
 
 	void setCaseSensitive(bool b) {caseSensitive_=b;}
 	bool caseSensitive() const {return caseSensitive_;}
@@ -157,6 +159,7 @@ protected:
     QMap<QString,QString> extQuery_;
     bool caseSensitive_;
     int maxNum_;
+    bool ignoreMaxNum_;
 
 	QMap<QString,NodeQueryStringOption*> stringOptions_;
 	QMap<QString,NodeQuerySelectOption*> selectOptions_;

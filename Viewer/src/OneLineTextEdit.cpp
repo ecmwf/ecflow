@@ -58,4 +58,9 @@ QSize OneLineTextEdit::sizeHint() const
     );*/
 }
 
+void OneLineTextEdit::mousePressEvent(QMouseEvent *e)
+{
+	Q_EMIT clicked();
+}
+
 

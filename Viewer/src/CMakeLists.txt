@@ -200,6 +200,7 @@ set(viewer_moc_files AbstractNodeModel.hpp
     NodeSearchDialog.hpp
     NodeSearchWidget.hpp
     NodeWidget.hpp
+    OneLineTextEdit.hpp
     OutputItemWidget.hpp
     PropertyDialog.hpp             
     PropertyEditor.hpp

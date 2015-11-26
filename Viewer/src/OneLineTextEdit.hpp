@@ -15,10 +15,17 @@
 
 class OneLineTextEdit : public QTextEdit
 {
+Q_OBJECT
+
 public:
 	OneLineTextEdit(QWidget* parent=0);
 	QSize sizeHint() const;
 
+Q_SIGNALS:
+	void clicked();
+
+protected:
+	void mousePressEvent(QMouseEvent *e);
 };
 
 

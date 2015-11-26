@@ -17,6 +17,7 @@
 #include "NodeFilterDialog.hpp"
 #include "NodeQuery.hpp"
 #include "ServerFilter.hpp"
+#include "UserMessage.hpp"
 #include "VFilter.hpp"
 
 #include <assert.h>
@@ -27,6 +28,13 @@ TableFilterWidget::TableFilterWidget(QWidget *parent) :
    serverFilter_(0)
 {
 	setupUi(this);
+
+	connect(queryTe_,SIGNAL(clicked()),
+			this,SLOT(slotEdit()));
+
+	numLabel_->hide();
+
+	slotTotalNumChanged(0);
 
 	//queryTe_->setFixedHeight(18);
 }
@@ -42,6 +50,7 @@ void TableFilterWidget::slotEdit()
 	if(d.exec() == QDialog::Accepted)
 	{
 		filterDef_->setQuery(d.query());
+		UserMessage::message(UserMessage::DBG,false,"new table query: " + filterDef_->query()->query().toStdString());
 	}
 }
 
@@ -49,44 +58,15 @@ void TableFilterWidget::build(NodeFilterDef* def,ServerFilter *sf)
 {
 	filterDef_=def;
 	serverFilter_=sf;
-	qDebug() << filterDef_->query()->stateSelection();
 
 	connect(filterDef_,SIGNAL(changed()),
 			this,SLOT(slotDefChanged()));
 
-	/*exprLabel_->hide();
-
-	//
-    QToolButton *tb=new QToolButton(this);
-    tb->setText("Status");
-    tb->setAutoRaise(true);
-    tb->setPopupMode(QToolButton::InstantPopup);
-
-	buttonLayout_->addWidget(tb);
-
-	QMenu *menu=new QMenu(this);
-
-	//stateFilterMenu_=new StateFilterMenu(menuState,filter_->menu());
-	VParamFilterMenu* sfm= new VParamFilterMenu(menu,filterDef_->nodeState(),
-			VParamFilterMenu::ColourDecor);
-
-	tb->setMenu(menu);*/
-
 	slotDefChanged();
-
-
-
 }
 
 void TableFilterWidget::slotDefChanged()
 {
-	/*QStringList lst=filterDef_->query()->extQueryString();
-	QString q;
-	if(lst.count() > 1)
-		q=lst.join(" and ");
-	else if(lst.count()==1)
-		q=lst.front();*/
-
 	QColor bg(240,240,240);
 	queryTe_->setHtml(filterDef_->query()->extQueryHtml(false,bg,0));
 }
@@ -114,4 +94,9 @@ void TableFilterWidget::slotHeaderFilter(QString column,QPoint globalPos)
 	}
 
 	delete q;
+}
+
+void TableFilterWidget::slotTotalNumChanged(int n)
+{
+	numLabel_->setText(tr("Total: ") + QString::number(n));
 }

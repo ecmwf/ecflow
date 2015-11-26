@@ -196,7 +196,7 @@ void TableNodeViewDelegate::renderNode(QPainter *painter,const QModelIndex& inde
 			{
 				pixLst << IconProvider::pixmap(id,iconSize_);
 				pixRectLst << QRect(xp,yp,pixLst.back().width(),pixLst.back().height());
-				xp+=pixLst.back().width();
+				xp+=pixLst.back().width()+2;
 			}
 		}
 

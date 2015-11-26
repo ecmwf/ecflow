@@ -326,8 +326,7 @@ void VTableServer::notifyBeginServerScan(ServerHandler* server,const VServerChan
 void VTableServer::notifyEndServerScan(ServerHandler* server)
 {
 	runFilter();
-	Q_EMIT endServerScan(this,
-			server->vRoot()->totalNum());
+	Q_EMIT endServerScan(this,server->vRoot()->totalNum());
 
 	/*
 
@@ -343,9 +342,6 @@ void VTableServer::notifyEndServerScan(ServerHandler* server)
 	filter_->endReset();
 
 	Q_EMIT endServerScan(this,realCount);*/
-
-
-
 }
 
 void VTableServer::notifyBeginServerClear(ServerHandler* server)
@@ -490,7 +486,7 @@ void VModelData::connectToModel(VModelServer* d)
 
 	//The model relays this signal
 	connect(d,SIGNAL(filterChanged()),
-				model_,SIGNAL(filterChanged()));
+		model_,SIGNAL(filterChanged()));
 
 	//The model relays this signal
 	connect(d,SIGNAL(rerender()),
@@ -931,6 +927,7 @@ bool VTableModelData::isFiltered(VNode *node) const
 	int id=indexOfServer(node->server());
 	if(id != -1)
 	{
+		qDebug() << "isFiltered" << node->name() << servers_.at(id)->filter_->isFiltered(node);
 		return servers_.at(id)->filter_->isFiltered(node);
 	}
 

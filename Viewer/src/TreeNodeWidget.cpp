@@ -29,7 +29,7 @@ TreeNodeWidget::TreeNodeWidget(ServerFilter* servers,QWidget* parent) : NodeWidg
 	setupUi(this);
 
 	//This defines how to filter the nodes in the tree. We only want to filter according to node status.
-	filterDef_=new NodeFilterDef(NodeFilterDef::NodeStateScope);
+	filterDef_=new NodeFilterDef(servers,NodeFilterDef::NodeStateScope);
 
 	//Create the tree model. It uses the datahandler to access the data.
 	model_=new TreeNodeModel(servers,filterDef_,atts_,icons_,this);

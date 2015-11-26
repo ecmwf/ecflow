@@ -31,6 +31,7 @@ public Q_SLOTS:
 	void slotEdit();
 	void slotDefChanged();
 	void slotHeaderFilter(QString column,QPoint globalPos);
+	void slotTotalNumChanged(int);
 
 private:
 	NodeFilterDef* filterDef_;

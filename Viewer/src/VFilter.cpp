@@ -18,6 +18,7 @@
 #include "VParam.hpp"
 #include "VSettings.hpp"
 
+#include "ServerFilter.hpp"
 #include "ServerHandler.hpp"
 
 #include <QDebug>
@@ -173,7 +174,9 @@ IconFilter::IconFilter() : VParamSet()
 }
 
 
-NodeFilterDef::NodeFilterDef(Scope scope) : nodeState_(0)
+NodeFilterDef::NodeFilterDef(ServerFilter* serverFilter,Scope scope) :
+	serverFilter_(serverFilter),
+	nodeState_(0)
 {
 	nodeState_=new NodeStateFilter;
 
@@ -191,9 +194,9 @@ NodeFilterDef::NodeFilterDef(Scope scope) : nodeState_(0)
 					this,SIGNAL(changed()));
 	}
 
-	query_=new NodeQuery("tmp");
-	QStringList sel("aborted");
-	query_->setStateSelection(sel);
+	query_=new NodeQuery("tmp",true);
+	//QStringList sel("aborted");
+	//query_->setStateSelection(sel);
 }
 
 NodeFilterDef::~NodeFilterDef()
@@ -224,6 +227,14 @@ void NodeFilterDef::readSettings(VSettings *vs)
 	vs->beginGroup("query");
 	query_->load(vs);
 	vs->endGroup();
+
+	QStringList lst;
+	for(std::vector<ServerItem*>::const_iterator it=serverFilter_->items().begin(); it != serverFilter_->items().end(); ++it)
+	{
+		lst << QString::fromStdString((*it)->name());
+	}
+	query_->checkAllServers(lst);
+
 	Q_EMIT changed();
 }
 
@@ -345,30 +356,6 @@ int TreeNodeFilter::matchCount()
 	return 0;
 };
 
-/*int TreeNodeFilter::nonMatchCount()
-{
-	if(beingReset_)
-			return 0;
-
-	if(resultMode_==StoreNonMatched)
-	{
-		return static_cast<int>(result_.size());
-	}
-	return 0;
-}*/
-
-/*int TreeNodeFilter::realMatchCount()
-{
-	return 0;
-}*/
-
-/*VNode* TreeNodeFilter::realMatchAt(int)
-{
-	return NULL;
-}*/
-
-
-
 //===========================================================
 // TableNodeFilter
 //===========================================================
@@ -386,6 +373,9 @@ bool TableNodeFilter::isFiltered(VNode* node)
 {
 	if(beingReset_ || matchMode_ == NoneMatch)
 		return false;
+
+	else if(matchMode_ == AllMatch)
+		return true;
 
 	return res_[node->index()];
 }
@@ -406,36 +396,47 @@ void TableNodeFilter::beginReset(ServerHandler* server)
 {
 	beingReset_=true;
 
-	if(!def_->query_->hasServer(server->name()))
+	matchMode_=NoneMatch;
+
+	NodeQuery* q=def_->query_;
+
+	if(!q->hasServer(server->name()))
 	{
 		matchMode_=NoneMatch;
-
 		//Deallocates
 		res_=std::vector<bool>();
 	}
 	else
 	{
-		int num=server->vRoot()->totalNum();
-		if(num != res_.size())
+		if(q->query().isEmpty() && q->rootNode().empty())
 		{
-			//Reallocates
+			matchMode_=AllMatch;
+			//Deallocates
 			res_=std::vector<bool>();
-			res_.reserve(num);
-			for(size_t i=0; i < num; i++)
-			{
-				res_.push_back(false);
-			}
 		}
 		else
 		{
-			std::fill(res_.begin(),res_.end(),false);
+			matchMode_=VectorMatch;
+			int num=server->vRoot()->totalNum();
+			if(num != res_.size())
+			{
+				//Reallocates
+				res_=std::vector<bool>();
+				res_.reserve(num);
+				for(size_t i=0; i < num; i++)
+				{
+					res_.push_back(false);
+				}
+			}
+			else
+			{
+				std::fill(res_.begin(),res_.end(),false);
+			}
+
+			queryEngine_->setQuery(def_->query_);
+			queryEngine_->runQuery(server);
 		}
-
-
-		queryEngine_->setQuery(def_->query_);
-		queryEngine_->runQuery(server);
 	}
-
 }
 
 void TableNodeFilter::endReset()
