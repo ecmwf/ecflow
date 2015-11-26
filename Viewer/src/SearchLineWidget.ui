@@ -10,12 +10,6 @@
     <height>266</height>
    </rect>
   </property>
-  <property name="maximumSize">
-   <size>
-    <width>744</width>
-    <height>373</height>
-   </size>
-  </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>
