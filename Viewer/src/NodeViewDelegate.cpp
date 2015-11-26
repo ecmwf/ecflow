@@ -560,8 +560,9 @@ void NodeViewDelegate::renderLimit(QPainter *painter,QStringList data,const QSty
 
 	QFontMetrics fm(attrFont_);
 	int offset=2;
+	int itemOffset=3;
 	int gap=fm.width('A');
-	int itemSize=6;
+	int itemSize=fm.ascent();
 	QColor itemEmptyCol(240,240,240);
 	QColor itemCol(Qt::green);
 
@@ -591,7 +592,7 @@ void NodeViewDelegate::renderLimit(QPainter *painter,QStringList data,const QSty
 	if(drawItem)
 	{
 		xItem=valRect.right()+gap;
-		fillRect.setRight(xItem+max*(itemSize+offset)+offset);
+		fillRect.setRight(xItem+max*(itemSize+itemOffset)+itemOffset);
 	}
 	else
 	{
@@ -631,7 +632,7 @@ void NodeViewDelegate::renderLimit(QPainter *painter,QStringList data,const QSty
 				painter->setBrush(itemEmptyCol);
 			}
 			painter->drawEllipse(xItem,yItem,itemSize,itemSize);
-			xItem+=offset+itemSize;
+			xItem+=itemOffset+itemSize;
 		}
 		painter->setRenderHint(QPainter::Antialiasing,false);
 	}

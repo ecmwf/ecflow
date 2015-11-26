@@ -192,6 +192,7 @@ VDir_ptr OutputProvider::directory()
 	dir=fetchLocalDir(fileName);
 	if(dir)
 		return dir;
+	//Then the logserver
 	else
 		dir=fetchDirViaLogServer(n,fileName);
 
@@ -253,7 +254,8 @@ VDir_ptr OutputProvider::fetchLocalDir(const std::string& path)
 			return res;
 		}
 		//It must be a file
-		if(boost::filesystem::exists(p.parent_path()))
+		if(boost::filesystem::exists(p) &&
+		   boost::filesystem::exists(p.parent_path()))
 		{
 			std::string dirName=p.parent_path().string();
 			std::string fileName=p.leaf().string();

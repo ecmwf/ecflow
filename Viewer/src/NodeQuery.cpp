@@ -465,7 +465,7 @@ void NodeQuery::buildQueryString()
 		extQuery_["scope"]=scopePart;
 
 	if(query_.isEmpty())
-		extQuery_["node"] = "ANY";
+		extQuery_["node"] = "ALL";
 
 	QString opPart;
 	if(!ignoreMaxNum_)
