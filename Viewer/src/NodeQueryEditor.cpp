@@ -384,16 +384,7 @@ void NodeQueryEditor::slotServerCbChanged()
 
 	if(!initIsOn_)
 	{
-		//Server list
-		if(serverCb_->hasSelection())
-		{
-			query_->setServers(serverCb_->selection(),
-				(serverCb_->selection().count() == serverCb_->count()));
-		}
-		else if(serverCb_->count() > 0)
-		{
-			query_->setServers(serverCb_->all(),true);
-		}
+		query_->setServers(serverCb_->selection());
 		updateQueryTe();
 		checkGuiState();
 	}
@@ -531,31 +522,15 @@ void NodeQueryEditor::checkGuiState()
 {
 	serverResetTb_->setEnabled(serverCb_->hasSelection());
 
-	bool oneServer=(serverCb_->selection().count() == 1);
+	bool oneServer=(serverCb_->count() == 1 || serverCb_->selection().count() == 1);
 
 	rootLabel_->setEnabled(oneServer);
 	rootLe_->setEnabled(oneServer);
-
-	/*bool canBeRun=(!serverCb_->selection().isEmpty() ||
-		           !query_->queryString().isEmpty() ||
-	               (rootLe_->isEnabled() && !rootLe_->text().simplified().isEmpty()));
-
-	//if(canBeRun_ != canBeRun)
-	//{
-		canBeRun_=canBeRun;
-		Q_EMIT queryEnabledChanged(canBeRun_);
-	//}*/
 }
 
 void NodeQueryEditor::updateQueryTe()
 {
 	query_->buildQueryString();
-	/*QString q;
-	QStringList lst=query_->extQueryString();
-	if(lst.count() > 1)
-		q=lst.join(" and\n");
-	else if(lst.count()==1)
-		q=lst.front();*/
 
 	QColor bg(241,241,241);
 	setQueryTe(query_->extQueryHtml(true,bg,65));
@@ -563,7 +538,7 @@ void NodeQueryEditor::updateQueryTe()
 
 void NodeQueryEditor::setQueryTe(QString s)
 {
-	int rowNum=s.count("\n")+1;
+	int rowNum=s.count("<tr>")+s.count("<br>")+1;
 	if(rowNum==0 && !s.isEmpty())
 		rowNum=1;
 
@@ -572,11 +547,6 @@ void NodeQueryEditor::setQueryTe(QString s)
 		oldRowNum=1;
 
 	queryTe_->setHtml(s);
-
-	//for(QTextBlock it = queryTe->document()->begin(); it != queruTe_->document()->end(); it = it.next())
-	//{
-	//	QTextBlockFormat f=it.textBlockFormat();
-	//}
 
 	if(!queryTeCanExpand_)
 	{
@@ -617,6 +587,11 @@ void NodeQueryEditor::adjustQueryTe(int rn)
 // Servers
 //------------------------------------------
 
+QStringList NodeQueryEditor::allServers() const
+{
+	return serverCb_->all();
+}
+
 void NodeQueryEditor::updateServers()
 {
 	serverCb_->clear();
@@ -632,12 +607,14 @@ void NodeQueryEditor::updateServers()
 	//Init
 	if(serverCb_->count() == 1)
 	{
-		serverCb_->selectSoleItem();
+		//serverCb_->selectSoleItem();
 	}
 	else
 	{
-		slotServerCbChanged();
+		//slotServerCbChanged();
 	}
+
+	slotServerCbChanged();
 
 }
 

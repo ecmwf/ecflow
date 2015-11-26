@@ -40,6 +40,13 @@ ServerFilter::~ServerFilter()
 	}
 }
 
+void ServerFilter::serverNames(std::vector<std::string>& vec) const
+{
+	for(std::vector<ServerItem*>::const_iterator it=items_.begin(); it != items_.end(); ++it)
+	{
+		vec.push_back((*it)->name());
+	}
+}
 
 void ServerFilter::addServer(ServerItem *item,bool broadcast)
 {

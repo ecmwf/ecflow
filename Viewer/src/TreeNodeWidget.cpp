@@ -23,16 +23,16 @@
 
 #include "FilterWidget.hpp"
 
-TreeNodeWidget::TreeNodeWidget(ServerFilter* servers,QWidget* parent) : NodeWidget("tree",parent)
+TreeNodeWidget::TreeNodeWidget(ServerFilter* serverFilter,QWidget* parent) : NodeWidget("tree",serverFilter,parent)
 {
 	//Init qt-creator form
 	setupUi(this);
 
 	//This defines how to filter the nodes in the tree. We only want to filter according to node status.
-	filterDef_=new NodeFilterDef(servers,NodeFilterDef::NodeStateScope);
+	filterDef_=new NodeFilterDef(serverFilter_,NodeFilterDef::NodeStateScope);
 
 	//Create the tree model. It uses the datahandler to access the data.
-	model_=new TreeNodeModel(servers,filterDef_,atts_,icons_,this);
+	model_=new TreeNodeModel(serverFilter_,filterDef_,atts_,icons_,this);
 
 	//data_->reset(servers);
 

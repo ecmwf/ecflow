@@ -112,7 +112,7 @@ void NodeQuerySelectOption::load(VSettings* vs)
 NodeQuery::NodeQuery(const std::string& name,bool ignoreMaxNum) :
   name_(name),
   advanced_(false),
-  allServers_(false),
+  //allServers_(true),
   caseSensitive_(false),
   maxNum_(defaultMaxNum_),
   ignoreMaxNum_(ignoreMaxNum)
@@ -190,7 +190,7 @@ void NodeQuery::swap(const NodeQuery* q)
 	extQuery_=q->extQuery_;
 	rootNode_=q->rootNode_;
 	servers_=q->servers_;
-	allServers_=q->allServers_;
+	//allServers_=q->allServers_;
 	caseSensitive_=q->caseSensitive_;
 	maxNum_=q->maxNum_;
 	ignoreMaxNum_=q->ignoreMaxNum_;
@@ -228,20 +228,15 @@ bool NodeQuery::hasServer(const std::string& name) const
 	return servers_.contains(QString::fromStdString(name));
 }
 
-void NodeQuery::checkAllServers(QStringList all)
+void NodeQuery::adjustServers(const std::vector<std::string>& all)
 {
-	if(all.count() != servers_.count())
-		allServers_=false;
+	QStringList allLst=vecToLst(all);
 
-	Q_FOREACH(QString s,all)
-		if(!servers_.contains(s))
-		{
-			allServers_=false;
-			buildQueryString();
-		}
-
-	allServers_=true;
-	buildQueryString();
+	/*if(allServers_)
+	{
+		servers_=allLst;
+		buildQueryString();
+	}*/
 }
 
 QStringList NodeQuery::typeSelection() const
@@ -456,10 +451,10 @@ void NodeQuery::buildQueryString()
 
 	//Extended query
 	QString scopePart;
-	if(!servers_.isEmpty() && !allServers_)
+	if(!servers_.isEmpty())
 		scopePart="servers = \'" + servers_.join(", ") + "\'";
 
-	if(servers_.size() == 1 && !rootNode_.empty())
+	if(servers_.size() <= 1 && !rootNode_.empty())
 	{
 		if(!scopePart.isEmpty())
 			scopePart+=" and ";
@@ -602,6 +597,8 @@ void NodeQuery::load(VSettings* vs)
 	for(std::vector<std::string>::const_iterator it=v.begin(); it != v.end(); ++it)
 	    servers_ << QString::fromStdString(*it);
 
+	//allServers_=vs->getAsBool("allServers",allServers_);
+
 	rootNode_=vs->get("rootNode",rootNode_);
     
     Q_FOREACH(QString s,stringOptions_.keys())
@@ -633,6 +630,9 @@ void NodeQuery::save(VSettings* vs)
     std::vector<std::string> v;
     Q_FOREACH(QString s, servers_)
     	v.push_back(s.toStdString());
+
+    //if(!allServers_)
+   //     vs->putAsBool("allServers",allServers_);
 
     if(!v.empty())
     	vs->put("servers",v);

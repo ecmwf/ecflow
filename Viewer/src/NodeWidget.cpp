@@ -19,7 +19,9 @@
 #include <QAction>
 #include <QMenu>
 
-NodeWidget::NodeWidget(const std::string& type,QWidget* parent) : DashboardWidget(type,parent),
+NodeWidget::NodeWidget(const std::string& type,ServerFilter* serverFilter,QWidget* parent) :
+   DashboardWidget(type,parent),
+   serverFilter_(serverFilter),
    model_(0),
    filterModel_(0),
    view_(0),

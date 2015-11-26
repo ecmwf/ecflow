@@ -22,7 +22,7 @@
      <item>
       <widget class="QPushButton" name="applyPb_">
        <property name="text">
-        <string>Load</string>
+        <string>Apply</string>
        </property>
        <property name="icon">
         <iconset resource="viewer.qrc">

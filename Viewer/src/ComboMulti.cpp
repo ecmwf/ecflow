@@ -66,7 +66,7 @@ void ComboMulti::paintEvent(QPaintEvent *)
 
     // if no display text been set , use "..." as default
     if(dpyText_.isEmpty())
-        opt.currentText = "ANY";
+        opt.currentText = "ALL";
     else
     {
         opt.currentText = dpyText_;

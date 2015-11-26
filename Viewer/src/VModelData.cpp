@@ -927,7 +927,6 @@ bool VTableModelData::isFiltered(VNode *node) const
 	int id=indexOfServer(node->server());
 	if(id != -1)
 	{
-		qDebug() << "isFiltered" << node->name() << servers_.at(id)->filter_->isFiltered(node);
 		return servers_.at(id)->filter_->isFiltered(node);
 	}
 

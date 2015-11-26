@@ -58,10 +58,12 @@ Q_SIGNALS:
 	void dashboardCommand(VInfo_ptr,QString);
 
 protected:
-	explicit NodeWidget(const std::string& type,QWidget* parent=0);
+	explicit NodeWidget(const std::string& type,ServerFilter* serverFilter,QWidget* parent=0);
 	virtual ~NodeWidget();
 
 	void updateActionState(VInfo_ptr);
+
+	ServerFilter* serverFilter_;
 
 	AbstractNodeModel* model_;
 	NodeFilterModel* filterModel_;

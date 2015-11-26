@@ -84,7 +84,7 @@
         <item row="0" column="3">
          <widget class="QToolButton" name="serverResetTb_">
           <property name="toolTip">
-           <string>Reset</string>
+           <string>Clear server filter</string>
           </property>
           <property name="text">
            <string>...</string>

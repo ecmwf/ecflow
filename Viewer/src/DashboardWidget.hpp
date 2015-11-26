@@ -18,6 +18,7 @@
 #include "VInfo.hpp"
 
 class DashboardDockTitleWidget;
+class ServerFilter;
 class VSettings;
 
 class DashboardWidget : public QWidget
@@ -25,7 +26,8 @@ class DashboardWidget : public QWidget
 Q_OBJECT
 
 public:
-	DashboardWidget(const std::string& type, QWidget* parent=0) : QWidget(parent), type_(type), acceptSetCurrent_(false) {};
+	DashboardWidget(const std::string& type, QWidget* parent=0) :
+		QWidget(parent),type_(type), acceptSetCurrent_(false) {};
 	virtual ~DashboardWidget() {};
 
     virtual void populateDockTitleBar(DashboardDockTitleWidget*)=0;

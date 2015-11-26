@@ -26,22 +26,22 @@
 
 #include <QHBoxLayout>
 
-TableNodeWidget::TableNodeWidget(ServerFilter* servers,QWidget * parent) : NodeWidget("table",parent)
+TableNodeWidget::TableNodeWidget(ServerFilter* serverFilter,QWidget * parent) : NodeWidget("table",serverFilter,parent)
 {
 	//Init qt-creator form
 	setupUi(this);
 
 	//This defines how to filter the nodes in the tree. We only want to filter according to node status.
-	filterDef_=new NodeFilterDef(servers,NodeFilterDef::GeneralScope);
+	filterDef_=new NodeFilterDef(serverFilter_,NodeFilterDef::GeneralScope);
 
 	//Create the table model. It uses the datahandler to access the data.
-	model_=new TableNodeModel(servers,filterDef_,this);
+	model_=new TableNodeModel(serverFilter_,filterDef_,this);
 
 	//Create a filter model for the tree.
 	filterModel_=new NodeFilterModel(model_,this);
 
 	//Build the filter widget
-	filterW_->build(filterDef_,servers);
+	filterW_->build(filterDef_,serverFilter_);
 
 	//Create the view
 	QHBoxLayout *hb=new QHBoxLayout(viewHolder_);

@@ -98,11 +98,12 @@ public:
 	void setRootNode(const std::string& rootNode) {rootNode_=rootNode;}
 	const std::string& rootNode() const {return rootNode_;}
 
-	void setServers(QStringList servers,bool all=false) {servers_=servers; allServers_=all;}
+	//void setServers(QStringList servers,bool all=false) {servers_=servers; allServers_=all;}
+	void setServers(QStringList servers) {servers_=servers;}
 	//const std::vector<std::string>& servers() const {return servers_;}
 	QStringList servers() const {return servers_;}
 	bool hasServer(const std::string& name) const;
-	void checkAllServers(QStringList servers);
+	void adjustServers(const std::vector<std::string>& servers);
 
 	QString extQueryHtml(bool multi,QColor bgCol,int firstColWidth) const;
 	void buildQueryString();

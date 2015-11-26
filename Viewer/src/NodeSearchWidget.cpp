@@ -172,7 +172,7 @@ void NodeSearchWidget::slotFind()
 
 	assert(!engine_->isRunning());
 
-	engine_->runQuery(editor_->query());
+	engine_->runQuery(editor_->query(),editor_->allServers());
 }
 
 void NodeSearchWidget::slotStop()

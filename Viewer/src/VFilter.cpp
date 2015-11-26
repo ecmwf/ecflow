@@ -228,13 +228,6 @@ void NodeFilterDef::readSettings(VSettings *vs)
 	query_->load(vs);
 	vs->endGroup();
 
-	QStringList lst;
-	for(std::vector<ServerItem*>::const_iterator it=serverFilter_->items().begin(); it != serverFilter_->items().end(); ++it)
-	{
-		lst << QString::fromStdString((*it)->name());
-	}
-	query_->checkAllServers(lst);
-
 	Q_EMIT changed();
 }
 

@@ -35,7 +35,7 @@ public:
 	explicit NodeQueryEngine(QObject* parent=0);
 	~NodeQueryEngine();
 
-	void runQuery(NodeQuery* query);
+	void runQuery(NodeQuery* query,QStringList allServers);
 	void stopQuery();
 	int scannedCount() const {return scanCnt_;}
 

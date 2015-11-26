@@ -55,6 +55,7 @@ public:
     void toggleDefPanelVisible();
     bool isDefPanelVisible() const;
     int maxNum() const;
+    QStringList allServers() const;
 
     void notifyServerFilterAdded(ServerItem*);
     void notifyServerFilterRemoved(ServerItem*);

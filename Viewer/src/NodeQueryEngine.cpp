@@ -54,7 +54,7 @@ NodeQueryEngine::~NodeQueryEngine()
 		delete parser_;
 }
 
-void NodeQueryEngine::runQuery(NodeQuery* query)
+void NodeQueryEngine::runQuery(NodeQuery* query,QStringList allServers)
 {
 	if(isRunning())
 		wait();
@@ -74,16 +74,20 @@ void NodeQueryEngine::runQuery(NodeQuery* query)
 	if(parser_)
 		delete parser_;
 
-	UserMessage::message(UserMessage::DBG, true, std::string("Query: " + query_->query().toStdString()));
+	UserMessage::message(UserMessage::DBG,false, std::string("Query: " + query_->query().toStdString()));
 
 	parser_=NodeExpressionParser::parseWholeExpression(query_->query().toStdString(), query->caseSensitive());
 	if(parser_ == NULL)
 	{
-		UserMessage::message(UserMessage::ERROR, true, std::string("Error, unable to parse enabled condition: " + query_->query().toStdString()));
+		UserMessage::message(UserMessage::ERROR,true, std::string("Error, unable to parse enabled condition: " + query_->query().toStdString()));
 		return;
 	}
 
-	Q_FOREACH(QString s,query_->servers())
+	QStringList serverNames=query_->servers();
+	if(query_->servers().isEmpty())
+		serverNames=allServers;
+
+	Q_FOREACH(QString s,serverNames)
 	{
 		if(ServerHandler* server=ServerHandler::find(s.toStdString()))
 		{
