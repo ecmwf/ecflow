@@ -42,10 +42,6 @@ void TableFilterWidget::slotEdit()
 	if(d.exec() == QDialog::Accepted)
 	{
 		filterDef_->setQuery(d.query());
-		qDebug() << "query" << d.query()->queryString();
-		qDebug() << "query" << filterDef_->query()->queryString();
-		qDebug() << "table query" << filterDef_->query()->extQueryString(false);
-		//queryTe_->setPlainText(filterDef_->query()->extQueryString());
 	}
 }
 

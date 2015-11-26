@@ -440,6 +440,7 @@ void NodeViewDelegate::renderEvent(QPainter *painter,QStringList data,const QSty
 
 	//Draw name
 	painter->setPen(Qt::black);
+	painter->setFont(font);
 	painter->drawText(nameRect,Qt::AlignLeft | Qt::AlignVCenter,name);
 
 	if(setClipRect)

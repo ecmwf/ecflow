@@ -103,11 +103,6 @@ public:
 	QStringList servers() const {return servers_;}
 	bool hasServer(const std::string& name) const;
 
-	//void setOptions(const NodeQueryOptions& options) {options_=options;}
-	//const NodeQueryOptions& options() const {return options_;}
-
-	QString queryString(bool update=true);
-	QString extQueryString(bool) const;
 	QString extQueryHtml(bool multi,QColor bgCol,int firstColWidth) const;
 	void buildQueryString();
 

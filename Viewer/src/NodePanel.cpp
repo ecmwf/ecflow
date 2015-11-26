@@ -342,7 +342,6 @@ void NodePanel::readSettings(VComboSettings *vs)
 		{
 			d->addWidget("tree");
 		}
-
 	}
 
 	if(QWidget *w=currentDashboard())

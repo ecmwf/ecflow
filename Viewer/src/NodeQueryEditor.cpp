@@ -509,8 +509,6 @@ void NodeQueryEditor::slotFlagListChanged()
 		query_->setFlagSelection(flagList_->selection());
 		updateQueryTe();
 		checkGuiState();
-
-		qDebug() << "flag changed" << query_->queryString();
 	}
 }
 
@@ -555,11 +553,6 @@ void NodeQueryEditor::updateQueryTe()
 		q=lst.join(" and\n");
 	else if(lst.count()==1)
 		q=lst.front();*/
-
-
-	qDebug() << "udpate" << query_->queryString();
-	qDebug() << "udpate" << query_->extQueryString(false);
-	qDebug() << "udpate" << query_->extQueryString(true);
 
 	QColor bg(241,241,241);
 	setQueryTe(query_->extQueryHtml(true,bg,65));

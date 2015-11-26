@@ -313,13 +313,6 @@ void NodeQuery::setAttrGroupSelection(const std::vector<std::string>& vec)
 	selectOptions_["attr"]->selection_=vecToLst(vec);
 }
 
-QString NodeQuery::queryString(bool update)
-{
-	if(update)
-		buildQueryString();
-	return query_;
-}
-
 void NodeQuery::buildQueryString()
 {
 	//Scope
@@ -363,8 +356,6 @@ void NodeQuery::buildQueryString()
 		flagPart="(" + flagSelection().join(" or ") + ")";
 	}
 
-	qDebug() << "flag selection" << flagSelection() << flagPart;
-
 	//Attributes
 	QString attrPart;
 	Q_FOREACH(QString gr,attrGroupSelection())
@@ -391,8 +382,6 @@ void NodeQuery::buildQueryString()
 			attrPart+=" or ";
 		attrPart+=grPart;
 	}
-
-	qDebug() << "attr selection" << attrPart;
 
 	if(!attrPart.isEmpty())
 	{
@@ -427,9 +416,6 @@ void NodeQuery::buildQueryString()
 		extQuery_["state"]=statePart;
 	}
 
-	qDebug() << "flagPart " << flagPart;
-	qDebug() << "  --> " << query_;
-
 	if(!flagPart.isEmpty())
 	{
 		if(!query_.isEmpty())
@@ -438,7 +424,6 @@ void NodeQuery::buildQueryString()
 		query_+=flagPart;
 		extQuery_["flag"]=flagPart;
 	}
-	qDebug() << "  --> " << query_;
 
 	if(!attrPart.isEmpty())
 	{
@@ -448,8 +433,6 @@ void NodeQuery::buildQueryString()
 		query_+=attrPart;
 		extQuery_["attr"]=attrPart;
 	}
-
-	qDebug() << "  --> " << query_;
 
 	//Extended query
 	QString scopePart;
@@ -479,109 +462,7 @@ void NodeQuery::buildQueryString()
 			opPart+="case_insensitive";
 	}
 	extQuery_["options"]=opPart;
-
-	qDebug() << "  --> " << query_;
 }
-
-QString NodeQuery::extQueryString(bool multi) const
-{
-	QString str;
-
-	/*if(multi)
-	{
-		if(!extQuery_.value("scope").isEmpty())
-			str+="scope:   " + extQuery_.value("scope");
-
-		QStringList nodeParts;
-		nodeParts << "node" << "type" << "state" << "flag";
-		Q_FOREACH(QString s,nodeParts)
-		{
-			if(!extQuery_.value(s).isEmpty())
-			{
-				if(!str.isEmpty() && !str.contains("nodes:   "))
-					str+="\n";
-
-				if(!str.contains("nodes:   "))
-					str+="nodes:   "+ extQuery_.value(s);
-				else
-					str+=" and\n         " + extQuery_.value(s);
-			}
-		}
-
-		if(!extQuery_.value("options").isEmpty())
-		{
-			if(!str.isEmpty())
-				str+="\n";
-			str+="options: " + extQuery_.value("options");
-		}
-	}*/
-	if(multi)
-	{
-			str="<table width=\"100%\" cellpadding=\"6\">";
-			if(!extQuery_.value("scope").isEmpty())
-				str+="<tr><td width=\"60\" bgcolor=\"#EEEEEE\">scope</td><td bgcolor=\"#EEEEEE\">" + extQuery_.value("scope") + "</tr></td>";
-
-			QStringList nodeParts;
-			nodeParts << "node" << "type" << "state" << "flag";
-			Q_FOREACH(QString s,nodeParts)
-			{
-				if(!extQuery_.value(s).isEmpty())
-				{
-					//if(!str.isEmpty() && !str.contains("<td>nodes"))
-					//	str+="<br>";
-
-					if(!str.contains("nodes</td>"))
-						str+="<tr><td bgcolor=\"#EEEEEE\">nodes</td><td bgcolor=\"#EEEEEE\">"+ extQuery_.value(s);
-					else
-						str+=" and<br>         " + extQuery_.value(s);
-				}
-			}
-
-			if(str.contains("<td>nodes"))
-				str+="</td></tr>";
-
-			if(!extQuery_.value("options").isEmpty())
-			{
-				//if(!str.isEmpty())
-				//	str+="\n";
-				str+="<tr><td bgcolor=\"#EEEEEE\">options</td><td bgcolor=\"#EEEEEE\">" + extQuery_.value("options") +"</td></tr>";
-			}
-
-			str+="</table>";
-		}
-
-	else
-	{
-		if(!extQuery_.value("scope").isEmpty())
-			str+="scope: " + extQuery_.value("scope");
-
-		QStringList nodeParts;
-		nodeParts << "node" << "type" << "state" << "flag";
-		Q_FOREACH(QString s,nodeParts)
-		{
-			if(!extQuery_.value(s).isEmpty())
-			{
-				if(!str.isEmpty() && !str.contains("nodes: "))
-					str+=" | ";
-
-				if(!str.contains("nodes: "))
-					str+="nodes: "+ extQuery_.value(s);
-				else
-					str+=" and " + extQuery_.value(s);
-			}
-		}
-
-		if(!extQuery_.value("options").isEmpty())
-		{
-			if(!str.isEmpty())
-				str+=" | ";
-			str+="options: " + extQuery_.value("options");
-		}
-	}
-
-	return str;
-}
-
 
 QString NodeQuery::extQueryHtml(bool multi,QColor bgCol,int firstColWidth) const
 {

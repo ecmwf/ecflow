@@ -394,7 +394,10 @@ void Dashboard::readSettings(VComboSettings* vs)
 	//the the dockwidgets's objectname, so that has to be unique. We need to call
 	//it when the dockwidgets have already been created.
 	if(vs->containsQs("state"))
+	{
+		qDebug() << vs->getQs("state").toByteArray();
 		restoreState(vs->getQs("state").toByteArray());
+	}
 
 	selectFirstServerInView();
 }
