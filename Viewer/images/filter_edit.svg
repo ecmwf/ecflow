@@ -21,11 +21,11 @@
     <linearGradient
        id="linearGradient3617">
       <stop
-         style="stop-color:#bdc2f8;stop-opacity:1"
+         style="stop-color:#fefefe;stop-opacity:1;"
          offset="0"
          id="stop3619" />
       <stop
-         style="stop-color:#0e5b6f;stop-opacity:1"
+         style="stop-color:#4f93a3;stop-opacity:1;"
          offset="1"
          id="stop3621" />
     </linearGradient>
@@ -43,11 +43,11 @@
     <linearGradient
        id="linearGradient3717-3">
       <stop
-         style="stop-color:#9cb1da;stop-opacity:1;"
+         style="stop-color:#c1cee8;stop-opacity:1;"
          offset="0"
          id="stop3719-8" />
       <stop
-         style="stop-color:#ecf0f1;stop-opacity:1;"
+         style="stop-color:#ffffff;stop-opacity:1;"
          offset="1"
          id="stop3721-3" />
     </linearGradient>
@@ -55,8 +55,8 @@
        inkscape:collect="always"
        xlink:href="#linearGradient3617"
        id="linearGradient4163"
-       x1="2.1983273"
-       y1="25.221609"
+       x1="3.500973"
+       y1="25.36322"
        x2="14.203107"
        y2="25.221609"
        gradientUnits="userSpaceOnUse"
@@ -79,10 +79,10 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="30.25"
-     inkscape:cx="-9.6694215"
+     inkscape:cx="5.3449688"
      inkscape:cy="15.789501"
      inkscape:document-units="px"
-     inkscape:current-layer="layer6"
+     inkscape:current-layer="layer1"
      showgrid="true"
      inkscape:snap-grids="false"
      inkscape:window-width="1920"
@@ -150,7 +150,7 @@
        inkscape:connector-curvature="0"
        sodipodi:nodetypes="cccscccsc" />
     <ellipse
-       style="fill:url(#linearGradient4179);fill-opacity:1;stroke:#3f607c;stroke-width:0.25475222;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+       style="fill:url(#linearGradient4179);fill-opacity:1;stroke:#496b80;stroke-width:0.25479595999999999;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
        id="path3795"
        cx="8.1911592"
        cy="19.131386"
