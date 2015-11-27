@@ -262,10 +262,8 @@ install( FILES
 )
 
 # install documentation         
-install (FILES  
-            ${CMAKE_SOURCE_DIR}/Doc/user-manual/client_options.docx  
-            ${CMAKE_SOURCE_DIR}/Doc/user-manual/user_manual.docx    
-            ${CMAKE_SOURCE_DIR}/Doc/user-manual/user_manual.pdf    
+install (FILES   
+             ${CMAKE_SOURCE_DIR}/Doc/user-manual/client_options.docx  
          DESTINATION doc/ecflow
          PERMISSIONS OWNER_READ GROUP_READ WORLD_READ OWNER_EXECUTE GROUP_EXECUTE WORLD_EXECUTE
 )

@@ -531,24 +531,45 @@ void ehost::dir( node& n, const char* path, lister<ecf_dir>& l )
    host::dir(n, path, l);
 }
 
-bool use_ecf_out_cmd(node&n, std::string path, lister<ecf_dir>* l, bool dir, 
-		     std::string& content)
+bool use_ecf_out_cmd(node&n, std::string path, ecf_dir *dir, std::string& content)
 {
   /* used in conjonction with, for example:
      edit ECF_OUTPUT_CMD "/home/ma/map/bin/trimurti-out.sh -u %USER:0% -h %SCHOST:0% -j %ECF_JOB:0% -o %ECF_JOBOUT:0% -r %ECF_RID:0%" 
   */
+  char buf[2048];
   std::string cmd = n.variable("ECF_OUTPUT_CMD", true);
   if (cmd == ecf_node::none()) return false;
-  if (cmd.length() < 3) return false; // may be empty space characters, ignore cmd
-  if (!path.empty()) cmd += " -f " + path;
-  if (dir) cmd += " -d";
-  boost::shared_ptr<FILE> pipe(popen(cmd.c_str(), "r"), pclose);
+  else if (cmd.length() < 3) return false; // may be empty space characters, ignore cmd
+  else if (dir) cmd += " -d";
+  else if (!path.empty()) cmd += " -f " + path;
+
+  FILE *pipe = popen(cmd.c_str(), "r");
   if (!pipe) return false;
-  char line[4096];
-  while (!feof(pipe.get()))
-    if (fgets(line, 4096, pipe.get()) != NULL)
-      // if (dir && l) l->scan(line); else
-      content += line;
+
+  while (!feof(pipe)) {
+    if (fgets(buf, sizeof(buf), pipe) != NULL) {
+      if (dir) { 
+	dir->next = 0x0;
+	char name[1200];
+	sscanf(buf,"%d %d %d %d %d %d %d %s",
+	       & dir->mode,
+	       & dir->uid,
+	       & dir->gid,
+	       & dir->size,
+	       & dir->atime,
+	       & dir->mtime,
+	       & dir->ctime,
+	       name);
+	
+	dir->name_ = strdup(name);
+	dir->next = new ecf_dir();
+	dir = dir->next;
+
+	XECFDEBUG std::cout << "#MSG:" << buf << " # " << name << "\n";
+      } else { content += buf; }
+    }
+  }
+  pclose(pipe);
   return true;
 }
 
@@ -556,14 +577,14 @@ void host::dir( node& n, const char* path, lister<ecf_dir>& l )
 {
    gui::message("%s: fetching file list", this->name());
    std::string content;
-   if (use_ecf_out_cmd(n, path, &l, 1, content))
-     { } 
+   std::auto_ptr<ecf_dir> dir(new ecf_dir());
+   if (use_ecf_out_cmd(n, path, dir.get(), content))
+     { if (dir.get()) l.scan(dir.get()); } 
    else if (loghost_ != ecf_node::none()) {
       logsvr log_server(loghost_, logport_);
 
       if (log_server.ok()) {
          std::auto_ptr<ecf_dir> dir(log_server.getdir(path));
-
          if (dir.get()) {
             l.scan(dir.get());
             // return; // 20151115 add both remote + local?
@@ -1376,7 +1397,7 @@ tmp_file ehost::file(node& n, std::string name)
     // set_loghost(n); 
       std::string::size_type pos = loghost_.find(n.variable("ECF_MICRO"));
       std::string content;
-      if (use_ecf_out_cmd(n, name, NULL, false, content)) {
+      if (use_ecf_out_cmd(n, name, NULL, content)) {
 	tmp_file tmp(content); // tmpnam(NULL));
 	// tmp << content;
 	return tmp;
