@@ -24,7 +24,6 @@ PropertyMapper::~PropertyMapper()
 	}
 }
 
-
 VProperty* PropertyMapper::find(const std::string& path) const
 {
 	for(std::vector<VProperty*>::const_iterator it=props_.begin(); it != props_.end(); ++it)

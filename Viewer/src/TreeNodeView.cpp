@@ -82,10 +82,12 @@ TreeNodeView::TreeNodeView(NodeFilterModel* model,NodeFilterDef* filterDef,QWidg
 	//Properties
 	std::vector<std::string> propVec;
 	propVec.push_back("view.tree.indentation");
+	propVec.push_back("view.tree.background");
 	prop_=new PropertyMapper(propVec,this);
 
 	//Initialise indentation
 	adjustIndentation(prop_->find("view.tree.indentation")->value().toInt());
+	adjustBackground(prop_->find("view.tree.background")->value().value<QColor>());
 }
 
 TreeNodeView::~TreeNodeView()
@@ -275,12 +277,26 @@ void TreeNodeView::adjustIndentation(int offset)
 	}
 }
 
+void TreeNodeView::adjustBackground(QColor col)
+{
+	if(col.isValid())
+	{
+		qDebug() << "bg" << col << col.name();
+		QString sh="QTreeView { background : " + col.name() + ";}";
+		setStyleSheet(sh);
+	}
+}
+
 void TreeNodeView::notifyChange(VProperty* p)
 {
 	if(p->path() == "view.tree.indentation")
     {
 		adjustIndentation(p->value().toInt());
     }
+	else if(p->path() == "view.tree.background")
+	{
+		adjustBackground(p->value().value<QColor>());
+	}
 }
 
 //====================================================

@@ -70,6 +70,7 @@ protected:
 	void saveExpand(ExpandNode *parentExpand,const QModelIndex& idx);
 	void restoreExpand(ExpandNode *expand,const VNode* node);
 	void adjustIndentation(int);
+	void adjustBackground(QColor col);
 
 	ActionHandler* actionHandler_;
 	ExpandState *expandState_;

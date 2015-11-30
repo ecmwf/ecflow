@@ -101,7 +101,8 @@
                         "prefix" : "view.tree",
                 
                         "line" : "display_child_count",
-                        "line" : "indentation"
+                        "line" : "indentation",
+                        "line" : "background"                        
                     },
             
                     "group" : {
