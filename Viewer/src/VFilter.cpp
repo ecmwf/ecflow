@@ -71,6 +71,18 @@ QStringList VParamSet::currentAsList() const
 	return lst;
 }
 
+void VParamSet::setCurrent(const std::set<VParam*>& items)
+{
+	current_.clear();
+	for(std::set<VParam*>::const_iterator it=all_.begin(); it != all_.end(); ++it)
+	{
+		if(items.find(*it) != items.end())
+			current_.insert(*it);
+	}
+
+	Q_EMIT changed();
+}
+
 void VParamSet::current(const std::set<std::string>& names)
 {
 	current_.clear();
@@ -83,7 +95,7 @@ void VParamSet::current(const std::set<std::string>& names)
 	Q_EMIT changed();
 }
 
-void VParamSet::current(QStringList names)
+void VParamSet::setCurrent(QStringList names)
 {
 	current_.clear();
 	for(std::set<VParam*>::const_iterator it=all_.begin(); it != all_.end(); ++it)
@@ -152,11 +164,11 @@ AttributeFilter::AttributeFilter() : VParamSet()
 	std::vector<VParam*> v=VAttribute::filterItems();
 	init(v);
 
-	for(std::set<VParam*>::const_iterator it=all_.begin(); it != all_.end(); ++it)
+	/*for(std::set<VParam*>::const_iterator it=all_.begin(); it != all_.end(); ++it)
 	{
 		if((*it)->strName() != "var" && (*it)->strName() != "genvar")
 			current_.insert(*it);
-	}
+	}*/
 }
 
 //==============================================

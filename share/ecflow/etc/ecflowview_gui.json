@@ -110,7 +110,15 @@
                                 
                         "line" : "tree.nodeFontSize",
                         "line" : "tree.attributeFontSize"
-                    }                                                           
+                    },
+                    
+                    "group" : {
+                        "title" : "Attributes",
+                        "prefix" : "view.tree",
+                        
+                        "line" : "attributesPolicy",
+                        "line" : "defaultAttributes"
+                   }                                                                
                 }                   
 			}
  		},	

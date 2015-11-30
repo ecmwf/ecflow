@@ -24,6 +24,7 @@ class  QLineEdit;
 class  QSpinBox;
 class  QToolButton;
 class  QWidget;
+class  ComboMulti;
 
 #include "VProperty.hpp"
 
@@ -77,6 +78,7 @@ public:
 	QToolButton* masterTb() {return masterTb_;};
 	VProperty* property() const {return prop_;}
 	VProperty* guiProperty() const {return guiProp_;}
+	virtual bool canExpand() const {return false;}
 
 	void addHelper(PropertyLine*);
 
@@ -274,6 +276,34 @@ protected:
 
 protected:
 	QComboBox* cb_;
+};
+
+
+//-------------------------------------
+// Combo box editor
+//------------------------------------
+
+class ComboMultiPropertyLine : public PropertyLine
+{
+	Q_OBJECT
+
+public:
+	ComboMultiPropertyLine(VProperty* vProp,bool addLabel,QWidget * parent=0);
+	QWidget* item();
+	QWidget* button();
+	bool applyChange();
+	QVariant currentValue();
+	bool canExpand() const {return true;}
+
+public Q_SLOTS:
+	void slotCurrentChanged(int);
+	void slotReset(QVariant);
+
+protected:
+	void setEnabledEditable(bool);
+
+protected:
+	ComboMulti* cb_;
 };
 
 //-------------------------------------

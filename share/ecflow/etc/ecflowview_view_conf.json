@@ -52,7 +52,20 @@
                     "default" : "10",
                     "min" : "0",
                     "max" : "100"  
-                 }      	          
+                 },
+                 "defaultAttributes" : {
+                    "label" : "Default visible attributes",
+                    "default" : "meter/event/repeat/trigger/label/time/date/limit/limiter/late",
+                    "multi"   : "true",
+                    "values"  : "meter/event/repeat/trigger/label/time/date/limit/limiter/late/var/genvar",
+                    "values_label" : "Meters/Events/Repeats/Triggers/Labels/Times/Dates/Limits/Limiters/Late/Variables/Generated variables"
+                 },
+                 "attributesPolicy" : {
+                    "label" : "In new tree views show attributes",
+                    "default" : "default",
+                    "values"  : "default/last",
+                    "values_label" : "from default list/from last modified view"
+                 }          	         
             },
 
             "table": {

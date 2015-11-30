@@ -200,6 +200,9 @@
    <property name="toolTip">
     <string>Refresh &lt;b&gt;all servers&lt;/b&gt; in current tab</string>
    </property>
+   <property name="shortcut">
+    <string>Shift+F5</string>
+   </property>
   </action>
   <action name="actionReset">
    <property name="icon">

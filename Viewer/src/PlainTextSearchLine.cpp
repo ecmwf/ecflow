@@ -67,7 +67,6 @@ bool PlainTextSearchLine::findString (QString str, QTextDocument::FindFlags extr
 
 			found = (!cursor.isNull());
 			break;
-			break;
 		}
 		case StringMatchMode::RegexpMatch:
 		{

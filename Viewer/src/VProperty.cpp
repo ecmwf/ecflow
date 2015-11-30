@@ -206,13 +206,19 @@ std::string VProperty::valueAsString() const
 
 void VProperty::setParam(QString name,QString value)
 {
-	if(name == "values")
+	/*if(name == "values")
 	{
 		if(type_ == SoundType)
 			guiType_=SoundComboGui;
 		else
 			guiType_=StringComboGui;
 	}
+
+	if(name == "multi" && value == "true")
+	{
+		if(type_ == StringType || guiType_ == StringComboGui)
+			guiType_ == MultiStringComboGui;
+	}*/
 
     params_[name]=value;
 }
@@ -225,6 +231,30 @@ QString VProperty::param(QString name)
 
 	return QString();
 }
+
+void VProperty::adjustAfterLoad()
+{
+	QString vals=param("values");
+	QString multi=param("multi");
+
+	if(!vals.isEmpty())
+	{
+		if(type_ == SoundType)
+			guiType_=SoundComboGui;
+		else
+		{
+			if(multi == "true")
+			{
+				guiType_ = MultiStringComboGui;
+			}
+			else
+			{
+				guiType_=StringComboGui;
+			}
+		}
+	}
+}
+
 
 void VProperty::addChild(VProperty *prop)
 {

@@ -16,6 +16,7 @@
 
 ComboMulti::ComboMulti(QWidget *widget) :
     QComboBox(widget),
+	mode_(BasicMode),
     dpyText_("")
 {
     setSizeAdjustPolicy(QComboBox::AdjustToContents);
@@ -66,7 +67,10 @@ void ComboMulti::paintEvent(QPaintEvent *)
 
     // if no display text been set , use "..." as default
     if(dpyText_.isEmpty())
-        opt.currentText = "ALL";
+        if(mode_ == FilterMode)
+        	opt.currentText = "ALL";
+        else
+        	opt.currentText="NONE";
     else
     {
         opt.currentText = dpyText_;
@@ -87,7 +91,7 @@ void ComboMulti::slotChecked()
 
     for(int i=0; i < model()->rowCount(); i++)
     {
-        if(model()->data(model()->index(i,0),Qt::UserRole).toBool())
+        if(model()->data(model()->index(i,0),Qt::CheckStateRole).toBool())
         {
             selection_ << model()->data(model()->index(i,0),Qt::DisplayRole).toString();
         }
@@ -109,9 +113,21 @@ void ComboMulti::setSelection(QStringList lst)
 {
 	for(int i=0; i < count(); i++)
 	{
-		setItemData(i,false,Qt::UserRole);
+		setItemData(i,false,Qt::CheckStateRole);
 		if(lst.contains(itemText(i)))
-			setItemData(i,true,Qt::UserRole);
+			setItemData(i,true,Qt::CheckStateRole);
+	}
+
+	slotChecked();
+}
+
+void ComboMulti::setSelectionByData(QStringList lst)
+{
+	for(int i=0; i < count(); i++)
+	{
+		setItemData(i,false,Qt::CheckStateRole);
+		if(lst.contains(itemData(i).toString()))
+			setItemData(i,true,Qt::CheckStateRole);
 	}
 
 	slotChecked();
@@ -121,7 +137,7 @@ void ComboMulti::clearSelection()
 {
 	for(int i=0; i < count(); i++)
 	{
-	    setItemData(i,false,Qt::UserRole);
+	    setItemData(i,false,Qt::CheckStateRole);
 	}
 
 	slotChecked();
@@ -131,9 +147,20 @@ void ComboMulti::selectSoleItem()
 {
 	if(count() == 1)
 	{
-		setItemData(0,true,Qt::UserRole);
+		setItemData(0,true,Qt::CheckStateRole);
 		slotChecked();
 	}
+}
+
+QStringList ComboMulti::selectionData() const
+{
+	QStringList lst;
+	for(int i=0; i < count(); i++)
+	{
+		if(itemData(i,Qt::CheckStateRole).toBool())
+			lst << itemData(i,Qt::UserRole).toString();
+	}
+	return lst;
 }
 
 void ComboMulti::setDisplayText(QString text)
@@ -155,6 +182,12 @@ QStringList ComboMulti::all() const
 	return lst;
 }
 
+void ComboMulti::setMode(Mode mode)
+{
+	mode_=mode;
+}
+
+
 //==========================================================
 //
 // ComboMultiDelegate
@@ -170,7 +203,7 @@ void ComboMultiDelegate::paint(QPainter *painter, const QStyleOptionViewItem &op
                           const QModelIndex &index) const
 {
     //Get item data
-    bool value = index.data(Qt::UserRole).toBool();
+    bool value = index.data(Qt::CheckStateRole).toBool();
     QString text = index.data(Qt::DisplayRole).toString();
 
     // fill style options with item data
@@ -198,7 +231,7 @@ void ComboMultiDelegate::setEditorData(QWidget *editor,
 	//set editor data
 	QCheckBox *myEditor = static_cast<QCheckBox*>(editor);
 	myEditor->setText(index.data(Qt::DisplayRole).toString());
-	myEditor->setChecked(index.data(Qt::UserRole).toBool());
+	myEditor->setChecked(index.data(Qt::CheckStateRole).toBool());
 
 	connect(myEditor,SIGNAL(stateChanged(int)),
                  this,SLOT(slotEdited(int)));
@@ -212,13 +245,11 @@ void ComboMultiDelegate::setModelData(QWidget *editor, QAbstractItemModel *model
 	QCheckBox *myEditor = static_cast<QCheckBox*>(editor);
     bool value = myEditor->isChecked();
 
-    //set model data
-    QMap<int,QVariant> data;
-    data.insert(Qt::DisplayRole,myEditor->text());
-    data.insert(Qt::UserRole,value);
-    model->setItemData(index,data);
-
-    Q_EMIT itemChecked();
+    if(model->data(index,Qt::CheckStateRole).toBool() != value)
+    {
+    	model->setData(index,value,Qt::CheckStateRole);
+    	Q_EMIT itemChecked();
+    }
 
 }
 

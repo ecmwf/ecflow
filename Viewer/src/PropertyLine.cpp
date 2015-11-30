@@ -24,6 +24,7 @@
 #include <QPushButton>
 #include <QToolButton>
 
+#include "ComboMulti.hpp"
 #include "Sound.hpp"
 
 #include <assert.h>
@@ -708,6 +709,91 @@ void ComboPropertyLine::setEnabledEditable(bool b)
 
 //=========================================================================
 //
+// ComboMultiPropertyLine
+//
+//=========================================================================
+
+ComboMultiPropertyLine::ComboMultiPropertyLine(VProperty* guiProp,bool addLabel,QWidget * parent) : PropertyLine(guiProp,addLabel,parent)
+{
+	if(label_)
+	    label_->setText(label_->text() + ":");
+
+	cb_=new ComboMulti(parent);//(vProp->param("label"));
+
+	cb_->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+
+	connect(cb_,SIGNAL(currentIndexChanged(int)),
+			   this,SLOT(slotCurrentChanged(int)));
+
+	QStringList lst=prop_->param("values_label").split("/");
+    QStringList lstData=prop_->param("values").split("/");
+    if(prop_->param("values_label").simplified().isEmpty())
+        lst=lstData;
+
+    assert(lst.count() == lstData.count());
+    for(int i=0; i < lst.count(); i++)
+    {
+    	cb_->addItem(lst[i],lstData[i]);
+    }
+}
+
+QWidget* ComboMultiPropertyLine::item()
+{
+	return cb_;
+}
+
+QWidget* ComboMultiPropertyLine::button()
+{
+	return NULL;
+}
+
+void ComboMultiPropertyLine::slotReset(QVariant v)
+{
+	QStringList vals=v.toString().split("/");
+
+	cb_->setSelectionByData(vals);
+
+	PropertyLine::checkState();
+	valueChanged();
+}
+
+bool ComboMultiPropertyLine::applyChange()
+{
+    PropertyLine::applyMaster();
+
+    QString currentVal=cb_->selectionData().join("/");
+
+    if(oriVal_.toString() != currentVal)
+    {
+   		 prop_->setValue(currentVal);
+   		 oriVal_=prop_->value();
+   		 return true;
+    }
+
+    return false;
+}
+
+QVariant ComboMultiPropertyLine::currentValue()
+{
+	QStringList lst=cb_->selection();
+
+	return lst.join("/");
+}
+
+void ComboMultiPropertyLine::slotCurrentChanged(int)
+{
+    PropertyLine::checkState();
+    valueChanged();
+}
+
+void ComboMultiPropertyLine::setEnabledEditable(bool b)
+{
+	cb_->setEnabled(b);
+}
+
+
+//=========================================================================
+//
 // SoundComboPropertyLine
 //
 //=========================================================================
@@ -756,4 +842,5 @@ static PropertyLineMaker<FontPropertyLine> makerFont(VProperty::FontGui);
 static PropertyLineMaker<IntPropertyLine> makerInt(VProperty::IntGui);
 static PropertyLineMaker<BoolPropertyLine> makerBool(VProperty::BoolGui);
 static PropertyLineMaker<ComboPropertyLine> makerCombo(VProperty::StringComboGui);
+static PropertyLineMaker<ComboMultiPropertyLine> makerComboMulti(VProperty::MultiStringComboGui);
 static PropertyLineMaker<SoundComboPropertyLine> makerSoundCombo(VProperty::SoundComboGui);

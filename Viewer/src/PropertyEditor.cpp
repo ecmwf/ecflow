@@ -203,7 +203,14 @@ PropertyLine* PropertyEditor::addLine(VProperty *vProp,QGridLayout *gridLayout,Q
             }
             else
             {
-                gridLayout->addWidget(item->item(),row,1,Qt::AlignLeft);
+            	if(item->canExpand())
+            	{
+            		QHBoxLayout* hb=new QHBoxLayout;
+            	    hb->addWidget(item->item());
+            	    gridLayout->addLayout(hb,row,1,Qt::AlignLeft);
+            	}
+            	else
+            		gridLayout->addWidget(item->item(),row,1,Qt::AlignLeft);
             }
         }
         else

@@ -140,7 +140,9 @@ NodeQueryEditor::NodeQueryEditor(QWidget *parent) :
     //-------------------------
 
     //Servers
-    serverResetTb_->setEnabled(serverCb_->hasSelection());
+    serverCb_->setMode(ComboMulti::FilterMode);
+
+	serverResetTb_->setEnabled(serverCb_->hasSelection());
 
     connect(serverCb_,SIGNAL(selectionChanged()),
            this,SLOT(slotServerCbChanged()));

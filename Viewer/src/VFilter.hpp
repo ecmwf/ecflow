@@ -38,9 +38,10 @@ public:
 	virtual ~VParamSet() {};
 
 	const std::set<VParam*>& current() const {return current_;}
+	void setCurrent(const std::set<VParam*>&);
 	QStringList currentAsList() const;
 	void current(const std::set<std::string>&);
-	void current(QStringList);
+	void setCurrent(QStringList);
 	const std::set<VParam*>& all() const {return all_;}
 
 	bool isEmpty() const {return current_.empty();}

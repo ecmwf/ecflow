@@ -9,6 +9,7 @@
 
 #include "TreeNodeWidget.hpp"
 
+#include <QDebug>
 #include <QHBoxLayout>
 
 #include "AbstractNodeModel.hpp"
@@ -19,14 +20,24 @@
 #include "TreeNodeModel.hpp"
 #include "TreeNodeView.hpp"
 #include "VFilter.hpp"
+#include "VConfig.hpp"
 #include "VSettings.hpp"
 
 #include "FilterWidget.hpp"
+
+AttributeFilter* TreeNodeWidget::lastAtts_=NULL;
 
 TreeNodeWidget::TreeNodeWidget(ServerFilter* serverFilter,QWidget* parent) : NodeWidget("tree",serverFilter,parent)
 {
 	//Init qt-creator form
 	setupUi(this);
+
+	if(!lastAtts_)
+	{
+		lastAtts_=new AttributeFilter();
+	}
+
+	initAtts();
 
 	//This defines how to filter the nodes in the tree. We only want to filter according to node status.
 	filterDef_=new NodeFilterDef(serverFilter_,NodeFilterDef::NodeStateScope);
@@ -72,6 +83,9 @@ TreeNodeWidget::TreeNodeWidget(ServerFilter* serverFilter,QWidget* parent) : Nod
 	connect(model_,SIGNAL(rerender()),
 	        view_->realWidget(),SLOT(slotRerender()));
 
+	connect(atts_,SIGNAL(changed()),
+		   this,SLOT(slotAttsChanged()));
+
 	//This will not emit the trigered signal of the action!!
 	//Synchronise the action and the breadcrumbs state
 	actionBreadcrumbs->setChecked(bcWidget_->active());
@@ -83,6 +97,22 @@ TreeNodeWidget::TreeNodeWidget(ServerFilter* serverFilter,QWidget* parent) : Nod
 
 TreeNodeWidget::~TreeNodeWidget()
 {
+}
+
+void TreeNodeWidget::initAtts()
+{
+	if(VProperty *prop=VConfig::instance()->find("view.tree.attributesPolicy"))
+	{
+		if(prop->valueAsString() == "last")
+		{
+			atts_->setCurrent(lastAtts_->current());
+		}
+		else if(VProperty *propDef=VConfig::instance()->find("view.tree.defaultAttributes"))
+		{
+			qDebug() << "atts" << propDef->value().toString() << propDef->value().toString().split("/");
+			atts_->setCurrent(propDef->value().toString().split("/"));
+		}
+	}
 }
 
 void TreeNodeWidget::populateDockTitleBar(DashboardDockTitleWidget* tw)
@@ -164,6 +194,10 @@ bool TreeNodeWidget::selectFirstServerInView()
 	return true;
 }
 
+void TreeNodeWidget::slotAttsChanged()
+{
+	lastAtts_->setCurrent(atts_->current());
+}
 
 void TreeNodeWidget::writeSettings(VSettings* vs)
 {
@@ -188,6 +222,8 @@ void TreeNodeWidget::readSettings(VSettings* vs)
 	states_->readSettings(vs);
 	atts_->readSettings(vs);
 	icons_->readSettings(vs);
+
+	lastAtts_->setCurrent(atts_->current());
 
 	//The model at this point is inactive (not using its data). We make it active:
 	//	-it will instruct its data provider to filter the data according
