@@ -43,7 +43,7 @@ BOOST_AUTO_TEST_CASE( test_single_expression )
 // 	exprMap["../obs:YMD ge  ( 19720101 + 6576 - 1)"] = std::make_pair(AstGreaterEqual::stype(),true);
 // 	exprMap["../obs:YMD ge  ( (19720101 + 6576) - (12 + 1) )"] = std::make_pair(AstGreaterEqual::stype(),true);
 
-   exprMap["comp == complete and notready == complete"] = std::make_pair(AstAnd::stype(),false);
+   exprMap["../timers/end/ymd:YMD >= ./hind:YMD and hind_info == complete and comp == complete and notready == complete"] = std::make_pair(AstAnd::stype(),false);
 //   exprMap["comp == complete and ! ready == complete"] = std::make_pair(AstAnd::stype(),false);
 //   exprMap["comp == complete and not ready == complete"] = std::make_pair(AstAnd::stype(),false);
 //   exprMap["comp == complete and ~ ready == complete"] = std::make_pair(AstAnd::stype(),false);
