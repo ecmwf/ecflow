@@ -33,9 +33,8 @@ public Q_SLOTS:
 	virtual void slotFindNext()=0;
 	virtual void slotFindPrev()=0;
 	void slotClose();
-	void on_actionCaseSensitive__toggled(bool);
-	void on_actionWholeWords__toggled(bool);
-    void matchModeChanged(int newIndex);
+	virtual void on_actionCaseSensitive__toggled(bool);
+	virtual void on_actionWholeWords__toggled(bool);
 
 protected:
 	void updateButtons(bool);

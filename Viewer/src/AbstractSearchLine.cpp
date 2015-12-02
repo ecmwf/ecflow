@@ -41,8 +41,6 @@ AbstractSearchLine::AbstractSearchLine(QWidget* parent) : QWidget(parent)
 	connect(closeTb_,SIGNAL(clicked()),
 		this, SLOT(slotClose()));
 
-	connect(matchModeCb_,SIGNAL(currentIndexChanged(int)),
-		this, SLOT(matchModeChanged(int)));
 
 	nextTb_->setDefaultAction(actionNext_);
 	prevTb_->setDefaultAction(actionPrev_);
@@ -136,10 +134,3 @@ void AbstractSearchLine::on_actionWholeWords__toggled(bool b)
     wholeWords_ = b;
 }
 
-void AbstractSearchLine::matchModeChanged(int notUsed)
-{
-    if(matchModeCb_->currentMatchMode() == StringMatchMode::ContainsMatch)
-        actionWholeWords_->setEnabled(true);
-    else
-        actionWholeWords_->setEnabled(false);
-}

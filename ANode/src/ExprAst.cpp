@@ -213,7 +213,7 @@ std::ostream& AstNot::print( std::ostream& os ) const {
 }
 
 void AstNot::print_flat( std::ostream& os,bool add_bracket) const {
-   os << "! ";
+   os << name_;
    if (left_) {
       if (add_bracket) os << "(";
       left_->print_flat(os,add_bracket);

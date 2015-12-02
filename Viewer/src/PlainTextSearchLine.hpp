@@ -29,10 +29,14 @@ public Q_SLOTS:
 	void slotFindPrev();
 	void slotFindNext(bool) {slotFindNext();}
 	void slotFindPrev(bool) {slotFindPrev();}
+	void matchModeChanged(int newIndex);
+	void on_actionCaseSensitive__toggled(bool);
+	void on_actionWholeWords__toggled(bool);
 
 protected:
 	QTextDocument::FindFlags findFlags();
 	bool findString (QString str, QTextDocument::FindFlags extraFlags, bool gotoStartOfWord, int iteration);
+	void refreshSearch();
 	QPlainTextEdit* editor_;
 
 };

@@ -20,6 +20,9 @@ PlainTextSearchLine::PlainTextSearchLine(QWidget *parent) :
 	AbstractSearchLine(parent), editor_(0)
 {
 
+	connect(matchModeCb_,SIGNAL(currentIndexChanged(int)),
+		this, SLOT(matchModeChanged(int)));
+
 }
 
 PlainTextSearchLine::~PlainTextSearchLine()
@@ -118,21 +121,17 @@ void PlainTextSearchLine::slotFindNext()
 	if(!editor_)
 		return;
 
-	if(status_ == true)
-	{
-		findString(searchLine_->text(), 0, false, 0);
-	}
+	bool found = findString(searchLine_->text(), 0, false, 0);
+	updateButtons(found);
 }
 
 void PlainTextSearchLine::slotFindPrev()
 {
 	if(!editor_)
-			return;
+		return;
 
-	if(status_==true)
-	{
-		findString(searchLine_->text(), QTextDocument::FindBackward, false, 0);
-	}
+	bool found = findString(searchLine_->text(), QTextDocument::FindBackward, false, 0);
+	updateButtons(found);
 }
 
 QTextDocument::FindFlags PlainTextSearchLine::findFlags()
@@ -150,4 +149,51 @@ QTextDocument::FindFlags PlainTextSearchLine::findFlags()
 	}
 
 	return flags;
+}
+
+
+
+
+// PlainTextSearchLine::refreshSearch
+// performed when the user changes search parameters such as case sensitivity - we want to
+// re-do the search from the current point, but if the current selection still matches then
+// we'd like it to be found first.
+
+void PlainTextSearchLine::refreshSearch()
+{
+	// if there's something selected already then move the cursor to the start of the line and search again
+	QTextCursor cursor(editor_->textCursor());
+	if (cursor.hasSelection())
+	{
+		cursor.movePosition(QTextCursor::StartOfLine, QTextCursor::MoveAnchor);
+		editor_->setTextCursor(cursor);
+	}
+	slotFindNext();
+}
+
+
+void PlainTextSearchLine::matchModeChanged(int notUsed)
+{
+	if(matchModeCb_->currentMatchMode() == StringMatchMode::ContainsMatch)
+		actionWholeWords_->setEnabled(true);
+	else
+		actionWholeWords_->setEnabled(false);
+
+	refreshSearch();
+}
+
+
+void PlainTextSearchLine::on_actionCaseSensitive__toggled(bool b)
+{
+    AbstractSearchLine::on_actionCaseSensitive__toggled(b);
+
+	refreshSearch();
+}
+
+
+void PlainTextSearchLine::on_actionWholeWords__toggled(bool b)
+{
+    AbstractSearchLine::on_actionWholeWords__toggled(b);
+
+	refreshSearch();
 }
