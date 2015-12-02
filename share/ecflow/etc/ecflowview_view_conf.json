@@ -56,10 +56,10 @@
                     "values_label" : "Meters/Events/Repeats/Triggers/Labels/Times/Dates/Limits/Limiters/Late/Variables/Generated variables"
                  },
                  "attributesPolicy" : {
-                    "label" : "In new tree views show attributes",
+                    "label" : "In new tree views show",
                     "default" : "default",
                     "values"  : "default/last",
-                    "values_label" : "from default list/from last modified view"
+                    "values_label" : "default visible attributes/attributes from last modified view"
                  }          	         
             },
 
@@ -71,7 +71,7 @@
                 },               
                 "font" : {
  					"label" : "Font",
- 					"default": "font()"
+ 					"default": "font(,)"
  				} 				
 			},
 			

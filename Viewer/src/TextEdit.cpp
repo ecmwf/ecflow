@@ -422,9 +422,29 @@ void TextEdit::setFontProperty(VProperty* p)
 void TextEdit::wheelEvent(QWheelEvent *event)
 {
 	int fps=font().pointSize();
-	QPlainTextEdit::wheelEvent(event);
-	if(font().pointSize() != fps)
-		fontSizeChangedByZoom();
+
+	if(isReadOnly())
+	{
+		QPlainTextEdit::wheelEvent(event);
+		if(font().pointSize() != fps)
+			fontSizeChangedByZoom();
+	}
+	//For readOnly document the zoom does not work so we
+	//need this custom code!
+	else
+	{
+		if(event->modifiers() & Qt::ControlModifier)
+		{
+			const int delta = event->delta();
+	        if (delta < 0)
+	        	slotZoomOut();
+	        else if (delta > 0)
+	            slotZoomIn();
+	        return;
+		}
+
+		QPlainTextEdit::wheelEvent(event);
+	}
 }
 
 void TextEdit::slotZoomIn()

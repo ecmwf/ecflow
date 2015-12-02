@@ -137,8 +137,8 @@
     <bool>false</bool>
    </attribute>
    <addaction name="actionRefreshSelected"/>
-   <addaction name="actionManageServers"/>
    <addaction name="actionSearch"/>
+   <addaction name="actionManageServers"/>
   </widget>
   <action name="actionClose">
    <property name="icon">
@@ -173,7 +173,7 @@
      <normaloff>:/viewer/images/configure.svg</normaloff>:/viewer/images/configure.svg</iconset>
    </property>
    <property name="text">
-    <string>&amp;Configure ...</string>
+    <string>&amp;Preferences ...</string>
    </property>
   </action>
   <action name="actionNewTab">
