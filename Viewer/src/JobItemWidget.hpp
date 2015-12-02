@@ -21,6 +21,7 @@ class JobItemWidget : public CodeItemWidget, public InfoPanelItem
 {
 public:
 	explicit JobItemWidget(QWidget *parent=0);
+	~JobItemWidget();
 
 	void reload(VInfo_ptr);
 	QWidget* realWidget();

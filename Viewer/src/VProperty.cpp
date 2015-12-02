@@ -482,10 +482,21 @@ QFont VProperty::toFont(const std::string& name)
 {
 	QString qn=QString::fromStdString(name);
 	QFont f;
-	QRegExp rx("font\\((.+)\\)");
-	if(rx.indexIn(qn) > -1 && rx.captureCount() == 1)
+	QRegExp rx("font\\((.*),(.*)\\)");
+	if(rx.indexIn(qn) > -1 && rx.captureCount() == 2)
 	{
-		f.fromString(rx.cap(1));
+		QString family=rx.cap(1);
+		int size=rx.cap(2).toInt();
+
+		if(!family.isEmpty())
+			f.setFamily(family);
+
+		if(size >=1 && size < 200)
+			f.setPointSize(size);
+
+		qDebug() << family << size;
+
+		//f.fromString(rx.cap(1));
 	}
 
 	return f;
@@ -511,7 +522,7 @@ QString VProperty::toString(QColor col)
 
 QString VProperty::toString(QFont f)
 {
-	return "font(" + f.toString() + ")";
+	return "font(" + f.family() +"," + QString::number(f.pointSize()) +  ")";
 }
 
 

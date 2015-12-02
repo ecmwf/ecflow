@@ -217,6 +217,7 @@ set(viewer_moc_files AbstractNodeModel.hpp
     TableFilterWidget.hpp
     TableNodeModel.hpp 
     TableNodeView.hpp 
+    TableNodeViewDelegate.hpp
     TableNodeWidget.hpp             
     TextEdit.hpp
     TreeNodeModel.hpp

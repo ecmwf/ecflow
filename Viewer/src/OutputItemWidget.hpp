@@ -50,6 +50,8 @@ protected Q_SLOTS:
 	void on_searchTb__clicked();
 	void on_gotoLineTb__clicked();
 	void on_reloadTb__clicked();
+	void on_fontSizeUpTb__clicked();
+	void on_fontSizeDownTb__clicked();
 
 protected:
 	void updateDir(bool);
@@ -68,7 +70,6 @@ protected:
 	QTimer* updateDirTimer_;
 	Highlighter* jobHighlighter_;
 	static int updateDirTimeout_;
-
 };
 
 #endif

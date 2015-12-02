@@ -12,6 +12,7 @@
 #include "Highlighter.hpp"
 #include "InfoProvider.hpp"
 #include "MessageLabel.hpp"
+#include "VConfig.hpp"
 #include "VNode.hpp"
 #include "VReply.hpp"
 
@@ -31,6 +32,13 @@ ScriptItemWidget::ScriptItemWidget(QWidget *parent) : CodeItemWidget(parent)
     Highlighter* ih=new Highlighter(textEdit_->document(),"script");
 
 	infoProvider_=new ScriptProvider(this);
+
+	//Editor font
+	textEdit_->setFontProperty(VConfig::instance()->find("panel.script.font"));
+}
+
+ScriptItemWidget::~ScriptItemWidget()
+{
 }
 
 QWidget* ScriptItemWidget::realWidget()
@@ -93,5 +101,6 @@ void ScriptItemWidget::infoFailed(VReply* reply)
     //textEdit_->setPlainText(s);   
     messageLabel_->showError(s);
 }
+
 
 static InfoPanelItemMaker<ScriptItemWidget> maker1("script");

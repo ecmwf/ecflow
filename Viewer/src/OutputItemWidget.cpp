@@ -12,6 +12,7 @@
 #include "Highlighter.hpp"
 #include "OutputProvider.hpp"
 #include "OutputModel.hpp"
+#include "VConfig.hpp"
 #include "VReply.hpp"
 
 #include <QDebug>
@@ -79,6 +80,9 @@ OutputItemWidget::OutputItemWidget(QWidget *parent) :
 
 	connect(updateDirTimer_,SIGNAL(timeout()),
 			this,SLOT(slotUpdateDir()));
+
+	//Editor font
+	textEdit_->setFontProperty(VConfig::instance()->find("panel.output.font"));
 }
 
 OutputItemWidget::~OutputItemWidget()
@@ -225,6 +229,10 @@ void OutputItemWidget::clearContents()
 
 void OutputItemWidget::infoReady(VReply* reply)
 {
+	//For some unknown reason the textedit font, although it is properly set in the constructor,
+	//is reset to default when we first call infoready. So we need to set it again!!
+	textEdit_->updateFont();
+
 	if(reply->hasWarning())
 	{
 		messageLabel_->showWarning(QString::fromStdString(reply->warningText()));
@@ -368,6 +376,22 @@ void OutputItemWidget::slotOutputSelected(QModelIndex idx1,QModelIndex idx2)
 {
 	if(!ignoreOutputSelection_)
 		getCurrentFile();
+}
+
+//-----------------------------------------
+// Fontsize management
+//-----------------------------------------
+
+void OutputItemWidget::on_fontSizeUpTb__clicked()
+{
+	//We need to call a custom slot here instead of "zoomIn"!!!
+	textEdit_->slotZoomIn();
+}
+
+void OutputItemWidget::on_fontSizeDownTb__clicked()
+{
+	//We need to call a custom slot here instead of "zoomOut"!!!
+	textEdit_->slotZoomOut();
 }
 
 static InfoPanelItemMaker<OutputItemWidget> maker1("output");

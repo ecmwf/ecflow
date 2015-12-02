@@ -14,6 +14,7 @@
 #include <QComboBox>
 #include <QColorDialog>
 #include <QDebug>
+#include <QFontDatabase>
 #include <QFontDialog>
 #include <QHBoxLayout>
 #include <QIntValidator>
@@ -30,6 +31,27 @@
 #include <assert.h>
 
 static std::map<VProperty::GuiType,PropertyLineFactory*>* makers = 0;
+
+FontSizeSpin::FontSizeSpin(QWidget *parent) : QSpinBox(parent)
+{
+}
+
+void FontSizeSpin::setFamily(QString family)
+{
+	QFontDatabase db;
+	vals_=db.pointSizes(family);
+	setRange(0,vals_.count()-1);
+}
+
+QString FontSizeSpin::textFromValue(int value) const
+{
+	if(value >=0 && value < vals_.count())
+		return QString::number(vals_.at(value));
+
+	return QString();
+}
+
+
 
 //=========================================================================
 //
@@ -405,29 +427,60 @@ FontPropertyLine::FontPropertyLine(VProperty* guiProp,bool addLabel,QWidget * pa
 	if(label_)
         label_->setText(label_->text() + ":");
 
+	holderW_=new QWidget(parent);
+
+	QHBoxLayout* hb=new QHBoxLayout(holderW_);
+	hb->setContentsMargins(0,0,0,0);
+
+	QFontDatabase db;
+
+	familyCb_=new QComboBox(parent);
+	hb->addWidget(familyCb_);
+	Q_FOREACH(QString s,db.families(QFontDatabase::Latin))
+		familyCb_->addItem(s);
+
+	sizeSpin_=new QSpinBox(parent);
+	sizeSpin_->setRange(1,200);
+	hb->addWidget(sizeSpin_);
+
+	QLabel *sizeLabel=new QLabel("pt",parent);
+	hb->addWidget(sizeLabel);
+
 	lName_=new QLabel(parent);
 
-	tbEdit_=new QToolButton(parent);
+	connect(familyCb_,SIGNAL(currentIndexChanged(int)),
+			this,SLOT(slotFamilyChanged(int)));
+
+	connect(sizeSpin_,SIGNAL(valueChanged(int)),
+			this,SLOT(slotSizeChanged(int)));
+
+	/*tbEdit_=new QToolButton(parent);
 	tbEdit_->setToolTip(tr("Edit"));
 
 	connect(tbEdit_,SIGNAL(clicked(bool)),
-			this,SLOT(slotEdit(bool)));
+			this,SLOT(slotEdit(bool)));*/
 }
 
 QWidget* FontPropertyLine::item()
 {
-	return lName_;
+	return holderW_;
 }
 
 QWidget* FontPropertyLine::button()
 {
-	return tbEdit_;
+	return NULL; //tbEdit_;
 }
 
 void FontPropertyLine::slotReset(QVariant v)
 {
 	font_=v.value<QFont>();
-	lName_->setText(font_.toString());
+
+	for(int i=0; i < familyCb_->count(); i++)
+		if(familyCb_->itemText(i) == font_.family())
+			familyCb_->setCurrentIndex(i);
+
+	sizeSpin_->setValue(font_.pointSize());
+
 	PropertyLine::checkState();
 	valueChanged();
 }
@@ -446,6 +499,31 @@ void FontPropertyLine::slotEdit(bool)
 	}
 	valueChanged();
 }
+
+void FontPropertyLine::slotFamilyChanged(int idx)
+{
+	if(idx != -1)
+	{
+		QString family=familyCb_->itemText(idx);
+		if(font_.family() != family)
+		{
+			font_.setFamily(family);
+			PropertyLine::checkState();
+			valueChanged();
+		}
+	}
+}
+
+void FontPropertyLine::slotSizeChanged(int val)
+{
+	if(val != font_.pointSize())
+	{
+		font_.setPointSize(val);
+		PropertyLine::checkState();
+		valueChanged();
+	}
+}
+
 
 bool FontPropertyLine::applyChange()
 {
@@ -467,7 +545,7 @@ QVariant FontPropertyLine::currentValue()
 
 void FontPropertyLine::setEnabledEditable(bool b)
 {
-	tbEdit_->setEnabled(b);
+	//tbEdit_->setEnabled(b);
 }
 
 //=========================================================================

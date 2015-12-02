@@ -15,6 +15,7 @@
 
 #include <QFont>
 #include <QObject>
+#include <QSpinBox>
 #include <QVariant>
 
 class  QComboBox;
@@ -29,6 +30,21 @@ class  ComboMulti;
 #include "VProperty.hpp"
 
 class PropertyLine;
+
+class FontSizeSpin : public QSpinBox
+{
+public:
+	FontSizeSpin(QWidget* parent=0);
+	void setFamily(QString);
+
+protected:
+	QString textFromValue(int value) const;
+
+	QList<int> vals_;
+
+};
+
+
 
 //-------------------------------------
 // Factory
@@ -190,11 +206,16 @@ public:
 private Q_SLOTS:
 	void slotEdit(bool);
 	void slotReset(QVariant);
+	void slotFamilyChanged(int);
+	void slotSizeChanged(int);
 
 protected:
 	void setEnabledEditable(bool);
 
 private:
+	QWidget* holderW_;
+	QComboBox* familyCb_;
+	QSpinBox* sizeSpin_;
 	QLabel* lName_;
 	QToolButton *tbEdit_;
 	QFont font_;

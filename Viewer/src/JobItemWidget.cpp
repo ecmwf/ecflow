@@ -11,6 +11,7 @@
 
 #include "Highlighter.hpp"
 #include "InfoProvider.hpp"
+#include "VConfig.hpp"
 #include "VReply.hpp"
 #include "VNode.hpp"
 
@@ -24,6 +25,13 @@ JobItemWidget::JobItemWidget(QWidget *parent) : CodeItemWidget(parent)
 	Highlighter* ih=new Highlighter(textEdit_->document(),"job");
 
     infoProvider_=new JobProvider(this);
+
+	//Editor font
+	textEdit_->setFontProperty(VConfig::instance()->find("panel.job.font"));
+}
+
+JobItemWidget::~JobItemWidget()
+{
 }
 
 QWidget* JobItemWidget::realWidget()

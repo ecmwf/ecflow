@@ -25,12 +25,17 @@
 #include "FilterWidget.hpp"
 #include "IconProvider.hpp"
 #include "NodeFilterModel.hpp"
+#include "PropertyMapper.hpp"
 #include "TableNodeModel.hpp"
 #include "TableNodeViewDelegate.hpp"
 #include "VFilter.hpp"
 #include "VSettings.hpp"
 
-TableNodeView::TableNodeView(NodeFilterModel* model,NodeFilterDef* filterDef,QWidget* parent) : QTreeView(parent), NodeViewBase(model,filterDef)
+TableNodeView::TableNodeView(NodeFilterModel* model,NodeFilterDef* filterDef,QWidget* parent) :
+     QTreeView(parent),
+	 NodeViewBase(model,filterDef),
+	 needItemsLayout_(false),
+	 prop_(NULL)
 {
 	setProperty("style","nodeView");
 	setProperty("view","table");
@@ -69,7 +74,7 @@ TableNodeView::TableNodeView(NodeFilterModel* model,NodeFilterDef* filterDef,QWi
 
 	actionHandler_=new ActionHandler(this);
 
-	expandAll();
+	//expandAll();
 
 	//Header
 	header_=new TableNodeHeader(this);
@@ -97,6 +102,17 @@ TableNodeView::TableNodeView(NodeFilterModel* model,NodeFilterDef* filterDef,QWi
     //Create delegate to the view
     TableNodeViewDelegate *delegate=new TableNodeViewDelegate(this);
     setItemDelegate(delegate);
+
+	connect(delegate,SIGNAL(sizeHintChangedGlobal()),
+			this,SLOT(slotSizeHintChangedGlobal()));
+
+    //Properties
+	std::vector<std::string> propVec;
+	propVec.push_back("view.table.background");
+	prop_=new PropertyMapper(propVec,this);
+
+	//Initialise bg
+	adjustBackground(prop_->find("view.table.background")->value().value<QColor>());
 }
 
 void TableNodeView::setModel(NodeFilterModel *model)
@@ -197,9 +213,45 @@ void TableNodeView::slotViewCommand(std::vector<VInfo_ptr> nodeLst,QString cmd)
 	}
 }
 
+void TableNodeView::rerender()
+{
+	if(needItemsLayout_)
+	{
+		doItemsLayout();
+		needItemsLayout_=false;
+	}
+	else
+	{
+		viewport()->update();
+	}
+}
 
+void TableNodeView::slotRerender()
+{
+	rerender();
+}
 
+void TableNodeView::slotSizeHintChangedGlobal()
+{
+	needItemsLayout_=true;
+}
 
+void TableNodeView::adjustBackground(QColor col)
+{
+	if(col.isValid())
+	{
+		QString sh="QTreeView { background : " + col.name() + ";}";
+		setStyleSheet(sh);
+	}
+}
+
+void TableNodeView::notifyChange(VProperty* p)
+{
+	if(p->path() == "view.table.background")
+	{
+		adjustBackground(p->value().value<QColor>());
+	}
+}
 
 //=========================================
 // Header
@@ -270,6 +322,7 @@ void TableNodeView::readSettings(VSettings* vs)
 		}
 	}
 }
+
 
 //=========================================
 // TableNodeHeader

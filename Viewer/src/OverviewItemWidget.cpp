@@ -10,6 +10,7 @@
 #include "OverviewItemWidget.hpp"
 #include "Highlighter.hpp"
 #include "OverviewProvider.hpp"
+#include "VConfig.hpp"
 #include "VReply.hpp"
 
 #include <QScrollBar>
@@ -33,6 +34,13 @@ OverviewItemWidget::OverviewItemWidget(QWidget *parent) :
 	Highlighter* ih=new Highlighter(textEdit_->document(),"info");
 
 	infoProvider_=new OverviewProvider(this);
+
+	//Editor font
+	textEdit_->setFontProperty(VConfig::instance()->find("panel.overview.font"));
+}
+
+OverviewItemWidget::~OverviewItemWidget()
+{
 }
 
 QWidget* OverviewItemWidget::realWidget()
@@ -50,7 +58,7 @@ void OverviewItemWidget::reload(VInfo_ptr info)
 	if(info_ && info.get())
 	{
 		infoProvider_->info(info_);
-	}
+	}void broadcastEditorFontChanged();
 
 	enabled_=true;
 }

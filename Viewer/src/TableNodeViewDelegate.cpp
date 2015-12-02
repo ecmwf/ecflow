@@ -35,8 +35,7 @@ TableNodeViewDelegate::TableNodeViewDelegate(QWidget *parent)
     //Property
     if(propVec.empty())
     {
-        propVec.push_back("view.tree.font");
-        propVec.push_back("view.tree.displayChildCount");
+        propVec.push_back("view.table.font");
     }
 
     prop_=new PropertyMapper(propVec,this);
@@ -50,9 +49,18 @@ TableNodeViewDelegate::~TableNodeViewDelegate()
 
 void TableNodeViewDelegate::updateSettings()
 {
+	if(VProperty* p=prop_->find("view.table.font"))
+	{
+		QFont newFont=p->value().value<QFont>();
 
+		if(font_ != newFont)
+	    {
+	    	font_=newFont;
+	    	attrFont_=newFont;
+	    	Q_EMIT sizeHintChangedGlobal();
+	    }
+	}
 }
-
 
 void TableNodeViewDelegate::paint(QPainter *painter,const QStyleOptionViewItem &option,
                    const QModelIndex& index) const
@@ -137,6 +145,7 @@ void TableNodeViewDelegate::paint(QPainter *painter,const QStyleOptionViewItem &
     {
     	QString text=index.data(Qt::DisplayRole).toString();
     	QRect textRect = style->subElementRect(QStyle::SE_ItemViewItemText, &vopt, widget);
+    	painter->setFont(font_);
     	painter->setPen(Qt::black);
     	painter->drawText(textRect,Qt::AlignLeft | Qt::AlignVCenter,text);
     }
@@ -216,6 +225,7 @@ void TableNodeViewDelegate::renderNode(QPainter *painter,const QModelIndex& inde
 	//Draw text
 	QColor fg=index.data(Qt::ForegroundRole).value<QColor>();
 	painter->setPen(fg);
+	painter->setFont(font_);
 	painter->drawText(textRect,Qt::AlignLeft | Qt::AlignVCenter,text);
 
 

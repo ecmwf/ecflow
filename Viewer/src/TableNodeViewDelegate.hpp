@@ -26,12 +26,16 @@ class ModelColumn;
 
 class TableNodeViewDelegate : public NodeViewDelegate
 {
+ Q_OBJECT
 public:
     explicit TableNodeViewDelegate(QWidget *parent=0);
     ~TableNodeViewDelegate();
 
     void paint(QPainter *painter,const QStyleOptionViewItem &option,
                    const QModelIndex& index) const;
+
+Q_SIGNALS:
+    void sizeHintChangedGlobal();
 
 protected:
     void updateSettings();
@@ -41,7 +45,6 @@ protected:
 
     ModelColumn* columns_;
     QPen borderPen_;
-
 };
 
 #endif // TABLENODEVIEWDELEGATE_HPP

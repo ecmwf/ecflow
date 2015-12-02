@@ -54,6 +54,9 @@
     <file alias="filter_decor.svg">../images/filter_decor.svg</file> 
     <file alias="filter_edit.svg">../images/filter_edit.svg</file>
     <file alias="filter.svg">../images/filter.svg</file>
+    <file alias="font.svg">../images/font.svg</file>
+    <file alias="fontsize_down.svg">../images/fontsize_down.svg</file>
+    <file alias="fontsize_up.svg">../images/fontsize_up.svg</file>   
     <file alias="overview.svg">../images/overview.svg</file>
     <file alias="job.svg">../images/job.svg</file>
     <file alias="job_dock.svg">../images/job_dock.svg</file>

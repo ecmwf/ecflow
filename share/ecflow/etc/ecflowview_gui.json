@@ -8,18 +8,16 @@
             
             "tabs"  : {
                  "tab" : {
-                    "label"  : "Common",   
+                    "label"  : "Status",   
  
                     "group" : {
-                        "title" : "Node rendering",
-                        "prefix" : "view.common",
-                
-                        "line" : "node_style",
+                        "title" : "Status rendering options",
+                        "prefix" : "view.common",                                     
                         "line" : "node_gradient"
                     },
                               
                     "grid" : {
-                        "title" : "Status",                                    
+                        "title" : "Status colours",                                    
                         "h1" : "Fill colour",
                         "h2" : "Font colour",                  
                     
@@ -98,32 +96,71 @@
  
                     "group" : {
                         "title" : "Options",
-                        "prefix" : "view.tree",
-                
-                        "line" : "display_child_count",
-                        "line" : "indentation",
-                        "line" : "background"                        
-                    },
-            
-                    "group" : {
-                        "title" : "Font size",
                         "prefix" : "view",
-                                
-                        "line" : "tree.nodeFontSize",
-                        "line" : "tree.attributeFontSize"
+                
+                        "line" : "common.node_style",
+                        "line" : "tree.display_child_count",
+                        "line" : "tree.indentation",
+                        "line" : "tree.background"                        
                     },
-                    
+                             
                     "group" : {
                         "title" : "Attributes",
                         "prefix" : "view.tree",
                         
                         "line" : "attributesPolicy",
                         "line" : "defaultAttributes"
-                   }                                                                
-                }                   
+                   }                                                               
+                },
+                
+                "tab" : {
+                  
+                    "label"  : "Table view",   
+ 
+                    "group" : {
+                        "title" : "Options",
+                        "prefix" : "view.table",                
+                    
+                        "line" : "background"                                          
+                    }                                          
+                }                                      
 			}
  		},	
- 		
+            
+     "font":  {
+            "label": "Fonts",
+            "desc" : "Fonts",
+            "icon" : "font.svg",
+        
+            "group" : {
+                 "title" : "Tree view",
+                 "prefix" : "view.tree",
+                
+                 "line" : "nodeFont",
+                 "line" : "attributeFont"                                 
+             },       
+            
+            "group" : {
+                 "title" : "Table view",
+                 "prefix" : "view.table",
+                
+                 "line" : "font"                                           
+             },       
+        
+            "group" : {
+                 "title" : "Info panel text browsers",
+                 "prefix" : "panel",
+                
+                 "line" : "overview.font",
+                 "line" : "manual.font",
+                 "line" : "script.font",
+                 "line" : "job.font",  
+                 "line" : "output.font",   
+                 "line" : "why.font",
+                 "line" : "edit.font"             
+             }       
+       },             
+                     		
  	  "notification":  {
             "visible" : "true",
             "label": "Notifications",

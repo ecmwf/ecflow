@@ -17,6 +17,7 @@
 #include "NodeViewBase.hpp"
 
 #include "VInfo.hpp"
+#include "VProperty.hpp"
 
 class QComboBox;
 
@@ -24,21 +25,24 @@ class ActionHandler;
 class TableNodeModel;
 class NodeFilterModel;
 class NodeFilterDef;
+class PropertyMapper;
 class TableNodeHeader;
 
-class TableNodeView : public QTreeView, public NodeViewBase
+class TableNodeView : public QTreeView, public NodeViewBase, public VPropertyObserver
 {
 Q_OBJECT
 
 public:
 	explicit TableNodeView(NodeFilterModel* model,NodeFilterDef* filterDef,QWidget *parent=0);
 	void reload() {};
-	void rerender() {};
+	void rerender();
 	QWidget* realWidget();
 	VInfo_ptr currentSelection();
 	void currentSelection(VInfo_ptr n) {};
 	void selectFirstServer() {}
 	void setModel(NodeFilterModel *model);
+
+	void notifyChange(VProperty* p);
 
 	void readSettings(VSettings* vs);
 
@@ -48,6 +52,8 @@ public Q_SLOTS:
 	void slotContextMenu(const QPoint &position);
 	void slotViewCommand(std::vector<VInfo_ptr>,QString);
 	void slotHeaderContextMenu(const QPoint &position);
+	void slotSizeHintChangedGlobal();
+	void slotRerender();
 
 Q_SIGNALS:
 	void selectionChanged(VInfo_ptr);
@@ -58,9 +64,12 @@ Q_SIGNALS:
 protected:
 	QModelIndexList selectedList();
 	void handleContextMenu(QModelIndex indexClicked,QModelIndexList indexLst,QPoint globalPos,QPoint widgetPos,QWidget *widget);
+	void adjustBackground(QColor col);
 
 	ActionHandler* actionHandler_;
 	TableNodeHeader* header_;
+	bool needItemsLayout_;
+	PropertyMapper* prop_;
 };
 
 class TableNodeHeaderButton

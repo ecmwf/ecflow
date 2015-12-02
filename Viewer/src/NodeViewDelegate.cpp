@@ -175,6 +175,7 @@ void NodeViewDelegate::renderStatus(QPainter *painter,const QModelIndex& index,
     painter->fillRect(fillRect,bgBrush);
 
     //Draw text
+    painter->setFont(font_);
     painter->setPen(Qt::black);
     painter->drawText(textRect,Qt::AlignLeft | Qt::AlignVCenter,text);
 

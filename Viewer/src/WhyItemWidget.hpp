@@ -23,6 +23,7 @@ class WhyItemWidget : public CodeItemWidget, public InfoPanelItem
 {
 public:
 	explicit WhyItemWidget(QWidget *parent=0);
+	~WhyItemWidget();
 
 	void reload(VInfo_ptr);
 	QWidget* realWidget();
@@ -36,8 +37,6 @@ protected:
 
 private:
 	QString why() const;
-
-
 };
 
 #endif

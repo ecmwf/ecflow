@@ -44,12 +44,11 @@ TreeNodeViewDelegate::TreeNodeViewDelegate(QWidget *parent) :
 	//Property
 	if(propVec.empty())
 	{
-		propVec.push_back("view.tree.font");
+		propVec.push_back("view.tree.nodeFont");
+		propVec.push_back("view.tree.attributeFont");
 		propVec.push_back("view.tree.display_child_count");
         propVec.push_back("view.common.node_style");
         propVec.push_back("view.common.node_gradient");
-        propVec.push_back("view.tree.nodeFontSize");
-        propVec.push_back("view.tree.attributeFontSize");
 	}
 
     prop_=new PropertyMapper(propVec,this);
@@ -89,42 +88,32 @@ void TreeNodeViewDelegate::updateSettings()
 	{
 		nodeRectRad_=p->value().toInt();
 	}
-    if(VProperty* p=prop_->find("view.tree.nodeFontSize"))
+    if(VProperty* p=prop_->find("view.tree.nodeFont"))
     {
-    	int newSize=p->value().toInt();
+    	QFont newFont=p->value().value<QFont>();
 
-    	if(font_.pointSize() != newSize)
+    	if(font_ != newFont )
     	{
-    		font_.setPointSize(p->value().toInt());
+    		font_=newFont;
     		serverInfoFont_=font_;
-    		serverNumFont_.setPointSize(newSize);
-    		suiteNumFont_.setPointSize(newSize);
+    		serverNumFont_.setPointSize(font_.pointSize());
+    		suiteNumFont_.setPointSize(font_.pointSize());
     		adjustIconSize();
 
     		Q_EMIT sizeHintChangedGlobal();
     	}
     }
-    if(VProperty* p=prop_->find("view.tree.attributeFontSize"))
+    if(VProperty* p=prop_->find("view.tree.attributeFont"))
     {
-    	int newSize=p->value().toInt();
-    	if(attrFont_.pointSize() != newSize)
+    	QFont newFont=p->value().value<QFont>();
+
+    	if(attrFont_ != newFont)
     	{
-    		attrFont_.setPointSize(p->value().toInt());
+    		attrFont_=newFont;
     		Q_EMIT sizeHintChangedGlobal();
     	}
     }
 
-	if(VProperty* p=prop_->find("view.tree.font"))
-	{
-		/*font_=p->value().value<QFont>();
-
-		serverInfoFont_=font_;
-		serverNumFont_=font_;
-		serverNumFont_.setBold(true);
-		suiteNumFont_=font_;
-		suiteNumFont_.setBold(true);*/
-
-	}
 	if(VProperty* p=prop_->find("view.tree.display_child_count"))
 	{
 		drawChildCount_=p->value().toBool();
