@@ -22,7 +22,6 @@
 #include "Suite.hpp"
 #include "Family.hpp"
 #include "Task.hpp"
-#include "EcfFile.hpp"
 #include "JobsParam.hpp"
 #include "Jobs.hpp"
 #include "System.hpp"

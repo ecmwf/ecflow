@@ -19,6 +19,7 @@
 /// This class is used in the pre-processing of files( .ecf or .usr or .man typically)
 /// It is used to to create the job file.
 ///
+///
 /// Please note the %manual is only created on request from the file cmd.
 /// Even then it is extracted as a string. i.e. no .man file is
 /// created. This is left to the client.
@@ -27,13 +28,18 @@
 /// However for testing purpose this capability may be retained.
 class EcfFile {
 public:
+   enum ScriptType { ECF_FILE,      // Look for .ecf file, uses default algorithm to find %includes
+                     ECF_FETCH_CMD, // pre-process output of ECF_FETCH,     all %includes use same command
+                     ECF_SCRIPT_CMD // pre-process output of ECF_SCRIPT_CMD, uses default algorithm to find %includes
+             };
+
 	/// use default copy constructor, assignment, destructor
 	/// ECF_FETCH  is used obtain the script from running a command  i.e.
 	/// from the version control system. This has not been implemented yet.
-	EcfFile(Node*, const std::string& path_to_script_or_fetch_cmd, bool fetchCommand = false);
+	EcfFile(Node*, const std::string& path_to_script_or_fetch_cmd, EcfFile::ScriptType = ECF_FILE );
 
 	// The path to the ecf file, empty path means that ecf file could not be located
-	const std::string& path() const { return script_path_or_cmd_;}
+	bool valid() const { return !script_path_or_cmd_.empty();}
 
 	/// This function will return the contents of %manual -> %end for the input file
 	/// It will pre-process the file, then extract the manual form all the pre-processed files
@@ -72,9 +78,9 @@ public:
 
 private:
 	enum Type { SCRIPT, INCLUDE, MANUAL, COMMENT };
-	static std::string fileType(Type);
+	static std::string fileType(EcfFile::Type);
 
-	bool open_script_file(const std::string& file, Type, std::vector<std::string>& lines, std::string& errormsg) const;
+	bool open_script_file(const std::string& file, EcfFile::Type, std::vector<std::string>& lines, std::string& errormsg) const;
 	bool preProcess(std::vector<std::string>& script_lines, std::string& errormsg);
 	bool replaceSmsChildCmdsWithEcf(const std::string& clientPath, std::string& errormsg);
 	std::string getIncludedFilePath( const std::string& include, const std::string& line, std::string& errormsg);
@@ -91,6 +97,11 @@ private:
  	/// returns the extension, i.e for task->.ecf for alias->.usr, will throw if node_ is not task or alias
  	const std::string& get_extn() const;
 
+ 	bool do_popen(const std::string& the_cmd, EcfFile::Type, std::vector<std::string>& lines, std::string& errormsg) const;
+
+   boost::filesystem::path file_creation_path() const;
+   std::string script_or_job_path() const;
+
 /// User edit functions:
  	void get_used_variables(std::string& used_variables) const;
  	bool get_used_variables(NameValueMap& used_variables, std::string& errorMsg) const;
@@ -99,8 +110,8 @@ private:
 	Node* node_;                         // Task or Alias or Container when pre-processing the man files
 	std::string  ecfMicroCache_;         // cache value of ECF_MICRO
 	std::string  script_path_or_cmd_;    // path to .ecf, .usr file or command
-	mutable std::string  job_size_;     // to be placed in log file during job submission
-	//bool         fetchCommand_;        // script is to be extracted form version management repository. Not used !!!
+	mutable std::string  job_size_;      // to be placed in log file during job submission
+	EcfFile::ScriptType    script_type_; // get script from a file, or from running a command
 	std::vector<std::string> jobLines_;  // Lines that will form the job file.
 };
 

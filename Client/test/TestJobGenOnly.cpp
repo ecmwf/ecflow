@@ -29,7 +29,6 @@
 #include "Task.hpp"
 #include "Str.hpp"
 #include "File.hpp"
-#include "EcfFile.hpp"
 #include "ExprAst.hpp"
 #include "TestHelper.hpp"
 #include "JobCreationCtrl.hpp"
