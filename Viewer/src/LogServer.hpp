@@ -18,6 +18,7 @@ typedef boost::shared_ptr<LogServer> LogServer_ptr;
 
 class LogServer
 {
+
 public:
     LogServer(std::string host,std::string port);
     ~LogServer();

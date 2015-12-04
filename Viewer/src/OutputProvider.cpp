@@ -10,6 +10,7 @@
 #include "OutputProvider.hpp"
 
 #include "LogServer.hpp"
+#include "OutputClient.hpp"
 #include "VNode.hpp"
 #include "VReply.hpp"
 #include "ServerHandler.hpp"
@@ -18,6 +19,13 @@
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/path.hpp>
 #include <boost/algorithm/string/predicate.hpp>
+
+OutputProvider::OutputProvider(InfoPresenter* owner) :
+	InfoProvider(owner,VTask::OutputTask),
+	outClient_(NULL)
+{
+
+}
 
 //Node
 void OutputProvider::visit(VInfoNode* info)
@@ -108,10 +116,13 @@ void OutputProvider::fetchFile(ServerHandler *server,VNode *n,const std::string&
     	return;
     }
 
-    //The host is the localhost
+    //----------------------------------
+    // The host is the localhost
+    //----------------------------------
+
     if(server->isLocalHost())
     {
-    	//First we try to read the file directly from the disk
+    	//We try to read the file directly from the disk
     	if(!isJobout || server->readFromDisk())
     	{
     	    //Get the fileName
@@ -122,25 +133,25 @@ void OutputProvider::fetchFile(ServerHandler *server,VNode *n,const std::string&
     	    	return;
     	    }
     	}
-
-    	//Then we try the logserver
-    	if(fetchFileViaLogServer(n,fileName))
-    	{
-    		owner_->infoReady(reply_);
-    	    return;
-    	}
     }
-    //The host is another machine
-    else
-    {
-    	//First we try to use the logserver to fetch the file
-    	if(fetchFileViaLogServer(n,fileName))
-    	{
-    		owner_->infoReady(reply_);
-    		return;
-    	}
 
-    	//Then we try to read the file directly from the disk
+    //----------------------------------------------------
+    // Not the loacalhost or we could not read the file
+    //----------------------------------------------------
+
+    //We try the output client, its asynchronous!
+    if(fetchFileViaLogServer(n,fileName))
+    {
+    	//If we are here we created a output client and asked to the fetch the
+    	//file asynchronously. The ouput client will call slotOutputClientFinished() or
+    	//slotOutputClientError eventually!!
+    	return;
+    }
+
+    //If there is no output client and it is not the localhost we try
+    //to read it again from the disk!!!
+    if(!server->isLocalHost())
+    {
     	if(!isJobout || server->readFromDisk())
     	{
     		//Get the fileName
@@ -153,17 +164,12 @@ void OutputProvider::fetchFile(ServerHandler *server,VNode *n,const std::string&
     	}
     }
 
-    //Finally we try the server if it is the jobout file
+    //If we are here no output client is defined and we could not read the file from
+    //the local disk.
+    //We try the server if it is the jobout file
     if(isJobout)
     {
-    	reply_->fileReadMode(VReply::ServerReadMode);
-
-        //Define a task for getting the info from the server.
-        task_=VTask::create(taskType_,n,this);
-
-        //Run the task in the server. When it finish taskFinished() is called. The text returned
-        //in the reply will be prepended to the string we generated above.
-        server->run(task_);
+    	fetchJoboutViaServer(server,n,fileName);
         return;
     }
 
@@ -202,8 +208,37 @@ VDir_ptr OutputProvider::directory()
 
 bool OutputProvider::fetchFileViaLogServer(VNode *n,const std::string& fileName)
 {
+	std::string host, port;
+	if(n->logServer(host,port))
+	{
+		//host=host + "baaad";
+
+		reply_->setInfoText("Getting file through log server: " + host + "@" + port);
+		owner_->infoProgress(reply_);
+
+		if(!outClient_)
+		{
+			outClient_=new OutputClient(host,port,this);
+
+			connect(outClient_,SIGNAL(error(QString)),
+				this,SLOT(slotOutputClientError(QString)));
+
+			connect(outClient_,SIGNAL(progress(QString)),
+				this,SLOT(slotOutputClientProgress(QString)));
+
+			connect(outClient_,SIGNAL(finished()),
+				this,SLOT(slotOutputClientFinished()));
+		}
+
+		outClient_->getFile(fileName);
+
+		return true;
+	}
+
+	return false;
+
 	//Create a logserver
-	LogServer_ptr logServer=n->logServer();
+	/*LogServer_ptr logServer=n->logServer();
 
 	if(logServer && logServer->ok())
 	{
@@ -222,9 +257,69 @@ bool OutputProvider::fetchFileViaLogServer(VNode *n,const std::string& fileName)
 		}
 	}
 
-	return false;
+	return false;*/
 
 }
+
+void OutputProvider::slotOutputClientFinished()
+{
+	VFile_ptr tmp = outClient_->resultFile();
+
+	if(tmp && tmp.get() && tmp->exists())
+	{
+		reply_->setInfoText("");
+		reply_->fileReadMode(VReply::LogServerReadMode);
+
+		std::string method="served by " + outClient_->host() + "@" + outClient_->portStr();
+		reply_->fileReadMethod(method);
+
+		reply_->tmpFile(tmp);
+		owner_->infoReady(reply_);
+	}
+}
+
+void OutputProvider::slotOutputClientProgress(QString msg)
+{
+	reply_->setInfoText(msg.toStdString());
+	owner_->infoProgress(reply_);
+	reply_->setInfoText("");
+}
+
+void OutputProvider::slotOutputClientError(QString msg)
+{
+	if(info_ && info_.get())
+	{
+		ServerHandler* server=info_->server();
+		VNode *n=info_->node();
+
+		if(server && n)
+		{
+			std::string jobout=n->findVariable("ECF_JOBOUT",true);
+			if(outClient_->remoteFile() == jobout)
+			{
+				fetchJoboutViaServer(server,n,jobout);
+				return;
+			}
+		}
+	}
+
+	reply_->setErrorText(msg.toStdString());
+	owner_->infoFailed(reply_);
+}
+
+void OutputProvider::fetchJoboutViaServer(ServerHandler *server,VNode *n,const std::string& fileName)
+{
+    //Define a task for getting the info from the server.
+    task_=VTask::create(taskType_,n,this);
+
+    task_->reply()->fileReadMode(VReply::ServerReadMode);
+    task_->reply()->fileName(fileName);
+
+    //Run the task in the server. When it finish taskFinished() is called. The text returned
+    //in the reply will be prepended to the string we generated above.
+    server->run(task_);
+}
+
 
 VDir_ptr OutputProvider::fetchDirViaLogServer(VNode *n,const std::string& fileName)
 {

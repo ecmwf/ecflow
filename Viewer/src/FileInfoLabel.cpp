@@ -70,7 +70,7 @@ void FileInfoLabel::update(VReply* reply,QString extraText)
 	labelText="<b><font color=" + col.name() + ">File: </font></b>";
 	labelText+="<font color=" +colText.name() + ">" + fileName + "</font>";
 
-	VFileInfo f(fileName);
+	//VFileInfo f(fileName);
 
 	s="";
 
@@ -111,7 +111,7 @@ void FileInfoLabel::update(VReply* reply,QString extraText)
 		s+="<br>";
 		s+="<b><font color=" + col.name() + "> Source: </font></b>";
 		int rowLimit=10000;
-		s+="<font color=" + colText.name() + "> through server (first " + QString::number(rowLimit) + "lines)</font>";
+		s+="<font color=" + colText.name() + "> server (first " + QString::number(rowLimit) + " lines only)</font>";
 	}
 
 	else if(reply->fileReadMode() == VReply::LogServerReadMode)
@@ -119,22 +119,31 @@ void FileInfoLabel::update(VReply* reply,QString extraText)
 		VFile_ptr tmp=reply->tmpFile();
 		if(tmp && tmp.get())
 		{
-			VFileInfo f(QString::fromStdString(tmp->path()));
-			if(f.exists())
+			if(tmp->storageMode() == VFile::MemoryStorage)
 			{
-				//s+="<br>";
 				labelText+="<b><font color=" + col.name() + "> Size: </font></b>";
-				labelText+="<font color=" + colSize.name() + "> " + f.formatSize() + "</font>";
+				labelText+="<font color=" + colSize.name() + "> " + VFileInfo::formatSize(tmp->dataSize()) + "</font>";
 			}
+			else
+			{
+				VFileInfo f(QString::fromStdString(tmp->path()));
+				if(f.exists())
+				{
+					//s+="<br>";
+					labelText+="<b><font color=" + col.name() + "> Size: </font></b>";
+					labelText+="<font color=" + colSize.name() + "> " + f.formatSize() + "</font>";
+				}
+			}
+
+			QString dt=tmp->fetchDate().toString("yyyy-MM-dd HH:mm:ss");
+			s+="<b><font color=" + col.name() + "> Fetched: </font></b>";
+			s+="<font color=" + colText.name() + ">" + dt +  + "</font>";
+
+			s+="<br>";
+			s+="<b><font color=" + col.name() + "> Source: </font></b>";
+			s+="<font color=" + colText.name() + "> " + QString::fromStdString(reply->fileReadMethod()) + "</font>";
+			s+=" in " + QString::number(static_cast<float>(tmp->transferDuration())/1000.,'f',1) + " sec";
 		}
-
-		QString dt=QDateTime::currentDateTime().toString("yyyy-MM-dd HH:mm:ss");
-		s+="<b><font color=" + col.name() + "> Fetched: </font></b>";
-		s+="<font color=" + colText.name() + ">" + dt +  + "</font>";
-
-		s+="<br>";
-		s+="<b><font color=" + col.name() + "> Source: </font></b>";
-		s+="<font color=" + colText.name() + "> " + QString::fromStdString(reply->fileReadMethod()) + "</font>";
 	}
 
 	ttText=s;

@@ -12,12 +12,19 @@
 #include <unistd.h>
 #include <iostream>
 #include <fstream>
+#include <string.h>
 
 #include "VFile.hpp"
+const size_t VFile::maxDataSize_=1024*1024*10;
 
 VFile::VFile(const std::string& name,const std::string& str,bool deleteFile) :
 	path_(name),
-	deleteFile_(deleteFile)
+	deleteFile_(deleteFile),
+	storageMode_(DiskStorage),
+	data_(0),
+	dataSize_(0),
+	fp_(0),
+	transferDuration_(0)
 {
 	std::ofstream f(path_.c_str());
 	if(f.is_open())
@@ -29,22 +36,37 @@ VFile::VFile(const std::string& name,const std::string& str,bool deleteFile) :
 
 VFile::VFile(const std::string& name,bool deleteFile) :
 	path_(name),
-	deleteFile_(deleteFile)
+	deleteFile_(deleteFile),
+	storageMode_(MemoryStorage),
+	data_(0),
+	dataSize_(0),
+	fp_(0),
+	transferDuration_(0)
 {
 }
 
 VFile::VFile(bool deleteFile) :
 	path_(VFile::tmpName()),
-	deleteFile_(deleteFile)
+	deleteFile_(deleteFile),
+	storageMode_(MemoryStorage),
+	data_(0),
+	dataSize_(0),
+	fp_(0),
+	transferDuration_(0)
 {
 }
 
 VFile::~VFile()
 {
+	close();
+
+	if(data_)
+		delete [] data_;
+
 	if(deleteFile_)
 	{
 		//TODO: add further/better checks
-		if(!path_.empty() && path_ != "/" && path_.size() > 4)
+		if(exists() && !path_.empty() && path_ != "/" && path_.size() > 4)
 			unlink(path_.c_str());
 	}
 }
@@ -69,7 +91,91 @@ VFile_ptr VFile::create(bool deleteFile)
 	return VFile_ptr(new VFile(deleteFile));
 }
 
+void VFile::setStorageMode(StorageMode mode)
+{
+	if(storageMode_ == mode)
+		return;
 
+	storageMode_=mode;
+
+	if(storageMode_== DiskStorage)
+	{
+		if(dataSize_ > 0)
+		{
+			fp_ = fopen(path_.c_str(),"w");
+			if(fwrite(data_,1,dataSize_,fp_) != dataSize_)
+			{
+
+			}
+			fclose(fp_);
+			fp_=NULL;
+			delete [] data_;
+			data_=0;
+			dataSize_=0;
+		}
+	}
+}
+
+bool VFile::write(const char *buf,size_t len,std::string& err)
+{
+
+	printf("total:%d \n len: %d \n",dataSize_,len);
+
+
+	//Keep data in memory
+	if(storageMode_ == MemoryStorage)
+	{
+		if(!data_)
+		{
+			data_ = new char[maxDataSize_+1];
+		}
+
+		if(dataSize_ + len  < maxDataSize_)
+		{
+			memcpy(data_+dataSize_,buf,len);
+			dataSize_+=len;
+			return true;
+		}
+		else
+		{
+			setStorageMode(DiskStorage);
+		}
+	}
+
+	//Write data to disk
+	if(storageMode_ == DiskStorage)
+	{
+		if(!fp_)
+		{
+			fp_ = fopen(path_.c_str(),"w");
+		}
+
+		if(fwrite(buf,1,len,fp_) != len)
+		{
+			//char buf_loc[2048];
+		    //sprintf(buf_loc,"Write error on %s",out->path().c_str());
+		    //gui::syserr(buf);
+		    fclose(fp_);
+		    return false;
+		}
+	}
+
+	return true;
+}
+
+void VFile::close()
+{
+	if(fp_)
+	{
+		fclose(fp_);
+		fp_=NULL;
+	}
+	if(data_)
+	{
+		data_[dataSize_]='\0';
+		dataSize_++;
+	}
+}
 
 std::string VFile::tmpName()
 {

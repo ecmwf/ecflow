@@ -10,17 +10,22 @@
 #ifndef OUTPUTPROVIDER_HPP_
 #define OUTPUTPROVIDER_HPP_
 
+#include <QObject>
+
 #include "VDir.hpp"
 #include "VInfo.hpp"
 #include "InfoProvider.hpp"
 #include "VTask.hpp"
 #include "VTaskObserver.hpp"
 
-class OutputProvider : public InfoProvider
+class OutputClient;
+
+class OutputProvider : public QObject, public InfoProvider
 {
+Q_OBJECT
+
 public:
-	 explicit OutputProvider(InfoPresenter* owner) :
-		 InfoProvider(owner,VTask::OutputTask) {}
+	 explicit OutputProvider(InfoPresenter* owner);
 
 	 void visit(VInfoNode*);
 
@@ -32,12 +37,19 @@ public:
 
 	 std::string joboutFileName() const;
 
+private Q_SLOTS:
+	void slotOutputClientError(QString);
+	void slotOutputClientProgress(QString);
+	void slotOutputClientFinished();
+
 private:
 	 void fetchFile(ServerHandler *server,VNode *n,const std::string& fileName,bool isJobout);
+	 void fetchJoboutViaServer(ServerHandler *server,VNode *n,const std::string&);
 	 bool fetchFileViaLogServer(VNode *n,const std::string& fileName);
 	 VDir_ptr fetchDirViaLogServer(VNode *n,const std::string& fileName);
 	 VDir_ptr fetchLocalDir(const std::string& path);
 
+	 OutputClient *outClient_;
 };
 
 #endif

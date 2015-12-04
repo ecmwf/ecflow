@@ -152,6 +152,7 @@ public:
     virtual void why(std::vector<std::string>& theReasonWhy) const;
 
     LogServer_ptr logServer();
+    bool logServer(std::string& host,std::string& port);
 
 
 protected:

@@ -241,6 +241,8 @@ void OutputItemWidget::infoReady(VReply* reply)
 	{
 	    messageLabel_->showInfo(QString::fromStdString(reply->infoText()));
 	}
+	else
+		messageLabel_->hide();
 
 	//For job files we set the proper highlighter
 	if(reply->fileName().find(".job") != std::string::npos)
@@ -265,9 +267,17 @@ void OutputItemWidget::infoReady(VReply* reply)
     //If the info is stored in a tmp file
     if(f && f.get())
     {
-    	QFile file(QString::fromStdString(f->path()));
-    	file.open(QIODevice::ReadOnly);
-    	textEdit_->setPlainText(file.readAll());
+    	if(f->storageMode() == VFile::MemoryStorage)
+    	{
+    		QString s(f->data());
+    		textEdit_->setPlainText(s);
+    	}
+    	else
+    	{
+    		QFile file(QString::fromStdString(f->path()));
+    		file.open(QIODevice::ReadOnly);
+    		textEdit_->setPlainText(file.readAll());
+    	}
     }
     //If the info is stored as a string in the reply object
     else

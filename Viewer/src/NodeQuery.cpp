@@ -586,8 +586,7 @@ void NodeQuery::load(VSettings* vs)
 	advanced_=vs->getAsBool("advanced",advanced_);
 	caseSensitive_=vs->getAsBool("case",caseSensitive_);
 
-	int maxNum=maxNum_;
-	maxNum=vs->get<int>("maxNum",maxNum_);
+	int maxNum=vs->get<int>("maxNum",maxNum_);
 	if(maxNum_ > 1 && maxNum < 5000000)
 		maxNum_=maxNum;
 

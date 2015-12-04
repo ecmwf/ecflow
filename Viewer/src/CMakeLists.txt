@@ -74,6 +74,7 @@ set(viewer_srcs
     NodeViewDelegate.cpp
     NodeWidget.cpp
     OneLineTextEdit.cpp
+    OutputClient.cpp
     OutputModel.cpp
     OutputItemWidget.cpp
     OutputProvider.cpp
@@ -201,7 +202,9 @@ set(viewer_moc_files AbstractNodeModel.hpp
     NodeSearchWidget.hpp
     NodeWidget.hpp
     OneLineTextEdit.hpp
+    OutputClient.hpp
     OutputItemWidget.hpp
+    OutputProvider.hpp
     PropertyDialog.hpp             
     PropertyEditor.hpp
     PropertyLine.hpp

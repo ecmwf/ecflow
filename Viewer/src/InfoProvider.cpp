@@ -166,7 +166,8 @@ void  InfoProvider::taskChanged(VTask_ptr task)
             	owner_->infoFailed(task->reply());
         	}
             //We do not need the task anymore.
-            task_.reset();break;
+            task_.reset();
+            break;
         default:
             break;
     }

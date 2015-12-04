@@ -430,6 +430,30 @@ LogServer_ptr VNode::logServer()
 	return lsv;
 }
 
+bool VNode::logServer(std::string& host,std::string& port)
+{
+	if(!node_)
+		return false;
+
+	host=findInheritedVariable("ECF_LOGHOST",true);
+	port=findInheritedVariable("ECF_LOGPORT");
+	//if(logHost.empty())
+	//{
+	//	logHost=findInheritedVariable("LOGHOST",true);
+	//	logPort=findInheritedVariable("LOGPORT");
+	//}
+
+	std::string micro=findInheritedVariable("ECF_MICRO");
+	if(!host.empty() && !port.empty() &&
+	  (micro.empty() || host.find(micro) ==  std::string::npos))
+	{
+		return true;
+	}
+
+	return false;
+}
+
+
 bool VNode::isAncestor(const VNode* n)
 {
 	if(n == this)
