@@ -364,6 +364,7 @@ void OutputItemWidget::searchOnReload()
 	if (searchLine_->isVisible() && !searchLine_->isEmpty())
 	{
 		searchLine_->slotFindNext();
+		searchLine_->slotHighlight();
 	}
 	else
 	{

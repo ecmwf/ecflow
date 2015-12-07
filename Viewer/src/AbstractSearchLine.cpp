@@ -64,9 +64,11 @@ AbstractSearchLine::AbstractSearchLine(QWidget* parent) : QWidget(parent)
 	// set the menu on the Options toolbutton
 	caseSensitive_ = false;
 	wholeWords_    = false;
+	highlightAll_  = false;
 	QMenu *menu=new QMenu(this);
 	menu->addAction(actionCaseSensitive_);
 	menu->addAction(actionWholeWords_);
+	menu->addAction(actionHighlightAll_);
 	optionsTb_->setMenu(menu);
 
     matchModeCb_->setMatchMode(StringMatchMode::ContainsMatch);  // set the default match mode
@@ -134,3 +136,7 @@ void AbstractSearchLine::on_actionWholeWords__toggled(bool b)
     wholeWords_ = b;
 }
 
+void AbstractSearchLine::on_actionHighlightAll__toggled(bool b)
+{
+    highlightAll_ = b;
+}

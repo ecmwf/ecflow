@@ -11,6 +11,7 @@
 #define PLAINTEXTSEARCHLINE_HPP_
 
 #include <QPlainTextEdit>
+#include <QTimer>
 
 #include "AbstractSearchLine.hpp"
 
@@ -32,11 +33,17 @@ public Q_SLOTS:
 	void matchModeChanged(int newIndex);
 	void on_actionCaseSensitive__toggled(bool);
 	void on_actionWholeWords__toggled(bool);
+	void on_actionHighlightAll__toggled(bool);
+	void slotClose();
+	void slotHighlight();
 
 protected:
 	QTextDocument::FindFlags findFlags();
-	bool findString (QString str, QTextDocument::FindFlags extraFlags, bool gotoStartOfWord, int iteration);
+	bool findString (QString str, bool highlightAll, QTextDocument::FindFlags extraFlags, bool gotoStartOfWord, int iteration);
 	void refreshSearch();
+	void highlightMatches(QString txt);
+    void clearHighlights();
+    QTimer highlightAllTimer_;
 	QPlainTextEdit* editor_;
 
 };

@@ -25,16 +25,18 @@ public:
 	virtual bool isEmpty();
 	void selectAll();
 
-	bool caseSensitive() {return caseSensitive_;};
-	bool wholeWords()    {return wholeWords_;};
+	bool caseSensitive()  {return caseSensitive_;};
+	bool wholeWords()     {return wholeWords_;};
+	bool highlightAll()   {return highlightAll_;};
 
 public Q_SLOTS:
 	virtual void slotFind(QString)=0;
 	virtual void slotFindNext()=0;
 	virtual void slotFindPrev()=0;
-	void slotClose();
+	virtual void slotClose();
 	virtual void on_actionCaseSensitive__toggled(bool);
 	virtual void on_actionWholeWords__toggled(bool);
+	virtual void on_actionHighlightAll__toggled(bool);
 
 protected:
 	void updateButtons(bool);
@@ -42,6 +44,7 @@ protected:
 	bool status_;
 	bool caseSensitive_;
 	bool wholeWords_;
+	bool highlightAll_;
     StringMatchMode matchMode_;
 
 	QColor   oriColour_;

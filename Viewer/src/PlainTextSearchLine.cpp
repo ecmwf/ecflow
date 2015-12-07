@@ -15,14 +15,13 @@
 #include <QPushButton>
 
 #include "PlainTextSearchLine.hpp"
+//#include "UserMessage.hpp"
 
 PlainTextSearchLine::PlainTextSearchLine(QWidget *parent) :
 	AbstractSearchLine(parent), editor_(0)
 {
-
 	connect(matchModeCb_,SIGNAL(currentIndexChanged(int)),
 		this, SLOT(matchModeChanged(int)));
-
 }
 
 PlainTextSearchLine::~PlainTextSearchLine()
@@ -36,74 +35,141 @@ void PlainTextSearchLine::setEditor(QPlainTextEdit *e)
 }
 
 
-bool PlainTextSearchLine::findString (QString str, QTextDocument::FindFlags extraFlags, bool gotoStartOfWord, int iteration)
+bool PlainTextSearchLine::findString (QString str, bool highlightAll, QTextDocument::FindFlags extraFlags, bool gotoStartOfWord, int iteration)
 {
+	QColor highlightColour(200, 255, 200);
 	QTextDocument::FindFlags flags = findFlags() | extraFlags;
 
 	QTextCursor cursor(editor_->textCursor());
 
-	if (gotoStartOfWord)	// go to start of word?
+	if (highlightAll)  // if highlighting all matches, start from the start of the document
+		cursor.movePosition(QTextCursor::Start);
+
+	else if (gotoStartOfWord)	// go to start of word?
 		cursor.movePosition(QTextCursor::StartOfWord);
 
-	editor_->setTextCursor(cursor);
 
+	QList<QTextEdit::ExtraSelection> extraSelections;
 	bool found = false;
+	bool keepGoing = true;
+	int  numMatches = 0;
 
-	switch (matchModeCb_->currentMatchMode())
+	Qt::CaseSensitivity cs = (flags & QTextDocument::FindCaseSensitively) ? Qt::CaseSensitive : Qt::CaseInsensitive;
+
+	while (keepGoing)
 	{
-		case StringMatchMode::ContainsMatch:
+		switch (matchModeCb_->currentMatchMode())
 		{
-			found = editor_->find(str, flags);
-			break;
+			case StringMatchMode::ContainsMatch:
+			{
+				cursor = editor_->document()->find(str, cursor, flags);  // perform the search
+				found = (!cursor.isNull());
+
+				break;
+			}
+			case StringMatchMode::WildcardMatch:
+			{
+				QRegExp regexp(str);
+				regexp.setCaseSensitivity(cs);
+				regexp.setPatternSyntax(QRegExp::Wildcard);
+
+				cursor = editor_->document()->find(regexp, cursor, flags);  // perform the search
+				found = (!cursor.isNull());
+
+				break;
+			}
+			case StringMatchMode::RegexpMatch:
+			{
+				QRegExp regexp(str);
+				regexp.setCaseSensitivity(cs);
+
+				cursor = editor_->document()->find(regexp, cursor, flags);  // perform the search
+				found = (!cursor.isNull());
+
+				break;
+			}
+
+			default:
+			{
+				break;
+			}
 		}
-		case StringMatchMode::WildcardMatch:
+
+
+		if (found)
 		{
-			QRegExp regexp(str);
-			Qt::CaseSensitivity cs = (flags & QTextDocument::FindCaseSensitively) ? Qt::CaseSensitive : Qt::CaseInsensitive;
-			regexp.setCaseSensitivity(cs);
-			regexp.setPatternSyntax(QRegExp::Wildcard);
-
-			cursor = editor_->document()->find(regexp, editor_->textCursor(), flags);  // perform the search
-
-			if (!cursor.isNull())
+			if (highlightAll)
+			{
+				QTextEdit::ExtraSelection highlight;
+				highlight.cursor = cursor;
+				highlight.format.setBackground(highlightColour);
+				extraSelections << highlight;
+				numMatches++;
+			}
+			else
+			{
 				editor_->setTextCursor(cursor);  // mark the selection of the match
-
-			found = (!cursor.isNull());
-			break;
+			}
 		}
-		case StringMatchMode::RegexpMatch:
+
+
+		if (found && !highlightAll)  // found a match and we only want one - stop here and select it
+			keepGoing = false;
+
+		else if (!found && !highlightAll && (iteration != 0))  // didn't find a match, only want one, we HAVE wrapped around
+			keepGoing = false;
+
+		if (!found && highlightAll)  // want to highlight all, but no more matches found
+			keepGoing = false;
+
+
+
+		// not found, and we only want one match, then we need to wrap around and keep going
+		if (keepGoing)
 		{
-			QRegExp regexp(str);
-			Qt::CaseSensitivity cs = (flags & QTextDocument::FindCaseSensitively) ? Qt::CaseSensitive : Qt::CaseInsensitive;
-			regexp.setCaseSensitivity(cs);
-
-			cursor = editor_->document()->find(regexp, editor_->textCursor(), flags);  // perform the search
-
-			if (!cursor.isNull())
-				editor_->setTextCursor(cursor);  // mark the selection of the match
-
-			found = (!cursor.isNull());
-			break;
-		}
-		default:
-		{
-			break;
+			if (!highlightAll)
+			{
+				cursor=editor_->textCursor();
+				if (extraFlags & QTextDocument::FindBackward)
+					cursor.movePosition(QTextCursor::End);
+				else
+					cursor.movePosition(QTextCursor::Start);
+				editor_->setTextCursor(cursor);
+				iteration = 1;  // iteration=1 to avoid infinite wraparound!
+			}
 		}
 	}
 
-	// if not found, then go back to the top and try again (wraparound)
-	if (!found && (iteration == 0))
+
+	if (highlightAll)
 	{
-		cursor=editor_->textCursor();
-		if (extraFlags & QTextDocument::FindBackward)
-			cursor.movePosition(QTextCursor::End);
-		else
-			cursor.movePosition(QTextCursor::Start);
-		editor_->setTextCursor(cursor);
-		found = findString(str, extraFlags, gotoStartOfWord, 1); // iteration=1 to avoid infinite wraparound!
+		//char num[64];
+		//sprintf(num, "%d", numMatches);
+		//UserMessage::message(UserMessage::DBG, false," highlighting : " + std::string(num));
+
+		editor_->setExtraSelections( extraSelections );
 	}
 
 	return (found);
+}
+
+
+
+void PlainTextSearchLine::highlightMatches(QString txt)
+{
+	if (!txt.isEmpty())
+		findString(txt, true,  0, true, 0);   // highlight all matches
+}
+
+
+void PlainTextSearchLine::slotHighlight()
+{
+	//UserMessage::message(UserMessage::DBG, false," highlight: " + searchLine_->text().toStdString());
+
+	highlightAllTimer_.stop();
+
+	if (highlightAll())
+		highlightMatches(searchLine_->text());
 }
 
 
@@ -112,7 +178,24 @@ void PlainTextSearchLine::slotFind(QString txt)
 	if(!editor_)
 		return;
 
-	bool found = findString(txt, 0, true, 0);
+	highlightAllTimer_.stop();
+	bool found = findString(txt, false, 0, true, 0);  // find the next match
+
+	if (!isEmpty()) // there is a search term supplied by the user
+	{
+		// don't highlight the matches immediately - this can be expensive for large files,
+		// and we don't want to highlight each time the user types a new character; wait
+		// a moment and then start the highlight
+		highlightAllTimer_.setInterval(500);
+		highlightAllTimer_.disconnect();
+		connect(&highlightAllTimer_, SIGNAL(timeout()), this, SLOT(slotHighlight()));
+		highlightAllTimer_.start();
+	}
+	else
+	{
+		clearHighlights();
+	}
+
 	updateButtons(found);
 }
 
@@ -121,7 +204,7 @@ void PlainTextSearchLine::slotFindNext()
 	if(!editor_)
 		return;
 
-	bool found = findString(searchLine_->text(), 0, false, 0);
+	bool found = findString(searchLine_->text(), false, 0, false, 0);
 	updateButtons(found);
 }
 
@@ -130,7 +213,7 @@ void PlainTextSearchLine::slotFindPrev()
 	if(!editor_)
 		return;
 
-	bool found = findString(searchLine_->text(), QTextDocument::FindBackward, false, 0);
+	bool found = findString(searchLine_->text(), false, QTextDocument::FindBackward, false, 0);
 	updateButtons(found);
 }
 
@@ -154,6 +237,7 @@ QTextDocument::FindFlags PlainTextSearchLine::findFlags()
 
 
 
+
 // PlainTextSearchLine::refreshSearch
 // performed when the user changes search parameters such as case sensitivity - we want to
 // re-do the search from the current point, but if the current selection still matches then
@@ -169,6 +253,14 @@ void PlainTextSearchLine::refreshSearch()
 		editor_->setTextCursor(cursor);
 	}
 	slotFindNext();
+	slotHighlight();
+}
+
+
+void PlainTextSearchLine::clearHighlights()
+{
+	QList<QTextEdit::ExtraSelection> empty;
+	editor_->setExtraSelections(empty);
 }
 
 
@@ -197,3 +289,23 @@ void PlainTextSearchLine::on_actionWholeWords__toggled(bool b)
 
 	refreshSearch();
 }
+
+void PlainTextSearchLine::on_actionHighlightAll__toggled(bool b)
+{
+    AbstractSearchLine::on_actionHighlightAll__toggled(b);
+
+	if (b)                  // user switched on the highlights
+		slotHighlight();
+	else                    // user switched off the highlights
+		clearHighlights();
+
+
+	refreshSearch();
+}
+
+void PlainTextSearchLine::slotClose()
+{
+	AbstractSearchLine::slotClose();
+	clearHighlights();
+}
+
