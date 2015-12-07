@@ -53,10 +53,20 @@ private:
 
 
 
+// -----------------------------------------------------------------
+// BaseNodeCondition
+// The parent class for all node conditions.
+// delayUnwinding: choose whether to unwind the function stack
+// immediately after parsing this condition, or delay until we've
+// reached the end of the current sub-expression. Set to true for
+// loosely-coupled operators such as 'and', and set to false for
+// others which need to consume their arguments immediately.
+// -----------------------------------------------------------------
+
 class BaseNodeCondition
 {
 public:
-    BaseNodeCondition() {};
+    BaseNodeCondition() {delayUnwinding_ = false;};
     virtual ~BaseNodeCondition() {};
 
     bool execute(VInfo_ptr nodeInfo);
@@ -67,10 +77,12 @@ public:
 
     void setOperands(std::vector<BaseNodeCondition *> ops) {operands_ = ops;};
     bool containsAttributeSearch();
+    bool delayUnwinding() {return delayUnwinding_;};
 
 
 protected:
     std::vector<BaseNodeCondition *> operands_;
+    bool delayUnwinding_;
     virtual bool searchInAttributes() {return false;};
 };
 
@@ -79,7 +91,7 @@ protected:
 class AndNodeCondition : public BaseNodeCondition
 {
 public:
-    AndNodeCondition() {};
+    AndNodeCondition() {delayUnwinding_ = true;};
     ~AndNodeCondition() {};
 
     bool execute(VNode* node);
@@ -92,7 +104,7 @@ public:
 class OrNodeCondition : public BaseNodeCondition
 {
 public:
-    OrNodeCondition()  {};
+    OrNodeCondition()  {delayUnwinding_ = true;};
     ~OrNodeCondition() {};
 
     bool execute(VNode* node);

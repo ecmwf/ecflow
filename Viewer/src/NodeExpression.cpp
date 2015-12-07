@@ -80,7 +80,7 @@ bool NodeExpressionParser::isNodeFlag(const std::string &str)
 bool NodeExpressionParser::isWhatToSearchIn(const std::string &str, bool &isAttribute)
 {
     // list of non-attribute items that we can search in
-    if (str == "node_name")
+    if (str == "node_name" || str == "node_path")
     {
         isAttribute = false;
         return true;
@@ -121,6 +121,9 @@ BaseNodeCondition *NodeExpressionParser::parseWholeExpression(std::string expr, 
     char delimiter = ' ';
     char insideQuote = '\0';  // \0 if not inside a quote, \' if we are inside a quote
                               // will not handle the case of nested quotes!
+
+    UserMessage::message(UserMessage::DBG, false, std::string("parseWholeExpression:    ") + expr);
+
 
     ecf::Str::replace_all(expr, std::string("("), std::string(" ( "));
     ecf::Str::replace_all(expr, std::string(")"), std::string(" ) "));
@@ -169,6 +172,7 @@ BaseNodeCondition *NodeExpressionParser::parseWholeExpression(std::string expr, 
 
 BaseNodeCondition *NodeExpressionParser::parseExpression(bool caseSensitiveStringMatch)
 {
+    bool returnEarly = false;
     BaseNodeCondition *result = NULL;
 
     std::vector<BaseNodeCondition *> funcStack;
@@ -183,7 +187,7 @@ BaseNodeCondition *NodeExpressionParser::parseExpression(bool caseSensitiveStrin
     }
 
 
-    while (i_ != tokens_.end() || funcStack.size() > 0)
+    while (!returnEarly && i_ != tokens_.end())
     {
         bool tokenOk = true;
         bool updatedOperands = false;
@@ -294,7 +298,7 @@ BaseNodeCondition *NodeExpressionParser::parseExpression(bool caseSensitiveStrin
                 }
                 else if (*i_ == ")")
                 {
-                    return result;
+                    returnEarly = true;
                 }
 
                 else
@@ -316,16 +320,16 @@ BaseNodeCondition *NodeExpressionParser::parseExpression(bool caseSensitiveStrin
         {
             // if there are enough operands on the stack for the last
             // function, pop them off and create a small tree for that function
-            if (!funcStack.empty())
+            // but do not do this if the last function asks to delay this process
+            if (!funcStack.empty() && !funcStack.back()->delayUnwinding())
             {
                 if(updatedOperands && (operandStack.size() >= funcStack.back()->numOperands()))
                 {
                     std::vector<BaseNodeCondition *> operands;
-                    result = funcStack.back();  // last function is the current result
+                    result = funcStack.back();       // last function is the current result
                     operands = popLastNOperands(operandStack, result->numOperands());  // pop its operands off the stack
                     result->setOperands(operands);
-                    funcStack.pop_back(); // remove the last function from the stack
-                    //operandStack.clear(); // clear the operand stack
+                    funcStack.pop_back();            // remove the last function from the stack
                     operandStack.push_back(result);  // store the current result
                 }
             }
@@ -337,11 +341,28 @@ BaseNodeCondition *NodeExpressionParser::parseExpression(bool caseSensitiveStrin
             return result;
         }
 
-        if (i_ != tokens_.end())
+        if (i_ != tokens_.end() && !returnEarly)
             ++i_; // move onto the next token
     }
 
+
+    // final unwinding of the stack
+    while (!funcStack.empty())
+    {
+        if(operandStack.size() >= funcStack.back()->numOperands())
+        {
+            std::vector<BaseNodeCondition *> operands;
+            result = funcStack.back();  // last function is the current result
+            operands = popLastNOperands(operandStack, result->numOperands());  // pop its operands off the stack
+            result->setOperands(operands);
+            funcStack.pop_back(); // remove the last function from the stack
+            operandStack.push_back(result);  // store the current result
+        }
+    }
+
+
     UserMessage::message(UserMessage::DBG, false, std::string("    ") + result->print());
+
     return result;
 }
 
@@ -554,6 +575,12 @@ bool StringMatchCondition::execute(VNode *node)
     if (searchIn == "node_name")
     {
         bool ok = matcher_->match(searchForOperand->what(), node->strName());
+        return (ok);
+    }
+
+    else if (searchIn == "node_path")
+    {
+        bool ok = matcher_->match(searchForOperand->what(), node->absNodePath());
         return (ok);
     }
     else

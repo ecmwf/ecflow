@@ -341,7 +341,7 @@ void NodeQuery::buildQueryString()
 	if(!path.isEmpty())
 	{
 		if(!nodePart.isEmpty())
-			nodePart+=" or ";
+			nodePart+=" and ";
 
 		nodePart+="node_path " + stringOptions_["node_path"]->matchOperator() + " \'" +  path + "\'";
 	}
