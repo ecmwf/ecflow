@@ -5,10 +5,11 @@
 // In applying this licence, ECMWF does not waive the privileges and immunities
 // granted to it by virtue of its status as an intergovernmental organisation
 // nor does it submit to any jurisdiction.
+//
 //============================================================================
 
-#ifndef OUTPUTPROVIDER_HPP_
-#define OUTPUTPROVIDER_HPP_
+#ifndef VIEWER_SRC_OUTPUTDIRPROVIDER_HPP_
+#define VIEWER_SRC_OUTPUTDIRPROVIDER_HPP_
 
 #include <QObject>
 
@@ -18,24 +19,17 @@
 #include "VTask.hpp"
 #include "VTaskObserver.hpp"
 
-class OutputClient;
+class OutputDirClient;
 
-class OutputProvider : public QObject, public InfoProvider
+class OutputDirProvider : public QObject, public InfoProvider
 {
 Q_OBJECT
 
 public:
-	 explicit OutputProvider(InfoPresenter* owner);
+	 explicit OutputDirProvider(InfoPresenter* owner);
 
 	 void visit(VInfoNode*);
-
-	 //Get the contents of the jobout directory
-	 VDir_ptr directory();
-
-	 //Get a particular jobout file
-	 void file(const std::string& fileName);
-
-	 std::string joboutFileName() const;
+	 void clear();
 
 private Q_SLOTS:
 	void slotOutputClientError(QString);
@@ -43,13 +37,13 @@ private Q_SLOTS:
 	void slotOutputClientFinished();
 
 private:
-	 void fetchFile(ServerHandler *server,VNode *n,const std::string& fileName,bool isJobout);
-	 void fetchJoboutViaServer(ServerHandler *server,VNode *n,const std::string&);
-	 bool fetchFileViaLogServer(VNode *n,const std::string& fileName);
-	 VDir_ptr fetchDirViaLogServer(VNode *n,const std::string& fileName);
-	 VDir_ptr fetchLocalDir(const std::string& path);
+    void fetchDir(ServerHandler*,VNode*);
+	bool fetchDirViaOutputClient(VNode *n,const std::string& fileName);
+	VDir_ptr fetchLocalDir(const std::string& path);
+	OutputDirClient* makeOutputClient(const std::string& host,const std::string& port);
 
-	 OutputClient *outClient_;
+	OutputDirClient *outClient_;
 };
 
-#endif
+
+#endif /* VIEWER_SRC_OUTPUTDIRPROVIDER_HPP_ */

@@ -187,7 +187,7 @@
         </widget>
        </item>
        <item>
-        <widget class="QTreeView" name="outputView_"/>
+        <widget class="QTreeView" name="dirView_"/>
        </item>
       </layout>
      </widget>

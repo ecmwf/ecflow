@@ -119,6 +119,8 @@ void FileInfoLabel::update(VReply* reply,QString extraText)
 		VFile_ptr tmp=reply->tmpFile();
 		if(tmp && tmp.get())
 		{
+			VFileInfo f(QString::fromStdString(tmp->path()));
+
 			if(tmp->storageMode() == VFile::MemoryStorage)
 			{
 				labelText+="<b><font color=" + col.name() + "> Size: </font></b>";
@@ -126,7 +128,6 @@ void FileInfoLabel::update(VReply* reply,QString extraText)
 			}
 			else
 			{
-				VFileInfo f(QString::fromStdString(tmp->path()));
 				if(f.exists())
 				{
 					//s+="<br>";
@@ -142,7 +143,13 @@ void FileInfoLabel::update(VReply* reply,QString extraText)
 			s+="<br>";
 			s+="<b><font color=" + col.name() + "> Source: </font></b>";
 			s+="<font color=" + colText.name() + "> " + QString::fromStdString(reply->fileReadMethod()) + "</font>";
-			s+=" in " + QString::number(static_cast<float>(tmp->transferDuration())/1000.,'f',1) + " sec";
+
+			s+=" (transfer: " + QString::number(static_cast<float>(tmp->transferDuration())/1000.,'f',1) + " s";
+			if(tmp->widgetLoadDuration() > 0)
+			{
+				s+=", load: " + QString::number(static_cast<float>(tmp->widgetLoadDuration())/1000.,'f',1) + " s";
+			}
+			s+=")";
 		}
 	}
 

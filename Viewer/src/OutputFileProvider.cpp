@@ -7,10 +7,10 @@
 // nor does it submit to any jurisdiction.
 //============================================================================
 
-#include "OutputProvider.hpp"
+#include "OutputFileProvider.hpp"
 
 #include "LogServer.hpp"
-#include "OutputClient.hpp"
+#include "OutputFileClient.hpp"
 #include "VNode.hpp"
 #include "VReply.hpp"
 #include "ServerHandler.hpp"
@@ -20,15 +20,24 @@
 #include <boost/filesystem/path.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 
-OutputProvider::OutputProvider(InfoPresenter* owner) :
+OutputFileProvider::OutputFileProvider(InfoPresenter* owner) :
 	InfoProvider(owner,VTask::OutputTask),
 	outClient_(NULL)
 {
+}
 
+void OutputFileProvider::clear()
+{
+	if(outClient_)
+	{
+		delete outClient_;
+		outClient_=NULL;
+	}
+	InfoProvider::clear();
 }
 
 //Node
-void OutputProvider::visit(VInfoNode* info)
+void OutputFileProvider::visit(VInfoNode* info)
 {
 	//Reset the reply
 	reply_->reset();
@@ -53,7 +62,7 @@ void OutputProvider::visit(VInfoNode* info)
 }
 
 //Get a file
-void OutputProvider::file(const std::string& fileName)
+void OutputFileProvider::file(const std::string& fileName)
 {
 	//Check if the task is already running
 	if(task_)
@@ -79,7 +88,7 @@ void OutputProvider::file(const std::string& fileName)
 	fetchFile(server,n,fileName,(fileName==jobout));
 }
 
-void OutputProvider::fetchFile(ServerHandler *server,VNode *n,const std::string& fileName,bool isJobout)
+void OutputFileProvider::fetchFile(ServerHandler *server,VNode *n,const std::string& fileName,bool isJobout)
 {
 	if(!n || !n->node() || !server)
     {
@@ -111,7 +120,7 @@ void OutputProvider::fetchFile(ServerHandler *server,VNode *n,const std::string&
     //Check if it is tryno 0
     if(boost::algorithm::ends_with(fileName,".0"))
     {
-    	reply_->setInfoText("No output to be expected when TRYNO is 0!");
+    	reply_->setInfoText("Job output does not exist yet (TRYNO is 0!)");
     	owner_->infoReady(reply_);
     	return;
     }
@@ -134,13 +143,12 @@ void OutputProvider::fetchFile(ServerHandler *server,VNode *n,const std::string&
     	    }
     	}
     }
-
     //----------------------------------------------------
     // Not the loacalhost or we could not read the file
     //----------------------------------------------------
 
     //We try the output client, its asynchronous!
-    if(fetchFileViaLogServer(n,fileName))
+    if(fetchFileViaOutputClient(n,fileName))
     {
     	//If we are here we created a output client and asked to the fetch the
     	//file asynchronously. The ouput client will call slotOutputClientFinished() or
@@ -177,36 +185,7 @@ void OutputProvider::fetchFile(ServerHandler *server,VNode *n,const std::string&
     owner_->infoFailed(reply_);
 }
 
-VDir_ptr OutputProvider::directory()
-{
-	VDir_ptr dir;
-
-	if(!info_ || !info_->isNode() || !info_->node() || !info_->node()->node())
-	{
-	    return dir;
-	}
-
-	VNode *n=info_->node();
-
-	//Get the filename
-	std::string fileName=n->genVariable("ECF_JOBOUT");
-
-	if(fileName.empty())
-		return dir;
-
-	//Try local dir
-	dir=fetchLocalDir(fileName);
-	if(dir)
-		return dir;
-	//Then the logserver
-	else
-		dir=fetchDirViaLogServer(n,fileName);
-
-	return dir;
-}
-
-
-bool OutputProvider::fetchFileViaLogServer(VNode *n,const std::string& fileName)
+bool OutputFileProvider::fetchFileViaOutputClient(VNode *n,const std::string& fileName)
 {
 	std::string host, port;
 	if(n->logServer(host,port))
@@ -218,7 +197,7 @@ bool OutputProvider::fetchFileViaLogServer(VNode *n,const std::string& fileName)
 
 		if(!outClient_)
 		{
-			outClient_=new OutputClient(host,port,this);
+			outClient_=new OutputFileClient(host,port,this);
 
 			connect(outClient_,SIGNAL(error(QString)),
 				this,SLOT(slotOutputClientError(QString)));
@@ -236,34 +215,11 @@ bool OutputProvider::fetchFileViaLogServer(VNode *n,const std::string& fileName)
 	}
 
 	return false;
-
-	//Create a logserver
-	/*LogServer_ptr logServer=n->logServer();
-
-	if(logServer && logServer->ok())
-	{
-		VFile_ptr tmp = logServer->getFile(fileName);
-
-		if(tmp && tmp.get() && tmp->exists())
-		{
-			reply_->fileReadMode(VReply::LogServerReadMode);
-
-			std::string method="served by " + logServer->host() + "@" + logServer->port();
-			reply_->fileReadMethod(method);
-
-			reply_->tmpFile(tmp);
-
-			return true;
-		}
-	}
-
-	return false;*/
-
 }
 
-void OutputProvider::slotOutputClientFinished()
+void OutputFileProvider::slotOutputClientFinished()
 {
-	VFile_ptr tmp = outClient_->resultFile();
+	VFile_ptr tmp = outClient_->result();
 
 	if(tmp && tmp.get() && tmp->exists())
 	{
@@ -278,14 +234,15 @@ void OutputProvider::slotOutputClientFinished()
 	}
 }
 
-void OutputProvider::slotOutputClientProgress(QString msg)
+void OutputFileProvider::slotOutputClientProgress(QString msg)
 {
-	reply_->setInfoText(msg.toStdString());
-	owner_->infoProgress(reply_);
-	reply_->setInfoText("");
+	//reply_->setInfoText(msg.toStdString());
+	//owner_->infoProgress(reply_);
+	//reply_->setInfoText("");
+	qDebug() << "prog: " << msg;
 }
 
-void OutputProvider::slotOutputClientError(QString msg)
+void OutputFileProvider::slotOutputClientError(QString msg)
 {
 	if(info_ && info_.get())
 	{
@@ -307,7 +264,7 @@ void OutputProvider::slotOutputClientError(QString msg)
 	owner_->infoFailed(reply_);
 }
 
-void OutputProvider::fetchJoboutViaServer(ServerHandler *server,VNode *n,const std::string& fileName)
+void OutputFileProvider::fetchJoboutViaServer(ServerHandler *server,VNode *n,const std::string& fileName)
 {
     //Define a task for getting the info from the server.
     task_=VTask::create(taskType_,n,this);
@@ -320,7 +277,7 @@ void OutputProvider::fetchJoboutViaServer(ServerHandler *server,VNode *n,const s
     server->run(task_);
 }
 
-
+/*
 VDir_ptr OutputProvider::fetchDirViaLogServer(VNode *n,const std::string& fileName)
 {
 	VDir_ptr res;
@@ -335,7 +292,9 @@ VDir_ptr OutputProvider::fetchDirViaLogServer(VNode *n,const std::string& fileNa
 
 	return res;
 }
+*/
 
+/*
 VDir_ptr OutputProvider::fetchLocalDir(const std::string& path)
 {
 	VDir_ptr res;
@@ -375,8 +334,8 @@ VDir_ptr OutputProvider::fetchLocalDir(const std::string& path)
 	return res;
 }
 
-
-std::string OutputProvider::joboutFileName() const
+*/
+std::string OutputFileProvider::joboutFileName() const
 {
 	if(info_ && info_->isNode() && info_->node() && info_->node()->node())
 	{

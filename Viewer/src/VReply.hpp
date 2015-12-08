@@ -15,16 +15,19 @@
 
 #include "Zombie.hpp"
 #include "VFile.hpp"
+#include "VDir.hpp"
 
 class VReply
 {
 public:
 	enum Status {NoStatus,TaskDone,TaskFailed,TaskCancelled};
 	enum FileReadMode {NoReadMode,LocalReadMode,ServerReadMode,LogServerReadMode};
-	VReply() : status_(NoStatus), readMode_(NoReadMode) {};
+	VReply(void* sender=NULL) : sender_(sender), status_(NoStatus), readMode_(NoReadMode) {};
 	~VReply() {}
 
 	void reset();
+
+	void* sender() const {return sender_;}
 
 	const std::string& errorText() const {return errorText_;}
 	const std::string& warningText() const {return warningText_;}
@@ -36,6 +39,7 @@ public:
 	FileReadMode fileReadMode() const {return readMode_;}
 	const std::string fileReadMethod() {return readMethod_;}
 	VFile_ptr tmpFile() const {return tmpFile_;}
+	VDir_ptr directory() const {return dir_;}
 	const std::vector<Zombie>& zombies() const {return zombies_;}
 
 	bool textFromFile(const std::string&);
@@ -49,6 +53,7 @@ public:
 	void fileReadMode(FileReadMode m) {readMode_=m;}
 	void fileReadMethod(const std::string& m) {readMethod_=m;}
 	void tmpFile(VFile_ptr f) {tmpFile_=f;}
+	void setDirectory(VDir_ptr d) {dir_=d;}
 	void zombies(const std::vector<Zombie>& z) { zombies_=z;}
 
 	bool hasWarning() const {return !warningText_.empty();}
@@ -60,6 +65,7 @@ public:
 	void status(Status s) {status_=s;}
 
 protected:
+	void* sender_;
 	Status status_;
 	std::string errorText_;
 	std::string warningText_;
@@ -70,6 +76,7 @@ protected:
 	FileReadMode readMode_;
 	std::string  readMethod_;
 	VFile_ptr  tmpFile_;
+	VDir_ptr dir_;
 	std::vector<Zombie> zombies_;
 };
 

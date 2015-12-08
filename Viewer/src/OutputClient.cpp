@@ -11,43 +11,13 @@
 
 #include <QTimer>
 
-#include <string.h>
-#include <strings.h>
-#include <unistd.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <signal.h>
-#include <errno.h>
-#include <sys/types.h>
-#include <sys/wait.h>
-#include <sys/param.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <netdb.h>
-
-#include "setjmp.h"
-
-#ifdef AIX
-#include <memory.h>
-#endif
-
-#include <boost/filesystem/operations.hpp>
-#include <boost/filesystem/path.hpp>
-
-#define FAIL(a) do { perror(a); exit(1); } while(0)
-
 OutputClient::OutputClient(const std::string& host,const std::string& portStr,QObject* parent) :
 	QObject(parent),
 	soc_(NULL),
 	host_(host),
 	portStr_(portStr),
 	port_(19999),
-	timeout_(3000),
-	total_(0),
-	lastProgress_(0),
-	progressChunk_(1024*1024),
-	progressUnits_("MB")
+	timeout_(3000)
 {
 	if(!portStr_.empty())
 		port_=atoi(portStr.c_str());
@@ -66,6 +36,12 @@ OutputClient::OutputClient(const std::string& host,const std::string& portStr,QO
 		timeout_ = atoi(timeoutStr)*1000;
 }
 
+OutputClient::~OutputClient()
+{
+	soc_->abort();
+}
+
+
 void OutputClient::connectToHost(std::string host,int port)
 {
 	stopper_.start();
@@ -82,13 +58,10 @@ void OutputClient::slotCheckTimeout()
 	   soc_->state() == QAbstractSocket::ConnectingState)
 	{
 		soc_->abort();
-		if(out_)
-			out_.reset();
-
 		Q_EMIT error("Timeout error");
 	}
 }
-
+/*
 void OutputClient::slotConnected()
 {
 	qDebug() << "connected to " << soc_->peerName();
@@ -97,107 +70,7 @@ void OutputClient::slotConnected()
 	soc_->write(remoteFile_.c_str(),remoteFile_.size());
 	soc_->write("\n",1);
 }
-
-void OutputClient::slotError(QAbstractSocket::SocketError err)
-{
-	qDebug() << "error" <<  soc_->errorString();
-
-	switch(err)
-	{
-	case QAbstractSocket::RemoteHostClosedError:
-		qDebug() << "remote host closed";
-
-		if(out_)
-		{
-			out_->setTransferDuration(stopper_.elapsed());
-			out_->setFetchDate(QDateTime::currentDateTime());
-			out_->close();
-		}
-
-		Q_EMIT finished();
-
-		if(out_)
-			out_.reset();
-
-		break;
-	default:
-		soc_->abort();
-		if(out_)
-		{
-			out_->close();
-			out_.reset();
-		}
-		Q_EMIT error(soc_->errorString());
-		break;
-	}
-}
-
-void OutputClient::getFile(const std::string& name)
-{
-	connectToHost(host_,port_);
-
-	remoteFile_=name;
-	out_.reset();
-	out_=VFile_ptr(VFile::create(false));
-	total_=0;
-}
-
-void OutputClient::slotRead()
-{
-	const qint64 size = 64*1024;
-	char buf[size];
-	quint64 len = 0;
-
-	//if(soc_->bytesAvailable() < (int)sizeof(quint16))
-	//	return;
-
-	while((len = soc_->read(buf,size)) > 0)
-	{
-		std::string err;
-		if(!out_->write(buf,len,err))
-		{
-			soc_->abort();
-			Q_EMIT error("write failed");
-		}
-		total_ += len;
-
-		if(total_/progressChunk_ > lastProgress_)
-		{
-			lastProgress_=total_/progressChunk_;
-			Q_EMIT progress(QString::number(lastProgress_) + " " + progressUnits_ + " read");
-
-		}
-	}
-
-	qDebug() << "total" << total_;
-
-	//in.setVersion(QDataStream::Qt_4_0);
-
-
-
-	/*
-	if(blockSize == 0) {
-	  if (tcpSocket->bytesAvailable() < (int)sizeof(quint16))
-	            return;
-
-	        in >> blockSize;
-	    }
-
-
-
-	tcpSoc_->writeData("get ",4);
-	tcpSoc_->write(name.c_str(),name.size());
-	tcpSoc_->write("\n",1);
-
-	*/
-
-
-}
-
-VFile_ptr OutputClient::resultFile() const
-{
-	return out_;
-}
+*/
 
 /*
 
@@ -275,10 +148,7 @@ void LogClient::connect(std::string host,int port)
 	sigaction(SIGALRM, &old, &sa);
 }
 */
-OutputClient::~OutputClient()
-{
-	//close(soc_);
-}
+
 /*
 VFile_ptr LogClient::getFile(std::string name)
 {
@@ -325,7 +195,7 @@ VFile_ptr LogClient::getFile(std::string name)
 
 	//fwrite(buf,1,size,f);
 
-	if(fclose(f))
+	if(fclose(f))~OutputClient();
 	{
 	  char buf_loc[2048];
 	  sprintf(buf_loc,"Write error on %s",out->path().c_str());

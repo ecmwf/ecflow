@@ -75,9 +75,12 @@ set(viewer_srcs
     NodeWidget.cpp
     OneLineTextEdit.cpp
     OutputClient.cpp
+    OutputFileClient.cpp
+    OutputDirClient.cpp
     OutputModel.cpp
     OutputItemWidget.cpp
-    OutputProvider.cpp
+    OutputFileProvider.cpp
+    OutputDirProvider.cpp
     OverviewItemWidget.cpp
     OverviewProvider.cpp
     Palette.cpp
@@ -203,8 +206,11 @@ set(viewer_moc_files AbstractNodeModel.hpp
     NodeWidget.hpp
     OneLineTextEdit.hpp
     OutputClient.hpp
+    OutputFileClient.hpp
+    OutputDirClient.hpp
     OutputItemWidget.hpp
-    OutputProvider.hpp
+    OutputFileProvider.hpp
+    OutputDirProvider.hpp
     PropertyDialog.hpp             
     PropertyEditor.hpp
     PropertyLine.hpp

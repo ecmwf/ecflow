@@ -13,13 +13,9 @@
 
 #include <QObject>
 #include <QTcpSocket>
-
-#include "VFile.hpp"
-#include "VDir.hpp"
+#include <QTime>
 
 class QTcpSocket;
-class OutputClient;
-typedef boost::shared_ptr<OutputClient> LogClient_ptr;
 
 class OutputClient : public QObject
 {
@@ -34,16 +30,12 @@ public:
     const std::string& portStr() const {return portStr_;}
 
     const std::string& remoteFile() const {return remoteFile_;}
-    VFile_ptr resultFile() const;
-    void getFile(const std::string& name);
-    //VFile_ptr getFile(std::string name);
-    //VDir_ptr  getDir(const char* name);
     bool ok() const { return soc_ != NULL; }
 
 protected Q_SLOTS:
-    void slotError(QAbstractSocket::SocketError err);
-    void slotRead();
-    void slotConnected();
+    virtual void slotError(QAbstractSocket::SocketError err)=0;
+    virtual void slotRead()=0;
+    virtual void slotConnected()=0;
     void slotCheckTimeout();
 
 Q_SIGNALS:
@@ -51,9 +43,7 @@ Q_SIGNALS:
 	void progress(QString);
 	void finished();
 
-private:
-	OutputClient(const OutputClient&);
-	OutputClient& operator=(const OutputClient&);
+protected:
 	void connectToHost(std::string,int);
 
 	QTcpSocket* soc_;
@@ -62,13 +52,11 @@ private:
 	int port_;
 	int timeout_;
 	std::string remoteFile_;
-	qint64 total_;
-	VFile_ptr out_;
 	QTime stopper_;
-	qint64 lastProgress_;
-	const QString progressUnits_;
-	const qint64 progressChunk_;
 
+private:
+	OutputClient(const OutputClient&);
+	OutputClient& operator=(const OutputClient&);
 };
 
 

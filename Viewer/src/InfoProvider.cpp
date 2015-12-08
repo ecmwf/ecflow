@@ -21,7 +21,7 @@ InfoProvider::InfoProvider(InfoPresenter* owner,VTask::Type taskType) :
 	autoUpdate_(false),
 	inAutoUpdate_(false)
 {
-	reply_=new VReply();
+	reply_=new VReply(this);
 }
 
 InfoProvider::~InfoProvider()

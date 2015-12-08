@@ -4,6 +4,7 @@
 
 #include <QHBoxLayout>
 #include <QLabel>
+#include <QMovie>
 #include <QVariant>
 
 #include "IconProvider.hpp"
@@ -49,10 +50,15 @@ MessageLabel::MessageLabel(QWidget *parent) :
 	msgLabel_=new QLabel(this);
 	msgLabel_->setWordWrap(true);
 
+	loadLabel_=new QLabel(this);
+
 	QHBoxLayout* hb=new QHBoxLayout(this);
 	hb->setContentsMargins(2,2,2,2);
 	hb->addWidget(pixLabel_);
 	hb->addWidget(msgLabel_,1);
+	hb->addWidget(loadLabel_);
+
+	stopLoadLabel();
 
 	hide();
 }
@@ -97,4 +103,25 @@ void MessageLabel::showMessage(const Type& type,QString msg)
 	msgLabel_->setText(s);
 
 	show();
+}
+
+void MessageLabel::startLoadLabel()
+{
+	if(!loadLabel_->movie())
+	{
+		QMovie *movie = new QMovie(":viewer/spinning_wheel.gif", QByteArray(), loadLabel_);
+		loadLabel_->setMovie(movie);
+	}
+	loadLabel_->show();
+	loadLabel_->movie()->start();
+}
+
+void MessageLabel::stopLoadLabel()
+{
+	if(loadLabel_->movie())
+	{
+		loadLabel_->movie()->stop();
+	}
+
+	loadLabel_->hide();
 }

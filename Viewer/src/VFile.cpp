@@ -24,7 +24,8 @@ VFile::VFile(const std::string& name,const std::string& str,bool deleteFile) :
 	data_(0),
 	dataSize_(0),
 	fp_(0),
-	transferDuration_(0)
+	transferDuration_(0),
+	widgetLoadDuration_(0)
 {
 	std::ofstream f(path_.c_str());
 	if(f.is_open())
@@ -41,7 +42,8 @@ VFile::VFile(const std::string& name,bool deleteFile) :
 	data_(0),
 	dataSize_(0),
 	fp_(0),
-	transferDuration_(0)
+	transferDuration_(0),
+	widgetLoadDuration_(0)
 {
 }
 
@@ -52,7 +54,8 @@ VFile::VFile(bool deleteFile) :
 	data_(0),
 	dataSize_(0),
 	fp_(0),
-	transferDuration_(0)
+	transferDuration_(0),
+	widgetLoadDuration_(0)
 {
 }
 

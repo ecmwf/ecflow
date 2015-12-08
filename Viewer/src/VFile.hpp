@@ -40,6 +40,8 @@ public:
 	unsigned int transferDuration() const {return transferDuration_;}
 	void setFetchDate(QDateTime d) {fetchDate_=d;}
 	QDateTime fetchDate() const {return fetchDate_;}
+	void setWidgetLoadDuration(unsigned int t) {widgetLoadDuration_=t;}
+	unsigned int widgetLoadDuration() const {return widgetLoadDuration_;}
 
 	bool write(const char *buf,size_t len,std::string& err);
 	void close();
@@ -66,6 +68,7 @@ protected:
 	FILE* fp_;
 	unsigned int transferDuration_;
 	QDateTime fetchDate_;
+	unsigned int widgetLoadDuration_;
 };
 
 #endif

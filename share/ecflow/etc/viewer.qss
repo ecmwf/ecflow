@@ -174,7 +174,7 @@ QLineEdit[readOnly="true"] {
 ------------------------------*/
   
 QLabel[fileInfo="1"] {
-     border: 1px solid rgb(160,160,160);
+     border: 1px solid rgb(236,230,212);
      background: rgb(252, 241, 219);  
 }
   
