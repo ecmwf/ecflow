@@ -161,6 +161,27 @@ const Variable& Node::findVariable(const std::string& name) const
    return Variable::EMPTY();
 }
 
+const Variable& Node::find_parent_variable(const std::string& name) const
+{
+   const Variable& var = findVariable(name);
+   if (!var.empty()) return var;
+
+   Node* theParent = parent();
+   while (theParent) {
+      const Variable& pvar = theParent->findVariable(name);
+      if (!pvar.empty()) return  pvar;
+      theParent = theParent->parent();
+   }
+
+   // If all else fails search defs environment
+   Defs* the_defs = defs();
+   if ( the_defs ) {
+      return the_defs->server().findVariable(name);
+   }
+
+   return Variable::EMPTY();
+}
+
 bool Node::findVariableValue( const std::string& name, std::string& returnedValue) const
 {
    const Variable& var = findVariable(name);

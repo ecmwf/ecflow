@@ -17,16 +17,18 @@ from ecflow import Suite, Family, Task, Defs, Client, debug_build
 
 def create_defs(name=""):
     defs = Defs()
+    defs.add_variable("DEFS_VAR","0")
     suite_name = name
     if len(suite_name) == 0: suite_name = "s1"
     suite = defs.add_suite(suite_name);
-    
+    suite.add_variable("SUITE_VAR","1")
+
     f1 = suite.add_family("f1")
-    f1.add_task("f1_t1")
-    f1.add_task("f1_t2")
+    f1.add_task("f1_t1").add_variable("TASK_VAR","3")
+    f1.add_task("f1_t2").add_variable("TASK_VAR","3")
     f2 = suite.add_family("f2")
-    f2.add_task("f2_t1")
-    f2.add_task("f2_t2")
+    f2.add_task("f2_t1").add_variable("TASK_VAR","3")
+    f2.add_task("f2_t2").add_variable("TASK_VAR","3")
     return defs;
     
     
@@ -39,6 +41,26 @@ if __name__ == "__main__":
     tasks = defs.get_all_tasks()
     assert len(tasks) == 4, "Expected four tasks, but found " + str(len(tasks))
     for task in tasks:
+        # test find variable
+        var = task.find_parent_variable("TASK_VAR")
+        assert not var.empty()
+        assert var.value() == "3"
+
+        var = task.find_variable("TASK_VAR")
+        assert not var.empty()
+        assert var.value() == "3"
+        
+        var = task.find_parent_variable("SUITE_VAR");
+        assert not var.empty()
+        assert var.value() == "1"
+         
+        var = task.find_parent_variable("DEFS_VAR")
+        assert not var.empty()
+        assert var.value() == "0"
+
+        var = task.find_parent_variable("MADE_UP_VAR")
+        assert var.empty()
+
         if task.name() == "f1_t1":
             node = task.find_node_up_the_tree("f1")
             assert node != None
@@ -50,5 +72,5 @@ if __name__ == "__main__":
 
             node = task.find_node_up_the_tree("freddd")
             assert node == None
-
+            
     print "All Tests pass"

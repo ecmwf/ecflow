@@ -490,6 +490,7 @@ public:
 
    virtual node_ptr findImmediateChild(const std::string& /*name*/, size_t& /*child_pos*/) const { return node_ptr();}
    const Variable& findVariable(const std::string& name) const;
+   const Variable& find_parent_variable(const std::string& name) const;
    virtual const Variable& findGenVariable(const std::string& name) const;
    bool findVariableValue( const std::string& name, std::string& returnedValue) const;
    bool findGenVariableValue( const std::string& name, std::string& returnedValue) const;
