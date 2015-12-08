@@ -1119,7 +1119,7 @@ std::string EcfFile::getIncludedFilePath( const std::string& includedFile,
 
                // Don't rely on hard coded paths. Added for testing, but could be generally useful
                // since in test scenario ECF_INCLUDE is defined relative to $ECF_HOME
-               node_->enviromentSubsitution(ecf_include);
+               node_->variable_dollar_subsitution(ecf_include);
 
                if (fs::exists(ecf_include)) return ecf_include;
             }
@@ -1127,7 +1127,7 @@ std::string EcfFile::getIncludedFilePath( const std::string& includedFile,
          else {
             ecf_include += '/';
             ecf_include += the_include_file;
-            node_->enviromentSubsitution(ecf_include);
+            node_->variable_dollar_subsitution(ecf_include);
             if (fs::exists(ecf_include)) return ecf_include;
          }
 
