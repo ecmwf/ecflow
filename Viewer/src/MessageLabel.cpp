@@ -54,9 +54,9 @@ MessageLabel::MessageLabel(QWidget *parent) :
 
 	QHBoxLayout* hb=new QHBoxLayout(this);
 	hb->setContentsMargins(2,2,2,2);
+	hb->addWidget(loadLabel_);
 	hb->addWidget(pixLabel_);
 	hb->addWidget(msgLabel_,1);
-	hb->addWidget(loadLabel_);
 
 	stopLoadLabel();
 

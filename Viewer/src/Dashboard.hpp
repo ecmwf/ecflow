@@ -24,7 +24,7 @@ class ServerFilter;
 class ServerItem;
 class VComboSettings;
 
-class Dashboard : public QMainWindow
+class Dashboard : public QMainWindow, public ServerFilterObserver
 {
     Q_OBJECT
 
@@ -45,12 +45,18 @@ public:
 	void selectFirstServer();
 	void addSearchDialog();
 
+	void notifyServerFilterAdded(ServerItem* item);
+	void notifyServerFilterRemoved(ServerItem* item);
+	void notifyServerFilterChanged(ServerItem*);
+	void notifyServerFilterDelete();
+
 	void writeSettings(VComboSettings*);
 	void readSettings(VComboSettings*);
 
 Q_SIGNALS:
     void selectionChanged(VInfo_ptr);
 	void titleChanged(QWidget*,QString,QPixmap);
+	void contentsChanged();
 
 public Q_SLOTS:
 	void slotPopInfoPanel(VInfo_ptr,QString);
@@ -74,6 +80,7 @@ private:
 	ServerFilter* serverFilter_;
 	DashboardTitle* titleHandler_;
 	QList<DashboardWidget*> widgets_;
+	bool settingsAreRead_;
 	static int maxWidgetNum_;
 };
 

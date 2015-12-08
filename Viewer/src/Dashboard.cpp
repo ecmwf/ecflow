@@ -34,7 +34,8 @@
 int Dashboard::maxWidgetNum_=20;
 
 Dashboard::Dashboard(QString rootNode,QWidget *parent) :
-        QMainWindow(parent)
+   QMainWindow(parent),
+   settingsAreRead_(false)
 {
 	//We use the mainwindow as a widget. Its task is
 	//to dock all the component widgets!
@@ -42,6 +43,7 @@ Dashboard::Dashboard(QString rootNode,QWidget *parent) :
 
 	//The serverfilter. It holds the list of servers displayed by this dashboard.
 	serverFilter_=new ServerFilter();
+	serverFilter_->addObserver(this);
 
 	titleHandler_=new DashboardTitle(serverFilter_,this);
 
@@ -61,6 +63,7 @@ Dashboard::Dashboard(QString rootNode,QWidget *parent) :
 
 Dashboard::~Dashboard()
 {
+	serverFilter_->removeObserver(this);
 	delete serverFilter_;
 }
 
@@ -361,6 +364,8 @@ void Dashboard::writeSettings(VComboSettings* vs)
 
 void Dashboard::readSettings(VComboSettings* vs)
 {
+	settingsAreRead_=true;
+
 	serverFilter_->readSettings(vs);
 
 	Q_FOREACH(QWidget* w,findChildren<QDockWidget*>())
@@ -400,6 +405,8 @@ void Dashboard::readSettings(VComboSettings* vs)
 	}
 
 	selectFirstServerInView();
+
+	settingsAreRead_=false;
 }
 
 
@@ -454,4 +461,29 @@ std::string Dashboard::widgetSettingsId(int i)
 {
 	return "widget_" + boost::lexical_cast<std::string>(i);
 }
+
+void Dashboard::notifyServerFilterAdded(ServerItem* item)
+{
+	if(!settingsAreRead_)
+		Q_EMIT contentsChanged();
+}
+
+void Dashboard::notifyServerFilterRemoved(ServerItem* item)
+{
+	if(!settingsAreRead_)
+		Q_EMIT contentsChanged();
+}
+
+void Dashboard::notifyServerFilterChanged(ServerItem*)
+{
+	if(!settingsAreRead_)
+		Q_EMIT contentsChanged();
+}
+
+void Dashboard::notifyServerFilterDelete()
+{
+	//if(!settingsAreRead_)
+	//	Q_EMIT contentsChanged();
+}
+
 

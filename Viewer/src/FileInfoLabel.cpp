@@ -147,7 +147,7 @@ void FileInfoLabel::update(VReply* reply,QString extraText)
 			s+=" (transfer: " + QString::number(static_cast<float>(tmp->transferDuration())/1000.,'f',1) + " s";
 			if(tmp->widgetLoadDuration() > 0)
 			{
-				s+=", load: " + QString::number(static_cast<float>(tmp->widgetLoadDuration())/1000.,'f',1) + " s";
+				s+=", display: " + QString::number(static_cast<float>(tmp->widgetLoadDuration())/1000.,'f',1) + " s";
 			}
 			s+=")";
 		}

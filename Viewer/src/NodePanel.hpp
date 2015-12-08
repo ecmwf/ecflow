@@ -65,6 +65,7 @@ Q_SIGNALS:
 	void itemInfoChanged(QString);
 	void currentWidgetChanged();
 	void selectionChanged(VInfo_ptr);
+	void contentsChanged();
 
 protected:
 	Dashboard* addWidget(QString);

@@ -219,10 +219,6 @@ void OutputItemWidget::infoReady(VReply* reply)
 			hasMessage=true;
 		}
 
-
-		/*else
-			messageLabel_->hide();*/
-
 		//For job files we set the proper highlighter
 		if(reply->fileName().find(".job") != std::string::npos)
 		{
@@ -243,7 +239,7 @@ void OutputItemWidget::infoReady(VReply* reply)
 		VFile_ptr f=reply->tmpFile();
 
 		QTime stopper;
-		bool doSearch=true;
+		stopper.start();
 
 		//If the info is stored in a tmp file
 		if(f && f.get())
@@ -260,9 +256,6 @@ void OutputItemWidget::infoReady(VReply* reply)
 				messageLabel_->showInfo("Loading file into text editor ....");
 				QApplication::processEvents();
 
-				QTime stopper;
-				stopper.start();
-
 				QFile file(QString::fromStdString(f->path()));
 				file.open(QIODevice::ReadOnly);
 				QFileInfo fInfo(file);
@@ -273,12 +266,7 @@ void OutputItemWidget::infoReady(VReply* reply)
 				textEdit_->document()->setPlainText(str);
 				file.unmap(d);
 
-				f->setWidgetLoadDuration(stopper.elapsed());
-
 				hasMessage=false;
-
-				if(fInfo.size() > 20*1024*1024)
-					doSearch=false;
 			}
 		}
 		//If the info is stored as a string in the reply object
@@ -288,14 +276,19 @@ void OutputItemWidget::infoReady(VReply* reply)
 			textEdit_->setPlainText(s);
 		}
 
+		searchOnReload();
+
+		if(f && f.get())
+		{
+			f->setWidgetLoadDuration(stopper.elapsed());
+		}
+
 		if(!hasMessage)
 		{
 			messageLabel_->hide();
 		}
 		messageLabel_->stopLoadLabel();
 
-		if(doSearch)
-			searchOnReload();
 
 		//Update the file label
 		fileLabel_->update(reply);
@@ -307,7 +300,6 @@ void OutputItemWidget::infoReady(VReply* reply)
 	else
 	{
 		//Update the dir widget and select the proper file in the list
-		//updateDir(true,reply->fileName());
 		updateDir(reply->directory(),true);
 	}
 }
@@ -452,8 +444,9 @@ void OutputItemWidget::on_gotoLineTb__clicked()
 bool OutputItemWidget::automaticSearchForKeywords()
 {
 	QStringList keywords;
-	keywords << "--abort" << "--complete" << "xabort" << "xcomplete"
-	         << "System Billing Units";
+	//keywords << "--abort" << "--complete" << "xabort" << "xcomplete"
+	keywords <<  "--complete" << "xabort" << "xcomplete"
+			<< "System Billing Units";
 	bool found = false;
 	int i = 0;
 	QTextDocument::FindFlags findFlags = QTextDocument::FindBackward;

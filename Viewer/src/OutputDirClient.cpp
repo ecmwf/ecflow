@@ -88,11 +88,10 @@ void OutputDirClient::getDir(const std::string& name)
 	remoteFile_=name;
 	dir_.reset();
 	dir_=VDir_ptr(new VDir(dirName));
+	data_.clear();
 
 	//indicates the source of the files
 	dir_->where(host_ + "@" + portStr_);
-
-	connectToHost(host_,port_);
 }
 
 void OutputDirClient::slotRead()

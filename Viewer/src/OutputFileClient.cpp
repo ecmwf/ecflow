@@ -97,13 +97,9 @@ void OutputFileClient::slotRead()
 		{
 			lastProgress_=total_/progressChunk_;
 			Q_EMIT progress(QString::number(lastProgress_) + " " + progressUnits_ + " read");
-			qDebug() << "progress";
-
 		}
 
 	}
-
-	//qDebug() << "file total" << total_;
 }
 
 VFile_ptr OutputFileClient::result() const

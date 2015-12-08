@@ -55,6 +55,8 @@ Dashboard *NodePanel::addWidget(QString id)
 	connect(nw,SIGNAL(titleChanged(QWidget*,QString,QPixmap)),
 				this,SLOT(slotTabTitle(QWidget*,QString,QPixmap)));
 
+	connect(nw,SIGNAL(contentsChanged()),
+			this,SIGNAL(contentsChanged()));
 
 	return nw;
 }
