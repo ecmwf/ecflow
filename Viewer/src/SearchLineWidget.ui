@@ -185,7 +185,7 @@
     <string>Highlight all occurrences of the text</string>
    </property>
    <property name="shortcut">
-    <string>Alt+H</string>
+    <string>Alt+A</string>
    </property>
   </action>
  </widget>
