@@ -20,6 +20,7 @@ FileInfoLabel::FileInfoLabel(QWidget* parent) : QLabel(parent)
 {
 	//Define id for the css
 	setProperty("fileInfo","1");
+	setWordWrap(true);
 
     //Set size policy
 	/*QSizePolicy sizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);

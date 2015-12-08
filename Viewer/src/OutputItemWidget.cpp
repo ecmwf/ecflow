@@ -314,14 +314,18 @@ void OutputItemWidget::infoProgress(VReply* reply)
 
 void OutputItemWidget::infoFailed(VReply* reply)
 {
-	QString s=QString::fromStdString(reply->errorText());
-	messageLabel_->showError(s);
-	messageLabel_->stopLoadLabel();
+	if(reply->sender() == infoProvider_)
+	{
+		QString s=QString::fromStdString(reply->errorText());
 
-    //Update the file label
-    fileLabel_->update(reply);
+		messageLabel_->showError(s);
+		messageLabel_->stopLoadLabel();
 
-    //updateDir(true);
+		//Update the file label
+		fileLabel_->update(reply);
+
+		//updateDir(true);
+	}
 }
 
 void OutputItemWidget::on_reloadTb__clicked()

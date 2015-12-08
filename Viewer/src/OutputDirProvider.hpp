@@ -39,7 +39,7 @@ private Q_SLOTS:
 private:
     void fetchDir(ServerHandler*,VNode*);
 	bool fetchDirViaOutputClient(VNode *n,const std::string& fileName);
-	VDir_ptr fetchLocalDir(const std::string& path);
+	VDir_ptr fetchLocalDir(const std::string& path,bool);
 	OutputDirClient* makeOutputClient(const std::string& host,const std::string& port);
 
 	OutputDirClient *outClient_;

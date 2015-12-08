@@ -73,6 +73,9 @@ void OutputDirProvider::fetchDir(ServerHandler* server,VNode* n)
 	//Get the jobout name
 	std::string fileName=n->findVariable("ECF_JOBOUT",true);
 
+	//Check if it is tryno 0
+	bool tynozero=(boost::algorithm::ends_with(fileName,".0"));
+
 	//Jobout is empty: no dir path is availabale
 	if(fileName.empty())
 	{
@@ -88,7 +91,7 @@ void OutputDirProvider::fetchDir(ServerHandler* server,VNode* n)
 
     if(server->isLocalHost())
     {
-    	dir=fetchLocalDir(fileName);
+    	dir=fetchLocalDir(fileName,tynozero);
     	if(dir)
     	{
     		reply_->setDirectory(dir);
@@ -114,7 +117,7 @@ void OutputDirProvider::fetchDir(ServerHandler* server,VNode* n)
     //to read it again from the disk!!!
      if(!server->isLocalHost())
      {
-    	 dir=fetchLocalDir(fileName);
+    	 dir=fetchLocalDir(fileName,tynozero);
     	 if(dir)
     	 {
     	     reply_->setDirectory(dir);
@@ -167,21 +170,37 @@ void OutputDirProvider::slotOutputClientFinished()
 
 void OutputDirProvider::slotOutputClientProgress(QString msg)
 {
-	reply_->setInfoText(msg.toStdString());
+	/*reply_->setInfoText(msg.toStdString());
 	owner_->infoProgress(reply_);
-	reply_->setInfoText("");
+	reply_->setInfoText("");*/
 }
 
 void OutputDirProvider::slotOutputClientError(QString msg)
 {
 	if(info_ && info_.get())
 	{
+		if(ServerHandler* server=info_->server())
+		{
+			if(outClient_ && !server->isLocalHost())
+		    {
+				//Check if it is tryno 0
+				bool tynozero=(boost::algorithm::ends_with(outClient_->remoteFile(),".0"));
+				VDir_ptr dir=fetchLocalDir(outClient_->remoteFile(),tynozero);
+				if(dir)
+				{
+					reply_->setDirectory(dir);
+					owner_->infoReady(reply_);
+					return;
+				}
+		    }
+		}
+
 		reply_->setErrorText(msg.toStdString());
 		owner_->infoFailed(reply_);
 	}
 }
 
-VDir_ptr OutputDirProvider::fetchLocalDir(const std::string& path)
+VDir_ptr OutputDirProvider::fetchLocalDir(const std::string& path,bool trynozero)
 {
 	VDir_ptr res;
 
@@ -194,7 +213,7 @@ VDir_ptr OutputDirProvider::fetchLocalDir(const std::string& path)
 			return res;
 		}
 		//It must be a file
-		if(boost::filesystem::exists(p) &&
+		if((trynozero || boost::filesystem::exists(p)) &&
 		   boost::filesystem::exists(p.parent_path()))
 		{
 			std::string dirName=p.parent_path().string();
