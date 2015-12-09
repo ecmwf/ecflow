@@ -122,14 +122,14 @@ void OutputItemWidget::reload(VInfo_ptr info)
 
 	if(info_ && info_.get())
 	{
-	    //Get file contents
-	    infoProvider_->info(info_);
+		//Get file contents
+		infoProvider_->info(info_);
 
-	    //Get dir contents
-	    dirProvider_->info(info_);
+		//Get dir contents
+		dirProvider_->info(info_);
 
-	    //Start contents update timer
-	    updateDirTimer_->start();
+		//Start contents update timer
+		updateDirTimer_->start();
 	}
 }
 
@@ -309,7 +309,7 @@ void OutputItemWidget::infoProgress(VReply* reply)
 	messageLabel_->showInfo(QString::fromStdString(reply->infoText()));
 	messageLabel_->startLoadLabel();
 
-    //updateDir(true);
+	//updateDir(true);
 }
 
 void OutputItemWidget::infoFailed(VReply* reply)
@@ -447,21 +447,33 @@ void OutputItemWidget::on_gotoLineTb__clicked()
 // the (probably) most important piece of information is highlighted
 bool OutputItemWidget::automaticSearchForKeywords()
 {
-	QStringList keywords;
-	//keywords << "--abort" << "--complete" << "xabort" << "xcomplete"
-	keywords <<  "--complete" << "xabort" << "xcomplete"
-			<< "System Billing Units";
 	bool found = false;
-	int i = 0;
 	QTextDocument::FindFlags findFlags = QTextDocument::FindBackward;
+	QTextCursor cursor(textEdit_->textCursor());
+	cursor.movePosition(QTextCursor::End);
+
+
+	QRegExp regexp("--(abort|complete)");
+	QTextCursor findCursor = textEdit_->document()->find(regexp, cursor, findFlags);  // perform the search
+	found = (!findCursor.isNull());
+	if (found)
+		textEdit_->setTextCursor(findCursor);
+
+/*
+	QStringList keywords;
+	keywords << "--abort" << "--complete";// << "xabort" << "xcomplete"
+	         << "System Billing Units";
 
 	// find any of the keywords and stop at the first one
+	int i = 0;
 	while (!found && i < keywords.size())
 	{
+		cursor.movePosition(QTextCursor::End);
+		textEdit_->setTextCursor(cursor);
 		found = textEdit_->findString(keywords.at(i), findFlags);
 		i++;
 	}
-
+*/
 	return found;
 }
 
