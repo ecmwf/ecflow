@@ -15,13 +15,22 @@
 #include <QPushButton>
 
 #include "PlainTextSearchLine.hpp"
+#include "VConfig.hpp"
+#include "VProperty.hpp"
 //#include "UserMessage.hpp"
 
 PlainTextSearchLine::PlainTextSearchLine(QWidget *parent) :
-	AbstractSearchLine(parent), editor_(0)
+	AbstractSearchLine(parent),
+	editor_(0),
+	highlightColour_(QColor(200, 255, 200))
 {
 	connect(matchModeCb_,SIGNAL(currentIndexChanged(int)),
 		this, SLOT(matchModeChanged(int)));
+
+	if(VProperty *p=VConfig::instance()->find("panel.search.highlightColour"))
+	{
+		highlightColour_=p->value().value<QColor>();
+	}
 }
 
 PlainTextSearchLine::~PlainTextSearchLine()
@@ -37,7 +46,6 @@ void PlainTextSearchLine::setEditor(QPlainTextEdit *e)
 
 bool PlainTextSearchLine::findString (QString str, bool highlightAll, QTextDocument::FindFlags extraFlags, bool gotoStartOfWord, int iteration)
 {
-	QColor highlightColour(200, 255, 200);
 	QTextDocument::FindFlags flags = findFlags() | extraFlags;
 
 	QTextCursor cursor(editor_->textCursor());
@@ -102,7 +110,7 @@ bool PlainTextSearchLine::findString (QString str, bool highlightAll, QTextDocum
 			{
 				QTextEdit::ExtraSelection highlight;
 				highlight.cursor = cursor;
-				highlight.format.setBackground(highlightColour);
+				highlight.format.setBackground(highlightColour_);
 				extraSelections << highlight;
 				numMatches++;
 			}

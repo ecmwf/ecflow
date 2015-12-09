@@ -14,11 +14,14 @@
 
 class MessageLabelData {
 public:
-	MessageLabelData(QString iconPath,QString title,QString bg, QString border) :
-	title_(title), bg_(bg), border_(border)
+	MessageLabelData(QString iconPath,QString title,QColor bg, QColor border) :
+	title_(title), bg_(bg.name()), border_(border.name())
 	{
 		int id=IconProvider::add(iconPath,iconPath);
 		pix_=IconProvider::pixmap(id,20);
+
+		QColor bgLight=bg.lighter(105);
+		bg_="qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 " + bg.name() +", stop: 1 " + bgLight.name() + ")";
 	}
 
 	MessageLabelData()  {};
@@ -39,9 +42,9 @@ MessageLabel::MessageLabel(QWidget *parent) :
 
 	if(typeData.empty())
 	{
-		typeData[InfoType]=MessageLabelData(":/viewer/info.svg","Info","rgb(236,246,252)","rgb(180,194,230)");
-		typeData[WarningType]=MessageLabelData(":/viewer/warning.svg","Warning","rgb(255,198,63)","rgb(255,140,0)");
-		typeData[ErrorType]=MessageLabelData(":/viewer/error.svg","Error","rgb(255,231,231)","rgb(223,152,152)");
+		typeData[InfoType]=MessageLabelData(":/viewer/info.svg","Info",QColor(236,246,252),QColor(180,194,230));
+		typeData[WarningType]=MessageLabelData(":/viewer/warning.svg","Warning",QColor(255,198,63),QColor(255,140,0));
+		typeData[ErrorType]=MessageLabelData(":/viewer/error.svg","Error",QColor(255,231,231),QColor(223,152,152));
 	}
 
 	pixLabel_=new QLabel(this);

@@ -45,6 +45,7 @@ protected:
     void clearHighlights();
     QTimer highlightAllTimer_;
 	QPlainTextEdit* editor_;
+	QColor highlightColour_;
 
 };
 
