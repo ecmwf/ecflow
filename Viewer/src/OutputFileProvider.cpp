@@ -136,14 +136,6 @@ void OutputFileProvider::fetchFile(ServerHandler *server,VNode *n,const std::str
     	{
     		if(fetchLocalFile(fileName))
     			return;
-
-			/*//Get the fileName
-    	    if(reply_->textFromFile(fileName))
-    	    {
-    	    	reply_->fileReadMode(VReply::LocalReadMode);
-    	    	owner_->infoReady(reply_);
-    	    	return;
-    	    }*/
     	}
     }
     //----------------------------------------------------
@@ -168,13 +160,6 @@ void OutputFileProvider::fetchFile(ServerHandler *server,VNode *n,const std::str
     		//Get the fileName
     		if(fetchLocalFile(fileName))
     	    	return;
-
-    		/*if(reply_->textFromFile(fileName))
-    		{
-    			reply_->fileReadMode(VReply::LocalReadMode);
-    			owner_->infoReady(reply_);
-    			return;
-    		}*/
     	}
     }
 

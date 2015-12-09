@@ -253,12 +253,17 @@ void OutputItemWidget::infoReady(VReply* reply)
 			}
 			else
 			{
-				messageLabel_->showInfo("Loading file into text editor ....");
-				QApplication::processEvents();
-
 				QFile file(QString::fromStdString(f->path()));
 				file.open(QIODevice::ReadOnly);
 				QFileInfo fInfo(file);
+
+				if(fInfo.size() > 20*1024*1024)
+				{
+					messageLabel_->startLoadLabel();
+				}
+
+				messageLabel_->showInfo("Loading file into text editor ....");
+				QApplication::processEvents();
 
 				//This was the fastest implementation for files up to 125 Mb
 				uchar *d=file.map(0,fInfo.size());

@@ -52,6 +52,7 @@ MessageLabel::MessageLabel(QWidget *parent) :
 
 	msgLabel_=new QLabel(this);
 	msgLabel_->setWordWrap(true);
+	msgLabel_->setTextInteractionFlags(Qt::LinksAccessibleByMouse|Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse);
 
 	loadLabel_=new QLabel(this);
 
