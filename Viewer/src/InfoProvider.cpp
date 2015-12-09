@@ -144,6 +144,9 @@ void  InfoProvider::taskChanged(VTask_ptr task)
     if(task_ != task)
         return;
 
+    //temporary hack!
+    task_->reply()->setSender(this);
+
     switch(task->status())
     {
         case VTask::FINISHED:

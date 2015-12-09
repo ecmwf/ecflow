@@ -38,7 +38,7 @@ VFile::VFile(const std::string& name,const std::string& str,bool deleteFile) :
 VFile::VFile(const std::string& name,bool deleteFile) :
 	path_(name),
 	deleteFile_(deleteFile),
-	storageMode_(MemoryStorage),
+	storageMode_(DiskStorage),
 	data_(0),
 	dataSize_(0),
 	fp_(0),

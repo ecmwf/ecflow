@@ -28,6 +28,7 @@ public:
 	void reset();
 
 	void* sender() const {return sender_;}
+	void setSender(void* s) {sender_=s;}
 
 	const std::string& errorText() const {return errorText_;}
 	const std::string& warningText() const {return warningText_;}

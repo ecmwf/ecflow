@@ -43,6 +43,7 @@ private:
 	 void fetchFile(ServerHandler *server,VNode *n,const std::string& fileName,bool isJobout);
 	 void fetchJoboutViaServer(ServerHandler *server,VNode *n,const std::string&);
 	 bool fetchFileViaOutputClient(VNode *n,const std::string& fileName);
+	 bool fetchLocalFile(const std::string& fileName);
 
 	 OutputFileClient *outClient_;
 };

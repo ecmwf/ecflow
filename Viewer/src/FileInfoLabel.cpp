@@ -101,6 +101,12 @@ void FileInfoLabel::update(VReply* reply,QString extraText)
 			s+="<br>";
 			s+="<b><font color=" + col.name() + "> Source: </font></b>";
 			s+="<font color=" + colText.name() + "> local disk</font>";
+
+			VFile_ptr tmp=reply->tmpFile();
+			if(tmp->widgetLoadDuration() > 300)
+			{
+				s+=" (display: " + QString::number(static_cast<float>(tmp->widgetLoadDuration())/1000.,'f',1) + " s)";
+			}
 		}
 	}
 	else if(reply->fileReadMode() == VReply::ServerReadMode)

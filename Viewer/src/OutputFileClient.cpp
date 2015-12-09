@@ -21,8 +21,6 @@ OutputFileClient::OutputFileClient(const std::string& host,const std::string& po
 
 void OutputFileClient::slotConnected()
 {
-	qDebug() << "connected to " << soc_->peerName();
-
 	Q_EMIT progress("");
 
 	soc_->write("get ",4);
@@ -32,26 +30,34 @@ void OutputFileClient::slotConnected()
 
 void OutputFileClient::slotError(QAbstractSocket::SocketError err)
 {
-	qDebug() << "file error" <<  soc_->errorString();
-
 	switch(err)
 	{
 	case QAbstractSocket::RemoteHostClosedError:
-		qDebug() << "remote host closed";
 
-		if(out_)
+		soc_->abort();
+
+		if(total_ == 0)
 		{
-			out_->setTransferDuration(stopper_.elapsed());
-			out_->setFetchDate(QDateTime::currentDateTime());
-			out_->close();
-		}
-
-		Q_EMIT finished();
-
-		if(out_)
 			out_.reset();
+			Q_EMIT error(soc_->errorString());
+		}
+		else
+		{
+			if(out_)
+			{
+				out_->setTransferDuration(stopper_.elapsed());
+				out_->setFetchDate(QDateTime::currentDateTime());
+				out_->close();
+			}
 
+			Q_EMIT finished();
+
+			if(out_)
+				out_.reset();
+
+		}
 		break;
+
 	default:
 		soc_->abort();
 		if(out_)
@@ -79,9 +85,6 @@ void OutputFileClient::slotRead()
 	const qint64 size = 64*1024;
 	char buf[size];
 	quint64 len = 0;
-
-	//if(soc_->bytesAvailable() < (int)sizeof(quint16))
-	//	return;
 
 	while((len = soc_->read(buf,size)) > 0)
 	{

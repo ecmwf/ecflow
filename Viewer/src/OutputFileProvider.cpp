@@ -134,13 +134,16 @@ void OutputFileProvider::fetchFile(ServerHandler *server,VNode *n,const std::str
     	//We try to read the file directly from the disk
     	if(!isJobout || server->readFromDisk())
     	{
-    	    //Get the fileName
+    		if(fetchLocalFile(fileName))
+    			return;
+
+			/*//Get the fileName
     	    if(reply_->textFromFile(fileName))
     	    {
     	    	reply_->fileReadMode(VReply::LocalReadMode);
     	    	owner_->infoReady(reply_);
     	    	return;
-    	    }
+    	    }*/
     	}
     }
     //----------------------------------------------------
@@ -163,12 +166,15 @@ void OutputFileProvider::fetchFile(ServerHandler *server,VNode *n,const std::str
     	if(!isJobout || server->readFromDisk())
     	{
     		//Get the fileName
-    		if(reply_->textFromFile(fileName))
+    		if(fetchLocalFile(fileName))
+    	    	return;
+
+    		/*if(reply_->textFromFile(fileName))
     		{
     			reply_->fileReadMode(VReply::LocalReadMode);
     			owner_->infoReady(reply_);
     			return;
-    		}
+    		}*/
     	}
     }
 
@@ -275,6 +281,21 @@ void OutputFileProvider::fetchJoboutViaServer(ServerHandler *server,VNode *n,con
     //Run the task in the server. When it finish taskFinished() is called. The text returned
     //in the reply will be prepended to the string we generated above.
     server->run(task_);
+}
+
+bool OutputFileProvider::fetchLocalFile(const std::string& fileName)
+{
+	//we do not want to delete the file once the VFile object is destroyed!!
+	VFile_ptr f(VFile::create(fileName,false));
+	if(f->exists())
+	{
+		reply_->fileReadMode(VReply::LocalReadMode);
+		reply_->tmpFile(f);
+		owner_->infoReady(reply_);
+		return true;
+	}
+
+	return false;
 }
 
 /*
