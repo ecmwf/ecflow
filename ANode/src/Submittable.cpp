@@ -285,24 +285,42 @@ EcfFile Submittable::locatedEcfFile() const
    }
 
    // Caution: This is not used in operations or research, equally is has not been tested.
-   // Need to test or remove.
-   std::string smsFetchCmd;
-   findParentVariableValue( Str::ECF_FETCH(), smsFetchCmd );
-   if ( !smsFetchCmd.empty() ) {
+   std::string ecf_fetch_cmd;
+   findParentVariableValue( Str::ECF_FETCH(), ecf_fetch_cmd );
+   if ( !ecf_fetch_cmd.empty() ) {
 #ifdef DEBUG_TASK_LOCATION
-      std::cout << "Submittable::locatedEcfFile() Submittable " << name() << " ECF_FETCH = '" << smsFetchCmd << "' variable exists\n";
+      std::cout << "Submittable::locatedEcfFile() Submittable " << name() << " ECF_FETCH = '" << ecf_fetch_cmd << "' variable exists\n";
 #endif
-      if (variableSubsitution(smsFetchCmd))  {
-         return EcfFile( const_cast<Submittable*>(this), smsFetchCmd, true/*is a command*/);
+      if (variableSubsitution(ecf_fetch_cmd))  {
+         return EcfFile( const_cast<Submittable*>(this), ecf_fetch_cmd, EcfFile::ECF_FETCH_CMD);
       }
       else {
-         std::stringstream ss; ss << "   Variable ECF_FETCH(" << smsFetchCmd << ") defined, but variable substitution has failed:\n";
+         std::stringstream ss; ss << "   Variable ECF_FETCH(" << ecf_fetch_cmd << ") defined, but variable substitution has failed:\n";
          reasonEcfFileNotFound += ss.str();
          throw std::runtime_error( reasonEcfFileNotFound ) ;
       }
    }
    else {
       reasonEcfFileNotFound += "   Variable ECF_FETCH not defined:\n";
+   }
+
+   std::string ecf_script_cmd;
+   findParentVariableValue( "ECF_SCRIPT_CMD", ecf_script_cmd );
+   if ( !ecf_script_cmd.empty() ) {
+#ifdef DEBUG_TASK_LOCATION
+      std::cout << "Submittable::locatedEcfFile() Submittable " << name() << " ECF_SCRIPT_CMD = '" << ecf_script_cmd << "' variable exists\n";
+#endif
+      if (variableSubsitution(ecf_script_cmd))  {
+         return EcfFile( const_cast<Submittable*>(this), ecf_script_cmd, EcfFile::ECF_SCRIPT_CMD);
+      }
+      else {
+         std::stringstream ss; ss << "   Variable ECF_SCRIPT_CMD(" << ecf_script_cmd << ") defined, but variable substitution has failed:\n";
+         reasonEcfFileNotFound += ss.str();
+         throw std::runtime_error( reasonEcfFileNotFound ) ;
+      }
+   }
+   else {
+      reasonEcfFileNotFound += "   Variable ECF_SCRIPT_CMD not defined:\n";
    }
 
 

@@ -142,6 +142,107 @@ BOOST_AUTO_TEST_CASE( test_ecf_simple_include_file )
    boost::filesystem::remove_all( ecf_home + suite->absNodePath() );
 }
 
+BOOST_AUTO_TEST_CASE( test_ECF_SCRIPT_CMD )
+{
+   // The specific files are specified in ECF_INCLUDE and common files
+   // are specified in ECF_HOME. This test will ensure that if the file common.h
+   // is not found in ECF_INCLUDE we then look at ECF_HOME
+   cout << "ANode:: ...test_ECF_SCRIPT_CMD";
+
+   // This test FAIL's randomly on the cray in BATCH mode, but passes in interactive mode.
+    if (getenv("ECFLOW_CRAY_BATCH")) {
+       cout << " **** SKIPPING test, until HPC team can  fix File::createMissingDirectories.(like mkdir -p)  *****\n";
+       return;
+    }
+    cout << "\n";
+
+   // Create the defs file corresponding to the text below
+   //suite suite
+   //  edit ECF_INCLUDE $ECF_HOME/includes
+   //  task t1
+   //endsuite
+
+   // Create a defs file, where the task name mirrors the ecf files in the given directory
+   task_ptr task_t1 = Task::create( "t1" );
+   suite_ptr suite = Suite::create( "test_ecf_simple_include_file_ECF_SCRIPT_CMD"  );
+   Defs theDefs; {
+      suite->addVariable( Variable( Str::ECF_INCLUDE(), "$ECF_HOME/includes" ) );
+      suite->addTask( task_t1 );
+      theDefs.addSuite( suite );
+   }
+
+   // Override ECF_HOME. ECF_HOME is as default location for .ecf files, when ECF_INCLUDE not specified
+   // or when file does not exist in ECF_INCLUDE
+   std::string ecf_home = File::test_data("ANode/test/data","ANode");
+   theDefs.set_server().add_or_update_user_variables(Str::ECF_HOME(),ecf_home);
+
+   /// begin , will cause creation of generated variables. The generated variables
+   /// are use in client scripts and used to locate the sms files
+   theDefs.beginAll();
+
+   // generate the ecf file;
+   string header = "%include <simple_head.h>\n";
+   string body = "#body\n";
+   body += "%manual\nThis is a manual\n%end\n";
+   string tail = "%include <simple_tail.h>\n";
+   string ecf_file = header;
+   ecf_file += body;
+   ecf_file += tail;
+
+   string ecf_file_location = ecf_home  + task_t1->absNodePath() + File::ECF_EXTN();
+   // cout << "file_location = " << ecf_file_location << "\n";
+   BOOST_CHECK_MESSAGE(File::createMissingDirectories(ecf_file_location),"Could not create missing dir\n");
+
+   string errormsg;
+   BOOST_CHECK_MESSAGE(File::create(ecf_file_location, ecf_file, errormsg), errormsg);
+   BOOST_CHECK_MESSAGE(fs::exists(ecf_file_location), "Expected File " << ecf_file_location << " to exist");
+
+   // Create the generated variables
+   task_t1->update_generated_variables();
+   std::string cmd = "cat " + ecf_file_location;
+   task_t1->add_variable("ECF_SCRIPT_CMD",cmd);
+
+   /// Now finally the test
+   EcfFile ecfFile(task_t1.get(),cmd,EcfFile::ECF_SCRIPT_CMD);
+
+   /// Check generation of job files
+   JobsParam jobsParam(true); // spawn_jobs = false
+   {
+      try { ecfFile.create_job(jobsParam); }
+      catch ( std::exception& e) { BOOST_CHECK_MESSAGE(false,"Expected job creation to succeed " << e.what());}
+
+      string job_file_location = ecf_home  + task_t1->absNodePath() + File::JOB_EXTN() + task_t1->tryNo();
+      BOOST_CHECK_MESSAGE(fs::exists(job_file_location), "Expected File " << job_file_location << " to exist");
+
+      // Open the job file and check contents
+      std::string job_file_contents;
+      BOOST_CHECK_MESSAGE(File::open(job_file_location,job_file_contents),"Could not open job file " << job_file_location);
+      std::string expected_job_file_contents = "#head.h\n#body\n#tail.h";
+      BOOST_CHECK_MESSAGE(job_file_contents == expected_job_file_contents ,"Expected\n'" <<expected_job_file_contents << "' but found:\n'" <<  job_file_contents << "'");
+   }
+
+   /// Check manual extraction
+   {
+      std::string manual;
+      try { ecfFile.manual(manual); }
+      catch ( std::exception& e) { BOOST_CHECK_MESSAGE(false,"Expected manual extraction to succeed " << e.what());}
+
+      std::string expected_manual = "This is a manual\n";
+      BOOST_CHECK_MESSAGE(manual == expected_manual ,"Expected:\n'" << expected_manual << "' but found:\n'" <<  manual << "'");
+   }
+
+   /// Check script
+   {
+      std::string script;
+      try { ecfFile.script(script); }
+      catch ( std::exception& e) { BOOST_CHECK_MESSAGE(false,"Expected script extraction to succeed " << e.what());}
+      BOOST_CHECK_MESSAGE(script == ecf_file ,"Expected:\n'" << ecf_file << "' but found:\n'" <<  script << "'");
+   }
+
+   /// Remove all the generated files
+   boost::filesystem::remove_all( ecf_home + suite->absNodePath() );
+}
+
 BOOST_AUTO_TEST_CASE( test_ecf_include_file )
 {
    // The specific files are specified in ECF_INCLUDE and common files

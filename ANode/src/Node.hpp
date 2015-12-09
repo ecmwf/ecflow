@@ -189,7 +189,7 @@ public:
    /// Find all environment variables, in the input string and substitute.
    /// with correspondingly named variable value.
    /// i.e search for ${ENV} and replace
-   bool enviromentSubsitution(std::string& cmd);
+   bool variable_dollar_subsitution(std::string& cmd);
 
    /// Resolve inlimit references to limits, and check trigger and complete expression
    virtual bool check(std::string& errorMsg,std::string& warningMsg) const;
@@ -490,6 +490,7 @@ public:
 
    virtual node_ptr findImmediateChild(const std::string& /*name*/, size_t& /*child_pos*/) const { return node_ptr();}
    const Variable& findVariable(const std::string& name) const;
+   const Variable& find_parent_variable(const std::string& name) const;
    virtual const Variable& findGenVariable(const std::string& name) const;
    bool findVariableValue( const std::string& name, std::string& returnedValue) const;
    bool findGenVariableValue( const std::string& name, std::string& returnedValue) const;
