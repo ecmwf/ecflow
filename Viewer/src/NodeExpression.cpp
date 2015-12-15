@@ -471,7 +471,10 @@ bool TypeNodeCondition::execute(VNode* vnode)
 
 bool StateNodeCondition::execute(VNode* vnode)
 {
-    return vnode->stateName() == stateName_;
+	if (vnode->isServer())
+		return (vnode->serverStateName() == stateName_);
+	else
+		return (vnode->stateName() == stateName_);
 
     /*
 	if (vnode->isServer())

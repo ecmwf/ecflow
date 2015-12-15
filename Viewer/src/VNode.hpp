@@ -128,6 +128,7 @@ public:
     virtual QString name() const;
     std::string serverName() const;
     virtual QString stateName();
+    virtual QString serverStateName();
     virtual QString defaultStateName();
     virtual bool isDefaultStateComplete();
     virtual bool isSuspended() const;
@@ -208,6 +209,7 @@ public:
 	std::string absNodePath() const {return "/";}
 	QString stateName();
 	QString defaultStateName();
+    QString serverStateName();
 	bool isSuspended() const;
 	QColor  stateColour() const;
 	QColor  stateFontColour() const;

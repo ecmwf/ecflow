@@ -383,6 +383,10 @@ QString VNode::defaultStateName()
 	return VNState::toDefaultStateName(this);
 }
 
+QString VNode::serverStateName()
+{
+	return QString("");
+}
 
 bool VNode::isSuspended() const
 {
@@ -1070,12 +1074,17 @@ QString VServer::stateName()
 		return VNState::toName(server_);
 	}
 
-	return VNState::toName(server_);
+	return VSState::toName(server_);
 }
 
 QString VServer::defaultStateName()
 {
 	return stateName();
+}
+
+QString VServer::serverStateName()
+{
+	return VSState::toName(server_);
 }
 
 bool VServer::isSuspended() const
