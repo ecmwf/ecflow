@@ -12,6 +12,8 @@
 //
 // Description : Parser for passwd file
 //============================================================================
+#include "PasswdFile.hpp"
+
 #include <stdio.h>
 #include <time.h>
 // #define _XOPEN_SOURCE
@@ -26,7 +28,6 @@
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem/operations.hpp>
 
-#include "PasswdFile.hpp"
 #include "File.hpp"
 #include "Str.hpp"
 #include "Log.hpp"
