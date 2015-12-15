@@ -54,3 +54,18 @@ SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE
 FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, 
 TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE 
 OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+
+LazyTextEdit 
+================================================
+LazyTextEdit is a Qt based text editor that lazily loads data from disk when
+necessary.
+
+It tries to keep memory usage as low as possible and only stores chunks of data
+that have been modified. Its APIs resembles that of QText(Edit|Document|Cursor). 
+It supports basic formatting options using TextSections and SyntaxHighlighter.
+
+LazyTextEdit is licensed under the Apache 2.0 license.
+
+Some of the source code was modified for inclusion in ecFlowUI.
+

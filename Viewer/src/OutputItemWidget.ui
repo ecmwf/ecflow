@@ -151,20 +151,7 @@
         <widget class="MessageLabel" name="messageLabel_" native="true"/>
        </item>
        <item>
-        <widget class="TextEdit" name="textEdit_">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-           <horstretch>0</horstretch>
-           <verstretch>1</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="lineWrapMode">
-          <enum>QPlainTextEdit::NoWrap</enum>
-         </property>
-         <property name="readOnly">
-          <bool>true</bool>
-         </property>
-        </widget>
+        <widget class="OutputBrowser" name="browser_" native="true"/>
        </item>
        <item>
         <widget class="PlainTextSearchLine" name="searchLine_" native="true"/>
@@ -203,11 +190,6 @@
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>TextEdit</class>
-   <extends>QPlainTextEdit</extends>
-   <header location="global">TextEdit.hpp</header>
-  </customwidget>
-  <customwidget>
    <class>MessageLabel</class>
    <extends>QWidget</extends>
    <header>MessageLabel.hpp</header>
@@ -216,12 +198,18 @@
   <customwidget>
    <class>FileInfoLabel</class>
    <extends>QLabel</extends>
-   <header location="global">FileInfoLabel.hpp</header>
+   <header>FileInfoLabel.hpp</header>
   </customwidget>
   <customwidget>
    <class>DirInfoLabel</class>
    <extends>QLabel</extends>
-   <header location="global">FileInfoLabel.hpp</header>
+   <header>FileInfoLabel.hpp</header>
+  </customwidget>
+  <customwidget>
+   <class>OutputBrowser</class>
+   <extends>QWidget</extends>
+   <header>OutputBrowser.hpp</header>
+   <container>1</container>
   </customwidget>
  </customwidgets>
  <resources>

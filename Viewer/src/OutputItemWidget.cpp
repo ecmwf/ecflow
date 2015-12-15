@@ -12,6 +12,8 @@
 #include "Highlighter.hpp"
 #include "OutputDirProvider.hpp"
 #include "OutputModel.hpp"
+#include "TextEdit.hpp"
+#include "TextPagerEdit.hpp"
 #include "VConfig.hpp"
 #include "VReply.hpp"
 
@@ -46,8 +48,8 @@ OutputItemWidget::OutputItemWidget(QWidget *parent) :
 	//--------------------------------
 
 	//This highlighter only works for jobs
-	jobHighlighter_=new Highlighter(textEdit_->document(),"job");
-	jobHighlighter_->setDocument(NULL);
+	//jobHighlighter_=new Highlighter(textEdit_->document(),"job");
+	//jobHighlighter_->setDocument(NULL);
 
 	infoProvider_=new OutputFileProvider(this);
 
@@ -78,7 +80,7 @@ OutputItemWidget::OutputItemWidget(QWidget *parent) :
 			this,SLOT(slotOutputSelected(QModelIndex,QModelIndex)));
 
 	//Connect the searchline to the editor
-	searchLine_->setEditor(textEdit_);
+	//searchLine_->setEditor(textEdit_);
 
 	//Set splitter's initial size.
 	int wHeight=size().height();
@@ -97,7 +99,7 @@ OutputItemWidget::OutputItemWidget(QWidget *parent) :
 			this,SLOT(slotUpdateDir()));
 
 	//Editor font
-	textEdit_->setFontProperty(VConfig::instance()->find("panel.output.font"));
+	browser_->setFontProperty(VConfig::instance()->find("panel.output.font"));
 }
 
 OutputItemWidget::~OutputItemWidget()
@@ -157,7 +159,7 @@ void OutputItemWidget::getLatestFile()
 	messageLabel_->hide();
 	messageLabel_->stopLoadLabel();
 	fileLabel_->clear();
-	textEdit_->clear();
+	browser_->clear();
 
 	//Get the latest file contents
 	infoProvider_->info(info_);
@@ -168,7 +170,7 @@ void OutputItemWidget::getCurrentFile()
 	messageLabel_->hide();
 	messageLabel_->stopLoadLabel();
 	fileLabel_->clear();
-	textEdit_->clear();
+	browser_->clear();
 
 	if(info_ && info_.get())
 	{
@@ -188,11 +190,11 @@ void OutputItemWidget::clearContents()
 	messageLabel_->hide();
 	messageLabel_->stopLoadLabel();
 	fileLabel_->clear();
-	textEdit_->clear();
+	browser_->clear();
 
 	enableDir(false);
 }
-
+#if 0
 void OutputItemWidget::infoReady(VReply* reply)
 {
 	//------------------------
@@ -259,6 +261,20 @@ void OutputItemWidget::infoReady(VReply* reply)
 
 				if(fInfo.size() > 20*1024*1024)
 				{
+					textEditStacked_->setCurrentIndex(1);
+					TextPagerDocument::DeviceMode mode = TextPagerDocument::Sparse;
+					QTextCodec* codec=0;
+					textPager_->setReadOnly(false);
+					textPager_->load(QString::fromStdString(f->path()), mode, codec);
+
+				}
+				else
+				{
+
+
+
+				if(fInfo.size() > 20*1024*1024)
+				{
 					messageLabel_->startLoadLabel();
 				}
 
@@ -270,6 +286,8 @@ void OutputItemWidget::infoReady(VReply* reply)
 				QString str((char*)d);
 				textEdit_->document()->setPlainText(str);
 				file.unmap(d);
+				}
+
 
 				hasMessage=false;
 			}
@@ -281,7 +299,7 @@ void OutputItemWidget::infoReady(VReply* reply)
 			textEdit_->setPlainText(s);
 		}
 
-		searchOnReload();
+		//searchOnReload();
 
 		if(f && f.get())
 		{
@@ -308,6 +326,95 @@ void OutputItemWidget::infoReady(VReply* reply)
 		updateDir(reply->directory(),true);
 	}
 }
+#endif
+
+void OutputItemWidget::infoReady(VReply* reply)
+{
+	//------------------------
+	// From output provider
+	//------------------------
+
+	if(reply->sender() == infoProvider_)
+	{
+		//messageLabel_->stopLoadLabel();
+
+		//For some unknown reason the textedit font, although it is properly set in the constructor,
+		//is reset to default when we first call infoready. So we need to set it again!!
+		browser_->updateFont();
+
+		bool hasMessage=false;
+		if(reply->hasWarning())
+		{
+			messageLabel_->showWarning(QString::fromStdString(reply->warningText()));
+			hasMessage=true;
+		}
+		else if(reply->hasInfo())
+		{
+			messageLabel_->showInfo(QString::fromStdString(reply->infoText()));
+			hasMessage=true;
+		}
+
+		browser_->adjustHighlighter(QString::fromStdString(reply->fileName()));
+
+		VFile_ptr f=reply->tmpFile();
+
+		QTime stopper;
+		stopper.start();
+
+		//If the info is stored in a tmp file
+		if(f && f.get())
+		{
+			if(f->storageMode() == VFile::MemoryStorage)
+			{
+				//messageLabel_->hide();
+
+				QString s(f->data());
+				browser_->loadText(s);
+			}
+			else
+			{
+				browser_->loadFile(QString::fromStdString(f->path()));
+				hasMessage=false;
+			}
+		}
+		//If the info is stored as a string in the reply object
+		else
+		{
+			QString s=QString::fromStdString(reply->text());
+			browser_->loadText(s);
+		}
+
+		searchOnReload();
+
+		if(f && f.get())
+		{
+			f->setWidgetLoadDuration(stopper.elapsed());
+		}
+
+		if(!hasMessage)
+		{
+			messageLabel_->hide();
+		}
+		messageLabel_->stopLoadLabel();
+
+		//Update the file label
+		fileLabel_->update(reply);
+	}
+
+	//------------------------
+	// From output dir provider
+	//------------------------
+	else
+	{
+		//Update the dir widget and select the proper file in the list
+		updateDir(reply->directory(),true);
+	}
+}
+
+
+
+
+
 
 void OutputItemWidget::infoProgress(VReply* reply)
 {
@@ -445,7 +552,7 @@ void OutputItemWidget::on_searchTb__clicked()
 
 void OutputItemWidget::on_gotoLineTb__clicked()
 {
-	textEdit_->gotoLine();
+	browser_->gotoLine();
 }
 
 // search for a highlight any of the pre-defined keywords so that
@@ -490,14 +597,14 @@ bool OutputItemWidget::automaticSearchForKeywords()
 // we just go to the last line of the output
 void OutputItemWidget::searchOnReload()
 {
-	if (searchLine_->isVisible() && !searchLine_->isEmpty())
+	/*if (searchLine_->isVisible() && !searchLine_->isEmpty())
 	{
 		searchLine_->slotFindNext();
 		searchLine_->slotHighlight();
 	}
 	else
 	{
-		if (!automaticSearchForKeywords())
+		/*if (!automaticSearchForKeywords())
 		{
 			if (userClickedReload_)
 			{
@@ -508,7 +615,7 @@ void OutputItemWidget::searchOnReload()
 				textEdit_->setTextCursor(cursor);   
 			}
 		}
-	}
+	}*/
 }
 
 //This slot is called when a file item is selected in the output view.
@@ -525,13 +632,13 @@ void OutputItemWidget::slotOutputSelected(QModelIndex idx1,QModelIndex idx2)
 void OutputItemWidget::on_fontSizeUpTb__clicked()
 {
 	//We need to call a custom slot here instead of "zoomIn"!!!
-	textEdit_->slotZoomIn();
+	browser_->zoomIn();
 }
 
 void OutputItemWidget::on_fontSizeDownTb__clicked()
 {
 	//We need to call a custom slot here instead of "zoomOut"!!!
-	textEdit_->slotZoomOut();
+	browser_->zoomOut();
 }
 
 static InfoPanelItemMaker<OutputItemWidget> maker1("output");

@@ -21,7 +21,8 @@ class Highlighter;
 class OutputDirProvider;
 class OutputModel;
 class OutputSortModel;
-class QTime;
+class TextEdit;
+class TextPagerEdit;
 
 class OutputItemWidget : public QWidget, public InfoPanelItem, protected Ui::OutputItemWidget
 {
@@ -64,6 +65,9 @@ protected:
 	void getCurrentFile();
 	void getLatestFile();
 	std::string currentFullName() const;
+
+	TextEdit* textEdit_;
+	TextPagerEdit* textPager_;
 
 	OutputDirProvider* dirProvider_;
 	OutputModel* dirModel_;

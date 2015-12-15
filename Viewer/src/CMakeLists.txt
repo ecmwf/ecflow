@@ -74,6 +74,7 @@ set(viewer_srcs
     NodeViewDelegate.cpp
     NodeWidget.cpp
     OneLineTextEdit.cpp
+    OutputBrowser.cpp
     OutputClient.cpp
     OutputFileClient.cpp
     OutputDirClient.cpp
@@ -151,7 +152,14 @@ set(viewer_srcs
     VConfigLoader.cpp
     WhyItemWidget.cpp
     ZombieItemWidget.cpp
-    ZombieModel.cpp)
+    ZombieModel.cpp
+    TextPager/TextPagerCursor.cpp
+    TextPager/TextPagerDocument.cpp
+    TextPager/TextPagerEdit.cpp
+    TextPager/TextPagerLayout_p.cpp
+    TextPager/TextPagerSection.cpp
+    TextPager/TextPagerWidget.cpp
+    TextPager/syntaxhighlighter.cpp)
 
 if(ECFLOW_QT5)
     include_directories(${ECFLOW_QT_INCLUDE_DIR})
@@ -242,6 +250,14 @@ set(viewer_moc_files AbstractNodeModel.hpp
     VModelData.hpp
     VNodeList.hpp
     ZombieItemWidget.hpp
+    TextPager/TextPagerCursor_p.hpp
+    TextPager/TextPagerDocument.hpp
+    TextPager/TextPagerDocument_p.hpp
+    TextPager/TextPagerEdit.hpp
+    TextPager/TextPagerEdit_p.hpp
+    TextPager/TextPagerSection_p.hpp
+    TextPager/TextPagerWidget.hpp
+    TextPager/syntaxhighlighter.hpp   
 )
 
 set(viewer_wrap_ui_files
@@ -319,7 +335,8 @@ ecbuild_add_executable( TARGET   ecflow_ui
      ../../Base/src
      ../../Base/src/cts
      ../../Base/src/stc
-     ../../Client/src    
+     ../../Client/src
+     TextPager    
      ${Boost_INCLUDE_DIRS} 
     ${CMAKE_CURRENT_BINARY_DIR}
     LIBS     core nodeattr node libparser base libclient 
