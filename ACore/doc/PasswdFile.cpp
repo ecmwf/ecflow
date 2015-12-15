@@ -18,7 +18,9 @@
 #include <time.h>
 // #define _XOPEN_SOURCE
 #include <unistd.h>
+#ifndef __APPLE__
 #include <crypt.h>
+#endif
 #include <pwd.h>       /* getpwuid */
 #include <vector>
 #include <iostream>
