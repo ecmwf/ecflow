@@ -103,7 +103,7 @@ void FileInfoLabel::update(VReply* reply,QString extraText)
 			s+="<font color=" + colText.name() + "> local disk</font>";
 
 			VFile_ptr tmp=reply->tmpFile();
-			if(tmp->widgetLoadDuration() > 300)
+			if(tmp && tmp->widgetLoadDuration() > 300)
 			{
 				s+=" (display: " + QString::number(static_cast<float>(tmp->widgetLoadDuration())/1000.,'f',1) + " s)";
 			}
