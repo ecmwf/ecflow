@@ -83,10 +83,15 @@ public Q_SLOTS:
     void updateScrollBar();
     void onDocumentDestroyed();
     void onDocumentSizeChanged(int size);
+
+#if 0
     void onDocumentCommandInserted(DocumentCommand *cmd);
     void onDocumentCommandFinished(DocumentCommand *cmd);
     void onDocumentCommandRemoved(DocumentCommand *cmd);
     void onDocumentCommandTriggered(DocumentCommand *cmd, bool undo);
+#endif
+
+
     void onScrollBarValueChanged(int value);
     void onScrollBarActionTriggered(int action);
     void onCharactersAddedOrRemoved(int index, int count);

@@ -40,11 +40,6 @@ class TextPagerDocument : public QObject
     Q_PROPERTY(int instantiatedChunkCount READ instantiatedChunkCount)
     Q_PROPERTY(int swappedChunkCount READ swappedChunkCount)
     Q_PROPERTY(int chunkSize READ chunkSize WRITE setChunkSize)
-    Q_PROPERTY(bool undoRedoEnabled READ isUndoRedoEnabled WRITE setUndoRedoEnabled)
-    Q_PROPERTY(bool modified READ isModified WRITE setModified DESIGNABLE false)
-    Q_PROPERTY(bool undoAvailable READ isUndoAvailable NOTIFY undoAvailableChanged)
-    Q_PROPERTY(bool redoAvailable READ isRedoAvailable NOTIFY redoAvailableChanged)
-    Q_PROPERTY(bool collapseInsertUndo READ collapseInsertUndo WRITE setCollapseInsertUndo)
     Q_ENUMS(DeviceMode)
     Q_FLAGS(Options)
     Q_FLAGS(FindMode)
@@ -90,9 +85,7 @@ public:
     QString read(int pos, int size) const;
     QStringRef readRef(int pos, int size) const;
     QChar readCharacter(int index) const;
-    bool save(const QString &file);
-    bool save(QIODevice *device);
-    bool save();
+
     int documentSize() const;
     int chunkCount() const;
     int instantiatedChunkCount() const;
@@ -118,9 +111,6 @@ public:
     int chunkSize() const;
     void setChunkSize(int pos);
 
-    bool isUndoRedoEnabled() const;
-    void setUndoRedoEnabled(bool enable);
-
     QIODevice *device() const;
 
     TextPagerCursor find(const QRegExp &rx, const TextPagerCursor &cursor, FindMode flags = 0) const;
@@ -135,10 +125,6 @@ public:
     { return find(ch, TextPagerCursor(this, pos), flags); }
 
 
-    bool insert(int pos, const QString &ba);
-    inline bool insert(int pos, const QChar &ba) { return insert(pos, QString(ba)); }
-    void remove(int pos, int size);
-
     QList<TextPagerSection*> sections(int from = 0, int size = -1, TextPagerSection::TextSectionOptions opt = 0) const;
     inline TextPagerSection *sectionAt(int pos) const { return sections(pos, 1, TextPagerSection::IncludePartial).value(0); }
     TextPagerSection *insertTextSection(int pos, int size, const QTextCharFormat &format = QTextCharFormat(),
@@ -146,12 +132,6 @@ public:
     void insertTextSection(TextPagerSection *section);
     void takeTextSection(TextPagerSection *section);
     int currentMemoryUsage() const;
-
-    bool isUndoAvailable() const;
-    bool isRedoAvailable() const;
-
-    bool collapseInsertUndo() const;
-    void setCollapseInsertUndo(bool collapse);
 
     bool isModified() const;
 
@@ -162,11 +142,6 @@ public:
     virtual bool isWordCharacter(const QChar &ch, int index) const;
 
 public Q_SLOTS:
-    inline bool append(const QString &ba) { return insert(documentSize(), ba); }
-    inline bool append(const QChar &ba) { return append(QString(ba)); }
-    void setModified(bool modified);
-    void undo();
-    void redo();
     bool abortSave();
     bool abortFind() const;
 
@@ -180,8 +155,6 @@ Q_SIGNALS:
     void saveProgress(qreal progress);
     void findProgress(qreal progress, int position) const;
     void documentSizeChanged(int size);
-    void undoAvailableChanged(bool on);
-    void redoAvailableChanged(bool on);
     void modificationChanged(bool modified);
 
 protected:

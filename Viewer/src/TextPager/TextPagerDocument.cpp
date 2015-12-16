@@ -192,7 +192,7 @@ bool TextPagerDocument::load(QIODevice *device, DeviceMode mode, QTextCodec *cod
     Q_EMIT charactersAdded(0, d->documentSize);
     Q_EMIT documentSizeChanged(d->documentSize);
     Q_EMIT textChanged();
-    setModified(false);
+
     return true;
 }
 
@@ -284,19 +284,6 @@ QStringRef TextPagerDocument::readRef(int pos, int size) const
     return QStringRef();
 }
 
-
-bool TextPagerDocument::save(const QString &file)
-{
-    QFile from(file);
-    return from.open(QIODevice::WriteOnly) && save(&from);
-}
-
-bool TextPagerDocument::save()
-{
-    return d->device && save(d->device.data());
-}
-
-
 static bool isSameFile(const QIODevice *left, const QIODevice *right)
 {
     if (left == right)
@@ -307,95 +294,6 @@ static bool isSameFile(const QIODevice *left, const QIODevice *right)
         }
     }
     return false;
-}
-
-bool TextPagerDocument::save(QIODevice *device)
-{
-    QReadLocker locker(d->readWriteLock);
-    Q_ASSERT(device);
-    if (::isSameFile(d->device.data(), device)) {
-        QTemporaryFile tmp(0);
-        if (!tmp.open())
-            return false;
-        if (save(&tmp)) {
-            Q_ASSERT(qobject_cast<QFile*>(device));
-            Q_ASSERT(qobject_cast<QFile*>(d->device));
-            d->device.data()->close();
-            d->device.data()->open(QIODevice::WriteOnly);
-            tmp.seek(0);
-            const int chunkSize = 128; //1024 * 16;
-            char chunk[chunkSize];
-            Q_FOREVER {
-                const qint64 read = tmp.read(chunk, chunkSize);
-                switch (read) {
-                case -1: return false;
-                case 0: return true;
-                default:
-                    if (d->device.data()->write(chunk, read) != read) {
-                        return false;
-                    }
-                    break;
-                }
-            }
-            d->device.data()->close();
-            d->device.data()->open(QIODevice::ReadOnly);
-            if (d->deviceMode == Sparse) {
-                qDeleteAll(d->undoRedoStack);
-                d->undoRedoStack.clear();
-                d->undoRedoStackCurrent = 0;
-#ifndef NO_TEXTDOCUMENT_CHUNK_CACHE
-                d->cachedChunkPos = -1;
-                d->cachedChunk = 0;
-                d->cachedChunkData.clear();
-#endif
-                Chunk *c = d->first;
-                int pos = 0;
-                while (c) {
-                    Q_ASSERT((c->from == -1) == (c->length == -1));
-                    if (c->from == -1) { // unload chunks from memory
-                        c->from = pos;
-                        c->length = c->data.size();
-                        c->data.clear();
-                    }
-                    pos += c->length;
-                    c = c->next;
-                }
-            }
-
-            return true;
-//            return load(d->device, d->deviceMode);
-        }
-        return false;
-
-    }
-    Q_ASSERT(device);
-    if (!device->isWritable() || !d->first) {
-        return false;
-    }
-    d->saveState = TextDocumentPrivate::Saving;
-    const Chunk *c = d->first;
-    Q_EMIT saveProgress(0.0);
-    int written = 0;
-    QTextStream ts(device);
-    if (d->textCodec)
-        ts.setCodec(d->textCodec);
-    while (c) {
-        ts << d->chunkData(c, written);
-        written += c->size();
-        if (c != d->last) {
-            const double part = qreal(written) / double(d->documentSize);
-            Q_EMIT saveProgress(part * 100.0);
-        }
-        if (d->saveState == TextDocumentPrivate::AbortSave) {
-            d->saveState = TextDocumentPrivate::NotSaving;
-            return false;
-        }
-        c = c->next;
-    }
-    d->saveState = TextDocumentPrivate::NotSaving;
-    Q_EMIT saveProgress(100.0);
-
-    return true;
 }
 
 int TextPagerDocument::documentSize() const
@@ -826,133 +724,6 @@ TextPagerCursor TextPagerDocument::find(const QChar &chIn, const TextPagerCursor
     return TextPagerCursor();
 }
 
-bool TextPagerDocument::insert(int pos, const QString &string)
-{
-    QWriteLocker locker(d->readWriteLock);
-#ifdef QT_DEBUG
-    Q_ASSERT(d->iterators.isEmpty());
-#endif
-    Q_ASSERT(pos >= 0 && pos <= d->documentSize);
-    if (string.isEmpty())
-        return false;
-
-    const bool undoAvailable = isUndoAvailable();
-    DocumentCommand *cmd = 0;
-    if (!d->ignoreUndoRedo && d->undoRedoEnabled && d->cursorCommand) { // can only undo commands from
-        d->clearRedo();
-        if (d->collapseInsertUndo
-            && !d->undoRedoStack.isEmpty()
-            && d->undoRedoStack.last()->type == DocumentCommand::Inserted
-            && d->undoRedoStack.last()->position + d->undoRedoStack.last()->text.size() == pos) {
-            d->undoRedoStack.last()->text += string;
-        } else {
-            cmd = new DocumentCommand(DocumentCommand::Inserted, pos, string);
-            if (!d->modified)
-                d->modifiedIndex = d->undoRedoStackCurrent;
-            Q_EMIT d->undoRedoCommandInserted(cmd);
-            d->undoRedoStack.append(cmd);
-            ++d->undoRedoStackCurrent;
-            Q_ASSERT(d->undoRedoStackCurrent == d->undoRedoStack.size());
-        }
-    }
-    d->modified = true;
-
-    Chunk *c;
-    int offset;
-    c = d->chunkAt(pos, &offset);
-//    qDebug() << c << (c == d->last) << (c == d->first) <<  offset << c->size() << d->chunkSize;
-    if (c == d->last && offset == c->size() && c->size() >= d->chunkSize) {
-        Chunk *chunk = new Chunk;
-        c->next = chunk;
-        chunk->previous = c;
-        d->last = chunk;
-        offset = 0;
-        chunk->data = string;
-        d->documentSize += string.size();
-        if (d->options & SwapChunks) {
-            if (c->previous) {
-                d->swapOutChunk(c->previous);
-            }
-        }
-        c = chunk;
-    } else {
-        d->instantiateChunk(c);
-#ifndef NO_TEXTDOCUMENT_CHUNK_CACHE
-        if (c == d->cachedChunk) {
-            d->cachedChunkData.clear(); // avoid detach when inserting
-        }
-#endif
-        c->data.insert(offset, string);
-#ifndef NO_TEXTDOCUMENT_CHUNK_CACHE
-        if (c == d->cachedChunk) {
-            d->cachedChunkData = c->data;
-        } else if (pos <= d->cachedChunkPos) {
-            Q_ASSERT(d->cachedChunk);
-            d->cachedChunkPos += string.size();
-        }
-#endif
-#ifndef NO_TEXTDOCUMENT_READ_CACHE
-        if (pos <= d->cachePos) {
-            d->cachePos += string.size();
-        } else if (pos < d->cachePos + d->cache.size()) {
-            d->cachePos = -1;
-            d->cache.clear();
-        }
-#endif
-
-        TextPagerSection *s = d->sectionAt(pos, 0);
-        if (s && s->position() != pos) {
-            s->d.size += string.size();
-        }
-
-        d->documentSize += string.size();
-
-        Q_FOREACH(TextCursorSharedPrivate *cursor, d->textCursors) {
-            if (cursor->position >= pos)
-                cursor->position += string.size();
-            if (cursor->anchor >= pos)
-                cursor->anchor += string.size();
-        }
-        Q_FOREACH(TextPagerSection *section, d->getSections(pos, -1, 0, 0)) {
-            section->d.position += string.size();
-        }
-
-        if (d->hasChunksWithLineNumbers && c->firstLineIndex != -1) {
-            const int extraLines = string.count(QLatin1Char('\n'));
-            if (extraLines != 0) {
-#ifdef TEXTDOCUMENT_LINENUMBER_CACHE
-                c->lineNumbers.clear();
-                // ### could be optimized
-#else
-                Q_ASSERT(c->lines != -1);
-                c->lines += extraLines;
-#endif
-                c = c->next;
-                while (c) {
-                    if (c->firstLineIndex != -1) {
-//                     qDebug() << "changing chunk number" << d->chunkIndex(c)
-//                              << "starting with" << d->chunkData(c, -1).left(5)
-//                              << "from" << c->firstLineIndex << "to" << (c->firstLineIndex + extraLines);
-                        c->firstLineIndex += extraLines;
-                    }
-                    c = c->next;
-                }
-            }
-        }
-    }
-
-    Q_EMIT charactersAdded(pos, string.size());
-    Q_EMIT documentSizeChanged(d->documentSize);
-    if (isUndoAvailable() != undoAvailable) {
-        Q_EMIT undoAvailableChanged(!undoAvailable);
-    }
-    if (cmd)
-        Q_EMIT d->undoRedoCommandFinished(cmd);
-
-    Q_EMIT textChanged();
-    return true;
-}
-
 static inline int count(const QString &string, int from, int size, const QChar &ch)
 {
     Q_ASSERT(from + size <= string.size());
@@ -965,133 +736,6 @@ static inline int count(const QString &string, int from, int size, const QChar &
     }
 //    Q_ASSERT(string.mid(from, size).count(ch) == num);
     return num;
-}
-
-void TextPagerDocument::remove(int pos, int size)
-{
-    QWriteLocker locker(d->readWriteLock);
-#ifdef QT_DEBUG
-    Q_ASSERT(d->iterators.isEmpty());
-#endif
-    Q_ASSERT(pos >= 0 && pos + size <= d->documentSize);
-    Q_ASSERT(size >= 0);
-
-    if (size == 0)
-        return;
-
-    DocumentCommand *cmd = 0;
-    const bool undoAvailable = isUndoAvailable();
-    if (!d->ignoreUndoRedo && d->undoRedoEnabled && d->cursorCommand) {
-        d->clearRedo();
-        if (!d->undoRedoStack.isEmpty()
-            && d->undoRedoStack.last()->type == DocumentCommand::Removed
-            && d->undoRedoStack.last()->position == pos + size) {
-            d->undoRedoStack.last()->text.prepend(read(pos, size));
-            d->undoRedoStack.last()->position -= size;
-        } else {
-            cmd = new DocumentCommand(DocumentCommand::Removed, pos, read(pos, size));
-            if (!d->modified)
-                d->modifiedIndex = d->undoRedoStackCurrent;
-            Q_EMIT d->undoRedoCommandInserted(cmd);
-            d->undoRedoStack.append(cmd);
-            ++d->undoRedoStackCurrent;
-            Q_ASSERT(d->undoRedoStackCurrent == d->undoRedoStack.size());
-        }
-    }
-    d->modified = true;
-
-    int toRemove = size;
-    int newLinesRemoved = 0;
-    while (toRemove > 0) {
-        int offset;
-        Chunk *c = d->chunkAt(pos, &offset);
-        if (offset == 0 && toRemove >= c->size()) {
-            toRemove -= c->size();
-            if (d->hasChunksWithLineNumbers) {
-                newLinesRemoved += d->chunkData(c, pos).count('\n');
-                // ### should use the QVector<int> stuff if possible
-            }
-            d->removeChunk(c);
-        } else {
-            d->instantiateChunk(c);
-            const int removed = qMin(toRemove, c->size() - offset);
-            if (d->hasChunksWithLineNumbers) {
-                const int tmp = ::count(c->data, offset, removed, QLatin1Char('\n'));
-                newLinesRemoved += tmp;
-#ifdef TEXTDOCUMENT_LINENUMBER_CACHE
-                if (tmp > 0)
-                    c->lineNumbers.clear();
-                    // ### Could clear only the parts that need to be cleared really
-#endif
-            }
-#ifndef NO_TEXTDOCUMENT_CHUNK_CACHE
-//            qDebug() << "removing from" << c << d->cachedChunk;
-            if (d->cachedChunk == c) {
-                d->cachedChunkData.clear();
-            }
-#endif
-            c->data.remove(offset, removed);
-#ifndef NO_TEXTDOCUMENT_CHUNK_CACHE
-            if (d->cachedChunk == c)
-                d->cachedChunkData = c->data;
-#endif
-
-
-            toRemove -= removed;
-        }
-    }
-
-    Q_FOREACH(TextCursorSharedPrivate *cursor, d->textCursors) {
-        if (cursor->position >= pos)
-            cursor->position -= qMin(size, cursor->position - pos);
-        if (cursor->anchor >= pos)
-            cursor->anchor -= qMin(size, cursor->anchor - pos);
-    }
-
-    QList<TextPagerSection*> s = d->getSections(pos, -1, 0, 0);
-    Q_FOREACH(TextPagerSection *section, s) {
-        const QPair<int, int> intersection = ::intersection(pos, size, section->position(), section->size());
-        if (intersection.second == section->size()) {
-            delete section;
-        } else {
-            if (intersection.first == section->position() || intersection.first == -1)
-                section->d.position -= size;
-            section->d.size -= intersection.second;
-        }
-    }
-
-    d->documentSize -= size;
-#ifndef NO_TEXTDOCUMENT_READ_CACHE
-    if (pos + size < d->cachePos) {
-        d->cachePos -= size;
-    } else if (pos <= d->cachePos + d->cache.size()) {
-        d->cachePos = -1;
-        d->cache.clear();
-    }
-#endif
-    if (newLinesRemoved > 0) {
-        Q_ASSERT(d->hasChunksWithLineNumbers);
-        int offset;
-        Chunk *c = d->chunkAt(pos, &offset);
-        if (offset != 0)
-            c = c->next;
-        while (c) {
-            if (c->firstLineIndex != -1) {
-                c->firstLineIndex -= newLinesRemoved;
-            }
-            c = c->next;
-        }
-    }
-
-
-    Q_EMIT charactersRemoved(pos, size);
-    Q_EMIT documentSizeChanged(d->documentSize);
-    if (isUndoAvailable() != undoAvailable) {
-        Q_EMIT undoAvailableChanged(!undoAvailable);
-    }
-    if (cmd)
-        Q_EMIT d->undoRedoCommandFinished(cmd);
-    Q_EMIT textChanged();
 }
 
 void TextPagerDocument::takeTextSection(TextPagerSection *section)
@@ -1238,76 +882,10 @@ int TextPagerDocument::currentMemoryUsage() const
     return used;
 }
 
-void TextPagerDocument::undo()
-{
-    if (!isUndoAvailable())
-        return;
-    d->undoRedo(true);
-}
-
-void TextPagerDocument::redo()
-{
-    if (!isRedoAvailable())
-        return;
-    d->undoRedo(false);
-}
-
-bool TextPagerDocument::isUndoRedoEnabled() const
-{
-    return d->undoRedoEnabled;
-}
-
-void TextPagerDocument::setUndoRedoEnabled(bool enable)
-{
-    if (enable == d->undoRedoEnabled)
-        return;
-    d->undoRedoEnabled = enable;
-    if (!enable) {
-        qDeleteAll(d->undoRedoStack);
-        d->undoRedoStack.clear();
-        d->undoRedoStackCurrent = 0;
-    }
-}
-
-bool TextPagerDocument::isUndoAvailable() const
-{
-    return d->undoRedoStackCurrent > 0;
-}
-
-bool TextPagerDocument::isRedoAvailable() const
-{
-    return d->undoRedoStackCurrent < d->undoRedoStack.size();
-}
-
-bool TextPagerDocument::collapseInsertUndo() const
-{
-    return d->collapseInsertUndo;
-}
-void TextPagerDocument::setCollapseInsertUndo(bool collapse)
-{
-    d->collapseInsertUndo = collapse;
-}
-
 bool TextPagerDocument::isModified() const
 {
     // ### should it lock for read?
     return d->modified;
-}
-
-void TextPagerDocument::setModified(bool modified)
-{
-    // ### should it lock for write
-    if (d->modified == modified)
-        return;
-
-    d->modified = modified;
-    if (!modified) {
-        d->modifiedIndex = d->undoRedoStackCurrent;
-    } else {
-        d->modifiedIndex = -1;
-    }
-
-    Q_EMIT modificationChanged(modified);
 }
 
 int TextPagerDocument::lineNumber(int position) const
@@ -1389,7 +967,11 @@ QString TextPagerDocument::swapFileName(Chunk *chunk)
     return QString();
 }
 
-// --- TextDocumentPrivate ---
+//===========================================================================
+//
+//   TextDocumentPrivate
+//
+//===========================================================================
 
 Chunk *TextDocumentPrivate::chunkAt(int p, int *offset) const
 {
@@ -1430,18 +1012,6 @@ Chunk *TextDocumentPrivate::chunkAt(int p, int *offset) const
     return c;
 }
 
-void TextDocumentPrivate::clearRedo()
-{
-    const bool doEmit = undoRedoStackCurrent < undoRedoStack.size();
-    while (undoRedoStackCurrent < undoRedoStack.size()) {
-        DocumentCommand *cmd = undoRedoStack.takeLast();
-        Q_EMIT undoRedoCommandRemoved(cmd);
-        delete cmd;
-    }
-    if (doEmit) {
-        Q_EMIT q->redoAvailableChanged(false);
-    }
-}
 
 /* Evil double meaning of pos here. If it's -1 we don't cache it. */
 QString TextDocumentPrivate::chunkData(const Chunk *chunk, int chunkPos) const
@@ -1561,37 +1131,6 @@ void TextDocumentPrivate::removeChunk(Chunk *c)
     delete c;
 }
 
-void TextDocumentPrivate::undoRedo(bool undo)
-{
-    QWriteLocker locker(readWriteLock);
-    const bool undoWasAvailable = q->isUndoAvailable();
-    const bool redoWasAvailable = q->isRedoAvailable();
-    DocumentCommand *cmd = undoRedoStack.at(undo
-                                            ? --undoRedoStackCurrent
-                                            : undoRedoStackCurrent++);
-    const bool was = ignoreUndoRedo;
-    ignoreUndoRedo = true;
-    Q_ASSERT(cmd->type != DocumentCommand::None);
-    if ((cmd->type == DocumentCommand::Inserted) == undo) {
-        q->remove(cmd->position, cmd->text.size());
-    } else {
-        q->insert(cmd->position, cmd->text);
-    }
-    Q_EMIT undoRedoCommandTriggered(cmd, undo);
-    ignoreUndoRedo = was;
-
-    if ((cmd->joinStatus == DocumentCommand::Backward && undo)
-        || (cmd->joinStatus == DocumentCommand::Forward && !undo)) {
-        undoRedo(undo);
-    }
-    if (undoWasAvailable != q->isUndoAvailable())
-        Q_EMIT q->undoAvailableChanged(!undoWasAvailable);
-    if (redoWasAvailable != q->isRedoAvailable())
-        Q_EMIT q->redoAvailableChanged(!redoWasAvailable);
-    if (modified && modifiedIndex == undoRedoStackCurrent)
-        q->setModified(false);
-}
-
 QString TextDocumentPrivate::wordAt(int position, int *start) const
 {
     TextDocumentIterator from(this, position);
@@ -1646,15 +1185,6 @@ uint TextDocumentPrivate::wordBoundariesAt(int pos) const
         ret |= TextDocumentIterator::Right;
     }
     return ret;
-}
-
-
-void TextDocumentPrivate::joinLastTwoCommands()
-{
-    Q_ASSERT(!q->isRedoAvailable());
-    Q_ASSERT(undoRedoStack.size() >= 2);
-    undoRedoStack.last()->joinStatus = DocumentCommand::Backward;
-    undoRedoStack.at(undoRedoStack.size() - 2)->joinStatus = DocumentCommand::Forward;
 }
 
 void TextDocumentPrivate::updateChunkLineNumbers(Chunk *c, int chunkPos) const

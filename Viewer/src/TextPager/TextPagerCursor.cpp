@@ -177,23 +177,6 @@ int TextPagerCursor::anchor() const
     return isNull() ? -1 : d->anchor;
 }
 
-void TextPagerCursor::insertText(const QString &text)
-{
-    Q_ASSERT(!isNull());
-    const bool doJoin = hasSelection();
-    if (doJoin) {
-        removeSelectedText();
-    }
-    const bool old = d->document->d->cursorCommand;
-    d->document->d->cursorCommand = true;
-    if (d->document->insert(d->position, text) && textEdit) {
-        Q_EMIT textEdit->cursorPositionChanged(d->position);
-    }
-    if (doJoin)
-        d->document->d->joinLastTwoCommands();
-    d->document->d->cursorCommand = old;
-}
-
 bool TextPagerCursor::movePosition(TextPagerCursor::MoveOperation op,TextPagerCursor::MoveMode mode, int n)
 {
     if (!d || !d->document || n <= 0)
@@ -390,33 +373,6 @@ bool TextPagerCursor::movePosition(TextPagerCursor::MoveOperation op,TextPagerCu
     return true;
 }
 
-void TextPagerCursor::deleteChar()
-{
-    Q_ASSERT(!isNull());
-    if (hasSelection()) {
-        removeSelectedText();
-    } else if (d->position < d->document->documentSize()) {
-        const bool old = d->document->d->cursorCommand;
-        d->document->d->cursorCommand = true;
-        d->document->remove(d->position, 1);
-        d->document->d->cursorCommand = old;
-    }
-}
-
-void TextPagerCursor::deletePreviousChar()
-{
-    Q_ASSERT(!isNull());
-    if (hasSelection()) {
-        removeSelectedText();
-    } else if (d->position > 0) {
-        const bool old = d->document->d->cursorCommand;
-        d->document->d->cursorCommand = true;
-        d->document->remove(d->position - 1, 1);
-        d->document->d->cursorCommand = old;
-        d->anchor = --d->position;
-    }
-}
-
 void TextPagerCursor::select(SelectionType selection)
 {
     if (!d || !d->document)
@@ -448,25 +404,6 @@ void TextPagerCursor::select(SelectionType selection)
 bool TextPagerCursor::hasSelection() const
 {
     return !isNull() && d->anchor != d->position;
-}
-
-void TextPagerCursor::removeSelectedText()
-{
-    Q_ASSERT(!isNull());
-    if (d->anchor == d->position)
-        return;
-
-    SelectionChangedEmitter emitter(textEdit);
-    detach();
-    cursorChanged(false);
-    const int min = qMin(d->anchor, d->position);
-    const int max = qMax(d->anchor, d->position);
-    d->anchor = d->position = min;
-    const bool old = d->document->d->cursorCommand;
-    d->document->d->cursorCommand = true;
-    d->document->remove(min, max - min);
-    d->document->d->cursorCommand = old;
-    cursorChanged(true);
 }
 
 void TextPagerCursor::clearSelection()

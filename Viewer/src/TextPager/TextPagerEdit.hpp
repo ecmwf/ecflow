@@ -37,8 +37,6 @@ class TextPagerEdit : public QAbstractScrollArea, public VPropertyObserver
     Q_PROPERTY(bool readOnly READ readOnly WRITE setReadOnly)
     Q_PROPERTY(bool cursorVisible READ cursorVisible WRITE setCursorVisible)
     Q_PROPERTY(QString selectedText READ selectedText)
-    Q_PROPERTY(bool undoAvailable READ isUndoAvailable NOTIFY undoAvailableChanged)
-    Q_PROPERTY(bool redoAvailable READ isRedoAvailable NOTIFY redoAvailableChanged)
     Q_PROPERTY(int maximumSizeCopy READ maximumSizeCopy WRITE setMaximumSizeCopy)
     Q_PROPERTY(bool lineBreaking READ lineBreaking WRITE setLineBreaking)
 
@@ -70,7 +68,8 @@ public:
     void removeSyntaxHighlighter(SyntaxHighlighter *highlighter);
     void clearSyntaxHighlighters();
 
-    bool load(QIODevice *device, TextPagerDocument::DeviceMode mode = TextPagerDocument::Sparse, QTextCodec *codec = 0);
+    //bool load(QIODevice *device, TextPagerDocument::DeviceMode mode = TextPagerDocument::Sparse, QTextCodec *codec = 0);
+
     bool load(const QString &fileName, TextPagerDocument::DeviceMode mode = TextPagerDocument::Sparse, QTextCodec *codec = 0);
     void paintEvent(QPaintEvent *e);
     void scrollContentsBy(int dx, int dy);
@@ -106,10 +105,6 @@ public:
     QString selectedText() const;
     bool hasSelection() const;
 
-    bool save(QIODevice *device);
-    bool save();
-    bool save(const QString &file);
-
     void setText(const QString &text);
     QString read(int pos, int size) const;
     QChar readCharacter(int index) const;
@@ -131,8 +126,6 @@ public:
                                    const QVariant &data = QVariant());
 
     void ensureCursorVisible(const TextPagerCursor &cursor, int linesMargin = 0);
-    bool isUndoAvailable() const;
-    bool isRedoAvailable() const;
 
     void setFontProperty(VProperty* p);
     void notifyChange(VProperty* p);
@@ -143,23 +136,13 @@ public:
 
     enum ActionType {
         CopyAction,
-        PasteAction,
-        CutAction,
-        UndoAction,
-        RedoAction,
         SelectAllAction
     };
     QAction *action(ActionType type) const;
 
 public Q_SLOTS:
     void ensureCursorVisible();
-    void append(const QString &text);
-    void removeSelectedText();
     void copy(QClipboard::Mode mode = QClipboard::Clipboard);
-    void paste(QClipboard::Mode mode = QClipboard::Clipboard);
-    void cut();
-    void undo();
-    void redo();
     void selectAll();
     void clearSelection();
 
@@ -169,11 +152,9 @@ Q_SIGNALS:
     void selectionChanged();
     void cursorPositionChanged(int pos);
     void sectionClicked(TextPagerSection *section, const QPoint &pos);
-    void undoAvailableChanged(bool on);
-    void redoAvailableChanged(bool on);
 
 protected:
-    virtual void paste(int position, QClipboard::Mode mode);
+    //virtual void paste(int position, QClipboard::Mode mode);
     virtual void changeEvent(QEvent *e);
     virtual void keyPressEvent(QKeyEvent *e);
     virtual void keyReleaseEvent(QKeyEvent *e);
@@ -183,12 +164,6 @@ protected:
     virtual void mouseMoveEvent(QMouseEvent *e);
     virtual void mouseReleaseEvent(QMouseEvent *e);
     virtual void resizeEvent(QResizeEvent *e);
-#if 0 // ### not done yet
-    virtual void dragEnterEvent(QDragEnterEvent *e);
-    virtual void dragMoveEvent(QDragMoveEvent *e);
-    virtual void dropEvent(QDropEvent *e);
-#endif
-
 
 private:
     void updateFont();
@@ -197,7 +172,6 @@ private:
     void lineNumberAreaPaintEvent(QPaintEvent *e);
     int  lineNumberAreaWidth();
     void updateLineNumberArea();
-
 
     TextEditPrivate *d;
     friend class TextLayoutCacheManager;

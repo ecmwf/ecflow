@@ -545,9 +545,7 @@ void OutputItemWidget::enableDir(bool status)
 
 void OutputItemWidget::on_searchTb__clicked()
 {
-	searchLine_->setVisible(true);
-	searchLine_->setFocus();
-	searchLine_->selectAll();
+	browser_->showSearchLine();
 }
 
 void OutputItemWidget::on_gotoLineTb__clicked()

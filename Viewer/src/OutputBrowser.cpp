@@ -13,6 +13,7 @@
 #include <QVBoxLayout>
 
 #include "Highlighter.hpp"
+#include "PlainTextSearchLine.hpp"
 #include "TextEdit.hpp"
 #include "TextPagerWidget.hpp"
 
@@ -25,18 +26,33 @@ OutputBrowser::OutputBrowser(QWidget* parent) : QWidget(parent)
 	vb->addWidget(stacked_);
 
 	//Basic textedit
+	QWidget* tew=new QWidget(this);
+	QVBoxLayout *tewLayout=new QVBoxLayout(tew);
+	tewLayout->setContentsMargins(0,0,0,0);
+	tewLayout->setSpacing(1);
+
 	textEdit_=new TextEdit(this);
 	textEdit_->setReadOnly(true);
+	textEditSearchLine_=new PlainTextSearchLine(this);
+	textEditSearchLine_->setEditor(textEdit_);
+	tewLayout->addWidget(textEdit_,1);
+	tewLayout->addWidget(textEditSearchLine_);
 
 	//This highlighter only works for jobs
 	jobHighlighter_=new Highlighter(textEdit_->document(),"job");
 	jobHighlighter_->setDocument(NULL);
 
 	//Pager for very large files
+	QWidget* tpw=new QWidget(this);
+	QVBoxLayout *tpwLayout=new QVBoxLayout(tew);
+	tpwLayout->setContentsMargins(0,0,0,0);
+	tpwLayout->setSpacing(1);
+
 	textPager_=new TextPagerWidget(this);
+	tpwLayout->addWidget(textPager_,1);
 	//textPager_->setReadOnly(true);
 
-	stacked_->addWidget(textEdit_);
+	stacked_->addWidget(tew);
 	stacked_->addWidget(textPager_);
 
 	stacked_->setCurrentIndex(BasicIndex);
@@ -105,6 +121,16 @@ void OutputBrowser::gotoLine()
 
 }
 
+void OutputBrowser::showSearchLine()
+{
+	if(stacked_->currentIndex() == BasicIndex)
+	{
+	}
+
+	textEditSearchLine_->setVisible(true);
+	textEditSearchLine_->setFocus();
+	textEditSearchLine_->selectAll();
+}
 
 bool OutputBrowser::automaticSearchForKeywords()
 {

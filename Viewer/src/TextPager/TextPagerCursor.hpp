@@ -53,8 +53,6 @@ public:
 
     int anchor() const;
 
-    void insertText(const QString &text);
-
     QChar cursorCharacter() const;
     QString cursorLine() const;
     int lineHeight() const;
@@ -88,9 +86,6 @@ public:
 
     bool movePosition(MoveOperation op, MoveMode = MoveAnchor, int n = 1);
 
-    void deleteChar();
-    void deletePreviousChar();
-
     enum SelectionType {
         WordUnderCursor,
         LineUnderCursor,
@@ -100,7 +95,7 @@ public:
     void select(SelectionType selection);
 
     bool hasSelection() const;
-    void removeSelectedText();
+
     void clearSelection();
     int selectionStart() const;
     int selectionEnd() const;

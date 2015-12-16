@@ -148,8 +148,9 @@ public:
           documentSize(0),
           saveState(NotSaving), findState(NotFinding), ownDevice(false), modified(false),
           deviceMode(TextPagerDocument::Sparse), chunkSize(16384),
-          undoRedoStackCurrent(0), modifiedIndex(-1), undoRedoEnabled(true), ignoreUndoRedo(false),
-          collapseInsertUndo(false), hasChunksWithLineNumbers(false), textCodec(0), options(TextPagerDocument::DefaultOptions),
+          //undoRedoStackCurrent(0), modifiedIndex(-1), undoRedoEnabled(true), ignoreUndoRedo(false),
+          //collapseInsertUndo(false),
+		  hasChunksWithLineNumbers(false), textCodec(0), options(TextPagerDocument::DefaultOptions),
           readWriteLock(0), cursorCommand(false)
     {
         first = last = new Chunk;
@@ -178,9 +179,11 @@ public:
     TextPagerDocument::DeviceMode deviceMode;
     int chunkSize;
 
+#if 0
     QList<DocumentCommand*> undoRedoStack;
     int undoRedoStackCurrent, modifiedIndex;
     bool undoRedoEnabled, ignoreUndoRedo, collapseInsertUndo;
+#endif
 
     bool hasChunksWithLineNumbers;
     QTextCodec *textCodec;
@@ -191,7 +194,10 @@ public:
 #ifdef QT_DEBUG
     mutable QSet<TextDocumentIterator*> iterators;
 #endif
+
+#if 0
     void joinLastTwoCommands();
+#endif
 
     void removeChunk(Chunk *c);
     QString chunkData(const Chunk *chunk, int pos) const;
@@ -204,8 +210,11 @@ public:
 
     void instantiateChunk(Chunk *chunk);
     Chunk *chunkAt(int pos, int *offset) const;
+
+#if 0
     void clearRedo();
     void undoRedo(bool undo);
+#endif
 
     QString wordAt(int position, int *start = 0) const;
     QString paragraphAt(int position, int *start = 0) const;
@@ -220,10 +229,14 @@ public:
 Q_SIGNALS:
     void sectionFormatChanged(TextPagerSection *section);
     void sectionCursorChanged(TextPagerSection *section);
+
+#if 0
     void undoRedoCommandInserted(DocumentCommand *cmd);
     void undoRedoCommandRemoved(DocumentCommand *cmd);
     void undoRedoCommandTriggered(DocumentCommand *cmd, bool undo);
     void undoRedoCommandFinished(DocumentCommand *cmd);
+#endif
+
 private:
     friend class TextPagerSection;
 };

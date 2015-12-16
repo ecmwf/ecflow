@@ -13,6 +13,7 @@
 #include <QStackedWidget>
 
 class Highlighter;
+class PlainTextSearchLine;
 class TextEdit;
 class TextPagerWidget;
 class VProperty;
@@ -29,6 +30,7 @@ public:
 	void setFontProperty(VProperty* p);
 	void updateFont();
 	void gotoLine();
+	void showSearchLine();
 	bool automaticSearchForKeywords();
 	void zoomIn();
 	void zoomOut();
@@ -39,6 +41,7 @@ private:
 	QStackedWidget *stacked_;
 	TextEdit* textEdit_;
 	TextPagerWidget* textPager_;
+	PlainTextSearchLine* textEditSearchLine_;
 	Highlighter* jobHighlighter_;
 };
 
