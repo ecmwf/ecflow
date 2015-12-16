@@ -267,7 +267,9 @@ QVariant TreeNodeModel::serverData(const QModelIndex& index,int role) const
 		//Tooltip
 		else if(role == Qt::ToolTipRole)
 		{
-			return server->vRoot()->toolTip();
+			QString txt=server->vRoot()->toolTip();
+			txt+=VIcon::toolTip(server->vRoot(),icons_);
+			return txt;
 		}
 	}
 
@@ -318,7 +320,9 @@ QVariant TreeNodeModel::nodeData(const QModelIndex& index, int role) const
 		}
 		else if(role == Qt::ToolTipRole)
 		{
-			return vnode->toolTip();
+			QString txt=vnode->toolTip();
+			txt+=VIcon::toolTip(vnode,icons_);
+			return txt;
 		}
 
 		//The number of nodes a suite has

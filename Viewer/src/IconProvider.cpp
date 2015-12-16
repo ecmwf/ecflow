@@ -92,6 +92,16 @@ IconProvider::IconProvider()
 {
 }
 
+QString IconProvider::path(int id)
+{
+	std::map<int,IconItem*>::iterator it=iconsById_.find(id);
+	if(it != iconsById_.end())
+		return it->second->path();
+
+	return QString();
+
+}
+
 int IconProvider::add(QString path,QString name)
 {
 	std::map<QString,IconItem*>::iterator it=icons_.find(name);

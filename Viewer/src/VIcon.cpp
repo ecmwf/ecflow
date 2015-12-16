@@ -208,6 +208,39 @@ QVariantList VIcon::pixmapList(VNode *vnode,VParamSet *filter)
 	return lst;
 }
 
+QString VIcon::toolTip(VNode *vnode,VParamSet *filter)
+{
+	if(filter->isEmpty())
+		return QString();
+
+	int iconSize=12;
+	QString txt;
+
+	for(std::vector<VIcon*>::const_iterator it=itemsVec_.begin(); it != itemsVec_.end(); ++it)
+	{
+	   VIcon *v=*it;
+
+       if(!filter || filter->current().find(v) != filter->current().end())
+       {
+      	   if(v->show(vnode))
+      	   {
+      		 if(txt.isEmpty())
+      		 {
+      			 txt+="<br><b>Icons:</b><table cellpadding=\'1\'>";
+      		 }
+
+      		 txt+="<tr><td><img src=\'" + IconProvider::path(v->pixId_) + "\' width=\'" +
+      	           QString::number(iconSize) + "\' height=\'" + QString::number(iconSize) + "\'></td><td>" + v->name() + "</tr>";
+      	   }
+		}
+	}
+
+	if(!txt.isEmpty())
+		txt+="</table>";
+
+   	return txt;
+}
+
 void VIcon::load(VProperty* group)
 {
     Q_FOREACH(VProperty* p,group->children())

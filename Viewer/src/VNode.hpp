@@ -20,6 +20,7 @@
 #include "LogServer.hpp"
 #include "Node.hpp"
 
+class IconFilter;
 class ServerHandler;
 class VAttribute;
 class VServer;

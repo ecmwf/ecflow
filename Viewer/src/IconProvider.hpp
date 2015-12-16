@@ -23,6 +23,7 @@ public:
 
 	QPixmap pixmap(int);
 	int id () const {return id_;}
+	QString path() const {return path_;}
 
 protected:
   	static void greyOut(QImage &);
@@ -50,6 +51,7 @@ public:
 
 	static int add(QString path,QString name);
 
+	static QString path(int id);
 	static QPixmap pixmap(QString name,int size);
 	static QPixmap pixmap(int id,int size);
 
