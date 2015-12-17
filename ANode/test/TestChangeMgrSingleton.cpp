@@ -63,15 +63,18 @@ BOOST_AUTO_TEST_CASE( test_change_mgr_singleton )
    {
       defs_ptr theDefs = Defs::create();
 
-      MyObserver defs_obs(theDefs.get());
+      {
+         // ensure defs pointer out-lives the observer
+         MyObserver defs_obs(theDefs.get());
 
-      std::vector<ecf::Aspect::Type> aspects;
-      theDefs->notify(aspects);
-      theDefs->notify(aspects);
-      theDefs->notify(aspects);
-      theDefs->notify(aspects);
-      theDefs->notify(aspects);
-      BOOST_CHECK_MESSAGE( defs_obs.update_count() == 5,"Expected 5 update");
+         std::vector<ecf::Aspect::Type> aspects;
+         theDefs->notify(aspects);
+         theDefs->notify(aspects);
+         theDefs->notify(aspects);
+         theDefs->notify(aspects);
+         theDefs->notify(aspects);
+         BOOST_CHECK_MESSAGE( defs_obs.update_count() == 5,"Expected 5 update");
+      }
 
       theDefs.reset();
    }
@@ -84,7 +87,7 @@ BOOST_AUTO_TEST_CASE( test_change_mgr_singleton )
          {
             suite_ptr suite = theDefs->add_suite( "suite1" );
             family_ptr fam = suite->add_family( "family" );
-            task_ptr t1 = fam->add_task( "t1" );
+            fam->add_task( "t1" );
          }
 
          // get all nodes and observer them.
@@ -104,13 +107,14 @@ BOOST_AUTO_TEST_CASE( test_change_mgr_singleton )
          for(size_t i = 0; i < obs_vec.size(); ++i) {
             BOOST_CHECK_MESSAGE( obs_vec[i]->update_count() == 2,"Expected 2 updates");
          }
+
+         // delete observers
+         for(size_t i = 0; i < obs_vec.size(); ++i) { delete  obs_vec[i]; }
       }
 
       // make sure no node_ptr are in scope as they can *delay*
       // the destructor to the end of the scope, and hence affect this test
       delete theDefs;
-
-      for(size_t i = 0; i < obs_vec.size(); ++i) { delete  obs_vec[i]; }
    }
 }
 
