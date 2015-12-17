@@ -9,7 +9,7 @@
 //============================================================================
 
 #ifndef CHANGENOTIFYDIALOG_HPP_
-#define CHNAGENOTIFYDIALOG_HPP_
+#define CHANGENOTIFYDIALOG_HPP_
 
 #include <QDialog>
 #include <QLinearGradient>
