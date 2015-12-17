@@ -279,19 +279,24 @@ void CtsCmd::addOption(boost::program_options::options_description& desc) const
       }
       case CtsCmd::RELOAD_WHITE_LIST_FILE:{
          desc.add_options()( CtsApi::reloadwsfileArg(),
-                  "Reload the white list file.\n"
-                  "The white list file is used to authenticate 'user' commands.\n"
-                  "File path is specified by ECF_LISTS environment, read by the server on startup\n"
-                  "Raises an error if file does not exist, or fails to parse\n"
-                  "Expected format for this file is:\n\n"
-                  "# comment\n"
-                  "4.4.14  # version number\n\n"
-                  "# Users with read/write access\n"
-                  "user1   # comment\n"
-                  "user2   # comment\n\n"
-                  "# Users with read  access, must have - before user name\n"
-                  "-user3  # comment\n"
-                  "-user4"
+               "Reload the white list file.\n"
+               "The white list file is used to authenticate 'user' commands.\n"
+               "File path is specified by ECF_LISTS environment, read by the server on startup.\n"
+               "If ECF_LISTS is not specified, then by default it will open <host>.<port>.ecf.lists\n"
+               "On startup, if the file is not present or is present but is empty (i.e just contains the version number)\n"
+               "then all users have read/write access\n"
+               "However on reload it will raises an error if file does not exist, or fails to parse\n"
+               "Expected format for this file is:\n\n"
+               "# comment\n"
+               "4.4.14  # version number, this must be present, even if no users specified\n\n"
+               "# Users with read/write access\n"
+               "user1   # comment\n"
+               "user2   # comment\n\n"
+               "*       # use this form if you want all users to have read/write access\n\n"
+               "# Users with read  access, must have - before user name\n"
+               "-user3  # comment\n"
+               "-user4\n\n"
+               "-*      # use this form if you want all users to have read access"
          );
          break;
       }
