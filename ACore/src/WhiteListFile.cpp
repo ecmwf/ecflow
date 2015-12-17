@@ -14,6 +14,7 @@
 //============================================================================
 #include <pwd.h>       /* getpwuid */
 #include <vector>
+#include <iostream>
 #include <boost/lexical_cast.hpp>
 #include <boost/algorithm/string/trim.hpp>
 
