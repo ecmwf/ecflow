@@ -562,6 +562,18 @@ void VNode::why(std::vector<std::string>& theReasonWhy) const
 	}
 }
 
+const std::string& VNode::abortedReason() const
+{
+	if(node_ && node_.get())
+	{
+		return node_->abortedReason();
+	}
+
+	static std::string emptyStr;
+	return emptyStr;
+
+}
+
 QString VNode::toolTip()
 {    
     QString txt="<b>Name</b>: " + name() + "<br>";
@@ -578,10 +590,12 @@ QString VNode::toolTip()
     txt+="<b>Host</b>: " + QString::fromStdString(server()->host());
     txt+=" <b>Port</b>: " + QString::fromStdString(server()->port());
     
+    QString rs=QString::fromStdString(abortedReason());
+    if(!rs.isEmpty())
+    	txt+="<br><b>Aborted reason</b>:" + rs;
+
     return txt;
 }   
-
-
 
 //=================================================
 //

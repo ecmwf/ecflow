@@ -39,6 +39,9 @@ TreeNodeViewDelegate::TreeNodeViewDelegate(QWidget *parent) :
 	suiteNumFont_=font_;
 	suiteNumFont_.setBold(true);
 
+	abortedReasonFont_=font_;
+	abortedReasonFont_.setBold(true);
+
 	adjustIconSize();
 
 	//Property
@@ -96,8 +99,12 @@ void TreeNodeViewDelegate::updateSettings()
     	{
     		font_=newFont;
     		serverInfoFont_=font_;
+    		serverNumFont_.setFamily(font_.family());
     		serverNumFont_.setPointSize(font_.pointSize());
+    		suiteNumFont_.setFamily(font_.family());
     		suiteNumFont_.setPointSize(font_.pointSize());
+    		abortedReasonFont_.setFamily(font_.family());
+			abortedReasonFont_.setPointSize(font_.pointSize());
     		adjustIconSize();
 
     		Q_EMIT sizeHintChangedGlobal();
@@ -602,14 +609,27 @@ void TreeNodeViewDelegate::renderNode(QPainter *painter,const QModelIndex& index
 		if(hasNum)
 		{
 			numTxt="(" + QString::number(va.toInt()) + ")";
-			fm=QFontMetrics(suiteNumFont_);
+			QFontMetrics fmNum(suiteNumFont_);
 
-			int numWidth=fm.width(numTxt);
+			int numWidth=fmNum.width(numTxt);
 			numRect = textRect;
-			numRect.setLeft(currentRight+fm.width('A'));
+			numRect.setLeft(currentRight+fmNum.width('A'));
 			numRect.setWidth(numWidth);
 			currentRight=numRect.right();
 		}
+	}
+
+	//The aborted reason
+	QRect reasonRect;
+	QString reasonTxt=index.data(AbstractNodeModel::AbortedReasonRole).toString();
+	bool hasReason=(!reasonTxt.isEmpty());
+	if(hasReason)
+	{
+		QFontMetrics fmReason(abortedReasonFont_);
+		reasonRect = textRect;
+		reasonRect.setLeft(currentRight+fmReason.width('A'));
+		reasonRect.setWidth(fmReason.width(reasonTxt));
+		currentRight=reasonRect.right();
 	}
 
 	//Define clipping
@@ -636,6 +656,14 @@ void TreeNodeViewDelegate::renderNode(QPainter *painter,const QModelIndex& index
 		painter->setPen(QColor(120,120,120));
 		painter->setFont(suiteNumFont_);
 		painter->drawText(numRect,Qt::AlignLeft | Qt::AlignVCenter,numTxt);
+	}
+
+	//Draw aborted reason
+	if(hasReason)
+	{
+		painter->setPen(bg);
+		painter->setFont(abortedReasonFont_);
+		painter->drawText(reasonRect,Qt::AlignLeft | Qt::AlignVCenter,reasonTxt);
 	}
 
 	if(setClipRect)

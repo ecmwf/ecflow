@@ -68,6 +68,7 @@ protected:
     QFont serverNumFont_;
 	QFont suiteNumFont_;
 	QFont serverInfoFont_;
+	QFont abortedReasonFont_;
 };
 
 #endif

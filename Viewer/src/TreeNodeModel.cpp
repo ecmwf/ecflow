@@ -134,7 +134,8 @@ QVariant TreeNodeModel::data( const QModelIndex& index, int role ) const
 	   (role != Qt::DisplayRole && role != Qt::ToolTipRole && role != Qt::BackgroundRole &&
 	    role != Qt::ForegroundRole &&
 	    role != FilterRole && role != IconRole && role != ServerRole && role != NodeNumRole &&
-	    role != InfoRole && role != LoadRole && role != ConnectionRole && role != AttributeRole && role != AttributeLineRole ))
+	    role != InfoRole && role != LoadRole && role != ConnectionRole && role != AttributeRole && role != AttributeLineRole &&
+		role != AbortedReasonRole ))
     {
 		return QVariant();
 	}
@@ -333,6 +334,12 @@ QVariant TreeNodeModel::nodeData(const QModelIndex& index, int role) const
 				return vnode->server()->vRoot()->totalNumOfTopLevel(vnode);
 			}
 			return QVariant();
+		}
+
+		//The number of nodes a suite has
+		else if(role == AbortedReasonRole)
+		{
+			return QString::fromStdString(vnode->abortedReason());
 		}
 	}
 

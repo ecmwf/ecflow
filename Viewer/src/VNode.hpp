@@ -152,6 +152,7 @@ public:
     virtual QString toolTip();
     
     virtual void why(std::vector<std::string>& theReasonWhy) const;
+    const std::string&  abortedReason() const;
 
     LogServer_ptr logServer();
     bool logServer(std::string& host,std::string& port);

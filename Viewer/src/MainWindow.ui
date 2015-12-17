@@ -41,8 +41,8 @@
     </rect>
    </property>
    <property name="nativeMenuBar">
-     <bool>false</bool>
-    </property>
+    <bool>false</bool>
+   </property>
    <widget class="QMenu" name="menuLl">
     <property name="tearOffEnabled">
      <bool>true</bool>
