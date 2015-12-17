@@ -40,6 +40,9 @@
      <height>24</height>
     </rect>
    </property>
+   <property name="nativeMenuBar">
+     <bool>false</bool>
+    </property>
    <widget class="QMenu" name="menuLl">
     <property name="tearOffEnabled">
      <bool>true</bool>
