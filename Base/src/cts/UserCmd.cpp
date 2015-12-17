@@ -40,18 +40,25 @@ bool UserCmd::equals(ClientToServerCmd* rhs) const
 
 bool UserCmd::authenticate(AbstractServer* as, STC_Cmd_ptr& ) const
 {
+   // get the current user. This should have been set by the client
    LOG_ASSERT(!user().empty(),"");
 
-   // get the current user. This should have been set by the client
-   if (as->authenticateUser(user())) {
-      if (as->authenticateWriteAccess(user(),isWrite())) {
+   if (as->authenticateReadAccess(user())) {
+      // Does this user command require write access
+      if ( isWrite() ) {
+         // command requires write access. Check user has write access
+         if ( as->authenticateWriteAccess(user()) ) {
+            return true;
+         }
+         std::string msg = "[ authentication failed ] User ";
+         msg += user();
+         msg += " has no *write* access. Please see your administrator.";
+         throw std::runtime_error( msg );
+      }
+      else {
+         // read request, and we have read access
          return true;
       }
-
-      std::string msg = "[ authentication failed ] User ";
-      msg += user();
-      msg += " has no write access. Please see your administrator.";
-      throw std::runtime_error( msg );
    }
 
    std::string msg = "[ authentication failed ] User ";
