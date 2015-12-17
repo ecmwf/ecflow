@@ -80,7 +80,7 @@ class FindHighlight : public SyntaxHighlighter
 {
     Q_OBJECT
 public:
-    FindHighlight(const QString &str, TextEdit *edit)
+    FindHighlight(const QString &str, PlainTextEdit *edit)
         : SyntaxHighlighter(edit), match(str)
     {}
 
@@ -151,7 +151,7 @@ public:
 class Yellow : public SyntaxHighlighter
 {
 public:
-    Yellow(TextEdit *edit)
+    Yellow(PlainTextEdit *edit)
         : SyntaxHighlighter(edit)
     {}
     void highlightBlock(const QString &text)
@@ -165,7 +165,7 @@ public:
 class BlockLight : public SyntaxHighlighter
 {
 public:
-    BlockLight(TextEdit *edit)
+    BlockLight(PlainTextEdit *edit)
         : SyntaxHighlighter(edit)
     {}
     void highlightBlock(const QString &text)
@@ -180,12 +180,12 @@ public:
 };
 
 
-class Editor : public TextEdit
+class Editor : public PlainTextEdit
 {
     Q_OBJECT
 public:
     Editor(QWidget *parent = 0)
-        : TextEdit(parent)
+        : PlainTextEdit(parent)
     {
         setAttribute(Qt::WA_MouseTracking);
     }
@@ -195,7 +195,7 @@ public:
         if (cursor.isValid()) {
             emit cursorCharacter(cursor.cursorCharacter());
         }
-        TextEdit::mouseMoveEvent(e);
+        PlainTextEdit::mouseMoveEvent(e);
     }
 signals:
     void cursorCharacter(const QChar &ch);
@@ -480,8 +480,8 @@ public slots:
         cursor.movePosition(TextCursor::EndOfLine, TextCursor::KeepAnchor);
         QTextCharFormat format;
         format.setBackground(Qt::red);
-        TextEdit::ExtraSelection selection = { cursor, format };
-        textEdit->setExtraSelections(QList<TextEdit::ExtraSelection>() << selection);
+        PlainTextEdit::ExtraSelection selection = { cursor, format };
+        textEdit->setExtraSelections(QList<PlainTextEdit::ExtraSelection>() << selection);
     }
     void onModificationChanged(bool on)
     {
@@ -641,7 +641,7 @@ public slots:
     }
 private:
     QSpinBox *box;
-    TextEdit *textEdit, *otherEdit;
+    PlainTextEdit *textEdit, *otherEdit;
     QLabel *lbl;
     QLinkedList<QEvent*> events;
     bool doLineNumbers;

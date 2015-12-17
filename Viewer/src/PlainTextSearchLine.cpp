@@ -7,18 +7,32 @@
 // nor does it submit to any jurisdiction.
 //============================================================================
 
-#include <QColor>
-#include <QDebug>
-#include <QHBoxLayout>
-#include <QLabel>
-#include <QLineEdit>
-#include <QPushButton>
-
 #include "PlainTextSearchLine.hpp"
-#include "VConfig.hpp"
-#include "VProperty.hpp"
-//#include "UserMessage.hpp"
+#include "PlainTextSearchInterface.hpp"
 
+#include <assert.h>
+
+PlainTextSearchLine::PlainTextSearchLine(QWidget *parent) :
+	TextEditSearchLine(parent)
+{
+	interface_=new PlainTextSearchInterface;
+	TextEditSearchLine::setSearchInterface(interface_);
+}
+
+PlainTextSearchLine::~PlainTextSearchLine()
+{
+	delete interface_;
+}
+
+void PlainTextSearchLine::setEditor(QPlainTextEdit *e)
+{
+	PlainTextSearchInterface *pti=static_cast<PlainTextSearchInterface*>(interface_);
+	assert(pti);
+	pti->setEditor(e);
+}
+
+
+#if 0
 PlainTextSearchLine::PlainTextSearchLine(QWidget *parent) :
 	AbstractSearchLine(parent),
 	editor_(0),
@@ -316,4 +330,4 @@ void PlainTextSearchLine::slotClose()
 	AbstractSearchLine::slotClose();
 	clearHighlights();
 }
-
+#endif

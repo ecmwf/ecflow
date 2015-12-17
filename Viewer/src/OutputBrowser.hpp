@@ -13,8 +13,9 @@
 #include <QStackedWidget>
 
 class Highlighter;
-class PlainTextSearchLine;
-class TextEdit;
+class TextEditSearchLine;
+class PlainTextEdit;
+class PlainTextSearchInterface;
 class TextPagerWidget;
 class VProperty;
 
@@ -22,6 +23,7 @@ class OutputBrowser : public QWidget
 {
 public:
 	OutputBrowser(QWidget* parent);
+	~OutputBrowser();
 
 	void clear();
 	void loadFile(QString fileName);
@@ -31,18 +33,22 @@ public:
 	void updateFont();
 	void gotoLine();
 	void showSearchLine();
-	bool automaticSearchForKeywords();
+	bool searchOnReload(bool userClickedReload);
 	void zoomIn();
 	void zoomOut();
 
 private:
-	enum {BasicIndex=0,PagerIndex=1};
+	enum IndexType {BasicIndex=0,PagerIndex=1};
+	void changeIndex(IndexType indexType);
 
 	QStackedWidget *stacked_;
-	TextEdit* textEdit_;
+	PlainTextEdit* textEdit_;
 	TextPagerWidget* textPager_;
-	PlainTextSearchLine* textEditSearchLine_;
+	TextEditSearchLine* searchLine_;
 	Highlighter* jobHighlighter_;
+	PlainTextSearchInterface *textEditSearchInterface_;
+	//PagerTextSearchInterface *pagerSearchInterface_;
+
 };
 
 #endif /* VIEWER_SRC_OUTPUTBROWSER_HPP_ */

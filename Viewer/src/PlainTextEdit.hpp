@@ -17,13 +17,13 @@
 class LineNumberArea;
 class GotoLineDialog;
 
-class TextEdit : public QPlainTextEdit, public VPropertyObserver
+class PlainTextEdit : public QPlainTextEdit, public VPropertyObserver
 {
 Q_OBJECT
 
 public:
-    explicit TextEdit(QWidget* parent = 0);
-	~TextEdit();
+    explicit PlainTextEdit(QWidget* parent = 0);
+	~PlainTextEdit();
 
     void lineNumberAreaPaintEvent(QPaintEvent *event);
     int  lineNumberAreaWidth();
@@ -80,14 +80,14 @@ private:
 class LineNumberArea : public QWidget
 {
 public:
-    explicit LineNumberArea(TextEdit *editor) : QWidget(editor) {textEditor = editor;}
+    explicit LineNumberArea(PlainTextEdit *editor) : QWidget(editor) {textEditor = editor;}
     QSize sizeHint() const {return QSize(textEditor->lineNumberAreaWidth(), 0);}
 
 protected:
     void paintEvent(QPaintEvent *event) { textEditor->lineNumberAreaPaintEvent(event);}
 
 private:
-    TextEdit *textEditor;
+    PlainTextEdit *textEditor;
 };
 
 

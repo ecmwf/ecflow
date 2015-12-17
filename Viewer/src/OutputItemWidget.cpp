@@ -9,10 +9,10 @@
 
 #include "OutputItemWidget.hpp"
 
-#include "Highlighter.hpp"
 #include "OutputDirProvider.hpp"
+#include "OutputFileProvider.hpp"
 #include "OutputModel.hpp"
-#include "TextEdit.hpp"
+#include "PlainTextEdit.hpp"
 #include "TextPagerEdit.hpp"
 #include "VConfig.hpp"
 #include "VReply.hpp"
@@ -25,15 +25,13 @@
 #include <QMovie>
 #include <QTime>
 #include <QTimer>
-#include "OutputFileProvider.hpp"
 
 int OutputItemWidget::updateDirTimeout_=1000*60;
 
 OutputItemWidget::OutputItemWidget(QWidget *parent) :
 	QWidget(parent),
 	userClickedReload_(false),
-	ignoreOutputSelection_(false),
-	jobHighlighter_(0)
+	ignoreOutputSelection_(false)
 {
 	setupUi(this);
 
@@ -46,10 +44,6 @@ OutputItemWidget::OutputItemWidget(QWidget *parent) :
 	//--------------------------------
 	// The file contents
 	//--------------------------------
-
-	//This highlighter only works for jobs
-	//jobHighlighter_=new Highlighter(textEdit_->document(),"job");
-	//jobHighlighter_->setDocument(NULL);
 
 	infoProvider_=new OutputFileProvider(this);
 
@@ -79,8 +73,6 @@ OutputItemWidget::OutputItemWidget(QWidget *parent) :
 	connect(dirView_->selectionModel(),SIGNAL(currentChanged(QModelIndex,QModelIndex)),
 			this,SLOT(slotOutputSelected(QModelIndex,QModelIndex)));
 
-	//Connect the searchline to the editor
-	//searchLine_->setEditor(textEdit_);
 
 	//Set splitter's initial size.
 	int wHeight=size().height();
@@ -104,10 +96,6 @@ OutputItemWidget::OutputItemWidget(QWidget *parent) :
 
 OutputItemWidget::~OutputItemWidget()
 {
-	if(jobHighlighter_ && !jobHighlighter_->parent())
-	{
-		delete jobHighlighter_;
-	}
 }
 
 QWidget* OutputItemWidget::realWidget()
@@ -194,139 +182,6 @@ void OutputItemWidget::clearContents()
 
 	enableDir(false);
 }
-#if 0
-void OutputItemWidget::infoReady(VReply* reply)
-{
-	//------------------------
-	// From output provider
-	//------------------------
-
-	if(reply->sender() == infoProvider_)
-	{
-		//messageLabel_->stopLoadLabel();
-
-		//For some unknown reason the textedit font, although it is properly set in the constructor,
-		//is reset to default when we first call infoready. So we need to set it again!!
-		textEdit_->updateFont();
-
-		bool hasMessage=false;
-		if(reply->hasWarning())
-		{
-			messageLabel_->showWarning(QString::fromStdString(reply->warningText()));
-			hasMessage=true;
-		}
-		else if(reply->hasInfo())
-		{
-			messageLabel_->showInfo(QString::fromStdString(reply->infoText()));
-			hasMessage=true;
-		}
-
-		//For job files we set the proper highlighter
-		if(reply->fileName().find(".job") != std::string::npos)
-		{
-			if(!jobHighlighter_)
-			{
-				jobHighlighter_=new Highlighter(textEdit_->document(),"job");
-			}
-			else if(jobHighlighter_->document() != textEdit_->document())
-			{
-				jobHighlighter_->setDocument(textEdit_->document());
-			}
-		}
-		else if(jobHighlighter_)
-		{
-			jobHighlighter_->setDocument(NULL);
-		}
-
-		VFile_ptr f=reply->tmpFile();
-
-		QTime stopper;
-		stopper.start();
-
-		//If the info is stored in a tmp file
-		if(f && f.get())
-		{
-			if(f->storageMode() == VFile::MemoryStorage)
-			{
-				//messageLabel_->hide();
-
-				QString s(f->data());
-				textEdit_->setPlainText(s);
-			}
-			else
-			{
-				QFile file(QString::fromStdString(f->path()));
-				file.open(QIODevice::ReadOnly);
-				QFileInfo fInfo(file);
-
-				if(fInfo.size() > 20*1024*1024)
-				{
-					textEditStacked_->setCurrentIndex(1);
-					TextPagerDocument::DeviceMode mode = TextPagerDocument::Sparse;
-					QTextCodec* codec=0;
-					textPager_->setReadOnly(false);
-					textPager_->load(QString::fromStdString(f->path()), mode, codec);
-
-				}
-				else
-				{
-
-
-
-				if(fInfo.size() > 20*1024*1024)
-				{
-					messageLabel_->startLoadLabel();
-				}
-
-				messageLabel_->showInfo("Loading file into text editor ....");
-				QApplication::processEvents();
-
-				//This was the fastest implementation for files up to 125 Mb
-				uchar *d=file.map(0,fInfo.size());
-				QString str((char*)d);
-				textEdit_->document()->setPlainText(str);
-				file.unmap(d);
-				}
-
-
-				hasMessage=false;
-			}
-		}
-		//If the info is stored as a string in the reply object
-		else
-		{
-			QString s=QString::fromStdString(reply->text());
-			textEdit_->setPlainText(s);
-		}
-
-		//searchOnReload();
-
-		if(f && f.get())
-		{
-			f->setWidgetLoadDuration(stopper.elapsed());
-		}
-
-		if(!hasMessage)
-		{
-			messageLabel_->hide();
-		}
-		messageLabel_->stopLoadLabel();
-
-
-		//Update the file label
-		fileLabel_->update(reply);
-	}
-
-	//------------------------
-	// From output dir provider
-	//------------------------
-	else
-	{
-		//Update the dir widget and select the proper file in the list
-		updateDir(reply->directory(),true);
-	}
-}
-#endif
 
 void OutputItemWidget::infoReady(VReply* reply)
 {
@@ -410,11 +265,6 @@ void OutputItemWidget::infoReady(VReply* reply)
 		updateDir(reply->directory(),true);
 	}
 }
-
-
-
-
-
 
 void OutputItemWidget::infoProgress(VReply* reply)
 {
@@ -553,39 +403,6 @@ void OutputItemWidget::on_gotoLineTb__clicked()
 	browser_->gotoLine();
 }
 
-// search for a highlight any of the pre-defined keywords so that
-// the (probably) most important piece of information is highlighted
-bool OutputItemWidget::automaticSearchForKeywords()
-{
-	bool found = false;
-	QTextDocument::FindFlags findFlags = QTextDocument::FindBackward;
-	QTextCursor cursor(textEdit_->textCursor());
-	cursor.movePosition(QTextCursor::End);
-
-
-	QRegExp regexp("--(abort|complete)");
-	QTextCursor findCursor = textEdit_->document()->find(regexp, cursor, findFlags);  // perform the search
-	found = (!findCursor.isNull());
-	if (found)
-		textEdit_->setTextCursor(findCursor);
-
-/*
-	QStringList keywords;
-	keywords << "--abort" << "--complete";// << "xabort" << "xcomplete"
-	         << "System Billing Units";
-
-	// find any of the keywords and stop at the first one
-	int i = 0;
-	while (!found && i < keywords.size())
-	{
-		cursor.movePosition(QTextCursor::End);
-		textEdit_->setTextCursor(cursor);
-		found = textEdit_->findString(keywords.at(i), findFlags);
-		i++;
-	}
-*/
-	return found;
-}
 
 // Called when we load a new node's information into the panel, or
 // when we move to the panel from another one.
@@ -595,25 +412,7 @@ bool OutputItemWidget::automaticSearchForKeywords()
 // we just go to the last line of the output
 void OutputItemWidget::searchOnReload()
 {
-	/*if (searchLine_->isVisible() && !searchLine_->isEmpty())
-	{
-		searchLine_->slotFindNext();
-		searchLine_->slotHighlight();
-	}
-	else
-	{
-		/*if (!automaticSearchForKeywords())
-		{
-			if (userClickedReload_)
-			{
-				// move the cursor to the start of the last line
-				QTextCursor cursor = textEdit_->textCursor();
-				cursor.movePosition(QTextCursor::End);
-				cursor.movePosition(QTextCursor::StartOfLine);
-				textEdit_->setTextCursor(cursor);   
-			}
-		}
-	}*/
+	browser_->searchOnReload(userClickedReload_);
 }
 
 //This slot is called when a file item is selected in the output view.

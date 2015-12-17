@@ -7,7 +7,8 @@
 // nor does it submit to any jurisdiction.
 //============================================================================
 
-#include "TextEdit.hpp"
+#include "PlainTextEdit.hpp"
+
 #include "GotoLineDialog.hpp"
 
 #include <QtGlobal>
@@ -17,7 +18,7 @@
 #include <QTextBlock>
 #include <QWheelEvent>
 
-TextEdit::TextEdit(QWidget * parent) :
+PlainTextEdit::PlainTextEdit(QWidget * parent) :
     QPlainTextEdit(parent),
     showLineNum_(true),
     rightMargin_(2),
@@ -46,7 +47,7 @@ TextEdit::TextEdit(QWidget * parent) :
     setFont(f);
 }
 
-TextEdit::~TextEdit()
+PlainTextEdit::~PlainTextEdit()
 {
     if (gotoLineDialog_)
     	delete gotoLineDialog_;
@@ -55,7 +56,7 @@ TextEdit::~TextEdit()
     	fontProp_->removeObserver(this);
 }
 
-void TextEdit::setShowLineNumbers(bool b)
+void PlainTextEdit::setShowLineNumbers(bool b)
 {
 	showLineNum_ = b;
 	lineNumArea_->setVisible(b);
@@ -69,7 +70,7 @@ void TextEdit::setShowLineNumbers(bool b)
 //  - note that the first row and column are (1,1)
 // ---------------------------------------------------------------------------
 
-void TextEdit::cursorRowCol(int *row, int *col)
+void PlainTextEdit::cursorRowCol(int *row, int *col)
 {
     const QTextCursor cursor = textCursor();
 
@@ -96,7 +97,7 @@ void TextEdit::cursorRowCol(int *row, int *col)
 // returns the character to the left of the text cursor
 // ---------------------------------------------------------------------------
 
-QChar TextEdit::characterBehindCursor(QTextCursor *cursor)
+QChar PlainTextEdit::characterBehindCursor(QTextCursor *cursor)
 {
     QTextCursor docTextCursor = textCursor();
     QTextCursor *theCursor = (cursor == 0) ? &docTextCursor : cursor;
@@ -109,7 +110,7 @@ QChar TextEdit::characterBehindCursor(QTextCursor *cursor)
 // yes - all this code to do that!
 // ---------------------------------------------------------------------------
 
-int TextEdit::numLinesSelected()
+int PlainTextEdit::numLinesSelected()
 {
     QTextCursor cursor = textCursor();   // get the document's cursor
     int selStart = cursor.selectionStart();
@@ -129,7 +130,7 @@ int TextEdit::numLinesSelected()
 // maximum number of digits we need to display.
 // ---------------------------------------------------------------------------
 
-int TextEdit::lineNumberAreaWidth()
+int PlainTextEdit::lineNumberAreaWidth()
 {
     if (showLineNumbers())
     {
@@ -157,7 +158,7 @@ int TextEdit::lineNumberAreaWidth()
 // the new number of lines (blocks).
 // ---------------------------------------------------------------------------
 
-void TextEdit::updateLineNumberAreaWidth(int)
+void PlainTextEdit::updateLineNumberAreaWidth(int)
 {
     setViewportMargins(lineNumberAreaWidth(), 0, 0, 0);
 }
@@ -169,7 +170,7 @@ void TextEdit::updateLineNumberAreaWidth(int)
 // widget stays in sync with it.
 // ---------------------------------------------------------------------------
 
-void TextEdit::updateLineNumberArea(const QRect &rect, int dy)
+void PlainTextEdit::updateLineNumberArea(const QRect &rect, int dy)
 {
     if (dy)
         lineNumArea_->scroll(0, dy);
@@ -186,7 +187,7 @@ void TextEdit::updateLineNumberArea(const QRect &rect, int dy)
 // called when a resize event is triggered. Reset the size of the line widget.
 // ---------------------------------------------------------------------------
 
-void TextEdit::resizeEvent(QResizeEvent *e)
+void PlainTextEdit::resizeEvent(QResizeEvent *e)
 {
     QPlainTextEdit::resizeEvent(e);
 
@@ -200,7 +201,7 @@ void TextEdit::resizeEvent(QResizeEvent *e)
 // called when the widget gains input focus
 // ---------------------------------------------------------------------------
 
-void TextEdit::focusInEvent(QFocusEvent *event)
+void PlainTextEdit::focusInEvent(QFocusEvent *event)
 {
     Q_EMIT focusRegained();
     QPlainTextEdit::focusInEvent(event);
@@ -213,7 +214,7 @@ void TextEdit::focusInEvent(QFocusEvent *event)
 
 // ---------------------------------------------------------------------------
 
-void TextEdit::focusOutEvent(QFocusEvent *event)
+void PlainTextEdit::focusOutEvent(QFocusEvent *event)
 {
     Q_EMIT focusLost();
     QPlainTextEdit::focusOutEvent(event);
@@ -225,7 +226,7 @@ void TextEdit::focusOutEvent(QFocusEvent *event)
 // actually draw the numbers on the widget.
 // ---------------------------------------------------------------------------
 
-void TextEdit::lineNumberAreaPaintEvent(QPaintEvent *event)
+void PlainTextEdit::lineNumberAreaPaintEvent(QPaintEvent *event)
 {
     int currentRow, currentCol;
     cursorRowCol (&currentRow, &currentCol);  // get the current line number so we can highlight it
@@ -280,9 +281,9 @@ void TextEdit::lineNumberAreaPaintEvent(QPaintEvent *event)
 }
 
 
-QString TextEdit::emptyString_ ;  // used as a default argument to findString()
+QString PlainTextEdit::emptyString_ ;  // used as a default argument to findString()
 
-bool TextEdit::findString(const QString &s,QTextDocument::FindFlags flags, bool replace, const QString &r)
+bool PlainTextEdit::findString(const QString &s,QTextDocument::FindFlags flags, bool replace, const QString &r)
 {
 
     lastFindString_ = s;      // store for repeat searches
@@ -352,7 +353,7 @@ bool TextEdit::findString(const QString &s,QTextDocument::FindFlags flags, bool 
 // triggered when the user asks to bring up the 'go to line' dialog
 // ---------------------------------------------------------------------------
 
-void TextEdit::gotoLine()
+void PlainTextEdit::gotoLine()
 {
     // create the dialog if it does not already exist
 
@@ -380,7 +381,7 @@ void TextEdit::gotoLine()
 // triggered from the GotoLine dialog when the user wants to go to that line
 // ---------------------------------------------------------------------------
 
-void TextEdit::gotoLine(int line)
+void PlainTextEdit::gotoLine(int line)
 {
     int bn = 0;
     QTextBlock b;
@@ -412,14 +413,14 @@ void TextEdit::gotoLine(int line)
 // Fontsize management
 //---------------------------------------------
 
-void TextEdit::setFontProperty(VProperty* p)
+void PlainTextEdit::setFontProperty(VProperty* p)
 {
 	fontProp_=p;
 	fontProp_->addObserver(this);
 	updateFont();
 }
 
-void TextEdit::wheelEvent(QWheelEvent *event)
+void PlainTextEdit::wheelEvent(QWheelEvent *event)
 {
 	int fps=font().pointSize();
 
@@ -447,7 +448,7 @@ void TextEdit::wheelEvent(QWheelEvent *event)
 	}
 }
 
-void TextEdit::slotZoomIn()
+void PlainTextEdit::slotZoomIn()
 {
 #if QT_VERSION >= QT_VERSION_CHECK(5, 1, 1)
 	zoomIn();
@@ -460,7 +461,7 @@ void TextEdit::slotZoomIn()
 	fontSizeChangedByZoom();
 }
 
-void TextEdit::slotZoomOut()
+void PlainTextEdit::slotZoomOut()
 {
 	int oriSize=font().pointSize();
 
@@ -480,13 +481,13 @@ void TextEdit::slotZoomOut()
 		fontSizeChangedByZoom();
 }
 
-void TextEdit::fontSizeChangedByZoom()
+void PlainTextEdit::fontSizeChangedByZoom()
 {
 	if(fontProp_)
 		fontProp_->setValue(font());
 }
 
-void TextEdit::updateFont()
+void PlainTextEdit::updateFont()
 {
 	if(fontProp_)
 	{
@@ -496,7 +497,7 @@ void TextEdit::updateFont()
 	}
 }
 
-void TextEdit::notifyChange(VProperty* p)
+void PlainTextEdit::notifyChange(VProperty* p)
 {
 	if(fontProp_ ==p)
 	{

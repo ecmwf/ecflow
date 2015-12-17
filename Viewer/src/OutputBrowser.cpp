@@ -13,8 +13,9 @@
 #include <QVBoxLayout>
 
 #include "Highlighter.hpp"
-#include "PlainTextSearchLine.hpp"
-#include "TextEdit.hpp"
+#include "PlainTextEdit.hpp"
+#include "PlainTextSearchInterface.hpp"
+#include "TextEditSearchLine.hpp"
 #include "TextPagerWidget.hpp"
 
 OutputBrowser::OutputBrowser(QWidget* parent) : QWidget(parent)
@@ -25,43 +26,61 @@ OutputBrowser::OutputBrowser(QWidget* parent) : QWidget(parent)
 	stacked_=new QStackedWidget(this);
 	vb->addWidget(stacked_);
 
-	//Basic textedit
-	QWidget* tew=new QWidget(this);
-	QVBoxLayout *tewLayout=new QVBoxLayout(tew);
-	tewLayout->setContentsMargins(0,0,0,0);
-	tewLayout->setSpacing(1);
+	searchLine_=new TextEditSearchLine(this);
+	vb->addWidget(searchLine_);
 
-	textEdit_=new TextEdit(this);
+	//Basic textedit
+	textEdit_=new PlainTextEdit(this);
 	textEdit_->setReadOnly(true);
-	textEditSearchLine_=new PlainTextSearchLine(this);
-	textEditSearchLine_->setEditor(textEdit_);
-	tewLayout->addWidget(textEdit_,1);
-	tewLayout->addWidget(textEditSearchLine_);
+
+	textEditSearchInterface_=new PlainTextSearchInterface();
+	textEditSearchInterface_->setEditor(textEdit_);
 
 	//This highlighter only works for jobs
 	jobHighlighter_=new Highlighter(textEdit_->document(),"job");
 	jobHighlighter_->setDocument(NULL);
 
 	//Pager for very large files
-	QWidget* tpw=new QWidget(this);
-	QVBoxLayout *tpwLayout=new QVBoxLayout(tew);
-	tpwLayout->setContentsMargins(0,0,0,0);
-	tpwLayout->setSpacing(1);
-
 	textPager_=new TextPagerWidget(this);
-	tpwLayout->addWidget(textPager_,1);
-	//textPager_->setReadOnly(true);
+	//textEdit_->setReadOnly(true);
 
-	stacked_->addWidget(tew);
+	stacked_->addWidget(textEdit_);
 	stacked_->addWidget(textPager_);
 
 	stacked_->setCurrentIndex(BasicIndex);
+	searchLine_->hide();
+}
+
+OutputBrowser::~OutputBrowser()
+{
+	delete  textEditSearchInterface_;
+
+	if(jobHighlighter_ && !jobHighlighter_->parent())
+	{
+		delete jobHighlighter_;
+	}
 }
 
 void OutputBrowser::clear()
 {
 	textEdit_->clear();
 	textPager_->clear();
+}
+
+void OutputBrowser::changeIndex(IndexType indexType)
+{
+	if(indexType == BasicIndex)
+	{
+		stacked_->setCurrentIndex(indexType);
+		searchLine_->setSearchInterface(textEditSearchInterface_);
+		textPager_->clear();
+	}
+	else
+	{
+		stacked_->setCurrentIndex(indexType);
+		searchLine_->setSearchInterface(NULL);
+		textEdit_->clear();
+	}
 }
 
 void OutputBrowser::loadFile(QString fileName)
@@ -73,14 +92,14 @@ void OutputBrowser::loadFile(QString fileName)
 
 	if(fSize > 20*1024*1024)
 	{
-		stacked_->setCurrentIndex(PagerIndex);
+		changeIndex(PagerIndex);
 
 		TextPagerDocument::DeviceMode mode = TextPagerDocument::Sparse;
 		textPager_->load(fileName, mode);
 	}
 	else
 	{
-		stacked_->setCurrentIndex(BasicIndex);
+		changeIndex(BasicIndex);
 
 		//This was the fastest implementation for files up to 125 Mb
 		uchar *d=file.map(0,fSize);
@@ -92,7 +111,7 @@ void OutputBrowser::loadFile(QString fileName)
 
 void OutputBrowser::loadText(QString text)
 {
-	stacked_->setCurrentIndex(BasicIndex);
+	changeIndex(BasicIndex);
 	textEdit_->setPlainText(text);
 }
 
@@ -127,47 +146,15 @@ void OutputBrowser::showSearchLine()
 	{
 	}
 
-	textEditSearchLine_->setVisible(true);
-	textEditSearchLine_->setFocus();
-	textEditSearchLine_->selectAll();
+	searchLine_->setVisible(true);
+	searchLine_->setFocus();
+	searchLine_->selectAll();
 }
 
-bool OutputBrowser::automaticSearchForKeywords()
+bool OutputBrowser::searchOnReload(bool userClickedReload)
 {
-	bool found = false;
-
-	if(stacked_->currentIndex() == BasicIndex)
-	{
-		QTextDocument::FindFlags findFlags = QTextDocument::FindBackward;
-		QTextCursor cursor(textEdit_->textCursor());
-		cursor.movePosition(QTextCursor::End);
-
-		QRegExp regexp("--(abort|complete)");
-		QTextCursor findCursor = textEdit_->document()->find(regexp, cursor, findFlags);  // perform the search
-		found = (!findCursor.isNull());
-		if (found)
-			textEdit_->setTextCursor(findCursor);
-	}
-
-#if 0
-	QStringList keywords;
-	keywords << "--abort" << "--complete";// << "xabort" << "xcomplete"
-	         << "System Billing Units";
-
-	// find any of the keywords and stop at the first one
-	int i = 0;
-	while (!found && i < keywords.size())
-	{
-		cursor.movePosition(QTextCursor::End);
-		textEdit_->setTextCursor(cursor);
-		found = textEdit_->findString(keywords.at(i), findFlags);
-		i++;
-	}
-#endif
-
-	return found;
+	searchLine_->searchOnReload(userClickedReload);
 }
-
 
 void OutputBrowser::setFontProperty(VProperty* p)
 {

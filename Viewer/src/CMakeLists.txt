@@ -4,6 +4,7 @@ set(viewer_srcs
     AboutDialog.cpp
     AbstractNodeModel.cpp
     AbstractSearchLine.cpp
+    AbstractTextEditSearchInterface.cpp
     ActionHandler.cpp
     Animation.cpp
     AttributeSearchPanel.cpp
@@ -85,7 +86,9 @@ set(viewer_srcs
     OverviewItemWidget.cpp
     OverviewProvider.cpp
     Palette.cpp
+    PlainTextEdit.cpp
     PlainTextSearchLine.cpp
+    PlainTextSearchInterface.cpp
     PropertyDialog.cpp
     PropertyEditor.cpp
     PropertyLine.cpp
@@ -114,7 +117,7 @@ set(viewer_srcs
     TableNodeView.cpp
     TableNodeViewDelegate.cpp
     TableNodeWidget.cpp
-    TextEdit.cpp
+    TextEditSearchLine.cpp
     TimeItemWidget.cpp
     TriggerItemWidget.cpp
     TreeNodeModel.cpp
@@ -219,10 +222,10 @@ set(viewer_moc_files AbstractNodeModel.hpp
     OutputItemWidget.hpp
     OutputFileProvider.hpp
     OutputDirProvider.hpp
+    PlainTextEdit.hpp
     PropertyDialog.hpp             
     PropertyEditor.hpp
     PropertyLine.hpp
-    PlainTextSearchLine.hpp
     ServerComQueue.hpp
     ServerComThread.hpp
     ServerHandler.hpp
@@ -236,7 +239,7 @@ set(viewer_moc_files AbstractNodeModel.hpp
     TableNodeView.hpp 
     TableNodeViewDelegate.hpp
     TableNodeWidget.hpp             
-    TextEdit.hpp
+    TextEditSearchLine.hpp
     TreeNodeModel.hpp
     TreeNodeView.hpp           
     TreeNodeViewDelegate.hpp

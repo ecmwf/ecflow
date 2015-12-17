@@ -5,40 +5,28 @@
 // In applying this licence, ECMWF does not waive the privileges and immunities
 // granted to it by virtue of its status as an intergovernmental organisation
 // nor does it submit to any jurisdiction.
+//
 //============================================================================
 
-#ifndef PLAINTEXTSEARCHLINE_HPP_
-#define PLAINTEXTSEARCHLINE_HPP_
+#ifndef VIEWER_SRC_TEXTEDITSEARCHLINE_HPP_
+#define VIEWER_SRC_TEXTEDITSEARCHLINE_HPP_
 
-#include <QPlainTextEdit>
+#include <QTextDocument>
+#include <QTimer>
 
-#include "TextEditSearchLine.hpp"
+#include "AbstractSearchLine.hpp"
 
-class AbstractTextSearchInterface;
+class AbstractTextEditSearchInterface;
 
-class PlainTextSearchLine : public TextEditSearchLine
-{
-public:
-	explicit PlainTextSearchLine(QWidget *parent=0);
-	~PlainTextSearchLine();
-	void setEditor(QPlainTextEdit*);
-
-private:
-	//The interface is set internally
-	void setSearchInterface(AbstractTextSearchInterface*) {};
-
-};
-
-
-#if 0
-class PlainTextSearchLine : public AbstractSearchLine
+class TextEditSearchLine : public AbstractSearchLine
 {
 	Q_OBJECT
 
 public:
-	 explicit PlainTextSearchLine(QWidget *parent);
-	~PlainTextSearchLine();
-	void setEditor(QPlainTextEdit*);
+	 explicit TextEditSearchLine(QWidget *parent);
+	~TextEditSearchLine();
+	void setSearchInterface(AbstractTextEditSearchInterface*);
+	void searchOnReload(bool userClickedReload);
 
 public Q_SLOTS:
 	void slotFind(QString);
@@ -59,11 +47,11 @@ protected:
 	void refreshSearch();
 	void highlightMatches(QString txt);
     void clearHighlights();
+
+    AbstractTextEditSearchInterface* interface_;
     QTimer highlightAllTimer_;
-	QPlainTextEdit* editor_;
 	QColor highlightColour_;
+
 };
-#endif
 
-
-#endif
+#endif /* VIEWER_SRC_TEXTEDITSEARCHLINE_HPP_ */

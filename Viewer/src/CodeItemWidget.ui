@@ -153,7 +153,7 @@
     <widget class="MessageLabel" name="messageLabel_" native="true"/>
    </item>
    <item>
-    <widget class="TextEdit" name="textEdit_">
+    <widget class="PlainTextEdit" name="textEdit_">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
        <horstretch>0</horstretch>
@@ -181,9 +181,9 @@
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>TextEdit</class>
+   <class>PlainTextEdit</class>
    <extends>QPlainTextEdit</extends>
-   <header location="global">TextEdit.hpp</header>
+   <header location="global">PlainTextEdit.hpp</header>
   </customwidget>
   <customwidget>
    <class>MessageLabel</class>

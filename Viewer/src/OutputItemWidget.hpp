@@ -17,12 +17,9 @@
 
 #include "ui_OutputItemWidget.h"
 
-class Highlighter;
 class OutputDirProvider;
 class OutputModel;
 class OutputSortModel;
-class TextEdit;
-class TextPagerEdit;
 
 class OutputItemWidget : public QWidget, public InfoPanelItem, protected Ui::OutputItemWidget
 {
@@ -44,8 +41,6 @@ public:
 	void nodeChanged(const VNode*, const std::vector<ecf::Aspect::Type>&) {};
 	void defsChanged(const std::vector<ecf::Aspect::Type>&) {};
 
-	bool automaticSearchForKeywords();
-
 protected Q_SLOTS:
 	void slotOutputSelected(QModelIndex,QModelIndex);
 	void slotUpdateDir();
@@ -66,9 +61,6 @@ protected:
 	void getLatestFile();
 	std::string currentFullName() const;
 
-	TextEdit* textEdit_;
-	TextPagerEdit* textPager_;
-
 	OutputDirProvider* dirProvider_;
 	OutputModel* dirModel_;
 	OutputSortModel* dirSortModel_;
@@ -76,7 +68,6 @@ protected:
 	bool userClickedReload_;
 	bool ignoreOutputSelection_;
 	QTimer* updateDirTimer_;
-	Highlighter* jobHighlighter_;
 	static int updateDirTimeout_;
 };
 
