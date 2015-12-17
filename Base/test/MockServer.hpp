@@ -52,8 +52,8 @@ public:
  	virtual void halted() {}
  	virtual void restart() {}
 	virtual bool reloadWhiteListFile(std::string&) { return true;}
- 	virtual bool authenticateUser(const std::string& ) { return true;}
- 	virtual bool authenticateWriteAccess(const std::string& , bool ) { return true;}
+ 	virtual bool authenticateReadAccess(const std::string& ) { return true;}
+ 	virtual bool authenticateWriteAccess(const std::string& ) { return true;}
  	virtual bool lock(const std::string& user) {
  		if (userWhoHasLock_.empty()) {
  			userWhoHasLock_ = user;

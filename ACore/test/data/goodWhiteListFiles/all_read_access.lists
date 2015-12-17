@@ -8,6 +8,7 @@ cog   # a comment
 
 
 # Read only users
+-*
 -fred  # a comment
 -bill # a comment
 -jake # a comment

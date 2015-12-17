@@ -66,8 +66,8 @@ public:
    virtual void halted() { Server::halted(); }
    virtual void restart() { Server::restart(); }
    virtual bool reloadWhiteListFile(std::string& errorMsg) { return Server::reloadWhiteListFile(errorMsg);}
-   virtual bool authenticateUser(const std::string& user) { return Server::authenticateUser(user); }
-   virtual bool authenticateWriteAccess(const std::string& user, bool client_request_can_change_server_state) { return Server::authenticateWriteAccess(user,client_request_can_change_server_state); }
+   virtual bool authenticateReadAccess(const std::string& user) { return Server::authenticateReadAccess(user); }
+   virtual bool authenticateWriteAccess(const std::string& user) { return Server::authenticateWriteAccess(user); }
    virtual bool lock(const std::string& user) { return Server::lock(user); }
    virtual void unlock() { Server::unlock();}
    virtual const std::string& lockedUser() const { return Server::lockedUser(); }
