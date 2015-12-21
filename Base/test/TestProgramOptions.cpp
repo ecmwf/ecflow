@@ -59,7 +59,7 @@ BOOST_AUTO_TEST_CASE( test_program_options_implicit_value )
        };
 
        po::variables_map vm;
-       po::store(po::command_line_parser(3, argv, desc), vm);
+       po::store(po::parse_command_line(3, argv, desc), vm);
        po::notify(vm);
 
        BOOST_CHECK_MESSAGE(vm.count("arg1"), "Expected arg1");
