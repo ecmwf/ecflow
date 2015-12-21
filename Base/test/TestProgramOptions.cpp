@@ -33,41 +33,42 @@ BOOST_AUTO_TEST_CASE( test_program_options_implicit_value )
    po::options_description desc("Allowed options");
    desc.add_options()
        ("help", "produce help message")
-       ("arg1", po::value<string>()->implicit_value( string("") ), "arg1 description") ;
+       ("arg1", po::value<string>()->implicit_value( string("") ), "optional arg1 description") ;
 
    {
       char* argv[] = {
             const_cast<char*>("test_program_options_implicit_value"),
             const_cast<char*>("--help"),
-            const_cast<char*>("--arg1"),
+            const_cast<char*>("--arg1")
       };
 
       po::variables_map vm;
-      po::store(po::parse_command_line(3, argv, desc), vm);
-      po::notify(vm);
+      po::store(po::parse_command_line(3, argv, desc), vm);  // populate variable map
+      po::notify(vm);                                        // raise any errors
 
       BOOST_CHECK_MESSAGE(vm.count("help"), "Expected help");
       BOOST_CHECK_MESSAGE(vm.count("arg1"), "Expected arg1");
       BOOST_CHECK_MESSAGE(vm["arg1"].as<string>() == "", "Expected arg1 to be empty");
    }
    {
+      // ******* This test fails on boost 1.59, can't cope --arg1 10, only --arg1=10 *******
       char* argv[] = {
              const_cast<char*>("test_program_options_implicit_value"),
              const_cast<char*>("--arg1"),
-             const_cast<char*>("10"),
+             const_cast<char*>("10")
        };
 
        po::variables_map vm;
-       po::store(po::parse_command_line(4, argv, desc), vm);
+       po::store(po::command_line_parser(3, argv, desc), vm);
        po::notify(vm);
 
        BOOST_CHECK_MESSAGE(vm.count("arg1"), "Expected arg1");
-       BOOST_CHECK_MESSAGE(vm["arg1"].as<string>() == "10", "Expected arg1 with value of 10");
+       BOOST_CHECK_MESSAGE(vm["arg1"].as<string>() == "10", "Expected arg1 with value of 10 but found '" << vm["arg1"].as<string>() << "'");
    }
    {
       char* argv[] = {
              const_cast<char*>("test_program_options_implicit_value"),
-             const_cast<char*>("--arg1=11"),
+             const_cast<char*>("--arg1=11")
        };
 
        po::variables_map vm;
