@@ -98,10 +98,10 @@ echo "mode_arg=$mode_arg"
 echo "verbose_arg=$verbose_arg"
 set -x # echo script lines as they are executed
 
-# ====================================================================
+# ==================== modules ================================================
 # To load module automatically requires Korn shell, system start scripts
-# auto adds ability to module load
-module load cmake
+
+module load cmake/3.3.2
 cmake_extra_options=""
 if [[ "$clang_arg" = clang ]] ; then
 	module unload gnu
@@ -122,6 +122,9 @@ if [[ "$ARCH" = cray ]] ; then
     	module swap PrgEnv-cray PrgEnv-gnu
     fi
 fi
+
+# boost
+#module load boost/1.59.0
 
 # ====================================================================================  
 cmake_build_type=
