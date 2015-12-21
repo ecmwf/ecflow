@@ -74,8 +74,9 @@ Cmd_ptr ClientOptions::parse(int argc, char* argv[],ClientEnvironment* env) cons
    }
 
    // parse arguments into 'vm'.
+   //       --alter delete cron -w 0,1 10:00 /s1     # -w treated as option
+   //       --alter=/s1 change meter name -1         # -1 treated as option
    // Note: negative numbers get treated as options: i.e trying to change meter value to a negative number
-   //       --alter=/s1 change meter name -1
    //       To avoid negative numbers from being treated as option use, we need to change command line style:
    //       po::command_line_style::unix_style ^ po::command_line_style::allow_short
    boost::program_options::variables_map vm;
