@@ -661,12 +661,12 @@ static void replace(  string::size_type commentPos,
 
 bool EcfFile::replaceSmsChildCmdsWithEcf(const std::string& clientPath, std::string& errormsg)
 {
-   //   smsinit $$          	   ---> ECF_CLIENT(value) --init $$
+   //   smsinit $$          	   ---> ECF_CLIENT(value) --init=$$
    //   smscomplete         	   ---> ECF_CLIENT(value)
-   //   smsevent eventname       ---> ECF_CLIENT(value) --event eventname
-   //   smsmeter metername value ---> ECF_CLIENT(value) --meter metername value
-   //   smslabel value           ---> ECF_CLIENT(value) --label value
-   //   smswait expr             ---> ECF_CLIENT(value) --wait expr
+   //   smsevent eventname       ---> ECF_CLIENT(value) --event=eventname
+   //   smsmeter metername value ---> ECF_CLIENT(value) --meter=metername value
+   //   smslabel value           ---> ECF_CLIENT(value) --label=value
+   //   smswait expr             ---> ECF_CLIENT(value) --wait=expr
    //   smsabort                 ---> ECF_CLIENT(value) --abort
    size_t jobLines_size = jobLines_.size();
    for(size_t i=0; i < jobLines_size; ++i) {

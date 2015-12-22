@@ -4,7 +4,7 @@ prepare_migration() {
    use ecflow
    while read nick host port
    do
-     LOG="--host $host --port $port"
+     LOG="--host=$host --port=$port"
      ecflow_client $LOG --ping || continue
      version=$(ecflow_client $LOG --server_version)
      echo $nick $host $port $version

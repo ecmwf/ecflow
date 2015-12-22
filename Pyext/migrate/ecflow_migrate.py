@@ -338,11 +338,11 @@ def usage():
    o shutdown
         # ecflow_client --shutdown
    o suspend all suites
-        # CL="ecflow_client --port 32222 --host vsms1"
-        # for s in $($CL --suites); do $CL --suspend /$s; done
+        # CL="ecflow_client --port=32222 --host=vsms1"
+        # for s in $($CL --suites); do $CL --suspend=/$s; done
    o wait for active/submitted tasks to complete
    o halt the server
-        # ecflow_client --halt
+        # ecflow_client --halt=yes
    o Use --migrate to dump state and structure to a file
         # ecflow_client --migrate > all_suites.def
    o terminate server *or* leave server running but start new server on different machine
@@ -362,8 +362,8 @@ def usage():
    o set server running:
        # ecflow_client --restart
    o resume suspended suites
-       # CL="ecflow_client --port 32222 --host vsms1"
-       # for s in $($CL --suites); do $CL --resume /$s; done
+       # CL="ecflow_client --port=32222 --host=vsms1"
+       # for s in $($CL --suites); do $CL --resume=/$s; done
 
 
  There could be bugs with *old* "ecflow_client --migrate > all_suites.def"

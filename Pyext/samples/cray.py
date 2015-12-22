@@ -173,7 +173,7 @@ import signal
 
 ECF_PORT=$ECF_PORT:0$
 XECF="/usr/local/apps/ecflow/current/bin/ecflow_client ";
-# --port $ECF_PORT:0$ --host $ECF_NODE:0$ ";
+# --port=$ECF_PORT:0$ --host=$ECF_NODE:0$ ";
 def SigHandler(signum, frame):
    print "caught signal " + signum
    xabort()
@@ -242,18 +242,18 @@ if ECF_PORT > 0:
   os.environ['ECF_PASS'] = "$ECF_PASS:0$"
 
   def xinit():
-    os.system(XECF + " --init " + str(os.getpid()))  
+    os.system(XECF + " --init=" + str(os.getpid()))  
     print "init"
   def xabort():
     os.system(XECF + " --abort")  
   def xcomplete():
     os.system(XECF + " --complete")  
   def xmeter(name, step):
-    os.system(XECF + " --meter " + name + " " + str(step))  
+    os.system(XECF + " --meter=" + name + " " + str(step))  
   def xevent(name):
-    os.system(XECF + " --event " + name)  
+    os.system(XECF + " --event=" + name)  
   def xlabel(name, msg):
-    os.system(XECF + " --label " + name + " '%s'" % msg)  
+    os.system(XECF + " --label=" + name + " '%s'" % msg)  
 else:
   os.environ['SMS_PROG'] = "$SMS_PROG:0$"
   os.environ['SMSNAME'] = "$SMSNAME:0$"
@@ -699,7 +699,7 @@ set -eux
 # use ecflow || 
 export PATH=/usr/local/apps/ecflow/current/bin:$PATH
 export SIGNAL_LIST='1 2 3 4 5 6 7 8 13 15 24 31'
-ecflow_client --init $$
+ecflow_client --init=$$
 
 ERROR() {
   ecflow_client --abort # raison:trap
@@ -711,8 +711,8 @@ ERROR() {
 }
 trap ERROR 0 $SIGNAL_LIST
 
-ecflow_client --event 1
-ecflow_client --meter step 10
+ecflow_client --event=1
+ecflow_client --meter=step 10
 
 echo "simulates an error"; exit 1
 echo "simulates an early exit: expect this to be trapped and reflected as error"
@@ -764,15 +764,15 @@ ssh $SCHOST -R$ECF_PORT:$ECF_NODE:$ECF_PORT ''' + wdir + '''/smhi_run.sh \
   $ECF_NAME $ECF_PASS $SCRIPT_PATH/$SCRIPT_NAME $ECF_JOBOUT $ECF_NODE $ECF_PORT
 echo "#MSG: ssh exits with $?"
 else
-ecflow_client --init $$
+ecflow_client --init=$$
 
 i=0
 while [[ $i -lt ${STEPS:=1} ]]; do
-  ecflow_client --meter step $i
+  ecflow_client --meter=step $i
   ((i=i+1))
 done
 
-ecflow_client --event 1
+ecflow_client --event=1
 
 fi
 
@@ -828,15 +828,15 @@ ssh %SCHOST% -R%ECF_PORT%:%ECF_NODE%:%ECF_PORT% ''' + wdir + '''/smhi_run.sh \
   %ECF_NAME% %ECF_PASS% %SCRIPT_PATH%/%SCRIPT_NAME% %ECF_JOBOUT% %ECF_NODE% %ECF_PORT%
   echo "#MSG: ssh exits with $?"
 else
-ecflow_client --init $$
+ecflow_client --init=$$
 
 i=0
 while [[ $i -lt ${STEPS:=1} ]]; do
-  ecflow_client --meter step $i
+  ecflow_client --meter=step $i
   ((i=i+1))
 done
 
-ecflow_client --event 1
+ecflow_client --event=1
 
 fi
 

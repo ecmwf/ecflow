@@ -3,7 +3,7 @@
 import os, sys, signal
 
 ECF_PORT = ^ECF_PORT:0^
-XSVR = "ecflow_client --port %s --host ^ECF_NODE:0^ --" % ECF_PORT
+XSVR = "ecflow_client --port=%s --host=^ECF_NODE:0^ --" % ECF_PORT
 pid = os.getpid()
 
 def xinit(): 

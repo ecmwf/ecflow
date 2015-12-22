@@ -797,7 +797,7 @@ void MeterCmd::create( 	Cmd_ptr& cmd,
 		value = boost::lexical_cast<int>(strVal);
 	}
 	catch (boost::bad_lexical_cast& e) {
- 		throw std::runtime_error( "MeterCmd: Second argument must be a integer, i.e. --meter name 100\n" );
+ 		throw std::runtime_error( "MeterCmd: Second argument must be a integer, i.e. --meter=name 100\n" );
  	}
 
 	std::string errorMsg;

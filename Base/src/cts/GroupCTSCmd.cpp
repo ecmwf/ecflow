@@ -274,11 +274,11 @@ const char* GroupCTSCmd::desc() {
             "provide 'yes' as an additional parameter. See example below.\n"
             "  arg = string\n"
             "Usage:\n"
-            "   --group=\"halt yes; reloadwsfile; restart;\"\n"
+            "   --group=\"halt=yes; reloadwsfile; restart;\"\n"
             "                                 # halt server,bypass the confirmation prompt,\n"
             "                                 # reload white list file, restart server\n"
             "   --group=\"get; show\"           # get server defs, and write to standard output\n"
-            "   --group=\"get /s1; show state\" # get suite 's1', and write state to standard output"
+            "   --group=\"get=/s1; show state\" # get suite 's1', and write state to standard output"
             ;
 }
 

@@ -294,7 +294,7 @@ const char* client_env_description() {
             "| ECF_PORT |  <int>   | Mandatory* | The TCP/IP port to call on the server. Must be unique to a server |\n"
             "|----------|----------|------------|-------------------------------------------------------------------|\n\n"
             "* The host and port must be specified in order for the client to communicate with the server, this can \n"
-            "  be done by setting ECF_NODE, ECF_PORT or by specifying --host <host> --port <int> on the command line\n"
+            "  be done by setting ECF_NODE, ECF_PORT or by specifying --host=<host> --port=<int> on the command line\n"
             ;
 }
 
