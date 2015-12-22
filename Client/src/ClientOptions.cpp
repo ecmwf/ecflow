@@ -161,11 +161,11 @@ void ClientOptions::show_help(const std::string & help_cmd) const
       cout << Ecf::CLIENT_NAME() << " provides the command line interface, for interacting with the server:\n";
 
       cout << "Try:\n\n";
-      cout << "   " << Ecf::CLIENT_NAME() << " --help all       # List all commands, verbosely\n";
-      cout << "   " << Ecf::CLIENT_NAME() << " --help summary   # One line summary of all commands\n";
-      cout << "   " << Ecf::CLIENT_NAME() << " --help child     # One line summary of child commands\n";
-      cout << "   " << Ecf::CLIENT_NAME() << " --help user      # One line summary of user command\n";
-      cout << "   " << Ecf::CLIENT_NAME() << " --help <cmd>     # Detailed help on each command\n\n";
+      cout << "   " << Ecf::CLIENT_NAME() << " --help=all       # List all commands, verbosely\n";
+      cout << "   " << Ecf::CLIENT_NAME() << " --help=summary   # One line summary of all commands\n";
+      cout << "   " << Ecf::CLIENT_NAME() << " --help=child     # One line summary of child commands\n";
+      cout << "   " << Ecf::CLIENT_NAME() << " --help=user      # One line summary of user command\n";
+      cout << "   " << Ecf::CLIENT_NAME() << " --help=<cmd>     # Detailed help on each command\n\n";
 
       show_all_commands("Commands:");
     }
