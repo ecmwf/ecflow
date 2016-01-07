@@ -51,9 +51,8 @@ BOOST_AUTO_TEST_CASE( test_program_options_implicit_value )
       BOOST_CHECK_MESSAGE(vm["arg1"].as<string>() == "", "Expected arg1 to be empty");
    }
 //   {
-//      // ******* This test fails on boost 1.59, can't cope --arg1 10, only --arg1=10 *******
-//      // ******* Tried to use command_line_parser instead on parse_command_line, boost regression
-//      // ******* can not get to work.
+//      // This test fails on boost 1.59, can't cope --arg1 10, only --arg1=10 *******
+//      // See: ECFLOW-509 and https://svn.boost.org/trac/boost/ticket/11893
 //      char* argv[] = {
 //            const_cast<char*>("test_program_options_implicit_value"),
 //            const_cast<char*>("--arg1"),
