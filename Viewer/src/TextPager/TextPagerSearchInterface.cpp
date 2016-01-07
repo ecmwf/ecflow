@@ -16,7 +16,9 @@
 #include "TextPagerEdit.hpp"
 #include "UserMessage.hpp"
 
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
 #include <QGuiApplication>
+#endif
 
 bool TextPagerSearchInterface::findString (QString str, bool highlightAll, QTextDocument::FindFlags flags,
 		                                bool gotoStartOfWord, int iteration,StringMatchMode::Mode matchMode)
@@ -49,7 +51,9 @@ bool TextPagerSearchInterface::findString (QString str, bool highlightAll, QText
 
 	if(doSearch)
 	{
-		QGuiApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+	QGuiApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+#endif
 	}
 
 	switch (matchMode)
@@ -106,7 +110,9 @@ bool TextPagerSearchInterface::findString (QString str, bool highlightAll, QText
 
 	if(doSearch)
 	{
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
 		QGuiApplication::restoreOverrideCursor();
+#endif
 	}
 
 	return found;
