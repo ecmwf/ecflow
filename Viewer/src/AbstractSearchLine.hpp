@@ -24,6 +24,7 @@ public:
 	virtual void clear();
 	virtual bool isEmpty();
 	void selectAll();
+    void setConfirmSearch(bool);
 
 	bool caseSensitive()  {return caseSensitive_;};
 	bool wholeWords()     {return wholeWords_;};
@@ -40,6 +41,7 @@ public Q_SLOTS:
 
 protected:
 	void updateButtons(bool);
+	void toDefaultState();
 
 	bool status_;
 	bool caseSensitive_;
@@ -50,6 +52,8 @@ protected:
 	QColor   oriColour_;
 	QColor   redColour_;
 	QColor   greenColour_;
+
+	bool confirmSearch_;
 };
 
 #endif

@@ -27,6 +27,7 @@
 
 class TextPagerLineNumberArea;
 class TextEditPrivate;
+class TextPagerSearchHighlighter;
 
 class TextPagerEdit : public QAbstractScrollArea, public VPropertyObserver
 {
@@ -127,6 +128,10 @@ public:
 
     void ensureCursorVisible(const TextPagerCursor &cursor, int linesMargin = 0);
 
+    void setEnableSearchHighlighter(bool);
+    void setSearchHighlighter(QString txt,TextPagerDocument::FindMode mode);
+    void setSearchHighlighter(QRegExp rx,TextPagerDocument::FindMode mode);
+
     void setFontProperty(VProperty* p);
     void notifyChange(VProperty* p);
     void zoomIn();
@@ -177,6 +182,9 @@ private:
     friend class TextLayoutCacheManager;
     friend class TextEditPrivate;
     friend class TextPagerCursor;
+
+    TextPagerSearchHighlighter* searchHighlight_;
+    bool useSearchHighlight_;
 
     TextPagerLineNumberArea* lineNumArea_;
     VProperty* fontProp_;

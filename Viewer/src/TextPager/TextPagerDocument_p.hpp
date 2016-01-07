@@ -147,7 +147,7 @@ public:
 #endif
           documentSize(0),
           saveState(NotSaving), findState(NotFinding), ownDevice(false), modified(false),
-          deviceMode(TextPagerDocument::Sparse), chunkSize(16384),
+          deviceMode(TextPagerDocument::Sparse), chunkSize(1024*64), //chunkSize(16384),
           //undoRedoStackCurrent(0), modifiedIndex(-1), undoRedoEnabled(true), ignoreUndoRedo(false),
           //collapseInsertUndo(false),
 		  hasChunksWithLineNumbers(false), textCodec(0), options(TextPagerDocument::DefaultOptions),
@@ -246,7 +246,7 @@ class TextDocumentIterator
 {
 public:
     TextDocumentIterator(const TextDocumentPrivate *d, int p)
-        : doc(d), pos(p), min(0), max(-1), convert(false)
+        : doc(d), pos(p), min(0), max(-1), convert(false), newline('\n')
     {
         Q_ASSERT(doc);
 #ifndef NO_TEXTDOCUMENTITERATOR_CACHE
@@ -254,6 +254,7 @@ public:
         Q_ASSERT(chunk);
         const int chunkPos = p - offset;
         chunkData = doc->chunkData(chunk, chunkPos);
+        //chunkLines = chunkData.split('\n');
         Q_COMPARE_ASSERT(chunkData.size(), chunk->size());
 #ifdef QT_DEBUG
         if (p != d->documentSize) {
@@ -320,14 +321,21 @@ public:
         Q_COMPARE_ASSERT(chunkData.size(), chunk->size());
         if (pos == end())
             return QChar();
+
+//Calling readCharacter is very expensive during find!!! So we try not to call it!!!
+#if 0
 #ifdef QT_DEBUG
         if (doc->q->readCharacter(pos) != chunkData.at(offset)) {
             qDebug() << "got" << chunkData.at(offset) << "at" << offset << "in" << chunk << "of size" << chunkData.size()
                      << "expected" << doc->q->readCharacter(pos) << "at document pos" << pos;
         }
 #endif
+#endif
+#if 0
         ASSUME(doc->q->readCharacter(pos) == chunkData.at(offset));
+#endif
         return convert ? chunkData.at(offset).toLower() : chunkData.at(offset);
+        //return convert ? chunkData[offset].toLower() : chunkData[offset];
 #else
         return convert ? doc->q->readCharacter(pos).toLower() : doc->q->readCharacter(pos);
 #endif
@@ -390,6 +398,232 @@ public:
         }
     }
 
+// Gets the previous line preceding the current iterator position. It is only
+// used for TextPagerDocument::find and was added to speed up the original find
+// algorithm. it is only implemented for cached textdocument iterators!
+
+    inline unsigned char prevLine(QString& str)
+    {
+#ifndef NO_TEXTDOCUMENTITERATOR_CACHE
+       Q_ASSERT(doc);
+
+#ifdef QT_DEBUG
+    	//qDebug() << pos << offset;  //<< chunkData;
+#endif
+
+    	//Get the QString in the chunk as a const pointer. It is faster to iterate through it than
+    	//calling QString::at()
+    	const QChar *data = chunkData.constData();
+    	data+=offset;
+
+    	//The current character is probably a newline (the
+    	//result of the previous call) so we need to take a step back
+    	if(*data == newline)
+    	{
+    	   //If we are at the start
+    	   if(pos <= min) {
+		   //if(!hasPrevious()) {
+    		   return 0;
+    	   }
+
+    	   --pos;
+
+    	   //See if we need the previous chunk
+    	   if(--offset < 0) {
+    	       loadPrevChunk();
+    	       data = chunkData.constData();
+    	   } else {
+    		   --data;
+    	   }
+    	}
+
+    	//Mark the line end position within the chunk
+    	int to=offset;
+
+    	//We will go backwards until we find a newline
+    	while(*data != newline)
+        {
+#ifdef QT_DEBUG
+        	//qDebug() << pos << offset << chunkData.at(offset) << to;
+#endif
+    		if(pos <= min) {
+    			if(to != offset) {
+    			   if(str.size() == 0) {
+    			       str=chunkData.mid(offset,to-offset+1);
+    			   } else {
+    			       str.prepend(chunkData.mid(offset,to-offset+1));
+    			   }
+    			}
+        		return 0;
+        	}
+
+        	--pos;
+
+        	//If we need the previous chunk
+        	if(--offset < 0) {
+
+        		//Copy the line portion from this chunk to the result
+        		if(str.size() == 0)
+        			str=chunkData.mid(0,to);
+        		else
+        			str.prepend(chunkData.mid(0,to));
+
+        		//Get previous chunk
+        		loadPrevChunk();
+
+        		//Initialise the search positions
+        		data = chunkData.constData();
+        		data+=offset;
+        		to=offset;
+        	} else {
+        		--data;
+        	}
+        }
+
+#ifdef QT_DEBUG
+        	//qDebug() << pos << offset << to;
+#endif
+
+        //offset is either a newline charter or 0 (the start of the document)
+
+    	if(to != offset) {
+    	  if(str.size() == 0) {
+    	       str=chunkData.mid(offset,to-offset+1);
+    	   } else {
+    	       str.prepend(chunkData.mid(offset,to-offset+1));
+    	  }
+        }
+#endif
+
+#ifdef QT_DEBUG
+    	//qDebug() << "line:" << str;
+#endif
+
+        return 1;
+    }
+
+    // Gets the next line following- the current iterator position. It is only
+    // used for TextPagerDocument::find and was added to speed up the original find
+    // algorithm. it is only implemented for cached textdocument iterators!
+
+    inline unsigned char nextLine(QString& str)
+    {
+#ifndef NO_TEXTDOCUMENTITERATOR_CACHE
+        Q_ASSERT(doc);
+
+#ifdef QT_DEBUG
+    //    	qDebug() << pos << offset;  //<< chunkData;
+#endif
+
+        //Get the QString in the chunk as a const pointer. It is faster to iterate through it than
+        //calling QString::at()
+        const QChar *data = chunkData.constData();
+        data+=offset;
+
+        //The current character is probably a newline (the
+        //result of the previous call) so we need to take a step forward
+        if(*data == newline)
+        {
+        	//If we are at the end
+        	if(!hasNext())
+        		return 0;
+
+        	++pos;
+
+        	//See if we need the next chunk
+        	if(++offset >= chunkData.size()) {
+        		loadNextChunk();
+        	    data = chunkData.constData();
+
+        	} else {
+        		++data;
+        	}
+        }
+
+        //Mark the line start position within the chunk
+        int from=offset;
+
+        //We will go forward until we find a newline
+        while(*data != newline)
+        {
+#ifdef QT_DEBUG
+        	//qDebug() << pos << offset << chunkData.at(offset);
+#endif
+        	if(!hasNext())
+        		return 0;
+
+            ++pos;
+
+            //If we need the next chunk
+            if(++offset >= chunkData.size()) {
+
+            	//Copy the line portion from this chink to the result
+            	if(str.size() == 0)
+            		str=chunkData.mid(from,offset-from);
+            	else
+            		str.append(chunkData.mid(from,offset-from));
+
+            	//Get next chunk
+            	loadNextChunk();
+
+            	//Initialise the search positions
+            	data = chunkData.constData();
+            	from=0;
+            }
+            else {
+            	++data;
+            }
+
+        }
+
+        if(from != offset) {
+            if(str.size() == 0)
+            {
+            	str=chunkData.mid(from,offset-from+1);
+            }
+            else
+            	str.append(chunkData.mid(from,offset-from+1));
+        }
+
+#endif
+
+#ifdef QT_DEBUG
+        	//qDebug() << "line:" << str;
+#endif
+
+        return 1;
+    }
+
+
+    inline void loadPrevChunk()
+    {
+#ifndef NO_TEXTDOCUMENTITERATOR_CACHE
+        Q_ASSERT(chunk);
+        if (chunk->previous) {
+            chunk = chunk->previous;
+            Q_ASSERT(chunk);
+            chunkData = doc->chunkData(chunk, pos - chunk->size() + 1);
+            Q_COMPARE_ASSERT(chunkData.size(), chunk->size());
+            offset = chunkData.size() - 1;
+        }
+#endif
+    }
+
+    inline void loadNextChunk()
+    {
+#ifndef NO_TEXTDOCUMENTITERATOR_CACHE
+        Q_ASSERT(chunk);
+        if (chunk->next) {
+            chunk = chunk->next;
+            Q_ASSERT(chunk);
+            chunkData = doc->chunkData(chunk, pos);
+            Q_COMPARE_ASSERT(chunkData.size(), chunk->size());
+            offset = 0;
+        }
+#endif
+    }
+
+
     inline bool convertToLowerCase() const
     {
         return convert;
@@ -407,9 +641,11 @@ private:
 #ifndef NO_TEXTDOCUMENTITERATOR_CACHE
     int offset;
     QString chunkData;
+    QStringList chunkLines;
     Chunk *chunk;
 #endif
     bool convert;
+    const QChar newline;
 };
 
 

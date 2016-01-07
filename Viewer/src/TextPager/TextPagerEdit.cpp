@@ -20,7 +20,7 @@
 #include "TextPagerEdit_p.hpp"
 #include "TextPagerCursor_p.hpp"
 #include "TextPagerDocument_p.hpp"
-
+#include "TextPagerSearchHighlighter.hpp"
 
 #ifndef QT_NO_DEBUG
 bool doLog = false;
@@ -34,6 +34,7 @@ QString logFileName;
 TextPagerEdit::TextPagerEdit(QWidget *parent) :
    QAbstractScrollArea(parent),
    d(new TextEditPrivate(this)),
+   useSearchHighlight_(false),
    lineNumArea_(0),
    fontProp_(NULL)
 {
@@ -78,6 +79,8 @@ TextPagerEdit::TextPagerEdit(QWidget *parent) :
 
 
     setReadOnly(true);
+
+    searchHighlight_=new TextPagerSearchHighlighter(this);
 }
 
 
@@ -1377,6 +1380,26 @@ void TextPagerEdit::setSyntaxHighlighter(SyntaxHighlighter *h)
     }
 }
 
+
+void TextPagerEdit::setEnableSearchHighlighter(bool b)
+{
+	useSearchHighlight_=b;
+	if(useSearchHighlight_) {
+		setSyntaxHighlighter(searchHighlight_);
+	} else {
+		clearSyntaxHighlighters();
+	}
+}
+
+void TextPagerEdit::setSearchHighlighter(QString txt,TextPagerDocument::FindMode mode)
+{
+	searchHighlight_->reset(txt,mode,useSearchHighlight_);
+}
+
+void TextPagerEdit::setSearchHighlighter(QRegExp rx,TextPagerDocument::FindMode mode)
+{
+	searchHighlight_->reset(rx,mode,useSearchHighlight_);
+}
 
 //---------------------------------------------
 // Fontsize management

@@ -8,18 +8,18 @@
 //
 //============================================================================
 
-#ifndef VIEWER_SRC_PLAINTEXTSEARCHINTERFACE_HPP_
-#define VIEWER_SRC_PLAINTEXTSEARCHINTERFACE_HPP_
+#ifndef VIEWER_SRC_TEXTPAGER_TEXTPAGERSEARCHINTERFACE_HPP_
+#define VIEWER_SRC_TEXTPAGER_TEXTPAGERSEARCHINTERFACE_HPP_
 
 #include "AbstractTextEditSearchInterface.hpp"
 
-class QPlainTextEdit;
+class TextPagerEdit;
 
-class PlainTextSearchInterface : public AbstractTextEditSearchInterface
+class TextPagerSearchInterface : public AbstractTextEditSearchInterface
 {
 public:
-	PlainTextSearchInterface() : editor_(NULL) {}
-	void setEditor(QPlainTextEdit* e) {editor_=e;}
+	TextPagerSearchInterface() : editor_(NULL) {}
+	void setEditor(TextPagerEdit* e) {editor_=e;}
 
 	bool findString (QString str, bool highlightAll, QTextDocument::FindFlags findFlags,
 			         bool gotoStartOfWord, int iteration,StringMatchMode::Mode matchMode);
@@ -27,12 +27,12 @@ public:
 	void automaticSearchForKeywords(bool);
 	void refreshSearch();
 	void clearHighlights();
-	void enableHighlights() {};
+	void enableHighlights();
 
 protected:
 
-	QPlainTextEdit *editor_;
+	TextPagerEdit *editor_;
 
 };
 
-#endif /* VIEWER_SRC_PLAINTEXTSEARCHINTERFACE_HPP_ */
+#endif /* VIEWER_SRC_TEXTPAGER_TEXTPAGERSEARCHINTERFACE_HPP_ */

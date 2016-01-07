@@ -13,7 +13,7 @@
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="0,0,1,0,0,0,0,0">
+  <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="0,0,0,1,0,0,0,0,0">
    <property name="spacing">
     <number>1</number>
    </property>
@@ -27,6 +27,19 @@
      </property>
      <property name="buddy">
       <cstring>searchLine_</cstring>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QLabel" name="confirmSearchLabel_">
+     <property name="toolTip">
+      <string>Large file mode. Press enter or press the arrows to start search.</string>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="pixmap">
+      <pixmap resource="viewer.qrc">:/viewer/warning.svg</pixmap>
      </property>
     </widget>
    </item>

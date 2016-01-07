@@ -51,7 +51,6 @@ protected:
     AbstractTextEditSearchInterface* interface_;
     QTimer highlightAllTimer_;
 	QColor highlightColour_;
-
 };
 
 #endif /* VIEWER_SRC_TEXTEDITSEARCHLINE_HPP_ */

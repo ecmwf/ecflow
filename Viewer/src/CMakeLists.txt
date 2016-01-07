@@ -160,6 +160,8 @@ set(viewer_srcs
     TextPager/TextPagerDocument.cpp
     TextPager/TextPagerEdit.cpp
     TextPager/TextPagerLayout_p.cpp
+    TextPager/TextPagerSearchHighlighter.cpp
+    TextPager/TextPagerSearchInterface.cpp
     TextPager/TextPagerSection.cpp
     TextPager/TextPagerWidget.cpp
     TextPager/syntaxhighlighter.cpp)

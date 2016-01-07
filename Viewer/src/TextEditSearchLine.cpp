@@ -40,7 +40,6 @@ void TextEditSearchLine::setSearchInterface(AbstractTextEditSearchInterface *e)
 	interface_=e;
 }
 
-
 bool TextEditSearchLine::findString (QString str, bool highlightAll, QTextDocument::FindFlags extraFlags, bool gotoStartOfWord, int iteration)
 {
 	QTextDocument::FindFlags flags = findFlags() | extraFlags;
@@ -49,7 +48,12 @@ bool TextEditSearchLine::findString (QString str, bool highlightAll, QTextDocume
 
 void TextEditSearchLine::highlightMatches(QString txt)
 {
-	if (!txt.isEmpty())
+	if(confirmSearch_)
+	{
+		if(interface_)
+			interface_->enableHighlights();
+	}
+	else if (!txt.isEmpty())
 		findString(txt, true,  0, true, 0);   // highlight all matches
 }
 
@@ -63,11 +67,25 @@ void TextEditSearchLine::slotHighlight()
 		highlightMatches(searchLine_->text());
 }
 
-
+//This slot is called as we type in the search string
 void TextEditSearchLine::slotFind(QString txt)
 {
 	if(!interface_)
 		return;
+
+	//In confirmSearch mode we do not start the search
+	if(confirmSearch_)
+	{
+		toDefaultState();
+		return;
+	}
+
+	if(txt.isEmpty())
+	{
+		highlightAllTimer_.stop();
+		toDefaultState();
+		return;
+	}
 
 	highlightAllTimer_.stop();
 	bool found = findString(txt, false, 0, true, 0);  // find the next match
@@ -187,8 +205,8 @@ void TextEditSearchLine::on_actionHighlightAll__toggled(bool b)
 	else                    // user switched off the highlights
 		clearHighlights();
 
-
-	refreshSearch();
+	if(!confirmSearch_)
+		refreshSearch();
 }
 
 void TextEditSearchLine::slotClose()
@@ -196,7 +214,6 @@ void TextEditSearchLine::slotClose()
 	AbstractSearchLine::slotClose();
 	clearHighlights();
 }
-
 
 // Called when we load a new node's information into the panel, or
 // when we move to the panel from another one.
@@ -218,5 +235,4 @@ void TextEditSearchLine::searchOnReload(bool userClickedReload)
 		interface_->automaticSearchForKeywords(userClickedReload);
 	}
 }
-
 

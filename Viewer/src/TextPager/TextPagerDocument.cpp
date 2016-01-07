@@ -15,6 +15,9 @@
 #include <QDesktopServices>
 #include <qalgorithms.h>
 
+//#define TEXTDOCUMENT_FIND_DEBUG
+
+
 #if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
  #include <QStandardPaths>
 #endif
@@ -372,26 +375,78 @@ static void initFind(const TextPagerCursor &cursor, bool reverse, int *start, in
         *start = cursor.position();
         *limit = (reverse ? 0 : cursor.document()->documentSize());
     }
+
+
 }
 
-TextPagerCursor TextPagerDocument::find(const QRegExp &regexp, const TextPagerCursor &cursor, FindMode flags) const
+static void initFindForLines(const TextPagerCursor &cursor, bool reverse, int *start, int *limit)
 {
-    QReadLocker locker(d->readWriteLock);
+   *start = cursor.position();
+   if(*limit == -1)
+      	*limit = (reverse ? 0 : cursor.document()->documentSize());
+
+#ifdef TEXTDOCUMENT_FIND_DEBUG
+   qDebug() << "initial position" << "pos:" << *start << "anchor:" << cursor.anchor();
+#endif
+
+   //Change the search position according to the selection and search
+   //direction
+   if(cursor.anchor() >=0)
+   {
+   	int ca=cursor.anchor();
+
+   	if(!reverse)
+   	{
+   		if(*start < ca)
+   			*start=ca;
+   	}
+   	else
+   	{
+   		if(*start > ca && ca >0)
+   			*start=ca-1;
+   		else if(*start >0)
+   			*start=(*start)-1;
+   	}
+   }
+
+#ifdef TEXTDOCUMENT_FIND_DEBUG
+   qDebug() << "modified position" << "pos:" << *start << "anchor:" << cursor.anchor();
+#endif
+
+}
+
+TextPagerCursor TextPagerDocument::find(const QRegExp &regexp, const TextPagerCursor &cursor, FindMode flags,int limit) const
+{
+#ifdef TEXTDOCUMENT_FIND_DEBUG
+	qDebug() << "---> TextPagerDocument::find" << "regexp" << regexp;
+#endif
+
+	if(regexp.isEmpty())
+		return TextPagerCursor();
+
+	QReadLocker locker(d->readWriteLock);
     if (flags & FindWholeWords) {
         qWarning("FindWholeWords doesn't work with regexps. Instead use an actual RegExp for this");
     }
     if (flags & FindCaseSensitively) {
         qWarning("FindCaseSensitively doesn't work with regexps. Instead use an QRegExp::caseSensitivity for this");
     }
-    if (flags & FindWrap && cursor.hasSelection()) {
+   /* if (flags & FindWrap && cursor.hasSelection()) {
         qWarning("It makes no sense to pass FindWrap and set a selection for the cursor. The entire selection will be searched");
         flags &= ~FindWrap;
-    }
+    }*/
 
     const bool reverse = flags & FindBackward;
     int pos;
-    int limit;
-    ::initFind(cursor, reverse, &pos, &limit);
+    ::initFindForLines(cursor, reverse, &pos, &limit);
+
+    if(reverse) {
+      	if(pos < limit)
+        	return TextPagerCursor();
+    } else {
+      	if(pos > limit)
+      		return TextPagerCursor();
+    }
 
     if (pos == d->documentSize) {
         if (reverse) {
@@ -426,51 +481,82 @@ TextPagerCursor TextPagerDocument::find(const QRegExp &regexp, const TextPagerCu
         maxFindLength = (reverse ? pos : d->documentSize - pos);
         lastProgressTime.start();
     }
+
+    QString line;
+    int index;
+    int from;
+#ifdef TEXTDOCUMENT_FIND_DEBUG
+    QTime lap;
+    lap.start();
+#endif
+
+    //Loop over the lines in the document. Since we can have millions of lines it has to be
+    //extremely fast.
     do {
 #ifdef TEXTDOCUMENT_FIND_SLEEP
         findSleep(this);
 #endif
-        while ((it.nextPrev(direction, ok) != newline) && ok) ;
-        int from = qMin(it.position(), last);
-        int to = qMax(it.position(), last);
-        if (!ok) {
-            if (direction == TextDocumentIterator::Right)
-                ++to;
-        } else if (direction == TextDocumentIterator::Left) {
-            ++from;
-            ++to;
-        }
-        const QString line = read(from, to - from);
-        last = it.position() + 1;
-        int lineIndex = reverse ? line.size() : 0;
-        bool done;
-        do {
-            done = true;
-            const int index = (reverse ? regexp.lastIndexIn(line, lineIndex) : regexp.indexIn(line, lineIndex));
-            if (index != -1) {
-                if (!reverse && from + index + regexp.matchedLength() > limit) {
-                    ok = false;
-                    break;
-                }
 
-                const TextPagerCursor ret(this, from + index + regexp.matchedLength(), from + index);
-                Q_ASSERT(ret.selectedText() == regexp.capturedTexts().first());
-                if (flags & FindAll) {
-                    Q_EMIT entryFound(ret);
-                    if (reverse) {
-                        lineIndex = index;
-                    } else {
-                        lineIndex = index + regexp.matchedLength();
-                    }
-                    done = false;
-                    if (d->findState == TextDocumentPrivate::AbortFind)
-                        return TextPagerCursor();
-                } else {
-                    return ret;
-                }
-            }
-        } while (!done);
-        if (progressInterval != 0) {
+        //This clears the string without reallocation
+        line.resize(0);
+
+        if(((reverse)?it.prevLine(line):it.nextLine(line)) == 0)
+        {
+        	ok=false;
+        	if(line.isEmpty())
+        	  break;
+        }
+
+        //We only search for the first occurrence. So the FindAll flag is ignored.
+
+        //QRegExp::lastIndexIn()  is 3 times slower than QRegExp::indexIn()!! So we always call
+        //indexIn() first the lastIndexIn() if we need the reverse order.
+
+        if((index = regexp.indexIn(line, 0)) != -1) {
+
+#ifdef TEXTDOCUMENT_FIND_DEBUG
+        	qDebug() << line;
+#endif
+
+        	if(reverse) {
+        		index = regexp.lastIndexIn(line, line.size());
+        		from = it.position()-line.size();
+
+        		if(from + index  < limit) {
+        		    ok = false;
+        		} else {
+        			const TextPagerCursor ret(this, from + index, from + index + regexp.matchedLength());
+#ifdef TEXTDOCUMENT_FIND_DEBUG
+        			qDebug() << "total time" << lap.elapsed();
+        			qDebug() << "result" << "pos:" << ret.position() << "anchor:" << ret.anchor();
+#endif
+        			return ret;
+        		}
+        	} else {
+
+        		from = it.position()-line.size()+1;
+
+        		if(from + index + regexp.matchedLength() > limit) {
+        			ok = false;
+        		} else {
+        			const TextPagerCursor ret(this, from + index + regexp.matchedLength(), from + index);
+#ifdef TEXTDOCUMENT_FIND_DEBUG
+        			qDebug() << "current:" << it.current() <<  it.position() << line.size();
+        			qDebug() << "captured:" << index << regexp.capturedTexts().first();
+        			qDebug() << "cursor:" << ret.selectedText();
+#endif
+        			Q_ASSERT(ret.selectedText() == regexp.capturedTexts().first());
+#ifdef TEXTDOCUMENT_FIND_DEBUG
+        			qDebug() << "total time" << lap.elapsed();
+        			qDebug() << "result" << "pos:" << ret.position() << "anchor:" << ret.anchor();
+#endif
+        			return ret;
+        		}
+        	}
+        }
+
+
+        /*if (progressInterval != 0) {
             const int progress = qAbs(it.position() - lastProgress);
             if (progress >= progressInterval
                 || (lastProgressTime.elapsed() >= TEXTDOCUMENT_MAX_INTERVAL)) {
@@ -482,29 +568,40 @@ TextPagerCursor TextPagerDocument::find(const QRegExp &regexp, const TextPagerCu
                 lastProgress = it.position();
                 lastProgressTime.restart();
             }
-        }
+        }*/
+
     } while (ok);
 
+#ifdef TEXTDOCUMENT_FIND_DEBUG
+        qDebug() << "total time" << lap.elapsed();
+#endif
+
     if (flags & FindWrap) {
-        Q_ASSERT(!cursor.hasSelection());
+
+#ifdef TEXTDOCUMENT_FIND_DEBUG
+        qDebug() << "---> end of doc reached. FindWrap will start.";
+#endif
+    	//Q_ASSERT(!cursor.hasSelection());
         if (reverse) {
             if (cursor.position() + 1 < d->documentSize) {
-                return find(regexp, TextPagerCursor(this, cursor.position(), d->documentSize), flags & ~FindWrap);
+                return find(regexp, TextPagerCursor(this, d->documentSize), flags & ~FindWrap, cursor.position());
             }
         } else if (cursor.position() > 0) {
-            return find(regexp, TextPagerCursor(this, 0, cursor.position()), flags & ~FindWrap);
+            return find(regexp, TextPagerCursor(this, 0), flags & ~FindWrap, cursor.position());
         }
     }
 
     return TextPagerCursor();
 }
 
-TextPagerCursor TextPagerDocument::find(const QString &in, const TextPagerCursor &cursor, FindMode flags) const
+TextPagerCursor TextPagerDocument::find(const QString &in, const TextPagerCursor &cursor, FindMode flags, int limit) const
 {
-    if (in.isEmpty()) {
+#ifdef TEXTDOCUMENT_FIND_DEBUG
+	qDebug() << "---> TextPagerDocument::find" << "string:" << in;
+#endif
+
+	if (in.isEmpty()) {
         return TextPagerCursor();
-    } else if (in.size() == 1) {
-        return find(in.at(0), cursor, flags);
     }
 
     QReadLocker locker(d->readWriteLock);
@@ -512,14 +609,27 @@ TextPagerCursor TextPagerDocument::find(const QString &in, const TextPagerCursor
     const bool reverse = flags & FindBackward;
     const bool caseSensitive = flags & FindCaseSensitively;
     const bool wholeWords = flags & FindWholeWords;
-    if (flags & FindWrap && cursor.hasSelection()) {
+
+    /* if (flags & FindWrap && cursor.hasSelection()) {
         qWarning("It makes no sense to pass FindWrap and set a selection for the cursor. The entire selection will be searched");
         flags &= ~FindWrap;
     }
-
+*/
+    const QLatin1Char newline('\n');
     int pos;
-    int limit;
-    ::initFind(cursor, reverse, &pos, &limit);
+    ::initFindForLines(cursor, reverse, &pos, &limit);
+
+    //Sanity check!!
+    Q_ASSERT(pos >= 0 && pos <= d->documentSize);
+    Q_ASSERT(limit >= 0 && limit <= d->documentSize);
+
+    if(reverse) {
+    	if(pos < limit)
+    		return TextPagerCursor();
+    } else {
+    	if(pos > limit)
+    		return TextPagerCursor();
+    }
 
     if (pos == d->documentSize) {
         if (reverse) {
@@ -532,19 +642,18 @@ TextPagerCursor TextPagerDocument::find(const QString &in, const TextPagerCursor
     // ### what if one searches for a string with non-word characters in it and FindWholeWords?
     const TextDocumentIterator::Direction direction = (reverse ? TextDocumentIterator::Left : TextDocumentIterator::Right);
     QString word = caseSensitive ? in : in.toLower();
-    if (reverse) {
-        QChar *data = word.data();
-        const int size = word.size();
-        for (int i=0; i<size / 2; ++i) {
-            qSwap(data[i], data[size - 1 - i]);
-        }
-    }
+
     TextDocumentIterator it(d, pos);
     if (reverse) {
         it.setMinBoundary(limit);
     } else {
         it.setMaxBoundary(limit);
     }
+
+#ifdef TEXTDOCUMENT_FIND_DEBUG
+    qDebug() << "current character:" << it.current();
+#endif
+
     if (!caseSensitive)
         it.setConvertToLowerCase(true);
 
@@ -564,11 +673,20 @@ TextPagerCursor TextPagerDocument::find(const QString &in, const TextPagerCursor
         maxFindLength = (reverse ? pos : d->documentSize - pos);
         lastProgressTime.start();
     }
+
+    QString line;
+    int index;
+    int from;
+#ifdef TEXTDOCUMENT_FIND_DEBUG
+    QTime lap;
+    lap.start();
+#endif
+
     do {
 #ifdef TEXTDOCUMENT_FIND_SLEEP
         findSleep(this);
 #endif
-        if (progressInterval != 0) {
+     /*   if (progressInterval != 0) {
             const int progress = qAbs(it.position() - lastProgress);
             if (progress >= progressInterval
                 || (progress % 10 == 0 && lastProgressTime.elapsed() >= TEXTDOCUMENT_MAX_INTERVAL)) {
@@ -580,8 +698,68 @@ TextPagerCursor TextPagerDocument::find(const QString &in, const TextPagerCursor
                 lastProgress = it.position();
                 lastProgressTime.restart();
             }
+        }*/
+
+        //This clears the string without reallocation
+        line.resize(0);
+
+        if(((reverse)?it.prevLine(line):it.nextLine(line)) == 0)
+        {
+            ok=false;
+            if(line.isEmpty())
+            	break;
         }
 
+        if(!caseSensitive)
+        	line=line.toLower();
+
+#ifdef TEXTDOCUMENT_FIND_DEBUG
+        //qDebug() << line;
+#endif
+
+        if((index=line.indexOf(word)) != -1)
+        {
+#ifdef TEXTDOCUMENT_FIND_DEBUG
+        	qDebug() << line;
+#endif
+        	//The iterator is positioned at the linebreak character of the previous line, or at
+        	//the start of the document
+        	if(reverse)
+        	{
+        		from = it.position();
+
+        		TextPagerCursor ret(this, from + index, from + index + word.size());
+#ifdef TEXTDOCUMENT_FIND_DEBUG
+        		qDebug() << "total time" << lap.elapsed();
+        		qDebug() << "current:" << it.current() <<  it.position() << line.size();
+        		qDebug() << "result" << "pos:" << ret.position() << "anchor:" << ret.anchor();
+#endif
+        		return ret;
+        	}
+        	//The iterator is positioned at the linebreak character at the end of the line or at
+        	//the end of the document
+        	else
+        	{
+        		from = it.position()-line.size()+1;
+        		//if(it.current() != newline)
+        		//	from++;
+
+        		if(from + index + word.size() > limit) {
+        			ok = false;
+        		}
+        		else {
+        			TextPagerCursor ret(this, from + index + word.size(),from + index);
+#ifdef TEXTDOCUMENT_FIND_DEBUG
+        			qDebug() << "total time" << lap.elapsed();
+        			qDebug() << "current:" << it.current() <<  it.position() << line.size();
+        			qDebug() << "result" << "pos:" << ret.position() << "anchor:" << ret.anchor();
+#endif
+        	    	return ret;
+        		}
+        	}
+        }
+
+#if 0
         bool found = ch == word.at(wordIndex);
         if (found && wholeWords && (wordIndex == 0 || wordIndex == word.size() - 1)) {
             Q_ASSERT(word.size() > 1);
@@ -612,16 +790,24 @@ TextPagerCursor TextPagerDocument::find(const QString &in, const TextPagerCursor
             continue;
         }
         ch = it.nextPrev(direction, ok);
+
+#endif
+
     } while (ok);
 
+#ifdef TEXTDOCUMENT_FIND_DEBUG
+      qDebug() << "total time" << lap.elapsed();
+#endif
+
     if (flags & FindWrap) {
-        Q_ASSERT(!cursor.hasSelection());
+        //Q_ASSERT(!cursor.hasSelection());
         if (reverse) {
-            if (cursor.position() + 1 < d->documentSize) {
-                return find(in, TextPagerCursor(this, cursor.position(), d->documentSize), flags & ~FindWrap);
+
+        	if (cursor.position() + 1 < d->documentSize) {
+        		  return find(in, TextPagerCursor(this, d->documentSize), flags & ~FindWrap,cursor.position());
             }
         } else if (cursor.position() > 0) {
-            return find(in, TextPagerCursor(this, 0, cursor.position()), flags & ~FindWrap);
+        	return find(in, TextPagerCursor(this, 0), flags & ~FindWrap,cursor.position());
         }
     }
 

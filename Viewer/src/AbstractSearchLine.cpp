@@ -12,10 +12,13 @@
 #include <QMenu>
 #include "AbstractSearchLine.hpp"
 
-AbstractSearchLine::AbstractSearchLine(QWidget* parent) : QWidget(parent)
+AbstractSearchLine::AbstractSearchLine(QWidget* parent) :
+  QWidget(parent),
+  confirmSearch_(false)
 {
 	setupUi(this);
 
+	confirmSearchLabel_->hide();
 
 #if QT_VERSION >= QT_VERSION_CHECK(4, 7, 0)
 	searchLine_->setPlaceholderText(tr("Find"));
@@ -81,6 +84,7 @@ AbstractSearchLine::~AbstractSearchLine()
 
 void AbstractSearchLine::clear()
 {
+	//clearRequested();
 	searchLine_->clear();
 }
 
@@ -92,6 +96,13 @@ bool AbstractSearchLine::isEmpty()
 void AbstractSearchLine::selectAll()
 {
 	searchLine_->selectAll();
+}
+
+void AbstractSearchLine::toDefaultState()
+{
+	QPalette p=searchLine_->palette();
+	p.setColor(QPalette::Base,oriColour_);
+	searchLine_->setPalette(p);
 }
 
 void AbstractSearchLine::updateButtons(bool found)
@@ -139,4 +150,20 @@ void AbstractSearchLine::on_actionWholeWords__toggled(bool b)
 void AbstractSearchLine::on_actionHighlightAll__toggled(bool b)
 {
     highlightAll_ = b;
+}
+
+void AbstractSearchLine::setConfirmSearch(bool confirmSearch)
+{
+	confirmSearch_=confirmSearch;
+	confirmSearchLabel_->setVisible(confirmSearch_);
+
+	if(confirmSearch_)
+	{
+		status_=false;
+		if(searchLine_->text().isEmpty())
+		{
+			status_=false;
+			toDefaultState();
+		}
+	}
 }

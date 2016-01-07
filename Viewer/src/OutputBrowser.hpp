@@ -17,12 +17,13 @@ class TextEditSearchLine;
 class PlainTextEdit;
 class PlainTextSearchInterface;
 class TextPagerWidget;
+class TextPagerSearchInterface;
 class VProperty;
 
 class OutputBrowser : public QWidget
 {
 public:
-	OutputBrowser(QWidget* parent);
+	explicit OutputBrowser(QWidget* parent);
 	~OutputBrowser();
 
 	void clear();
@@ -47,8 +48,7 @@ private:
 	TextEditSearchLine* searchLine_;
 	Highlighter* jobHighlighter_;
 	PlainTextSearchInterface *textEditSearchInterface_;
-	//PagerTextSearchInterface *pagerSearchInterface_;
-
+	TextPagerSearchInterface *textPagerSearchInterface_;
 };
 
 #endif /* VIEWER_SRC_OUTPUTBROWSER_HPP_ */

@@ -16,6 +16,7 @@
 #include "PlainTextEdit.hpp"
 #include "PlainTextSearchInterface.hpp"
 #include "TextEditSearchLine.hpp"
+#include "TextPager/TextPagerSearchInterface.hpp"
 #include "TextPagerWidget.hpp"
 
 OutputBrowser::OutputBrowser(QWidget* parent) : QWidget(parent)
@@ -44,6 +45,9 @@ OutputBrowser::OutputBrowser(QWidget* parent) : QWidget(parent)
 	textPager_=new TextPagerWidget(this);
 	//textEdit_->setReadOnly(true);
 
+	textPagerSearchInterface_=new TextPagerSearchInterface();
+	textPagerSearchInterface_->setEditor(textPager_->textEditor());
+
 	stacked_->addWidget(textEdit_);
 	stacked_->addWidget(textPager_);
 
@@ -54,6 +58,7 @@ OutputBrowser::OutputBrowser(QWidget* parent) : QWidget(parent)
 OutputBrowser::~OutputBrowser()
 {
 	delete  textEditSearchInterface_;
+	delete  textPagerSearchInterface_;
 
 	if(jobHighlighter_ && !jobHighlighter_->parent())
 	{
@@ -72,13 +77,15 @@ void OutputBrowser::changeIndex(IndexType indexType)
 	if(indexType == BasicIndex)
 	{
 		stacked_->setCurrentIndex(indexType);
+		searchLine_->setConfirmSearch(false);
 		searchLine_->setSearchInterface(textEditSearchInterface_);
 		textPager_->clear();
 	}
 	else
 	{
 		stacked_->setCurrentIndex(indexType);
-		searchLine_->setSearchInterface(NULL);
+		searchLine_->setConfirmSearch(true);
+		searchLine_->setSearchInterface(textPagerSearchInterface_);
 		textEdit_->clear();
 	}
 }
@@ -95,6 +102,7 @@ void OutputBrowser::loadFile(QString fileName)
 		changeIndex(PagerIndex);
 
 		TextPagerDocument::DeviceMode mode = TextPagerDocument::Sparse;
+		//TextPagerDocument::DeviceMode mode = TextPagerDocument::LoadAll;
 		textPager_->load(fileName, mode);
 	}
 	else
