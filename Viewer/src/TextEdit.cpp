@@ -10,16 +10,19 @@
 #include "TextEdit.hpp"
 #include "GotoLineDialog.hpp"
 
+#include <QtGlobal>
 #include <QDebug>
 #include <QFile>
 #include <QPainter>
 #include <QTextBlock>
+#include <QWheelEvent>
 
 TextEdit::TextEdit(QWidget * parent) :
     QPlainTextEdit(parent),
     showLineNum_(true),
     rightMargin_(2),
-    gotoLineDialog_(0)
+    gotoLineDialog_(0),
+	fontProp_(NULL)
 {
     lineNumArea_ = new LineNumberArea(this);
 
@@ -45,7 +48,11 @@ TextEdit::TextEdit(QWidget * parent) :
 
 TextEdit::~TextEdit()
 {
-    if (gotoLineDialog_) delete gotoLineDialog_;
+    if (gotoLineDialog_)
+    	delete gotoLineDialog_;
+
+    if(fontProp_)
+    	fontProp_->removeObserver(this);
 }
 
 void TextEdit::setShowLineNumbers(bool b)
@@ -211,7 +218,6 @@ void TextEdit::focusOutEvent(QFocusEvent *event)
     Q_EMIT focusLost();
     QPlainTextEdit::focusOutEvent(event);
 }
-
 
 // ---------------------------------------------------------------------------
 // TextEdit::lineNumberAreaPaintEvent
@@ -401,3 +407,103 @@ void TextEdit::gotoLine(int line)
         // TODO: disable the 'ok' button if the number is out of range
     }
 }
+
+//---------------------------------------------
+// Fontsize management
+//---------------------------------------------
+
+void TextEdit::setFontProperty(VProperty* p)
+{
+	fontProp_=p;
+	fontProp_->addObserver(this);
+	updateFont();
+}
+
+void TextEdit::wheelEvent(QWheelEvent *event)
+{
+	int fps=font().pointSize();
+
+	if(isReadOnly())
+	{
+		QPlainTextEdit::wheelEvent(event);
+		if(font().pointSize() != fps)
+			fontSizeChangedByZoom();
+	}
+	//For readOnly document the zoom does not work so we
+	//need this custom code!
+	else
+	{
+		if(event->modifiers() & Qt::ControlModifier)
+		{
+			const int delta = event->delta();
+	        if (delta < 0)
+	        	slotZoomOut();
+	        else if (delta > 0)
+	            slotZoomIn();
+	        return;
+		}
+
+		QPlainTextEdit::wheelEvent(event);
+	}
+}
+
+void TextEdit::slotZoomIn()
+{
+#if QT_VERSION >= QT_VERSION_CHECK(5, 1, 1)
+	zoomIn();
+#else
+	QFont f=font();
+	int fps=f.pointSize();
+	f.setPointSize(fps+1);
+	setFont(f);
+#endif
+	fontSizeChangedByZoom();
+}
+
+void TextEdit::slotZoomOut()
+{
+	int oriSize=font().pointSize();
+
+#if QT_VERSION >= QT_VERSION_CHECK(5, 1, 1)
+	zoomOut();
+#else
+	QFont f=font();
+	int fps=f.pointSize();
+	if(fps > 1)
+	{
+		f.setPointSize(fps-1);
+		setFont(f);
+	}
+#endif
+
+	if(font().pointSize() != oriSize)
+		fontSizeChangedByZoom();
+}
+
+void TextEdit::fontSizeChangedByZoom()
+{
+	if(fontProp_)
+		fontProp_->setValue(font());
+}
+
+void TextEdit::updateFont()
+{
+	if(fontProp_)
+	{
+		QFont f=fontProp_->value().value<QFont>();
+		if(font() != f)
+			setFont(f);
+	}
+}
+
+void TextEdit::notifyChange(VProperty* p)
+{
+	if(fontProp_ ==p)
+	{
+		setFont(p->value().value<QFont>());
+	}
+}
+
+
+
+

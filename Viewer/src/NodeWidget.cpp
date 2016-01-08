@@ -19,7 +19,9 @@
 #include <QAction>
 #include <QMenu>
 
-NodeWidget::NodeWidget(QWidget* parent) : DashboardWidget(parent),
+NodeWidget::NodeWidget(const std::string& type,ServerFilter* serverFilter,QWidget* parent) :
+   DashboardWidget(type,parent),
+   serverFilter_(serverFilter),
    model_(0),
    filterModel_(0),
    view_(0),
@@ -59,7 +61,12 @@ VInfo_ptr NodeWidget::currentSelection()
 	return view_->currentSelection();
 }
 
-void NodeWidget::currentSelection(VInfo_ptr info)
+/*void NodeWidget::currentSelection(VInfo_ptr info)
+{
+	view_->currentSelection(info);
+}*/
+
+void NodeWidget::setCurrentSelection(VInfo_ptr info)
 {
 	view_->currentSelection(info);
 }

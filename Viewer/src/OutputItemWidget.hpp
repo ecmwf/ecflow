@@ -18,6 +18,7 @@
 #include "ui_OutputItemWidget.h"
 
 class Highlighter;
+class OutputDirProvider;
 class OutputModel;
 class OutputSortModel;
 class QTime;
@@ -47,12 +48,15 @@ public:
 protected Q_SLOTS:
 	void slotOutputSelected(QModelIndex,QModelIndex);
 	void slotUpdateDir();
-	void on_searchTb__toggled(bool b);
+	void on_searchTb__clicked();
 	void on_gotoLineTb__clicked();
 	void on_reloadTb__clicked();
+	void on_fontSizeUpTb__clicked();
+	void on_fontSizeDownTb__clicked();
 
 protected:
 	void updateDir(bool);
+	void updateDir(VDir_ptr,bool);
 	void updateDir(bool,const std::string&);
 	void enableDir(bool);
 	void updateWidgetState() {};
@@ -61,14 +65,15 @@ protected:
 	void getLatestFile();
 	std::string currentFullName() const;
 
+	OutputDirProvider* dirProvider_;
 	OutputModel* dirModel_;
 	OutputSortModel* dirSortModel_;
+
 	bool userClickedReload_;
 	bool ignoreOutputSelection_;
 	QTimer* updateDirTimer_;
 	Highlighter* jobHighlighter_;
 	static int updateDirTimeout_;
-
 };
 
 #endif

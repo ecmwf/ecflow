@@ -39,7 +39,7 @@
       </spacer>
      </item>
      <item>
-      <widget class="QToolButton" name="searchTb">
+      <widget class="QToolButton" name="searchTb_">
        <property name="toolTip">
         <string>Show search bar</string>
        </property>
@@ -54,7 +54,7 @@
         <string>Ctrl+F</string>
        </property>
        <property name="checkable">
-        <bool>true</bool>
+        <bool>false</bool>
        </property>
        <property name="autoRaise">
         <bool>true</bool>

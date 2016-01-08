@@ -87,6 +87,8 @@ if test_uname Linux ; then
   	  elif [ $tool = intel ] ; then
   
       		cp $WK/build_scripts/site_config/site-config-Linux64-intel.jam $SITE_CONFIG_LOCATION 
+      		#module unload gnu
+      		#module load intel/15.0.2
 
   	  elif [ $tool = clang ] ; then
   

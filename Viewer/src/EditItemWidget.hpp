@@ -18,6 +18,8 @@
 
 #include "ui_EditItemWidget.h"
 
+class PropertyMapper;
+
 class EditItemWidget : public QWidget, public InfoPanelItem, protected Ui::EditItemWidget
 {
 Q_OBJECT
@@ -40,8 +42,10 @@ public:
 protected Q_SLOTS:
 	void on_preprocTb__toggled(bool);
 	void on_submitTb__clicked(bool);
-	void on_searchTb__toggled(bool);
+	void on_searchTb__clicked();
 	void on_gotoLineTb__clicked();
+	void on_fontSizeUpTb__clicked();
+	void on_fontSizeDownTb__clicked();
 
 protected:
 	bool preproc() const;
@@ -50,7 +54,6 @@ protected:
 
 	bool preproc_;
 	bool alias_;
-
 };
 
 #endif

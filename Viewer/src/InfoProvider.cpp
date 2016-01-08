@@ -21,7 +21,7 @@ InfoProvider::InfoProvider(InfoPresenter* owner,VTask::Type taskType) :
 	autoUpdate_(false),
 	inAutoUpdate_(false)
 {
-	reply_=new VReply();
+	reply_=new VReply(this);
 }
 
 InfoProvider::~InfoProvider()
@@ -144,6 +144,9 @@ void  InfoProvider::taskChanged(VTask_ptr task)
     if(task_ != task)
         return;
 
+    //temporary hack!
+    task_->reply()->setSender(this);
+
     switch(task->status())
     {
         case VTask::FINISHED:
@@ -166,7 +169,8 @@ void  InfoProvider::taskChanged(VTask_ptr task)
             	owner_->infoFailed(task->reply());
         	}
             //We do not need the task anymore.
-            task_.reset();break;
+            task_.reset();
+            break;
         default:
             break;
     }

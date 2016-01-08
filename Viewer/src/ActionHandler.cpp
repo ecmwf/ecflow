@@ -8,6 +8,7 @@
 //
 //============================================================================
 
+#include <algorithm>
 
 #include "ActionHandler.hpp"
 
@@ -25,16 +26,20 @@ ActionHandler::ActionHandler(QWidget *view) : QObject(view), parent_(view)
 	connect(this,SIGNAL(viewCommand(std::vector<VInfo_ptr>,QString)),
 			parent_,SLOT(slotViewCommand(std::vector<VInfo_ptr>,QString)));
 
-
 	connect(this,SIGNAL(infoPanelCommand(VInfo_ptr,QString)),
-				parent_,SIGNAL(infoPanelCommand(VInfo_ptr,QString)));
+			parent_,SIGNAL(infoPanelCommand(VInfo_ptr,QString)));
+
+	connect(this,SIGNAL(dashboardCommand(VInfo_ptr,QString)),
+			parent_,SIGNAL(dashboardCommand(VInfo_ptr,QString)));
 
 	//makeShortcut();
 }
 
 void ActionHandler::contextMenu(std::vector<VInfo_ptr> nodesLst,QPoint pos)
 {
-    QAction *action = MenuHandler::invokeMenu("Node", nodesLst,pos,  parent_);
+
+    std::string view=parent_->property("view").toString().toStdString();
+    QAction *action = MenuHandler::invokeMenu("Node", nodesLst,pos,  parent_,view);
 
     if(action)
     {
@@ -44,6 +49,11 @@ void ActionHandler::contextMenu(std::vector<VInfo_ptr> nodesLst,QPoint pos)
     		if(item->handler() == "info_panel")
     		{
     			Q_EMIT infoPanelCommand(nodesLst.at(0),QString::fromStdString(item->command()));
+    			return;
+    		}
+    		else if(item->handler() == "dashboard")
+    		{
+    			Q_EMIT dashboardCommand(nodesLst.at(0),QString::fromStdString(item->command()));
     			return;
     		}
     	}
@@ -72,13 +82,26 @@ void ActionHandler::contextMenu(std::vector<VInfo_ptr> nodesLst,QPoint pos)
                 }
                 else
                 {
-                    for(int i=0; i < nodesLst.size(); i++)
+                    const int maxItems = 5;  // list no more than this number of nodes
+                    int numNodes = nodesLst.size();
+                    int numItemsToList = std::min(numNodes, 5);
+
+                    for(int i=0; i < numItemsToList; i++)
                     {
                         nodeNames += "<li><b>";
                         nodeNames += nodesLst[i]->path();
                         nodeNames += "</b></li>";
                         //if (i < nodesLst.size()-1)
                         //    nodeNames += "<br>";
+                    }
+                    if(numItemsToList < nodesLst.size())
+                    {
+                        std::string numExtra;  // to convert from int to string
+                        std::ostringstream ss;
+                        ss << (numNodes-numItemsToList);
+                        numExtra = ss.str();
+
+                        nodeNames += "<b>...and " + numExtra + " more </b></li>";
                     }
                     nodeNames += "</ul>";
                 }

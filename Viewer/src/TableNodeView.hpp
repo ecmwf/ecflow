@@ -17,6 +17,7 @@
 #include "NodeViewBase.hpp"
 
 #include "VInfo.hpp"
+#include "VProperty.hpp"
 
 class QComboBox;
 
@@ -24,20 +25,24 @@ class ActionHandler;
 class TableNodeModel;
 class NodeFilterModel;
 class NodeFilterDef;
+class PropertyMapper;
+class TableNodeHeader;
 
-class TableNodeView : public QTreeView, public NodeViewBase
+class TableNodeView : public QTreeView, public NodeViewBase, public VPropertyObserver
 {
 Q_OBJECT
 
 public:
 	explicit TableNodeView(NodeFilterModel* model,NodeFilterDef* filterDef,QWidget *parent=0);
 	void reload() {};
-	void rerender() {};
+	void rerender();
 	QWidget* realWidget();
 	VInfo_ptr currentSelection();
 	void currentSelection(VInfo_ptr n) {};
 	void selectFirstServer() {}
 	void setModel(NodeFilterModel *model);
+
+	void notifyChange(VProperty* p);
 
 	void readSettings(VSettings* vs);
 
@@ -47,16 +52,37 @@ public Q_SLOTS:
 	void slotContextMenu(const QPoint &position);
 	void slotViewCommand(std::vector<VInfo_ptr>,QString);
 	void slotHeaderContextMenu(const QPoint &position);
+	void slotSizeHintChangedGlobal();
+	void slotRerender();
 
 Q_SIGNALS:
 	void selectionChanged(VInfo_ptr);
 	void infoPanelCommand(VInfo_ptr,QString);
+	void dashboardCommand(VInfo_ptr,QString);
+	void headerButtonClicked(QString,QPoint);
 
 protected:
 	QModelIndexList selectedList();
 	void handleContextMenu(QModelIndex indexClicked,QModelIndexList indexLst,QPoint globalPos,QPoint widgetPos,QWidget *widget);
+	void adjustBackground(QColor col);
 
 	ActionHandler* actionHandler_;
+	TableNodeHeader* header_;
+	bool needItemsLayout_;
+	PropertyMapper* prop_;
+};
+
+class TableNodeHeaderButton
+{
+public:
+	TableNodeHeaderButton(QString id) : id_(id) {}
+
+	QString id() const {return id_;}
+	void setRect(QRect r) {rect_=r;}
+	QRect rect() const {return rect_;}
+
+	QString id_;
+	QRect rect_;
 };
 
 class TableNodeHeader : public QHeaderView
@@ -67,14 +93,21 @@ public:
 	explicit TableNodeHeader(QWidget *parent=0);
 
 	QSize sizeHint() const;
+	void setModel(QAbstractItemModel *model);
 
 public Q_SLOTS:
 	void slotSectionResized(int i);
 
+Q_SIGNALS:
+	void customButtonClicked(QString,QPoint);
+
 protected:
 	void showEvent(QShowEvent *QSize);
+	void paintSection(QPainter *painter, const QRect &rect, int logicalIndex) const;
+	void mousePressEvent(QMouseEvent *event);
 
-	QMap<int, QComboBox *> combo_;
+	QPixmap customPix_;
+	mutable QMap<int,TableNodeHeaderButton> customButton_;
 };
 
 #endif

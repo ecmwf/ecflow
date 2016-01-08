@@ -55,6 +55,8 @@ Dashboard *NodePanel::addWidget(QString id)
 	connect(nw,SIGNAL(titleChanged(QWidget*,QString,QPixmap)),
 				this,SLOT(slotTabTitle(QWidget*,QString,QPixmap)));
 
+	connect(nw,SIGNAL(contentsChanged()),
+			this,SIGNAL(contentsChanged()));
 
 	return nw;
 }
@@ -163,6 +165,14 @@ void NodePanel::openDialog(VInfo_ptr info,const std::string& type)
 	    w->slotPopInfoPanel(info,QString::fromStdString(type));
 	}
 }
+void NodePanel::addSearchDialog()
+{
+	if(Dashboard *w=currentDashboard())
+	{
+		w->addSearchDialog();
+	}
+}
+
 
 void NodePanel::slotTabTitle(QWidget* w,QString text,QPixmap pix)
 {
@@ -334,7 +344,6 @@ void NodePanel::readSettings(VComboSettings *vs)
 		{
 			d->addWidget("tree");
 		}
-
 	}
 
 	if(QWidget *w=currentDashboard())

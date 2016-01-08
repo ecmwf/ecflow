@@ -3,7 +3,7 @@
 ------------------------------*/
 
 QMainWindow { 
-    icon-size:  16px;
+    icon-size:  18px;
 }  
 
 /*QToolBar {
@@ -174,8 +174,8 @@ QLineEdit[readOnly="true"] {
 ------------------------------*/
   
 QLabel[fileInfo="1"] {
-     border: 1px solid rgb(160,160,160);
-     background: rgb(242, 242, 242);  
+     border: 1px solid rgb(216,210,200);
+     background: rgb(252, 241, 219);  
 }
   
 /*----------------------------

@@ -27,24 +27,8 @@
      </property>
      <item>
       <widget class="FileInfoLabel" name="fileLabel_">
-       <property name="autoFillBackground">
-        <bool>false</bool>
-       </property>
-       <property name="styleSheet">
-        <string notr="true">border: 1px solid rgb(150,150,150);
-background: rgb(242, 242, 242);  </string>
-       </property>
-       <property name="frameShape">
-        <enum>QFrame::StyledPanel</enum>
-       </property>
        <property name="text">
         <string/>
-       </property>
-       <property name="margin">
-        <number>2</number>
-       </property>
-       <property name="textInteractionFlags">
-        <set>Qt::LinksAccessibleByMouse|Qt::TextSelectableByMouse</set>
        </property>
       </widget>
      </item>
@@ -77,7 +61,7 @@ background: rgb(242, 242, 242);  </string>
         <string>Ctrl+F</string>
        </property>
        <property name="checkable">
-        <bool>true</bool>
+        <bool>false</bool>
        </property>
        <property name="autoRaise">
         <bool>true</bool>

@@ -23,7 +23,6 @@ ServerDefsAccess::~ServerDefsAccess()
 	server_->defsMutex_.unlock();  // unlock the resource on destruction
 }
 
-
 defs_ptr ServerDefsAccess::defs()
 {
 	return server_->defs();		// the resource will always be locked when we use it

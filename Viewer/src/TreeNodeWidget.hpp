@@ -39,11 +39,16 @@ public:
 protected Q_SLOTS:
 	void on_actionBreadcrumbs_triggered(bool b);
 	void slotSelectionChangedInView(VInfo_ptr info);
+	void slotAttsChanged();
 
 protected:
+	void initAtts();
+
 	VParamFilterMenu *stateFilterMenu_;
 	VParamFilterMenu *attrFilterMenu_;
 	VParamFilterMenu *iconFilterMenu_;
+
+	static AttributeFilter* lastAtts_;
 };
 
 #endif

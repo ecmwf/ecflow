@@ -17,6 +17,8 @@ public:
 	void showInfo(QString);
 	void showWarning(QString);
 	void showError(QString);
+	void startLoadLabel();
+	void stopLoadLabel();
 
 private:
 	void showMessage(const Type&,QString);
@@ -24,6 +26,7 @@ private:
 	Type currentType_;
 	QLabel *pixLabel_;
 	QLabel* msgLabel_;
+	QLabel* loadLabel_;
 
 };
 

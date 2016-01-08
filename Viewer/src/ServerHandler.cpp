@@ -56,7 +56,8 @@ ServerHandler::ServerHandler(const std::string& name,const std::string& host, co
    activity_(NoActivity),
    connectState_(new ConnectState()),
    suiteFilter_(new SuiteFilter()),
-   conf_(0)
+   conf_(0),
+   prevServerState_(SState::RUNNING)
 {
 	if(localHostName_.empty())
 	{
@@ -219,49 +220,84 @@ void ServerHandler::removeServer(ServerHandler* server)
 	}
 }
 
+//This function can be called many times so we need to avoid locking the mutex.
 SState::State ServerHandler::serverState()
 {
+	SState::State state;
 	if(connectState_->state() != ConnectState::Normal || activity() == LoadActivity)
-		return SState::RUNNING;
-
-	ServerDefsAccess defsAccess(this);  // will reliquish its resources on destruction
-	defs_ptr defs = defsAccess.defs();
-	if(defs != NULL)
 	{
-		ServerState& st=defs->set_server();
-		return st.get_state();
+		prevServerState_= SState::RUNNING;
+
 	}
-	return SState::RUNNING;
+	//If we are here we can be sure that the defs pointer is not being deleted!! We
+	//access it without locking the mutex!!!
+	else
+	{
+		//If get the defs can be 100% sure that it is not being deleted!! So we can
+		//access it without locking the mutex!!!
+		defs_ptr d=safelyAccessSimpleDefsMembers();
+		if(d && d.get())
+		{
+			prevServerState_= d->set_server().get_state();
+			return prevServerState_;
+		}
+	}
+
+	return prevServerState_;
 }
 
+//This function can be called many times so we need to avoid locking the mutex.
 NState::State ServerHandler::state(bool& suspended)
 {
 	if(connectState_->state() != ConnectState::Normal || activity() == LoadActivity)
 		return NState::UNKNOWN;
 
 	suspended=false;
-	ServerDefsAccess defsAccess(this);  // will reliquish its resources on destruction
-	defs_ptr defs = defsAccess.defs();
-	if(defs != NULL)
+
+	defs_ptr d=safelyAccessSimpleDefsMembers();
+	if(d && d.get())
 	{
-		suspended=defs->isSuspended();
-		return defs->state();
+		suspended=d->isSuspended();
+		return d->state();
 	}
+
 	return NState::UNKNOWN;
 }
 
 defs_ptr ServerHandler::defs()
 {
+	defs_ptr null;
+
 	if(client_)
 	{
 		return client_->defs();
 	}
 	else
 	{
-		defs_ptr null;
 		return null;
 	}
 }
+
+defs_ptr ServerHandler::safelyAccessSimpleDefsMembers()
+{
+	defs_ptr null;
+
+	//The defs might be deleted during reset so it cannot be accessed.
+	if(activity_ == LoadActivity)
+	{
+		return null;
+	}
+	//Otherwise it is safe to access certain non-vector members
+	else if(client_)
+	{
+		return client_->defs();
+	}
+	else
+	{
+		return null;
+	}
+}
+
 
 void ServerHandler::errorMessage(std::string message)
 {
@@ -543,7 +579,12 @@ void ServerHandler::command(const std::vector<std::string>& fullPaths, const std
 
 		for(unsigned int i=0; i < fullPaths.size(); ++i)
 		{
-			fullNameStr+= " " +  fullPaths[i];
+			if(i>0)
+			{
+				fullNameStr+= " ";
+			}
+
+			fullNameStr+=fullPaths[i];
 		}
 
 		//Replace placeholders with real node names
@@ -650,10 +691,29 @@ void ServerHandler::broadcast(NoMethodV1 proc,const VNode* node,const std::vecto
 //---------------------------------------------------------------------------
 
 //This slot is called when the Defs change.
-void ServerHandler::slotDefsChanged(std::vector<ecf::Aspect::Type> a)
+void ServerHandler::slotDefsChanged(std::vector<ecf::Aspect::Type> aspect)
 {
+	UserMessage::message(UserMessage::DBG, false, std::string("ServerHandler::slotDefsChanged"));
+	for(std::vector<ecf::Aspect::Type>::const_iterator it=aspect.begin(); it != aspect.end(); ++it)
+		UserMessage::message(UserMessage::DBG, false, std::string(" aspect: ") + boost::lexical_cast<std::string>(*it));
+
+	//Begin update for the VNode
+	VNodeChange change;
+	vRoot_->beginUpdate(aspect);
+
+	//Notify the observers
+	//broadcast(&NodeObserver::notifyBeginNodeChange,vn,aspect,change);
+
+	//End update for the VNode
+	//vRoot_->endUpdate(vn,aspect,change);
+
+	//Notify the observers
+	//broadcast(&NodeObserver::notifyEndNodeChange,vn,aspect,change);
+
+	//UserMessage::message(UserMessage::DBG, false," --> Update applied");
+
 	for(std::vector<ServerObserver*>::const_iterator it=serverObservers_.begin(); it != serverObservers_.end(); ++it)
-		(*it)->notifyDefsChanged(this,a);
+		(*it)->notifyDefsChanged(this,aspect);
 }
 
 void ServerHandler::addServerObserver(ServerObserver *obs)
@@ -963,36 +1023,31 @@ void ServerHandler::reset()
 {
 	UserMessage::message(UserMessage::DBG, false, std::string("ServerHandler::reset"));
 
-	//We are in the middle of a reset
-	if(comQueue_->state() == ServerComQueue::ResetState)
-	{
-		UserMessage::message(UserMessage::DBG, false, " --> skip reset - it is already running");
-		return;
-	}
-
 	//---------------------------------
 	// First part of reset: clearing
 	//---------------------------------
 
-	//Stop the timer
-	stopRefreshTimer();
+	if(comQueue_->prepareReset())
+	{
+		//Stop the timer
+		stopRefreshTimer();
 
-	//A safety measure
-	comQueue_->suspend();
+		// First part of reset: clear the tree
+		clearTree();
 
-	//Clear the tree.
-	clearTree();
+		// Second part of reset: loading
 
-	//--------------------------------------
-	// Second part of reset: loading
-	//--------------------------------------
+		//Indicate that we reload the defs
+		setActivity(LoadActivity);
 
-	//Indicate that we reload the defs
-	setActivity(LoadActivity);
-
-	//NOTE: at this point the queue is not running but reset() will start it.
-	//While the queue is in reset mode it does not accept tasks.
-	comQueue_->reset();
+		//NOTE: at this point the queue is not running but reset() will start it.
+		//While the queue is in reset mode it does not accept tasks.
+		comQueue_->reset();
+	}
+	else
+	{
+		UserMessage::message(UserMessage::DBG, false, " --> skip reset");
+	}
 }
 
 //The reset was successful
@@ -1099,7 +1154,7 @@ void ServerHandler::rescanTree()
 	stopRefreshTimer();
 
 	//Stop the queue as a safety measure: we do not want any changes during the rescan
-	comQueue_->suspend();
+	comQueue_->suspend(false);
 
 	//clear the tree
 	clearTree();
@@ -1265,6 +1320,23 @@ void ServerHandler::loadConf()
 {
 	//This will call confChanged for any non-default settings
 	conf_->loadSettings();
+}
+
+//--------------------------------------------
+// Other
+//--------------------------------------------
+
+void ServerHandler::searchBegan()
+{
+	UserMessage::message(UserMessage::DBG, false,"(" + name() + ") ServerHandler::searchBegan -- suspend queue");
+	comQueue_->suspend(true);
+}
+
+void ServerHandler::searchFinished()
+{
+	UserMessage::message(UserMessage::DBG, false, "(" + name() + ") ServerHandler::searchFinished -- start queue");
+	comQueue_->start();
+
 }
 
 //--------------------------------------------------------------

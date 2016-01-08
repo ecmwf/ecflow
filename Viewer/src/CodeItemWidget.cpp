@@ -10,7 +10,11 @@
 
 #include "CodeItemWidget.hpp"
 
-CodeItemWidget::CodeItemWidget(QWidget *parent) : QWidget(parent)
+#include <QDebug>
+#include <QFontDatabase>
+
+CodeItemWidget::CodeItemWidget(QWidget *parent) :
+  QWidget(parent)
 {
 	setupUi(this);
 
@@ -23,6 +27,9 @@ CodeItemWidget::CodeItemWidget(QWidget *parent) : QWidget(parent)
 	searchLine_->setVisible(false);
 }
 
+CodeItemWidget::~CodeItemWidget()
+{
+}
 
 void CodeItemWidget::removeSpacer()
 {
@@ -38,17 +45,26 @@ void CodeItemWidget::removeSpacer()
 	}
 }
 
-
-void CodeItemWidget::on_searchTb_toggled(bool b)
+void CodeItemWidget::on_searchTb__clicked()
 {
-	searchLine_->setVisible(b);
-	if(b)
-	{
-		searchLine_->setFocus();
-	}
+	searchLine_->setVisible(true);
+	searchLine_->setFocus();
+	searchLine_->selectAll();
 }
 
 void CodeItemWidget::on_gotoLineTb__clicked()
 {
 	textEdit_->gotoLine();
+}
+
+void CodeItemWidget::on_fontSizeUpTb__clicked()
+{
+	//We need to call a custom slot here instead of "zoomIn"!!!
+	textEdit_->slotZoomIn();
+}
+
+void CodeItemWidget::on_fontSizeDownTb__clicked()
+{
+	//We need to call a custom slot here instead of "zoomOut"!!!
+	textEdit_->slotZoomOut();
 }

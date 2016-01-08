@@ -46,6 +46,7 @@ public:
 	void addToDashboard(const std::string& type);
 	void init();
 	void openDialog(VInfo_ptr,const std::string& type);
+	void addSearchDialog();
 
 	void writeSettings(VComboSettings*);
 	void readSettings(VComboSettings*);
@@ -64,6 +65,7 @@ Q_SIGNALS:
 	void itemInfoChanged(QString);
 	void currentWidgetChanged();
 	void selectionChanged(VInfo_ptr);
+	void contentsChanged();
 
 protected:
 	Dashboard* addWidget(QString);

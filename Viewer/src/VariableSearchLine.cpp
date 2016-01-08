@@ -21,7 +21,7 @@ VariableSearchLine::VariableSearchLine(QWidget *parent) :
     currentResultItem_(-1)
 {
 	label_->hide();
-
+	closeTb_->hide();
 }
 
 VariableSearchLine::~VariableSearchLine()

@@ -21,21 +21,21 @@ do
    esac
 done
 
-client="ecflow_client --host $ECF_NODE --port $ECF_PORT"
+client="ecflow_client --host=$ECF_NODE --port=$ECF_PORT"
 which ecflow_client || module load ecflow
 if [[ -f $ECF_LOG ]]; then
-    ecflow_client --server_load $ECF_LOG
+    ecflow_client --server_load=$ECF_LOG
 elif [[ "$ECF_LOG" = /* ]]; then
     $SSH $ECF_NODE $O -p $ECF_PORT -l $ECF_LOG -n $ECF_NODE -h $ECF_HOME
 elif [[ -f $ECF_HOME/$ECF_LOG ]]; then
-    ecflow_client --server_load $ECF_HOME/$ECF_LOG
+    ecflow_client --server_load=$ECF_HOME/$ECF_LOG
 elif ! `$client --ping`; then
     echo "server is not responding"
     exit 1
 elif [[ $ECF_NODE != $(uname -n) ]]; then # try remote
     $SSH $ECF_NODE $O -p $ECF_PORT -l $ECF_LOG -n $ECF_NODE -h $ECF_HOME
 else
-    $client --server_load || $client --server_load $ECF_LOG || $client --server_load $ECF_HOME/$ECF_LOG 
+    $client --server_load || $client --server_load=$ECF_LOG || $client --server_load=$ECF_HOME/$ECF_LOG 
 fi
 
 $VIEWER ${ECF_NODE}.${ECF_PORT}.png

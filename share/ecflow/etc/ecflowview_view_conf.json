@@ -9,7 +9,7 @@
                     "values_label" : "Text in status rectangle (classic)/Separate text and status rectangle"
                 },    
                 "node_gradient" : {
-                    "label" : "Gradient shading for nodes",
+                    "label" : "Use gradient shading",
                     "default" : "true"
                 },    
                 "fontSize" : {
@@ -22,55 +22,57 @@
             },
             "tree": {
             	
-                "font" : {
-					"label" : "Font",
-					"default": "font(Sans Serif,9,-1,5,50,0,0,0,0,0)"
+                "nodeFont" : {
+					"label" : "Nodes",
+					"default": "font(,)"
 				},
+				 
+				"attributeFont" : {
+                    "label" : "Attributes",
+                    "default": "font(,)"
+                },
+				
 				"display_child_count" : {
 					"label" : "Display number of children for servers/suites",
 					"default": "true"
 				}, 
 				
-				"nodeFontSize" : {
-                    "label": "Nodes",
-                    "suffix" : "points",                                           
-                    "default": "9",
-                    "min" : "7",
-                    "max" : "32"
-                  },  
-                  
-                 "attributeFontSize" : {
-                    "label" : "Attributes",
-                    "suffix" : "points",                                           
-                    "default": "8",
-                    "min" : "7",
-                    "max" : "32"
-                  },
-                 "indentation" : {
+				"background"  : {
+				    "label"   :  "Background colour",
+				    "default" : "rgb(250,250,250)"
+				},
+                "indentation" : {
                     "label" : "Indentation",
                     "suffix" : "pixels",
                     "default" : "10",
                     "min" : "0",
                     "max" : "100"  
-                 }      	          
+                 },
+                 "defaultAttributes" : {
+                    "label" : "Default visible attributes",
+                    "default" : "meter/event/repeat/trigger/label/time/date/limit/limiter/late",
+                    "multi"   : "true",
+                    "values"  : "meter/event/repeat/trigger/label/time/date/limit/limiter/late/var/genvar",
+                    "values_label" : "Meters/Events/Repeats/Triggers/Labels/Times/Dates/Limits/Limiters/Late/Variables/Generated variables"
+                 },
+                 "attributesPolicy" : {
+                    "label" : "In new tree views show",
+                    "default" : "default",
+                    "values"  : "default/last",
+                    "values_label" : "default visible attributes/attributes from last modified view"
+                 }          	         
             },
 
             "table": {
             
-            	"font" : {
+            	"background"  : {
+                    "label"   : "Background colour",
+                    "default" : "rgb(250,250,250)"
+                },               
+                "font" : {
  					"label" : "Font",
- 					"default": "font()"
- 				},
- 				
- 				"fontSize" : {
-                    "label": "Table view",
-                    "suffix" : "points",                                           
-                    "default": "9",
-                    "min" : "7",
-                    "max" : "20"
-                  } 
- 				
- 				
+ 					"default": "font(,)"
+ 				} 				
 			},
 			
 	       "textEditor" : {
@@ -83,8 +85,30 @@
                     "max" : "20"
                   } 
                  
-			} 
-		     
+			} 		     
+    },
+    
+    "query_columns": {
+        
+        "server" : {
+            "label" : "Server",
+            "tooltip" : "Server"
+        },
+        "path" : {
+            "label" : "Node",
+            "tooltip" : "Node"
+        },
+        "status" : {
+            "label" : "State",
+            "tooltip" : "Node status"
+        },
+        "type" : {
+            "label" : "Type",
+            "tooltip" : "Node type"
+        },
+        "attribute" : {
+            "label" : "Attribute"
+        }       
     },
     
     "table_columns": {

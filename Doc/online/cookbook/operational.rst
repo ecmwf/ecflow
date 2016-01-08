@@ -184,7 +184,7 @@ an 'admin' suite will be required:
 * to ensure that ecflow logfile is not filling up the disk, nor
   touching a quota limit, issuing regularly the command::
 
-    ecflow_client --port %ECF_PORT% --host %ECF_NODE% --log=new
+    ecflow_client --port=%ECF_PORT% --host=%ECF_NODE% --log=new
 
 * to duplicate the checkpoint file, on a remote, backup server, or a
   slower long term archive system. (to handle the case when disk

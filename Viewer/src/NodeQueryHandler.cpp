@@ -41,7 +41,7 @@ NodeQuery* NodeQueryHandler::add(const std::string& name)
 
 NodeQuery* NodeQueryHandler::add(const std::string& name,const std::string& query)
 {
-	NodeQuery *item=new NodeQuery(name,query);
+	NodeQuery *item=new NodeQuery(name);
 	items_.push_back(item);
 	return item;
 }

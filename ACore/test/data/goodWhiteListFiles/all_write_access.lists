@@ -1,0 +1,14 @@
+
+4.4.14   # comment
+
+# These user have read and write access to the server
+uid1  
+uid2   
+cog    
+*     # all users have read and write access 
+
+# Read only users
+-*
+-fred # a comment
+-bill # a comment
+-jake # a comment

@@ -7,37 +7,45 @@
 // nor does it submit to any jurisdiction.
 //============================================================================
 
-#ifndef OUTPUTPROVIDER_HPP_
-#define OUTPUTPROVIDER_HPP_
+#ifndef OUTPUTFILEPROVIDER_HPP_
+#define OUTPUTFILEPROVIDER_HPP_
 
-#include "VDir.hpp"
+#include <QObject>
+
 #include "VInfo.hpp"
 #include "InfoProvider.hpp"
 #include "VTask.hpp"
 #include "VTaskObserver.hpp"
 
-class OutputProvider : public InfoProvider
+class OutputFileClient;
+
+class OutputFileProvider : public QObject, public InfoProvider
 {
+Q_OBJECT
+
 public:
-	 explicit OutputProvider(InfoPresenter* owner) :
-		 InfoProvider(owner,VTask::OutputTask) {}
+	 explicit OutputFileProvider(InfoPresenter* owner);
 
 	 void visit(VInfoNode*);
-
-	 //Get the contents of the jobout directory
-	 VDir_ptr directory();
+	 void clear();
 
 	 //Get a particular jobout file
 	 void file(const std::string& fileName);
 
 	 std::string joboutFileName() const;
 
+private Q_SLOTS:
+	void slotOutputClientError(QString);
+	void slotOutputClientProgress(QString);
+	void slotOutputClientFinished();
+
 private:
 	 void fetchFile(ServerHandler *server,VNode *n,const std::string& fileName,bool isJobout);
-	 bool fetchFileViaLogServer(VNode *n,const std::string& fileName);
-	 VDir_ptr fetchDirViaLogServer(VNode *n,const std::string& fileName);
-	 VDir_ptr fetchLocalDir(const std::string& path);
+	 void fetchJoboutViaServer(ServerHandler *server,VNode *n,const std::string&);
+	 bool fetchFileViaOutputClient(VNode *n,const std::string& fileName);
+	 bool fetchLocalFile(const std::string& fileName);
 
+	 OutputFileClient *outClient_;
 };
 
 #endif

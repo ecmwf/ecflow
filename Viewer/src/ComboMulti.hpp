@@ -9,14 +9,24 @@ class ComboMulti: public QComboBox
 Q_OBJECT;
 
 public:
-    explicit ComboMulti(QWidget *widget = 0);
+    enum Mode {BasicMode,FilterMode};
+
+    enum CustomItemRole {SelectRole = Qt::UserRole+1};
+
+	explicit ComboMulti(QWidget *widget = 0);
     virtual ~ComboMulti();
     bool eventFilter(QObject *object, QEvent *event);
     virtual void paintEvent(QPaintEvent *);
     void setDisplayText(QString text);
     QString displayText() const;
+    bool hasSelection() const {return !selection_.isEmpty();}
     QStringList selection() const {return selection_;}
+    QStringList all() const;
+    QStringList selectionData() const;
     void selectSoleItem();
+    void setSelection(QStringList);
+    void setSelectionByData(QStringList);
+    void setMode(Mode);
 
 public Q_SLOTS:
     void slotChecked();
@@ -26,7 +36,9 @@ Q_SIGNALS:
 	void selectionChanged();
 
 private:
-    QString dpyText_;
+    Mode mode_;
+    bool elide_;
+	QString dpyText_;
     QStringList selection_;
 };
 

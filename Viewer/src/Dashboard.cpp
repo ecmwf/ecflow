@@ -28,11 +28,14 @@
 #include <QLabel>
 #include <QDockWidget>
 #include <QToolButton>
+#include "NodeSearchDialog.hpp"
+#include "NodeSearchWidget.hpp"
 
 int Dashboard::maxWidgetNum_=20;
 
 Dashboard::Dashboard(QString rootNode,QWidget *parent) :
-        QMainWindow(parent)
+   QMainWindow(parent),
+   settingsAreRead_(false)
 {
 	//We use the mainwindow as a widget. Its task is
 	//to dock all the component widgets!
@@ -40,6 +43,7 @@ Dashboard::Dashboard(QString rootNode,QWidget *parent) :
 
 	//The serverfilter. It holds the list of servers displayed by this dashboard.
 	serverFilter_=new ServerFilter();
+	serverFilter_->addObserver(this);
 
 	titleHandler_=new DashboardTitle(serverFilter_,this);
 
@@ -59,6 +63,7 @@ Dashboard::Dashboard(QString rootNode,QWidget *parent) :
 
 Dashboard::~Dashboard()
 {
+	serverFilter_->removeObserver(this);
 	delete serverFilter_;
 }
 
@@ -78,6 +83,9 @@ DashboardWidget* Dashboard::addWidgetCore(const std::string& type)
 		connect(ctl,SIGNAL(popInfoPanel(VInfo_ptr,QString)),
 				this,SLOT(slotPopInfoPanel(VInfo_ptr,QString)));
 
+		connect(ctl,SIGNAL(dashboardCommand(VInfo_ptr,QString)),
+				this,SLOT(slotCommand(VInfo_ptr,QString)));
+
 		w=ctl;
 	}
 	else if(type == "table")
@@ -89,6 +97,9 @@ DashboardWidget* Dashboard::addWidgetCore(const std::string& type)
 
 		connect(ctl,SIGNAL(popInfoPanel(VInfo_ptr,QString)),
 				this,SLOT(slotPopInfoPanel(VInfo_ptr,QString)));
+
+		connect(ctl,SIGNAL(dashboardCommand(VInfo_ptr,QString)),
+				this,SLOT(slotCommand(VInfo_ptr,QString)));
 
 		w=ctl;
 	}
@@ -179,6 +190,42 @@ DashboardWidget* Dashboard::addDialog(const std::string& type)
     return w;
 }
 
+void Dashboard::addSearchDialog()
+{
+	//It will delete itself on close!!
+	NodeSearchDialog* d=new NodeSearchDialog(this);
+	d->queryWidget()->setServerFilter(serverFilter_);
+
+	for(int i=0; i < widgets_.count(); i++)
+	{
+		if(widgets_.at(i)->type() == "tree")
+		{
+			connect(d->queryWidget(),SIGNAL(selectionChanged(VInfo_ptr)),
+				    widgets_.at(i),SLOT(setCurrentSelection(VInfo_ptr)));
+		}
+	}
+
+	d->show();
+}
+
+void Dashboard::addSearchDialog(VInfo_ptr info)
+{
+	//It will delete itself on close!!
+	NodeSearchDialog* d=new NodeSearchDialog(this);
+	d->queryWidget()->setServerFilter(serverFilter_);
+	d->queryWidget()->setRootNode(info);
+
+	for(int i=0; i < widgets_.count(); i++)
+	{
+		if(widgets_.at(i)->type() == "tree")
+		{
+			connect(d->queryWidget(),SIGNAL(selectionChanged(VInfo_ptr)),
+				    widgets_.at(i),SLOT(setCurrentSelection(VInfo_ptr)));
+		}
+	}
+
+	d->show();
+}
 
 void Dashboard::slotDockClose()
 {
@@ -232,6 +279,19 @@ void Dashboard::slotPopInfoPanel(VInfo_ptr info,QString name)
 void Dashboard::slotTitle(QString s,QPixmap p)
 {
 	Q_EMIT titleChanged(this,s,p);
+}
+
+
+
+void Dashboard::slotCommand(VInfo_ptr info,QString cmd)
+{
+	if(!info || !info.get() )
+		return;
+
+	if(cmd == "search")
+	{
+		addSearchDialog(info);
+	}
 }
 
 //------------------------
@@ -304,6 +364,8 @@ void Dashboard::writeSettings(VComboSettings* vs)
 
 void Dashboard::readSettings(VComboSettings* vs)
 {
+	settingsAreRead_=true;
+
 	serverFilter_->readSettings(vs);
 
 	Q_FOREACH(QWidget* w,findChildren<QDockWidget*>())
@@ -337,9 +399,14 @@ void Dashboard::readSettings(VComboSettings* vs)
 	//the the dockwidgets's objectname, so that has to be unique. We need to call
 	//it when the dockwidgets have already been created.
 	if(vs->containsQs("state"))
+	{
+		qDebug() << vs->getQs("state").toByteArray();
 		restoreState(vs->getQs("state").toByteArray());
+	}
 
 	selectFirstServerInView();
+
+	settingsAreRead_=false;
 }
 
 
@@ -394,4 +461,29 @@ std::string Dashboard::widgetSettingsId(int i)
 {
 	return "widget_" + boost::lexical_cast<std::string>(i);
 }
+
+void Dashboard::notifyServerFilterAdded(ServerItem* item)
+{
+	if(!settingsAreRead_)
+		Q_EMIT contentsChanged();
+}
+
+void Dashboard::notifyServerFilterRemoved(ServerItem* item)
+{
+	if(!settingsAreRead_)
+		Q_EMIT contentsChanged();
+}
+
+void Dashboard::notifyServerFilterChanged(ServerItem*)
+{
+	if(!settingsAreRead_)
+		Q_EMIT contentsChanged();
+}
+
+void Dashboard::notifyServerFilterDelete()
+{
+	//if(!settingsAreRead_)
+	//	Q_EMIT contentsChanged();
+}
+
 

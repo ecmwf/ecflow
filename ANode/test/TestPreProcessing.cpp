@@ -23,7 +23,6 @@
 #include "Suite.hpp"
 #include "Family.hpp"
 #include "Task.hpp"
-#include "EcfFile.hpp"
 #include "File.hpp"
 #include "JobsParam.hpp"
 #include "Str.hpp"
@@ -180,14 +179,14 @@ void test_sms_preprocessing(const std::string& directory, bool pass)
 	std::vector<Task*> theTasks;
  	theDefs.getAllTasks(theTasks);
 
-	// Override ECF_HOME.   ECF_HOME is need to locate to the ecf files
+	// Override ECF_HOME.   ECF_HOME is need to locate the ecf files
 	theDefs.set_server().add_or_update_user_variables(Str::ECF_HOME(),smshome);
 
 	/// begin , will cause creation of generated variables. The generated variables
 	/// are used in client scripts(sms) and used to locate the sms files
 	theDefs.beginAll();
 
-	// Test Job creator, this will pre-process and perform variable substitution on sms files
+	// Test Job creator, this will pre-process and perform variable substitution on ecf files
 	BOOST_FOREACH(Task* t, theTasks) {
 
 	   //cout << "task " << t->absNodePath() << "\n";

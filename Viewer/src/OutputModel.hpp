@@ -2,6 +2,7 @@
 #define OUTPUTMODEL_H
 
 #include <QAbstractItemModel>
+#include <QDateTime>
 #include <QSortFilterProxyModel>
 
 #include "NodeObserver.hpp"
@@ -31,8 +32,8 @@ public:
 protected:
    	bool hasData() const;
    	QString formatSize(unsigned int size) const;
-   	QString formatDate(const std::time_t&) const;
-   	QString formatAgo(const std::time_t& t) const;
+   	QString formatDate(QDateTime) const;
+   	QString formatAgo(QDateTime) const;
 
    	VDir_ptr dir_;
 };

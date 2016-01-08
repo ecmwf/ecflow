@@ -95,6 +95,33 @@ if __name__ == "__main__":
     suite.delete_limit("limitName1"); assert len(list(suite.limits)) == 3, "Expected 3 limits since we just deleted one limitName1" 
     suite.delete_limit("");           assert len(list(suite.limits)) == 0, "Expected 0 limits since we just deleted all of them"
 
+    #===========================================================================
+    # Test Limit and node paths, ECFLOW-518
+    #===========================================================================
+    the_limit = ecflow.Limit("limitName1", 10)
+    assert the_limit.name() == "limitName1", "name not as expected"
+    assert the_limit.value() == 0 ,"Expected limit value of 0"
+    assert the_limit.limit() == 10 ,"Expected limit of 10"
+    assert len(list(the_limit.node_paths())) == 0 ,"Expected nodes which have consumed a limit to be empty"
+    
+    the_limit.increment(1,"/path1") ;  assert the_limit.value() == 1 ,"Expected limit value of 1"
+    the_limit.increment(1,"/path2") ;  assert the_limit.value() == 2 ,"Expected limit value of 2"
+    the_limit.increment(1,"/path3") ;  assert the_limit.value() == 3 ,"Expected limit value of 3"
+    the_limit.increment(1,"/path4") ;  assert the_limit.value() == 4 ,"Expected limit value of 4"
+    for path in the_limit.node_paths(): print path
+    assert len(list(the_limit.node_paths())) == 4 ,"expected 4 path"
+    the_limit.decrement(1,"/path1") ; assert the_limit.value() == 3 ,"Expected limit value of 3"
+    the_limit.decrement(1,"/path2") ; assert the_limit.value() == 2 ,"Expected limit value of 2"
+    the_limit.decrement(1,"/path3") ; assert the_limit.value() == 1 ,"Expected limit value of 1"
+    the_limit.decrement(1,"/path4") ; assert the_limit.value() == 0 ,"Expected limit value of 0"
+    assert len(list(the_limit.node_paths())) == 0 ,"Expected nodes which have consumed a limit to be empty"
+
+    the_limit.increment(1,"/path1") # add same path, should only consume one token
+    the_limit.increment(1,"/path1")
+    the_limit.increment(1,"/path1")
+    the_limit.increment(1,"/path1")
+    assert len(list(the_limit.node_paths())) == 1 ,"expected 1 path"
+    assert the_limit.value() == 1 ,"Expected limit value of 1"
 
     #===========================================================================
     # add and delete inlimits

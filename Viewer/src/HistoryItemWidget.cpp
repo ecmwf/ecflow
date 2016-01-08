@@ -20,6 +20,7 @@ HistoryItemWidget::HistoryItemWidget(QWidget *parent) : QWidget(parent)
 	setupUi(this);
 
 	searchTb_->setEnabled(false);
+	searchTb_->setVisible(false);
 	searchLine_->setVisible(false);
 
 	infoProvider_=new LogProvider(this);

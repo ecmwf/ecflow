@@ -10,84 +10,47 @@
 #ifndef VIEWER_SRC_ATTRIBUTESEARCHPANEL_HPP_
 #define VIEWER_SRC_ATTRIBUTESEARCHPANEL_HPP_
 
+#include <QMap>
 #include <QWidget>
 
-#include "ui_AttributeSearchPanel.h"
-#include "ui_EventSearchWidget.h"
-#include "ui_LabelSearchWidget.h"
-
+class QGridLayout;
 class QStandardItemModel;
+class AttrGroupDesc;
+class NodeQuery;
 
-class AttributeSearchWidget : public QWidget
-{
-	Q_OBJECT
-
-public:
-	explicit AttributeSearchWidget(QString, QWidget* parent=0);
-	virtual QString query()=0;
-	QString labelName() const {return labelName_;}
-
-protected Q_SLOTS:
-	void buildQuery() {};
-
-Q_SIGNALS:
-	void queryChanged();
-
-protected:
-	QString labelName_;
-};
-
-
-class EventSearchWidget : public AttributeSearchWidget, protected Ui::EventSearchWidget
-{
-    Q_OBJECT
-
-public:
-    explicit EventSearchWidget(QWidget *parent = 0);
-    ~EventSearchWidget() {};
-    QString query();
-
-protected Q_SLOTS:
-    void slotTextChanged(QString);
-};
-
-class LabelSearchWidget : public AttributeSearchWidget, protected Ui::LabelSearchWidget
-{
-    Q_OBJECT
-
-public:
-    explicit LabelSearchWidget(QWidget *parent = 0);
-    ~LabelSearchWidget() {};
-    QString query();
-
-protected Q_SLOTS:
-    void slotTextChanged(QString);
-};
-
-class AttributeSearchPanel : public QWidget, protected Ui::AttributeSearchPanel
+class AttributeSearchPanel : public QWidget
 {
     Q_OBJECT
 
 public:
     explicit AttributeSearchPanel(QWidget *parent = 0);
-    ~AttributeSearchPanel() {};
-    QString query() const {return query_;}
+    ~AttributeSearchPanel();
+    //QString query() const {return query_;}
+    QStringList groupNames() const;
+    void setQuery(NodeQuery*);
+    void init();
 
 public Q_SLOTS:
     void buildQuery();
+    void setSelection(QStringList);
+    void clearSelection();
 
 protected Q_SLOTS:
-	void slotChangePage(const QModelIndex& idx);
+	void slotTextEdited(QString);
+	void slotMatchChanged(int);
+	void slotCaseChanged(bool);
 
 Q_SIGNALS:
 	void queryChanged();
 
 private:
-	void addPage(AttributeSearchWidget*);
+	void addStringLine(QString labelTxt,QString text,QString group);
 
-	QMap<QString,AttributeSearchWidget*> pages_;
-	QStandardItemModel* model_;
-	QString query_;
+	NodeQuery* query_;
+	QMap<QString,AttrGroupDesc*> groups_;
+	QGridLayout* grid_;
+	QStringList selection_;
+
 };
 
 #endif /* VIEWER_SRC_ATTRIBUTESEARCHPANEL_HPP_ */

@@ -12,7 +12,8 @@
 
 #include <string>
 #include <vector>
-#include <ctime>
+
+#include <QDateTime>
 
 #include <boost/shared_ptr.hpp>
 
@@ -25,7 +26,7 @@ public:
     //int gid_;
   	unsigned int size_;
   	//int atime_;
-  	std::time_t mtime_;
+  	QDateTime mtime_;
   	//int ctime_;
   	std::string method_;
 };

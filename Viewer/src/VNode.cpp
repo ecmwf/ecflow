@@ -32,7 +32,8 @@ VNode::VNode(VNode* parent,node_ptr node) :
     node_(node),
     parent_(parent),
     attrNum_(-1),
-    cachedAttrNum_(-1)
+    cachedAttrNum_(-1),
+	index_(-1)
 {
 	if(parent_)
 		parent_->addChild(this);
@@ -428,6 +429,30 @@ LogServer_ptr VNode::logServer()
 
 	return lsv;
 }
+
+bool VNode::logServer(std::string& host,std::string& port)
+{
+	if(!node_)
+		return false;
+
+	host=findInheritedVariable("ECF_LOGHOST",true);
+	port=findInheritedVariable("ECF_LOGPORT");
+	//if(logHost.empty())
+	//{
+	//	logHost=findInheritedVariable("LOGHOST",true);
+	//	logPort=findInheritedVariable("LOGPORT");
+	//}
+
+	std::string micro=findInheritedVariable("ECF_MICRO");
+	if(!host.empty() && !port.empty() &&
+	  (micro.empty() || host.find(micro) ==  std::string::npos))
+	{
+		return true;
+	}
+
+	return false;
+}
+
 
 bool VNode::isAncestor(const VNode* n)
 {
@@ -856,6 +881,8 @@ void VServer::endScan()
 	{
 		nodes_.reserve(totalNum_);
 		collect(nodes_);
+		for(size_t i=0; i < nodes_.size(); i++)
+			nodes_[i]->setIndex(i);
 	}
 }
 
@@ -904,17 +931,6 @@ VNode* VServer::nodeAt(int idx) const
 	return nodes_.at(idx);
 }
 
-int VServer::indexOfNode(const VNode* vn) const
-{
-	for(int i=0; i < nodes_.size(); i++)
-	{
-		if(nodes_.at(i) == vn)
-			return i;
-	}
-	return -1;
-}
-
-
 //----------------------------------------------
 // Update
 //----------------------------------------------
@@ -925,17 +941,6 @@ void VServer::beginUpdate(VNode* node,const std::vector<ecf::Aspect::Type>& aspe
 	//views do not know about this change. So at this point (this is the begin step of the update)
 	//all VNode functions have to return the values valid before the update happened!!!!!!!
 	//The main goal of this function is to cleverly provide the views with some information about the nature of the update.
-
-	//We need to update the cache server variables
-	if(node == this)
-	{
-		if(std::find(aspect.begin(),aspect.end(),ecf::Aspect::SERVER_VARIABLE) != aspect.end() ||
-		   std::find(aspect.begin(),aspect.end(),ecf::Aspect::FLAG) != aspect.end())
-		{
-			//This will use the defs!!!
-			updateCache();
-		}
-	}
 
 	//Update the generated variables. There is no notification about their change so we have to to do it!!!
 	if(node->node())
@@ -1020,6 +1025,17 @@ void VServer::endUpdate(VNode* node,const std::vector<ecf::Aspect::Type>& aspect
 	{
 		//This call updates the number of attributes stored in the VNode
 		node->endUpdateAttrNum();
+	}
+}
+
+void VServer::beginUpdate(const std::vector<ecf::Aspect::Type>& aspect)
+{
+	//We need to update the cached server variables
+	if(std::find(aspect.begin(),aspect.end(),ecf::Aspect::SERVER_VARIABLE) != aspect.end() ||
+	   std::find(aspect.begin(),aspect.end(),ecf::Aspect::FLAG) != aspect.end())
+	{
+		//This will use the defs!!!
+		updateCache();
 	}
 }
 

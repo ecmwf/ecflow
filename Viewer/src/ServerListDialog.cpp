@@ -213,7 +213,6 @@ ServerListDialog::ServerListDialog(Mode mode,ServerFilter *filter,QWidget *paren
 {
 	setupUi(this);
 
-
 	QString wt=windowTitle();
 	wt+="  -  " + QString::fromStdString(VConfig::instance()->appLongName());
 	setWindowTitle(wt);
@@ -710,7 +709,7 @@ QVariant ServerListModel::headerData(int section,Qt::Orientation ori,int role) c
 		switch(section)
 		{
     		case LoadColumn: return tr("Indicates if the server is <b>loaded</b> in the <b>current</b> tab");
-    		case NameColumn: return tr("Server name is a freely customisable <b>nickname</b>. It is only used only by the </b>viewer</b>.");
+    		case NameColumn: return tr("Server name is a freely customisable <b>nickname</b>. It is only used by the </b>viewer</b>.");
     		case HostColumn: return tr("Hostname of the server");
     		case PortColumn: return tr("Port number of the server");
     		case FavouriteColumn: return tr("Indicates if a server is a <b>favourite</b>. Only favourite and loaded servers \

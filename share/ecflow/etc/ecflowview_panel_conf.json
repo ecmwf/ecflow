@@ -1,0 +1,61 @@
+{
+    "panel":  {
+          
+        "search" : {
+            "highlightColour" : {
+                "label" : "Highlight colour",
+                "default" : "rgb(250,250,50)"
+            }    
+        },        
+                     
+        
+        "overview": {                
+            "font" : {
+                "label" : "Info tab",
+                "default": "font(Monospace,)"
+            }    
+        },
+        "manual" : {
+                    
+             "font" : {
+                 "label" : "Manual tab",
+                 "default": "font(Monospace,)"
+             }
+        },
+        "job" : {
+                    
+             "font" : {
+                 "label" : "Job tab",
+                 "default": "font(Monospace,)"
+             }
+        },
+        "script" : {
+                    
+             "font" : {
+                 "label" : "Script tab",
+                 "default": "font(Monospace,)"
+             }
+        },
+        "output" : {
+                    
+             "font" : {
+                 "label" : "Output tab",
+                 "default": "font(Monospace,)"
+             }
+        },  
+        "why" : {
+                    
+             "font" : {
+                 "label" : "Why tab",
+                 "default": "font(Monospace,)"
+             }
+        },   
+        "edit" : {
+                    
+             "font" : {
+                 "label" : "Edit tab",
+                 "default": "font(Monospace,)"
+             }
+        }      
+    }                     
+}

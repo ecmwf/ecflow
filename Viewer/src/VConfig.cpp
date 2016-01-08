@@ -197,6 +197,7 @@ void VConfig::loadProperty(const boost::property_tree::ptree& pt,VProperty *prop
             VProperty *chProp=new VProperty(name);
             prop->addChild(chProp);
             loadProperty(ptProp,chProp);
+            chProp->adjustAfterLoad();
         }
         else
         {

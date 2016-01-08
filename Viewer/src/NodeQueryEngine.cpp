@@ -17,87 +17,130 @@
 #include "ServerDefsAccess.hpp"
 #include "ServerHandler.hpp"
 #include "UserMessage.hpp"
+#include "VFilter.hpp"
 #include "VNode.hpp"
 
+static bool metaRegistered=false;
 
 NodeQueryEngine::NodeQueryEngine(QObject* parent) :
 	QThread(parent),
-	query_(NULL),
-	parser_(NULL)
+	query_(new NodeQuery("tmp")),
+	parser_(NULL),
+	stopIt_(false),
+	cnt_(0),
+	scanCnt_(0),
+	maxNum_(250000),
+	chunkSize_(100),
+	rootNode_(0)
 {
+	//We will need to pass various non-Qt types via signals and slots
+	//So we need to register these types.
+	if(!metaRegistered)
+	{
+		qRegisterMetaType<NodeQueryResultTmp_ptr>("NodeQueryResultTmp_ptr");
+		qRegisterMetaType<QList<NodeQueryResultTmp_ptr> >("QList<NodeQueryResultTmp_ptr>");
+		metaRegistered=true;
+	}
+
+	connect(this,SIGNAL(finished()),
+			this,SLOT(slotFinished()));
 }
 
 NodeQueryEngine::~NodeQueryEngine()
 {
-	if(query_)
-		delete query_;
+	delete query_;
+
+	if(parser_)
+		delete parser_;
 }
 
-void NodeQueryEngine::exec(NodeQuery* query)
+void NodeQueryEngine::runQuery(NodeQuery* query,QStringList allServers)
 {
 	if(isRunning())
 		wait();
 
-	if(query_)
-	{
-		delete query_;
-		query_=NULL;
-	}
+	stopIt_=false;
+	res_.clear();
+	cnt_=0;
+	scanCnt_=0;
+	rootNode_=0;
 
-	query_=query->clone();
+	query_->swap(query);
+
+	maxNum_=query_->maxNum();
 
 	servers_.clear();
 
 	if(parser_)
 		delete parser_;
 
-	parser_=NodeExpressionParser::parseWholeExpression(query_->query());
+	UserMessage::message(UserMessage::DBG,false, std::string("Query: " + query_->query().toStdString()));
+
+	parser_=NodeExpressionParser::parseWholeExpression(query_->query().toStdString(), query->caseSensitive());
 	if(parser_ == NULL)
 	{
-		UserMessage::message(UserMessage::ERROR, true, std::string("Error, unable to parse enabled condition: " + query_->query()));
+		UserMessage::message(UserMessage::ERROR,true, std::string("Error, unable to parse enabled condition: " + query_->query().toStdString()));
 		return;
 	}
 
-	for(std::vector<std::string>::const_iterator it=query_->servers().begin(); it != query_->servers().end(); ++it)
+	QStringList serverNames=query_->servers();
+	if(query_->servers().isEmpty())
+		serverNames=allServers;
+
+	Q_FOREACH(QString s,serverNames)
 	{
-		if(ServerHandler* server=ServerHandler::find(*it))
+		if(ServerHandler* server=ServerHandler::find(s.toStdString()))
+		{
 			servers_.push_back(server);
+		}
+	}
+
+	if(!query_->rootNode().empty())
+	{
+		if(servers_.size() != 1)
+			return;
+
+		rootNode_=servers_.at(0)->vRoot()->find(query_->rootNode());
+	}
+
+	//Notify the servers that the search began
+	Q_FOREACH(ServerHandler* s,servers_)
+	{
+		s->searchBegan();
 	}
 
 	//Start thread execution
 	start();
 }
 
-void NodeQueryEngine::exec(const NodeQuery& query,NodeFilter* filter)
+void NodeQueryEngine::stopQuery()
 {
-	/*query_=query;
-
-	if(parser_)
-		delete parser_;
-
-	parser_=NodeExpressionParser::parseWholeExpression(query_.query());
-	if(parser_ == NULL)
-	{
-		UserMessage::message(UserMessage::ERROR, true, std::string("Error, unable to parse enabled condition: " + query_.query()));
-		return;
-	}*/
-	//run(server,server->vRoot());
+	stopIt_=true;
 }
-
 
 void NodeQueryEngine::run()
 {
-	for(std::vector<ServerHandler*>::const_iterator it=servers_.begin(); it != servers_.end(); ++it)
+	if(rootNode_)
 	{
-		ServerHandler *server=*it;
-
-		//Set the mutex on the server defs. We do not allow sycn while the
-		//search is running.
-		//TODO: avoid blocking the main (gui) thread
-		//ServerDefsAccess defs(server);
-
-		run(server,server->vRoot());
+		run(servers_.at(0),rootNode_);
 	}
+	else
+	{
+		for(std::vector<ServerHandler*>::const_iterator it=servers_.begin(); it != servers_.end(); ++it)
+		{
+			ServerHandler *server=*it;
+
+			run(server,server->vRoot());
+
+			if(stopIt_)
+			{
+				broadcastChunk(true);
+				return;
+			}
+		}
+	}
+
+	broadcastChunk(true);
 }
 
 void NodeQueryEngine::run(ServerHandler *server,VNode* root)
@@ -107,14 +150,130 @@ void NodeQueryEngine::run(ServerHandler *server,VNode* root)
 
 void NodeQueryEngine::runRecursively(VNode *node)
 {
+	if(stopIt_)
+		return;
+
 	if(parser_->execute(node))
 	{
-		UserMessage::message(UserMessage::DBG,false,"FOUND: " + node->absNodePath());
+		broadcastFind(node);
+	}
 
-		QStringList  lst;
-		lst << QString::fromStdString(node->server()->name());
-		lst << QString::fromStdString(node->absNodePath());
-		Q_EMIT found(lst);
+	scanCnt_++;
+
+	for(int i=0; i < node->numOfChildren(); i++)
+	{
+		runRecursively(node->childAt(i));
+		if(stopIt_)
+			return;
+	}
+}
+
+void NodeQueryEngine::broadcastFind(VNode* node)
+{
+	NodeQueryResultTmp_ptr d(new NodeQueryResultTmp(node));
+
+	//Add to res vector
+	res_ << d;
+
+	broadcastChunk(false);
+
+	cnt_++;
+
+	if(cnt_ >= maxNum_)
+	{
+		broadcastChunk(true);
+		stopIt_=true;
+	}
+}
+
+void NodeQueryEngine::broadcastChunk(bool force)
+{
+	bool doIt=false;
+	if(!force)
+	{
+		if(res_.count() >= chunkSize_)
+		{
+			doIt=true;
+		}
+	}
+	else if(!res_.isEmpty())
+	{
+		doIt=true;
+	}
+
+	if(doIt)
+	{
+		Q_EMIT found(res_);
+		res_.clear();
+	}
+}
+
+void NodeQueryEngine::slotFinished()
+{
+	//Notify the servers that the search finished
+	Q_FOREACH(ServerHandler* s,servers_)
+	{
+		s->searchFinished();
+	}
+}
+
+void NodeQueryEngine::slotFailed()
+{
+
+}
+
+NodeFilterEngine::NodeFilterEngine(NodeFilter* owner) :
+	query_(new NodeQuery("tmp")),
+	parser_(NULL),
+	server_(NULL),
+	owner_(owner)
+{
+}
+
+NodeFilterEngine::~NodeFilterEngine()
+{
+	delete query_;
+
+	if(parser_)
+		delete parser_;
+}
+
+void NodeFilterEngine::setQuery(NodeQuery* query)
+{
+	query_->swap(query);
+
+	if(parser_)
+		delete parser_;
+
+	parser_=NodeExpressionParser::parseWholeExpression(query_->query().toStdString());
+	if(parser_ == NULL)
+	{
+		UserMessage::message(UserMessage::ERROR, true, std::string("Error, unable to parse enabled condition: " + query_->query().toStdString()));
+	}
+}
+
+
+void NodeFilterEngine::runQuery(ServerHandler* server)
+{
+	if(!query_)
+		return;
+
+	server_=server;
+	if(!server_)
+		return;
+
+	if(!parser_)
+		return;
+
+	runRecursively(server_->vRoot());
+}
+
+void NodeFilterEngine::runRecursively(VNode *node)
+{
+	if(!node->isServer() && parser_->execute(node))
+	{
+		//UserMessage::message(UserMessage::DBG,false,"FOUND: " + node->absNodePath());
+		owner_->res_[node->index()]=1;
 	}
 
 	for(int i=0; i < node->numOfChildren(); i++)
@@ -122,3 +281,18 @@ void NodeQueryEngine::runRecursively(VNode *node)
 		runRecursively(node->childAt(i));
 	}
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

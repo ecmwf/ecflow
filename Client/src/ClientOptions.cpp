@@ -74,8 +74,9 @@ Cmd_ptr ClientOptions::parse(int argc, char* argv[],ClientEnvironment* env) cons
    }
 
    // parse arguments into 'vm'.
+   //       --alter delete cron -w 0,1 10:00 /s1     # -w treated as option
+   //       --alter=/s1 change meter name -1         # -1 treated as option
    // Note: negative numbers get treated as options: i.e trying to change meter value to a negative number
-   //       --alter=/s1 change meter name -1
    //       To avoid negative numbers from being treated as option use, we need to change command line style:
    //       po::command_line_style::unix_style ^ po::command_line_style::allow_short
    boost::program_options::variables_map vm;
@@ -160,11 +161,11 @@ void ClientOptions::show_help(const std::string & help_cmd) const
       cout << Ecf::CLIENT_NAME() << " provides the command line interface, for interacting with the server:\n";
 
       cout << "Try:\n\n";
-      cout << "   " << Ecf::CLIENT_NAME() << " --help all       # List all commands, verbosely\n";
-      cout << "   " << Ecf::CLIENT_NAME() << " --help summary   # One line summary of all commands\n";
-      cout << "   " << Ecf::CLIENT_NAME() << " --help child     # One line summary of child commands\n";
-      cout << "   " << Ecf::CLIENT_NAME() << " --help user      # One line summary of user command\n";
-      cout << "   " << Ecf::CLIENT_NAME() << " --help <cmd>     # Detailed help on each command\n\n";
+      cout << "   " << Ecf::CLIENT_NAME() << " --help=all       # List all commands, verbosely\n";
+      cout << "   " << Ecf::CLIENT_NAME() << " --help=summary   # One line summary of all commands\n";
+      cout << "   " << Ecf::CLIENT_NAME() << " --help=child     # One line summary of child commands\n";
+      cout << "   " << Ecf::CLIENT_NAME() << " --help=user      # One line summary of user command\n";
+      cout << "   " << Ecf::CLIENT_NAME() << " --help=<cmd>     # Detailed help on each command\n\n";
 
       show_all_commands("Commands:");
     }
@@ -293,7 +294,7 @@ const char* client_env_description() {
             "| ECF_PORT |  <int>   | Mandatory* | The TCP/IP port to call on the server. Must be unique to a server |\n"
             "|----------|----------|------------|-------------------------------------------------------------------|\n\n"
             "* The host and port must be specified in order for the client to communicate with the server, this can \n"
-            "  be done by setting ECF_NODE, ECF_PORT or by specifying --host <host> --port <int> on the command line\n"
+            "  be done by setting ECF_NODE, ECF_PORT or by specifying --host=<host> --port=<int> on the command line\n"
             ;
 }
 

@@ -64,6 +64,7 @@ protected Q_SLOTS:
 	void slotSelectionChanged(VInfo_ptr);
 	void slotOpenInfoPanel();
 	void slotConfigChanged();
+	void slotContentsChanged();
 
 private:
     void init(MainWindow*);
@@ -83,6 +84,7 @@ private:
     static bool aboutToClose(MainWindow*);
     static bool aboutToQuit(MainWindow*);
     static void save(MainWindow *);
+    static void saveContents(MainWindow *);
     static MainWindow* findWindow(QWidget *childW);
     static void configChanged(MainWindow *);
 

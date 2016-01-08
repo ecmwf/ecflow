@@ -15,6 +15,7 @@
 
 #include <QFont>
 #include <QObject>
+#include <QSpinBox>
 #include <QVariant>
 
 class  QComboBox;
@@ -24,10 +25,26 @@ class  QLineEdit;
 class  QSpinBox;
 class  QToolButton;
 class  QWidget;
+class  ComboMulti;
 
 #include "VProperty.hpp"
 
 class PropertyLine;
+
+class FontSizeSpin : public QSpinBox
+{
+public:
+	FontSizeSpin(QWidget* parent=0);
+	void setFamily(QString);
+
+protected:
+	QString textFromValue(int value) const;
+
+	QList<int> vals_;
+
+};
+
+
 
 //-------------------------------------
 // Factory
@@ -77,6 +94,7 @@ public:
 	QToolButton* masterTb() {return masterTb_;};
 	VProperty* property() const {return prop_;}
 	VProperty* guiProperty() const {return guiProp_;}
+	virtual bool canExpand() const {return false;}
 
 	void addHelper(PropertyLine*);
 
@@ -188,11 +206,16 @@ public:
 private Q_SLOTS:
 	void slotEdit(bool);
 	void slotReset(QVariant);
+	void slotFamilyChanged(int);
+	void slotSizeChanged(int);
 
 protected:
 	void setEnabledEditable(bool);
 
 private:
+	QWidget* holderW_;
+	QComboBox* familyCb_;
+	QSpinBox* sizeSpin_;
 	QLabel* lName_;
 	QToolButton *tbEdit_;
 	QFont font_;
@@ -274,6 +297,34 @@ protected:
 
 protected:
 	QComboBox* cb_;
+};
+
+
+//-------------------------------------
+// Combo box editor
+//------------------------------------
+
+class ComboMultiPropertyLine : public PropertyLine
+{
+	Q_OBJECT
+
+public:
+	ComboMultiPropertyLine(VProperty* vProp,bool addLabel,QWidget * parent=0);
+	QWidget* item();
+	QWidget* button();
+	bool applyChange();
+	QVariant currentValue();
+	bool canExpand() const {return true;}
+
+public Q_SLOTS:
+	void slotCurrentChanged(int);
+	void slotReset(QVariant);
+
+protected:
+	void setEnabledEditable(bool);
+
+protected:
+	ComboMulti* cb_;
 };
 
 //-------------------------------------

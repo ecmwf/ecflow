@@ -13,8 +13,8 @@
 #include "Highlighter.hpp"
 #include "InfoProvider.hpp"
 #include "MessageLabel.hpp"
+#include "VConfig.hpp"
 #include "VReply.hpp"
-
 
 ManualItemWidget::ManualItemWidget(QWidget *parent) : CodeItemWidget(parent)
 {
@@ -25,6 +25,16 @@ ManualItemWidget::ManualItemWidget(QWidget *parent) : CodeItemWidget(parent)
     Highlighter* ih=new Highlighter(textEdit_->document(),"manual");
 
     infoProvider_=new ManualProvider(this);
+
+    infoProvider_=new JobProvider(this);
+
+	//Editor font
+	textEdit_->setFontProperty(VConfig::instance()->find("panel.manual.font"));
+
+}
+
+ManualItemWidget::~ManualItemWidget()
+{
 }
 
 QWidget* ManualItemWidget::realWidget()

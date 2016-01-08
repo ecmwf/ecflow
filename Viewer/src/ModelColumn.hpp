@@ -42,6 +42,7 @@ public:
 	int indexOf(const std::string&) const;
 	QString id(int i) const {assert(i>=0 && i < count()); return items_.at(i)->id_;}
 	QString label(int i) const {assert(i>=0 && i < count()); return items_.at(i)->label_;}
+	QString tooltip(int i) const {assert(i>=0 && i < count()); return items_.at(i)->tooltip_;}
 
 	static ModelColumn* def(const std::string& id);
 

@@ -124,7 +124,7 @@ const char* RunNodeCmd::desc() {
             "         If the path is /suite/family will recursively run all tasks\n"
             "         When providing multiple paths avoid running the same task twice\n"
             "Example:\n"
-            "  --run /suite/t1                    # run task t1\n"
+            "  --run=/suite/t1                    # run task t1\n"
             "Effect:\n"
             "     task t1; time 12:00             # will complete if run manually\n"
             "     task t2; time 10:00 13:00 01:00 # will run 4 times before completing\n"

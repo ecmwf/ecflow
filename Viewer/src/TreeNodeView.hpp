@@ -62,6 +62,7 @@ public Q_SLOTS:
 Q_SIGNALS:
 	void selectionChanged(VInfo_ptr);
 	void infoPanelCommand(VInfo_ptr,QString);
+	void dashboardCommand(VInfo_ptr,QString);
 
 protected:
 	QModelIndexList selectedList();
@@ -69,6 +70,7 @@ protected:
 	void saveExpand(ExpandNode *parentExpand,const QModelIndex& idx);
 	void restoreExpand(ExpandNode *expand,const VNode* node);
 	void adjustIndentation(int);
+	void adjustBackground(QColor col);
 
 	ActionHandler* actionHandler_;
 	ExpandState *expandState_;

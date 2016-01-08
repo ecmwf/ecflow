@@ -17,13 +17,16 @@
 #include "AbstractNodeModel.hpp"
 #include "PropertyMapper.hpp"
 
+int NodeViewDelegate::lighter_=150;
+
 static std::vector<std::string> propVec;
 
 NodeViewDelegate::NodeViewDelegate(QWidget *parent) :
     QStyledItemDelegate(parent),
     prop_(0),
 	iconSize_(16),
-	iconGap_(3)
+	iconGap_(3),
+	useStateGrad_(true)
 {
     /*//Property
 	if(propVec.empty())
@@ -56,6 +59,10 @@ NodeViewDelegate::NodeViewDelegate(QWidget *parent) :
 		QImage img=imgR.read();
 		errPix_=QPixmap(QPixmap::fromImage(img));
 	}
+
+	grad_.setCoordinateMode(QGradient::ObjectBoundingMode);
+	grad_.setStart(0,0);
+	grad_.setFinalStop(0,1);
 
 	attrRenderers_["meter"]=&NodeViewDelegate::renderMeter;
 	attrRenderers_["label"]=&NodeViewDelegate::renderLabel;
@@ -118,6 +125,65 @@ void NodeViewDelegate::adjustIconSize()
 }
 
 
+void NodeViewDelegate::renderStatus(QPainter *painter,const QModelIndex& index,
+                                    const QStyleOptionViewItemV4& option) const
+{
+    int offset=4;
+
+    QFontMetrics fm(font_);
+    int deltaH=(option.rect.height()-(fm.height()+4))/2;
+
+    //The initial filled rect (we will adjust its  width)
+    QRect fillRect=option.rect.adjusted(offset,deltaH,-offset,-deltaH-1);
+    if(option.state & QStyle::State_Selected)
+        fillRect.adjust(0,0,0,-0);
+
+    int currentRight=fillRect.right();
+
+    //The text rectangle
+    QString text=index.data(Qt::DisplayRole).toString();
+    int textWidth=fm.width(text);
+    QRect textRect = fillRect.adjusted(offset,0,0,0);
+    textRect.setWidth(textWidth);
+
+    if(textRect.right() > currentRight)
+    	currentRight=textRect.right();
+
+    //Define clipping
+    int rightPos=currentRight+1;
+    const bool setClipRect = rightPos > option.rect.right();
+    if(setClipRect)
+    {
+    	painter->save();
+    	QRect cr=option.rect.adjusted(0,0,-offset,0);
+    	painter->setClipRect(cr);
+    }
+
+    //Fill rect
+    QColor bg=index.data(Qt::BackgroundRole).value<QColor>();
+    QColor bgLight=bg.lighter(lighter_);
+    QBrush bgBrush;
+    if(useStateGrad_)
+    {
+       grad_.setColorAt(0,bgLight);
+       grad_.setColorAt(1,bg);
+       bgBrush=QBrush(grad_);
+    }
+    else
+       bgBrush=QBrush(bg);
+
+    painter->fillRect(fillRect,bgBrush);
+
+    //Draw text
+    painter->setFont(font_);
+    painter->setPen(Qt::black);
+    painter->drawText(textRect,Qt::AlignLeft | Qt::AlignVCenter,text);
+
+    if(setClipRect)
+    {
+        painter->restore();
+    }
+}
 
 //========================================================
 // data is encoded as a QStringList as follows:
@@ -333,7 +399,7 @@ void NodeViewDelegate::renderEvent(QPainter *painter,QStringList data,const QSty
 	QString name=data.at(1);
 	bool val=false;
 	if(data.count() > 2) val=(data.at(2) == "1");
-	QColor cCol=(val)?(Qt::blue):(Qt::gray);
+	QColor cCol=(val)?(Qt::blue):QColor(240,240,240);
 
 	int offset=2;
 
@@ -375,6 +441,7 @@ void NodeViewDelegate::renderEvent(QPainter *painter,QStringList data,const QSty
 
 	//Draw name
 	painter->setPen(Qt::black);
+	painter->setFont(font);
 	painter->drawText(nameRect,Qt::AlignLeft | Qt::AlignVCenter,name);
 
 	if(setClipRect)
@@ -494,9 +561,10 @@ void NodeViewDelegate::renderLimit(QPainter *painter,QStringList data,const QSty
 
 	QFontMetrics fm(attrFont_);
 	int offset=2;
+	int itemOffset=3;
 	int gap=fm.width('A');
-	int itemSize=6;
-	QColor itemEmptyCol(Qt::gray);
+	int itemSize=fm.ascent()-2;
+	QColor itemEmptyCol(240,240,240);
 	QColor itemCol(Qt::green);
 
 	//The border rect (we will adjust its  width)
@@ -525,7 +593,7 @@ void NodeViewDelegate::renderLimit(QPainter *painter,QStringList data,const QSty
 	if(drawItem)
 	{
 		xItem=valRect.right()+gap;
-		fillRect.setRight(xItem+max*(itemSize+offset)+offset);
+		fillRect.setRight(xItem+max*(itemSize+itemOffset)+itemOffset);
 	}
 	else
 	{
@@ -555,9 +623,9 @@ void NodeViewDelegate::renderLimit(QPainter *painter,QStringList data,const QSty
 	//Draw items
 	if(drawItem)
 	{
-		painter->setRenderHint(QPainter::Antialiasing,true);
+		//painter->setRenderHint(QPainter::Antialiasing,true);
 		painter->setBrush(itemCol);
-		int yItem=fillRect.center().y()-itemSize/2;
+		int yItem=option.rect.y()+(option.rect.height()-itemSize)/2;
 		for(int i=0; i < max; i++)
 		{
 			if(i==val)
@@ -565,9 +633,11 @@ void NodeViewDelegate::renderLimit(QPainter *painter,QStringList data,const QSty
 				painter->setBrush(itemEmptyCol);
 			}
 			painter->drawEllipse(xItem,yItem,itemSize,itemSize);
-			xItem+=offset+itemSize;
+			//painter->drawLine(xItem,fillRect.center().y(),xItem+itemSize,fillRect.center().y());
+
+			xItem+=itemOffset+itemSize;
 		}
-		painter->setRenderHint(QPainter::Antialiasing,false);
+		//painter->setRenderHint(QPainter::Antialiasing,false);
 	}
 
 	if(setClipRect || drawItem)
@@ -631,7 +701,7 @@ void NodeViewDelegate::renderTrigger(QPainter *painter,QStringList data,const QS
 	int offset=2;
 
 	//The border rect (we will adjust its  width)
-	QRect fillRect=option.rect.adjusted(offset,1,0,-1);
+	QRect fillRect=option.rect.adjusted(offset,2,0,-2);
 	if(option.state & QStyle::State_Selected)
 		fillRect.adjust(0,1,0,-1);
 

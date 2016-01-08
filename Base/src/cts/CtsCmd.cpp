@@ -242,7 +242,8 @@ void CtsCmd::addOption(boost::program_options::options_description& desc) const
       case CtsCmd::SHUTDOWN_SERVER: {
          desc.add_options()( CtsApi::shutdownServerArg(),po::value< string >()->implicit_value( string("") ),
                   "Stop server from scheduling new jobs.\n"
-                  "  arg1 = yes(optional) # use to bypass confirmation prompt\n"
+                  "  arg1 = yes(optional) # use to bypass confirmation prompt,i.e\n"
+                  "  --shutdown=yes\n"
                   "The following table shows server behaviour in the different states.\n"
                   "|----------------------------------------------------------------------------------|\n"
                   "| Server State | User Request | Task Request |Job Scheduling | Auto-Check-pointing |\n"
@@ -258,7 +259,8 @@ void CtsCmd::addOption(boost::program_options::options_description& desc) const
          desc.add_options()( CtsApi::haltServerArg(),po::value< string >()->implicit_value( string("") ),
                   "Stop server communication with jobs, and new job scheduling.\n"
                   "Also stops automatic check pointing\n"
-                  "  arg1 = yes(optional) # use to bypass confirmation prompt\n"
+                  "  arg1 = yes(optional) # use to bypass confirmation prompt,i.e.\n"
+                  "  --halt=yes\n"
                   "The following table shows server behaviour in the different states.\n"
                   "|----------------------------------------------------------------------------------|\n"
                   "| Server State | User Request | Task Request |Job Scheduling | Auto-Check-pointing |\n"
@@ -273,25 +275,31 @@ void CtsCmd::addOption(boost::program_options::options_description& desc) const
       case CtsCmd::TERMINATE_SERVER:{
          desc.add_options()( CtsApi::terminateServerArg(),po::value< string >()->implicit_value( string("") ),
                   "Terminate the server.\n"
-                  "  arg1 = yes(optional) # use to bypass confirmation prompt"
+                  "  arg1 = yes(optional) # use to bypass confirmation prompt.i.e\n"
+                  "  --terminate=yes"
          );
          break;
       }
       case CtsCmd::RELOAD_WHITE_LIST_FILE:{
          desc.add_options()( CtsApi::reloadwsfileArg(),
-                  "Reload the white list file.\n"
-                  "The white list file is used to authenticate 'user' commands.\n"
-                  "File path is specified by ECF_LISTS environment, read by the server on startup\n"
-                  "Raises an error if file does not exist, or fails to parse\n"
-                  "Expected format for this file is:\n\n"
-                  "# comment\n"
-                  "4.4.14  # version number\n\n"
-                  "# Users with read/write access\n"
-                  "user1   # comment\n"
-                  "user2   # comment\n\n"
-                  "# Users with read  access, must have - before user name\n"
-                  "-user3  # comment\n"
-                  "-user4"
+               "Reload the white list file.\n"
+               "The white list file is used to authenticate 'user' commands.\n"
+               "File path is specified by ECF_LISTS environment, read by the server on startup.\n"
+               "If ECF_LISTS is not specified, then by default it will open <host>.<port>.ecf.lists\n"
+               "On startup, if the file is not present or is present but is empty (i.e just contains the version number)\n"
+               "then all users have read/write access\n"
+               "However on reload it will raises an error if file does not exist, or fails to parse\n"
+               "Expected format for this file is:\n\n"
+               "# comment\n"
+               "4.4.14  # version number, this must be present, even if no users specified\n\n"
+               "# Users with read/write access\n"
+               "user1   # comment\n"
+               "user2   # comment\n\n"
+               "*       # use this form if you want all users to have read/write access\n\n"
+               "# Users with read  access, must have - before user name\n"
+               "-user3  # comment\n"
+               "-user4\n\n"
+               "-*      # use this form if you want all users to have read access"
          );
          break;
       }

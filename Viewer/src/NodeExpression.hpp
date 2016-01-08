@@ -16,6 +16,7 @@
 #include "VSState.hpp"
 #include "VNode.hpp"
 #include "VInfo.hpp"
+#include "StringMatchMode.hpp"
 
 
 // ----------------------
@@ -33,14 +34,15 @@ public:
     enum NodeType {SERVER, SUITE, FAMILY, TASK, ALIAS, NODE, BAD};
 
 
-    static BaseNodeCondition *parseWholeExpression(std::string);
-    static BaseNodeCondition *parseExpression();
+    static BaseNodeCondition *parseWholeExpression(std::string, bool caseSensitiveStringMatch=true);
+    static BaseNodeCondition *parseExpression(bool caseSensitiveStringMatch);
     static void               setTokens(std::vector<std::string> &tokens) {tokens_ = tokens; i_ = tokens_.begin();};
 
     static NodeType    nodeType(const std::string &name);
     static std::string typeName(const NodeType);
     static bool        isUserLevel(const std::string &str);
     static bool        isNodeAttribute(const std::string &str);
+    static bool        isNodeFlag(const std::string &str);
     static bool        isWhatToSearchIn(const std::string &str, bool &isAttribute);
 
 private:
@@ -51,10 +53,20 @@ private:
 
 
 
+// -----------------------------------------------------------------
+// BaseNodeCondition
+// The parent class for all node conditions.
+// delayUnwinding: choose whether to unwind the function stack
+// immediately after parsing this condition, or delay until we've
+// reached the end of the current sub-expression. Set to true for
+// loosely-coupled operators such as 'and', and set to false for
+// others which need to consume their arguments immediately.
+// -----------------------------------------------------------------
+
 class BaseNodeCondition
 {
 public:
-    BaseNodeCondition() {};
+    BaseNodeCondition() {delayUnwinding_ = false;};
     virtual ~BaseNodeCondition() {};
 
     bool execute(VInfo_ptr nodeInfo);
@@ -65,10 +77,12 @@ public:
 
     void setOperands(std::vector<BaseNodeCondition *> ops) {operands_ = ops;};
     bool containsAttributeSearch();
+    bool delayUnwinding() {return delayUnwinding_;};
 
 
 protected:
     std::vector<BaseNodeCondition *> operands_;
+    bool delayUnwinding_;
     virtual bool searchInAttributes() {return false;};
 };
 
@@ -77,7 +91,7 @@ protected:
 class AndNodeCondition : public BaseNodeCondition
 {
 public:
-    AndNodeCondition() {};
+    AndNodeCondition() {delayUnwinding_ = true;};
     ~AndNodeCondition() {};
 
     bool execute(VNode* node);
@@ -90,7 +104,7 @@ public:
 class OrNodeCondition : public BaseNodeCondition
 {
 public:
-    OrNodeCondition()  {};
+    OrNodeCondition()  {delayUnwinding_ = true;};
     ~OrNodeCondition() {};
 
     bool execute(VNode* node);
@@ -111,20 +125,88 @@ public:
     std::string print() {return std::string("not") + "(" + operands_[0]->print() + ")";};
 };
 
+
+
+// --------------------------------
+// String matching utitlity classes
+// --------------------------------
+
+// note that it would be ideal for the match() function to take references to strings
+// for efficiency, but this is not always possible.
+
+class StringMatchBase
+{
+public:
+    StringMatchBase(bool caseSensitive)  {caseSensitive_ = caseSensitive;};
+    ~StringMatchBase() {};
+
+    virtual bool match(std::string searchFor, std::string searchIn) = 0;
+
+protected:
+    bool caseSensitive_;
+};
+
+class StringMatchExact : public StringMatchBase
+{
+public:
+    StringMatchExact(bool caseSensitive) : StringMatchBase(caseSensitive) {};
+    ~StringMatchExact() {};
+
+    bool match(std::string searchFor, std::string searchIn);
+};
+
+class StringMatchContains : public StringMatchBase
+{
+public:
+    StringMatchContains(bool caseSensitive)  : StringMatchBase(caseSensitive) {};
+    ~StringMatchContains() {};
+
+    bool match(std::string searchFor, std::string searchIn);
+};
+
+class StringMatchWildcard : public StringMatchBase
+{
+public:
+    StringMatchWildcard(bool caseSensitive)  : StringMatchBase(caseSensitive) {};
+    ~StringMatchWildcard() {};
+
+    bool match(std::string searchFor, std::string searchIn);
+};
+
+class StringMatchRegexp : public StringMatchBase
+{
+public:
+    StringMatchRegexp(bool caseSensitive)  : StringMatchBase(caseSensitive) {};
+    ~StringMatchRegexp() {};
+
+    bool match(std::string searchFor, std::string searchIn);
+};
+
 // -----------------------------------------------------------------
+
+// -------------------------
+// String matching condition
+// -------------------------
 
 class StringMatchCondition : public BaseNodeCondition
 {
 public:
-    StringMatchCondition()  {};
-    ~StringMatchCondition() {};
+    StringMatchCondition(StringMatchMode::Mode matchMode, bool caseSensitive);
+    ~StringMatchCondition() {if (matcher_) delete matcher_;};
 
     bool execute(VNode *node);
     int  numOperands() {return 2;};
     std::string print() {return operands_[0]->print() + " = " + operands_[1]->print();};
     bool operand2IsArbitraryString() {return true;};
+private:
+    StringMatchBase *matcher_;
 };
+
 // -----------------------------------------------------------------
+
+// ---------------------------
+// Basic true/false conditions
+// ---------------------------
 
 class TrueNodeCondition : public BaseNodeCondition
 {
@@ -135,8 +217,6 @@ public:
     bool execute(VNode*) {return true;};
     std::string print() {return std::string("true");};
 };
-
-// -----------------------------------------------------------------
 
 class FalseNodeCondition : public BaseNodeCondition
 {
@@ -149,6 +229,10 @@ public:
 };
 
 // -----------------------------------------------------------------
+
+// -------------------
+// Node type condition
+// -------------------
 
 class TypeNodeCondition : public BaseNodeCondition
 {
@@ -165,6 +249,10 @@ private:
 
 // -----------------------------------------------------------------
 
+// --------------------
+// Node state condition
+// --------------------
+
 class StateNodeCondition : public BaseNodeCondition
 {
 public:
@@ -179,6 +267,10 @@ private:
 };
 
 // -----------------------------------------------------------------
+
+// --------------------
+// User level condition
+// --------------------
 
 class UserLevelCondition : public BaseNodeCondition
 {
@@ -195,6 +287,10 @@ private:
 
 // -----------------------------------------------------------------
 
+// ------------------------
+// Node attribute condition
+// ------------------------
+
 class NodeAttributeCondition : public BaseNodeCondition
 {
 public:
@@ -209,6 +305,28 @@ private:
 };
 
 // -----------------------------------------------------------------
+
+// ------------------------
+// Node attribute condition
+// ------------------------
+
+class NodeFlagCondition : public BaseNodeCondition
+{
+public:
+    explicit NodeFlagCondition(QString nodeFlagName) {nodeFlagName_ = nodeFlagName;};
+    ~NodeFlagCondition() {};
+
+    bool execute(VNode*);
+    std::string print() {return nodeFlagName_.toStdString();};
+
+private:
+    QString nodeFlagName_;
+};
+// -----------------------------------------------------------------
+
+// -----------------
+// Search conditions
+// -----------------
 
 class WhatToSearchInOperand : public BaseNodeCondition
 {

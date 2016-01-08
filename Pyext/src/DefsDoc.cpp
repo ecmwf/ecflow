@@ -151,8 +151,8 @@ const char* DefsDoc::add_label_doc()
             "  task.add_label( Label(\"TEA\",\"/me/\"))\n"
             "  task.add_label( \"Joe\",\"/me/\")\n\n"
             "The corresponding child command in the .ecf script file might be::\n"
-            "  ecflow_client --label TEA time\n"
-            "  ecflow_client --label Joe ninety\n"
+            "  ecflow_client --label=TEA time\n"
+            "  ecflow_client --label=Joe ninety\n"
             ;
 }
 

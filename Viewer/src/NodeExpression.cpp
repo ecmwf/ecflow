@@ -8,10 +8,13 @@
 //
 //============================================================================
 
+#include <QRegExp>
+
 #include <boost/algorithm/string.hpp>
 
 #include "Str.hpp"
 #include "Node.hpp"
+#include "Submittable.hpp"
 
 #include "NodeExpression.hpp"
 #include "UserMessage.hpp"
@@ -64,11 +67,20 @@ bool NodeExpressionParser::isNodeAttribute(const std::string &str)
         return false;
 }
 
+bool NodeExpressionParser::isNodeFlag(const std::string &str)
+{
+    if (str == "is_late" || str == "has_message" ||
+    	str == "is_rerun" || str == "is_waiting" || str == "is_zombie")
+        return true;
+    else
+        return false;
+}
+
 
 bool NodeExpressionParser::isWhatToSearchIn(const std::string &str, bool &isAttribute)
 {
     // list of non-attribute items that we can search in
-    if (str == "name")
+    if (str == "node_name" || str == "node_path")
     {
         isAttribute = false;
         return true;
@@ -103,27 +115,64 @@ std::vector<BaseNodeCondition *> NodeExpressionParser::popLastNOperands(std::vec
 
 
 
-BaseNodeCondition *NodeExpressionParser::parseWholeExpression(std::string expr)
+BaseNodeCondition *NodeExpressionParser::parseWholeExpression(std::string expr, bool caseSensitiveStringMatch)
 {
     std::vector<std::string> tokens;
-    std::string delimiters(" ");
+    char delimiter = ' ';
+    char insideQuote = '\0';  // \0 if not inside a quote, \' if we are inside a quote
+                              // will not handle the case of nested quotes!
 
-    UserMessage::message(UserMessage::DBG, false, std::string("    in: ") + expr);
+    UserMessage::message(UserMessage::DBG, false, std::string("parseWholeExpression:    ") + expr);
+
 
     ecf::Str::replace_all(expr, std::string("("), std::string(" ( "));
     ecf::Str::replace_all(expr, std::string(")"), std::string(" ) "));
 
-    boost::algorithm::to_lower(expr); // convert to lowercase
-    ecf::Str::split(expr, tokens, delimiters);
+    //boost::algorithm::to_lower(expr); // convert to lowercase
+
+    int    index  = 0;
+    int    length = expr.length();
+    std::string token  = "";
+
+
+    // loop through each character in the string
+
+    while (index < length)
+    {
+        char c = expr[index];
+
+        if (c == '\'')  // a quote character?
+        {
+            if (insideQuote == '\'')   // this is the closing quote
+                insideQuote = '\0';    // note that we are no longer inside a quote 
+            else
+                insideQuote = '\'';    // this is an opening quote
+        }
+        else if (c == delimiter && insideQuote == '\0') // a delimeter but not inside a quote?
+        {
+            if (token.length()>0)
+                tokens.push_back(token);
+            token ="";
+        }
+        else
+            token += c;
+
+        index++;
+    }
+
+    if(token.length()>0)
+        tokens.push_back(token);
+
 
     setTokens(tokens);
 
-    return parseExpression();
+    return parseExpression(caseSensitiveStringMatch);
 }
 
 
-BaseNodeCondition *NodeExpressionParser::parseExpression()
+BaseNodeCondition *NodeExpressionParser::parseExpression(bool caseSensitiveStringMatch)
 {
+    bool returnEarly = false;
     BaseNodeCondition *result = NULL;
 
     std::vector<BaseNodeCondition *> funcStack;
@@ -138,7 +187,7 @@ BaseNodeCondition *NodeExpressionParser::parseExpression()
     }
 
 
-    while (i_ != tokens_.end() || funcStack.size() > 0)
+    while (!returnEarly && i_ != tokens_.end())
     {
         bool tokenOk = true;
         bool updatedOperands = false;
@@ -195,6 +244,14 @@ BaseNodeCondition *NodeExpressionParser::parseExpression()
                     result = attrCond;
                     updatedOperands = true;
                 }
+                // node flag
+                else if (isNodeFlag(*i_))
+                {
+                    NodeFlagCondition *flagCond = new NodeFlagCondition(QString::fromStdString(*i_));
+                    operandStack.push_back(flagCond);
+                    result = flagCond;
+                    updatedOperands = true;
+                }
 
                 else if (isWhatToSearchIn(*i_, attr))
                 {
@@ -225,9 +282,10 @@ BaseNodeCondition *NodeExpressionParser::parseExpression()
                     funcStack.push_back(notCond);
                     result = notCond;
                 }
-                else if (*i_ == "=")
+
+                else if(StringMatchMode::operToMode(*i_) != StringMatchMode::InvalidMatch)
                 {
-                    StringMatchCondition *stringMatchCond = new StringMatchCondition();
+                    StringMatchCondition *stringMatchCond = new StringMatchCondition(StringMatchMode::operToMode(*i_), caseSensitiveStringMatch);
                     funcStack.push_back(stringMatchCond);
                     result = stringMatchCond;
                 }
@@ -235,12 +293,12 @@ BaseNodeCondition *NodeExpressionParser::parseExpression()
                 else if (*i_ == "(")
                 {
                     ++i_;
-                    result = NodeExpressionParser::parseExpression();
+                    result = NodeExpressionParser::parseExpression(caseSensitiveStringMatch);
                     operandStack.push_back(result);
                 }
                 else if (*i_ == ")")
                 {
-                    return result;
+                    returnEarly = true;
                 }
 
                 else
@@ -262,16 +320,16 @@ BaseNodeCondition *NodeExpressionParser::parseExpression()
         {
             // if there are enough operands on the stack for the last
             // function, pop them off and create a small tree for that function
-            if (!funcStack.empty())
+            // but do not do this if the last function asks to delay this process
+            if (!funcStack.empty() && !funcStack.back()->delayUnwinding())
             {
                 if(updatedOperands && (operandStack.size() >= funcStack.back()->numOperands()))
                 {
                     std::vector<BaseNodeCondition *> operands;
-                    result = funcStack.back();  // last function is the current result
+                    result = funcStack.back();       // last function is the current result
                     operands = popLastNOperands(operandStack, result->numOperands());  // pop its operands off the stack
                     result->setOperands(operands);
-                    funcStack.pop_back(); // remove the last function from the stack
-                    //operandStack.clear(); // clear the operand stack
+                    funcStack.pop_back();            // remove the last function from the stack
                     operandStack.push_back(result);  // store the current result
                 }
             }
@@ -283,11 +341,28 @@ BaseNodeCondition *NodeExpressionParser::parseExpression()
             return result;
         }
 
-        if (i_ != tokens_.end())
+        if (i_ != tokens_.end() && !returnEarly)
             ++i_; // move onto the next token
     }
 
+
+    // final unwinding of the stack
+    while (!funcStack.empty())
+    {
+        if(operandStack.size() >= funcStack.back()->numOperands())
+        {
+            std::vector<BaseNodeCondition *> operands;
+            result = funcStack.back();  // last function is the current result
+            operands = popLastNOperands(operandStack, result->numOperands());  // pop its operands off the stack
+            result->setOperands(operands);
+            funcStack.pop_back(); // remove the last function from the stack
+            operandStack.push_back(result);  // store the current result
+        }
+    }
+
+
     UserMessage::message(UserMessage::DBG, false, std::string("    ") + result->print());
+
     return result;
 }
 
@@ -426,11 +501,68 @@ bool UserLevelCondition::execute(VNode* vnode)
     return true;
 }
 
+
 //=========================================================================
 //
-//  UserLevelCondition
+//  String match utility functions
 //
 //=========================================================================
+
+bool StringMatchExact::match(std::string searchFor, std::string searchIn)
+{
+    return searchFor == searchIn;
+}
+
+bool StringMatchContains::match(std::string searchFor, std::string searchIn)
+{
+    Qt::CaseSensitivity cs = (caseSensitive_) ? Qt::CaseSensitive : Qt::CaseInsensitive;
+    QRegExp regexp(QString::fromStdString(searchFor), cs);
+    int index = regexp.indexIn(QString::fromStdString(searchIn));
+    return (index != -1);  // -1 means no match
+}
+
+bool StringMatchWildcard::match(std::string searchFor, std::string searchIn)
+{
+    Qt::CaseSensitivity cs = (caseSensitive_) ? Qt::CaseSensitive : Qt::CaseInsensitive;
+    QRegExp regexp(QString::fromStdString(searchFor), cs);
+    regexp.setPatternSyntax(QRegExp::Wildcard);
+    return regexp.exactMatch(QString::fromStdString(searchIn));
+}
+
+bool StringMatchRegexp::match(std::string searchFor, std::string searchIn)
+{
+    Qt::CaseSensitivity cs = (caseSensitive_) ? Qt::CaseSensitive : Qt::CaseInsensitive;
+    QRegExp regexp(QString::fromStdString(searchFor), cs);
+    return regexp.exactMatch(QString::fromStdString(searchIn));
+}
+
+//=========================================================================
+//
+//  String match condition
+//
+//=========================================================================
+
+StringMatchCondition::StringMatchCondition(StringMatchMode::Mode matchMode, bool caseSensitive)
+{
+    switch (matchMode)
+    {
+        case StringMatchMode::ContainsMatch:
+            matcher_ = new StringMatchContains(caseSensitive);
+            break;
+        case StringMatchMode::WildcardMatch:
+            matcher_ = new StringMatchWildcard(caseSensitive);
+            break;
+        case StringMatchMode::RegexpMatch:
+            matcher_ = new StringMatchRegexp(caseSensitive);
+            break;
+        default:
+            UserMessage::message(UserMessage::ERROR, false, "StringMatchCondition: bad matchMode");
+            matcher_ = new StringMatchExact(caseSensitive);
+            break;
+    }
+}
+
+
 
 bool StringMatchCondition::execute(VNode *node)
 {
@@ -440,11 +572,20 @@ bool StringMatchCondition::execute(VNode *node)
     std::string searchIn = searchInOperand->what();
 
     //TODO  XXXX check - name, label, variable, etc
-    if (searchIn == "name")
-        return node->strName() == searchForOperand->what();
+    if (searchIn == "node_name")
+    {
+        bool ok = matcher_->match(searchForOperand->what(), node->strName());
+        return (ok);
+    }
+
+    else if (searchIn == "node_path")
+    {
+        bool ok = matcher_->match(searchForOperand->what(), node->absNodePath());
+        return (ok);
+    }
     else
         return false;
-};
+}
 
 // -----------------------------------------------------------------
 
@@ -481,14 +622,50 @@ bool NodeAttributeCondition::execute(VNode* vnode)
     }
 
     return false;
-};
+}
 
+// -----------------------------------------------------------------
+
+bool NodeFlagCondition::execute(VNode* vnode)
+{
+	if (vnode->isServer())
+	{
+		return false;
+	}
+	else //if(nodeInfo->isNode())
+	{
+		if(nodeFlagName_ == "is_zombie")
+			return vnode->isFlagSet(ecf::Flag::ZOMBIE);
+
+		if(nodeFlagName_ == "has_message")
+			return vnode->isFlagSet(ecf::Flag::MESSAGE);
+
+		else if(nodeFlagName_ == "is_late")
+			return vnode->isFlagSet(ecf::Flag::LATE);
+
+		else if(nodeFlagName_ == "is_rerun")
+		{
+			node_ptr node=vnode->node();
+			if(!node.get()) return false;
+
+			if(Submittable* s = node->isSubmittable())
+			{
+				return (s->try_no() > 1);
+			}
+			return false;
+		}
+		else if(nodeFlagName_ == "is_waiting")
+			return vnode->isFlagSet(ecf::Flag::WAIT);
+
+	}
+	return false;
+}
 
 WhatToSearchInOperand::WhatToSearchInOperand(std::string what, bool &attr)
 {
     what_ = what;
     searchInAttributes_ = attr;
-};
+}
 
 
 WhatToSearchInOperand::~WhatToSearchInOperand() {};

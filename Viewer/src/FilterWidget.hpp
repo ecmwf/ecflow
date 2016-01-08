@@ -31,8 +31,9 @@ Q_OBJECT
 
 public:
 	enum DecorMode {NoDecor,ColourDecor,PixmapDecor};
+	enum ItemMode {FilterMode,ShowMode};
 
-	VParamFilterMenu(QMenu* parent,VParamSet* filter,DecorMode decorMode=NoDecor);
+	VParamFilterMenu(QMenu* parent,VParamSet* filter,QString title,ItemMode,DecorMode decorMode=NoDecor);
 	void reload();
 
 protected Q_SLOTS:
@@ -41,10 +42,12 @@ protected Q_SLOTS:
 	void slotUnselectAll(bool);
 
 protected:
+	void buildTitle(QString,QMenu*);
 	void addAction(QString name,QString id);
 
 	QMenu*  menu_;
 	VParamSet* filter_;
+	ItemMode itemMode_;
 	DecorMode decorMode_;
 };
 

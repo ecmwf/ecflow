@@ -12,7 +12,6 @@
 #define TreeNodeViewDelegate_HPP_
 
 #include <QBrush>
-#include <QLinearGradient>
 #include <QMap>
 #include <QPen>
 #include <QStyledItemDelegate>
@@ -64,16 +63,11 @@ protected:
     int nodeRectRad_;
 	bool drawChildCount_;
     NodeStyle nodeStyle_;
-    bool useNodeGrad_;
     int indentation_;
 
     QFont serverNumFont_;
 	QFont suiteNumFont_;
 	QFont serverInfoFont_;
-
-	mutable QLinearGradient grad_;
-	static int lighter_;
-
 };
 
 #endif

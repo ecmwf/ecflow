@@ -1,22 +1,15 @@
 #
 4.4.14   #   comment
- 
-#
+
 # These user have read and write access to the server
-#
-uid1    # a comment
+uid1  # a comment
 uid2  # a comment
 cog   # a comment
 
-#
-# Read only uisers
-# 
+
+# Read only users
 -fred  # a comment
 -bill # a comment
 -jake # a comment
 
-
-# a comment
-# a comment
-# a comment
 # a comment

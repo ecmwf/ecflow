@@ -73,9 +73,10 @@ option( ENABLE_ALL_TESTS      "This includes performance/migration/regression te
 if(ENABLE_QT5)
     list(APPEND QT_DEPS "Qt5Widgets REQUIRED 5.0.0")
     list(APPEND QT_DEPS "Qt5Gui REQUIRED 5.0.0")
+    list(APPEND QT_DEPS "Qt5Network REQUIRED 5.0.0")
     list(APPEND QT_DEPS "Qt5Multimedia REQUIRED 5.0.0")
 else()
-    set(QT_DEPS "Qt4 4.8.0 REQUIRED QtCore QtGui" )
+    set(QT_DEPS "Qt4 4.8.0 REQUIRED QtCore QtGui QtNetwork" )
 endif()
 
 ecbuild_add_option( FEATURE VIEWER
@@ -118,14 +119,14 @@ endif()
 
 ecbuild_add_extra_search_paths( boost ) # also respects BOOST_ROOT
 
-# Ecflow test require statics libs, otherwise get double free, error.
+# Ecflow test require statics libs for boost < 1.59, otherwise get double free error.
 # To use static boost python ensure that Boost_USE_STATIC_LIBS is set on.
 # See: http://www.cmake.org/cmake/help/v3.0/module/FindBoost.html
 set(Boost_USE_STATIC_LIBS        ON)
 set(Boost_USE_MULTITHREADED      ON)
 set(Boost_NO_SYSTEM_PATHS        ON)
 set(Boost_DETAILED_FAILURE_MSG   ON)
-#set(Boost_DEBUG                  ON)
+#set(Boost_DEBUG                 ON)
 
 find_package( Boost 1.53.0 REQUIRED COMPONENTS python serialization system thread unit_test_framework test_exec_monitor filesystem program_options date_time regex)
 
@@ -161,8 +162,8 @@ if(ENABLE_VIEWER)
 
       if( Qt5Widgets_FOUND )
           message(STATUS "Qt5 version ${Qt5Widgets_VERSION_STRING} was found")
-          SET(ECFLOW_QT_INCLUDE_DIR ${Qt5Widgets_INCLUDE_DIRS} ${Qt5Gui_INCLUDE_DIR} ${Qt5Multimedia_INCLUDE_DIR})
-          SET(ECFLOW_QT_LIBRARIES ${Qt5Widgets_LIBRARIES} ${Qt5Gui_LIBRARIES} ${Qt5Multimedia_LIBRARIES})
+          SET(ECFLOW_QT_INCLUDE_DIR ${Qt5Widgets_INCLUDE_DIRS} ${Qt5Gui_INCLUDE_DIR} ${Qt5Network_INCLUDE_DIR} ${Qt5Multimedia_INCLUDE_DIR})
+          SET(ECFLOW_QT_LIBRARIES ${Qt5Widgets_LIBRARIES} ${Qt5Gui_LIBRARIES} ${Qt5Network_LIBRARIES} ${Qt5Multimedia_LIBRARIES})
           set( ECFLOW_QT 1)
           set( ECFLOW_QT5 1)
           add_definitions( -DECFLOW_QT5 )
@@ -172,7 +173,7 @@ if(ENABLE_VIEWER)
           message(FATAL_ERROR "Qt5 was NOT found - this is required for the new user interface")
       endif()
   else( ENABLE_QT5 )
-    #find_package(Qt4 4.6.2 REQUIRED QtCore QtGui )
+    #find_package(Qt4 4.6.2 REQUIRED QtCore QtGui QtNetwork)
     if( QT_FOUND )
         set( ECFLOW_QT 1)
         #We need to disable keywords because there is a problem in using Qt and boost together.

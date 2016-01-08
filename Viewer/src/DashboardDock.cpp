@@ -61,6 +61,14 @@ void DashboardDockTitleWidget::addActions(QList<QAction*> lst)
          tb->setAutoRaise(true);
          tb->setPopupMode(QToolButton::InstantPopup);
          //tb->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
+
+
+         QPalette p=tb->palette();
+         p.setColor(QPalette::ButtonText,Qt::white);
+         tb->setPalette(p);
+
+
+
          actionLayout_->addWidget(tb);
 
          if(!ac->isEnabled())

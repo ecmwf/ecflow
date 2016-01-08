@@ -7,6 +7,7 @@
 // nor does it submit to any jurisdiction.
 //============================================================================
 
+#include <QtGlobal>
 #include <QShortcut>
 #include <QMenu>
 #include "AbstractSearchLine.hpp"
@@ -15,7 +16,15 @@ AbstractSearchLine::AbstractSearchLine(QWidget* parent) : QWidget(parent)
 {
 	setupUi(this);
 
-	//searchLine_->setDecoration(QPixmap(":/viewer/filter_decor.svg"));
+
+#if QT_VERSION >= QT_VERSION_CHECK(4, 7, 0)
+	searchLine_->setPlaceholderText(tr("Find"));
+	label_->hide();
+#endif
+
+#if QT_VERSION >= QT_VERSION_CHECK(5, 2, 0)
+	searchLine_->setClearButtonEnabled(true);
+#endif
 
 	connect(searchLine_, SIGNAL(textChanged(QString)),
 		this, SLOT(slotFind(QString)));
@@ -23,17 +32,22 @@ AbstractSearchLine::AbstractSearchLine(QWidget* parent) : QWidget(parent)
 	connect(searchLine_, SIGNAL( returnPressed()),
 		this, SLOT(slotFindNext()));
 
-	connect(nextPb_, SIGNAL(clicked()),
+	connect(actionNext_,SIGNAL(triggered()),
 		this, SLOT(slotFindNext()));
 
-	connect(prevPb_,SIGNAL(clicked()),
+	connect(actionPrev_,SIGNAL(triggered()),
 		this, SLOT(slotFindPrev()));
+
+	connect(closeTb_,SIGNAL(clicked()),
+		this, SLOT(slotClose()));
+
+
+	nextTb_->setDefaultAction(actionNext_);
+	prevTb_->setDefaultAction(actionPrev_);
 
 	oriColour_=QColor(searchLine_->palette().color(QPalette::Base));
 	redColour_=QColor(247,230,230);
 	greenColour_=QColor(186,249,206);
-
-
 
 	// for the 'find next' functionality, although Qt (at the time of writing) uses
 	// both F3 and CTRL-G for most platforms, this is not true for Linux. Therefore,
@@ -45,20 +59,20 @@ AbstractSearchLine::AbstractSearchLine(QWidget* parent) : QWidget(parent)
 
 	status_=true;
 
-
 	setFocusProxy(searchLine_);
-
-
 
 	// set the menu on the Options toolbutton
 	caseSensitive_ = false;
 	wholeWords_    = false;
+	highlightAll_  = false;
 	QMenu *menu=new QMenu(this);
 	menu->addAction(actionCaseSensitive_);
 	menu->addAction(actionWholeWords_);
-	optionsPb_->setMenu(menu);
+	menu->addAction(actionHighlightAll_);
+	optionsTb_->setMenu(menu);
 
-
+    matchModeCb_->setMatchMode(StringMatchMode::ContainsMatch);  // set the default match mode
+    //matchModeChanged(1);  // dummy call to initialise the 'whole words' option state
 }
 
 AbstractSearchLine::~AbstractSearchLine()
@@ -73,6 +87,11 @@ void AbstractSearchLine::clear()
 bool AbstractSearchLine::isEmpty()
 {
 	return searchLine_->text().isEmpty();
+}
+
+void AbstractSearchLine::selectAll()
+{
+	searchLine_->selectAll();
 }
 
 void AbstractSearchLine::updateButtons(bool found)
@@ -102,6 +121,11 @@ void AbstractSearchLine::updateButtons(bool found)
 	}
 }
 
+void AbstractSearchLine::slotClose()
+{
+	hide();
+}
+
 void AbstractSearchLine::on_actionCaseSensitive__toggled(bool b)
 {
     caseSensitive_ = b;
@@ -110,4 +134,9 @@ void AbstractSearchLine::on_actionCaseSensitive__toggled(bool b)
 void AbstractSearchLine::on_actionWholeWords__toggled(bool b)
 {
     wholeWords_ = b;
+}
+
+void AbstractSearchLine::on_actionHighlightAll__toggled(bool b)
+{
+    highlightAll_ = b;
 }

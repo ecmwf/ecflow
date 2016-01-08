@@ -171,7 +171,7 @@ int ClientInvoker::invoke(int argc, char* argv[]) const
    RoundTripRecorder round_trip_recorder(this);
 
 	/// If NO_ECF set then abort immediately. returning success. Useful in testing  jobs stand-alone.
-	if (clientEnv_.no_ecf())  return 0; // success
+	if (clientEnv_.no_ecf()) { cout << "NO_ECF\n"; return 0; } // success
 
 	// Clear error message. For test. Don't keep previous error.
 	// i.e If next test passes when it shouldn't the wrong message is output
@@ -260,7 +260,7 @@ int ClientInvoker::invoke(Cmd_ptr cts_cmd) const
 int ClientInvoker::do_invoke_cmd(Cmd_ptr cts_cmd) const
 {
 	if (clientEnv_.debug()) cout << "\necflow:ClientInvoker::do_invoke_cmd on_error_throw_exception_(" << on_error_throw_exception_ << ")================================" << std::endl;
-	if (clientEnv_.no_ecf())  return 0; // success If NO_ECF set then abort immediately. returning success. Useful in testing  jobs stand-alone.
+	if (clientEnv_.no_ecf()) { cout << "NO_ECF\n"; return 0;} // success If NO_ECF set then abort immediately. returning success. Useful in testing  jobs stand-alone.
 	if (testInterface_) return 0;       // The testInterface_ flag allows testing of client interface, parsing of args, without needing to contact server
 	assert(!clientEnv_.host().empty()); // make sure host is NOT empty.
 

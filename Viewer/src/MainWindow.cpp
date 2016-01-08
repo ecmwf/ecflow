@@ -43,7 +43,6 @@
 
 #include <boost/lexical_cast.hpp>
 #include <boost/property_tree/json_parser.hpp>
-#include "NodeQueryDialog.hpp"
 
 bool MainWindow::quitStarted_=false;
 QList<MainWindow*> MainWindow::windows_;
@@ -77,6 +76,9 @@ MainWindow::MainWindow(QStringList idLst,QWidget *parent) : QMainWindow(parent)
     connect(nodePanel_,SIGNAL(selectionChanged(VInfo_ptr)),
     			this,SLOT(slotSelectionChanged(VInfo_ptr)));
 
+    connect(nodePanel_,SIGNAL(contentsChanged()),
+    	    this,SLOT(slotContentsChanged()));
+
     //Add temporary preview label
     /*QLabel *label=new QLabel(" This is a preview version and has not been verified for operational use! ",this);
     label->setAutoFillBackground(true);
@@ -105,7 +107,7 @@ MainWindow::MainWindow(QStringList idLst,QWidget *parent) : QMainWindow(parent)
     ChangeNotifyWidget* chw=new ChangeNotifyWidget(this);
     statusBar()->addPermanentWidget(chw);
 
-    actionSearch->setVisible(false);
+    //actionSearch->setVisible(false);
 
 }
 
@@ -236,13 +238,8 @@ void MainWindow::on_actionConfigureNodeMenu_triggered()
 
 void MainWindow::on_actionSearch_triggered()
 {
-    NodeQueryDialog* d=new NodeQueryDialog(this);
-    d->setServerFilter(nodePanel_->serverFilter());
-    d->show();
-
-	/*if(d.exec() == QDialog::Accepted)
-	{
-    }*/
+    //It takes ownership of the dialogue.
+    nodePanel_->addSearchDialog();
 }
 
 void MainWindow::on_actionManageServers_triggered()
@@ -371,6 +368,11 @@ void MainWindow::reloadContents()
 void MainWindow::rerenderContents()
 {
 	nodePanel_->rerender();
+}
+
+void MainWindow::slotContentsChanged()
+{
+	MainWindow::saveContents(NULL);
 }
 
 //==============================================================
@@ -612,6 +614,46 @@ void MainWindow::init()
 
 void MainWindow::save(MainWindow *topWin)
 {
+	MainWindow::saveContents(topWin);
+
+	/*SessionItem* cs=SessionHandler::instance()->current();
+	assert(cs);
+
+	VComboSettings vs(cs->sessionFile(),cs->windowFile());
+
+	//We have to clear it so that not to remember all the previous windows
+	vs.clear();
+
+	//Add total window number and id of active window
+	vs.put("windowCount",windows_.count());
+	vs.put("topWindowId",windows_.indexOf(topWin));
+
+	//Save info for all the windows
+	for(int i=0; i < windows_.count(); i++)
+	{
+		std::string id="window_"+boost::lexical_cast<std::string>(i);
+		vs.beginGroup(id);
+		windows_.at(i)->writeSettings(&vs);
+		vs.endGroup();
+	}
+
+	//Write to json
+	vs.write();*/
+
+	//Save global config
+	VConfig::instance()->saveSettings();
+
+	ServerHandler::saveSettings();
+
+	//Save non-global config
+	for(int i=0; i < windows_.count(); i++)
+	{
+		//windows_.at(i)->saveSettings();
+	}
+}
+
+void MainWindow::saveContents(MainWindow *topWin)
+{
 	SessionItem* cs=SessionHandler::instance()->current();
 	assert(cs);
 
@@ -635,19 +677,8 @@ void MainWindow::save(MainWindow *topWin)
 
 	//Write to json
 	vs.write();
-
-	//Save global config
-	VConfig::instance()->saveSettings();
-
-	ServerHandler::saveSettings();
-
-
-	//Save non-global config
-	for(int i=0; i < windows_.count(); i++)
-	{
-		//windows_.at(i)->saveSettings();
-	}
 }
+
 
 void MainWindow::reload()
 {

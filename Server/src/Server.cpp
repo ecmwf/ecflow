@@ -634,14 +634,14 @@ bool Server::reloadWhiteListFile(std::string& errorMsg)
    return serverEnv_.reloadWhiteListFile(errorMsg);
 }
 
-bool Server::authenticateUser(const std::string& user)
+bool Server::authenticateReadAccess(const std::string& user)
 {
-   return serverEnv_.authenticateUser(user);
+   return serverEnv_.authenticateReadAccess(user);
 }
 
-bool Server::authenticateWriteAccess(const std::string& user,  bool client_request_can_change_server_state )
+bool Server::authenticateWriteAccess(const std::string& user )
 {
-   return serverEnv_.authenticateWriteAccess(user, client_request_can_change_server_state);
+   return serverEnv_.authenticateWriteAccess(user);
 }
 
 bool Server::lock(const std::string& user)

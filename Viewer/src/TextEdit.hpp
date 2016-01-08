@@ -12,10 +12,12 @@
 
 #include <QPlainTextEdit>
 
+#include "VProperty.hpp"
+
 class LineNumberArea;
 class GotoLineDialog;
 
-class TextEdit : public QPlainTextEdit
+class TextEdit : public QPlainTextEdit, public VPropertyObserver
 {
 Q_OBJECT
 
@@ -35,8 +37,14 @@ public:
     int numLinesSelected();
     bool findString(const QString &,QTextDocument::FindFlags,bool replace=false,const QString &r=emptyString_);
 
+    void setFontProperty(VProperty* p);
+    void updateFont();
+    void notifyChange(VProperty* p);
+
 public Q_SLOTS:
      void gotoLine();
+     void slotZoomIn();
+     void slotZoomOut();
 
 private Q_SLOTS:
      void updateLineNumberAreaWidth(int newBlockCount);
@@ -46,13 +54,17 @@ private Q_SLOTS:
 Q_SIGNALS:
     void focusRegained ();
     void focusLost();
+    void fontSizeChangedByWheel();
 
 protected:
     void resizeEvent(QResizeEvent *event);
     void focusInEvent(QFocusEvent *event);
     void focusOutEvent(QFocusEvent *event);
+    void wheelEvent(QWheelEvent *event);
 
 private:
+    void fontSizeChangedByZoom();
+
     bool showLineNum_;
     QWidget *lineNumArea_;
     int rightMargin_;
@@ -60,6 +72,8 @@ private:
     QTextDocument::FindFlags lastFindFlags_;
     GotoLineDialog *gotoLineDialog_;
     static QString emptyString_;
+
+    VProperty *fontProp_;
 };
 
 

@@ -7,6 +7,7 @@ set(viewer_srcs
     ActionHandler.cpp
     Animation.cpp
     AttributeSearchPanel.cpp
+    CaseSensitiveButton.cpp
     ChangeNotify.cpp
     ChangeNotifyDialog.cpp
     ChangeNotifyEditor.cpp
@@ -18,6 +19,7 @@ set(viewer_srcs
     CommandDesignerWidget.cpp
     ConfigListDelegate.cpp
     CustomCommandDialog.cpp
+    CustomListWidget.cpp
     CustomTabWidget.cpp
     Dashboard.cpp
     DashboardDialog.cpp
@@ -53,20 +55,32 @@ set(viewer_srcs
     MessageItemWidget.cpp
     ModelColumn.cpp
     NodeExpression.cpp
+    NodeFilterDialog.cpp
     NodeFilterModel.cpp
     NodePanel.cpp
     NodePathWidget.cpp
     NodeQuery.cpp
-    NodeQueryDialog.cpp
+    NodeQueryCombo.cpp
+    NodeQueryEditor.cpp
     NodeQueryEngine.cpp
     NodeQueryHandler.cpp
-    NodeQueryWidget.cpp
+    NodeQueryResult.cpp
+    NodeQueryResultModel.cpp
+    NodeQueryResultView.cpp
+    NodeQueryViewDelegate.cpp
+    NodeSearchDialog.cpp
+    NodeSearchWidget.cpp
     NodeViewBase.cpp
     NodeViewDelegate.cpp
     NodeWidget.cpp
+    OneLineTextEdit.cpp
+    OutputClient.cpp
+    OutputFileClient.cpp
+    OutputDirClient.cpp
     OutputModel.cpp
     OutputItemWidget.cpp
-    OutputProvider.cpp
+    OutputFileProvider.cpp
+    OutputDirProvider.cpp
     OverviewItemWidget.cpp
     OverviewProvider.cpp
     Palette.cpp
@@ -87,6 +101,8 @@ set(viewer_srcs
     ServerSettingsItemWidget.cpp
     SessionHandler.cpp
     Sound.cpp
+    StringMatchCombo.cpp
+    StringMatchMode.cpp
     SuiteItemWidget.cpp
     SuiteFilter.cpp
     SuiteFilterObserver.hpp
@@ -150,6 +166,7 @@ set(viewer_moc_files AbstractNodeModel.hpp
     ActionHandler.hpp
     Animation.hpp
     AttributeSearchPanel.hpp
+    CaseSensitiveButton.hpp
     ChangeNotifyDialog.hpp
     ChangeNotifyEditor.hpp
     ChangeNotifyModel.hpp
@@ -158,6 +175,7 @@ set(viewer_moc_files AbstractNodeModel.hpp
     CommandDesignerWidget.hpp
     CodeItemWidget.hpp
     CustomCommandDialog.hpp
+    CustomListWidget.hpp
     Dashboard.hpp
     DashboardDialog.hpp
     DashboardDock.hpp
@@ -173,14 +191,26 @@ set(viewer_moc_files AbstractNodeModel.hpp
     LogProvider.hpp
     MainWindow.hpp
     MenuConfigDialog.hpp
+    NodeFilterDialog.hpp
     NodeFilterModel.hpp            
     NodePanel.hpp
-    NodePathWidget.hpp            
-    NodeQueryDialog.hpp
+    NodePathWidget.hpp
+    NodeQueryCombo.hpp           
+    NodeQueryEditor.hpp
     NodeQueryEngine.hpp
-    NodeQueryWidget.hpp
+    NodeQueryResult.hpp
+    NodeQueryResultModel.hpp
+    NodeQueryResultView.hpp
+    NodeSearchDialog.hpp
+    NodeSearchWidget.hpp
     NodeWidget.hpp
+    OneLineTextEdit.hpp
+    OutputClient.hpp
+    OutputFileClient.hpp
+    OutputDirClient.hpp
     OutputItemWidget.hpp
+    OutputFileProvider.hpp
+    OutputDirProvider.hpp
     PropertyDialog.hpp             
     PropertyEditor.hpp
     PropertyLine.hpp
@@ -190,11 +220,13 @@ set(viewer_moc_files AbstractNodeModel.hpp
     ServerHandler.hpp
     ServerListDialog.hpp
     ServerSettingsItemWidget.hpp
+    StringMatchCombo.hpp
     SuiteItemWidget.hpp
     TabWidget.hpp
     TableFilterWidget.hpp
     TableNodeModel.hpp 
     TableNodeView.hpp 
+    TableNodeViewDelegate.hpp
     TableNodeWidget.hpp             
     TextEdit.hpp
     TreeNodeModel.hpp
@@ -214,7 +246,6 @@ set(viewer_moc_files AbstractNodeModel.hpp
 
 set(viewer_wrap_ui_files
     AboutDialog.ui
-    AttributeSearchPanel.ui
     ChangeNotifyDialog.ui
     ChangeNotifyDialogWidget.ui
     ChangeNotifyEditor.ui
@@ -224,17 +255,17 @@ set(viewer_wrap_ui_files
     DashboardDialog.ui
     DashboardDockTitleWidget.ui
     EditItemWidget.ui
-    EventSearchWidget.ui
     GotoLineDialog.ui
     HistoryItemWidget.ui
     InfoPanel.ui    
-    LabelSearchWidget.ui
     MainWindow.ui 
     MessageItemWidget.ui
     MenuConfigDialog.ui
-    NodeQueryDialog.ui
+    NodeFilterDialog.ui
+    NodeQueryEditor.ui
     NodeQuerySaveDialog.ui
-    NodeQueryWidget.ui
+    NodeSearchDialog.ui
+    NodeSearchWidget.ui
     OutputItemWidget.ui 
     PropertyDialog.ui
     PropertyEditor.ui
@@ -290,12 +321,16 @@ ecbuild_add_executable( TARGET   ecflow_ui
      ../../Base/src/stc
      ../../Client/src    
      ${Boost_INCLUDE_DIRS} 
-    ${CMAKE_CURRENT_BINARY_DIR}
-    LIBS     core nodeattr node libparser base libclient 
-     pthread ${Boost_LIBRARIES}
-     m crypt dl fl
-     ${ECFLOW_QT_LIBRARIES}
+     ${CMAKE_CURRENT_BINARY_DIR}
+    LIBS core nodeattr node libparser base libclient 
+         pthread  
+         m crypt dl fl
+         ${ECFLOW_QT_LIBRARIES}
 )
+
+# This ensures that for debug config, we only link with debug boost libs, for other configs, we link with optimised boost libs
+target_link_libraries(ecflow_ui debug ${Boost_REGEX_LIBRARY_DEBUG}   ${Boost_REGEX_LIBRARY_RELEASE} )                
+
 
 set(build_ecflow_ui_log 0)
 
@@ -303,7 +338,7 @@ if(${build_ecflow_ui_log})
     list(REMOVE_ITEM viewer_srcs ViewerMain.cpp)
     ecbuild_add_executable( TARGET   ecflow_ui_log
         SOURCES  LogEvent.cpp
-        ${viewer_srcs} ${VIEWER_MOC} ${VIEWER_RES} ${VIEWER_FORMS_HEADERS}
+                 ${viewer_srcs} ${VIEWER_MOC} ${VIEWER_RES} ${VIEWER_FORMS_HEADERS}
         INCLUDES .
          ../../ACore/src 
          ../../ANattr/src
@@ -314,11 +349,11 @@ if(${build_ecflow_ui_log})
          ../../Base/src/stc
          ../../Client/src     
          ${Boost_INCLUDE_DIRS} 
-        ${CMAKE_CURRENT_BINARY_DIR}
-        LIBS     core nodeattr node libparser base libclient 
-         pthread ${Boost_LIBRARIES}
-         m 
-         ${ECFLOW_QT_LIBRARIES}
+         ${CMAKE_CURRENT_BINARY_DIR}
+        LIBS core nodeattr node libparser base libclient 
+             pthread  
+             m 
+             ${ECFLOW_QT_LIBRARIES}
         DEFINITIONS MAIN_LOG
     )
 endif()

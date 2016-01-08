@@ -222,6 +222,7 @@ void VComboSettings::putQs(const std::string& key,QVariant val)
 
 QVariant  VComboSettings::getQs(const std::string& key)
 {
+	qDebug() << "qt group" << qs_.group();
 	return qs_.value(QString::fromStdString(key));
 }
 
@@ -229,6 +230,8 @@ void VComboSettings::beginGroup(const std::string &id)
 {
 	VSettings::beginGroup(id);
 	qs_.beginGroup(QString::fromStdString(id));
+
+	qDebug() << "qt group" << qs_.group();
 }
 
 void VComboSettings::endGroup()

@@ -18,19 +18,20 @@
 #include <QMessageBox>
 #include <QMenu>
 #include <QLabel>
+#include <QLinearGradient>
 #include <QWidgetAction>
 #include <QDebug>
 #include <QObject>
+#include <QVBoxLayout>
 
 #include "Str.hpp"
 #include "MenuHandler.hpp"
 #include "ServerHandler.hpp"
 #include "UserMessage.hpp"
 #include "NodeExpression.hpp"
-
+#include "VConfig.hpp"
 
 std::vector<Menu *> MenuHandler::menus_;
-
 
 MenuHandler::MenuHandler()
 {
@@ -127,8 +128,10 @@ bool MenuHandler::readMenuConfigFile(const std::string &configFile)
                 std::string questFor = ItemDef.get("question_for","");
                 std::string question = ItemDef.get("question", "");
                 std::string handler  = ItemDef.get("handler", "");
+                std::string views    = ItemDef.get("view", "");
                 std::string icon     = ItemDef.get("icon", "");
                 std::string hidden   = ItemDef.get("hidden", "false");
+
                 //std::cout << "  " << name << " :" << menuName << std::endl;
 
                 UserMessage::message(UserMessage::DBG, false, std::string("  " + name));
@@ -165,6 +168,18 @@ bool MenuHandler::readMenuConfigFile(const std::string &configFile)
                 item->setQuestion(question);
                 item->setHandler(handler);
                 item->setIcon(icon);
+
+                if(!views.empty())
+                {
+                	std::vector<std::string> viewsVec;
+                	QStringList vLst=QString::fromStdString(views).split("/");
+                	for(int i=0; i < vLst.count(); i++)
+                	{
+                		viewsVec.push_back(vLst[i].toStdString());
+                	}
+
+                	item->setViews(viewsVec);
+                }
 
                 if(hidden == "true")
                 	item->setHidden(true);
@@ -285,14 +300,14 @@ bool MenuHandler::addItemToMenu(MenuItem *item, const std::string &menuName)
 }
 
 
-QAction *MenuHandler::invokeMenu(const std::string &menuName, std::vector<VInfo_ptr> nodes, QPoint pos, QWidget *parent)
+QAction *MenuHandler::invokeMenu(const std::string &menuName, std::vector<VInfo_ptr> nodes, QPoint pos, QWidget *parent,const std::string& view)
 {
     QAction *selectedAction = NULL;
     Menu *menu = findMenu(menuName);
 
     if (menu)
     {
-        QMenu *qMenu = menu->generateMenu(nodes, parent);
+        QMenu *qMenu = menu->generateMenu(nodes, parent, view);
 
         if (qMenu)
         {
@@ -332,55 +347,21 @@ Menu::~Menu()
 }
 
 
-QMenu *Menu::generateMenu(std::vector<VInfo_ptr> nodes, QWidget *parent)
+QMenu *Menu::generateMenu(std::vector<VInfo_ptr> nodes, QWidget *parent,const std::string& view)
 {
-    bool showIcompatibleItems = true;
     QMenu *qmenu=new QMenu(parent);	
     qmenu->setTitle(QString::fromStdString(name()));
-
 
     if (nodes.empty())
         return NULL;
 
-
     //qmenu->setWindowFlags(Qt::Tool);
     //qmenu->setWindowTitle("my title");
-
 
     // add an inactive action(!) to the top of the menu in order to show which
     // node has been selected
 
-    QLabel *nodeLabel = NULL;
-
-    if (nodes.size() == 1)
-    {
-        //single node selected put a label with the node name + colour
-        nodeLabel = new QLabel(QString::fromStdString((*nodes[0]).name()));
-
-        QPalette labelPalette;
-        labelPalette.setColor(QPalette::Window,     (*nodes[0]).node()->stateColour());
-        labelPalette.setColor(QPalette::WindowText, QColor(96,96,96));
-        nodeLabel->setAutoFillBackground(true);
-        nodeLabel->setPalette(labelPalette);
-    }
-    else
-    {
-        // multiple nodes selected - say how many
-        nodeLabel = new QLabel(QObject::tr("%1 nodes selected").arg(nodes.size()));
-    }
-
-    QFont menuTitleFont;
-    menuTitleFont.setBold(true);
-    menuTitleFont.setItalic(true);
-    nodeLabel->setFont(menuTitleFont);
-    nodeLabel->setAlignment(Qt::AlignHCenter);
-    nodeLabel->setObjectName("nodeLabel");
-
-    QWidgetAction *action = new QWidgetAction(0);
-    action->setDefaultWidget(nodeLabel);
-    action->setEnabled(false);
-    action->setParent(parent);
-    qmenu->addAction(action);
+    buildMenuTitle(nodes,qmenu);
 
     //TypeNodeCondition  typeCondFamily   (MenuItem::FAMILY);
     //TypeNodeCondition  typeCondTask     (MenuItem::TASK);
@@ -403,6 +384,9 @@ QMenu *Menu::generateMenu(std::vector<VInfo_ptr> nodes, QWidget *parent)
         //  is this item valid for the current selection?
 
     	if((*itItems)->hidden())
+    		continue;
+
+    	if(!(*itItems)->isValidView(view))
     		continue;
 
         bool visible = true;
@@ -430,7 +414,7 @@ QMenu *Menu::generateMenu(std::vector<VInfo_ptr> nodes, QWidget *parent)
                 Menu *menu = MenuHandler::findMenu((*itItems)->name());
                 if (menu)
                 {
-                    QMenu *subMenu = menu->generateMenu(nodes, 0);
+                    QMenu *subMenu = menu->generateMenu(nodes, 0, view);
                     qmenu->addMenu(subMenu);
                     subMenu->setEnabled(enabled);
                 }
@@ -441,16 +425,89 @@ QMenu *Menu::generateMenu(std::vector<VInfo_ptr> nodes, QWidget *parent)
             }
             else
             {
-                QAction *action = (*itItems)->action();
+                //When we add the action to the menu its parent (NULL a.i. the QApplication) does not change.
+            	//So when the menu is deleted the action is not deleted.
+            	//At least this is the behaviour with Qt 4.8. and 5.5.
+            	QAction *action = (*itItems)->action();
                 qmenu->addAction(action);
-                action->setParent(parent);
                 action->setEnabled(enabled);
             }
         }
     }
 
-
     return qmenu;
+}
+
+void Menu::buildMenuTitle(std::vector<VInfo_ptr> nodes, QMenu* qmenu)
+{
+	QLabel *nodeLabel = NULL;
+
+	if (nodes.size() == 1)
+	{
+		VNode *node=nodes.at(0)->node();
+
+		if(!node)
+			return;
+
+		//single node selected put a label with the node name + colour
+		nodeLabel = new QLabel(node->name());
+
+		QBrush bgBrush(node->stateColour());
+
+		if(VProperty* p=VConfig::instance()->find("view.common.node_gradient"))
+		{
+			if(p->value().toBool())
+			{
+				int lighter=150;
+				QColor bg=bgBrush.color();
+				QColor bgLight=bg.lighter(lighter);
+				QColor border=bg.darker(125);
+
+				QLinearGradient grad;
+				grad.setCoordinateMode(QGradient::ObjectBoundingMode);
+				grad.setStart(0,0);
+				grad.setFinalStop(0,1);
+
+				grad.setColorAt(0,bgLight);
+				grad.setColorAt(1,bg);
+				bgBrush=QBrush(grad);
+			}
+		}
+
+		QPalette labelPalette;
+		labelPalette.setBrush(QPalette::Window,bgBrush);
+		labelPalette.setColor(QPalette::WindowText,node->stateFontColour());//QColor(96,96,96));
+		nodeLabel->setAutoFillBackground(true);
+		nodeLabel->setPalette(labelPalette);
+
+		QString titleQss="QLabel {padding: 2px;}";
+		nodeLabel->setStyleSheet(titleQss);
+	}
+	else
+	{
+		// multiple nodes selected - say how many
+		nodeLabel = new QLabel(QObject::tr("%1 nodes selected").arg(nodes.size()));
+	}
+
+	QFont menuTitleFont;
+	menuTitleFont.setBold(true);
+	menuTitleFont.setItalic(true);
+	nodeLabel->setFont(menuTitleFont);
+	nodeLabel->setAlignment(Qt::AlignHCenter);
+	nodeLabel->setObjectName("nodeLabel");
+
+	QWidget* titleW=new QWidget(qmenu);
+	QVBoxLayout *titleLayout=new QVBoxLayout(titleW);
+	titleLayout->setContentsMargins(2,2,2,2);
+	titleLayout->addWidget(nodeLabel);
+	nodeLabel->setParent(titleW);
+
+	QWidgetAction *wAction = new QWidgetAction(qmenu);
+	//Qt doc says: the ownership of the widget is passed to the widgetaction.
+	//So when the action is deleted it will be deleted as well.
+	wAction->setDefaultWidget(titleW);
+	//wAction->setEnabled(false);
+	qmenu->addAction(wAction);
 }
 
 
@@ -464,6 +521,7 @@ MenuItem::MenuItem(const std::string &name) :
    hidden_(false),
    visibleCondition_(NULL),
    enabledCondition_(NULL),
+   questionCondition_(NULL),
    isSubMenu_(false),
    isDivider_(false)
 {
@@ -477,7 +535,6 @@ MenuItem::MenuItem(const std::string &name) :
         action_->setText(QString(name.c_str()));
     }
 }
-
 
 MenuItem::~MenuItem()
 {
@@ -506,7 +563,6 @@ void MenuItem::setIcon(const std::string& icon)
 	}
 }
 
-
 bool MenuItem::shouldAskQuestion(std::vector<VInfo_ptr> &nodes)
 {
     bool askQuestion = false;
@@ -520,6 +576,13 @@ bool MenuItem::shouldAskQuestion(std::vector<VInfo_ptr> &nodes)
     return askQuestion;
 }
 
+bool MenuItem::isValidView(const std::string& view) const
+{
+	if(views_.empty())
+		return true;
+
+	return (std::find(views_.begin(),views_.end(),view) != views_.end());
+}
 
 
 // // adds an entry to the list of valid node types for this menu item

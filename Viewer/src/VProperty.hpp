@@ -53,7 +53,7 @@ public:
     enum Type {StringType,IntType,BoolType,ColourType,FontType,SoundType};
 
     enum GuiType {StringGui,IntGui,BoolGui,ColourGui,FontGui,SoundGui,
-    			  StringComboGui,SoundComboGui};
+    			  StringComboGui,MultiStringComboGui,SoundComboGui};
 
     QString name() const {return name_;}
     const std::string& strName() const {return strName_;}
@@ -69,6 +69,7 @@ public:
     void setValue(const std::string&);
     void setValue(QVariant);
     void setParam(QString,QString);
+    void adjustAfterLoad();
 
     std::string path();
     VProperty* parent() const {return parent_;}

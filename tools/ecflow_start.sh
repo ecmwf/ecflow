@@ -113,7 +113,7 @@ fname=$rcdir/$(echo $host | cut -c1-4).$USER.$ECF_PORT
 if [ -f $fname ]; then host=$(cat $fname); fi
 
 mkdir -p $rcdir
-ecflow_client --port $ECF_PORT --host $host --ping  && echo "server is already started" && exit 0 || :
+ecflow_client --port=$ECF_PORT --host=$host --ping  && echo "server is already started" && exit 0 || :
 
 servers=$HOME/.ecflowrc/servers
 localh=$(uname -n)
