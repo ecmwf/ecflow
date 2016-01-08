@@ -63,6 +63,8 @@ Dashboard::Dashboard(QString rootNode,QWidget *parent) :
 
 Dashboard::~Dashboard()
 {
+	Q_EMIT aboutToDelete();
+
 	serverFilter_->removeObserver(this);
 	delete serverFilter_;
 }
@@ -179,11 +181,21 @@ DashboardWidget* Dashboard::addDialog(const std::string& type)
 	if(!w)
 		return 0;
 
-	DashboardDialog* dia=new DashboardDialog(this);
+	//The DashBoard or any of its child cannot be the parent of the
+	//dialog because in this case it would be always on top its parent. This is
+	//the behaviour when the dialog's parent is QMainWindow.
+	DashboardDialog* dia=new DashboardDialog(0);
+
+	//So the parent in 0 and we will emit a signal from the Dashboard
+	//destructor to notify the dialog about it. Then we can be sure
+	//sure that the dialog deletes itself when the Dashboard gets deleted.
+    connect(this,SIGNAL(aboutToDelete()),
+    		dia,SLOT(slotOwnerDelete()));
 
     connect(dia,SIGNAL(finished(int)),
             this,SLOT(slotDialogFinished(int)));
 
+    //The dialog will reparent the widget
     dia->add(w);
 	dia->show();
 
@@ -193,7 +205,8 @@ DashboardWidget* Dashboard::addDialog(const std::string& type)
 void Dashboard::addSearchDialog()
 {
 	//It will delete itself on close!!
-	NodeSearchDialog* d=new NodeSearchDialog(this);
+	//The parent is 0, for the reason see the comment in addDialog()
+	NodeSearchDialog* d=new NodeSearchDialog(0);
 	d->queryWidget()->setServerFilter(serverFilter_);
 
 	for(int i=0; i < widgets_.count(); i++)
@@ -205,13 +218,18 @@ void Dashboard::addSearchDialog()
 		}
 	}
 
+	//The dashboard signals the dialog on deletion
+	connect(this,SIGNAL(aboutToDelete()),
+	    	d,SLOT(slotOwnerDelete()));
+
 	d->show();
 }
 
 void Dashboard::addSearchDialog(VInfo_ptr info)
 {
 	//It will delete itself on close!!
-	NodeSearchDialog* d=new NodeSearchDialog(this);
+	//The parent is 0, for the reason see the comment in addDialog()
+	NodeSearchDialog* d=new NodeSearchDialog(0);
 	d->queryWidget()->setServerFilter(serverFilter_);
 	d->queryWidget()->setRootNode(info);
 
@@ -223,6 +241,10 @@ void Dashboard::addSearchDialog(VInfo_ptr info)
 				    widgets_.at(i),SLOT(setCurrentSelection(VInfo_ptr)));
 		}
 	}
+
+	//The dashboard signals the dialog on deletion
+	connect(this,SIGNAL(aboutToDelete()),
+		    d,SLOT(slotOwnerDelete()));
 
 	d->show();
 }

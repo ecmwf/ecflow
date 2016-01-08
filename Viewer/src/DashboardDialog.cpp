@@ -37,12 +37,15 @@ DashboardDialog::DashboardDialog(QWidget *parent) :
 
 DashboardDialog::~DashboardDialog()
 {
-	dw_->deleteLater();
+	//dw_->deleteLater();
 }
 
 void DashboardDialog::add(DashboardWidget* dw)
 {
 	dw_=dw;
+
+	//The dialog takes ownership of the widget
+	dw_->setParent(this);
 
 	layout_->insertWidget(0,dw_,1);
 
@@ -69,6 +72,10 @@ void DashboardDialog::slotUpdateTitle(QString txt)
     setWindowTitle(txt.remove("<b>").remove("</b>"));
 }
 
+void DashboardDialog::slotOwnerDelete()
+{
+	this->deleteLater();
+}
 
 void DashboardDialog::writeSettings()
 {

@@ -31,6 +31,7 @@
 #include "VSettings.hpp"
 #include "VTaskObserver.hpp"
 
+#include <QDebug>
 #include <QMessageBox>
 #include <QMetaType>
 
@@ -140,7 +141,7 @@ ServerHandler::~ServerHandler()
 	saveConf();
 
 	//Notify the observers
-	broadcast(&ServerObserver::notifyServerDelete);
+	broadcast(&ServerObserver::notifyServerDelete,true);
 
 	//The queue must be deleted before the client, since the thread might
 	//be running a job on the client!!
@@ -718,6 +719,8 @@ void ServerHandler::slotDefsChanged(std::vector<ecf::Aspect::Type> aspect)
 
 void ServerHandler::addServerObserver(ServerObserver *obs)
 {
+	qDebug() << "add to" << name_.c_str() << obs;
+
 	std::vector<ServerObserver*>::iterator it=std::find(serverObservers_.begin(),serverObservers_.end(),obs);
 	if(it == serverObservers_.end())
 	{
@@ -734,7 +737,7 @@ void ServerHandler::removeServerObserver(ServerObserver *obs)
 	}
 }
 
-void ServerHandler::broadcast(SoMethod proc)
+void ServerHandler::broadcast(SoMethod proc,bool checkExistence)
 {
 	//When the observers are being notified (in a loop) they might
 	//want to remove themselves from the observer list. This will cause a crash. To avoid
@@ -742,7 +745,13 @@ void ServerHandler::broadcast(SoMethod proc)
 	std::vector<ServerObserver*> sObsCopy=serverObservers_;
 
 	for(std::vector<ServerObserver*>::const_iterator it=sObsCopy.begin(); it != sObsCopy.end(); ++it)
-		((*it)->*proc)(this);
+	{
+		//We need to check if the given observer is still in the original list. When we delete the server, due to
+		//dependencies it is possible that the observer is already deleted at this point.
+		if(!checkExistence || std::find(serverObservers_.begin(),serverObservers_.end(),*it) != serverObservers_.end())
+			((*it)->*proc)(this);
+	}
+
 }
 
 void ServerHandler::broadcast(SoMethodV1 proc,const VServerChange& ch)

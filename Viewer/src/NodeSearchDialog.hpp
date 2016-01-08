@@ -32,6 +32,7 @@ public:
 protected Q_SLOTS:
 	void accept();
     void reject();
+    void slotOwnerDelete();
 
 protected:
 	void closeEvent(QCloseEvent * event);

@@ -25,7 +25,7 @@ class VariableModelData
 {
 public:
 	explicit VariableModelData(VInfo_ptr info);
-	virtual ~VariableModelData() {};
+	virtual ~VariableModelData();
 
 	std::string fullPath();
 	std::string name();

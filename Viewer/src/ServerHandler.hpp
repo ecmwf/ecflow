@@ -170,7 +170,7 @@ private:
 
 	typedef void (ServerObserver::*SoMethod)(ServerHandler*);
 	typedef void (ServerObserver::*SoMethodV1)(ServerHandler*,const VServerChange&);
-	void broadcast(SoMethod);
+	void broadcast(SoMethod,bool checkExitense=false);
 	void broadcast(SoMethodV1,const VServerChange&);
 
 	typedef void (NodeObserver::*NoMethod)(const VNode*);

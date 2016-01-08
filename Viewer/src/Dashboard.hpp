@@ -57,6 +57,7 @@ Q_SIGNALS:
     void selectionChanged(VInfo_ptr);
 	void titleChanged(QWidget*,QString,QPixmap);
 	void contentsChanged();
+	void aboutToDelete();
 
 public Q_SLOTS:
 	void slotPopInfoPanel(VInfo_ptr,QString);

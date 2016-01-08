@@ -61,6 +61,11 @@ void NodeSearchDialog::reject()
 	QDialog::reject();
 }
 
+void NodeSearchDialog::slotOwnerDelete()
+{
+	deleteLater();
+}
+
 //------------------------------------------
 // Settings read/write
 //------------------------------------------

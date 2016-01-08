@@ -38,6 +38,10 @@ VariableModelData::VariableModelData(VInfo_ptr info) :
 	}
 }
 
+VariableModelData::~VariableModelData()
+{
+}
+
 void VariableModelData::clear()
 {
 	vars_.clear();
