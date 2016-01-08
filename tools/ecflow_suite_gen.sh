@@ -1,25 +1,12 @@
 #!/bin/bash
 exec 3> /dev/stdout
-
-commands="
-EOF          abort        action       autocancel   automigrate  autorestore  
-clock        complete     cron         date         day          defstatus    
-edit         endfamily    endsuite     endtask      event        extern       
-family       inlimit      label        late         limit        meter        
-owner        repeat       suite        task         text         time         
-today        trigger      "
-
 commands="   autocancel   
 clock        complete     cron         date         day          defstatus    
 edit         endfamily    endsuite     endtask      event        extern       
 family       inlimit      label        late         limit        meter        
-        repeat       suite        task              time         
-today        trigger      "
+repeat       suite        task              time    today        trigger      "
 
-# DEBUG=1
-if [[ ${DEBUG:=0} != 0 ]] ; then set -eux ; fi
-
-enable -n time || : # shell builtin removed
+# enable -n time || : # shell builtin removed
 for fname in $commands; do
 source /dev/stdin <<EOF
 function $fname()
@@ -30,14 +17,36 @@ EOF
 done
 
 alias time="echo time \"\${*}\" >&3"
-# function time {    echo $fname "$*" >&3 }
-type time
-# typeset -f ; typeset -F
-# declare -f; for fnam in $(declare -f); do declare $fnam; type $fnam; done; 
-# compgen
-
 init="ECF_NAME=%ECF_NAME% ECF_PASS=%ECF_PASS% ecflow_client --init;"
 complete="ECF_NAME=%ECF_NAME% ECF_PASS=%ECF_PASS% ecflow_client --complete;"
+
+ensemble() {
+num=0
+tot=10
+family ensemble
+limit  lim 5
+inlimit ensemble:lim
+while (( num <= tot)); do 
+  family $(printf "%02d" $num)
+    task model; edit MEMBER $num; (( num += 1))
+  endfamily
+done
+endfamily
+
+family process
+  for param in "z" "u" "v" "t" "q"; do 
+    task $param; edit PARAM $param; 
+  done
+endfamily # process
+
+family seq
+  for num in $(seq 1 9); do
+    family $(printf "%02d" $num)
+      task model; edit MEMBER $num; (( num += 1))
+    endfamily  
+  done
+endfamily
+}
 
 producer() {
     family producer
@@ -84,6 +93,8 @@ suite $SUITE_NAME
 
   producer # function defined upper
 
+  ensemble
+
   task cron
     cron 00:00 23:59 01:00
     late -s 00:05 -c 00:10
@@ -91,8 +102,6 @@ suite $SUITE_NAME
   task day
     day monday
   
-#  task date;     # today 1.1.1. # like date, different behaviour at replay
-
   family fam
     time 12:00
     date "1.*.*"
@@ -133,7 +142,7 @@ exec 3> $sdef
 if [[ $TEST == 1 ]]; then
  test_suite
 else
-  echo "insert your suite definition HERE $0 $LINE"
+  echo "#ERR: insert your suite definition HERE $0 $LINENO"
   exit 2
 fi
 
