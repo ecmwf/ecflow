@@ -108,7 +108,7 @@ std::string Limit::toString() const {
 
 void Limit::decrement( int tokens ,  const std::string& abs_node_path) {
 
-   // cout << "Limit::decrement name = " << name_ << " current value_ = " << value_ << " limit = " <<  theLimit_ << " consume tokens = " << tokens << "\n";
+   // cout << "Limit::decrement name = " << name_ << " current value_ = " << value_ << " limit = " <<  theLimit_ << " consume tokens = " << tokens << " path = " << abs_node_path << "\n";
    // Note: we previously had 'if (value_ > 0) {
    //       However if the user had manually changed the value_, then we could be left with paths_,  that would never have been cleared
    if (delete_path(abs_node_path)) {
@@ -127,7 +127,7 @@ void Limit::decrement( int tokens ,  const std::string& abs_node_path) {
 }
 
 void Limit::increment( int tokens , const std::string& abs_node_path) {
-   // cout << "Limit::increment name = " << name_ << " current value_ = " << value_ << " limit = " <<  theLimit_ << " consume tokens = " << tokens << "\n";
+   // cout << "Limit::increment name = " << name_ << " current value_ = " << value_ << " limit = " <<  theLimit_ << " consume tokens = " << tokens << " path = " << abs_node_path << "\n";
 
    // increment should keep increasing limit value, *EVEN* if over the limit. See ECFLOW-324
    // Note: previously we had:
