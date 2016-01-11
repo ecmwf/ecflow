@@ -51,7 +51,7 @@ public Q_SLOTS:
 	void slotSelectItem(const QModelIndex&);
 	void slotDoubleClickItem(const QModelIndex&);
 	void slotContextMenu(const QPoint &position);
-	void slotViewCommand(std::vector<VInfo_ptr>,QString);
+	void slotViewCommand(VInfo_ptr,QString);
 	void slotSetCurrent(VInfo_ptr);
 	void slotSaveExpand(const VNode* node);
 	void slotRestoreExpand(const VNode* node);
@@ -71,6 +71,8 @@ protected:
 	void restoreExpand(ExpandNode *expand,const VNode* node);
 	void adjustIndentation(int);
 	void adjustBackground(QColor col);
+	void expandAll(const QModelIndex& idx);
+	void collapseAll(const QModelIndex& idx);
 
 	ActionHandler* actionHandler_;
 	ExpandState *expandState_;

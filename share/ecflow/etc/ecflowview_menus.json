@@ -545,7 +545,27 @@
             "command"        : "job",
             "handler"        : "info_panel",
             "icon"           : "job.svg"          
-        }
+        }, 
+        {
+            "menu"           : "Node",
+            "name"           : "-"
+        },
+        {
+            "menu"           : "Node",
+            "name"           : "Expand all children",
+            "visible_for"    : "server or node",        
+            "command"        : "expand",
+            "handler"        : "tree",
+            "view"           : "tree"                    
+        },
+        {
+            "menu"           : "Node",
+            "name"           : "Collapse all children",
+            "visible_for"    : "server or node",        
+            "command"        : "collapse",
+            "handler"        : "tree",
+            "view"           : "tree"                    
+        }        
         
 
     ]

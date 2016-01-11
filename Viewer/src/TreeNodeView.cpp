@@ -15,6 +15,10 @@
 #include <QPalette>
 #include <QScrollBar>
 
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+#include <QGuiApplication>
+#endif
+
 #include "ActionHandler.hpp"
 #include "Animation.hpp"
 #include "ExpandState.hpp"
@@ -77,7 +81,7 @@ TreeNodeView::TreeNodeView(NodeFilterModel* model,NodeFilterDef* filterDef,QWidg
 	connect(this,SIGNAL(doubleClicked(const QModelIndex&)),
 			this,SLOT(slotDoubleClickItem(const QModelIndex)));
 
-	expandAll();
+	//expandAll();
 
 	//Properties
 	std::vector<std::string> propVec;
@@ -213,11 +217,33 @@ void TreeNodeView::handleContextMenu(QModelIndex indexClicked,QModelIndexList in
 	}
 }
 
-void TreeNodeView::slotViewCommand(std::vector<VInfo_ptr> nodeLst,QString cmd)
+void TreeNodeView::slotViewCommand(VInfo_ptr info,QString cmd)
 {
+	if(cmd == "expand")
+	{
+		QModelIndex idx=model_->infoToIndex(info);
+		if(idx.isValid())
+		{
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+		QGuiApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+#endif
+		expandAll(idx);
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+		QGuiApplication::restoreOverrideCursor();
+#endif
 
-	if(nodeLst.size() == 0)
-		return;
+		}
+	}
+	else if(cmd == "collapse")
+	{
+		QModelIndex idx=model_->infoToIndex(info);
+		if(idx.isValid())
+		{
+				collapseAll(idx);
+
+		}
+	}
+
 
 	/*if(cmd == "set_as_root")
 	{
@@ -302,6 +328,28 @@ void TreeNodeView::notifyChange(VProperty* p)
 //====================================================
 // Expand state management
 //====================================================
+
+void TreeNodeView::expandAll(const QModelIndex& idx)
+{
+	expand(idx);
+
+	for(int i=0; i < model_->rowCount(idx); i++)
+	{
+		QModelIndex chIdx=model_->index(i, 0, idx);
+		expandAll(chIdx);
+	}
+}
+
+void TreeNodeView::collapseAll(const QModelIndex& idx)
+{
+	collapse(idx);
+
+	for(int i=0; i < model_->rowCount(idx); i++)
+	{
+		QModelIndex chIdx=model_->index(i, 0, idx);
+		collapseAll(chIdx);
+	}
+}
 
 //Save the expand state for the given node (it can be a server as well)
 void TreeNodeView::slotSaveExpand(const VNode* node)

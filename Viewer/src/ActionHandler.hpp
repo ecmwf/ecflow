@@ -30,7 +30,7 @@ public:
 
 		void contextMenu(std::vector<VInfo_ptr>,QPoint);
 Q_SIGNALS:
-	    void viewCommand(std::vector<VInfo_ptr>,QString);
+	    void viewCommand(VInfo_ptr,QString);
 	    void infoPanelCommand(VInfo_ptr,QString);
 	    void dashboardCommand(VInfo_ptr,QString);
 

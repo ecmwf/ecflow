@@ -393,6 +393,11 @@ bool VNode::isSuspended() const
 	return (node_ && node_->isSuspended());
 }
 
+bool VNode::isAborted() const
+{
+	return (node_ && node_->state() == NState::ABORTED && !node_->isSuspended());
+}
+
 QColor  VNode::stateColour() const
 {
 	return VNState::toColour(this);

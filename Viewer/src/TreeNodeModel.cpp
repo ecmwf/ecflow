@@ -337,7 +337,7 @@ QVariant TreeNodeModel::nodeData(const QModelIndex& index, int role) const
 		}
 
 		//The number of nodes a suite has
-		else if(role == AbortedReasonRole)
+		else if(role == AbortedReasonRole && vnode->isAborted())
 		{
 			return QString::fromStdString(vnode->abortedReason());
 		}

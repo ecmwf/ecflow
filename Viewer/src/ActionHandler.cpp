@@ -23,8 +23,8 @@
 
 ActionHandler::ActionHandler(QWidget *view) : QObject(view), parent_(view)
 {
-	connect(this,SIGNAL(viewCommand(std::vector<VInfo_ptr>,QString)),
-			parent_,SLOT(slotViewCommand(std::vector<VInfo_ptr>,QString)));
+	connect(this,SIGNAL(viewCommand(VInfo_ptr,QString)),
+			parent_,SLOT(slotViewCommand(VInfo_ptr,QString)));
 
 	connect(this,SIGNAL(infoPanelCommand(VInfo_ptr,QString)),
 			parent_,SIGNAL(infoPanelCommand(VInfo_ptr,QString)));
@@ -56,11 +56,16 @@ void ActionHandler::contextMenu(std::vector<VInfo_ptr> nodesLst,QPoint pos)
     			Q_EMIT dashboardCommand(nodesLst.at(0),QString::fromStdString(item->command()));
     			return;
     		}
+    		else if(item->handler() == "tree")
+    		{
+    			Q_EMIT viewCommand(nodesLst.at(0),QString::fromStdString(item->command()));
+    			return;
+    		}
     	}
 
     	if(action->iconText() == "Set as root")
         {
-            Q_EMIT viewCommand(nodesLst,"set_as_root");
+            //Q_EMIT viewCommand(nodesLst,"set_as_root");
         }
         else if(action->iconText() == "Custom")  // would expect this to be 'Custom...' but it's just 'Custom'
         {
