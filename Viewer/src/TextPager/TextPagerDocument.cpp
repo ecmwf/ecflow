@@ -719,7 +719,6 @@ TextPagerCursor TextPagerDocument::find(const QString &in, const TextPagerCursor
 
         if((index=line.indexOf(word)) != -1) {
 
-        	index=line.indexOf(word);
         	//Backward:
         	//The iterator is positioned at the linebreak character of the previous line, or at
         	//the start of the document
