@@ -28,11 +28,14 @@ public:
 	enum Mode {NoMode,TextMode,RegexpMode};
 
 protected:
+	bool isWordCharacter(const QChar& ch) const;
+
 	Mode mode_;
 	QRegExp rx_;
 	QString text_;
 	QTextCharFormat format_;
 	bool caseSensitive_;
+	bool wholeWords_;
 	static QColor bgColour_;
 };
 

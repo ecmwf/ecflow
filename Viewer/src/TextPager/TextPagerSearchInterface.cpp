@@ -45,6 +45,9 @@ bool TextPagerSearchInterface::findString (QString str, bool highlightAll, QText
 	if(flags & QTextDocument::FindBackward)
 		mode |= TextPagerDocument::FindBackward;
 
+	if(flags & QTextDocument::FindWholeWords)
+		mode |= TextPagerDocument::FindWholeWords;
+
 	bool found = false;
 
 	Qt::CaseSensitivity cs = (flags & QTextDocument::FindCaseSensitively) ? Qt::CaseSensitive : Qt::CaseInsensitive;

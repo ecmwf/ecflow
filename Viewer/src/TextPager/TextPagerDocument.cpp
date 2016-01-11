@@ -15,7 +15,7 @@
 #include <QDesktopServices>
 #include <qalgorithms.h>
 
-//#define TEXTDOCUMENT_FIND_DEBUG
+#define TEXTDOCUMENT_FIND_DEBUG
 
 
 #if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
@@ -717,46 +717,84 @@ TextPagerCursor TextPagerDocument::find(const QString &in, const TextPagerCursor
         //qDebug() << line;
 #endif
 
-        if((index=line.indexOf(word)) != -1)
-        {
-#ifdef TEXTDOCUMENT_FIND_DEBUG
-        	qDebug() << line;
-#endif
+        if((index=line.indexOf(word)) != -1) {
+
+        	index=line.indexOf(word);
+        	//Backward:
         	//The iterator is positioned at the linebreak character of the previous line, or at
         	//the start of the document
-        	if(reverse)
-        	{
+        	if(reverse) {
         		from = it.position();
-
-        		TextPagerCursor ret(this, from + index, from + index + word.size());
-#ifdef TEXTDOCUMENT_FIND_DEBUG
-        		qDebug() << "total time" << lap.elapsed();
-        		qDebug() << "current:" << it.current() <<  it.position() << line.size();
-        		qDebug() << "result" << "pos:" << ret.position() << "anchor:" << ret.anchor();
-#endif
-        		return ret;
+        		index=line.lastIndexOf(word);
         	}
+        	//Forward:
         	//The iterator is positioned at the linebreak character at the end of the line or at
         	//the end of the document
-        	else
-        	{
-        		from = it.position()-line.size()+1;
-        		//if(it.current() != newline)
-        		//	from++;
-
-        		if(from + index + word.size() > limit) {
-        			ok = false;
-        		}
-        		else {
-        			TextPagerCursor ret(this, from + index + word.size(),from + index);
-#ifdef TEXTDOCUMENT_FIND_DEBUG
-        			qDebug() << "total time" << lap.elapsed();
-        			qDebug() << "current:" << it.current() <<  it.position() << line.size();
-        			qDebug() << "result" << "pos:" << ret.position() << "anchor:" << ret.anchor();
-#endif
-        	    	return ret;
-        		}
+        	else {
+        	    from = it.position()-line.size()+1;
         	}
+
+        	while(ok && index != -1) {
+
+        		const int startPos=from + index;
+        		const int endPos=from + index + word.size();
+
+        		if(!reverse && endPos > limit) {
+        			ok = false;
+        			break;
+        		}
+
+        		bool found=true;
+        		if(wholeWords) {
+
+        			if(TextDocumentIterator::Left != d->wordBoundariesAt(startPos)) {
+        				found = false;
+        			}
+        			if(found) {
+        				if(TextDocumentIterator::Right != d->wordBoundariesAt(endPos-1)) {
+        					found = false;
+        				}
+        			}
+        		}
+
+        		if(found) {
+
+#ifdef TEXTDOCUMENT_FIND_DEBUG
+        			qDebug() << line;
+#endif
+        			//Backward
+        			if(reverse) {
+        				TextPagerCursor ret(this, startPos, endPos);
+#ifdef TEXTDOCUMENT_FIND_DEBUG
+        				qDebug() << "total time" << lap.elapsed();
+        				qDebug() << "current:" << it.current() <<  it.position() << line.size();
+        				qDebug() << "result" << "pos:" << ret.position() << "anchor:" << ret.anchor();
+#endif
+        				return ret;
+        			//Forward
+        			} else {
+
+        				TextPagerCursor ret(this, endPos,startPos);
+#ifdef TEXTDOCUMENT_FIND_DEBUG
+        				qDebug() << "total time" << lap.elapsed();
+        				qDebug() << "current:" << it.current() <<  it.position() << line.size();
+        				qDebug() << "result" << "pos:" << ret.position() << "anchor:" << ret.anchor();
+#endif
+        				return ret;
+        			}
+
+        		//If it is not a wholeword we try to match every other match int he same line
+        		} else {
+
+        			if(reverse) {
+        			      index=line.lastIndexOf(word,index-1);
+        			} else {
+        				index=line.indexOf(word,index+word.size());
+        			}
+
+        		}
+        	} //while
+
         }
 
 #if 0

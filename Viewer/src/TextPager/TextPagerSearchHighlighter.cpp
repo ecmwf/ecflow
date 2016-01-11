@@ -20,7 +20,8 @@ QColor TextPagerSearchHighlighter::bgColour_=QColor(200, 255, 200);
 TextPagerSearchHighlighter::TextPagerSearchHighlighter(QObject *parent) :
   SyntaxHighlighter(parent),
   mode_(NoMode),
-  caseSensitive_(false)
+  caseSensitive_(false),
+  wholeWords_(false)
  {
 	if(VProperty *p=VConfig::instance()->find("panel.search.highlightColour"))
 	{
@@ -31,6 +32,12 @@ TextPagerSearchHighlighter::TextPagerSearchHighlighter(QObject *parent) :
 
 	rx_=QRegExp("(server)");
  }
+
+//from QRegExp
+bool TextPagerSearchHighlighter::isWordCharacter(const QChar& ch) const
+{
+	return ch.isLetterOrNumber() || ch.isMark() || ch == QLatin1Char('_');
+}
 
 void TextPagerSearchHighlighter::highlightBlock(const QString &string)
 {
@@ -54,7 +61,17 @@ void TextPagerSearchHighlighter::highlightBlock(const QString &string)
 		while((index = string.indexOf(text_,index,
 			   caseSensitive_?Qt::CaseSensitive:Qt::CaseInsensitive)) != -1)
 		{
-			setFormat(index, text_.size(), format_);
+			bool found=true;
+			if(wholeWords_)
+			{
+				if(index>0)
+					found=!isWordCharacter(string.at(index-1));
+				if(found && index + text_.size() < string.size())
+					found=!isWordCharacter(string.at(index+text_.size()));
+			}
+			if(found)
+				setFormat(index, text_.size(), format_);
+
 			index+=string.size();
 		}
 	}
@@ -80,6 +97,13 @@ void TextPagerSearchHighlighter::reset(QString txt,TextPagerDocument::FindMode m
 	if(cs != caseSensitive_)
 	{
 		caseSensitive_=cs;
+		changed=true;
+	}
+
+	bool ww=mode & TextPagerDocument::FindWholeWords;
+	if(ww != wholeWords_)
+	{
+		wholeWords_=ww;
 		changed=true;
 	}
 
