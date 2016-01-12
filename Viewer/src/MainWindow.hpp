@@ -20,6 +20,7 @@
 #include <boost/property_tree/ptree.hpp>
 
 class QActionGroup;
+class QLabel;
 class InfoPanel;
 class NodePanel;
 class ServerFilterMenu;

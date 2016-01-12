@@ -13,6 +13,7 @@
 #include <boost/property_tree/json_parser.hpp>
 #include <boost/foreach.hpp>
 
+#include <assert.h>
 #include <iostream>
 
 #include <QMessageBox>
@@ -31,7 +32,10 @@
 #include "NodeExpression.hpp"
 #include "VConfig.hpp"
 
+int MenuItem::idCnt_=0;
+
 std::vector<Menu *> MenuHandler::menus_;
+
 
 MenuHandler::MenuHandler()
 {
@@ -264,7 +268,7 @@ MenuItem* MenuHandler::findItem(QAction* ac)
 	{
 		for(std::vector<MenuItem*>::iterator it=(*itMenus)->items().begin(); it!=(*itMenus)->items().end(); ++it)
 		{
-			if((*it)->action() == ac)
+			if((*it)->id() == ac->data().toInt())
 			{
 				return *it;
 			}
@@ -307,19 +311,31 @@ QAction *MenuHandler::invokeMenu(const std::string &menuName, std::vector<VInfo_
 
     if (menu)
     {
-        QMenu *qMenu = menu->generateMenu(nodes, parent, view);
+    	QList<QAction*> acLst;
+
+    	//While create the menus we collect all the actions created with "parent" as the parent.
+    	//QMenu does not take ownership of these actions so we need to delete them.
+        QMenu *qMenu = menu->generateMenu(nodes, parent, NULL, view,acLst);
 
         if (qMenu)
         {
             selectedAction = qMenu->exec(pos);
+
             delete qMenu;
+
+            //Delete all the actions with "parent" as the parent;
+            Q_FOREACH(QAction *ac,acLst)
+            {
+            	assert(parent == ac->parent());
+            	delete ac;
+            }
+
+
         }
     }
 
     return selectedAction;
 }
-
-
 
 // -----------------------------------------------------------------
 
@@ -347,10 +363,18 @@ Menu::~Menu()
 }
 
 
-QMenu *Menu::generateMenu(std::vector<VInfo_ptr> nodes, QWidget *parent,const std::string& view)
+QMenu *Menu::generateMenu(std::vector<VInfo_ptr> nodes, QWidget *parent,QMenu* parentMenu,const std::string& view,QList<QAction*>& acLst)
 {
-    QMenu *qmenu=new QMenu(parent);	
-    qmenu->setTitle(QString::fromStdString(name()));
+	QMenu *qmenu=NULL;
+	if(parentMenu)
+	{
+		qmenu=parentMenu->addMenu(QString::fromStdString(name()));
+	}
+	else
+	{
+		qmenu=new QMenu(parent);
+		qmenu->setTitle(QString::fromStdString(name()));
+	}
 
     if (nodes.empty())
         return NULL;
@@ -410,12 +434,11 @@ QMenu *Menu::generateMenu(std::vector<VInfo_ptr> nodes, QWidget *parent,const st
 
             if ((*itItems)->isSubMenu())
             {
-                //QMenu *subMenu = qmenu->addMenu(QString::fromStdString((*itItems)->name()));
                 Menu *menu = MenuHandler::findMenu((*itItems)->name());
                 if (menu)
                 {
-                    QMenu *subMenu = menu->generateMenu(nodes, 0, view);
-                    qmenu->addMenu(subMenu);
+                    //The submenu will be added to qmenu and it will take ownership of it.
+                	QMenu *subMenu = menu->generateMenu(nodes, parent, qmenu, view, acLst);
                     subMenu->setEnabled(enabled);
                 }
             }
@@ -428,9 +451,16 @@ QMenu *Menu::generateMenu(std::vector<VInfo_ptr> nodes, QWidget *parent,const st
                 //When we add the action to the menu its parent (NULL a.i. the QApplication) does not change.
             	//So when the menu is deleted the action is not deleted.
             	//At least this is the behaviour with Qt 4.8. and 5.5.
-            	QAction *action = (*itItems)->action();
-                qmenu->addAction(action);
+            	//QAction *action = (*itItems)->action();
+            	//action->setParent(parent);
+
+            	//These actions will have "parent" as the parent, otherwise the statustip would not work
+            	//on qmainwindows. The downside is that we need to delete these actions separately when the qmenu is deleted.
+            	//In theory the parent of the actions could be the qmenu as well, but in this case the statustip does not work!
+            	QAction* action=(*itItems)->createAction(parent);
+            	qmenu->addAction(action);
                 action->setEnabled(enabled);
+                acLst << action;
             }
         }
     }
@@ -517,7 +547,7 @@ void Menu::buildMenuTitle(std::vector<VInfo_ptr> nodes, QMenu* qmenu)
 
 MenuItem::MenuItem(const std::string &name) :
    name_(name),
-   action_(0),
+   id_(idCnt_++),
    hidden_(false),
    visibleCondition_(NULL),
    enabledCondition_(NULL),
@@ -529,25 +559,18 @@ MenuItem::MenuItem(const std::string &name) :
     {
         isDivider_ = true;
     }
-    else
-    {
-        action_ = new QAction(0);
-        action_->setText(QString(name.c_str()));
-    }
 }
 
 MenuItem::~MenuItem()
 {
-    if (action_)
-        delete action_;
 }
 
 void MenuItem::setCommand(const std::string &command)
 {
     command_ = command;
 
-    if (action_)
-        action_->setStatusTip(QString(command.c_str()));  // so we see the command in the status bar
+    //if (action_)
+    //    action_->setStatusTip(QString(command.c_str()));  // so we see the command in the status bar
 }
 
 void MenuItem::setHandler(const std::string& handler)
@@ -559,7 +582,7 @@ void MenuItem::setIcon(const std::string& icon)
 {
 	if(!icon.empty())
 	{
-		action_->setIcon(QPixmap(":/viewer/" + QString::fromStdString(icon)));
+		icon_=QIcon(QPixmap(":/viewer/" + QString::fromStdString(icon)));
 	}
 }
 
@@ -584,8 +607,19 @@ bool MenuItem::isValidView(const std::string& view) const
 	return (std::find(views_.begin(),views_.end(),view) != views_.end());
 }
 
+QAction* MenuItem::createAction(QWidget* parent)
+{
+	QAction *ac=new QAction(parent);
+	ac->setText(QString::fromStdString(name_));
+	ac->setIcon(icon_);
+	ac->setStatusTip(QString::fromStdString(command_));  // so we see the command in the status bar
+	ac->setData(id_);
+	return ac;
 
-// // adds an entry to the list of valid node types for this menu item
+}
+
+
+// // adds an entry to the list of valid node types for this menu item(*itItems)
 // void MenuItem::addValidType(std::string type)
 // {
 //     static NodeType all[] = {TASK, FAMILY, SUITE, SERVER, ALIAS};

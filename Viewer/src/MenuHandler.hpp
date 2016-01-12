@@ -12,6 +12,8 @@
 
 #include <vector>
 #include <QString>
+#include <QIcon>
+#include <QList>
 #include <QPoint>
 
 #include "VInfo.hpp"
@@ -60,13 +62,18 @@ public:
     const std::string command() const {return command_;}
     const std::string question() const {return question_;}
     bool hidden() const {return hidden_;}
-    QAction     *action() {return action_;};
+    int id() const {return id_;}
+    QAction* createAction(QWidget* parent);
 
 private:
+    //No copy allowed
+    MenuItem(const MenuItem&);
+    MenuItem& operator=(const MenuItem&);
 
     //bool isNodeTypeValidForMenuItem(NodeType type);
 
     std::string name_;
+    int id_;
     std::string tooltip_;
     std::string command_;
     std::string question_;
@@ -86,7 +93,9 @@ private:
     bool isSubMenu_;
     bool isDivider_;
 
-    QAction *action_;
+    QIcon icon_;
+
+    static int idCnt_;
 };
 
 
@@ -106,9 +115,8 @@ public:
     QString exec(std::vector<Node *> nodes);
     std::string &name()       {return name_;};
     void addItem(MenuItem *item) {items_.push_back(item);};
-    QMenu *generateMenu(std::vector<VInfo_ptr> nodes, QWidget *parent,const std::string& view);
+    QMenu *generateMenu(std::vector<VInfo_ptr> nodes, QWidget *parent,QMenu* parentMenu,const std::string& view,QList<QAction*>&);
     std::vector<MenuItem *>& items() {return items_;};
-
 
 private:
     void buildMenuTitle(std::vector<VInfo_ptr> nodes, QMenu* qmenu);
