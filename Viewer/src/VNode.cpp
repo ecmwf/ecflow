@@ -585,10 +585,11 @@ QString VNode::toolTip()
     txt+="<b>Path</b>: " + QString::fromStdString(absNodePath()) + "<br>";
     txt+="<b>Type</b>: " + QString::fromStdString(nodeType()) + "<br>";
     
-    txt+="<b>Status</b>: " + stateName() + "<br>";
+    txt+="<b>Status</b>: " + stateName();
     if(isSuspended())        
-        txt+="<b>Real status</b>: " + VNState::toRealStateName(this) + "<br>";
-          
+        txt+=" (" + VNState::toRealStateName(this) + ")";
+
+    txt+="<br>";
     txt+="<b>Default status</b>: " + defaultStateName() + "<br>";
     
     txt+="<b>Server:</b> " + QString::fromStdString(server()->name()) + "<br>";

@@ -622,12 +622,16 @@ void TreeNodeViewDelegate::renderNode(QPainter *painter,const QModelIndex& index
 	//The aborted reason
 	QRect reasonRect;
 	QString reasonTxt=index.data(AbstractNodeModel::AbortedReasonRole).toString();
+	if(reasonTxt.contains('\n'))
+		reasonTxt=reasonTxt.split("\n").first();
+
 	bool hasReason=(!reasonTxt.isEmpty());
 	if(hasReason)
 	{
 		QFontMetrics fmReason(abortedReasonFont_);
 		reasonRect = textRect;
 		reasonRect.setLeft(currentRight+fmReason.width('A'));
+		reasonTxt=fmReason.elidedText(reasonTxt,Qt::ElideRight,220);
 		reasonRect.setWidth(fmReason.width(reasonTxt));
 		currentRight=reasonRect.right();
 	}

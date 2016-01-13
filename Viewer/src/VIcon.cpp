@@ -54,10 +54,10 @@ public:
 	bool show(VNode*);
 };
 
-class VMessageIcon : public VIcon
+class VNodeLogIcon : public VIcon
 {
 public:
-	explicit VMessageIcon(const std::string& name) : VIcon(name) {};
+	explicit VNodeLogIcon(const std::string& name) : VIcon(name) {};
 	bool show(VNode*);
 };
 
@@ -110,7 +110,7 @@ public:
 //==========================================================
 
 //This also defines the order the icons will appear in the views
-static VMessageIcon messageIcon("message");
+static VNodeLogIcon nodeLogIcon("message");
 static VRerunIcon rerunIcon("rerun");
 static VCompleteIcon completeIcon("complete");
 static VLateIcon lateIcon("late");
@@ -213,7 +213,7 @@ QString VIcon::toolTip(VNode *vnode,VParamSet *filter)
 	if(filter->isEmpty())
 		return QString();
 
-	int iconSize=12;
+	int iconSize=16;
 	QString txt;
 
 	for(std::vector<VIcon*>::const_iterator it=itemsVec_.begin(); it != itemsVec_.end(); ++it)
@@ -230,7 +230,7 @@ QString VIcon::toolTip(VNode *vnode,VParamSet *filter)
       		 }
 
       		 txt+="<tr><td><img src=\'" + IconProvider::path(v->pixId_) + "\' width=\'" +
-      	           QString::number(iconSize) + "\' height=\'" + QString::number(iconSize) + "\'></td><td>" + v->name() + "</tr>";
+      	           QString::number(iconSize) + "\' height=\'" + QString::number(iconSize) + "\'></td><td>" + v->shortDescription() + "</tr>";
       	   }
 		}
 	}
@@ -239,6 +239,18 @@ QString VIcon::toolTip(VNode *vnode,VParamSet *filter)
 		txt+="</table>";
 
    	return txt;
+}
+
+QString VIcon::shortDescription() const
+{
+	QString v;
+	if(prop_)
+		v=prop_->param("shortDesc");
+
+	if(v.isEmpty())
+		v=name();
+
+	return v;
 }
 
 void VIcon::load(VProperty* group)
@@ -295,7 +307,7 @@ bool VRerunIcon::show(VNode *n)
 //==========================================================
 
 //Node and server
-bool VMessageIcon::show(VNode *n)
+bool VNodeLogIcon::show(VNode *n)
 {
 	if(!n)
 		return false;

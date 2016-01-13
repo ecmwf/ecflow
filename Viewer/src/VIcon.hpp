@@ -43,6 +43,7 @@ protected:
 	void initPixmap();
 	QPixmap pixmap(int size);
 	virtual bool show(VNode*)=0;
+	QString shortDescription() const;
 
 	int pixId_;
 

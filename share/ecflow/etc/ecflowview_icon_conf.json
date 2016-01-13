@@ -7,28 +7,31 @@
         	"wait" : {
         		"label" : "Waiting", 
         		"tooltip" : "A running task is waiting for a trigger.",
+                "shortDesc" : "Waiting for a trigger",
                 "icon" : {      
                 	"default" : "icon_waiting.svg"
                 }
         	},      
             "rerun" : {
                  "label" : "Rerun",
-                 "tooltip" : "",
+                 "tooltip" : "Task has been restarted",
+                 "shortDesc" : "Has been restarted",
                  "icon" : {      
                      "default" : "icon_rerun.svg"
-                 }
-                
+                }            
             },
             "message" : {
-                 "label" : "Message",
-                 "tooltip" : "Has user messages. User has issued a command since the last begin.",
+                 "label" : "Has node log entry",
+                 "shortDesc" : "Has node log entry",
+                 "tooltip" : "There are log entries for this node. Users have issued commands since the last begin.",
                  "icon"  : {
-                	 "default": "icon_message.svg"
+                	 "default": "icon_node_log.svg"
                   }
             },
             "complete" : {
             	 "label" : "Complete",
             	 "tooltip" : "",
+                 "shortDesc" : "Complete",
                  "icon"  : {	 
                 	 "default" : "icon_complete.svg"
                  }		 
@@ -36,6 +39,7 @@
             "time" : {
                  "label" : "Time",
                  "tooltip" : "Node has a time dependency.",
+                 "shortDesc" : "Has time dependency",
                  "icon"  : {
                 	 "default" : "icon_clock.svg"
                  }
@@ -43,12 +47,14 @@
             "date" : {
                  "label" : "Date",
                  "tooltip" : "Node has date or day dependency.",
-                 "icon"  : { 
+                  "shortDesc" : "Has date or day dependency",
+                  "icon"  : { 
                 	 "default" : "icon_calendar.svg"
                  }
             },
             "zombie" : {
                 "label" : "Zombie",
+                "shortDesc" : "Is a zombie",
                 "tooltip" : "",
                 "icon"  : {
                 	"default" :"icon_zombie.svg"
@@ -57,13 +63,15 @@
             "late" : {
                 "label" : "Late",
                 "tooltip" : "Node is late.",               
+                "shortDesc" : "Is late",
                 "icon"  : {
                 	"default" : "icon_late.svg"
                 }
             },
             "slow" : {
                 "label" : "Slow server write",
-                "tooltip" : "Slow chekpoint file or job fle writing.",               
+                "tooltip" : "Slow chekpoint file or job file writing.",               
+                "shortDesc" : "Slow writing",
                 "icon"  : {
                     "default" : "icon_slow.svg"
                 }

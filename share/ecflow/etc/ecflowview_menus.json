@@ -467,11 +467,11 @@
         },
         {
             "menu"           : "Node",
-            "name"           : "Log ...",
+            "name"           : "Server log ...",
             "visible_for"    : "server",        
             "command"        : "history",
             "handler"        : "info_panel",
-            "icon"           : "log.svg"          
+            "icon"           : "server_log.svg"          
         },         
         {
             "menu"           : "Node",

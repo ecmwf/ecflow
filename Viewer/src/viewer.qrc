@@ -10,22 +10,15 @@
     <file>../images/add_info.svg</file>
     <file>../images/add_table.svg</file>
     <file>../images/add_tree.svg</file>
-    <file alias="icon_calendar.svg">../images/icon_calendar.svg</file>
-    <file alias="icon_calendar.png">../images/icon_calendar.png</file>
-    <file alias="icon_clock.svg">../images/icon_clock.svg</file>
-    <file alias="icon_clock.png">../images/icon_clock.png</file>
-    <file alias="icon_complete.png">../images/icon_complete.png</file>
-    <file alias="icon_complete.svg">../images/icon_complete.svg</file>
-    <file alias="icon_defstatus.png">../images/icon_defstatus.png</file>
+    <file alias="icon_calendar.svg">../images/icon_calendar.svg</file>   
+    <file alias="icon_clock.svg">../images/icon_clock.svg</file>     
+    <file alias="icon_complete.svg">../images/icon_complete.svg</file>   
     <file alias="icon_late.svg">../images/icon_late.svg</file>
-    <file alias="icon_message.svg">../images/icon_message.svg</file>
+    <file alias="icon_node_log.svg">../images/icon_node_log.svg</file>
     <file alias="icon_rerun.svg">../images/icon_rerun.svg</file>
-    <file alias="icon_slow.svg">../images/icon_slow.svg</file>
-    <file alias="icon_Z.png">../images/icon_Z.png</file>
-    <file alias="icon_waiting.svg">../images/icon_waiting.svg</file>
-    <file alias="icon_waiting.png">../images/icon_waiting.png</file>
-    <file alias="icon_zombie.svg">../images/icon_zombie.svg</file>
-    <file alias="script.png">../images/icon_Script.png</file>
+    <file alias="icon_slow.svg">../images/icon_slow.svg</file>   
+    <file alias="icon_waiting.svg">../images/icon_waiting.svg</file>  
+    <file alias="icon_zombie.svg">../images/icon_zombie.svg</file>  
     <file>../images/arrow_up.svg</file>
     <file>../images/arrow_down.svg</file>
     <file>../images/add.svg</file>
@@ -39,8 +32,7 @@
     <file alias="case_sensitive.svg">../images/case_sensitive.svg</file>
     <file alias="colour.svg">../images/colour.svg</file>
     <file alias="directory_arrow.svg">../images/directory_arrow.svg</file>
-    <file alias="dock_config.svg">../images/dock_config.svg</file>
-    <file alias="dock_info.svg">../images/dock_info.svg</file>
+    <file alias="dock_config.svg">../images/dock_config.svg</file>   
     <file alias="dock_menu_indicator.png">../images/dock_menu_indicator.png</file>
     <file alias="drawer_open.svg">../images/drawer_open.svg</file>
     <file alias="drawer_close.svg">../images/drawer_close.svg</file>
@@ -59,18 +51,13 @@
     <file alias="fontsize_up.svg">../images/fontsize_up.svg</file>   
     <file alias="overview.svg">../images/overview.svg</file>
     <file alias="job.svg">../images/job.svg</file>
-    <file alias="job_dock.svg">../images/job_dock.svg</file>
-    <file alias="log.svg">../images/log.svg</file>
     <file alias="log_info.svg">../images/log_info.svg</file>
     <file alias="log_error.svg">../images/log_error.svg</file>
     <file alias="manage_server.svg">../images/manage_server.svg</file>
     <file alias="manual.svg">../images/manual.svg</file>
-    <file alias="manual_dock.svg">../images/manual_dock.svg</file>
-    <file alias="message.svg">../images/message.svg</file>
-    <file alias="message_dock.svg">../images/message_dock.svg</file>
+    <file alias="node_log.svg">../images/node_log.svg</file>
     <file alias="notification.svg">../images/notification.svg</file>
     <file alias="output.svg">../images/output.svg</file>
-    <file alias="output_dock.svg">../images/output_dock.svg</file>
     <file alias="padlock.svg">../images/padlock.svg</file>
     <file alias="path_arrow.svg">../images/path_arrow.svg</file>
     <file alias="reload.svg">../images/reload.svg</file>
@@ -78,10 +65,10 @@
     <file alias="rescue.svg">../images/rescue.svg</file>
     <file alias="reset_to_default.svg">../images/reset_to_default.svg</file>
     <file alias="script.svg">../images/script.svg</file>
-    <file alias="script_dock.svg">../images/script_dock.svg</file>
     <file alias="search_decor.svg">../images/search_decor.svg</file>
     <file alias="select_all.svg">../images/select_all.svg</file>
     <file alias="server.svg">../images/server.svg</file>
+    <file alias="server_log.svg">../images/server_log.svg</file>
     <file alias="spinning_wheel.gif">../images/spinning_wheel.gif</file>
     <file alias="splash_screen.png">../images/splash_screen.png</file>
     <file alias="status.svg">../images/status.svg</file>
@@ -91,11 +78,8 @@
     <file alias="unknown.svg">../images/unknown.svg</file>
     <file alias="unselect_all.svg">../images/unselect_all.svg</file>
     <file alias="variable.svg">../images/variable.svg</file>
-    <file alias="variable_dock.svg">../images/variable_dock.svg</file>
     <file alias="warning.svg">../images/warning.svg</file>
     <file alias="why.svg">../images/why.svg</file>
-    <file alias="why_dock.svg">../images/why_dock.svg</file>
     <file alias="zombie.svg">../images/zombie.svg</file>
-    <file alias="zombie_dock.svg">../images/zombie_dock.svg</file>
   </qresource>
 </RCC>

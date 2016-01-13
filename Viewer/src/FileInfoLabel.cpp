@@ -84,7 +84,7 @@ void FileInfoLabel::update(VReply* reply,QString extraText)
 			//s+="<br>";
 
 			labelText+="<b><font color=" + col.name() + "> Size: </font></b>";
-			labelText+="<font color=" + colSize.name() + "> " + f.formatSize() + "</font>";
+			labelText+="<font color=" + fileSizeColour(f.size()).name() + "> " + f.formatSize() + "</font>";
 
 			/*s+="<b><font color=" + col.name() + "> Permissions: </font></b>";
 			s+="<font color=" + colText.name() + ">" + f.formatPermissions() + "</font>";
@@ -131,7 +131,7 @@ void FileInfoLabel::update(VReply* reply,QString extraText)
 			if(tmp->storageMode() == VFile::MemoryStorage)
 			{
 				labelText+="<b><font color=" + col.name() + "> Size: </font></b>";
-				labelText+="<font color=" + colSize.name() + "> " + VFileInfo::formatSize(tmp->dataSize()) + "</font>";
+				labelText+="<font color=" + fileSizeColour(f.size()).name() + "> " + VFileInfo::formatSize(tmp->dataSize()) + "</font>";
 			}
 			else
 			{
@@ -169,6 +169,17 @@ void FileInfoLabel::update(VReply* reply,QString extraText)
 
 	setText(labelText);
 	setToolTip(ttText);
+}
+
+QColor FileInfoLabel::fileSizeColour(qint64 size) const
+{
+	QColor col(0,0,255);
+	if(size > 10*1024*1024)
+		col=QColor(Qt::red);
+	/*else if( size > 10*1024*1024)
+		col=QColor(255,166,0);*/
+
+	return col;
 }
 
 void DirInfoLabel::update(VDir_ptr dir)
