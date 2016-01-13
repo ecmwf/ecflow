@@ -26,8 +26,6 @@ ManualItemWidget::ManualItemWidget(QWidget *parent) : CodeItemWidget(parent)
 
     infoProvider_=new ManualProvider(this);
 
-    infoProvider_=new JobProvider(this);
-
 	//Editor font
 	textEdit_->setFontProperty(VConfig::instance()->find("panel.manual.font"));
 
