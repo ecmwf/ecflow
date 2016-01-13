@@ -324,7 +324,7 @@
         {
             "menu"           : "Node",
             "name"           : "Custom...",
-            "command"        : "CUSTOM_COMMAND"
+            "command"        : "custom"
         },
 
 

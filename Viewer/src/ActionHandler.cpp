@@ -44,30 +44,33 @@ void ActionHandler::contextMenu(std::vector<VInfo_ptr> nodesLst,QPoint pos)
     if(action)
     {
     	MenuItem* item=MenuHandler::findItem(action);
-    	if(item)
+    	
+        if(!item)
+            return;
+        
+        
+    	if(item->handler() == "info_panel")
     	{
-    		if(item->handler() == "info_panel")
-    		{
-    			Q_EMIT infoPanelCommand(nodesLst.at(0),QString::fromStdString(item->command()));
-    			return;
-    		}
-    		else if(item->handler() == "dashboard")
-    		{
-    			Q_EMIT dashboardCommand(nodesLst.at(0),QString::fromStdString(item->command()));
-    			return;
-    		}
-    		else if(item->handler() == "tree")
-    		{
-    			Q_EMIT viewCommand(nodesLst.at(0),QString::fromStdString(item->command()));
-    			return;
-    		}
+    		Q_EMIT infoPanelCommand(nodesLst.at(0),QString::fromStdString(item->command()));
+    		return;
+    	}
+    	else if(item->handler() == "dashboard")
+    	{
+    		Q_EMIT dashboardCommand(nodesLst.at(0),QString::fromStdString(item->command()));
+    		return;
+    	}
+    	else if(item->handler() == "tree")
+    	{
+    		Q_EMIT viewCommand(nodesLst.at(0),QString::fromStdString(item->command()));
+    		return;
     	}
 
-    	if(action->iconText() == "Set as root")
+    	/*if(action->iconText() == "Set as root")
         {
             //Q_EMIT viewCommand(nodesLst,"set_as_root");
-        }
-        else if(action->iconText() == "Custom")  // would expect this to be 'Custom...' but it's just 'Custom'
+        }*/
+        
+        else if(item->command() == "custom")  // would expect this to be 'Custom...' but it's just 'Custom'
         {
             CustomCommandDialog customCommandDialog(0);
             if (customCommandDialog.exec() == QDialog::Accepted)
