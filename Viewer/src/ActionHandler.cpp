@@ -12,9 +12,17 @@
 
 #include "ActionHandler.hpp"
 
+#include <QtGlobal>
 #include <QAction>
+#include <QClipboard>
 #include <QMenu>
 #include <QMessageBox>
+
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+#include <QGuiApplication>
+#else
+#include <QApplication>
+#endif
 
 #include "Str.hpp"
 #include "ServerHandler.hpp"
@@ -69,7 +77,29 @@ void ActionHandler::contextMenu(std::vector<VInfo_ptr> nodesLst,QPoint pos)
         {
             //Q_EMIT viewCommand(nodesLst,"set_as_root");
         }*/
-        
+    	else if(item->command() == "copy")
+    	{
+    		 QString txt;
+    		 for(std::vector<VInfo_ptr>::const_iterator it=nodesLst.begin(); it != nodesLst.end(); ++it)
+    		 {
+    			 if(*it)
+    			 {
+    				 if(!txt.isEmpty())
+    				    txt+=",";
+    				 txt+=QString::fromStdString((*it)->path());
+    			 }
+    		 }
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+    		 QClipboard* cb=QGuiApplication::clipboard();
+    		 cb->setText(txt, QClipboard::Clipboard);
+    		 cb->setText(txt, QClipboard::Selection);
+#else
+    		 QClipboard* cb=QApplication::clipboard();
+    		 cb->setText(txt, QClipboard::Clipboard);
+    		 cb->setText(txt, QClipboard::Selection);
+#endif
+    	}
+
         else if(item->command() == "custom")  // would expect this to be 'Custom...' but it's just 'Custom'
         {
             CustomCommandDialog customCommandDialog(0);

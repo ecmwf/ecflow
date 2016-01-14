@@ -581,6 +581,16 @@
             "handler"        : "info_panel",
             "icon"           : "job.svg"          
         }, 
+         {
+            "menu"           : "Node",
+            "name"           : "-"
+        },
+        {
+            "menu"           : "Node",
+            "name"           : "Copy node path",
+            "visible_for"    : "server or node",        
+            "command"        : "copy"                      
+        },
         {
             "menu"           : "Node",
             "name"           : "-"

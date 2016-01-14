@@ -144,7 +144,7 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="16.15625"
-     inkscape:cx="-0.80379338"
+     inkscape:cx="25.412958"
      inkscape:cy="17.039481"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
@@ -218,23 +218,6 @@
        id="path2822-9"
        sodipodi:nodetypes="cccsccccc"
        inkscape:connector-curvature="0" />
-    <path
-       style="fill:url(#linearGradient3680);fill-opacity:1;stroke:#3c3333;stroke-width:1px;stroke-linecap:round;stroke-linejoin:round;stroke-opacity:1"
-       d="m 36.827853,1048.0914 14.359768,-25.8723 15.164409,25.7485 -29.524177,0.1238 z"
-       id="path2822"
-       sodipodi:nodetypes="cccc"
-       inkscape:connector-curvature="0" />
-    <text
-       xml:space="preserve"
-       style="font-size:24.92413139px;font-style:normal;font-weight:normal;fill:#000000;fill-opacity:1;stroke:none;font-family:Arial;-inkscape-font-specification:Arial"
-       x="-13.527848"
-       y="1330.8749"
-       id="text3604"
-       transform="scale(1.2868668,0.7770812)"><tspan
-         sodipodi:role="line"
-         id="tspan3606"
-         x="-13.527848"
-         y="1330.8749">!</tspan></text>
     <path
        sodipodi:type="arc"
        style="fill:#12122b;fill-opacity:1;fill-rule:evenodd;stroke:none"
