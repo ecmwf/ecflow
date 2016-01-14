@@ -25,6 +25,8 @@ public:
 	virtual bool isEmpty();
 	void selectAll();
     void setConfirmSearch(bool);
+    bool confirmSearch() const {return confirmSearch_;}
+    QString confirmSearchText() const;
 
 	bool caseSensitive()  {return caseSensitive_;};
 	bool wholeWords()     {return wholeWords_;};
@@ -39,9 +41,14 @@ public Q_SLOTS:
 	virtual void on_actionWholeWords__toggled(bool);
 	virtual void on_actionHighlightAll__toggled(bool);
 
+Q_SIGNALS:
+	void visibilityChanged();
+
 protected:
 	void updateButtons(bool);
 	void toDefaultState();
+	void hideEvent(QHideEvent* event);
+	void showEvent(QShowEvent* event);
 
 	bool status_;
 	bool caseSensitive_;

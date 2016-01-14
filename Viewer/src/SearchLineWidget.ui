@@ -31,17 +31,7 @@
     </widget>
    </item>
    <item>
-    <widget class="QLabel" name="confirmSearchLabel_">
-     <property name="toolTip">
-      <string>Large file mode. Press enter or press the arrows to start search.</string>
-     </property>
-     <property name="text">
-      <string/>
-     </property>
-     <property name="pixmap">
-      <pixmap resource="viewer.qrc">:/viewer/warning.svg</pixmap>
-     </property>
-    </widget>
+    <widget class="MessageLabel" name="confirmSearchLabel_" native="true"/>
    </item>
    <item>
     <widget class="StringMatchCombo" name="matchModeCb_"/>
@@ -203,6 +193,12 @@
   </action>
  </widget>
  <customwidgets>
+  <customwidget>
+   <class>MessageLabel</class>
+   <extends>QWidget</extends>
+   <header>MessageLabel.hpp</header>
+   <container>1</container>
+  </customwidget>
   <customwidget>
    <class>StringMatchCombo</class>
    <extends>QComboBox</extends>

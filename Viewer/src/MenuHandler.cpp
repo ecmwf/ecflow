@@ -135,6 +135,7 @@ bool MenuHandler::readMenuConfigFile(const std::string &configFile)
                 std::string views    = ItemDef.get("view", "");
                 std::string icon     = ItemDef.get("icon", "");
                 std::string hidden   = ItemDef.get("hidden", "false");
+                std::string statustip  = ItemDef.get("status_tip", "");
 
                 //std::cout << "  " << name << " :" << menuName << std::endl;
 
@@ -172,6 +173,7 @@ bool MenuHandler::readMenuConfigFile(const std::string &configFile)
                 item->setQuestion(question);
                 item->setHandler(handler);
                 item->setIcon(icon);
+                item->setStatustip(statustip);
 
                 if(!views.empty())
                 {
@@ -612,7 +614,14 @@ QAction* MenuItem::createAction(QWidget* parent)
 	QAction *ac=new QAction(parent);
 	ac->setText(QString::fromStdString(name_));
 	ac->setIcon(icon_);
-	ac->setStatusTip(QString::fromStdString(command_));  // so we see the command in the status bar
+
+	if(!statustip_.empty())
+	{
+		if(statustip_ == "__cmd__")
+			ac->setStatusTip(QString::fromStdString(command_));  // so we see the command in the status bar
+		else
+			ac->setStatusTip(QString::fromStdString(statustip_));
+	}
 	ac->setData(id_);
 	return ac;
 

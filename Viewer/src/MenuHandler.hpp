@@ -45,6 +45,7 @@ public:
     void setViews(const std::vector<std::string> &views) {views_=views;};
     void setQuestion(const std::string &question) {question_=question;}
     void setIcon(const std::string &icon);
+    void setStatustip(const std::string &statustip) {statustip_=statustip;}
     void setHidden(bool b) {hidden_=b;}
     void setAsSubMenu() {isSubMenu_ = true;};
     void setVisibleCondition(BaseNodeCondition *cond)  {visibleCondition_  = cond;};
@@ -76,6 +77,7 @@ private:
     int id_;
     std::string tooltip_;
     std::string command_;
+    std::string statustip_;
     std::string question_;
     std::string defaultAnswer_;
     std::string handler_;

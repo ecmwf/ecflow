@@ -13,6 +13,7 @@
 #include <QVBoxLayout>
 
 #include "Highlighter.hpp"
+#include "MessageLabel.hpp"
 #include "PlainTextEdit.hpp"
 #include "PlainTextSearchInterface.hpp"
 #include "TextEditSearchLine.hpp"
@@ -23,9 +24,15 @@ OutputBrowser::OutputBrowser(QWidget* parent) : QWidget(parent)
 {
 	QVBoxLayout *vb=new QVBoxLayout(this);
 	vb->setContentsMargins(0,0,0,0);
+	vb->setSpacing(2);
 
 	stacked_=new QStackedWidget(this);
 	vb->addWidget(stacked_);
+
+	confirmSearchLabel_=new MessageLabel(this);
+	confirmSearchLabel_->setShowTypeTitle(false);
+	//confirmSearchLabel_->useNarrowMode(true);
+	vb->addWidget(confirmSearchLabel_);
 
 	searchLine_=new TextEditSearchLine(this);
 	vb->addWidget(searchLine_);
@@ -33,6 +40,7 @@ OutputBrowser::OutputBrowser(QWidget* parent) : QWidget(parent)
 	//Basic textedit
 	textEdit_=new PlainTextEdit(this);
 	textEdit_->setReadOnly(true);
+	textEdit_->setWordWrapMode(QTextOption::NoWrap);
 
 	textEditSearchInterface_=new PlainTextSearchInterface();
 	textEditSearchInterface_->setEditor(textEdit_);
@@ -51,8 +59,12 @@ OutputBrowser::OutputBrowser(QWidget* parent) : QWidget(parent)
 	stacked_->addWidget(textEdit_);
 	stacked_->addWidget(textPager_);
 
+
 	stacked_->setCurrentIndex(BasicIndex);
 	searchLine_->hide();
+
+	connect(searchLine_,SIGNAL(visibilityChanged()),
+			this,SLOT(showConfirmSearchLabel()));
 }
 
 OutputBrowser::~OutputBrowser()
@@ -79,6 +91,9 @@ void OutputBrowser::changeIndex(IndexType indexType)
 		stacked_->setCurrentIndex(indexType);
 		searchLine_->setConfirmSearch(false);
 		searchLine_->setSearchInterface(textEditSearchInterface_);
+		//confirmSearchLabel_->clear();
+		//confirmSearchLabel_->hide();
+
 		textPager_->clear();
 	}
 	else
@@ -86,8 +101,12 @@ void OutputBrowser::changeIndex(IndexType indexType)
 		stacked_->setCurrentIndex(indexType);
 		searchLine_->setConfirmSearch(true);
 		searchLine_->setSearchInterface(textPagerSearchInterface_);
+		//confirmSearchLabel_->show();
+		//confirmSearchLabel_->showWarning(searchLine_->confirmSearchText());
 		textEdit_->clear();
 	}
+
+	showConfirmSearchLabel();
 }
 
 void OutputBrowser::loadFile(QString fileName)
@@ -145,21 +164,18 @@ void OutputBrowser::adjustHighlighter(QString fileName)
 
 void OutputBrowser::gotoLine()
 {
-
+	if(stacked_->currentIndex() == BasicIndex)
+		textEdit_->gotoLine();
 }
 
 void OutputBrowser::showSearchLine()
 {
-	if(stacked_->currentIndex() == BasicIndex)
-	{
-	}
-
 	searchLine_->setVisible(true);
 	searchLine_->setFocus();
 	searchLine_->selectAll();
 }
 
-bool OutputBrowser::searchOnReload(bool userClickedReload)
+void OutputBrowser::searchOnReload(bool userClickedReload)
 {
 	searchLine_->searchOnReload(userClickedReload);
 }
@@ -185,4 +201,17 @@ void OutputBrowser::zoomOut()
 {
 	textEdit_->slotZoomOut();
 	textPager_->zoomOut();
+}
+
+void OutputBrowser::showConfirmSearchLabel()
+{
+	if(searchLine_->isVisible() &&  searchLine_->confirmSearch())
+	{
+		confirmSearchLabel_->showWarning(searchLine_->confirmSearchText());
+		//confirmSearchLabel_->show();
+	}
+	else
+	{
+		confirmSearchLabel_->hide();
+	}
 }

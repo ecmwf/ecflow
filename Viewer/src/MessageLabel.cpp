@@ -14,13 +14,12 @@
 
 class MessageLabelData {
 public:
-	MessageLabelData(QString iconPath,QString title,QColor bg, QColor border) :
+	MessageLabelData(QString iconPath,QString title,QColor bg, QColor bgLight,QColor border) :
 	title_(title), bg_(bg.name()), border_(border.name())
 	{
 		int id=IconProvider::add(iconPath,iconPath);
-		pix_=IconProvider::pixmap(id,20);
+		pix_=IconProvider::pixmap(id,18);
 
-		QColor bgLight=bg.lighter(105);
 		bg_="qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 " + bg.name() +", stop: 1 " + bgLight.name() + ")";
 	}
 
@@ -36,15 +35,24 @@ static std::map<MessageLabel::Type,MessageLabelData> typeData;
 
 MessageLabel::MessageLabel(QWidget *parent) :
 	QWidget(parent),
-	currentType_(NoType)
+	currentType_(NoType),
+	showTypeTitle_(true)
 {
 	setProperty("base","1");
 
 	if(typeData.empty())
 	{
-		typeData[InfoType]=MessageLabelData(":/viewer/info.svg","Info",QColor(236,246,252),QColor(180,194,230));
-		typeData[WarningType]=MessageLabelData(":/viewer/warning.svg","Warning",QColor(255,198,63),QColor(255,140,0));
-		typeData[ErrorType]=MessageLabelData(":/viewer/error.svg","Error",QColor(255,231,231),QColor(223,152,152));
+		QColor bg(236,246,252);
+		QColor bgLight=bg.lighter(105);
+		typeData[InfoType]=MessageLabelData(":/viewer/info.svg","Info",bg,bgLight,QColor(180,194,230));
+
+		bg=QColor(234,215,150);
+		bgLight=bg.lighter(112);
+		typeData[WarningType]=MessageLabelData(":/viewer/warning.svg","Warning",bg,bgLight,QColor(226,195,110)); //255,198,63
+
+		bg=QColor(255,231,231);
+		bgLight=bg.lighter(105);
+		typeData[ErrorType]=MessageLabelData(":/viewer/error.svg","Error",bg,bgLight,QColor(223,152,152));
 	}
 
 	pixLabel_=new QLabel(this);
@@ -56,15 +64,20 @@ MessageLabel::MessageLabel(QWidget *parent) :
 
 	loadLabel_=new QLabel(this);
 
-	QHBoxLayout* hb=new QHBoxLayout(this);
-	hb->setContentsMargins(2,2,2,2);
-	hb->addWidget(loadLabel_);
-	hb->addWidget(pixLabel_);
-	hb->addWidget(msgLabel_,1);
+	layout_=new QHBoxLayout(this);
+	layout_->setContentsMargins(2,2,2,2);
+	layout_->addWidget(loadLabel_);
+	layout_->addWidget(pixLabel_);
+	layout_->addWidget(msgLabel_,1);
 
 	stopLoadLabel();
 
 	hide();
+}
+
+void MessageLabel::clear()
+{
+	msgLabel_->setText("");
 }
 
 void MessageLabel::showInfo(QString msg)
@@ -103,7 +116,9 @@ void MessageLabel::showMessage(const Type& type,QString msg)
 
 	QString s=msg;
 	s.replace("\n","<br>");
-	s="<b>" + it->second.title_ + ": </b><br>" + s;
+	if(showTypeTitle_)
+		s="<b>" + it->second.title_ + ": </b><br>" + s;
+
 	msgLabel_->setText(s);
 
 	show();
@@ -129,3 +144,20 @@ void MessageLabel::stopLoadLabel()
 
 	loadLabel_->hide();
 }
+
+void MessageLabel::setShowTypeTitle(bool b)
+{
+	if(showTypeTitle_ != b)
+	{
+		showTypeTitle_=b;
+	}
+}
+
+void MessageLabel::useNarrowMode(bool b)
+{
+	if(!b)
+		layout_->setContentsMargins(2,2,2,2);
+	else
+		layout_->setContentsMargins(2,0,2,0);
+}
+

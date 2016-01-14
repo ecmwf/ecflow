@@ -13,6 +13,7 @@
 #include <QStackedWidget>
 
 class Highlighter;
+class MessageLabel;
 class TextEditSearchLine;
 class PlainTextEdit;
 class PlainTextSearchInterface;
@@ -22,6 +23,8 @@ class VProperty;
 
 class OutputBrowser : public QWidget
 {
+Q_OBJECT
+
 public:
 	explicit OutputBrowser(QWidget* parent);
 	~OutputBrowser();
@@ -34,9 +37,12 @@ public:
 	void updateFont();
 	void gotoLine();
 	void showSearchLine();
-	bool searchOnReload(bool userClickedReload);
+	void searchOnReload(bool userClickedReload);
 	void zoomIn();
 	void zoomOut();
+
+protected Q_SLOTS:
+	void showConfirmSearchLabel();
 
 private:
 	enum IndexType {BasicIndex=0,PagerIndex=1};
@@ -49,6 +55,7 @@ private:
 	Highlighter* jobHighlighter_;
 	PlainTextSearchInterface *textEditSearchInterface_;
 	TextPagerSearchInterface *textPagerSearchInterface_;
+	MessageLabel *confirmSearchLabel_;
 };
 
 #endif /* VIEWER_SRC_OUTPUTBROWSER_HPP_ */

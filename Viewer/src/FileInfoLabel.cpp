@@ -102,11 +102,11 @@ void FileInfoLabel::update(VReply* reply,QString extraText)
 			s+="<b><font color=" + col.name() + "> Source: </font></b>";
 			s+="<font color=" + colText.name() + "> local disk</font>";
 
-			VFile_ptr tmp=reply->tmpFile();
+			/*VFile_ptr tmp=reply->tmpFile();
 			if(tmp && tmp->widgetLoadDuration() > 300)
 			{
 				s+=" (display: " + QString::number(static_cast<float>(tmp->widgetLoadDuration())/1000.,'f',1) + " s)";
-			}
+			}*/
 		}
 	}
 	else if(reply->fileReadMode() == VReply::ServerReadMode)
@@ -152,10 +152,10 @@ void FileInfoLabel::update(VReply* reply,QString extraText)
 			s+="<font color=" + colText.name() + "> " + QString::fromStdString(reply->fileReadMethod()) + "</font>";
 
 			s+=" (transfer: " + QString::number(static_cast<float>(tmp->transferDuration())/1000.,'f',1) + " s";
-			if(tmp->widgetLoadDuration() > 0)
+			/*if(tmp->widgetLoadDuration() > 0)
 			{
 				s+=", display: " + QString::number(static_cast<float>(tmp->widgetLoadDuration())/1000.,'f',1) + " s";
-			}
+			}*/
 			s+=")";
 		}
 	}

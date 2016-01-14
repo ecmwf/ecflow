@@ -5,6 +5,7 @@
 
 #include <QWidget>
 
+class QHBoxLayout;
 class QLabel;
 
 class MessageLabel : public QWidget
@@ -19,14 +20,19 @@ public:
 	void showError(QString);
 	void startLoadLabel();
 	void stopLoadLabel();
+	void setShowTypeTitle(bool);
+	void clear();
+	void useNarrowMode(bool);;
 
 private:
 	void showMessage(const Type&,QString);
 
+	bool showTypeTitle_;
 	Type currentType_;
 	QLabel *pixLabel_;
 	QLabel* msgLabel_;
 	QLabel* loadLabel_;
+	QHBoxLayout* layout_;
 
 };
 

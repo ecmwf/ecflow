@@ -11,6 +11,7 @@
 #include <QShortcut>
 #include <QMenu>
 #include "AbstractSearchLine.hpp"
+#include "IconProvider.hpp"
 
 AbstractSearchLine::AbstractSearchLine(QWidget* parent) :
   QWidget(parent),
@@ -19,6 +20,7 @@ AbstractSearchLine::AbstractSearchLine(QWidget* parent) :
 	setupUi(this);
 
 	confirmSearchLabel_->hide();
+	confirmSearchLabel_->setShowTypeTitle(false);
 
 #if QT_VERSION >= QT_VERSION_CHECK(4, 7, 0)
 	searchLine_->setPlaceholderText(tr("Find"));
@@ -43,7 +45,6 @@ AbstractSearchLine::AbstractSearchLine(QWidget* parent) :
 
 	connect(closeTb_,SIGNAL(clicked()),
 		this, SLOT(slotClose()));
-
 
 	nextTb_->setDefaultAction(actionNext_);
 	prevTb_->setDefaultAction(actionPrev_);
@@ -76,6 +77,8 @@ AbstractSearchLine::AbstractSearchLine(QWidget* parent) :
 
     matchModeCb_->setMatchMode(StringMatchMode::ContainsMatch);  // set the default match mode
     //matchModeChanged(1);  // dummy call to initialise the 'whole words' option state
+
+    setConfirmSearch(false);
 }
 
 AbstractSearchLine::~AbstractSearchLine()
@@ -155,15 +158,47 @@ void AbstractSearchLine::on_actionHighlightAll__toggled(bool b)
 void AbstractSearchLine::setConfirmSearch(bool confirmSearch)
 {
 	confirmSearch_=confirmSearch;
-	confirmSearchLabel_->setVisible(confirmSearch_);
+	//confirmSearchLabel_->setVisible(confirmSearch_);
 
 	if(confirmSearch_)
 	{
-		status_=false;
+		//confirmSearchLabel_->showWarning("Large file mode");
 		if(searchLine_->text().isEmpty())
 		{
 			status_=false;
 			toDefaultState();
 		}
+
+#if QT_VERSION >= QT_VERSION_CHECK(4, 7, 0)
+		searchLine_->setPlaceholderText(tr("Find   (you need to hit enter to start search)"));
+#endif
 	}
+	else
+	{
+#if QT_VERSION >= QT_VERSION_CHECK(4, 7, 0)
+		searchLine_->setPlaceholderText(tr("Find"));
+#endif
+	}
+
+	searchLine_->setToolTip(confirmSearchText());
+}
+
+QString AbstractSearchLine::confirmSearchText() const
+{
+	return (confirmSearch_)?
+		"Search works in <b>large file mode</b>. After typing in the search term <b>press enter</b> or use the arrows to start search!":
+			"Search works in <b> continuous mode</b>. As you type in a new character the search starts immediately.";
+
+}
+
+void AbstractSearchLine::hideEvent(QHideEvent* event)
+{
+	QWidget::hideEvent(event);
+	Q_EMIT visibilityChanged();
+}
+
+void AbstractSearchLine::showEvent(QShowEvent* event)
+{
+	QWidget::showEvent(event);
+	Q_EMIT visibilityChanged();
 }

@@ -218,6 +218,7 @@ set(viewer_moc_files AbstractNodeModel.hpp
     NodeSearchWidget.hpp
     NodeWidget.hpp
     OneLineTextEdit.hpp
+    OutputBrowser.hpp
     OutputClient.hpp
     OutputFileClient.hpp
     OutputDirClient.hpp
