@@ -7,18 +7,290 @@
 // nor does it submit to any jurisdiction.
 //============================================================================
 
+#include <boost/bind.hpp>
+
 #include "CommandDesignerWidget.hpp"
+#include "CustomCommandHandler.hpp"
+#include "Child.hpp"
+#include "Str.hpp"
+
+using namespace boost;
+namespace po = boost::program_options;
 
 
 CommandDesignerWidget::CommandDesignerWidget(QWidget *parent) : QWidget(parent)
 {
 	setupUi(this);
-	connect (insertPushButton_, SIGNAL(clicked()), this, SLOT(insertCurrentText()));
+
+	connect (componentsList_, SIGNAL(itemClicked(QListWidgetItem *)), this,
+		SLOT(insertComponent(QListWidgetItem *)));
+
+
+	// at least for now, all commands will start with this:
+	commandLineEdit_->setText("ecflow_client ");
+
+
+	// ensure the Save button is in the right state
+	on_commandLineEdit__textChanged();
+
+	saveNameLineEdit_->setPlaceholderText(tr("Unnamed"));
+
+	currentCommandSaved_ = false;
+
+	refreshSavedCommandList();
+
+
+	// set up and populate our list of options to the ecflow client
+	// - this would be more efficient if we did it only once, in a singleton, but
+	//   it seems pretty fast so we'll leave it like this for now
+	clientOptionsDescriptions_ = new po::options_description("help" , po::options_description::m_default_line_length + 80);
+	cmdRegistry_.addAllOptions(*clientOptionsDescriptions_);
+	addClientCommandsToComponentList();
 }
 
 
-void CommandDesignerWidget::insertCurrentText()
+CommandDesignerWidget::~CommandDesignerWidget()
+{
+	delete clientOptionsDescriptions_;
+}
+
+
+void CommandDesignerWidget::addClientCommandsToComponentList()
+{
+	// sort the commands into alphabetical order
+	std::vector< boost::shared_ptr<po::option_description> > options = clientOptionsDescriptions_->options();
+
+	std::sort(options.begin(),options.end(),
+		boost::bind(std::less<std::string>(),
+			boost::bind(&po::option_description::long_name,_1),
+			boost::bind(&po::option_description::long_name,_2)));
+
+	// loop through the sorted commands and add them to the list
+	size_t numOptions = options.size();
+
+	for(size_t i = 0; i < numOptions; i++)
+	{
+		if (!ecf::Child::valid_child_cmd(options[i]->long_name()))  // do not show the 'child' options
+		{
+			componentsList_->addItem(QString("--") + QString::fromStdString(options[i]->long_name()));
+			QString statusTip(QString::fromStdString(options[i]->long_name()));
+			componentsList_->item(componentsList_->count()-1)->setStatusTip(statusTip);
+		}
+	}
+
+	// ensure the itemEntered slot is triggered
+	componentsList_->setMouseTracking(true);
+
+	// when the mouse hovers over an item, set the background colour of that item
+	componentsList_->setStyleSheet("QListWidget::item:hover {background-color:#FFFFDD;}");
+}
+
+
+void CommandDesignerWidget::on_componentsList__itemEntered(QListWidgetItem *item)
+{
+	// get the command name
+	QString qCommand(item->text());
+	std::string command = qCommand.toStdString();
+	ecf::Str::replace_all(command, "--", "");  // remove the "--" from the start
+
+
+	// try to find it in our list of commands
+	const po::option_description* od = clientOptionsDescriptions_->find_nothrow(command,
+				false,  /*approx, will find nearest match*/
+				false, /*long_ignore_case = false*/
+				false  /*short_ignore_case = false*/
+				);
+
+	if (od)
+	{
+		// get the description, but only take the first line
+		std::vector< std::string > lines;
+		ecf::Str::split(od->description(),lines,"\n");
+		if (!lines.empty())
+		{
+			QString text = qCommand + QString(": ");
+			commandHelpLabel_->setText(text + QString::fromStdString(lines[0]));
+		}
+	}
+	else
+	{
+		// not a command that we have help text for
+		commandHelpLabel_->setText("");
+	}
+}
+
+
+
+
+void CommandDesignerWidget::insertComponent(QListWidgetItem *item)
 {
 	//commandLineEdit_->setText("Silly");
-	commandLineEdit_->insert(componentsComboBox_->currentText() + " ");
+	commandLineEdit_->insert(item->text() + " ");
 }
+
+
+
+void CommandDesignerWidget::on_commandLineEdit__textChanged()
+{
+	runButton_->setEnabled(!commandLineEdit_->text().isEmpty()); // only allow to run a non-empty command
+
+	currentCommandSaved_ = false;
+
+	updateSaveButtonStatus();
+}
+
+void CommandDesignerWidget::on_saveNameLineEdit__textChanged()
+{
+	currentCommandSaved_ = false;
+	updateSaveButtonStatus();
+}
+
+void CommandDesignerWidget::updateSaveButtonStatus()
+{
+
+	// logic:
+	// - if no row in the saved command table is selected, then 'overwrite'
+	//   is disabled
+	// - if nothing has been modified, then 'overwrite' is disabled
+	// - otherwise 'overwrite' is enabled
+	// - if the name is not empty, and it exists in the current list, then
+	//   then 'save as new' is disabled
+	// - if no command is entered, then both buttons are disabled
+
+	if (savedCommandsTable_->currentRow() == -1 ||
+		currentCommandSaved_ ||
+		commandLineEdit_->text().isEmpty())
+		overwriteButton_->setEnabled(false);
+	else
+		overwriteButton_->setEnabled(true);
+
+
+	int thisRow = CustomCommandHandler::instance()->findIndex(saveNameLineEdit_->text().toStdString());
+
+	if ((!saveNameLineEdit_->text().isEmpty() && thisRow != -1) ||
+		commandLineEdit_->text().isEmpty())
+		saveAsNewButton_->setEnabled(false);
+	else
+		saveAsNewButton_->setEnabled(true);
+
+
+
+/*
+
+	saveAsNewButton_->setEnabled((!commandLineEdit_->text().isEmpty()));
+
+
+	if (commandLineEdit_->text().isEmpty() || currentCommandSaved_)
+	{
+		overwriteButton_->setEnabled(false);
+	}
+	else
+	{
+		overwriteButton_->setEnabled(true);
+	}
+*/
+/*
+	// if the currently-entered name already exists in our list of
+	// commands, change the Save button to 'Overwrite'
+
+	QString name(saveNameLineEdit_->text());
+	if (!name.isEmpty() && CustomCommandHandler::instance()->find(name.toStdString()))
+	{
+		overwriteButton_->setText(tr("Overwrite"));
+	}
+	else
+	{
+		overwriteButton_->setText(tr("Save"));
+	}
+*/
+}
+
+
+void CommandDesignerWidget::on_saveAsNewButton__clicked()
+{
+	std::string name, command;
+	bool context;
+
+	name    = saveNameLineEdit_->text().toStdString();
+	command = commandLineEdit_->text().toStdString();
+	context = addToContextMenuCb_->isChecked();
+	CustomCommand *cmd = CustomCommandHandler::instance()->add(name, command, context);
+	refreshSavedCommandList();
+	currentCommandSaved_ = true;
+	updateSaveButtonStatus();
+}
+
+void CommandDesignerWidget::on_overwriteButton__clicked()
+{
+	std::string name, command;
+	bool context;
+
+	name    = saveNameLineEdit_->text().toStdString();
+	command = commandLineEdit_->text().toStdString();
+	context = addToContextMenuCb_->isChecked();
+	CustomCommand *cmd = CustomCommandHandler::instance()->replace(savedCommandsTable_->currentRow(), name, command, context);
+	refreshSavedCommandList();
+	currentCommandSaved_ = true;
+	updateSaveButtonStatus();
+}
+
+
+void CommandDesignerWidget::on_runButton__clicked()
+{
+	// close the dialogue - the calling function will call the command() function
+	// to retrieve the user's command
+	//accept();
+}
+
+
+void CommandDesignerWidget::refreshSavedCommandList()
+{
+	int n = CustomCommandHandler::instance()->numCommands();
+
+	savedCommandsTable_->clearContents();
+
+	for (int i = 0; i < n; i++)
+	{
+		CustomCommand *command = CustomCommandHandler::instance()->commandFromIndex(i);
+		addCommandToSavedList(command, i);
+	}
+}
+
+
+
+void CommandDesignerWidget::addCommandToSavedList(CustomCommand *command, int row)
+{
+	QTableWidgetItem *nameItem    = new QTableWidgetItem(QString::fromStdString(command->name()));
+	QTableWidgetItem *contextItem = new QTableWidgetItem();
+	QTableWidgetItem *commandItem = new QTableWidgetItem(QString::fromStdString(command->command()));
+
+	// if the command already exists (by name) then we will replaced it;
+	// otherwise add a new row to the table
+
+//	int thisRow = CustomCommandHandler::instance()->findIndex(command->name());
+//	if (thisRow == -1)
+//		thisRow = savedCommandsTable_->rowCount();
+
+	int lastRow = savedCommandsTable_->rowCount()-1;
+
+	if (row > lastRow)
+		savedCommandsTable_->insertRow(row);
+
+	savedCommandsTable_->setItem(row, 0, nameItem);
+	savedCommandsTable_->setItem(row, 2, commandItem);
+}
+
+
+void CommandDesignerWidget::on_savedCommandsTable__cellClicked(int row, int column)
+{
+	// get the details of this command from the table
+	QTableWidgetItem *nameItem    = savedCommandsTable_->item(row, 0);
+	QTableWidgetItem *contextItem = savedCommandsTable_->item(row, 1);
+	QTableWidgetItem *commandItem = savedCommandsTable_->item(row, 2);
+
+	// insert the details into the edit boxes
+	commandLineEdit_->setText(commandItem->text());
+	saveNameLineEdit_->setText(nameItem->text());
+}
+
+

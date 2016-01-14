@@ -25,6 +25,7 @@
 #include "DirectoryHandler.hpp"
 #include "Highlighter.hpp"
 #include "NodeQueryHandler.hpp"
+#include "CustomCommandHandler.hpp"
 #include "Palette.hpp"
 #include "ServerList.hpp"
 #include "VConfig.hpp"
@@ -92,6 +93,11 @@ int main(int argc, char **argv)
     std::string menuFilename("ecflowview_menus.json");
     std::string menuPath = DirectoryHandler::concatenate(DirectoryHandler::etcDir(), menuFilename);
     MenuHandler::readMenuConfigFile(menuPath);
+
+    //Load the custom context menu commands
+    std::string cmdsFilename("ecflowview_custom_commands.json");
+    std::string cmdsPath = DirectoryHandler::concatenate(DirectoryHandler::etcDir(), cmdsFilename);
+    CustomCommandHandler::instance()->init(cmdsPath);
 
     //Load the info panel definition
     std::string panelFile = DirectoryHandler::concatenate(DirectoryHandler::etcDir(), "ecflowview_panels.json");

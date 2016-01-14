@@ -14,6 +14,9 @@
 #include <QDialog>
 
 #include "ui_CommandDesignerWidget.h"
+#include "CustomCommandHandler.hpp"
+
+#include "CtsCmdRegistry.hpp"
 
 class CommandDesignerWidget : public QWidget, private Ui::commandDesignerWidget
 {
@@ -21,13 +24,33 @@ class CommandDesignerWidget : public QWidget, private Ui::commandDesignerWidget
 
 public:
 	explicit CommandDesignerWidget(QWidget *parent = 0);
-	~CommandDesignerWidget() {};
+	~CommandDesignerWidget();
 
 	QString command() {return commandLineEdit_->text();};
 
 
 public Q_SLOTS:
-	void insertCurrentText();
+	void insertComponent(QListWidgetItem *);
+	void on_commandLineEdit__textChanged();
+	void on_saveNameLineEdit__textChanged();
+	void on_overwriteButton__clicked();
+	void on_saveAsNewButton__clicked();
+	void on_runButton__clicked();
+	void on_savedCommandsTable__cellClicked(int row, int column);
+	void on_componentsList__itemEntered(QListWidgetItem *item);
+	QPushButton *runButton() {return runButton_;};
+
+
+private:
+	void updateSaveButtonStatus();
+	void addCommandToSavedList(CustomCommand *command, int row);
+	void refreshSavedCommandList();
+	void addClientCommandsToComponentList();
+
+	bool currentCommandSaved_;
+
+	CtsCmdRegistry cmdRegistry_;
+	boost::program_options::options_description* clientOptionsDescriptions_;
 };
 
 #endif

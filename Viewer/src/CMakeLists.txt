@@ -20,6 +20,7 @@ set(viewer_srcs
     CommandDesignerWidget.cpp
     ConfigListDelegate.cpp
     CustomCommandDialog.cpp
+    CustomCommandHandler.cpp
     CustomListWidget.cpp
     CustomTabWidget.cpp
     Dashboard.cpp
