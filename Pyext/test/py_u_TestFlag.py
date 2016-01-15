@@ -79,7 +79,7 @@ if __name__ == "__main__":
         assert flag.is_set( flg ),"expected flag %r to be set" % flag.type_to_string(flg)
 
     #===========================================================================
-    # Node:  get the flag, should empt for a newly created node.
+    # Node:  get the flag, should be empty for a newly created node.
     #===========================================================================
     suite = ecflow.Suite("s1")
     flag = suite.get_flag()
