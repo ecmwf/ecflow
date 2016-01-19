@@ -22,9 +22,6 @@ CommandDesignerWidget::CommandDesignerWidget(QWidget *parent) : QWidget(parent)
 {
 	setupUi(this);
 
-	connect (componentsList_, SIGNAL(itemClicked(QListWidgetItem *)), this,
-		SLOT(insertComponent(QListWidgetItem *)));
-
 
 	// at least for now, all commands will start with this:
 	commandLineEdit_->setText("ecflow_client ");
@@ -48,8 +45,12 @@ CommandDesignerWidget::CommandDesignerWidget(QWidget *parent) : QWidget(parent)
 	addClientCommandsToComponentList();
 
 
+	infoLabel_->setShowTypeTitle(false);
+	infoLabel_->showInfo(tr("Click command for help, double-click to insert"));
+
 	// temporary
-	//saveCommandGroupBox_->setVisible(false);
+	saveCommandGroupBox_->setVisible(false);
+	tabWidget_->setTabEnabled(1, false);
 	//savedCommandsGroupBox_->setVisible(false);
 
 }
@@ -88,11 +89,11 @@ void CommandDesignerWidget::addClientCommandsToComponentList()
 	componentsList_->setMouseTracking(true);
 
 	// when the mouse hovers over an item, set the background colour of that item
-	componentsList_->setStyleSheet("QListWidget::item:hover {background-color:#FFFFDD;}");
+	componentsList_->setStyleSheet("QListWidget::item:hover {background-color:#FFFFDD;color:black}");
 }
 
 
-void CommandDesignerWidget::on_componentsList__itemEntered(QListWidgetItem *item)
+void CommandDesignerWidget::showCommandHelp(QListWidgetItem *item, bool showFullHelp)
 {
 	// get the command name
 	QString qCommand(item->text());
@@ -117,6 +118,11 @@ void CommandDesignerWidget::on_componentsList__itemEntered(QListWidgetItem *item
 			QString text = qCommand + QString(": ");
 			commandHelpLabel_->setText(text + QString::fromStdString(lines[0]));
 		}
+
+		if (showFullHelp)
+		{
+			commandManPage_->setText(qCommand + "\n\n" + QString::fromStdString(od->description()));
+		}
 	}
 	else
 	{
@@ -126,6 +132,24 @@ void CommandDesignerWidget::on_componentsList__itemEntered(QListWidgetItem *item
 }
 
 
+
+// when the mouse moves over an item, display the help text for it
+void CommandDesignerWidget::on_componentsList__itemEntered(QListWidgetItem *item)
+{
+	showCommandHelp(item, false);
+}
+
+// when the mouse moves over an item, display the help text for it
+void CommandDesignerWidget::on_componentsList__itemClicked(QListWidgetItem *item)
+{
+	showCommandHelp(item, true);
+}
+
+// when the mouse moves over an item, display the help text for it
+void CommandDesignerWidget::on_componentsList__itemDoubleClicked(QListWidgetItem *item)
+{
+	insertComponent(item);
+}
 
 
 void CommandDesignerWidget::insertComponent(QListWidgetItem *item)

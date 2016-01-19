@@ -38,6 +38,8 @@ public Q_SLOTS:
 	void on_runButton__clicked();
 	void on_savedCommandsTable__cellClicked(int row, int column);
 	void on_componentsList__itemEntered(QListWidgetItem *item);
+	void on_componentsList__itemClicked(QListWidgetItem *item);
+	void on_componentsList__itemDoubleClicked(QListWidgetItem *item);
 	QPushButton *runButton() {return runButton_;};
 
 
@@ -46,6 +48,7 @@ private:
 	void addCommandToSavedList(CustomCommand *command, int row);
 	void refreshSavedCommandList();
 	void addClientCommandsToComponentList();
+	void showCommandHelp(QListWidgetItem *item, bool showFullHelp);
 
 	bool currentCommandSaved_;
 
