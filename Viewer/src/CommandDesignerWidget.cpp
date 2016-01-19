@@ -46,6 +46,12 @@ CommandDesignerWidget::CommandDesignerWidget(QWidget *parent) : QWidget(parent)
 	clientOptionsDescriptions_ = new po::options_description("help" , po::options_description::m_default_line_length + 80);
 	cmdRegistry_.addAllOptions(*clientOptionsDescriptions_);
 	addClientCommandsToComponentList();
+
+
+	// temporary
+	//saveCommandGroupBox_->setVisible(false);
+	//savedCommandsGroupBox_->setVisible(false);
+
 }
 
 
@@ -270,6 +276,8 @@ void CommandDesignerWidget::addCommandToSavedList(CustomCommand *command, int ro
 //	int thisRow = CustomCommandHandler::instance()->findIndex(command->name());
 //	if (thisRow == -1)
 //		thisRow = savedCommandsTable_->rowCount();
+
+	//contextItem->setCheckable();
 
 	int lastRow = savedCommandsTable_->rowCount()-1;
 
