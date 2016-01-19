@@ -116,7 +116,7 @@ void OutputBrowser::loadFile(QString fileName)
     QFileInfo fInfo(file);
     qint64 fSize=fInfo.size();
 
-	if(fSize > 20*1024*1024)
+	if(false /*fSize > 20*1024*1024*/)
 	{
 		changeIndex(PagerIndex);
 
