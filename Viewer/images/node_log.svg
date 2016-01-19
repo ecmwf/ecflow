@@ -57,10 +57,10 @@
        id="linearGradient4793"
        gradientUnits="userSpaceOnUse"
        gradientTransform="matrix(1.1496437,0,0,1.0974014,-0.68181471,-2.5135733)"
-       x1="39.770168"
-       y1="21.076097"
-       x2="0.52047515"
-       y2="8.9222469" />
+       x1="29.836605"
+       y1="18.129137"
+       x2="-6.005146"
+       y2="5.2368469" />
     <linearGradient
        id="linearGradient3786-4">
       <stop
@@ -70,7 +70,7 @@
       <stop
          id="stop3790-8"
          offset="1"
-         style="stop-color:#ddeaef;stop-opacity:1;" />
+         style="stop-color:#e4eef2;stop-opacity:1;" />
     </linearGradient>
     <linearGradient
        inkscape:collect="always"
@@ -123,15 +123,6 @@
          offset="1"
          id="stop3606-3" />
     </linearGradient>
-    <linearGradient
-       y2="21.301931"
-       x2="28.312923"
-       y1="21.301931"
-       x1="4.7915082"
-       gradientUnits="userSpaceOnUse"
-       id="linearGradient3956"
-       xlink:href="#linearGradient3602-4"
-       inkscape:collect="always" />
   </defs>
   <sodipodi:namedview
      id="base"
@@ -140,17 +131,17 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="10.544931"
-     inkscape:cx="19.091133"
-     inkscape:cy="27.545532"
+     inkscape:zoom="32.390762"
+     inkscape:cx="11.822327"
+     inkscape:cy="17.211211"
      inkscape:document-units="px"
      inkscape:current-layer="layer3"
      showgrid="true"
      inkscape:snap-grids="false"
      inkscape:window-width="1693"
      inkscape:window-height="1132"
-     inkscape:window-x="1931"
-     inkscape:window-y="23"
+     inkscape:window-x="52"
+     inkscape:window-y="100"
      inkscape:window-maximized="0"
      inkscape:snap-to-guides="false">
     <inkscape:grid
@@ -218,7 +209,7 @@
        inkscape:connector-curvature="0"
        sodipodi:nodetypes="ccsssssc" />
     <rect
-       style="fill:url(#linearGradient4793);fill-opacity:1.0;fill-rule:evenodd;stroke:#414b5c;stroke-width:1;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;display:inline"
+       style="fill:url(#linearGradient4793);fill-opacity:1;fill-rule:evenodd;stroke:#414b5c;stroke-width:1;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;display:inline"
        id="rect3843"
        width="26.395824"
        height="28.576334"
@@ -239,28 +230,15 @@
        transform="matrix(-0.27864429,-0.2293023,-0.50135483,0.12744222,6.6798023,4.727201)"
        sodipodi:open="true" />
     <path
-       sodipodi:open="true"
-       transform="matrix(-0.33270706,-0.29865763,-0.59862807,0.1659887,17.39732,55.075574)"
-       sodipodi:end="4.5518387"
-       sodipodi:start="0.64184942"
-       d="M 0.38392011,10.062077 A 5.3066669,5.0479193 0 1 1 -4.7149979,2.0569996"
-       sodipodi:ry="5.0479193"
-       sodipodi:rx="5.3066669"
-       sodipodi:cy="7.04"
-       sodipodi:cx="-3.8666666"
-       id="path8466"
-       style="fill:none;stroke:#3d455f;stroke-width:5.16799831;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;display:inline"
-       sodipodi:type="arc" />
-    <path
        sodipodi:type="arc"
-       style="fill:url(#linearGradient3956);fill-opacity:1;stroke:none;display:inline"
+       style="fill:#769ea7;fill-opacity:1;stroke:#6f8a91;stroke-width:1.01176022999999993;stroke-opacity:1;display:inline"
        id="path8398"
        sodipodi:cx="16.552216"
        sodipodi:cy="21.301931"
        sodipodi:rx="11.112521"
        sodipodi:ry="11.57878"
        d="m 27.664737,21.301931 a 11.112521,11.57878 0 1 1 -22.2250426,0 11.112521,11.57878 0 1 1 22.2250426,0 z"
-       transform="matrix(-0.2474061,-0.79430286,0.77086747,-0.23480995,5.9767862,33.648559)" />
+       transform="matrix(-0.24413564,-0.78633963,0.76067738,-0.23245588,5.9236104,33.281366)" />
     <text
        xml:space="preserve"
        style="font-size:18px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#ffffff;fill-opacity:1;stroke:none;display:inline;font-family:Courier;-inkscape-font-specification:Courier Bold"
