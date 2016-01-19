@@ -93,6 +93,17 @@ static boost::shared_ptr<ZombieAttr> create_ZombieAttr(Child::ZombieType zt,cons
    return boost::make_shared<ZombieAttr>(zt,vec,uc,life_time_in_server );
 }
 
+
+static boost::python::list wrap_set_of_strings(Limit* limit)
+{
+   boost::python::list list;
+   const std::set<std::string>& paths = limit->paths();
+   BOOST_FOREACH(std::string path, paths) {
+      list.append(path);
+   }
+   return list;
+}
+
 void export_NodeAttr()
 {
 	enum_<Child::ZombieType>("ZombieType", NodeAttrDoc::zombie_type_doc())
@@ -154,14 +165,19 @@ void export_NodeAttr()
    .def("empty",     &Label::empty,     "Return true if the Label is empty. Used when returning a NULL Label, from a find")
   	;
 
+	// This will not work, because paths_begin
+   //.add_property("node_paths", boost::python::range(&Limit::paths_begin,&Limit::paths_begin),"List of nodes(paths) that have consumed a limit")
+
 	class_<Limit,  boost::shared_ptr<Limit> >("Limit",NodeAttrDoc::limit_doc(),init<std::string, int>())
 	.def(self == self )                               // __eq__
 	.def("__str__",  &Limit::toString)                // __str__
 	.def("name",     &Limit::name, return_value_policy<copy_const_reference>(), "Return the :term:`limit` name as string")
    .def("value",    &Limit::value,    "The :term:`limit` token value as an integer")
    .def("limit",    &Limit::theLimit, "The max value of the :term:`limit` as an integer")
-   .add_property("node_paths", boost::python::range(&Limit::paths_begin,&Limit::paths_begin),"List of nodes(paths) that have consumed a limit")
-	;
+   .def("increment",&Limit::increment, "used for test only")
+   .def("decrement",&Limit::decrement, "used for test only")
+   .def("node_paths",&wrap_set_of_strings,"List of nodes(paths) that have consumed a limit")
+ 	;
 
 	class_<InLimit>("InLimit",NodeAttrDoc::inlimit_doc(),init<std::string,  std::string, optional<int> >())
 	.def( init<std::string,std::string> () )

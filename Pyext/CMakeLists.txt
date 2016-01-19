@@ -62,6 +62,7 @@ list( APPEND u_tests
         py_u_TestEcf  
         py_u_TestError        
         py_u_TestFind        
+        py_u_TestFlag      
         py_u_TestGetAllTasks   
         py_u_TestJobGeneration 
         py_u_TestParent        

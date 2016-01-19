@@ -11,7 +11,7 @@ else
    cd $WK;
    
    # Allow test to be rerun. This can fail
-   Client/bin/%COMPILER_VERSION%/release/ecflow_client --terminate yes || true
+   Client/bin/%COMPILER_VERSION%/release/ecflow_client --terminate=yes || true
    
    # Clear up
    rm -rf `hostname`.*

@@ -50,6 +50,7 @@ std::vector<Flag::Type> Flag::list()
    ret.push_back(Flag::FORCE_ABORT);
    ret.push_back(Flag::USER_EDIT);
    ret.push_back(Flag::TASK_ABORTED);
+   ret.push_back(Flag::EDIT_FAILED);
    ret.push_back(Flag::JOBCMD_FAILED);
    ret.push_back(Flag::NO_SCRIPT);
    ret.push_back(Flag::KILLED);

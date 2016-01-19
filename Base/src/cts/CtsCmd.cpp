@@ -242,7 +242,8 @@ void CtsCmd::addOption(boost::program_options::options_description& desc) const
       case CtsCmd::SHUTDOWN_SERVER: {
          desc.add_options()( CtsApi::shutdownServerArg(),po::value< string >()->implicit_value( string("") ),
                   "Stop server from scheduling new jobs.\n"
-                  "  arg1 = yes(optional) # use to bypass confirmation prompt\n"
+                  "  arg1 = yes(optional) # use to bypass confirmation prompt,i.e\n"
+                  "  --shutdown=yes\n"
                   "The following table shows server behaviour in the different states.\n"
                   "|----------------------------------------------------------------------------------|\n"
                   "| Server State | User Request | Task Request |Job Scheduling | Auto-Check-pointing |\n"
@@ -258,7 +259,8 @@ void CtsCmd::addOption(boost::program_options::options_description& desc) const
          desc.add_options()( CtsApi::haltServerArg(),po::value< string >()->implicit_value( string("") ),
                   "Stop server communication with jobs, and new job scheduling.\n"
                   "Also stops automatic check pointing\n"
-                  "  arg1 = yes(optional) # use to bypass confirmation prompt\n"
+                  "  arg1 = yes(optional) # use to bypass confirmation prompt,i.e.\n"
+                  "  --halt=yes\n"
                   "The following table shows server behaviour in the different states.\n"
                   "|----------------------------------------------------------------------------------|\n"
                   "| Server State | User Request | Task Request |Job Scheduling | Auto-Check-pointing |\n"
@@ -273,7 +275,8 @@ void CtsCmd::addOption(boost::program_options::options_description& desc) const
       case CtsCmd::TERMINATE_SERVER:{
          desc.add_options()( CtsApi::terminateServerArg(),po::value< string >()->implicit_value( string("") ),
                   "Terminate the server.\n"
-                  "  arg1 = yes(optional) # use to bypass confirmation prompt"
+                  "  arg1 = yes(optional) # use to bypass confirmation prompt.i.e\n"
+                  "  --terminate=yes"
          );
          break;
       }

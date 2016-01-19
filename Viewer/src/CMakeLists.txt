@@ -345,12 +345,16 @@ ecbuild_add_executable( TARGET   ecflow_ui
      ../../Client/src
      TextPager    
      ${Boost_INCLUDE_DIRS} 
-    ${CMAKE_CURRENT_BINARY_DIR}
-    LIBS     core nodeattr node libparser base libclient 
-     pthread ${Boost_LIBRARIES}
-     m crypt dl fl
-     ${ECFLOW_QT_LIBRARIES}
+     ${CMAKE_CURRENT_BINARY_DIR}
+    LIBS core nodeattr node libparser base libclient 
+         pthread  
+         m crypt dl fl
+         ${ECFLOW_QT_LIBRARIES}
 )
+
+# This ensures that for debug config, we only link with debug boost libs, for other configs, we link with optimised boost libs
+target_link_libraries(ecflow_ui debug ${Boost_REGEX_LIBRARY_DEBUG}   ${Boost_REGEX_LIBRARY_RELEASE} )                
+
 
 set(build_ecflow_ui_log 0)
 
@@ -358,7 +362,7 @@ if(${build_ecflow_ui_log})
     list(REMOVE_ITEM viewer_srcs ViewerMain.cpp)
     ecbuild_add_executable( TARGET   ecflow_ui_log
         SOURCES  LogEvent.cpp
-        ${viewer_srcs} ${VIEWER_MOC} ${VIEWER_RES} ${VIEWER_FORMS_HEADERS}
+                 ${viewer_srcs} ${VIEWER_MOC} ${VIEWER_RES} ${VIEWER_FORMS_HEADERS}
         INCLUDES .
          ../../ACore/src 
          ../../ANattr/src
@@ -369,11 +373,11 @@ if(${build_ecflow_ui_log})
          ../../Base/src/stc
          ../../Client/src     
          ${Boost_INCLUDE_DIRS} 
-        ${CMAKE_CURRENT_BINARY_DIR}
-        LIBS     core nodeattr node libparser base libclient 
-         pthread ${Boost_LIBRARIES}
-         m 
-         ${ECFLOW_QT_LIBRARIES}
+         ${CMAKE_CURRENT_BINARY_DIR}
+        LIBS core nodeattr node libparser base libclient 
+             pthread  
+             m 
+             ${ECFLOW_QT_LIBRARIES}
         DEFINITIONS MAIN_LOG
     )
 endif()

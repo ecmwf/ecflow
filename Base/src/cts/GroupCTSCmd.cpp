@@ -54,8 +54,8 @@ GroupCTSCmd::GroupCTSCmd(const std::string& cmdSeries,AbstractClientEnv* clientE
 
 
    for(size_t i=0; i < individualCmdVec.size(); i++){
-      // massage the commands so that, we add -- at the start of each command. This is required
-      // by the boost program options.
+      // massage the commands so that, we add -- at the start of each command.
+      // This is required by the boost program options.
       std::string aCmd = individualCmdVec[i];
       boost::algorithm::trim(aCmd);
 
@@ -66,6 +66,14 @@ GroupCTSCmd::GroupCTSCmd(const std::string& cmdSeries,AbstractClientEnv* clientE
       // Each sub command can have, many args
       std::vector<std::string> subCmdArgs;
       Str::split(subCmd,subCmdArgs);
+
+      // The first will be the command, then the args. However from boost 1.59
+      // we must use --cmd=value, instead of --cmd value
+      if (!subCmdArgs.empty() && subCmdArgs.size() > 1 && subCmdArgs[0].find("=") == std::string::npos) {
+         subCmdArgs[0] += "=";
+         subCmdArgs[0] += subCmdArgs[1];
+         subCmdArgs.erase( subCmdArgs.begin() + 1); // remove, since we have added to first
+      }
 
       /// Hack because we *can't* create program option with vector of strings, which can be empty
       /// Hence if command is just show, add a dummy arg.
@@ -266,11 +274,11 @@ const char* GroupCTSCmd::desc() {
             "provide 'yes' as an additional parameter. See example below.\n"
             "  arg = string\n"
             "Usage:\n"
-            "   --group=\"halt yes; reloadwsfile; restart;\"\n"
+            "   --group=\"halt=yes; reloadwsfile; restart;\"\n"
             "                                 # halt server,bypass the confirmation prompt,\n"
             "                                 # reload white list file, restart server\n"
             "   --group=\"get; show\"           # get server defs, and write to standard output\n"
-            "   --group=\"get /s1; show state\" # get suite 's1', and write state to standard output"
+            "   --group=\"get=/s1; show state\" # get suite 's1', and write state to standard output"
             ;
 }
 

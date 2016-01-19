@@ -6,19 +6,19 @@ Reproducing bug task. A ssh command is run into other server that tries to updat
 
 for (( n = 1 ; n <= 500 ; n++ )); do
   #print "iteration n=$n"
-  ksh -c "module load ecflow; env ECF_NODE=%ECF_NODE% ECF_PORT=%ECF_PORT% ecflow_client --label label $n" &
+  ksh -c "module load ecflow; env ECF_NODE=%ECF_NODE% ECF_PORT=%ECF_PORT% ecflow_client --label=label $n" &
 done
 
 #export ECF_DEBUG_CLIENT=1
 #export ECF_NODE=%ECF_NODE%
 #export ECF_PORT=%ECF_PORT%
 #for (( n = 1 ; n <= 500 ; n++ ));do
-#  ecflow_client --label label "label_number_$n"
+#  ecflow_client --label=label "label_number_$n"
 #done
 
 #for (( n = 1 ; n <= 200 ; n++ )); do
 #  print "sleeping" $n
-#  ecflow_client --label sleeping $n
+#  ecflow_client --label=sleeping $n
 #  sleep 1
 #done
 

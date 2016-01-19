@@ -29,7 +29,7 @@ Ecf Script
    while [[ $n -le 100 ]]            # Loop 100 times 
    do 
       sleep 1                        # Wait a short time 
-      ecflow_client --meter progress $n # Notify ecFlow 
+      ecflow_client --meter=progress $n # Notify ecFlow 
       (( n = $n + 1 )) 
    done 
    %include <tail.h>

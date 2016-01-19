@@ -515,7 +515,6 @@ protected:
             std::vector<std::string>& options,
             std::vector<std::string>& paths);
 
-
 private:
    std::string user_;
 

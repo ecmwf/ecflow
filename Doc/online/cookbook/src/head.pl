@@ -13,9 +13,9 @@ sub xinit() { system("ecflow_client --init $$"); }
 sub xabort() { system("ecflow_client --abort $$"); }
 sub xcomplete() { system("ecflow_client --complete $$"); }
 sub xmeter($$) { my $name=shift; my $value=shift; 
-		 system("ecflow_client --meter $name $value"); }
-sub xevent($)  { my $n=shift;    system("ecflow_client --event $n"); }
+		 system("ecflow_client --meter=$name $value"); }
+sub xevent($)  { my $n=shift;    system("ecflow_client --event=$n"); }
 sub xlabel($$) {  my $name=shift; my $value=shift; 
-		  system("ecflow_client --label $name $value"); }
+		  system("ecflow_client --label=$name $value"); }
 xinit();
 eval '

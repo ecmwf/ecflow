@@ -136,7 +136,8 @@ void ZombieCmd::addOption(boost::program_options::options_description& desc) con
 			         "with the server, they will complete successfully (but without updating the node tree)\n"
 			         "allowing the job to finish.\n"
 			         "The server zombie is automatically deleted after 1 hour\n"
-			         "  arg = path to task"
+			         "  arg = path to task\n"
+			         "  --zombie_fob=/path/to/task"
 			);
 			break;
 		}
@@ -148,7 +149,8 @@ void ZombieCmd::addOption(boost::program_options::options_description& desc) con
 			         "force a abort, the abort will also fail.\n"
 			         "Hence job structure should use 'set -e' in the error trapping functions to prevent\n"
 			         "infinite recursion. The server zombie is automatically deleted after 1 hour\n"
-			         "  arg = path to task"
+			         "  arg = path to task\n"
+                  "  --zombie_fail=/path/to/task"
 			);
 			break;
 		}
@@ -158,7 +160,8 @@ void ZombieCmd::addOption(boost::program_options::options_description& desc) con
 			         "Next time the child commands (init,event,meter,label,abort,complete) communicate\n"
 			         "with the server, the password on the zombie is adopted by the task.\n"
 			         "The zombie is then deleted.\n"
-			         "  arg = path to task"
+			         "  arg = path to task\n"
+                  "  --zombie_adopt=/path/to/task"
 			);
 			break;
 		}
@@ -167,7 +170,8 @@ void ZombieCmd::addOption(boost::program_options::options_description& desc) con
 			         "Locates the task in the zombie list, and removes it.\n"
 			         "Since a job typically has many child commands(i.e init, complete, event, meter, label)\n"
 			         "the zombie may reappear\n"
-			         "  arg = path to task"
+			         "  arg = path to task\n"
+                  "  --zombie_remove=/path/to/task"
 			);
 			break;
 		}
@@ -178,7 +182,8 @@ void ZombieCmd::addOption(boost::program_options::options_description& desc) con
 			         "when the server can not match the passwords. Each child commands will continue\n"
 			         "attempting to connect to the server for 24 hours, and will then return an error.\n"
 			         "The connection timeout can be configured with environment ECF_TIMEOUT\n"
-			         "  arg = path to task"
+			         "  arg = path to task\n"
+                  "  --zombie_block=/path/to/task"
 			);
 			break;
 		}
@@ -189,7 +194,8 @@ void ZombieCmd::addOption(boost::program_options::options_description& desc) con
                   "The job is allowed to continue until the kill is received\n"
                   "Can only kill zombies that have an associated Task, hence path zombies\n"
                   "must be killed manually.\n"
-                  "  arg = path to task"
+                  "  arg = path to task\n"
+                  "  --zombie_kill=/path/to/task"
          );
          break;
       }

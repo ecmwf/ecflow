@@ -75,8 +75,8 @@ const char* ShowCmd::desc() {
             "    --group=\"get ; show defs\"    # same as the previous example\n"
             "    --group=\"get ; show state\"   # Show all state for the node tree\n"
             "    --group=\"get ; show migrate\" # Shows state and allows migration\n"
-	         "    --group=\"get /s1; show\"      # show state for the node only\n"
-	         "    --group=\"get /s1; show state\""
+	         "    --group=\"get=/s1; show\"      # show state for the node only\n"
+	         "    --group=\"get=/s1; show state\""
 	;
 }
 

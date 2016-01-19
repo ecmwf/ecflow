@@ -99,7 +99,7 @@ bool Node::findParentUserVariableValue(const std::string& name, std::string& the
    // If all else fails search defs environment, returns empty string if match not found
    Defs* the_defs = defs();
    if ( the_defs ) {
-      // Note: when calling ecflow_client --get_state /suite/task
+      // Note: when calling ecflow_client --get_state=/suite/task
       // The node can be detached from the defs.
       theValue = the_defs->server().find_variable(name);
       if ( !theValue.empty() ) return true;
@@ -121,7 +121,7 @@ const std::string& Node::find_parent_user_variable_value(const std::string& name
 
    Defs* the_defs = defs();
    if ( the_defs ) {
-      // Note: when calling ecflow_client --get_state /suite/task
+      // Note: when calling ecflow_client --get_state=/suite/task
       // The node can be detached from the defs.
       return the_defs->server().find_variable(name);
    }
@@ -143,7 +143,7 @@ bool Node::user_variable_exists(const std::string& name) const
    // If all else fails search defs environment, returns empty string if match not found
    Defs* the_defs = defs();
    if ( the_defs ) {
-      // Note: when calling ecflow_client --get_state /suite/task
+      // Note: when calling ecflow_client --get_state=/suite/task
       // The node can be detached from the defs.
       return the_defs->server().variable_exists(name);
    }
@@ -535,7 +535,7 @@ node_ptr Node::findReferencedNode(const std::string& nodePath, const std::string
    if (!theDefs) {
       // In the case where we have a stand alone Node. i.e no parent set. The Defs will be NULL.
       // Take the case where we want to dump the state of a single node.
-      //    ecflow_client --get_state /test/f2 --port=4141
+      //    ecflow_client --get_state=/test/f2 --port=4141
       // Here we are printing the state of the Node only, *NO* defs is returned.
       // The print will cause the AST to be evaluated. The trigger evaluation will required chasing
       // down reference nodes. Hence we will end up here. Rather than crashing, just return a NULL Pointer.

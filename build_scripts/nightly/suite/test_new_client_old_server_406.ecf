@@ -14,7 +14,7 @@ else
    Client/bin/%COMPILER_VERSION%/release/ecflow_client --version
    
    # Allow test to be rerun, by killing the OLD server, This can fail
-   /usr/local/apps/ecflow/4.0.6/bin/ecflow_client --terminate yes || true
+   /usr/local/apps/ecflow/4.0.6/bin/ecflow_client --terminate=yes || true
    
    # Clear up
    rm -rf `hostname`.*
@@ -35,7 +35,7 @@ else
    Test/bin/%COMPILER_VERSION%/release/s_test
    
    # Allow test to be rerun. by killing the OLD server, This can fail
-   /usr/local/apps/ecflow/4.0.6/bin/ecflow_client --terminate yes || true
+   /usr/local/apps/ecflow/4.0.6/bin/ecflow_client --terminate=yes || true
    
    # Clear up
    rm -rf `hostname`.*

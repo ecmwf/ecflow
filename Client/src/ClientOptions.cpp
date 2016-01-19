@@ -161,11 +161,11 @@ void ClientOptions::show_help(const std::string & help_cmd) const
       cout << Ecf::CLIENT_NAME() << " provides the command line interface, for interacting with the server:\n";
 
       cout << "Try:\n\n";
-      cout << "   " << Ecf::CLIENT_NAME() << " --help all       # List all commands, verbosely\n";
-      cout << "   " << Ecf::CLIENT_NAME() << " --help summary   # One line summary of all commands\n";
-      cout << "   " << Ecf::CLIENT_NAME() << " --help child     # One line summary of child commands\n";
-      cout << "   " << Ecf::CLIENT_NAME() << " --help user      # One line summary of user command\n";
-      cout << "   " << Ecf::CLIENT_NAME() << " --help <cmd>     # Detailed help on each command\n\n";
+      cout << "   " << Ecf::CLIENT_NAME() << " --help=all       # List all commands, verbosely\n";
+      cout << "   " << Ecf::CLIENT_NAME() << " --help=summary   # One line summary of all commands\n";
+      cout << "   " << Ecf::CLIENT_NAME() << " --help=child     # One line summary of child commands\n";
+      cout << "   " << Ecf::CLIENT_NAME() << " --help=user      # One line summary of user command\n";
+      cout << "   " << Ecf::CLIENT_NAME() << " --help=<cmd>     # Detailed help on each command\n\n";
 
       show_all_commands("Commands:");
     }
@@ -294,7 +294,7 @@ const char* client_env_description() {
             "| ECF_PORT |  <int>   | Mandatory* | The TCP/IP port to call on the server. Must be unique to a server |\n"
             "|----------|----------|------------|-------------------------------------------------------------------|\n\n"
             "* The host and port must be specified in order for the client to communicate with the server, this can \n"
-            "  be done by setting ECF_NODE, ECF_PORT or by specifying --host <host> --port <int> on the command line\n"
+            "  be done by setting ECF_NODE, ECF_PORT or by specifying --host=<host> --port=<int> on the command line\n"
             ;
 }
 

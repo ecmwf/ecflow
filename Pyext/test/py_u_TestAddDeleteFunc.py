@@ -49,7 +49,7 @@ if __name__ == "__main__":
     
     # add and delete limits
     the_limit = Limit("limitName1", 10)
-    assert len(list(the_limit.node_paths)) == 0 ,"Expected nodes which have consumed a limit to be empty"
+    assert len(list(the_limit.node_paths())) == 0 ,"Expected nodes which have consumed a limit to be empty"
     suite.add_limit(  Limit("limitName1", 10) )\
         .add_limit(  Limit("limitName2", 10) )\
         .add_limit(  "limitName3", 10 )\

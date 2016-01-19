@@ -198,6 +198,7 @@ BOOST_AUTO_TEST_CASE( test_client_interface )
    BOOST_REQUIRE_MESSAGE( theClient.reloadwsfile() == 0,CtsApi::reloadwsfile() << " should return 0\n" << theClient.errorMsg());
    BOOST_REQUIRE_MESSAGE( theClient.forceDependencyEval() == 0, CtsApi::forceDependencyEval() << " should return 0\n" << theClient.errorMsg());
    BOOST_REQUIRE_MESSAGE( theClient.group("shutdown yes;halt yes;restart") == 0,"--group should return 0\n" << theClient.errorMsg());
+   BOOST_REQUIRE_MESSAGE( theClient.group("shutdown=yes;halt=yes;restart") == 0,"--group should return 0\n" << theClient.errorMsg());
    BOOST_REQUIRE_MESSAGE( theClient.group("get ; show") == 0,"--group should return 0\n" << theClient.errorMsg());
    BOOST_REQUIRE_MESSAGE( theClient.group("get ; show state") == 0,"--group should return 0\n" << theClient.errorMsg());
    BOOST_REQUIRE_MESSAGE( theClient.group("get ; show defs") == 0,"--group should return 0\n" << theClient.errorMsg());
