@@ -59,16 +59,24 @@ void VConfig::init(const std::string& parDirPath)
    fs::path parDir(parDirPath);
     
    if(fs::exists(parDir) && fs::is_directory(parDir))
-    {
-        for(fs::directory_iterator it(parDir) ; 
-            it != fs::directory_iterator() ; ++it)
-        {
-            if(fs::is_regular_file(it->status()) )
+   {
+       //fs::directory_iterator it(parDir);
+       
+       //The conf files have to be loaded in alphabetical order!! At least NotifyChange require it!
+       //So we read the paths into a vector and sort it.
+       std::vector<fs::path> vec; 
+       copy(fs::directory_iterator(parDir), fs::directory_iterator(), back_inserter(vec));
+       std::sort(vec.begin(), vec.end()); 
+       
+       //The paths are now in alphabetical order
+       for(std::vector<fs::path>::const_iterator it=vec.begin(); it != vec.end(); ++it) 
+       {
+            if(fs::is_regular_file(*it))
             {
-                std::string name=it->path().filename().string();
+                std::string name=it->filename().string();
                 if(name.find("_conf.json") != std::string::npos)
                 {    
-                    loadInit(it->path().string());
+                    loadInit(it->string());
                 }    
             }
         }
