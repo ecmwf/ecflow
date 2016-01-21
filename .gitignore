@@ -4,6 +4,9 @@
 .cproject
 .project
 
+#netbeans
+nbproject/
+
 # cmake
 ecbuild/
 build/
