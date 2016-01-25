@@ -31,6 +31,7 @@
 #include "UserMessage.hpp"
 #include "NodeExpression.hpp"
 #include "VConfig.hpp"
+#include "CustomCommandHandler.hpp"
 
 int MenuItem::idCnt_=0;
 
@@ -250,6 +251,35 @@ bool MenuHandler::readMenuConfigFile(const std::string &configFile)
 }
 
 
+// ---------------------------------------------------------
+// MenuHandler::addCustomMenuCommands
+// Obtains the current list of custom commands and adds them
+// to the list of custom menu items.
+// ---------------------------------------------------------
+
+void MenuHandler::addCustomMenuCommands()
+{
+    BaseNodeCondition *trueCond = new TrueNodeCondition();
+    CustomCommandHandler *customCmds = CustomCommandHandler::instance();
+
+    int numCommands = customCmds->numCommands();
+
+    for (int i = 0; i < numCommands; i++)
+    {
+        CustomCommand *cmd = customCmds->commandFromIndex(i);
+
+        MenuItem *item = new MenuItem(cmd->name());
+        item->setCommand(cmd->command());
+        item->setEnabledCondition(trueCond);
+        item->setVisibleCondition(trueCond);
+        item->setQuestionCondition(trueCond);
+        item->setStatustip("__cmd__");
+        addItemToMenu(item, "Custom");
+    }
+
+}
+
+
 
 Menu *MenuHandler::findMenu(const std::string &name)
 {
@@ -292,7 +322,7 @@ bool MenuHandler::addItemToMenu(MenuItem *item, const std::string &menuName)
     
     if (menu)
     {
-        menu->addItem(item);
+        menu->addItemToFixedList(item);
         return true;
     }
     else
@@ -357,7 +387,7 @@ Menu::Menu(const std::string &name) : name_(name)
 
 Menu::~Menu()
 {
-    for (std::vector<MenuItem*>::iterator itItems = items_.begin(); itItems != items_.end(); ++itItems)
+    for (std::vector<MenuItem*>::iterator itItems = itemsCombined_.begin(); itItems != itemsCombined_.end(); ++itItems)
     {
         if (*itItems)
             delete (*itItems);
@@ -404,8 +434,11 @@ QMenu *Menu::generateMenu(std::vector<VInfo_ptr> nodes, QWidget *parent,QMenu* p
     //}
 
 
+    // merge the fixed menu items (from the config file) with the dynamic ones
+    itemsCombined_ = itemsFixed_;
+    itemsCombined_.insert(itemsCombined_.end(), itemsCustom_.begin(), itemsCustom_.end());
 
-    for (std::vector<MenuItem*>::iterator itItems = items_.begin(); itItems != items_.end(); ++itItems)
+    for (std::vector<MenuItem*>::iterator itItems = itemsCombined_.begin(); itItems != itemsCombined_.end(); ++itItems)
     {
         //  is this item valid for the current selection?
 

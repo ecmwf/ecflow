@@ -116,15 +116,18 @@ public:
     ~Menu();
     QString exec(std::vector<Node *> nodes);
     std::string &name()       {return name_;};
-    void addItem(MenuItem *item) {items_.push_back(item);};
+    void addItemToFixedList(MenuItem *item) {itemsFixed_.push_back(item);};
+    void addItemToCustomList(MenuItem *item) {itemsCustom_.push_back(item);};
     QMenu *generateMenu(std::vector<VInfo_ptr> nodes, QWidget *parent,QMenu* parentMenu,const std::string& view,QList<QAction*>&);
-    std::vector<MenuItem *>& items() {return items_;};
+    std::vector<MenuItem *>& items() {return itemsCombined_;};
 
 private:
     void buildMenuTitle(std::vector<VInfo_ptr> nodes, QMenu* qmenu);
 
     std::string             name_;
-    std::vector<MenuItem *> items_;
+    std::vector<MenuItem *> itemsFixed_;
+    std::vector<MenuItem *> itemsCustom_;
+    std::vector<MenuItem *> itemsCombined_;  // items from config file plus custom commands
 
 };
 
@@ -149,6 +152,7 @@ public:
     static MenuItem* findItem(QAction*);
     static MenuItem* newItem(const std::string &name);
     static void addMenu(Menu *menu) {menus_.push_back(menu);};
+    static void addCustomMenuCommands();
 
 private:
     static std::vector<Menu *> menus_;

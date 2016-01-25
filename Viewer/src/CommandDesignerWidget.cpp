@@ -13,6 +13,7 @@
 #include "CustomCommandHandler.hpp"
 #include "Child.hpp"
 #include "Str.hpp"
+#include "MenuHandler.hpp"
 
 using namespace boost;
 namespace po = boost::program_options;
@@ -23,8 +24,12 @@ CommandDesignerWidget::CommandDesignerWidget(QWidget *parent) : QWidget(parent)
 	setupUi(this);
 
 
-	// at least for now, all commands will start with this:
-	commandLineEdit_->setText("ecflow_client ");
+	// at least for now, all commands will start with 'ecflow_client' and end with '<full_name>'
+	commandLineEdit_->setText("ecflow_client  <full_name>");
+	//commandLineEdit_->installEventFilter(this);
+	commandLineEdit_->setFocus();
+
+	haveSetUpDefaultCommandLine_ = false;
 
 
 	// ensure the Save button is in the right state
@@ -49,16 +54,32 @@ CommandDesignerWidget::CommandDesignerWidget(QWidget *parent) : QWidget(parent)
 	infoLabel_->showInfo(tr("Click command for help, double-click to insert"));
 
 	// temporary
-	saveCommandGroupBox_->setVisible(false);
-	tabWidget_->setTabEnabled(1, false);
+	//saveCommandGroupBox_->setVisible(false);
+	//tabWidget_->setTabEnabled(1, false);
 	//savedCommandsGroupBox_->setVisible(false);
 
 }
+
+void CommandDesignerWidget::initialiseCommandLine()
+{
+	if (!haveSetUpDefaultCommandLine_)
+	{
+		// put the cursor between the two pre-defined strings - this is where the command will go
+		commandLineEdit_->home(false);
+		commandLineEdit_->setCursorPosition(14);
+		commandLineEdit_->deselect();
+
+		haveSetUpDefaultCommandLine_ = true;
+	}
+}
+
 
 
 CommandDesignerWidget::~CommandDesignerWidget()
 {
 	delete clientOptionsDescriptions_;
+
+	MenuHandler::addCustomMenuCommands();
 }
 
 
@@ -137,18 +158,21 @@ void CommandDesignerWidget::showCommandHelp(QListWidgetItem *item, bool showFull
 void CommandDesignerWidget::on_componentsList__itemEntered(QListWidgetItem *item)
 {
 	showCommandHelp(item, false);
+	initialiseCommandLine();
 }
 
 // when the mouse moves over an item, display the help text for it
 void CommandDesignerWidget::on_componentsList__itemClicked(QListWidgetItem *item)
 {
 	showCommandHelp(item, true);
+	commandLineEdit_->setFocus(); // to keep the text cursor visible
 }
 
 // when the mouse moves over an item, display the help text for it
 void CommandDesignerWidget::on_componentsList__itemDoubleClicked(QListWidgetItem *item)
 {
 	insertComponent(item);
+	commandLineEdit_->setFocus(); // to keep the text cursor visible
 }
 
 
@@ -326,3 +350,14 @@ void CommandDesignerWidget::on_savedCommandsTable__cellClicked(int row, int colu
 }
 
 
+/*
+bool CommandDesignerWidget::eventFilter(QObject* object, QEvent* event)
+{
+	if(object == commandLineEdit_ && event->type() == QEvent::FocusIn)
+	{
+		initialiseCommandLine();
+		return false;
+	}
+	return false;
+}
+*/

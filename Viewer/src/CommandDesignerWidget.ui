@@ -225,6 +225,18 @@
    <container>1</container>
   </customwidget>
  </customwidgets>
+ <tabstops>
+  <tabstop>componentsList_</tabstop>
+  <tabstop>commandLineEdit_</tabstop>
+  <tabstop>saveNameLineEdit_</tabstop>
+  <tabstop>overwriteButton_</tabstop>
+  <tabstop>tabWidget_</tabstop>
+  <tabstop>savedCommandsTable_</tabstop>
+  <tabstop>addToContextMenuCb_</tabstop>
+  <tabstop>runButton_</tabstop>
+  <tabstop>saveAsNewButton_</tabstop>
+  <tabstop>commandManPage_</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

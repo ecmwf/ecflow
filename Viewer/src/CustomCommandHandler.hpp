@@ -18,9 +18,9 @@ class CustomCommand
 {
 public:
 	CustomCommand(const std::string &name, const std::string &command, bool context);
-	std::string name()    {return name_;};
-	std::string command() {return command_;};
-	bool inContextMenu()  {return inContextMenu_;};
+	std::string name()    const {return name_;};
+	std::string command() const {return command_;};
+	bool inContextMenu()  const {return inContextMenu_;};
 	void set(const std::string &name, const std::string &command, bool context);
 
 

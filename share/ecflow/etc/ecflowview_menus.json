@@ -29,7 +29,13 @@
         {
             "name"    : "Defstatus",
             "modes"   : ["Submenu"]
+        },
+
+        {
+            "name"    : "Custom",
+            "modes"   : ["Submenu"]
         }
+
 
     ],
 
@@ -342,12 +348,26 @@
             "name"           : "-"
         },
 
+
+
+
         {
+            "name"           : "Custom",
+            "type"           : "Submenu",
             "menu"           : "Node",
-            "name"           : "Custom...",
+            "command"        : "None"
+        },
+
+        {
+            "menu"           : "Custom",
+            "name"           : "New command...",
             "command"        : "custom"
         },
 
+        {
+            "menu"           : "Custom",
+            "name"           : "-"
+        },
 
 
 

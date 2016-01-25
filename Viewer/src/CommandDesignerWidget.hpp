@@ -13,6 +13,8 @@
 
 #include <QDialog>
 
+class CommandLineEdit;
+
 #include "ui_CommandDesignerWidget.h"
 #include "CustomCommandHandler.hpp"
 
@@ -27,6 +29,8 @@ public:
 	~CommandDesignerWidget();
 
 	QString command() {return commandLineEdit_->text();};
+
+	void initialiseCommandLine();
 
 
 public Q_SLOTS:
@@ -49,11 +53,16 @@ private:
 	void refreshSavedCommandList();
 	void addClientCommandsToComponentList();
 	void showCommandHelp(QListWidgetItem *item, bool showFullHelp);
+	//bool eventFilter(QObject* object, QEvent* event);
 
 	bool currentCommandSaved_;
+	bool haveSetUpDefaultCommandLine_;
 
 	CtsCmdRegistry cmdRegistry_;
 	boost::program_options::options_description* clientOptionsDescriptions_;
 };
+
+
+
 
 #endif
