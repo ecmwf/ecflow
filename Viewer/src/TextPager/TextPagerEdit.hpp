@@ -131,7 +131,8 @@ public:
     void setEnableSearchHighlighter(bool);
     void setSearchHighlighter(QString txt,TextPagerDocument::FindMode mode);
     void setSearchHighlighter(QRegExp rx,TextPagerDocument::FindMode mode);
-
+    
+    void gotoLine(int);
     void setFontProperty(VProperty* p);
     void notifyChange(VProperty* p);
     void zoomIn();

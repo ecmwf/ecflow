@@ -111,18 +111,18 @@ void OutputBrowser::changeIndex(IndexType indexType)
 
 void OutputBrowser::loadFile(QString fileName)
 {
-	QFile file(fileName);
+    QFile file(fileName);
     file.open(QIODevice::ReadOnly);
     QFileInfo fInfo(file);
     qint64 fSize=fInfo.size();
 
-	if(false /*fSize > 20*1024*1024*/)
+	if(true /*fSize > 20*1024*1024*/)
 	{
-		changeIndex(PagerIndex);
+            changeIndex(PagerIndex);
 
-		TextPagerDocument::DeviceMode mode = TextPagerDocument::Sparse;
-		//TextPagerDocument::DeviceMode mode = TextPagerDocument::LoadAll;
-		textPager_->load(fileName, mode);
+            TextPagerDocument::DeviceMode mode = TextPagerDocument::Sparse;
+            //TextPagerDocument::DeviceMode mode = TextPagerDocument::LoadAll;
+            textPager_->load(fileName, mode);
 	}
 	else
 	{
@@ -164,8 +164,10 @@ void OutputBrowser::adjustHighlighter(QString fileName)
 
 void OutputBrowser::gotoLine()
 {
-	if(stacked_->currentIndex() == BasicIndex)
-		textEdit_->gotoLine();
+    if(stacked_->currentIndex() == BasicIndex)
+	textEdit_->gotoLine();
+    else
+       textPager_->gotoLine(); 
 }
 
 void OutputBrowser::showSearchLine()

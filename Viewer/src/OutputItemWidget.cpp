@@ -16,6 +16,7 @@
 #include "TextPagerEdit.hpp"
 #include "VConfig.hpp"
 #include "VReply.hpp"
+#include "UserMessage.hpp"
 
 #include <QApplication>
 #include <QDebug>
@@ -163,6 +164,7 @@ void OutputItemWidget::getCurrentFile()
 	if(info_ && info_.get())
 	{
 		std::string fullName=currentFullName();
+                UserMessage::message(UserMessage::DBG,false,"output selected: " + fullName);
 		OutputFileProvider* op=static_cast<OutputFileProvider*>(infoProvider_);
 		op->file(fullName);
 	}

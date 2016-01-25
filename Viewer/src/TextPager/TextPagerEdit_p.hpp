@@ -59,7 +59,8 @@ public:
     bool isSectionOnScreen(const TextPagerSection *section) const;
     void cursorMoveKeyEventReadOnly(QKeyEvent *e);
     virtual void relayout(); // from TextPagerLayout
-
+    void adjustVerticalScrollBar();
+    
     int requestedScrollBarPosition, lastRequestedScrollBarPosition, cursorWidth, sectionCount,
         maximumSizeCopy, pendingTimeOut, autoScrollLines;
     bool readOnly, cursorVisible, blockScrollBarUpdate, updateScrollBarPageStepPending, inMouseEvent;

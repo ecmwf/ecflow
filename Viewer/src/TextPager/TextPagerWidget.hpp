@@ -13,6 +13,8 @@
 
 #include "TextPagerEdit.hpp"
 
+class GotoLineDialog;
+
 class TextPagerWidget : public QWidget //TextPagerEdit
 {
     Q_OBJECT
@@ -26,10 +28,13 @@ public:
     void setFontProperty(VProperty* p);
     void zoomIn();
     void zoomOut();
-
+    void gotoLine();
+    
     //void mouseMoveEvent(QMouseEvent *e);
 	//void timerEvent(QTimerEvent *e);
-
+protected Q_SLOTS:
+    void gotoLine(int);
+    
 Q_SIGNALS:
     void cursorCharacter(const QChar &ch);
 
@@ -40,6 +45,7 @@ private:
     TextPagerEdit *textEditor_;
 
     TextPagerLineNumberArea *lineNumArea_;
+    GotoLineDialog *gotoLineDialog_;
 };
 
 

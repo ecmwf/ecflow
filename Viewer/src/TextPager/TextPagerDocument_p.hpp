@@ -147,7 +147,7 @@ public:
 #endif
           documentSize(0),
           saveState(NotSaving), findState(NotFinding), ownDevice(false), modified(false),
-          deviceMode(TextPagerDocument::Sparse), chunkSize(1024*64), //chunkSize(16384),
+          deviceMode(TextPagerDocument::Sparse), chunkSize(16384), //chunkSize(1024*64), //chunkSize(16384),
           //undoRedoStackCurrent(0), modifiedIndex(-1), undoRedoEnabled(true), ignoreUndoRedo(false),
           //collapseInsertUndo(false),
 		  hasChunksWithLineNumbers(false), textCodec(0), options(TextPagerDocument::DefaultOptions),
@@ -249,6 +249,9 @@ public:
         : doc(d), pos(p), min(0), max(-1), convert(false), newline('\n')
     {
         Q_ASSERT(doc);
+
+        end_=end();
+
 #ifndef NO_TEXTDOCUMENTITERATOR_CACHE
         chunk = doc->chunkAt(p, &offset);
         Q_ASSERT(chunk);
@@ -295,6 +298,9 @@ public:
     {
         max = bound;
         Q_ASSERT(pos <= max);
+
+        //We suppose that the document size does not change
+        end_=end();
     }
 
 
@@ -525,7 +531,8 @@ public:
         if(*data == newline)
         {
         	//If we are at the end
-        	if(!hasNext())
+        	if(pos >= end())
+        	//if(!)hasNext())
         		return 0;
 
         	++pos;
@@ -549,7 +556,8 @@ public:
 #ifdef QT_DEBUG
         	//qDebug() << pos << offset << chunkData.at(offset);
 #endif
-        	if(!hasNext())
+        	if(pos >= end())
+        	//if(!hasNext())
         		return 0;
 
             ++pos;
@@ -638,6 +646,7 @@ private:
     const TextDocumentPrivate *doc;
     int pos;
     int min, max;
+    int end_; // to speed things up
 #ifndef NO_TEXTDOCUMENTITERATOR_CACHE
     int offset;
     QString chunkData;

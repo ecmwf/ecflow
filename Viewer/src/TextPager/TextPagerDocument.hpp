@@ -116,6 +116,7 @@ public:
     TextPagerCursor find(const QRegExp &rx, const TextPagerCursor &cursor, FindMode flags = 0,int limit = -1) const;
     TextPagerCursor find(const QString &ba, const TextPagerCursor &cursor, FindMode flags = 0, int limit = -1) const;
     TextPagerCursor find(const QChar &ch, const TextPagerCursor &cursor, FindMode flags = 0) const;
+    TextPagerCursor findLine(int lineNum, const TextPagerCursor &cursor) const;
 
     inline TextPagerCursor find(const QRegExp &rx, int pos = 0, FindMode flags = 0) const
     { return find(rx, TextPagerCursor(this, pos), flags); }

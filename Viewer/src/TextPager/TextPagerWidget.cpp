@@ -8,10 +8,6 @@
 //
 //============================================================================
 
-// abcde fghij klmno pqrst uvwxy z1234 56789 0!@#$ abcde fghij klmno pqrst uvwxy z1234 56789 0!@#$
-
-//#include <QtWidgets>
-
 #include <QWidget>
 #include <QString>
 #include <QFont>
@@ -31,16 +27,16 @@
 #include <QMessageBox>
 #include <QInputDialog>
 
-
 #include "TextPagerWidget.hpp"
 
-
+#include "GotoLineDialog.hpp"
 
 bool add = false;
 
 TextPagerWidget::TextPagerWidget(QWidget *parent) :
    //TextPagerEdit(parent),
-   doLineNumbers(true)
+   doLineNumbers(true),
+   gotoLineDialog_(NULL)
 {
 	QHBoxLayout* hb=new QHBoxLayout(this);
 	hb->setContentsMargins(0,0,0,0);
@@ -222,4 +218,34 @@ void TextPagerWidget::zoomOut()
 {
 	textEditor_->zoomOut();
 }
+// ---------------------------------------------------------------------------
+// TextEdit::gotoLine
+// triggered when the user asks to bring up the 'go to line' dialog
+// ---------------------------------------------------------------------------
 
+void TextPagerWidget::gotoLine()
+{
+    // create the dialog if it does not already exist
+
+    if (!gotoLineDialog_)
+    {
+        gotoLineDialog_ = new GotoLineDialog(this);
+
+        connect(gotoLineDialog_, SIGNAL(gotoLine(int)), this, SLOT(gotoLine(int)));
+    }
+
+    // if created, set it up and display it
+
+    if (gotoLineDialog_)
+    {
+        gotoLineDialog_->show();
+        gotoLineDialog_->raise();
+        gotoLineDialog_->activateWindow();
+        gotoLineDialog_->setupUIBeforeShow();
+    }
+}
+
+void TextPagerWidget::gotoLine(int line)
+{
+    textEditor_->gotoLine(line);
+}    

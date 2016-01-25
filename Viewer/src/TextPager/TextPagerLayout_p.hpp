@@ -68,7 +68,7 @@ class TextPagerEdit;
 class TextPagerLayout : public TextDocumentBuffer
 {
 public:
-    enum { MinimumBufferSize = 5000, LeftMargin = 3 };
+    enum { MinimumBufferSize = 10000, LeftMargin = 3 };
     TextPagerLayout(TextPagerDocument *doc = 0)
         : TextDocumentBuffer(doc), textEdit(0),
         viewportPosition(0), layoutEnd(-1), viewport(-1),
@@ -119,7 +119,7 @@ public:
         Forward = 0,
         Backward = TextPagerDocument::FindBackward
     };
-    void updateViewportPosition(int pos, Direction direction);
+    void updateViewportPosition(int pos, Direction direction,bool applyIt=true);
 };
 
 #endif

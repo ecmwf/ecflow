@@ -282,7 +282,8 @@ void TextPagerLayout::relayoutByPosition(int size)
 
 void TextPagerLayout::relayout()
 {
-    relayoutByPosition(2000); // ### totally arbitrary number
+    //relayoutByPosition(2000); // ### totally arbitrary number
+    relayoutByPosition(1.5*MinimumBufferSize); 
 }
 
 QTextLayout *TextPagerLayout::layoutForPosition(int pos, int *offset, int *index) const
@@ -364,7 +365,7 @@ QTextLine TextPagerLayout::lineForPosition(int pos, int *offsetInLine, int *line
 // right direction and sets viewportPosition to that. Updates
 // scrollbars if this is a TextEditPrivate
 
-void TextPagerLayout::updateViewportPosition(int pos, Direction direction)
+void TextPagerLayout::updateViewportPosition(int pos, Direction direction,bool applyIt)
 {
     pos = qMin(pos, maxViewportPosition);
     if (document->documentSize() == 0) {
@@ -397,16 +398,20 @@ void TextPagerLayout::updateViewportPosition(int pos, Direction direction)
     }
     layoutDirty = true;
 
-    if (textEdit && !suppressTextEditUpdates) {
-        textEdit->viewport()->update();
-        TextEditPrivate *p = static_cast<TextEditPrivate*>(this);
-        p->pendingScrollBarUpdate = true;
-        p->updateCursorPosition(p->lastHoverPos);
-        if (!textEdit->verticalScrollBar()->isSliderDown()) {
-            p->updateScrollBar();
-        } // sliderReleased is connected to updateScrollBar()
-    }
-    relayout();
+    if(applyIt) {
+    
+        if (textEdit && !suppressTextEditUpdates) {
+            textEdit->viewport()->update();
+            TextEditPrivate *p = static_cast<TextEditPrivate*>(this);
+            p->pendingScrollBarUpdate = true;
+            p->updateCursorPosition(p->lastHoverPos);
+            if (!textEdit->verticalScrollBar()->isSliderDown()) {
+                p->updateScrollBar();
+            } // sliderReleased is connected to updateScrollBar()
+        }
+    
+        relayout();
+    }    
 }
 
 #ifndef QT_NO_DEBUG_STREAM

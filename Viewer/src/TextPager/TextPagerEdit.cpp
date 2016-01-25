@@ -27,6 +27,8 @@ bool doLog = false;
 QString logFileName;
 #endif
 
+#define DEBUG_TEXTPAGER_LASTPAGESIZE  
+
 /*!
     Constructs an empty TextPagerEdit with parent \a parent.
 */
@@ -226,12 +228,14 @@ void TextPagerEdit::setDocument(TextPagerDocument *doc)
     connect(d->document->d, SIGNAL(undoRedoCommandRemoved(DocumentCommand *)),
             d, SLOT(onDocumentCommandRemoved(DocumentCommand *)));
     connect(d->document->d, SIGNAL(undoRedoCommandTriggered(DocumentCommand *, bool)),
-            d, SLOT(onDocumentCommandTriggered(DocumentCommand *, bool)));
+            d, SLOT(onDocumentCommandTriggered(DocumentCommand *, bool)));*/
+   
     connect(d->document, SIGNAL(charactersAdded(int, int)),
             d, SLOT(onCharactersAddedOrRemoved(int, int)));
     connect(d->document, SIGNAL(charactersRemoved(int, int)),
             d, SLOT(onCharactersAddedOrRemoved(int, int)));
-    connect(d->document, SIGNAL(textChanged()), this, SIGNAL(textChanged()));
+    
+    /*connect(d->document, SIGNAL(textChanged()), this, SIGNAL(textChanged()));
     connect(d->document, SIGNAL(undoAvailableChanged(bool)),
             this, SIGNAL(undoAvailableChanged(bool)));
     connect(d->document, SIGNAL(redoAvailableChanged(bool)),
@@ -585,6 +589,7 @@ void TextPagerEdit::resizeEvent(QResizeEvent *e)
     }
 #endif
     QAbstractScrollArea::resizeEvent(e);
+    d->adjustVerticalScrollBar();
     d->updateScrollBarPageStepPending = true;
     d->layoutDirty = true;
 }
@@ -725,7 +730,9 @@ void TextPagerEdit::changeEvent(QEvent *e)
         Q_FOREACH(QTextLayout *l, d->unusedTextLayouts) {
             l->setFont(d->font);
         }
-
+      
+        d->adjustVerticalScrollBar();
+        
         updateLineNumberArea();
 
         d->layoutDirty = true;
@@ -763,7 +770,6 @@ void TextPagerEdit::keyReleaseEvent(QKeyEvent *e)
 #endif
     QAbstractScrollArea::keyReleaseEvent(e);
 }
-
 
 void TextPagerEdit::setCursorPosition(int pos, TextPagerCursor::MoveMode mode)
 {
@@ -848,7 +854,48 @@ QChar TextPagerEdit::readCharacter(int index) const
 
 void TextEditPrivate::onDocumentSizeChanged(int size)
 {
-    textEdit->verticalScrollBar()->setRange(0, qMax(0, size));
+    adjustVerticalScrollBar();
+    
+    /*int s=findLastPageSize();
+    
+    qDebug() << "lat page position" << s;
+    
+    if(s != -1)
+       textEdit->verticalScrollBar()->setRange(0, s); 
+    else
+       textEdit->verticalScrollBar()->setRange(0, qMax(0, size)); 
+    
+    
+    //textEdit->verticalScrollBar()->setRange(0, qMax(0, size));
+//    qDebug() << findLastPageSize();
+    maxViewportPosition = textEdit->verticalScrollBar()->maximum();
+    updateScrollBarPageStepPending = true;*/
+}
+
+
+void TextEditPrivate::adjustVerticalScrollBar()
+{
+    int s=findLastPageSize();
+    
+    int size=(document != 0)?(document->documentSize()):0;
+  
+#ifdef DEBUG_TEXTPAGER_LASTPAGESIZE    
+    qDebug() << "last page position" << s;
+#endif    
+    if(s == 0) {
+        textEdit->verticalScrollBar()->hide();
+        textEdit->verticalScrollBar()->setEnabled(false);
+    } else {
+        textEdit->verticalScrollBar()->setEnabled(true);
+        textEdit->verticalScrollBar()->show();
+ 
+        if(s != -1)
+            textEdit->verticalScrollBar()->setRange(0, s); 
+        else
+            textEdit->verticalScrollBar()->setRange(0, qMax(0, size)); 
+    }
+    
+    //textEdit->verticalScrollBar()->setRange(0, qMax(0, size));
 //    qDebug() << findLastPageSize();
     maxViewportPosition = textEdit->verticalScrollBar()->maximum();
     updateScrollBarPageStepPending = true;
@@ -1334,37 +1381,110 @@ bool TextEditPrivate::canInsertFromMimeData(const QMimeData *data) const
     return data->hasText();
 }
 
+
+//Find the viewport position for the end of the document supposing the the last line 
+//is exactly located at the bottom of the viewport.
 int TextEditPrivate::findLastPageSize() const
 {
     if (!document || document->documentSize() == 0)
         return -1;
     TextEditPrivate p(textEdit);
+    p.font=textEdit->font();
     p.viewportPosition = 0;
     p.document = document;
     const int documentSize = document->documentSize();
     p.maxViewportPosition = documentSize;
-    int start = 0;
+    
+    //The viewport height (including the height of the horizontal slider)
+    int vh=p.textEdit->viewport()->height(); //-p.textEdit->horizontalScrollBar()->height();
+    
+    //Max 1.5*MinimumBufferSize can be kept in the buffer after the viewportPosition
+    int maxCharNum=p.MinimumBufferSize*1.5-200;
+    int start = documentSize-maxCharNum;
+    if(start < 0) start=0;
     int i = 0;
+#ifdef DEBUG_TEXTPAGER_LASTPAGESIZE 
+    QTime tm;
+    tm.start();
+#endif    
+    
+    //We get the viewportPosition closest to start 
+    p.updateViewportPosition(start, Forward,false);
+    
+    //Relayout using the max number of characters
+    p.relayoutByPosition(maxCharNum);
+
+#ifdef DEBUG_TEXTPAGER_LASTPAGESIZE     
+    qDebug() << vh << font.pointSize();
+    qDebug()  << "findLastPageSize -->" << "start:" << start << "layoutEnd:" << p.layoutEnd << "documentSize:" << documentSize << "viewportPosition:" << p.viewportPosition << p.contentRect;
+    qDebug() << "bottom:" << p.textLayouts.last()->boundingRect().bottom();
+#endif  
+   
+    //The end of the layout should be the end of the document
+    if(p.layoutEnd == documentSize && p.textLayouts.count() >0) {
+   
+        int top=p.textLayouts.last()->boundingRect().bottom()+4-vh;
+        int pos=documentSize-p.textLayouts.last()->text().size();
+           
+        for(int i=p.textLayouts.count()-2; i >=0; i--) {
+          
+            if(p.textLayouts.at(i)->boundingRect().top() <= top) {
+#ifdef DEBUG_TEXTPAGER_LASTPAGESIZE 
+                qDebug() << "find position:" << pos; // << "line:" << p.document->lineNumber(pos);
+#endif
+                p.updateViewportPosition(pos, Backward,false);
+#ifdef DEBUG_TEXTPAGER_LASTPAGESIZE 
+                qDebug() << "viewPortPosition:" << p.viewportPosition << "time:" << tm.elapsed(); // << "line:" << p.document->lineNumber(p.viewportPosition);                 
+#endif
+                return p.viewportPosition;                
+            }
+            pos-=p.textLayouts.at(i)->text().size();           
+        }
+        
+        return 0; //the whole text is in the viewport, no vertical scrollbar is needed
+    }   
+   
+    return -1;
+ 
+#if 0   
+    Q_FOREACH(QTextLayout *tl,p.textLayouts) {
+        qDebug() << tl->text().size() << tl->boundingRect().bottom();
+    }
+   
     Q_FOREVER {
-        p.updateViewportPosition(start, Backward);
-        p.relayoutByPosition(documentSize);
-        qDebug() << "i" << i++ << "start" << start << "layoutEnd" << p.layoutEnd << "documentSize" << documentSize << "viewportPosition" << p.viewportPosition;
+ 
+#ifdef DEBUG_TEXTPAGER_LASTPAGESIZE        
+        //qDebug() << "findLastPageSize --> start:" << start << "lineNumber:" << p.document->lineNumber(start);
+#endif        
+        //Relayout the text from start
+        p.updateViewportPosition(start, Forward);
+        p.relayoutByGeometry(vh);
+
+#ifdef DEBUG_TEXTPAGER_LASTPAGESIZE            
+        qDebug() << "   step:" << i  << "start:" << start << "layoutEnd:" << p.layoutEnd << "documentSize:" << documentSize << "viewportPosition:" << p.viewportPosition << p.contentRect;
+        qDebug() << "   lines:" << p.lines.count();
+#endif
+        //Check if the end of the layout is the end of the document
         if (p.layoutEnd == documentSize) {
+#ifdef DEBUG_TEXTPAGER_LASTPAGESIZE               
+            qDebug() << "findLastPageSize -->  found time:" << tm.elapsed();
+            qDebug() << "   lineNumber:" << p.document->lineNumber(p.viewportPosition) << p.contentRect;
+#endif            
             break;
         }
-//        last = start;
-        start += 100;
+        
+        //Start in the next line (viewport position must be a newline character)
+        start = p.viewportPosition+100;
+        
+        //We must stop at a point
+        Q_ASSERT(i <= maxCharNum);
+        
+        i++;
     }
-//    qDebug() << last;
-//    return last;
-    return p.viewportPosition;
-//     const int startPos = qMax(0, document->documentSize() - ((layoutEnd - viewportPosition) * 2)); // ### estimate
-//     p.viewportPosition = startPos;
-//     p.relayoutByPosition(document->documentSize() - startPos);
-
-    // ### not done
-
     return -1;
+    
+    return p.viewportPosition;
+#endif    
 }
 
 void TextPagerEdit::setSyntaxHighlighter(SyntaxHighlighter *h)
@@ -1383,22 +1503,29 @@ void TextPagerEdit::setSyntaxHighlighter(SyntaxHighlighter *h)
 
 void TextPagerEdit::setEnableSearchHighlighter(bool b)
 {
-	useSearchHighlight_=b;
-	if(useSearchHighlight_) {
-		setSyntaxHighlighter(searchHighlight_);
-	} else {
-		clearSyntaxHighlighters();
-	}
+    useSearchHighlight_=b;
+    if(useSearchHighlight_) {
+	setSyntaxHighlighter(searchHighlight_);
+    } else {
+	clearSyntaxHighlighters();
+    }
 }
 
 void TextPagerEdit::setSearchHighlighter(QString txt,TextPagerDocument::FindMode mode)
 {
-	searchHighlight_->reset(txt,mode,useSearchHighlight_);
+    searchHighlight_->reset(txt,mode,useSearchHighlight_);
 }
 
 void TextPagerEdit::setSearchHighlighter(QRegExp rx,TextPagerDocument::FindMode mode)
 {
-	searchHighlight_->reset(rx,mode,useSearchHighlight_);
+    searchHighlight_->reset(rx,mode,useSearchHighlight_);
+}
+
+void TextPagerEdit::gotoLine(int lineNum)
+{
+    TextPagerCursor cursor=d->document->findLine(lineNum,textCursor());
+    if(!cursor.isNull())
+        setTextCursor(cursor);
 }
 
 //---------------------------------------------
