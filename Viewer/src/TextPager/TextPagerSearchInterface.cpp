@@ -55,7 +55,7 @@ bool TextPagerSearchInterface::findString (QString str, bool highlightAll, QText
 	if(doSearch)
 	{
 #if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
-	QGuiApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+		QGuiApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 #endif
 	}
 
@@ -123,12 +123,15 @@ bool TextPagerSearchInterface::findString (QString str, bool highlightAll, QText
 
 void TextPagerSearchInterface::automaticSearchForKeywords(bool userClickedReload)
 {
-
 	bool found = false;
 
 	TextPagerDocument::FindMode findMode = TextPagerDocument::FindBackward;
 	TextPagerCursor cursor(editor_->textCursor());
 	cursor.movePosition(TextPagerCursor::End);
+
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+	QGuiApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+#endif
 
 	//QRegExp regexp("10:56:45 4");
 	QRegExp regexp("--(abort|complete)");
@@ -155,9 +158,6 @@ void TextPagerSearchInterface::automaticSearchForKeywords(bool userClickedReload
 		i++;
 	}
 #endif
-
-
-
 	else
 	{
 		if(userClickedReload)
@@ -169,6 +169,10 @@ void TextPagerSearchInterface::automaticSearchForKeywords(bool userClickedReload
 			editor_->setTextCursor(cursor);
 		}
 	}
+
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+	QGuiApplication::restoreOverrideCursor();
+#endif
 }
 
 void TextPagerSearchInterface::refreshSearch()

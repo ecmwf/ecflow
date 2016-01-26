@@ -22,12 +22,13 @@
 #include "TextPagerDocument_p.hpp"
 #include "TextPagerSearchHighlighter.hpp"
 
-#ifndef QT_NO_DEBUG
+#define DEBUG_TEXTPAGER_LASTPAGESIZE
+//#define DEBUG_TEXTPAGER
+
+#ifdef DEBUG_TEXTPAGER
 bool doLog = false;
 QString logFileName;
 #endif
-
-#define DEBUG_TEXTPAGER_LASTPAGESIZE  
 
 /*!
     Constructs an empty TextPagerEdit with parent \a parent.
@@ -44,7 +45,7 @@ TextPagerEdit::TextPagerEdit(QWidget *parent) :
 
     setProperty("pager","1");
 
-#ifndef QT_NO_DEBUG
+#ifdef DEBUG_TEXTPAGER
     if (logFileName.isEmpty())
         logFileName = QDateTime::currentDateTime().toString("yyyyMMdd_hhmmsszzz.log");
 #endif
@@ -287,7 +288,7 @@ void TextPagerEdit::setCursorWidth(int cw)
 #if 0
 bool TextPagerEdit::load(QIODevice *dev, TextPagerDocument::DeviceMode mode, QTextCodec *codec)
 {
-#ifndef QT_NO_DEBUG
+#ifdef DEBUG_TEXTPAGER
     if (doLog) {
         QFile f(logFileName);
         f.open(QIODevice::WriteOnly);
@@ -307,7 +308,7 @@ bool TextPagerEdit::load(QIODevice *dev, TextPagerDocument::DeviceMode mode, QTe
 
 bool TextPagerEdit::load(const QString &file, TextPagerDocument::DeviceMode mode, QTextCodec *codec)
 {
-#ifndef QT_NO_DEBUG
+#ifdef DEBUG_TEXTPAGER
     if (doLog) {
         QFile f(logFileName);
         f.open(QIODevice::WriteOnly);
@@ -454,7 +455,7 @@ void TextPagerEdit::mousePressEvent(QMouseEvent *e)
 {
     d->inMouseEvent = true;
     if (e->button() == Qt::LeftButton) {
-#ifndef QT_NO_DEBUG
+#ifdef DEBUG_TEXTPAGER
         if (doLog) {
             QFile file(logFileName);
             file.open(QIODevice::Append);
@@ -487,7 +488,7 @@ void TextPagerEdit::mousePressEvent(QMouseEvent *e)
 void TextPagerEdit::mouseDoubleClickEvent(QMouseEvent *e)
 {
     if (e->button() == Qt::LeftButton) {
-#ifndef QT_NO_DEBUG
+#ifdef DEBUG_TEXTPAGER
         if (doLog) {
             QFile file(logFileName);
             file.open(QIODevice::Append);
@@ -515,7 +516,7 @@ void TextPagerEdit::mouseMoveEvent(QMouseEvent *e)
     if (e->buttons() == Qt::NoButton) {
         d->updateCursorPosition(e->pos());
     } else if (e->buttons() == Qt::LeftButton && d->document->documentSize()) {
-#ifndef QT_NO_DEBUG
+#ifdef DEBUG_TEXTPAGER
         if (doLog) {
             QFile file(logFileName);
             file.open(QIODevice::Append);
@@ -570,7 +571,7 @@ void TextPagerEdit::mouseReleaseEvent(QMouseEvent *e)
 {
     d->inMouseEvent = false;
     if (e->button() == Qt::LeftButton) {
-#ifndef QT_NO_DEBUG
+#ifdef DEBUG_TEXTPAGER
         if (doLog) {
             QFile file(logFileName);
             file.open(QIODevice::Append);
@@ -592,7 +593,7 @@ void TextPagerEdit::mouseReleaseEvent(QMouseEvent *e)
 
 void TextPagerEdit::resizeEvent(QResizeEvent *e)
 {
-#ifndef QT_NO_DEBUG
+#ifdef DEBUG_TEXTPAGER
     if (doLog) {
         QFile file(logFileName);
         file.open(QIODevice::Append);
@@ -758,7 +759,7 @@ void TextPagerEdit::changeEvent(QEvent *e)
 
 void TextPagerEdit::keyPressEvent(QKeyEvent *e)
 {
-#ifndef QT_NO_DEBUG
+#ifdef DEBUG_TEXTPAGER
     if (doLog) {
         QFile file(logFileName);
         file.open(QIODevice::Append);
@@ -776,7 +777,7 @@ void TextPagerEdit::keyPressEvent(QKeyEvent *e)
 
 void TextPagerEdit::keyReleaseEvent(QKeyEvent *e)
 {
-#ifndef QT_NO_DEBUG
+#ifdef DEBUG_TEXTPAGER
     if (doLog) { // ### does it make any sense to replay these? Probably not
         QFile file(logFileName);
         file.open(QIODevice::Append);
