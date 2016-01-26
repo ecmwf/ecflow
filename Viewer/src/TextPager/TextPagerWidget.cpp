@@ -204,6 +204,11 @@ bool TextPagerWidget::load(const QString &fileName, TextPagerDocument::DeviceMod
 	return textEditor_->load(fileName, mode, NULL);
 }
 
+void TextPagerWidget::setText(const QString &txt)
+{
+	textEditor_->setText(txt);
+}
+
 void TextPagerWidget::setFontProperty(VProperty* p)
 {
 	textEditor_->setFontProperty(p);

@@ -24,7 +24,8 @@ public:
 	TextPagerEdit* textEditor() const {return textEditor_;}
 	void clear();
     bool load(const QString &fileName, TextPagerDocument::DeviceMode mode = TextPagerDocument::Sparse);
-
+    void setText(const QString& txt);
+    
     void setFontProperty(VProperty* p);
     void zoomIn();
     void zoomOut();

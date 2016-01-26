@@ -20,62 +20,65 @@
 #include "TextPager/TextPagerSearchInterface.hpp"
 #include "TextPagerWidget.hpp"
 
+int OutputBrowser::minPagerTextSize_=300*1024;
+int OutputBrowser::minPagerSparseSize_=30*1024*1024;
+int OutputBrowser::minConfirmSearchSize_=10*1024*1024;
+
 OutputBrowser::OutputBrowser(QWidget* parent) : QWidget(parent)
 {
-	QVBoxLayout *vb=new QVBoxLayout(this);
-	vb->setContentsMargins(0,0,0,0);
-	vb->setSpacing(2);
+    QVBoxLayout *vb=new QVBoxLayout(this);
+    vb->setContentsMargins(0,0,0,0);
+    vb->setSpacing(2);
 
-	stacked_=new QStackedWidget(this);
-	vb->addWidget(stacked_);
+    stacked_=new QStackedWidget(this);
+    vb->addWidget(stacked_);
 
-	confirmSearchLabel_=new MessageLabel(this);
-	confirmSearchLabel_->setShowTypeTitle(false);
-	//confirmSearchLabel_->useNarrowMode(true);
-	vb->addWidget(confirmSearchLabel_);
+    confirmSearchLabel_=new MessageLabel(this);
+    confirmSearchLabel_->setShowTypeTitle(false);
+    //confirmSearchLabel_->useNarrowMode(true);
+    vb->addWidget(confirmSearchLabel_);
 
-	searchLine_=new TextEditSearchLine(this);
-	vb->addWidget(searchLine_);
+    searchLine_=new TextEditSearchLine(this);
+    vb->addWidget(searchLine_);
 
-	//Basic textedit
-	textEdit_=new PlainTextEdit(this);
-	textEdit_->setReadOnly(true);
-	textEdit_->setWordWrapMode(QTextOption::NoWrap);
+    //Basic textedit
+    textEdit_=new PlainTextEdit(this);
+    textEdit_->setReadOnly(true);
+    textEdit_->setWordWrapMode(QTextOption::NoWrap);
 
-	textEditSearchInterface_=new PlainTextSearchInterface();
-	textEditSearchInterface_->setEditor(textEdit_);
+    textEditSearchInterface_=new PlainTextSearchInterface();
+    textEditSearchInterface_->setEditor(textEdit_);
 
-	//This highlighter only works for jobs
-	jobHighlighter_=new Highlighter(textEdit_->document(),"job");
-	jobHighlighter_->setDocument(NULL);
+    //This highlighter only works for jobs
+    jobHighlighter_=new Highlighter(textEdit_->document(),"job");
+    jobHighlighter_->setDocument(NULL);
 
-	//Pager for very large files
-	textPager_=new TextPagerWidget(this);
-	//textEdit_->setReadOnly(true);
+    //Pager for very large files
+    textPager_=new TextPagerWidget(this);
+    //textEdit_->setReadOnly(true);
 
-	textPagerSearchInterface_=new TextPagerSearchInterface();
-	textPagerSearchInterface_->setEditor(textPager_->textEditor());
+    textPagerSearchInterface_=new TextPagerSearchInterface();
+    textPagerSearchInterface_->setEditor(textPager_->textEditor());
 
-	stacked_->addWidget(textEdit_);
-	stacked_->addWidget(textPager_);
+    stacked_->addWidget(textEdit_);
+    stacked_->addWidget(textPager_);
 
+    stacked_->setCurrentIndex(BasicIndex);
+    searchLine_->hide();
 
-	stacked_->setCurrentIndex(BasicIndex);
-	searchLine_->hide();
-
-	connect(searchLine_,SIGNAL(visibilityChanged()),
-			this,SLOT(showConfirmSearchLabel()));
+    connect(searchLine_,SIGNAL(visibilityChanged()),
+          this,SLOT(showConfirmSearchLabel()));
 }
 
 OutputBrowser::~OutputBrowser()
 {
-	delete  textEditSearchInterface_;
-	delete  textPagerSearchInterface_;
+    delete  textEditSearchInterface_;
+    delete  textPagerSearchInterface_;
 
-	if(jobHighlighter_ && !jobHighlighter_->parent())
-	{
-		delete jobHighlighter_;
-	}
+    if(jobHighlighter_ && !jobHighlighter_->parent())
+    {
+            delete jobHighlighter_;
+    }
 }
 
 void OutputBrowser::clear()
@@ -84,29 +87,29 @@ void OutputBrowser::clear()
 	textPager_->clear();
 }
 
-void OutputBrowser::changeIndex(IndexType indexType)
+void OutputBrowser::changeIndex(IndexType indexType,qint64 fileSize)
 {
-	if(indexType == BasicIndex)
-	{
-		stacked_->setCurrentIndex(indexType);
-		searchLine_->setConfirmSearch(false);
-		searchLine_->setSearchInterface(textEditSearchInterface_);
-		//confirmSearchLabel_->clear();
-		//confirmSearchLabel_->hide();
+    if(indexType == BasicIndex)
+    {
+        stacked_->setCurrentIndex(indexType);
+        searchLine_->setConfirmSearch(false);
+        searchLine_->setSearchInterface(textEditSearchInterface_);
+        //confirmSearchLabel_->clear();
+        //confirmSearchLabel_->hide();
 
-		textPager_->clear();
-	}
-	else
-	{
-		stacked_->setCurrentIndex(indexType);
-		searchLine_->setConfirmSearch(true);
-		searchLine_->setSearchInterface(textPagerSearchInterface_);
-		//confirmSearchLabel_->show();
-		//confirmSearchLabel_->showWarning(searchLine_->confirmSearchText());
-		textEdit_->clear();
-	}
+        textPager_->clear();
+    }
+    else
+    {
+        stacked_->setCurrentIndex(indexType);
+        searchLine_->setConfirmSearch(fileSize >=minConfirmSearchSize_);
+        searchLine_->setSearchInterface(textPagerSearchInterface_);
+        //confirmSearchLabel_->show();
+        //confirmSearchLabel_->showWarning(searchLine_->confirmSearchText());
+        textEdit_->clear();
+    }
 
-	showConfirmSearchLabel();
+    showConfirmSearchLabel();
 }
 
 void OutputBrowser::loadFile(QString fileName)
@@ -115,51 +118,67 @@ void OutputBrowser::loadFile(QString fileName)
     file.open(QIODevice::ReadOnly);
     QFileInfo fInfo(file);
     qint64 fSize=fInfo.size();
+    
+    if(!isJobFile(fileName) && fSize >= minPagerTextSize_)
+    {
+        changeIndex(PagerIndex,fSize);
 
-	if(true /*fSize > 20*1024*1024*/)
-	{
-            changeIndex(PagerIndex);
+        TextPagerDocument::DeviceMode mode=(fSize >= minPagerSparseSize_)?
+        		           TextPagerDocument::Sparse:TextPagerDocument::LoadAll;
+        textPager_->load(fileName, mode);
+    }
+    else
+    {
+    	changeIndex(BasicIndex,fSize);
 
-            TextPagerDocument::DeviceMode mode = TextPagerDocument::Sparse;
-            //TextPagerDocument::DeviceMode mode = TextPagerDocument::LoadAll;
-            textPager_->load(fileName, mode);
-	}
-	else
-	{
-		changeIndex(BasicIndex);
-
-		//This was the fastest implementation for files up to 125 Mb
-		uchar *d=file.map(0,fSize);
-		QString str((char*)d);
-		textEdit_->document()->setPlainText(str);
-		file.unmap(d);
-	}
+        adjustHighlighter(fileName);
+       
+        QString str=file.readAll();
+        textEdit_->document()->setPlainText(str);
+    }
 }
 
-void OutputBrowser::loadText(QString text)
+void OutputBrowser::loadText(QString txt,QString fileName)
 {
-	changeIndex(BasicIndex);
-	textEdit_->setPlainText(text);
+    //We estimate the size in bytes
+	qint64 txtSize=txt.size()*2;
+    
+    if(!isJobFile(fileName) && txtSize > minPagerTextSize_)
+    {
+        changeIndex(PagerIndex,txtSize);
+        textPager_->setText(txt);
+    }
+    else
+    {
+    	changeIndex(BasicIndex,txtSize);
+        adjustHighlighter(fileName);  
+        textEdit_->document()->setPlainText(txt);
+    }
+}
+
+bool OutputBrowser::isJobFile(QString fileName)
+{
+    return fileName.contains(".job");
 }
 
 void OutputBrowser::adjustHighlighter(QString fileName)
 {
-	//For job files we set the proper highlighter
-	if(fileName.contains(".job"))
+    //For job files we set the proper highlighter
+    if(isJobFile(fileName))
+    {
+	if(!jobHighlighter_)
 	{
-		if(!jobHighlighter_)
-		{
-			jobHighlighter_=new Highlighter(textEdit_->document(),"job");
-		}
-		else if(jobHighlighter_->document() != textEdit_->document())
-		{
-			jobHighlighter_->setDocument(textEdit_->document());
-		}
+            jobHighlighter_=new Highlighter(textEdit_->document(),"job");
 	}
-	else if(jobHighlighter_)
+	else if(jobHighlighter_->document() != textEdit_->document())
 	{
-		jobHighlighter_->setDocument(NULL);
+            jobHighlighter_->setDocument(textEdit_->document());
 	}
+    }
+    else if(jobHighlighter_)
+    {
+	jobHighlighter_->setDocument(NULL);
+    }
 }
 
 void OutputBrowser::gotoLine()

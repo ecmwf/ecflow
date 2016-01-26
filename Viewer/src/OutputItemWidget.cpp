@@ -172,100 +172,100 @@ void OutputItemWidget::getCurrentFile()
 
 void OutputItemWidget::clearContents()
 {
-	updateDirTimer_->stop();
+    updateDirTimer_->stop();
 
-	InfoPanelItem::clear();
-	dirProvider_->clear();
+    InfoPanelItem::clear();
+    dirProvider_->clear();
 
-	messageLabel_->hide();
-	messageLabel_->stopLoadLabel();
-	fileLabel_->clear();
-	browser_->clear();
+    messageLabel_->hide();
+    messageLabel_->stopLoadLabel();
+    fileLabel_->clear();
+    browser_->clear();
 
-	enableDir(false);
+    enableDir(false);
 }
 
 void OutputItemWidget::infoReady(VReply* reply)
 {
-	//------------------------
-	// From output provider
-	//------------------------
+    //------------------------
+    // From output provider
+    //------------------------
 
-	if(reply->sender() == infoProvider_)
-	{
-		//messageLabel_->stopLoadLabel();
+    if(reply->sender() == infoProvider_)
+    {
+        //messageLabel_->stopLoadLabel();
 
-		//For some unknown reason the textedit font, although it is properly set in the constructor,
-		//is reset to default when we first call infoready. So we need to set it again!!
-		browser_->updateFont();
+        //For some unknown reason the textedit font, although it is properly set in the constructor,
+        //is reset to default when we first call infoready. So we need to set it again!!
+        browser_->updateFont();
 
-		bool hasMessage=false;
-		if(reply->hasWarning())
-		{
-			messageLabel_->showWarning(QString::fromStdString(reply->warningText()));
-			hasMessage=true;
-		}
-		else if(reply->hasInfo())
-		{
-			messageLabel_->showInfo(QString::fromStdString(reply->infoText()));
-			hasMessage=true;
-		}
+        bool hasMessage=false;
+        if(reply->hasWarning())
+        {
+            messageLabel_->showWarning(QString::fromStdString(reply->warningText()));
+            hasMessage=true;
+        }
+        else if(reply->hasInfo())
+        {
+            messageLabel_->showInfo(QString::fromStdString(reply->infoText()));
+            hasMessage=true;
+        }
 
-		browser_->adjustHighlighter(QString::fromStdString(reply->fileName()));
+        browser_->adjustHighlighter(QString::fromStdString(reply->fileName()));
 
-		VFile_ptr f=reply->tmpFile();
+        VFile_ptr f=reply->tmpFile();
 
-		QTime stopper;
-		stopper.start();
+        //QTime stopper;
+        //stopper.start();
 
-		//If the info is stored in a tmp file
-		if(f && f.get())
-		{
-			if(f->storageMode() == VFile::MemoryStorage)
-			{
-				//messageLabel_->hide();
+        //If the info is stored in a tmp file
+        if(f && f.get())
+        {
+            if(f->storageMode() == VFile::MemoryStorage)
+            {
+                    //messageLabel_->hide();
 
-				QString s(f->data());
-				browser_->loadText(s);
-			}
-			else
-			{
-				browser_->loadFile(QString::fromStdString(f->path()));
-				hasMessage=false;
-			}
-		}
-		//If the info is stored as a string in the reply object
-		else
-		{
-			QString s=QString::fromStdString(reply->text());
-			browser_->loadText(s);
-		}
+                    QString s(f->data());
+                    browser_->loadText(s,QString::fromStdString(f->path()));
+            }
+            else
+            {
+                    browser_->loadFile(QString::fromStdString(f->path()));
+                    hasMessage=false;
+            }
+        }
+        //If the info is stored as a string in the reply object
+        else
+        {
+                QString s=QString::fromStdString(reply->text());
+                browser_->loadText(s,QString::fromStdString(reply->fileName()));
+        }
 
-		searchOnReload();
+        searchOnReload();
 
-		if(f && f.get())
-		{
-			f->setWidgetLoadDuration(stopper.elapsed());
-		}
+        //if(f && f.get())
+        //{
+        //	f->setWidgetLoadDuration(stopper.elapsed());
+        //}
 
-		if(!hasMessage)
-		{
-			messageLabel_->hide();
-		}
-		messageLabel_->stopLoadLabel();
+        if(!hasMessage)
+        {
+                messageLabel_->hide();
+        }
+        messageLabel_->stopLoadLabel();
 
-		//Update the file label
-		fileLabel_->update(reply);
-	}
+        //Update the file label
+        fileLabel_->update(reply);
+    }
 
-	//------------------------
-	// From output dir provider
-	//------------------------
-	else
-	{
-		//Update the dir widget and select the proper file in the list
-		updateDir(reply->directory(),true);
-	}
+    //------------------------
+    // From output dir provider
+    //------------------------
+    else
+    {
+        //Update the dir widget and select the proper file in the list
+        updateDir(reply->directory(),true);
+    }
 }
 
 void OutputItemWidget::infoProgress(VReply* reply)

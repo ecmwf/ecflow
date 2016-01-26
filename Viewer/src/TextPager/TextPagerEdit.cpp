@@ -299,6 +299,8 @@ bool TextPagerEdit::load(QIODevice *dev, TextPagerDocument::DeviceMode mode, QTe
         }
     }
 #endif
+    //we have to check to font here because the initial setting in setFontProperty doe not have any effect
+    updateFont();
     return d->document->load(dev, mode, codec);
 }
 #endif
@@ -313,10 +315,16 @@ bool TextPagerEdit::load(const QString &file, TextPagerDocument::DeviceMode mode
         ds << file;
     }
 #endif
-
     //we have to check to font here because the initial setting in setFontProperty doe not have any effect
     updateFont();
     return d->document->load(file, mode, codec);
+}
+
+void TextPagerEdit::setText(const QString &txt)
+{
+    //we have to check to font here because the initial setting in setFontProperty doe not have any effect
+    updateFont();
+    d->document->setText(txt);
 }
 
 enum SelectionAddStatus {
@@ -325,6 +333,10 @@ enum SelectionAddStatus {
     After,
     Success
 };
+
+
+
+
 
 static inline SelectionAddStatus addSelection(int layoutStart, int layoutLength,
                                               const TextPagerCursor &cursor, QTextLayout::FormatRange *format)
@@ -837,11 +849,6 @@ void TextPagerEdit::selectAll()
     Q_EMIT selectionChanged();
 }
 
-void TextPagerEdit::setText(const QString &text)
-{
-    d->document->setText(text);
-}
-
 QString TextPagerEdit::read(int pos, int size) const
 {
     return d->document->read(pos, size);
@@ -1057,6 +1064,9 @@ void TextEditPrivate::onCharactersAddedOrRemoved(int from, int count)
 {
     Q_ASSERT(count >= 0);
     Q_UNUSED(count);
+
+    textCursor.clearSelection();
+
     if (from > qMin(bufferPosition + buffer.size(), layoutEnd)) {
         return;
     }

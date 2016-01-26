@@ -31,7 +31,7 @@ public:
 
 	void clear();
 	void loadFile(QString fileName);
-	void loadText(QString text);
+	void loadText(QString text,QString fileName);
 	void adjustHighlighter(QString fileName);
 	void setFontProperty(VProperty* p);
 	void updateFont();
@@ -46,8 +46,9 @@ protected Q_SLOTS:
 
 private:
 	enum IndexType {BasicIndex=0,PagerIndex=1};
-	void changeIndex(IndexType indexType);
-
+	void changeIndex(IndexType indexType,qint64 fileSize);
+    bool isJobFile(QString fileName);
+    
 	QStackedWidget *stacked_;
 	PlainTextEdit* textEdit_;
 	TextPagerWidget* textPager_;
@@ -56,6 +57,9 @@ private:
 	PlainTextSearchInterface *textEditSearchInterface_;
 	TextPagerSearchInterface *textPagerSearchInterface_;
 	MessageLabel *confirmSearchLabel_;
+	static int minPagerTextSize_;
+	static int minPagerSparseSize_;
+	static int minConfirmSearchSize_;
 };
 
 #endif /* VIEWER_SRC_OUTPUTBROWSER_HPP_ */

@@ -7,6 +7,13 @@
 #netbeans
 nbproject/
 
+#Qt creator
+ecflow.config
+ecflow.creator
+ecflow.includes
+ecflow.files
+ecflow.creator.user
+ 
 # cmake
 ecbuild/
 build/

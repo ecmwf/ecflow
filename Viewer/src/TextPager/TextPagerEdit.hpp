@@ -72,6 +72,7 @@ public:
     //bool load(QIODevice *device, TextPagerDocument::DeviceMode mode = TextPagerDocument::Sparse, QTextCodec *codec = 0);
 
     bool load(const QString &fileName, TextPagerDocument::DeviceMode mode = TextPagerDocument::Sparse, QTextCodec *codec = 0);
+
     void paintEvent(QPaintEvent *e);
     void scrollContentsBy(int dx, int dy);
 
