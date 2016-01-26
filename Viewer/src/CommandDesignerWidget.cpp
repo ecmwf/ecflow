@@ -14,6 +14,7 @@
 #include "Child.hpp"
 #include "Str.hpp"
 #include "MenuHandler.hpp"
+#include "NodeQueryResult.hpp"
 
 using namespace boost;
 namespace po = boost::program_options;
@@ -53,12 +54,22 @@ CommandDesignerWidget::CommandDesignerWidget(QWidget *parent) : QWidget(parent)
 	infoLabel_->setShowTypeTitle(false);
 	infoLabel_->showInfo(tr("Click command for help, double-click to insert"));
 
+	nodeSelectionView_->enableContextMenu(false);
+
 	// temporary
 	//saveCommandGroupBox_->setVisible(false);
 	//tabWidget_->setTabEnabled(1, false);
 	//savedCommandsGroupBox_->setVisible(false);
 
 }
+
+CommandDesignerWidget::~CommandDesignerWidget()
+{
+	delete clientOptionsDescriptions_;
+
+	MenuHandler::addCustomMenuCommands();
+}
+
 
 void CommandDesignerWidget::initialiseCommandLine()
 {
@@ -74,12 +85,19 @@ void CommandDesignerWidget::initialiseCommandLine()
 }
 
 
-
-CommandDesignerWidget::~CommandDesignerWidget()
+void CommandDesignerWidget::setNodes(std::vector<VInfo_ptr> nodes)
 {
-	delete clientOptionsDescriptions_;
+	nodes_ = nodes;
 
-	MenuHandler::addCustomMenuCommands();
+
+	// populate the list of nodes
+	nodeSelectionView_->setSourceModel(&nodeModel_);
+	nodeModel_.slotBeginReset();
+	nodeModel_.data()->add(nodes);
+	nodeModel_.slotEndReset();
+
+	// all should be selected at first
+	nodeSelectionView_->selectAll();
 }
 
 

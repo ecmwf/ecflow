@@ -63,10 +63,7 @@ NodeQueryResultView::NodeQueryResultView(QWidget* parent) :
 	setPalette(pal);
 
 	//Context menu
-	setContextMenuPolicy(Qt::CustomContextMenu);
-
-	connect(this, SIGNAL(customContextMenuRequested(const QPoint &)),
-		                this, SLOT(slotContextMenu(const QPoint &)));
+	enableContextMenu(true);
 
 	//Selection
 	connect(this,SIGNAL(clicked(const QModelIndex&)),
@@ -81,6 +78,26 @@ NodeQueryResultView::~NodeQueryResultView()
 {
 	delete actionHandler_;
 }
+
+
+void NodeQueryResultView::enableContextMenu(bool enable)
+{
+	if (enable)
+	{
+		setContextMenuPolicy(Qt::CustomContextMenu);
+
+		connect(this, SIGNAL(customContextMenuRequested(const QPoint &)),
+		                	this, SLOT(slotContextMenu(const QPoint &)));
+	}
+	else
+	{
+		setContextMenuPolicy(Qt::NoContextMenu);
+
+		disconnect(this, SIGNAL(customContextMenuRequested(const QPoint &)),
+		                	this, SLOT(slotContextMenu(const QPoint &)));
+	}
+}
+
 
 void NodeQueryResultView::setSourceModel(NodeQueryResultModel *model)
 {

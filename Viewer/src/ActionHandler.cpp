@@ -103,6 +103,7 @@ void ActionHandler::contextMenu(std::vector<VInfo_ptr> nodesLst,QPoint pos)
         else if(item->command() == "custom")  // would expect this to be 'Custom...' but it's just 'Custom'
         {
             CustomCommandDialog customCommandDialog(0);
+            customCommandDialog.setNodes(nodesLst);
             if (customCommandDialog.exec() == QDialog::Accepted)
             {
                 ServerHandler::command(nodesLst, customCommandDialog.command().toStdString());

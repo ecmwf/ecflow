@@ -35,6 +35,7 @@ public:
 	void currentSelection(VInfo_ptr n);
 	void selectFirstServer();
 	void setSourceModel(NodeQueryResultModel* model);
+	void enableContextMenu(bool enable);
 
 	//void readSettings(VSettings* vs) {};
 

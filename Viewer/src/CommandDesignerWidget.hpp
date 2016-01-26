@@ -17,6 +17,7 @@ class CommandLineEdit;
 
 #include "ui_CommandDesignerWidget.h"
 #include "CustomCommandHandler.hpp"
+#include "NodeQueryResultModel.hpp"
 
 #include "CtsCmdRegistry.hpp"
 
@@ -29,8 +30,8 @@ public:
 	~CommandDesignerWidget();
 
 	QString command() {return commandLineEdit_->text();};
+	void setNodes(std::vector<VInfo_ptr> nodes);
 
-	void initialiseCommandLine();
 
 
 public Q_SLOTS:
@@ -53,10 +54,14 @@ private:
 	void refreshSavedCommandList();
 	void addClientCommandsToComponentList();
 	void showCommandHelp(QListWidgetItem *item, bool showFullHelp);
+	void initialiseCommandLine();
 	//bool eventFilter(QObject* object, QEvent* event);
 
 	bool currentCommandSaved_;
 	bool haveSetUpDefaultCommandLine_;
+
+	std::vector<VInfo_ptr> nodes_;
+	NodeQueryResultModel nodeModel_; 
 
 	CtsCmdRegistry cmdRegistry_;
 	boost::program_options::options_description* clientOptionsDescriptions_;
