@@ -105,6 +105,18 @@ void NodeQueryResultView::setSourceModel(NodeQueryResultModel *model)
 	sortModel_->setSourceModel(model_);
 }
 
+
+
+// if the user clicks outside of the nodes, thereby deselecting all,
+// the selectionChanged signal is not emitted, so we try to take
+// care of that here
+void NodeQueryResultView::mouseReleaseEvent (QMouseEvent *event)
+{
+	QTreeView::mouseReleaseEvent(event);
+	Q_EMIT mouseReleased();
+}
+
+
 //Collects the selected list of indexes
 QModelIndexList NodeQueryResultView::selectedList()
 {
@@ -167,6 +179,20 @@ void NodeQueryResultView::selectFirstServer()
 		setCurrentIndex(idx);
 		VInfo_ptr info=model_->nodeInfo(sortModel_->mapToSource(idx));
 		Q_EMIT selectionChanged(info);
+	}
+}
+
+
+void NodeQueryResultView::getListOfSelectedNodes(std::vector<VInfo_ptr> &nodeList)
+{
+	QModelIndexList indexList=selectedList();
+
+	nodeList.clear();
+	for(int i=0; i < indexList.count(); i++)
+	{
+		VInfo_ptr info=model_->nodeInfo(sortModel_->mapToSource(indexList[i]));
+		if(info && !info->isEmpty())
+			nodeList.push_back(info);
 	}
 }
 

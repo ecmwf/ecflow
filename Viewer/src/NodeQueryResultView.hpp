@@ -36,6 +36,7 @@ public:
 	void selectFirstServer();
 	void setSourceModel(NodeQueryResultModel* model);
 	void enableContextMenu(bool enable);
+	void getListOfSelectedNodes(std::vector<VInfo_ptr> &nodeList);
 
 	//void readSettings(VSettings* vs) {};
 
@@ -50,11 +51,13 @@ public Q_SLOTS:
 
 Q_SIGNALS:
 	void selectionChanged(VInfo_ptr);
+	void mouseReleased();
 	void infoPanelCommand(VInfo_ptr,QString);
 
 protected:
 	QModelIndexList selectedList();
 	void handleContextMenu(QModelIndex indexClicked,QModelIndexList indexLst,QPoint globalPos,QPoint widgetPos,QWidget *widget);
+	void mouseReleaseEvent (QMouseEvent *event);
 
 	NodeQueryResultModel* model_;
 	QSortFilterProxyModel* sortModel_;

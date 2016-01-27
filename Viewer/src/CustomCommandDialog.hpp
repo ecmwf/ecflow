@@ -24,7 +24,8 @@ public:
 	~CustomCommandDialog() {};
 
     QString command() {return commandDesigner_->command();};
-	void setNodes(std::vector<VInfo_ptr> nodes) {commandDesigner_->setNodes(nodes);};
+	void setNodes(std::vector<VInfo_ptr> &nodes) {commandDesigner_->setNodes(nodes);};
+	std::vector<VInfo_ptr> &selectedNodes() {return commandDesigner_->selectedNodes();};
 
 
 

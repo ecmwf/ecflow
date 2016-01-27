@@ -30,7 +30,8 @@ public:
 	~CommandDesignerWidget();
 
 	QString command() {return commandLineEdit_->text();};
-	void setNodes(std::vector<VInfo_ptr> nodes);
+	void setNodes(std::vector<VInfo_ptr> &nodes);
+	std::vector<VInfo_ptr> &selectedNodes();
 
 
 
@@ -45,6 +46,8 @@ public Q_SLOTS:
 	void on_componentsList__itemEntered(QListWidgetItem *item);
 	void on_componentsList__itemClicked(QListWidgetItem *item);
 	void on_componentsList__itemDoubleClicked(QListWidgetItem *item);
+	void on_nodeListLinkLabel__linkActivated(const QString &link);
+	void on_nodeSelectionChanged();
 	QPushButton *runButton() {return runButton_;};
 
 
@@ -55,6 +58,7 @@ private:
 	void addClientCommandsToComponentList();
 	void showCommandHelp(QListWidgetItem *item, bool showFullHelp);
 	void initialiseCommandLine();
+	void setNodeNumberLinkText(int numNodes);
 	//bool eventFilter(QObject* object, QEvent* event);
 
 	bool currentCommandSaved_;

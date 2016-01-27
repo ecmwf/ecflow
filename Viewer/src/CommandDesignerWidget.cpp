@@ -56,6 +56,14 @@ CommandDesignerWidget::CommandDesignerWidget(QWidget *parent) : QWidget(parent)
 
 	nodeSelectionView_->enableContextMenu(false);
 
+
+	nodeListLinkLabel_->setOpenExternalLinks(false);
+
+
+	connect(nodeSelectionView_, SIGNAL(selectionChanged(VInfo_ptr)), this, SLOT(on_nodeSelectionChanged()));
+	connect(nodeSelectionView_, SIGNAL(mouseReleased()),             this, SLOT(on_nodeSelectionChanged()));
+
+
 	// temporary
 	//saveCommandGroupBox_->setVisible(false);
 	//tabWidget_->setTabEnabled(1, false);
@@ -85,7 +93,7 @@ void CommandDesignerWidget::initialiseCommandLine()
 }
 
 
-void CommandDesignerWidget::setNodes(std::vector<VInfo_ptr> nodes)
+void CommandDesignerWidget::setNodes(std::vector<VInfo_ptr> &nodes)
 {
 	nodes_ = nodes;
 
@@ -98,6 +106,45 @@ void CommandDesignerWidget::setNodes(std::vector<VInfo_ptr> nodes)
 
 	// all should be selected at first
 	nodeSelectionView_->selectAll();
+
+
+	on_nodeSelectionChanged();  // get the number of selected nodes and act accordingly
+}
+
+
+
+// when the user clicks on the hyperlinked label which tells them how many nodes
+// will be acted on, we want to switch to the Nodes tab
+void CommandDesignerWidget::on_nodeListLinkLabel__linkActivated(const QString &link)
+{
+	if (link == "#nodes")
+	{
+		tabWidget_->setCurrentIndex(1);
+	}
+}
+
+
+void CommandDesignerWidget::setNodeNumberLinkText(int numNodes)
+{
+	QString s;
+
+	s = (numNodes == 1) ? "" : "s";
+
+	nodeListLinkLabel_->setText(tr("<a href=\"#nodes\">%1 node%2 selected</a>").arg(numNodes).arg(s));
+}
+
+// triggered when the user changes their node selection
+void CommandDesignerWidget::on_nodeSelectionChanged()
+{
+	setNodeNumberLinkText(selectedNodes().size());
+	on_commandLineEdit__textChanged();  // trigger the enabling/disabling of the Run button
+}
+
+
+std::vector<VInfo_ptr> &CommandDesignerWidget::selectedNodes()
+{
+	nodeSelectionView_->getListOfSelectedNodes(nodes_);
+	return nodes_;
 }
 
 
@@ -204,7 +251,8 @@ void CommandDesignerWidget::insertComponent(QListWidgetItem *item)
 
 void CommandDesignerWidget::on_commandLineEdit__textChanged()
 {
-	runButton_->setEnabled(!commandLineEdit_->text().isEmpty()); // only allow to run a non-empty command
+	 // only allow to run a non-empty command, and on 1 or more nodes
+	runButton_->setEnabled((!commandLineEdit_->text().isEmpty()) && nodes_.size() > 0);
 
 	currentCommandSaved_ = false;
 

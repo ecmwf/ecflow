@@ -106,7 +106,11 @@ void ActionHandler::contextMenu(std::vector<VInfo_ptr> nodesLst,QPoint pos)
             customCommandDialog.setNodes(nodesLst);
             if (customCommandDialog.exec() == QDialog::Accepted)
             {
-                ServerHandler::command(nodesLst, customCommandDialog.command().toStdString());
+                // the user could have changed the node selection within the custom editor
+                std::vector<VInfo_ptr> selectedNodes = customCommandDialog.selectedNodes();
+
+                // send the command to the server
+                ServerHandler::command(selectedNodes, customCommandDialog.command().toStdString());
             }
         }
         else
