@@ -34,7 +34,8 @@ ServerComThread::ServerComThread(ServerHandler *server, ClientInvoker *ci) :
 		taskType_(VTask::NoTask),
 		rescanNeed_(false),
 		hasSuiteFilter_(false),
-		autoAddNewSuites_(false)
+		autoAddNewSuites_(false),
+		maxLineNum_(-1)
 {
 }
 
@@ -70,6 +71,8 @@ void ServerComThread::task(VTask_ptr task)
 		hasSuiteFilter_=server_->suiteFilter()->isEnabled();
 		autoAddNewSuites_=server_->suiteFilter()->autoAddNewSuites();
 		filteredSuites_=server_->suiteFilter()->filter();
+
+		maxLineNum_=server_->conf()->intValue(VServerSettings::MaxOutputFileLines);
 
 		//Start the thread execution
 		start();
@@ -141,7 +144,11 @@ void ServerComThread::run()
 			case VTask::OutputTask:
 			{
 				UserMessage::message(UserMessage::DBG, false, std::string(" FILE"));
-				ci_->file(nodePath_,params_["clientPar"]);
+				if(maxLineNum_ < 0)
+					ci_->file(nodePath_,params_["clientPar"]);
+				else
+					ci_->file(nodePath_,params_["clientPar"],boost::lexical_cast<std::string>(maxLineNum_));
+
 				break;
 			}
 

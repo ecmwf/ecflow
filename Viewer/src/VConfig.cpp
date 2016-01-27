@@ -462,7 +462,7 @@ bool VConfig::readRcFile(const std::string& rcFile,boost::property_tree::ptree& 
 				}
 				else if(par[0] == "jobfile_length")
 				{
-					pt.put("server.files.maxJobFileLines",par[1]);
+					pt.put("server.files.maxOutputFileLines",par[1]);
 					hasValue=true;
 				}
 

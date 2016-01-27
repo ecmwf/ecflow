@@ -103,13 +103,15 @@ void InfoProvider::visit(VInfoNode* info)
 
     		if(reply_->textFromFile(fileName))
     		{
+    			reply_->fileReadMode(VReply::LocalReadMode);
+    			reply_->fileName(fileName);
     			owner_->infoReady(reply_);
     			return;
     		}
-    		else if(handleFileMissing(fileName,reply_))
+    		/*else if(handleFileMissing(fileName,reply_))
     		{
     			return;
-    		}
+    		}*/
     	}
     }
 
@@ -118,6 +120,8 @@ void InfoProvider::visit(VInfoNode* info)
 
     //Define a task for getting the info from the server.
     task_=VTask::create(taskType_,n,this);
+    task_->reply()->fileName(fileName);
+    task_->reply()->fileReadMode(VReply::ServerReadMode);
 
     //Run the task in the server. When it finish taskFinished() is called. The text returned
     //in the reply will be prepended to the string we generated above.

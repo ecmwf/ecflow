@@ -351,11 +351,11 @@
  			
  			"group" : {
 				
-				"title" : "Files",
+				"title" : "Files (manual, script, job and job output)",
 				"prefix" : "server.files",
 				
 				"line" : "readFilesFromDisk",
-				"line" : "maxJobFileLines"				
+				"line" : "maxOutputFileLines"				
 			},
 
 			"grid-hidden" : {

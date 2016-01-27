@@ -51,7 +51,7 @@ void FileInfoLabel::update(VReply* reply,QString extraText)
 	QString ttText;
 	QString s;
 
-	QColor col(Qt::black);
+	QColor col(39,49,101);
 	QColor colText("#000010");
 	QColor colSize(0,0,255);
 	QColor colErr(255,0,0);
@@ -116,9 +116,13 @@ void FileInfoLabel::update(VReply* reply,QString extraText)
 		s+="<font color=" + colText.name() + ">" + dt +  + "</font>";
 
 		s+="<br>";
-		s+="<b><font color=" + col.name() + "> Source: </font></b>";
-		int rowLimit=10000;
-		s+="<font color=" + colText.name() + "> server (first " + QString::number(rowLimit) + " lines only)</font>";
+		s+="<b><font color=" + col.name() + "> Source: </font></b><font color=" + colText.name() + "> server";
+		int rowLimit=reply->readTruncatedTo();
+		if(rowLimit >= 0)
+		{
+			s+=" (text truncated to last " + QString::number(rowLimit) + " lines)";
+		}
+		s+="</font>";
 	}
 
 	else if(reply->fileReadMode() == VReply::LogServerReadMode)
