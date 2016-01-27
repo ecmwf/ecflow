@@ -100,7 +100,7 @@ void FileInfoLabel::update(VReply* reply,QString extraText)
 
 			s+="<br>";
 			s+="<b><font color=" + col.name() + "> Source: </font></b>";
-			s+="<font color=" + colText.name() + "> local disk</font>";
+			s+="<font color=" + colText.name() + "> read from disk</font>";
 
 			/*VFile_ptr tmp=reply->tmpFile();
 			if(tmp && tmp->widgetLoadDuration() > 300)
@@ -112,15 +112,18 @@ void FileInfoLabel::update(VReply* reply,QString extraText)
 	else if(reply->fileReadMode() == VReply::ServerReadMode)
 	{
 		QString dt=QDateTime::currentDateTime().toString("yyyy-MM-dd HH:mm:ss");
-		s+="<b><font color=" + col.name() + "> Fetched: </font></b>";
-		s+="<font color=" + colText.name() + ">" + dt +  + "</font>";
+		//s+="<b><font color=" + col.name() + "> Fetched: </font></b>";
+		//s+="<font color=" + colText.name() + ">" + dt +  + "</font>";
 
 		s+="<br>";
-		s+="<b><font color=" + col.name() + "> Source: </font></b><font color=" + colText.name() + "> server";
+		s+="<b><font color=" + col.name() + "> Source: </font></b><font color=" + colText.name() + "> fetched from server </font>" +
+			//"<font color=" + colHighlight.name() +	"server </font>" +
+			" <font color=" + col.name() + "> <b>at</b> </font><font color=" + colText.name() + ">" + dt + "</font>";
+
 		int rowLimit=reply->readTruncatedTo();
 		if(rowLimit >= 0)
 		{
-			s+=" (text truncated to last " + QString::number(rowLimit) + " lines)";
+			s+=" (<i>text truncated to last " + QString::number(rowLimit) + " lines</i>)";
 		}
 		s+="</font>";
 	}
@@ -147,20 +150,16 @@ void FileInfoLabel::update(VReply* reply,QString extraText)
 				}
 			}
 
-			QString dt=tmp->fetchDate().toString("yyyy-MM-dd HH:mm:ss");
-			s+="<b><font color=" + col.name() + "> Fetched: </font></b>";
-			s+="<font color=" + colText.name() + ">" + dt +  + "</font>";
-
 			s+="<br>";
 			s+="<b><font color=" + col.name() + "> Source: </font></b>";
 			s+="<font color=" + colText.name() + "> " + QString::fromStdString(reply->fileReadMethod()) + "</font>";
 
-			s+=" (transfer: " + QString::number(static_cast<float>(tmp->transferDuration())/1000.,'f',1) + " s";
-			/*if(tmp->widgetLoadDuration() > 0)
-			{
-				s+=", display: " + QString::number(static_cast<float>(tmp->widgetLoadDuration())/1000.,'f',1) + " s";
-			}*/
-			s+=")";
+			//s+=" (took <font color=" + colSize.name() + "> " + QString::number(static_cast<float>(tmp->transferDuration())/1000.,'f',1) + " s </font>)";
+			s+=" (took " + QString::number(static_cast<float>(tmp->transferDuration())/1000.,'f',1) + " s)";
+
+			QString dt=tmp->fetchDate().toString("yyyy-MM-dd HH:mm:ss");
+			s+="<b><font color=" + col.name() + "> at </font></b>";
+			s+="<font color=" + colText.name() + ">" + dt +  + "</font>";
 		}
 	}
 
