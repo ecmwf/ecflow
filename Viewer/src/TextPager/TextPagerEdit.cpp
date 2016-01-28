@@ -21,6 +21,7 @@
 #include "TextPagerCursor_p.hpp"
 #include "TextPagerDocument_p.hpp"
 #include "TextPagerSearchHighlighter.hpp"
+#include "UserMessage.hpp"
 
 #define DEBUG_TEXTPAGER_LASTPAGESIZE
 //#define DEBUG_TEXTPAGER
@@ -316,9 +317,13 @@ bool TextPagerEdit::load(const QString &file, TextPagerDocument::DeviceMode mode
         ds << file;
     }
 #endif
+
+    UserMessage::message(UserMessage::DBG,false,"TextPagerEdit::load fileName" + file.toStdString());
     //we have to check to font here because the initial setting in setFontProperty doe not have any effect
     updateFont();
-    return d->document->load(file, mode, codec);
+    bool ret=d->document->load(file, mode, codec);
+    UserMessage::message(UserMessage::DBG,false,"  cursor: " + QString::number(textCursor().position()).toStdString());
+    return ret;
 }
 
 void TextPagerEdit::setText(const QString &txt)
@@ -1072,9 +1077,15 @@ void TextEditPrivate::onCharactersAddedOrRemoved(int from, int count)
 
     textCursor.clearSelection();
 
-    if (from > qMin(bufferPosition + buffer.size(), layoutEnd)) {
+    if(textCursor.position() > document->documentSize())
+        textCursor.setPosition(0);
+
+    UserMessage::message(UserMessage::DBG,false,
+              "TextEditPrivate::onCharactersAddedOrRemoved --> textCursor: " + QString::number(textCursor.position()).toStdString());
+
+    /*if (from > qMin(bufferPosition + buffer.size(), layoutEnd)) {
         return;
-    }
+    }*/
     buffer.clear(); // isn't it better to just add them here?
     layoutDirty = true;
     textEdit->viewport()->update();
@@ -1520,9 +1531,15 @@ void TextPagerEdit::setEnableSearchHighlighter(bool b)
 {
     useSearchHighlight_=b;
     if(useSearchHighlight_) {
-	setSyntaxHighlighter(searchHighlight_);
+    	setSyntaxHighlighter(searchHighlight_);
     } else {
-	clearSyntaxHighlighters();
+    	//searchHighlight_ can only be deleted when the editor is deleted.
+    	//Because clearSyntaxHighlighters() deletes the highlighters  we need to use
+    	//takeSyntaxHighlighter() instead.
+    	takeSyntaxHighlighter(searchHighlight_);
+    	d->layoutDirty = true;
+        viewport()->update();
+        //clearSyntaxHighlighters();
     }
 }
 

@@ -48,13 +48,14 @@ bool TextEditSearchLine::findString (QString str, bool highlightAll, QTextDocume
 
 void TextEditSearchLine::highlightMatches(QString txt)
 {
-	if(confirmSearch_)
+	if(interface_)
 	{
-		if(interface_)
-			interface_->enableHighlights();
+		interface_->enableHighlights();
+		if(interface_->highlightsNeedSearch() && !txt.isEmpty())
+		{
+			findString(txt, true,  0, true, 0);   // highlight all matches
+		}
 	}
-	else if (!txt.isEmpty())
-		findString(txt, true,  0, true, 0);   // highlight all matches
 }
 
 void TextEditSearchLine::slotHighlight()
@@ -205,7 +206,7 @@ void TextEditSearchLine::on_actionHighlightAll__toggled(bool b)
 	else                    // user switched off the highlights
 		clearHighlights();
 
-	if(!confirmSearch_)
+	if(interface_ && interface_->highlightsNeedSearch())
 		refreshSearch();
 }
 

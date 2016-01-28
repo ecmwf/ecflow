@@ -129,6 +129,8 @@ void TextPagerSearchInterface::automaticSearchForKeywords(bool userClickedReload
 	TextPagerCursor cursor(editor_->textCursor());
 	cursor.movePosition(TextPagerCursor::End);
 
+    //qDebug() << "automaticSearchForKeyword" << editor_->textCursor().position();
+
 #if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
 	QGuiApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 #endif

@@ -28,6 +28,7 @@ public:
 	virtual void refreshSearch()=0;
 	virtual void clearHighlights()=0;
 	virtual void enableHighlights()=0;
+	virtual bool highlightsNeedSearch()=0;
 
 protected:
 	static QColor highlightColour_;

@@ -9,10 +9,10 @@ nbproject/
 
 #Qt creator
 ecflow.config
-ecflow.creator
+*.creator
+*.creator.*
 ecflow.includes
 ecflow.files
-ecflow.creator.user
  
 # cmake
 ecbuild/

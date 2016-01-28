@@ -28,6 +28,7 @@ public:
 	void refreshSearch();
 	void clearHighlights();
 	void enableHighlights();
+	bool highlightsNeedSearch() {return false;}
 
 protected:
 
