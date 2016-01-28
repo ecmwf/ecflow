@@ -1536,10 +1536,12 @@ void TextPagerEdit::setEnableSearchHighlighter(bool b)
     	//searchHighlight_ can only be deleted when the editor is deleted.
     	//Because clearSyntaxHighlighters() deletes the highlighters  we need to use
     	//takeSyntaxHighlighter() instead.
-    	takeSyntaxHighlighter(searchHighlight_);
-    	d->layoutDirty = true;
-        viewport()->update();
-        //clearSyntaxHighlighters();
+        if(d->syntaxHighlighters.contains(searchHighlight_)) {
+            takeSyntaxHighlighter(searchHighlight_);
+            d->layoutDirty = true;
+            viewport()->update();
+            //clearSyntaxHighlighters();
+        }
     }
 }
 

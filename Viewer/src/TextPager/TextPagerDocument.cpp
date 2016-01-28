@@ -523,8 +523,6 @@ TextPagerCursor TextPagerDocument::find(const QRegExp &regexp, const TextPagerCu
         		index = regexp.lastIndexIn(line, line.size());
                 from = it.position(); //-line.size();
 
-                qDebug() << "index" <<  it.position() << index << from;
-                qDebug() << "read" << read(it.position(),index);
         		if(from + index  < limit) {
         		    ok = false;
         		} else {
