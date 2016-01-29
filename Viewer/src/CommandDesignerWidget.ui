@@ -177,14 +177,14 @@
            </widget>
           </item>
           <item>
+           <widget class="QLineEdit" name="commandLineEdit_"/>
+          </item>
+          <item>
            <widget class="QPushButton" name="runButton_">
             <property name="text">
              <string>&amp;Run</string>
             </property>
            </widget>
-          </item>
-          <item>
-           <widget class="QLineEdit" name="commandLineEdit_"/>
           </item>
          </layout>
         </item>
