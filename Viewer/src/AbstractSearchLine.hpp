@@ -28,9 +28,9 @@ public:
     bool confirmSearch() const {return confirmSearch_;}
     QString confirmSearchText() const;
 
-	bool caseSensitive()  {return caseSensitive_;};
-	bool wholeWords()     {return wholeWords_;};
-	bool highlightAll()   {return highlightAll_;};
+    bool caseSensitive()  {return caseSensitive_;}
+    bool wholeWords()     {return wholeWords_;}
+    bool highlightAll()   {return highlightAll_;}
 
 public Q_SLOTS:
 	virtual void slotFind(QString)=0;

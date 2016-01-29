@@ -26,7 +26,8 @@ public:
 
 	void automaticSearchForKeywords(bool);
 	void refreshSearch();
-	void clearHighlights();
+    void clearHighlights();
+    void disableHighlights();
 	void enableHighlights();
 	bool highlightsNeedSearch() {return false;}
 

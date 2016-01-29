@@ -162,13 +162,17 @@ void TextEditSearchLine::refreshSearch()
 	slotHighlight();
 }
 
+void TextEditSearchLine::disableHighlights()
+{
+    if(interface_)
+        interface_->disableHighlights();
+}
+
 
 void TextEditSearchLine::clearHighlights()
 {
-	if(!interface_)
-		return;
-
-	interface_->clearHighlights();
+    if(interface_)
+        interface_->clearHighlights();
 }
 
 void TextEditSearchLine::matchModeChanged(int notUsed)
@@ -204,7 +208,7 @@ void TextEditSearchLine::on_actionHighlightAll__toggled(bool b)
 	if (b)                  // user switched on the highlights
 		slotHighlight();
 	else                    // user switched off the highlights
-		clearHighlights();
+        disableHighlights();
 
 	if(interface_ && interface_->highlightsNeedSearch())
 		refreshSearch();
@@ -212,8 +216,8 @@ void TextEditSearchLine::on_actionHighlightAll__toggled(bool b)
 
 void TextEditSearchLine::slotClose()
 {
-	AbstractSearchLine::slotClose();
-	clearHighlights();
+	AbstractSearchLine::slotClose();    
+    clearHighlights();
 }
 
 // Called when we load a new node's information into the panel, or

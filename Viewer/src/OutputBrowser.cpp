@@ -20,9 +20,9 @@
 #include "TextPager/TextPagerSearchInterface.hpp"
 #include "TextPagerWidget.hpp"
 
-int OutputBrowser::minPagerTextSize_=300*1024;
+int OutputBrowser::minPagerTextSize_=1*1024*1024;
 int OutputBrowser::minPagerSparseSize_=30*1024*1024;
-int OutputBrowser::minConfirmSearchSize_=6*1024*1024;
+int OutputBrowser::minConfirmSearchSize_=5*1024*1024;
 
 OutputBrowser::OutputBrowser(QWidget* parent) : QWidget(parent)
 {

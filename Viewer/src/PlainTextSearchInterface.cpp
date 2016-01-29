@@ -202,3 +202,7 @@ void PlainTextSearchInterface::clearHighlights()
 	editor_->setExtraSelections(empty);
 }
 
+void PlainTextSearchInterface::disableHighlights()
+{
+    clearHighlights();
+}

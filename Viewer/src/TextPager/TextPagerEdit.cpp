@@ -1545,6 +1545,11 @@ void TextPagerEdit::setEnableSearchHighlighter(bool b)
     }
 }
 
+void TextPagerEdit::clearSearchHighlighter()
+{
+    searchHighlight_->clear();
+}
+
 void TextPagerEdit::setSearchHighlighter(QString txt,TextPagerDocument::FindMode mode)
 {
     searchHighlight_->reset(txt,mode,useSearchHighlight_);

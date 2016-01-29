@@ -246,6 +246,7 @@ OutputDirClient* OutputDirProvider::makeOutputClient(const std::string& host,con
 		if(outClient_->host() != host || outClient_->portStr() != port)
 		{
 			delete outClient_;
+			outClient_=0;
 		}
 	}
 

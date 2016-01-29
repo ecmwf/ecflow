@@ -47,6 +47,7 @@ protected:
 	void refreshSearch();
 	void highlightMatches(QString txt);
     void clearHighlights();
+    void disableHighlights();
 
     AbstractTextEditSearchInterface* interface_;
     QTimer highlightAllTimer_;

@@ -108,7 +108,8 @@ bool TextPagerSearchInterface::findString (QString str, bool highlightAll, QText
 
 	if(found)
 	{
-		editor_->setTextCursor(cursor);  // mark the selection of the match
+        editor_->setTextCursor(cursor);  // mark the selection of the match
+        editor_->ensureCursorVisible(editor_->textCursor(),5);
 	}
 
 	if(doSearch)
@@ -129,7 +130,7 @@ void TextPagerSearchInterface::automaticSearchForKeywords(bool userClickedReload
 	TextPagerCursor cursor(editor_->textCursor());
 	cursor.movePosition(TextPagerCursor::End);
 
-    //qDebug() << "automaticSearchForKeyword" << editor_->textCursor().position();
+    qDebug() << "automaticSearchForKeyword" << editor_->textCursor().position();
 
 #if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
 	QGuiApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
@@ -193,23 +194,18 @@ void TextPagerSearchInterface::refreshSearch()
 
 void TextPagerSearchInterface::clearHighlights()
 {
-	if(!editor_)
-		return;
-
-	editor_->setEnableSearchHighlighter(false);
-
-
-	/*QList<TextPagerEdit::ExtraSelection> empty;
-	editor_->setExtraSelections(empty);*/
+    if(editor_)
+        editor_->clearSearchHighlighter();
 }
 
 void TextPagerSearchInterface::enableHighlights()
 {
-	if(!editor_)
-		return;
-
-	editor_->setEnableSearchHighlighter(true);
+    if(editor_)
+        editor_->setEnableSearchHighlighter(true);
 }
 
-
-
+void TextPagerSearchInterface::disableHighlights()
+{
+    if(editor_)
+        editor_->setEnableSearchHighlighter(false);
+}

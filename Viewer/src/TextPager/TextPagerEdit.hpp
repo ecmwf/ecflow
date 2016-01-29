@@ -130,6 +130,7 @@ public:
     void ensureCursorVisible(const TextPagerCursor &cursor, int linesMargin = 0);
 
     void setEnableSearchHighlighter(bool);
+    void clearSearchHighlighter();
     void setSearchHighlighter(QString txt,TextPagerDocument::FindMode mode);
     void setSearchHighlighter(QRegExp rx,TextPagerDocument::FindMode mode);
     

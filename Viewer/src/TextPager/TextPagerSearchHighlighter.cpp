@@ -46,7 +46,8 @@ void TextPagerSearchHighlighter::highlightBlock(const QString &string)
 
 	if(mode_ == RegexpMode)
 	{
-		int index=0;
+        if(rx_.isEmpty()) return;
+        int index=0;
 		while((index = rx_.indexIn(string, index)) != -1) {
 
 			if(rx_.matchedLength() == 0)
@@ -57,7 +58,8 @@ void TextPagerSearchHighlighter::highlightBlock(const QString &string)
 	}
 	else if(mode_ == TextMode)
 	{
-		int index=0;
+        if(text_.isEmpty()) return;
+        int index=0;
 		while((index = string.indexOf(text_,index,
 			   caseSensitive_?Qt::CaseSensitive:Qt::CaseInsensitive)) != -1)
 		{
@@ -133,5 +135,11 @@ void TextPagerSearchHighlighter::reset(QRegExp rx,TextPagerDocument::FindMode mo
 		rehighlight();
 }
 
+void TextPagerSearchHighlighter::clear()
+{
+    rx_=QRegExp();
+    text_.clear();
+    rehighlight();
+}
 
 
