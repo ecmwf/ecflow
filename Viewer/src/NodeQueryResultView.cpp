@@ -107,16 +107,6 @@ void NodeQueryResultView::setSourceModel(NodeQueryResultModel *model)
 
 
 
-// if the user clicks outside of the nodes, thereby deselecting all,
-// the selectionChanged signal is not emitted, so we try to take
-// care of that here
-void NodeQueryResultView::mouseReleaseEvent (QMouseEvent *event)
-{
-	QTreeView::mouseReleaseEvent(event);
-	Q_EMIT mouseReleased();
-}
-
-
 //Collects the selected list of indexes
 QModelIndexList NodeQueryResultView::selectedList()
 {
@@ -128,6 +118,15 @@ QModelIndexList NodeQueryResultView::selectedList()
   	}
 	return lst;
 }
+
+
+// this is called even if the user clicks outside of the node list to deselect all
+void NodeQueryResultView::selectionChanged(const QItemSelection &selected, const QItemSelection &deselected)
+{
+	QTreeView::selectionChanged(selected, deselected);
+	Q_EMIT selectionChanged();
+}
+
 
 void NodeQueryResultView::slotSelectItem(const QModelIndex&)
 {

@@ -48,16 +48,16 @@ public Q_SLOTS:
 	void slotSetCurrent(VInfo_ptr);
 	void slotRerender();
 	void slotSizeHintChangedGlobal();
+	void selectionChanged (const QItemSelection &selected, const QItemSelection &deselected);
 
 Q_SIGNALS:
 	void selectionChanged(VInfo_ptr);
-	void mouseReleased();
+	void selectionChanged();
 	void infoPanelCommand(VInfo_ptr,QString);
 
 protected:
 	QModelIndexList selectedList();
 	void handleContextMenu(QModelIndex indexClicked,QModelIndexList indexLst,QPoint globalPos,QPoint widgetPos,QWidget *widget);
-	void mouseReleaseEvent (QMouseEvent *event);
 
 	NodeQueryResultModel* model_;
 	QSortFilterProxyModel* sortModel_;

@@ -60,8 +60,7 @@ CommandDesignerWidget::CommandDesignerWidget(QWidget *parent) : QWidget(parent)
 	nodeListLinkLabel_->setOpenExternalLinks(false);
 
 
-	connect(nodeSelectionView_, SIGNAL(selectionChanged(VInfo_ptr)), this, SLOT(on_nodeSelectionChanged()));
-	connect(nodeSelectionView_, SIGNAL(mouseReleased()),             this, SLOT(on_nodeSelectionChanged()));
+	connect(nodeSelectionView_, SIGNAL(selectionChanged()), this, SLOT(on_nodeSelectionChanged()));
 
 
 	// temporary
@@ -130,7 +129,7 @@ void CommandDesignerWidget::setNodeNumberLinkText(int numNodes)
 
 	s = (numNodes == 1) ? "" : "s";
 
-	nodeListLinkLabel_->setText(tr("<a href=\"#nodes\">%1 node%2 selected</a>").arg(numNodes).arg(s));
+	nodeListLinkLabel_->setText(tr("Command will be run on %1 node%2: <a href=\"#nodes\">click here for list</a>").arg(numNodes).arg(s));
 }
 
 // triggered when the user changes their node selection

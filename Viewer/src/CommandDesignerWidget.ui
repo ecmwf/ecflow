@@ -36,6 +36,9 @@
            </attribute>
            <layout class="QVBoxLayout" name="verticalLayout_6">
             <item>
+             <widget class="MessageLabel" name="infoLabel_" native="true"/>
+            </item>
+            <item>
              <widget class="QFrame" name="frame">
               <property name="frameShape">
                <enum>QFrame::NoFrame</enum>
@@ -85,9 +88,6 @@
                </item>
               </layout>
              </widget>
-            </item>
-            <item>
-             <widget class="MessageLabel" name="infoLabel_" native="true"/>
             </item>
             <item>
              <widget class="QLabel" name="commandHelpLabel_">
