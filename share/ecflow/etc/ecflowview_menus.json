@@ -32,6 +32,11 @@
         },
 
         {
+            "name"    : "Special",
+            "modes"   : ["Submenu"]
+        },
+
+        {
             "name"    : "Custom",
             "modes"   : ["Submenu"]
         }
@@ -168,6 +173,14 @@
             "name"           : "Order",
             "type"           : "Submenu",
             "visible_for"    : "(node or alias) and admin",
+            "command"        : "None"
+        },
+
+        {
+            "menu"           : "Node",
+            "name"           : "Special",
+            "type"           : "Submenu",
+            "visible_for"    : "(node or alias)",
             "command"        : "None"
         },
 
@@ -429,6 +442,78 @@
             "menu"           : "Order",
             "name"           : "Alphabetically",
             "command"        : "ecflow_client --order <full_name> alpha",
+            "status_tip"     : "__cmd__"
+        },
+
+
+        {
+            "menu"           : "Special",
+            "name"           : "Kill",
+            "visible_for"    : "(suite or family)",
+            "enabled_for"    : "(active or submitted or aborted)",
+            "command"        : "ecflow_client --kill <full_name>",
+            "question"       : "Confirm kill of <full_name>",
+            "default_answer" : "Yes",
+            "status_tip"     : "__cmd__"
+        },
+
+        {
+            "menu"           : "Special",
+            "name"           : "Kill",
+            "visible_for"    : "(task or alias)",
+            "enabled_for"    : "(active or submitted)",
+            "command"        : "ecflow_client --kill <full_name>",
+            "question"       : "Confirm kill <full_name>",
+            "default_answer" : "Yes",
+            "status_tip"     : "__cmd__"
+        },
+
+        {
+            "menu"           : "Special",
+            "name"           : "Free password",
+            "visible_for"    : "(task or alias)",
+            "command"        : "ecflow_client --alter add variable ECF_PASS FREE <full_name>",
+            "status_tip"     : "__cmd__"
+        },
+
+        {
+            "menu"           : "Special",
+            "name"           : "Clear zombie flag",
+            "visible_for"    : "(task or alias)",
+            "command"        : "ecflow_client --alter clear_flag zombie <full_name>",
+            "status_tip"     : "__cmd__"
+        },
+
+        {
+            "menu"           : "Special",
+            "name"           : "Clear late flag",
+            "visible_for"    : "(task or alias)",
+            "command"        : "ecflow_client --alter clear_flag late <full_name>",
+            "status_tip"     : "__cmd__"
+        },
+
+        {
+            "menu"           : "Special",
+            "name"           : "Clear killed flag",
+            "visible_for"    : "(task or alias)",
+            "command"        : "ecflow_client --alter clear_flag killed <full_name>",
+            "status_tip"     : "__cmd__"
+        },
+
+        {
+            "menu"           : "Special",
+            "name"           : "Execute",
+            "visible_for"    : "family",
+            "enabled_for"    : "(not active) and (not submitted)",
+            "command"        : "ecflow_client --run <full_name>",
+            "status_tip"     : "__cmd__"
+        },
+
+        {
+            "menu"           : "Special",
+            "name"           : "Walk",
+            "visible_for"    : "(suite or family)",
+            "command"        : "ecflow_client --force-dep-eval <full_name>",
             "status_tip"     : "__cmd__"
         },
 
