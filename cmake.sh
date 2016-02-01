@@ -193,8 +193,7 @@ fi
 #   *AND* for testing python install to local directory
 #
 
-cmake $source_dir \
-            -DCMAKE_MODULE_PATH=$workspace/ecbuild/cmake \
+ecbuild $source_dir \
             -DCMAKE_BUILD_TYPE=$cmake_build_type \
             -DCMAKE_INSTALL_PREFIX=/var/tmp/$USER/install/cmake/ecflow/$release.$major.$minor \
             -DCMAKE_PYTHON_INSTALL_TYPE=local \
@@ -205,6 +204,7 @@ cmake $source_dir \
             -DCMAKE_PREFIX_PATH="/usr/local/apps/qt/5.5.0/5.5/gcc_64/" \
             ${cmake_extra_options}
             #-DCMAKE_PYTHON_INSTALL_PREFIX=/var/tmp/$USER/install/cmake/ecflow/$release.$major.$minor/lib/python2.7/site-packages/ecflow
+            #-DCMAKE_MODULE_PATH=$workspace/ecbuild/cmake \
         
 # =============================================================================================
 if [[ "$make_arg" != "" ]] ; then
