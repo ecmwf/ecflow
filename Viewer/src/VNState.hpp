@@ -34,7 +34,8 @@ public:
     static QString toRealStateName(const VNode*);
 	static QColor  toColour(const VNode* n);
 	static QColor  toRealColour(const VNode* n);
-	static QColor  toFontColour(const VNode* n);
+    static QColor  toFontColour(const VNode* n);
+    static QColor  toTypeColour(const VNode* n);
 	static VNState* toState(const VNode* n);
 	static VNState* toDefaultState(const VNode* n);
 	static VNState* toRealState(const VNode* n);

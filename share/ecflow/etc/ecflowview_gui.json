@@ -18,50 +18,58 @@
                               
                     "grid" : {
                         "title" : "Status colours",                                    
-                        "h1" : "Fill colour",
-                        "h2" : "Font colour",                  
+                        "h1" : "Node cell",
+                        "h2" : "Name in cell",
+                        "h3" : "Type in cell",
                     
                         "row" : {
                             "label" : "Unknown",
                             "prefix" :   "nstate.unknown",		 		       
  				            "line" :  "fill_colour",
-				            "line" :  "font_colour"
+                            "line" :  "font_colour",
+                            "line" :  "type_colour"
 			             },					 				
 			             "row" : {
                             "label" : "Complete",
                             "prefix" :   "nstate.complete",                     
                             "line" :  "fill_colour",
-                            "line" :  "font_colour"
+                            "line" :  "font_colour",
+                            "line" :  "type_colour"
                         },  
                         "row" : {
                             "label" : "Queued",
                             "prefix" :   "nstate.queued",                     
                             "line" :  "fill_colour",
-                            "line" :  "font_colour"
+                            "line" :  "font_colour",
+                            "line" :  "type_colour"
                         },  
                         "row" : {
                             "label" : "Aborted",
                             "prefix" :   "nstate.aborted",                     
                             "line" :  "fill_colour",
-                            "line" :  "font_colour"
+                            "line" :  "font_colour",
+                            "line" :  "type_colour"
                         },                                  
                         "row" : {
                             "label" : "Submitted",
                             "prefix" :   "nstate.submitted",                     
                             "line" :  "fill_colour",
-                            "line" :  "font_colour"
+                            "line" :  "font_colour",
+                            "line" :  "type_colour"
                         },  
                         "row" : {
                             "label" : "Active",
                             "prefix" :   "nstate.active",                     
                             "line" :  "fill_colour",
-                            "line" :  "font_colour"
+                            "line" :  "font_colour",
+                            "line" :  "type_colour"
                         },  			
 			             "row" : {
                             "label" : "Suspended ",
                             "prefix" :   "nstate.suspended",                     
                             "line" :  "fill_colour",
-                            "line" :  "font_colour"
+                            "line" :  "font_colour",
+                            "line" :  "type_colour"
                         },
                 
 			             "note" : {
@@ -99,7 +107,8 @@
                         "prefix" : "view",
                 
                         "line" : "common.node_style",
-                        "line" : "tree.display_child_count",
+                        "line" : "tree.displayNodeType",
+                        "line" : "tree.display_child_count",                        
                         "line" : "tree.indentation",
                         "line" : "tree.background"                        
                     },

@@ -413,6 +413,11 @@ QColor  VNode::stateFontColour() const
 	return VNState::toFontColour(this);
 }
 
+QColor  VNode::typeFontColour() const
+{
+    return VNState::toTypeColour(this);
+}
+
 LogServer_ptr VNode::logServer()
 {
 	LogServer_ptr lsv;
@@ -545,9 +550,19 @@ const std::string&  VNode::nodeType()
 	else if(np->isFamily())
 		return familyStr;
 	else if(np->isTask())
-			return taskStr;
+        return taskStr;
 
 	return defaultStr;
+}
+
+bool VNode::isFamily() const
+{
+    node_ptr np=node();
+
+    if(!np || !np.get())
+        return false;
+
+    return (np->isFamily())?true:false;
 }
 
 bool VNode::isFlagSet(ecf::Flag::Type f) const

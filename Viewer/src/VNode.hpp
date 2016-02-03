@@ -91,6 +91,9 @@ public:
     node_ptr node() const {return node_;}
     virtual bool isTopLevel() const;
     virtual bool isServer() const {return false;}
+    virtual bool isSuite() const {return isTopLevel();}
+    virtual bool isFamily() const;
+    virtual bool isTask() const {return false;}
 
     void beginUpdateAttrNum();
     void endUpdateAttrNum();
@@ -137,8 +140,9 @@ public:
     virtual QColor  stateColour() const;
     virtual QColor  realStateColour() const;
     virtual QColor  stateFontColour() const;
+    virtual QColor  typeFontColour() const;
     virtual int tryNo() const;
-    virtual void internalState(VNodeInternalState&) {};
+    virtual void internalState(VNodeInternalState&) {}
 
     bool hasAccessed() const;
     bool isAncestor(const VNode* n);

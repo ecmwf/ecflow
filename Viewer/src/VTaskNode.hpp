@@ -28,6 +28,7 @@ public:
 	bool isEmpty() const { return true;}
 	bool isTopLevel() const {return false;}
 	bool isServer() const {return false;}
+	bool isTask() const {return true;}
 	void internalState(VNodeInternalState&);
 
 protected:

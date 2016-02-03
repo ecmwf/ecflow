@@ -19,7 +19,8 @@ VParam::VParam(const std::string& name) :
    qName_(QString::fromStdString(name)),
    prop_(0),
    colourPropName_("fill_colour"),
-   fontColourPropName_("font_colour")
+   fontColourPropName_("font_colour"),
+   typeColourPropName_("type_colour")
 {
 
 }
@@ -46,7 +47,15 @@ void VParam::setProperty(VProperty* prop)
 			p->addObserver(this);
 			fontColour_=p->value().value<QColor>();
 		}
-	}
+    }
+    if(!typeColourPropName_.isEmpty())
+    {
+        if(VProperty* p=prop->findChild(typeColourPropName_))
+        {
+            p->addObserver(this);
+            typeColour_=p->value().value<QColor>();
+        }
+    }
 }
 
 void VParam::notifyChange(VProperty* prop)
@@ -55,7 +64,10 @@ void VParam::notifyChange(VProperty* prop)
 		colour_=prop->value().value<QColor>();
 
 	else if(prop->name() == fontColourPropName_)
-		fontColour_=prop->value().value<QColor>();
+        fontColour_=prop->value().value<QColor>();
+
+    else if(prop->name() == typeColourPropName_)
+        typeColour_=prop->value().value<QColor>();
 }
 
 /*
