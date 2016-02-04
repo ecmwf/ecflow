@@ -50,6 +50,10 @@
 #define TEXTDOCUMENT_LINENUMBER_CACHE_INTERVAL 100
 #endif
 
+#ifdef QT_DEBUG
+//#define _UI_TEXTPAGER_ITERATOR_DEBUG
+#endif
+
 static inline bool matchSection(const TextPagerSection *section, const TextPagerEdit *textEdit)
 {
     if (!textEdit) {
@@ -413,14 +417,16 @@ public:
 #ifndef NO_TEXTDOCUMENTITERATOR_CACHE
        Q_ASSERT(doc);
 
-#ifdef QT_DEBUG
-    	//qDebug() << pos << offset;  //<< chunkData;
+#ifdef _UI_TEXTPAGER_ITERATOR_DEBUG
+        qDebug() << "prevLine --->" << pos << offset;  //<< chunkData;
 #endif
 
     	//Get the QString in the chunk as a const pointer. It is faster to iterate through it than
     	//calling QString::at()
     	const QChar *data = chunkData.constData();
     	data+=offset;
+
+        Q_ASSERT(*data  == chunkData.at(offset));
 
     	//The current character is probably a newline (the
     	//result of the previous call) so we need to take a step back
@@ -438,6 +444,7 @@ public:
     	   if(--offset < 0) {
     	       loadPrevChunk();
     	       data = chunkData.constData();
+               data+=offset;
     	   } else {
     		   --data;
     	   }
@@ -448,9 +455,10 @@ public:
 
     	//We will go backwards until we find a newline
     	while(*data != newline)
-        {
-#ifdef QT_DEBUG
-        	//qDebug() << pos << offset << chunkData.at(offset) << to;
+        {          
+            //Q_ASSERT(*data  == chunkData.at(offset));
+#ifdef _UI_TEXTPAGER_ITERATOR_DEBUG
+            qDebug() << pos << offset << chunkData.at(offset) << to;
 #endif
     		if(pos <= min) {
     			if(to != offset) {
@@ -481,13 +489,16 @@ public:
         		data = chunkData.constData();
         		data+=offset;
         		to=offset;
+#ifdef _UI_TEXTPAGER_ITERATOR_DEBUG
+                //qDebug() << "change" << pos << offset << *data << chunkData.at(offset);
+#endif
         	} else {
         		--data;
         	}
         }
 
-#ifdef QT_DEBUG
-        	//qDebug() << pos << offset << to;
+#ifdef _UI_TEXTPAGER_ITERATOR_DEBUG
+           qDebug() << pos << offset << to;
 #endif
 
         //offset is either a newline charter or 0 (the start of the document)
@@ -501,7 +512,7 @@ public:
         }
 #endif
 
-#ifdef QT_DEBUG
+#ifdef _UI_TEXTPAGER_ITERATOR_DEBUG
     	//qDebug() << "line:" << str;
 #endif
 
@@ -517,8 +528,8 @@ public:
 #ifndef NO_TEXTDOCUMENTITERATOR_CACHE
         Q_ASSERT(doc);
 
-#ifdef QT_DEBUG
-    //    	qDebug() << pos << offset;  //<< chunkData;
+#ifdef _UI_TEXTPAGER_ITERATOR_DEBUG
+    //    	qDebug() << nextLine --->" << pos << offset;  //<< chunkData;
 #endif
 
         //Get the QString in the chunk as a const pointer. It is faster to iterate through it than
@@ -540,8 +551,8 @@ public:
         	//See if we need the next chunk
         	if(++offset >= chunkData.size()) {
         		loadNextChunk();
-        	    data = chunkData.constData();
-
+                data = chunkData.constData();
+                Q_ASSERT(offset == 0);
         	} else {
         		++data;
         	}
@@ -553,7 +564,7 @@ public:
         //We will go forward until we find a newline
         while(*data != newline)
         {
-#ifdef QT_DEBUG
+#ifdef _UI_TEXTPAGER_ITERATOR_DEBUG
         	//qDebug() << pos << offset << chunkData.at(offset);
 #endif
         	if(pos >= end())
@@ -595,7 +606,7 @@ public:
 
 #endif
 
-#ifdef QT_DEBUG
+#ifdef _UI_TEXTPAGER_ITERATOR_DEBUG
         	//qDebug() << "line:" << str;
 #endif
 
