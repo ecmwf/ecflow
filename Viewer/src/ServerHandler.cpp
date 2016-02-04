@@ -719,8 +719,6 @@ void ServerHandler::slotDefsChanged(std::vector<ecf::Aspect::Type> aspect)
 
 void ServerHandler::addServerObserver(ServerObserver *obs)
 {
-	qDebug() << "add to" << name_.c_str() << obs;
-
 	std::vector<ServerObserver*>::iterator it=std::find(serverObservers_.begin(),serverObservers_.end(),obs);
 	if(it == serverObservers_.end())
 	{

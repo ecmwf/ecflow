@@ -422,7 +422,6 @@ void Dashboard::readSettings(VComboSettings* vs)
 	//it when the dockwidgets have already been created.
 	if(vs->containsQs("state"))
 	{
-		qDebug() << vs->getQs("state").toByteArray();
 		restoreState(vs->getQs("state").toByteArray());
 	}
 

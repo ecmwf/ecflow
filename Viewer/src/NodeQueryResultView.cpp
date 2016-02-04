@@ -20,6 +20,7 @@
 #include "ActionHandler.hpp"
 #include "NodeQueryResultModel.hpp"
 #include "NodeQueryViewDelegate.hpp"
+#include "UserMessage.hpp"
 #include "VNode.hpp"
 
 NodeQueryResultView::NodeQueryResultView(QWidget* parent) :
@@ -215,8 +216,6 @@ void NodeQueryResultView::handleContextMenu(QModelIndex indexClicked,QModelIndex
   	//Node actions
   	if(indexClicked.isValid())   //indexLst[0].isValid() && indexLst[0].column() == 0)
 	{
-	  	qDebug() << "context menu" << indexClicked;
-
   		std::vector<VInfo_ptr> nodeLst;
 		for(int i=0; i < indexLst.count(); i++)
 		{
@@ -241,8 +240,7 @@ void NodeQueryResultView::slotViewCommand(std::vector<VInfo_ptr> nodeLst,QString
 		return;
 
 	/*if(cmd == "set_as_root")
-	{
-		qDebug() << "set as root";
+	{	
 		model_->setRootNode(nodeLst.at(0)->node());
 		expandAll();
 	}*/

@@ -14,8 +14,6 @@
 #include "ServerHandler.hpp"
 #include "VSettings.hpp"
 
-#include <QDebug>
-
 NodePanel::NodePanel(QWidget* parent) :
   TabWidget(parent)
 
@@ -29,8 +27,7 @@ NodePanel::NodePanel(QWidget* parent) :
 }
 
 NodePanel::~NodePanel()
-{
-	qDebug() << "a";
+{    
 }
 
 //=============================================

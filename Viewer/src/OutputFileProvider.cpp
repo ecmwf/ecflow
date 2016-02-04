@@ -230,7 +230,7 @@ void OutputFileProvider::slotOutputClientProgress(QString msg)
 	//reply_->setInfoText(msg.toStdString());
 	//owner_->infoProgress(reply_);
 	//reply_->setInfoText("");
-	qDebug() << "prog: " << msg;
+    //qDebug() << "prog: " << msg;
 }
 
 void OutputFileProvider::slotOutputClientError(QString msg)

@@ -18,6 +18,8 @@
 #include <boost/algorithm/string/join.hpp>
 #include <boost/property_tree/json_parser.hpp>
 
+//#define _UI_SETTINGS_DEBUG
+
 //======================================================
 //
 // VSettingsPath
@@ -184,14 +186,11 @@ VComboSettings::VComboSettings(const std::string& file,const std::string& qsFile
 {
 
 	//qs_(QString::fromStdString(application))
-
 	//QSettings::setPath(QSettings::IniFormat, QSettings::UserScope,"/home/graphics/cgr/.ecflowview");
-
-
 	//QSettings::setPath(QSettings::IniFormat, QSettings::UserScope,"/home/graphics/cgr/.ecflowview");
-
-	qDebug() << qs_.fileName();
-
+#ifdef _UI_SETTINGS_DEBUG
+    UserMessage::message(UserMessage::DBG,false,"VComboSettings --> fileName=" + qs_.fileName().toStdString());
+#endif
 }
 
 VComboSettings::~VComboSettings()
@@ -222,7 +221,9 @@ void VComboSettings::putQs(const std::string& key,QVariant val)
 
 QVariant  VComboSettings::getQs(const std::string& key)
 {
-	qDebug() << "qt group" << qs_.group();
+#ifdef _UI_SETTINGS_DEBUG
+    qDebug() << "qt group" << qs_.group();
+#endif
 	return qs_.value(QString::fromStdString(key));
 }
 
@@ -230,8 +231,9 @@ void VComboSettings::beginGroup(const std::string &id)
 {
 	VSettings::beginGroup(id);
 	qs_.beginGroup(QString::fromStdString(id));
-
+#ifdef _UI_SETTINGS_DEBUG
 	qDebug() << "qt group" << qs_.group();
+#endif
 }
 
 void VComboSettings::endGroup()

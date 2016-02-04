@@ -198,7 +198,7 @@ void TreeNodeView::handleContextMenu(QModelIndex indexClicked,QModelIndexList in
   	//Node actions
   	if(indexClicked.isValid() && indexClicked.column() == 0)   //indexLst[0].isValid() && indexLst[0].column() == 0)
 	{
-	  	qDebug() << "context menu" << indexClicked;
+        //qDebug() << "context menu" << indexClicked;
 
   		std::vector<VInfo_ptr> nodeLst;
 		for(int i=0; i < indexLst.count(); i++)
@@ -247,7 +247,6 @@ void TreeNodeView::slotViewCommand(VInfo_ptr info,QString cmd)
 
 	/*if(cmd == "set_as_root")
 	{
-		qDebug() << "set as root";
 		model_->setRootNode(nodeLst.at(0)->node());
 		expandAll();
 	}*/
@@ -307,7 +306,6 @@ void TreeNodeView::adjustBackground(QColor col)
 {
 	if(col.isValid())
 	{
-		qDebug() << "bg" << col << col.name();
 		QString sh="QTreeView { background : " + col.name() + ";}";
 		setStyleSheet(sh);
 	}
