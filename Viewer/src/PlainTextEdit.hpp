@@ -73,6 +73,10 @@ private:
     GotoLineDialog *gotoLineDialog_;
     static QString emptyString_;
 
+    QColor numAreaBgCol_;
+    QColor numAreaFontCol_;
+    QColor numAreaSeparatorCol_;
+    QColor numAreaCurrentCol_;
     VProperty *fontProp_;
 };
 

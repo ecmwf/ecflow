@@ -28,6 +28,8 @@
 
 VConfig* VConfig::instance_=0;
 
+//#define _UI_CONFIG_LOAD_DEBUG
+
 VConfig::VConfig()
 {
 	appName_="ecFlowUI";
@@ -109,7 +111,8 @@ void VConfig::loadInit(const std::string& parFile)
     {
          std::string errorMessage = e.what();
          UserMessage::message(UserMessage::ERROR, true,
-                 std::string("Error! VConfig::load() unable to parse definition file: " + parFile + " Message: " +errorMessage));
+                 std::string("Fatal error!\nVConfig::load() unable to parse definition file: " + parFile + "\nMessage: " +errorMessage));
+         exit(1);
          return;
     }
     
@@ -146,8 +149,9 @@ void VConfig::loadProperty(const boost::property_tree::ptree& pt,VProperty *prop
     	std::string name=it->first;
     	ptree ptProp=it->second;
 
+#ifdef _UI_CONFIG_LOAD_DEBUG
     	UserMessage::message(UserMessage::DBG,false,"   VConfig::loadProperty() read item: " + name);
-
+#endif
     	//Default value
     	if(name == "default")
     	{
@@ -166,36 +170,45 @@ void VConfig::loadProperty(const boost::property_tree::ptree& pt,VProperty *prop
     		if(!prefix.isEmpty())
     			val=prefix.toStdString() + "." + val;
 
+#ifdef _UI_CONFIG_LOAD_DEBUG
     		UserMessage::message(UserMessage::DBG,false,"   VConfig::loadProperty() line: " + val);
-            
+#endif
     		if(VProperty* lineEditProp=find(val))
     		{
-    			UserMessage::message(UserMessage::DBG,false,"     --> link found");
+#ifdef _UI_CONFIG_LOAD_DEBUG
+                UserMessage::message(UserMessage::DBG,false,"     --> link found");
+#endif
                 chProp->setLink(lineEditProp);
-    		}
-    		else
+            }
+            else
     		{
-    			UserMessage::message(UserMessage::DBG,false,"     --> link NOT found");
-    		}
+#ifdef _UI_CONFIG_LOAD_DEBUG
+                UserMessage::message(UserMessage::DBG,false,"     --> link NOT found");
+#endif
+            }
     	}
     	//If the property is a "line" (i.e. a line with additional parameters)
     	else if(prop->name() == "line" && name ==  "link")
     	{
     		std::string val=ptProp.get_value<std::string>();
 
-    		UserMessage::message(UserMessage::DBG,false,"   VConfig::loadProperty() line link: " + val);
-
+#ifdef _UI_CONFIG_LOAD_DEBUG
+            UserMessage::message(UserMessage::DBG,false,"   VConfig::loadProperty() line link: " + val);
+#endif
     		if(VProperty* lineEditProp=find(val))
     		{
-    			UserMessage::message(UserMessage::DBG,false,"     --> link found");
-    			   prop->setLink(lineEditProp);
+#ifdef _UI_CONFIG_LOAD_DEBUG
+                UserMessage::message(UserMessage::DBG,false,"     --> link found");
+#endif
+                prop->setLink(lineEditProp);
     		}
     		else
     		{
-    			   UserMessage::message(UserMessage::DBG,false,"     --> link NOT found");
+#ifdef _UI_CONFIG_LOAD_DEBUG
+                UserMessage::message(UserMessage::DBG,false,"     --> link NOT found");
+#endif
     		}
     	}
-
 
         //Here we only load the properties with
         //children (i.e. key/value pairs (like "line" etc above)

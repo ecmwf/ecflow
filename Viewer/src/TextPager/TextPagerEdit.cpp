@@ -22,6 +22,9 @@
 #include "TextPagerDocument_p.hpp"
 #include "TextPagerSearchHighlighter.hpp"
 #include "UserMessage.hpp"
+#include "VConfig.hpp"
+
+#include <cmath>
 
 #define DEBUG_TEXTPAGER_LASTPAGESIZE
 //#define DEBUG_TEXTPAGER
@@ -483,7 +486,11 @@ void TextPagerEdit::mousePressEvent(QMouseEvent *e)
             d->sectionPressed = d->document->d->sectionAt(pos, this);
             setCursorPosition(pos, shift ? TextPagerCursor::KeepAnchor : TextPagerCursor::MoveAnchor);
         }
+
         e->accept();
+
+        //The cursor changed so wee need to update the selected line number
+        lineNumArea_->update();
     }
     else {
         QAbstractScrollArea::mousePressEvent(e);
@@ -550,6 +557,10 @@ void TextPagerEdit::mouseMoveEvent(QMouseEvent *e)
                 pos = d->document->documentSize();
             d->autoScrollTimer.stop();
             setCursorPosition(pos, TextPagerCursor::KeepAnchor);
+
+            //The cursor changed so wee need to update the selected line number
+            lineNumArea_->update();
+
             return;
         }
         const int distance = qMax(r.top() - d->lastMouseMove.y(), d->lastMouseMove.y() - r.bottom());
@@ -755,7 +766,7 @@ void TextPagerEdit::changeEvent(QEvent *e)
       
         d->adjustVerticalScrollBar();
         
-        updateLineNumberArea();
+        lineNumArea_->updateWidth();
 
         d->layoutDirty = true;
         viewport()->update();
@@ -1100,10 +1111,13 @@ void TextPagerEdit::ensureCursorVisible()
         viewport()->update();
     } else {
         const QRect r = viewport()->rect();
-        QRect crect = cursorRect(d->textCursor);
+        QRect realCrect = cursorRect(d->textCursor);
+        QRect crect = realCrect;
         crect.setLeft(r.left());
         crect.setRight(r.right());
         // ### what if the cursor is out of bounds horizontally?
+
+        //qDebug() << "ensureCursorVisible" << r << crect << cursorRect(d->textCursor) << horizontalScrollBar()->value() << horizontalScrollBar()->maximum() <<  d->widest;
         if (!r.contains(crect)) {
             if (r.intersects(crect)) {
                 int scroll;
@@ -1118,8 +1132,28 @@ void TextPagerEdit::ensureCursorVisible()
             }
             viewport()->update();
         }
+
+        //Adjust the horizontal position
+        if(realCrect.left() > horizontalScrollBar()->value()+r.width())
+        {
+            int hval=realCrect.left()-r.width()/2;
+            horizontalScrollBar()->setValue((hval < horizontalScrollBar()->maximum())?
+                                                hval:
+                                                horizontalScrollBar()->maximum());
+        }
+        else if(realCrect.right() < horizontalScrollBar()->value())
+        {
+            int hval=realCrect.left()-r.width()/2;
+            horizontalScrollBar()->setValue((hval > horizontalScrollBar()->minimum())?
+                                                hval:
+                                                horizontalScrollBar()->minimum());
+        }
     }
 }
+
+//textEdit->horizontalScrollBar()->setPageStep(s.width());
+//textEdit->horizontalScrollBar()->setMaximum(qMax(0, widest - s.width()));
+
 
 TextPagerCursor &TextPagerEdit::textCursor()
 {
@@ -1571,30 +1605,6 @@ void TextPagerEdit::gotoLine(int lineNum)
 // Fontsize management
 //---------------------------------------------
 
-/*int TextPagerEdit::lineNumberAreaWidth()
-{
-    if(1)
-    {
-        int digits = 1;
-        int max = qMax(1, blockCount());
-        while (max >= 10)
-        {
-            max /= 10;
-            ++digits;
-        }
-
-        int space = 3 + fontMetrics().width(QLatin1Char('9')) * digits + rightMargin_;
-
-        return space;
-    }
-    else
-    {
-        return 0;
-    }
-}*/
-
-
-
 void TextPagerEdit::setFontProperty(VProperty* p)
 {
 	fontProp_=p;
@@ -1658,35 +1668,8 @@ void TextPagerEdit::setLineNumberArea(TextPagerLineNumberArea *a)
 	connect(d,SIGNAL(scrollBarChanged()),
 			lineNumArea_,SLOT(update()));
 
-	updateLineNumberArea();
-}
-
-void TextPagerEdit::updateLineNumberArea()
-{
-	lineNumArea_->setFixedWidth(lineNumberAreaWidth());
-}
-
-int TextPagerEdit::lineNumberAreaWidth()
-{
-	if(lineNumArea_)
-    {
-		int rightMargin=3;
-		int digits = 7;
-        /*int max = qMax(1, blockCount());
-        while (max >= 10)
-        {
-            max /= 10;
-            ++digits;
-        }*/
-
-        int space = 3 + fontMetrics().width(QLatin1Char('9')) * digits + rightMargin;
-
-        return space;
-    }
-    else
-    {
-        return 0;
-    }
+    //Initialise the width
+    lineNumArea_->updateWidth();
 }
 
 void TextPagerEdit::lineNumberAreaPaintEvent(QPaintEvent *e)
@@ -1695,10 +1678,10 @@ void TextPagerEdit::lineNumberAreaPaintEvent(QPaintEvent *e)
     	return;
 
     QPainter painter(lineNumArea_);
-
     const QRect er = e->rect();
-    painter.translate(-horizontalScrollBar()->value(), 0);
+    //painter.translate(-horizontalScrollBar()->value(), 0);
     //painter.setFont(font());
+
     QVector<QTextLayout::FormatRange> selections;
     selections.reserve(d->extraSelections.size() + 1);
     int textLayoutOffset = d->viewportPosition;
@@ -1706,56 +1689,112 @@ void TextPagerEdit::lineNumberAreaPaintEvent(QPaintEvent *e)
     QRect numRect=er;
 
     //Background and border
-    painter.fillRect(numRect, QColor(240, 240, 240));
-    painter.setPen(QPen(QColor(220,220,220)));
+    painter.fillRect(numRect, lineNumArea_->bgColour());
+    painter.setPen(QPen(lineNumArea_->separatorColour()));
     painter.drawLine(lineNumArea_->width()-1,er.y(),lineNumArea_->width()-1,er.bottom());
 
-    int numWidth=lineNumArea_->width();
+    int numWidth=lineNumArea_->width()-lineNumArea_->rightMargin();
 
     QFont fontNormal(font());   // the font to use for most line numbers
     QFont fontBold(fontNormal);  // the font to use for the current line number
     fontBold.setBold(true);
-    //painter.setPen(Qt::blue);
-    painter.setPen(QColor(108,108,108));
+    painter.setPen(lineNumArea_->fontColour());
     painter.setFont(fontNormal);
 
     int cursorPos=d->textCursor.position();
 
-    const QTextLayout *cursorLayout = d->cursorVisible ? d->layoutForPosition(d->textCursor.position()) : 0;
-    int extraSelectionIndex = 0;
+    //const QTextLayout *cursorLayout = d->cursorVisible ? d->layoutForPosition(d->textCursor.position()) : 0;
+    //int extraSelectionIndex = 0;
     QTextLayout::FormatRange selectionRange;
     selectionRange.start = -1;
+    int maxLineNum=-1;
     Q_FOREACH(QTextLayout *l, d->textLayouts) {
         const int textSize = l->text().size();
         const QRect r = l->boundingRect().toRect();
         if (r.intersects(er)) {
 
         	const int lineNum=lineNumber(textLayoutOffset)+1;
-
-        	QRect lRect(0,r.y(),numWidth-3,r.height());
+            maxLineNum=lineNum;
+            QRect lRect(0,r.y(),numWidth,r.height());
 
         	// is this the current line?
         	if(cursorPos >= textLayoutOffset && cursorPos <= textLayoutOffset+l->text().size())
         	{
         		painter.setFont(fontBold);
-        	    painter.fillRect(lRect, QColor(212, 212, 255));  // highlight the background
+                painter.fillRect(lRect, lineNumArea_->currentColour());  // highlight the background
         	    painter.drawText(lRect,QString::number(lineNum),Qt::AlignRight|Qt::AlignVCenter);
         	    painter.setFont(fontNormal);
         	}
         	else
-        	{
-        		//qDebug() << "text" << textLayoutOffset << r << lRect << l->text();
+        	{        		
         		painter.drawText(lRect,QString::number(lineNum),Qt::AlignRight|Qt::AlignVCenter);
         	}
 
         } else if (r.top() > er.bottom()) {
             break;
         }
-        textLayoutOffset += l->text().size() + 1;
+        textLayoutOffset += textSize + 1;
+    }
+
+    if(maxLineNum != -1)
+        lineNumArea_->updateWidth(maxLineNum);
+}
+
+//==========================================================================
+//
+// TextPagerLineNumberArea
+//
+//==========================================================================
+
+TextPagerLineNumberArea::TextPagerLineNumberArea(TextPagerEdit *editor) :
+    QWidget(editor), textEditor_ (editor), digits_(6), rightMargin_(3),
+    bgCol_(232,231,230), fontCol_(220,220,200), separatorCol_(220,220,200),
+    currentCol_(212,212,255)
+{
+    Q_ASSERT(textEditor_);
+
+    if(VProperty* p=VConfig::instance()->find("view.textEdit.numAreaBackground"))
+        bgCol_=p->value().value<QColor>();
+
+    if(VProperty* p=VConfig::instance()->find("view.textEdit.numAreaFontColour"))
+        fontCol_=p->value().value<QColor>();
+
+    if(VProperty* p=VConfig::instance()->find("view.textEdit.numAreaSeparator"))
+        separatorCol_=p->value().value<QColor>();
+
+    if(VProperty* p=VConfig::instance()->find("view.textEdit.numAreaCurrent"))
+        currentCol_=p->value().value<QColor>();
+
+    editor->setLineNumberArea(this);
+}
+
+void TextPagerLineNumberArea::updateWidth(int maxLineNum)
+{
+    if(maxLineNum == -1 || pow(10,digits_)-1 < maxLineNum)
+    {
+        setFixedWidth(computeWidth(maxLineNum));
     }
 }
 
+int TextPagerLineNumberArea::computeWidth(int maxLineNum) const
+{
+    if(maxLineNum > 0)
+    {
+        int maxDigits=1;
+        int mx = maxLineNum;
+        while ( mx >= 10)
+        {
+           mx /= 10;
+           ++maxDigits;
+        }
 
+        if(maxDigits > digits_)
+            digits_=maxDigits;
+    }
+
+    return  (textEditor_)?(3 + textEditor_->fontMetrics().width(QLatin1Char('9')) * digits_ + rightMargin_):3+rightMargin_;
+
+}
 
 
 

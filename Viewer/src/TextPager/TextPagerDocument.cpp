@@ -575,6 +575,7 @@ TextPagerCursor TextPagerDocument::find(const QRegExp &regexp, const TextPagerCu
 
 #ifdef TEXTDOCUMENT_FIND_DEBUG
         qDebug() << "total time" << lap.elapsed();
+        qDebug() << "iterator position:" << it.position();
 #endif
 
     if (flags & FindWrap) {

@@ -18,12 +18,18 @@
 #include <QTextBlock>
 #include <QWheelEvent>
 
+#include "VConfig.hpp"
+
 PlainTextEdit::PlainTextEdit(QWidget * parent) :
     QPlainTextEdit(parent),
     showLineNum_(true),
     rightMargin_(2),
     gotoLineDialog_(0),
-	fontProp_(NULL)
+    fontProp_(NULL),
+    numAreaBgCol_(232,231,230),
+    numAreaFontCol_(102,102,102),
+    numAreaSeparatorCol_(210,210,210),
+    numAreaCurrentCol_(212,212,255)
 {
     lineNumArea_ = new LineNumberArea(this);
 
@@ -35,6 +41,19 @@ PlainTextEdit::PlainTextEdit(QWidget * parent) :
 
     connect(this,SIGNAL(cursorPositionChanged()),
     		lineNumArea_,SLOT(update()));
+
+
+    if(VProperty* p=VConfig::instance()->find("view.textEdit.numAreaBackground"))
+        numAreaBgCol_=p->value().value<QColor>();
+
+    if(VProperty* p=VConfig::instance()->find("view.textEdit.numAreaFontColour"))
+        numAreaFontCol_=p->value().value<QColor>();
+
+    if(VProperty* p=VConfig::instance()->find("view.textEdit.numAreaSeparator"))
+        numAreaSeparatorCol_=p->value().value<QColor>();
+
+    if(VProperty* p=VConfig::instance()->find("view.textEdit.numAreaCurrent"))
+        numAreaCurrentCol_=p->value().value<QColor>();
 
     updateLineNumberAreaWidth(0);
 
@@ -233,9 +252,9 @@ void PlainTextEdit::lineNumberAreaPaintEvent(QPaintEvent *event)
 
 
     QPainter painter(lineNumArea_);
-    painter.fillRect(event->rect(), QColor(240, 240, 240));  // light grey background
+    painter.fillRect(event->rect(), numAreaBgCol_);  // light grey background
 
-    painter.setPen(QPen(QColor(220,220,220)));
+    painter.setPen(QPen(numAreaSeparatorCol_));
     painter.drawLine(event->rect().topRight(),event->rect().bottomRight());
 
     QTextBlock block = firstVisibleBlock();
@@ -246,7 +265,7 @@ void PlainTextEdit::lineNumberAreaPaintEvent(QPaintEvent *event)
     QFont fontBold(fontNormal);  // the font to use for the current line number
     fontBold.setBold(true);
     //painter.setPen(Qt::blue);
-    painter.setPen(QColor(108,108,108));
+    painter.setPen(numAreaFontCol_);
 
     painter.setFont(fontNormal);
 
@@ -259,7 +278,7 @@ void PlainTextEdit::lineNumberAreaPaintEvent(QPaintEvent *event)
             if (blockNumber == currentRow-1)  // is this the current line?
             {
                 painter.setFont(fontBold);
-                painter.fillRect(0, top, lineNumArea_->width()-rightMargin_, fontMetrics().height(), QColor(212, 212, 255));  // highlight the background
+                painter.fillRect(0, top, lineNumArea_->width()-rightMargin_, fontMetrics().height(), numAreaCurrentCol_);  // highlight the background
             }
 
 

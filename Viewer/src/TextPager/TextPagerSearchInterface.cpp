@@ -110,6 +110,7 @@ bool TextPagerSearchInterface::findString (QString str, bool highlightAll, QText
 	{
         editor_->setTextCursor(cursor);  // mark the selection of the match
         editor_->ensureCursorVisible();
+        cursor.movePosition(TextPagerCursor::StartOfLine);
 	}
 
 	if(doSearch)
