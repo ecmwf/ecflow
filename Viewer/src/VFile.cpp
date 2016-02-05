@@ -122,7 +122,7 @@ void VFile::setStorageMode(StorageMode mode)
 bool VFile::write(const char *buf,size_t len,std::string& err)
 {
 
-	printf("total:%d \n len: %d \n",dataSize_,len);
+    //printf("total:%d \n len: %d \n",dataSize_,len);
 
 
 	//Keep data in memory

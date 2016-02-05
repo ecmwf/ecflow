@@ -34,7 +34,10 @@ OutputItemWidget::OutputItemWidget(QWidget *parent) :
 	userClickedReload_(false),
 	ignoreOutputSelection_(false)
 {
-	setupUi(this);
+    //We try to keep the contents when clicking away
+    tryToKeepContents_=true;
+
+    setupUi(this);
 
 	messageLabel_->hide();
 	dirLabel_->hide();
@@ -183,6 +186,19 @@ void OutputItemWidget::clearContents()
     browser_->clear();
 
     enableDir(false);
+}
+
+void OutputItemWidget::resumeUpdate()
+{
+     dirProvider_->setEnabled(true);
+     slotUpdateDir();
+     updateDirTimer_->start();
+}
+
+void OutputItemWidget::suspendUpdate()
+{
+     updateDirTimer_->stop();
+     dirProvider_->setEnabled(false);
 }
 
 void OutputItemWidget::infoReady(VReply* reply)

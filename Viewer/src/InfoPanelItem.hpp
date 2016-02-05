@@ -30,25 +30,27 @@ friend class InfoPanel;
 
 public:
 	InfoPanelItem() : enabled_(false), useAncestors_(false),
-	                  frozen_(false), detached_(false), tryToKeepContents_(false) {};
+                      frozen_(false), detached_(false), tryToKeepContents_(false) {}
 	virtual ~InfoPanelItem();
 
 
 	virtual void reload(VInfo_ptr info)=0;
 	virtual QWidget* realWidget()=0;
 	virtual void clearContents()=0;
+    virtual void resumeUpdate()=0;
+    virtual void suspendUpdate()=0;
 	bool enabled() const {return enabled_;}
 	virtual void setEnabled(bool);
 	void setFrozen(bool);
 	void setDetached(bool);
 
 	//From VTaskObserver
-	void taskChanged(VTask_ptr) {};
+    void taskChanged(VTask_ptr) {}
 
 	//From VInfoPresenter
-	void infoReady(VReply*) {};
-	void infoFailed(VReply*) {};
-	void infoProgress(VReply*) {};
+    void infoReady(VReply*) {}
+    void infoFailed(VReply*) {}
+    void infoProgress(VReply*) {}
 
 	//From NodeObserver
 	void notifyBeginNodeChange(const VNode*, const std::vector<ecf::Aspect::Type>&,const VNodeChange&);
@@ -61,9 +63,9 @@ protected:
 
 	//Notifications about the server changes
 	virtual void defsChanged(const std::vector<ecf::Aspect::Type>&)=0;
-	virtual void connectStateChanged() {};
-	virtual void suiteFilterChanged() {};
-	virtual void serverSyncFinished() {};
+    virtual void connectStateChanged() {}
+    virtual void suiteFilterChanged() {}
+    virtual void serverSyncFinished() {}
 	
 	//Notifications about the node changes
 	virtual void nodeChanged(const VNode*, const std::vector<ecf::Aspect::Type>&)=0;

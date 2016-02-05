@@ -24,7 +24,9 @@ public:
 
 	void reload(VInfo_ptr);
 	QWidget* realWidget();
-	void clearContents();
+    void clearContents();
+    void resumeUpdate() {}
+    void suspendUpdate() {}
 
 	//From VInfoPresenter
 	void infoReady(VReply*);
