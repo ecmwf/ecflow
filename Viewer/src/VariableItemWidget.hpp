@@ -87,8 +87,8 @@ public:
 	void reload(VInfo_ptr);
 	QWidget* realWidget();
     void clearContents();
-    void resumeUpdate() {}
-    void suspendUpdate() {}
+    void becameSelected() {}
+    void becameUnselected() {}
 
 public Q_SLOTS:
 	void on_actionProp_triggered();

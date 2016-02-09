@@ -77,6 +77,7 @@ set(viewer_srcs
     NodeWidget.cpp
     OneLineTextEdit.cpp
     OutputBrowser.cpp
+    OutputCache.cpp
     OutputClient.cpp
     OutputFileClient.cpp
     OutputDirClient.cpp
@@ -220,6 +221,7 @@ set(viewer_moc_files AbstractNodeModel.hpp
     NodeWidget.hpp
     OneLineTextEdit.hpp
     OutputBrowser.hpp
+    OutputCache.hpp
     OutputClient.hpp
     OutputFileClient.hpp
     OutputDirClient.hpp

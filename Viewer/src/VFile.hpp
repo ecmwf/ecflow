@@ -45,6 +45,7 @@ public:
 
 	bool write(const char *buf,size_t len,std::string& err);
 	void close();
+    void print();
 
 	static VFile_ptr create(const std::string& path,const std::string& contents,bool deleteFile=true);
 	static VFile_ptr create(const std::string& path,bool deleteFile= true);

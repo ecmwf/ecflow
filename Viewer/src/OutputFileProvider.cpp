@@ -10,6 +10,7 @@
 #include "OutputFileProvider.hpp"
 
 #include "LogServer.hpp"
+#include "OutputCache.hpp"
 #include "OutputFileClient.hpp"
 #include "VNode.hpp"
 #include "VReply.hpp"
@@ -138,6 +139,7 @@ void OutputFileProvider::fetchFile(ServerHandler *server,VNode *n,const std::str
     			return;
     	}
     }
+
     //----------------------------------------------------
     // Not the loacalhost or we could not read the file
     //----------------------------------------------------
@@ -179,12 +181,38 @@ void OutputFileProvider::fetchFile(ServerHandler *server,VNode *n,const std::str
 bool OutputFileProvider::fetchFileViaOutputClient(VNode *n,const std::string& fileName)
 {
 	std::string host, port;
-	if(n->logServer(host,port))
+    host="freki";
+    port="9316";
+
+    UserMessage::debug("OutputFileProvider::fetchFileViaOutputClient <-- file: " + fileName);
+
+    //Check cache
+    VFile_ptr f=OutputCache::instance()->find(info_,fileName);
+    if(f)
+    {
+        UserMessage::debug("  File found in cache");
+
+        reply_->setInfoText("");
+        reply_->fileReadMode(VReply::LogServerReadMode);
+
+        std::string method="served by " + host + "@" + port;
+        reply_->fileReadMethod(method);
+
+        reply_->tmpFile(f);
+        owner_->infoReady(reply_);
+        return true;
+    }
+
+    if(n->logServer(host,port))
 	{
 		//host=host + "baaad";
 
-		reply_->setInfoText("Getting file through log server: " + host + "@" + port);
-		owner_->infoProgress(reply_);
+        UserMessage::debug("OutputFileProvider::fetchFileViaOutputClient --> host:" + host +
+                             " port:" + port + " file: " + fileName);
+
+        //reply_->setInfoText("Getting file through log server: " + host + "@" + port);
+        //owner_->infoProgress(reply_);
+        owner_->infoProgressStart("Getting file through log server: " + host + "@" + port,0);
 
 		if(!outClient_)
 		{
@@ -193,8 +221,8 @@ bool OutputFileProvider::fetchFileViaOutputClient(VNode *n,const std::string& fi
 			connect(outClient_,SIGNAL(error(QString)),
 				this,SLOT(slotOutputClientError(QString)));
 
-			connect(outClient_,SIGNAL(progress(QString)),
-				this,SLOT(slotOutputClientProgress(QString)));
+            connect(outClient_,SIGNAL(progress(QString,int)),
+                this,SLOT(slotOutputClientProgress(QString,int)));
 
 			connect(outClient_,SIGNAL(finished()),
 				this,SLOT(slotOutputClientFinished()));
@@ -211,31 +239,39 @@ bool OutputFileProvider::fetchFileViaOutputClient(VNode *n,const std::string& fi
 void OutputFileProvider::slotOutputClientFinished()
 {
 	VFile_ptr tmp = outClient_->result();
+    assert(tmp);
+    outClient_->clearResult();
 
-	if(tmp && tmp.get() && tmp->exists())
-	{
-		reply_->setInfoText("");
-		reply_->fileReadMode(VReply::LogServerReadMode);
+    reply_->setInfoText("");
+    reply_->fileReadMode(VReply::LogServerReadMode);
 
-		std::string method="served by " + outClient_->host() + "@" + outClient_->portStr();
-		reply_->fileReadMethod(method);
+    std::string method="served by " + outClient_->host() + "@" + outClient_->portStr();
+    reply_->fileReadMethod(method);
 
-		reply_->tmpFile(tmp);
-		owner_->infoReady(reply_);
-	}
+    reply_->tmpFile(tmp);
+    owner_->infoReady(reply_);
 }
 
-void OutputFileProvider::slotOutputClientProgress(QString msg)
+void OutputFileProvider::slotOutputClientProgress(QString msg,int value)
 {
-	//reply_->setInfoText(msg.toStdString());
-	//owner_->infoProgress(reply_);
-	//reply_->setInfoText("");
+    UserMessage::debug("OutputFileProvider::slotOutputClientProgress " + msg.toStdString());
+
+    owner_->infoProgress(msg.toStdString(),value);
+
+    //reply_->setInfoText(msg.toStdString());
+    //owner_->infoProgress(reply_);
+    //reply_->setInfoText("");
+
     //qDebug() << "prog: " << msg;
 }
 
+
+
 void OutputFileProvider::slotOutputClientError(QString msg)
 {
-	if(info_ && info_.get())
+    UserMessage::message(UserMessage::DBG,false,"OutputFileProvider::slotOutputClientError error:" + msg.toStdString());
+
+    if(info_ && info_.get())
 	{
 		ServerHandler* server=info_->server();
 		VNode *n=info_->node();
@@ -251,7 +287,9 @@ void OutputFileProvider::slotOutputClientError(QString msg)
 		}
 	}
 
-	reply_->setErrorText(msg.toStdString());
+    reply_->setErrorText("Failed to fetch file from logserver "  +
+                         outClient_->host() + "@" + outClient_->portStr() +
+                         "Error: " + msg.toStdString());
 	owner_->infoFailed(reply_);
 }
 
@@ -351,5 +389,26 @@ std::string OutputFileProvider::joboutFileName() const
 	return std::string();
 }
 
+void OutputFileProvider::setDir(VDir_ptr dir)
+{
+    if(outClient_)
+        outClient_->setDir(dir);
 
+    /*if(dir != dir_)
+        dir_=dir;
+    else
+        return;
+
+    if(dir_ && outClient_)
+    {
+        for(unsigned int i=0; i < dir->count(); i++)
+        {
+            if(dir_->fullName(i) == outClient_->remoteFile())
+            {
+                outClient_->setExpectedSize(dir->items().at(i)->size_);
+                return;
+            }
+        }
+    }*/
+}
 

@@ -12,6 +12,7 @@
 
 #include <QObject>
 
+#include "VDir.hpp"
 #include "VInfo.hpp"
 #include "InfoProvider.hpp"
 #include "VTask.hpp"
@@ -31,12 +32,13 @@ public:
 
 	 //Get a particular jobout file
 	 void file(const std::string& fileName);
+     void setDir(VDir_ptr);
 
 	 std::string joboutFileName() const;
 
 private Q_SLOTS:
 	void slotOutputClientError(QString);
-	void slotOutputClientProgress(QString);
+    void slotOutputClientProgress(QString,int);
 	void slotOutputClientFinished();
 
 private:

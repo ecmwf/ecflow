@@ -13,6 +13,7 @@
 
 #include "InfoPanelItem.hpp"
 
+#include "VFile.hpp"
 #include "VDir.hpp"
 
 #include "ui_OutputItemWidget.h"
@@ -32,13 +33,15 @@ public:
 	void reload(VInfo_ptr);
 	QWidget* realWidget();
 	void clearContents();
-    void resumeUpdate();
-    void suspendUpdate();
+    void becameSelected();
+    void becameUnselected();
 
 	//From VInfoPresenter
 	void infoReady(VReply*);
 	void infoFailed(VReply*);
 	void infoProgress(VReply*);
+    void infoProgressStart(const std::string& text,int max);
+    void infoProgress(const std::string& text,int value);
 
     void nodeChanged(const VNode*, const std::vector<ecf::Aspect::Type>&) {}
     void defsChanged(const std::vector<ecf::Aspect::Type>&) {}
@@ -71,6 +74,7 @@ protected:
 	bool ignoreOutputSelection_;
 	QTimer* updateDirTimer_;
 	static int updateDirTimeout_;
+    VFile_ptr cachedOutput_;
 };
 
 #endif

@@ -37,10 +37,11 @@ public:
 	virtual void reload(VInfo_ptr info)=0;
 	virtual QWidget* realWidget()=0;
 	virtual void clearContents()=0;
-    virtual void resumeUpdate()=0;
-    virtual void suspendUpdate()=0;
+    virtual void becameSelected()=0;
+    virtual void becameUnselected()=0;
 	bool enabled() const {return enabled_;}
 	virtual void setEnabled(bool);
+    void setSelected(bool);
 	void setFrozen(bool);
 	void setDetached(bool);
 
@@ -51,6 +52,8 @@ public:
     void infoReady(VReply*) {}
     void infoFailed(VReply*) {}
     void infoProgress(VReply*) {}
+    void infoProgressStart(int min,int max,const std::string& text) {}
+    void infoProgress(int value,const std::string& text) {}
 
 	//From NodeObserver
 	void notifyBeginNodeChange(const VNode*, const std::vector<ecf::Aspect::Type>&,const VNodeChange&);

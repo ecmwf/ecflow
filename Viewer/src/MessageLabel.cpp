@@ -5,9 +5,12 @@
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QMovie>
+#include <QProgressBar>
 #include <QVariant>
+#include <QVBoxLayout>
 
 #include "IconProvider.hpp"
+#include "UserMessage.hpp"
 
 #include <map>
 #include <assert.h>
@@ -23,7 +26,7 @@ public:
 		bg_="qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 " + bg.name() +", stop: 1 " + bgLight.name() + ")";
 	}
 
-	MessageLabelData()  {};
+    MessageLabelData()  {}
 
 	QPixmap pix_;
 	QString title_;
@@ -64,13 +67,28 @@ MessageLabel::MessageLabel(QWidget *parent) :
 
 	loadLabel_=new QLabel(this);
 
+    //progress widget
+    progLabel_=new QLabel(this);
+    progBar_=new QProgressBar(this);
+    progWidget_=new QWidget(this);
+    QHBoxLayout* progLayout=new QHBoxLayout(progWidget_);
+    progLayout->addWidget(progBar_);
+    progLayout->addWidget(progLabel_);
+
 	layout_=new QHBoxLayout(this);
 	layout_->setContentsMargins(2,2,2,2);
 	layout_->addWidget(loadLabel_);
 	layout_->addWidget(pixLabel_);
-	layout_->addWidget(msgLabel_,1);
+
+    QVBoxLayout* rightVb=new QVBoxLayout;
+    rightVb->addWidget(msgLabel_);
+    rightVb->addWidget(progWidget_);
+    layout_->addLayout(rightVb,1);
+
+    //layout_->addWidget(msgLabel_,1);
 
 	stopLoadLabel();
+    stopProgress();
 
 	hide();
 }
@@ -135,6 +153,7 @@ void MessageLabel::startLoadLabel()
 	loadLabel_->movie()->start();
 }
 
+
 void MessageLabel::stopLoadLabel()
 {
 	if(loadLabel_->movie())
@@ -143,6 +162,33 @@ void MessageLabel::stopLoadLabel()
 	}
 
 	loadLabel_->hide();
+}
+
+void MessageLabel::startProgress(int max)
+{
+    Q_ASSERT(max >=0 && max <=100);
+    progBar_->setRange(0,max);
+    progWidget_->show();
+}
+
+void MessageLabel::stopProgress()
+{
+    progWidget_->hide();
+    progLabel_->setText("");
+    progBar_->setRange(0,0);
+}
+
+void MessageLabel::progress(QString text,int value)
+{
+    Q_ASSERT(value >=0 && value <=100);
+
+    if(progBar_->maximum() == 0)
+        progBar_->setMaximum(100);
+
+    progBar_->setValue(value);
+    progLabel_->setText(text);
+
+    UserMessage::debug("MessageLabel::progress --> " + QString::number(value).toStdString() + "%");
 }
 
 void MessageLabel::setShowTypeTitle(bool b)

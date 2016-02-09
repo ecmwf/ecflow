@@ -68,7 +68,7 @@ void MessageItemWidget::infoReady(VReply* reply)
     	firstRun=false;
     	for(int i=0; i < model_->columnCount()-1; i++)
     	{
-    			treeView_->resizeColumnToContents(i);
+            treeView_->resizeColumnToContents(i);
     	}
     }
 }

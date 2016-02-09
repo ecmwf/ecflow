@@ -36,7 +36,7 @@ public:
 	//From VInfoVisitor
 	void visit(VInfoServer*);
 	void visit(VInfoNode*);
-	void visit(VInfoAttribute*) {};
+    void visit(VInfoAttribute*) {}
 
 	//From VTaskObserver
 	void taskChanged(VTask_ptr);

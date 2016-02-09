@@ -33,18 +33,18 @@ public:
 	void reload(VInfo_ptr);
 	QWidget* realWidget();
     void clearContents();
-    void resumeUpdate() {}
-    void suspendUpdate() {}
+    void becameSelected() {}
+    void becameUnselected() {}
 
-	void nodeChanged(const VNode*, const std::vector<ecf::Aspect::Type>&) {};
-	void defsChanged(const std::vector<ecf::Aspect::Type>&) {};
+    void nodeChanged(const VNode*, const std::vector<ecf::Aspect::Type>&) {}
+    void defsChanged(const std::vector<ecf::Aspect::Type>&) {}
 
 protected Q_SLOTS:
 	void slotClicked(QAbstractButton* button);
 	void slotEditorChanged();
 
 protected:
-	void updateWidgetState() {};
+    void updateWidgetState() {}
 };
 
 #endif

@@ -30,8 +30,8 @@ public:
 	void reload(VInfo_ptr);
 	QWidget* realWidget();
     void clearContents();
-    void resumeUpdate() {}
-    void suspendUpdate() {}
+    void becameSelected() {}
+    void becameUnselected() {}
 
 	//From VInfoPresenter
 	void infoReady(VReply*);

@@ -9,6 +9,7 @@
 
 #include "OutputItemWidget.hpp"
 
+#include "OutputCache.hpp"
 #include "OutputDirProvider.hpp"
 #include "OutputFileProvider.hpp"
 #include "OutputModel.hpp"
@@ -116,11 +117,11 @@ void OutputItemWidget::reload(VInfo_ptr info)
 
 	if(info_ && info_.get())
 	{
-		//Get file contents
-		infoProvider_->info(info_);
+        //Get file contents
+        infoProvider_->info(info_);
 
-		//Get dir contents
-		dirProvider_->info(info_);
+        //Get dir contents
+        dirProvider_->info(info_);
 
 		//Start contents update timer
 		updateDirTimer_->start();
@@ -149,11 +150,15 @@ std::string OutputItemWidget::currentFullName() const
 void OutputItemWidget::getLatestFile()
 {
 	messageLabel_->hide();
-	messageLabel_->stopLoadLabel();
-	fileLabel_->clear();
+    //messageLabel_->stopLoadLabel();
+    messageLabel_->stopProgress();
+    fileLabel_->clear();
 	browser_->clear();
 
-	//Get the latest file contents
+    OutputCache::instance()->markForRemove(cachedOutput_);
+    cachedOutput_.reset();
+
+    //Get the latest file contents
 	infoProvider_->info(info_);
 }
 
@@ -161,13 +166,17 @@ void OutputItemWidget::getCurrentFile()
 {
 	messageLabel_->hide();
 	messageLabel_->stopLoadLabel();
-	fileLabel_->clear();
+    messageLabel_->stopProgress();
+    fileLabel_->clear();
 	browser_->clear();
+
+    OutputCache::instance()->markForRemove(cachedOutput_);
+    cachedOutput_.reset();
 
 	if(info_ && info_.get())
 	{
 		std::string fullName=currentFullName();
-                UserMessage::message(UserMessage::DBG,false,"output selected: " + fullName);
+        UserMessage::message(UserMessage::DBG,false,"output selected: " + fullName);
 		OutputFileProvider* op=static_cast<OutputFileProvider*>(infoProvider_);
 		op->file(fullName);
 	}
@@ -175,27 +184,31 @@ void OutputItemWidget::getCurrentFile()
 
 void OutputItemWidget::clearContents()
 {
+    OutputCache::instance()->markForRemove(cachedOutput_);
+    cachedOutput_.reset();
+
     updateDirTimer_->stop();
 
     InfoPanelItem::clear();
     dirProvider_->clear();
 
     messageLabel_->hide();
-    messageLabel_->stopLoadLabel();
+    messageLabel_->stopProgress();
+    //messageLabel_->stopLoadLabel();
     fileLabel_->clear();
     browser_->clear();
 
     enableDir(false);
 }
 
-void OutputItemWidget::resumeUpdate()
+void OutputItemWidget::becameSelected()
 {
      dirProvider_->setEnabled(true);
      slotUpdateDir();
      updateDirTimer_->start();
 }
 
-void OutputItemWidget::suspendUpdate()
+void OutputItemWidget::becameUnselected()
 {
      updateDirTimer_->stop();
      dirProvider_->setEnabled(false);
@@ -207,9 +220,12 @@ void OutputItemWidget::infoReady(VReply* reply)
     // From output provider
     //------------------------
 
+    OutputCache::instance()->markForRemove(cachedOutput_);
+    cachedOutput_.reset();
+
     if(reply->sender() == infoProvider_)
     {
-        //messageLabel_->stopLoadLabel();
+        messageLabel_->stopProgress();
 
         //For some unknown reason the textedit font, although it is properly set in the constructor,
         //is reset to default when we first call infoready. So we need to set it again!!
@@ -249,6 +265,14 @@ void OutputItemWidget::infoReady(VReply* reply)
                     browser_->loadFile(QString::fromStdString(f->path()));
                     hasMessage=false;
             }
+
+            //Cache the file coming through the logserver
+            if(reply->fileReadMode() == VReply::LogServerReadMode)
+            {
+                cachedOutput_=f;
+                OutputCache::instance()->add(info_,reply->fileName(),f);
+            }
+
         }
         //If the info is stored as a string in the reply object
         else
@@ -257,6 +281,15 @@ void OutputItemWidget::infoReady(VReply* reply)
                 browser_->loadText(s,QString::fromStdString(reply->fileName()));
         }
 
+        if(!hasMessage)
+        {
+            messageLabel_->hide();
+        }
+        //messageLabel_->stopLoadLabel();
+
+        //Update the file label
+        fileLabel_->update(reply);
+
         searchOnReload();
 
         //if(f && f.get())
@@ -264,14 +297,6 @@ void OutputItemWidget::infoReady(VReply* reply)
         //	f->setWidgetLoadDuration(stopper.elapsed());
         //}
 
-        if(!hasMessage)
-        {
-                messageLabel_->hide();
-        }
-        messageLabel_->stopLoadLabel();
-
-        //Update the file label
-        fileLabel_->update(reply);
     }
 
     //------------------------
@@ -287,9 +312,19 @@ void OutputItemWidget::infoReady(VReply* reply)
 void OutputItemWidget::infoProgress(VReply* reply)
 {
 	messageLabel_->showInfo(QString::fromStdString(reply->infoText()));
-	messageLabel_->startLoadLabel();
-
+    //messageLabel_->startLoadLabel();
 	//updateDir(true);
+}
+
+void  OutputItemWidget::infoProgressStart(const std::string& text,int max)
+{
+    messageLabel_->showInfo(QString::fromStdString(text));
+    messageLabel_->startProgress(max);
+}
+
+void  OutputItemWidget::infoProgress(const std::string& text,int value)
+{
+    messageLabel_->progress(QString::fromStdString(text),value);
 }
 
 void OutputItemWidget::infoFailed(VReply* reply)
@@ -299,7 +334,8 @@ void OutputItemWidget::infoFailed(VReply* reply)
 		QString s=QString::fromStdString(reply->errorText());
 
 		messageLabel_->showError(s);
-		messageLabel_->stopLoadLabel();
+        //messageLabel_->stopLoadLabel();
+        messageLabel_->stopProgress();
 
 		//Update the file label
 		fileLabel_->update(reply);
@@ -328,7 +364,10 @@ void OutputItemWidget::updateDir(VDir_ptr dir,bool restartTimer)
 
 	if(status)
 	{
-		std::string fullName=currentFullName();
+        OutputFileProvider* op=static_cast<OutputFileProvider*>(infoProvider_);
+        op->setDir(dir);
+
+        std::string fullName=currentFullName();
 
 		dirView_->selectionModel()->clearSelection();
 		dirModel_->setData(dir);

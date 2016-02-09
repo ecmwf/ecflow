@@ -22,13 +22,15 @@ class VReply;
 class InfoPresenter
 {
 public:
-	InfoPresenter() : infoProvider_(0) {};
-	virtual ~InfoPresenter() {};
-	virtual void infoReady(VReply*) {};
-	virtual void infoFailed(VReply*) {};
-	virtual void infoProgress(VReply*) {};
-	virtual void infoAppended(VReply*) {};
-	VInfo_ptr info() const {return info_;}
+    InfoPresenter() : infoProvider_(0) {}
+    virtual ~InfoPresenter() {}
+    virtual void infoReady(VReply*) {}
+    virtual void infoFailed(VReply*) {}
+    virtual void infoProgress(VReply*) {}
+    virtual void infoProgressStart(const std::string& text,int max) {}
+    virtual void infoProgress(const std::string& text,int value) {}
+    virtual void infoAppended(VReply*) {}
+    VInfo_ptr info() const {return info_;}
 
 protected:
 	VInfo_ptr info_;
