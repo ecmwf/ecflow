@@ -15,7 +15,7 @@
 #include <QDesktopServices>
 #include <qalgorithms.h>
 
-#define TEXTDOCUMENT_FIND_DEBUG
+//#define TEXTDOCUMENT_FIND_DEBUG
 #define TEXTDOCUMENT_USE_FILE_LOCK
 
 
@@ -540,13 +540,21 @@ TextPagerCursor TextPagerDocument::find(const QRegExp &regexp, const TextPagerCu
         		if(from + index + regexp.matchedLength() > limit) {
         			ok = false;
         		} else {
-        			const TextPagerCursor ret(this, from + index + regexp.matchedLength(), from + index);
+
+                    //we need to remove the newline char from the end of the matching text
+                    QString captured=regexp.capturedTexts().first();
+                    if(index + regexp.matchedLength() == line.size() && line.endsWith(newline))
+                    {
+                        captured.chop(1);
+                    }
+
+                    const TextPagerCursor ret(this, from + index + captured.size(), from + index);
 #ifdef TEXTDOCUMENT_FIND_DEBUG
         			qDebug() << "current:" << it.current() <<  it.position() << line.size();
-        			qDebug() << "captured:" << index << regexp.capturedTexts().first();
+                    qDebug() << "captured:" << index << captured;
         			qDebug() << "cursor:" << ret.selectedText();
 #endif
-        			Q_ASSERT(ret.selectedText() == regexp.capturedTexts().first());
+                    Q_ASSERT(ret.selectedText() == captured);
 #ifdef TEXTDOCUMENT_FIND_DEBUG
         			qDebug() << "total time" << lap.elapsed();
         			qDebug() << "result" << "pos:" << ret.position() << "anchor:" << ret.anchor();
@@ -721,7 +729,7 @@ TextPagerCursor TextPagerDocument::find(const QString &in, const TextPagerCursor
 
         if((index=line.indexOf(word)) != -1) {
 
-        	//Backward:
+            //Backward:
         	//The iterator is positioned at the linebreak character of the previous line, or at
         	//the start of the document
         	if(reverse) {
@@ -732,7 +740,7 @@ TextPagerCursor TextPagerDocument::find(const QString &in, const TextPagerCursor
         	//The iterator is positioned at the linebreak character at the end of the line or at
         	//the end of the document
         	else {
-        	    from = it.position()-line.size()+1;
+                from = it.position()-line.size()+1;
         	}
 
         	while(ok && index != -1) {
