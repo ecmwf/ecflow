@@ -130,6 +130,7 @@ int TextPagerLayout::doLayout(int index, QList<TextPagerSection*> *sections) // 
         line.setPosition(QPoint(leftMargin, y));
         lines.append(qMakePair(lineStart + line.textStart(), line));
     }
+
     widest = qMax(widest, localWidest);
     lastBottomMargin = bottomMargin;
 

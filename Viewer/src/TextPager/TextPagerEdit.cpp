@@ -26,7 +26,7 @@
 
 #include <cmath>
 
-#define _UI_TEXTPAGER_DEBUG
+//#define _UI_TEXTPAGER_DEBUG
 //#define DEBUG_TEXTPAGER_LASTPAGESIZE
 #define DEBUG_TEXTPAGER
 
@@ -1434,10 +1434,19 @@ void TextEditPrivate::cursorMoveKeyEventReadOnly(QKeyEvent *e)
 void TextEditPrivate::relayout()
 {
     const QSize s = textEdit->viewport()->size();
+
+    int widestOri=widest;
+
+    widest=-1;
     relayoutByGeometry(s.height());
+    if(widest == -1)
+        widest=widestOri;
+
     textEdit->horizontalScrollBar()->setPageStep(s.width());
     textEdit->horizontalScrollBar()->setMaximum(qMax(0, widest - s.width()));
-//    qDebug() << widest << s.width() << textEdit->horizontalScrollBar()->maximum();
+#ifdef _UI_TEXTPAGER_DEBUG
+    qDebug() << widest << s.width() << textEdit->horizontalScrollBar()->maximum();
+#endif
 }
 
 bool TextEditPrivate::dirtyForSection(TextPagerSection *section)
