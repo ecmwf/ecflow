@@ -35,7 +35,7 @@ class TextEditPrivate : public QObject, public TextPagerLayout
     Q_OBJECT
 public:
     TextEditPrivate(TextPagerEdit *qptr)
-        : requestedScrollBarPosition(-1), lastRequestedScrollBarPosition(-1), cursorWidth(1),
+        : requestedScrollBarPosition(-1), lastRequestedScrollBarPosition(-1), cursorWidth(2),
         sectionCount(0), maximumSizeCopy(50000), pendingTimeOut(-1), autoScrollLines(0),
         readOnly(true), cursorVisible(false), blockScrollBarUpdate(false),
         updateScrollBarPageStepPending(true), inMouseEvent(false), sectionPressed(0),

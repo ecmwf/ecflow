@@ -26,8 +26,9 @@
 
 #include <cmath>
 
+#define _UI_TEXTPAGER_DEBUG
 //#define DEBUG_TEXTPAGER_LASTPAGESIZE
-//#define DEBUG_TEXTPAGER
+#define DEBUG_TEXTPAGER
 
 #ifdef DEBUG_TEXTPAGER
 bool doLog = false;
@@ -627,7 +628,33 @@ int TextPagerEdit::textPositionAt(const QPoint &pos) const
 {
     if (!viewport()->rect().contains(pos))
         return -1;
-    return d->textPositionAt(pos);
+
+    QPoint realPos=pos;
+    realPos+=QPoint(horizontalScrollBar()->value(),0);
+
+    //Adjust the horizontal position
+  /*  if(pos.x()  > horizontalScrollBar()->value()+viewport()->rect().width())
+    {
+        int hval=realCrect.left()-r.width()/2;
+        horizontalScrollBar()->setValue((hval < horizontalScrollBar()->maximum())?
+                                            hval:
+                                            horizontalScrollBar()->maximum());
+    }
+    else if(realCrect.right() < horizontalScrollBar()->value())
+    {
+        int hval=realCrect.left()-r.width()/2;
+        horizontalScrollBar()->setValue((hval > horizontalScrollBar()->minimum())?
+                                            hval:
+                                            horizontalScrollBar()->minimum());
+    }
+}*/
+
+
+
+
+
+
+    return d->textPositionAt(realPos);
 }
 
 bool TextPagerEdit::readOnly() const
@@ -638,7 +665,9 @@ bool TextPagerEdit::readOnly() const
 void TextPagerEdit::setReadOnly(bool rr)
 {
     d->readOnly = rr;
-    setCursorVisible(!rr);
+
+    //we always want to show the cursor
+    //setCursorVisible(!rr);
 
   /*  //d->actions[PasteAction]->setEnabled(!rr);
     //d->actions[CutAction]->setEnabled(!rr);
@@ -1384,7 +1413,17 @@ void TextEditPrivate::cursorMoveKeyEventReadOnly(QKeyEvent *e)
         scrollLines(qMax(1, visibleLines - 1));
     } else if (e == QKeySequence::MoveToPreviousPage) {
         scrollLines(-qMax(1, visibleLines));
-    } else {
+    } else if (e == QKeySequence::MoveToStartOfLine) {
+         textCursor.movePosition(TextPagerCursor::StartOfLine);
+         e->accept();
+         return;
+    } else if (e == QKeySequence::MoveToEndOfLine) {
+         textCursor.movePosition(TextPagerCursor::EndOfLine);
+         e->accept();
+         return;
+    }
+
+    else {
         e->ignore();
         return;
     }
