@@ -68,7 +68,7 @@ class TextPagerEdit;
 class TextPagerLayout : public TextDocumentBuffer
 {
 public:
-    enum { MinimumBufferSize = 30000, LeftMargin = 3 };
+    enum { MinimumBufferSize = 90000, LeftMargin = 3 };
     TextPagerLayout(TextPagerDocument *doc = 0)
         : TextDocumentBuffer(doc), textEdit(0),
         viewportPosition(0), layoutEnd(-1), viewport(-1),

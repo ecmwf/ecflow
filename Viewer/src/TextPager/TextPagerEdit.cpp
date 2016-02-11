@@ -28,7 +28,7 @@
 
 //#define _UI_TEXTPAGER_DEBUG
 //#define DEBUG_TEXTPAGER_LASTPAGESIZE
-#define DEBUG_TEXTPAGER
+//#define DEBUG_TEXTPAGER
 
 #ifdef DEBUG_TEXTPAGER
 bool doLog = false;
@@ -619,7 +619,8 @@ void TextPagerEdit::resizeEvent(QResizeEvent *e)
     }
 #endif
     QAbstractScrollArea::resizeEvent(e);
-    d->adjustVerticalScrollBar();
+    if(e->oldSize().height() != e->size().height())
+        d->adjustVerticalScrollBar();
     d->updateScrollBarPageStepPending = true;
     d->layoutDirty = true;
 }
@@ -1496,18 +1497,53 @@ int TextEditPrivate::findLastPageSize() const
 {
     if (!document || document->documentSize() == 0)
         return -1;
+
+#ifdef DEBUG_TEXTPAGER_LASTPAGESIZE
+    qDebug() << "TextEditPrivate::findLastPageSize -->";
+#endif
     TextEditPrivate p(textEdit);
     p.font=textEdit->font();
     p.viewportPosition = 0;
     p.document = document;
     const int documentSize = document->documentSize();
     p.maxViewportPosition = documentSize;
-    
+
     //The viewport height (including the height of the horizontal slider)
     int vh=p.textEdit->viewport()->height(); //-p.textEdit->horizontalScrollBar()->height();
-    
+
     //Max 1.5*MinimumBufferSize can be kept in the buffer after the viewportPosition
     int maxCharNum=p.MinimumBufferSize*1.5-200;
+
+    //We use the lastpage cache to find a better start position
+
+#ifdef DEBUG_TEXTPAGER_LASTPAGESIZE
+    qDebug() << "  lastPageCache height:" << lastPage.height << "position:"  <<   lastPage.position <<
+                "documentSize:" << lastPage.documentSize << "widest:" << lastPage.widest;
+#endif
+
+    if(lastPage.documentSize != documentSize)
+    {
+        lastPage.clear();
+        lastPage.documentSize = documentSize;
+    }
+
+    Direction sizeChangeDir=Forward;
+    if(lastPage.height != -1) {
+        if(lastPage.height > vh) {
+            maxCharNum=documentSize-lastPage.position+1;
+            sizeChangeDir=Backward;
+        } else if(lastPage.height< vh) {
+            maxCharNum=documentSize-lastPage.position+1000;
+            sizeChangeDir=Backward;
+        } else {
+            return lastPage.position;
+        }
+    }
+
+    lastPage.height=vh;
+
+    Q_ASSERT(maxCharNum>=0);
+
     int start = documentSize-maxCharNum;
     if(start < 0) start=0;
     int i = 0;
@@ -1516,83 +1552,85 @@ int TextEditPrivate::findLastPageSize() const
     tm.start();
 #endif    
     
-    //We get the viewportPosition closest to start 
-    p.updateViewportPosition(start, Forward,false);
-    
-    //Relayout using the max number of characters
-    p.relayoutByPosition(maxCharNum);
+    //Try to find the last page by iteration
+    int step=0;
+    const int maxStep=10;
+    bool reachedTop=(start == 0);
+
+    while(step < maxStep) {
+#ifdef DEBUG_TEXTPAGER_LASTPAGESIZE
+        qDebug() << "  ITERATION STEP:" << step;
+        qDebug() << "  start:" << start << "maxCharNum:" << maxCharNum;
+#endif
+        //We get the viewportPosition closest to start
+        p.updateViewportPosition(start,sizeChangeDir,false);
+
+#ifdef DEBUG_TEXTPAGER_LASTPAGESIZE
+        qDebug() << "  after updateviewport> start-viewportPos:" << start-p.viewportPosition;
+#endif
+        //adjust the max number of characters
+        if(start > p.viewportPosition)
+            maxCharNum+=(start-p.viewportPosition)+1;
+
+        //Relayout using the max number of characters
+        p.relayoutByPosition(maxCharNum);
 
 #ifdef DEBUG_TEXTPAGER_LASTPAGESIZE     
-    qDebug() << vh << font.pointSize();
-    qDebug()  << "findLastPageSize -->" << "start:" << start << "layoutEnd:" << p.layoutEnd << "documentSize:" << documentSize << "viewportPosition:" << p.viewportPosition << p.contentRect;
-    qDebug() << "bottom:" << p.textLayouts.last()->boundingRect().bottom();
+        qDebug() << "  vh:" << vh << "fontSize:" << font.pointSize();
+        qDebug() << "  viewport size" << textEdit->viewport()->size();
+        qDebug() << "  layoutEnd:" << p.layoutEnd << "documentSize:" << documentSize << "viewportPosition:" << p.viewportPosition << p.contentRect;
+        qDebug() << "  bottom:" << p.textLayouts.last()->boundingRect().bottom();
 #endif  
    
-    //The end of the layout should be the end of the document
-    if(p.layoutEnd == documentSize && p.textLayouts.count() >0) {
+        //The end of the layout should be the end of the document
+        if(p.layoutEnd == documentSize && p.textLayouts.count() >0) {
    
-        int top=p.textLayouts.last()->boundingRect().bottom()+4-vh;
-        int pos=documentSize-p.textLayouts.last()->text().size();
+            int top=p.textLayouts.last()->boundingRect().bottom()+4-vh;
+            int pos=documentSize-p.textLayouts.last()->text().size();
            
-        for(int i=p.textLayouts.count()-2; i >=0; i--) {
+            for(int i=p.textLayouts.count()-2; i >=0; i--) {
           
-            if(p.textLayouts.at(i)->boundingRect().top() <= top) {
+                if(p.textLayouts.at(i)->boundingRect().top() <= top) {
 #ifdef DEBUG_TEXTPAGER_LASTPAGESIZE 
-                qDebug() << "find position:" << pos; // << "line:" << p.document->lineNumber(pos);
+                    qDebug() << "  find position:" << pos; // << "line:" << p.document->lineNumber(pos);
 #endif
-                p.updateViewportPosition(pos, Backward,false);
+                    p.updateViewportPosition(pos, Backward,false);
 #ifdef DEBUG_TEXTPAGER_LASTPAGESIZE 
-                qDebug() << "viewPortPosition:" << p.viewportPosition << "time:" << tm.elapsed(); // << "line:" << p.document->lineNumber(p.viewportPosition);                 
+                    qDebug() << "  viewPortPosition:" << p.viewportPosition << "time:" << tm.elapsed(); // << "line:" << p.document->lineNumber(p.viewportPosition);
 #endif
-                return p.viewportPosition;                
+                    lastPage.position=p.viewportPosition;
+                    lastPage.widest=p.widest;
+                    return p.viewportPosition;
+                }
+                pos-=p.textLayouts.at(i)->text().size();
             }
-            pos-=p.textLayouts.at(i)->text().size();           
         }
-        
-        return 0; //the whole text is in the viewport, no vertical scrollbar is needed
-    }   
-   
-    return -1;
- 
-#if 0   
-    Q_FOREACH(QTextLayout *tl,p.textLayouts) {
-        qDebug() << tl->text().size() << tl->boundingRect().bottom();
-    }
-   
-    Q_FOREVER {
- 
-#ifdef DEBUG_TEXTPAGER_LASTPAGESIZE        
-        //qDebug() << "findLastPageSize --> start:" << start << "lineNumber:" << p.document->lineNumber(start);
-#endif        
-        //Relayout the text from start
-        p.updateViewportPosition(start, Forward);
-        p.relayoutByGeometry(vh);
+        //We could not find the last page. We try again from a larger number of characters from the
+        //end of the document
+        step++;
+        maxCharNum+=1000;
+        start = documentSize-maxCharNum;
 
-#ifdef DEBUG_TEXTPAGER_LASTPAGESIZE            
-        qDebug() << "   step:" << i  << "start:" << start << "layoutEnd:" << p.layoutEnd << "documentSize:" << documentSize << "viewportPosition:" << p.viewportPosition << p.contentRect;
-        qDebug() << "   lines:" << p.lines.count();
-#endif
-        //Check if the end of the layout is the end of the document
-        if (p.layoutEnd == documentSize) {
-#ifdef DEBUG_TEXTPAGER_LASTPAGESIZE               
-            qDebug() << "findLastPageSize -->  found time:" << tm.elapsed();
-            qDebug() << "   lineNumber:" << p.document->lineNumber(p.viewportPosition) << p.contentRect;
-#endif            
+        if(start < 0 && reachedTop)
             break;
+
+        if(start < 0)
+        {
+            reachedTop=true;
+            start=0;
         }
-        
-        //Start in the next line (viewport position must be a newline character)
-        start = p.viewportPosition+100;
-        
-        //We must stop at a point
-        Q_ASSERT(i <= maxCharNum);
-        
-        i++;
     }
-    return -1;
-    
-    return p.viewportPosition;
-#endif    
+
+    lastPage.clear();
+
+    //the whole text is in the viewport, no vertical scrollbar is needed
+    if(reachedTop)
+        return -1;
+
+    //If we are here we the last page position will be the end of the document and there will be
+    //a white space block after the last row in the editor.
+    //TODO: improve it!
+    return documentSize;
 }
 
 void TextPagerEdit::setSyntaxHighlighter(SyntaxHighlighter *h)

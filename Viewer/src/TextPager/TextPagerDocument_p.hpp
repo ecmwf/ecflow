@@ -151,7 +151,7 @@ public:
 #endif
           documentSize(0),
           saveState(NotSaving), findState(NotFinding), ownDevice(false), modified(false),
-          deviceMode(TextPagerDocument::Sparse), chunkSize(2*16384), //chunkSize(1024*64), //chunkSize(16384),
+          deviceMode(TextPagerDocument::Sparse), chunkSize(64*1024), //chunkSize(1024*64), //chunkSize(16384),
           //undoRedoStackCurrent(0), modifiedIndex(-1), undoRedoEnabled(true), ignoreUndoRedo(false),
           //collapseInsertUndo(false),
 		  hasChunksWithLineNumbers(false), textCodec(0), options(TextPagerDocument::DefaultOptions),

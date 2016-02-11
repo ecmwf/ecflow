@@ -30,6 +30,15 @@ struct CursorData {
     int position, anchor;
 };
 
+struct LastPageCache {
+    LastPageCache() : position(-1),height(-1),widest(-1), documentSize(-1) {}
+    void clear() {position=-1; height=-1; widest=-1; documentSize=-1;}
+    int position;
+    int height;
+    int widest;
+    int documentSize;
+};
+
 class TextEditPrivate : public QObject, public TextPagerLayout
 {
     Q_OBJECT
@@ -73,6 +82,7 @@ public:
     QCursor *sectionCursor;
     QPoint lastHoverPos, lastMouseMove;
     QHash<DocumentCommand *, QPair<CursorData, CursorData> > undoRedoCommands;
+    mutable LastPageCache lastPage;
 
 public Q_SLOTS:
     void onSyntaxHighlighterDestroyed(QObject *o);
