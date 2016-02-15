@@ -9,7 +9,7 @@
 
 #include "OutputItemWidget.hpp"
 
-#include "OutputCache.hpp"
+//#include "OutputCache.hpp"
 #include "OutputDirProvider.hpp"
 #include "OutputFileProvider.hpp"
 #include "OutputModel.hpp"
@@ -155,8 +155,8 @@ void OutputItemWidget::getLatestFile()
     fileLabel_->clear();
 	browser_->clear();
 
-    OutputCache::instance()->markForRemove(cachedOutput_);
-    cachedOutput_.reset();
+    //OutputCache::instance()->markForRemove(cachedOutput_,true);
+    //cachedOutput_.reset();
 
     //Get the latest file contents
 	infoProvider_->info(info_);
@@ -170,8 +170,8 @@ void OutputItemWidget::getCurrentFile()
     fileLabel_->clear();
 	browser_->clear();
 
-    OutputCache::instance()->markForRemove(cachedOutput_);
-    cachedOutput_.reset();
+    //OutputCache::instance()->markForRemove(cachedOutput_);
+    //cachedOutput_.reset();
 
 	if(info_ && info_.get())
 	{
@@ -184,8 +184,8 @@ void OutputItemWidget::getCurrentFile()
 
 void OutputItemWidget::clearContents()
 {
-    OutputCache::instance()->markForRemove(cachedOutput_);
-    cachedOutput_.reset();
+    //OutputCache::instance()->markForRemove(cachedOutput_);
+    //cachedOutput_.reset();
 
     updateDirTimer_->stop();
 
@@ -220,8 +220,8 @@ void OutputItemWidget::infoReady(VReply* reply)
     // From output provider
     //------------------------
 
-    OutputCache::instance()->markForRemove(cachedOutput_);
-    cachedOutput_.reset();
+    //OutputCache::instance()->markForRemove(cachedOutput_);
+    //cachedOutput_.reset();
 
     if(reply->sender() == infoProvider_)
     {
@@ -251,9 +251,13 @@ void OutputItemWidget::infoReady(VReply* reply)
         //stopper.start();
 
         //If the info is stored in a tmp file
-        if(f && f.get())
+        if(f)
         {
-            if(f->storageMode() == VFile::MemoryStorage)
+            browser_->loadFile(f);
+            if(f->storageMode() == VFile::DiskStorage)
+                hasMessage=false;
+
+            /*if(f->storageMode() == VFile::MemoryStorage)
             {
                     //messageLabel_->hide();
 
@@ -264,13 +268,13 @@ void OutputItemWidget::infoReady(VReply* reply)
             {
                     browser_->loadFile(QString::fromStdString(f->path()));
                     hasMessage=false;
-            }
+            }*/
 
             //Cache the file coming through the logserver
             if(reply->fileReadMode() == VReply::LogServerReadMode)
             {
-                cachedOutput_=f;
-                OutputCache::instance()->add(info_,reply->fileName(),f);
+                //cachedOutput_=f;
+                //OutputCache::instance()->add(info_,reply->fileName(),f);
             }
 
         }

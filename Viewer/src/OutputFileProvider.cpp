@@ -10,7 +10,6 @@
 #include "OutputFileProvider.hpp"
 
 #include "LogServer.hpp"
-#include "OutputCache.hpp"
 #include "OutputFileClient.hpp"
 #include "VNode.hpp"
 #include "VReply.hpp"
@@ -23,18 +22,21 @@
 
 OutputFileProvider::OutputFileProvider(InfoPresenter* owner) :
 	InfoProvider(owner,VTask::OutputTask),
-	outClient_(NULL)
+    outClient_(NULL), latestCached_(NULL)
 {
 }
 
 void OutputFileProvider::clear()
 {
-	if(outClient_)
+    OutputCache::instance()->detach(latestCached_);
+    latestCached_=NULL;
+
+    if(outClient_)
 	{
 		delete outClient_;
 		outClient_=NULL;
 	}
-	InfoProvider::clear();
+    InfoProvider::clear();
 }
 
 //Node
@@ -57,15 +59,27 @@ void OutputFileProvider::visit(VInfoNode* info)
    	}
 
     //Get the filename
-    std::string fileName=n->findVariable("ECF_JOBOUT",true);
+    std::string jobout=n->findVariable("ECF_JOBOUT",true);
 
-    fetchFile(server,n,fileName,true);
+    //This is needed for the refresh!!! We want to detach the item but keep
+    //lastCached.
+    bool detachCache=!(latestCached_ && latestCached_->sameAs(info_,jobout));
+    if(!detachCache)
+    {
+        OutputCache::instance()->detach(latestCached_);
+    }
+
+    fetchFile(server,n,jobout,true,detachCache);
 }
 
 //Get a file
 void OutputFileProvider::file(const std::string& fileName)
 {
-	//Check if the task is already running
+    //When a new file is requested
+    OutputCache::instance()->detach(latestCached_);
+    latestCached_=NULL;
+
+    //Check if the task is already running
 	if(task_)
 	{
 		task_->status(VTask::CANCELLED);
@@ -86,12 +100,18 @@ void OutputFileProvider::file(const std::string& fileName)
 	//Get the filename
 	std::string jobout=n->findVariable("ECF_JOBOUT",true);
 
-	fetchFile(server,n,fileName,(fileName==jobout));
+    fetchFile(server,n,fileName,(fileName==jobout),false);
 }
 
-void OutputFileProvider::fetchFile(ServerHandler *server,VNode *n,const std::string& fileName,bool isJobout)
+void OutputFileProvider::fetchFile(ServerHandler *server,VNode *n,const std::string& fileName,bool isJobout,bool detachCache)
 {
-	if(!n || !n->node() || !server)
+    if(detachCache)
+    {
+        OutputCache::instance()->detach(latestCached_);
+        latestCached_=NULL;
+    }
+
+    if(!n || !n->node() || !server)
     {
     	owner_->infoFailed(reply_);
     	return;
@@ -181,28 +201,40 @@ void OutputFileProvider::fetchFile(ServerHandler *server,VNode *n,const std::str
 bool OutputFileProvider::fetchFileViaOutputClient(VNode *n,const std::string& fileName)
 {
 	std::string host, port;
-    host="freki";
-    port="9316";
+    //host="freki";
+    //port="9316";
 
     UserMessage::debug("OutputFileProvider::fetchFileViaOutputClient <-- file: " + fileName);
 
-    //Check cache
-    VFile_ptr f=OutputCache::instance()->find(info_,fileName);
-    if(f)
+    //If it is not the jobout file or it is the joubout but it is not the current item in the cache
+    //(i.e. we do not want to referesh it) we try to use the cache
+    if(fileName != joboutFileName() || !(latestCached_))
     {
-        UserMessage::debug("  File found in cache");
+        //Check cache
+        if(OutputCacheItem* item=OutputCache::instance()->use(info_,fileName))
+        {
+            latestCached_=item;
+            VFile_ptr f=item->file();
+            assert(f);
 
-        reply_->setInfoText("");
-        reply_->fileReadMode(VReply::LogServerReadMode);
+            UserMessage::debug("  File found in cache");
 
-        std::string method="served by " + host + "@" + port;
-        reply_->fileReadMethod(method);
+            reply_->setInfoText("");
+            reply_->fileReadMode(VReply::LogServerReadMode);
 
-        reply_->tmpFile(f);
-        owner_->infoReady(reply_);
-        return true;
+            std::string method="served by " + host + "@" + port;
+            reply_->fileReadMethod(method);
+
+            reply_->tmpFile(f);
+            owner_->infoReady(reply_);
+            return true;
+        }
     }
 
+    //If we are here we do not need to know the previously cached item
+    latestCached_=NULL;
+
+    //We did not used the cache
     if(n->logServer(host,port))
 	{
 		//host=host + "baaad";
@@ -242,6 +274,8 @@ void OutputFileProvider::slotOutputClientFinished()
     assert(tmp);
     outClient_->clearResult();
 
+    latestCached_=OutputCache::instance()->add(info_,tmp->sourcePath(),tmp);
+
     reply_->setInfoText("");
     reply_->fileReadMode(VReply::LogServerReadMode);
 
@@ -254,7 +288,7 @@ void OutputFileProvider::slotOutputClientFinished()
 
 void OutputFileProvider::slotOutputClientProgress(QString msg,int value)
 {
-    UserMessage::debug("OutputFileProvider::slotOutputClientProgress " + msg.toStdString());
+    //UserMessage::debug("OutputFileProvider::slotOutputClientProgress " + msg.toStdString());
 
     owner_->infoProgress(msg.toStdString(),value);
 

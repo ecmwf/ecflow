@@ -67,7 +67,7 @@ VFile::~VFile()
 {
 	close();
 
-    UserMessage::message(UserMessage::DBG,false,"VFile:: delete -->");
+    UserMessage::message(UserMessage::DBG,false,"VFile::~VFile -->");
     print();
 
 	if(data_)
@@ -75,16 +75,20 @@ VFile::~VFile()
         delete [] data_;
         UserMessage::debug("  memory released");
     }
-	if(deleteFile_)
-	{
-		//TODO: add further/better checks
-		if(exists() && !path_.empty() && path_ != "/" && path_.size() > 4)
-        {
-            unlink(path_.c_str());
-            UserMessage::debug("  file deleted from disk");
-        }
+
+    //TODO: add further/better checks
+    if(deleteFile_ &&
+       exists() && !path_.empty() && path_ != "/" && path_.size() > 4)
+    {
+        unlink(path_.c_str());
+        UserMessage::debug("  file deleted from disk");
     }
-    UserMessage::debug("<-- VFile:: delete");
+    else if(!path_.empty() && exists())
+    {
+        UserMessage::debug("  file was kept on disk");
+    }
+
+    UserMessage::debug("<-- VFile::~VFile");
 }
 
 bool VFile::exists() const

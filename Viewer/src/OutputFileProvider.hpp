@@ -12,6 +12,7 @@
 
 #include <QObject>
 
+#include "OutputCache.hpp"
 #include "VDir.hpp"
 #include "VInfo.hpp"
 #include "InfoProvider.hpp"
@@ -42,12 +43,14 @@ private Q_SLOTS:
 	void slotOutputClientFinished();
 
 private:
-	 void fetchFile(ServerHandler *server,VNode *n,const std::string& fileName,bool isJobout);
+     void fetchFile(ServerHandler *server,VNode *n,const std::string& fileName,bool isJobout,bool detachCache);
 	 void fetchJoboutViaServer(ServerHandler *server,VNode *n,const std::string&);
 	 bool fetchFileViaOutputClient(VNode *n,const std::string& fileName);
 	 bool fetchLocalFile(const std::string& fileName);
 
 	 OutputFileClient *outClient_;
+     OutputCacheItem* latestCached_;
+     //OutputCache* cache_;
 };
 
 #endif

@@ -102,7 +102,9 @@ void OutputFileClient::getFile(const std::string& name)
 	remoteFile_=name;
 	out_.reset();
     out_=VFile_ptr(VFile::create(true)); //we will delete the file from disk
-	total_=0;
+    out_->setSourcePath(name);
+    total_=0;
+    lastProgress_=0;
     estimateExpectedSize();
 }
 

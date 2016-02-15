@@ -21,6 +21,8 @@ class TextPagerWidget;
 class TextPagerSearchInterface;
 class VProperty;
 
+#include "VFile.hpp"
+
 class OutputBrowser : public QWidget
 {
 Q_OBJECT
@@ -29,9 +31,10 @@ public:
 	explicit OutputBrowser(QWidget* parent);
 	~OutputBrowser();
 
-	void clear();
+    void clear();
+    void loadFile(VFile_ptr file);
 	void loadFile(QString fileName);
-	void loadText(QString text,QString fileName);
+    void loadText(QString text,QString fileName,bool resetFile=true);
 	void adjustHighlighter(QString fileName);
 	void setFontProperty(VProperty* p);
 	void updateFont();
@@ -57,7 +60,12 @@ private:
 	PlainTextSearchInterface *textEditSearchInterface_;
 	TextPagerSearchInterface *textPagerSearchInterface_;
 	MessageLabel *confirmSearchLabel_;
-	static int minPagerTextSize_;
+
+    //we keep a reference to it to make sure that it does not get deleted while
+    //it is being displayed
+    VFile_ptr file_;
+
+    static int minPagerTextSize_;
 	static int minPagerSparseSize_;
 	static int minConfirmSearchSize_;
 };

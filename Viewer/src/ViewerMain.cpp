@@ -14,7 +14,6 @@
 #include <QApplication>
 #include <QDebug>
 #include <QFile>
-#include <QSplashScreen>
 #include <QStyleFactory>
 
 #include "File.hpp"
@@ -42,15 +41,6 @@ int main(int argc, char **argv)
 
 
     QApplication app(argc, argv);
-
-
-    //Spash screen
-	/*QPixmap pixmap(":/viewer/splash_screen.png");
-    QSplashScreen splash(pixmap);
-
-    splash.showMessage("Loading resources ...",Qt::AlignBottom | Qt::AlignLeft);
-    splash.show();
-    app.processEvents();*/
 
 
     QStringList styleLst=QStyleFactory::keys();
@@ -124,30 +114,12 @@ int main(int argc, char **argv)
     Highlighter::init(DirectoryHandler::concatenate(DirectoryHandler::etcDir(),
     		      "ecflowview_highlighter.json"));
 
-
     //Initialise the system palette
     Palette::load(DirectoryHandler::concatenate(DirectoryHandler::etcDir(),
-		      "ecflowview_palette.json"));
-
-    /* for(int i=0; i < 8; i++)
-    {
-    	sleep(1);
-    	app.processEvents();
-    }
-*/
+		      "ecflowview_palette.json")); 
 
     //Build the GUI
     MainWindow::init();
-
-    //add splash screen here
-
-   // MainWindow MainWindow;
-    //MainWindow.resize(800, 640);
-    //MainWindow.show();
-
-    //MainWindow.printDefTree(argv[1], atoi(argv[2]));
-
-   // splash.close();
 
     //Show all the windows
     MainWindow::showWindows();

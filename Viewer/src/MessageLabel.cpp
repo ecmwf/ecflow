@@ -188,7 +188,7 @@ void MessageLabel::progress(QString text,int value)
     progBar_->setValue(value);
     progLabel_->setText(text);
 
-    UserMessage::debug("MessageLabel::progress --> " + QString::number(value).toStdString() + "%");
+    //UserMessage::debug("MessageLabel::progress --> " + QString::number(value).toStdString() + "%");
 }
 
 void MessageLabel::setShowTypeTitle(bool b)

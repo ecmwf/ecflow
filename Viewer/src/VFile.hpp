@@ -27,8 +27,10 @@ public:
 
 	enum StorageMode {MemoryStorage,DiskStorage};
 
-	const std::string& path() const {return path_;}
-	void  setContents(const std::string);
+    const std::string& path() const {return path_;}
+    const std::string& sourcePath() const {return sourcePath_;}
+    void setSourcePath(const std::string& p) {sourcePath_=p;}
+    void  setContents(const std::string);
 	bool  exists() const;
 
 	StorageMode storageMode() const {return storageMode_;}
@@ -60,6 +62,7 @@ protected:
 	void setStorageMode(StorageMode);
 
 	std::string path_;
+    std::string sourcePath_;
 	bool  deleteFile_;
 
 	StorageMode storageMode_;

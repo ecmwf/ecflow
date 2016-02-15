@@ -85,6 +85,7 @@ void OutputBrowser::clear()
 {
 	textEdit_->clear();
 	textPager_->clear();
+    file_.reset();
 }
 
 void OutputBrowser::changeIndex(IndexType indexType,qint64 fileSize)
@@ -110,6 +111,20 @@ void OutputBrowser::changeIndex(IndexType indexType,qint64 fileSize)
     }
 
     showConfirmSearchLabel();
+}
+
+void OutputBrowser::loadFile(VFile_ptr file)
+{
+    file_=file;
+    if(file_->storageMode() == VFile::DiskStorage)
+    {
+        loadFile(QString::fromStdString(file_->path()));
+    }
+    else
+    {
+        QString s(file_->data());
+        loadText(s,QString::fromStdString(file_->sourcePath()),true);
+    }
 }
 
 void OutputBrowser::loadFile(QString fileName)
@@ -138,8 +153,11 @@ void OutputBrowser::loadFile(QString fileName)
     }
 }
 
-void OutputBrowser::loadText(QString txt,QString fileName)
+void OutputBrowser::loadText(QString txt,QString fileName,bool resetFile)
 {
+    if(resetFile)
+       file_.reset();
+
     //We estimate the size in bytes
 	qint64 txtSize=txt.size()*2;
     
