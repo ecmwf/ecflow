@@ -23,6 +23,7 @@ std::string DirectoryHandler::shareDir_;
 std::string DirectoryHandler::etcDir_;
 std::string DirectoryHandler::configDir_;
 std::string DirectoryHandler::rcDir_;
+std::string DirectoryHandler::tmpDir_;
 
 static bool firstStartUp=false;
 
@@ -108,6 +109,42 @@ void DirectoryHandler::init(const std::string& exeStr)
 		shareDir_ = shareDir.string();
 		etcDir_   = etcDir.string();
 	}
+
+    //Tmp dir
+    if(char *h=getenv("ECFLOWUI_TMPDIR"))
+    {
+        tmpDir_=std::string(h);
+    }
+    else if(char *h=getenv("TMPDIR"))
+    {
+        tmpDir_=std::string(h);
+        boost::filesystem::path tmp(tmpDir_);
+        tmp /= "eclow_ui.tmp";
+        if(!boost::filesystem::exists(tmp))
+        {
+            UserMessage::message(UserMessage::WARN, false,
+                "ECFLOWUI_TMPDIR env variable is not defined. ecFlowUI creates its tmp direcoty in TMPDIR as "  + tmp.string());
+
+            try
+            {
+                if(boost::filesystem::create_directory(tmp))
+                {
+                    tmpDir_=tmp.string();
+                    UserMessage::debug("Tmp dir created: " + tmpDir_);
+                }
+            }
+            catch (const boost::filesystem::filesystem_error& e)
+            {
+                UserMessage::message(UserMessage::ERROR,true,"Creating tmp directory failed:" + std::string(e.what()));
+            }
+        }
+    }
+    else
+    {
+        UserMessage::message(UserMessage::ERROR, true,
+            "Neither of ECFLOWUI_TMPDIR and TMPDIR are defined. ecflowUI cannot be started up!");
+        exit(1);
+    }
 }
 
 
@@ -153,7 +190,7 @@ void DirectoryHandler::createDir(const std::string& path)
 		catch(const boost::filesystem::filesystem_error& err)
 		{
 			UserMessage::message(UserMessage::ERROR, true,
-					std::string("Could not create dir: " + path + " reason: " + err.what()));
+                    "Could not create dir: " + path + " reason: " + err.what());
 		}
 	}
 }
@@ -162,3 +199,26 @@ bool DirectoryHandler::isFirstStartUp()
 {
 	return firstStartUp;
 }
+
+//Return a unique non-existing tmp filename
+std::string DirectoryHandler::tmpFileName()
+{
+    boost::filesystem::path tmp(tmpDir_);
+    if(boost::filesystem::exists(tmp))
+    {
+        try
+        {
+            boost::filesystem::path model= tmp;
+            model /= "%%%%-%%%%-%%%%-%%%%";
+            return boost::filesystem::unique_path(model).string();
+        }
+        catch(const boost::filesystem::filesystem_error& err)
+        {
+            UserMessage::message(UserMessage::WARN, false,
+                std::string("Could not generate tmp filename! Reason: ") + err.what());
+        }
+    }
+
+    return std::string();
+}
+

@@ -152,7 +152,7 @@ void FileInfoLabel::update(VReply* reply,QString extraText)
 
 			s+="<br>";
 			s+="<b><font color=" + col.name() + "> Source: </font></b>";
-			s+="<font color=" + colText.name() + "> " + QString::fromStdString(reply->fileReadMethod()) + "</font>";
+            s+="<font color=" + colText.name() + "> " + QString::fromStdString(tmp->fetchMethod()) + "</font>";
 
 			//s+=" (took <font color=" + colSize.name() + "> " + QString::number(static_cast<float>(tmp->transferDuration())/1000.,'f',1) + " s </font>)";
 			s+=" (took " + QString::number(static_cast<float>(tmp->transferDuration())/1000.,'f',1) + " s)";
@@ -160,6 +160,10 @@ void FileInfoLabel::update(VReply* reply,QString extraText)
 			QString dt=tmp->fetchDate().toString("yyyy-MM-dd HH:mm:ss");
 			s+="<b><font color=" + col.name() + "> at </font></b>";
 			s+="<font color=" + colText.name() + ">" + dt +  + "</font>";
+            if(tmp->cached())
+            {
+                s+=" (cached)";
+            }
 		}
 	}
 

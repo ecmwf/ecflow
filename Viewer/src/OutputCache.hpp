@@ -49,13 +49,6 @@ public:
     void detach(OutputCacheItem*);
     OutputCacheItem* use(VInfo_ptr info,const std::string& sourcePath);
 
-
-    /*void markForRemove(VFile_ptr file,bool forget=false);
-    void setCurrent(VInfo_ptr,const std::string&);
-    bool isCurrent(VInfo_ptr,const std::string&);
-
-    VFile_ptr find(VInfo_ptr,const std::string&);*/
-
     void print();
     static OutputCache* instance();
     void clear();

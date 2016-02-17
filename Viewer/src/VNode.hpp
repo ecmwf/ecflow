@@ -94,6 +94,7 @@ public:
     virtual bool isSuite() const {return isTopLevel();}
     virtual bool isFamily() const;
     virtual bool isTask() const {return false;}
+    virtual bool isAlias() const;
 
     void beginUpdateAttrNum();
     void endUpdateAttrNum();

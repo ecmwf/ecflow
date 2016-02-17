@@ -317,6 +317,7 @@ QVariant TreeNodeModel::nodeData(const QModelIndex& index, int role) const
             if(vnode->isTask()) return 2;
             else if(vnode->isSuite()) return 0;
             else if(vnode->isFamily()) return 1;
+            else if(vnode->isAlias()) return 3;
             return 0;
         }
         else if(role  == NodeTypeForegroundRole)

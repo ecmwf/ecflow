@@ -133,8 +133,11 @@ void OutputFileClient::slotRead()
             {
                 prog=static_cast<int>(100.*static_cast<float>(total_)/static_cast<float>(expected_));
                 if(prog>100) prog=100;
+                Q_EMIT progress(QString::number(lastProgress_) + "/" + QString::number(expected_/progressChunk_) +
+                               " " + progressUnits_  + " transferred",prog);
             }
-            Q_EMIT progress(QString::number(lastProgress_) + " " + progressUnits_ + " read",prog);
+            else
+                Q_EMIT progress(QString::number(lastProgress_) + " " + progressUnits_ + " transferred",prog);
 		}
 	}
 }

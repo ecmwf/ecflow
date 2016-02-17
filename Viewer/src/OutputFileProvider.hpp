@@ -50,7 +50,7 @@ private:
 
 	 OutputFileClient *outClient_;
      OutputCacheItem* latestCached_;
-     //OutputCache* cache_;
+     VDir_ptr dir_;
 };
 
 #endif

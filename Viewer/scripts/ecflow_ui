@@ -1,0 +1,75 @@
+#!/bin/bash
+
+#============================================================================
+# Copyright 2016 ECMWF.
+# This software is licensed under the terms of the Apache Licence version 2.0
+# which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+# In applying this licence, ECMWF does not waive the privileges and immunities
+# granted to it by virtue of its status as an intergovernmental organisation
+# nor does it submit to any jurisdiction.
+#============================================================================
+
+# ----------------------------------------------------------
+# Clean up the tmp directory at the end or on error
+#-----------------------------------------------------------
+cleanup(){
+    status=$?
+    trap "" EXIT ERR
+
+    if [ "$status" = "0" ]
+    then
+        echo "$(basename $0): $1 (OK) (line $2), exit status $status, starting 'cleanup'"
+    else
+        echo "$(basename $0): $1 on ERROR (line $2), exit status $status, starting 'cleanup'"
+    fi
+
+    if [ $(echo $ECFLOWUI_TMPDIR | grep -c "/ecflow_ui.") -ge 1 ] ; then
+        rm -Rf $ECFLOWUI_TMPDIR
+    fi
+
+    exit $status
+}
+
+#Define tmp root dir
+TMPDIR_ROOT=${TMPDIR:=/tmp}
+export ECFLOWUI_TMPDIR=${ECFLOWUI_TMPDIR:=$TMPDIR}
+
+# check that TMPDIR_ROOT actually exists - we can't run without it
+if [ ! -d $TMPDIR_ROOT ]
+then
+    echo ""
+    echo "  Temporary directory '$TMPDIR_ROOT' does not exist"
+    echo "  ecFlowUI needs this in order to run. Check that environment"
+    echo "  variable \$TMPDIR is set to a valid directory and try again."
+    exit 1
+fi
+
+#Define and create tmp dir
+export ECFLOWUI_TMPDIR=${TMPDIR_ROOT}/ecflow_ui.$$.$LOGNAME
+mkdir -p $ECFLOWUI_TMPDIR
+
+#Check if we could create it
+if [ $? -ne 0 ]
+then
+    echo ""
+    echo "  Temporary directory '$ECFLOWUI_TMPDIR' could not be created."
+    echo "  ecFlowUI needs this in order to run. Check that environment"
+    echo "  variable \$TMPDIR is set to a valid directory and try again."
+    exit 1
+fi
+
+# =============================================================
+# tmp directory cleaned automatically at end or at error.
+# on new platforms check that these signals are valid:
+
+ECFLOWUI_SIGLIST="HUP INT QUIT TERM XCPU  XFSZ"
+#           1   2   3    15   30/24 31/25
+
+trap 'cleanup "EXIT" $LINENO' EXIT
+trap 'cleanup "SIGNAL trap" $LINENO' $ECFLOWUI_SIGLIST
+
+#Figure out the directory of the exe
+EXE_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+#Start the viewer
+${EXE_DIR}/ecflow_ui.x

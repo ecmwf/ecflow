@@ -26,12 +26,13 @@ public:
     void progress(QString text,int value);
 	void setShowTypeTitle(bool);
 	void clear();
-    void useNarrowMode(bool);
+    void setNarrowMode(bool);
 
 private:
 	void showMessage(const Type&,QString);
 
 	bool showTypeTitle_;
+    bool narrowMode_;
 	Type currentType_;
 	QLabel *pixLabel_;
 	QLabel* msgLabel_;

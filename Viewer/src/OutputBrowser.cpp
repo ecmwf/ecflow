@@ -35,7 +35,7 @@ OutputBrowser::OutputBrowser(QWidget* parent) : QWidget(parent)
 
     confirmSearchLabel_=new MessageLabel(this);
     confirmSearchLabel_->setShowTypeTitle(false);
-    //confirmSearchLabel_->useNarrowMode(true);
+    confirmSearchLabel_->setNarrowMode(true);
     vb->addWidget(confirmSearchLabel_);
 
     searchLine_=new TextEditSearchLine(this);

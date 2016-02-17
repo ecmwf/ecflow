@@ -17,7 +17,7 @@ OutputCache* OutputCache::instance_=NULL;
 #define _UI_OUTPUTCACHE_DEBUG
 
 OutputCacheItem::OutputCacheItem(const std::string& id, VFile_ptr file,QObject *parent) :
-      QTimer(parent), id_(id), file_(file), timeout_(15*1000), cnt_(0)
+      QTimer(parent), id_(id), file_(file), timeout_(120*1000), cnt_(0)
 {
     attach();
 }
@@ -31,12 +31,6 @@ bool OutputCacheItem::sameAs(VInfo_ptr info,const std::string& sourcePath)
     }
     return false;
 }
-
-/*void OutputCacheItem::markForRemove(bool forget)
-{
-    forget_=forget;
-    start(timeout_);
-}*/
 
 void OutputCacheItem::attach()
 {
@@ -54,11 +48,11 @@ void OutputCacheItem::detach()
     }
 }
 
-/*void OutputCacheItem::keepIt()
-{
-    forget_=false;
-    stop();
-}*/
+//========================================================
+//
+// OutputCache
+//
+//========================================================
 
 OutputCache::~OutputCache()
 {
@@ -139,36 +133,6 @@ void OutputCache::detach(OutputCacheItem* item)
     }
 }
 
-/*
-void OutputCache::markForRemove(VFile_ptr file,bool forget)
-{
-    if(!file)
-        return;
-#ifdef _UI_OUTPUTCACHE_DEBUG
-    UserMessage::debug("OutputCache::markForRemove --> ref_count: " +
-                       QString::number(file.use_count()).toStdString());
-    file->print();
-    print();
-#endif
-
-    QMap<std::string, OutputCacheItem*>::iterator it = items_.begin();
-    while (it != items_.end() ) 
-    {
-       if(it.value()->file_ == file)
-       {    
-           it.value()->markForRemove(forget);
-#ifdef _UI_OUTPUTCACHE_DEBUG
-           UserMessage::debug("  item to remove: " + it.key());
-           print();
-#endif
-           return;
-       }    
-       
-       ++it;
-    }    
-}
-*/
-
 void OutputCache::removeItem()
 {
     if(OutputCacheItem* item=static_cast<OutputCacheItem*>(sender()))
@@ -203,59 +167,7 @@ void OutputCache::removeItem()
         }
     }        
 }
-/*
-bool OutputCache::isCurrent(VInfo_ptr info,const std::string& sourcePath)
-{
-    if(info && info->isNode() && info->server())
-    {
-        std::string id=info->path() + ":" + sourcePath;
-        QMap<std::string, OutputCacheItem*>::iterator it = items_.find(id);
-        return (it != items_.end() && it.value() == current_);
-    }
 
-    return false;
-}
-
-VFile_ptr OutputCache::makeCurent(VInfo_ptr info,const std::string& sourcePath)
-{
-    if(info && info->isNode() && info->server())
-    {
-        std::string id=info->path() + ":" + sourcePath;
-        QMap<std::string, OutputCacheItem*>::iterator it = items_.find(id);
-        if(it != items_.end())
-        {
-            if(it.value() != current_)
-            {
-                current_->markForRemove();
-                current_=it.value();
-            }
-            current_->keepIt();
-            return it.value()->file_;
-        }
-    }
-
-    return VFile_ptr();
-}
-*/
-/*
-VFile_ptr OutputCache::find(VInfo_ptr info,const std::string& sourcePath)
-{
-    if(info && info->isNode() && info->server())
-    {
-        std::string id=info->path() + ":" + sourcePath;        
-        QMap<std::string, OutputCacheItem*>::iterator it = items_.find(id);       
-        if(it != items_.end())
-        {
-            if(it.value()->forget_)
-                return  VFile_ptr();
-            it.value()->keepIt();
-            return it.value()->file_;
-        }
-    }
-
-    return VFile_ptr();
-}    
-*/
 OutputCacheItem* OutputCache::use(VInfo_ptr info,const std::string& sourcePath)
 {
     if(info && info->isNode() && info->server())

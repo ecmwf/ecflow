@@ -539,6 +539,7 @@ void TreeNodeViewDelegate::renderNode(QPainter *painter,const QModelIndex& index
         case 0: typeText.text_="S"; break;
         case 1: typeText.text_="F"; break;
         case 2: typeText.text_="T"; break;
+        case 3: typeText.text_="A"; break;
         default: break;
         }
     }

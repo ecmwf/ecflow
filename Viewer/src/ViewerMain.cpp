@@ -37,11 +37,10 @@ int main(int argc, char **argv)
     //  std::cout << "Usage:" << std::endl;
      //   std::cout << argv[0] << " <host> <port>" << std::endl;
     //    return 1;
-    //}
+    //
 
-
+    //Init qt
     QApplication app(argc, argv);
-
 
     QStringList styleLst=QStyleFactory::keys();
 

@@ -14,6 +14,7 @@
 #include <fstream>
 #include <string.h>
 
+#include "DirectoryHandler.hpp"
 #include "VFile.hpp"
 #include "UserMessage.hpp"
 
@@ -29,7 +30,7 @@ VFile::VFile(const std::string& name,const std::string& str,bool deleteFile) :
 	dataSize_(0),
 	fp_(0),
 	transferDuration_(0),
-	widgetLoadDuration_(0)
+    cached_(false)
 {
 	std::ofstream f(path_.c_str());
 	if(f.is_open())
@@ -47,7 +48,7 @@ VFile::VFile(const std::string& name,bool deleteFile) :
 	dataSize_(0),
 	fp_(0),
 	transferDuration_(0),
-	widgetLoadDuration_(0)
+    cached_(false)
 {
 }
 
@@ -59,7 +60,7 @@ VFile::VFile(bool deleteFile) :
 	dataSize_(0),
 	fp_(0),
 	transferDuration_(0),
-	widgetLoadDuration_(0)
+    cached_(false)
 {
 }
 
@@ -125,7 +126,7 @@ void VFile::setStorageMode(StorageMode mode)
 		if(dataSize_ > 0)
 		{
             if(path_.empty())
-               path_=VFile::tmpName();
+               path_=DirectoryHandler::tmpFileName();
 
             fp_ = fopen(path_.c_str(),"w");
 			if(fwrite(data_,1,dataSize_,fp_) != dataSize_)
@@ -173,7 +174,7 @@ bool VFile::write(const char *buf,size_t len,std::string& err)
 		if(!fp_)
 		{
             if(path_.empty())
-               path_=VFile::tmpName();
+               path_=DirectoryHandler::tmpFileName();
 
             fp_ = fopen(path_.c_str(),"a");
 		}
@@ -205,6 +206,7 @@ void VFile::close()
 	}
 }
 
+/*
 std::string VFile::tmpName()
 {
 	std::string res;
@@ -238,6 +240,7 @@ std::string VFile::tmpName()
 	return res;
 
 }
+*/
 
 void VFile::print()
 {

@@ -10,7 +10,6 @@
 #ifndef DIRECTORY_HANDLER_HPP_
 #define DIRECTORY_HANDLER_HPP_
 
-#include <string>
 #include <vector>
 
 class DirectoryHandler
@@ -19,11 +18,12 @@ public:
     DirectoryHandler();
 
     static void init(const std::string& exePath);
-    static std::string shareDir()  {return shareDir_;};
-    static std::string etcDir()    {return etcDir_;};
-    static std::string configDir()  {return configDir_;};
-    static std::string rcDir()    {return rcDir_;};
+    static std::string shareDir()  {return shareDir_;}
+    static std::string etcDir()    {return etcDir_;}
+    static std::string configDir()  {return configDir_;}
+    static std::string rcDir()    {return rcDir_;}
     static std::string concatenate(const std::string &path1, const std::string &path2);
+    static std::string tmpFileName();
     static void createDir(const std::string& path);
 
     static void findFiles(const std::string &dirPath,const std::string &regExpPattern,
@@ -36,7 +36,7 @@ private:
     static std::string etcDir_;
     static std::string configDir_;
     static std::string rcDir_;
-
+    static std::string tmpDir_;
 };
 
 #endif

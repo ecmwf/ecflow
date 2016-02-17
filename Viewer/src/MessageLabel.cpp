@@ -18,20 +18,23 @@
 class MessageLabelData {
 public:
 	MessageLabelData(QString iconPath,QString title,QColor bg, QColor bgLight,QColor border) :
-	title_(title), bg_(bg.name()), border_(border.name())
+        title_(title), bg_(bg.name()), border_(border.name())
 	{
-		int id=IconProvider::add(iconPath,iconPath);
-		pix_=IconProvider::pixmap(id,18);
+        int id=IconProvider::add(iconPath,iconPath);
+        pix_=IconProvider::pixmap(id,16);
+        pixSmall_=IconProvider::pixmap(id,12);
 
-		bg_="qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 " + bg.name() +", stop: 1 " + bgLight.name() + ")";
+        bg_="qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 " + bg.name() +", stop: 1 " + bgLight.name() + ")";
 	}
 
     MessageLabelData()  {}
 
 	QPixmap pix_;
+    QPixmap pixSmall_;
 	QString title_;
 	QString bg_;
 	QString border_;
+
 };
 
 static std::map<MessageLabel::Type,MessageLabelData> typeData;
@@ -39,7 +42,8 @@ static std::map<MessageLabel::Type,MessageLabelData> typeData;
 MessageLabel::MessageLabel(QWidget *parent) :
 	QWidget(parent),
 	currentType_(NoType),
-	showTypeTitle_(true)
+    showTypeTitle_(true),
+    narrowMode_(false)
 {
 	setProperty("base","1");
 
@@ -76,13 +80,18 @@ MessageLabel::MessageLabel(QWidget *parent) :
     progLayout->addWidget(progLabel_);
 
 	layout_=new QHBoxLayout(this);
-	layout_->setContentsMargins(2,2,2,2);
-	layout_->addWidget(loadLabel_);
-	layout_->addWidget(pixLabel_);
+	layout_->setContentsMargins(2,2,2,2);	
+    layout_->addWidget(loadLabel_);
+
+    QVBoxLayout *pixLayout=new QVBoxLayout();
+    pixLayout->addWidget(pixLabel_);
+    pixLayout->addStretch(1);
+    layout_->addLayout(pixLayout);
 
     QVBoxLayout* rightVb=new QVBoxLayout;
     rightVb->addWidget(msgLabel_);
     rightVb->addWidget(progWidget_);
+    rightVb->addStretch(1);
     layout_->addLayout(rightVb,1);
 
     //layout_->addWidget(msgLabel_,1);
@@ -127,7 +136,7 @@ void MessageLabel::showMessage(const Type& type,QString msg)
 
 		setStyleSheet(sh);
 
-		pixLabel_->setPixmap(it->second.pix_);
+        pixLabel_->setPixmap(((!narrowMode_)?it->second.pix_:it->second.pixSmall_));
 
 		currentType_=type;
 	}
@@ -199,11 +208,20 @@ void MessageLabel::setShowTypeTitle(bool b)
 	}
 }
 
-void MessageLabel::useNarrowMode(bool b)
+void MessageLabel::setNarrowMode(bool b)
 {
-	if(!b)
-		layout_->setContentsMargins(2,2,2,2);
-	else
-		layout_->setContentsMargins(2,0,2,0);
+    if(b==narrowMode_)
+        return;
+
+    narrowMode_=b;
+
+    /*if(!narrowMode_)
+    {
+        layout_->setContentsMargins(2,2,2,2);
+    }
+    else
+    {
+        layout_->setContentsMargins(2,0,2,0);
+    }*/
 }
 

@@ -334,7 +334,7 @@ ADD_DEPENDENCIES(Qt_resource_cpp ${image_files})
 add_definitions( -DECFLOW_SHARED_DIR="${CMAKE_INSTALL_PREFIX}/share/ecflow" )
 
 
-ecbuild_add_executable( TARGET   ecflow_ui
+ecbuild_add_executable( TARGET   ecflow_ui.x
     SOURCES  ${viewer_srcs} ${VIEWER_MOC} ${VIEWER_RES} ${VIEWER_FORMS_HEADERS}
     INCLUDES .
      ../../ACore/src 
@@ -355,7 +355,7 @@ ecbuild_add_executable( TARGET   ecflow_ui
 )
 
 # This ensures that for debug config, we only link with debug boost libs, for other configs, we link with optimised boost libs
-target_link_libraries(ecflow_ui debug ${Boost_REGEX_LIBRARY_DEBUG}   ${Boost_REGEX_LIBRARY_RELEASE} )                
+target_link_libraries(ecflow_ui.x debug ${Boost_REGEX_LIBRARY_DEBUG}   ${Boost_REGEX_LIBRARY_RELEASE} )
 
 
 set(build_ecflow_ui_log 0)

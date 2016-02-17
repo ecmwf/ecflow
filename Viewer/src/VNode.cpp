@@ -565,6 +565,16 @@ bool VNode::isFamily() const
     return (np->isFamily())?true:false;
 }
 
+bool VNode::isAlias() const
+{
+    node_ptr np=node();
+
+    if(!np || !np.get())
+        return false;
+
+    return (np->isAlias())?true:false;
+}
+
 bool VNode::isFlagSet(ecf::Flag::Type f) const
 {
 	if(node_ && node_.get())

@@ -37,6 +37,8 @@ void OutputFileProvider::clear()
 		outClient_=NULL;
 	}
     InfoProvider::clear();
+
+    dir_.reset();
 }
 
 //Node
@@ -216,14 +218,12 @@ bool OutputFileProvider::fetchFileViaOutputClient(VNode *n,const std::string& fi
             latestCached_=item;
             VFile_ptr f=item->file();
             assert(f);
+            f->setCached(true);
 
             UserMessage::debug("  File found in cache");
 
             reply_->setInfoText("");
             reply_->fileReadMode(VReply::LogServerReadMode);
-
-            std::string method="served by " + host + "@" + port;
-            reply_->fileReadMethod(method);
 
             reply_->tmpFile(f);
             owner_->infoReady(reply_);
@@ -244,7 +244,7 @@ bool OutputFileProvider::fetchFileViaOutputClient(VNode *n,const std::string& fi
 
         //reply_->setInfoText("Getting file through log server: " + host + "@" + port);
         //owner_->infoProgress(reply_);
-        owner_->infoProgressStart("Getting file through log server: " + host + "@" + port,0);
+        owner_->infoProgressStart("Getting file from log server: " + host + "@" + port,0);
 
 		if(!outClient_)
 		{
@@ -258,6 +258,8 @@ bool OutputFileProvider::fetchFileViaOutputClient(VNode *n,const std::string& fi
 
 			connect(outClient_,SIGNAL(finished()),
 				this,SLOT(slotOutputClientFinished()));
+
+            outClient_->setDir(dir_);
 		}
 
 		outClient_->getFile(fileName);
@@ -280,7 +282,7 @@ void OutputFileProvider::slotOutputClientFinished()
     reply_->fileReadMode(VReply::LogServerReadMode);
 
     std::string method="served by " + outClient_->host() + "@" + outClient_->portStr();
-    reply_->fileReadMethod(method);
+    tmp->setFetchMethod(method);
 
     reply_->tmpFile(tmp);
     owner_->infoReady(reply_);
@@ -426,23 +428,9 @@ std::string OutputFileProvider::joboutFileName() const
 void OutputFileProvider::setDir(VDir_ptr dir)
 {
     if(outClient_)
-        outClient_->setDir(dir);
+        outClient_->setDir(dir);  
 
-    /*if(dir != dir_)
+    if(dir != dir_)
         dir_=dir;
-    else
-        return;
-
-    if(dir_ && outClient_)
-    {
-        for(unsigned int i=0; i < dir->count(); i++)
-        {
-            if(dir_->fullName(i) == outClient_->remoteFile())
-            {
-                outClient_->setExpectedSize(dir->items().at(i)->size_);
-                return;
-            }
-        }
-    }*/
 }
 
