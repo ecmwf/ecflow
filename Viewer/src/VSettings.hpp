@@ -55,6 +55,7 @@ public:
 	//void put(const std::string& key,bool val);
 	void put(const std::string& key,const std::string& val);
 	void put(const std::string& key,const std::vector<std::string>& val);
+	void put(const std::string& key,const std::vector<VSettings>& val);
 	void putAsBool(const std::string& key,bool val);
 
 	template <typename T>

@@ -29,6 +29,7 @@
 #include "ServerList.hpp"
 #include "VConfig.hpp"
 #include "VServerSettings.hpp"
+#include "SessionHandler.hpp"
 
 int main(int argc, char **argv)
 {
@@ -82,11 +83,13 @@ int main(int argc, char **argv)
     std::string menuFilename("ecflowview_menus.json");
     std::string menuPath = DirectoryHandler::concatenate(DirectoryHandler::etcDir(), menuFilename);
     MenuHandler::readMenuConfigFile(menuPath);
+    MenuHandler::refreshCustomMenuCommands();
 
     //Load the custom context menu commands
-    std::string cmdsFilename("ecflowview_custom_commands.json");
-    std::string cmdsPath = DirectoryHandler::concatenate(DirectoryHandler::etcDir(), cmdsFilename);
-    CustomCommandHandler::instance()->init(cmdsPath);
+    SessionItem* cs=SessionHandler::instance()->current();
+    std::string cmdsPath=cs->recentCustomCommandsFile();
+    CustomSavedCommandHandler::instance()->init(cmdsPath);
+    CustomCommandHistoryHandler::instance()->init(cmdsPath);
 
     //Load the info panel definition
     std::string panelFile = DirectoryHandler::concatenate(DirectoryHandler::etcDir(), "ecflowview_panels.json");

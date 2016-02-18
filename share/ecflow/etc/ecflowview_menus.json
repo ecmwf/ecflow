@@ -371,16 +371,6 @@
             "command"        : "None"
         },
 
-        {
-            "menu"           : "Custom",
-            "name"           : "New command...",
-            "command"        : "custom"
-        },
-
-        {
-            "menu"           : "Custom",
-            "name"           : "-"
-        },
 
 
 

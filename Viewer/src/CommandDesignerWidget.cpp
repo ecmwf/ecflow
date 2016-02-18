@@ -25,7 +25,7 @@ CommandDesignerWidget::CommandDesignerWidget(QWidget *parent) : QWidget(parent)
 	setupUi(this);
 
 
-	// at least for now, all commands will start with 'ecflow_client' and end with '<full_name>'
+	//at least for now, all commands will start with 'ecflow_client' and end with '<full_name>'
 	commandLineEdit_->setText("ecflow_client  <full_name>");
 	//commandLineEdit_->installEventFilter(this);
 	commandLineEdit_->setFocus();
@@ -74,7 +74,7 @@ CommandDesignerWidget::~CommandDesignerWidget()
 {
 	delete clientOptionsDescriptions_;
 
-	MenuHandler::addCustomMenuCommands();
+	MenuHandler::refreshCustomMenuCommands();
 }
 
 
@@ -284,7 +284,7 @@ void CommandDesignerWidget::updateSaveButtonStatus()
 		overwriteButton_->setEnabled(true);
 
 
-	int thisRow = CustomCommandHandler::instance()->findIndex(saveNameLineEdit_->text().toStdString());
+	int thisRow = CustomSavedCommandHandler::instance()->findIndexFromName(saveNameLineEdit_->text().toStdString());
 
 	if ((!saveNameLineEdit_->text().isEmpty() && thisRow != -1) ||
 		commandLineEdit_->text().isEmpty())
@@ -333,7 +333,7 @@ void CommandDesignerWidget::on_saveAsNewButton__clicked()
 	name    = saveNameLineEdit_->text().toStdString();
 	command = commandLineEdit_->text().toStdString();
 	context = addToContextMenuCb_->isChecked();
-	CustomCommand *cmd = CustomCommandHandler::instance()->add(name, command, context);
+	CustomCommand *cmd = CustomSavedCommandHandler::instance()->add(name, command, context);
 	refreshSavedCommandList();
 	currentCommandSaved_ = true;
 	updateSaveButtonStatus();
@@ -347,7 +347,7 @@ void CommandDesignerWidget::on_overwriteButton__clicked()
 	name    = saveNameLineEdit_->text().toStdString();
 	command = commandLineEdit_->text().toStdString();
 	context = addToContextMenuCb_->isChecked();
-	CustomCommand *cmd = CustomCommandHandler::instance()->replace(savedCommandsTable_->currentRow(), name, command, context);
+	CustomCommand *cmd = CustomSavedCommandHandler::instance()->replace(savedCommandsTable_->currentRow(), name, command, context);
 	refreshSavedCommandList();
 	currentCommandSaved_ = true;
 	updateSaveButtonStatus();
@@ -356,6 +356,12 @@ void CommandDesignerWidget::on_overwriteButton__clicked()
 
 void CommandDesignerWidget::on_runButton__clicked()
 {
+	std::string command = commandLineEdit_->text().toStdString();
+
+	// save this in the command history
+	CustomCommandHistoryHandler::instance()->add(command, command, true);
+
+
 	// close the dialogue - the calling function will call the command() function
 	// to retrieve the user's command
 	//accept();
@@ -364,13 +370,13 @@ void CommandDesignerWidget::on_runButton__clicked()
 
 void CommandDesignerWidget::refreshSavedCommandList()
 {
-	int n = CustomCommandHandler::instance()->numCommands();
+	int n = CustomSavedCommandHandler::instance()->numCommands();
 
 	savedCommandsTable_->clearContents();
 
 	for (int i = 0; i < n; i++)
 	{
-		CustomCommand *command = CustomCommandHandler::instance()->commandFromIndex(i);
+		CustomCommand *command = CustomSavedCommandHandler::instance()->commandFromIndex(i);
 		addCommandToSavedList(command, i);
 	}
 }

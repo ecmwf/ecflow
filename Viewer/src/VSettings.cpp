@@ -122,6 +122,7 @@ void VSettings::put(const std::string& key,const std::string& val)
 	pt_.put(path_.path(key),val);
 }
 
+
 void VSettings::put(const std::string& key,const std::vector<std::string>& val)
 {
 	boost::property_tree::ptree array;
@@ -131,6 +132,19 @@ void VSettings::put(const std::string& key,const std::vector<std::string>& val)
 	}
 	pt_.put_child(path_.path(key),array);
 }
+
+
+// for adding a list of 'structs'
+void VSettings::put(const std::string& key,const std::vector<VSettings>& val)
+{
+	boost::property_tree::ptree array;
+	for(std::vector<VSettings>::const_iterator it=val.begin(); it != val.end(); ++it)
+	{
+		array.push_back(std::make_pair("",(*it).pt_));
+	}
+	pt_.put_child(path_.path(key),array);
+}
+
 
 void VSettings::putAsBool(const std::string& key,bool val)
 {
@@ -173,6 +187,7 @@ void VSettings::endGroup()
 {
 	path_.pop();
 }
+
 
 //======================================================
 //

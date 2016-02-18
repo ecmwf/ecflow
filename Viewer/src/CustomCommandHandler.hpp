@@ -11,8 +11,10 @@
 #define VIEWER_SRC_CUSTOMCOMMANDHANDLER_HPP_
 
 #include <string>
-#include <vector>
+#include <deque>
 
+
+class VSettings;
 
 class CustomCommand
 {
@@ -22,6 +24,7 @@ public:
 	std::string command() const {return command_;};
 	bool inContextMenu()  const {return inContextMenu_;};
 	void set(const std::string &name, const std::string &command, bool context);
+	void save(VSettings *vs);
 
 
 private:
@@ -36,7 +39,7 @@ class CustomCommandHandler
 public:
 	CustomCommandHandler();
 
-	CustomCommand* add(const std::string& name, const std::string& command, bool context);
+	virtual CustomCommand* add(const std::string& name, const std::string& command, bool context) = 0;
 	CustomCommand* replace(int index, const std::string& name, const std::string& command, bool context);
 	//void remove(const std::string& name);
 	//void remove(CustomCommand*);
@@ -47,19 +50,55 @@ public:
 	void init(const std::string& configFilePath);
 	//const std::vector<NodeQuery*>& items() const {return items_;}
 	CustomCommand* find(const std::string& name) const;
-	int findIndex(const std::string& name) const;
+	int findIndexFromName(const std::string& name) const;
 	int numCommands() {return items_.size();};
 	CustomCommand *commandFromIndex(int i) {return items_[i];};
 
-	static CustomCommandHandler* instance();
-
 protected:
-	static CustomCommandHandler* instance_;
+	void writeSettings();
 
 	std::string dirPath_;
 	const std::string suffix_;
-	std::vector<CustomCommand*> items_;
+	std::deque<CustomCommand*> items_;
 };
+
+
+
+// ----------------------------------------------------------------------------------------------
+// specialisation of CustomCommandHandler to handle the commands that the user has manually saved
+// ----------------------------------------------------------------------------------------------
+
+class CustomSavedCommandHandler : public CustomCommandHandler
+{
+public:
+    CustomSavedCommandHandler() {};
+    CustomCommand* add(const std::string& name, const std::string& command, bool context);
+
+    static CustomSavedCommandHandler* instance();
+
+protected:
+    static CustomSavedCommandHandler* instance_;
+};
+
+
+
+// --------------------------------------------------------------------------------------------
+// specialisation of CustomCommandHandler to handle the commands that the user has recently run
+// --------------------------------------------------------------------------------------------
+
+class CustomCommandHistoryHandler : public CustomCommandHandler
+{
+public:
+    CustomCommandHistoryHandler();
+    CustomCommand* add(const std::string& name, const std::string& command, bool context);
+    static CustomCommandHistoryHandler* instance();
+
+protected:
+    static CustomCommandHistoryHandler* instance_;
+    int maxCommands_;
+};
+
+
 
 
 #endif /* VIEWER_SRC_CUSTOMCOMMANDHANDLER_HPP_ */
