@@ -17,6 +17,8 @@
 
 #include <boost/algorithm/string/join.hpp>
 #include <boost/property_tree/json_parser.hpp>
+#include <boost/filesystem/path.hpp>
+#include <boost/filesystem/operations.hpp>
 
 //#define _UI_SETTINGS_DEBUG
 
@@ -63,6 +65,11 @@ VSettings::VSettings(const std::string& file) : file_(file)
 {
 }
 
+VSettings::VSettings(boost::property_tree::ptree pt) : pt_(pt)
+{
+}
+
+
 void VSettings::clear()
 {
 	pt_.clear();
@@ -81,7 +88,7 @@ bool VSettings::containsFullPath(const std::string& key)
 
 
 //bool VSettings::read(const std::string &fs)
-bool VSettings::read()
+bool VSettings::read(bool failIfFileDoesNotExist)
 {
 	try
 	{
@@ -89,12 +96,17 @@ bool VSettings::read()
 	}
 	catch (const boost::property_tree::json_parser::json_parser_error& e)
 	{
-		 if(!DirectoryHandler::isFirstStartUp())
-		 {
-			 std::string errorMessage = e.what();
-			 UserMessage::message(UserMessage::ERROR, true, std::string("Error, unable to parse JSON session file : " + errorMessage));
-		 }
-		 return false;
+		namespace fs=boost::filesystem;
+		fs::path boostpath(file_);
+		if (!failIfFileDoesNotExist && !fs::exists(boostpath))  // no file and that's ok
+			return false;
+
+		if(!DirectoryHandler::isFirstStartUp())
+		{
+			std::string errorMessage = e.what();
+			UserMessage::message(UserMessage::ERROR, true, std::string("Error, unable to parse JSON session file : " + errorMessage));
+		}
+		return false;
 	}
 
 	return true;
@@ -177,6 +189,24 @@ bool VSettings::getAsBool(const std::string& key,bool defaultVal)
 	return false;
 
 }
+
+// for getting a list of 'structs'
+void VSettings::get(const std::string& key, std::vector<VSettings>& val)
+{
+	boost::optional<boost::property_tree::ptree& > ptArray=pt_.get_child_optional(path_.path(key));
+	if(!ptArray)
+	{
+		return;
+	}
+
+	for(boost::property_tree::ptree::const_iterator it = ptArray.get().begin(); it != ptArray.get().end(); ++it)
+	{
+		boost::property_tree::ptree child = it->second;
+		VSettings vs(child);
+		val.push_back(vs);
+	}
+}
+
 
 void VSettings::beginGroup(const std::string &id)
 {

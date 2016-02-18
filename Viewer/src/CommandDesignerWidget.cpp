@@ -333,7 +333,7 @@ void CommandDesignerWidget::on_saveAsNewButton__clicked()
 	name    = saveNameLineEdit_->text().toStdString();
 	command = commandLineEdit_->text().toStdString();
 	context = addToContextMenuCb_->isChecked();
-	CustomCommand *cmd = CustomSavedCommandHandler::instance()->add(name, command, context);
+	CustomCommand *cmd = CustomSavedCommandHandler::instance()->add(name, command, context, true);
 	refreshSavedCommandList();
 	currentCommandSaved_ = true;
 	updateSaveButtonStatus();
@@ -359,7 +359,7 @@ void CommandDesignerWidget::on_runButton__clicked()
 	std::string command = commandLineEdit_->text().toStdString();
 
 	// save this in the command history
-	CustomCommandHistoryHandler::instance()->add(command, command, true);
+	CustomCommandHistoryHandler::instance()->add(command, command, true, true);
 
 
 	// close the dialogue - the calling function will call the command() function

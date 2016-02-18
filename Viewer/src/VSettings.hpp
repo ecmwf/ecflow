@@ -36,12 +36,13 @@ class VSettings
 {
 public:
 	explicit VSettings(const std::string& file);
+	explicit VSettings(boost::property_tree::ptree pt);
 	virtual ~VSettings() {};
 
 	//bool read(const std::string &fs);
 	//virtual void write(const std::string &fs);
 
-	bool read();
+	bool read(bool failIfFileDoesNotExist = true);
 	virtual void write();
 
 	virtual void clear();
@@ -65,6 +66,7 @@ public:
 	}
 	void get(const std::string& key,std::vector<std::string>& val);
 	bool getAsBool(const std::string& key,bool defaultVal);
+	void get(const std::string& key,std::vector<VSettings>& val);
 
 	const boost::property_tree::ptree & propertyTree() const {return pt_;}
 

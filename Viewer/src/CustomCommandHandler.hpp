@@ -39,7 +39,7 @@ class CustomCommandHandler
 public:
 	CustomCommandHandler();
 
-	virtual CustomCommand* add(const std::string& name, const std::string& command, bool context) = 0;
+	virtual CustomCommand* add(const std::string& name, const std::string& command, bool context, bool WriteSettings) = 0;
 	CustomCommand* replace(int index, const std::string& name, const std::string& command, bool context);
 	//void remove(const std::string& name);
 	//void remove(CustomCommand*);
@@ -56,6 +56,7 @@ public:
 
 protected:
 	void writeSettings();
+	void readSettings();
 
 	std::string dirPath_;
 	const std::string suffix_;
@@ -72,7 +73,7 @@ class CustomSavedCommandHandler : public CustomCommandHandler
 {
 public:
     CustomSavedCommandHandler() {};
-    CustomCommand* add(const std::string& name, const std::string& command, bool context);
+    CustomCommand* add(const std::string& name, const std::string& command, bool context, bool saveSettings);
 
     static CustomSavedCommandHandler* instance();
 
@@ -90,7 +91,7 @@ class CustomCommandHistoryHandler : public CustomCommandHandler
 {
 public:
     CustomCommandHistoryHandler();
-    CustomCommand* add(const std::string& name, const std::string& command, bool context);
+    CustomCommand* add(const std::string& name, const std::string& command, bool context, bool saveSettings);
     static CustomCommandHistoryHandler* instance();
 
 protected:

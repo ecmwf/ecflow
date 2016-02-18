@@ -50,6 +50,8 @@ void CustomCommandHandler::init(const std::string& configFilePath)
 {
 
     dirPath_ = configFilePath;
+    readSettings();
+
     /*
     dirPath_=dirPath;
 	DirectoryHandler::createDir(dirPath_);
@@ -135,6 +137,30 @@ void CustomCommandHandler::writeSettings()
     vs.write();
 }
 
+void CustomCommandHandler::readSettings()
+{
+    std::vector<VSettings> vsItems;
+    std::string dummyFileName="dummy";
+    std::string key="commands";
+    VSettings vs(dirPath_);
+
+    bool ok = vs.read(false);  // false means we don't abort if the file is not there
+
+    if (ok)
+    {
+        std::vector<VSettings> commands;
+        vs.get("commands", commands);
+
+        for (int i = 0; i < commands.size(); i++)
+        {
+            VSettings *vsCommand = &commands[i];
+            std::string emptyDefault="";
+            std::string name    = vsCommand->get("name",    emptyDefault);
+            std::string command = vsCommand->get("command", emptyDefault);
+            CustomCommandHistoryHandler::instance()->add(name, command, true, false);  // add it to our in-memory list
+        }
+    }
+}
 
 
 // -------------------------
@@ -156,7 +182,7 @@ CustomSavedCommandHandler* CustomSavedCommandHandler::instance()
     return instance_;
 }
 
-CustomCommand* CustomSavedCommandHandler::add(const std::string& name, const std::string& command, bool context)
+CustomCommand* CustomSavedCommandHandler::add(const std::string& name, const std::string& command, bool context, bool saveSettings)
 {
     CustomCommand *item;
     //int index = findIndex(name);
@@ -172,7 +198,9 @@ CustomCommand* CustomSavedCommandHandler::add(const std::string& name, const std
     //    item->set(name, command, context);
     //}
 
-    writeSettings();
+    if (saveSettings)
+        writeSettings();
+
     return item;
 }
 
@@ -201,7 +229,7 @@ CustomCommandHistoryHandler* CustomCommandHistoryHandler::instance()
 }
 
 
-CustomCommand* CustomCommandHistoryHandler::add(const std::string& name, const std::string& command, bool context)
+CustomCommand* CustomCommandHistoryHandler::add(const std::string& name, const std::string& command, bool context, bool saveSettings)
 {
     CustomCommand *item;
     int index = findIndexFromName(name);
@@ -216,7 +244,9 @@ CustomCommand* CustomCommandHistoryHandler::add(const std::string& name, const s
             items_.pop_back(); // remove the last item
         }
 
-        writeSettings();
+        if (saveSettings)
+            writeSettings();
+
         return item;
     }
     else
