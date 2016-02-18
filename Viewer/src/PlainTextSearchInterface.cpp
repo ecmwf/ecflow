@@ -164,8 +164,6 @@ void PlainTextSearchInterface::automaticSearchForKeywords(bool userClickedReload
 	}
 #endif
 
-
-
 	else
 	{
 		if(userClickedReload)

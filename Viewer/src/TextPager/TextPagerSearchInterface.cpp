@@ -162,7 +162,8 @@ void TextPagerSearchInterface::automaticSearchForKeywords(bool userClickedReload
 		i++;
 	}
 #endif
-	else
+
+    else
 	{
 		if(userClickedReload)
 		{

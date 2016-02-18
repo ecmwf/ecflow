@@ -11,6 +11,9 @@
 #define VIEWER_SRC_OUTPUTBROWSER_HPP_
 
 #include <QStackedWidget>
+#include <QMap>
+
+#include "VFile.hpp"
 
 class Highlighter;
 class MessageLabel;
@@ -21,7 +24,19 @@ class TextPagerWidget;
 class TextPagerSearchInterface;
 class VProperty;
 
-#include "VFile.hpp"
+class OutputBrowser;
+
+class CursorCacheItem
+{
+    friend class OutputBrowser;
+public:
+    CursorCacheItem() : pos_(0), verticalScrollValue_(0), viewportHeight_(0) {}
+protected:
+    int pos_;
+    int verticalScrollValue_;
+    int viewportHeight_;
+};
+
 
 class OutputBrowser : public QWidget
 {
@@ -33,7 +48,6 @@ public:
 
     void clear();
     void loadFile(VFile_ptr file);
-	void loadFile(QString fileName);
     void loadText(QString text,QString fileName,bool resetFile=true);
 	void adjustHighlighter(QString fileName);
 	void setFontProperty(VProperty* p);
@@ -43,6 +57,7 @@ public:
 	void searchOnReload(bool userClickedReload);
 	void zoomIn();
 	void zoomOut();
+    void clearCursorCache() {cursorCache_.clear();}
 
 protected Q_SLOTS:
 	void showConfirmSearchLabel();
@@ -51,8 +66,11 @@ private:
 	enum IndexType {BasicIndex=0,PagerIndex=1};
 	void changeIndex(IndexType indexType,qint64 fileSize);
     bool isJobFile(QString fileName);
-    
-	QStackedWidget *stacked_;
+    void loadFile(QString fileName);
+    void updateCursorFromCache(const std::string&);
+    void setCursorPos(qint64 pos);
+
+    QStackedWidget *stacked_;
 	PlainTextEdit* textEdit_;
 	TextPagerWidget* textPager_;
 	TextEditSearchLine* searchLine_;
@@ -64,6 +82,10 @@ private:
     //we keep a reference to it to make sure that it does not get deleted while
     //it is being displayed
     VFile_ptr file_;
+    int lastPos_;
+    std::string currentSourceFile_;
+
+    QMap<std::string,CursorCacheItem> cursorCache_;
 
     static int minPagerTextSize_;
 	static int minPagerSparseSize_;

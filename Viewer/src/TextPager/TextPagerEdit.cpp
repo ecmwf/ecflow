@@ -82,7 +82,7 @@ TextPagerEdit::TextPagerEdit(QWidget *parent) :
     //d->actions[UndoAction]->setEnabled(false);
     //d->actions[RedoAction]->setEnabled(false);
     setContextMenuPolicy(Qt::ActionsContextMenu);
-    setCursorVisible(true); // starts blinking
+    //setCursorVisible(true); // starts blinking
     connect(this, SIGNAL(selectionChanged()), d, SLOT(onSelectionChanged()));
 
 
@@ -423,6 +423,13 @@ void TextPagerEdit::paintEvent(QPaintEvent *e)
                 extraSelectionIndex = lowestIncompleteSelection;
             }
 
+            // is this the current line?
+            /*if(cursorLayout == l)
+            {
+                p.fillRect(r, QColor(216,228,239));  // highlight the current line
+            }*/
+
+
             if (selectionRange.start != -1) {
                 // The last range in the vector has priority, that
                 // should probably be the real selection
@@ -667,8 +674,7 @@ void TextPagerEdit::setReadOnly(bool rr)
 {
     d->readOnly = rr;
 
-    //we always want to show the cursor
-    //setCursorVisible(!rr);
+    setCursorVisible(!rr);
 
   /*  //d->actions[PasteAction]->setEnabled(!rr);
     //d->actions[CutAction]->setEnabled(!rr);

@@ -74,7 +74,6 @@ protected:
 	bool ignoreOutputSelection_;
 	QTimer* updateDirTimer_;
 	static int updateDirTimeout_;
-    //VFile_ptr cachedOutput_;
 };
 
 #endif

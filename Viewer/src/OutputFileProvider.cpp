@@ -244,7 +244,7 @@ bool OutputFileProvider::fetchFileViaOutputClient(VNode *n,const std::string& fi
 
         //reply_->setInfoText("Getting file through log server: " + host + "@" + port);
         //owner_->infoProgress(reply_);
-        owner_->infoProgressStart("Getting file from log server: " + host + "@" + port,0);
+        owner_->infoProgressStart("Getting file <i>" + fileName + "</i> from log server <i>" + host + "@" + port  +"</i>",0);
 
 		if(!outClient_)
 		{
@@ -334,8 +334,11 @@ void OutputFileProvider::fetchJoboutViaServer(ServerHandler *server,VNode *n,con
     //Define a task for getting the info from the server.
     task_=VTask::create(taskType_,n,this);
 
+
     task_->reply()->fileReadMode(VReply::ServerReadMode);
     task_->reply()->fileName(fileName);
+
+    //owner_->infoProgressStart("Getting file <i>" + fileName + "</i> from server",0);
 
     //Run the task in the server. When it finish taskFinished() is called. The text returned
     //in the reply will be prepended to the string we generated above.
@@ -348,8 +351,9 @@ bool OutputFileProvider::fetchLocalFile(const std::string& fileName)
 	VFile_ptr f(VFile::create(fileName,false));
 	if(f->exists())
 	{
+        f->setSourcePath(f->path());
 		reply_->fileReadMode(VReply::LocalReadMode);
-		reply_->tmpFile(f);
+        reply_->tmpFile(f);
 		owner_->infoReady(reply_);
 		return true;
 	}

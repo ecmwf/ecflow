@@ -9,7 +9,6 @@
 
 #include "OutputItemWidget.hpp"
 
-//#include "OutputCache.hpp"
 #include "OutputDirProvider.hpp"
 #include "OutputFileProvider.hpp"
 #include "OutputModel.hpp"
@@ -114,6 +113,7 @@ void OutputItemWidget::reload(VInfo_ptr info)
 
 	enabled_=true;
 	info_=info;
+    userClickedReload_ = false;
 
 	if(info_ && info_.get())
 	{
@@ -155,9 +155,6 @@ void OutputItemWidget::getLatestFile()
     fileLabel_->clear();
 	browser_->clear();
 
-    //OutputCache::instance()->markForRemove(cachedOutput_,true);
-    //cachedOutput_.reset();
-
     //Get the latest file contents
 	infoProvider_->info(info_);
 }
@@ -170,9 +167,6 @@ void OutputItemWidget::getCurrentFile()
     fileLabel_->clear();
 	browser_->clear();
 
-    //OutputCache::instance()->markForRemove(cachedOutput_);
-    //cachedOutput_.reset();
-
 	if(info_ && info_.get())
 	{
 		std::string fullName=currentFullName();
@@ -184,9 +178,6 @@ void OutputItemWidget::getCurrentFile()
 
 void OutputItemWidget::clearContents()
 {
-    //OutputCache::instance()->markForRemove(cachedOutput_);
-    //cachedOutput_.reset();
-
     updateDirTimer_->stop();
 
     InfoPanelItem::clear();
@@ -196,8 +187,10 @@ void OutputItemWidget::clearContents()
     messageLabel_->stopProgress();
     //messageLabel_->stopLoadLabel();
     fileLabel_->clear();
+    browser_->clearCursorCache();
     browser_->clear();
-
+    reloadTb_->setEnabled(true);
+    userClickedReload_ = false;
     enableDir(false);
 }
 
@@ -219,9 +212,6 @@ void OutputItemWidget::infoReady(VReply* reply)
     //------------------------
     // From output provider
     //------------------------
-
-    //OutputCache::instance()->markForRemove(cachedOutput_);
-    //cachedOutput_.reset();
 
     if(reply->sender() == infoProvider_)
     {
@@ -257,32 +247,12 @@ void OutputItemWidget::infoReady(VReply* reply)
             if(f->storageMode() == VFile::DiskStorage)
                 hasMessage=false;
 
-            /*if(f->storageMode() == VFile::MemoryStorage)
-            {
-                    //messageLabel_->hide();
-
-                    QString s(f->data());
-                    browser_->loadText(s,QString::fromStdString(f->path()));
-            }
-            else
-            {
-                    browser_->loadFile(QString::fromStdString(f->path()));
-                    hasMessage=false;
-            }*/
-
-            //Cache the file coming through the logserver
-            if(reply->fileReadMode() == VReply::LogServerReadMode)
-            {
-                //cachedOutput_=f;
-                //OutputCache::instance()->add(info_,reply->fileName(),f);
-            }
-
         }
         //If the info is stored as a string in the reply object
         else
         {
-                QString s=QString::fromStdString(reply->text());
-                browser_->loadText(s,QString::fromStdString(reply->fileName()));
+            QString s=QString::fromStdString(reply->text());
+            browser_->loadText(s,QString::fromStdString(reply->fileName()));
         }
 
         if(!hasMessage)
@@ -294,13 +264,23 @@ void OutputItemWidget::infoReady(VReply* reply)
         //Update the file label
         fileLabel_->update(reply);
 
-        searchOnReload();
+        //Search for some keywords in the current jobout
 
-        //if(f && f.get())
-        //{
-        //	f->setWidgetLoadDuration(stopper.elapsed());
-        //}
+        //We do not have dir info so the file must be the jobout
+        if(dirModel_->isEmpty())
+            searchOnReload();
+        //We have dir info
+        else
+        {
+            OutputFileProvider* op=static_cast<OutputFileProvider*>(infoProvider_);
+            if(reply->fileName() == op->joboutFileName())
+            {
+                searchOnReload();
+            }
+        }
 
+        userClickedReload_ = false;
+        reloadTb_->setEnabled(true);
     }
 
     //------------------------
@@ -333,7 +313,7 @@ void  OutputItemWidget::infoProgress(const std::string& text,int value)
 
 void OutputItemWidget::infoFailed(VReply* reply)
 {
-	if(reply->sender() == infoProvider_)
+    if(reply->sender() == infoProvider_)
 	{
 		QString s=QString::fromStdString(reply->errorText());
 
@@ -344,15 +324,18 @@ void OutputItemWidget::infoFailed(VReply* reply)
 		//Update the file label
 		fileLabel_->update(reply);
 
-		//updateDir(true);
+        userClickedReload_ = false;
+        reloadTb_->setEnabled(true);
+        //updateDir(true);
 	}
 }
 
 void OutputItemWidget::on_reloadTb__clicked()
 {
 	userClickedReload_ = true;
-	getLatestFile();
-	userClickedReload_ = false;
+    reloadTb_->setEnabled(false);
+    getLatestFile();
+    //userClickedReload_ = false;
 }
 
 //------------------------------------

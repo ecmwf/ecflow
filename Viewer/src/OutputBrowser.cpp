@@ -24,7 +24,9 @@ int OutputBrowser::minPagerTextSize_=1*1024*1024;
 int OutputBrowser::minPagerSparseSize_=30*1024*1024;
 int OutputBrowser::minConfirmSearchSize_=5*1024*1024;
 
-OutputBrowser::OutputBrowser(QWidget* parent) : QWidget(parent)
+OutputBrowser::OutputBrowser(QWidget* parent) :
+    QWidget(parent),
+    lastPos_(0)
 {
     QVBoxLayout *vb=new QVBoxLayout(this);
     vb->setContentsMargins(0,0,0,0);
@@ -83,7 +85,14 @@ OutputBrowser::~OutputBrowser()
 
 void OutputBrowser::clear()
 {
-	textEdit_->clear();
+    if(stacked_->currentIndex() == BasicIndex)
+        cursorCache_[currentSourceFile_].pos_=textEdit_->textCursor().position();
+    else
+        cursorCache_[currentSourceFile_].pos_=textPager_->textEditor()->textCursor().position();
+
+    currentSourceFile_.clear();
+
+    textEdit_->clear();
 	textPager_->clear();
     file_.reset();
 }
@@ -119,6 +128,9 @@ void OutputBrowser::loadFile(VFile_ptr file)
     if(file_->storageMode() == VFile::DiskStorage)
     {
         loadFile(QString::fromStdString(file_->path()));
+
+        //Set the cursor position from the cache
+        updateCursorFromCache(file_->sourcePath());
     }
     else
     {
@@ -172,6 +184,22 @@ void OutputBrowser::loadText(QString txt,QString fileName,bool resetFile)
         adjustHighlighter(fileName);  
         textEdit_->document()->setPlainText(txt);
     }
+
+    //Set the cursor position from the cache
+    updateCursorFromCache(fileName.toStdString());
+}
+
+void OutputBrowser::updateCursorFromCache(const std::string& sourcePath)
+{
+#if 0
+    //Set the cursor position from the cache
+    QMap<std::string,CursorCacheItem>::const_iterator it=cursorCache_.find(sourcePath);
+    if(it != cursorCache_.end())
+    {
+        setCursorPos(it.value().pos_);
+    }
+    currentSourceFile_=file_->sourcePath();
+#endif
 }
 
 bool OutputBrowser::isJobFile(QString fileName)
@@ -253,4 +281,18 @@ void OutputBrowser::showConfirmSearchLabel()
 	{
 		confirmSearchLabel_->hide();
 	}
+}
+
+void OutputBrowser::setCursorPos(qint64 pos)
+{
+    if(stacked_->currentIndex() == BasicIndex)
+    {
+        QTextCursor c=textEdit_->textCursor();
+        c.setPosition(pos);
+        textEdit_->setTextCursor(c);
+    }
+    else
+    {
+        textPager_->textEditor()->setCursorPosition(pos);
+    }
 }
