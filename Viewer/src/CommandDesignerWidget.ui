@@ -70,11 +70,6 @@
                    <string>&lt;full_name&gt;</string>
                   </property>
                  </item>
-                 <item>
-                  <property name="text">
-                   <string>&lt;parent_name&gt;</string>
-                  </property>
-                 </item>
                 </widget>
                </item>
                <item>

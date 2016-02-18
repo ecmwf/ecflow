@@ -64,8 +64,8 @@ CommandDesignerWidget::CommandDesignerWidget(QWidget *parent) : QWidget(parent)
 
 
 	// temporary
-	//saveCommandGroupBox_->setVisible(false);
-	//tabWidget_->setTabEnabled(1, false);
+	saveCommandGroupBox_->setVisible(false);
+	tabWidget_->setTabEnabled(2, false);
 	//savedCommandsGroupBox_->setVisible(false);
 
 }
