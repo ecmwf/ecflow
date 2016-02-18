@@ -4,6 +4,16 @@
 .cproject
 .project
 
+#netbeans
+nbproject/
+
+#Qt creator
+ecflow.config
+*.creator
+*.creator.*
+ecflow.includes
+ecflow.files
+ 
 # cmake
 ecbuild/
 build/

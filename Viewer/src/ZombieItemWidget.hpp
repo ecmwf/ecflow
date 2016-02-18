@@ -30,15 +30,17 @@ public:
     ~ZombieItemWidget();
 	void reload(VInfo_ptr);
 	QWidget* realWidget();
-	void clearContents();
+    void clearContents();
+    void becameSelected() {}
+    void becameUnselected() {}
 
 	//From VInfoPresenter
 	void infoReady(VReply*);
 	void infoFailed(VReply*);
-	void infoProgress(VReply*) {};
+    void infoProgress(VReply*) {}
 
-	void nodeChanged(const VNode*, const std::vector<ecf::Aspect::Type>&) {};
-	void defsChanged(const std::vector<ecf::Aspect::Type>&) {};
+    void nodeChanged(const VNode*, const std::vector<ecf::Aspect::Type>&) {}
+    void defsChanged(const std::vector<ecf::Aspect::Type>&) {}
 
 protected Q_SLOTS:
 	void on_actionTerminate_triggered();
@@ -50,7 +52,7 @@ protected Q_SLOTS:
 	void slotItemSelected(QModelIndex,QModelIndex);
 
 protected:
-	void updateWidgetState() {};
+    void updateWidgetState() {}
 	void serverSyncFinished();
 
 private:

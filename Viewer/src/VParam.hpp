@@ -26,6 +26,7 @@ public:
 		QString label() const {return label_;}
 		QColor colour() const {return colour_;}
 		QColor fontColour() const {return fontColour_;}
+        QColor typeColour() const {return typeColour_;}
 
 		void setProperty(VProperty*);
 		
@@ -55,6 +56,7 @@ protected:
 		//Cached information
 		QColor colour_;
 		QColor fontColour_;
+        QColor typeColour_;
 
         /*std::map<std::string,int> numberMap_;
 		std::map<std::string,std::string> textMap_;
@@ -63,7 +65,8 @@ protected:
 
 		VProperty* prop_;
 		QString colourPropName_;
-		QString fontColourPropName_;
+        QString fontColourPropName_;
+        QString typeColourPropName_;
 };
 
 #endif

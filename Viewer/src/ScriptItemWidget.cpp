@@ -59,8 +59,7 @@ void ScriptItemWidget::reload(VInfo_ptr info)
     }
     else
     {
-        fileLabel_->setText(tr("<b>File:</b> ") + QString::fromStdString(info->node()->genVariable("ECF_SCRIPT")));
-        infoProvider_->info(info_);
+    	infoProvider_->info(info_);
     }	
 }
 
@@ -87,6 +86,9 @@ void ScriptItemWidget::infoReady(VReply* reply)
     {
         messageLabel_->showInfo(QString::fromStdString(reply->infoText()));
     }
+
+    fileLabel_->update(reply);
+
 }
 
 void ScriptItemWidget::infoProgress(VReply* reply)

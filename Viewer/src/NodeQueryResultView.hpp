@@ -35,6 +35,8 @@ public:
 	void currentSelection(VInfo_ptr n);
 	void selectFirstServer();
 	void setSourceModel(NodeQueryResultModel* model);
+	void enableContextMenu(bool enable);
+	void getListOfSelectedNodes(std::vector<VInfo_ptr> &nodeList);
 
 	//void readSettings(VSettings* vs) {};
 
@@ -46,9 +48,11 @@ public Q_SLOTS:
 	void slotSetCurrent(VInfo_ptr);
 	void slotRerender();
 	void slotSizeHintChangedGlobal();
+	void selectionChanged (const QItemSelection &selected, const QItemSelection &deselected);
 
 Q_SIGNALS:
 	void selectionChanged(VInfo_ptr);
+	void selectionChanged();
 	void infoPanelCommand(VInfo_ptr,QString);
 
 protected:

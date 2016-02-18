@@ -16,7 +16,7 @@ public:
 
    	void setData(VDir_ptr dir);
    	void clearData();
-
+    bool isEmpty() const {return (!dir_);}
    	int columnCount (const QModelIndex& parent = QModelIndex() ) const;
    	int rowCount (const QModelIndex& parent = QModelIndex() ) const;
 
@@ -43,7 +43,7 @@ class OutputSortModel : public QSortFilterProxyModel
 {
 public:
 	explicit OutputSortModel(QObject *parent=0);
-	~OutputSortModel() {};
+    ~OutputSortModel() {}
 
 	bool lessThan(const QModelIndex &left, const QModelIndex &right) const;
 	bool filterAcceptsRow(int,const QModelIndex &) const;

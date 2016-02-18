@@ -17,6 +17,10 @@
 
 #include <boost/algorithm/string/join.hpp>
 #include <boost/property_tree/json_parser.hpp>
+#include <boost/filesystem/path.hpp>
+#include <boost/filesystem/operations.hpp>
+
+//#define _UI_SETTINGS_DEBUG
 
 //======================================================
 //
@@ -61,6 +65,11 @@ VSettings::VSettings(const std::string& file) : file_(file)
 {
 }
 
+VSettings::VSettings(boost::property_tree::ptree pt) : pt_(pt)
+{
+}
+
+
 void VSettings::clear()
 {
 	pt_.clear();
@@ -79,7 +88,7 @@ bool VSettings::containsFullPath(const std::string& key)
 
 
 //bool VSettings::read(const std::string &fs)
-bool VSettings::read()
+bool VSettings::read(bool failIfFileDoesNotExist)
 {
 	try
 	{
@@ -87,12 +96,17 @@ bool VSettings::read()
 	}
 	catch (const boost::property_tree::json_parser::json_parser_error& e)
 	{
-		 if(!DirectoryHandler::isFirstStartUp())
-		 {
-			 std::string errorMessage = e.what();
-			 UserMessage::message(UserMessage::ERROR, true, std::string("Error, unable to parse JSON session file : " + errorMessage));
-		 }
-		 return false;
+		namespace fs=boost::filesystem;
+		fs::path boostpath(file_);
+		if (!failIfFileDoesNotExist && !fs::exists(boostpath))  // no file and that's ok
+			return false;
+
+		if(!DirectoryHandler::isFirstStartUp())
+		{
+			std::string errorMessage = e.what();
+			UserMessage::message(UserMessage::ERROR, true, std::string("Error, unable to parse JSON session file : " + errorMessage));
+		}
+		return false;
 	}
 
 	return true;
@@ -120,6 +134,7 @@ void VSettings::put(const std::string& key,const std::string& val)
 	pt_.put(path_.path(key),val);
 }
 
+
 void VSettings::put(const std::string& key,const std::vector<std::string>& val)
 {
 	boost::property_tree::ptree array;
@@ -129,6 +144,19 @@ void VSettings::put(const std::string& key,const std::vector<std::string>& val)
 	}
 	pt_.put_child(path_.path(key),array);
 }
+
+
+// for adding a list of 'structs'
+void VSettings::put(const std::string& key,const std::vector<VSettings>& val)
+{
+	boost::property_tree::ptree array;
+	for(std::vector<VSettings>::const_iterator it=val.begin(); it != val.end(); ++it)
+	{
+		array.push_back(std::make_pair("",(*it).pt_));
+	}
+	pt_.put_child(path_.path(key),array);
+}
+
 
 void VSettings::putAsBool(const std::string& key,bool val)
 {
@@ -162,6 +190,24 @@ bool VSettings::getAsBool(const std::string& key,bool defaultVal)
 
 }
 
+// for getting a list of 'structs'
+void VSettings::get(const std::string& key, std::vector<VSettings>& val)
+{
+	boost::optional<boost::property_tree::ptree& > ptArray=pt_.get_child_optional(path_.path(key));
+	if(!ptArray)
+	{
+		return;
+	}
+
+	for(boost::property_tree::ptree::const_iterator it = ptArray.get().begin(); it != ptArray.get().end(); ++it)
+	{
+		boost::property_tree::ptree child = it->second;
+		VSettings vs(child);
+		val.push_back(vs);
+	}
+}
+
+
 void VSettings::beginGroup(const std::string &id)
 {
 	path_.add(id);
@@ -171,6 +217,7 @@ void VSettings::endGroup()
 {
 	path_.pop();
 }
+
 
 //======================================================
 //
@@ -184,14 +231,11 @@ VComboSettings::VComboSettings(const std::string& file,const std::string& qsFile
 {
 
 	//qs_(QString::fromStdString(application))
-
 	//QSettings::setPath(QSettings::IniFormat, QSettings::UserScope,"/home/graphics/cgr/.ecflowview");
-
-
 	//QSettings::setPath(QSettings::IniFormat, QSettings::UserScope,"/home/graphics/cgr/.ecflowview");
-
-	qDebug() << qs_.fileName();
-
+#ifdef _UI_SETTINGS_DEBUG
+    UserMessage::message(UserMessage::DBG,false,"VComboSettings --> fileName=" + qs_.fileName().toStdString());
+#endif
 }
 
 VComboSettings::~VComboSettings()
@@ -222,7 +266,9 @@ void VComboSettings::putQs(const std::string& key,QVariant val)
 
 QVariant  VComboSettings::getQs(const std::string& key)
 {
-	qDebug() << "qt group" << qs_.group();
+#ifdef _UI_SETTINGS_DEBUG
+    qDebug() << "qt group" << qs_.group();
+#endif
 	return qs_.value(QString::fromStdString(key));
 }
 
@@ -230,8 +276,9 @@ void VComboSettings::beginGroup(const std::string &id)
 {
 	VSettings::beginGroup(id);
 	qs_.beginGroup(QString::fromStdString(id));
-
+#ifdef _UI_SETTINGS_DEBUG
 	qDebug() << "qt group" << qs_.group();
+#endif
 }
 
 void VComboSettings::endGroup()

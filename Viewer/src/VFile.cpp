@@ -14,7 +14,12 @@
 #include <fstream>
 #include <string.h>
 
+#include "DirectoryHandler.hpp"
 #include "VFile.hpp"
+#include "UserMessage.hpp"
+
+#include <boost/lexical_cast.hpp>
+
 const size_t VFile::maxDataSize_=1024*1024*10;
 
 VFile::VFile(const std::string& name,const std::string& str,bool deleteFile) :
@@ -25,7 +30,7 @@ VFile::VFile(const std::string& name,const std::string& str,bool deleteFile) :
 	dataSize_(0),
 	fp_(0),
 	transferDuration_(0),
-	widgetLoadDuration_(0)
+    cached_(false)
 {
 	std::ofstream f(path_.c_str());
 	if(f.is_open())
@@ -43,19 +48,19 @@ VFile::VFile(const std::string& name,bool deleteFile) :
 	dataSize_(0),
 	fp_(0),
 	transferDuration_(0),
-	widgetLoadDuration_(0)
+    cached_(false)
 {
 }
 
 VFile::VFile(bool deleteFile) :
-	path_(VFile::tmpName()),
+    path_(""),
 	deleteFile_(deleteFile),
 	storageMode_(MemoryStorage),
 	data_(0),
 	dataSize_(0),
 	fp_(0),
 	transferDuration_(0),
-	widgetLoadDuration_(0)
+    cached_(false)
 {
 }
 
@@ -63,20 +68,35 @@ VFile::~VFile()
 {
 	close();
 
-	if(data_)
-		delete [] data_;
+    UserMessage::message(UserMessage::DBG,false,"VFile::~VFile -->");
+    print();
 
-	if(deleteFile_)
-	{
-		//TODO: add further/better checks
-		if(exists() && !path_.empty() && path_ != "/" && path_.size() > 4)
-			unlink(path_.c_str());
-	}
+	if(data_)
+    {
+        delete [] data_;
+        UserMessage::debug("  memory released");
+    }
+
+    //TODO: add further/better checks
+    if(deleteFile_ &&
+       exists() && !path_.empty() && path_ != "/" && path_.size() > 4)
+    {
+        unlink(path_.c_str());
+        UserMessage::debug("  file deleted from disk");
+    }
+    else if(!path_.empty() && exists())
+    {
+        UserMessage::debug("  file was kept on disk");
+    }
+
+    UserMessage::debug("<-- VFile::~VFile");
 }
 
 bool VFile::exists() const
 {
-	return (access(path_.c_str(), R_OK) ==0);
+    if(path_.empty())
+        return false;
+    return (access(path_.c_str(), R_OK) ==0);
 }
 
 VFile_ptr VFile::create(const std::string& path,const std::string& str,bool deleteFile)
@@ -105,7 +125,10 @@ void VFile::setStorageMode(StorageMode mode)
 	{
 		if(dataSize_ > 0)
 		{
-			fp_ = fopen(path_.c_str(),"w");
+            if(path_.empty())
+               path_=DirectoryHandler::tmpFileName();
+
+            fp_ = fopen(path_.c_str(),"w");
 			if(fwrite(data_,1,dataSize_,fp_) != dataSize_)
 			{
 
@@ -122,7 +145,7 @@ void VFile::setStorageMode(StorageMode mode)
 bool VFile::write(const char *buf,size_t len,std::string& err)
 {
 
-	printf("total:%d \n len: %d \n",dataSize_,len);
+    //printf("total:%d \n len: %d \n",dataSize_,len);
 
 
 	//Keep data in memory
@@ -150,7 +173,10 @@ bool VFile::write(const char *buf,size_t len,std::string& err)
 	{
 		if(!fp_)
 		{
-			fp_ = fopen(path_.c_str(),"w");
+            if(path_.empty())
+               path_=DirectoryHandler::tmpFileName();
+
+            fp_ = fopen(path_.c_str(),"a");
 		}
 
 		if(fwrite(buf,1,len,fp_) != len)
@@ -180,6 +206,7 @@ void VFile::close()
 	}
 }
 
+/*
 std::string VFile::tmpName()
 {
 	std::string res;
@@ -212,5 +239,21 @@ std::string VFile::tmpName()
 
 	return res;
 
+}
+*/
+
+void VFile::print()
+{
+    std::string str="  VFile contents --> storage:";
+    if(storageMode_ == MemoryStorage)
+    {
+        str+="memory size:" + boost::lexical_cast<std::string>(dataSize_);
+    }
+    else
+    {
+        str+="disk path: " + path_;
+    }
+
+    UserMessage::message(UserMessage::DBG,false,str);
 }
 

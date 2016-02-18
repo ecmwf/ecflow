@@ -168,7 +168,7 @@ void OutputDirProvider::slotOutputClientFinished()
 	}
 }
 
-void OutputDirProvider::slotOutputClientProgress(QString msg)
+void OutputDirProvider::slotOutputClientProgress(QString,int)
 {
 	/*reply_->setInfoText(msg.toStdString());
 	owner_->infoProgress(reply_);
@@ -246,6 +246,7 @@ OutputDirClient* OutputDirProvider::makeOutputClient(const std::string& host,con
 		if(outClient_->host() != host || outClient_->portStr() != port)
 		{
 			delete outClient_;
+			outClient_=0;
 		}
 	}
 
@@ -256,8 +257,8 @@ OutputDirClient* OutputDirProvider::makeOutputClient(const std::string& host,con
 		connect(outClient_,SIGNAL(error(QString)),
 				this,SLOT(slotOutputClientError(QString)));
 
-		connect(outClient_,SIGNAL(progress(QString)),
-				this,SLOT(slotOutputClientProgress(QString)));
+        connect(outClient_,SIGNAL(progress(QString,int)),
+                this,SLOT(slotOutputClientProgress(QString,int)));
 
 		connect(outClient_,SIGNAL(finished()),
 				this,SLOT(slotOutputClientFinished()));

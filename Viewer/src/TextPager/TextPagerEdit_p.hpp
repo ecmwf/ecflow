@@ -30,12 +30,21 @@ struct CursorData {
     int position, anchor;
 };
 
+struct LastPageCache {
+    LastPageCache() : position(-1),height(-1),widest(-1), documentSize(-1) {}
+    void clear() {position=-1; height=-1; widest=-1; documentSize=-1;}
+    int position;
+    int height;
+    int widest;
+    int documentSize;
+};
+
 class TextEditPrivate : public QObject, public TextPagerLayout
 {
     Q_OBJECT
 public:
     TextEditPrivate(TextPagerEdit *qptr)
-        : requestedScrollBarPosition(-1), lastRequestedScrollBarPosition(-1), cursorWidth(1),
+        : requestedScrollBarPosition(-1), lastRequestedScrollBarPosition(-1), cursorWidth(2),
         sectionCount(0), maximumSizeCopy(50000), pendingTimeOut(-1), autoScrollLines(0),
         readOnly(true), cursorVisible(false), blockScrollBarUpdate(false),
         updateScrollBarPageStepPending(true), inMouseEvent(false), sectionPressed(0),
@@ -59,7 +68,8 @@ public:
     bool isSectionOnScreen(const TextPagerSection *section) const;
     void cursorMoveKeyEventReadOnly(QKeyEvent *e);
     virtual void relayout(); // from TextPagerLayout
-
+    void adjustVerticalScrollBar();
+    
     int requestedScrollBarPosition, lastRequestedScrollBarPosition, cursorWidth, sectionCount,
         maximumSizeCopy, pendingTimeOut, autoScrollLines;
     bool readOnly, cursorVisible, blockScrollBarUpdate, updateScrollBarPageStepPending, inMouseEvent;
@@ -72,6 +82,7 @@ public:
     QCursor *sectionCursor;
     QPoint lastHoverPos, lastMouseMove;
     QHash<DocumentCommand *, QPair<CursorData, CursorData> > undoRedoCommands;
+    mutable LastPageCache lastPage;
 
 public Q_SLOTS:
     void onSyntaxHighlighterDestroyed(QObject *o);

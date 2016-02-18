@@ -16,6 +16,7 @@
 #include "TextPagerEdit.hpp"
 #include "VConfig.hpp"
 #include "VReply.hpp"
+#include "UserMessage.hpp"
 
 #include <QApplication>
 #include <QDebug>
@@ -33,7 +34,10 @@ OutputItemWidget::OutputItemWidget(QWidget *parent) :
 	userClickedReload_(false),
 	ignoreOutputSelection_(false)
 {
-	setupUi(this);
+    //We try to keep the contents when clicking away
+    tryToKeepContents_=true;
+
+    setupUi(this);
 
 	messageLabel_->hide();
 	dirLabel_->hide();
@@ -109,14 +113,15 @@ void OutputItemWidget::reload(VInfo_ptr info)
 
 	enabled_=true;
 	info_=info;
+    userClickedReload_ = false;
 
 	if(info_ && info_.get())
 	{
-		//Get file contents
-		infoProvider_->info(info_);
+        //Get file contents
+        infoProvider_->info(info_);
 
-		//Get dir contents
-		dirProvider_->info(info_);
+        //Get dir contents
+        dirProvider_->info(info_);
 
 		//Start contents update timer
 		updateDirTimer_->start();
@@ -145,11 +150,12 @@ std::string OutputItemWidget::currentFullName() const
 void OutputItemWidget::getLatestFile()
 {
 	messageLabel_->hide();
-	messageLabel_->stopLoadLabel();
-	fileLabel_->clear();
+    //messageLabel_->stopLoadLabel();
+    messageLabel_->stopProgress();
+    fileLabel_->clear();
 	browser_->clear();
 
-	//Get the latest file contents
+    //Get the latest file contents
 	infoProvider_->info(info_);
 }
 
@@ -157,12 +163,14 @@ void OutputItemWidget::getCurrentFile()
 {
 	messageLabel_->hide();
 	messageLabel_->stopLoadLabel();
-	fileLabel_->clear();
+    messageLabel_->stopProgress();
+    fileLabel_->clear();
 	browser_->clear();
 
 	if(info_ && info_.get())
 	{
 		std::string fullName=currentFullName();
+        UserMessage::message(UserMessage::DBG,false,"output selected: " + fullName);
 		OutputFileProvider* op=static_cast<OutputFileProvider*>(infoProvider_);
 		op->file(fullName);
 	}
@@ -170,131 +178,164 @@ void OutputItemWidget::getCurrentFile()
 
 void OutputItemWidget::clearContents()
 {
-	updateDirTimer_->stop();
+    updateDirTimer_->stop();
 
-	InfoPanelItem::clear();
-	dirProvider_->clear();
+    InfoPanelItem::clear();
+    dirProvider_->clear();
 
-	messageLabel_->hide();
-	messageLabel_->stopLoadLabel();
-	fileLabel_->clear();
-	browser_->clear();
+    messageLabel_->hide();
+    messageLabel_->stopProgress();
+    //messageLabel_->stopLoadLabel();
+    fileLabel_->clear();
+    browser_->clearCursorCache();
+    browser_->clear();
+    reloadTb_->setEnabled(true);
+    userClickedReload_ = false;
+    enableDir(false);
+}
 
-	enableDir(false);
+void OutputItemWidget::becameSelected()
+{
+     dirProvider_->setEnabled(true);
+     slotUpdateDir();
+     updateDirTimer_->start();
+}
+
+void OutputItemWidget::becameUnselected()
+{
+     updateDirTimer_->stop();
+     dirProvider_->setEnabled(false);
 }
 
 void OutputItemWidget::infoReady(VReply* reply)
 {
-	//------------------------
-	// From output provider
-	//------------------------
+    //------------------------
+    // From output provider
+    //------------------------
 
-	if(reply->sender() == infoProvider_)
-	{
-		//messageLabel_->stopLoadLabel();
+    if(reply->sender() == infoProvider_)
+    {
+        messageLabel_->stopProgress();
 
-		//For some unknown reason the textedit font, although it is properly set in the constructor,
-		//is reset to default when we first call infoready. So we need to set it again!!
-		browser_->updateFont();
+        //For some unknown reason the textedit font, although it is properly set in the constructor,
+        //is reset to default when we first call infoready. So we need to set it again!!
+        browser_->updateFont();
 
-		bool hasMessage=false;
-		if(reply->hasWarning())
-		{
-			messageLabel_->showWarning(QString::fromStdString(reply->warningText()));
-			hasMessage=true;
-		}
-		else if(reply->hasInfo())
-		{
-			messageLabel_->showInfo(QString::fromStdString(reply->infoText()));
-			hasMessage=true;
-		}
+        bool hasMessage=false;
+        if(reply->hasWarning())
+        {
+            messageLabel_->showWarning(QString::fromStdString(reply->warningText()));
+            hasMessage=true;
+        }
+        else if(reply->hasInfo())
+        {
+            messageLabel_->showInfo(QString::fromStdString(reply->infoText()));
+            hasMessage=true;
+        }
 
-		browser_->adjustHighlighter(QString::fromStdString(reply->fileName()));
+        browser_->adjustHighlighter(QString::fromStdString(reply->fileName()));
 
-		VFile_ptr f=reply->tmpFile();
+        VFile_ptr f=reply->tmpFile();
 
-		QTime stopper;
-		stopper.start();
+        //QTime stopper;
+        //stopper.start();
 
-		//If the info is stored in a tmp file
-		if(f && f.get())
-		{
-			if(f->storageMode() == VFile::MemoryStorage)
-			{
-				//messageLabel_->hide();
+        //If the info is stored in a tmp file
+        if(f)
+        {
+            browser_->loadFile(f);
+            if(f->storageMode() == VFile::DiskStorage)
+                hasMessage=false;
 
-				QString s(f->data());
-				browser_->loadText(s);
-			}
-			else
-			{
-				browser_->loadFile(QString::fromStdString(f->path()));
-				hasMessage=false;
-			}
-		}
-		//If the info is stored as a string in the reply object
-		else
-		{
-			QString s=QString::fromStdString(reply->text());
-			browser_->loadText(s);
-		}
+        }
+        //If the info is stored as a string in the reply object
+        else
+        {
+            QString s=QString::fromStdString(reply->text());
+            browser_->loadText(s,QString::fromStdString(reply->fileName()));
+        }
 
-		searchOnReload();
+        if(!hasMessage)
+        {
+            messageLabel_->hide();
+        }
+        //messageLabel_->stopLoadLabel();
 
-		if(f && f.get())
-		{
-			f->setWidgetLoadDuration(stopper.elapsed());
-		}
+        //Update the file label
+        fileLabel_->update(reply);
 
-		if(!hasMessage)
-		{
-			messageLabel_->hide();
-		}
-		messageLabel_->stopLoadLabel();
+        //Search for some keywords in the current jobout
 
-		//Update the file label
-		fileLabel_->update(reply);
-	}
+        //We do not have dir info so the file must be the jobout
+        if(dirModel_->isEmpty())
+            searchOnReload();
+        //We have dir info
+        else
+        {
+            OutputFileProvider* op=static_cast<OutputFileProvider*>(infoProvider_);
+            if(reply->fileName() == op->joboutFileName())
+            {
+                searchOnReload();
+            }
+        }
 
-	//------------------------
-	// From output dir provider
-	//------------------------
-	else
-	{
-		//Update the dir widget and select the proper file in the list
-		updateDir(reply->directory(),true);
-	}
+        userClickedReload_ = false;
+        reloadTb_->setEnabled(true);
+    }
+
+    //------------------------
+    // From output dir provider
+    //------------------------
+    else
+    {
+        //Update the dir widget and select the proper file in the list
+        updateDir(reply->directory(),true);
+    }
 }
 
 void OutputItemWidget::infoProgress(VReply* reply)
 {
 	messageLabel_->showInfo(QString::fromStdString(reply->infoText()));
-	messageLabel_->startLoadLabel();
-
+    //messageLabel_->startLoadLabel();
 	//updateDir(true);
+}
+
+void  OutputItemWidget::infoProgressStart(const std::string& text,int max)
+{
+    messageLabel_->showInfo(QString::fromStdString(text));
+    messageLabel_->startProgress(max);
+}
+
+void  OutputItemWidget::infoProgress(const std::string& text,int value)
+{
+    messageLabel_->progress(QString::fromStdString(text),value);
 }
 
 void OutputItemWidget::infoFailed(VReply* reply)
 {
-	if(reply->sender() == infoProvider_)
+    if(reply->sender() == infoProvider_)
 	{
 		QString s=QString::fromStdString(reply->errorText());
 
 		messageLabel_->showError(s);
-		messageLabel_->stopLoadLabel();
+        //messageLabel_->stopLoadLabel();
+        messageLabel_->stopProgress();
 
 		//Update the file label
 		fileLabel_->update(reply);
 
-		//updateDir(true);
+        userClickedReload_ = false;
+        reloadTb_->setEnabled(true);
+        //updateDir(true);
 	}
 }
 
 void OutputItemWidget::on_reloadTb__clicked()
 {
 	userClickedReload_ = true;
-	getLatestFile();
-	userClickedReload_ = false;
+    reloadTb_->setEnabled(false);
+    getLatestFile();
+    //userClickedReload_ = false;
 }
 
 //------------------------------------
@@ -310,7 +351,10 @@ void OutputItemWidget::updateDir(VDir_ptr dir,bool restartTimer)
 
 	if(status)
 	{
-		std::string fullName=currentFullName();
+        OutputFileProvider* op=static_cast<OutputFileProvider*>(infoProvider_);
+        op->setDir(dir);
+
+        std::string fullName=currentFullName();
 
 		dirView_->selectionModel()->clearSelection();
 		dirModel_->setData(dir);

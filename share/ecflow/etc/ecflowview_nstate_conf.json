@@ -12,11 +12,10 @@
 					"label" : "Font colour",
 					"default": "rgb(0,0,0)"
 				},
-                "font" : {
-					"label" : "Font",
-					"default": "font()"
-				}
-                
+                "type_colour" : {
+                    "label" : "Type colour",
+                    "default": "rgb(0,0,0)"
+                }
             },
 
             "complete": {
@@ -29,7 +28,11 @@
             		"font_colour" : {
 						"label" : "Font colour",
 						"default": "rgb(0,0,0)"
-					}
+                    },
+                    "type_colour" : {
+                        "label" : "Type colour",
+                        "default": "rgb(110,110,110)"
+                    }
 			},	
             	
             "queued": {
@@ -42,7 +45,11 @@
         			"font_colour" : {
 						"label" : "Font colour",
 						"default": "rgb(0,0,0)"
-					}                 
+                    },
+                    "type_colour" : {
+                        "label" : "Type colour",
+                        "default": "rgb(90,90,90)"
+                    }
             },
 
             "aborted": {
@@ -55,7 +62,11 @@
     			"font_colour" : {
 					"label" : "Font colour",
 					"default": "rgb(0,0,0)"
-				}                    
+                },
+                "type_colour" : {
+                    "label" : "Type colour",
+                    "default": "rgb(255,255,255)"
+                }
             },
 
             "submitted": {
@@ -68,7 +79,11 @@
     			"font_colour" : {
 					"label" : "Font colour",
 					"default": "rgb(0,0,0)"
-				}                               	           	
+                },
+                "type_colour" : {
+                    "label" : "Type colour",
+                    "default": "rgb(90,90,90)"
+                }
             },
 
             "active": {
@@ -81,7 +96,11 @@
     			"font_colour" : {
 					"label" : "Font colour",
 					"default": "rgb(0,0,0)"
-				}                                	        
+                },
+                "type_colour" : {
+                    "label" : "Type colour",
+                    "default": "rgb(90,90,90)"
+                }
             },
 
             "suspended": {
@@ -94,7 +113,11 @@
     			"font_colour" : {
 					"label" : "Font colour",
 					"default": "rgb(0,0,0)"
-				}                      
+                },
+                "type_colour" : {
+                    "label" : "Type colour",
+                    "default": "rgb(90,90,90)"
+                }
             }
     }
 }

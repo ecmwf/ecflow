@@ -19,6 +19,7 @@
 #include "NodeObserver.hpp"
 #include "NodeQueryResultTmp.hpp"
 #include "ServerObserver.hpp"
+#include "VInfo.hpp"
 
 class ServerHandler;
 class VNode;
@@ -92,7 +93,9 @@ public:
  	//From NodeObserver
     void notifyBeginNodeChange(const VNode*, const std::vector<ecf::Aspect::Type>&,const VNodeChange&);
  	void notifyEndNodeChange(const VNode*, const std::vector<ecf::Aspect::Type>&,const VNodeChange&);
-
+    void add(std::vector<VInfo_ptr>);
+    
+    
 public Q_SLOTS:
  	void add(NodeQueryResultTmp_ptr);
  	void add(QList<NodeQueryResultTmp_ptr> items);

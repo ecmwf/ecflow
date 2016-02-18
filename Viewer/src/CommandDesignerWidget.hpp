@@ -13,8 +13,11 @@
 
 #include <QDialog>
 
+class CommandLineEdit;
+
 #include "ui_CommandDesignerWidget.h"
 #include "CustomCommandHandler.hpp"
+#include "NodeQueryResultModel.hpp"
 
 #include "CtsCmdRegistry.hpp"
 
@@ -27,6 +30,9 @@ public:
 	~CommandDesignerWidget();
 
 	QString command() {return commandLineEdit_->text();};
+	void setNodes(std::vector<VInfo_ptr> &nodes);
+	std::vector<VInfo_ptr> &selectedNodes();
+
 
 
 public Q_SLOTS:
@@ -40,6 +46,8 @@ public Q_SLOTS:
 	void on_componentsList__itemEntered(QListWidgetItem *item);
 	void on_componentsList__itemClicked(QListWidgetItem *item);
 	void on_componentsList__itemDoubleClicked(QListWidgetItem *item);
+	void on_nodeListLinkLabel__linkActivated(const QString &link);
+	void on_nodeSelectionChanged();
 	QPushButton *runButton() {return runButton_;};
 
 
@@ -49,11 +57,21 @@ private:
 	void refreshSavedCommandList();
 	void addClientCommandsToComponentList();
 	void showCommandHelp(QListWidgetItem *item, bool showFullHelp);
+	void initialiseCommandLine();
+	void setNodeNumberLinkText(int numNodes);
+	//bool eventFilter(QObject* object, QEvent* event);
 
 	bool currentCommandSaved_;
+	bool haveSetUpDefaultCommandLine_;
+
+	std::vector<VInfo_ptr> nodes_;
+	NodeQueryResultModel nodeModel_; 
 
 	CtsCmdRegistry cmdRegistry_;
 	boost::program_options::options_description* clientOptionsDescriptions_;
 };
+
+
+
 
 #endif

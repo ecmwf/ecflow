@@ -186,7 +186,7 @@ void LogProvider::slotLinesAppend(QStringList lst)
 		owner_->infoFailed(reply_);
 	}
 
-	qDebug() << "LogProvider::slotLinesAppend()" << lst;
+    //qDebug() << "LogProvider::slotLinesAppend()" << lst;
 
 	std::vector<std::string> vec;
 	Q_FOREACH(QString s,lst)

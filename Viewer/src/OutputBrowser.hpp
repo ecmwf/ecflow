@@ -11,6 +11,9 @@
 #define VIEWER_SRC_OUTPUTBROWSER_HPP_
 
 #include <QStackedWidget>
+#include <QMap>
+
+#include "VFile.hpp"
 
 class Highlighter;
 class MessageLabel;
@@ -21,6 +24,20 @@ class TextPagerWidget;
 class TextPagerSearchInterface;
 class VProperty;
 
+class OutputBrowser;
+
+class CursorCacheItem
+{
+    friend class OutputBrowser;
+public:
+    CursorCacheItem() : pos_(0), verticalScrollValue_(0), viewportHeight_(0) {}
+protected:
+    int pos_;
+    int verticalScrollValue_;
+    int viewportHeight_;
+};
+
+
 class OutputBrowser : public QWidget
 {
 Q_OBJECT
@@ -29,9 +46,9 @@ public:
 	explicit OutputBrowser(QWidget* parent);
 	~OutputBrowser();
 
-	void clear();
-	void loadFile(QString fileName);
-	void loadText(QString text);
+    void clear();
+    void loadFile(VFile_ptr file);
+    void loadText(QString text,QString fileName,bool resetFile=true);
 	void adjustHighlighter(QString fileName);
 	void setFontProperty(VProperty* p);
 	void updateFont();
@@ -40,15 +57,20 @@ public:
 	void searchOnReload(bool userClickedReload);
 	void zoomIn();
 	void zoomOut();
+    void clearCursorCache() {cursorCache_.clear();}
 
 protected Q_SLOTS:
 	void showConfirmSearchLabel();
 
 private:
 	enum IndexType {BasicIndex=0,PagerIndex=1};
-	void changeIndex(IndexType indexType);
+	void changeIndex(IndexType indexType,qint64 fileSize);
+    bool isJobFile(QString fileName);
+    void loadFile(QString fileName);
+    void updateCursorFromCache(const std::string&);
+    void setCursorPos(qint64 pos);
 
-	QStackedWidget *stacked_;
+    QStackedWidget *stacked_;
 	PlainTextEdit* textEdit_;
 	TextPagerWidget* textPager_;
 	TextEditSearchLine* searchLine_;
@@ -56,6 +78,18 @@ private:
 	PlainTextSearchInterface *textEditSearchInterface_;
 	TextPagerSearchInterface *textPagerSearchInterface_;
 	MessageLabel *confirmSearchLabel_;
+
+    //we keep a reference to it to make sure that it does not get deleted while
+    //it is being displayed
+    VFile_ptr file_;
+    int lastPos_;
+    std::string currentSourceFile_;
+
+    QMap<std::string,CursorCacheItem> cursorCache_;
+
+    static int minPagerTextSize_;
+	static int minPagerSparseSize_;
+	static int minConfirmSearchSize_;
 };
 
 #endif /* VIEWER_SRC_OUTPUTBROWSER_HPP_ */

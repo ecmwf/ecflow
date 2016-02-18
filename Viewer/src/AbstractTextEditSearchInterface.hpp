@@ -26,8 +26,10 @@ public:
 			                bool gotoStartOfWord, int iteration,StringMatchMode::Mode matchMode)=0;
 	virtual void automaticSearchForKeywords(bool)=0;
 	virtual void refreshSearch()=0;
-	virtual void clearHighlights()=0;
+    virtual void clearHighlights()=0;
+    virtual void disableHighlights()=0;
 	virtual void enableHighlights()=0;
+	virtual bool highlightsNeedSearch()=0;
 
 protected:
 	static QColor highlightColour_;

@@ -7,6 +7,7 @@
 
 class QHBoxLayout;
 class QLabel;
+class QProgressBar;
 
 class MessageLabel : public QWidget
 {
@@ -20,19 +21,26 @@ public:
 	void showError(QString);
 	void startLoadLabel();
 	void stopLoadLabel();
+    void startProgress(int max=0);
+    void stopProgress();
+    void progress(QString text,int value);
 	void setShowTypeTitle(bool);
 	void clear();
-	void useNarrowMode(bool);;
+    void setNarrowMode(bool);
 
 private:
 	void showMessage(const Type&,QString);
 
 	bool showTypeTitle_;
+    bool narrowMode_;
 	Type currentType_;
 	QLabel *pixLabel_;
 	QLabel* msgLabel_;
 	QLabel* loadLabel_;
 	QHBoxLayout* layout_;
+    QWidget* progWidget_;
+    QLabel*  progLabel_;
+    QProgressBar* progBar_;
 
 };
 

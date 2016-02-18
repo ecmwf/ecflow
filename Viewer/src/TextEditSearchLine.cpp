@@ -48,13 +48,14 @@ bool TextEditSearchLine::findString (QString str, bool highlightAll, QTextDocume
 
 void TextEditSearchLine::highlightMatches(QString txt)
 {
-	if(confirmSearch_)
+	if(interface_)
 	{
-		if(interface_)
-			interface_->enableHighlights();
+		interface_->enableHighlights();
+		if(interface_->highlightsNeedSearch() && !txt.isEmpty())
+		{
+			findString(txt, true,  0, true, 0);   // highlight all matches
+		}
 	}
-	else if (!txt.isEmpty())
-		findString(txt, true,  0, true, 0);   // highlight all matches
 }
 
 void TextEditSearchLine::slotHighlight()
@@ -161,13 +162,17 @@ void TextEditSearchLine::refreshSearch()
 	slotHighlight();
 }
 
+void TextEditSearchLine::disableHighlights()
+{
+    if(interface_)
+        interface_->disableHighlights();
+}
+
 
 void TextEditSearchLine::clearHighlights()
 {
-	if(!interface_)
-		return;
-
-	interface_->clearHighlights();
+    if(interface_)
+        interface_->clearHighlights();
 }
 
 void TextEditSearchLine::matchModeChanged(int notUsed)
@@ -203,16 +208,16 @@ void TextEditSearchLine::on_actionHighlightAll__toggled(bool b)
 	if (b)                  // user switched on the highlights
 		slotHighlight();
 	else                    // user switched off the highlights
-		clearHighlights();
+        disableHighlights();
 
-	if(!confirmSearch_)
+	if(interface_ && interface_->highlightsNeedSearch())
 		refreshSearch();
 }
 
 void TextEditSearchLine::slotClose()
 {
-	AbstractSearchLine::slotClose();
-	clearHighlights();
+	AbstractSearchLine::slotClose();    
+    clearHighlights();
 }
 
 // Called when we load a new node's information into the panel, or

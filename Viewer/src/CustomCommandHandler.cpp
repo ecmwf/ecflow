@@ -14,6 +14,7 @@
 
 #include "DirectoryHandler.hpp"
 #include "File.hpp"
+#include "VSettings.hpp"
 
 
 CustomCommand::CustomCommand(const std::string &name, const std::string &command, bool context)
@@ -32,26 +33,26 @@ void CustomCommand::set(const std::string &name, const std::string &command, boo
 }
 
 
-CustomCommandHandler* CustomCommandHandler::instance_=0;
+void CustomCommand::save(VSettings *vs)
+{
+    vs->put("name",    name());
+    vs->put("command", command());
+}
+
+
 
 CustomCommandHandler::CustomCommandHandler()
 {
 }
 
-CustomCommandHandler* CustomCommandHandler::instance()
-{
-	if(!instance_)
-	{
-		instance_=new CustomCommandHandler();
-	}
-
-	return instance_;
-}
-
 
 void CustomCommandHandler::init(const std::string& configFilePath)
 {
-/*
+
+    dirPath_ = configFilePath;
+    readSettings();
+
+    /*
     dirPath_=dirPath;
 	DirectoryHandler::createDir(dirPath_);
 
@@ -79,25 +80,6 @@ void CustomCommandHandler::init(const std::string& configFilePath)
 
 
 
-CustomCommand* CustomCommandHandler::add(const std::string& name, const std::string& command, bool context)
-{
-    CustomCommand *item;
-    //int index = findIndex(name);
-
-    //if (index == -1)  // not already in the list
-    {
-        item=new CustomCommand(name, command, context);
-	    items_.push_back(item);
-    }
-    //else  // already in the list - just update it
-    //{
-    //    item = items_[index];
-    //    item->set(name, command, context);
-    //}
-
-	return item;
-}
-
 
 CustomCommand* CustomCommandHandler::replace(int index, const std::string& name, const std::string& command, bool context)
 {
@@ -107,31 +89,171 @@ CustomCommand* CustomCommandHandler::replace(int index, const std::string& name,
     item = items_[index];
     item->set(name, command, context);
 
-	return item;
+    writeSettings();
+
+    return item;
 }
 
 CustomCommand* CustomCommandHandler::find(const std::string& name) const
 {
-	for(std::vector<CustomCommand*>::const_iterator it=items_.begin(); it != items_.end(); ++it)
-	{
-		if((*it)->name() == name)
-			return *it;
-	}
-	return NULL;
+    for(std::deque<CustomCommand*>::const_iterator it=items_.begin(); it != items_.end(); ++it)
+    {
+        if((*it)->name() == name)
+            return *it;
+    }
+    return NULL;
 }
 
 
 // find the index of the command which has the given name; -1 if not found
-int CustomCommandHandler::findIndex(const std::string& name) const
+int CustomCommandHandler::findIndexFromName(const std::string& name) const
 {
     int i = 0;
-	for(std::vector<CustomCommand*>::const_iterator it=items_.begin(); it != items_.end(); ++it)
-	{
-		if((*it)->name() == name)
-			return i;
+    for(std::deque<CustomCommand*>::const_iterator it=items_.begin(); it != items_.end(); ++it)
+    {
+        if((*it)->name() == name)
+            return i;
         i++;
-	}
-	return -1;  // it was not found
+    }
+    return -1;  // it was not found
+}
+
+
+void CustomCommandHandler::writeSettings()
+{
+    std::vector<VSettings> vsItems;
+    std::string dummyFileName="dummy";
+    std::string key="commands";
+    VSettings vs(dirPath_);
+
+    for(int i = 0; i < numCommands(); i++)
+    {
+        VSettings vsThisItem(dummyFileName);
+        CustomCommand *cmd = commandFromIndex(i);
+        cmd->save(&vsThisItem);
+        vsItems.push_back(vsThisItem);
+    }
+    vs.put(key,vsItems);
+    vs.write();
+}
+
+void CustomCommandHandler::readSettings()
+{
+    std::vector<VSettings> vsItems;
+    std::string dummyFileName="dummy";
+    std::string key="commands";
+    VSettings vs(dirPath_);
+
+    bool ok = vs.read(false);  // false means we don't abort if the file is not there
+
+    if (ok)
+    {
+        std::vector<VSettings> commands;
+        vs.get("commands", commands);
+
+        for (int i = 0; i < commands.size(); i++)
+        {
+            VSettings *vsCommand = &commands[i];
+            std::string emptyDefault="";
+            std::string name    = vsCommand->get("name",    emptyDefault);
+            std::string command = vsCommand->get("command", emptyDefault);
+            CustomCommandHistoryHandler::instance()->add(name, command, true, false);  // add it to our in-memory list
+        }
+    }
+}
+
+
+// -------------------------
+// CustomSavedCommandHandler
+// -------------------------
+
+CustomSavedCommandHandler* CustomSavedCommandHandler::instance_=0;
+
+
+
+
+CustomSavedCommandHandler* CustomSavedCommandHandler::instance()
+{
+    if(!instance_)
+    {
+        instance_=new CustomSavedCommandHandler();
+    }
+
+    return instance_;
+}
+
+CustomCommand* CustomSavedCommandHandler::add(const std::string& name, const std::string& command, bool context, bool saveSettings)
+{
+    CustomCommand *item;
+    //int index = findIndex(name);
+
+    //if (index == -1)  // not already in the list
+    {
+        item=new CustomCommand(name, command, context);
+        items_.push_back(item);
+    }
+    //else  // already in the list - just update it
+    //{
+    //    item = items_[index];
+    //    item->set(name, command, context);
+    //}
+
+    if (saveSettings)
+        writeSettings();
+
+    return item;
+}
+
+
+// ---------------------------
+// CustomCommandHistoryHandler
+// ---------------------------
+
+
+CustomCommandHistoryHandler* CustomCommandHistoryHandler::instance_=0;
+
+CustomCommandHistoryHandler::CustomCommandHistoryHandler()
+{
+    maxCommands_ = 10;
+}
+
+
+CustomCommandHistoryHandler* CustomCommandHistoryHandler::instance()
+{
+    if(!instance_)
+    {
+        instance_=new CustomCommandHistoryHandler();
+    }
+
+    return instance_;
+}
+
+
+CustomCommand* CustomCommandHistoryHandler::add(const std::string& name, const std::string& command, bool context, bool saveSettings)
+{
+    CustomCommand *item;
+    int index = findIndexFromName(name);
+
+    if (index == -1)  // not already in the list
+    {
+        item=new CustomCommand(name, command, context);
+        items_.push_front(item);  // add it to the front
+
+        if (items_.size() > maxCommands_)  // too many commands?
+        {
+            items_.pop_back(); // remove the last item
+        }
+
+        if (saveSettings)
+            writeSettings();
+
+        return item;
+    }
+    else
+    {
+        return commandFromIndex(index);
+    }
+
 }
 
 /*

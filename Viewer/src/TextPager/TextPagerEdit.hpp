@@ -72,6 +72,7 @@ public:
     //bool load(QIODevice *device, TextPagerDocument::DeviceMode mode = TextPagerDocument::Sparse, QTextCodec *codec = 0);
 
     bool load(const QString &fileName, TextPagerDocument::DeviceMode mode = TextPagerDocument::Sparse, QTextCodec *codec = 0);
+
     void paintEvent(QPaintEvent *e);
     void scrollContentsBy(int dx, int dy);
 
@@ -129,9 +130,11 @@ public:
     void ensureCursorVisible(const TextPagerCursor &cursor, int linesMargin = 0);
 
     void setEnableSearchHighlighter(bool);
+    void clearSearchHighlighter();
     void setSearchHighlighter(QString txt,TextPagerDocument::FindMode mode);
     void setSearchHighlighter(QRegExp rx,TextPagerDocument::FindMode mode);
-
+    
+    void gotoLine(int);
     void setFontProperty(VProperty* p);
     void notifyChange(VProperty* p);
     void zoomIn();
@@ -194,14 +197,28 @@ private:
 class TextPagerLineNumberArea : public QWidget
 {
 public:
-    explicit TextPagerLineNumberArea(TextPagerEdit *editor) : QWidget(editor), textEditor_ (editor) {}
-    QSize sizeHint() const {QSize(textEditor_->lineNumberAreaWidth(), 0);}
+    explicit TextPagerLineNumberArea(TextPagerEdit *editor);
+    QSize sizeHint() const {QSize(computeWidth(), 0);}
+    int rightMargin() const {return rightMargin_;}
+    void updateWidth(int maxLineNum=-1);
+    QColor bgColour() const {return bgCol_;}
+    QColor fontColour() const {return fontCol_;}
+    QColor separatorColour() const {return separatorCol_;}
+    QColor currentColour() const {return currentCol_;}
 
 protected:
     void paintEvent(QPaintEvent *event) { textEditor_->lineNumberAreaPaintEvent(event);}
 
 private:
+    int computeWidth(int maxLineNum=-1) const;
+
     TextPagerEdit *textEditor_;
+    mutable int digits_;
+    int rightMargin_;
+    QColor bgCol_;
+    QColor fontCol_;
+    QColor separatorCol_;
+    QColor currentCol_;
 };
 
 

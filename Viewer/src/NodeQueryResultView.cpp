@@ -20,6 +20,7 @@
 #include "ActionHandler.hpp"
 #include "NodeQueryResultModel.hpp"
 #include "NodeQueryViewDelegate.hpp"
+#include "UserMessage.hpp"
 #include "VNode.hpp"
 
 NodeQueryResultView::NodeQueryResultView(QWidget* parent) :
@@ -63,10 +64,7 @@ NodeQueryResultView::NodeQueryResultView(QWidget* parent) :
 	setPalette(pal);
 
 	//Context menu
-	setContextMenuPolicy(Qt::CustomContextMenu);
-
-	connect(this, SIGNAL(customContextMenuRequested(const QPoint &)),
-		                this, SLOT(slotContextMenu(const QPoint &)));
+	enableContextMenu(true);
 
 	//Selection
 	connect(this,SIGNAL(clicked(const QModelIndex&)),
@@ -82,11 +80,33 @@ NodeQueryResultView::~NodeQueryResultView()
 	delete actionHandler_;
 }
 
+
+void NodeQueryResultView::enableContextMenu(bool enable)
+{
+	if (enable)
+	{
+		setContextMenuPolicy(Qt::CustomContextMenu);
+
+		connect(this, SIGNAL(customContextMenuRequested(const QPoint &)),
+		                	this, SLOT(slotContextMenu(const QPoint &)));
+	}
+	else
+	{
+		setContextMenuPolicy(Qt::NoContextMenu);
+
+		disconnect(this, SIGNAL(customContextMenuRequested(const QPoint &)),
+		                	this, SLOT(slotContextMenu(const QPoint &)));
+	}
+}
+
+
 void NodeQueryResultView::setSourceModel(NodeQueryResultModel *model)
 {
 	model_= model;
 	sortModel_->setSourceModel(model_);
 }
+
+
 
 //Collects the selected list of indexes
 QModelIndexList NodeQueryResultView::selectedList()
@@ -99,6 +119,15 @@ QModelIndexList NodeQueryResultView::selectedList()
   	}
 	return lst;
 }
+
+
+// this is called even if the user clicks outside of the node list to deselect all
+void NodeQueryResultView::selectionChanged(const QItemSelection &selected, const QItemSelection &deselected)
+{
+	QTreeView::selectionChanged(selected, deselected);
+	Q_EMIT selectionChanged();
+}
+
 
 void NodeQueryResultView::slotSelectItem(const QModelIndex&)
 {
@@ -154,6 +183,20 @@ void NodeQueryResultView::selectFirstServer()
 }
 
 
+void NodeQueryResultView::getListOfSelectedNodes(std::vector<VInfo_ptr> &nodeList)
+{
+	QModelIndexList indexList=selectedList();
+
+	nodeList.clear();
+	for(int i=0; i < indexList.count(); i++)
+	{
+		VInfo_ptr info=model_->nodeInfo(sortModel_->mapToSource(indexList[i]));
+		if(info && !info->isEmpty())
+			nodeList.push_back(info);
+	}
+}
+
+
 void NodeQueryResultView::slotDoubleClickItem(const QModelIndex&)
 {
 }
@@ -173,8 +216,6 @@ void NodeQueryResultView::handleContextMenu(QModelIndex indexClicked,QModelIndex
   	//Node actions
   	if(indexClicked.isValid())   //indexLst[0].isValid() && indexLst[0].column() == 0)
 	{
-	  	qDebug() << "context menu" << indexClicked;
-
   		std::vector<VInfo_ptr> nodeLst;
 		for(int i=0; i < indexLst.count(); i++)
 		{
@@ -199,8 +240,7 @@ void NodeQueryResultView::slotViewCommand(std::vector<VInfo_ptr> nodeLst,QString
 		return;
 
 	/*if(cmd == "set_as_root")
-	{
-		qDebug() << "set as root";
+	{	
 		model_->setRootNode(nodeLst.at(0)->node());
 		expandAll();
 	}*/

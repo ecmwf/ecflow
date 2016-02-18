@@ -23,6 +23,8 @@
 
 class AnimationHandler;
 class PropertyMapper;
+class NodeShape;
+class NodeText;
 
 class TreeNodeViewDelegate : public NodeViewDelegate
 {
@@ -52,9 +54,13 @@ protected:
 	void renderNode(QPainter *painter,const QModelIndex& index,
             		const QStyleOptionViewItemV4& option,QString text) const;
 
-	void renderNodeCell(QPainter *painter,QColor bg,QColor realBg,QColor fg,
-                      QRect stateRect,QRect filleRect,QRect realRect,QRect textRect, QString text,
-                      bool selected) const;
+    void renderServerCell(QPainter *painter,const NodeShape& stateShape,
+                                            const NodeText& text,bool selected) const;
+
+    void renderNodeCell(QPainter *painter,const NodeShape& stateShape,const NodeShape &realShape,
+                       const NodeText& nodeText,const NodeText& typeText,bool selected) const;
+
+    void renderNodeShape(QPainter* painter,const NodeShape& shape) const;
 
     enum NodeStyle {ClassicNodeStyle,BoxAndTextNodeStyle};
                     
@@ -64,11 +70,14 @@ protected:
 	bool drawChildCount_;
     NodeStyle nodeStyle_;
     int indentation_;
+    bool drawNodeType_;
+    QColor typeBgCol_;
 
     QFont serverNumFont_;
 	QFont suiteNumFont_;
 	QFont serverInfoFont_;
 	QFont abortedReasonFont_;
+    QFont typeFont_;
 };
 
 #endif

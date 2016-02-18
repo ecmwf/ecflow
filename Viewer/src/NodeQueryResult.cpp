@@ -186,6 +186,38 @@ void NodeQueryResult::add(QList<NodeQueryResultTmp_ptr> items)
 	Q_EMIT endAppendRows(items.count());
 }
 
+void NodeQueryResult::add(std::vector<VInfo_ptr> items)
+{
+	if(items.size() == 0)
+		return;
+
+        //Count the needed items
+        int num=0;
+        for(unsigned int i=0; i < items.size(); i++)
+	{   
+            assert(items.at(i) && items.at(i).get());
+            if(items.at(i)->isServer() || items.at(i)->isNode())
+            {
+                num++;
+            }    
+        }
+        
+	Q_EMIT beginAppendRows(items.size());
+
+	for(unsigned int i=0; i < items.size(); i++)
+	{           
+            if(items.at(i)->isServer() || items.at(i)->isNode())
+            {
+                VNode *node=items.at(i)->node();
+		ServerHandler *s=items.at(i)->server();
+		attach(s);
+		data_.push_back(new NodeQueryResultItem(node));
+		blocks_[s].add(node,data_.size()-1);
+            }    
+	}
+
+	Q_EMIT endAppendRows(items.size());
+}
 void NodeQueryResult::clear()
 {
 	Q_EMIT beginReset();

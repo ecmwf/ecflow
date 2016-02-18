@@ -13,6 +13,8 @@
 #include "CustomCommandHandler.hpp"
 #include "Child.hpp"
 #include "Str.hpp"
+#include "MenuHandler.hpp"
+#include "NodeQueryResult.hpp"
 
 using namespace boost;
 namespace po = boost::program_options;
@@ -23,8 +25,12 @@ CommandDesignerWidget::CommandDesignerWidget(QWidget *parent) : QWidget(parent)
 	setupUi(this);
 
 
-	// at least for now, all commands will start with this:
-	commandLineEdit_->setText("ecflow_client ");
+	//at least for now, all commands will start with 'ecflow_client' and end with '<full_name>'
+	commandLineEdit_->setText("ecflow_client  <full_name>");
+	//commandLineEdit_->installEventFilter(this);
+	commandLineEdit_->setFocus();
+
+	haveSetUpDefaultCommandLine_ = false;
 
 
 	// ensure the Save button is in the right state
@@ -48,17 +54,96 @@ CommandDesignerWidget::CommandDesignerWidget(QWidget *parent) : QWidget(parent)
 	infoLabel_->setShowTypeTitle(false);
 	infoLabel_->showInfo(tr("Click command for help, double-click to insert"));
 
+	nodeSelectionView_->enableContextMenu(false);
+
+
+	nodeListLinkLabel_->setOpenExternalLinks(false);
+
+
+	connect(nodeSelectionView_, SIGNAL(selectionChanged()), this, SLOT(on_nodeSelectionChanged()));
+
+
 	// temporary
 	saveCommandGroupBox_->setVisible(false);
-	tabWidget_->setTabEnabled(1, false);
+	tabWidget_->setTabEnabled(2, false);
 	//savedCommandsGroupBox_->setVisible(false);
 
 }
 
-
 CommandDesignerWidget::~CommandDesignerWidget()
 {
 	delete clientOptionsDescriptions_;
+
+	MenuHandler::refreshCustomMenuCommands();
+}
+
+
+void CommandDesignerWidget::initialiseCommandLine()
+{
+	if (!haveSetUpDefaultCommandLine_)
+	{
+		// put the cursor between the two pre-defined strings - this is where the command will go
+		commandLineEdit_->home(false);
+		commandLineEdit_->setCursorPosition(14);
+		commandLineEdit_->deselect();
+
+		haveSetUpDefaultCommandLine_ = true;
+	}
+}
+
+
+void CommandDesignerWidget::setNodes(std::vector<VInfo_ptr> &nodes)
+{
+	nodes_ = nodes;
+
+
+	// populate the list of nodes
+	nodeSelectionView_->setSourceModel(&nodeModel_);
+	nodeModel_.slotBeginReset();
+	nodeModel_.data()->add(nodes);
+	nodeModel_.slotEndReset();
+
+	// all should be selected at first
+	nodeSelectionView_->selectAll();
+
+
+	on_nodeSelectionChanged();  // get the number of selected nodes and act accordingly
+}
+
+
+
+// when the user clicks on the hyperlinked label which tells them how many nodes
+// will be acted on, we want to switch to the Nodes tab
+void CommandDesignerWidget::on_nodeListLinkLabel__linkActivated(const QString &link)
+{
+	if (link == "#nodes")
+	{
+		tabWidget_->setCurrentIndex(1);
+	}
+}
+
+
+void CommandDesignerWidget::setNodeNumberLinkText(int numNodes)
+{
+	QString s;
+
+	s = (numNodes == 1) ? "" : "s";
+
+	nodeListLinkLabel_->setText(tr("Command will be run on %1 node%2: <a href=\"#nodes\">click here for list</a>").arg(numNodes).arg(s));
+}
+
+// triggered when the user changes their node selection
+void CommandDesignerWidget::on_nodeSelectionChanged()
+{
+	setNodeNumberLinkText(selectedNodes().size());
+	on_commandLineEdit__textChanged();  // trigger the enabling/disabling of the Run button
+}
+
+
+std::vector<VInfo_ptr> &CommandDesignerWidget::selectedNodes()
+{
+	nodeSelectionView_->getListOfSelectedNodes(nodes_);
+	return nodes_;
 }
 
 
@@ -137,18 +222,21 @@ void CommandDesignerWidget::showCommandHelp(QListWidgetItem *item, bool showFull
 void CommandDesignerWidget::on_componentsList__itemEntered(QListWidgetItem *item)
 {
 	showCommandHelp(item, false);
+	initialiseCommandLine();
 }
 
 // when the mouse moves over an item, display the help text for it
 void CommandDesignerWidget::on_componentsList__itemClicked(QListWidgetItem *item)
 {
 	showCommandHelp(item, true);
+	commandLineEdit_->setFocus(); // to keep the text cursor visible
 }
 
 // when the mouse moves over an item, display the help text for it
 void CommandDesignerWidget::on_componentsList__itemDoubleClicked(QListWidgetItem *item)
 {
 	insertComponent(item);
+	commandLineEdit_->setFocus(); // to keep the text cursor visible
 }
 
 
@@ -162,7 +250,8 @@ void CommandDesignerWidget::insertComponent(QListWidgetItem *item)
 
 void CommandDesignerWidget::on_commandLineEdit__textChanged()
 {
-	runButton_->setEnabled(!commandLineEdit_->text().isEmpty()); // only allow to run a non-empty command
+	 // only allow to run a non-empty command, and on 1 or more nodes
+	runButton_->setEnabled((!commandLineEdit_->text().isEmpty()) && nodes_.size() > 0);
 
 	currentCommandSaved_ = false;
 
@@ -195,7 +284,7 @@ void CommandDesignerWidget::updateSaveButtonStatus()
 		overwriteButton_->setEnabled(true);
 
 
-	int thisRow = CustomCommandHandler::instance()->findIndex(saveNameLineEdit_->text().toStdString());
+	int thisRow = CustomSavedCommandHandler::instance()->findIndexFromName(saveNameLineEdit_->text().toStdString());
 
 	if ((!saveNameLineEdit_->text().isEmpty() && thisRow != -1) ||
 		commandLineEdit_->text().isEmpty())
@@ -244,7 +333,7 @@ void CommandDesignerWidget::on_saveAsNewButton__clicked()
 	name    = saveNameLineEdit_->text().toStdString();
 	command = commandLineEdit_->text().toStdString();
 	context = addToContextMenuCb_->isChecked();
-	CustomCommand *cmd = CustomCommandHandler::instance()->add(name, command, context);
+	CustomCommand *cmd = CustomSavedCommandHandler::instance()->add(name, command, context, true);
 	refreshSavedCommandList();
 	currentCommandSaved_ = true;
 	updateSaveButtonStatus();
@@ -258,7 +347,7 @@ void CommandDesignerWidget::on_overwriteButton__clicked()
 	name    = saveNameLineEdit_->text().toStdString();
 	command = commandLineEdit_->text().toStdString();
 	context = addToContextMenuCb_->isChecked();
-	CustomCommand *cmd = CustomCommandHandler::instance()->replace(savedCommandsTable_->currentRow(), name, command, context);
+	CustomCommand *cmd = CustomSavedCommandHandler::instance()->replace(savedCommandsTable_->currentRow(), name, command, context);
 	refreshSavedCommandList();
 	currentCommandSaved_ = true;
 	updateSaveButtonStatus();
@@ -267,6 +356,12 @@ void CommandDesignerWidget::on_overwriteButton__clicked()
 
 void CommandDesignerWidget::on_runButton__clicked()
 {
+	std::string command = commandLineEdit_->text().toStdString();
+
+	// save this in the command history
+	CustomCommandHistoryHandler::instance()->add(command, command, true, true);
+
+
 	// close the dialogue - the calling function will call the command() function
 	// to retrieve the user's command
 	//accept();
@@ -275,13 +370,13 @@ void CommandDesignerWidget::on_runButton__clicked()
 
 void CommandDesignerWidget::refreshSavedCommandList()
 {
-	int n = CustomCommandHandler::instance()->numCommands();
+	int n = CustomSavedCommandHandler::instance()->numCommands();
 
 	savedCommandsTable_->clearContents();
 
 	for (int i = 0; i < n; i++)
 	{
-		CustomCommand *command = CustomCommandHandler::instance()->commandFromIndex(i);
+		CustomCommand *command = CustomSavedCommandHandler::instance()->commandFromIndex(i);
 		addCommandToSavedList(command, i);
 	}
 }
@@ -326,3 +421,14 @@ void CommandDesignerWidget::on_savedCommandsTable__cellClicked(int row, int colu
 }
 
 
+/*
+bool CommandDesignerWidget::eventFilter(QObject* object, QEvent* event)
+{
+	if(object == commandLineEdit_ && event->type() == QEvent::FocusIn)
+	{
+		initialiseCommandLine();
+		return false;
+	}
+	return false;
+}
+*/

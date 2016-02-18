@@ -33,7 +33,7 @@ public:
 
 private Q_SLOTS:
 	void slotOutputClientError(QString);
-	void slotOutputClientProgress(QString);
+    void slotOutputClientProgress(QString,int);
 	void slotOutputClientFinished();
 
 private:

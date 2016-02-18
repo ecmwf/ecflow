@@ -12,6 +12,8 @@
 
 #include <QDebug>
 
+#include "UserMessage.hpp"
+
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/path.hpp>
 
@@ -40,7 +42,8 @@ void OutputDirClient::slotCheckTimeout()
 
 void OutputDirClient::slotConnected()
 {
-	qDebug() << "dir connected to " << soc_->peerName();
+    UserMessage::message(UserMessage::DBG,false,"OutputDirClient::slotConnected() connected to " +
+                         soc_->peerName().toStdString());
 
 	soc_->write("list ",5);
 	soc_->write(remoteFile_.c_str(),remoteFile_.size());
@@ -49,12 +52,13 @@ void OutputDirClient::slotConnected()
 
 void OutputDirClient::slotError(QAbstractSocket::SocketError err)
 {
-	qDebug() << "error" <<  soc_->errorString();
+    //qDebug() << "error" <<  soc_->errorString();
 
 	switch(err)
 	{
 	case QAbstractSocket::RemoteHostClosedError:
-		qDebug() << "remote host closed";
+
+        //qDebug() << "remote host closed";
 
 		if(dir_)
 		{

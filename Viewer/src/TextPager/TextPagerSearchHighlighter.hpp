@@ -25,7 +25,8 @@ public:
 	virtual void highlightBlock(const QString &string);
 	void reset(QString txt,TextPagerDocument::FindMode mode,bool apply);
 	void reset(QRegExp rx,TextPagerDocument::FindMode mode, bool apply);
-	enum Mode {NoMode,TextMode,RegexpMode};
+    void clear();
+    enum Mode {NoMode,TextMode,RegexpMode};
 
 protected:
 	bool isWordCharacter(const QChar& ch) const;
@@ -38,7 +39,5 @@ protected:
 	bool wholeWords_;
 	static QColor bgColour_;
 };
-
-
 
 #endif /* VIEWER_SRC_TEXTPAGER_TEXTPAGERSEARCHHIGHLIGHTER_HPP_ */

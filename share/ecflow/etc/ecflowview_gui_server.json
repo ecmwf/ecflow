@@ -25,7 +25,7 @@
                 "prefix" : "server.files",
                 
                 "line" : "readFilesFromDisk",
-                "line" : "maxJobFileLines"              
+                "line" : "maxOutputFileLines"              
             },
 
             "custom-notification" : {

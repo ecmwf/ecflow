@@ -15,7 +15,8 @@
 #include <QDesktopServices>
 #include <qalgorithms.h>
 
-#define TEXTDOCUMENT_FIND_DEBUG
+//#define TEXTDOCUMENT_FIND_DEBUG
+#define TEXTDOCUMENT_USE_FILE_LOCK
 
 
 #if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
@@ -520,7 +521,7 @@ TextPagerCursor TextPagerDocument::find(const QRegExp &regexp, const TextPagerCu
 
         	if(reverse) {
         		index = regexp.lastIndexIn(line, line.size());
-        		from = it.position()-line.size();
+                from = it.position(); //-line.size();
 
         		if(from + index  < limit) {
         		    ok = false;
@@ -539,13 +540,21 @@ TextPagerCursor TextPagerDocument::find(const QRegExp &regexp, const TextPagerCu
         		if(from + index + regexp.matchedLength() > limit) {
         			ok = false;
         		} else {
-        			const TextPagerCursor ret(this, from + index + regexp.matchedLength(), from + index);
+
+                    //we need to remove the newline char from the end of the matching text
+                    QString captured=regexp.capturedTexts().first();
+                    if(index + regexp.matchedLength() == line.size() && line.endsWith(newline))
+                    {
+                        captured.chop(1);
+                    }
+
+                    const TextPagerCursor ret(this, from + index + captured.size(), from + index);
 #ifdef TEXTDOCUMENT_FIND_DEBUG
         			qDebug() << "current:" << it.current() <<  it.position() << line.size();
-        			qDebug() << "captured:" << index << regexp.capturedTexts().first();
+                    qDebug() << "captured:" << index << captured;
         			qDebug() << "cursor:" << ret.selectedText();
 #endif
-        			Q_ASSERT(ret.selectedText() == regexp.capturedTexts().first());
+                    Q_ASSERT(ret.selectedText() == captured);
 #ifdef TEXTDOCUMENT_FIND_DEBUG
         			qDebug() << "total time" << lap.elapsed();
         			qDebug() << "result" << "pos:" << ret.position() << "anchor:" << ret.anchor();
@@ -574,6 +583,7 @@ TextPagerCursor TextPagerDocument::find(const QRegExp &regexp, const TextPagerCu
 
 #ifdef TEXTDOCUMENT_FIND_DEBUG
         qDebug() << "total time" << lap.elapsed();
+        qDebug() << "iterator position:" << it.position();
 #endif
 
     if (flags & FindWrap) {
@@ -719,7 +729,7 @@ TextPagerCursor TextPagerDocument::find(const QString &in, const TextPagerCursor
 
         if((index=line.indexOf(word)) != -1) {
 
-        	//Backward:
+            //Backward:
         	//The iterator is positioned at the linebreak character of the previous line, or at
         	//the start of the document
         	if(reverse) {
@@ -730,7 +740,7 @@ TextPagerCursor TextPagerDocument::find(const QString &in, const TextPagerCursor
         	//The iterator is positioned at the linebreak character at the end of the line or at
         	//the end of the document
         	else {
-        	    from = it.position()-line.size()+1;
+                from = it.position()-line.size()+1;
         	}
 
         	while(ok && index != -1) {
@@ -1121,7 +1131,9 @@ int TextPagerDocument::lineNumber(int position) const
     Q_ASSERT(c->firstLineIndex != -1);
     Q_ASSERT(d->first->firstLineIndex != -1);
     const int extra = (offset == 0 ? 0 : d->countNewLines(c, position - offset, offset));
-#ifdef QT_DEBUG
+
+//#ifdef QT_DEBUG
+#if 0
     if (position <= 16000) {
         const QString data = read(0, position);
         // if we're on a newline it shouldn't count so we do read(0, position)
@@ -1134,6 +1146,7 @@ int TextPagerDocument::lineNumber(int position) const
         }
     }
 #endif
+
     return c->firstLineIndex + extra;
 }
 
@@ -1152,6 +1165,94 @@ int TextPagerDocument::columnNumber(const TextPagerCursor &cursor) const
 {
     return cursor.document() == this ? cursor.columnNumber() : -1;
 }
+
+TextPagerCursor TextPagerDocument::findLine(int lineNum, const TextPagerCursor &cursor) const
+{
+    if(lineNum <=0)
+        return TextPagerCursor();
+    
+    lineNum--;
+
+    Q_ASSERT(cursor.position() >=0);
+    
+    int current=lineNumber(cursor);
+
+#ifdef TEXTDOCUMENT_FIND_DEBUG            
+    qDebug() << "findLine --> line:" << lineNum << "current:" << current; 
+#endif        
+        
+    if(lineNum == current)
+        return cursor;
+   
+    int offset;
+    Chunk *c = d->chunkAt(cursor.position(), &offset);
+    
+    Q_ASSERT(c != NULL);
+    
+    int pos=cursor.position() - offset;  //points to the chunks beginning
+    d->updateChunkLineNumbers(c, pos);
+  
+#ifdef TEXTDOCUMENT_FIND_DEBUG            
+    qDebug() << "chunk - first line:" << c->firstLineIndex << "pos:" << pos;
+#endif          
+    
+    if(lineNum < current) {       
+            
+        while(c->firstLineIndex > lineNum && c->previous) {
+            pos-=c->size();
+            c=c->previous;
+            d->updateChunkLineNumbers(c,pos);
+#ifdef TEXTDOCUMENT_FIND_DEBUG 
+            //qDebug() << "chunk - first line:" << c->firstLineIndex << "pos:" << pos;
+#endif
+        }  
+        
+    } else if(lineNum > current) {
+
+        while(c->firstLineIndex < lineNum && c->next) {
+            pos+=c->size();
+            c=c->next;
+            d->updateChunkLineNumbers(c,pos);
+#ifdef TEXTDOCUMENT_FIND_DEBUG 
+            //qDebug() << "chunk - first line:" << c->firstLineIndex << "pos:" << pos;
+#endif           
+        }  
+        
+        Q_ASSERT(c != NULL && c->previous != NULL);
+        
+        c=c->previous;
+        pos-=c->size();
+    }
+       
+#ifdef TEXTDOCUMENT_FIND_DEBUG  
+    if(c) qDebug() << "chunk found - first line:" << c->firstLineIndex << "pos:" << pos;
+    else qDebug() << "chunk not found";
+#endif   
+    if(c && c->firstLineIndex != -1 && c->firstLineIndex <= lineNum) {
+            
+        current=c->firstLineIndex;
+        if(current == lineNum)
+            return TextPagerCursor(this,pos);
+            
+        QChar newline('\n');         
+        int index=0;
+        QString data=d->chunkData(c,-1);
+        while((index=data.indexOf(newline,index)) != -1) {
+#ifdef TEXTDOCUMENT_FIND_DEBUG  
+            //qDebug() << "chunk found - line:" << current << "index:" << index;
+#endif       
+            if(current == lineNum) {
+                TextPagerCursor ret(this,pos+index);
+                    return ret;
+            }
+            index++;
+            current++; 
+        }
+    }        
+        
+    return TextPagerCursor();
+}
+
 
 void TextPagerDocument::setOptions(Options opt)
 {
@@ -1258,8 +1359,9 @@ QString TextDocumentPrivate::chunkData(const Chunk *chunk, int chunkPos) const
         // Can only happen if the device gets deleted behind our back when in Sparse mode
         return QString().fill(QLatin1Char(' '), chunk->size());
     } else {
-        QFile file;
         QIODevice *dev = device.data();
+#if 0
+        QFile file;
         if (!chunk->swap.isEmpty()) {
             file.setFileName(chunk->swap);
             if (!file.open(QIODevice::ReadOnly)) {
@@ -1268,19 +1370,50 @@ QString TextDocumentPrivate::chunkData(const Chunk *chunk, int chunkPos) const
             }
             dev = &file;
         }
+#endif
         QTextStream ts(dev);
-        if (textCodec)
-            ts.setCodec(textCodec);
+        //if (textCodec)
+         //   ts.setCodec(textCodec);
 //         if (!chunk->swap.isEmpty()) {
 //             qDebug() << "reading stuff from swap" << chunk << chunk->from << chunk->size() << chunk->swap;
 //         }
-        ts.seek(chunk->from);
+       ts.seek(chunk->from);
+
+#ifndef NO_TEXTDOCUMENT_CHUNK_CACHE
+
+        if (chunkPos != -1) {
+        	cachedChunkData =  ts.read(chunk->length);
+
+        	Q_ASSERT(cachedChunkData.size() == chunk->size());
+
+        	cachedChunk = const_cast<Chunk*>(chunk);
+        	cachedChunkPos = chunkPos;
+
+        	return cachedChunkData;
+/*#ifdef QT_DEBUG
+        	if (chunkPos != chunk->pos()) {
+        	     qWarning() << chunkPos << chunk->pos();
+        	 }
+        	 Q_ASSERT(chunkPos == chunk->pos());
+#endif*/
+        } else {
+        	const QString data = ts.read(chunk->length);
+        	return data;
+        }
+
+#else
         const QString data = ts.read(chunk->length);
-        Q_ASSERT(data.size() == chunk->size());
+        return data;
+#endif
+    }
+        //Q_ASSERT(data.size() == chunk->size());
 #ifndef NO_TEXTDOCUMENT_CHUNK_CACHE
 #ifdef DEBUG_CACHE_HITS
         qWarning() << "chunkData hits" << hits << "misses" << ++misses;
 #endif
+#endif
+
+#if 0
         if (chunkPos != -1) {
             cachedChunk = const_cast<Chunk*>(chunk);
             cachedChunkData = data;
@@ -1292,9 +1425,11 @@ QString TextDocumentPrivate::chunkData(const Chunk *chunk, int chunkPos) const
             Q_ASSERT(chunkPos == chunk->pos());
 #endif
         }
-#endif
-        return data;
+
+        //return data;
     }
+#endif
+	return QString();
 }
 
 int TextDocumentPrivate::chunkIndex(const Chunk *c) const
@@ -1420,7 +1555,7 @@ void TextDocumentPrivate::updateChunkLineNumbers(Chunk *c, int chunkPos) const
             //pos -= cc->size();
         	//Here chunkPos points to the position (the beginning) of the chunk so
         	//the line above was incorrect had to be changed like this:
-        	pos -=cc->previous->size();
+            pos -=cc->previous->size();
             cc = cc->previous;
         }
         // cc is at the first chunk that has firstLineIndex != -1

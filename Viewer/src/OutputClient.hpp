@@ -40,7 +40,7 @@ protected Q_SLOTS:
 
 Q_SIGNALS:
 	void error(QString);
-	void progress(QString);
+    void progress(QString,int);
 	void finished();
 
 protected:

@@ -12,6 +12,7 @@
 #define VIEWER_SRC_OUTPUTFILECLIENT_HPP_
 
 #include "OutputClient.hpp"
+#include "VDir.hpp"
 #include "VFile.hpp"
 
 class OutputFileClient : public OutputClient
@@ -23,7 +24,11 @@ public:
 
     const std::string& remoteFile() const {return remoteFile_;}
     VFile_ptr result() const;
+    void clearResult();
     void getFile(const std::string& name);
+    void setExpectedSize(qint64 v);
+    int maxProgress() const;
+    void setDir(VDir_ptr);
 
 protected Q_SLOTS:
     void slotError(QAbstractSocket::SocketError err);
@@ -33,14 +38,16 @@ protected Q_SLOTS:
 private:
 	OutputFileClient(const OutputClient&);
 	OutputFileClient& operator=(const OutputClient&);
+    void estimateExpectedSize();
 
 	std::string remoteFile_;
 	qint64 total_;
+    qint64 expected_;
 	VFile_ptr out_;
+    VDir_ptr dir_;
 	qint64 lastProgress_;
 	const QString progressUnits_;
 	const qint64 progressChunk_;
-
 };
 
 #endif /* VIEWER_SRC_OUTPUTFILECLIENT_HPP_ */

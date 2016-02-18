@@ -22,7 +22,7 @@ class VReply
 public:
 	enum Status {NoStatus,TaskDone,TaskFailed,TaskCancelled};
 	enum FileReadMode {NoReadMode,LocalReadMode,ServerReadMode,LogServerReadMode};
-	VReply(void* sender=NULL) : sender_(sender), status_(NoStatus), readMode_(NoReadMode) {};
+    VReply(void* sender=NULL) : sender_(sender), status_(NoStatus), readMode_(NoReadMode),readTruncatedTo_(-1) {}
 	~VReply() {}
 
 	void reset();
@@ -42,6 +42,7 @@ public:
 	VFile_ptr tmpFile() const {return tmpFile_;}
 	VDir_ptr directory() const {return dir_;}
 	const std::vector<Zombie>& zombies() const {return zombies_;}
+	void setReadTruncatedTo(int ival) {readTruncatedTo_=ival;}
 
 	bool textFromFile(const std::string&);
 	void text(const std::vector<std::string>& msg);
@@ -56,6 +57,7 @@ public:
 	void tmpFile(VFile_ptr f) {tmpFile_=f;}
 	void setDirectory(VDir_ptr d) {dir_=d;}
 	void zombies(const std::vector<Zombie>& z) { zombies_=z;}
+	int readTruncatedTo() const {return readTruncatedTo_;}
 
 	bool hasWarning() const {return !warningText_.empty();}
 	bool hasInfo() const {return !infoText_.empty();}
@@ -76,6 +78,7 @@ protected:
 	std::string fileName_;
 	FileReadMode readMode_;
 	std::string  readMethod_;
+	int readTruncatedTo_;
 	VFile_ptr  tmpFile_;
 	VDir_ptr dir_;
 	std::vector<Zombie> zombies_;

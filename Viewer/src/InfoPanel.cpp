@@ -409,8 +409,9 @@ void InfoPanel::slotCurrentWidgetChanged(int idx)
 
 	if(InfoPanelItem* current=findItem(tab_->widget(idx)))
 	{
-		//Enable the current item
-		current->setEnabled(true);
+        current->setSelected(true);
+        //Enable the current item
+        //current->setEnabled(true);
 
 		//Reload the item if it is needed
 		if(!current->info())
@@ -422,7 +423,8 @@ void InfoPanel::slotCurrentWidgetChanged(int idx)
 			if(InfoPanelItemHandler* d=findHandler(tab_->widget(i)))
 			{
 				if(d->item() != current)
-					d->item()->setEnabled(false);
+                    d->item()->setSelected(false);
+                    //d->item()->setEnabled(false);
 			}
 		}
 	}

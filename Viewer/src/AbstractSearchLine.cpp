@@ -10,6 +10,7 @@
 #include <QtGlobal>
 #include <QShortcut>
 #include <QMenu>
+#include <QShowEvent>
 #include "AbstractSearchLine.hpp"
 #include "IconProvider.hpp"
 
@@ -200,5 +201,8 @@ void AbstractSearchLine::hideEvent(QHideEvent* event)
 void AbstractSearchLine::showEvent(QShowEvent* event)
 {
 	QWidget::showEvent(event);
-	Q_EMIT visibilityChanged();
+    if(!event->spontaneous())
+        slotFind(searchLine_->text());
+    //refreshSearch();
+    Q_EMIT visibilityChanged();
 }

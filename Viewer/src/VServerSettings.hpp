@@ -22,7 +22,7 @@ class VServerSettings : public VPropertyObserver
 	friend class ServerHandler;
 
 public:
-	enum Param {UpdateRate,AdaptiveUpdate,MaxAdaptiveUpdateRate,MaxJobFileLines,ReadFromDisk,
+	enum Param {UpdateRate,AdaptiveUpdate,MaxAdaptiveUpdateRate,MaxOutputFileLines,ReadFromDisk,
 	           NotifyAbortedEnabled, NotifyAbortedPopup, NotifyAbortedSound,
 			   NotifyRestartedEnabled, NotifyRestartedPopup, NotifyRestartedSound,
 			   NotifyLateEnabled, NotifyLatePopup, NotifyLateSound,

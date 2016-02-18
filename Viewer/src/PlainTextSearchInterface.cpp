@@ -164,8 +164,6 @@ void PlainTextSearchInterface::automaticSearchForKeywords(bool userClickedReload
 	}
 #endif
 
-
-
 	else
 	{
 		if(userClickedReload)
@@ -202,3 +200,7 @@ void PlainTextSearchInterface::clearHighlights()
 	editor_->setExtraSelections(empty);
 }
 
+void PlainTextSearchInterface::disableHighlights()
+{
+    clearHighlights();
+}

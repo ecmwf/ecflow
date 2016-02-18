@@ -45,9 +45,9 @@
             		"default": "true"
                 	},
             
-            	"maxJobFileLines": {
-                	"label": "Maximum size of job files",
-                	"suffix" : "lines", 
+            	"maxOutputFileLines": {
+                	"label": "Fetch the last",
+                	"suffix" : "lines of files from the server", 
                 	"tooltip": "",                          
                 	"default": "15000",
                 	"min" : "0"	

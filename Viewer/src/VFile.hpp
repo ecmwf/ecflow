@@ -27,8 +27,10 @@ public:
 
 	enum StorageMode {MemoryStorage,DiskStorage};
 
-	const std::string& path() const {return path_;}
-	void  setContents(const std::string);
+    const std::string& path() const {return path_;}
+    const std::string& sourcePath() const {return sourcePath_;}
+    void setSourcePath(const std::string& p) {sourcePath_=p;}
+    void  setContents(const std::string);
 	bool  exists() const;
 
 	StorageMode storageMode() const {return storageMode_;}
@@ -40,17 +42,20 @@ public:
 	unsigned int transferDuration() const {return transferDuration_;}
 	void setFetchDate(QDateTime d) {fetchDate_=d;}
 	QDateTime fetchDate() const {return fetchDate_;}
-	void setWidgetLoadDuration(unsigned int t) {widgetLoadDuration_=t;}
-	unsigned int widgetLoadDuration() const {return widgetLoadDuration_;}
+    void setFetchMethod(const std::string& fetchMethod) {fetchMethod_=fetchMethod;}
+    const std::string& fetchMethod() const {return fetchMethod_;}
+    void setCached(bool b) {cached_=b;}
+    bool cached() const {return cached_;}
 
 	bool write(const char *buf,size_t len,std::string& err);
 	void close();
+    void print();
 
 	static VFile_ptr create(const std::string& path,const std::string& contents,bool deleteFile=true);
 	static VFile_ptr create(const std::string& path,bool deleteFile= true);
 	static VFile_ptr create(bool deleteFile= true);
 
-	static std::string tmpName();
+    //static std::string tmpName();
 
 protected:
 	VFile(const std::string& name,const std::string& str,bool deleteFile=true);
@@ -59,6 +64,7 @@ protected:
 	void setStorageMode(StorageMode);
 
 	std::string path_;
+    std::string sourcePath_;
 	bool  deleteFile_;
 
 	StorageMode storageMode_;
@@ -67,8 +73,9 @@ protected:
 	size_t dataSize_;
 	FILE* fp_;
 	unsigned int transferDuration_;
-	QDateTime fetchDate_;
-	unsigned int widgetLoadDuration_;
+    QDateTime fetchDate_;
+    std::string fetchMethod_;
+    bool cached_;
 };
 
 #endif

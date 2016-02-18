@@ -24,11 +24,14 @@
 #include "VProperty.hpp"
 #include "PropertyMapper.hpp"
 #include "ServerHandler.hpp"
+#include "UserMessage.hpp"
 #include "VNState.hpp"
 #include "VSState.hpp"
 #include "VSettings.hpp"
 
 static std::vector<std::string> propVec;
+
+//#define _UI_NODEPATHWIDGET_DEBUG
 
 BcWidget::BcWidget(QWidget* parent) : 
     QWidget(parent),
@@ -538,7 +541,6 @@ void  NodePathWidget::slotMenuSelected(int idx,QPoint bcPos)
 {
 	if(idx != -1)
 	{
-		qDebug() << sender() << "slotMenu";
         loadMenu(bc_->mapToGlobal(bcPos),nodeAt(idx));
 	}
 }
@@ -553,8 +555,9 @@ void  NodePathWidget::slotMenuSelected(int idx,QPoint bcPos)
 
 VInfo_ptr NodePathWidget::nodeAt(int idx)
 {
-	qDebug() << "nodeAt()" << idx;
-
+#ifdef _UI_NODEPATHWIDGET_DEBUG
+    UserMessage::message(UserMessage::DBG,false,"NodePathWidget::nodeAt idx=" + boost::statc_cast<std::string>(idx));
+#endif
 	ServerHandler* server=info_->server();
 
 	if(info_ && server)
@@ -589,7 +592,9 @@ void NodePathWidget::loadMenu(const QPoint& pos,VInfo_ptr p)
 
 		if(acLst.count() > 0)
 		{
-			qDebug() << "load menu";
+#ifdef _UI_NODEPATHWIDGET_DEBUG
+            UserMessage::message(UserMessage::DBG,false,"NodePathWidget::loadMenu");
+#endif
             
             if(QAction *ac=QMenu::exec(acLst,pos,acLst.front(),this))
 			{

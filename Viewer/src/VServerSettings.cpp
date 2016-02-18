@@ -42,7 +42,7 @@ VServerSettings::VServerSettings(ServerHandler* server) :
 		parNames_[AdaptiveUpdate]="server.update.adaptiveUpdate";
 		parNames_[MaxAdaptiveUpdateRate]="server.update.maxAdaptiveUpdateRateInMin";
 
-		parNames_[MaxJobFileLines]="server.files.maxJobFileLines";
+		parNames_[MaxOutputFileLines]="server.files.maxOutputFileLines";
 		parNames_[ReadFromDisk]="server.files.readFilesFromDisk";
 
 		parNames_[NotifyAbortedEnabled]="server.notification.aborted.enabled";

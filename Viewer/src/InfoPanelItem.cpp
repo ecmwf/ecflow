@@ -108,9 +108,8 @@ void InfoPanelItem::clear()
 	}
 }
 
-//This function is called when an info panel item (i.e. a tab) becomes visible ot the infopanel
+//This function is called when the infopanel
 // is being reset. The info_ might be unset.
-//properly set.
 void InfoPanelItem::setEnabled(bool enabled)
 {
 	enabled_=enabled;
@@ -122,25 +121,58 @@ void InfoPanelItem::setEnabled(bool enabled)
 			infoProvider_->setEnabled(true);
 
 		//If we do not want to keep the contents reload the item
-		if(!frozen_ && !tryToKeepContents_)
-			reload(info_);
+        //if(!frozen_ && !tryToKeepContents_)
+        //	reload(info_);
+
+        //else if(tryToKeepContents_)
+        //    resumeUpdate();
 
 	}
 	else
 	{
 		//Disable the info provider
 		if(infoProvider_)
-				infoProvider_->setEnabled(false);
+            infoProvider_->setEnabled(false);
 
 		//If we do not want to keep the contents clear the item
-		if(!frozen_ && !tryToKeepContents_)
-			clearContents();
+        //if(!frozen_ && !tryToKeepContents_)
+        //	clearContents();
 
+        // else if(tryToKeepContents_)
+       //     suspendUpdate();
 	}
 
 	updateWidgetState();
 }
 
+void InfoPanelItem::setSelected(bool selected)
+{
+    if(selected)
+    {
+        if(!enabled_)
+        {
+            setEnabled(true);
+            reload(info_);
+        }
+
+        becameSelected();
+    }
+
+    //if the item becomes unselected we do not do anything if it is frozen
+    //or the contents must be kept (e.g. for output)
+    else
+    {
+        if(!frozen_ && !tryToKeepContents_)
+        {
+            clearContents();
+            setEnabled(false);
+        }
+
+        becameUnselected();
+    }
+
+    updateWidgetState();
+}
 
 void InfoPanelItem::setFrozen(bool b)
 {

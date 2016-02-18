@@ -28,6 +28,8 @@
 
 VConfig* VConfig::instance_=0;
 
+//#define _UI_CONFIG_LOAD_DEBUG
+
 VConfig::VConfig()
 {
 	appName_="ecFlowUI";
@@ -59,16 +61,24 @@ void VConfig::init(const std::string& parDirPath)
    fs::path parDir(parDirPath);
     
    if(fs::exists(parDir) && fs::is_directory(parDir))
-    {
-        for(fs::directory_iterator it(parDir) ; 
-            it != fs::directory_iterator() ; ++it)
-        {
-            if(fs::is_regular_file(it->status()) )
+   {
+       //fs::directory_iterator it(parDir);
+       
+       //The conf files have to be loaded in alphabetical order!! At least NotifyChange require it!
+       //So we read the paths into a vector and sort it.
+       std::vector<fs::path> vec; 
+       copy(fs::directory_iterator(parDir), fs::directory_iterator(), back_inserter(vec));
+       std::sort(vec.begin(), vec.end()); 
+       
+       //The paths are now in alphabetical order
+       for(std::vector<fs::path>::const_iterator it=vec.begin(); it != vec.end(); ++it) 
+       {
+            if(fs::is_regular_file(*it))
             {
-                std::string name=it->path().filename().string();
+                std::string name=it->filename().string();
                 if(name.find("_conf.json") != std::string::npos)
                 {    
-                    loadInit(it->path().string());
+                    loadInit(it->string());
                 }    
             }
         }
@@ -101,7 +111,8 @@ void VConfig::loadInit(const std::string& parFile)
     {
          std::string errorMessage = e.what();
          UserMessage::message(UserMessage::ERROR, true,
-                 std::string("Error! VConfig::load() unable to parse definition file: " + parFile + " Message: " +errorMessage));
+                 std::string("Fatal error!\nVConfig::load() unable to parse definition file: " + parFile + "\nMessage: " +errorMessage));
+         exit(1);
          return;
     }
     
@@ -138,8 +149,9 @@ void VConfig::loadProperty(const boost::property_tree::ptree& pt,VProperty *prop
     	std::string name=it->first;
     	ptree ptProp=it->second;
 
+#ifdef _UI_CONFIG_LOAD_DEBUG
     	UserMessage::message(UserMessage::DBG,false,"   VConfig::loadProperty() read item: " + name);
-
+#endif
     	//Default value
     	if(name == "default")
     	{
@@ -158,36 +170,45 @@ void VConfig::loadProperty(const boost::property_tree::ptree& pt,VProperty *prop
     		if(!prefix.isEmpty())
     			val=prefix.toStdString() + "." + val;
 
+#ifdef _UI_CONFIG_LOAD_DEBUG
     		UserMessage::message(UserMessage::DBG,false,"   VConfig::loadProperty() line: " + val);
-            
+#endif
     		if(VProperty* lineEditProp=find(val))
     		{
-    			UserMessage::message(UserMessage::DBG,false,"     --> link found");
+#ifdef _UI_CONFIG_LOAD_DEBUG
+                UserMessage::message(UserMessage::DBG,false,"     --> link found");
+#endif
                 chProp->setLink(lineEditProp);
-    		}
-    		else
+            }
+            else
     		{
-    			UserMessage::message(UserMessage::DBG,false,"     --> link NOT found");
-    		}
+#ifdef _UI_CONFIG_LOAD_DEBUG
+                UserMessage::message(UserMessage::DBG,false,"     --> link NOT found");
+#endif
+            }
     	}
     	//If the property is a "line" (i.e. a line with additional parameters)
     	else if(prop->name() == "line" && name ==  "link")
     	{
     		std::string val=ptProp.get_value<std::string>();
 
-    		UserMessage::message(UserMessage::DBG,false,"   VConfig::loadProperty() line link: " + val);
-
+#ifdef _UI_CONFIG_LOAD_DEBUG
+            UserMessage::message(UserMessage::DBG,false,"   VConfig::loadProperty() line link: " + val);
+#endif
     		if(VProperty* lineEditProp=find(val))
     		{
-    			UserMessage::message(UserMessage::DBG,false,"     --> link found");
-    			   prop->setLink(lineEditProp);
+#ifdef _UI_CONFIG_LOAD_DEBUG
+                UserMessage::message(UserMessage::DBG,false,"     --> link found");
+#endif
+                prop->setLink(lineEditProp);
     		}
     		else
     		{
-    			   UserMessage::message(UserMessage::DBG,false,"     --> link NOT found");
+#ifdef _UI_CONFIG_LOAD_DEBUG
+                UserMessage::message(UserMessage::DBG,false,"     --> link NOT found");
+#endif
     		}
     	}
-
 
         //Here we only load the properties with
         //children (i.e. key/value pairs (like "line" etc above)
@@ -454,7 +475,7 @@ bool VConfig::readRcFile(const std::string& rcFile,boost::property_tree::ptree& 
 				}
 				else if(par[0] == "jobfile_length")
 				{
-					pt.put("server.files.maxJobFileLines",par[1]);
+					pt.put("server.files.maxOutputFileLines",par[1]);
 					hasValue=true;
 				}
 

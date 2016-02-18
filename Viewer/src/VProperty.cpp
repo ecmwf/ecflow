@@ -494,8 +494,7 @@ QFont VProperty::toFont(const std::string& name)
 		if(size >=1 && size < 200)
 			f.setPointSize(size);
 
-		qDebug() << family << size;
-
+        //qDebug() << family << size
 		//f.fromString(rx.cap(1));
 	}
 

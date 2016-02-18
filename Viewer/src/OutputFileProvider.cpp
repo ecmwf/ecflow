@@ -22,18 +22,23 @@
 
 OutputFileProvider::OutputFileProvider(InfoPresenter* owner) :
 	InfoProvider(owner,VTask::OutputTask),
-	outClient_(NULL)
+    outClient_(NULL), latestCached_(NULL)
 {
 }
 
 void OutputFileProvider::clear()
 {
-	if(outClient_)
+    OutputCache::instance()->detach(latestCached_);
+    latestCached_=NULL;
+
+    if(outClient_)
 	{
 		delete outClient_;
 		outClient_=NULL;
 	}
-	InfoProvider::clear();
+    InfoProvider::clear();
+
+    dir_.reset();
 }
 
 //Node
@@ -56,15 +61,27 @@ void OutputFileProvider::visit(VInfoNode* info)
    	}
 
     //Get the filename
-    std::string fileName=n->findVariable("ECF_JOBOUT",true);
+    std::string jobout=n->findVariable("ECF_JOBOUT",true);
 
-    fetchFile(server,n,fileName,true);
+    //This is needed for the refresh!!! We want to detach the item but keep
+    //lastCached.
+    bool detachCache=!(latestCached_ && latestCached_->sameAs(info_,jobout));
+    if(!detachCache)
+    {
+        OutputCache::instance()->detach(latestCached_);
+    }
+
+    fetchFile(server,n,jobout,true,detachCache);
 }
 
 //Get a file
 void OutputFileProvider::file(const std::string& fileName)
 {
-	//Check if the task is already running
+    //When a new file is requested
+    OutputCache::instance()->detach(latestCached_);
+    latestCached_=NULL;
+
+    //Check if the task is already running
 	if(task_)
 	{
 		task_->status(VTask::CANCELLED);
@@ -85,12 +102,18 @@ void OutputFileProvider::file(const std::string& fileName)
 	//Get the filename
 	std::string jobout=n->findVariable("ECF_JOBOUT",true);
 
-	fetchFile(server,n,fileName,(fileName==jobout));
+    fetchFile(server,n,fileName,(fileName==jobout),false);
 }
 
-void OutputFileProvider::fetchFile(ServerHandler *server,VNode *n,const std::string& fileName,bool isJobout)
+void OutputFileProvider::fetchFile(ServerHandler *server,VNode *n,const std::string& fileName,bool isJobout,bool detachCache)
 {
-	if(!n || !n->node() || !server)
+    if(detachCache)
+    {
+        OutputCache::instance()->detach(latestCached_);
+        latestCached_=NULL;
+    }
+
+    if(!n || !n->node() || !server)
     {
     	owner_->infoFailed(reply_);
     	return;
@@ -138,6 +161,7 @@ void OutputFileProvider::fetchFile(ServerHandler *server,VNode *n,const std::str
     			return;
     	}
     }
+
     //----------------------------------------------------
     // Not the loacalhost or we could not read the file
     //----------------------------------------------------
@@ -179,12 +203,48 @@ void OutputFileProvider::fetchFile(ServerHandler *server,VNode *n,const std::str
 bool OutputFileProvider::fetchFileViaOutputClient(VNode *n,const std::string& fileName)
 {
 	std::string host, port;
-	if(n->logServer(host,port))
+    //host="freki";
+    //port="9316";
+
+    UserMessage::debug("OutputFileProvider::fetchFileViaOutputClient <-- file: " + fileName);
+
+    //If it is not the jobout file or it is the joubout but it is not the current item in the cache
+    //(i.e. we do not want to referesh it) we try to use the cache
+    if(fileName != joboutFileName() || !(latestCached_))
+    {
+        //Check cache
+        if(OutputCacheItem* item=OutputCache::instance()->use(info_,fileName))
+        {
+            latestCached_=item;
+            VFile_ptr f=item->file();
+            assert(f);
+            f->setCached(true);
+
+            UserMessage::debug("  File found in cache");
+
+            reply_->setInfoText("");
+            reply_->fileReadMode(VReply::LogServerReadMode);
+
+            reply_->tmpFile(f);
+            owner_->infoReady(reply_);
+            return true;
+        }
+    }
+
+    //If we are here we do not need to know the previously cached item
+    latestCached_=NULL;
+
+    //We did not used the cache
+    if(n->logServer(host,port))
 	{
 		//host=host + "baaad";
 
-		reply_->setInfoText("Getting file through log server: " + host + "@" + port);
-		owner_->infoProgress(reply_);
+        UserMessage::debug("OutputFileProvider::fetchFileViaOutputClient --> host:" + host +
+                             " port:" + port + " file: " + fileName);
+
+        //reply_->setInfoText("Getting file through log server: " + host + "@" + port);
+        //owner_->infoProgress(reply_);
+        owner_->infoProgressStart("Getting file <i>" + fileName + "</i> from log server <i>" + host + "@" + port  +"</i>",0);
 
 		if(!outClient_)
 		{
@@ -193,11 +253,13 @@ bool OutputFileProvider::fetchFileViaOutputClient(VNode *n,const std::string& fi
 			connect(outClient_,SIGNAL(error(QString)),
 				this,SLOT(slotOutputClientError(QString)));
 
-			connect(outClient_,SIGNAL(progress(QString)),
-				this,SLOT(slotOutputClientProgress(QString)));
+            connect(outClient_,SIGNAL(progress(QString,int)),
+                this,SLOT(slotOutputClientProgress(QString,int)));
 
 			connect(outClient_,SIGNAL(finished()),
 				this,SLOT(slotOutputClientFinished()));
+
+            outClient_->setDir(dir_);
 		}
 
 		outClient_->getFile(fileName);
@@ -211,31 +273,41 @@ bool OutputFileProvider::fetchFileViaOutputClient(VNode *n,const std::string& fi
 void OutputFileProvider::slotOutputClientFinished()
 {
 	VFile_ptr tmp = outClient_->result();
+    assert(tmp);
+    outClient_->clearResult();
 
-	if(tmp && tmp.get() && tmp->exists())
-	{
-		reply_->setInfoText("");
-		reply_->fileReadMode(VReply::LogServerReadMode);
+    latestCached_=OutputCache::instance()->add(info_,tmp->sourcePath(),tmp);
 
-		std::string method="served by " + outClient_->host() + "@" + outClient_->portStr();
-		reply_->fileReadMethod(method);
+    reply_->setInfoText("");
+    reply_->fileReadMode(VReply::LogServerReadMode);
 
-		reply_->tmpFile(tmp);
-		owner_->infoReady(reply_);
-	}
+    std::string method="served by " + outClient_->host() + "@" + outClient_->portStr();
+    tmp->setFetchMethod(method);
+
+    reply_->tmpFile(tmp);
+    owner_->infoReady(reply_);
 }
 
-void OutputFileProvider::slotOutputClientProgress(QString msg)
+void OutputFileProvider::slotOutputClientProgress(QString msg,int value)
 {
-	//reply_->setInfoText(msg.toStdString());
-	//owner_->infoProgress(reply_);
-	//reply_->setInfoText("");
-	qDebug() << "prog: " << msg;
+    //UserMessage::debug("OutputFileProvider::slotOutputClientProgress " + msg.toStdString());
+
+    owner_->infoProgress(msg.toStdString(),value);
+
+    //reply_->setInfoText(msg.toStdString());
+    //owner_->infoProgress(reply_);
+    //reply_->setInfoText("");
+
+    //qDebug() << "prog: " << msg;
 }
+
+
 
 void OutputFileProvider::slotOutputClientError(QString msg)
 {
-	if(info_ && info_.get())
+    UserMessage::message(UserMessage::DBG,false,"OutputFileProvider::slotOutputClientError error:" + msg.toStdString());
+
+    if(info_ && info_.get())
 	{
 		ServerHandler* server=info_->server();
 		VNode *n=info_->node();
@@ -251,7 +323,9 @@ void OutputFileProvider::slotOutputClientError(QString msg)
 		}
 	}
 
-	reply_->setErrorText(msg.toStdString());
+    reply_->setErrorText("Failed to fetch file from logserver "  +
+                         outClient_->host() + "@" + outClient_->portStr() +
+                         "Error: " + msg.toStdString());
 	owner_->infoFailed(reply_);
 }
 
@@ -260,8 +334,11 @@ void OutputFileProvider::fetchJoboutViaServer(ServerHandler *server,VNode *n,con
     //Define a task for getting the info from the server.
     task_=VTask::create(taskType_,n,this);
 
+
     task_->reply()->fileReadMode(VReply::ServerReadMode);
     task_->reply()->fileName(fileName);
+
+    //owner_->infoProgressStart("Getting file <i>" + fileName + "</i> from server",0);
 
     //Run the task in the server. When it finish taskFinished() is called. The text returned
     //in the reply will be prepended to the string we generated above.
@@ -274,8 +351,9 @@ bool OutputFileProvider::fetchLocalFile(const std::string& fileName)
 	VFile_ptr f(VFile::create(fileName,false));
 	if(f->exists())
 	{
+        f->setSourcePath(f->path());
 		reply_->fileReadMode(VReply::LocalReadMode);
-		reply_->tmpFile(f);
+        reply_->tmpFile(f);
 		owner_->infoReady(reply_);
 		return true;
 	}
@@ -351,5 +429,12 @@ std::string OutputFileProvider::joboutFileName() const
 	return std::string();
 }
 
+void OutputFileProvider::setDir(VDir_ptr dir)
+{
+    if(outClient_)
+        outClient_->setDir(dir);  
 
+    if(dir != dir_)
+        dir_=dir;
+}
 

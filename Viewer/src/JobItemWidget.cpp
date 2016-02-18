@@ -49,7 +49,6 @@ void JobItemWidget::reload(VInfo_ptr info)
     //Info must be a node
     if(info_.get() && info_->isNode() && info_->node())
     {
-        fileLabel_->setText(tr("<b>File:</b> ") + QString::fromStdString(info_->node()->genVariable("ECF_JOB")));
         infoProvider_->info(info_);
     }   
 }
@@ -74,6 +73,8 @@ void JobItemWidget::infoReady(VReply* reply)
     {
     	messageLabel_->showInfo(QString::fromStdString(reply->infoText()));
     }
+
+    fileLabel_->update(reply);
 }
 
 void JobItemWidget::infoProgress(VReply* reply)

@@ -58,3 +58,7 @@ void UserMessage::message(MessageType type, bool popup, const std::string& messa
 
 }
 
+void UserMessage::debug(const std::string& message)
+{
+        std::cout << "DEBUG : " << message << std::endl;
+}

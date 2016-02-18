@@ -14,3 +14,4 @@ if (POLICY CMP0046)
 endif()
 
 add_subdirectory( src )
+add_subdirectory( scripts )

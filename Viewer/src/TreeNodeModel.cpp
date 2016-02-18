@@ -135,7 +135,7 @@ QVariant TreeNodeModel::data( const QModelIndex& index, int role ) const
 	    role != Qt::ForegroundRole &&
 	    role != FilterRole && role != IconRole && role != ServerRole && role != NodeNumRole &&
 	    role != InfoRole && role != LoadRole && role != ConnectionRole && role != AttributeRole && role != AttributeLineRole &&
-		role != AbortedReasonRole ))
+        role != AbortedReasonRole && role != NodeTypeRole && role != NodeTypeForegroundRole))
     {
 		return QVariant();
 	}
@@ -312,6 +312,18 @@ QVariant TreeNodeModel::nodeData(const QModelIndex& index, int role) const
 		else if(role == Qt::ForegroundRole)
 			return vnode->stateFontColour();
 
+        else if(role  == NodeTypeRole)
+        {
+            if(vnode->isTask()) return 2;
+            else if(vnode->isSuite()) return 0;
+            else if(vnode->isFamily()) return 1;
+            else if(vnode->isAlias()) return 3;
+            return 0;
+        }
+        else if(role  == NodeTypeForegroundRole)
+        {
+            return vnode->typeFontColour();
+        }
 		else if(role == IconRole)
 		{
 			if(icons_->isEmpty())

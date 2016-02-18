@@ -31,6 +31,7 @@
 #include "UserMessage.hpp"
 #include "NodeExpression.hpp"
 #include "VConfig.hpp"
+#include "CustomCommandHandler.hpp"
 
 int MenuItem::idCnt_=0;
 
@@ -250,6 +251,60 @@ bool MenuHandler::readMenuConfigFile(const std::string &configFile)
 }
 
 
+// ---------------------------------------------------------
+// MenuHandler::addCustomMenuCommands
+// Obtains the current list of custom commands and adds them
+// to the list of custom menu items.
+// ---------------------------------------------------------
+
+void MenuHandler::refreshCustomMenuCommands()
+{
+    BaseNodeCondition *trueCond  = new TrueNodeCondition();
+    BaseNodeCondition *falseCond = new FalseNodeCondition();
+    CustomCommandHistoryHandler *customRecentCmds = CustomCommandHistoryHandler::instance();
+
+    Menu *menu = findMenu("Custom");
+    if (menu)
+    {
+        menu->clearFixedList();
+
+        // create the 'compulsary' menu items
+        MenuItem *item1 = new MenuItem("New command...");
+        item1->setCommand("custom");
+        addItemToMenu(item1, "Custom");
+        item1->setEnabledCondition(trueCond);
+        item1->setVisibleCondition(trueCond);
+        item1->setQuestionCondition(falseCond);
+
+        MenuItem *item2 = new MenuItem("-");
+        addItemToMenu(item2, "Custom");
+        item2->setEnabledCondition(trueCond);
+        item2->setVisibleCondition(trueCond);
+        item2->setQuestionCondition(falseCond);
+
+        MenuItem *item3 = new MenuItem("Recent");
+        addItemToMenu(item3, "Custom");
+        item3->setEnabledCondition(falseCond);
+        item3->setVisibleCondition(trueCond);
+        item3->setQuestionCondition(falseCond);
+
+        int numCommands = customRecentCmds->numCommands();
+
+        for (int i = 0; i < numCommands; i++)
+        {
+            CustomCommand *cmd = customRecentCmds->commandFromIndex(i);
+
+            MenuItem *item = new MenuItem(cmd->name());
+            item->setCommand(cmd->command());
+            item->setEnabledCondition(trueCond);
+            item->setVisibleCondition(trueCond);
+            item->setQuestionCondition(trueCond);
+            item->setStatustip("__cmd__");
+            addItemToMenu(item, "Custom");
+        }
+    }
+}
+
 
 Menu *MenuHandler::findMenu(const std::string &name)
 {
@@ -292,7 +347,7 @@ bool MenuHandler::addItemToMenu(MenuItem *item, const std::string &menuName)
     
     if (menu)
     {
-        menu->addItem(item);
+        menu->addItemToFixedList(item);
         return true;
     }
     else
@@ -357,7 +412,7 @@ Menu::Menu(const std::string &name) : name_(name)
 
 Menu::~Menu()
 {
-    for (std::vector<MenuItem*>::iterator itItems = items_.begin(); itItems != items_.end(); ++itItems)
+    for (std::vector<MenuItem*>::iterator itItems = itemsCombined_.begin(); itItems != itemsCombined_.end(); ++itItems)
     {
         if (*itItems)
             delete (*itItems);
@@ -404,8 +459,11 @@ QMenu *Menu::generateMenu(std::vector<VInfo_ptr> nodes, QWidget *parent,QMenu* p
     //}
 
 
+    // merge the fixed menu items (from the config file) with the dynamic ones
+    itemsCombined_ = itemsFixed_;
+    itemsCombined_.insert(itemsCombined_.end(), itemsCustom_.begin(), itemsCustom_.end());
 
-    for (std::vector<MenuItem*>::iterator itItems = items_.begin(); itItems != items_.end(); ++itItems)
+    for (std::vector<MenuItem*>::iterator itItems = itemsCombined_.begin(); itItems != itemsCombined_.end(); ++itItems)
     {
         //  is this item valid for the current selection?
 
@@ -440,8 +498,8 @@ QMenu *Menu::generateMenu(std::vector<VInfo_ptr> nodes, QWidget *parent,QMenu* p
                 if (menu)
                 {
                     //The submenu will be added to qmenu and it will take ownership of it.
-                	QMenu *subMenu = menu->generateMenu(nodes, parent, qmenu, view, acLst);
-                    subMenu->setEnabled(enabled);
+					QMenu *subMenu = menu->generateMenu(nodes, parent, qmenu, view, acLst);
+					subMenu->setEnabled(enabled);
                 }
             }
             else if  ((*itItems)->isDivider())
@@ -470,6 +528,33 @@ QMenu *Menu::generateMenu(std::vector<VInfo_ptr> nodes, QWidget *parent,QMenu* p
     return qmenu;
 }
 
+/*
+void Menu::addSubHeading(std::string &name)
+{
+    QLabel *nodeLabel = new QLabel(name);
+
+    QFont menuTitleFont;
+    menuTitleFont.setBold(true);
+    menuTitleFont.setItalic(true);
+    nodeLabel->setFont(menuTitleFont);
+    nodeLabel->setAlignment(Qt::AlignHCenter);
+    nodeLabel->setObjectName("nodeLabel");
+
+    QWidget* titleW=new QWidget(qmenu);
+    QVBoxLayout *titleLayout=new QVBoxLayout(titleW);
+    titleLayout->setContentsMargins(2,2,2,2);
+    titleLayout->addWidget(nodeLabel);
+    nodeLabel->setParent(titleW);
+
+    QWidgetAction *wAction = new QWidgetAction(qmenu);
+    //Qt doc says: the ownership of the widget is passed to the widgetaction.
+    //So when the action is deleted it will be deleted as well.
+    wAction->setDefaultWidget(titleW);
+    //wAction->setEnabled(false);
+    qmenu->addAction(wAction);
+
+}
+*/
 void Menu::buildMenuTitle(std::vector<VInfo_ptr> nodes, QMenu* qmenu)
 {
 	QLabel *nodeLabel = NULL;
