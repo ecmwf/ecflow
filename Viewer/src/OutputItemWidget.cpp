@@ -109,7 +109,7 @@ QWidget* OutputItemWidget::realWidget()
 
 void OutputItemWidget::reload(VInfo_ptr info)
 {
-	clearContents();
+    clearContents();
 
 	enabled_=true;
 	info_=info;

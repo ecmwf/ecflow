@@ -54,7 +54,7 @@ NodeQueryEngine::~NodeQueryEngine()
 		delete parser_;
 }
 
-void NodeQueryEngine::runQuery(NodeQuery* query,QStringList allServers)
+bool NodeQueryEngine::runQuery(NodeQuery* query,QStringList allServers)
 {
 	if(isRunning())
 		wait();
@@ -80,7 +80,7 @@ void NodeQueryEngine::runQuery(NodeQuery* query,QStringList allServers)
 	if(parser_ == NULL)
 	{
 		UserMessage::message(UserMessage::ERROR,true, std::string("Error, unable to parse enabled condition: " + query_->query().toStdString()));
-		return;
+        return false;
 	}
 
 	QStringList serverNames=query_->servers();
@@ -98,7 +98,7 @@ void NodeQueryEngine::runQuery(NodeQuery* query,QStringList allServers)
 	if(!query_->rootNode().empty())
 	{
 		if(servers_.size() != 1)
-			return;
+            return false;
 
 		rootNode_=servers_.at(0)->vRoot()->find(query_->rootNode());
 	}
@@ -111,11 +111,14 @@ void NodeQueryEngine::runQuery(NodeQuery* query,QStringList allServers)
 
 	//Start thread execution
 	start();
+
+    return true;
 }
 
 void NodeQueryEngine::stopQuery()
 {
 	stopIt_=true;
+    wait();
 }
 
 void NodeQueryEngine::run()

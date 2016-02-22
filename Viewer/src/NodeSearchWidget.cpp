@@ -23,6 +23,7 @@
 
 #include <QtGlobal>
 #include <QCloseEvent>
+#include <QDebug>
 #include <QMessageBox>
 #include <QPalette>
 #include <QSettings>
@@ -116,6 +117,7 @@ NodeSearchWidget::NodeSearchWidget(QWidget *parent) :
 
 	resW_->hide();
 	editor_->setQueryTeCanExpand(true);
+    stopPb_->setEnabled(false);
 	//mainLayout_->setStretch(1,0);
 	//mainLayout_->setStretch(0,1);
 }
@@ -153,13 +155,27 @@ void NodeSearchWidget::slotQueryEnabledChanged(bool queryEnabled)
 {
 	//if(!engine_->isRunning())
 	//{
-		findPb_->setEnabled(queryEnabled);
+#if 0
+    UserMessage::debug("NodeSearchWidget::slotQueryEnabledChanged -->" + std::string((queryEnabled?"true":"false")));
+    findPb_->setEnabled(queryEnabled);
+#endif
 	//}
 }
 
 void NodeSearchWidget::slotFind()
 {
-	if(!resW_->isVisible())
+    UserMessage::debug("NodeSearchWidget::slotFind -->");
+
+    //Avoid double clicking
+    if(!findPb_->isEnabled())
+    {
+         UserMessage::debug("<-- NodeSearchWidget::slotFind - search is already running");
+         return;
+    }
+
+    qDebug() << engine_->isRunning();
+
+    if(!resW_->isVisible())
 	{
 		resW_->show();
 		editor_->setQueryTeCanExpand(false);
@@ -171,13 +187,28 @@ void NodeSearchWidget::slotFind()
 	model_->clearData();
 
 	assert(!engine_->isRunning());
+    assert(findPb_->isEnabled());
+    assert(!stopPb_->isEnabled());
 
-	engine_->runQuery(editor_->query(),editor_->allServers());
+    //We set the button state in advance as if the engine were running
+    adjustButtonState(true);
+
+    if(!engine_->runQuery(editor_->query(),editor_->allServers()))
+    {
+        //if we are here we could not start the query and we need to reset the button state
+        adjustButtonState();
+    }
+
+    UserMessage::debug("<-- NodeSearchWidget::slotFind");
 }
 
 void NodeSearchWidget::slotStop()
 {
-	engine_->stopQuery();
+    //It is a blocking call!
+    engine_->stopQuery();
+    assert(!engine_->isRunning());
+
+    adjustButtonState();
 }
 
 void NodeSearchWidget::slotClose()
@@ -188,27 +219,24 @@ void NodeSearchWidget::slotClose()
 
 void NodeSearchWidget::slotQueryStarted()
 {
- 	UserMessage::message(UserMessage::DBG,false,"Search started");
+    UserMessage::debug("NodeSearchWidget::slotQueryStarted -->");
 
-  	findPb_->setEnabled(false);
-  	stopPb_->setEnabled(true);
-  	editor_->setEnabled(false);
-  	closePb_->setEnabled(false);
+    adjustButtonState();
 
-	queryProgress_->setRange(0,0);
+    queryProgress_->setRange(0,0);
 	queryProgress_->show();
 
 	progressLabel_->setText("Search in progress ...");
+
+    UserMessage::debug("<-- NodeSearchWidget::slotQueryStarted");
 }
 
 void NodeSearchWidget::slotQueryFinished()
 {
-	UserMessage::message(UserMessage::DBG,false,"Search finished. Total node scanned: " + boost::lexical_cast<std::string>(engine_->scannedCount()));
+    UserMessage::debug("NodeSearchWidget::slotQueryFinished -->");
+    UserMessage::debug("  Search finished. Total node scanned: " + boost::lexical_cast<std::string>(engine_->scannedCount()));
 
-	findPb_->setEnabled(true);
-  	stopPb_->setEnabled(false);
-  	editor_->setEnabled(true);
-  	closePb_->setEnabled(true);
+    adjustButtonState();
 
 	queryProgress_->hide();
 	queryProgress_->setRange(0,1);
@@ -217,6 +245,35 @@ void NodeSearchWidget::slotQueryFinished()
 	progressLabel_->setText(QString::number(model_->rowCount()) + " items found");
 
 	adjustColumns();
+
+    qDebug() << engine_->isRunning();
+
+    UserMessage::debug("<-- NodeSearchWidget::slotQueryFinished");
+}
+
+void NodeSearchWidget::adjustButtonState()
+{
+    adjustButtonState(engine_->isRunning());
+}
+
+void NodeSearchWidget::adjustButtonState(bool engineRunning)
+{
+    if(engineRunning)
+    {
+        findPb_->setEnabled(false);
+        stopPb_->setEnabled(true);
+        editor_->setEnabled(false);
+    }
+    else
+    {
+        findPb_->setEnabled(true);
+        stopPb_->setEnabled(false);
+        editor_->setEnabled(true);
+    }
+
+    UserMessage::debug("NodeSearchWidget::adjustButtonState -->");
+    UserMessage::debug(" findTb_: " + boost::lexical_cast<std::string>(findPb_->isEnabled()));
+    UserMessage::debug("<-- NodeSearchWidget::adjustButtonState");
 }
 
 void NodeSearchWidget::adjustColumns()

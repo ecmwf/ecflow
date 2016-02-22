@@ -107,8 +107,8 @@ OutputCacheItem* OutputCache::add(VInfo_ptr info,const std::string& sourcePath,V
             UserMessage::debug("  add item:" + id);
             print();
             UserMessage::debug("<-- OutputCache::add");
-            return item;
 #endif
+            return item;
         }
     }
 #ifdef _UI_OUTPUTCACHE_DEBUG

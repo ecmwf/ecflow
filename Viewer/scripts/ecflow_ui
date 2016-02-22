@@ -32,7 +32,6 @@ cleanup(){
 
 #Define tmp root dir
 TMPDIR_ROOT=${TMPDIR:=/tmp}
-export ECFLOWUI_TMPDIR=${ECFLOWUI_TMPDIR:=$TMPDIR}
 
 # check that TMPDIR_ROOT actually exists - we can't run without it
 if [ ! -d $TMPDIR_ROOT ]

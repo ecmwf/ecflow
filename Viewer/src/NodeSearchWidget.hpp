@@ -50,7 +50,9 @@ Q_SIGNALS:
 	void selectionChanged(VInfo_ptr);
 
 private:
-	void adjustColumns();
+    void adjustColumns();
+    void adjustButtonState();
+    void adjustButtonState(bool);
 
 	NodeQuery* query_;
 	NodeQueryEngine* engine_;
