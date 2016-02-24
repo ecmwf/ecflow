@@ -42,22 +42,26 @@ void OutputFileProvider::clear()
 }
 
 //Node
-void OutputFileProvider::visit(VInfoNode* info)
+void OutputFileProvider::visit(VInfoNode* infoNode)
 {
-	//Reset the reply
+    assert(info_->node() == infoNode->node());
+
+    //Reset the reply
 	reply_->reset();
 
-	if(!info)
+    if(!info_)
  	{
        	owner_->infoFailed(reply_);
+        return;
    	}
 
 	ServerHandler* server=info_->server();
-	VNode *n=info->node();
+    VNode *n=infoNode->node();
 
     if(!n || !n->node())
    	{
        	owner_->infoFailed(reply_);
+        return;
    	}
 
     //Get the filename
@@ -94,6 +98,7 @@ void OutputFileProvider::file(const std::string& fileName)
 	if(!info_->isNode() || !info_->node() || !info_->node()->node())
 	{
 	    owner_->infoFailed(reply_);
+        return;
 	}
 
 	ServerHandler* server=info_->server();
@@ -202,9 +207,8 @@ void OutputFileProvider::fetchFile(ServerHandler *server,VNode *n,const std::str
 
 bool OutputFileProvider::fetchFileViaOutputClient(VNode *n,const std::string& fileName)
 {
-	std::string host, port;
-    //host="freki";
-    //port="9316";
+    std::string host, port;
+    assert(n);
 
     UserMessage::debug("OutputFileProvider::fetchFileViaOutputClient <-- file: " + fileName);
 
@@ -274,6 +278,7 @@ void OutputFileProvider::slotOutputClientFinished()
 {
 	VFile_ptr tmp = outClient_->result();
     assert(tmp);
+
     outClient_->clearResult();
 
     latestCached_=OutputCache::instance()->add(info_,tmp->sourcePath(),tmp);
@@ -307,7 +312,7 @@ void OutputFileProvider::slotOutputClientError(QString msg)
 {
     UserMessage::message(UserMessage::DBG,false,"OutputFileProvider::slotOutputClientError error:" + msg.toStdString());
 
-    if(info_ && info_.get())
+    if(info_)
 	{
 		ServerHandler* server=info_->server();
 		VNode *n=info_->node();
@@ -331,9 +336,11 @@ void OutputFileProvider::slotOutputClientError(QString msg)
 
 void OutputFileProvider::fetchJoboutViaServer(ServerHandler *server,VNode *n,const std::string& fileName)
 {
+    assert(server);
+    assert(n);
+
     //Define a task for getting the info from the server.
     task_=VTask::create(taskType_,n,this);
-
 
     task_->reply()->fileReadMode(VReply::ServerReadMode);
     task_->reply()->fileName(fileName);
@@ -361,64 +368,7 @@ bool OutputFileProvider::fetchLocalFile(const std::string& fileName)
 	return false;
 }
 
-/*
-VDir_ptr OutputProvider::fetchDirViaLogServer(VNode *n,const std::string& fileName)
-{
-	VDir_ptr res;
 
-	//Create a logserver
-	LogServer_ptr logServer=n->logServer();
-
-	if(logServer && logServer->ok())
-	{
-		res=logServer->getDir(fileName.c_str());
-	}
-
-	return res;
-}
-*/
-
-/*
-VDir_ptr OutputProvider::fetchLocalDir(const std::string& path)
-{
-	VDir_ptr res;
-
-	boost::filesystem::path p(path);
-
-	try {
-		//Is it a directory?
-		if(boost::filesystem::is_directory(p))
-		{
-			return res;
-		}
-		//It must be a file
-		if(boost::filesystem::exists(p) &&
-		   boost::filesystem::exists(p.parent_path()))
-		{
-			std::string dirName=p.parent_path().string();
-			std::string fileName=p.leaf().string();
-
-			std::string::size_type pos=fileName.find_last_of(".");
-			if(pos != std::string::npos)
-			{
-				std::string pattern=fileName.substr(0,pos);
-				res=VDir_ptr(new VDir(dirName,pattern));
-				return res;
-			}
-		}
-
-	}
-	catch (const boost::filesystem::filesystem_error& e)
-	{
-		UserMessage::message(UserMessage::WARN,false,"fetchLocalDir failed:" + std::string(e.what()));
-		return res;
-	}
-
-
-	return res;
-}
-
-*/
 std::string OutputFileProvider::joboutFileName() const
 {
 	if(info_ && info_->isNode() && info_->node() && info_->node()->node())

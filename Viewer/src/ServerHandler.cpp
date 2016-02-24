@@ -1127,6 +1127,13 @@ void ServerHandler::resetFailed(const std::string& errMsg)
 	//This status is indicated by the connectStat_. Each object needs to be aware of it
 	//and do its tasks accordingly.
 
+    //Create an object to inform the observers about the change
+    VServerChange change;
+    //Notify the observers that the scan has started
+    broadcast(&ServerObserver::notifyBeginServerScan,change);
+    //Notify the observers that scan has ended
+    broadcast(&ServerObserver::notifyEndServerScan);
+
 	connectState_->state(ConnectState::Lost);
 	connectState_->errorMessage(errMsg);
 	setActivity(NoActivity);

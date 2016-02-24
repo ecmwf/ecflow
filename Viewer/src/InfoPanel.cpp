@@ -64,6 +64,8 @@ InfoPanel::InfoPanel(QWidget* parent) :
 
 	tab_->setIconSize(QSize(16,16));
 
+    messageLabel_->hide();
+
 	//Builds the menu for the settings tool button
 	/*QMenu *menu=new QMenu(this);
 	menu->setTearOffEnabled(true);
@@ -149,7 +151,10 @@ void InfoPanel::setCurrent(const std::string& name)
 
 void InfoPanel::clear()
 {
-	//Unregister from observer lists
+    messageLabel_->hide();
+    messageLabel_->clear();
+
+    //Unregister from observer lists
 	if(info_ && info_.get())
 	{
 		if(info_->server())
@@ -520,13 +525,12 @@ void InfoPanel::updateTitle()
 	Q_EMIT titleUpdated(txt);
 }
 
-
 void InfoPanel::notifyDataLost(VInfo* info)
 {
 	if(info_ && info_.get() == info)
 	{
-		clear();
-	}
+        clear();
+    }
 }
 
 //-------------------------------------------------
@@ -538,7 +542,7 @@ void InfoPanel::notifyDefsChanged(ServerHandler *server, const std::vector<ecf::
 	if(frozen())
 		return;
 
-	if(info_.get())
+    if(info_)
 	{
 		if(info_->server() && info_->server() == server)
 		{
@@ -559,21 +563,61 @@ void InfoPanel::notifyServerDelete(ServerHandler* server)
 	}
 }
 
+//This must be called at the beginning of a reset
 void InfoPanel::notifyBeginServerClear(ServerHandler* server)
 {
+    if(info_)
+    {
+        if(info_->server() && info_->server() == server)
+        {           
+            messageLabel_->showWarning("Server <b>" + QString::fromStdString(server->name()) + "</b> is being reset. \
+                   Until the server is fully \
+                   reloaded only <b>limited functionalty</b> is avaliable in the Info Panel!");
+
+            messageLabel_->startLoadLabel();
+
+            Q_FOREACH(InfoPanelItemHandler *item,items_)
+            {
+                item->item()->suspend();
+            }
+        }
+    }
 }
 
+//This must be called at the end of a reset
 void InfoPanel::notifyEndServerScan(ServerHandler* server)
 {
+    if(info_)
+    {
+        if(info_->server() && info_->server() == server)
+        {
+            messageLabel_->hide();
+            messageLabel_->clear();
 
+            //We try to ressurect the info. We have to do it explicitly because it is not guaranteed
+            //the notifyEndServerScan() will be first called on the VInfo then on the InfoPanel. So it
+            //is possible that the not still exists but it is still set to NULL in VInfo.
+            info_->regainData();
+
+            //If the node is not available dataLost() will be called.
+            if(!info_->node())
+                return;
+
+            //Otherwise we resume all the tabs
+            Q_FOREACH(InfoPanelItemHandler *item,items_)
+            {
+                item->item()->resume();
+            }
+        }
+    }
 }
 
 void InfoPanel::notifyServerConnectState(ServerHandler* server)
 {
-	if(frozen())
-		return;
+    if(frozen())
+        return;
 
-	if(info_.get())
+    if(info_)
 	{
 		if(info_->server() && info_->server() == server)
 		{

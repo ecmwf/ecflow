@@ -80,8 +80,12 @@ MessageLabel::MessageLabel(QWidget *parent) :
     progLayout->addWidget(progLabel_);
 
 	layout_=new QHBoxLayout(this);
-	layout_->setContentsMargins(2,2,2,2);	
-    layout_->addWidget(loadLabel_);
+	layout_->setContentsMargins(2,2,2,2);	    
+
+    QVBoxLayout *loadLayout=new QVBoxLayout();
+    loadLayout->addWidget(loadLabel_);
+    loadLayout->addStretch(1);
+    layout_->addLayout(loadLayout);
 
     QVBoxLayout *pixLayout=new QVBoxLayout();
     pixLayout->addWidget(pixLabel_);
@@ -105,6 +109,8 @@ MessageLabel::MessageLabel(QWidget *parent) :
 void MessageLabel::clear()
 {
 	msgLabel_->setText("");
+    stopLoadLabel();
+    stopProgress();
 }
 
 void MessageLabel::showInfo(QString msg)

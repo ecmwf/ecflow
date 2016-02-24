@@ -60,6 +60,7 @@ public:
 
 	virtual void accept(VInfoVisitor*)=0;
 
+    void regainData();
 	void addObserver(VInfoObserver*);
 	void removeObserver(VInfoObserver*);
 

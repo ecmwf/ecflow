@@ -39,6 +39,8 @@ public:
 	virtual void clearContents()=0;
     virtual void becameSelected()=0;
     virtual void becameUnselected()=0;
+    virtual void suspend() {}
+    virtual void resume() {}
 	bool enabled() const {return enabled_;}
 	virtual void setEnabled(bool);
     void setSelected(bool);

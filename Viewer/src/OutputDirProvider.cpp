@@ -25,7 +25,6 @@ OutputDirProvider::OutputDirProvider(InfoPresenter* owner) :
 	InfoProvider(owner,VTask::NoTask),
 	outClient_(NULL)
 {
-
 }
 
 void OutputDirProvider::clear()

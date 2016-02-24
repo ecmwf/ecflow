@@ -106,23 +106,31 @@ void VInfo::dataLost()
 
 void VInfo::notifyBeginServerClear(ServerHandler* server)
 {
-	node_=NULL;
+    node_=NULL;
 }
 
 void VInfo::notifyEndServerScan(ServerHandler* server)
 {
-	if(isServer())
-	{
-		node_=server_->vRoot();
-	}
-	else if(isNode())
-	{
-		node_=server_->vRoot()->find(nodePath_);
-		if(!node_)
-		{
-			dataLost();
-		}
-	}
+    regainData();
+}
+
+void VInfo::regainData()
+{
+    if(node_)
+        return;
+
+    if(isServer())
+    {
+        node_=server_->vRoot();
+    }
+    else if(isNode())
+    {
+        node_=server_->vRoot()->find(nodePath_);
+        if(!node_)
+        {
+            dataLost();
+        }
+    }
 }
 
 void VInfo::addObserver(VInfoObserver* o)

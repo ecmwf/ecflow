@@ -194,6 +194,30 @@ void OutputItemWidget::clearContents()
     enableDir(false);
 }
 
+//The data is not avialable
+void OutputItemWidget::suspend()
+{
+    updateDirTimer_->stop();
+    reloadTb_->setEnabled(false);
+    enableDir(false);
+}
+
+//The data is available again
+void OutputItemWidget::resume()
+{
+    if(info_ && info_->node())
+    {
+        reloadTb_->setEnabled(true);
+        enableDir(true);
+        slotUpdateDir();
+        updateDirTimer_->start();
+    }
+    else
+    {
+        clearContents();
+    }
+}
+
 void OutputItemWidget::becameSelected()
 {
      dirProvider_->setEnabled(true);

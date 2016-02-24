@@ -35,6 +35,8 @@ public:
 	void clearContents();
     void becameSelected();
     void becameUnselected();
+    void suspend();
+    void resume();
 
 	//From VInfoPresenter
 	void infoReady(VReply*);
