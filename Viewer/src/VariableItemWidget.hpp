@@ -87,8 +87,6 @@ public:
 	void reload(VInfo_ptr);
 	QWidget* realWidget();
     void clearContents();
-    void becameSelected() {}
-    void becameUnselected() {}
 
 public Q_SLOTS:
 	void on_actionProp_triggered();
@@ -107,6 +105,7 @@ protected:
 	void addItem(const QModelIndex& index);
 	void removeItem(const QModelIndex& index);
 	void updateWidgetState();
+    void updateState(const ChangeFlags&);
 
 	void nodeChanged(const VNode*, const std::vector<ecf::Aspect::Type>&);
 	void defsChanged(const std::vector<ecf::Aspect::Type>&);

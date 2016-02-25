@@ -11,6 +11,7 @@
 #define INFOPRESENTER_HPP_
 
 #include "VInfo.hpp"
+#include <vector>
 
 class InfoProvider;
 class VReply;
@@ -31,10 +32,12 @@ public:
     virtual void infoProgress(const std::string& text,int value) {}
     virtual void infoAppended(VReply*) {}
     VInfo_ptr info() const {return info_;}
+    void registerInfoProvider(InfoProvider* ip) {infoProviders_.push_back(ip);}
 
 protected:
 	VInfo_ptr info_;
-	InfoProvider* infoProvider_;
+    InfoProvider* infoProvider_; //the main info provider
+    std::vector<InfoProvider*> infoProviders_; //the list of all the providers including the main one
 };
 
 #endif

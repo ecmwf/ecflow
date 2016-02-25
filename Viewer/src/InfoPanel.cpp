@@ -312,7 +312,8 @@ void InfoPanel::adjustTabs(VInfo_ptr info)
 		{
 			if(InfoPanelItemHandler* d=findHandler(*it))
 			{
-				d->addToTab(tab_);
+                d->addToTab(tab_);
+                d->item()->setEnabled(true);
 			}
 		}
 
@@ -338,11 +339,23 @@ void InfoPanel::adjustTabs(VInfo_ptr info)
 		tabBeingAdjusted_=false;
 	}
 
+    //We use the same set of tabs
+    else
+    {
+        for(int i=0; i < tab_->count(); i++)
+        {
+            if(InfoPanelItemHandler* d=findHandler(tab_->widget(i)))
+            {
+                d->item()->setEnabled(true);
+            }
+        }
+    }
+
 	//We reload the current tab
 	if(currentItem)
-	{
-		currentItem->setEnabled(true);
-		currentItem->reload(info);
+    {
+        currentItem->setSelected(true,info);
+        //currentItem->reload(info);
 	}
 }
 
@@ -414,22 +427,19 @@ void InfoPanel::slotCurrentWidgetChanged(int idx)
 
 	if(InfoPanelItem* current=findItem(tab_->widget(idx)))
 	{
-        current->setSelected(true);
-        //Enable the current item
-        //current->setEnabled(true);
+        current->setSelected(true,info_);
 
 		//Reload the item if it is needed
-		if(!current->info())
-			current->reload(info_);
+        /*if(!current->isSuspended() && !current->info())
+            current->reload(info_);*/
 
-		//Disable the others
+        //Deselect the others
 		for(int i=0; i < tab_->count(); i++)
 		{
 			if(InfoPanelItemHandler* d=findHandler(tab_->widget(i)))
 			{
 				if(d->item() != current)
-                    d->item()->setSelected(false);
-                    //d->item()->setEnabled(false);
+                    d->item()->setSelected(false,info_);
 			}
 		}
 	}
@@ -578,7 +588,7 @@ void InfoPanel::notifyBeginServerClear(ServerHandler* server)
 
             Q_FOREACH(InfoPanelItemHandler *item,items_)
             {
-                item->item()->suspend();
+                item->item()->setSuspended(true,info_);
             }
         }
     }
@@ -606,7 +616,7 @@ void InfoPanel::notifyEndServerScan(ServerHandler* server)
             //Otherwise we resume all the tabs
             Q_FOREACH(InfoPanelItemHandler *item,items_)
             {
-                item->item()->resume();
+                item->item()->setSuspended(false,info_);
             }
         }
     }

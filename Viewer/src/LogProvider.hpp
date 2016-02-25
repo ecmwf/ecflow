@@ -46,7 +46,7 @@ private:
 	void stopWatchFile();
 	std::string readLastLines(const std::string& filename,int last_n_lines,size_t& size,std::string& error_msg);
 
-	 FileWatcher* fileWatcher_;
+    FileWatcher* fileWatcher_;
 
 };
 

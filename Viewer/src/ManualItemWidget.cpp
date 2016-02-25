@@ -28,7 +28,6 @@ ManualItemWidget::ManualItemWidget(QWidget *parent) : CodeItemWidget(parent)
 
 	//Editor font
 	textEdit_->setFontProperty(VConfig::instance()->find("panel.manual.font"));
-
 }
 
 ManualItemWidget::~ManualItemWidget()
@@ -42,16 +41,21 @@ QWidget* ManualItemWidget::realWidget()
 
 void ManualItemWidget::reload(VInfo_ptr info)
 {
-	clearContents();
+    assert(enabled_);
 
-	enabled_=true;
+    if(suspended_)
+        return;
+
+    clearContents();
+
     info_=info;
     messageLabel_->hide();
 
-    if(info_ && info_.get())
+    //Info must be a node
+    if(info_ && info_->isNode() && info_->node())
     {
         infoProvider_->info(info_);
-    }   
+    }
 }
 
 void ManualItemWidget::clearContents()

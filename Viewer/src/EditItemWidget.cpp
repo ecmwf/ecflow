@@ -52,18 +52,22 @@ QWidget* EditItemWidget::realWidget()
 
 void EditItemWidget::reload(VInfo_ptr info)
 {
-	clearContents();
+    assert(enabled_);
 
-	enabled_=true;
-	info_=info;
+    if(suspended_)
+        return;
 
-	if(info_ && info_.get())
-	{
-		//Get file contents
-		EditProvider* ep=static_cast<EditProvider*>(infoProvider_);
-		ep->preproc(preproc());
-		infoProvider_->info(info_);
-	}
+    clearContents();
+    info_=info;
+
+    //Info must be a node
+    if(info_ && info_->isNode() && info_->node())
+    {
+        //Get file contents
+        EditProvider* ep=static_cast<EditProvider*>(infoProvider_);
+        ep->preproc(preproc());
+        infoProvider_->info(info_);
+    }
 }
 
 void EditItemWidget::clearContents()

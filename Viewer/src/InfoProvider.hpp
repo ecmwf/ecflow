@@ -10,6 +10,7 @@
 #ifndef INFOPROVIDER_HPP_
 #define INFOPROVIDER_HPP_
 
+#include "FlagSet.hpp"
 #include "VInfo.hpp"
 #include "InfoPresenter.hpp"
 #include "VTask.hpp"
@@ -42,9 +43,12 @@ public:
 	void taskChanged(VTask_ptr);
 
 protected:
-	virtual void handleFileNotDefined(VReply *reply);
+    //enum ChangeFlag {EnabledChanged=1,AutoUpdateChanged=2};
+    //typedef FlagSet<ChangeFlag> ChangeFlags;
+
+    virtual void handleFileNotDefined(VReply *reply);
 	virtual bool handleFileMissing(const std::string& fileName,VReply *reply);
-	virtual void optionsChanged() {}
+    virtual void optionsChanged() {}
 
 	InfoPresenter* owner_;
 	VInfo_ptr info_;
@@ -102,6 +106,5 @@ class ZombieProvider : public InfoProvider
 public:
 	 explicit ZombieProvider(InfoPresenter* owner);
 };
-
 
 #endif

@@ -50,17 +50,21 @@ QWidget* OverviewItemWidget::realWidget()
 
 void OverviewItemWidget::reload(VInfo_ptr info)
 {
-	clearContents();
+    assert(enabled_);
 
-	//set the info
-	adjust(info);
+    if(suspended_)
+        return;
 
-	if(info_ && info.get())
-	{
-		infoProvider_->info(info_);
-	}void broadcastEditorFontChanged();
+    clearContents();
 
-	enabled_=true;
+    //set the info
+    adjust(info);
+
+    //Info must be a node
+    if(info_)
+    {
+        infoProvider_->info(info_);
+    }
 }
 
 void OverviewItemWidget::reload()

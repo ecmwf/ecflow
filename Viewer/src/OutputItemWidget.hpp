@@ -33,10 +33,6 @@ public:
 	void reload(VInfo_ptr);
 	QWidget* realWidget();
 	void clearContents();
-    void becameSelected();
-    void becameUnselected();
-    void suspend();
-    void resume();
 
 	//From VInfoPresenter
 	void infoReady(VReply*);
@@ -62,6 +58,8 @@ protected:
 	void updateDir(VDir_ptr,bool);
 	void updateDir(bool,const std::string&);
 	void enableDir(bool);
+    void updateState(const FlagSet<ChangeFlag>&);
+
     void updateWidgetState() {}
 	void searchOnReload();
 	void getCurrentFile();

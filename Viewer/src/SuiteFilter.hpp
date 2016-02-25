@@ -13,9 +13,12 @@
 #include <string>
 #include <vector>
 
+#include "FlagSet.hpp"
+
 class SuiteFilterObserver;
 class VSettings;
 
+#if 0
 template <class T>
 class FlagSet
 {
@@ -33,6 +36,8 @@ private:
     int flags_;
 
 };
+
+#endif
 
 class SuiteFilterItem
 {

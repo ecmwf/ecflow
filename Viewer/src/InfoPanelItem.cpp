@@ -37,10 +37,6 @@ InfoPanelItem* InfoPanelItemFactory::create(const std::string& name)
 	if(j != makers->end())
 		return (*j).second->make();
 
-	//Default
-	//return  new MvQTextLine(e,p);
-	//return new MvQLineEditItem(e,p) ;
-
 	return 0;
 }
 
@@ -63,7 +59,7 @@ InfoPanelItem::~InfoPanelItem()
 void InfoPanelItem::adjust(VInfo_ptr info)
 {
   	//Check if there is data in info
-  	if(info.get())
+    if(info)
   	{
   		ServerHandler *server=info->server();
 
@@ -102,10 +98,10 @@ void InfoPanelItem::clear()
 
 	info_.reset();
 
-	if(infoProvider_)
-	{
-		infoProvider_->clear();
-	}
+    for(std::vector<InfoProvider*>::iterator it=infoProviders_.begin(); it != infoProviders_.end(); ++it)
+    {
+        (*it)->clear();
+    }
 }
 
 //This function is called when the infopanel
@@ -116,87 +112,128 @@ void InfoPanelItem::setEnabled(bool enabled)
 
 	if(enabled_)
 	{
-		//Enable the infoProvider
-		if(infoProvider_)
-			infoProvider_->setEnabled(true);
-
-		//If we do not want to keep the contents reload the item
-        //if(!frozen_ && !tryToKeepContents_)
-        //	reload(info_);
-
-        //else if(tryToKeepContents_)
-        //    resumeUpdate();
-
+        //Enable the infoProviders
+        for(std::vector<InfoProvider*>::iterator it=infoProviders_.begin(); it != infoProviders_.end(); ++it)
+        {
+            (*it)->setEnabled(true);
+        }
 	}
 	else
 	{
-		//Disable the info provider
-		if(infoProvider_)
-            infoProvider_->setEnabled(false);
+        clearContents();
 
-		//If we do not want to keep the contents clear the item
-        //if(!frozen_ && !tryToKeepContents_)
-        //	clearContents();
+        selected_=false;
+        suspended_=false;
 
-        // else if(tryToKeepContents_)
-       //     suspendUpdate();
+        //Disable the info provider
+        for(std::vector<InfoProvider*>::iterator it=infoProviders_.begin(); it != infoProviders_.end(); ++it)
+        {
+            //This will clear the providers again
+            (*it)->setEnabled(false);
+        }
 	}
 
 	updateWidgetState();
 }
 
-void InfoPanelItem::setSelected(bool selected)
+void InfoPanelItem::setSelected(bool selected,VInfo_ptr info)
 {
-    if(selected)
-    {
-        if(!enabled_)
-        {
-            setEnabled(true);
-            reload(info_);
-        }
+    if(selected_ == selected)
+        return;
 
-        becameSelected();
+    ChangeFlags flags(SelectedChanged);
+    selected_=selected;
+
+    if(selected_)
+    {
+        //Suspend
+        if(suspended_) {}
+        //Resume
+        else
+        {
+            if(unselectedFlags_.isSet(KeepContents))
+            {
+                if(!info_)
+                {
+                    reload(info);
+                    return;
+                }
+            }
+            else
+            {
+                reload(info);
+                return;
+            }
+        }
     }
 
     //if the item becomes unselected we do not do anything if it is frozen
     //or the contents must be kept (e.g. for output)
     else
     {
-        if(!frozen_ && !tryToKeepContents_)
+        if(!frozen_)
         {
-            clearContents();
-            setEnabled(false);
+            if(!unselectedFlags_.isSet(KeepContents))
+            {
+                //This will also clear the providers
+                clearContents();
+            }
         }
 
-        becameUnselected();
+        return;
     }
 
-    updateWidgetState();
+    //We update the derived class
+    updateState(flags);
+    //updateWidgetState();
+}
+
+void InfoPanelItem::setSuspended(bool suspended,VInfo_ptr info)
+{
+    if(suspended_ == suspended)
+        return;
+
+    suspended_=suspended;
+    ChangeFlags flags(SuspendedChanged);
+
+    //Suspend
+    if(suspended_) {}
+    //Resume
+    else
+    {
+        if(selected_ && !info_)
+        {
+            reload(info);
+            return;
+        }
+    }
+
+    //We update the derived class
+    updateState(flags);
 }
 
 void InfoPanelItem::setFrozen(bool b)
 {
 	frozen_=b;
-	updateWidgetState();
+    updateState(FrozenChanged);
+    updateWidgetState();
 }
 
 void InfoPanelItem::setDetached(bool b)
 {
 	detached_=b;
-	updateWidgetState();
+    updateState(DetachedChanged);
+    updateWidgetState();
 }
 
 //From NodeObserver
 void InfoPanelItem::notifyBeginNodeChange(const VNode* node, const std::vector<ecf::Aspect::Type>& aspect,const VNodeChange&)
 {
-	if(frozen_)
+    if(!node  || frozen_ || !enabled_ || suspended_)
 		return;
 
-	if(!enabled_)
-        return;
-    
     //Check if there is data in info
-	if(info_.get())
+    if(info_)
 	{
 		if(info_->isNode())
 		{

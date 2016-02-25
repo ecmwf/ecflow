@@ -35,7 +35,7 @@ OutputItemWidget::OutputItemWidget(QWidget *parent) :
 	ignoreOutputSelection_(false)
 {
     //We try to keep the contents when clicking away
-    tryToKeepContents_=true;
+    //tryToKeepContents_=true;
 
     setupUi(this);
 
@@ -109,13 +109,19 @@ QWidget* OutputItemWidget::realWidget()
 
 void OutputItemWidget::reload(VInfo_ptr info)
 {
+    assert(enabled_);
+
+    if(suspended_)
+        return;
+
     clearContents();
 
-	enabled_=true;
+    //enabled_=true;
 	info_=info;
     userClickedReload_ = false;
 
-	if(info_ && info_.get())
+    //info must be a node
+    if(info_ && info_->isNode() && info_->node())
 	{
         //Get file contents
         infoProvider_->info(info_);
@@ -150,7 +156,6 @@ std::string OutputItemWidget::currentFullName() const
 void OutputItemWidget::getLatestFile()
 {
 	messageLabel_->hide();
-    //messageLabel_->stopLoadLabel();
     messageLabel_->stopProgress();
     fileLabel_->clear();
 	browser_->clear();
@@ -167,7 +172,7 @@ void OutputItemWidget::getCurrentFile()
     fileLabel_->clear();
 	browser_->clear();
 
-	if(info_ && info_.get())
+    if(info_)
 	{
 		std::string fullName=currentFullName();
         UserMessage::message(UserMessage::DBG,false,"output selected: " + fullName);
@@ -179,56 +184,61 @@ void OutputItemWidget::getCurrentFile()
 void OutputItemWidget::clearContents()
 {
     updateDirTimer_->stop();
-
     InfoPanelItem::clear();
-    dirProvider_->clear();
-
+    enableDir(false);
     messageLabel_->hide();
     messageLabel_->stopProgress();
-    //messageLabel_->stopLoadLabel();
     fileLabel_->clear();
     browser_->clearCursorCache();
     browser_->clear();
     reloadTb_->setEnabled(true);
     userClickedReload_ = false;
-    enableDir(false);
 }
 
-//The data is not avialable
-void OutputItemWidget::suspend()
+void OutputItemWidget::updateState(const FlagSet<ChangeFlag>& flags)
 {
-    updateDirTimer_->stop();
-    reloadTb_->setEnabled(false);
-    enableDir(false);
-}
-
-//The data is available again
-void OutputItemWidget::resume()
-{
-    if(info_ && info_->node())
+    if(flags.isSet(SelectedChanged))
     {
-        reloadTb_->setEnabled(true);
-        enableDir(true);
-        slotUpdateDir();
-        updateDirTimer_->start();
+        if(selected_ && !suspended_)
+        {            
+            slotUpdateDir();
+            updateDirTimer_->start();
+        }
+        //If unselected we stop the dir update
+        else
+        {
+            updateDirTimer_->stop();            
+        }
     }
-    else
+
+    if(flags.isSet(SuspendedChanged))
     {
-        clearContents();
+        //Suspend
+        if(suspended_)
+        {
+            updateDirTimer_->stop();
+            reloadTb_->setEnabled(false);
+            enableDir(false);
+        }
+        //Resume
+        else
+        {
+            if(info_ && info_->node())
+            {
+                reloadTb_->setEnabled(true);
+                enableDir(true);
+                if(selected_)
+                {
+                    slotUpdateDir();
+                    updateDirTimer_->start();
+                }
+            }
+            else
+            {
+                clearContents();
+            }
+        }
     }
-}
-
-void OutputItemWidget::becameSelected()
-{
-     dirProvider_->setEnabled(true);
-     slotUpdateDir();
-     updateDirTimer_->start();
-}
-
-void OutputItemWidget::becameUnselected()
-{
-     updateDirTimer_->stop();
-     dirProvider_->setEnabled(false);
 }
 
 void OutputItemWidget::infoReady(VReply* reply)
@@ -293,6 +303,7 @@ void OutputItemWidget::infoReady(VReply* reply)
         //We do not have dir info so the file must be the jobout
         if(dirModel_->isEmpty())
             searchOnReload();
+
         //We have dir info
         else
         {
@@ -305,6 +316,14 @@ void OutputItemWidget::infoReady(VReply* reply)
 
         userClickedReload_ = false;
         reloadTb_->setEnabled(true);
+
+        //If we got a local file or a file via the logserver we restart the dir update timer
+        if(!suspended_ &&
+           (reply->fileReadMode() == VReply::LocalReadMode ||
+            reply->fileReadMode() == VReply::LogServerReadMode))
+        {
+            updateDirTimer_->start();
+        }
     }
 
     //------------------------
@@ -352,6 +371,14 @@ void OutputItemWidget::infoFailed(VReply* reply)
         reloadTb_->setEnabled(true);
         //updateDir(true);
 	}
+    else
+    {
+        //We do not have directories
+        enableDir(false);
+        //the timer is stopped. It will be restarted again if we get a local file or
+        //a file via the logserver
+        updateDirTimer_->stop();
+    }
 }
 
 void OutputItemWidget::on_reloadTb__clicked()
@@ -371,7 +398,7 @@ void OutputItemWidget::updateDir(VDir_ptr dir,bool restartTimer)
 	if(restartTimer)
 		updateDirTimer_->stop();
 
-	bool status=(dir && dir.get());
+    bool status=(dir && dir->count() >0);
 
 	if(status)
 	{

@@ -48,19 +48,20 @@ QWidget* ScriptItemWidget::realWidget()
 
 void ScriptItemWidget::reload(VInfo_ptr info)
 {
-    clearContents();
-    
-    enabled_=true;
-    info_=info;
+    assert(enabled_);
 
-    if(!info.get() || !info->isNode() || !info->node())
+    if(suspended_)
+        return;
+
+    clearContents();
+    info_=info;
+    messageLabel_->hide();
+
+    //Info must be a node
+    if(info_ && info_->isNode() && info_->node())
     {
-       return;
+        infoProvider_->info(info_);
     }
-    else
-    {
-    	infoProvider_->info(info_);
-    }	
 }
 
 void ScriptItemWidget::clearContents()

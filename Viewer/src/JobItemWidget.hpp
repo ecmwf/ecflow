@@ -26,8 +26,6 @@ public:
 	void reload(VInfo_ptr);
 	QWidget* realWidget();
     void clearContents();
-    void becameSelected() {}
-    void becameUnselected() {}
 
 	//From VInfoPresenter
     void infoReady(VReply*);
@@ -38,7 +36,8 @@ public:
     void defsChanged(const std::vector<ecf::Aspect::Type>&) {}
 
 protected:
-	void updateWidgetState() {};
+    void updateWidgetState() {}
+    void updateState(const ChangeFlags&) {}
 };
 
 #endif

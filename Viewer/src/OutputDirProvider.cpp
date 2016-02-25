@@ -130,7 +130,6 @@ void OutputDirProvider::fetchDir(ServerHandler* server,VNode* n)
      owner_->infoFailed(reply_);
 }
 
-
 bool OutputDirProvider::fetchDirViaOutputClient(VNode *n,const std::string& fileName)
 {
 	std::string host, port;

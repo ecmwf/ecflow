@@ -30,16 +30,14 @@ public:
 	void reload(VInfo_ptr);
 	QWidget* realWidget();
     void clearContents();
-    void becameSelected() {}
-    void becameUnselected() {}
 
 	//From VInfoPresenter
 	void infoReady(VReply*);
 	void infoFailed(VReply*);
 	void infoProgress(VReply*);
 
-	void nodeChanged(const VNode*, const std::vector<ecf::Aspect::Type>&) {};
-	void defsChanged(const std::vector<ecf::Aspect::Type>&) {};
+    void nodeChanged(const VNode*, const std::vector<ecf::Aspect::Type>&) {}
+    void defsChanged(const std::vector<ecf::Aspect::Type>&) {}
 
 protected Q_SLOTS:
 	void on_preprocTb__toggled(bool);
@@ -52,7 +50,8 @@ protected Q_SLOTS:
 protected:
 	bool preproc() const;
 	bool alias() const;
-	void updateWidgetState() {};
+    void updateWidgetState() {}
+    void updateState(const ChangeFlags&) {}
 
 	bool preproc_;
 	bool alias_;

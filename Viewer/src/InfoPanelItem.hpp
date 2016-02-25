@@ -10,6 +10,7 @@
 #ifndef INFOPANELITEM_HPP_
 #define INFOPANELITEM_HPP_
 
+#include "FlagSet.hpp"
 #include "NodeObserver.hpp"
 #include "VInfo.hpp"
 #include "InfoPresenter.hpp"
@@ -29,21 +30,27 @@ class InfoPanelItem : public VTaskObserver, public InfoPresenter, public NodeObs
 friend class InfoPanel;
 
 public:
-	InfoPanelItem() : enabled_(false), useAncestors_(false),
-                      frozen_(false), detached_(false), tryToKeepContents_(false) {}
+    InfoPanelItem() : enabled_(false), selected_(false), suspended_(false),
+                      frozen_(false), detached_(false), unselectedFlags_(KeepContents),
+                      useAncestors_(false) {}
 	virtual ~InfoPanelItem();
 
+    enum ChangeFlag {EnabledChanged=1,SelectedChanged=2,SuspendedChanged=4,FrozenChanged=8,DetachedChanged=16};
+    typedef FlagSet<ChangeFlag> ChangeFlags;
+
+    //What to do when the item is unselected
+    enum UnselectedFlag {KeepContents=1,KeepActivity=2};
+    typedef FlagSet<UnselectedFlag> UnselectedFlags;
 
 	virtual void reload(VInfo_ptr info)=0;
 	virtual QWidget* realWidget()=0;
 	virtual void clearContents()=0;
-    virtual void becameSelected()=0;
-    virtual void becameUnselected()=0;
-    virtual void suspend() {}
-    virtual void resume() {}
-	bool enabled() const {return enabled_;}
-	virtual void setEnabled(bool);
-    void setSelected(bool);
+
+    //bool enabled() const {return enabled_;}
+    bool isSuspended() const {return suspended_;}
+    virtual void setEnabled(bool);
+    void setSelected(bool,VInfo_ptr);
+    void setSuspended(bool,VInfo_ptr);
 	void setFrozen(bool);
 	void setDetached(bool);
 
@@ -65,6 +72,7 @@ protected:
 	void adjust(VInfo_ptr);
 	virtual void clear();
 	virtual void updateWidgetState()=0;
+    virtual void updateState(const ChangeFlags&)=0;
 
 	//Notifications about the server changes
 	virtual void defsChanged(const std::vector<ecf::Aspect::Type>&)=0;
@@ -76,10 +84,13 @@ protected:
 	virtual void nodeChanged(const VNode*, const std::vector<ecf::Aspect::Type>&)=0;
 	
 	bool enabled_;
-    bool useAncestors_;
+    bool selected_;
+    bool suspended_;
     bool frozen_;
     bool detached_;
     bool tryToKeepContents_;
+    UnselectedFlags unselectedFlags_;
+    bool useAncestors_;
 };
 
 class InfoPanelItemFactory

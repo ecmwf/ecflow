@@ -41,13 +41,17 @@ QWidget* JobItemWidget::realWidget()
 
 void JobItemWidget::reload(VInfo_ptr info)
 {
-	clearContents();
+    assert(enabled_);
 
-	enabled_=true;
+    if(suspended_)
+        return;
+
+    clearContents();
     info_=info;
+    messageLabel_->hide();
 
     //Info must be a node
-    if(info_.get() && info_->isNode() && info_->node())
+    if(info_ && info_->isNode() && info_->node())
     {
         infoProvider_->info(info_);
     }   

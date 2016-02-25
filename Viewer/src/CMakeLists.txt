@@ -32,6 +32,7 @@ set(viewer_srcs
     EditItemWidget.cpp
     EditProvider.cpp
     ExpandState.cpp
+    FlagSet.hpp
     FileInfoLabel.cpp
     FileWatcher.cpp
     FilterWidget.cpp

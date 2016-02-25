@@ -48,11 +48,11 @@ void LogProvider::optionsChanged()
 		{
 			stopWatchFile();
 		}
-		else
+        /*else
 		{
 			if(!inAutoUpdate_)
 				fetchFile();
-		}
+        }*/
 	}
 	else
 	{
@@ -75,7 +75,7 @@ void LogProvider::fetchFile()
 	//Reset the reply
 	reply_->reset();
 
-	if(!info_ || !info_.get())
+    if(!info_)
 	{
 	   owner_->infoFailed(reply_);
 	   return;

@@ -44,12 +44,15 @@ QWidget* WhyItemWidget::realWidget()
 
 void WhyItemWidget::reload(VInfo_ptr info)
 {
-	clearContents();
+    assert(enabled_);
 
-	enabled_=true;
+    if(suspended_)
+        return;
+
+    clearContents();
 	info_=info;
 
-	if(info_ && info_.get())
+    if(info_)
 	{
 		textEdit_->setPlainText(why());
 	}

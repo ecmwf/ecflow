@@ -26,14 +26,13 @@ public:
 	void reload(VInfo_ptr);
 	QWidget* realWidget();
     void clearContents();
-    void becameSelected() {}
-    void becameUnselected() {}
 
     void nodeChanged(const VNode*, const std::vector<ecf::Aspect::Type>&) {}
     void defsChanged(const std::vector<ecf::Aspect::Type>&) {}
 
 protected:
     void updateWidgetState() {}
+    void updateState(const ChangeFlags&) {}
 
 };
 

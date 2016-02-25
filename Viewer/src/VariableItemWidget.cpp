@@ -318,14 +318,18 @@ QWidget* VariableItemWidget::realWidget()
 //A new info object is set
 void VariableItemWidget::reload(VInfo_ptr info)
 {
-	clearContents();
+    assert(enabled_);
 
+    if(suspended_)
+       return;
+
+    clearContents();
 	adjust(info);
+
 	data_->reload(info);
 	varView->expandAll();
 	varView->resizeColumnToContents(0);
 	//varView->reload(info);
-	enabled_=true;
 }
 
 void VariableItemWidget::clearContents()
@@ -340,6 +344,10 @@ void VariableItemWidget::slotItemSelected(const QModelIndex& idx,const QModelInd
 	checkActionState();
 }
 
+void VariableItemWidget::updateState(const FlagSet<ChangeFlag>& flags)
+{
+     checkActionState();
+}
 
 void VariableItemWidget::updateWidgetState()
 {

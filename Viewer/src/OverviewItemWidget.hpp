@@ -23,8 +23,6 @@ public:
 	void reload(VInfo_ptr);
 	QWidget* realWidget();
     void clearContents();
-    void becameSelected() {}
-    void becameUnselected() {}
 
 	//From VInfoPresenter
 	void infoReady(VReply*);
@@ -37,7 +35,8 @@ public:
 
 protected:
 	void reload();
-	void updateWidgetState() {};
+    void updateWidgetState() {}
+    void updateState(const ChangeFlags&) {}
 
 	int lastScrollPos_;
 };
