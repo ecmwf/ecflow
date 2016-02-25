@@ -35,7 +35,6 @@ public:
     void defsChanged(const std::vector<ecf::Aspect::Type>&) {}
 
 protected:
-    void updateWidgetState() {}
     void updateState(const ChangeFlags&) {}
 	LogModel* model_;
 

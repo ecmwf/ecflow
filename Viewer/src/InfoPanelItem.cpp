@@ -106,16 +106,16 @@ void InfoPanelItem::clear()
 
 //This function is called when the infopanel
 // is being reset. The info_ might be unset.
-void InfoPanelItem::setEnabled(bool enabled)
+void InfoPanelItem::setActive(bool active)
 {
-	enabled_=enabled;
+    active_=active;
 
-	if(enabled_)
+    if(active_)
 	{
         //Enable the infoProviders
         for(std::vector<InfoProvider*>::iterator it=infoProviders_.begin(); it != infoProviders_.end(); ++it)
         {
-            (*it)->setEnabled(true);
+            (*it)->setActive(true);
         }
 	}
 	else
@@ -129,11 +129,11 @@ void InfoPanelItem::setEnabled(bool enabled)
         for(std::vector<InfoProvider*>::iterator it=infoProviders_.begin(); it != infoProviders_.end(); ++it)
         {
             //This will clear the providers again
-            (*it)->setEnabled(false);
+            (*it)->setActive(false);
         }
 	}
 
-	updateWidgetState();
+    //updateWidgetState();
 }
 
 void InfoPanelItem::setSelected(bool selected,VInfo_ptr info)
@@ -143,6 +143,8 @@ void InfoPanelItem::setSelected(bool selected,VInfo_ptr info)
 
     ChangeFlags flags(SelectedChanged);
     selected_=selected;
+
+    assert(active_);
 
     if(selected_)
     {
@@ -185,7 +187,6 @@ void InfoPanelItem::setSelected(bool selected,VInfo_ptr info)
 
     //We update the derived class
     updateState(flags);
-    //updateWidgetState();
 }
 
 void InfoPanelItem::setSuspended(bool suspended,VInfo_ptr info)
@@ -195,6 +196,9 @@ void InfoPanelItem::setSuspended(bool suspended,VInfo_ptr info)
 
     suspended_=suspended;
     ChangeFlags flags(SuspendedChanged);
+
+    if(!active_)
+        return;
 
     //Suspend
     if(suspended_) {}
@@ -215,21 +219,30 @@ void InfoPanelItem::setSuspended(bool suspended,VInfo_ptr info)
 void InfoPanelItem::setFrozen(bool b)
 {
 	frozen_=b;
+    if(!active_)
+        return;
+
+    //We update the derived class
     updateState(FrozenChanged);
-    updateWidgetState();
+
 }
 
 void InfoPanelItem::setDetached(bool b)
 {
 	detached_=b;
+
+    if(!active_)
+        return;
+
+    //We update the derived class
     updateState(DetachedChanged);
-    updateWidgetState();
+
 }
 
 //From NodeObserver
 void InfoPanelItem::notifyBeginNodeChange(const VNode* node, const std::vector<ecf::Aspect::Type>& aspect,const VNodeChange&)
 {
-    if(!node  || frozen_ || !enabled_ || suspended_)
+    if(!node  || frozen_ || !active_ || suspended_)
 		return;
 
     //Check if there is data in info

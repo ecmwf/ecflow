@@ -35,7 +35,6 @@ public:
 
 protected:
 	void reload();
-    void updateWidgetState() {}
     void updateState(const ChangeFlags&) {}
 
 	int lastScrollPos_;

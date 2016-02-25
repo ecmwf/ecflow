@@ -50,8 +50,7 @@ protected Q_SLOTS:
 	void slotItemSelected(QModelIndex,QModelIndex);
 
 protected:
-    void updateWidgetState() {}
-    void updateState(const ChangeFlags&) {}
+    void updateState(const ChangeFlags&);
 	void serverSyncFinished();
 
 private:

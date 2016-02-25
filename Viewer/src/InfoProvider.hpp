@@ -28,10 +28,9 @@ public:
 	void command(VTask::Type);
 	virtual void clear();
 
-	bool enabled() const {return enabled_;}
-	void setEnabled(bool);
-	bool autoUpdate() const {return autoUpdate_;}
-	void setAutoUpdate(bool);
+    void setActive(bool);
+    virtual void setAutoUpdate(bool);
+    bool autoUpdate() const {return autoUpdate_;}
 	bool inAutoUpdate() const {return inAutoUpdate_;}
 
 	//From VInfoVisitor
@@ -43,9 +42,6 @@ public:
 	void taskChanged(VTask_ptr);
 
 protected:
-    //enum ChangeFlag {EnabledChanged=1,AutoUpdateChanged=2};
-    //typedef FlagSet<ChangeFlag> ChangeFlags;
-
     virtual void handleFileNotDefined(VReply *reply);
 	virtual bool handleFileMissing(const std::string& fileName,VReply *reply);
     virtual void optionsChanged() {}
@@ -58,7 +54,7 @@ protected:
 	std::string fileVarName_;
 	std::string fileNotDefinedText_;
 	std::string fileMissingText_;
-	bool enabled_;
+    bool active_;
 	bool autoUpdate_;
 	bool inAutoUpdate_;
 };

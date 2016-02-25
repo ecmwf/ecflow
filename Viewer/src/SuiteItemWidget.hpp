@@ -49,12 +49,12 @@ protected Q_SLOTS:
 	void slotModelEdited(const QModelIndex&,const QModelIndex&);
 
 protected:
-	void updateData();
-	void updateWidgetState();
-    void updateState(const ChangeFlags&) {}
+	void updateData();    
+    void updateState(const ChangeFlags&);
 	void settingsChanged();
+    void checkActionState();
 
-	SuiteModel *model_;
+    SuiteModel *model_;
 };
 
 #endif

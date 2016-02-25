@@ -17,7 +17,7 @@
 InfoProvider::InfoProvider(InfoPresenter* owner,VTask::Type taskType) :
 	owner_(owner),
 	taskType_(taskType),
-	enabled_(false),
+    active_(false),
 	autoUpdate_(false),
 	inAutoUpdate_(false)
 {
@@ -41,17 +41,16 @@ void InfoProvider::clear()
 	info_.reset();
 }
 
-void InfoProvider::setEnabled(bool b)
+void InfoProvider::setActive(bool b)
 {
-    enabled_=b;
-    if(!enabled_)
+    active_=b;
+    if(!active_)
         clear();
 }
 
 void InfoProvider::setAutoUpdate(bool b)
 {
     autoUpdate_=b;
-    optionsChanged();
 }
 
 void InfoProvider::info(VInfo_ptr info)

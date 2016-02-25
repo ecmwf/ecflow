@@ -285,9 +285,9 @@ VariableItemWidget::VariableItemWidget(QWidget *parent)
 	//Build context menu
 	varView->addAction(actionAdd);
 	varView->addAction(sep1);
-	varView->addAction(actionCopy);
-	varView->addAction(actionPaste);
-	varView->addAction(sep2);
+    //varView->addAction(actionCopy);
+    //varView->addAction(actionPaste);
+    //varView->addAction(sep2);
 	varView->addAction(actionDelete);
 	varView->addAction(sep3);
 	varView->addAction(actionProp);
@@ -318,7 +318,7 @@ QWidget* VariableItemWidget::realWidget()
 //A new info object is set
 void VariableItemWidget::reload(VInfo_ptr info)
 {
-    assert(enabled_);
+    assert(active_);
 
     if(suspended_)
        return;
@@ -346,19 +346,21 @@ void VariableItemWidget::slotItemSelected(const QModelIndex& idx,const QModelInd
 
 void VariableItemWidget::updateState(const FlagSet<ChangeFlag>& flags)
 {
-     checkActionState();
+    checkActionState();
 }
-
-void VariableItemWidget::updateWidgetState()
-{
-	checkActionState();
-}
-
 
 void VariableItemWidget::checkActionState()
 {
 	QModelIndex vIndex=varView->currentIndex();
 	QModelIndex index=sortModel_->mapToSource(vIndex);
+
+    if(suspended_)
+    {
+         actionAdd->setEnabled(false);
+         actionProp->setEnabled(false);
+         actionDelete->setEnabled(false);
+         return;
+    }
 
 	//The index is invalid (no selection)
 	if(!index.isValid())
@@ -508,7 +510,8 @@ void VariableItemWidget::removeItem(const QModelIndex& index)
 
 void VariableItemWidget::on_varView_doubleClicked(const QModelIndex& index)
 {
-	editItem(index);
+    if(!suspended_)
+       editItem(index);
 }
 
 void VariableItemWidget::on_actionProp_triggered()

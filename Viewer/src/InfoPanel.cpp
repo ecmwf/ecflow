@@ -285,7 +285,7 @@ void InfoPanel::adjustTabs(VInfo_ptr info)
 		if(InfoPanelItemHandler* d=findHandler(tab_->widget(i)))
 		{
 			//Disable and force to clear the contents
-			d->item()->setEnabled(false);
+			d->item()->setActive(false);
 			d->item()->clearContents();
 
 			if(d->match(ids))
@@ -313,7 +313,7 @@ void InfoPanel::adjustTabs(VInfo_ptr info)
 			if(InfoPanelItemHandler* d=findHandler(*it))
 			{
                 d->addToTab(tab_);
-                d->item()->setEnabled(true);
+                d->item()->setActive(true);
 			}
 		}
 
@@ -346,7 +346,7 @@ void InfoPanel::adjustTabs(VInfo_ptr info)
         {
             if(InfoPanelItemHandler* d=findHandler(tab_->widget(i)))
             {
-                d->item()->setEnabled(true);
+                d->item()->setActive(true);
             }
         }
     }

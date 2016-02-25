@@ -60,7 +60,6 @@ protected:
 	void enableDir(bool);
     void updateState(const FlagSet<ChangeFlag>&);
 
-    void updateWidgetState() {}
 	void searchOnReload();
 	void getCurrentFile();
 	void getLatestFile();

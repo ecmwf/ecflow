@@ -43,9 +43,9 @@ protected Q_SLOTS:
 	void on_reloadTb__clicked(bool);
 
 protected:
-	void updateWidgetState();
-    void updateState(const ChangeFlags&) {}
+    void updateState(const ChangeFlags&);
     void adjustColumnSize();
+    void checkActionState();
 
 	LogModel* model_;
 };

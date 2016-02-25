@@ -44,7 +44,7 @@ QWidget* WhyItemWidget::realWidget()
 
 void WhyItemWidget::reload(VInfo_ptr info)
 {
-    assert(enabled_);
+    assert(active_);
 
     if(suspended_)
         return;

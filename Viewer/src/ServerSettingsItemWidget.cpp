@@ -45,12 +45,13 @@ QWidget* ServerSettingsItemWidget::realWidget()
 
 void ServerSettingsItemWidget::reload(VInfo_ptr info)
 {
-	clearContents();
+    assert(active_);
 
-	enabled_=true;
+    clearContents();
+
 	info_=info;
 
-	if(info_ && info_.get() && info_->isServer() && info_->server())
+    if(info_ && info_->isServer() && info_->server())
 	{
 		editor_->edit(info_->server()->conf()->guiProp(),
 				QString::fromStdString(info_->server()->name()));
@@ -67,6 +68,36 @@ void ServerSettingsItemWidget::clearContents()
 	//TODO: properly set gui state
 }
 
+void ServerSettingsItemWidget::updateState(const FlagSet<ChangeFlag>& flags)
+{
+    if(flags.isSet(ActiveChanged))
+    {
+        if(active_)
+        {
+            editor_->setEnabled(true);
+            buttonBox_->setEnabled(true);
+        }
+    }
+
+    if(flags.isSet(SuspendedChanged))
+    {
+        if(active_)
+        {
+            if(suspended_)
+            {
+                editor_->setEnabled(false);
+                buttonBox_->setEnabled(false);
+            }
+            else
+            {
+                editor_->setEnabled(true);
+                buttonBox_->setEnabled(true);
+            }
+        }
+    }
+
+}
+
 void  ServerSettingsItemWidget::slotEditorChanged()
 {
 	QPushButton* applyPb=buttonBox_->button(QDialogButtonBox::Apply);
@@ -76,7 +107,7 @@ void  ServerSettingsItemWidget::slotEditorChanged()
 
 void ServerSettingsItemWidget::slotClicked(QAbstractButton* button)
 {
-	if(!enabled_)
+	if(!active_)
 		return;
 
 	switch(buttonBox_->standardButton(button))

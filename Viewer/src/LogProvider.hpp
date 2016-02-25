@@ -32,12 +32,10 @@ public:
 
 	 void visit(VInfoServer*);
 	 void clear();
+     void setAutoUpdate(bool);
 
 public Q_SLOTS:
 	void slotLinesAppend(QStringList);
-
-protected:
-	void optionsChanged();
 
 private:
 	void fetchFile();

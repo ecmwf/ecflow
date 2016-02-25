@@ -38,7 +38,6 @@ public:
     QGraphicsView* view() { return graphicsView; }
 
 protected:
-   void updateWidgetState() {}
    void updateState(const ChangeFlags&) {}
 };
 

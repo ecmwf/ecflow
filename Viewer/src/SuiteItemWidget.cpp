@@ -40,7 +40,7 @@ SuiteItemWidget::SuiteItemWidget(QWidget *parent) : QWidget(parent)
 	okTb->setEnabled(false);
 	enableTb->setChecked(false);
 
-	updateWidgetState();
+    checkActionState();
 }
 
 QWidget* SuiteItemWidget::realWidget()
@@ -50,12 +50,16 @@ QWidget* SuiteItemWidget::realWidget()
 
 void SuiteItemWidget::reload(VInfo_ptr info)
 {
-	clearContents();
+    assert(active_);
 
-	enabled_=true;
+    if(suspended_)
+        return;
+
+    clearContents();
+
 	info_=info;
 
-	if(info_.get() && info_->isServer() && info_->server())
+    if(info_ && info_->isServer() && info_->server())
 	{
 		//Get the current suitefilter
 		SuiteFilter *sf=info_->server()->suiteFilter();
@@ -68,7 +72,7 @@ void SuiteItemWidget::reload(VInfo_ptr info)
 		enableTb->setChecked(sf->isEnabled());
 		autoCb->setChecked(sf->autoAddNewSuites());
 
-		updateWidgetState();
+        checkActionState();
 
 		//We update the filter because it might not show the current status. If
 		//there is a change the model will be notified
@@ -118,9 +122,32 @@ void SuiteItemWidget::clearContents()
 	//messageLabel->hide();
 }
 
-void SuiteItemWidget::updateWidgetState()
+void SuiteItemWidget::updateState(const FlagSet<ChangeFlag>&)
 {
-	if(enableTb->isChecked())
+    checkActionState();
+}
+
+void SuiteItemWidget::checkActionState()
+{
+    if(suspended_)
+    {
+        enableTb->setEnabled(false);
+        autoCb->setEnabled(false);
+        selectAllTb->setEnabled(false);
+        unselectAllTb->setEnabled(false);
+        syncTb->setEnabled(false);
+        suiteView->setEnabled(false);
+        okTb->setEnabled(false);
+        return;
+    }
+    else
+    {
+         enableTb->setEnabled(true);
+         okTb->setEnabled(true);
+         suiteView->setEnabled(true);
+    }
+
+    if(enableTb->isChecked())
 	{
 		autoCb->setEnabled(true);
 		selectAllTb->setEnabled(true);
@@ -160,7 +187,7 @@ void SuiteItemWidget::on_autoCb_clicked(bool val)
 		sf->setAutoAddNewSuites(val);
 	}
 
-	updateWidgetState();
+    checkActionState();
 }
 
 void SuiteItemWidget::on_enableTb_clicked(bool val)
@@ -172,7 +199,7 @@ void SuiteItemWidget::on_enableTb_clicked(bool val)
 		settingsChanged();
 	}
 
-	updateWidgetState();
+    checkActionState();
 }
 
 void SuiteItemWidget::on_selectAllTb_clicked(bool)

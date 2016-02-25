@@ -31,6 +31,8 @@ MessageItemWidget::MessageItemWidget(QWidget *parent) : QWidget(parent)
     treeView_->setProperty("log","1");
     treeView_->setModel(model_);
     treeView_->setItemDelegate(new LogDelegate(this));
+
+    syncTb_->hide();
 }
 
 QWidget* MessageItemWidget::realWidget()
@@ -40,12 +42,15 @@ QWidget* MessageItemWidget::realWidget()
 
 void MessageItemWidget::reload(VInfo_ptr info)
 {
-	clearContents();
+    assert(active_);
 
-	enabled_=true;
+    if(suspended_)
+        return;
+
+    clearContents();
     info_=info;
 
-    if(info_ && info_.get())
+    if(info_)
     {
         infoProvider_->info(info_);
     }
@@ -54,7 +59,6 @@ void MessageItemWidget::reload(VInfo_ptr info)
 void MessageItemWidget::clearContents()
 {
     InfoPanelItem::clear();
-
     model_->clearData();
 }
 

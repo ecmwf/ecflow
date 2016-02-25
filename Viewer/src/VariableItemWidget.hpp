@@ -104,7 +104,6 @@ protected:
 	void duplicateItem(const QModelIndex& index);
 	void addItem(const QModelIndex& index);
 	void removeItem(const QModelIndex& index);
-	void updateWidgetState();
     void updateState(const ChangeFlags&);
 
 	void nodeChanged(const VNode*, const std::vector<ecf::Aspect::Type>&);

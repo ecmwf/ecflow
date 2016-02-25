@@ -41,7 +41,7 @@ QWidget* JobItemWidget::realWidget()
 
 void JobItemWidget::reload(VInfo_ptr info)
 {
-    assert(enabled_);
+    assert(active_);
 
     if(suspended_)
         return;

@@ -48,7 +48,7 @@ QWidget* ScriptItemWidget::realWidget()
 
 void ScriptItemWidget::reload(VInfo_ptr info)
 {
-    assert(enabled_);
+    assert(active_);
 
     if(suspended_)
         return;

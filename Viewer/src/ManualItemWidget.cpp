@@ -41,7 +41,7 @@ QWidget* ManualItemWidget::realWidget()
 
 void ManualItemWidget::reload(VInfo_ptr info)
 {
-    assert(enabled_);
+    assert(active_);
 
     if(suspended_)
         return;

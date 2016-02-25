@@ -47,7 +47,7 @@
         <string>...</string>
        </property>
        <property name="icon">
-        <iconset resource="viewer.qrc">
+        <iconset>
          <normaloff>:/viewer/search_decor.svg</normaloff>:/viewer/search_decor.svg</iconset>
        </property>
        <property name="shortcut">
@@ -62,7 +62,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QToolButton" name="toolButton">
+      <widget class="QToolButton" name="syncTb_">
        <property name="toolTip">
         <string>Refresh messages</string>
        </property>
@@ -70,7 +70,7 @@
         <string>...</string>
        </property>
        <property name="icon">
-        <iconset resource="viewer.qrc">
+        <iconset>
          <normaloff>:/viewer/sync.svg</normaloff>:/viewer/sync.svg</iconset>
        </property>
        <property name="autoRaise">
@@ -106,6 +106,12 @@
  </widget>
  <customwidgets>
   <customwidget>
+   <class>MessageLabel</class>
+   <extends>QWidget</extends>
+   <header location="global">MessageLabel.hpp</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
    <class>PlainTextSearchLine</class>
    <extends>QWidget</extends>
    <header>PlainTextSearchLine.hpp</header>
@@ -116,15 +122,7 @@
    <extends>QTreeView</extends>
    <header location="global">TreeView.hpp</header>
   </customwidget>
-  <customwidget>
-   <class>MessageLabel</class>
-   <extends>QWidget</extends>
-   <header>MessageLabel.hpp</header>
-   <container>1</container>
-  </customwidget>
  </customwidgets>
- <resources>
-  <include location="viewer.qrc"/>
- </resources>
+ <resources/>
  <connections/>
 </ui>

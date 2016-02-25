@@ -32,7 +32,7 @@ HistoryItemWidget::HistoryItemWidget(QWidget *parent) : QWidget(parent)
 	treeView_->setModel(model_);
 	treeView_->setItemDelegate(new LogDelegate(this));
 
-	updateWidgetState();
+    checkActionState();
 }
 
 QWidget* HistoryItemWidget::realWidget()
@@ -42,12 +42,15 @@ QWidget* HistoryItemWidget::realWidget()
 
 void HistoryItemWidget::reload(VInfo_ptr info)
 {
-	clearContents();
+    assert(active_);
 
-	//active_=true;
+    if(suspended_)
+        return;
+
+	clearContents();    
     info_=info;
 
-    if(info_ && info_.get())
+    if(info_)
     {
         infoProvider_->info(info_);
     }
@@ -65,7 +68,7 @@ void HistoryItemWidget::infoReady(VReply* reply)
     adjustColumnSize();
     fileLabel_->update(reply,"(Last 100 lines)");
     treeView_->scrollTo(model_->lastIndex());
-    updateWidgetState();
+    checkActionState();
 }
 
 void HistoryItemWidget::infoProgress(VReply* reply)
@@ -77,7 +80,7 @@ void HistoryItemWidget::infoFailed(VReply* reply)
 {
     QString s=QString::fromStdString(reply->errorText());
 
-    updateWidgetState();
+    checkActionState();
 }
 
 void HistoryItemWidget::infoAppended(VReply* reply)
@@ -86,12 +89,42 @@ void HistoryItemWidget::infoAppended(VReply* reply)
     adjustColumnSize();
     treeView_->scrollTo(model_->lastIndex());
 
-    updateWidgetState();
+    checkActionState();
 }
 
-void HistoryItemWidget::updateWidgetState()
+void HistoryItemWidget::updateState(const ChangeFlags& flags)
 {
-	if(infoProvider_->autoUpdate() == frozen_)
+    if(flags.isSet(SelectedChanged))
+    {
+        if(!selected_)
+        {
+            infoProvider_->setAutoUpdate(false);
+            reloadTb_->setEnabled(false);
+            return;
+        }
+    }
+
+    if(flags.isSet(SuspendedChanged))
+    {
+        //Suspend
+        if(suspended_)
+        {
+            infoProvider_->setAutoUpdate(false);
+            reloadTb_->setEnabled(false);
+            return;
+        }
+
+    }
+
+    checkActionState();
+}
+
+void HistoryItemWidget::checkActionState()
+{
+    if(suspended_)
+        return;
+
+    if(infoProvider_->autoUpdate() == frozen_)
 	{
 		infoProvider_->setAutoUpdate(!frozen_);
 	}

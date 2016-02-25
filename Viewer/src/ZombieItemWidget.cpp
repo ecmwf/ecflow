@@ -74,12 +74,15 @@ QWidget* ZombieItemWidget::realWidget()
 
 void ZombieItemWidget::reload(VInfo_ptr info)
 {
-	clearContents();
+    assert(active_);
 
-	enabled_=true;
+    if(suspended_)
+        return;
+
+    clearContents();
 	info_=info;
 
-	if(info_.get() && info_->isServer() && info_->server())
+    if(info_ && info_->isServer() && info_->server())
 	{
 		commandSent_=false;
 		infoProvider_->info(info_);
@@ -93,13 +96,19 @@ void ZombieItemWidget::clearContents()
 	checkActionState();
 }
 
+
 void ZombieItemWidget::updateContents()
 {
 	//model_->clearData();
-	if(info_.get() && info_->isServer() && info_->server())
+    if(info_ && info_->isServer() && info_->server())
 	{
 		infoProvider_->info(info_);
 	}
+}
+
+void ZombieItemWidget::updateState(const FlagSet<ChangeFlag>&)
+{
+    checkActionState();
 }
 
 /*
@@ -243,7 +252,22 @@ void ZombieItemWidget::slotItemSelected(QModelIndex,QModelIndex)
 
 void ZombieItemWidget::checkActionState()
 {
-	QModelIndex vIndex=zombieView->currentIndex();
+    if(suspended_)
+    {
+        reloadTb_->setEnabled(false);
+        actionRescue->setEnabled(false);
+        actionFoboff->setEnabled(false);
+        actionKill->setEnabled(false);
+        actionTerminate->setEnabled(false);
+        actionDelete->setEnabled(false);
+        return;
+    }
+    else
+    {
+        reloadTb_->setEnabled(true);
+    }
+
+    QModelIndex vIndex=zombieView->currentIndex();
 	QModelIndex index=sortModel_->mapToSource(vIndex);
 
 	bool acState=(index.isValid())?true:false;

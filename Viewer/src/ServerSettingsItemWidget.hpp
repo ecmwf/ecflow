@@ -42,8 +42,7 @@ protected Q_SLOTS:
 	void slotEditorChanged();
 
 protected:
-    void updateWidgetState() {}
-    void updateState(const ChangeFlags&) {}
+    void updateState(const ChangeFlags&);
 };
 
 #endif
