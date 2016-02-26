@@ -43,6 +43,8 @@ void ExpandState::clear()
 		delete root_;
 
 	root_=0;
+
+    selection_.reset();
 }
 
 ExpandNode* ExpandState::setRoot(const std::string& name)

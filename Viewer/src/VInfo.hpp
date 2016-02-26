@@ -57,6 +57,7 @@ public:
 
 	virtual std::string name()=0;
     virtual std::string path()=0;
+    const std::string& storedNodePath() const {return nodePath_;}
 
 	virtual void accept(VInfoVisitor*)=0;
 
@@ -68,12 +69,15 @@ public:
     void notifyDefsChanged(ServerHandler* server, const std::vector<ecf::Aspect::Type>& a) {}
     void notifyServerDelete(ServerHandler* server);
     void notifyBeginServerClear(ServerHandler* server);
-    void notifyEndServerClear(ServerHandler* server) {}
+    void notifyEndServerClear(ServerHandler* server);
     void notifyBeginServerScan(ServerHandler* server,const VServerChange&) {}
     void notifyEndServerScan(ServerHandler* server);
     void notifyServerConnectState(ServerHandler* server) {}
     void notifyServerActivityChanged(ServerHandler* server) {}
     void notifyServerSuiteFilterChanged(ServerHandler* server) {}
+
+    // Overload + operator to add two Box objects.
+    bool operator ==(const VInfo&);
 
 protected:
 	VInfo(ServerHandler* server,VNode* node);

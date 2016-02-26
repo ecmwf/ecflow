@@ -56,6 +56,7 @@ protected:
     void paintEvent(QPaintEvent*);
     void mouseMoveEvent(QMouseEvent *event);
     void mousePressEvent(QMouseEvent* event);
+    void changeEvent(QEvent* event);
     
     void updateSettings();
     void reset(int);
@@ -104,6 +105,10 @@ protected:
     bool current_;
     bool hasMenu_;
     QLinearGradient grad_;
+    bool enabled_;
+    static QColor disabledBgCol_;
+    static QColor disabledBorderCol_;
+    static QColor disabledFontCol_;
 };
 
 
@@ -126,10 +131,10 @@ public:
 	//From ServerObserver
 	void notifyDefsChanged(ServerHandler* server,const std::vector<ecf::Aspect::Type>&);
 	void notifyServerDelete(ServerHandler* server);
-	void notifyBeginServerClear(ServerHandler* server) {};
-	void notifyEndServerClear(ServerHandler* server) {};
-	void notifyBeginServerScan(ServerHandler* server,const VServerChange&) {};
-	void notifyEndServerScan(ServerHandler* server) {};
+    void notifyBeginServerClear(ServerHandler* server);
+    void notifyEndServerClear(ServerHandler* server) {}
+    void notifyBeginServerScan(ServerHandler* server,const VServerChange&) {}
+    void notifyEndServerScan(ServerHandler* server);
 	void notifyServerConnectState(ServerHandler* server);
 	void notifyServerActivityChanged(ServerHandler* server);
 

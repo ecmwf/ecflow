@@ -352,7 +352,16 @@ void TreeNodeView::collapseAll(const QModelIndex& idx)
 //Save the expand state for the given node (it can be a server as well)
 void TreeNodeView::slotSaveExpand(const VNode* node)
 {
-	expandState_->clear();
+    assert(node);
+
+    expandState_->clear();
+
+    VInfo_ptr s=currentSelection();
+    if(s)
+    {
+        if(node->server() == s->server())
+          expandState_->selection_=s;
+    }
 
 	QModelIndex idx=model_->nodeToIndex(node);
 	if(isExpanded(idx))
@@ -392,7 +401,17 @@ void TreeNodeView::slotRestoreExpand(const VNode* node)
 
 	restoreExpand(expandState_->root(),node);
 
-	expandState_->clear();
+    if(expandState_->selection_)
+    {
+        VInfo_ptr s=currentSelection();
+        if(!s)
+        {
+            expandState_->selection_->regainData();
+            currentSelection(expandState_->selection_);
+        }
+    }
+
+    expandState_->clear();
 }
 
 void TreeNodeView::restoreExpand(ExpandNode *expand,const VNode* node)

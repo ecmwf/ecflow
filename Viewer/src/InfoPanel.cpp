@@ -186,7 +186,27 @@ void InfoPanel::clear()
 //TODO: It should be the slot
 void InfoPanel::reset(VInfo_ptr info)
 {
-	//Set info
+    if(info_ && info)
+    {
+        //UserMessage::debug("path: " + info_->path() + " " + info->path());
+
+        if(*(info_.get()) == *(info.get()))
+            return;
+
+        //it can happen thet the stored info was not yet updated after a
+        //server reload. If there is chance for it we try to regain its data and
+        //comapare it again to the incoming node
+        else if(info_->server() == info->server() &&
+                info_->storedNodePath() == info->storedNodePath() &&
+                !info_->node() && info->node())
+        {
+            info_->regainData();
+            if(info_->node() == info->node())
+                return;
+        }
+    }
+
+    //Set info
     adjustInfo(info);
 
     //Set tabs
@@ -194,7 +214,6 @@ void InfoPanel::reset(VInfo_ptr info)
 
 	//Set breadcrumbs
 	bcWidget_->setPath(info);
-
 
     updateTitle();
 }
@@ -204,7 +223,7 @@ void InfoPanel::slotReload(VInfo_ptr info)
 {
 	//When the mode is detached it cannot receive
 	//the reload request
-	if(info_ && info_.get() && detached())
+    if(info_ && info_ && detached())
 		return;
 
 	reset(info);
@@ -215,7 +234,6 @@ void InfoPanel::slotReloadFromBc(VInfo_ptr info)
 {
     reset(info);
 }
-
 
 //Set the new VInfo object.
 //We also we need to manage the node observers. The InfoItem
@@ -580,9 +598,8 @@ void InfoPanel::notifyBeginServerClear(ServerHandler* server)
     {
         if(info_->server() && info_->server() == server)
         {           
-            messageLabel_->showWarning("Server <b>" + QString::fromStdString(server->name()) + "</b> is being reset. \
-                   Until the server is fully \
-                   reloaded only <b>limited functionalty</b> is avaliable in the Info Panel!");
+            messageLabel_->showWarning("Server <b>" + QString::fromStdString(server->name()) + "</b> is being reloaded. \
+                   Until it is finished only <b>limited functionalty</b> is avaliable in the Info Panel!");
 
             messageLabel_->startLoadLabel();
 

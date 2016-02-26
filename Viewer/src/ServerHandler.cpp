@@ -46,6 +46,8 @@
 std::vector<ServerHandler*> ServerHandler::servers_;
 std::string ServerHandler::localHostName_;
 
+//#define __UI_SERVEROBSERVER_DEBUG
+
 ServerHandler::ServerHandler(const std::string& name,const std::string& host, const std::string& port) :
    name_(name),
    host_(host),
@@ -722,7 +724,10 @@ void ServerHandler::addServerObserver(ServerObserver *obs)
 	std::vector<ServerObserver*>::iterator it=std::find(serverObservers_.begin(),serverObservers_.end(),obs);
 	if(it == serverObservers_.end())
 	{
-		serverObservers_.push_back(obs);
+        serverObservers_.push_back(obs);
+#ifdef __UI_SERVEROBSERVER_DEBUG
+        UserMessage::debug("ServerHandler::addServerObserver -->  " + boost::lexical_cast<std::string>(obs));
+#endif
 	}
 }
 
@@ -732,6 +737,9 @@ void ServerHandler::removeServerObserver(ServerObserver *obs)
 	if(it != serverObservers_.end())
 	{
 		serverObservers_.erase(it);
+#ifdef __UI_SERVEROBSERVER_DEBUG
+        UserMessage::debug("ServerHandler::removeServerObserver --> " + boost::lexical_cast<std::string>(obs));
+#endif
 	}
 }
 
@@ -1104,7 +1112,7 @@ void ServerHandler::resetFinished()
 	assert(change.suiteNum_ == vRoot_->numOfChildren());
 
 	//Notify the observers that scan has ended
-	broadcast(&ServerObserver::notifyEndServerScan);
+    broadcast(&ServerObserver::notifyEndServerScan,true);
 
 	//The suites might have been changed
 	updateSuiteFilter();

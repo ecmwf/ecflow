@@ -46,6 +46,7 @@ public:
 	ExpandNode* root() const {return root_;}
 
 	ExpandNode* root_;
+    VInfo_ptr selection_;
 };
 
 #endif

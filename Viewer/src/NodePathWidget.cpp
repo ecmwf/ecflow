@@ -31,6 +31,10 @@
 
 static std::vector<std::string> propVec;
 
+QColor NodePathItem::disabledBgCol_;
+QColor NodePathItem::disabledBorderCol_;
+QColor NodePathItem::disabledFontCol_;
+
 //#define _UI_NODEPATHWIDGET_DEBUG
 
 BcWidget::BcWidget(QWidget* parent) : 
@@ -204,6 +208,7 @@ void BcWidget::crePixmap()
     {    
         for(int i=0; i < items_.count(); i++)
         {
+            items_.at(i)->enabled_=isEnabled();
             items_.at(i)->draw(&painter,useGrad_,gradLighter_);
         }
     }    
@@ -253,14 +258,33 @@ void BcWidget::mousePressEvent(QMouseEvent *event)
     }
 }    
 
+void BcWidget::changeEvent(QEvent* event)
+{
+    if(event->type() == QEvent::EnabledChange)
+    {
+        crePixmap();
+//TODO: Will update be called automatically?
+    }
+
+    QWidget::changeEvent(event);
+}
+
 NodePathItem::NodePathItem(int index,QString text,QColor bgCol,QColor fontCol,bool hasMenu,bool current) :
     index_(index),
     text_(text),
     bgCol_(bgCol),
     fontCol_(fontCol),
     current_(current),
-    hasMenu_(hasMenu)
+    hasMenu_(hasMenu),
+    enabled_(true)
 {
+    if(!disabledBgCol_.isValid())
+    {
+        disabledBgCol_=QColor(200,200,200);
+        disabledBorderCol_=QColor(170,170,170);
+        disabledFontCol_=QColor(40,40,40);
+    }
+
     grad_.setCoordinateMode(QGradient::ObjectBoundingMode);
     grad_.setStart(0,0);
     grad_.setFinalStop(0,1);
@@ -281,19 +305,33 @@ void NodePathItem::draw(QPainter  *painter,bool useGrad,int lighter)
     	painter->setPen(QPen(borderCol_,0));
     }*/
 
-    painter->setPen(QPen(borderCol_,0));
+    QColor border, bg, fontCol;
+    if(enabled_)
+    {
+        border=borderCol_;
+        bg=bgCol_;
+        fontCol=fontCol_;
+    }
+    else
+    {
+        border=disabledBorderCol_;
+        bg=disabledBgCol_;
+        fontCol=disabledFontCol_;
+    }
+
+    painter->setPen(QPen(border,0));
     
     QBrush bgBrush;
        
     if(useGrad)
     {
-        QColor bgLight=bgCol_.lighter(lighter);
+        QColor bgLight=bg.lighter(lighter);
         grad_.setColorAt(0,bgLight);
-        grad_.setColorAt(1,bgCol_); 
+        grad_.setColorAt(1,bg);
         bgBrush=QBrush(grad_);
     }
     else
-        bgBrush=QBrush(bgCol_);
+        bgBrush=QBrush(bg);
     
     painter->setBrush(bgBrush);
     painter->drawPolygon(shape_);
@@ -303,7 +341,7 @@ void NodePathItem::draw(QPainter  *painter,bool useGrad,int lighter)
     	painter->setPen(QPen(borderCol_,0));
     }*/
 
-    painter->setPen(fontCol_);
+    painter->setPen(fontCol);
     painter->drawText(textRect_,Qt::AlignVCenter | Qt::AlignHCenter,text_);  
     
 }
@@ -611,6 +649,7 @@ void NodePathWidget::loadMenu(const QPoint& pos,VInfo_ptr p)
 	}
 }
 
+
 void NodePathWidget::notifyBeginNodeChange(const VNode* node, const std::vector<ecf::Aspect::Type>& aspect,const VNodeChange&)
 {
 	if(!active_)
@@ -663,7 +702,7 @@ void NodePathWidget::notifyDefsChanged(ServerHandler* server,const std::vector<e
 		return;
 
 	//Check if there is data in inf0
-	if(info_.get() && info_->server()  && info_->server() == server)
+    if(info_ && info_->server()  && info_->server() == server)
 	{
 		//State changed
 		if(std::find(aspect.begin(),aspect.end(),ecf::Aspect::SERVER_STATE) != aspect.end())
@@ -680,6 +719,50 @@ void NodePathWidget::notifyDefsChanged(ServerHandler* server,const std::vector<e
 
 }
 
+//This must be called at the beginning of a reset
+void NodePathWidget::notifyBeginServerClear(ServerHandler* server)
+{
+    if(info_)
+    {
+        if(info_->server() && info_->server() == server)
+        {
+            setEnabled(false);
+
+            /*messageLabel_->showWarning("Server <b>" + QString::fromStdString(server->name()) + "</b> is being reset. \
+                   Until the server is fully \
+                   reloaded only <b>limited functionalty</b> is avaliable in the Info Panel!");
+
+            messageLabel_->startLoadLabel();
+
+            Q_FOREACH(InfoPanelItemHandler *item,items_)
+            {
+                item->item()->setSuspended(true,info_);
+            }*/
+        }
+    }
+}
+
+//This must be called at the end of a reset
+void NodePathWidget::notifyEndServerScan(ServerHandler* server)
+{
+    if(info_)
+    {
+        if(info_->server() && info_->server() == server)
+        {
+            setEnabled(true);
+
+            //We try to ressurect the info. We have to do it explicitly because it is not guaranteed
+            //the notifyEndServerScan() will be first called on the VInfo then on the breadcrumbs. So it
+            //is possible that the node still exists but it is still set to NULL in VInfo.
+            info_->regainData();
+
+            //Should we observer the info?
+            if(!info_->node())
+                clear(true);
+        }
+    }
+}
+
 
 void NodePathWidget::notifyServerDelete(ServerHandler* server)
 {
@@ -691,16 +774,16 @@ void NodePathWidget::notifyServerDelete(ServerHandler* server)
 	}
 }
 
-void NodePathWidget::notifyServerConnectState(ServerHandler* server)
+void NodePathWidget::notifyServerConnectState(ServerHandler* /*server*/)
 {
-	reset();
+//TODO: we need to indicate the state here!
+    //reset();
 }
 
-void NodePathWidget::notifyServerActivityChanged(ServerHandler* server)
+void NodePathWidget::notifyServerActivityChanged(ServerHandler* /*server*/)
 {
-	reset();
+    //reset();
 }
-
 
 void  NodePathWidget::slotRefreshServer()
 {

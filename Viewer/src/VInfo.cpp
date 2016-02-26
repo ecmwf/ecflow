@@ -14,11 +14,16 @@
 #include "Suite.hpp"
 
 #include "ServerHandler.hpp"
+#include "UserMessage.hpp"
 #include "VAttribute.hpp"
 #include "VNState.hpp"
 #include "VSState.hpp"
 
+#include <boost/lexical_cast.hpp>
+
 static std::map<std::string,VInfoAttributeFactory*>* makers = 0;
+
+//#define _UI_VINFO_DEBUG
 
 //========================================
 //
@@ -75,11 +80,18 @@ VInfo::VInfo(ServerHandler* server,VNode* node) :
 
 VInfo::~VInfo()
 {
-	if(server_)
+#ifdef _UI_VINFO_DEBUG
+    UserMessage::debug("VInfo::~VInfo() -->  \n" + boost::lexical_cast<std::string>(this));
+#endif
+    if(server_)
 		server_->removeServerObserver(this);
 
 	for(std::vector<VInfoObserver*>::const_iterator it=observers_.begin(); it != observers_.end(); ++it)
 		(*it)->notifyDelete(this);
+
+#ifdef _UI_VINFO_DEBUG
+    UserMessage::debug("<-- VInfo::~VInfo()");
+#endif
 }
 
 void VInfo::notifyServerDelete(ServerHandler* server)
@@ -105,6 +117,11 @@ void VInfo::dataLost()
 }
 
 void VInfo::notifyBeginServerClear(ServerHandler* server)
+{
+    node_=NULL;
+}
+
+void VInfo::notifyEndServerClear(ServerHandler* server)
 {
     node_=NULL;
 }
@@ -145,6 +162,12 @@ void VInfo::removeObserver(VInfoObserver* o)
 	std::vector<VInfoObserver*>::iterator it=std::find(observers_.begin(),observers_.end(),o);
 	if(it != observers_.end())
 		observers_.erase(it);
+}
+
+bool VInfo::operator ==(const VInfo& other)
+{
+    return (server_ == other.server_ && node_ == other.node_ &&
+            nodePath_ == other.nodePath_);
 }
 
 //=========================================
