@@ -20,9 +20,12 @@
 
 class Node;
 class ServerHandler;
+class VariableModelDataHandler;
 
 class VariableModelData
 {
+   friend class VariableModelDataHandler;
+
 public:
 	explicit VariableModelData(VInfo_ptr info);
 	virtual ~VariableModelData();
@@ -32,7 +35,8 @@ public:
 	std::string type();
 	const std::string& name(int index) const;
 	const std::string& value(int index) const;
-	bool isGenVar(int index) const;
+    bool isGenVar(const std::string& varName) const;
+    bool isGenVar(int index) const;
 	bool isReadOnly(int index) const;
 	bool isReadOnly(const std::string& varName) const;
 	int varNum() const;
@@ -46,11 +50,15 @@ public:
     void clear();
 	void reload();
 	void setValue(int index,const std::string& val);
+    void alter(const std::string& name,const std::string& val);
 	void add(const std::string& name,const std::string& val);
 	void remove(int index,const std::string& val);
 
-	int checkUpdateDiff();
-	bool update();
+protected:
+    void removeDuplicates(const std::vector<Variable>& vars,std::vector<Variable>& genVars);
+    int latestVars(std::vector<Variable>& v,std::vector<Variable>& gv);
+    int checkUpdateDiff(std::vector<Variable>& v,std::vector<Variable>& gv);
+    bool update(std::vector<Variable>& v,std::vector<Variable>& gv);
 
 	std::vector<Variable> vars_;
 	std::vector<Variable> genVars_;

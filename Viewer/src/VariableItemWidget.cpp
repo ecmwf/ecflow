@@ -422,17 +422,34 @@ void VariableItemWidget::editItem(const QModelIndex& index)
 
 		if(d.exec()== QDialog::Accepted && !frozen_)
 		{
-			//We assign new value to a variable
+            //data might have deleted while the dialog was open
+            //so we alter it via the model that can properly lookup the
+            //data object
+            model_->alterVariable(vIndex,d.name(),d.value());
+            //data->alter(d.name().toStdString(),d.value().toStdString());
+#if 0
+                //We assign new value to a variable
 			if(data->hasName(d.name().toStdString()))
 			{
-				model_->setVariable(vIndex,name,d.value());
+                //Add as a user variable with the given name. That is the only way to change a
+                //gen var.
+                if(data->isGenVar(d.name().toStdString()))
+                {
+                    data->add(d.name().toStdString(),d.value().toStdString());
+                }
+                //alter an existing user variable
+                else
+                {
+                    model_->setVariable(vIndex,name,d.value());
+                }
 			}
 			//A new variable is added
 			else
 			{
 				data->add(d.name().toStdString(),d.value().toStdString());
 			}
-		}
+#endif
+        }
 	}
 }
 
@@ -457,7 +474,8 @@ void VariableItemWidget::duplicateItem(const QModelIndex& index)
 
 		if(d.exec() == QDialog::Accepted)
 		{
-			data->add(d.name().toStdString(),d.value().toStdString());
+            data->alter(d.name().toStdString(),d.value().toStdString());
+            //data->add(d.name().toStdString(),d.value().toStdString());
 		}
 	}
 }
@@ -475,8 +493,9 @@ void VariableItemWidget::addItem(const QModelIndex& index)
 		VariableAddDialog d(data,this);
 
 		if(d.exec() == QDialog::Accepted)
-		{
-			data->add(d.name().toStdString(),d.value().toStdString());
+        {
+            data->alter(d.name().toStdString(),d.value().toStdString());
+            //data->add(d.name().toStdString(),d.value().toStdString());
 		}
 	}
 }
@@ -502,11 +521,13 @@ void VariableItemWidget::removeItem(const QModelIndex& index)
 						QString::fromStdString(data->type()) + " <b>" + QString::fromStdString(data->name()) +  "</b>?",
 					    QMessageBox::Ok | QMessageBox::Cancel,QMessageBox::Cancel) == QMessageBox::Ok)
 		{
-			model_->removeVariable(vIndex,name,value);
+            //data might have deleted while the dialog was open
+            //so we alter it via the model that can properly lookup the
+            //data object
+            model_->removeVariable(vIndex,name,value);
 		}
 	}
 }
-
 
 void VariableItemWidget::on_varView_doubleClicked(const QModelIndex& index)
 {

@@ -193,6 +193,35 @@ bool VariableModel::variable(const QModelIndex& idx, QString& name,QString& valu
 	return false;
 }
 
+bool VariableModel::alterVariable(const QModelIndex& index, QString name,QString value)
+{
+    int block;
+    int row;
+
+    identify(index,block,row);
+
+    if(block == -1 || row == -1)
+        return false;
+
+    if(block >=0 && block < data_->count())
+    {
+        //double check
+        if(data_->data(block)->name(row) != name.toStdString())
+        {
+            assert(0);
+            return false;
+        }
+
+        //This will call the ServerComThread  so we
+        //do not know if it was successful or not. The model will be
+        //updated through the observer when the value will actually
+        //change.
+        data_->data(block)->alter(name.toStdString(),value.toStdString());
+    }
+
+    return false;
+}
+
 bool VariableModel::setVariable(const QModelIndex& index, QString name,QString value)
 {
     int block;
