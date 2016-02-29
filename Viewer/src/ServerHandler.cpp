@@ -1214,7 +1214,7 @@ void ServerHandler::rescanTree()
 	vRoot_->endScan();
 
 	//Notify the observers that scan has ended
-	broadcast(&ServerObserver::notifyEndServerScan);
+	broadcast(&ServerObserver::notifyEndServerScan,true);
 
 	//Restart the queue
 	comQueue_->start();
