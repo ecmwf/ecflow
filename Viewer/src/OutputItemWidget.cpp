@@ -139,15 +139,14 @@ std::string OutputItemWidget::currentFullName() const
 	QModelIndex current=dirSortModel_->mapToSource(dirView_->currentIndex());
 
 	std::string fullName;
-	OutputFileProvider* op=static_cast<OutputFileProvider*>(infoProvider_);
-
 	if(current.isValid())
 	{
 		fullName=dirModel_->fullName(current);
 	}
 	else
 	{
-		fullName=op->joboutFileName();
+        OutputFileProvider* op=static_cast<OutputFileProvider*>(infoProvider_);
+        fullName=op->joboutFileName();
 	}
 
 	return fullName;
@@ -324,6 +323,17 @@ void OutputItemWidget::infoReady(VReply* reply)
         {
             updateDirTimer_->start();
         }
+
+        //If we got a local file or a file via the logserver we set the selection
+        //int the dir list according to the file
+        if(reply->fileReadMode() == VReply::LocalReadMode ||
+           reply->fileReadMode() == VReply::LogServerReadMode)
+        {
+            if(f)
+                setCurrentInDir(f->sourcePath());
+            else
+                setCurrentInDir(reply->fileName());
+        }
     }
 
     //------------------------
@@ -392,6 +402,17 @@ void OutputItemWidget::on_reloadTb__clicked()
 //------------------------------------
 // Directory contents
 //------------------------------------
+
+void OutputItemWidget::setCurrentInDir(const std::string& fullName)
+{
+    if(!dirModel_->isEmpty())
+    {
+        //Try to preserve the selection
+        ignoreOutputSelection_=true;
+        dirView_->setCurrentIndex(dirSortModel_->fullNameToIndex(fullName));
+        ignoreOutputSelection_=false;
+    }
+}
 
 void OutputItemWidget::updateDir(VDir_ptr dir,bool restartTimer)
 {
