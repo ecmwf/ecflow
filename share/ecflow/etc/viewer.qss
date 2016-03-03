@@ -16,6 +16,8 @@ QToolBar > QToolButton {
   	padding:  1px;
 }	
 
+QToolTip { color: black; background-color: rgb(192,218,255); border: 1px solid rgb(60,59,58);}
+
 /* ----------------------------
   Breadcrumbs 
 -------------------------------*/
@@ -157,16 +159,20 @@ QTreeView[log="1"]::item {
   Info panel text
 ------------------------------*/
 
-QPlainTextEdit[readOnly="false"] { 
+QPlainTextEdit[form="1"][readOnly="false"] {
+    background-color: rgb(255,255,255);
+}
+
+QPlainTextEdit[edit="1"][readOnly="false"] {
     background-color: rgb(245,245,245);
 }
 
-QPlainTextEdit[readOnly="true"] { 
+QPlainTextEdit[readOnly="true"] {
     background-color: rgb(245,245,245);
 }
 
 QLineEdit[readOnly="true"] { 
-    background-color: rgb(251,251,251);
+    background-color: rgb(245,245,245);
 }
 
 QAbstractScrollArea[pager="1"] {

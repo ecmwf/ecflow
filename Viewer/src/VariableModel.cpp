@@ -53,7 +53,7 @@ bool VariableModel::hasData() const
 
 int VariableModel::columnCount( const QModelIndex& /*parent */ ) const
 {
-   	 return 2;
+     return 2;
 }
 
 int VariableModel::rowCount( const QModelIndex& parent) const
@@ -94,7 +94,7 @@ QVariant VariableModel::data( const QModelIndex& index, int role ) const
 	//Data lookup can be costly so we immediately return a default value for all
 	//the cases where the default should be used.
 	if(role != Qt::DisplayRole && role != Qt::BackgroundRole && role != Qt::ForegroundRole &&
-	   role != ReadOnlyRole)
+       role != ReadOnlyRole && role != Qt::ToolTipRole)
 	{
 		return QVariant();
 	}
@@ -153,14 +153,28 @@ QVariant VariableModel::data( const QModelIndex& index, int role ) const
         {    
 		    if(index.column() == 0)
 		    {
-			    return QString::fromStdString(d->name(row));
-		    }
-		    else if(index.column() == 1)
-		    {
-			    return QString::fromStdString(d->value(row));
-		    }
+                QString s=QString::fromStdString(d->name(row));
+                if(d->isGenVar(row))
+                    s+=" (g)";
+                return s;
+            }
+            else if(index.column() == 1)
+            {
+                return QString::fromStdString(d->value(row));
+            }
         }
+        else if(role == Qt::ToolTipRole)
+        {
+            QString s="User defined variable";
+            if(d->isGenVar(row))
+            {
+                s="Generated variable";
+            }
+            if(d->isReadOnly(row))
+                s+= " (read only)";
 
+            return s;
+        }
 		else if(role == ReadOnlyRole)
         {
 			return (d->isReadOnly(row))?true:false;
@@ -287,8 +301,8 @@ QVariant VariableModel::headerData( const int section, const Qt::Orientation ori
 
    	switch ( section )
 	{
-   	case 0: return tr("Name");
-   	case 1: return tr("Value");
+   	case 0: return tr("Name");  
+    case 1: return tr("Value");
    	default: return QVariant();
    	}
 

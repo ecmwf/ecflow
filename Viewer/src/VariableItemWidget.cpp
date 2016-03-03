@@ -15,6 +15,7 @@
 #include <QPushButton>
 #include <QVBoxLayout>
 
+#include "IconProvider.hpp"
 #include "LineEdit.hpp"
 #include "VariableModel.hpp"
 #include "VariableModelData.hpp"
@@ -82,6 +83,8 @@ VariablePropDialog::VariablePropDialog(VariableModelData *data,QString name, QSt
    data_(data)
 {
 	setupUi(this);
+    typeIconLabel_->hide();
+    valueEdit_->setProperty("form","1");
 
 	QString parentTxt="<b>" + QString::fromStdString(data_->fullPath()) + " </b> (type: " +
 		    QString::fromStdString(data_->type());
@@ -99,6 +102,9 @@ VariablePropDialog::VariablePropDialog(VariableModelData *data,QString name, QSt
 	if(readOnly)
 	{
 		typeTxt+=" (read only)";
+        int id=IconProvider::add(":/viewer/padlock.svg","padlock");
+        typeIconLabel_->show();
+        typeIconLabel_->setPixmap(IconProvider::pixmap(id,12));
 	}
 
 	typeLabel_->setText(typeTxt);

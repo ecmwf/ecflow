@@ -42,6 +42,7 @@ EditItemWidget::EditItemWidget(QWidget *parent) :
 	//connect(submitTb_,SIGNAL(clicked(bool)),
 	//		this,SLOT(on_submitTb__clicked(bool)));
 
+    textEdit_->setProperty("edit","1");
 	textEdit_->setFontProperty(VConfig::instance()->find("panel.edit.font"));
 }
 
