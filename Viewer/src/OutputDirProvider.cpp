@@ -215,15 +215,15 @@ VDir_ptr OutputDirProvider::fetchLocalDir(const std::string& path,bool trynozero
 		   boost::filesystem::exists(p.parent_path()))
 		{
 			std::string dirName=p.parent_path().string();
-			std::string fileName=p.leaf().string();
+            //std::string fileName=p.leaf().string();
 
-			std::string::size_type pos=fileName.find_last_of(".");
-			if(pos != std::string::npos)
-			{
-				std::string pattern=fileName.substr(0,pos);
+            if(info_ && info_->isNode() && info_->node())
+            {
+                std::string nodeName=info_->node()->strName();
+                std::string pattern=nodeName+".";
 				res=VDir_ptr(new VDir(dirName,pattern));
-				return res;
-			}
+				return res;          
+            }
 		}
 
 	}
