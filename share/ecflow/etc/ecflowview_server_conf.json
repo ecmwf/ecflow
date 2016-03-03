@@ -7,7 +7,7 @@
             	"label" : "Update",
             	"tooltip" : "update",      
             
-            	"update": {
+                "autoUpdate": {
             		"label": "Enable automatic update",                     
             		"default": "true"
                 },
@@ -21,11 +21,18 @@
                 },
                 
                 "adaptiveUpdate": {
-                	"label": "Adaptive update frequency",
+                    "label": "Enable adaptive update frequency",
                 	"tooltip": "Adaptive update frequency",                          
                 	"default": "true"
                 },
-			
+
+                "adaptiveUpdateIncrementInSec": {
+                    "label": "Adaptive update frequency increment",
+                    "suffix" : "seconds",
+                    "tooltip": "Adaptive update frequency increment",
+                    "default": "5",
+                    "min" : "0"
+                },
                 "maxAdaptiveUpdateRateInMin": {
                 	"label": "Maximum adaptive update frequency",
                 	"suffix" : "minutes", 

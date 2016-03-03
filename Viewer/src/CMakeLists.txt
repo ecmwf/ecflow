@@ -129,6 +129,7 @@ set(viewer_srcs
     TreeNodeWidget.cpp
     TreeView.cpp
     TriggerView.cpp
+    UpdateTimer.cpp
     UserMessage.cpp
     VAttribute.cpp
     VConfig.cpp   

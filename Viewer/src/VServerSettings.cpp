@@ -38,9 +38,11 @@ VServerSettings::VServerSettings(ServerHandler* server) :
 {
 	if(parNames_.empty())
 	{
-		parNames_[UpdateRate]="server.update.updateRateInSec";
+        parNames_[AutoUpdate]="server.update.autoUpdate";
+        parNames_[UpdateRate]="server.update.updateRateInSec";
 		parNames_[AdaptiveUpdate]="server.update.adaptiveUpdate";
-		parNames_[MaxAdaptiveUpdateRate]="server.update.maxAdaptiveUpdateRateInMin";
+        parNames_[AdaptiveUpdateIncrement]="server.update.adaptiveUpdateIncrementInSec";
+        parNames_[MaxAdaptiveUpdateRate]="server.update.maxAdaptiveUpdateRateInMin";
 
 		parNames_[MaxOutputFileLines]="server.files.maxOutputFileLines";
 		parNames_[ReadFromDisk]="server.files.readFilesFromDisk";

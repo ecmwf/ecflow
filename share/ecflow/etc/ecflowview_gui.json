@@ -352,9 +352,10 @@
  				"title" : "Update",
  				"prefix" : "server.update",
  				
- 				"line" : "update",
+                "line" : "autoUpdate",
  				"line" : "updateRateInSec",
  				"line" : "adaptiveUpdate",
+                "line" : "adaptiveUpdateIncrementInSec",
  				"line" : "maxAdaptiveUpdateRateInMin"
  			},
  			

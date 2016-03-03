@@ -19,6 +19,7 @@
 #include "Animation.hpp"
 #include "IconProvider.hpp"
 #include "PropertyMapper.hpp"
+#include "ServerHandler.hpp"
 
 static std::vector<std::string> propVec;
 
@@ -39,13 +40,23 @@ struct NodeText
     QString text_;
 };
 
+struct ServerUpdateData
+{
+    QRect br_;
+    int prevTime_;
+    int nextTime_;
+    QString prevText_;
+    QString nextText_;
+    float prog_;
+};
 
 TreeNodeViewDelegate::TreeNodeViewDelegate(QWidget *parent) :
     nodeRectRad_(0),
     drawChildCount_(true),
     nodeStyle_(ClassicNodeStyle),
     indentation_(0),
-    drawNodeType_(true)
+    drawNodeType_(true),
+    bgCol_(Qt::white)
 {
 	attrFont_=font_;
 	attrFont_.setPointSize(8);
@@ -74,6 +85,7 @@ TreeNodeViewDelegate::TreeNodeViewDelegate(QWidget *parent) :
 		propVec.push_back("view.tree.attributeFont");
         propVec.push_back("view.tree.display_child_count");
         propVec.push_back("view.tree.displayNodeType");
+        propVec.push_back("view.tree.background");
         propVec.push_back("view.common.node_style");
         propVec.push_back("view.common.node_gradient");
 	}
@@ -155,6 +167,11 @@ void TreeNodeViewDelegate::updateSettings()
     if(VProperty* p=prop_->find("view.tree.displayNodeType"))
     {
         drawNodeType_=p->value().toBool();
+    }
+
+    if(VProperty* p=prop_->find("view.tree.background"))
+    {
+        bgCol_=p->value().value<QColor>();
     }
 }
 
@@ -296,7 +313,9 @@ void TreeNodeViewDelegate::paint(QPainter *painter,const QStyleOptionViewItem &o
 void TreeNodeViewDelegate::renderServer(QPainter *painter,const QModelIndex& index,
 		                                   const QStyleOptionViewItemV4& option,QString text) const
 {
-	bool selected=option.state & QStyle::State_Selected;
+    ServerHandler* server=static_cast<ServerHandler*>(index.data(AbstractNodeModel::ServerPointerRole).value<void*>());
+
+    bool selected=option.state & QStyle::State_Selected;
     int offset=4;
 
 	QFontMetrics fm(font_);
@@ -308,6 +327,21 @@ void TreeNodeViewDelegate::renderServer(QPainter *painter,const QModelIndex& ind
 	if(option.state & QStyle::State_Selected)
 		itemRect.adjust(0,0,0,0);
 
+#if 0
+    painter->setPen(QColor(190,190,190));
+    painter->drawLine(0,option.rect.y()+1,painter->device()->width(),option.rect.y()+1);
+    painter->drawLine(0,option.rect.bottom()-1,painter->device()->width(),option.rect.bottom()-1);
+#endif
+#if 0
+
+    QRect progRect(0,itemRect.y()-deltaH,painter->device()->width(),itemRect.height()+2*deltaH);
+    progRect.setWidth(painter->device()->width());
+    painter->setBrush(Qt::NoBrush);
+    painter->setPen(QColor(190,190,190));
+    painter->drawRect(progRect);
+    painter->setBrush(QColor(230,230,230));
+    painter->drawRect(progRect.adjusted(0,0,-progRect.width()*0.4,0));
+#endif
 	int currentRight=itemRect.left();
 
     NodeShape stateShape;
@@ -333,7 +367,12 @@ void TreeNodeViewDelegate::renderServer(QPainter *painter,const QModelIndex& ind
         currentRight=stateShape.shape_.boundingRect().right()+offset;
     }    
 
-	//Icons area
+    //Refresh timer
+   /* bool hasTimer=true;
+    QRect timeRect(currentRight+offset,itemRect.y()-1,itemRect.height()+2,itemRect.height()+2);
+    currentRight=timeRect.right();*/
+
+    //Icons area
 	QList<QPixmap> pixLst;
 	QList<QRect> pixRectLst;
 
@@ -419,15 +458,49 @@ void TreeNodeViewDelegate::renderServer(QPainter *painter,const QModelIndex& ind
 		{
 			numTxt="(" + QString::number(va.toInt()) + ")";
 
-			fm=QFontMetrics(serverNumFont_);
+            QFontMetrics fmNum(serverNumFont_);
 
-			int numWidth=fm.width(numTxt);
+            int numWidth=fmNum.width(numTxt);
             numRect = nodeText.br_;
-			numRect.setLeft(currentRight+fm.width('A'));
+            numRect.setLeft(currentRight+fmNum.width('A'));
 			numRect.setWidth(numWidth);
 			currentRight=numRect.right();
 		}
 	}
+
+    //Update
+    bool hasUpdate=false;
+    ServerUpdateData updateData;
+#if 0
+    if(server)
+    {
+        hasUpdate=true;
+        updateData.br_=QRect(currentRight+3*offset,itemRect.y()-1,0,itemRect.height()+2);
+        updateData.prevTime_=server->secsSinceLastRefresh();
+        updateData.nextTime_=server->secsTillNextRefresh();
+        if(updateData.prevTime_ >=0)
+        {
+            if(updateData.nextTime_ >=0)
+            {
+                updateData.prevText_="-" + formatTime(updateData.prevTime_);
+                updateData.nextText_="+" +formatTime(updateData.nextTime_);
+                updateData.prog_=(static_cast<float>(updateData.prevTime_)/static_cast<float>(updateData.prevTime_+updateData.nextTime_));
+                updateData.br_.setWidth(fm.width("ABCDE")+fm.width(updateData.prevText_)+fm.width(updateData.nextText_)+2*offset);
+            }
+            else
+            {
+                updateData.prevText_="last update: " + formatTime(updateData.prevTime_);
+                updateData.prog_=0;
+                updateData.br_.setWidth(fm.width(updateData.prevText_));
+            }
+            currentRight=updateData.br_.right();
+         }
+        else
+        {
+            hasUpdate=false;
+        }
+    }
+#endif
 
 	//Define clipping
 	int rightPos=currentRight+1;
@@ -439,9 +512,13 @@ void TreeNodeViewDelegate::renderServer(QPainter *painter,const QModelIndex& ind
 	}
 
 	//Draw state/node rect
-
     renderServerCell(painter,stateShape,nodeText,selected);
     
+    //Draw timer
+    /*int remaining=6*60*1000; //   server->remainingTimeToRefresh();
+    int total=10*60*1000; //server->refreshPeriod() ;
+    renderTimer(painter,timeRect,remaining,total);*/
+
 	//Draw icons
 	for(int i=0; i < pixLst.count(); i++)
 	{
@@ -479,7 +556,12 @@ void TreeNodeViewDelegate::renderServer(QPainter *painter,const QModelIndex& ind
 			painter->drawPixmap(loadRect,an->currentPixmap());
 		}
 	}
-
+#if 0
+    if(hasUpdate)
+    {
+        renderServerUpdate(painter,updateData);
+    }
+#endif
 	if(setClipRect)
 	{
 		painter->restore();
@@ -867,8 +949,101 @@ void TreeNodeViewDelegate::renderNodeShape(QPainter* painter,const NodeShape& sh
     painter->drawPolygon(shape.shape_);
 }
 
+void TreeNodeViewDelegate::renderTimer(QPainter *painter,QRect target,int remaining, int total) const
+{
+    QImage img(target.width(),target.height(),QImage::Format_ARGB32_Premultiplied);
+    QRect r=img.rect().adjusted(2,2,-2,-2);
+    img.fill(Qt::transparent);
+    QPainter p(&img);
+    p.setRenderHint(QPainter::Antialiasing,true);
+
+    int angle=static_cast<int>(360.*static_cast<float>(total-remaining)/static_cast<float>(total));
+    /*angle-=90.;
+    if(angle >=0 && angle <= 90) angle=90-angle;
+    else
+       angle=450-angle;*/
+
+    QColor c(43,97,158);
+
+    QBrush b(c);
+    p.setBrush(b);
+    p.setPen(c);
+    p.drawPie(r,90*16,-angle*16);
+    p.setBrush(Qt::NoBrush);
+    p.drawEllipse(r);
+
+    painter->drawImage(target,img,img.rect());
+}
 
 
+void TreeNodeViewDelegate::renderServerUpdate(QPainter* painter,const ServerUpdateData& data) const
+{
+    QFont font(font_);
+    font.setPointSize(font_.pointSize()-1);
+    QFontMetrics fm(font);
+    painter->setFont(font);
+    painter->setPen(Qt::black);
 
+    QColor minCol=QColor(198,215,253);
+    QColor maxCol=QColor(43,97,158);
 
+    QRect r1=data.br_;
+    r1.setWidth(fm.width(data.prevText_));
+    painter->setPen(minCol);
+    //painter->setPen(Qt::red);
+    painter->drawText(r1,Qt::AlignLeft | Qt::AlignVCenter,data.prevText_);
 
+    if(!data.prevText_.isEmpty())
+    {
+        QRect r2=data.br_;
+        r2.setX(data.br_.right()-fm.width(data.nextText_));
+        //painter->setPen(QColor(1,128,73));
+        painter->setPen(maxCol);
+        painter->drawText(r2,Qt::AlignRight | Qt::AlignVCenter,data.nextText_);
+
+        int dh=(data.br_.height()-fm.height()+1)/2;
+        QRect r=data.br_.adjusted(r1.width()+4,2*dh,-r2.width()-4,-2*dh);
+
+        int pos=static_cast<int>(data.prog_* r.width());
+        QRect rPrev=r.adjusted(0,0,-(r.width()-pos),0);
+
+        QLinearGradient grad;
+        grad.setCoordinateMode(QGradient::ObjectBoundingMode);
+        grad.setStart(0,0);
+        grad.setFinalStop(1,0);
+        QColor posCol=interpolate(minCol,maxCol,data.prog_);
+
+        grad.setColorAt(0,minCol);
+        grad.setColorAt(1,posCol);
+        painter->setPen(Qt::NoPen);
+        painter->setBrush(grad);
+        painter->drawRect(rPrev);
+
+        painter->setBrush(Qt::NoBrush);
+        painter->setPen(QColor(190,190,190));
+        painter->drawRect(r);
+    }
+}
+
+QString TreeNodeViewDelegate::formatTime(int timeInSec) const
+{
+    int h=timeInSec/3600;
+    int r=timeInSec%3600;
+    int m=r/60;
+    int s=r%60;
+
+    QTime t(h,m,s);
+    if(h > 0)
+        return t.toString("h:mm:ss");
+    else
+        return t.toString("m:ss");
+
+    return QString();
+}
+
+QColor TreeNodeViewDelegate::interpolate(QColor c1,QColor c2,float r) const
+{
+    return QColor::fromRgbF(c1.redF()+r*(c2.redF()-c1.redF()),
+                  c1.greenF()+r*(c2.greenF()-c1.greenF()),
+                  c1.blueF()+r*(c2.blueF()-c1.blueF()));
+}

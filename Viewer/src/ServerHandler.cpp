@@ -26,6 +26,7 @@
 #include "ServerDefsAccess.hpp"
 #include "ServerObserver.hpp"
 #include "SuiteFilter.hpp"
+#include "UpdateTimer.hpp"
 #include "UserMessage.hpp"
 #include "VNode.hpp"
 #include "VSettings.hpp"
@@ -47,6 +48,7 @@ std::vector<ServerHandler*> ServerHandler::servers_;
 std::string ServerHandler::localHostName_;
 
 //#define __UI_SERVEROBSERVER_DEBUG
+#define __UI_SERVERUPDATE_DEBUG
 
 ServerHandler::ServerHandler(const std::string& name,const std::string& host, const std::string& port) :
    name_(name),
@@ -83,7 +85,9 @@ ServerHandler::ServerHandler(const std::string& name,const std::string& host, co
 
 	//Connect up the timer for refreshing the server info. The timer has not
 	//started yet.
-	connect(&refreshTimer_, SIGNAL(timeout()),
+
+    refreshTimer_=new UpdateTimer(this);
+    connect(refreshTimer_, SIGNAL(timeout()),
 			this, SLOT(refreshServerInfo()));
 
 
@@ -166,39 +170,100 @@ ServerHandler::~ServerHandler()
 	delete conf_;
 }
 
+int ServerHandler::secsSinceLastRefresh() const
+{
+    return static_cast<int>(lastRefresh_.secsTo(QDateTime::currentDateTime()));
+}
+
+int ServerHandler::secsTillNextRefresh() const
+{
+     if(refreshTimer_->isActive())
+         return refreshTimer_->remainingTime()/1000;
+     return -1;
+}
+
 void ServerHandler::stopRefreshTimer()
 {
-	refreshTimer_.stop();
+    refreshTimer_->stop();
+#ifdef __UI_SERVERUPDATE_DEBUG
+    UserMessage::debug("stopRefreshTimer -->");
+#endif
 }
 
 void ServerHandler::startRefreshTimer()
 {
-	//If we are not connected to the server the
+    UserMessage::debug("startRefreshTimer -->");
+
+    if(!conf_->boolValue(VServerSettings::AutoUpdate))
+    {
+        return;
+    }
+
+    //If we are not connected to the server the
 	//timer should not run.
 	if(connectState_->state() == ConnectState::Disconnected)
 		return;
 
-	if(!refreshTimer_.isActive())
+    if(!refreshTimer_->isActive())
 	{
-		refreshTimer_.setInterval(conf_->intValue(VServerSettings::UpdateRate)*1000);
-		refreshTimer_.start();
+        refreshTimer_->setInterval(conf_->intValue(VServerSettings::UpdateRate)*1000);
+        refreshTimer_->start();
 	}
+
+#ifdef __UI_SERVERUPDATE_DEBUG
+    UserMessage::debug("startRefreshTimer --> " + QString::number(refreshTimer_->interval()).toStdString());
+#endif
 }
 
 void ServerHandler::updateRefreshTimer()
 {
-	//If we are not connected to the server the
+   UserMessage::debug("updateRefreshTimer -->");
+
+   if(!conf_->boolValue(VServerSettings::AutoUpdate))
+    {
+        stopRefreshTimer();
+        return;
+    }
+
+    //If we are not connected to the server the
 	//timer should not run.
 	if(connectState_->state() == ConnectState::Disconnected)
 		return;
 
-	if(refreshTimer_.isActive())
+    if(refreshTimer_->isActive())
 	{
-		refreshTimer_.stop();
-		refreshTimer_.setInterval(conf_->intValue(VServerSettings::UpdateRate)*1000);
-		refreshTimer_.start();
+        refreshTimer_->stop();
+        refreshTimer_->setInterval(conf_->intValue(VServerSettings::UpdateRate)*1000);
+        refreshTimer_->start();
 	}
+
+#ifdef __UI_SERVERUPDATE_DEBUG
+    UserMessage::debug("updateRefreshTimer --> " + QString::number(refreshTimer_->interval()).toStdString());
+#endif
+
 }
+
+void ServerHandler::driftRefreshTimer()
+{
+    if(!conf_->boolValue(VServerSettings::AutoUpdate))
+    {
+        return;
+    }
+
+    //We increase the update frequency
+    if(activity_ != LoadActivity &&
+       conf_->boolValue(VServerSettings::AdaptiveUpdate))
+    {
+        refreshTimer_->drift(conf_->intValue(VServerSettings::AdaptiveUpdateIncrement),
+                              conf_->intValue(VServerSettings::MaxAdaptiveUpdateRate));
+    }
+
+#ifdef __UI_SERVERUPDATE_DEBUG
+    UserMessage::debug("driftRefreshTimer --> " + QString::number(refreshTimer_->interval()).toStdString());
+#endif
+
+}
+
 
 void ServerHandler::setActivity(Activity ac)
 {
@@ -399,6 +464,7 @@ void ServerHandler::manual(VTask_ptr task)
 	comQueue_->addTask(task);
 }
 
+//The user initiated a refresh
 void ServerHandler::refresh()
 {
 	//We add and refresh task to the queue. On startup this function can be called
@@ -406,14 +472,34 @@ void ServerHandler::refresh()
 	if(comQueue_)
 	{
 		comQueue_->addNewsTask();
+        lastRefresh_=QDateTime::currentDateTime();
 	}
+
+    //Reset the timer to its original value (i.e. remove the drift)
+    updateRefreshTimer();
+}
+
+
+//The user initiated a refresh
+void ServerHandler::refreshInternal()
+{
+    //We add and refresh task to the queue. On startup this function can be called
+    //before the comQueue_ was created so we need to check if it exists.
+    if(comQueue_)
+    {
+        comQueue_->addNewsTask();
+        lastRefresh_=QDateTime::currentDateTime();
+    }
 }
 
 //This slot is called by the timer regularly to get news from the server.
 void ServerHandler::refreshServerInfo()
 {
 	UserMessage::message(UserMessage::DBG, false, std::string("auto refreshing server info for ") + name());
-	refresh();
+    refreshInternal();
+
+    //We reduce the update frequency
+    driftRefreshTimer();
 }
 
 std::string ServerHandler::commandToString(const std::vector<std::string>& cmd)
@@ -1040,7 +1126,7 @@ void ServerHandler::connectServer()
 		startRefreshTimer();
 
 		//Try to get the news
-		refresh();
+        refreshInternal();
 
 		//TODO: attach the observers!!!!
 	}
@@ -1301,7 +1387,10 @@ void ServerHandler::confChanged(VServerSettings::Param par,VProperty* prop)
 {
 	switch(par)
 	{
-	case VServerSettings::UpdateRate:
+    case VServerSettings::AutoUpdate:
+        updateRefreshTimer();
+        break;
+    case VServerSettings::UpdateRate:
 		updateRefreshTimer();
 		break;
 	case VServerSettings::NotifyAbortedEnabled:

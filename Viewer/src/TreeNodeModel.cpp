@@ -135,13 +135,13 @@ QVariant TreeNodeModel::data( const QModelIndex& index, int role ) const
 	    role != Qt::ForegroundRole &&
 	    role != FilterRole && role != IconRole && role != ServerRole && role != NodeNumRole &&
 	    role != InfoRole && role != LoadRole && role != ConnectionRole && role != AttributeRole && role != AttributeLineRole &&
-        role != AbortedReasonRole && role != NodeTypeRole && role != NodeTypeForegroundRole))
+        role != AbortedReasonRole && role != NodeTypeRole && role != NodeTypeForegroundRole && role != ServerPointerRole))
     {
 		return QVariant();
 	}
 
 	//Identifies server
-	if(role == ServerRole)
+    if(role == ServerRole)
 	{
 		if(isServer(index))
 			return 0;
@@ -202,7 +202,10 @@ QVariant TreeNodeModel::serverData(const QModelIndex& index,int role) const
 
 	if(index.column() == 0)
 	{
-		//The colour of the server node
+        if(role == ServerPointerRole)
+            return qVariantFromValue((void *) server);
+
+        //The colour of the server node
 		if(role == ConnectionRole)
 			return (server->connectState()->state() == ConnectState::Lost)?0:1;
 

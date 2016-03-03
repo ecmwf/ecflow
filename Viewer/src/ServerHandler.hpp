@@ -24,7 +24,6 @@
 #include "VServerSettings.hpp"
 
 #include <QMutex>
-#include <QTimer>
 
 class ClientInvoker;
 class ServerReply;
@@ -35,6 +34,7 @@ class ServerHandler;
 class ServerComQueue;
 class ServerObserver;
 class SuiteFilter;
+class UpdateTimer;
 class VNodeChange;
 class VServer;
 class VServerChange;
@@ -102,6 +102,8 @@ public:
 
 	void searchBegan();
 	void searchFinished();
+    int secsSinceLastRefresh() const;
+    int secsTillNextRefresh() const;
 
 	static ServerHandler* find(const std::string& name);
 
@@ -143,7 +145,8 @@ private Q_SLOTS:
 
 private:
 	//Begin and end the initialisation by connecting to the server and syncing.
-	void resetFinished();
+    void refreshInternal();
+    void resetFinished();
 	void resetFailed(const std::string& errMsg);
 	void clearTree();
 	void rescanTree();
@@ -156,7 +159,8 @@ private:
 	//Handle the refresh timer
 	void stopRefreshTimer();
 	void startRefreshTimer();
-	void updateRefreshTimer();
+    void updateRefreshTimer();
+    void driftRefreshTimer();
 
 	void script(VTask_ptr req);
 	void job(VTask_ptr req);
@@ -191,7 +195,8 @@ private:
 	//std::string targetNodeNames_;      // used when building up a command in ServerHandler::command
 	//std::string targetNodeFullNames_;  // used when building up a command in ServerHandler::command
 
-	QTimer refreshTimer_;
+    UpdateTimer* refreshTimer_;
+    QDateTime lastRefresh_;
 
 	Activity activity_;
 	ConnectState* connectState_;
