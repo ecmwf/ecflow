@@ -105,7 +105,7 @@ void NodeViewDelegate::adjustIconSize()
 	int h=fm.ascent()+fm.descent()/2;
 	iconSize_=h;
 	if(iconSize_ % 2 == 1)
-		iconSize_+1;
+        iconSize_+=1;
 
 	iconGap_=iconSize_/5;
 	if(iconGap_ < 3)
