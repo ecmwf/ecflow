@@ -23,7 +23,7 @@ friend class VariableSortModel;
 public:
    	VariableModel(VariableModelDataHandler* data,QObject *parent=0);
 
-   	enum CustomItemRole {ReadOnlyRole = Qt::UserRole+1};
+    enum CustomItemRole {ReadOnlyRole = Qt::UserRole+1,GenVarRole = Qt::UserRole+2};
 
    	int columnCount (const QModelIndex& parent = QModelIndex() ) const;
    	int rowCount (const QModelIndex& parent = QModelIndex() ) const;

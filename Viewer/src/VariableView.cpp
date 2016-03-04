@@ -29,8 +29,9 @@ VariableDelegate::VariableDelegate(QWidget *parent) : QStyledItemDelegate(parent
 	selectPen_=QPen(QColor(8,117,182));
     selectBrush_=QBrush(QColor(200,222,250));
     borderPen_=QPen(QColor(230,230,230));
+    genVarPixId_=IconProvider::add(":/viewer/genvar.svg","genvar");
 
-    QImageReader imgR(":/viewer/padlock.svg");
+    /*QImageReader imgR(":/viewer/padlock.svg");
     if(imgR.canRead())
     {
     	QFont font;
@@ -39,7 +40,7 @@ VariableDelegate::VariableDelegate(QWidget *parent) : QStyledItemDelegate(parent
     	imgR.setScaledSize(QSize(size,size));
     	QImage img=imgR.read();
     	lockPix_=QPixmap(QPixmap::fromImage(img));
-    }
+    }*/
 }
 
 void VariableDelegate::paint(QPainter *painter,const QStyleOptionViewItem &option,
@@ -81,7 +82,7 @@ void VariableDelegate::paint(QPainter *painter,const QStyleOptionViewItem &optio
     	QColor bg=index.data(Qt::BackgroundRole).value<QColor>();
     	if(bg.isValid())
     	{
-    		painter->fillRect(bgRect,bg);
+            painter->fillRect(bgRect,bg);
     	}
     }
 
@@ -115,41 +116,93 @@ void VariableDelegate::paint(QPainter *painter,const QStyleOptionViewItem &optio
 
     //Display text
     QString text=index.data(Qt::DisplayRole).toString();
-    QRect textRect = style->subElementRect(QStyle::SE_ItemViewItemText, &vopt, widget);
+    QRect textRect = style->subElementRect(QStyle::SE_ItemViewItemText, &vopt, widget);   
+    QFont f;
+    QFontMetrics fm(f);
+    textRect.setWidth(fm.width(text));
 
-    //For variables in the first column we move the text to the left.
     if(index.column() == 0 && !hasChild)
     {
-    	textRect.setLeft(option.rect.x()-17);
+        bool hasLock=false;
+        QPixmap lockPix;
+        QRect lockRect;
+        bool hasGen=false;
+        QPixmap genPix;
+        QRect genRect;
 
+        textRect.setLeft(option.rect.x()-17);
     	bool locked=index.data(VariableModel::ReadOnlyRole).toBool();
     	if(locked)
     	{
-    		QPixmap lockPix=IconProvider::lockPixmap(textRect.height()-6);
+            hasLock=true;
+            lockPix=IconProvider::lockPixmap(textRect.height()-6);
 
-    		QRect lockRect(textRect.left()-4-lockPix.width(),
+            lockRect=QRect(textRect.left()-4-lockPix.width(),
     				       textRect.top()+(textRect.height()-lockPix.height())/2,
     			           lockPix.width(),lockPix.height());
-
-    		painter->drawPixmap(lockRect,lockPix);
     	}
+
+        bool gen=index.data(VariableModel::GenVarRole).toBool();
+        if(gen && genVarPixId_ >= 0)
+        {
+            hasGen=true;
+
+            genPix=IconProvider::pixmap(genVarPixId_,textRect.height()-4);
+            genRect=QRect(textRect.left(),
+                          textRect.top()+(textRect.height()-genPix.height())/2,
+                          genPix.width(), genPix.height());
+
+            textRect.moveLeft(genRect.right()+4);
+        }
+
+        if(textRect.right()+1 > option.rect.right())
+        {
+            painter->setClipRect(option.rect.adjusted(-option.rect.left(),0,0,0));
+        }
+
+        QColor fg=index.data(Qt::ForegroundRole).value<QColor>();
+        if(!fg.isValid())
+            fg=Qt::black;
+        painter->setPen(fg);
+
+        painter->drawText(textRect,Qt::AlignLeft | Qt::AlignVCenter,text);
+
+        if(hasLock)
+            painter->drawPixmap(lockRect,lockPix);
+
+        if(hasGen)
+           painter->drawPixmap(genRect,genPix);
+
     }
-    
-    if(index.column() == 1)
+    else if(index.column() == 0)
+    {
+        QColor fg=index.data(Qt::ForegroundRole).value<QColor>();
+        if(!fg.isValid())
+            fg=Qt::black;
+        painter->setPen(fg);
+        QFont fBold;
+        fBold.setPointSize(fBold.pointSize()-1);
+        fBold.setBold(true);
+        QFontMetrics fmBold(fBold);
+        textRect.setWidth(fmBold.width(text + "a"));
+        painter->setFont(fBold);
+
+        painter->drawText(textRect,Qt::AlignLeft | Qt::AlignVCenter,text);
+
+    }
+    else if(index.column() == 1)
     {
         textRect.adjust(2,0,2,0);
-    }    
-    
-    QColor fg=index.data(Qt::ForegroundRole).value<QColor>();
-    if(!fg.isValid())
-    	   fg=Qt::black;
 
-    painter->setPen(fg);
-    painter->drawText(textRect,Qt::AlignLeft | Qt::AlignVCenter,text);
+        QColor fg=index.data(Qt::ForegroundRole).value<QColor>();
+        if(!fg.isValid())
+            fg=Qt::black;
+        painter->setPen(fg);
+        painter->drawText(textRect,Qt::AlignLeft | Qt::AlignVCenter,text);
+    }    
 
     //Restore painter state
     painter->restore();
-
 }
 
 QSize VariableDelegate::sizeHint(const QStyleOptionViewItem & option, const QModelIndex & index ) const
@@ -160,8 +213,6 @@ QSize VariableDelegate::sizeHint(const QStyleOptionViewItem & option, const QMod
 
     return size;
 }
-
-
 
 //========================================================
 //
@@ -195,7 +246,7 @@ void VariableView::drawBranches(QPainter* painter,const QRect& rect,const QModel
 		//We need to fill the branch area here. We cannot do it in the delegate
 		//because when the delegate is called the branch control is already
 		//rendered, so the delegate would just overpaint it!!!
-		painter->fillRect(rect,index.data(Qt::BackgroundRole).value<QColor>());
+        painter->fillRect(rect.adjusted(0,1,0,0),index.data(Qt::BackgroundRole).value<QColor>());
 
 		//Draw the branch with the default method
 		QTreeView::drawBranches(painter,rect,index);

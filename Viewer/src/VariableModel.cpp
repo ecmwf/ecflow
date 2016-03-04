@@ -15,8 +15,9 @@
 #include "ServerHandler.hpp"
 #include "VariableModelData.hpp"
 
-QColor VariableModel::varCol_=QColor(Qt::black);
-QColor VariableModel::genVarCol_=QColor(34,51,136);
+QColor VariableModel::varCol_=QColor(60,61,62);
+//QColor VariableModel::genVarCol_=QColor(34,51,136);
+QColor VariableModel::genVarCol_=QColor(0,115,48);
 QColor VariableModel::blockBgCol_=QColor(122,122,122);
 QColor VariableModel::blockFgCol_=QColor(255,255,255);
 
@@ -94,7 +95,7 @@ QVariant VariableModel::data( const QModelIndex& index, int role ) const
 	//Data lookup can be costly so we immediately return a default value for all
 	//the cases where the default should be used.
 	if(role != Qt::DisplayRole && role != Qt::BackgroundRole && role != Qt::ForegroundRole &&
-       role != ReadOnlyRole && role != Qt::ToolTipRole)
+       role != ReadOnlyRole && role != Qt::ToolTipRole && role != GenVarRole && role != Qt::FontRole)
 	{
 		return QVariant();
 	}
@@ -144,7 +145,7 @@ QVariant VariableModel::data( const QModelIndex& index, int role ) const
 		if(role == Qt::ForegroundRole)
 		{
 			//Generated variable
-			if(d->isGenVar(row))
+            if(d->isGenVar(row) && index.column() == 0)
 				return genVarCol_;
 			else
 				return varCol_;
@@ -154,8 +155,8 @@ QVariant VariableModel::data( const QModelIndex& index, int role ) const
 		    if(index.column() == 0)
 		    {
                 QString s=QString::fromStdString(d->name(row));
-                if(d->isGenVar(row))
-                    s+=" (g)";
+                //if(d->isGenVar(row))
+                //    s+=" (g)";
                 return s;
             }
             else if(index.column() == 1)
@@ -175,10 +176,25 @@ QVariant VariableModel::data( const QModelIndex& index, int role ) const
 
             return s;
         }
+        else if(role == Qt::FontRole)
+        {
+            if(d->isGenVar(row))
+            {
+                QFont f;
+                f.setBold(true);
+                return f;
+            }
+        }
 		else if(role == ReadOnlyRole)
         {
 			return (d->isReadOnly(row))?true:false;
         }
+
+        else if(role == GenVarRole)
+        {
+            return (d->isGenVar(row))?true:false;
+        }
+
 
 		return QVariant();
 	}

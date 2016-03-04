@@ -86,16 +86,15 @@ VariablePropDialog::VariablePropDialog(VariableModelData *data,QString name, QSt
     typeIconLabel_->hide();
     valueEdit_->setProperty("form","1");
 
-	QString parentTxt="<b>" + QString::fromStdString(data_->fullPath()) + " </b> (type: " +
-		    QString::fromStdString(data_->type());
-
-	if(data_->type() ==  "server")
-	{
-		parentTxt+=" name: <b>" + QString::fromStdString(data_->name()) + "</b>";
-	}
-
-	parentTxt+=")";
-	parentLabel_->setText(parentTxt);
+    if(data_->type() ==  "server")
+    {
+         parentLabel_->setText(QString::fromStdString(data_->name()) +" (type: server)");
+    }
+    else
+    {
+        parentLabel_->setText(QString::fromStdString(data_->fullPath()) + "(type: " +
+                QString::fromStdString(data_->type()) + ")");
+    }
 
 	QString typeTxt=genVar?tr("<b>generated variable</b>"):tr("<b>user variable</b>");
 	bool readOnly=data_->isReadOnly(name.toStdString());

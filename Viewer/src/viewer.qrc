@@ -49,6 +49,7 @@
     <file alias="font.svg">../images/font.svg</file>
     <file alias="fontsize_down.svg">../images/fontsize_down.svg</file>
     <file alias="fontsize_up.svg">../images/fontsize_up.svg</file>   
+    <file alias="genvar.svg">../images/genvar.svg</file>
     <file alias="overview.svg">../images/overview.svg</file>
     <file alias="job.svg">../images/job.svg</file>
     <file alias="large_file_search.svg">../images/large_file_search.svg</file>

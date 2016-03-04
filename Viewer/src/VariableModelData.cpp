@@ -86,7 +86,7 @@ void  VariableModelData::removeDuplicates(const std::vector<Variable>& vars,std:
 std::string VariableModelData::fullPath()
 {
 	if(info_ && info_->node())
-		return info_->node()->absNodePath();
+        return info_->path();
 
 	return std::string();
 }
