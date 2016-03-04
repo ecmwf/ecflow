@@ -56,7 +56,7 @@ public:
 
 protected:
     void removeDuplicates(const std::vector<Variable>& vars,std::vector<Variable>& genVars);
-    int latestVars(std::vector<Variable>& v,std::vector<Variable>& gv);
+    void latestVars(std::vector<Variable>& v,std::vector<Variable>& gv);
     int checkUpdateDiff(std::vector<Variable>& v,std::vector<Variable>& gv);
     bool update(std::vector<Variable>& v,std::vector<Variable>& gv);
 

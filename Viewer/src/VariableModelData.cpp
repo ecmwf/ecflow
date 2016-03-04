@@ -277,7 +277,7 @@ int VariableModelData::varNum() const
 	return vars_.size() + genVars_.size();
 }
 
-int VariableModelData::latestVars(std::vector<Variable>& v,std::vector<Variable>& vg)
+void VariableModelData::latestVars(std::vector<Variable>& v,std::vector<Variable>& vg)
 {
     if(info_ && info_->node())
     {
