@@ -314,6 +314,7 @@ void TreeNodeViewDelegate::renderServer(QPainter *painter,const QModelIndex& ind
 		                                   const QStyleOptionViewItemV4& option,QString text) const
 {
     ServerHandler* server=static_cast<ServerHandler*>(index.data(AbstractNodeModel::ServerPointerRole).value<void*>());
+    Q_ASSERT(server);
 
     bool selected=option.state & QStyle::State_Selected;
     int offset=4;
@@ -436,13 +437,14 @@ void TreeNodeViewDelegate::renderServer(QPainter *painter,const QModelIndex& ind
 		currentRight=loadRect.right();
 
 		//Add this index to the animations
-		an->addTarget(index);
+        //There is no guarantee that this index will be valid in the future!!!
+        an->addTarget(server->vRoot());
 	}
 	//Stops load animation
 	else
 	{
 		if((an=animation_->find(Animation::ServerLoadType,false)) != NULL)
-			an->removeTarget(index);
+            an->removeTarget(server->vRoot());
 	}
 
 	//The node number (optional)

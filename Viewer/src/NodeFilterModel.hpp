@@ -29,7 +29,7 @@ public:
 
 	//From QSortFilterProxyModel:
 	//we set the source model in the constructor. So this function should not do anything.
-	void setSourceModel(QAbstractItemModel*) {};
+    void setSourceModel(QAbstractItemModel*) {}
 
 	VInfo_ptr nodeInfo(const QModelIndex&);
 	QModelIndex infoToIndex(VInfo_ptr);

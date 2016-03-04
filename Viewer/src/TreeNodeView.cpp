@@ -281,9 +281,9 @@ void TreeNodeView::slotRepaint(Animation* an)
 	if(!an)
 		return;
 
-	Q_FOREACH(QModelIndex idx,an->targets())
+    Q_FOREACH(VNode* n,an->targets())
 	{
-		update(idx);
+        update(model_->nodeToIndex(n));
 	}
 }
 
