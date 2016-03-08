@@ -50,7 +50,8 @@ STC_Cmd_ptr ClientToServerCmd::handleRequest(AbstractServer* as) const
 
    // LOG the command, *BEFORE* invoking it. (i.e in case server hangs/crashes)
    // Allow override in the rare cases, where we want to output additional debug
-   do_log();
+   // If logging fails set late flag to warn users, ECFLOW-536
+   do_log(as);
 
 #ifdef DEBUG_INVARIANTS
    LOG_ASSERT( as->defs() , "ClientToServerCmd::handleRequest: Start:  No defs? ");
@@ -90,11 +91,16 @@ STC_Cmd_ptr ClientToServerCmd::handleRequest(AbstractServer* as) const
    return server_to_client_ptr;
 }
 
-void ClientToServerCmd::do_log() const
+void ClientToServerCmd::do_log(AbstractServer* as) const
 {
    std::stringstream ss;
-   print(ss);                 // Populate the stream with command details:
-   log(Log::MSG,ss.str());    // will automatically add end of line
+   print(ss);                        // Populate the stream with command details:
+   if (!log(Log::MSG,ss.str())) {    // will automatically add end of line
+      // problems writing to log file, warn users, ECFLOW-536
+      if (as->defs()) {
+         as->defs()->flag().set(ecf::Flag::LATE);
+      }
+   }
 }
 
 STC_Cmd_ptr ClientToServerCmd::doJobSubmission(AbstractServer* as)

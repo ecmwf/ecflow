@@ -71,19 +71,23 @@ int CSyncCmd::timeout() const
    return 20; // CSyncCmd::NEWS
 }
 
-void CSyncCmd::do_log() const
+void CSyncCmd::do_log(AbstractServer* as) const
 {
    if (api_ == CSyncCmd::NEWS)  {
 
       /// Log without adding a new line, to the log file
       /// The SNewsCmd will append additional debug and then add new line
       std::stringstream ss;
-      print(ss);                         // Populate the stream with command details:
-      log_no_newline(Log::MSG,ss.str()); // log command without adding newline
+      print(ss);                                   // Populate the stream with command details:
+      bool ok = log_no_newline(Log::MSG,ss.str()); // log command without adding newline
+      if (!ok && as->defs()) {
+         // problems writing to log file, warn user ECFLOW-536
+         as->defs()->flag().set(ecf::Flag::LATE);
+      }
       return;
    }
 
-   ClientToServerCmd::do_log();
+   ClientToServerCmd::do_log(as);
 }
 
 STC_Cmd_ptr CSyncCmd::doHandleRequest(AbstractServer* as) const
