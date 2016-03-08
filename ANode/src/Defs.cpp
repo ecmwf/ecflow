@@ -195,9 +195,15 @@ void Defs::updateCalendar( const ecf::CalendarUpdateParams & calUpdateParams)
  		std::vector<node_ptr>::iterator theNodeEnd = auto_cancelled_nodes.end();
  		string msg;
  		for(std::vector<node_ptr>::iterator n = auto_cancelled_nodes.begin(); n != theNodeEnd; ++n) {
- 		   msg.clear(); msg = "autocancel "; msg += (*n)->debugNodePath();
- 			ecf::log(Log::MSG,msg);
- 			(*n)->remove();
+ 		   // If we have two autocancel in the hierarchy, with same attributes. Then
+ 		   // (*n)->remove() on the second will fail( with a crash, SuiteChanged0 destructor,  no suite pointer)
+ 		   // since it would already be detached. See ECFLOW-556
+ 		   // By checking we can still reach the Defs we know we are not detached
+ 		   if ((*n)->defs()) {
+ 		      msg.clear(); msg = "autocancel "; msg += (*n)->debugNodePath();
+ 		      ecf::log(Log::MSG,msg);
+ 		      (*n)->remove();
+ 		   }
   		}
  	}
 }
