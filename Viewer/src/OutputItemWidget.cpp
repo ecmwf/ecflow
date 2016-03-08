@@ -10,6 +10,7 @@
 #include "OutputItemWidget.hpp"
 
 #include "OutputDirProvider.hpp"
+#include "OutputFetchInfo.hpp"
 #include "OutputFileProvider.hpp"
 #include "OutputModel.hpp"
 #include "PlainTextEdit.hpp"
@@ -26,6 +27,7 @@
 #include <QMovie>
 #include <QTime>
 #include <QTimer>
+#include <QWidgetAction>
 
 int OutputItemWidget::updateDirTimeout_=1000*60;
 
@@ -96,6 +98,11 @@ OutputItemWidget::OutputItemWidget(QWidget *parent) :
 
 	//Editor font
 	browser_->setFontProperty(VConfig::instance()->find("panel.output.font"));
+
+    fetchInfo_=new OutputFetchInfo(this);
+    QWidgetAction* fetchInfoAction=new QWidgetAction(this);
+    fetchInfoAction->setDefaultWidget(fetchInfo_);
+    fetchInfoTb_->addAction(fetchInfoAction);
 }
 
 OutputItemWidget::~OutputItemWidget()
@@ -157,7 +164,8 @@ void OutputItemWidget::getLatestFile()
 	messageLabel_->hide();
     messageLabel_->stopProgress();
     fileLabel_->clear();
-	browser_->clear();
+    browser_->clear();
+    fetchInfo_->clearInfo();
 
     //Get the latest file contents
 	infoProvider_->info(info_);
@@ -169,7 +177,8 @@ void OutputItemWidget::getCurrentFile()
 	messageLabel_->stopLoadLabel();
     messageLabel_->stopProgress();
     fileLabel_->clear();
-	browser_->clear();
+    browser_->clear();
+    fetchInfo_->clearInfo();
 
     if(info_)
 	{
@@ -192,6 +201,7 @@ void OutputItemWidget::clearContents()
     browser_->clear();
     reloadTb_->setEnabled(true);
     userClickedReload_ = false;
+    fetchInfo_->clearInfo();
 }
 
 void OutputItemWidget::updateState(const FlagSet<ChangeFlag>& flags)
@@ -334,6 +344,8 @@ void OutputItemWidget::infoReady(VReply* reply)
             else
                 setCurrentInDir(reply->fileName());
         }
+
+        fetchInfo_->setInfo(reply,info_);
     }
 
     //------------------------
@@ -380,6 +392,8 @@ void OutputItemWidget::infoFailed(VReply* reply)
         userClickedReload_ = false;
         reloadTb_->setEnabled(true);
         //updateDir(true);
+
+        fetchInfo_->setInfo(reply,info_);
 	}
     else
     {

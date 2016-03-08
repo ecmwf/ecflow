@@ -43,6 +43,7 @@ public:
 	VDir_ptr directory() const {return dir_;}
 	const std::vector<Zombie>& zombies() const {return zombies_;}
 	void setReadTruncatedTo(int ival) {readTruncatedTo_=ival;}
+    const std::vector<std::string>& log() const {return log_;}
 
 	bool textFromFile(const std::string&);
 	void text(const std::vector<std::string>& msg);
@@ -58,6 +59,9 @@ public:
 	void setDirectory(VDir_ptr d) {dir_=d;}
 	void zombies(const std::vector<Zombie>& z) { zombies_=z;}
 	int readTruncatedTo() const {return readTruncatedTo_;}
+    void addLog(const std::string& s) {log_.push_back(s);}
+    void setLog(const std::vector<std::string>& s) {log_=s;}
+    void clearLog() {log_.clear();}
 
 	bool hasWarning() const {return !warningText_.empty();}
 	bool hasInfo() const {return !infoText_.empty();}
@@ -79,6 +83,7 @@ protected:
 	FileReadMode readMode_;
 	std::string  readMethod_;
 	int readTruncatedTo_;
+    std::vector<std::string> log_;
 	VFile_ptr  tmpFile_;
 	VDir_ptr dir_;
 	std::vector<Zombie> zombies_;

@@ -157,15 +157,20 @@ void OutputFileProvider::fetchFile(ServerHandler *server,VNode *n,const std::str
     // The host is the localhost
     //----------------------------------
 
-    if(server->isLocalHost())
-    {
+    if(isJobout)
+       reply_->addLog("REMARK>This file is the <b>current</b> job output.");
+    else
+       reply_->addLog("REMARK>This file is <b>not</b> the <b>current</b> job output.");
+
+    //if(server->isLocalHost())
+    // {
     	//We try to read the file directly from the disk
     	if(!isJobout || server->readFromDisk())
     	{
     		if(fetchLocalFile(fileName))
     			return;
     	}
-    }
+    //}
 
     //----------------------------------------------------
     // Not the loacalhost or we could not read the file
@@ -180,9 +185,11 @@ void OutputFileProvider::fetchFile(ServerHandler *server,VNode *n,const std::str
     	return;
     }
 
+    reply_->addLog("TRY>fetch file from logserver: NOT DEFINED");
+
     //If there is no output client and it is not the localhost we try
     //to read it again from the disk!!!
-    if(!server->isLocalHost())
+    /*if(!server->isLocalHost())
     {
     	if(!isJobout || server->readFromDisk())
     	{
@@ -190,7 +197,7 @@ void OutputFileProvider::fetchFile(ServerHandler *server,VNode *n,const std::str
     		if(fetchLocalFile(fileName))
     	    	return;
     	}
-    }
+    }*/
 
     //If we are here no output client is defined and we could not read the file from
     //the local disk.
@@ -285,6 +292,7 @@ void OutputFileProvider::slotOutputClientFinished()
 
     reply_->setInfoText("");
     reply_->fileReadMode(VReply::LogServerReadMode);
+    reply_->addLog("TRY> fetch file from logserver: " + outClient_->host() + "@" + outClient_->portStr() + ": OK");
 
     std::string method="served by " + outClient_->host() + "@" + outClient_->portStr();
     tmp->setFetchMethod(method);
@@ -311,6 +319,7 @@ void OutputFileProvider::slotOutputClientProgress(QString msg,int value)
 void OutputFileProvider::slotOutputClientError(QString msg)
 {
     UserMessage::message(UserMessage::DBG,false,"OutputFileProvider::slotOutputClientError error:" + msg.toStdString());
+    reply_->addLog("TRY> fetch file from logserver: " + outClient_->host() + "@" + outClient_->portStr() + " FAILED");
 
     if(info_)
 	{
@@ -320,7 +329,17 @@ void OutputFileProvider::slotOutputClientError(QString msg)
 		if(server && n)
 		{
 			std::string jobout=n->findVariable("ECF_JOBOUT",true);
-			if(outClient_->remoteFile() == jobout)
+            bool isJobout=(outClient_->remoteFile() == jobout);
+
+            //We try to read the file directly from the disk
+           /* if(!isJobout || server->readFromDisk())
+            {
+                if(fetchLocalFile(outClient_->remoteFile()))
+                    return;
+            }*/
+
+            //Then we try the server
+            if(isJobout)
 			{
 				fetchJoboutViaServer(server,n,jobout);
 				return;
@@ -344,6 +363,7 @@ void OutputFileProvider::fetchJoboutViaServer(ServerHandler *server,VNode *n,con
 
     task_->reply()->fileReadMode(VReply::ServerReadMode);
     task_->reply()->fileName(fileName);
+    task_->reply()->setLog(reply_->log());
 
     //owner_->infoProgressStart("Getting file <i>" + fileName + "</i> from server",0);
 
@@ -359,12 +379,13 @@ bool OutputFileProvider::fetchLocalFile(const std::string& fileName)
 	if(f->exists())
 	{
         f->setSourcePath(f->path());
-		reply_->fileReadMode(VReply::LocalReadMode);
+        reply_->fileReadMode(VReply::LocalReadMode);
+        reply_->addLog("TRY> read file from disk: OK");
         reply_->tmpFile(f);
 		owner_->infoReady(reply_);
 		return true;
 	}
-
+    reply_->addLog("TRY> read file from disk: NO ACCESS");
 	return false;
 }
 

@@ -170,6 +170,7 @@ void  InfoProvider::taskChanged(VTask_ptr task)
         case VTask::FINISHED:
             //We prepend the results to the existing text
             //reply_->text(task->reply()->text());
+            task->reply()->addLog("TRY>fetch file from server: OK");
             owner_->infoReady(task->reply());
             //We do not need the task anymore.
             task_.reset();
@@ -177,14 +178,16 @@ void  InfoProvider::taskChanged(VTask_ptr task)
         case VTask::ABORTED:
         case VTask::REJECTED:
            //reply_->setErrorText(task->reply()->errorText());
-           owner_->infoFailed(task->reply());
-           //We do not need the task anymore.
+            task->reply()->addLog("TRY>fetch file from server: FAILED");
+            owner_->infoFailed(task->reply());
+            //We do not need the task anymore.
            task_.reset();break;
         case VTask::CANCELLED:
             if(!task->reply()->errorText().empty())
         	{
             	//reply_->setErrorText(task->reply()->errorText());
-            	owner_->infoFailed(task->reply());
+                task->reply()->addLog("TRY>fetch file from server: FAILED");
+                owner_->infoFailed(task->reply());
         	}
             //We do not need the task anymore.
             task_.reset();

@@ -19,6 +19,7 @@
 #include "ui_OutputItemWidget.h"
 
 class OutputDirProvider;
+class OutputFetchInfo;
 class OutputModel;
 class OutputSortModel;
 
@@ -60,11 +61,11 @@ protected:
 	void updateDir(bool,const std::string&);
 	void enableDir(bool);
     void updateState(const FlagSet<ChangeFlag>&);
-
 	void searchOnReload();
 	void getCurrentFile();
 	void getLatestFile();
 	std::string currentFullName() const;
+    void updateHistoryLabel(const std::vector<std::string>&);
 
 	OutputDirProvider* dirProvider_;
 	OutputModel* dirModel_;
@@ -74,6 +75,7 @@ protected:
 	bool ignoreOutputSelection_;
 	QTimer* updateDirTimer_;
 	static int updateDirTimeout_;
+    OutputFetchInfo* fetchInfo_;
 };
 
 #endif

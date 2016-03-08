@@ -17,16 +17,7 @@
    <property name="spacing">
     <number>1</number>
    </property>
-   <property name="leftMargin">
-    <number>0</number>
-   </property>
-   <property name="topMargin">
-    <number>0</number>
-   </property>
-   <property name="rightMargin">
-    <number>0</number>
-   </property>
-   <property name="bottomMargin">
+   <property name="margin">
     <number>0</number>
    </property>
    <item>
@@ -40,7 +31,7 @@
         <number>1</number>
        </property>
        <item>
-        <layout class="QHBoxLayout" name="horizontalLayout" stretch="1,0,0,0,0,0">
+        <layout class="QHBoxLayout" name="horizontalLayout" stretch="1,0,0,0,0,0,0">
          <property name="spacing">
           <number>1</number>
          </property>
@@ -48,6 +39,26 @@
           <widget class="FileInfoLabel" name="fileLabel_">
            <property name="text">
             <string/>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QToolButton" name="fetchInfoTb_">
+           <property name="toolTip">
+            <string>Additional information about the fetched output file</string>
+           </property>
+           <property name="text">
+            <string>...</string>
+           </property>
+           <property name="icon">
+            <iconset resource="viewer.qrc">
+             <normaloff>:/viewer/grey_info.svg</normaloff>:/viewer/grey_info.svg</iconset>
+           </property>
+           <property name="popupMode">
+            <enum>QToolButton::InstantPopup</enum>
+           </property>
+           <property name="autoRaise">
+            <bool>true</bool>
            </property>
           </widget>
          </item>
@@ -60,7 +71,7 @@
             <string>...</string>
            </property>
            <property name="icon">
-            <iconset>
+            <iconset resource="viewer.qrc">
              <normaloff>:/viewer/fontsize_up.svg</normaloff>:/viewer/fontsize_up.svg</iconset>
            </property>
            <property name="shortcut">
@@ -80,7 +91,7 @@
             <string>...</string>
            </property>
            <property name="icon">
-            <iconset>
+            <iconset resource="viewer.qrc">
              <normaloff>:/viewer/fontsize_down.svg</normaloff>:/viewer/fontsize_down.svg</iconset>
            </property>
            <property name="shortcut">
@@ -100,7 +111,7 @@
             <string>...</string>
            </property>
            <property name="icon">
-            <iconset>
+            <iconset resource="viewer.qrc">
              <normaloff>:/viewer/search_decor.svg</normaloff>:/viewer/search_decor.svg</iconset>
            </property>
            <property name="shortcut">
@@ -123,7 +134,7 @@
             <string>...</string>
            </property>
            <property name="icon">
-            <iconset>
+            <iconset resource="viewer.qrc">
              <normaloff>:/viewer/images/goto_line.svg</normaloff>:/viewer/images/goto_line.svg</iconset>
            </property>
            <property name="shortcut">
@@ -143,7 +154,7 @@
             <string>...</string>
            </property>
            <property name="icon">
-            <iconset>
+            <iconset resource="viewer.qrc">
              <normaloff>:/viewer/sync.svg</normaloff>:/viewer/sync.svg</iconset>
            </property>
            <property name="shortcut">
@@ -172,16 +183,7 @@
        <property name="spacing">
         <number>1</number>
        </property>
-       <property name="leftMargin">
-        <number>0</number>
-       </property>
-       <property name="topMargin">
-        <number>0</number>
-       </property>
-       <property name="rightMargin">
-        <number>0</number>
-       </property>
-       <property name="bottomMargin">
+       <property name="margin">
         <number>0</number>
        </property>
        <item>
@@ -230,6 +232,8 @@
    <container>1</container>
   </customwidget>
  </customwidgets>
- <resources/>
+ <resources>
+  <include location="viewer.qrc"/>
+ </resources>
  <connections/>
 </ui>

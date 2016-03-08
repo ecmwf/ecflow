@@ -88,8 +88,8 @@ void OutputDirProvider::fetchDir(ServerHandler* server,VNode* n)
     // The host is the localhost
     //----------------------------------
 
-    if(server->isLocalHost())
-    {
+    //if(server->isLocalHost())
+    //{
     	dir=fetchLocalDir(fileName,tynozero);
     	if(dir)
     	{
@@ -97,7 +97,7 @@ void OutputDirProvider::fetchDir(ServerHandler* server,VNode* n)
     		owner_->infoReady(reply_);
     		return;
     	}
-    }
+   // }
 
     //----------------------------------------------------
     // Not the localhost or we could not read dir
@@ -114,7 +114,7 @@ void OutputDirProvider::fetchDir(ServerHandler* server,VNode* n)
 
     //If there is no output client and it is not the localhost we try
     //to read it again from the disk!!!
-     if(!server->isLocalHost())
+    /* if(!server->isLocalHost())
      {
     	 dir=fetchLocalDir(fileName,tynozero);
     	 if(dir)
@@ -123,7 +123,7 @@ void OutputDirProvider::fetchDir(ServerHandler* server,VNode* n)
     	     owner_->infoReady(reply_);
     	     return;
     	 }
-     }
+     }*/
 
      //If we are we coud not get the file
      reply_->setDirectory(dir);

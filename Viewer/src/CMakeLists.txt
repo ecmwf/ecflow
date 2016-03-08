@@ -80,6 +80,7 @@ set(viewer_srcs
     OutputBrowser.cpp
     OutputCache.cpp
     OutputClient.cpp
+    OutputFetchInfo.cpp
     OutputFileClient.cpp
     OutputDirClient.cpp
     OutputModel.cpp

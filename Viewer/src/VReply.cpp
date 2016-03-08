@@ -53,4 +53,5 @@ void VReply::reset()
 	readMode_=NoReadMode;
 	readMethod_.clear();
 	tmpFile_.reset();
+    log_.clear();
 }
