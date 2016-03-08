@@ -14,7 +14,7 @@ class OutputModel : public QAbstractItemModel
 public:
 	explicit OutputModel(QObject *parent=0);
 
-   	void setData(VDir_ptr dir);
+    void setData(VDir_ptr dir,const std::string& jobout);
    	void clearData();
     bool isEmpty() const {return (!dir_);}
    	int columnCount (const QModelIndex& parent = QModelIndex() ) const;
@@ -36,6 +36,8 @@ protected:
    	QString formatAgo(QDateTime) const;
 
    	VDir_ptr dir_;
+    int joboutRow_;
+    static QColor joboutCol_;
 };
 
 //Filters and sorts the output

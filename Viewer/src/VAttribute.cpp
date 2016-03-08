@@ -32,7 +32,7 @@ std::map<std::string,VAttribute*> VAttribute::items_;
 class VMeterAttribute : public VAttribute
 {
 public:
-	explicit VMeterAttribute(const std::string& n) : VAttribute(n) {};
+    explicit VMeterAttribute(const std::string& n) : VAttribute(n) {}
 	int num(const VNode *node);
 	bool getData(VNode *node,int row,int& size,QStringList& data);
 };
@@ -40,7 +40,7 @@ public:
 class VEventAttribute : public VAttribute
 {
 public:
-	explicit  VEventAttribute(const std::string& n) : VAttribute(n) {};
+    explicit  VEventAttribute(const std::string& n) : VAttribute(n) {}
 	int num(const VNode *node);
 	bool getData(VNode *node,int row,int& size,QStringList& data);
 };
@@ -49,7 +49,7 @@ public:
 class VRepeatAttribute : public VAttribute
 {
 public:
-	explicit VRepeatAttribute(const std::string& n) : VAttribute(n) {};
+    explicit VRepeatAttribute(const std::string& n) : VAttribute(n) {}
 	int num(const VNode *node);
 	bool getData(VNode *node,int row,int& size,QStringList& data);
 };
@@ -57,7 +57,7 @@ public:
 class VTriggerAttribute : public VAttribute
 {
 public:
-	explicit VTriggerAttribute(const std::string& n) : VAttribute(n) {};
+    explicit VTriggerAttribute(const std::string& n) : VAttribute(n) {}
 	int num(const VNode *node);
 	bool getData(VNode *node,int row,int& size,QStringList& data);
 };
@@ -65,7 +65,7 @@ public:
 class VLabelAttribute : public VAttribute
 {
 public:
-	explicit VLabelAttribute(const std::string& n) : VAttribute(n) {};
+    explicit VLabelAttribute(const std::string& n) : VAttribute(n) {}
 	int num(const VNode *node);
 	bool getData(VNode *node,int row,int& size,QStringList& data);
 	int lineNum(const VNode* vnode,int row);
@@ -74,7 +74,7 @@ public:
 class VDateAttribute : public VAttribute
 {
 public:
-	explicit VDateAttribute(const std::string& n) : VAttribute(n) {};
+    explicit VDateAttribute(const std::string& n) : VAttribute(n) {}
 	int num(const VNode *node);
 	bool getData(VNode *node,int row,int& size,QStringList& data);
 };
@@ -82,7 +82,7 @@ public:
 class VTimeAttribute : public VAttribute
 {
 public:
-	explicit VTimeAttribute(const std::string& n) : VAttribute(n) {};
+    explicit VTimeAttribute(const std::string& n) : VAttribute(n) {}
 	int num(const VNode *node);
 	bool getData(VNode *node,int row,int& size,QStringList& data);
 };
@@ -90,7 +90,7 @@ public:
 class VLimitAttribute : public VAttribute
 {
 public:
-	explicit VLimitAttribute(const std::string& n) : VAttribute(n) {};
+    explicit VLimitAttribute(const std::string& n) : VAttribute(n) {}
 	int num(const VNode *node);
 	bool getData(VNode *node,int row,int& size,QStringList& data);
 };
@@ -98,7 +98,7 @@ public:
 class VLimiterAttribute : public VAttribute
 {
 public:
-	explicit VLimiterAttribute(const std::string& n) : VAttribute(n) {};
+    explicit VLimiterAttribute(const std::string& n) : VAttribute(n) {}
 	int num(const VNode *node);
 	bool getData(VNode *node,int row,int& size,QStringList& data);
 };
@@ -106,7 +106,7 @@ public:
 class VLateAttribute : public VAttribute
 {
 public:
-	explicit VLateAttribute(const std::string& n) : VAttribute(n) {};
+    explicit VLateAttribute(const std::string& n) : VAttribute(n) {}
 	int num(const VNode *node);
 	bool getData(VNode *node,int row,int& size,QStringList& data);
 };
@@ -114,7 +114,7 @@ public:
 class VVarAttribute : public VAttribute
 {
 public:
-	explicit VVarAttribute(const std::string& n) : VAttribute(n) {};
+    explicit VVarAttribute(const std::string& n) : VAttribute(n) {}
 	int num(const VNode *node);
 	bool getData(VNode *node,int row,int& size,QStringList& data);
 };
@@ -122,7 +122,7 @@ public:
 class VGenvarAttribute : public VAttribute
 {
 public:
-	explicit VGenvarAttribute(const std::string& n) : VAttribute(n) {};
+    explicit VGenvarAttribute(const std::string& n) : VAttribute(n) {}
 	int num(const VNode *node);
 	bool getData(VNode *node,int row,int& size,QStringList& data);
 };
@@ -228,9 +228,7 @@ bool VAttribute::getData(VNode *vnode,int row,VAttribute* &type,QStringList& dat
 		int size=0;
 		if(it->second->getData(vnode,row-totalRow,size,data))
 		{
-			type=it->second;
-            qDebug() << row << data;
-
+			type=it->second;        
             return true;
 		}
 		totalRow+=size;

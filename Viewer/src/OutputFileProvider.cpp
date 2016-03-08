@@ -65,7 +65,7 @@ void OutputFileProvider::visit(VInfoNode* infoNode)
    	}
 
     //Get the filename
-    std::string jobout=n->findVariable("ECF_JOBOUT",true);
+    std::string jobout=joboutFileName(); //n->findVariable("ECF_JOBOUT",true);
 
     //This is needed for the refresh!!! We want to detach the item but keep
     //lastCached.
@@ -104,8 +104,8 @@ void OutputFileProvider::file(const std::string& fileName)
 	ServerHandler* server=info_->server();
 	VNode *n=info_->node();
 
-	//Get the filename
-	std::string jobout=n->findVariable("ECF_JOBOUT",true);
+    //Get the filename
+    std::string jobout=joboutFileName(); //n->findVariable("ECF_JOBOUT",true);
 
     fetchFile(server,n,fileName,(fileName==jobout),false);
 }
@@ -148,9 +148,16 @@ void OutputFileProvider::fetchFile(ServerHandler *server,VNode *n,const std::str
     //Check if it is tryno 0
     if(boost::algorithm::ends_with(fileName,".0"))
     {
-    	reply_->setInfoText("Job output does not exist yet (TRYNO is 0!)");
+        reply_->setInfoText("Current job output does not exist yet (<b>TRYNO</b> is <b>0</b>!)");
     	owner_->infoReady(reply_);
     	return;
+    }
+
+    if(isJobout && n->isSubmitted())
+    {
+        reply_->setInfoText("Current job output does not exist yet (node status is <b>submitted</b>!)");
+        owner_->infoReady(reply_);
+        return;
     }
 
     //----------------------------------
@@ -392,7 +399,7 @@ bool OutputFileProvider::fetchLocalFile(const std::string& fileName)
 
 std::string OutputFileProvider::joboutFileName() const
 {
-	if(info_ && info_->isNode() && info_->node() && info_->node()->node())
+    if(info_ && info_->isNode() && info_->node() && info_->node()->node())
 	{
 		return info_->node()->findVariable("ECF_JOBOUT",true);
 	}

@@ -443,8 +443,8 @@ void OutputItemWidget::updateDir(VDir_ptr dir,bool restartTimer)
         std::string fullName=currentFullName();
 
 		dirView_->selectionModel()->clearSelection();
-		dirModel_->setData(dir);
-		dirWidget_->show();
+        dirModel_->setData(dir,op->joboutFileName());
+        dirWidget_->show();
 
 		//Try to preserve the selection
 		ignoreOutputSelection_=true;

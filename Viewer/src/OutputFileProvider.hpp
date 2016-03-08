@@ -35,7 +35,7 @@ public:
 	 void file(const std::string& fileName);
      void setDir(VDir_ptr);
 
-	 std::string joboutFileName() const;
+     std::string joboutFileName() const;
 
 private Q_SLOTS:
 	void slotOutputClientError(QString);

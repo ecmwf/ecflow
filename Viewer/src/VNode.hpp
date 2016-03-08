@@ -83,7 +83,7 @@ friend class VServer;
 
 public:
 	VNode(VNode* parent,node_ptr);
-	virtual ~VNode() {};
+    virtual ~VNode() {}
 
 	enum SortMode {ParentToChildSort,ChildToParentSort};
 
@@ -138,6 +138,7 @@ public:
     virtual bool isDefaultStateComplete();
     virtual bool isSuspended() const;
     virtual bool isAborted() const;
+    virtual bool isSubmitted() const;
     virtual QColor  stateColour() const;
     virtual QColor  realStateColour() const;
     virtual QColor  stateFontColour() const;
@@ -171,8 +172,8 @@ protected:
     short currentAttrNum() const;
     bool isAttrNumInitialised() const {return attrNum_!=-1;}
     VNode* find(const std::vector<std::string>& pathVec);
-    virtual void check(VServerSettings* conf,bool) {};
-    virtual void check(VServerSettings* conf,const VNodeInternalState&) {};
+    virtual void check(VServerSettings* conf,bool) {}
+    virtual void check(VServerSettings* conf,const VNodeInternalState&) {}
     void setIndex(int i) {index_=i;}
 
     //Node* node_;

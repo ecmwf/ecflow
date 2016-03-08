@@ -162,7 +162,7 @@ void FileInfoLabel::update(VReply* reply,QString extraText)
 			s+="<font color=" + colText.name() + ">" + dt +  + "</font>";
             if(tmp->cached())
             {
-                s+=" (cached)";
+                s+=" (<b>cached</b>)";
             }
 		}
 	}
