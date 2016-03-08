@@ -152,6 +152,9 @@ QVariant TableNodeModel::headerData( const int section, const Qt::Orientation or
 	if ( orient != Qt::Horizontal || (role != Qt::DisplayRole && role != Qt::UserRole ))
       		  return QAbstractItemModel::headerData( section, orient, role );
 
+	if (section < 0 || section >= columns_->count())  // this can happen during a server reset
+			return QVariant();
+
 	if(role == Qt::DisplayRole)
 		return columns_->label(section);
 	else if(role == Qt::UserRole)
