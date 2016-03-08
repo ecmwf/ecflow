@@ -79,6 +79,7 @@ void UserCmd::setup_user_authentification()
    }
 
    user_ = the_user_name;
+   assert(!user_.empty());
 }
 
 void UserCmd::prompt_for_confirmation(const std::string& prompt)
