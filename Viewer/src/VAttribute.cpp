@@ -27,6 +27,7 @@
 
 std::map<std::string,VAttribute*> VAttribute::items_;
 
+//#define _UI_ATTR_DEBUG
 
 class VMeterAttribute : public VAttribute
 {
@@ -218,6 +219,9 @@ bool VAttribute::getData(VNode *vnode,int row,VAttribute* &type,QStringList& dat
 	if(!vnode)
 		return false;
 
+    if(vnode->name() == "main")
+        qDebug() << "main";
+
 	int totalRow=0;
 	for(std::map<std::string,VAttribute*>::const_iterator it=items_.begin(); it != items_.end(); ++it)
 	{
@@ -225,7 +229,9 @@ bool VAttribute::getData(VNode *vnode,int row,VAttribute* &type,QStringList& dat
 		if(it->second->getData(vnode,row-totalRow,size,data))
 		{
 			type=it->second;
-			return true;
+            qDebug() << row << data;
+
+            return true;
 		}
 		totalRow+=size;
 	}
@@ -295,6 +301,9 @@ bool VMeterAttribute::getData(VNode *vnode,int row,int& size,QStringList& data)
 	if(!node.get())
 		return false;
 
+#ifdef _UI_ATTR_DEBUG
+    UserMessage::debug("VMeterAttribute::getData -->");
+#endif
 	const std::vector<Meter>&  v=node->meters();
 	if(row >=0 && row < v.size())
 	{
@@ -302,10 +311,17 @@ bool VMeterAttribute::getData(VNode *vnode,int row,int& size,QStringList& data)
 						QString::fromStdString(v.at(row).name()) <<
 						QString::number(v.at(row).value()) << QString::number(v.at(row).min()) << QString::number(v.at(row).max()) <<
 						QString::number(v.at(row).colorChange());
-		return true;
+#ifdef _UI_ATTR_DEBUG
+    UserMessage::debug("  data=" + data.join(",").toStdString());
+#endif
+        return true;
 	}
+
 	size=v.size();
-	return false;
+#ifdef _UI_ATTR_DEBUG
+    UserMessage::debug("  size=" + QString::number(size).toStdString());
+#endif
+    return false;
 }
 
 //================================
@@ -330,6 +346,9 @@ bool VLabelAttribute::getData(VNode *vnode,int row,int& size,QStringList& data)
 	if(!node.get())
 		return false;
 
+#ifdef _UI_ATTR_DEBUG
+    UserMessage::debug("VLabelAttribute::getData -->");
+#endif
 	const std::vector<Label>&  v=node->labels();
 	if(row >=0 && row < v.size())
 	{
@@ -342,10 +361,19 @@ bool VLabelAttribute::getData(VNode *vnode,int row,int& size,QStringList& data)
         data << qName_ <<
 					QString::fromStdString(v.at(row).name()) <<
                     QString::fromStdString(val);
+
+#ifdef _UI_ATTR_DEBUG
+    UserMessage::debug("  data=" + data.join(",").toStdString());
+#endif
         return true;
 	}
 	size=v.size();
-	return false;
+
+#ifdef _UI_ATTR_DEBUG
+    UserMessage::debug("  size=" + QString::number(size).toStdString());
+#endif
+
+    return false;
 }
 
 int VLabelAttribute::lineNum(const VNode* vnode,int row)
@@ -393,16 +421,26 @@ bool VEventAttribute::getData(VNode *vnode,int row,int& size,QStringList& data)
 	if(!node.get())
 			return false;
 
+#ifdef _UI_ATTR_DEBUG
+    UserMessage::debug("VEventAttribute::getData -->");
+#endif
 	const std::vector<Event>& v=node->events();
 	if(row >=0 && row < v.size())
 	{
 		data << qName_ <<
 				QString::fromStdString(v.at(row).name_or_number()) <<
 				QString::number((v.at(row).value()==true)?1:0);
-		return true;
+#ifdef _UI_ATTR_DEBUG
+    UserMessage::debug("  data=" + data.join(",").toStdString());
+#endif
+        return true;
 	}
 	size=v.size();
-	return false;
+#ifdef _UI_ATTR_DEBUG
+    UserMessage::debug("  size=" + QString::number(size).toStdString());
+#endif
+
+    return false;
 }
 
 //================================
@@ -425,7 +463,11 @@ int VGenvarAttribute::num(const VNode *vnode)
 
 bool VGenvarAttribute::getData(VNode *vnode,int row,int& size,QStringList& data)
 {
-	std::vector<Variable> genV;
+#ifdef _UI_ATTR_DEBUG
+    UserMessage::debug("VGenvarAttribute::getData -->");
+#endif
+
+    std::vector<Variable> genV;
 	vnode->genVariables(genV);
 
 	/*node_ptr node=vnode->node();
@@ -440,10 +482,17 @@ bool VGenvarAttribute::getData(VNode *vnode,int row,int& size,QStringList& data)
 		data << qName_ <<
 				QString::fromStdString(genV.at(row).name()) <<
 				QString::fromStdString(genV.at(row).theValue());
-		return true;
+#ifdef _UI_ATTR_DEBUG
+    UserMessage::debug("  data=" + data.join(",").toStdString());
+#endif
+        return true;
 	}
 	size=genV.size();
-	return false;
+
+#ifdef _UI_ATTR_DEBUG
+    UserMessage::debug("  size=" + QString::number(size).toStdString());
+#endif
+    return false;
 }
 
 //================================
@@ -460,7 +509,11 @@ int VVarAttribute::num(const VNode *vnode)
 
 bool VVarAttribute::getData(VNode *vnode,int row,int& size,QStringList& data)
 {
-	if(vnode->isServer())
+#ifdef _UI_ATTR_DEBUG
+    UserMessage::debug("VVarAttribute::getData -->");
+#endif
+
+    if(vnode->isServer())
 	{
 		std::vector<Variable> v;
 		vnode->variables(v);
@@ -470,9 +523,15 @@ bool VVarAttribute::getData(VNode *vnode,int row,int& size,QStringList& data)
 			data << qName_ <<
 					QString::fromStdString(v.at(row).name()) <<
 					QString::fromStdString(v.at(row).theValue());
-			return true;
+#ifdef _UI_ATTR_DEBUG
+            UserMessage::debug("  data=" + data.join(",").toStdString());
+#endif
+            return true;
 		}
-		size=v.size();
+#ifdef _UI_ATTR_DEBUG
+        UserMessage::debug("  size=" + QString::number(size).toStdString());
+#endif
+        size=v.size();
 	}
 	else
 	{
@@ -486,9 +545,15 @@ bool VVarAttribute::getData(VNode *vnode,int row,int& size,QStringList& data)
 			data << qName_ <<
 					QString::fromStdString(v.at(row).name()) <<
 					QString::fromStdString(v.at(row).theValue());
-			return true;
+#ifdef _UI_ATTR_DEBUG
+            UserMessage::debug("  data=" + data.join(",").toStdString());
+#endif
+            return true;
 		}
-		size=v.size();
+#ifdef _UI_ATTR_DEBUG
+        UserMessage::debug("  size=" + QString::number(size).toStdString());
+#endif
+        size=v.size();
 	}
 
 	return false;
@@ -516,16 +581,28 @@ bool VLimitAttribute::getData(VNode *vnode,int row,int& size,QStringList& data)
 	if(!node.get())
 		return false;
 
+#ifdef _UI_ATTR_DEBUG
+    UserMessage::debug("VLimitAttribute::getData -->");
+#endif
+
 	const std::vector<limit_ptr>& v=node->limits();
 	if(row >=0 && row < v.size())
 	{
 		data << qName_ <<
 					QString::fromStdString(v.at(row)->name()) <<
 					QString::number(v.at(row)->value()) <<
-					QString::number(v.at(row)->theLimit());
-		return true;
-	}
-	size=v.size();
+					QString::number(v.at(row)->theLimit());       
+#ifdef _UI_ATTR_DEBUG
+        UserMessage::debug("  data=" + data.join(",").toStdString());
+#endif
+
+        return true;
+    }
+    size=v.size();
+#ifdef _UI_ATTR_DEBUG
+    UserMessage::debug("  size=" + QString::number(size).toStdString());
+#endif
+
 	return false;
 }
 
@@ -551,16 +628,25 @@ bool VLimiterAttribute::getData(VNode *vnode,int row,int& size,QStringList& data
 	if(!node.get())
 		return false;
 
+#ifdef _UI_ATTR_DEBUG
+    UserMessage::debug("VLimiterAttribute::getData -->");
+#endif
 	const std::vector<InLimit>& v=node->inlimits();
 	if(row >=0 && row < v.size())
 	{
-			data << qName_ <<
+        data << qName_ <<
 					QString::fromStdString(v.at(row).name()) <<
 					QString::fromStdString(v.at(row).pathToNode());
-			return true;
+#ifdef _UI_ATTR_DEBUG
+        UserMessage::debug("  data=" + data.join(",").toStdString());
+#endif
+        return true;
 	}
 	size=v.size();
-	return false;
+#ifdef _UI_ATTR_DEBUG
+    UserMessage::debug("  size=" + QString::number(size).toStdString());
+#endif
+    return false;
 }
 
 //================================
@@ -588,6 +674,9 @@ bool VTriggerAttribute::getData(VNode *vnode,int row,int& size,QStringList& data
 	if(!node.get())
 		return false;
 
+#ifdef _UI_ATTR_DEBUG
+    UserMessage::debug("VTriggerAttribute::getData -->");
+#endif
 	Expression* eT=node->get_trigger();
 	Expression* eC=node->get_complete();
 	if(row ==0 && (eT || eC))
@@ -595,11 +684,17 @@ bool VTriggerAttribute::getData(VNode *vnode,int row,int& size,QStringList& data
 		data << qName_;
 		if(eT) data << "0" << QString::fromStdString(eT->expression());
 		else if(eC) data << "1" << QString::fromStdString(eC->expression());
-		return true;
+#ifdef _UI_ATTR_DEBUG
+        UserMessage::debug("  data=" + data.join(",").toStdString());
+#endif
+        return true;
 	}
 
 	size=(eT || eC)?1:0;
-	return false;
+#ifdef _UI_ATTR_DEBUG
+    UserMessage::debug("  size=" + QString::number(size).toStdString());
+#endif
+    return false;
 }
 
 //================================
@@ -624,25 +719,34 @@ bool VTimeAttribute::getData(VNode *vnode,int row,int& size,QStringList& data)
 	if(!node.get())
 		return false;
 
+#ifdef _UI_ATTR_DEBUG
+    UserMessage::debug("VTimeAttribute::getData -->");
+#endif
+
 	const std::vector<ecf::TimeAttr>& tV=node->timeVec();
 	const std::vector<ecf::TodayAttr>& tdV=node->todayVec();
 	const std::vector<ecf::CronAttr>& cV=node->crons();
 
 	if(row >=0 && row < tV.size()+tdV.size()+ cV.size())
 	{
-			data << qName_;
-			if(row < tV.size())
-				data << QString::fromStdString(tV.at(row).name());
-			else if(row < tV.size() + tdV.size())
-				data << QString::fromStdString(tdV.at(row-tV.size()).name());
-			else
-				data << QString::fromStdString(cV.at(row-tV.size()-tdV.size()).name());
-
-			return true;
+        data << qName_;
+        if(row < tV.size())
+            data << QString::fromStdString(tV.at(row).name());
+        else if(row < tV.size() + tdV.size())
+            data << QString::fromStdString(tdV.at(row-tV.size()).name());
+        else
+            data << QString::fromStdString(cV.at(row-tV.size()-tdV.size()).name());
+#ifdef _UI_ATTR_DEBUG
+        UserMessage::debug("  data=" + data.join(",").toStdString());
+#endif
+        return true;
 	}
 
 	size=tV.size()+tdV.size()+ cV.size();
-	return false;
+#ifdef _UI_ATTR_DEBUG
+    UserMessage::debug("  size=" + QString::number(size).toStdString());
+#endif
+    return false;
 }
 
 //================================
@@ -667,6 +771,10 @@ bool VDateAttribute::getData(VNode *vnode,int row,int& size,QStringList& data)
 	if(!node.get())
 		return false;
 
+#ifdef _UI_ATTR_DEBUG
+    UserMessage::debug("VDateAttribute::getData -->");
+#endif
+
 	const std::vector<DateAttr>& dV=node->dates();
 	const std::vector<DayAttr>& dayV=node->days();
 
@@ -678,10 +786,16 @@ bool VDateAttribute::getData(VNode *vnode,int row,int& size,QStringList& data)
 		else
 			data << QString::fromStdString(dayV.at(row-dV.size()).name());
 
+#ifdef _UI_ATTR_DEBUG
+        UserMessage::debug("  data=" + data.join(",").toStdString());
+#endif
+
 		return true;
 	}
 	size=dV.size()+dayV.size();
-
+#ifdef _UI_ATTR_DEBUG
+    UserMessage::debug("  size=" + QString::number(size).toStdString());
+#endif
 	return false;
 }
 
@@ -708,15 +822,25 @@ bool VRepeatAttribute::getData(VNode *vnode,int row,int& size,QStringList& data)
 	if(!node.get())
 		return false;
 
+#ifdef _UI_ATTR_DEBUG
+    UserMessage::debug("VRepeatAttribute::getData -->");
+#endif
+
 	const Repeat& r=node->repeat();
-	if(row >=0 && !r.empty())
+    if(row ==0 && !r.empty())
 	{
 		data << qName_ << QString::fromStdString(r.name()) <<
 		QString::fromStdString(r.valueAsString());
-		return true;
+#ifdef _UI_ATTR_DEBUG
+        UserMessage::debug("  data=" + data.join(",").toStdString());
+#endif
+        return true;
 	}
 	size=(r.empty())?0:1;
-	return false;
+#ifdef _UI_ATTR_DEBUG
+    UserMessage::debug("  size=" + QString::number(size).toStdString());
+#endif
+    return false;
 }
 
 //================================
@@ -741,14 +865,24 @@ bool VLateAttribute::getData(VNode *vnode,int row,int& size,QStringList& data)
 	if(!node.get())
 		return false;
 
+#ifdef _UI_ATTR_DEBUG
+    UserMessage::debug("VLateAttribute::getData -->");
+#endif
+
 	ecf::LateAttr *late=node->get_late();
-	if(row >=0 && late)
+    if(row ==0 && late)
 	{
 		data << qName_ << QString::fromStdString(late->name());
-		return true;
+#ifdef _UI_ATTR_DEBUG
+        UserMessage::debug("  data=" + data.join(",").toStdString());
+#endif
+        return true;
 	}
 	size=(late)?1:0;
-	return false;
+#ifdef _UI_ATTR_DEBUG
+    UserMessage::debug("  size=" + QString::number(size).toStdString());
+#endif
+    return false;
 }
 
 static SimpleLoader<VAttribute> loader("attribute");
