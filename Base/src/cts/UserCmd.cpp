@@ -41,6 +41,7 @@ bool UserCmd::equals(ClientToServerCmd* rhs) const
 bool UserCmd::authenticate(AbstractServer* as, STC_Cmd_ptr& ) const
 {
    // The user should NOT be empty. Rather than asserting and killing the server, fail authentication
+   // ECFLOW-577 and ECFLOW-512. What is user_ empty
    if (!user_.empty() && as->authenticateReadAccess(user_)) {
 
       // Does this user command require write access
