@@ -253,7 +253,7 @@ STC_Cmd_ptr CFileCmd::doHandleRequest(AbstractServer* as) const
 	/// The file could get very large, hence truncate at the start
 	if (Str::truncate_at_start(fileContents, max_lines_)) {
 		std::stringstream ss;
-		ss << "\n# >>>>>>>> File truncated down to " << max_lines_ << ". Truncated from the start <<<<<<<<<\n";
+		ss << "\n# >>>>>>>> File truncated down to " << max_lines_ << ". Truncated from the end of the file <<<<<<<<<\n";
 		fileContents += ss.str();
 	}
 
