@@ -975,10 +975,10 @@ void ServerHandler::clientTaskFinished(VTask_ptr task,const ServerReply& serverR
 			task->reply()->text(serverReply.get_string());
 
 			//if the text is truncated the following line is added to the bottom of it:
-			//# >>>>>>>> File truncated down to 15. Truncated from the start <<<<<<<<<
+            //# >>>>>>>> File truncated down to 15. Truncated from the end of file <<<<<<<<<
 			//We search for this string and if truncation did happen we indicate it in the reply
 			size_t txtSize=task->reply()->text().size();
-			if(task->reply()->text().find("File truncated down to",
+            if(task->reply()->text().find(">> File truncated down to",
 			      (txtSize > 200)?(txtSize-100):0) != std::string::npos)
 			{
 				task->reply()->setReadTruncatedTo(conf_->intValue(VServerSettings::MaxOutputFileLines));
