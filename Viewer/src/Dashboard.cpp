@@ -186,7 +186,7 @@ DashboardWidget* Dashboard::addDialog(const std::string& type)
 	//the behaviour when the dialog's parent is QMainWindow.
 	DashboardDialog* dia=new DashboardDialog(0);
 
-	//So the parent in 0 and we will emit a signal from the Dashboard
+    //So the parent is 0 and we will emit a signal from the Dashboard
 	//destructor to notify the dialog about it. Then we can be sure
 	//sure that the dialog deletes itself when the Dashboard gets deleted.
     connect(this,SIGNAL(aboutToDelete()),

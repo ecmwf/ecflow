@@ -9,16 +9,18 @@
 
 #include "VModelData.hpp"
 
+#include  "AbstractNodeModel.hpp"
 #include "NodeQuery.hpp"
 #include "VFilter.hpp"
 #include "ServerHandler.hpp"
+#include "UserMessage.hpp"
 #include "VAttribute.hpp"
 #include "VNode.hpp"
 
-#include  "AbstractNodeModel.hpp"
-
 #include <QDebug>
 #include <QMetaMethod>
+
+//#define _UI_VMODELDATA_DEBUG
 
 //==========================================
 //
@@ -520,8 +522,15 @@ void VModelData::init()
 
 void VModelData::clear()
 {
-	if(serverFilter_)
+#ifdef _UI_VMODELDATA_DEBUG
+    UserMessage::debug("VModelData::clear --> " +  QString::number((qint64)this,16).toStdString());
+    qDebug() << "   serverFilter_" << serverFilter_;
+#endif
+
+    if(serverFilter_)
 		serverFilter_->removeObserver(this);
+
+    serverFilter_=NULL;
 
 	for(int i=0; i < servers_.size(); i++)
 	{
@@ -529,6 +538,10 @@ void VModelData::clear()
 	}
 
 	servers_.clear();
+
+#ifdef _UI_VMODELDATA_DEBUG
+    UserMessage::debug("<-- VModelData::clear");
+#endif
 }
 
 VModelServer* VModelData::server(int n) const
@@ -649,9 +662,28 @@ void VModelData::notifyServerFilterChanged(ServerItem* item)
 
 void VModelData::notifyServerFilterDelete()
 {
-	Q_EMIT filterDeleteBegin();
+#ifdef _UI_VMODELDATA_DEBUG
+    UserMessage::debug("VModelData::notifyServerFilterDelete --> " + QString::number((qint64)this,16).toStdString());
+#endif
+
+    Q_EMIT filterDeleteBegin();
+
+#ifdef _UI_VMODELDATA_DEBUG
+    UserMessage::debug("  filterDeleteBegin emitted");
+#endif
+
 	clear();
+
+#ifdef _UI_VMODELDATA_DEBUG
+    UserMessage::debug("  filterDeleteEnd emitted");
+#endif
+
 	Q_EMIT filterDeleteEnd();
+
+#ifdef _UI_VMODELDATA_DEBUG
+    UserMessage::debug("<-- VModelData::notifyServerFilterDelete");
+#endif
+
 }
 
 void VModelData::slotFilterDefChanged()

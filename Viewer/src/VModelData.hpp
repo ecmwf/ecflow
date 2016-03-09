@@ -82,7 +82,7 @@ public:
 
 	 //From ServerObserver
 	 void notifyDefsChanged(ServerHandler* server, const std::vector<ecf::Aspect::Type>& a);
-	 void notifyServerDelete(ServerHandler* server) {};
+     void notifyServerDelete(ServerHandler*) {}
 	 void notifyBeginServerClear(ServerHandler* server);
 	 void notifyEndServerClear(ServerHandler* server);
 	 void notifyBeginServerScan(ServerHandler* server,const VServerChange&);
@@ -107,8 +107,8 @@ public:
 	 ~VTableServer();
 
 	 //From ServerObserver
-	 void notifyDefsChanged(ServerHandler* server, const std::vector<ecf::Aspect::Type>& a) {};
-	 void notifyServerDelete(ServerHandler* server) {};
+     void notifyDefsChanged(ServerHandler* server, const std::vector<ecf::Aspect::Type>& a) {}
+     void notifyServerDelete(ServerHandler*) {}
 	 void notifyBeginServerClear(ServerHandler* server);
      void notifyEndServerClear(ServerHandler* server);
      void notifyBeginServerScan(ServerHandler* server,const VServerChange&);
