@@ -147,7 +147,7 @@ ServerHandler::~ServerHandler()
 	saveConf();
 
 	//Notify the observers
-	broadcast(&ServerObserver::notifyServerDelete,true);
+    broadcast(&ServerObserver::notifyServerDelete);
 
 	//The queue must be deleted before the client, since the thread might
 	//be running a job on the client!!
@@ -829,9 +829,11 @@ void ServerHandler::removeServerObserver(ServerObserver *obs)
 	}
 }
 
-void ServerHandler::broadcast(SoMethod proc,bool checkExistence)
+void ServerHandler::broadcast(SoMethod proc)
 {
-	//When the observers are being notified (in a loop) they might
+    bool checkExistence=true;
+
+    //When the observers are being notified (in a loop) they might
 	//want to remove themselves from the observer list. This will cause a crash. To avoid
 	//this we create a copy of the observers and use it in the notification loop.
 	std::vector<ServerObserver*> sObsCopy=serverObservers_;
@@ -1198,7 +1200,7 @@ void ServerHandler::resetFinished()
 	assert(change.suiteNum_ == vRoot_->numOfChildren());
 
 	//Notify the observers that scan has ended
-    broadcast(&ServerObserver::notifyEndServerScan,true);
+    broadcast(&ServerObserver::notifyEndServerScan);
 
 	//The suites might have been changed
 	updateSuiteFilter();
@@ -1247,13 +1249,13 @@ void ServerHandler::clearTree()
 	if(!vRoot_->isEmpty())
 	{
 		//Notify observers that the clear is about to begin
-		broadcast(&ServerObserver::notifyBeginServerClear);
+        broadcast(&ServerObserver::notifyBeginServerClear);
 
 		//Clear vnode
 		vRoot_->clear();
 
 		//Notify observers that the clear ended
-		broadcast(&ServerObserver::notifyEndServerClear);
+        broadcast(&ServerObserver::notifyEndServerClear);
 	}
 
 	UserMessage::message(UserMessage::DBG, false, std::string("ServerHandler::clearTree --  end"));
@@ -1300,7 +1302,7 @@ void ServerHandler::rescanTree()
 	vRoot_->endScan();
 
 	//Notify the observers that scan has ended
-	broadcast(&ServerObserver::notifyEndServerScan,true);
+    broadcast(&ServerObserver::notifyEndServerScan);
 
 	//Restart the queue
 	comQueue_->start();
