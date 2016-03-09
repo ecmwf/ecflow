@@ -108,7 +108,10 @@ PropertyLine::PropertyLine(VProperty* guiProp,bool addLabel,QWidget * parent) :
 	oriVal_=prop_->value();
 
 	if(addLabel)
-		label_=new QLabel(prop_->param("label"),parent);
+    {
+        label_=new QLabel(prop_->param("label"),parent);
+        label_->setToolTip(prop_->param("tooltip"));
+    }
 
 	QString suffixText=prop_->param("suffix");
 	if(!suffixText.isEmpty())
@@ -159,6 +162,9 @@ void PropertyLine::init()
 		slotReset(prop_->value());
 	}
 	doNotEmitChange_=false;
+
+    if(item())
+        item()->setToolTip(prop_->param("tooltip"));
 }
 
 void PropertyLine::slotResetToDefault(bool)

@@ -17,6 +17,9 @@
                 "line" : "autoUpdate",
                 "line" : "updateRateInSec",
                 "line" : "adaptiveUpdate",
+                "note" : {
+                    "default": "When enabled the server update period is <u>increased at every automatic update</u> until the maximum period is reached. If the user in the meantime updates the server manually the update period is set back to its original value and whole process starts again."
+                },
                 "line" : "adaptiveUpdateIncrementInSec",
                 "line" : "maxAdaptiveUpdateRateInMin"
             },

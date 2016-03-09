@@ -524,8 +524,7 @@ void PropertyEditor::addNote(VProperty* vProp,QVBoxLayout* layout,QWidget *paren
     txt.replace("%SERVER%",(serverName_.isEmpty())?"?":"<b>" + serverName_ + "</b>");
 
     layout->addSpacing(5);
-    QLabel *label=new QLabel("<b>Note:</b> " + txt,parent);
-    label->setWordWrap(true);
+    QLabel *label=new QLabel("<i>Note:</i> " + txt,parent);
     layout->addWidget(label);
 }
 
@@ -545,7 +544,8 @@ void PropertyEditor::addNote(VProperty* vProp,QGridLayout* layout,QWidget *paren
     //fr->setFrameShape(QFrame::HLine);
     //layout->addWidget(fr,layout->rowCount(),0,1,-1,Qt::AlignVCenter);
 
-    QLabel *label=new QLabel("<table><tr><td><b>Note:</b></td><td>" + txt + "</td></tr></table>",parent);
+    QLabel *label=new QLabel("<table><tr><td><b>&nbsp;&nbsp;&nbsp;</b></td><td><i>Note:</i> " + txt + "</td></tr></table>",parent);
+    label->setWordWrap(true);
     layout->addWidget(label,layout->rowCount(),0,1,-1,Qt::AlignVCenter);
 }
 

@@ -8,35 +8,36 @@
             	"tooltip" : "update",      
             
                 "autoUpdate": {
-            		"label": "Enable automatic update",                     
+                    "label": "Update server state automatically",
+                    "tooltip" : "When enabled the server is queried for updates at regular intervals.",
             		"default": "true"
                 },
             	           	
             	"updateRateInSec": {
-            		"label": "Update frequency",
+                    "label": "Server update period",
             		"suffix" : "seconds", 
-            		"tooltip": "update frequency",                          
+                    "tooltip": "Defines the automatic server update period.",
             		"default": "60",
             		"min" : "0"
                 },
                 
                 "adaptiveUpdate": {
-                    "label": "Enable adaptive update frequency",
-                	"tooltip": "Adaptive update frequency",                          
+                    "label": "Increase server update period when inactive",
+                    "tooltip" : "When enabled the server update period is increased at every automatic update until the maximum period is reached. If the user in the meantime updates the server manually the update period is set back to its original value and whole process starts again.",
                 	"default": "true"
                 },
 
                 "adaptiveUpdateIncrementInSec": {
-                    "label": "Adaptive update frequency increment",
+                    "label": "Server update period increment",
                     "suffix" : "seconds",
-                    "tooltip": "Adaptive update frequency increment",
+                    "tooltip": "Defines by how many seconds the server update period is increased at every automatic update.",
                     "default": "5",
                     "min" : "0"
                 },
                 "maxAdaptiveUpdateRateInMin": {
-                	"label": "Maximum adaptive update frequency",
+                    "label": "Do not increase server update period over",
                 	"suffix" : "minutes", 
-                	"tooltip": "Maximum adaptive update frequency",                          
+                    "tooltip": "Defines the maximum server update period. When it is reached the update period is not increased any more.",
                 	"default": "60",
                 	"min" : "0"
                 }
@@ -48,7 +49,7 @@
 				
 				"readFilesFromDisk": {
             		"label": "Read files from disk when possible",
-            		"tooltip": "",                          
+                    "tooltip": "When enabled the viewer first always tries to read the files from disk. Having failed to do it it tries the server. It is <b>highly recommended</b> to enable this option to avoid overloading the server.",
             		"default": "true"
                 	},
             
