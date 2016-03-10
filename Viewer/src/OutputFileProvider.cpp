@@ -16,6 +16,8 @@
 #include "ServerHandler.hpp"
 #include "UserMessage.hpp"
 
+#include <QDateTime>
+
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/path.hpp>
 #include <boost/algorithm/string/predicate.hpp>
@@ -134,12 +136,14 @@ void OutputFileProvider::fetchFile(ServerHandler *server,VNode *n,const std::str
 		if(isJobout)
 		{
 			reply_->setErrorText("Variable ECF_JOBOUT is not defined!");
-			owner_->infoFailed(reply_);
+            reply_->addLog("MSG>Variable ECF_JOBOUT is not defined!.");
+            owner_->infoFailed(reply_);
 		}
 		else
 		{
 			reply_->setErrorText("Output file is not defined!");
-			owner_->infoFailed(reply_);
+            reply_->addLog("MSG>Output file is not defined.");
+            owner_->infoFailed(reply_);
 		}
 
 		return;
@@ -148,14 +152,16 @@ void OutputFileProvider::fetchFile(ServerHandler *server,VNode *n,const std::str
     //Check if it is tryno 0
     if(boost::algorithm::ends_with(fileName,".0"))
     {
-        reply_->setInfoText("Current job output does not exist yet (<b>TRYNO</b> is <b>0</b>!)");
-    	owner_->infoReady(reply_);
+        reply_->setInfoText("Current job output does not exist yet (<b>TRYNO</b> is <b>0</b>)!)");
+        reply_->addLog("MSG>Current job output does not exist yet (<b>TRYNO</b> is <b>0</b>)!");
+        owner_->infoReady(reply_);
     	return;
     }
 
     if(isJobout && n->isSubmitted())
     {
         reply_->setInfoText("Current job output does not exist yet (node status is <b>submitted</b>!)");
+        reply_->addLog("MSG>Current job output does not exist yet (node status is <b>submitted</b>!)");
         owner_->infoReady(reply_);
         return;
     }
@@ -165,9 +171,9 @@ void OutputFileProvider::fetchFile(ServerHandler *server,VNode *n,const std::str
     //----------------------------------
 
     if(isJobout)
-       reply_->addLog("REMARK>This file is the <b>current</b> job output.");
+       reply_->addLog("REMARK>This file is the <b>current</b> job output (defined by variable <b>ECF_JOBOUT</b>).");
     else
-       reply_->addLog("REMARK>This file is <b>not</b> the <b>current</b> job output.");
+       reply_->addLog("REMARK>This file is <b>not</b> the <b>current</b> job output (defined by <b>ECF_JOBOUT</b>).");
 
     //if(server->isLocalHost())
     // {
@@ -243,6 +249,9 @@ bool OutputFileProvider::fetchFileViaOutputClient(VNode *n,const std::string& fi
             reply_->setInfoText("");
             reply_->fileReadMode(VReply::LogServerReadMode);
 
+            reply_->setLog(f->log());
+            reply_->addLog("REMARK>File was read from cache.");
+
             reply_->tmpFile(f);
             owner_->infoReady(reply_);
             return true;
@@ -301,8 +310,10 @@ void OutputFileProvider::slotOutputClientFinished()
     reply_->fileReadMode(VReply::LogServerReadMode);
     reply_->addLog("TRY> fetch file from logserver: " + outClient_->host() + "@" + outClient_->portStr() + ": OK");
 
+    tmp->setFetchMode(VFile::LogServerFetchMode);
+    tmp->setLog(reply_->log());
     std::string method="served by " + outClient_->host() + "@" + outClient_->portStr();
-    tmp->setFetchMethod(method);
+    tmp->setFetchModeStr(method);
 
     reply_->tmpFile(tmp);
     owner_->infoReady(reply_);
@@ -339,7 +350,7 @@ void OutputFileProvider::slotOutputClientError(QString msg)
             bool isJobout=(outClient_->remoteFile() == jobout);
 
             //We try to read the file directly from the disk
-           /* if(!isJobout || server->readFromDisk())
+            /* if(!isJobout || server->readFromDisk())
             {
                 if(fetchLocalFile(outClient_->remoteFile()))
                     return;
@@ -385,9 +396,14 @@ bool OutputFileProvider::fetchLocalFile(const std::string& fileName)
 	VFile_ptr f(VFile::create(fileName,false));
 	if(f->exists())
 	{
-        f->setSourcePath(f->path());
         reply_->fileReadMode(VReply::LocalReadMode);
         reply_->addLog("TRY> read file from disk: OK");
+
+        f->setSourcePath(f->path());
+        f->setFetchMode(VFile::LocalFetchMode);
+        f->setFetchDate(QDateTime::currentDateTime());
+        f->setLog(reply_->log());
+
         reply_->tmpFile(f);
 		owner_->infoReady(reply_);
 		return true;

@@ -968,27 +968,33 @@ void ServerHandler::clientTaskFinished(VTask_ptr task,const ServerReply& serverR
 		case VTask::ScriptTask:
 		case VTask::ManualTask:
 		case VTask::HistoryTask:
-		case VTask::JobTask:
-		case VTask::OutputTask:
+		case VTask::JobTask:	
 		{
 			task->reply()->fileReadMode(VReply::ServerReadMode);
-			task->reply()->text(serverReply.get_string());
-
-			//if the text is truncated the following line is added to the bottom of it:
-            //# >>>>>>>> File truncated down to 15. Truncated from the end of file <<<<<<<<<
-			//We search for this string and if truncation did happen we indicate it in the reply
-			size_t txtSize=task->reply()->text().size();
-            if(task->reply()->text().find(">> File truncated down to",
-			      (txtSize > 200)?(txtSize-100):0) != std::string::npos)
-			{
-				task->reply()->setReadTruncatedTo(conf_->intValue(VServerSettings::MaxOutputFileLines));
-			}
-
+            task->reply()->setText(serverReply.get_string());
+            task->reply()->setReadTruncatedTo(truncatedLinesFromServer(task->reply()->text()));
 			task->status(VTask::FINISHED);
 			break;
 		}
 
-		case VTask::MessageTask:
+        case VTask::OutputTask:
+        {
+            task->reply()->fileReadMode(VReply::ServerReadMode);
+
+            std::string err;
+            VFile_ptr f(VFile::create(false));
+            f->setFetchMode(VFile::ServerFetchMode);
+            f->setFetchModeStr("fetched from server " + name());
+            f->setSourcePath(task->reply()->fileName());
+            f->setTruncatedTo(truncatedLinesFromServer(serverReply.get_string()));
+            f->write(serverReply.get_string(),err);
+            task->reply()->tmpFile(f);
+
+            task->status(VTask::FINISHED);
+            break;
+        }
+
+        case VTask::MessageTask:
 		{
 			task->reply()->setTextVec(serverReply.get_string_vec());
 			task->status(VTask::FINISHED);
@@ -1462,6 +1468,21 @@ void ServerHandler::searchFinished()
 	UserMessage::message(UserMessage::DBG, false, "(" + name() + ") ServerHandler::searchFinished -- start queue");
 	comQueue_->start();
 
+}
+
+int ServerHandler::truncatedLinesFromServer(const std::string& txt) const
+{
+    //if the text is truncated the following line is added to the bottom of it:
+    //# >>>>>>>> File truncated down to 15. Truncated from the end of file <<<<<<<<<
+    //We search for this string and if truncation did happen we indicate it in the reply
+    size_t txtSize=txt.size();
+    if(txt.find(">> File truncated down to",
+        (txtSize > 200)?(txtSize-100):0) != std::string::npos)
+    {
+        return conf_->intValue(VServerSettings::MaxOutputFileLines);
+    }
+
+    return -1;
 }
 
 //--------------------------------------------------------------

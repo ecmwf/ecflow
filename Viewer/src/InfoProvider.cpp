@@ -12,6 +12,8 @@
 #include "VReply.hpp"
 #include "ServerHandler.hpp"
 
+#include <QDateTime>
+
 #include <boost/algorithm/string/predicate.hpp>
 
 InfoProvider::InfoProvider(InfoPresenter* owner,VTask::Type taskType) :
@@ -105,16 +107,18 @@ void InfoProvider::visit(VInfoNode* info)
     VNode *n=info->node();
 
     std::string fileName;
+    if(!fileVarName_.empty())
+    {
+        //Get the fileName
+        fileName=n->genVariable(fileVarName_);
+    }
 
     //We try to read the file directly from the disk
     if(info->server()->readFromDisk())
     {
     	//There is a variable defined for the filename
-    	if(!fileVarName_.empty())
-    	{
-    		//Get the fileName
-    		fileName=n->genVariable(fileVarName_);
-
+        if(!fileName.empty())
+    	{   		
     		if(reply_->textFromFile(fileName))
     		{
     			reply_->fileReadMode(VReply::LocalReadMode);
@@ -167,26 +171,32 @@ void  InfoProvider::taskChanged(VTask_ptr task)
 
     switch(task->status())
     {
-        case VTask::FINISHED:
-            //We prepend the results to the existing text
-            //reply_->text(task->reply()->text());
-            task->reply()->addLog("TRY>fetch file from server: OK");
+        case VTask::FINISHED:                 
+            {
+            task->reply()->addLog("TRY>fetch file from ecflow server: OK");
+
+            //The file should have a copy of the reply log
+            VFile_ptr f=task_->reply()->tmpFile();
+            if(f)
+            {
+                f->setFetchDate(QDateTime::currentDateTime());
+                f->setFetchMode(VFile::ServerFetchMode);
+                f->setLog(task_->reply()->log());
+            }
             owner_->infoReady(task->reply());
-            //We do not need the task anymore.
-            task_.reset();
+            task_.reset();            
+            }
             break;
         case VTask::ABORTED:
-        case VTask::REJECTED:
-           //reply_->setErrorText(task->reply()->errorText());
-            task->reply()->addLog("TRY>fetch file from server: FAILED");
-            owner_->infoFailed(task->reply());
-            //We do not need the task anymore.
-           task_.reset();break;
+        case VTask::REJECTED:         
+            task->reply()->addLog("TRY>fetch file from ecflow server: FAILED");
+            owner_->infoFailed(task->reply());          
+            task_.reset();
+            break;
         case VTask::CANCELLED:
             if(!task->reply()->errorText().empty())
-        	{
-            	//reply_->setErrorText(task->reply()->errorText());
-                task->reply()->addLog("TRY>fetch file from server: FAILED");
+        	{            	
+                task->reply()->addLog("TRY>fetch file from ecflow server: FAILED");
                 owner_->infoFailed(task->reply());
         	}
             //We do not need the task anymore.

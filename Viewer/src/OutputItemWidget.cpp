@@ -280,9 +280,6 @@ void OutputItemWidget::infoReady(VReply* reply)
 
         VFile_ptr f=reply->tmpFile();
 
-        //QTime stopper;
-        //stopper.start();
-
         //If the info is stored in a tmp file
         if(f)
         {
@@ -293,9 +290,9 @@ void OutputItemWidget::infoReady(VReply* reply)
         }
         //If the info is stored as a string in the reply object
         else
-        {
-            QString s=QString::fromStdString(reply->text());
-            browser_->loadText(s,QString::fromStdString(reply->fileName()));
+        {            
+            //QString s=QString::fromStdString(reply->text());
+            //browser_->loadText(s,QString::fromStdString(reply->fileName()));
         }
 
         if(!hasMessage)
@@ -339,10 +336,10 @@ void OutputItemWidget::infoReady(VReply* reply)
         if(reply->fileReadMode() == VReply::LocalReadMode ||
            reply->fileReadMode() == VReply::LogServerReadMode)
         {
-            if(f)
+            //if(f)
                 setCurrentInDir(f->sourcePath());
-            else
-                setCurrentInDir(reply->fileName());
+            /*else
+                setCurrentInDir(reply->fileName());*/
         }
 
         fetchInfo_->setInfo(reply,info_);

@@ -552,7 +552,7 @@ void NodeQueryEditor::setQueryTe(QString s)
 
 	if(!queryTeCanExpand_)
 	{
-		if(oldRowNum != rowNum && oldRowNum > 3 || rowNum > 3)
+        if(oldRowNum != rowNum && (oldRowNum > 3 || rowNum > 3))
 		{
 			QFont f;
 			QFontMetrics fm(f);

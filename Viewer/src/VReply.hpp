@@ -62,6 +62,7 @@ public:
     void addLog(const std::string& s) {log_.push_back(s);}
     void setLog(const std::vector<std::string>& s) {log_=s;}
     void clearLog() {log_.clear();}
+    void setText(const std::string& txt) {text_=txt;}
 
 	bool hasWarning() const {return !warningText_.empty();}
 	bool hasInfo() const {return !infoText_.empty();}

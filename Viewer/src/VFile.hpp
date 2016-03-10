@@ -11,6 +11,7 @@
 #define VFILE_INC__
 
 #include <string>
+#include <vector>
 
 #include <boost/shared_ptr.hpp>
 #include <boost/enable_shared_from_this.hpp>
@@ -25,7 +26,8 @@ class VFile : public boost::enable_shared_from_this<VFile>
 public:
 	virtual ~VFile();
 
-	enum StorageMode {MemoryStorage,DiskStorage};
+    enum StorageMode {MemoryStorage,DiskStorage};
+    enum FetchMode {NoFetchMode,LocalFetchMode,ServerFetchMode,LogServerFetchMode};
 
     const std::string& path() const {return path_;}
     const std::string& sourcePath() const {return sourcePath_;}
@@ -42,13 +44,22 @@ public:
 	unsigned int transferDuration() const {return transferDuration_;}
 	void setFetchDate(QDateTime d) {fetchDate_=d;}
 	QDateTime fetchDate() const {return fetchDate_;}
-    void setFetchMethod(const std::string& fetchMethod) {fetchMethod_=fetchMethod;}
-    const std::string& fetchMethod() const {return fetchMethod_;}
+    void setFetchMode(FetchMode m) {fetchMode_=m;}
+    FetchMode fetchMode() const {return fetchMode_;}
+    void setFetchModeStr(const std::string& fetchMethod) {fetchModeStr_=fetchMethod;}
+    const std::string& fetchModeStr() const {return fetchModeStr_;}
+    int truncatedTo() const {return truncatedTo_;}
+    void setTruncatedTo(int t) {truncatedTo_=t;}
     void setCached(bool b) {cached_=b;}
     bool cached() const {return cached_;}
+    void setLog(const std::vector<std::string>& log) {log_=log;}
+    void addToLog(const std::string& s) {log_.push_back(s);}
+    const std::vector<std::string>& log() const {return log_;}
 
 	bool write(const char *buf,size_t len,std::string& err);
-	void close();
+    bool write(const std::string& buf,std::string& err);
+
+    void close();
     void print();
 
 	static VFile_ptr create(const std::string& path,const std::string& contents,bool deleteFile=true);
@@ -72,10 +83,16 @@ protected:
 	char* data_;
 	size_t dataSize_;
 	FILE* fp_;
-	unsigned int transferDuration_;
+
+    FetchMode fetchMode_;
+    std::string fetchModeStr_;
     QDateTime fetchDate_;
-    std::string fetchMethod_;
+    unsigned int transferDuration_;
+    int truncatedTo_;
+
     bool cached_;
+    std::vector<std::string> log_;
+
 };
 
 #endif

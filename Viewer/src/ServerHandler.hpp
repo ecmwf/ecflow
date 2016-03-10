@@ -187,6 +187,8 @@ private:
 	void saveConf();
 	void loadConf();
 
+    int truncatedLinesFromServer(const std::string& txt) const;
+
 	QMutex           defsMutex_;
 	defs_ptr defs_;
 

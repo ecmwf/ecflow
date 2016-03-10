@@ -526,7 +526,7 @@ VNode* VNode::ancestorAt(int idx,SortMode sortMode)
 
 	std::vector<VNode*> nodes=ancestors(sortMode);
 
-	if(nodes.size() >= 0 && nodes.size() > idx)
+    if(nodes.size() > idx)
 	{
 		return nodes.at(idx);
 	}

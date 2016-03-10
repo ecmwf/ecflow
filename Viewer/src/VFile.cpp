@@ -29,6 +29,7 @@ VFile::VFile(const std::string& name,const std::string& str,bool deleteFile) :
 	data_(0),
 	dataSize_(0),
 	fp_(0),
+    fetchMode_(NoFetchMode),
 	transferDuration_(0),
     cached_(false)
 {
@@ -47,7 +48,8 @@ VFile::VFile(const std::string& name,bool deleteFile) :
 	data_(0),
 	dataSize_(0),
 	fp_(0),
-	transferDuration_(0),
+    fetchMode_(NoFetchMode),
+    transferDuration_(0),
     cached_(false)
 {
 }
@@ -59,7 +61,8 @@ VFile::VFile(bool deleteFile) :
 	data_(0),
 	dataSize_(0),
 	fp_(0),
-	transferDuration_(0),
+    fetchMode_(NoFetchMode),
+    transferDuration_(0),
     cached_(false)
 {
 }
@@ -142,11 +145,14 @@ void VFile::setStorageMode(StorageMode mode)
 	}
 }
 
+bool VFile::write(const std::string& buf,std::string& err)
+{
+    return write(buf.c_str(),buf.size(),err);
+}
+
 bool VFile::write(const char *buf,size_t len,std::string& err)
 {
-
     //printf("total:%d \n len: %d \n",dataSize_,len);
-
 
 	//Keep data in memory
 	if(storageMode_ == MemoryStorage)

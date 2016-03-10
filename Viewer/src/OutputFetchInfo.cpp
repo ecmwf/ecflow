@@ -50,28 +50,11 @@ void OutputFetchInfo::setInfo(VReply *reply,VInfo_ptr info)
 
     QStringList options;
     QStringList remarks;
+    QStringList msg;
     QStringList tries;
     QStringList other;
 
     QString html;
-
-    if(info && info->server())
-    {
-        ServerHandler* server=info->server();
-        bool rfd=server->readFromDisk();
-        QString t;
-        if(rfd)
-        {
-            t="With the current settings the viewer tries to read the ouput files <b>from disk</b>, if it fails it tries the <b>logserver</b> (if defined) and finally the <b>server</b>.";
-        }
-        else
-        {
-            t="With the current settings the viewer tries to read the ouput files from the <b>log server</b> (if defined), then from the <b>server</b>.";
-        }
-        t+=" (To change this setting go Edit -> Preferences -> Server options -> Files)";
-
-        html+=t;
-    }
 
     int cnt=1;
     for(std::vector<std::string>::const_iterator it=reply->log().begin(); it != reply->log().end(); ++it)
@@ -85,6 +68,11 @@ void OutputFetchInfo::setInfo(VReply *reply,VInfo_ptr info)
         else if(s.startsWith("OPTION>"))
         {
             options << s.remove(0,7);
+            continue;
+        }
+        else if(s.startsWith("MSG>"))
+        {
+            msg << s.remove(0,4);
             continue;
         }
         else if(s.startsWith("TRY>"))
@@ -103,17 +91,40 @@ void OutputFetchInfo::setInfo(VReply *reply,VInfo_ptr info)
             other << s;
     }
 
-
     if(info && info->server())
     {
         ServerHandler* server=info->server();
-        if(reply->fileReadMode() == VReply::LocalReadMode &&
+        bool rfd=server->readFromDisk();
+        QString t;
+        if(rfd)
+        {
+            t="With the current settings the viewer tries to read the output files <b>from disk</b>; if \
+               it fails, it tries the <b>logserver</b> (if defined) and finally the <b>ecflow server</b>";
+        }
+        else
+        {
+            t="With the current settings the viewer tries to read the ouput files from the <b>log server</b>\
+               (if defined), then from the <b>ecflow server</b>. Reading the file from disk is not tried at all!";
+        }
+        t+=" (To change this behaviour go Edit -> Preferences -> Server options -> Files)";
+
+        remarks << t;
+
+        if(reply->tmpFile() && reply->fileReadMode() == VReply::LocalReadMode &&
             !server->isLocalHost())
         {
-            remarks << "The ouput file was read <b>from disk</b> but the server's host (" + QString::fromStdString(server->host()) +
-                   ") is not the local host. Therefore it is possible that output file is not"
-                   " located on the disk, but there is a file with the same name on disk. So we might have read the wrong file";
+            remarks << "The output file was read <b>from disk</b> but the server's \
+                       host (" + QString::fromStdString(server->host()) +
+                       ") is not running on the local machine. If the path is machine-specific (e.g. /tmp) \
+                       and there exists a file with the same path on the local machine, then\
+                       this will have been read instead.";
         }
+    }
+
+    if(!msg.isEmpty())
+    {
+       html+="<p><u>Messages</u></p>";
+       html+=buildList(msg);
     }
 
     if(!options.isEmpty())
