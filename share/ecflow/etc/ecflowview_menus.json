@@ -145,14 +145,6 @@
         },
 
         {
-            "menu"           : "Node",
-            "name"           : "Special",
-            "type"           : "Submenu",
-            "visible_for"    : "node or alias",
-            "command"        : "None"
-        },
-
-        {
             "name"           : "Defstatus",
             "type"           : "Submenu",
             "menu"           : "Node",
@@ -180,7 +172,7 @@
             "menu"           : "Node",
             "name"           : "Special",
             "type"           : "Submenu",
-            "visible_for"    : "(node or alias)",
+            "visible_for"    : "node or alias",
             "command"        : "None"
         },
 
