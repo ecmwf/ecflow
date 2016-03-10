@@ -53,7 +53,7 @@ bool GroupSTCCmd::equals(ServerToClientCmd* rhs) const
 
 bool GroupSTCCmd::handle_server_response( ServerReply& server_reply, Cmd_ptr cts_cmd, bool debug ) const
 {
-	if (debug) std::cout << "GroupSTCCmd::handle_server_response\n";
+	if (debug) std::cout << "  GroupSTCCmd::handle_server_response\n";
 
 	BOOST_FOREACH(STC_Cmd_ptr subCmd, cmdVec_) {
 		(void)subCmd->handle_server_response(server_reply, cts_cmd, debug);
@@ -104,7 +104,7 @@ bool GroupSTCCmd::handle_server_response( ServerReply& server_reply, Cmd_ptr cts
 
 	std::string nodePath;
 	if (cts_cmd->why_cmd(nodePath) && defs.get()) {
-		if (debug) std::cout << "   GroupSTCCmd::handle_server_response *why* was called\n";
+		if (debug) std::cout << "  GroupSTCCmd::handle_server_response *why* was called\n";
 
 		/// client --group="get; why"          # where get will call DefsCmd will return defs, from the server
 		/// client --group="get; why <path>"   # where get will call DefsCmd will return defs, from the server

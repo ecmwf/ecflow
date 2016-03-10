@@ -1298,7 +1298,6 @@ std::ostream& Node::print(std::ostream& os) const
       if ( PrintStyle::getStyle() == PrintStyle::STATE  ) {
          Indentor in;
          if (completeExpr_->isFree()) Indentor::indent(os) << "# (free)\n";
-         else                         Indentor::indent(os) << "# (holding)\n";
          if ( completeAst() ) {
             if (!defs()) {
                // Full defs is required for extern checking, and finding absolute node paths
@@ -1315,7 +1314,6 @@ std::ostream& Node::print(std::ostream& os) const
       if ( PrintStyle::getStyle() == PrintStyle::STATE  ) {
          Indentor in;
          if (triggerExpr_->isFree()) Indentor::indent(os) << "# (free)\n";
-         else                        Indentor::indent(os) << "# (holding)\n";
          if ( triggerAst() ) {
             if (!defs()) {
                Indentor in;

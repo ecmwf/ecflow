@@ -48,7 +48,7 @@ std::ostream& ZombieGetCmd::print(std::ostream& os) const
 bool ZombieGetCmd::handle_server_response( ServerReply& server_reply, Cmd_ptr cts_cmd,  bool debug ) const
 {
 	if (debug) {
-		std::cout << "ZombieGetCmd::handle_server_response zombies.size() = " << zombies_.size() << "\n";
+		std::cout << "  ZombieGetCmd::handle_server_response zombies.size() = " << zombies_.size() << "\n";
 	}
 
 	if (server_reply.cli()) {

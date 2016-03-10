@@ -37,7 +37,7 @@ std::ostream& SServerLoadCmd::print(std::ostream& os) const
 
 bool SServerLoadCmd::handle_server_response( ServerReply& server_reply, Cmd_ptr cts_cmd, bool debug ) const
 {
-   if (debug) cout << "SServerLoadCmd::handle_server_response log_file_path = " << log_file_path() << "\n";
+   if (debug) cout << "  SServerLoadCmd::handle_server_response log_file_path = " << log_file_path() << "\n";
    Gnuplot gnuplot(log_file_path(), server_reply.host(), server_reply.port());
    gnuplot.show_server_load();
    return true;

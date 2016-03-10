@@ -246,7 +246,7 @@ void ClientHandleCmd::create( 	Cmd_ptr& cmd,
 						boost::program_options::variables_map& vm,
 						AbstractClientEnv*  ac ) const
 {
-	if (ac->debug()) cout << "ClientHandleCmd::create api = '" << api_ << "'.\n";
+	if (ac->debug()) cout << "  ClientHandleCmd::create api = '" << api_ << "'.\n";
 
 	switch (api_) {
 

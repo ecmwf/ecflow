@@ -69,7 +69,7 @@ void ServerVersionCmd::create(    Cmd_ptr& cmd,
          boost::program_options::variables_map& vm,
          AbstractClientEnv*  ace ) const
 {
-   if (ace->debug()) cout << "ServerVersionCmd::create\n";
+   if (ace->debug()) cout << "  ServerVersionCmd::create\n";
 
    // testing client interface
    if (ace->under_test())  return;

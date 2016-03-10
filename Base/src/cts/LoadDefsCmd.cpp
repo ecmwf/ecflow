@@ -130,7 +130,7 @@ void LoadDefsCmd::create( 	Cmd_ptr& cmd,
 		else if (args[i] == "check_only") check_only = true;
 		else defs_filename = args[i];
 	}
-	if (clientEnv->debug())  cout <<  "LoadDefsCmd::create:  Defs file '" <<  defs_filename << "'.\n";
+	if (clientEnv->debug()) cout << "  LoadDefsCmd::create:  Defs file '" <<  defs_filename << "'.\n";
 
 	cmd = LoadDefsCmd::create(defs_filename,force, check_only,clientEnv );
 }

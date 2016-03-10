@@ -212,11 +212,11 @@ void RequeueNodeCmd::create( 	Cmd_ptr& cmd,
    for(size_t i = 0; i < vec_size; i++) {
       if (options[i] == "abort") {
          option = RequeueNodeCmd::ABORT;
-         if (ac->debug()) cout << "ABORT selected\n";
+         if (ac->debug()) cout << "  ABORT selected\n";
       }
       else if (options[i] == "force") {
          option = RequeueNodeCmd::FORCE;
-         if (ac->debug())  cout << "FORCE selected\n";
+         if (ac->debug())  cout << "  FORCE selected\n";
       }
       else {
          std::stringstream ss;

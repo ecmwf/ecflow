@@ -136,7 +136,8 @@ protected:
    /// Log the command. Must typically be done before call doHandleRequest(), in case of crash/exception
    /// In rare case allow override. (i.e for additional debug)
    /// called by handleRequest, part of the template pattern
-   virtual void do_log() const;
+   /// If logging fails set late flag to warn users ECFLOW-536
+   virtual void do_log(AbstractServer*) const;
 
    /// Some commands which cause a change in state, should force an immediate job submission.
    /// Providing the server is *NOT* shutdown
@@ -685,7 +686,7 @@ private:
 
    /// Custom handling of command logging to add additional debug on same line
    /// makes it easier to debug errors in syncing.
-   virtual void do_log() const;
+   virtual void do_log(AbstractServer*) const;
 
    virtual STC_Cmd_ptr doHandleRequest(AbstractServer*) const;
 

@@ -65,28 +65,28 @@ Log::~Log()
 }
 
 
-void Log::log(Log::LogType lt,const std::string& message)
+bool Log::log(Log::LogType lt,const std::string& message)
 {
 	if (!logImpl_) {
 		logImpl_ = new LogImpl(fileName_) ;
 	}
-	logImpl_->log(lt,message);
+	return logImpl_->log(lt,message);
 }
 
-void Log::log_no_newline(Log::LogType lt,const std::string& message)
+bool Log::log_no_newline(Log::LogType lt,const std::string& message)
 {
    if (!logImpl_) {
       logImpl_ = new LogImpl(fileName_) ;
    }
-   logImpl_->log_no_newline(lt,message);
+   return logImpl_->log_no_newline(lt,message);
 }
 
-void Log::append(const std::string& message)
+bool Log::append(const std::string& message)
 {
    if (!logImpl_) {
       logImpl_ = new LogImpl(fileName_) ;
    }
-   logImpl_->append(message);
+   return logImpl_->append(message);
 }
 
 void Log::cache_time_stamp()
@@ -190,40 +190,43 @@ std::string Log::contents(int get_last_n_lines)
    return File::get_first_n_lines(fileName_,std::abs(get_last_n_lines),error_msg);
 }
 
-void log(Log::LogType lt,const std::string& message)
+bool log(Log::LogType lt,const std::string& message)
 {
 	if (Log::instance()) {
- 		Log::instance()->log(lt,message);
+ 		return Log::instance()->log(lt,message);
 	}
 	else {
 		if (LogToCout::ok()) {
 			Indentor::indent(cout) << message << endl;
 		}
 	}
+	return true;
 }
 
-void log_no_newline(Log::LogType lt,const std::string& message)
+bool log_no_newline(Log::LogType lt,const std::string& message)
 {
    if (Log::instance()) {
-      Log::instance()->log_no_newline(lt,message);
+      return Log::instance()->log_no_newline(lt,message);
    }
    else {
       if (LogToCout::ok()) {
          Indentor::indent(cout) << message << endl;
       }
    }
+	return true;
 }
 
-void log_append(const std::string& message)
+bool log_append(const std::string& message)
 {
    if (Log::instance()) {
-      Log::instance()->append(message);
+      return Log::instance()->append(message);
    }
    else {
       if (LogToCout::ok()) {
          Indentor::indent(cout) << message << endl;
       }
    }
+   return true;
 }
 
 void log_assert(char const* expr,char const* file, long line, const std::string& message)
@@ -276,7 +279,7 @@ static void append_log_type(std::string& str, Log::LogType lt)
    }
 }
 
-void LogImpl::do_log(Log::LogType lt,const std::string& message, bool newline)
+bool LogImpl::do_log(Log::LogType lt,const std::string& message, bool newline)
 {
 //#if DEBUG_BLOCKING_DISK_IO
 //   ecf::DurationTimer timer;
@@ -306,7 +309,7 @@ void LogImpl::do_log(Log::LogType lt,const std::string& message, bool newline)
    }
 
    // Check to see, if writing to file was ok.
-   check_file_write(message);
+   return check_file_write(message);
 
 //#if DEBUG_BLOCKING_DISK_IO
 //   long total_seconds = timer.elapsed().total_seconds();
@@ -320,19 +323,20 @@ void LogImpl::do_log(Log::LogType lt,const std::string& message, bool newline)
 //#endif
 }
 
-void LogImpl::append(const std::string& message)
+bool LogImpl::append(const std::string& message)
 {
    file_ << message << endl;
-   check_file_write(message);
+   return check_file_write(message);
 }
 
-void LogImpl::check_file_write(const std::string& message) const
+bool LogImpl::check_file_write(const std::string& message) const
 {
    bool file_is_good = file_.good();
    if (!file_is_good) cout << "LogImpl::append: Could not write to log file! File system full? Try --log=flush !" << endl;
    if (LogToCout::ok() || !file_is_good) {
       Indentor::indent(cout) << message << endl;
    }
+   return file_is_good;
 }
 
 void LogImpl::create_time_stamp()

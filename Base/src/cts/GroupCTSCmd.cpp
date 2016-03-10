@@ -43,7 +43,7 @@ GroupCTSCmd::GroupCTSCmd(const std::string& cmdSeries,AbstractClientEnv* clientE
    Str::split(cmdSeries,individualCmdVec,";");
    if ( individualCmdVec.empty())  throw std::runtime_error("GroupCTSCmd::GroupCTSCmd: Please provide a list of ';' separated commands\n" );
    if (clientEnv->debug()){
-      for(size_t i=0; i < individualCmdVec.size(); i++) { cout << "   CHILD COMMAND = " << individualCmdVec[i] << "\n";}
+      for(size_t i=0; i < individualCmdVec.size(); i++) { cout << "  CHILD COMMAND = " << individualCmdVec[i] << "\n";}
    }
 
 
@@ -86,7 +86,7 @@ GroupCTSCmd::GroupCTSCmd(const std::string& cmdSeries,AbstractClientEnv* clientE
       ArgvCreator argvCreator(theArgs);
 
       if (clientEnv->debug()) {
-         cout << "   PROCESSING COMMAND = '" << subCmd << "' argc(" << argvCreator.argc() << ")";
+         cout << "  PROCESSING COMMAND = '" << subCmd << "' argc(" << argvCreator.argc() << ")";
          cout << argvCreator.toString() << "\n";
       }
 
@@ -290,7 +290,7 @@ void GroupCTSCmd::create( 	Cmd_ptr& cmd,
 							boost::program_options::variables_map& vm,
 							AbstractClientEnv* clientEnv ) const
 {
-   if (clientEnv->debug()) cout <<  arg() << ": Group Cmd '" << vm[ arg() ].as< std::string > ()  << "'\n";
+   if (clientEnv->debug()) cout << "  " << arg() << ": Group Cmd '" << vm[ arg() ].as< std::string > ()  << "'\n";
 
    // Parse and split commands and then parse individually. Assumes commands are separated by ';'
    std::string cmdSeries = vm[GroupCTSCmd::arg()].as< std::string > ();

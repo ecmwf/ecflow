@@ -267,5 +267,38 @@ BOOST_AUTO_TEST_CASE( test_autocancel_task )
    BOOST_CHECK_MESSAGE(task_vec.size() == 0,"Expected to have 0 tasks but found " << task_vec.size());
 }
 
+BOOST_AUTO_TEST_CASE( test_two_autocancel_in_hierarchy )
+{
+   cout << "Simulator:: ...test_two_autocancel_in_hierarchy\n"; // ECFLOW-556
+
+   // ****: Since we have no time dependencies the simulator calendar increment
+   // ****: is in hours. Hence autocancel at hour resolution
+   Defs theDefs;
+   {
+      ClockAttr clockAttr(true);
+      clockAttr.date(12,10,2009); // 12 October 2009 was a Monday
+      suite_ptr suite = theDefs.add_suite("test_two_autocancel_in_hierarchy");
+      suite->addClock( clockAttr );
+
+      family_ptr fam = suite->add_family("family");
+      fam->addAutoCancel( ecf::AutoCancelAttr( ecf::TimeSlot(1,0), true));
+      task_ptr task = fam->add_task("t");
+      task->addAutoCancel( ecf::AutoCancelAttr( ecf::TimeSlot(1,0), true));
+   }
+
+   Simulator simulator;
+   std::string errorMsg;
+   BOOST_CHECK_MESSAGE(simulator.run(theDefs,TestUtil::testDataLocation("test_two_autocancel_in_hierarchy.def"), errorMsg),errorMsg);
+
+   std::vector<task_ptr> task_vec;
+   theDefs.get_all_tasks(task_vec);
+
+   std::vector<Family*> famVec;
+   theDefs.getAllFamilies(famVec);
+
+   BOOST_CHECK_MESSAGE(famVec.size() == 0,"Expected to have 0 families but found " << famVec.size());
+   BOOST_CHECK_MESSAGE(task_vec.size() == 0,"Expected to have 0 tasks but found " << task_vec.size());
+}
+
 BOOST_AUTO_TEST_SUITE_END()
 

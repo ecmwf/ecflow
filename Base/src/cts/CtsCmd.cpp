@@ -371,7 +371,7 @@ void CtsCmd::create( 	Cmd_ptr& cmd,
          boost::program_options::variables_map& vm,
          AbstractClientEnv*  ac ) const
 {
-   if (ac->debug()) cout << "CtsCmd::create api = '" << api_ << "'.\n";
+   if (ac->debug()) cout << "  CtsCmd::create api = '" << api_ << "'.\n";
 
    assert( api_ != CtsCmd::NO_CMD);
 
@@ -389,7 +389,7 @@ void CtsCmd::create( 	Cmd_ptr& cmd,
    else if ( api_ == CtsCmd::SERVER_LOAD) {
 
       std::string log_file = vm[ theArg() ].as< std::string > ();
-      if (ac->debug()) std::cout << "   CtsCmd::create CtsCmd::SERVER_LOAD " << log_file << "\n";
+      if (ac->debug()) std::cout << "  CtsCmd::create CtsCmd::SERVER_LOAD " << log_file << "\n";
 
       if (!log_file.empty()) {
 

@@ -57,7 +57,7 @@ std::ostream& SSuitesCmd::print(std::ostream& os) const
 
 bool SSuitesCmd::handle_server_response( ServerReply& server_reply, Cmd_ptr cts_cmd, bool debug ) const
 {
-	if (debug) std::cout << "SSuitesCmd::handle_server_response\n";
+	if (debug) std::cout << "  SSuitesCmd::handle_server_response\n";
 
 	if (server_reply.cli() && !cts_cmd->group_cmd()) {
 	   /// This Could be part of a group command, hence ONLY if NOT group command
