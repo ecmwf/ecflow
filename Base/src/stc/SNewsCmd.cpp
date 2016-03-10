@@ -240,7 +240,7 @@ void SNewsCmd::init(
 /// Called in the client
 bool SNewsCmd::handle_server_response( ServerReply& server_reply, Cmd_ptr /*cts_cmd*/, bool debug ) const
 {
-	if (debug) std::cout << "SNewsCmd::handle_server_response news_ = " << news_ << "\n";
+	if (debug) std::cout << "  SNewsCmd::handle_server_response news_ = " << news_ << "\n";
 	server_reply.set_news( news_);
 	return true;
 }

@@ -51,7 +51,7 @@ bool ErrorCmd::equals(ServerToClientCmd* rhs) const
 
 bool ErrorCmd::handle_server_response( ServerReply& server_reply, Cmd_ptr cts_cmd, bool debug ) const
 {
-	if (debug) std::cout << "ErrorCmd::handle_server_response " << error_msg_ << "\n";
+	if (debug) std::cout << "  ErrorCmd::handle_server_response " << error_msg_ << "\n";
 
 	std::stringstream ss;
 	ss << "Error: request( "; cts_cmd->print(ss); ss << " ) failed!  Server replied with: '" <<  error_msg_ << "'\n";

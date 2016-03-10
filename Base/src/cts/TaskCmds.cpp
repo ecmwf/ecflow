@@ -294,7 +294,7 @@ void InitCmd::create( 	Cmd_ptr& cmd,
 	std::string process_or_remote_id = vm[ arg() ].as< std::string > ();
 
 	if (clientEnv->debug())
-		cout << "InitCmd::create " << InitCmd::arg()
+		cout << "  InitCmd::create " << InitCmd::arg()
 		<< "  clientEnv->task_path(" << clientEnv->task_path()
 		<< ") clientEnv->jobs_password(" << clientEnv->jobs_password()
 		<< ") clientEnv->process_or_remote_id(" << clientEnv->process_or_remote_id()
@@ -379,7 +379,7 @@ void CompleteCmd::create( 	Cmd_ptr& cmd,
 							AbstractClientEnv* clientEnv ) const
 {
 	if (clientEnv->debug())
-		cout << "CompleteCmd::create " << CompleteCmd::arg()
+		cout << "  CompleteCmd::create " << CompleteCmd::arg()
 		<< " task_path(" << clientEnv->task_path()
 		<< ") password(" << clientEnv->jobs_password()
 		<< ") remote_id(" << clientEnv->process_or_remote_id()
@@ -500,7 +500,7 @@ void CtsWaitCmd::create( 	Cmd_ptr& cmd,
 	std::string expression = vm[ arg() ].as< std::string > ();
 
 	if (clientEnv->debug())
-		cout << "CtsWaitCmd::create " << CtsWaitCmd::arg()
+		cout << "  CtsWaitCmd::create " << CtsWaitCmd::arg()
 		<< " task_path(" << clientEnv->task_path()
 		<< ") password(" << clientEnv->jobs_password()
 		<< ") remote_id(" << clientEnv->process_or_remote_id()
@@ -599,7 +599,7 @@ void AbortCmd::create( 	Cmd_ptr& cmd,
 	std::string reason = vm[ arg() ].as< std::string > ();
 
 	if (clientEnv->debug())
-		cout << "AbortCmd::create " << AbortCmd::arg()
+		cout << "  AbortCmd::create " << AbortCmd::arg()
 		<< " task_path(" << clientEnv->task_path()
 		<< ") password(" << clientEnv->jobs_password()
 		<< ") remote_id(" << clientEnv->process_or_remote_id()
@@ -677,7 +677,7 @@ void EventCmd::create( 	Cmd_ptr& cmd,
 	std::string event = vm[ arg() ].as< std::string > ();
 
 	if (clientEnv->debug())
-		cout << "EventCmd::create " << EventCmd::arg()
+		cout << "  EventCmd::create " << EventCmd::arg()
 		<< " task_path(" << clientEnv->task_path()
 		<< ") password(" << clientEnv->jobs_password()
 		<< ") remote_id(" << clientEnv->process_or_remote_id()
@@ -776,7 +776,7 @@ void MeterCmd::create( 	Cmd_ptr& cmd,
 
 	if (clientEnv->debug()) {
 		dumpVecArgs(MeterCmd::arg(),args);
-		cout << "MeterCmd::create " << MeterCmd::arg()
+		cout << "  MeterCmd::create " << MeterCmd::arg()
 		<< " task_path(" << clientEnv->task_path()
 		<< ") password(" << clientEnv->jobs_password()
 		<< ") remote_id(" << clientEnv->process_or_remote_id()
@@ -879,7 +879,7 @@ void LabelCmd::create( 	Cmd_ptr& cmd,
 
 	if (clientEnv->debug()) {
 		dumpVecArgs(LabelCmd::arg(),args);
-		cout << "LabelCmd::create " << LabelCmd::arg()
+		cout << "  LabelCmd::create " << LabelCmd::arg()
 		<< " task_path(" << clientEnv->task_path()
 		<< ") password(" << clientEnv->jobs_password()
 		<< ") remote_id(" << clientEnv->process_or_remote_id()

@@ -55,14 +55,14 @@ ClientInvoker::ClientInvoker()
 : on_error_throw_exception_(true), cli_(false), test_(false),testInterface_(false),
   connection_attempts_(2),retry_connection_period_(RETRY_CONNECTION_PERIOD),child_task_try_no_(0)
 {
-	if (clientEnv_.debug()) cout << "\n" << TimeStamp::now() << "ClientInvoker::ClientInvoker():============================start=========================\n";
+	if (clientEnv_.debug()) cout << TimeStamp::now() << "ClientInvoker::ClientInvoker(): 1=================start=================\n";
 }
 
 ClientInvoker::ClientInvoker(const std::string& host_port)
 : on_error_throw_exception_(true), cli_(false), test_(false),testInterface_(false),
   connection_attempts_(2),retry_connection_period_(RETRY_CONNECTION_PERIOD),child_task_try_no_(0)
 {
-   if (clientEnv_.debug()) cout << "\n" << TimeStamp::now() << "ClientInvoker::ClientInvoker():============================start==========================\n";
+   if (clientEnv_.debug()) cout << TimeStamp::now() << "ClientInvoker::ClientInvoker(): 2=================start=================\n";
    // assume format <host>:<port>
    size_t colonPos = host_port.find_first_of(':');
    if (colonPos == string::npos)  throw std::runtime_error("ClientInvoker::ClientInvoker: expected <host>:<port> : no ':' found in " + host_port);
@@ -75,7 +75,7 @@ ClientInvoker::ClientInvoker(const std::string& host, const std::string& port)
 : on_error_throw_exception_(true), cli_(false), test_(false),testInterface_(false),
   connection_attempts_(2),retry_connection_period_(RETRY_CONNECTION_PERIOD)
 {
-   if (clientEnv_.debug()) cout << "\n" << TimeStamp::now() << "ClientInvoker::ClientInvoker():============================start==========================\n";
+   if (clientEnv_.debug()) cout << TimeStamp::now() << "ClientInvoker::ClientInvoker(): 3=================start=================\n";
    set_host_port(host,port);
 }
 
@@ -83,7 +83,7 @@ ClientInvoker::ClientInvoker(const std::string& host, int port)
 : on_error_throw_exception_(true), cli_(false), test_(false),testInterface_(false),
   connection_attempts_(2),retry_connection_period_(RETRY_CONNECTION_PERIOD)
 {
-   if (clientEnv_.debug()) cout << "\n" << TimeStamp::now() << "ClientInvoker::ClientInvoker():============================start============================\n";
+   if (clientEnv_.debug()) cout << TimeStamp::now() << "ClientInvoker::ClientInvoker(): 4=================start=================\n";
    set_host_port(host, boost::lexical_cast<std::string>(port));
 }
 
@@ -1070,7 +1070,7 @@ std::string ClientInvoker::find_free_port(int seed_port_number, bool debug)
    // Using server_version() but then get error messages
    // ******** Until this is done we can't implement port hopping **********
 
-   if (debug) cout << "ClientInvoker::find_free_port: starting with port " << seed_port_number << "\n";
+   if (debug) cout << "  ClientInvoker::find_free_port: starting with port " << seed_port_number << "\n";
    int the_port = seed_port_number;
    std::string free_port;
    ClientInvoker client;

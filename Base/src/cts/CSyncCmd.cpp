@@ -141,7 +141,7 @@ void CSyncCmd::create( 	Cmd_ptr& cmd,
 						boost::program_options::variables_map& vm,
 						AbstractClientEnv*  ac ) const
 {
-	if (ac->debug()) cout << "CSyncCmd::create api = '" << api_ << "'.\n";
+	if (ac->debug()) cout << "  CSyncCmd::create api = '" << api_ << "'.\n";
 
 	if (api_ == CSyncCmd::NEWS || api_ == CSyncCmd::SYNC){
 	   vector<unsigned int> args = vm[ theArg() ].as< vector<unsigned int> >();

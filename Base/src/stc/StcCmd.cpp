@@ -34,22 +34,22 @@ bool StcCmd::handle_server_response( ServerReply& server_reply, Cmd_ptr cts_cmd,
 	bool ret = false;
 	switch (api_) {
 		case StcCmd::OK: {
-			if (debug) std::cout << "StcCmd::handle_server_response OK\n";
+			if (debug) std::cout << "  StcCmd::handle_server_response OK\n";
 			ret = true;
 			break;
 		}
  		case StcCmd::BLOCK_CLIENT_SERVER_HALTED: {
-			if (debug) std::cout << "StcCmd::handle_server_response BLOCK_CLIENT_SERVER_HALTED\n";
+			if (debug) std::cout << "  StcCmd::handle_server_response BLOCK_CLIENT_SERVER_HALTED\n";
 			server_reply.set_block_client_server_halted(); // requires further work, by ClientInvoker
 			break;
  		}
 		case StcCmd::BLOCK_CLIENT_ON_HOME_SERVER: {
-			if (debug) std::cout << "StcCmd::handle_server_response BLOCK_CLIENT_ON_HOME_SERVER\n";
+			if (debug) std::cout << "  StcCmd::handle_server_response BLOCK_CLIENT_ON_HOME_SERVER\n";
 			server_reply.set_block_client_on_home_server(); // requires further work, by ClientInvoker
 			break;
  		}
 		case StcCmd::BLOCK_CLIENT_ZOMBIE: {
-			if (debug) std::cout << "StcCmd::handle_server_response BLOCK_CLIENT_ZOMBIE\n";
+			if (debug) std::cout << "  StcCmd::handle_server_response BLOCK_CLIENT_ZOMBIE\n";
 			server_reply.set_block_client_zombie_detected(); // requires further work, by ClientInvoker
 			break;
  		}

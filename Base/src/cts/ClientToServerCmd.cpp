@@ -139,7 +139,7 @@ node_ptr ClientToServerCmd::find_node(AbstractServer* as, const std::string& abs
 
 
 void ClientToServerCmd::dumpVecArgs(const char* argOption, const std::vector<std::string>& args) {
-   cout << argOption;
+   cout << "  " << argOption;
    for(size_t i= 0; i < args.size(); i++)  { cout << " args[" << i << "]='" << args[i] << "'";} cout << "\n";
 }
 

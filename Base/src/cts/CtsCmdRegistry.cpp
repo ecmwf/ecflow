@@ -111,7 +111,7 @@ bool CtsCmdRegistry::parse(Cmd_ptr& cmd,
 
 		if ( vm.count( vec_[i]->theArg() ) ) {
 
-			if (clientEnv->debug()) std::cout << "CtsCmdRegistry::parse matched with registered command " << vec_[i]->theArg() << "\n";
+			if (clientEnv->debug()) std::cout << "  CtsCmdRegistry::parse matched with registered command " << vec_[i]->theArg() << "\n";
 
 			vec_[i]->create(cmd,vm,clientEnv);
 			return true;

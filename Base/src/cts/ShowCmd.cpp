@@ -89,7 +89,7 @@ void ShowCmd::create( 	Cmd_ptr& cmd,
 {
    std::string show_state = vm[ ShowCmd::arg() ].as< std::string > ();
 
-   if (ac->debug()) cout << "ShowCmd::create api = '" << show_state << "'.\n";
+   if (ac->debug()) cout << "  ShowCmd::create api = '" << show_state << "'.\n";
 
 	PrintStyle::Type_t style = PrintStyle::DEFS;
 	if (!show_state.empty()) {

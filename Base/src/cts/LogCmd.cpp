@@ -175,7 +175,7 @@ void LogCmd::create( 	Cmd_ptr& cmd,
 {
 	vector<string> args = vm[ arg() ].as< vector<string> >();
 
-	if (ac->debug())   dumpVecArgs(LogCmd::arg(),args);
+	if (ac->debug()) dumpVecArgs(LogCmd::arg(),args);
 
 	if (!args.empty() && args[0] == "get")  {
 

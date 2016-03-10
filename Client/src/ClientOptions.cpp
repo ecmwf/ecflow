@@ -67,10 +67,10 @@ ClientOptions::~ClientOptions()
 Cmd_ptr ClientOptions::parse(int argc, char* argv[],ClientEnvironment* env) const
 {
    if (env->debug()) {
-      cout <<  "ClientOptions::parse argc=" << argc;
+      cout <<  "  ClientOptions::parse argc=" << argc;
       for(int i = 0; i < argc; i++) { cout << "  arg" << i << "=" << argv[i];}
       cout << "\n";
-      std::cout << "help column width = " << po::options_description::m_default_line_length + 80 << "\n";
+      std::cout << "  help column width = " << po::options_description::m_default_line_length + 80 << "\n";
    }
 
    // parse arguments into 'vm'.
@@ -88,7 +88,7 @@ Cmd_ptr ClientOptions::parse(int argc, char* argv[],ClientEnvironment* env) cons
    std::string host,port;
    if ( vm.count( "port" ) ) {
       port = vm[ "port" ].as< std::string > ();
-      if (env->debug())  std::cout << "   port " << port << " overridden at the command line\n";
+      if (env->debug())  std::cout << "  port " << port << " overridden at the command line\n";
       try { boost::lexical_cast< int >( port );}
       catch ( boost::bad_lexical_cast& e ) {
          std::stringstream ss; ss << "ClientOptions::parse: The specified port(" << port << ") must be convertible to an integer";
@@ -108,7 +108,7 @@ Cmd_ptr ClientOptions::parse(int argc, char* argv[],ClientEnvironment* env) cons
    }
    if ( vm.count( "rid" ) ) {
       std::string rid = vm[ "rid" ].as< std::string > ();
-      if (env->debug())  std::cout << "   rid " << rid << " overridden at the command line\n";
+      if (env->debug())  std::cout << "  rid " << rid << " overridden at the command line\n";
       env->set_remote_id(rid);
    }
 

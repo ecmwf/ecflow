@@ -37,7 +37,7 @@ std::ostream& SStringCmd::print(std::ostream& os) const
 
 bool SStringCmd::handle_server_response( ServerReply& server_reply, Cmd_ptr cts_cmd, bool debug ) const
 {
-	if (debug) cout << "SStringCmd::handle_server_response str.size()= " << str_.size() << "\n";
+	if (debug) cout << "  SStringCmd::handle_server_response str.size()= " << str_.size() << "\n";
 	if (server_reply.cli())  std::cout << str_ << "\n";
 	else server_reply.set_string( str_ );
 	return true;

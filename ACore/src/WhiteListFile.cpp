@@ -61,7 +61,7 @@ bool WhiteListFile::allow_write_access(const std::string& user) const
 bool WhiteListFile::load(const std::string& file, bool debug, std::string& errorMsg )
 {
    if (debug) {
-      std::cout << "White list file " << file << " opening...\n";
+      std::cout << "  White list file " << file << " opening...\n";
    }
 
    white_list_file_ = file;

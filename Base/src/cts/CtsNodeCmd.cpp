@@ -328,7 +328,7 @@ void CtsNodeCmd::create(   Cmd_ptr& cmd,
 {
    assert( api_ != CtsNodeCmd::NO_CMD);
 
-   if (ac->debug()) cout << "CtsNodeCmd::create = '" << theArg() << "'.\n";
+   if (ac->debug()) cout << "  CtsNodeCmd::create = '" << theArg() << "'.\n";
 
    std::string absNodePath = vm[ theArg() ].as< std::string > ();
 

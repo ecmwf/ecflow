@@ -48,7 +48,7 @@ std::ostream& SStatsCmd::print(std::ostream& os) const
 
 bool SStatsCmd::handle_server_response( ServerReply& server_reply, Cmd_ptr /*cts_cmd*/, bool debug ) const
 {
-	if (debug) std::cout << "SStatsCmd::handle_server_response\n";
+	if (debug) std::cout << "  SStatsCmd::handle_server_response\n";
    if (server_reply.cli())  stats_.show();
    else server_reply.set_stats( stats_ );
 	return true;

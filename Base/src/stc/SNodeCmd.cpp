@@ -97,7 +97,7 @@ std::ostream& SNodeCmd::print(std::ostream& os) const
 // Called in client
 bool SNodeCmd::handle_server_response( ServerReply& server_reply, Cmd_ptr cts_cmd,  bool debug ) const
 {
-   if (debug) std::cout << "SNodeCmd::handle_server_response\n";
+   if (debug) std::cout << "  SNodeCmd::handle_server_response\n";
 
    node_ptr node = get_node_ptr();
    if ( !node.get() ) {
