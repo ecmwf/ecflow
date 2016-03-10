@@ -23,21 +23,21 @@
                 
                 "adaptiveUpdate": {
                     "label": "Increase server update period when inactive",
-                    "tooltip" : "When enabled the server update period is increased at every automatic update until the maximum period is reached. If the user in the meantime updates the server manually the update period is set back to its original value and whole process starts again.",
+                    "tooltip" : "When enabled the server update period is <b>increased at every automatic update</b> until the maximum period is reached. If the user in the meantime updates the server manually the update period is set back to its original value and whole process starts again.",
                 	"default": "true"
                 },
 
                 "adaptiveUpdateIncrementInSec": {
                     "label": "Server update period increment",
                     "suffix" : "seconds",
-                    "tooltip": "Defines by how many seconds the server update period is increased at every automatic update.",
+                    "tooltip": "Defines by how many seconds the server update period is <b>increased</b> at every automatic update.",
                     "default": "5",
                     "min" : "0"
                 },
                 "maxAdaptiveUpdateRateInMin": {
                     "label": "Do not increase server update period over",
                 	"suffix" : "minutes", 
-                    "tooltip": "Defines the maximum server update period. When it is reached the update period is not increased any more.",
+                    "tooltip": "Defines the <b>maximum</b> server update period. When it is reached the update period is not increased any more.",
                 	"default": "60",
                 	"min" : "0"
                 }

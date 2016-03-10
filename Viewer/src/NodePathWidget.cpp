@@ -510,8 +510,10 @@ void NodePathWidget::setPath(QString)
 
 void NodePathWidget::setPath(VInfo_ptr info)
 {
-  	if(!active_)
-  		return;
+    setEnabled(true);
+
+    if(!active_)
+        return;
 
   	ServerHandler *server=0;
   	bool sameServer=false;

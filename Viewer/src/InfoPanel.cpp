@@ -206,6 +206,9 @@ void InfoPanel::reset(VInfo_ptr info)
         }
     }
 
+    messageLabel_->hide();
+    messageLabel_->clear();
+
     //Set info
     adjustInfo(info);
 
