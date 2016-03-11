@@ -43,7 +43,6 @@ OutputItemWidget::OutputItemWidget(QWidget *parent) :
 
 	messageLabel_->hide();
 	dirLabel_->hide();
-	searchLine_->hide();
 
 	fileLabel_->setProperty("fileInfo","1");
 

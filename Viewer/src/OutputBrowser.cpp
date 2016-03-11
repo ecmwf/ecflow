@@ -33,7 +33,7 @@ OutputBrowser::OutputBrowser(QWidget* parent) :
     vb->setSpacing(2);
 
     stacked_=new QStackedWidget(this);
-    vb->addWidget(stacked_);
+    vb->addWidget(stacked_,1);
 
     confirmSearchLabel_=new MessageLabel(this);
     confirmSearchLabel_->setShowTypeTitle(false);
