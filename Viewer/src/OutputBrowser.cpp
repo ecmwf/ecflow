@@ -124,6 +124,12 @@ void OutputBrowser::changeIndex(IndexType indexType,qint64 fileSize)
 
 void OutputBrowser::loadFile(VFile_ptr file)
 {
+    if(!file)
+    {
+        clear();
+        return;
+    }
+
     file_=file;
     if(file_->storageMode() == VFile::DiskStorage)
     {

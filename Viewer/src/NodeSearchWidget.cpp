@@ -282,7 +282,7 @@ void NodeSearchWidget::adjustColumns()
 	{
 		columnsAdjusted_=true;
 
-	//We preset the column width. Setting it dynamically can be expansive
+    //We preset the column width. Setting it dynamically can be expensive
 	//for a large number of rows (> 1M)
 	QFont f;
 	QFontMetrics fm(f);

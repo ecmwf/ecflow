@@ -305,17 +305,20 @@ void OutputItemWidget::infoReady(VReply* reply)
 
         //Search for some keywords in the current jobout
 
-        //We do not have dir info so the file must be the jobout
-        if(dirModel_->isEmpty())
-            searchOnReload();
-
-        //We have dir info
-        else
+        if(f)
         {
-            OutputFileProvider* op=static_cast<OutputFileProvider*>(infoProvider_);
-            if(reply->fileName() == op->joboutFileName())
-            {
+            //We do not have dir info so the file must be the jobout
+            if(dirModel_->isEmpty())
                 searchOnReload();
+
+            //We have dir info
+            else
+            {
+                OutputFileProvider* op=static_cast<OutputFileProvider*>(infoProvider_);
+                if(reply->fileName() == op->joboutFileName())
+                {
+                    searchOnReload();
+                }
             }
         }
 
