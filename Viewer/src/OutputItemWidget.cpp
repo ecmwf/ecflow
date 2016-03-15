@@ -14,6 +14,7 @@
 #include "OutputFileProvider.hpp"
 #include "OutputModel.hpp"
 #include "PlainTextEdit.hpp"
+#include "ServerHandler.hpp"
 #include "TextPagerEdit.hpp"
 #include "VConfig.hpp"
 #include "VReply.hpp"
@@ -42,6 +43,7 @@ OutputItemWidget::OutputItemWidget(QWidget *parent) :
     setupUi(this);
 
 	messageLabel_->hide();
+    warnLabel_->hide();
 	dirLabel_->hide();
 
 	fileLabel_->setProperty("fileInfo","1");
@@ -343,6 +345,20 @@ void OutputItemWidget::infoReady(VReply* reply)
             /*else
                 setCurrentInDir(reply->fileName());*/
         }
+#if 0
+        if(reply->tmpFile() && reply->fileReadMode() == VReply::LocalReadMode &&
+            info_ && !info_->server()->isLocalHost())
+        {
+            QString msg="The output file was read <b>from disk</b> but the server's \
+                       host (" + QString::fromStdString(info_->server()->host()) +
+                       ") is not running on the local machine. If the path is machine-specific (e.g. /tmp) \
+                       and there exists a file with the same path on the local machine, then\
+                       this will have been read instead.";
+
+            warnLabel_->showWarning(msg);
+        }
+#endif
+
 
         fetchInfo_->setInfo(reply,info_);
     }
