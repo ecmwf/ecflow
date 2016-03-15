@@ -29,8 +29,11 @@ ecbuild_add_library( TARGET    ecflow
                                ${PYTHON_INCLUDE_DIRS} 
                     )
 
-# This ensures that for debug config, we only link with debug boost libs, for other configs, we link with optimised boost libs                 
-target_link_libraries(ecflow debug ${Boost_PYTHON_LIBRARY_DEBUG}  ${Boost_PYTHON_LIBRARY_RELEASE})
+# This ensures that for debug config, we only link with debug boost libs, for other configs, we link with optimised boost libs 
+if (   PYTHONLIBS_FOUND )             
+   target_link_libraries(ecflow debug      ${Boost_PYTHON_LIBRARY_DEBUG}   )
+   target_link_libraries(ecflow optimized  ${Boost_PYTHON_LIBRARY_RELEASE} )
+endif()
 
 #
 # Override default behaviour that add RPATHS during install
