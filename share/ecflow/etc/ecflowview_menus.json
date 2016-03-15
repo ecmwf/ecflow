@@ -236,7 +236,7 @@
             "name"           : "Restart",
             "visible_for"    : "server",
             "enabled_for"    : "shutdown or halted",
-            "command"        : "ecflow_client --restart yes",
+            "command"        : "ecflow_client --restart",
             "question"       : "Restart the server in <node_name>?",
             "default_answer" : "No",
             "status_tip"     : "__cmd__"
