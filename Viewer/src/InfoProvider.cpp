@@ -183,6 +183,7 @@ void  InfoProvider::taskChanged(VTask_ptr task)
                 f->setFetchMode(VFile::ServerFetchMode);
                 f->setLog(task_->reply()->log());
             }
+            task->reply()->status(VReply::TaskDone);
             owner_->infoReady(task->reply());
             task_.reset();            
             }
@@ -190,13 +191,15 @@ void  InfoProvider::taskChanged(VTask_ptr task)
         case VTask::ABORTED:
         case VTask::REJECTED:         
             task->reply()->addLog("TRY>fetch file from ecflow server: FAILED");
-            owner_->infoFailed(task->reply());          
+            task->reply()->status(VReply::TaskFailed);
+            owner_->infoFailed(task->reply());
             task_.reset();
             break;
         case VTask::CANCELLED:
             if(!task->reply()->errorText().empty())
         	{            	
                 task->reply()->addLog("TRY>fetch file from ecflow server: FAILED");
+                task->reply()->status(VReply::TaskCancelled);
                 owner_->infoFailed(task->reply());
         	}
             //We do not need the task anymore.
