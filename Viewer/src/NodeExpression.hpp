@@ -44,7 +44,7 @@ public:
     static bool        isNodeAttribute(const std::string &str);
     static bool        isNodeFlag(const std::string &str);
     static bool        isWhatToSearchIn(const std::string &str, bool &isAttribute);
-
+    static bool        isAttribute(const std::string &str);
 private:
     static std::vector<BaseNodeCondition *> popLastNOperands(std::vector<BaseNodeCondition *> &inOperands, int n);
     static std::vector<std::string> tokens_;

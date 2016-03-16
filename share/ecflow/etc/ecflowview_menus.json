@@ -697,9 +697,15 @@
             "command"        : "collapse",
             "handler"        : "tree",
             "view"           : "tree"                    
-        }        
-        
-
+        },
+        {
+            "menu"           : "Node",
+            "name"           : "Edit ...",
+            "visible_for"    : "attribute",
+            "command"        : "edit",
+            "handler"        : "tree",
+            "view"           : "tree"
+        }
     ]
 
 }

@@ -13,6 +13,10 @@ ecflow.config
 *.creator.*
 ecflow.includes
 ecflow.files
+ecflow_attr.config
+ecflow_attr.files
+ecflow_attr.includes
+
  
 # cmake
 ecbuild/

@@ -96,6 +96,13 @@ bool NodeExpressionParser::isWhatToSearchIn(const std::string &str, bool &isAttr
     return false;
 }
 
+bool NodeExpressionParser::isAttribute(const std::string &str)
+{
+    if (str == "attribute" || "label")
+        return true;
+    else
+        return false;
+}
 
 // NodeExpressionParser::popLastNOperands
 // - utility function to remove and return the last n operands from
@@ -671,5 +678,43 @@ WhatToSearchInOperand::WhatToSearchInOperand(std::string what, bool &attr)
 }
 
 
-WhatToSearchInOperand::~WhatToSearchInOperand() {};
-WhatToSearchForOperand::~WhatToSearchForOperand() {};
+WhatToSearchInOperand::~WhatToSearchInOperand() {}
+WhatToSearchForOperand::~WhatToSearchForOperand() {}
+
+// -----------------------------------------------------------------
+#if 0
+bool AttributeCondition::execute(VNode* vnode)
+{
+    if (vnode->isServer())
+    {
+        if (nodeAttrName_ == "locked")
+        {
+            return false;   //  XXX temporary for now
+        }
+    }
+
+    else //if(nodeInfo->isNode())
+    {
+        node_ptr node = vnode->node();
+
+        if (nodeAttrName_ == "label")
+        {
+            return (node->timeVec().size()  > 0 ||
+                    node->todayVec().size() > 0 ||
+                    node->crons().size()    > 0);
+        }
+        else if (nodeAttrName_ == "has_date")
+        {
+            return (node->days().size()  > 0 ||
+                    node->dates().size() > 0);
+        }
+        else if (nodeAttrName_ == "has_triggers")
+        {
+            return (node->triggerAst() ||
+                    node->completeAst());
+        }
+    }
+
+    return false;
+}
+#endif

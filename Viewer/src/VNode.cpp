@@ -29,8 +29,9 @@
 //=================================================
 
 VNode::VNode(VNode* parent,node_ptr node) :
+    VItem(parent),
     node_(node),
-    parent_(parent),
+    //parent_(parent),
     attrNum_(-1),
     cachedAttrNum_(-1),
 	index_(-1)

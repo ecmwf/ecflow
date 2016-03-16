@@ -20,6 +20,8 @@
 #include "LogServer.hpp"
 #include "Node.hpp"
 
+#include "VItem.hpp"
+
 class IconFilter;
 class ServerHandler;
 class VAttribute;
@@ -77,7 +79,7 @@ public:
     }
 };
 
-class VNode
+class VNode : public VItem
 {
 friend class VServer;
 
@@ -89,12 +91,12 @@ public:
 
 	virtual ServerHandler* server() const;
     node_ptr node() const {return node_;}
-    virtual bool isTopLevel() const;
-    virtual bool isServer() const {return false;}
-    virtual bool isSuite() const {return isTopLevel();}
-    virtual bool isFamily() const;
-    virtual bool isTask() const {return false;}
-    virtual bool isAlias() const;
+    bool isTopLevel() const;
+    bool isServer() const {return false;}
+    bool isSuite() const {return isTopLevel();}
+    bool isFamily() const;
+    bool isTask() const {return false;}
+    bool isAlias() const;
 
     void beginUpdateAttrNum();
     void endUpdateAttrNum();
@@ -106,7 +108,7 @@ public:
     VAttribute* getAttributeType(int);
     int getAttributeLineNum(int row);
 
-    VNode* parent() const {return parent_;}
+    //VNode* parent() const {return parent_;}
     int numOfChildren() const { return static_cast<int>(children_.size());}
     VNode* childAt(int index) const;
     int indexOfChild(const VNode* vn) const;
@@ -178,7 +180,7 @@ protected:
 
     //Node* node_;
     node_ptr node_;
-    VNode* parent_;
+    //VNode* parent_;
     std::vector<VNode*> children_;
     mutable short attrNum_;
     mutable short cachedAttrNum_;
